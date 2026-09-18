@@ -1,0 +1,18 @@
+# Benchmarks (Stand 2026-09-18)
+
+Lebende Liste. Jede Phase ergänzt hier den weltweit stärksten öffentlichen Benchmark für die Bereiche, die sie neu aufbaut, mit Quelle und abgeleiteten Anforderungen. Fremde Systeme sind Benchmark, nie Quelle (Constitution Art. V).
+
+| Bereich | Benchmark | Was übernommen wird (abstrakt) | Quelle |
+|---|---|---|---|
+| Developer-Onboarding, Komponentenverteilung | shadcn/ui CLI + Registry, `components.json`, CSS-Variablen-Theming | Ein Befehl, Quellcode im Projekt, Registry-Protokoll, Agent-Skill | https://ui.shadcn.com/docs/components-json · https://ui.shadcn.com/docs/theming |
+| Utility-CSS-Ziel | Tailwind v4 (`@theme`, CSS-first) | Tokens als `@theme`-Variablen, Aspekto/Dimensio als CSS-Schichten | https://www.buildmvpfast.com/blog/tailwind-v4-shadcn-ui-migration-breaking-changes-guide-2026 |
+| Theme-Layer über Tailwind | daisyUI 5 | Themes als CSS-Variablen-Sätze, semantische Farbrollen | (Phase 6 recherchieren) |
+| Token-Format | W3C DTCG + Tokens-Studio-Konventionen ($themes/$metadata) | Sets, mehrdimensionale Themes, Aliasketten | https://docs.tokens.studio/manage-settings/token-format · https://blog.codercops.com/blog/design-tokens-2026-w3c-format-guide |
+| Design-Tool 2 | Penpot native Tokens (13 Typen, Sets, multidimensionale Themes, DTCG-Import/Export) | Modelo muss Penpot-Themes 1:1 abbilden können | https://help.penpot.app/user-guide/design-systems/design-tokens/ · https://tokens.studio/blog/tokens-studio-penpot-bringing-native-open-standard-design-tokens-to-everyone |
+| Figma-Variablen | Figma Variables + Modes, DTCG-Import-Plugins | Modes = Dimensioj | https://www.figma.com/community/plugin/1602387835479491374/dtcg-design-token-manager |
+| Komponenten-Landschaft | shadcn, Base UI, Ark UI, Radix, Panda CSS, Nuxt UI, HeroUI, Mantine | Inventar- und Zustandsabdeckung, Headless-Muster | https://designrevision.com/blog/best-tailwind-component-libraries · https://dualite.dev/blogs/best-ui-component-libraries |
+| UX Writing | (Phase 2 recherchieren) | | |
+| Motion | (Phase 4 recherchieren) | | |
+| Barrierefreiheit / Prüfung | (Phase 0 recherchieren: axe, WCAG 2.2, APCA) | | |
+| Datenvisualisierung | (Phase 4 recherchieren) | | |
+| Contribution / Governance | (Phase 9 recherchieren) | | |

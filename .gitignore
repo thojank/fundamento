@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.turbo/
+coverage/
+*.log
+.DS_Store
+.env
+.env.*
+# Benchmark material must never enter this repository (Constitution Art. V)
+_benchmark/
+**/ds-benchmark-*/
