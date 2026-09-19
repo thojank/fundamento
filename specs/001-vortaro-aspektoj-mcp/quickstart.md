@@ -29,6 +29,12 @@ pnpm fm mcp            --config fundamento.config.json
 
 The same flow runs in CI against `packages/modelo/test/fixtures/valid/aspekto-ekzemplo/`.
 
+Notes for package authors:
+
+- `sets/aspekto/<name>.json` must set every core token; conjunction sets carry deltas only.
+- Values for light mode with high contrast belong in `aspekto/<name>+color-scheme/light+contrast/high`, not in `aspekto/<name>+contrast/high`. A set conditioned on `contrast=high` alone is also active in dark mode, where it ties with the core's `color-scheme/dark+contrast/high` (same priority and specificity). `set-override-ambiguous` reports such a tie even when a more specific set overrides both, and its suggestion names the kondicxo to add.
+- Thresholds are never lowered. Where a brand colour cannot carry text under `contrast=high` (e.g. a bright signal colour below 7:1 against any text colour), the core's high-contrast role mapping applies instead.
+
 ## Designer: switch the Aspekto (< 1 minute)
 
 1. After `pnpm build`, import `packages/modelo/dist/vortaro/komuna/` into Penpot (Tokens → Import, folder).

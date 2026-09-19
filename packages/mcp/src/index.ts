@@ -3,6 +3,7 @@
 // place that touches `process.argv` and the exit code.
 
 import { parseArgs } from "node:util";
+import { isProcessEntry, nodeVersionProblem } from "./node-version.js";
 import { MCP_FLAGS, McpUsageError, mcpHelp, mcpOptions, runMcp } from "./start.js";
 import { nearest } from "./tools.js";
 
@@ -71,6 +72,12 @@ async function runFromProcess(): Promise<void> {
   }
 }
 
-if (import.meta.main) {
+// Before the entry guard: on Node < 24 `import.meta.main` is undefined and the bin would end
+// silently with exit 0.
+const versionProblem = nodeVersionProblem(process.versions.node);
+if (versionProblem !== undefined && isProcessEntry(import.meta.url)) {
+  process.stderr.write(`fundamento-mcp: ${versionProblem}`);
+  process.exitCode = 1;
+} else if (import.meta.main) {
   await runFromProcess();
 }

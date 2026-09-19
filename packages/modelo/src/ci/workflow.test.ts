@@ -173,8 +173,11 @@ describe("root package.json check script", () => {
     );
   });
 
-  it("defines perf as the AK-07 timing run of @fundamento/mcp", () => {
-    expect(scripts.perf).toBe("pnpm --filter @fundamento/mcp run perf");
+  it("defines perf as its own Turborepo task: after build, one at a time", () => {
+    expect(scripts.perf).toBe("turbo run perf --concurrency=1");
+    const turbo: unknown = JSON.parse(readFileSync(`${repoRoot}turbo.json`, "utf8"));
+    const tasks = isRecord(turbo) && isRecord(turbo.tasks) ? turbo.tasks : {};
+    expect(tasks.perf).toEqual({ dependsOn: ["build"], cache: false, outputs: [] });
   });
 
   it("invokes all five check scripts, in the CI order", () => {
@@ -212,5 +215,17 @@ describe("the MCP acceptance suite runs in the Test gate (Spec 001 T028)", () =>
 
   it("has the quickstart test in the cli package, which spawns the built fm", () => {
     expect(existsSync(`${repoRoot}packages/cli/src/quickstart.test.ts`)).toBe(true);
+  });
+});
+
+describe("Node 24 is enforced (Spec 001 review A)", () => {
+  it("pnpm refuses an install on another Node (engine-strict)", () => {
+    expect(readFileSync(`${repoRoot}.npmrc`, "utf8").split("\n")).toContain("engine-strict=true");
+    const pkg: unknown = JSON.parse(readFileSync(packageJsonPath, "utf8"));
+    expect(isRecord(pkg) && pkg.engines).toEqual({ node: ">=24" });
+  });
+
+  it("gives this package's spawning tests a 30 s budget (vitest.config.ts)", ({ task }) => {
+    expect(task.timeout).toBeGreaterThanOrEqual(30_000);
   });
 });

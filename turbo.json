@@ -24,6 +24,11 @@
     "lint": {
       "dependsOn": ["^build"],
       "outputs": []
+    },
+    "perf": {
+      "dependsOn": ["build"],
+      "cache": false,
+      "outputs": []
     }
   }
 }
