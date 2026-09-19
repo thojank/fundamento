@@ -61,7 +61,7 @@ Eine Marke wird als ausführbare Spezifikation beschrieben (Modelo); daraus ents
 | Paket | Repo | Lizenz | Stand |
 |---|---|---|---|
 | `@fundamento/aspekto-komuna` | im Kern | MIT | Referenz |
-| `fundamento-aspekto-ciferecigo` | privat (`thojank/fundamento-aspekto-ciferecigo`) | proprietär | v0.1.0; nach Phase 2 neu ableiten |
+| `fundamento-aspekto-ciferecigo` | privat (`thojank/fundamento-aspekto-ciferecigo`) | proprietär | v0.2.0 abgeleitet gegen den Kern nach Phase 2 (T026), Archiv übergeben; Repo-Push durch den Maintainer |
 
 ## Wo Entscheidungen stehen
 
