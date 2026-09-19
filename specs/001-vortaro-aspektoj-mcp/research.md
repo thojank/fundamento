@@ -83,4 +83,44 @@ Anforderung des Maintainers vom 2026-09-19: Das Design soll sich zur Laufzeit ko
 
 ## 10. Enportilo-Erkenntnisse aus der ciferecigo-Ableitung
 
-Wird mit T030 gefüllt (Plan D-18, Q5): welche Ableitungsschritte mechanisch waren, welche Urteil brauchten und was Anhang A fehlte.
+Stand 2026-09-19, T030 (Plan D-18, Q5). Das Paket `fundamento-aspekto-ciferecigo` entstand außerhalb des Kern-Repos; es wurde als Archiv übergeben und nicht gepusht. Abgeleitet hat es ein Skript (`scripts/derive.mjs`): Es schreibt die Sets, das `$themes.json`-Fragment, `derivation/report.json` und `DERIVATION.md`, deterministisch (zwei Läufe, gleiche Bytes) und in etwa 1 s. Es ist der erste Prototyp des Enportilo (Phase 7). Ergebnis: `fm modelo validate --aspekto ../fundamento-aspekto-ciferecigo` meldet 0 Fehler und 0 Warnungen. `check:alirebleco` besteht für die Komposition komuna + ciferecigo mit 60 Paaren × 144 Kombinationen und einem WCAG-Minimum von 3,79:1 (ui). `check:regularo` zählt 14 Reguloj, `fm modelo export` ist über zwei Läufe byte-identisch, und `check:clean-room` im Kern bleibt grün. Die visuelle Prüfung durch den Maintainer steht aus.
+
+### Mechanisch (ohne Urteil ableitbar)
+
+- **Palettenrampe:** Die Rampe ist komunas OKLCH-Helligkeit je Stufe derselben Rollen-Palette. Jeder abgeleitete Schritt behält damit die Helligkeit, für die das Rollen-Mapping des Kerns gebaut ist. Deshalb bestehen die meisten Paare ohne Eingriff: Nur 8 von 60 × 4 Farbklassen brauchten eine Ausweichstufe.
+- **Anker:** Ein Anker behält seinen exakten Wert und sitzt auf der Stufe mit der nächsten Helligkeit. Die Platzierung ist greedy über alle Anker-Stufen-Paare; ist die Stufe belegt, geht der Anker auf die nächstbeste. Hue und Chroma werden zwischen den Ankern nach Helligkeit interpoliert, Chroma wird per Bisektion auf sRGB beschnitten.
+- **Paletten ohne Anker** (success, warning, info) sind identisch mit komuna. Anhang A nennt nur Signal und Fehler.
+- **Skalen:** Spacing, Size, Layout, Opacity, die Schriftgrößen-Skala und die Gewichte kommen unverändert aus komuna. Wegen der Vollständigkeitsregel (D-04) stehen sie wörtlich im Paket.
+- **Kontrast-Ausweichregel:** Die Vordergrund-Rolle wandert entlang ihrer Palette, weg von der Helligkeit des Hintergrunds, bis zur ersten Stufe, die besteht. Hat ihre Palette keine solche Stufe, wandert der Hintergrund in die andere Richtung. Gemessen wird mit dem echten Resolver je Farbklasse (Schema × Kontrast); `viewport`, `density` und `motion` ändern keine Farbe. Ergebnis: 8 Ausweichstufen, je Klasse und Rolle einmal protokolliert (Rolle, Originalstufe, gewählte Stufe, Kontrast vorher und nachher).
+
+### Urteil nötig (steht als "judgement" in `DERIVATION.md`)
+
+1. **Enden der Neutral-Rampe:** Der Kern nutzt `neutral.0` und `neutral.1000` als Extremwerte für Flächen und "on"-Farben; komuna belegt sie mit Weiß und Schwarz. Die Marke hat weder Weiß noch Schwarz. Deshalb liegen der hellste und der dunkelste Anker fest auf 0 und 1000, obwohl ihre Helligkeit näher an 50 und 950 liegt. Ohne dieses Pinnen stünden reines Weiß und Schwarz in Navigation, Fokus-Innenring und Statustexten.
+2. **Rollen statt Tokens:** Anhang A sagt "Paper (Hintergrund)", "Light (heller Hintergrund)", "Ink (Text)" und "Signalfarbe (Aktion, Hervorhebung, Flächen)". Die Zuordnung auf die Kernrollen war Urteil: Paper wurde `background.default` und `canvas`, Light wurde `raised`, und Signal wurde `action.primary.*` sowie `brand.fill`. Das sind 10 Umhängungen je Farbschema. Alle übrigen Rollen folgen dem Kern-Mapping (spätes Binden).
+3. **Linie (Ink mit 22 % Deckung):** Deckend über Paper ergibt das eine Stufe um 400. Die Linie erreicht das 3:1 der `ui`-Paare nicht, deshalb trägt nur die dekorative Rolle `color.border.subtle` sie. `border.default` und `border.strong` behalten die Kernrollen.
+4. **Typografie ohne freie Primitive:** Für drei Display-Rollen gibt es nur zwei freie Zeilenhöhen-Primitive (`solid`, `tight`). display.1 bekommt 0,70, display.2 und display.3 bekommen 0,82. Die Laufweite steht in Anhang A in `em`. DTCG-Dimensionen kennen nur `px`/`rem`, deshalb wurde sie bei komunas Rollengröße umgerechnet und skaliert unter `viewport=compact` nicht mit. `normal` = 1,45 gilt auch für Caption und Code, weil sie das Primitiv teilen.
+5. **Dauern:** Anhang A kennt zwei Dauern (300 ms Hover, 650 ms Standard). `slow` und `deliberate` fallen auf den Standard.
+6. **Kicker/Label:** Die Angabe gilt für `kicker` und `label.2`, die Rollen mit komunas 12-px-Stufe (0,72 rem = 11,52 px, 0,48 px Abstand). `label.1` bleibt wie komuna.
+
+### Was Anhang A fehlte
+
+Anhang A nennt keine Werte für:
+- Statusfarben außer Fehler
+- eine Monospace-Schrift (jetzt generisch)
+- Farbwerte für Hover, Pressed und Selected (die Marke zeigt Zustände über den Schnitt; alle Zustände von `action.primary` tragen Signal)
+- eine Fokusfarbe
+- eine dritte Display-Zeilenhöhe
+- Dauern für `slow`/`deliberate`
+
+Nicht als Token ausdrückbar sind außerdem:
+- Bildbehandlung (Graustufen, Multiply-Overlay)
+- die Signatur (✳, `mix-blend-mode: difference`)
+- Hover als Schnittwechsel und die −6°-Rotation der Pills; sie stehen als Regulo `hover-by-cut` (manual) im Paket
+
+### Befunde für Kern und Enportilo
+
+- **Signal trägt keinen Text unter `contrast=high`.** Selbst der dunkelste mögliche Vordergrund bleibt auf der Signalfläche unter 7:1 (Ink 6,05:1, Schwarz rund 6,7:1). In light/high setzt das generische Set `action.primary.rest` auf die dunkle Akzentstufe 800, und die Ausweichregel legt hellen Text darauf. Die Marke verliert dort ihre Signalfläche. Ob eine Marke das akzeptiert oder `contrast=high` die Signalfläche anders behandeln soll (z. B. Signal nur als Rand oder Fläche ohne Text), ist eine Produktfrage für Spec 003.
+- **Set-Rangfolge:** Eine Konjunktion nur mit `contrast=high` gilt auch in dark/high. Dort ist sie gleichrangig mit dem Kern-Set `color-scheme/dark+contrast/high` (gleiche Priorität, gleiche Spezifität). `set-override-ambiguous` meldet das auch dann, wenn ein spezifischeres Set beide überschreibt. Deshalb schreibt der Enportilo light/high-Ausweichstufen in `aspekto/<name>+color-scheme/light+contrast/high`. Das sollte die Regel für jedes Aspekto-Paket sein; der Kern kennt Bedingungen auf Standardwerte schon.
+- **Ausweichregel, erste Fassung:** Stufe für Stufe je Fehlpaar und in `+contrast/high` geschrieben, erzeugte sie 46 Einträge und pendelte. Mit dem Sprung zur ersten bestehenden Stufe, eigenen Sets je Farbklasse und einem Eintrag je Klasse und Rolle sind es 8. Ein Enportilo braucht diese Regel samt Protokoll von Anfang an.
+- **APCA (beratend, vgl. §8):** Die Komposition ergibt 3 186 Hinweise, davon 2 016 für ciferecigo: light/default 306, light/high 612, dark/default 630, dark/high 468. Das passt dazu, dass die Entscheidung über APCA bei Spec 003 liegt.
+- **Werkzeug:** Die CLI setzt Node 24 voraus (`import.meta.main`). Unter einer älteren Node-Version endet `fm` ohne Ausgabe mit Exit 0. Während T030 war im Shell-Pfad kurz Node 20 aktiv, und das fiel nur durch die leere Ausgabe auf.
