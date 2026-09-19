@@ -980,6 +980,9 @@
         },
         "on": {
           "$value": "{color.palette.neutral.0}"
+        },
+        "border": {
+          "$value": "{color.palette.success.700}"
         }
       },
       "warning": {
@@ -997,6 +1000,9 @@
         },
         "on": {
           "$value": "{color.palette.neutral.0}"
+        },
+        "border": {
+          "$value": "{color.palette.warning.700}"
         }
       },
       "danger": {
@@ -1014,6 +1020,9 @@
         },
         "on": {
           "$value": "{color.palette.neutral.0}"
+        },
+        "border": {
+          "$value": "{color.palette.danger.700}"
         }
       },
       "info": {
@@ -1031,6 +1040,9 @@
         },
         "on": {
           "$value": "{color.palette.neutral.0}"
+        },
+        "border": {
+          "$value": "{color.palette.info.700}"
         }
       }
     },

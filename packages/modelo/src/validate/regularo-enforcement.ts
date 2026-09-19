@@ -67,8 +67,13 @@ export const REGULO_ENFORCERS: Readonly<Record<string, Enforcer>> = {
    * 1.4.11), palette, shadow and backdrop are not placed as text or UI.
    */
   "contrast-pairs-declared": (modelo) => {
-    const foregrounds = new Set(modelo.kontrastParoj.map((pair) => pair.foreground));
-    const backgrounds = new Set(modelo.kontrastParoj.map((pair) => pair.background));
+    // Members of an alternative pair count as declared (Spec 002, D-09).
+    const foregrounds = new Set(
+      modelo.kontrastParoj.flatMap((pair) => [pair.foreground, pair.aux?.foreground ?? []].flat()),
+    );
+    const backgrounds = new Set(
+      modelo.kontrastParoj.flatMap((pair) => [pair.background, pair.aux?.background ?? []].flat()),
+    );
     const core = modelo.setoj.find((set) => set.name === CORE_SET_NAME)?.tokens ?? {};
     return Object.values(core).flatMap((token) => {
       const asForeground =

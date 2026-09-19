@@ -88,3 +88,19 @@ describe("Reguloj of Spec 001 (Art. VI)", () => {
     expect(byName.get("contrast-pairs-declared")?.checkability).toBe("automatic");
   });
 });
+
+describe("status surfaces may hold their contrast through a border (Spec 002 FR-06, FR-07)", () => {
+  it.each(["success", "warning", "danger", "info"])(
+    "status-%s-basic-on-background-default names its border as the aux pair, with a kialo",
+    (status) => {
+      const pair = modelo.kontrastParoj.find(
+        (candidate) => candidate.name === `status-${status}-basic-on-background-default`,
+      );
+      expect(pair?.aux).toEqual({
+        foreground: `color.status.${status}.border`,
+        background: "color.background.default",
+      });
+      expect(pair?.kialo).toContain("1.4.11");
+    },
+  );
+});
