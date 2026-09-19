@@ -50,7 +50,7 @@ A mutation check (one changed value must make the test fail) replaces the red ru
 - [x] **T009 CSS Celo** (FR-05, D-05, AK-03 for CSS)
   - Red: `celoj/css/css.test.ts`: one file per Aspekto and one combined; every selector is `:where(…)`; the order of the blocks equals the resolver's set order; a conjunction set becomes a combined selector at its position; aliases are `var(--fm-…)`; the lint `css-physical-property` rejects a fixture with `margin-left`. `packages/eroj/test/computed-styles.spec.ts` (Playwright): for every combination of komuna and ekzemplo, `getComputedStyle` on the root equals `rezolvoj.json` for every token.
   - Green: `celoj/css/`; the vortaro-lint rules (`--fm-` namespace, literals only in `--fm-` definitions) and `css-physical-property` run on the generated CSS in the projekcioj tests, because generated files never enter the repository that `check:vortaro-lint` scans. Done note: the computed-style test runs in Chromium (CI step „Playwright browsers" added, red first in `workflow.test.ts`); a default Dimensio value also matches a missing attribute (`:is([data-fm-x="v"], :not([data-fm-x]))`). The lockfile changed again only for the workspace links of `eroj` to `modelo` and `projekcioj` (no new external package).
-- [ ] **T010 Tailwind Celo** (FR-06, D-06)
+- [x] **T010 Tailwind Celo** (FR-06, D-06)
   - Red: `celoj/tailwind/tailwind.test.ts`: every token with a Tailwind target appears in `@theme inline` under its `derive_name` name with the value `var(--fm-…)`, no literal; tokens without a target are absent. A fixture project with Tailwind 4.3.3 builds a page using `bg-fm-action-primary-rest` and `bg-red-500`: the first compiles to the `var()`, the second exists unprefixed.
   - Green: `celoj/tailwind/`.
 
