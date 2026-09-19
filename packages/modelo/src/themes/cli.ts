@@ -9,6 +9,7 @@ import { join, resolve } from "node:path";
 import { parseArgs } from "node:util";
 import type { ValidationIssue } from "../contracts/issues.js";
 import type { ModeloSource } from "../contracts/modelo.js";
+import { coreView } from "../load/core-view.js";
 import { METADATA_FILE_NAME, THEMES_FILE_NAME } from "../load/files.js";
 import { loadModelo } from "../load/load-modelo.js";
 import { defaultModeloSource, fixtureModeloSource } from "../load/source.js";
@@ -132,7 +133,7 @@ function writeDerived(source: ModeloSource, env: ThemesCliEnv): number {
   }
   // Token-level load issues do not affect the derivation (Dimensioj and kondicxoj only);
   // `fm modelo validate` reports them.
-  const { themesJson, metadataJson } = serializeThemes(deriveThemes(modelo));
+  const { themesJson, metadataJson } = serializeThemes(deriveThemes(coreView(modelo)));
   const themesPath = join(source.vortaroDir, THEMES_FILE_NAME);
   const metadataPath = join(source.vortaroDir, METADATA_FILE_NAME);
   writeFileSync(themesPath, themesJson);

@@ -1,0 +1,9 @@
+{
+  "description": "aspekto-ekzemplo mints IDs in namespace ekz, but its lock registers a core-format set ID.",
+  "issues": [
+    {
+      "rule": "id-namespace-mismatch",
+      "path": "aspekto-ekzemplo/ids.lock.json#/ids/set_01M2WRK8G0EEEEEEEEEEEEEEE3"
+    }
+  ]
+}

@@ -190,6 +190,7 @@ describe("buildModelo: robustness against structurally odd input", () => {
       name: `set${index}`,
       ...doc(`vortaro/sets/set${index}.json`, value),
     })),
+    packages: [],
     data: {
       "dimensioj.json": doc("data/dimensioj.json", { dimensioj: [] }),
       "reguloj.json": doc("data/reguloj.json", { reguloj: [] }),

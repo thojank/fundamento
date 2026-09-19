@@ -1,7 +1,9 @@
 // Where a Modelo lives on disk (§2.1 "Modelo root") and how issue paths are made relative to it.
 
+import { existsSync } from "node:fs";
 import { dirname, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
+import { CONFIG_FILE_NAME, readKonfiguro } from "../config/read-config.js";
 import type { ModeloSource } from "../contracts/modelo.js";
 
 /**
@@ -17,9 +19,23 @@ export function defaultModeloSource(): ModeloSource {
   };
 }
 
-/** The source of a Modelo root laid out as `<root>/vortaro` and `<root>/data` (fixtures, `--fixture`). */
+/**
+ * The source of a Modelo root laid out as `<root>/vortaro` and `<root>/data` (fixtures,
+ * `--fixture`). A `<root>/fundamento.config.json` adds its Aspekto packages (D-07, D-16); its
+ * issues become `sourceIssues` with paths relative to the root.
+ */
 export function fixtureModeloSource(root: string): ModeloSource {
-  return { vortaroDir: join(root, "vortaro"), dataDir: join(root, "data") };
+  const source: ModeloSource = { vortaroDir: join(root, "vortaro"), dataDir: join(root, "data") };
+  const configFile = join(root, CONFIG_FILE_NAME);
+  if (!existsSync(configFile)) {
+    return source;
+  }
+  const { konfiguro, issues } = readKonfiguro(configFile, CONFIG_FILE_NAME);
+  return {
+    ...source,
+    aspektoPackages: konfiguro?.aspektoPackages ?? [],
+    sourceIssues: issues,
+  };
 }
 
 /**

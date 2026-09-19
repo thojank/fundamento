@@ -4,6 +4,7 @@
 
 import { formatIssuePath, type ValidationIssue } from "../contracts/issues.js";
 import type { Modelo } from "../contracts/modelo.js";
+import { coreView } from "../load/core-view.js";
 import type { ModeloFiles } from "../load/files.js";
 import { deriveThemes } from "../themes/derive.js";
 import { serializeCanonicalJson, serializeThemes } from "../themes/serialize.js";
@@ -12,7 +13,7 @@ const SUGGESTION =
   "Run `pnpm vortaro:themes` (for a fixture: `pnpm vortaro:themes --root <modelo-root>`) and commit the result; never edit this file by hand.";
 
 export function themesIssues(modelo: Modelo, files: ModeloFiles): ValidationIssue[] {
-  const { themesJson, metadataJson } = serializeThemes(deriveThemes(modelo));
+  const { themesJson, metadataJson } = serializeThemes(deriveThemes(coreView(modelo)));
   const issues: ValidationIssue[] = [];
   if (serializeCanonicalJson(files.themes.value) !== themesJson) {
     issues.push({

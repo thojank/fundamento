@@ -36,7 +36,7 @@ Order follows the plan's "Build order". The ciferecigo package is the last task.
 
 ## Stage 2 – Aspekto packages and composition
 
-- [ ] **T006 Package loading and composition** (D-08)
+- [x] **T006 Package loading and composition** (D-08)
   - Red: `load/compose.test.ts` on small self-contained fixtures (`valid/compose-two-aspektoj`, `invalid/aspekto-set-foreign`, `invalid/aspekto-name-duplicate`, `invalid/aspekto-reference-missing`, `invalid/id-namespace-mismatch`, `invalid/id-namespace-duplicate` from T003); resolver provenance includes `origin.package`.
   - Green: `ModeloSource.aspektoPackages`, loader, assembly of the `aspekto` values, resolver provenance.
 - [ ] **T007 Migration `neutra` → `komuna`** (FR-09, AK-04)

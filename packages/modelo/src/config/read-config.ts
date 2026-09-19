@@ -68,8 +68,8 @@ export function resolveAspektoEntry(
   }
 }
 
-/** Reads, validates and resolves a config file. */
-export function readKonfiguro(file: string): ReadKonfiguroResult {
+/** Reads, validates and resolves a config file. `displayFile` is the file part of issue paths. */
+export function readKonfiguro(file: string, displayFile = file): ReadKonfiguroResult {
   let text: string;
   try {
     text = readFileSync(file, "utf8");
@@ -79,14 +79,14 @@ export function readKonfiguro(file: string): ReadKonfiguroResult {
         {
           rule: "file-missing",
           severity: "error",
-          path: file,
+          path: displayFile,
           message: `Cannot read ${file}: ${error instanceof Error ? error.message : String(error)}`,
           suggestion: `Create ${CONFIG_FILE_NAME} with { "aspektoj": [] } or pass the right --config path.`,
         },
       ],
     };
   }
-  const parsed = parseStrictJson(text, file);
+  const parsed = parseStrictJson(text, displayFile);
   if (parsed.issues.length > 0) {
     return { issues: parsed.issues };
   }
@@ -96,7 +96,7 @@ export function readKonfiguro(file: string): ReadKonfiguroResult {
       issues: (validate.errors ?? []).map((error) => ({
         rule: "config-invalid",
         severity: "error",
-        path: formatIssuePath({ file, pointer: error.instancePath }),
+        path: formatIssuePath({ file: displayFile, pointer: error.instancePath }),
         message: `${CONFIG_FILE_NAME} ${error.message ?? "is invalid"}${
           typeof error.params.additionalProperty === "string"
             ? ` ('${error.params.additionalProperty}')`
@@ -121,7 +121,7 @@ export function readKonfiguro(file: string): ReadKonfiguroResult {
     issues.push({
       rule: "aspekto-package-missing",
       severity: "error",
-      path: formatIssuePath({ file, pointer: `/aspektoj/${index}` }),
+      path: formatIssuePath({ file: displayFile, pointer: `/aspektoj/${index}` }),
       message: `No Aspekto package (a directory with ${ASPEKTO_FILE_NAME}) at ${dir}.`,
       suggestion:
         "Check the path (relative to the config file) or install the npm package; the rest of the Modelo is still validated.",

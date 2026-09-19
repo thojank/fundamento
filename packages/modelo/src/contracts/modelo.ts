@@ -35,10 +35,37 @@ export type {
   TokenSetFile,
 } from "../generated/modelo-schema.js";
 
-/** Where a Modelo lives: the vortaro directory (`$themes.json`, `$metadata.json`, `sets/`) and the data directory. */
+/**
+ * Where a Modelo lives: the vortaro directory (`$themes.json`, `$metadata.json`, `sets/`), the
+ * data directory and the Aspekto packages composed with them (Spec 001, D-08).
+ */
 export interface ModeloSource {
   vortaroDir: string;
   dataDir: string;
+  /** Absolute directories of Aspekto packages (each with `aspekto.json`), in config order. */
+  aspektoPackages?: readonly string[];
+  /** Issues found while resolving the source, e.g. from `fundamento.config.json`; reported first. */
+  sourceIssues?: readonly ValidationIssue[];
+}
+
+/** An Aspekto package composed into a Modelo (D-05, D-08). */
+export interface LoadedAspektoPackage {
+  /** Package label: the `name` of its package.json, or its directory name. */
+  name: string;
+  /** Aspekto name from `aspekto.json`, when it is a string. */
+  aspekto?: string;
+  /** DimensioValoro ID from `aspekto.json`, when it is a string. */
+  id?: string;
+  /** `idNamespace` from `aspekto.json`, when it is a string. */
+  namespace?: string;
+  /** `aspekto.json` path relative to the Modelo root. */
+  aspektoFile: string;
+  /** `ids.lock.json` path relative to the Modelo root. */
+  lockFile: string;
+  /** The package's own ID registry. */
+  idsLock: IdsLock;
+  /** Whether its Aspekto value was added to the aspekto Dimensio (false for a duplicate name). */
+  composed: boolean;
 }
 
 /** One parsed `dimensio=valoro` condition of a set. */
@@ -67,6 +94,8 @@ export interface LoadedSet {
   kondicxoj: Kondicxo[];
   /** Set file path relative to the Modelo root. */
   file: string;
+  /** The Aspekto package holding the set; absent for core sets (D-08). */
+  package?: string;
   tokens: Record<string, LoadedToken>;
 }
 
@@ -78,7 +107,10 @@ export interface Modelo {
   reguloj: Regulo[];
   jugxoj: Jugxo[];
   kontrastParoj: KontrastParo[];
+  /** Union of the core registry and every package registry. */
   idsLock: IdsLock;
+  /** Composed Aspekto packages in config order (D-08). */
+  aspektoPackages: LoadedAspektoPackage[];
   /** Raw `$themes.json`, kept for the drift check. */
   themesFile: unknown;
   /** Raw `$metadata.json`, kept for the drift check. */

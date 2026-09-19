@@ -2,7 +2,7 @@
 // edge; everything after it (`buildModelo`) is pure.
 
 import { type Dirent, readdirSync, readFileSync } from "node:fs";
-import { join } from "node:path";
+import { basename, join } from "node:path";
 import { formatIssuePath, type ValidationIssue } from "../contracts/issues.js";
 import type { ModeloSource } from "../contracts/modelo.js";
 import { DATA_FILE_SCHEMA_DEFS, type DataFileName } from "../contracts/schema.js";
@@ -20,12 +20,26 @@ export interface ModeloDocument {
 export interface ModeloSetDocument extends ModeloDocument {
   /** Set name: path below `sets/` without `.json`, e.g. `color-scheme/dark`. */
   name: string;
+  /** Label of the Aspekto package holding the set; absent for core sets (D-08). */
+  package?: string;
+}
+
+/** The files of one Aspekto package (D-05). Its sets are part of `ModeloFiles.sets`. */
+export interface AspektoPackageFiles {
+  /** Package label: the `name` of its package.json, or its directory name. */
+  name: string;
+  /** Absolute package directory. */
+  dir: string;
+  aspekto: ModeloDocument;
+  idsLock: ModeloDocument;
 }
 
 /** Every file of a Modelo root, parsed but not interpreted. FUND-3.2 validates these raw values. */
 export interface ModeloFiles {
-  /** Sorted by set name (code-point order). */
+  /** Core and package sets, sorted by set name (code-point order). */
   sets: ModeloSetDocument[];
+  /** Composed Aspekto packages in source order (D-08). */
+  packages: AspektoPackageFiles[];
   data: Record<DataFileName, ModeloDocument>;
   themes: ModeloDocument;
   metadata: ModeloDocument;
@@ -50,7 +64,7 @@ export const SETS_DIR_NAME = "sets";
  */
 export function readModeloFiles(source: ModeloSource): ReadModeloFilesResult {
   const root = modeloRootOf(source);
-  const issues: ValidationIssue[] = [];
+  const issues: ValidationIssue[] = [...(source.sourceIssues ?? [])];
 
   const read = (absolutePath: string): ModeloDocument | undefined => {
     const file = relativeModeloPath(root, absolutePath);
@@ -79,6 +93,31 @@ export function readModeloFiles(source: ModeloSource): ReadModeloFilesResult {
     }
   }
 
+  const packages: AspektoPackageFiles[] = [];
+  let packagesComplete = true;
+  for (const dir of source.aspektoPackages ?? []) {
+    const name = packageLabel(dir);
+    const aspekto = read(join(dir, ASPEKTO_FILE));
+    const idsLock = read(join(dir, PACKAGE_LOCK_FILE));
+    const packageSetsDir = join(dir, SETS_DIR_NAME);
+    const packageSetPaths = listSetFiles(packageSetsDir);
+    if (packageSetPaths === undefined) {
+      issues.push(fileMissing(relativeModeloPath(root, packageSetsDir), undefined, "directory"));
+    }
+    for (const { name: setName, path } of packageSetPaths ?? []) {
+      const document = read(path);
+      if (document !== undefined) {
+        sets.push({ name: setName, package: name, ...document });
+      }
+    }
+    if (aspekto === undefined || idsLock === undefined) {
+      packagesComplete = false;
+      continue;
+    }
+    packages.push({ name, dir, aspekto, idsLock });
+  }
+  sets.sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
+
   const themes = read(join(source.vortaroDir, THEMES_FILE_NAME));
   const metadata = read(join(source.vortaroDir, METADATA_FILE_NAME));
   const data: Partial<Record<DataFileName, ModeloDocument>> = {};
@@ -89,10 +128,43 @@ export function readModeloFiles(source: ModeloSource): ReadModeloFilesResult {
     }
   }
 
-  if (issues.length > 0 || themes === undefined || metadata === undefined || !isComplete(data)) {
+  const blocking = issues.some(
+    (issue) => issue.rule === "file-missing" || issue.rule.startsWith("json-"),
+  );
+  if (
+    blocking ||
+    !packagesComplete ||
+    themes === undefined ||
+    metadata === undefined ||
+    !isComplete(data)
+  ) {
     return { issues };
   }
-  return { files: { sets, data, themes, metadata }, issues };
+  return { files: { sets, packages, data, themes, metadata }, issues };
+}
+
+/** The file every Aspekto package has at its root. */
+const ASPEKTO_FILE = "aspekto.json";
+/** The package's own ID registry. */
+const PACKAGE_LOCK_FILE = "ids.lock.json";
+
+/** The `name` of the package's package.json, or its directory name. */
+function packageLabel(dir: string): string {
+  try {
+    const manifest: unknown = JSON.parse(readFileSync(join(dir, "package.json"), "utf8"));
+    if (
+      typeof manifest === "object" &&
+      manifest !== null &&
+      "name" in manifest &&
+      typeof manifest.name === "string" &&
+      manifest.name !== ""
+    ) {
+      return manifest.name;
+    }
+  } catch {
+    // No or unreadable package.json: fall back to the directory name.
+  }
+  return basename(dir);
 }
 
 function isComplete(

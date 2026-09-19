@@ -60,7 +60,10 @@ export function resolveCombination(modelo: Modelo, assignment: Assignment): Comb
       id: coreToken.id ?? "",
       type: coreToken.type,
       value: structuredClone(result.value),
-      origin: { set: winner.set.name, setId: winner.set.id ?? "" },
+      origin:
+        winner.set.package === undefined
+          ? { set: winner.set.name, setId: winner.set.id ?? "" }
+          : { set: winner.set.name, setId: winner.set.id ?? "", package: winner.set.package },
       aliasChain: result.aliasChain.map((link) => ({ ...link })),
     };
     if (result.fieldAliases !== undefined) {

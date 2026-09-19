@@ -4,13 +4,15 @@ import type { IdsLock } from "../contracts/entity-ids.js";
 import type { ValidationIssue } from "../contracts/issues.js";
 import type {
   Dimensio,
+  DimensioValoro,
   Jugxo,
   KontrastParo,
+  LoadedAspektoPackage,
   LoadedSet,
   Modelo,
   Regulo,
 } from "../contracts/modelo.js";
-import type { ModeloFiles, ModeloSetDocument } from "./files.js";
+import type { AspektoPackageFiles, ModeloFiles, ModeloSetDocument } from "./files.js";
 import { flattenTokenTree, fundamentoExtension, parseKondicxoj } from "./flatten.js";
 import { isJsonObject, type JsonObject } from "./guards.js";
 import { MODELO_VERSION } from "./version.js";
@@ -34,18 +36,83 @@ export function buildModelo(files: ModeloFiles): BuildModeloResult {
     issues.push(...setIssues);
     return set;
   });
+  const dimensioj = sortByPriority(
+    entriesOf<Dimensio>(files.data["dimensioj.json"].value, "dimensioj"),
+  );
+  const aspektoPackages = composeAspektoValues(dimensioj, files.packages);
+  const idsLock: IdsLock = { ids: { ...idsLockOf(files.data["ids.lock.json"].value).ids } };
+  for (const pkg of aspektoPackages) {
+    for (const [id, entry] of Object.entries(pkg.idsLock.ids)) {
+      // A cross-registry duplicate keeps the first entry; validation reports `id-duplicate`.
+      if (!Object.hasOwn(idsLock.ids, id)) {
+        idsLock.ids[id] = entry;
+      }
+    }
+  }
   const modelo: Modelo = {
     version: MODELO_VERSION,
-    dimensioj: sortByPriority(entriesOf<Dimensio>(files.data["dimensioj.json"].value, "dimensioj")),
+    dimensioj,
     setoj,
     reguloj: entriesOf<Regulo>(files.data["reguloj.json"].value, "reguloj"),
     jugxoj: entriesOf<Jugxo>(files.data["jugxoj.json"].value, "jugxoj"),
     kontrastParoj: entriesOf<KontrastParo>(files.data["kontrastparoj.json"].value, "kontrastParoj"),
-    idsLock: idsLockOf(files.data["ids.lock.json"].value),
+    idsLock,
+    aspektoPackages,
     themesFile: files.themes.value,
     metadataFile: files.metadata.value,
   };
   return { modelo, issues };
+}
+
+/** Name of the Dimensio whose values are Aspektoj. */
+export const ASPEKTO_DIMENSIO = "aspekto";
+
+/**
+ * Adds each package's Aspekto as a value of the aspekto Dimensio (D-05: the values are assembled
+ * from the loaded packages). A name that already exists is not added again; validation reports
+ * `aspekto-name-duplicate`. Mutates `dimensioj` (a fresh array of fresh entries) in place.
+ */
+function composeAspektoValues(
+  dimensioj: Dimensio[],
+  packages: readonly AspektoPackageFiles[],
+): LoadedAspektoPackage[] {
+  const index = dimensioj.findIndex((dimensio) => dimensio.name === ASPEKTO_DIMENSIO);
+  const aspekto = index === -1 ? undefined : dimensioj[index];
+  const valoroj: DimensioValoro[] = Array.isArray(aspekto?.valoroj) ? [...aspekto.valoroj] : [];
+  const loaded = packages.map((pkg) => {
+    const raw = isJsonObject(pkg.aspekto.value) ? pkg.aspekto.value : {};
+    const name = typeof raw.name === "string" ? raw.name : undefined;
+    const id = typeof raw.id === "string" ? raw.id : undefined;
+    const owner = typeof raw.owner === "string" ? raw.owner : undefined;
+    const license = typeof raw.license === "string" ? raw.license : undefined;
+    const composed =
+      aspekto !== undefined &&
+      name !== undefined &&
+      !valoroj.some((valoro) => isJsonObject(valoro) && valoro.name === name);
+    if (composed && name !== undefined) {
+      const valoro: DimensioValoro = { id: id ?? "", name };
+      if (owner !== undefined && license !== undefined) {
+        // Transitional view until the Aspekto metadata moves out of dimensioj.json (T007).
+        valoro.aspekto = { owner, licenseNote: license };
+      }
+      valoroj.push(valoro);
+    }
+    const entry: LoadedAspektoPackage = {
+      name: pkg.name,
+      aspektoFile: pkg.aspekto.file,
+      lockFile: pkg.idsLock.file,
+      idsLock: idsLockOf(pkg.idsLock.value),
+      composed,
+    };
+    if (name !== undefined) entry.aspekto = name;
+    if (id !== undefined) entry.id = id;
+    if (typeof raw.idNamespace === "string") entry.namespace = raw.idNamespace;
+    return entry;
+  });
+  if (aspekto !== undefined && index !== -1) {
+    dimensioj[index] = { ...aspekto, valoroj };
+  }
+  return loaded;
 }
 
 function buildSet(document: ModeloSetDocument): { set: LoadedSet; issues: ValidationIssue[] } {
@@ -57,6 +124,9 @@ function buildSet(document: ModeloSetDocument): { set: LoadedSet; issues: Valida
     file: document.file,
     tokens,
   };
+  if (document.package !== undefined) {
+    set.package = document.package;
+  }
   if (typeof extension?.id === "string") {
     set.id = extension.id;
   }

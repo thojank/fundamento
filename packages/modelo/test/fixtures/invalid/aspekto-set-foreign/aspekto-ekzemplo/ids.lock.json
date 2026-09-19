@@ -1,0 +1,16 @@
+{
+  "ids": {
+    "dva_ekz_01M2WRK8G0EEEEEEEEEEEEEEE0": {
+      "status": "active",
+      "type": "dimensioValoro"
+    },
+    "set_ekz_01M2WRK8G0EEEEEEEEEEEEEEE1": {
+      "status": "active",
+      "type": "tokenSet"
+    },
+    "set_ekz_01M2WRK8G0EEEEEEEEEEEEEEE2": {
+      "status": "active",
+      "type": "tokenSet"
+    }
+  }
+}

@@ -18,6 +18,11 @@ export const DEFAULT_LOCK_FILE = "data/ids.lock.json";
 export interface CheckIdsOptions {
   /** Lock file path used in `id-orphaned` issue paths. Defaults to `DEFAULT_LOCK_FILE`. */
   lockFile?: string;
+  /**
+   * The lock file that registers `id`, when the lock is a union of several registries (an Aspekto
+   * package lock, D-08). `undefined` falls back to `lockFile`.
+   */
+  lockFileFor?: (id: string) => string | undefined;
 }
 
 function escapePointerSegment(segment: string): string {
@@ -145,7 +150,10 @@ export function checkIds(
     issues.push(
       issue(
         "id-orphaned",
-        formatIssuePath({ file: lockFile, pointer: `/ids/${escapePointerSegment(id)}` }),
+        formatIssuePath({
+          file: options.lockFileFor?.(id) ?? lockFile,
+          pointer: `/ids/${escapePointerSegment(id)}`,
+        }),
         `ID '${id}' (${entry.type}) is active in the lock but no entity in the Modelo uses it.`,
         `If the ${entry.type} was removed, run \`pnpm id:retire ${id}\`; otherwise restore its ID.`,
       ),

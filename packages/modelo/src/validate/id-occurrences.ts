@@ -8,7 +8,13 @@ import type { IdOccurrence } from "../contracts/modelo.js";
 import { appendPointer } from "../json/pointer.js";
 import type { ModeloFiles } from "../load/files.js";
 import { fundamentoExtension } from "../load/flatten.js";
-import { EXTENSION_POINTER, type JsonObject, rawEntries, walkRawTokens } from "./raw.js";
+import {
+  EXTENSION_POINTER,
+  isJsonObject,
+  type JsonObject,
+  rawEntries,
+  walkRawTokens,
+} from "./raw.js";
 
 /**
  * ID occurrences of: core token definitions (overrides in other sets carry no ID), set roots,
@@ -50,6 +56,12 @@ export function collectIdOccurrences(files: ModeloFiles): IdOccurrence[] {
         );
       });
     }
+  }
+
+  for (const pkg of files.packages) {
+    // The Aspekto of a package is a DimensioValoro whose ID lives in aspekto.json (D-05).
+    const aspekto = isJsonObject(pkg.aspekto.value) ? pkg.aspekto.value : undefined;
+    add("dimensioValoro", pkg.aspekto.file, "", aspekto, "");
   }
 
   const dimensioj = files.data["dimensioj.json"];
