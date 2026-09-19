@@ -69,6 +69,12 @@ export function resolveCombination(modelo: Modelo, assignment: Assignment): Comb
     if (result.fieldAliases !== undefined) {
       resolved.fieldAliases = structuredClone(result.fieldAliases);
     }
+    // textTransform is a field of its own: the last active set that states it wins (D-11).
+    const transform = ordered.findLast((set) => set.tokens[name]?.textTransform !== undefined);
+    const textTransform = transform?.tokens[name]?.textTransform;
+    if (transform !== undefined && textTransform !== undefined) {
+      resolved.textTransform = { value: textTransform, set: transform.name };
+    }
     tokens[name] = resolved;
   }
   return {

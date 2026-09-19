@@ -129,6 +129,13 @@ export type KontrastKategorio = "text-normal" | "text-large" | "ui";
  */
 export type SkemoId = string;
 /**
+ * Text transformation of a typography role (Spec 001, D-11). DTCG has no field for it; the values are platform-neutral.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "TextTransform".
+ */
+export type TextTransform = "none" | "uppercase" | "lowercase" | "capitalize";
+/**
  * This interface was referenced by `ModeloJson`'s JSON-Schema
  * via the `definition` "Alias".
  */
@@ -170,13 +177,6 @@ export type ProjekcioId = string;
  * via the `definition` "CeloId".
  */
 export type CeloId = string;
-/**
- * Text transformation of a typography role (Spec 001, D-11). DTCG has no field for it; the values are platform-neutral.
- *
- * This interface was referenced by `ModeloJson`'s JSON-Schema
- * via the `definition` "TextTransform".
- */
-export type TextTransform = "none" | "uppercase" | "lowercase" | "capitalize";
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema
  * via the `definition` "ColorSpace".
@@ -592,6 +592,13 @@ export interface ResolvedToken {
   aliasChain: AliasLink[];
   fieldAliases?: {
     [k: string]: AliasLink[];
+  };
+  /**
+   * Text transformation of a typography token and the set that states it; the last active set that states one wins (Spec 001, D-11). Absent when no set states one.
+   */
+  textTransform?: {
+    value: TextTransform;
+    set: SetName;
   };
 }
 /**

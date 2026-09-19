@@ -1575,6 +1575,20 @@
               "$ref": "#/$defs/AliasLink"
             }
           }
+        },
+        "textTransform": {
+          "description": "Text transformation of a typography token and the set that states it; the last active set that states one wins (Spec 001, D-11). Absent when no set states one.",
+          "type": "object",
+          "properties": {
+            "value": {
+              "$ref": "#/$defs/TextTransform"
+            },
+            "set": {
+              "$ref": "#/$defs/SetName"
+            }
+          },
+          "required": ["value", "set"],
+          "additionalProperties": false
         }
       },
       "required": ["id", "type", "value", "origin", "aliasChain"],

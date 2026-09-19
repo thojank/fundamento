@@ -65,9 +65,9 @@ Order follows the plan's "Build order". The ciferecigo package is the last task.
 - [x] **T013 Colour** (D-02, D-12)
   - Red: coverage (colour part), `color-semantic-literal`, `color-role-missing` fixtures; rename test `color.palette.blue.600` → `accent.600` with the same ID.
   - Green: 72 palette primitives and 68 semantic tokens with roles in `core` (komuna values: an OKLCH lightness ramp per role palette, low-chroma blue-grey accent). **Also done here (moved from T016):** the colour parts of the generic sets are rewritten alias-only: `color-scheme/dark`, `contrast/high` and the new generic conjunction `color-scheme/dark+contrast/high`; `aspekto/komuna+color-scheme/dark` tints `neutral.950`. Reason: the Phase-0 dark and high sets overrode palette literals that the new semantics no longer use, so contrast would break in dark mode. Reguloj `semantic-colors-alias-palette` (now automatic) and the new `color-roles-declared` are enforced through D-19. All ~60 planned pairs were checked in light, dark, high and dark+high before writing (text AAA ≥ 7:1 in both high modes).
-- [ ] **T014 Typography** (D-11, FR-04, FR-05)
+- [x] **T014 Typography** (D-11, FR-04, FR-05)
   - Red: coverage (typography part); 14 composites, all fields aliases; `textTransform` on kicker; renames `font.size.body` / `font.lineheight.body` / `typography.body` → `.1` with the same IDs; families `Geist` / `Geist Mono` plus fallbacks.
-  - Green: families, weights, size/line-height/tracking scales and roles, composites.
+  - Green: families, weights, size/line-height/tracking scales and roles, composites; the loader reads `textTransform` and the resolver reports it with the set that states it (`ResolvedToken.textTransform`). **Also done here (moved from T016):** the typography part of `viewport/compact` and `viewport/expanded` is rewritten alias-only (display and headline sizes plus their tracking), because the Phase-0 viewport sets overrode the renamed `font.size.body`; body text is no longer viewport-shifted.
 - [ ] **T015 Spacing, size, shape, elevation, motion, layout, focus, opacity** (K4)
   - Red: coverage (rest), flip `it.fails` from T012; `border.width.*` and motion roles are aliases over scales; renames `motion.duration.short` → `fast` and `shadow.raised` → `elevation.shadow.raised` with the same IDs.
   - Green: data-model §2 rows.

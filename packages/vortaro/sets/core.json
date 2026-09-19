@@ -2140,12 +2140,26 @@
   "font": {
     "family": {
       "$type": "fontFamily",
-      "body": {
+      "display": {
         "$value": [
+          "Geist",
           "system-ui",
           "sans-serif"
         ],
-        "$description": "Body text family (generic families only).",
+        "$description": "Display and headline family: Geist (OFL-1.1) with generic fallbacks.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9FT4YK4YSZWWKGEWH4K1Z"
+          }
+        }
+      },
+      "body": {
+        "$value": [
+          "Geist",
+          "system-ui",
+          "sans-serif"
+        ],
+        "$description": "Body family: Geist (OFL-1.1) with generic fallbacks.",
         "$extensions": {
           "com.ciferecigo.fundamento": {
             "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBW"
@@ -2154,9 +2168,11 @@
       },
       "code": {
         "$value": [
+          "Geist Mono",
+          "ui-monospace",
           "monospace"
         ],
-        "$description": "Code text family (generic family only).",
+        "$description": "Code family: Geist Mono (OFL-1.1) with generic fallbacks.",
         "$extensions": {
           "com.ciferecigo.fundamento": {
             "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBX"
@@ -2164,50 +2180,857 @@
         }
       }
     },
-    "size": {
-      "$type": "dimension",
-      "body": {
-        "$value": {
-          "value": 16,
-          "unit": "px"
-        },
-        "$description": "Body text size.",
-        "$extensions": {
-          "com.ciferecigo.fundamento": {
-            "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBY"
-          }
-        }
-      }
-    },
     "weight": {
       "$type": "fontWeight",
+      "thin": {
+        "$value": 100,
+        "$description": "Weight thin (100).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9FT4ZRDMQX50BGG3CN86T"
+          }
+        }
+      },
+      "extralight": {
+        "$value": 200,
+        "$description": "Weight extralight (200).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9FT4ZRDMQX50BGG3CN86V"
+          }
+        }
+      },
+      "light": {
+        "$value": 300,
+        "$description": "Weight light (300).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9FT4ZRDMQX50BGG3CN86W"
+          }
+        }
+      },
       "regular": {
         "$value": 400,
-        "$description": "Regular weight.",
+        "$description": "Weight regular (400).",
         "$extensions": {
           "com.ciferecigo.fundamento": {
             "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBZ"
           }
         }
       },
+      "medium": {
+        "$value": 500,
+        "$description": "Weight medium (500).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9FT4ZRDMQX50BGG3CN86X"
+          }
+        }
+      },
+      "semibold": {
+        "$value": 600,
+        "$description": "Weight semibold (600).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9FT4ZRDMQX50BGG3CN86Y"
+          }
+        }
+      },
       "bold": {
         "$value": 700,
-        "$description": "Bold weight.",
+        "$description": "Weight bold (700).",
         "$extensions": {
           "com.ciferecigo.fundamento": {
             "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVC0"
+          }
+        }
+      },
+      "extrabold": {
+        "$value": 800,
+        "$description": "Weight extrabold (800).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9FT4ZRDMQX50BGG3CN86Z"
+          }
+        }
+      },
+      "black": {
+        "$value": 900,
+        "$description": "Weight black (900).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9FT4ZRDMQX50BGG3CN870"
+          }
+        }
+      }
+    },
+    "size": {
+      "$type": "dimension",
+      "scale": {
+        "100": {
+          "$value": {
+            "value": 12,
+            "unit": "px"
+          },
+          "$description": "Font size step 100 (12 px reference units).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN871"
+            }
+          }
+        },
+        "200": {
+          "$value": {
+            "value": 14,
+            "unit": "px"
+          },
+          "$description": "Font size step 200 (14 px reference units).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN872"
+            }
+          }
+        },
+        "300": {
+          "$value": {
+            "value": 16,
+            "unit": "px"
+          },
+          "$description": "Font size step 300 (16 px reference units).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN873"
+            }
+          }
+        },
+        "400": {
+          "$value": {
+            "value": 18,
+            "unit": "px"
+          },
+          "$description": "Font size step 400 (18 px reference units).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN874"
+            }
+          }
+        },
+        "500": {
+          "$value": {
+            "value": 20,
+            "unit": "px"
+          },
+          "$description": "Font size step 500 (20 px reference units).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN875"
+            }
+          }
+        },
+        "600": {
+          "$value": {
+            "value": 24,
+            "unit": "px"
+          },
+          "$description": "Font size step 600 (24 px reference units).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN876"
+            }
+          }
+        },
+        "700": {
+          "$value": {
+            "value": 28,
+            "unit": "px"
+          },
+          "$description": "Font size step 700 (28 px reference units).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN877"
+            }
+          }
+        },
+        "800": {
+          "$value": {
+            "value": 32,
+            "unit": "px"
+          },
+          "$description": "Font size step 800 (32 px reference units).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN878"
+            }
+          }
+        },
+        "900": {
+          "$value": {
+            "value": 40,
+            "unit": "px"
+          },
+          "$description": "Font size step 900 (40 px reference units).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN879"
+            }
+          }
+        },
+        "1000": {
+          "$value": {
+            "value": 48,
+            "unit": "px"
+          },
+          "$description": "Font size step 1000 (48 px reference units).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN87A"
+            }
+          }
+        },
+        "1100": {
+          "$value": {
+            "value": 56,
+            "unit": "px"
+          },
+          "$description": "Font size step 1100 (56 px reference units).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN87B"
+            }
+          }
+        },
+        "1200": {
+          "$value": {
+            "value": 64,
+            "unit": "px"
+          },
+          "$description": "Font size step 1200 (64 px reference units).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN87C"
+            }
+          }
+        }
+      },
+      "display": {
+        "1": {
+          "$value": "{font.size.scale.1100}",
+          "$description": "Font size of the role display.1.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN87D"
+            }
+          }
+        },
+        "2": {
+          "$value": "{font.size.scale.1000}",
+          "$description": "Font size of the role display.2.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN87E"
+            }
+          }
+        },
+        "3": {
+          "$value": "{font.size.scale.900}",
+          "$description": "Font size of the role display.3.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN87F"
+            }
+          }
+        }
+      },
+      "headline": {
+        "1": {
+          "$value": "{font.size.scale.800}",
+          "$description": "Font size of the role headline.1.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN87G"
+            }
+          }
+        },
+        "2": {
+          "$value": "{font.size.scale.700}",
+          "$description": "Font size of the role headline.2.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN87H"
+            }
+          }
+        },
+        "3": {
+          "$value": "{font.size.scale.600}",
+          "$description": "Font size of the role headline.3.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN87J"
+            }
+          }
+        },
+        "4": {
+          "$value": "{font.size.scale.500}",
+          "$description": "Font size of the role headline.4.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN87K"
+            }
+          }
+        }
+      },
+      "body": {
+        "1": {
+          "$value": "{font.size.scale.300}",
+          "$description": "Font size of the role body.1.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBY"
+            }
+          }
+        },
+        "2": {
+          "$value": "{font.size.scale.200}",
+          "$description": "Font size of the role body.2.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN87M"
+            }
+          }
+        }
+      },
+      "label": {
+        "1": {
+          "$value": "{font.size.scale.200}",
+          "$description": "Font size of the role label.1.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN87N"
+            }
+          }
+        },
+        "2": {
+          "$value": "{font.size.scale.100}",
+          "$description": "Font size of the role label.2.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN87P"
+            }
+          }
+        }
+      },
+      "caption": {
+        "$value": "{font.size.scale.100}",
+        "$description": "Font size of the role caption.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9FT4ZRDMQX50BGG3CN87Q"
+          }
+        }
+      },
+      "code": {
+        "$value": "{font.size.scale.200}",
+        "$description": "Font size of the role code.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9FT4ZRDMQX50BGG3CN87R"
+          }
+        }
+      },
+      "kicker": {
+        "$value": "{font.size.scale.100}",
+        "$description": "Font size of the role kicker.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9FT4ZRDMQX50BGG3CN87S"
           }
         }
       }
     },
     "lineheight": {
       "$type": "number",
+      "scale": {
+        "solid": {
+          "$value": 1,
+          "$description": "Line height solid: 1 \u00d7 the font size.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN87T"
+            }
+          }
+        },
+        "tight": {
+          "$value": 1.1,
+          "$description": "Line height tight: 1.1 \u00d7 the font size.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN87V"
+            }
+          }
+        },
+        "snug": {
+          "$value": 1.25,
+          "$description": "Line height snug: 1.25 \u00d7 the font size.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN87W"
+            }
+          }
+        },
+        "normal": {
+          "$value": 1.5,
+          "$description": "Line height normal: 1.5 \u00d7 the font size.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN87X"
+            }
+          }
+        },
+        "relaxed": {
+          "$value": 1.625,
+          "$description": "Line height relaxed: 1.625 \u00d7 the font size.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN87Y"
+            }
+          }
+        },
+        "loose": {
+          "$value": 1.75,
+          "$description": "Line height loose: 1.75 \u00d7 the font size.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN87Z"
+            }
+          }
+        }
+      },
+      "display": {
+        "1": {
+          "$value": "{font.lineheight.scale.tight}",
+          "$description": "Line height of the role display.1.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN880"
+            }
+          }
+        },
+        "2": {
+          "$value": "{font.lineheight.scale.tight}",
+          "$description": "Line height of the role display.2.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN881"
+            }
+          }
+        },
+        "3": {
+          "$value": "{font.lineheight.scale.tight}",
+          "$description": "Line height of the role display.3.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN882"
+            }
+          }
+        }
+      },
+      "headline": {
+        "1": {
+          "$value": "{font.lineheight.scale.snug}",
+          "$description": "Line height of the role headline.1.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN883"
+            }
+          }
+        },
+        "2": {
+          "$value": "{font.lineheight.scale.snug}",
+          "$description": "Line height of the role headline.2.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN884"
+            }
+          }
+        },
+        "3": {
+          "$value": "{font.lineheight.scale.snug}",
+          "$description": "Line height of the role headline.3.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN885"
+            }
+          }
+        },
+        "4": {
+          "$value": "{font.lineheight.scale.snug}",
+          "$description": "Line height of the role headline.4.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN886"
+            }
+          }
+        }
+      },
       "body": {
-        "$value": 1.5,
-        "$description": "Body line height as a multiple of the font size.",
+        "1": {
+          "$value": "{font.lineheight.scale.normal}",
+          "$description": "Line height of the role body.1.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVC1"
+            }
+          }
+        },
+        "2": {
+          "$value": "{font.lineheight.scale.normal}",
+          "$description": "Line height of the role body.2.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN887"
+            }
+          }
+        }
+      },
+      "label": {
+        "1": {
+          "$value": "{font.lineheight.scale.snug}",
+          "$description": "Line height of the role label.1.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN888"
+            }
+          }
+        },
+        "2": {
+          "$value": "{font.lineheight.scale.snug}",
+          "$description": "Line height of the role label.2.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN889"
+            }
+          }
+        }
+      },
+      "caption": {
+        "$value": "{font.lineheight.scale.normal}",
+        "$description": "Line height of the role caption.",
         "$extensions": {
           "com.ciferecigo.fundamento": {
-            "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVC1"
+            "id": "tok_01M2W9FT4ZRDMQX50BGG3CN88A"
+          }
+        }
+      },
+      "code": {
+        "$value": "{font.lineheight.scale.normal}",
+        "$description": "Line height of the role code.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9FT4ZRDMQX50BGG3CN88B"
+          }
+        }
+      },
+      "kicker": {
+        "$value": "{font.lineheight.scale.snug}",
+        "$description": "Line height of the role kicker.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9FT4ZRDMQX50BGG3CN88C"
+          }
+        }
+      }
+    },
+    "tracking": {
+      "$type": "dimension",
+      "scale": {
+        "100": {
+          "$value": {
+            "value": 0,
+            "unit": "px"
+          },
+          "$description": "Letter spacing that belongs to font size step 100 (0 px).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN88D"
+            }
+          }
+        },
+        "200": {
+          "$value": {
+            "value": 0,
+            "unit": "px"
+          },
+          "$description": "Letter spacing that belongs to font size step 200 (0 px).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN88E"
+            }
+          }
+        },
+        "300": {
+          "$value": {
+            "value": 0,
+            "unit": "px"
+          },
+          "$description": "Letter spacing that belongs to font size step 300 (0 px).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN88F"
+            }
+          }
+        },
+        "400": {
+          "$value": {
+            "value": 0,
+            "unit": "px"
+          },
+          "$description": "Letter spacing that belongs to font size step 400 (0 px).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN88G"
+            }
+          }
+        },
+        "500": {
+          "$value": {
+            "value": 0,
+            "unit": "px"
+          },
+          "$description": "Letter spacing that belongs to font size step 500 (0 px).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN88H"
+            }
+          }
+        },
+        "600": {
+          "$value": {
+            "value": 0,
+            "unit": "px"
+          },
+          "$description": "Letter spacing that belongs to font size step 600 (0 px).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN88J"
+            }
+          }
+        },
+        "700": {
+          "$value": {
+            "value": 0,
+            "unit": "px"
+          },
+          "$description": "Letter spacing that belongs to font size step 700 (0 px).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN88K"
+            }
+          }
+        },
+        "800": {
+          "$value": {
+            "value": 0,
+            "unit": "px"
+          },
+          "$description": "Letter spacing that belongs to font size step 800 (0 px).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN88M"
+            }
+          }
+        },
+        "900": {
+          "$value": {
+            "value": -0.4,
+            "unit": "px"
+          },
+          "$description": "Letter spacing that belongs to font size step 900 (-0.4 px).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN88N"
+            }
+          }
+        },
+        "1000": {
+          "$value": {
+            "value": -0.6,
+            "unit": "px"
+          },
+          "$description": "Letter spacing that belongs to font size step 1000 (-0.6 px).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN88P"
+            }
+          }
+        },
+        "1100": {
+          "$value": {
+            "value": -0.8,
+            "unit": "px"
+          },
+          "$description": "Letter spacing that belongs to font size step 1100 (-0.8 px).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN88Q"
+            }
+          }
+        },
+        "1200": {
+          "$value": {
+            "value": -1.0,
+            "unit": "px"
+          },
+          "$description": "Letter spacing that belongs to font size step 1200 (-1.0 px).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN88R"
+            }
+          }
+        },
+        "caps": {
+          "$value": {
+            "value": 0.6,
+            "unit": "px"
+          },
+          "$description": "Letter spacing for small text in capitals (0.6 px).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN88S"
+            }
+          }
+        }
+      },
+      "display": {
+        "1": {
+          "$value": "{font.tracking.scale.1100}",
+          "$description": "Letter spacing of the role display.1.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN88T"
+            }
+          }
+        },
+        "2": {
+          "$value": "{font.tracking.scale.1000}",
+          "$description": "Letter spacing of the role display.2.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN88V"
+            }
+          }
+        },
+        "3": {
+          "$value": "{font.tracking.scale.900}",
+          "$description": "Letter spacing of the role display.3.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN88W"
+            }
+          }
+        }
+      },
+      "headline": {
+        "1": {
+          "$value": "{font.tracking.scale.800}",
+          "$description": "Letter spacing of the role headline.1.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN88X"
+            }
+          }
+        },
+        "2": {
+          "$value": "{font.tracking.scale.700}",
+          "$description": "Letter spacing of the role headline.2.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN88Y"
+            }
+          }
+        },
+        "3": {
+          "$value": "{font.tracking.scale.600}",
+          "$description": "Letter spacing of the role headline.3.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN88Z"
+            }
+          }
+        },
+        "4": {
+          "$value": "{font.tracking.scale.500}",
+          "$description": "Letter spacing of the role headline.4.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN890"
+            }
+          }
+        }
+      },
+      "body": {
+        "1": {
+          "$value": "{font.tracking.scale.300}",
+          "$description": "Letter spacing of the role body.1.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN891"
+            }
+          }
+        },
+        "2": {
+          "$value": "{font.tracking.scale.200}",
+          "$description": "Letter spacing of the role body.2.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN892"
+            }
+          }
+        }
+      },
+      "label": {
+        "1": {
+          "$value": "{font.tracking.scale.200}",
+          "$description": "Letter spacing of the role label.1.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN893"
+            }
+          }
+        },
+        "2": {
+          "$value": "{font.tracking.scale.100}",
+          "$description": "Letter spacing of the role label.2.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN894"
+            }
+          }
+        }
+      },
+      "caption": {
+        "$value": "{font.tracking.scale.100}",
+        "$description": "Letter spacing of the role caption.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9FT4ZRDMQX50BGG3CN895"
+          }
+        }
+      },
+      "code": {
+        "$value": "{font.tracking.scale.200}",
+        "$description": "Letter spacing of the role code.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9FT4ZRDMQX50BGG3CN896"
+          }
+        }
+      },
+      "kicker": {
+        "$value": "{font.tracking.scale.caps}",
+        "$description": "Letter spacing of the role kicker.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9FT4ZRDMQX50BGG3CN897"
           }
         }
       }
@@ -2291,21 +3114,222 @@
   },
   "typography": {
     "$type": "typography",
+    "display": {
+      "1": {
+        "$value": {
+          "fontFamily": "{font.family.display}",
+          "fontSize": "{font.size.display.1}",
+          "fontWeight": "{font.weight.medium}",
+          "letterSpacing": "{font.tracking.display.1}",
+          "lineHeight": "{font.lineheight.display.1}"
+        },
+        "$description": "Display text, the largest headings on a page 1, composed from role tokens.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9FT4ZRDMQX50BGG3CN898"
+          }
+        }
+      },
+      "2": {
+        "$value": {
+          "fontFamily": "{font.family.display}",
+          "fontSize": "{font.size.display.2}",
+          "fontWeight": "{font.weight.medium}",
+          "letterSpacing": "{font.tracking.display.2}",
+          "lineHeight": "{font.lineheight.display.2}"
+        },
+        "$description": "Display text, the largest headings on a page 2, composed from role tokens.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9FT4ZRDMQX50BGG3CN899"
+          }
+        }
+      },
+      "3": {
+        "$value": {
+          "fontFamily": "{font.family.display}",
+          "fontSize": "{font.size.display.3}",
+          "fontWeight": "{font.weight.medium}",
+          "letterSpacing": "{font.tracking.display.3}",
+          "lineHeight": "{font.lineheight.display.3}"
+        },
+        "$description": "Display text, the largest headings on a page 3, composed from role tokens.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9FT4ZRDMQX50BGG3CN89A"
+          }
+        }
+      }
+    },
+    "headline": {
+      "1": {
+        "$value": {
+          "fontFamily": "{font.family.display}",
+          "fontSize": "{font.size.headline.1}",
+          "fontWeight": "{font.weight.semibold}",
+          "letterSpacing": "{font.tracking.headline.1}",
+          "lineHeight": "{font.lineheight.headline.1}"
+        },
+        "$description": "Headline 1, composed from role tokens.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9FT4ZRDMQX50BGG3CN89B"
+          }
+        }
+      },
+      "2": {
+        "$value": {
+          "fontFamily": "{font.family.display}",
+          "fontSize": "{font.size.headline.2}",
+          "fontWeight": "{font.weight.semibold}",
+          "letterSpacing": "{font.tracking.headline.2}",
+          "lineHeight": "{font.lineheight.headline.2}"
+        },
+        "$description": "Headline 2, composed from role tokens.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9FT4ZRDMQX50BGG3CN89C"
+          }
+        }
+      },
+      "3": {
+        "$value": {
+          "fontFamily": "{font.family.display}",
+          "fontSize": "{font.size.headline.3}",
+          "fontWeight": "{font.weight.semibold}",
+          "letterSpacing": "{font.tracking.headline.3}",
+          "lineHeight": "{font.lineheight.headline.3}"
+        },
+        "$description": "Headline 3, composed from role tokens.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9FT4ZRDMQX50BGG3CN89D"
+          }
+        }
+      },
+      "4": {
+        "$value": {
+          "fontFamily": "{font.family.display}",
+          "fontSize": "{font.size.headline.4}",
+          "fontWeight": "{font.weight.semibold}",
+          "letterSpacing": "{font.tracking.headline.4}",
+          "lineHeight": "{font.lineheight.headline.4}"
+        },
+        "$description": "Headline 4, composed from role tokens.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9FT4ZRDMQX50BGG3CN89E"
+          }
+        }
+      }
+    },
     "body": {
+      "1": {
+        "$value": {
+          "fontFamily": "{font.family.body}",
+          "fontSize": "{font.size.body.1}",
+          "fontWeight": "{font.weight.regular}",
+          "letterSpacing": "{font.tracking.body.1}",
+          "lineHeight": "{font.lineheight.body.1}"
+        },
+        "$description": "Body text 1, composed from role tokens.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVC6"
+          }
+        }
+      },
+      "2": {
+        "$value": {
+          "fontFamily": "{font.family.body}",
+          "fontSize": "{font.size.body.2}",
+          "fontWeight": "{font.weight.regular}",
+          "letterSpacing": "{font.tracking.body.2}",
+          "lineHeight": "{font.lineheight.body.2}"
+        },
+        "$description": "Body text 2, composed from role tokens.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9FT4ZRDMQX50BGG3CN89F"
+          }
+        }
+      }
+    },
+    "label": {
+      "1": {
+        "$value": {
+          "fontFamily": "{font.family.body}",
+          "fontSize": "{font.size.label.1}",
+          "fontWeight": "{font.weight.medium}",
+          "letterSpacing": "{font.tracking.label.1}",
+          "lineHeight": "{font.lineheight.label.1}"
+        },
+        "$description": "Label of a control or field 1, composed from role tokens.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9FT4ZRDMQX50BGG3CN89G"
+          }
+        }
+      },
+      "2": {
+        "$value": {
+          "fontFamily": "{font.family.body}",
+          "fontSize": "{font.size.label.2}",
+          "fontWeight": "{font.weight.medium}",
+          "letterSpacing": "{font.tracking.label.2}",
+          "lineHeight": "{font.lineheight.label.2}"
+        },
+        "$description": "Label of a control or field 2, composed from role tokens.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9FT4ZRDMQX50BGG3CN89H"
+          }
+        }
+      }
+    },
+    "caption": {
       "$value": {
         "fontFamily": "{font.family.body}",
-        "fontSize": "{font.size.body}",
+        "fontSize": "{font.size.caption}",
         "fontWeight": "{font.weight.regular}",
-        "letterSpacing": {
-          "value": 0,
-          "unit": "px"
-        },
-        "lineHeight": "{font.lineheight.body}"
+        "letterSpacing": "{font.tracking.caption}",
+        "lineHeight": "{font.lineheight.caption}"
       },
-      "$description": "Body text style, composed from the font tokens.",
+      "$description": "Caption and helper text, composed from role tokens.",
       "$extensions": {
         "com.ciferecigo.fundamento": {
-          "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVC6"
+          "id": "tok_01M2W9FT4ZRDMQX50BGG3CN89J"
+        }
+      }
+    },
+    "code": {
+      "$value": {
+        "fontFamily": "{font.family.code}",
+        "fontSize": "{font.size.code}",
+        "fontWeight": "{font.weight.regular}",
+        "letterSpacing": "{font.tracking.code}",
+        "lineHeight": "{font.lineheight.code}"
+      },
+      "$description": "Code and monospaced text, composed from role tokens.",
+      "$extensions": {
+        "com.ciferecigo.fundamento": {
+          "id": "tok_01M2W9FT4ZRDMQX50BGG3CN89K"
+        }
+      }
+    },
+    "kicker": {
+      "$value": {
+        "fontFamily": "{font.family.body}",
+        "fontSize": "{font.size.kicker}",
+        "fontWeight": "{font.weight.semibold}",
+        "letterSpacing": "{font.tracking.kicker}",
+        "lineHeight": "{font.lineheight.kicker}"
+      },
+      "$description": "Kicker above a headline, in capitals, composed from role tokens.",
+      "$extensions": {
+        "com.ciferecigo.fundamento": {
+          "id": "tok_01M2W9FT4ZRDMQX50BGG3CN89M",
+          "textTransform": "uppercase"
         }
       }
     }

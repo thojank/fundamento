@@ -199,24 +199,27 @@ describe("Phase 0 repo Modelo: core tokens (FR-09, FR-12, FR-18, S2, S4)", () =>
         t.value !== null &&
         Object.values(t.value).some((field) => typeof field === "string" && field.startsWith("{")),
     );
-    expect(composites.map((t) => t.type).sort()).toEqual(["border", "shadow", "typography"]);
+    expect([...new Set(composites.map((t) => t.type))].sort()).toEqual([
+      "border",
+      "shadow",
+      "typography",
+    ]);
   });
 
-  it("uses only generic font families (FR-18: no fonts)", () => {
-    const generic = new Set([
-      "system-ui",
-      "sans-serif",
-      "serif",
-      "monospace",
-      "ui-sans-serif",
-      "ui-serif",
-      "ui-monospace",
-    ]);
-    const families = Object.values(setNamed(repoModelo(), CORE).tokens)
+  it("starts every font stack with a family komuna declares or a generic family (Spec 001 FR-05)", () => {
+    const modelo = repoModelo();
+    const generic = new Set(["system-ui", "sans-serif", "serif", "monospace", "ui-monospace"]);
+    const declared = new Set((modelo.aspektoPackages[0]?.fonts ?? []).map((font) => font.family));
+    const stacks = Object.values(setNamed(modelo, CORE).tokens)
       .filter((t) => t.type === "fontFamily")
-      .flatMap((t) => (Array.isArray(t.value) ? t.value : [t.value]));
-    expect(families.length).toBeGreaterThan(0);
-    for (const family of families) expect(generic.has(family as string), String(family)).toBe(true);
+      .map((t) => (Array.isArray(t.value) ? t.value : [t.value]) as string[]);
+    expect(stacks.length).toBeGreaterThan(0);
+    for (const stack of stacks) {
+      const [first] = stack;
+      expect(declared.has(first ?? "") || generic.has(first ?? ""), String(first)).toBe(true);
+      // Every stack ends in a generic family, so text renders without the font file.
+      expect(generic.has(stack.at(-1) ?? ""), stack.join(", ")).toBe(true);
+    }
   });
 });
 

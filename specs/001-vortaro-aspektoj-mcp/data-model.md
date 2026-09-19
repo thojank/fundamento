@@ -38,7 +38,7 @@ Numbers are planned counts; the coverage test fixes categories and minimum roles
 | Font weights | `font.weight.{thin,extralight,light,regular,medium,semibold,bold,extrabold,black}` | P | 9 |
 | Font size scale / roles | `font.size.scale.<12 steps>`; `font.size.<role>` for the 14 roles | P / R | 12 + 14 |
 | Line height scale / roles | `font.lineheight.scale.{solid,tight,snug,normal,relaxed,loose}`; `font.lineheight.<role>` | P / R | 6 + 14 |
-| Tracking scale / roles | `font.tracking.scale.<same 12 steps as size>` (px); `font.tracking.<role>` | P / R | 12 + 14 |
+| Tracking scale / roles | `font.tracking.scale.<same 12 steps as size>` (px) plus `font.tracking.scale.caps` for small text in capitals (the kicker); `font.tracking.<role>` | P / R | 13 + 14 |
 | Typography composites | `typography.display.{1,2,3}`, `typography.headline.{1,2,3,4}`, `typography.body.{1,2}`, `typography.label.{1,2}`, `typography.{caption,code,kicker}` | R | 14 |
 | Spacing | `spacing.scale.<12 steps>`; `spacing.{xsmall,small,medium,large,xlarge,xxlarge}` | P / R | 18 |
 | Size | `size.scale.<10 steps>`; `size.icon.{small,medium,large}`; `size.control.{small,medium,large}`; `size.container.{small,medium,large,max}`; `size.breakpoint.{medium,expanded}` | P / R | 22 |
@@ -54,7 +54,7 @@ Numbers are planned counts; the coverage test fixes categories and minimum roles
 
 | Set | Re-points |
 |---|---|
-| `viewport/compact`, `viewport/expanded` | `font.size.{display,headline}.*`, the matching `font.tracking.*` and `font.lineheight.*` roles, `layout.grid.*`, `layout.container.max` (all R) |
+| `viewport/compact`, `viewport/expanded` | `font.size.{display,headline}.*` and the matching `font.tracking.*` roles (line heights are unitless and stay), `layout.grid.*`, `layout.container.max` (all R) |
 | `density/compact`, `density/comfortable` | `spacing.<role>`, `size.control.*` only (both R). No typography (K3, Regulo `density-affects-layout-only`). |
 | `color-scheme/dark` | semantic colors → other palette steps; `color.shadow.*`; `color.backdrop` (all R; palettes are never targets) |
 | `contrast/high` | text, border and focus color roles → stronger palette steps; `border.width.default` → `{border.width.strong}` (R since K4) |

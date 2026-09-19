@@ -26,9 +26,6 @@ const { kategorioj } = JSON.parse(
  */
 const PENDING = new Set([
   "focus",
-  "typography.families-weights",
-  "typography.scales",
-  "typography.roles",
   "spacing",
   "shape",
   "elevation",

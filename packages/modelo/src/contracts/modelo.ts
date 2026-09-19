@@ -12,6 +12,7 @@ import type {
   KontrastParo,
   Regulo,
   Rezolvo,
+  TextTransform,
   TokenRole,
 } from "../generated/modelo-schema.js";
 import type { IssueLocation, ValidationIssue } from "./issues.js";
@@ -98,6 +99,8 @@ export interface LoadedToken {
   description?: string;
   id?: string;
   role?: TokenRole;
+  /** Text transformation of a typography token, from its Fundamento extension (D-11). */
+  textTransform?: TextTransform;
   location: IssueLocation;
 }
 
