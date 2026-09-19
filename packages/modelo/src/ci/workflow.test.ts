@@ -19,6 +19,11 @@ const CHECK_STEPS: ReadonlyArray<readonly [name: string, script: string]> = [
 ];
 
 const GATE_STEPS: ReadonlyArray<readonly [name: string, run: string]> = [
+  // The rendered checks of @fundamento/eroj need a browser (Spec 003 T009; T013 adds the others).
+  [
+    "Playwright browsers",
+    "pnpm --filter @fundamento/eroj exec playwright install --with-deps chromium",
+  ],
   ["Build", "pnpm build"],
   ["Test", "pnpm test"],
   // AK-07 timings run alone, outside the parallel Turborepo test run (Spec 001 D-17).

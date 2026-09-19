@@ -18,6 +18,7 @@ import {
   readModeloFiles,
   type ValidationIssue,
 } from "@fundamento/modelo";
+import { CSS_CELO } from "./celoj/css/css.js";
 
 /** What a Celo gets: the loaded Modelo and its export, never raw files (Art. I). */
 export interface CeloInput {
@@ -39,7 +40,7 @@ export interface Celo {
 }
 
 /** Every Celo, in the order of Art. XII. Each task of Spec 003 adds its Celo here. */
-export const CELOJ: readonly Celo[] = [];
+export const CELOJ: readonly Celo[] = [CSS_CELO];
 
 export const MANIFEST_FILE = "projekcioj.json";
 

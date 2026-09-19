@@ -42,6 +42,10 @@ jobs:
       - name: Install
         run: pnpm install --frozen-lockfile
 
+      # The rendered checks of @fundamento/eroj (computed styles, Spec 003 T009) need a browser.
+      - name: Playwright browsers
+        run: pnpm --filter @fundamento/eroj exec playwright install --with-deps chromium
+
       - name: Build
         run: pnpm build
 

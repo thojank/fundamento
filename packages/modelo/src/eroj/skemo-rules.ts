@@ -79,7 +79,7 @@ export function forbiddenBy(
 }
 
 /** Where a part property's token comes from in one combination. */
-export interface BoundToken {
+export interface SkemoBoundToken {
   token: string;
   /** JSON Pointer (inside the Ero file) of the binding or `fixed` that supplied it. */
   pointer: string;
@@ -96,7 +96,7 @@ export function boundToken(
   property: string,
   combination: Combination,
   seen: ReadonlySet<string> = new Set(),
-): BoundToken | undefined {
+): SkemoBoundToken | undefined {
   const source = skemo.parts[part]?.[property as SkemoPartProperty];
   if (source === undefined) return undefined;
   if ("fixed" in source) {
@@ -122,8 +122,8 @@ function matchingBinding(
   part: string,
   property: string,
   combination: Combination,
-): BoundToken | undefined {
-  let best: { binding: BoundToken; keys: number } | undefined;
+): SkemoBoundToken | undefined {
+  let best: { binding: SkemoBoundToken; keys: number } | undefined;
   skemo.bindings.forEach((binding, index) => {
     if (binding.part !== part || binding.property !== property) return;
     const when = Object.entries(binding.when ?? {});

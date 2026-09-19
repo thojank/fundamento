@@ -10,7 +10,7 @@
   ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "test": "vitest run --passWithNoTests",
+    "test": "vitest run --passWithNoTests && playwright test",
     "lint": "tsc -p tsconfig.json --noEmit && biome check ."
   },
   "peerDependencies": {
@@ -26,6 +26,8 @@
     }
   },
   "devDependencies": {
+    "@fundamento/modelo": "workspace:*",
+    "@fundamento/projekcioj": "workspace:*",
     "@axe-core/playwright": "4.13.0",
     "@playwright/test": "1.63.0",
     "@types/node": "^24.13.5",
