@@ -23,6 +23,7 @@
     "lint": "tsc -p tsconfig.json --noEmit && biome check ."
   },
   "dependencies": {
+    "@fundamento/mcp": "workspace:*",
     "@fundamento/modelo": "workspace:*"
   },
   "devDependencies": {

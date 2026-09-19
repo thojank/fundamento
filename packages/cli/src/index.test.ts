@@ -347,3 +347,93 @@ describe("fm modelo export (Spec 001 T019, D-09)", () => {
     expect(run.stdout).toContain(".fundamento/export");
   });
 });
+
+describe("fm modelo validate --aspekto / --config (Spec 001 T027, D-07)", () => {
+  const ekzemploPackage = join(validFixtures, "aspekto-ekzemplo", "aspekto-ekzemplo");
+  const incompletePackage = join(invalidFixtures, "aspekto-incomplete", "aspekto-ekzemplo");
+  const ekzemploConfig = join(validFixtures, "aspekto-ekzemplo", "fundamento.config.json");
+  const incompleteConfig = join(invalidFixtures, "aspekto-incomplete", "fundamento.config.json");
+
+  it("validates a package against the repo core", () => {
+    const run = fm(["modelo", "validate", "--aspekto", ekzemploPackage]);
+    expect(run.code, run.stdout).toBe(0);
+    expect(run.stdout).toContain("VALID");
+    expect(run.stdout).toContain(ekzemploPackage);
+  });
+
+  it("reports an incomplete package with exit 1", () => {
+    const run = fm(["modelo", "validate", "--aspekto", incompletePackage]);
+    expect(run.code).toBe(1);
+    expect(run.stdout).toContain("aspekto-incomplete");
+  });
+
+  it("takes --aspekto more than once", () => {
+    const run = fm([
+      "modelo",
+      "validate",
+      "--aspekto",
+      ekzemploPackage,
+      "--aspekto",
+      incompletePackage,
+    ]);
+    expect(run.code).toBe(1);
+    expect(run.stdout).toContain("aspekto-name-duplicate");
+  });
+
+  it("validates a project config", () => {
+    expect(fm(["modelo", "validate", "--config", ekzemploConfig]).code).toBe(0);
+    const run = fm(["modelo", "validate", "--config", incompleteConfig, "--json"]);
+    expect(run.code).toBe(1);
+    expect((JSON.parse(run.stdout) as { errors: unknown[] }).errors).toHaveLength(4);
+  });
+
+  it("rejects a path together with --config, and suggests --aspekto for a typo", () => {
+    const both = fm(["modelo", "validate", validFixtures, "--config", ekzemploConfig]);
+    expect(both.code).toBe(2);
+    expect(both.stderr).toContain("--config");
+    const typo = fm(["modelo", "validate", "--aspketo", ekzemploPackage]);
+    expect(typo.code).toBe(2);
+    expect(typo.stderr).toContain("Did you mean `--aspekto`?");
+    expectNoStackTrace(typo);
+  });
+
+  it("documents the flags in --help", () => {
+    const run = fm(["modelo", "validate", "--help"]);
+    expect(run.stdout).toContain("--aspekto <dir>");
+    expect(run.stdout).toContain("--config <file>");
+  });
+});
+
+describe("fm mcp (Spec 001 T027, D-13)", () => {
+  it("is listed in fm --help", () => {
+    expect(fm(["--help"]).stdout).toMatch(/^\s+mcp\s+/m);
+  });
+
+  it("explains its flags with --help", () => {
+    const run = fm(["mcp", "--help"]);
+    expect(run.code).toBe(0);
+    for (const flag of ["--config <file>", "--export <dir>", "--http", "--port <n>", "7300"]) {
+      expect(run.stdout).toContain(flag);
+    }
+  });
+
+  it.each([
+    [["--prot", "7400"], "Did you mean `--port`?"],
+    [["--port", "abc"], "--port"],
+    [["--port", "7400"], "--http"],
+    [["--config", "a.json", "--export", "dir"], "--export"],
+    [["extra"], "no arguments"],
+  ])("exits 2 on the usage error %j", (args, text) => {
+    const run = fm(["mcp", ...args]);
+    expect(run.code).toBe(2);
+    expect(run.stderr).toContain(text);
+    expectNoStackTrace(run);
+  });
+
+  it("exits 1 when the Modelo cannot be read", () => {
+    const run = fm(["mcp", "--config", join(repoRoot, "nenia", "fundamento.config.json")]);
+    expect(run.code).toBe(1);
+    expect(run.stderr).toContain("file-missing");
+    expectNoStackTrace(run);
+  });
+});

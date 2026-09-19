@@ -25,6 +25,9 @@ importers:
 
   packages/cli:
     dependencies:
+      '@fundamento/mcp':
+        specifier: workspace:*
+        version: link:../mcp
       '@fundamento/modelo':
         specifier: workspace:*
         version: link:../modelo

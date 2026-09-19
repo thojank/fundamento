@@ -1,5 +1,6 @@
-// `fm modelo validate [path]`: validates the repo Modelo or a Modelo root (<root>/vortaro,
-// <root>/data) and prints a human summary or, with --json, only the ValidationReport.
+// `fm modelo validate [path] [--config <file>] [--aspekto <dir>]…`: validates the repo Modelo, a
+// Modelo root (<root>/vortaro, <root>/data) or a project config, optionally with extra Aspekto
+// packages (Spec 001, D-07), and prints a human summary or, with --json, only the report.
 import { statSync } from "node:fs";
 import { resolve } from "node:path";
 import {
@@ -7,9 +8,11 @@ import {
   fixtureModeloSource,
   type ModeloSource,
   modeloRootOf,
+  projectModeloSource,
   type ValidationIssue,
   type ValidationReport,
   validateModelo,
+  withAspektoPackages,
 } from "@fundamento/modelo";
 import { parseFlags, UsageError } from "../args.js";
 import { type CliContext, type Command, EXIT_FAIL, EXIT_OK } from "../command.js";
@@ -29,19 +32,22 @@ const SUMMARY_KEYS = [
 
 const HELP = `${COMMAND_LINE}: Validate a Modelo against its schema and every Modelo rule.
 
-Usage: ${COMMAND_LINE} [path] [--json]
-       ${COMMAND_LINE} --path <path> [--json]
+Usage: ${COMMAND_LINE} [path] [--aspekto <dir>]… [--json]
+       ${COMMAND_LINE} --config <file> [--aspekto <dir>]… [--json]
 
-Without a path, validates the Modelo of this repository.
+Without a path, validates the Modelo of this repository with its reference Aspekto komuna.
 With a path, validates the Modelo root there: a directory containing
   vortaro/   $themes.json, $metadata.json and sets/
   data/      dimensioj.json, reguloj.json, jugxoj.json, kontrastparoj.json, ids.lock.json
 Relative paths resolve against the directory you ran the command from.
 
 Options:
-  --path <path>   The Modelo root to validate (same as the [path] argument)
-  --json          Print only the ValidationReport as JSON on stdout
-  -h, --help      Show this help
+  --path <path>    The Modelo root to validate (same as the [path] argument)
+  --config <file>  A project's fundamento.config.json: the core, komuna and the Aspekto
+                   packages it lists (not together with a path)
+  --aspekto <dir>  An Aspekto package directory to validate with the core; repeatable
+  --json           Print only the ValidationReport as JSON on stdout
+  -h, --help       Show this help
 
 Exit codes: 0 valid, 1 invalid, 2 usage error.
 `;
@@ -165,24 +171,49 @@ function formatReport(report: ValidationReport, label: string, pathsRelativeTo: 
 function run(args: readonly string[], context: CliContext): number {
   const { values, positionals } = parseFlags(
     args,
-    { path: { type: "string" }, json: { type: "boolean" } },
+    {
+      path: { type: "string" },
+      config: { type: "string" },
+      aspekto: { type: "string", multiple: true },
+      json: { type: "boolean" },
+    },
     COMMAND_LINE,
   );
   const given = pathArgument(values, positionals);
+  const config = typeof values.config === "string" ? values.config : undefined;
+  if (given !== undefined && config !== undefined) {
+    throw new UsageError(`\`${COMMAND_LINE}\` takes a path or --config, not both.`, [
+      "A project config names its own core; add packages with --aspekto <dir>.",
+    ]);
+  }
+  const packages = (Array.isArray(values.aspekto) ? values.aspekto : [])
+    .filter((dir): dir is string => typeof dir === "string")
+    .map((dir) => resolve(context.baseDir, dir));
+  const withPackages = (base: Target): Target =>
+    packages.length === 0
+      ? base
+      : {
+          label: `${base.label} + Aspekto packages ${packages.join(", ")}`,
+          source: withAspektoPackages(base.source, packages),
+        };
 
   let target: Target | undefined;
   let report: ValidationReport;
-  if (given === undefined) {
+  if (config !== undefined) {
+    const file = resolve(context.baseDir, config);
+    target = withPackages({ label: `project ${file}`, source: projectModeloSource(file, config) });
+    report = validateModelo(target.source);
+  } else if (given === undefined) {
     const source = defaultModeloSource();
-    target = { label: `repo Modelo (${modeloRootOf(source)})`, source };
-    report = validateModelo(source);
+    target = withPackages({ label: `repo Modelo (${modeloRootOf(source)})`, source });
+    report = validateModelo(target.source);
   } else {
     const absolute = resolve(context.baseDir, given);
     const issues = rootIssues(given, absolute, context.baseDir);
     if (issues.length > 0) {
       report = emptyReport(issues);
     } else {
-      target = { label: absolute, source: fixtureModeloSource(absolute) };
+      target = withPackages({ label: absolute, source: fixtureModeloSource(absolute) });
       report = validateModelo(target.source);
     }
   }
@@ -199,7 +230,8 @@ function run(args: readonly string[], context: CliContext): number {
 
 export const modeloValidate: Command = {
   name: "validate",
-  summary: "Validate the repo Modelo, or the Modelo root at [path], against every Modelo rule.",
+  summary:
+    "Validate the repo Modelo, a Modelo root or a project config (plus --aspekto packages) against every Modelo rule.",
   help: HELP,
   run,
 };

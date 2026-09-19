@@ -120,7 +120,7 @@ Order follows the plan's "Build order". The ciferecigo package is the last task.
 - [x] **T026 Resources and HTTP transport**
   - Red: three resources with the bytes of the export; `--http` binds only to `127.0.0.1`, rejects foreign `Host` headers, and rejects `validate.aspektoPath` with `mcp-input-invalid`.
   - Green: `resources.ts`, `http.ts`.
-- [ ] **T027 CLI commands** (D-07, D-13)
+- [x] **T027 CLI commands** (D-07, D-13)
   - Red: `packages/cli` tests: `fm mcp --help`, `fm modelo validate --aspekto <dir>` (repeatable) and `--config`, `fm modelo export`; exit codes 0/1/2 and "did you mean"; `fundamento-mcp` bin.
   - Green: `commands/mcp.ts`, `commands/modelo-export.ts`, flags in `modelo-validate.ts`.
 - [ ] **T028 Acceptance suite** (AK-06, AK-07, Art. XIII)

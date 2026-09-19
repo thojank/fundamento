@@ -8,6 +8,7 @@ import {
   EXIT_OK,
   EXIT_USAGE,
 } from "./command.js";
+import { mcp } from "./commands/mcp.js";
 import { modeloExport } from "./commands/modelo-export.js";
 import { modeloValidate } from "./commands/modelo-validate.js";
 import { closest } from "./suggest.js";
@@ -21,6 +22,7 @@ const ENTRIES: readonly Entry[] = [
     summary: "Work with the Modelo: tokens, Dimensioj, Reguloj and Jugxoj.",
     commands: [modeloValidate, modeloExport],
   },
+  mcp,
 ];
 
 const HELP_FLAGS = new Set(["--help", "-h"]);
@@ -95,7 +97,11 @@ function wantsHelp(args: readonly string[]): boolean {
   return (end === -1 ? args : args.slice(0, end)).some((arg) => HELP_FLAGS.has(arg));
 }
 
-function runGroup(group: CommandGroup, args: readonly string[], context: CliContext): number {
+function runGroup(
+  group: CommandGroup,
+  args: readonly string[],
+  context: CliContext,
+): number | Promise<number> {
   const [name, ...rest] = args;
   if (name === undefined) {
     context.stderr(groupHelp(group));
@@ -124,7 +130,11 @@ function runGroup(group: CommandGroup, args: readonly string[], context: CliCont
   return runCommand(command, rest, context);
 }
 
-function runCommand(command: Command, args: readonly string[], context: CliContext): number {
+function runCommand(
+  command: Command,
+  args: readonly string[],
+  context: CliContext,
+): number | Promise<number> {
   if (wantsHelp(args)) {
     context.stdout(command.help);
     return EXIT_OK;
@@ -132,7 +142,7 @@ function runCommand(command: Command, args: readonly string[], context: CliConte
   return command.run(args, context);
 }
 
-function dispatch(argv: readonly string[], context: CliContext): number {
+function dispatch(argv: readonly string[], context: CliContext): number | Promise<number> {
   const [head, ...rest] = argv;
   if (head === undefined) {
     context.stderr(topLevelHelp(context.version));
@@ -170,9 +180,9 @@ function dispatch(argv: readonly string[], context: CliContext): number {
  * Runs `fm` with `argv` (without the node and script paths) and returns the exit code:
  * 0 success, 1 the checked thing is invalid, 2 usage error or failure to run. Never throws.
  */
-export function main(argv: readonly string[], context: CliContext): number {
+export async function main(argv: readonly string[], context: CliContext): Promise<number> {
   try {
-    return dispatch(argv, context);
+    return await dispatch(argv, context);
   } catch (error) {
     if (error instanceof UsageError) {
       context.stderr(`fm: ${[error.message, ...error.hints].join("\n")}\n`);

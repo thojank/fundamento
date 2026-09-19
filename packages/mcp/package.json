@@ -4,6 +4,9 @@
   "description": "Fundamento MCP server: read-only tools and resources over the Modelo export.",
   "license": "MIT",
   "type": "module",
+  "bin": {
+    "fundamento-mcp": "dist/index.js"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",

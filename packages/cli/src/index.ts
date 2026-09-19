@@ -33,7 +33,7 @@ async function runFromProcess(): Promise<void> {
     // Imported lazily so that even a broken `@fundamento/modelo` install is reported, not thrown.
     const { main } = await import("./cli.js");
     const initCwd = process.env.INIT_CWD;
-    process.exitCode = main(process.argv.slice(2), {
+    process.exitCode = await main(process.argv.slice(2), {
       version: cliVersion(),
       baseDir: initCwd !== undefined && initCwd !== "" ? initCwd : process.cwd(),
       stdout: (text) => process.stdout.write(text),
