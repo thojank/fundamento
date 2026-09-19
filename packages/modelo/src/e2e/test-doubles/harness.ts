@@ -189,7 +189,15 @@ export function checkFixtureRoot(fixture: Fixture): string {
 // ---------------------------------------------------------------------------------------------
 // Shape assertions shared by every command (cross-command consistency)
 
-const ISSUE_KEYS = new Set(["rule", "severity", "path", "message", "suggestion", "combination"]);
+const ISSUE_KEYS = new Set([
+  "rule",
+  "severity",
+  "path",
+  "message",
+  "suggestion",
+  "combination",
+  "regulo",
+]);
 
 const nonEmpty = (value: unknown): boolean => typeof value === "string" && value.trim() !== "";
 
@@ -209,6 +217,13 @@ export function expectIssueShape(issue: unknown, severity: "error" | "warning"):
   );
   if (record.combination !== undefined) {
     expect(typeof record.combination).toBe("object");
+  }
+  if (record.regulo !== undefined) {
+    // Spec 002 FR-08: a cited Regulo is complete, so an agent can quote it as is.
+    const regulo = record.regulo as Record<string, unknown>;
+    for (const key of ["id", "name", "kialo"] as const) {
+      expect(nonEmpty(regulo[key]), `issue.regulo.${key} must be a non-empty string`).toBe(true);
+    }
   }
 }
 

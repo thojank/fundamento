@@ -137,6 +137,15 @@ export interface ValidationIssue {
   suggestion: string;
   /** The Dimensio assignment in which the issue occurs, for per-combination issues. */
   combination?: Record<string, string>;
+  /** The Regulo whose enforcer reported the issue, with its kialo (Spec 002, FR-08, D-03). */
+  regulo?: IssueRegulo;
+}
+
+/** The Regulo an issue cites, so an agent can quote the reason without looking it up. */
+export interface IssueRegulo {
+  id: string;
+  name: string;
+  kialo: string;
 }
 
 /** A position inside one Modelo file. */

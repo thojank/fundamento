@@ -172,8 +172,14 @@ export const REGULO_ENFORCERS: Readonly<Record<string, Enforcer>> = {
       })),
 };
 
+/** Every issue of an automatic Regulo's enforcer, citing that Regulo and its kialo (FR-08). */
 export function regularoEnforcementIssues(modelo: Modelo): ValidationIssue[] {
-  return modelo.reguloj.flatMap((regulo) =>
-    regulo.checkability === "automatic" ? (REGULO_ENFORCERS[regulo.name]?.(modelo) ?? []) : [],
-  );
+  return modelo.reguloj.flatMap((regulo) => {
+    if (regulo.checkability !== "automatic") return [];
+    const cited = { id: regulo.id, name: regulo.name, kialo: regulo.kialo };
+    return (REGULO_ENFORCERS[regulo.name]?.(modelo) ?? []).map((issue) => ({
+      ...issue,
+      regulo: cited,
+    }));
+  });
 }

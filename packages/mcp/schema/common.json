@@ -29,6 +29,21 @@
           "additionalProperties": {
             "type": "string"
           }
+        },
+        "regulo": {
+          "description": "The Regulo whose enforcer reported the issue, with its kialo (Spec 002, FR-08).",
+          "type": "object",
+          "properties": {
+            "id": {
+              "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/ReguloId"
+            },
+            "name": {
+              "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+            },
+            "kialo": { "type": "string", "minLength": 1 }
+          },
+          "required": ["id", "name", "kialo"],
+          "additionalProperties": false
         }
       },
       "additionalProperties": false,

@@ -139,7 +139,23 @@ const EXAMPLES: Record<string, { input: unknown; output: unknown; badInput: unkn
   },
   validate: {
     input: { aspektoPath: "../fundamento-aspekto-x" },
-    output: { valid: false, errors: [ISSUE], warnings: [], scope: "package" },
+    output: {
+      valid: false,
+      errors: [
+        ISSUE,
+        {
+          ...ISSUE,
+          rule: "state-distinct",
+          regulo: {
+            id: "reg_01M2VEEE5280TGESDHQQ14EA33",
+            name: "state-distinct",
+            kialo: "A state that looks like rest gives no feedback.",
+          },
+        },
+      ],
+      warnings: [],
+      scope: "package",
+    },
     badInput: { aspektoPath: "" },
   },
   derive_name: {

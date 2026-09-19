@@ -121,3 +121,36 @@ describe("contrast-pairs-declared → kontrastparo-missing-for-role", () => {
     ]);
   });
 });
+
+describe("issues cite their Regulo (Spec 002 FR-08, D-03)", () => {
+  it("carries id, name and kialo of the declaring Regulo on every enforcer issue", () => {
+    const root = mutatedMinimal((edit) => {
+      edit("data/reguloj.json", (file: Reguloj) => {
+        for (const regulo of file.reguloj) regulo.checkability = "automatic";
+      });
+      edit("vortaro/sets/core.json", (core: Core) => literalText(core));
+    });
+    roots.push(root);
+    const issue = validateModelo(fixtureModeloSource(root)).errors.find(
+      (candidate) => candidate.rule === "color-semantic-literal",
+    );
+    expect(issue?.regulo).toEqual({
+      id: "reg_01K5FMAJ0J14KNVH5BXJ93VFBG",
+      name: "semantic-colors-alias-palette",
+      kialo: "A palette change then reaches every semantic use in one place.",
+    });
+  });
+
+  it("leaves issues of always-on rules without a Regulo", () => {
+    const root = mutatedMinimal((edit) => {
+      edit("vortaro/sets/core.json", (core: Core) => {
+        const text = core.color.text?.default;
+        if (text) text.$value = "{color.missing}";
+      });
+    });
+    roots.push(root);
+    const issues = validateModelo(fixtureModeloSource(root)).errors;
+    expect(issues.length).toBeGreaterThan(0);
+    expect(issues.every((issue) => issue.regulo === undefined)).toBe(true);
+  });
+});

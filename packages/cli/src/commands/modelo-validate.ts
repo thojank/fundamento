@@ -136,6 +136,10 @@ export function formatIssue(issue: ValidationIssue): string {
     `    message:     ${issue.message}`,
     `    suggestion:  ${issue.suggestion}`,
   ];
+  if (issue.regulo !== undefined) {
+    lines.push(`    regulo:      ${issue.regulo.name} (${issue.regulo.id})`);
+    lines.push(`    kialo:       ${issue.regulo.kialo}`);
+  }
   if (issue.combination !== undefined) {
     const pairs = Object.entries(issue.combination).map(([key, value]) => `${key}=${value}`);
     lines.push(`    combination: ${pairs.join(", ")}`);
