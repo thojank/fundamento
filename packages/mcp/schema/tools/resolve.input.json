@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ciferecigo.com/fundamento/schema/mcp/resolve.input.json",
+  "title": "resolve input",
+  "description": "Resolve an assignment: value and provenance per token.",
+  "type": "object",
+  "properties": {
+    "assignment": {
+      "type": "object",
+      "propertyNames": {
+        "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+      },
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "tokens": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,6 +1,6 @@
 # Plan – Spec 001: Vortaro mit echten Werten, Aspekto-Pakete, MCP-Server
 
-**Spec:** [`spec.md`](spec.md) (approved) · **Research:** [`research.md`](research.md) (§7 added by this plan) · **Data model:** [`data-model.md`](data-model.md) · **Contracts:** [`contracts/`](contracts/) · **Quickstart:** [`quickstart.md`](quickstart.md) · **Constitution:** v1.3 · **Status:** decisions D-01–D-18 accepted by the maintainer 2026-09-19; clarifications Q1–Q5 closed; no tasks yet · **Date:** 2026-09-19 · **Base:** `main` @ `72192ec`
+**Spec:** [`spec.md`](spec.md) (approved) · **Research:** [`research.md`](research.md) (§7 added by this plan) · **Data model:** [`data-model.md`](data-model.md) · **Contracts:** [`contracts/`](contracts/) · **Quickstart:** [`quickstart.md`](quickstart.md) · **Constitution:** v1.3 · **Status:** decisions D-01–D-18 accepted by the maintainer 2026-09-19; clarifications Q1–Q5 closed; tasks in [`tasks.md`](tasks.md): T001–T029 implemented in the repository, T030 (ciferecigo) is built outside it · **Date:** 2026-09-19 · **Base:** `main` @ `72192ec`
 
 This plan is the output of `/speckit.plan` for Spec 001. It fixes the technical design of Phase 1, reviews it against every Article of Constitution v1.3 and lists the deviations under Complexity Tracking. The five clarifications raised in the first draft (Q1–Q5) were answered by the maintainer on 2026-09-19; the answers are worked into the decisions and listed in "Resolved clarifications" at the end. No `[NEEDS CLARIFICATION]` marker is open (AK-11).
 
@@ -155,11 +155,11 @@ S7 (question 3) and Anhang A place brand rules with a kialo in the private packa
 
 - **SDK:** `@modelcontextprotocol/sdk` pinned to exactly `1.30.0` (no range), the stable v1 line, used through the low-level `Server` class. Tool input and output schemas are hand-written JSON Schema files (`packages/mcp/schema/tools/*.json`) that `$ref` the Modelo schema for shared shapes (token, issue, resolved token). Inputs are validated with the existing Ajv setup; outputs are asserted in tests. Results are returned as `structuredContent` plus a JSON text block for older clients. The v2 split packages (`@modelcontextprotocol/server` 2.0.0, released 2026-09-17) are two days old at planning time and are re-evaluated in Phase 2 (research §7.3).
 - **Transport:** stdio by default. `--http [--port <n>]` uses Streamable HTTP, binds to `127.0.0.1` only, enables DNS-rebinding protection and has no auth, because it is read-only and local. Remote hosting is out of scope.
-- **Data (FR-17, interpretation):** at start the server composes the configured Modelo (D-07) and builds the **same in-memory export object** that `fm modelo export` would write, using the same function, so the bytes are identical. It never reads source files again afterwards. With `--export <dir>` it serves a pre-built export directory instead and does no composition at all. The server starts even when the Modelo is invalid: `describe` reports the error count, and `validate` returns the issues.
+- **Data (FR-17, interpretation):** at start the server composes the configured Modelo (D-07) and builds the **same in-memory export object** that `fm modelo export` would write, using the same function, so the bytes are identical. It never reads source files again afterwards. `rezolvoj.json` is built from that same in-memory Modelo on the first read of its resource (T028: it is the costly part and only the resource needs it; start 1.35 s → 0.8 s), so FR-17 still holds: no source walking after the start. An invalid Modelo is served without resources, as `fm modelo export` writes nothing for it. With `--export <dir>` it serves a pre-built export directory instead and does no composition at all. The server starts even when the Modelo is invalid: `describe` reports the error count, and `validate` returns the issues.
 - **Tools** (all read-only, `snake_case`): `describe`, `list_dimensioj`, `list_aspektoj`, `search_tokens`, `get_token`, `resolve`, `list_reguloj`, `list_jugxoj`, `validate`, `derive_name`. **Resources:** `fundamento://export/modelo.json`, `…/modelo.schema.json`, `…/rezolvoj.json`. Full contracts are in [`contracts/mcp-tools.md`](contracts/mcp-tools.md).
 - **Errors (FR-18):** `isError: true` with `structuredContent = { issues: Issue[] }` in the shared issue shape. Unknown Dimensio values and unknown Aspektoj add `allowed: string[]` next to the issues.
 - `validate` optionally takes `aspektoPath`, a local package directory that is validated against the served core. In `--http` mode this parameter is rejected, so a network client cannot probe the file system.
-- `resolve` runs the resolver on demand and caches by assignment. `rezolvoj.json` is only served as a resource.
+- `resolve` runs the resolver on demand, without a cache: a full resolve over stdio takes about 3 ms (T028), so a cache would add state without benefit (Art. XI). `rezolvoj.json` is only served as a resource.
 - **Start:** `fm mcp [--config] [--export] [--http] [--port]`, and the bin `fundamento-mcp` (FR-15's `npx @fundamento/mcp` works once the packages are published, which is Phase 9; until then use `pnpm fm mcp`). The in-memory export at start is the confirmed reading of FR-17.
 
 ### D-14 Describe sentence and the S7 dialog (AK-06)
@@ -185,7 +185,7 @@ It lives in `packages/modelo/test/fixtures/valid/aspekto-ekzemplo/` (a fixture, 
 
 ### D-17 Performance measurement (AK-07)
 
-The test measures the server start (spawn to first `describe` answer) and 100 `resolve` calls on the fixture config. The budgets are 2 s / 100 ms per call locally, with a factor-3 tolerance under `CI=true`. That factor comes from the Phase-0 lesson with cold runners (Jugxo `jug_01M2W3K1YPP05F4XF86J71RGTK`). The raw numbers are logged, so regressions stay visible.
+The test measures the server start (spawn to first `describe` answer) and 100 `resolve` calls on the fixture config. The budgets are 2 s / 100 ms per call, with a factor-3 tolerance under `CI=true` only. That factor comes from the Phase-0 lesson with cold runners (Jugxo `jug_01M2W3K1YPP05F4XF86J71RGTK`). The timings run **alone, as their own Turborepo task `perf`** (`dependsOn: build`, not cached, `pnpm perf` = `turbo run perf --concurrency=1`) after the test step (CI and `pnpm check`), never inside the parallel test run. There they measured the machine's load: 0.76 s alone vs 3.5–7.2 s in the gate, where even the factor 3 would not hold. This was accepted by the maintainer on 2026-09-19 after the acceptance measurement and replaces the interim "factor 3 under `CI=true` or `TURBO_HASH`". The raw numbers are always logged; the first baseline is in `research.md` §8.2.
 
 ### D-18 ciferecigo package (FR-13, Q3, Q5)
 
@@ -200,11 +200,17 @@ The test measures the server start (spawn to first `describe` answer) and 100 `r
 2. **Brand-neutral scales:** spacing, size, radius primitives, motion, layout and opacity are taken over identical to komuna (restated literally, because completeness requires it, D-04). The exceptions are the values Anhang A states explicitly (radius, border width, motion, elevation).
 3. **Typography:** every role uses the brand font from Anhang A with komuna's size scale. Weight, line height, tracking and text transform are set per role where Anhang A states them (display, kicker/label, body). All other roles take komuna's values.
 4. **Contrast:** derived steps must pass Alirebleco in every combination. If an anchor colour cannot meet a threshold in a given role, the derivation picks another step for that role and records it. Thresholds are never lowered.
-5. Every rule, with its inputs and the resulting steps, is written into `DERIVATION.md` in the package. This derivation is the first prototype of the Enportilo (Phase 7). What it teaches (which steps were mechanical, which needed judgement, what Anhang A lacked) goes into `research.md` §8 of this spec during implementation.
+5. Every rule, with its inputs and the resulting steps, is written into `DERIVATION.md` in the package. This derivation is the first prototype of the Enportilo (Phase 7). What it teaches (which steps were mechanical, which needed judgement, what Anhang A lacked) goes into `research.md` §10 of this spec during implementation (§8 holds the APCA and AK-07 baselines).
 
 ### D-19 Reguloj with checkability "automatic" are enforced by validation (added during T013)
 
 The Phase-0 Reguloj carry `checkability` (`automatic` or `manual`). Validation enforces every Regulo the Modelo declares `automatic` through a fixed table of enforcers (`validate/regularo-enforcement.ts`): `semantic-colors-alias-palette` → `color-semantic-literal`, `color-roles-declared` → `color-role-missing`, `contrast-pairs-declared` → `kontrastparo-missing-for-role` (T017), `dimensio-sets-alias-only` → `dimensio-set-literal` / `dimensio-set-primitive` (T016). The Regularo, with its kialoj, is therefore the switch (Art. VI). The repo declares these Reguloj `automatic`. The Phase-0 test fixtures declare `semantic-colors-alias-palette` as `manual` and keep testing their own rules unchanged. Rules that follow directly from the Constitution (Aspekto completeness, the reference set, fonts, ID namespaces) are always on.
+
+**In the repo, `manual` for an automatically checkable rule is an error** (confirmed by the maintainer, 2026-09-19). `manual` is reserved for fixtures and for Reguloj that data cannot violate (in Phase 1 only `disabled-exempt-from-contrast`, an exemption). The test `data/regularo-repo.test.ts` enforces this: every automatic Regulo has an enforcer (or an always-on rule), and the four Reguloj above stay automatic. Following that rule, `typography-roles-composite`, `motion-reduced-instant`, `density-affects-layout-only` and the new `focus-ring-dual-contrast` are automatic too (rules `typography-role-not-composite`, `motion-reduced-not-instant`, `density-set-scope`, `focus-ring-pair-missing`).
+
+### D-20 `aspekto.json` knows font scripts and layers (added by the maintainer, T018b)
+
+`fonts[].scripts` is required: the ISO 15924 codes a family covers, at least one (rule `aspekto-font-scripts-missing`). `aspekto.json` may carry `tavoloj` (layers); Phase 1 reserves only `vida` with the empty value `{}` and ignores other keys. Reason: the Aspekto package is the brand package, and the Vortaro is one of its layers, so later layers can join the same package without changing its format.
 
 ## Project structure (after Phase 1)
 
@@ -249,7 +255,7 @@ CI (`ci.yml`): same named steps. The Test step now includes the fixture-config r
 
 | Dependency | Version | Package | Reason | License |
 |---|---|---|---|---|
-| `@modelcontextprotocol/sdk` | 1.30.0 (pinned, no range) | `mcp` | Official MCP TypeScript SDK (spec constraint: no own protocol implementation). The low-level `Server`, `StdioServerTransport` and `StreamableHTTPServerTransport` are used directly (Art. XI). | MIT |
+| `@modelcontextprotocol/sdk` | 1.30.0 (pinned, no range) | `mcp`; `cli` (dev: the quickstart test drives `fm mcp` as a client) | Official MCP TypeScript SDK (spec constraint: no own protocol implementation). The low-level `Server`, `StdioServerTransport` and `StreamableHTTPServerTransport` are used directly (Art. XI). | MIT |
 | `zod` | ^4 | `mcp` | Required peer dependency of the SDK. It is **not** used for Fundamento's own schemas, which stay hand-written JSON Schema. | MIT |
 
 No other new third-party dependency. The SDK's transitive HTTP stack (express, hono, cors, …) is only loaded on the `--http` path. `pnpm-lock.yaml` is changed in the first ticket only (Phase-0 practice).
@@ -361,7 +367,7 @@ One entry per Article of Constitution v1.3.
 | **Phase-0 test fixtures still say `neutra`** | Phase-0 fixtures are self-contained test Modelos; renaming them proves nothing. The engineering standard `global/testing.md` was updated to `komuna` / `ekzemplo` on 2026-09-19. | None. |
 | **Timing tolerance in CI** (D-17) | Cold runners (Phase-0 Jugxo on Article X). | Raw timings are logged. |
 | **ciferecigo verified only locally** (D-18) | The private repository does not exist yet, and the core packages are unpublished, so the package has no CI in Phase 1 and consumes the core through a local path. | The maintainer adds CI once the core packages are published (Phase 9) or a registry is chosen. |
-| **Derived brand values** (D-18) | Anhang A covers about 30 facts, while a complete Aspekto needs ~340 tokens. The rest is derived by documented rules in `DERIVATION.md`. | Visual review by the maintainer at acceptance. The findings feed the Enportilo (Phase 7, `research.md` §8). |
+| **Derived brand values** (D-18) | Anhang A covers about 30 facts, while a complete Aspekto needs ~340 tokens. The rest is derived by documented rules in `DERIVATION.md`. | Visual review by the maintainer at acceptance. The findings feed the Enportilo (Phase 7, `research.md` §10). |
 
 ## Build order (orientation, not tasks)
 
@@ -371,33 +377,38 @@ One entry per Article of Constitution v1.3.
 4. Export per Aspekto, themes fragments, determinism.
 5. Checks: Alirebleco per Aspekto, Regularo for packages, clean-room fingerprints.
 6. MCP server and CLI, then the S7 integration test, the performance test and the quickstart test.
-7. The ciferecigo package outside the repo (D-18) with `DERIVATION.md`, validated with `fm modelo validate --aspekto`, delivered as an archive; `research.md` §8; then the Penpot import per Aspekto (manual).
+7. The ciferecigo package outside the repo (D-18) with `DERIVATION.md`, validated with `fm modelo validate --aspekto`, delivered as an archive; `research.md` §10; then the Penpot import per Aspekto (manual).
 
 ## Penpot import result
 
 **Status:** pending maintainer verification after the build (AK-09). The procedure follows Spec 000, with one import per folder `packages/modelo/dist/vortaro/<aspekto>/`. Record the Penpot version, date, result and deviations for `komuna` and for `ciferecigo` (the latter in the private repo, not here).
 
-## Traceability (requirement → decision)
+## Traceability (requirement → decision → tasks)
 
-| Requirement | Design |
-|---|---|
-| FR-01, AK-01 | D-02, data-model §2; coverage test with the category fixture from research §4/§6 |
-| FR-02, FR-03 | D-02, `color-semantic-literal`, name grammar (state as a segment) |
-| FR-04, FR-05, AK-05 | D-11; AK-05 needs the spec amendment below (K3) |
-| FR-06, FR-07 | D-03 (K3, K4) |
-| FR-08, AK-02 | D-12 |
-| FR-09, AK-04 | D-06, data-model §6 (frozen Phase-0 registry, K1) |
-| FR-10, AK-03 | D-04, D-05, D-16 |
-| FR-11 | D-05, D-06, D-10 |
-| FR-12 | D-07, D-08 |
-| FR-13 | D-18 |
-| FR-14 | D-06 |
-| FR-15 … FR-18, AK-06, AK-07 | D-13, D-14, D-17, contracts/mcp-tools.md |
-| FR-19 | Constitution v1.3 already ratified; migration = rename (D-06) |
-| AK-08 | D-15 |
-| AK-09 | this plan; Penpot result section |
-| AK-10 | D-09 |
-| AK-11 | no open marker; see "Resolved clarifications" |
+| Requirement | Design | Tasks |
+|---|---|---|
+| FR-01, AK-01 | D-02, data-model §2; coverage test with the category fixture from research §4/§6 | T012, T013, T014, T015 |
+| FR-02, FR-03 | D-02, `color-semantic-literal`, name grammar (state as a segment) | T005, T013 |
+| FR-04, FR-05, AK-05 | D-11, D-20; AK-05 needs the spec amendment below (K3) | T014, T016, T018, T018b |
+| FR-06, FR-07 | D-03 (K3, K4) | T009, T015, T016 |
+| FR-08, AK-02 | D-12 | T013, T017, T021 |
+| FR-09, AK-04 | D-06, data-model §6 (frozen Phase-0 registry, K1) | T002, T007 |
+| FR-10, AK-03 | D-04, D-05, D-16 | T005, T008, T018 |
+| FR-11 | D-05, D-06, D-10, D-20 | T003, T004, T006, T010, T018b, T021 |
+| FR-12 | D-07, D-08 | T004, T006, T011, T027 |
+| FR-13 | D-18 | T030 (outside the repository, delivered as an archive) |
+| FR-14 | D-06 | T002, T003, T007 |
+| FR-15 | D-13, contracts/mcp-tools.md | T001, T024, T026, T027 |
+| FR-16 | D-13, D-14, contracts/mcp-tools.md | T023, T024, T025 |
+| FR-17 | D-13 (in-memory export at start) | T019, T024, T026 |
+| FR-18 | D-13, contracts/mcp-tools.md (error envelope with `allowed`) | T023, T024, T025 |
+| FR-19 | Constitution v1.3 already ratified; migration = rename (D-06) | T007, T008 |
+| AK-06 | D-13, D-14, D-16 | T023, T028 |
+| AK-07 | D-17 | T028 |
+| AK-08 | D-15 | T022, T029 |
+| AK-09 | this plan; Penpot result section | T019, T029, T030 (Penpot import per Aspekto, manual) |
+| AK-10 | D-09 | T019 |
+| AK-11 | no open marker; see "Resolved clarifications" | T029 |
 
 ## Resolved clarifications
 
@@ -409,7 +420,7 @@ Answered by the maintainer on 2026-09-19.
 | Q2 | Where is the reference Aspekto stated? | Only in the Modelo (`core.referenceAspekto`). `fundamento.config.json` lists packages only. Key Entities corrected in the spec. | D-05, D-07, spec `d815ad5` |
 | Q3 | Private ciferecigo repository? | It does not exist yet; P0 does not push to it. P0 builds a standalone folder outside the core repo and delivers it as an archive; the maintainer creates the repository and pushes. Core packages come through a local path (`link:`/`file:`); no CI in Phase 1. `fm modelo validate --aspekto <path>` is part of the acceptance. | D-07, D-18 |
 | Q4 | "Complete coverage" in the S7 dialog? | Dropped. The sentence names the Dimensioj and counts per token group; the proof is the tests (coverage, `aspekto-incomplete`). S7 corrected in the spec. | D-14, spec `d815ad5` |
-| Q5 | Values not in Anhang A? | P0 derives them: an OKLCH lightness ramp from the anchor colours, brand-neutral scales identical to komuna, typography roles with the brand font and komuna's sizes. Every rule is written into `DERIVATION.md`; findings go into `research.md` §8. Visual review at acceptance. | D-18 |
+| Q5 | Values not in Anhang A? | P0 derives them: an OKLCH lightness ramp from the anchor colours, brand-neutral scales identical to komuna, typography roles with the brand font and komuna's sizes. Every rule is written into `DERIVATION.md`; findings go into `research.md` §10. Visual review at acceptance. | D-18 |
 
 ## Review round 2 (2026-09-19)
 

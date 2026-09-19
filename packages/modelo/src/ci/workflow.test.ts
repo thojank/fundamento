@@ -7,6 +7,8 @@ import { CHECK_NAMES } from "../contracts/checks.js";
 const repoRoot = fileURLToPath(new URL("../../../../", import.meta.url));
 const workflowPath = `${repoRoot}.github/workflows/ci.yml`;
 const packageJsonPath = `${repoRoot}package.json`;
+const mcpPackageJsonPath = `${repoRoot}packages/mcp/package.json`;
+const mcpE2eDir = `${repoRoot}packages/mcp/src/e2e/`;
 
 const CHECK_STEPS: ReadonlyArray<readonly [name: string, script: string]> = [
   ["Check: Vortaro-Lint", "check:vortaro-lint"],
@@ -19,6 +21,8 @@ const CHECK_STEPS: ReadonlyArray<readonly [name: string, script: string]> = [
 const GATE_STEPS: ReadonlyArray<readonly [name: string, run: string]> = [
   ["Build", "pnpm build"],
   ["Test", "pnpm test"],
+  // AK-07 timings run alone, outside the parallel Turborepo test run (Spec 001 D-17).
+  ["Perf", "pnpm perf"],
   ["Lint", "pnpm lint"],
   ...CHECK_STEPS.map(([name, script]) => [name, `pnpm ${script}`] as const),
 ];
@@ -158,11 +162,22 @@ describe("root package.json check script", () => {
     expect(commands.length).toBeGreaterThan(1);
   });
 
-  it("runs build, test and lint before the checks", () => {
+  it("runs build, test, perf and lint before the checks", () => {
     const head = commands.slice(0, commands.length - CHECK_STEPS.length);
     expect(head.join(" && ")).toMatch(/build/);
     expect(head.join(" && ")).toMatch(/test/);
+    expect(head).toContain("pnpm perf");
     expect(head).toContain("pnpm lint");
+    expect(head.indexOf("pnpm perf")).toBeGreaterThan(
+      head.findIndex((command) => /\btest\b/.test(command)),
+    );
+  });
+
+  it("defines perf as its own Turborepo task: after build, one at a time", () => {
+    expect(scripts.perf).toBe("turbo run perf --concurrency=1");
+    const turbo: unknown = JSON.parse(readFileSync(`${repoRoot}turbo.json`, "utf8"));
+    const tasks = isRecord(turbo) && isRecord(turbo.tasks) ? turbo.tasks : {};
+    expect(tasks.perf).toEqual({ dependsOn: ["build"], cache: false, outputs: [] });
   });
 
   it("invokes all five check scripts, in the CI order", () => {
@@ -175,5 +190,42 @@ describe("root package.json check script", () => {
     for (const [, script] of CHECK_STEPS) {
       expect(scripts[script]).toBe(`node packages/modelo/dist/checks/run.js ${script.slice(6)}`);
     }
+  });
+});
+
+describe("the MCP acceptance suite runs in the Test gate (Spec 001 T028)", () => {
+  const pkg: unknown = JSON.parse(readFileSync(mcpPackageJsonPath, "utf8"));
+  const scripts = isRecord(pkg) && isRecord(pkg.scripts) ? pkg.scripts : {};
+
+  it("@fundamento/mcp has tests and no longer passes without them", () => {
+    expect(scripts.test).toBe("vitest run");
+  });
+
+  it("runs the AK-07 timings only in its own perf step, never in the parallel test run", () => {
+    expect(scripts.perf).toBe("vitest run --config vitest.perf.config.ts");
+    const unit = readFileSync(`${repoRoot}packages/mcp/vitest.config.ts`, "utf8");
+    const perf = readFileSync(`${repoRoot}packages/mcp/vitest.perf.config.ts`, "utf8");
+    expect(unit).toContain('exclude: [...configDefaults.exclude, "src/e2e/perf.test.ts"]');
+    expect(perf).toContain('include: ["src/e2e/perf.test.ts"]');
+  });
+
+  it.each(["s7-dialog.test.ts", "perf.test.ts"])("has %s", (file) => {
+    expect(existsSync(`${mcpE2eDir}${file}`)).toBe(true);
+  });
+
+  it("has the quickstart test in the cli package, which spawns the built fm", () => {
+    expect(existsSync(`${repoRoot}packages/cli/src/quickstart.test.ts`)).toBe(true);
+  });
+});
+
+describe("Node 24 is enforced (Spec 001 review A)", () => {
+  it("pnpm refuses an install on another Node (engine-strict)", () => {
+    expect(readFileSync(`${repoRoot}.npmrc`, "utf8").split("\n")).toContain("engine-strict=true");
+    const pkg: unknown = JSON.parse(readFileSync(packageJsonPath, "utf8"));
+    expect(isRecord(pkg) && pkg.engines).toEqual({ node: ">=24" });
+  });
+
+  it("gives this package's spawning tests a 30 s budget (vitest.config.ts)", ({ task }) => {
+    expect(task.timeout).toBeGreaterThanOrEqual(30_000);
   });
 });

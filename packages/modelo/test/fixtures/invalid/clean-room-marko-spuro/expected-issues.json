@@ -1,0 +1,18 @@
+{
+  "description": "A synthetic fingerprint list marks #123abc, the family 'Sintetika Sans' and one cubic-bezier curve as brand values; each occurrence outside the allowlist is reported. Durations and rem values are never candidates (K2).",
+  "check": "clean-room",
+  "issues": [
+    {
+      "rule": "clean-room-marko-spuro",
+      "path": "docs/notes.md:3:21"
+    },
+    {
+      "rule": "clean-room-marko-spuro",
+      "path": "src/theme.css:2:16"
+    },
+    {
+      "rule": "clean-room-marko-spuro",
+      "path": "src/theme.css:4:14"
+    }
+  ]
+}

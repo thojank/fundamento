@@ -62,6 +62,17 @@ export function collectIdOccurrences(files: ModeloFiles): IdOccurrence[] {
     // The Aspekto of a package is a DimensioValoro whose ID lives in aspekto.json (D-05).
     const aspekto = isJsonObject(pkg.aspekto.value) ? pkg.aspekto.value : undefined;
     add("dimensioValoro", pkg.aspekto.file, "", aspekto, "");
+    for (const [key, entityType] of [
+      ["reguloj", "regulo"],
+      ["jugxoj", "jugxo"],
+    ] as const) {
+      const document = pkg[key];
+      if (document === undefined) continue;
+      for (const { entry, index } of rawEntries(document.value, key)) {
+        const pointer = `/${key}/${index}`;
+        add(entityType, document.file, pointer, entry, pointer);
+      }
+    }
   }
 
   const dimensioj = files.data["dimensioj.json"];

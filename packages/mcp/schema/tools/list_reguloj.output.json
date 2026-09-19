@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ciferecigo.com/fundamento/schema/mcp/list_reguloj.output.json",
+  "title": "list_reguloj output",
+  "description": "Reguloj with their kialo, optionally with one Aspekto's own.",
+  "type": "object",
+  "properties": {
+    "reguloj": {
+      "type": "array",
+      "items": {
+        "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Regulo"
+      }
+    }
+  },
+  "additionalProperties": false,
+  "required": ["reguloj"]
+}

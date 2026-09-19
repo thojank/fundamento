@@ -9,7 +9,10 @@
       "family": "Ekzempla Sans",
       "license": "proprietary",
       "source": "invented for tests",
-      "redistributable": false
+      "redistributable": false,
+      "scripts": [
+        "Latn"
+      ]
     }
   ]
 }

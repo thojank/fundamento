@@ -255,6 +255,15 @@ describe("resolve: same priority and same specificity (valid/resolve-tie)", () =
     expect(outcome.warnings[0]?.message).toContain(B);
   });
 
+  it("suggests the kondicxo that separates the tied sets, preferring the Aspekto set", () => {
+    const outcome = resolve(modelo, { "color-scheme": "dark", contrast: "high" });
+    if (!outcome.ok) throw new Error(JSON.stringify(outcome.issues));
+    const suggestion = outcome.warnings[0]?.suggestion ?? "";
+    expect(suggestion).toContain(`Add the kondicxo color-scheme=light to ${A}`);
+    expect(suggestion).toContain("aspekto/neutra+color-scheme/light+contrast/high");
+    expect(suggestion).toContain("a more specific set that overrides both does not remove");
+  });
+
   it("does not warn when only one of the tied sets is active", () => {
     const outcome = resolve(modelo, { contrast: "high" });
     if (!outcome.ok) throw new Error(JSON.stringify(outcome.issues));

@@ -120,11 +120,11 @@ describe("the S6 dialog from dist/modelo.json alone (AK-06)", () => {
 
   it("states the S6 sentence", () => {
     expect(description.sentence).toContain(
-      `six Dimensioj (${description.dimensioj.join(", ")}), one Aspekto \`komuna\`, ${description.tokenCount} tokens in `,
+      `six Dimensioj (${description.dimensioj.join(", ")}), one Aspekto (\`komuna\`: reference, MIT, Geist), ${description.tokenCount} tokens in `,
     );
     // Counts change while Spec 001 fills the Vortaro; the shape of the sentence does not.
     expect(description.sentence).toMatch(
-      /^Fundamento v0\.1\.0: six Dimensioj \(aspekto, viewport, density, color-scheme, contrast, motion\), one Aspekto `komuna`, \d+ tokens in \w+ types, \w+ rules with reasons, no Eroj\.$/,
+      /^Fundamento v0\.1\.0: six Dimensioj \(aspekto, viewport, density, color-scheme, contrast, motion\), one Aspekto \(`komuna`: reference, MIT, Geist\), \d+ tokens in \w+ types \(.+\), \w+ rules with reasons, \w+ Jugxoj, no Eroj\.$/,
     );
   });
 });

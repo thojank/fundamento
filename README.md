@@ -7,15 +7,15 @@ Terminology is Esperanto and binding (see the Constitution). Code, comments and 
 ## What lives where
 
 - [`.specify/memory/constitution.md`](.specify/memory/constitution.md): the Constitution (Articles I–XIII). Read this first.
-- [`specs/000-fundamento-repo/`](specs/000-fundamento-repo/): Spec 000 (`spec.md`), research and the engineering plan with the Compliance Review (`plan.md`).
+- [`specs/`](specs/): one folder per spec with `spec.md`, research and the engineering plan with its Compliance Review: [`000-fundamento-repo/`](specs/000-fundamento-repo/) (the repository) and [`001-vortaro-aspektoj-mcp/`](specs/001-vortaro-aspektoj-mcp/) (Vortaro values, Aspekto packages, MCP server).
 - [`research/benchmarks.md`](research/benchmarks.md): living list of public benchmarks (requirements only, never content).
-- `packages/modelo/` (`@fundamento/modelo`): schema, loading, validation, resolution, NomReguloj, checks and export. All logic lives here.
-- `packages/modelo/schema/modelo.schema.json`: the one hand-written JSON Schema (draft 2020-12); TS types are generated from it.
-- `packages/modelo/data/`: Dimensioj, Reguloj, Jugxoj, KontrastParoj and the ID registry `ids.lock.json`.
-- `packages/vortaro/` (`@fundamento/vortaro`): the token data in W3C DTCG 2025.10, one set per file, plus `$themes.json` and `$metadata.json`. No code.
-- `packages/cli/` (`@fundamento/cli`): the `fm` command line.
-- `packages/modelo/dist/`: build output `modelo.json`, `modelo.schema.json`, `rezolvoj.json` (byte-identical across builds).
-- `packages/modelo/test/fixtures/{valid,invalid}/`: fixture Modelo roots; every check has one that makes it fail.
+- `packages/modelo/` (`@fundamento/modelo`): schema, loading, composition, validation, resolution, NomReguloj, checks and export. All logic lives here.
+- `packages/modelo/schema/` and `packages/modelo/data/`: the one hand-written JSON Schema (draft 2020-12; TS types are generated from it) and the Dimensioj, Reguloj, Jugxoj, KontrastParoj and ID registry `ids.lock.json`.
+- `packages/vortaro/` (`@fundamento/vortaro`): the core tokens in W3C DTCG 2025.10 (primitives carry values, roles carry aliases), one set per file, plus `$themes.json` and `$metadata.json`. No code.
+- `packages/aspekto-komuna/` (`@fundamento/aspekto-komuna`): the reference Aspekto `komuna` as an Aspekto package (`aspekto.json`, `ids.lock.json`, its sets). Always composed.
+- `packages/cli/` (`@fundamento/cli`): the `fm` command line; `packages/mcp/` (`@fundamento/mcp`): the MCP server, bin `fundamento-mcp`.
+- `packages/modelo/dist/`: build output `modelo.json`, `modelo.schema.json`, `rezolvoj.json` and `vortaro/<aspekto>/` (byte-identical across builds).
+- `packages/modelo/test/fixtures/{valid,invalid}/`: fixture Modelo roots, including the external fixture Aspekto `aspekto-ekzemplo`; every check has one that makes it fail.
 
 ## Quickstart
 
@@ -27,16 +27,42 @@ Three commands, no configuration:
 |---|---|
 | `pnpm install` | Installs the workspace. |
 | `pnpm build` | Compiles all packages and exports `modelo.json`, `modelo.schema.json` and `rezolvoj.json`. The build fails if the repo Modelo is invalid. |
-| `pnpm check` | Build, tests and lint, then the five checks in sequence. Fails on the first failure. |
+| `pnpm check` | Build, tests, the AK-07 timings (`pnpm perf`) and lint, then the five checks in sequence. Fails on the first failure. |
+| `pnpm perf` | The MCP server's start and `resolve` timings (AK-07), alone and outside the parallel test run; needs a build first. |
 
 The CLI:
 
 ```sh
-pnpm fm --version                          # prints the Fundamento version
-pnpm fm modelo validate [path] [--json]    # validates the repo Modelo, or a Modelo root (a directory with vortaro/ and data/)
+pnpm fm --version                                        # prints the Fundamento version
+pnpm fm modelo validate [path] [--json]                  # the repo Modelo (core + komuna), or a Modelo root (vortaro/ and data/)
+pnpm fm modelo validate --config <file>                  # a project: core, komuna and the Aspekto packages its config lists
+pnpm fm modelo validate --aspekto <dir> [--aspekto <dir>]  # Aspekto packages against the repo core, no config file needed
+pnpm fm modelo export [--config <file>] [--out <dir>]    # modelo.json, modelo.schema.json, rezolvoj.json, vortaro/<aspekto>/
+pnpm fm mcp [--config <file>] [--export <dir>] [--http [--port <n>]]  # the MCP server (see below)
 ```
 
-`fm modelo validate` exits 0 when valid and 1 when invalid; every issue names a `path`, a `rule` and a `suggestion`. Fixture paths are relative to the directory you run the command from, e.g. `pnpm fm modelo validate packages/modelo/test/fixtures/invalid/modelo-name-grammar`.
+`fm modelo validate` exits 0 when valid and 1 when invalid; every issue names a `path`, a `rule` and a `suggestion`. Fixture paths are relative to the directory you run the command from, e.g. `pnpm fm modelo validate packages/modelo/test/fixtures/invalid/modelo-name-grammar`. `fm modelo export` writes nothing for an invalid Modelo (default output: `.fundamento/export/`).
+
+## Aspekto packages
+
+An Aspekto (a brand) is a package: a folder with `aspekto.json` (owner, license, fonts with their scripts, optional layers), `ids.lock.json` in its own ID namespace, a `$themes.json` fragment and its sets under `sets/aspekto/<name>[+…]`, optionally with `reguloj.json` and `jugxoj.json`. The reference Aspekto `komuna` is always composed. A project adds external packages in `fundamento.config.json`:
+
+```json
+{ "aspektoj": ["../fundamento-aspekto-<name>"] }
+```
+
+Every Aspekto must set every token the reference Aspekto sets (`aspekto-incomplete` lists what is missing) and must pass Alirebleco in every combination. The fixture `packages/modelo/test/fixtures/valid/aspekto-ekzemplo/` is a complete example.
+
+## MCP server
+
+`pnpm fm mcp` (or the bin `fundamento-mcp` with the same flags) serves the Modelo to AI agents over stdio, read-only; logs go to stderr. Registering it is one command, e.g. `claude mcp add fundamento -- pnpm --dir /path/to/fundamento -s fm mcp`.
+
+- Tools: `describe`, `list_dimensioj`, `list_aspektoj`, `search_tokens`, `get_token`, `resolve`, `list_reguloj`, `list_jugxoj`, `validate`, `derive_name`. Every input and output has a JSON Schema (`packages/mcp/schema/`); errors carry the same issues as the checks, plus the allowed values.
+- Resources: `fundamento://export/modelo.json`, `modelo.schema.json` and `rezolvoj.json`, the bytes of `fm modelo export`.
+- `--config <file>` serves a project with its Aspekto packages; `--export <dir>` serves an export as is.
+- `--http [--port <n>]` serves Streamable HTTP at `http://127.0.0.1:<port>/mcp` (default port 7300), loopback only, with a Host/Origin guard; `validate` refuses local paths there.
+
+The contract is [`specs/001-vortaro-aspektoj-mcp/contracts/mcp-tools.md`](specs/001-vortaro-aspektoj-mcp/contracts/mcp-tools.md).
 
 ## Checks
 
@@ -71,26 +97,26 @@ Every maintainer command explains itself with `--help`.
 
 ## Penpot quickstart
 
-The Vortaro is a Tokens-Studio multi-file folder, so Penpot can import it without a converter (Art. XII, AK-11):
+The export writes one complete Tokens-Studio multi-file folder per Aspekto, so Penpot can import each brand without a converter (Art. XII, AK-09):
 
-1. Open a Penpot file and go to the **Tokens** panel.
-2. Choose **Import** and select the folder `packages/vortaro` (or a ZIP of it). It contains `$themes.json`, `$metadata.json` and `sets/**.json`; `package.json` is not a token file and can be ignored. Menu labels differ between Penpot versions.
-3. Activate themes in the theme selector, e.g. `color-scheme` → `dark`, then `contrast` → `high`.
+1. Run `pnpm build` (the repo Modelo with `komuna`) or `pnpm fm modelo export --config <file>` (a project with its Aspektoj).
+2. Open a Penpot file, go to the **Tokens** panel, choose **Import** and select the folder `packages/modelo/dist/vortaro/<aspekto>/` (after `fm modelo export`: `<out>/vortaro/<aspekto>/`), or a ZIP of it. It contains `$themes.json`, `$metadata.json` and `sets/**.json`. Menu labels differ between Penpot versions.
+3. Activate themes in the theme selector, e.g. `color-scheme` → `dark`, then `contrast` → `high`. For a second brand, import its folder and switch between the imported theme sets.
 
-What to expect:
+What to expect for `komuna`:
 
-- 6 theme groups (`aspekto`, `viewport`, `density`, `color-scheme`, `contrast`, `motion`) with 13 themes, and 10 sets in resolver order (`core` first, marked `source`).
-- The conjunction set `aspekto/neutra+color-scheme/dark` is listed under **both** the `aspekto/neutra` and the `color-scheme/dark` theme.
+- 6 theme groups (`aspekto`, `viewport`, `density`, `color-scheme`, `contrast`, `motion`) with 13 themes, and 11 sets in resolver order (`core` first, marked `source`).
+- The conjunction set `aspekto/komuna+color-scheme/dark` is listed under **both** the `aspekto/komuna` and the `color-scheme/dark` theme.
 - Values are DTCG 2025.10 objects: `color` as `{colorSpace, components, hex}`, `dimension` as `{value, unit: "px"}`, `duration` as `{value, unit}`. A Penpot version that does not read this object format yet may show such tokens as invalid or skip them. This is documented, not solved by changing the Modelo format.
 - Fundamento metadata sits in `$extensions["com.ciferecigo.fundamento"]` and is ignored by Penpot.
 
-The recorded outcome of the import lives in [`specs/000-fundamento-repo/plan.md`](specs/000-fundamento-repo/plan.md) ("Penpot import result").
+`packages/vortaro` alone holds only the core, without any Aspekto; import the per-Aspekto folder instead. The recorded outcomes live in [`specs/000-fundamento-repo/plan.md`](specs/000-fundamento-repo/plan.md) (Phase 0) and [`specs/001-vortaro-aspektoj-mcp/plan.md`](specs/001-vortaro-aspektoj-mcp/plan.md) ("Penpot import result", one entry per Aspekto).
 
 ## Clean room
 
 Fundamento contains no token names, values, code, text, icons, fonts or identifiers from any other design system. Other systems serve only as benchmarks from which abstract requirements are derived (`research/`). `.gitignore` excludes the local benchmark folders (`_benchmark/`, `**/ds-benchmark-*/`), and `pnpm check:clean-room` proves the rule positively: an allowlist of the Fundamento namespace, never a blocklist of foreign names.
 
-Phase 0 ships no fonts and no icons (FR-18).
+No font files and no icons are shipped (Spec 000 FR-18): Aspektoj reference font families, and each package declares their license and scripts. A brand owner's own values live in their private Aspekto package; the core repository keeps none of them (`pnpm check:clean-room` compares fingerprints, Spec 001 AK-08).
 
 ## License
 

@@ -1,0 +1,14 @@
+{
+  "$comment": "SHA-256 fingerprints of brand values of Anhang A of specs/001-vortaro-aspektoj-mcp/spec.md (hex colours, the brand font family, the easing curve; K2). Hashes only: the values themselves stay out of code (D-15). The values are public; this list enforces AK-08, it does not keep anything secret.",
+  "fingerprints": [
+    "0edfa2fa501f626ada6fe92611b027f94a3d6ad22eb33242ac842ca517586a6c",
+    "17ed618801e4200733bbf2ebc77b89ec25b34ca1151a9f1ee81025106dcef62d",
+    "6e36762d9136c0b48212a5ddc415cdf8e148ac52508025c9bc0826e55aaafe67",
+    "7422727e4ad766a56bef611ebbde3bb51ca9d7f30ac70f7e6e61c1c9513b8bbf",
+    "7f78538c48dcbeaae5dc43dd48aa3f44049522c0170cf2fec292ee853ecf80a7",
+    "95bd6fc698291d6fef6116412eb60f86b2e306f4d64000971a38bf1f32410e7d",
+    "ac8db82615cabefa1e382b8a15056e2b3f96a89e06e65d9404ee2aa9da0db95e",
+    "ba783b597209410760b5e23dccd948c3828e427ee538f66e9b96c707c97bfc48",
+    "bcd2da4e0372896d55ad4c40f1349091098cdf8c18465d9f5b516706c224ed66"
+  ]
+}

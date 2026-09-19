@@ -6,7 +6,7 @@ Companion to [`../plan.md`](../plan.md) D-13. The normative schemas are written 
 
 - Every tool is read-only (`annotations.readOnlyHint: true`, `idempotentHint: true`, `openWorldHint: false`).
 - Success: `structuredContent` = the output object, plus one `text` content block with the same JSON (for clients without structured output).
-- Failure: `isError: true`, `structuredContent = { "issues": Issue[], "allowed"?: string[] }`. `Issue` is the Phase-0 shape `{ rule, severity, path, message, suggestion, combination? }`.
+- Failure: `isError: true`, `structuredContent = { "issues": Issue[], "allowed"?: string[] }`. `Issue` is the Phase-0 shape `{ rule, severity, path, message, suggestion, combination? }`. Because clients validate `structuredContent` against the listed `outputSchema` even on `isError` (SDK 1.30 client), `tools/list` publishes `outputSchema` as `{ type: "object", anyOf: [output, envelope] }`, self-contained (every `$ref` bundled into local `$defs`). The files in `schema/tools/` stay the normative output shape alone.
 - Input objects are `additionalProperties: false`; unknown input fields produce an issue with the rule `mcp-input-invalid`.
 - List outputs are sorted canonically (by name, or by Dimensio priority), so answers are deterministic.
 
@@ -49,5 +49,7 @@ Companion to [`../plan.md`](../plan.md) D-13. The normative schemas are written 
 fm mcp [--config <file>] [--export <dir>] [--http] [--port <n>=7300]
 fundamento-mcp …same flags…
 ```
+
+`--http` serves Streamable HTTP at `http://127.0.0.1:<port>/mcp`, stateless (one server per POST request, JSON responses). It binds to `127.0.0.1` only. Its own DNS-rebinding guard answers 403 unless `Host` is `127.0.0.1:<port>` or `localhost:<port>` and any `Origin` is `http://` plus one of those. The SDK transport's built-in guard is deprecated in 1.30. `validate.aspektoPath` is refused with `mcp-input-invalid`. A Modelo that cannot be exported serves no resources.
 
 Exit 2 on a usage error, with a "did you mean" suggestion (Phase-0 CLI conventions). Logs go to stderr only, because stdout belongs to the protocol under stdio.

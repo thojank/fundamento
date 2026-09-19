@@ -7,8 +7,8 @@ Companion to [`plan.md`](plan.md). Decision numbers (D-xx) refer to the plan. Th
 | Entity | Stored in | Fields | Validation |
 |---|---|---|---|
 | **AspektoPakajxo** | package folder | `aspekto.json`, `ids.lock.json`, `$themes.json` (derived), `sets/aspekto/<name>[+…].json`, optional `reguloj.json`, `jugxoj.json` | `aspekto-set-foreign`, `aspekto-incomplete`, `aspekto-reference-set-not-empty`, `themes-out-of-sync`, ID rules |
-| **Aspekto** (`aspekto.json`) | package root | `id` (`dva_…`), `name` (`Name` grammar), `owner`, `license` (SPDX id or `proprietary`), `idNamespace?` (`^[a-z]{2,8}$`, required for every package except the reference), `fonts[]` | `$defs/AspektoFile` in the one canonical `modelo.schema.json` (T004); `aspekto-name-duplicate`, `id-namespace-duplicate` |
-| **Fonto** | `aspekto.json#/fonts/<i>` | `family`, `license` (SPDX or `proprietary`), `source` (URL or text), `redistributable` (bool) | `aspekto-font-undeclared` (first family of every resolved `fontFamily` token must be declared or generic) |
+| **Aspekto** (`aspekto.json`) | package root | `id` (`dva_…`), `name` (`Name` grammar), `owner`, `license` (SPDX id or `proprietary`), `idNamespace?` (`^[a-z]{2,8}$`, required for every package except the reference), `fonts[]`, `tavoloj?` (layers; Phase 1 reserves `vida: {}`, other keys are ignored; D-20) | `$defs/AspektoFile` in the one canonical `modelo.schema.json` (T004); `aspekto-name-duplicate`, `id-namespace-duplicate` |
+| **Fonto** | `aspekto.json#/fonts/<i>` | `family`, `license` (SPDX or `proprietary`), `source` (URL or text), `redistributable` (bool), `scripts` (ISO 15924 codes, at least one; T018b) | `aspekto-font-undeclared` (first family of every resolved `fontFamily` token must be declared or generic) |
 | **Konfiguro** | `fundamento.config.json` (project root, not part of the Modelo) | `aspektoj: string[]` (path or npm name); nothing else, the reference Aspekto is not stated here (Q2) | `config-invalid`, `aspekto-package-missing` |
 | **Dimensio `aspekto`** | `data/dimensioj.json` | as in Phase 0, but `valoroj` is **assembled** from the loaded packages; new field `referenceAspekto` | `aspekto-reference-missing` (the reference package is not loaded) |
 | **Token** | sets | unchanged, plus `role` values and `textTransform` extension on typography composites | `color-role-missing`, `color-semantic-literal`, `dimensio-set-literal` |
@@ -129,6 +129,7 @@ Exempt by role: `disabled` (Regulo `disabled-exempt-from-contrast`) and `decorat
 | `aspekto-incomplete` | error | one issue per core token missing from `aspekto/<name>` |
 | `aspekto-set-foreign` | error | a package holds a set not conditioned on its own Aspekto |
 | `aspekto-font-undeclared` | error | a resolved font family is neither declared nor generic |
+| `aspekto-font-scripts-missing` | error | a font in `aspekto.json` lists no ISO 15924 `scripts` (T018b) |
 | `id-namespace-mismatch` | error | an ID in a package lacks the package namespace |
 | `id-namespace-duplicate` | error | two packages declare the same namespace |
 | `dimensio-set-literal` | error | a literal value in a set without an `aspekto` condition |
@@ -136,8 +137,15 @@ Exempt by role: `disabled` (Regulo `disabled-exempt-from-contrast`) and `decorat
 | `color-semantic-literal` | error | a non-palette color token (in any set) is not an alias into `color.palette.*` |
 | `color-role-missing` | error | a color token without `role` |
 | `kontrastparo-missing-for-role` | error | a token of a checked role appears in no KontrastParo |
+| `focus-ring-pair-missing` | error | a focus colour lacks its pair on `color.background.default` or on `color.focus.inner` (Regulo `focus-ring-dual-contrast`) |
+| `typography-role-not-composite` | error | a typography composite does not alias its role tokens (Regulo `typography-roles-composite`) |
+| `motion-reduced-not-instant` | error | a duration or easing role is not instant under `motion=reduced` (Regulo `motion-reduced-instant`) |
+| `density-set-scope` | error | a density set re-points anything but spacing and control-size roles, or a token viewport shifts (Regulo `density-affects-layout-only`) |
 | `regulo-aspekto-unknown` | error | a Regulo or Jugxo is scoped to an unknown Aspekto |
 | `clean-room-marko-spuro` | error | a brand fingerprint outside the allowlist (D-15) |
+| `mcp-input-invalid` | error | an MCP tool input violates its schema, or `validate.aspektoPath` is used over HTTP (T023, T026) |
+| `token-unknown` | error | `get_token` or `resolve` names a token that does not exist; `allowed` lists the nearest names (T024, T025) |
+| `nomregulo-no-target` | warning | `derive_name`: a NomRegulo gives no target (today only Tailwind: no theme namespace, or its `$type` is not allowed there); the token stays available as `--fm-*` only (FR-13b, T025) |
 
 `set-override-has-extensions` is relaxed: overrides may carry `$extensions["com.ciferecigo.fundamento"].textTransform` and nothing else.
 

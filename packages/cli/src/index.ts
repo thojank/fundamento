@@ -3,6 +3,7 @@
 // caught here, so users see a message and an exit code, never a stack trace.
 import { readFileSync } from "node:fs";
 import { EXIT_USAGE } from "./command.js";
+import { isProcessEntry, nodeVersionProblem } from "./node-version.js";
 
 export type { CliContext, Command, CommandGroup } from "./command.js";
 
@@ -33,7 +34,7 @@ async function runFromProcess(): Promise<void> {
     // Imported lazily so that even a broken `@fundamento/modelo` install is reported, not thrown.
     const { main } = await import("./cli.js");
     const initCwd = process.env.INIT_CWD;
-    process.exitCode = main(process.argv.slice(2), {
+    process.exitCode = await main(process.argv.slice(2), {
       version: cliVersion(),
       baseDir: initCwd !== undefined && initCwd !== "" ? initCwd : process.cwd(),
       stdout: (text) => process.stdout.write(text),
@@ -46,6 +47,12 @@ async function runFromProcess(): Promise<void> {
   }
 }
 
-if (import.meta.main) {
+// Before the entry guard: on Node < 24 `import.meta.main` is undefined and the bin would end
+// silently with exit 0.
+const versionProblem = nodeVersionProblem(process.versions.node);
+if (versionProblem !== undefined && isProcessEntry(import.meta.url)) {
+  process.stderr.write(`fm: ${versionProblem}`);
+  process.exitCode = 1;
+} else if (import.meta.main) {
   await runFromProcess();
 }

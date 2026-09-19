@@ -84,54 +84,58 @@ Order follows the plan's "Build order". The ciferecigo package is the last task.
   - Red: `e2e/external-aspekto.test.ts`: `valid/aspekto-ekzemplo` (complete against the real core, `ekz` namespace, dark and high-contrast conjunctions, a fictitious font, flat-elevation Regulo, typography distinct from komuna) validates through its own `fundamento.config.json` (`$schema` relative to the repo schema); `invalid/aspekto-incomplete` lists exactly the removed tokens.
   - Green: fixture data (warm neutrals, petrol accent, a fictitious grotesk, light display weight, solid display line height, tighter tracking, flat elevation, sharper corners; both conjunction sets), plus `projectModeloSource(config)` (core + komuna + config packages, de-duplicated) and `vortaro:themes --config` (writes only the fragments of the listed packages). The Aspekto-scoped Regulo (flat elevation) is added in T021, when package Reguloj are read; adding its ID now would leave it orphaned.
 
+- [x] **T018b `aspekto.json`: font scripts and layers** (D-05, D-20; added by the maintainer 2026-09-19)
+  - Red: `contracts/aspekto-schema.test.ts`: `fonts[].scripts` is required, an array of ISO 15924 codes (`Latn`, `Cyrl`, `Arab`, `Hans`, …) with at least one entry; `tavoloj` is optional, knows only the reserved key `vida` with the empty value `{}`, and allows unknown keys. `validate/aspekto-file.test.ts`: a package font without `scripts` gives `aspekto-font-scripts-missing` (error) at `<pkg>/aspekto.json#/fonts/<i>/scripts`; a package with `tavoloj: { vida: {}, <unknown>: … }` validates without issues (validation ignores unknown keys). Repo test: komuna declares `["Latn"]` for Geist and Geist Mono.
+  - Green: schema (`Fonto.scripts`, `AspektoFile.tavoloj`), rule `aspekto-font-scripts-missing`, `scripts: ["Latn"]` in komuna, ekzemplo and every package fixture. No further logic in Phase 1.
+
 ## Stage 4 – Export
 
-- [ ] **T019 Export per Aspekto and `fm modelo export`** (D-09, AK-10)
+- [x] **T019 Export per Aspekto and `fm modelo export`** (D-09, AK-10)
   - Red: export tests for the new `modelo.json` fields; `dist/vortaro/<aspekto>/` is a complete Tokens-Studio folder; SHA-256 equal over two builds with the repo config and with the fixture config.
   - Green: `export/per-aspekto.ts`, build script, CLI command `fm modelo export [--config] [--out]`.
-- [ ] **T020 Describe sentence** (D-14, Q4)
+- [x] **T020 Describe sentence** (D-14, Q4)
   - Red: `export/describe.test.ts`: Dimensioj and counts per token group, license, font and reference/external flags; no word "complete"/"vollständig".
   - Green: `describeModelo`.
 
 ## Stage 5 – Checks
 
-- [ ] **T021 [P] Alirebleco and Regularo over all Aspektoj**
+- [x] **T021 [P] Alirebleco and Regularo over all Aspektoj**
   - Red: `check:alirebleco --fixture` on the ekzemplo config evaluates both Aspektoj; `check:regularo` finds a package Regulo without kialo (`invalid/package-regulo-without-kialo`) and `regulo-aspekto-unknown`.
-  - Green: checks iterate over the composition.
-- [ ] **T022 [P] Clean-room fingerprints** (D-15, K2, AK-08)
+  - Green: checks iterate over the composition (`--config <file>` on the check runner); package `reguloj.json` / `jugxoj.json` are read, schema-checked, ID-checked and merged, scoped to the package's Aspekto; `ekzemplo` carries the Regulo `elevation-flat` (manual: fixture, no enforcer). The package-Regulo cases run on mutated copies of `valid/aspekto-ekzemplo` instead of a separate committed fixture.
+- [x] **T022 [P] Clean-room fingerprints** (D-15, K2, AK-08)
   - Red: `checks/clean-room/marko-spuro.test.ts`: normalization (hex to lowercase 6-digit, family lowercase without quotes, cubic-bezier without whitespace and as a DTCG array); durations and length scalars are never candidates; failing fixture with a **synthetic** fingerprint list; the allowlist exempts exactly `spec.md` and `research.md` of Spec 001.
   - Green: `clean-room-marko-spuro`, `marko-spuroj.json` (hashes only).
 
 ## Stage 6 – MCP server and CLI
 
-- [ ] **T023 Tool schemas and contract tests** (contracts/mcp-tools.md)
+- [x] **T023 Tool schemas and contract tests** (contracts/mcp-tools.md)
   - Red: `packages/mcp/src/contracts.test.ts`: ten input/output schemas compile with Ajv and `$ref` the Modelo schema; examples from the contract validate.
   - Green: `packages/mcp/schema/tools/*.json`.
-- [ ] **T024 Server core and read tools** (D-13)
+- [x] **T024 Server core and read tools** (D-13)
   - Red: in-process client tests for `describe`, `list_dimensioj`, `list_aspektoj`, `search_tokens` (segment prefix, limit/offset), `get_token` (`token-unknown` + `allowed`); outputs validate against the T023 schemas; the server starts on an invalid Modelo and reports the error count.
   - Green: `server.ts`, `load.ts` (in-memory export via the same function as `fm modelo export`; `--export <dir>`), stdio transport.
-- [ ] **T025 Resolve, rules, validate, derive_name** (D-13, FR-18)
+- [x] **T025 Resolve, rules, validate, derive_name** (D-13, FR-18)
   - Red: `resolve` equals the direct resolver incl. `origin.package`; unknown Dimensio/valoro/Aspekto → issues + `allowed`; `list_reguloj {aspekto}`; `list_jugxoj {ref}`; `validate` served + `aspektoPath`; `derive_name` for the five Celoj.
   - Green: the remaining tools, error envelope.
-- [ ] **T026 Resources and HTTP transport**
+- [x] **T026 Resources and HTTP transport**
   - Red: three resources with the bytes of the export; `--http` binds only to `127.0.0.1`, rejects foreign `Host` headers, and rejects `validate.aspektoPath` with `mcp-input-invalid`.
   - Green: `resources.ts`, `http.ts`.
-- [ ] **T027 CLI commands** (D-07, D-13)
+- [x] **T027 CLI commands** (D-07, D-13)
   - Red: `packages/cli` tests: `fm mcp --help`, `fm modelo validate --aspekto <dir>` (repeatable) and `--config`, `fm modelo export`; exit codes 0/1/2 and "did you mean"; `fundamento-mcp` bin.
   - Green: `commands/mcp.ts`, `commands/modelo-export.ts`, flags in `modelo-validate.ts`.
-- [ ] **T028 Acceptance suite** (AK-06, AK-07, Art. XIII)
-  - Red: `packages/mcp/src/e2e/s7-dialog.test.ts` (three S7 questions against the ekzemplo config, every number recomputed from `modelo.json`); `perf.test.ts` (spawn to first `describe` < 2 s, 100 × `resolve` < 100 ms each, factor 3 under `CI=true`, raw timings logged); `quickstart.test.ts` (spawn `fm mcp`, `initialize`, `tools/list` = 10 tools); `ci/workflow.test.ts` updated.
+- [x] **T028 Acceptance suite** (AK-06, AK-07, Art. XIII)
+  - Red: `packages/mcp/src/e2e/s7-dialog.test.ts` (three S7 questions against the ekzemplo config, every number recomputed from `modelo.json`); `perf.test.ts` (spawn to first `describe` < 2 s, 100 × `resolve` < 100 ms each, runs alone as its own Turborepo task `perf` (`dependsOn: build`, concurrency 1, script `pnpm perf`) after the test step, never inside the parallel test run; factor 3 only under `CI=true`; raw timings always logged, first baseline in research §8.2; D-17); `quickstart.test.ts` (spawn `fm mcp`, `initialize`, `tools/list` = 10 tools); `ci/workflow.test.ts` updated.
   - Green: fixes only; no new features.
-- [ ] **T029 Documentation of the repository**
+- [x] **T029 Documentation of the repository**
   - Red: `docs/docs.test.ts` extended: README lists the new commands and the per-Aspekto Penpot folder; `plan.md` Traceability maps every FR/AK of Spec 001 to task IDs; no Anhang-A value outside the allowlist (reuses T022).
   - Green: README, plan traceability, "Penpot import result" left as "pending maintainer verification".
 
 ## Stage 7 – ciferecigo (last)
 
-- [ ] **T030 ciferecigo package outside the core repository** (D-18, FR-13, Q3, Q5)
+- [x] **T030 ciferecigo package outside the core repository** (D-18, FR-13, Q3, Q5; delivered as an archive 2026-09-19 with DERIVATION.md Rules 1–6 and the preview `preview/index.html`; accepted, the visual review is done by the maintainer with the preview)
   - Red: create the empty package skeleton in the p0 workspace at `../fundamento-aspekto-ciferecigo` (`aspekto.json`, empty set, `link:`/`file:` dev dependencies on the core) and run `pnpm fm modelo validate --aspekto ../fundamento-aspekto-ciferecigo`; it must fail with `aspekto-incomplete` for every core token.
   - Green: derive all values by the D-18 rules; write `DERIVATION.md` (OKLCH ramp with anchors and resulting steps, scales taken from komuna, typography roles, every contrast-driven step change); sets incl. the dark and high-contrast conjunctions; Aspekto Reguloj with kialo (from Anhang A).
-  - Done when: `fm modelo validate --aspekto …` exits 0; `check:alirebleco` passes for the composition; `check:clean-room` in the core is still green (nothing leaked into `repos/fundamento`); archive `fundamento-aspekto-ciferecigo.tar.gz` (without `node_modules`) handed to the maintainer; `research.md` §8 (Enportilo findings) committed in the core. Visual review by the maintainer.
+  - Done when: `fm modelo validate --aspekto …` exits 0; `check:alirebleco` passes for the composition; `check:clean-room` in the core is still green (nothing leaked into `repos/fundamento`); archive `fundamento-aspekto-ciferecigo.tar.gz` (without `node_modules`) handed to the maintainer; `research.md` §10 (Enportilo findings; §8 holds the APCA and AK-07 baselines) committed in the core. Visual review by the maintainer.
 
 ---
 

@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ciferecigo.com/fundamento/schema/mcp/list_dimensioj.output.json",
+  "title": "list_dimensioj output",
+  "description": "The Dimensioj with values, default, priority and sets.",
+  "type": "object",
+  "properties": {
+    "dimensioj": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+          },
+          "priority": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "default": {
+            "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+          },
+          "valoroj": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+                },
+                "sets": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/SetName"
+                  }
+                }
+              },
+              "additionalProperties": false,
+              "required": ["name", "sets"]
+            }
+          }
+        },
+        "additionalProperties": false,
+        "required": ["name", "priority", "default", "valoroj"]
+      }
+    },
+    "order": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "additionalProperties": false,
+  "required": ["dimensioj", "order"]
+}

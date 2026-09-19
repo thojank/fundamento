@@ -4,6 +4,9 @@
   "description": "Fundamento MCP server: read-only tools and resources over the Modelo export.",
   "license": "MIT",
   "type": "module",
+  "bin": {
+    "fundamento-mcp": "dist/index.js"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -17,7 +20,8 @@
   ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "test": "vitest run --passWithNoTests",
+    "test": "vitest run",
+    "perf": "vitest run --config vitest.perf.config.ts",
     "lint": "tsc -p tsconfig.json --noEmit && biome check ."
   },
   "dependencies": {

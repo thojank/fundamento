@@ -1,0 +1,13 @@
+{
+  "reguloj": [
+    {
+      "id": "reg_ekz_01M2WCJ0N1BXR32541KVQEAJDV",
+      "name": "elevation-flat",
+      "statement": "Surfaces of ekzemplo cast no shadow: every elevation.shadow.* is a transparent zero layer.",
+      "kialo": "The brand builds hierarchy with lines and joints instead of depth; a shadow would break its flatness and make surfaces look like objects.",
+      "scope": "vortaro: elevation.shadow.* in aspekto/ekzemplo",
+      "checkability": "manual",
+      "aspekto": "ekzemplo"
+    }
+  ]
+}

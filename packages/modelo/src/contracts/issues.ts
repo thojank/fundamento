@@ -51,6 +51,7 @@ export const RULE_IDS = [
   "aspekto-incomplete",
   "aspekto-set-foreign",
   "aspekto-font-undeclared",
+  "aspekto-font-scripts-missing",
   // Generic Dimensio sets (Spec 001 T009)
   "dimensio-set-literal",
   "dimensio-set-primitive",
@@ -58,6 +59,11 @@ export const RULE_IDS = [
   "color-semantic-literal",
   "color-role-missing",
   "kontrastparo-missing-for-role",
+  // Reguloj made automatic after D-19 (Spec 001)
+  "focus-ring-pair-missing",
+  "typography-role-not-composite",
+  "motion-reduced-not-instant",
+  "density-set-scope",
   // Regularo in Aspekto packages (Spec 001 T021)
   "regulo-aspekto-unknown",
   // Dimensioj (FUND-3.2)
@@ -91,6 +97,10 @@ export const RULE_IDS = [
   "clean-room-benchmark-reference",
   "clean-room-foreign-prefix",
   "clean-room-marko-spuro",
+  // MCP tools (Spec 001 T023, FR-18)
+  "mcp-input-invalid",
+  "token-unknown",
+  "nomregulo-no-target",
   // Parity (FUND-4.4)
   "parity-item-missing",
   "parity-prop-mismatch",

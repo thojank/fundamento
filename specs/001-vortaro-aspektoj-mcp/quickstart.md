@@ -15,7 +15,7 @@ Then, in the agent:
 > "Which value does `color.text.default` have in komuna, dark mode, high contrast, and why?" → `resolve` with provenance
 > "What is `color.action.primary.rest` called in Figma and in CSS?" → `derive_name`
 
-Automated check: a test spawns `fm mcp`, sends `initialize`, `tools/list` and `describe`, and asserts ten tools and a schema-conformant answer within the AK-07 budget.
+Automated check: a test spawns `fm mcp`, sends `initialize`, `tools/list` and `describe`, and asserts ten tools and a schema-conformant answer. The AK-07 timings run separately as `pnpm perf`.
 
 ## Developer: include an external Aspekto
 
@@ -28,6 +28,12 @@ pnpm fm mcp            --config fundamento.config.json
 ```
 
 The same flow runs in CI against `packages/modelo/test/fixtures/valid/aspekto-ekzemplo/`.
+
+Notes for package authors:
+
+- `sets/aspekto/<name>.json` must set every core token; conjunction sets carry deltas only.
+- Values for light mode with high contrast belong in `aspekto/<name>+color-scheme/light+contrast/high`, not in `aspekto/<name>+contrast/high`. A set conditioned on `contrast=high` alone is also active in dark mode, where it ties with the core's `color-scheme/dark+contrast/high` (same priority and specificity). `set-override-ambiguous` reports such a tie even when a more specific set overrides both, and its suggestion names the kondicxo to add.
+- Thresholds are never lowered. Where a brand colour cannot carry text under `contrast=high` (e.g. a bright signal colour below 7:1 against any text colour), the core's high-contrast role mapping applies instead.
 
 ## Designer: switch the Aspekto (< 1 minute)
 

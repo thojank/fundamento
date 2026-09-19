@@ -5,9 +5,31 @@
 import { aliasTarget, CORE_SET_NAME } from "../contracts/grammar.js";
 import { formatIssuePath, type ValidationIssue } from "../contracts/issues.js";
 import type { Modelo } from "../contracts/modelo.js";
+import { ASPEKTO_DIMENSIO } from "../load/build.js";
+import { resolve } from "../resolve/resolve.js";
 import { dimensioSetIssues } from "./dimensio-set-rules.js";
 
 const PALETTE_PREFIX = "color.palette.";
+const FOCUS_SURFACE = "color.background.default";
+const FOCUS_GAP = "color.focus.inner";
+const DENSITY_SCOPE = /^(spacing\.[a-z0-9]+|size\.control\.[a-z0-9]+)$/;
+
+function isRoleComposite(role: string, value: unknown): boolean {
+  if (typeof value !== "object" || value === null) return false;
+  const fields = value as Record<string, unknown>;
+  return (
+    aliasTarget(fields.fontSize) === `font.size.${role}` &&
+    aliasTarget(fields.lineHeight) === `font.lineheight.${role}` &&
+    aliasTarget(fields.letterSpacing) === `font.tracking.${role}` &&
+    aliasTarget(fields.fontFamily) !== undefined &&
+    aliasTarget(fields.fontWeight) !== undefined
+  );
+}
+
+function isInstant(value: unknown): boolean {
+  if (Array.isArray(value)) return JSON.stringify(value) === "[0,0,1,1]";
+  return typeof value === "object" && value !== null && (value as { value?: unknown }).value === 0;
+}
 
 type Enforcer = (modelo: Modelo) => ValidationIssue[];
 
@@ -53,6 +75,87 @@ export const REGULO_ENFORCERS: Readonly<Record<string, Enforcer>> = {
         },
       ];
     });
+  },
+  /**
+   * The focus ring must contrast with the surface around it and with its own gap colour
+   * (color.focus.inner): one colour cannot reach 3:1 against every surface (WCAG 2.4.13).
+   */
+  "focus-ring-dual-contrast": (modelo) => {
+    const core = modelo.setoj.find((set) => set.name === CORE_SET_NAME)?.tokens ?? {};
+    const paired = (foreground: string, background: string) =>
+      modelo.kontrastParoj.some(
+        (pair) => pair.foreground === foreground && pair.background === background,
+      );
+    return Object.values(core)
+      .filter((token) => token.role === "focus")
+      .filter((token) => !paired(token.name, FOCUS_SURFACE) || !paired(token.name, FOCUS_GAP))
+      .map((token) => ({
+        rule: "focus-ring-pair-missing" as const,
+        severity: "error" as const,
+        path: formatIssuePath(token.location),
+        message: `The focus colour ${token.name} needs a KontrastParo on ${FOCUS_SURFACE} and one on its gap colour ${FOCUS_GAP}.`,
+        suggestion: `Declare both pairs (kategorio ui) in data/kontrastparoj.json (Regulo focus-ring-dual-contrast).`,
+      }));
+  },
+  /** FR-04, D-02: typography roles are composites of aliases over their role tokens. */
+  "typography-roles-composite": (modelo) =>
+    modelo.setoj.flatMap((set) =>
+      Object.values(set.tokens)
+        .filter((token) => token.type === "typography" && token.name.startsWith("typography."))
+        .filter((token) => !isRoleComposite(token.name.slice("typography.".length), token.value))
+        .map((token) => ({
+          rule: "typography-role-not-composite" as const,
+          severity: "error" as const,
+          path: formatIssuePath(token.location),
+          message: `${token.name} in ${set.name} is not a composite of aliases over its role tokens.`,
+          suggestion: `Alias fontSize, lineHeight and letterSpacing to font.size, font.lineheight and font.tracking of the role, and fontFamily and fontWeight to primitives (Regulo typography-roles-composite).`,
+        })),
+    ),
+  /** FR-06: under motion=reduced every duration role is 0 ms and every easing role linear. */
+  "motion-reduced-instant": (modelo) => {
+    const core = modelo.setoj.find((set) => set.name === CORE_SET_NAME)?.tokens ?? {};
+    const roles = Object.values(core).filter(
+      (token) =>
+        (token.type === "duration" || token.type === "cubicBezier") &&
+        aliasTarget(token.value) !== undefined,
+    );
+    const aspektoj =
+      modelo.dimensioj.find((dimensio) => dimensio.name === ASPEKTO_DIMENSIO)?.valoroj ?? [];
+    return aspektoj.flatMap((aspekto) => {
+      const assignment = { [ASPEKTO_DIMENSIO]: aspekto.name, motion: "reduced" };
+      const outcome = resolve(modelo, assignment);
+      if (!outcome.ok) return []; // unresolvable combinations are reported elsewhere
+      return roles
+        .filter((token) => !isInstant(outcome.rezolvo.tokens[token.name]?.value))
+        .map((token) => ({
+          rule: "motion-reduced-not-instant" as const,
+          severity: "error" as const,
+          path: `rezolvo(${ASPEKTO_DIMENSIO}=${aspekto.name},motion=reduced)/${token.name}`,
+          message: `${token.name} is not instant under motion=reduced.`,
+          suggestion: `Re-point ${token.name} to motion.duration.scale.0 or motion.easing.curve.linear in motion/reduced (Regulo motion-reduced-instant).`,
+        }));
+    });
+  },
+  /** K3: density re-points spacing and control-size roles only, never a token viewport shifts. */
+  "density-affects-layout-only": (modelo) => {
+    const viewport = new Set(
+      modelo.setoj
+        .filter((set) => set.name.startsWith("viewport/"))
+        .flatMap((set) => Object.keys(set.tokens)),
+    );
+    return modelo.setoj
+      .filter((set) => set.name.startsWith("density/"))
+      .flatMap((set) =>
+        Object.values(set.tokens)
+          .filter((token) => !DENSITY_SCOPE.test(token.name) || viewport.has(token.name))
+          .map((token) => ({
+            rule: "density-set-scope" as const,
+            severity: "error" as const,
+            path: formatIssuePath(token.location),
+            message: `${set.name} re-points ${token.name}; density changes only spacing and control-size roles and never a token viewport shifts.`,
+            suggestion: `Move the change to viewport/* (typography, layout) or leave it out (Regulo density-affects-layout-only).`,
+          })),
+      );
   },
   /** D-03, K4: generic Dimensio sets hold aliases only and re-point roles only. */
   "dimensio-sets-alias-only": dimensioSetIssues,

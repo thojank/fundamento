@@ -4,6 +4,10 @@
       "status": "active",
       "type": "dimensioValoro"
     },
+    "reg_ekz_01M2WCJ0N1BXR32541KVQEAJDV": {
+      "status": "active",
+      "type": "regulo"
+    },
     "set_ekz_01M2WA1QF2YS5V98E3NF9QN2YA": {
       "status": "active",
       "type": "tokenSet"

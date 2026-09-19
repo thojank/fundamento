@@ -20,7 +20,7 @@ export interface Command {
   name: string;
   summary: string;
   help: string;
-  run: (args: readonly string[], context: CliContext) => number;
+  run: (args: readonly string[], context: CliContext) => number | Promise<number>;
 }
 
 /** A named group of commands, e.g. `fm modelo <command>`. */

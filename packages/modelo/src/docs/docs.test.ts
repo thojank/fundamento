@@ -5,6 +5,7 @@ import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
+import { findBrandValues, repoFingerprints } from "../checks/clean-room/marko-spuro.js";
 
 const repoRoot = fileURLToPath(new URL("../../../../", import.meta.url));
 const specDir = `${repoRoot}specs/000-fundamento-repo/`;
@@ -64,6 +65,8 @@ function declaredDependencies(): string[] {
     "packages/modelo/package.json",
     "packages/vortaro/package.json",
     "packages/cli/package.json",
+    "packages/mcp/package.json",
+    "packages/aspekto-komuna/package.json",
   ];
   const names = new Set<string>();
   for (const manifest of manifests) {
@@ -139,13 +142,25 @@ describe("specs/000-fundamento-repo/plan.md (FR-19, AK-08)", () => {
   });
 
   it("records a reason for every declared third-party dependency", () => {
-    const deps = section(plan, "Dependencies");
+    // Phase 0 installed the base toolchain; Spec 001 added the MCP SDK and its peer. Each plan's
+    // Dependencies table names its own columns, so the reason is found by its header.
+    const tables = [plan, read("specs/001-vortaro-aspektoj-mcp/plan.md")].map((text) =>
+      section(text, "Dependencies")
+        .split("\n")
+        .filter((line) => line.startsWith("|")),
+    );
     for (const name of declaredDependencies()) {
-      const row = deps.split("\n").find((line) => line.startsWith(`| \`${name}\` |`));
-      expect(row, `dependency ${name} missing from plan.md`).toBeDefined();
-      const cells = (row ?? "").split("|").map((cell) => cell.trim());
-      // | name | version | reason |
-      expect(cells[3]?.length ?? 0, `dependency ${name} needs a reason`).toBeGreaterThan(10);
+      const table = tables.find((lines) =>
+        lines.some((line) => line.startsWith(`| \`${name}\` |`)),
+      );
+      expect(table, `dependency ${name} missing from the plans' Dependencies tables`).toBeDefined();
+      const cellsOf = (line: string) => line.split("|").map((cell) => cell.trim());
+      const reasonIndex = cellsOf(table?.[0] ?? "").indexOf("Reason");
+      const row = table?.find((line) => line.startsWith(`| \`${name}\` |`)) ?? "";
+      expect(
+        cellsOf(row)[reasonIndex]?.length ?? 0,
+        `dependency ${name} needs a reason`,
+      ).toBeGreaterThan(10);
     }
   });
 
@@ -202,5 +217,89 @@ describe("README.md (S1, FR-02, AK-11)", () => {
     const overview = section(readme, "What lives where");
     const lines = overview.split("\n").filter((line) => line.startsWith("- "));
     expect(lines).toHaveLength(10);
+  });
+});
+
+describe("Spec 001 documentation (T029)", () => {
+  const readme = read("README.md");
+  const plan001 = read("specs/001-vortaro-aspektoj-mcp/plan.md");
+
+  it.each([
+    "pnpm fm modelo export",
+    "pnpm fm modelo validate --config",
+    "pnpm fm modelo validate --aspekto",
+    "pnpm fm mcp",
+    "--http",
+    "fundamento-mcp",
+    "fundamento.config.json",
+    "packages/aspekto-komuna",
+    "packages/mcp",
+  ])("the README documents %s", (fragment) => {
+    expect(readme).toContain(fragment);
+  });
+
+  it("the Penpot quickstart imports one folder per Aspekto and points to both plans", () => {
+    const quickstart = section(readme, "Penpot quickstart");
+    expect(quickstart).toContain("packages/modelo/dist/vortaro/<aspekto>/");
+    expect(quickstart).toContain("specs/001-vortaro-aspektoj-mcp/plan.md");
+  });
+
+  it("the README names the MCP tools", () => {
+    const mcp = section(readme, "MCP server");
+    for (const tool of [
+      "describe",
+      "list_dimensioj",
+      "list_aspektoj",
+      "search_tokens",
+      "get_token",
+      "resolve",
+      "list_reguloj",
+      "list_jugxoj",
+      "validate",
+      "derive_name",
+    ]) {
+      expect(mcp).toContain(`\`${tool}\``);
+    }
+  });
+
+  it("traces every FR and AK of Spec 001 to decisions and task IDs", () => {
+    const spec = read("specs/001-vortaro-aspektoj-mcp/spec.md");
+    const rows = section(plan001, "Traceability (requirement → decision → tasks)")
+      .split("\n")
+      .filter((line) => line.startsWith("| ") && !line.startsWith("| Requirement"));
+    const ids = new Set([...spec.matchAll(/^- ((?:FR|AK)-\d+[a-z]?):/gm)].map((m) => m[1] ?? ""));
+    expect(ids.size).toBe(30);
+    for (const id of ids) {
+      const row = rows.find((line) =>
+        new RegExp(`\\b${id}\\b(?![a-z])`).test(line.split("|")[1] ?? ""),
+      );
+      expect(row, `${id} missing from the traceability table`).toBeDefined();
+      expect(row, `${id} has no task ID`).toMatch(/\bT0\d\db?\b/);
+    }
+  });
+
+  it("has no open clarification marker in Spec 001 (AK-11)", () => {
+    for (const file of ["spec.md", "plan.md", "research.md", "data-model.md", "tasks.md"]) {
+      // Mentions in code spans (the AK-11 text itself) are not markers.
+      expect(proseOnly(read(`specs/001-vortaro-aspektoj-mcp/${file}`)), file).not.toContain(
+        "[NEEDS CLARIFICATION",
+      );
+    }
+  });
+
+  it("leaves the Penpot import result pending maintainer verification", () => {
+    expect(section(plan001, "Penpot import result")).toContain("pending maintainer verification");
+  });
+
+  it.each([
+    "README.md",
+    "specs/001-vortaro-aspektoj-mcp/plan.md",
+    "specs/001-vortaro-aspektoj-mcp/tasks.md",
+    "specs/001-vortaro-aspektoj-mcp/data-model.md",
+    "specs/001-vortaro-aspektoj-mcp/quickstart.md",
+    "specs/001-vortaro-aspektoj-mcp/contracts/mcp-tools.md",
+  ])("%s holds no brand value (AK-08, reuses T022)", (file) => {
+    expect(repoFingerprints().size).toBeGreaterThan(0);
+    expect(findBrandValues(file, read(file), repoFingerprints())).toEqual([]);
   });
 });

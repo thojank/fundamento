@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ciferecigo.com/fundamento/schema/mcp/validate.input.json",
+  "title": "validate input",
+  "description": "Validation issues of the served Modelo or of a local Aspekto package.",
+  "type": "object",
+  "properties": {
+    "aspektoPath": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "additionalProperties": false
+}

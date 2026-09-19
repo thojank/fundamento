@@ -1,12 +1,13 @@
 // Rules of composing Aspekto packages with the core (Spec 001, D-05, D-06, D-08). Pure.
 
+import { checkRegularo } from "../checks/regularo/rules.js";
 import type { IdsLock } from "../contracts/entity-ids.js";
 import { CORE_SET_NAME } from "../contracts/grammar.js";
 import { formatIssuePath, type ValidationIssue } from "../contracts/issues.js";
 import type { Modelo } from "../contracts/modelo.js";
 import { checkIdNamespaces, type IdRegistry } from "../ids/check-ids.js";
 import { ASPEKTO_DIMENSIO, referenceAspektoOf } from "../load/build.js";
-import type { ModeloFiles } from "../load/files.js";
+import type { ModeloDocument, ModeloFiles } from "../load/files.js";
 import { EXTENSION_POINTER, isJsonObject, rawEntries } from "./raw.js";
 
 const KONDICXOJ_POINTER = `${EXTENSION_POINTER}/kondicxoj`;
@@ -196,4 +197,49 @@ function completenessIssues(modelo: Modelo, reference: string | undefined): Vali
 
 function tokenPointer(name: string): string {
   return `/${name.split(".").map(escapePointerSegment).join("/")}`;
+}
+
+/**
+ * D-10: the Reguloj and Jugxoj of Aspekto packages follow the core rules (kialo, references to
+ * existing Reguloj across all files), and every Aspekto-scoped entry names a loaded Aspekto; a
+ * package entry names its own (`regulo-aspekto-unknown`).
+ */
+export function packageRegularoIssues(modelo: Modelo, files: ModeloFiles): ValidationIssue[] {
+  const reguloj = [
+    files.data["reguloj.json"],
+    ...files.packages.flatMap((pkg) => (pkg.reguloj ? [pkg.reguloj] : [])),
+  ];
+  const jugxoj = [
+    files.data["jugxoj.json"],
+    ...files.packages.flatMap((pkg) => (pkg.jugxoj ? [pkg.jugxoj] : [])),
+  ];
+  const issues = checkRegularo({ reguloj, jugxoj }).issues;
+
+  const aspekto = modelo.dimensioj.find((dimensio) => dimensio.name === ASPEKTO_DIMENSIO);
+  const known = new Set((aspekto?.valoroj ?? []).map((valoro) => valoro.name));
+  const scan = (document: ModeloDocument, key: "reguloj" | "jugxoj", own: string | undefined) => {
+    for (const { entry, index } of rawEntries(document.value, key)) {
+      const named = entry.aspekto;
+      if (named === undefined) continue;
+      const foreign = own !== undefined && named !== own;
+      if (typeof named === "string" && known.has(named) && !foreign) continue;
+      issues.push({
+        rule: "regulo-aspekto-unknown",
+        severity: "error",
+        path: formatIssuePath({ file: document.file, pointer: `/${key}/${index}/aspekto` }),
+        message: foreign
+          ? `This entry of the package for ${own} is scoped to ${String(named)}; a package only holds Reguloj and Jugxoj of its own Aspekto.`
+          : `This entry is scoped to the Aspekto ${JSON.stringify(named)}, which is not loaded.`,
+        suggestion: `Scope it to one of: ${[...known].join(", ")}${own === undefined ? "" : ` (in this package: ${own})`}.`,
+      });
+    }
+  };
+  scan(files.data["reguloj.json"], "reguloj", undefined);
+  scan(files.data["jugxoj.json"], "jugxoj", undefined);
+  files.packages.forEach((pkg, index) => {
+    const own = modelo.aspektoPackages[index]?.aspekto;
+    if (pkg.reguloj) scan(pkg.reguloj, "reguloj", own);
+    if (pkg.jugxoj) scan(pkg.jugxoj, "jugxoj", own);
+  });
+  return issues;
 }

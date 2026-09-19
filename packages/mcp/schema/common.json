@@ -1,0 +1,163 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ciferecigo.com/fundamento/schema/mcp/common.json",
+  "description": "Shapes shared by the tools of @fundamento/mcp (Spec 001, contracts/mcp-tools.md).",
+  "$defs": {
+    "Issue": {
+      "type": "object",
+      "properties": {
+        "rule": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+        },
+        "severity": {
+          "enum": ["error", "warning"]
+        },
+        "path": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        },
+        "suggestion": {
+          "type": "string",
+          "minLength": 1
+        },
+        "combination": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": ["rule", "severity", "path", "message", "suggestion"]
+    },
+    "ErrorEnvelope": {
+      "type": "object",
+      "properties": {
+        "issues": {
+          "type": "array",
+          "items": {
+            "$ref": "https://ciferecigo.com/fundamento/schema/mcp/common.json#/$defs/Issue"
+          },
+          "minItems": 1
+        },
+        "allowed": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": ["issues"]
+    },
+    "FontSummary": {
+      "type": "object",
+      "properties": {
+        "family": {
+          "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/NonEmptyText"
+        },
+        "license": {
+          "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/License"
+        },
+        "redistributable": {
+          "type": "boolean"
+        },
+        "scripts": {
+          "type": "array",
+          "items": {
+            "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Iso15924"
+          },
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false,
+      "required": ["family", "license", "redistributable", "scripts"]
+    },
+    "AspektoSummary": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+        },
+        "reference": {
+          "type": "boolean"
+        },
+        "external": {
+          "type": "boolean"
+        },
+        "owner": {
+          "type": "string"
+        },
+        "license": {
+          "type": "string"
+        },
+        "fonts": {
+          "type": "array",
+          "items": {
+            "$ref": "https://ciferecigo.com/fundamento/schema/mcp/common.json#/$defs/FontSummary"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": ["name", "reference", "external", "owner", "license", "fonts"]
+    },
+    "AspektoDetail": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+        },
+        "reference": {
+          "type": "boolean"
+        },
+        "external": {
+          "type": "boolean"
+        },
+        "owner": {
+          "type": "string"
+        },
+        "license": {
+          "type": "string"
+        },
+        "fonts": {
+          "type": "array",
+          "items": {
+            "$ref": "https://ciferecigo.com/fundamento/schema/mcp/common.json#/$defs/FontSummary"
+          }
+        },
+        "id": {
+          "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/DimensioValoroId"
+        },
+        "package": {
+          "type": "string",
+          "minLength": 1
+        },
+        "idNamespace": {
+          "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/IdNamespace"
+        },
+        "sets": {
+          "type": "array",
+          "items": {
+            "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/SetName"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "reference",
+        "external",
+        "owner",
+        "license",
+        "fonts",
+        "id",
+        "package",
+        "sets"
+      ]
+    }
+  }
+}

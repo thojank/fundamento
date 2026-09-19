@@ -28,6 +28,16 @@ function counted(count: number, singular: string, plural: string): string {
   return `${countWord(count)} ${count === 1 ? singular : plural}`;
 }
 
+/** One Aspekto as the dialog names it. */
+export interface AspektoDetail {
+  name: string;
+  reference: boolean;
+  external: boolean;
+  license: string;
+  /** The first declared font family, if any. */
+  font?: string;
+}
+
 /** The facts of the S6 dialog, every one derived from the export. */
 export interface ModeloDescription {
   version: string;
@@ -42,6 +52,11 @@ export interface ModeloDescription {
   /** Reguloj with a non-blank kialo. */
   reguloWithKialoCount: number;
   eroCount: number;
+  jugxoCount: number;
+  /** Token count per top-level group (`color`, `typography`, …), groups sorted by name. */
+  tokensByGroup: Record<string, number>;
+  /** Package Aspektoj with their flags, license and first font family (D-14). */
+  aspektoDetails: AspektoDetail[];
   /** One-sentence answer, e.g. "Fundamento v0.1.0: six Dimensioj (…), one Aspekto `komuna`, …". */
   sentence: string;
 }
@@ -56,14 +71,39 @@ export function describeModelo(modelo: ModeloJson): ModeloDescription {
   const reguloCount = modelo.reguloj.length;
   const reguloWithKialoCount = modelo.reguloj.filter((regulo) => regulo.kialo.trim() !== "").length;
   const eroCount = modelo.eroj.length;
+  const jugxoCount = modelo.jugxoj.length;
+  const tokensByGroup: Record<string, number> = {};
+  for (const group of modelo.tokens.map((token) => token.name.split(".")[0] ?? "").sort()) {
+    tokensByGroup[group] = (tokensByGroup[group] ?? 0) + 1;
+  }
+  const aspektoDetails: AspektoDetail[] = modelo.aspektoj.flatMap((aspekto) => {
+    if (aspekto.reference === undefined || aspekto.license === undefined) return [];
+    const detail: AspektoDetail = {
+      name: aspekto.name,
+      reference: aspekto.reference,
+      external: aspekto.external === true,
+      license: aspekto.license,
+    };
+    const font = aspekto.fonts?.[0]?.family;
+    if (font !== undefined) detail.font = font;
+    return [detail];
+  });
+  const details = new Map(aspektoDetails.map((detail) => [detail.name, detail]));
 
   const dimensioPart = `${counted(dimensioj.length, "Dimensio", "Dimensioj")}${
     dimensioj.length === 0 ? "" : ` (${dimensioj.join(", ")})`
   }`;
   const aspektoPart = `${counted(aspektoj.length, "Aspekto", "Aspektoj")}${
-    aspektoj.length === 0 ? "" : ` ${aspektoj.map((name) => `\`${name}\``).join(", ")}`
+    aspektoj.length === 0
+      ? ""
+      : ` (${aspektoj.map((name) => describeAspekto(name, details.get(name))).join("; ")})`
   }`;
-  const tokenPart = `${tokenCount} ${tokenCount === 1 ? "token" : "tokens"} in ${counted(typeCount, "type", "types")}`;
+  const groups = Object.entries(tokensByGroup)
+    .map(([group, count]) => `${group} ${count}`)
+    .join(", ");
+  const tokenPart = `${tokenCount} ${tokenCount === 1 ? "token" : "tokens"} in ${counted(typeCount, "type", "types")}${
+    groups === "" ? "" : ` (${groups})`
+  }`;
   const reguloPart =
     reguloWithKialoCount === reguloCount
       ? `${counted(reguloCount, "rule", "rules")} with reasons`
@@ -79,6 +119,20 @@ export function describeModelo(modelo: ModeloJson): ModeloDescription {
     reguloCount,
     reguloWithKialoCount,
     eroCount,
-    sentence: `Fundamento v${version}: ${dimensioPart}, ${aspektoPart}, ${tokenPart}, ${reguloPart}, ${eroPart}.`,
+    jugxoCount,
+    tokensByGroup,
+    aspektoDetails,
+    sentence: `Fundamento v${version}: ${dimensioPart}, ${aspektoPart}, ${tokenPart}, ${reguloPart}, ${counted(jugxoCount, "Jugxo", "Jugxoj")}, ${eroPart}.`,
   };
+}
+
+/** "`komuna`: reference, MIT, Geist"; an Aspekto without package metadata is named only. */
+function describeAspekto(name: string, detail: AspektoDetail | undefined): string {
+  if (detail === undefined) return `\`${name}\``;
+  const facts = [
+    detail.reference ? "reference" : detail.external ? "external" : "included",
+    detail.license,
+    ...(detail.font === undefined ? [] : [detail.font]),
+  ];
+  return `\`${name}\`: ${facts.join(", ")}`;
 }

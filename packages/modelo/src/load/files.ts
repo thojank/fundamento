@@ -1,7 +1,7 @@
 // Reads the raw files of a Modelo root through the strict JSON parser. This is the loader's I/O
 // edge; everything after it (`buildModelo`) is pure.
 
-import { type Dirent, readdirSync, readFileSync } from "node:fs";
+import { type Dirent, existsSync, readdirSync, readFileSync } from "node:fs";
 import { basename, join } from "node:path";
 import { formatIssuePath, type ValidationIssue } from "../contracts/issues.js";
 import type { ModeloSource } from "../contracts/modelo.js";
@@ -34,6 +34,9 @@ export interface AspektoPackageFiles {
   idsLock: ModeloDocument;
   /** The derived `$themes.json` fragment (D-05). */
   themes: ModeloDocument;
+  /** Optional Aspekto-scoped Reguloj and Jugxoj (D-10). */
+  reguloj?: ModeloDocument;
+  jugxoj?: ModeloDocument;
 }
 
 /** Every file of a Modelo root, parsed but not interpreted. FUND-3.2 validates these raw values. */
@@ -117,7 +120,16 @@ export function readModeloFiles(source: ModeloSource): ReadModeloFilesResult {
       packagesComplete = false;
       continue;
     }
-    packages.push({ name, dir, aspekto, idsLock, themes: packageThemes });
+    const entry: AspektoPackageFiles = { name, dir, aspekto, idsLock, themes: packageThemes };
+    for (const key of ["reguloj", "jugxoj"] as const) {
+      const path = join(dir, `${key}.json`);
+      if (existsSync(path)) {
+        const document = read(path);
+        if (document === undefined) packagesComplete = false;
+        else entry[key] = document;
+      }
+    }
+    packages.push(entry);
   }
   sets.sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
 

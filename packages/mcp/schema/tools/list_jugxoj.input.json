@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ciferecigo.com/fundamento/schema/mcp/list_jugxoj.input.json",
+  "title": "list_jugxoj input",
+  "description": "Jugxoj, optionally by reference or Aspekto.",
+  "type": "object",
+  "properties": {
+    "ref": {
+      "oneOf": [
+        {
+          "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/JugxoReguloRef"
+        },
+        {
+          "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/JugxoEroRef"
+        },
+        {
+          "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/JugxoArtikoloRef"
+        }
+      ]
+    },
+    "aspekto": {
+      "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+    }
+  },
+  "additionalProperties": false
+}

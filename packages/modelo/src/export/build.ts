@@ -14,6 +14,7 @@ import type { ModeloSource } from "../contracts/modelo.js";
 import { defaultModeloSource, fixtureModeloSource } from "../load/source.js";
 import { EXPORT_FILE_NAMES } from "./export-modelo.js";
 import { prepareModeloExport } from "./prepare.js";
+import { writeModeloExport } from "./write.js";
 
 export const EXIT_OK = 0;
 export const EXIT_DOMAIN_ERROR = 1;
@@ -101,12 +102,9 @@ export function runExportBuild(argv: readonly string[], env: ExportBuildEnv): nu
       );
       return EXIT_DOMAIN_ERROR;
     }
-    mkdirSync(outDir, { recursive: true });
-    writeFileSync(join(outDir, EXPORT_FILE_NAMES.modelo), result.files.modeloJson);
-    writeFileSync(join(outDir, EXPORT_FILE_NAMES.schema), result.files.schemaJson);
-    writeFileSync(join(outDir, EXPORT_FILE_NAMES.rezolvoj), result.files.rezolvojJson);
+    writeModeloExport(outDir, result.files);
     env.stdout(
-      `modelo export: wrote ${Object.values(EXPORT_FILE_NAMES).join(", ")} to ${outDir}\n`,
+      `modelo export: wrote ${Object.values(EXPORT_FILE_NAMES).join(", ")} and vortaro/<aspekto>/ to ${outDir}\n`,
     );
     return EXIT_OK;
   } catch (error) {

@@ -76,6 +76,16 @@
     },
     "rezolvo": {
       "$ref": "#/$defs/Rezolvo"
+    },
+    "core": {
+      "description": "Facts of the core (Spec 001, FR-10): the reference Aspekto whose values live in core.",
+      "type": "object",
+      "properties": {
+        "referenceAspekto": {
+          "$ref": "#/$defs/Name"
+        }
+      },
+      "additionalProperties": false
     }
   },
   "required": [
@@ -1237,10 +1247,29 @@
         "family": { "$ref": "#/$defs/NonEmptyText" },
         "license": { "$ref": "#/$defs/License" },
         "source": { "$ref": "#/$defs/NonEmptyText" },
-        "redistributable": { "type": "boolean" }
+        "redistributable": { "type": "boolean" },
+        "scripts": {
+          "description": "Writing systems the family covers, as ISO 15924 codes (Latn, Cyrl, Arab, Hans, …); at least one (Spec 001, T018b).",
+          "type": "array",
+          "items": { "$ref": "#/$defs/Iso15924" },
+          "minItems": 1,
+          "uniqueItems": true
+        }
       },
-      "required": ["family", "license", "source", "redistributable"],
+      "required": ["family", "license", "source", "redistributable", "scripts"],
       "additionalProperties": false
+    },
+    "Iso15924": {
+      "description": "An ISO 15924 script code: four letters, the first uppercase (e.g. Latn, Cyrl, Hans).",
+      "type": "string",
+      "pattern": "^[A-Z][a-z]{3}$"
+    },
+    "Tavoloj": {
+      "description": "Layers of the brand package (Spec 001, D-20): the Aspekto package is the brand package and the Vortaro is one of its layers. Phase 1 reserves only the key vida, with the empty value {}; other keys are allowed and ignored by validation.",
+      "type": "object",
+      "properties": {
+        "vida": { "type": "object", "maxProperties": 0 }
+      }
     },
     "AspektoFile": {
       "description": "aspekto.json of an Aspekto package (Spec 001, D-05). `id` is the DimensioValoro ID of the Aspekto; `idNamespace` is required for every package except the reference Aspekto (checked on composition).",
@@ -1251,7 +1280,8 @@
         "owner": { "$ref": "#/$defs/NonEmptyText" },
         "license": { "$ref": "#/$defs/License" },
         "idNamespace": { "$ref": "#/$defs/IdNamespace" },
-        "fonts": { "type": "array", "items": { "$ref": "#/$defs/Fonto" } }
+        "fonts": { "type": "array", "items": { "$ref": "#/$defs/Fonto" } },
+        "tavoloj": { "$ref": "#/$defs/Tavoloj" }
       },
       "required": ["id", "name", "owner", "license", "fonts"],
       "additionalProperties": false
@@ -1800,6 +1830,9 @@
         },
         "package": {
           "$ref": "#/$defs/NonEmptyText"
+        },
+        "idNamespace": {
+          "$ref": "#/$defs/IdNamespace"
         }
       },
       "required": ["id", "name", "owner"],
@@ -1845,6 +1878,10 @@
         },
         "tree": {
           "$ref": "#/$defs/TokenSetFile"
+        },
+        "package": {
+          "description": "The Aspekto package that holds the set (Spec 001, D-08); absent for core sets.",
+          "$ref": "#/$defs/NonEmptyText"
         }
       },
       "required": ["id", "name", "kondicxoj", "tree"],

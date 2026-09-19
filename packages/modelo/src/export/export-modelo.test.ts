@@ -77,11 +77,12 @@ function collectRefs(node: unknown, out: string[] = []): string[] {
 }
 
 describe("exportModelo: shape (§2.9)", () => {
-  it("has exactly the §2.9 top-level keys", () => {
+  it("has exactly the §2.9 top-level keys plus core (Spec 001 FR-10)", () => {
     expect(Object.keys(modeloJson).sort()).toEqual(
       [
         "$schema",
         "aspektoj",
+        "core",
         "dimensioj",
         "eroj",
         "fundamento",
@@ -124,12 +125,14 @@ describe("exportModelo: shape (§2.9)", () => {
             license: "OFL-1.1",
             source: "https://github.com/vercel/geist-font",
             redistributable: true,
+            scripts: ["Latn"],
           },
           {
             family: "Geist Mono",
             license: "OFL-1.1",
             source: "https://github.com/vercel/geist-font",
             redistributable: true,
+            scripts: ["Latn"],
           },
         ],
         reference: true,

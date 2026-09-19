@@ -9,3 +9,5 @@ coverage/
 # Benchmark material must never enter this repository (Constitution Art. V)
 _benchmark/
 **/ds-benchmark-*/
+# Default output of `fm modelo export` (Spec 001, D-09)
+.fundamento/
