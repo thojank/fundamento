@@ -66,6 +66,12 @@ export const RULE_IDS = [
   "density-set-scope",
   // Regularo in Aspekto packages (Spec 001 T021)
   "regulo-aspekto-unknown",
+  // Reguloj of Spec 002 (T005–T008); their rule IDs are the Regulo names (plan D-03)
+  "surface-order",
+  "text-hierarchy",
+  "state-distinct",
+  "semantic-described",
+  "regulo-sojlo-missing",
   // Dimensioj (FUND-3.2)
   "dimensio-default-invalid",
   "dimensio-priority-invalid",
@@ -101,6 +107,11 @@ export const RULE_IDS = [
   "mcp-input-invalid",
   "token-unknown",
   "nomregulo-no-target",
+  // Gvidanto tools (Spec 002 T017, T019, T022)
+  "regulo-unknown",
+  "term-unknown",
+  "kontrast-not-color",
+  "kategorio-required",
   // Parity (FUND-4.4)
   "parity-item-missing",
   "parity-prop-mismatch",

@@ -119,6 +119,11 @@ export type Deprecated = boolean | string;
 export type ReguloId = string;
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "TokenPattern".
+ */
+export type TokenPattern = string;
+/**
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
  * via the `definition` "JugxoId".
  */
 export type JugxoId = string;
@@ -524,6 +529,30 @@ export interface Regulo {
    * Scopes the entry to one Aspekto; entries in an Aspekto package carry their Aspekto (Spec 001, D-10).
    */
   aspekto?: string;
+  /**
+   * Which tokens the Regulo governs; explain finds a token's Reguloj only through this field (Spec 002, D-02). A token matches when any criterion matches. Token patterns may use * for one segment and a trailing ** for one or more.
+   */
+  appliesTo?: {
+    /**
+     * @minItems 1
+     */
+    tokens?: TokenPattern[];
+    /**
+     * @minItems 1
+     */
+    roles?: TokenRole[];
+    /**
+     * @minItems 1
+     */
+    types?: DtcgType[];
+  };
+  /**
+   * The numeric threshold of a measuring Regulo; the enforcer reads it and agents cite it (Spec 002, D-02, D-06).
+   */
+  sojlo?: {
+    metric: "oklch-l-delta";
+    min: number;
+  };
 }
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema

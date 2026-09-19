@@ -4,6 +4,12 @@
 /** Canonical token name (FR-13a): dot-separated segments of `[a-z0-9]+`. */
 export const TOKEN_NAME_PATTERN = /^[a-z0-9]+(\.[a-z0-9]+)*$/;
 
+/**
+ * Token pattern of `Regulo.appliesTo.tokens` (Spec 002, D-02): a token name whose segments may be
+ * `*` (exactly one segment); the last segment may be `**` (one or more segments).
+ */
+export const TOKEN_PATTERN_PATTERN = /^(?:[a-z0-9]+|\*)(?:\.(?:[a-z0-9]+|\*))*(?:\.\*\*)?$/;
+
 /** One segment of a canonical token name, i.e. one key of a DTCG group. */
 export const TOKEN_NAME_SEGMENT_PATTERN = /^[a-z0-9]+$/;
 
@@ -39,4 +45,15 @@ export function isTokenName(name: string): boolean {
 /** Returns the referenced token name of an alias string, or `undefined` if it is no alias. */
 export function aliasTarget(value: unknown): string | undefined {
   return typeof value === "string" && ALIAS_PATTERN.test(value) ? value.slice(1, -1) : undefined;
+}
+
+/** Whether a token name matches a `TokenPattern` (`*` = one segment, trailing `**` = one or more). */
+export function matchesTokenPattern(pattern: string, name: string): boolean {
+  const want = pattern.split(".");
+  const have = name.split(".");
+  if (want.at(-1) === "**") {
+    const head = want.slice(0, -1);
+    return have.length > head.length && head.every((part, i) => part === "*" || part === have[i]);
+  }
+  return want.length === have.length && want.every((part, i) => part === "*" || part === have[i]);
 }
