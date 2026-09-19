@@ -18,7 +18,7 @@ import {
 
 /**
  * ID occurrences of: core token definitions (overrides in other sets carry no ID), set roots,
- * Dimensioj, DimensioValoroj, Reguloj, Jugxoj and KontrastParoj. `$themes.json` is skipped: its
+ * Dimensioj, DimensioValoroj, Reguloj, Jugxoj, KontrastParoj, Eroj and Skemoj. `$themes.json` is skipped: its
  * theme IDs repeat the DimensioValoro IDs by design.
  *
  * A present string ID points at the `id` value itself (e.g.
@@ -95,6 +95,18 @@ export function collectIdOccurrences(files: ModeloFiles): IdOccurrence[] {
     for (const { entry, index } of rawEntries(document.value, key)) {
       const pointer = `/${key}/${index}`;
       add(entityType, document.file, pointer, entry, pointer);
+    }
+  }
+
+  // Spec 003: each Ero file holds an Ero and its Skemo, two entities with their own IDs.
+  for (const document of files.eroj) {
+    const value = isJsonObject(document.value) ? document.value : undefined;
+    for (const [key, entityType] of [
+      ["ero", "ero"],
+      ["skemo", "skemo"],
+    ] as const) {
+      const entity = isJsonObject(value?.[key]) ? (value?.[key] as JsonObject) : undefined;
+      add(entityType, document.file, `/${key}`, entity, `/${key}`);
     }
   }
   return occurrences;

@@ -117,6 +117,26 @@ export const RULE_IDS = [
   "parity-prop-mismatch",
   "parity-value-mismatch",
   "parity-state-mismatch",
+  "parity-binding-mismatch",
+  // Eroj and Skemoj (Spec 003, data-model §7)
+  "skemo-token-missing",
+  "skemo-token-type",
+  "skemo-binding-missing",
+  "skemo-kontrastparo-missing",
+  "skemo-intent-invalid",
+  "skemo-constraint-invalid",
+  "jugxo-ekzemplo-invalid",
+  // Ero Reguloj and usage (Spec 003, D-04, D-16)
+  "one-primary-per-container",
+  "destructive-not-primary-color",
+  "label-required",
+  "touch-target-min",
+  "ero-prop-constraint",
+  "ero-unknown",
+  "intent-unknown",
+  // Projekcio lints (Spec 003, D-17)
+  "css-physical-property",
+  "ero-hardcoded-string",
 ] as const;
 
 export type RuleId = (typeof RULE_IDS)[number];

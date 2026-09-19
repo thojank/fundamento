@@ -46,6 +46,8 @@ export interface ModeloFiles {
   /** Composed Aspekto packages in source order (D-08). */
   packages: AspektoPackageFiles[];
   data: Record<DataFileName, ModeloDocument>;
+  /** `data/eroj/<name>/skemo.json`, sorted by path; empty when the directory does not exist. */
+  eroj: ModeloDocument[];
   themes: ModeloDocument;
   metadata: ModeloDocument;
 }
@@ -60,6 +62,10 @@ export const DATA_FILE_NAMES = Object.keys(DATA_FILE_SCHEMA_DEFS) as DataFileNam
 export const THEMES_FILE_NAME = "$themes.json";
 export const METADATA_FILE_NAME = "$metadata.json";
 export const SETS_DIR_NAME = "sets";
+/** Directory below the data directory holding one folder per Ero (Spec 003, D-02). */
+export const EROJ_DIR_NAME = "eroj";
+/** The file in each Ero folder: the Ero and its Skemo. */
+export const SKEMO_FILE_NAME = "skemo.json";
 
 /**
  * Reads `<vortaroDir>/sets/**.json`, `<vortaroDir>/$themes.json`, `<vortaroDir>/$metadata.json`
@@ -143,6 +149,12 @@ export function readModeloFiles(source: ModeloSource): ReadModeloFilesResult {
     }
   }
 
+  const eroj: ModeloDocument[] = [];
+  for (const path of listEroFiles(join(source.dataDir, EROJ_DIR_NAME))) {
+    const document = read(path);
+    if (document !== undefined) eroj.push(document);
+  }
+
   const blocking = issues.some(
     (issue) => issue.rule === "file-missing" || issue.rule.startsWith("json-"),
   );
@@ -155,7 +167,22 @@ export function readModeloFiles(source: ModeloSource): ReadModeloFilesResult {
   ) {
     return { issues };
   }
-  return { files: { sets, packages, data, themes, metadata }, issues };
+  return { files: { sets, packages, data, eroj, themes, metadata }, issues };
+}
+
+/** `<erojDir>/<name>/skemo.json` for every folder that has one, sorted by path. */
+function listEroFiles(erojDir: string): string[] {
+  let entries: Dirent[];
+  try {
+    entries = readdirSync(erojDir, { withFileTypes: true });
+  } catch {
+    return [];
+  }
+  return entries
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => join(erojDir, entry.name, SKEMO_FILE_NAME))
+    .filter((path) => existsSync(path))
+    .sort();
 }
 
 /** The file every Aspekto package has at its root. */

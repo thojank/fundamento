@@ -131,7 +131,8 @@ function partialModeloJson(modelo: Modelo): ModeloJson {
     reguloj: modelo.reguloj,
     jugxoj: modelo.jugxoj,
     kontrastParoj: modelo.kontrastParoj,
-    eroj: [],
+    eroj: modelo.eroj.map((entry) => entry.ero),
+    skemoj: modelo.eroj.map((entry) => entry.skemo),
     rezolvo: { assignment: {}, tokens: {} },
   };
 }

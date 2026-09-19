@@ -20,7 +20,7 @@ Companion to [`plan.md`](plan.md). Decision numbers (D-xx) and open points (Q-x)
 {
   "$schema": "../../../schema/modelo.schema.json#/$defs/EroFile",
   "ero": {
-    "id": "ero_…", "name": "butono",
+    "id": "ero_…", "name": "butono", "skemo": "ske_…",
     "description": "A button: starts an action. Label text is always visible or named."
   },
   "skemo": {
@@ -43,18 +43,18 @@ Companion to [`plan.md`](plan.md). Decision numbers (D-xx) and open points (Q-x)
       { "name": "icon-end",   "decorative": true }
     ],
     "parts": {
-      "surface":    { "background": { "by": ["variant", "tone", "state"] } },
+      "surface":    { "fill": { "by": ["variant", "tone", "state"] } },
       "label":      { "color": { "by": ["variant", "tone", "state"] }, "typography": { "by": ["size"] } },
       "border":     { "color": { "by": ["variant", "tone", "state"] }, "width": { "fixed": "border.width.default" } },
       "focus-ring": { "ring": { "fixed": "focus.ring" }, "offset": { "fixed": "focus.offset" }, "gap": { "fixed": "color.focus.inner" } },
       "icon":       { "color": { "sameAs": "label.color" }, "size": { "by": ["size"] } },
-      "box":        { "height": { "by": ["size"] }, "padding-inline": { "by": ["size"] }, "gap": { "fixed": "spacing.small" },
+      "box":        { "height": { "by": ["size"] }, "inline-padding": { "by": ["size"] }, "gap": { "fixed": "spacing.small" },
                       "radius": { "fixed": "radius.role.control" } },
       "motion":     { "duration": { "fixed": "motion.duration.fast" }, "easing": { "fixed": "motion.easing.standard" } }
     },
     "bindings": [
       // one entry per part property and key; missing states inherit "rest" (focus and loading: rest surface)
-      { "part": "surface", "property": "background", "when": { "variant": "primary", "tone": "default", "state": "rest" },
+      { "part": "surface", "property": "fill", "when": { "variant": "primary", "tone": "default", "state": "rest" },
         "token": "color.action.primary.rest" },
       { "part": "label", "property": "color", "when": { "variant": "primary", "tone": "default" },
         "token": "color.action.primary.text" },
@@ -69,7 +69,7 @@ Companion to [`plan.md`](plan.md). Decision numbers (D-xx) and open points (Q-x)
       "keys": ["Enter", "Space"]
     },
     "constraints": [
-      { "if": { "tone": "danger" }, "then": { "variant": ["primary"] },
+      { "when": { "tone": "danger" }, "allowed": { "variant": ["primary"] },
         "kialo": "The danger tokens describe a filled surface and its text; a danger label on a neutral surface has no tokens." }
     ],
     "intents": [
@@ -87,7 +87,9 @@ Companion to [`plan.md`](plan.md). Decision numbers (D-xx) and open points (Q-x)
 Rules of the schema (`$defs/EroFile`, `$defs/Skemo`, `$defs/SkemoBinding`, `$defs/SkemoPart`):
 - **Names.** Every name follows the `Name` grammar. Prop names are also the HTML attribute names (kebab-case), the React props (camelCase, derived mechanically: `full-width` → `fullWidth`) and the Figma property names (the prop name as is).
 - **Bindings.** A binding's `when` keys must be props of kind `enum` or `state`; values must be allowed values. The most specific matching binding wins (most keys, then order).
-- **Platform neutrality.** `parts` and their properties are platform-neutral names. The CSS property each maps to is Celo knowledge in `projekcioj` (Art. VIII).
+- **Platform neutrality.** `parts` and their properties are platform-neutral names from a closed vocabulary (`SkemoPartProperty`: `fill`, `color`, `typography`, `width`, `height`, `inline-padding`, `gap`, `radius`, `ring`, `offset`, `size`, `duration`, `easing`). The CSS property each maps to is Celo knowledge in `projekcioj` (Art. VIII); a CSS name such as `background` is a schema violation.
+- **Constraints** use `when` (prop values) and `allowed` (the values other props may take), not `if`/`then`: an object with a `then` property is a thenable in JavaScript.
+- **Files.** Each Ero lives in `data/eroj/<name>/skemo.json`; the loader reads every folder, validates the file against `EroFile` and exports the Eroj into `eroj` and the Skemoj into `skemoj` of `modelo.json`.
 
 ## 3. Ero Reguloj
 

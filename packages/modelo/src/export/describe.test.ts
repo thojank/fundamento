@@ -44,6 +44,7 @@ function modeloJson(overrides: Partial<ModeloJson> = {}): ModeloJson {
     jugxoj: [],
     kontrastParoj: [],
     eroj: [],
+    skemoj: [],
     rezolvo: { assignment: { aspekto: "a" }, tokens: {} },
     ...overrides,
   };
@@ -109,7 +110,10 @@ describe("describeModelo", () => {
 
   it("handles an export without Aspektoj and with Eroj", () => {
     const description = describeModelo(
-      modeloJson({ aspektoj: [], eroj: [{ id: "ero_1", name: "button", skemo: "ske_1" }] }),
+      modeloJson({
+        aspektoj: [],
+        eroj: [{ id: "ero_1", name: "button", skemo: "ske_1", description: "A button." }],
+      }),
     );
     expect(description.sentence).toContain("no Aspektoj");
     expect(description.sentence).toMatch(/one Ero\. Ask explain why a value is what it is\.$/);
