@@ -21,6 +21,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "test": "vitest run",
+    "perf": "vitest run --config vitest.perf.config.ts",
     "lint": "tsc -p tsconfig.json --noEmit && biome check ."
   },
   "dependencies": {

@@ -27,7 +27,8 @@ Three commands, no configuration:
 |---|---|
 | `pnpm install` | Installs the workspace. |
 | `pnpm build` | Compiles all packages and exports `modelo.json`, `modelo.schema.json` and `rezolvoj.json`. The build fails if the repo Modelo is invalid. |
-| `pnpm check` | Build, tests and lint, then the five checks in sequence. Fails on the first failure. |
+| `pnpm check` | Build, tests, the AK-07 timings (`pnpm perf`) and lint, then the five checks in sequence. Fails on the first failure. |
+| `pnpm perf` | The MCP server's start and `resolve` timings (AK-07), alone and outside the parallel test run; needs a build first. |
 
 The CLI:
 

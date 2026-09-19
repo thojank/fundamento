@@ -124,7 +124,7 @@ Order follows the plan's "Build order". The ciferecigo package is the last task.
   - Red: `packages/cli` tests: `fm mcp --help`, `fm modelo validate --aspekto <dir>` (repeatable) and `--config`, `fm modelo export`; exit codes 0/1/2 and "did you mean"; `fundamento-mcp` bin.
   - Green: `commands/mcp.ts`, `commands/modelo-export.ts`, flags in `modelo-validate.ts`.
 - [x] **T028 Acceptance suite** (AK-06, AK-07, Art. XIII)
-  - Red: `packages/mcp/src/e2e/s7-dialog.test.ts` (three S7 questions against the ekzemplo config, every number recomputed from `modelo.json`); `perf.test.ts` (spawn to first `describe` < 2 s, 100 × `resolve` < 100 ms each, factor 3 under `CI=true` or `TURBO_HASH` (Turborepo gate; measured 0.8 s alone, 3.5 s with every package testing in parallel; accepted 2026-09-19, D-17), strict 2 s / 100 ms when the timing test runs alone, raw timings always logged); `quickstart.test.ts` (spawn `fm mcp`, `initialize`, `tools/list` = 10 tools); `ci/workflow.test.ts` updated.
+  - Red: `packages/mcp/src/e2e/s7-dialog.test.ts` (three S7 questions against the ekzemplo config, every number recomputed from `modelo.json`); `perf.test.ts` (spawn to first `describe` < 2 s, 100 × `resolve` < 100 ms each, runs alone as its own step `pnpm perf` after the test step, never inside the parallel test run; factor 3 only under `CI=true`; raw timings always logged, first baseline in research §8.2; D-17); `quickstart.test.ts` (spawn `fm mcp`, `initialize`, `tools/list` = 10 tools); `ci/workflow.test.ts` updated.
   - Green: fixes only; no new features.
 - [x] **T029 Documentation of the repository**
   - Red: `docs/docs.test.ts` extended: README lists the new commands and the per-Aspekto Penpot folder; `plan.md` Traceability maps every FR/AK of Spec 001 to task IDs; no Anhang-A value outside the allowlist (reuses T022).
@@ -135,7 +135,7 @@ Order follows the plan's "Build order". The ciferecigo package is the last task.
 - [x] **T030 ciferecigo package outside the core repository** (D-18, FR-13, Q3, Q5; delivered as an archive 2026-09-19, visual review by the maintainer pending)
   - Red: create the empty package skeleton in the p0 workspace at `../fundamento-aspekto-ciferecigo` (`aspekto.json`, empty set, `link:`/`file:` dev dependencies on the core) and run `pnpm fm modelo validate --aspekto ../fundamento-aspekto-ciferecigo`; it must fail with `aspekto-incomplete` for every core token.
   - Green: derive all values by the D-18 rules; write `DERIVATION.md` (OKLCH ramp with anchors and resulting steps, scales taken from komuna, typography roles, every contrast-driven step change); sets incl. the dark and high-contrast conjunctions; Aspekto Reguloj with kialo (from Anhang A).
-  - Done when: `fm modelo validate --aspekto …` exits 0; `check:alirebleco` passes for the composition; `check:clean-room` in the core is still green (nothing leaked into `repos/fundamento`); archive `fundamento-aspekto-ciferecigo.tar.gz` (without `node_modules`) handed to the maintainer; `research.md` §10 (Enportilo findings; §8 holds the APCA baseline) committed in the core. Visual review by the maintainer.
+  - Done when: `fm modelo validate --aspekto …` exits 0; `check:alirebleco` passes for the composition; `check:clean-room` in the core is still green (nothing leaked into `repos/fundamento`); archive `fundamento-aspekto-ciferecigo.tar.gz` (without `node_modules`) handed to the maintainer; `research.md` §10 (Enportilo findings; §8 holds the APCA and AK-07 baselines) committed in the core. Visual review by the maintainer.
 
 ---
 

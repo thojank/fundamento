@@ -51,7 +51,9 @@ Entscheidungen des Plans mit Begründung und verworfenen Alternativen. Nummern v
 ### 7.4 Clean Room für die eigene Marke (D-15)
 - Nachweis ohne Werte im Code: SHA-256-Fingerabdrücke normalisierter Markenwerte, Allowlist nur `spec.md` und `research.md` dieser Spec. Fingerabdrücke nur für markenspezifische Werte: Hex-Farben, die eigene Schriftfamilie und `cubic-bezier`-Kurven. Dauern und Längen-Skalare bleiben draußen, sie sind generisch (K2). Der Check schützt keine Geheimhaltung (die Werte sind öffentlich, kurze Hashes sind umkehrbar), er erzwingt nur AK-08. Verworfen: Klartext-Blocklist (würde die Werte selbst in den Code bringen) und reine Namensprüfung (`com.ciferecigo.fundamento` ist der Extension-Namensraum und steht überall).
 
-## 8. APCA-Baseline für komuna (nur beratend, Stand 2026-09-19)
+## 8. Baselines: APCA für komuna und AK-07-Zeiten (Stand 2026-09-19)
+
+### 8.1 APCA-Baseline für komuna (nur beratend)
 
 Entscheidung des Maintainers: komuna wird nicht auf APCA getunt. APCA bleibt beratend (`contrast-advisory`, Warnung), bindend ist WCAG 2.x. Die Zahlen hier sind eine Baseline zum Nachlesen; kein Test schreibt sie fest. Ob APCA unter `contrast=high` bindend wird, entscheidet Spec 003.
 
@@ -73,6 +75,20 @@ Betroffene Paare je Zelle:
 - **dark / high:** `action-primary-text-on-fill`, `action-tertiary-text-on-action-tertiary-hover`, `action-tertiary-text-on-action-tertiary-pressed`, `action-tertiary-text-on-action-tertiary-rest`, `action-tertiary-text-on-action-tertiary-selected`, `brand-text-on-brand-fill`, `link-rest-on-background-default`, `status-danger-on-basic`, `status-danger-text-on-background-default`, `status-danger-text-on-status-danger-subtle`, `status-danger-text-on-status-danger-weak`, `status-info-on-basic`, `status-info-text-on-background-default`, `status-info-text-on-status-info-subtle`, `status-info-text-on-status-info-weak`, `status-success-on-basic`, `status-success-text-on-background-default`, `status-success-text-on-status-success-subtle`, `status-success-text-on-status-success-weak`, `status-warning-on-basic`, `status-warning-text-on-background-default`, `status-warning-text-on-status-warning-subtle`, `status-warning-text-on-status-warning-weak`
 
 Beobachtung ohne Bewertung: Die Hinweise ballen sich im Dark Mode (79 %), vor allem bei Status-Farben und dem Akzent als Textfarbe auf dunklen Flächen. Das entspricht der bekannten Eigenschaft von APCA, dunkle Hintergründe strenger zu bewerten als WCAG 2.x.
+
+### 8.2 AK-07-Zeiten (erste Baseline)
+
+Gemessen mit `pnpm perf` (`packages/mcp/src/e2e/perf.test.ts`) unter Node 24. Der Test startet `fundamento-mcp --config` mit der ekzemplo-Konfiguration (Kern + komuna + ekzemplo, 144 Kombinationen) über stdio. Er misst Spawn bis zur ersten `describe`-Antwort und 100 × `resolve` ohne Token-Filter, also alle 340 Tokens je Aufruf. Budget: 2 s bzw. 100 ms je Aufruf, Faktor 3 nur unter `CI=true`. Die Werte sind eine Baseline zum Nachlesen; kein Test schreibt sie fest.
+
+| Messung | Umgebung | Start bis `describe` | `resolve` Median | `resolve` Max |
+|---|---|---|---|---|
+| Timing-Test allein | Maintainer-Mac, Node 24 (Abnahme) | 764 ms | 3,0 ms | 5,8 ms |
+| Timing-Test allein | P0-Umgebung, Node 24.21.0, `pnpm perf` | 763 ms | 3,0 ms | 7,7 ms |
+| Timing-Test allein | P0-Umgebung, vor dem trägen `rezolvoj.json` (T028) | 1 352 ms | 3,3 ms | 5,5 ms |
+| unter `pnpm test` (Turbo-Parallelität) | Maintainer-Mac, Node 24 (Abnahme) | 7,2 s | – | – |
+| unter `pnpm test` (Turbo-Parallelität) | P0-Umgebung | 3,5–3,6 s | 3,5 ms | 65,5 ms |
+
+Folge (D-17, vom Maintainer bestätigt): Die Zeiten laufen nicht mehr in `pnpm test`, sondern als eigener Schritt `pnpm perf` nach dem Test-Schritt. Das gilt in CI und in `pnpm check`. Unter Turbo-Parallelität misst der Test die Last der Maschine, nicht den Server; 7,2 s hätten auch den Faktor 3 (6 s) überschritten. Der Quickstart-Test prüft deshalb nur noch die Funktion, keine Zeit.
 
 ## 9. Kunteksta adaptado (Kandidat, nicht Phase 1)
 

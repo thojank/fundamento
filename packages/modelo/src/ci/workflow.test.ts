@@ -21,6 +21,8 @@ const CHECK_STEPS: ReadonlyArray<readonly [name: string, script: string]> = [
 const GATE_STEPS: ReadonlyArray<readonly [name: string, run: string]> = [
   ["Build", "pnpm build"],
   ["Test", "pnpm test"],
+  // AK-07 timings run alone, outside the parallel Turborepo test run (Spec 001 D-17).
+  ["Perf", "pnpm perf"],
   ["Lint", "pnpm lint"],
   ...CHECK_STEPS.map(([name, script]) => [name, `pnpm ${script}`] as const),
 ];
@@ -160,11 +162,19 @@ describe("root package.json check script", () => {
     expect(commands.length).toBeGreaterThan(1);
   });
 
-  it("runs build, test and lint before the checks", () => {
+  it("runs build, test, perf and lint before the checks", () => {
     const head = commands.slice(0, commands.length - CHECK_STEPS.length);
     expect(head.join(" && ")).toMatch(/build/);
     expect(head.join(" && ")).toMatch(/test/);
+    expect(head).toContain("pnpm perf");
     expect(head).toContain("pnpm lint");
+    expect(head.indexOf("pnpm perf")).toBeGreaterThan(
+      head.findIndex((command) => /\btest\b/.test(command)),
+    );
+  });
+
+  it("defines perf as the AK-07 timing run of @fundamento/mcp", () => {
+    expect(scripts.perf).toBe("pnpm --filter @fundamento/mcp run perf");
   });
 
   it("invokes all five check scripts, in the CI order", () => {
@@ -186,6 +196,14 @@ describe("the MCP acceptance suite runs in the Test gate (Spec 001 T028)", () =>
 
   it("@fundamento/mcp has tests and no longer passes without them", () => {
     expect(scripts.test).toBe("vitest run");
+  });
+
+  it("runs the AK-07 timings only in its own perf step, never in the parallel test run", () => {
+    expect(scripts.perf).toBe("vitest run --config vitest.perf.config.ts");
+    const unit = readFileSync(`${repoRoot}packages/mcp/vitest.config.ts`, "utf8");
+    const perf = readFileSync(`${repoRoot}packages/mcp/vitest.perf.config.ts`, "utf8");
+    expect(unit).toContain('exclude: [...configDefaults.exclude, "src/e2e/perf.test.ts"]');
+    expect(perf).toContain('include: ["src/e2e/perf.test.ts"]');
   });
 
   it.each(["s7-dialog.test.ts", "perf.test.ts"])("has %s", (file) => {

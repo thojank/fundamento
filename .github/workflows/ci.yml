@@ -48,6 +48,10 @@ jobs:
       - name: Test
         run: pnpm test
 
+      # AK-07 timings alone, after the parallel test run (Spec 001 D-17).
+      - name: Perf
+        run: pnpm perf
+
       - name: Lint
         run: pnpm lint
 

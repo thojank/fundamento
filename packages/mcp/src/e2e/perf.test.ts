@@ -1,9 +1,8 @@
 // AK-07: start under 2 s (spawn to the first describe answer) and resolve under 100 ms, measured
-// over stdio against the heaviest fixture (core + komuna + ekzemplo). The budgets get factor 3
-// on a loaded machine: under CI=true (shared runners) and inside the Turborepo gate (TURBO_HASH),
-// where every package tests in parallel (measured: 0.8 s alone, 3.6 s in the gate; Jugxo
-// jug_01M2W3K1YPP05F4XF86J71RGTK). Run this file alone for the strict budget. The raw timings are
-// written to stderr either way (task T028).
+// over stdio against the heaviest fixture (core + komuna + ekzemplo). Runs only as `pnpm perf`,
+// alone and outside the parallel Turborepo test run, which measured the machine's load instead
+// (0.8 s alone vs 3.5-7.2 s in the gate; research.md section 8). Factor 3 only under CI=true
+// (shared runners; Jugxo jug_01M2W3K1YPP05F4XF86J71RGTK). Raw timings go to stderr either way.
 
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
@@ -12,8 +11,7 @@ import { afterAll, describe, expect, it } from "vitest";
 import { EKZEMPLO_CONFIG } from "../test-doubles/client.js";
 
 const BIN = new URL("../../dist/index.js", import.meta.url).pathname;
-const LOADED = process.env.CI === "true" || process.env.TURBO_HASH !== undefined;
-const FACTOR = LOADED ? 3 : 1;
+const FACTOR = process.env.CI === "true" ? 3 : 1;
 const START_BUDGET_MS = 2_000 * FACTOR;
 const RESOLVE_BUDGET_MS = 100 * FACTOR;
 

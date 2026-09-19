@@ -15,7 +15,7 @@ Then, in the agent:
 > "Which value does `color.text.default` have in komuna, dark mode, high contrast, and why?" → `resolve` with provenance
 > "What is `color.action.primary.rest` called in Figma and in CSS?" → `derive_name`
 
-Automated check: a test spawns `fm mcp`, sends `initialize`, `tools/list` and `describe`, and asserts ten tools and a schema-conformant answer within the AK-07 budget.
+Automated check: a test spawns `fm mcp`, sends `initialize`, `tools/list` and `describe`, and asserts ten tools and a schema-conformant answer. The AK-07 timings run separately as `pnpm perf`.
 
 ## Developer: include an external Aspekto
 

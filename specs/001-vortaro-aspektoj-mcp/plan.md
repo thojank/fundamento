@@ -185,7 +185,7 @@ It lives in `packages/modelo/test/fixtures/valid/aspekto-ekzemplo/` (a fixture, 
 
 ### D-17 Performance measurement (AK-07)
 
-The test measures the server start (spawn to first `describe` answer) and 100 `resolve` calls on the fixture config. The budgets are 2 s / 100 ms per call locally, with a factor-3 tolerance under `CI=true` or `TURBO_HASH` (inside the Turborepo gate every package tests in parallel: 0.8 s alone, 3.5 s in the gate; accepted by the maintainer 2026-09-19). Run alone, the timing test keeps the strict 2 s / 100 ms. That factor comes from the Phase-0 lesson with cold runners (Jugxo `jug_01M2W3K1YPP05F4XF86J71RGTK`). The raw numbers are always logged, so regressions stay visible.
+The test measures the server start (spawn to first `describe` answer) and 100 `resolve` calls on the fixture config. The budgets are 2 s / 100 ms per call, with a factor-3 tolerance under `CI=true` only. That factor comes from the Phase-0 lesson with cold runners (Jugxo `jug_01M2W3K1YPP05F4XF86J71RGTK`). The timings run **alone, as their own step `pnpm perf`** after the test step (CI and `pnpm check`), never inside the parallel Turborepo test run. There they measured the machine's load: 0.76 s alone vs 3.5–7.2 s in the gate, where even the factor 3 would not hold. This was accepted by the maintainer on 2026-09-19 after the acceptance measurement and replaces the interim "factor 3 under `CI=true` or `TURBO_HASH`". The raw numbers are always logged; the first baseline is in `research.md` §8.2.
 
 ### D-18 ciferecigo package (FR-13, Q3, Q5)
 
@@ -200,7 +200,7 @@ The test measures the server start (spawn to first `describe` answer) and 100 `r
 2. **Brand-neutral scales:** spacing, size, radius primitives, motion, layout and opacity are taken over identical to komuna (restated literally, because completeness requires it, D-04). The exceptions are the values Anhang A states explicitly (radius, border width, motion, elevation).
 3. **Typography:** every role uses the brand font from Anhang A with komuna's size scale. Weight, line height, tracking and text transform are set per role where Anhang A states them (display, kicker/label, body). All other roles take komuna's values.
 4. **Contrast:** derived steps must pass Alirebleco in every combination. If an anchor colour cannot meet a threshold in a given role, the derivation picks another step for that role and records it. Thresholds are never lowered.
-5. Every rule, with its inputs and the resulting steps, is written into `DERIVATION.md` in the package. This derivation is the first prototype of the Enportilo (Phase 7). What it teaches (which steps were mechanical, which needed judgement, what Anhang A lacked) goes into `research.md` §10 of this spec during implementation (§8 holds the APCA baseline).
+5. Every rule, with its inputs and the resulting steps, is written into `DERIVATION.md` in the package. This derivation is the first prototype of the Enportilo (Phase 7). What it teaches (which steps were mechanical, which needed judgement, what Anhang A lacked) goes into `research.md` §10 of this spec during implementation (§8 holds the APCA and AK-07 baselines).
 
 ### D-19 Reguloj with checkability "automatic" are enforced by validation (added during T013)
 
