@@ -987,7 +987,7 @@
       },
       "warning": {
         "basic": {
-          "$value": "{color.palette.warning.600}"
+          "$value": "{color.palette.warning.200}"
         },
         "weak": {
           "$value": "{color.palette.warning.100}"
@@ -999,7 +999,7 @@
           "$value": "{color.palette.warning.800}"
         },
         "on": {
-          "$value": "{color.palette.neutral.0}"
+          "$value": "{color.palette.neutral.900}"
         },
         "border": {
           "$value": "{color.palette.warning.700}"

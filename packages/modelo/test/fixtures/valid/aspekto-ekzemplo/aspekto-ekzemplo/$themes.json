@@ -6,8 +6,17 @@
     "selectedTokenSets": {
       "aspekto/ekzemplo": "enabled",
       "aspekto/ekzemplo+color-scheme/dark": "enabled",
+      "aspekto/ekzemplo+color-scheme/light+contrast/high": "enabled",
       "aspekto/ekzemplo+contrast/high": "enabled",
       "core": "source"
+    }
+  },
+  {
+    "group": "color-scheme",
+    "id": "dva_01M2VEEDQFS0RGTE2M27JARKH9",
+    "name": "light",
+    "selectedTokenSets": {
+      "aspekto/ekzemplo+color-scheme/light+contrast/high": "enabled"
     }
   },
   {
@@ -23,6 +32,7 @@
     "id": "dva_01M2VEEDQFS0RGTE2M27JARKHC",
     "name": "high",
     "selectedTokenSets": {
+      "aspekto/ekzemplo+color-scheme/light+contrast/high": "enabled",
       "aspekto/ekzemplo+contrast/high": "enabled"
     }
   }

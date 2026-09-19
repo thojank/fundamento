@@ -56,16 +56,17 @@ The stage order was set by the maintainer: README → Regularo → komuna repair
 
 ## Stage 3 – KontrastParo `aux`
 
-- [ ] **T011 Schema for `aux` and `kialo`** (FR-07, D-09)
+- [x] **T011 Schema for `aux` and `kialo`** (FR-07, D-09)
   - Red: `invalid/kontrastparo-aux-on-text` and `invalid/kontrastparo-aux-without-kialo` give `schema-violation` at the exact pointer; `kontrastparo-token-missing` / `kontrastparo-not-color` for aux tokens.
   - Green: schema `if/then`, static checks in `evaluate.ts` and `data-rules.ts` for the aux tokens.
-- [ ] **T012 Status border tokens** (FR-06, D-09)
+- [x] **T012 Status border tokens** (FR-06, D-09)
   - Red: coverage test expects `color.status.{success,warning,danger,info}.border` (role `border`, `$description`); `aspekto-incomplete` for ekzemplo lists the four; `contrast-pairs-declared` counts `aux` members (unit test).
   - Green: 4 `tok_` IDs; `core` → `<s>.700`, `color-scheme/dark` → `<s>.300`; ekzemplo sets them; `pnpm vortaro:themes` if needed.
-- [ ] **T013 Measurement, branches and report** (FR-07, D-09, AK-03)
+  - Done with the `aux` + `kialo` data of the four status pairs (moved here from T013): without it `contrast-pairs-declared` would flag the new borders and the repo Modelo would be invalid between the tasks.
+- [x] **T013 Measurement, branches and report** (FR-07, D-09, AK-03)
   - Red: `checks/alirebleco/measure.test.ts`: `measureKontrastParo` branch semantics (main passes → `main`, aux measured and returned; main fails, aux passes → `aux`; both fail → `null` and one `contrast-below-threshold` naming both pairs and ratios); `valid/kontrastparo-aux-carries`, `invalid/kontrastparo-aux-both-fail`; `evaluateAlirebleco(…, { collect: true })` returns measurements in canonical order; `--json` has `stats.auxBranch`, `branch:aux:<pair>` and `branches[]`.
   - Green: `checks/alirebleco/measure.ts`, `evaluate.ts` derives issues from measurements; `aux` and kialo on the four `status-<s>-basic-on-background-default` pairs in `data/kontrastparoj.json`.
-- [ ] **T014 Light warning fill in ekzemplo** (D-10, S3)
+- [x] **T014 Light warning fill in ekzemplo** (D-10, S3)
   - Red: `e2e/external-aspekto.test.ts`: in ekzemplo light/default the pair `status-warning-basic-on-background-default` passes with `branch: "aux"` (main < 3:1, aux ≥ 3:1); every other combination of ekzemplo passes.
   - Green: invented warning steps in `aspekto/ekzemplo`, a dark `status.warning.on`, and `aspekto/ekzemplo+color-scheme/light+contrast/high` where high contrast needs it; `check:clean-room` green.
 
