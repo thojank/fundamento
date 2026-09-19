@@ -20,6 +20,7 @@ import {
 } from "@fundamento/modelo";
 import { CSS_CELO } from "./celoj/css/css.js";
 import { TAILWIND_CELO } from "./celoj/tailwind/tailwind.js";
+import { WEB_COMPONENT_CELO } from "./celoj/web-component/web-component.js";
 
 /** What a Celo gets: the loaded Modelo and its export, never raw files (Art. I). */
 export interface CeloInput {
@@ -41,7 +42,7 @@ export interface Celo {
 }
 
 /** Every Celo, in the order of Art. XII. Each task of Spec 003 adds its Celo here. */
-export const CELOJ: readonly Celo[] = [CSS_CELO, TAILWIND_CELO];
+export const CELOJ: readonly Celo[] = [CSS_CELO, TAILWIND_CELO, WEB_COMPONENT_CELO];
 
 export const MANIFEST_FILE = "projekcioj.json";
 

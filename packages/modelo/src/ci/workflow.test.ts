@@ -19,10 +19,10 @@ const CHECK_STEPS: ReadonlyArray<readonly [name: string, script: string]> = [
 ];
 
 const GATE_STEPS: ReadonlyArray<readonly [name: string, run: string]> = [
-  // The rendered checks of @fundamento/eroj need a browser (Spec 003 T009; T013 adds the others).
+  // The rendered checks of @fundamento/eroj run in Chromium, Firefox and WebKit (Spec 003).
   [
     "Playwright browsers",
-    "pnpm --filter @fundamento/eroj exec playwright install --with-deps chromium",
+    "pnpm --filter @fundamento/eroj exec playwright install --with-deps chromium firefox webkit",
   ],
   ["Build", "pnpm build"],
   ["Test", "pnpm test"],

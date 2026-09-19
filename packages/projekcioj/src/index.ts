@@ -2,3 +2,5 @@
 export * from "./build.js";
 export * from "./celoj/css/css.js";
 export * from "./celoj/tailwind/tailwind.js";
+export * from "./celoj/web-component/web-component.js";
+export * from "./eroj-sources.js";

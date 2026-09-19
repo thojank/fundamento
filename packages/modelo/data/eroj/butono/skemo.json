@@ -81,6 +81,7 @@
       },
       "icon": { "color": { "sameAs": "label.color" }, "size": { "by": ["size"] } },
       "box": {
+        "width": { "fixed": "size.target.min" },
         "height": { "by": ["size"] },
         "inline-padding": { "by": ["size"] },
         "gap": { "fixed": "spacing.small" },
