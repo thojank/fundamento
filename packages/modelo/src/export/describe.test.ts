@@ -74,10 +74,11 @@ describe("describeModelo", () => {
       typeCount: 1,
       reguloCount: 1,
       reguloWithKialoCount: 1,
+      reguloAutomaticCount: 0,
       eroCount: 0,
     });
     expect(description.sentence).toBe(
-      "Fundamento v1.2.3: one Dimensio (aspekto), two Aspektoj (`a`; `b`), 2 tokens in one type (color 2), one rule with reasons, no Jugxoj, no Eroj.",
+      "Fundamento v1.2.3: one Dimensio (aspekto), two Aspektoj (`a`; `b`), 2 tokens in one type (color 2), one rule with reasons (none automatic), no Jugxoj, no Eroj. Ask explain why a value is what it is.",
     );
   });
 
@@ -111,6 +112,6 @@ describe("describeModelo", () => {
       modeloJson({ aspektoj: [], eroj: [{ id: "ero_1", name: "button", skemo: "ske_1" }] }),
     );
     expect(description.sentence).toContain("no Aspektoj");
-    expect(description.sentence).toMatch(/one Ero\.$/);
+    expect(description.sentence).toMatch(/one Ero\. Ask explain why a value is what it is\.$/);
   });
 });

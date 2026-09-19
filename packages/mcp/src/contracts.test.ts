@@ -34,7 +34,7 @@ const EXAMPLES: Record<string, { input: unknown; output: unknown; badInput: unkn
       dimensioj: ["aspekto"],
       aspektoj: [SUMMARY],
       tokens: { count: 2, byType: { color: 2 }, byGroup: { color: 2 } },
-      reguloj: { count: 1, withKialo: 1 },
+      reguloj: { count: 1, withKialo: 1, automatic: 1 },
       jugxoj: { count: 0 },
       eroj: { count: 0 },
       validation: { errors: 0, warnings: 0 },

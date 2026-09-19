@@ -56,7 +56,7 @@ describe("S7 with ekzemplo (AK-06)", () => {
       dimensioj: string[];
       aspektoj: { name: string }[];
       tokens: { count: number; byType: Record<string, number>; byGroup: Record<string, number> };
-      reguloj: { count: number; withKialo: number };
+      reguloj: { count: number; withKialo: number; automatic: number };
       jugxoj: { count: number };
       validation: { errors: number };
       sentence: string;
@@ -79,6 +79,12 @@ describe("S7 with ekzemplo (AK-06)", () => {
       expect(answer.sentence).toContain(`${group} ${n}`);
     }
     expect(answer.sentence).not.toMatch(/\b(all|complete|every)\b/i);
+    // Spec 002 FR-14: Reguloj (automatic) and Jugxoj, and the pointer to explain.
+    expect(answer.reguloj.automatic).toBe(
+      modeloJson.reguloj.filter((regulo) => regulo.checkability === "automatic").length,
+    );
+    expect(answer.sentence).toContain(`${answer.reguloj.automatic} automatic`);
+    expect(answer.sentence).toMatch(/Ask explain why a value is what it is\.$/);
   });
 
   it("'Welche Farbe hat primärer Text in ekzemplo im Dark Mode?': resolve", async () => {

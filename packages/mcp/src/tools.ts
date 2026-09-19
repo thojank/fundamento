@@ -105,7 +105,11 @@ const describe: Tool = (served) => {
     dimensioj: description.dimensioj,
     aspektoj: modeloJson.aspektoj.map(aspektoSummary),
     tokens: { count: description.tokenCount, byType, byGroup: description.tokensByGroup },
-    reguloj: { count: description.reguloCount, withKialo: description.reguloWithKialoCount },
+    reguloj: {
+      count: description.reguloCount,
+      withKialo: description.reguloWithKialoCount,
+      automatic: description.reguloAutomaticCount,
+    },
     jugxoj: { count: description.jugxoCount },
     eroj: { count: description.eroCount },
     validation: { errors: report.errors.length, warnings: report.warnings.length },
