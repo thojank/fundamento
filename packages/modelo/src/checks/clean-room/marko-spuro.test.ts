@@ -66,7 +66,10 @@ describe("marko-spuroj.json of the repo (D-15)", () => {
 });
 
 describe("check:clean-room with fingerprints", () => {
-  it("passes on the repo: brand values appear only in the allowlisted files", async () => {
+  // Scans every text file of the repository: sized like the other whole-repo checks.
+  it("passes on the repo: brand values appear only in the allowlisted files", {
+    timeout: 30_000,
+  }, async () => {
     const result = await check({ json: true, repoRoot });
     expect(result.errors.filter((issue) => issue.rule === "clean-room-marko-spuro")).toEqual([]);
     expect(result.stats.fingerprintFiles).toBeGreaterThan(100);

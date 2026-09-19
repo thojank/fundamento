@@ -78,8 +78,17 @@ export function brandCandidates(text: string): BrandCandidate[] {
   return candidates;
 }
 
+/** Most candidates repeat (the same words in many files); hashing each value once keeps the scan fast. */
+const FINGERPRINT_CACHE = new Map<string, string>();
+
 export function fingerprintOf(candidate: Pick<BrandCandidate, "kind" | "normalized">): string {
-  return createHash("sha256").update(`${candidate.kind}:${candidate.normalized}`).digest("hex");
+  const key = `${candidate.kind}:${candidate.normalized}`;
+  let fingerprint = FINGERPRINT_CACHE.get(key);
+  if (fingerprint === undefined) {
+    fingerprint = createHash("sha256").update(key).digest("hex");
+    FINGERPRINT_CACHE.set(key, fingerprint);
+  }
+  return fingerprint;
 }
 
 /** The fingerprints of the repo (hashes only; derived once from Anhang A of Spec 001). */
