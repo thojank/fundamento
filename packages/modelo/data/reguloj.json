@@ -87,6 +87,30 @@
       "scope": "vortaro: color tokens with role focus; data/kontrastparoj.json",
       "checkability": "automatic",
       "appliesTo": { "roles": ["focus"] }
+    },
+    {
+      "id": "reg_01M2X5AMA1FH06H7BARC9QSTJB",
+      "name": "surface-order",
+      "statement": "In every combination of every Aspekto, the OKLCH lightness of color.background.sunken ≤ canvas ≤ default ≤ raised, in both colour schemes; transparent values are composited over color.background.default first.",
+      "kialo": "The surface hierarchy carries spatial meaning: sunken areas sit below the page and raised ones above it. A break is visible to every user and to no contrast check, so it must be checked on its own (Constitution Art. VI, finding from the ciferecigo acceptance).",
+      "scope": "vortaro: color.background.sunken, canvas, default and raised in every combination",
+      "checkability": "automatic",
+      "appliesTo": {
+        "tokens": [
+          "color.background.sunken",
+          "color.background.canvas",
+          "color.background.default",
+          "color.background.raised"
+        ]
+      }
+    },
+    {
+      "id": "reg_01M2X5AMA2ZN877V4TX1VFQB2J",
+      "name": "semantic-described",
+      "statement": "Every role token in core (its value is an alias, or a composite with an alias field) has a $description that states its use: not empty, no alias reference and no colour value.",
+      "kialo": "Agents read values from bare token files but not the purpose of a token; with a description per role token they choose the right token for a use, for example a destructive action. The description is input for agents, not documentation, so it must describe the use rather than repeat the value.",
+      "scope": "vortaro: role tokens in core",
+      "checkability": "automatic"
     }
   ]
 }

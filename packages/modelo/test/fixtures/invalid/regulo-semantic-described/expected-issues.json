@@ -1,0 +1,17 @@
+{
+  "description": "Spec 002 FR-04: a missing description, one that names an alias, one that names a colour value.",
+  "issues": [
+    {
+      "rule": "semantic-described",
+      "path": "vortaro/sets/core.json#/color/background/canvas"
+    },
+    {
+      "rule": "semantic-described",
+      "path": "vortaro/sets/core.json#/color/text/muted"
+    },
+    {
+      "rule": "semantic-described",
+      "path": "vortaro/sets/core.json#/color/text/subtle"
+    }
+  ]
+}

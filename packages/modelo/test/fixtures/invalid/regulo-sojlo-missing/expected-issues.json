@@ -1,0 +1,9 @@
+{
+  "description": "Spec 002 D-02: state-distinct is automatic but declares no sojlo.",
+  "issues": [
+    {
+      "rule": "regulo-sojlo-missing",
+      "path": "data/reguloj.json#/reguloj/3"
+    }
+  ]
+}

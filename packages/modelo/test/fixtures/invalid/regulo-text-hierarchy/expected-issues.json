@@ -1,0 +1,9 @@
+{
+  "description": "Spec 002 FR-02: subtle and muted collapse under contrast=high in light.",
+  "issues": [
+    {
+      "rule": "text-hierarchy",
+      "path": "rezolvo(color-scheme=light,contrast=high)/color.text.muted"
+    }
+  ]
+}

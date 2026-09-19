@@ -4,9 +4,11 @@
 
 import { aliasTarget, CORE_SET_NAME } from "../contracts/grammar.js";
 import { formatIssuePath, type ValidationIssue } from "../contracts/issues.js";
-import type { Modelo } from "../contracts/modelo.js";
+import type { Modelo, Regulo } from "../contracts/modelo.js";
 import { ASPEKTO_DIMENSIO } from "../load/build.js";
 import { resolve } from "../resolve/resolve.js";
+import { COMBINATION_CHECKERS, semanticDescribedIssues, sojloIssues } from "./color-reguloj.js";
+import { runCombinationChecker } from "./combination-reguloj.js";
 import { dimensioSetIssues } from "./dimensio-set-rules.js";
 
 const PALETTE_PREFIX = "color.palette.";
@@ -31,7 +33,17 @@ function isInstant(value: unknown): boolean {
   return typeof value === "object" && value !== null && (value as { value?: unknown }).value === 0;
 }
 
-type Enforcer = (modelo: Modelo) => ValidationIssue[];
+type Enforcer = (modelo: Modelo, regulo: Regulo) => ValidationIssue[];
+
+/** A per-combination Regulo (Spec 002, D-04): its checker over every combination. */
+const perCombination =
+  (name: string): Enforcer =>
+  (modelo, regulo) => [
+    ...sojloIssues(modelo, regulo),
+    ...(regulo.sojlo === undefined && name === "state-distinct"
+      ? []
+      : runCombinationChecker(modelo, regulo, COMBINATION_CHECKERS[name] ?? (() => []))),
+  ];
 
 /** Enforceable Reguloj by name. A Regulo declared "automatic" must have an entry here. */
 export const REGULO_ENFORCERS: Readonly<Record<string, Enforcer>> = {
@@ -159,6 +171,14 @@ export const REGULO_ENFORCERS: Readonly<Record<string, Enforcer>> = {
   },
   /** D-03, K4: generic Dimensio sets hold aliases only and re-point roles only. */
   "dimensio-sets-alias-only": dimensioSetIssues,
+  /** Spec 002 FR-01: surfaces ordered by lightness in every combination. */
+  "surface-order": perCombination("surface-order"),
+  /** Spec 002 FR-02: the text roles stay distinct and ordered in every combination. */
+  "text-hierarchy": perCombination("text-hierarchy"),
+  /** Spec 002 FR-03: action states differ from rest by at least `sojlo.min` in lightness. */
+  "state-distinct": perCombination("state-distinct"),
+  /** Spec 002 FR-04: every core role token has a $description of its use. */
+  "semantic-described": (modelo) => semanticDescribedIssues(modelo),
   /** FR-08: every colour token declares its role (in core, where roles live). */
   "color-roles-declared": (modelo) =>
     Object.values(modelo.setoj.find((set) => set.name === CORE_SET_NAME)?.tokens ?? {})
@@ -177,7 +197,7 @@ export function regularoEnforcementIssues(modelo: Modelo): ValidationIssue[] {
   return modelo.reguloj.flatMap((regulo) => {
     if (regulo.checkability !== "automatic") return [];
     const cited = { id: regulo.id, name: regulo.name, kialo: regulo.kialo };
-    return (REGULO_ENFORCERS[regulo.name]?.(modelo) ?? []).map((issue) => ({
+    return (REGULO_ENFORCERS[regulo.name]?.(modelo, regulo) ?? []).map((issue) => ({
       ...issue,
       regulo: cited,
     }));
