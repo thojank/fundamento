@@ -1,6 +1,6 @@
 # Fundamento – Constitution
 
-Version 1.5 · 2026-09-19 · Status: ratifiziert
+Version 1.6 · 2026-09-19 · Status: ratifiziert
 
 Fundamento ist ein maschinenlesbares, nativ mehrmarkenfähiges Design System. Sein kanonischer Zustand ist ein Datenmodell; Figma, Code, Dokumentation und Werkzeuge sind Projektionen dieses Modells. Diese Constitution definiert die Prinzipien, gegen die jede Spezifikation, jeder Plan und jede Implementierung geprüft wird. Sie ist bewusst kurz. Was hier nicht steht, ist verhandelbar; was hier steht, nicht.
 
@@ -117,7 +117,7 @@ Fundamento ersetzt keine Werkzeuge, es speist sie. Das W3C-DTCG-Format (Design T
 Verbindliche Celoj (Ausgabeziele) der Projekcioj, in dieser Priorität:
 
 1. **CSS Custom Properties** (`--fm-*`) als Basis für alles Weitere
-2. **Tailwind v4** (`@theme`-Block, jeder Aspekto × Dimensio als CSS-Schicht) und darauf **daisyUI**-Themes
+2. **Tailwind v4** (`@theme`-Block, jeder Aspekto × Dimensio als CSS-Schicht) und darauf **daisyUI**-Themes. Tailwind v4: Tokens im `@theme` unter dem Namensraum `fm` (`--color-fm-*` → `bg-fm-*`), nicht per `prefix()`, weil `prefix()` alle Klassen des Projekts umbenennt.
 3. **shadcn-kompatible Registry**: Eroj als kopierbarer Quellcode per CLI, mit `--fm-*`-Variablen statt Hardcodes
 4. **Web Components** (`fm-*`) mit Wrappern für React, Vue, Angular, Svelte
 5. **Figma** (Variablen mit Modes, Library, Code Connect) und **Penpot** (DTCG-Import, Tokens, Komponenten), Penpot nachrangig, aber im Modelo von Anfang an mitgedacht
@@ -138,7 +138,7 @@ Prüfkriterium für jede Spec: Ein Entwickler ohne Vorwissen nutzt ein Ero in un
 
 ## Governance
 
-- Diese Constitution ändert sich nur durch eine Spec mit dem Titel „Constitution Amendment", die den geänderten Artikel, den Grund und die Migration bestehender Artefakte beschreibt. Änderungshistorie: v1.1 Art. XII/XIII ergänzt; v1.2 DTCG verbindlich, Mehrdimensionalität; v1.3 (Spec 001) Art. IV Aspekto-Pakete und Vollständigkeit, Art. V Schriften je Aspekto, Art. VI Jugxo-Bezug auf Artikel; v1.4 (Spec 002) Terminologie Tavolo und Ontologio, Art. III Ontologio, Art. VI Befund wird Regel, Art. VIII Internacia; v1.5 (Spec 003) Art. XII Celo Figma Make Kit, Verweis auf `docs/vojmapo.md`.
+- Diese Constitution ändert sich nur durch eine Spec mit dem Titel „Constitution Amendment", die den geänderten Artikel, den Grund und die Migration bestehender Artefakte beschreibt. Änderungshistorie: v1.1 Art. XII/XIII ergänzt; v1.2 DTCG verbindlich, Mehrdimensionalität; v1.3 (Spec 001) Art. IV Aspekto-Pakete und Vollständigkeit, Art. V Schriften je Aspekto, Art. VI Jugxo-Bezug auf Artikel; v1.4 (Spec 002) Terminologie Tavolo und Ontologio, Art. III Ontologio, Art. VI Befund wird Regel, Art. VIII Internacia; v1.5 (Spec 003) Art. XII Celo Figma Make Kit, Verweis auf `docs/vojmapo.md`; v1.6 (Spec 003) Art. XII Tailwind-Namensraum `fm` im `@theme` statt `prefix(fm)` (bricht die Tailwind-NomRegulo, Jugxo zu Art. XII).
 - Jeder `plan.md` enthält einen Abschnitt „Constitutional Compliance Review" mit einem Eintrag pro Artikel: konform / Ausnahme mit Grund.
 - `/speckit.analyze` prüft jede Phase gegen diese Constitution, bevor Tasks erzeugt werden.
 - Die Constitution hat Vorrang vor jeder anderen Praxis, jedem Template und jeder Bequemlichkeit.

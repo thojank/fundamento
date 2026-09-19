@@ -398,3 +398,35 @@ describe("Spec 002 documentation (T025)", () => {
     expect(findBrandValues(file, read(file), repoFingerprints())).toEqual([]);
   });
 });
+
+describe("Spec 003 documentation (T001, Constitution v1.6)", () => {
+  const constitution = read(".specify/memory/constitution.md");
+  const TAILWIND_SENTENCE =
+    "Tailwind v4: Tokens im `@theme` unter dem Namensraum `fm` (`--color-fm-*` → `bg-fm-*`), nicht per `prefix()`, weil `prefix()` alle Klassen des Projekts umbenennt.";
+
+  it("the Constitution header says version 1.6", () => {
+    expect(constitution.split("\n")[2]).toMatch(/^Version 1\.6 · /);
+  });
+
+  it("Art. XII Celo 2 carries the Tailwind naming sentence", () => {
+    const article = section(
+      constitution,
+      "Artikel XII – Interoperebleco (Interoperabilität statt Insel)",
+    );
+    const celo2 = article.split("\n").find((line) => line.startsWith("2. ")) ?? "";
+    expect(celo2).toContain(TAILWIND_SENTENCE);
+  });
+
+  it("the change history names v1.6 (Spec 003) with Art. XII", () => {
+    const history = section(constitution, "Governance");
+    expect(history).toMatch(/v1\.6 \(Spec 003\) Art\. XII/);
+  });
+
+  it("Spec 003 lists the v1.6 amendment and the plan header names v1.6", () => {
+    const spec = read("specs/003-butono-durchstich/spec.md");
+    const amendments = section(spec, "Constitution-Änderungen (v1.4 → v1.5, v1.6)");
+    expect(amendments).toContain("v1.6");
+    expect(amendments).toContain("prefix()");
+    expect(read("specs/003-butono-durchstich/plan.md").split("\n")[2]).toContain("v1.6");
+  });
+});

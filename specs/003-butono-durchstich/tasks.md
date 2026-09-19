@@ -17,7 +17,7 @@ A mutation check (one changed value must make the test fail) replaces the red ru
 
 ## Stage 0 – Constitution v1.6 and the Tailwind NomRegulo
 
-- [ ] **T001 Constitution v1.6** (D-06, maintainer decision)
+- [x] **T001 Constitution v1.6** (D-06, maintainer decision)
   - Red: `docs/docs.test.ts` asserts: the Constitution header says `Version 1.6`; Art. XII Celo 2 contains the sentence „Tailwind v4: Tokens im `@theme` unter dem Namensraum `fm` (`--color-fm-*` → `bg-fm-*`), nicht per `prefix()`, weil `prefix()` alle Klassen des Projekts umbenennt."; the change history names v1.6 (Spec 003) with Art. XII; `spec.md` of Spec 003 lists the amendment under „Constitution-Änderungen"; the plan header names v1.6.
   - Green: `.specify/memory/constitution.md` (header, Art. XII item 2, history), `spec.md` section „Constitution-Änderungen (v1.4 → v1.5, v1.6)", plan header.
 - [ ] **T002 Tailwind NomRegulo with `fm` in the theme key, and two Jugxoj** (D-06, FR-06, D-10, FR-17)
