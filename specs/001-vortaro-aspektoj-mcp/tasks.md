@@ -72,7 +72,7 @@ Order follows the plan's "Build order". The ciferecigo package is the last task.
   - Red: coverage (rest), flip `it.fails` from T012; `border.width.*` and motion roles are aliases over scales; renames `motion.duration.short` → `fast` and `shadow.raised` → `elevation.shadow.raised` with the same IDs.
   - Green: data-model §2 rows (340 core tokens in 11 types). **Also done here (moved from T016):** `motion/reduced` alias-only (the rename of `motion.duration.short` forced it), `contrast/high` re-points `border.width.default` to `{border.width.strong}`, and the layout part of both viewport sets.
   - Done when (in addition to the general rule): **no `it.fails` remains in `data/coverage.test.ts`**, and every category test is green.
-- [ ] **T016 Dimensio sets** (D-03, K3, K4, FR-06, FR-07, AK-05)
+- [x] **T016 Dimensio sets** (D-03, K3, K4, FR-06, FR-07, AK-05)
   - Red: `data/dimensio-sets.test.ts`: every set passes `dimensio-set-literal` and `dimensio-set-primitive`; `motion=reduced` resolves to `0ms` / `linear`; `viewport=compact` changes typography per field with provenance; **`density=compact` leaves every typography field unchanged** (K3).
   - Green: rewrite `density/compact` and `density/comfortable` (spacing and control roles only); every other generic set was already rewritten in T013–T015.
   - Also (from T009): enforce `dimensioSetIssues` through the new automatic Regulo `dimensio-sets-alias-only` (D-19) and add fixtures that declare it (red first).

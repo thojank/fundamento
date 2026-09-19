@@ -5,6 +5,7 @@
 import { aliasTarget, CORE_SET_NAME } from "../contracts/grammar.js";
 import { formatIssuePath, type ValidationIssue } from "../contracts/issues.js";
 import type { Modelo } from "../contracts/modelo.js";
+import { dimensioSetIssues } from "./dimensio-set-rules.js";
 
 const PALETTE_PREFIX = "color.palette.";
 
@@ -26,6 +27,8 @@ export const REGULO_ENFORCERS: Readonly<Record<string, Enforcer>> = {
           suggestion: `Give ${token.name} an alias like {color.palette.<name>.<step>}; literal colours belong in color.palette.* (Regulo semantic-colors-alias-palette).`,
         })),
     ),
+  /** D-03, K4: generic Dimensio sets hold aliases only and re-point roles only. */
+  "dimensio-sets-alias-only": dimensioSetIssues,
   /** FR-08: every colour token declares its role (in core, where roles live). */
   "color-roles-declared": (modelo) =>
     Object.values(modelo.setoj.find((set) => set.name === CORE_SET_NAME)?.tokens ?? {})

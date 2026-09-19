@@ -71,3 +71,27 @@ describe("color-roles-declared → color-role-missing", () => {
     );
   });
 });
+
+describe("dimensio-sets-alias-only → dimensio-set-literal / dimensio-set-primitive", () => {
+  const regulo = {
+    id: "reg_01M2WRK8G0GGGGGGGGGGGGGGG2",
+    name: "dimensio-sets-alias-only",
+    statement: "Generic Dimensio sets only re-point role tokens with aliases.",
+    kialo:
+      "They outrank every Aspekto; a literal or a re-pointed primitive would reach every brand.",
+    scope: "vortaro: sets without an aspekto condition",
+  };
+
+  it("accepts valid/minimal, whose generic sets only re-point roles, when automatic", () => {
+    const rules = run("automatic", "dimensio-sets-alias-only", () => {}, regulo).map(
+      ([rule]) => rule,
+    );
+    // The violations themselves are the fixtures invalid/dimensio-set-literal and -primitive.
+    expect(rules.filter((rule) => rule?.startsWith("dimensio-set-"))).toEqual([]);
+  });
+
+  it("stays silent while the Regulo is manual", () => {
+    const rules = run("manual", "dimensio-sets-alias-only", () => {}, regulo).map(([rule]) => rule);
+    expect(rules.filter((rule) => rule?.startsWith("dimensio-set-"))).toEqual([]);
+  });
+});

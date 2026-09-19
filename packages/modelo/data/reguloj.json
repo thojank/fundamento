@@ -23,6 +23,22 @@
       "kialo": "Roles tell the contrast gate which colours must be paired and tell agents how a colour may be used; a colour without a role can be neither checked nor explained.",
       "scope": "vortaro: color tokens in core",
       "checkability": "automatic"
+    },
+    {
+      "id": "reg_01M2W9R5XBN0FFGBR4J0BF138T",
+      "name": "dimensio-sets-alias-only",
+      "statement": "Sets without an aspekto condition (generic Dimensio sets) hold aliases only and only re-point tokens that are aliases in core (roles); primitives change only per Aspekto.",
+      "kialo": "Generic Dimensio sets outrank every Aspekto set, so whatever they hold reaches every brand. A literal or a re-pointed primitive there would make every Aspekto inherit a core value, which Article IV forbids; re-pointing roles lets each Aspekto keep its own values in every combination.",
+      "scope": "vortaro: sets without an aspekto condition",
+      "checkability": "automatic"
+    },
+    {
+      "id": "reg_01M2W9R5XC63NNE3PZA86AFKKS",
+      "name": "density-affects-layout-only",
+      "statement": "The density Dimensio re-points spacing and control-size roles only; it never changes typography. viewport and density never shift the same token.",
+      "kialo": "Density is layout compactness, font size is legibility and belongs to viewport. If viewport and density shifted the same token, the result would depend on their priority order and be predictable for nobody.",
+      "scope": "vortaro: sets density/*",
+      "checkability": "manual"
     }
   ]
 }

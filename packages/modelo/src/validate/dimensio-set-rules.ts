@@ -6,7 +6,7 @@
 //   (roles), never primitives, which would otherwise become roles in one combination.
 // Aspekto sets and conjunction sets belong to one Aspekto and may hold literals. Pure.
 //
-// Wired into validateModelo by T016, together with the rewritten repo sets.
+// Enforced through the Regulo dimensio-sets-alias-only when a Modelo declares it automatic (D-19).
 
 import { aliasTarget, CORE_SET_NAME } from "../contracts/grammar.js";
 import { formatIssuePath, type ValidationIssue } from "../contracts/issues.js";

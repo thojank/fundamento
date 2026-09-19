@@ -1,10 +1,45 @@
 {
   "$extensions": {
-    "com.ciferecigo.fundamento": { "id": "set_01M2VEEDW45A0B9Q4GQ465NCHH", "kondicxoj": ["density=comfortable"] }
+    "com.ciferecigo.fundamento": {
+      "id": "set_01M2VEEDW45A0B9Q4GQ465NCHH",
+      "kondicxoj": [
+        "density=comfortable"
+      ]
+    }
   },
   "spacing": {
     "$type": "dimension",
-    "medium": { "$value": { "value": 12, "unit": "px" } },
-    "large": { "$value": { "value": 24, "unit": "px" } }
+    "xsmall": {
+      "$value": "{spacing.scale.100}"
+    },
+    "small": {
+      "$value": "{spacing.scale.150}"
+    },
+    "medium": {
+      "$value": "{spacing.scale.300}"
+    },
+    "large": {
+      "$value": "{spacing.scale.500}"
+    },
+    "xlarge": {
+      "$value": "{spacing.scale.800}"
+    },
+    "xxlarge": {
+      "$value": "{spacing.scale.1200}"
+    }
+  },
+  "size": {
+    "control": {
+      "$type": "dimension",
+      "small": {
+        "$value": "{size.scale.700}"
+      },
+      "medium": {
+        "$value": "{size.scale.800}"
+      },
+      "large": {
+        "$value": "{size.scale.900}"
+      }
+    }
   }
 }
