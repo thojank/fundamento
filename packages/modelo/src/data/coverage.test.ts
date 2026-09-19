@@ -25,16 +25,6 @@ const { kategorioj } = JSON.parse(
  * this set is empty and removed (T015 "Done when").
  */
 const PENDING = new Set([
-  "color.palette",
-  "color.action",
-  "color.surface",
-  "color.text",
-  "color.border",
-  "color.link",
-  "color.navigation",
-  "color.status",
-  "color.brand",
-  "color.shadow-backdrop",
   "focus",
   "typography.families-weights",
   "typography.scales",

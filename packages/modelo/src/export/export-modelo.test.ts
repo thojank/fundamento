@@ -148,7 +148,6 @@ describe("exportModelo: shape (§2.9)", () => {
   it("inventories the core tokens sorted by name, with id, type, description and role", () => {
     const core = modelo.setoj.find((set) => set.name === "core");
     expect(modeloJson.tokens).toHaveLength(Object.keys(core?.tokens ?? {}).length);
-    expect(modeloJson.tokens).toHaveLength(30);
     const names = modeloJson.tokens.map((token) => token.name);
     expect(names).toEqual([...names].sort());
     const text = modeloJson.tokens.find((token) => token.name === "color.text.default");

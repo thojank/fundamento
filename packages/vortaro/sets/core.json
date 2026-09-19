@@ -1,56 +1,1325 @@
 {
-  "$extensions": { "com.ciferecigo.fundamento": { "id": "set_01M2VEEDW32MC4ZQPRN0GC9JRR", "kondicxoj": [] } },
+  "$extensions": {
+    "com.ciferecigo.fundamento": {
+      "id": "set_01M2VEEDW32MC4ZQPRN0GC9JRR",
+      "kondicxoj": []
+    }
+  },
   "color": {
     "$type": "color",
     "palette": {
       "neutral": {
         "0": {
-          "$value": { "colorSpace": "srgb", "components": [1, 1, 1], "hex": "#ffffff" },
-          "$description": "Lightest neutral.",
-          "$extensions": { "com.ciferecigo.fundamento": { "id": "tok_01M2VEEE0PMRFBGM9Z8B2DWBQF" } }
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              1,
+              1,
+              1
+            ],
+            "hex": "#ffffff"
+          },
+          "$description": "White, the lightest neutral.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2VEEE0PMRFBGM9Z8B2DWBQF",
+              "role": "palette"
+            }
+          }
+        },
+        "50": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.9662,
+              0.9672,
+              0.9689
+            ],
+            "hex": "#f6f7f7"
+          },
+          "$description": "Neutral grey, step 50.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400YPCCM5JC5WTW610A3",
+              "role": "palette"
+            }
+          }
         },
         "100": {
-          "$value": { "colorSpace": "srgb", "components": [0.9412, 0.9412, 0.9412], "hex": "#f0f0f0" },
-          "$description": "Very light neutral.",
-          "$extensions": { "com.ciferecigo.fundamento": { "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBA" } }
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.926,
+              0.9282,
+              0.9318
+            ],
+            "hex": "#ecedee"
+          },
+          "$description": "Neutral grey, step 100.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBA",
+              "role": "palette"
+            }
+          }
+        },
+        "200": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.8533,
+              0.8574,
+              0.8641
+            ],
+            "hex": "#dadbdc"
+          },
+          "$description": "Neutral grey, step 200.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XSH",
+              "role": "palette"
+            }
+          }
+        },
+        "300": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.75,
+              0.7563,
+              0.7666
+            ],
+            "hex": "#bfc1c3"
+          },
+          "$description": "Neutral grey, step 300.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XSJ",
+              "role": "palette"
+            }
+          }
+        },
+        "400": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.6252,
+              0.6334,
+              0.6466
+            ],
+            "hex": "#9fa2a5"
+          },
+          "$description": "Neutral grey, step 400.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XSK",
+              "role": "palette"
+            }
+          }
         },
         "500": {
-          "$value": { "colorSpace": "srgb", "components": [0.4196, 0.4196, 0.4196], "hex": "#6b6b6b" },
-          "$description": "Mid neutral.",
-          "$extensions": { "com.ciferecigo.fundamento": { "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBB" } }
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.5059,
+              0.5146,
+              0.5286
+            ],
+            "hex": "#818387"
+          },
+          "$description": "Neutral grey, step 500.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBB",
+              "role": "palette"
+            }
+          }
+        },
+        "600": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.4033,
+              0.4117,
+              0.4252
+            ],
+            "hex": "#67696c"
+          },
+          "$description": "Neutral grey, step 600.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XSM",
+              "role": "palette"
+            }
+          }
+        },
+        "700": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.3158,
+              0.3238,
+              0.3368
+            ],
+            "hex": "#515356"
+          },
+          "$description": "Neutral grey, step 700.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XSN",
+              "role": "palette"
+            }
+          }
+        },
+        "800": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.2323,
+              0.2399,
+              0.2522
+            ],
+            "hex": "#3b3d40"
+          },
+          "$description": "Neutral grey, step 800.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XSP",
+              "role": "palette"
+            }
+          }
         },
         "900": {
-          "$value": { "colorSpace": "srgb", "components": [0.1098, 0.1098, 0.1098], "hex": "#1c1c1c" },
-          "$description": "Very dark neutral.",
-          "$extensions": { "com.ciferecigo.fundamento": { "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBC" } }
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.1541,
+              0.1605,
+              0.1707
+            ],
+            "hex": "#27292c"
+          },
+          "$description": "Neutral grey, step 900.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBC",
+              "role": "palette"
+            }
+          }
+        },
+        "950": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.0819,
+              0.0865,
+              0.094
+            ],
+            "hex": "#151618"
+          },
+          "$description": "Neutral grey, step 950.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XSQ",
+              "role": "palette"
+            }
+          }
         },
         "1000": {
-          "$value": { "colorSpace": "srgb", "components": [0, 0, 0], "hex": "#000000" },
-          "$description": "Darkest neutral.",
-          "$extensions": { "com.ciferecigo.fundamento": { "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBD" } }
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0,
+              0,
+              0
+            ],
+            "hex": "#000000"
+          },
+          "$description": "Black, the darkest neutral.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBD",
+              "role": "palette"
+            }
+          }
         }
       },
-      "blue": {
+      "accent": {
+        "50": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.9546,
+              0.969,
+              0.9878
+            ],
+            "hex": "#f3f7fc"
+          },
+          "$description": "Accent (komuna: calm blue-grey, no signature colour), step 50.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XSR",
+              "role": "palette"
+            }
+          }
+        },
+        "100": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.9013,
+              0.9318,
+              0.9715
+            ],
+            "hex": "#e6eef8"
+          },
+          "$description": "Accent (komuna: calm blue-grey, no signature colour), step 100.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XSS",
+              "role": "palette"
+            }
+          }
+        },
+        "200": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.8071,
+              0.8636,
+              0.9371
+            ],
+            "hex": "#cedcef"
+          },
+          "$description": "Accent (komuna: calm blue-grey, no signature colour), step 200.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XST",
+              "role": "palette"
+            }
+          }
+        },
+        "300": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.6779,
+              0.7648,
+              0.8775
+            ],
+            "hex": "#adc3e0"
+          },
+          "$description": "Accent (komuna: calm blue-grey, no signature colour), step 300.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XSV",
+              "role": "palette"
+            }
+          }
+        },
+        "400": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.5298,
+              0.6427,
+              0.7885
+            ],
+            "hex": "#87a4c9"
+          },
+          "$description": "Accent (komuna: calm blue-grey, no signature colour), step 400.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XSW",
+              "role": "palette"
+            }
+          }
+        },
+        "500": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.4025,
+              0.523,
+              0.6782
+            ],
+            "hex": "#6785ad"
+          },
+          "$description": "Accent (komuna: calm blue-grey, no signature colour), step 500.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XSX",
+              "role": "palette"
+            }
+          }
+        },
         "600": {
-          "$value": { "colorSpace": "srgb", "components": [0.1176, 0.2902, 0.6196], "hex": "#1e4a9e" },
-          "$description": "Saturated blue used for primary actions.",
-          "$extensions": { "com.ciferecigo.fundamento": { "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBE" } }
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.3022,
+              0.4187,
+              0.5681
+            ],
+            "hex": "#4d6b91"
+          },
+          "$description": "Accent (komuna: calm blue-grey, no signature colour), step 600.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBE",
+              "role": "palette"
+            }
+          }
+        },
+        "700": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.2166,
+              0.3293,
+              0.473
+            ],
+            "hex": "#375479"
+          },
+          "$description": "Accent (komuna: calm blue-grey, no signature colour), step 700.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XSY",
+              "role": "palette"
+            }
+          }
+        },
+        "800": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.1341,
+              0.2433,
+              0.3808
+            ],
+            "hex": "#223e61"
+          },
+          "$description": "Accent (komuna: calm blue-grey, no signature colour), step 800.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XSZ",
+              "role": "palette"
+            }
+          }
+        },
+        "900": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.0693,
+              0.1621,
+              0.2773
+            ],
+            "hex": "#122947"
+          },
+          "$description": "Accent (komuna: calm blue-grey, no signature colour), step 900.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XT0",
+              "role": "palette"
+            }
+          }
+        },
+        "950": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.0209,
+              0.0869,
+              0.1715
+            ],
+            "hex": "#05162c"
+          },
+          "$description": "Accent (komuna: calm blue-grey, no signature colour), step 950.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XT1",
+              "role": "palette"
+            }
+          }
+        }
+      },
+      "success": {
+        "50": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.9433,
+              0.9788,
+              0.9486
+            ],
+            "hex": "#f1faf2"
+          },
+          "$description": "Success green, step 50.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XT2",
+              "role": "palette"
+            }
+          }
+        },
+        "100": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.8767,
+              0.9524,
+              0.8884
+            ],
+            "hex": "#e0f3e3"
+          },
+          "$description": "Success green, step 100.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XT3",
+              "role": "palette"
+            }
+          }
+        },
+        "200": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.7586,
+              0.9012,
+              0.7827
+            ],
+            "hex": "#c1e6c8"
+          },
+          "$description": "Success green, step 200.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XT4",
+              "role": "palette"
+            }
+          }
+        },
+        "300": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.5959,
+              0.8213,
+              0.6393
+            ],
+            "hex": "#98d1a3"
+          },
+          "$description": "Success green, step 300.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XT5",
+              "role": "palette"
+            }
+          }
+        },
+        "400": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.4058,
+              0.7141,
+              0.4772
+            ],
+            "hex": "#67b67a"
+          },
+          "$description": "Success green, step 400.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XT6",
+              "role": "palette"
+            }
+          }
+        },
+        "500": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.2449,
+              0.5977,
+              0.3433
+            ],
+            "hex": "#3e9858"
+          },
+          "$description": "Success green, step 500.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XT7",
+              "role": "palette"
+            }
+          }
+        },
+        "600": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.1135,
+              0.4896,
+              0.242
+            ],
+            "hex": "#1d7d3e"
+          },
+          "$description": "Success green, step 600.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XT8",
+              "role": "palette"
+            }
+          }
+        },
+        "700": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0,
+              0.3965,
+              0.1534
+            ],
+            "hex": "#006527"
+          },
+          "$description": "Success green, step 700.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XT9",
+              "role": "palette"
+            }
+          }
+        },
+        "800": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0,
+              0.3064,
+              0.0598
+            ],
+            "hex": "#004e0f"
+          },
+          "$description": "Success green, step 800.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XTA",
+              "role": "palette"
+            }
+          }
+        },
+        "900": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0,
+              0.2118,
+              0.015
+            ],
+            "hex": "#003604"
+          },
+          "$description": "Success green, step 900.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XTB",
+              "role": "palette"
+            }
+          }
+        },
+        "950": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0,
+              0.123,
+              0
+            ],
+            "hex": "#001f00"
+          },
+          "$description": "Success green, step 950.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XTC",
+              "role": "palette"
+            }
+          }
+        }
+      },
+      "warning": {
+        "50": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.9919,
+              0.9631,
+              0.9253
+            ],
+            "hex": "#fdf6ec"
+          },
+          "$description": "Warning amber, step 50.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XTD",
+              "role": "palette"
+            }
+          }
+        },
+        "100": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.9799,
+              0.919,
+              0.8384
+            ],
+            "hex": "#faead6"
+          },
+          "$description": "Warning amber, step 100.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XTE",
+              "role": "palette"
+            }
+          }
+        },
+        "200": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.9518,
+              0.8385,
+              0.6863
+            ],
+            "hex": "#f3d6af"
+          },
+          "$description": "Warning amber, step 200.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XTF",
+              "role": "palette"
+            }
+          }
+        },
+        "300": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.8983,
+              0.7232,
+              0.479
+            ],
+            "hex": "#e5b87a"
+          },
+          "$description": "Warning amber, step 300.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XTG",
+              "role": "palette"
+            }
+          }
+        },
+        "400": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.8129,
+              0.5837,
+              0.2226
+            ],
+            "hex": "#cf9539"
+          },
+          "$description": "Warning amber, step 400.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XTH",
+              "role": "palette"
+            }
+          }
+        },
+        "500": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.702,
+              0.4556,
+              0
+            ],
+            "hex": "#b37400"
+          },
+          "$description": "Warning amber, step 500.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XTJ",
+              "role": "palette"
+            }
+          }
+        },
+        "600": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.5765,
+              0.3573,
+              0
+            ],
+            "hex": "#935b00"
+          },
+          "$description": "Warning amber, step 600.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XTK",
+              "role": "palette"
+            }
+          }
+        },
+        "700": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.4609,
+              0.2778,
+              0
+            ],
+            "hex": "#764700"
+          },
+          "$description": "Warning amber, step 700.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XTM",
+              "role": "palette"
+            }
+          }
+        },
+        "800": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.3501,
+              0.2019,
+              0
+            ],
+            "hex": "#593300"
+          },
+          "$description": "Warning amber, step 800.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XTN",
+              "role": "palette"
+            }
+          }
+        },
+        "900": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.2452,
+              0.1301,
+              0
+            ],
+            "hex": "#3f2100"
+          },
+          "$description": "Warning amber, step 900.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XTP",
+              "role": "palette"
+            }
+          }
+        },
+        "950": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.147,
+              0.0635,
+              0
+            ],
+            "hex": "#251000"
+          },
+          "$description": "Warning amber, step 950.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XTQ",
+              "role": "palette"
+            }
+          }
+        }
+      },
+      "danger": {
+        "50": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              1,
+              0.9509,
+              0.9419
+            ],
+            "hex": "#fff2f0"
+          },
+          "$description": "Danger red, step 50.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XTR",
+              "role": "palette"
+            }
+          }
+        },
+        "100": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              1,
+              0.8927,
+              0.8743
+            ],
+            "hex": "#ffe4df"
+          },
+          "$description": "Danger red, step 100.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XTS",
+              "role": "palette"
+            }
+          }
+        },
+        "200": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              1,
+              0.7881,
+              0.7562
+            ],
+            "hex": "#ffc9c1"
+          },
+          "$description": "Danger red, step 200.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XTT",
+              "role": "palette"
+            }
+          }
+        },
+        "300": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              1,
+              0.6411,
+              0.598
+            ],
+            "hex": "#ffa398"
+          },
+          "$description": "Danger red, step 300.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XTV",
+              "role": "palette"
+            }
+          }
+        },
+        "400": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.9504,
+              0.4661,
+              0.4217
+            ],
+            "hex": "#f2776c"
+          },
+          "$description": "Danger red, step 400.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XTW",
+              "role": "palette"
+            }
+          }
+        },
+        "500": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.8391,
+              0.3151,
+              0.281
+            ],
+            "hex": "#d65048"
+          },
+          "$description": "Danger red, step 500.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XTX",
+              "role": "palette"
+            }
+          }
+        },
+        "600": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.7155,
+              0.1964,
+              0.1778
+            ],
+            "hex": "#b6322d"
+          },
+          "$description": "Danger red, step 600.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XTY",
+              "role": "palette"
+            }
+          }
+        },
+        "700": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.6071,
+              0.063,
+              0.0803
+            ],
+            "hex": "#9b1014"
+          },
+          "$description": "Danger red, step 700.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XTZ",
+              "role": "palette"
+            }
+          }
+        },
+        "800": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.4958,
+              0,
+              0
+            ],
+            "hex": "#7e0000"
+          },
+          "$description": "Danger red, step 800.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XV0",
+              "role": "palette"
+            }
+          }
+        },
+        "900": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.3528,
+              0,
+              0
+            ],
+            "hex": "#5a0000"
+          },
+          "$description": "Danger red, step 900.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XV1",
+              "role": "palette"
+            }
+          }
+        },
+        "950": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.2191,
+              0,
+              0
+            ],
+            "hex": "#380000"
+          },
+          "$description": "Danger red, step 950.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XV2",
+              "role": "palette"
+            }
+          }
+        }
+      },
+      "info": {
+        "50": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.9388,
+              0.9733,
+              0.9992
+            ],
+            "hex": "#eff8ff"
+          },
+          "$description": "Information blue, step 50.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XV3",
+              "role": "palette"
+            }
+          }
+        },
+        "100": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.8671,
+              0.9405,
+              0.9953
+            ],
+            "hex": "#ddf0fe"
+          },
+          "$description": "Information blue, step 100.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XV4",
+              "role": "palette"
+            }
+          }
+        },
+        "200": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.7403,
+              0.8789,
+              0.9807
+            ],
+            "hex": "#bde0fa"
+          },
+          "$description": "Information blue, step 200.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XV5",
+              "role": "palette"
+            }
+          }
+        },
+        "300": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.566,
+              0.7864,
+              0.9432
+            ],
+            "hex": "#90c9f1"
+          },
+          "$description": "Information blue, step 300.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XV6",
+              "role": "palette"
+            }
+          }
+        },
+        "400": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.3615,
+              0.6675,
+              0.8723
+            ],
+            "hex": "#5caade"
+          },
+          "$description": "Information blue, step 400.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XV7",
+              "role": "palette"
+            }
+          }
+        },
+        "500": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.1834,
+              0.5467,
+              0.7664
+            ],
+            "hex": "#2f8bc3"
+          },
+          "$description": "Information blue, step 500.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XV8",
+              "role": "palette"
+            }
+          }
+        },
+        "600": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0,
+              0.4395,
+              0.6523
+            ],
+            "hex": "#0070a6"
+          },
+          "$description": "Information blue, step 600.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XV9",
+              "role": "palette"
+            }
+          }
+        },
+        "700": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0,
+              0.3469,
+              0.5534
+            ],
+            "hex": "#00588d"
+          },
+          "$description": "Information blue, step 700.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XVA",
+              "role": "palette"
+            }
+          }
+        },
+        "800": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0,
+              0.2575,
+              0.4391
+            ],
+            "hex": "#004270"
+          },
+          "$description": "Information blue, step 800.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XVB",
+              "role": "palette"
+            }
+          }
+        },
+        "900": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0,
+              0.1729,
+              0.3163
+            ],
+            "hex": "#002c51"
+          },
+          "$description": "Information blue, step 900.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XVC",
+              "role": "palette"
+            }
+          }
+        },
+        "950": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0,
+              0.0939,
+              0.2013
+            ],
+            "hex": "#001833"
+          },
+          "$description": "Information blue, step 950.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XVD",
+              "role": "palette"
+            }
+          }
         }
       },
       "shade": {
+        "0": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0,
+              0,
+              0
+            ],
+            "alpha": 0,
+            "hex": "#000000"
+          },
+          "$description": "Fully transparent black: a shadow that casts nothing.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XVE",
+              "role": "palette"
+            }
+          }
+        },
+        "10": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0,
+              0,
+              0
+            ],
+            "alpha": 0.1,
+            "hex": "#000000"
+          },
+          "$description": "Black at 10 % opacity, for shadows and backdrops.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XVF",
+              "role": "palette"
+            }
+          }
+        },
         "25": {
-          "$value": { "colorSpace": "srgb", "components": [0, 0, 0], "alpha": 0.25, "hex": "#000000" },
-          "$description": "Black at 25 % opacity, for shadows.",
-          "$extensions": { "com.ciferecigo.fundamento": { "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBF" } }
-        }
-      }
-    },
-    "text": {
-      "default": {
-        "$value": "{color.palette.neutral.900}",
-        "$description": "Default body text.",
-        "$extensions": {
-          "com.ciferecigo.fundamento": { "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBG", "role": "foreground" }
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0,
+              0,
+              0
+            ],
+            "alpha": 0.25,
+            "hex": "#000000"
+          },
+          "$description": "Black at 25 % opacity, for shadows and backdrops.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBF",
+              "role": "palette"
+            }
+          }
+        },
+        "50": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0,
+              0,
+              0
+            ],
+            "alpha": 0.5,
+            "hex": "#000000"
+          },
+          "$description": "Black at 50 % opacity, for shadows and backdrops.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XVG",
+              "role": "palette"
+            }
+          }
         }
       }
     },
@@ -59,34 +1328,714 @@
         "$value": "{color.palette.neutral.0}",
         "$description": "Default surface background.",
         "$extensions": {
-          "com.ciferecigo.fundamento": { "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBH", "role": "background" }
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBH",
+            "role": "background"
+          }
+        }
+      },
+      "canvas": {
+        "$value": "{color.palette.neutral.50}",
+        "$description": "Page canvas behind surfaces.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9400ZA1K81R0W23SG0XVH",
+            "role": "background"
+          }
+        }
+      },
+      "raised": {
+        "$value": "{color.palette.neutral.0}",
+        "$description": "Raised surface such as a card or menu.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9400ZA1K81R0W23SG0XVJ",
+            "role": "background"
+          }
+        }
+      },
+      "sunken": {
+        "$value": "{color.palette.neutral.100}",
+        "$description": "Sunken area such as a well or input track.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9400ZA1K81R0W23SG0XVK",
+            "role": "background"
+          }
+        }
+      },
+      "inverse": {
+        "$value": "{color.palette.neutral.900}",
+        "$description": "Inverted surface (dark in light mode).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9400ZA1K81R0W23SG0XVM",
+            "role": "background"
+          }
+        }
+      }
+    },
+    "text": {
+      "default": {
+        "$value": "{color.palette.neutral.900}",
+        "$description": "Default body text.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBG",
+            "role": "foreground"
+          }
+        }
+      },
+      "subtle": {
+        "$value": "{color.palette.neutral.700}",
+        "$description": "Secondary text, one step quieter.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9400ZA1K81R0W23SG0XVN",
+            "role": "foreground"
+          }
+        }
+      },
+      "muted": {
+        "$value": "{color.palette.neutral.600}",
+        "$description": "Tertiary text such as hints, two steps quieter.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9400ZA1K81R0W23SG0XVP",
+            "role": "foreground"
+          }
+        }
+      },
+      "inverse": {
+        "$value": "{color.palette.neutral.0}",
+        "$description": "Text on inverted surfaces.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9400ZA1K81R0W23SG0XVQ",
+            "role": "foreground"
+          }
+        }
+      },
+      "disabled": {
+        "$value": "{color.palette.neutral.400}",
+        "$description": "Text of disabled content (exempt from contrast, WCAG 1.4.3).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9400ZA1K81R0W23SG0XVR",
+            "role": "disabled"
+          }
+        }
+      }
+    },
+    "link": {
+      "rest": {
+        "$value": "{color.palette.accent.700}",
+        "$description": "Link text at rest.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9400ZA1K81R0W23SG0XVS",
+            "role": "foreground"
+          }
+        }
+      },
+      "hover": {
+        "$value": "{color.palette.accent.800}",
+        "$description": "Link text on hover.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9400ZA1K81R0W23SG0XVT",
+            "role": "foreground"
+          }
+        }
+      },
+      "visited": {
+        "$value": "{color.palette.accent.900}",
+        "$description": "Visited link text.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9400ZA1K81R0W23SG0XVV",
+            "role": "foreground"
+          }
         }
       }
     },
     "border": {
       "default": {
         "$value": "{color.palette.neutral.500}",
-        "$description": "Default border and divider color.",
+        "$description": "Default border and divider of interactive content.",
         "$extensions": {
-          "com.ciferecigo.fundamento": { "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBJ", "role": "border" }
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBJ",
+            "role": "border"
+          }
+        }
+      },
+      "subtle": {
+        "$value": "{color.palette.neutral.200}",
+        "$description": "Decorative divider without information.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9400ZA1K81R0W23SG0XVW",
+            "role": "decorative"
+          }
+        }
+      },
+      "strong": {
+        "$value": "{color.palette.neutral.700}",
+        "$description": "Emphasised border.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9400ZA1K81R0W23SG0XVX",
+            "role": "border"
+          }
+        }
+      },
+      "inverse": {
+        "$value": "{color.palette.neutral.400}",
+        "$description": "Border on inverted surfaces.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9400ZA1K81R0W23SG0XVY",
+            "role": "border"
+          }
+        }
+      },
+      "disabled": {
+        "$value": "{color.palette.neutral.300}",
+        "$description": "Border of disabled controls.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9400ZA1K81R0W23SG0XVZ",
+            "role": "disabled"
+          }
         }
       }
     },
     "action": {
       "primary": {
         "rest": {
-          "$value": "{color.palette.blue.600}",
-          "$description": "Fill of a primary action at rest.",
+          "$value": "{color.palette.accent.700}",
+          "$description": "Primary action: fill at rest.",
           "$extensions": {
-            "com.ciferecigo.fundamento": { "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBK", "role": "background" }
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBK",
+              "role": "background"
+            }
+          }
+        },
+        "hover": {
+          "$value": "{color.palette.accent.800}",
+          "$description": "Primary action: fill on hover.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XW0",
+              "role": "background"
+            }
+          }
+        },
+        "pressed": {
+          "$value": "{color.palette.accent.900}",
+          "$description": "Primary action: fill while pressed.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XW1",
+              "role": "background"
+            }
+          }
+        },
+        "selected": {
+          "$value": "{color.palette.accent.800}",
+          "$description": "Primary action: fill when selected.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XW2",
+              "role": "background"
+            }
+          }
+        },
+        "disabled": {
+          "$value": "{color.palette.neutral.200}",
+          "$description": "Primary action: fill when disabled.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XW3",
+              "role": "disabled"
+            }
           }
         },
         "text": {
           "$value": "{color.palette.neutral.0}",
-          "$description": "Text on the primary action fill.",
+          "$description": "Primary action: text on the fill.",
           "$extensions": {
-            "com.ciferecigo.fundamento": { "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBM", "role": "foreground" }
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBM",
+              "role": "foreground"
+            }
           }
+        }
+      },
+      "secondary": {
+        "rest": {
+          "$value": "{color.palette.neutral.100}",
+          "$description": "Secondary action: fill at rest.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XW4",
+              "role": "background"
+            }
+          }
+        },
+        "hover": {
+          "$value": "{color.palette.neutral.200}",
+          "$description": "Secondary action: fill on hover.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XW5",
+              "role": "background"
+            }
+          }
+        },
+        "pressed": {
+          "$value": "{color.palette.neutral.300}",
+          "$description": "Secondary action: fill while pressed.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XW6",
+              "role": "background"
+            }
+          }
+        },
+        "selected": {
+          "$value": "{color.palette.neutral.200}",
+          "$description": "Secondary action: fill when selected.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XW7",
+              "role": "background"
+            }
+          }
+        },
+        "disabled": {
+          "$value": "{color.palette.neutral.100}",
+          "$description": "Secondary action: fill when disabled.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XW8",
+              "role": "disabled"
+            }
+          }
+        },
+        "text": {
+          "$value": "{color.palette.neutral.900}",
+          "$description": "Secondary action: text on the fill.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XW9",
+              "role": "foreground"
+            }
+          }
+        }
+      },
+      "tertiary": {
+        "rest": {
+          "$value": "{color.palette.neutral.0}",
+          "$description": "Tertiary action: fill at rest.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XWA",
+              "role": "background"
+            }
+          }
+        },
+        "hover": {
+          "$value": "{color.palette.neutral.50}",
+          "$description": "Tertiary action: fill on hover.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XWB",
+              "role": "background"
+            }
+          }
+        },
+        "pressed": {
+          "$value": "{color.palette.neutral.100}",
+          "$description": "Tertiary action: fill while pressed.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XWC",
+              "role": "background"
+            }
+          }
+        },
+        "selected": {
+          "$value": "{color.palette.accent.50}",
+          "$description": "Tertiary action: fill when selected.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XWD",
+              "role": "background"
+            }
+          }
+        },
+        "disabled": {
+          "$value": "{color.palette.neutral.0}",
+          "$description": "Tertiary action: fill when disabled.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XWE",
+              "role": "disabled"
+            }
+          }
+        },
+        "text": {
+          "$value": "{color.palette.accent.700}",
+          "$description": "Tertiary action: text on the fill.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XWF",
+              "role": "foreground"
+            }
+          }
+        }
+      }
+    },
+    "navigation": {
+      "rest": {
+        "$value": "{color.palette.neutral.0}",
+        "$description": "Navigation item at rest.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9400ZA1K81R0W23SG0XWG",
+            "role": "background"
+          }
+        }
+      },
+      "hover": {
+        "$value": "{color.palette.neutral.100}",
+        "$description": "Navigation item on hover.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9400ZA1K81R0W23SG0XWH",
+            "role": "background"
+          }
+        }
+      },
+      "selected": {
+        "$value": "{color.palette.accent.100}",
+        "$description": "Selected navigation item.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9400ZA1K81R0W23SG0XWJ",
+            "role": "background"
+          }
+        }
+      },
+      "text": {
+        "rest": {
+          "$value": "{color.palette.neutral.800}",
+          "$description": "Navigation text, rest.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XWK",
+              "role": "foreground"
+            }
+          }
+        },
+        "selected": {
+          "$value": "{color.palette.accent.900}",
+          "$description": "Navigation text, selected.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XWM",
+              "role": "foreground"
+            }
+          }
+        }
+      }
+    },
+    "status": {
+      "success": {
+        "basic": {
+          "$value": "{color.palette.success.600}",
+          "$description": "Status success: strong fill and indicator.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XWN",
+              "role": "background"
+            }
+          }
+        },
+        "weak": {
+          "$value": "{color.palette.success.100}",
+          "$description": "Status success: light fill, e.g. a banner.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XWP",
+              "role": "background"
+            }
+          }
+        },
+        "subtle": {
+          "$value": "{color.palette.success.50}",
+          "$description": "Status success: lightest fill, e.g. an inline notice.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XWQ",
+              "role": "background"
+            }
+          }
+        },
+        "text": {
+          "$value": "{color.palette.success.800}",
+          "$description": "Status success: text on light surfaces.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XWR",
+              "role": "foreground"
+            }
+          }
+        },
+        "on": {
+          "$value": "{color.palette.neutral.0}",
+          "$description": "Status success: text on the strong fill.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XWS",
+              "role": "foreground"
+            }
+          }
+        }
+      },
+      "warning": {
+        "basic": {
+          "$value": "{color.palette.warning.600}",
+          "$description": "Status warning: strong fill and indicator.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XWT",
+              "role": "background"
+            }
+          }
+        },
+        "weak": {
+          "$value": "{color.palette.warning.100}",
+          "$description": "Status warning: light fill, e.g. a banner.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XWV",
+              "role": "background"
+            }
+          }
+        },
+        "subtle": {
+          "$value": "{color.palette.warning.50}",
+          "$description": "Status warning: lightest fill, e.g. an inline notice.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XWW",
+              "role": "background"
+            }
+          }
+        },
+        "text": {
+          "$value": "{color.palette.warning.800}",
+          "$description": "Status warning: text on light surfaces.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XWX",
+              "role": "foreground"
+            }
+          }
+        },
+        "on": {
+          "$value": "{color.palette.neutral.0}",
+          "$description": "Status warning: text on the strong fill.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XWY",
+              "role": "foreground"
+            }
+          }
+        }
+      },
+      "danger": {
+        "basic": {
+          "$value": "{color.palette.danger.600}",
+          "$description": "Status danger: strong fill and indicator.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XWZ",
+              "role": "background"
+            }
+          }
+        },
+        "weak": {
+          "$value": "{color.palette.danger.100}",
+          "$description": "Status danger: light fill, e.g. a banner.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XX0",
+              "role": "background"
+            }
+          }
+        },
+        "subtle": {
+          "$value": "{color.palette.danger.50}",
+          "$description": "Status danger: lightest fill, e.g. an inline notice.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XX1",
+              "role": "background"
+            }
+          }
+        },
+        "text": {
+          "$value": "{color.palette.danger.800}",
+          "$description": "Status danger: text on light surfaces.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XX2",
+              "role": "foreground"
+            }
+          }
+        },
+        "on": {
+          "$value": "{color.palette.neutral.0}",
+          "$description": "Status danger: text on the strong fill.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XX3",
+              "role": "foreground"
+            }
+          }
+        }
+      },
+      "info": {
+        "basic": {
+          "$value": "{color.palette.info.600}",
+          "$description": "Status info: strong fill and indicator.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XX4",
+              "role": "background"
+            }
+          }
+        },
+        "weak": {
+          "$value": "{color.palette.info.100}",
+          "$description": "Status info: light fill, e.g. a banner.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XX5",
+              "role": "background"
+            }
+          }
+        },
+        "subtle": {
+          "$value": "{color.palette.info.50}",
+          "$description": "Status info: lightest fill, e.g. an inline notice.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XX6",
+              "role": "background"
+            }
+          }
+        },
+        "text": {
+          "$value": "{color.palette.info.800}",
+          "$description": "Status info: text on light surfaces.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XX7",
+              "role": "foreground"
+            }
+          }
+        },
+        "on": {
+          "$value": "{color.palette.neutral.0}",
+          "$description": "Status info: text on the strong fill.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XX8",
+              "role": "foreground"
+            }
+          }
+        }
+      }
+    },
+    "brand": {
+      "fill": {
+        "$value": "{color.palette.accent.800}",
+        "$description": "Brand or hero surface.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9400ZA1K81R0W23SG0XX9",
+            "role": "background"
+          }
+        }
+      },
+      "text": {
+        "$value": "{color.palette.neutral.0}",
+        "$description": "Text on the brand surface.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9400ZA1K81R0W23SG0XXA",
+            "role": "foreground"
+          }
+        }
+      }
+    },
+    "focus": {
+      "ring": {
+        "$value": "{color.palette.accent.600}",
+        "$description": "Focus ring colour.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9400ZA1K81R0W23SG0XXB",
+            "role": "focus"
+          }
+        }
+      },
+      "inner": {
+        "$value": "{color.palette.neutral.0}",
+        "$description": "Gap between focus ring and content.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9400ZA1K81R0W23SG0XXC",
+            "role": "background"
+          }
+        }
+      }
+    },
+    "shadow": {
+      "key": {
+        "$value": "{color.palette.shade.25}",
+        "$description": "Colour of the key (direct) shadow.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9400ZA1K81R0W23SG0XXD",
+            "role": "shadow"
+          }
+        }
+      },
+      "ambient": {
+        "$value": "{color.palette.shade.10}",
+        "$description": "Colour of the ambient (diffuse) shadow.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9400ZA1K81R0W23SG0XXE",
+            "role": "shadow"
+          }
+        }
+      }
+    },
+    "backdrop": {
+      "$value": "{color.palette.shade.50}",
+      "$description": "Backdrop behind modal layers.",
+      "$extensions": {
+        "com.ciferecigo.fundamento": {
+          "id": "tok_01M2W9400ZA1K81R0W23SG0XXF",
+          "role": "backdrop"
         }
       }
     }
@@ -94,70 +2043,140 @@
   "spacing": {
     "$type": "dimension",
     "small": {
-      "$value": { "value": 4, "unit": "px" },
+      "$value": {
+        "value": 4,
+        "unit": "px"
+      },
       "$description": "Small gap between related elements.",
-      "$extensions": { "com.ciferecigo.fundamento": { "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBN" } }
+      "$extensions": {
+        "com.ciferecigo.fundamento": {
+          "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBN"
+        }
+      }
     },
     "medium": {
-      "$value": { "value": 8, "unit": "px" },
+      "$value": {
+        "value": 8,
+        "unit": "px"
+      },
       "$description": "Default gap between elements.",
-      "$extensions": { "com.ciferecigo.fundamento": { "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBP" } }
+      "$extensions": {
+        "com.ciferecigo.fundamento": {
+          "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBP"
+        }
+      }
     },
     "large": {
-      "$value": { "value": 16, "unit": "px" },
+      "$value": {
+        "value": 16,
+        "unit": "px"
+      },
       "$description": "Gap between groups of elements.",
-      "$extensions": { "com.ciferecigo.fundamento": { "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBQ" } }
+      "$extensions": {
+        "com.ciferecigo.fundamento": {
+          "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBQ"
+        }
+      }
     }
   },
   "radius": {
     "$type": "dimension",
     "medium": {
-      "$value": { "value": 4, "unit": "px" },
+      "$value": {
+        "value": 4,
+        "unit": "px"
+      },
       "$description": "Default corner radius.",
-      "$extensions": { "com.ciferecigo.fundamento": { "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBR" } }
+      "$extensions": {
+        "com.ciferecigo.fundamento": {
+          "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBR"
+        }
+      }
     },
     "large": {
-      "$value": { "value": 8, "unit": "px" },
+      "$value": {
+        "value": 8,
+        "unit": "px"
+      },
       "$description": "Corner radius of large surfaces.",
-      "$extensions": { "com.ciferecigo.fundamento": { "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBS" } }
+      "$extensions": {
+        "com.ciferecigo.fundamento": {
+          "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBS"
+        }
+      }
     }
   },
   "border": {
     "width": {
       "default": {
         "$type": "dimension",
-        "$value": { "value": 1, "unit": "px" },
+        "$value": {
+          "value": 1,
+          "unit": "px"
+        },
         "$description": "Default border width.",
-        "$extensions": { "com.ciferecigo.fundamento": { "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBT" } }
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBT"
+          }
+        }
       }
     },
     "default": {
       "$type": "border",
-      "$value": { "color": "{color.border.default}", "width": "{border.width.default}", "style": "solid" },
+      "$value": {
+        "color": "{color.border.default}",
+        "width": "{border.width.default}",
+        "style": "solid"
+      },
       "$description": "Default border, composed from the border color and width tokens.",
-      "$extensions": { "com.ciferecigo.fundamento": { "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBV" } }
+      "$extensions": {
+        "com.ciferecigo.fundamento": {
+          "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBV"
+        }
+      }
     }
   },
   "font": {
     "family": {
       "$type": "fontFamily",
       "body": {
-        "$value": ["system-ui", "sans-serif"],
+        "$value": [
+          "system-ui",
+          "sans-serif"
+        ],
         "$description": "Body text family (generic families only).",
-        "$extensions": { "com.ciferecigo.fundamento": { "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBW" } }
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBW"
+          }
+        }
       },
       "code": {
-        "$value": ["monospace"],
+        "$value": [
+          "monospace"
+        ],
         "$description": "Code text family (generic family only).",
-        "$extensions": { "com.ciferecigo.fundamento": { "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBX" } }
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBX"
+          }
+        }
       }
     },
     "size": {
       "$type": "dimension",
       "body": {
-        "$value": { "value": 16, "unit": "px" },
+        "$value": {
+          "value": 16,
+          "unit": "px"
+        },
         "$description": "Body text size.",
-        "$extensions": { "com.ciferecigo.fundamento": { "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBY" } }
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBY"
+          }
+        }
       }
     },
     "weight": {
@@ -165,12 +2184,20 @@
       "regular": {
         "$value": 400,
         "$description": "Regular weight.",
-        "$extensions": { "com.ciferecigo.fundamento": { "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBZ" } }
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBZ"
+          }
+        }
       },
       "bold": {
         "$value": 700,
         "$description": "Bold weight.",
-        "$extensions": { "com.ciferecigo.fundamento": { "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVC0" } }
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVC0"
+          }
+        }
       }
     },
     "lineheight": {
@@ -178,7 +2205,11 @@
       "body": {
         "$value": 1.5,
         "$description": "Body line height as a multiple of the font size.",
-        "$extensions": { "com.ciferecigo.fundamento": { "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVC1" } }
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVC1"
+          }
+        }
       }
     }
   },
@@ -186,22 +2217,45 @@
     "duration": {
       "$type": "duration",
       "short": {
-        "$value": { "value": 120, "unit": "ms" },
+        "$value": {
+          "value": 120,
+          "unit": "ms"
+        },
         "$description": "Short transition, e.g. hover feedback.",
-        "$extensions": { "com.ciferecigo.fundamento": { "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVC2" } }
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVC2"
+          }
+        }
       },
       "medium": {
-        "$value": { "value": 240, "unit": "ms" },
+        "$value": {
+          "value": 240,
+          "unit": "ms"
+        },
         "$description": "Medium transition, e.g. expanding a panel.",
-        "$extensions": { "com.ciferecigo.fundamento": { "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVC3" } }
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVC3"
+          }
+        }
       }
     },
     "easing": {
       "$type": "cubicBezier",
       "standard": {
-        "$value": [0.3, 0, 0.2, 1],
+        "$value": [
+          0.3,
+          0,
+          0.2,
+          1
+        ],
         "$description": "Default easing curve.",
-        "$extensions": { "com.ciferecigo.fundamento": { "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVC4" } }
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVC4"
+          }
+        }
       }
     }
   },
@@ -210,13 +2264,29 @@
     "raised": {
       "$value": {
         "color": "{color.palette.shade.25}",
-        "offsetX": { "value": 0, "unit": "px" },
-        "offsetY": { "value": 2, "unit": "px" },
-        "blur": { "value": 6, "unit": "px" },
-        "spread": { "value": 0, "unit": "px" }
+        "offsetX": {
+          "value": 0,
+          "unit": "px"
+        },
+        "offsetY": {
+          "value": 2,
+          "unit": "px"
+        },
+        "blur": {
+          "value": 6,
+          "unit": "px"
+        },
+        "spread": {
+          "value": 0,
+          "unit": "px"
+        }
       },
       "$description": "Shadow of a slightly raised surface.",
-      "$extensions": { "com.ciferecigo.fundamento": { "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVC5" } }
+      "$extensions": {
+        "com.ciferecigo.fundamento": {
+          "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVC5"
+        }
+      }
     }
   },
   "typography": {
@@ -226,11 +2296,18 @@
         "fontFamily": "{font.family.body}",
         "fontSize": "{font.size.body}",
         "fontWeight": "{font.weight.regular}",
-        "letterSpacing": { "value": 0, "unit": "px" },
+        "letterSpacing": {
+          "value": 0,
+          "unit": "px"
+        },
         "lineHeight": "{font.lineheight.body}"
       },
       "$description": "Body text style, composed from the font tokens.",
-      "$extensions": { "com.ciferecigo.fundamento": { "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVC6" } }
+      "$extensions": {
+        "com.ciferecigo.fundamento": {
+          "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVC6"
+        }
+      }
     }
   }
 }

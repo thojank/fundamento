@@ -24,7 +24,7 @@ Numbers are planned counts; the coverage test fixes categories and minimum roles
 
 | Category | Tokens | P / R | Count |
 |---|---|---|---|
-| Color palettes | `color.palette.neutral.{0,50,100,…,900,950,1000}`; `color.palette.{accent,success,warning,danger,info}.{50,100,200,…,900,950}`; `color.palette.shade.{0,25,50}` (alpha black, `0` = fully transparent) | P | 71 |
+| Color palettes | `color.palette.neutral.{0,50,100,…,900,950,1000}`; `color.palette.{accent,success,warning,danger,info}.{50,100,200,…,900,950}`; `color.palette.shade.{0,10,25,50}` (alpha black, `0` = fully transparent) | P | 72 |
 | Color background | `color.background.{default,canvas,raised,sunken,inverse}` | R | 5 |
 | Color text | `color.text.{default,subtle,muted,inverse,disabled}` | R | 5 |
 | Color link | `color.link.{rest,hover,visited}` | R | 3 |
@@ -110,8 +110,10 @@ packages/modelo/test/fixtures/valid/aspekto-ekzemplo/
 | Status surfaces (K5) | `status.<s>.text` on `status.<s>.{weak,subtle}`, 8 pairs (badges, banners, inline notices) | text-normal |
 | Brand | `brand.text` on `brand.fill` | text-normal |
 | Borders | `border.{default,strong}` on `background.{default,raised}`; `border.inverse` on `background.inverse` | ui |
-| Focus | `focus.ring` on `background.{default,inverse}` and on `action.primary.rest` | ui |
+| Focus | `focus.ring` on `background.{default,raised}` and on `focus.inner` (the gap between ring and content) | ui |
 | Status indicators | `status.<s>.basic` on `background.default` | ui |
+
+A single ring colour cannot reach 3:1 against a white surface, a dark inverse surface and the primary fill at the same time (checked during T013), so the ring is paired with its gap colour `focus.inner` instead, as WCAG 2.4.13 describes (the ring contrasts with the adjacent colours).
 
 Exempt by role: `disabled` (Regulo `disabled-exempt-from-contrast`) and `decorative` (e.g. `border.subtle`; WCAG 1.4.11 covers only information-bearing graphics).
 

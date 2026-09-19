@@ -46,11 +46,17 @@ describe("alirebleco on the repo", () => {
     expect(result.check).toBe("alirebleco");
     expect(result.errors).toEqual([]);
     expect(result.ok).toBe(true);
-    expect(result.stats.pairs).toBe(3);
+    const pairs = (
+      JSON.parse(
+        readFileSync(new URL("../../../data/kontrastparoj.json", import.meta.url), "utf8"),
+      ) as { kontrastParoj: unknown[] }
+    ).kontrastParoj.length;
+    expect(result.stats.pairs).toBe(pairs);
     expect(result.stats.combinations).toBe(72);
-    expect(result.stats.evaluations).toBe(216);
-    expect(result.stats.minRatio).toBeGreaterThanOrEqual(4.5);
-    expect(result.summary).toMatch(/216/);
+    expect(result.stats.evaluations).toBe(pairs * 72);
+    // The lowest ratio belongs to a ui pair (threshold 3:1); text pairs need 4.5:1 or 7:1.
+    expect(result.stats.minRatio).toBeGreaterThanOrEqual(3);
+    expect(result.summary).toMatch(new RegExp(String(pairs * 72)));
     for (const warning of result.warnings) {
       expect(warning.rule).toBe("contrast-advisory");
       expect(warning.severity).toBe("warning");

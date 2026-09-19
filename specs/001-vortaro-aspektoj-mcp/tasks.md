@@ -62,9 +62,9 @@ Order follows the plan's "Build order". The ciferecigo package is the last task.
 - [x] **T012 Coverage test** (FR-01, AK-01)
   - Red: `data/coverage.test.ts` with the category fixture from Spec 000 research §4 plus research §6 (minimum roles and steps per category). It is generated as **one `it` per category** (e.g. `coverage: color.status`, `coverage: typography composites`), each asserting only that category's required tokens and naming the missing ones, so the progress of T013–T015 is visible per category in every test run. It must fail on the Phase-0 core.
   - Green: none in this task. The category tests stay red until T013–T015 and are the gate for them. **This is the one approved exception to "green at the end of the task"**: categories not yet delivered are marked `it.fails` between T012 and T015; each of T013 and T014 removes `it.fails` from the categories it completes.
-- [ ] **T013 Colour** (D-02, D-12)
+- [x] **T013 Colour** (D-02, D-12)
   - Red: coverage (colour part), `color-semantic-literal`, `color-role-missing` fixtures; rename test `color.palette.blue.600` → `accent.600` with the same ID.
-  - Green: 71 palette primitives and 68 semantic tokens with roles in `core` (komuna values, low-chroma accent).
+  - Green: 72 palette primitives and 68 semantic tokens with roles in `core` (komuna values: an OKLCH lightness ramp per role palette, low-chroma blue-grey accent). **Also done here (moved from T016):** the colour parts of the generic sets are rewritten alias-only: `color-scheme/dark`, `contrast/high` and the new generic conjunction `color-scheme/dark+contrast/high`; `aspekto/komuna+color-scheme/dark` tints `neutral.950`. Reason: the Phase-0 dark and high sets overrode palette literals that the new semantics no longer use, so contrast would break in dark mode. Reguloj `semantic-colors-alias-palette` (now automatic) and the new `color-roles-declared` are enforced through D-19. All ~60 planned pairs were checked in light, dark, high and dark+high before writing (text AAA ≥ 7:1 in both high modes).
 - [ ] **T014 Typography** (D-11, FR-04, FR-05)
   - Red: coverage (typography part); 14 composites, all fields aliases; `textTransform` on kicker; renames `font.size.body` / `font.lineheight.body` / `typography.body` → `.1` with the same IDs; families `Geist` / `Geist Mono` plus fallbacks.
   - Green: families, weights, size/line-height/tracking scales and roles, composites.
@@ -74,8 +74,8 @@ Order follows the plan's "Build order". The ciferecigo package is the last task.
   - Done when (in addition to the general rule): **no `it.fails` remains in `data/coverage.test.ts`**, and every category test is green.
 - [ ] **T016 Dimensio sets** (D-03, K3, K4, FR-06, FR-07, AK-05)
   - Red: `data/dimensio-sets.test.ts`: every set passes `dimensio-set-literal` and `dimensio-set-primitive`; `motion=reduced` resolves to `0ms` / `linear`; `viewport=compact` changes typography per field with provenance; **`density=compact` leaves every typography field unchanged** (K3).
-  - Green: rewrite viewport, density, color-scheme/dark, contrast/high and motion/reduced; move the Phase-0 literals into primitives or into `aspekto/komuna+color-scheme/dark`.
-  - Also (from T009): wire `dimensioSetIssues` into `validateModelo` and add the fixtures `invalid/dimensio-set-literal` and `invalid/dimensio-set-primitive` (red first against the unwired code).
+  - Green: rewrite viewport, density and motion/reduced and the remaining non-colour literal of contrast/high (`border.width.default`); the colour parts were done in T013.
+  - Also (from T009): enforce `dimensioSetIssues` through the new automatic Regulo `dimensio-sets-alias-only` (D-19) and add fixtures that declare it (red first).
   - AK-05 as amended in the spec (`1f04af5`): changed in `viewport=compact`, unchanged in `density=compact`. A second assertion: no token is re-pointed by both a `viewport/*` and a `density/*` set.
 - [ ] **T017 KontrastParoj and Reguloj** (D-12, K5, Art. VI, AK-02)
   - Red: `kontrastparo-missing-for-role` fixtures; the ~60 pairs incl. the 8 K5 pairs; `data/ak02.test.ts`: every text pair ≥ 7:1 under `contrast=high` in all 72 combinations; `check:regularo` expects the 6 new Reguloj with kialo (incl. `density-affects-layout-only`).

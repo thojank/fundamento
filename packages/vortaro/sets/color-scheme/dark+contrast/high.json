@@ -1,0 +1,127 @@
+{
+  "$extensions": {
+    "com.ciferecigo.fundamento": {
+      "id": "set_01M2W9405H78SEPQEPVE8KH9MB",
+      "kondicxoj": [
+        "color-scheme=dark",
+        "contrast=high"
+      ]
+    }
+  },
+  "color": {
+    "$type": "color",
+    "text": {
+      "subtle": {
+        "$value": "{color.palette.neutral.100}"
+      },
+      "muted": {
+        "$value": "{color.palette.neutral.100}"
+      }
+    },
+    "border": {
+      "default": {
+        "$value": "{color.palette.neutral.300}"
+      },
+      "strong": {
+        "$value": "{color.palette.neutral.100}"
+      },
+      "inverse": {
+        "$value": "{color.palette.neutral.800}"
+      }
+    },
+    "link": {
+      "rest": {
+        "$value": "{color.palette.accent.200}"
+      },
+      "hover": {
+        "$value": "{color.palette.accent.100}"
+      },
+      "visited": {
+        "$value": "{color.palette.accent.50}"
+      }
+    },
+    "action": {
+      "primary": {
+        "rest": {
+          "$value": "{color.palette.accent.200}"
+        },
+        "hover": {
+          "$value": "{color.palette.accent.100}"
+        },
+        "pressed": {
+          "$value": "{color.palette.accent.50}"
+        },
+        "selected": {
+          "$value": "{color.palette.accent.100}"
+        }
+      },
+      "secondary": {
+        "text": {
+          "$value": "{color.palette.neutral.0}"
+        },
+        "pressed": {
+          "$value": "{color.palette.neutral.700}"
+        }
+      },
+      "tertiary": {
+        "text": {
+          "$value": "{color.palette.accent.200}"
+        }
+      }
+    },
+    "navigation": {
+      "text": {
+        "rest": {
+          "$value": "{color.palette.neutral.50}"
+        },
+        "selected": {
+          "$value": "{color.palette.accent.50}"
+        }
+      }
+    },
+    "brand": {
+      "fill": {
+        "$value": "{color.palette.accent.200}"
+      }
+    },
+    "focus": {
+      "ring": {
+        "$value": "{color.palette.accent.200}"
+      }
+    },
+    "status": {
+      "success": {
+        "text": {
+          "$value": "{color.palette.success.200}"
+        },
+        "basic": {
+          "$value": "{color.palette.success.300}"
+        }
+      },
+      "warning": {
+        "text": {
+          "$value": "{color.palette.warning.200}"
+        },
+        "basic": {
+          "$value": "{color.palette.warning.300}"
+        }
+      },
+      "danger": {
+        "text": {
+          "$value": "{color.palette.danger.200}"
+        },
+        "basic": {
+          "$value": "{color.palette.danger.300}"
+        }
+      },
+      "info": {
+        "text": {
+          "$value": "{color.palette.info.200}"
+        },
+        "basic": {
+          "$value": "{color.palette.info.300}"
+        }
+      }
+    }
+  }
+}

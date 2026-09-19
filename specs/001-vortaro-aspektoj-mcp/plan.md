@@ -202,6 +202,10 @@ The test measures the server start (spawn to first `describe` answer) and 100 `r
 4. **Contrast:** derived steps must pass Alirebleco in every combination. If an anchor colour cannot meet a threshold in a given role, the derivation picks another step for that role and records it. Thresholds are never lowered.
 5. Every rule, with its inputs and the resulting steps, is written into `DERIVATION.md` in the package. This derivation is the first prototype of the Enportilo (Phase 7). What it teaches (which steps were mechanical, which needed judgement, what Anhang A lacked) goes into `research.md` §8 of this spec during implementation.
 
+### D-19 Reguloj with checkability "automatic" are enforced by validation (added during T013)
+
+The Phase-0 Reguloj carry `checkability` (`automatic` or `manual`). Validation enforces every Regulo the Modelo declares `automatic` through a fixed table of enforcers (`validate/regularo-enforcement.ts`): `semantic-colors-alias-palette` → `color-semantic-literal`, `color-roles-declared` → `color-role-missing`, `contrast-pairs-declared` → `kontrastparo-missing-for-role` (T017), `dimensio-sets-alias-only` → `dimensio-set-literal` / `dimensio-set-primitive` (T016). The Regularo, with its kialoj, is therefore the switch (Art. VI). The repo declares these Reguloj `automatic`. The Phase-0 test fixtures declare `semantic-colors-alias-palette` as `manual` and keep testing their own rules unchanged. Rules that follow directly from the Constitution (Aspekto completeness, the reference set, fonts, ID namespaces) are always on.
+
 ## Project structure (after Phase 1)
 
 ```

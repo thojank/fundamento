@@ -14,7 +14,15 @@
       "statement": "Semantic color tokens in core reference palette tokens instead of literal color values.",
       "kialo": "Aspektoj and Dimensioj then change a color by overriding one palette token, and late binding carries the change to every semantic use in every combination; a literal in a semantic token would silently opt out of that and drift between combinations.",
       "scope": "vortaro: core color tokens outside color.palette",
-      "checkability": "manual"
+      "checkability": "automatic"
+    },
+    {
+      "id": "reg_01M2W940AP0XFAPQCMW136QEGJ",
+      "name": "color-roles-declared",
+      "statement": "Every colour token declares its role: palette for primitives; foreground, background, border, focus, shadow, backdrop, disabled or decorative for semantic colours.",
+      "kialo": "Roles tell the contrast gate which colours must be paired and tell agents how a colour may be used; a colour without a role can be neither checked nor explained.",
+      "scope": "vortaro: color tokens in core",
+      "checkability": "automatic"
     }
   ]
 }
