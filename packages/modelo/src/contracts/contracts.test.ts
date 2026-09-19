@@ -78,7 +78,7 @@ describe("entity ID prefixes (§2.3)", () => {
 describe("rule catalog (§2.6)", () => {
   it("contains every rule ID exactly once", () => {
     expect(new Set(RULE_IDS).size).toBe(RULE_IDS.length);
-    expect(RULE_IDS).toHaveLength(58);
+    expect(RULE_IDS).toHaveLength(71);
     expect(RULE_IDS).toContain("id-namespace-mismatch");
     expect(RULE_IDS).toContain("id-namespace-duplicate");
     for (const rule of [
@@ -117,7 +117,17 @@ describe("rule catalog (§2.6)", () => {
 describe("shared constants", () => {
   it("lists the DTCG 2025.10 types, roles and the extension key", () => {
     expect(DTCG_TYPES).toHaveLength(13);
-    expect(TOKEN_ROLES).toEqual(["foreground", "background", "border"]);
+    expect(TOKEN_ROLES).toEqual([
+      "palette",
+      "foreground",
+      "background",
+      "border",
+      "focus",
+      "shadow",
+      "backdrop",
+      "disabled",
+      "decorative",
+    ]);
     expect(FUNDAMENTO_EXTENSION_KEY).toBe("com.ciferecigo.fundamento");
     expect(CHECK_NAMES).toEqual(["vortaro-lint", "parity", "regularo", "alirebleco", "clean-room"]);
   });

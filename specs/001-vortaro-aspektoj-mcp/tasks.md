@@ -30,9 +30,9 @@ Order follows the plan's "Build order". The ciferecigo package is the last task.
 - [x] **T004 Aspekto and config schemas** (D-05, D-07)
   - Red: `contracts/aspekto-schema.test.ts`, `config/read-config.test.ts`: valid/invalid `aspekto.json` (license SPDX or `proprietary`, `fonts[]`, `idNamespace`); config with paths and npm names resolved relative to the config file; `config-invalid`, `aspekto-package-missing` with the resolved path.
   - Green: `$defs/AspektoFile` (+ `Fonto`, `License`, `IdNamespace`) in `modelo.schema.json` (one canonical Modelo schema, Phase-0 principle); `schema/config.schema.json` stays separate because the config is not part of the Modelo; generated types for both; `src/config/`.
-- [ ] **T005 Modelo schema extensions and rule catalog**
+- [x] **T005 Modelo schema extensions and rule catalog**
   - Red: schema tests for `referenceAspekto`, the new `TokenRole` values, `aspekto` on Regulo/Jugxo, `origin.package`, the extended `AspektoEntry`, and `textTransform`; catalog test lists every rule of data-model §5; type-drift test.
-  - Green: `modelo.schema.json`, `contracts/issues.ts`, regenerated types.
+  - Green: `modelo.schema.json`, `contracts/issues.ts`, regenerated types. New fields are optional where the data migrates later (e.g. `AspektoEntry.licenseNote` stays optional until T007 drops it); the task that migrates the data makes them required.
 
 ## Stage 2 – Aspekto packages and composition
 

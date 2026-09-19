@@ -30,6 +30,13 @@ export type DimensioValoroId = string;
  */
 export type NonEmptyText = string;
 /**
+ * An SPDX license expression, or `proprietary` for rights that are not openly licensed.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "License".
+ */
+export type License = string;
+/**
  * This interface was referenced by `ModeloJson`'s JSON-Schema
  * via the `definition` "DtcgType".
  */
@@ -61,7 +68,16 @@ export type TokenName = string;
  * This interface was referenced by `ModeloJson`'s JSON-Schema
  * via the `definition` "TokenRole".
  */
-export type TokenRole = "foreground" | "background" | "border";
+export type TokenRole =
+  | "palette"
+  | "foreground"
+  | "background"
+  | "border"
+  | "focus"
+  | "shadow"
+  | "backdrop"
+  | "disabled"
+  | "decorative";
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema
  * via the `definition` "TokenSetId".
@@ -154,6 +170,13 @@ export type ProjekcioId = string;
  * via the `definition` "CeloId".
  */
 export type CeloId = string;
+/**
+ * Text transformation of a typography role (Spec 001, D-11). DTCG has no field for it; the values are platform-neutral.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "TextTransform".
+ */
+export type TextTransform = "none" | "uppercase" | "lowercase" | "capitalize";
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema
  * via the `definition` "ColorSpace".
@@ -263,13 +286,6 @@ export type DtcgToken = {
   $deprecated?: Deprecated;
 };
 /**
- * An SPDX license expression, or `proprietary` for rights that are not openly licensed.
- *
- * This interface was referenced by `ModeloJson`'s JSON-Schema
- * via the `definition` "License".
- */
-export type License = string;
-/**
  * ID namespace of an external Aspekto package (Spec 001, D-06): 2 to 8 lowercase letters.
  *
  * This interface was referenced by `ModeloJson`'s JSON-Schema
@@ -312,6 +328,10 @@ export interface Dimensio {
   name: Name;
   priority: number;
   default: Name;
+  /**
+   * Only on the aspekto Dimensio: the reference Aspekto whose values live in core (Spec 001, FR-10).
+   */
+  referenceAspekto?: string;
   /**
    * @minItems 1
    */
@@ -375,7 +395,30 @@ export interface AspektoEntry {
   id: DimensioValoroId;
   name: Name;
   owner: NonEmptyText;
-  licenseNote: NonEmptyText;
+  licenseNote?: NonEmptyText;
+  license?: License;
+  fonts?: Fonto[];
+  /**
+   * True for the reference Aspekto (core.referenceAspekto).
+   */
+  reference?: boolean;
+  /**
+   * True when the package lies outside the core repository.
+   */
+  external?: boolean;
+  package?: NonEmptyText;
+}
+/**
+ * A font family an Aspekto uses. Font files never enter the core repository; the fallback stack lives only in the fontFamily token value.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "Fonto".
+ */
+export interface Fonto {
+  family: NonEmptyText;
+  license: License;
+  source: NonEmptyText;
+  redistributable: boolean;
 }
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema
@@ -453,6 +496,10 @@ export interface Regulo {
   kialo: NonEmptyText;
   scope: NonEmptyText;
   checkability: "automatic" | "manual";
+  /**
+   * Scopes the entry to one Aspekto; entries in an Aspekto package carry their Aspekto (Spec 001, D-10).
+   */
+  aspekto?: string;
 }
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema
@@ -465,6 +512,10 @@ export interface Jugxo {
   kialo: NonEmptyText;
   date: string;
   context: string;
+  /**
+   * Scopes the entry to one Aspekto; entries in an Aspekto package carry their Aspekto (Spec 001, D-10).
+   */
+  aspekto?: string;
 }
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema
@@ -550,6 +601,10 @@ export interface ResolvedToken {
 export interface ResolvedTokenOrigin {
   set: SetName;
   setId: TokenSetId;
+  /**
+   * The Aspekto package that holds the set (Spec 001, D-08); absent for core sets.
+   */
+  package?: string;
 }
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema
@@ -660,6 +715,7 @@ export interface TypographyValue {
 export interface TokenFundamentoExtension {
   id: TokenId;
   role?: TokenRole;
+  textTransform?: TextTransform;
 }
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema
@@ -691,18 +747,6 @@ export interface DtcgGroup {
   $extensions?: GroupExtensions;
   $deprecated?: Deprecated;
   [k: string]: DtcgNode | DtcgType | string | GroupExtensions | Deprecated | undefined;
-}
-/**
- * A font family an Aspekto uses. Font files never enter the core repository; the fallback stack lives only in the fontFamily token value.
- *
- * This interface was referenced by `ModeloJson`'s JSON-Schema
- * via the `definition` "Fonto".
- */
-export interface Fonto {
-  family: NonEmptyText;
-  license: License;
-  source: NonEmptyText;
-  redistributable: boolean;
 }
 /**
  * aspekto.json of an Aspekto package (Spec 001, D-05). `id` is the DimensioValoro ID of the Aspekto; `idNamespace` is required for every package except the reference Aspekto (checked on composition).
