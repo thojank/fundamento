@@ -31,7 +31,7 @@ export function dataIssues(modelo: Modelo, files: ModeloFiles): DataRulesResult 
     issues: [
       ...dimensioIssues(files.data["dimensioj.json"], kontrast.count, composedAspektoNames(modelo)),
       ...reguloIssues(files.data["reguloj.json"]),
-      ...jugxoIssues(files.data["jugxoj.json"], files.data["reguloj.json"]),
+      ...jugxoIssues(files.data["jugxoj.json"], files.data["reguloj.json"], eroIdsOf(files)),
       ...kontrast.issues,
     ],
     kontrastParoj: kontrast.checkable,
@@ -249,10 +249,14 @@ function reguloIssues(document: ModeloDocument): ValidationIssue[] {
 
 /**
  * `jugxo-ref-missing`: a Jugxo refers to an existing Regulo (`{ regulo: id }`), Ero
- * (`{ ero: id }`; Phase 0 has no Eroj, so every Ero reference is dangling) or constitution
+ * (`{ ero: id }`, an Ero in `data/eroj/`) or constitution
  * Article (`{ artikolo: "I".."XIII" }`).
  */
-function jugxoIssues(document: ModeloDocument, reguloj: ModeloDocument): ValidationIssue[] {
+function jugxoIssues(
+  document: ModeloDocument,
+  reguloj: ModeloDocument,
+  eroIds: ReadonlySet<string>,
+): ValidationIssue[] {
   const reguloIds = new Set(
     rawEntries(reguloj.value, "reguloj").flatMap(({ entry }) =>
       typeof entry.id === "string" ? [entry.id] : [],
@@ -289,15 +293,17 @@ function jugxoIssues(document: ModeloDocument, reguloj: ModeloDocument): Validat
           ];
     }
     if (isJsonObject(ref) && typeof ref.ero === "string" && Object.keys(ref).length === 1) {
-      return [
-        issueAt(
-          document,
-          `${pointer}/ref/ero`,
-          "jugxo-ref-missing",
-          `Jugxo ${name} refers to Ero ${ref.ero}, which does not exist (the Modelo has no Eroj).`,
-          "Refer to an existing Regulo instead, or add the Ero first.",
-        ),
-      ];
+      return eroIds.has(ref.ero)
+        ? []
+        : [
+            issueAt(
+              document,
+              `${pointer}/ref/ero`,
+              "jugxo-ref-missing",
+              `Jugxo ${name} refers to Ero ${ref.ero}, which does not exist.`,
+              `Refer to the ID of an existing Ero (${listOrNone([...eroIds].sort())}).`,
+            ),
+          ];
     }
     return [
       issueAt(
@@ -381,4 +387,16 @@ function kontrastParoIssues(
 
 function listOrNone(names: readonly string[]): string {
   return names.length === 0 ? "none exist" : names.join(", ");
+}
+
+/** IDs of the Eroj in `data/eroj/<name>/skemo.json` (Spec 003). */
+export function eroIdsOf(files: Pick<ModeloFiles, "eroj">): Set<string> {
+  return new Set(
+    files.eroj.flatMap((document) => {
+      const value = document.value;
+      return isJsonObject(value) && isJsonObject(value.ero) && typeof value.ero.id === "string"
+        ? [value.ero.id]
+        : [];
+    }),
+  );
 }

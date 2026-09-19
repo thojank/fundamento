@@ -108,7 +108,8 @@ New rule IDs: `one-primary-per-container`, `destructive-not-primary-color`, `lab
 |---|---|
 | `skemo-token-missing` | a binding names a token that core does not define |
 | `skemo-token-type` | a binding's token type does not fit the part property (colour → `color`, height → `dimension`, typography → `typography`, ring → `border`) |
-| `skemo-binding-missing` | a combination of the `by` keys has no binding for a part property that needs one |
+| `skemo-binding-missing` | a combination of the `by` keys has no binding for a part property that needs one (a state without its own binding uses `rest`) |
+| `skemo-binding-invalid` | a binding or `by` list names an unknown prop, value or part property, or `sameAs` points nowhere |
 | `skemo-kontrastparo-missing` | a label-on-surface pair of a variant × tone × state (except `disabled`) is not a declared KontrastParo |
 | `skemo-intent-invalid` | an intent's `props` are not allowed values, violate a constraint, or its `regulo` does not exist |
 | `skemo-constraint-invalid` | a constraint names an unknown prop or value |
@@ -146,7 +147,7 @@ New rule IDs: `one-primary-per-container`, `destructive-not-primary-color`, `lab
 
 ## 7. New rule-catalog entries
 
-`skemo-token-missing`, `skemo-token-type`, `skemo-binding-missing`, `skemo-kontrastparo-missing`, `skemo-intent-invalid`, `skemo-constraint-invalid`, `ero-prop-constraint`, `jugxo-ekzemplo-invalid`, `one-primary-per-container`, `destructive-not-primary-color`, `label-required`, `touch-target-min`, `css-physical-property` (lint), `ero-hardcoded-string` (lint), `parity-binding-mismatch`, `ero-unknown`, `intent-unknown`.
+`skemo-token-missing`, `skemo-token-type`, `skemo-binding-missing`, `skemo-binding-invalid`, `skemo-kontrastparo-missing`, `skemo-intent-invalid`, `skemo-constraint-invalid`, `ero-prop-constraint`, `jugxo-ekzemplo-invalid`, `one-primary-per-container`, `destructive-not-primary-color`, `label-required`, `touch-target-min`, `css-physical-property` (lint), `ero-hardcoded-string` (lint), `parity-binding-mismatch`, `ero-unknown`, `intent-unknown`.
 
 ## 8. Migration
 

@@ -122,6 +122,7 @@ export const RULE_IDS = [
   "skemo-token-missing",
   "skemo-token-type",
   "skemo-binding-missing",
+  "skemo-binding-invalid",
   "skemo-kontrastparo-missing",
   "skemo-intent-invalid",
   "skemo-constraint-invalid",
