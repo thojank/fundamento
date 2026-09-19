@@ -18,6 +18,7 @@ import {
   readModeloFiles,
   type ValidationIssue,
 } from "@fundamento/modelo";
+import { CODE_CONNECT_CELO } from "./celoj/code-connect/code-connect.js";
 import { CSS_CELO } from "./celoj/css/css.js";
 import { FIGMA_CELO } from "./celoj/figma/figma.js";
 import { REACT_CELO } from "./celoj/react/react.js";
@@ -29,6 +30,8 @@ export interface CeloInput {
   modelo: Modelo;
   modeloJson: ModeloJson;
   rezolvoj: RezolvojJson;
+  /** Environment of the build; only the optional Code Connect Celo reads it (D-13). */
+  env?: Readonly<Record<string, string | undefined>>;
 }
 
 /** One generated file: a path relative to the output directory and its text. */
@@ -50,6 +53,7 @@ export const CELOJ: readonly Celo[] = [
   WEB_COMPONENT_CELO,
   REACT_CELO,
   FIGMA_CELO,
+  CODE_CONNECT_CELO,
 ];
 
 export const MANIFEST_FILE = "projekcioj.json";
@@ -82,6 +86,7 @@ export function celoInputOf(
       modelo: buildModelo(files).modelo,
       modeloJson: JSON.parse(prepared.files.modeloJson) as ModeloJson,
       rezolvoj: JSON.parse(prepared.files.rezolvojJson) as RezolvojJson,
+      env: process.env,
     },
     warnings: prepared.warnings,
   };

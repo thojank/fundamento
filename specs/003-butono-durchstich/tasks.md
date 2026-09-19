@@ -77,9 +77,9 @@ A mutation check (one changed value must make the test fail) replaces the red ru
 - [x] **T016 Development plugin** (D-12)
   - Red: `celoj/figma/plugin.test.ts` runs the generated `code.js` against an in-memory Plugin-API test double: the first run creates collections, variables and the component set; the second run creates nothing and changes nothing; a node without Fundamento plugin data is never touched; a changed plan updates in place.
   - Green: `celoj/figma/plugin.ts` generates `figma/plugin/manifest.json` and `figma/plugin/code.js` with the plan embedded (a plugin reads no repository files). Applying it in the test account is the maintainer's S3. Done note: the double covers exactly the API slice the plugin uses, listed in the plugin's header comment; the plugin creates one component per variant with a control frame and a label text and binds variables to fills, strokes, stroke weight, sizes, padding, gap, radius and font size.
-- [ ] **T017 [P] Code Connect files (optional Projekcio)** (D-13)
+- [x] **T017 [P] Code Connect files (optional Projekcio)** (D-13)
   - Red: the generated `butono.figma.tsx` and `butono.figma.ts` map every Skemo prop and value (parsed, compared with the Skemo); the component URL comes only from `FUNDAMENTO_FIGMA_BUTONO_URL`; without it the Celo emits nothing and says why.
-  - Green: `celoj/code-connect/`. No `figma connect publish` in the phase.
+  - Green: `celoj/code-connect/`. No `figma connect publish` in the phase. Done note: the URL reaches the Celo through `CeloInput.env` (the build passes `process.env`), so the generator stays pure; every prop is mapped (`figma.enum`, `figma.boolean`, `figma.string`), and `skipReason` names the missing variable.
 
 ## Stage 5 – Make Kits
 
