@@ -4,8 +4,8 @@
 
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import type { AddressInfo } from "node:net";
-import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
-import type { Transport } from "@modelcontextprotocol/sdk/shared/transport.js";
+import { NodeStreamableHTTPServerTransport } from "@modelcontextprotocol/node";
+import type { Transport } from "@modelcontextprotocol/server";
 import type { Served } from "./load.js";
 import { createFundamentoServer } from "./server.js";
 
@@ -56,7 +56,7 @@ export async function startHttpServer(
     const server = createFundamentoServer(served, { transport: "http" });
     // No sessionIdGenerator: stateless. The cast bridges the SDK's optional callbacks and
     // exactOptionalPropertyTypes.
-    const transport = new StreamableHTTPServerTransport({ enableJsonResponse: true });
+    const transport = new NodeStreamableHTTPServerTransport({ enableJsonResponse: true });
     response.on("close", () => {
       void transport.close();
       void server.close();

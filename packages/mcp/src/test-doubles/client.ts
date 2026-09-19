@@ -1,8 +1,7 @@
 // In-process client for the server tests: SDK client over an in-memory transport, every result
 // checked against the tool's output schema or the error envelope.
 
-import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
+import { Client, InMemoryTransport } from "@modelcontextprotocol/client";
 import { expect } from "vitest";
 import { type LoadOptions, loadServed } from "../load.js";
 import { compileToolSchemas } from "../schemas.js";

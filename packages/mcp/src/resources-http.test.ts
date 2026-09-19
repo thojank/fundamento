@@ -2,9 +2,11 @@
 
 import { readFileSync } from "node:fs";
 import { request } from "node:http";
-import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
-import type { Transport } from "@modelcontextprotocol/sdk/shared/transport.js";
+import {
+  Client,
+  StreamableHTTPClientTransport,
+  type Transport,
+} from "@modelcontextprotocol/client";
 import { afterAll, describe, expect, it } from "vitest";
 import { startHttpServer } from "./http.js";
 import { loadServed } from "./load.js";

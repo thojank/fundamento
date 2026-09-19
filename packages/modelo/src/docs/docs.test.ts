@@ -144,7 +144,11 @@ describe("specs/000-fundamento-repo/plan.md (FR-19, AK-08)", () => {
   it("records a reason for every declared third-party dependency", () => {
     // Phase 0 installed the base toolchain; Spec 001 added the MCP SDK and its peer. Each plan's
     // Dependencies table names its own columns, so the reason is found by its header.
-    const tables = [plan, read("specs/001-vortaro-aspektoj-mcp/plan.md")].map((text) =>
+    const tables = [
+      plan,
+      read("specs/001-vortaro-aspektoj-mcp/plan.md"),
+      read("specs/002-regularo-gvidanto/plan.md"),
+    ].map((text) =>
       section(text, "Dependencies")
         .split("\n")
         .filter((line) => line.startsWith("|")),

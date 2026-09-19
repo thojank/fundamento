@@ -3,8 +3,8 @@
 
 import { resolve } from "node:path";
 import type { ValidationIssue } from "@fundamento/modelo";
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import type { Transport } from "@modelcontextprotocol/sdk/shared/transport.js";
+import type { Transport } from "@modelcontextprotocol/server";
+import { StdioServerTransport } from "@modelcontextprotocol/server/stdio";
 import { DEFAULT_HTTP_PORT, startHttpServer } from "./http.js";
 import { loadServed, type Served, ServedLoadError } from "./load.js";
 import { createFundamentoServer } from "./server.js";

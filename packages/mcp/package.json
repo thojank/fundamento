@@ -26,10 +26,11 @@
   },
   "dependencies": {
     "@fundamento/modelo": "workspace:*",
-    "@modelcontextprotocol/sdk": "1.30.0",
-    "zod": "^4.6.5"
+    "@modelcontextprotocol/node": "2.0.0",
+    "@modelcontextprotocol/server": "2.0.0"
   },
   "devDependencies": {
+    "@modelcontextprotocol/client": "2.0.0",
     "@types/node": "^24.13.5",
     "typescript": "^7.0.2",
     "vitest": "^5.0.1"

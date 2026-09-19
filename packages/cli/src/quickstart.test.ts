@@ -5,9 +5,8 @@
 // to `pnpm perf` alone (Spec 001 D-17).
 
 import { fileURLToPath } from "node:url";
-import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
-import type { Transport } from "@modelcontextprotocol/sdk/shared/transport.js";
+import { Client, type Transport } from "@modelcontextprotocol/client";
+import { StdioClientTransport } from "@modelcontextprotocol/client/stdio";
 import { afterAll, describe, expect, it } from "vitest";
 
 const FM = fileURLToPath(new URL("../dist/index.js", import.meta.url));

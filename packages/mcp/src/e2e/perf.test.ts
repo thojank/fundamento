@@ -4,9 +4,8 @@
 // (0.8 s alone vs 3.5-7.2 s in the gate; research.md section 8). Factor 3 only under CI=true
 // (shared runners; Jugxo jug_01M2W3K1YPP05F4XF86J71RGTK). Raw timings go to stderr either way.
 
-import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
-import type { Transport } from "@modelcontextprotocol/sdk/shared/transport.js";
+import { Client, type Transport } from "@modelcontextprotocol/client";
+import { StdioClientTransport } from "@modelcontextprotocol/client/stdio";
 import { afterAll, describe, expect, it } from "vitest";
 import { EKZEMPLO_CONFIG } from "../test-doubles/client.js";
 

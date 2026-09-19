@@ -1,17 +1,9 @@
-// The Fundamento MCP server (Spec 001, D-13): ten read-only tools over the served export, on the
-// SDK's low-level Server. Inputs are validated against the tool schemas; results carry
-// structuredContent plus the same JSON as text for older clients.
+// The Fundamento MCP server (Spec 001, D-13): read-only tools over the served export, on the
+// low-level Server of SDK v2 (Spec 002, D-17). Inputs are validated against the tool schemas;
+// results carry structuredContent plus the same JSON as text for older clients.
 
 import type { ErrorObject } from "@fundamento/modelo";
-import { Server } from "@modelcontextprotocol/sdk/server/index.js";
-import {
-  CallToolRequestSchema,
-  ErrorCode,
-  ListResourcesRequestSchema,
-  ListToolsRequestSchema,
-  McpError,
-  ReadResourceRequestSchema,
-} from "@modelcontextprotocol/sdk/types.js";
+import { ProtocolError, ProtocolErrorCode, Server } from "@modelcontextprotocol/server";
 import { bundleResultSchema, bundleSchema } from "./bundle.js";
 import type { Served } from "./load.js";
 import { listResources, readResource } from "./resources.js";
@@ -85,14 +77,14 @@ export function createFundamentoServer(served: Served, options: ServerOptions = 
     { name: SERVER_NAME, version: served.modeloJson.fundamento.version },
     { capabilities: { tools: {}, resources: {} } },
   );
-  server.setRequestHandler(ListResourcesRequestSchema, () => ({
+  server.setRequestHandler("resources/list", () => ({
     resources: listResources(served),
   }));
-  server.setRequestHandler(ReadResourceRequestSchema, (request) => {
+  server.setRequestHandler("resources/read", (request) => {
     const contents = readResource(served, request.params.uri);
     if (contents === undefined) {
-      throw new McpError(
-        ErrorCode.InvalidParams,
+      throw new ProtocolError(
+        ProtocolErrorCode.InvalidParams,
         `Unknown resource ${request.params.uri}; see resources/list.`,
       );
     }
@@ -105,8 +97,8 @@ export function createFundamentoServer(served: Served, options: ServerOptions = 
     outputSchema: bundleResultSchema(tool.output.schema, tool.error.schema) as { type: "object" },
     annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   }));
-  server.setRequestHandler(ListToolsRequestSchema, () => ({ tools: listed }));
-  server.setRequestHandler(CallToolRequestSchema, (request) => {
+  server.setRequestHandler("tools/list", () => ({ tools: listed }));
+  server.setRequestHandler("tools/call", (request) => {
     const name = request.params.name as ToolName;
     const tool = tools.find((candidate) => candidate.name === name);
     const args = request.params.arguments ?? {};
