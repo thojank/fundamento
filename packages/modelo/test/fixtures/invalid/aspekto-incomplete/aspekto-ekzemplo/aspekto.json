@@ -9,7 +9,10 @@
       "family": "Ekzempla Grotesk",
       "license": "proprietary",
       "source": "fictitious family for tests; no font file exists",
-      "redistributable": false
+      "redistributable": false,
+      "scripts": [
+        "Latn"
+      ]
     }
   ]
 }

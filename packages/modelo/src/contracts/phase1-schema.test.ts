@@ -90,7 +90,15 @@ describe("Spec 001 schema extensions (T005)", () => {
       name: "komuna",
       owner: "Fundamento",
       license: "MIT",
-      fonts: [{ family: "Geist", license: "OFL-1.1", source: "https://x", redistributable: true }],
+      fonts: [
+        {
+          family: "Geist",
+          license: "OFL-1.1",
+          source: "https://x",
+          redistributable: true,
+          scripts: ["Latn"],
+        },
+      ],
       reference: true,
       external: false,
       package: "@fundamento/aspekto-komuna",

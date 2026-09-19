@@ -37,6 +37,13 @@ export type NonEmptyText = string;
  */
 export type License = string;
 /**
+ * An ISO 15924 script code: four letters, the first uppercase (e.g. Latn, Cyrl, Hans).
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "Iso15924".
+ */
+export type Iso15924 = string;
+/**
  * This interface was referenced by `ModeloJson`'s JSON-Schema
  * via the `definition` "DtcgType".
  */
@@ -419,6 +426,12 @@ export interface Fonto {
   license: License;
   source: NonEmptyText;
   redistributable: boolean;
+  /**
+   * Writing systems the family covers, as ISO 15924 codes (Latn, Cyrl, Arab, Hans, …); at least one (Spec 001, T018b).
+   *
+   * @minItems 1
+   */
+  scripts: Iso15924[];
 }
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema
@@ -756,6 +769,15 @@ export interface DtcgGroup {
   [k: string]: DtcgNode | DtcgType | string | GroupExtensions | Deprecated | undefined;
 }
 /**
+ * Layers of the brand package (Spec 001, D-20): the Aspekto package is the brand package and the Vortaro is one of its layers. Phase 1 reserves only the key vida, with the empty value {}; other keys are allowed and ignored by validation.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "Tavoloj".
+ */
+export interface Tavoloj {
+  vida?: {};
+}
+/**
  * aspekto.json of an Aspekto package (Spec 001, D-05). `id` is the DimensioValoro ID of the Aspekto; `idNamespace` is required for every package except the reference Aspekto (checked on composition).
  *
  * This interface was referenced by `ModeloJson`'s JSON-Schema
@@ -768,6 +790,7 @@ export interface AspektoFile {
   license: License;
   idNamespace?: IdNamespace;
   fonts: Fonto[];
+  tavoloj?: Tavoloj;
 }
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema

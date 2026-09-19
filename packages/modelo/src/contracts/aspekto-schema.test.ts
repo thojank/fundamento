@@ -17,6 +17,7 @@ const KOMUNA = {
       license: "OFL-1.1",
       source: "https://github.com/vercel/geist-font",
       redistributable: true,
+      scripts: ["Latn"],
     },
   ],
 };
@@ -28,7 +29,13 @@ const EXTERNAL = {
   license: "proprietary",
   idNamespace: "ekz",
   fonts: [
-    { family: "Ekzempla Sans", license: "proprietary", source: "licensed", redistributable: false },
+    {
+      family: "Ekzempla Sans",
+      license: "proprietary",
+      source: "licensed",
+      redistributable: false,
+      scripts: ["Latn", "Cyrl"],
+    },
   ],
 };
 
@@ -57,5 +64,40 @@ describe("AspektoFile schema (D-05)", () => {
   ])("rejects %s", (_label, value) => {
     const cleaned = JSON.parse(JSON.stringify(value));
     expect(validate(cleaned)).toBe(false);
+  });
+});
+
+describe("fonts[].scripts and tavoloj (T018b, D-20)", () => {
+  const withFont = (font: Record<string, unknown>) => ({
+    ...KOMUNA,
+    fonts: [{ family: "Geist", license: "OFL-1.1", source: "x", redistributable: true, ...font }],
+  });
+
+  it.each([
+    ["one script", ["Latn"]],
+    ["several scripts", ["Latn", "Cyrl", "Arab", "Hans"]],
+  ])("accepts %s", (_label, scripts) => {
+    expect(validate(withFont({ scripts }))).toBe(true);
+  });
+
+  it.each([
+    ["missing scripts", {}],
+    ["an empty list", { scripts: [] }],
+    ["a lowercase code", { scripts: ["latn"] }],
+    ["a three-letter code", { scripts: ["Lat"] }],
+    ["a numeric code", { scripts: ["215"] }],
+  ])("rejects %s", (_label, font) => {
+    expect(validate(withFont(font))).toBe(false);
+  });
+
+  it("accepts tavoloj with the reserved key vida as {} and with unknown keys", () => {
+    expect(validate({ ...KOMUNA, tavoloj: { vida: {} } })).toBe(true);
+    expect(validate({ ...KOMUNA, tavoloj: { vida: {}, sono: { any: "thing" } } })).toBe(true);
+    expect(validate({ ...KOMUNA, tavoloj: {} })).toBe(true);
+  });
+
+  it("rejects a non-empty vida and a tavoloj that is not an object", () => {
+    expect(validate({ ...KOMUNA, tavoloj: { vida: { vortaro: "x" } } })).toBe(false);
+    expect(validate({ ...KOMUNA, tavoloj: ["vida"] })).toBe(false);
   });
 });

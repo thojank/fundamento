@@ -7,8 +7,8 @@ Companion to [`plan.md`](plan.md). Decision numbers (D-xx) refer to the plan. Th
 | Entity | Stored in | Fields | Validation |
 |---|---|---|---|
 | **AspektoPakajxo** | package folder | `aspekto.json`, `ids.lock.json`, `$themes.json` (derived), `sets/aspekto/<name>[+…].json`, optional `reguloj.json`, `jugxoj.json` | `aspekto-set-foreign`, `aspekto-incomplete`, `aspekto-reference-set-not-empty`, `themes-out-of-sync`, ID rules |
-| **Aspekto** (`aspekto.json`) | package root | `id` (`dva_…`), `name` (`Name` grammar), `owner`, `license` (SPDX id or `proprietary`), `idNamespace?` (`^[a-z]{2,8}$`, required for every package except the reference), `fonts[]` | `$defs/AspektoFile` in the one canonical `modelo.schema.json` (T004); `aspekto-name-duplicate`, `id-namespace-duplicate` |
-| **Fonto** | `aspekto.json#/fonts/<i>` | `family`, `license` (SPDX or `proprietary`), `source` (URL or text), `redistributable` (bool) | `aspekto-font-undeclared` (first family of every resolved `fontFamily` token must be declared or generic) |
+| **Aspekto** (`aspekto.json`) | package root | `id` (`dva_…`), `name` (`Name` grammar), `owner`, `license` (SPDX id or `proprietary`), `idNamespace?` (`^[a-z]{2,8}$`, required for every package except the reference), `fonts[]`, `tavoloj?` (layers; Phase 1 reserves `vida: {}`, other keys are ignored; D-20) | `$defs/AspektoFile` in the one canonical `modelo.schema.json` (T004); `aspekto-name-duplicate`, `id-namespace-duplicate` |
+| **Fonto** | `aspekto.json#/fonts/<i>` | `family`, `license` (SPDX or `proprietary`), `source` (URL or text), `redistributable` (bool), `scripts` (ISO 15924 codes, at least one; T018b) | `aspekto-font-undeclared` (first family of every resolved `fontFamily` token must be declared or generic) |
 | **Konfiguro** | `fundamento.config.json` (project root, not part of the Modelo) | `aspektoj: string[]` (path or npm name); nothing else, the reference Aspekto is not stated here (Q2) | `config-invalid`, `aspekto-package-missing` |
 | **Dimensio `aspekto`** | `data/dimensioj.json` | as in Phase 0, but `valoroj` is **assembled** from the loaded packages; new field `referenceAspekto` | `aspekto-reference-missing` (the reference package is not loaded) |
 | **Token** | sets | unchanged, plus `role` values and `textTransform` extension on typography composites | `color-role-missing`, `color-semantic-literal`, `dimensio-set-literal` |
@@ -129,6 +129,7 @@ Exempt by role: `disabled` (Regulo `disabled-exempt-from-contrast`) and `decorat
 | `aspekto-incomplete` | error | one issue per core token missing from `aspekto/<name>` |
 | `aspekto-set-foreign` | error | a package holds a set not conditioned on its own Aspekto |
 | `aspekto-font-undeclared` | error | a resolved font family is neither declared nor generic |
+| `aspekto-font-scripts-missing` | error | a font in `aspekto.json` lists no ISO 15924 `scripts` (T018b) |
 | `id-namespace-mismatch` | error | an ID in a package lacks the package namespace |
 | `id-namespace-duplicate` | error | two packages declare the same namespace |
 | `dimensio-set-literal` | error | a literal value in a set without an `aspekto` condition |

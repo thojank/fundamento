@@ -51,6 +51,7 @@ export const RULE_IDS = [
   "aspekto-incomplete",
   "aspekto-set-foreign",
   "aspekto-font-undeclared",
+  "aspekto-font-scripts-missing",
   // Generic Dimensio sets (Spec 001 T009)
   "dimensio-set-literal",
   "dimensio-set-primitive",

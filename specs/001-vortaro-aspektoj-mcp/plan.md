@@ -208,6 +208,10 @@ The Phase-0 Reguloj carry `checkability` (`automatic` or `manual`). Validation e
 
 **In the repo, `manual` for an automatically checkable rule is an error** (confirmed by the maintainer, 2026-09-19). `manual` is reserved for fixtures and for Reguloj that data cannot violate (in Phase 1 only `disabled-exempt-from-contrast`, an exemption). The test `data/regularo-repo.test.ts` enforces this: every automatic Regulo has an enforcer (or an always-on rule), and the four Reguloj above stay automatic. Following that rule, `typography-roles-composite`, `motion-reduced-instant`, `density-affects-layout-only` and the new `focus-ring-dual-contrast` are automatic too (rules `typography-role-not-composite`, `motion-reduced-not-instant`, `density-set-scope`, `focus-ring-pair-missing`).
 
+### D-20 `aspekto.json` knows font scripts and layers (added by the maintainer, T018b)
+
+`fonts[].scripts` is required: the ISO 15924 codes a family covers, at least one (rule `aspekto-font-scripts-missing`). `aspekto.json` may carry `tavoloj` (layers); Phase 1 reserves only `vida` with the empty value `{}` and ignores other keys. Reason: the Aspekto package is the brand package, and the Vortaro is one of its layers, so later layers can join the same package without changing its format.
+
 ## Project structure (after Phase 1)
 
 ```

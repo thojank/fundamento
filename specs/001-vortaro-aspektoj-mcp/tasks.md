@@ -84,6 +84,10 @@ Order follows the plan's "Build order". The ciferecigo package is the last task.
   - Red: `e2e/external-aspekto.test.ts`: `valid/aspekto-ekzemplo` (complete against the real core, `ekz` namespace, dark and high-contrast conjunctions, a fictitious font, flat-elevation Regulo, typography distinct from komuna) validates through its own `fundamento.config.json` (`$schema` relative to the repo schema); `invalid/aspekto-incomplete` lists exactly the removed tokens.
   - Green: fixture data (warm neutrals, petrol accent, a fictitious grotesk, light display weight, solid display line height, tighter tracking, flat elevation, sharper corners; both conjunction sets), plus `projectModeloSource(config)` (core + komuna + config packages, de-duplicated) and `vortaro:themes --config` (writes only the fragments of the listed packages). The Aspekto-scoped Regulo (flat elevation) is added in T021, when package Reguloj are read; adding its ID now would leave it orphaned.
 
+- [x] **T018b `aspekto.json`: font scripts and layers** (D-05, D-20; added by the maintainer 2026-09-19)
+  - Red: `contracts/aspekto-schema.test.ts`: `fonts[].scripts` is required, an array of ISO 15924 codes (`Latn`, `Cyrl`, `Arab`, `Hans`, …) with at least one entry; `tavoloj` is optional, knows only the reserved key `vida` with the empty value `{}`, and allows unknown keys. `validate/aspekto-file.test.ts`: a package font without `scripts` gives `aspekto-font-scripts-missing` (error) at `<pkg>/aspekto.json#/fonts/<i>/scripts`; a package with `tavoloj: { vida: {}, <unknown>: … }` validates without issues (validation ignores unknown keys). Repo test: komuna declares `["Latn"]` for Geist and Geist Mono.
+  - Green: schema (`Fonto.scripts`, `AspektoFile.tavoloj`), rule `aspekto-font-scripts-missing`, `scripts: ["Latn"]` in komuna, ekzemplo and every package fixture. No further logic in Phase 1.
+
 ## Stage 4 – Export
 
 - [ ] **T019 Export per Aspekto and `fm modelo export`** (D-09, AK-10)
