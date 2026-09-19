@@ -5,6 +5,7 @@ export * from "./checks/alirebleco/metrics.js";
 export * from "./checks/parity/inventory.js";
 export * from "./checks/regularo/rules.js";
 export * from "./checks/run.js";
+export * from "./config/index.js";
 export * from "./contracts/index.js";
 export * from "./export/index.js";
 export * from "./ids/index.js";

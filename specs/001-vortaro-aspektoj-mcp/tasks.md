@@ -27,9 +27,9 @@ Order follows the plan's "Build order". The ciferecigo package is the last task.
 - [x] **T003 ID namespaces** (D-06)
   - Red: grammar fixtures for `<type>_<ULID>` and `<type>_<ns>_<ULID>`; fast-check proves every Phase-0 ID still matches; `id:new --lock <pkg>/ids.lock.json` mints with the namespace from `aspekto.json`; the pure rules `id-namespace-mismatch` / `id-namespace-duplicate` (`checkIdNamespaces`). The Modelo fixtures `invalid/id-namespace-mismatch` and `invalid/id-namespace-duplicate` need package loading and move to T006.
   - Green: `contracts/entity-ids.ts`, schema ID defs, `ids/cli.ts`, rules.
-- [ ] **T004 Aspekto and config schemas** (D-05, D-07)
+- [x] **T004 Aspekto and config schemas** (D-05, D-07)
   - Red: `contracts/aspekto-schema.test.ts`, `config/read-config.test.ts`: valid/invalid `aspekto.json` (license SPDX or `proprietary`, `fonts[]`, `idNamespace`); config with paths and npm names resolved relative to the config file; `config-invalid`, `aspekto-package-missing` with the resolved path.
-  - Green: `schema/aspekto.schema.json`, `schema/config.schema.json`, generated types, `src/config/`.
+  - Green: `$defs/AspektoFile` (+ `Fonto`, `License`, `IdNamespace`) in `modelo.schema.json` (one canonical Modelo schema, Phase-0 principle); `schema/config.schema.json` stays separate because the config is not part of the Modelo; generated types for both; `src/config/`.
 - [ ] **T005 Modelo schema extensions and rule catalog**
   - Red: schema tests for `referenceAspekto`, the new `TokenRole` values, `aspekto` on Regulo/Jugxo, `origin.package`, the extended `AspektoEntry`, and `textTransform`; catalog test lists every rule of data-model §5; type-drift test.
   - Green: `modelo.schema.json`, `contracts/issues.ts`, regenerated types.

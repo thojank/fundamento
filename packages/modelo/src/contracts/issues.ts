@@ -41,6 +41,9 @@ export const RULE_IDS = [
   // ID namespaces of Aspekto packages (Spec 001 T003)
   "id-namespace-mismatch",
   "id-namespace-duplicate",
+  // Config and Aspekto packages (Spec 001 T004)
+  "config-invalid",
+  "aspekto-package-missing",
   // Dimensioj (FUND-3.2)
   "dimensio-default-invalid",
   "dimensio-priority-invalid",

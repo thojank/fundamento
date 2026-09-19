@@ -1202,6 +1202,42 @@
       "required": ["owner", "licenseNote"],
       "additionalProperties": false
     },
+    "License": {
+      "description": "An SPDX license expression, or `proprietary` for rights that are not openly licensed.",
+      "type": "string",
+      "pattern": "^(proprietary|[A-Za-z0-9][A-Za-z0-9.+-]*( (AND|OR|WITH) [A-Za-z0-9][A-Za-z0-9.+-]*)*)$"
+    },
+    "IdNamespace": {
+      "description": "ID namespace of an external Aspekto package (Spec 001, D-06): 2 to 8 lowercase letters.",
+      "type": "string",
+      "pattern": "^[a-z]{2,8}$"
+    },
+    "Fonto": {
+      "description": "A font family an Aspekto uses. Font files never enter the core repository; the fallback stack lives only in the fontFamily token value.",
+      "type": "object",
+      "properties": {
+        "family": { "$ref": "#/$defs/NonEmptyText" },
+        "license": { "$ref": "#/$defs/License" },
+        "source": { "$ref": "#/$defs/NonEmptyText" },
+        "redistributable": { "type": "boolean" }
+      },
+      "required": ["family", "license", "source", "redistributable"],
+      "additionalProperties": false
+    },
+    "AspektoFile": {
+      "description": "aspekto.json of an Aspekto package (Spec 001, D-05). `id` is the DimensioValoro ID of the Aspekto; `idNamespace` is required for every package except the reference Aspekto (checked on composition).",
+      "type": "object",
+      "properties": {
+        "id": { "$ref": "#/$defs/DimensioValoroId" },
+        "name": { "$ref": "#/$defs/Name" },
+        "owner": { "$ref": "#/$defs/NonEmptyText" },
+        "license": { "$ref": "#/$defs/License" },
+        "idNamespace": { "$ref": "#/$defs/IdNamespace" },
+        "fonts": { "type": "array", "items": { "$ref": "#/$defs/Fonto" } }
+      },
+      "required": ["id", "name", "owner", "license", "fonts"],
+      "additionalProperties": false
+    },
     "DimensioValoro": {
       "type": "object",
       "properties": {

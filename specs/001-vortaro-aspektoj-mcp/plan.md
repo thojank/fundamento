@@ -212,7 +212,7 @@ fundamento/
    ├─ aspekto-komuna/   package.json · aspekto.json · ids.lock.json · $themes.json · sets/aspekto/komuna.json (empty)
    │                    · sets/aspekto/komuna+color-scheme/dark.json
    ├─ modelo/
-   │   ├─ schema/       modelo.schema.json (extended) · config.schema.json · aspekto.schema.json
+   │   ├─ schema/       modelo.schema.json (extended, incl. `AspektoFile`) · config.schema.json
    │   ├─ data/         dimensioj.json (aspekto values removed, referenceAspekto added) · reguloj.json · jugxoj.json
    │   │                · kontrastparoj.json · ids.lock.json
    │   ├─ src/          + config/ (read and resolve fundamento.config.json) · aspekto/ (package loading, completeness,

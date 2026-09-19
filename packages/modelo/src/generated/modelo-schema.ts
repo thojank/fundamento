@@ -263,6 +263,20 @@ export type DtcgToken = {
   $deprecated?: Deprecated;
 };
 /**
+ * An SPDX license expression, or `proprietary` for rights that are not openly licensed.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "License".
+ */
+export type License = string;
+/**
+ * ID namespace of an external Aspekto package (Spec 001, D-06): 2 to 8 lowercase letters.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "IdNamespace".
+ */
+export type IdNamespace = string;
+/**
  * This interface was referenced by `ModeloJson`'s JSON-Schema
  * via the `definition` "IdStatus".
  */
@@ -677,6 +691,32 @@ export interface DtcgGroup {
   $extensions?: GroupExtensions;
   $deprecated?: Deprecated;
   [k: string]: DtcgNode | DtcgType | string | GroupExtensions | Deprecated | undefined;
+}
+/**
+ * A font family an Aspekto uses. Font files never enter the core repository; the fallback stack lives only in the fontFamily token value.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "Fonto".
+ */
+export interface Fonto {
+  family: NonEmptyText;
+  license: License;
+  source: NonEmptyText;
+  redistributable: boolean;
+}
+/**
+ * aspekto.json of an Aspekto package (Spec 001, D-05). `id` is the DimensioValoro ID of the Aspekto; `idNamespace` is required for every package except the reference Aspekto (checked on composition).
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "AspektoFile".
+ */
+export interface AspektoFile {
+  id: DimensioValoroId;
+  name: Name;
+  owner: NonEmptyText;
+  license: License;
+  idNamespace?: IdNamespace;
+  fonts: Fonto[];
 }
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema

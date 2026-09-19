@@ -16,6 +16,7 @@ export const SCHEMA_DEFS = {
   jugxojFile: "JugxojFile",
   kontrastParojFile: "KontrastParojFile",
   idsLock: "IdsLock",
+  aspektoFile: "AspektoFile",
   rezolvo: "Rezolvo",
   resolvedToken: "ResolvedToken",
   ero: "Ero",
@@ -41,6 +42,23 @@ export type DataFileName = keyof typeof DATA_FILE_SCHEMA_DEFS;
 /** Absolute schema reference of a def, e.g. `schemaRef("DimensiojFile")`. */
 export function schemaRef(defName: string): string {
   return `${MODELO_SCHEMA_ID}#/$defs/${defName}`;
+}
+
+export const CONFIG_SCHEMA_ID = "https://ciferecigo.com/fundamento/schema/config.schema.json";
+
+/**
+ * File URL of the schema of `fundamento.config.json` (D-07). It is separate from the Modelo
+ * schema because the config is not part of the Modelo; it only selects Aspekto packages.
+ */
+export const CONFIG_SCHEMA_URL = new URL("../../schema/config.schema.json", import.meta.url);
+
+/** Reads the config schema from disk as a parsed JSON object. */
+export function readConfigSchema(): Record<string, unknown> {
+  const schema: unknown = JSON.parse(readFileSync(CONFIG_SCHEMA_URL, "utf8"));
+  if (typeof schema !== "object" || schema === null || Array.isArray(schema)) {
+    throw new Error(`Config schema ${CONFIG_SCHEMA_URL.href} is not a JSON object.`);
+  }
+  return { ...schema };
 }
 
 /** Reads the canonical schema from disk as a parsed JSON object. */

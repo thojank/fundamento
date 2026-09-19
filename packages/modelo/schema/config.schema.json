@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ciferecigo.com/fundamento/schema/config.schema.json",
+  "title": "fundamento.config.json",
+  "description": "Project configuration (Spec 001, D-07). It selects Aspekto packages and nothing else; it is not part of the Modelo. The reference Aspekto is stated only in the Modelo (core.referenceAspekto).",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "minLength": 1
+    },
+    "aspektoj": {
+      "description": "Aspekto packages to include besides the reference Aspekto: a path relative to this file, or an npm package name resolved from this file's directory.",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    }
+  },
+  "required": ["aspektoj"],
+  "additionalProperties": false
+}
