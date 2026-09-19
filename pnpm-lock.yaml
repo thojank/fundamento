@@ -32,6 +32,9 @@ importers:
         specifier: workspace:*
         version: link:../modelo
     devDependencies:
+      '@modelcontextprotocol/sdk':
+        specifier: 1.30.0
+        version: 1.30.0(zod@4.6.5)
       '@types/node':
         specifier: ^24.13.5
         version: 24.13.5

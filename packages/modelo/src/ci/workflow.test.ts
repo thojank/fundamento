@@ -7,6 +7,8 @@ import { CHECK_NAMES } from "../contracts/checks.js";
 const repoRoot = fileURLToPath(new URL("../../../../", import.meta.url));
 const workflowPath = `${repoRoot}.github/workflows/ci.yml`;
 const packageJsonPath = `${repoRoot}package.json`;
+const mcpPackageJsonPath = `${repoRoot}packages/mcp/package.json`;
+const mcpE2eDir = `${repoRoot}packages/mcp/src/e2e/`;
 
 const CHECK_STEPS: ReadonlyArray<readonly [name: string, script: string]> = [
   ["Check: Vortaro-Lint", "check:vortaro-lint"],
@@ -175,5 +177,22 @@ describe("root package.json check script", () => {
     for (const [, script] of CHECK_STEPS) {
       expect(scripts[script]).toBe(`node packages/modelo/dist/checks/run.js ${script.slice(6)}`);
     }
+  });
+});
+
+describe("the MCP acceptance suite runs in the Test gate (Spec 001 T028)", () => {
+  const pkg: unknown = JSON.parse(readFileSync(mcpPackageJsonPath, "utf8"));
+  const scripts = isRecord(pkg) && isRecord(pkg.scripts) ? pkg.scripts : {};
+
+  it("@fundamento/mcp has tests and no longer passes without them", () => {
+    expect(scripts.test).toBe("vitest run");
+  });
+
+  it.each(["s7-dialog.test.ts", "perf.test.ts"])("has %s", (file) => {
+    expect(existsSync(`${mcpE2eDir}${file}`)).toBe(true);
+  });
+
+  it("has the quickstart test in the cli package, which spawns the built fm", () => {
+    expect(existsSync(`${repoRoot}packages/cli/src/quickstart.test.ts`)).toBe(true);
   });
 });

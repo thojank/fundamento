@@ -255,7 +255,7 @@ CI (`ci.yml`): same named steps. The Test step now includes the fixture-config r
 
 | Dependency | Version | Package | Reason | License |
 |---|---|---|---|---|
-| `@modelcontextprotocol/sdk` | 1.30.0 (pinned, no range) | `mcp` | Official MCP TypeScript SDK (spec constraint: no own protocol implementation). The low-level `Server`, `StdioServerTransport` and `StreamableHTTPServerTransport` are used directly (Art. XI). | MIT |
+| `@modelcontextprotocol/sdk` | 1.30.0 (pinned, no range) | `mcp`; `cli` (dev: the quickstart test drives `fm mcp` as a client) | Official MCP TypeScript SDK (spec constraint: no own protocol implementation). The low-level `Server`, `StdioServerTransport` and `StreamableHTTPServerTransport` are used directly (Art. XI). | MIT |
 | `zod` | ^4 | `mcp` | Required peer dependency of the SDK. It is **not** used for Fundamento's own schemas, which stay hand-written JSON Schema. | MIT |
 
 No other new third-party dependency. The SDK's transitive HTTP stack (express, hono, cors, …) is only loaded on the `--http` path. `pnpm-lock.yaml` is changed in the first ticket only (Phase-0 practice).

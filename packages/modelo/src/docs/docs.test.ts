@@ -64,6 +64,8 @@ function declaredDependencies(): string[] {
     "packages/modelo/package.json",
     "packages/vortaro/package.json",
     "packages/cli/package.json",
+    "packages/mcp/package.json",
+    "packages/aspekto-komuna/package.json",
   ];
   const names = new Set<string>();
   for (const manifest of manifests) {
@@ -139,13 +141,25 @@ describe("specs/000-fundamento-repo/plan.md (FR-19, AK-08)", () => {
   });
 
   it("records a reason for every declared third-party dependency", () => {
-    const deps = section(plan, "Dependencies");
+    // Phase 0 installed the base toolchain; Spec 001 added the MCP SDK and its peer. Each plan's
+    // Dependencies table names its own columns, so the reason is found by its header.
+    const tables = [plan, read("specs/001-vortaro-aspektoj-mcp/plan.md")].map((text) =>
+      section(text, "Dependencies")
+        .split("\n")
+        .filter((line) => line.startsWith("|")),
+    );
     for (const name of declaredDependencies()) {
-      const row = deps.split("\n").find((line) => line.startsWith(`| \`${name}\` |`));
-      expect(row, `dependency ${name} missing from plan.md`).toBeDefined();
-      const cells = (row ?? "").split("|").map((cell) => cell.trim());
-      // | name | version | reason |
-      expect(cells[3]?.length ?? 0, `dependency ${name} needs a reason`).toBeGreaterThan(10);
+      const table = tables.find((lines) =>
+        lines.some((line) => line.startsWith(`| \`${name}\` |`)),
+      );
+      expect(table, `dependency ${name} missing from the plans' Dependencies tables`).toBeDefined();
+      const cellsOf = (line: string) => line.split("|").map((cell) => cell.trim());
+      const reasonIndex = cellsOf(table?.[0] ?? "").indexOf("Reason");
+      const row = table?.find((line) => line.startsWith(`| \`${name}\` |`)) ?? "";
+      expect(
+        cellsOf(row)[reasonIndex]?.length ?? 0,
+        `dependency ${name} needs a reason`,
+      ).toBeGreaterThan(10);
     }
   });
 

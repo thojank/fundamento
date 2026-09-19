@@ -6,9 +6,10 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import {
   buildModelo,
+  buildModeloJson,
+  buildRezolvojJson,
   defaultModeloSource,
   EXPORT_FILE_NAMES,
-  exportModelo,
   type Modelo,
   type ModeloJson,
   type ModeloSource,
@@ -16,6 +17,7 @@ import {
   projectModeloSource,
   readModeloFiles,
   readModeloSchema,
+  serializeCanonicalJson,
   type ValidationIssue,
   validateModeloFiles,
 } from "@fundamento/modelo";
@@ -33,7 +35,7 @@ export interface Served {
   modelo: Modelo;
   /** Validation issues found at start (none for a pre-built export: it was valid when written). */
   report: { errors: ValidationIssue[]; warnings: ValidationIssue[] };
-  /** The export files for the resources, when an export exists. */
+  /** The export files for the resources; absent for an invalid Modelo. */
   exportFiles?: { modeloJson: string; schemaJson: string; rezolvojJson: string };
   /** The source the server composed, for validating a package against the same core. */
   source?: ModeloSource;
@@ -71,23 +73,9 @@ export function loadServed(options: LoadOptions = {}): Served {
   if (files === undefined) throw new ServedLoadError(issues);
   const report = validateModeloFiles(files, issues);
   const built = buildModelo(files).modelo;
-  try {
-    const exported = exportModelo({ modelo: built, sets: files.sets, schema: readModeloSchema() });
-    const modeloJson = JSON.parse(exported.modeloJson) as ModeloJson;
-    return {
-      modeloJson,
-      modelo: modeloFromExport(modeloJson),
-      report: { errors: report.errors, warnings: report.warnings },
-      exportFiles: {
-        modeloJson: exported.modeloJson,
-        schemaJson: exported.schemaJson,
-        rezolvojJson: exported.rezolvojJson,
-      },
-      source,
-    };
-  } catch {
-    // An invalid Modelo may not be exportable (e.g. an unresolvable alias). Serve what the source
-    // gives, so `describe` and `validate` can still explain what is wrong.
+  if (report.errors.length > 0) {
+    // An invalid Modelo is not exported (as with `fm modelo export`) and may not even be
+    // exportable. Serve what the source gives, so `describe` and `validate` can explain it.
     return {
       modeloJson: partialModeloJson(built),
       modelo: built,
@@ -95,6 +83,29 @@ export function loadServed(options: LoadOptions = {}): Served {
       source,
     };
   }
+  // The same functions as `fm modelo export`, so the resources have its bytes. rezolvoj.json
+  // (every combination) is built on first read: it is the costly part and only a resource needs
+  // it (AK-07 start budget).
+  const schema = readModeloSchema();
+  const modeloJsonText = serializeCanonicalJson(
+    buildModeloJson({ modelo: built, sets: files.sets, schema }),
+  );
+  const modeloJson = JSON.parse(modeloJsonText) as ModeloJson;
+  let rezolvojJson: string | undefined;
+  return {
+    modeloJson,
+    modelo: modeloFromExport(modeloJson),
+    report: { errors: report.errors, warnings: report.warnings },
+    exportFiles: {
+      modeloJson: modeloJsonText,
+      schemaJson: serializeCanonicalJson(schema),
+      get rezolvojJson() {
+        rezolvojJson ??= serializeCanonicalJson(buildRezolvojJson(built));
+        return rezolvojJson;
+      },
+    },
+    source,
+  };
 }
 
 /** The parts of modelo.json that need no resolution, for a Modelo that cannot be exported. */

@@ -123,8 +123,8 @@ Order follows the plan's "Build order". The ciferecigo package is the last task.
 - [x] **T027 CLI commands** (D-07, D-13)
   - Red: `packages/cli` tests: `fm mcp --help`, `fm modelo validate --aspekto <dir>` (repeatable) and `--config`, `fm modelo export`; exit codes 0/1/2 and "did you mean"; `fundamento-mcp` bin.
   - Green: `commands/mcp.ts`, `commands/modelo-export.ts`, flags in `modelo-validate.ts`.
-- [ ] **T028 Acceptance suite** (AK-06, AK-07, Art. XIII)
-  - Red: `packages/mcp/src/e2e/s7-dialog.test.ts` (three S7 questions against the ekzemplo config, every number recomputed from `modelo.json`); `perf.test.ts` (spawn to first `describe` < 2 s, 100 × `resolve` < 100 ms each, factor 3 under `CI=true`, raw timings logged); `quickstart.test.ts` (spawn `fm mcp`, `initialize`, `tools/list` = 10 tools); `ci/workflow.test.ts` updated.
+- [x] **T028 Acceptance suite** (AK-06, AK-07, Art. XIII)
+  - Red: `packages/mcp/src/e2e/s7-dialog.test.ts` (three S7 questions against the ekzemplo config, every number recomputed from `modelo.json`); `perf.test.ts` (spawn to first `describe` < 2 s, 100 × `resolve` < 100 ms each, factor 3 under `CI=true` and inside the Turborepo gate (`TURBO_HASH`; measured 0.8 s alone, 3.6 s with every package testing in parallel), strict when run alone, raw timings logged); `quickstart.test.ts` (spawn `fm mcp`, `initialize`, `tools/list` = 10 tools); `ci/workflow.test.ts` updated.
   - Green: fixes only; no new features.
 - [ ] **T029 Documentation of the repository**
   - Red: `docs/docs.test.ts` extended: README lists the new commands and the per-Aspekto Penpot folder; `plan.md` Traceability maps every FR/AK of Spec 001 to task IDs; no Anhang-A value outside the allowlist (reuses T022).

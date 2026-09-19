@@ -15,7 +15,9 @@ afterAll(() => {
 const configOf = (root: string) => `${root}/fundamento.config.json`;
 const REGULOJ = "aspekto-ekzemplo/reguloj.json";
 
-describe("package Reguloj (D-10)", () => {
+// Each case validates a full project Modelo (144 combinations): sized for a loaded runner
+// (Jugxo jug_01M2W3K1YPP05F4XF86J71RGTK).
+describe("package Reguloj (D-10)", { timeout: 30_000 }, () => {
   it("joins the Modelo's Regularo, scoped to the package's Aspekto", () => {
     const { modelo } = loadModelo(
       projectModeloSource(configOf(fixtureRoot("valid", "aspekto-ekzemplo"))),
