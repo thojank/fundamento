@@ -88,12 +88,14 @@ function exportedSet(
   if (!trees.has(set.name)) {
     throw new ModeloExportError(`No raw tree was supplied for set ${set.name}.`);
   }
-  return {
+  const exported: ModeloJson["setoj"][number] = {
     id: requireId(set.id, `Set ${set.name}`),
     name: set.name,
     kondicxoj: set.kondicxoj.map((kondicxo) => `${kondicxo.dimensio}=${kondicxo.valoro}`),
     tree: structuredClone(trees.get(set.name)) as TokenSetFile,
   };
+  if (set.package !== undefined) exported.package = set.package;
+  return exported;
 }
 
 /**
@@ -150,6 +152,7 @@ export function buildModeloJson(input: ModeloExportInput): ModeloJson {
         package: pkg.name,
       };
       if (pkg.license !== undefined) entry.license = pkg.license;
+      if (pkg.namespace !== undefined) entry.idNamespace = pkg.namespace;
       if (pkg.fonts !== undefined) entry.fonts = structuredClone(pkg.fonts);
       return [entry];
     }),

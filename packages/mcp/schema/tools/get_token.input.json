@@ -3,6 +3,7 @@
   "$id": "https://ciferecigo.com/fundamento/schema/mcp/get_token.input.json",
   "title": "get_token input",
   "description": "One token with its core definition and every override.",
+  "type": "object",
   "oneOf": [
     {
       "type": "object",

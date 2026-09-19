@@ -111,7 +111,7 @@ Order follows the plan's "Build order". The ciferecigo package is the last task.
 - [x] **T023 Tool schemas and contract tests** (contracts/mcp-tools.md)
   - Red: `packages/mcp/src/contracts.test.ts`: ten input/output schemas compile with Ajv and `$ref` the Modelo schema; examples from the contract validate.
   - Green: `packages/mcp/schema/tools/*.json`.
-- [ ] **T024 Server core and read tools** (D-13)
+- [x] **T024 Server core and read tools** (D-13)
   - Red: in-process client tests for `describe`, `list_dimensioj`, `list_aspektoj`, `search_tokens` (segment prefix, limit/offset), `get_token` (`token-unknown` + `allowed`); outputs validate against the T023 schemas; the server starts on an invalid Modelo and reports the error count.
   - Green: `server.ts`, `load.ts` (in-memory export via the same function as `fm modelo export`; `--export <dir>`), stdio transport.
 - [ ] **T025 Resolve, rules, validate, derive_name** (D-13, FR-18)

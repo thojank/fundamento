@@ -44,6 +44,13 @@ export type License = string;
  */
 export type Iso15924 = string;
 /**
+ * ID namespace of an external Aspekto package (Spec 001, D-06): 2 to 8 lowercase letters.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "IdNamespace".
+ */
+export type IdNamespace = string;
+/**
  * This interface was referenced by `ModeloJson`'s JSON-Schema
  * via the `definition` "DtcgType".
  */
@@ -293,13 +300,6 @@ export type DtcgToken = {
   $deprecated?: Deprecated;
 };
 /**
- * ID namespace of an external Aspekto package (Spec 001, D-06): 2 to 8 lowercase letters.
- *
- * This interface was referenced by `ModeloJson`'s JSON-Schema
- * via the `definition` "IdNamespace".
- */
-export type IdNamespace = string;
-/**
  * This interface was referenced by `ModeloJson`'s JSON-Schema
  * via the `definition` "IdStatus".
  */
@@ -420,6 +420,7 @@ export interface AspektoEntry {
    */
   external?: boolean;
   package?: NonEmptyText;
+  idNamespace?: IdNamespace;
 }
 /**
  * A font family an Aspekto uses. Font files never enter the core repository; the fallback stack lives only in the fontFamily token value.
@@ -459,6 +460,10 @@ export interface ExportedSet {
   name: SetName;
   kondicxoj: KondicxoExpression[];
   tree: TokenSetFile;
+  /**
+   * The Aspekto package that holds the set (Spec 001, D-08); absent for core sets.
+   */
+  package?: string;
 }
 /**
  * Root of a set file (vortaro/sets/<set-name>.json): a DTCG group whose extension carries the set ID and its kondicxoj (empty for core).

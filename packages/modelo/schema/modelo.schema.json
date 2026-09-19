@@ -1830,6 +1830,9 @@
         },
         "package": {
           "$ref": "#/$defs/NonEmptyText"
+        },
+        "idNamespace": {
+          "$ref": "#/$defs/IdNamespace"
         }
       },
       "required": ["id", "name", "owner"],
@@ -1875,6 +1878,10 @@
         },
         "tree": {
           "$ref": "#/$defs/TokenSetFile"
+        },
+        "package": {
+          "description": "The Aspekto package that holds the set (Spec 001, D-08); absent for core sets.",
+          "$ref": "#/$defs/NonEmptyText"
         }
       },
       "required": ["id", "name", "kondicxoj", "tree"],
