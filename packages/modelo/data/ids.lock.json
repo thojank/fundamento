@@ -328,6 +328,18 @@
       "status": "active",
       "type": "kontrastParo"
     },
+    "kpa_01M2XKQ2JPCM7KHWKW5JQARB3A": {
+      "status": "active",
+      "type": "kontrastParo"
+    },
+    "kpa_01M2XKQ2JQPSK3CAVAYNQ90236": {
+      "status": "active",
+      "type": "kontrastParo"
+    },
+    "kpa_01M2XKQ2JQPSK3CAVAYNQ90237": {
+      "status": "active",
+      "type": "kontrastParo"
+    },
     "reg_01M2VEEE5280TGESDHQQ14EA33": {
       "status": "active",
       "type": "regulo"
@@ -1793,6 +1805,26 @@
       "type": "token"
     },
     "tok_01M2X7P56E9TCC4H8FW10YM7Q9": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M2XKPB5B8ZHNVRJJDC0TDTBN": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M2XKPB5CWJD16SX2RNJZ398S": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M2XKPB5CWJD16SX2RNJZ398T": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M2XKPB5DHNTHAYCE5HP5SQKB": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M2XKPB5DHNTHAYCE5HP5SQKC": {
       "status": "active",
       "type": "token"
     }

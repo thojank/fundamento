@@ -62,7 +62,8 @@ describe("resolve", async () => {
     const byPrefix = await output<Resolved>(client, "resolve", { tokens: ["color.action"] });
     expect(Object.keys(byPrefix.assignment)).toHaveLength(6);
     expect(byPrefix.assignment.aspekto).toBe("komuna");
-    expect(Object.keys(byPrefix.tokens)).toHaveLength(18);
+    // 3 variants × 6 + color.action.danger.* × 4 (Spec 003 T003)
+    expect(Object.keys(byPrefix.tokens)).toHaveLength(22);
     const all = await output<Resolved>(client, "resolve");
     expect(Object.keys(all.tokens)).toHaveLength(served.modeloJson.tokens.length);
   });

@@ -141,6 +141,27 @@
       "kategorio": "text-normal"
     },
     {
+      "id": "kpa_01M2XKQ2JPCM7KHWKW5JQARB3A",
+      "name": "action-danger-text-on-fill",
+      "foreground": "color.action.danger.text",
+      "background": "color.action.danger.rest",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M2XKQ2JQPSK3CAVAYNQ90236",
+      "name": "action-danger-text-on-action-danger-hover",
+      "foreground": "color.action.danger.text",
+      "background": "color.action.danger.hover",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M2XKQ2JQPSK3CAVAYNQ90237",
+      "name": "action-danger-text-on-action-danger-pressed",
+      "foreground": "color.action.danger.text",
+      "background": "color.action.danger.pressed",
+      "kategorio": "text-normal"
+    },
+    {
       "id": "kpa_01M2W9W6QK3YTCXM2XBRA41K6A",
       "name": "action-secondary-text-on-action-secondary-rest",
       "foreground": "color.action.secondary.text",

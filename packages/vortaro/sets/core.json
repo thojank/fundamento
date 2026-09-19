@@ -1697,6 +1697,48 @@
             }
           }
         }
+      },
+      "danger": {
+        "rest": {
+          "$value": "{color.palette.danger.700}",
+          "$description": "Danger action: fill at rest, for the main action that destroys data (butono tone=danger).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2XKPB5B8ZHNVRJJDC0TDTBN",
+              "role": "background"
+            }
+          }
+        },
+        "hover": {
+          "$value": "{color.palette.danger.800}",
+          "$description": "Danger action: fill on hover.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2XKPB5CWJD16SX2RNJZ398S",
+              "role": "background"
+            }
+          }
+        },
+        "pressed": {
+          "$value": "{color.palette.danger.900}",
+          "$description": "Danger action: fill while pressed.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2XKPB5CWJD16SX2RNJZ398T",
+              "role": "background"
+            }
+          }
+        },
+        "text": {
+          "$value": "{color.palette.neutral.0}",
+          "$description": "Danger action: label and icon on the danger fill in every state.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2XKPB5DHNTHAYCE5HP5SQKB",
+              "role": "foreground"
+            }
+          }
+        }
       }
     },
     "navigation": {
@@ -4088,6 +4130,17 @@
         "$extensions": {
           "com.ciferecigo.fundamento": {
             "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JTY"
+          }
+        }
+      }
+    },
+    "target": {
+      "min": {
+        "$value": "{size.scale.400}",
+        "$description": "Minimum width and height of a pointer target (WCAG 2.5.8 Target Size (Minimum), AA: 24 × 24 px); the threshold of the Regulo touch-target-min.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2XKPB5DHNTHAYCE5HP5SQKC"
           }
         }
       }

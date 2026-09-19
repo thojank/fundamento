@@ -11,7 +11,7 @@ Companion to [`plan.md`](plan.md). Decision numbers (D-xx) and open points (Q-x)
 | **Regulo** | `data/reguloj.json` | `appliesTo.eroj` (new criterion); four Ero Reguloj (§3) | schema; repo test (enforcer in validation or usage table) |
 | **Jugxo** | `data/jugxoj.json` | optional `ekzemplo` (an instance list, §5) for examples right and wrong | schema; `ekzemplo` instances validated against the Skemo |
 | **Token** | `packages/vortaro/sets/core.json` and the Dimensio sets; komuna, ekzemplo | Q1 (decided): `color.action.danger.{rest,hover,pressed,text}`; `size.target.min` (24 px, core only) | existing rules incl. `state-distinct`; completeness for every Aspekto |
-| **KontrastParo** | `data/kontrastparoj.json` | Q1: three pairs `action-danger-text-on-action-danger-{rest,hover,pressed}` | existing rules; `skemo-kontrastparo-missing` |
+| **KontrastParo** | `data/kontrastparoj.json` | Q1: three pairs `action-danger-text-on-fill`, `action-danger-text-on-action-danger-{hover,pressed}` | existing rules; `skemo-kontrastparo-missing` |
 | **Instance** (not stored) | MCP input of `check_usage`, Jugxo `ekzemplo` | `{ ero, props, container?, intent?, label? }` | against the Skemo |
 
 ## 2. Skemo (`skemo.json`)

@@ -943,6 +943,20 @@
         "text": {
           "$value": "{color.palette.accent.700}"
         }
+      },
+      "danger": {
+        "rest": {
+          "$value": "{color.palette.danger.700}"
+        },
+        "hover": {
+          "$value": "{color.palette.danger.800}"
+        },
+        "pressed": {
+          "$value": "{color.palette.danger.900}"
+        },
+        "text": {
+          "$value": "{color.palette.neutral.0}"
+        }
       }
     },
     "navigation": {
@@ -2032,6 +2046,11 @@
           "value": 1024,
           "unit": "px"
         }
+      }
+    },
+    "target": {
+      "min": {
+        "$value": "{size.scale.400}"
       }
     }
   },

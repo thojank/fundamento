@@ -128,6 +128,20 @@
         "text": {
           "$value": "{color.palette.accent.300}"
         }
+      },
+      "danger": {
+        "rest": {
+          "$value": "{color.palette.danger.300}"
+        },
+        "hover": {
+          "$value": "{color.palette.danger.200}"
+        },
+        "pressed": {
+          "$value": "{color.palette.danger.100}"
+        },
+        "text": {
+          "$value": "{color.palette.neutral.950}"
+        }
       }
     },
     "navigation": {

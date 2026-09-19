@@ -66,6 +66,17 @@
         "text": {
           "$value": "{color.palette.accent.800}"
         }
+      },
+      "danger": {
+        "rest": {
+          "$value": "{color.palette.danger.800}"
+        },
+        "hover": {
+          "$value": "{color.palette.danger.900}"
+        },
+        "pressed": {
+          "$value": "{color.palette.danger.950}"
+        }
       }
     },
     "navigation": {

@@ -71,7 +71,7 @@ Ero and Skemo are two entities with their own IDs in one file, `data/eroj/butono
 
 ### D-03 Skemo ↔ Vortaro validation (FR-04)
 
-New rules: `skemo-token-missing` (a bound token does not exist in core), `skemo-token-type` (a binding's token has the wrong type for its part property), `skemo-binding-missing` (a variant × tone × state combination has no binding for a part that needs one), `skemo-kontrastparo-missing` (the label-on-surface pair of a variant × tone × state is not a declared KontrastParo; `disabled` exempt by the Phase-1 Regulo). The twelve action pairs already exist; `tone=danger` needs three more: `color.action.danger.text` on `color.action.danger.{rest,hover,pressed}` (Q1). Positive and negative fixtures per rule (AK-01).
+New rules: `skemo-token-missing` (a bound token does not exist in core), `skemo-token-type` (a binding's token has the wrong type for its part property), `skemo-binding-missing` (a variant × tone × state combination has no binding for a part that needs one), `skemo-kontrastparo-missing` (the label-on-surface pair of a variant × tone × state is not a declared KontrastParo; `disabled` exempt by the Phase-1 Regulo). The twelve action pairs already exist; `tone=danger` needs three more: `color.action.danger.text` on `color.action.danger.{rest,hover,pressed}` (Q1; `action-danger-text-on-fill`, `…-on-action-danger-hover`, `…-on-action-danger-pressed`). Positive and negative fixtures per rule (AK-01).
 
 ### D-04 Ero Reguloj (FR-03)
 
