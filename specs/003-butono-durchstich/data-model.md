@@ -10,7 +10,7 @@ Companion to [`plan.md`](plan.md). Decision numbers (D-xx) and open points (Q-x)
 | **Skemo** | `…/skemo.json#/skemo` | grows from props + states to the full specification (§2) | schema; Skemo ↔ Vortaro rules (§4) |
 | **Regulo** | `data/reguloj.json` | `appliesTo.eroj` (new criterion); four Ero Reguloj (§3) | schema; repo test (enforcer in validation or usage table) |
 | **Jugxo** | `data/jugxoj.json` | optional `ekzemplo` (an instance list, §5) for examples right and wrong | schema; `ekzemplo` instances validated against the Skemo |
-| **Token** | `packages/vortaro/sets/core.json` and the Dimensio sets; komuna, ekzemplo | Q1 (decided): `color.action.danger.{rest,hover,pressed,text}` | existing rules incl. `state-distinct`; completeness for every Aspekto |
+| **Token** | `packages/vortaro/sets/core.json` and the Dimensio sets; komuna, ekzemplo | Q1 (decided): `color.action.danger.{rest,hover,pressed,text}`; `size.target.min` (24 px, core only) | existing rules incl. `state-distinct`; completeness for every Aspekto |
 | **KontrastParo** | `data/kontrastparoj.json` | Q1: three pairs `action-danger-text-on-action-danger-{rest,hover,pressed}` | existing rules; `skemo-kontrastparo-missing` |
 | **Instance** (not stored) | MCP input of `check_usage`, Jugxo `ekzemplo` | `{ ero, props, container?, intent?, label? }` | against the Skemo |
 
@@ -96,7 +96,7 @@ Rules of the schema (`$defs/EroFile`, `$defs/Skemo`, `$defs/SkemoBinding`, `$def
 | `one-primary-per-container` | A container holds at most one `butono` with `variant=primary`. | Two equal calls to action move the decision onto the user; one primary action makes the next step obvious. | `eroj: [butono]` | usage (`check_usage`) |
 | `destructive-not-primary-color` | An action that destroys data is never `variant=primary` with `tone=default`: as the main action it is `primary` + `danger`, next to another primary action it is `secondary`. | The primary colour promises the expected next step; a destructive action needs a colour that warns before it acts. | `eroj: [butono]` | usage |
 | `label-required` | Every `butono` has a visible label or, icon-only, a `label` prop as accessible name. | A button without a name cannot be found or understood by assistive technology, and an icon alone is not understood by everyone. | `eroj: [butono]` | usage; axe in the rendered check |
-| `touch-target-min` | Every resolved `size.control.*` is at least 24 px in every combination. | WCAG 2.5.8 (AA) requires a 24 × 24 px target; smaller targets fail people with tremor or large fingers. | `tokens: [size.control.*]` | validation (Modelo) |
+| `touch-target-min` | Every resolved `size.control.*` is at least `size.target.min` (24 px) in every combination. | WCAG 2.5.8 (AA) requires a 24 × 24 px target; smaller targets fail people with tremor or large fingers. | `tokens: [size.control.*]` | validation (Modelo) |
 
 New rule IDs: `one-primary-per-container`, `destructive-not-primary-color`, `label-required`, `touch-target-min` (issue rule = Regulo name, as in Spec 002).
 
@@ -144,7 +144,7 @@ New rule IDs: `one-primary-per-container`, `destructive-not-primary-color`, `lab
 
 ## 7. New rule-catalog entries
 
-`skemo-token-missing`, `skemo-token-type`, `skemo-binding-missing`, `skemo-kontrastparo-missing`, `skemo-intent-invalid`, `skemo-constraint-invalid`, `ero-prop-constraint`, `jugxo-ekzemplo-invalid`, `one-primary-per-container`, `destructive-not-primary-color`, `label-required`, `touch-target-min`, `css-physical-property` (lint), `parity-binding-mismatch`, `ero-unknown`, `intent-unknown`.
+`skemo-token-missing`, `skemo-token-type`, `skemo-binding-missing`, `skemo-kontrastparo-missing`, `skemo-intent-invalid`, `skemo-constraint-invalid`, `ero-prop-constraint`, `jugxo-ekzemplo-invalid`, `one-primary-per-container`, `destructive-not-primary-color`, `label-required`, `touch-target-min`, `css-physical-property` (lint), `ero-hardcoded-string` (lint), `parity-binding-mismatch`, `ero-unknown`, `intent-unknown`.
 
 ## 8. Migration
 

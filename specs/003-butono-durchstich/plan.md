@@ -82,7 +82,7 @@ Four new Reguloj scoped to the Ero (`appliesTo.eroj: ["butono"]`, a new criterio
 | `one-primary-per-container` | `check_usage` | at most one instance with `variant=primary` per `container` |
 | `destructive-not-primary-color` | `check_usage` | an instance with `intent: "destructive"` is never `variant=primary` with `tone=default`; as the main action (a confirmation dialog) it is `primary` + `danger`, next to another primary action it is `secondary` |
 | `label-required` | `check_usage`, and axe in the rendered check | every instance has a visible label or an accessible name |
-| `touch-target-min` | validation (Modelo) | every resolved `size.control.*` ≥ 24 px in every combination (WCAG 2.5.8 AA; today ≥ 28 px) |
+| `touch-target-min` | validation (Modelo), and the rendered size in the component test | every resolved `size.control.*` ≥ `size.target.min` (a new core token, 24 px, WCAG 2.5.8 AA; today ≥ 28 px) in every combination; `fm-butono`'s rendered box ≥ 24 × 24 px |
 
 The three usage Reguloj are `automatic` with an enforcer in the usage evaluation, not in Modelo validation: the repo test "every automatic Regulo has an enforcer" (Spec 001 D-19) accepts either table. Examples right and wrong are Jugxoj with `ref: { ero }` and a new optional `ekzemplo` (an instance list), from which the generators render snippets.
 
@@ -218,7 +218,8 @@ README.md               generated
   - no hex value anywhere; a test greps for it.
 - **Test (AK-08).** A fresh Vite 8 + React 18 project, and one with React 19 and Tailwind 4.3, installs the packed tarball, imports the CSS, renders `<Butono>`, builds, and passes axe and the computed-style check.
 - **Getting the guidelines into Figma.** Figma reads guidelines from the kit, not the package (research §6.1). The maintainer creates the kit, adds the package and copies the `guidelines/` folder into the kit's `guidelines/` (one manual step, documented in `quickstart.md`). The package keeps them so the kit can be rebuilt from any version.
-- **Publishing (Q2).** `@fundamento/make-kit-komuna` and `@fundamento/make-kit-ekzemplo` become public pre-releases on npm under the dist-tag `next`, version 0.x; no organisation registry. The kits' license is MIT; for ekzemplo that follows from its invented values, and its fictitious font ships as a family name with a fallback stack, never as a file. The phase prepares `pnpm publish --dry-run --tag next` and documents the result below; the maintainer publishes after the acceptance.
+- **Release path (review).** `.github/workflows/release.yml`, `workflow_dispatch` only, `permissions: id-token: write, contents: read`, npm Trusted Publishing with provenance; no `NPM_TOKEN` secret, no token in `.npmrc`. The maintainer registers the Trusted Publisher after the acceptance; the scope `@fundamento` belongs to the npm org „fundamento". Every kit tarball passes the clean-room fingerprints (T018).
+- **Publishing (Q2).** `@fundamento/make-kit-komuna` and `@fundamento/make-kit-ekzemplo` become public pre-releases on npm under the dist-tag `next`, version 0.x; no organisation registry. The kits' license is MIT; for ekzemplo that follows from its invented values, and its fictitious font ships as the name „Ekzempla Grotesk" with generic fallback families only, never as a file and never next to a real typeface. The phase prepares `pnpm publish --dry-run --tag next` and documents the result below; the maintainer publishes after the acceptance.
 
 ### D-15 Parity (FR-12, Art. X gate 2)
 
@@ -251,7 +252,7 @@ The comparator from Phase 0 finally gets inventories:
 - The Playwright tests render `dir="rtl"`: icon-start is on the right and the focus ring is intact.
 - **Expansion:** +35 % (Constitution) and +100 % (short labels, research §6.6) with a pseudo-localisation that adds accents and non-Latin characters: `[Šàvé ſtörè ~~~]`. They assert no overflow (`scrollWidth ≤ clientWidth` for the label, no clipping) and that the element grows, since no fixed width is set.
 
-Every visible text comes from the slot or a prop; the Web Component contains no string. A test greps the generated sources for text nodes.
+Every visible text comes from the slot or a prop; the Web Component contains no string. The i18n lint `ero-hardcoded-string` checks the Ero templates and the generated sources for text nodes and literal `aria-label`, `title` and `alt` (T014).
 
 ### D-18 Quickstart and CI
 
