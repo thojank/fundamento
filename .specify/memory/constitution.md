@@ -1,6 +1,6 @@
 # Fundamento – Constitution
 
-Version 1.2 · 2026-09-18 · Status: ratifiziert
+Version 1.3 · 2026-09-19 · Status: ratifiziert
 
 Fundamento ist ein maschinenlesbares, nativ mehrmarkenfähiges Design System. Sein kanonischer Zustand ist ein Datenmodell; Figma, Code, Dokumentation und Werkzeuge sind Projektionen dieses Modells. Diese Constitution definiert die Prinzipien, gegen die jede Spezifikation, jeder Plan und jede Implementierung geprüft wird. Sie ist bewusst kurz. Was hier nicht steht, ist verhandelbar; was hier steht, nicht.
 
@@ -15,7 +15,7 @@ Fundamento verwendet Esperanto als Fachsprache. Die Begriffe sind im Modell, im 
 | **Fundamento** | Das System als Ganzes; der unantastbare Kern | Paketscope `@fundamento/*`, CSS-Präfix `--fm-`, Custom-Element-Präfix `fm-` |
 | **Modelo** | Das kanonische Datenmodell (Single Source of Truth) | `packages/modelo` |
 | **Vortaro** | Das Token-Vokabular: Namen, Typen, Alias-Ketten | Token-Ebene des Modelo |
-| **Aspekto** | Eine Markenausprägung (Brand Theme) des Systems | `aspekto: ciferecigo`, `aspekto: neutra` |
+| **Aspekto** | Eine Markenausprägung (Brand Theme) des Systems; ein eigenes Paket, das im Kern-Repo oder außerhalb liegen kann | `aspekto: komuna` (Referenz, MIT), `aspekto: ciferecigo` (extern, proprietär) |
 | **Dimensio** | Eine Adaptionsdimension (Farbmodus, Dichte, Kontrast, …) | Figma-Mode ≙ Dimensio-Wert |
 | **Ero** | Eine Komponente (Element) | `fm-butono`, `packages/eroj` |
 | **Skemo** | Die maschinenlesbare Spezifikation eines Ero | `eroj/butono/skemo.json` |
@@ -56,7 +56,7 @@ Der Zielablauf ist verbindlich: Ein Agent entwirft per MCP in Figma aus Library-
 
 ## Artikel IV – Nativa Multmarkeco (native Mehrmarkenfähigkeit)
 
-Fundamento kennt keine Standardmarke, die andere Marken überschreiben. Jeder Aspekto ist eine vollständige Belegung des Vortaro; `neutra` ist ein Aspekto wie jeder andere und dient nur als Referenzimplementierung. Adaption ist nicht auf Farbe und Schrift beschränkt: Jede Dimensio kann jeden Token-Typ betreffen (Spacing, Grid, Radius, Elevation, Motion, Typografie, Ikonografie).
+Fundamento kennt keine Standardmarke, die andere Marken überschreiben. Jeder Aspekto ist eine vollständige Belegung des Vortaro: Er überschreibt jeden Token des Kerns, und die Validierung erzwingt diese Vollständigkeit. Der Kern (`core`) trägt Struktur, Typen und die Werte der Referenzmarke `komuna`; `komuna` ist damit ein Aspekto wie jeder andere, nur einer, dessen Werte der Kern für Werkzeuge vorhält, die eine Belegung brauchen. Kein anderer Aspekto erbt Werte von `komuna` oder vom Kern. Aspektoj sind eigene Pakete: Sie dürfen im Kern-Repo liegen (`komuna`, MIT) oder außerhalb, mit eigener Lizenz und eigenen Rechten (z. B. `ciferecigo`), und werden über eine Konfiguration eingebunden. Adaption ist nicht auf Farbe und Schrift beschränkt: Jede Dimensio kann jeden Token-Typ betreffen (Spacing, Grid, Radius, Elevation, Motion, Typografie, Ikonografie).
 
 Das Vortaro ist von Anfang an **mehrdimensional**: Jede Dimensio ist ein eigenes Token-Set, das nur die Tokens enthält, die sie verändert; aktive Werte überlagern sich in definierter Reihenfolge. Flache Theme-Listen (eine Datei pro Kombination) sind unzulässig. Dimensioj sind orthogonal und kombinierbar. Die initialen Dimensioj sind `aspekto`, `color-scheme`, `density`, `contrast`, `motion`, `viewport`. Weitere Dimensioj werden durch Spec eingeführt, nie ad hoc. Die Auflösungsreihenfolge bei Konflikten ist im Modelo definiert und für alle Projekcioj identisch.
 
@@ -67,13 +67,13 @@ Fundamento ist eigenständig. Es enthält keine Token-Namen, Werte, Code, Texte,
 Regeln für jede Spec und jeden Plan:
 - Quellmaterial anderer Systeme wird dem Coding-Tool nicht vorgelegt. Es erhält nur abstrahierte Checklisten.
 - Wo ein Bereich neu aufgebaut wird (UX Writing, Motion, Barrierefreiheit, Datenvisualisierung, Contribution), wird vorher der weltweit stärkste öffentliche Benchmark recherchiert, benannt und als Anforderungsquelle dokumentiert (`research.md`).
-- Schriften und Icon-Sets sind Open Source mit permissiver Lizenz. Fremde Marken kommen ausschließlich über den Enportilo als Aspekto ins System, und nur mit nachgewiesenen Rechten.
+- Schriften und Icon-Sets im Kern-Repo sind Open Source mit permissiver Lizenz. Ein Aspekto darf proprietäre Schriften und Assets verwenden; sie werden als Familienname referenziert und mit Fallback versehen, die Dateien liegen nie im Kern-Repo, sondern im Aspekto-Paket oder werden zur Laufzeit geladen. Fremde Marken kommen ausschließlich über den Enportilo als Aspekto ins System, und nur mit nachgewiesenen Rechten.
 
 ## Artikel VI – Regularo kun Kialoj (Regeln mit Gründen)
 
 Jede Regel im System trägt ihre Begründung. Ein Constraint ohne `kialo` (Grund) ist ungültig. Beispiel: „Ein Container hat höchstens eine primäre Aktion, weil zwei gleichrangige Handlungsaufforderungen die Entscheidung auf den Nutzer verlagern." Die Begründung ist maschinenlesbar und wird vom Gvidanto und vom Prüf-Agenten zitiert.
 
-Das Regularo wächst durch Jugxoj: Jede Entscheidung über Konformität oder Abweichung wird als Präzedenzfall mit Grund gespeichert, Ablehnungen ebenso wie Freigaben. Das Regularo ist damit keine Verfassung, die vorab alles regelt, sondern eine Rechtsprechung, die aus Fällen lernt. Wenige Invarianten sind fest; alles andere darf innerhalb der Invarianten variieren.
+Das Regularo wächst durch Jugxoj: Jede Entscheidung über Konformität oder Abweichung wird als Präzedenzfall mit Grund gespeichert, Ablehnungen ebenso wie Freigaben. Eine Jugxo verweist auf eine Regulo, ein Ero oder einen Artikel dieser Constitution; auch Abweichungen von der Constitution selbst werden so festgehalten (erste Jugxo: `jug_01M2VRT7KQ77W91MVXB4GXSRZ4`, Artikel X, 2026-09-19). Das Regularo ist damit keine Verfassung, die vorab alles regelt, sondern eine Rechtsprechung, die aus Fällen lernt. Wenige Invarianten sind fest; alles andere darf innerhalb der Invarianten variieren.
 
 ## Artikel VII – Agenta Dokumentado (agentische Dokumentation)
 
@@ -129,7 +129,7 @@ Prüfkriterium für jede Spec: Ein Entwickler ohne Vorwissen nutzt ein Ero in un
 
 ## Governance
 
-- Diese Constitution ändert sich nur durch eine Spec mit dem Titel „Constitution Amendment", die den geänderten Artikel, den Grund und die Migration bestehender Artefakte beschreibt.
+- Diese Constitution ändert sich nur durch eine Spec mit dem Titel „Constitution Amendment", die den geänderten Artikel, den Grund und die Migration bestehender Artefakte beschreibt. Änderungshistorie: v1.1 Art. XII/XIII ergänzt; v1.2 DTCG verbindlich, Mehrdimensionalität; v1.3 (Spec 001) Art. IV Aspekto-Pakete und Vollständigkeit, Art. V Schriften je Aspekto, Art. VI Jugxo-Bezug auf Artikel.
 - Jeder `plan.md` enthält einen Abschnitt „Constitutional Compliance Review" mit einem Eintrag pro Artikel: konform / Ausnahme mit Grund.
 - `/speckit.analyze` prüft jede Phase gegen diese Constitution, bevor Tasks erzeugt werden.
 - Die Constitution hat Vorrang vor jeder anderen Praxis, jedem Template und jeder Bequemlichkeit.
@@ -141,7 +141,7 @@ Prüfkriterium für jede Spec: Ein Entwickler ohne Vorwissen nutzt ein Ero in un
 | Phase | Spec | Ergebnis |
 |---|---|---|
 | 0 | Fundamento-Repo, Modelo-Schema, Vortaro-Spezifikation (DTCG) | Baubares Monorepo, leeres Modelo mit Schema, CI mit den vier Prüfungen |
-| 1 | Vortaro + Dimensioj + MCP-Server | Aspekto `neutra` und `ciferecigo`, MCP beantwortet Token-Fragen |
+| 1 | Vortaro mit echten Werten, Aspekto-Pakete, MCP-Server | Aspekto `komuna` (Referenz, Geist), externes Aspekto-Paket `ciferecigo`, MCP beantwortet Token-Fragen |
 | 2 | Regularo + Gvidanto (Kern) | Regeln mit Kialoj, erster Dialog „was gibt's hier?" |
 | 3 | Ero `butono` als Durchstich | Modelo → Web Component → CSS → Figma → Code Connect → Gvidanto → Prüfung |
 | 4 | Eroj in der Breite, Sxablonoj | Abdeckung eines reifen Systems |
