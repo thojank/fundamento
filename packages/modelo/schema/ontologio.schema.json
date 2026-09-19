@@ -1,0 +1,169 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ciferecigo.com/fundamento/schema/ontologio.schema.json",
+  "title": "Fundamento Ontologio",
+  "description": "The terminology of the Constitution as data (Spec 002 FR-15). Field names follow SKOS (prefLabel, altLabel, definition, broader, related, notation, inScheme) without prefix, so a JSON-LD context can map them later; named relations that SKOS lacks sit in relations with declared predicates. References to concepts are relative IRIs (#Term).",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "uri": {
+      "const": "https://fundamento.ciferecigo.com/ontologio"
+    },
+    "constitution": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+$"
+    },
+    "schemes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "enum": ["terminologio", "modelo"]
+          },
+          "definition": {
+            "$ref": "#/$defs/EnDe"
+          }
+        },
+        "required": ["id", "definition"],
+        "additionalProperties": false
+      }
+    },
+    "predicates": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][A-Za-z]*$"
+          },
+          "definition": {
+            "$ref": "#/$defs/EnDe"
+          }
+        },
+        "required": ["id", "definition"],
+        "additionalProperties": false
+      }
+    },
+    "concepts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/Concept"
+      }
+    }
+  },
+  "required": ["uri", "constitution", "schemes", "predicates", "concepts"],
+  "additionalProperties": false,
+  "$defs": {
+    "Text": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S"
+    },
+    "EnDe": {
+      "type": "object",
+      "properties": {
+        "en": {
+          "$ref": "#/$defs/Text"
+        },
+        "de": {
+          "$ref": "#/$defs/Text"
+        }
+      },
+      "required": ["en", "de"],
+      "additionalProperties": false
+    },
+    "Ref": {
+      "type": "string",
+      "pattern": "^#[A-Z][A-Za-z]*$"
+    },
+    "Concept": {
+      "type": "object",
+      "properties": {
+        "uri": {
+          "type": "string",
+          "pattern": "^https://fundamento\\.ciferecigo\\.com/ontologio#[A-Z][A-Za-z]*$"
+        },
+        "term": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Za-z]*$"
+        },
+        "inScheme": {
+          "enum": ["terminologio", "modelo"]
+        },
+        "notation": {
+          "type": "string",
+          "pattern": "^[a-z][A-Za-z]*$"
+        },
+        "prefLabel": {
+          "type": "object",
+          "properties": {
+            "eo": {
+              "$ref": "#/$defs/Text"
+            },
+            "en": {
+              "$ref": "#/$defs/Text"
+            },
+            "de": {
+              "$ref": "#/$defs/Text"
+            }
+          },
+          "required": ["eo", "en", "de"],
+          "additionalProperties": false
+        },
+        "altLabel": {
+          "type": "object",
+          "propertyNames": {
+            "enum": ["eo", "en", "de"]
+          },
+          "additionalProperties": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "#/$defs/Text"
+            }
+          }
+        },
+        "definition": {
+          "$ref": "#/$defs/EnDe"
+        },
+        "broader": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Ref"
+          }
+        },
+        "related": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Ref"
+          }
+        },
+        "relations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "predicate": {
+                "type": "string"
+              },
+              "target": {
+                "$ref": "#/$defs/Ref"
+              }
+            },
+            "required": ["predicate", "target"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["uri", "term", "inScheme", "prefLabel", "definition"],
+      "additionalProperties": false
+    }
+  }
+}
