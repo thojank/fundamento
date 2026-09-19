@@ -44,9 +44,9 @@ A mutation check (one changed value must make the test fail) replaces the red ru
 
 ## Stage 2 – Packages, CSS and Tailwind
 
-- [ ] **T008 Packages `projekcioj` and `eroj`, `fm projekcioj build`** (D-01, D-18, AK-02)
+- [x] **T008 Packages `projekcioj` and `eroj`, `fm projekcioj build`** (D-01, D-18, AK-02)
   - Red: `workspace.test.ts`: both packages exist with MIT license and the exact pinned dev dependencies of the plan's table, no runtime dependency in `eroj`; `packages/projekcioj/src/build.test.ts`: building twice gives identical bytes, deleting every output and rebuilding gives the same SHA-256; `packages/cli/src/e2e`: `fm projekcioj build --out <tmp>` exits 0 and lists the Celoj; generated folders are git-ignored.
-  - Green: package scaffolds, `build.ts` with the Celo registry, CLI command. The only task that changes `pnpm-lock.yaml`.
+  - Green: package scaffolds, `build.ts` with the Celo registry, CLI command. The only task that changes `pnpm-lock.yaml`. Done note: the two `package.json` files had to exist before the red run (pnpm installs the dev dependencies from them), so the manifest assertions of `workspace.test.ts` were already green at red; the red run covered `.gitignore`, `build.ts` and the CLI command. `react-18`/`react-dom-18` are npm aliases; pnpm warns that `react-dom@18` sees `react@19` as its peer, which T012 resolves in its own test project.
 - [ ] **T009 CSS Celo** (FR-05, D-05, AK-03 for CSS)
   - Red: `celoj/css/css.test.ts`: one file per Aspekto and one combined; every selector is `:where(…)`; the order of the blocks equals the resolver's set order; a conjunction set becomes a combined selector at its position; aliases are `var(--fm-…)`; the lint `css-physical-property` rejects a fixture with `margin-left`. `packages/eroj/test/computed-styles.spec.ts` (Playwright): for every combination of komuna and ekzemplo, `getComputedStyle` on the root equals `rezolvoj.json` for every token.
   - Green: `celoj/css/`; `check:vortaro-lint` runs on the generated CSS.

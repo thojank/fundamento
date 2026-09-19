@@ -1,12 +1,10 @@
 {
-  "name": "@fundamento/cli",
+  "name": "@fundamento/projekcioj",
   "version": "0.1.0",
-  "description": "Fundamento command line interface (fm).",
+  "description": "Fundamento projections: every generator, one folder per Celo (CSS, Tailwind, Web Component, React, Figma, Code Connect, Make Kit).",
   "license": "MIT",
+  "private": true,
   "type": "module",
-  "bin": {
-    "fm": "dist/index.js"
-  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -23,14 +21,17 @@
     "lint": "tsc -p tsconfig.json --noEmit && biome check ."
   },
   "dependencies": {
-    "@fundamento/mcp": "workspace:*",
-    "@fundamento/modelo": "workspace:*",
-    "@fundamento/projekcioj": "workspace:*"
+    "@fundamento/modelo": "workspace:*"
   },
   "devDependencies": {
-    "@modelcontextprotocol/client": "2.0.0",
+    "@figma/code-connect": "2.0.1",
+    "@figma/plugin-typings": "1.138.0",
+    "@tailwindcss/vite": "4.3.3",
     "@types/node": "^24.13.5",
+    "@vitejs/plugin-react": "6.1.1",
+    "tailwindcss": "4.3.3",
     "typescript": "^7.0.2",
+    "vite": "8.3.0",
     "vitest": "^5.0.1"
   }
 }
