@@ -58,8 +58,14 @@ export function buildModelo(files: ModeloFiles): BuildModeloResult {
     version: MODELO_VERSION,
     dimensioj,
     setoj,
-    reguloj: entriesOf<Regulo>(files.data["reguloj.json"].value, "reguloj"),
-    jugxoj: entriesOf<Jugxo>(files.data["jugxoj.json"].value, "jugxoj"),
+    reguloj: [
+      ...entriesOf<Regulo>(files.data["reguloj.json"].value, "reguloj"),
+      ...packageEntries<Regulo>(files.packages, aspektoPackages, "reguloj"),
+    ],
+    jugxoj: [
+      ...entriesOf<Jugxo>(files.data["jugxoj.json"].value, "jugxoj"),
+      ...packageEntries<Jugxo>(files.packages, aspektoPackages, "jugxoj"),
+    ],
     kontrastParoj: entriesOf<KontrastParo>(files.data["kontrastparoj.json"].value, "kontrastParoj"),
     idsLock,
     aspektoPackages,
@@ -143,6 +149,23 @@ function buildSet(document: ModeloSetDocument): { set: LoadedSet; issues: Valida
     set.id = extension.id;
   }
   return { set, issues };
+}
+
+/**
+ * The Reguloj or Jugxoj of every package (D-10), each scoped to its package's Aspekto unless it
+ * names one itself (validation reports a foreign or unknown Aspekto: regulo-aspekto-unknown).
+ */
+function packageEntries<T extends { aspekto?: string }>(
+  packages: readonly AspektoPackageFiles[],
+  loaded: readonly LoadedAspektoPackage[],
+  key: "reguloj" | "jugxoj",
+): T[] {
+  return packages.flatMap((pkg, index) => {
+    const aspekto = loaded[index]?.aspekto;
+    return entriesOf<T>(pkg[key]?.value, key).map((entry) =>
+      entry.aspekto === undefined && aspekto !== undefined ? { ...entry, aspekto } : entry,
+    );
+  });
 }
 
 /**

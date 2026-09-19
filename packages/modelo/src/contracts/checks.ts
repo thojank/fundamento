@@ -24,6 +24,8 @@ export interface CheckResult {
 export interface CheckOptions {
   json: boolean;
   fixture?: string;
+  /** A project's fundamento.config.json: core + reference Aspekto + its packages (Spec 001). */
+  config?: string;
   repoRoot: string;
 }
 

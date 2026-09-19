@@ -13,10 +13,13 @@ export interface RegularoDocument {
 }
 
 export interface RegularoInput {
-  /** `data/reguloj.json`; absent when it could not be read (already reported by the caller). */
-  reguloj?: RegularoDocument;
-  /** `data/jugxoj.json`; absent when it could not be read. */
-  jugxoj?: RegularoDocument;
+  /**
+   * `data/reguloj.json` (plus the `reguloj.json` of each Aspekto package, D-10); absent when it
+   * could not be read (already reported by the caller).
+   */
+  reguloj?: RegularoDocument | readonly RegularoDocument[];
+  /** `data/jugxoj.json` (plus package `jugxoj.json` files); absent when it could not be read. */
+  jugxoj?: RegularoDocument | readonly RegularoDocument[];
   /** IDs of existing Eroj. Phase 0 has none, so every Ero reference is dangling. */
   eroIds?: ReadonlySet<string>;
 }
@@ -78,12 +81,12 @@ export function checkRegularo(input: RegularoInput): RegularoResult {
   const eroIds = input.eroIds ?? new Set<string>();
 
   let reguloIds: Set<string> | undefined;
-  if (input.reguloj !== undefined) {
-    const { file } = input.reguloj;
-    const reguloj = entriesOf(input.reguloj, "reguloj", issues);
+  for (const document of documents(input.reguloj)) {
+    const { file } = document;
+    const reguloj = entriesOf(document, "reguloj", issues);
     if (reguloj !== undefined) {
-      reguloIds = new Set();
-      stats.reguloj = reguloj.length;
+      reguloIds ??= new Set();
+      stats.reguloj += reguloj.length;
       reguloj.forEach((entry: unknown, index) => {
         const pointer = appendPointer("/reguloj", index);
         if (!isPlainObject(entry)) {
@@ -124,11 +127,11 @@ export function checkRegularo(input: RegularoInput): RegularoResult {
     }
   }
 
-  if (input.jugxoj !== undefined) {
-    const { file } = input.jugxoj;
-    const jugxoj = entriesOf(input.jugxoj, "jugxoj", issues);
+  for (const document of documents(input.jugxoj)) {
+    const { file } = document;
+    const jugxoj = entriesOf(document, "jugxoj", issues);
     if (jugxoj !== undefined) {
-      stats.jugxoj = jugxoj.length;
+      stats.jugxoj += jugxoj.length;
       if (reguloIds !== undefined) {
         const known = reguloIds;
         jugxoj.forEach((entry: unknown, index) => {
@@ -164,6 +167,13 @@ export function checkRegularo(input: RegularoInput): RegularoResult {
   }
 
   return { issues, stats };
+}
+
+function documents(
+  value: RegularoDocument | readonly RegularoDocument[] | undefined,
+): readonly RegularoDocument[] {
+  if (value === undefined) return [];
+  return Array.isArray(value) ? value : [value as RegularoDocument];
 }
 
 function checkRef(

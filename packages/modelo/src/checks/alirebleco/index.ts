@@ -12,6 +12,7 @@ import {
   modeloRootOf,
   relativeModeloPath,
 } from "../../load/source.js";
+import { checkSource } from "../source.js";
 import { evaluateAlirebleco } from "./evaluate.js";
 
 export * from "./color.js";
@@ -19,8 +20,7 @@ export * from "./evaluate.js";
 export * from "./metrics.js";
 
 export async function check(options: CheckOptions): Promise<CheckResult> {
-  const source: ModeloSource =
-    options.fixture === undefined ? defaultModeloSource() : fixtureModeloSource(options.fixture);
+  const source: ModeloSource = checkSource(options);
   const { modelo, issues } = loadModelo(source);
   const loadErrors = issues.filter((issue) => issue.severity === "error");
   if (modelo === undefined) {

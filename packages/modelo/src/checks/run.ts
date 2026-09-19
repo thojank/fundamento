@@ -63,6 +63,8 @@ export const HELP = [
   "  --json            Print only the CheckResult JSON on stdout (pipe with `pnpm -s`).",
   "  --fixture <path>  Run against a fixture instead of the repo. Relative paths resolve",
   "                    against the directory pnpm was invoked from (INIT_CWD), else the cwd.",
+  "  --config <file>   Run against a project: the core, komuna and the Aspekto packages its",
+  "                    fundamento.config.json lists (relative paths as for --fixture).",
   "  -h, --help        Show this help.",
   "",
   "Exit codes: 0 = pass, 1 = check failed, 2 = usage or internal error.",
@@ -71,7 +73,14 @@ export const HELP = [
 
 type ParsedArgs =
   | { ok: true; help: true }
-  | { ok: true; help: false; check: CheckName; json: boolean; fixture: string | undefined }
+  | {
+      ok: true;
+      help: false;
+      check: CheckName;
+      json: boolean;
+      fixture: string | undefined;
+      config: string | undefined;
+    }
   | { ok: false; message: string };
 
 function isCheckName(value: string): value is CheckName {
@@ -109,12 +118,16 @@ export function parseCheckArgs(argv: readonly string[]): ParsedArgs {
       message: `Unknown check '${name}'. Available checks: ${CHECK_NAMES.join(", ")}`,
     };
   }
+  if (parsed.values.fixture !== undefined && parsed.values.config !== undefined) {
+    return { ok: false, message: "Use either --fixture or --config, not both." };
+  }
   return {
     ok: true,
     help: false,
     check: name,
     json: parsed.values.json,
     fixture: parsed.values.fixture,
+    config: parsed.values.config,
   };
 }
 
@@ -126,6 +139,7 @@ function parseArgsStrict(argv: readonly string[]) {
     options: {
       json: { type: "boolean", default: false },
       fixture: { type: "string" },
+      config: { type: "string" },
       help: { type: "boolean", short: "h", default: false },
     },
   });
@@ -233,10 +247,9 @@ export async function runCheck(argv: readonly string[], env: RunCheckEnv): Promi
     return EXIT_USAGE;
   }
 
-  const options: CheckOptions =
-    fixture === undefined
-      ? { json: args.json, repoRoot: env.repoRoot }
-      : { json: args.json, repoRoot: env.repoRoot, fixture };
+  const options: CheckOptions = { json: args.json, repoRoot: env.repoRoot };
+  if (fixture !== undefined) options.fixture = fixture;
+  if (args.config !== undefined) options.config = resolve(env.cwd, args.config);
 
   let result: unknown;
   try {

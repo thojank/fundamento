@@ -99,9 +99,9 @@ Order follows the plan's "Build order". The ciferecigo package is the last task.
 
 ## Stage 5 – Checks
 
-- [ ] **T021 [P] Alirebleco and Regularo over all Aspektoj**
+- [x] **T021 [P] Alirebleco and Regularo over all Aspektoj**
   - Red: `check:alirebleco --fixture` on the ekzemplo config evaluates both Aspektoj; `check:regularo` finds a package Regulo without kialo (`invalid/package-regulo-without-kialo`) and `regulo-aspekto-unknown`.
-  - Green: checks iterate over the composition.
+  - Green: checks iterate over the composition (`--config <file>` on the check runner); package `reguloj.json` / `jugxoj.json` are read, schema-checked, ID-checked and merged, scoped to the package's Aspekto; `ekzemplo` carries the Regulo `elevation-flat` (manual: fixture, no enforcer). The package-Regulo cases run on mutated copies of `valid/aspekto-ekzemplo` instead of a separate committed fixture.
 - [ ] **T022 [P] Clean-room fingerprints** (D-15, K2, AK-08)
   - Red: `checks/clean-room/marko-spuro.test.ts`: normalization (hex to lowercase 6-digit, family lowercase without quotes, cubic-bezier without whitespace and as a DTCG array); durations and length scalars are never candidates; failing fixture with a **synthetic** fingerprint list; the allowlist exempts exactly `spec.md` and `research.md` of Spec 001.
   - Green: `clean-room-marko-spuro`, `marko-spuroj.json` (hashes only).
