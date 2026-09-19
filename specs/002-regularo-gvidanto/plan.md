@@ -365,6 +365,7 @@ One entry per Article of Constitution v1.4.
 | **New core tokens are breaking for external Aspektoj** (D-09, Art. IV) | Completeness means every Aspekto must set `color.status.<s>.border`. | ciferecigo must add four tokens and be re-derived for the text repair; quickstart for package authors lists the delta. |
 | **SDK 2.0.0 without patch release** (D-17) | Published eight weeks ago, declared the stable line; the contract suite guards it. | Pinned exactly; fallback to 1.30.0 with a Jugxo if the suite does not pass unchanged. `zod` remains an unused transitive dependency. |
 | **Ontologio drift test reads the Constitution file** (D-14) | FR-16 compares the Constitution's table with the file. | The test depends on the table format (bold first column). A format change of the table fails the test loudly, which is intended. |
+| **Retroactive red runs** (T005–T008, T011) | The implementation was written before the red run; the red run was taken afterwards by removing the implementation temporarily. Accepted by the maintainer because the purpose holds: the tests are proven to fail. | Phase 3 again runs red before implementing. Mutation checks replace a red run only for acceptance tests (T023, T024). |
 | **Carried from Spec 001** | Completeness restating (~344 entries per Aspekto), `textTransform` extension, namespace infix, conjunction approximation, timing tolerance in CI. | Unchanged; Phase 7 (`fm aspekto init --from komuna`) remains the plan for the restating burden. |
 
 ## Build order (orientation, not tasks)

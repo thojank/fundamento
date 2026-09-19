@@ -83,6 +83,20 @@ Kleinste Differenz eines Zustands zu `rest` über alle Kombinationen (OKLCH-Hell
 - Folgerung: `check_contrast` ohne Belegung (alle Kombinationen) sprengt mit voller Auflösung das Budget von 100 ms. Der Plan löst nur die zwei Tokens samt Alias-Kette auf (D-18) und misst es in `pnpm perf`.
 - Messung nach der Umsetzung (T016, T024; `pnpm perf`, lokal, core + komuna + ekzemplo, über stdio): Teilauflösung zweier Tokens über 144 Kombinationen etwa 9 ms statt 143 ms. `explain` je Aufruf Median 1,2 ms, Maximum 3,5 ms; `check_contrast` ohne Belegung (alle 144 Kombinationen) Median 8,3 ms, Maximum 24 ms; Start bis zur ersten `describe`-Antwort 816 ms; `resolve` Median 3,1 ms. Budget je Aufruf 100 ms (Faktor 3 unter `CI=true`). Der Ausweichschritt aus D-18 (nur farbrelevante Dimensioj) ist nicht nötig.
 
+### 8.4a APCA-Hinweise nach Phase 2 (neue Baseline, nur protokolliert)
+
+`check:alirebleco` im Repo (komuna, 60 Paare × 72 Kombinationen): **1188** beratende APCA-Hinweise, vorher auf `main` @ `639062a` **1170** (+18). Ermittelt durch Vergleich der Hinweise je Paar und Farbklasse zwischen beiden Ständen:
+
+| Paar | Farbklasse | vorher | nachher | Ursache |
+|---|---|---|---|---|
+| `text-subtle-on-background-sunken` | light/high | 18 | 0 | Textreparatur T009 (subtle `neutral.800` → `950`) |
+| `text-muted-on-background-sunken` | light/high | 18 | 0 | Textreparatur T009 (muted `neutral.800` → `900`) |
+| `action-tertiary-text-on-action-tertiary-hover` | light/high | 0 | 18 | neue tertiary-Stufe T010 (hover `neutral.50` → `100`) |
+| `action-tertiary-text-on-action-tertiary-pressed` | light/default | 0 | 18 | neue tertiary-Stufe T010 (pressed `neutral.100` → `200`) |
+| `action-tertiary-text-on-action-tertiary-selected` | light/high | 0 | 18 | neue tertiary-Stufe T010 (selected `accent.50` → `100`) |
+
+Die Statusränder tragen nichts bei: APCA wird auf dem Zweig gemessen, der das Paar trägt, und in komuna trägt überall der Hauptzweig. Alle betroffenen Paare erfüllen WCAG 2.x (verbindlich); APCA bleibt bis Spec 003 beratend. Keine Änderung, nur Baseline.
+
 ### 8.5 Statusränder (FR-06)
 
 Kontrast der Kandidaten auf `background.default` (komuna / ekzemplo, schwächster Status): light `<s>.700` ≥ 7,25 / 7,29:1, dark `<s>.300` ≥ 9,46 / 9,45:1. Unter `contrast=high` ändern sich Flächen nicht, die Werte gelten also auch dort. Die heutigen Füllungen `status.<s>.basic` bestehen 3:1 in komuna und ekzemplo überall (Minimum 5,17:1); der Alternativzweig wird dort erst durch die helle Warnfläche im Fixture gebraucht (Plan D-10).
