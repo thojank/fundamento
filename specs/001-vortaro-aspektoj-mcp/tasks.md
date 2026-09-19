@@ -45,9 +45,10 @@ Order follows the plan's "Build order". The ciferecigo package is the last task.
 - [x] **T008 Completeness and reference rules** (D-04)
   - Red: `validate/aspekto-rules.test.ts` with small fixtures: an incomplete Aspekto gives one `aspekto-incomplete` per missing token at its pointer; `aspekto-reference-set-not-empty`; identical aliases count; conjunction sets exempt; `set-introduces-token` on Aspekto and conjunction sets (Q1).
   - Green: validation rules.
-- [ ] **T009 Generic-set rules** (D-03, K4, D-11)
-  - Red: fixtures `invalid/dimensio-set-literal`, `invalid/dimensio-set-primitive`, `valid/override-text-transform`, `invalid/override-other-extension`.
-  - Green: both rules; relax `set-override-has-extensions` for `textTransform` only.
+- [x] **T009 Generic-set rules** (D-03, K4, D-11)
+  - Red: unit tests of `dimensioSetIssues` (literal, primitive, both, Aspekto and conjunction sets exempt); `textTransform`-only override accepted, `role`/`id` in an override rejected.
+  - Green: both rules as pure functions (`validate/dimensio-set-rules.ts`); relax `set-override-has-extensions` for `textTransform` only.
+  - **Sequencing change (reported to the maintainer):** the rules are wired into `validateModelo`, and the fixtures `invalid/dimensio-set-literal` / `invalid/dimensio-set-primitive` are added, in **T016**. Wiring them here would make the repo Modelo invalid (the Phase-0 generic sets hold literals whose target primitives only arrive in T013–T015), so the build would stay red until T016.
 - [ ] **T010 Font declaration rule** (D-05)
   - Red: `invalid/aspekto-font-undeclared`; generic families pass.
   - Green: `aspekto-font-undeclared`.
@@ -74,6 +75,7 @@ Order follows the plan's "Build order". The ciferecigo package is the last task.
 - [ ] **T016 Dimensio sets** (D-03, K3, K4, FR-06, FR-07, AK-05)
   - Red: `data/dimensio-sets.test.ts`: every set passes `dimensio-set-literal` and `dimensio-set-primitive`; `motion=reduced` resolves to `0ms` / `linear`; `viewport=compact` changes typography per field with provenance; **`density=compact` leaves every typography field unchanged** (K3).
   - Green: rewrite viewport, density, color-scheme/dark, contrast/high and motion/reduced; move the Phase-0 literals into primitives or into `aspekto/komuna+color-scheme/dark`.
+  - Also (from T009): wire `dimensioSetIssues` into `validateModelo` and add the fixtures `invalid/dimensio-set-literal` and `invalid/dimensio-set-primitive` (red first against the unwired code).
   - AK-05 as amended in the spec (`1f04af5`): changed in `viewport=compact`, unchanged in `density=compact`. A second assertion: no token is re-pointed by both a `viewport/*` and a `density/*` set.
 - [ ] **T017 KontrastParoj and Reguloj** (D-12, K5, Art. VI, AK-02)
   - Red: `kontrastparo-missing-for-role` fixtures; the ~60 pairs incl. the 8 K5 pairs; `data/ak02.test.ts`: every text pair ≥ 7:1 under `contrast=high` in all 72 combinations; `check:regularo` expects the 6 new Reguloj with kialo (incl. `density-affects-layout-only`).
