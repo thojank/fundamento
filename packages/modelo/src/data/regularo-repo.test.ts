@@ -91,4 +91,11 @@ describe("Regularo of the repo (D-19)", () => {
       .map((regulo) => regulo.name);
     expect(missing).toEqual([]);
   });
+
+  it("states the threshold of state-distinct as its sojlo says (D-02, R1)", () => {
+    const regulo = reguloj.find((candidate) => candidate.name === "state-distinct");
+    expect(regulo?.sojlo).toEqual({ metric: "oklch-l-delta", min: 0.05 });
+    expect(regulo?.statement).toContain(`by at least ${regulo?.sojlo?.min}`);
+    expect(regulo?.kialo).toContain(`${regulo?.sojlo?.min} is 2.5 times`);
+  });
 });

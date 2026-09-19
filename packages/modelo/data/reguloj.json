@@ -120,7 +120,23 @@
       "scope": "vortaro: color.text.default, subtle and muted in every combination",
       "checkability": "automatic",
       "appliesTo": { "tokens": ["color.text.default", "color.text.subtle", "color.text.muted"] }
+    },
+    {
+      "id": "reg_01M2X5G6TX43QJ21SFD4WFNM3W",
+      "name": "state-distinct",
+      "statement": "In every combination of every Aspekto, the OKLCH lightness of color.action.<v>.hover, .pressed and .selected differs from .rest by at least 0.05, for every action variant; transparent values are composited over color.background.default first.",
+      "kialo": "A state that looks like the rest state gives no feedback, and a difference in hue alone disappears in greyscale and for people with a colour-vision deficiency; no contrast check sees either. The difference must be clear, not just perceptible: 0.05 is 2.5 times the typical just-noticeable difference and leaves a reserve for poor displays and colour-vision deficiency.",
+      "scope": "vortaro: color.action.<v>.hover, pressed, selected against rest in every combination",
+      "checkability": "automatic",
+      "appliesTo": {
+        "tokens": [
+          "color.action.*.hover",
+          "color.action.*.pressed",
+          "color.action.*.selected",
+          "color.action.*.rest"
+        ]
+      },
+      "sojlo": { "metric": "oklch-l-delta", "min": 0.05 }
     }
-
   ]
 }

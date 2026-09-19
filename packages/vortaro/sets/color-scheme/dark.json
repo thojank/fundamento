@@ -120,7 +120,7 @@
           "$value": "{color.palette.neutral.800}"
         },
         "selected": {
-          "$value": "{color.palette.accent.950}"
+          "$value": "{color.palette.accent.900}"
         },
         "disabled": {
           "$value": "{color.palette.neutral.950}"

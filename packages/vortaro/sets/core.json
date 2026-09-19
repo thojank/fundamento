@@ -1648,7 +1648,7 @@
           }
         },
         "hover": {
-          "$value": "{color.palette.neutral.50}",
+          "$value": "{color.palette.neutral.100}",
           "$description": "Tertiary action: fill on hover.",
           "$extensions": {
             "com.ciferecigo.fundamento": {
@@ -1658,7 +1658,7 @@
           }
         },
         "pressed": {
-          "$value": "{color.palette.neutral.100}",
+          "$value": "{color.palette.neutral.200}",
           "$description": "Tertiary action: fill while pressed.",
           "$extensions": {
             "com.ciferecigo.fundamento": {
@@ -1668,7 +1668,7 @@
           }
         },
         "selected": {
-          "$value": "{color.palette.accent.50}",
+          "$value": "{color.palette.accent.100}",
           "$description": "Tertiary action: fill when selected.",
           "$extensions": {
             "com.ciferecigo.fundamento": {
