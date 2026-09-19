@@ -11,8 +11,11 @@
   "color": {
     "$type": "color",
     "text": {
+      "default": {
+        "$value": "{color.palette.neutral.0}"
+      },
       "subtle": {
-        "$value": "{color.palette.neutral.100}"
+        "$value": "{color.palette.neutral.50}"
       },
       "muted": {
         "$value": "{color.palette.neutral.100}"
