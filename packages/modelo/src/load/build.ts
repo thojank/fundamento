@@ -105,6 +105,7 @@ function composeAspektoValues(
     }
     const entry: LoadedAspektoPackage = {
       name: pkg.name,
+      dir: pkg.dir,
       aspektoFile: pkg.aspekto.file,
       lockFile: pkg.idsLock.file,
       idsLock: idsLockOf(pkg.idsLock.value),

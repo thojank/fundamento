@@ -79,7 +79,10 @@ describe("aspekto-incomplete (D-04)", () => {
         color: { $type: "color", text: { default: { $value: "{color.palette.neutral.0}" } } },
       }),
     );
-    expect(report.errors).toEqual([]);
+    // The new set also makes the package's $themes.json fragment stale (T011); that is all.
+    expect(report.errors.map((issue) => [issue.rule, issue.path])).toEqual([
+      ["themes-out-of-sync", "aspekto-ekzemplo/$themes.json#"],
+    ]);
   });
 });
 

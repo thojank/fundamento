@@ -54,6 +54,8 @@ export interface ModeloSource {
 export interface LoadedAspektoPackage {
   /** Package label: the `name` of its package.json, or its directory name. */
   name: string;
+  /** Absolute package directory. */
+  dir: string;
   /** Aspekto name from `aspekto.json`, when it is a string. */
   aspekto?: string;
   /** DimensioValoro ID from `aspekto.json`, when it is a string. */

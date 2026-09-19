@@ -1,0 +1,10 @@
+{
+  "tokenSetOrder": [
+    "core",
+    "color-scheme/dark",
+    "contrast/high",
+    "color-scheme/dark+contrast/high",
+    "etoso/malvarma",
+    "etoso/varma"
+  ]
+}

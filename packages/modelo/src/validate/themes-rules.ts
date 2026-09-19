@@ -6,7 +6,7 @@ import { formatIssuePath, type ValidationIssue } from "../contracts/issues.js";
 import type { Modelo } from "../contracts/modelo.js";
 import { coreView } from "../load/core-view.js";
 import type { ModeloFiles } from "../load/files.js";
-import { deriveThemes } from "../themes/derive.js";
+import { deriveThemeFragment, deriveThemes } from "../themes/derive.js";
 import { serializeCanonicalJson, serializeThemes } from "../themes/serialize.js";
 
 const SUGGESTION =
@@ -32,6 +32,18 @@ export function themesIssues(modelo: Modelo, files: ModeloFiles): ValidationIssu
       message: `${files.metadata.file} differs from the derived token set order (the resolver's set order).`,
       suggestion: SUGGESTION,
     });
+  }
+  for (const pkg of files.packages) {
+    const fragment = serializeCanonicalJson(deriveThemeFragment(modelo, pkg.name));
+    if (serializeCanonicalJson(pkg.themes.value) !== fragment) {
+      issues.push({
+        rule: "themes-out-of-sync",
+        severity: "error",
+        path: formatIssuePath({ file: pkg.themes.file, pointer: "" }),
+        message: `${pkg.themes.file} differs from the themes fragment derived for the package ${pkg.name}.`,
+        suggestion: SUGGESTION,
+      });
+    }
   }
   return issues;
 }

@@ -4,7 +4,7 @@
 // Exit codes: 0 = files written, 1 = domain error (Modelo cannot be loaded, write failed),
 // 2 = usage error. Never prints stack traces.
 
-import { writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { parseArgs } from "node:util";
 import type { ValidationIssue } from "../contracts/issues.js";
@@ -13,8 +13,8 @@ import { coreView } from "../load/core-view.js";
 import { METADATA_FILE_NAME, THEMES_FILE_NAME } from "../load/files.js";
 import { loadModelo } from "../load/load-modelo.js";
 import { defaultModeloSource, fixtureModeloSource } from "../load/source.js";
-import { deriveThemes } from "./derive.js";
-import { serializeThemes } from "./serialize.js";
+import { deriveThemeFragment, deriveThemes } from "./derive.js";
+import { serializeCanonicalJson, serializeThemes } from "./serialize.js";
 
 export const EXIT_OK = 0;
 export const EXIT_DOMAIN_ERROR = 1;
@@ -116,13 +116,19 @@ function writeDerived(source: ModeloSource, env: ThemesCliEnv): number {
   let loaded = loadModelo(source);
   if (
     loaded.modelo === undefined &&
-    loaded.issues.length > 0 &&
-    loaded.issues.every(concernsDerivedFile)
+    loaded.issues.some(concernsDerivedFile) &&
+    // Only unreadable files block loading; e.g. config issues do not.
+    loaded.issues
+      .filter((issue) => issue.rule === "file-missing" || issue.rule.startsWith("json-"))
+      .every(concernsDerivedFile)
   ) {
     // Only the derived files are missing or broken: they are regenerated below, so start from
-    // empty placeholders to be able to load the rest of the Modelo.
-    writeFileSync(join(source.vortaroDir, THEMES_FILE_NAME), "[]\n");
-    writeFileSync(join(source.vortaroDir, METADATA_FILE_NAME), '{ "tokenSetOrder": [] }\n');
+    // empty placeholders (where a file is unusable) to be able to load the rest of the Modelo.
+    replaceUnusable(join(source.vortaroDir, THEMES_FILE_NAME), "[]\n");
+    replaceUnusable(join(source.vortaroDir, METADATA_FILE_NAME), '{ "tokenSetOrder": [] }\n');
+    for (const dir of source.aspektoPackages ?? []) {
+      replaceUnusable(join(dir, THEMES_FILE_NAME), "[]\n");
+    }
     loaded = loadModelo(source);
   }
   const { modelo } = loaded;
@@ -139,7 +145,22 @@ function writeDerived(source: ModeloSource, env: ThemesCliEnv): number {
   writeFileSync(themesPath, themesJson);
   writeFileSync(metadataPath, metadataJson);
   env.stdout(`wrote ${themesPath}\nwrote ${metadataPath}\n`);
+  // Each Aspekto package carries its own fragment (D-05).
+  for (const pkg of modelo.aspektoPackages) {
+    const fragmentPath = join(pkg.dir, THEMES_FILE_NAME);
+    writeFileSync(fragmentPath, serializeCanonicalJson(deriveThemeFragment(modelo, pkg.name)));
+    env.stdout(`wrote ${fragmentPath}\n`);
+  }
   return EXIT_OK;
+}
+
+/** Writes `placeholder` to `path` unless it holds parseable JSON. */
+function replaceUnusable(path: string, placeholder: string): void {
+  try {
+    JSON.parse(readFileSync(path, "utf8"));
+  } catch {
+    writeFileSync(path, placeholder);
+  }
 }
 
 /** Runs the themes CLI. Never throws: failures become messages on stderr plus an exit code. */

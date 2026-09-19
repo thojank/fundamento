@@ -32,6 +32,8 @@ export interface AspektoPackageFiles {
   dir: string;
   aspekto: ModeloDocument;
   idsLock: ModeloDocument;
+  /** The derived `$themes.json` fragment (D-05). */
+  themes: ModeloDocument;
 }
 
 /** Every file of a Modelo root, parsed but not interpreted. FUND-3.2 validates these raw values. */
@@ -99,6 +101,7 @@ export function readModeloFiles(source: ModeloSource): ReadModeloFilesResult {
     const name = packageLabel(dir);
     const aspekto = read(join(dir, ASPEKTO_FILE));
     const idsLock = read(join(dir, PACKAGE_LOCK_FILE));
+    const packageThemes = read(join(dir, THEMES_FILE_NAME));
     const packageSetsDir = join(dir, SETS_DIR_NAME);
     const packageSetPaths = listSetFiles(packageSetsDir);
     if (packageSetPaths === undefined) {
@@ -110,11 +113,11 @@ export function readModeloFiles(source: ModeloSource): ReadModeloFilesResult {
         sets.push({ name: setName, package: name, ...document });
       }
     }
-    if (aspekto === undefined || idsLock === undefined) {
+    if (aspekto === undefined || idsLock === undefined || packageThemes === undefined) {
       packagesComplete = false;
       continue;
     }
-    packages.push({ name, dir, aspekto, idsLock });
+    packages.push({ name, dir, aspekto, idsLock, themes: packageThemes });
   }
   sets.sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
 

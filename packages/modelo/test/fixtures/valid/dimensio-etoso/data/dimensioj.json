@@ -1,0 +1,80 @@
+{
+  "dimensioj": [
+    {
+      "id": "dim_01K5FMAJ00XXDRXSKS77MRDT7Z",
+      "name": "color-scheme",
+      "priority": 1,
+      "default": "light",
+      "valoroj": [
+        {
+          "id": "dva_01K5FMAJ01CHCS4BMCX5D0TM49",
+          "name": "light"
+        },
+        {
+          "id": "dva_01K5FMAJ02GHG044FZ9966Q9ZB",
+          "name": "dark"
+        }
+      ]
+    },
+    {
+      "id": "dim_01K5FMAJ03PESFH9GRTNTZSDZN",
+      "name": "contrast",
+      "priority": 2,
+      "default": "default",
+      "valoroj": [
+        {
+          "id": "dva_01K5FMAJ044A9T094C67VSEFNV",
+          "name": "default",
+          "kontrastSojloj": {
+            "wcag2": {
+              "text-normal": 4.5,
+              "text-large": 3,
+              "ui": 3
+            },
+            "apca": {
+              "text-normal": 75,
+              "text-large": 60,
+              "ui": 45
+            }
+          }
+        },
+        {
+          "id": "dva_01K5FMAJ056744YXV7ZXR50AW5",
+          "name": "high",
+          "kontrastSojloj": {
+            "wcag2": {
+              "text-normal": 7,
+              "text-large": 4.5,
+              "ui": 3
+            },
+            "apca": {
+              "text-normal": 90,
+              "text-large": 75,
+              "ui": 60
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "dim_01M2WRK8G0FFFFFFFFFFFFFFF0",
+      "name": "etoso",
+      "priority": 3,
+      "default": "neutrala",
+      "valoroj": [
+        {
+          "id": "dva_01M2WRK8G0FFFFFFFFFFFFFFF1",
+          "name": "neutrala"
+        },
+        {
+          "id": "dva_01M2WRK8G0FFFFFFFFFFFFFFF2",
+          "name": "varma"
+        },
+        {
+          "id": "dva_01M2WRK8G0FFFFFFFFFFFFFFF3",
+          "name": "malvarma"
+        }
+      ]
+    }
+  ]
+}

@@ -52,7 +52,7 @@ Order follows the plan's "Build order". The ciferecigo package is the last task.
 - [x] **T010 Font declaration rule** (D-05)
   - Red: `invalid/aspekto-font-undeclared`; generic families pass.
   - Green: `aspekto-font-undeclared`.
-- [ ] **T011 Themes fragments** (D-08)
+- [x] **T011 Themes fragments** (D-08)
   - Red: `themes/fragment.test.ts`: derived package `$themes.json`, core-only vortaro themes, drift errors; `pnpm vortaro:themes` regenerates the fragments.
   - Red (extensibility guard, research §9): `valid/dimensio-etoso` is a copy of a small valid fixture plus a seventh Dimensio `etoso` (values `neutrala` default, `varma`, `malvarma`; priority 7) with alias-only sets `etoso/varma` and `etoso/malvarma`. The test asserts that it validates with 0 errors, that `$themes.json` gets an `etoso` group, and that `resolve` changes the re-pointed tokens with origin `etoso/varma`. The fixture adds data only; the test also asserts that no schema or code file mentions `etoso`.
   - Green: `themes/derive.ts`, `themes/cli.ts`. No change for `etoso` should be needed; if one is, stop and report instead of adding it.
