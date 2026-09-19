@@ -46,7 +46,12 @@ const EXAMPLES: Record<string, { input: unknown; output: unknown; badInput: unkn
     input: {},
     output: {
       dimensioj: [
-        { name: "color-scheme", priority: 4, default: "light", valoroj: [{ name: "dark", sets: ["color-scheme/dark"] }] },
+        {
+          name: "color-scheme",
+          priority: 4,
+          default: "light",
+          valoroj: [{ name: "dark", sets: ["color-scheme/dark"] }],
+        },
       ],
       order: "core, then ascending priority, then condition count, then set name; last wins",
     },
@@ -56,16 +61,35 @@ const EXAMPLES: Record<string, { input: unknown; output: unknown; badInput: unkn
     input: {},
     output: {
       aspektoj: [
-        { ...SUMMARY, id: "dva_01M2VEEDQEJEE7MR7JA8JRPMJB", package: "@fundamento/aspekto-komuna", sets: ["aspekto/komuna"] },
+        {
+          ...SUMMARY,
+          id: "dva_01M2VEEDQEJEE7MR7JA8JRPMJB",
+          package: "@fundamento/aspekto-komuna",
+          sets: ["aspekto/komuna"],
+        },
       ],
     },
     badInput: { aspekto: "komuna" },
   },
   search_tokens: {
-    input: { prefix: "color.action", type: "color", role: "background", text: "fill", limit: 10, offset: 0 },
+    input: {
+      prefix: "color.action",
+      type: "color",
+      role: "background",
+      text: "fill",
+      limit: 10,
+      offset: 0,
+    },
     output: {
       total: 1,
-      tokens: [{ id: "tok_01M2VEEE0QJXF3E9TY0JX4XVBK", name: "color.action.primary.rest", type: "color", role: "background" }],
+      tokens: [
+        {
+          id: "tok_01M2VEEE0QJXF3E9TY0JX4XVBK",
+          name: "color.action.primary.rest",
+          type: "color",
+          role: "background",
+        },
+      ],
     },
     badInput: { limit: 501 },
   },
@@ -78,7 +102,11 @@ const EXAMPLES: Record<string, { input: unknown; output: unknown; badInput: unkn
       role: "foreground",
       definition: { set: "core", value: "{color.palette.neutral.900}" },
       overrides: [
-        { set: "color-scheme/dark", kondicxoj: ["color-scheme=dark"], value: "{color.palette.neutral.50}" },
+        {
+          set: "color-scheme/dark",
+          kondicxoj: ["color-scheme=dark"],
+          value: "{color.palette.neutral.50}",
+        },
       ],
     },
     badInput: { name: "color.text.default", id: "tok_01M2VEEE0QJXF3E9TY0JX4XVBG" },
@@ -116,7 +144,10 @@ const EXAMPLES: Record<string, { input: unknown; output: unknown; badInput: unkn
   },
   derive_name: {
     input: { name: "color.action.primary.rest", celo: "figma" },
-    output: { name: "color.action.primary.rest", derivations: { figma: "color/action/primary/rest" } },
+    output: {
+      name: "color.action.primary.rest",
+      derivations: { figma: "color/action/primary/rest" },
+    },
     badInput: { name: "color.text.default", celo: "sketch" },
   },
 };
@@ -149,8 +180,13 @@ describe("tool schemas (contracts/mcp-tools.md)", () => {
     if (tool === undefined || example === undefined) throw new Error(`missing ${name}`);
 
     it("accepts the contract's example input and output", () => {
-      expect(tool.input.validate(example.input), JSON.stringify(tool.input.validate.errors)).toBe(true);
-      expect(tool.output.validate(example.output), JSON.stringify(tool.output.validate.errors)).toBe(true);
+      expect(tool.input.validate(example.input), JSON.stringify(tool.input.validate.errors)).toBe(
+        true,
+      );
+      expect(
+        tool.output.validate(example.output),
+        JSON.stringify(tool.output.validate.errors),
+      ).toBe(true);
     });
 
     it("rejects an input the contract rules out", () => {
@@ -161,6 +197,6 @@ describe("tool schemas (contracts/mcp-tools.md)", () => {
   it("describes every error as an issue envelope with optional allowed values (FR-18)", () => {
     const envelope = validators[0]?.error;
     expect(envelope?.validate({ issues: [ISSUE], allowed: ["light", "dark"] })).toBe(true);
-    expect(envelope?.validate({ issues: [] , extra: 1 })).toBe(false);
+    expect(envelope?.validate({ issues: [], extra: 1 })).toBe(false);
   });
 });
