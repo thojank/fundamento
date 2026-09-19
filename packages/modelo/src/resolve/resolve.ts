@@ -34,7 +34,19 @@ export interface CombinationResolution {
  * definition won the overlay (`setId` is `""` when that set has no ID). Alias targets are looked up
  * in the whole overlay, so a reference to a token only an active override set defines resolves.
  */
-export function resolveCombination(modelo: Modelo, assignment: Assignment): CombinationResolution {
+export interface ResolveCombinationOptions {
+  /**
+   * Resolve only these core tokens and their alias chains (Spec 002, D-18); names that are no
+   * core token are ignored. Override-ambiguity warnings are not computed in this mode.
+   */
+  names?: readonly string[];
+}
+
+export function resolveCombination(
+  modelo: Modelo,
+  assignment: Assignment,
+  options: ResolveCombinationOptions = {},
+): CombinationResolution {
   const completed = completeAssignment(modelo, assignment);
   if (completed.assignment === undefined) {
     return { tokens: {}, errors: completed.issues, warnings: [] };
@@ -42,9 +54,11 @@ export function resolveCombination(modelo: Modelo, assignment: Assignment): Comb
   const complete = completed.assignment;
   const ordered = orderActiveSets(modelo, complete);
   const overlaid = overlaySets(ordered);
-  const coreNames = Object.keys(
+  const allNames = Object.keys(
     modelo.setoj.find((set) => set.name === CORE_SET_NAME)?.tokens ?? {},
   ).sort();
+  const wanted = options.names === undefined ? undefined : new Set(options.names);
+  const coreNames = wanted === undefined ? allNames : allNames.filter((name) => wanted.has(name));
   const { bound, issues } = bindAliases(modelo, overlaid, coreNames, complete);
   const core = modelo.setoj.find((set) => set.name === CORE_SET_NAME);
 
@@ -81,7 +95,7 @@ export function resolveCombination(modelo: Modelo, assignment: Assignment): Comb
     assignment: complete,
     tokens,
     errors: issues,
-    warnings: findAmbiguousOverrides(modelo, ordered, complete),
+    warnings: wanted === undefined ? findAmbiguousOverrides(modelo, ordered, complete) : [],
   };
 }
 

@@ -1,8 +1,11 @@
 // FR-11 / S4 resolution against small real fixture Vortaroj (no mocks): every combination of the
 // test Dimensioj, final value and origin set, priority, specificity, late binding, ties and cycles.
 
+import fc from "fast-check";
 import { describe, expect, it } from "vitest";
 import type { AliasLink, Assignment, ResolveOutcome, Rezolvo } from "../contracts/modelo.js";
+import { loadModelo } from "../load/load-modelo.js";
+import { defaultModeloSource } from "../load/source.js";
 import {
   allAssignments,
   completeAssignment,
@@ -416,5 +419,33 @@ describe("resolve: composite sub-field aliases (fixture tree modified in memory)
     expect(outcome.issues.map((issue) => [issue.rule, issue.path])).toEqual([
       ["alias-cycle", `rezolvo(${LIGHT_DEFAULT})/shadow.raised`],
     ]);
+  });
+});
+
+describe("resolveCombination with a token subset (Spec 002, D-18)", () => {
+  const { modelo: repo } = loadModelo(defaultModeloSource());
+  if (repo === undefined) throw new Error("repo did not load");
+  const names = Object.keys(resolveCombination(repo, {}).tokens);
+  const assignments = allAssignments(repo);
+
+  it("equals the full resolution filtered to the named tokens, for any subset and combination", () => {
+    fc.assert(
+      fc.property(
+        fc.subarray(names, { minLength: 1, maxLength: 12 }),
+        fc.constantFrom(...assignments),
+        (subset, assignment) => {
+          const full = resolveCombination(repo, assignment);
+          const part = resolveCombination(repo, assignment, { names: subset });
+          expect(Object.keys(part.tokens).sort()).toEqual([...subset].sort());
+          for (const name of subset) expect(part.tokens[name]).toEqual(full.tokens[name]);
+          expect(part.assignment).toEqual(full.assignment);
+        },
+      ),
+      { numRuns: 60 },
+    );
+  });
+
+  it("ignores names that are not core tokens", () => {
+    expect(resolveCombination(repo, {}, { names: ["color.missing"] }).tokens).toEqual({});
   });
 });
