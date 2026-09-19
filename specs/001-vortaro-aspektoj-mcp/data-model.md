@@ -18,7 +18,7 @@ Companion to [`plan.md`](plan.md). Decision numbers (D-xx) refer to the plan. Th
 | **MCP-Ilo** | `packages/mcp/schema/tools/` | name, input schema, output schema, `readOnlyHint: true` | contract tests (AK-06) |
 | **Rezolvo** | export | `origin` gains `package` | schema |
 
-## 2. Vortaro tree (core, about 327 tokens)
+## 2. Vortaro tree (core, about 338 tokens)
 
 Numbers are planned counts; the coverage test fixes categories and minimum roles, not exact counts. "P" = primitive (literal), "R" = role or semantic (alias).
 
@@ -42,23 +42,23 @@ Numbers are planned counts; the coverage test fixes categories and minimum roles
 | Typography composites | `typography.display.{1,2,3}`, `typography.headline.{1,2,3,4}`, `typography.body.{1,2}`, `typography.label.{1,2}`, `typography.{caption,code,kicker}` | R | 14 |
 | Spacing | `spacing.scale.<12 steps>`; `spacing.{xsmall,small,medium,large,xlarge,xxlarge}` | P / R | 18 |
 | Size | `size.scale.<10 steps>`; `size.icon.{small,medium,large}`; `size.control.{small,medium,large}`; `size.container.{small,medium,large,max}`; `size.breakpoint.{medium,expanded}` | P / R | 22 |
-| Shape | `radius.{none,small,medium,large,xlarge,full}`; `radius.role.{control,surface,pill}`; `border.width.{default,strong,focus}`; `border.{default,subtle,strong}` (composites); `stroke.{solid,dashed}` | P / R | 17 |
+| Shape | `radius.{none,small,medium,large,xlarge,full}` (P); `radius.role.{control,surface,pill}` (R); `border.width.scale.{1,2,3}` (P); `border.width.{default,strong,focus}` (R, K4); `border.{default,subtle,strong}` (composites, R); `stroke.{solid,dashed}` (P) | P / R | 20 |
 | Elevation | `elevation.shadow.{raised,overlay,modal,floating}`; `elevation.layer.{base,raised,navigation,overlay,modal,toast}` (`number`) | P / R | 10 |
-| Motion | `motion.duration.{none,fast,medium,slow,deliberate}`; `motion.easing.{linear,standard,emphasized,enter,exit}` | P | 10 |
+| Motion | `motion.duration.scale.{0,1,2,3,4}` (P, `0` = 0 ms); `motion.duration.{fast,medium,slow,deliberate}` (R); `motion.easing.curve.{linear,smooth,expressive,decelerate,accelerate}` (P); `motion.easing.{standard,emphasized,enter,exit}` (R, K4) | P / R | 18 |
 | Layout | `layout.columns.{4,8,12}`; `layout.grid.{columns,gutter,margin}`; `layout.container.max` | P / R | 7 |
 | Focus | `focus.ring` (border composite), `focus.offset` | R | 2 |
 | Opacity | `opacity.{disabled,overlay,hover,pressed}` | P | 4 |
-| **Total** | | | **≈ 327** |
+| **Total** | | | **≈ 338** |
 
-**Dimensio sets (alias-only, D-03):**
+**Dimensio sets (alias-only, D-03; only tokens that are R in `core` may be targets, K4 `dimensio-set-primitive`):**
 
 | Set | Re-points |
 |---|---|
-| `viewport/compact`, `viewport/expanded` | `font.size.{display,headline}.*`, the matching `font.tracking.*` and `font.lineheight.*` roles, `layout.grid.*`, `layout.container.max` |
-| `density/compact`, `density/comfortable` | `spacing.<role>`, `size.control.*`, `font.size.{body,label}.*` and their line heights |
-| `color-scheme/dark` | semantic colors → other palette steps; `color.shadow.*`; `color.backdrop` |
-| `contrast/high` | text, border and focus roles → stronger palette steps; `border.width.default` → `border.width.strong` |
-| `motion/reduced` | every `motion.duration.<x>` → `{motion.duration.none}`; every easing → `{motion.easing.linear}` |
+| `viewport/compact`, `viewport/expanded` | `font.size.{display,headline}.*`, the matching `font.tracking.*` and `font.lineheight.*` roles, `layout.grid.*`, `layout.container.max` (all R) |
+| `density/compact`, `density/comfortable` | `spacing.<role>`, `size.control.*` only (both R). No typography (K3, Regulo `density-affects-layout-only`). |
+| `color-scheme/dark` | semantic colors → other palette steps; `color.shadow.*`; `color.backdrop` (all R; palettes are never targets) |
+| `contrast/high` | text, border and focus color roles → stronger palette steps; `border.width.default` → `{border.width.strong}` (R since K4) |
+| `motion/reduced` | the four duration roles → `{motion.duration.scale.0}`; the four easing roles → `{motion.easing.curve.linear}` (all R since K4) |
 
 **komuna** (values in `core`, D-05): calm, neutral, with no signature color. The `accent` palette is a low-chroma blue-grey. The families are `Geist` / `Geist Mono` with generic fallbacks, and the tracking is moderate (0 to slightly negative only for display). `aspekto/komuna+color-scheme/dark` (the Phase-0 conjunction set, ID kept) carries komuna's dark-surface tint. It is the only komuna conjunction set.
 
@@ -98,7 +98,7 @@ packages/modelo/test/fixtures/valid/aspekto-ekzemplo/
 { "id": "dim_01M2VEEDJRNEGZF2QHTC7AGWPK", "name": "aspekto", "priority": 1, "default": "komuna", "referenceAspekto": "komuna" }
 ```
 
-## 4. KontrastParoj (about 52)
+## 4. KontrastParoj (about 60)
 
 | Group | Pairs | Kategorio |
 |---|---|---|
@@ -107,6 +107,7 @@ packages/modelo/test/fixtures/valid/aspekto-ekzemplo/
 | Actions | `action.<v>.text` on `action.<v>.{rest,hover,pressed,selected}` for 3 variants | text-normal |
 | Navigation | `navigation.text.rest` on `navigation.{rest,hover}`, `navigation.text.selected` on `navigation.selected` | text-normal |
 | Status | `status.<s>.text` on `background.default`; `status.<s>.on` on `status.<s>.basic` | text-normal |
+| Status surfaces (K5) | `status.<s>.text` on `status.<s>.{weak,subtle}`, 8 pairs (badges, banners, inline notices) | text-normal |
 | Brand | `brand.text` on `brand.fill` | text-normal |
 | Borders | `border.{default,strong}` on `background.{default,raised}`; `border.inverse` on `background.inverse` | ui |
 | Focus | `focus.ring` on `background.{default,inverse}` and on `action.primary.rest` | ui |
@@ -129,6 +130,7 @@ Exempt by role: `disabled` (Regulo `disabled-exempt-from-contrast`) and `decorat
 | `id-namespace-mismatch` | error | an ID in a package lacks the package namespace |
 | `id-namespace-duplicate` | error | two packages declare the same namespace |
 | `dimensio-set-literal` | error | a literal value in a set without an `aspekto` condition |
+| `dimensio-set-primitive` | error | a set without an `aspekto` condition overrides a token whose `core` value is a literal (K4) |
 | `color-semantic-literal` | error | a non-palette color token (in any set) is not an alias into `color.palette.*` |
 | `color-role-missing` | error | a color token without `role` |
 | `kontrastparo-missing-for-role` | error | a token of a checked role appears in no KontrastParo |
@@ -151,4 +153,8 @@ Exempt by role: `disabled` (Regulo `disabled-exempt-from-contrast`) and `decorat
 | `shadow.raised` | `elevation.shadow.raised` | `tok_01M2VEEE0QJXF3E9TY0JX4XVC5` |
 | `typography.body` | `typography.body.1` | `tok_01M2VEEE0QJXF3E9TY0JX4XVC6` |
 
-The other 24 Phase-0 tokens keep their names. The literals of Phase-0 generic sets move into palette/scale primitives or the komuna conjunction set (D-03). The acceptance test for AK-04 reads `ids.lock.json` at `6e517c6` (via `git show`) and asserts: every Phase-0 ID is still active in the union of registries, and the komuna ID equals the neutra ID.
+The other 24 Phase-0 tokens keep their names. The literals of Phase-0 generic sets move into palette/scale primitives or the komuna conjunction set (D-03).
+
+Phase-0 tokens that held a literal and become roles (K4 and D-02) keep their name **and** ID; their former literal moves to a new primitive: `spacing.{small,medium,large}` → `spacing.scale.*`, `font.size.body.1` → `font.size.scale.*`, `font.lineheight.body.1` → `font.lineheight.scale.*`, `border.width.default` → `border.width.scale.1`, `motion.duration.{fast,medium}` → `motion.duration.scale.*`, `motion.easing.standard` → `motion.easing.curve.smooth`.
+
+**AK-04 without git (K1).** `packages/modelo/test/fixtures/phase0-ids.lock.json` is a frozen copy of `packages/modelo/data/ids.lock.json` at `6e517c6`. It is taken over byte for byte, with one addition: a first member `"$comment"` recording the origin (path, commit `6e517c6`, date, "frozen for AK-04, never edit"). Strict byte identity and a comment field exclude each other, so a unit test pins the SHA-256 of the fixture file instead; the fixture cannot drift unnoticed. The AK-04 test reads only this fixture (no `git show`, since CI checks out with `fetch-depth: 1`) and asserts: every Phase-0 ID is still active in the union of the current registries, and the komuna ID equals the neutra ID.

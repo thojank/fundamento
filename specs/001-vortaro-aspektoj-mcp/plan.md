@@ -10,7 +10,7 @@ Per AK-08 this file contains **no** ciferecigo brand values; it refers to "Anhan
 
 Phase 1 turns the Phase-0 skeleton into a usable token system without adding a generator. It adds two packages (`@fundamento/aspekto-komuna`, `@fundamento/mcp`) and extends `@fundamento/modelo`, `@fundamento/vortaro` and `@fundamento/cli`.
 
-1. **Vortaro.** About 330 core tokens (target band 250–400) covering every category of Spec 000 `research.md` §4 plus the Phase-1 additions (focus role, opacity, layout per viewport, reduced motion). Two tiers everywhere: **primitives** (palettes, scales) carry literal values, **semantic/role tokens** are aliases. Generic Dimensio sets only **re-point aliases**; they never carry literals (D-03).
+1. **Vortaro.** About 340 core tokens (target band 250–400) covering every category of Spec 000 `research.md` §4 plus the Phase-1 additions (focus role, opacity, layout per viewport, reduced motion). Two tiers everywhere: **primitives** (palettes, scales) carry literal values, **semantic/role tokens** are aliases. Generic Dimensio sets only **re-point aliases**; they never carry literals (D-03).
 2. **Aspektoj as packages.** An Aspekto is a folder with `aspekto.json`, `sets/`, its own `ids.lock.json` and a derived `$themes.json` fragment. `komuna` (the Phase-0 `neutra`, same ID) lives in `packages/aspekto-komuna`; it is the reference Aspekto whose values sit in `core`, so its own set is empty. Every other Aspekto must override **every** core token (`aspekto-incomplete`). External packages are included through `fundamento.config.json`. CI proves the external path with the invented fixture `aspekto-ekzemplo`; ciferecigo lives only in the private repository.
 3. **MCP server.** `@fundamento/mcp` on the official TypeScript SDK, stdio by default and optionally Streamable HTTP on localhost. It offers ten read-only tools and three resources over the in-memory export of the configured Modelo. `fm mcp` starts it.
 
@@ -27,7 +27,7 @@ Phase 1 turns the Phase-0 skeleton into a usable token system without adding a g
 | Project type | Library + CLI + MCP server in one monorepo |
 | Performance goals | MCP start < 2 s; `resolve` < 100 ms per assignment (FR-17, AK-07), measured in tests with a CI tolerance factor (D-17) |
 | Constraints | Offline; the core builds without external packages; byte-identical export (AK-10); no ciferecigo values in the core repository (AK-08) |
-| Scale | ~330 tokens, 6 Dimensioj, 72 combinations per Aspekto (144 with the fixture Aspekto); ~50 KontrastParoj ≈ 3 700 contrast evaluations per Aspekto |
+| Scale | ~340 tokens, 6 Dimensioj, 72 combinations per Aspekto (144 with the fixture Aspekto); ~60 KontrastParoj ≈ 4 300 contrast evaluations per Aspekto |
 
 ## Constitution Check (gate before design)
 
@@ -59,7 +59,7 @@ All packages move to version `0.1.0` (the S7 dialog says "Fundamento v0.1.0").
 
 ### D-02 Two tiers: primitives carry values, roles carry aliases
 
-- Primitives: `color.palette.<name>.<step>`, `font.size.scale.<n>`, `spacing.scale.<n>`, `size.scale.<n>`, `radius.<step>`, `motion.duration.<name>`, and so on. Only primitives hold literals.
+- Primitives: `color.palette.<name>.<step>`, `font.size.scale.<n>`, `spacing.scale.<n>`, `size.scale.<n>`, `radius.<step>`, `border.width.scale.<n>`, `motion.duration.scale.<n>`, `motion.easing.curve.<name>`, and so on. Only primitives hold literals.
 - Semantic and role tokens (`color.text.default`, `spacing.medium`, `font.size.headline.1`, `layout.grid.gutter`, …) are aliases to primitives. FR-02 (`semantic-colors-alias-palette`) becomes an enforced rule for color (`color-semantic-literal`) and is generalized for the other categories through D-03.
 - Typography composites (FR-04) reference **role tokens** for the fields that Dimensioj change (`fontSize`, `lineHeight`, `letterSpacing`) and primitives for the fields only an Aspekto changes (`fontFamily`, `fontWeight`). Generic sets therefore never have to restate a composite, which would overwrite an Aspekto's weight or family.
 
@@ -68,9 +68,11 @@ All packages move to version `0.1.0` (the S7 dialog says "Fundamento v0.1.0").
 Art. IV: "Kein anderer Aspekto erbt Werte von `komuna` oder vom Kern." Sets without an `aspekto` condition (`color-scheme/dark`, `contrast/high`, `density/*`, `viewport/*`, `motion/reduced`) have a higher priority than `aspekto/*` (priority 1). A literal in such a set would therefore reach **every** Aspekto, and that is exactly the forbidden inheritance. So these sets may only re-point aliases:
 
 - `color-scheme/dark` maps semantic colors to other palette steps (`color.text.default → {color.palette.neutral.50}`). Each Aspekto defines what its palette steps look like.
-- `density/*` and `viewport/*` shift role tokens along the scales (FR-07: "über Aliasse, nicht über neue Werte").
-- `motion/reduced` points durations at `motion.duration.none` and easings at `motion.easing.linear`. Both are primitives that every Aspekto must override too (the reference and the fixture use `0ms` and `linear`), so FR-06 holds after resolution.
+- `viewport/*` shifts typography roles (size, line height, tracking) and layout roles along their scales. `density/*` shifts **only** `spacing.<role>` and `size.control.*` (FR-07: "über Aliasse, nicht über neue Werte"). Density never touches typography: density is layout compactness, font size is legibility and belongs to `viewport`. If both shifted the same token, the result would depend on the priority order and be predictable for nobody. This is recorded as the Regulo `density-affects-layout-only` (K3; see "Spec amendment required").
+- `motion/reduced` points the duration roles at `motion.duration.scale.0` and the easing roles at `motion.easing.curve.linear`. Both are primitives that every Aspekto must override too (the reference and the fixture use `0ms` and `linear`), so FR-06 holds after resolution.
 - `contrast/high` points semantic colors at stronger palette steps.
+
+**Only role tokens may be re-pointed (new rule `dimensio-set-primitive`, error; K4).** `dimensio-set-literal` alone would still let a generic set turn a primitive into an alias for one combination (e.g. a width primitive re-pointed to another width), which quietly makes it a role there. So a set without an `aspekto` condition may only override tokens whose `core` value is an alias. Consequences for the data model: `border.width.{default,strong,focus}` become roles over `border.width.scale.{1,2,3}`, so `contrast/high` can legally re-point `border.width.default` to `{border.width.strong}`. The motion durations and easings become roles over `motion.duration.scale.*` and `motion.easing.curve.*`. Every target in the Dimensio-set table of data-model §2 was checked against the P/R column.
 
 Conjunction sets (`aspekto/X+…`) may carry literals; they belong to one Aspekto. Phase-0 literals in generic sets move into `core` primitives or the komuna conjunction set (see data-model §6).
 
@@ -103,7 +105,7 @@ Conjunction sets (`aspekto/X+…`) may carry literals; they belong to one Aspekt
 - Core and komuna keep the Phase-0 format `<type>_<ULID>`. komuna *is* the core reference, and FR-09/FR-14 require unchanged IDs. The `dva_…PMJB` ID of `neutra` and both `aspekto/neutra*` set IDs move from `packages/modelo/data/ids.lock.json` to `packages/aspekto-komuna/ids.lock.json` unchanged.
 - External packages declare `idNamespace` (`^[a-z]{2,8}$`, e.g. `ekz` for the fixture) and mint `<type>_<ns>_<ULID>` (e.g. `set_ekz_01…`). `ID_PATTERN` is extended backwards-compatibly. `pnpm id:new --lock <pkg>/ids.lock.json` reads the namespace from the neighbouring `aspekto.json`.
 - New rules: `id-namespace-mismatch` (an ID in a package without its namespace), `id-namespace-duplicate` (two packages with the same namespace). Cross-registry collisions are reported by the existing `id-duplicate`, now evaluated over the union of all registries (edge case).
-- FR-14: no `retired` IDs. The six Phase-0 tokens whose names change keep their IDs (data-model §6); a test compares the union of active IDs with `ids.lock.json` at `6e517c6`.
+- FR-14: no `retired` IDs. The six Phase-0 tokens whose names change keep their IDs (data-model §6); a test compares the union of active IDs with the frozen Phase-0 registry `packages/modelo/test/fixtures/phase0-ids.lock.json` (K1, data-model §6). Tests never call git.
 
 ### D-07 Configuration `fundamento.config.json` (FR-12)
 
@@ -137,7 +139,7 @@ S7 (question 3) and Anhang A place brand rules with a kialo in the private packa
 ### D-11 Typography (FR-04, FR-05, S5, research §5)
 
 - Roles: `typography.display.{1,2,3}`, `headline.{1,2,3,4}`, `body.{1,2}`, `label.{1,2}`, `caption`, `code`, `kicker`, which makes 14 composites. Each field of each composite is an alias.
-- **Letter spacing is stored as a DTCG `dimension` in `px`** (the Phase-0 reference unit), per role. Relative `em` is not a DTCG unit; storing it would break Art. XII. The relative value is derivable in Projekcioj because each resolved composite carries both `letterSpacing` and `fontSize` (CSS `em` = letterSpacing / fontSize; Figma percent = letterSpacing / fontSize × 100). This conversion is a **value rule of the Projekcio documentation** (Phase 5 generators), not part of the NomReguloj: `derive_name` derives names only and never touches values. Dimension shifts move `font.size.<role>` and `font.tracking.<role>` together along their scales, so an Aspekto's relative tracking survives `viewport` and `density` as long as the Aspekto defines matching scale steps. A brand that needs something else uses a conjunction set.
+- **Letter spacing is stored as a DTCG `dimension` in `px`** (the Phase-0 reference unit), per role. Relative `em` is not a DTCG unit; storing it would break Art. XII. The relative value is derivable in Projekcioj because each resolved composite carries both `letterSpacing` and `fontSize` (CSS `em` = letterSpacing / fontSize; Figma percent = letterSpacing / fontSize × 100). This conversion is a **value rule of the Projekcio documentation** (Phase 5 generators), not part of the NomReguloj: `derive_name` derives names only and never touches values. Dimension shifts move `font.size.<role>` and `font.tracking.<role>` together along their scales, so an Aspekto's relative tracking survives `viewport` (the only Dimensio that changes typography, D-03) as long as the Aspekto defines matching scale steps. A brand that needs something else uses a conjunction set.
 - `lineHeight` is a unitless DTCG `number`, as in Phase 0.
 - `textTransform` sits in `$extensions["com.ciferecigo.fundamento"].textTransform` on the composite, with the values `none | uppercase | lowercase | capitalize`, which are platform-neutral. `set-override-has-extensions` is relaxed so that overrides may carry exactly this one key (an Aspekto must be able to set its kicker to uppercase). The resolver reports it as a field with provenance.
 - `fontFamily` tokens hold a stack: komuna `["Geist", "system-ui", "sans-serif"]` and `["Geist Mono", "ui-monospace", "monospace"]`. No font file enters the repo (FR-05; research §1).
@@ -166,11 +168,18 @@ S7 (question 3) and Anhang A place brand rules with a kialo in the private packa
 
 ### D-15 Clean room for the owner's own brand (AK-08)
 
-`check:clean-room` gets a fourth rule, `clean-room-marko-spuro`. A list of **SHA-256 fingerprints** of normalized Anhang-A values (hex colors, font family names, easing curves, rem/em literals) is stored in `src/checks/clean-room/marko-spuroj.json`, so the values themselves never enter code. Every tracked text file is tokenized, the candidates are normalized and hashed, and matches outside the allowlist fail. The allowlist is `specs/001-vortaro-aspektoj-mcp/spec.md` and `specs/001-vortaro-aspektoj-mcp/research.md`. A failing fixture proves it (with a synthetic fingerprint list, so the fixture itself holds no brand value).
+`check:clean-room` gets a fourth rule, `clean-room-marko-spuro`. A list of **SHA-256 fingerprints** is stored in `src/checks/clean-room/marko-spuroj.json`, so the values themselves never enter code. **Only brand-specific values are fingerprinted (K2):**
+- hex colours, normalized to lowercase 6-digit form (`#abc` expands to `#aabbcc`, and an alpha suffix is dropped);
+- font family names, normalized to lowercase without quotes. Only the brand's own family is included; generic families and common system fallbacks named in Anhang A are excluded, because komuna or the fixture may legitimately use them;
+- `cubic-bezier(…)` curves, normalized without whitespace (and the same four numbers as a DTCG `cubicBezier` array).
+
+Durations, `rem`/`em`/`px` scalars and all other numbers stay out: values such as `200ms` or `0.5rem` are generic and would produce false positives in komuna or the fixture. Every tracked text file is tokenized, the candidates are normalized and hashed, and matches outside the allowlist fail. The allowlist is `specs/001-vortaro-aspektoj-mcp/spec.md` and `specs/001-vortaro-aspektoj-mcp/research.md`. A failing fixture proves it (with a synthetic fingerprint list, so the fixture itself holds no brand value).
 
 **What the check does and does not do.** The Anhang-A values are public on the brand's website, and a SHA-256 hash of a short value such as a hex colour is trivially reversible. The check is therefore **not** a secrecy measure. Its only purpose is to enforce AK-08 mechanically: no brand values in the core repository outside the two allowlisted files. Hashing only keeps the check's own data file from becoming such a place.
 
 ### D-16 Fixture Aspekto `aspekto-ekzemplo`
+
+The fixture's `fundamento.config.json` points `$schema` at the schema in the repository by relative path (`../../../../schema/config.schema.json`). The `node_modules` path in D-07 only works once the packages are published (Phase 9).
 
 It lives in `packages/modelo/test/fixtures/valid/aspekto-ekzemplo/` (a fixture, not a package, so it does not count under Art. XI). It has invented values, `idNamespace: "ekz"`, license `proprietary` and a fictitious font family with `redistributable: false` and a generic fallback. It is complete, has conjunction sets for `color-scheme/dark` and `contrast/high`, typography that differs from komuna (AK-05), and one Aspekto-scoped Regulo (flat elevation), so all three S7 questions have an analogue. A sibling config `fundamento.config.json` in the fixture includes it. `invalid/aspekto-incomplete` is a copy with a handful of tokens removed.
 
@@ -268,7 +277,7 @@ One entry per Article of Constitution v1.3.
 - The reference Aspekto `komuna` sits in `core`, its own set is empty, and it is marked once (`referenceAspekto`).
 - Every other Aspekto overrides every core token (`aspekto-incomplete`). Generic Dimensio sets carry no literals (`dimensio-set-literal`), so no Aspekto inherits values from core or komuna through a Dimensio either.
 - Aspektoj are packages inside the repo (komuna, MIT) or outside it (config), treated identically by validation, resolution, checks and export.
-- Every Dimensio affects more than color: typography (`density`, `viewport`), layout, spacing, size, motion, elevation.
+- Every Dimensio affects more than color: typography (`viewport`), layout (`viewport`), spacing and control sizes (`density`), motion, border width (`contrast`).
 - Aspektoj introduce no tokens (Q1); a brand assigns the role-named core palettes, so completeness is measured against one fixed token list.
 
 ### Article V – Pura Cxambro
@@ -279,7 +288,7 @@ One entry per Article of Constitution v1.3.
 
 ### Article VI – Regularo kun Kialoj
 **Verdict:** conforming
-- New core Reguloj, each with a kialo: `dimensio-sets-alias-only`, `aspekto-complete`, `disabled-exempt-from-contrast`, `typography-roles-composite`, `motion-reduced-instant`. The two Phase-0 Reguloj switch to `checkability: automatic`.
+- New core Reguloj, each with a kialo: `dimensio-sets-alias-only`, `aspekto-complete`, `disabled-exempt-from-contrast`, `typography-roles-composite`, `motion-reduced-instant`, `density-affects-layout-only` (kialo: density is layout compactness, font size is legibility and belongs to `viewport`; two Dimensioj shifting one token would make the result depend on priority order). The two Phase-0 Reguloj switch to `checkability: automatic`.
 - Aspekto-scoped Reguloj and Jugxoj (D-10) let a brand justify its deviations in its own package; Jugxoj may reference Articles (v1.3).
 - If implementation deviates from this plan, the deviation is recorded as a Jugxo, as in Phase 0.
 
@@ -304,12 +313,12 @@ One entry per Article of Constitution v1.3.
 ### Article IX – Vertikala Tranĉo
 **Verdict:** conforming (with a note)
 - The constitution's phase table puts the full Vortaro (Phase 1) before `butono` (Phase 3), and S1 gives the reason: the slice must not invent tokens. No Ero, Projekcio generator or Sxablono is built.
-- Note: about 330 tokens is breadth. Scope is capped at the checklist of Spec 000 research §4 plus research §6, and the coverage test fixes the list, so the Vortaro cannot grow beyond it without a spec.
+- Note: about 340 tokens is breadth. Scope is capped at the checklist of Spec 000 research §4 plus research §6, and the coverage test fixes the list, so the Vortaro cannot grow beyond it without a spec.
 
 ### Article X – Kontrolo kaj Konformeco
 **Verdict:** conforming
 - Test-first with an observed red run for every ticket (Jugxo `jug_01M2VRT7…`). Every new validation rule gets a positive and a negative fixture with exact `path` and `rule`.
-- The four conformance checks now run over every configured Aspekto. Alirebleco covers about 50 pairs × 72 combinations per Aspekto. AK-02 (AAA text in `contrast=high`) is an extra acceptance test.
+- The four conformance checks now run over every configured Aspekto. Alirebleco covers about 60 pairs × 72 combinations per Aspekto. AK-02 (AAA text in `contrast=high`) is an extra acceptance test.
 - Focus, keyboard and ARIA checks still need Eroj (Phase 3). The benchmark tool for them is still unnamed in `research/benchmarks.md` (carried over from Phase 0).
 
 ### Article XI – Simpleco
@@ -334,21 +343,21 @@ One entry per Article of Constitution v1.3.
 
 | Item | Why | Debt / follow-up |
 |---|---|---|
-| **Alias-only generic sets** (D-03) | Art. IV forbids inheriting core values; generic sets outrank `aspekto/*`. | Extra primitives (`motion.duration.none`, `motion.easing.linear`, `layout.columns.*`) that every Aspekto must also override. |
-| **Completeness means restating ~330 entries per Aspekto** (D-04) | Constitution v1.3 Art. IV, taken literally: "überschreibt jeden Token des Kerns". Identical aliases count as a conscious decision. | Tedious by hand. **No helper in Phase 1.** Phase 7 (Agordilo) gets `fm aspekto init --from komuna`, which writes a complete Aspekto set from komuna so nobody writes ~330 entries by hand. |
+| **Alias-only generic sets** (D-03) | Art. IV forbids inheriting core values; generic sets outrank `aspekto/*`. | Extra primitives (`motion.duration.scale.*`, `motion.easing.curve.*`, `border.width.scale.*`, `layout.columns.*`) that every Aspekto must also override. Two rules (`dimensio-set-literal`, `dimensio-set-primitive`). |
+| **Completeness means restating ~340 entries per Aspekto** (D-04) | Constitution v1.3 Art. IV, taken literally: "überschreibt jeden Token des Kerns". Identical aliases count as a conscious decision. | Tedious by hand. **No helper in Phase 1.** Phase 7 (Agordilo) gets `fm aspekto init --from komuna`, which writes a complete Aspekto set from komuna so nobody writes ~340 entries by hand. |
 | **`set-override-has-extensions` relaxed for `textTransform`** (D-11) | An Aspekto must be able to set text transformation, and DTCG has no field for it. | One whitelisted extension key. Revisit if DTCG standardizes it. |
 | **Aspekto-scoped Reguloj/Jugxoj in packages** (D-10) | S7 and Anhang A need brand rules in the private package, but FR-11 does not list the file. | Package format is one optional file larger than specified. |
 | **ID namespace infix only for external packages** (D-06) | komuna keeps its Phase-0 IDs (FR-09/14), so the core namespace covers core + reference. | Two ID formats. The pattern stays one regex. |
 | **MCP SDK v1 instead of v2** (D-13) | v2 (split packages) went GA two days before this plan; v1.30 is proven with JSON-Schema-first tools. | Pinned to exactly 1.30.0. **Check migration to SDK 2.x in Phase 2.** `zod` is a peer dependency that Fundamento code does not use. |
 | **MCP serves an in-memory export** (D-13, FR-17 interpretation) | Art. XIII: `fm mcp` must work without a prior export step. Reading only the export object keeps FR-17's intent (one read model, no source walking). `--export` serves files verbatim. | Start time includes composition. Measured in AK-07. |
-| **`rezolvoj.json` grows** | ~330 tokens × 72 combinations per Aspekto, with provenance, comes to several MB. | Served as a resource only; tools resolve on demand. Split per Aspekto if agents choke on it. |
+| **`rezolvoj.json` grows** | ~340 tokens × 72 combinations per Aspekto, with provenance, comes to several MB. | Served as a resource only; tools resolve on demand. Split per Aspekto if agents choke on it. |
 | **"No shadow" as a transparent layer** | The Phase-0 schema requires `minItems: 1` for shadow arrays; DTCG does not define an empty shadow. A brand without shadows sets its elevation primitives to one transparent, zero-offset layer and explains that in a Regulo. | Revisit if DTCG defines `none`. |
 | **Six Phase-0 tokens renamed** (data-model §6) | FR-03/FR-04/FR-06 naming (`typography.body` → `typography.body.1` etc.). IDs are unchanged (FR-14). | Nothing downstream consumes the names yet. |
 | **Conjunction approximation within one Aspekto** | The per-Aspekto folder fixes the cross-brand leak. Inside one brand, `aspekto/X+color-scheme/dark` is still `enabled` under `light` in Tokens Studio / Penpot. | Same as Phase 0; tools have no conjunction concept. D-03 keeps such sets small. |
 | **Phase-0 test fixtures still say `neutra`** | Phase-0 fixtures are self-contained test Modelos; renaming them proves nothing. The engineering standard `global/testing.md` was updated to `komuna` / `ekzemplo` on 2026-09-19. | None. |
 | **Timing tolerance in CI** (D-17) | Cold runners (Phase-0 Jugxo on Article X). | Raw timings are logged. |
 | **ciferecigo verified only locally** (D-18) | The private repository does not exist yet, and the core packages are unpublished, so the package has no CI in Phase 1 and consumes the core through a local path. | The maintainer adds CI once the core packages are published (Phase 9) or a registry is chosen. |
-| **Derived brand values** (D-18) | Anhang A covers about 30 facts, while a complete Aspekto needs ~330 tokens. The rest is derived by documented rules in `DERIVATION.md`. | Visual review by the maintainer at acceptance. The findings feed the Enportilo (Phase 7, `research.md` §8). |
+| **Derived brand values** (D-18) | Anhang A covers about 30 facts, while a complete Aspekto needs ~340 tokens. The rest is derived by documented rules in `DERIVATION.md`. | Visual review by the maintainer at acceptance. The findings feed the Enportilo (Phase 7, `research.md` §8). |
 
 ## Build order (orientation, not tasks)
 
@@ -370,10 +379,10 @@ One entry per Article of Constitution v1.3.
 |---|---|
 | FR-01, AK-01 | D-02, data-model §2; coverage test with the category fixture from research §4/§6 |
 | FR-02, FR-03 | D-02, `color-semantic-literal`, name grammar (state as a segment) |
-| FR-04, FR-05, AK-05 | D-11 |
-| FR-06, FR-07 | D-03 |
+| FR-04, FR-05, AK-05 | D-11; AK-05 needs the spec amendment below (K3) |
+| FR-06, FR-07 | D-03 (K3, K4) |
 | FR-08, AK-02 | D-12 |
-| FR-09, AK-04 | D-06, data-model §6 |
+| FR-09, AK-04 | D-06, data-model §6 (frozen Phase-0 registry, K1) |
 | FR-10, AK-03 | D-04, D-05, D-16 |
 | FR-11 | D-05, D-06, D-10 |
 | FR-12 | D-07, D-08 |
@@ -397,3 +406,24 @@ Answered by the maintainer on 2026-09-19.
 | Q3 | Private ciferecigo repository? | It does not exist yet; P0 does not push to it. P0 builds a standalone folder outside the core repo and delivers it as an archive; the maintainer creates the repository and pushes. Core packages come through a local path (`link:`/`file:`); no CI in Phase 1. `fm modelo validate --aspekto <path>` is part of the acceptance. | D-07, D-18 |
 | Q4 | "Complete coverage" in the S7 dialog? | Dropped. The sentence names the Dimensioj and counts per token group; the proof is the tests (coverage, `aspekto-incomplete`). S7 corrected in the spec. | D-14, spec `d815ad5` |
 | Q5 | Values not in Anhang A? | P0 derives them: an OKLCH lightness ramp from the anchor colours, brand-neutral scales identical to komuna, typography roles with the brand font and komuna's sizes. Every rule is written into `DERIVATION.md`; findings go into `research.md` §8. Visual review at acceptance. | D-18 |
+
+## Review round 2 (2026-09-19)
+
+The maintainer accepted D-01–D-18 and asked for five corrections, worked in above:
+
+| # | Correction | Where |
+|---|---|---|
+| K1 | AK-04 compares against a frozen copy of the Phase-0 registry (`test/fixtures/phase0-ids.lock.json`), not `git show`; CI checks out with `fetch-depth: 1`. | D-06, data-model §6 |
+| K2 | Fingerprints only for hex colours, the brand font family and cubic-bezier curves; no durations or length scalars. | D-15 |
+| K3 | `density` shifts only spacing and control sizes, never typography; Regulo `density-affects-layout-only`. | D-03, D-11, Art. VI, data-model §2 |
+| K4 | New rule `dimensio-set-primitive`: generic sets may only override tokens that are aliases in `core`. Border widths and motion become roles over primitive scales. | D-03, data-model §2, §5, §6 |
+| K5 | 8 more KontrastParoj: `status.<s>.text` on `status.<s>.{weak,subtle}`. | data-model §4 |
+
+Confirmed without change: the tracking scale parallel to the size scale; `color.palette.shade.*` as alpha black; "no shadow" as a transparent layer plus a Regulo; `validate.aspektoPath` only under stdio; `--http` only on `127.0.0.1`. The Penpot folder import is verified by the maintainer after the build.
+
+## Spec amendment required (K3)
+
+K3 contradicts two places in the spec: S5 ("`density` verändert Größen und Zeilenhöhen") and AK-05 ("… in `density=compact` und `viewport=compact` verändert"). The plan follows K3. The spec text needs the maintainer's approval before it changes. Proposed wording:
+- S5: "… und `viewport` verändert Größen, Zeilenhöhen und Laufweiten; `density` verändert keine Typografie (Regulo `density-affects-layout-only`)."
+- AK-05: "… und in `viewport=compact` verändert, in `density=compact` unverändert; Auflösung mit Herkunft zeigt das je Feld."
+
