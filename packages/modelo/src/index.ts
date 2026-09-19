@@ -9,6 +9,7 @@ export * from "./checks/regularo/rules.js";
 export * from "./checks/run.js";
 export * from "./checks/vortaro-lint/css-literal.js";
 export * from "./checks/vortaro-lint/css-physical.js";
+export * from "./checks/vortaro-lint/ero-strings.js";
 export * from "./config/index.js";
 export * from "./contracts/index.js";
 export * from "./eroj/skemo-rules.js";
