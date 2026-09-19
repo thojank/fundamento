@@ -95,3 +95,29 @@ describe("dimensio-sets-alias-only → dimensio-set-literal / dimensio-set-primi
     expect(rules.filter((rule) => rule?.startsWith("dimensio-set-"))).toEqual([]);
   });
 });
+
+describe("contrast-pairs-declared → kontrastparo-missing-for-role", () => {
+  it("reports every checked role that appears in no KontrastParo when automatic", () => {
+    const root = mutatedMinimal((edit) => {
+      edit("data/reguloj.json", (file: Reguloj) => {
+        file.reguloj.push({
+          id: "reg_01M2WRK8G0GGGGGGGGGGGGGGG3",
+          name: "contrast-pairs-declared",
+          statement: "Every foreground, border and focus colour is paired with its backgrounds.",
+          kialo: "Contrast is only checked for declared pairs.",
+          scope: "vortaro: color tokens",
+          checkability: "automatic",
+        });
+      });
+      edit("data/kontrastparoj.json", () => ({ kontrastParoj: [] }));
+    });
+    roots.push(root);
+    const issues = validateModelo(fixtureModeloSource(root))
+      .errors.filter((issue) => issue.rule === "kontrastparo-missing-for-role")
+      .map((issue) => issue.path);
+    expect(issues).toEqual([
+      "vortaro/sets/core.json#/color/background/default",
+      "vortaro/sets/core.json#/color/text/default",
+    ]);
+  });
+});

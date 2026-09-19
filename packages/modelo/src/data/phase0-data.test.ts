@@ -387,7 +387,10 @@ describe("Phase 0 repo Modelo: KontrastParoj (FR-16)", () => {
     for (const pair of modelo.kontrastParoj) {
       expect(core[pair.foreground]?.type, pair.name).toBe("color");
       expect(core[pair.background]?.type, pair.name).toBe("color");
-      expect(["foreground", "border"], pair.name).toContain(core[pair.foreground]?.role);
+      // A status fill (role background) is also the foreground of a ui pair: an indicator on a surface.
+      expect(["foreground", "border", "focus", "background"], pair.name).toContain(
+        core[pair.foreground]?.role,
+      );
       expect(core[pair.background]?.role, pair.name).toBe("background");
     }
   });

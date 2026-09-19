@@ -3,10 +3,10 @@
     {
       "id": "reg_01M2VEEE5280TGESDHQQ14EA33",
       "name": "contrast-pairs-declared",
-      "statement": "Every combination of a foreground or border color token with the background color token it is placed on has a KontrastParo.",
+      "statement": "Every foreground, border and focus colour token is the foreground of a KontrastParo, and every background colour token its background; tokens with the role disabled or decorative are exempt.",
       "kialo": "Contrast must be provable per combination (Art. X): the Alirebleco check only evaluates declared KontrastParoj across all resolutions, so an undeclared text-on-background or border-on-background pairing is an unchecked accessibility risk.",
       "scope": "vortaro: color tokens with role foreground, background or border",
-      "checkability": "manual"
+      "checkability": "automatic"
     },
     {
       "id": "reg_01M2VEEE53WJ4R0H861BN7MJYF",
@@ -38,6 +38,38 @@
       "statement": "The density Dimensio re-points spacing and control-size roles only; it never changes typography. viewport and density never shift the same token.",
       "kialo": "Density is layout compactness, font size is legibility and belongs to viewport. If viewport and density shifted the same token, the result would depend on their priority order and be predictable for nobody.",
       "scope": "vortaro: sets density/*",
+      "checkability": "manual"
+    },
+    {
+      "id": "reg_01M2W9W6WAVG6QE0S6DNDJNX7J",
+      "name": "aspekto-complete",
+      "statement": "Every Aspekto except the reference overrides every core token in its own set aspekto/<name>; identical aliases count, conjunction sets carry deltas only.",
+      "kialo": "An Aspekto is a complete assignment of the Vortaro (Article IV). If a brand could leave a token out, it would silently inherit the reference brand's value, and a forgotten token would surface at the customer instead of in validation.",
+      "scope": "vortaro: Aspekto packages",
+      "checkability": "automatic"
+    },
+    {
+      "id": "reg_01M2W9W6WB2TWHVZQTJ2SND87H",
+      "name": "disabled-exempt-from-contrast",
+      "statement": "Colour tokens with the role disabled or decorative need no KontrastParo.",
+      "kialo": "WCAG 2.x exempts inactive components (1.4.3) and decoration that carries no information (1.4.11). Forcing contrast on them would make disabled controls look actionable and dividers look like content.",
+      "scope": "vortaro: color tokens with role disabled or decorative",
+      "checkability": "manual"
+    },
+    {
+      "id": "reg_01M2W9W6WB2TWHVZQTJ2SND87J",
+      "name": "typography-roles-composite",
+      "statement": "Every typography role is a composite whose fields are aliases: size, line height and letter spacing alias role tokens, family and weight alias primitives.",
+      "kialo": "Dimensioj then shift role tokens along the scales and never restate a composite, which would overwrite an Aspekto's weight or family; one role per text style keeps every Projekcio and every agent on the same names.",
+      "scope": "vortaro: typography.*",
+      "checkability": "manual"
+    },
+    {
+      "id": "reg_01M2W9W6WB2TWHVZQTJ2SND87K",
+      "name": "motion-reduced-instant",
+      "statement": "Under motion=reduced every duration role is the instant step and every easing role is linear.",
+      "kialo": "People who ask their system to reduce motion must not see animated transitions; making every duration instant through the scale keeps components working without special cases and lets each Aspekto define what instant means.",
+      "scope": "vortaro: sets motion/reduced",
       "checkability": "manual"
     }
   ]

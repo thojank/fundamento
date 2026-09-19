@@ -8,6 +8,111 @@
       "kategorio": "text-normal"
     },
     {
+      "id": "kpa_01M2W9W6QJGB4DV3K0FMKTH5P0",
+      "name": "text-default-on-background-canvas",
+      "foreground": "color.text.default",
+      "background": "color.background.canvas",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M2W9W6QK3YTCXM2XBRA41K5S",
+      "name": "text-default-on-background-raised",
+      "foreground": "color.text.default",
+      "background": "color.background.raised",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M2W9W6QK3YTCXM2XBRA41K5T",
+      "name": "text-default-on-background-sunken",
+      "foreground": "color.text.default",
+      "background": "color.background.sunken",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M2W9W6QK3YTCXM2XBRA41K5V",
+      "name": "text-subtle-on-background-default",
+      "foreground": "color.text.subtle",
+      "background": "color.background.default",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M2W9W6QK3YTCXM2XBRA41K5W",
+      "name": "text-subtle-on-background-canvas",
+      "foreground": "color.text.subtle",
+      "background": "color.background.canvas",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M2W9W6QK3YTCXM2XBRA41K5X",
+      "name": "text-subtle-on-background-raised",
+      "foreground": "color.text.subtle",
+      "background": "color.background.raised",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M2W9W6QK3YTCXM2XBRA41K5Y",
+      "name": "text-subtle-on-background-sunken",
+      "foreground": "color.text.subtle",
+      "background": "color.background.sunken",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M2W9W6QK3YTCXM2XBRA41K5Z",
+      "name": "text-muted-on-background-default",
+      "foreground": "color.text.muted",
+      "background": "color.background.default",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M2W9W6QK3YTCXM2XBRA41K60",
+      "name": "text-muted-on-background-canvas",
+      "foreground": "color.text.muted",
+      "background": "color.background.canvas",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M2W9W6QK3YTCXM2XBRA41K61",
+      "name": "text-muted-on-background-raised",
+      "foreground": "color.text.muted",
+      "background": "color.background.raised",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M2W9W6QK3YTCXM2XBRA41K62",
+      "name": "text-muted-on-background-sunken",
+      "foreground": "color.text.muted",
+      "background": "color.background.sunken",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M2W9W6QK3YTCXM2XBRA41K63",
+      "name": "text-inverse-on-background-inverse",
+      "foreground": "color.text.inverse",
+      "background": "color.background.inverse",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M2W9W6QK3YTCXM2XBRA41K64",
+      "name": "link-rest-on-background-default",
+      "foreground": "color.link.rest",
+      "background": "color.background.default",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M2W9W6QK3YTCXM2XBRA41K65",
+      "name": "link-hover-on-background-default",
+      "foreground": "color.link.hover",
+      "background": "color.background.default",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M2W9W6QK3YTCXM2XBRA41K66",
+      "name": "link-visited-on-background-default",
+      "foreground": "color.link.visited",
+      "background": "color.background.default",
+      "kategorio": "text-normal"
+    },
+    {
       "id": "kpa_01M2VEEE9JEJM22AGVHZ2Q22AM",
       "name": "action-primary-text-on-fill",
       "foreground": "color.action.primary.text",
@@ -15,9 +120,303 @@
       "kategorio": "text-normal"
     },
     {
+      "id": "kpa_01M2W9W6QK3YTCXM2XBRA41K67",
+      "name": "action-primary-text-on-action-primary-hover",
+      "foreground": "color.action.primary.text",
+      "background": "color.action.primary.hover",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M2W9W6QK3YTCXM2XBRA41K68",
+      "name": "action-primary-text-on-action-primary-pressed",
+      "foreground": "color.action.primary.text",
+      "background": "color.action.primary.pressed",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M2W9W6QK3YTCXM2XBRA41K69",
+      "name": "action-primary-text-on-action-primary-selected",
+      "foreground": "color.action.primary.text",
+      "background": "color.action.primary.selected",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M2W9W6QK3YTCXM2XBRA41K6A",
+      "name": "action-secondary-text-on-action-secondary-rest",
+      "foreground": "color.action.secondary.text",
+      "background": "color.action.secondary.rest",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M2W9W6QK3YTCXM2XBRA41K6B",
+      "name": "action-secondary-text-on-action-secondary-hover",
+      "foreground": "color.action.secondary.text",
+      "background": "color.action.secondary.hover",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M2W9W6QK3YTCXM2XBRA41K6C",
+      "name": "action-secondary-text-on-action-secondary-pressed",
+      "foreground": "color.action.secondary.text",
+      "background": "color.action.secondary.pressed",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M2W9W6QK3YTCXM2XBRA41K6D",
+      "name": "action-secondary-text-on-action-secondary-selected",
+      "foreground": "color.action.secondary.text",
+      "background": "color.action.secondary.selected",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M2W9W6QK3YTCXM2XBRA41K6E",
+      "name": "action-tertiary-text-on-action-tertiary-rest",
+      "foreground": "color.action.tertiary.text",
+      "background": "color.action.tertiary.rest",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M2W9W6QK3YTCXM2XBRA41K6F",
+      "name": "action-tertiary-text-on-action-tertiary-hover",
+      "foreground": "color.action.tertiary.text",
+      "background": "color.action.tertiary.hover",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M2W9W6QK3YTCXM2XBRA41K6G",
+      "name": "action-tertiary-text-on-action-tertiary-pressed",
+      "foreground": "color.action.tertiary.text",
+      "background": "color.action.tertiary.pressed",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M2W9W6QK3YTCXM2XBRA41K6H",
+      "name": "action-tertiary-text-on-action-tertiary-selected",
+      "foreground": "color.action.tertiary.text",
+      "background": "color.action.tertiary.selected",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M2W9W6QK3YTCXM2XBRA41K6J",
+      "name": "navigation-text-rest-on-navigation-rest",
+      "foreground": "color.navigation.text.rest",
+      "background": "color.navigation.rest",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M2W9W6QK3YTCXM2XBRA41K6K",
+      "name": "navigation-text-rest-on-navigation-hover",
+      "foreground": "color.navigation.text.rest",
+      "background": "color.navigation.hover",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M2W9W6QK3YTCXM2XBRA41K6M",
+      "name": "navigation-text-selected-on-navigation-selected",
+      "foreground": "color.navigation.text.selected",
+      "background": "color.navigation.selected",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M2W9W6QK3YTCXM2XBRA41K6N",
+      "name": "status-success-text-on-background-default",
+      "foreground": "color.status.success.text",
+      "background": "color.background.default",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M2W9W6QK3YTCXM2XBRA41K6P",
+      "name": "status-success-on-basic",
+      "foreground": "color.status.success.on",
+      "background": "color.status.success.basic",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M2W9W6QK3YTCXM2XBRA41K6Q",
+      "name": "status-success-text-on-status-success-weak",
+      "foreground": "color.status.success.text",
+      "background": "color.status.success.weak",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M2W9W6QK3YTCXM2XBRA41K6R",
+      "name": "status-success-text-on-status-success-subtle",
+      "foreground": "color.status.success.text",
+      "background": "color.status.success.subtle",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M2W9W6QK3YTCXM2XBRA41K6S",
+      "name": "status-warning-text-on-background-default",
+      "foreground": "color.status.warning.text",
+      "background": "color.background.default",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M2W9W6QK3YTCXM2XBRA41K6T",
+      "name": "status-warning-on-basic",
+      "foreground": "color.status.warning.on",
+      "background": "color.status.warning.basic",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M2W9W6QK3YTCXM2XBRA41K6V",
+      "name": "status-warning-text-on-status-warning-weak",
+      "foreground": "color.status.warning.text",
+      "background": "color.status.warning.weak",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M2W9W6QK3YTCXM2XBRA41K6W",
+      "name": "status-warning-text-on-status-warning-subtle",
+      "foreground": "color.status.warning.text",
+      "background": "color.status.warning.subtle",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M2W9W6QK3YTCXM2XBRA41K6X",
+      "name": "status-danger-text-on-background-default",
+      "foreground": "color.status.danger.text",
+      "background": "color.background.default",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M2W9W6QK3YTCXM2XBRA41K6Y",
+      "name": "status-danger-on-basic",
+      "foreground": "color.status.danger.on",
+      "background": "color.status.danger.basic",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M2W9W6QK3YTCXM2XBRA41K6Z",
+      "name": "status-danger-text-on-status-danger-weak",
+      "foreground": "color.status.danger.text",
+      "background": "color.status.danger.weak",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M2W9W6QK3YTCXM2XBRA41K70",
+      "name": "status-danger-text-on-status-danger-subtle",
+      "foreground": "color.status.danger.text",
+      "background": "color.status.danger.subtle",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M2W9W6QK3YTCXM2XBRA41K71",
+      "name": "status-info-text-on-background-default",
+      "foreground": "color.status.info.text",
+      "background": "color.background.default",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M2W9W6QK3YTCXM2XBRA41K72",
+      "name": "status-info-on-basic",
+      "foreground": "color.status.info.on",
+      "background": "color.status.info.basic",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M2W9W6QK3YTCXM2XBRA41K73",
+      "name": "status-info-text-on-status-info-weak",
+      "foreground": "color.status.info.text",
+      "background": "color.status.info.weak",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M2W9W6QK3YTCXM2XBRA41K74",
+      "name": "status-info-text-on-status-info-subtle",
+      "foreground": "color.status.info.text",
+      "background": "color.status.info.subtle",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M2W9W6QK3YTCXM2XBRA41K75",
+      "name": "brand-text-on-brand-fill",
+      "foreground": "color.brand.text",
+      "background": "color.brand.fill",
+      "kategorio": "text-normal"
+    },
+    {
       "id": "kpa_01M2VEEE9JEJM22AGVHZ2Q22AN",
       "name": "border-on-background",
       "foreground": "color.border.default",
+      "background": "color.background.default",
+      "kategorio": "ui"
+    },
+    {
+      "id": "kpa_01M2W9W6QK3YTCXM2XBRA41K76",
+      "name": "border-strong-on-background-default",
+      "foreground": "color.border.strong",
+      "background": "color.background.default",
+      "kategorio": "ui"
+    },
+    {
+      "id": "kpa_01M2W9W6QK3YTCXM2XBRA41K77",
+      "name": "border-default-on-background-raised",
+      "foreground": "color.border.default",
+      "background": "color.background.raised",
+      "kategorio": "ui"
+    },
+    {
+      "id": "kpa_01M2W9W6QK3YTCXM2XBRA41K78",
+      "name": "border-strong-on-background-raised",
+      "foreground": "color.border.strong",
+      "background": "color.background.raised",
+      "kategorio": "ui"
+    },
+    {
+      "id": "kpa_01M2W9W6QK3YTCXM2XBRA41K79",
+      "name": "border-inverse-on-background-inverse",
+      "foreground": "color.border.inverse",
+      "background": "color.background.inverse",
+      "kategorio": "ui"
+    },
+    {
+      "id": "kpa_01M2W9W6QK3YTCXM2XBRA41K7A",
+      "name": "focus-ring-on-background-default",
+      "foreground": "color.focus.ring",
+      "background": "color.background.default",
+      "kategorio": "ui"
+    },
+    {
+      "id": "kpa_01M2W9W6QK3YTCXM2XBRA41K7B",
+      "name": "focus-ring-on-background-raised",
+      "foreground": "color.focus.ring",
+      "background": "color.background.raised",
+      "kategorio": "ui"
+    },
+    {
+      "id": "kpa_01M2W9W6QK3YTCXM2XBRA41K7C",
+      "name": "focus-ring-on-focus-inner",
+      "foreground": "color.focus.ring",
+      "background": "color.focus.inner",
+      "kategorio": "ui"
+    },
+    {
+      "id": "kpa_01M2W9W6QK3YTCXM2XBRA41K7D",
+      "name": "status-success-basic-on-background-default",
+      "foreground": "color.status.success.basic",
+      "background": "color.background.default",
+      "kategorio": "ui"
+    },
+    {
+      "id": "kpa_01M2W9W6QK3YTCXM2XBRA41K7E",
+      "name": "status-warning-basic-on-background-default",
+      "foreground": "color.status.warning.basic",
+      "background": "color.background.default",
+      "kategorio": "ui"
+    },
+    {
+      "id": "kpa_01M2W9W6QK3YTCXM2XBRA41K7F",
+      "name": "status-danger-basic-on-background-default",
+      "foreground": "color.status.danger.basic",
+      "background": "color.background.default",
+      "kategorio": "ui"
+    },
+    {
+      "id": "kpa_01M2W9W6QK3YTCXM2XBRA41K7G",
+      "name": "status-info-basic-on-background-default",
+      "foreground": "color.status.info.basic",
       "background": "color.background.default",
       "kategorio": "ui"
     }

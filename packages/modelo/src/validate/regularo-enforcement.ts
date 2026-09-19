@@ -27,6 +27,33 @@ export const REGULO_ENFORCERS: Readonly<Record<string, Enforcer>> = {
           suggestion: `Give ${token.name} an alias like {color.palette.<name>.<step>}; literal colours belong in color.palette.* (Regulo semantic-colors-alias-palette).`,
         })),
     ),
+  /**
+   * D-12: every foreground, border and focus colour is the foreground of a KontrastParo and every
+   * background colour its background; roles disabled and decorative are exempt (WCAG 1.4.3,
+   * 1.4.11), palette, shadow and backdrop are not placed as text or UI.
+   */
+  "contrast-pairs-declared": (modelo) => {
+    const foregrounds = new Set(modelo.kontrastParoj.map((pair) => pair.foreground));
+    const backgrounds = new Set(modelo.kontrastParoj.map((pair) => pair.background));
+    const core = modelo.setoj.find((set) => set.name === CORE_SET_NAME)?.tokens ?? {};
+    return Object.values(core).flatMap((token) => {
+      const asForeground =
+        token.role === "foreground" || token.role === "border" || token.role === "focus";
+      const missing = asForeground
+        ? !foregrounds.has(token.name)
+        : token.role === "background" && !backgrounds.has(token.name);
+      if (!missing) return [];
+      return [
+        {
+          rule: "kontrastparo-missing-for-role" as const,
+          severity: "error" as const,
+          path: formatIssuePath(token.location),
+          message: `${token.name} (role ${token.role}) appears in no KontrastParo as ${asForeground ? "foreground" : "background"}, so its contrast is never checked.`,
+          suggestion: `Declare a KontrastParo in data/kontrastparoj.json that places ${token.name} ${asForeground ? "on the backgrounds it is used on" : "under the foregrounds used on it"}, or give it the role disabled or decorative if WCAG exempts it.`,
+        },
+      ];
+    });
+  },
   /** D-03, K4: generic Dimensio sets hold aliases only and re-point roles only. */
   "dimensio-sets-alias-only": dimensioSetIssues,
   /** FR-08: every colour token declares its role (in core, where roles live). */
