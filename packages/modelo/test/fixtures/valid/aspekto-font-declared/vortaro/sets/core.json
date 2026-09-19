@@ -1,0 +1,164 @@
+{
+  "$extensions": {
+    "com.ciferecigo.fundamento": {
+      "id": "set_01M2WRK8G0DDDDDDDDDDDDDDDN",
+      "kondicxoj": []
+    }
+  },
+  "color": {
+    "$type": "color",
+    "palette": {
+      "neutral": {
+        "0": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              1,
+              1,
+              1
+            ],
+            "hex": "#ffffff"
+          },
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2WRK8G0DDDDDDDDDDDDDDDS"
+            }
+          }
+        },
+        "900": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.1,
+              0.1,
+              0.1
+            ],
+            "hex": "#1a1a1a"
+          },
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2WRK8G0DDDDDDDDDDDDDDDT"
+            }
+          }
+        },
+        "1000": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0,
+              0,
+              0
+            ],
+            "hex": "#000000"
+          },
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2WRK8G0DDDDDDDDDDDDDDDV"
+            }
+          }
+        }
+      }
+    },
+    "text": {
+      "default": {
+        "$value": "{color.palette.neutral.900}",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2WRK8G0DDDDDDDDDDDDDDDW",
+            "role": "foreground"
+          }
+        }
+      }
+    },
+    "border": {
+      "default": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "hex": "#808080"
+        },
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2WRK8G0DDDDDDDDDDDDDDDX",
+            "role": "border"
+          }
+        }
+      }
+    },
+    "background": {
+      "default": {
+        "$value": "{color.palette.neutral.0}",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2WRK8G0DDDDDDDDDDDDDDDY",
+            "role": "background"
+          }
+        }
+      }
+    }
+  },
+  "shadow": {
+    "$type": "shadow",
+    "raised": {
+      "$value": {
+        "color": "{color.palette.neutral.900}",
+        "offsetX": {
+          "value": 0,
+          "unit": "px"
+        },
+        "offsetY": {
+          "value": 2,
+          "unit": "px"
+        },
+        "blur": {
+          "value": 4,
+          "unit": "px"
+        },
+        "spread": {
+          "value": 0,
+          "unit": "px"
+        }
+      },
+      "$extensions": {
+        "com.ciferecigo.fundamento": {
+          "id": "tok_01M2WRK8G0DDDDDDDDDDDDDDDZ"
+        }
+      }
+    }
+  },
+  "spacing": {
+    "$type": "dimension",
+    "small": {
+      "$value": {
+        "value": 4,
+        "unit": "px"
+      },
+      "$extensions": {
+        "com.ciferecigo.fundamento": {
+          "id": "tok_01M2WRK8G0DDDDDDDDDDDDDDE0"
+        }
+      }
+    }
+  },
+  "font": {
+    "family": {
+      "$type": "fontFamily",
+      "body": {
+        "$value": [
+          "system-ui",
+          "sans-serif"
+        ],
+        "$description": "Body text family.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2WRK8G0DDDDDDDDDDDDDDEA"
+          }
+        }
+      }
+    }
+  }
+}

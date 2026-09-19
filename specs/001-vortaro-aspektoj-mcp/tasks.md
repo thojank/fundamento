@@ -49,7 +49,7 @@ Order follows the plan's "Build order". The ciferecigo package is the last task.
   - Red: unit tests of `dimensioSetIssues` (literal, primitive, both, Aspekto and conjunction sets exempt); `textTransform`-only override accepted, `role`/`id` in an override rejected.
   - Green: both rules as pure functions (`validate/dimensio-set-rules.ts`); relax `set-override-has-extensions` for `textTransform` only.
   - **Sequencing change (reported to the maintainer):** the rules are wired into `validateModelo`, and the fixtures `invalid/dimensio-set-literal` / `invalid/dimensio-set-primitive` are added, in **T016**. Wiring them here would make the repo Modelo invalid (the Phase-0 generic sets hold literals whose target primitives only arrive in T013–T015), so the build would stay red until T016.
-- [ ] **T010 Font declaration rule** (D-05)
+- [x] **T010 Font declaration rule** (D-05)
   - Red: `invalid/aspekto-font-undeclared`; generic families pass.
   - Green: `aspekto-font-undeclared`.
 - [ ] **T011 Themes fragments** (D-08)

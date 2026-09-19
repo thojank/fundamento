@@ -1,0 +1,9 @@
+{
+  "description": "aspekto-ekzemplo sets font.family.body to 'Nekonata Sans', which its aspekto.json does not declare in fonts[].",
+  "issues": [
+    {
+      "rule": "aspekto-font-undeclared",
+      "path": "aspekto-ekzemplo/sets/aspekto/ekzemplo.json#/font/family/body"
+    }
+  ]
+}
