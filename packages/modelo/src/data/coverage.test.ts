@@ -1,5 +1,5 @@
 // FR-01 / AK-01 (Spec 001, tasks T012–T015): the core Vortaro covers every category of the
-// checklist in test/fixtures/coverage/kategorioj.json (Spec 000 research §4 plus Spec 001
+// checklist in test/fixtures/checklist/kategorioj.json (Spec 000 research §4 plus Spec 001
 // research §6). One test per category, each naming its missing tokens, so the progress of
 // T013–T015 is visible per category. The list lives in the test, not in the Modelo.
 
@@ -16,7 +16,7 @@ interface Kategorio {
 }
 
 const { kategorioj } = JSON.parse(
-  readFileSync(new URL("../../test/fixtures/coverage/kategorioj.json", import.meta.url), "utf8"),
+  readFileSync(new URL("../../test/fixtures/checklist/kategorioj.json", import.meta.url), "utf8"),
 ) as { kategorioj: Kategorio[] };
 
 const { modelo } = loadModelo(defaultModeloSource());

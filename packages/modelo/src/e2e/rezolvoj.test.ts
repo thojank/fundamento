@@ -74,26 +74,36 @@ describe("AK-04: all 72 combinations resolve to unique values with provenance", 
 
   it("AK-04: every combination has exactly one value and one provenance per core token", () => {
     expect(tokenNames.length).toBeGreaterThanOrEqual(30);
+    // One assertion over all ~24 000 resolved tokens: per-token expect calls took >10 s on CI.
+    const violations: string[] = [];
     for (const rezolvo of rezolvoj) {
-      expect(Object.keys(rezolvo.tokens).sort()).toEqual(tokenNames);
+      const names = Object.keys(rezolvo.tokens).sort();
+      if (JSON.stringify(names) !== JSON.stringify(tokenNames)) {
+        violations.push(`token set differs in ${JSON.stringify(rezolvo.assignment)}`);
+      }
       for (const [name, token] of Object.entries(rezolvo.tokens)) {
         const where = `${name} in ${JSON.stringify(rezolvo.assignment)}`;
-        expect(token.value, where).toBeDefined();
-        expect(token.value, where).not.toBeNull();
+        if (token.value === undefined || token.value === null)
+          violations.push(`${where}: no value`);
         // A resolved value never contains an unresolved alias.
-        expect(JSON.stringify(token.value), where).not.toMatch(/"\{[^"]*\}"/);
+        if (/"\{[^"]*\}"/.test(JSON.stringify(token.value)))
+          violations.push(`${where}: alias left`);
         // Provenance: the origin set exists, carries that set's ID, and is active here.
         const origin = setsByName.get(token.origin.set);
-        expect(origin, where).toBeDefined();
-        expect(token.origin.setId, where).toBe(origin?.id);
-        expect(isActive(token.origin.set, rezolvo.assignment), where).toBe(true);
+        if (origin === undefined || token.origin.setId !== origin.id) {
+          violations.push(`${where}: origin ${token.origin.set} unknown or with a wrong ID`);
+        }
+        if (!isActive(token.origin.set, rezolvo.assignment)) {
+          violations.push(`${where}: origin ${token.origin.set} not active`);
+        }
         // Every alias link names an active set.
         const links = [...token.aliasChain, ...Object.values(token.fieldAliases ?? {}).flat()];
         for (const link of links) {
-          expect(isActive(link.set, rezolvo.assignment), `${where} via ${link.set}`).toBe(true);
+          if (!isActive(link.set, rezolvo.assignment)) violations.push(`${where} via ${link.set}`);
         }
       }
     }
+    expect(violations).toEqual([]);
   });
 });
 
