@@ -1,5 +1,5 @@
 /* Positive fixture: Tailwind v4 @theme entries named by the Tailwind NomRegulo. */
 @theme {
-  --color-text-default: var(--fm-color-text-default);
-  --spacing-small: var(--fm-spacing-small);
+  --color-fm-text-default: var(--fm-color-text-default);
+  --spacing-fm-small: var(--fm-spacing-small);
 }

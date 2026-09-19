@@ -329,13 +329,14 @@ describe("Phase 0 repo Modelo: sets (FR-10, FR-12)", () => {
 });
 
 describe("Phase 0 repo Modelo: Regularo (FR-08)", () => {
-  it("has exactly two Reguloj with a kialo and the Article X Jugxoj", () => {
+  it("has Reguloj with a kialo and keeps the two Phase-0 Article X Jugxoj first", () => {
     const modelo = repoModelo();
     expect(modelo.reguloj.length).toBeGreaterThanOrEqual(3);
     for (const regulo of modelo.reguloj) {
       expect(regulo.kialo.trim().length, regulo.name).toBeGreaterThan(40);
     }
-    expect(modelo.jugxoj).toHaveLength(2);
+    // Later phases add Jugxoj (Spec 003 T002); the two Phase-0 entries stay first.
+    expect(modelo.jugxoj.length).toBeGreaterThanOrEqual(2);
     expect(modelo.jugxoj[0]).toMatchObject({
       ref: { artikolo: "X" },
       decision: "deviation-recorded",

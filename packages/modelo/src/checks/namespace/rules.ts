@@ -148,7 +148,7 @@ export function checkCssCustomProperties(file: string, css: string): CountedIssu
             "namespace-custom-property",
             path,
             `@theme entry "${prop}" is not a name the Tailwind NomRegulo derives from a token.`,
-            "Name @theme entries after a token in a Tailwind namespace (e.g. --color-<token path>); Tailwind prefix(fm) turns them into --fm-*.",
+            "Name @theme entries after a token in a Tailwind namespace with fm after the namespace (e.g. --color-fm-<rest of the token path>), and set them to var(--fm-<token path>); never use prefix(fm) (Constitution v1.6, Art. XII).",
           ),
         );
       }

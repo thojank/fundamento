@@ -182,6 +182,15 @@ describe("derive_name", async () => {
     });
   });
 
+  it("derives Tailwind names with fm in the theme key (Constitution v1.6, T002)", async () => {
+    expect(
+      await output(client, "derive_name", { name: "color.action.primary.rest", celo: "tailwind" }),
+    ).toEqual({
+      name: "color.action.primary.rest",
+      derivations: { tailwind: "--color-fm-action-primary-rest" },
+    });
+  });
+
   it("omits Tailwind with a warning when there is no namespace", async () => {
     const opacity = served.modeloJson.tokens.find((token) => token.name.startsWith("opacity."));
     if (opacity === undefined) throw new Error("no opacity token");
