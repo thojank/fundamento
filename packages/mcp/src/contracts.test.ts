@@ -158,6 +158,42 @@ const EXAMPLES: Record<string, { input: unknown; output: unknown; badInput: unkn
     },
     badInput: { aspektoPath: "" },
   },
+  check_contrast: {
+    input: {
+      foreground: "color.text.muted",
+      background: "color.background.sunken",
+      assignment: { "color-scheme": "dark" },
+    },
+    output: {
+      foreground: "color.text.muted",
+      background: "color.background.sunken",
+      kategorio: "text-normal",
+      kategorioSource: "declared",
+      declared: {
+        id: "kpa_01M2W9W6QK3YTCXM2XBRA41K5T",
+        name: "text-muted-on-background-sunken",
+        position: "main",
+      },
+      results: [
+        {
+          ratio: 8.08,
+          threshold: 4.5,
+          passed: true,
+          branch: "main",
+          apcaMin: 71.2,
+          combinations: [
+            "aspekto=komuna,viewport=medium,density=default,color-scheme=dark,contrast=default,motion=default",
+          ],
+        },
+      ],
+      summary: { combinations: 1, passed: 1, failed: 0, minRatio: 8.08 },
+    },
+    badInput: {
+      foreground: "color.text.muted",
+      background: "color.background.sunken",
+      kategorio: "text",
+    },
+  },
   derive_name: {
     input: { name: "color.action.primary.rest", celo: "figma" },
     output: {
@@ -169,7 +205,7 @@ const EXAMPLES: Record<string, { input: unknown; output: unknown; badInput: unkn
 };
 
 describe("tool schemas (contracts/mcp-tools.md)", () => {
-  it("defines exactly the ten tools of FR-16, snake_case, verb first", () => {
+  it("defines the ten tools of FR-16 and the Gvidanto tools of Spec 002, snake_case, verb first", () => {
     expect([...TOOL_NAMES]).toEqual([
       "describe",
       "list_dimensioj",
@@ -181,6 +217,7 @@ describe("tool schemas (contracts/mcp-tools.md)", () => {
       "list_jugxoj",
       "validate",
       "derive_name",
+      "check_contrast",
     ]);
   });
 

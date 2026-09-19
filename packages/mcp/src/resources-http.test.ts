@@ -10,6 +10,7 @@ import {
 import { afterAll, describe, expect, it } from "vitest";
 import { startHttpServer } from "./http.js";
 import { loadServed } from "./load.js";
+import { TOOL_NAMES } from "./schemas.js";
 import { closeClients, connect, EKZEMPLO_PACKAGE } from "./test-doubles/client.js";
 
 afterAll(closeClients);
@@ -85,7 +86,7 @@ describe("the HTTP transport", async () => {
 
   it("serves the tools", async () => {
     const { tools } = await client.listTools();
-    expect(tools).toHaveLength(10);
+    expect(tools).toHaveLength(TOOL_NAMES.length);
     const described = await client.callTool({ name: "describe", arguments: {} });
     expect(described.isError).toBeFalsy();
   });

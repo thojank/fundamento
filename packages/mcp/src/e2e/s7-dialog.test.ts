@@ -41,6 +41,7 @@ describe("S7 with ekzemplo (AK-06)", () => {
     const inputs: Record<string, Record<string, unknown>> = {
       get_token: { name: "color.text.default" },
       derive_name: { name: "color.text.default" },
+      check_contrast: { foreground: "color.text.default", background: "color.background.default" },
     };
     for (const name of TOOL_NAMES) {
       const result = await call(client, name, inputs[name] ?? {});

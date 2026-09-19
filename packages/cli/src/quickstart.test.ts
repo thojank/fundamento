@@ -5,6 +5,7 @@
 // to `pnpm perf` alone (Spec 001 D-17).
 
 import { fileURLToPath } from "node:url";
+import { TOOL_NAMES } from "@fundamento/mcp";
 import { Client, type Transport } from "@modelcontextprotocol/client";
 import { StdioClientTransport } from "@modelcontextprotocol/client/stdio";
 import { afterAll, describe, expect, it } from "vitest";
@@ -24,7 +25,7 @@ describe("quickstart: fm mcp", () => {
     );
     expect(client.getServerVersion()?.name).toBe("fundamento");
     const { tools } = await client.listTools();
-    expect(tools).toHaveLength(10);
+    expect(tools).toHaveLength(TOOL_NAMES.length);
     const described = (await client.callTool({ name: "describe", arguments: {} })) as {
       isError?: boolean;
       structuredContent?: { aspektoj: { name: string }[]; sentence: string };

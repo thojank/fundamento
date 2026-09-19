@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ciferecigo.com/fundamento/schema/mcp/check_contrast.output.json",
+  "title": "check_contrast output",
+  "description": "Results grouped by identical result (ratio at two decimals, truncated; threshold; passed; for pairs with aux also branch and aux ratio), each with the complete list of its combinations.",
+  "type": "object",
+  "properties": {
+    "foreground": {
+      "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/TokenName"
+    },
+    "background": {
+      "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/TokenName"
+    },
+    "kategorio": {
+      "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/KontrastKategorio"
+    },
+    "kategorioSource": { "enum": ["input", "declared", "role"] },
+    "declared": {
+      "anyOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/KontrastParoId"
+            },
+            "name": {
+              "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+            },
+            "position": { "enum": ["main", "aux"] },
+            "kialo": { "type": "string", "minLength": 1 }
+          },
+          "required": ["id", "name", "position"],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "results": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "ratio": { "type": "number", "minimum": 1 },
+          "threshold": { "type": "number", "minimum": 1 },
+          "passed": { "type": "boolean" },
+          "branch": { "enum": ["main", "aux", null] },
+          "auxRatio": { "type": "number", "minimum": 1 },
+          "apcaMin": { "type": "number", "minimum": 0 },
+          "combinations": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "type": "string", "minLength": 1 }
+          }
+        },
+        "required": ["ratio", "threshold", "passed", "branch", "combinations"],
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "combinations": { "type": "integer", "minimum": 1 },
+        "passed": { "type": "integer", "minimum": 0 },
+        "failed": { "type": "integer", "minimum": 0 },
+        "minRatio": { "type": "number", "minimum": 1 }
+      },
+      "required": ["combinations", "passed", "failed", "minRatio"],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "foreground",
+    "background",
+    "kategorio",
+    "kategorioSource",
+    "declared",
+    "results",
+    "summary"
+  ],
+  "additionalProperties": false
+}

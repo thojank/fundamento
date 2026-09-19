@@ -116,6 +116,14 @@ function sojlojOf(
   return isJsonObject(sojloj) ? (sojloj as unknown as KontrastSojloj) : undefined;
 }
 
+/** The `kontrastSojloj` active in a complete assignment (Spec 002: shared with check_contrast). */
+export function kontrastSojlojOf(
+  modelo: Modelo,
+  assignment: Record<string, string>,
+): KontrastSojloj | undefined {
+  return sojlojOf(thresholdDimensio(modelo), assignment);
+}
+
 function thresholdOf(
   sojloj: KontrastSojloj | undefined,
   metric: ContrastMetric,

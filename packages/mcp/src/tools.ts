@@ -3,7 +3,9 @@
 
 import {
   CELOJ,
+  type CheckContrastInput,
   CORE_SET_NAME,
+  checkContrast,
   checkTokenName,
   completeAssignment,
   describeModelo,
@@ -356,6 +358,21 @@ const deriveName: Tool = (served, args) => {
   return ok(issues.length === 0 ? { name, derivations } : { name, derivations, issues });
 };
 
+/** Spec 002 FR-09: the contrast of any colour pair, from the modelo function. */
+const checkContrastTool: Tool = (served, args) => {
+  const result = checkContrast(served.modelo, args as unknown as CheckContrastInput);
+  if (!result.ok) {
+    return {
+      ok: false,
+      envelope: {
+        issues: result.issues,
+        ...(result.allowed === undefined ? {} : { allowed: result.allowed }),
+      },
+    };
+  }
+  return ok(result.output as unknown as Record<string, unknown>);
+};
+
 export const TOOLS: Record<ToolName, Tool> = {
   describe,
   list_dimensioj: listDimensioj,
@@ -367,4 +384,5 @@ export const TOOLS: Record<ToolName, Tool> = {
   list_jugxoj: listJugxoj,
   validate,
   derive_name: deriveName,
+  check_contrast: checkContrastTool,
 };

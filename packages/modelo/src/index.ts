@@ -8,6 +8,7 @@ export * from "./checks/run.js";
 export * from "./config/index.js";
 export * from "./contracts/index.js";
 export * from "./export/index.js";
+export * from "./gvidanto/index.js";
 export * from "./ids/index.js";
 export * from "./load/index.js";
 export * from "./nomreguloj/index.js";

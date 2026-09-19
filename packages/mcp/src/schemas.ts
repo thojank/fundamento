@@ -5,7 +5,7 @@
 import { readFileSync } from "node:fs";
 import { createModeloAjv, type ValidateFunction } from "@fundamento/modelo";
 
-/** The ten read-only tools of FR-16, in contract order. */
+/** The ten read-only tools of FR-16, then the Gvidanto tools of Spec 002, in contract order. */
 export const TOOL_NAMES = [
   "describe",
   "list_dimensioj",
@@ -17,6 +17,7 @@ export const TOOL_NAMES = [
   "list_jugxoj",
   "validate",
   "derive_name",
+  "check_contrast",
 ] as const;
 
 export type ToolName = (typeof TOOL_NAMES)[number];
