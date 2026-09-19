@@ -4,7 +4,7 @@ import type { IdsLock } from "../contracts/entity-ids.js";
 import { formatIssuePath, type ValidationIssue } from "../contracts/issues.js";
 import type { Modelo } from "../contracts/modelo.js";
 import { checkIdNamespaces, type IdRegistry } from "../ids/check-ids.js";
-import { ASPEKTO_DIMENSIO } from "../load/build.js";
+import { ASPEKTO_DIMENSIO, referenceAspektoOf } from "../load/build.js";
 import type { ModeloFiles } from "../load/files.js";
 import { EXTENSION_POINTER, isJsonObject, rawEntries } from "./raw.js";
 
@@ -12,12 +12,6 @@ const KONDICXOJ_POINTER = `${EXTENSION_POINTER}/kondicxoj`;
 
 function escapePointerSegment(segment: string): string {
   return segment.replaceAll("~", "~0").replaceAll("/", "~1");
-}
-
-/** The reference Aspekto named on the aspekto Dimensio, if any. */
-export function referenceAspektoOf(modelo: Modelo): string | undefined {
-  const aspekto = modelo.dimensioj.find((dimensio) => dimensio.name === ASPEKTO_DIMENSIO);
-  return typeof aspekto?.referenceAspekto === "string" ? aspekto.referenceAspekto : undefined;
 }
 
 /**

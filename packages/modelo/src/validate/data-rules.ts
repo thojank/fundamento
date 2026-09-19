@@ -29,7 +29,7 @@ export function dataIssues(modelo: Modelo, files: ModeloFiles): DataRulesResult 
   const kontrast = kontrastParoIssues(modelo, files.data["kontrastparoj.json"]);
   return {
     issues: [
-      ...dimensioIssues(files.data["dimensioj.json"], kontrast.count),
+      ...dimensioIssues(files.data["dimensioj.json"], kontrast.count, composedAspektoNames(modelo)),
       ...reguloIssues(files.data["reguloj.json"]),
       ...jugxoIssues(files.data["jugxoj.json"], files.data["reguloj.json"]),
       ...kontrast.issues,
@@ -58,6 +58,13 @@ function nameOf(entry: JsonObject, fallback: string): string {
   return typeof entry.name === "string" ? entry.name : fallback;
 }
 
+/** Aspekto names contributed by loaded packages (D-05). */
+function composedAspektoNames(modelo: Modelo): string[] {
+  return modelo.aspektoPackages.flatMap((pkg) =>
+    pkg.composed && pkg.aspekto !== undefined ? [pkg.aspekto] : [],
+  );
+}
+
 /**
  * - `dimensio-priority-invalid`: priorities are positive integers, unique (reported at the later
  *   Dimensio in file order).
@@ -67,7 +74,11 @@ function nameOf(entry: JsonObject, fallback: string): string {
  * - `aspekto-metadata-missing`: every valoro of the `aspekto` Dimensio carries owner/license.
  * - `schema-violation`: duplicate Dimensio names, duplicate valoro names within a Dimensio.
  */
-function dimensioIssues(document: ModeloDocument, kontrastParoCount: number): ValidationIssue[] {
+function dimensioIssues(
+  document: ModeloDocument,
+  kontrastParoCount: number,
+  packageAspektoj: readonly string[],
+): ValidationIssue[] {
   const issues: ValidationIssue[] = [];
   const priorities = new Map<number, string>();
   const names = new Set<string>();
@@ -121,9 +132,13 @@ function dimensioIssues(document: ModeloDocument, kontrastParoCount: number): Va
     }
 
     const valoroj = rawEntries(entry, "valoroj");
-    const valoroNames = valoroj.flatMap(({ entry: valoro }) =>
-      typeof valoro.name === "string" ? [valoro.name] : [],
-    );
+    const valoroNames = [
+      ...valoroj.flatMap(({ entry: valoro }) =>
+        typeof valoro.name === "string" ? [valoro.name] : [],
+      ),
+      // The aspekto Dimensio's values come from the loaded packages (D-05).
+      ...(entry.name === ASPEKTO_DIMENSIO ? packageAspektoj : []),
+    ];
     const seenValoroj = new Set<string>();
     for (const { entry: valoro, index: valoroIndex } of valoroj) {
       if (typeof valoro.name === "string") {

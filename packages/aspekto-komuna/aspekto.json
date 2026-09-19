@@ -1,0 +1,20 @@
+{
+  "id": "dva_01M2VEEDQEJEE7MR7JA8JRPMJB",
+  "name": "komuna",
+  "owner": "Fundamento",
+  "license": "MIT",
+  "fonts": [
+    {
+      "family": "Geist",
+      "license": "OFL-1.1",
+      "source": "https://github.com/vercel/geist-font",
+      "redistributable": true
+    },
+    {
+      "family": "Geist Mono",
+      "license": "OFL-1.1",
+      "source": "https://github.com/vercel/geist-font",
+      "redistributable": true
+    }
+  ]
+}

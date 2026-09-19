@@ -63,6 +63,9 @@ importers:
 
   packages/modelo:
     dependencies:
+      '@fundamento/aspekto-komuna':
+        specifier: workspace:*
+        version: link:../aspekto-komuna
       '@fundamento/vortaro':
         specifier: workspace:*
         version: link:../vortaro

@@ -8,10 +8,12 @@ import type {
   Jugxo,
   KontrastParo,
   LoadedAspektoPackage,
+  LoadedDimensio,
   LoadedSet,
   Modelo,
   Regulo,
 } from "../contracts/modelo.js";
+import type { Fonto } from "../generated/modelo-schema.js";
 import type { AspektoPackageFiles, ModeloFiles, ModeloSetDocument } from "./files.js";
 import { flattenTokenTree, fundamentoExtension, parseKondicxoj } from "./flatten.js";
 import { isJsonObject, type JsonObject } from "./guards.js";
@@ -36,9 +38,12 @@ export function buildModelo(files: ModeloFiles): BuildModeloResult {
     issues.push(...setIssues);
     return set;
   });
-  const dimensioj = sortByPriority(
+  const dimensioj: LoadedDimensio[] = sortByPriority(
     entriesOf<Dimensio>(files.data["dimensioj.json"].value, "dimensioj"),
-  );
+  ).map((dimensio) => ({
+    ...dimensio,
+    valoroj: Array.isArray(dimensio.valoroj) ? dimensio.valoroj : [],
+  }));
   const aspektoPackages = composeAspektoValues(dimensioj, files.packages);
   const idsLock: IdsLock = { ids: { ...idsLockOf(files.data["ids.lock.json"].value).ids } };
   for (const pkg of aspektoPackages) {
@@ -67,18 +72,24 @@ export function buildModelo(files: ModeloFiles): BuildModeloResult {
 /** Name of the Dimensio whose values are Aspektoj. */
 export const ASPEKTO_DIMENSIO = "aspekto";
 
+/** The reference Aspekto named on the aspekto Dimensio (FR-10), if any. */
+export function referenceAspektoOf(modelo: Pick<Modelo, "dimensioj">): string | undefined {
+  const aspekto = modelo.dimensioj.find((dimensio) => dimensio.name === ASPEKTO_DIMENSIO);
+  return typeof aspekto?.referenceAspekto === "string" ? aspekto.referenceAspekto : undefined;
+}
+
 /**
  * Adds each package's Aspekto as a value of the aspekto Dimensio (D-05: the values are assembled
  * from the loaded packages). A name that already exists is not added again; validation reports
  * `aspekto-name-duplicate`. Mutates `dimensioj` (a fresh array of fresh entries) in place.
  */
 function composeAspektoValues(
-  dimensioj: Dimensio[],
+  dimensioj: LoadedDimensio[],
   packages: readonly AspektoPackageFiles[],
 ): LoadedAspektoPackage[] {
   const index = dimensioj.findIndex((dimensio) => dimensio.name === ASPEKTO_DIMENSIO);
   const aspekto = index === -1 ? undefined : dimensioj[index];
-  const valoroj: DimensioValoro[] = Array.isArray(aspekto?.valoroj) ? [...aspekto.valoroj] : [];
+  const valoroj: DimensioValoro[] = [...(aspekto?.valoroj ?? [])];
   const loaded = packages.map((pkg) => {
     const raw = isJsonObject(pkg.aspekto.value) ? pkg.aspekto.value : {};
     const name = typeof raw.name === "string" ? raw.name : undefined;
@@ -90,12 +101,7 @@ function composeAspektoValues(
       name !== undefined &&
       !valoroj.some((valoro) => isJsonObject(valoro) && valoro.name === name);
     if (composed && name !== undefined) {
-      const valoro: DimensioValoro = { id: id ?? "", name };
-      if (owner !== undefined && license !== undefined) {
-        // Transitional view until the Aspekto metadata moves out of dimensioj.json (T007).
-        valoro.aspekto = { owner, licenseNote: license };
-      }
-      valoroj.push(valoro);
+      valoroj.push({ id: id ?? "", name });
     }
     const entry: LoadedAspektoPackage = {
       name: pkg.name,
@@ -106,6 +112,11 @@ function composeAspektoValues(
     };
     if (name !== undefined) entry.aspekto = name;
     if (id !== undefined) entry.id = id;
+    if (owner !== undefined) entry.owner = owner;
+    if (license !== undefined) entry.license = license;
+    // Typed after schema validation (AspektoFile); the loader only guarantees objects.
+    if (Array.isArray(raw.fonts))
+      entry.fonts = raw.fonts.filter(isJsonObject) as unknown as Fonto[];
     if (typeof raw.idNamespace === "string") entry.namespace = raw.idNamespace;
     return entry;
   });

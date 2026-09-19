@@ -25,7 +25,7 @@ Companion to [`../plan.md`](../plan.md) D-13. The normative schemas are written 
 | `validate` | `{ aspektoPath? }` | `{ valid, errors: Issue[], warnings: Issue[], scope: "served" \| "package" }` | Without input: the issues of the served Modelo (computed at start). `aspektoPath`: a local package directory validated against the served core (the stdio transport only; rejected under `--http` with `mcp-input-invalid`). |
 | `derive_name` | `{ name, celo?: "css" \| "figma" \| "typescript" \| "tailwind" \| "dtcg" }` | `{ name, derivations: { css?, figma?, typescript?, tailwind?, dtcg? } }` | Uses the Phase-0 NomReguloj unchanged. A name outside the grammar gives `token-name-grammar`. A name with no Tailwind namespace omits `tailwind` and adds a warning issue. The name need not exist in the Vortaro (the derivation is pure). |
 
-`AspektoSummary = { name, reference: boolean, external: boolean, owner, license, fonts: [{ family, license, redistributable }] }`. `external` means that the package lies outside the core repository's `packages/` directory.
+`AspektoSummary = { name, reference: boolean, external: boolean, owner, license, fonts: [{ family, license, redistributable }] }`. `external` means that the package is not published in the `@fundamento/` npm scope, i.e. it is not shipped with Fundamento and has its own repository, owner and license (T007: a path-based definition would call `@fundamento/aspekto-komuna` external once installed from npm).
 
 ## Resources
 

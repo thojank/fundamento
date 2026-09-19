@@ -1276,7 +1276,7 @@
       "additionalProperties": false
     },
     "Dimensio": {
-      "description": "An adaptation dimension. priority is unique; 1 is lowest and higher priorities win in resolution.",
+      "description": "An adaptation dimension. priority is unique; 1 is lowest and higher priorities win in resolution. The values of the aspekto Dimensio come from the loaded Aspekto packages (Spec 001, D-05), so dimensioj.json lists none for it; every other Dimensio lists its values (dimensio-default-invalid otherwise).",
       "type": "object",
       "properties": {
         "id": {
@@ -1304,7 +1304,7 @@
           "minItems": 1
         }
       },
-      "required": ["id", "name", "priority", "default", "valoroj"],
+      "required": ["id", "name", "priority", "default"],
       "additionalProperties": false
     },
     "DimensiojFile": {

@@ -10,6 +10,7 @@ import { DTCG_TYPES } from "../contracts/dtcg.js";
 import { entityTypeOfId } from "../contracts/entity-ids.js";
 import type { Assignment, LoadedSet, Modelo, Rezolvo } from "../contracts/modelo.js";
 import { DATA_FILE_SCHEMA_DEFS, SCHEMA_DEFS } from "../contracts/schema.js";
+import { coreView } from "../load/core-view.js";
 import { loadModelo } from "../load/load-modelo.js";
 import { defaultModeloSource } from "../load/source.js";
 import { allAssignments, formatCombination, resolve } from "../resolve/index.js";
@@ -72,7 +73,7 @@ const FR09_TYPES = [
 const CORE = "core";
 const DARK = "color-scheme/dark";
 const HIGH = "contrast/high";
-const NEUTRA_DARK = "aspekto/neutra+color-scheme/dark";
+const KOMUNA_DARK = "aspekto/komuna+color-scheme/dark";
 
 describe("Phase 0 repo Modelo: loading", () => {
   it("loads through defaultModeloSource() with zero issues", () => {
@@ -108,7 +109,7 @@ describe("Phase 0 repo Modelo: Dimensioj (FR-11a, FR-16)", () => {
         default: d.default,
       })),
     ).toEqual([
-      { priority: 1, name: "aspekto", valoroj: ["neutra"], default: "neutra" },
+      { priority: 1, name: "aspekto", valoroj: ["komuna"], default: "komuna" },
       {
         priority: 2,
         name: "viewport",
@@ -145,11 +146,17 @@ describe("Phase 0 repo Modelo: Dimensioj (FR-11a, FR-16)", () => {
     expect(sojloj.high?.apca).toBeDefined();
   });
 
-  it("gives the test Aspekto neutra owner and license metadata", () => {
-    const aspekto = repoModelo().dimensioj.find((d) => d.name === "aspekto");
-    expect(aspekto?.valoroj.map((v) => [v.name, v.aspekto])).toEqual([
-      ["neutra", { owner: "Fundamento", licenseNote: expect.stringContaining("MIT") }],
-    ]);
+  it("takes the reference Aspekto komuna with owner, license and fonts from its package (Spec 001 T007)", () => {
+    const [komuna, ...others] = repoModelo().aspektoPackages;
+    expect(others).toEqual([]);
+    expect(komuna).toMatchObject({
+      name: "@fundamento/aspekto-komuna",
+      aspekto: "komuna",
+      owner: "Fundamento",
+      license: "MIT",
+      composed: true,
+    });
+    expect(komuna?.fonts?.map((font) => font.family)).toEqual(["Geist", "Geist Mono"]);
   });
 
   it("yields 72 complete combinations", () => {
@@ -215,8 +222,8 @@ describe("Phase 0 repo Modelo: core tokens (FR-09, FR-12, FR-18, S2, S4)", () =>
 describe("Phase 0 repo Modelo: sets (FR-10, FR-12)", () => {
   it("has the expected sets", () => {
     expect(repoModelo().setoj.map((s) => s.name)).toEqual([
-      "aspekto/neutra",
-      NEUTRA_DARK,
+      "aspekto/komuna",
+      KOMUNA_DARK,
       DARK,
       HIGH,
       CORE,
@@ -270,11 +277,11 @@ describe("Phase 0 repo Modelo: sets (FR-10, FR-12)", () => {
     }
   });
 
-  it("specificity: aspekto/neutra+color-scheme/dark overrides a token that color-scheme/dark overrides, and wins", () => {
+  it("specificity: aspekto/komuna+color-scheme/dark overrides a token that color-scheme/dark overrides, and wins", () => {
     const modelo = repoModelo();
-    const conjunction = setNamed(modelo, NEUTRA_DARK);
+    const conjunction = setNamed(modelo, KOMUNA_DARK);
     expect(conjunction.kondicxoj).toEqual([
-      { dimensio: "aspekto", valoro: "neutra" },
+      { dimensio: "aspekto", valoro: "komuna" },
       { dimensio: "color-scheme", valoro: "dark" },
     ]);
     const dark = setNamed(modelo, DARK).tokens;
@@ -282,7 +289,7 @@ describe("Phase 0 repo Modelo: sets (FR-10, FR-12)", () => {
     expect(shared.length).toBeGreaterThan(0);
     const rezolvo = resolveOk(modelo, { "color-scheme": "dark" });
     for (const name of shared) {
-      expect(resolvedToken(rezolvo, name).origin.set, name).toBe(NEUTRA_DARK);
+      expect(resolvedToken(rezolvo, name).origin.set, name).toBe(KOMUNA_DARK);
     }
   });
 
@@ -305,7 +312,7 @@ describe("Phase 0 repo Modelo: sets (FR-10, FR-12)", () => {
     expect(text?.origin.set).toBe(CORE);
     expect(text?.aliasChain.at(-1)).toEqual({
       token: "color.palette.neutral.900",
-      set: NEUTRA_DARK,
+      set: KOMUNA_DARK,
     });
   });
 
@@ -428,8 +435,8 @@ describe("Phase 0 repo Modelo: IDs and derived files", () => {
     }
   });
 
-  it("$themes.json and $metadata.json are byte-identical to the derived output", () => {
-    const { themesJson, metadataJson } = serializeThemes(deriveThemes(repoModelo()));
+  it("$themes.json and $metadata.json are byte-identical to the derived core view (D-08)", () => {
+    const { themesJson, metadataJson } = serializeThemes(deriveThemes(coreView(repoModelo())));
     expect(readFileSync(join(source.vortaroDir, "$themes.json"), "utf8")).toBe(themesJson);
     expect(readFileSync(join(source.vortaroDir, "$metadata.json"), "utf8")).toBe(metadataJson);
   });

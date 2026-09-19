@@ -107,7 +107,7 @@ describe("the S6 dialog from dist/modelo.json alone (AK-06)", () => {
     expect(description.version).toBe("0.1.0");
     expect(description.dimensioj).toEqual(modeloJson.dimensioj.map((dimensio) => dimensio.name));
     expect(description.dimensioj).toHaveLength(6);
-    expect(description.aspektoj).toEqual(["neutra"]);
+    expect(description.aspektoj).toEqual(["komuna"]);
     expect(description.tokenCount).toBe(modeloJson.tokens.length);
     expect(description.typeCount).toBe(10);
     expect(description.reguloCount).toBe(2);
@@ -117,10 +117,10 @@ describe("the S6 dialog from dist/modelo.json alone (AK-06)", () => {
 
   it("states the S6 sentence", () => {
     expect(description.sentence).toBe(
-      `Fundamento v0.1.0: six Dimensioj (${description.dimensioj.join(", ")}), one Aspekto \`neutra\`, ${description.tokenCount} tokens in ten types, two rules with reasons, no Eroj.`,
+      `Fundamento v0.1.0: six Dimensioj (${description.dimensioj.join(", ")}), one Aspekto \`komuna\`, ${description.tokenCount} tokens in ten types, two rules with reasons, no Eroj.`,
     );
     expect(description.sentence).toBe(
-      "Fundamento v0.1.0: six Dimensioj (aspekto, viewport, density, color-scheme, contrast, motion), one Aspekto `neutra`, 30 tokens in ten types, two rules with reasons, no Eroj.",
+      "Fundamento v0.1.0: six Dimensioj (aspekto, viewport, density, color-scheme, contrast, motion), one Aspekto `komuna`, 30 tokens in ten types, two rules with reasons, no Eroj.",
     );
   });
 });

@@ -7,8 +7,17 @@ import { CONFIG_FILE_NAME, readKonfiguro } from "../config/read-config.js";
 import type { ModeloSource } from "../contracts/modelo.js";
 
 /**
+ * The directory of the reference Aspekto package `@fundamento/aspekto-komuna`. The core always
+ * includes it: the reference Aspekto's values live in core (FR-10, D-07).
+ */
+export function referenceAspektoPackageDir(): string {
+  return dirname(fileURLToPath(import.meta.resolve("@fundamento/aspekto-komuna/package.json")));
+}
+
+/**
  * The repo's Modelo: the `@fundamento/vortaro` package directory (found through module
- * resolution) and `packages/modelo/data`. Independent of the current working directory.
+ * resolution), `packages/modelo/data` and the reference Aspekto package. Independent of the
+ * current working directory.
  */
 export function defaultModeloSource(): ModeloSource {
   const vortaroPackageJson = fileURLToPath(import.meta.resolve("@fundamento/vortaro/package.json"));
@@ -16,6 +25,7 @@ export function defaultModeloSource(): ModeloSource {
     vortaroDir: dirname(vortaroPackageJson),
     // Valid from both `src/load/` and `dist/load/`.
     dataDir: fileURLToPath(new URL("../../data", import.meta.url)),
+    aspektoPackages: [referenceAspektoPackageDir()],
   };
 }
 

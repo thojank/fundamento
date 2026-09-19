@@ -23,6 +23,7 @@
     "generate:types": "node src/contracts/type-generation.ts"
   },
   "dependencies": {
+    "@fundamento/aspekto-komuna": "workspace:*",
     "@fundamento/vortaro": "workspace:*",
     "ajv": "^8.20.0",
     "ajv-formats": "^3.0.1",

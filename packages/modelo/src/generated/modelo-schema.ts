@@ -318,7 +318,7 @@ export interface ModeloJson {
   rezolvo: Rezolvo;
 }
 /**
- * An adaptation dimension. priority is unique; 1 is lowest and higher priorities win in resolution.
+ * An adaptation dimension. priority is unique; 1 is lowest and higher priorities win in resolution. The values of the aspekto Dimensio come from the loaded Aspekto packages (Spec 001, D-05), so dimensioj.json lists none for it; every other Dimensio lists its values (dimensio-default-invalid otherwise).
  *
  * This interface was referenced by `ModeloJson`'s JSON-Schema
  * via the `definition` "Dimensio".
@@ -335,7 +335,7 @@ export interface Dimensio {
   /**
    * @minItems 1
    */
-  valoroj: DimensioValoro[];
+  valoroj?: DimensioValoro[];
 }
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema

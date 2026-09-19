@@ -14,6 +14,7 @@ import type {
   Rezolvo,
   TokenSetFile,
 } from "../contracts/modelo.js";
+import { referenceAspektoOf } from "../load/build.js";
 import { allAssignments, formatCombination } from "../resolve/assignment.js";
 import { resolve } from "../resolve/resolve.js";
 import { serializeCanonicalJson } from "../themes/serialize.js";
@@ -92,6 +93,12 @@ function exportedSet(
   };
 }
 
+/**
+ * npm scope of the packages that ship with Fundamento. A package outside it is an external
+ * Aspekto (its own repository, owner and license; D-05).
+ */
+const CORE_PACKAGE_SCOPE = "@fundamento/";
+
 /** `modelo.json` as a value (§2.9). Pure; throws `ModeloExportError` on unexportable input. */
 export function buildModeloJson(input: ModeloExportInput): ModeloJson {
   const { modelo } = input;
@@ -118,11 +125,32 @@ export function buildModeloJson(input: ModeloExportInput): ModeloJson {
 
   const usedTypes = new Set<DtcgType>(tokens.map((token) => token.type));
 
-  const aspektoj: ModeloJson["aspektoj"] = modelo.dimensioj.flatMap((dimensio) =>
-    dimensio.valoroj.flatMap((valoro) =>
-      valoro.aspekto === undefined ? [] : [{ id: valoro.id, name: valoro.name, ...valoro.aspekto }],
+  const reference = referenceAspektoOf(modelo);
+  const aspektoj: ModeloJson["aspektoj"] = [
+    // Aspektoj declared in dimensioj.json with inline metadata (Phase-0 layout, fixtures only).
+    ...modelo.dimensioj.flatMap((dimensio) =>
+      dimensio.valoroj.flatMap((valoro) =>
+        valoro.aspekto === undefined
+          ? []
+          : [{ id: valoro.id, name: valoro.name, ...valoro.aspekto }],
+      ),
     ),
-  );
+    // Aspektoj of packages (D-05), described by their aspekto.json.
+    ...modelo.aspektoPackages.flatMap((pkg) => {
+      if (!pkg.composed || pkg.aspekto === undefined) return [];
+      const entry: ModeloJson["aspektoj"][number] = {
+        id: requireId(pkg.id, `Aspekto ${pkg.aspekto}`),
+        name: pkg.aspekto,
+        owner: pkg.owner ?? "",
+        reference: pkg.aspekto === reference,
+        external: !pkg.name.startsWith(CORE_PACKAGE_SCOPE),
+        package: pkg.name,
+      };
+      if (pkg.license !== undefined) entry.license = pkg.license;
+      if (pkg.fonts !== undefined) entry.fonts = structuredClone(pkg.fonts);
+      return [entry];
+    }),
+  ];
 
   return {
     $schema: MODELO_JSON_SCHEMA_REF,

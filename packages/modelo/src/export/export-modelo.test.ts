@@ -108,16 +108,33 @@ describe("exportModelo: shape (§2.9)", () => {
       [...modeloJson.dimensioj.map((d) => d.priority)].sort((a, b) => a - b),
     );
     const contrast = modeloJson.dimensioj.find((d) => d.name === "contrast");
-    expect(contrast?.valoroj.every((v) => v.kontrastSojloj !== undefined)).toBe(true);
+    expect(contrast?.valoroj?.every((v) => v.kontrastSojloj !== undefined)).toBe(true);
   });
 
-  it("lists every Aspekto with its metadata as a convenience view", () => {
+  it("lists every Aspekto with its package metadata as a convenience view (Spec 001 T007)", () => {
     expect(modeloJson.aspektoj).toEqual([
       {
-        id: expect.stringMatching(/^dva_/),
-        name: "neutra",
+        id: "dva_01M2VEEDQEJEE7MR7JA8JRPMJB",
+        name: "komuna",
         owner: "Fundamento",
-        licenseNote: expect.any(String),
+        license: "MIT",
+        fonts: [
+          {
+            family: "Geist",
+            license: "OFL-1.1",
+            source: "https://github.com/vercel/geist-font",
+            redistributable: true,
+          },
+          {
+            family: "Geist Mono",
+            license: "OFL-1.1",
+            source: "https://github.com/vercel/geist-font",
+            redistributable: true,
+          },
+        ],
+        reference: true,
+        external: false,
+        package: "@fundamento/aspekto-komuna",
       },
     ]);
   });
@@ -157,9 +174,9 @@ describe("exportModelo: shape (§2.9)", () => {
       expect(set.id).toMatch(/^set_/);
     }
     const conjunction = modeloJson.setoj.find(
-      (set) => set.name === "aspekto/neutra+color-scheme/dark",
+      (set) => set.name === "aspekto/komuna+color-scheme/dark",
     );
-    expect(conjunction?.kondicxoj).toEqual(["aspekto=neutra", "color-scheme=dark"]);
+    expect(conjunction?.kondicxoj).toEqual(["aspekto=komuna", "color-scheme=dark"]);
     expect(modeloJson.setoj.find((set) => set.name === "core")?.kondicxoj).toEqual([]);
   });
 

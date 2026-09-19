@@ -53,7 +53,7 @@ function definesToken(setName: string, name: string): boolean {
 describe("AK-04: all 72 combinations resolve to unique values with provenance", () => {
   it("AK-04: rezolvoj.json holds exactly the 72 distinct complete assignments", () => {
     const expectedCount = modelo.dimensioj.reduce(
-      (product, dimensio) => product * dimensio.valoroj.length,
+      (product, dimensio) => product * (dimensio.valoroj ?? []).length,
       1,
     );
     expect(expectedCount).toBe(72);
@@ -65,7 +65,7 @@ describe("AK-04: all 72 combinations resolve to unique values with provenance", 
         modelo.dimensioj.map((dimensio) => dimensio.name).sort(),
       );
       for (const dimensio of modelo.dimensioj) {
-        expect(dimensio.valoroj.map((valoro) => valoro.name)).toContain(
+        expect((dimensio.valoroj ?? []).map((valoro) => valoro.name)).toContain(
           rezolvo.assignment[dimensio.name],
         );
       }
@@ -132,18 +132,18 @@ describe("AK-04: priority, late binding and conjunction sets on the repo data", 
     expect(token.value).not.toEqual(tokenIn(light, "color.action.primary.rest").value);
   });
 
-  it("AK-04 conjunction: color.palette.neutral.900 in dark comes from aspekto/neutra+color-scheme/dark", () => {
+  it("AK-04 conjunction: color.palette.neutral.900 in dark comes from aspekto/komuna+color-scheme/dark", () => {
     const dark = rezolvoj.filter((rezolvo) => rezolvo.assignment["color-scheme"] === "dark");
     expect(dark).toHaveLength(36);
     expect(definesToken("color-scheme/dark", "color.palette.neutral.900")).toBe(true);
-    expect(definesToken("aspekto/neutra+color-scheme/dark", "color.palette.neutral.900")).toBe(
+    expect(definesToken("aspekto/komuna+color-scheme/dark", "color.palette.neutral.900")).toBe(
       true,
     );
     for (const rezolvo of dark) {
       const token = tokenIn(rezolvo, "color.palette.neutral.900");
       // The single-condition set color-scheme/dark defines the same token and is active too.
       expect(isActive("color-scheme/dark", rezolvo.assignment)).toBe(true);
-      expect(token.origin.set).toBe("aspekto/neutra+color-scheme/dark");
+      expect(token.origin.set).toBe("aspekto/komuna+color-scheme/dark");
     }
   });
 });

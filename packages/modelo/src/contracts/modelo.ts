@@ -3,8 +3,10 @@
 
 import type {
   Dimensio,
+  DimensioValoro,
   DtcgType,
   EntityType,
+  Fonto,
   IdsLock,
   Jugxo,
   KontrastParo,
@@ -58,6 +60,10 @@ export interface LoadedAspektoPackage {
   id?: string;
   /** `idNamespace` from `aspekto.json`, when it is a string. */
   namespace?: string;
+  /** `owner`, `license` and `fonts` from `aspekto.json` (typed after schema validation). */
+  owner?: string;
+  license?: string;
+  fonts?: Fonto[];
   /** `aspekto.json` path relative to the Modelo root. */
   aspektoFile: string;
   /** `ids.lock.json` path relative to the Modelo root. */
@@ -67,6 +73,12 @@ export interface LoadedAspektoPackage {
   /** Whether its Aspekto value was added to the aspekto Dimensio (false for a duplicate name). */
   composed: boolean;
 }
+
+/**
+ * A Dimensio of the in-memory Modelo: its values are always present. For the aspekto Dimensio
+ * they are assembled from the loaded Aspekto packages (D-05).
+ */
+export type LoadedDimensio = Dimensio & { valoroj: DimensioValoro[] };
 
 /** One parsed `dimensio=valoro` condition of a set. */
 export interface Kondicxo {
@@ -102,7 +114,7 @@ export interface LoadedSet {
 export interface Modelo {
   version: string;
   /** Sorted by priority ascending. */
-  dimensioj: Dimensio[];
+  dimensioj: LoadedDimensio[];
   setoj: LoadedSet[];
   reguloj: Regulo[];
   jugxoj: Jugxo[];

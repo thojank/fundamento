@@ -24,10 +24,6 @@
       "status": "active",
       "type": "dimensio"
     },
-    "dva_01M2VEEDQEJEE7MR7JA8JRPMJB": {
-      "status": "active",
-      "type": "dimensioValoro"
-    },
     "dva_01M2VEEDQFS0RGTE2M27JARKH3": {
       "status": "active",
       "type": "dimensioValoro"
@@ -108,10 +104,6 @@
       "status": "active",
       "type": "tokenSet"
     },
-    "set_01M2VEEDW32MC4ZQPRN0GC9JRS": {
-      "status": "active",
-      "type": "tokenSet"
-    },
     "set_01M2VEEDW45A0B9Q4GQ465NCHE": {
       "status": "active",
       "type": "tokenSet"
@@ -137,10 +129,6 @@
       "type": "tokenSet"
     },
     "set_01M2VEEDW45A0B9Q4GQ465NCHM": {
-      "status": "active",
-      "type": "tokenSet"
-    },
-    "set_01M2VEEDW45A0B9Q4GQ465NCHN": {
       "status": "active",
       "type": "tokenSet"
     },

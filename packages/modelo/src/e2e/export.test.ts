@@ -36,7 +36,7 @@ describe("AK-06: the S6 dialog is answered from dist/modelo.json alone", () => {
     expect(description).toMatchObject({
       version: "0.1.0",
       dimensioj: ["aspekto", "viewport", "density", "color-scheme", "contrast", "motion"],
-      aspektoj: ["neutra"],
+      aspektoj: ["komuna"],
       tokenCount: 30,
       typeCount: 10,
       reguloCount: 2,
@@ -52,7 +52,7 @@ describe("AK-06: the S6 dialog is answered from dist/modelo.json alone", () => {
 
   it("AK-06: states the S6 sentence", () => {
     expect(describeModelo(modeloJson).sentence).toBe(
-      "Fundamento v0.1.0: six Dimensioj (aspekto, viewport, density, color-scheme, contrast, motion), one Aspekto `neutra`, 30 tokens in ten types, two rules with reasons, no Eroj.",
+      "Fundamento v0.1.0: six Dimensioj (aspekto, viewport, density, color-scheme, contrast, motion), one Aspekto `komuna`, 30 tokens in ten types, two rules with reasons, no Eroj.",
     );
   });
 });
