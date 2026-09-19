@@ -1,0 +1,9 @@
+{
+  "description": "T027: light/high 1000/950/900 on a ramp whose 950 and 900 lie 0.023 apart in OKLCH lightness.",
+  "issues": [
+    {
+      "rule": "text-hierarchy",
+      "path": "rezolvo(color-scheme=light,contrast=high)/color.text.muted"
+    }
+  ]
+}

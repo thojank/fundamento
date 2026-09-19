@@ -117,6 +117,12 @@ The stage order was set by the maintainer: README → Regularo → komuna repair
   - Red: `packages/cli/src/quickstart.test.ts` calls `prompts/get gvidanto` and one `explain` against a spawned server; `docs/docs.test.ts`: the README MCP section lists 14 tools, the prompt and the Ontologio resource, the checks table mentions the `aux` branches; `plan.md` traceability maps every FR/AK to task IDs.
   - Green: README sections, plan traceability; byte-identical export and `check:clean-room` confirmed. Then the Phase-2 PR.
 
+## Follow-up after the acceptance (own branch from `main`, PR #7)
+
+- [x] **T027 text-hierarchy with a minimum lightness step** (FR-02 amended; finding of the Gvidanto acceptance)
+  - Red: `invalid/regulo-text-hierarchy-flat-dark-high` (0/50/100: two issues) and `invalid/regulo-text-hierarchy-flat-light-high` (1000/950/900 on a ramp whose 950 and 900 lie 0.023 apart); unit tests for the message and for `regulo-sojlo-missing` on text-hierarchy (6 failed); then `sojlo` on the repo Regulo: `fm modelo validate` 2 errors (komuna dark/high), 5 with ekzemplo (plus ekzemplo light/high subtle); `data/text-hierarchy.test.ts` with the target steps and the 0.05 step (6 failed).
+  - Green: checker measures neighbouring roles after compositing; `text-hierarchy` needs `sojlo`; core `color-scheme/dark+contrast/high` subtle `neutral.100`, muted `neutral.200`; ekzemplo light/high subtle `neutral.900`, muted `neutral.800`; fixtures that copy the base get the repaired steps (light/high muted `800`, dark/high `200/300`).
+
 ## Stage 8 – ciferecigo (last, after the merge, outside the repository)
 
 - [ ] **T026 Re-derive ciferecigo against the new core** (spec edge case; maintainer request)

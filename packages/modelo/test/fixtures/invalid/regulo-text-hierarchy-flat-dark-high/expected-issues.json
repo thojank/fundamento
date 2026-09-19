@@ -1,0 +1,13 @@
+{
+  "description": "T027: dark/high 0/50/100 are distinct and ordered but neighbouring roles differ by less than 0.05 in OKLCH lightness (the Gvidanto acceptance finding).",
+  "issues": [
+    {
+      "rule": "text-hierarchy",
+      "path": "rezolvo(color-scheme=dark,contrast=high)/color.text.muted"
+    },
+    {
+      "rule": "text-hierarchy",
+      "path": "rezolvo(color-scheme=dark,contrast=high)/color.text.subtle"
+    }
+  ]
+}

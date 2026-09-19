@@ -15,10 +15,10 @@
         "$value": "{color.palette.neutral.0}"
       },
       "subtle": {
-        "$value": "{color.palette.neutral.50}"
+        "$value": "{color.palette.neutral.200}"
       },
       "muted": {
-        "$value": "{color.palette.neutral.100}"
+        "$value": "{color.palette.neutral.300}"
       }
     }
   }

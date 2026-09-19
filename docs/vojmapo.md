@@ -21,8 +21,8 @@ Eine Marke wird als ausführbare Spezifikation beschrieben (Modelo); daraus ents
 |---|---|---|---|
 | 0 | [000](../specs/000-fundamento-repo/) | Monorepo, Modelo-Schema, DTCG-Vortaro, Konjunktions-Sets, ULID-IDs, 5 CI-Prüfungen, CLI `fm modelo validate` | ✅ abgenommen |
 | 1 | [001](../specs/001-vortaro-aspektoj-mcp/) | 340 Tokens, 6 Dimensioj, Referenzmarke `komuna` (Geist), Aspekto-Pakete intern/extern, MCP-Server (10 Werkzeuge), Export je Aspekto, externes Paket `ciferecigo` (abgeleitet, privat) | ✅ abgenommen |
-| 2 | [002](../specs/002-regularo-gvidanto/) | Reguloj aus Abnahme-Befunden (`surface-order`, `text-hierarchy`, `state-distinct`, `semantic-described`), komuna-Reparatur, KontrastParo mit Rand-Alternative, Gvidanto-Werkzeuge (`check_contrast`, `explain`, `explain_regulo`, `describe_term`), MCP-Prompt, Ontologio Stufe 1, MCP-SDK 2 | 🔄 in Umsetzung |
-| 3 | [003](../specs/003-butono-durchstich/) | Erster Ero `butono` durch alle Ebenen: Skemo → CSS/Tailwind → Web Component + React → Figma-Komponente → Code-Zuordnung → **Figma Make Kit** je Aspekto → Gvidanto → Prüfung. Internacia und Alirebleco (Fokus, Tastatur, ARIA) erstmals an einem Ero | 📝 Spec vorgeschrieben |
+| 2 | [002](../specs/002-regularo-gvidanto/) | Reguloj aus Abnahme-Befunden (`surface-order`, `text-hierarchy`, `state-distinct`, `semantic-described`), komuna-Reparatur, KontrastParo mit Rand-Alternative, Gvidanto-Werkzeuge (`check_contrast`, `explain`, `explain_regulo`, `describe_term`), MCP-Prompt, Ontologio Stufe 1, MCP-SDK 2; Nachtrag T027 (Mindestabstand der Textrollen) | ✅ abgenommen |
+| 3 | [003](../specs/003-butono-durchstich/) | Erster Ero `butono` durch alle Ebenen: Skemo → CSS/Tailwind → Web Component + React → Figma-Komponente → Code-Zuordnung → **Figma Make Kit** je Aspekto → Gvidanto → Prüfung. Internacia und Alirebleco (Fokus, Tastatur, ARIA) erstmals an einem Ero | 📝 bereit für /speckit.plan |
 | 4 | – | Eroj in der Breite (Formular, Navigation, Feedback, Daten), Sxablonoj | geplant |
 | 5 | – | Generatoren in voller Breite: Figma-Library je Aspekto, Penpot, Icons, Fonts, JSON-LD-Projekcio der Ontologio, Laufzeit-Umschaltung aller Dimensioj | geplant |
 | 6 | – | CLI + Registry: `fm init / add / aspekto use / lint / diff`, shadcn-kompatible Registry | geplant |
@@ -54,6 +54,7 @@ Eine Marke wird als ausführbare Spezifikation beschrieben (Modelo); daraus ents
 | „Text oder Icon genügt" als Nicht-Text-Kontrast | WCAG 1.4.11 | Spec 003 (braucht Ero-Wissen) |
 | APCA verbindlich unter `contrast=high`? | Baseline Spec 001 §8 | Spec 003 |
 | Prüfwerkzeug für Fokus/Tastatur/ARIA unbenannt | seit Phase 0 | Spec 003 |
+| Textrollen verschieden, aber optisch flach (dark/high `#ffffff` / `#f6f7f7` / `#ecedee`) | Gvidanto-Abnahme (Claude Code, Phase 2) | Spec 002 FR-02 ergänzt, T027: Mindestabstand \|ΔL\| ≥ 0,05 (OKLCH) zwischen benachbarten Textrollen |
 
 ## Externe Pakete
 

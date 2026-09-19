@@ -27,7 +27,7 @@
     {
       "id": "reg_01M2X53D4ZSW5XT4A0E0QHVFYV",
       "name": "text-hierarchy",
-      "statement": "In every combination, color.text.default, .subtle and .muted differ, and their contrast against color.background.default does not rise from default to muted.",
+      "statement": "In every combination, color.text.default, .subtle and .muted resolve to pairwise different colours, neighbouring roles differ by at least 0.05 in OKLCH lightness, and their contrast against color.background.default does not rise from default to muted.",
       "kialo": "The text roles carry a distinction of meaning; high contrast must not erase it.",
       "scope": "vortaro: color.text.*",
       "checkability": "automatic",
@@ -37,6 +37,10 @@
           "color.text.subtle",
           "color.text.muted"
         ]
+      },
+      "sojlo": {
+        "metric": "oklch-l-delta",
+        "min": 0.05
       }
     },
     {
