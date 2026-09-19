@@ -73,3 +73,7 @@ jobs:
 
       - name: "Check: Clean-Room"
         run: pnpm check:clean-room
+
+      # Rendered accessibility of the Eroj: axe-core, keyboard, focus ring (Spec 003 T013, D-09).
+      - name: "Check: Alirebleco (Eroj)"
+        run: pnpm check:alirebleco-eroj

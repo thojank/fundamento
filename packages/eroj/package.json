@@ -26,7 +26,8 @@
   "scripts": {
     "build": "node scripts/generate.mjs && tsc -p tsconfig.build.json",
     "test": "vitest run --passWithNoTests && playwright test",
-    "lint": "node scripts/generate.mjs && tsc -p tsconfig.json --noEmit && biome check ."
+    "lint": "node scripts/generate.mjs && tsc -p tsconfig.json --noEmit && biome check .",
+    "check:alirebleco": "playwright test --config playwright.alirebleco.config.ts"
   },
   "peerDependencies": {
     "react": ">=18",

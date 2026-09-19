@@ -13,6 +13,6 @@ Lebende Liste. Jede Phase ergänzt hier den weltweit stärksten öffentlichen Be
 | Komponenten-Landschaft | shadcn, Base UI, Ark UI, Radix, Panda CSS, Nuxt UI, HeroUI, Mantine | Inventar- und Zustandsabdeckung, Headless-Muster | https://designrevision.com/blog/best-tailwind-component-libraries · https://dualite.dev/blogs/best-ui-component-libraries |
 | UX Writing | (Phase 2 recherchieren) | | |
 | Motion | (Phase 4 recherchieren) | | |
-| Barrierefreiheit / Prüfung | (Phase 0 recherchieren: axe, WCAG 2.2, APCA) | | |
+| Barrierefreiheit / Prüfung | axe-core 4.13 (MPL-2.0) über `@axe-core/playwright` 4.13 in Playwright 1.63 (Apache-2.0), Chromium, Firefox, WebKit; WCAG 2.2 A/AA; APCA nur beratend (Jugxo zu Art. X) | Werkzeug, kein Inhalt: prüft gerenderte Eroj, übernimmt nichts in das Modelo | Spec 003 D-09, T013 (`check:alirebleco-eroj`) |
 | Datenvisualisierung | (Phase 4 recherchieren) | | |
 | Contribution / Governance | (Phase 9 recherchieren) | | |

@@ -18,6 +18,11 @@ const CHECK_STEPS: ReadonlyArray<readonly [name: string, script: string]> = [
   ["Check: Clean-Room", "check:clean-room"],
 ];
 
+/** Rendered checks of the Eroj (Spec 003 T013, plan D-09): axe-core, keyboard, focus, ARIA. */
+const ERO_CHECK_STEPS: ReadonlyArray<readonly [name: string, script: string]> = [
+  ["Check: Alirebleco (Eroj)", "check:alirebleco-eroj"],
+];
+
 const GATE_STEPS: ReadonlyArray<readonly [name: string, run: string]> = [
   // The rendered checks of @fundamento/eroj run in Chromium, Firefox and WebKit (Spec 003).
   [
@@ -30,6 +35,7 @@ const GATE_STEPS: ReadonlyArray<readonly [name: string, run: string]> = [
   ["Perf", "pnpm perf"],
   ["Lint", "pnpm lint"],
   ...CHECK_STEPS.map(([name, script]) => [name, `pnpm ${script}`] as const),
+  ...ERO_CHECK_STEPS.map(([name, script]) => [name, `pnpm ${script}`] as const),
 ];
 
 interface Step {
@@ -168,7 +174,7 @@ describe("root package.json check script", () => {
   });
 
   it("runs build, test, perf and lint before the checks", () => {
-    const head = commands.slice(0, commands.length - CHECK_STEPS.length);
+    const head = commands.slice(0, commands.length - CHECK_STEPS.length - ERO_CHECK_STEPS.length);
     expect(head.join(" && ")).toMatch(/build/);
     expect(head.join(" && ")).toMatch(/test/);
     expect(head).toContain("pnpm perf");
@@ -185,9 +191,15 @@ describe("root package.json check script", () => {
     expect(tasks.perf).toEqual({ dependsOn: ["build"], cache: false, outputs: [] });
   });
 
-  it("invokes all five check scripts, in the CI order", () => {
-    expect(commands.slice(-CHECK_STEPS.length)).toEqual(
-      CHECK_STEPS.map(([, script]) => `pnpm ${script}`),
+  it("invokes all five check scripts and the rendered Ero check, in the CI order", () => {
+    expect(commands.slice(-CHECK_STEPS.length - ERO_CHECK_STEPS.length)).toEqual(
+      [...CHECK_STEPS, ...ERO_CHECK_STEPS].map(([, script]) => `pnpm ${script}`),
+    );
+  });
+
+  it("runs the rendered Ero check through @fundamento/eroj (Spec 003 T013)", () => {
+    expect(scripts["check:alirebleco-eroj"]).toBe(
+      "pnpm --filter @fundamento/eroj run check:alirebleco",
     );
   });
 
