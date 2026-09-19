@@ -50,13 +50,13 @@ Deterministic: lower-case, strip punctuation, x-convention folding; the first Sk
 { instances: integer, valid: boolean,
   violations: [ { instance: integer[], issue: Issue } ] }   // Issue with regulo { id, name, kialo }
 ```
-Rules: `one-primary-per-container` (grouped by `container`; instances without a container form one implicit container), `destructive-not-primary-color` (`intent` matches a Skemo intent with `tone=danger`, and the instance's tone is not danger), `label-required` (no `label` and no label slot text given), `ero-unknown`, and prop validation against the Skemo (`mcp-input-invalid` with `allowed`).
+Rules: `one-primary-per-container` (grouped by `container`; instances without a container form one implicit container), `destructive-not-primary-color` (`intent` is `destructive` or its label matches a destructive keyword, and the instance is `variant=primary` with `tone=default`), `ero-prop-constraint` (a Skemo constraint is violated, e.g. `tone=danger` with `variant=secondary`), `label-required` (no `label` and no label slot text given), `ero-unknown`, and prop validation against the Skemo (`mcp-input-invalid` with `allowed`).
 
 ## AK-09 dialog (automated, config `core + aspekto-ekzemplo`)
 
 | Question | Calls | Checked against |
 |---|---|---|
-| "Welchen Button nehme ich für ‚Löschen'?" | `suggest_ero { intent: "Löschen" }` | Skemo intent `destructive`, Regulo kialo |
+| "Welchen Button nehme ich für ‚Löschen'?" | `suggest_ero { intent: "Löschen" }` | Skemo intent `destructive` → `variant=primary`, `tone=danger`; Regulo kialo |
 | "Ist dieser Screen konform?" (two primaries in one dialog) | `check_usage` | one violation `one-primary-per-container` naming both instances, kialo from `reguloj.json` |
 | "Wie heißt die Variante in Figma und in React?" | `get_ero { name: "butono" }` | property `variant` in Figma, prop `variant` in React, identical values (parity) |
 

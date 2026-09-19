@@ -10,8 +10,8 @@ Companion to [`plan.md`](plan.md). Decision numbers (D-xx) and open points (Q-x)
 | **Skemo** | `…/skemo.json#/skemo` | grows from props + states to the full specification (§2) | schema; Skemo ↔ Vortaro rules (§4) |
 | **Regulo** | `data/reguloj.json` | `appliesTo.eroj` (new criterion); four Ero Reguloj (§3) | schema; repo test (enforcer in validation or usage table) |
 | **Jugxo** | `data/jugxoj.json` | optional `ekzemplo` (an instance list, §5) for examples right and wrong | schema; `ekzemplo` instances validated against the Skemo |
-| **Token** | `packages/vortaro/sets/core.json` | Q1: `color.action.danger.{rest,hover,pressed,text}` (proposal) | existing rules; completeness for every Aspekto |
-| **KontrastParo** | `data/kontrastparoj.json` | Q1: four `action-danger-text-on-action-danger-*` pairs | existing rules; `skemo-kontrastparo-missing` |
+| **Token** | `packages/vortaro/sets/core.json` and the Dimensio sets; komuna, ekzemplo | Q1 (decided): `color.action.danger.{rest,hover,pressed,text}` | existing rules incl. `state-distinct`; completeness for every Aspekto |
+| **KontrastParo** | `data/kontrastparoj.json` | Q1: three pairs `action-danger-text-on-action-danger-{rest,hover,pressed}` | existing rules; `skemo-kontrastparo-missing` |
 | **Instance** (not stored) | MCP input of `check_usage`, Jugxo `ekzemplo` | `{ ero, props, container?, intent?, label? }` | against the Skemo |
 
 ## 2. Skemo (`skemo.json`)
@@ -28,7 +28,7 @@ Companion to [`plan.md`](plan.md). Decision numbers (D-xx) and open points (Q-x)
     "props": [
       { "name": "variant",    "kind": "enum",    "values": ["primary", "secondary", "tertiary"], "default": "secondary",
         "description": "Emphasis; at most one primary per container (Regulo one-primary-per-container)." },
-      { "name": "tone",       "kind": "enum",    "values": ["neutral", "danger"], "default": "neutral" },     // Q1
+      { "name": "tone",       "kind": "enum",    "values": ["default", "danger"], "default": "default" },     // Q1
       { "name": "size",       "kind": "enum",    "values": ["small", "medium", "large"], "default": "medium" },
       { "name": "type",       "kind": "enum",    "values": ["button", "submit", "reset"], "default": "button" },
       { "name": "disabled",   "kind": "boolean", "default": false },
@@ -54,9 +54,9 @@ Companion to [`plan.md`](plan.md). Decision numbers (D-xx) and open points (Q-x)
     },
     "bindings": [
       // one entry per part property and key; missing states inherit "rest" (focus and loading: rest surface)
-      { "part": "surface", "property": "background", "when": { "variant": "primary", "tone": "neutral", "state": "rest" },
+      { "part": "surface", "property": "background", "when": { "variant": "primary", "tone": "default", "state": "rest" },
         "token": "color.action.primary.rest" },
-      { "part": "label", "property": "color", "when": { "variant": "primary", "tone": "neutral" },
+      { "part": "label", "property": "color", "when": { "variant": "primary", "tone": "default" },
         "token": "color.action.primary.text" },
       { "part": "label", "property": "color", "when": { "state": "disabled" }, "token": "color.text.disabled" },
       { "part": "box", "property": "height", "when": { "size": "medium" }, "token": "size.control.medium" }
@@ -68,9 +68,13 @@ Companion to [`plan.md`](plan.md). Decision numbers (D-xx) and open points (Q-x)
       "states": { "disabled": ["aria-disabled"], "loading": ["aria-disabled", "aria-busy"] },
       "keys": ["Enter", "Space"]
     },
+    "constraints": [
+      { "if": { "tone": "danger" }, "then": { "variant": ["primary"] },
+        "kialo": "The danger tokens describe a filled surface and its text; a danger label on a neutral surface has no tokens." }
+    ],
     "intents": [
       { "intent": "destructive", "keywords": { "en": ["delete", "remove", "destroy"], "de": ["löschen", "entfernen"] },
-        "props": { "tone": "danger", "variant": "secondary" }, "regulo": "destructive-not-primary-color" },
+        "props": { "tone": "danger", "variant": "primary" }, "regulo": "destructive-not-primary-color" },
       { "intent": "confirm",     "keywords": { "en": ["save", "submit", "confirm"], "de": ["speichern", "senden", "bestätigen"] },
         "props": { "variant": "primary" }, "regulo": "one-primary-per-container" },
       { "intent": "dismiss",     "keywords": { "en": ["cancel", "close", "back"], "de": ["abbrechen", "schließen", "zurück"] },
@@ -90,7 +94,7 @@ Rules of the schema (`$defs/EroFile`, `$defs/Skemo`, `$defs/SkemoBinding`, `$def
 | Name | Statement | Kialo | `appliesTo` | Enforced in |
 |---|---|---|---|---|
 | `one-primary-per-container` | A container holds at most one `butono` with `variant=primary`. | Two equal calls to action move the decision onto the user; one primary action makes the next step obvious. | `eroj: [butono]` | usage (`check_usage`) |
-| `destructive-not-primary-color` | An action that destroys data uses `tone=danger`, never the neutral primary colour. | The primary colour promises the expected next step; a destructive action needs a colour that warns before it acts. | `eroj: [butono]` | usage |
+| `destructive-not-primary-color` | An action that destroys data is never `variant=primary` with `tone=default`: as the main action it is `primary` + `danger`, next to another primary action it is `secondary`. | The primary colour promises the expected next step; a destructive action needs a colour that warns before it acts. | `eroj: [butono]` | usage |
 | `label-required` | Every `butono` has a visible label or, icon-only, a `label` prop as accessible name. | A button without a name cannot be found or understood by assistive technology, and an icon alone is not understood by everyone. | `eroj: [butono]` | usage; axe in the rendered check |
 | `touch-target-min` | Every resolved `size.control.*` is at least 24 px in every combination. | WCAG 2.5.8 (AA) requires a 24 × 24 px target; smaller targets fail people with tremor or large fingers. | `tokens: [size.control.*]` | validation (Modelo) |
 
@@ -104,7 +108,8 @@ New rule IDs: `one-primary-per-container`, `destructive-not-primary-color`, `lab
 | `skemo-token-type` | a binding's token type does not fit the part property (colour → `color`, height → `dimension`, typography → `typography`, ring → `border`) |
 | `skemo-binding-missing` | a combination of the `by` keys has no binding for a part property that needs one |
 | `skemo-kontrastparo-missing` | a label-on-surface pair of a variant × tone × state (except `disabled`) is not a declared KontrastParo |
-| `skemo-intent-invalid` | an intent's `props` are not allowed values, or its `regulo` does not exist |
+| `skemo-intent-invalid` | an intent's `props` are not allowed values, violate a constraint, or its `regulo` does not exist |
+| `skemo-constraint-invalid` | a constraint names an unknown prop or value |
 | `jugxo-ekzemplo-invalid` | a Jugxo `ekzemplo` instance uses a prop or value the Skemo does not allow |
 
 ## 5. Jugxo `ekzemplo`
@@ -139,10 +144,11 @@ New rule IDs: `one-primary-per-container`, `destructive-not-primary-color`, `lab
 
 ## 7. New rule-catalog entries
 
-`skemo-token-missing`, `skemo-token-type`, `skemo-binding-missing`, `skemo-kontrastparo-missing`, `skemo-intent-invalid`, `jugxo-ekzemplo-invalid`, `one-primary-per-container`, `destructive-not-primary-color`, `label-required`, `touch-target-min`, `css-physical-property` (lint), `parity-binding-mismatch`, `ero-unknown`, `intent-unknown`.
+`skemo-token-missing`, `skemo-token-type`, `skemo-binding-missing`, `skemo-kontrastparo-missing`, `skemo-intent-invalid`, `skemo-constraint-invalid`, `ero-prop-constraint`, `jugxo-ekzemplo-invalid`, `one-primary-per-container`, `destructive-not-primary-color`, `label-required`, `touch-target-min`, `css-physical-property` (lint), `parity-binding-mismatch`, `ero-unknown`, `intent-unknown`.
 
 ## 8. Migration
 
 - **Modelo:** additive. New Ero data; `appliesTo.eroj`; the Jugxo `ekzemplo` field is optional.
-- **Q1:** if new danger action tokens are chosen, every non-reference Aspekto must add four tokens (ekzemplo in the repo; ciferecigo outside, re-derived as in T026).
-- **Tailwind NomRegulo (D-06):** `derive_name` returns `--color-fm-…` style names. The MCP contract shape is unchanged, and no external consumer exists.
+- **Q1 (decided):** every non-reference Aspekto adds the four danger action tokens (ekzemplo in the repo; ciferecigo outside, re-derived at the end of the phase as in T026).
+- **Q2 (decided):** the ekzemplo Make Kit is MIT-licensed; the fixture's `aspekto.json` license changes from `proprietary` to `MIT`, the fictitious font stays a name without a file.
+- **Tailwind NomRegulo (D-06, Constitution v1.6):** `derive_name` returns `--color-fm-…` style names. The MCP contract shape is unchanged, and no external consumer exists. A Jugxo on Article XII records the breaking change.

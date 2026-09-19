@@ -23,7 +23,7 @@ Companion to [`../plan.md`](../plan.md) D-05 … D-14. These are the public surf
 ## 2. Tailwind v4 Celo (D-06)
 
 - File `fundamento.tailwind.css`: `@theme inline { … }`, to be imported after `tailwindcss` and after the CSS Celo.
-- Theme keys: `--<namespace>-fm-<rest of the token name>` → utilities `<utility>-fm-<rest>`:
+- Theme keys (Constitution v1.6, Art. XII): `--<namespace>-fm-<rest of the token name>` → utilities `<utility>-fm-<rest>`; no `prefix()`, so the host project's own classes keep their names:
 
 | Token | Theme key | Example utilities |
 |---|---|---|
@@ -36,14 +36,14 @@ Companion to [`../plan.md`](../plan.md) D-05 … D-14. These are the public surf
 ## 3. Web Component `fm-butono` (D-07)
 
 ```html
-<fm-butono variant="primary" tone="neutral" size="medium" type="submit" disabled loading full-width label="…">
+<fm-butono variant="primary" tone="default" size="medium" type="submit" disabled loading full-width label="…">
   <svg slot="icon-start" aria-hidden="true">…</svg>
   Speichern
   <svg slot="icon-end" aria-hidden="true">…</svg>
 </fm-butono>
 ```
 
-- Attributes = Skemo props (kebab-case); properties = camelCase with the same values; invalid values fall back to the default and log one `console.warn` naming the allowed values.
+- Attributes = Skemo props (kebab-case); properties = camelCase with the same values; invalid values fall back to the default and log one `console.warn` naming the allowed values. A combination a Skemo constraint forbids (`tone=danger` without `variant=primary`) renders `tone=default` and warns with the kialo.
 - Registration: `import "@fundamento/eroj/define"` (registers once; importing twice is safe).
 - Events: native `click` (composed); no custom events in Phase 3.
 - Form: `formAssociated`; `type="submit" | "reset"` act on the owning form.
@@ -54,7 +54,7 @@ Companion to [`../plan.md`](../plan.md) D-05 … D-14. These are the public surf
 
 ```tsx
 import { Butono } from "@fundamento/eroj/react";
-<Butono variant="primary" tone="neutral" size="medium" type="submit" disabled={false} loading={false}
+<Butono variant="primary" tone="default" size="medium" type="submit" disabled={false} loading={false}
         fullWidth label="…" onClick={…} iconStart={<Icon />} iconEnd={<Icon />}>Speichern</Butono>
 ```
 
@@ -87,7 +87,7 @@ import { Butono } from "@fundamento/eroj/react";
 
 ## 6. Make Kit package (D-14)
 
-- Name `@fundamento/make-kit-<aspekto>`, version = Fundamento version with pre-release tag.
+- Name `@fundamento/make-kit-<aspekto>` (`komuna`, `ekzemplo`), version 0.x with a pre-release identifier, dist-tag `next`, license MIT, `publishConfig.access: public`. Published by the maintainer after the acceptance; the phase runs `pnpm publish --dry-run --tag next` only.
 - `exports`: `.` (`import` → `dist/index.js`, `require` → `dist/index.cjs`, `types` → `dist/index.d.ts`), `./styles.css`, `./tailwind.css`, `./guidelines/*`; also `main`, `module`, `types`.
 - No `dependencies`; `peerDependencies` React ≥ 18.
 - `guidelines/` as listed in plan D-14; every file generated; no hex values; every token reference is a Tailwind class or `--fm-*` name that exists; every Ero Regulo appears with its kialo.

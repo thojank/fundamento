@@ -1,6 +1,6 @@
 # Plan – Spec 003: Durchstich `butono`, mit Figma Make Kit
 
-**Spec:** [`spec.md`](spec.md) · **Research:** [`research.md`](research.md) (§6 added by this plan) · **Data model:** [`data-model.md`](data-model.md) · **Contracts:** [`contracts/`](contracts/) · **Quickstart:** [`quickstart.md`](quickstart.md) · **Constitution:** v1.5 (binding) · **Frame:** [`docs/vojmapo.md`](../../docs/vojmapo.md) · **Status:** draft for maintainer review; no tasks yet · **Date:** 2026-09-19 · **Base:** `main` @ `71ace22`
+**Spec:** [`spec.md`](spec.md) · **Research:** [`research.md`](research.md) (§6 added by this plan) · **Data model:** [`data-model.md`](data-model.md) · **Contracts:** [`contracts/`](contracts/) · **Quickstart:** [`quickstart.md`](quickstart.md) · **Constitution:** v1.5 (binding), amended to v1.6 in this phase (D-06) · **Frame:** [`docs/vojmapo.md`](../../docs/vojmapo.md) · **Status:** accepted by the maintainer 2026-09-19 with the decisions Q1–Q4 and the Constitution v1.6 amendment (see "Maintainer decisions"); tasks in [`tasks.md`](tasks.md) · **Date:** 2026-09-19 · **Base:** `main` @ `71ace22`
 
 This plan is the output of `/speckit.plan` for Spec 003. It fixes the technical design of Phase 3, makes the decisions the maintainer asked for (Web Components, React wrapper, accessibility tool, APCA, state text colours, Figma projection, Make Kit package structure), reviews the design against every Article of Constitution v1.5 and lists the deviations under Complexity Tracking. `/speckit.tasks` runs only after the maintainer's review and `/speckit.analyze`.
 
@@ -38,7 +38,7 @@ Phase 3 pulls one Ero, `butono`, through every layer. It adds two packages, `@fu
 | Depth before breadth (Art. IX): one Ero through every layer | pass |
 | Clean room (Art. V): no benchmark content; ciferecigo stays out of registries and accounts | pass |
 | Figma path independent of Organization/Enterprise (spec clarification) | pass (D-12, D-13) |
-| Open questions | two, listed under "Open points for the maintainer review"; neither blocks the design, both change data before tasks |
+| Open questions | none; Q1–Q4 decided by the maintainer ("Maintainer decisions") |
 
 ## Key design decisions
 
@@ -59,18 +59,19 @@ Art. I: the only hand-written code for `butono` is the generator and its behavio
 
 The Phase-0 `Skemo` (props, states) grows into the full specification (data-model §2):
 - **props** with kind, values, default and `attribute` (the HTML attribute name, identical to the prop name; boolean attributes for booleans);
-- **variants** `primary | secondary | tertiary` (emphasis) and **tones** `neutral | danger` (meaning; see Q1) as enum props; **sizes** `small | medium | large` bound to `size.control.*`;
+- **variants** `primary | secondary | tertiary` (emphasis) and **tones** `default | danger` (meaning; Q1) as enum props; `tone=danger` combines with `variant=primary` only (a Skemo constraint, see below); **sizes** `small | medium | large` bound to `size.control.*`;
 - **states** `rest | hover | pressed | focus | disabled | loading`;
 - **slots** `label` (default), `icon-start`, `icon-end`;
 - **parts** `surface`, `label`, `border`, `focus-ring`, `icon`, each with token bindings per variant × tone × state (a state not listed inherits `rest`), plus size-bound bindings (height, padding, radius, typography);
 - **a11y**: native role `button`, accessible name from the `label` slot or the `label` prop, `aria-disabled` and `aria-busy` for `disabled` and `loading`, keyboard `Enter` and `Space`;
+- **constraints**: combinations of prop values that are not allowed, each with a kialo. The first one is `tone=danger` only with `variant=primary`: the four danger tokens (Q1) describe a filled surface and its text, and a danger label on a neutral surface would need further tokens that no requirement asks for. The component falls back to `tone=default` and warns; `check_usage` reports the combination;
 - **intents** for `suggest_ero` (D-16): which intent maps to which variant and tone, with a kialo.
 
 Ero and Skemo are two entities with their own IDs in one file, `data/eroj/butono/skemo.json` (the path the Constitution's terminology names). The Skemo is the single source for every projection (FR-01).
 
 ### D-03 Skemo ↔ Vortaro validation (FR-04)
 
-New rules: `skemo-token-missing` (a bound token does not exist in core), `skemo-token-type` (a binding's token has the wrong type for its part property), `skemo-binding-missing` (a variant × tone × state combination has no binding for a part that needs one), `skemo-kontrastparo-missing` (the label-on-surface pair of a variant × tone × state is not a declared KontrastParo; `disabled` exempt by the Phase-1 Regulo). The twelve action pairs already exist; `tone=danger` needs four more (Q1). Positive and negative fixtures per rule (AK-01).
+New rules: `skemo-token-missing` (a bound token does not exist in core), `skemo-token-type` (a binding's token has the wrong type for its part property), `skemo-binding-missing` (a variant × tone × state combination has no binding for a part that needs one), `skemo-kontrastparo-missing` (the label-on-surface pair of a variant × tone × state is not a declared KontrastParo; `disabled` exempt by the Phase-1 Regulo). The twelve action pairs already exist; `tone=danger` needs three more: `color.action.danger.text` on `color.action.danger.{rest,hover,pressed}` (Q1). Positive and negative fixtures per rule (AK-01).
 
 ### D-04 Ero Reguloj (FR-03)
 
@@ -79,7 +80,7 @@ Four new Reguloj scoped to the Ero (`appliesTo.eroj: ["butono"]`, a new criterio
 | Regulo | Checked by | How |
 |---|---|---|
 | `one-primary-per-container` | `check_usage` | at most one instance with `variant=primary` per `container` |
-| `destructive-not-primary-color` | `check_usage` | an instance with `intent: "destructive"` uses `tone=danger` |
+| `destructive-not-primary-color` | `check_usage` | an instance with `intent: "destructive"` is never `variant=primary` with `tone=default`; as the main action (a confirmation dialog) it is `primary` + `danger`, next to another primary action it is `secondary` |
 | `label-required` | `check_usage`, and axe in the rendered check | every instance has a visible label or an accessible name |
 | `touch-target-min` | validation (Modelo) | every resolved `size.control.*` ≥ 24 px in every combination (WCAG 2.5.8 AA; today ≥ 28 px) |
 
@@ -99,6 +100,8 @@ The three usage Reguloj are `automatic` with an enforcer in the usage evaluation
 The spec asks for classes like `bg-fm-action-primary-rest`. The Phase-0 NomRegulo assumes `@import "tailwindcss" prefix(fm)`, which gives `fm:bg-action-primary-rest` and prefixes every utility of the host project. That is wrong for Figma Make and for any project that already uses Tailwind.
 
 **Decision:** the Tailwind NomRegulo puts `fm` into the theme key instead of a global prefix: `--color-fm-action-primary-rest` → `bg-fm-action-primary-rest`, `--spacing-fm-medium` → `p-fm-medium`. The generated `tailwind.css` is `@theme inline { --color-fm-action-primary-rest: var(--fm-color-action-primary-rest); … }`, so utilities always read the CSS Celo's variables and switch with the attributes. `derive_name` returns the new name; its contract shape is unchanged. Nothing consumes the old name yet (Complexity Tracking).
+
+**Constitution v1.6 (maintainer decision).** The change is made as an amendment in this phase. Art. XII, Celo 2 reads: „Tailwind v4: Tokens im `@theme` unter dem Namensraum `fm` (`--color-fm-*` → `bg-fm-*`), nicht per `prefix()`, weil `prefix()` alle Klassen des Projekts umbenennt." The change history gets the v1.6 entry. Because the change is breaking for the Tailwind NomRegulo, it is recorded as a Jugxo on Article XII with this kialo.
 
 ### D-07 Web Components (FR-07): native, Shadow DOM (decision)
 
@@ -215,7 +218,7 @@ README.md               generated
   - no hex value anywhere; a test greps for it.
 - **Test (AK-08).** A fresh Vite 8 + React 18 project, and one with React 19 and Tailwind 4.3, installs the packed tarball, imports the CSS, renders `<Butono>`, builds, and passes axe and the computed-style check.
 - **Getting the guidelines into Figma.** Figma reads guidelines from the kit, not the package (research §6.1). The maintainer creates the kit, adds the package and copies the `guidelines/` folder into the kit's `guidelines/` (one manual step, documented in `quickstart.md`). The package keeps them so the kit can be rebuilt from any version.
-- **Publishing (spec clarification).** komuna as a public pre-release on npm (`next` tag) is the one outward-facing step, and it needs the maintainer's go at task time. ekzemplo: see Q2.
+- **Publishing (Q2).** `@fundamento/make-kit-komuna` and `@fundamento/make-kit-ekzemplo` become public pre-releases on npm under the dist-tag `next`, version 0.x; no organisation registry. The kits' license is MIT; for ekzemplo that follows from its invented values, and its fictitious font ships as a family name with a fallback stack, never as a file. The phase prepares `pnpm publish --dry-run --tag next` and documents the result below; the maintainer publishes after the acceptance.
 
 ### D-15 Parity (FR-12, Art. X gate 2)
 
@@ -260,16 +263,14 @@ Every visible text comes from the slot or a prop; the Web Component contains no 
 
   The workflow test is updated.
 
-## Open points for the maintainer review
+## Maintainer decisions (review 2026-09-19)
 
-These are decisions this plan needs from the maintainer before tasks, because they change data or an outward-facing step:
-
-- **Q1 – Danger tone.** FR-03 requires "Löschen nutzt Danger, nicht Primär", but neither the Vortaro nor the Skemo has a danger action today. The plan proposes a prop `tone: neutral | danger` and four new role tokens `color.action.danger.{rest,hover,pressed,text}` in core (aliasing the danger palette), with their KontrastParoj. That is breaking for external Aspektoj (completeness), as in Phase 2. The alternative is binding the danger tone to the existing `color.status.danger.*` tokens (no new tokens, but a status role used for actions).
-- **Q2 – ekzemplo in Figma Make.** S4 and AK-08 need the second brand as a Make Kit, and Make reads packages only from npm (public) or the organisation's registry. Options:
-  - publish `@fundamento/make-kit-ekzemplo` as a public pre-release too, with its license changed from `proprietary` to MIT, since the values are invented;
-  - or use the test account's private registry for ekzemplo only (Organization/Enterprise, allowed for testing but not for the standard path).
-- **Q3 – Rule 9 of ciferecigo** (T026, amber warning fill in light carried by the border): confirm or revert.
-- **Q4 – sunken depth in ciferecigo light** (T026): accept depth zero (Rule 6 as written), or choose sunken per contrast class.
+- **Q1 – Danger tone.** A prop `tone: default | danger` and four role tokens `color.action.danger.{rest,hover,pressed,text}` in core, komuna and ekzemplo. `state-distinct` and the KontrastParoj apply to them as to every action. Breaking for external Aspektoj (completeness); ciferecigo is re-derived at the end of the phase, as a follow-up task like T026 of Spec 002.
+- **Q2 – Make Kits on npm.** Public pre-releases under the dist-tag `next`, version 0.x, for `@fundamento/make-kit-komuna` and `@fundamento/make-kit-ekzemplo`; no organisation registry. Publishing happens after the acceptance and by the maintainer; the phase prepares `pnpm publish --dry-run` and documents the result (D-14).
+- **Q3 – ciferecigo Rule 9** stays.
+- **Q4 – sunken depth zero in ciferecigo light** is accepted. `docs/vojmapo.md` records it as a requirement for Phase 7: the Enportilo creates intermediate steps when rules collide on the ramp.
+- **Tailwind naming** accepted as Constitution v1.6 in this phase (D-06), with a Jugxo on Article XII.
+- **Red before the implementation, without exception.**
 
 ## Project structure (after Phase 3, delta)
 
@@ -397,21 +398,23 @@ One entry per Article of Constitution v1.5.
 | **Guidelines copied into the kit by hand** (D-14) | Figma reads guidelines from the kit; no import from the package is documented. | One manual step per kit update. Automate when Figma offers an import or an API. |
 | **Figma cascade with hidden helper variables** (D-12) | Modes are per collection and plan-limited; conjunctions and several Dimensioj per token need a chain. | About 640 variables, and names of helpers visible in the variables panel (hidden from publishing). The simulator test guards correctness. |
 | **Four Aspektoj per library on the Professional plan** (D-12) | Plan-independence. | One library per Aspekto beyond four brands, or Organization/Enterprise. |
-| **Tailwind NomRegulo changed** (D-06) | The global `prefix(fm)` breaks host projects and Figma Make. | `derive_name` returns new Tailwind names; Phase-0 comment updated. No consumer affected. |
+| **Tailwind NomRegulo changed** (D-06) | The global `prefix(fm)` breaks host projects and Figma Make. | Constitution v1.6 and a Jugxo on Article XII; `derive_name` returns new Tailwind names; Phase-0 comment updated. No consumer affected. |
+| **`tone=danger` only with `variant=primary`** (D-02) | Four tokens describe one filled danger surface. | A danger label on secondary or tertiary surfaces needs its own tokens and pairs; introduce them when a spec asks for it. |
 | **`:where()` for every CSS selector** (D-05) | Specificity must not override the resolver's order. | Host CSS with any specificity can override `--fm-*`; that is intended (theming escape hatch), but documented. |
 | **Root-only theming** (D-05) | Nested theming needs more than attributes on one element. | Phase 5 (Laufzeit-Umschaltung). |
 | **Native Web Component, no Lit** (D-07) | One Ero; no second user. | Re-evaluate at the second Ero (Phase 4). |
 | **React wrapper renders the Web Component** (D-08) | One behaviour implementation. | SSR shows an unupgraded element until hydration; Make is client-side. Revisit if an SSR user appears. |
 | **Two a11y layers** (D-09) | Token contrast needs no browser; focus, keyboard and ARIA do. | A second rendered CI step with three browsers (time, cache). |
 | **Usage Reguloj enforced outside validation** (D-04) | They judge instances in a design, not Modelo data. | The repo test accepts two enforcer tables. |
-| **Pre-release on npm** (D-14) | Make reads only npm or the organisation's registry. | Outward-facing; each publish needs the maintainer's go. |
+| **Pre-release on npm** (D-14, Q2) | Make reads only npm or the organisation's registry. | Outward-facing; the maintainer publishes after the acceptance, the phase delivers the dry run. |
 | **React version for Make not documented by Figma** (D-08) | Research §6.1. | Tested against 18 and 19; revisit when Figma states it. |
 | **Retroactive red runs (Phase 2)** | Accepted once. | Red before implementation again from this phase on. |
 | **Carried from Specs 001/002** | Completeness restating, conjunction approximation in Tokens Studio, timing tolerance in CI. | Unchanged. |
 
 ## Build order (orientation, not tasks)
 
-1. Skemo schema and `butono` data, Ero Reguloj, Jugxo examples; the Skemo ↔ Vortaro rules (red fixtures first). Q1 decided before this step.
+0. Constitution v1.6 and the Tailwind NomRegulo, with the Jugxo.
+1. Danger action tokens (Q1); Skemo schema and `butono` data, Ero Reguloj, Jugxo examples; the Skemo ↔ Vortaro rules (red fixtures first).
 2. CSS and Tailwind Celoj with the computed-style test (AK-03 for CSS) and the NomRegulo change.
 3. Web Component and React wrapper; Playwright accessibility, keyboard, RTL and expansion (AK-05, AK-06).
 4. Figma plan with the simulator test; the development plugin; Code Connect files.
@@ -425,7 +428,7 @@ One entry per Article of Constitution v1.5.
 | Requirement | Design |
 |---|---|
 | FR-01, FR-02 | D-02 |
-| FR-03 | D-04, Q1 |
+| FR-03 | D-04, D-02 (constraint), Q1 |
 | FR-04 | D-03 |
 | FR-05 | D-05 |
 | FR-06 | D-06 |
@@ -433,6 +436,7 @@ One entry per Article of Constitution v1.5.
 | FR-08 | D-08 |
 | FR-09 | D-12 |
 | FR-10 | D-13 |
+| FR-06 (amended naming) | D-06, Constitution v1.6 |
 | FR-11 | D-14, Q2 |
 | FR-12 | D-15 |
 | FR-13, FR-14 | D-16 |
@@ -454,3 +458,7 @@ One entry per Article of Constitution v1.5.
 ## Manual acceptance results
 
 **Status:** pending, after implementation. Figma library (S3), Make Kits (S4, AK-08) and the S5 run (AK-10) are recorded here by the maintainer.
+
+### Publish dry run (Q2)
+
+**Status:** pending (task T020). Records, per kit, the command, version, dist-tag, file list and packed size of `pnpm publish --dry-run --tag next --access public`.
