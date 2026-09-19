@@ -19,43 +19,20 @@ const { kategorioj } = JSON.parse(
   readFileSync(new URL("../../test/fixtures/coverage/kategorioj.json", import.meta.url), "utf8"),
 ) as { kategorioj: Kategorio[] };
 
-/**
- * Categories not delivered yet: they are expected to fail (`it.fails`) until their task lands.
- * T013 removes the colour categories, T014 the typography categories, T015 the rest; after T015
- * this set is empty and removed (T015 "Done when").
- */
-const PENDING = new Set([
-  "focus",
-  "spacing",
-  "shape",
-  "elevation",
-  "motion",
-  "size",
-  "layout",
-  "opacity",
-]);
-
 const { modelo } = loadModelo(defaultModeloSource());
 const core = new Set(
   Object.keys(modelo?.setoj.find((set) => set.name === CORE_SET_NAME)?.tokens ?? {}),
 );
 
 describe("coverage of the core Vortaro (FR-01, AK-01)", () => {
-  it("lists every pending category in the checklist", () => {
-    const ids = new Set(kategorioj.map((kategorio) => kategorio.id));
-    expect([...PENDING].filter((id) => !ids.has(id))).toEqual([]);
-  });
-
   for (const kategorio of kategorioj) {
-    const test = PENDING.has(kategorio.id) ? it.fails : it;
-    test(`coverage: ${kategorio.id}`, () => {
+    it(`coverage: ${kategorio.id}`, () => {
       const missing = kategorio.tokens.filter((name) => !core.has(name));
       expect(missing, `${kategorio.id} (${kategorio.source})`).toEqual([]);
     });
   }
 
   it("stays within the planned size of 250–400 core tokens", () => {
-    if (PENDING.size > 0) return; // meaningful once every category is delivered (T015)
     expect(core.size).toBeGreaterThanOrEqual(250);
     expect(core.size).toBeLessThanOrEqual(400);
   });

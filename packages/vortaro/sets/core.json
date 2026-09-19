@@ -2042,11 +2042,163 @@
   },
   "spacing": {
     "$type": "dimension",
-    "small": {
-      "$value": {
-        "value": 4,
-        "unit": "px"
+    "scale": {
+      "0": {
+        "$value": {
+          "value": 0,
+          "unit": "px"
+        },
+        "$description": "Spacing step 0 (0 px reference units).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JST"
+          }
+        }
       },
+      "50": {
+        "$value": {
+          "value": 2,
+          "unit": "px"
+        },
+        "$description": "Spacing step 50 (2 px reference units).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JSV"
+          }
+        }
+      },
+      "100": {
+        "$value": {
+          "value": 4,
+          "unit": "px"
+        },
+        "$description": "Spacing step 100 (4 px reference units).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JSW"
+          }
+        }
+      },
+      "150": {
+        "$value": {
+          "value": 6,
+          "unit": "px"
+        },
+        "$description": "Spacing step 150 (6 px reference units).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JSX"
+          }
+        }
+      },
+      "200": {
+        "$value": {
+          "value": 8,
+          "unit": "px"
+        },
+        "$description": "Spacing step 200 (8 px reference units).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JSY"
+          }
+        }
+      },
+      "300": {
+        "$value": {
+          "value": 12,
+          "unit": "px"
+        },
+        "$description": "Spacing step 300 (12 px reference units).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JSZ"
+          }
+        }
+      },
+      "400": {
+        "$value": {
+          "value": 16,
+          "unit": "px"
+        },
+        "$description": "Spacing step 400 (16 px reference units).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JT0"
+          }
+        }
+      },
+      "500": {
+        "$value": {
+          "value": 20,
+          "unit": "px"
+        },
+        "$description": "Spacing step 500 (20 px reference units).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JT1"
+          }
+        }
+      },
+      "600": {
+        "$value": {
+          "value": 24,
+          "unit": "px"
+        },
+        "$description": "Spacing step 600 (24 px reference units).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JT2"
+          }
+        }
+      },
+      "800": {
+        "$value": {
+          "value": 32,
+          "unit": "px"
+        },
+        "$description": "Spacing step 800 (32 px reference units).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JT3"
+          }
+        }
+      },
+      "1000": {
+        "$value": {
+          "value": 40,
+          "unit": "px"
+        },
+        "$description": "Spacing step 1000 (40 px reference units).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JT4"
+          }
+        }
+      },
+      "1200": {
+        "$value": {
+          "value": 48,
+          "unit": "px"
+        },
+        "$description": "Spacing step 1200 (48 px reference units).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JT5"
+          }
+        }
+      }
+    },
+    "xsmall": {
+      "$value": "{spacing.scale.50}",
+      "$description": "Tightest gap, e.g. between an icon and its label.",
+      "$extensions": {
+        "com.ciferecigo.fundamento": {
+          "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JT6"
+        }
+      }
+    },
+    "small": {
+      "$value": "{spacing.scale.100}",
       "$description": "Small gap between related elements.",
       "$extensions": {
         "com.ciferecigo.fundamento": {
@@ -2055,10 +2207,7 @@
       }
     },
     "medium": {
-      "$value": {
-        "value": 8,
-        "unit": "px"
-      },
+      "$value": "{spacing.scale.200}",
       "$description": "Default gap between elements.",
       "$extensions": {
         "com.ciferecigo.fundamento": {
@@ -2067,20 +2216,59 @@
       }
     },
     "large": {
-      "$value": {
-        "value": 16,
-        "unit": "px"
-      },
+      "$value": "{spacing.scale.400}",
       "$description": "Gap between groups of elements.",
       "$extensions": {
         "com.ciferecigo.fundamento": {
           "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBQ"
         }
       }
+    },
+    "xlarge": {
+      "$value": "{spacing.scale.600}",
+      "$description": "Gap between sections of a component.",
+      "$extensions": {
+        "com.ciferecigo.fundamento": {
+          "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JT7"
+        }
+      }
+    },
+    "xxlarge": {
+      "$value": "{spacing.scale.1000}",
+      "$description": "Gap between page sections.",
+      "$extensions": {
+        "com.ciferecigo.fundamento": {
+          "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JT8"
+        }
+      }
     }
   },
   "radius": {
     "$type": "dimension",
+    "none": {
+      "$value": {
+        "value": 0,
+        "unit": "px"
+      },
+      "$description": "No rounding.",
+      "$extensions": {
+        "com.ciferecigo.fundamento": {
+          "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JTZ"
+        }
+      }
+    },
+    "small": {
+      "$value": {
+        "value": 2,
+        "unit": "px"
+      },
+      "$description": "Slight rounding.",
+      "$extensions": {
+        "com.ciferecigo.fundamento": {
+          "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JV0"
+        }
+      }
+    },
     "medium": {
       "$value": {
         "value": 4,
@@ -2104,20 +2292,126 @@
           "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBS"
         }
       }
+    },
+    "xlarge": {
+      "$value": {
+        "value": 16,
+        "unit": "px"
+      },
+      "$description": "Strong rounding.",
+      "$extensions": {
+        "com.ciferecigo.fundamento": {
+          "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JV1"
+        }
+      }
+    },
+    "full": {
+      "$value": {
+        "value": 9999,
+        "unit": "px"
+      },
+      "$description": "Fully round ends, e.g. a pill.",
+      "$extensions": {
+        "com.ciferecigo.fundamento": {
+          "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JV2"
+        }
+      }
+    },
+    "role": {
+      "control": {
+        "$value": "{radius.medium}",
+        "$description": "Corner radius of controls.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JV3"
+          }
+        }
+      },
+      "surface": {
+        "$value": "{radius.large}",
+        "$description": "Corner radius of surfaces such as cards.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JV4"
+          }
+        }
+      },
+      "pill": {
+        "$value": "{radius.full}",
+        "$description": "Corner radius of pill-shaped actions.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JV5"
+          }
+        }
+      }
     }
   },
   "border": {
     "width": {
-      "default": {
-        "$type": "dimension",
-        "$value": {
-          "value": 1,
-          "unit": "px"
+      "$type": "dimension",
+      "scale": {
+        "1": {
+          "$value": {
+            "value": 1,
+            "unit": "px"
+          },
+          "$description": "Border width step 1 (1 px).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9MEJVS33SK9HVJPB32X9Q"
+            }
+          }
         },
+        "2": {
+          "$value": {
+            "value": 2,
+            "unit": "px"
+          },
+          "$description": "Border width step 2 (2 px).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9MEJVS33SK9HVJPB32X9R"
+            }
+          }
+        },
+        "3": {
+          "$value": {
+            "value": 3,
+            "unit": "px"
+          },
+          "$description": "Border width step 3 (3 px).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9MEJVS33SK9HVJPB32X9S"
+            }
+          }
+        }
+      },
+      "default": {
+        "$value": "{border.width.scale.1}",
         "$description": "Default border width.",
         "$extensions": {
           "com.ciferecigo.fundamento": {
             "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBT"
+          }
+        }
+      },
+      "strong": {
+        "$value": "{border.width.scale.2}",
+        "$description": "Emphasised border width.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJVS33SK9HVJPB32X9T"
+          }
+        }
+      },
+      "focus": {
+        "$value": "{border.width.scale.2}",
+        "$description": "Width of the focus ring.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJVS33SK9HVJPB32X9V"
           }
         }
       }
@@ -2127,12 +2421,40 @@
       "$value": {
         "color": "{color.border.default}",
         "width": "{border.width.default}",
-        "style": "solid"
+        "style": "{stroke.solid}"
       },
-      "$description": "Default border, composed from the border color and width tokens.",
+      "$description": "Default border, composed from the border colour, width and stroke tokens.",
       "$extensions": {
         "com.ciferecigo.fundamento": {
           "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBV"
+        }
+      }
+    },
+    "subtle": {
+      "$type": "border",
+      "$value": {
+        "color": "{color.border.subtle}",
+        "width": "{border.width.default}",
+        "style": "{stroke.solid}"
+      },
+      "$description": "Decorative divider border.",
+      "$extensions": {
+        "com.ciferecigo.fundamento": {
+          "id": "tok_01M2W9MEJVS33SK9HVJPB32X9W"
+        }
+      }
+    },
+    "strong": {
+      "$type": "border",
+      "$value": {
+        "color": "{color.border.strong}",
+        "width": "{border.width.strong}",
+        "style": "{stroke.solid}"
+      },
+      "$description": "Emphasised border.",
+      "$extensions": {
+        "com.ciferecigo.fundamento": {
+          "id": "tok_01M2W9MEJVS33SK9HVJPB32X9X"
         }
       }
     }
@@ -3039,11 +3361,70 @@
   "motion": {
     "duration": {
       "$type": "duration",
-      "short": {
-        "$value": {
-          "value": 120,
-          "unit": "ms"
+      "scale": {
+        "0": {
+          "$value": {
+            "value": 0,
+            "unit": "ms"
+          },
+          "$description": "No duration: the change is instant.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9MEJVS33SK9HVJPB32XA9"
+            }
+          }
         },
+        "1": {
+          "$value": {
+            "value": 100,
+            "unit": "ms"
+          },
+          "$description": "Duration step 1 (100 ms).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9MEJVS33SK9HVJPB32XAA"
+            }
+          }
+        },
+        "2": {
+          "$value": {
+            "value": 200,
+            "unit": "ms"
+          },
+          "$description": "Duration step 2 (200 ms).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9MEJVS33SK9HVJPB32XAB"
+            }
+          }
+        },
+        "3": {
+          "$value": {
+            "value": 300,
+            "unit": "ms"
+          },
+          "$description": "Duration step 3 (300 ms).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9MEJVS33SK9HVJPB32XAC"
+            }
+          }
+        },
+        "4": {
+          "$value": {
+            "value": 500,
+            "unit": "ms"
+          },
+          "$description": "Duration step 4 (500 ms).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9MEJVS33SK9HVJPB32XAD"
+            }
+          }
+        }
+      },
+      "fast": {
+        "$value": "{motion.duration.scale.1}",
         "$description": "Short transition, e.g. hover feedback.",
         "$extensions": {
           "com.ciferecigo.fundamento": {
@@ -3052,62 +3433,141 @@
         }
       },
       "medium": {
-        "$value": {
-          "value": 240,
-          "unit": "ms"
-        },
+        "$value": "{motion.duration.scale.2}",
         "$description": "Medium transition, e.g. expanding a panel.",
         "$extensions": {
           "com.ciferecigo.fundamento": {
             "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVC3"
           }
         }
+      },
+      "slow": {
+        "$value": "{motion.duration.scale.3}",
+        "$description": "Slow transition, e.g. a large surface entering.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJVS33SK9HVJPB32XAE"
+          }
+        }
+      },
+      "deliberate": {
+        "$value": "{motion.duration.scale.4}",
+        "$description": "Deliberate motion that the user should notice.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJVS33SK9HVJPB32XAF"
+          }
+        }
       }
     },
     "easing": {
       "$type": "cubicBezier",
+      "curve": {
+        "linear": {
+          "$value": [
+            0,
+            0,
+            1,
+            1
+          ],
+          "$description": "Linear: no easing.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9MEJVS33SK9HVJPB32XAG"
+            }
+          }
+        },
+        "smooth": {
+          "$value": [
+            0.3,
+            0,
+            0.2,
+            1
+          ],
+          "$description": "Smooth in and out.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9MEJVS33SK9HVJPB32XAH"
+            }
+          }
+        },
+        "expressive": {
+          "$value": [
+            0.2,
+            0,
+            0,
+            1
+          ],
+          "$description": "Expressive, fast start.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9MEJVS33SK9HVJPB32XAJ"
+            }
+          }
+        },
+        "decelerate": {
+          "$value": [
+            0,
+            0,
+            0.2,
+            1
+          ],
+          "$description": "Decelerating: for elements entering.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9MEJVS33SK9HVJPB32XAK"
+            }
+          }
+        },
+        "accelerate": {
+          "$value": [
+            0.3,
+            0,
+            1,
+            1
+          ],
+          "$description": "Accelerating: for elements leaving.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9MEJVS33SK9HVJPB32XAM"
+            }
+          }
+        }
+      },
       "standard": {
-        "$value": [
-          0.3,
-          0,
-          0.2,
-          1
-        ],
-        "$description": "Default easing curve.",
+        "$value": "{motion.easing.curve.smooth}",
+        "$description": "Default easing.",
         "$extensions": {
           "com.ciferecigo.fundamento": {
             "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVC4"
           }
         }
-      }
-    }
-  },
-  "shadow": {
-    "$type": "shadow",
-    "raised": {
-      "$value": {
-        "color": "{color.palette.shade.25}",
-        "offsetX": {
-          "value": 0,
-          "unit": "px"
-        },
-        "offsetY": {
-          "value": 2,
-          "unit": "px"
-        },
-        "blur": {
-          "value": 6,
-          "unit": "px"
-        },
-        "spread": {
-          "value": 0,
-          "unit": "px"
+      },
+      "emphasized": {
+        "$value": "{motion.easing.curve.expressive}",
+        "$description": "Easing for emphasised motion.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJVS33SK9HVJPB32XAN"
+          }
         }
       },
-      "$description": "Shadow of a slightly raised surface.",
-      "$extensions": {
-        "com.ciferecigo.fundamento": {
-          "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVC5"
+      "enter": {
+        "$value": "{motion.easing.curve.decelerate}",
+        "$description": "Easing for elements entering.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJVS33SK9HVJPB32XAP"
+          }
+        }
+      },
+      "exit": {
+        "$value": "{motion.easing.curve.accelerate}",
+        "$description": "Easing for elements leaving.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJVS33SK9HVJPB32XAQ"
+          }
         }
       }
     }
@@ -3330,6 +3790,660 @@
         "com.ciferecigo.fundamento": {
           "id": "tok_01M2W9FT4ZRDMQX50BGG3CN89M",
           "textTransform": "uppercase"
+        }
+      }
+    }
+  },
+  "size": {
+    "$type": "dimension",
+    "scale": {
+      "100": {
+        "$value": {
+          "value": 12,
+          "unit": "px"
+        },
+        "$description": "Size step 100 (12 px reference units).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JT9"
+          }
+        }
+      },
+      "200": {
+        "$value": {
+          "value": 16,
+          "unit": "px"
+        },
+        "$description": "Size step 200 (16 px reference units).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JTA"
+          }
+        }
+      },
+      "300": {
+        "$value": {
+          "value": 20,
+          "unit": "px"
+        },
+        "$description": "Size step 300 (20 px reference units).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JTB"
+          }
+        }
+      },
+      "400": {
+        "$value": {
+          "value": 24,
+          "unit": "px"
+        },
+        "$description": "Size step 400 (24 px reference units).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JTC"
+          }
+        }
+      },
+      "500": {
+        "$value": {
+          "value": 28,
+          "unit": "px"
+        },
+        "$description": "Size step 500 (28 px reference units).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JTD"
+          }
+        }
+      },
+      "600": {
+        "$value": {
+          "value": 32,
+          "unit": "px"
+        },
+        "$description": "Size step 600 (32 px reference units).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JTE"
+          }
+        }
+      },
+      "700": {
+        "$value": {
+          "value": 40,
+          "unit": "px"
+        },
+        "$description": "Size step 700 (40 px reference units).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JTF"
+          }
+        }
+      },
+      "800": {
+        "$value": {
+          "value": 48,
+          "unit": "px"
+        },
+        "$description": "Size step 800 (48 px reference units).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JTG"
+          }
+        }
+      },
+      "900": {
+        "$value": {
+          "value": 56,
+          "unit": "px"
+        },
+        "$description": "Size step 900 (56 px reference units).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JTH"
+          }
+        }
+      },
+      "1000": {
+        "$value": {
+          "value": 64,
+          "unit": "px"
+        },
+        "$description": "Size step 1000 (64 px reference units).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JTJ"
+          }
+        }
+      }
+    },
+    "icon": {
+      "small": {
+        "$value": "{size.scale.200}",
+        "$description": "Icon size small.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JTK"
+          }
+        }
+      },
+      "medium": {
+        "$value": "{size.scale.300}",
+        "$description": "Icon size medium.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JTM"
+          }
+        }
+      },
+      "large": {
+        "$value": "{size.scale.400}",
+        "$description": "Icon size large.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JTN"
+          }
+        }
+      }
+    },
+    "control": {
+      "small": {
+        "$value": "{size.scale.600}",
+        "$description": "Height of a small control such as a button or input.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JTP"
+          }
+        }
+      },
+      "medium": {
+        "$value": "{size.scale.700}",
+        "$description": "Height of a medium control such as a button or input.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JTQ"
+          }
+        }
+      },
+      "large": {
+        "$value": "{size.scale.800}",
+        "$description": "Height of a large control such as a button or input.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JTR"
+          }
+        }
+      }
+    },
+    "container": {
+      "small": {
+        "$value": {
+          "value": 640,
+          "unit": "px"
+        },
+        "$description": "Container width small (640 px reference units).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JTS"
+          }
+        }
+      },
+      "medium": {
+        "$value": {
+          "value": 960,
+          "unit": "px"
+        },
+        "$description": "Container width medium (960 px reference units).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JTT"
+          }
+        }
+      },
+      "large": {
+        "$value": {
+          "value": 1280,
+          "unit": "px"
+        },
+        "$description": "Container width large (1280 px reference units).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JTV"
+          }
+        }
+      },
+      "max": {
+        "$value": {
+          "value": 1440,
+          "unit": "px"
+        },
+        "$description": "Container width max (1440 px reference units).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JTW"
+          }
+        }
+      }
+    },
+    "breakpoint": {
+      "medium": {
+        "$value": {
+          "value": 600,
+          "unit": "px"
+        },
+        "$description": "Lower bound of the medium viewport (compact below it).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JTX"
+          }
+        }
+      },
+      "expanded": {
+        "$value": {
+          "value": 1024,
+          "unit": "px"
+        },
+        "$description": "Lower bound of the expanded viewport.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JTY"
+          }
+        }
+      }
+    }
+  },
+  "stroke": {
+    "$type": "strokeStyle",
+    "solid": {
+      "$value": "solid",
+      "$description": "Solid stroke.",
+      "$extensions": {
+        "com.ciferecigo.fundamento": {
+          "id": "tok_01M2W9MEJVS33SK9HVJPB32X9Y"
+        }
+      }
+    },
+    "dashed": {
+      "$value": "dashed",
+      "$description": "Dashed stroke.",
+      "$extensions": {
+        "com.ciferecigo.fundamento": {
+          "id": "tok_01M2W9MEJVS33SK9HVJPB32X9Z"
+        }
+      }
+    }
+  },
+  "elevation": {
+    "shadow": {
+      "$type": "shadow",
+      "raised": {
+        "$value": {
+          "color": "{color.shadow.key}",
+          "offsetX": {
+            "value": 0,
+            "unit": "px"
+          },
+          "offsetY": {
+            "value": 2,
+            "unit": "px"
+          },
+          "blur": {
+            "value": 6,
+            "unit": "px"
+          },
+          "spread": {
+            "value": 0,
+            "unit": "px"
+          }
+        },
+        "$description": "Shadow of a slightly raised surface.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVC5"
+          }
+        }
+      },
+      "overlay": {
+        "$value": [
+          {
+            "color": "{color.shadow.key}",
+            "offsetX": {
+              "value": 0,
+              "unit": "px"
+            },
+            "offsetY": {
+              "value": 4,
+              "unit": "px"
+            },
+            "blur": {
+              "value": 12,
+              "unit": "px"
+            },
+            "spread": {
+              "value": 0,
+              "unit": "px"
+            }
+          },
+          {
+            "color": "{color.shadow.ambient}",
+            "offsetX": {
+              "value": 0,
+              "unit": "px"
+            },
+            "offsetY": {
+              "value": 0,
+              "unit": "px"
+            },
+            "blur": {
+              "value": 2,
+              "unit": "px"
+            },
+            "spread": {
+              "value": 0,
+              "unit": "px"
+            }
+          }
+        ],
+        "$description": "Shadow of an overlay such as a menu or popover.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJVS33SK9HVJPB32XA0"
+          }
+        }
+      },
+      "floating": {
+        "$value": [
+          {
+            "color": "{color.shadow.key}",
+            "offsetX": {
+              "value": 0,
+              "unit": "px"
+            },
+            "offsetY": {
+              "value": 8,
+              "unit": "px"
+            },
+            "blur": {
+              "value": 24,
+              "unit": "px"
+            },
+            "spread": {
+              "value": 0,
+              "unit": "px"
+            }
+          },
+          {
+            "color": "{color.shadow.ambient}",
+            "offsetX": {
+              "value": 0,
+              "unit": "px"
+            },
+            "offsetY": {
+              "value": 0,
+              "unit": "px"
+            },
+            "blur": {
+              "value": 4,
+              "unit": "px"
+            },
+            "spread": {
+              "value": 0,
+              "unit": "px"
+            }
+          }
+        ],
+        "$description": "Shadow of a floating element such as a floating action.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJVS33SK9HVJPB32XA1"
+          }
+        }
+      },
+      "modal": {
+        "$value": [
+          {
+            "color": "{color.shadow.key}",
+            "offsetX": {
+              "value": 0,
+              "unit": "px"
+            },
+            "offsetY": {
+              "value": 12,
+              "unit": "px"
+            },
+            "blur": {
+              "value": 32,
+              "unit": "px"
+            },
+            "spread": {
+              "value": 0,
+              "unit": "px"
+            }
+          },
+          {
+            "color": "{color.shadow.ambient}",
+            "offsetX": {
+              "value": 0,
+              "unit": "px"
+            },
+            "offsetY": {
+              "value": 0,
+              "unit": "px"
+            },
+            "blur": {
+              "value": 8,
+              "unit": "px"
+            },
+            "spread": {
+              "value": 0,
+              "unit": "px"
+            }
+          }
+        ],
+        "$description": "Shadow of a modal dialog.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJVS33SK9HVJPB32XA2"
+          }
+        }
+      }
+    },
+    "layer": {
+      "$type": "number",
+      "base": {
+        "$value": 0,
+        "$description": "Base layer of the page.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJVS33SK9HVJPB32XA3"
+          }
+        }
+      },
+      "raised": {
+        "$value": 1,
+        "$description": "Raised content within the page.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJVS33SK9HVJPB32XA4"
+          }
+        }
+      },
+      "navigation": {
+        "$value": 100,
+        "$description": "Sticky navigation.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJVS33SK9HVJPB32XA5"
+          }
+        }
+      },
+      "overlay": {
+        "$value": 200,
+        "$description": "Overlays such as menus and popovers.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJVS33SK9HVJPB32XA6"
+          }
+        }
+      },
+      "modal": {
+        "$value": 300,
+        "$description": "Modal dialogs and their backdrop.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJVS33SK9HVJPB32XA7"
+          }
+        }
+      },
+      "toast": {
+        "$value": 400,
+        "$description": "Toasts above everything.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJVS33SK9HVJPB32XA8"
+          }
+        }
+      }
+    }
+  },
+  "layout": {
+    "columns": {
+      "$type": "number",
+      "4": {
+        "$value": 4,
+        "$description": "A grid of 4 columns.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJVS33SK9HVJPB32XAR"
+          }
+        }
+      },
+      "8": {
+        "$value": 8,
+        "$description": "A grid of 8 columns.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJVS33SK9HVJPB32XAS"
+          }
+        }
+      },
+      "12": {
+        "$value": 12,
+        "$description": "A grid of 12 columns.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJVS33SK9HVJPB32XAT"
+          }
+        }
+      }
+    },
+    "grid": {
+      "columns": {
+        "$type": "number",
+        "$value": "{layout.columns.8}",
+        "$description": "Number of grid columns.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJVS33SK9HVJPB32XAV"
+          }
+        }
+      },
+      "gutter": {
+        "$type": "dimension",
+        "$value": "{spacing.scale.400}",
+        "$description": "Gap between grid columns.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJVS33SK9HVJPB32XAW"
+          }
+        }
+      },
+      "margin": {
+        "$type": "dimension",
+        "$value": "{spacing.scale.600}",
+        "$description": "Outer margin of the grid.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJVS33SK9HVJPB32XAX"
+          }
+        }
+      }
+    },
+    "container": {
+      "max": {
+        "$type": "dimension",
+        "$value": "{size.container.large}",
+        "$description": "Maximum width of the page container.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJVS33SK9HVJPB32XAY"
+          }
+        }
+      }
+    }
+  },
+  "focus": {
+    "ring": {
+      "$type": "border",
+      "$value": {
+        "color": "{color.focus.ring}",
+        "width": "{border.width.focus}",
+        "style": "{stroke.solid}"
+      },
+      "$description": "Focus ring, composed from the focus colour, width and stroke.",
+      "$extensions": {
+        "com.ciferecigo.fundamento": {
+          "id": "tok_01M2W9MEJVS33SK9HVJPB32XAZ"
+        }
+      }
+    },
+    "offset": {
+      "$type": "dimension",
+      "$value": "{spacing.scale.50}",
+      "$description": "Gap between the focus ring and the element.",
+      "$extensions": {
+        "com.ciferecigo.fundamento": {
+          "id": "tok_01M2W9MEJVS33SK9HVJPB32XB0"
+        }
+      }
+    }
+  },
+  "opacity": {
+    "$type": "number",
+    "disabled": {
+      "$value": 0.38,
+      "$description": "Opacity of disabled content.",
+      "$extensions": {
+        "com.ciferecigo.fundamento": {
+          "id": "tok_01M2W9MEJVS33SK9HVJPB32XB1"
+        }
+      }
+    },
+    "overlay": {
+      "$value": 0.5,
+      "$description": "Opacity of an overlay scrim.",
+      "$extensions": {
+        "com.ciferecigo.fundamento": {
+          "id": "tok_01M2W9MEJVS33SK9HVJPB32XB2"
+        }
+      }
+    },
+    "hover": {
+      "$value": 0.08,
+      "$description": "Opacity of a hover state layer.",
+      "$extensions": {
+        "com.ciferecigo.fundamento": {
+          "id": "tok_01M2W9MEJVS33SK9HVJPB32XB3"
+        }
+      }
+    },
+    "pressed": {
+      "$value": 0.12,
+      "$description": "Opacity of a pressed state layer.",
+      "$extensions": {
+        "com.ciferecigo.fundamento": {
+          "id": "tok_01M2W9MEJVS33SK9HVJPB32XB4"
         }
       }
     }

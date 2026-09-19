@@ -142,7 +142,7 @@ describe("exportModelo: shape (§2.9)", () => {
   it("lists the used token types in DTCG declaration order", () => {
     const used = new Set(modeloJson.tokens.map((token) => token.type));
     expect(modeloJson.tokenTypes).toEqual(DTCG_TYPES.filter((type) => used.has(type)));
-    expect(modeloJson.tokenTypes).toHaveLength(10);
+    expect(modeloJson.tokenTypes).toHaveLength(used.size);
   });
 
   it("inventories the core tokens sorted by name, with id, type, description and role", () => {
