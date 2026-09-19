@@ -182,6 +182,8 @@ export const REGULO_ENFORCERS: Readonly<Record<string, Enforcer>> = {
   "text-hierarchy": perCombination("text-hierarchy"),
   /** Spec 002 FR-03: action states differ from rest by at least `sojlo.min` in lightness. */
   "state-distinct": perCombination("state-distinct"),
+  /** Spec 003 T006: size.control.* ≥ size.target.min (WCAG 2.5.8). */
+  "touch-target-min": perCombination("touch-target-min"),
   /** Spec 002 FR-04: every core role token has a $description of its use. */
   "semantic-described": (modelo) => semanticDescribedIssues(modelo),
   /** FR-08: every colour token declares its role (in core, where roles live). */
