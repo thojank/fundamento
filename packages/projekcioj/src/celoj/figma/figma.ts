@@ -18,6 +18,7 @@ import {
   nomRegulo,
 } from "@fundamento/modelo";
 import type { Celo, CeloInput, GeneratedFile } from "../../build.js";
+import { pluginManifest, pluginSource } from "./plugin.js";
 
 /** A variable value: a literal, or an alias to another variable of the plan. */
 export type FigmaValue = { alias: string } | string | number | FigmaColor | boolean;
@@ -366,7 +367,11 @@ export const FIGMA_CELO: Celo = {
       collections,
       components: modelo.eroj.map((entry) => componentSetOf(entry, modeloJson.fundamento.version)),
     };
-    return [{ path: "figma/plan.json", text: `${JSON.stringify(plan, null, 2)}\n` }];
+    return [
+      { path: "figma/plan.json", text: `${JSON.stringify(plan, null, 2)}\n` },
+      { path: "figma/plugin/manifest.json", text: pluginManifest(plan) },
+      { path: "figma/plugin/code.js", text: pluginSource(plan) },
+    ];
   },
 };
 
