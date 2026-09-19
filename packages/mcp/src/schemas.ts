@@ -20,6 +20,7 @@ export const TOOL_NAMES = [
   "check_contrast",
   "explain",
   "explain_regulo",
+  "describe_term",
 ] as const;
 
 export type ToolName = (typeof TOOL_NAMES)[number];

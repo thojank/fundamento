@@ -44,6 +44,7 @@ describe("S7 with ekzemplo (AK-06)", () => {
       check_contrast: { foreground: "color.text.default", background: "color.background.default" },
       explain: { token: "color.text.default" },
       explain_regulo: { name: "text-hierarchy" },
+      describe_term: { term: "Aspekto" },
     };
     for (const name of TOOL_NAMES) {
       const result = await call(client, name, inputs[name] ?? {});

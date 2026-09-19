@@ -8,7 +8,9 @@ import {
   checkContrast,
   checkTokenName,
   completeAssignment,
+  type DescribeTermInput,
   describeModelo,
+  describeTerm,
   type ExplainInput,
   type ExplainReguloInput,
   explain,
@@ -411,6 +413,21 @@ const explainReguloTool: Tool = (served, args) => {
   return ok(JSON.parse(JSON.stringify(result.output)) as Record<string, unknown>);
 };
 
+/** Spec 002 FR-12: a term of the Ontologio with its instances in the served Modelo. */
+const describeTermTool: Tool = (served, args) => {
+  const result = describeTerm(served.modelo, args as unknown as DescribeTermInput);
+  if (!result.ok) {
+    return {
+      ok: false,
+      envelope: {
+        issues: result.issues,
+        ...(result.allowed === undefined ? {} : { allowed: result.allowed }),
+      },
+    };
+  }
+  return ok(JSON.parse(JSON.stringify(result.output)) as Record<string, unknown>);
+};
+
 export const TOOLS: Record<ToolName, Tool> = {
   describe,
   list_dimensioj: listDimensioj,
@@ -425,4 +442,5 @@ export const TOOLS: Record<ToolName, Tool> = {
   check_contrast: checkContrastTool,
   explain: explainTool,
   explain_regulo: explainReguloTool,
+  describe_term: describeTermTool,
 };

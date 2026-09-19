@@ -1,7 +1,7 @@
 // The Gvidanto tools of Spec 002 over the in-memory client (contracts/mcp-tools.md §2): each
 // answer equals the modelo function behind it, and errors come as issue envelopes.
 
-import { checkContrast, explain, explainRegulo } from "@fundamento/modelo";
+import { checkContrast, describeTerm, explain, explainRegulo } from "@fundamento/modelo";
 import { afterAll, describe, expect, it } from "vitest";
 import { call, closeClients, connect, EKZEMPLO_CONFIG, output } from "./test-doubles/client.js";
 
@@ -58,5 +58,23 @@ describe("explain_regulo (FR-11)", () => {
     const result = await call(client, "explain_regulo", { name: "state-distinkt" });
     expect(result.isError).toBe(true);
     expect(result.structuredContent?.allowed).toContain("state-distinct");
+  });
+});
+
+describe("describe_term (FR-12)", () => {
+  it("returns what describeTerm computes, found through a German label", async () => {
+    const { client, served } = await connect({ config: EKZEMPLO_CONFIG });
+    const answer = await output(client, "describe_term", { term: "Marke" });
+    const direct = describeTerm(served.modelo, { term: "Marke" });
+    if (!direct.ok) throw new Error("direct call failed");
+    expect(answer).toEqual(JSON.parse(JSON.stringify(direct.output)));
+    expect(answer).toMatchObject({ term: "Aspekto", matchedBy: "altLabel" });
+  });
+
+  it("answers an unknown term with term-unknown", async () => {
+    const { client } = await connect();
+    const result = await call(client, "describe_term", { term: "Aspektoo" });
+    expect(result.isError).toBe(true);
+    expect(result.structuredContent?.allowed).toContain("Aspekto");
   });
 });

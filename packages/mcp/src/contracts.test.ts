@@ -261,6 +261,28 @@ const EXAMPLES: Record<string, { input: unknown; output: unknown; badInput: unkn
     },
     badInput: { name: "state-distinct", id: "reg_01M2VEEE5280TGESDHQQ14EA33" },
   },
+  describe_term: {
+    input: { term: "Marke" },
+    output: {
+      term: "Aspekto",
+      uri: "https://fundamento.ciferecigo.com/ontologio#Aspekto",
+      inScheme: "terminologio",
+      prefLabel: { eo: "Aspekto", en: "brand theme", de: "Markenausprägung" },
+      altLabel: { en: ["brand"], de: ["Marke"] },
+      definition: { en: "One brand's complete assignment.", de: "Eine vollständige Belegung." },
+      broader: [{ term: "Modelo", uri: "https://fundamento.ciferecigo.com/ontologio#Modelo" }],
+      related: [],
+      relations: [
+        {
+          predicate: "assigns",
+          target: { term: "Vortaro", uri: "https://fundamento.ciferecigo.com/ontologio#Vortaro" },
+        },
+      ],
+      matchedBy: "altLabel",
+      instances: { count: 1, names: ["komuna"] },
+    },
+    badInput: { term: "" },
+  },
   derive_name: {
     input: { name: "color.action.primary.rest", celo: "figma" },
     output: {
@@ -287,6 +309,7 @@ describe("tool schemas (contracts/mcp-tools.md)", () => {
       "check_contrast",
       "explain",
       "explain_regulo",
+      "describe_term",
     ]);
   });
 

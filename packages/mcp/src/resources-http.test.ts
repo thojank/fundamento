@@ -25,10 +25,18 @@ const RESOURCES = [
 describe("resources", async () => {
   const { client } = await connect();
 
-  it("lists the three export files as JSON", async () => {
+  it("lists the three export files and the Ontologio as JSON", async () => {
     const { resources } = await client.listResources();
-    expect(resources.map((resource) => [resource.uri, resource.mimeType])).toEqual(
-      RESOURCES.map(([uri]) => [uri, "application/json"]),
+    expect(resources.map((resource) => [resource.uri, resource.mimeType])).toEqual([
+      ...RESOURCES.map(([uri]) => [uri, "application/json"]),
+      ["fundamento://ontologio.json", "application/json"],
+    ]);
+  });
+
+  it("serves the bytes of data/ontologio.json (Spec 002 FR-17)", async () => {
+    const { contents } = await client.readResource({ uri: "fundamento://ontologio.json" });
+    expect((contents[0] as { text?: string }).text).toBe(
+      readFileSync(new URL("../../modelo/data/ontologio.json", import.meta.url), "utf8"),
     );
   });
 

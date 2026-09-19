@@ -18,7 +18,14 @@ describe("prompt gvidanto", () => {
     const tools = new Set<string>(TOOL_NAMES);
     const unknown = named.filter((word) => !tools.has(word) && word.includes("_"));
     expect(unknown).toEqual([]);
-    for (const tool of ["describe", "explain", "check_contrast", "explain_regulo", "validate"]) {
+    for (const tool of [
+      "describe",
+      "explain",
+      "check_contrast",
+      "explain_regulo",
+      "describe_term",
+      "validate",
+    ]) {
       expect(text, tool).toContain(`\`${tool}\``);
     }
   });

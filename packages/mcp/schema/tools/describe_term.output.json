@@ -1,0 +1,164 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ciferecigo.com/fundamento/schema/mcp/describe_term.output.json",
+  "title": "describe_term output",
+  "description": "One concept of the Ontologio (Spec 002 FR-12) with its instances in the served Modelo where it has them.",
+  "type": "object",
+  "properties": {
+    "term": {
+      "type": "string",
+      "minLength": 1
+    },
+    "uri": {
+      "type": "string",
+      "pattern": "#[A-Z][A-Za-z]*$"
+    },
+    "inScheme": {
+      "enum": ["terminologio", "modelo"]
+    },
+    "notation": {
+      "type": "string"
+    },
+    "prefLabel": {
+      "type": "object",
+      "properties": {
+        "eo": {
+          "type": "string"
+        },
+        "en": {
+          "type": "string"
+        },
+        "de": {
+          "type": "string"
+        }
+      },
+      "required": ["eo", "en", "de"],
+      "additionalProperties": false
+    },
+    "altLabel": {
+      "type": "object",
+      "propertyNames": {
+        "enum": ["eo", "en", "de"]
+      },
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      }
+    },
+    "definition": {
+      "type": "object",
+      "properties": {
+        "en": {
+          "type": "string",
+          "minLength": 1
+        },
+        "de": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": ["en", "de"],
+      "additionalProperties": false
+    },
+    "broader": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "term": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uri": {
+            "type": "string",
+            "pattern": "#[A-Z][A-Za-z]*$"
+          }
+        },
+        "required": ["term", "uri"],
+        "additionalProperties": false
+      }
+    },
+    "related": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "term": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uri": {
+            "type": "string",
+            "pattern": "#[A-Z][A-Za-z]*$"
+          }
+        },
+        "required": ["term", "uri"],
+        "additionalProperties": false
+      }
+    },
+    "relations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "predicate": {
+            "type": "string",
+            "minLength": 1
+          },
+          "target": {
+            "type": "object",
+            "properties": {
+              "term": {
+                "type": "string",
+                "minLength": 1
+              },
+              "uri": {
+                "type": "string",
+                "pattern": "#[A-Z][A-Za-z]*$"
+              }
+            },
+            "required": ["term", "uri"],
+            "additionalProperties": false
+          }
+        },
+        "required": ["predicate", "target"],
+        "additionalProperties": false
+      }
+    },
+    "matchedBy": {
+      "enum": ["term", "prefLabel", "altLabel"]
+    },
+    "instances": {
+      "type": "object",
+      "properties": {
+        "count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "names": {
+          "type": "array",
+          "maxItems": 50,
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": ["count"],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "term",
+    "uri",
+    "inScheme",
+    "prefLabel",
+    "definition",
+    "broader",
+    "related",
+    "relations",
+    "matchedBy"
+  ],
+  "additionalProperties": false
+}
