@@ -2,46 +2,17 @@
 // in-process through the SDK client over an in-memory transport.
 
 import { describeModelo } from "@fundamento/modelo";
-import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import { afterAll, describe, expect, it } from "vitest";
-import { type LoadOptions, loadServed } from "./load.js";
-import { compileToolSchemas } from "./schemas.js";
-import { createFundamentoServer } from "./server.js";
+import {
+  call,
+  closeClients,
+  connect,
+  EKZEMPLO_CONFIG as EKZEMPLO,
+  INCOMPLETE_CONFIG as INCOMPLETE,
+  toolSchemas as schemas,
+} from "./test-doubles/client.js";
 
-const FIXTURES = new URL("../../modelo/test/fixtures/", import.meta.url).pathname;
-const EKZEMPLO = `${FIXTURES}valid/aspekto-ekzemplo/fundamento.config.json`;
-const INCOMPLETE = `${FIXTURES}invalid/aspekto-incomplete/fundamento.config.json`;
-const schemas = new Map(compileToolSchemas().map((tool) => [tool.name, tool]));
-const clients: Client[] = [];
-
-async function connect(options: LoadOptions = {}) {
-  const served = loadServed(options);
-  const server = createFundamentoServer(served);
-  const [clientSide, serverSide] = InMemoryTransport.createLinkedPair();
-  const client = new Client({ name: "test", version: "0" });
-  await Promise.all([server.connect(serverSide), client.connect(clientSide)]);
-  clients.push(client);
-  return { client, served };
-}
-afterAll(async () => {
-  for (const client of clients) await client.close();
-});
-
-type Result = {
-  isError?: boolean;
-  structuredContent?: Record<string, unknown>;
-  content: unknown[];
-};
-async function call(client: Client, name: string, args: Record<string, unknown> = {}) {
-  const result = (await client.callTool({ name, arguments: args })) as Result;
-  const tool = schemas.get(name as never);
-  const schema = result.isError ? tool?.error : tool?.output;
-  expect(schema?.validate(result.structuredContent), JSON.stringify(schema?.validate.errors)).toBe(
-    true,
-  );
-  return result;
-}
+afterAll(closeClients);
 
 describe("the repo server", async () => {
   const { client, served } = await connect();

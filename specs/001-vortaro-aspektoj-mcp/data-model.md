@@ -144,7 +144,8 @@ Exempt by role: `disabled` (Regulo `disabled-exempt-from-contrast`) and `decorat
 | `regulo-aspekto-unknown` | error | a Regulo or Jugxo is scoped to an unknown Aspekto |
 | `clean-room-marko-spuro` | error | a brand fingerprint outside the allowlist (D-15) |
 | `mcp-input-invalid` | error | an MCP tool input violates its schema, or `validate.aspektoPath` is used over HTTP (T023, T026) |
-| `token-unknown` | error | `get_token` names a token that does not exist; `allowed` lists the nearest names (T025) |
+| `token-unknown` | error | `get_token` or `resolve` names a token that does not exist; `allowed` lists the nearest names (T024, T025) |
+| `nomregulo-no-target` | warning | `derive_name`: a NomRegulo gives no target (today only Tailwind: no theme namespace, or its `$type` is not allowed there); the token stays available as `--fm-*` only (FR-13b, T025) |
 
 `set-override-has-extensions` is relaxed: overrides may carry `$extensions["com.ciferecigo.fundamento"].textTransform` and nothing else.
 

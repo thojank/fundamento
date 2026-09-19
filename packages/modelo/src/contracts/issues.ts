@@ -100,6 +100,7 @@ export const RULE_IDS = [
   // MCP tools (Spec 001 T023, FR-18)
   "mcp-input-invalid",
   "token-unknown",
+  "nomregulo-no-target",
   // Parity (FUND-4.4)
   "parity-item-missing",
   "parity-prop-mismatch",

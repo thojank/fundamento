@@ -76,24 +76,7 @@ export function createFundamentoServer(served: Served): Server {
     }
     if (!tool.input.validate(args))
       return asCallResult(inputIssues(tool.input.validate.errors, name));
-    const implementation = TOOLS[name];
-    if (implementation === undefined) {
-      return asCallResult({
-        ok: false,
-        envelope: {
-          issues: [
-            {
-              rule: "mcp-input-invalid",
-              severity: "error",
-              path: name,
-              message: `The tool ${name} is not implemented yet.`,
-              suggestion: "Spec 001 T025 adds it.",
-            },
-          ],
-        },
-      });
-    }
-    return asCallResult(implementation(served, args));
+    return asCallResult(TOOLS[name](served, args));
   });
   return server;
 }
