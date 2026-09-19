@@ -1,0 +1,25 @@
+{
+  "kontrastParoj": [
+    {
+      "id": "kpa_01M2VEEE9HREQTY2499C9JS05Q",
+      "name": "text-on-background",
+      "foreground": "color.text.default",
+      "background": "color.background.default",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M2VEEE9JEJM22AGVHZ2Q22AM",
+      "name": "action-primary-text-on-fill",
+      "foreground": "color.action.primary.text",
+      "background": "color.action.primary.rest",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M2VEEE9JEJM22AGVHZ2Q22AN",
+      "name": "border-on-background",
+      "foreground": "color.border.default",
+      "background": "color.background.default",
+      "kategorio": "ui"
+    }
+  ]
+}

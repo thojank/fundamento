@@ -1,0 +1,9 @@
+{
+  "description": "$metadata.json lists contrast/high before color-scheme/dark, which is not the resolver order.",
+  "issues": [
+    {
+      "rule": "metadata-out-of-sync",
+      "path": "vortaro/$metadata.json#"
+    }
+  ]
+}

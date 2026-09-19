@@ -1,0 +1,15 @@
+{
+  "description": "Copy of valid/minimal in which color-scheme/dark gives color.background.default alpha 0.5. The KontrastParo's background is translucent in both dark combinations, so its contrast cannot be determined and alirebleco reports kontrastparo-background-transparent there.",
+  "check": "alirebleco",
+  "issues": [
+    {
+      "rule": "kontrastparo-background-transparent",
+      "path": "rezolvo(color-scheme=dark,contrast=default)/kontrastParo/text-on-background"
+    },
+    {
+      "rule": "kontrastparo-background-transparent",
+      "path": "rezolvo(color-scheme=dark,contrast=high)/kontrastParo/text-on-background"
+    }
+  ],
+  "warnings": []
+}

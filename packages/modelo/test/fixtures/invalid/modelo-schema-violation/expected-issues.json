@@ -1,0 +1,9 @@
+{
+  "description": "The Regulo's checkability is \"sometimes\", which the schema does not allow and no specific rule covers.",
+  "issues": [
+    {
+      "rule": "schema-violation",
+      "path": "data/reguloj.json#/reguloj/0/checkability"
+    }
+  ]
+}

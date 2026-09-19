@@ -1,0 +1,20 @@
+{
+  "reguloj": [
+    {
+      "id": "reg_01M2VEEE5280TGESDHQQ14EA33",
+      "name": "contrast-pairs-declared",
+      "statement": "Every combination of a foreground or border color token with the background color token it is placed on has a KontrastParo.",
+      "kialo": "Contrast must be provable per combination (Art. X): the Alirebleco check only evaluates declared KontrastParoj across all resolutions, so an undeclared text-on-background or border-on-background pairing is an unchecked accessibility risk.",
+      "scope": "vortaro: color tokens with role foreground, background or border",
+      "checkability": "manual"
+    },
+    {
+      "id": "reg_01M2VEEE53WJ4R0H861BN7MJYF",
+      "name": "semantic-colors-alias-palette",
+      "statement": "Semantic color tokens in core reference palette tokens instead of literal color values.",
+      "kialo": "Aspektoj and Dimensioj then change a color by overriding one palette token, and late binding carries the change to every semantic use in every combination; a literal in a semantic token would silently opt out of that and drift between combinations.",
+      "scope": "vortaro: core color tokens outside color.palette",
+      "checkability": "manual"
+    }
+  ]
+}

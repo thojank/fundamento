@@ -1,0 +1,66 @@
+{
+  "dimensioj": [
+    {
+      "id": "dim_01M2WRK8G0DDDDDDDDDDDDDDDD",
+      "name": "aspekto",
+      "priority": 1,
+      "default": "neutra",
+      "valoroj": [
+        {
+          "id": "dva_01M2WRK8G0DDDDDDDDDDDDDDDG",
+          "name": "neutra",
+          "aspekto": {
+            "owner": "Fundamento test fixtures",
+            "licenseNote": "MIT, test data only."
+          }
+        }
+      ]
+    },
+    {
+      "id": "dim_01M2WRK8G0DDDDDDDDDDDDDDDE",
+      "name": "color-scheme",
+      "priority": 2,
+      "default": "light",
+      "valoroj": [
+        {
+          "id": "dva_01M2WRK8G0DDDDDDDDDDDDDDDH",
+          "name": "light"
+        },
+        {
+          "id": "dva_01M2WRK8G0DDDDDDDDDDDDDDDJ",
+          "name": "dark"
+        }
+      ]
+    },
+    {
+      "id": "dim_01M2WRK8G0DDDDDDDDDDDDDDDF",
+      "name": "contrast",
+      "priority": 3,
+      "default": "default",
+      "valoroj": [
+        {
+          "id": "dva_01M2WRK8G0DDDDDDDDDDDDDDDK",
+          "name": "default",
+          "kontrastSojloj": {
+            "wcag2": {
+              "text-normal": 4.5,
+              "text-large": 3,
+              "ui": 3
+            }
+          }
+        },
+        {
+          "id": "dva_01M2WRK8G0DDDDDDDDDDDDDDDM",
+          "name": "high",
+          "kontrastSojloj": {
+            "wcag2": {
+              "text-normal": 7,
+              "text-large": 4.5,
+              "ui": 3
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

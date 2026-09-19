@@ -1,0 +1,9 @@
+{
+  "description": "core renames the group key spacing.medium to spacing.Medium (uppercase segment, FR-13a).",
+  "issues": [
+    {
+      "rule": "token-name-grammar",
+      "path": "vortaro/sets/core.json#/spacing/Medium"
+    }
+  ]
+}

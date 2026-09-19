@@ -1,0 +1,9 @@
+{
+  "description": "$themes.json lacks contrast/high under the high theme (hand-edited instead of generated).",
+  "issues": [
+    {
+      "rule": "themes-out-of-sync",
+      "path": "vortaro/$themes.json#"
+    }
+  ]
+}

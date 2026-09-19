@@ -1,0 +1,12 @@
+{
+  "jugxoj": [
+    {
+      "id": "jug_01K5FMAJ0M0000000000000000",
+      "ref": { "regulo": "reg_01K5FMAJ0Z0000000000000000" },
+      "decision": "approved",
+      "kialo": "The approval refers to a Regulo that does not exist.",
+      "date": "2026-09-19",
+      "context": "regularo-dangling-jugxo fixture"
+    }
+  ]
+}

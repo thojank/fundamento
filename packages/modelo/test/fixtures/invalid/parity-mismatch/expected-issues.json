@@ -1,0 +1,10 @@
+{
+  "description": "Two inventories that differ in a prop value, a value, a state and a whole item (S5.2).",
+  "check": "parity",
+  "issues": [
+    { "rule": "parity-prop-mismatch", "path": "items.x.props.variant" },
+    { "rule": "parity-state-mismatch", "path": "items.x.states.disabled" },
+    { "rule": "parity-value-mismatch", "path": "items.x.values.padding" },
+    { "rule": "parity-item-missing", "path": "items.y" }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "description": "contrast/high is conditioned on contrast=maximum, a valoro the contrast Dimensio does not have.",
+  "issues": [
+    {
+      "rule": "set-kondicxoj-unknown",
+      "path": "vortaro/sets/contrast/high.json#/$extensions/com.ciferecigo.fundamento/kondicxoj/0"
+    }
+  ]
+}

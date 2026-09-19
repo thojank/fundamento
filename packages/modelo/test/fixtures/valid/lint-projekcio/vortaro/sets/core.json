@@ -1,0 +1,12 @@
+{
+  "color": {
+    "$type": "color",
+    "text": {
+      "default": { "$value": { "colorSpace": "srgb", "components": [0.1, 0.1, 0.1] } }
+    }
+  },
+  "spacing": {
+    "$type": "dimension",
+    "small": { "$value": { "value": 4, "unit": "px" } }
+  }
+}

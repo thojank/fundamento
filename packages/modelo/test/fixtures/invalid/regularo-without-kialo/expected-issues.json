@@ -1,0 +1,7 @@
+{
+  "description": "Copy of valid/minimal whose only Regulo has no kialo (FR-08). The schema also rejects this; the regularo check reports it on its own.",
+  "check": "regularo",
+  "issues": [
+    { "rule": "regulo-kialo-missing", "path": "data/reguloj.json#/reguloj/0/kialo" }
+  ]
+}

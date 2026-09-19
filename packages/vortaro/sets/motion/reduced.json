@@ -1,0 +1,12 @@
+{
+  "$extensions": {
+    "com.ciferecigo.fundamento": { "id": "set_01M2VEEDW45A0B9Q4GQ465NCHM", "kondicxoj": ["motion=reduced"] }
+  },
+  "motion": {
+    "duration": {
+      "$type": "duration",
+      "short": { "$value": { "value": 0, "unit": "ms" } },
+      "medium": { "$value": { "value": 0, "unit": "ms" } }
+    }
+  }
+}

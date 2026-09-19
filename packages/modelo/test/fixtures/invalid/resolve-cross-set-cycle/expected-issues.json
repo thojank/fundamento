@@ -1,0 +1,9 @@
+{
+  "description": "core defines color.a -> {color.b} (b literal); color-scheme/dark overrides color.b -> {color.a}. The cycle exists only after the overlay, so resolve reports alias-cycle for color-scheme=dark only (light resolves).",
+  "issues": [
+    {
+      "rule": "alias-cycle",
+      "path": "rezolvo(color-scheme=dark)/color.a"
+    }
+  ]
+}

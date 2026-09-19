@@ -1,0 +1,9 @@
+{
+  "items": {
+    "x": {
+      "props": { "size": ["small", "large"], "variant": ["primary", "tertiary"] },
+      "states": ["default", "hover"],
+      "values": { "padding": "12px" }
+    }
+  }
+}

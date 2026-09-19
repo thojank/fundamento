@@ -1,0 +1,6 @@
+{
+  "description": "core.json defines color.text.default twice (duplicate JSON key); the strict parser reports it instead of silently keeping the last one, and validation stops after loading.",
+  "issues": [
+    { "rule": "json-duplicate-key", "path": "vortaro/sets/core.json#/color/text/default" }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "description": "spacing.small declares the unknown $type \"size\".",
+  "issues": [
+    {
+      "rule": "token-type-unknown",
+      "path": "vortaro/sets/core.json#/spacing/small/$type"
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "description": "color.text.default carries an ID that ids.lock.json marks retired.",
+  "issues": [
+    {
+      "rule": "id-retired-reused",
+      "path": "vortaro/sets/core.json#/color/text/default/$extensions/com.ciferecigo.fundamento/id"
+    }
+  ]
+}

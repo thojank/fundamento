@@ -1,0 +1,9 @@
+{
+  "description": "contrast has priority 2.5; priorities are unique positive integers.",
+  "issues": [
+    {
+      "rule": "dimensio-priority-invalid",
+      "path": "data/dimensioj.json#/dimensioj/1/priority"
+    }
+  ]
+}

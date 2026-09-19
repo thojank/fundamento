@@ -1,0 +1,10 @@
+{
+  "$extensions": {
+    "com.ciferecigo.fundamento": { "id": "set_01M2VEEDW45A0B9Q4GQ465NCHH", "kondicxoj": ["density=comfortable"] }
+  },
+  "spacing": {
+    "$type": "dimension",
+    "medium": { "$value": { "value": 12, "unit": "px" } },
+    "large": { "$value": { "value": 24, "unit": "px" } }
+  }
+}

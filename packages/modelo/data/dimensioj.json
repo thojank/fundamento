@@ -1,0 +1,86 @@
+{
+  "dimensioj": [
+    {
+      "id": "dim_01M2VEEDJRNEGZF2QHTC7AGWPK",
+      "name": "aspekto",
+      "priority": 1,
+      "default": "neutra",
+      "valoroj": [
+        {
+          "id": "dva_01M2VEEDQEJEE7MR7JA8JRPMJB",
+          "name": "neutra",
+          "aspekto": {
+            "owner": "Fundamento",
+            "licenseNote": "MIT. Generic test values invented for Phase 0; replaced by real Aspekto values in Phase 1."
+          }
+        }
+      ]
+    },
+    {
+      "id": "dim_01M2VEEDJSKN3J6SNGE98H37T5",
+      "name": "viewport",
+      "priority": 2,
+      "default": "medium",
+      "valoroj": [
+        { "id": "dva_01M2VEEDQFS0RGTE2M27JARKH3", "name": "compact" },
+        { "id": "dva_01M2VEEDQFS0RGTE2M27JARKH4", "name": "medium" },
+        { "id": "dva_01M2VEEDQFS0RGTE2M27JARKH5", "name": "expanded" }
+      ]
+    },
+    {
+      "id": "dim_01M2VEEDJSKN3J6SNGE98H37T6",
+      "name": "density",
+      "priority": 3,
+      "default": "default",
+      "valoroj": [
+        { "id": "dva_01M2VEEDQFS0RGTE2M27JARKH6", "name": "compact" },
+        { "id": "dva_01M2VEEDQFS0RGTE2M27JARKH7", "name": "default" },
+        { "id": "dva_01M2VEEDQFS0RGTE2M27JARKH8", "name": "comfortable" }
+      ]
+    },
+    {
+      "id": "dim_01M2VEEDJSKN3J6SNGE98H37T7",
+      "name": "color-scheme",
+      "priority": 4,
+      "default": "light",
+      "valoroj": [
+        { "id": "dva_01M2VEEDQFS0RGTE2M27JARKH9", "name": "light" },
+        { "id": "dva_01M2VEEDQFS0RGTE2M27JARKHA", "name": "dark" }
+      ]
+    },
+    {
+      "id": "dim_01M2VEEDJSKN3J6SNGE98H37T8",
+      "name": "contrast",
+      "priority": 5,
+      "default": "default",
+      "valoroj": [
+        {
+          "id": "dva_01M2VEEDQFS0RGTE2M27JARKHB",
+          "name": "default",
+          "kontrastSojloj": {
+            "wcag2": { "text-normal": 4.5, "text-large": 3, "ui": 3 },
+            "apca": { "text-normal": 75, "text-large": 60, "ui": 45 }
+          }
+        },
+        {
+          "id": "dva_01M2VEEDQFS0RGTE2M27JARKHC",
+          "name": "high",
+          "kontrastSojloj": {
+            "wcag2": { "text-normal": 7, "text-large": 4.5, "ui": 3 },
+            "apca": { "text-normal": 90, "text-large": 75, "ui": 60 }
+          }
+        }
+      ]
+    },
+    {
+      "id": "dim_01M2VEEDJSKN3J6SNGE98H37T9",
+      "name": "motion",
+      "priority": 6,
+      "default": "default",
+      "valoroj": [
+        { "id": "dva_01M2VEEDQFS0RGTE2M27JARKHD", "name": "default" },
+        { "id": "dva_01M2VEEDQFS0RGTE2M27JARKHE", "name": "reduced" }
+      ]
+    }
+  ]
+}

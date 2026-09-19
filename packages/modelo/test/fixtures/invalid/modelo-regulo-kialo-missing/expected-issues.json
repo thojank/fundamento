@@ -1,0 +1,9 @@
+{
+  "description": "The Regulo has no kialo.",
+  "issues": [
+    {
+      "rule": "regulo-kialo-missing",
+      "path": "data/reguloj.json#/reguloj/0/kialo"
+    }
+  ]
+}

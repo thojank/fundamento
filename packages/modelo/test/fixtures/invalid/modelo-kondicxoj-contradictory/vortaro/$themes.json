@@ -1,0 +1,40 @@
+[
+  {
+    "group": "color-scheme",
+    "id": "dva_01K5FMAJ01CHCS4BMCX5D0TM49",
+    "name": "light",
+    "selectedTokenSets": {
+      "color-scheme/light+color-scheme/dark": "enabled",
+      "core": "source"
+    }
+  },
+  {
+    "group": "color-scheme",
+    "id": "dva_01K5FMAJ02GHG044FZ9966Q9ZB",
+    "name": "dark",
+    "selectedTokenSets": {
+      "color-scheme/dark": "enabled",
+      "color-scheme/dark+contrast/high": "enabled",
+      "color-scheme/light+color-scheme/dark": "enabled",
+      "core": "source"
+    }
+  },
+  {
+    "group": "contrast",
+    "id": "dva_01K5FMAJ044A9T094C67VSEFNV",
+    "name": "default",
+    "selectedTokenSets": {
+      "core": "source"
+    }
+  },
+  {
+    "group": "contrast",
+    "id": "dva_01K5FMAJ056744YXV7ZXR50AW5",
+    "name": "high",
+    "selectedTokenSets": {
+      "color-scheme/dark+contrast/high": "enabled",
+      "contrast/high": "enabled",
+      "core": "source"
+    }
+  }
+]

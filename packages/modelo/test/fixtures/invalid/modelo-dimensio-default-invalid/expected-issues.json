@@ -1,0 +1,9 @@
+{
+  "description": "color-scheme declares default \"dusk\", which is not one of its valoroj.",
+  "issues": [
+    {
+      "rule": "dimensio-default-invalid",
+      "path": "data/dimensioj.json#/dimensioj/0/default"
+    }
+  ]
+}

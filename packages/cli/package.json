@@ -1,0 +1,33 @@
+{
+  "name": "@fundamento/cli",
+  "version": "0.0.1",
+  "description": "Fundamento command line interface (fm).",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "fm": "dist/index.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "test": "vitest run",
+    "lint": "tsc -p tsconfig.json --noEmit && biome check ."
+  },
+  "dependencies": {
+    "@fundamento/modelo": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.5",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.1"
+  }
+}

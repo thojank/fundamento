@@ -1,0 +1,14 @@
+{
+  "tokenSetOrder": [
+    "core",
+    "aspekto/neutra",
+    "viewport/compact",
+    "viewport/expanded",
+    "density/comfortable",
+    "density/compact",
+    "color-scheme/dark",
+    "aspekto/neutra+color-scheme/dark",
+    "contrast/high",
+    "motion/reduced"
+  ]
+}

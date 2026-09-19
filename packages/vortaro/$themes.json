@@ -1,0 +1,116 @@
+[
+  {
+    "group": "aspekto",
+    "id": "dva_01M2VEEDQEJEE7MR7JA8JRPMJB",
+    "name": "neutra",
+    "selectedTokenSets": {
+      "aspekto/neutra": "enabled",
+      "aspekto/neutra+color-scheme/dark": "enabled",
+      "core": "source"
+    }
+  },
+  {
+    "group": "viewport",
+    "id": "dva_01M2VEEDQFS0RGTE2M27JARKH3",
+    "name": "compact",
+    "selectedTokenSets": {
+      "core": "source",
+      "viewport/compact": "enabled"
+    }
+  },
+  {
+    "group": "viewport",
+    "id": "dva_01M2VEEDQFS0RGTE2M27JARKH4",
+    "name": "medium",
+    "selectedTokenSets": {
+      "core": "source"
+    }
+  },
+  {
+    "group": "viewport",
+    "id": "dva_01M2VEEDQFS0RGTE2M27JARKH5",
+    "name": "expanded",
+    "selectedTokenSets": {
+      "core": "source",
+      "viewport/expanded": "enabled"
+    }
+  },
+  {
+    "group": "density",
+    "id": "dva_01M2VEEDQFS0RGTE2M27JARKH6",
+    "name": "compact",
+    "selectedTokenSets": {
+      "core": "source",
+      "density/compact": "enabled"
+    }
+  },
+  {
+    "group": "density",
+    "id": "dva_01M2VEEDQFS0RGTE2M27JARKH7",
+    "name": "default",
+    "selectedTokenSets": {
+      "core": "source"
+    }
+  },
+  {
+    "group": "density",
+    "id": "dva_01M2VEEDQFS0RGTE2M27JARKH8",
+    "name": "comfortable",
+    "selectedTokenSets": {
+      "core": "source",
+      "density/comfortable": "enabled"
+    }
+  },
+  {
+    "group": "color-scheme",
+    "id": "dva_01M2VEEDQFS0RGTE2M27JARKH9",
+    "name": "light",
+    "selectedTokenSets": {
+      "core": "source"
+    }
+  },
+  {
+    "group": "color-scheme",
+    "id": "dva_01M2VEEDQFS0RGTE2M27JARKHA",
+    "name": "dark",
+    "selectedTokenSets": {
+      "aspekto/neutra+color-scheme/dark": "enabled",
+      "color-scheme/dark": "enabled",
+      "core": "source"
+    }
+  },
+  {
+    "group": "contrast",
+    "id": "dva_01M2VEEDQFS0RGTE2M27JARKHB",
+    "name": "default",
+    "selectedTokenSets": {
+      "core": "source"
+    }
+  },
+  {
+    "group": "contrast",
+    "id": "dva_01M2VEEDQFS0RGTE2M27JARKHC",
+    "name": "high",
+    "selectedTokenSets": {
+      "contrast/high": "enabled",
+      "core": "source"
+    }
+  },
+  {
+    "group": "motion",
+    "id": "dva_01M2VEEDQFS0RGTE2M27JARKHD",
+    "name": "default",
+    "selectedTokenSets": {
+      "core": "source"
+    }
+  },
+  {
+    "group": "motion",
+    "id": "dva_01M2VEEDQFS0RGTE2M27JARKHE",
+    "name": "reduced",
+    "selectedTokenSets": {
+      "core": "source",
+      "motion/reduced": "enabled"
+    }
+  }
+]

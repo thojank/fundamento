@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+# No network beyond `pnpm install`: keep Turborepo telemetry off.
+env:
+  TURBO_TELEMETRY_DISABLED: "1"
+  DO_NOT_TRACK: "1"
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Build, test, lint and conformance checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      # Default fetch depth (1) is enough: the checks only need `git ls-files`.
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      # pnpm version comes from `packageManager` in package.json; no `version` input.
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+
+      # pnpm must be installed first so setup-node can resolve the pnpm store for caching.
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
+
+      - name: Test
+        run: pnpm test
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: "Check: Vortaro-Lint"
+        run: pnpm check:vortaro-lint
+
+      - name: "Check: Parity"
+        run: pnpm check:parity
+
+      - name: "Check: Regularo"
+        run: pnpm check:regularo
+
+      - name: "Check: Alirebleco"
+        run: pnpm check:alirebleco
+
+      - name: "Check: Clean-Room"
+        run: pnpm check:clean-room

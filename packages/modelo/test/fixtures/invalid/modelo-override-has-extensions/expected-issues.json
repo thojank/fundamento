@@ -1,0 +1,9 @@
+{
+  "description": "color-scheme/dark's override of color.background.default repeats the Fundamento extension (id, role) of the core definition.",
+  "issues": [
+    {
+      "rule": "set-override-has-extensions",
+      "path": "vortaro/sets/color-scheme/dark.json#/color/background/default/$extensions/com.ciferecigo.fundamento"
+    }
+  ]
+}

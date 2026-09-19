@@ -1,0 +1,9 @@
+{
+  "description": "spacing.small ($type dimension) has the CSS string \"4px\" instead of {value, unit}.",
+  "issues": [
+    {
+      "rule": "token-value-invalid",
+      "path": "vortaro/sets/core.json#/spacing/small/$value"
+    }
+  ]
+}

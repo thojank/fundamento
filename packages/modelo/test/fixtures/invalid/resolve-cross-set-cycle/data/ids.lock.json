@@ -1,0 +1,32 @@
+{
+  "ids": {
+    "dim_01M2WRK8G0DDDDDDDDDDDDDDDE": {
+      "status": "active",
+      "type": "dimensio"
+    },
+    "dva_01M2WRK8G0DDDDDDDDDDDDDDDH": {
+      "status": "active",
+      "type": "dimensioValoro"
+    },
+    "dva_01M2WRK8G0DDDDDDDDDDDDDDDJ": {
+      "status": "active",
+      "type": "dimensioValoro"
+    },
+    "set_01M2WRK8G0DDDDDDDDDDDDDDDN": {
+      "status": "active",
+      "type": "tokenSet"
+    },
+    "set_01M2WRK8G0DDDDDDDDDDDDDDDP": {
+      "status": "active",
+      "type": "tokenSet"
+    },
+    "tok_01M2WRK8G0DDDDDDDDDDDDDDE3": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M2WRK8G0DDDDDDDDDDDDDDE4": {
+      "status": "active",
+      "type": "token"
+    }
+  }
+}

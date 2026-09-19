@@ -1,0 +1,9 @@
+{
+  "description": "Two tokens (color.background.default and color.text.default) carry the same ID. checkIds reports id-duplicate at the later occurrence in path order.",
+  "issues": [
+    {
+      "rule": "id-duplicate",
+      "path": "vortaro/sets/core.json#/color/text/default/$extensions/com.ciferecigo.fundamento/id"
+    }
+  ]
+}

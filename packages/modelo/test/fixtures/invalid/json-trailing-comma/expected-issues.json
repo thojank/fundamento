@@ -1,0 +1,6 @@
+{
+  "description": "color-scheme/dark.json has a trailing comma, which strict JSON rejects; validation stops after loading.",
+  "issues": [
+    { "rule": "json-syntax", "path": "vortaro/sets/color-scheme/dark.json#" }
+  ]
+}

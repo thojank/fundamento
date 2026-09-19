@@ -1,0 +1,44 @@
+{
+  "ids": {
+    "dim_01M2SVWYM039AWTQ5JA8FTY23P": {
+      "status": "active",
+      "type": "dimensio"
+    },
+    "dim_01M2SVWYM039AWTQ5JA8FTY23Q": {
+      "status": "active",
+      "type": "dimensio"
+    },
+    "dva_01M2SVWYM039AWTQ5JA8FTY23R": {
+      "status": "active",
+      "type": "dimensioValoro"
+    },
+    "dva_01M2SVWYM039AWTQ5JA8FTY23S": {
+      "status": "active",
+      "type": "dimensioValoro"
+    },
+    "dva_01M2SVWYM039AWTQ5JA8FTY23T": {
+      "status": "active",
+      "type": "dimensioValoro"
+    },
+    "dva_01M2SVWYM039AWTQ5JA8FTY23V": {
+      "status": "active",
+      "type": "dimensioValoro"
+    },
+    "set_01M2SVWYM039AWTQ5JA8FTY23W": {
+      "status": "active",
+      "type": "tokenSet"
+    },
+    "tok_01M2SVWYM039AWTQ5JA8FTY23X": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M2SVWYM039AWTQ5JA8FTY23Y": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M2SVWYM039AWTQ5JA8FTY23Z": {
+      "status": "active",
+      "type": "token"
+    }
+  }
+}

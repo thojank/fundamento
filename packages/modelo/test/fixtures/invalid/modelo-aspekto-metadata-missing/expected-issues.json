@@ -1,0 +1,9 @@
+{
+  "description": "An aspekto Dimensio is added whose valoro neutra has no owner/license metadata.",
+  "issues": [
+    {
+      "rule": "aspekto-metadata-missing",
+      "path": "data/dimensioj.json#/dimensioj/2/valoroj/0"
+    }
+  ]
+}

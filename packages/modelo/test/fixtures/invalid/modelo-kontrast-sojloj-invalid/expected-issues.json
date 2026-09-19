@@ -1,0 +1,9 @@
+{
+  "description": "The contrast valoro high carries no kontrastSojloj.",
+  "issues": [
+    {
+      "rule": "kontrast-sojloj-invalid",
+      "path": "data/dimensioj.json#/dimensioj/1/valoroj/1"
+    }
+  ]
+}

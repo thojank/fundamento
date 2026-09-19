@@ -1,0 +1,20 @@
+{
+  "dimensioj": [
+    {
+      "id": "dim_01M2WRK8G0DDDDDDDDDDDDDDDE",
+      "name": "color-scheme",
+      "priority": 1,
+      "default": "light",
+      "valoroj": [
+        {
+          "id": "dva_01M2WRK8G0DDDDDDDDDDDDDDDH",
+          "name": "light"
+        },
+        {
+          "id": "dva_01M2WRK8G0DDDDDDDDDDDDDDDJ",
+          "name": "dark"
+        }
+      ]
+    }
+  ]
+}

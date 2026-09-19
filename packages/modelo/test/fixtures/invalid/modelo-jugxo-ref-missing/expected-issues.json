@@ -1,0 +1,9 @@
+{
+  "description": "A Jugxo refers to a Regulo ID that no Regulo carries.",
+  "issues": [
+    {
+      "rule": "jugxo-ref-missing",
+      "path": "data/jugxoj.json#/jugxoj/0/ref/regulo"
+    }
+  ]
+}

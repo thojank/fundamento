@@ -1,0 +1,52 @@
+{
+  "ids": {
+    "dim_01M2WRK8G0DDDDDDDDDDDDDDDD": {
+      "status": "active",
+      "type": "dimensio"
+    },
+    "dim_01M2WRK8G0DDDDDDDDDDDDDDDE": {
+      "status": "active",
+      "type": "dimensio"
+    },
+    "dim_01M2WRK8G0DDDDDDDDDDDDDDDF": {
+      "status": "active",
+      "type": "dimensio"
+    },
+    "dva_01M2WRK8G0DDDDDDDDDDDDDDDG": {
+      "status": "active",
+      "type": "dimensioValoro"
+    },
+    "dva_01M2WRK8G0DDDDDDDDDDDDDDDH": {
+      "status": "active",
+      "type": "dimensioValoro"
+    },
+    "dva_01M2WRK8G0DDDDDDDDDDDDDDDJ": {
+      "status": "active",
+      "type": "dimensioValoro"
+    },
+    "dva_01M2WRK8G0DDDDDDDDDDDDDDDK": {
+      "status": "active",
+      "type": "dimensioValoro"
+    },
+    "dva_01M2WRK8G0DDDDDDDDDDDDDDDM": {
+      "status": "active",
+      "type": "dimensioValoro"
+    },
+    "set_01M2WRK8G0DDDDDDDDDDDDDDDN": {
+      "status": "active",
+      "type": "tokenSet"
+    },
+    "set_01M2WRK8G0DDDDDDDDDDDDDDE1": {
+      "status": "active",
+      "type": "tokenSet"
+    },
+    "set_01M2WRK8G0DDDDDDDDDDDDDDE2": {
+      "status": "active",
+      "type": "tokenSet"
+    },
+    "tok_01M2WRK8G0DDDDDDDDDDDDDDDW": {
+      "status": "active",
+      "type": "token"
+    }
+  }
+}

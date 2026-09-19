@@ -1,0 +1,7 @@
+{
+  "description": "Source code imports from a benchmark directory (FR-17).",
+  "check": "clean-room",
+  "issues": [
+    { "rule": "clean-room-benchmark-reference", "path": "src/index.ts:1:28" }
+  ]
+}

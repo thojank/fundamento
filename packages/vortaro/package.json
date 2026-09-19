@@ -1,0 +1,17 @@
+{
+  "name": "@fundamento/vortaro",
+  "version": "0.0.1",
+  "description": "Fundamento Vortaro: DTCG token data (sets, $themes.json, $metadata.json). Contains no code.",
+  "license": "MIT",
+  "type": "module",
+  "files": ["$themes.json", "$metadata.json", "sets"],
+  "exports": {
+    "./package.json": "./package.json",
+    "./$themes.json": "./$themes.json",
+    "./$metadata.json": "./$metadata.json",
+    "./sets/*": "./sets/*"
+  },
+  "scripts": {
+    "lint": "biome check ."
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "description": "color-scheme/dark overrides color.text.default (color in core) with a dimension.",
+  "issues": [
+    {
+      "rule": "set-changes-type",
+      "path": "vortaro/sets/color-scheme/dark.json#/color/text/default"
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "description": "A stylesheet defines a custom property outside the --fm- namespace (FR-14).",
+  "check": "vortaro-lint",
+  "issues": [
+    { "rule": "namespace-custom-property", "path": "styles/theme.css:2:3" }
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "dimensioj": [
+    {
+      "id": "dim_01M2SVWYM039AWTQ5JA8FTY23P",
+      "name": "color-scheme",
+      "priority": 1,
+      "default": "light",
+      "valoroj": [
+        {
+          "id": "dva_01M2SVWYM039AWTQ5JA8FTY23R",
+          "name": "light"
+        },
+        {
+          "id": "dva_01M2SVWYM039AWTQ5JA8FTY23S",
+          "name": "dark"
+        }
+      ]
+    },
+    {
+      "id": "dim_01M2SVWYM039AWTQ5JA8FTY23Q",
+      "name": "contrast",
+      "priority": 2,
+      "default": "default",
+      "valoroj": [
+        {
+          "id": "dva_01M2SVWYM039AWTQ5JA8FTY23T",
+          "name": "default",
+          "kontrastSojloj": {
+            "wcag2": {
+              "text-normal": 4.5,
+              "text-large": 3,
+              "ui": 3
+            }
+          }
+        },
+        {
+          "id": "dva_01M2SVWYM039AWTQ5JA8FTY23V",
+          "name": "high",
+          "kontrastSojloj": {
+            "wcag2": {
+              "text-normal": 7,
+              "text-large": 4.5,
+              "ui": 3
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

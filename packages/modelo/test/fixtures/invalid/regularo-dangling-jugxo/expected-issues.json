@@ -1,0 +1,7 @@
+{
+  "description": "Copy of valid/minimal with one Jugxo whose ref points at a Regulo ID that no Regulo carries (FR-08). The Jugxo ID is registered in the lock so nothing else changes.",
+  "check": "regularo",
+  "issues": [
+    { "rule": "jugxo-ref-missing", "path": "data/jugxoj.json#/jugxoj/0/ref/regulo" }
+  ]
+}

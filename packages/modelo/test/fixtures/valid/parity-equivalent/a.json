@@ -1,0 +1,14 @@
+{
+  "items": {
+    "button": {
+      "props": { "size": ["small", "large"], "variant": ["primary", "secondary"] },
+      "states": ["default", "disabled", "hover"],
+      "values": { "border": "1px solid", "padding": "8px" }
+    },
+    "link": {
+      "props": {},
+      "states": ["default"],
+      "values": {}
+    }
+  }
+}

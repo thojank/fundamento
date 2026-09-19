@@ -1,0 +1,9 @@
+{
+  "description": "color.palette.neutral.1000 inherits $type color from its group but has only two components.",
+  "issues": [
+    {
+      "rule": "token-value-invalid",
+      "path": "vortaro/sets/core.json#/color/palette/neutral/1000/$value"
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+[
+  {
+    "group": "color-scheme",
+    "id": "dva_01M2SVWYM039AWTQ5JA8FTY23R",
+    "name": "light",
+    "selectedTokenSets": {
+      "core": "source"
+    }
+  },
+  {
+    "group": "color-scheme",
+    "id": "dva_01M2SVWYM039AWTQ5JA8FTY23S",
+    "name": "dark",
+    "selectedTokenSets": {
+      "core": "source"
+    }
+  },
+  {
+    "group": "contrast",
+    "id": "dva_01M2SVWYM039AWTQ5JA8FTY23T",
+    "name": "default",
+    "selectedTokenSets": {
+      "core": "source"
+    }
+  },
+  {
+    "group": "contrast",
+    "id": "dva_01M2SVWYM039AWTQ5JA8FTY23V",
+    "name": "high",
+    "selectedTokenSets": {
+      "core": "source"
+    }
+  }
+]

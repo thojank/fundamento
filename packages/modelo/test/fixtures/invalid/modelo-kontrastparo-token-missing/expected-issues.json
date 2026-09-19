@@ -1,0 +1,9 @@
+{
+  "description": "The KontrastParo's foreground color.text.primary does not exist in core.",
+  "issues": [
+    {
+      "rule": "kontrastparo-token-missing",
+      "path": "data/kontrastparoj.json#/kontrastParoj/0/foreground"
+    }
+  ]
+}

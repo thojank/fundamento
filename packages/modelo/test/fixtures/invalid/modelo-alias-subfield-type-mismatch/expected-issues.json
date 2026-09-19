@@ -1,0 +1,9 @@
+{
+  "description": "core adds border.default whose color sub-field references {spacing.small}, a dimension token (width correctly references it).",
+  "issues": [
+    {
+      "rule": "alias-type-mismatch",
+      "path": "vortaro/sets/core.json#/border/default/$value/color"
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "description": "The KontrastParo's background is spacing.small, a dimension token.",
+  "issues": [
+    {
+      "rule": "kontrastparo-not-color",
+      "path": "data/kontrastparoj.json#/kontrastParoj/0/background"
+    }
+  ]
+}

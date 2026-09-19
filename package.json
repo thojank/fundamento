@@ -1,0 +1,32 @@
+{
+  "name": "fundamento",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=24"
+  },
+  "packageManager": "pnpm@10.34.5",
+  "scripts": {
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "lint": "turbo run lint && biome check package.json biome.json turbo.json tsconfig.base.json",
+    "check": "turbo run build test && pnpm lint && pnpm check:vortaro-lint && pnpm check:parity && pnpm check:regularo && pnpm check:alirebleco && pnpm check:clean-room",
+    "check:vortaro-lint": "node packages/modelo/dist/checks/run.js vortaro-lint",
+    "check:parity": "node packages/modelo/dist/checks/run.js parity",
+    "check:regularo": "node packages/modelo/dist/checks/run.js regularo",
+    "check:alirebleco": "node packages/modelo/dist/checks/run.js alirebleco",
+    "check:clean-room": "node packages/modelo/dist/checks/run.js clean-room",
+    "id:new": "node packages/modelo/dist/ids/cli.js new",
+    "id:retire": "node packages/modelo/dist/ids/cli.js retire",
+    "vortaro:themes": "node packages/modelo/dist/themes/cli.js",
+    "fm": "node packages/cli/dist/index.js"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.14",
+    "@types/node": "^24.13.5",
+    "turbo": "^2.11.2",
+    "typescript": "^7.0.2"
+  }
+}

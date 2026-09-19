@@ -1,0 +1,8 @@
+:root {
+  --fm-color-text-default: #1a1a1a;
+}
+
+.fm-card {
+  color: #ff0000;
+  padding: var(--fm-spacing-small);
+}

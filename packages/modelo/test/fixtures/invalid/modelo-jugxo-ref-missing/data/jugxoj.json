@@ -1,0 +1,14 @@
+{
+  "jugxoj": [
+    {
+      "id": "jug_01M2VEHHZE87Z637T0ZDJXNCG0",
+      "ref": {
+        "regulo": "reg_01K5FMAJ0Z0000000000000000"
+      },
+      "decision": "approved",
+      "kialo": "Test decision.",
+      "date": "2026-09-19",
+      "context": "fixture"
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "description": "color-scheme/dark gives color.background.default alpha 0.5, so the KontrastParo background is transparent from color-scheme=dark,contrast=default on.",
+  "issues": [
+    {
+      "rule": "kontrastparo-background-transparent",
+      "path": "data/kontrastparoj.json#/kontrastParoj/0/background"
+    }
+  ]
+}

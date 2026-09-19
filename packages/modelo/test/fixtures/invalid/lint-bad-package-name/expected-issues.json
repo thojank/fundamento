@@ -1,0 +1,7 @@
+{
+  "description": "A workspace package is named outside the @fundamento/ scope (FR-14).",
+  "check": "vortaro-lint",
+  "issues": [
+    { "rule": "namespace-package", "path": "packages/widgets/package.json#/name" }
+  ]
+}

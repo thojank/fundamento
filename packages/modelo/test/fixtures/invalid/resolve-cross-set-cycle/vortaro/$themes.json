@@ -1,0 +1,19 @@
+[
+  {
+    "group": "color-scheme",
+    "id": "dva_01M2WRK8G0DDDDDDDDDDDDDDDH",
+    "name": "light",
+    "selectedTokenSets": {
+      "core": "source"
+    }
+  },
+  {
+    "group": "color-scheme",
+    "id": "dva_01M2WRK8G0DDDDDDDDDDDDDDDJ",
+    "name": "dark",
+    "selectedTokenSets": {
+      "color-scheme/dark": "enabled",
+      "core": "source"
+    }
+  }
+]

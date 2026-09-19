@@ -1,0 +1,20 @@
+/* Positive fixture: literals only in --fm-* definitions, everything else references tokens. */
+:root {
+  --fm-color-text-default: #1a1a1a;
+  --fm-color-background-default: oklch(0.99 0 0);
+  --fm-spacing-small: 4px;
+  --fm-spacing-medium: 0.5rem;
+  --fm-duration-fast: 120ms;
+  --fm-shadow-raised: 0 1px 2px rgb(0 0 0 / 0.2);
+}
+
+.fm-card {
+  color: var(--fm-color-text-default);
+  background-color: var(--fm-color-background-default);
+  padding: var(--fm-spacing-small) var(--fm-spacing-medium);
+  margin: 0;
+  box-shadow: var(--fm-shadow-raised);
+  transition-duration: var(--fm-duration-fast);
+  gap: calc(var(--fm-spacing-small) * 2);
+  border-color: inherit;
+}

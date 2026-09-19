@@ -1,0 +1,7 @@
+{
+  "description": "A JSON key uses the Esperanto letter \u015d instead of the x-convention (kolorsxemo). FR-14 requires ASCII identifiers.",
+  "check": "vortaro-lint",
+  "issues": [
+    { "rule": "namespace-non-ascii", "path": "config/nomoj.json#/kolorŝemo" }
+  ]
+}

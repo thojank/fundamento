@@ -1,0 +1,46 @@
+[
+  {
+    "group": "aspekto",
+    "id": "dva_01M2WRK8G0DDDDDDDDDDDDDDDG",
+    "name": "neutra",
+    "selectedTokenSets": {
+      "aspekto/neutra+contrast/high": "enabled",
+      "core": "source"
+    }
+  },
+  {
+    "group": "color-scheme",
+    "id": "dva_01M2WRK8G0DDDDDDDDDDDDDDDH",
+    "name": "light",
+    "selectedTokenSets": {
+      "core": "source"
+    }
+  },
+  {
+    "group": "color-scheme",
+    "id": "dva_01M2WRK8G0DDDDDDDDDDDDDDDJ",
+    "name": "dark",
+    "selectedTokenSets": {
+      "color-scheme/dark+contrast/high": "enabled",
+      "core": "source"
+    }
+  },
+  {
+    "group": "contrast",
+    "id": "dva_01M2WRK8G0DDDDDDDDDDDDDDDK",
+    "name": "default",
+    "selectedTokenSets": {
+      "core": "source"
+    }
+  },
+  {
+    "group": "contrast",
+    "id": "dva_01M2WRK8G0DDDDDDDDDDDDDDDM",
+    "name": "high",
+    "selectedTokenSets": {
+      "aspekto/neutra+contrast/high": "enabled",
+      "color-scheme/dark+contrast/high": "enabled",
+      "core": "source"
+    }
+  }
+]

@@ -1,0 +1,24 @@
+{
+  "description": "AK-13. Copy of valid/minimal in which contrast=high sets color.text.default to a mid grey: #666666 on #f2f2f2 (light, 5.14:1) and #8a8a8a on #1a1a1a (dark, 5.04:1). Every contrast=default combination passes (>= 15:1); both contrast=high combinations fail the text-normal threshold 7:1. APCA shortfalls in the same combinations are advisory warnings only.",
+  "check": "alirebleco",
+  "issues": [
+    {
+      "rule": "contrast-below-threshold",
+      "path": "rezolvo(color-scheme=light,contrast=high)/kontrastParo/text-on-background"
+    },
+    {
+      "rule": "contrast-below-threshold",
+      "path": "rezolvo(color-scheme=dark,contrast=high)/kontrastParo/text-on-background"
+    }
+  ],
+  "warnings": [
+    {
+      "rule": "contrast-advisory",
+      "path": "rezolvo(color-scheme=light,contrast=high)/kontrastParo/text-on-background"
+    },
+    {
+      "rule": "contrast-advisory",
+      "path": "rezolvo(color-scheme=dark,contrast=high)/kontrastParo/text-on-background"
+    }
+  ]
+}

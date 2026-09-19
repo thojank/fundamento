@@ -1,0 +1,129 @@
+{
+  "$extensions": {
+    "com.ciferecigo.fundamento": {
+      "id": "set_01K5FMAJ06444R7MA0HZE3KXSJ",
+      "kondicxoj": []
+    }
+  },
+  "color": {
+    "$type": "color",
+    "palette": {
+      "neutral": {
+        "0": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              1,
+              1,
+              1
+            ],
+            "hex": "#ffffff"
+          },
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01K5FMAJ0AND635FTMQ9558Y63"
+            }
+          }
+        },
+        "100": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.95,
+              0.95,
+              0.95
+            ],
+            "hex": "#f2f2f2"
+          },
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01K5FMAJ0BQ499YPVK4P8NPRZ3"
+            }
+          }
+        },
+        "900": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.1,
+              0.1,
+              0.1
+            ],
+            "hex": "#1a1a1a"
+          },
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01K5FMAJ0CGDK0SHC894P66C4B"
+            }
+          }
+        },
+        "1000": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0,
+              0,
+              0
+            ],
+            "hex": "#000000"
+          },
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01K5FMAJ0DQ0T56XFQD500JQRD"
+            }
+          }
+        }
+      }
+    },
+    "background": {
+      "default": {
+        "$value": "{color.palette.neutral.100}",
+        "$description": "Default page background.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01K5FMAJ0EN8B4C4Z6KSPYEMCX",
+            "role": "background"
+          }
+        }
+      }
+    },
+    "text": {
+      "default": {
+        "$value": "{color.palette.neutral.900}",
+        "$description": "Default body text.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01K5FMAJ0FRV73CQ8J0CJ9HV5S",
+            "role": "foreground"
+          }
+        }
+      }
+    }
+  },
+  "spacing": {
+    "small": {
+      "$type": "size",
+      "$value": {
+        "value": 4,
+        "unit": "px"
+      },
+      "$extensions": {
+        "com.ciferecigo.fundamento": {
+          "id": "tok_01K5FMAJ0GQGZMPKY9NN4KF5G6"
+        }
+      }
+    },
+    "medium": {
+      "$type": "dimension",
+      "$value": {
+        "value": 8,
+        "unit": "px"
+      },
+      "$extensions": {
+        "com.ciferecigo.fundamento": {
+          "id": "tok_01K5FMAJ0H4CZYQST4Y5HHM8HV"
+        }
+      }
+    }
+  }
+}

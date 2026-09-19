@@ -1,0 +1,1750 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ciferecigo.com/fundamento/schema/modelo.schema.json",
+  "title": "ModeloJson",
+  "description": "Canonical schema of the Fundamento Modelo. The root validates the exported modelo.json; $defs describe every Key Entity and every source-file format (set files and the data files).",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "minLength": 1
+    },
+    "fundamento": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "$ref": "#/$defs/Version"
+        }
+      },
+      "required": ["version"],
+      "additionalProperties": false
+    },
+    "dimensioj": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Dimensio"
+      }
+    },
+    "aspektoj": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/AspektoEntry"
+      }
+    },
+    "tokenTypes": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/DtcgType"
+      },
+      "uniqueItems": true
+    },
+    "tokens": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/TokenInventoryEntry"
+      }
+    },
+    "setoj": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/ExportedSet"
+      }
+    },
+    "reguloj": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Regulo"
+      }
+    },
+    "jugxoj": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Jugxo"
+      }
+    },
+    "kontrastParoj": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/KontrastParo"
+      }
+    },
+    "eroj": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Ero"
+      }
+    },
+    "rezolvo": {
+      "$ref": "#/$defs/Rezolvo"
+    }
+  },
+  "required": [
+    "$schema",
+    "fundamento",
+    "dimensioj",
+    "aspektoj",
+    "tokenTypes",
+    "tokens",
+    "setoj",
+    "reguloj",
+    "jugxoj",
+    "kontrastParoj",
+    "eroj",
+    "rezolvo"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "Version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(-[0-9A-Za-z.-]+)?$"
+    },
+    "NonEmptyText": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S"
+    },
+    "TokenName": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(\\.[a-z0-9]+)*$"
+    },
+    "Name": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+    },
+    "KondicxoExpression": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*=[a-z0-9]+(-[a-z0-9]+)*$"
+    },
+    "SetName": {
+      "type": "string",
+      "pattern": "^(core|[a-z0-9]+(-[a-z0-9]+)*\\/[a-z0-9]+(-[a-z0-9]+)*(\\+[a-z0-9]+(-[a-z0-9]+)*\\/[a-z0-9]+(-[a-z0-9]+)*)*)$"
+    },
+    "Alias": {
+      "type": "string",
+      "pattern": "^\\{[^{}]+\\}$"
+    },
+    "EntityType": {
+      "type": "string",
+      "enum": [
+        "token",
+        "tokenSet",
+        "dimensio",
+        "dimensioValoro",
+        "regulo",
+        "jugxo",
+        "kontrastParo",
+        "ero",
+        "skemo",
+        "sxablono",
+        "projekcio",
+        "celo"
+      ]
+    },
+    "AnyId": {
+      "type": "string",
+      "pattern": "^(tok|set|dim|dva|reg|jug|kpa|ero|ske|sxa|prj|cel)_[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+    },
+    "TokenId": {
+      "type": "string",
+      "pattern": "^tok_[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+    },
+    "TokenSetId": {
+      "type": "string",
+      "pattern": "^set_[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+    },
+    "DimensioId": {
+      "type": "string",
+      "pattern": "^dim_[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+    },
+    "DimensioValoroId": {
+      "type": "string",
+      "pattern": "^dva_[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+    },
+    "ReguloId": {
+      "type": "string",
+      "pattern": "^reg_[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+    },
+    "JugxoId": {
+      "type": "string",
+      "pattern": "^jug_[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+    },
+    "KontrastParoId": {
+      "type": "string",
+      "pattern": "^kpa_[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+    },
+    "EroId": {
+      "type": "string",
+      "pattern": "^ero_[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+    },
+    "SkemoId": {
+      "type": "string",
+      "pattern": "^ske_[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+    },
+    "SxablonoId": {
+      "type": "string",
+      "pattern": "^sxa_[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+    },
+    "ProjekcioId": {
+      "type": "string",
+      "pattern": "^prj_[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+    },
+    "CeloId": {
+      "type": "string",
+      "pattern": "^cel_[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+    },
+    "DtcgType": {
+      "type": "string",
+      "enum": [
+        "color",
+        "dimension",
+        "fontFamily",
+        "fontWeight",
+        "duration",
+        "cubicBezier",
+        "number",
+        "strokeStyle",
+        "shadow",
+        "typography",
+        "border",
+        "gradient",
+        "transition"
+      ]
+    },
+    "TokenRole": {
+      "type": "string",
+      "enum": ["foreground", "background", "border"]
+    },
+    "Deprecated": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "string"
+        }
+      ]
+    },
+    "ColorSpace": {
+      "type": "string",
+      "enum": [
+        "srgb",
+        "srgb-linear",
+        "hsl",
+        "hwb",
+        "lab",
+        "lch",
+        "oklab",
+        "oklch",
+        "display-p3",
+        "a98-rgb",
+        "prophoto-rgb",
+        "rec2020",
+        "xyz-d65",
+        "xyz-d50"
+      ]
+    },
+    "ColorComponent": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "const": "none"
+        }
+      ]
+    },
+    "ColorValue": {
+      "description": "DTCG 2025.10 color: colour space plus three components, optional alpha and a 6-digit hex fallback.",
+      "type": "object",
+      "properties": {
+        "colorSpace": {
+          "$ref": "#/$defs/ColorSpace"
+        },
+        "components": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ColorComponent"
+          },
+          "minItems": 3,
+          "maxItems": 3
+        },
+        "alpha": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "hex": {
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}$"
+        }
+      },
+      "required": ["colorSpace", "components"],
+      "additionalProperties": false
+    },
+    "DimensionValue": {
+      "description": "DTCG dimension. Only px is accepted: a platform-neutral reference unit (1 px = 1 pt = 1 dp), FR-09a.",
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "number"
+        },
+        "unit": {
+          "const": "px"
+        }
+      },
+      "required": ["value", "unit"],
+      "additionalProperties": false
+    },
+    "FontFamilyValue": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1
+        }
+      ]
+    },
+    "FontWeightKeyword": {
+      "type": "string",
+      "enum": [
+        "thin",
+        "hairline",
+        "extra-light",
+        "ultra-light",
+        "light",
+        "normal",
+        "regular",
+        "book",
+        "medium",
+        "semi-bold",
+        "demi-bold",
+        "bold",
+        "extra-bold",
+        "ultra-bold",
+        "black",
+        "heavy",
+        "extra-black",
+        "ultra-black"
+      ]
+    },
+    "FontWeightValue": {
+      "anyOf": [
+        {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 1000
+        },
+        {
+          "$ref": "#/$defs/FontWeightKeyword"
+        }
+      ]
+    },
+    "DurationValue": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "number",
+          "minimum": 0
+        },
+        "unit": {
+          "type": "string",
+          "enum": ["ms", "s"]
+        }
+      },
+      "required": ["value", "unit"],
+      "additionalProperties": false
+    },
+    "CubicBezierValue": {
+      "description": "[P1x, P1y, P2x, P2y]; the x coordinates lie in [0, 1].",
+      "type": "array",
+      "prefixItems": [
+        {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "number"
+        }
+      ],
+      "items": {
+        "type": "number"
+      },
+      "minItems": 4,
+      "maxItems": 4
+    },
+    "NumberValue": {
+      "type": "number"
+    },
+    "StrokeStyleKeyword": {
+      "type": "string",
+      "enum": ["solid", "dashed", "dotted", "double", "groove", "ridge", "outset", "inset"]
+    },
+    "StrokeStyleObject": {
+      "type": "object",
+      "properties": {
+        "dashArray": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Alias"
+              },
+              {
+                "$ref": "#/$defs/DimensionValue"
+              }
+            ]
+          },
+          "minItems": 1
+        },
+        "lineCap": {
+          "type": "string",
+          "enum": ["round", "butt", "square"]
+        }
+      },
+      "required": ["dashArray", "lineCap"],
+      "additionalProperties": false
+    },
+    "StrokeStyleValue": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/StrokeStyleKeyword"
+        },
+        {
+          "$ref": "#/$defs/StrokeStyleObject"
+        }
+      ]
+    },
+    "BorderValue": {
+      "type": "object",
+      "properties": {
+        "color": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Alias"
+            },
+            {
+              "$ref": "#/$defs/ColorValue"
+            }
+          ]
+        },
+        "width": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Alias"
+            },
+            {
+              "$ref": "#/$defs/DimensionValue"
+            }
+          ]
+        },
+        "style": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Alias"
+            },
+            {
+              "$ref": "#/$defs/StrokeStyleValue"
+            }
+          ]
+        }
+      },
+      "required": ["color", "width", "style"],
+      "additionalProperties": false
+    },
+    "TransitionValue": {
+      "type": "object",
+      "properties": {
+        "duration": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Alias"
+            },
+            {
+              "$ref": "#/$defs/DurationValue"
+            }
+          ]
+        },
+        "delay": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Alias"
+            },
+            {
+              "$ref": "#/$defs/DurationValue"
+            }
+          ]
+        },
+        "timingFunction": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Alias"
+            },
+            {
+              "$ref": "#/$defs/CubicBezierValue"
+            }
+          ]
+        }
+      },
+      "required": ["duration", "delay", "timingFunction"],
+      "additionalProperties": false
+    },
+    "ShadowLayer": {
+      "type": "object",
+      "properties": {
+        "color": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Alias"
+            },
+            {
+              "$ref": "#/$defs/ColorValue"
+            }
+          ]
+        },
+        "offsetX": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Alias"
+            },
+            {
+              "$ref": "#/$defs/DimensionValue"
+            }
+          ]
+        },
+        "offsetY": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Alias"
+            },
+            {
+              "$ref": "#/$defs/DimensionValue"
+            }
+          ]
+        },
+        "blur": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Alias"
+            },
+            {
+              "$ref": "#/$defs/DimensionValue"
+            }
+          ]
+        },
+        "spread": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Alias"
+            },
+            {
+              "$ref": "#/$defs/DimensionValue"
+            }
+          ]
+        },
+        "inset": {
+          "type": "boolean"
+        }
+      },
+      "required": ["color", "offsetX", "offsetY", "blur", "spread"],
+      "additionalProperties": false
+    },
+    "ShadowValue": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ShadowLayer"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ShadowLayer"
+          },
+          "minItems": 1
+        }
+      ]
+    },
+    "GradientStop": {
+      "type": "object",
+      "properties": {
+        "color": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Alias"
+            },
+            {
+              "$ref": "#/$defs/ColorValue"
+            }
+          ]
+        },
+        "position": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Alias"
+            },
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          ]
+        }
+      },
+      "required": ["color", "position"],
+      "additionalProperties": false
+    },
+    "GradientValue": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/GradientStop"
+      },
+      "minItems": 1
+    },
+    "TypographyValue": {
+      "type": "object",
+      "properties": {
+        "fontFamily": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Alias"
+            },
+            {
+              "$ref": "#/$defs/FontFamilyValue"
+            }
+          ]
+        },
+        "fontSize": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Alias"
+            },
+            {
+              "$ref": "#/$defs/DimensionValue"
+            }
+          ]
+        },
+        "fontWeight": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Alias"
+            },
+            {
+              "$ref": "#/$defs/FontWeightValue"
+            }
+          ]
+        },
+        "letterSpacing": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Alias"
+            },
+            {
+              "$ref": "#/$defs/DimensionValue"
+            }
+          ]
+        },
+        "lineHeight": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Alias"
+            },
+            {
+              "$ref": "#/$defs/NumberValue"
+            }
+          ]
+        }
+      },
+      "required": ["fontFamily", "fontSize", "fontWeight", "letterSpacing", "lineHeight"],
+      "additionalProperties": false
+    },
+    "TokenFundamentoExtension": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/TokenId"
+        },
+        "role": {
+          "$ref": "#/$defs/TokenRole"
+        }
+      },
+      "required": ["id"],
+      "additionalProperties": false
+    },
+    "TokenExtensions": {
+      "type": "object",
+      "properties": {
+        "com.ciferecigo.fundamento": {
+          "$ref": "#/$defs/TokenFundamentoExtension"
+        }
+      },
+      "additionalProperties": true
+    },
+    "SetFundamentoExtension": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/TokenSetId"
+        },
+        "kondicxoj": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/KondicxoExpression"
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": ["id", "kondicxoj"],
+      "additionalProperties": false
+    },
+    "SetExtensions": {
+      "type": "object",
+      "properties": {
+        "com.ciferecigo.fundamento": {
+          "$ref": "#/$defs/SetFundamentoExtension"
+        }
+      },
+      "additionalProperties": true
+    },
+    "GroupExtensions": {
+      "description": "Extensions of a nested group. The Fundamento key is only allowed on tokens and on the set root.",
+      "type": "object",
+      "properties": {
+        "com.ciferecigo.fundamento": false
+      },
+      "additionalProperties": true
+    },
+    "DtcgToken": {
+      "description": "A DTCG 2025.10 token. $value is a literal of the token's type or a whole-value alias {a.b.c}. With an explicit $type the value is checked here; an inherited type is checked by the Modelo validation.",
+      "type": "object",
+      "properties": {
+        "$value": {},
+        "$type": {
+          "$ref": "#/$defs/DtcgType"
+        },
+        "$description": {
+          "type": "string"
+        },
+        "$extensions": {
+          "$ref": "#/$defs/TokenExtensions"
+        },
+        "$deprecated": {
+          "$ref": "#/$defs/Deprecated"
+        }
+      },
+      "required": ["$value"],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "$type": {
+                "const": "color"
+              }
+            },
+            "required": ["$type"]
+          },
+          "then": {
+            "properties": {
+              "$value": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/Alias"
+                  },
+                  {
+                    "$ref": "#/$defs/ColorValue"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "$type": {
+                "const": "dimension"
+              }
+            },
+            "required": ["$type"]
+          },
+          "then": {
+            "properties": {
+              "$value": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/Alias"
+                  },
+                  {
+                    "$ref": "#/$defs/DimensionValue"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "$type": {
+                "const": "fontFamily"
+              }
+            },
+            "required": ["$type"]
+          },
+          "then": {
+            "properties": {
+              "$value": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/Alias"
+                  },
+                  {
+                    "$ref": "#/$defs/FontFamilyValue"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "$type": {
+                "const": "fontWeight"
+              }
+            },
+            "required": ["$type"]
+          },
+          "then": {
+            "properties": {
+              "$value": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/Alias"
+                  },
+                  {
+                    "$ref": "#/$defs/FontWeightValue"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "$type": {
+                "const": "duration"
+              }
+            },
+            "required": ["$type"]
+          },
+          "then": {
+            "properties": {
+              "$value": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/Alias"
+                  },
+                  {
+                    "$ref": "#/$defs/DurationValue"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "$type": {
+                "const": "cubicBezier"
+              }
+            },
+            "required": ["$type"]
+          },
+          "then": {
+            "properties": {
+              "$value": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/Alias"
+                  },
+                  {
+                    "$ref": "#/$defs/CubicBezierValue"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "$type": {
+                "const": "number"
+              }
+            },
+            "required": ["$type"]
+          },
+          "then": {
+            "properties": {
+              "$value": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/Alias"
+                  },
+                  {
+                    "$ref": "#/$defs/NumberValue"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "$type": {
+                "const": "strokeStyle"
+              }
+            },
+            "required": ["$type"]
+          },
+          "then": {
+            "properties": {
+              "$value": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/Alias"
+                  },
+                  {
+                    "$ref": "#/$defs/StrokeStyleValue"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "$type": {
+                "const": "shadow"
+              }
+            },
+            "required": ["$type"]
+          },
+          "then": {
+            "properties": {
+              "$value": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/Alias"
+                  },
+                  {
+                    "$ref": "#/$defs/ShadowValue"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "$type": {
+                "const": "typography"
+              }
+            },
+            "required": ["$type"]
+          },
+          "then": {
+            "properties": {
+              "$value": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/Alias"
+                  },
+                  {
+                    "$ref": "#/$defs/TypographyValue"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "$type": {
+                "const": "border"
+              }
+            },
+            "required": ["$type"]
+          },
+          "then": {
+            "properties": {
+              "$value": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/Alias"
+                  },
+                  {
+                    "$ref": "#/$defs/BorderValue"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "$type": {
+                "const": "gradient"
+              }
+            },
+            "required": ["$type"]
+          },
+          "then": {
+            "properties": {
+              "$value": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/Alias"
+                  },
+                  {
+                    "$ref": "#/$defs/GradientValue"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "$type": {
+                "const": "transition"
+              }
+            },
+            "required": ["$type"]
+          },
+          "then": {
+            "properties": {
+              "$value": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/Alias"
+                  },
+                  {
+                    "$ref": "#/$defs/TransitionValue"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "DtcgGroup": {
+      "description": "A DTCG group. Child keys are name segments ([a-z0-9]+, FR-13a); the canonical token name is the dot-joined path.",
+      "type": "object",
+      "properties": {
+        "$type": {
+          "$ref": "#/$defs/DtcgType"
+        },
+        "$description": {
+          "type": "string"
+        },
+        "$extensions": {
+          "$ref": "#/$defs/GroupExtensions"
+        },
+        "$deprecated": {
+          "$ref": "#/$defs/Deprecated"
+        }
+      },
+      "patternProperties": {
+        "^[a-z0-9]+$": {
+          "$ref": "#/$defs/DtcgNode"
+        }
+      },
+      "additionalProperties": false
+    },
+    "DtcgNode": {
+      "description": "A token (object with $value) or a group (anything else).",
+      "if": {
+        "type": "object",
+        "properties": {
+          "$value": true
+        },
+        "required": ["$value"]
+      },
+      "then": {
+        "$ref": "#/$defs/DtcgToken"
+      },
+      "else": {
+        "$ref": "#/$defs/DtcgGroup"
+      }
+    },
+    "TokenSetFile": {
+      "description": "Root of a set file (vortaro/sets/<set-name>.json): a DTCG group whose extension carries the set ID and its kondicxoj (empty for core).",
+      "type": "object",
+      "properties": {
+        "$type": {
+          "$ref": "#/$defs/DtcgType"
+        },
+        "$description": {
+          "type": "string"
+        },
+        "$extensions": {
+          "$ref": "#/$defs/SetExtensions"
+        },
+        "$deprecated": {
+          "$ref": "#/$defs/Deprecated"
+        }
+      },
+      "patternProperties": {
+        "^[a-z0-9]+$": {
+          "$ref": "#/$defs/DtcgNode"
+        }
+      },
+      "additionalProperties": false
+    },
+    "KontrastKategorio": {
+      "type": "string",
+      "enum": ["text-normal", "text-large", "ui"]
+    },
+    "Wcag2Sojloj": {
+      "description": "Minimum WCAG 2.x contrast ratios (binding).",
+      "type": "object",
+      "properties": {
+        "text-normal": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 21
+        },
+        "text-large": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 21
+        },
+        "ui": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 21
+        }
+      },
+      "required": ["text-normal", "text-large", "ui"],
+      "additionalProperties": false
+    },
+    "ApcaSojloj": {
+      "description": "Minimum absolute APCA Lc values (advisory).",
+      "type": "object",
+      "properties": {
+        "text-normal": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 110
+        },
+        "text-large": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 110
+        },
+        "ui": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 110
+        }
+      },
+      "required": ["text-normal", "text-large", "ui"],
+      "additionalProperties": false
+    },
+    "KontrastSojloj": {
+      "type": "object",
+      "properties": {
+        "wcag2": {
+          "$ref": "#/$defs/Wcag2Sojloj"
+        },
+        "apca": {
+          "$ref": "#/$defs/ApcaSojloj"
+        }
+      },
+      "required": ["wcag2"],
+      "additionalProperties": false
+    },
+    "AspektoMetadata": {
+      "type": "object",
+      "properties": {
+        "owner": {
+          "$ref": "#/$defs/NonEmptyText"
+        },
+        "licenseNote": {
+          "$ref": "#/$defs/NonEmptyText"
+        }
+      },
+      "required": ["owner", "licenseNote"],
+      "additionalProperties": false
+    },
+    "DimensioValoro": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/DimensioValoroId"
+        },
+        "name": {
+          "$ref": "#/$defs/Name"
+        },
+        "kontrastSojloj": {
+          "$ref": "#/$defs/KontrastSojloj"
+        },
+        "aspekto": {
+          "$ref": "#/$defs/AspektoMetadata"
+        }
+      },
+      "required": ["id", "name"],
+      "additionalProperties": false
+    },
+    "Dimensio": {
+      "description": "An adaptation dimension. priority is unique; 1 is lowest and higher priorities win in resolution.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/DimensioId"
+        },
+        "name": {
+          "$ref": "#/$defs/Name"
+        },
+        "priority": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "default": {
+          "$ref": "#/$defs/Name"
+        },
+        "valoroj": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DimensioValoro"
+          },
+          "minItems": 1
+        }
+      },
+      "required": ["id", "name", "priority", "default", "valoroj"],
+      "additionalProperties": false
+    },
+    "DimensiojFile": {
+      "type": "object",
+      "properties": {
+        "dimensioj": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Dimensio"
+          }
+        }
+      },
+      "required": ["dimensioj"],
+      "additionalProperties": false
+    },
+    "Regulo": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/ReguloId"
+        },
+        "name": {
+          "$ref": "#/$defs/Name"
+        },
+        "statement": {
+          "$ref": "#/$defs/NonEmptyText"
+        },
+        "kialo": {
+          "$ref": "#/$defs/NonEmptyText"
+        },
+        "scope": {
+          "$ref": "#/$defs/NonEmptyText"
+        },
+        "checkability": {
+          "type": "string",
+          "enum": ["automatic", "manual"]
+        }
+      },
+      "required": ["id", "name", "statement", "kialo", "scope", "checkability"],
+      "additionalProperties": false
+    },
+    "RegulojFile": {
+      "type": "object",
+      "properties": {
+        "reguloj": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Regulo"
+          }
+        }
+      },
+      "required": ["reguloj"],
+      "additionalProperties": false
+    },
+    "JugxoReguloRef": {
+      "type": "object",
+      "properties": {
+        "regulo": {
+          "$ref": "#/$defs/ReguloId"
+        }
+      },
+      "required": ["regulo"],
+      "additionalProperties": false
+    },
+    "JugxoEroRef": {
+      "type": "object",
+      "properties": {
+        "ero": {
+          "$ref": "#/$defs/EroId"
+        }
+      },
+      "required": ["ero"],
+      "additionalProperties": false
+    },
+    "JugxoArtikoloRef": {
+      "type": "object",
+      "description": "A constitution Article (I to XIII), for Jugxoj that record a deviation from the constitution itself.",
+      "properties": {
+        "artikolo": {
+          "enum": ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII", "XIII"]
+        }
+      },
+      "required": ["artikolo"],
+      "additionalProperties": false
+    },
+    "Jugxo": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/JugxoId"
+        },
+        "ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/JugxoReguloRef"
+            },
+            {
+              "$ref": "#/$defs/JugxoEroRef"
+            },
+            {
+              "$ref": "#/$defs/JugxoArtikoloRef"
+            }
+          ]
+        },
+        "decision": {
+          "type": "string",
+          "enum": ["approved", "rejected", "deviation-recorded"]
+        },
+        "kialo": {
+          "$ref": "#/$defs/NonEmptyText"
+        },
+        "date": {
+          "type": "string",
+          "format": "date"
+        },
+        "context": {
+          "type": "string"
+        }
+      },
+      "required": ["id", "ref", "decision", "kialo", "date", "context"],
+      "additionalProperties": false
+    },
+    "JugxojFile": {
+      "type": "object",
+      "properties": {
+        "jugxoj": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Jugxo"
+          }
+        }
+      },
+      "required": ["jugxoj"],
+      "additionalProperties": false
+    },
+    "KontrastParo": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/KontrastParoId"
+        },
+        "name": {
+          "$ref": "#/$defs/Name"
+        },
+        "foreground": {
+          "$ref": "#/$defs/TokenName"
+        },
+        "background": {
+          "$ref": "#/$defs/TokenName"
+        },
+        "kategorio": {
+          "$ref": "#/$defs/KontrastKategorio"
+        }
+      },
+      "required": ["id", "name", "foreground", "background", "kategorio"],
+      "additionalProperties": false
+    },
+    "KontrastParojFile": {
+      "type": "object",
+      "properties": {
+        "kontrastParoj": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/KontrastParo"
+          }
+        }
+      },
+      "required": ["kontrastParoj"],
+      "additionalProperties": false
+    },
+    "IdStatus": {
+      "type": "string",
+      "enum": ["active", "retired"]
+    },
+    "IdsLockEntry": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "$ref": "#/$defs/EntityType"
+        },
+        "status": {
+          "$ref": "#/$defs/IdStatus"
+        }
+      },
+      "required": ["type", "status"],
+      "additionalProperties": false
+    },
+    "IdsLock": {
+      "description": "data/ids.lock.json: every ID ever issued, with its entity type and status. Keys are sorted.",
+      "type": "object",
+      "properties": {
+        "ids": {
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/AnyId"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/IdsLockEntry"
+          }
+        }
+      },
+      "required": ["ids"],
+      "additionalProperties": false
+    },
+    "AliasLink": {
+      "type": "object",
+      "properties": {
+        "token": {
+          "$ref": "#/$defs/TokenName"
+        },
+        "set": {
+          "$ref": "#/$defs/SetName"
+        }
+      },
+      "required": ["token", "set"],
+      "additionalProperties": false
+    },
+    "ResolvedTokenOrigin": {
+      "type": "object",
+      "properties": {
+        "set": {
+          "$ref": "#/$defs/SetName"
+        },
+        "setId": {
+          "$ref": "#/$defs/TokenSetId"
+        }
+      },
+      "required": ["set", "setId"],
+      "additionalProperties": false
+    },
+    "ResolvedToken": {
+      "description": "A token's final value in one combination, with aliases fully inlined, plus its provenance.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/TokenId"
+        },
+        "type": {
+          "$ref": "#/$defs/DtcgType"
+        },
+        "value": {},
+        "origin": {
+          "$ref": "#/$defs/ResolvedTokenOrigin"
+        },
+        "aliasChain": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/AliasLink"
+          }
+        },
+        "fieldAliases": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/AliasLink"
+            }
+          }
+        }
+      },
+      "required": ["id", "type", "value", "origin", "aliasChain"],
+      "additionalProperties": false
+    },
+    "Rezolvo": {
+      "description": "Result of one resolution: the complete assignment (dimensio -> valoro) and every token with value and provenance.",
+      "type": "object",
+      "properties": {
+        "assignment": {
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/Name"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/Name"
+          }
+        },
+        "tokens": {
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/TokenName"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/ResolvedToken"
+          }
+        }
+      },
+      "required": ["assignment", "tokens"],
+      "additionalProperties": false
+    },
+    "Ero": {
+      "description": "A component. Schema only in Phase 0.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/EroId"
+        },
+        "name": {
+          "$ref": "#/$defs/Name"
+        },
+        "skemo": {
+          "$ref": "#/$defs/SkemoId"
+        },
+        "description": {
+          "type": "string"
+        }
+      },
+      "required": ["id", "name", "skemo"],
+      "additionalProperties": false
+    },
+    "SkemoProp": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/Name"
+        },
+        "kind": {
+          "type": "string",
+          "enum": ["enum", "boolean", "string", "number"]
+        },
+        "values": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Name"
+          },
+          "uniqueItems": true
+        },
+        "default": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "boolean"
+            }
+          ]
+        }
+      },
+      "required": ["name", "kind"],
+      "additionalProperties": false
+    },
+    "Skemo": {
+      "description": "The machine-readable specification of an Ero: props and states. Schema only in Phase 0.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/SkemoId"
+        },
+        "ero": {
+          "$ref": "#/$defs/EroId"
+        },
+        "props": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SkemoProp"
+          }
+        },
+        "states": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Name"
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": ["id", "ero", "props", "states"],
+      "additionalProperties": false
+    },
+    "Sxablono": {
+      "description": "A template or pattern (layout, page type, flow). Schema only in Phase 0.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/SxablonoId"
+        },
+        "name": {
+          "$ref": "#/$defs/Name"
+        },
+        "kind": {
+          "type": "string",
+          "enum": ["layout", "page", "flow"]
+        },
+        "eroj": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/EroId"
+          }
+        },
+        "description": {
+          "type": "string"
+        }
+      },
+      "required": ["id", "name", "kind", "eroj"],
+      "additionalProperties": false
+    },
+    "Projekcio": {
+      "description": "A derivation from the Modelo into one output target. Schema only in Phase 0.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/ProjekcioId"
+        },
+        "name": {
+          "$ref": "#/$defs/Name"
+        },
+        "celo": {
+          "$ref": "#/$defs/CeloId"
+        },
+        "description": {
+          "type": "string"
+        }
+      },
+      "required": ["id", "name", "celo"],
+      "additionalProperties": false
+    },
+    "Celo": {
+      "description": "An output target of a Projekcio. Target-specific knowledge lives in package code, never here. Schema only in Phase 0.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/CeloId"
+        },
+        "name": {
+          "$ref": "#/$defs/Name"
+        },
+        "description": {
+          "type": "string"
+        }
+      },
+      "required": ["id", "name"],
+      "additionalProperties": false
+    },
+    "AspektoEntry": {
+      "description": "Convenience view of one value of the aspekto Dimensio (it shares the DimensioValoro ID).",
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/DimensioValoroId"
+        },
+        "name": {
+          "$ref": "#/$defs/Name"
+        },
+        "owner": {
+          "$ref": "#/$defs/NonEmptyText"
+        },
+        "licenseNote": {
+          "$ref": "#/$defs/NonEmptyText"
+        }
+      },
+      "required": ["id", "name", "owner", "licenseNote"],
+      "additionalProperties": false
+    },
+    "TokenInventoryEntry": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/TokenId"
+        },
+        "name": {
+          "$ref": "#/$defs/TokenName"
+        },
+        "type": {
+          "$ref": "#/$defs/DtcgType"
+        },
+        "description": {
+          "type": "string"
+        },
+        "role": {
+          "$ref": "#/$defs/TokenRole"
+        }
+      },
+      "required": ["id", "name", "type"],
+      "additionalProperties": false
+    },
+    "ExportedSet": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/TokenSetId"
+        },
+        "name": {
+          "$ref": "#/$defs/SetName"
+        },
+        "kondicxoj": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/KondicxoExpression"
+          },
+          "uniqueItems": true
+        },
+        "tree": {
+          "$ref": "#/$defs/TokenSetFile"
+        }
+      },
+      "required": ["id", "name", "kondicxoj", "tree"],
+      "additionalProperties": false
+    }
+  }
+}

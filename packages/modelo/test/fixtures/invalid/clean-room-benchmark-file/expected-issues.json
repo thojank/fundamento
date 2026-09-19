@@ -1,0 +1,8 @@
+{
+  "description": "A file lies under a benchmark directory (FR-17). The repo .gitignore ignores every _benchmark/ directory, so the benchmark file cannot be committed with this fixture: tests copy the fixture to a temporary directory and create the files listed in 'materialize' there. Run by hand: cp -R <this dir> /tmp/fm-cr && mkdir -p /tmp/fm-cr/_benchmark && echo '{}' > /tmp/fm-cr/_benchmark/tokens.json && pnpm check:clean-room --fixture /tmp/fm-cr (exit 1).",
+  "check": "clean-room",
+  "materialize": { "_benchmark/tokens.json": "{}\n" },
+  "issues": [
+    { "rule": "clean-room-benchmark-path", "path": "_benchmark/" }
+  ]
+}

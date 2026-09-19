@@ -1,0 +1,9 @@
+{
+  "description": "color-scheme/dark defines color.border.default, which core lacks.",
+  "issues": [
+    {
+      "rule": "set-introduces-token",
+      "path": "vortaro/sets/color-scheme/dark.json#/color/border/default"
+    }
+  ]
+}

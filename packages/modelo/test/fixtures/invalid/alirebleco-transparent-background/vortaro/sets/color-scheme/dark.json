@@ -1,0 +1,19 @@
+{
+  "$extensions": {
+    "com.ciferecigo.fundamento": {
+      "id": "set_01K5FMAJ07WSBKK3Q3SN0DG7H3",
+      "kondicxoj": ["color-scheme=dark"]
+    }
+  },
+  "color": {
+    "$type": "color",
+    "background": {
+      "default": {
+        "$value": { "colorSpace": "srgb", "components": [0.1, 0.1, 0.1], "alpha": 0.5, "hex": "#1a1a1a" }
+      }
+    },
+    "text": {
+      "default": { "$value": "{color.palette.neutral.100}" }
+    }
+  }
+}

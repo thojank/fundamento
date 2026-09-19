@@ -1,0 +1,9 @@
+{
+  "description": "color.text.default (color) references {spacing.small}, a dimension token.",
+  "issues": [
+    {
+      "rule": "alias-type-mismatch",
+      "path": "vortaro/sets/core.json#/color/text/default/$value"
+    }
+  ]
+}

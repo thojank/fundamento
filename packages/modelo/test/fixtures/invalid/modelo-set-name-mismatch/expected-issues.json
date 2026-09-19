@@ -1,0 +1,9 @@
+{
+  "description": "The contrast=high set lives in sets/contrast/hi.json; its canonical name is contrast/high.",
+  "issues": [
+    {
+      "rule": "set-name-mismatch",
+      "path": "vortaro/sets/contrast/hi.json#"
+    }
+  ]
+}

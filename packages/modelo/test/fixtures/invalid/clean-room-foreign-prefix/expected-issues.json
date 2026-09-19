@@ -1,0 +1,7 @@
+{
+  "description": "A custom element is registered outside the fm- namespace. clean-room applies the FR-14 allowlist and reports clean-room-foreign-prefix; vortaro-lint reports the same finding as namespace-custom-element.",
+  "check": "clean-room",
+  "issues": [
+    { "rule": "clean-room-foreign-prefix", "path": "src/elements.ts:2:1" }
+  ]
+}

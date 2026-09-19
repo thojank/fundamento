@@ -1,0 +1,35 @@
+{
+  "$extensions": {
+    "com.ciferecigo.fundamento": {
+      "id": "set_01M2WRK8G0DDDDDDDDDDDDDDDN",
+      "kondicxoj": []
+    }
+  },
+  "color": {
+    "$type": "color",
+    "a": {
+      "$value": "{color.b}",
+      "$extensions": {
+        "com.ciferecigo.fundamento": {
+          "id": "tok_01M2WRK8G0DDDDDDDDDDDDDDE3"
+        }
+      }
+    },
+    "b": {
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [
+          0.5,
+          0.5,
+          0.5
+        ],
+        "hex": "#808080"
+      },
+      "$extensions": {
+        "com.ciferecigo.fundamento": {
+          "id": "tok_01M2WRK8G0DDDDDDDDDDDDDDE4"
+        }
+      }
+    }
+  }
+}

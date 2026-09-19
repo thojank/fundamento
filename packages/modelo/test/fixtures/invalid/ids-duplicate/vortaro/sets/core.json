@@ -1,0 +1,69 @@
+{
+  "$extensions": {
+    "com.ciferecigo.fundamento": {
+      "id": "set_01M2SVWYM039AWTQ5JA8FTY23W",
+      "kondicxoj": []
+    }
+  },
+  "color": {
+    "$type": "color",
+    "palette": {
+      "neutral": {
+        "0": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              1,
+              1,
+              1
+            ],
+            "hex": "#ffffff"
+          },
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2SVWYM039AWTQ5JA8FTY23X"
+            }
+          }
+        },
+        "900": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.1,
+              0.1,
+              0.1
+            ],
+            "hex": "#1a1a1a"
+          },
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2SVWYM039AWTQ5JA8FTY23Y"
+            }
+          }
+        }
+      }
+    },
+    "background": {
+      "default": {
+        "$value": "{color.palette.neutral.0}",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2SVWYM039AWTQ5JA8FTY23Z",
+            "role": "background"
+          }
+        }
+      }
+    },
+    "text": {
+      "default": {
+        "$value": "{color.palette.neutral.900}",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2SVWYM039AWTQ5JA8FTY23Z",
+            "role": "foreground"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "name": "@fundamento/modelo",
+  "version": "0.0.1",
+  "description": "Fundamento Modelo: schema, loading, validation, resolution, checks and export.",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "schema",
+    "data"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json && node dist/export/build.js",
+    "test": "vitest run",
+    "lint": "tsc -p tsconfig.json --noEmit && biome check .",
+    "generate:types": "node src/contracts/type-generation.ts"
+  },
+  "dependencies": {
+    "@fundamento/vortaro": "workspace:*",
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1",
+    "colorjs.io": "^0.7.1",
+    "jsonc-parser": "^3.3.1",
+    "postcss": "^8.5.28",
+    "ulid": "^3.0.2"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.5",
+    "fast-check": "^4.10.1",
+    "json-schema-to-typescript": "^16.0.0",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.1",
+    "yaml": "^2.9.1"
+  }
+}

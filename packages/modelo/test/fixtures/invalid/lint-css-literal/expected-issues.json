@@ -1,0 +1,7 @@
+{
+  "description": "A Projekcio CSS declaration uses a literal color instead of a var(--fm-*) token reference. vortaro-lint reports css-literal-value at the declaration.",
+  "check": "vortaro-lint",
+  "issues": [
+    { "rule": "css-literal-value", "path": "packages/projekcioj/css/fundamento.css:6:3" }
+  ]
+}

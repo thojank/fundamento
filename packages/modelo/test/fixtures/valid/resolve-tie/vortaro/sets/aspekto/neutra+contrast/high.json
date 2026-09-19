@@ -1,0 +1,27 @@
+{
+  "$extensions": {
+    "com.ciferecigo.fundamento": {
+      "id": "set_01M2WRK8G0DDDDDDDDDDDDDDE1",
+      "kondicxoj": [
+        "aspekto=neutra",
+        "contrast=high"
+      ]
+    }
+  },
+  "color": {
+    "$type": "color",
+    "text": {
+      "default": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0,
+            0,
+            0
+          ],
+          "hex": "#000000"
+        }
+      }
+    }
+  }
+}

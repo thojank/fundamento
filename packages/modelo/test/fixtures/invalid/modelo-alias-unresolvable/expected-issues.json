@@ -1,0 +1,13 @@
+{
+  "description": "color-scheme/dark introduces color.accent and contrast/high points color.text.default at it, so color-scheme=light,contrast=high cannot resolve it. Both the introduction and the first failing combination are reported.",
+  "issues": [
+    {
+      "rule": "alias-unresolvable-in-combination",
+      "path": "rezolvo(color-scheme=light,contrast=high)/color.text.default"
+    },
+    {
+      "rule": "set-introduces-token",
+      "path": "vortaro/sets/color-scheme/dark.json#/color/accent"
+    }
+  ]
+}

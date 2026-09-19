@@ -1,0 +1,6 @@
+{
+  "$extensions": {
+    "com.ciferecigo.fundamento": { "id": "set_01M2VEEDW45A0B9Q4GQ465NCHE", "kondicxoj": ["viewport=compact"] }
+  },
+  "font": { "size": { "$type": "dimension", "body": { "$value": { "value": 14, "unit": "px" } } } }
+}

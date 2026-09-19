@@ -1,0 +1,30 @@
+{
+  "$extensions": {
+    "com.ciferecigo.fundamento": {
+      "id": "set_01M2WRK8G0DDDDDDDDDDDDDDDN",
+      "kondicxoj": []
+    }
+  },
+  "color": {
+    "$type": "color",
+    "text": {
+      "default": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.1,
+            0.1,
+            0.1
+          ],
+          "hex": "#1a1a1a"
+        },
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2WRK8G0DDDDDDDDDDDDDDDW",
+            "role": "foreground"
+          }
+        }
+      }
+    }
+  }
+}

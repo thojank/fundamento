@@ -1,0 +1,14 @@
+{
+  "items": {
+    "x": {
+      "props": { "size": ["small", "large"], "variant": ["primary", "secondary"] },
+      "states": ["default", "disabled", "hover"],
+      "values": { "padding": "8px" }
+    },
+    "y": {
+      "props": {},
+      "states": ["default"],
+      "values": {}
+    }
+  }
+}
