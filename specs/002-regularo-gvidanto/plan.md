@@ -1,6 +1,6 @@
 # Plan – Spec 002: Regularo und Gvidanto (Kern), Ontologio
 
-**Spec:** [`spec.md`](spec.md) (approved) · **Research:** [`research.md`](research.md) (§8–§9 added by this plan) · **Data model:** [`data-model.md`](data-model.md) · **Contracts:** [`contracts/`](contracts/) · **Quickstart:** [`quickstart.md`](quickstart.md) · **Constitution:** v1.4 (binding) · **Status:** draft for maintainer review; no tasks yet · **Date:** 2026-09-19 · **Base:** `main` @ `639062a`
+**Spec:** [`spec.md`](spec.md) (approved) · **Research:** [`research.md`](research.md) (§8–§9 added by this plan) · **Data model:** [`data-model.md`](data-model.md) · **Contracts:** [`contracts/`](contracts/) · **Quickstart:** [`quickstart.md`](quickstart.md) · **Constitution:** v1.4 (binding) · **Status:** accepted by the maintainer 2026-09-19 (decisions D-06, D-07, D-17; review points R1–R3 decided, see "Maintainer review"); tasks in [`tasks.md`](tasks.md) · **Date:** 2026-09-19 · **Base:** `main` @ `639062a`
 
 This plan is the output of `/speckit.plan` for Spec 002. It fixes the technical design of Phase 2, makes the three decisions the spec delegates to the plan (FR-03 metric and threshold, FR-05 state text colours, FR-19 SDK), reviews the design against every Article of Constitution v1.4 and lists the deviations under Complexity Tracking. `/speckit.tasks` runs only after the maintainer has reviewed these artifacts and `/speckit.analyze` has passed (Governance).
 
@@ -82,22 +82,22 @@ Phase 2 adds no package. It extends `@fundamento/modelo`, `@fundamento/vortaro`,
 
   | Set | Today | After |
   |---|---|---|
-  | `contrast/high` | subtle → `neutral.800`, muted → `neutral.800` | default → `neutral.950`, subtle → `neutral.900`, muted → `neutral.800` |
+  | `contrast/high` | subtle → `neutral.800`, muted → `neutral.800` | default → `neutral.1000`, subtle → `neutral.950`, muted → `neutral.900` |
   | `color-scheme/dark+contrast/high` | subtle → `neutral.100`, muted → `neutral.100` | default → `neutral.50` (new, required because `contrast/high` now re-points `default` and outranks `color-scheme/dark`), subtle → `neutral.100`, muted → `neutral.200` |
 
-  Minimum contrast over the four surfaces afterwards (komuna / ekzemplo): light/high 15.41 / 12.42 / 9.25 and 15.42 / 12.44 / 9.26; dark/high 13.57 / 12.42 / 10.49 and 13.59 / 12.44 / 10.50. Every text pair stays ≥ 7:1 under `contrast=high` (Spec 001 AK-02), and no threshold changes (research §8.3). External packages that follow the core in high contrast (ciferecigo) inherit the fix; the maintainer repeats their acceptance outside the repo (spec edge case).
+  High contrast means maximum contrast for the main role (R2): in light, `text.default` takes the darkest step, and `950` and `900` stay for subtle and muted. Minimum contrast over the four surfaces afterwards (komuna / ekzemplo): light/high 17.88 / 15.41 / 12.42 and 16.31 / 15.42 / 12.44; dark/high 13.57 / 12.42 / 10.49 and 13.59 / 12.44 / 10.50. A test asserts explicitly, for komuna and ekzemplo in light/high and dark/high, that the three text roles resolve to three different values, each ≥ 7:1 on all four surfaces, in falling order. Every text pair stays ≥ 7:1 under `contrast=high` (Spec 001 AK-02), and no threshold changes (research §8.3). External packages that follow the core in high contrast (ciferecigo) inherit the fix; the maintainer repeats their acceptance outside the repo (spec edge case).
 
 ### D-06 `state-distinct`: metric and threshold (decision on FR-03)
 
-**Decision: the metric is the absolute OKLCH lightness difference |ΔL| between a state and `rest`, and the threshold is 0.04.** For every action variant `v` found in core (`color.action.<v>.rest` exists), each of `hover`, `pressed` and `selected` must satisfy |L(state) − L(rest)| ≥ 0.04 in every combination.
+**Decision: the metric is the absolute OKLCH lightness difference |ΔL| between a state and `rest`, and the threshold is 0.05 (R1).** For every action variant `v` found in core (`color.action.<v>.rest` exists), each of `hover`, `pressed` and `selected` must satisfy |L(state) − L(rest)| ≥ 0.05 in every combination.
 
 Why lightness and not ΔE_OK:
 - A state that differs from `rest` only in hue or chroma is invisible to many people with a colour-vision deficiency and in greyscale. WCAG 1.4.1 (use of colour) points the same way. Lightness survives both.
 - The data shows that this is not hypothetical: komuna's `action.tertiary.selected` in dark differs from `rest` by ΔE_OK 0.035 and by ΔL **0.000**. The difference is hue and chroma alone (research §8.2). A ΔE_OK rule counts such a difference as visible; with a more saturated accent it would pass any ΔE_OK threshold while staying invisible in greyscale.
 - Surfaces (`surface-order`) are already measured in OKLCH L. One colour quantity for all three combination Reguloj keeps them explainable.
-- ΔL ≤ ΔE_OK always holds, so ΔL ≥ 0.04 implies ΔE_OK ≥ 0.04. The rule is at least as strict as the ΔE_OK candidate from research §2 at the same number.
+- ΔL ≤ ΔE_OK always holds, so ΔL ≥ 0.05 implies ΔE_OK ≥ 0.05. The rule is at least as strict as the ΔE_OK candidate from research §2 at the same number.
 
-Why 0.04: research §2 puts the practical JND of ΔE_OK at about 0.02 with a wide spread between people; a state should be clearly visible, not barely. 0.04 is twice the JND, the smallest multiple that is not "at the threshold". It is also the largest value the existing primary and secondary ramps pass without changes (minimum measured |ΔL| 0.055), so the rule targets the defect found (tertiary states) and not the whole palette design. The number lives in the Modelo (`sojlo`, D-02) and can be raised by a later spec.
+Why 0.05 (maintainer decision R1): the rule means "clearly different", not "just perceptible". Research §2 puts the practical JND of ΔE_OK at about 0.02 with a wide spread between people; 0.05 is 2.5 times that and leaves a reserve for poor displays and colour-vision deficiency. It costs nothing: primary and secondary pass today with at least 0.055, so the rule targets the defect found (tertiary states) and not the whole palette design. This reasoning is part of the Regulo's kialo (data-model §3). The number lives in the Modelo (`sojlo`, D-02) and can be raised by a later spec.
 
 **Repair.** komuna (and ekzemplo, which mirrors the core aliases) fail today in two places: `tertiary.hover` in light (|ΔL| 0.025) and `tertiary.selected` (light 0.025, dark 0.000). New core aliases:
 
@@ -149,7 +149,8 @@ A **role token** is a core token whose value is an alias or a composite with at 
 - **Kategorio** in this order: the input; else the declared pair's `kategorio`; else from the foreground's role (`foreground` → `text-normal`; `border`, `focus` → `ui`). Any other role without input gives `kategorio-required` with `allowed`. The output states `kategorioSource: "input" | "declared" | "role"`.
 - **Declared** means a KontrastParo whose main pair equals the input, or whose `aux` pair does (returned with `position: "main" | "aux"`, its ID, name and kialo).
 - **Combinations.** Without `assignment`: every combination of every Aspekto. With `assignment`: that one combination (missing Dimensioj get their defaults, as `resolve` does).
-- **Grouping.** Results with identical resolved colours and identical sojloj are grouped: one entry per group with `combinations: string[]` (formatted, canonical). For komuna that is 4 entries instead of 72. AK-04 compares per combination by looking up the group.
+- **Grouping (R3).** Results are grouped by identical **result**, not by Dimensio values and not by Aspekto: the key is the WCAG ratio at two decimals, the threshold and `passed`. For a declared pair with `aux` the key also holds `branch` and the aux ratio at two decimals, because otherwise the group would hide which branch carries. Each group carries the result plus the **complete** list of its combinations (formatted, canonical order), so no information is lost: every combination appears in exactly one group. APCA is advisory and not part of the key; each group reports its lowest `lc`. Groups are ordered by first combination. AK-04 compares per combination by looking up its group.
+- **Two decimals** use the Alirebleco convention (truncated, not rounded), so a ratio of 4.499 appears as 4.49 and can never look like a pass of 4.5.
 - Measurement uses `measureKontrastParo` for declared pairs (so `aux` and branch are reported) and the same compositing and metrics for undeclared ones.
 
 ### D-12 `explain` (FR-10)
@@ -357,7 +358,7 @@ One entry per Article of Constitution v1.4.
 | **Distinct-violation reporting** (D-04) | One issue per combination would print 36 issues for 2 defects in komuna. | `explain_regulo` counts distinct violations, not combinations (`violations.unit`). |
 | **Resolution cache** (D-04) | Avoids a second resolution pass per validation (≈ 143 ms per 144 combinations). | A `WeakMap` keyed by Modelo; no invalidation needed, Modelos are immutable after build. |
 | **Token-subset resolution** (D-18) | `check_contrast` over all combinations must stay < 100 ms. | Second code path in the binder, covered by an equivalence property test (subset = full, filtered). |
-| **Grouped `check_contrast` results** (D-11) | 72 identical entries per Aspekto would bury the answer. | Parity test must expand groups (AK-04). |
+| **Grouped `check_contrast` results** (D-11, R3) | 72 near-identical entries per Aspekto would bury the answer; grouping by result keeps every combination listed. | Parity test must expand groups (AK-04). |
 | **ΔL instead of ΔE_OK** (D-06) | Colour-vision deficiency and a hue-only state found in komuna. | A state that differs strongly in chroma but little in lightness fails; the suggestion explains why. Revisit with Ero data in Phase 3. |
 | **No state text colours** (D-07) | No second concrete user; states can move away from the text lightness. | Re-evaluate with `butono` (Phase 3). |
 | **`contrast/high` re-points `text.default`** (D-05) | Needed to make three different steps ≥ 7:1 in light. | Forces the explicit `text.default` in `color-scheme/dark+contrast/high`; any future token re-pointed in `contrast/high` must be restated there (existing practice, now one token more). |
@@ -382,7 +383,7 @@ One entry per Article of Constitution v1.4.
 |---|---|
 | FR-01 | D-04, D-05 |
 | FR-02 | D-04, D-05 |
-| FR-03 | D-04, **D-06 (decision: \|ΔL\| OKLCH ≥ 0.04)** |
+| FR-03 | D-04, **D-06 (decision: \|ΔL\| OKLCH ≥ 0.05)** |
 | FR-04 | D-08 |
 | FR-05 | D-05, D-06, **D-07 (decision: no state text colours)** |
 | FR-06 | D-09 |
@@ -409,10 +410,14 @@ One entry per Article of Constitution v1.4.
 | AK-10 | unchanged export path |
 | AK-11 | no open marker |
 
-## Open points for the maintainer review
+## Maintainer review (2026-09-19)
 
-None blocks `/speckit.tasks`. Points where a different call is possible and cheap to change before tasks:
+D-06 (FR-03, |ΔL| OKLCH as the data field `sojlo`), D-07 (FR-05, no state text colours, re-evaluate with `butono`) and D-17 (FR-19, SDK 2.0.0 as the first MCP task with the fallback rule) are accepted. The date of SDK 2.0.0 in Spec 001 research §7.3 carries a pointer to the correction in research §9 of this spec. The three review points are decided and worked in above:
 
-1. **Threshold 0.04** (D-06). 0.05 would still pass the current primary and secondary ramps (minimum 0.055) and give more margin; 0.06 would require re-stepping primary hover in every scheme.
-2. **Text repair in light/high** (D-05) uses `neutral.950` for `text.default`; `neutral.1000` is the alternative (pure black in komuna).
-3. **`check_contrast` grouping** (D-11) changes the result shape compared with one entry per combination; the latter is simpler for parity but 72× longer.
+| # | Point | Decision | Where |
+|---|---|---|---|
+| R1 | Threshold of `state-distinct` | **0.05**: "clearly different", 2.5 × JND, reserve for displays and colour-vision deficiency; free today (primary and secondary ≥ 0.055). The reasoning goes into the kialo. | D-06, data-model §3 |
+| R2 | `text.default` in light/high | **`neutral.1000`**: high contrast means maximum contrast for the main role; subtle `950`, muted `900`; all three different and ≥ 7:1, asserted explicitly in a test. | D-05, data-model §6 |
+| R3 | `check_contrast` output | **Grouped by identical result** (ratio at two decimals, threshold, passed), each group with the complete, canonically sorted list of its combinations. | D-11, contracts §2.1 |
+
+Process: the branch is pushed, no PR until the end of Phase 2 (as in Phase 1). Task order as set by the maintainer in [`tasks.md`](tasks.md). After the merge, ciferecigo is re-derived against the new core outside the repository as the last task.

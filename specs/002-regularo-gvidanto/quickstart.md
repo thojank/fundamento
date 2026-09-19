@@ -15,7 +15,7 @@ In the agent, pick the prompt `gvidanto` (Claude Code: `/mcp__fundamento__gvidan
 |---|---|---|
 | "What is here?" | `describe` | Aspektoj, Dimensioj, tokens per group, Reguloj (automatic) and Jugxoj |
 | "Why is `color.text.subtle` this light in komuna, dark, high contrast?" | `explain` | value, alias chain with set and package, `text-hierarchy` with ID and kialo, contrast on `background.default` |
-| "May I put `color.text.muted` on `color.background.sunken`?" | `check_contrast` | pass or fail per group of combinations, ratio, threshold, declared pair |
+| "May I put `color.text.muted` on `color.background.sunken`?" | `check_contrast` | one entry per distinct result (ratio, threshold, pass) with the full list of combinations it holds for, and whether the pair is declared |
 | "What is an Aspekto?" | `describe_term` | definition, broader term, relations, the loaded Aspektoj |
 
 The automated test does the first two steps with a spawned server, calls `prompts/get gvidanto` and one `explain`, and must finish well under five minutes (Art. XIII).
@@ -29,7 +29,7 @@ pnpm fm modelo validate --aspekto ../fundamento-aspekto-<name>
 Expect, until the package is updated:
 
 - `aspekto-incomplete` for the four new tokens `color.status.{success,warning,danger,info}.border`;
-- possibly `text-hierarchy` (text roles collapse under `contrast=high`), `state-distinct` (a state differs from `rest` by less than 0.04 in OKLCH lightness, or only in hue), `surface-order`.
+- possibly `text-hierarchy` (text roles collapse under `contrast=high`), `state-distinct` (a state differs from `rest` by less than 0.05 in OKLCH lightness, or only in hue), `surface-order`.
 
 Every issue carries `regulo.kialo`. Move states away from the lightness of `color.action.<v>.text` (plan D-07); give light/high values in `aspekto/<name>+color-scheme/light+contrast/high` (Spec 001 research §10).
 

@@ -67,7 +67,7 @@ Kleinste Differenz eines Zustands zu `rest` über alle Kombinationen (OKLCH-Hell
 
 - `tertiary.hover` liegt in light nur eine Stufe über `rest` (`neutral.0` → `neutral.50`), knapp über der JND.
 - `tertiary.selected` unterscheidet sich im Dark-Schema nur in Farbton und Chroma (`neutral.950` → `accent.950`: ΔE_OK 0,035, ΔL 0,000). In Graustufen und für viele Menschen mit Farbfehlsichtigkeit ist der Zustand unsichtbar. Das ist ein neuer Befund dieses Plans (Art. VI) und der Grund für ΔL als Metrik (Plan D-06).
-- Kandidaten nach der Reparatur (Plan D-06) und Kontrast von `action.tertiary.text` darauf (komuna / ekzemplo): light `neutral.100` ΔL 0,055 / 0,052, 6,61 / 6,18:1; `neutral.200` ΔL 0,110 / 0,107, 5,58 / 5,21:1; `accent.100` ΔL 0,055 / 0,052, 6,62 / 6,22:1. Unter `contrast=high` in light: 9,26 / 7,82 / 9,26 (komuna), 8,66 / 7,31 / 8,72 (ekzemplo). Dark `accent.900` ΔL 0,080 / 0,089, 8,11 / 7,89:1, unter high 10,52 / 10,14:1. Alle Text-Schwellen (4,5 bzw. 7) bleiben erfüllt.
+- Kandidaten nach der Reparatur (Plan D-06; Schwelle nach Review 0,05, alle Kandidaten liegen bei mindestens 0,052) und Kontrast von `action.tertiary.text` darauf (komuna / ekzemplo): light `neutral.100` ΔL 0,055 / 0,052, 6,61 / 6,18:1; `neutral.200` ΔL 0,110 / 0,107, 5,58 / 5,21:1; `accent.100` ΔL 0,055 / 0,052, 6,62 / 6,22:1. Unter `contrast=high` in light: 9,26 / 7,82 / 9,26 (komuna), 8,66 / 7,31 / 8,72 (ekzemplo). Dark `accent.900` ΔL 0,080 / 0,089, 8,11 / 7,89:1, unter high 10,52 / 10,14:1. Alle Text-Schwellen (4,5 bzw. 7) bleiben erfüllt.
 
 ### 8.3 Texthierarchie und Flächenordnung (FR-01, FR-02)
 

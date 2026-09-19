@@ -41,18 +41,21 @@ Total after Phase 2: 14 tools (AK-08).
   kategorio: "text-normal" | "text-large" | "ui",
   kategorioSource: "input" | "declared" | "role",
   declared: null | { id, name, position: "main" | "aux", kialo? },
-  results: [
+  results: [                             // one group per identical result (R3)
     {
-      aspekto,
-      combinations: string[],              // every combination with these exact colours and sojloj, canonical order
-      ...PairResult                        // for an undeclared pair: branch is "main" or null, no aux
+      ratio, threshold, passed,            // group key: WCAG ratio at two decimals (truncated), threshold, passed
+      branch: "main" | "aux" | null,       // key too when the declared pair has aux; else "main" or null
+      auxRatio?: number,                   // key too when the declared pair has aux
+      apcaMin?: number,                    // advisory, lowest |Lc| in the group; not part of the key
+      combinations: string[]               // complete list of the group's combinations, canonical order
     }
   ],
   summary: { combinations: integer, passed: integer, failed: integer, minRatio: number }
 }
 ```
 
-- Order of `results`: Aspekto (reference first, then by name), then first combination.
+- Grouping is by result, never by Dimensio values or Aspekto: a group may span Aspektoj and schemes. Every combination appears in exactly one group; `summary.combinations` equals the sum of the group sizes.
+- Order of `results`: by first combination (canonical: reference Aspekto first, then by name, then Dimensio order).
 - With `assignment`: exactly one result with one combination.
 - Errors: `token-unknown` (+ nearest names), `kontrast-not-color`, `kategorio-required` (+ `allowed`), `resolve-unknown-*`.
 - AK-04: for every declared KontrastParo and every combination, the result group containing that combination has the same `ratio`, `threshold`, `passed` and `branch` as `evaluateAlirebleco(…, { collect: true })`.
