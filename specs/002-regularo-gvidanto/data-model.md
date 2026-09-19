@@ -233,8 +233,9 @@ interface PairMeasurement {
 | `contrast/high` | `color.text.default` | – (core `neutral.900`) | `{color.palette.neutral.1000}` | D-05, R2 |
 | `contrast/high` | `color.text.subtle` | `{color.palette.neutral.800}` | `{color.palette.neutral.950}` | D-05, R2 |
 | `contrast/high` | `color.text.muted` | `{color.palette.neutral.800}` | `{color.palette.neutral.900}` | D-05, R2 |
-| `color-scheme/dark+contrast/high` | `color.text.default` | – (dark `neutral.50`) | `{color.palette.neutral.50}` | D-05 |
-| `color-scheme/dark+contrast/high` | `color.text.muted` | `{color.palette.neutral.100}` | `{color.palette.neutral.200}` | D-05 |
+| `color-scheme/dark+contrast/high` | `color.text.default` | – (dark `neutral.50`) | `{color.palette.neutral.0}` | D-05, R4 |
+| `color-scheme/dark+contrast/high` | `color.text.subtle` | `{color.palette.neutral.100}` | `{color.palette.neutral.50}` | D-05, R4 |
+| `color-scheme/dark+contrast/high` | `color.text.muted` | `{color.palette.neutral.100}` | unchanged | D-05, R4 |
 
 All targets are roles re-pointed to palette steps; no literal enters a generic set (Spec 001 D-03). Token IDs of existing tokens are unchanged.
 

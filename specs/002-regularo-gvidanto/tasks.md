@@ -1,6 +1,6 @@
 # Tasks – Spec 002
 
-**Plan:** [`plan.md`](plan.md) (D-01–D-20, R1–R3) · **Data model:** [`data-model.md`](data-model.md) · **Contracts:** [`contracts/mcp-tools.md`](contracts/mcp-tools.md) · **Status:** draft for maintainer review · **Date:** 2026-09-19
+**Plan:** [`plan.md`](plan.md) (D-01–D-20, R1–R3) · **Data model:** [`data-model.md`](data-model.md) · **Contracts:** [`contracts/mcp-tools.md`](contracts/mcp-tools.md) · **Status:** approved by the maintainer 2026-09-19 (incl. R3 additions, R4 and both sequencing changes) · **Date:** 2026-09-19
 
 The stage order was set by the maintainer: README → Regularo → komuna repair → KontrastParo `aux` → SDK migration → Gvidanto tools → Ontologio → acceptance (S7, perf) → ciferecigo outside the repo, as the last task after the merge. One PR at the end of Phase 2, as in Phase 1.
 
@@ -48,8 +48,8 @@ The stage order was set by the maintainer: README → Regularo → komuna repair
 ## Stage 2 – komuna repair
 
 - [ ] **T009 Text hierarchy under high contrast** (FR-02, FR-05, D-05, R2)
-  - Red: add `text-hierarchy` (new `reg_` ID) to `data/reguloj.json`; `fm modelo validate` fails with the distinct violations for komuna and ekzemplo in light/high and dark/high. New test `data/text-hierarchy.test.ts` asserts explicitly, for komuna and ekzemplo in light/high and dark/high: three different values, each ≥ 7:1 on `background.{default,canvas,raised,sunken}`, falling in the order default > subtle > muted; light/high resolves to `neutral.1000` / `950` / `900`.
-  - Green: `contrast/high`: default → `neutral.1000`, subtle → `neutral.950`, muted → `neutral.900`; `color-scheme/dark+contrast/high`: default → `neutral.50`, subtle → `neutral.100`, muted → `neutral.200`. Spec 001 AK-02 and `check:alirebleco` stay green.
+  - Red: add `text-hierarchy` (new `reg_` ID) to `data/reguloj.json`; `fm modelo validate` fails with the distinct violations for komuna and ekzemplo in light/high and dark/high. New test `data/text-hierarchy.test.ts` asserts explicitly, for komuna and ekzemplo in light/high and dark/high: three different values, each ≥ 7:1 on `background.{default,canvas,raised,sunken}`, falling in the order default > subtle > muted; light/high resolves to `neutral.1000` / `950` / `900` (R2), dark/high to `neutral.0` / `50` / `100` (R4); dark/default `text.default` is not `neutral.0` (halation kialo in the test, R4).
+  - Green: `contrast/high`: default → `neutral.1000`, subtle → `neutral.950`, muted → `neutral.900`; `color-scheme/dark+contrast/high`: default → `neutral.0`, subtle → `neutral.50`, muted → `neutral.100`. Spec 001 AK-02 and `check:alirebleco` stay green.
 - [ ] **T010 Tertiary action states** (FR-03, FR-05, D-06, D-07)
   - Red: add `state-distinct` to `data/reguloj.json`; validation fails for `tertiary.hover` (light) and `tertiary.selected` (light, dark) in komuna and ekzemplo.
   - Green: `core`: tertiary hover → `neutral.100`, pressed → `neutral.200`, selected → `accent.100`; `color-scheme/dark`: selected → `accent.900`; the same aliases in `aspekto-ekzemplo`'s own set. All `action.tertiary.text` pairs stay ≥ 4.5:1 and ≥ 7:1 under high (research §8.2).

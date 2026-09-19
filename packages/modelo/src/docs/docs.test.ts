@@ -303,3 +303,24 @@ describe("Spec 001 documentation (T029)", () => {
     expect(findBrandValues(file, read(file), repoFingerprints())).toEqual([]);
   });
 });
+
+describe("Spec 002 documentation (T001, D-20)", () => {
+  const whatLivesWhere = section(read("README.md"), "What lives where");
+  const lines = whatLivesWhere.split("\n");
+  const lineWith = (fragment: string) => lines.find((line) => line.includes(fragment)) ?? "";
+
+  it("links Spec 002 next to the Spec 000 and 001 links", () => {
+    const specs = lineWith("(specs/)");
+    expect(specs).toContain("(specs/000-fundamento-repo/)");
+    expect(specs).toContain("(specs/001-vortaro-aspektoj-mcp/)");
+    expect(specs).toContain("(specs/002-regularo-gvidanto/)");
+  });
+
+  it("links docs/vizio.md next to the Constitution", () => {
+    expect(lineWith("(.specify/memory/constitution.md)")).toContain("(docs/vizio.md)");
+  });
+
+  it.each(["specs/002-regularo-gvidanto/spec.md", "docs/vizio.md"])("%s exists", (file) => {
+    expect(read(file).length).toBeGreaterThan(0);
+  });
+});

@@ -6,8 +6,8 @@ Terminology is Esperanto and binding (see the Constitution). Code, comments and 
 
 ## What lives where
 
-- [`.specify/memory/constitution.md`](.specify/memory/constitution.md): the Constitution (Articles I–XIII). Read this first.
-- [`specs/`](specs/): one folder per spec with `spec.md`, research and the engineering plan with its Compliance Review: [`000-fundamento-repo/`](specs/000-fundamento-repo/) (the repository) and [`001-vortaro-aspektoj-mcp/`](specs/001-vortaro-aspektoj-mcp/) (Vortaro values, Aspekto packages, MCP server).
+- [`.specify/memory/constitution.md`](.specify/memory/constitution.md): the Constitution (Articles I–XIII). Read this first; [`docs/vizio.md`](docs/vizio.md) explains why Fundamento starts with a data model, conjunction sets and rulings instead of a component library.
+- [`specs/`](specs/): one folder per spec with `spec.md`, research and the engineering plan with its Compliance Review: [`000-fundamento-repo/`](specs/000-fundamento-repo/) (the repository), [`001-vortaro-aspektoj-mcp/`](specs/001-vortaro-aspektoj-mcp/) (Vortaro values, Aspekto packages, MCP server) and [`002-regularo-gvidanto/`](specs/002-regularo-gvidanto/) (Regularo, Gvidanto, Ontologio).
 - [`research/benchmarks.md`](research/benchmarks.md): living list of public benchmarks (requirements only, never content).
 - `packages/modelo/` (`@fundamento/modelo`): schema, loading, composition, validation, resolution, NomReguloj, checks and export. All logic lives here.
 - `packages/modelo/schema/` and `packages/modelo/data/`: the one hand-written JSON Schema (draft 2020-12; TS types are generated from it) and the Dimensioj, Reguloj, Jugxoj, KontrastParoj and ID registry `ids.lock.json`.
