@@ -10,7 +10,9 @@ import {
   completeAssignment,
   describeModelo,
   type ExplainInput,
+  type ExplainReguloInput,
   explain,
+  explainRegulo,
   isNoTarget,
   NOM_REGULOJ,
   resolve as resolveAssignment,
@@ -390,6 +392,21 @@ const explainTool: Tool = (served, args) => {
   return ok(JSON.parse(JSON.stringify(result.output)) as Record<string, unknown>);
 };
 
+/** Spec 002 FR-11: a Regulo with its reason and its violations in the served Modelo. */
+const explainReguloTool: Tool = (served, args) => {
+  const result = explainRegulo(served.modelo, args as unknown as ExplainReguloInput, served.report);
+  if (!result.ok) {
+    return {
+      ok: false,
+      envelope: {
+        issues: result.issues,
+        ...(result.allowed === undefined ? {} : { allowed: result.allowed }),
+      },
+    };
+  }
+  return ok(JSON.parse(JSON.stringify(result.output)) as Record<string, unknown>);
+};
+
 export const TOOLS: Record<ToolName, Tool> = {
   describe,
   list_dimensioj: listDimensioj,
@@ -403,4 +420,5 @@ export const TOOLS: Record<ToolName, Tool> = {
   derive_name: deriveName,
   check_contrast: checkContrastTool,
   explain: explainTool,
+  explain_regulo: explainReguloTool,
 };

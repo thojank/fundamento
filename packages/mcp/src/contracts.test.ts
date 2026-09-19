@@ -245,6 +245,22 @@ const EXAMPLES: Record<string, { input: unknown; output: unknown; badInput: unkn
     },
     badInput: { token: "color.text.subtle", assignment: { contrast: "HIGH" } },
   },
+  explain_regulo: {
+    input: { name: "state-distinct" },
+    output: {
+      id: "reg_01M2VEEE5280TGESDHQQ14EA33",
+      name: "state-distinct",
+      statement: "States differ from rest by at least 0.05 in OKLCH lightness.",
+      kialo: "A state that looks like rest gives no feedback.",
+      checkability: "automatic",
+      scope: "vortaro: color.action.*",
+      appliesTo: { tokens: ["color.action.*.hover"] },
+      sojlo: { metric: "oklch-l-delta", min: 0.05 },
+      violations: { unit: "distinct", total: 2, byAspekto: { komuna: 1, ekzemplo: 1 } },
+      jugxoj: [],
+    },
+    badInput: { name: "state-distinct", id: "reg_01M2VEEE5280TGESDHQQ14EA33" },
+  },
   derive_name: {
     input: { name: "color.action.primary.rest", celo: "figma" },
     output: {
@@ -270,6 +286,7 @@ describe("tool schemas (contracts/mcp-tools.md)", () => {
       "derive_name",
       "check_contrast",
       "explain",
+      "explain_regulo",
     ]);
   });
 

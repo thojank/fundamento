@@ -19,6 +19,7 @@ export const TOOL_NAMES = [
   "derive_name",
   "check_contrast",
   "explain",
+  "explain_regulo",
 ] as const;
 
 export type ToolName = (typeof TOOL_NAMES)[number];

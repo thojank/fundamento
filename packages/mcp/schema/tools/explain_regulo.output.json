@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ciferecigo.com/fundamento/schema/mcp/explain_regulo.output.json",
+  "title": "explain_regulo output",
+  "description": "One Regulo with its reason and its violations in the served Modelo (Spec 002 FR-11). Violations count distinct violations as validation reports them; issues without a combination count under core.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/ReguloId"
+    },
+    "name": {
+      "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+    },
+    "statement": {
+      "type": "string",
+      "minLength": 1
+    },
+    "kialo": {
+      "type": "string",
+      "minLength": 1
+    },
+    "checkability": {
+      "enum": ["automatic", "manual"]
+    },
+    "scope": {
+      "type": "string",
+      "minLength": 1
+    },
+    "aspekto": {
+      "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+    },
+    "appliesTo": {
+      "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/ReguloAppliesTo"
+    },
+    "sojlo": {
+      "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/ReguloSojlo"
+    },
+    "violations": {
+      "type": "object",
+      "properties": {
+        "unit": {
+          "const": "distinct"
+        },
+        "total": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "byAspekto": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      },
+      "required": ["unit", "total", "byAspekto"],
+      "additionalProperties": false
+    },
+    "jugxoj": {
+      "type": "array",
+      "items": {
+        "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Jugxo"
+      }
+    }
+  },
+  "required": ["id", "name", "statement", "kialo", "checkability", "scope", "violations", "jugxoj"],
+  "additionalProperties": false
+}

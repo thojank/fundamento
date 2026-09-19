@@ -551,30 +551,38 @@ export interface Regulo {
    * Scopes the entry to one Aspekto; entries in an Aspekto package carry their Aspekto (Spec 001, D-10).
    */
   aspekto?: string;
+  appliesTo?: ReguloAppliesTo;
+  sojlo?: ReguloSojlo;
+}
+/**
+ * Which tokens the Regulo governs; explain finds a token's Reguloj only through this field (Spec 002, D-02). A token matches when any criterion matches. Token patterns may use * for one segment and a trailing ** for one or more.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "ReguloAppliesTo".
+ */
+export interface ReguloAppliesTo {
   /**
-   * Which tokens the Regulo governs; explain finds a token's Reguloj only through this field (Spec 002, D-02). A token matches when any criterion matches. Token patterns may use * for one segment and a trailing ** for one or more.
+   * @minItems 1
    */
-  appliesTo?: {
-    /**
-     * @minItems 1
-     */
-    tokens?: TokenPattern[];
-    /**
-     * @minItems 1
-     */
-    roles?: TokenRole[];
-    /**
-     * @minItems 1
-     */
-    types?: DtcgType[];
-  };
+  tokens?: TokenPattern[];
   /**
-   * The numeric threshold of a measuring Regulo; the enforcer reads it and agents cite it (Spec 002, D-02, D-06).
+   * @minItems 1
    */
-  sojlo?: {
-    metric: "oklch-l-delta";
-    min: number;
-  };
+  roles?: TokenRole[];
+  /**
+   * @minItems 1
+   */
+  types?: DtcgType[];
+}
+/**
+ * The numeric threshold of a measuring Regulo; the enforcer reads it and agents cite it (Spec 002, D-02, D-06).
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "ReguloSojlo".
+ */
+export interface ReguloSojlo {
+  metric: "oklch-l-delta";
+  min: number;
 }
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema

@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ciferecigo.com/fundamento/schema/mcp/explain_regulo.input.json",
+  "title": "explain_regulo input",
+  "description": "What a Regulo says and why: statement, kialo, how it is checked, its scope and threshold, how many distinct violations the served Modelo has per Aspekto, and the Jugxoj about it. Name the Regulo by name or by ID.",
+  "type": "object",
+  "properties": {
+    "name": {
+      "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+    },
+    "id": {
+      "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/ReguloId"
+    }
+  },
+  "oneOf": [
+    {
+      "properties": {
+        "name": true
+      },
+      "required": ["name"]
+    },
+    {
+      "properties": {
+        "id": true
+      },
+      "required": ["id"]
+    }
+  ],
+  "additionalProperties": false
+}

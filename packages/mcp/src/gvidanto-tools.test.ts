@@ -1,7 +1,7 @@
 // The Gvidanto tools of Spec 002 over the in-memory client (contracts/mcp-tools.md §2): each
 // answer equals the modelo function behind it, and errors come as issue envelopes.
 
-import { checkContrast, explain } from "@fundamento/modelo";
+import { checkContrast, explain, explainRegulo } from "@fundamento/modelo";
 import { afterAll, describe, expect, it } from "vitest";
 import { call, closeClients, connect, EKZEMPLO_CONFIG, output } from "./test-doubles/client.js";
 
@@ -39,5 +39,24 @@ describe("explain (FR-10)", () => {
     const direct = explain(served.modelo, input, served.report);
     if (!direct.ok) throw new Error("direct call failed");
     expect(answer).toEqual(JSON.parse(JSON.stringify(direct.output)));
+  });
+});
+
+describe("explain_regulo (FR-11)", () => {
+  it("returns what explainRegulo computes, by name and by ID", async () => {
+    const { client, served } = await connect({ config: EKZEMPLO_CONFIG });
+    const answer = await output(client, "explain_regulo", { name: "state-distinct" });
+    const direct = explainRegulo(served.modelo, { name: "state-distinct" }, served.report);
+    if (!direct.ok) throw new Error("direct call failed");
+    expect(answer).toEqual(JSON.parse(JSON.stringify(direct.output)));
+    const byId = await output(client, "explain_regulo", { id: direct.output.id });
+    expect(byId).toEqual(answer);
+  });
+
+  it("answers an unknown Regulo with regulo-unknown", async () => {
+    const { client } = await connect();
+    const result = await call(client, "explain_regulo", { name: "state-distinkt" });
+    expect(result.isError).toBe(true);
+    expect(result.structuredContent?.allowed).toContain("state-distinct");
   });
 });
