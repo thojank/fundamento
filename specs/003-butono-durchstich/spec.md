@@ -101,7 +101,8 @@ Ein Agent entwirft per Figma-MCP einen Screen mit `butono`-Instanzen. Ein Coding
 - **AK-09** Gvidanto-Dialog (Art. VII): „Welchen Button für Löschen?", „Ist dieser Screen konform?" (mit zwei primären Aktionen → Verletzung mit Kialo), „Wie heißt die Variante in Figma und in React?".
 - **AK-10** S5 als Durchlauf mit einem echten Figma-Entwurf, vom Maintainer abgenommen.
 
-## Offene Klärungen
+## Klärungen (Maintainer, 2026-09-19)
 
-- [NEEDS CLARIFICATION] **Figma-Plan.** Code Connect ist nur im Organization- und Enterprise-Plan verfügbar, die REST-API zum Schreiben von Variablen nur im Enterprise-Plan (research §2). Auf welchem Plan läuft das Fundamento-Figma-Projekt? Davon hängen FR-09 (Generierung über Plugin-API statt REST) und FR-10 (Code Connect oder eigene Zuordnung im Modelo, über MCP abfragbar) ab.
-- [NEEDS CLARIFICATION] **Zweite Marke für Tests.** `ekzemplo` (Fixture, im Repo) reicht für CI. Soll die Make-Kit-Abnahme zusätzlich mit ciferecigo (privat, eigener Plan für private Pakete nötig) laufen?
+- **Figma-Plan:** Aufbau und Test laufen in einem Figma-Konto mit Organization/Enterprise-Funktionen. Fundamento darf davon aber **nicht abhängen**: Der Standardweg ist planunabhängig (Figma-Projekcio über die Plugin-API; Zuordnung Figma ↔ Code als Daten im Modelo, über MCP abfragbar). Code Connect ist eine **zusätzliche** Projekcio aus derselben Zuordnung, im Testkonto erprobt. Jedes Figma-Artefakt ist aus dem Repo neu erzeugbar; keine Quelle liegt nur in Figma.
+- **Trennung im Testkonto:** eigenes Team oder Projekt nur für Fundamento; keine anderen Design-System-Libraries aktiviert (auch nicht als Kontext für KI-Funktionen); keine Veröffentlichung in eine Registry des Kontoinhabers; Make Kits werden nur als öffentliches Pre-Release-Paket (komuna) oder lokal getestet. Art. V gilt unverändert.
+- **Zweite Marke für die Make-Kit-Abnahme:** das Fixture `ekzemplo`. ciferecigo wird nicht in fremde Registries oder Konten geladen.
