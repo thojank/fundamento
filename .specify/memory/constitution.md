@@ -1,6 +1,6 @@
 # Fundamento – Constitution
 
-Version 1.3 · 2026-09-19 · Status: ratifiziert
+Version 1.4 · 2026-09-19 · Status: ratifiziert
 
 Fundamento ist ein maschinenlesbares, nativ mehrmarkenfähiges Design System. Sein kanonischer Zustand ist ein Datenmodell; Figma, Code, Dokumentation und Werkzeuge sind Projektionen dieses Modells. Diese Constitution definiert die Prinzipien, gegen die jede Spezifikation, jeder Plan und jede Implementierung geprüft wird. Sie ist bewusst kurz. Was hier nicht steht, ist verhandelbar; was hier steht, nicht.
 
@@ -27,6 +27,8 @@ Fundamento verwendet Esperanto als Fachsprache. Die Begriffe sind im Modell, im 
 | **Agordilo** | Brand Design Configurator | `packages/agordilo` |
 | **Gvidanto** | Der Doku-Agent („was gibt's hier?") | `packages/gvidanto` |
 | **Celo** | Ein Ausgabeziel einer Projekcio (Tailwind, daisyUI, Penpot, …) | `projekcioj/<celo>` |
+| **Tavolo** | Eine Schicht eines Aspekto-Pakets; das Vortaro ist die Schicht `vida` (visuell), weitere Schichten (Sprache, Verhalten) folgen durch Spec | `aspekto.json#/tavoloj/vida` |
+| **Ontologio** | Die maschinenlesbare Fassung dieser Terminologie: Begriffe, Definitionen, Beziehungen | `packages/modelo/data/ontologio.json` |
 
 Schreibweise in Bezeichnern: Esperanto-Sonderzeichen werden nach x-Konvention geschrieben (`ĵ → jx`, `ŝ → sx`), damit Paketnamen, Dateinamen und URLs ASCII bleiben. In Prosa darf die Originalschreibweise verwendet werden.
 
@@ -52,6 +54,8 @@ Code Connect verbindet jede Figma-Komponente mit ihrer Code-Komponente. Ein Lint
 
 Der primäre Konsument des Systems ist ein Agent, nicht ein Mensch. Der MCP-Server über dem Modelo ist die erste Schnittstelle, die gebaut wird, nicht die letzte. Jede Frage, die ein Mensch an das System stellen könnte, muss ein Agent per MCP beantwortet bekommen: welche Eroj es gibt, welche Props, welche Regeln, welche Tokens für Aspekto X in Dimensio Y, ob ein gegebener Screen konform ist.
 
+Die Terminologie dieser Constitution existiert zusätzlich als **Ontologio**: eine maschinenlesbare Datei mit einer stabilen URI, einer Definition und den erlaubten Beziehungen je Begriff. Ein Agent muss jeden Begriff des Systems erfragen können, ohne diese Constitution zu lesen. Die Tabelle oben und die Ontologio dürfen nicht auseinanderlaufen; CI prüft das. Jeder Export des Modelo ist damit auch als Wissensgraph lesbar; die Serialisierung als JSON-LD ist eine Projekcio (Phase 5).
+
 Der Zielablauf ist verbindlich: Ein Agent entwirft per MCP in Figma aus Library-Instanzen mit gebundenen Variablen. Ein Coding-Tool liest den Entwurf, findet über Code Connect zu jeder Instanz die Code-Komponente und erzeugt Code, der Tokens referenziert. Ein Prüf-Agent vergleicht Entwurf und Code gegen das Modelo. Jede Spec muss angeben, wie sie diesen Ablauf verbessert oder erhält.
 
 ## Artikel IV – Nativa Multmarkeco (native Mehrmarkenfähigkeit)
@@ -73,7 +77,9 @@ Regeln für jede Spec und jeden Plan:
 
 Jede Regel im System trägt ihre Begründung. Ein Constraint ohne `kialo` (Grund) ist ungültig. Beispiel: „Ein Container hat höchstens eine primäre Aktion, weil zwei gleichrangige Handlungsaufforderungen die Entscheidung auf den Nutzer verlagern." Die Begründung ist maschinenlesbar und wird vom Gvidanto und vom Prüf-Agenten zitiert.
 
-Das Regularo wächst durch Jugxoj: Jede Entscheidung über Konformität oder Abweichung wird als Präzedenzfall mit Grund gespeichert, Ablehnungen ebenso wie Freigaben. Eine Jugxo verweist auf eine Regulo, ein Ero oder einen Artikel dieser Constitution; auch Abweichungen von der Constitution selbst werden so festgehalten (erste Jugxo: `jug_01M2VRT7KQ77W91MVXB4GXSRZ4`, Artikel X, 2026-09-19). Das Regularo ist damit keine Verfassung, die vorab alles regelt, sondern eine Rechtsprechung, die aus Fällen lernt. Wenige Invarianten sind fest; alles andere darf innerhalb der Invarianten variieren.
+Das Regularo wächst durch Jugxoj: Jede Entscheidung über Konformität oder Abweichung wird als Präzedenzfall mit Grund gespeichert, Ablehnungen ebenso wie Freigaben. Eine Jugxo verweist auf eine Regulo, ein Ero oder einen Artikel dieser Constitution; auch Abweichungen von der Constitution selbst werden so festgehalten (erste Jugxo: `jug_01M2VRT7KQ77W91MVXB4GXSRZ4`, Artikel X, 2026-09-19). Das Regularo ist damit keine Verfassung, die vorab alles regelt, sondern eine Rechtsprechung, die aus Fällen lernt.
+
+**Befund wird Regel.** Jeder Befund aus einer menschlichen Abnahme (visuell, redaktionell, fachlich), den keine Prüfung gefunden hat, wird als Regulo-Kandidat mit Kialo festgehalten und, wo er maschinell prüfbar ist, mit der nächsten Spec zu einer automatischen Regulo. Kontrast ist notwendig, aber nicht hinreichend: Ordnung von Flächen, Hierarchie von Textrollen und Unterscheidbarkeit von Zuständen sind ebenso prüfbare Eigenschaften einer Marke. Wenige Invarianten sind fest; alles andere darf innerhalb der Invarianten variieren.
 
 ## Artikel VII – Agenta Dokumentado (agentische Dokumentation)
 
@@ -84,6 +90,8 @@ Jede Spec, die Wissen ins System bringt (neue Eroj, Regeln, Sxablonoj), muss ang
 ## Artikel VIII – Retejo Unue, Movebla Modelo (Web-first, mobilfähiges Modell)
 
 Die erste Plattform ist das Web (Web Components als Kern, Framework-Wrapper als Projekcioj). Das Modelo ist plattformneutral: Token-Typen, Ero-Skemoj und Dimensioj enthalten nichts Web-Spezifisches. Eine Projekcio für SwiftUI oder Compose muss ohne Änderung am Modelo möglich sein. Eine Spec, die Web-Begriffe (Pixel, CSS-Eigenschaften, DOM) ins Modelo einführt, verletzt diesen Artikel.
+
+**Internacia (Internationalisierung).** Fundamento ist sprach- und schriftneutral. Eroj verwenden nur logische Richtungen (Anfang/Ende statt links/rechts), jedes Ero hat Rechts-nach-links als Testfall, verträgt Textexpansion und nimmt jeden sichtbaren Text (Labels, ARIA-Texte, Pluralformen) über Slots oder eine Nachrichten-Schnittstelle an, nie als festen String. Datum, Zahl und Währung formatiert die Anwendung; Eroj nehmen formatierte Werte an. Jede Schrift eines Aspekto deklariert die Schriftsysteme, die sie abdeckt (ISO 15924); fehlende Schriftsysteme werden über Fallbacks gedeckt, die im Aspekto stehen.
 
 ## Artikel IX – Vertikala Tranĉo (vertikaler Durchstich vor Breite)
 
@@ -129,7 +137,7 @@ Prüfkriterium für jede Spec: Ein Entwickler ohne Vorwissen nutzt ein Ero in un
 
 ## Governance
 
-- Diese Constitution ändert sich nur durch eine Spec mit dem Titel „Constitution Amendment", die den geänderten Artikel, den Grund und die Migration bestehender Artefakte beschreibt. Änderungshistorie: v1.1 Art. XII/XIII ergänzt; v1.2 DTCG verbindlich, Mehrdimensionalität; v1.3 (Spec 001) Art. IV Aspekto-Pakete und Vollständigkeit, Art. V Schriften je Aspekto, Art. VI Jugxo-Bezug auf Artikel.
+- Diese Constitution ändert sich nur durch eine Spec mit dem Titel „Constitution Amendment", die den geänderten Artikel, den Grund und die Migration bestehender Artefakte beschreibt. Änderungshistorie: v1.1 Art. XII/XIII ergänzt; v1.2 DTCG verbindlich, Mehrdimensionalität; v1.3 (Spec 001) Art. IV Aspekto-Pakete und Vollständigkeit, Art. V Schriften je Aspekto, Art. VI Jugxo-Bezug auf Artikel; v1.4 (Spec 002) Terminologie Tavolo und Ontologio, Art. III Ontologio, Art. VI Befund wird Regel, Art. VIII Internacia.
 - Jeder `plan.md` enthält einen Abschnitt „Constitutional Compliance Review" mit einem Eintrag pro Artikel: konform / Ausnahme mit Grund.
 - `/speckit.analyze` prüft jede Phase gegen diese Constitution, bevor Tasks erzeugt werden.
 - Die Constitution hat Vorrang vor jeder anderen Praxis, jedem Template und jeder Bequemlichkeit.
@@ -142,7 +150,7 @@ Prüfkriterium für jede Spec: Ein Entwickler ohne Vorwissen nutzt ein Ero in un
 |---|---|---|
 | 0 | Fundamento-Repo, Modelo-Schema, Vortaro-Spezifikation (DTCG) | Baubares Monorepo, leeres Modelo mit Schema, CI mit den vier Prüfungen |
 | 1 | Vortaro mit echten Werten, Aspekto-Pakete, MCP-Server | Aspekto `komuna` (Referenz, Geist), externes Aspekto-Paket `ciferecigo`, MCP beantwortet Token-Fragen |
-| 2 | Regularo + Gvidanto (Kern) | Regeln mit Kialoj, erster Dialog „was gibt's hier?" |
+| 2 | Regularo + Gvidanto (Kern) + Ontologio | Befunde aus Phase 1 als automatische Reguloj, komuna repariert, Gvidanto-Werkzeuge (warum, Kontrast, Begriffe), Ontologio |
 | 3 | Ero `butono` als Durchstich | Modelo → Web Component → CSS → Figma → Code Connect → Gvidanto → Prüfung |
 | 4 | Eroj in der Breite, Sxablonoj | Abdeckung eines reifen Systems |
 | 5 | Figma-Library-Generator, Penpot-Export, Icon- und Font-Pipeline | Publizierbare Library je Aspekto, Penpot-Paket |
