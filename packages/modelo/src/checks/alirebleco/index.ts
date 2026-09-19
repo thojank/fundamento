@@ -17,6 +17,7 @@ import { evaluateAlirebleco } from "./evaluate.js";
 
 export * from "./color.js";
 export * from "./evaluate.js";
+export * from "./measure.js";
 export * from "./metrics.js";
 
 export async function check(options: CheckOptions): Promise<CheckResult> {
