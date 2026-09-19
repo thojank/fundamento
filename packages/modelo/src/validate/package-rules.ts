@@ -1,6 +1,7 @@
 // Rules of composing Aspekto packages with the core (Spec 001, D-05, D-06, D-08). Pure.
 
 import type { IdsLock } from "../contracts/entity-ids.js";
+import { CORE_SET_NAME } from "../contracts/grammar.js";
 import { formatIssuePath, type ValidationIssue } from "../contracts/issues.js";
 import type { Modelo } from "../contracts/modelo.js";
 import { checkIdNamespaces, type IdRegistry } from "../ids/check-ids.js";
@@ -78,6 +79,8 @@ export function packageIssues(modelo: Modelo, files: ModeloFiles): ValidationIss
     }
   }
 
+  issues.push(...completenessIssues(modelo, reference));
+
   const coreLock = modeloLockOf(files);
   const registries: IdRegistry[] = [
     { lockFile: files.data["ids.lock.json"].file, lock: coreLock },
@@ -137,4 +140,60 @@ function modeloLockOf(files: ModeloFiles): IdsLock {
   return isJsonObject(value) && isJsonObject(value.ids)
     ? { ids: value.ids as IdsLock["ids"] }
     : { ids: {} };
+}
+
+/**
+ * D-04 / FR-10: every package Aspekto except the reference overrides every core token in its
+ * single-condition set `aspekto/<name>` (`aspekto-incomplete`, one issue per missing token at the
+ * pointer where it would sit); the reference Aspekto's own set is empty
+ * (`aspekto-reference-set-not-empty`, one issue per token). Conjunction sets carry deltas and are
+ * exempt. Aspektoj declared inline in dimensioj.json (the Phase-0 layout, fixtures only) are not
+ * packages and are not checked; the repo declares none.
+ */
+function completenessIssues(modelo: Modelo, reference: string | undefined): ValidationIssue[] {
+  const core = modelo.setoj.find((set) => set.name === CORE_SET_NAME);
+  if (core === undefined) {
+    return [];
+  }
+  const coreNames = Object.keys(core.tokens).sort();
+  const issues: ValidationIssue[] = [];
+  for (const pkg of modelo.aspektoPackages) {
+    if (!pkg.composed || pkg.aspekto === undefined) {
+      continue;
+    }
+    const setName = `${ASPEKTO_DIMENSIO}/${pkg.aspekto}`;
+    const set = modelo.setoj.find(
+      (candidate) => candidate.package === pkg.name && candidate.name === setName,
+    );
+    const file = set?.file ?? pkg.aspektoFile.replace(/aspekto\.json$/, `sets/${setName}.json`);
+    if (pkg.aspekto === reference) {
+      for (const name of Object.keys(set?.tokens ?? {}).sort()) {
+        issues.push({
+          rule: "aspekto-reference-set-not-empty",
+          severity: "error",
+          path: formatIssuePath({ file, pointer: tokenPointer(name) }),
+          message: `${setName} overrides ${name}, but ${pkg.aspekto} is the reference Aspekto: its values live in core.`,
+          suggestion: `Change the value in core instead; ${setName} stays empty (FR-10).`,
+        });
+      }
+      continue;
+    }
+    for (const name of coreNames) {
+      if (set?.tokens[name] !== undefined) {
+        continue;
+      }
+      issues.push({
+        rule: "aspekto-incomplete",
+        severity: "error",
+        path: formatIssuePath({ file, pointer: tokenPointer(name) }),
+        message: `The Aspekto ${pkg.aspekto} does not override ${name}; every Aspekto is a complete assignment of the Vortaro (Art. IV).`,
+        suggestion: `Add ${name} to ${setName} (an alias identical to core counts). No Aspekto inherits values from core or from the reference Aspekto.`,
+      });
+    }
+  }
+  return issues;
+}
+
+function tokenPointer(name: string): string {
+  return `/${name.split(".").map(escapePointerSegment).join("/")}`;
 }

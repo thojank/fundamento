@@ -42,7 +42,7 @@ Order follows the plan's "Build order". The ciferecigo package is the last task.
 - [x] **T007 Migration `neutra` → `komuna`** (FR-09, AK-04)
   - Red: `e2e/phase0-ids.test.ts` (AK-04 against the T002 fixture: every Phase-0 ID active in the union of registries, komuna ID = neutra ID, no new `dva_`); `aspekto-komuna` package tests (format, empty set).
   - Green: move the Aspekto metadata and IDs into `packages/aspekto-komuna`; set `referenceAspekto` in `data/dimensioj.json`; make vortaro `$themes.json` core-only. The aspekto Dimensio lists no values in `dimensioj.json` (`valoroj` is optional in the schema; its default is checked against the composed values); the repo Modelo always composes komuna; the export describes package Aspektoj from `aspekto.json`. The workspace link to `@fundamento/aspekto-komuna` adds three lines to `pnpm-lock.yaml` (no third-party dependency).
-- [ ] **T008 Completeness and reference rules** (D-04)
+- [x] **T008 Completeness and reference rules** (D-04)
   - Red: `validate/aspekto-rules.test.ts` with small fixtures: an incomplete Aspekto gives one `aspekto-incomplete` per missing token at its pointer; `aspekto-reference-set-not-empty`; identical aliases count; conjunction sets exempt; `set-introduces-token` on Aspekto and conjunction sets (Q1).
   - Green: validation rules.
 - [ ] **T009 Generic-set rules** (D-03, K4, D-11)

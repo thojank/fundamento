@@ -1,9 +1,17 @@
 // Test support (not a double): real fixture Modelo roots, and throwaway copies of `valid/minimal`
 // with one change applied, for rule variants that do not warrant a committed fixture.
 
-import { cpSync, existsSync, mkdtempSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import {
+  cpSync,
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 export const FIXTURES_DIR = fileURLToPath(new URL("../../../test/fixtures/", import.meta.url));
@@ -44,6 +52,27 @@ export function modeloValidationFixtures(): { name: string; expected: ExpectedIs
       const expected = JSON.parse(readFileSync(expectedFile, "utf8")) as ExpectedIssues;
       return expected.check === undefined ? [{ name, expected }] : [];
     });
+}
+
+/**
+ * Copies the fixture `valid/<name>` into a fresh temporary directory and lets `mutate` edit JSON
+ * files in it (paths relative to the copy's root). Returns the copy's root.
+ */
+export function mutatedFixture(
+  name: string,
+  mutate: (edit: (file: string, change: (value: never) => unknown) => void, root: string) => void,
+): string {
+  const root = mkdtempSync(join(tmpdir(), "fm-validate-"));
+  cpSync(fixtureRoot("valid", name), root, { recursive: true });
+  const edit = (file: string, change: (value: never) => unknown): void => {
+    const path = join(root, file);
+    const value = (existsSync(path) ? JSON.parse(readFileSync(path, "utf8")) : {}) as never;
+    const result = change(value);
+    mkdirSync(dirname(path), { recursive: true });
+    writeFileSync(path, `${JSON.stringify(result === undefined ? value : result, null, 2)}\n`);
+  };
+  mutate(edit, root);
+  return root;
 }
 
 /**
