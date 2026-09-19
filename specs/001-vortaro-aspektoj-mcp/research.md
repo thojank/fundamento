@@ -50,3 +50,11 @@ Entscheidungen des Plans mit Begründung und verworfenen Alternativen. Nummern v
 
 ### 7.4 Clean Room für die eigene Marke (D-15)
 - Nachweis ohne Werte im Code: SHA-256-Fingerabdrücke normalisierter Markenwerte, Allowlist nur `spec.md` und `research.md` dieser Spec. Fingerabdrücke nur für markenspezifische Werte: Hex-Farben, die eigene Schriftfamilie und `cubic-bezier`-Kurven. Dauern und Längen-Skalare bleiben draußen, sie sind generisch (K2). Der Check schützt keine Geheimhaltung (die Werte sind öffentlich, kurze Hashes sind umkehrbar), er erzwingt nur AK-08. Verworfen: Klartext-Blocklist (würde die Werte selbst in den Code bringen) und reine Namensprüfung (`com.ciferecigo.fundamento` ist der Extension-Namensraum und steht überall).
+
+## 9. Kunteksta adaptado (Kandidat, nicht Phase 1)
+
+Anforderung des Maintainers vom 2026-09-19: Das Design soll sich zur Laufzeit kontextabhängig ändern können, z. B. morgens kühle und abends warme Farben. Das ist ein Kandidat für eine eigene, kommende Spec (Einführung einer Dimensio durch Spec, Art. IV) und ausdrücklich nicht Teil von Phase 1.
+
+- **Absicherung in Phase 1:** Ein Test in T011 belegt, dass eine siebte Dimensio rein über Daten hinzukommt. Das Fixture `dimensio-etoso` hat die Werte `neutrala`, `varma`, `malvarma` und alias-only-Sets; es gibt keinen Schema- oder Code-Eingriff. Das Fixture validiert und wird aufgelöst.
+- **Offene Fragen für die kommende Spec:** Wer setzt den Wert zur Laufzeit (Projekcio, Host-App, Agent)? Wie oft wechselt er, und mit welchem Übergang (Motion)? Wie wirkt er mit `color-scheme` und `contrast` zusammen (Priorität, Alirebleco über alle neuen Kombinationen)? Bleibt ein diskreter Dimensio-Wert, oder braucht es interpolierte Zwischenwerte (dann kein reines Token-Set mehr)?
+

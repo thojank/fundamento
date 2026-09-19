@@ -1,6 +1,6 @@
 # Tasks – Spec 001
 
-**Plan:** [`plan.md`](plan.md) (D-01–D-18, K1–K5) · **Data model:** [`data-model.md`](data-model.md) · **Status:** draft for maintainer review · **Date:** 2026-09-19
+**Plan:** [`plan.md`](plan.md) (D-01–D-18, K1–K5) · **Data model:** [`data-model.md`](data-model.md) · **Status:** approved by the maintainer 2026-09-19 (incl. the `it.fails` exception T012–T015) · **Date:** 2026-09-19
 
 Order follows the plan's "Build order". The ciferecigo package is the last task.
 
@@ -53,13 +53,14 @@ Order follows the plan's "Build order". The ciferecigo package is the last task.
   - Green: `aspekto-font-undeclared`.
 - [ ] **T011 Themes fragments** (D-08)
   - Red: `themes/fragment.test.ts`: derived package `$themes.json`, core-only vortaro themes, drift errors; `pnpm vortaro:themes` regenerates the fragments.
-  - Green: `themes/derive.ts`, `themes/cli.ts`.
+  - Red (extensibility guard, research §9): `valid/dimensio-etoso` is a copy of a small valid fixture plus a seventh Dimensio `etoso` (values `neutrala` default, `varma`, `malvarma`; priority 7) with alias-only sets `etoso/varma` and `etoso/malvarma`. The test asserts that it validates with 0 errors, that `$themes.json` gets an `etoso` group, and that `resolve` changes the re-pointed tokens with origin `etoso/varma`. The fixture adds data only; the test also asserts that no schema or code file mentions `etoso`.
+  - Green: `themes/derive.ts`, `themes/cli.ts`. No change for `etoso` should be needed; if one is, stop and report instead of adding it.
 
 ## Stage 3 – Vortaro data
 
 - [ ] **T012 Coverage test** (FR-01, AK-01)
-  - Red: `data/coverage.test.ts` with the category fixture from Spec 000 research §4 plus research §6 (minimum roles and steps per category). It must fail on the Phase-0 core.
-  - Green: none in this task. The test stays red until T013–T015 and is the gate for them. **This is the one planned exception to "green at the end of the task"**; it is marked `it.fails` only between T012 and T015 and flipped back in T015.
+  - Red: `data/coverage.test.ts` with the category fixture from Spec 000 research §4 plus research §6 (minimum roles and steps per category). It is generated as **one `it` per category** (e.g. `coverage: color.status`, `coverage: typography composites`), each asserting only that category's required tokens and naming the missing ones, so the progress of T013–T015 is visible per category in every test run. It must fail on the Phase-0 core.
+  - Green: none in this task. The category tests stay red until T013–T015 and are the gate for them. **This is the one approved exception to "green at the end of the task"**: categories not yet delivered are marked `it.fails` between T012 and T015; each of T013 and T014 removes `it.fails` from the categories it completes.
 - [ ] **T013 Colour** (D-02, D-12)
   - Red: coverage (colour part), `color-semantic-literal`, `color-role-missing` fixtures; rename test `color.palette.blue.600` → `accent.600` with the same ID.
   - Green: 71 palette primitives and 68 semantic tokens with roles in `core` (komuna values, low-chroma accent).
@@ -69,10 +70,11 @@ Order follows the plan's "Build order". The ciferecigo package is the last task.
 - [ ] **T015 Spacing, size, shape, elevation, motion, layout, focus, opacity** (K4)
   - Red: coverage (rest), flip `it.fails` from T012; `border.width.*` and motion roles are aliases over scales; renames `motion.duration.short` → `fast` and `shadow.raised` → `elevation.shadow.raised` with the same IDs.
   - Green: data-model §2 rows.
+  - Done when (in addition to the general rule): **no `it.fails` remains in `data/coverage.test.ts`**, and every category test is green.
 - [ ] **T016 Dimensio sets** (D-03, K3, K4, FR-06, FR-07, AK-05)
   - Red: `data/dimensio-sets.test.ts`: every set passes `dimensio-set-literal` and `dimensio-set-primitive`; `motion=reduced` resolves to `0ms` / `linear`; `viewport=compact` changes typography per field with provenance; **`density=compact` leaves every typography field unchanged** (K3).
   - Green: rewrite viewport, density, color-scheme/dark, contrast/high and motion/reduced; move the Phase-0 literals into primitives or into `aspekto/komuna+color-scheme/dark`.
-  - Note: the AK-05 wording depends on the spec amendment in plan.md "Spec amendment required (K3)".
+  - AK-05 as amended in the spec (`1f04af5`): changed in `viewport=compact`, unchanged in `density=compact`. A second assertion: no token is re-pointed by both a `viewport/*` and a `density/*` set.
 - [ ] **T017 KontrastParoj and Reguloj** (D-12, K5, Art. VI, AK-02)
   - Red: `kontrastparo-missing-for-role` fixtures; the ~60 pairs incl. the 8 K5 pairs; `data/ak02.test.ts`: every text pair ≥ 7:1 under `contrast=high` in all 72 combinations; `check:regularo` expects the 6 new Reguloj with kialo (incl. `density-affects-layout-only`).
   - Green: `data/kontrastparoj.json`, `data/reguloj.json`, role exemptions (`disabled`, `decorative`); tune komuna steps until Alirebleco passes, never the thresholds.

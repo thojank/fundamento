@@ -421,9 +421,9 @@ The maintainer accepted D-01–D-18 and asked for five corrections, worked in ab
 
 Confirmed without change: the tracking scale parallel to the size scale; `color.palette.shade.*` as alpha black; "no shadow" as a transparent layer plus a Regulo; `validate.aspektoPath` only under stdio; `--http` only on `127.0.0.1`. The Penpot folder import is verified by the maintainer after the build.
 
-## Spec amendment required (K3)
+## Spec amendment K3 (approved, commit `1f04af5`)
 
-K3 contradicts two places in the spec: S5 ("`density` verändert Größen und Zeilenhöhen") and AK-05 ("… in `density=compact` und `viewport=compact` verändert"). The plan follows K3. The spec text needs the maintainer's approval before it changes. Proposed wording:
+K3 contradicted S5 and AK-05. The maintainer approved the amendment on 2026-09-19. The spec now reads as below and adds the underlying rule to the edge cases: "`viewport` und `density` verschieben nie denselben Token."
 - S5: "… und `viewport` verändert Größen, Zeilenhöhen und Laufweiten; `density` verändert keine Typografie (Regulo `density-affects-layout-only`)."
 - AK-05: "… und in `viewport=compact` verändert, in `density=compact` unverändert; Auflösung mit Herkunft zeigt das je Feld."
 
