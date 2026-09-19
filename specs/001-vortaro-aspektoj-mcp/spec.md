@@ -1,6 +1,6 @@
 # Spec 001 – Vortaro mit echten Werten, Aspekto-Pakete, MCP-Server
 
-**Branch:** `001-vortaro-aspektoj-mcp` · **Status:** Ready for /speckit.plan, revidiert 2026-09-19 (Klärungen Q1, Q2, Q4 aus `plan.md`) · **Constitution:** v1.3 · **Erstellt:** 2026-09-19 · **Voraussetzung:** Spec 000 auf `main` (`6e517c6`), CI grün
+**Branch:** `001-vortaro-aspektoj-mcp` · **Status:** Ready for /speckit.plan, revidiert 2026-09-19 (Klärungen Q1, Q2, Q4 und K3 aus `plan.md`) · **Constitution:** v1.3 · **Erstellt:** 2026-09-19 · **Voraussetzung:** Spec 000 auf `main` (`6e517c6`), CI grün
 
 ## Zweck
 
@@ -47,7 +47,7 @@ Die Marke `ciferecigo` liegt in einem eigenen privaten Repository (`thojank/fund
 
 ### S5 – Typografie, die Marken tragen kann (Designer)
 
-Die Typografie-Rollen des Vortaro (Display, Headline in Stufen, Body, Label, Caption, Code, Kicker) sind Composites mit Familie, Größe, Gewicht, Zeilenhöhe, Laufweite und Textumwandlung. Sie sind je Aspekto und je Dimensio überschreibbar: `komuna` nutzt moderate Werte; `ciferecigo` setzt Display-Rollen auf Gewicht 100–200, Zeilenhöhe unter 0,8 und negative Laufweite, Kicker in Versalien mit positiver Laufweite. Beides ist ohne Schemaänderung ausdrückbar, und `density` verändert Größen und Zeilenhöhen, `viewport` die Display-Größen.
+Die Typografie-Rollen des Vortaro (Display, Headline in Stufen, Body, Label, Caption, Code, Kicker) sind Composites mit Familie, Größe, Gewicht, Zeilenhöhe, Laufweite und Textumwandlung. Sie sind je Aspekto und je Dimensio überschreibbar: `komuna` nutzt moderate Werte; `ciferecigo` setzt Display-Rollen auf Gewicht 100–200, Zeilenhöhe unter 0,8 und negative Laufweite, Kicker in Versalien mit positiver Laufweite. Beides ist ohne Schemaänderung ausdrückbar, und `viewport` verändert Größen, Zeilenhöhen und Laufweiten; `density` verändert keine Typografie (Regulo `density-affects-layout-only`).
 
 *Warum:* Artikel IV („Adaption in allen Aspekten"). Eine Marke, deren Charakter in der Typografie liegt, ist der harte Testfall für das Token-Schema; Farbe allein beweist nichts.
 
@@ -140,6 +140,7 @@ Aus den MCP-Antworten allein muss sich dieser Dialog bilden lassen:
 - **Aspekto überschreibt einen Token mit anderem `$type`**: Fehler (Regel aus Spec 000).
 - **Aspekto ohne Konjunktions-Set für `dark`**: gültig; das generische `color-scheme/dark` hängt die semantischen Farben auf andere Stufen der rollenbenannten Kern-Paletten (`neutral`, `accent`, `success`, …) um, und diese Stufen hat der Aspekto vollständig belegt (spätes Binden). Ein Aspekto führt keine eigenen Paletten ein: Eine Marke belegt `accent` mit ihrer Signalfarbe, statt eine Palette nach der Farbe zu benennen (S3).
 - **Konjunktions-Set-Approximation in `$themes.json`** (aus Phase 0): Mit zwei Aspektoj wird sie sichtbar. Der Export erzeugt `$themes.json` je Aspekto getrennt (ein Tokens-Studio-/Penpot-Import je Marke), sodass die Approximation innerhalb einer Marke bleibt. Dokumentiert in `research.md`.
+- **`viewport` und `density` verschieben nie denselben Token.** `density` betrifft nur Layout-Kompaktheit (Spacing, Komponentenhöhen), `viewport` die Typografie; sonst hinge das Ergebnis von der Prioritätsreihenfolge ab.
 - **MCP-Client fragt nach Aspekto, der nicht konfiguriert ist**: Antwort mit Liste der verfügbaren Aspektoj.
 
 ---
@@ -150,7 +151,7 @@ Aus den MCP-Antworten allein muss sich dieser Dialog bilden lassen:
 - AK-02: `komuna` besteht Alirebleco in allen Kombinationen; in `contrast=high` liegt jedes Text-Paar über 7:1.
 - AK-03: Fixture eines unvollständigen Aspekto schlägt mit `aspekto-incomplete` und der Liste fehlender Tokens fehl; Fixture eines vollständigen fiktiven externen Aspekto (`aspekto-ekzemplo`) besteht und wird über `fundamento.config.json` eingebunden.
 - AK-04: Die ID von `neutra`/`komuna` ist vor und nach der Umbenennung identisch (Test gegen `ids.lock.json` aus `6e517c6`).
-- AK-05: Typografie-Rollen sind in `komuna` und im externen Fixture unterschiedlich belegt (Gewicht, Zeilenhöhe, Laufweite) und in `density=compact` und `viewport=compact` verändert; Auflösung mit Herkunft zeigt das je Feld.
+- AK-05: Typografie-Rollen sind in `komuna` und im externen Fixture unterschiedlich belegt (Gewicht, Zeilenhöhe, Laufweite) und in `viewport=compact` verändert, in `density=compact` unverändert; Auflösung mit Herkunft zeigt das je Feld.
 - AK-06: MCP-Server startet, alle zehn Werkzeuge antworten mit schema-konformem JSON; ein Integrationstest spielt den Dialog aus S7 mit dem Fixture-Aspekto durch und rechnet jede Aussage aus den Antworten nach.
 - AK-07: `resolve` unter 100 ms, Start unter 2 s (gemessen im Test, mit Toleranz für CI).
 - AK-08: Kern-Repo enthält keine ciferecigo-Werte außerhalb von Spec und Research (Clean-Room-Prüfung erweitert um eine Allowlist der Dateien, die Markenwerte enthalten dürfen).
