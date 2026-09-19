@@ -1,6 +1,6 @@
 # Plan – Spec 001: Vortaro mit echten Werten, Aspekto-Pakete, MCP-Server
 
-**Spec:** [`spec.md`](spec.md) (approved) · **Research:** [`research.md`](research.md) (§7 added by this plan) · **Data model:** [`data-model.md`](data-model.md) · **Contracts:** [`contracts/`](contracts/) · **Quickstart:** [`quickstart.md`](quickstart.md) · **Constitution:** v1.3 · **Status:** decisions D-01–D-18 accepted by the maintainer 2026-09-19; clarifications Q1–Q5 closed; no tasks yet · **Date:** 2026-09-19 · **Base:** `main` @ `72192ec`
+**Spec:** [`spec.md`](spec.md) (approved) · **Research:** [`research.md`](research.md) (§7 added by this plan) · **Data model:** [`data-model.md`](data-model.md) · **Contracts:** [`contracts/`](contracts/) · **Quickstart:** [`quickstart.md`](quickstart.md) · **Constitution:** v1.3 · **Status:** decisions D-01–D-18 accepted by the maintainer 2026-09-19; clarifications Q1–Q5 closed; tasks in [`tasks.md`](tasks.md): T001–T029 implemented in the repository, T030 (ciferecigo) is built outside it · **Date:** 2026-09-19 · **Base:** `main` @ `72192ec`
 
 This plan is the output of `/speckit.plan` for Spec 001. It fixes the technical design of Phase 1, reviews it against every Article of Constitution v1.3 and lists the deviations under Complexity Tracking. The five clarifications raised in the first draft (Q1–Q5) were answered by the maintainer on 2026-09-19; the answers are worked into the decisions and listed in "Resolved clarifications" at the end. No `[NEEDS CLARIFICATION]` marker is open (AK-11).
 
@@ -383,27 +383,32 @@ One entry per Article of Constitution v1.3.
 
 **Status:** pending maintainer verification after the build (AK-09). The procedure follows Spec 000, with one import per folder `packages/modelo/dist/vortaro/<aspekto>/`. Record the Penpot version, date, result and deviations for `komuna` and for `ciferecigo` (the latter in the private repo, not here).
 
-## Traceability (requirement → decision)
+## Traceability (requirement → decision → tasks)
 
-| Requirement | Design |
-|---|---|
-| FR-01, AK-01 | D-02, data-model §2; coverage test with the category fixture from research §4/§6 |
-| FR-02, FR-03 | D-02, `color-semantic-literal`, name grammar (state as a segment) |
-| FR-04, FR-05, AK-05 | D-11; AK-05 needs the spec amendment below (K3) |
-| FR-06, FR-07 | D-03 (K3, K4) |
-| FR-08, AK-02 | D-12 |
-| FR-09, AK-04 | D-06, data-model §6 (frozen Phase-0 registry, K1) |
-| FR-10, AK-03 | D-04, D-05, D-16 |
-| FR-11 | D-05, D-06, D-10 |
-| FR-12 | D-07, D-08 |
-| FR-13 | D-18 |
-| FR-14 | D-06 |
-| FR-15 … FR-18, AK-06, AK-07 | D-13, D-14, D-17, contracts/mcp-tools.md |
-| FR-19 | Constitution v1.3 already ratified; migration = rename (D-06) |
-| AK-08 | D-15 |
-| AK-09 | this plan; Penpot result section |
-| AK-10 | D-09 |
-| AK-11 | no open marker; see "Resolved clarifications" |
+| Requirement | Design | Tasks |
+|---|---|---|
+| FR-01, AK-01 | D-02, data-model §2; coverage test with the category fixture from research §4/§6 | T012, T013, T014, T015 |
+| FR-02, FR-03 | D-02, `color-semantic-literal`, name grammar (state as a segment) | T005, T013 |
+| FR-04, FR-05, AK-05 | D-11, D-20; AK-05 needs the spec amendment below (K3) | T014, T016, T018, T018b |
+| FR-06, FR-07 | D-03 (K3, K4) | T009, T015, T016 |
+| FR-08, AK-02 | D-12 | T013, T017, T021 |
+| FR-09, AK-04 | D-06, data-model §6 (frozen Phase-0 registry, K1) | T002, T007 |
+| FR-10, AK-03 | D-04, D-05, D-16 | T005, T008, T018 |
+| FR-11 | D-05, D-06, D-10, D-20 | T003, T004, T006, T010, T018b, T021 |
+| FR-12 | D-07, D-08 | T004, T006, T011, T027 |
+| FR-13 | D-18 | T030 (outside the repository, delivered as an archive) |
+| FR-14 | D-06 | T002, T003, T007 |
+| FR-15 | D-13, contracts/mcp-tools.md | T001, T024, T026, T027 |
+| FR-16 | D-13, D-14, contracts/mcp-tools.md | T023, T024, T025 |
+| FR-17 | D-13 (in-memory export at start) | T019, T024, T026 |
+| FR-18 | D-13, contracts/mcp-tools.md (error envelope with `allowed`) | T023, T024, T025 |
+| FR-19 | Constitution v1.3 already ratified; migration = rename (D-06) | T007, T008 |
+| AK-06 | D-13, D-14, D-16 | T023, T028 |
+| AK-07 | D-17 | T028 |
+| AK-08 | D-15 | T022, T029 |
+| AK-09 | this plan; Penpot result section | T019, T029, T030 (Penpot import per Aspekto, manual) |
+| AK-10 | D-09 | T019 |
+| AK-11 | no open marker; see "Resolved clarifications" | T029 |
 
 ## Resolved clarifications
 
