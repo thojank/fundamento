@@ -59,7 +59,7 @@ Order follows the plan's "Build order". The ciferecigo package is the last task.
 
 ## Stage 3 – Vortaro data
 
-- [ ] **T012 Coverage test** (FR-01, AK-01)
+- [x] **T012 Coverage test** (FR-01, AK-01)
   - Red: `data/coverage.test.ts` with the category fixture from Spec 000 research §4 plus research §6 (minimum roles and steps per category). It is generated as **one `it` per category** (e.g. `coverage: color.status`, `coverage: typography composites`), each asserting only that category's required tokens and naming the missing ones, so the progress of T013–T015 is visible per category in every test run. It must fail on the Phase-0 core.
   - Green: none in this task. The category tests stay red until T013–T015 and are the gate for them. **This is the one approved exception to "green at the end of the task"**: categories not yet delivered are marked `it.fails` between T012 and T015; each of T013 and T014 removes `it.fails` from the categories it completes.
 - [ ] **T013 Colour** (D-02, D-12)
