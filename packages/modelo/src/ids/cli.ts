@@ -9,7 +9,12 @@ import { parseArgs } from "node:util";
 import { ENTITY_ID_PREFIXES, ENTITY_TYPES, type EntityType } from "../contracts/entity-ids.js";
 import type { ValidationIssue } from "../contracts/issues.js";
 import { allocateIds, retireId } from "./lock.js";
-import { defaultLockPath, readIdsLockFile, writeIdsLockFile } from "./lock-file.js";
+import {
+  defaultLockPath,
+  readIdsLockFile,
+  readLockNamespace,
+  writeIdsLockFile,
+} from "./lock-file.js";
 import { createIdGenerator, type IdGenerator, systemUlidSource } from "./ulid-source.js";
 
 export const EXIT_OK = 0;
@@ -33,6 +38,8 @@ const TYPE_LIST = ENTITY_TYPES.map(
 export const IDS_HELP = `Fundamento ID registry (packages/modelo/data/ids.lock.json)
 
 Every Modelo entity carries a stable, opaque ID: <prefix>_<ULID>, e.g. tok_01K5FMAJ0AND635FTMQ9558Y63.
+In an external Aspekto package the ID carries the package namespace: <prefix>_<ns>_<ULID>. The
+namespace is "idNamespace" in the aspekto.json next to the --lock file.
 IDs are issued only by this command and never reused. Never write or edit IDs by hand.
 
 Usage:
@@ -175,7 +182,18 @@ async function runNew(command: Extract<Command, { kind: "new" }>, env: IdsCliEnv
     env.stderr(formatIssues(read.issues));
     return EXIT_DOMAIN_ERROR;
   }
-  const { lock, ids } = allocateIds(read.lock, command.entityType, command.count, env.nextId);
+  const namespace = await readLockNamespace(command.lock);
+  if (!namespace.ok) {
+    env.stderr(formatIssues(namespace.issues));
+    return EXIT_DOMAIN_ERROR;
+  }
+  const { lock, ids } = allocateIds(
+    read.lock,
+    command.entityType,
+    command.count,
+    env.nextId,
+    namespace.namespace,
+  );
   const writeIssues = await writeIdsLockFile(command.lock, lock);
   if (writeIssues.length > 0) {
     env.stderr(formatIssues(writeIssues));
@@ -183,7 +201,16 @@ async function runNew(command: Extract<Command, { kind: "new" }>, env: IdsCliEnv
   }
   env.stdout(
     command.json
-      ? `${JSON.stringify({ entityType: command.entityType, ids, lock: command.lock }, null, 2)}\n`
+      ? `${JSON.stringify(
+          {
+            entityType: command.entityType,
+            ...(namespace.namespace === undefined ? {} : { namespace: namespace.namespace }),
+            ids,
+            lock: command.lock,
+          },
+          null,
+          2,
+        )}\n`
       : ids.map((id) => `${id}\n`).join(""),
   );
   return EXIT_OK;

@@ -38,6 +38,9 @@ export const RULE_IDS = [
   "id-retired-reused",
   "id-unregistered",
   "id-orphaned",
+  // ID namespaces of Aspekto packages (Spec 001 T003)
+  "id-namespace-mismatch",
+  "id-namespace-duplicate",
   // Dimensioj (FUND-3.2)
   "dimensio-default-invalid",
   "dimensio-priority-invalid",

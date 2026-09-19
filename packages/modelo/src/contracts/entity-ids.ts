@@ -1,4 +1,5 @@
-// Entity types and their opaque ID format (§2.3): `<prefix>_<26-char Crockford ULID>`.
+// Entity types and their opaque ID format (§2.3): `<prefix>_<26-char Crockford ULID>`, or
+// `<prefix>_<namespace>_<ULID>` for IDs minted in an external Aspekto package (Spec 001, D-06).
 
 import type { EntityType } from "../generated/modelo-schema.js";
 
@@ -43,18 +44,32 @@ export const ENTITY_TYPES = [
  */
 export const ULID_PATTERN_SOURCE = "[0-7][0-9A-HJKMNP-TV-Z]{25}";
 
-/** Matches any well-formed Fundamento ID and captures its prefix. */
+/**
+ * The ID namespace of an external Aspekto package (`idNamespace` in `aspekto.json`): 2 to 8
+ * lowercase letters. Core and reference-Aspekto IDs have no namespace.
+ */
+export const ID_NAMESPACE_PATTERN_SOURCE = "[a-z]{2,8}";
+export const ID_NAMESPACE_PATTERN = new RegExp(`^${ID_NAMESPACE_PATTERN_SOURCE}$`);
+
+/** Matches any well-formed Fundamento ID and captures its prefix and optional namespace. */
 export const ID_PATTERN = new RegExp(
-  `^(${Object.values(ENTITY_ID_PREFIXES).join("|")})_${ULID_PATTERN_SOURCE}$`,
+  `^(${Object.values(ENTITY_ID_PREFIXES).join("|")})_(?:(${ID_NAMESPACE_PATTERN_SOURCE})_)?${ULID_PATTERN_SOURCE}$`,
 );
 
-/** The ID pattern of one entity type. */
+/** The ID pattern of one entity type, with or without a namespace. */
 export function idPatternFor(entityType: EntityType): RegExp {
-  return new RegExp(`^${ENTITY_ID_PREFIXES[entityType]}_${ULID_PATTERN_SOURCE}$`);
+  return new RegExp(
+    `^${ENTITY_ID_PREFIXES[entityType]}_(?:${ID_NAMESPACE_PATTERN_SOURCE}_)?${ULID_PATTERN_SOURCE}$`,
+  );
 }
 
 /** The entity type encoded in a well-formed ID, or `undefined` for a malformed ID. */
 export function entityTypeOfId(id: string): EntityType | undefined {
   const prefix = ID_PATTERN.exec(id)?.[1];
   return ENTITY_TYPES.find((entityType) => ENTITY_ID_PREFIXES[entityType] === prefix);
+}
+
+/** The namespace of a well-formed namespaced ID; `undefined` for core IDs and malformed IDs. */
+export function namespaceOfId(id: string): string | undefined {
+  return ID_PATTERN.exec(id)?.[2];
 }

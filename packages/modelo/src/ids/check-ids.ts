@@ -7,6 +7,7 @@ import {
   ID_PATTERN,
   type IdsLock,
   idPatternFor,
+  namespaceOfId,
 } from "../contracts/entity-ids.js";
 import { formatIssuePath, type RuleId, type ValidationIssue } from "../contracts/issues.js";
 import type { IdOccurrence } from "../contracts/modelo.js";
@@ -157,4 +158,64 @@ export function checkIds(
       compareStrings(a.rule, b.rule) ||
       compareStrings(a.message, b.message),
   );
+}
+
+/** One ID registry of a composed Modelo: the core lock or an Aspekto package lock (D-06). */
+export interface IdRegistry {
+  /** Lock path used in issue paths. */
+  lockFile: string;
+  /** `aspekto.json` path used in issue paths; absent for the core registry. */
+  aspektoFile?: string;
+  /** The package's `idNamespace`; absent for the core and the reference Aspekto. */
+  namespace?: string;
+  lock: IdsLock;
+}
+
+/**
+ * The namespace rules of D-06: every ID in a registry carries exactly that registry's namespace
+ * (none for the core and the reference Aspekto), and no two packages share a namespace. Reports
+ * `id-namespace-mismatch` at the lock entry and `id-namespace-duplicate` at the later package's
+ * `idNamespace`. Sorted by path.
+ */
+export function checkIdNamespaces(registries: readonly IdRegistry[]): ValidationIssue[] {
+  const issues: ValidationIssue[] = [];
+  const firstByNamespace = new Map<string, string>();
+  for (const registry of registries) {
+    const { namespace } = registry;
+    if (namespace !== undefined) {
+      const first = firstByNamespace.get(namespace);
+      if (first === undefined) {
+        firstByNamespace.set(namespace, registry.aspektoFile ?? registry.lockFile);
+      } else {
+        issues.push(
+          issue(
+            "id-namespace-duplicate",
+            formatIssuePath({
+              file: registry.aspektoFile ?? registry.lockFile,
+              pointer: "/idNamespace",
+            }),
+            `The ID namespace '${namespace}' is already used by ${first}.`,
+            "Give every Aspekto package its own idNamespace (2–8 lowercase letters).",
+          ),
+        );
+      }
+    }
+    for (const id of Object.keys(registry.lock.ids).sort()) {
+      const actual = namespaceOfId(id);
+      if (actual === namespace) {
+        continue;
+      }
+      issues.push(
+        issue(
+          "id-namespace-mismatch",
+          formatIssuePath({ file: registry.lockFile, pointer: `/ids/${escapePointerSegment(id)}` }),
+          namespace === undefined
+            ? `ID '${id}' carries the namespace '${actual}', but this registry has none.`
+            : `ID '${id}' ${actual === undefined ? "has no namespace" : `carries the namespace '${actual}'`}, but this package mints IDs in '${namespace}'.`,
+          "Allocate IDs with `pnpm id:new <entityType> --lock <this lock>`; never copy IDs between packages.",
+        ),
+      );
+    }
+  }
+  return issues.sort((a, b) => compareStrings(a.path, b.path) || compareStrings(a.rule, b.rule));
 }

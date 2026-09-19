@@ -23,6 +23,21 @@ describe("ID generation", () => {
     expect(id).toMatch(idPatternFor(entityType));
   });
 
+  it("prefixes the ULID with an Aspekto package namespace when given (D-06)", () => {
+    const next = generator();
+    const id = next("tokenSet", "ekz");
+    expect(id).toMatch(/^set_ekz_[0-7][0-9A-HJKMNP-TV-Z]{25}$/);
+    expect(id).toMatch(idPatternFor("tokenSet"));
+  });
+
+  it("allocates namespaced IDs into a package lock (D-06)", () => {
+    const { ids } = allocateIds(emptyIdsLock(), "regulo", 2, generator(), "ekz");
+    expect(ids).toHaveLength(2);
+    for (const id of ids) {
+      expect(id.startsWith("reg_ekz_")).toBe(true);
+    }
+  });
+
   it("is deterministic for the same time and random source", () => {
     const a = generator(7);
     const b = generator(7);

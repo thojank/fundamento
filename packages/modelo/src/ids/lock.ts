@@ -87,14 +87,16 @@ export function parseIdsLock(
 }
 
 /**
- * Appends `count` new active IDs of `entityType`. Returns a new lock; the input is not mutated.
- * IDs already present in the lock (active or retired) are never issued again.
+ * Appends `count` new active IDs of `entityType`, in `namespace` when given (an external Aspekto
+ * package, D-06). Returns a new lock; the input is not mutated. IDs already present in the lock
+ * (active or retired) are never issued again.
  */
 export function allocateIds(
   lock: IdsLock,
   entityType: EntityType,
   count: number,
   nextId: IdGenerator,
+  namespace?: string,
 ): { lock: IdsLock; ids: string[] } {
   if (!Number.isInteger(count) || count < 1) {
     throw new RangeError(`count must be a positive integer, got ${count}.`);
@@ -102,12 +104,12 @@ export function allocateIds(
   const ids: IdsLock["ids"] = { ...lock.ids };
   const issued: string[] = [];
   for (let n = 0; n < count; n += 1) {
-    let id = nextId(entityType);
+    let id = nextId(entityType, namespace);
     for (let attempt = 1; id in ids; attempt += 1) {
       if (attempt >= MAX_ATTEMPTS_PER_ID) {
         throw new Error(`Could not generate an unused ${entityType} ID.`);
       }
-      id = nextId(entityType);
+      id = nextId(entityType, namespace);
     }
     ids[id] = { type: entityType, status: "active" };
     issued.push(id);

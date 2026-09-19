@@ -24,8 +24,8 @@ Order follows the plan's "Build order". The ciferecigo package is the last task.
 
 ## Stage 1 – Schema and contracts
 
-- [ ] **T003 ID namespaces** (D-06)
-  - Red: grammar fixtures for `<type>_<ULID>` and `<type>_<ns>_<ULID>`; fast-check proves every Phase-0 ID still matches; `id:new --lock <pkg>/ids.lock.json` mints with the namespace from `aspekto.json`; fixtures `invalid/id-namespace-mismatch`, `invalid/id-namespace-duplicate`.
+- [x] **T003 ID namespaces** (D-06)
+  - Red: grammar fixtures for `<type>_<ULID>` and `<type>_<ns>_<ULID>`; fast-check proves every Phase-0 ID still matches; `id:new --lock <pkg>/ids.lock.json` mints with the namespace from `aspekto.json`; the pure rules `id-namespace-mismatch` / `id-namespace-duplicate` (`checkIdNamespaces`). The Modelo fixtures `invalid/id-namespace-mismatch` and `invalid/id-namespace-duplicate` need package loading and move to T006.
   - Green: `contracts/entity-ids.ts`, schema ID defs, `ids/cli.ts`, rules.
 - [ ] **T004 Aspekto and config schemas** (D-05, D-07)
   - Red: `contracts/aspekto-schema.test.ts`, `config/read-config.test.ts`: valid/invalid `aspekto.json` (license SPDX or `proprietary`, `fonts[]`, `idNamespace`); config with paths and npm names resolved relative to the config file; `config-invalid`, `aspekto-package-missing` with the resolved path.
@@ -37,7 +37,7 @@ Order follows the plan's "Build order". The ciferecigo package is the last task.
 ## Stage 2 – Aspekto packages and composition
 
 - [ ] **T006 Package loading and composition** (D-08)
-  - Red: `load/compose.test.ts` on small self-contained fixtures (`valid/compose-two-aspektoj`, `invalid/aspekto-set-foreign`, `invalid/aspekto-name-duplicate`, `invalid/aspekto-reference-missing`); resolver provenance includes `origin.package`.
+  - Red: `load/compose.test.ts` on small self-contained fixtures (`valid/compose-two-aspektoj`, `invalid/aspekto-set-foreign`, `invalid/aspekto-name-duplicate`, `invalid/aspekto-reference-missing`, `invalid/id-namespace-mismatch`, `invalid/id-namespace-duplicate` from T003); resolver provenance includes `origin.package`.
   - Green: `ModeloSource.aspektoPackages`, loader, assembly of the `aspekto` values, resolver provenance.
 - [ ] **T007 Migration `neutra` → `komuna`** (FR-09, AK-04)
   - Red: `e2e/phase0-ids.test.ts` (AK-04 against the T002 fixture: every Phase-0 ID active in the union of registries, komuna ID = neutra ID, no new `dva_`); `aspekto-komuna` package tests (format, empty set).

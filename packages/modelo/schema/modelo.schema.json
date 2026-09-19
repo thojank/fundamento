@@ -142,55 +142,55 @@
     },
     "AnyId": {
       "type": "string",
-      "pattern": "^(tok|set|dim|dva|reg|jug|kpa|ero|ske|sxa|prj|cel)_[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+      "pattern": "^(tok|set|dim|dva|reg|jug|kpa|ero|ske|sxa|prj|cel)_(?:[a-z]{2,8}_)?[0-7][0-9A-HJKMNP-TV-Z]{25}$"
     },
     "TokenId": {
       "type": "string",
-      "pattern": "^tok_[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+      "pattern": "^tok_(?:[a-z]{2,8}_)?[0-7][0-9A-HJKMNP-TV-Z]{25}$"
     },
     "TokenSetId": {
       "type": "string",
-      "pattern": "^set_[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+      "pattern": "^set_(?:[a-z]{2,8}_)?[0-7][0-9A-HJKMNP-TV-Z]{25}$"
     },
     "DimensioId": {
       "type": "string",
-      "pattern": "^dim_[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+      "pattern": "^dim_(?:[a-z]{2,8}_)?[0-7][0-9A-HJKMNP-TV-Z]{25}$"
     },
     "DimensioValoroId": {
       "type": "string",
-      "pattern": "^dva_[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+      "pattern": "^dva_(?:[a-z]{2,8}_)?[0-7][0-9A-HJKMNP-TV-Z]{25}$"
     },
     "ReguloId": {
       "type": "string",
-      "pattern": "^reg_[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+      "pattern": "^reg_(?:[a-z]{2,8}_)?[0-7][0-9A-HJKMNP-TV-Z]{25}$"
     },
     "JugxoId": {
       "type": "string",
-      "pattern": "^jug_[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+      "pattern": "^jug_(?:[a-z]{2,8}_)?[0-7][0-9A-HJKMNP-TV-Z]{25}$"
     },
     "KontrastParoId": {
       "type": "string",
-      "pattern": "^kpa_[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+      "pattern": "^kpa_(?:[a-z]{2,8}_)?[0-7][0-9A-HJKMNP-TV-Z]{25}$"
     },
     "EroId": {
       "type": "string",
-      "pattern": "^ero_[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+      "pattern": "^ero_(?:[a-z]{2,8}_)?[0-7][0-9A-HJKMNP-TV-Z]{25}$"
     },
     "SkemoId": {
       "type": "string",
-      "pattern": "^ske_[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+      "pattern": "^ske_(?:[a-z]{2,8}_)?[0-7][0-9A-HJKMNP-TV-Z]{25}$"
     },
     "SxablonoId": {
       "type": "string",
-      "pattern": "^sxa_[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+      "pattern": "^sxa_(?:[a-z]{2,8}_)?[0-7][0-9A-HJKMNP-TV-Z]{25}$"
     },
     "ProjekcioId": {
       "type": "string",
-      "pattern": "^prj_[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+      "pattern": "^prj_(?:[a-z]{2,8}_)?[0-7][0-9A-HJKMNP-TV-Z]{25}$"
     },
     "CeloId": {
       "type": "string",
-      "pattern": "^cel_[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+      "pattern": "^cel_(?:[a-z]{2,8}_)?[0-7][0-9A-HJKMNP-TV-Z]{25}$"
     },
     "DtcgType": {
       "type": "string",

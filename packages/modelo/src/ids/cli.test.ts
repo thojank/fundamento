@@ -258,3 +258,51 @@ describe("built CLI entry point", () => {
     expect(bad.stderr).not.toMatch(/\n\s+at /);
   });
 });
+
+describe("id new in an Aspekto package (D-06)", () => {
+  function pkg(name: string, aspekto: unknown): string {
+    const root = join(dir, name);
+    mkdirSync(root);
+    writeFileSync(join(root, "ids.lock.json"), EMPTY_LOCK);
+    if (aspekto !== undefined) {
+      writeFileSync(join(root, "aspekto.json"), JSON.stringify(aspekto));
+    }
+    return root;
+  }
+
+  it("mints IDs with the namespace from the neighbouring aspekto.json", async () => {
+    pkg("ekzemplo", { name: "ekzemplo", idNamespace: "ekz" });
+    const out = await run(["new", "tokenSet", "--count", "2", "--lock", "ekzemplo/ids.lock.json"]);
+    expect(out.code).toBe(EXIT_OK);
+    const ids = out.stdout.trim().split("\n");
+    expect(ids).toHaveLength(2);
+    for (const id of ids) {
+      expect(id).toMatch(/^set_ekz_[0-7][0-9A-HJKMNP-TV-Z]{25}$/);
+    }
+    expect(
+      Object.keys((readLock(join(dir, "ekzemplo", "ids.lock.json")) as { ids: object }).ids),
+    ).toEqual([...ids].sort());
+  });
+
+  it("reports the namespace in the JSON result", async () => {
+    pkg("ekzemplo", { name: "ekzemplo", idNamespace: "ekz" });
+    const out = await run(["new", "token", "--lock", "ekzemplo/ids.lock.json", "--json"]);
+    expect(JSON.parse(out.stdout)).toMatchObject({ entityType: "token", namespace: "ekz" });
+  });
+
+  it("mints core-format IDs for a package without idNamespace (the reference Aspekto)", async () => {
+    pkg("komuna", { name: "komuna" });
+    const out = await run(["new", "tokenSet", "--lock", "komuna/ids.lock.json"]);
+    expect(out.code).toBe(EXIT_OK);
+    expect(out.stdout.trim()).toMatch(/^set_[0-7][0-9A-HJKMNP-TV-Z]{25}$/);
+  });
+
+  it("is an error for an invalid idNamespace and writes nothing (exit 1)", async () => {
+    pkg("bad", { name: "bad", idNamespace: "E" });
+    const out = await run(["new", "token", "--lock", "bad/ids.lock.json"]);
+    expect(out.code).toBe(EXIT_DOMAIN_ERROR);
+    expect(out.stderr).toContain("schema-violation");
+    expect(out.stderr).toContain("idNamespace");
+    expect(readFileSync(join(dir, "bad", "ids.lock.json"), "utf8")).toBe(EMPTY_LOCK);
+  });
+});
