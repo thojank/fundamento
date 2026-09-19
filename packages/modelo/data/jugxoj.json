@@ -31,6 +31,133 @@
       "kialo": "APCA stays advisory: WCAG 3 has not settled its contrast method, so a binding APCA threshold would hold brands to a method no standard names; revisit when WCAG 3 contrast reaches Candidate Recommendation.",
       "date": "2026-09-19",
       "context": "Spec 003 FR-17, plan D-10. WCAG 2 contrast stays binding (4.5:1, 3:1, and 7:1 for text under contrast=high); APCA is still reported by check:alirebleco, check_contrast and explain (baseline Spec 001 §8, Spec 002 research §8.7)."
+    },
+    {
+      "id": "jug_01M2XN0Q7YGPVYC981A9D98PSZ",
+      "ref": { "ero": "ero_01M2XN0PHDBBD6MNFN75DB9NQ5" },
+      "decision": "approved",
+      "kialo": "One primary action per dialog: Speichern leads, Abbrechen steps back as tertiary.",
+      "date": "2026-09-19",
+      "context": "Example CORRECT for the Regulo named in ekzemplo.regulo (Spec 003 T007); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M2XMV80DG7JCJDTZGE66MGHW",
+        "instances": [
+          {
+            "ero": "butono",
+            "props": { "variant": "primary", "type": "submit" },
+            "container": "dialog",
+            "label": "Speichern"
+          },
+          {
+            "ero": "butono",
+            "props": { "variant": "tertiary" },
+            "container": "dialog",
+            "label": "Abbrechen"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M2XN0Q7YGPVYC981A9D98PT0",
+      "ref": { "ero": "ero_01M2XN0PHDBBD6MNFN75DB9NQ5" },
+      "decision": "rejected",
+      "kialo": "Two primary buttons in one dialog: the user has to decide which one is the main action.",
+      "date": "2026-09-19",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 003 T007); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M2XMV80DG7JCJDTZGE66MGHW",
+        "instances": [
+          {
+            "ero": "butono",
+            "props": { "variant": "primary" },
+            "container": "dialog",
+            "label": "Speichern"
+          },
+          {
+            "ero": "butono",
+            "props": { "variant": "primary" },
+            "container": "dialog",
+            "label": "Weiter"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M2XN0Q7YGPVYC981A9D98PT1",
+      "ref": { "ero": "ero_01M2XN0PHDBBD6MNFN75DB9NQ5" },
+      "decision": "approved",
+      "kialo": "A confirmation dialog whose main action destroys data uses the danger fill; the escape stays tertiary.",
+      "date": "2026-09-19",
+      "context": "Example CORRECT for the Regulo named in ekzemplo.regulo (Spec 003 T007); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M2XMV80DG7JCJDTZGE66MGHX",
+        "instances": [
+          {
+            "ero": "butono",
+            "props": { "variant": "primary", "tone": "danger" },
+            "container": "confirm-delete",
+            "intent": "destructive",
+            "label": "Löschen"
+          },
+          {
+            "ero": "butono",
+            "props": { "variant": "tertiary" },
+            "container": "confirm-delete",
+            "label": "Abbrechen"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M2XN0Q7YGPVYC981A9D98PT2",
+      "ref": { "ero": "ero_01M2XN0PHDBBD6MNFN75DB9NQ5" },
+      "decision": "rejected",
+      "kialo": "Löschen in the neutral primary colour promises the expected next step instead of warning before data is lost.",
+      "date": "2026-09-19",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 003 T007); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M2XMV80DG7JCJDTZGE66MGHX",
+        "instances": [
+          {
+            "ero": "butono",
+            "props": { "variant": "primary" },
+            "container": "confirm-delete",
+            "label": "Löschen"
+          },
+          {
+            "ero": "butono",
+            "props": { "variant": "tertiary" },
+            "container": "confirm-delete",
+            "label": "Abbrechen"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M2XN0Q7YGPVYC981A9D98PT3",
+      "ref": { "ero": "ero_01M2XN0PHDBBD6MNFN75DB9NQ5" },
+      "decision": "approved",
+      "kialo": "An icon-only button names itself with the label prop, so assistive technology can announce it.",
+      "date": "2026-09-19",
+      "context": "Example CORRECT for the Regulo named in ekzemplo.regulo (Spec 003 T007); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M2XMV80DG7JCJDTZGE66MGHY",
+        "instances": [
+          { "ero": "butono", "props": { "variant": "tertiary", "size": "small", "label": "Schließen" } }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M2XN0Q7YGPVYC981A9D98PT4",
+      "ref": { "ero": "ero_01M2XN0PHDBBD6MNFN75DB9NQ5" },
+      "decision": "rejected",
+      "kialo": "An icon-only button without a name: a screen reader announces only \"button\".",
+      "date": "2026-09-19",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 003 T007); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M2XMV80DG7JCJDTZGE66MGHY",
+        "instances": [{ "ero": "butono", "props": { "variant": "tertiary", "size": "small" } }]
+      }
     }
   ]
 }

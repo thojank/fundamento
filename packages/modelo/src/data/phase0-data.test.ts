@@ -431,8 +431,9 @@ describe("Phase 0 repo Modelo: IDs and derived files", () => {
         if (match[1] !== undefined) used.push(match[1]);
       }
     }
-    expect(new Set(used).size, "no ID is used twice").toBe(used.length);
-    expect([...used].sort()).toEqual(Object.keys(lock.ids).sort());
+    // Since Spec 003, data also references IDs (an Ero's Skemo, Jugxo refs and examples), so an ID
+    // may occur more than once; checkIds reports real duplicates (id-duplicate) in validation.
+    expect([...new Set(used)].sort()).toEqual(Object.keys(lock.ids).sort());
     for (const [id, entry] of Object.entries(lock.ids)) {
       expect(entry).toEqual({ type: entityTypeOfId(id), status: "active" });
     }

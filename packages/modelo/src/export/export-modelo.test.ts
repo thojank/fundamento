@@ -183,11 +183,12 @@ describe("exportModelo: shape (§2.9)", () => {
     expect(modeloJson.setoj.find((set) => set.name === "core")?.kondicxoj).toEqual([]);
   });
 
-  it("exports Reguloj, Jugxoj, KontrastParoj as in the data and no Eroj", () => {
+  it("exports Reguloj, Jugxoj, KontrastParoj and Eroj as in the data", () => {
     expect(modeloJson.reguloj).toEqual(modelo.reguloj);
     expect(modeloJson.jugxoj).toEqual(modelo.jugxoj);
     expect(modeloJson.kontrastParoj).toEqual(modelo.kontrastParoj);
-    expect(modeloJson.eroj).toEqual([]);
+    expect(modeloJson.eroj).toEqual(modelo.eroj.map((entry) => entry.ero));
+    expect(modeloJson.skemoj).toEqual(modelo.eroj.map((entry) => entry.skemo));
   });
 
   it("embeds the default-assignment Rezolvo with provenance", () => {

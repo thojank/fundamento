@@ -72,6 +72,10 @@
       "status": "active",
       "type": "dimensioValoro"
     },
+    "ero_01M2XN0PHDBBD6MNFN75DB9NQ5": {
+      "status": "active",
+      "type": "ero"
+    },
     "jug_01M2VRT7KQ77W91MVXB4GXSRZ4": {
       "status": "active",
       "type": "jugxo"
@@ -85,6 +89,30 @@
       "type": "jugxo"
     },
     "jug_01M2XKF38358Z6WQH9KARYJ6F3": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M2XN0Q7YGPVYC981A9D98PSZ": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M2XN0Q7YGPVYC981A9D98PT0": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M2XN0Q7YGPVYC981A9D98PT1": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M2XN0Q7YGPVYC981A9D98PT2": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M2XN0Q7YGPVYC981A9D98PT3": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M2XN0Q7YGPVYC981A9D98PT4": {
       "status": "active",
       "type": "jugxo"
     },
@@ -447,6 +475,10 @@
     "set_01M2W9405H78SEPQEPVE8KH9MB": {
       "status": "active",
       "type": "tokenSet"
+    },
+    "ske_01M2XN0PWS92GP7VFHW161EH0D": {
+      "status": "active",
+      "type": "skemo"
     },
     "tok_01M2VEEE0PMRFBGM9Z8B2DWBQF": {
       "status": "active",

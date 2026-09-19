@@ -120,7 +120,9 @@ export const USAGE_ENFORCERS: Readonly<Record<string, UsageEnforcer>> = {
     instances.flatMap((instance, index) => {
       const ero = eroOf(instance);
       if (ero === undefined || !applies(regulo, ero)) return [];
-      if ((instance.label ?? "").trim() !== "") return [];
+      // The visible label (slot text) or, icon-only, the label prop as accessible name.
+      const name = instance.label ?? instance.props.label;
+      if (typeof name === "string" && name.trim() !== "") return [];
       return [
         {
           instance: [index],
