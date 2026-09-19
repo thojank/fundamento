@@ -150,5 +150,15 @@ Nicht als Token ausdrückbar sind außerdem:
   - `checkability: automatic` (über alle Kombinationen jedes Aspekto).
   - Kialo: Die Textrollen tragen eine Bedeutungsunterscheidung; hoher Kontrast darf sie nicht löschen, und eine Kontrastprüfung erkennt ein Zusammenfallen nicht.
   - Heute verletzt: komuna in light/high und dark/high (siehe oben); ciferecigo folgt dort dem Kern und wird mit dem Kern-Fix neu abgeleitet.
+- **Regulo-Kandidat für den Kern: `state-distinct`** (vom Maintainer festgelegt, dritter Kandidat; Umsetzung in Phase 2 mit `surface-order` und `text-hierarchy`).
+  - Aussage: `color.action.*.hover`, `.pressed` und `.selected` unterscheiden sich in jeder Kombination von `.rest`.
+  - `checkability: automatic`.
+  - Kialo: Ein Zustand, der aussieht wie der Ruhezustand, gibt keine Rückmeldung; das sieht keine Kontrastprüfung.
+  - Befund aus der Umsetzung: Der Kern hat nur ein `action.primary.text` für alle Zustände. Mit dunklem Text auf der Signalfläche erreichen nur hellere Akzentstufen 4,5:1 (Ink auf 600 nur 3,21:1). Daher gilt für ciferecigo (Regel 8, vom Maintainer entschieden): Zustände entfernen sich von der Helligkeit der Textfarbe (hover eine Stufe, pressed zwei, selected = pressed). Ob der Kern Zustands-Textfarben braucht, ist eine Frage für Phase 2.
+- **Visuelle Abnahme ciferecigo, weitere Entscheidungen (Regeln 7 und 8 in `DERIVATION.md`):**
+  - Statusfarben halten ≥ 40° OKLCH-Hue-Abstand zum Akzent. Danger liegt 41° unter dem Signal (Karmesin, 40° plus 1° Rundungsreserve); die Fehlerfarbe aus Anhang A lag nur 6° neben dem Signal und ist ersetzt (dokumentierte Abweichung von Anhang A). Warning ist Amber bei 87,5° mit maximaler Chroma.
+  - Physikalische Grenze: Amber existiert nur oberhalb L ≈ 0,75, eine Warnfläche muss sich im Light-Schema aber mit 3:1 von Paper abheben (Amber 1,34:1). Deshalb ist die Warnfläche nur im Dark-Schema Amber; im Light-Schema wählt die Ausweichregel die erste 3:1-Stufe (Ocker/Oliv). Kern-Kandidat für Phase 2: Kontrastpaare für Füllflächen, die über einen 3:1-Rahmen erfüllt werden dürfen; dann ginge Amber auch im Light-Schema.
+  - `display.1` behält 0,70, weil Anhang A 0,70 ausdrücklich nennt; der Regulo `display-1-single-line` (manual, mit Kialo) beschränkt die Rolle auf eine Zeile.
+  - Die Abnahmen sind als `scripts/check.mjs` im Paket ausführbar (`pnpm check`): state-distinct, Status-Hue, Amber im Dark, Danger-Hue, display.1. Das ist der dritte Enportilo-Prototyp: Befunde der visuellen Abnahme als wiederholbare Prüfung.
 - **APCA (beratend, vgl. §8):** Die Komposition ergibt 3 186 Hinweise, davon 2 016 für ciferecigo: light/default 306, light/high 612, dark/default 630, dark/high 468. Das passt dazu, dass die Entscheidung über APCA bei Spec 003 liegt.
 - **Werkzeug:** Die CLI setzt Node 24 voraus (`import.meta.main`). Unter einer älteren Node-Version endet `fm` ohne Ausgabe mit Exit 0. Während T030 war im Shell-Pfad kurz Node 20 aktiv, und das fiel nur durch die leere Ausgabe auf.
