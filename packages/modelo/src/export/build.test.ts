@@ -62,7 +62,10 @@ describe("build artifacts in dist/", () => {
 });
 
 describe("building twice is byte-identical (AK-10)", () => {
-  it("two runs of the export build give the same SHA-256 hashes as dist/", () => {
+  // Spawns the build twice: sized for a cold or loaded runner (Jugxo jug_01M2W3K1YPP05F4XF86J71RGTK).
+  it("two runs of the export build give the same SHA-256 hashes as dist/", {
+    timeout: 30_000,
+  }, () => {
     const first = tempDir();
     const second = tempDir();
     for (const out of [first, second]) {
@@ -104,23 +107,24 @@ describe("the S6 dialog from dist/modelo.json alone (AK-06)", () => {
   const description = describeModelo(modeloJson);
 
   it("answers 'what is here?' with computed facts", () => {
-    expect(description.version).toBe("0.0.1");
+    expect(description.version).toBe("0.1.0");
     expect(description.dimensioj).toEqual(modeloJson.dimensioj.map((dimensio) => dimensio.name));
     expect(description.dimensioj).toHaveLength(6);
-    expect(description.aspektoj).toEqual(["neutra"]);
+    expect(description.aspektoj).toEqual(["komuna"]);
     expect(description.tokenCount).toBe(modeloJson.tokens.length);
-    expect(description.typeCount).toBe(10);
-    expect(description.reguloCount).toBe(2);
-    expect(description.reguloWithKialoCount).toBe(2);
+    expect(description.typeCount).toBe(new Set(modeloJson.tokens.map((t) => t.type)).size);
+    expect(description.reguloCount).toBe(modeloJson.reguloj.length);
+    expect(description.reguloWithKialoCount).toBe(modeloJson.reguloj.length);
     expect(description.eroCount).toBe(0);
   });
 
   it("states the S6 sentence", () => {
-    expect(description.sentence).toBe(
-      `Fundamento v0.0.1: six Dimensioj (${description.dimensioj.join(", ")}), one Aspekto \`neutra\`, ${description.tokenCount} tokens in ten types, two rules with reasons, no Eroj.`,
+    expect(description.sentence).toContain(
+      `six Dimensioj (${description.dimensioj.join(", ")}), one Aspekto \`komuna\`, ${description.tokenCount} tokens in `,
     );
-    expect(description.sentence).toBe(
-      "Fundamento v0.0.1: six Dimensioj (aspekto, viewport, density, color-scheme, contrast, motion), one Aspekto `neutra`, 30 tokens in ten types, two rules with reasons, no Eroj.",
+    // Counts change while Spec 001 fills the Vortaro; the shape of the sentence does not.
+    expect(description.sentence).toMatch(
+      /^Fundamento v0\.1\.0: six Dimensioj \(aspekto, viewport, density, color-scheme, contrast, motion\), one Aspekto `komuna`, \d+ tokens in \w+ types, \w+ rules with reasons, no Eroj\.$/,
     );
   });
 });

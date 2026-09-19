@@ -75,3 +75,31 @@ export function deriveThemes(modelo: Modelo): DerivedThemes {
   }
   return { themes, metadata: { tokenSetOrder: ordered.map((set) => set.name) } };
 }
+
+/**
+ * The `$themes.json` fragment of an Aspekto package (Spec 001, D-05): the package's contribution
+ * to the composed themes. It lists every theme in which a set of the package is enabled, with
+ * only those sets, and `core: "source"` on the package's own Aspekto theme. The core `$themes.json`
+ * (the core view) plus every fragment, merged per theme, equals `deriveThemes(modelo)`.
+ */
+export function deriveThemeFragment(modelo: Modelo, packageName: string): TokensStudioTheme[] {
+  const own = new Set(
+    modelo.setoj.filter((set) => set.package === packageName).map((set) => set.name),
+  );
+  const aspekto = modelo.aspektoPackages.find((pkg) => pkg.name === packageName)?.aspekto;
+  const fragment: TokensStudioTheme[] = [];
+  for (const theme of deriveThemes(modelo).themes) {
+    const selectedTokenSets: Record<string, TokenSetStatus> = {};
+    const isOwnAspekto = theme.group === "aspekto" && theme.name === aspekto;
+    if (isOwnAspekto && theme.selectedTokenSets[CORE_SET_NAME] !== undefined) {
+      selectedTokenSets[CORE_SET_NAME] = theme.selectedTokenSets[CORE_SET_NAME];
+    }
+    for (const [name, status] of Object.entries(theme.selectedTokenSets)) {
+      if (own.has(name)) selectedTokenSets[name] = status;
+    }
+    if (isOwnAspekto || Object.keys(selectedTokenSets).length > 0) {
+      fragment.push({ ...theme, selectedTokenSets });
+    }
+  }
+  return fragment;
+}

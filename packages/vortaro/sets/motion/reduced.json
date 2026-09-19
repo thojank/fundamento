@@ -1,12 +1,42 @@
 {
   "$extensions": {
-    "com.ciferecigo.fundamento": { "id": "set_01M2VEEDW45A0B9Q4GQ465NCHM", "kondicxoj": ["motion=reduced"] }
+    "com.ciferecigo.fundamento": {
+      "id": "set_01M2VEEDW45A0B9Q4GQ465NCHM",
+      "kondicxoj": [
+        "motion=reduced"
+      ]
+    }
   },
   "motion": {
     "duration": {
       "$type": "duration",
-      "short": { "$value": { "value": 0, "unit": "ms" } },
-      "medium": { "$value": { "value": 0, "unit": "ms" } }
+      "fast": {
+        "$value": "{motion.duration.scale.0}"
+      },
+      "medium": {
+        "$value": "{motion.duration.scale.0}"
+      },
+      "slow": {
+        "$value": "{motion.duration.scale.0}"
+      },
+      "deliberate": {
+        "$value": "{motion.duration.scale.0}"
+      }
+    },
+    "easing": {
+      "$type": "cubicBezier",
+      "standard": {
+        "$value": "{motion.easing.curve.linear}"
+      },
+      "emphasized": {
+        "$value": "{motion.easing.curve.linear}"
+      },
+      "enter": {
+        "$value": "{motion.easing.curve.linear}"
+      },
+      "exit": {
+        "$value": "{motion.easing.curve.linear}"
+      }
     }
   }
 }

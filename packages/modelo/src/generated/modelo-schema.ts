@@ -30,6 +30,13 @@ export type DimensioValoroId = string;
  */
 export type NonEmptyText = string;
 /**
+ * An SPDX license expression, or `proprietary` for rights that are not openly licensed.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "License".
+ */
+export type License = string;
+/**
  * This interface was referenced by `ModeloJson`'s JSON-Schema
  * via the `definition` "DtcgType".
  */
@@ -61,7 +68,16 @@ export type TokenName = string;
  * This interface was referenced by `ModeloJson`'s JSON-Schema
  * via the `definition` "TokenRole".
  */
-export type TokenRole = "foreground" | "background" | "border";
+export type TokenRole =
+  | "palette"
+  | "foreground"
+  | "background"
+  | "border"
+  | "focus"
+  | "shadow"
+  | "backdrop"
+  | "disabled"
+  | "decorative";
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema
  * via the `definition` "TokenSetId".
@@ -112,6 +128,13 @@ export type KontrastKategorio = "text-normal" | "text-large" | "ui";
  * via the `definition` "SkemoId".
  */
 export type SkemoId = string;
+/**
+ * Text transformation of a typography role (Spec 001, D-11). DTCG has no field for it; the values are platform-neutral.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "TextTransform".
+ */
+export type TextTransform = "none" | "uppercase" | "lowercase" | "capitalize";
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema
  * via the `definition` "Alias".
@@ -263,6 +286,13 @@ export type DtcgToken = {
   $deprecated?: Deprecated;
 };
 /**
+ * ID namespace of an external Aspekto package (Spec 001, D-06): 2 to 8 lowercase letters.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "IdNamespace".
+ */
+export type IdNamespace = string;
+/**
  * This interface was referenced by `ModeloJson`'s JSON-Schema
  * via the `definition` "IdStatus".
  */
@@ -288,7 +318,7 @@ export interface ModeloJson {
   rezolvo: Rezolvo;
 }
 /**
- * An adaptation dimension. priority is unique; 1 is lowest and higher priorities win in resolution.
+ * An adaptation dimension. priority is unique; 1 is lowest and higher priorities win in resolution. The values of the aspekto Dimensio come from the loaded Aspekto packages (Spec 001, D-05), so dimensioj.json lists none for it; every other Dimensio lists its values (dimensio-default-invalid otherwise).
  *
  * This interface was referenced by `ModeloJson`'s JSON-Schema
  * via the `definition` "Dimensio".
@@ -299,9 +329,13 @@ export interface Dimensio {
   priority: number;
   default: Name;
   /**
+   * Only on the aspekto Dimensio: the reference Aspekto whose values live in core (Spec 001, FR-10).
+   */
+  referenceAspekto?: string;
+  /**
    * @minItems 1
    */
-  valoroj: DimensioValoro[];
+  valoroj?: DimensioValoro[];
 }
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema
@@ -361,7 +395,30 @@ export interface AspektoEntry {
   id: DimensioValoroId;
   name: Name;
   owner: NonEmptyText;
-  licenseNote: NonEmptyText;
+  licenseNote?: NonEmptyText;
+  license?: License;
+  fonts?: Fonto[];
+  /**
+   * True for the reference Aspekto (core.referenceAspekto).
+   */
+  reference?: boolean;
+  /**
+   * True when the package lies outside the core repository.
+   */
+  external?: boolean;
+  package?: NonEmptyText;
+}
+/**
+ * A font family an Aspekto uses. Font files never enter the core repository; the fallback stack lives only in the fontFamily token value.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "Fonto".
+ */
+export interface Fonto {
+  family: NonEmptyText;
+  license: License;
+  source: NonEmptyText;
+  redistributable: boolean;
 }
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema
@@ -439,6 +496,10 @@ export interface Regulo {
   kialo: NonEmptyText;
   scope: NonEmptyText;
   checkability: "automatic" | "manual";
+  /**
+   * Scopes the entry to one Aspekto; entries in an Aspekto package carry their Aspekto (Spec 001, D-10).
+   */
+  aspekto?: string;
 }
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema
@@ -451,6 +512,10 @@ export interface Jugxo {
   kialo: NonEmptyText;
   date: string;
   context: string;
+  /**
+   * Scopes the entry to one Aspekto; entries in an Aspekto package carry their Aspekto (Spec 001, D-10).
+   */
+  aspekto?: string;
 }
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema
@@ -528,6 +593,13 @@ export interface ResolvedToken {
   fieldAliases?: {
     [k: string]: AliasLink[];
   };
+  /**
+   * Text transformation of a typography token and the set that states it; the last active set that states one wins (Spec 001, D-11). Absent when no set states one.
+   */
+  textTransform?: {
+    value: TextTransform;
+    set: SetName;
+  };
 }
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema
@@ -536,6 +608,10 @@ export interface ResolvedToken {
 export interface ResolvedTokenOrigin {
   set: SetName;
   setId: TokenSetId;
+  /**
+   * The Aspekto package that holds the set (Spec 001, D-08); absent for core sets.
+   */
+  package?: string;
 }
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema
@@ -646,6 +722,7 @@ export interface TypographyValue {
 export interface TokenFundamentoExtension {
   id: TokenId;
   role?: TokenRole;
+  textTransform?: TextTransform;
 }
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema
@@ -677,6 +754,20 @@ export interface DtcgGroup {
   $extensions?: GroupExtensions;
   $deprecated?: Deprecated;
   [k: string]: DtcgNode | DtcgType | string | GroupExtensions | Deprecated | undefined;
+}
+/**
+ * aspekto.json of an Aspekto package (Spec 001, D-05). `id` is the DimensioValoro ID of the Aspekto; `idNamespace` is required for every package except the reference Aspekto (checked on composition).
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "AspektoFile".
+ */
+export interface AspektoFile {
+  id: DimensioValoroId;
+  name: Name;
+  owner: NonEmptyText;
+  license: License;
+  idNamespace?: IdNamespace;
+  fonts: Fonto[];
 }
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema

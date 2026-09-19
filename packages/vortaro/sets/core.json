@@ -1,56 +1,1325 @@
 {
-  "$extensions": { "com.ciferecigo.fundamento": { "id": "set_01M2VEEDW32MC4ZQPRN0GC9JRR", "kondicxoj": [] } },
+  "$extensions": {
+    "com.ciferecigo.fundamento": {
+      "id": "set_01M2VEEDW32MC4ZQPRN0GC9JRR",
+      "kondicxoj": []
+    }
+  },
   "color": {
     "$type": "color",
     "palette": {
       "neutral": {
         "0": {
-          "$value": { "colorSpace": "srgb", "components": [1, 1, 1], "hex": "#ffffff" },
-          "$description": "Lightest neutral.",
-          "$extensions": { "com.ciferecigo.fundamento": { "id": "tok_01M2VEEE0PMRFBGM9Z8B2DWBQF" } }
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              1,
+              1,
+              1
+            ],
+            "hex": "#ffffff"
+          },
+          "$description": "White, the lightest neutral.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2VEEE0PMRFBGM9Z8B2DWBQF",
+              "role": "palette"
+            }
+          }
+        },
+        "50": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.9662,
+              0.9672,
+              0.9689
+            ],
+            "hex": "#f6f7f7"
+          },
+          "$description": "Neutral grey, step 50.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400YPCCM5JC5WTW610A3",
+              "role": "palette"
+            }
+          }
         },
         "100": {
-          "$value": { "colorSpace": "srgb", "components": [0.9412, 0.9412, 0.9412], "hex": "#f0f0f0" },
-          "$description": "Very light neutral.",
-          "$extensions": { "com.ciferecigo.fundamento": { "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBA" } }
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.926,
+              0.9282,
+              0.9318
+            ],
+            "hex": "#ecedee"
+          },
+          "$description": "Neutral grey, step 100.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBA",
+              "role": "palette"
+            }
+          }
+        },
+        "200": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.8533,
+              0.8574,
+              0.8641
+            ],
+            "hex": "#dadbdc"
+          },
+          "$description": "Neutral grey, step 200.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XSH",
+              "role": "palette"
+            }
+          }
+        },
+        "300": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.75,
+              0.7563,
+              0.7666
+            ],
+            "hex": "#bfc1c3"
+          },
+          "$description": "Neutral grey, step 300.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XSJ",
+              "role": "palette"
+            }
+          }
+        },
+        "400": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.6252,
+              0.6334,
+              0.6466
+            ],
+            "hex": "#9fa2a5"
+          },
+          "$description": "Neutral grey, step 400.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XSK",
+              "role": "palette"
+            }
+          }
         },
         "500": {
-          "$value": { "colorSpace": "srgb", "components": [0.4196, 0.4196, 0.4196], "hex": "#6b6b6b" },
-          "$description": "Mid neutral.",
-          "$extensions": { "com.ciferecigo.fundamento": { "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBB" } }
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.5059,
+              0.5146,
+              0.5286
+            ],
+            "hex": "#818387"
+          },
+          "$description": "Neutral grey, step 500.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBB",
+              "role": "palette"
+            }
+          }
+        },
+        "600": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.4033,
+              0.4117,
+              0.4252
+            ],
+            "hex": "#67696c"
+          },
+          "$description": "Neutral grey, step 600.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XSM",
+              "role": "palette"
+            }
+          }
+        },
+        "700": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.3158,
+              0.3238,
+              0.3368
+            ],
+            "hex": "#515356"
+          },
+          "$description": "Neutral grey, step 700.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XSN",
+              "role": "palette"
+            }
+          }
+        },
+        "800": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.2323,
+              0.2399,
+              0.2522
+            ],
+            "hex": "#3b3d40"
+          },
+          "$description": "Neutral grey, step 800.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XSP",
+              "role": "palette"
+            }
+          }
         },
         "900": {
-          "$value": { "colorSpace": "srgb", "components": [0.1098, 0.1098, 0.1098], "hex": "#1c1c1c" },
-          "$description": "Very dark neutral.",
-          "$extensions": { "com.ciferecigo.fundamento": { "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBC" } }
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.1541,
+              0.1605,
+              0.1707
+            ],
+            "hex": "#27292c"
+          },
+          "$description": "Neutral grey, step 900.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBC",
+              "role": "palette"
+            }
+          }
+        },
+        "950": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.0819,
+              0.0865,
+              0.094
+            ],
+            "hex": "#151618"
+          },
+          "$description": "Neutral grey, step 950.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XSQ",
+              "role": "palette"
+            }
+          }
         },
         "1000": {
-          "$value": { "colorSpace": "srgb", "components": [0, 0, 0], "hex": "#000000" },
-          "$description": "Darkest neutral.",
-          "$extensions": { "com.ciferecigo.fundamento": { "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBD" } }
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0,
+              0,
+              0
+            ],
+            "hex": "#000000"
+          },
+          "$description": "Black, the darkest neutral.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBD",
+              "role": "palette"
+            }
+          }
         }
       },
-      "blue": {
+      "accent": {
+        "50": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.9546,
+              0.969,
+              0.9878
+            ],
+            "hex": "#f3f7fc"
+          },
+          "$description": "Accent (komuna: calm blue-grey, no signature colour), step 50.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XSR",
+              "role": "palette"
+            }
+          }
+        },
+        "100": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.9013,
+              0.9318,
+              0.9715
+            ],
+            "hex": "#e6eef8"
+          },
+          "$description": "Accent (komuna: calm blue-grey, no signature colour), step 100.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XSS",
+              "role": "palette"
+            }
+          }
+        },
+        "200": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.8071,
+              0.8636,
+              0.9371
+            ],
+            "hex": "#cedcef"
+          },
+          "$description": "Accent (komuna: calm blue-grey, no signature colour), step 200.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XST",
+              "role": "palette"
+            }
+          }
+        },
+        "300": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.6779,
+              0.7648,
+              0.8775
+            ],
+            "hex": "#adc3e0"
+          },
+          "$description": "Accent (komuna: calm blue-grey, no signature colour), step 300.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XSV",
+              "role": "palette"
+            }
+          }
+        },
+        "400": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.5298,
+              0.6427,
+              0.7885
+            ],
+            "hex": "#87a4c9"
+          },
+          "$description": "Accent (komuna: calm blue-grey, no signature colour), step 400.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XSW",
+              "role": "palette"
+            }
+          }
+        },
+        "500": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.4025,
+              0.523,
+              0.6782
+            ],
+            "hex": "#6785ad"
+          },
+          "$description": "Accent (komuna: calm blue-grey, no signature colour), step 500.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XSX",
+              "role": "palette"
+            }
+          }
+        },
         "600": {
-          "$value": { "colorSpace": "srgb", "components": [0.1176, 0.2902, 0.6196], "hex": "#1e4a9e" },
-          "$description": "Saturated blue used for primary actions.",
-          "$extensions": { "com.ciferecigo.fundamento": { "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBE" } }
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.3022,
+              0.4187,
+              0.5681
+            ],
+            "hex": "#4d6b91"
+          },
+          "$description": "Accent (komuna: calm blue-grey, no signature colour), step 600.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBE",
+              "role": "palette"
+            }
+          }
+        },
+        "700": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.2166,
+              0.3293,
+              0.473
+            ],
+            "hex": "#375479"
+          },
+          "$description": "Accent (komuna: calm blue-grey, no signature colour), step 700.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XSY",
+              "role": "palette"
+            }
+          }
+        },
+        "800": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.1341,
+              0.2433,
+              0.3808
+            ],
+            "hex": "#223e61"
+          },
+          "$description": "Accent (komuna: calm blue-grey, no signature colour), step 800.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XSZ",
+              "role": "palette"
+            }
+          }
+        },
+        "900": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.0693,
+              0.1621,
+              0.2773
+            ],
+            "hex": "#122947"
+          },
+          "$description": "Accent (komuna: calm blue-grey, no signature colour), step 900.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XT0",
+              "role": "palette"
+            }
+          }
+        },
+        "950": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.0209,
+              0.0869,
+              0.1715
+            ],
+            "hex": "#05162c"
+          },
+          "$description": "Accent (komuna: calm blue-grey, no signature colour), step 950.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XT1",
+              "role": "palette"
+            }
+          }
+        }
+      },
+      "success": {
+        "50": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.9433,
+              0.9788,
+              0.9486
+            ],
+            "hex": "#f1faf2"
+          },
+          "$description": "Success green, step 50.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XT2",
+              "role": "palette"
+            }
+          }
+        },
+        "100": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.8767,
+              0.9524,
+              0.8884
+            ],
+            "hex": "#e0f3e3"
+          },
+          "$description": "Success green, step 100.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XT3",
+              "role": "palette"
+            }
+          }
+        },
+        "200": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.7586,
+              0.9012,
+              0.7827
+            ],
+            "hex": "#c1e6c8"
+          },
+          "$description": "Success green, step 200.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XT4",
+              "role": "palette"
+            }
+          }
+        },
+        "300": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.5959,
+              0.8213,
+              0.6393
+            ],
+            "hex": "#98d1a3"
+          },
+          "$description": "Success green, step 300.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XT5",
+              "role": "palette"
+            }
+          }
+        },
+        "400": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.4058,
+              0.7141,
+              0.4772
+            ],
+            "hex": "#67b67a"
+          },
+          "$description": "Success green, step 400.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XT6",
+              "role": "palette"
+            }
+          }
+        },
+        "500": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.2449,
+              0.5977,
+              0.3433
+            ],
+            "hex": "#3e9858"
+          },
+          "$description": "Success green, step 500.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XT7",
+              "role": "palette"
+            }
+          }
+        },
+        "600": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.1135,
+              0.4896,
+              0.242
+            ],
+            "hex": "#1d7d3e"
+          },
+          "$description": "Success green, step 600.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XT8",
+              "role": "palette"
+            }
+          }
+        },
+        "700": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0,
+              0.3965,
+              0.1534
+            ],
+            "hex": "#006527"
+          },
+          "$description": "Success green, step 700.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XT9",
+              "role": "palette"
+            }
+          }
+        },
+        "800": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0,
+              0.3064,
+              0.0598
+            ],
+            "hex": "#004e0f"
+          },
+          "$description": "Success green, step 800.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XTA",
+              "role": "palette"
+            }
+          }
+        },
+        "900": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0,
+              0.2118,
+              0.015
+            ],
+            "hex": "#003604"
+          },
+          "$description": "Success green, step 900.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XTB",
+              "role": "palette"
+            }
+          }
+        },
+        "950": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0,
+              0.123,
+              0
+            ],
+            "hex": "#001f00"
+          },
+          "$description": "Success green, step 950.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XTC",
+              "role": "palette"
+            }
+          }
+        }
+      },
+      "warning": {
+        "50": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.9919,
+              0.9631,
+              0.9253
+            ],
+            "hex": "#fdf6ec"
+          },
+          "$description": "Warning amber, step 50.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XTD",
+              "role": "palette"
+            }
+          }
+        },
+        "100": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.9799,
+              0.919,
+              0.8384
+            ],
+            "hex": "#faead6"
+          },
+          "$description": "Warning amber, step 100.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XTE",
+              "role": "palette"
+            }
+          }
+        },
+        "200": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.9518,
+              0.8385,
+              0.6863
+            ],
+            "hex": "#f3d6af"
+          },
+          "$description": "Warning amber, step 200.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XTF",
+              "role": "palette"
+            }
+          }
+        },
+        "300": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.8983,
+              0.7232,
+              0.479
+            ],
+            "hex": "#e5b87a"
+          },
+          "$description": "Warning amber, step 300.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XTG",
+              "role": "palette"
+            }
+          }
+        },
+        "400": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.8129,
+              0.5837,
+              0.2226
+            ],
+            "hex": "#cf9539"
+          },
+          "$description": "Warning amber, step 400.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XTH",
+              "role": "palette"
+            }
+          }
+        },
+        "500": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.702,
+              0.4556,
+              0
+            ],
+            "hex": "#b37400"
+          },
+          "$description": "Warning amber, step 500.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XTJ",
+              "role": "palette"
+            }
+          }
+        },
+        "600": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.5765,
+              0.3573,
+              0
+            ],
+            "hex": "#935b00"
+          },
+          "$description": "Warning amber, step 600.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XTK",
+              "role": "palette"
+            }
+          }
+        },
+        "700": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.4609,
+              0.2778,
+              0
+            ],
+            "hex": "#764700"
+          },
+          "$description": "Warning amber, step 700.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XTM",
+              "role": "palette"
+            }
+          }
+        },
+        "800": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.3501,
+              0.2019,
+              0
+            ],
+            "hex": "#593300"
+          },
+          "$description": "Warning amber, step 800.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XTN",
+              "role": "palette"
+            }
+          }
+        },
+        "900": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.2452,
+              0.1301,
+              0
+            ],
+            "hex": "#3f2100"
+          },
+          "$description": "Warning amber, step 900.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XTP",
+              "role": "palette"
+            }
+          }
+        },
+        "950": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.147,
+              0.0635,
+              0
+            ],
+            "hex": "#251000"
+          },
+          "$description": "Warning amber, step 950.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XTQ",
+              "role": "palette"
+            }
+          }
+        }
+      },
+      "danger": {
+        "50": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              1,
+              0.9509,
+              0.9419
+            ],
+            "hex": "#fff2f0"
+          },
+          "$description": "Danger red, step 50.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XTR",
+              "role": "palette"
+            }
+          }
+        },
+        "100": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              1,
+              0.8927,
+              0.8743
+            ],
+            "hex": "#ffe4df"
+          },
+          "$description": "Danger red, step 100.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XTS",
+              "role": "palette"
+            }
+          }
+        },
+        "200": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              1,
+              0.7881,
+              0.7562
+            ],
+            "hex": "#ffc9c1"
+          },
+          "$description": "Danger red, step 200.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XTT",
+              "role": "palette"
+            }
+          }
+        },
+        "300": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              1,
+              0.6411,
+              0.598
+            ],
+            "hex": "#ffa398"
+          },
+          "$description": "Danger red, step 300.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XTV",
+              "role": "palette"
+            }
+          }
+        },
+        "400": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.9504,
+              0.4661,
+              0.4217
+            ],
+            "hex": "#f2776c"
+          },
+          "$description": "Danger red, step 400.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XTW",
+              "role": "palette"
+            }
+          }
+        },
+        "500": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.8391,
+              0.3151,
+              0.281
+            ],
+            "hex": "#d65048"
+          },
+          "$description": "Danger red, step 500.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XTX",
+              "role": "palette"
+            }
+          }
+        },
+        "600": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.7155,
+              0.1964,
+              0.1778
+            ],
+            "hex": "#b6322d"
+          },
+          "$description": "Danger red, step 600.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XTY",
+              "role": "palette"
+            }
+          }
+        },
+        "700": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.6071,
+              0.063,
+              0.0803
+            ],
+            "hex": "#9b1014"
+          },
+          "$description": "Danger red, step 700.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XTZ",
+              "role": "palette"
+            }
+          }
+        },
+        "800": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.4958,
+              0,
+              0
+            ],
+            "hex": "#7e0000"
+          },
+          "$description": "Danger red, step 800.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XV0",
+              "role": "palette"
+            }
+          }
+        },
+        "900": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.3528,
+              0,
+              0
+            ],
+            "hex": "#5a0000"
+          },
+          "$description": "Danger red, step 900.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XV1",
+              "role": "palette"
+            }
+          }
+        },
+        "950": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.2191,
+              0,
+              0
+            ],
+            "hex": "#380000"
+          },
+          "$description": "Danger red, step 950.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XV2",
+              "role": "palette"
+            }
+          }
+        }
+      },
+      "info": {
+        "50": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.9388,
+              0.9733,
+              0.9992
+            ],
+            "hex": "#eff8ff"
+          },
+          "$description": "Information blue, step 50.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XV3",
+              "role": "palette"
+            }
+          }
+        },
+        "100": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.8671,
+              0.9405,
+              0.9953
+            ],
+            "hex": "#ddf0fe"
+          },
+          "$description": "Information blue, step 100.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XV4",
+              "role": "palette"
+            }
+          }
+        },
+        "200": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.7403,
+              0.8789,
+              0.9807
+            ],
+            "hex": "#bde0fa"
+          },
+          "$description": "Information blue, step 200.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XV5",
+              "role": "palette"
+            }
+          }
+        },
+        "300": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.566,
+              0.7864,
+              0.9432
+            ],
+            "hex": "#90c9f1"
+          },
+          "$description": "Information blue, step 300.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XV6",
+              "role": "palette"
+            }
+          }
+        },
+        "400": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.3615,
+              0.6675,
+              0.8723
+            ],
+            "hex": "#5caade"
+          },
+          "$description": "Information blue, step 400.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XV7",
+              "role": "palette"
+            }
+          }
+        },
+        "500": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.1834,
+              0.5467,
+              0.7664
+            ],
+            "hex": "#2f8bc3"
+          },
+          "$description": "Information blue, step 500.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XV8",
+              "role": "palette"
+            }
+          }
+        },
+        "600": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0,
+              0.4395,
+              0.6523
+            ],
+            "hex": "#0070a6"
+          },
+          "$description": "Information blue, step 600.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XV9",
+              "role": "palette"
+            }
+          }
+        },
+        "700": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0,
+              0.3469,
+              0.5534
+            ],
+            "hex": "#00588d"
+          },
+          "$description": "Information blue, step 700.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XVA",
+              "role": "palette"
+            }
+          }
+        },
+        "800": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0,
+              0.2575,
+              0.4391
+            ],
+            "hex": "#004270"
+          },
+          "$description": "Information blue, step 800.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XVB",
+              "role": "palette"
+            }
+          }
+        },
+        "900": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0,
+              0.1729,
+              0.3163
+            ],
+            "hex": "#002c51"
+          },
+          "$description": "Information blue, step 900.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XVC",
+              "role": "palette"
+            }
+          }
+        },
+        "950": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0,
+              0.0939,
+              0.2013
+            ],
+            "hex": "#001833"
+          },
+          "$description": "Information blue, step 950.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XVD",
+              "role": "palette"
+            }
+          }
         }
       },
       "shade": {
+        "0": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0,
+              0,
+              0
+            ],
+            "alpha": 0,
+            "hex": "#000000"
+          },
+          "$description": "Fully transparent black: a shadow that casts nothing.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XVE",
+              "role": "palette"
+            }
+          }
+        },
+        "10": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0,
+              0,
+              0
+            ],
+            "alpha": 0.1,
+            "hex": "#000000"
+          },
+          "$description": "Black at 10 % opacity, for shadows and backdrops.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XVF",
+              "role": "palette"
+            }
+          }
+        },
         "25": {
-          "$value": { "colorSpace": "srgb", "components": [0, 0, 0], "alpha": 0.25, "hex": "#000000" },
-          "$description": "Black at 25 % opacity, for shadows.",
-          "$extensions": { "com.ciferecigo.fundamento": { "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBF" } }
-        }
-      }
-    },
-    "text": {
-      "default": {
-        "$value": "{color.palette.neutral.900}",
-        "$description": "Default body text.",
-        "$extensions": {
-          "com.ciferecigo.fundamento": { "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBG", "role": "foreground" }
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0,
+              0,
+              0
+            ],
+            "alpha": 0.25,
+            "hex": "#000000"
+          },
+          "$description": "Black at 25 % opacity, for shadows and backdrops.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBF",
+              "role": "palette"
+            }
+          }
+        },
+        "50": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0,
+              0,
+              0
+            ],
+            "alpha": 0.5,
+            "hex": "#000000"
+          },
+          "$description": "Black at 50 % opacity, for shadows and backdrops.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XVG",
+              "role": "palette"
+            }
+          }
         }
       }
     },
@@ -59,178 +1328,3124 @@
         "$value": "{color.palette.neutral.0}",
         "$description": "Default surface background.",
         "$extensions": {
-          "com.ciferecigo.fundamento": { "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBH", "role": "background" }
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBH",
+            "role": "background"
+          }
+        }
+      },
+      "canvas": {
+        "$value": "{color.palette.neutral.50}",
+        "$description": "Page canvas behind surfaces.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9400ZA1K81R0W23SG0XVH",
+            "role": "background"
+          }
+        }
+      },
+      "raised": {
+        "$value": "{color.palette.neutral.0}",
+        "$description": "Raised surface such as a card or menu.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9400ZA1K81R0W23SG0XVJ",
+            "role": "background"
+          }
+        }
+      },
+      "sunken": {
+        "$value": "{color.palette.neutral.100}",
+        "$description": "Sunken area such as a well or input track.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9400ZA1K81R0W23SG0XVK",
+            "role": "background"
+          }
+        }
+      },
+      "inverse": {
+        "$value": "{color.palette.neutral.900}",
+        "$description": "Inverted surface (dark in light mode).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9400ZA1K81R0W23SG0XVM",
+            "role": "background"
+          }
+        }
+      }
+    },
+    "text": {
+      "default": {
+        "$value": "{color.palette.neutral.900}",
+        "$description": "Default body text.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBG",
+            "role": "foreground"
+          }
+        }
+      },
+      "subtle": {
+        "$value": "{color.palette.neutral.700}",
+        "$description": "Secondary text, one step quieter.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9400ZA1K81R0W23SG0XVN",
+            "role": "foreground"
+          }
+        }
+      },
+      "muted": {
+        "$value": "{color.palette.neutral.600}",
+        "$description": "Tertiary text such as hints, two steps quieter.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9400ZA1K81R0W23SG0XVP",
+            "role": "foreground"
+          }
+        }
+      },
+      "inverse": {
+        "$value": "{color.palette.neutral.0}",
+        "$description": "Text on inverted surfaces.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9400ZA1K81R0W23SG0XVQ",
+            "role": "foreground"
+          }
+        }
+      },
+      "disabled": {
+        "$value": "{color.palette.neutral.400}",
+        "$description": "Text of disabled content (exempt from contrast, WCAG 1.4.3).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9400ZA1K81R0W23SG0XVR",
+            "role": "disabled"
+          }
+        }
+      }
+    },
+    "link": {
+      "rest": {
+        "$value": "{color.palette.accent.700}",
+        "$description": "Link text at rest.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9400ZA1K81R0W23SG0XVS",
+            "role": "foreground"
+          }
+        }
+      },
+      "hover": {
+        "$value": "{color.palette.accent.800}",
+        "$description": "Link text on hover.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9400ZA1K81R0W23SG0XVT",
+            "role": "foreground"
+          }
+        }
+      },
+      "visited": {
+        "$value": "{color.palette.accent.900}",
+        "$description": "Visited link text.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9400ZA1K81R0W23SG0XVV",
+            "role": "foreground"
+          }
         }
       }
     },
     "border": {
       "default": {
         "$value": "{color.palette.neutral.500}",
-        "$description": "Default border and divider color.",
+        "$description": "Default border and divider of interactive content.",
         "$extensions": {
-          "com.ciferecigo.fundamento": { "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBJ", "role": "border" }
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBJ",
+            "role": "border"
+          }
+        }
+      },
+      "subtle": {
+        "$value": "{color.palette.neutral.200}",
+        "$description": "Decorative divider without information.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9400ZA1K81R0W23SG0XVW",
+            "role": "decorative"
+          }
+        }
+      },
+      "strong": {
+        "$value": "{color.palette.neutral.700}",
+        "$description": "Emphasised border.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9400ZA1K81R0W23SG0XVX",
+            "role": "border"
+          }
+        }
+      },
+      "inverse": {
+        "$value": "{color.palette.neutral.400}",
+        "$description": "Border on inverted surfaces.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9400ZA1K81R0W23SG0XVY",
+            "role": "border"
+          }
+        }
+      },
+      "disabled": {
+        "$value": "{color.palette.neutral.300}",
+        "$description": "Border of disabled controls.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9400ZA1K81R0W23SG0XVZ",
+            "role": "disabled"
+          }
         }
       }
     },
     "action": {
       "primary": {
         "rest": {
-          "$value": "{color.palette.blue.600}",
-          "$description": "Fill of a primary action at rest.",
+          "$value": "{color.palette.accent.700}",
+          "$description": "Primary action: fill at rest.",
           "$extensions": {
-            "com.ciferecigo.fundamento": { "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBK", "role": "background" }
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBK",
+              "role": "background"
+            }
+          }
+        },
+        "hover": {
+          "$value": "{color.palette.accent.800}",
+          "$description": "Primary action: fill on hover.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XW0",
+              "role": "background"
+            }
+          }
+        },
+        "pressed": {
+          "$value": "{color.palette.accent.900}",
+          "$description": "Primary action: fill while pressed.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XW1",
+              "role": "background"
+            }
+          }
+        },
+        "selected": {
+          "$value": "{color.palette.accent.800}",
+          "$description": "Primary action: fill when selected.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XW2",
+              "role": "background"
+            }
+          }
+        },
+        "disabled": {
+          "$value": "{color.palette.neutral.200}",
+          "$description": "Primary action: fill when disabled.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XW3",
+              "role": "disabled"
+            }
           }
         },
         "text": {
           "$value": "{color.palette.neutral.0}",
-          "$description": "Text on the primary action fill.",
+          "$description": "Primary action: text on the fill.",
           "$extensions": {
-            "com.ciferecigo.fundamento": { "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBM", "role": "foreground" }
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBM",
+              "role": "foreground"
+            }
           }
+        }
+      },
+      "secondary": {
+        "rest": {
+          "$value": "{color.palette.neutral.100}",
+          "$description": "Secondary action: fill at rest.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XW4",
+              "role": "background"
+            }
+          }
+        },
+        "hover": {
+          "$value": "{color.palette.neutral.200}",
+          "$description": "Secondary action: fill on hover.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XW5",
+              "role": "background"
+            }
+          }
+        },
+        "pressed": {
+          "$value": "{color.palette.neutral.300}",
+          "$description": "Secondary action: fill while pressed.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XW6",
+              "role": "background"
+            }
+          }
+        },
+        "selected": {
+          "$value": "{color.palette.neutral.200}",
+          "$description": "Secondary action: fill when selected.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XW7",
+              "role": "background"
+            }
+          }
+        },
+        "disabled": {
+          "$value": "{color.palette.neutral.100}",
+          "$description": "Secondary action: fill when disabled.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XW8",
+              "role": "disabled"
+            }
+          }
+        },
+        "text": {
+          "$value": "{color.palette.neutral.900}",
+          "$description": "Secondary action: text on the fill.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XW9",
+              "role": "foreground"
+            }
+          }
+        }
+      },
+      "tertiary": {
+        "rest": {
+          "$value": "{color.palette.neutral.0}",
+          "$description": "Tertiary action: fill at rest.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XWA",
+              "role": "background"
+            }
+          }
+        },
+        "hover": {
+          "$value": "{color.palette.neutral.50}",
+          "$description": "Tertiary action: fill on hover.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XWB",
+              "role": "background"
+            }
+          }
+        },
+        "pressed": {
+          "$value": "{color.palette.neutral.100}",
+          "$description": "Tertiary action: fill while pressed.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XWC",
+              "role": "background"
+            }
+          }
+        },
+        "selected": {
+          "$value": "{color.palette.accent.50}",
+          "$description": "Tertiary action: fill when selected.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XWD",
+              "role": "background"
+            }
+          }
+        },
+        "disabled": {
+          "$value": "{color.palette.neutral.0}",
+          "$description": "Tertiary action: fill when disabled.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XWE",
+              "role": "disabled"
+            }
+          }
+        },
+        "text": {
+          "$value": "{color.palette.accent.700}",
+          "$description": "Tertiary action: text on the fill.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XWF",
+              "role": "foreground"
+            }
+          }
+        }
+      }
+    },
+    "navigation": {
+      "rest": {
+        "$value": "{color.palette.neutral.0}",
+        "$description": "Navigation item at rest.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9400ZA1K81R0W23SG0XWG",
+            "role": "background"
+          }
+        }
+      },
+      "hover": {
+        "$value": "{color.palette.neutral.100}",
+        "$description": "Navigation item on hover.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9400ZA1K81R0W23SG0XWH",
+            "role": "background"
+          }
+        }
+      },
+      "selected": {
+        "$value": "{color.palette.accent.100}",
+        "$description": "Selected navigation item.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9400ZA1K81R0W23SG0XWJ",
+            "role": "background"
+          }
+        }
+      },
+      "text": {
+        "rest": {
+          "$value": "{color.palette.neutral.800}",
+          "$description": "Navigation text, rest.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XWK",
+              "role": "foreground"
+            }
+          }
+        },
+        "selected": {
+          "$value": "{color.palette.accent.900}",
+          "$description": "Navigation text, selected.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XWM",
+              "role": "foreground"
+            }
+          }
+        }
+      }
+    },
+    "status": {
+      "success": {
+        "basic": {
+          "$value": "{color.palette.success.600}",
+          "$description": "Status success: strong fill and indicator.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XWN",
+              "role": "background"
+            }
+          }
+        },
+        "weak": {
+          "$value": "{color.palette.success.100}",
+          "$description": "Status success: light fill, e.g. a banner.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XWP",
+              "role": "background"
+            }
+          }
+        },
+        "subtle": {
+          "$value": "{color.palette.success.50}",
+          "$description": "Status success: lightest fill, e.g. an inline notice.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XWQ",
+              "role": "background"
+            }
+          }
+        },
+        "text": {
+          "$value": "{color.palette.success.800}",
+          "$description": "Status success: text on light surfaces.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XWR",
+              "role": "foreground"
+            }
+          }
+        },
+        "on": {
+          "$value": "{color.palette.neutral.0}",
+          "$description": "Status success: text on the strong fill.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XWS",
+              "role": "foreground"
+            }
+          }
+        }
+      },
+      "warning": {
+        "basic": {
+          "$value": "{color.palette.warning.600}",
+          "$description": "Status warning: strong fill and indicator.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XWT",
+              "role": "background"
+            }
+          }
+        },
+        "weak": {
+          "$value": "{color.palette.warning.100}",
+          "$description": "Status warning: light fill, e.g. a banner.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XWV",
+              "role": "background"
+            }
+          }
+        },
+        "subtle": {
+          "$value": "{color.palette.warning.50}",
+          "$description": "Status warning: lightest fill, e.g. an inline notice.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XWW",
+              "role": "background"
+            }
+          }
+        },
+        "text": {
+          "$value": "{color.palette.warning.800}",
+          "$description": "Status warning: text on light surfaces.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XWX",
+              "role": "foreground"
+            }
+          }
+        },
+        "on": {
+          "$value": "{color.palette.neutral.0}",
+          "$description": "Status warning: text on the strong fill.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XWY",
+              "role": "foreground"
+            }
+          }
+        }
+      },
+      "danger": {
+        "basic": {
+          "$value": "{color.palette.danger.600}",
+          "$description": "Status danger: strong fill and indicator.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XWZ",
+              "role": "background"
+            }
+          }
+        },
+        "weak": {
+          "$value": "{color.palette.danger.100}",
+          "$description": "Status danger: light fill, e.g. a banner.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XX0",
+              "role": "background"
+            }
+          }
+        },
+        "subtle": {
+          "$value": "{color.palette.danger.50}",
+          "$description": "Status danger: lightest fill, e.g. an inline notice.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XX1",
+              "role": "background"
+            }
+          }
+        },
+        "text": {
+          "$value": "{color.palette.danger.800}",
+          "$description": "Status danger: text on light surfaces.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XX2",
+              "role": "foreground"
+            }
+          }
+        },
+        "on": {
+          "$value": "{color.palette.neutral.0}",
+          "$description": "Status danger: text on the strong fill.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XX3",
+              "role": "foreground"
+            }
+          }
+        }
+      },
+      "info": {
+        "basic": {
+          "$value": "{color.palette.info.600}",
+          "$description": "Status info: strong fill and indicator.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XX4",
+              "role": "background"
+            }
+          }
+        },
+        "weak": {
+          "$value": "{color.palette.info.100}",
+          "$description": "Status info: light fill, e.g. a banner.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XX5",
+              "role": "background"
+            }
+          }
+        },
+        "subtle": {
+          "$value": "{color.palette.info.50}",
+          "$description": "Status info: lightest fill, e.g. an inline notice.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XX6",
+              "role": "background"
+            }
+          }
+        },
+        "text": {
+          "$value": "{color.palette.info.800}",
+          "$description": "Status info: text on light surfaces.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XX7",
+              "role": "foreground"
+            }
+          }
+        },
+        "on": {
+          "$value": "{color.palette.neutral.0}",
+          "$description": "Status info: text on the strong fill.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9400ZA1K81R0W23SG0XX8",
+              "role": "foreground"
+            }
+          }
+        }
+      }
+    },
+    "brand": {
+      "fill": {
+        "$value": "{color.palette.accent.800}",
+        "$description": "Brand or hero surface.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9400ZA1K81R0W23SG0XX9",
+            "role": "background"
+          }
+        }
+      },
+      "text": {
+        "$value": "{color.palette.neutral.0}",
+        "$description": "Text on the brand surface.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9400ZA1K81R0W23SG0XXA",
+            "role": "foreground"
+          }
+        }
+      }
+    },
+    "focus": {
+      "ring": {
+        "$value": "{color.palette.accent.600}",
+        "$description": "Focus ring colour.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9400ZA1K81R0W23SG0XXB",
+            "role": "focus"
+          }
+        }
+      },
+      "inner": {
+        "$value": "{color.palette.neutral.0}",
+        "$description": "Gap between focus ring and content.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9400ZA1K81R0W23SG0XXC",
+            "role": "background"
+          }
+        }
+      }
+    },
+    "shadow": {
+      "key": {
+        "$value": "{color.palette.shade.25}",
+        "$description": "Colour of the key (direct) shadow.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9400ZA1K81R0W23SG0XXD",
+            "role": "shadow"
+          }
+        }
+      },
+      "ambient": {
+        "$value": "{color.palette.shade.10}",
+        "$description": "Colour of the ambient (diffuse) shadow.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9400ZA1K81R0W23SG0XXE",
+            "role": "shadow"
+          }
+        }
+      }
+    },
+    "backdrop": {
+      "$value": "{color.palette.shade.50}",
+      "$description": "Backdrop behind modal layers.",
+      "$extensions": {
+        "com.ciferecigo.fundamento": {
+          "id": "tok_01M2W9400ZA1K81R0W23SG0XXF",
+          "role": "backdrop"
         }
       }
     }
   },
   "spacing": {
     "$type": "dimension",
+    "scale": {
+      "0": {
+        "$value": {
+          "value": 0,
+          "unit": "px"
+        },
+        "$description": "Spacing step 0 (0 px reference units).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JST"
+          }
+        }
+      },
+      "50": {
+        "$value": {
+          "value": 2,
+          "unit": "px"
+        },
+        "$description": "Spacing step 50 (2 px reference units).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JSV"
+          }
+        }
+      },
+      "100": {
+        "$value": {
+          "value": 4,
+          "unit": "px"
+        },
+        "$description": "Spacing step 100 (4 px reference units).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JSW"
+          }
+        }
+      },
+      "150": {
+        "$value": {
+          "value": 6,
+          "unit": "px"
+        },
+        "$description": "Spacing step 150 (6 px reference units).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JSX"
+          }
+        }
+      },
+      "200": {
+        "$value": {
+          "value": 8,
+          "unit": "px"
+        },
+        "$description": "Spacing step 200 (8 px reference units).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JSY"
+          }
+        }
+      },
+      "300": {
+        "$value": {
+          "value": 12,
+          "unit": "px"
+        },
+        "$description": "Spacing step 300 (12 px reference units).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JSZ"
+          }
+        }
+      },
+      "400": {
+        "$value": {
+          "value": 16,
+          "unit": "px"
+        },
+        "$description": "Spacing step 400 (16 px reference units).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JT0"
+          }
+        }
+      },
+      "500": {
+        "$value": {
+          "value": 20,
+          "unit": "px"
+        },
+        "$description": "Spacing step 500 (20 px reference units).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JT1"
+          }
+        }
+      },
+      "600": {
+        "$value": {
+          "value": 24,
+          "unit": "px"
+        },
+        "$description": "Spacing step 600 (24 px reference units).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JT2"
+          }
+        }
+      },
+      "800": {
+        "$value": {
+          "value": 32,
+          "unit": "px"
+        },
+        "$description": "Spacing step 800 (32 px reference units).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JT3"
+          }
+        }
+      },
+      "1000": {
+        "$value": {
+          "value": 40,
+          "unit": "px"
+        },
+        "$description": "Spacing step 1000 (40 px reference units).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JT4"
+          }
+        }
+      },
+      "1200": {
+        "$value": {
+          "value": 48,
+          "unit": "px"
+        },
+        "$description": "Spacing step 1200 (48 px reference units).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JT5"
+          }
+        }
+      }
+    },
+    "xsmall": {
+      "$value": "{spacing.scale.50}",
+      "$description": "Tightest gap, e.g. between an icon and its label.",
+      "$extensions": {
+        "com.ciferecigo.fundamento": {
+          "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JT6"
+        }
+      }
+    },
     "small": {
-      "$value": { "value": 4, "unit": "px" },
+      "$value": "{spacing.scale.100}",
       "$description": "Small gap between related elements.",
-      "$extensions": { "com.ciferecigo.fundamento": { "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBN" } }
+      "$extensions": {
+        "com.ciferecigo.fundamento": {
+          "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBN"
+        }
+      }
     },
     "medium": {
-      "$value": { "value": 8, "unit": "px" },
+      "$value": "{spacing.scale.200}",
       "$description": "Default gap between elements.",
-      "$extensions": { "com.ciferecigo.fundamento": { "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBP" } }
+      "$extensions": {
+        "com.ciferecigo.fundamento": {
+          "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBP"
+        }
+      }
     },
     "large": {
-      "$value": { "value": 16, "unit": "px" },
+      "$value": "{spacing.scale.400}",
       "$description": "Gap between groups of elements.",
-      "$extensions": { "com.ciferecigo.fundamento": { "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBQ" } }
+      "$extensions": {
+        "com.ciferecigo.fundamento": {
+          "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBQ"
+        }
+      }
+    },
+    "xlarge": {
+      "$value": "{spacing.scale.600}",
+      "$description": "Gap between sections of a component.",
+      "$extensions": {
+        "com.ciferecigo.fundamento": {
+          "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JT7"
+        }
+      }
+    },
+    "xxlarge": {
+      "$value": "{spacing.scale.1000}",
+      "$description": "Gap between page sections.",
+      "$extensions": {
+        "com.ciferecigo.fundamento": {
+          "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JT8"
+        }
+      }
     }
   },
   "radius": {
     "$type": "dimension",
+    "none": {
+      "$value": {
+        "value": 0,
+        "unit": "px"
+      },
+      "$description": "No rounding.",
+      "$extensions": {
+        "com.ciferecigo.fundamento": {
+          "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JTZ"
+        }
+      }
+    },
+    "small": {
+      "$value": {
+        "value": 2,
+        "unit": "px"
+      },
+      "$description": "Slight rounding.",
+      "$extensions": {
+        "com.ciferecigo.fundamento": {
+          "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JV0"
+        }
+      }
+    },
     "medium": {
-      "$value": { "value": 4, "unit": "px" },
+      "$value": {
+        "value": 4,
+        "unit": "px"
+      },
       "$description": "Default corner radius.",
-      "$extensions": { "com.ciferecigo.fundamento": { "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBR" } }
+      "$extensions": {
+        "com.ciferecigo.fundamento": {
+          "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBR"
+        }
+      }
     },
     "large": {
-      "$value": { "value": 8, "unit": "px" },
+      "$value": {
+        "value": 8,
+        "unit": "px"
+      },
       "$description": "Corner radius of large surfaces.",
-      "$extensions": { "com.ciferecigo.fundamento": { "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBS" } }
+      "$extensions": {
+        "com.ciferecigo.fundamento": {
+          "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBS"
+        }
+      }
+    },
+    "xlarge": {
+      "$value": {
+        "value": 16,
+        "unit": "px"
+      },
+      "$description": "Strong rounding.",
+      "$extensions": {
+        "com.ciferecigo.fundamento": {
+          "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JV1"
+        }
+      }
+    },
+    "full": {
+      "$value": {
+        "value": 9999,
+        "unit": "px"
+      },
+      "$description": "Fully round ends, e.g. a pill.",
+      "$extensions": {
+        "com.ciferecigo.fundamento": {
+          "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JV2"
+        }
+      }
+    },
+    "role": {
+      "control": {
+        "$value": "{radius.medium}",
+        "$description": "Corner radius of controls.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JV3"
+          }
+        }
+      },
+      "surface": {
+        "$value": "{radius.large}",
+        "$description": "Corner radius of surfaces such as cards.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JV4"
+          }
+        }
+      },
+      "pill": {
+        "$value": "{radius.full}",
+        "$description": "Corner radius of pill-shaped actions.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JV5"
+          }
+        }
+      }
     }
   },
   "border": {
     "width": {
+      "$type": "dimension",
+      "scale": {
+        "1": {
+          "$value": {
+            "value": 1,
+            "unit": "px"
+          },
+          "$description": "Border width step 1 (1 px).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9MEJVS33SK9HVJPB32X9Q"
+            }
+          }
+        },
+        "2": {
+          "$value": {
+            "value": 2,
+            "unit": "px"
+          },
+          "$description": "Border width step 2 (2 px).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9MEJVS33SK9HVJPB32X9R"
+            }
+          }
+        },
+        "3": {
+          "$value": {
+            "value": 3,
+            "unit": "px"
+          },
+          "$description": "Border width step 3 (3 px).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9MEJVS33SK9HVJPB32X9S"
+            }
+          }
+        }
+      },
       "default": {
-        "$type": "dimension",
-        "$value": { "value": 1, "unit": "px" },
+        "$value": "{border.width.scale.1}",
         "$description": "Default border width.",
-        "$extensions": { "com.ciferecigo.fundamento": { "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBT" } }
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBT"
+          }
+        }
+      },
+      "strong": {
+        "$value": "{border.width.scale.2}",
+        "$description": "Emphasised border width.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJVS33SK9HVJPB32X9T"
+          }
+        }
+      },
+      "focus": {
+        "$value": "{border.width.scale.2}",
+        "$description": "Width of the focus ring.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJVS33SK9HVJPB32X9V"
+          }
+        }
       }
     },
     "default": {
       "$type": "border",
-      "$value": { "color": "{color.border.default}", "width": "{border.width.default}", "style": "solid" },
-      "$description": "Default border, composed from the border color and width tokens.",
-      "$extensions": { "com.ciferecigo.fundamento": { "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBV" } }
+      "$value": {
+        "color": "{color.border.default}",
+        "width": "{border.width.default}",
+        "style": "{stroke.solid}"
+      },
+      "$description": "Default border, composed from the border colour, width and stroke tokens.",
+      "$extensions": {
+        "com.ciferecigo.fundamento": {
+          "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBV"
+        }
+      }
+    },
+    "subtle": {
+      "$type": "border",
+      "$value": {
+        "color": "{color.border.subtle}",
+        "width": "{border.width.default}",
+        "style": "{stroke.solid}"
+      },
+      "$description": "Decorative divider border.",
+      "$extensions": {
+        "com.ciferecigo.fundamento": {
+          "id": "tok_01M2W9MEJVS33SK9HVJPB32X9W"
+        }
+      }
+    },
+    "strong": {
+      "$type": "border",
+      "$value": {
+        "color": "{color.border.strong}",
+        "width": "{border.width.strong}",
+        "style": "{stroke.solid}"
+      },
+      "$description": "Emphasised border.",
+      "$extensions": {
+        "com.ciferecigo.fundamento": {
+          "id": "tok_01M2W9MEJVS33SK9HVJPB32X9X"
+        }
+      }
     }
   },
   "font": {
     "family": {
       "$type": "fontFamily",
+      "display": {
+        "$value": [
+          "Geist",
+          "system-ui",
+          "sans-serif"
+        ],
+        "$description": "Display and headline family: Geist (OFL-1.1) with generic fallbacks.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9FT4YK4YSZWWKGEWH4K1Z"
+          }
+        }
+      },
       "body": {
-        "$value": ["system-ui", "sans-serif"],
-        "$description": "Body text family (generic families only).",
-        "$extensions": { "com.ciferecigo.fundamento": { "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBW" } }
+        "$value": [
+          "Geist",
+          "system-ui",
+          "sans-serif"
+        ],
+        "$description": "Body family: Geist (OFL-1.1) with generic fallbacks.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBW"
+          }
+        }
       },
       "code": {
-        "$value": ["monospace"],
-        "$description": "Code text family (generic family only).",
-        "$extensions": { "com.ciferecigo.fundamento": { "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBX" } }
-      }
-    },
-    "size": {
-      "$type": "dimension",
-      "body": {
-        "$value": { "value": 16, "unit": "px" },
-        "$description": "Body text size.",
-        "$extensions": { "com.ciferecigo.fundamento": { "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBY" } }
+        "$value": [
+          "Geist Mono",
+          "ui-monospace",
+          "monospace"
+        ],
+        "$description": "Code family: Geist Mono (OFL-1.1) with generic fallbacks.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBX"
+          }
+        }
       }
     },
     "weight": {
       "$type": "fontWeight",
+      "thin": {
+        "$value": 100,
+        "$description": "Weight thin (100).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9FT4ZRDMQX50BGG3CN86T"
+          }
+        }
+      },
+      "extralight": {
+        "$value": 200,
+        "$description": "Weight extralight (200).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9FT4ZRDMQX50BGG3CN86V"
+          }
+        }
+      },
+      "light": {
+        "$value": 300,
+        "$description": "Weight light (300).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9FT4ZRDMQX50BGG3CN86W"
+          }
+        }
+      },
       "regular": {
         "$value": 400,
-        "$description": "Regular weight.",
-        "$extensions": { "com.ciferecigo.fundamento": { "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBZ" } }
+        "$description": "Weight regular (400).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBZ"
+          }
+        }
+      },
+      "medium": {
+        "$value": 500,
+        "$description": "Weight medium (500).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9FT4ZRDMQX50BGG3CN86X"
+          }
+        }
+      },
+      "semibold": {
+        "$value": 600,
+        "$description": "Weight semibold (600).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9FT4ZRDMQX50BGG3CN86Y"
+          }
+        }
       },
       "bold": {
         "$value": 700,
-        "$description": "Bold weight.",
-        "$extensions": { "com.ciferecigo.fundamento": { "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVC0" } }
+        "$description": "Weight bold (700).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVC0"
+          }
+        }
+      },
+      "extrabold": {
+        "$value": 800,
+        "$description": "Weight extrabold (800).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9FT4ZRDMQX50BGG3CN86Z"
+          }
+        }
+      },
+      "black": {
+        "$value": 900,
+        "$description": "Weight black (900).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9FT4ZRDMQX50BGG3CN870"
+          }
+        }
+      }
+    },
+    "size": {
+      "$type": "dimension",
+      "scale": {
+        "100": {
+          "$value": {
+            "value": 12,
+            "unit": "px"
+          },
+          "$description": "Font size step 100 (12 px reference units).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN871"
+            }
+          }
+        },
+        "200": {
+          "$value": {
+            "value": 14,
+            "unit": "px"
+          },
+          "$description": "Font size step 200 (14 px reference units).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN872"
+            }
+          }
+        },
+        "300": {
+          "$value": {
+            "value": 16,
+            "unit": "px"
+          },
+          "$description": "Font size step 300 (16 px reference units).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN873"
+            }
+          }
+        },
+        "400": {
+          "$value": {
+            "value": 18,
+            "unit": "px"
+          },
+          "$description": "Font size step 400 (18 px reference units).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN874"
+            }
+          }
+        },
+        "500": {
+          "$value": {
+            "value": 20,
+            "unit": "px"
+          },
+          "$description": "Font size step 500 (20 px reference units).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN875"
+            }
+          }
+        },
+        "600": {
+          "$value": {
+            "value": 24,
+            "unit": "px"
+          },
+          "$description": "Font size step 600 (24 px reference units).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN876"
+            }
+          }
+        },
+        "700": {
+          "$value": {
+            "value": 28,
+            "unit": "px"
+          },
+          "$description": "Font size step 700 (28 px reference units).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN877"
+            }
+          }
+        },
+        "800": {
+          "$value": {
+            "value": 32,
+            "unit": "px"
+          },
+          "$description": "Font size step 800 (32 px reference units).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN878"
+            }
+          }
+        },
+        "900": {
+          "$value": {
+            "value": 40,
+            "unit": "px"
+          },
+          "$description": "Font size step 900 (40 px reference units).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN879"
+            }
+          }
+        },
+        "1000": {
+          "$value": {
+            "value": 48,
+            "unit": "px"
+          },
+          "$description": "Font size step 1000 (48 px reference units).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN87A"
+            }
+          }
+        },
+        "1100": {
+          "$value": {
+            "value": 56,
+            "unit": "px"
+          },
+          "$description": "Font size step 1100 (56 px reference units).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN87B"
+            }
+          }
+        },
+        "1200": {
+          "$value": {
+            "value": 64,
+            "unit": "px"
+          },
+          "$description": "Font size step 1200 (64 px reference units).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN87C"
+            }
+          }
+        }
+      },
+      "display": {
+        "1": {
+          "$value": "{font.size.scale.1100}",
+          "$description": "Font size of the role display.1.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN87D"
+            }
+          }
+        },
+        "2": {
+          "$value": "{font.size.scale.1000}",
+          "$description": "Font size of the role display.2.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN87E"
+            }
+          }
+        },
+        "3": {
+          "$value": "{font.size.scale.900}",
+          "$description": "Font size of the role display.3.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN87F"
+            }
+          }
+        }
+      },
+      "headline": {
+        "1": {
+          "$value": "{font.size.scale.800}",
+          "$description": "Font size of the role headline.1.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN87G"
+            }
+          }
+        },
+        "2": {
+          "$value": "{font.size.scale.700}",
+          "$description": "Font size of the role headline.2.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN87H"
+            }
+          }
+        },
+        "3": {
+          "$value": "{font.size.scale.600}",
+          "$description": "Font size of the role headline.3.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN87J"
+            }
+          }
+        },
+        "4": {
+          "$value": "{font.size.scale.500}",
+          "$description": "Font size of the role headline.4.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN87K"
+            }
+          }
+        }
+      },
+      "body": {
+        "1": {
+          "$value": "{font.size.scale.300}",
+          "$description": "Font size of the role body.1.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVBY"
+            }
+          }
+        },
+        "2": {
+          "$value": "{font.size.scale.200}",
+          "$description": "Font size of the role body.2.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN87M"
+            }
+          }
+        }
+      },
+      "label": {
+        "1": {
+          "$value": "{font.size.scale.200}",
+          "$description": "Font size of the role label.1.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN87N"
+            }
+          }
+        },
+        "2": {
+          "$value": "{font.size.scale.100}",
+          "$description": "Font size of the role label.2.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN87P"
+            }
+          }
+        }
+      },
+      "caption": {
+        "$value": "{font.size.scale.100}",
+        "$description": "Font size of the role caption.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9FT4ZRDMQX50BGG3CN87Q"
+          }
+        }
+      },
+      "code": {
+        "$value": "{font.size.scale.200}",
+        "$description": "Font size of the role code.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9FT4ZRDMQX50BGG3CN87R"
+          }
+        }
+      },
+      "kicker": {
+        "$value": "{font.size.scale.100}",
+        "$description": "Font size of the role kicker.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9FT4ZRDMQX50BGG3CN87S"
+          }
+        }
       }
     },
     "lineheight": {
       "$type": "number",
+      "scale": {
+        "solid": {
+          "$value": 1,
+          "$description": "Line height solid: 1 \u00d7 the font size.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN87T"
+            }
+          }
+        },
+        "tight": {
+          "$value": 1.1,
+          "$description": "Line height tight: 1.1 \u00d7 the font size.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN87V"
+            }
+          }
+        },
+        "snug": {
+          "$value": 1.25,
+          "$description": "Line height snug: 1.25 \u00d7 the font size.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN87W"
+            }
+          }
+        },
+        "normal": {
+          "$value": 1.5,
+          "$description": "Line height normal: 1.5 \u00d7 the font size.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN87X"
+            }
+          }
+        },
+        "relaxed": {
+          "$value": 1.625,
+          "$description": "Line height relaxed: 1.625 \u00d7 the font size.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN87Y"
+            }
+          }
+        },
+        "loose": {
+          "$value": 1.75,
+          "$description": "Line height loose: 1.75 \u00d7 the font size.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN87Z"
+            }
+          }
+        }
+      },
+      "display": {
+        "1": {
+          "$value": "{font.lineheight.scale.tight}",
+          "$description": "Line height of the role display.1.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN880"
+            }
+          }
+        },
+        "2": {
+          "$value": "{font.lineheight.scale.tight}",
+          "$description": "Line height of the role display.2.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN881"
+            }
+          }
+        },
+        "3": {
+          "$value": "{font.lineheight.scale.tight}",
+          "$description": "Line height of the role display.3.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN882"
+            }
+          }
+        }
+      },
+      "headline": {
+        "1": {
+          "$value": "{font.lineheight.scale.snug}",
+          "$description": "Line height of the role headline.1.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN883"
+            }
+          }
+        },
+        "2": {
+          "$value": "{font.lineheight.scale.snug}",
+          "$description": "Line height of the role headline.2.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN884"
+            }
+          }
+        },
+        "3": {
+          "$value": "{font.lineheight.scale.snug}",
+          "$description": "Line height of the role headline.3.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN885"
+            }
+          }
+        },
+        "4": {
+          "$value": "{font.lineheight.scale.snug}",
+          "$description": "Line height of the role headline.4.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN886"
+            }
+          }
+        }
+      },
       "body": {
-        "$value": 1.5,
-        "$description": "Body line height as a multiple of the font size.",
-        "$extensions": { "com.ciferecigo.fundamento": { "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVC1" } }
+        "1": {
+          "$value": "{font.lineheight.scale.normal}",
+          "$description": "Line height of the role body.1.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVC1"
+            }
+          }
+        },
+        "2": {
+          "$value": "{font.lineheight.scale.normal}",
+          "$description": "Line height of the role body.2.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN887"
+            }
+          }
+        }
+      },
+      "label": {
+        "1": {
+          "$value": "{font.lineheight.scale.snug}",
+          "$description": "Line height of the role label.1.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN888"
+            }
+          }
+        },
+        "2": {
+          "$value": "{font.lineheight.scale.snug}",
+          "$description": "Line height of the role label.2.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN889"
+            }
+          }
+        }
+      },
+      "caption": {
+        "$value": "{font.lineheight.scale.normal}",
+        "$description": "Line height of the role caption.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9FT4ZRDMQX50BGG3CN88A"
+          }
+        }
+      },
+      "code": {
+        "$value": "{font.lineheight.scale.normal}",
+        "$description": "Line height of the role code.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9FT4ZRDMQX50BGG3CN88B"
+          }
+        }
+      },
+      "kicker": {
+        "$value": "{font.lineheight.scale.snug}",
+        "$description": "Line height of the role kicker.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9FT4ZRDMQX50BGG3CN88C"
+          }
+        }
+      }
+    },
+    "tracking": {
+      "$type": "dimension",
+      "scale": {
+        "100": {
+          "$value": {
+            "value": 0,
+            "unit": "px"
+          },
+          "$description": "Letter spacing that belongs to font size step 100 (0 px).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN88D"
+            }
+          }
+        },
+        "200": {
+          "$value": {
+            "value": 0,
+            "unit": "px"
+          },
+          "$description": "Letter spacing that belongs to font size step 200 (0 px).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN88E"
+            }
+          }
+        },
+        "300": {
+          "$value": {
+            "value": 0,
+            "unit": "px"
+          },
+          "$description": "Letter spacing that belongs to font size step 300 (0 px).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN88F"
+            }
+          }
+        },
+        "400": {
+          "$value": {
+            "value": 0,
+            "unit": "px"
+          },
+          "$description": "Letter spacing that belongs to font size step 400 (0 px).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN88G"
+            }
+          }
+        },
+        "500": {
+          "$value": {
+            "value": 0,
+            "unit": "px"
+          },
+          "$description": "Letter spacing that belongs to font size step 500 (0 px).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN88H"
+            }
+          }
+        },
+        "600": {
+          "$value": {
+            "value": 0,
+            "unit": "px"
+          },
+          "$description": "Letter spacing that belongs to font size step 600 (0 px).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN88J"
+            }
+          }
+        },
+        "700": {
+          "$value": {
+            "value": 0,
+            "unit": "px"
+          },
+          "$description": "Letter spacing that belongs to font size step 700 (0 px).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN88K"
+            }
+          }
+        },
+        "800": {
+          "$value": {
+            "value": 0,
+            "unit": "px"
+          },
+          "$description": "Letter spacing that belongs to font size step 800 (0 px).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN88M"
+            }
+          }
+        },
+        "900": {
+          "$value": {
+            "value": -0.4,
+            "unit": "px"
+          },
+          "$description": "Letter spacing that belongs to font size step 900 (-0.4 px).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN88N"
+            }
+          }
+        },
+        "1000": {
+          "$value": {
+            "value": -0.6,
+            "unit": "px"
+          },
+          "$description": "Letter spacing that belongs to font size step 1000 (-0.6 px).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN88P"
+            }
+          }
+        },
+        "1100": {
+          "$value": {
+            "value": -0.8,
+            "unit": "px"
+          },
+          "$description": "Letter spacing that belongs to font size step 1100 (-0.8 px).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN88Q"
+            }
+          }
+        },
+        "1200": {
+          "$value": {
+            "value": -1.0,
+            "unit": "px"
+          },
+          "$description": "Letter spacing that belongs to font size step 1200 (-1.0 px).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN88R"
+            }
+          }
+        },
+        "caps": {
+          "$value": {
+            "value": 0.6,
+            "unit": "px"
+          },
+          "$description": "Letter spacing for small text in capitals (0.6 px).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN88S"
+            }
+          }
+        }
+      },
+      "display": {
+        "1": {
+          "$value": "{font.tracking.scale.1100}",
+          "$description": "Letter spacing of the role display.1.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN88T"
+            }
+          }
+        },
+        "2": {
+          "$value": "{font.tracking.scale.1000}",
+          "$description": "Letter spacing of the role display.2.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN88V"
+            }
+          }
+        },
+        "3": {
+          "$value": "{font.tracking.scale.900}",
+          "$description": "Letter spacing of the role display.3.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN88W"
+            }
+          }
+        }
+      },
+      "headline": {
+        "1": {
+          "$value": "{font.tracking.scale.800}",
+          "$description": "Letter spacing of the role headline.1.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN88X"
+            }
+          }
+        },
+        "2": {
+          "$value": "{font.tracking.scale.700}",
+          "$description": "Letter spacing of the role headline.2.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN88Y"
+            }
+          }
+        },
+        "3": {
+          "$value": "{font.tracking.scale.600}",
+          "$description": "Letter spacing of the role headline.3.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN88Z"
+            }
+          }
+        },
+        "4": {
+          "$value": "{font.tracking.scale.500}",
+          "$description": "Letter spacing of the role headline.4.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN890"
+            }
+          }
+        }
+      },
+      "body": {
+        "1": {
+          "$value": "{font.tracking.scale.300}",
+          "$description": "Letter spacing of the role body.1.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN891"
+            }
+          }
+        },
+        "2": {
+          "$value": "{font.tracking.scale.200}",
+          "$description": "Letter spacing of the role body.2.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN892"
+            }
+          }
+        }
+      },
+      "label": {
+        "1": {
+          "$value": "{font.tracking.scale.200}",
+          "$description": "Letter spacing of the role label.1.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN893"
+            }
+          }
+        },
+        "2": {
+          "$value": "{font.tracking.scale.100}",
+          "$description": "Letter spacing of the role label.2.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9FT4ZRDMQX50BGG3CN894"
+            }
+          }
+        }
+      },
+      "caption": {
+        "$value": "{font.tracking.scale.100}",
+        "$description": "Letter spacing of the role caption.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9FT4ZRDMQX50BGG3CN895"
+          }
+        }
+      },
+      "code": {
+        "$value": "{font.tracking.scale.200}",
+        "$description": "Letter spacing of the role code.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9FT4ZRDMQX50BGG3CN896"
+          }
+        }
+      },
+      "kicker": {
+        "$value": "{font.tracking.scale.caps}",
+        "$description": "Letter spacing of the role kicker.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9FT4ZRDMQX50BGG3CN897"
+          }
+        }
       }
     }
   },
   "motion": {
     "duration": {
       "$type": "duration",
-      "short": {
-        "$value": { "value": 120, "unit": "ms" },
+      "scale": {
+        "0": {
+          "$value": {
+            "value": 0,
+            "unit": "ms"
+          },
+          "$description": "No duration: the change is instant.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9MEJVS33SK9HVJPB32XA9"
+            }
+          }
+        },
+        "1": {
+          "$value": {
+            "value": 100,
+            "unit": "ms"
+          },
+          "$description": "Duration step 1 (100 ms).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9MEJVS33SK9HVJPB32XAA"
+            }
+          }
+        },
+        "2": {
+          "$value": {
+            "value": 200,
+            "unit": "ms"
+          },
+          "$description": "Duration step 2 (200 ms).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9MEJVS33SK9HVJPB32XAB"
+            }
+          }
+        },
+        "3": {
+          "$value": {
+            "value": 300,
+            "unit": "ms"
+          },
+          "$description": "Duration step 3 (300 ms).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9MEJVS33SK9HVJPB32XAC"
+            }
+          }
+        },
+        "4": {
+          "$value": {
+            "value": 500,
+            "unit": "ms"
+          },
+          "$description": "Duration step 4 (500 ms).",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9MEJVS33SK9HVJPB32XAD"
+            }
+          }
+        }
+      },
+      "fast": {
+        "$value": "{motion.duration.scale.1}",
         "$description": "Short transition, e.g. hover feedback.",
-        "$extensions": { "com.ciferecigo.fundamento": { "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVC2" } }
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVC2"
+          }
+        }
       },
       "medium": {
-        "$value": { "value": 240, "unit": "ms" },
+        "$value": "{motion.duration.scale.2}",
         "$description": "Medium transition, e.g. expanding a panel.",
-        "$extensions": { "com.ciferecigo.fundamento": { "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVC3" } }
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVC3"
+          }
+        }
+      },
+      "slow": {
+        "$value": "{motion.duration.scale.3}",
+        "$description": "Slow transition, e.g. a large surface entering.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJVS33SK9HVJPB32XAE"
+          }
+        }
+      },
+      "deliberate": {
+        "$value": "{motion.duration.scale.4}",
+        "$description": "Deliberate motion that the user should notice.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJVS33SK9HVJPB32XAF"
+          }
+        }
       }
     },
     "easing": {
       "$type": "cubicBezier",
-      "standard": {
-        "$value": [0.3, 0, 0.2, 1],
-        "$description": "Default easing curve.",
-        "$extensions": { "com.ciferecigo.fundamento": { "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVC4" } }
-      }
-    }
-  },
-  "shadow": {
-    "$type": "shadow",
-    "raised": {
-      "$value": {
-        "color": "{color.palette.shade.25}",
-        "offsetX": { "value": 0, "unit": "px" },
-        "offsetY": { "value": 2, "unit": "px" },
-        "blur": { "value": 6, "unit": "px" },
-        "spread": { "value": 0, "unit": "px" }
+      "curve": {
+        "linear": {
+          "$value": [
+            0,
+            0,
+            1,
+            1
+          ],
+          "$description": "Linear: no easing.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9MEJVS33SK9HVJPB32XAG"
+            }
+          }
+        },
+        "smooth": {
+          "$value": [
+            0.3,
+            0,
+            0.2,
+            1
+          ],
+          "$description": "Smooth in and out.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9MEJVS33SK9HVJPB32XAH"
+            }
+          }
+        },
+        "expressive": {
+          "$value": [
+            0.2,
+            0,
+            0,
+            1
+          ],
+          "$description": "Expressive, fast start.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9MEJVS33SK9HVJPB32XAJ"
+            }
+          }
+        },
+        "decelerate": {
+          "$value": [
+            0,
+            0,
+            0.2,
+            1
+          ],
+          "$description": "Decelerating: for elements entering.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9MEJVS33SK9HVJPB32XAK"
+            }
+          }
+        },
+        "accelerate": {
+          "$value": [
+            0.3,
+            0,
+            1,
+            1
+          ],
+          "$description": "Accelerating: for elements leaving.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2W9MEJVS33SK9HVJPB32XAM"
+            }
+          }
+        }
       },
-      "$description": "Shadow of a slightly raised surface.",
-      "$extensions": { "com.ciferecigo.fundamento": { "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVC5" } }
+      "standard": {
+        "$value": "{motion.easing.curve.smooth}",
+        "$description": "Default easing.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVC4"
+          }
+        }
+      },
+      "emphasized": {
+        "$value": "{motion.easing.curve.expressive}",
+        "$description": "Easing for emphasised motion.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJVS33SK9HVJPB32XAN"
+          }
+        }
+      },
+      "enter": {
+        "$value": "{motion.easing.curve.decelerate}",
+        "$description": "Easing for elements entering.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJVS33SK9HVJPB32XAP"
+          }
+        }
+      },
+      "exit": {
+        "$value": "{motion.easing.curve.accelerate}",
+        "$description": "Easing for elements leaving.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJVS33SK9HVJPB32XAQ"
+          }
+        }
+      }
     }
   },
   "typography": {
     "$type": "typography",
+    "display": {
+      "1": {
+        "$value": {
+          "fontFamily": "{font.family.display}",
+          "fontSize": "{font.size.display.1}",
+          "fontWeight": "{font.weight.medium}",
+          "letterSpacing": "{font.tracking.display.1}",
+          "lineHeight": "{font.lineheight.display.1}"
+        },
+        "$description": "Display text, the largest headings on a page 1, composed from role tokens.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9FT4ZRDMQX50BGG3CN898"
+          }
+        }
+      },
+      "2": {
+        "$value": {
+          "fontFamily": "{font.family.display}",
+          "fontSize": "{font.size.display.2}",
+          "fontWeight": "{font.weight.medium}",
+          "letterSpacing": "{font.tracking.display.2}",
+          "lineHeight": "{font.lineheight.display.2}"
+        },
+        "$description": "Display text, the largest headings on a page 2, composed from role tokens.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9FT4ZRDMQX50BGG3CN899"
+          }
+        }
+      },
+      "3": {
+        "$value": {
+          "fontFamily": "{font.family.display}",
+          "fontSize": "{font.size.display.3}",
+          "fontWeight": "{font.weight.medium}",
+          "letterSpacing": "{font.tracking.display.3}",
+          "lineHeight": "{font.lineheight.display.3}"
+        },
+        "$description": "Display text, the largest headings on a page 3, composed from role tokens.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9FT4ZRDMQX50BGG3CN89A"
+          }
+        }
+      }
+    },
+    "headline": {
+      "1": {
+        "$value": {
+          "fontFamily": "{font.family.display}",
+          "fontSize": "{font.size.headline.1}",
+          "fontWeight": "{font.weight.semibold}",
+          "letterSpacing": "{font.tracking.headline.1}",
+          "lineHeight": "{font.lineheight.headline.1}"
+        },
+        "$description": "Headline 1, composed from role tokens.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9FT4ZRDMQX50BGG3CN89B"
+          }
+        }
+      },
+      "2": {
+        "$value": {
+          "fontFamily": "{font.family.display}",
+          "fontSize": "{font.size.headline.2}",
+          "fontWeight": "{font.weight.semibold}",
+          "letterSpacing": "{font.tracking.headline.2}",
+          "lineHeight": "{font.lineheight.headline.2}"
+        },
+        "$description": "Headline 2, composed from role tokens.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9FT4ZRDMQX50BGG3CN89C"
+          }
+        }
+      },
+      "3": {
+        "$value": {
+          "fontFamily": "{font.family.display}",
+          "fontSize": "{font.size.headline.3}",
+          "fontWeight": "{font.weight.semibold}",
+          "letterSpacing": "{font.tracking.headline.3}",
+          "lineHeight": "{font.lineheight.headline.3}"
+        },
+        "$description": "Headline 3, composed from role tokens.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9FT4ZRDMQX50BGG3CN89D"
+          }
+        }
+      },
+      "4": {
+        "$value": {
+          "fontFamily": "{font.family.display}",
+          "fontSize": "{font.size.headline.4}",
+          "fontWeight": "{font.weight.semibold}",
+          "letterSpacing": "{font.tracking.headline.4}",
+          "lineHeight": "{font.lineheight.headline.4}"
+        },
+        "$description": "Headline 4, composed from role tokens.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9FT4ZRDMQX50BGG3CN89E"
+          }
+        }
+      }
+    },
     "body": {
+      "1": {
+        "$value": {
+          "fontFamily": "{font.family.body}",
+          "fontSize": "{font.size.body.1}",
+          "fontWeight": "{font.weight.regular}",
+          "letterSpacing": "{font.tracking.body.1}",
+          "lineHeight": "{font.lineheight.body.1}"
+        },
+        "$description": "Body text 1, composed from role tokens.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVC6"
+          }
+        }
+      },
+      "2": {
+        "$value": {
+          "fontFamily": "{font.family.body}",
+          "fontSize": "{font.size.body.2}",
+          "fontWeight": "{font.weight.regular}",
+          "letterSpacing": "{font.tracking.body.2}",
+          "lineHeight": "{font.lineheight.body.2}"
+        },
+        "$description": "Body text 2, composed from role tokens.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9FT4ZRDMQX50BGG3CN89F"
+          }
+        }
+      }
+    },
+    "label": {
+      "1": {
+        "$value": {
+          "fontFamily": "{font.family.body}",
+          "fontSize": "{font.size.label.1}",
+          "fontWeight": "{font.weight.medium}",
+          "letterSpacing": "{font.tracking.label.1}",
+          "lineHeight": "{font.lineheight.label.1}"
+        },
+        "$description": "Label of a control or field 1, composed from role tokens.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9FT4ZRDMQX50BGG3CN89G"
+          }
+        }
+      },
+      "2": {
+        "$value": {
+          "fontFamily": "{font.family.body}",
+          "fontSize": "{font.size.label.2}",
+          "fontWeight": "{font.weight.medium}",
+          "letterSpacing": "{font.tracking.label.2}",
+          "lineHeight": "{font.lineheight.label.2}"
+        },
+        "$description": "Label of a control or field 2, composed from role tokens.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9FT4ZRDMQX50BGG3CN89H"
+          }
+        }
+      }
+    },
+    "caption": {
       "$value": {
         "fontFamily": "{font.family.body}",
-        "fontSize": "{font.size.body}",
+        "fontSize": "{font.size.caption}",
         "fontWeight": "{font.weight.regular}",
-        "letterSpacing": { "value": 0, "unit": "px" },
-        "lineHeight": "{font.lineheight.body}"
+        "letterSpacing": "{font.tracking.caption}",
+        "lineHeight": "{font.lineheight.caption}"
       },
-      "$description": "Body text style, composed from the font tokens.",
-      "$extensions": { "com.ciferecigo.fundamento": { "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVC6" } }
+      "$description": "Caption and helper text, composed from role tokens.",
+      "$extensions": {
+        "com.ciferecigo.fundamento": {
+          "id": "tok_01M2W9FT4ZRDMQX50BGG3CN89J"
+        }
+      }
+    },
+    "code": {
+      "$value": {
+        "fontFamily": "{font.family.code}",
+        "fontSize": "{font.size.code}",
+        "fontWeight": "{font.weight.regular}",
+        "letterSpacing": "{font.tracking.code}",
+        "lineHeight": "{font.lineheight.code}"
+      },
+      "$description": "Code and monospaced text, composed from role tokens.",
+      "$extensions": {
+        "com.ciferecigo.fundamento": {
+          "id": "tok_01M2W9FT4ZRDMQX50BGG3CN89K"
+        }
+      }
+    },
+    "kicker": {
+      "$value": {
+        "fontFamily": "{font.family.body}",
+        "fontSize": "{font.size.kicker}",
+        "fontWeight": "{font.weight.semibold}",
+        "letterSpacing": "{font.tracking.kicker}",
+        "lineHeight": "{font.lineheight.kicker}"
+      },
+      "$description": "Kicker above a headline, in capitals, composed from role tokens.",
+      "$extensions": {
+        "com.ciferecigo.fundamento": {
+          "id": "tok_01M2W9FT4ZRDMQX50BGG3CN89M",
+          "textTransform": "uppercase"
+        }
+      }
+    }
+  },
+  "size": {
+    "$type": "dimension",
+    "scale": {
+      "100": {
+        "$value": {
+          "value": 12,
+          "unit": "px"
+        },
+        "$description": "Size step 100 (12 px reference units).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JT9"
+          }
+        }
+      },
+      "200": {
+        "$value": {
+          "value": 16,
+          "unit": "px"
+        },
+        "$description": "Size step 200 (16 px reference units).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JTA"
+          }
+        }
+      },
+      "300": {
+        "$value": {
+          "value": 20,
+          "unit": "px"
+        },
+        "$description": "Size step 300 (20 px reference units).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JTB"
+          }
+        }
+      },
+      "400": {
+        "$value": {
+          "value": 24,
+          "unit": "px"
+        },
+        "$description": "Size step 400 (24 px reference units).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JTC"
+          }
+        }
+      },
+      "500": {
+        "$value": {
+          "value": 28,
+          "unit": "px"
+        },
+        "$description": "Size step 500 (28 px reference units).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JTD"
+          }
+        }
+      },
+      "600": {
+        "$value": {
+          "value": 32,
+          "unit": "px"
+        },
+        "$description": "Size step 600 (32 px reference units).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JTE"
+          }
+        }
+      },
+      "700": {
+        "$value": {
+          "value": 40,
+          "unit": "px"
+        },
+        "$description": "Size step 700 (40 px reference units).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JTF"
+          }
+        }
+      },
+      "800": {
+        "$value": {
+          "value": 48,
+          "unit": "px"
+        },
+        "$description": "Size step 800 (48 px reference units).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JTG"
+          }
+        }
+      },
+      "900": {
+        "$value": {
+          "value": 56,
+          "unit": "px"
+        },
+        "$description": "Size step 900 (56 px reference units).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JTH"
+          }
+        }
+      },
+      "1000": {
+        "$value": {
+          "value": 64,
+          "unit": "px"
+        },
+        "$description": "Size step 1000 (64 px reference units).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JTJ"
+          }
+        }
+      }
+    },
+    "icon": {
+      "small": {
+        "$value": "{size.scale.200}",
+        "$description": "Icon size small.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JTK"
+          }
+        }
+      },
+      "medium": {
+        "$value": "{size.scale.300}",
+        "$description": "Icon size medium.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JTM"
+          }
+        }
+      },
+      "large": {
+        "$value": "{size.scale.400}",
+        "$description": "Icon size large.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JTN"
+          }
+        }
+      }
+    },
+    "control": {
+      "small": {
+        "$value": "{size.scale.600}",
+        "$description": "Height of a small control such as a button or input.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JTP"
+          }
+        }
+      },
+      "medium": {
+        "$value": "{size.scale.700}",
+        "$description": "Height of a medium control such as a button or input.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JTQ"
+          }
+        }
+      },
+      "large": {
+        "$value": "{size.scale.800}",
+        "$description": "Height of a large control such as a button or input.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JTR"
+          }
+        }
+      }
+    },
+    "container": {
+      "small": {
+        "$value": {
+          "value": 640,
+          "unit": "px"
+        },
+        "$description": "Container width small (640 px reference units).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JTS"
+          }
+        }
+      },
+      "medium": {
+        "$value": {
+          "value": 960,
+          "unit": "px"
+        },
+        "$description": "Container width medium (960 px reference units).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JTT"
+          }
+        }
+      },
+      "large": {
+        "$value": {
+          "value": 1280,
+          "unit": "px"
+        },
+        "$description": "Container width large (1280 px reference units).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JTV"
+          }
+        }
+      },
+      "max": {
+        "$value": {
+          "value": 1440,
+          "unit": "px"
+        },
+        "$description": "Container width max (1440 px reference units).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JTW"
+          }
+        }
+      }
+    },
+    "breakpoint": {
+      "medium": {
+        "$value": {
+          "value": 600,
+          "unit": "px"
+        },
+        "$description": "Lower bound of the medium viewport (compact below it).",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JTX"
+          }
+        }
+      },
+      "expanded": {
+        "$value": {
+          "value": 1024,
+          "unit": "px"
+        },
+        "$description": "Lower bound of the expanded viewport.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJTW4YWM7GRDDAP4JTY"
+          }
+        }
+      }
+    }
+  },
+  "stroke": {
+    "$type": "strokeStyle",
+    "solid": {
+      "$value": "solid",
+      "$description": "Solid stroke.",
+      "$extensions": {
+        "com.ciferecigo.fundamento": {
+          "id": "tok_01M2W9MEJVS33SK9HVJPB32X9Y"
+        }
+      }
+    },
+    "dashed": {
+      "$value": "dashed",
+      "$description": "Dashed stroke.",
+      "$extensions": {
+        "com.ciferecigo.fundamento": {
+          "id": "tok_01M2W9MEJVS33SK9HVJPB32X9Z"
+        }
+      }
+    }
+  },
+  "elevation": {
+    "shadow": {
+      "$type": "shadow",
+      "raised": {
+        "$value": {
+          "color": "{color.shadow.key}",
+          "offsetX": {
+            "value": 0,
+            "unit": "px"
+          },
+          "offsetY": {
+            "value": 2,
+            "unit": "px"
+          },
+          "blur": {
+            "value": 6,
+            "unit": "px"
+          },
+          "spread": {
+            "value": 0,
+            "unit": "px"
+          }
+        },
+        "$description": "Shadow of a slightly raised surface.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2VEEE0QJXF3E9TY0JX4XVC5"
+          }
+        }
+      },
+      "overlay": {
+        "$value": [
+          {
+            "color": "{color.shadow.key}",
+            "offsetX": {
+              "value": 0,
+              "unit": "px"
+            },
+            "offsetY": {
+              "value": 4,
+              "unit": "px"
+            },
+            "blur": {
+              "value": 12,
+              "unit": "px"
+            },
+            "spread": {
+              "value": 0,
+              "unit": "px"
+            }
+          },
+          {
+            "color": "{color.shadow.ambient}",
+            "offsetX": {
+              "value": 0,
+              "unit": "px"
+            },
+            "offsetY": {
+              "value": 0,
+              "unit": "px"
+            },
+            "blur": {
+              "value": 2,
+              "unit": "px"
+            },
+            "spread": {
+              "value": 0,
+              "unit": "px"
+            }
+          }
+        ],
+        "$description": "Shadow of an overlay such as a menu or popover.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJVS33SK9HVJPB32XA0"
+          }
+        }
+      },
+      "floating": {
+        "$value": [
+          {
+            "color": "{color.shadow.key}",
+            "offsetX": {
+              "value": 0,
+              "unit": "px"
+            },
+            "offsetY": {
+              "value": 8,
+              "unit": "px"
+            },
+            "blur": {
+              "value": 24,
+              "unit": "px"
+            },
+            "spread": {
+              "value": 0,
+              "unit": "px"
+            }
+          },
+          {
+            "color": "{color.shadow.ambient}",
+            "offsetX": {
+              "value": 0,
+              "unit": "px"
+            },
+            "offsetY": {
+              "value": 0,
+              "unit": "px"
+            },
+            "blur": {
+              "value": 4,
+              "unit": "px"
+            },
+            "spread": {
+              "value": 0,
+              "unit": "px"
+            }
+          }
+        ],
+        "$description": "Shadow of a floating element such as a floating action.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJVS33SK9HVJPB32XA1"
+          }
+        }
+      },
+      "modal": {
+        "$value": [
+          {
+            "color": "{color.shadow.key}",
+            "offsetX": {
+              "value": 0,
+              "unit": "px"
+            },
+            "offsetY": {
+              "value": 12,
+              "unit": "px"
+            },
+            "blur": {
+              "value": 32,
+              "unit": "px"
+            },
+            "spread": {
+              "value": 0,
+              "unit": "px"
+            }
+          },
+          {
+            "color": "{color.shadow.ambient}",
+            "offsetX": {
+              "value": 0,
+              "unit": "px"
+            },
+            "offsetY": {
+              "value": 0,
+              "unit": "px"
+            },
+            "blur": {
+              "value": 8,
+              "unit": "px"
+            },
+            "spread": {
+              "value": 0,
+              "unit": "px"
+            }
+          }
+        ],
+        "$description": "Shadow of a modal dialog.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJVS33SK9HVJPB32XA2"
+          }
+        }
+      }
+    },
+    "layer": {
+      "$type": "number",
+      "base": {
+        "$value": 0,
+        "$description": "Base layer of the page.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJVS33SK9HVJPB32XA3"
+          }
+        }
+      },
+      "raised": {
+        "$value": 1,
+        "$description": "Raised content within the page.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJVS33SK9HVJPB32XA4"
+          }
+        }
+      },
+      "navigation": {
+        "$value": 100,
+        "$description": "Sticky navigation.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJVS33SK9HVJPB32XA5"
+          }
+        }
+      },
+      "overlay": {
+        "$value": 200,
+        "$description": "Overlays such as menus and popovers.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJVS33SK9HVJPB32XA6"
+          }
+        }
+      },
+      "modal": {
+        "$value": 300,
+        "$description": "Modal dialogs and their backdrop.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJVS33SK9HVJPB32XA7"
+          }
+        }
+      },
+      "toast": {
+        "$value": 400,
+        "$description": "Toasts above everything.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJVS33SK9HVJPB32XA8"
+          }
+        }
+      }
+    }
+  },
+  "layout": {
+    "columns": {
+      "$type": "number",
+      "4": {
+        "$value": 4,
+        "$description": "A grid of 4 columns.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJVS33SK9HVJPB32XAR"
+          }
+        }
+      },
+      "8": {
+        "$value": 8,
+        "$description": "A grid of 8 columns.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJVS33SK9HVJPB32XAS"
+          }
+        }
+      },
+      "12": {
+        "$value": 12,
+        "$description": "A grid of 12 columns.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJVS33SK9HVJPB32XAT"
+          }
+        }
+      }
+    },
+    "grid": {
+      "columns": {
+        "$type": "number",
+        "$value": "{layout.columns.8}",
+        "$description": "Number of grid columns.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJVS33SK9HVJPB32XAV"
+          }
+        }
+      },
+      "gutter": {
+        "$type": "dimension",
+        "$value": "{spacing.scale.400}",
+        "$description": "Gap between grid columns.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJVS33SK9HVJPB32XAW"
+          }
+        }
+      },
+      "margin": {
+        "$type": "dimension",
+        "$value": "{spacing.scale.600}",
+        "$description": "Outer margin of the grid.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJVS33SK9HVJPB32XAX"
+          }
+        }
+      }
+    },
+    "container": {
+      "max": {
+        "$type": "dimension",
+        "$value": "{size.container.large}",
+        "$description": "Maximum width of the page container.",
+        "$extensions": {
+          "com.ciferecigo.fundamento": {
+            "id": "tok_01M2W9MEJVS33SK9HVJPB32XAY"
+          }
+        }
+      }
+    }
+  },
+  "focus": {
+    "ring": {
+      "$type": "border",
+      "$value": {
+        "color": "{color.focus.ring}",
+        "width": "{border.width.focus}",
+        "style": "{stroke.solid}"
+      },
+      "$description": "Focus ring, composed from the focus colour, width and stroke.",
+      "$extensions": {
+        "com.ciferecigo.fundamento": {
+          "id": "tok_01M2W9MEJVS33SK9HVJPB32XAZ"
+        }
+      }
+    },
+    "offset": {
+      "$type": "dimension",
+      "$value": "{spacing.scale.50}",
+      "$description": "Gap between the focus ring and the element.",
+      "$extensions": {
+        "com.ciferecigo.fundamento": {
+          "id": "tok_01M2W9MEJVS33SK9HVJPB32XB0"
+        }
+      }
+    }
+  },
+  "opacity": {
+    "$type": "number",
+    "disabled": {
+      "$value": 0.38,
+      "$description": "Opacity of disabled content.",
+      "$extensions": {
+        "com.ciferecigo.fundamento": {
+          "id": "tok_01M2W9MEJVS33SK9HVJPB32XB1"
+        }
+      }
+    },
+    "overlay": {
+      "$value": 0.5,
+      "$description": "Opacity of an overlay scrim.",
+      "$extensions": {
+        "com.ciferecigo.fundamento": {
+          "id": "tok_01M2W9MEJVS33SK9HVJPB32XB2"
+        }
+      }
+    },
+    "hover": {
+      "$value": 0.08,
+      "$description": "Opacity of a hover state layer.",
+      "$extensions": {
+        "com.ciferecigo.fundamento": {
+          "id": "tok_01M2W9MEJVS33SK9HVJPB32XB3"
+        }
+      }
+    },
+    "pressed": {
+      "$value": 0.12,
+      "$description": "Opacity of a pressed state layer.",
+      "$extensions": {
+        "com.ciferecigo.fundamento": {
+          "id": "tok_01M2W9MEJVS33SK9HVJPB32XB4"
+        }
+      }
     }
   }
 }

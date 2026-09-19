@@ -8,7 +8,7 @@ import { appendPointer } from "../json/pointer.js";
 import type { ModeloFiles } from "../load/files.js";
 import { fundamentoExtension } from "../load/flatten.js";
 import { valoroNames } from "../resolve/assignment.js";
-import { compareStrings, EXTENSION_POINTER, valueAtPointer } from "./raw.js";
+import { compareStrings, EXTENSION_POINTER, isJsonObject, valueAtPointer } from "./raw.js";
 
 const KONDICXOJ_POINTER = `${EXTENSION_POINTER}/kondicxoj`;
 
@@ -167,13 +167,14 @@ function overrideIssues(set: LoadedSet, core: LoadedSet, tree: unknown): Validat
       });
     }
     const extensionPointer = `${token.location.pointer}${EXTENSION_POINTER}`;
-    if (valueAtPointer(tree, extensionPointer) !== undefined) {
+    const extension = valueAtPointer(tree, extensionPointer);
+    if (extension !== undefined && !isTextTransformOnly(extension)) {
       issues.push({
         rule: "set-override-has-extensions",
         severity: "error",
         path: formatIssuePath({ file: set.file, pointer: extensionPointer }),
-        message: `The override of ${token.name} in set ${set.name} carries Fundamento $extensions; ID and role belong to the core definition only.`,
-        suggestion: `Remove $extensions["com.ciferecigo.fundamento"] from this override.`,
+        message: `The override of ${token.name} in set ${set.name} carries Fundamento $extensions; ID and role belong to the core definition only (an override may set textTransform only).`,
+        suggestion: `Remove $extensions["com.ciferecigo.fundamento"] from this override, or keep only "textTransform".`,
       });
     }
   }
@@ -190,4 +191,16 @@ function exampleKondicxo(modelo: Modelo): string {
 
 function listOrNone(names: readonly string[]): string {
   return names.length === 0 ? "(none)" : names.join(", ");
+}
+
+/**
+ * An override may carry exactly one Fundamento extension key, `textTransform` (Spec 001, D-11): an
+ * Aspekto must be able to set its text transformation, and DTCG has no field for it.
+ */
+function isTextTransformOnly(extension: unknown): boolean {
+  return (
+    isJsonObject(extension) &&
+    Object.keys(extension).length === 1 &&
+    Object.hasOwn(extension, "textTransform")
+  );
 }

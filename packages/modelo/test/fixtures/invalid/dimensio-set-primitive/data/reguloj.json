@@ -1,0 +1,20 @@
+{
+  "reguloj": [
+    {
+      "id": "reg_01K5FMAJ0J14KNVH5BXJ93VFBG",
+      "name": "semantic-colors-alias-palette",
+      "statement": "Semantic color tokens reference palette tokens instead of literal values.",
+      "kialo": "A palette change then reaches every semantic use in one place.",
+      "scope": "vortaro",
+      "checkability": "manual"
+    },
+    {
+      "id": "reg_01M2WRK8G0HHHHHHHHHHHHHHH1",
+      "name": "dimensio-sets-alias-only",
+      "statement": "Generic Dimensio sets only re-point role tokens with aliases.",
+      "kialo": "They outrank every Aspekto; a literal or a re-pointed primitive would reach every brand.",
+      "scope": "vortaro: sets without an aspekto condition",
+      "checkability": "automatic"
+    }
+  ]
+}

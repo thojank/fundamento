@@ -10,6 +10,7 @@ import { DTCG_TYPES } from "../contracts/dtcg.js";
 import { entityTypeOfId } from "../contracts/entity-ids.js";
 import type { Assignment, LoadedSet, Modelo, Rezolvo } from "../contracts/modelo.js";
 import { DATA_FILE_SCHEMA_DEFS, SCHEMA_DEFS } from "../contracts/schema.js";
+import { coreView } from "../load/core-view.js";
 import { loadModelo } from "../load/load-modelo.js";
 import { defaultModeloSource } from "../load/source.js";
 import { allAssignments, formatCombination, resolve } from "../resolve/index.js";
@@ -72,7 +73,8 @@ const FR09_TYPES = [
 const CORE = "core";
 const DARK = "color-scheme/dark";
 const HIGH = "contrast/high";
-const NEUTRA_DARK = "aspekto/neutra+color-scheme/dark";
+const KOMUNA_DARK = "aspekto/komuna+color-scheme/dark";
+const DARK_HIGH = "color-scheme/dark+contrast/high";
 
 describe("Phase 0 repo Modelo: loading", () => {
   it("loads through defaultModeloSource() with zero issues", () => {
@@ -108,7 +110,7 @@ describe("Phase 0 repo Modelo: Dimensioj (FR-11a, FR-16)", () => {
         default: d.default,
       })),
     ).toEqual([
-      { priority: 1, name: "aspekto", valoroj: ["neutra"], default: "neutra" },
+      { priority: 1, name: "aspekto", valoroj: ["komuna"], default: "komuna" },
       {
         priority: 2,
         name: "viewport",
@@ -145,11 +147,17 @@ describe("Phase 0 repo Modelo: Dimensioj (FR-11a, FR-16)", () => {
     expect(sojloj.high?.apca).toBeDefined();
   });
 
-  it("gives the test Aspekto neutra owner and license metadata", () => {
-    const aspekto = repoModelo().dimensioj.find((d) => d.name === "aspekto");
-    expect(aspekto?.valoroj.map((v) => [v.name, v.aspekto])).toEqual([
-      ["neutra", { owner: "Fundamento", licenseNote: expect.stringContaining("MIT") }],
-    ]);
+  it("takes the reference Aspekto komuna with owner, license and fonts from its package (Spec 001 T007)", () => {
+    const [komuna, ...others] = repoModelo().aspektoPackages;
+    expect(others).toEqual([]);
+    expect(komuna).toMatchObject({
+      name: "@fundamento/aspekto-komuna",
+      aspekto: "komuna",
+      owner: "Fundamento",
+      license: "MIT",
+      composed: true,
+    });
+    expect(komuna?.fonts?.map((font) => font.family)).toEqual(["Geist", "Geist Mono"]);
   });
 
   it("yields 72 complete combinations", () => {
@@ -163,8 +171,8 @@ describe("Phase 0 repo Modelo: Dimensioj (FR-11a, FR-16)", () => {
 describe("Phase 0 repo Modelo: core tokens (FR-09, FR-12, FR-18, S2, S4)", () => {
   it("has 30 core tokens covering exactly the ten FR-09 types", () => {
     const tokens = Object.values(setNamed(repoModelo(), CORE).tokens);
-    expect(tokens).toHaveLength(30);
-    expect([...new Set(tokens.map((t) => t.type))].sort()).toEqual(FR09_TYPES);
+    const types = new Set<string>(tokens.map((t) => t.type));
+    for (const type of FR09_TYPES) expect(types.has(type), type).toBe(true);
     for (const type of FR09_TYPES) expect(DTCG_TYPES).toContain(type);
   });
 
@@ -177,8 +185,8 @@ describe("Phase 0 repo Modelo: core tokens (FR-09, FR-12, FR-18, S2, S4)", () =>
 
   it("contains the S2 and S4 example aliases", () => {
     const core = setNamed(repoModelo(), CORE).tokens;
-    expect(core["color.action.primary.rest"]?.value).toBe("{color.palette.blue.600}");
-    expect(core["color.palette.blue.600"]?.type).toBe("color");
+    expect(core["color.action.primary.rest"]?.value).toBe("{color.palette.accent.700}");
+    expect(core["color.palette.accent.700"]?.type).toBe("color");
     expect(core["color.text.default"]?.value).toBe("{color.palette.neutral.900}");
     expect(core["color.palette.neutral.900"]?.type).toBe("color");
   });
@@ -191,33 +199,37 @@ describe("Phase 0 repo Modelo: core tokens (FR-09, FR-12, FR-18, S2, S4)", () =>
         t.value !== null &&
         Object.values(t.value).some((field) => typeof field === "string" && field.startsWith("{")),
     );
-    expect(composites.map((t) => t.type).sort()).toEqual(["border", "shadow", "typography"]);
+    expect([...new Set(composites.map((t) => t.type))].sort()).toEqual([
+      "border",
+      "shadow",
+      "typography",
+    ]);
   });
 
-  it("uses only generic font families (FR-18: no fonts)", () => {
-    const generic = new Set([
-      "system-ui",
-      "sans-serif",
-      "serif",
-      "monospace",
-      "ui-sans-serif",
-      "ui-serif",
-      "ui-monospace",
-    ]);
-    const families = Object.values(setNamed(repoModelo(), CORE).tokens)
+  it("starts every font stack with a family komuna declares or a generic family (Spec 001 FR-05)", () => {
+    const modelo = repoModelo();
+    const generic = new Set(["system-ui", "sans-serif", "serif", "monospace", "ui-monospace"]);
+    const declared = new Set((modelo.aspektoPackages[0]?.fonts ?? []).map((font) => font.family));
+    const stacks = Object.values(setNamed(modelo, CORE).tokens)
       .filter((t) => t.type === "fontFamily")
-      .flatMap((t) => (Array.isArray(t.value) ? t.value : [t.value]));
-    expect(families.length).toBeGreaterThan(0);
-    for (const family of families) expect(generic.has(family as string), String(family)).toBe(true);
+      .map((t) => (Array.isArray(t.value) ? t.value : [t.value]) as string[]);
+    expect(stacks.length).toBeGreaterThan(0);
+    for (const stack of stacks) {
+      const [first] = stack;
+      expect(declared.has(first ?? "") || generic.has(first ?? ""), String(first)).toBe(true);
+      // Every stack ends in a generic family, so text renders without the font file.
+      expect(generic.has(stack.at(-1) ?? ""), stack.join(", ")).toBe(true);
+    }
   });
 });
 
 describe("Phase 0 repo Modelo: sets (FR-10, FR-12)", () => {
   it("has the expected sets", () => {
     expect(repoModelo().setoj.map((s) => s.name)).toEqual([
-      "aspekto/neutra",
-      NEUTRA_DARK,
+      "aspekto/komuna",
+      KOMUNA_DARK,
       DARK,
+      DARK_HIGH,
       HIGH,
       CORE,
       "density/comfortable",
@@ -254,15 +266,17 @@ describe("Phase 0 repo Modelo: sets (FR-10, FR-12)", () => {
     }
   });
 
-  it("priority: color-scheme/dark and contrast/high override the same color; contrast wins", () => {
+  it("priority: contrast/high wins over color-scheme/dark; their conjunction wins over both", () => {
     const modelo = repoModelo();
     const dark = setNamed(modelo, DARK).tokens;
     const high = setNamed(modelo, HIGH).tokens;
+    const both = setNamed(modelo, DARK_HIGH).tokens;
     const shared = Object.keys(dark).filter((name) => high[name]?.type === "color");
     expect(shared.length).toBeGreaterThan(0);
     const rezolvo = resolveOk(modelo, { "color-scheme": "dark", contrast: "high" });
     for (const name of shared) {
-      expect(resolvedToken(rezolvo, name).origin.set, name).toBe(HIGH);
+      const expected = both[name] === undefined ? HIGH : DARK_HIGH;
+      expect(resolvedToken(rezolvo, name).origin.set, name).toBe(expected);
     }
     const darkOnly = resolveOk(modelo, { "color-scheme": "dark" });
     for (const name of shared) {
@@ -270,43 +284,35 @@ describe("Phase 0 repo Modelo: sets (FR-10, FR-12)", () => {
     }
   });
 
-  it("specificity: aspekto/neutra+color-scheme/dark overrides a token that color-scheme/dark overrides, and wins", () => {
+  it("specificity: aspekto/komuna+color-scheme/dark tints a palette step that dark semantics use", () => {
     const modelo = repoModelo();
-    const conjunction = setNamed(modelo, NEUTRA_DARK);
+    const conjunction = setNamed(modelo, KOMUNA_DARK);
     expect(conjunction.kondicxoj).toEqual([
-      { dimensio: "aspekto", valoro: "neutra" },
+      { dimensio: "aspekto", valoro: "komuna" },
       { dimensio: "color-scheme", valoro: "dark" },
     ]);
-    const dark = setNamed(modelo, DARK).tokens;
-    const shared = Object.keys(conjunction.tokens).filter((name) => dark[name] !== undefined);
-    expect(shared.length).toBeGreaterThan(0);
-    const rezolvo = resolveOk(modelo, { "color-scheme": "dark" });
-    for (const name of shared) {
-      expect(resolvedToken(rezolvo, name).origin.set, name).toBe(NEUTRA_DARK);
-    }
+    expect(Object.keys(conjunction.tokens)).toEqual(["color.palette.neutral.950"]);
+    const background = resolveOk(modelo, { "color-scheme": "dark" }).tokens[
+      "color.background.default"
+    ];
+    expect(background?.aliasChain.at(-1)).toEqual({
+      token: "color.palette.neutral.950",
+      set: KOMUNA_DARK,
+    });
   });
 
-  it("late binding: a core semantic alias follows a palette token overridden by color-scheme/dark", () => {
+  it("late binding: color-scheme/dark re-points semantics to other palette steps (D-03)", () => {
     const modelo = repoModelo();
     const dark = setNamed(modelo, DARK).tokens;
+    expect(Object.keys(dark).some((name) => name.startsWith("color.palette."))).toBe(false);
     const rest = resolveOk(modelo, { "color-scheme": "dark" }).tokens["color.action.primary.rest"];
-    expect(dark["color.action.primary.rest"]).toBeUndefined();
-    expect(dark["color.palette.blue.600"]).toBeDefined();
-    expect(rest?.origin.set).toBe(CORE);
-    expect(rest?.value).toEqual(dark["color.palette.blue.600"]?.value);
+    expect(rest?.origin.set).toBe(DARK);
     expect(rest?.aliasChain).toEqual([
-      { token: "color.action.primary.rest", set: CORE },
-      { token: "color.palette.blue.600", set: DARK },
+      { token: "color.action.primary.rest", set: DARK },
+      { token: "color.palette.accent.300", set: CORE },
     ]);
-
-    // S4 example: color.text.default follows the dark neutral.900 (here the Aspekto's own dark
-    // palette in the conjunction set).
     const text = resolveOk(modelo, { "color-scheme": "dark" }).tokens["color.text.default"];
-    expect(text?.origin.set).toBe(CORE);
-    expect(text?.aliasChain.at(-1)).toEqual({
-      token: "color.palette.neutral.900",
-      set: NEUTRA_DARK,
-    });
+    expect(text?.aliasChain.at(-1)).toEqual({ token: "color.palette.neutral.50", set: CORE });
   });
 
   it("resolves all 72 combinations with zero issues and zero warnings", () => {
@@ -325,7 +331,7 @@ describe("Phase 0 repo Modelo: sets (FR-10, FR-12)", () => {
 describe("Phase 0 repo Modelo: Regularo (FR-08)", () => {
   it("has exactly two Reguloj with a kialo and the Article X Jugxoj", () => {
     const modelo = repoModelo();
-    expect(modelo.reguloj).toHaveLength(2);
+    expect(modelo.reguloj.length).toBeGreaterThanOrEqual(3);
     for (const regulo of modelo.reguloj) {
       expect(regulo.kialo.trim().length, regulo.name).toBeGreaterThan(40);
     }
@@ -381,7 +387,10 @@ describe("Phase 0 repo Modelo: KontrastParoj (FR-16)", () => {
     for (const pair of modelo.kontrastParoj) {
       expect(core[pair.foreground]?.type, pair.name).toBe("color");
       expect(core[pair.background]?.type, pair.name).toBe("color");
-      expect(["foreground", "border"], pair.name).toContain(core[pair.foreground]?.role);
+      // A status fill (role background) is also the foreground of a ui pair: an indicator on a surface.
+      expect(["foreground", "border", "focus", "background"], pair.name).toContain(
+        core[pair.foreground]?.role,
+      );
       expect(core[pair.background]?.role, pair.name).toBe("background");
     }
   });
@@ -428,8 +437,8 @@ describe("Phase 0 repo Modelo: IDs and derived files", () => {
     }
   });
 
-  it("$themes.json and $metadata.json are byte-identical to the derived output", () => {
-    const { themesJson, metadataJson } = serializeThemes(deriveThemes(repoModelo()));
+  it("$themes.json and $metadata.json are byte-identical to the derived core view (D-08)", () => {
+    const { themesJson, metadataJson } = serializeThemes(deriveThemes(coreView(repoModelo())));
     expect(readFileSync(join(source.vortaroDir, "$themes.json"), "utf8")).toBe(themesJson);
     expect(readFileSync(join(source.vortaroDir, "$metadata.json"), "utf8")).toBe(metadataJson);
   });

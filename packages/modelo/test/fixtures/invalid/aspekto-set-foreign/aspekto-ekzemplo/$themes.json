@@ -1,0 +1,19 @@
+[
+  {
+    "group": "aspekto",
+    "id": "dva_01M2WRK8G0DDDDDDDDDDDDDDDG",
+    "name": "neutra",
+    "selectedTokenSets": {
+      "aspekto/neutra": "enabled"
+    }
+  },
+  {
+    "group": "aspekto",
+    "id": "dva_ekz_01M2WRK8G0EEEEEEEEEEEEEEE0",
+    "name": "ekzemplo",
+    "selectedTokenSets": {
+      "aspekto/ekzemplo": "enabled",
+      "core": "source"
+    }
+  }
+]

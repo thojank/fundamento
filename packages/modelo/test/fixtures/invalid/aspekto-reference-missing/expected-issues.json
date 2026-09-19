@@ -1,0 +1,9 @@
+{
+  "description": "The aspekto Dimensio names komuna as reference Aspekto, but no loaded Aspekto is called komuna.",
+  "issues": [
+    {
+      "rule": "aspekto-reference-missing",
+      "path": "data/dimensioj.json#/dimensioj/0/referenceAspekto"
+    }
+  ]
+}

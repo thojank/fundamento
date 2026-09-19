@@ -22,9 +22,15 @@ export const DTCG_TYPES = [
 ] as const satisfies readonly DtcgType[];
 
 export const TOKEN_ROLES = [
+  "palette",
   "foreground",
   "background",
   "border",
+  "focus",
+  "shadow",
+  "backdrop",
+  "disabled",
+  "decorative",
 ] as const satisfies readonly TokenRole[];
 
 /** `$extensions` key for Fundamento metadata on tokens (`id`, `role`) and sets (`id`, `kondicxoj`). */

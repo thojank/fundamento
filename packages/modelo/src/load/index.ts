@@ -2,6 +2,7 @@
 // entry needs one line for both modules.
 export * from "../json/index.js";
 export * from "./build.js";
+export * from "./core-view.js";
 export * from "./files.js";
 export * from "./flatten.js";
 export * from "./load-modelo.js";

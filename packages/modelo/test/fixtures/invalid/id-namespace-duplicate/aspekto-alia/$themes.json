@@ -1,0 +1,11 @@
+[
+  {
+    "group": "aspekto",
+    "id": "dva_ekz_01M2WRK8G0EEEEEEEEEEEEEEE4",
+    "name": "alia",
+    "selectedTokenSets": {
+      "aspekto/alia": "enabled",
+      "core": "source"
+    }
+  }
+]

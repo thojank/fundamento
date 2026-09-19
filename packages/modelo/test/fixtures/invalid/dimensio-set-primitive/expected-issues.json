@@ -1,0 +1,9 @@
+{
+  "description": "The generic set etoso/malvarma re-points the primitive color.palette.neutral.900; with the Regulo dimensio-sets-alias-only automatic this is an error (K4, D-19).",
+  "issues": [
+    {
+      "rule": "dimensio-set-primitive",
+      "path": "vortaro/sets/etoso/malvarma.json#/color/palette/neutral/900"
+    }
+  ]
+}

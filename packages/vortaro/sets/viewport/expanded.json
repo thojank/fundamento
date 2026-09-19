@@ -1,6 +1,90 @@
 {
   "$extensions": {
-    "com.ciferecigo.fundamento": { "id": "set_01M2VEEDW45A0B9Q4GQ465NCHF", "kondicxoj": ["viewport=expanded"] }
+    "com.ciferecigo.fundamento": {
+      "id": "set_01M2VEEDW45A0B9Q4GQ465NCHF",
+      "kondicxoj": [
+        "viewport=expanded"
+      ]
+    }
   },
-  "font": { "size": { "$type": "dimension", "body": { "$value": { "value": 18, "unit": "px" } } } }
+  "font": {
+    "size": {
+      "$type": "dimension",
+      "display": {
+        "1": {
+          "$value": "{font.size.scale.1200}"
+        },
+        "2": {
+          "$value": "{font.size.scale.1100}"
+        },
+        "3": {
+          "$value": "{font.size.scale.1000}"
+        }
+      },
+      "headline": {
+        "1": {
+          "$value": "{font.size.scale.900}"
+        },
+        "2": {
+          "$value": "{font.size.scale.800}"
+        },
+        "3": {
+          "$value": "{font.size.scale.700}"
+        },
+        "4": {
+          "$value": "{font.size.scale.600}"
+        }
+      }
+    },
+    "tracking": {
+      "$type": "dimension",
+      "display": {
+        "1": {
+          "$value": "{font.tracking.scale.1200}"
+        },
+        "2": {
+          "$value": "{font.tracking.scale.1100}"
+        },
+        "3": {
+          "$value": "{font.tracking.scale.1000}"
+        }
+      },
+      "headline": {
+        "1": {
+          "$value": "{font.tracking.scale.900}"
+        },
+        "2": {
+          "$value": "{font.tracking.scale.800}"
+        },
+        "3": {
+          "$value": "{font.tracking.scale.700}"
+        },
+        "4": {
+          "$value": "{font.tracking.scale.600}"
+        }
+      }
+    }
+  },
+  "layout": {
+    "grid": {
+      "columns": {
+        "$type": "number",
+        "$value": "{layout.columns.12}"
+      },
+      "gutter": {
+        "$type": "dimension",
+        "$value": "{spacing.scale.600}"
+      },
+      "margin": {
+        "$type": "dimension",
+        "$value": "{spacing.scale.1000}"
+      }
+    },
+    "container": {
+      "max": {
+        "$type": "dimension",
+        "$value": "{size.container.max}"
+      }
+    }
+  }
 }

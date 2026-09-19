@@ -1,0 +1,9 @@
+{
+  "description": "aspekto-alia uses the ID namespace ekz, which aspekto-ekzemplo already uses.",
+  "issues": [
+    {
+      "rule": "id-namespace-duplicate",
+      "path": "aspekto-alia/aspekto.json#/idNamespace"
+    }
+  ]
+}

@@ -38,6 +38,28 @@ export const RULE_IDS = [
   "id-retired-reused",
   "id-unregistered",
   "id-orphaned",
+  // ID namespaces of Aspekto packages (Spec 001 T003)
+  "id-namespace-mismatch",
+  "id-namespace-duplicate",
+  // Config and Aspekto packages (Spec 001 T004)
+  "config-invalid",
+  "aspekto-package-missing",
+  // Aspekto composition and completeness (Spec 001 T006, T008, T010)
+  "aspekto-name-duplicate",
+  "aspekto-reference-missing",
+  "aspekto-reference-set-not-empty",
+  "aspekto-incomplete",
+  "aspekto-set-foreign",
+  "aspekto-font-undeclared",
+  // Generic Dimensio sets (Spec 001 T009)
+  "dimensio-set-literal",
+  "dimensio-set-primitive",
+  // Colour roles and KontrastParoj (Spec 001 T013, T017)
+  "color-semantic-literal",
+  "color-role-missing",
+  "kontrastparo-missing-for-role",
+  // Regularo in Aspekto packages (Spec 001 T021)
+  "regulo-aspekto-unknown",
   // Dimensioj (FUND-3.2)
   "dimensio-default-invalid",
   "dimensio-priority-invalid",
@@ -68,6 +90,7 @@ export const RULE_IDS = [
   "clean-room-benchmark-path",
   "clean-room-benchmark-reference",
   "clean-room-foreign-prefix",
+  "clean-room-marko-spuro",
   // Parity (FUND-4.4)
   "parity-item-missing",
   "parity-prop-mismatch",

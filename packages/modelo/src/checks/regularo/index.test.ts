@@ -40,11 +40,20 @@ function minimalCopy(): string {
 }
 
 describe("regularo on the repo", () => {
-  it("passes with the Phase 0 Reguloj and Jugxoj", async () => {
+  it("passes with the repo Reguloj and Jugxoj", async () => {
     const result = await check({ json: true, repoRoot });
     expect(result.errors).toEqual([]);
     expect(result).toMatchObject({ check: "regularo", ok: true, warnings: [] });
-    expect(result.stats).toEqual({ reguloj: 2, jugxoj: 2 });
+    const count = (file: string, key: string) =>
+      (
+        JSON.parse(
+          readFileSync(new URL(`../../../data/${file}`, import.meta.url), "utf8"),
+        ) as Record<string, unknown[]>
+      )[key]?.length;
+    expect(result.stats).toEqual({
+      reguloj: count("reguloj.json", "reguloj"),
+      jugxoj: count("jugxoj.json", "jugxoj"),
+    });
   });
 });
 

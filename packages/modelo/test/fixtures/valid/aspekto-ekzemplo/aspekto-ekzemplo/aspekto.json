@@ -1,0 +1,15 @@
+{
+  "id": "dva_ekz_01M2WA1QAAE4DSTCDX190GBSRZ",
+  "name": "ekzemplo",
+  "owner": "Ekzemplo Studio (fictitious, test only)",
+  "license": "proprietary",
+  "idNamespace": "ekz",
+  "fonts": [
+    {
+      "family": "Ekzempla Grotesk",
+      "license": "proprietary",
+      "source": "fictitious family for tests; no font file exists",
+      "redistributable": false
+    }
+  ]
+}

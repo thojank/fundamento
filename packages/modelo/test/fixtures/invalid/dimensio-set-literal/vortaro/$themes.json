@@ -1,0 +1,60 @@
+[
+  {
+    "group": "color-scheme",
+    "id": "dva_01K5FMAJ01CHCS4BMCX5D0TM49",
+    "name": "light",
+    "selectedTokenSets": {
+      "core": "source"
+    }
+  },
+  {
+    "group": "color-scheme",
+    "id": "dva_01K5FMAJ02GHG044FZ9966Q9ZB",
+    "name": "dark",
+    "selectedTokenSets": {
+      "core": "source"
+    }
+  },
+  {
+    "group": "contrast",
+    "id": "dva_01K5FMAJ044A9T094C67VSEFNV",
+    "name": "default",
+    "selectedTokenSets": {
+      "core": "source"
+    }
+  },
+  {
+    "group": "contrast",
+    "id": "dva_01K5FMAJ056744YXV7ZXR50AW5",
+    "name": "high",
+    "selectedTokenSets": {
+      "core": "source"
+    }
+  },
+  {
+    "group": "etoso",
+    "id": "dva_01M2WRK8G0FFFFFFFFFFFFFFF1",
+    "name": "neutrala",
+    "selectedTokenSets": {
+      "core": "source"
+    }
+  },
+  {
+    "group": "etoso",
+    "id": "dva_01M2WRK8G0FFFFFFFFFFFFFFF2",
+    "name": "varma",
+    "selectedTokenSets": {
+      "core": "source",
+      "etoso/varma": "enabled"
+    }
+  },
+  {
+    "group": "etoso",
+    "id": "dva_01M2WRK8G0FFFFFFFFFFFFFFF3",
+    "name": "malvarma",
+    "selectedTokenSets": {
+      "core": "source",
+      "etoso/malvarma": "enabled"
+    }
+  }
+]

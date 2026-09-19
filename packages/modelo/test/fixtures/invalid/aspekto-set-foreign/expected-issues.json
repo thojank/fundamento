@@ -1,0 +1,9 @@
+{
+  "description": "An Aspekto package may only hold sets conditioned on its own Aspekto; aspekto-ekzemplo ships a set for the Aspekto neutra.",
+  "issues": [
+    {
+      "rule": "aspekto-set-foreign",
+      "path": "aspekto-ekzemplo/sets/aspekto/neutra.json#/$extensions/com.ciferecigo.fundamento/kondicxoj"
+    }
+  ]
+}

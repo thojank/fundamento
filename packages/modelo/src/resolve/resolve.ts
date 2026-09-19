@@ -60,11 +60,20 @@ export function resolveCombination(modelo: Modelo, assignment: Assignment): Comb
       id: coreToken.id ?? "",
       type: coreToken.type,
       value: structuredClone(result.value),
-      origin: { set: winner.set.name, setId: winner.set.id ?? "" },
+      origin:
+        winner.set.package === undefined
+          ? { set: winner.set.name, setId: winner.set.id ?? "" }
+          : { set: winner.set.name, setId: winner.set.id ?? "", package: winner.set.package },
       aliasChain: result.aliasChain.map((link) => ({ ...link })),
     };
     if (result.fieldAliases !== undefined) {
       resolved.fieldAliases = structuredClone(result.fieldAliases);
+    }
+    // textTransform is a field of its own: the last active set that states it wins (D-11).
+    const transform = ordered.findLast((set) => set.tokens[name]?.textTransform !== undefined);
+    const textTransform = transform?.tokens[name]?.textTransform;
+    if (transform !== undefined && textTransform !== undefined) {
+      resolved.textTransform = { value: textTransform, set: transform.name };
     }
     tokens[name] = resolved;
   }

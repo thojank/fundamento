@@ -3,7 +3,7 @@
 import { readFile, rename, writeFile } from "node:fs/promises";
 import { basename, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import type { IdsLock } from "../contracts/entity-ids.js";
+import { ID_NAMESPACE_PATTERN, type IdsLock } from "../contracts/entity-ids.js";
 import type { ValidationIssue } from "../contracts/issues.js";
 import { parseIdsLock, serializeIdsLock, validateIdsLock } from "./lock.js";
 
@@ -52,6 +52,67 @@ export async function readIdsLockFile(path: string, displayPath = path): Promise
   return parsed.lock === undefined
     ? { ok: false, issues: parsed.issues }
     : { ok: true, lock: parsed.lock };
+}
+
+export type ReadNamespaceResult =
+  | { ok: true; namespace: string | undefined }
+  | { ok: false; issues: ValidationIssue[] };
+
+/**
+ * The ID namespace for a lock (D-06): `idNamespace` from the `aspekto.json` next to it. A lock
+ * without a neighbouring `aspekto.json` (the core registry), or an `aspekto.json` without
+ * `idNamespace` (the reference Aspekto), has no namespace.
+ */
+export async function readLockNamespace(lockPath: string): Promise<ReadNamespaceResult> {
+  const aspektoPath = join(dirname(lockPath), "aspekto.json");
+  let text: string;
+  try {
+    text = await readFile(aspektoPath, "utf8");
+  } catch (error) {
+    if (isNotFound(error)) {
+      return { ok: true, namespace: undefined };
+    }
+    throw error;
+  }
+  let value: unknown;
+  try {
+    value = JSON.parse(text);
+  } catch (error) {
+    return {
+      ok: false,
+      issues: [
+        {
+          rule: "json-syntax",
+          severity: "error",
+          path: `${aspektoPath}#`,
+          message: `aspekto.json is not valid JSON: ${error instanceof Error ? error.message : String(error)}`,
+          suggestion: "Fix the JSON syntax of aspekto.json.",
+        },
+      ],
+    };
+  }
+  const namespace =
+    typeof value === "object" && value !== null && "idNamespace" in value
+      ? value.idNamespace
+      : undefined;
+  if (namespace === undefined) {
+    return { ok: true, namespace: undefined };
+  }
+  if (typeof namespace !== "string" || !ID_NAMESPACE_PATTERN.test(namespace)) {
+    return {
+      ok: false,
+      issues: [
+        {
+          rule: "schema-violation",
+          severity: "error",
+          path: `${aspektoPath}#/idNamespace`,
+          message: `idNamespace ${JSON.stringify(namespace)} must be 2 to 8 lowercase letters.`,
+          suggestion: 'Set "idNamespace" in aspekto.json to 2–8 lowercase letters, e.g. "ekz".',
+        },
+      ],
+    };
+  }
+  return { ok: true, namespace };
 }
 
 /**

@@ -53,7 +53,7 @@ function definesToken(setName: string, name: string): boolean {
 describe("AK-04: all 72 combinations resolve to unique values with provenance", () => {
   it("AK-04: rezolvoj.json holds exactly the 72 distinct complete assignments", () => {
     const expectedCount = modelo.dimensioj.reduce(
-      (product, dimensio) => product * dimensio.valoroj.length,
+      (product, dimensio) => product * (dimensio.valoroj ?? []).length,
       1,
     );
     expect(expectedCount).toBe(72);
@@ -65,7 +65,7 @@ describe("AK-04: all 72 combinations resolve to unique values with provenance", 
         modelo.dimensioj.map((dimensio) => dimensio.name).sort(),
       );
       for (const dimensio of modelo.dimensioj) {
-        expect(dimensio.valoroj.map((valoro) => valoro.name)).toContain(
+        expect((dimensio.valoroj ?? []).map((valoro) => valoro.name)).toContain(
           rezolvo.assignment[dimensio.name],
         );
       }
@@ -73,77 +73,82 @@ describe("AK-04: all 72 combinations resolve to unique values with provenance", 
   });
 
   it("AK-04: every combination has exactly one value and one provenance per core token", () => {
-    expect(tokenNames.length).toBe(30);
+    expect(tokenNames.length).toBeGreaterThanOrEqual(30);
+    // One assertion over all ~24 000 resolved tokens: per-token expect calls took >10 s on CI.
+    const violations: string[] = [];
     for (const rezolvo of rezolvoj) {
-      expect(Object.keys(rezolvo.tokens).sort()).toEqual(tokenNames);
+      const names = Object.keys(rezolvo.tokens).sort();
+      if (JSON.stringify(names) !== JSON.stringify(tokenNames)) {
+        violations.push(`token set differs in ${JSON.stringify(rezolvo.assignment)}`);
+      }
       for (const [name, token] of Object.entries(rezolvo.tokens)) {
         const where = `${name} in ${JSON.stringify(rezolvo.assignment)}`;
-        expect(token.value, where).toBeDefined();
-        expect(token.value, where).not.toBeNull();
+        if (token.value === undefined || token.value === null)
+          violations.push(`${where}: no value`);
         // A resolved value never contains an unresolved alias.
-        expect(JSON.stringify(token.value), where).not.toMatch(/"\{[^"]*\}"/);
+        if (/"\{[^"]*\}"/.test(JSON.stringify(token.value)))
+          violations.push(`${where}: alias left`);
         // Provenance: the origin set exists, carries that set's ID, and is active here.
         const origin = setsByName.get(token.origin.set);
-        expect(origin, where).toBeDefined();
-        expect(token.origin.setId, where).toBe(origin?.id);
-        expect(isActive(token.origin.set, rezolvo.assignment), where).toBe(true);
+        if (origin === undefined || token.origin.setId !== origin.id) {
+          violations.push(`${where}: origin ${token.origin.set} unknown or with a wrong ID`);
+        }
+        if (!isActive(token.origin.set, rezolvo.assignment)) {
+          violations.push(`${where}: origin ${token.origin.set} not active`);
+        }
         // Every alias link names an active set.
         const links = [...token.aliasChain, ...Object.values(token.fieldAliases ?? {}).flat()];
         for (const link of links) {
-          expect(isActive(link.set, rezolvo.assignment), `${where} via ${link.set}`).toBe(true);
+          if (!isActive(link.set, rezolvo.assignment)) violations.push(`${where} via ${link.set}`);
         }
       }
     }
+    expect(violations).toEqual([]);
   });
 });
 
 describe("AK-04: priority, late binding and conjunction sets on the repo data", () => {
-  it("AK-04 priority: color.border.default in dark + high comes from contrast/high", () => {
-    const rezolvo = rezolvoWhere({ "color-scheme": "dark", contrast: "high" });
-    const token = tokenIn(rezolvo, "color.border.default");
-    expect(definesToken("color-scheme/dark", "color.border.default")).toBe(true);
-    expect(definesToken("contrast/high", "color.border.default")).toBe(true);
-    // Both color-scheme/dark and contrast/high override it; contrast has the higher priority.
-    expect(isActive("color-scheme/dark", rezolvo.assignment)).toBe(true);
-    expect(token.origin.set).toBe("contrast/high");
-    expect(token.aliasChain[0]).toEqual({ set: "contrast/high", token: "color.border.default" });
-    // The same token in dark + default contrast comes from the dark set instead.
-    const darkDefault = tokenIn(
-      rezolvoWhere({ "color-scheme": "dark", contrast: "default" }),
-      "color.border.default",
+  it("AK-04 priority: color.text.subtle comes from the most specific active set", () => {
+    const origin = (assignment: Record<string, string>) =>
+      tokenIn(rezolvoWhere(assignment), "color.text.subtle").origin.set;
+    for (const set of ["color-scheme/dark", "contrast/high", "color-scheme/dark+contrast/high"]) {
+      expect(definesToken(set, "color.text.subtle"), set).toBe(true);
+    }
+    // contrast (priority 5) beats color-scheme (4); their conjunction beats both.
+    expect(origin({ "color-scheme": "light", contrast: "high" })).toBe("contrast/high");
+    expect(origin({ "color-scheme": "dark", contrast: "default" })).toBe("color-scheme/dark");
+    expect(origin({ "color-scheme": "dark", contrast: "high" })).toBe(
+      "color-scheme/dark+contrast/high",
     );
-    expect(darkDefault.origin.set).toBe("color-scheme/dark");
+    expect(origin({ "color-scheme": "light", contrast: "default" })).toBe("core");
   });
 
-  it("AK-04 late binding: color.action.primary.rest in dark follows blue.600 from color-scheme/dark", () => {
+  it("AK-04 late binding: color.action.primary.rest in dark is re-pointed by color-scheme/dark", () => {
     const dark = rezolvoWhere({ "color-scheme": "dark" });
     const light = rezolvoWhere({ "color-scheme": "light" });
     const token = tokenIn(dark, "color.action.primary.rest");
-    // The alias is declared once in core and bound late, against the dark palette.
-    expect(token.origin.set).toBe("core");
+    // The generic set only re-points the alias (D-03); the value comes from the core palette.
+    expect(token.origin.set).toBe("color-scheme/dark");
     expect(token.aliasChain).toEqual([
-      { set: "core", token: "color.action.primary.rest" },
-      { set: "color-scheme/dark", token: "color.palette.blue.600" },
+      { set: "color-scheme/dark", token: "color.action.primary.rest" },
+      { set: "core", token: "color.palette.accent.300" },
     ]);
-    expect(definesToken("core", "color.action.primary.rest")).toBe(true);
-    expect(definesToken("color-scheme/dark", "color.action.primary.rest")).toBe(false);
-    expect(token.value).toEqual(tokenIn(dark, "color.palette.blue.600").value);
-    expect(tokenIn(dark, "color.palette.blue.600").origin.set).toBe("color-scheme/dark");
+    expect(token.value).toEqual(tokenIn(dark, "color.palette.accent.300").value);
     expect(token.value).not.toEqual(tokenIn(light, "color.action.primary.rest").value);
   });
 
-  it("AK-04 conjunction: color.palette.neutral.900 in dark comes from aspekto/neutra+color-scheme/dark", () => {
+  it("AK-04 conjunction: komuna tints color.palette.neutral.950 in dark via its conjunction set", () => {
     const dark = rezolvoj.filter((rezolvo) => rezolvo.assignment["color-scheme"] === "dark");
     expect(dark).toHaveLength(36);
-    expect(definesToken("color-scheme/dark", "color.palette.neutral.900")).toBe(true);
-    expect(definesToken("aspekto/neutra+color-scheme/dark", "color.palette.neutral.900")).toBe(
-      true,
-    );
+    expect(definesToken("color-scheme/dark", "color.palette.neutral.950")).toBe(false);
     for (const rezolvo of dark) {
-      const token = tokenIn(rezolvo, "color.palette.neutral.900");
-      // The single-condition set color-scheme/dark defines the same token and is active too.
-      expect(isActive("color-scheme/dark", rezolvo.assignment)).toBe(true);
-      expect(token.origin.set).toBe("aspekto/neutra+color-scheme/dark");
+      expect(tokenIn(rezolvo, "color.palette.neutral.950").origin.set).toBe(
+        "aspekto/komuna+color-scheme/dark",
+      );
+      expect(tokenIn(rezolvo, "color.background.default").aliasChain.at(-1)).toEqual({
+        set: "aspekto/komuna+color-scheme/dark",
+        token: "color.palette.neutral.950",
+      });
     }
   });
 });

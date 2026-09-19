@@ -12,8 +12,11 @@ export interface UlidSource {
   random(): number;
 }
 
-/** Generates the next ID of an entity type. IDs from one generator strictly increase. */
-export type IdGenerator = (entityType: EntityType) => string;
+/**
+ * Generates the next ID of an entity type, optionally in an Aspekto package namespace
+ * (`<prefix>_<namespace>_<ULID>`, D-06). IDs from one generator strictly increase.
+ */
+export type IdGenerator = (entityType: EntityType, namespace?: string) => string;
 
 /** The real clock plus a cryptographically secure random source (used by the CLI edge). */
 export function systemUlidSource(): UlidSource {
@@ -51,5 +54,6 @@ export function fixedUlidSource(time: number, seed: number): UlidSource {
  */
 export function createIdGenerator(source: UlidSource): IdGenerator {
   const nextUlid = monotonicFactory(() => source.random());
-  return (entityType) => `${ENTITY_ID_PREFIXES[entityType]}_${nextUlid(source.now())}`;
+  return (entityType, namespace) =>
+    `${ENTITY_ID_PREFIXES[entityType]}_${namespace === undefined ? "" : `${namespace}_`}${nextUlid(source.now())}`;
 }

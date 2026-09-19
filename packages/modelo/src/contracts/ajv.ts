@@ -2,7 +2,13 @@
 
 import { Ajv2020, type ValidateFunction } from "ajv/dist/2020.js";
 import addFormats from "ajv-formats";
-import { MODELO_SCHEMA_ID, readModeloSchema, schemaRef } from "./schema.js";
+import {
+  CONFIG_SCHEMA_ID,
+  MODELO_SCHEMA_ID,
+  readConfigSchema,
+  readModeloSchema,
+  schemaRef,
+} from "./schema.js";
 
 export type { ErrorObject, ValidateFunction } from "ajv/dist/2020.js";
 
@@ -17,7 +23,17 @@ export function createModeloAjv(): ModeloAjv {
   // ajv-formats is CommonJS; under NodeNext its default export is reached via `.default`.
   addFormats.default(ajv, ["date"]);
   ajv.addSchema(readModeloSchema());
+  ajv.addSchema(readConfigSchema());
   return ajv;
+}
+
+/** The compiled validator of `fundamento.config.json` (D-07). */
+export function getConfigValidator(ajv: ModeloAjv): ValidateFunction {
+  const validate = ajv.getSchema(CONFIG_SCHEMA_ID);
+  if (validate === undefined) {
+    throw new Error(`Unknown config schema ${CONFIG_SCHEMA_ID}.`);
+  }
+  return validate;
 }
 
 /**

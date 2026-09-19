@@ -1,0 +1,21 @@
+{
+  "description": "aspekto-ekzemplo leaves out four core tokens; validation lists exactly these (AK-03).",
+  "issues": [
+    {
+      "rule": "aspekto-incomplete",
+      "path": "\u2026/aspekto-ekzemplo/sets/aspekto/ekzemplo.json#/color/action/primary/rest"
+    },
+    {
+      "rule": "aspekto-incomplete",
+      "path": "\u2026/aspekto-ekzemplo/sets/aspekto/ekzemplo.json#/color/text/default"
+    },
+    {
+      "rule": "aspekto-incomplete",
+      "path": "\u2026/aspekto-ekzemplo/sets/aspekto/ekzemplo.json#/motion/duration/fast"
+    },
+    {
+      "rule": "aspekto-incomplete",
+      "path": "\u2026/aspekto-ekzemplo/sets/aspekto/ekzemplo.json#/typography/kicker"
+    }
+  ]
+}

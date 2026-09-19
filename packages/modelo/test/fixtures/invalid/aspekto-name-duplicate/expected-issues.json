@@ -1,0 +1,9 @@
+{
+  "description": "The package aspekto-neutra declares the Aspekto name neutra, which already exists.",
+  "issues": [
+    {
+      "rule": "aspekto-name-duplicate",
+      "path": "aspekto-neutra/aspekto.json#/name"
+    }
+  ]
+}

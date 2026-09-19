@@ -1,0 +1,30 @@
+{
+  "$extensions": {
+    "com.ciferecigo.fundamento": {
+      "id": "set_01M2WRK8G0FFFFFFFFFFFFFFF5",
+      "kondicxoj": [
+        "etoso=malvarma"
+      ]
+    }
+  },
+  "color": {
+    "$type": "color",
+    "background": {
+      "default": {
+        "$value": "{color.palette.neutral.100}"
+      }
+    },
+    "text": {
+      "default": {
+        "$value": "{color.palette.neutral.0}"
+      }
+    },
+    "palette": {
+      "neutral": {
+        "900": {
+          "$value": "{color.palette.neutral.1000}"
+        }
+      }
+    }
+  }
+}

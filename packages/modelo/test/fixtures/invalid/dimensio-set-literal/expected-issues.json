@@ -1,0 +1,9 @@
+{
+  "description": "The generic set etoso/varma gives the role color.text.default a literal; with the Regulo dimensio-sets-alias-only automatic this is an error (D-03, D-19).",
+  "issues": [
+    {
+      "rule": "dimensio-set-literal",
+      "path": "vortaro/sets/etoso/varma.json#/color/text/default"
+    }
+  ]
+}

@@ -37,7 +37,11 @@
   },
   "overrides": [
     {
-      "includes": ["packages/vortaro/**/*.json", "packages/modelo/data/**/*.json"],
+      "includes": [
+        "packages/vortaro/**/*.json",
+        "packages/modelo/data/**/*.json",
+        "packages/aspekto-komuna/sets/**/*.json"
+      ],
       "formatter": {
         "enabled": false
       }

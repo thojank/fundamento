@@ -29,3 +29,32 @@ DTCG `typography` kennt `fontFamily`, `fontSize`, `fontWeight`, `letterSpacing`,
 ## 6. Abdeckungs-Checkliste
 
 Siehe Spec 000 `research.md` §4; für Phase 1 bindend. Ergänzt um: Fokusring als eigene Rolle, Opazitätsstufen, Layout je Viewport, Motion mit `reduced`.
+
+## 7. Plan-Research (ergänzt durch `/speckit.plan`, 2026-09-19)
+
+Entscheidungen des Plans mit Begründung und verworfenen Alternativen. Nummern verweisen auf `plan.md`.
+
+### 7.1 Laufweite in Typografie-Composites (D-11, beantwortet §5)
+- **Entscheidung:** `letterSpacing` bleibt DTCG-`dimension` in `px` (Referenzeinheit aus Phase 0), je Rolle; Skala `font.tracking.scale.<n>` mit denselben Stufen wie `font.size.scale`, damit Dimensio-Verschiebungen Größe und Laufweite gemeinsam bewegen.
+- **Begründung:** DTCG kennt `em` nicht; eine relative Einheit wäre eine Abweichung vom einzigen zulässigen Speicherformat (Art. XII). Der relative Wert ist in jeder Projekcio ableitbar, weil das aufgelöste Composite `fontSize` und `letterSpacing` enthält (CSS `em` = px ÷ fontSize, Figma-Prozent = × 100).
+- **Verworfen:** `number` als em-Faktor im Composite (nicht DTCG-konform, Tokens Studio/Penpot würden es als px lesen); `$extensions`-Feld mit em-Wert (zweite Quelle derselben Tatsache, Art. I).
+
+### 7.2 Aspekto-Vollständigkeit und Dimensio-Sets (D-03, D-04)
+- Generische Dimensio-Sets haben höhere Priorität als `aspekto/*`. Literale darin würden an jede Marke vererbt, was Art. IV v1.3 verbietet. Daher dürfen sie nur Aliasse umhängen (Muster „Primitive belegt der Aspekto, Dimensioj verschieben Semantik“), wie Tokens-Studio-Multi-Brand-Setups mit Brand-Primitiven und Mode-Semantik.
+- **Verworfen:** Aspekto mit höchster Priorität (dann könnte keine Dimensio mehr über eine Marke wirken, und `motion=reduced` wäre je Marke zu wiederholen).
+
+### 7.3 MCP-SDK-Version (D-13)
+- Stand npm am 2026-09-19: `@modelcontextprotocol/sdk` 1.30.0 (latest der v1-Linie, 2026-07-27); v2 als getrennte Pakete `@modelcontextprotocol/server` / `@modelcontextprotocol/node` 2.0.0 (GA 2026-09-17, Peer `zod` ^4, HTTP-Adapter über hono).
+- **Entscheidung:** v1.30 mit der Low-Level-Klasse `Server` und handgeschriebenen JSON-Schemas für Tools. v2 wird in Phase 2 (Gvidanto) neu bewertet.
+- Quellen: https://github.com/modelcontextprotocol/typescript-sdk · https://ts.sdk.modelcontextprotocol.io/v2/serving/http
+
+### 7.4 Clean Room für die eigene Marke (D-15)
+- Nachweis ohne Werte im Code: SHA-256-Fingerabdrücke normalisierter Markenwerte, Allowlist nur `spec.md` und `research.md` dieser Spec. Fingerabdrücke nur für markenspezifische Werte: Hex-Farben, die eigene Schriftfamilie und `cubic-bezier`-Kurven. Dauern und Längen-Skalare bleiben draußen, sie sind generisch (K2). Der Check schützt keine Geheimhaltung (die Werte sind öffentlich, kurze Hashes sind umkehrbar), er erzwingt nur AK-08. Verworfen: Klartext-Blocklist (würde die Werte selbst in den Code bringen) und reine Namensprüfung (`com.ciferecigo.fundamento` ist der Extension-Namensraum und steht überall).
+
+## 9. Kunteksta adaptado (Kandidat, nicht Phase 1)
+
+Anforderung des Maintainers vom 2026-09-19: Das Design soll sich zur Laufzeit kontextabhängig ändern können, z. B. morgens kühle und abends warme Farben. Das ist ein Kandidat für eine eigene, kommende Spec (Einführung einer Dimensio durch Spec, Art. IV) und ausdrücklich nicht Teil von Phase 1.
+
+- **Absicherung in Phase 1:** Ein Test in T011 belegt, dass eine siebte Dimensio rein über Daten hinzukommt. Das Fixture `dimensio-etoso` hat die Werte `neutrala`, `varma`, `malvarma` und alias-only-Sets; es gibt keinen Schema- oder Code-Eingriff. Das Fixture validiert und wird aufgelöst.
+- **Offene Fragen für die kommende Spec:** Wer setzt den Wert zur Laufzeit (Projekcio, Host-App, Agent)? Wie oft wechselt er, und mit welchem Übergang (Motion)? Wie wirkt er mit `color-scheme` und `contrast` zusammen (Priorität, Alirebleco über alle neuen Kombinationen)? Bleibt ein diskreter Dimensio-Wert, oder braucht es interpolierte Zwischenwerte (dann kein reines Token-Set mehr)?
+

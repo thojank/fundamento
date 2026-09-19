@@ -1,0 +1,15 @@
+{
+  "id": "dva_ekz_01M2WRK8G0EEEEEEEEEEEEEEE0",
+  "name": "ekzemplo",
+  "owner": "Ekzemplo test owner",
+  "license": "proprietary",
+  "idNamespace": "ekz",
+  "fonts": [
+    {
+      "family": "Ekzempla Sans",
+      "license": "proprietary",
+      "source": "invented for tests",
+      "redistributable": false
+    }
+  ]
+}

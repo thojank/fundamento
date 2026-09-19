@@ -1,0 +1,20 @@
+[
+  {
+    "group": "aspekto",
+    "id": "dva_01M2VEEDQEJEE7MR7JA8JRPMJB",
+    "name": "komuna",
+    "selectedTokenSets": {
+      "aspekto/komuna": "enabled",
+      "aspekto/komuna+color-scheme/dark": "enabled",
+      "core": "source"
+    }
+  },
+  {
+    "group": "color-scheme",
+    "id": "dva_01M2VEEDQFS0RGTE2M27JARKHA",
+    "name": "dark",
+    "selectedTokenSets": {
+      "aspekto/komuna+color-scheme/dark": "enabled"
+    }
+  }
+]

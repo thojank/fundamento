@@ -4,17 +4,8 @@
       "id": "dim_01M2VEEDJRNEGZF2QHTC7AGWPK",
       "name": "aspekto",
       "priority": 1,
-      "default": "neutra",
-      "valoroj": [
-        {
-          "id": "dva_01M2VEEDQEJEE7MR7JA8JRPMJB",
-          "name": "neutra",
-          "aspekto": {
-            "owner": "Fundamento",
-            "licenseNote": "MIT. Generic test values invented for Phase 0; replaced by real Aspekto values in Phase 1."
-          }
-        }
-      ]
+      "default": "komuna",
+      "referenceAspekto": "komuna"
     },
     {
       "id": "dim_01M2VEEDJSKN3J6SNGE98H37T5",

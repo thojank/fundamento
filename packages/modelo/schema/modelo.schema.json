@@ -142,55 +142,55 @@
     },
     "AnyId": {
       "type": "string",
-      "pattern": "^(tok|set|dim|dva|reg|jug|kpa|ero|ske|sxa|prj|cel)_[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+      "pattern": "^(tok|set|dim|dva|reg|jug|kpa|ero|ske|sxa|prj|cel)_(?:[a-z]{2,8}_)?[0-7][0-9A-HJKMNP-TV-Z]{25}$"
     },
     "TokenId": {
       "type": "string",
-      "pattern": "^tok_[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+      "pattern": "^tok_(?:[a-z]{2,8}_)?[0-7][0-9A-HJKMNP-TV-Z]{25}$"
     },
     "TokenSetId": {
       "type": "string",
-      "pattern": "^set_[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+      "pattern": "^set_(?:[a-z]{2,8}_)?[0-7][0-9A-HJKMNP-TV-Z]{25}$"
     },
     "DimensioId": {
       "type": "string",
-      "pattern": "^dim_[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+      "pattern": "^dim_(?:[a-z]{2,8}_)?[0-7][0-9A-HJKMNP-TV-Z]{25}$"
     },
     "DimensioValoroId": {
       "type": "string",
-      "pattern": "^dva_[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+      "pattern": "^dva_(?:[a-z]{2,8}_)?[0-7][0-9A-HJKMNP-TV-Z]{25}$"
     },
     "ReguloId": {
       "type": "string",
-      "pattern": "^reg_[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+      "pattern": "^reg_(?:[a-z]{2,8}_)?[0-7][0-9A-HJKMNP-TV-Z]{25}$"
     },
     "JugxoId": {
       "type": "string",
-      "pattern": "^jug_[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+      "pattern": "^jug_(?:[a-z]{2,8}_)?[0-7][0-9A-HJKMNP-TV-Z]{25}$"
     },
     "KontrastParoId": {
       "type": "string",
-      "pattern": "^kpa_[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+      "pattern": "^kpa_(?:[a-z]{2,8}_)?[0-7][0-9A-HJKMNP-TV-Z]{25}$"
     },
     "EroId": {
       "type": "string",
-      "pattern": "^ero_[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+      "pattern": "^ero_(?:[a-z]{2,8}_)?[0-7][0-9A-HJKMNP-TV-Z]{25}$"
     },
     "SkemoId": {
       "type": "string",
-      "pattern": "^ske_[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+      "pattern": "^ske_(?:[a-z]{2,8}_)?[0-7][0-9A-HJKMNP-TV-Z]{25}$"
     },
     "SxablonoId": {
       "type": "string",
-      "pattern": "^sxa_[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+      "pattern": "^sxa_(?:[a-z]{2,8}_)?[0-7][0-9A-HJKMNP-TV-Z]{25}$"
     },
     "ProjekcioId": {
       "type": "string",
-      "pattern": "^prj_[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+      "pattern": "^prj_(?:[a-z]{2,8}_)?[0-7][0-9A-HJKMNP-TV-Z]{25}$"
     },
     "CeloId": {
       "type": "string",
-      "pattern": "^cel_[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+      "pattern": "^cel_(?:[a-z]{2,8}_)?[0-7][0-9A-HJKMNP-TV-Z]{25}$"
     },
     "DtcgType": {
       "type": "string",
@@ -212,7 +212,22 @@
     },
     "TokenRole": {
       "type": "string",
-      "enum": ["foreground", "background", "border"]
+      "enum": [
+        "palette",
+        "foreground",
+        "background",
+        "border",
+        "focus",
+        "shadow",
+        "backdrop",
+        "disabled",
+        "decorative"
+      ]
+    },
+    "TextTransform": {
+      "description": "Text transformation of a typography role (Spec 001, D-11). DTCG has no field for it; the values are platform-neutral.",
+      "type": "string",
+      "enum": ["none", "uppercase", "lowercase", "capitalize"]
     },
     "Deprecated": {
       "anyOf": [
@@ -679,6 +694,9 @@
         },
         "role": {
           "$ref": "#/$defs/TokenRole"
+        },
+        "textTransform": {
+          "$ref": "#/$defs/TextTransform"
         }
       },
       "required": ["id"],
@@ -1202,6 +1220,42 @@
       "required": ["owner", "licenseNote"],
       "additionalProperties": false
     },
+    "License": {
+      "description": "An SPDX license expression, or `proprietary` for rights that are not openly licensed.",
+      "type": "string",
+      "pattern": "^(proprietary|[A-Za-z0-9][A-Za-z0-9.+-]*( (AND|OR|WITH) [A-Za-z0-9][A-Za-z0-9.+-]*)*)$"
+    },
+    "IdNamespace": {
+      "description": "ID namespace of an external Aspekto package (Spec 001, D-06): 2 to 8 lowercase letters.",
+      "type": "string",
+      "pattern": "^[a-z]{2,8}$"
+    },
+    "Fonto": {
+      "description": "A font family an Aspekto uses. Font files never enter the core repository; the fallback stack lives only in the fontFamily token value.",
+      "type": "object",
+      "properties": {
+        "family": { "$ref": "#/$defs/NonEmptyText" },
+        "license": { "$ref": "#/$defs/License" },
+        "source": { "$ref": "#/$defs/NonEmptyText" },
+        "redistributable": { "type": "boolean" }
+      },
+      "required": ["family", "license", "source", "redistributable"],
+      "additionalProperties": false
+    },
+    "AspektoFile": {
+      "description": "aspekto.json of an Aspekto package (Spec 001, D-05). `id` is the DimensioValoro ID of the Aspekto; `idNamespace` is required for every package except the reference Aspekto (checked on composition).",
+      "type": "object",
+      "properties": {
+        "id": { "$ref": "#/$defs/DimensioValoroId" },
+        "name": { "$ref": "#/$defs/Name" },
+        "owner": { "$ref": "#/$defs/NonEmptyText" },
+        "license": { "$ref": "#/$defs/License" },
+        "idNamespace": { "$ref": "#/$defs/IdNamespace" },
+        "fonts": { "type": "array", "items": { "$ref": "#/$defs/Fonto" } }
+      },
+      "required": ["id", "name", "owner", "license", "fonts"],
+      "additionalProperties": false
+    },
     "DimensioValoro": {
       "type": "object",
       "properties": {
@@ -1222,7 +1276,7 @@
       "additionalProperties": false
     },
     "Dimensio": {
-      "description": "An adaptation dimension. priority is unique; 1 is lowest and higher priorities win in resolution.",
+      "description": "An adaptation dimension. priority is unique; 1 is lowest and higher priorities win in resolution. The values of the aspekto Dimensio come from the loaded Aspekto packages (Spec 001, D-05), so dimensioj.json lists none for it; every other Dimensio lists its values (dimensio-default-invalid otherwise).",
       "type": "object",
       "properties": {
         "id": {
@@ -1238,6 +1292,10 @@
         "default": {
           "$ref": "#/$defs/Name"
         },
+        "referenceAspekto": {
+          "description": "Only on the aspekto Dimensio: the reference Aspekto whose values live in core (Spec 001, FR-10).",
+          "$ref": "#/$defs/Name"
+        },
         "valoroj": {
           "type": "array",
           "items": {
@@ -1246,7 +1304,7 @@
           "minItems": 1
         }
       },
-      "required": ["id", "name", "priority", "default", "valoroj"],
+      "required": ["id", "name", "priority", "default"],
       "additionalProperties": false
     },
     "DimensiojFile": {
@@ -1283,6 +1341,10 @@
         "checkability": {
           "type": "string",
           "enum": ["automatic", "manual"]
+        },
+        "aspekto": {
+          "description": "Scopes the entry to one Aspekto; entries in an Aspekto package carry their Aspekto (Spec 001, D-10).",
+          "$ref": "#/$defs/Name"
         }
       },
       "required": ["id", "name", "statement", "kialo", "scope", "checkability"],
@@ -1364,6 +1426,10 @@
         },
         "context": {
           "type": "string"
+        },
+        "aspekto": {
+          "description": "Scopes the entry to one Aspekto; entries in an Aspekto package carry their Aspekto (Spec 001, D-10).",
+          "$ref": "#/$defs/Name"
         }
       },
       "required": ["id", "ref", "decision", "kialo", "date", "context"],
@@ -1472,6 +1538,10 @@
         },
         "setId": {
           "$ref": "#/$defs/TokenSetId"
+        },
+        "package": {
+          "description": "The Aspekto package that holds the set (Spec 001, D-08); absent for core sets.",
+          "$ref": "#/$defs/NonEmptyText"
         }
       },
       "required": ["set", "setId"],
@@ -1505,6 +1575,20 @@
               "$ref": "#/$defs/AliasLink"
             }
           }
+        },
+        "textTransform": {
+          "description": "Text transformation of a typography token and the set that states it; the last active set that states one wins (Spec 001, D-11). Absent when no set states one.",
+          "type": "object",
+          "properties": {
+            "value": {
+              "$ref": "#/$defs/TextTransform"
+            },
+            "set": {
+              "$ref": "#/$defs/SetName"
+            }
+          },
+          "required": ["value", "set"],
+          "additionalProperties": false
         }
       },
       "required": ["id", "type", "value", "origin", "aliasChain"],
@@ -1696,9 +1780,29 @@
         },
         "licenseNote": {
           "$ref": "#/$defs/NonEmptyText"
+        },
+        "license": {
+          "$ref": "#/$defs/License"
+        },
+        "fonts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Fonto"
+          }
+        },
+        "reference": {
+          "description": "True for the reference Aspekto (core.referenceAspekto).",
+          "type": "boolean"
+        },
+        "external": {
+          "description": "True when the package lies outside the core repository.",
+          "type": "boolean"
+        },
+        "package": {
+          "$ref": "#/$defs/NonEmptyText"
         }
       },
-      "required": ["id", "name", "owner", "licenseNote"],
+      "required": ["id", "name", "owner"],
       "additionalProperties": false
     },
     "TokenInventoryEntry": {

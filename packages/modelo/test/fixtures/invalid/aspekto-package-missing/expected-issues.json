@@ -1,0 +1,9 @@
+{
+  "description": "The config lists ./aspekto-mankas, which does not exist; aspekto-ekzemplo is still loaded and validated.",
+  "issues": [
+    {
+      "rule": "aspekto-package-missing",
+      "path": "fundamento.config.json#/aspektoj/1"
+    }
+  ]
+}

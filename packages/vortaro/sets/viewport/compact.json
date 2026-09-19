@@ -1,6 +1,90 @@
 {
   "$extensions": {
-    "com.ciferecigo.fundamento": { "id": "set_01M2VEEDW45A0B9Q4GQ465NCHE", "kondicxoj": ["viewport=compact"] }
+    "com.ciferecigo.fundamento": {
+      "id": "set_01M2VEEDW45A0B9Q4GQ465NCHE",
+      "kondicxoj": [
+        "viewport=compact"
+      ]
+    }
   },
-  "font": { "size": { "$type": "dimension", "body": { "$value": { "value": 14, "unit": "px" } } } }
+  "font": {
+    "size": {
+      "$type": "dimension",
+      "display": {
+        "1": {
+          "$value": "{font.size.scale.900}"
+        },
+        "2": {
+          "$value": "{font.size.scale.800}"
+        },
+        "3": {
+          "$value": "{font.size.scale.700}"
+        }
+      },
+      "headline": {
+        "1": {
+          "$value": "{font.size.scale.700}"
+        },
+        "2": {
+          "$value": "{font.size.scale.600}"
+        },
+        "3": {
+          "$value": "{font.size.scale.500}"
+        },
+        "4": {
+          "$value": "{font.size.scale.400}"
+        }
+      }
+    },
+    "tracking": {
+      "$type": "dimension",
+      "display": {
+        "1": {
+          "$value": "{font.tracking.scale.900}"
+        },
+        "2": {
+          "$value": "{font.tracking.scale.800}"
+        },
+        "3": {
+          "$value": "{font.tracking.scale.700}"
+        }
+      },
+      "headline": {
+        "1": {
+          "$value": "{font.tracking.scale.700}"
+        },
+        "2": {
+          "$value": "{font.tracking.scale.600}"
+        },
+        "3": {
+          "$value": "{font.tracking.scale.500}"
+        },
+        "4": {
+          "$value": "{font.tracking.scale.400}"
+        }
+      }
+    }
+  },
+  "layout": {
+    "grid": {
+      "columns": {
+        "$type": "number",
+        "$value": "{layout.columns.4}"
+      },
+      "gutter": {
+        "$type": "dimension",
+        "$value": "{spacing.scale.300}"
+      },
+      "margin": {
+        "$type": "dimension",
+        "$value": "{spacing.scale.400}"
+      }
+    },
+    "container": {
+      "max": {
+        "$type": "dimension",
+        "$value": "{size.container.small}"
+      }
+    }
+  }
 }

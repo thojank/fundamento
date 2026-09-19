@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { createModeloAjv, getModeloValidator } from "./ajv.js";
 import { DTCG_TYPES, TOKEN_ROLES, TOKEN_VALUE_DEFS } from "./dtcg.js";
-import { ENTITY_ID_PREFIXES, ENTITY_TYPES, ULID_PATTERN_SOURCE } from "./entity-ids.js";
+import {
+  ENTITY_ID_PREFIXES,
+  ENTITY_TYPES,
+  ID_NAMESPACE_PATTERN_SOURCE,
+  ULID_PATTERN_SOURCE,
+} from "./entity-ids.js";
 import {
   ALIAS_PATTERN,
   KONDICXO_PATTERN,
@@ -525,10 +530,12 @@ describe("modelo schema", () => {
       const def = `${entityType[0]?.toUpperCase()}${entityType.slice(1)}Id`;
       expect(defs[def], def).toEqual({
         type: "string",
-        pattern: `^${prefix}_${ULID_PATTERN_SOURCE}$`,
+        pattern: `^${prefix}_(?:${ID_NAMESPACE_PATTERN_SOURCE}_)?${ULID_PATTERN_SOURCE}$`,
       });
       const validate = getModeloValidator(ajv, def);
       expect(validate(`${prefix}_${ULID}`)).toBe(true);
+      expect(validate(`${prefix}_ekz_${ULID}`)).toBe(true); // namespaced (D-06)
+      expect(validate(`${prefix}_E_${ULID}`)).toBe(false);
       for (const other of Object.values(ENTITY_ID_PREFIXES).filter((p) => p !== prefix)) {
         expect(validate(`${other}_${ULID}`)).toBe(false);
       }

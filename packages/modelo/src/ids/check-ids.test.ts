@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { EntityType, IdOccurrence, IdsLock } from "../contracts/index.js";
-import { checkIds, DEFAULT_LOCK_FILE } from "./check-ids.js";
+import { checkIdNamespaces, checkIds, DEFAULT_LOCK_FILE } from "./check-ids.js";
 
 /** A well-formed 26-character ULID whose tail is `seed` (Crockford characters only). */
 function ulid(seed: string): string {
@@ -200,5 +200,60 @@ describe("checkIds", () => {
     // IDs never contain `~` or `/`, but the lock path must stay a valid pointer regardless.
     const issues = checkIds([], { ids: { "tok_a/b~c": { type: "token", status: "active" } } });
     expect(issues[0]?.path).toBe("data/ids.lock.json#/ids/tok_a~1b~0c");
+  });
+});
+
+describe("checkIdNamespaces (D-06)", () => {
+  const CORE_REG = { lockFile: "modelo/data/ids.lock.json" };
+  const EKZ_TOK = `tok_ekz_${ulid("E")}`;
+  const EKZ_SET = `set_ekz_${ulid("F")}`;
+
+  it("accepts core IDs in a registry without namespace and namespaced IDs in their package", () => {
+    const issues = checkIdNamespaces([
+      { ...CORE_REG, lock: lockOf({ [TOK_A]: ["token", "active"] }) },
+      {
+        lockFile: "aspekto-ekzemplo/ids.lock.json",
+        aspektoFile: "aspekto-ekzemplo/aspekto.json",
+        namespace: "ekz",
+        lock: lockOf({ [EKZ_TOK]: ["token", "active"], [EKZ_SET]: ["tokenSet", "active"] }),
+      },
+    ]);
+    expect(issues).toEqual([]);
+  });
+
+  it("reports id-namespace-mismatch at the lock entry for a foreign or missing namespace", () => {
+    const issues = checkIdNamespaces([
+      { ...CORE_REG, lock: lockOf({ [EKZ_TOK]: ["token", "active"] }) },
+      {
+        lockFile: "aspekto-ekzemplo/ids.lock.json",
+        aspektoFile: "aspekto-ekzemplo/aspekto.json",
+        namespace: "ekz",
+        lock: lockOf({ [TOK_B]: ["token", "active"] }),
+      },
+    ]);
+    expect(issues.map((i) => [i.rule, i.path])).toEqual([
+      ["id-namespace-mismatch", `aspekto-ekzemplo/ids.lock.json#/ids/${TOK_B}`],
+      ["id-namespace-mismatch", `modelo/data/ids.lock.json#/ids/${EKZ_TOK}`],
+    ]);
+  });
+
+  it("reports id-namespace-duplicate at the second package's idNamespace", () => {
+    const issues = checkIdNamespaces([
+      {
+        lockFile: "a/ids.lock.json",
+        aspektoFile: "a/aspekto.json",
+        namespace: "ekz",
+        lock: lockOf({}),
+      },
+      {
+        lockFile: "b/ids.lock.json",
+        aspektoFile: "b/aspekto.json",
+        namespace: "ekz",
+        lock: lockOf({}),
+      },
+    ]);
+    expect(issues.map((i) => [i.rule, i.path])).toEqual([
+      ["id-namespace-duplicate", "b/aspekto.json#/idNamespace"],
+    ]);
   });
 });

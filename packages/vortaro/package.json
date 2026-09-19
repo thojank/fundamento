@@ -1,6 +1,6 @@
 {
   "name": "@fundamento/vortaro",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Fundamento Vortaro: DTCG token data (sets, $themes.json, $metadata.json). Contains no code.",
   "license": "MIT",
   "type": "module",

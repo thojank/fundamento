@@ -9,6 +9,7 @@ import {
 } from "../contracts/dtcg.js";
 import { formatIssuePath, type ValidationIssue } from "../contracts/issues.js";
 import type { Kondicxo, LoadedToken } from "../contracts/modelo.js";
+import type { TextTransform } from "../generated/modelo-schema.js";
 import { appendPointer } from "../json/pointer.js";
 import { isJsonObject, type JsonObject } from "./guards.js";
 
@@ -95,6 +96,9 @@ export function flattenTokenTree(tree: unknown, file: string): FlattenResult {
     if (isTokenRole(extension?.role)) {
       token.role = extension.role;
     }
+    if (isTextTransform(extension?.textTransform)) {
+      token.textTransform = extension.textTransform;
+    }
     // defineProperty: a canonical name such as "__proto__" must become an own key.
     Object.defineProperty(tokens, name, {
       value: token,
@@ -168,6 +172,12 @@ export function parseKondicxoj(value: unknown): Kondicxo[] {
 
 function isDtcgType(value: unknown): value is DtcgType {
   return typeof value === "string" && (DTCG_TYPES as readonly string[]).includes(value);
+}
+
+const TEXT_TRANSFORMS: readonly TextTransform[] = ["none", "uppercase", "lowercase", "capitalize"];
+
+function isTextTransform(value: unknown): value is TextTransform {
+  return typeof value === "string" && (TEXT_TRANSFORMS as readonly string[]).includes(value);
 }
 
 function isTokenRole(value: unknown): value is TokenRole {

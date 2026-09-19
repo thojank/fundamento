@@ -11,7 +11,9 @@
       "inputs": [
         "$TURBO_DEFAULT$",
         "$TURBO_ROOT$/packages/vortaro/*.json",
-        "$TURBO_ROOT$/packages/vortaro/sets/**"
+        "$TURBO_ROOT$/packages/vortaro/sets/**",
+        "$TURBO_ROOT$/packages/aspekto-komuna/*.json",
+        "$TURBO_ROOT$/packages/aspekto-komuna/sets/**"
       ],
       "outputs": ["dist/**"]
     },

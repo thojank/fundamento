@@ -1,12 +1,24 @@
 // Where a Modelo lives on disk (§2.1 "Modelo root") and how issue paths are made relative to it.
 
+import { existsSync, realpathSync } from "node:fs";
 import { dirname, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
+import { CONFIG_FILE_NAME, readKonfiguro } from "../config/read-config.js";
+import type { ValidationIssue } from "../contracts/issues.js";
 import type { ModeloSource } from "../contracts/modelo.js";
 
 /**
+ * The directory of the reference Aspekto package `@fundamento/aspekto-komuna`. The core always
+ * includes it: the reference Aspekto's values live in core (FR-10, D-07).
+ */
+export function referenceAspektoPackageDir(): string {
+  return dirname(fileURLToPath(import.meta.resolve("@fundamento/aspekto-komuna/package.json")));
+}
+
+/**
  * The repo's Modelo: the `@fundamento/vortaro` package directory (found through module
- * resolution) and `packages/modelo/data`. Independent of the current working directory.
+ * resolution), `packages/modelo/data` and the reference Aspekto package. Independent of the
+ * current working directory.
  */
 export function defaultModeloSource(): ModeloSource {
   const vortaroPackageJson = fileURLToPath(import.meta.resolve("@fundamento/vortaro/package.json"));
@@ -14,12 +26,68 @@ export function defaultModeloSource(): ModeloSource {
     vortaroDir: dirname(vortaroPackageJson),
     // Valid from both `src/load/` and `dist/load/`.
     dataDir: fileURLToPath(new URL("../../data", import.meta.url)),
+    aspektoPackages: [referenceAspektoPackageDir()],
   };
 }
 
-/** The source of a Modelo root laid out as `<root>/vortaro` and `<root>/data` (fixtures, `--fixture`). */
+/**
+ * A project's Modelo (D-07): the repo core, the reference Aspekto (always) and the Aspekto packages
+ * listed in `configFile`. Listing the reference package again is idempotent. Config issues become
+ * `sourceIssues`; `displayFile` is the config's file part in their paths.
+ */
+export function projectModeloSource(configFile: string, displayFile = configFile): ModeloSource {
+  const { konfiguro, issues } = readKonfiguro(configFile, displayFile);
+  return withAspektoPackages(defaultModeloSource(), konfiguro?.aspektoPackages ?? [], issues);
+}
+
+/**
+ * The repo core with the reference Aspekto plus `packageDirs` (e.g. from `--aspekto <dir>`),
+ * without duplicates (compared by real path).
+ */
+export function withAspektoPackages(
+  source: ModeloSource,
+  packageDirs: readonly string[],
+  sourceIssues: readonly ValidationIssue[] = [],
+): ModeloSource {
+  const seen = new Set<string>();
+  const unique = [...(source.aspektoPackages ?? []), ...packageDirs].filter((dir) => {
+    const key = realPath(dir);
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+  return {
+    ...source,
+    aspektoPackages: unique,
+    sourceIssues: [...(source.sourceIssues ?? []), ...sourceIssues],
+  };
+}
+
+function realPath(dir: string): string {
+  try {
+    return realpathSync(dir);
+  } catch {
+    return resolve(dir);
+  }
+}
+
+/**
+ * The source of a Modelo root laid out as `<root>/vortaro` and `<root>/data` (fixtures,
+ * `--fixture`). A `<root>/fundamento.config.json` adds its Aspekto packages (D-07, D-16); its
+ * issues become `sourceIssues` with paths relative to the root.
+ */
 export function fixtureModeloSource(root: string): ModeloSource {
-  return { vortaroDir: join(root, "vortaro"), dataDir: join(root, "data") };
+  const source: ModeloSource = { vortaroDir: join(root, "vortaro"), dataDir: join(root, "data") };
+  const configFile = join(root, CONFIG_FILE_NAME);
+  if (!existsSync(configFile)) {
+    return source;
+  }
+  const { konfiguro, issues } = readKonfiguro(configFile, CONFIG_FILE_NAME);
+  return {
+    ...source,
+    aspektoPackages: konfiguro?.aspektoPackages ?? [],
+    sourceIssues: issues,
+  };
 }
 
 /**
