@@ -4,7 +4,7 @@
 // Exit codes: 0 = files written, 1 = domain error (Modelo cannot be loaded, write failed),
 // 2 = usage error. Never prints stack traces.
 
-import { readFileSync, writeFileSync } from "node:fs";
+import { readFileSync, realpathSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { parseArgs } from "node:util";
 import type { ValidationIssue } from "../contracts/issues.js";
@@ -12,7 +12,12 @@ import type { ModeloSource } from "../contracts/modelo.js";
 import { coreView } from "../load/core-view.js";
 import { METADATA_FILE_NAME, THEMES_FILE_NAME } from "../load/files.js";
 import { loadModelo } from "../load/load-modelo.js";
-import { defaultModeloSource, fixtureModeloSource } from "../load/source.js";
+import {
+  defaultModeloSource,
+  fixtureModeloSource,
+  projectModeloSource,
+  referenceAspektoPackageDir,
+} from "../load/source.js";
 import { deriveThemeFragment, deriveThemes } from "./derive.js";
 import { serializeCanonicalJson, serializeThemes } from "./serialize.js";
 
@@ -35,12 +40,14 @@ The files are derived from data/dimensioj.json and the kondicxoj of the set file
 resolver's set order. Never edit them by hand; run this command after changing Dimensioj or sets.
 
 Usage:
-  pnpm vortaro:themes [--root <path>]
+  pnpm vortaro:themes [--root <path> | --config <file>]
 
 Options:
   --root <path>   A Modelo root (<path>/vortaro, <path>/data), e.g. a test fixture. Relative to the
                   directory you run the command from. Default: the repo Vortaro
                   (packages/vortaro with packages/modelo/data).
+  --config <file> A project's fundamento.config.json: regenerates only the $themes.json fragments
+                  of the Aspekto packages it lists (the core files stay untouched).
   -h, --help      Show this help.
 
 Exit codes: 0 written, 1 Modelo cannot be loaded or files cannot be written, 2 usage error.
@@ -50,7 +57,7 @@ const USAGE = `Usage: pnpm vortaro:themes [--root <path>]
 Run with --help for details.
 `;
 
-type Command = { kind: "help" } | { kind: "write"; source: ModeloSource };
+type Command = { kind: "help" } | { kind: "write"; source: ModeloSource; fragmentsOnly: boolean };
 
 function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
@@ -73,14 +80,21 @@ export function parseThemesArgs(
   if (positionals.length > 0) {
     return { ok: false, message: `Unexpected arguments: ${positionals.join(" ")}` };
   }
-  if (values.root === "") {
-    return { ok: false, message: "--root must not be empty." };
+  if (values.root === "" || values.config === "") {
+    return { ok: false, message: "--root and --config must not be empty." };
+  }
+  if (values.root !== undefined && values.config !== undefined) {
+    return { ok: false, message: "Use either --root or --config, not both." };
+  }
+  if (values.config !== undefined) {
+    const source = projectModeloSource(resolve(env.cwd, values.config));
+    return { ok: true, command: { kind: "write", source, fragmentsOnly: true } };
   }
   const source =
     values.root === undefined
       ? env.defaultSource()
       : fixtureModeloSource(resolve(env.cwd, values.root));
-  return { ok: true, command: { kind: "write", source } };
+  return { ok: true, command: { kind: "write", source, fragmentsOnly: false } };
 }
 
 function parseStrict(argv: readonly string[]) {
@@ -90,6 +104,7 @@ function parseStrict(argv: readonly string[]) {
     strict: true,
     options: {
       root: { type: "string" },
+      config: { type: "string" },
       help: { type: "boolean", short: "h", default: false },
     },
   });
@@ -112,7 +127,7 @@ function concernsDerivedFile(issue: ValidationIssue): boolean {
   return DERIVED_FILES.some((name) => file === name || file.endsWith(`/${name}`));
 }
 
-function writeDerived(source: ModeloSource, env: ThemesCliEnv): number {
+function writeDerived(source: ModeloSource, fragmentsOnly: boolean, env: ThemesCliEnv): number {
   let loaded = loadModelo(source);
   if (
     loaded.modelo === undefined &&
@@ -139,14 +154,20 @@ function writeDerived(source: ModeloSource, env: ThemesCliEnv): number {
   }
   // Token-level load issues do not affect the derivation (Dimensioj and kondicxoj only);
   // `fm modelo validate` reports them.
-  const { themesJson, metadataJson } = serializeThemes(deriveThemes(coreView(modelo)));
-  const themesPath = join(source.vortaroDir, THEMES_FILE_NAME);
-  const metadataPath = join(source.vortaroDir, METADATA_FILE_NAME);
-  writeFileSync(themesPath, themesJson);
-  writeFileSync(metadataPath, metadataJson);
-  env.stdout(`wrote ${themesPath}\nwrote ${metadataPath}\n`);
+  if (!fragmentsOnly) {
+    const { themesJson, metadataJson } = serializeThemes(deriveThemes(coreView(modelo)));
+    const themesPath = join(source.vortaroDir, THEMES_FILE_NAME);
+    const metadataPath = join(source.vortaroDir, METADATA_FILE_NAME);
+    writeFileSync(themesPath, themesJson);
+    writeFileSync(metadataPath, metadataJson);
+    env.stdout(`wrote ${themesPath}\nwrote ${metadataPath}\n`);
+  }
   // Each Aspekto package carries its own fragment (D-05).
+  // With --config, the reference package belongs to the core (in a project it sits in
+  // node_modules): only the packages the config lists are written.
+  const reference = fragmentsOnly ? realpathSync(referenceAspektoPackageDir()) : undefined;
   for (const pkg of modelo.aspektoPackages) {
+    if (reference !== undefined && realpathSync(pkg.dir) === reference) continue;
     const fragmentPath = join(pkg.dir, THEMES_FILE_NAME);
     writeFileSync(fragmentPath, serializeCanonicalJson(deriveThemeFragment(modelo, pkg.name)));
     env.stdout(`wrote ${fragmentPath}\n`);
@@ -181,7 +202,7 @@ export function runThemesCli(argv: readonly string[], env: ThemesCliEnv): number
     return EXIT_OK;
   }
   try {
-    return writeDerived(parsed.command.source, env);
+    return writeDerived(parsed.command.source, parsed.command.fragmentsOnly, env);
   } catch (error) {
     env.stderr(`error ${errorMessage(error)}\n`);
     return EXIT_DOMAIN_ERROR;

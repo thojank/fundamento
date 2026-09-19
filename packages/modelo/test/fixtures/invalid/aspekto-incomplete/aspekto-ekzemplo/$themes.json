@@ -1,0 +1,29 @@
+[
+  {
+    "group": "aspekto",
+    "id": "dva_ekz_01M2WA1QAAE4DSTCDX190GBSRZ",
+    "name": "ekzemplo",
+    "selectedTokenSets": {
+      "aspekto/ekzemplo": "enabled",
+      "aspekto/ekzemplo+color-scheme/dark": "enabled",
+      "aspekto/ekzemplo+contrast/high": "enabled",
+      "core": "source"
+    }
+  },
+  {
+    "group": "color-scheme",
+    "id": "dva_01M2VEEDQFS0RGTE2M27JARKHA",
+    "name": "dark",
+    "selectedTokenSets": {
+      "aspekto/ekzemplo+color-scheme/dark": "enabled"
+    }
+  },
+  {
+    "group": "contrast",
+    "id": "dva_01M2VEEDQFS0RGTE2M27JARKHC",
+    "name": "high",
+    "selectedTokenSets": {
+      "aspekto/ekzemplo+contrast/high": "enabled"
+    }
+  }
+]

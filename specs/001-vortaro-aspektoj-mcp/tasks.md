@@ -80,9 +80,9 @@ Order follows the plan's "Build order". The ciferecigo package is the last task.
 - [x] **T017 KontrastParoj and Reguloj** (D-12, K5, Art. VI, AK-02)
   - Red: `kontrastparo-missing-for-role` fixtures; the ~60 pairs incl. the 8 K5 pairs; `data/ak02.test.ts`: every text pair ≥ 7:1 under `contrast=high` in all 72 combinations; `check:regularo` expects the 6 new Reguloj with kialo (incl. `density-affects-layout-only`).
   - Green: `data/kontrastparoj.json`, `data/reguloj.json`, role exemptions (`disabled`, `decorative`); tune komuna steps until Alirebleco passes, never the thresholds.
-- [ ] **T018 Fixture Aspekto `ekzemplo`** (D-16, AK-03, AK-05)
+- [x] **T018 Fixture Aspekto `ekzemplo`** (D-16, AK-03, AK-05)
   - Red: `e2e/external-aspekto.test.ts`: `valid/aspekto-ekzemplo` (complete against the real core, `ekz` namespace, dark and high-contrast conjunctions, a fictitious font, flat-elevation Regulo, typography distinct from komuna) validates through its own `fundamento.config.json` (`$schema` relative to the repo schema); `invalid/aspekto-incomplete` lists exactly the removed tokens.
-  - Green: fixture data only.
+  - Green: fixture data (warm neutrals, petrol accent, a fictitious grotesk, light display weight, solid display line height, tighter tracking, flat elevation, sharper corners; both conjunction sets), plus `projectModeloSource(config)` (core + komuna + config packages, de-duplicated) and `vortaro:themes --config` (writes only the fragments of the listed packages). The Aspekto-scoped Regulo (flat elevation) is added in T021, when package Reguloj are read; adding its ID now would leave it orphaned.
 
 ## Stage 4 – Export
 
