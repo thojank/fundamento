@@ -1,6 +1,6 @@
 # Fundamento – Constitution
 
-Version 1.4 · 2026-09-19 · Status: ratifiziert
+Version 1.5 · 2026-09-19 · Status: ratifiziert
 
 Fundamento ist ein maschinenlesbares, nativ mehrmarkenfähiges Design System. Sein kanonischer Zustand ist ein Datenmodell; Figma, Code, Dokumentation und Werkzeuge sind Projektionen dieses Modells. Diese Constitution definiert die Prinzipien, gegen die jede Spezifikation, jeder Plan und jede Implementierung geprüft wird. Sie ist bewusst kurz. Was hier nicht steht, ist verhandelbar; was hier steht, nicht.
 
@@ -121,6 +121,7 @@ Verbindliche Celoj (Ausgabeziele) der Projekcioj, in dieser Priorität:
 3. **shadcn-kompatible Registry**: Eroj als kopierbarer Quellcode per CLI, mit `--fm-*`-Variablen statt Hardcodes
 4. **Web Components** (`fm-*`) mit Wrappern für React, Vue, Angular, Svelte
 5. **Figma** (Variablen mit Modes, Library, Code Connect) und **Penpot** (DTCG-Import, Tokens, Komponenten), Penpot nachrangig, aber im Modelo von Anfang an mitgedacht
+   - **Figma Make Kit** je Aspekto: React-Paket, Tailwind-Tokens und aus dem Modelo generierte Guidelines (keine handgeschriebene Zeile, Art. VII)
 6. **Tokens Studio** (Sync in beide Richtungen über das DTCG-Repo)
 
 Ein neues Celo wird durch Spec eingeführt und muss aus dem Modelo ohne Modeländerung erzeugbar sein (Artikel I). Welche Frameworks aktuell relevant sind, wird pro Phase gegen den Markt geprüft (`research.md`); die Liste oben ist der Stand von 2026-09.
@@ -137,7 +138,7 @@ Prüfkriterium für jede Spec: Ein Entwickler ohne Vorwissen nutzt ein Ero in un
 
 ## Governance
 
-- Diese Constitution ändert sich nur durch eine Spec mit dem Titel „Constitution Amendment", die den geänderten Artikel, den Grund und die Migration bestehender Artefakte beschreibt. Änderungshistorie: v1.1 Art. XII/XIII ergänzt; v1.2 DTCG verbindlich, Mehrdimensionalität; v1.3 (Spec 001) Art. IV Aspekto-Pakete und Vollständigkeit, Art. V Schriften je Aspekto, Art. VI Jugxo-Bezug auf Artikel; v1.4 (Spec 002) Terminologie Tavolo und Ontologio, Art. III Ontologio, Art. VI Befund wird Regel, Art. VIII Internacia.
+- Diese Constitution ändert sich nur durch eine Spec mit dem Titel „Constitution Amendment", die den geänderten Artikel, den Grund und die Migration bestehender Artefakte beschreibt. Änderungshistorie: v1.1 Art. XII/XIII ergänzt; v1.2 DTCG verbindlich, Mehrdimensionalität; v1.3 (Spec 001) Art. IV Aspekto-Pakete und Vollständigkeit, Art. V Schriften je Aspekto, Art. VI Jugxo-Bezug auf Artikel; v1.4 (Spec 002) Terminologie Tavolo und Ontologio, Art. III Ontologio, Art. VI Befund wird Regel, Art. VIII Internacia; v1.5 (Spec 003) Art. XII Celo Figma Make Kit, Verweis auf `docs/vojmapo.md`.
 - Jeder `plan.md` enthält einen Abschnitt „Constitutional Compliance Review" mit einem Eintrag pro Artikel: konform / Ausnahme mit Grund.
 - `/speckit.analyze` prüft jede Phase gegen diese Constitution, bevor Tasks erzeugt werden.
 - Die Constitution hat Vorrang vor jeder anderen Praxis, jedem Template und jeder Bequemlichkeit.
@@ -146,12 +147,14 @@ Prüfkriterium für jede Spec: Ein Entwickler ohne Vorwissen nutzt ein Ero in un
 
 ## Phasenfolge (Referenz, nicht normativ)
 
+Der gepflegte End-to-End-Fahrplan mit Status, Querschnittsthemen und Ideen steht in [`docs/vojmapo.md`](../../docs/vojmapo.md); die Tabelle unten ist die Kurzfassung.
+
 | Phase | Spec | Ergebnis |
 |---|---|---|
 | 0 | Fundamento-Repo, Modelo-Schema, Vortaro-Spezifikation (DTCG) | Baubares Monorepo, leeres Modelo mit Schema, CI mit den vier Prüfungen |
 | 1 | Vortaro mit echten Werten, Aspekto-Pakete, MCP-Server | Aspekto `komuna` (Referenz, Geist), externes Aspekto-Paket `ciferecigo`, MCP beantwortet Token-Fragen |
 | 2 | Regularo + Gvidanto (Kern) + Ontologio | Befunde aus Phase 1 als automatische Reguloj, komuna repariert, Gvidanto-Werkzeuge (warum, Kontrast, Begriffe), Ontologio |
-| 3 | Ero `butono` als Durchstich | Modelo → Web Component → CSS → Figma → Code Connect → Gvidanto → Prüfung |
+| 3 | Ero `butono` als Durchstich | Modelo → CSS/Tailwind → Web Component + React → Figma → Zuordnung Figma↔Code → Figma Make Kit → Gvidanto → Prüfung |
 | 4 | Eroj in der Breite, Sxablonoj | Abdeckung eines reifen Systems |
 | 5 | Figma-Library-Generator, Penpot-Export, Icon- und Font-Pipeline | Publizierbare Library je Aspekto, Penpot-Paket |
 | 6 | CLI + Registry | `fm init / add / aspekto / lint / sync / export`, shadcn-kompatible Registry |
