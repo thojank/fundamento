@@ -71,9 +71,9 @@ A mutation check (one changed value must make the test fail) replaces the red ru
 
 ## Stage 4 – Figma
 
-- [ ] **T015 Figma plan and simulator** (FR-09, D-12, AK-03 for Figma)
+- [x] **T015 Figma plan and simulator** (FR-09, D-12, AK-03 for Figma)
   - Red: `celoj/figma/simulator.test.ts`: resolving `plan.json` by Figma's mode rules gives `rezolvoj.json` for every combination; a fixture plan with one swapped alias fails; every collection has ≤ 4 modes; helper variables are hidden from publishing; the component set's properties equal the Skemo props and values; plugin data `fundamento.ero` on every node; deterministic output.
-  - Green: `celoj/figma/plan.ts`, the simulator in the test suite.
+  - Green: `celoj/figma/figma.ts` with `resolveFigmaPlan` as the simulator. Done notes: composite tokens (typography, border) become one variable per field, since Figma variables hold no composites; token aliases stay aliases, so Figma's late binding matches the resolver's; the component set carries variants only for the props the parts are keyed by plus state (`type` is form behaviour and would only multiply the set): 72 variants. Measured for core + komuna + ekzemplo: 794 variables, 381 of them hidden helpers; the single-mode collection `fundamento` stays empty, because every Aspekto restates every token (Art. IV).
 - [ ] **T016 Development plugin** (D-12)
   - Red: `celoj/figma/plugin.test.ts` runs the generated `code.js` against an in-memory Plugin-API test double: the first run creates collections, variables and the component set; the second run creates nothing and changes nothing; a node without Fundamento plugin data is never touched; a changed plan updates in place.
   - Green: `celoj/figma/plugin/` (manifest, code). Applying it in the test account is the maintainer's S3.
