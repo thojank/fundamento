@@ -17,7 +17,7 @@ afterAll(closeClients);
 describe("the repo server", async () => {
   const { client, served } = await connect();
 
-  it("lists the ten read-only tools with input and output schemas", async () => {
+  it("lists the read-only tools with input and output schemas", async () => {
     const { tools } = await client.listTools();
     expect(tools.map((tool) => tool.name)).toEqual([...schemas.keys()]);
     for (const tool of tools) {

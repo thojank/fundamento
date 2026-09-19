@@ -377,38 +377,39 @@ One entry per Article of Constitution v1.4.
 6. MCP: SDK v2 migration with the unchanged Spec-001 suites (D-17), then `check_contrast`, `explain`, `explain_regulo`, `describe_term`, `describe`, prompt, resource; subset resolution and perf.
 7. S7 dialog test (AK-06), quickstart test, README MCP and checks sections.
 
-## Traceability (requirement → decision)
+## Traceability (requirement → decision → tasks)
 
-| Requirement | Design |
-|---|---|
-| FR-01 | D-04, D-05 |
-| FR-02 | D-04, D-05 |
-| FR-03 | D-04, **D-06 (decision: \|ΔL\| OKLCH ≥ 0.05)** |
-| FR-04 | D-08 |
-| FR-05 | D-05, D-06, **D-07 (decision: no state text colours)** |
-| FR-06 | D-09 |
-| FR-07 | D-09, D-10 |
-| FR-08 | D-03 |
-| FR-09 | D-11, D-18 |
-| FR-10 | D-02, D-12 |
-| FR-11 | D-13 |
-| FR-12 | D-14 |
-| FR-13 | D-15 |
-| FR-14 | D-16 |
-| FR-15, FR-16, FR-17 | D-14 |
-| FR-18 | Constitution v1.4 on `main`; no artifact changes beyond this plan |
-| FR-19 | **D-17 (decision: migrate to 2.0.0, guarded, with fallback)** |
-| AK-01 | D-10 fixtures |
-| AK-02 | D-05, D-06 (measured in research §8) |
-| AK-03 | D-09, D-10 |
-| AK-04 | D-09, D-11 |
-| AK-05 | D-12 |
-| AK-06 | D-16, quickstart, contracts §6 |
-| AK-07 | D-14 |
-| AK-08 | D-15, contracts |
-| AK-09 | D-18 |
-| AK-10 | unchanged export path |
-| AK-11 | no open marker |
+| Requirement | Design | Tasks |
+|---|---|---|
+| FR-01 | D-04, D-05 | T004, T005 |
+| FR-02 | D-04, D-05 | T004, T006, T009 |
+| FR-03 | D-04, **D-06 (decision: \|ΔL\| OKLCH ≥ 0.05)** | T004, T007, T010 |
+| FR-04 | D-08 | T008 |
+| FR-05 | D-05, D-06, **D-07 (decision: no state text colours)** | T009, T010 |
+| FR-06 | D-09 | T012 |
+| FR-07 | D-09, D-10 | T011, T012, T013, T014 |
+| FR-08 | D-03 | T003 |
+| FR-09 | D-11, D-18 | T016, T017 |
+| FR-10 | D-02, D-12 | T018 |
+| FR-11 | D-13 | T019 |
+| FR-12 | D-14 | T022 |
+| FR-13 | D-15 | T020, T022 |
+| FR-14 | D-16 | T020 |
+| FR-15, FR-16 | D-14 | T021 |
+| FR-17 | D-14 | T022 |
+| FR-18 | Constitution v1.4 on `main`; no artifact changes beyond this plan | done |
+| FR-19 | **D-17 (decision: migrate to 2.0.0, guarded, with fallback)** | T015 |
+| AK-01 | D-10 fixtures | T005, T006, T007, T008 |
+| AK-02 | D-05, D-06 (measured in research §8) | T009, T010 |
+| AK-03 | D-09, D-10 | T011, T013 |
+| AK-04 | D-09, D-11 | T017 |
+| AK-05 | D-12 | T018 |
+| AK-06 | D-16, quickstart, contracts §6 | T023 |
+| AK-07 | D-14 | T021 |
+| AK-08 | D-15, contracts | T017, T018, T019, T020, T022, T025 |
+| AK-09 | D-18 | T024 |
+| AK-10 | unchanged export path | every task, T025 |
+| AK-11 | no open marker | done (plan), T025 |
 
 ## Maintainer review (2026-09-19)
 

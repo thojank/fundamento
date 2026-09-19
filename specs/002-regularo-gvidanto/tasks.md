@@ -72,7 +72,7 @@ The stage order was set by the maintainer: README → Regularo → komuna repair
 
 ## Stage 4 – SDK migration
 
-- [ ] **T015 MCP SDK 2.0.0** (FR-19, D-17)
+- [x] **T015 MCP SDK 2.0.0** (FR-19, D-17)
   - Red: `workspace.test.ts`: `packages/mcp` depends on `@modelcontextprotocol/server` and `@modelcontextprotocol/node` exactly `2.0.0`, `mcp` and `cli` on `@modelcontextprotocol/client` `2.0.0` (dev), and no package on `@modelcontextprotocol/sdk`.
   - Green: `server.ts` (`setRequestHandler("tools/list", …)` etc.), `start.ts` (stdio), `http.ts` (`NodeStreamableHTTPServerTransport` behind the own guard), `test-doubles/client.ts`, the test clients in `mcp` and `cli`. The only task that changes `pnpm-lock.yaml`.
   - Done when: `contracts`, `server`, `rules-resolve`, `s7-dialog`, `resources-http`, `bin`, `perf` and the CLI quickstart pass **with unchanged assertions** (diff of the test files: imports only).
@@ -80,40 +80,40 @@ The stage order was set by the maintainer: README → Regularo → komuna repair
 
 ## Stage 5 – Gvidanto tools
 
-- [ ] **T016 Token-subset resolution** (D-18)
+- [x] **T016 Token-subset resolution** (D-18)
   - Red: fast-check property in `resolve/resolve.test.ts`: `resolveCombination(m, a, { names })` equals the full resolution filtered to `names` (value, origin, alias chain) on the repo and fixture Modelos.
   - Green: optional `names` in the binder.
-- [ ] **T017 `check_contrast`** (FR-09, D-11, R3, AK-04)
+- [x] **T017 `check_contrast`** (FR-09, D-11, R3, AK-04)
   - Red: `gvidanto/check-contrast.test.ts`: kategorio from input, declared pair or role, `kategorio-required`; declared as main or aux; with and without `assignment`; grouping by result (ratio at two decimals, truncated, threshold, passed; plus branch and aux ratio for aux pairs), every combination in exactly one group, groups may span Aspektoj, canonical order; `kontrast-not-color`, `token-unknown`. AK-04 parity: for every declared pair and every combination, the same ratio, threshold, passed and branch as `evaluateAlirebleco(…, { collect: true })`. Contract test for the tool schemas in `packages/mcp`.
   - Green: `gvidanto/check-contrast.ts`, tool and schemas.
-- [ ] **T018 `explain`** (FR-10, D-12, AK-05)
+- [x] **T018 `explain`** (FR-10, D-12, AK-05)
   - Red: `gvidanto/explain.test.ts`: the chain equals `resolve`'s chain plus `package`; Reguloj via `token`, `role`, `type` and `issue`; combination Reguloj evaluated for this assignment, static ones from the report, manual as `manual`; KontrastParoj in all four positions with their `PairMeasurement`; Jugxoj; every kialo equals the stored one.
   - Green: `gvidanto/explain.ts`, tool and schemas.
-- [ ] **T019 [P] `explain_regulo`** (FR-11, D-13)
+- [x] **T019 [P] `explain_regulo`** (FR-11, D-13)
   - Red: by name and by ID; `violations { unit: "distinct", total, byAspekto }` from the report (a fixture with violations in two Aspektoj); `sojlo` and `appliesTo` returned; `regulo-unknown` with nearest names; `--export` mode gives 0.
   - Green: tool and schemas.
-- [ ] **T020 [P] `describe` and prompt `gvidanto`** (FR-13, FR-14, D-15, D-16)
+- [x] **T020 [P] `describe` and prompt `gvidanto`** (FR-13, FR-14, D-15, D-16)
   - Red: `describe` output has `reguloj.automatic`, the sentence names Reguloj, Jugxoj and `explain`; `prompts/list` lists `gvidanto`; `prompts/get` returns the file text; every backticked `snake_case` word in `prompts/gvidanto.md` is a registered tool, and the six required tools are named.
   - Green: prompts capability, `packages/mcp/prompts/gvidanto.md`, `files` in `package.json`.
 
 ## Stage 6 – Ontologio
 
-- [ ] **T021 Ontologio file and drift test** (FR-15, FR-16, D-14, AK-07)
+- [x] **T021 Ontologio file and drift test** (FR-15, FR-16, D-14, AK-07)
   - Red: `data/ontologio.test.ts`: every check of data-model §4.3, run against the real Constitution and schema, plus failing fixtures (a missing term, an extra term, an entity type without `notation`, a duplicate URI, a dangling `broader`, an undeclared predicate).
   - Green: `schema/ontologio.schema.json`, `data/ontologio.json` with the 17 + 5 concepts of data-model §4.2, labels `eo`/`en`/`de`, definitions `en`/`de`.
-- [ ] **T022 `describe_term` and resource** (FR-12, FR-17, D-14)
+- [x] **T022 `describe_term` and resource** (FR-12, FR-17, D-14)
   - Red: match by term, `prefLabel` and `altLabel` in any language, case-insensitive, x-convention folding ("Marke" and "brand" → `Aspekto`, `matchedBy: "altLabel"`); `instances` per the table in contracts §2.4; `term-unknown` with up to five nearest terms; `fundamento://ontologio.json` serves the file's bytes, also under `--export`.
   - Green: `gvidanto/ontologio.ts`, tool, schemas, resource. (This tool needs the Ontologio, so it is in this stage rather than in Stage 5.)
 
 ## Stage 7 – Acceptance
 
-- [ ] **T023 S7 dialog** (S7, AK-06)
+- [x] **T023 S7 dialog** (S7, AK-06)
   - Red: `packages/mcp/src/e2e/s7-dialog.test.ts` extended with the five questions of contracts §6 against `core + aspekto-ekzemplo`; every number recomputed from `modelo.json`, `resolve` and `evaluateAlirebleco`; mutation check (one changed number fails the test).
   - Green: fixes only where the test finds a gap.
-- [ ] **T024 Performance** (AK-09, D-18)
+- [x] **T024 Performance** (AK-09, D-18)
   - Red: `perf.test.ts`: 100 `explain` and 100 `check_contrast` calls without `assignment` on the fixture config, each < 100 ms per call (factor 3 under `CI=true`), raw numbers logged.
   - Green: optimise only if red; the next step (colour-relevant Dimensioj only) needs a Jugxo first (D-18). Baseline into `research.md` §8.4.
-- [ ] **T025 Quickstart, README, traceability** (Art. XIII, AK-08, AK-10, AK-11)
+- [x] **T025 Quickstart, README, traceability** (Art. XIII, AK-08, AK-10, AK-11)
   - Red: `packages/cli/src/quickstart.test.ts` calls `prompts/get gvidanto` and one `explain` against a spawned server; `docs/docs.test.ts`: the README MCP section lists 14 tools, the prompt and the Ontologio resource, the checks table mentions the `aux` branches; `plan.md` traceability maps every FR/AK to task IDs.
   - Green: README sections, plan traceability; byte-identical export and `check:clean-room` confirmed. Then the Phase-2 PR.
 

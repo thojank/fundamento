@@ -328,3 +328,73 @@ describe("Spec 002 documentation (T001, D-20)", () => {
     expect(read(file).length).toBeGreaterThan(0);
   });
 });
+
+describe("Spec 002 documentation (T025)", () => {
+  const readme = read("README.md");
+  const plan002 = read("specs/002-regularo-gvidanto/plan.md");
+
+  it("the README names every MCP tool, the prompt and the Ontologio resource", () => {
+    const mcp = section(readme, "MCP server");
+    for (const tool of [
+      "describe",
+      "list_dimensioj",
+      "list_aspektoj",
+      "search_tokens",
+      "get_token",
+      "resolve",
+      "list_reguloj",
+      "list_jugxoj",
+      "validate",
+      "derive_name",
+      "check_contrast",
+      "explain",
+      "explain_regulo",
+      "describe_term",
+    ]) {
+      expect(mcp).toContain(`\`${tool}\``);
+    }
+    expect(mcp).toContain("`gvidanto`");
+    expect(mcp).toContain("`fundamento://ontologio.json`");
+  });
+
+  it("the README says that Alirebleco reports the aux branches and that issues cite their Regulo", () => {
+    const checks = section(readme, "Checks");
+    expect(checks).toContain("aux");
+    expect(checks).toContain("branches");
+    expect(readme).toContain("kialo");
+  });
+
+  it("traces every FR and AK of Spec 002 to decisions and task IDs", () => {
+    const spec = read("specs/002-regularo-gvidanto/spec.md");
+    const rows = section(plan002, "Traceability (requirement → decision → tasks)")
+      .split("\n")
+      .filter((line) => line.startsWith("| ") && !line.startsWith("| Requirement"));
+    const ids = new Set([...spec.matchAll(/^- \*\*((?:FR|AK)-\d+)/gm)].map((m) => m[1] ?? ""));
+    expect(ids.size).toBe(30);
+    for (const id of ids) {
+      const row = rows.find((line) => new RegExp(`\\b${id}\\b`).test(line.split("|")[1] ?? ""));
+      expect(row, `${id} missing from the traceability table`).toBeDefined();
+      expect(row, `${id} has no task ID`).toMatch(/\bT0\d\d\b|done/);
+    }
+  });
+
+  it("has no open clarification marker in Spec 002 (AK-11)", () => {
+    for (const file of ["spec.md", "plan.md", "research.md", "data-model.md", "tasks.md"]) {
+      expect(proseOnly(read(`specs/002-regularo-gvidanto/${file}`)), file).not.toContain(
+        "[NEEDS CLARIFICATION",
+      );
+    }
+  });
+
+  it.each([
+    "specs/002-regularo-gvidanto/plan.md",
+    "specs/002-regularo-gvidanto/tasks.md",
+    "specs/002-regularo-gvidanto/data-model.md",
+    "specs/002-regularo-gvidanto/quickstart.md",
+    "specs/002-regularo-gvidanto/contracts/mcp-tools.md",
+    "packages/modelo/data/ontologio.json",
+    "packages/mcp/prompts/gvidanto.md",
+  ])("%s holds no brand value (AK-10, clean room)", (file) => {
+    expect(findBrandValues(file, read(file), repoFingerprints())).toEqual([]);
+  });
+});
