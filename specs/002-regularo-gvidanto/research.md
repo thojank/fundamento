@@ -81,6 +81,7 @@ Kleinste Differenz eines Zustands zu `rest` über alle Kombinationen (OKLCH-Hell
 - Volle Auflösung aller 144 Kombinationen: 142–159 ms (drei Läufe), also etwa 1 ms je Kombination.
 - `evaluateAlirebleco` über 60 Paare × 144 Kombinationen: etwa 300 ms, 0 Fehler, WCAG-Minimum 3,76:1.
 - Folgerung: `check_contrast` ohne Belegung (alle Kombinationen) sprengt mit voller Auflösung das Budget von 100 ms. Der Plan löst nur die zwei Tokens samt Alias-Kette auf (D-18) und misst es in `pnpm perf`.
+- Messung nach der Umsetzung (T016, T024; `pnpm perf`, lokal, core + komuna + ekzemplo, über stdio): Teilauflösung zweier Tokens über 144 Kombinationen etwa 9 ms statt 143 ms. `explain` je Aufruf Median 1,2 ms, Maximum 3,5 ms; `check_contrast` ohne Belegung (alle 144 Kombinationen) Median 8,3 ms, Maximum 24 ms; Start bis zur ersten `describe`-Antwort 816 ms; `resolve` Median 3,1 ms. Budget je Aufruf 100 ms (Faktor 3 unter `CI=true`). Der Ausweichschritt aus D-18 (nur farbrelevante Dimensioj) ist nicht nötig.
 
 ### 8.5 Statusränder (FR-06)
 
