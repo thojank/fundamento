@@ -173,6 +173,98 @@
         "package",
         "sets"
       ]
+    },
+    "Branch": {
+      "description": "One branch of a KontrastParo measured in one combination (Spec 002).",
+      "type": "object",
+      "properties": {
+        "foreground": {
+          "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/TokenName"
+        },
+        "background": {
+          "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/TokenName"
+        },
+        "ratio": {
+          "type": "number",
+          "minimum": 1
+        },
+        "passed": {
+          "type": "boolean"
+        },
+        "composited": {
+          "type": "boolean"
+        },
+        "apca": {
+          "type": "object",
+          "properties": {
+            "lc": {
+              "type": "number",
+              "minimum": 0
+            },
+            "threshold": {
+              "type": "number"
+            },
+            "passed": {
+              "type": "boolean"
+            }
+          },
+          "required": ["lc"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["foreground", "background", "ratio", "passed", "composited"],
+      "additionalProperties": false
+    },
+    "PairResult": {
+      "description": "A KontrastParo in one combination: the branch that carries it (main, aux, or null when both fail) (Spec 002).",
+      "type": "object",
+      "properties": {
+        "threshold": {
+          "type": "number",
+          "minimum": 1
+        },
+        "passed": {
+          "type": "boolean"
+        },
+        "branch": {
+          "enum": ["main", "aux", null]
+        },
+        "main": {
+          "$ref": "https://ciferecigo.com/fundamento/schema/mcp/common.json#/$defs/Branch"
+        },
+        "aux": {
+          "$ref": "https://ciferecigo.com/fundamento/schema/mcp/common.json#/$defs/Branch"
+        }
+      },
+      "required": ["threshold", "passed", "branch", "main"],
+      "additionalProperties": false
+    },
+    "ReguloRef": {
+      "description": "A Regulo as the Gvidanto cites it (Spec 002).",
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/ReguloId"
+        },
+        "name": {
+          "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+        },
+        "statement": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kialo": {
+          "type": "string",
+          "minLength": 1
+        },
+        "checkability": {
+          "enum": ["automatic", "manual"]
+        },
+        "aspekto": {
+          "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+        }
+      },
+      "required": ["id", "name", "statement", "kialo", "checkability"]
     }
   }
 }

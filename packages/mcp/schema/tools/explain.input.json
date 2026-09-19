@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ciferecigo.com/fundamento/schema/mcp/explain.input.json",
+  "title": "explain input",
+  "description": "Why does a token have its value? Value, alias chain with set and package, the Reguloj that govern the token with kialo and result, its KontrastParoj with result, and the Jugxoj. One combination; missing Dimensioj take their default.",
+  "type": "object",
+  "properties": {
+    "token": {
+      "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/TokenName"
+    },
+    "assignment": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+      }
+    }
+  },
+  "required": ["token"],
+  "additionalProperties": false
+}

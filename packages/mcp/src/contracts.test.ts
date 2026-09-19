@@ -194,6 +194,57 @@ const EXAMPLES: Record<string, { input: unknown; output: unknown; badInput: unkn
       kategorio: "text",
     },
   },
+  explain: {
+    input: { token: "color.text.subtle", assignment: { "color-scheme": "dark", contrast: "high" } },
+    output: {
+      token: "color.text.subtle",
+      id: "tok_01M2W9400ZA1K81R0W23SG0XWT",
+      type: "color",
+      role: "foreground",
+      description: "Secondary text.",
+      assignment: { aspekto: "komuna", "color-scheme": "dark", contrast: "high" },
+      combination: "aspekto=komuna,color-scheme=dark,contrast=high",
+      value: { colorSpace: "srgb", components: [0.95, 0.95, 0.96], hex: "#f2f2f5" },
+      origin: { set: "color-scheme/dark+contrast/high" },
+      aliasChain: [
+        { token: "color.text.subtle", set: "color-scheme/dark+contrast/high" },
+        { token: "color.palette.neutral.50", set: "core" },
+      ],
+      reguloj: [
+        {
+          id: "reg_01M2VEEE5280TGESDHQQ14EA33",
+          name: "text-hierarchy",
+          statement: "The text roles stay distinct.",
+          kialo: "High contrast must not erase meaning.",
+          checkability: "automatic",
+          via: "token",
+          result: "passed",
+          issues: [],
+        },
+      ],
+      kontrastParoj: [
+        {
+          id: "kpa_01M2W9W6QK3YTCXM2XBRA41K5V",
+          name: "text-subtle-on-background-default",
+          kategorio: "text-normal",
+          position: "foreground",
+          threshold: 7,
+          passed: true,
+          branch: "main",
+          main: {
+            foreground: "color.text.subtle",
+            background: "color.background.default",
+            ratio: 15.41,
+            passed: true,
+            composited: false,
+            apca: { lc: 98.1, threshold: 90, passed: true },
+          },
+        },
+      ],
+      jugxoj: [],
+    },
+    badInput: { token: "color.text.subtle", assignment: { contrast: "HIGH" } },
+  },
   derive_name: {
     input: { name: "color.action.primary.rest", celo: "figma" },
     output: {
@@ -218,6 +269,7 @@ describe("tool schemas (contracts/mcp-tools.md)", () => {
       "validate",
       "derive_name",
       "check_contrast",
+      "explain",
     ]);
   });
 

@@ -9,6 +9,8 @@ import {
   checkTokenName,
   completeAssignment,
   describeModelo,
+  type ExplainInput,
+  explain,
   isNoTarget,
   NOM_REGULOJ,
   resolve as resolveAssignment,
@@ -373,6 +375,21 @@ const checkContrastTool: Tool = (served, args) => {
   return ok(result.output as unknown as Record<string, unknown>);
 };
 
+/** Spec 002 FR-10: why a token has its value, from the modelo function and the served report. */
+const explainTool: Tool = (served, args) => {
+  const result = explain(served.modelo, args as unknown as ExplainInput, served.report);
+  if (!result.ok) {
+    return {
+      ok: false,
+      envelope: {
+        issues: result.issues,
+        ...(result.allowed === undefined ? {} : { allowed: result.allowed }),
+      },
+    };
+  }
+  return ok(JSON.parse(JSON.stringify(result.output)) as Record<string, unknown>);
+};
+
 export const TOOLS: Record<ToolName, Tool> = {
   describe,
   list_dimensioj: listDimensioj,
@@ -385,4 +402,5 @@ export const TOOLS: Record<ToolName, Tool> = {
   validate,
   derive_name: deriveName,
   check_contrast: checkContrastTool,
+  explain: explainTool,
 };

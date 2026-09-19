@@ -1,0 +1,173 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ciferecigo.com/fundamento/schema/mcp/explain.output.json",
+  "title": "explain output",
+  "description": "The explanation of one token in one combination (Spec 002 FR-10).",
+  "type": "object",
+  "properties": {
+    "token": {
+      "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/TokenName"
+    },
+    "id": {
+      "type": "string"
+    },
+    "type": {
+      "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/DtcgType"
+    },
+    "role": {
+      "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/TokenRole"
+    },
+    "description": {
+      "type": "string"
+    },
+    "assignment": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+      }
+    },
+    "combination": {
+      "type": "string",
+      "minLength": 1
+    },
+    "value": {},
+    "origin": {
+      "type": "object",
+      "properties": {
+        "set": {
+          "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/SetName"
+        },
+        "package": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": ["set"],
+      "additionalProperties": false
+    },
+    "aliasChain": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/TokenName"
+          },
+          "set": {
+            "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/SetName"
+          },
+          "package": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": ["token", "set"],
+        "additionalProperties": false
+      }
+    },
+    "reguloj": {
+      "type": "array",
+      "items": {
+        "allOf": [
+          {
+            "$ref": "https://ciferecigo.com/fundamento/schema/mcp/common.json#/$defs/ReguloRef"
+          }
+        ],
+        "type": "object",
+        "properties": {
+          "id": true,
+          "name": true,
+          "statement": true,
+          "kialo": true,
+          "checkability": true,
+          "aspekto": true,
+          "via": {
+            "enum": ["token", "role", "type", "issue"]
+          },
+          "result": {
+            "enum": ["passed", "violated", "manual"]
+          },
+          "issues": {
+            "type": "array",
+            "items": {
+              "$ref": "https://ciferecigo.com/fundamento/schema/mcp/common.json#/$defs/Issue"
+            }
+          }
+        },
+        "required": ["via", "result", "issues"],
+        "additionalProperties": false
+      }
+    },
+    "kontrastParoj": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/KontrastParoId"
+          },
+          "name": {
+            "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+          },
+          "kategorio": {
+            "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/KontrastKategorio"
+          },
+          "kialo": {
+            "type": "string",
+            "minLength": 1
+          },
+          "position": {
+            "enum": ["foreground", "background", "aux-foreground", "aux-background"]
+          },
+          "threshold": {
+            "type": "number",
+            "minimum": 1
+          },
+          "passed": {
+            "type": "boolean"
+          },
+          "branch": {
+            "enum": ["main", "aux", null]
+          },
+          "main": {
+            "$ref": "https://ciferecigo.com/fundamento/schema/mcp/common.json#/$defs/Branch"
+          },
+          "aux": {
+            "$ref": "https://ciferecigo.com/fundamento/schema/mcp/common.json#/$defs/Branch"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "kategorio",
+          "position",
+          "threshold",
+          "passed",
+          "branch",
+          "main"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "jugxoj": {
+      "type": "array",
+      "items": {
+        "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Jugxo"
+      }
+    }
+  },
+  "required": [
+    "token",
+    "id",
+    "type",
+    "assignment",
+    "combination",
+    "value",
+    "origin",
+    "aliasChain",
+    "reguloj",
+    "kontrastParoj",
+    "jugxoj"
+  ],
+  "additionalProperties": false
+}
