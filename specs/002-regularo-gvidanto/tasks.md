@@ -17,40 +17,40 @@ The stage order was set by the maintainer: README → Regularo → komuna repair
 
 ## Stage 0 – README
 
-- [ ] **T001 README references** (D-20)
+- [x] **T001 README references** (D-20)
   - Red: `docs/docs.test.ts` asserts that `README.md` links `specs/002-regularo-gvidanto/` in "What lives where" next to the Spec 000/001 links, and `docs/vizio.md` next to the Constitution, and that both targets exist.
   - Green: two README entries.
 
 ## Stage 1 – Regularo (red-first with fixtures)
 
-- [ ] **T002 Schema and rule catalog** (D-02, D-03, data-model §2, §7)
+- [x] **T002 Schema and rule catalog** (D-02, D-03, data-model §2, §7)
   - Red: schema tests for Regulo `appliesTo` (`tokens` patterns with `*` and trailing `**`, `roles`, `types`, `minProperties: 1`) and `sojlo` (`metric` enum `oklch-l-delta`, `min > 0`); `TokenPattern` derived from the `TokenName` grammar (fast-check: every token name is a pattern that matches itself); the catalog test lists every rule of data-model §7; type-drift test.
   - Green: `modelo.schema.json`, `contracts/issues.ts`, regenerated types, a pure `matchesTokenPattern`.
-- [ ] **T003 Issues cite their Regulo; `appliesTo` for Phase 1** (D-03, FR-08)
+- [x] **T003 Issues cite their Regulo; `appliesTo` for Phase 1** (D-03, FR-08)
   - Red: `validate/regularo-enforcement.test.ts`: every issue of every enforcer carries `regulo { id, name, kialo }` equal to the declaring entry (core and package Reguloj); CLI text output prints the kialo (`e2e/cli.test.ts`); `data/regularo-repo.test.ts`: every automatic core Regulo with token-located issues declares `appliesTo` (exemption `semantic-described`, with reason), the Phase-1 table of data-model §3 is present.
   - Green: wrap issues in `regularoEnforcementIssues`; `appliesTo` in `data/reguloj.json`; MCP `common.json#/$defs/Issue` gains the optional field (contract test still green).
-- [ ] **T004 Combination checkers and resolution cache** (D-04)
+- [x] **T004 Combination checkers and resolution cache** (D-04)
   - Red: `validate/resolutions.test.ts`: `resolutionsOf(modelo)` resolves each combination once (spy) and is shared by `combination-rules.ts`; `validate/combination-reguloj.test.ts`: the dedupe key (rule, Aspekto, subject tokens, resolved values) reports one issue per distinct violation at the first canonical combination, the message counts the combinations; OKLCH L of a colour with alpha < 1 is taken after compositing over `color.background.default`.
   - Green: `validate/resolutions.ts`, `validate/combination-reguloj.ts` (checker table next to `REGULO_ENFORCERS`), lightness helper in `checks/alirebleco/color.ts`.
-- [ ] **T005 [P] `surface-order`** (FR-01, D-05)
+- [x] **T005 [P] `surface-order`** (FR-01, D-05)
   - Red: `invalid/regulo-surface-order` (sunken lighter than canvas in one scheme: exact `rule`, `path`, `combination`, both lightnesses in the message); `valid/regulo-surface-order-equal` (canvas = default passes).
   - Green: checker; Regulo entry (new `reg_` ID) with kialo and `appliesTo` in `data/reguloj.json`; the repo stays valid.
-- [ ] **T006 [P] `text-hierarchy`** (FR-02, D-05)
+- [x] **T006 [P] `text-hierarchy`** (FR-02, D-05)
   - Red: `invalid/regulo-text-hierarchy` (subtle = muted under `contrast=high`); a second negative case where contrast rises from subtle to muted; a ramp with too few steps above 7:1 gets the message "needs one more step; the core lowers nothing"; aliases to identical values count as equal.
   - Green: checker; Regulo entry prepared in the fixture only (repo: T009).
-- [ ] **T007 [P] `state-distinct`** (FR-03, D-06, R1)
+- [x] **T007 [P] `state-distinct`** (FR-03, D-06, R1)
   - Red: `invalid/regulo-state-distinct` (a hue-only `selected`, |ΔL| < 0.05); `invalid/regulo-state-distinct-transparent` (a translucent `hover` that fails only after compositing); `invalid/regulo-sojlo-missing`; a test ties the statement text to `sojlo.min`; the suggestion names "away from the lightness of `color.action.<v>.text`" (D-07).
   - Green: checker reading `sojlo`; Regulo entry with `sojlo { metric: oklch-l-delta, min: 0.05 }` and the R1 kialo prepared in the fixture only (repo: T010).
-- [ ] **T008 [P] `semantic-described`** (FR-04, D-08)
+- [x] **T008 [P] `semantic-described`** (FR-04, D-08)
   - Red: `invalid/regulo-semantic-described` with three cases (missing, alias reference in the text, hex literal in the text); primitives and Aspekto sets are not checked.
   - Green: enforcer; Regulo entry in `data/reguloj.json`; the repo stays valid (163 of 163 role tokens described, research §8.1).
 
 ## Stage 2 – komuna repair
 
-- [ ] **T009 Text hierarchy under high contrast** (FR-02, FR-05, D-05, R2)
+- [x] **T009 Text hierarchy under high contrast** (FR-02, FR-05, D-05, R2)
   - Red: add `text-hierarchy` (new `reg_` ID) to `data/reguloj.json`; `fm modelo validate` fails with the distinct violations for komuna and ekzemplo in light/high and dark/high. New test `data/text-hierarchy.test.ts` asserts explicitly, for komuna and ekzemplo in light/high and dark/high: three different values, each ≥ 7:1 on `background.{default,canvas,raised,sunken}`, falling in the order default > subtle > muted; light/high resolves to `neutral.1000` / `950` / `900` (R2), dark/high to `neutral.0` / `50` / `100` (R4); dark/default `text.default` is not `neutral.0` (halation kialo in the test, R4).
   - Green: `contrast/high`: default → `neutral.1000`, subtle → `neutral.950`, muted → `neutral.900`; `color-scheme/dark+contrast/high`: default → `neutral.0`, subtle → `neutral.50`, muted → `neutral.100`. Spec 001 AK-02 and `check:alirebleco` stay green.
-- [ ] **T010 Tertiary action states** (FR-03, FR-05, D-06, D-07)
+- [x] **T010 Tertiary action states** (FR-03, FR-05, D-06, D-07)
   - Red: add `state-distinct` to `data/reguloj.json`; validation fails for `tertiary.hover` (light) and `tertiary.selected` (light, dark) in komuna and ekzemplo.
   - Green: `core`: tertiary hover → `neutral.100`, pressed → `neutral.200`, selected → `accent.100`; `color-scheme/dark`: selected → `accent.900`; the same aliases in `aspekto-ekzemplo`'s own set. All `action.tertiary.text` pairs stay ≥ 4.5:1 and ≥ 7:1 under high (research §8.2).
 
