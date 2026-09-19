@@ -56,5 +56,6 @@ export async function check(options: CheckOptions): Promise<CheckResult> {
     errors,
     warnings,
     stats,
+    branches: evaluation.branches,
   };
 }

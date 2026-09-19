@@ -231,9 +231,10 @@ export function expectIssueShape(issue: unknown, severity: "error" | "warning"):
 export function expectCheckResult(value: unknown, check: CheckName): CheckResult {
   expect(typeof value === "object" && value !== null).toBe(true);
   const result = value as CheckResult;
-  expect(Object.keys(result).sort()).toEqual(
-    ["check", "errors", "ok", "stats", "summary", "warnings"].sort(),
-  );
+  // Alirebleco also lists the pair × combination results its aux pairs carry (Spec 002, FR-07).
+  const keys = ["check", "errors", "ok", "stats", "summary", "warnings"];
+  if (check === "alirebleco") keys.push("branches");
+  expect(Object.keys(result).sort()).toEqual(keys.sort());
   expect(result.check).toBe(check);
   expect(typeof result.ok).toBe("boolean");
   expect(nonEmpty(result.summary)).toBe(true);

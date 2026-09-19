@@ -19,6 +19,8 @@ export interface CheckResult {
   errors: ValidationIssue[];
   warnings: ValidationIssue[];
   stats: Record<string, number>;
+  /** Alirebleco only: pair × combination results carried by the alternative pair (Spec 002). */
+  branches?: { pair: string; combination: string; branch: "aux" }[];
 }
 
 export interface CheckOptions {
