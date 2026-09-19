@@ -80,7 +80,7 @@ describe("fm --version", () => {
     const run = fm(["--version"]);
     expect(run.code).toBe(0);
     expect(run.stdout.trim()).toBe(pkg.version);
-    expect(run.stdout.trim()).toBe("0.0.1");
+    expect(run.stdout.trim()).toBe("0.1.0");
   });
 });
 

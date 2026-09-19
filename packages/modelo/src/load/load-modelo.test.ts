@@ -30,7 +30,7 @@ describe("loadModelo: valid/minimal", () => {
       readFileSync(new URL("../../package.json", import.meta.url), "utf8"),
     );
     expect(modelo?.version).toBe((pkg as { version: string }).version);
-    expect(modelo?.version).toBe("0.0.1");
+    expect(modelo?.version).toBe("0.1.0");
   });
 
   it("sorts Dimensioj by priority", () => {

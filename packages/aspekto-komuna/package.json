@@ -1,0 +1,14 @@
+{
+  "name": "@fundamento/aspekto-komuna",
+  "version": "0.1.0",
+  "description": "Fundamento reference Aspekto komuna in the Aspekto package format. Contains no code.",
+  "license": "MIT",
+  "type": "module",
+  "files": [],
+  "exports": {
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "lint": "biome check ."
+  }
+}

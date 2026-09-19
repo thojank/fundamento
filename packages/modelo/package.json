@@ -1,6 +1,6 @@
 {
   "name": "@fundamento/modelo",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Fundamento Modelo: schema, loading, validation, resolution, checks and export.",
   "license": "MIT",
   "type": "module",

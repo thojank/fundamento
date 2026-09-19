@@ -1,12 +1,9 @@
 {
-  "name": "@fundamento/cli",
+  "name": "@fundamento/mcp",
   "version": "0.1.0",
-  "description": "Fundamento command line interface (fm).",
+  "description": "Fundamento MCP server: read-only tools and resources over the Modelo export.",
   "license": "MIT",
   "type": "module",
-  "bin": {
-    "fm": "dist/index.js"
-  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -15,15 +12,18 @@
     "./package.json": "./package.json"
   },
   "files": [
-    "dist"
+    "dist",
+    "schema"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "test": "vitest run",
+    "test": "vitest run --passWithNoTests",
     "lint": "tsc -p tsconfig.json --noEmit && biome check ."
   },
   "dependencies": {
-    "@fundamento/modelo": "workspace:*"
+    "@fundamento/modelo": "workspace:*",
+    "@modelcontextprotocol/sdk": "1.30.0",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@types/node": "^24.13.5",

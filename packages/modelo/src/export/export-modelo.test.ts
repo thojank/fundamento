@@ -99,7 +99,7 @@ describe("exportModelo: shape (§2.9)", () => {
   it("points $schema at the sibling schema and carries the package version", () => {
     expect(modeloJson.$schema).toBe(MODELO_JSON_SCHEMA_REF);
     expect(modeloJson.fundamento).toEqual({ version: MODELO_VERSION });
-    expect(modeloJson.fundamento.version).toBe("0.0.1");
+    expect(modeloJson.fundamento.version).toBe("0.1.0");
   });
 
   it("exports the Dimensioj in priority order with values, default, thresholds and Aspekto metadata", () => {

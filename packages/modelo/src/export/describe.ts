@@ -42,7 +42,7 @@ export interface ModeloDescription {
   /** Reguloj with a non-blank kialo. */
   reguloWithKialoCount: number;
   eroCount: number;
-  /** One-sentence answer, e.g. "Fundamento v0.0.1: six Dimensioj (…), one Aspekto `neutra`, …". */
+  /** One-sentence answer, e.g. "Fundamento v0.1.0: six Dimensioj (…), one Aspekto `neutra`, …". */
   sentence: string;
 }
 
