@@ -1,0 +1,22 @@
+{
+  "kontrastParoj": [
+    {
+      "id": "kpa_01K5FMAJ0K2ES2P0S3VGVDAX3Q",
+      "name": "text-on-background",
+      "foreground": "color.text.default",
+      "background": "color.background.default",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M2X7H80F3F9EJDR3T8JGR66B",
+      "name": "action-primary-on-background",
+      "foreground": "color.action.primary.rest",
+      "background": "color.background.default",
+      "kategorio": "ui",
+      "aux": {
+        "foreground": "color.text.default",
+        "background": "color.background.default"
+      }
+    }
+  ]
+}

@@ -326,9 +326,23 @@ function kontrastParoIssues(
   const entries = rawEntries(document.value, "kontrastParoj");
   for (const { entry, index } of entries) {
     const name = nameOf(entry, `#${index}`);
-    for (const field of ["foreground", "background"] as const) {
-      const pointer = `/kontrastParoj/${index}/${field}`;
-      const tokenName = entry[field];
+    // The main pair, and the alternative pair `aux` when declared (Spec 002, FR-07).
+    const members: {
+      holder: Record<string, unknown>;
+      base: string;
+      field: "foreground" | "background";
+    }[] = [
+      { holder: entry, base: `/kontrastParoj/${index}`, field: "foreground" },
+      { holder: entry, base: `/kontrastParoj/${index}`, field: "background" },
+    ];
+    if (isJsonObject(entry.aux)) {
+      for (const field of ["foreground", "background"] as const) {
+        members.push({ holder: entry.aux, base: `/kontrastParoj/${index}/aux`, field });
+      }
+    }
+    for (const { holder, base, field } of members) {
+      const pointer = `${base}/${field}`;
+      const tokenName = holder[field];
       const token =
         typeof tokenName === "string" && core !== undefined && Object.hasOwn(core.tokens, tokenName)
           ? core.tokens[tokenName]
@@ -337,7 +351,7 @@ function kontrastParoIssues(
         issues.push(
           issueAt(
             document,
-            field in entry ? pointer : `/kontrastParoj/${index}`,
+            field in holder ? pointer : base,
             "kontrastparo-token-missing",
             `KontrastParo '${name}' names ${field} ${JSON.stringify(tokenName) ?? "(none)"}, which is no core token.`,
             `Set ${field} to the canonical name of a color token defined in core.`,

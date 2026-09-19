@@ -1,0 +1,9 @@
+{
+  "description": "Spec 002 FR-07: a text pair must not name an alternative pair.",
+  "issues": [
+    {
+      "rule": "schema-violation",
+      "path": "data/kontrastparoj.json#/kontrastParoj/0"
+    }
+  ]
+}

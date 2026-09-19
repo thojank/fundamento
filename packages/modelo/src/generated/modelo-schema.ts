@@ -134,6 +134,28 @@ export type JugxoId = string;
 export type EroId = string;
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "KontrastParo".
+ */
+export type KontrastParo = {
+  id: KontrastParoId;
+  name: Name;
+  foreground: TokenName;
+  background: TokenName;
+  kategorio: KontrastKategorio;
+  /**
+   * Alternative pair (aŭ, 'or'): the KontrastParo holds when the main pair or this pair meets the threshold of the same kategorio (Spec 002, FR-07). Not allowed for text categories; requires a kialo.
+   */
+  aux?: {
+    foreground: TokenName;
+    background: TokenName;
+  };
+  /**
+   * Why the pair exists or why its alternative is enough; required with aux (Spec 002, D-09).
+   */
+  kialo?: string;
+};
+/**
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
  * via the `definition` "KontrastParoId".
  */
 export type KontrastParoId = string;
@@ -593,17 +615,6 @@ export interface JugxoEroRef {
 export interface JugxoArtikoloRef {
   artikolo:
     "I" | "II" | "III" | "IV" | "V" | "VI" | "VII" | "VIII" | "IX" | "X" | "XI" | "XII" | "XIII";
-}
-/**
- * This interface was referenced by `ModeloJson`'s JSON-Schema
- * via the `definition` "KontrastParo".
- */
-export interface KontrastParo {
-  id: KontrastParoId;
-  name: Name;
-  foreground: TokenName;
-  background: TokenName;
-  kategorio: KontrastKategorio;
 }
 /**
  * A component. Schema only in Phase 0.

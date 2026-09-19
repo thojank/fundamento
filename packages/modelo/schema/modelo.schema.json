@@ -1524,9 +1524,36 @@
         },
         "kategorio": {
           "$ref": "#/$defs/KontrastKategorio"
+        },
+        "aux": {
+          "description": "Alternative pair (aŭ, 'or'): the KontrastParo holds when the main pair or this pair meets the threshold of the same kategorio (Spec 002, FR-07). Not allowed for text categories; requires a kialo.",
+          "type": "object",
+          "properties": {
+            "foreground": { "$ref": "#/$defs/TokenName" },
+            "background": { "$ref": "#/$defs/TokenName" }
+          },
+          "required": ["foreground", "background"],
+          "additionalProperties": false
+        },
+        "kialo": {
+          "description": "Why the pair exists or why its alternative is enough; required with aux (Spec 002, D-09).",
+          "$ref": "#/$defs/NonEmptyText"
         }
       },
       "required": ["id", "name", "foreground", "background", "kategorio"],
+      "allOf": [
+        {
+          "if": { "properties": { "aux": true }, "required": ["aux"] },
+          "then": { "properties": { "kialo": true }, "required": ["kialo"] }
+        },
+        {
+          "if": {
+            "properties": { "kategorio": { "enum": ["text-normal", "text-large"] } },
+            "required": ["kategorio"]
+          },
+          "then": { "not": { "properties": { "aux": true }, "required": ["aux"] } }
+        }
+      ],
       "additionalProperties": false
     },
     "KontrastParojFile": {

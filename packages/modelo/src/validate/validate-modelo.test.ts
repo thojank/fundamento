@@ -6,7 +6,12 @@ import { join } from "node:path";
 import { afterAll, describe, expect, it } from "vitest";
 import type { RuleId, ValidationIssue } from "../contracts/issues.js";
 import { fixtureModeloSource } from "../load/source.js";
-import { fixtureRoot, modeloValidationFixtures, mutatedMinimal } from "./test-doubles/fixtures.js";
+import {
+  fixtureRoot,
+  modeloValidationFixtures,
+  mutatedFixture,
+  mutatedMinimal,
+} from "./test-doubles/fixtures.js";
 import { validateModelo } from "./validate-modelo.js";
 
 const pairs = (issues: readonly ValidationIssue[]): { rule: string; path: string }[] =>
@@ -332,5 +337,43 @@ describe("determinism", () => {
     const second = validateFixture("invalid", "modelo-alias-unresolvable");
     expect(second).toEqual(first);
     expect(pairs(first.errors)).toEqual([...pairs(first.errors)].sort(byPathThenRule));
+  });
+});
+
+describe("KontrastParo aux members (Spec 002, T011)", () => {
+  const aux = (auxPair: Record<string, string>) => {
+    const root = mutatedFixture("regularo-kombinoj", (edit) =>
+      edit("data/kontrastparoj.json", (file: { kontrastParoj: Record<string, unknown>[] }) => {
+        file.kontrastParoj.push({
+          id: "kpa_01M2WRK8G0GGGGGGGGGGGGGGG1",
+          name: "action-primary-on-background",
+          foreground: "color.action.primary.rest",
+          background: "color.background.default",
+          kategorio: "ui",
+          aux: auxPair,
+          kialo: "A border carries the pair.",
+        });
+      }),
+    );
+    auxRoots.push(root);
+    return validateModelo(fixtureModeloSource(root))
+      .errors.filter((issue) => issue.rule.startsWith("kontrastparo-"))
+      .map((issue) => [issue.rule, issue.path]);
+  };
+  const auxRoots: string[] = [];
+  afterAll(() => {
+    for (const root of auxRoots) rmSync(root, { recursive: true, force: true });
+  });
+
+  it("reports an aux token that is no core token", () => {
+    expect(aux({ foreground: "color.missing", background: "color.background.default" })).toEqual([
+      ["kontrastparo-token-missing", "data/kontrastparoj.json#/kontrastParoj/1/aux/foreground"],
+    ]);
+  });
+
+  it("reports an aux token that is no colour", () => {
+    expect(aux({ foreground: "color.text.default", background: "spacing.small" })).toEqual([
+      ["kontrastparo-not-color", "data/kontrastparoj.json#/kontrastParoj/1/aux/background"],
+    ]);
   });
 });
