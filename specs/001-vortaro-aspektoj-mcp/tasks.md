@@ -131,7 +131,7 @@ Order follows the plan's "Build order". The ciferecigo package is the last task.
 - [ ] **T030 ciferecigo package outside the core repository** (D-18, FR-13, Q3, Q5)
   - Red: create the empty package skeleton in the p0 workspace at `../fundamento-aspekto-ciferecigo` (`aspekto.json`, empty set, `link:`/`file:` dev dependencies on the core) and run `pnpm fm modelo validate --aspekto ../fundamento-aspekto-ciferecigo`; it must fail with `aspekto-incomplete` for every core token.
   - Green: derive all values by the D-18 rules; write `DERIVATION.md` (OKLCH ramp with anchors and resulting steps, scales taken from komuna, typography roles, every contrast-driven step change); sets incl. the dark and high-contrast conjunctions; Aspekto Reguloj with kialo (from Anhang A).
-  - Done when: `fm modelo validate --aspekto …` exits 0; `check:alirebleco` passes for the composition; `check:clean-room` in the core is still green (nothing leaked into `repos/fundamento`); archive `fundamento-aspekto-ciferecigo.tar.gz` (without `node_modules`) handed to the maintainer; `research.md` §8 (Enportilo findings) committed in the core. Visual review by the maintainer.
+  - Done when: `fm modelo validate --aspekto …` exits 0; `check:alirebleco` passes for the composition; `check:clean-room` in the core is still green (nothing leaked into `repos/fundamento`); archive `fundamento-aspekto-ciferecigo.tar.gz` (without `node_modules`) handed to the maintainer; `research.md` §10 (Enportilo findings; §8 holds the APCA baseline) committed in the core. Visual review by the maintainer.
 
 ---
 

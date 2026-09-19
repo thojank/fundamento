@@ -51,6 +51,29 @@ Entscheidungen des Plans mit Begründung und verworfenen Alternativen. Nummern v
 ### 7.4 Clean Room für die eigene Marke (D-15)
 - Nachweis ohne Werte im Code: SHA-256-Fingerabdrücke normalisierter Markenwerte, Allowlist nur `spec.md` und `research.md` dieser Spec. Fingerabdrücke nur für markenspezifische Werte: Hex-Farben, die eigene Schriftfamilie und `cubic-bezier`-Kurven. Dauern und Längen-Skalare bleiben draußen, sie sind generisch (K2). Der Check schützt keine Geheimhaltung (die Werte sind öffentlich, kurze Hashes sind umkehrbar), er erzwingt nur AK-08. Verworfen: Klartext-Blocklist (würde die Werte selbst in den Code bringen) und reine Namensprüfung (`com.ciferecigo.fundamento` ist der Extension-Namensraum und steht überall).
 
+## 8. APCA-Baseline für komuna (nur beratend, Stand 2026-09-19)
+
+Entscheidung des Maintainers: komuna wird nicht auf APCA getunt. APCA bleibt beratend (`contrast-advisory`, Warnung), bindend ist WCAG 2.x. Die Zahlen hier sind eine Baseline zum Nachlesen; kein Test schreibt sie fest. Ob APCA unter `contrast=high` bindend wird, entscheidet Spec 003.
+
+Gemessen mit `node packages/modelo/dist/checks/run.js alirebleco --json` auf dem Repo-Modelo nach T017 (komuna, 60 KontrastParoj × 72 Kombinationen = 4 320 Auswertungen, 0 WCAG-Verstöße): **1 170 APCA-Hinweise**. APCA-Schwellen laut `data/dimensioj.json`: `contrast=default` 75 / 60 / 45, `contrast=high` 90 / 75 / 60 (text-normal / text-large / ui).
+
+`viewport`, `density` und `motion` ändern keine Farbe; jede der 18 Kombinationen dieser drei Dimensioj trägt dieselben 65 Hinweise bei. Aufgeschlüsselt nach Paar-Kategorie und `color-scheme` × `contrast` (Hinweise gesamt = Paare × 18):
+
+| Paar-Kategorie | light / default | light / high | dark / default | dark / high | Summe |
+|---|---|---|---|---|---|
+| text-normal | 54 (3 Paare) | 180 (10) | 486 (27) | 414 (23) | 1 134 |
+| ui | 0 | 0 | 36 (2) | 0 | 36 |
+| **Summe** | **54** | **180** | **522** | **414** | **1 170** |
+
+Betroffene Paare je Zelle:
+
+- **light / default:** `action-secondary-text-on-action-secondary-pressed`, `text-muted-on-background-canvas`, `text-muted-on-background-sunken`
+- **light / high:** `action-secondary-text-on-action-secondary-hover`, `action-secondary-text-on-action-secondary-pressed`, `action-secondary-text-on-action-secondary-selected`, `action-tertiary-text-on-action-tertiary-pressed`, `status-danger-text-on-status-danger-weak`, `status-info-text-on-status-info-weak`, `status-success-on-basic`, `status-success-text-on-status-success-weak`, `text-muted-on-background-sunken`, `text-subtle-on-background-sunken`
+- **dark / default:** `action-primary-text-on-fill`, `action-tertiary-text-on-action-tertiary-hover`, `action-tertiary-text-on-action-tertiary-pressed`, `action-tertiary-text-on-action-tertiary-rest`, `action-tertiary-text-on-action-tertiary-selected`, `border-default-on-background-raised`, `border-on-background`, `brand-text-on-brand-fill`, `link-rest-on-background-default`, `status-danger-on-basic`, `status-danger-text-on-background-default`, `status-danger-text-on-status-danger-subtle`, `status-danger-text-on-status-danger-weak`, `status-info-on-basic`, `status-info-text-on-background-default`, `status-info-text-on-status-info-subtle`, `status-info-text-on-status-info-weak`, `status-success-on-basic`, `status-success-text-on-background-default`, `status-success-text-on-status-success-subtle`, `status-success-text-on-status-success-weak`, `status-warning-on-basic`, `status-warning-text-on-background-default`, `status-warning-text-on-status-warning-subtle`, `status-warning-text-on-status-warning-weak`, `text-muted-on-background-canvas`, `text-muted-on-background-default`, `text-muted-on-background-raised`, `text-muted-on-background-sunken`
+- **dark / high:** `action-primary-text-on-fill`, `action-tertiary-text-on-action-tertiary-hover`, `action-tertiary-text-on-action-tertiary-pressed`, `action-tertiary-text-on-action-tertiary-rest`, `action-tertiary-text-on-action-tertiary-selected`, `brand-text-on-brand-fill`, `link-rest-on-background-default`, `status-danger-on-basic`, `status-danger-text-on-background-default`, `status-danger-text-on-status-danger-subtle`, `status-danger-text-on-status-danger-weak`, `status-info-on-basic`, `status-info-text-on-background-default`, `status-info-text-on-status-info-subtle`, `status-info-text-on-status-info-weak`, `status-success-on-basic`, `status-success-text-on-background-default`, `status-success-text-on-status-success-subtle`, `status-success-text-on-status-success-weak`, `status-warning-on-basic`, `status-warning-text-on-background-default`, `status-warning-text-on-status-warning-subtle`, `status-warning-text-on-status-warning-weak`
+
+Beobachtung ohne Bewertung: Die Hinweise ballen sich im Dark Mode (79 %), vor allem bei Status-Farben und dem Akzent als Textfarbe auf dunklen Flächen. Das entspricht der bekannten Eigenschaft von APCA, dunkle Hintergründe strenger zu bewerten als WCAG 2.x.
+
 ## 9. Kunteksta adaptado (Kandidat, nicht Phase 1)
 
 Anforderung des Maintainers vom 2026-09-19: Das Design soll sich zur Laufzeit kontextabhängig ändern können, z. B. morgens kühle und abends warme Farben. Das ist ein Kandidat für eine eigene, kommende Spec (Einführung einer Dimensio durch Spec, Art. IV) und ausdrücklich nicht Teil von Phase 1.
@@ -58,3 +81,6 @@ Anforderung des Maintainers vom 2026-09-19: Das Design soll sich zur Laufzeit ko
 - **Absicherung in Phase 1:** Ein Test in T011 belegt, dass eine siebte Dimensio rein über Daten hinzukommt. Das Fixture `dimensio-etoso` hat die Werte `neutrala`, `varma`, `malvarma` und alias-only-Sets; es gibt keinen Schema- oder Code-Eingriff. Das Fixture validiert und wird aufgelöst.
 - **Offene Fragen für die kommende Spec:** Wer setzt den Wert zur Laufzeit (Projekcio, Host-App, Agent)? Wie oft wechselt er, und mit welchem Übergang (Motion)? Wie wirkt er mit `color-scheme` und `contrast` zusammen (Priorität, Alirebleco über alle neuen Kombinationen)? Bleibt ein diskreter Dimensio-Wert, oder braucht es interpolierte Zwischenwerte (dann kein reines Token-Set mehr)?
 
+## 10. Enportilo-Erkenntnisse aus der ciferecigo-Ableitung
+
+Wird mit T030 gefüllt (Plan D-18, Q5): welche Ableitungsschritte mechanisch waren, welche Urteil brauchten und was Anhang A fehlte.

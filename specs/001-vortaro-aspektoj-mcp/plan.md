@@ -200,11 +200,13 @@ The test measures the server start (spawn to first `describe` answer) and 100 `r
 2. **Brand-neutral scales:** spacing, size, radius primitives, motion, layout and opacity are taken over identical to komuna (restated literally, because completeness requires it, D-04). The exceptions are the values Anhang A states explicitly (radius, border width, motion, elevation).
 3. **Typography:** every role uses the brand font from Anhang A with komuna's size scale. Weight, line height, tracking and text transform are set per role where Anhang A states them (display, kicker/label, body). All other roles take komuna's values.
 4. **Contrast:** derived steps must pass Alirebleco in every combination. If an anchor colour cannot meet a threshold in a given role, the derivation picks another step for that role and records it. Thresholds are never lowered.
-5. Every rule, with its inputs and the resulting steps, is written into `DERIVATION.md` in the package. This derivation is the first prototype of the Enportilo (Phase 7). What it teaches (which steps were mechanical, which needed judgement, what Anhang A lacked) goes into `research.md` §8 of this spec during implementation.
+5. Every rule, with its inputs and the resulting steps, is written into `DERIVATION.md` in the package. This derivation is the first prototype of the Enportilo (Phase 7). What it teaches (which steps were mechanical, which needed judgement, what Anhang A lacked) goes into `research.md` §10 of this spec during implementation (§8 holds the APCA baseline).
 
 ### D-19 Reguloj with checkability "automatic" are enforced by validation (added during T013)
 
 The Phase-0 Reguloj carry `checkability` (`automatic` or `manual`). Validation enforces every Regulo the Modelo declares `automatic` through a fixed table of enforcers (`validate/regularo-enforcement.ts`): `semantic-colors-alias-palette` → `color-semantic-literal`, `color-roles-declared` → `color-role-missing`, `contrast-pairs-declared` → `kontrastparo-missing-for-role` (T017), `dimensio-sets-alias-only` → `dimensio-set-literal` / `dimensio-set-primitive` (T016). The Regularo, with its kialoj, is therefore the switch (Art. VI). The repo declares these Reguloj `automatic`. The Phase-0 test fixtures declare `semantic-colors-alias-palette` as `manual` and keep testing their own rules unchanged. Rules that follow directly from the Constitution (Aspekto completeness, the reference set, fonts, ID namespaces) are always on.
+
+**In the repo, `manual` for an automatically checkable rule is an error** (confirmed by the maintainer, 2026-09-19). `manual` is reserved for fixtures and for Reguloj that data cannot violate (in Phase 1 only `disabled-exempt-from-contrast`, an exemption). The test `data/regularo-repo.test.ts` enforces this: every automatic Regulo has an enforcer (or an always-on rule), and the four Reguloj above stay automatic. Following that rule, `typography-roles-composite`, `motion-reduced-instant`, `density-affects-layout-only` and the new `focus-ring-dual-contrast` are automatic too (rules `typography-role-not-composite`, `motion-reduced-not-instant`, `density-set-scope`, `focus-ring-pair-missing`).
 
 ## Project structure (after Phase 1)
 
@@ -361,7 +363,7 @@ One entry per Article of Constitution v1.3.
 | **Phase-0 test fixtures still say `neutra`** | Phase-0 fixtures are self-contained test Modelos; renaming them proves nothing. The engineering standard `global/testing.md` was updated to `komuna` / `ekzemplo` on 2026-09-19. | None. |
 | **Timing tolerance in CI** (D-17) | Cold runners (Phase-0 Jugxo on Article X). | Raw timings are logged. |
 | **ciferecigo verified only locally** (D-18) | The private repository does not exist yet, and the core packages are unpublished, so the package has no CI in Phase 1 and consumes the core through a local path. | The maintainer adds CI once the core packages are published (Phase 9) or a registry is chosen. |
-| **Derived brand values** (D-18) | Anhang A covers about 30 facts, while a complete Aspekto needs ~340 tokens. The rest is derived by documented rules in `DERIVATION.md`. | Visual review by the maintainer at acceptance. The findings feed the Enportilo (Phase 7, `research.md` §8). |
+| **Derived brand values** (D-18) | Anhang A covers about 30 facts, while a complete Aspekto needs ~340 tokens. The rest is derived by documented rules in `DERIVATION.md`. | Visual review by the maintainer at acceptance. The findings feed the Enportilo (Phase 7, `research.md` §10). |
 
 ## Build order (orientation, not tasks)
 
@@ -371,7 +373,7 @@ One entry per Article of Constitution v1.3.
 4. Export per Aspekto, themes fragments, determinism.
 5. Checks: Alirebleco per Aspekto, Regularo for packages, clean-room fingerprints.
 6. MCP server and CLI, then the S7 integration test, the performance test and the quickstart test.
-7. The ciferecigo package outside the repo (D-18) with `DERIVATION.md`, validated with `fm modelo validate --aspekto`, delivered as an archive; `research.md` §8; then the Penpot import per Aspekto (manual).
+7. The ciferecigo package outside the repo (D-18) with `DERIVATION.md`, validated with `fm modelo validate --aspekto`, delivered as an archive; `research.md` §10; then the Penpot import per Aspekto (manual).
 
 ## Penpot import result
 
@@ -409,7 +411,7 @@ Answered by the maintainer on 2026-09-19.
 | Q2 | Where is the reference Aspekto stated? | Only in the Modelo (`core.referenceAspekto`). `fundamento.config.json` lists packages only. Key Entities corrected in the spec. | D-05, D-07, spec `d815ad5` |
 | Q3 | Private ciferecigo repository? | It does not exist yet; P0 does not push to it. P0 builds a standalone folder outside the core repo and delivers it as an archive; the maintainer creates the repository and pushes. Core packages come through a local path (`link:`/`file:`); no CI in Phase 1. `fm modelo validate --aspekto <path>` is part of the acceptance. | D-07, D-18 |
 | Q4 | "Complete coverage" in the S7 dialog? | Dropped. The sentence names the Dimensioj and counts per token group; the proof is the tests (coverage, `aspekto-incomplete`). S7 corrected in the spec. | D-14, spec `d815ad5` |
-| Q5 | Values not in Anhang A? | P0 derives them: an OKLCH lightness ramp from the anchor colours, brand-neutral scales identical to komuna, typography roles with the brand font and komuna's sizes. Every rule is written into `DERIVATION.md`; findings go into `research.md` §8. Visual review at acceptance. | D-18 |
+| Q5 | Values not in Anhang A? | P0 derives them: an OKLCH lightness ramp from the anchor colours, brand-neutral scales identical to komuna, typography roles with the brand font and komuna's sizes. Every rule is written into `DERIVATION.md`; findings go into `research.md` §10. Visual review at acceptance. | D-18 |
 
 ## Review round 2 (2026-09-19)
 

@@ -58,6 +58,11 @@ export const RULE_IDS = [
   "color-semantic-literal",
   "color-role-missing",
   "kontrastparo-missing-for-role",
+  // Reguloj made automatic after D-19 (Spec 001)
+  "focus-ring-pair-missing",
+  "typography-role-not-composite",
+  "motion-reduced-not-instant",
+  "density-set-scope",
   // Regularo in Aspekto packages (Spec 001 T021)
   "regulo-aspekto-unknown",
   // Dimensioj (FUND-3.2)

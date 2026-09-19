@@ -38,7 +38,7 @@
       "statement": "The density Dimensio re-points spacing and control-size roles only; it never changes typography. viewport and density never shift the same token.",
       "kialo": "Density is layout compactness, font size is legibility and belongs to viewport. If viewport and density shifted the same token, the result would depend on their priority order and be predictable for nobody.",
       "scope": "vortaro: sets density/*",
-      "checkability": "manual"
+      "checkability": "automatic"
     },
     {
       "id": "reg_01M2W9W6WAVG6QE0S6DNDJNX7J",
@@ -62,7 +62,7 @@
       "statement": "Every typography role is a composite whose fields are aliases: size, line height and letter spacing alias role tokens, family and weight alias primitives.",
       "kialo": "Dimensioj then shift role tokens along the scales and never restate a composite, which would overwrite an Aspekto's weight or family; one role per text style keeps every Projekcio and every agent on the same names.",
       "scope": "vortaro: typography.*",
-      "checkability": "manual"
+      "checkability": "automatic"
     },
     {
       "id": "reg_01M2W9W6WB2TWHVZQTJ2SND87K",
@@ -70,7 +70,15 @@
       "statement": "Under motion=reduced every duration role is the instant step and every easing role is linear.",
       "kialo": "People who ask their system to reduce motion must not see animated transitions; making every duration instant through the scale keeps components working without special cases and lets each Aspekto define what instant means.",
       "scope": "vortaro: sets motion/reduced",
-      "checkability": "manual"
+      "checkability": "automatic"
+    },
+    {
+      "id": "reg_01M2WBXFPVWAZ8RW7VWCWAYAMY",
+      "name": "focus-ring-dual-contrast",
+      "statement": "Every focus colour is the foreground of a KontrastParo on color.background.default and of one on its gap colour color.focus.inner.",
+      "kialo": "A single ring colour cannot reach 3:1 against a white surface, a dark inverse surface and a filled primary action at the same time. The ring therefore sits on its own gap colour and must contrast with that gap and with the surface around it, as WCAG 2.4.13 describes for focus indicators.",
+      "scope": "vortaro: color tokens with role focus; data/kontrastparoj.json",
+      "checkability": "automatic"
     }
   ]
 }

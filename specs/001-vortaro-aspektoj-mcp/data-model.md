@@ -136,6 +136,10 @@ Exempt by role: `disabled` (Regulo `disabled-exempt-from-contrast`) and `decorat
 | `color-semantic-literal` | error | a non-palette color token (in any set) is not an alias into `color.palette.*` |
 | `color-role-missing` | error | a color token without `role` |
 | `kontrastparo-missing-for-role` | error | a token of a checked role appears in no KontrastParo |
+| `focus-ring-pair-missing` | error | a focus colour lacks its pair on `color.background.default` or on `color.focus.inner` (Regulo `focus-ring-dual-contrast`) |
+| `typography-role-not-composite` | error | a typography composite does not alias its role tokens (Regulo `typography-roles-composite`) |
+| `motion-reduced-not-instant` | error | a duration or easing role is not instant under `motion=reduced` (Regulo `motion-reduced-instant`) |
+| `density-set-scope` | error | a density set re-points anything but spacing and control-size roles, or a token viewport shifts (Regulo `density-affects-layout-only`) |
 | `regulo-aspekto-unknown` | error | a Regulo or Jugxo is scoped to an unknown Aspekto |
 | `clean-room-marko-spuro` | error | a brand fingerprint outside the allowlist (D-15) |
 
