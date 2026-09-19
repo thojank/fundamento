@@ -115,11 +115,12 @@
     {
       "id": "reg_01M2X5DXT0TJ1ZYQG95RWX02ZV",
       "name": "text-hierarchy",
-      "statement": "In every combination of every Aspekto, color.text.default, color.text.subtle and color.text.muted resolve to pairwise different colours, and their contrast against color.background.default does not rise from default to subtle to muted.",
-      "kialo": "The text roles carry a distinction of meaning. High contrast must strengthen them, not erase them, and a contrast check does not see a collapse because every collapsed role still passes. Under contrast=high the main role takes the maximum contrast the ramp offers, so subtle and muted keep their own steps.",
+      "statement": "In every combination of every Aspekto, color.text.default, color.text.subtle and color.text.muted resolve to pairwise different colours, neighbouring roles (default and subtle, subtle and muted) differ by at least 0.05 in OKLCH lightness after compositing, and their contrast against color.background.default does not rise from default to subtle to muted.",
+      "kialo": "The text roles carry a distinction of meaning. High contrast must strengthen them, not erase them, and a contrast check does not see a collapse because every collapsed role still passes. Under contrast=high the main role takes the maximum contrast the ramp offers, so subtle and muted keep their own steps. Distinct is not distinguishable; a hierarchy the eye does not see does not exist.",
       "scope": "vortaro: color.text.default, subtle and muted in every combination",
       "checkability": "automatic",
-      "appliesTo": { "tokens": ["color.text.default", "color.text.subtle", "color.text.muted"] }
+      "appliesTo": { "tokens": ["color.text.default", "color.text.subtle", "color.text.muted"] },
+      "sojlo": { "metric": "oklch-l-delta", "min": 0.05 }
     },
     {
       "id": "reg_01M2X5G6TX43QJ21SFD4WFNM3W",

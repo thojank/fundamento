@@ -2,7 +2,11 @@
   "$extensions": {
     "com.ciferecigo.fundamento": {
       "id": "set_ekz_01M2X80VENR6M9X2JCA7G5E7B0",
-      "kondicxoj": ["aspekto=ekzemplo", "color-scheme=light", "contrast=high"]
+      "kondicxoj": [
+        "aspekto=ekzemplo",
+        "color-scheme=light",
+        "contrast=high"
+      ]
     }
   },
   "color": {
@@ -12,6 +16,14 @@
         "on": {
           "$value": "{color.palette.neutral.0}"
         }
+      }
+    },
+    "text": {
+      "subtle": {
+        "$value": "{color.palette.neutral.900}"
+      },
+      "muted": {
+        "$value": "{color.palette.neutral.800}"
       }
     }
   }

@@ -163,6 +163,22 @@ export const textHierarchy: CombinationChecker = (context) => {
         message: `${role} has contrast ${fmt2(ratio)}:1 on ${BACKDROP}, above ${previous} with ${fmt2(before)}:1; contrast must not rise from default to subtle to muted.`,
         suggestion: `Swap or re-point ${role} (set '${originOf(context, role)}') and ${previous} so that default ≥ subtle ≥ muted in contrast.`,
       });
+      continue;
+    }
+    // T027: distinct is not distinguishable; neighbouring roles need a visible lightness step.
+    const min = context.regulo.sojlo?.min;
+    if (min === undefined) continue;
+    const previous = TEXT_ROLES[later - 1] as string;
+    const delta = Math.abs(
+      oklchLightness(colors[later] as ColorValue) - oklchLightness(colors[later - 1] as ColorValue),
+    );
+    if (delta < min - EPSILON) {
+      findings.push({
+        subject: role,
+        values: hexes.join(" "),
+        message: `${role} differs from ${previous} by ${fmt3(delta)} in OKLCH lightness, below ${min}; the roles are distinct but not distinguishable.`,
+        suggestion: `Keep the main role at its maximum contrast and move ${role} (set '${originOf(context, role)}') to the next palette step at least ${min} away from ${previous} that still meets every text threshold.`,
+      });
     }
   }
   return findings;
@@ -207,7 +223,7 @@ export const COMBINATION_CHECKERS: Readonly<Record<string, CombinationChecker>> 
 };
 
 /** Reguloj whose checker needs a `sojlo`. */
-export const NEEDS_SOJLO: ReadonlySet<string> = new Set(["state-distinct"]);
+export const NEEDS_SOJLO: ReadonlySet<string> = new Set(["state-distinct", "text-hierarchy"]);
 
 /** `regulo-sojlo-missing` for a measuring Regulo declared without its threshold. */
 export function sojloIssues(modelo: Modelo, regulo: Regulo): ValidationIssue[] {

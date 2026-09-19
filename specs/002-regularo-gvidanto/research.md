@@ -97,6 +97,25 @@ Kleinste Differenz eines Zustands zu `rest` über alle Kombinationen (OKLCH-Hell
 
 Die Statusränder tragen nichts bei: APCA wird auf dem Zweig gemessen, der das Paar trägt, und in komuna trägt überall der Hauptzweig. Alle betroffenen Paare erfüllen WCAG 2.x (verbindlich); APCA bleibt bis Spec 003 beratend. Keine Änderung, nur Baseline.
 
+### 8.7 Helligkeitsabstand der Textrollen (T027, gemessen vor der Wahl der Schwelle)
+
+Befund der Maintainer-Abnahme per Claude Code: dark/high `#ffffff` / `#f6f7f7` / `#ecedee` erfüllt `text-hierarchy` (verschieden, geordnet), ist aber optisch flach. Kleinster |ΔL| (OKLCH, nach Komposition) benachbarter Rollen über alle Kombinationen, vorher → nachher:
+
+| Aspekto, Klasse | Stufen vorher | default→subtle | subtle→muted | Stufen nachher | default→subtle | subtle→muted | Mindestkontrast d / s / m |
+|---|---|---|---|---|---|---|---|
+| komuna light/default | 900/700/600 | 0,160 | 0,080 | unverändert | 0,160 | 0,080 | 12,42 / 6,61 / 4,69 |
+| komuna light/high | 1000/950/900 | 0,200 | 0,080 | unverändert | 0,200 | 0,080 | 17,88 / 15,41 / 12,42 |
+| komuna dark/default | 50/200/300 | 0,085 | 0,080 | unverändert | 0,085 | 0,080 | 13,57 / 10,49 / 8,08 |
+| komuna dark/high | 0/50/100 | **0,025** | **0,030** | 0/100/200 | 0,055 | 0,055 | 14,59 / 12,42 / 10,49 |
+| ekzemplo light/default | 900/700/600 | 0,160 | 0,080 | unverändert | 0,160 | 0,080 | 12,44 / 6,62 / 4,70 |
+| ekzemplo light/high | 1000/950/900 | **0,031** | 0,080 | 1000/900/800 | 0,111 | 0,080 | 16,31 / 12,44 / 9,26 |
+| ekzemplo dark/default | 100/200/300 | 0,055 | 0,080 | unverändert | 0,055 | 0,080 | 12,44 / 10,50 / 8,08 |
+| ekzemplo dark/high | 0/50/100 | **0,022** | **0,030** | 0/100/200 | 0,052 | 0,055 | 14,50 / 12,44 / 10,50 |
+
+- Schwelle 0,05 wie bei `state-distinct`: Alle Klassen außerhalb von high lagen schon bei mindestens 0,055; die Schwelle trifft nur die flachen Fälle.
+- ekzemplos `neutral.1000` ist kein reines Schwarz (L 0,169), deshalb liegt `950` nur 0,031 darüber; light/high rückt dort eine Stufe weiter (eigenes Konjunktions-Set). komuna light/high bleibt.
+- APCA-Hinweise (beratend) im Repo: 1188 → **1260** (+72), alle aus `text-muted-on-background-*` in komuna dark/high (je 18 auf default, canvas, raised, sunken): muted liegt jetzt eine Stufe dunkler (`neutral.200`, 10,49:1 WCAG). Nur protokolliert.
+
 ### 8.5 Statusränder (FR-06)
 
 Kontrast der Kandidaten auf `background.default` (komuna / ekzemplo, schwächster Status): light `<s>.700` ≥ 7,25 / 7,29:1, dark `<s>.300` ≥ 9,46 / 9,45:1. Unter `contrast=high` ändern sich Flächen nicht, die Werte gelten also auch dort. Die heutigen Füllungen `status.<s>.basic` bestehen 3:1 in komuna und ekzemplo überall (Minimum 5,17:1); der Alternativzweig wird dort erst durch die helle Warnfläche im Fixture gebraucht (Plan D-10).

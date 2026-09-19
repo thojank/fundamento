@@ -73,7 +73,7 @@ Four new core Reguloj (IDs issued with `pnpm id:new regulo --count 4`):
 | Name | Statement | Kialo | `appliesTo` | `sojlo` | Rule ID |
 |---|---|---|---|---|---|
 | `surface-order` | In every combination of every Aspekto, the OKLCH lightness of `color.background.sunken` ≤ `canvas` ≤ `default` ≤ `raised`, in both colour schemes. | The surface hierarchy carries spatial meaning; a break is visible to users and to no contrast check. | `tokens: [color.background.sunken, color.background.canvas, color.background.default, color.background.raised]` | – | `surface-order` |
-| `text-hierarchy` | In every combination, `color.text.default`, `.subtle` and `.muted` resolve to pairwise different colours, and their contrast against `color.background.default` does not rise from default to subtle to muted. | The text roles carry a distinction of meaning; high contrast must not erase it, and a contrast check does not see a collapse. | `tokens: [color.text.default, color.text.subtle, color.text.muted]` | – | `text-hierarchy` |
+| `text-hierarchy` | In every combination, `color.text.default`, `.subtle` and `.muted` resolve to pairwise different colours, neighbouring roles differ by at least 0.05 in OKLCH lightness after compositing (T027), and their contrast against `color.background.default` does not rise from default to subtle to muted. | The text roles carry a distinction of meaning; high contrast must not erase it, and a contrast check does not see a collapse. Distinct is not distinguishable; a hierarchy the eye does not see does not exist. | `tokens: [color.text.default, color.text.subtle, color.text.muted]` | `{ metric: oklch-l-delta, min: 0.05 }` (T027) | `text-hierarchy` |
 | `state-distinct` | In every combination, the OKLCH lightness of `color.action.<v>.hover`, `.pressed` and `.selected` differs from `.rest` by at least 0.05, for every action variant. | A state that looks like the rest state gives no feedback, and a difference in hue alone disappears in greyscale and for people with a colour-vision deficiency; no contrast check sees either. The difference must be clear, not just perceptible: 0.05 is 2.5 times the typical just-noticeable difference and leaves a reserve for poor displays and colour-vision deficiency. | `tokens: [color.action.*.hover, color.action.*.pressed, color.action.*.selected, color.action.*.rest]` | `{ metric: oklch-l-delta, min: 0.05 }` | `state-distinct` |
 | `semantic-described` | Every role token in core (its value is an alias, or a composite with an alias field) has a `$description` that states its use: not empty, no alias reference, no colour literal. | Agents read values from bare token files but not the purpose; a description per role token is their input for choosing the right token. | omitted (see note) | – | `semantic-described` |
 
@@ -234,8 +234,8 @@ interface PairMeasurement {
 | `contrast/high` | `color.text.subtle` | `{color.palette.neutral.800}` | `{color.palette.neutral.950}` | D-05, R2 |
 | `contrast/high` | `color.text.muted` | `{color.palette.neutral.800}` | `{color.palette.neutral.900}` | D-05, R2 |
 | `color-scheme/dark+contrast/high` | `color.text.default` | – (dark `neutral.50`) | `{color.palette.neutral.0}` | D-05, R4 |
-| `color-scheme/dark+contrast/high` | `color.text.subtle` | `{color.palette.neutral.100}` | `{color.palette.neutral.50}` | D-05, R4 |
-| `color-scheme/dark+contrast/high` | `color.text.muted` | `{color.palette.neutral.100}` | unchanged | D-05, R4 |
+| `color-scheme/dark+contrast/high` | `color.text.subtle` | `{color.palette.neutral.100}` | `{color.palette.neutral.50}`, then `{color.palette.neutral.100}` (T027) | D-05, R4, T027 |
+| `color-scheme/dark+contrast/high` | `color.text.muted` | `{color.palette.neutral.100}` | unchanged, then `{color.palette.neutral.200}` (T027) | D-05, R4, T027 |
 
 All targets are roles re-pointed to palette steps; no literal enters a generic set (Spec 001 D-03). Token IDs of existing tokens are unchanged.
 

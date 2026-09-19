@@ -412,6 +412,10 @@ One entry per Article of Constitution v1.4.
 | AK-10 | unchanged export path | every task, T025 |
 | AK-11 | no open marker | done (plan), T025 |
 
+## Follow-up T027 (2026-09-19, after the Phase-2 acceptance)
+
+The maintainer's acceptance through Claude Code found dark/high `#ffffff` / `#f6f7f7` / `#ecedee`: distinct and ordered, so `text-hierarchy` passed, yet optically flat. FR-02 gains a minimum lightness step between neighbouring text roles, |ΔL| ≥ `sojlo` in OKLCH after compositing; the threshold is data (0.05, as for `state-distinct`), measured before it was chosen (research §8.7). `text-hierarchy` now requires a `sojlo` (`regulo-sojlo-missing` otherwise). Repair, with the main role keeping its maximum contrast and subtle and muted moving to the next steps that meet the threshold: core `color-scheme/dark+contrast/high` subtle `neutral.50` → `100`, muted `neutral.100` → `200` (supersedes R4's `0/50/100`); ekzemplo light/high subtle `neutral.900`, muted `neutral.800` in its conjunction set, because its darkest neutral is no pure black and `950` lies 0.031 from `1000`. komuna light/high keeps `1000/950/900` (0.200 and 0.080 apart). Every text pair stays ≥ 7:1 under high.
+
 ## Maintainer review (2026-09-19)
 
 D-06 (FR-03, |ΔL| OKLCH as the data field `sojlo`), D-07 (FR-05, no state text colours, re-evaluate with `butono`) and D-17 (FR-19, SDK 2.0.0 as the first MCP task with the fallback rule) are accepted. The date of SDK 2.0.0 in Spec 001 research §7.3 carries a pointer to the correction in research §9 of this spec. The three review points are decided and worked in above:

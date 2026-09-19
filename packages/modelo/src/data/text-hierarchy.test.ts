@@ -7,7 +7,7 @@
 // user has asked for maximum contrast explicitly, so the exclusion does not apply there.
 
 import { describe, expect, it } from "vitest";
-import { readDtcgColor } from "../checks/alirebleco/color.js";
+import { oklchLightness, readDtcgColor } from "../checks/alirebleco/color.js";
 import { WCAG2_METRIC } from "../checks/alirebleco/metrics.js";
 import { loadModelo } from "../load/load-modelo.js";
 import { projectModeloSource } from "../load/source.js";
@@ -35,13 +35,42 @@ function stepOf(tokens: ReturnType<typeof resolved>, name: string): string | und
 }
 
 describe.each(["komuna", "ekzemplo"])("text roles of %s under contrast=high", (aspekto) => {
-  it.each([
-    ["light", ["neutral.1000", "neutral.950", "neutral.900"]],
-    ["dark", ["neutral.0", "neutral.50", "neutral.100"]],
-  ] as const)("%s resolves default, subtle, muted to %j", (scheme, steps) => {
-    const tokens = resolved(aspekto, scheme, "high");
-    expect(ROLES.map((role) => stepOf(tokens, `color.text.${role}`))).toEqual(steps);
-  });
+  // T027: the main role keeps the maximum contrast; subtle and muted take the next steps that are
+  // at least sojlo.min (0.05) apart in OKLCH lightness. ekzemplo's darkest neutral is no pure
+  // black, so its 950 lies too close to 1000 and light/high moves one step further.
+  const STEPS: Record<string, Record<"light" | "dark", string[]>> = {
+    komuna: {
+      light: ["neutral.1000", "neutral.950", "neutral.900"],
+      dark: ["neutral.0", "neutral.100", "neutral.200"],
+    },
+    ekzemplo: {
+      light: ["neutral.1000", "neutral.900", "neutral.800"],
+      dark: ["neutral.0", "neutral.100", "neutral.200"],
+    },
+  };
+  it.each(["light", "dark"] as const)(
+    "%s resolves default, subtle, muted to its steps",
+    (scheme) => {
+      const tokens = resolved(aspekto, scheme, "high");
+      expect(ROLES.map((role) => stepOf(tokens, `color.text.${role}`))).toEqual(
+        STEPS[aspekto]?.[scheme],
+      );
+    },
+  );
+
+  it.each(["light", "dark"])(
+    "%s: neighbouring roles differ by at least 0.05 in OKLCH lightness",
+    (scheme) => {
+      const tokens = resolved(aspekto, scheme, "high");
+      const lightness = ROLES.map((role) => {
+        const value = readDtcgColor(tokens[`color.text.${role}`]?.value);
+        if (value === undefined) throw new Error(`${role} is no colour`);
+        return oklchLightness(value);
+      });
+      expect(Math.abs((lightness[0] ?? 0) - (lightness[1] ?? 0))).toBeGreaterThanOrEqual(0.05);
+      expect(Math.abs((lightness[1] ?? 0) - (lightness[2] ?? 0))).toBeGreaterThanOrEqual(0.05);
+    },
+  );
 
   it.each(["light", "dark"])(
     "%s: three different values, each ≥ 7:1 on every surface, falling from default to muted",

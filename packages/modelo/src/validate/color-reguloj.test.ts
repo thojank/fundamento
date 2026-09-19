@@ -121,3 +121,27 @@ describe("semantic-described (FR-04)", () => {
     expect(issues).toEqual([]);
   });
 });
+
+describe("text-hierarchy with a minimum lightness difference (Spec 002 FR-02, T027)", () => {
+  it("reports neighbouring roles closer than sojlo.min, with the difference in the message", () => {
+    const issue = errors((edit) =>
+      edit("vortaro/sets/color-scheme/dark+contrast/high.json", (set: Json) => {
+        at(set, "color.text.subtle").$value = "{color.palette.neutral.50}";
+      }),
+    ).find((candidate) => candidate.rule === "text-hierarchy");
+    expect(issue?.path).toBe("rezolvo(color-scheme=dark,contrast=high)/color.text.subtle");
+    expect(issue?.message).toMatch(
+      /differs from color\.text\.default by 0\.0\d\d in OKLCH lightness, below 0\.05/,
+    );
+  });
+
+  it("requires a sojlo for text-hierarchy", () => {
+    const issues = errors((edit) =>
+      edit("data/reguloj.json", (file: { reguloj: Record<string, unknown>[] }) => {
+        const regulo = file.reguloj.find((entry) => entry.name === "text-hierarchy");
+        if (regulo) delete regulo.sojlo;
+      }),
+    ).filter((issue) => issue.rule === "regulo-sojlo-missing");
+    expect(issues.map((issue) => issue.path)).toEqual(["data/reguloj.json#/reguloj/2"]);
+  });
+});
