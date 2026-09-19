@@ -7,6 +7,14 @@
       "kialo": "FUND-4.1 wrote tests before code but ran them only afterwards, so they were never observed failing; from now on the red run is part of ticket completion",
       "date": "2026-09-19",
       "context": "Phase 0 build (Spec 000), ticket FUND-4.1 (deterministic export). Test-first was followed in writing but not observed; recorded in specs/000-fundamento-repo/plan.md under Article X and Complexity Tracking."
+    },
+    {
+      "id": "jug_01M2W3K1YPP05F4XF86J71RGTK",
+      "ref": { "artikolo": "X" },
+      "decision": "deviation-recorded",
+      "kialo": "Tests that spawn processes must have timeouts sized for a cold CI runner, otherwise the gate flakes and loses authority.",
+      "date": "2026-09-19",
+      "context": "CI #1 failed when the cli integration test 'reports modelo-regulo-kialo-missing' took 5295 ms to spawn the built fm binary on a cold runner, over Vitest's 5 s default. packages/cli/vitest.config.ts now gives the cli tests a 30 s testTimeout (not global, not for modelo), and its global setup builds the cli and its workspace dependencies so `pnpm test` in packages/cli does not rely on a warm Turborepo cache."
     }
   ]
 }
