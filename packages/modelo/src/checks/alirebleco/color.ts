@@ -105,3 +105,13 @@ export function compositeOver(foreground: ColorValue, background: ColorValue): C
   }
   return result;
 }
+
+/**
+ * OKLCH lightness (0…1) of a colour as seen: a translucent colour is first composited over
+ * `backdrop` (Spec 002, D-04), as the contrast check does. Without a backdrop it is measured as is.
+ */
+export function oklchLightness(color: ColorValue, backdrop?: ColorValue): number {
+  const seen =
+    backdrop !== undefined && alphaOf(color) < 1 ? compositeOver(color, backdrop) : color;
+  return Number(toColorjs(seen).to("oklch").coords[0] ?? 0);
+}
