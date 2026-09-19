@@ -8,6 +8,7 @@ import {
   EXIT_OK,
   EXIT_USAGE,
 } from "./command.js";
+import { modeloExport } from "./commands/modelo-export.js";
 import { modeloValidate } from "./commands/modelo-validate.js";
 import { closest } from "./suggest.js";
 
@@ -18,7 +19,7 @@ const ENTRIES: readonly Entry[] = [
   {
     name: "modelo",
     summary: "Work with the Modelo: tokens, Dimensioj, Reguloj and Jugxoj.",
-    commands: [modeloValidate],
+    commands: [modeloValidate, modeloExport],
   },
 ];
 

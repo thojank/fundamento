@@ -90,7 +90,7 @@ Order follows the plan's "Build order". The ciferecigo package is the last task.
 
 ## Stage 4 – Export
 
-- [ ] **T019 Export per Aspekto and `fm modelo export`** (D-09, AK-10)
+- [x] **T019 Export per Aspekto and `fm modelo export`** (D-09, AK-10)
   - Red: export tests for the new `modelo.json` fields; `dist/vortaro/<aspekto>/` is a complete Tokens-Studio folder; SHA-256 equal over two builds with the repo config and with the fixture config.
   - Green: `export/per-aspekto.ts`, build script, CLI command `fm modelo export [--config] [--out]`.
 - [ ] **T020 Describe sentence** (D-14, Q4)

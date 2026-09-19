@@ -76,6 +76,16 @@
     },
     "rezolvo": {
       "$ref": "#/$defs/Rezolvo"
+    },
+    "core": {
+      "description": "Facts of the core (Spec 001, FR-10): the reference Aspekto whose values live in core.",
+      "type": "object",
+      "properties": {
+        "referenceAspekto": {
+          "$ref": "#/$defs/Name"
+        }
+      },
+      "additionalProperties": false
     }
   },
   "required": [

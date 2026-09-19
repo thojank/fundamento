@@ -18,6 +18,7 @@ import { referenceAspektoOf } from "../load/build.js";
 import { allAssignments, formatCombination } from "../resolve/assignment.js";
 import { resolve } from "../resolve/resolve.js";
 import { serializeCanonicalJson } from "../themes/serialize.js";
+import { buildVortaroFolders } from "./per-aspekto.js";
 
 /** The value of `modelo.json#/$schema`: the schema is shipped next to it. */
 export const MODELO_JSON_SCHEMA_REF = "./modelo.schema.json";
@@ -44,11 +45,13 @@ export interface ModeloExportInput {
   schema: Readonly<Record<string, unknown>>;
 }
 
-/** The exact bytes of the three artifacts. */
+/** The exact bytes of the three artifacts and of the Tokens-Studio folder per Aspekto. */
 export interface ModeloExport {
   modeloJson: string;
   schemaJson: string;
   rezolvojJson: string;
+  /** Aspekto name -> file path inside `vortaro/<aspekto>/` -> canonical JSON text (D-09). */
+  vortaro: Record<string, Record<string, string>>;
 }
 
 export interface RezolvojJson {
@@ -152,7 +155,7 @@ export function buildModeloJson(input: ModeloExportInput): ModeloJson {
     }),
   ];
 
-  return {
+  const modeloJson: ModeloJson = {
     $schema: MODELO_JSON_SCHEMA_REF,
     fundamento: { version: modelo.version },
     dimensioj: structuredClone(modelo.dimensioj),
@@ -169,6 +172,10 @@ export function buildModeloJson(input: ModeloExportInput): ModeloJson {
     eroj: [],
     rezolvo: resolveOrThrow(modelo, {}),
   };
+  if (reference !== undefined) {
+    modeloJson.core = { referenceAspekto: reference };
+  }
+  return modeloJson;
 }
 
 /** `rezolvoj.json` as a value: one Rezolvo per combination, in `allAssignments` order. Pure. */
@@ -190,5 +197,6 @@ export function exportModelo(input: ModeloExportInput): ModeloExport {
     modeloJson: serializeCanonicalJson(buildModeloJson(input)),
     schemaJson: serializeCanonicalJson(input.schema),
     rezolvojJson: serializeCanonicalJson(buildRezolvojJson(input.modelo)),
+    vortaro: buildVortaroFolders(input.modelo, input.sets),
   };
 }

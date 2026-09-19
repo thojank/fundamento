@@ -323,6 +323,12 @@ export interface ModeloJson {
   kontrastParoj: KontrastParo[];
   eroj: Ero[];
   rezolvo: Rezolvo;
+  /**
+   * Facts of the core (Spec 001, FR-10): the reference Aspekto whose values live in core.
+   */
+  core?: {
+    referenceAspekto?: Name;
+  };
 }
 /**
  * An adaptation dimension. priority is unique; 1 is lowest and higher priorities win in resolution. The values of the aspekto Dimensio come from the loaded Aspekto packages (Spec 001, D-05), so dimensioj.json lists none for it; every other Dimensio lists its values (dimensio-default-invalid otherwise).

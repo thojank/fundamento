@@ -123,7 +123,7 @@ function pathArgument(
   return flag ?? positional;
 }
 
-function formatIssue(issue: ValidationIssue): string {
+export function formatIssue(issue: ValidationIssue): string {
   const lines = [
     `  [${issue.severity}] ${issue.rule}`,
     `    path:        ${issue.path}`,

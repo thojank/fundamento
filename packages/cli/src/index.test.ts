@@ -1,5 +1,6 @@
 import { spawnSync } from "node:child_process";
-import { existsSync, readFileSync } from "node:fs";
+import { createHash } from "node:crypto";
+import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -285,5 +286,64 @@ describe("usage errors", () => {
     expect(run.code).toBe(2);
     expect(run.stderr).toContain("--path");
     expectNoStackTrace(run);
+  });
+});
+
+describe("fm modelo export (Spec 001 T019, D-09)", () => {
+  const ekzempla = join(validFixtures, "aspekto-ekzemplo", "fundamento.config.json");
+
+  function sha(dir: string): Record<string, string> {
+    const out: Record<string, string> = {};
+    const walk = (path: string, rel: string): void => {
+      for (const entry of readdirSync(path, { withFileTypes: true })) {
+        const child = join(path, entry.name);
+        if (entry.isDirectory()) walk(child, `${rel}${entry.name}/`);
+        else
+          out[`${rel}${entry.name}`] = createHash("sha256")
+            .update(readFileSync(child))
+            .digest("hex");
+      }
+    };
+    walk(dir, "");
+    return out;
+  }
+
+  it("writes the export and one Tokens-Studio folder per Aspekto for a project config", () => {
+    const out = mkdtempSync(join(tmpdir(), "fm-export-"));
+    const run = fm(["modelo", "export", "--config", ekzempla, "--out", out]);
+    expect(run.code, run.stderr).toBe(0);
+    const files = Object.keys(sha(out));
+    for (const file of ["modelo.json", "modelo.schema.json", "rezolvoj.json"]) {
+      expect(files).toContain(file);
+    }
+    expect(files).toContain("vortaro/ekzemplo/$themes.json");
+    expect(files).toContain("vortaro/komuna/sets/core.json");
+    rmSync(out, { recursive: true, force: true });
+  });
+
+  it("is byte-identical over two runs (AK-10)", () => {
+    const first = mkdtempSync(join(tmpdir(), "fm-export-"));
+    const second = mkdtempSync(join(tmpdir(), "fm-export-"));
+    expect(fm(["modelo", "export", "--config", ekzempla, "--out", first]).code).toBe(0);
+    expect(fm(["modelo", "export", "--config", ekzempla, "--out", second]).code).toBe(0);
+    expect(sha(first)).toEqual(sha(second));
+    rmSync(first, { recursive: true, force: true });
+    rmSync(second, { recursive: true, force: true });
+  });
+
+  it("writes nothing and exits 1 for an invalid project Modelo", () => {
+    const out = join(mkdtempSync(join(tmpdir(), "fm-export-")), "export");
+    const config = join(invalidFixtures, "aspekto-incomplete", "fundamento.config.json");
+    const run = fm(["modelo", "export", "--config", config, "--out", out]);
+    expect(run.code).toBe(1);
+    expect(run.stderr).toContain("aspekto-incomplete");
+    expect(existsSync(out)).toBe(false);
+  });
+
+  it("explains itself with --help", () => {
+    const run = fm(["modelo", "export", "--help"]);
+    expect(run.code).toBe(0);
+    expect(run.stdout).toContain("--config");
+    expect(run.stdout).toContain(".fundamento/export");
   });
 });
