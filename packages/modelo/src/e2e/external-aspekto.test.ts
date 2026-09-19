@@ -28,7 +28,10 @@ describe("valid/aspekto-ekzemplo with the repo core (AK-03)", () => {
     ]);
   });
 
-  it("validates without errors or warnings: complete, namespaced, fonts declared", () => {
+  // Full validation of 144 combinations: ~1 s alone, several seconds on a loaded runner.
+  it("validates without errors or warnings: complete, namespaced, fonts declared", {
+    timeout: 30_000,
+  }, () => {
     const report = validateModelo(source);
     expect(report.errors).toEqual([]);
     expect(report.warnings).toEqual([]);

@@ -77,7 +77,7 @@ describe("describeModelo", () => {
       eroCount: 0,
     });
     expect(description.sentence).toBe(
-      "Fundamento v1.2.3: one Dimensio (aspekto), two Aspektoj `a`, `b`, 2 tokens in one type, one rule with reasons, no Eroj.",
+      "Fundamento v1.2.3: one Dimensio (aspekto), two Aspektoj (`a`; `b`), 2 tokens in one type (color 2), one rule with reasons, no Jugxoj, no Eroj.",
     );
   });
 
@@ -93,7 +93,7 @@ describe("describeModelo", () => {
       }),
     );
     expect(description.typeCount).toBe(2);
-    expect(description.sentence).toContain("3 tokens in two types");
+    expect(description.sentence).toContain("3 tokens in two types (color 1, size 2)");
   });
 
   it("says how many rules carry a reason when not all do", () => {

@@ -78,7 +78,10 @@ describe("Tokens-Studio folder per Aspekto (D-09)", () => {
     );
   });
 
-  it("is byte-identical over two exports, with and without the external package (AK-10)", () => {
+  // Four full exports (two with 144 combinations): ~2.5 s alone, more on a loaded CI runner.
+  it("is byte-identical over two exports, with and without the external package (AK-10)", {
+    timeout: 30_000,
+  }, () => {
     const hash = (value: ModeloExport) =>
       createHash("sha256").update(JSON.stringify(value)).digest("hex");
     expect(hash(exportOf())).toBe(hash(exportOf()));
