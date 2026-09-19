@@ -5,7 +5,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
-// These tests drive the built binary, exactly as `pnpm fm` does (Turbo builds before testing).
+// These tests drive the built binary, exactly as `pnpm fm` does (vitest.global-setup.ts builds it).
 const built = fileURLToPath(new URL("../dist/index.js", import.meta.url));
 const cliDir = fileURLToPath(new URL("..", import.meta.url));
 const repoRoot = dirname(dirname(cliDir));
@@ -52,6 +52,13 @@ function validateFixtures(): string[] {
     return typeof expected === "object" && expected !== null && !("check" in expected);
   });
 }
+
+describe("test budget", () => {
+  // A cold CI runner took 5.3 s for one spawn; Vitest's 5 s default made the gate flaky.
+  it("gives process-spawning tests a timeout sized for a cold CI runner", ({ task }) => {
+    expect(task.timeout).toBeGreaterThanOrEqual(30_000);
+  });
+});
 
 describe("fm binary", () => {
   it("is built with a node shebang", () => {

@@ -276,6 +276,7 @@ Deviations from the Constitution and from the spec, with the reason and the debt
 | **Test-first deviation** (Art. X) | FUND-4.1's export tests were written first but first run after implementation. | Recorded as the Jugxo `jug_01M2VRT7KQ77W91MVXB4GXSRZ4` on Article X; the red run is now part of ticket completion. |
 | **Jugxo on a constitution Article** (FR-08) | FR-08 lets a Jugxo reference a Regulo or an Ero, and Phase 0 was to ship no Jugxoj. Recording a deviation from the constitution itself needs a reference to an Article. | The schema gained `JugxoArtikoloRef` (`{ artikolo: "I".."XIII" }`) and the decision `deviation-recorded`; validation and `check:regularo` accept Article references. Phase 0 ships one Jugxo. Decided by the maintainer on 2026-09-19. |
 | **ID lock never created implicitly** | QA found that a mistyped `--lock` path silently created a second registry. | `id:new` / `id:retire` fail with `file-missing` (exit 1) when the lock does not exist and never create files or directories. A new registry is started by creating `{ "ids": {} }` on purpose. |
+| **30 s timeout for spawn tests** (Art. X) | CI #1 (on `6e517c6`) failed when one cli test that spawns the built `fm` took 5295 ms on a cold runner, over Vitest's 5 s default. `packages/cli/vitest.config.ts` sets `testTimeout: 30_000` for the cli package only; its global setup builds cli and its dependencies outside Turborepo. | Recorded as the Jugxo `jug_01M2W3K1YPP05F4XF86J71RGTK` on Article X. |
 
 ## Penpot import result
 

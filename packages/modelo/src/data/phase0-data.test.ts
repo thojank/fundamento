@@ -323,13 +323,13 @@ describe("Phase 0 repo Modelo: sets (FR-10, FR-12)", () => {
 });
 
 describe("Phase 0 repo Modelo: Regularo (FR-08)", () => {
-  it("has exactly two Reguloj with a kialo and the Article X Jugxo", () => {
+  it("has exactly two Reguloj with a kialo and the Article X Jugxoj", () => {
     const modelo = repoModelo();
     expect(modelo.reguloj).toHaveLength(2);
     for (const regulo of modelo.reguloj) {
       expect(regulo.kialo.trim().length, regulo.name).toBeGreaterThan(40);
     }
-    expect(modelo.jugxoj).toHaveLength(1);
+    expect(modelo.jugxoj).toHaveLength(2);
     expect(modelo.jugxoj[0]).toMatchObject({
       ref: { artikolo: "X" },
       decision: "deviation-recorded",
@@ -337,7 +337,14 @@ describe("Phase 0 repo Modelo: Regularo (FR-08)", () => {
         "FUND-4.1 wrote tests before code but ran them only afterwards, so they were never observed failing; from now on the red run is part of ticket completion",
       date: "2026-09-19",
     });
-    expect(modelo.jugxoj[0]?.id).toMatch(/^jug_/);
+    expect(modelo.jugxoj[1]).toMatchObject({
+      ref: { artikolo: "X" },
+      decision: "deviation-recorded",
+      kialo:
+        "Tests that spawn processes must have timeouts sized for a cold CI runner, otherwise the gate flakes and loses authority.",
+      date: "2026-09-19",
+    });
+    for (const jugxo of modelo.jugxoj) expect(jugxo.id).toMatch(/^jug_/);
   });
 });
 

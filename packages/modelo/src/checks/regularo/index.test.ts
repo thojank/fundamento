@@ -44,7 +44,7 @@ describe("regularo on the repo", () => {
     const result = await check({ json: true, repoRoot });
     expect(result.errors).toEqual([]);
     expect(result).toMatchObject({ check: "regularo", ok: true, warnings: [] });
-    expect(result.stats).toEqual({ reguloj: 2, jugxoj: 1 });
+    expect(result.stats).toEqual({ reguloj: 2, jugxoj: 2 });
   });
 });
 
