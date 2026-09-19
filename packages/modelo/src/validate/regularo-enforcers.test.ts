@@ -16,7 +16,9 @@ function enforce(name: string, mutate: (modelo: Modelo) => void = () => {}) {
   mutate(modelo);
   const enforcer = REGULO_ENFORCERS[name];
   if (enforcer === undefined) throw new Error(`no enforcer for ${name}`);
-  return enforcer(modelo).map((issue) => [issue.rule, issue.path]);
+  const regulo = modelo.reguloj.find((candidate) => candidate.name === name);
+  if (regulo === undefined) throw new Error(`no Regulo ${name}`);
+  return enforcer(modelo, regulo).map((issue) => [issue.rule, issue.path]);
 }
 
 const set = (modelo: Modelo, name: string) => {

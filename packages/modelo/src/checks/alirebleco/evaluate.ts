@@ -10,7 +10,13 @@ import { appendPointer } from "../../json/pointer.js";
 import { isJsonObject } from "../../load/guards.js";
 import { allAssignments, formatCombination } from "../../resolve/assignment.js";
 import { resolveCombination } from "../../resolve/resolve.js";
-import { alphaOf, compositeOver, readDtcgColor } from "./color.js";
+import { alphaOf, readDtcgColor } from "./color.js";
+import {
+  type BranchMeasurement,
+  combineBranches,
+  measureBranch,
+  type PairMeasurement,
+} from "./measure.js";
 import { APCA_METRIC, type ContrastMetric, WCAG2_METRIC } from "./metrics.js";
 
 /** A metric plus what a shortfall means: binding (error) or advisory (warning). */
@@ -33,6 +39,15 @@ export interface EvaluateAlireblecoOptions {
   dimensiojFile?: string;
   /** Metrics to apply; default {@link DEFAULT_METRIC_BINDINGS}. */
   metrics?: readonly MetricBinding[];
+  /** Also return every measurement (pair × combination), for parity with check_contrast. */
+  collect?: boolean;
+}
+
+/** A pair × combination whose result the alternative pair carries (Spec 002, FR-07). */
+export interface AuxBranchEntry {
+  pair: string;
+  combination: string;
+  branch: "aux";
 }
 
 export interface AlireblecoEvaluation {
@@ -44,6 +59,10 @@ export interface AlireblecoEvaluation {
    * something was measured) and `minRatio:<pair>` per measured pair.
    */
   stats: Record<string, number>;
+  /** Every pair × combination whose result the aux pair carries, in canonical order. */
+  branches: AuxBranchEntry[];
+  /** With `collect: true`: every measurement, in canonical order (combination, then pair). */
+  measurements?: PairMeasurement[];
 }
 
 const KATEGORIOJ: readonly KontrastKategorio[] = ["text-normal", "text-large", "ui"];
@@ -95,6 +114,14 @@ function sojlojOf(
     : undefined;
   const sojloj: unknown = isJsonObject(valoro) ? valoro.kontrastSojloj : undefined;
   return isJsonObject(sojloj) ? (sojloj as unknown as KontrastSojloj) : undefined;
+}
+
+/** The `kontrastSojloj` active in a complete assignment (Spec 002: shared with check_contrast). */
+export function kontrastSojlojOf(
+  modelo: Modelo,
+  assignment: Record<string, string>,
+): KontrastSojloj | undefined {
+  return sojlojOf(thresholdDimensio(modelo), assignment);
 }
 
 function thresholdOf(
@@ -161,14 +188,35 @@ export function evaluateAlirebleco(
       });
       ok = false;
     }
-    for (const field of ["foreground", "background"] as const) {
-      const tokenName: unknown = entry.pair[field];
+    const members: {
+      holder: Record<string, unknown>;
+      field: "foreground" | "background";
+      at: string;
+    }[] = [
+      {
+        holder: entry.pair as unknown as Record<string, unknown>,
+        field: "foreground",
+        at: "foreground",
+      },
+      {
+        holder: entry.pair as unknown as Record<string, unknown>,
+        field: "background",
+        at: "background",
+      },
+    ];
+    const aux: unknown = entry.pair.aux;
+    if (isJsonObject(aux)) {
+      members.push({ holder: aux, field: "foreground", at: "aux/foreground" });
+      members.push({ holder: aux, field: "background", at: "aux/background" });
+    }
+    for (const { holder, field, at } of members) {
+      const tokenName: unknown = holder[field];
       const token = typeof tokenName === "string" ? own(core?.tokens, tokenName) : undefined;
       if (token === undefined) {
         errors.push({
           rule: "kontrastparo-token-missing",
           severity: "error",
-          path: pairPointer(entry.index, field),
+          path: pairPointer(entry.index, at),
           message: `KontrastParo '${entry.name}': ${field} token '${String(tokenName)}' is not defined in core.`,
           suggestion: `Point ${field} at an existing core color token, or define '${String(tokenName)}' in core.`,
         });
@@ -177,7 +225,7 @@ export function evaluateAlirebleco(
         errors.push({
           rule: "kontrastparo-not-color",
           severity: "error",
-          path: pairPointer(entry.index, field),
+          path: pairPointer(entry.index, at),
           message: `KontrastParo '${entry.name}': ${field} token '${token.name}' has type '${token.type}', not 'color'.`,
           suggestion: `Point ${field} at a color token.`,
         });
@@ -201,6 +249,9 @@ export function evaluateAlirebleco(
     });
   }
 
+  const collect = options.collect === true;
+  const branches: AuxBranchEntry[] = [];
+  const measurements: PairMeasurement[] = [];
   const reportedSojloj = new Set<string>();
   const minima = new Map<string, number>();
   for (const assignment of assignments) {
@@ -217,49 +268,61 @@ export function evaluateAlirebleco(
       const kategorio = pair.kategorio;
       const path = `rezolvo(${combination})/kontrastParo/${name}`;
       const context = { path, combination: { ...complete } };
-      const colors: Partial<Record<"foreground" | "background", ColorValue>> = {};
-      for (const field of ["foreground", "background"] as const) {
-        const resolved = own(resolution.tokens, pair[field]);
-        if (resolved === undefined) {
+      const auxPair = isJsonObject(pair.aux) ? pair.aux : undefined;
+
+      /** Resolved colours of one branch, or undefined after reporting why they are missing. */
+      const branchColors = (
+        names: { foreground: string; background: string },
+        label: string,
+      ): { foreground: ColorValue; background: ColorValue } | undefined => {
+        const colors: Partial<Record<"foreground" | "background", ColorValue>> = {};
+        for (const field of ["foreground", "background"] as const) {
+          const tokenName = names[field];
+          const resolved = own(resolution.tokens, tokenName);
+          if (resolved === undefined) {
+            errors.push({
+              rule: "kontrastparo-token-missing",
+              severity: "error",
+              ...context,
+              message: `KontrastParo '${name}': ${label}${field} token '${tokenName}' does not resolve in ${combination}.`,
+              suggestion: `Fix the alias chain of '${tokenName}' for this combination (see the resolver's alias-* issues).`,
+            });
+            continue;
+          }
+          const color = readDtcgColor(resolved.value);
+          if (color === undefined) {
+            errors.push({
+              rule: "kontrastparo-not-color",
+              severity: "error",
+              ...context,
+              message: `KontrastParo '${name}': ${label}${field} token '${tokenName}' resolves to a value that is not a DTCG color in ${combination} (set '${resolved.origin.set}').`,
+              suggestion: `Give '${tokenName}' a color value ({ colorSpace, components[3], alpha? }) in set '${resolved.origin.set}'.`,
+            });
+            continue;
+          }
+          colors[field] = color;
+        }
+        const { foreground, background } = colors;
+        if (foreground === undefined || background === undefined) return undefined;
+        if (alphaOf(background) < 1) {
+          const origin = own(resolution.tokens, names.background)?.origin.set ?? CORE_SET_NAME;
           errors.push({
-            rule: "kontrastparo-token-missing",
+            rule: "kontrastparo-background-transparent",
             severity: "error",
             ...context,
-            message: `KontrastParo '${name}': ${field} token '${pair[field]}' does not resolve in ${combination}.`,
-            suggestion: `Fix the alias chain of '${pair[field]}' for this combination (see the resolver's alias-* issues).`,
+            message: `KontrastParo '${name}': ${label}background '${names.background}' has alpha ${alphaOf(background)} in ${combination}; contrast against an unknown backdrop cannot be determined.`,
+            suggestion: `Make '${names.background}' opaque (alpha 1) in set '${origin}', or pair the foreground with an opaque background token.`,
           });
-          continue;
+          return undefined;
         }
-        const color = readDtcgColor(resolved.value);
-        if (color === undefined) {
-          errors.push({
-            rule: "kontrastparo-not-color",
-            severity: "error",
-            ...context,
-            message: `KontrastParo '${name}': ${field} token '${pair[field]}' resolves to a value that is not a DTCG color in ${combination} (set '${resolved.origin.set}').`,
-            suggestion: `Give '${pair[field]}' a color value ({ colorSpace, components[3], alpha? }) in set '${resolved.origin.set}'.`,
-          });
-          continue;
-        }
-        colors[field] = color;
-      }
-      const { foreground, background } = colors;
-      if (foreground === undefined || background === undefined) {
+        return { foreground, background };
+      };
+
+      const mainNames = { foreground: pair.foreground, background: pair.background };
+      const mainColors = branchColors(mainNames, "");
+      if (mainColors === undefined) {
         continue;
       }
-      if (alphaOf(background) < 1) {
-        const origin = own(resolution.tokens, pair.background)?.origin.set ?? CORE_SET_NAME;
-        errors.push({
-          rule: "kontrastparo-background-transparent",
-          severity: "error",
-          ...context,
-          message: `KontrastParo '${name}': background '${pair.background}' has alpha ${alphaOf(background)} in ${combination}; contrast against an unknown backdrop cannot be determined.`,
-          suggestion: `Make '${pair.background}' opaque (alpha 1) in set '${origin}', or pair the foreground with an opaque background token.`,
-        });
-        continue;
-      }
-      const effective =
-        alphaOf(foreground) < 1 ? compositeOver(foreground, background) : foreground;
       if (sojloj === undefined) {
         if (activeValoro !== undefined && !reportedSojloj.has(activeValoro)) {
           reportedSojloj.add(activeValoro);
@@ -273,34 +336,107 @@ export function evaluateAlirebleco(
         }
         continue;
       }
+      const metricList = metrics.map((binding) => binding.metric);
+      const main = measureBranch(
+        mainNames,
+        mainColors.foreground,
+        mainColors.background,
+        kategorio,
+        sojloj,
+        metricList,
+      );
+      let aux: BranchMeasurement | undefined;
+      if (auxPair !== undefined) {
+        const auxNames = {
+          foreground: String(auxPair.foreground),
+          background: String(auxPair.background),
+        };
+        const auxColors = branchColors(auxNames, "aux ");
+        if (auxColors !== undefined) {
+          aux = measureBranch(
+            auxNames,
+            auxColors.foreground,
+            auxColors.background,
+            kategorio,
+            sojloj,
+            metricList,
+          );
+        }
+      }
+      const { passed, branch } = combineBranches(main, aux);
+      const carrying = branch === "aux" && aux !== undefined ? aux : main;
+
       stats.evaluations = (stats.evaluations ?? 0) + 1;
+      for (const { metric } of metrics) {
+        if (main.metrics[metric.id]?.threshold !== undefined) {
+          const statKey = `${metric.id}Evaluations`;
+          stats[statKey] = (stats[statKey] ?? 0) + 1;
+        }
+      }
+      const previous = minima.get(name);
+      minima.set(
+        name,
+        previous === undefined ? carrying.ratio : Math.min(previous, carrying.ratio),
+      );
+      if (branch === "aux") {
+        stats.auxBranch = (stats.auxBranch ?? 0) + 1;
+        stats[`branch:aux:${name}`] = (stats[`branch:aux:${name}`] ?? 0) + 1;
+        branches.push({ pair: name, combination, branch: "aux" });
+      }
+      if (collect) {
+        const measured: PairMeasurement = {
+          pair: {
+            id: String(pair.id),
+            name,
+            ...(typeof pair.kialo === "string" ? { kialo: pair.kialo } : {}),
+          },
+          combination: { ...complete },
+          kategorio,
+          ...(main.metrics[metrics[0]?.metric.id ?? ""]?.threshold === undefined
+            ? {}
+            : { threshold: main.metrics[metrics[0]?.metric.id ?? ""]?.threshold as number }),
+          main,
+          ...(aux === undefined ? {} : { aux }),
+          passed,
+          branch,
+        };
+        measurements.push(measured);
+      }
+
+      const tokens = resolution.tokens;
       for (const [position, binding] of metrics.entries()) {
         const { metric } = binding;
-        const threshold = thresholdOf(sojloj, metric, kategorio);
-        if (threshold === undefined) {
+        // The binding metric fails only when no branch carries the pair; advisory metrics are
+        // reported on the branch that carries it (the main pair when none does).
+        const source = position === 0 ? main : carrying;
+        const measuredMetric = source.metrics[metric.id];
+        if (measuredMetric?.threshold === undefined || measuredMetric.passed !== false) {
           continue;
         }
-        const value = metric.compute(effective, background);
-        const statKey = `${metric.id}Evaluations`;
-        stats[statKey] = (stats[statKey] ?? 0) + 1;
-        if (position === 0) {
-          const previous = minima.get(name);
-          minima.set(name, previous === undefined ? value : Math.min(previous, value));
-        }
-        if (metric.passes(value, threshold)) {
+        if (position === 0 && passed) {
           continue;
         }
-        const tokens = resolution.tokens;
-        const fgSet = own(tokens, pair.foreground)?.origin.set ?? CORE_SET_NAME;
-        const bgSet = own(tokens, pair.background)?.origin.set ?? CORE_SET_NAME;
-        const translucency =
-          effective === foreground ? "" : ` (foreground alpha ${alphaOf(foreground)} composited)`;
+        const threshold = measuredMetric.threshold;
+        const describe = (branchValue: BranchMeasurement): string => {
+          const value = branchValue.metrics[metric.id]?.value ?? 0;
+          const translucency = branchValue.composited
+            ? ` (foreground alpha ${branchValue.foregroundAlpha} composited)`
+            : "";
+          return `${branchValue.foreground} on ${branchValue.background} has ${metric.label} ${metric.formatValue(value)}${translucency}`;
+        };
+        const alternative =
+          position === 0 && aux !== undefined ? `, and the alternative pair ${describe(aux)}` : "";
+        const fgSet = own(tokens, source.foreground)?.origin.set ?? CORE_SET_NAME;
+        const bgSet = own(tokens, source.background)?.origin.set ?? CORE_SET_NAME;
         const issue: ValidationIssue = {
           rule: binding.rule,
           severity: binding.severity,
           ...context,
-          message: `KontrastParo '${name}' (${kategorio}): ${pair.foreground} on ${pair.background} has ${metric.label} ${metric.formatValue(value)}${translucency} in ${combination}, below the threshold ${metric.formatThreshold(threshold)} of ${activeValoro ?? "the active contrast valoro"}.`,
-          suggestion: `Adjust the token values of '${pair.foreground}' (set '${fgSet}') or '${pair.background}' (set '${bgSet}') for this combination; do not lower the threshold.`,
+          message: `KontrastParo '${name}' (${kategorio}): ${describe(source)}${alternative} in ${combination}, below the threshold ${metric.formatThreshold(threshold)} of ${activeValoro ?? "the active contrast valoro"}.`,
+          suggestion:
+            position === 0 && aux !== undefined
+              ? `Adjust '${pair.foreground}' or '${pair.background}', or give the alternative '${aux.foreground}' (set '${own(tokens, aux.foreground)?.origin.set ?? CORE_SET_NAME}') a step that reaches the threshold; do not lower the threshold.`
+              : `Adjust the token values of '${source.foreground}' (set '${fgSet}') or '${source.background}' (set '${bgSet}') for this combination; do not lower the threshold.`,
         };
         (binding.severity === "error" ? errors : warnings).push(issue);
       }
@@ -314,5 +450,5 @@ export function evaluateAlirebleco(
   for (const [name, value] of minima) {
     stats[`minRatio:${name}`] = Math.trunc(value * 100 + 1e-9) / 100;
   }
-  return { errors, warnings, stats };
+  return { errors, warnings, stats, branches, ...(collect ? { measurements } : {}) };
 }

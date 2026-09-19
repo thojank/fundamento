@@ -272,3 +272,68 @@ describe("built runner", () => {
     );
   });
 });
+
+describe("KontrastParo aux branches (Spec 002 FR-07, D-09, AK-03)", () => {
+  const PAIR = "status-warning-basic-on-background-default";
+
+  it("passes when the fill misses 3:1 and the border reaches it, and reports the aux branch", async () => {
+    const result = await check({
+      json: true,
+      repoRoot,
+      fixture: fixture("valid/kontrastparo-aux-carries"),
+    });
+    expect(result.errors).toEqual([]);
+    expect(result.ok).toBe(true);
+    expect(result.stats.auxBranch).toBe(4);
+    expect(result.stats[`branch:aux:${PAIR}`]).toBe(4);
+    expect(result.branches?.map((entry) => [entry.pair, entry.branch])).toEqual(
+      Array.from({ length: 4 }, () => [PAIR, "aux"]),
+    );
+    // The minimum reported for a pair is the ratio of the branch that carries it.
+    expect(result.stats[`minRatio:${PAIR}`]).toBeGreaterThanOrEqual(3);
+  });
+
+  it("fails when both branches miss and names both pairs with their ratios", async () => {
+    const name = "invalid/kontrastparo-aux-both-fail";
+    const result = await check({ json: true, repoRoot, fixture: fixture(name) });
+    expect(pairs(result.errors)).toEqual(expectedIssues(name).issues);
+    for (const issue of result.errors) {
+      expect(issue.message).toContain("color.status.warning.basic on color.background.default");
+      expect(issue.message).toContain("color.status.warning.border on color.background.default");
+      expect(issue.message.match(/\d+\.\d{2}:1/g)?.length).toBeGreaterThanOrEqual(2);
+    }
+  });
+
+  it("collects one measurement per pair and combination, in canonical order", () => {
+    const { modelo } = loadModelo(fixtureModeloSource(fixture("valid/kontrastparo-aux-carries")));
+    if (modelo === undefined) throw new Error("fixture did not load");
+    const evaluation = evaluateAlirebleco(modelo, { kontrastParojFile: DATA, collect: true });
+    const measurements = evaluation.measurements ?? [];
+    expect(measurements).toHaveLength(8);
+    const warning = measurements.filter((entry) => entry.pair.name === PAIR);
+    expect(warning.map((entry) => entry.branch)).toEqual(["aux", "aux", "aux", "aux"]);
+    for (const entry of warning) {
+      expect(entry.main.passed).toBe(false);
+      expect(entry.aux?.passed).toBe(true);
+      expect(entry.passed).toBe(true);
+      expect(entry.pair.kialo).toContain("1.4.11");
+    }
+    const text = measurements.filter((entry) => entry.pair.name === "text-on-background");
+    expect(text.every((entry) => entry.branch === "main" && entry.aux === undefined)).toBe(true);
+  });
+
+  it("measures and returns the aux pair even when the main pair passes", () => {
+    const { modelo } = loadModelo(fixtureModeloSource(fixture("valid/kontrastparo-aux-carries")));
+    if (modelo === undefined) throw new Error("fixture did not load");
+    const core = modelo.setoj.find((set) => set.name === "core");
+    const basic = core?.tokens["color.status.warning.basic"];
+    if (basic === undefined) throw new Error("missing token");
+    basic.value = "{color.palette.neutral.900}";
+    const evaluation = evaluateAlirebleco(modelo, { kontrastParojFile: DATA, collect: true });
+    const light = (evaluation.measurements ?? []).find(
+      (entry) => entry.pair.name === PAIR && entry.combination["color-scheme"] === "light",
+    );
+    expect(light?.branch).toBe("main");
+    expect(light?.aux?.ratio).toBeGreaterThan(0);
+  });
+});

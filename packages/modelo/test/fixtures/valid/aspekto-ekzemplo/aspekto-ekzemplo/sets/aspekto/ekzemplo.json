@@ -929,13 +929,13 @@
           "$value": "{color.palette.neutral.0}"
         },
         "hover": {
-          "$value": "{color.palette.neutral.50}"
-        },
-        "pressed": {
           "$value": "{color.palette.neutral.100}"
         },
+        "pressed": {
+          "$value": "{color.palette.neutral.200}"
+        },
         "selected": {
-          "$value": "{color.palette.accent.50}"
+          "$value": "{color.palette.accent.100}"
         },
         "disabled": {
           "$value": "{color.palette.neutral.0}"
@@ -980,11 +980,14 @@
         },
         "on": {
           "$value": "{color.palette.neutral.0}"
+        },
+        "border": {
+          "$value": "{color.palette.success.700}"
         }
       },
       "warning": {
         "basic": {
-          "$value": "{color.palette.warning.600}"
+          "$value": "{color.palette.warning.200}"
         },
         "weak": {
           "$value": "{color.palette.warning.100}"
@@ -996,7 +999,10 @@
           "$value": "{color.palette.warning.800}"
         },
         "on": {
-          "$value": "{color.palette.neutral.0}"
+          "$value": "{color.palette.neutral.900}"
+        },
+        "border": {
+          "$value": "{color.palette.warning.700}"
         }
       },
       "danger": {
@@ -1014,6 +1020,9 @@
         },
         "on": {
           "$value": "{color.palette.neutral.0}"
+        },
+        "border": {
+          "$value": "{color.palette.danger.700}"
         }
       },
       "info": {
@@ -1031,6 +1040,9 @@
         },
         "on": {
           "$value": "{color.palette.neutral.0}"
+        },
+        "border": {
+          "$value": "{color.palette.info.700}"
         }
       }
     },

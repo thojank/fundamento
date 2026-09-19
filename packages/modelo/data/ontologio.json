@@ -1,0 +1,774 @@
+{
+  "$schema": "../schema/ontologio.schema.json",
+  "uri": "https://fundamento.ciferecigo.com/ontologio",
+  "constitution": "1.4",
+  "schemes": [
+    {
+      "id": "terminologio",
+      "definition": {
+        "en": "The binding terminology of the Constitution (table Terminologio).",
+        "de": "Die verbindliche Terminologie der Constitution (Tabelle Terminologio)."
+      }
+    },
+    {
+      "id": "modelo",
+      "definition": {
+        "en": "Entity types of the Modelo schema that the terminology table does not name.",
+        "de": "Entitätsarten des Modelo-Schemas, die die Terminologie-Tabelle nicht nennt."
+      }
+    }
+  ],
+  "predicates": [
+    {
+      "id": "partOf",
+      "definition": {
+        "en": "The subject is a component of the target.",
+        "de": "Das Subjekt ist Bestandteil des Ziels."
+      }
+    },
+    {
+      "id": "assigns",
+      "definition": {
+        "en": "The subject gives values to every entry of the target.",
+        "de": "Das Subjekt belegt jeden Eintrag des Ziels mit einem Wert."
+      }
+    },
+    {
+      "id": "varies",
+      "definition": {
+        "en": "The subject changes values of the target per value.",
+        "de": "Das Subjekt verändert Werte des Ziels je Wert."
+      }
+    },
+    {
+      "id": "derivedFrom",
+      "definition": {
+        "en": "The subject is generated from the target.",
+        "de": "Das Subjekt wird aus dem Ziel erzeugt."
+      }
+    },
+    {
+      "id": "specifies",
+      "definition": {
+        "en": "The subject is the machine-readable specification of the target.",
+        "de": "Das Subjekt ist die maschinenlesbare Spezifikation des Ziels."
+      }
+    },
+    {
+      "id": "references",
+      "definition": {
+        "en": "The subject points at the target.",
+        "de": "Das Subjekt verweist auf das Ziel."
+      }
+    },
+    {
+      "id": "explains",
+      "definition": {
+        "en": "The subject answers questions about the target.",
+        "de": "Das Subjekt beantwortet Fragen zum Ziel."
+      }
+    },
+    {
+      "id": "writes",
+      "definition": {
+        "en": "The subject writes its output into the target.",
+        "de": "Das Subjekt schreibt sein Ergebnis in das Ziel."
+      }
+    }
+  ],
+  "concepts": [
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Fundamento",
+      "term": "Fundamento",
+      "inScheme": "terminologio",
+      "prefLabel": {
+        "eo": "Fundamento",
+        "en": "Fundamento",
+        "de": "Fundamento"
+      },
+      "altLabel": {
+        "en": [
+          "design system"
+        ],
+        "de": [
+          "Designsystem"
+        ]
+      },
+      "definition": {
+        "en": "The system as a whole; the core that is not up for negotiation.",
+        "de": "Das System als Ganzes; der unantastbare Kern."
+      }
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Modelo",
+      "term": "Modelo",
+      "inScheme": "terminologio",
+      "prefLabel": {
+        "eo": "Modelo",
+        "en": "model",
+        "de": "Modell"
+      },
+      "altLabel": {
+        "en": [
+          "data model",
+          "single source of truth"
+        ],
+        "de": [
+          "Datenmodell"
+        ]
+      },
+      "definition": {
+        "en": "The canonical data model of the system and its single source of truth; everything else is derived from it.",
+        "de": "Das kanonische Datenmodell des Systems und seine einzige Quelle der Wahrheit; alles andere wird daraus abgeleitet."
+      },
+      "broader": [
+        "#Fundamento"
+      ],
+      "relations": [
+        {
+          "predicate": "partOf",
+          "target": "#Fundamento"
+        }
+      ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Vortaro",
+      "term": "Vortaro",
+      "inScheme": "terminologio",
+      "prefLabel": {
+        "eo": "Vortaro",
+        "en": "vocabulary",
+        "de": "Vokabular"
+      },
+      "altLabel": {
+        "en": [
+          "design tokens",
+          "token vocabulary"
+        ],
+        "de": [
+          "Tokens",
+          "Token-Vokabular"
+        ]
+      },
+      "definition": {
+        "en": "The token vocabulary: names, types and alias chains; the token layer of the model.",
+        "de": "Das Token-Vokabular: Namen, Typen, Alias-Ketten; die Token-Ebene des Modells."
+      },
+      "broader": [
+        "#Modelo"
+      ],
+      "relations": [
+        {
+          "predicate": "partOf",
+          "target": "#Modelo"
+        }
+      ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Aspekto",
+      "term": "Aspekto",
+      "inScheme": "terminologio",
+      "prefLabel": {
+        "eo": "Aspekto",
+        "en": "brand theme",
+        "de": "Markenausprägung"
+      },
+      "altLabel": {
+        "en": [
+          "brand",
+          "theme"
+        ],
+        "de": [
+          "Marke",
+          "Brand Theme"
+        ]
+      },
+      "definition": {
+        "en": "One brand's complete assignment of the vocabulary, shipped as its own package inside or outside the core repository.",
+        "de": "Eine vollständige Belegung des Vokabulars für eine Marke, als eigenes Paket im Kern-Repo oder außerhalb."
+      },
+      "broader": [
+        "#Modelo"
+      ],
+      "related": [
+        "#Dimensio"
+      ],
+      "relations": [
+        {
+          "predicate": "assigns",
+          "target": "#Vortaro"
+        }
+      ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Dimensio",
+      "term": "Dimensio",
+      "inScheme": "terminologio",
+      "notation": "dimensio",
+      "prefLabel": {
+        "eo": "Dimensio",
+        "en": "dimension",
+        "de": "Dimension"
+      },
+      "altLabel": {
+        "en": [
+          "mode",
+          "adaptation dimension"
+        ],
+        "de": [
+          "Modus",
+          "Adaptionsdimension"
+        ]
+      },
+      "definition": {
+        "en": "An adaptation dimension such as colour scheme, density or contrast; each value of a dimension changes tokens through its own set.",
+        "de": "Eine Adaptionsdimension wie Farbmodus, Dichte oder Kontrast; jeder Wert einer Dimension verändert Tokens über ein eigenes Set."
+      },
+      "broader": [
+        "#Modelo"
+      ],
+      "related": [
+        "#Aspekto"
+      ],
+      "relations": [
+        {
+          "predicate": "varies",
+          "target": "#Vortaro"
+        }
+      ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Ero",
+      "term": "Ero",
+      "inScheme": "terminologio",
+      "notation": "ero",
+      "prefLabel": {
+        "eo": "Ero",
+        "en": "component",
+        "de": "Komponente"
+      },
+      "altLabel": {
+        "en": [
+          "element"
+        ],
+        "de": [
+          "Element"
+        ]
+      },
+      "definition": {
+        "en": "A component (element) of the system.",
+        "de": "Eine Komponente (Element) des Systems."
+      },
+      "broader": [
+        "#Modelo"
+      ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Skemo",
+      "term": "Skemo",
+      "inScheme": "terminologio",
+      "notation": "skemo",
+      "prefLabel": {
+        "eo": "Skemo",
+        "en": "component schema",
+        "de": "Komponentenschema"
+      },
+      "altLabel": {
+        "en": [
+          "schema"
+        ],
+        "de": [
+          "Schema"
+        ]
+      },
+      "definition": {
+        "en": "The machine-readable specification of a component.",
+        "de": "Die maschinenlesbare Spezifikation einer Komponente."
+      },
+      "broader": [
+        "#Modelo"
+      ],
+      "relations": [
+        {
+          "predicate": "specifies",
+          "target": "#Ero"
+        }
+      ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Regularo",
+      "term": "Regularo",
+      "inScheme": "terminologio",
+      "prefLabel": {
+        "eo": "Regularo",
+        "en": "rule book",
+        "de": "Regelwerk"
+      },
+      "altLabel": {
+        "en": [
+          "rules"
+        ],
+        "de": [
+          "Regeln",
+          "Regularium"
+        ]
+      },
+      "definition": {
+        "en": "The collection of rules with their reasons: constraints and composition rules, grown by rulings.",
+        "de": "Die Regelsammlung mit Begründungen: Constraints und Kompositionsregeln, gewachsen durch Einzelurteile."
+      },
+      "broader": [
+        "#Modelo"
+      ],
+      "relations": [
+        {
+          "predicate": "partOf",
+          "target": "#Modelo"
+        }
+      ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Jugxo",
+      "term": "Jugxo",
+      "inScheme": "terminologio",
+      "notation": "jugxo",
+      "prefLabel": {
+        "eo": "Jugxo",
+        "en": "ruling",
+        "de": "Einzelurteil"
+      },
+      "altLabel": {
+        "en": [
+          "precedent"
+        ],
+        "de": [
+          "Präzedenzfall",
+          "Urteil"
+        ]
+      },
+      "definition": {
+        "en": "A single ruling: a precedent with its reason, approving or rejecting, that refers to a rule, a component or an article of the Constitution.",
+        "de": "Ein Einzelurteil: ein Präzedenzfall mit Begründung, positiv oder negativ, der sich auf eine Regel, eine Komponente oder einen Artikel der Constitution bezieht."
+      },
+      "broader": [
+        "#Regularo"
+      ],
+      "relations": [
+        {
+          "predicate": "partOf",
+          "target": "#Regularo"
+        },
+        {
+          "predicate": "references",
+          "target": "#Regulo"
+        }
+      ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Sxablono",
+      "term": "Sxablono",
+      "inScheme": "terminologio",
+      "notation": "sxablono",
+      "prefLabel": {
+        "eo": "Sxablono",
+        "en": "template",
+        "de": "Vorlage"
+      },
+      "altLabel": {
+        "en": [
+          "pattern"
+        ],
+        "de": [
+          "Template",
+          "Pattern"
+        ]
+      },
+      "definition": {
+        "en": "A template or pattern: a layout, page type or flow composed of components.",
+        "de": "Ein Template oder Pattern: Layout, Seitentyp oder Ablauf aus Komponenten."
+      },
+      "broader": [
+        "#Modelo"
+      ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Projekcio",
+      "term": "Projekcio",
+      "inScheme": "terminologio",
+      "notation": "projekcio",
+      "prefLabel": {
+        "eo": "Projekcio",
+        "en": "projection",
+        "de": "Projektion"
+      },
+      "altLabel": {
+        "en": [
+          "derivation",
+          "output"
+        ],
+        "de": [
+          "Ableitung"
+        ]
+      },
+      "definition": {
+        "en": "A derivation from the model, such as CSS, Figma variables or documentation; never edited by hand.",
+        "de": "Eine Ableitung aus dem Modell, etwa CSS, Figma-Variablen oder Dokumentation; nie von Hand bearbeitet."
+      },
+      "broader": [
+        "#Fundamento"
+      ],
+      "relations": [
+        {
+          "predicate": "derivedFrom",
+          "target": "#Modelo"
+        },
+        {
+          "predicate": "writes",
+          "target": "#Celo"
+        }
+      ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Enportilo",
+      "term": "Enportilo",
+      "inScheme": "terminologio",
+      "prefLabel": {
+        "eo": "Enportilo",
+        "en": "brand importer",
+        "de": "Marken-Importer"
+      },
+      "altLabel": {
+        "en": [
+          "importer"
+        ],
+        "de": [
+          "Importer"
+        ]
+      },
+      "definition": {
+        "en": "The brand design importer: brings a foreign brand into the system as a brand theme.",
+        "de": "Der Brand Design Importer: bringt eine fremde Marke als Markenausprägung ins System."
+      },
+      "broader": [
+        "#Fundamento"
+      ],
+      "relations": [
+        {
+          "predicate": "writes",
+          "target": "#Aspekto"
+        }
+      ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Agordilo",
+      "term": "Agordilo",
+      "inScheme": "terminologio",
+      "prefLabel": {
+        "eo": "Agordilo",
+        "en": "brand configurator",
+        "de": "Marken-Konfigurator"
+      },
+      "altLabel": {
+        "en": [
+          "configurator"
+        ],
+        "de": [
+          "Konfigurator"
+        ]
+      },
+      "definition": {
+        "en": "The brand design configurator: creates and changes a brand theme within the rules.",
+        "de": "Der Brand Design Configurator: erstellt und ändert eine Markenausprägung innerhalb der Regeln."
+      },
+      "broader": [
+        "#Fundamento"
+      ],
+      "relations": [
+        {
+          "predicate": "writes",
+          "target": "#Aspekto"
+        }
+      ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Gvidanto",
+      "term": "Gvidanto",
+      "inScheme": "terminologio",
+      "prefLabel": {
+        "eo": "Gvidanto",
+        "en": "guide",
+        "de": "Leitfaden-Agent"
+      },
+      "altLabel": {
+        "en": [
+          "documentation agent",
+          "guide agent"
+        ],
+        "de": [
+          "Doku-Agent"
+        ]
+      },
+      "definition": {
+        "en": "The documentation agent: answers questions about the system from the model (\"what is here?\").",
+        "de": "Der Doku-Agent: beantwortet Fragen zum System aus dem Modell („was gibt's hier?“)."
+      },
+      "broader": [
+        "#Fundamento"
+      ],
+      "relations": [
+        {
+          "predicate": "explains",
+          "target": "#Modelo"
+        }
+      ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Celo",
+      "term": "Celo",
+      "inScheme": "terminologio",
+      "notation": "celo",
+      "prefLabel": {
+        "eo": "Celo",
+        "en": "target",
+        "de": "Ausgabeziel"
+      },
+      "altLabel": {
+        "en": [
+          "output target"
+        ],
+        "de": [
+          "Ziel"
+        ]
+      },
+      "definition": {
+        "en": "An output target of a projection, such as Tailwind, daisyUI or Penpot.",
+        "de": "Ein Ausgabeziel einer Projektion, etwa Tailwind, daisyUI oder Penpot."
+      },
+      "broader": [
+        "#Fundamento"
+      ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Tavolo",
+      "term": "Tavolo",
+      "inScheme": "terminologio",
+      "prefLabel": {
+        "eo": "Tavolo",
+        "en": "layer",
+        "de": "Schicht"
+      },
+      "altLabel": {
+        "en": [
+          "brand layer"
+        ],
+        "de": [
+          "Ebene"
+        ]
+      },
+      "definition": {
+        "en": "A layer of a brand theme package; the vocabulary is the visual layer vida, further layers such as language or behaviour follow by spec.",
+        "de": "Eine Schicht eines Aspekto-Pakets; das Vokabular ist die visuelle Schicht vida, weitere Schichten wie Sprache oder Verhalten folgen durch Spec."
+      },
+      "broader": [
+        "#Aspekto"
+      ],
+      "relations": [
+        {
+          "predicate": "partOf",
+          "target": "#Aspekto"
+        }
+      ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Ontologio",
+      "term": "Ontologio",
+      "inScheme": "terminologio",
+      "prefLabel": {
+        "eo": "Ontologio",
+        "en": "ontology",
+        "de": "Ontologie"
+      },
+      "altLabel": {
+        "en": [
+          "terminology"
+        ],
+        "de": [
+          "Terminologie"
+        ]
+      },
+      "definition": {
+        "en": "The machine-readable form of this terminology: terms, definitions and relations.",
+        "de": "Die maschinenlesbare Fassung dieser Terminologie: Begriffe, Definitionen, Beziehungen."
+      },
+      "broader": [
+        "#Fundamento"
+      ],
+      "relations": [
+        {
+          "predicate": "explains",
+          "target": "#Fundamento"
+        }
+      ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Token",
+      "term": "Token",
+      "inScheme": "modelo",
+      "notation": "token",
+      "prefLabel": {
+        "eo": "Token",
+        "en": "token",
+        "de": "Token"
+      },
+      "altLabel": {
+        "en": [
+          "design token"
+        ],
+        "de": [
+          "Design-Token"
+        ]
+      },
+      "definition": {
+        "en": "A named design decision with a type and a value or an alias to another token.",
+        "de": "Eine benannte Gestaltungsentscheidung mit Typ und Wert oder Alias auf ein anderes Token."
+      },
+      "broader": [
+        "#Vortaro"
+      ],
+      "relations": [
+        {
+          "predicate": "partOf",
+          "target": "#Vortaro"
+        }
+      ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#TokenSet",
+      "term": "TokenSet",
+      "inScheme": "modelo",
+      "notation": "tokenSet",
+      "prefLabel": {
+        "eo": "TokenSet",
+        "en": "token set",
+        "de": "Token-Set"
+      },
+      "altLabel": {
+        "en": [
+          "set"
+        ],
+        "de": [
+          "Set"
+        ]
+      },
+      "definition": {
+        "en": "A set of token values that is active in the core or under conditions on dimension values.",
+        "de": "Eine Menge von Token-Werten, die im Kern oder unter Bedingungen auf Dimensionswerte aktiv ist."
+      },
+      "broader": [
+        "#Vortaro"
+      ],
+      "relations": [
+        {
+          "predicate": "partOf",
+          "target": "#Vortaro"
+        }
+      ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#DimensioValoro",
+      "term": "DimensioValoro",
+      "inScheme": "modelo",
+      "notation": "dimensioValoro",
+      "prefLabel": {
+        "eo": "DimensioValoro",
+        "en": "dimension value",
+        "de": "Dimensionswert"
+      },
+      "altLabel": {
+        "en": [
+          "mode value"
+        ],
+        "de": [
+          "Modus-Wert"
+        ]
+      },
+      "definition": {
+        "en": "One value of a dimension, such as dark of the colour scheme.",
+        "de": "Ein Wert einer Dimension, etwa dark des Farbmodus."
+      },
+      "broader": [
+        "#Dimensio"
+      ],
+      "relations": [
+        {
+          "predicate": "partOf",
+          "target": "#Dimensio"
+        }
+      ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Regulo",
+      "term": "Regulo",
+      "inScheme": "modelo",
+      "notation": "regulo",
+      "prefLabel": {
+        "eo": "Regulo",
+        "en": "rule",
+        "de": "Regel"
+      },
+      "altLabel": {
+        "en": [
+          "constraint"
+        ],
+        "de": [
+          "Constraint"
+        ]
+      },
+      "definition": {
+        "en": "A single rule with its reason (kialo); automatic rules are checked by validation.",
+        "de": "Eine einzelne Regel mit ihrer Begründung (Kialo); automatische Regeln prüft die Validierung."
+      },
+      "broader": [
+        "#Regularo"
+      ],
+      "relations": [
+        {
+          "predicate": "partOf",
+          "target": "#Regularo"
+        }
+      ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#KontrastParo",
+      "term": "KontrastParo",
+      "inScheme": "modelo",
+      "notation": "kontrastParo",
+      "prefLabel": {
+        "eo": "KontrastParo",
+        "en": "contrast pair",
+        "de": "Kontrastpaar"
+      },
+      "altLabel": {
+        "en": [
+          "contrast check"
+        ],
+        "de": [
+          "Kontrastprüfung"
+        ]
+      },
+      "definition": {
+        "en": "A declared pair of foreground and background tokens whose contrast is checked in every combination, optionally with an alternative pair.",
+        "de": "Ein deklariertes Paar aus Vordergrund- und Hintergrund-Token, dessen Kontrast in jeder Kombination geprüft wird, optional mit Alternativpaar."
+      },
+      "broader": [
+        "#Regularo"
+      ],
+      "relations": [
+        {
+          "predicate": "references",
+          "target": "#Token"
+        }
+      ]
+    }
+  ]
+}

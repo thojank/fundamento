@@ -4,9 +4,8 @@
 // (0.8 s alone vs 3.5-7.2 s in the gate; research.md section 8). Factor 3 only under CI=true
 // (shared runners; Jugxo jug_01M2W3K1YPP05F4XF86J71RGTK). Raw timings go to stderr either way.
 
-import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
-import type { Transport } from "@modelcontextprotocol/sdk/shared/transport.js";
+import { Client, type Transport } from "@modelcontextprotocol/client";
+import { StdioClientTransport } from "@modelcontextprotocol/client/stdio";
 import { afterAll, describe, expect, it } from "vitest";
 import { EKZEMPLO_CONFIG } from "../test-doubles/client.js";
 
@@ -60,4 +59,43 @@ describe("performance (AK-07)", { timeout: 60_000 }, () => {
     );
     expect(Math.max(...timings)).toBeLessThan(RESOLVE_BUDGET_MS);
   });
+
+  // Spec 002 AK-09: explain and check_contrast under 100 ms per call. check_contrast without an
+  // assignment is the worst case: every combination of both Aspektoj.
+  it.each([
+    [
+      "explain",
+      (index: number) => ({
+        token: ["color.text.subtle", "color.status.warning.border", "color.action.tertiary.hover"][
+          index % 3
+        ],
+        assignment: { aspekto: index % 2 === 0 ? "komuna" : "ekzemplo" },
+      }),
+    ],
+    [
+      "check_contrast",
+      (index: number) =>
+        [
+          { foreground: "color.text.muted", background: "color.background.sunken" },
+          { foreground: "color.status.warning.basic", background: "color.background.default" },
+          { foreground: "color.text.default", background: "color.action.primary.rest" },
+        ][index % 3],
+    ],
+  ])(
+    `answers 100 %s calls within ${RESOLVE_BUDGET_MS} ms each (Spec 002 AK-09)`,
+    async (tool, input) => {
+      const timings: number[] = [];
+      for (let index = 0; index < 100; index++) {
+        const started = performance.now();
+        const result = await client.callTool({ name: tool, arguments: input(index) as never });
+        timings.push(performance.now() - started);
+        expect(result.isError).toBeFalsy();
+      }
+      const sorted = [...timings].sort((a, b) => a - b);
+      process.stderr.write(
+        `AK-09 ${tool} ms: min ${sorted[0]?.toFixed(1)}, median ${sorted[50]?.toFixed(1)}, max ${sorted[99]?.toFixed(1)}; raw ${timings.map((t) => t.toFixed(1)).join(" ")}\n`,
+      );
+      expect(Math.max(...timings)).toBeLessThan(RESOLVE_BUDGET_MS);
+    },
+  );
 });

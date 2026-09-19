@@ -1648,7 +1648,7 @@
           }
         },
         "hover": {
-          "$value": "{color.palette.neutral.50}",
+          "$value": "{color.palette.neutral.100}",
           "$description": "Tertiary action: fill on hover.",
           "$extensions": {
             "com.ciferecigo.fundamento": {
@@ -1658,7 +1658,7 @@
           }
         },
         "pressed": {
-          "$value": "{color.palette.neutral.100}",
+          "$value": "{color.palette.neutral.200}",
           "$description": "Tertiary action: fill while pressed.",
           "$extensions": {
             "com.ciferecigo.fundamento": {
@@ -1668,7 +1668,7 @@
           }
         },
         "selected": {
-          "$value": "{color.palette.accent.50}",
+          "$value": "{color.palette.accent.100}",
           "$description": "Tertiary action: fill when selected.",
           "$extensions": {
             "com.ciferecigo.fundamento": {
@@ -1804,6 +1804,16 @@
               "role": "foreground"
             }
           }
+        },
+        "border": {
+          "$value": "{color.palette.success.700}",
+          "$description": "Status success: border that outlines a success surface and carries its contrast when the fill is too light.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2X7P56E9TCC4H8FW10YM7Q6",
+              "role": "border"
+            }
+          }
         }
       },
       "warning": {
@@ -1854,6 +1864,16 @@
             "com.ciferecigo.fundamento": {
               "id": "tok_01M2W9400ZA1K81R0W23SG0XWY",
               "role": "foreground"
+            }
+          }
+        },
+        "border": {
+          "$value": "{color.palette.warning.700}",
+          "$description": "Status warning: border that outlines a warning surface and carries its contrast when the fill is too light.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2X7P56E9TCC4H8FW10YM7Q7",
+              "role": "border"
             }
           }
         }
@@ -1908,6 +1928,16 @@
               "role": "foreground"
             }
           }
+        },
+        "border": {
+          "$value": "{color.palette.danger.700}",
+          "$description": "Status danger: border that outlines a danger surface and carries its contrast when the fill is too light.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2X7P56E9TCC4H8FW10YM7Q8",
+              "role": "border"
+            }
+          }
         }
       },
       "info": {
@@ -1958,6 +1988,16 @@
             "com.ciferecigo.fundamento": {
               "id": "tok_01M2W9400ZA1K81R0W23SG0XX8",
               "role": "foreground"
+            }
+          }
+        },
+        "border": {
+          "$value": "{color.palette.info.700}",
+          "$description": "Status info: border that outlines an info surface and carries its contrast when the fill is too light.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2X7P56E9TCC4H8FW10YM7Q9",
+              "role": "border"
             }
           }
         }

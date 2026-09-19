@@ -34,7 +34,7 @@ const EXAMPLES: Record<string, { input: unknown; output: unknown; badInput: unkn
       dimensioj: ["aspekto"],
       aspektoj: [SUMMARY],
       tokens: { count: 2, byType: { color: 2 }, byGroup: { color: 2 } },
-      reguloj: { count: 1, withKialo: 1 },
+      reguloj: { count: 1, withKialo: 1, automatic: 1 },
       jugxoj: { count: 0 },
       eroj: { count: 0 },
       validation: { errors: 0, warnings: 0 },
@@ -139,8 +139,149 @@ const EXAMPLES: Record<string, { input: unknown; output: unknown; badInput: unkn
   },
   validate: {
     input: { aspektoPath: "../fundamento-aspekto-x" },
-    output: { valid: false, errors: [ISSUE], warnings: [], scope: "package" },
+    output: {
+      valid: false,
+      errors: [
+        ISSUE,
+        {
+          ...ISSUE,
+          rule: "state-distinct",
+          regulo: {
+            id: "reg_01M2VEEE5280TGESDHQQ14EA33",
+            name: "state-distinct",
+            kialo: "A state that looks like rest gives no feedback.",
+          },
+        },
+      ],
+      warnings: [],
+      scope: "package",
+    },
     badInput: { aspektoPath: "" },
+  },
+  check_contrast: {
+    input: {
+      foreground: "color.text.muted",
+      background: "color.background.sunken",
+      assignment: { "color-scheme": "dark" },
+    },
+    output: {
+      foreground: "color.text.muted",
+      background: "color.background.sunken",
+      kategorio: "text-normal",
+      kategorioSource: "declared",
+      declared: {
+        id: "kpa_01M2W9W6QK3YTCXM2XBRA41K5T",
+        name: "text-muted-on-background-sunken",
+        position: "main",
+      },
+      results: [
+        {
+          ratio: 8.08,
+          threshold: 4.5,
+          passed: true,
+          branch: "main",
+          apcaMin: 71.2,
+          combinations: [
+            "aspekto=komuna,viewport=medium,density=default,color-scheme=dark,contrast=default,motion=default",
+          ],
+        },
+      ],
+      summary: { combinations: 1, passed: 1, failed: 0, minRatio: 8.08 },
+    },
+    badInput: {
+      foreground: "color.text.muted",
+      background: "color.background.sunken",
+      kategorio: "text",
+    },
+  },
+  explain: {
+    input: { token: "color.text.subtle", assignment: { "color-scheme": "dark", contrast: "high" } },
+    output: {
+      token: "color.text.subtle",
+      id: "tok_01M2W9400ZA1K81R0W23SG0XWT",
+      type: "color",
+      role: "foreground",
+      description: "Secondary text.",
+      assignment: { aspekto: "komuna", "color-scheme": "dark", contrast: "high" },
+      combination: "aspekto=komuna,color-scheme=dark,contrast=high",
+      value: { colorSpace: "srgb", components: [0.95, 0.95, 0.96], hex: "#f2f2f5" },
+      origin: { set: "color-scheme/dark+contrast/high" },
+      aliasChain: [
+        { token: "color.text.subtle", set: "color-scheme/dark+contrast/high" },
+        { token: "color.palette.neutral.50", set: "core" },
+      ],
+      reguloj: [
+        {
+          id: "reg_01M2VEEE5280TGESDHQQ14EA33",
+          name: "text-hierarchy",
+          statement: "The text roles stay distinct.",
+          kialo: "High contrast must not erase meaning.",
+          checkability: "automatic",
+          via: "token",
+          result: "passed",
+          issues: [],
+        },
+      ],
+      kontrastParoj: [
+        {
+          id: "kpa_01M2W9W6QK3YTCXM2XBRA41K5V",
+          name: "text-subtle-on-background-default",
+          kategorio: "text-normal",
+          position: "foreground",
+          threshold: 7,
+          passed: true,
+          branch: "main",
+          main: {
+            foreground: "color.text.subtle",
+            background: "color.background.default",
+            ratio: 15.41,
+            passed: true,
+            composited: false,
+            apca: { lc: 98.1, threshold: 90, passed: true },
+          },
+        },
+      ],
+      jugxoj: [],
+    },
+    badInput: { token: "color.text.subtle", assignment: { contrast: "HIGH" } },
+  },
+  explain_regulo: {
+    input: { name: "state-distinct" },
+    output: {
+      id: "reg_01M2VEEE5280TGESDHQQ14EA33",
+      name: "state-distinct",
+      statement: "States differ from rest by at least 0.05 in OKLCH lightness.",
+      kialo: "A state that looks like rest gives no feedback.",
+      checkability: "automatic",
+      scope: "vortaro: color.action.*",
+      appliesTo: { tokens: ["color.action.*.hover"] },
+      sojlo: { metric: "oklch-l-delta", min: 0.05 },
+      violations: { unit: "distinct", total: 2, byAspekto: { komuna: 1, ekzemplo: 1 } },
+      jugxoj: [],
+    },
+    badInput: { name: "state-distinct", id: "reg_01M2VEEE5280TGESDHQQ14EA33" },
+  },
+  describe_term: {
+    input: { term: "Marke" },
+    output: {
+      term: "Aspekto",
+      uri: "https://fundamento.ciferecigo.com/ontologio#Aspekto",
+      inScheme: "terminologio",
+      prefLabel: { eo: "Aspekto", en: "brand theme", de: "Markenausprägung" },
+      altLabel: { en: ["brand"], de: ["Marke"] },
+      definition: { en: "One brand's complete assignment.", de: "Eine vollständige Belegung." },
+      broader: [{ term: "Modelo", uri: "https://fundamento.ciferecigo.com/ontologio#Modelo" }],
+      related: [],
+      relations: [
+        {
+          predicate: "assigns",
+          target: { term: "Vortaro", uri: "https://fundamento.ciferecigo.com/ontologio#Vortaro" },
+        },
+      ],
+      matchedBy: "altLabel",
+      instances: { count: 1, names: ["komuna"] },
+    },
+    badInput: { term: "" },
   },
   derive_name: {
     input: { name: "color.action.primary.rest", celo: "figma" },
@@ -153,7 +294,7 @@ const EXAMPLES: Record<string, { input: unknown; output: unknown; badInput: unkn
 };
 
 describe("tool schemas (contracts/mcp-tools.md)", () => {
-  it("defines exactly the ten tools of FR-16, snake_case, verb first", () => {
+  it("defines the ten tools of FR-16 and the Gvidanto tools of Spec 002, snake_case, verb first", () => {
     expect([...TOOL_NAMES]).toEqual([
       "describe",
       "list_dimensioj",
@@ -165,6 +306,10 @@ describe("tool schemas (contracts/mcp-tools.md)", () => {
       "list_jugxoj",
       "validate",
       "derive_name",
+      "check_contrast",
+      "explain",
+      "explain_regulo",
+      "describe_term",
     ]);
   });
 

@@ -1,0 +1,9 @@
+{
+  "description": "Spec 002 FR-03: selected differs from rest only in hue in dark.",
+  "issues": [
+    {
+      "rule": "state-distinct",
+      "path": "rezolvo(color-scheme=dark,contrast=default)/color.action.primary.selected"
+    }
+  ]
+}

@@ -4,7 +4,7 @@
 import { rmSync } from "node:fs";
 import { afterAll, describe, expect, it } from "vitest";
 import { fixtureModeloSource } from "../load/source.js";
-import { mutatedMinimal } from "./test-doubles/fixtures.js";
+import { mutatedFixture, mutatedMinimal } from "./test-doubles/fixtures.js";
 import { validateModelo } from "./validate-modelo.js";
 
 const roots: string[] = [];
@@ -119,5 +119,81 @@ describe("contrast-pairs-declared → kontrastparo-missing-for-role", () => {
       "vortaro/sets/core.json#/color/background/default",
       "vortaro/sets/core.json#/color/text/default",
     ]);
+  });
+});
+
+describe("issues cite their Regulo (Spec 002 FR-08, D-03)", () => {
+  it("carries id, name and kialo of the declaring Regulo on every enforcer issue", () => {
+    const root = mutatedMinimal((edit) => {
+      edit("data/reguloj.json", (file: Reguloj) => {
+        for (const regulo of file.reguloj) regulo.checkability = "automatic";
+      });
+      edit("vortaro/sets/core.json", (core: Core) => literalText(core));
+    });
+    roots.push(root);
+    const issue = validateModelo(fixtureModeloSource(root)).errors.find(
+      (candidate) => candidate.rule === "color-semantic-literal",
+    );
+    expect(issue?.regulo).toEqual({
+      id: "reg_01K5FMAJ0J14KNVH5BXJ93VFBG",
+      name: "semantic-colors-alias-palette",
+      kialo: "A palette change then reaches every semantic use in one place.",
+    });
+  });
+
+  it("leaves issues of always-on rules without a Regulo", () => {
+    const root = mutatedMinimal((edit) => {
+      edit("vortaro/sets/core.json", (core: Core) => {
+        const text = core.color.text?.default;
+        if (text) text.$value = "{color.missing}";
+      });
+    });
+    roots.push(root);
+    const issues = validateModelo(fixtureModeloSource(root)).errors;
+    expect(issues.length).toBeGreaterThan(0);
+    expect(issues.every((issue) => issue.regulo === undefined)).toBe(true);
+  });
+});
+
+describe("contrast-pairs-declared counts aux members (Spec 002, D-09)", () => {
+  it("accepts a border token that appears only as the foreground of an aux pair", () => {
+    const root = mutatedFixture("regularo-kombinoj", (edit) => {
+      edit("data/reguloj.json", (file: Reguloj) => {
+        file.reguloj.push({
+          id: "reg_01M2WRK8G0GGGGGGGGGGGGGGG3",
+          name: "contrast-pairs-declared",
+          statement: "Every foreground, border and focus colour is paired with its backgrounds.",
+          kialo: "Contrast is only checked for declared pairs.",
+          scope: "vortaro: color tokens",
+          checkability: "automatic",
+        });
+      });
+      edit("vortaro/sets/core.json", (core: Core) => {
+        const color = core.color as unknown as Record<string, Record<string, unknown>>;
+        color.edge = {
+          line: {
+            $value: "{color.palette.neutral.900}",
+            $description: "Edge of an action.",
+            $extensions: { "com.ciferecigo.fundamento": { role: "border" } },
+          },
+        };
+      });
+      edit("data/kontrastparoj.json", (file: { kontrastParoj: Record<string, unknown>[] }) => {
+        file.kontrastParoj.push({
+          id: "kpa_01M2WRK8G0GGGGGGGGGGGGGGG2",
+          name: "action-primary-on-background",
+          foreground: "color.action.primary.rest",
+          background: "color.background.default",
+          kategorio: "ui",
+          aux: { foreground: "color.edge.line", background: "color.background.default" },
+          kialo: "The edge carries the pair.",
+        });
+      });
+    });
+    roots.push(root);
+    const missing = validateModelo(fixtureModeloSource(root))
+      .errors.filter((issue) => issue.rule === "kontrastparo-missing-for-role")
+      .map((issue) => issue.path);
+    expect(missing).not.toContain("vortaro/sets/core.json#/color/edge/line");
   });
 });

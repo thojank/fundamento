@@ -183,6 +183,16 @@
       ]
     },
     {
+      "id": "color.status.border",
+      "source": "Spec 002 FR-06: a border per status that can carry the status surface's contrast (KontrastParo aux)",
+      "tokens": [
+        "color.status.success.border",
+        "color.status.warning.border",
+        "color.status.danger.border",
+        "color.status.info.border"
+      ]
+    },
+    {
       "id": "color.brand",
       "source": "\u00a74 Hero/Marke",
       "tokens": [

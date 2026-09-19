@@ -1,0 +1,9 @@
+{
+  "description": "Spec 002 FR-03: a translucent hover passes as a raw value but not after compositing over background.default.",
+  "issues": [
+    {
+      "rule": "state-distinct",
+      "path": "rezolvo(color-scheme=light,contrast=default)/color.action.primary.hover"
+    }
+  ]
+}

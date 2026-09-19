@@ -120,7 +120,7 @@
           "$value": "{color.palette.neutral.800}"
         },
         "selected": {
-          "$value": "{color.palette.accent.950}"
+          "$value": "{color.palette.accent.900}"
         },
         "disabled": {
           "$value": "{color.palette.neutral.950}"
@@ -189,6 +189,9 @@
         },
         "on": {
           "$value": "{color.palette.neutral.950}"
+        },
+        "border": {
+          "$value": "{color.palette.success.300}"
         }
       },
       "warning": {
@@ -206,6 +209,9 @@
         },
         "on": {
           "$value": "{color.palette.neutral.950}"
+        },
+        "border": {
+          "$value": "{color.palette.warning.300}"
         }
       },
       "danger": {
@@ -223,6 +229,9 @@
         },
         "on": {
           "$value": "{color.palette.neutral.950}"
+        },
+        "border": {
+          "$value": "{color.palette.danger.300}"
         }
       },
       "info": {
@@ -240,6 +249,9 @@
         },
         "on": {
           "$value": "{color.palette.neutral.950}"
+        },
+        "border": {
+          "$value": "{color.palette.info.300}"
         }
       }
     }

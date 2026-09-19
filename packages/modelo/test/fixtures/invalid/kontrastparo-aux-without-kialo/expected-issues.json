@@ -1,0 +1,9 @@
+{
+  "description": "Spec 002 FR-07: a pair with an alternative must say why (kialo).",
+  "issues": [
+    {
+      "rule": "schema-violation",
+      "path": "data/kontrastparoj.json#/kontrastParoj/1"
+    }
+  ]
+}

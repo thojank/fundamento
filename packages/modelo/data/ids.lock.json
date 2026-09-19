@@ -360,6 +360,22 @@
       "status": "active",
       "type": "regulo"
     },
+    "reg_01M2X5AMA1FH06H7BARC9QSTJB": {
+      "status": "active",
+      "type": "regulo"
+    },
+    "reg_01M2X5AMA2ZN877V4TX1VFQB2J": {
+      "status": "active",
+      "type": "regulo"
+    },
+    "reg_01M2X5DXT0TJ1ZYQG95RWX02ZV": {
+      "status": "active",
+      "type": "regulo"
+    },
+    "reg_01M2X5G6TX43QJ21SFD4WFNM3W": {
+      "status": "active",
+      "type": "regulo"
+    },
     "set_01M2VEEDW32MC4ZQPRN0GC9JRR": {
       "status": "active",
       "type": "tokenSet"
@@ -1753,6 +1769,22 @@
       "type": "token"
     },
     "tok_01M2W9MEJVS33SK9HVJPB32XB4": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M2X7P56E9TCC4H8FW10YM7Q6": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M2X7P56E9TCC4H8FW10YM7Q7": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M2X7P56E9TCC4H8FW10YM7Q8": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M2X7P56E9TCC4H8FW10YM7Q9": {
       "status": "active",
       "type": "token"
     }

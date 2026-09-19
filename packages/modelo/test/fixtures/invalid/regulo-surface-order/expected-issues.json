@@ -1,0 +1,9 @@
+{
+  "description": "Spec 002 FR-01: sunken is lighter than canvas in light.",
+  "issues": [
+    {
+      "rule": "surface-order",
+      "path": "rezolvo(color-scheme=light,contrast=default)/color.background.sunken"
+    }
+  ]
+}

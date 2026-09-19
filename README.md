@@ -6,8 +6,8 @@ Terminology is Esperanto and binding (see the Constitution). Code, comments and 
 
 ## What lives where
 
-- [`.specify/memory/constitution.md`](.specify/memory/constitution.md): the Constitution (Articles I–XIII). Read this first.
-- [`specs/`](specs/): one folder per spec with `spec.md`, research and the engineering plan with its Compliance Review: [`000-fundamento-repo/`](specs/000-fundamento-repo/) (the repository) and [`001-vortaro-aspektoj-mcp/`](specs/001-vortaro-aspektoj-mcp/) (Vortaro values, Aspekto packages, MCP server).
+- [`.specify/memory/constitution.md`](.specify/memory/constitution.md): the Constitution (Articles I–XIII). Read this first; [`docs/vizio.md`](docs/vizio.md) explains why Fundamento starts with a data model, conjunction sets and rulings instead of a component library.
+- [`specs/`](specs/): one folder per spec with `spec.md`, research and the engineering plan with its Compliance Review: [`000-fundamento-repo/`](specs/000-fundamento-repo/) (the repository), [`001-vortaro-aspektoj-mcp/`](specs/001-vortaro-aspektoj-mcp/) (Vortaro values, Aspekto packages, MCP server) and [`002-regularo-gvidanto/`](specs/002-regularo-gvidanto/) (Regularo, Gvidanto, Ontologio).
 - [`research/benchmarks.md`](research/benchmarks.md): living list of public benchmarks (requirements only, never content).
 - `packages/modelo/` (`@fundamento/modelo`): schema, loading, composition, validation, resolution, NomReguloj, checks and export. All logic lives here.
 - `packages/modelo/schema/` and `packages/modelo/data/`: the one hand-written JSON Schema (draft 2020-12; TS types are generated from it) and the Dimensioj, Reguloj, Jugxoj, KontrastParoj and ID registry `ids.lock.json`.
@@ -58,11 +58,13 @@ Every Aspekto must set every token the reference Aspekto sets (`aspekto-incomple
 `pnpm fm mcp` (or the bin `fundamento-mcp` with the same flags) serves the Modelo to AI agents over stdio, read-only; logs go to stderr. Registering it is one command, e.g. `claude mcp add fundamento -- pnpm --dir /path/to/fundamento -s fm mcp`.
 
 - Tools: `describe`, `list_dimensioj`, `list_aspektoj`, `search_tokens`, `get_token`, `resolve`, `list_reguloj`, `list_jugxoj`, `validate`, `derive_name`. Every input and output has a JSON Schema (`packages/mcp/schema/`); errors carry the same issues as the checks, plus the allowed values.
-- Resources: `fundamento://export/modelo.json`, `modelo.schema.json` and `rezolvoj.json`, the bytes of `fm modelo export`.
+- Gvidanto tools (Spec 002): `check_contrast` (the contrast of any colour pair, grouped by result, with every combination listed), `explain` (why a token has its value: alias chain, the Reguloj with kialo and result, its KontrastParoj), `explain_regulo` (a Regulo, its threshold and its violations per Aspekto) and `describe_term` (a term of the Ontologio, also from English or German words).
+- Prompt: `gvidanto` tells a client agent how to answer: values only from tools, reasons with Regulo ID and kialo, check when unsure.
+- Resources: `fundamento://export/modelo.json`, `modelo.schema.json` and `rezolvoj.json`, the bytes of `fm modelo export`; `fundamento://ontologio.json`, the terminology as data, in every mode.
 - `--config <file>` serves a project with its Aspekto packages; `--export <dir>` serves an export as is.
 - `--http [--port <n>]` serves Streamable HTTP at `http://127.0.0.1:<port>/mcp` (default port 7300), loopback only, with a Host/Origin guard; `validate` refuses local paths there.
 
-The contract is [`specs/001-vortaro-aspektoj-mcp/contracts/mcp-tools.md`](specs/001-vortaro-aspektoj-mcp/contracts/mcp-tools.md).
+The contracts are [`specs/001-vortaro-aspektoj-mcp/contracts/mcp-tools.md`](specs/001-vortaro-aspektoj-mcp/contracts/mcp-tools.md) and the Phase-2 delta [`specs/002-regularo-gvidanto/contracts/mcp-tools.md`](specs/002-regularo-gvidanto/contracts/mcp-tools.md).
 
 ## Checks
 
@@ -72,8 +74,8 @@ Each check is its own command and its own named CI step. Exit 0 = pass, 1 = chec
 |---|---|
 | `pnpm check:vortaro-lint` | No literal values in Projekcio CSS; the `--fm-` / `fm-` / `@fundamento/` namespace rule over the repo (Art. X gate 1). |
 | `pnpm check:parity` | Two normalized inventories agree in props, values and states (Art. X gate 2; empty inventory in Phase 0). |
-| `pnpm check:regularo` | Every Regulo has a `kialo`; every Jugxo references something that exists (Art. X gate 3). |
-| `pnpm check:alirebleco` | Every KontrastParo meets its thresholds in all 72 combinations: WCAG 2.x binding, APCA advisory (Art. X gate 4). |
+| `pnpm check:regularo` | Every Regulo has a `kialo`; every Jugxo references something that exists (Art. X gate 3). Automatic Reguloj are enforced by `fm modelo validate`, and every issue they raise cites the Regulo with its ID and kialo. |
+| `pnpm check:alirebleco` | Every KontrastParo meets its thresholds in all 72 combinations: WCAG 2.x binding, APCA advisory (Art. X gate 4). A non-text pair may name an alternative pair `aux` (e.g. a status border); `--json` lists the pair × combination results the alternative carries under `branches`. |
 | `pnpm check:clean-room` | Nothing from a benchmark directory is in or referenced by the repo; every identifier is in the Fundamento namespace (Art. V). |
 
 Every check accepts `--json` (stdout carries only the result JSON), `--fixture <dir>` (checks that directory instead of the repo; relative paths resolve against the directory you run pnpm from, like `fm`) and `--help`:

@@ -119,6 +119,11 @@ export type Deprecated = boolean | string;
 export type ReguloId = string;
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "TokenPattern".
+ */
+export type TokenPattern = string;
+/**
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
  * via the `definition` "JugxoId".
  */
 export type JugxoId = string;
@@ -127,6 +132,28 @@ export type JugxoId = string;
  * via the `definition` "EroId".
  */
 export type EroId = string;
+/**
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "KontrastParo".
+ */
+export type KontrastParo = {
+  id: KontrastParoId;
+  name: Name;
+  foreground: TokenName;
+  background: TokenName;
+  kategorio: KontrastKategorio;
+  /**
+   * Alternative pair (aŭ, 'or'): the KontrastParo holds when the main pair or this pair meets the threshold of the same kategorio (Spec 002, FR-07). Not allowed for text categories; requires a kialo.
+   */
+  aux?: {
+    foreground: TokenName;
+    background: TokenName;
+  };
+  /**
+   * Why the pair exists or why its alternative is enough; required with aux (Spec 002, D-09).
+   */
+  kialo?: string;
+};
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema
  * via the `definition` "KontrastParoId".
@@ -524,6 +551,38 @@ export interface Regulo {
    * Scopes the entry to one Aspekto; entries in an Aspekto package carry their Aspekto (Spec 001, D-10).
    */
   aspekto?: string;
+  appliesTo?: ReguloAppliesTo;
+  sojlo?: ReguloSojlo;
+}
+/**
+ * Which tokens the Regulo governs; explain finds a token's Reguloj only through this field (Spec 002, D-02). A token matches when any criterion matches. Token patterns may use * for one segment and a trailing ** for one or more.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "ReguloAppliesTo".
+ */
+export interface ReguloAppliesTo {
+  /**
+   * @minItems 1
+   */
+  tokens?: TokenPattern[];
+  /**
+   * @minItems 1
+   */
+  roles?: TokenRole[];
+  /**
+   * @minItems 1
+   */
+  types?: DtcgType[];
+}
+/**
+ * The numeric threshold of a measuring Regulo; the enforcer reads it and agents cite it (Spec 002, D-02, D-06).
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "ReguloSojlo".
+ */
+export interface ReguloSojlo {
+  metric: "oklch-l-delta";
+  min: number;
 }
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema
@@ -564,17 +623,6 @@ export interface JugxoEroRef {
 export interface JugxoArtikoloRef {
   artikolo:
     "I" | "II" | "III" | "IV" | "V" | "VI" | "VII" | "VIII" | "IX" | "X" | "XI" | "XII" | "XIII";
-}
-/**
- * This interface was referenced by `ModeloJson`'s JSON-Schema
- * via the `definition` "KontrastParo".
- */
-export interface KontrastParo {
-  id: KontrastParoId;
-  name: Name;
-  foreground: TokenName;
-  background: TokenName;
-  kategorio: KontrastKategorio;
 }
 /**
  * A component. Schema only in Phase 0.

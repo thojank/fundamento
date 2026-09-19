@@ -1,17 +1,10 @@
-// The Fundamento MCP server (Spec 001, D-13): ten read-only tools over the served export, on the
-// SDK's low-level Server. Inputs are validated against the tool schemas; results carry
-// structuredContent plus the same JSON as text for older clients.
+// The Fundamento MCP server (Spec 001, D-13): read-only tools over the served export, on the
+// low-level Server of SDK v2 (Spec 002, D-17). Inputs are validated against the tool schemas;
+// results carry structuredContent plus the same JSON as text for older clients.
 
+import { readFileSync } from "node:fs";
 import type { ErrorObject } from "@fundamento/modelo";
-import { Server } from "@modelcontextprotocol/sdk/server/index.js";
-import {
-  CallToolRequestSchema,
-  ErrorCode,
-  ListResourcesRequestSchema,
-  ListToolsRequestSchema,
-  McpError,
-  ReadResourceRequestSchema,
-} from "@modelcontextprotocol/sdk/types.js";
+import { ProtocolError, ProtocolErrorCode, Server } from "@modelcontextprotocol/server";
 import { bundleResultSchema, bundleSchema } from "./bundle.js";
 import type { Served } from "./load.js";
 import { listResources, readResource } from "./resources.js";
@@ -19,6 +12,21 @@ import { type CompiledTool, compileToolSchemas, type ToolName } from "./schemas.
 import { TOOLS, type ToolResult } from "./tools.js";
 
 export const SERVER_NAME = "fundamento";
+
+/** The prompt that tells a client agent how to use the tools (Spec 002 FR-13, D-15). */
+export const GVIDANTO_PROMPT = {
+  name: "gvidanto",
+  title: "Fundamento Gvidanto",
+  description:
+    "How to answer questions about this design system: values only from tools, reasons with Regulo ID and kialo, check when unsure.",
+};
+
+let gvidantoText: string | undefined;
+
+function gvidantoPromptText(): string {
+  gvidantoText ??= readFileSync(new URL("../prompts/gvidanto.md", import.meta.url), "utf8");
+  return gvidantoText;
+}
 
 function inputIssues(errors: readonly ErrorObject[] | null | undefined, tool: string): ToolResult {
   return {
@@ -83,16 +91,31 @@ export function createFundamentoServer(served: Served, options: ServerOptions = 
   const tools = toolSchemas();
   const server = new Server(
     { name: SERVER_NAME, version: served.modeloJson.fundamento.version },
-    { capabilities: { tools: {}, resources: {} } },
+    { capabilities: { tools: {}, resources: {}, prompts: {} } },
   );
-  server.setRequestHandler(ListResourcesRequestSchema, () => ({
+  server.setRequestHandler("prompts/list", () => ({ prompts: [GVIDANTO_PROMPT] }));
+  server.setRequestHandler("prompts/get", (request) => {
+    if (request.params.name !== GVIDANTO_PROMPT.name) {
+      throw new ProtocolError(
+        ProtocolErrorCode.InvalidParams,
+        `Unknown prompt ${request.params.name}; see prompts/list.`,
+      );
+    }
+    return {
+      description: GVIDANTO_PROMPT.description,
+      messages: [
+        { role: "user" as const, content: { type: "text" as const, text: gvidantoPromptText() } },
+      ],
+    };
+  });
+  server.setRequestHandler("resources/list", () => ({
     resources: listResources(served),
   }));
-  server.setRequestHandler(ReadResourceRequestSchema, (request) => {
+  server.setRequestHandler("resources/read", (request) => {
     const contents = readResource(served, request.params.uri);
     if (contents === undefined) {
-      throw new McpError(
-        ErrorCode.InvalidParams,
+      throw new ProtocolError(
+        ProtocolErrorCode.InvalidParams,
         `Unknown resource ${request.params.uri}; see resources/list.`,
       );
     }
@@ -105,8 +128,8 @@ export function createFundamentoServer(served: Served, options: ServerOptions = 
     outputSchema: bundleResultSchema(tool.output.schema, tool.error.schema) as { type: "object" },
     annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   }));
-  server.setRequestHandler(ListToolsRequestSchema, () => ({ tools: listed }));
-  server.setRequestHandler(CallToolRequestSchema, (request) => {
+  server.setRequestHandler("tools/list", () => ({ tools: listed }));
+  server.setRequestHandler("tools/call", (request) => {
     const name = request.params.name as ToolName;
     const tool = tools.find((candidate) => candidate.name === name);
     const args = request.params.arguments ?? {};

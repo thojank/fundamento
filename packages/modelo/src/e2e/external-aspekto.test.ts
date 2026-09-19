@@ -2,6 +2,7 @@
 // its own fundamento.config.json (Spec 001, D-16, AK-03, AK-05; task T018).
 
 import { describe, expect, it } from "vitest";
+import { evaluateAlirebleco } from "../checks/alirebleco/evaluate.js";
 import { loadModelo } from "../load/load-modelo.js";
 import { projectModeloSource } from "../load/source.js";
 import { resolve } from "../resolve/resolve.js";
@@ -97,5 +98,35 @@ describe("invalid/aspekto-incomplete (AK-03)", () => {
       ["aspekto-incomplete", `${set}#/motion/duration/fast`],
       ["aspekto-incomplete", `${set}#/typography/kicker`],
     ]);
+  });
+});
+
+describe("the warning surface of ekzemplo holds through its border (Spec 002 S3, D-10)", () => {
+  const PAIR = "status-warning-basic-on-background-default";
+  if (modelo === undefined) throw new Error("did not load");
+  const evaluation = evaluateAlirebleco(modelo, {
+    kontrastParojFile: "data/kontrastparoj.json",
+    collect: true,
+  });
+
+  it("passes every pair in every combination of both Aspektoj", () => {
+    expect(evaluation.errors).toEqual([]);
+  });
+
+  it("uses the aux branch in ekzemplo light/default only: fill below 3:1, border at least 3:1", () => {
+    const warning = (evaluation.measurements ?? []).filter(
+      (entry) => entry.pair.name === PAIR && entry.branch === "aux",
+    );
+    expect(warning.length).toBe(18);
+    for (const entry of warning) {
+      expect(entry.combination).toMatchObject({
+        aspekto: "ekzemplo",
+        "color-scheme": "light",
+        contrast: "default",
+      });
+      expect(entry.main.ratio).toBeLessThan(3);
+      expect(entry.aux?.ratio).toBeGreaterThanOrEqual(3);
+    }
+    expect(evaluation.branches.every((entry) => entry.pair === PAIR)).toBe(true);
   });
 });

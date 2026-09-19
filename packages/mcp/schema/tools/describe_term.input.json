@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ciferecigo.com/fundamento/schema/mcp/describe_term.input.json",
+  "title": "describe_term input",
+  "description": "What does a term of Fundamento mean? Definition, broader term and relations from the Ontologio, plus its instances in the served Modelo. Accepts the Esperanto term or an English or German label, e.g. Aspekto, brand or Marke.",
+  "type": "object",
+  "properties": {
+    "term": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S"
+    }
+  },
+  "required": ["term"],
+  "additionalProperties": false
+}

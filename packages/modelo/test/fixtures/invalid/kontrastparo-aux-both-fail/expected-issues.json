@@ -1,0 +1,23 @@
+{
+  "description": "Spec 002 FR-07, AK-03: the warning fill and its border both miss 3:1 in every combination; the issue names both pairs.",
+  "check": "alirebleco",
+  "issues": [
+    {
+      "rule": "contrast-below-threshold",
+      "path": "rezolvo(color-scheme=light,contrast=default)/kontrastParo/status-warning-basic-on-background-default"
+    },
+    {
+      "rule": "contrast-below-threshold",
+      "path": "rezolvo(color-scheme=light,contrast=high)/kontrastParo/status-warning-basic-on-background-default"
+    },
+    {
+      "rule": "contrast-below-threshold",
+      "path": "rezolvo(color-scheme=dark,contrast=default)/kontrastParo/status-warning-basic-on-background-default"
+    },
+    {
+      "rule": "contrast-below-threshold",
+      "path": "rezolvo(color-scheme=dark,contrast=high)/kontrastParo/status-warning-basic-on-background-default"
+    }
+  ],
+  "warnings": []
+}

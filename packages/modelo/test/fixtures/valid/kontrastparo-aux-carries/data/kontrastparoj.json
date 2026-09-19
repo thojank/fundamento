@@ -1,0 +1,23 @@
+{
+  "kontrastParoj": [
+    {
+      "id": "kpa_01K5FMAJ0K2ES2P0S3VGVDAX3Q",
+      "name": "text-on-background",
+      "foreground": "color.text.default",
+      "background": "color.background.default",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M2X7SC2WYKJC0G0KXQ0NB47D",
+      "name": "status-warning-basic-on-background-default",
+      "foreground": "color.status.warning.basic",
+      "background": "color.background.default",
+      "kategorio": "ui",
+      "aux": {
+        "foreground": "color.status.warning.border",
+        "background": "color.background.default"
+      },
+      "kialo": "A border that reaches 3:1 identifies the status surface even when its fill does not (WCAG 1.4.11)."
+    }
+  ]
+}

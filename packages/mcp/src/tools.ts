@@ -3,10 +3,18 @@
 
 import {
   CELOJ,
+  type CheckContrastInput,
   CORE_SET_NAME,
+  checkContrast,
   checkTokenName,
   completeAssignment,
+  type DescribeTermInput,
   describeModelo,
+  describeTerm,
+  type ExplainInput,
+  type ExplainReguloInput,
+  explain,
+  explainRegulo,
   isNoTarget,
   NOM_REGULOJ,
   resolve as resolveAssignment,
@@ -99,7 +107,11 @@ const describe: Tool = (served) => {
     dimensioj: description.dimensioj,
     aspektoj: modeloJson.aspektoj.map(aspektoSummary),
     tokens: { count: description.tokenCount, byType, byGroup: description.tokensByGroup },
-    reguloj: { count: description.reguloCount, withKialo: description.reguloWithKialoCount },
+    reguloj: {
+      count: description.reguloCount,
+      withKialo: description.reguloWithKialoCount,
+      automatic: description.reguloAutomaticCount,
+    },
     jugxoj: { count: description.jugxoCount },
     eroj: { count: description.eroCount },
     validation: { errors: report.errors.length, warnings: report.warnings.length },
@@ -356,6 +368,66 @@ const deriveName: Tool = (served, args) => {
   return ok(issues.length === 0 ? { name, derivations } : { name, derivations, issues });
 };
 
+/** Spec 002 FR-09: the contrast of any colour pair, from the modelo function. */
+const checkContrastTool: Tool = (served, args) => {
+  const result = checkContrast(served.modelo, args as unknown as CheckContrastInput);
+  if (!result.ok) {
+    return {
+      ok: false,
+      envelope: {
+        issues: result.issues,
+        ...(result.allowed === undefined ? {} : { allowed: result.allowed }),
+      },
+    };
+  }
+  return ok(result.output as unknown as Record<string, unknown>);
+};
+
+/** Spec 002 FR-10: why a token has its value, from the modelo function and the served report. */
+const explainTool: Tool = (served, args) => {
+  const result = explain(served.modelo, args as unknown as ExplainInput, served.report);
+  if (!result.ok) {
+    return {
+      ok: false,
+      envelope: {
+        issues: result.issues,
+        ...(result.allowed === undefined ? {} : { allowed: result.allowed }),
+      },
+    };
+  }
+  return ok(JSON.parse(JSON.stringify(result.output)) as Record<string, unknown>);
+};
+
+/** Spec 002 FR-11: a Regulo with its reason and its violations in the served Modelo. */
+const explainReguloTool: Tool = (served, args) => {
+  const result = explainRegulo(served.modelo, args as unknown as ExplainReguloInput, served.report);
+  if (!result.ok) {
+    return {
+      ok: false,
+      envelope: {
+        issues: result.issues,
+        ...(result.allowed === undefined ? {} : { allowed: result.allowed }),
+      },
+    };
+  }
+  return ok(JSON.parse(JSON.stringify(result.output)) as Record<string, unknown>);
+};
+
+/** Spec 002 FR-12: a term of the Ontologio with its instances in the served Modelo. */
+const describeTermTool: Tool = (served, args) => {
+  const result = describeTerm(served.modelo, args as unknown as DescribeTermInput);
+  if (!result.ok) {
+    return {
+      ok: false,
+      envelope: {
+        issues: result.issues,
+        ...(result.allowed === undefined ? {} : { allowed: result.allowed }),
+      },
+    };
+  }
+  return ok(JSON.parse(JSON.stringify(result.output)) as Record<string, unknown>);
+};
+
 export const TOOLS: Record<ToolName, Tool> = {
   describe,
   list_dimensioj: listDimensioj,
@@ -367,4 +439,8 @@ export const TOOLS: Record<ToolName, Tool> = {
   list_jugxoj: listJugxoj,
   validate,
   derive_name: deriveName,
+  check_contrast: checkContrastTool,
+  explain: explainTool,
+  explain_regulo: explainReguloTool,
+  describe_term: describeTermTool,
 };

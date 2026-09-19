@@ -4,6 +4,7 @@ import {
   alphaOf,
   COLORJS_SPACE_OF,
   compositeOver,
+  oklchLightness,
   readDtcgColor,
   srgbComponentsOf,
 } from "./color.js";
@@ -147,5 +148,25 @@ describe("alpha compositing", () => {
     expect(r).toBeCloseTo(0.5, 6);
     expect(g).toBeCloseTo(0.5, 6);
     expect(b).toBeCloseTo(0.5, 6);
+  });
+});
+
+describe("oklchLightness (Spec 002, D-04)", () => {
+  const white = { colorSpace: "srgb", components: [1, 1, 1] } as const;
+  const black = { colorSpace: "srgb", components: [0, 0, 0] } as const;
+
+  it("is the OKLCH lightness of an opaque colour", () => {
+    expect(oklchLightness({ ...white, components: [...white.components] })).toBeCloseTo(1, 6);
+    expect(oklchLightness({ ...black, components: [...black.components] })).toBeCloseTo(0, 6);
+  });
+
+  it("composites a translucent colour over the backdrop first", () => {
+    const halfBlack = { colorSpace: "srgb" as const, components: [0, 0, 0], alpha: 0.5 };
+    const backdrop = { colorSpace: "srgb" as const, components: [1, 1, 1] };
+    expect(oklchLightness(halfBlack, backdrop)).toBeCloseTo(
+      oklchLightness(compositeOver(halfBlack, backdrop)),
+      9,
+    );
+    expect(oklchLightness(halfBlack, backdrop)).toBeGreaterThan(0.5);
   });
 });

@@ -1,0 +1,196 @@
+{
+  "ids": {
+    "dim_01K5FMAJ00XXDRXSKS77MRDT7Z": {
+      "status": "active",
+      "type": "dimensio"
+    },
+    "dim_01K5FMAJ03PESFH9GRTNTZSDZN": {
+      "status": "active",
+      "type": "dimensio"
+    },
+    "dva_01K5FMAJ01CHCS4BMCX5D0TM49": {
+      "status": "active",
+      "type": "dimensioValoro"
+    },
+    "dva_01K5FMAJ02GHG044FZ9966Q9ZB": {
+      "status": "active",
+      "type": "dimensioValoro"
+    },
+    "dva_01K5FMAJ044A9T094C67VSEFNV": {
+      "status": "active",
+      "type": "dimensioValoro"
+    },
+    "dva_01K5FMAJ056744YXV7ZXR50AW5": {
+      "status": "active",
+      "type": "dimensioValoro"
+    },
+    "kpa_01K5FMAJ0K2ES2P0S3VGVDAX3Q": {
+      "status": "active",
+      "type": "kontrastParo"
+    },
+    "reg_01K5FMAJ0J14KNVH5BXJ93VFBG": {
+      "status": "active",
+      "type": "regulo"
+    },
+    "reg_01M2X53D4Y2R9V0RN99725SR78": {
+      "status": "active",
+      "type": "regulo"
+    },
+    "reg_01M2X53D4ZSW5XT4A0E0QHVFYV": {
+      "status": "active",
+      "type": "regulo"
+    },
+    "reg_01M2X53D4ZSW5XT4A0E0QHVFYW": {
+      "status": "active",
+      "type": "regulo"
+    },
+    "reg_01M2X53D4ZSW5XT4A0E0QHVFYX": {
+      "status": "active",
+      "type": "regulo"
+    },
+    "set_01K5FMAJ06444R7MA0HZE3KXSJ": {
+      "status": "active",
+      "type": "tokenSet"
+    },
+    "set_01K5FMAJ07WSBKK3Q3SN0DG7H3": {
+      "status": "active",
+      "type": "tokenSet"
+    },
+    "set_01K5FMAJ08Q2D4K38M0QH1Z9N5": {
+      "status": "active",
+      "type": "tokenSet"
+    },
+    "set_01K5FMAJ09A8T3D4MW25RD97BN": {
+      "status": "active",
+      "type": "tokenSet"
+    },
+    "tok_01K5FMAJ0AND635FTMQ9558Y63": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01K5FMAJ0BQ499YPVK4P8NPRZ3": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01K5FMAJ0CGDK0SHC894P66C4B": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01K5FMAJ0DQ0T56XFQD500JQRD": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01K5FMAJ0EN8B4C4Z6KSPYEMCX": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01K5FMAJ0FRV73CQ8J0CJ9HV5S": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01K5FMAJ0GQGZMPKY9NN4KF5G6": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01K5FMAJ0H4CZYQST4Y5HHM8HV": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M2X53D0HZVY7SPDB45S5EVHR": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M2X53D0J4WQ9ZC0R6HTQ0JAT": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M2X53D0J4WQ9ZC0R6HTQ0JAV": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M2X53D0J4WQ9ZC0R6HTQ0JAW": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M2X53D0J4WQ9ZC0R6HTQ0JAX": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M2X53D0J4WQ9ZC0R6HTQ0JAY": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M2X53D0J4WQ9ZC0R6HTQ0JAZ": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M2X53D0J4WQ9ZC0R6HTQ0JB0": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M2X53D0J4WQ9ZC0R6HTQ0JB1": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M2X53D0J4WQ9ZC0R6HTQ0JB2": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M2X53D0J4WQ9ZC0R6HTQ0JB3": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M2X53D0J4WQ9ZC0R6HTQ0JB4": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M2X53D0J4WQ9ZC0R6HTQ0JB5": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M2X53D0J4WQ9ZC0R6HTQ0JB6": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M2X53D0J4WQ9ZC0R6HTQ0JB7": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M2X53D0J4WQ9ZC0R6HTQ0JB8": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M2X53D0J4WQ9ZC0R6HTQ0JB9": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M2X53D0J4WQ9ZC0R6HTQ0JBA": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M2X53D0J4WQ9ZC0R6HTQ0JBB": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M2X53D0J4WQ9ZC0R6HTQ0JBC": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M2X53D0J4WQ9ZC0R6HTQ0JBD": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M2X53D0J4WQ9ZC0R6HTQ0JBE": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M2X53D0J4WQ9ZC0R6HTQ0JBF": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M2X58ADDVCTJV6206JK7YCQP": {
+      "status": "active",
+      "type": "token"
+    }
+  }
+}

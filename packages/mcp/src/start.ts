@@ -3,8 +3,8 @@
 
 import { resolve } from "node:path";
 import type { ValidationIssue } from "@fundamento/modelo";
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import type { Transport } from "@modelcontextprotocol/sdk/shared/transport.js";
+import type { Transport } from "@modelcontextprotocol/server";
+import { StdioServerTransport } from "@modelcontextprotocol/server/stdio";
 import { DEFAULT_HTTP_PORT, startHttpServer } from "./http.js";
 import { loadServed, type Served, ServedLoadError } from "./load.js";
 import { createFundamentoServer } from "./server.js";
@@ -22,8 +22,10 @@ export function mcpHelp(commandLine: string): string {
 
 Usage: ${commandLine} [--config <file>] [--export <dir>] [--http [--port <n>]]
 
-Serves ten read-only tools (describe, list_dimensioj, list_aspektoj, search_tokens, get_token,
-resolve, list_reguloj, list_jugxoj, validate, derive_name) and the export files as resources.
+Serves read-only tools (describe, list_dimensioj, list_aspektoj, search_tokens, get_token,
+resolve, list_reguloj, list_jugxoj, validate, derive_name, check_contrast, explain,
+explain_regulo, describe_term), the prompt gvidanto, the export files and the Ontologio as
+resources.
 Without --config and --export, serves the Modelo of this repository with its reference Aspekto
 komuna. The export is built in memory at start, with the same function as \`fm modelo export\`.
 

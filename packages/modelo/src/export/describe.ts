@@ -51,6 +51,8 @@ export interface ModeloDescription {
   reguloCount: number;
   /** Reguloj with a non-blank kialo. */
   reguloWithKialoCount: number;
+  /** Reguloj that validation enforces (checkability automatic; Spec 002 FR-14). */
+  reguloAutomaticCount: number;
   eroCount: number;
   jugxoCount: number;
   /** Token count per top-level group (`color`, `typography`, …), groups sorted by name. */
@@ -70,6 +72,9 @@ export function describeModelo(modelo: ModeloJson): ModeloDescription {
   const typeCount = new Set(modelo.tokens.map((token) => token.type)).size;
   const reguloCount = modelo.reguloj.length;
   const reguloWithKialoCount = modelo.reguloj.filter((regulo) => regulo.kialo.trim() !== "").length;
+  const reguloAutomaticCount = modelo.reguloj.filter(
+    (regulo) => regulo.checkability === "automatic",
+  ).length;
   const eroCount = modelo.eroj.length;
   const jugxoCount = modelo.jugxoj.length;
   const tokensByGroup: Record<string, number> = {};
@@ -104,10 +109,11 @@ export function describeModelo(modelo: ModeloJson): ModeloDescription {
   const tokenPart = `${tokenCount} ${tokenCount === 1 ? "token" : "tokens"} in ${counted(typeCount, "type", "types")}${
     groups === "" ? "" : ` (${groups})`
   }`;
+  const automaticPart = `(${reguloAutomaticCount === 0 ? "none" : countWord(reguloAutomaticCount)} automatic)`;
   const reguloPart =
     reguloWithKialoCount === reguloCount
-      ? `${counted(reguloCount, "rule", "rules")} with reasons`
-      : `${counted(reguloCount, "rule", "rules")}, ${countWord(reguloWithKialoCount)} with reasons`;
+      ? `${counted(reguloCount, "rule", "rules")} with reasons ${automaticPart}`
+      : `${counted(reguloCount, "rule", "rules")}, ${countWord(reguloWithKialoCount)} with reasons ${automaticPart}`;
   const eroPart = counted(eroCount, "Ero", "Eroj");
 
   return {
@@ -118,11 +124,12 @@ export function describeModelo(modelo: ModeloJson): ModeloDescription {
     typeCount,
     reguloCount,
     reguloWithKialoCount,
+    reguloAutomaticCount,
     eroCount,
     jugxoCount,
     tokensByGroup,
     aspektoDetails,
-    sentence: `Fundamento v${version}: ${dimensioPart}, ${aspektoPart}, ${tokenPart}, ${reguloPart}, ${counted(jugxoCount, "Jugxo", "Jugxoj")}, ${eroPart}.`,
+    sentence: `Fundamento v${version}: ${dimensioPart}, ${aspektoPart}, ${tokenPart}, ${reguloPart}, ${counted(jugxoCount, "Jugxo", "Jugxoj")}, ${eroPart}. Ask explain why a value is what it is.`,
   };
 }
 

@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ciferecigo.com/fundamento/schema/mcp/check_contrast.input.json",
+  "title": "check_contrast input",
+  "description": "Contrast of a foreground colour token on a background colour token: ratio, threshold, pass or fail per group of combinations, APCA as advice, and whether the pair is a declared KontrastParo. Any pair is allowed.",
+  "type": "object",
+  "properties": {
+    "foreground": {
+      "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/TokenName"
+    },
+    "background": {
+      "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/TokenName"
+    },
+    "assignment": {
+      "description": "One combination; missing Dimensioj take their default. Without it: every combination of every Aspekto.",
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+      }
+    },
+    "kategorio": {
+      "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/KontrastKategorio"
+    }
+  },
+  "required": ["foreground", "background"],
+  "additionalProperties": false
+}

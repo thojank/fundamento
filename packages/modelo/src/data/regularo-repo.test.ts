@@ -7,6 +7,29 @@ import { loadModelo } from "../load/load-modelo.js";
 import { defaultModeloSource } from "../load/source.js";
 import { REGULO_ENFORCERS } from "../validate/regularo-enforcement.js";
 
+/**
+ * Automatic Reguloj without `appliesTo` (Spec 002, D-02), with the reason: explain finds a token's
+ * Reguloj only through `appliesTo`, so every other automatic Regulo must declare it.
+ */
+const WITHOUT_APPLIES_TO: Record<string, string> = {
+  "dimensio-sets-alias-only": "set-level: it governs sets, not tokens",
+  "aspekto-complete": "package-level: it governs Aspekto packages, not tokens",
+  "semantic-described":
+    "it governs every role token; explain lists it only when the token itself violates it",
+};
+
+/** `appliesTo` of the Phase-1 Reguloj (Spec 002 data-model §3). */
+const PHASE1_APPLIES_TO: Record<string, unknown> = {
+  "contrast-pairs-declared": { roles: ["foreground", "background", "border", "focus"] },
+  "semantic-colors-alias-palette": { types: ["color"] },
+  "color-roles-declared": { types: ["color"] },
+  "density-affects-layout-only": { tokens: ["spacing.*", "size.control.*"] },
+  "disabled-exempt-from-contrast": { roles: ["disabled", "decorative"] },
+  "typography-roles-composite": { tokens: ["typography.**"] },
+  "motion-reduced-instant": { tokens: ["motion.duration.*", "motion.easing.*"] },
+  "focus-ring-dual-contrast": { roles: ["focus"] },
+};
+
 /** Reguloj that cannot be violated by data, with the reason. */
 const NOT_CHECKABLE: Record<string, string> = {
   "disabled-exempt-from-contrast":
@@ -55,5 +78,24 @@ describe("Regularo of the repo (D-19)", () => {
     const regulo = reguloj.find((candidate) => candidate.name === "focus-ring-dual-contrast");
     expect(regulo?.checkability).toBe("automatic");
     expect(regulo?.kialo.length ?? 0).toBeGreaterThan(40);
+  });
+
+  it.each(Object.entries(PHASE1_APPLIES_TO))("declares appliesTo for %s", (name, appliesTo) => {
+    expect(reguloj.find((regulo) => regulo.name === name)?.appliesTo).toEqual(appliesTo);
+  });
+
+  it("declares appliesTo for every automatic Regulo except the listed exemptions", () => {
+    const missing = reguloj
+      .filter((regulo) => regulo.checkability === "automatic" && regulo.appliesTo === undefined)
+      .filter((regulo) => WITHOUT_APPLIES_TO[regulo.name] === undefined)
+      .map((regulo) => regulo.name);
+    expect(missing).toEqual([]);
+  });
+
+  it("states the threshold of state-distinct as its sojlo says (D-02, R1)", () => {
+    const regulo = reguloj.find((candidate) => candidate.name === "state-distinct");
+    expect(regulo?.sojlo).toEqual({ metric: "oklch-l-delta", min: 0.05 });
+    expect(regulo?.statement).toContain(`by at least ${regulo?.sojlo?.min}`);
+    expect(regulo?.kialo).toContain(`${regulo?.sojlo?.min} is 2.5 times`);
   });
 });

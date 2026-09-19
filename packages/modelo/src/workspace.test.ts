@@ -47,11 +47,22 @@ describe("workspace packages (plan D-01)", () => {
     expect(root.version).toBe("0.1.0");
   });
 
-  it("pins the MCP SDK exactly and adds its zod peer (plan D-13)", () => {
+  it("pins the MCP SDK v2 packages exactly (Spec 002 plan D-17)", () => {
     const mcp = manifest("mcp");
-    expect(mcp.dependencies?.["@modelcontextprotocol/sdk"]).toBe("1.30.0");
-    expect(mcp.dependencies?.zod).toMatch(/^\^4\./);
+    expect(mcp.dependencies?.["@modelcontextprotocol/server"]).toBe("2.0.0");
+    expect(mcp.dependencies?.["@modelcontextprotocol/node"]).toBe("2.0.0");
+    expect(mcp.devDependencies?.["@modelcontextprotocol/client"]).toBe("2.0.0");
+    expect(manifest("cli").devDependencies?.["@modelcontextprotocol/client"]).toBe("2.0.0");
     expect(mcp.dependencies?.["@fundamento/modelo"]).toBe("workspace:*");
+  });
+
+  it("no longer depends on the v1 SDK or on zod directly (D-17)", () => {
+    for (const dir of Object.keys(PACKAGES)) {
+      const { dependencies, devDependencies } = manifest(dir);
+      const names = Object.keys({ ...dependencies, ...devDependencies });
+      expect(names, dir).not.toContain("@modelcontextprotocol/sdk");
+      expect(names, dir).not.toContain("zod");
+    }
   });
 
   it("keeps aspekto-komuna a data-only package without dependencies", () => {

@@ -189,7 +189,15 @@ export function checkFixtureRoot(fixture: Fixture): string {
 // ---------------------------------------------------------------------------------------------
 // Shape assertions shared by every command (cross-command consistency)
 
-const ISSUE_KEYS = new Set(["rule", "severity", "path", "message", "suggestion", "combination"]);
+const ISSUE_KEYS = new Set([
+  "rule",
+  "severity",
+  "path",
+  "message",
+  "suggestion",
+  "combination",
+  "regulo",
+]);
 
 const nonEmpty = (value: unknown): boolean => typeof value === "string" && value.trim() !== "";
 
@@ -210,15 +218,23 @@ export function expectIssueShape(issue: unknown, severity: "error" | "warning"):
   if (record.combination !== undefined) {
     expect(typeof record.combination).toBe("object");
   }
+  if (record.regulo !== undefined) {
+    // Spec 002 FR-08: a cited Regulo is complete, so an agent can quote it as is.
+    const regulo = record.regulo as Record<string, unknown>;
+    for (const key of ["id", "name", "kialo"] as const) {
+      expect(nonEmpty(regulo[key]), `issue.regulo.${key} must be a non-empty string`).toBe(true);
+    }
+  }
 }
 
 /** A `CheckResult` as printed by the runner under `--json`. */
 export function expectCheckResult(value: unknown, check: CheckName): CheckResult {
   expect(typeof value === "object" && value !== null).toBe(true);
   const result = value as CheckResult;
-  expect(Object.keys(result).sort()).toEqual(
-    ["check", "errors", "ok", "stats", "summary", "warnings"].sort(),
-  );
+  // Alirebleco also lists the pair × combination results its aux pairs carry (Spec 002, FR-07).
+  const keys = ["check", "errors", "ok", "stats", "summary", "warnings"];
+  if (check === "alirebleco") keys.push("branches");
+  expect(Object.keys(result).sort()).toEqual(keys.sort());
   expect(result.check).toBe(check);
   expect(typeof result.ok).toBe("boolean");
   expect(nonEmpty(result.summary)).toBe(true);

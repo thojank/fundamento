@@ -2,12 +2,15 @@
 
 import { readFileSync } from "node:fs";
 import { request } from "node:http";
-import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
-import type { Transport } from "@modelcontextprotocol/sdk/shared/transport.js";
+import {
+  Client,
+  StreamableHTTPClientTransport,
+  type Transport,
+} from "@modelcontextprotocol/client";
 import { afterAll, describe, expect, it } from "vitest";
 import { startHttpServer } from "./http.js";
 import { loadServed } from "./load.js";
+import { TOOL_NAMES } from "./schemas.js";
 import { closeClients, connect, EKZEMPLO_PACKAGE } from "./test-doubles/client.js";
 
 afterAll(closeClients);
@@ -22,10 +25,18 @@ const RESOURCES = [
 describe("resources", async () => {
   const { client } = await connect();
 
-  it("lists the three export files as JSON", async () => {
+  it("lists the three export files and the Ontologio as JSON", async () => {
     const { resources } = await client.listResources();
-    expect(resources.map((resource) => [resource.uri, resource.mimeType])).toEqual(
-      RESOURCES.map(([uri]) => [uri, "application/json"]),
+    expect(resources.map((resource) => [resource.uri, resource.mimeType])).toEqual([
+      ...RESOURCES.map(([uri]) => [uri, "application/json"]),
+      ["fundamento://ontologio.json", "application/json"],
+    ]);
+  });
+
+  it("serves the bytes of data/ontologio.json (Spec 002 FR-17)", async () => {
+    const { contents } = await client.readResource({ uri: "fundamento://ontologio.json" });
+    expect((contents[0] as { text?: string }).text).toBe(
+      readFileSync(new URL("../../modelo/data/ontologio.json", import.meta.url), "utf8"),
     );
   });
 
@@ -83,7 +94,7 @@ describe("the HTTP transport", async () => {
 
   it("serves the tools", async () => {
     const { tools } = await client.listTools();
-    expect(tools).toHaveLength(10);
+    expect(tools).toHaveLength(TOOL_NAMES.length);
     const described = await client.callTool({ name: "describe", arguments: {} });
     expect(described.isError).toBeFalsy();
   });

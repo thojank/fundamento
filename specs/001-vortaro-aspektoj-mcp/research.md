@@ -45,6 +45,7 @@ Entscheidungen des Plans mit Begründung und verworfenen Alternativen. Nummern v
 
 ### 7.3 MCP-SDK-Version (D-13)
 - Stand npm am 2026-09-19: `@modelcontextprotocol/sdk` 1.30.0 (latest der v1-Linie, 2026-07-27); v2 als getrennte Pakete `@modelcontextprotocol/server` / `@modelcontextprotocol/node` 2.0.0 (GA 2026-09-17, Peer `zod` ^4, HTTP-Adapter über hono).
+- **Korrigiert in Spec 002 research §9:** Version 2.0.0 wurde laut npm-Registry am 2026-07-27 veröffentlicht, am selben Tag wie 1.30.0; der 2026-09-17 ist nicht das Veröffentlichungsdatum.
 - **Entscheidung:** v1.30 mit der Low-Level-Klasse `Server` und handgeschriebenen JSON-Schemas für Tools. v2 wird in Phase 2 (Gvidanto) neu bewertet.
 - Quellen: https://github.com/modelcontextprotocol/typescript-sdk · https://ts.sdk.modelcontextprotocol.io/v2/serving/http
 

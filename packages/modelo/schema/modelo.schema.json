@@ -117,6 +117,10 @@
       "type": "string",
       "pattern": "^[a-z0-9]+(\\.[a-z0-9]+)*$"
     },
+    "TokenPattern": {
+      "type": "string",
+      "pattern": "^(?:[a-z0-9]+|\\*)(?:\\.(?:[a-z0-9]+|\\*))*(?:\\.\\*\\*)?$"
+    },
     "Name": {
       "type": "string",
       "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
@@ -1375,9 +1379,36 @@
         "aspekto": {
           "description": "Scopes the entry to one Aspekto; entries in an Aspekto package carry their Aspekto (Spec 001, D-10).",
           "$ref": "#/$defs/Name"
-        }
+        },
+        "appliesTo": { "$ref": "#/$defs/ReguloAppliesTo" },
+        "sojlo": { "$ref": "#/$defs/ReguloSojlo" }
       },
       "required": ["id", "name", "statement", "kialo", "scope", "checkability"],
+      "additionalProperties": false
+    },
+    "ReguloAppliesTo": {
+      "description": "Which tokens the Regulo governs; explain finds a token's Reguloj only through this field (Spec 002, D-02). A token matches when any criterion matches. Token patterns may use * for one segment and a trailing ** for one or more.",
+      "type": "object",
+      "properties": {
+        "tokens": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/TokenPattern" }
+        },
+        "roles": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/TokenRole" } },
+        "types": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/DtcgType" } }
+      },
+      "minProperties": 1,
+      "additionalProperties": false
+    },
+    "ReguloSojlo": {
+      "description": "The numeric threshold of a measuring Regulo; the enforcer reads it and agents cite it (Spec 002, D-02, D-06).",
+      "type": "object",
+      "properties": {
+        "metric": { "type": "string", "enum": ["oklch-l-delta"] },
+        "min": { "type": "number", "exclusiveMinimum": 0 }
+      },
+      "required": ["metric", "min"],
       "additionalProperties": false
     },
     "RegulojFile": {
@@ -1495,9 +1526,36 @@
         },
         "kategorio": {
           "$ref": "#/$defs/KontrastKategorio"
+        },
+        "aux": {
+          "description": "Alternative pair (aŭ, 'or'): the KontrastParo holds when the main pair or this pair meets the threshold of the same kategorio (Spec 002, FR-07). Not allowed for text categories; requires a kialo.",
+          "type": "object",
+          "properties": {
+            "foreground": { "$ref": "#/$defs/TokenName" },
+            "background": { "$ref": "#/$defs/TokenName" }
+          },
+          "required": ["foreground", "background"],
+          "additionalProperties": false
+        },
+        "kialo": {
+          "description": "Why the pair exists or why its alternative is enough; required with aux (Spec 002, D-09).",
+          "$ref": "#/$defs/NonEmptyText"
         }
       },
       "required": ["id", "name", "foreground", "background", "kategorio"],
+      "allOf": [
+        {
+          "if": { "properties": { "aux": true }, "required": ["aux"] },
+          "then": { "properties": { "kialo": true }, "required": ["kialo"] }
+        },
+        {
+          "if": {
+            "properties": { "kategorio": { "enum": ["text-normal", "text-large"] } },
+            "required": ["kategorio"]
+          },
+          "then": { "not": { "properties": { "aux": true }, "required": ["aux"] } }
+        }
+      ],
       "additionalProperties": false
     },
     "KontrastParojFile": {

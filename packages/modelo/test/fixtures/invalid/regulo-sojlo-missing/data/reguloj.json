@@ -1,0 +1,67 @@
+{
+  "reguloj": [
+    {
+      "id": "reg_01K5FMAJ0J14KNVH5BXJ93VFBG",
+      "name": "semantic-colors-alias-palette",
+      "statement": "Semantic color tokens reference palette tokens instead of literal values.",
+      "kialo": "A palette change then reaches every semantic use in one place.",
+      "scope": "vortaro",
+      "checkability": "manual"
+    },
+    {
+      "id": "reg_01M2X53D4Y2R9V0RN99725SR78",
+      "name": "surface-order",
+      "statement": "In every combination, the OKLCH lightness of color.background.sunken ≤ canvas ≤ default ≤ raised.",
+      "kialo": "The surface hierarchy carries spatial meaning; a break is visible to users and to no contrast check.",
+      "scope": "vortaro: color.background.*",
+      "checkability": "automatic",
+      "appliesTo": {
+        "tokens": [
+          "color.background.sunken",
+          "color.background.canvas",
+          "color.background.default",
+          "color.background.raised"
+        ]
+      }
+    },
+    {
+      "id": "reg_01M2X53D4ZSW5XT4A0E0QHVFYV",
+      "name": "text-hierarchy",
+      "statement": "In every combination, color.text.default, .subtle and .muted differ, and their contrast against color.background.default does not rise from default to muted.",
+      "kialo": "The text roles carry a distinction of meaning; high contrast must not erase it.",
+      "scope": "vortaro: color.text.*",
+      "checkability": "automatic",
+      "appliesTo": {
+        "tokens": [
+          "color.text.default",
+          "color.text.subtle",
+          "color.text.muted"
+        ]
+      }
+    },
+    {
+      "id": "reg_01M2X53D4ZSW5XT4A0E0QHVFYW",
+      "name": "state-distinct",
+      "statement": "In every combination, the OKLCH lightness of color.action.<v>.hover, .pressed and .selected differs from .rest by at least 0.05.",
+      "kialo": "A state that looks like the rest state gives no feedback.",
+      "scope": "vortaro: color.action.*",
+      "checkability": "automatic",
+      "appliesTo": {
+        "tokens": [
+          "color.action.*.hover",
+          "color.action.*.pressed",
+          "color.action.*.selected",
+          "color.action.*.rest"
+        ]
+      }
+    },
+    {
+      "id": "reg_01M2X53D4ZSW5XT4A0E0QHVFYX",
+      "name": "semantic-described",
+      "statement": "Every role token in core has a $description that states its use.",
+      "kialo": "Agents read values from token files but not the purpose.",
+      "scope": "vortaro: core role tokens",
+      "checkability": "automatic"
+    }
+  ]
+}
