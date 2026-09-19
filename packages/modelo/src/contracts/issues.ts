@@ -97,6 +97,9 @@ export const RULE_IDS = [
   "clean-room-benchmark-reference",
   "clean-room-foreign-prefix",
   "clean-room-marko-spuro",
+  // MCP tools (Spec 001 T023, FR-18)
+  "mcp-input-invalid",
+  "token-unknown",
   // Parity (FUND-4.4)
   "parity-item-missing",
   "parity-prop-mismatch",

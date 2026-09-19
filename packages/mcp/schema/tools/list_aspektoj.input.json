@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ciferecigo.com/fundamento/schema/mcp/list_aspektoj.input.json",
+  "title": "list_aspektoj input",
+  "description": "The Aspektoj with metadata, package and sets.",
+  "type": "object",
+  "properties": {},
+  "additionalProperties": false
+}

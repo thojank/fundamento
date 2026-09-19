@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ciferecigo.com/fundamento/schema/mcp/list_dimensioj.input.json",
+  "title": "list_dimensioj input",
+  "description": "The Dimensioj with values, default, priority and sets.",
+  "type": "object",
+  "properties": {},
+  "additionalProperties": false
+}

@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ciferecigo.com/fundamento/schema/mcp/derive_name.output.json",
+  "title": "derive_name output",
+  "description": "The name of a token in each Celo (CSS, Figma, TypeScript, Tailwind, DTCG).",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "derivations": {
+      "type": "object",
+      "properties": {
+        "css": {
+          "type": "string"
+        },
+        "figma": {
+          "type": "string"
+        },
+        "typescript": {
+          "type": "string"
+        },
+        "tailwind": {
+          "type": "string"
+        },
+        "dtcg": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "issues": {
+      "type": "array",
+      "items": {
+        "$ref": "https://ciferecigo.com/fundamento/schema/mcp/common.json#/$defs/Issue"
+      }
+    }
+  },
+  "additionalProperties": false,
+  "required": ["name", "derivations"]
+}

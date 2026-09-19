@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ciferecigo.com/fundamento/schema/mcp/describe.input.json",
+  "title": "describe input",
+  "description": "What is here? Overview of the served Modelo.",
+  "type": "object",
+  "properties": {},
+  "additionalProperties": false
+}

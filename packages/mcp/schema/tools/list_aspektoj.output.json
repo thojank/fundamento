@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ciferecigo.com/fundamento/schema/mcp/list_aspektoj.output.json",
+  "title": "list_aspektoj output",
+  "description": "The Aspektoj with metadata, package and sets.",
+  "type": "object",
+  "properties": {
+    "aspektoj": {
+      "type": "array",
+      "items": {
+        "$ref": "https://ciferecigo.com/fundamento/schema/mcp/common.json#/$defs/AspektoDetail"
+      }
+    }
+  },
+  "additionalProperties": false,
+  "required": ["aspektoj"]
+}

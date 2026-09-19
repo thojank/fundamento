@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ciferecigo.com/fundamento/schema/mcp/derive_name.input.json",
+  "title": "derive_name input",
+  "description": "The name of a token in each Celo (CSS, Figma, TypeScript, Tailwind, DTCG).",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "celo": {
+      "enum": ["css", "figma", "typescript", "tailwind", "dtcg"]
+    }
+  },
+  "additionalProperties": false,
+  "required": ["name"]
+}

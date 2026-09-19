@@ -143,6 +143,8 @@ Exempt by role: `disabled` (Regulo `disabled-exempt-from-contrast`) and `decorat
 | `density-set-scope` | error | a density set re-points anything but spacing and control-size roles, or a token viewport shifts (Regulo `density-affects-layout-only`) |
 | `regulo-aspekto-unknown` | error | a Regulo or Jugxo is scoped to an unknown Aspekto |
 | `clean-room-marko-spuro` | error | a brand fingerprint outside the allowlist (D-15) |
+| `mcp-input-invalid` | error | an MCP tool input violates its schema, or `validate.aspektoPath` is used over HTTP (T023, T026) |
+| `token-unknown` | error | `get_token` names a token that does not exist; `allowed` lists the nearest names (T025) |
 
 `set-override-has-extensions` is relaxed: overrides may carry `$extensions["com.ciferecigo.fundamento"].textTransform` and nothing else.
 

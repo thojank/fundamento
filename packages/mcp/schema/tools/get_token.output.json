@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ciferecigo.com/fundamento/schema/mcp/get_token.output.json",
+  "title": "get_token output",
+  "description": "One token with its core definition and every override.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/TokenId"
+    },
+    "name": {
+      "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/TokenName"
+    },
+    "type": {
+      "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/DtcgType"
+    },
+    "role": {
+      "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/TokenRole"
+    },
+    "description": {
+      "type": "string"
+    },
+    "textTransform": {
+      "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/TextTransform"
+    },
+    "definition": {
+      "type": "object",
+      "properties": {
+        "set": {
+          "const": "core"
+        },
+        "value": {}
+      },
+      "additionalProperties": false,
+      "required": ["set", "value"]
+    },
+    "overrides": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "set": {
+            "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/SetName"
+          },
+          "package": {
+            "type": "string",
+            "minLength": 1
+          },
+          "kondicxoj": {
+            "type": "array",
+            "items": {
+              "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/KondicxoExpression"
+            }
+          },
+          "value": {}
+        },
+        "additionalProperties": false,
+        "required": ["set", "kondicxoj", "value"]
+      }
+    }
+  },
+  "additionalProperties": false,
+  "required": ["id", "name", "type", "definition", "overrides"]
+}

@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ciferecigo.com/fundamento/schema/mcp/get_token.input.json",
+  "title": "get_token input",
+  "description": "One token with its core definition and every override.",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "name": {
+          "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/TokenName"
+        }
+      },
+      "additionalProperties": false,
+      "required": ["name"]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/TokenId"
+        }
+      },
+      "additionalProperties": false,
+      "required": ["id"]
+    }
+  ]
+}

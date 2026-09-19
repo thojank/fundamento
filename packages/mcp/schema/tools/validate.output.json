@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ciferecigo.com/fundamento/schema/mcp/validate.output.json",
+  "title": "validate output",
+  "description": "Validation issues of the served Modelo or of a local Aspekto package.",
+  "type": "object",
+  "properties": {
+    "valid": {
+      "type": "boolean"
+    },
+    "errors": {
+      "type": "array",
+      "items": {
+        "$ref": "https://ciferecigo.com/fundamento/schema/mcp/common.json#/$defs/Issue"
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "$ref": "https://ciferecigo.com/fundamento/schema/mcp/common.json#/$defs/Issue"
+      }
+    },
+    "scope": {
+      "enum": ["served", "package"]
+    }
+  },
+  "additionalProperties": false,
+  "required": ["valid", "errors", "warnings", "scope"]
+}

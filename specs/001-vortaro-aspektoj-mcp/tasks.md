@@ -108,7 +108,7 @@ Order follows the plan's "Build order". The ciferecigo package is the last task.
 
 ## Stage 6 – MCP server and CLI
 
-- [ ] **T023 Tool schemas and contract tests** (contracts/mcp-tools.md)
+- [x] **T023 Tool schemas and contract tests** (contracts/mcp-tools.md)
   - Red: `packages/mcp/src/contracts.test.ts`: ten input/output schemas compile with Ajv and `$ref` the Modelo schema; examples from the contract validate.
   - Green: `packages/mcp/schema/tools/*.json`.
 - [ ] **T024 Server core and read tools** (D-13)
