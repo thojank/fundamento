@@ -117,7 +117,7 @@ Order follows the plan's "Build order". The ciferecigo package is the last task.
 - [x] **T025 Resolve, rules, validate, derive_name** (D-13, FR-18)
   - Red: `resolve` equals the direct resolver incl. `origin.package`; unknown Dimensio/valoro/Aspekto → issues + `allowed`; `list_reguloj {aspekto}`; `list_jugxoj {ref}`; `validate` served + `aspektoPath`; `derive_name` for the five Celoj.
   - Green: the remaining tools, error envelope.
-- [ ] **T026 Resources and HTTP transport**
+- [x] **T026 Resources and HTTP transport**
   - Red: three resources with the bytes of the export; `--http` binds only to `127.0.0.1`, rejects foreign `Host` headers, and rejects `validate.aspektoPath` with `mcp-input-invalid`.
   - Green: `resources.ts`, `http.ts`.
 - [ ] **T027 CLI commands** (D-07, D-13)

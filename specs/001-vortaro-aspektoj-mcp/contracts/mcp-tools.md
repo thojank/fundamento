@@ -50,4 +50,6 @@ fm mcp [--config <file>] [--export <dir>] [--http] [--port <n>=7300]
 fundamento-mcp …same flags…
 ```
 
+`--http` serves Streamable HTTP at `http://127.0.0.1:<port>/mcp`, stateless (one server per POST request, JSON responses). It binds to `127.0.0.1` only. Its own DNS-rebinding guard answers 403 unless `Host` is `127.0.0.1:<port>` or `localhost:<port>` and any `Origin` is `http://` plus one of those. The SDK transport's built-in guard is deprecated in 1.30. `validate.aspektoPath` is refused with `mcp-input-invalid`. A Modelo that cannot be exported serves no resources.
+
 Exit 2 on a usage error, with a "did you mean" suggestion (Phase-0 CLI conventions). Logs go to stderr only, because stdout belongs to the protocol under stdio.

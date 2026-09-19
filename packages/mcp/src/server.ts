@@ -4,10 +4,18 @@
 
 import type { ErrorObject } from "@fundamento/modelo";
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
-import { CallToolRequestSchema, ListToolsRequestSchema } from "@modelcontextprotocol/sdk/types.js";
+import {
+  CallToolRequestSchema,
+  ErrorCode,
+  ListResourcesRequestSchema,
+  ListToolsRequestSchema,
+  McpError,
+  ReadResourceRequestSchema,
+} from "@modelcontextprotocol/sdk/types.js";
 import { bundleResultSchema, bundleSchema } from "./bundle.js";
 import type { Served } from "./load.js";
-import { compileToolSchemas, type ToolName } from "./schemas.js";
+import { listResources, readResource } from "./resources.js";
+import { type CompiledTool, compileToolSchemas, type ToolName } from "./schemas.js";
 import { TOOLS, type ToolResult } from "./tools.js";
 
 export const SERVER_NAME = "fundamento";
@@ -40,12 +48,56 @@ function asCallResult(result: ToolResult) {
   };
 }
 
-export function createFundamentoServer(served: Served): Server {
-  const tools = compileToolSchemas();
+export interface ServerOptions {
+  /** `http` refuses `validate.aspektoPath`: a remote caller must not name local paths. */
+  transport?: "stdio" | "http";
+}
+
+let compiled: CompiledTool[] | undefined;
+
+/** Compiling the schemas is the expensive part; the HTTP transport builds a server per request. */
+function toolSchemas(): CompiledTool[] {
+  compiled ??= compileToolSchemas();
+  return compiled;
+}
+
+function aspektoPathOverHttp(): ToolResult {
+  return {
+    ok: false,
+    envelope: {
+      issues: [
+        {
+          rule: "mcp-input-invalid",
+          severity: "error",
+          path: "validate/aspektoPath",
+          message: "aspektoPath names a local directory and is accepted over stdio only.",
+          suggestion:
+            "Call validate without input for the served Modelo, or run `fm modelo validate --aspekto <dir>` locally.",
+        },
+      ],
+    },
+  };
+}
+
+export function createFundamentoServer(served: Served, options: ServerOptions = {}): Server {
+  const tools = toolSchemas();
   const server = new Server(
     { name: SERVER_NAME, version: served.modeloJson.fundamento.version },
-    { capabilities: { tools: {} } },
+    { capabilities: { tools: {}, resources: {} } },
   );
+  server.setRequestHandler(ListResourcesRequestSchema, () => ({
+    resources: listResources(served),
+  }));
+  server.setRequestHandler(ReadResourceRequestSchema, (request) => {
+    const contents = readResource(served, request.params.uri);
+    if (contents === undefined) {
+      throw new McpError(
+        ErrorCode.InvalidParams,
+        `Unknown resource ${request.params.uri}; see resources/list.`,
+      );
+    }
+    return { contents: [contents] };
+  });
   const listed = tools.map((tool) => ({
     name: tool.name,
     description: String(tool.input.schema.description ?? tool.name),
@@ -76,6 +128,9 @@ export function createFundamentoServer(served: Served): Server {
     }
     if (!tool.input.validate(args))
       return asCallResult(inputIssues(tool.input.validate.errors, name));
+    if (name === "validate" && options.transport === "http" && "aspektoPath" in args) {
+      return asCallResult(aspektoPathOverHttp());
+    }
     return asCallResult(TOOLS[name](served, args));
   });
   return server;
