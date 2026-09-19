@@ -18,7 +18,7 @@ Order follows the plan's "Build order". The ciferecigo package is the last task.
 - [x] **T001 Package skeletons and dependencies** (D-01, D-13)
   - Red: `workspace.test.ts` asserts five packages, all at `0.1.0`; `packages/mcp` depends on `@modelcontextprotocol/sdk` exactly `1.30.0` and on `zod` ^4; `aspekto-komuna` has no dependencies.
   - Green: create `packages/aspekto-komuna` (data only) and `packages/mcp` (tsconfig, vitest config, empty `src/index.ts`); bump versions; install. The only task that changes `pnpm-lock.yaml`.
-- [ ] **T002 Frozen Phase-0 registry** (K1)
+- [x] **T002 Frozen Phase-0 registry** (K1)
   - Red: `ids/phase0-fixture.test.ts` expects `test/fixtures/phase0-ids.lock.json` with a leading `$comment` (origin: `packages/modelo/data/ids.lock.json` @ `6e517c6`) and pins its SHA-256.
   - Green: create the fixture once from `6e517c6` (the only step that uses git; the test itself never calls git).
 
