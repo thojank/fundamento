@@ -19,6 +19,7 @@ import {
   type ValidationIssue,
 } from "@fundamento/modelo";
 import { CSS_CELO } from "./celoj/css/css.js";
+import { REACT_CELO } from "./celoj/react/react.js";
 import { TAILWIND_CELO } from "./celoj/tailwind/tailwind.js";
 import { WEB_COMPONENT_CELO } from "./celoj/web-component/web-component.js";
 
@@ -42,7 +43,7 @@ export interface Celo {
 }
 
 /** Every Celo, in the order of Art. XII. Each task of Spec 003 adds its Celo here. */
-export const CELOJ: readonly Celo[] = [CSS_CELO, TAILWIND_CELO, WEB_COMPONENT_CELO];
+export const CELOJ: readonly Celo[] = [CSS_CELO, TAILWIND_CELO, WEB_COMPONENT_CELO, REACT_CELO];
 
 export const MANIFEST_FILE = "projekcioj.json";
 
