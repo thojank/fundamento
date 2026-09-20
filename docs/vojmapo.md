@@ -64,17 +64,17 @@ Die Esperanto-Begriffe für die folgenden Konzepte (Vorschläge: *Familio*, *Gas
 
 ### Drei Fälle
 
-1. **Markenfamilie.** Beispiel Jio: Basismarke Jio, Untermarken wie Jio Mart, Jio Fashion, Jio Entertainment, die sich in Farbe, Dichte, Schriftstärke und Interaktion unterscheiden; daneben eigenständige Marken, die völlig abweichen dürfen. Art. IV bleibt: keine Vererbung zur Laufzeit. Untermarken werden beim Build nach dokumentierten Regeln aus der Basis **abgeleitet** (wie ciferecigo) und als vollständige Aspektoj ausgeliefert; die Ableitungsbeziehung ist Metadatum, damit eine Änderung der Basis alle Ableitungen neu erzeugt.
-2. **Gastgeber gewinnt.** Beispiel: Ein Film in Jio Entertainment (purpur) wird angehalten; das UI zeigt Kleidung und Möbel aus der Szene; der Kauf läuft über Dienste von Jio Fashion und Jio Furniture, die sich nahtlos im Design von Jio Entertainment zeigen. Beispiel 2: Im Portal des Taj Mahal wird ein Ticket gekauft und mit Jio Pay (eigentlich golden) bezahlt, im Design des Taj Mahal. Technische Grundlage: CSS Custom Properties erben durch Shadow DOM; ein Microfrontend, das das Vortaro spricht, übernimmt die Belegung des Gastgebers ohne eigenen Code. **Das gemeinsame Vortaro ist der Vertrag, die Marke ist nur die Belegung.**
+1. **Markenfamilie.** Beispiel: eine Basismarke mit Untermarken für Handel, Mode, Unterhaltung, Gesundheit, Finanzen, die sich in Farbe, Dichte, Schriftstärke und Interaktion unterscheiden; daneben eigenständige Marken, die völlig abweichen dürfen. Art. IV bleibt: keine Vererbung zur Laufzeit. Untermarken werden beim Build nach dokumentierten Regeln aus der Basis **abgeleitet** (wie ciferecigo) und als vollständige Aspektoj ausgeliefert; die Ableitungsbeziehung ist Metadatum, damit eine Änderung der Basis alle Ableitungen neu erzeugt.
+2. **Gastgeber gewinnt.** Beispiel: Ein Film im Unterhaltungsdienst (Markenfarbe purpur) wird angehalten; das UI zeigt Kleidung und Möbel aus der Szene; der Kauf läuft über den Mode- und den Möbeldienst derselben Gruppe, die sich nahtlos im Design des Unterhaltungsdienstes zeigen. Beispiel 2: Im Portal einer Kulturerbe-Stätte wird ein Ticket gekauft und mit dem Zahlungsdienst der Gruppe (eigene Markenfarbe golden) bezahlt, im Design des Portals. Technische Grundlage: CSS Custom Properties erben durch Shadow DOM; ein Microfrontend, das das Vortaro spricht, übernimmt die Belegung des Gastgebers ohne eigenen Code. **Das gemeinsame Vortaro ist der Vertrag, die Marke ist nur die Belegung.**
 3. **Gast gewinnt, in freigegebenen Rollen.** Beispiel: gesponserter Mautabschnitt, Gastmarke über der Fahrzeugmarke (siehe Etoso, Gast-Aspekto).
 
 ### Vorrang-Regel als Daten
 
-Für jeden Kontext legt eine Regel fest, welche Marke welche Rollen bestimmt: Gastgeber, Gast oder Familie. Die Regel ist Teil des Regularo, trägt einen Kialo und ist über den Gvidanto abfragbar („warum ist diese Bezahlmaske gerade im Taj-Mahal-Design?").
+Für jeden Kontext legt eine Regel fest, welche Marke welche Rollen bestimmt: Gastgeber, Gast oder Familie. Die Regel ist Teil des Regularo, trägt einen Kialo und ist über den Gvidanto abfragbar („warum ist diese Bezahlmaske gerade im Design des Portals?").
 
 ### Geschützte Rollen
 
-Vertrauens- und Sicherheitsmerkmale übernehmen nie die Marke eines anderen: Zahlungsbestätigung, Sicherheitskennzeichen, Kennzeichnung des Zahlungsdienstes („bezahlt mit Jio Pay"), Warn- und Gefahrenfarben, Fahrinformationen. Grund: Wenn eine Bezahlmaske jede Marke annehmen kann, kann der Nutzer eine echte Zahlung nicht mehr von einer gefälschten unterscheiden. Die Marke fließt, Vertrauen und Sicherheit nicht. Das ist eine Regulo, keine Konvention.
+Vertrauens- und Sicherheitsmerkmale übernehmen nie die Marke eines anderen: Zahlungsbestätigung, Sicherheitskennzeichen, Kennzeichnung des Zahlungsdienstes („bezahlt mit <Zahlungsdienst>"), Warn- und Gefahrenfarben, Fahrinformationen. Grund: Wenn eine Bezahlmaske jede Marke annehmen kann, kann der Nutzer eine echte Zahlung nicht mehr von einer gefälschten unterscheiden. Die Marke fließt, Vertrauen und Sicherheit nicht. Das ist eine Regulo, keine Konvention.
 
 ### Wie Marken entstehen
 
@@ -92,8 +92,8 @@ Stand der Idee: Konzept, keine Spec. Quelle: Gespräche mit dem Maintainer am 20
 
 ### Weicher Übergang zur Laufzeit
 
-- Dimensio-Wechsel zur Laufzeit ändern das UI nicht schlagartig, sondern gleiten: Tokens werden als typisierte CSS-Eigenschaften registriert (`@property`) und interpolieren. Farben mischen in OKLCH, Längen, Radien, Schatten ebenso, Schrift über die Achsen einer Variable Font (Stärke, Breite). Für strukturelle Wechsel: View Transitions.
-- Dauer und Kurve kommen aus den Motion-Tokens; bei `motion=reduced` wird der Übergang zur kurzen Überblendung oder zum sofortigen Wechsel.
+- Dimensio-Wechsel zur Laufzeit ändern das UI nicht schlagartig, sondern gleiten. Dafür braucht es zwei Dinge: Die Tokens werden als typisierte CSS-Eigenschaften registriert (`@property`), sonst kann der Browser nicht interpolieren, **und** jede registrierte Eigenschaft bekommt eine ausdrückliche `transition` (generiert, nicht von Hand). Registrieren allein animiert nichts. Farbraum: Werden Farben in `oklch()` ausgegeben, interpoliert der Browser nach CSS Color 4 in Oklab; bei Legacy-Syntax (`#hex`, `rgb()`) in sRGB mit Grauschleier in der Mitte. Wo ein echter OKLCH-Pfad nötig ist (Farbton-Drehung), wird das Mischgewicht animiert und die Farbe per `color-mix(in oklch, …)` berechnet. Längen, Radien, Schatten interpolieren ebenso, Schrift über die Achsen einer Variable Font (Stärke, Breite). Für strukturelle Wechsel: View Transitions.
+- Dauer und Kurve der generierten `transition`-Deklarationen kommen aus den Motion-Tokens; unter `motion=reduced` und `prefers-reduced-motion: reduce` wird die Dauer auf eine kurze Überblendung oder null gesetzt, ebenfalls generiert. Eine Prüfung stellt sicher, dass jede registrierte Eigenschaft eine Übergangsregel und einen Reduced-Motion-Fall hat.
 - **Neue Regulo-Art (Kandidat): Übergangs-Prüfung.** Zwei gültige Zustände garantieren keinen gültigen Zwischenzustand (hell → düster ist bei 50 % grau auf grau). Die Prüfung tastet jeden erlaubten Übergang in Schritten ab und prüft die KontrastParoj unterwegs. Wo sie scheitert, muss der Übergang anders geführt werden (Text und Fläche zeitversetzt, Umweg über einen sicheren Zwischenzustand).
 
 ### Stimmungsraum statt Themenliste

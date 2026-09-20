@@ -51,7 +51,7 @@ The aim is not that AI replaces brand designers. The model is **human direction,
 
 A multi-brand system usually means many brands living side by side, each in its own product. The harder and more valuable case is different: **the brand follows the context, not the provider.**
 
-At Jio, with more than fifty core brands and fifty more across the Reliance group, this was the goal for years. A viewer pauses a film in the entertainment service and buys the sweater the lead actor wears; the purchase runs through the fashion service, but it looks like the entertainment service. A visitor buys a ticket in the portal of a heritage site and pays with the group's payment service; the payment looks like the heritage site, not like the payment brand.
+In brand groups with a hundred brands and more, this has been the goal for years, and it is the problem the founder of Fundamento worked on in his previous design-system role. A viewer pauses a film in the entertainment service and buys the sweater the lead actor wears; the purchase runs through the fashion service, but it looks like the entertainment service. A visitor buys a ticket in the portal of a heritage site and pays with the group's payment service; the payment looks like the heritage site, not like the payment brand.
 
 Fundamento calls this a **fluid brand**. Components are brand-agnostic: they know the vocabulary, never a brand. The system is multi-brand: many brands, each complete, none a skin over another. The runtime is context-adaptive: which brand governs which roles is decided by the situation, through a precedence rule that is data, carries a reason and can be queried.
 
