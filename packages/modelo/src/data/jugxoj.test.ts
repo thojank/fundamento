@@ -47,3 +47,17 @@ describe("Jugxo on Article X: APCA stays advisory (T002, D-10, FR-17)", () => {
     expect(entry?.context).toContain("WCAG 2");
   });
 });
+
+describe("Jugxo on Article VI: the literal rule for Ero stylesheets (F2)", () => {
+  const entry = jugxoj.find(
+    (jugxo) => jugxo.ref.artikolo === "VI" && jugxo.kialo.includes("stylesheet"),
+  );
+
+  it("records the refinement of the Phase-0 rule with its kialo", () => {
+    expect(entry).toBeDefined();
+    expect(entry?.decision).toBe("deviation-recorded");
+    expect(entry?.kialo).toContain("structure");
+    expect(entry?.context).toContain("css-literal-value");
+    expect(entry?.context).toContain("allowlist");
+  });
+});

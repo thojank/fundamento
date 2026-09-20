@@ -53,6 +53,22 @@ An Aspekto (a brand) is a package: a folder with `aspekto.json` (owner, license,
 
 Every Aspekto must set every token the reference Aspekto sets (`aspekto-incomplete` lists what is missing) and must pass Alirebleco in every combination. The fixture `packages/modelo/test/fixtures/valid/aspekto-ekzemplo/` is a complete example.
 
+## Packages
+
+Everything lives in one workspace; the npm org for published packages is
+[@fundamento](https://www.npmjs.com/org/fundamento) (the maintainer publishes, never a build).
+
+| Package | Purpose |
+|---|---|
+| `@fundamento/vortaro` | The token sets of the core Vortaro (DTCG) |
+| `@fundamento/modelo` | Schema, loader, resolver, validation, checks, NomReguloj, Gvidanto |
+| `@fundamento/aspekto-komuna` | The reference Aspekto |
+| `@fundamento/projekcioj` | Every generator: CSS, Tailwind, Web Component, React, Figma, Code Connect, Make Kit |
+| `@fundamento/eroj` | The generated Eroj: `fm-butono` and its React wrapper |
+| `@fundamento/mcp` | The MCP server (Gvidanto) |
+| `@fundamento/cli` | `fm`: validate, export, build projections, run the server |
+| `@fundamento/make-kit-<aspekto>` | Build output of `projekcioj`: one Figma Make kit per Aspekto (published under the dist-tag `next` after the acceptance) |
+
 ## MCP server
 
 `pnpm fm mcp` (or the bin `fundamento-mcp` with the same flags) serves the Modelo to AI agents over stdio, read-only; logs go to stderr. Registering it is one command, e.g. `claude mcp add fundamento -- pnpm --dir /path/to/fundamento -s fm mcp`.

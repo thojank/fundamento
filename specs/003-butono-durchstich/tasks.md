@@ -81,6 +81,21 @@ A mutation check (one changed value must make the test fail) replaces the red ru
   - Red: the generated `butono.figma.tsx` and `butono.figma.ts` map every Skemo prop and value (parsed, compared with the Skemo); the component URL comes only from `FUNDAMENTO_FIGMA_BUTONO_URL`; without it the Celo emits nothing and says why.
   - Green: `celoj/code-connect/`. No `figma connect publish` in the phase. Done note: the URL reaches the Celo through `CeloInput.env` (the build passes `process.env`), so the generator stays pure; every prop is mapped (`figma.enum`, `figma.boolean`, `figma.string`), and `skipReason` names the missing variable.
 
+## Follow-ups from the Stage 2–4 review (maintainer, 2026-09-20)
+
+- [x] **F1 The plugin creates no empty collection** (review decision 2)
+  - Red: `plugin.test.ts`: a plan whose collection `fundamento` has no variables leads to no such collection in the double, neither on the first nor on the second run; the other collections are unchanged.
+  - Green: the plugin skips collections without variables; `plan.md` says why one can be empty (Art. IV completeness).
+- [x] **F2 The literal rule for Ero stylesheets** (review decision 3)
+  - Red: `component-css.test.ts`: `color: red` and `padding: 8px` are reported as `css-literal-value`; an explicit, small allowlist of structural properties (`display`, `position`, `box-sizing`, `cursor`, `align-*`, `justify-*`, `flex-*`, `appearance`, `pointer-events`, `user-select`, `white-space`, `text-decoration`, `margin: 0`) passes; every design property (colour, background, border, outline, padding, margin, gap, sizes with min/max, font, line-height, letter-spacing, radius, shadow, opacity, transition, animation) passes only as `var(--fm-*)`; the generated stylesheet of every Ero passes.
+  - Green: `checks/vortaro-lint/component-css.ts` in `modelo`, used by the Web-Component test instead of its own property list; a Jugxo on Article VI records the refinement of the Phase-0 rule with its kialo.
+- [x] **F3 FR-14 exemption only on the generator path** (review decision 4)
+  - Red: `rules.test.ts`: in a generator source (`packages/projekcioj/src/celoj/…`) a registration with an interpolated name passes, but one with a literal name outside the `fm-` namespace still fails; in hand-written code (any other path) an interpolated name fails as before.
+  - Green: the exemption in `checkCustomElements`, scoped to the generator path; the generator writes the registration literally again.
+- [x] **F4 npm org in the documentation** (maintainer)
+  - Red: `docs.test.ts`: `docs/vojmapo.md` names the npm org URL at Phase 3, and the README lists the packages with it.
+  - Green: both entries.
+
 ## Stage 5 – Make Kits
 
 - [ ] **T018 Make Kit packages** (FR-11, D-14, AK-08 automated part, Q2)

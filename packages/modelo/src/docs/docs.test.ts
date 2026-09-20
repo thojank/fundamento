@@ -430,3 +430,30 @@ describe("Spec 003 documentation (T001, Constitution v1.6)", () => {
     expect(read("specs/003-butono-durchstich/plan.md").split("\n")[2]).toContain("v1.6");
   });
 });
+
+describe("Spec 003 documentation (F4: the npm org)", () => {
+  const ORG = "https://www.npmjs.com/org/fundamento";
+
+  it("names the npm org at Phase 3 of the vojmapo", () => {
+    const vojmapo = read("docs/vojmapo.md");
+    const phase3 = vojmapo.split("\n").find((line) => line.startsWith("| 3 |")) ?? "";
+    expect(phase3).toContain(ORG);
+  });
+
+  it("lists the packages with the npm org in the README", () => {
+    const packages = section(read("README.md"), "Packages");
+    expect(packages).toContain(ORG);
+    for (const name of [
+      "@fundamento/modelo",
+      "@fundamento/vortaro",
+      "@fundamento/mcp",
+      "@fundamento/cli",
+      "@fundamento/projekcioj",
+      "@fundamento/eroj",
+      "@fundamento/aspekto-komuna",
+    ]) {
+      expect(packages, name).toContain(name);
+    }
+    expect(packages).toContain("make-kit");
+  });
+});

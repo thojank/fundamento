@@ -158,6 +158,14 @@
         "regulo": "reg_01M2XMV80DG7JCJDTZGE66MGHY",
         "instances": [{ "ero": "butono", "props": { "variant": "tertiary", "size": "small" } }]
       }
+    },
+    {
+      "id": "jug_01M2YDYBYFMRS7PREH2WQTCBZW",
+      "ref": { "artikolo": "VI" },
+      "decision": "deviation-recorded",
+      "kialo": "An Ero stylesheet carries structure as well as design: display, cursor or box-sizing are structure, have no token and cannot become one, while every design value must stay a token. The Phase-0 literal rule was written for token CSS and treats every keyword as a literal, so it is refined for Ero stylesheets instead of being weakened.",
+      "date": "2026-09-20",
+      "context": "Spec 003, review of Stages 2-4 (decision 3). The refined rule (css-literal-value in checks/vortaro-lint/component-css.ts) has a small, explicit allowlist of structural properties where keywords and 0 are allowed, requires a token reference for every design property (colour, background, border, outline, spacing, size, type, radius, shadow, opacity, motion), and reports any property in neither list, so both lists stay conscious decisions. Negative tests: color: red and padding: 8px are reported. The Phase-0 rule is unchanged for token CSS and every other file."
     }
   ]
 }

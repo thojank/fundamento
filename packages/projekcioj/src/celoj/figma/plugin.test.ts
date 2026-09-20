@@ -39,7 +39,9 @@ describe("Figma development plugin (T016)", () => {
     const double = figmaDouble();
     await run(double);
     expect(double.collections.map((collection) => collection.name)).toEqual(
-      plan.collections.map((collection) => collection.name),
+      plan.collections
+        .filter((collection) => collection.variables.length > 0)
+        .map((collection) => collection.name),
     );
     const planned = plan.collections.flatMap((collection) => collection.variables);
     expect(double.variables).toHaveLength(planned.length);
@@ -84,6 +86,23 @@ describe("Figma development plugin (T016)", () => {
       b: 0.125,
       a: 1,
     });
+  });
+
+  it("creates no collection without variables, on either run (F1, review decision 2)", async () => {
+    const empty = plan.collections.filter((collection) => collection.variables.length === 0);
+    // Every Aspekto restates every core token (Art. IV), so `fundamento` carries none of them.
+    expect(empty.map((collection) => collection.name)).toEqual(["fundamento"]);
+    const double = figmaDouble();
+    await run(double);
+    expect(double.collections.map((collection) => collection.name)).toEqual(
+      plan.collections
+        .filter((collection) => collection.variables.length > 0)
+        .map((collection) => collection.name),
+    );
+    const created = { ...double.counts };
+    await run(double);
+    expect(double.counts.collections).toBe(created.collections);
+    expect(double.collections.some((collection) => collection.name === "fundamento")).toBe(false);
   });
 
   it("never touches a node without Fundamento plugin data", async () => {

@@ -152,6 +152,27 @@ describe("checkCssCustomProperties", () => {
   });
 });
 
+describe("checkCustomElements: the generator path (Spec 003 F3)", () => {
+  const GENERATOR = "packages/projekcioj/src/celoj/web-component/web-component.ts";
+  const HANDWRITTEN = "packages/eroj/src/define.ts";
+
+  it("accepts an interpolated name in a generator source: it writes the literal name", () => {
+    const result = checkCustomElements(GENERATOR, `${DEFINE}("\${tag}", \${className});`);
+    expect(result.issues).toEqual([]);
+    expect(result.definitions).toBe(1);
+  });
+
+  it("still rejects a literal outside the fm- namespace in a generator source", () => {
+    const result = checkCustomElements(GENERATOR, `${DEFINE}("x-foo", XFoo);`);
+    expect(result.issues.map((issue) => issue.rule)).toEqual(["namespace-custom-element"]);
+  });
+
+  it("rejects an interpolated name in hand-written code", () => {
+    const result = checkCustomElements(HANDWRITTEN, `${DEFINE}("\${tag}", Thing);`);
+    expect(result.issues.map((issue) => issue.rule)).toEqual(["namespace-custom-element"]);
+  });
+});
+
 describe("checkCustomElements", () => {
   it("accepts fm- element names", () => {
     const text = `${DEFINE}("fm-button", FmButton);\n${DEFINE}('fm-text-field', X);`;

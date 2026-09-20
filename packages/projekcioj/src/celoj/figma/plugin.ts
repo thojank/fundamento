@@ -45,6 +45,9 @@ async function applyCollections() {
   const collections = new Map();
   const modeIds = new Map();
   for (const spec of PLAN.collections) {
+    // A collection without variables is not created: in a Modelo with an external Aspekto every
+    // token hangs on the aspekto Dimensio (Art. IV completeness), so fundamento can be empty.
+    if (spec.variables.length === 0) continue;
     const collection = byName.get(spec.name) ?? figma.variables.createVariableCollection(spec.name);
     collections.set(spec.name, collection);
     const ids = {};

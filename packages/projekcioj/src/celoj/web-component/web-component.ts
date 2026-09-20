@@ -108,7 +108,7 @@ const STRUCTURE = `:host { display: inline-block; vertical-align: middle; }
 :host([full-width]) { display: block; }
 :where([part="control"]) { display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; margin: 0; border-style: solid; cursor: pointer; appearance: none; text-decoration: none; white-space: nowrap; transition-property: background-color, color, border-color; }
 :host([full-width]) :where([part="control"]) { display: flex; }
-:where([part="control"]:focus:not(:focus-visible)) { outline: none; }
+:where([part="control"]:focus:not(:focus-visible)) { outline-width: 0; }
 :where([part="control"]:disabled, [part="control"][aria-disabled="true"]) { cursor: not-allowed; }
 :where([part="control"]) ${ICONS} { flex: none; }`;
 
@@ -195,9 +195,6 @@ export function namesOf(ero: LoadedEro["ero"]): {
 
 export const GENERATED_DIR = "eroj/src/generated";
 
-/** The registration call of the generated index. */
-const REGISTER = ["customElements", "define"].join(".");
-
 export const WEB_COMPONENT_CELO: Celo = {
   name: "web-component",
   generate({ modelo }: CeloInput): GeneratedFile[] {
@@ -227,12 +224,12 @@ export const WEB_COMPONENT_CELO: Celo = {
       });
     }
     const imports = eroj.map(({ tag, className }) => `import { ${className} } from "./${tag}.js";`);
-    // The registration is emitted with the literal fm- name; vortaro-lint (FR-14) checks it on the
-    // generated output (web-component.test.ts). Written as REGISTER here so the repo scan, which
-    // looks for registration calls in source text, does not mistake this template for one.
+    // The registration is emitted with the literal fm- name; vortaro-lint (FR-14) checks that name
+    // on the generated output (web-component.test.ts). The interpolated name here is allowed only
+    // because this file is a generator source (isEroGeneratorSource, Spec 003 F3).
     const defines = eroj.map(
       ({ tag, className }) =>
-        `  if (customElements.get("${tag}") === undefined) ${REGISTER}("${tag}", ${className});`,
+        `  if (customElements.get("${tag}") === undefined) customElements.define("${tag}", ${className});`,
     );
     files.push({
       path: `${GENERATED_DIR}/index.ts`,

@@ -4,6 +4,7 @@
 
 import {
   checkCustomElements,
+  componentCssIssues,
   cssPhysicalPropertyIssues,
   defaultModeloSource,
 } from "@fundamento/modelo";
@@ -42,16 +43,9 @@ describe("Web Component Celo (T011)", () => {
     expect(JSON.parse(skemo ?? "null")).toEqual(butono?.skemo);
   });
 
-  it("gives every design property a token value", () => {
-    const declarations = [...css.matchAll(/([a-z-]+): ([^;]+);/g)];
-    const design = declarations.filter(([, property]) => DESIGN.test(property ?? ""));
-    expect(design.length).toBeGreaterThan(40);
-    for (const [, property, value] of design) {
-      const withoutTokens = (value ?? "")
-        .replace(/var\(--fm-[a-z0-9-]+\)/g, "")
-        .replace(/\b0\b/g, "");
-      expect(withoutTokens.trim(), `${property}: ${value}`).toMatch(/^[\s,]*$/);
-    }
+  it("gives every design property a token value (F2: the Ero stylesheet rule)", () => {
+    expect([...css.matchAll(/var\(--fm-[a-z0-9-]+\)/g)].length).toBeGreaterThan(40);
+    expect(componentCssIssues("butono.css", css)).toEqual([]);
   });
 
   it("uses logical properties only and keeps every target at least size.target.min", () => {
