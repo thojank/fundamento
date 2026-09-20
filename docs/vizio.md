@@ -47,8 +47,24 @@ In the executable chain, the brand is not documented after the fact. It is the s
 
 The aim is not that AI replaces brand designers. The model is **human direction, machine exploration, machine execution, human judgment**. People decide meaning, cultural relevance, differentiation and taste. Machines research, explore variants, check consistency, document, transform and implement. Brand design moves from asset creation to **system direction**.
 
+## Fluid brands: the brand follows the context
+
+A multi-brand system usually means many brands living side by side, each in its own product. The harder and more valuable case is different: **the brand follows the context, not the provider.**
+
+At Jio, with more than fifty core brands and fifty more across the Reliance group, this was the goal for years. A viewer pauses a film in the entertainment service and buys the sweater the lead actor wears; the purchase runs through the fashion service, but it looks like the entertainment service. A visitor buys a ticket in the portal of a heritage site and pays with the group's payment service; the payment looks like the heritage site, not like the payment brand.
+
+Fundamento calls this a **fluid brand**. Components are brand-agnostic: they know the vocabulary, never a brand. The system is multi-brand: many brands, each complete, none a skin over another. The runtime is context-adaptive: which brand governs which roles is decided by the situation, through a precedence rule that is data, carries a reason and can be queried.
+
+Three cases follow from it:
+
+- **Family:** sub-brands are derived from a parent brand by documented rules and shipped as complete brands, so a change to the parent regenerates every child.
+- **Host wins:** an embedded service takes the brand of the place it appears in. The shared vocabulary is the contract; the brand is only the assignment of values.
+- **Guest wins, in permitted roles:** a sponsor's brand is laid over the host for a time and a place, with consent, and withdrawn afterwards.
+
+One limit holds in every case: **trust and safety do not flow.** Payment confirmations, security marks, the name of the payment provider, warnings and safety-relevant information never take another brand's values. If a payment form can wear any brand, a user can no longer tell a real payment from a fake one.
+
 ## Where this leads
 
-The design system is not the end product. It is the first executable projection of a brand specification. Next come context-dependent behavior at runtime (a brand that is calm in the morning and warm in the evening, within its rules), a formal ontology so every export is also a knowledge graph, and tooling that creates new brands through an iterative, rule-bound process in which every iteration is a valid, complete brand rather than a mood board.
+The design system is not the end product. It is the first executable projection of a brand specification. Next come context-dependent behavior at runtime (a brand that is calm in the morning and warm in the evening, within its rules), a formal ontology so every export is also a knowledge graph, and tooling that creates new brands through an iterative, rule-bound process in which every iteration is a valid, complete brand rather than a mood board. Brands will be described in words and rules, steered by examples and generated; configured step by step, or imported from examples and links for a client's commission, applied in that client's context rather than copied.
 
 In one sentence: **brands become software.**

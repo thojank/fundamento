@@ -39,10 +39,52 @@ Eine Marke wird als ausführbare Spezifikation beschrieben (Modelo); daraus ents
 | **Internacia** | logische Richtungen, RTL-Testfall, Textexpansion, keine festen Strings, Schriftsysteme je Schrift | Art. VIII · ab Spec 003 je Ero | Regel steht, Umsetzung ab Phase 3 |
 | **Alirebleco** | WCAG-Kontrast je Aspekto × Kombination; Fokus, Tastatur, ARIA an Eroj; APCA beratend | Art. X · Spec 001/002 · Spec 003 (Werkzeug benennen, APCA entscheiden) | Kontrast ✅, Rest ab Phase 3 |
 | **Figma Make Kits** | Kit je Aspekto: React-Paket + Tailwind-Tokens + aus dem Modelo **generierte** `guidelines/` | neues Celo, Spec 003 (Durchstich), Phase 9 (öffentlich) | Spec 003 |
+| **Fluida Marko** | Die Marke folgt dem Kontext, nicht dem Anbieter: Markenfamilie, Gastgeber, Gast, Vorrang-Regel als Daten, geschützte Rollen (Details im Abschnitt unten) | Leitbegriff seit 2026-09-20; eigene Spec nach Spec 004, gemeinsam mit Etoso | Konzept |
 | **Etoso** | Dimensio für Kontext und Stimmung, Laufzeit-Umschaltung mit weichem Übergang, Stimmungsraum statt Themenliste, Gast-Aspekto (Details im Abschnitt unten) | eigene Spec nach Spec 004; Phase-1-Test belegt: neue Dimensio rein über Daten; Vitrino (Spec 004) ist der erste sichtbare Beleg der Laufzeit-Umschaltung | Kandidat, Konzept unten |
 | **Tavoloj / Brand DNA** | Aspekto-Paket trägt weitere Schichten neben `vida`: Sprache (Voice), Verhalten, Governance | `aspekto.json#/tavoloj` reserviert (Phase 1) | Kandidat |
 | **Inspiro** | Muster aus kuratierten Sammlungen (Pinterest-API, Browser-Extension, DOM-Analyse) → abstrahierte Muster → Sxablonoj; nie Inhalte Dritter | Phase 8; Vorstufe MCP-Werkzeug `inspiro_analyze` ab Phase 5 | Idee |
 | **Kreilo** | Plattform für iterative Markenerschaffung, jede Iteration ein gültiger, vollständiger Aspekto | eigenes Projekt auf Fundamento, nach Phase 7 | Idee |
+
+## Fluida Marko – Familie, Gastgeber, Gast
+
+Stand: Leitkonzept, keine Spec. Herkunft: Ziel des Design-System-Teams bei Jio (50+ Kernmarken, 50+ weitere Marken der Reliance-Gruppe), das dort nicht vollständig gelöst wurde; eingebracht vom Maintainer am 2026-09-20.
+
+**Kernsatz:** Die Marke folgt dem Kontext, nicht dem Anbieter. Ein Dienst sieht dort aus, wo er gebraucht wird, nicht dort, wo er herkommt.
+
+### Begriffe
+
+| Ebene | Begriff | Bedeutung |
+|---|---|---|
+| Oberbegriff | **Fluida Marko** (Fluid Brand, fluide Marke) | Die Marke ist kein fester Zustand eines Produkts, sondern ein Wert, der zur Laufzeit aus dem Kontext entsteht. Kurzformel für Vorträge: „Brand as Runtime". |
+| Ero | **markenagnostisch** | Ein Ero kennt keine Marke, nur das Vortaro. |
+| System | **mehrmarkenfähig** | Viele Marken gleichrangig und vollständig (Art. IV). |
+| Laufzeit | **kontextadaptiv** | Welche Marke welche Rollen bestimmt, entscheidet die Situation. |
+
+Die Esperanto-Begriffe für die folgenden Konzepte (Vorschläge: *Familio*, *Gastiganto*, *Gasto*, *Prioritato*, *protektata rolo*) werden per Constitution Amendment in der zugehörigen Spec festgelegt.
+
+### Drei Fälle
+
+1. **Markenfamilie.** Beispiel Jio: Basismarke Jio, Untermarken wie Jio Mart, Jio Fashion, Jio Entertainment, die sich in Farbe, Dichte, Schriftstärke und Interaktion unterscheiden; daneben eigenständige Marken, die völlig abweichen dürfen. Art. IV bleibt: keine Vererbung zur Laufzeit. Untermarken werden beim Build nach dokumentierten Regeln aus der Basis **abgeleitet** (wie ciferecigo) und als vollständige Aspektoj ausgeliefert; die Ableitungsbeziehung ist Metadatum, damit eine Änderung der Basis alle Ableitungen neu erzeugt.
+2. **Gastgeber gewinnt.** Beispiel: Ein Film in Jio Entertainment (purpur) wird angehalten; das UI zeigt Kleidung und Möbel aus der Szene; der Kauf läuft über Dienste von Jio Fashion und Jio Furniture, die sich nahtlos im Design von Jio Entertainment zeigen. Beispiel 2: Im Portal des Taj Mahal wird ein Ticket gekauft und mit Jio Pay (eigentlich golden) bezahlt, im Design des Taj Mahal. Technische Grundlage: CSS Custom Properties erben durch Shadow DOM; ein Microfrontend, das das Vortaro spricht, übernimmt die Belegung des Gastgebers ohne eigenen Code. **Das gemeinsame Vortaro ist der Vertrag, die Marke ist nur die Belegung.**
+3. **Gast gewinnt, in freigegebenen Rollen.** Beispiel: gesponserter Mautabschnitt, Gastmarke über der Fahrzeugmarke (siehe Etoso, Gast-Aspekto).
+
+### Vorrang-Regel als Daten
+
+Für jeden Kontext legt eine Regel fest, welche Marke welche Rollen bestimmt: Gastgeber, Gast oder Familie. Die Regel ist Teil des Regularo, trägt einen Kialo und ist über den Gvidanto abfragbar („warum ist diese Bezahlmaske gerade im Taj-Mahal-Design?").
+
+### Geschützte Rollen
+
+Vertrauens- und Sicherheitsmerkmale übernehmen nie die Marke eines anderen: Zahlungsbestätigung, Sicherheitskennzeichen, Kennzeichnung des Zahlungsdienstes („bezahlt mit Jio Pay"), Warn- und Gefahrenfarben, Fahrinformationen. Grund: Wenn eine Bezahlmaske jede Marke annehmen kann, kann der Nutzer eine echte Zahlung nicht mehr von einer gefälschten unterscheiden. Die Marke fließt, Vertrauen und Sicherheit nicht. Das ist eine Regulo, keine Konvention.
+
+### Wie Marken entstehen
+
+- **Beschrieben:** Design wird in Worten und Regeln beschrieben, mit Beispielen gesteuert und daraus erzeugt.
+- **Konfiguriert:** Der Agordilo entwickelt eine Marke iterativ; jede Iteration ist eine gültige, vollständige Aspekto (siehe Kreilo).
+- **Importiert:** Der Enportilo übernimmt eine Marke aus Beispielen, Links oder Dateien per Drag & Drop, für Kundenaufträge („bau mir eine App für Marke X"). Der Auftrag ist der Rechtenachweis nach Art. V; ohne Auftrag oder Lizenz kein Import. Anwenden im eigenen Kontext, nicht kopieren.
+
+### Veröffentlichung
+
+Das Konzept wird offen entwickelt und veröffentlicht: Artikel, Videos, Vorträge, Demo-Anwendungen (Etoso-Fragebogen, Gastgeber-Demo „Film anhalten und kaufen", Fahrzeug-Vision). Belegt wird jede Behauptung durch laufenden Code und Prüfungen, nicht durch Folien.
 
 ## Etoso – Übergänge, Stimmungsraum, Gast-Aspekto
 
