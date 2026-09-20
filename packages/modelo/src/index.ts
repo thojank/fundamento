@@ -21,6 +21,7 @@ export * from "./export/index.js";
 export * from "./gvidanto/index.js";
 export * from "./ids/index.js";
 export * from "./load/index.js";
+export * from "./metrikoj/index.js";
 export * from "./nomreguloj/index.js";
 export * from "./ontologio/check.js";
 export * from "./resolve/index.js";

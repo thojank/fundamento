@@ -404,7 +404,6 @@ describe("Spec 003 documentation (T001, Constitution v1.6)", () => {
   const TAILWIND_SENTENCE =
     "Tailwind v4: Tokens im `@theme` unter dem Namensraum `fm` (`--color-fm-*` → `bg-fm-*`), nicht per `prefix()`, weil `prefix()` alle Klassen des Projekts umbenennt.";
 
-
   it("Art. XII Celo 2 carries the Tailwind naming sentence", () => {
     const article = section(
       constitution,
@@ -536,8 +535,7 @@ describe("Spec 004 documentation (T001, Constitution v1.7)", () => {
   const constitution = read(".specify/memory/constitution.md");
   const BENCHMARK_SENTENCE =
     "Ein fremdes System mit offener, nachgewiesener Lizenz darf als Benchmark-Aspekto importiert werden, um es mit denselben Prüfungen zu messen.";
-  const SOURCE_RULE =
-    "Quellmaterial anderer Systeme wird dem Coding-Tool nicht vorgelegt.";
+  const SOURCE_RULE = "Quellmaterial anderer Systeme wird dem Coding-Tool nicht vorgelegt.";
 
   it("the Constitution header says version 1.7", () => {
     expect(constitution.split("\n")[2]).toMatch(/^Version 1\.7 · /);

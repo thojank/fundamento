@@ -11,7 +11,7 @@ Dieser Plan ist die Ausgabe von `/speckit.plan` für **Etappe A** von Spec 004. 
 Etappe A macht drei Dinge, in dieser Reihenfolge:
 
 1. **Ziele vor Werten (FR-01, FR-02), auf zwei Ebenen.** Zwölf messbare Qualitätsziele mit Kialo. Sieben davon gelten als **Regulo** für jede Marke, weil sie Zugänglichkeit und Struktur sichern; fünf sind **Aspiroj** – Ziele, die komuna sich selbst setzt, prüfbar und begründet, aber ohne Anspruch auf andere Marken („Fluida Marko", D-03). Heute schlagen an: die Kontrast-Reserve als Regulo (kleinster Wert +3,6 %), der Abstand benachbarter Flächen als Regulo (zweimal genau 0) und drei Aspiroj von komuna (reine Endpunkte als Fläche, Reserve 10 %, eigener Dunkelmodus mit 1,3 % Abdeckung). Die Regel kommt zuerst, die Werte danach – der rote Lauf ist das Repo selbst.
-2. **komuna 2 (FR-01, FR-04).** Die Werte von komuna werden so weit geändert, wie Reguloj und eigene Aspiroj es verlangen: eigene Stufen für Flächen statt reiner Endpunkte, 57 eigene Dunkelwerte statt der gemeinsamen Umsetzung, drei enge KontrastParoj auf Reserve gebracht. `ekzemplo` zieht dort nach, wo eine **Regulo** es verlangt – nicht bei komunas Aspiroj; `ciferecigo` nach dem Merge außerhalb des Repos.
+2. **komuna 2 (FR-01, FR-04).** Die Werte von komuna werden so weit geändert, wie Reguloj und eigene Aspiroj es verlangen: eigene Stufen für Flächen statt reiner Endpunkte, 56 eigene Dunkelwerte statt der gemeinsamen Umsetzung, drei enge KontrastParoj auf Reserve gebracht. `ekzemplo` zieht dort nach, wo eine **Regulo** es verlangt – nicht bei komunas Aspiroj; `ciferecigo` nach dem Merge außerhalb des Repos.
 3. **Vitrino (FR-05 bis FR-09).** Ein neues Celo schreibt eine einzige, eigenständige HTML-Datei: Paletten mit Helligkeitskurve, Flächenfolge, Texthierarchie, Status, Aktionen, echtes `fm-butono`, Kontrastmatrix und Regularo-Ergebnis, alle Dimensioj zur Laufzeit umschaltbar und zwei Aspektoj nebeneinander (in Etappe A komuna ↔ ekzemplo).
 
 Dazu die Verfassungsänderung v1.7 (Art. V, Benchmark-Aspekto) und die Vorbereitung der Clean-Room-Prüfung auf Fingerprints fremder Benchmark-Aspektoj, damit Etappe B nur noch ihre Liste liefern muss.
@@ -115,7 +115,7 @@ Drei Ausnahmen mit Kialo in der Regulo selbst: **Alpha-Rampen** (`shade`) fallen
   { "metriko": "oklch-l-step", "min": 0.04, "max": 0.2, "appliesTo": { "tokens": ["color.palette.*"] },
     "kialo": "Eine feste Schrittweite lässt die Rampen gleich schnell laufen und macht eine Ableitung möglich." },
   { "metriko": "dimensio-kovrado", "dimensio": "color-scheme", "valoro": "dark", "min": 1,
-    "appliesTo": { "tokens": ["color.background.*", "color.text.*", "color.action.*", "color.status.*"] },
+    "appliesTo": { "tokens": ["color.background.**", "color.text.**", "color.action.**", "color.status.**"] },
     "kialo": "Ein Dunkelmodus, den alle Marken teilen, ist eine Umsetzung, kein Entwurf." }
 ]
 ```
@@ -132,7 +132,7 @@ Die Reguloj bestimmen die Arbeit, nicht umgekehrt. Aus G1 bis G3 folgt genau die
 
 1. **Neue Ankernahe Stufen in der neutralen Rampe.** Die Flächen brauchen eigene Stufen dicht an Weiß und Schwarz, statt die Anker selbst zu belegen. Die Zahl der neuen Stufen ergibt sich aus der Rechnung, nicht aus Geschmack: vier Flächenrollen × zwei Schemata, jede mit ≥ 0,02 Abstand zur Nachbarin und zum Anker.
 2. **Flächenrollen neu gezeigt.** Hell: `raised` bekommt eine eigene, hellere Stufe als `default`; dunkel: `sunken` wird dunkler als `canvas`. Damit verschwinden die vier Nullabstände aus research §2.2.
-3. **Eigener Dunkelmodus für komuna (G9).** komuna trägt seine Dunkelwerte künftig selbst: **57 Tokens** in `aspekto/komuna+color-scheme/dark` – alle Rollen der Gruppen `background`, `text`, `action` und `status`, die der Dunkelmodus umsetzt (research §2.8; heute ist es genau ein Palettenprimitiv). Der generische Satz `color-scheme/dark` bleibt für alle anderen Marken die gemeinsame Umsetzung; komuna hört auf, sie zu benutzen. Das ist der Unterschied zwischen „umgesetzt" und „abgestimmt", und er ist als `dimensio-kovrado` eine Zahl: 1,3 % heute, 100 % danach.
+3. **Eigener Dunkelmodus für komuna (G9).** komuna trägt seine Dunkelwerte künftig selbst: **56 Tokens** in `aspekto/komuna+color-scheme/dark` – alle Rollen der Gruppen `background`, `text`, `action` und `status`, die der Dunkelmodus umsetzt (research §2.8; heute ist es genau ein Palettenprimitiv). Der generische Satz `color-scheme/dark` bleibt für alle anderen Marken die gemeinsame Umsetzung; komuna hört auf, sie zu benutzen. Das ist der Unterschied zwischen „umgesetzt" und „abgestimmt", und er ist als `dimensio-kovrado` eine Zahl: 1,3 % heute, 100 % danach.
 4. **Drei enge Paare auf Reserve.** `status-success-on-basic` (+3,6 %), `text-muted-on-background-sunken` (+4,2 %) und `status-info-on-basic` (+7,3 %) bekommen Luft, indem die Status-Basisflächen und `color.text.muted` auf benachbarte Rampenstufen gelegt werden. Erwartung: die Änderung an `sunken` aus Punkt 2 hebt das zweite Paar bereits an.
 5. **Nichts anderes.** Die Typografie bleibt, wie sie ist (G7, G8 sind heute erfüllt); die Skala wird dokumentiert, nicht neu gerechnet. Paletten behalten ihre Kurve (G4, G5 sind erfüllt); es kommen nur Stufen dazu.
 
@@ -277,7 +277,7 @@ packages/modelo/
 ├─ data/reguloj.json                  + acht Reguloj mit Kialo und Sojlo
 packages/vortaro/sets/core.json       komuna 2: ankernahe neutrale Stufen, Flächenrollen, Status
 packages/aspekto-komuna/aspekto.json  + aspiroj (vier Ziele mit Kialo)
-packages/aspekto-komuna/sets/aspekto/komuna+color-scheme/dark.json   eigener Dunkelmodus, 57 Werte
+packages/aspekto-komuna/sets/aspekto/komuna+color-scheme/dark.json   eigener Dunkelmodus, 56 Werte
 packages/modelo/test/fixtures/valid/aspekto-ekzemplo/                ekzemplo zieht nach
 packages/projekcioj/src/celoj/vitrino/   NEU: Vorlage, Daten, SVG-Kurve, after-Phase
 packages/eroj/test/vitrino.check.ts      NEU: axe, Umschalten, Gegenüberstellung
@@ -318,7 +318,7 @@ Keine neuen. Genutzt werden `colorjs.io` (bereits für OKLCH und APCA), Playwrig
 | **ciferecigo außerhalb** | Privates Paket, eigener Ort. | Nachlauf nach dem Merge, wie Spec 003 T028; bis dahin ist ciferecigo gegen die neuen Reguloj ungeprüft. |
 | **Neuer Begriff `Aspiro`, neuer Grundsatz `FluidaMarko`** | Ohne zweite Ebene würde jede Entscheidung von komuna zur Pflicht für jede Marke. | `Aspiro` steht in der Terminologie-Tabelle (v1.7) und damit im Drift-Test; `FluidaMarko` braucht ein drittes Ontologio-Schema `principoj` und wartet auf seine eigene Spec, bevor die Constitution ihn führt (D-14). |
 | **Aspiro-Verstoß ist ein Fehler** | Ein selbst gesetztes Ziel soll nicht unbemerkt verloren gehen. | Wer ein Ziel aufgibt, muss es sichtbar in `aspekto.json` streichen oder senken; das ist gewollt, aber es kann sich bei fremden Marken wie eine Vorschrift anfühlen. Bei Bedarf auf `warning` umstellbar. |
-| **57 eigene Dunkelwerte** | komuna bestimmt seinen Dunkelmodus selbst (G9). | Mehr Werte zu pflegen; die generische Umsetzung bleibt für alle anderen Marken der bequeme Weg. |
+| **56 eigene Dunkelwerte** | komuna bestimmt seinen Dunkelmodus selbst (G9). | Mehr Werte zu pflegen; die generische Umsetzung bleibt für alle anderen Marken der bequeme Weg. |
 | **Etappe B offen** | Import und Bericht laufen in einer eigenen Sitzung. | Die vier Schnittstellen aus D-01 sind festgelegt; ändert Etappe B daran etwas, ist es ein Jugxo. |
 
 ## Reihenfolge (Orientierung, keine Aufgaben)

@@ -110,7 +110,7 @@ Der eine eigene Dunkelwert von komuna ist dazu ein Palettenprimitiv (`color.pale
 | `color.background` | 5 |
 | übrige (`border`, `link`, `navigation`, `brand`, `focus`, `shadow`, `palette`) | 19 |
 
-Die vier erstgenannten Gruppen sind zusammen **57 Tokens**: das ist der Umfang, wenn komuna seinen Dunkelmodus selbst bestimmen soll.
+Die vier erstgenannten Gruppen umfassen zusammen **56 verschiedene Tokens** (die Tabelle zählt Vorkommen je Satz, ein Token steht in beiden Dunkel-Sätzen): das ist der Umfang, wenn komuna seinen Dunkelmodus selbst bestimmen soll.
 
 ## 3. Ist-Stand ekzemplo (Folgen für FR-04)
 

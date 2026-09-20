@@ -11,7 +11,7 @@ Begleitet [`plan.md`](plan.md); die Kürzel D-xx verweisen auf dessen Entscheidu
 | **Ontologio-Begriffe** | `packages/modelo/data/ontologio.json` | `Aspiro` unter `inScheme: terminologio` (und damit in der Terminologie-Tabelle der Constitution, v1.7) sowie `FluidaMarko` im neuen Schema `principoj` (Plan D-14) | Ontologio-Schema (neues Schema `principoj`) und Drift-Test aus Spec 002 |
 | **Sojlo-Metriken** | `packages/modelo/src/metrikoj/` | zehn Metrik-IDs als reine Funktionen (§3) | Unit-Tests mit erfundenen Rampen und Grenzfällen |
 | **Token** | `packages/vortaro/sets/core.json` | komuna 2: ankernahe neutrale Stufen, Flächenrollen, zwei Status-Basisflächen, `color.text.muted` (D-04) | die neuen Reguloj, komunas Aspiroj, Vollständigkeit je Aspekto |
-| **Aspekto-Satz** | `packages/aspekto-komuna/sets/aspekto/komuna+color-scheme/dark.json` | komuna bekommt 57 eigene Dunkelwerte (`background`, `text`, `action`, `status`) | `dimensio-sets-alias-only` gilt hier nicht (Aspekto-Satz), Vollständigkeit und die neuen Reguloj |
+| **Aspekto-Satz** | `packages/aspekto-komuna/sets/aspekto/komuna+color-scheme/dark.json` | komuna bekommt 56 eigene Dunkelwerte (`background`, `text`, `action`, `status`) | `dimensio-sets-alias-only` gilt hier nicht (Aspekto-Satz), Vollständigkeit und die neuen Reguloj |
 | **Fixture-Aspekto** | `packages/modelo/test/fixtures/valid/aspekto-ekzemplo/` | zieht bei denselben Reguloj nach (D-05) | wie komuna |
 | **Vitrino-Daten** | `vitrino/index.html`, JSON-Insel | neue Projektion (§4) | byte-gleich, Inhalt, axe (D-09) |
 | **Fingerprintquelle** | `marko-spuroj.json`, `fundamento.config.json`, `--spuroj` | Herkunft je Liste (§5) | Negativtest mit Test-Fingerprint |
@@ -61,7 +61,7 @@ Ein Entwurfsziel einer einzelnen Marke: dieselbe Messung wie eine Regulo, eigene
     "metriko": "dimensio-kovrado",              // Pflicht: eine Metrik-ID aus §3
     "dimensio": "color-scheme",                 // nur für dimensio-kovrado
     "valoro": "dark",
-    "appliesTo": { "tokens": ["color.background.*", "color.text.*", "color.action.*", "color.status.*"] },
+    "appliesTo": { "tokens": ["color.background.**", "color.text.**", "color.action.**", "color.status.**"] },
     "min": 1,                                   // mindestens eine Schranke: min oder max
     "kialo": "Ein Dunkelmodus, den alle Marken teilen, ist eine Umsetzung, kein Entwurf."
   }
