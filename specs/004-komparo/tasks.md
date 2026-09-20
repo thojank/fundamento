@@ -126,6 +126,10 @@ Etappe A umfasst FR-01 bis FR-09, FR-19 und den vorbereitenden Teil von FR-15. *
   des Vergleichsstands und die Veränderung (D-07c). Roter Lauf zuerst (`datumoj.test.ts`,
   „breaks the advisory APCA findings down by category"; `bazo.test.ts` für die Spalten des
   Vergleichsstands).
+- **Vierter Befund aus der CI (Last, nicht Inhalt):** `fm modelo export` zweimal in einem Test —
+  zwei Spawns des gebauten Binaries — lief auf dem Runner in seine 30 s. Der Test bekommt den
+  festgehaltenen Faktor 3 unter `CI=true` (Jugxo `jug_01M2W3K1YPP05F4XF86J71RGTK`), wie schon der
+  gleichnamige Test in `modelo`. Keine Schwelle der Prüfung bewegt sich.
 - **Folgearbeiten aus der Änderung:** die Fixture `invalid/aspekto-incomplete` und die Marke
   `ekzemplo` haben die vier neuen Palettenstufen bekommen (sonst wären sie unvollständig); zwei
   Datentests, die Paare selbst nachrechnen (`kontrast.test.ts`, `phase0-data.test.ts`), setzen die

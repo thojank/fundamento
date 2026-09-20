@@ -321,15 +321,23 @@ describe("fm modelo export (Spec 001 T019, D-09)", () => {
     rmSync(out, { recursive: true, force: true });
   });
 
-  it("is byte-identical over two runs (AK-10)", () => {
-    const first = mkdtempSync(join(tmpdir(), "fm-export-"));
-    const second = mkdtempSync(join(tmpdir(), "fm-export-"));
-    expect(fm(["modelo", "export", "--config", ekzempla, "--out", first]).code).toBe(0);
-    expect(fm(["modelo", "export", "--config", ekzempla, "--out", second]).code).toBe(0);
-    expect(sha(first)).toEqual(sha(second));
-    rmSync(first, { recursive: true, force: true });
-    rmSync(second, { recursive: true, force: true });
-  });
+  // Two exports of the whole Modelo, each a spawn of the built binary: on a loaded CI runner this
+  // measures the machine as much as the export, so it gets the recorded factor 3
+  // (Jugxo jug_01M2W3K1YPP05F4XF86J71RGTK, as in modelo's export build test). No threshold of the
+  // check itself moves.
+  it(
+    "is byte-identical over two runs (AK-10)",
+    () => {
+      const first = mkdtempSync(join(tmpdir(), "fm-export-"));
+      const second = mkdtempSync(join(tmpdir(), "fm-export-"));
+      expect(fm(["modelo", "export", "--config", ekzempla, "--out", first]).code).toBe(0);
+      expect(fm(["modelo", "export", "--config", ekzempla, "--out", second]).code).toBe(0);
+      expect(sha(first)).toEqual(sha(second));
+      rmSync(first, { recursive: true, force: true });
+      rmSync(second, { recursive: true, force: true });
+    },
+    30_000 * (process.env.CI === "true" ? 3 : 1),
+  );
 
   it("writes nothing and exits 1 for an invalid project Modelo", () => {
     const out = join(mkdtempSync(join(tmpdir(), "fm-export-")), "export");
