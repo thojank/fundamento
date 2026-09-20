@@ -120,6 +120,12 @@ Etappe A umfasst FR-01 bis FR-09, FR-19 und den vorbereitenden Teil von FR-15. *
   dunkel + hoher Kontrast). Reserve im schlechtesten Fall: 46 % / 40 % hell, 23 % / 17 % dunkel,
   26 % / 21 % hell + hoher Kontrast, 23 % / 15 % dunkel + hoher Kontrast. Beratende APCA-Hinweise
   1 746 → 1 764.
+- **APCA-Entscheidung des Maintainers (2026-09-20):** keine Aspiro; APCA bleibt beratend
+  (Jugxo `jug_01M2ZXYQ2S8YARKYXM3JAJ5ATM` zu Art. X). Dafür schlüsselt die Vitrino die Hinweise je
+  Kategorie auf — Messungen, Hinweise, Schwellenband, schlechtester Lc mit Paar, dieselben Zahlen
+  des Vergleichsstands und die Veränderung (D-07c). Roter Lauf zuerst (`datumoj.test.ts`,
+  „breaks the advisory APCA findings down by category"; `bazo.test.ts` für die Spalten des
+  Vergleichsstands).
 - **Folgearbeiten aus der Änderung:** die Fixture `invalid/aspekto-incomplete` und die Marke
   `ekzemplo` haben die vier neuen Palettenstufen bekommen (sonst wären sie unvollständig); zwei
   Datentests, die Paare selbst nachrechnen (`kontrast.test.ts`, `phase0-data.test.ts`), setzen die

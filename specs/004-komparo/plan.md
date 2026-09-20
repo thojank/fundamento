@@ -233,6 +233,28 @@ Anker ist vorn. Zwei Werte, die gleich angezeigt werden, gelten als gleich — w
 ist das Urteil. Die Regelmäßigkeit liest dieselben Rampen wie die Regulo `palette-even`
 (`palettePikoj`: undurchsichtig, ohne Ankerstufen), damit eine Zahl der anderen nicht widerspricht.
 
+### D-07c APCA bleibt beratend, aber aufgeschlüsselt (Entscheidung 2026-09-20)
+
+Der Maintainer hat entschieden: **keine Aspiro** „APCA nicht schlechter als Stand X". Alle Textpaare
+bestehen beide Maße mit Reserve, und APCA ist nicht normativ; ein Ziel auf eine Zahl, die kein
+Standard nennt, würde die Werte an eine Methode binden, die sich noch ändert. Festgehalten als
+Jugxo `jug_01M2ZXYQ2S8YARKYXM3JAJ5ATM` zu Art. X, ergänzend zu `jug_01M2XKF38358Z6WQH9KARYJ6F3`.
+
+Statt eines Ziels zeigt die Vitrino die Hinweise **je Kategorie**: Messungen, Hinweise,
+Schwellenband, schlechtester Lc mit dem Paar, dazu dieselben Zahlen des Vergleichsstands und die
+Veränderung. Eine bloße Gesamtzahl sagt nichts. Stand des Kern-Modelo:
+
+| Kategorie | Messungen | Hinweise | Schwelle | schlechtester Lc | Vergleichsstand |
+|---|---|---|---|---|---|
+| text-normal | 3 672 | 1 728 | 75–90 | 48,8 (`status-danger-on-basic`) | 1 260 · 50,2 |
+| ui | 864 | 36 | 45–60 | 42,7 (`border-default-on-background-raised`) | 36 · 32,6 |
+
+Liegt ein Vergleichsstand vor, zählt die Tabelle nur dessen Kombinationen — sonst verglichen sich
+144 Kombinationen mit 72, und die Veränderung wäre bloß die zweite Marke.
+
+Die Kategorien des Vergleichsstands werden mit den heutigen Kategorien und Schwellen gezählt: Paar
+und Kombination sind dieselben, nur die Werte unterscheiden sich.
+
 ### D-08b Der Vergleichsstand `mezuroj-main.json` (T010)
 
 `specs/004-komparo/mezuroj-main.json` ist **erzeugt**, nicht geschrieben: 22 800 Zeilen, je Paar und

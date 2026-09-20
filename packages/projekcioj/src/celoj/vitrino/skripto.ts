@@ -39,9 +39,9 @@ function renderKontrasto() {
       reserve + '</td><td>' + row.apca.toFixed(1) + '</td><td>' + (row.apcaSojlo === undefined ? "–" : row.apcaSojlo) +
       '</td><td>' + (row.pasis ? "bestanden" : "verfehlt") + '</td><td>' + delta + '</td></tr>';
   });
-  const hints = apcaSatz();
+  const hints = apcaSatz() + apcaTabelo();
   document.getElementById("fm-vitrino-kontrasto-tabelo").innerHTML =
-    hints + table("KontrastParoj dieser Kombination", ["Paar", "Kategorie", "WCAG", "Schwelle", "Reserve", "APCA", "APCA-Schwelle", "Ergebnis", "Δ WCAG / Δ APCA gegen den Vergleichsstand"], rows);
+    hints + '<div id="fm-vitrino-kontrasto-paroj">' + table("KontrastParoj dieser Kombination", ["Paar", "Kategorie", "WCAG", "Schwelle", "Reserve", "APCA", "APCA-Schwelle", "Ergebnis", "Δ WCAG / Δ APCA gegen den Vergleichsstand"], rows) + '</div>';
 }
 
 function renderRegularo() {
@@ -96,6 +96,27 @@ function fragment() {
   const parts = ["aspekto=" + root.getAttribute("data-fm-aspekto")];
   for (const dimensio of datumoj.dimensioj) parts.push(dimensio.name + "=" + root.getAttribute("data-fm-" + dimensio.name));
   location.replace("#" + parts.join("&"));
+}
+
+function apcaTabelo() {
+  const rows = (datumoj.apcaHintoj.kategorioj || []).map(function (row) {
+    const delta = row.bazo === undefined ? "–" :
+      (row.nun - row.bazo >= 0 ? "+" : "") + (row.nun - row.bazo) +
+      " / " + ((row.plejMalbona - row.bazoPlejMalbona) >= 0 ? "+" : "") +
+      (row.plejMalbona - row.bazoPlejMalbona).toFixed(1);
+    return '<tr><th scope="row">' + esc(row.kategorio) + '</th><td>' + row.mezuroj + '</td><td>' +
+      row.nun + '</td><td>' + row.sojlo + '</td><td>' + row.plejMalbona.toFixed(1) + ' (' +
+      esc(row.plejMalbonaParo) + ')</td><td>' +
+      (row.bazo === undefined ? "–" : row.bazo + " · " + row.bazoPlejMalbona.toFixed(1)) +
+      '</td><td>' + delta + '</td></tr>';
+  });
+  if (rows.length === 0) return "";
+  const caption = datumoj.apcaHintoj.bazo === undefined
+    ? "Beratende APCA-Hinweise je Kategorie"
+    : "Beratende APCA-Hinweise je Kategorie, gezählt in den Kombinationen des Vergleichsstands";
+  return table(caption,
+    ["Kategorie", "Messungen", "Hinweise", "APCA-Schwelle", "schlechtester Lc (Paar)",
+     "Vergleichsstand: Hinweise · schlechtester Lc", "Veränderung Hinweise / Lc"], rows);
 }
 
 function apcaSatz() {

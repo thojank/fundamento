@@ -458,6 +458,6 @@ describe("KontrastParo with a backdrop (translucent background)", () => {
       (issue) => issue.rule === "kontrastparo-background-transparent",
     );
     expect(transparent.length).toBeGreaterThan(0);
-    expect(transparent[0]?.message).toContain("backdrop");
+    expect(transparent[0]?.message).toContain("the surface 'color.background.overlay'");
   });
 });

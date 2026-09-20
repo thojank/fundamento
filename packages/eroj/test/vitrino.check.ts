@@ -65,8 +65,7 @@ const surfaceColour = (page: Page) =>
 /** The first pair of the contrast table: its numbers must follow the colour Dimensioj. */
 const firstContrastRow = (page: Page) =>
   page.evaluate(
-    () =>
-      document.querySelector("#fm-vitrino-kontrasto-tabelo tbody tr")?.textContent?.trim() ?? "",
+    () => document.querySelector("#fm-vitrino-kontrasto-paroj tbody tr")?.textContent?.trim() ?? "",
   );
 
 const cssValue = (page: Page, property: string) =>
@@ -174,7 +173,7 @@ test("the contrast table shows WCAG, APCA and the change against the comparison 
   page,
 }) => {
   await open(page);
-  const table = page.locator("#fm-vitrino-kontrasto-tabelo");
+  const table = page.locator("#fm-vitrino-kontrasto-paroj");
   await expect(table).toContainText("APCA");
   await expect(table).toContainText("Δ WCAG / Δ APCA");
   await expect(table).toContainText("Vergleichsstand");
@@ -182,6 +181,12 @@ test("the contrast table shows WCAG, APCA and the change against the comparison 
   await expect(row.locator("td").nth(6)).toContainText(/bestanden|verfehlt/);
   // The rise of the advisory APCA findings against main, counted where both states have the
   // combination: this build has 144, the snapshot of main 72 (Spec 004 T010).
+  // A bare total says nothing: the findings are broken down by category (maintainer's decision).
+  await expect(page.locator("#fm-vitrino-kontrasto")).toContainText(
+    "Beratende APCA-Hinweise je Kategorie",
+  );
+  await expect(page.locator("#fm-vitrino-kontrasto")).toContainText("text-normal");
+  await expect(page.locator("#fm-vitrino-kontrasto")).toContainText("schlechtester Lc (Paar)");
   // An overlay names the surface it was measured on: the worst of the ladder (Spec 004).
   await expect(table).toContainText("über color.background.");
   await expect(page.locator("#fm-vitrino-kontrasto p").first()).toContainText(

@@ -317,15 +317,16 @@ export function evaluateAlirebleco(
         // lie on, or the ladder is taken; every one of them is measured and the worst decides
         // (Spec 004, maintainer's review of 2026-09-20).
         if (alphaOf(background) < 1) {
-          const { surfaces, translucent } = backdropSurfaces(background, backdropNames, (token) =>
-            readDtcgColor(own(resolution.tokens, token)?.value),
-          );
+          const colorAt = (token: string) => readDtcgColor(own(resolution.tokens, token)?.value);
+          const { surfaces, translucent } = backdropSurfaces(background, backdropNames, colorAt);
           if (translucent.length > 0) {
+            const first = translucent[0] as string;
+            const surfaceAlpha = alphaOf(colorAt(first) as ColorValue);
             errors.push({
               rule: "kontrastparo-background-transparent",
               severity: "error",
               ...context,
-              message: `KontrastParo '${name}': ${label}backdrop '${translucent[0]}' is translucent in ${combination}; an overlay on an overlay still has no colour.`,
+              message: `KontrastParo '${name}': ${label}the surface '${first}' it may lie on has alpha ${surfaceAlpha} in ${combination}; an overlay on an overlay still has no colour.`,
               suggestion: `Name opaque surfaces in the backdrop of '${name}' (for example color.background.default).`,
             });
             return undefined;

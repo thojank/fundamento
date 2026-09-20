@@ -461,9 +461,19 @@ describe("Phase 0 repo Modelo: IDs and derived files", () => {
     }
     // Since Spec 003, data also references IDs (an Ero's Skemo, Jugxo refs and examples), so an ID
     // may occur more than once; checkIds reports real duplicates (id-duplicate) in validation.
-    expect([...new Set(used)].sort()).toEqual(Object.keys(lock.ids).sort());
+    // A retired ID is the other half of the contract: its entity is gone, so the data must not
+    // name it, and it can never come back (Spec 004 retired two overlay steps).
+    const active = Object.entries(lock.ids)
+      .filter(([, entry]) => entry.status === "active")
+      .map(([id]) => id);
+    const retired = Object.entries(lock.ids)
+      .filter(([, entry]) => entry.status === "retired")
+      .map(([id]) => id);
+    expect([...new Set(used)].sort()).toEqual(active.sort());
+    expect(retired.filter((id) => used.includes(id))).toEqual([]);
     for (const [id, entry] of Object.entries(lock.ids)) {
-      expect(entry).toEqual({ type: entityTypeOfId(id), status: "active" });
+      expect(entry.type, id).toBe(entityTypeOfId(id));
+      expect(["active", "retired"], id).toContain(entry.status);
     }
   });
 

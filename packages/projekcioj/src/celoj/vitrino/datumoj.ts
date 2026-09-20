@@ -119,6 +119,22 @@ export interface VitrinoDatumoj {
     bazoKombinoj?: number;
     komunaj?: { nun: number; kombinoj: number };
     mankantaj?: number;
+    /**
+     * Per KontrastKategorio, because a bare total says nothing (maintainer's decision of
+     * 2026-09-20): how many measurements there are, how many of them are advisory findings, the
+     * worst APCA value with its pair, and the same for the comparison state where it has data.
+     */
+    kategorioj: {
+      kategorio: string;
+      mezuroj: number;
+      nun: number;
+      /** The APCA thresholds that bind this category; two values when contrast=high raises it. */
+      sojlo: string;
+      plejMalbona: number;
+      plejMalbonaParo: string;
+      bazo?: number;
+      bazoPlejMalbona?: number;
+    }[];
   };
 }
 
@@ -398,6 +414,18 @@ export function vitrinoDatumoj({ input, bazo }: VitrinoDatumojInput): VitrinoDat
   let apcaNun = 0;
   let apcaKomunaj = 0;
   const apcaPerAspekto = new Map<string, number>();
+  interface KategorioTally {
+    mezuroj: number;
+    nun: number;
+    sojloMin: number;
+    sojloMax: number;
+    plejMalbona: number;
+    plejMalbonaParo: string;
+    bazo: number;
+    bazoPlejMalbona: number;
+    bazoMezuroj: number;
+  }
+  const perKategorio = new Map<string, KategorioTally>();
   const komunajKombinoj = new Set<string>();
   for (const measurement of evaluation.measurements ?? []) {
     const key = kombinoKey(modelo, measurement.combination);
@@ -409,6 +437,41 @@ export function vitrinoDatumoj({ input, bazo }: VitrinoDatumojInput): VitrinoDat
     const advisory =
       apca !== undefined && apca.threshold !== undefined && apca.passed === false ? 1 : 0;
     apcaNun += advisory;
+    // With a comparison state the categories count where both states have the combination, so the
+    // change column compares like with like (the header sentence says the same for the total).
+    const counts = bazo === undefined || bazoEntry !== undefined;
+    if (counts && apca?.threshold !== undefined && apca.value !== undefined) {
+      const kategorio = measurement.kategorio;
+      const tally = perKategorio.get(kategorio) ?? {
+        mezuroj: 0,
+        nun: 0,
+        sojloMin: apca.threshold,
+        sojloMax: apca.threshold,
+        plejMalbona: Number.POSITIVE_INFINITY,
+        plejMalbonaParo: "",
+        bazo: 0,
+        bazoPlejMalbona: Number.POSITIVE_INFINITY,
+        bazoMezuroj: 0,
+      };
+      tally.mezuroj += 1;
+      tally.nun += advisory;
+      tally.sojloMin = Math.min(tally.sojloMin, apca.threshold);
+      tally.sojloMax = Math.max(tally.sojloMax, apca.threshold);
+      const value = Math.abs(apca.value);
+      if (value < tally.plejMalbona) {
+        tally.plejMalbona = value;
+        tally.plejMalbonaParo = measurement.pair.name;
+      }
+      if (bazoEntry !== undefined) {
+        // The comparison state is counted with today's categories and thresholds: the pair and
+        // the combination are the same, only the values differ.
+        const bazoValue = Math.abs(bazoEntry.apca);
+        tally.bazoMezuroj += 1;
+        if (bazoValue < apca.threshold) tally.bazo += 1;
+        tally.bazoPlejMalbona = Math.min(tally.bazoPlejMalbona, bazoValue);
+      }
+      perKategorio.set(kategorio, tally);
+    }
     const aspektoOfKey = key.slice(0, key.indexOf("|"));
     apcaPerAspekto.set(aspektoOfKey, (apcaPerAspekto.get(aspektoOfKey) ?? 0) + advisory);
     if (bazo?.mezuroj[key] !== undefined) {
@@ -494,6 +557,22 @@ export function vitrinoDatumoj({ input, bazo }: VitrinoDatumojInput): VitrinoDat
     apcaHintoj: {
       nun: apcaNun,
       kombinoj: Object.keys(mezuroj).length,
+      kategorioj: [...perKategorio.entries()]
+        .sort(([a], [b]) => (a < b ? -1 : 1))
+        .map(([kategorio, tally]) => ({
+          kategorio,
+          mezuroj: tally.mezuroj,
+          nun: tally.nun,
+          sojlo:
+            tally.sojloMin === tally.sojloMax
+              ? String(tally.sojloMin)
+              : `${tally.sojloMin}–${tally.sojloMax}`,
+          plejMalbona: round(tally.plejMalbona, 1),
+          plejMalbonaParo: tally.plejMalbonaParo,
+          ...(tally.bazoMezuroj === 0
+            ? {}
+            : { bazo: tally.bazo, bazoPlejMalbona: round(tally.bazoPlejMalbona, 1) }),
+        })),
       ...(bazo === undefined
         ? {}
         : {

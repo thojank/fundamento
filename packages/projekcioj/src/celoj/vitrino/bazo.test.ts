@@ -81,6 +81,17 @@ describe("fm modelo mezuroj writes a snapshot the Vitrino can compare with", () 
     expect(row?.bazo).toBeDefined();
     expect((row?.wcag2 ?? 0) - (row?.bazo?.wcag2 ?? 0)).toBeCloseTo(0.5, 2);
     expect(datumoj.apcaHintoj.bazo).toBe(datumoj.apcaHintoj.nun - 450);
+
+    // A bare total says nothing: every category carries its own count, its worst APCA value and
+    // the same two numbers for the comparison state (maintainer's decision of 2026-09-20).
+    const kategorioj = datumoj.apcaHintoj.kategorioj;
+    expect(kategorioj.length).toBeGreaterThan(1);
+    const textNormal = kategorioj.find((row) => row.kategorio === "text-normal");
+    expect(textNormal?.nun).toBeGreaterThan(0);
+    expect(textNormal?.bazo).toBeGreaterThan(0);
+    expect(textNormal?.bazoPlejMalbona).toBeGreaterThan(0);
+    // The snapshot is three Lc weaker per pair, so its worst value is lower than today's.
+    expect(textNormal?.bazoPlejMalbona ?? 0).toBeLessThan(textNormal?.plejMalbona ?? 0);
   }, 180_000);
 
   // A snapshot of the repo Modelo covers komuna's 72 combinations; a build of the ekzemplo

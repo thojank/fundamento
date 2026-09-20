@@ -164,6 +164,25 @@ describe("the sections of FR-06", () => {
     expect(plain?.surfaco).toBeUndefined();
   });
 
+  // "1 764 Hinweise" says nothing without the categories (maintainer's decision of 2026-09-20).
+  it("breaks the advisory APCA findings down by category, with the worst value and the change", () => {
+    const rows = datumoj.apcaHintoj.kategorioj ?? [];
+    expect(rows.length).toBeGreaterThan(1);
+    expect(rows.map((row) => row.kategorio)).toContain("text-normal");
+    for (const row of rows) {
+      expect(row.nun, row.kategorio).toBeGreaterThanOrEqual(0);
+      expect(row.mezuroj, row.kategorio).toBeGreaterThan(0);
+      // The worst value is an APCA Lc, and it names the pair it belongs to.
+      expect(row.plejMalbona, row.kategorio).toBeGreaterThan(0);
+      expect(row.plejMalbonaParo, row.kategorio).not.toBe("");
+      // The threshold column names the band, because contrast=high raises it.
+      expect(row.sojlo, row.kategorio).toMatch(/^\d+(–\d+)?$/);
+    }
+    const textNormal = rows.find((row) => row.kategorio === "text-normal");
+    // The repo Modelo builds without a comparison state here, so no baseline column.
+    expect(textNormal?.bazo).toBeUndefined();
+  });
+
   it("carries the coverage per Dimensio value", () => {
     const coverage = datumoj.kovrado.komuna ?? [];
     const dark = coverage.find(
