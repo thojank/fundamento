@@ -428,6 +428,10 @@ Keine neuen. Genutzt werden `colorjs.io` (bereits für OKLCH und APCA), Playwrig
 | FR-09 | D-06, D-09 | T007, T012 |
 | FR-15 (vorbereitend) | D-10 | T013 |
 | FR-19 | D-11 | T001 |
+| Durchsicht 2026-09-20 (tertiäre Aktion, backdrop) | D-07b | T006, T010, T011 |
+| Durchsicht 2026-09-20 (Kriterien der Gegenüberstellung) | D-08c | T011 |
+| Entscheidung 2026-09-20 (APCA beratend, Aufschlüsselung) | D-07c | T010 |
+| Art. XIII (Dokumentation) | D-08b, D-09 | T014 |
 | AK-01 | D-02, D-03, D-04, D-05 | T003, T004, T005, T006 |
 | AK-02 | D-07, D-09 | T007 – T012 |
 | AK-06 (Teil) | D-10 | T013 |

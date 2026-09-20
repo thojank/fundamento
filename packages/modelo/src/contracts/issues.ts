@@ -89,6 +89,7 @@ export const RULE_IDS = [
   // KontrastParoj (FUND-3.2, FUND-4.5)
   "kontrastparo-token-missing",
   "kontrastparo-not-color",
+  "clean-room-spuro-file-missing",
   "kontrastparo-background-transparent",
   "contrast-below-threshold",
   "contrast-advisory",

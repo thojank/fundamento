@@ -5,7 +5,11 @@ import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
-import { findBrandValues, repoFingerprints } from "../checks/clean-room/marko-spuro.js";
+import {
+  findBrandValues,
+  repoFingerprintIndex,
+  repoFingerprints,
+} from "../checks/clean-room/marko-spuro.js";
 
 const repoRoot = fileURLToPath(new URL("../../../../", import.meta.url));
 const specDir = `${repoRoot}specs/000-fundamento-repo/`;
@@ -304,7 +308,7 @@ describe("Spec 001 documentation (T029)", () => {
     "specs/001-vortaro-aspektoj-mcp/contracts/mcp-tools.md",
   ])("%s holds no brand value (AK-08, reuses T022)", (file) => {
     expect(repoFingerprints().size).toBeGreaterThan(0);
-    expect(findBrandValues(file, read(file), repoFingerprints())).toEqual([]);
+    expect(findBrandValues(file, read(file), repoFingerprintIndex())).toEqual([]);
   });
 });
 
@@ -395,7 +399,7 @@ describe("Spec 002 documentation (T025)", () => {
     "packages/modelo/data/ontologio.json",
     "packages/mcp/prompts/gvidanto.md",
   ])("%s holds no brand value (AK-10, clean room)", (file) => {
-    expect(findBrandValues(file, read(file), repoFingerprints())).toEqual([]);
+    expect(findBrandValues(file, read(file), repoFingerprintIndex())).toEqual([]);
   });
 });
 
@@ -545,6 +549,70 @@ describe("Spec 004: the Vitrino check (T012)", () => {
     expect(ci).toContain("Check: Vitrino");
     expect(ci).toContain("pnpm check:vitrino");
     expect(ci.indexOf("Check: Vitrino")).toBeGreaterThan(ci.indexOf("Check: Quickstart"));
+  });
+});
+
+describe("Spec 004 documentation: Etappe A (T014)", () => {
+  const readme = read("README.md");
+
+  it("the README names the Vitrino with its path and its check", () => {
+    const checks = section(readme, "Checks");
+    expect(checks).toContain("pnpm check:vitrino");
+    expect(readme).toContain("vitrino/index.html");
+    expect(readme).toContain("Gegenüberstellung");
+  });
+
+  it("the README lists the seven structural Reguloj of Etappe A", () => {
+    for (const regulo of [
+      "contrast-reserve",
+      "surface-distinct",
+      "palette-even",
+      "palette-aligned",
+      "srgb-gamut",
+      "type-scale",
+      "type-rhythm",
+    ]) {
+      expect(readme, regulo).toContain(regulo);
+    }
+  });
+
+  it("the README explains Aspiro and Fluida Marko in a sentence each", () => {
+    expect(readme).toMatch(/\*\*Aspiro\*\*|`Aspiro`|Aspiro\b/);
+    expect(readme).toContain("Fluida Marko");
+    // The distinction is the point: a Regulo binds every brand, an Aspiro only its own.
+    expect(readme).toMatch(/Aspiro[^.]*\b(Marke|brand)\b/);
+  });
+
+  it("the vojmapo records Etappe A as implemented with the acceptance open", () => {
+    const vojmapo = read("docs/vojmapo.md");
+    const row = vojmapo.split("\n").find((line) => line.startsWith("| 3b |")) ?? "";
+    expect(row).toContain("umgesetzt");
+    expect(row).toContain("Abnahme");
+  });
+
+  it("the vojmapo carries the Regulo candidate for label text in Phase 4", () => {
+    const vojmapo = read("docs/vojmapo.md");
+    const row = vojmapo.split("\n").find((line) => line.startsWith("| 4 |")) ?? "";
+    expect(row).toContain("Beschriftungstext");
+    expect(row).toContain("APCA");
+    expect(row).toContain("WCAG");
+  });
+
+  it("the plan maps every FR and AK of Etappe A to the tasks that implement it", () => {
+    const plan = read("specs/004-komparo/plan.md");
+    const table = section(plan, "Nachverfolgbarkeit (Anforderung → Entwurf → Aufgaben)");
+    for (const id of ["FR-01", "FR-05", "FR-09", "FR-15", "FR-19", "AK-01", "AK-02"]) {
+      const row = table.split("\n").find((line) => new RegExp(`\\|[^|]*\\b${id}\\b`).test(line));
+      expect(row, id).toBeDefined();
+      expect(row ?? "", id).toMatch(/T0\d\d|M1|keine Aufgabe/);
+    }
+  });
+
+  it("the quickstart of Spec 004 runs the Vitrino and the checks it names", () => {
+    const quickstart = read("specs/004-komparo/quickstart.md");
+    expect(quickstart).toContain("pnpm check:vitrino");
+    expect(quickstart).toContain("fm projekcioj build");
+    expect(quickstart).toContain("--bazo");
   });
 });
 

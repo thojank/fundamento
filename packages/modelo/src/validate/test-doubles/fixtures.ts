@@ -32,6 +32,11 @@ export interface ExpectedIssues {
   issues: ExpectedIssue[];
   /** Expected warnings; absent means none. */
   warnings?: ExpectedIssue[];
+  /**
+   * Extra arguments the check needs for this fixture, paths relative to the fixture root (Spec 004
+   * T013: a fingerprint list is named on the command line, not found by convention).
+   */
+  args?: string[];
 }
 
 /** Invalid fixtures that are Modelo roots (`vortaro/` + `data/`) with an `expected-issues.json`. */

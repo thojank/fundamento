@@ -1,0 +1,5 @@
+/* A synthetic value that only the second fingerprint list knows. */
+:root {
+  --fm-color-accent: #4f6d8a;
+  --fm-font-body: "Fremda Serif", serif;
+}

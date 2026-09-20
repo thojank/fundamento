@@ -1,0 +1,8 @@
+{
+  "$comment": "Synthetic fingerprints of an invented benchmark Aspekto for the clean-room test. Hashes only: a fingerprint list never writes the values out, that is the point of it (D-15).",
+  "source": "testmarko",
+  "fingerprints": [
+    "23a7ce586cde4da461ecdb47ccfdf5c4860a51640004e5ca1b7559b6b044e806",
+    "5be3d2e2884d2080a87b4796319846bc6ac1b7bc943d505704afaeb61413a535"
+  ]
+}

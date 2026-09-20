@@ -18,6 +18,15 @@ pnpm fm projekcioj build --config packages/modelo/test/fixtures/valid/aspekto-ek
   --out .fundamento/projekcioj
 ```
 
+Mit einem Vergleichsstand zeigt die Kontrastmatrix je Paar auch die Veränderung:
+
+```sh
+pnpm fm projekcioj build --config packages/modelo/test/fixtures/valid/aspekto-ekzemplo/fundamento.config.json \
+  --bazo specs/004-komparo/mezuroj-main.json --out .fundamento/projekcioj
+```
+
+Der Vergleichsstand selbst entsteht mit `pnpm fm modelo mezuroj --out <datei>` auf dem Stand, gegen den verglichen werden soll.
+
 In der Vitrino „Gegenüberstellung" wählen: links komuna, rechts ekzemplo, gleiche Kombination, je Kriterium beide Werte und die Kennzeichnung vorn / gleich / hinten. In Etappe B kommt `komparo` als dritte Wahl dazu, ohne Änderung an der Vitrino.
 
 ## 3. Die neuen Reguloj sehen und verstehen

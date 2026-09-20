@@ -7,7 +7,7 @@ Terminology is Esperanto and binding (see the Constitution). Code, comments and 
 ## What lives where
 
 - [`.specify/memory/constitution.md`](.specify/memory/constitution.md): the Constitution (Articles I–XIII). Read this first; [`docs/vizio.md`](docs/vizio.md) explains why Fundamento starts with a data model, conjunction sets and rulings instead of a component library.
-- [`specs/`](specs/): one folder per spec with `spec.md`, research and the engineering plan with its Compliance Review: [`000-fundamento-repo/`](specs/000-fundamento-repo/) (the repository), [`001-vortaro-aspektoj-mcp/`](specs/001-vortaro-aspektoj-mcp/) (Vortaro values, Aspekto packages, MCP server) and [`002-regularo-gvidanto/`](specs/002-regularo-gvidanto/) (Regularo, Gvidanto, Ontologio).
+- [`specs/`](specs/): one folder per spec with `spec.md`, research and the engineering plan with its Compliance Review: [`000-fundamento-repo/`](specs/000-fundamento-repo/) (the repository), [`001-vortaro-aspektoj-mcp/`](specs/001-vortaro-aspektoj-mcp/) (Vortaro values, Aspekto packages, MCP server) [`002-regularo-gvidanto/`](specs/002-regularo-gvidanto/) (Regularo, Gvidanto, Ontologio), [`003-butono-durchstich/`](specs/003-butono-durchstich/) (the first Ero through every layer) and [`004-komparo/`](specs/004-komparo/) (measurements, the reference Aspekto komuna 2 and the Vitrino).
 - [`research/benchmarks.md`](research/benchmarks.md): living list of public benchmarks (requirements only, never content).
 - `packages/modelo/` (`@fundamento/modelo`): schema, loading, composition, validation, resolution, NomReguloj, checks and export. All logic lives here.
 - `packages/modelo/schema/` and `packages/modelo/data/`: the one hand-written JSON Schema (draft 2020-12; TS types are generated from it) and the Dimensioj, Reguloj, Jugxoj, KontrastParoj and ID registry `ids.lock.json`.
@@ -113,6 +113,18 @@ Everything lives in one workspace; the npm org for published packages is
 - `--http [--port <n>]` serves Streamable HTTP at `http://127.0.0.1:<port>/mcp` (default port 7300), loopback only, with a Host/Origin guard; `validate` refuses local paths there.
 
 The contracts are [`specs/001-vortaro-aspektoj-mcp/contracts/mcp-tools.md`](specs/001-vortaro-aspektoj-mcp/contracts/mcp-tools.md) the Phase-2 delta [`specs/002-regularo-gvidanto/contracts/mcp-tools.md`](specs/002-regularo-gvidanto/contracts/mcp-tools.md) and the Phase-3 delta [`specs/003-butono-durchstich/contracts/mcp-tools.md`](specs/003-butono-durchstich/contracts/mcp-tools.md).
+
+## Reguloj, Aspiroj and Fluida Marko
+
+A **Regulo** binds every Aspekto: it may only enforce accessibility and structure, never taste. Spec 004 added seven structural ones — `contrast-reserve` (a pair keeps a reserve above its threshold), `surface-distinct` (neighbouring surfaces differ in lightness), `palette-even` (the inner steps of a ramp advance evenly, measured per 100 step units), `palette-aligned` (the same step number weighs the same in every ramp), `srgb-gamut` (values stay inside the gamut the contrast was computed in), `type-scale` (the scale keeps a constant ratio) and `type-rhythm` (line height and tracking follow the size, within a role family).
+
+An **Aspiro** is a design goal a single brand sets itself: the same measurement as a Regulo, its own bound, its own kialo, checked only for that brand and never for another (`aspekto.json#/aspiroj`). A missed goal is reported as `aspiro-missed`, never as a rule violation. The reference Aspekto komuna declares five, among them a contrast reserve of 10 % where the Regulo asks for 5 %.
+
+That separation is the principle **Fluida Marko**: brands are free, rules enforce accessibility and structure, and a brand's taste stays its own. A brand that keeps pure white as a surface passes every Regulo — it simply misses a goal komuna sets for itself.
+
+## Vitrino
+
+`pnpm fm projekcioj build` writes `vitrino/index.html`, one self-contained file per build: palettes with lightness, surfaces, text hierarchy, status and action colours, the real `fm-butono` in every combination of its Skemo, the contrast matrix with WCAG and APCA side by side, the Regularo with its kialo, the design goals with their scope, the coverage per Dimensio and a **Gegenüberstellung** of two Aspektoj, criterion by criterion. Every Dimensio switches in the browser without a reload, and the state travels in the URL fragment (`#aspekto=komuna&color-scheme=dark&contrast=high`). With `--bazo <file>` (a snapshot of `fm modelo mezuroj`) every pair also shows the change against that state.
 
 ## Checks
 

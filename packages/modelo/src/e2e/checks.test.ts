@@ -37,9 +37,14 @@ beforeAll(async () => {
   const [repo, fixtures] = await Promise.all([
     Promise.all(CHECK_NAMES.map((name) => runCheck(repoArgs(name)))),
     Promise.all(
-      failing.map((fixture) =>
-        runCheck([fixture.expected.check, "--json", "--fixture", checkFixtureRoot(fixture)]),
-      ),
+      failing.map((fixture) => {
+        const root = checkFixtureRoot(fixture);
+        // A fixture may say what the check needs besides its root: a path is relative to it.
+        const extra = (fixture.expected.args ?? []).map((arg: string) =>
+          arg.startsWith("--") ? arg : join(root, arg),
+        );
+        return runCheck([fixture.expected.check, "--json", "--fixture", root, ...extra]);
+      }),
     ),
   ]);
   CHECK_NAMES.forEach((name, i) => {

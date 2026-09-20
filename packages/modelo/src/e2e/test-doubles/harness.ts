@@ -101,6 +101,11 @@ export interface ExpectedIssues {
   materialize?: Record<string, string>;
   issues: ExpectedIssue[];
   warnings?: ExpectedIssue[];
+  /**
+   * Extra arguments this fixture needs, paths relative to its root: a fingerprint list is named on
+   * the command line, not found by convention (Spec 004 T013).
+   */
+  args?: string[];
 }
 
 export interface Fixture {
