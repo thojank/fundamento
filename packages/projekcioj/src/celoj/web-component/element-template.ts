@@ -54,8 +54,15 @@ function camel(name: string): string {
   return name.replace(/-([a-z0-9])/g, (_match, letter: string) => letter.toUpperCase());
 }
 
+/**
+ * The base class. Without a DOM (server-side rendering) HTMLElement does not exist, and a class
+ * declaration would throw at import time, so the module stays importable with a stand-in that is
+ * never instantiated there.
+ */
+const Base = (typeof HTMLElement === "undefined" ? class {} : HTMLElement) as typeof HTMLElement;
+
 /** Generated from the Skemo of ${ero}; behaviour from the template in @fundamento/projekcioj. */
-export class ${className} extends HTMLElement {
+export class ${className} extends Base {
   static formAssociated = true;
   static observedAttributes = PROPS.map((prop) => prop.name);
 
@@ -167,6 +174,18 @@ export class ${className} extends HTMLElement {
     else if (type === "reset") form.reset();
   }
 }
+
+/**
+ * Registers <${tag}> once. Called on import, and exported so a wrapper can call it explicitly:
+ * a bundler may drop a bare side-effect import, but never a called function (F6). Without a DOM
+ * (server-side rendering) it does nothing.
+ */
+export function define${className}(): void {
+  if (typeof customElements === "undefined" || customElements.get("${tag}") !== undefined) return;
+  customElements.define("${tag}", ${className});
+}
+
+define${className}();
 
 for (const prop of PROPS) {
   Object.defineProperty(${className}.prototype, camel(prop.name), {

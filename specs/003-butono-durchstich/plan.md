@@ -118,6 +118,8 @@ The spec asks for classes like `bg-fm-action-primary-rest`. The Phase-0 NomRegul
 - `disabled` sets `disabled` on the inner button and `aria-disabled` on the host's internals; `loading` keeps focus (`aria-disabled="true"`, `aria-busy="true"`, clicks swallowed), so a screen reader user does not lose their place.
 - Styles are one constructable stylesheet generated from the Skemo (each part property is `var(--fm-<token>)`); only logical properties (`padding-inline`, `margin-inline-start`), so RTL works through `dir`. Transitions use `motion.duration.fast` and `motion.easing.standard`, which `motion=reduced` makes instant.
 - Only `::part(control)` is exposed. Anything more is breadth without a user.
+- **Forced colors (F5).** The ring is an outline with token values, never only a shadow: Windows high contrast drops shadows, so the gap (a `box-shadow`) disappears there while the outline stays. A Chromium test with `forcedColors: "active"` holds that.
+- **Registration (F6).** Each element module registers its element itself, guarded by `customElements.get` and by `typeof customElements` (no DOM, no registration), and exports that registration so the React wrapper can call it: a bundler may drop a bare side-effect import, never a called function. Wrapper and element therefore import in one direction, with no cycle.
 
 ### D-08 React wrapper (FR-08): thin, generated, React 18 and 19
 

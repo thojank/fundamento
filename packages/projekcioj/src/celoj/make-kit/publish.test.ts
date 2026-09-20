@@ -51,6 +51,9 @@ describe("what a publish would contain (T020)", () => {
       const files = result.files.map((file) => file.path).sort();
       expect(files).toEqual([
         "README.md",
+        "dist/element.cjs",
+        "dist/element.d.ts",
+        "dist/element.js",
         "dist/index.cjs",
         "dist/index.d.ts",
         "dist/index.js",

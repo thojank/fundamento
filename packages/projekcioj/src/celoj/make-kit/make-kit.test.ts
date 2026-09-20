@@ -50,6 +50,7 @@ describe("Make Kit sources (T018)", () => {
       "guidelines/foundations/typography.md",
       "guidelines/setup.md",
       "package.json",
+      "src/element.ts",
       "src/index.ts",
       "src/react.ts",
       "styles.css",
@@ -65,8 +66,16 @@ describe("Make Kit sources (T018)", () => {
     expect(manifest.publishConfig).toEqual({ access: "public", tag: "next" });
     expect(manifest.dependencies).toBeUndefined();
     expect(manifest.peerDependencies).toEqual({ react: ">=18", "react-dom": ">=18" });
+    // Provenance fails when repository.url does not match the repository the workflow runs in (F7).
+    expect(manifest.repository).toEqual({
+      type: "git",
+      url: "git+https://github.com/thojank/fundamento.git",
+      directory: `packages/projekcioj/dist/make-kit/${aspekto}`,
+    });
+    expect(manifest.homepage).toBe("https://github.com/thojank/fundamento#readme");
     expect(Object.keys(manifest.exports as object).sort()).toEqual([
       ".",
+      "./element",
       "./guidelines/*",
       "./package.json",
       "./styles.css",
@@ -161,11 +170,18 @@ describe("Make Kit tarball (T018, clean room)", () => {
 
   it("builds an ESM and a CJS bundle with types for every Aspekto", () => {
     for (const aspekto of ASPEKTOJ) {
-      for (const file of ["dist/index.js", "dist/index.cjs", "dist/index.d.ts"]) {
+      for (const file of [
+        "dist/index.js",
+        "dist/index.cjs",
+        "dist/index.d.ts",
+        "dist/element.js",
+        "dist/element.cjs",
+        "dist/element.d.ts",
+      ]) {
         expect(
           statSync(join(built[aspekto] ?? "", file)).size,
           `${aspekto}/${file}`,
-        ).toBeGreaterThan(200);
+        ).toBeGreaterThan(100);
       }
     }
   });

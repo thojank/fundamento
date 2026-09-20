@@ -44,7 +44,7 @@ Companion to [`../plan.md`](../plan.md) D-05 … D-14. These are the public surf
 ```
 
 - Attributes = Skemo props (kebab-case); properties = camelCase with the same values; invalid values fall back to the default and log one `console.warn` naming the allowed values. A combination a Skemo constraint forbids (`tone=danger` without `variant=primary`) renders `tone=default` and warns with the kialo.
-- Registration: `import "@fundamento/eroj/define"` (registers once; importing twice is safe).
+- Registration: importing the element registers it once; `import "@fundamento/eroj/define"` stays the explicit line, and `defineEroj()` can be called directly. Without a DOM nothing is registered, so the module is safe to import on a server.
 - Events: native `click` (composed); no custom events in Phase 3.
 - Form: `formAssociated`; `type="submit" | "reset"` act on the owning form.
 - Styling hooks: `--fm-*` custom properties; `::part(control)`.
@@ -88,7 +88,8 @@ import { Butono } from "@fundamento/eroj/react";
 ## 6. Make Kit package (D-14)
 
 - Name `@fundamento/make-kit-<aspekto>` (`komuna`, `ekzemplo`), version 0.x with a pre-release identifier, dist-tag `next`, license MIT, `publishConfig.access: public`. Published by the maintainer after the acceptance; the phase runs `pnpm publish --dry-run --tag next` only.
-- `exports`: `.` (`import` → `dist/index.js`, `require` → `dist/index.cjs`, `types` → `dist/index.d.ts`), `./styles.css`, `./tailwind.css`, `./guidelines/*`; also `main`, `module`, `types`.
+- `exports`: `.` (`import` → `dist/index.js`, `require` → `dist/index.cjs`, `types` → `dist/index.d.ts`), `./element` (the Eroj without React, for plain HTML), `./styles.css`, `./tailwind.css`, `./guidelines/*`; also `main`, `module`, `types`.
+- `repository` (`git+https://github.com/thojank/fundamento.git` with `directory`), `homepage` and `license: MIT`: npm provenance checks that the package names the repository it was built from.
 - No `dependencies`; `peerDependencies` React ≥ 18.
 - `guidelines/` as listed in plan D-14; every file generated; no hex values; every token reference is a Tailwind class or `--fm-*` name that exists; every Ero Regulo appears with its kialo.
 - Guarantee (AK-08): builds and renders in a fresh Vite 8 project with React 18 and with React 19 + Tailwind 4.

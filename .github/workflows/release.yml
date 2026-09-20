@@ -41,6 +41,18 @@ jobs:
       - name: Build
         run: pnpm build
 
+      # pnpm hands the publish and the OIDC exchange to the npm CLI, which needs npm >= 11.5.1 for
+      # Trusted Publishing (research §7). Without it npm would silently look for a token.
+      - name: Check the npm version
+        run: |
+          required=11.5.1
+          installed=$(npm --version)
+          if [ "$(printf '%s\n%s\n' "$required" "$installed" | sort -V | head -1)" != "$required" ]; then
+            echo "npm $installed is older than $required, which npm Trusted Publishing needs." >&2
+            exit 1
+          fi
+          echo "npm $installed is new enough for Trusted Publishing."
+
       - name: Generate the projections
         run: pnpm fm projekcioj build --out .fundamento/projekcioj
 

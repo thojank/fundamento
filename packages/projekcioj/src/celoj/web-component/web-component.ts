@@ -223,14 +223,12 @@ export const WEB_COMPONENT_CELO: Celo = {
         text: header + elementSource({ tag, className, constant, ero: entry.ero.name }),
       });
     }
-    const imports = eroj.map(({ tag, className }) => `import { ${className} } from "./${tag}.js";`);
-    // The registration is emitted with the literal fm- name; vortaro-lint (FR-14) checks that name
-    // on the generated output (web-component.test.ts). The interpolated name here is allowed only
-    // because this file is a generator source (isEroGeneratorSource, Spec 003 F3).
-    const defines = eroj.map(
-      ({ tag, className }) =>
-        `  if (customElements.get("${tag}") === undefined) customElements.define("${tag}", ${className});`,
+    // Every element module registers itself on import and exports its registration (F6);
+    // defineEroj calls them all, for a user who wants one explicit line.
+    const imports = eroj.map(
+      ({ tag, className }) => `import { ${className}, define${className} } from "./${tag}.js";`,
     );
+    const defines = eroj.map(({ className }) => `  define${className}();`);
     files.push({
       path: `${GENERATED_DIR}/index.ts`,
       text: `${header}${imports.join("\n")}\n\nexport * from "./skemo.js";\nexport { ${eroj.map(({ className }) => className).join(", ")} };\n\n/** Registers every Ero once; importing twice is safe. */\nexport function defineEroj(): void {\n${defines.join("\n")}\n}\n`,

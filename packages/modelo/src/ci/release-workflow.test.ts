@@ -39,6 +39,15 @@ describe("release.yml (T020, Trusted Publishing)", () => {
     expect(runs).toContain("pnpm publish --dry-run --tag next --provenance --access public");
   });
 
+  it("refuses an npm older than 11.5.1, which Trusted Publishing needs (F7, research §7)", () => {
+    const runs = steps()
+      .map((step) => step.run ?? "")
+      .join("\n");
+    expect(runs).toContain("11.5.1");
+    expect(runs).toMatch(/npm --version|npm -v/);
+    expect(runs).toMatch(/exit 1/);
+  });
+
   it("publishes nothing by itself: every publish command is a dry run", () => {
     for (const step of steps()) {
       for (const line of (step.run ?? "").split("\n")) {

@@ -10,12 +10,15 @@ import {
 } from "@fundamento/modelo";
 import { describe, expect, it } from "vitest";
 import { celoInputOf } from "../../build.js";
+import { REACT_CELO } from "../react/react.js";
 import { WEB_COMPONENT_CELO } from "./web-component.js";
 
 const prepared = celoInputOf(defaultModeloSource());
 if (!prepared.ok) throw new Error("the repo Modelo must be valid");
 const files = Object.fromEntries(
-  WEB_COMPONENT_CELO.generate(prepared.input).map((file) => [file.path, file.text]),
+  [...WEB_COMPONENT_CELO.generate(prepared.input), ...REACT_CELO.generate(prepared.input)].map(
+    (file) => [file.path, file.text],
+  ),
 );
 const butono = prepared.input.modelo.eroj.find((entry) => entry.ero.name === "butono");
 const styles = files["eroj/src/generated/butono.styles.ts"] ?? "";
@@ -32,6 +35,7 @@ describe("Web Component Celo (T011)", () => {
       "eroj/src/generated/butono.styles.ts",
       "eroj/src/generated/fm-butono.ts",
       "eroj/src/generated/index.ts",
+      "eroj/src/generated/react.ts",
       "eroj/src/generated/skemo.ts",
     ]);
   });
@@ -53,12 +57,31 @@ describe("Web Component Celo (T011)", () => {
     expect(css).toContain("min-inline-size: var(--fm-size-target-min);");
   });
 
-  it("registers every element under a literal fm- name (FR-14, checked on the generated output)", () => {
+  it("registers the element in its own module, guarded, and leaves no import cycle (F6)", () => {
+    // The element registers itself: the React wrapper only imports it, so index, element and
+    // wrapper import in one direction.
+    expect(element).toContain('customElements.get("fm-butono") !== undefined');
+    expect(element).toContain('customElements.define("fm-butono", FmButono)');
+    expect(element).toContain('typeof customElements === "undefined"');
+    expect(element).toContain("defineFmButono();");
+    const react = files["eroj/src/generated/react.ts"] ?? "";
+    expect(react).toContain('import { defineFmButono } from "./fm-butono.js";');
+    expect(react).toContain("defineFmButono();");
+    expect(react).not.toContain('from "./index.js"');
     const index = files["eroj/src/generated/index.ts"] ?? "";
-    const result = checkCustomElements("index.ts", index);
+    expect(index).not.toContain('from "./react.js"');
+  });
+
+  it("keeps the element importable without a DOM (server-side rendering, F6)", () => {
+    expect(element).toContain('typeof HTMLElement === "undefined"');
+  });
+
+  it("registers every element under a literal fm- name (FR-14, checked on the generated output)", () => {
+    // The registration lives in the element module (F6), with a literal name.
+    const result = checkCustomElements("fm-butono.ts", element);
     expect(result.definitions).toBe(1);
     expect(result.issues).toEqual([]);
-    expect(index).toContain('customElements.define("fm-butono", FmButono)');
+    expect(element).toContain('customElements.define("fm-butono", FmButono)');
   });
 
   it("exposes only ::part(control) and has no text of its own (Art. VIII)", () => {

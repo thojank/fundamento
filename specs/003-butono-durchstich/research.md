@@ -64,3 +64,9 @@ Registry-Stände per `npm view` am 2026-09-19; Doku-Stände am selben Tag abgeru
 ### 6.6 Internacia (präzisiert §5)
 
 - Textexpansion: Übersetzungen aus dem Englischen werden für kurze Texte bis zu 200–300 % länger, für mittlere Absätze um etwa 30–40 %. Quelle: https://www.w3.org/International/articles/article-text-size — die 35 % der Constitution entsprechen der mittleren Stufe; für die kurzen Beschriftungen von `butono` prüft der Plan zusätzlich das Doppelte.
+
+## 7. Nachtrag zum Release-Pfad (2026-09-20, Review Stage 5)
+
+- **Trusted Publishing und pnpm.** `pnpm publish` führt den Publish nicht selbst aus, sondern reicht ihn an die npm-CLI weiter; deshalb hängt die OIDC-Unterstützung an der npm-Version, nicht an pnpm. npm verlangt für Trusted Publishing **npm ≥ 11.5.1** und Node ≥ 22.14. pnpm 10 arbeitet damit; für pnpm 11 ist ein Rückschritt gemeldet, weshalb Projekte bewusst auf 10.x bleiben. Quellen: https://docs.npmjs.com/trusted-publishers/ · https://github.blog/changelog/2025-07-31-npm-trusted-publishing-with-oidc-is-generally-available/ · https://github.com/pnpm/pnpm/issues/9812 · https://github.com/pnpm/pnpm/issues/11513
+- **Stand im Repo:** Node 24 (`.nvmrc`) bringt npm 11.19.0 mit, pnpm ist auf 10.34.5 festgelegt. Der Release-Workflow prüft die npm-Version vor dem Publish und bricht unter 11.5.1 ab, statt still auf einen Token zurückzufallen.
+- **Provenance** verlangt, dass `repository.url` des Pakets auf dasselbe Repository zeigt, aus dem der Workflow läuft; die Make Kits tragen deshalb `repository` mit `directory`, `homepage` und `license`.

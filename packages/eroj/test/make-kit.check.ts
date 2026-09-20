@@ -121,6 +121,67 @@ const TYPES: Record<string, string> = {
   ".html": "text/html; charset=utf-8",
 };
 
+test("the kit works in plain HTML without React, and a double import is harmless (F6)", async ({
+  page,
+}) => {
+  const work = mkdtempSync(join(tmpdir(), "fm-kit-plain-"));
+  const kits = await buildMakeKits(join(work, "kits"), source);
+  const dir = kits.komuna ?? "";
+  const problems: string[] = [];
+  page.on("pageerror", (error) => problems.push(`pageerror: ${String(error)}`));
+  page.on("console", (message) => {
+    if (message.type() === "error") problems.push(`console: ${message.text()}`);
+  });
+  await page.route(`${ORIGIN}/**`, async (route) => {
+    const path = new URL(route.request().url()).pathname;
+    if (path === "/") {
+      await route.fulfill({
+        contentType: "text/html; charset=utf-8",
+        body: `<!doctype html><html lang="de"><head><meta charset="utf-8"><title>Kit</title><link rel="stylesheet" href="/styles.css"><script type="module">import "/dist/element.js"; import "/dist/element.js";</script></head><body><fm-butono id="a" variant="primary">Speichern</fm-butono></body></html>`,
+      });
+      return;
+    }
+    // A request the kit does not answer (a favicon, say) must not hang the page load.
+    try {
+      await route.fulfill({
+        contentType: TYPES[extname(path)] ?? "application/octet-stream",
+        body: readFileSync(join(dir, path.slice(1))),
+      });
+    } catch {
+      await route.fulfill({ status: 404, body: "" });
+    }
+  });
+  await page.goto(`${ORIGIN}/`);
+  await page.waitForTimeout(1000);
+  expect(
+    await page.evaluate(() => customElements.get("fm-butono") !== undefined),
+    problems.join("\n") || "the element did not register",
+  ).toBe(true);
+  await expect(page.getByRole("button", { name: "Speichern" })).toBeVisible();
+  expect(
+    await page.locator("#a").evaluate((element) => element.shadowRoot !== null),
+    problems.join("\n"),
+  ).toBe(true);
+  expect(problems).toEqual([]);
+}, 600_000);
+
+test("the kit's bundle imports in Node without a DOM (server-side rendering, F6)", async () => {
+  const work = mkdtempSync(join(tmpdir(), "fm-kit-ssr-"));
+  const kits = await buildMakeKits(join(work, "kits"), source);
+  // The element entry is what a server may import: it needs neither a DOM nor React.
+  const entry = join(kits.komuna ?? "", "dist/element.js");
+  const output = execFileSync(
+    process.execPath,
+    [
+      "--input-type=module",
+      "-e",
+      `const m = await import(${JSON.stringify(entry)});\nconsole.log(typeof m.FmButono, typeof m.defineEroj, typeof customElements);`,
+    ],
+    { encoding: "utf8" },
+  );
+  expect(output.trim()).toBe("function function undefined");
+}, 600_000);
+
 for (const [label, react, tailwind] of [
   ["React 18.3", "18.3.1", false],
   ["React 19.3 + Tailwind 4.3", "19.3.0", true],
@@ -141,16 +202,21 @@ for (const [label, react, tailwind] of [
     await page.route(`${ORIGIN}/**`, async (route) => {
       const path = new URL(route.request().url()).pathname;
       const file = join(dist, path === "/" ? "index.html" : path);
-      await route.fulfill({
-        contentType: TYPES[extname(file)] ?? "application/octet-stream",
-        body: readFileSync(file),
-      });
+      try {
+        await route.fulfill({
+          contentType: TYPES[extname(file)] ?? "application/octet-stream",
+          body: readFileSync(file),
+        });
+      } catch {
+        await route.fulfill({ status: 404, body: "" });
+      }
     });
     await page.goto(`${ORIGIN}/`);
 
+    const body = await page.evaluate(() => document.body.innerHTML.slice(0, 300));
     await expect(
       page.getByRole("button", { name: "Speichern" }),
-      problems.join("\n"),
+      [...problems, `body: ${body}`].join("\n"),
     ).toBeVisible();
     await expect(page.getByRole("button", { name: "Abbrechen" })).toBeVisible();
     const fill = await page
