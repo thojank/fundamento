@@ -137,16 +137,18 @@ Etappe A umfasst FR-01 bis FR-09, FR-19 und den vorbereitenden Teil von FR-15. *
 
 ## Etappe 5 – Clean Room
 
-- [ ] **T013 Fingerprintquellen mit Herkunft** (FR-15 vorbereitend, AK-06 Teil, D-10, contracts/checks §1)
+- [x] **T013 Fingerprintquellen mit Herkunft** (FR-15 vorbereitend, AK-06 Teil, D-10, contracts/checks §1)
   - Rot: Fixture mit einer zweiten Fingerprintliste `{ "source": "testmarko", "fingerprints": [...] }` und einem eingepflanzten Wert im Prüfbaum: erwartet wird genau ein Fund mit der Herkunft `testmarko`; ohne die Liste kein Fund; eine genannte, fehlende Datei ergibt `file-missing`.
   - Grün: `--spuroj` (mehrfach), `markoSpuroj` in `fundamento.config.json`, Herkunft in der Meldung, `fingerprintSources` und `fingerprints` in den Stats.
   - Fertig wenn: die eingebaute Liste unverändert weiterläuft und Etappe B nur noch ihre Datei liefern muss.
+  - Done-Notiz: Rot zuerst mit der Fixture `invalid/clean-room-fremda-spuro` (eigene Liste `spuroj/testmarko.json`, zwei erfundene Werte in `src/theme.css`): ohne Liste kein Fund, mit Liste genau zwei, die Meldung nennt „A value of the Aspekto 'testmarko'". Eine genannte, fehlende Datei ergibt `clean-room-spuro-file-missing` mit dem Pfad — Etappe B kann nicht versehentlich gegen eine Liste prüfen, die nie übergeben wurde. Die Herkunft entscheidet die Lesereihenfolge (eingebaut, `markoSpuroj` der Konfiguration, `--spuroj`), und eine genannte Liste wird selbst nicht durchsucht: sie enthält nur Hashes. Stats: `fingerprintSources` und `fingerprints`. Nebenbefund: die Fixture-Liste trug die Werte im `$comment` — genau das, was eine Fingerprintliste nie tun darf; der Kommentar nennt jetzt nur noch den Zweck.
 
 ## Etappe 6 – Dokumentation
 
-- [ ] **T014 README, Vojmapo, Quickstart, Nachverfolgbarkeit** (Art. XIII, AK-02)
+- [x] **T014 README, Vojmapo, Quickstart, Nachverfolgbarkeit** (Art. XIII, AK-02)
   - Rot: `docs.test.ts`: README nennt die Vitrino mit Pfad, `pnpm check:vitrino`, die sieben neuen Reguloj, den Begriff Aspiro mit einem Satz Erklärung und den Grundsatz Fluida Marko und den Gegenüberstellungs-Schalter; `docs/vojmapo.md` Zeile 3b trägt Etappe A als umgesetzt mit offener Abnahme; `plan.md` verweist auf die Aufgaben-IDs.
   - Grün: die Dokumente.
+  - Done-Notiz: Rot zuerst über sechs neue Prüfungen in `docs.test.ts`. Das README hat zwei neue Abschnitte — „Reguloj, Aspiroj and Fluida Marko" (die sieben strukturellen Reguloj, der Begriff Aspiro, der Grundsatz) und „Vitrino" (Pfad, Umschalten, URL-Fragment, `--bazo`) —, die Spec-Liste nennt jetzt auch 003 und 004. `docs/vojmapo.md` Zeile 3b trägt Etappe A als umgesetzt mit offener Abnahme; Zeile 4 trägt den **Regulo-Kandidaten aus der Abnahme**: eigene Kontrastkategorie für Beschriftungstext mit eigenem beratenden APCA-Band, WCAG-Schwellen unberührt. Der Quickstart zeigt den Vergleichsstand (`--bazo`, `fm modelo mezuroj`), die Nachverfolgbarkeit im Plan führt die Entscheidungen der Durchsichten (D-07b, D-07c, D-08c) und T014.
 
 ## Manuelle Abnahme (Maintainer, nach dem PR)
 

@@ -8,9 +8,10 @@ import { tmpdir } from "node:os";
 import { join, relative } from "node:path";
 import {
   findBrandValues,
+  fingerprintIndex,
   fingerprintOf,
   projectModeloSource,
-  repoFingerprints,
+  repoFingerprintIndex,
 } from "@fundamento/modelo";
 import { beforeAll, describe, expect, it } from "vitest";
 import { celoInputOf } from "../../build.js";
@@ -220,13 +221,15 @@ describe("Make Kit tarball (T018, clean room)", () => {
       walk(root);
       expect(texts.length).toBeGreaterThan(10);
       for (const [path, text] of texts) {
-        expect(findBrandValues(path, text, repoFingerprints()), path).toEqual([]);
+        expect(findBrandValues(path, text, repoFingerprintIndex()), path).toEqual([]);
       }
       // The check has teeth: the fingerprint of a colour the kit really contains is found.
       const styles = texts.find(([path]) => path.endsWith("styles.css"));
       const hex = /#[0-9a-f]{6}/.exec(styles?.[1] ?? "")?.[0] ?? "";
       expect(hex).not.toBe("");
-      const planted = new Set([fingerprintOf({ kind: "hex", normalized: hex })]);
+      const planted = fingerprintIndex([
+        { source: "testmarko", fingerprints: [fingerprintOf({ kind: "hex", normalized: hex })] },
+      ]);
       expect(findBrandValues(styles?.[0] ?? "", styles?.[1] ?? "", planted).length).toBeGreaterThan(
         0,
       );

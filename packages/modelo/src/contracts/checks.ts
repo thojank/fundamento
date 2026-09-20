@@ -33,6 +33,11 @@ export interface CheckOptions {
    * Defaults to `<repoRoot>/.fundamento/projekcioj` (Spec 003 T021).
    */
   projekcioj?: string;
+  /**
+   * Clean-room only: further fingerprint lists of benchmark Aspektoj, in reading order
+   * (`--spuroj`, `markoSpuroj` in the config). Each names its own source (Spec 004 T013).
+   */
+  spuroj?: string[];
   repoRoot: string;
 }
 

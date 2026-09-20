@@ -78,7 +78,9 @@ describe("entity ID prefixes (§2.3)", () => {
 describe("rule catalog (§2.6)", () => {
   it("contains every rule ID exactly once", () => {
     expect(new Set(RULE_IDS).size).toBe(RULE_IDS.length);
-    expect(RULE_IDS).toHaveLength(114);
+    // 115 since Spec 004 T013: a named fingerprint list that does not exist is its own finding.
+    expect(RULE_IDS).toHaveLength(115);
+    expect(RULE_IDS).toContain("clean-room-spuro-file-missing");
     expect(RULE_IDS).toContain("nomregulo-no-target");
     expect(RULE_IDS).toContain("id-namespace-mismatch");
     expect(RULE_IDS).toContain("id-namespace-duplicate");

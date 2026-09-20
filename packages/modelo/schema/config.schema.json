@@ -17,6 +17,15 @@
         "minLength": 1
       },
       "uniqueItems": true
+    },
+    "markoSpuroj": {
+      "description": "Fingerprint lists of benchmark Aspektoj that check:clean-room reads, as paths relative to this file. Each list holds hashes only and names its own source (Spec 004, FR-15).",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
     }
   },
   "required": ["aspektoj"],

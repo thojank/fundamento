@@ -91,39 +91,83 @@ export function fingerprintOf(candidate: Pick<BrandCandidate, "kind" | "normaliz
   return fingerprint;
 }
 
+/**
+ * Fingerprints and where they come from (Spec 004 T013): a finding must be able to say which list
+ * knew the value — the repository's own, or a benchmark Aspekto that handed its list over. A
+ * fingerprint in several lists names the first source in reading order (built-in, config,
+ * command line).
+ */
+export type FingerprintIndex = ReadonlyMap<string, string>;
+
+/** The name a list without `source` carries: the repository's own values. */
+export const REPO_SOURCE = "repo";
+
 /** The fingerprints of the repo (hashes only; derived once from Anhang A of Spec 001). */
 export function repoFingerprints(): ReadonlySet<string> {
   return new Set(markoSpuroj.fingerprints);
 }
 
-/** Parses a fingerprint file of the form { fingerprints: string[] }. */
+/** The repo's fingerprints as an index: every one of them comes from the repository itself. */
+export function repoFingerprintIndex(): FingerprintIndex {
+  return fingerprintIndex([{ source: REPO_SOURCE, fingerprints: markoSpuroj.fingerprints }]);
+}
+
+/** Parses a fingerprint file of the form { source?: string, fingerprints: string[] }. */
 export function parseFingerprints(value: unknown): ReadonlySet<string> {
-  const list =
-    typeof value === "object" && value !== null && "fingerprints" in value
-      ? value.fingerprints
-      : undefined;
-  return new Set(Array.isArray(list) ? list.filter((item) => typeof item === "string") : []);
+  return new Set(parseFingerprintSource(value, REPO_SOURCE).fingerprints);
+}
+
+/** The source name and the fingerprints of one list; an unnamed list is `fallback`. */
+export function parseFingerprintSource(
+  value: unknown,
+  fallback: string,
+): { source: string; fingerprints: string[] } {
+  const record =
+    typeof value === "object" && value !== null ? (value as Record<string, unknown>) : {};
+  const list = record.fingerprints;
+  return {
+    source: typeof record.source === "string" && record.source !== "" ? record.source : fallback,
+    fingerprints: Array.isArray(list) ? list.filter((item) => typeof item === "string") : [],
+  };
+}
+
+/** Builds the index; earlier lists win, so the reading order decides the provenance. */
+export function fingerprintIndex(
+  lists: readonly { source: string; fingerprints: readonly string[] }[],
+): FingerprintIndex {
+  const index = new Map<string, string>();
+  for (const list of lists) {
+    for (const fingerprint of list.fingerprints) {
+      if (!index.has(fingerprint)) index.set(fingerprint, list.source);
+    }
+  }
+  return index;
 }
 
 /** One issue per brand value found in `text`; `file` is the scan-relative path. */
 export function findBrandValues(
   file: string,
   text: string,
-  fingerprints: ReadonlySet<string>,
+  fingerprints: FingerprintIndex,
 ): ValidationIssue[] {
   if (fingerprints.size === 0) return [];
   const seen = new Set<number>();
   const issues: ValidationIssue[] = [];
   for (const candidate of brandCandidates(text)) {
-    if (seen.has(candidate.index) || !fingerprints.has(fingerprintOf(candidate))) continue;
+    const source = fingerprints.get(fingerprintOf(candidate));
+    if (seen.has(candidate.index) || source === undefined) continue;
     seen.add(candidate.index);
     const { line, column } = lineColumn(text, candidate.index);
+    const whose = source === REPO_SOURCE ? "A brand value" : `A value of the Aspekto '${source}'`;
     issues.push({
       rule: "clean-room-marko-spuro",
       severity: "error",
       path: textPath(file, line, column),
-      message: `A brand value (${candidate.kind}) appears outside the files allowed to hold it.`,
-      suggestion: `Brand values belong in the private Aspekto package; in the core repository they may appear only in ${[...MARKO_SPURO_ALLOWLIST].join(" and ")} (AK-08).`,
+      message: `${whose} (${candidate.kind}) appears outside the files allowed to hold it.`,
+      suggestion:
+        source === REPO_SOURCE
+          ? `Brand values belong in the private Aspekto package; in the core repository they may appear only in ${[...MARKO_SPURO_ALLOWLIST].join(" and ")} (AK-08).`
+          : `Values of '${source}' stay in their own package: this repository knows the Aspekto only as fingerprints (Art. V). Replace the value with one of your own.`,
     });
   }
   return issues;

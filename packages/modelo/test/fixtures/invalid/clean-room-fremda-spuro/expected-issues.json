@@ -1,0 +1,18 @@
+{
+  "description": "The fixture itself brings no fingerprints; a second list passed with --spuroj knows two synthetic values of an invented benchmark Aspekto 'testmarko'. Both occurrences in src/theme.css are reported, and the message names the source. Without the list the fixture is clean.",
+  "check": "clean-room",
+  "args": [
+    "--spuroj",
+    "spuroj/testmarko.json"
+  ],
+  "issues": [
+    {
+      "rule": "clean-room-marko-spuro",
+      "path": "src/theme.css:3:22"
+    },
+    {
+      "rule": "clean-room-marko-spuro",
+      "path": "src/theme.css:4:20"
+    }
+  ]
+}

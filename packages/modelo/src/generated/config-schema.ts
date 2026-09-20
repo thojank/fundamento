@@ -13,4 +13,8 @@ export interface FundamentoConfigJson {
    * Aspekto packages to include besides the reference Aspekto: a path relative to this file, or an npm package name resolved from this file's directory.
    */
   aspektoj: string[];
+  /**
+   * Fingerprint lists of benchmark Aspektoj that check:clean-room reads, as paths relative to this file. Each list holds hashes only and names its own source (Spec 004, FR-15).
+   */
+  markoSpuroj?: string[];
 }
