@@ -60,6 +60,8 @@ Sieben Rampen, 72 Palettentokens. `shade` ist eine Alpha-Rampe (transparentes Sc
 | neutral | 0 … 1000 (13) | 0,050 … 0,400 | 8,00 |
 | shade | 0 … 50 (4, Alpha) | – | – |
 
+Gemessen an der **Regelmäßigkeit** – wie weit ein Schritt vom Median seiner eigenen Rampe abweicht, Ankerstufen und Alpha-Rampe ausgenommen – liegt jede Buntrampe bei **62,5 %** (`danger` 58,7 %); der Ausreißer ist immer derselbe: der erste Schritt 50 → 100 mit ΔL 0,030 gegen einen Median von 0,080. Das helle Ende ist also bewusst feiner abgestuft.
+
 Die Rampen sind **streng monoton** und untereinander **eng ausgerichtet**: bei gleicher Stufennummer weichen die Helligkeiten der fünf Buntrampen um höchstens 0,013 voneinander ab. Die Ausreißer entstehen an zwei Stellen: der Sprung 900 → 950 ist ein halber Schritt (deshalb 0,160 je 100 Einheiten) und die neutralen Endpunkte 0 und 1000 sind reines Weiß und Schwarz (0,400).
 
 ### 2.5 Typografie
@@ -118,7 +120,8 @@ Die drei engsten Paare von ekzemplo sind `status-success-on-basic` (+4,1 %), `te
 | `wcag2-reserve` | `wcagWert / Schwelle − 1` je KontrastParo × Kombination | min +3,6 % |
 | `oklch-l-delta` (Flächen) | Helligkeitsabstand benachbarter Flächenrollen | 0,000 an zwei Stellen |
 | `oklch-l-extreme` | Abstand einer Flächenrolle zu reinem Weiß/Schwarz | 0,000 an vier Stellen |
-| `oklch-l-step` | ΔL je 100 Stufeneinheiten innerhalb einer Rampe | 0,050 … 0,400 |
+| `oklch-l-step` | ΔL je 100 Stufeneinheiten innerhalb einer Rampe | 0,055 … 0,160 (ohne Anker) |
+| `oklch-l-step-consistency` | größte relative Abweichung eines Schritts vom Median seiner Rampe | 62,5 % |
 | `oklch-l-align` | Abweichung der Helligkeit gleicher Stufennummern zwischen Rampen | ≤ 0,013 |
 | `srgb-gamut` | jede Komponente in 0 … 1 | erfüllt |
 | `type-scale-ratio` | Verhältnis benachbarter Größenstufen | 1,111 … 1,250 |

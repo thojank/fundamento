@@ -8,7 +8,7 @@ Begleitet [`plan.md`](plan.md); die Kürzel D-xx verweisen auf dessen Entscheidu
 |---|---|---|---|
 | **Regulo** | `packages/modelo/data/reguloj.json` | sieben neue Reguloj mit Kialo und Sojlo (§2) | Schema; jede Regulo braucht einen Durchsetzer (Repo-Test) |
 | **Aspiro** (neu) | `aspekto.json#/aspiroj` | Entwurfsziel einer einzelnen Marke, mit Kialo und Schranke (§2b) | Schema; Prüfung nur für die erklärende Aspekto; Negativtest „Fluida Marko" |
-| **Ontologio-Begriff** | `packages/modelo/data/ontologio.json` | `Aspiro` unter `inScheme: modelo` (Plan D-14) | Ontologio-Schema und Drift-Test aus Spec 002 |
+| **Ontologio-Begriffe** | `packages/modelo/data/ontologio.json` | `Aspiro` unter `inScheme: terminologio` (und damit in der Terminologie-Tabelle der Constitution, v1.7) sowie `FluidaMarko` im neuen Schema `principoj` (Plan D-14) | Ontologio-Schema (neues Schema `principoj`) und Drift-Test aus Spec 002 |
 | **Sojlo-Metriken** | `packages/modelo/src/metrikoj/` | zehn Metrik-IDs als reine Funktionen (§3) | Unit-Tests mit erfundenen Rampen und Grenzfällen |
 | **Token** | `packages/vortaro/sets/core.json` | komuna 2: ankernahe neutrale Stufen, Flächenrollen, zwei Status-Basisflächen, `color.text.muted` (D-04) | die neuen Reguloj, komunas Aspiroj, Vollständigkeit je Aspekto |
 | **Aspekto-Satz** | `packages/aspekto-komuna/sets/aspekto/komuna+color-scheme/dark.json` | komuna bekommt 57 eigene Dunkelwerte (`background`, `text`, `action`, `status`) | `dimensio-sets-alias-only` gilt hier nicht (Aspekto-Satz), Vollständigkeit und die neuen Reguloj |
@@ -37,13 +37,13 @@ Form wie bisher; `kialo` ist Pflicht (Art. VI), `sojlo` nur, wo es eine Zahl gib
 |---|---|---|---|
 | `contrast-reserve` | `roles` (fore/back/border/focus) | `{ metric: "wcag2-reserve", min: 0.05 }` | je Paar × Kombination, auf der Messung von `evaluateAlirebleco` |
 | `surface-distinct` | `tokens: ["color.background.*"]` | `{ metric: "oklch-l-delta", min: 0.02 }` | je Kombination, benachbarte Flächenrollen in der Reihenfolge von `surface-order` |
-| `palette-even` | `tokens: ["color.palette.*"]` | `{ metric: "oklch-l-step", min: 0.04, max: 0.2 }` | je Rampe im Kern-Satz; Alpha-Rampen und Ankerstufen ausgenommen |
+| `palette-even` | `tokens: ["color.palette.*"]` | `{ metric: "oklch-l-step-consistency", max: 0.75 }` | je Rampe im Kern-Satz: strenge Monotonie, kein Schritt mehr als 75 % vom Median entfernt; Alpha-Rampen und Ankerstufen ausgenommen |
 | `palette-aligned` | `tokens: ["color.palette.*"]` | `{ metric: "oklch-l-align", max: 0.02 }` | je Stufennummer über alle Buntrampen |
 | `srgb-gamut` | `types: ["color"]` | – | je Farbtoken, auch in jedem Aspekto-Satz |
 | `type-scale` | `tokens: ["font.size.scale.*"]` | `{ metric: "type-scale-consistency", max: 0.1 }` | Regelmäßigkeit: jedes Verhältnis höchstens 10 % vom Median entfernt, streng monoton |
 | `type-rhythm` | `tokens: ["font.lineheight.*", "font.tracking.*"]` | – | Monotonie gegen die Größenrolle |
 
-Nicht mehr als Regulo, sondern als Aspiro von komuna (Plan D-03, „Fluida Marko"): der Abstand einer Fläche zu reinem Weiß oder Schwarz, die Reserve von 10 %, das Verhältnisband 1,10 – 1,30 und der eigene Dunkelmodus.
+Nicht als Regulo, sondern als Aspiro von komuna (Plan D-03, „Fluida Marko"): der Abstand einer Fläche zu reinem Weiß oder Schwarz, die Reserve von 10 %, das Verhältnisband 1,10 – 1,30 der Typo-Skala, die Schrittweite 0,04 – 0,20 der Paletten und der eigene Dunkelmodus.
 
 Zwei Ausnahmen, jede mit eigenem Satz im `kialo` der betroffenen Regulo:
 
@@ -96,6 +96,7 @@ Reine Funktionen, stabile IDs, gemeinsame Nutzung durch Prüfung, Vitrino und sp
 | `srgb-gamut` | `(a: ColorValue) => { inside: boolean; worst: number }` | größte Überschreitung von 0 … 1 |
 | `type-scale-ratio` | `(sizes: number[]) => number[]` | Verhältnisse benachbarter Stufen |
 | `type-scale-consistency` | `(sizes: number[]) => { median: number; worst: number; at: number }` | größte **relative** Abweichung eines Verhältnisses vom Median |
+| `oklch-l-step-consistency` | `(ramp: RampStep[]) => { median: number; worst: number; at: number }` | größte **relative** Abweichung eines Schritts vom Median der Rampe |
 | `type-rhythm` | `(rows: { size: number; lineHeight: number; tracking: number }[]) => { monotone: boolean; breaks: … }` | Verstöße gegen die Monotonie |
 | `dimensio-kovrado` | `(modelo, { aspekto, dimensio, valoro, scope? }) => { own: number; total: number; share: number }` | Anteil der Tokens eines Dimensio-Werts, die die Marke selbst setzt |
 

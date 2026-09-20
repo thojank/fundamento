@@ -13,12 +13,17 @@ Etappe A umfasst FR-01 bis FR-09, FR-19 und den vorbereitenden Teil von FR-15. *
 - **Fertig heißt:** `pnpm check` grün, Aufgabe hier abgehakt, Abweichungen als Done-Notiz festgehalten.
 - `[P]` = kann parallel zur vorigen Aufgabe laufen (andere Dateien, keine Abhängigkeit).
 
+**Zwischenberichte an den Maintainer** (Review 2026-09-20):
+
+1. **Nach T006 – komuna 2 grün**, mit den Zahlen vorher/nachher (Reserve, Flächenabstände, Abdeckung im Dunkelmodus). Der Maintainer hat „nach T005" geschrieben und komuna 2 gemeint; in dieser Liste ist komuna 2 die Aufgabe **T006**, weil T005 die Aspiro-Ebene einführt.
+2. **Nach T011 – Vitrino fertig**, mit Screenshots in hell, dunkel und hohem Kontrast.
+
 ## Etappe 0 – Verfassung
 
-- [ ] **T001 Constitution v1.7, Art. V Benchmark-Aspekto** (FR-19, AK-08, D-11)
-  - Rot: `packages/modelo/src/docs/docs.test.ts` erwartet Version `1.7`, den Absatz „Benchmark-Aspekto" im Wortlaut aus FR-19 unter Artikel V, den Historieneintrag `v1.7 (Spec 004) …` und den unveränderten Satz „Quellmaterial anderer Systeme wird dem Coding-Tool nicht vorgelegt".
-  - Grün: `.specify/memory/constitution.md` auf v1.7.
-  - Fertig wenn: Dokumenttest grün; kein Jugxo nötig (Erweiterung, kein Bruch), Begründung in plan.md D-11.
+- [ ] **T001 Constitution v1.7: Art. V Benchmark-Aspekto und der Begriff Aspiro** (FR-19, AK-08, D-11, D-14)
+  - Rot: `packages/modelo/src/docs/docs.test.ts` erwartet Version `1.7`, den Absatz „Benchmark-Aspekto" im Wortlaut aus FR-19 unter Artikel V, eine Zeile **Aspiro** in der Terminologie-Tabelle, den Historieneintrag `v1.7 (Spec 004) …` und den unveränderten Satz „Quellmaterial anderer Systeme wird dem Coding-Tool nicht vorgelegt". Der Ontologio-Drift-Test schlägt an, solange die Tabellenzeile ohne Ontologio-Begriff dasteht (`table-term-missing`) – er wird in T005 grün.
+  - Grün: `.specify/memory/constitution.md` auf v1.7, mit der Terminologie-Zeile „**Aspiro** | Ein messbares Entwurfsziel einer einzelnen Marke, mit Kialo; gilt nur für sie | `aspekto.json#/aspiroj`".
+  - Fertig wenn: Dokumenttest grün; kein Jugxo nötig (Erweiterung, kein Bruch), Begründung in plan.md D-11. Der Grundsatz „Fluida Marko" kommt **nicht** in v1.7.
 
 ## Etappe 1 – Metriken
 
@@ -34,20 +39,20 @@ Etappe A umfasst FR-01 bis FR-09, FR-19 und den vorbereitenden Teil von FR-15. *
   - Grün: Durchsetzer in `validate/color-reguloj.ts` (je Kombination), Meldungen mit gemessenem und gefordertem Wert (contracts/checks §3).
   - Fertig wenn: die Zahl der Verstöße je Aspekto in der Done-Notiz steht; Werte ändert erst T006.
 - [ ] **T004 [P] Die fünf Reguloj, die heute halten** (FR-01, FR-02, D-02 G4–G8)
-  - Rot: `palette-even`, `palette-aligned`, `srgb-gamut`, `type-scale` (als **Regelmäßigkeit**, `type-scale-consistency` ≤ 10 %) und `type-rhythm`; da das Repo sie erfüllt, kommt der rote Lauf aus Fixtures: je eine ungültige Modelo-Fixture pro Regulo (Rampe mit Ausreißer, Rampe gegen die anderen verschoben, Farbe außerhalb des Gamuts, Skala mit einem Verhältnis 1,6 neben lauter 1,2, Zeilenhöhe die mit der Größe steigt) mit `expected-issues.json`.
+  - Rot: `palette-even` (als **Regelmäßigkeit**, `oklch-l-step-consistency` ≤ 75 % plus strenge Monotonie), `palette-aligned`, `srgb-gamut`, `type-scale` (als **Regelmäßigkeit**, `type-scale-consistency` ≤ 10 %) und `type-rhythm`; da das Repo sie erfüllt, kommt der rote Lauf aus Fixtures: je eine ungültige Modelo-Fixture pro Regulo (Rampe mit einem Sprung mitten drin, Rampe gegen die anderen verschoben, Farbe außerhalb des Gamuts, Skala mit einem Verhältnis 1,6 neben lauter 1,2, Zeilenhöhe die mit der Größe steigt) mit `expected-issues.json`.
   - Grün: Durchsetzer; Ausnahmen mit Kialo in der Regulo selbst (Alpha-Rampen, Ankerstufen – data-model §2).
-  - Fertig wenn: die Fixtures rot waren, das Repo grün ist und `check:regularo` die neuen Reguloj mit Kialo führt. **Kein fester Verhältnisbereich** in `type-scale`: eine Marke mit konstantem 1,5 besteht.
+  - Fertig wenn: die Fixtures rot waren, das Repo grün ist (komuna liegt bei 62,5 % von 75 %) und `check:regularo` die neuen Reguloj mit Kialo führt. **Zwei Positivtests halten Fluida Marko fest:** eine Palette mit gleichmäßigen, aber kleinen Schritten (ΔL 0,025 überall) besteht `palette-even`; eine Größenskala mit konstantem Verhältnis 1,5 besteht `type-scale`.
 
 ## Etappe 3 – Aspiroj (je Marke)
 
 - [ ] **T005 Aspiroj: Begriff, Schema, Prüfung, getrennte Ausgabe** (FR-01, FR-02, D-03, D-14, data-model §2b)
-  - Rot: (1) Ontologio-Test erwartet den Begriff `Aspiro` unter `inScheme: modelo` mit Definition in `en`/`de` und Bezug zu `Aspekto`; (2) Schema-Test erwartet `aspekto.json#/aspiroj` mit Pflichtfeldern `metriko` und `kialo` und mindestens einer Schranke – eine Aspiro ohne Kialo ist ungültig; (3) `validate`-Test über eine Fixture-Marke mit einer verfehlten Aspiro erwartet genau ein `aspiro-missed` mit Marke, Metrik, Ist, Soll und Kialo, Zusammenfassung getrennt gezählt; (4) **Negativtest Fluida Marko:** eine Fixture-Marke mit reinem Weiß als Fläche und konstantem Verhältnis 1,5 besteht jede Regulo und bekommt kein `aspiro-missed`.
-  - Grün: Schema, `validate/aspiroj.ts`, Regel-ID `aspiro-missed` im Katalog, Stats `reguloViolations` und `aspiroMisses`, Ontologio-Eintrag.
-  - Fertig wenn: eine Marke ohne `aspiroj` vollständig gültig ist; die Meldung nie das Wort „Regel" für ein Ziel benutzt. **Benennung:** fällt die Entscheidung des Maintainers auf `Intenco`, `Promeso` oder `Strebo`, wird hier umbenannt (Ontologio, Schema, Meldung, Vitrino).
+  - Rot: (1) Ontologio-Tests erwarten den Begriff **`Aspiro`** unter `inScheme: terminologio` (Drift gegen die Tabellenzeile aus T001, beide Richtungen) **und** den Grundsatz **`FluidaMarko`** im neuen Schema `principoj` mit der Definition des Maintainers und Verweisen auf `docs/vojmapo.md` und `docs/vizio.md`; das Ontologio-Schema kennt `principoj` noch nicht, der Test läuft deshalb erst rot; (2) Schema-Test erwartet `aspekto.json#/aspiroj` mit Pflichtfeldern `metriko` und `kialo` und mindestens einer Schranke – eine Aspiro ohne Kialo ist ungültig; (3) `validate`-Test über eine Fixture-Marke mit einer verfehlten Aspiro erwartet genau ein `aspiro-missed` mit Marke, Metrik, Ist, Soll und Kialo, Zusammenfassung getrennt gezählt; (4) **Negativtest Fluida Marko:** eine Fixture-Marke mit reinem Weiß als Fläche und konstantem Verhältnis 1,5 besteht jede Regulo und bekommt kein `aspiro-missed`.
+  - Grün: Modelo-Schema (`AspektoAspiro`), `validate/aspiroj.ts`, Regel-ID `aspiro-missed` im Katalog, Stats `reguloViolations` und `aspiroMisses`, Ontologio-Schema um `principoj` erweitert, beide Ontologio-Einträge.
+  - Fertig wenn: eine Marke ohne `aspiroj` vollständig gültig ist; die Meldung nie das Wort „Regel" für ein Ziel benutzt; der Ontologio-Drift-Test (Spec 002) grün ist, auch die Prüfung „je Entitätsart genau eine Notation".
 - [ ] **T006 komuna 2: eigene Ziele und die Werte dazu** (FR-01, FR-04, AK-01, D-02 G1b/G3/G7b/G9, D-04, D-05)
-  - Rot: komunas vier Aspiroj in `packages/aspekto-komuna/aspekto.json` (Reserve ≥ 10 %, Abstand zum Anker ≥ 0,02 für Flächen, Verhältnisband 1,10 – 1,30, Abdeckung `color-scheme=dark` = 100 % über `background`, `text`, `action`, `status`); `validate` meldet vier verfehlte Entwurfsziele, dazu die Regulo-Verstöße aus T003.
+  - Rot: komunas fünf Aspiroj in `packages/aspekto-komuna/aspekto.json` (Reserve ≥ 10 %, Abstand zum Anker ≥ 0,02 für Flächen, Verhältnisband 1,10 – 1,30 der Typo-Skala, Schrittweite 0,04 – 0,20 der Paletten, Abdeckung `color-scheme=dark` = 100 % über `background`, `text`, `action`, `status`); `validate` meldet die verfehlten Entwurfsziele (heute: Reserve, Anker, Abdeckung), dazu die Regulo-Verstöße aus T003.
   - Grün, in dieser Reihenfolge: (1) ankernahe neutrale Stufen, (2) Flächenrollen neu gezeigt (hell `raised` über `default`, dunkel `sunken` unter `canvas`), (3) **57 eigene Dunkelwerte** in `aspekto/komuna+color-scheme/dark`, (4) drei enge KontrastParoj auf Reserve. `ekzemplo` zieht **nur** dort nach, wo eine Regulo es verlangt.
-  - Fertig wenn: `pnpm check` grün; jede Wertänderung nennt in der Commit-Nachricht die Regulo oder Aspiro, die sie erzwingt; research §2 bekommt eine Spalte „nachher"; die Abdeckung von komuna in `color-scheme=dark` steht bei 100 %, die von ekzemplo unverändert bei 1,3 % (und das ist in Ordnung – Fluida Marko).
+  - Fertig wenn: `pnpm check` grün; jede Wertänderung nennt in der Commit-Nachricht die Regulo oder Aspiro, die sie erzwingt; research §2 bekommt eine Spalte „nachher"; die Abdeckung von komuna in `color-scheme=dark` steht bei 100 %, die von ekzemplo unverändert bei 1,3 %, weil ekzemplo seine Dunkelwerte weiter aus dem generischen Satz `color-scheme/dark` bezieht (und das ist in Ordnung – Fluida Marko).
 
 ## Etappe 4 – Vitrino
 
@@ -82,7 +87,7 @@ Etappe A umfasst FR-01 bis FR-09, FR-19 und den vorbereitenden Teil von FR-15. *
 ## Etappe 6 – Dokumentation
 
 - [ ] **T014 README, Vojmapo, Quickstart, Nachverfolgbarkeit** (Art. XIII, AK-02)
-  - Rot: `docs.test.ts`: README nennt die Vitrino mit Pfad, `pnpm check:vitrino`, die sieben neuen Reguloj, den Begriff Aspiro mit einem Satz Erklärung und den Gegenüberstellungs-Schalter; `docs/vojmapo.md` Zeile 3b trägt Etappe A als umgesetzt mit offener Abnahme; `plan.md` verweist auf die Aufgaben-IDs.
+  - Rot: `docs.test.ts`: README nennt die Vitrino mit Pfad, `pnpm check:vitrino`, die sieben neuen Reguloj, den Begriff Aspiro mit einem Satz Erklärung und den Grundsatz Fluida Marko und den Gegenüberstellungs-Schalter; `docs/vojmapo.md` Zeile 3b trägt Etappe A als umgesetzt mit offener Abnahme; `plan.md` verweist auf die Aufgaben-IDs.
   - Grün: die Dokumente.
 
 ## Manuelle Abnahme (Maintainer, nach dem PR)

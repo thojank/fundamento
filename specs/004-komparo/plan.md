@@ -10,7 +10,7 @@ Dieser Plan ist die Ausgabe von `/speckit.plan` für **Etappe A** von Spec 004. 
 
 Etappe A macht drei Dinge, in dieser Reihenfolge:
 
-1. **Ziele vor Werten (FR-01, FR-02), auf zwei Ebenen.** Zehn messbare Qualitätsziele mit Kialo. Sieben davon gelten als **Regulo** für jede Marke, weil sie Zugänglichkeit und Struktur sichern; vier sind **Aspiroj** – Ziele, die komuna sich selbst setzt, prüfbar und begründet, aber ohne Anspruch auf andere Marken („Fluida Marko", D-03). Heute schlagen an: die Kontrast-Reserve als Regulo (kleinster Wert +3,6 %), der Abstand benachbarter Flächen als Regulo (zweimal genau 0) und drei Aspiroj von komuna (reine Endpunkte als Fläche, Reserve 10 %, eigener Dunkelmodus mit 1,3 % Abdeckung). Die Regel kommt zuerst, die Werte danach – der rote Lauf ist das Repo selbst.
+1. **Ziele vor Werten (FR-01, FR-02), auf zwei Ebenen.** Zwölf messbare Qualitätsziele mit Kialo. Sieben davon gelten als **Regulo** für jede Marke, weil sie Zugänglichkeit und Struktur sichern; fünf sind **Aspiroj** – Ziele, die komuna sich selbst setzt, prüfbar und begründet, aber ohne Anspruch auf andere Marken („Fluida Marko", D-03). Heute schlagen an: die Kontrast-Reserve als Regulo (kleinster Wert +3,6 %), der Abstand benachbarter Flächen als Regulo (zweimal genau 0) und drei Aspiroj von komuna (reine Endpunkte als Fläche, Reserve 10 %, eigener Dunkelmodus mit 1,3 % Abdeckung). Die Regel kommt zuerst, die Werte danach – der rote Lauf ist das Repo selbst.
 2. **komuna 2 (FR-01, FR-04).** Die Werte von komuna werden so weit geändert, wie Reguloj und eigene Aspiroj es verlangen: eigene Stufen für Flächen statt reiner Endpunkte, 57 eigene Dunkelwerte statt der gemeinsamen Umsetzung, drei enge KontrastParoj auf Reserve gebracht. `ekzemplo` zieht dort nach, wo eine **Regulo** es verlangt – nicht bei komunas Aspiroj; `ciferecigo` nach dem Merge außerhalb des Repos.
 3. **Vitrino (FR-05 bis FR-09).** Ein neues Celo schreibt eine einzige, eigenständige HTML-Datei: Paletten mit Helligkeitskurve, Flächenfolge, Texthierarchie, Status, Aktionen, echtes `fm-butono`, Kontrastmatrix und Regularo-Ergebnis, alle Dimensioj zur Laufzeit umschaltbar und zwei Aspektoj nebeneinander (in Etappe A komuna ↔ ekzemplo).
 
@@ -25,7 +25,7 @@ Dazu die Verfassungsänderung v1.7 (Art. V, Benchmark-Aspekto) und die Vorbereit
 | Neue Abhängigkeiten | keine. OKLCH über `oklchLightness` (Spec 002), Kontrast über `evaluateAlirebleco`, Rendern über die vorhandenen Playwright- und axe-Einrichtungen |
 | Prüfungen | fünf Kern-Checks unverändert; `check:vitrino` kommt als eigener Schritt dazu (D-09) |
 | Leistungsziel | `fm projekcioj build` bleibt unter 10 s (heute 0,6–0,8 s); die Vitrino darf davon höchstens 2 s brauchen; die HTML-Datei bleibt unter 3 MB |
-| Umfang | 7 neue Reguloj, 4 Aspiroj für komuna, ~30 geänderte und 57 neue Tokenwerte (eigener Dunkelmodus), 1 neues Celo, 1 neue Prüfung, 1 Verfassungsänderung, 1 neuer Ontologio-Begriff |
+| Umfang | 7 neue Reguloj, 5 Aspiroj für komuna, ~30 geänderte und 57 neue Tokenwerte (eigener Dunkelmodus), 1 neues Celo, 1 neue Prüfung, 1 Verfassungsänderung, 1 neuer Ontologio-Begriff |
 | Test-first | Rot vor der Umsetzung ohne Ausnahme; Mutationsprüfung nur für Abnahmetests (Vitrino-Abnahme, Zeitbudgets), wie in Phase 3 |
 
 ## Constitution Check (Tor vor dem Entwurf)
@@ -58,7 +58,7 @@ Etappe A enthält alles, was im Kern-Repo passiert und ohne Kenntnis fremder Wer
 | Kennzahlen | ein Metriken-Modul mit stabilen IDs, das Regulo, Vitrino und späterer Bericht gemeinsam nutzen (D-12) |
 | Vollständigkeit | die neuen Reguloj gelten unverändert auch für komparo; abgeleitete Werte kennzeichnet Etappe B selbst |
 
-### D-02 Die zehn Qualitätsziele (FR-01)
+### D-02 Die zwölf Qualitätsziele (FR-01)
 
 Jedes Ziel nennt: was gemessen wird, warum (Kialo), den heutigen Wert, den Zielwert und **auf welcher Ebene** es gilt – als Regulo für jede Marke oder als Aspiro nur für komuna (D-03). Die Zielwerte sind an den eigenen Daten geprüft (research §2), damit sie erreichbar sind und trotzdem Arbeit verlangen.
 
@@ -68,7 +68,8 @@ Jedes Ziel nennt: was gemessen wird, warum (Kialo), den heutigen Wert, den Zielw
 | G1b | komunas eigene Reserve | dieselbe Messung | min +3,6 % | **≥ +10 %** | **Aspiro komuna** | Die Referenzmarke soll vormachen, was erreichbar ist, ohne es jeder Marke vorzuschreiben. |
 | G2 | Flächen bleiben unterscheidbar | `oklch-l-delta` benachbarter Flächenrollen | 0,000 (zweimal) | **≥ 0,02** | **Regulo** | Wenn zwei Flächen gleich hell sind, trägt nur der Schatten die Schichtung; ohne Schatten (hoher Kontrast, Druck, forced colors) verschwindet sie ganz. Das ist Struktur, nicht Geschmack. |
 | G3 | Keine reinen Endpunkte als Fläche | `oklch-l-extreme` je Flächenrolle | 0,000 (viermal) | **≥ 0,02** | **Aspiro komuna** | Reines Weiß und reines Schwarz lassen keinen Platz mehr nach oben oder unten. Eine Marke darf sich trotzdem dafür entscheiden – komuna nicht. |
-| G4 | Paletten mit gleichmäßiger Kurve | `oklch-l-step` (ΔL je 100 Stufeneinheiten) | 0,050 … 0,160 | **0,04 … 0,20**, streng monoton | **Regulo** | Eine Rampe ist ein Werkzeug: Wer „eine Stufe dunkler" sagt, muss überall dieselbe Wirkung bekommen. |
+| G4 | Rampe ist regelmäßig | `oklch-l-step-consistency` (relative Abweichung eines Schritts vom Median der Rampe), dazu strenge Monotonie | 62,5 % (58,7 % bei `danger`) | **≤ 75 %**, streng monoton | **Regulo** | Eine Rampe ist ein Werkzeug: Wer „eine Stufe dunkler" sagt, muss überall ungefähr dieselbe Wirkung bekommen. **Wie fein** eine Marke abstuft, ist ihre Sache – nur der Sprung mitten in der Rampe ist es nicht. |
+| G4b | komunas Schrittweite | `oklch-l-step` (ΔL je 100 Stufeneinheiten) | 0,055 … 0,160 | **0,04 … 0,20** | **Aspiro komuna** | Die Referenzmarke legt sich auf eine Schrittweite fest, damit ihre Rampen untereinander gleich schnell laufen und eine abgeleitete Marke sie übernehmen kann. |
 | G5 | Rampen untereinander ausgerichtet | `oklch-l-align` | ≤ 0,013 | **≤ 0,02** | **Regulo** | Gleiche Stufennummer, gleiche Helligkeit: sonst wirkt dieselbe Rolle je nach Farbe verschieden schwer. |
 | G6 | Alle Werte im sRGB-Gamut | `srgb-gamut` | erfüllt | bleibt erfüllt, geprüft | **Regulo** | Was außerhalb des Gamuts liegt, beschneidet der Browser – dann stimmt der gemessene Kontrast nicht mehr mit dem gezeigten überein. |
 | G7 | Skala ist regelmäßig | `type-scale-consistency` (relative Abweichung vom Median) | 7,1 % | **≤ 10 %** | **Regulo** | Eine Skala muss vorhersagbar sein; **welches** Verhältnis eine Marke wählt, ist ihre Sache. |
@@ -89,7 +90,7 @@ APCA bleibt beratend (Art. X, Jugxo `jug_01M2XKF38358Z6WQH9KARYJ6F3`).
 |---|---|---|---|
 | `contrast-reserve` | `roles: [foreground, background, border, focus]` | `{ metric: "wcag2-reserve", min: 0.05 }` | jede KontrastParo × Kombination |
 | `surface-distinct` | `tokens: ["color.background.*"]` | `{ metric: "oklch-l-delta", min: 0.02 }` | benachbarte Flächenrollen je Kombination |
-| `palette-even` | `tokens: ["color.palette.*"]` | `{ metric: "oklch-l-step", min: 0.04, max: 0.2 }` | Monotonie und Bandbreite je Rampe |
+| `palette-even` | `tokens: ["color.palette.*"]` | `{ metric: "oklch-l-step-consistency", max: 0.75 }` | **Regelmäßigkeit**: strenge Monotonie, und kein Schritt weicht mehr als 75 % vom Median seiner Rampe ab – **keine** feste Schrittweite |
 | `palette-aligned` | `tokens: ["color.palette.*"]` | `{ metric: "oklch-l-align", max: 0.02 }` | gleiche Stufennummer über Rampen |
 | `srgb-gamut` | `types: ["color"]` | – | jede Komponente in 0 … 1 |
 | `type-scale` | `tokens: ["font.size.scale.*"]` | `{ metric: "type-scale-consistency", max: 0.1 }` | **Regelmäßigkeit**: jedes Verhältnis höchstens 10 % vom Median der Skala entfernt, streng monoton – **kein** fester Bereich |
@@ -109,6 +110,8 @@ Zwei Ausnahmen mit Kialo in der Regulo selbst: **Alpha-Rampen** (`shade`) fallen
     "kialo": "Ein ruhiges Band macht die Skala berechenbar." },
   { "metriko": "oklch-l-extreme", "min": 0.02, "appliesTo": { "tokens": ["color.background.*"] },
     "kialo": "Reines Weiß und reines Schwarz lassen keinen Platz mehr nach oben oder unten." },
+  { "metriko": "oklch-l-step", "min": 0.04, "max": 0.2, "appliesTo": { "tokens": ["color.palette.*"] },
+    "kialo": "Eine feste Schrittweite lässt die Rampen gleich schnell laufen und macht eine Ableitung möglich." },
   { "metriko": "dimensio-kovrado", "dimensio": "color-scheme", "valoro": "dark", "min": 1,
     "appliesTo": { "tokens": ["color.background.*", "color.text.*", "color.action.*", "color.status.*"] },
     "kialo": "Ein Dunkelmodus, den alle Marken teilen, ist eine Umsetzung, kein Entwurf." }
@@ -119,7 +122,7 @@ Zwei Ausnahmen mit Kialo in der Regulo selbst: **Alpha-Rampen** (`shade`) fallen
 - **Geprüft** wird eine Aspiro nur in den Kombinationen der erklärenden Aspekto.
 - **Ausgabe getrennt:** Ein Regulo-Verstoß ist `<regulo-name>`, ein verfehltes Ziel ist `aspiro-missed`; die Zusammenfassung zählt beide getrennt („3 Regulo-Verstöße, 1 verfehltes Entwurfsziel").
 - **Schweregrad:** `error` für die erklärende Marke. Begründung: Eine Marke, die sich ein Ziel setzt, soll es nicht unbemerkt verlieren; wer es aufgeben will, streicht oder senkt es sichtbar in `aspekto.json` (und begründet das dort, wo es steht).
-- **Negativtest (Fluida Marko):** Eine Fixture-Aspekto mit reinem Weiß als Fläche und einem konstanten Verhältnis von 1,5 **besteht alle Reguloj**. Sie erklärt keine Aspiroj und bekommt deshalb auch keinen `aspiro-missed`.
+- **Negativtests (Fluida Marko):** (1) Eine Fixture-Aspekto mit reinem Weiß als Fläche und einem konstanten Verhältnis von 1,5 in der Typo-Skala **besteht alle Reguloj**. (2) Eine Palette mit gleichmäßigen, aber **kleinen** Schritten (ΔL 0,025 überall) besteht `palette-even` – sie ist regelmäßig, nur feiner abgestuft als komuna. Beide Fixtures erklären keine Aspiroj und bekommen deshalb auch keinen `aspiro-missed`.
 
 ### D-04 komuna 2: was sich an Werten ändert (FR-01)
 
@@ -137,9 +140,9 @@ Reihenfolge in der Umsetzung: erst die Regulo (rot), dann die Werte (grün). Jed
 
 | Aspekto | Ort | Vorgehen |
 |---|---|---|
-| `ekzemplo` | Fixture im Repo | zieht dort nach, wo eine **Regulo** es verlangt: drei enge Paare und zwei Nullabstände (research §3). komunas Aspiroj gelten für ekzemplo nicht; die Marke darf reines Weiß und ihren geerbten Dunkelmodus behalten (Fluida Marko). |
+| `ekzemplo` | Fixture im Repo | zieht dort nach, wo eine **Regulo** es verlangt: drei enge Paare und zwei Nullabstände (research §3). komunas Aspiroj gelten für ekzemplo nicht; die Marke darf reines Weiß behalten und ihre Dunkelwerte weiter aus dem generischen Satz `color-scheme/dark` beziehen (Fluida Marko). |
 | `ciferecigo` | externes, privates Paket | nach dem Merge außerhalb des Repos neu abgeleitet, wie Spec 003 T028; die Aufgabe steht als Nachlauf in `tasks.md` und wird vom Maintainer ausgeführt |
-| `komparo` | Etappe B | erbt die Reguloj; abgeleitete Werte kennzeichnet Etappe B selbst (FR-13, FR-14) |
+| `komparo` | Etappe B | die Reguloj gelten unverändert auch dort; abgeleitete Werte kennzeichnet Etappe B selbst (FR-13, FR-14) |
 
 Eine neue Regulo darf nie stillschweigend eine Marke aussperren: Die Aufgabe, die eine Regulo einführt, prüft im selben Lauf beide Aspektoj des Repos. Eine Aspiro darf das umgekehrt nie tun: Sie gilt nur für die Marke, die sie erklärt, und ein Negativtest hält das fest (D-03).
 
@@ -220,7 +223,9 @@ Etappe B liefert danach nur noch ihre Datei; das Kern-Repo sieht weiterhin keine
 
 Art. V erhält den Absatz „Benchmark-Aspekto" im Wortlaut aus FR-19. Dazu:
 
-- Änderungshistorie: `v1.7 (Spec 004) Art. V Benchmark-Aspekto: Import fremder Systeme als eigene Aspektoj in getrennten Repos, Kern erhält nur Kennzahlen und Fingerprints`.
+- **Terminologie-Tabelle:** v1.7 ergänzt eine Zeile **Aspiro** – „Ein messbares Entwurfsziel einer einzelnen Marke, mit Kialo; gilt nur für sie" · Verwendung `aspekto.json#/aspiroj` (Maintainer-Entscheidung zu D-14). Damit gehört `Aspiro` zum Schema `terminologio` der Ontologio, und der Drift-Test aus Spec 002 verlangt beide Seiten.
+- Änderungshistorie: `v1.7 (Spec 004) Art. V Benchmark-Aspekto: Import fremder Systeme als eigene Aspektoj in getrennten Repos, Kern erhält nur Kennzahlen und Fingerprints; Terminologie um Aspiro ergänzt`.
+- **Nicht** in v1.7: der Grundsatz „Fluida Marko". Er kommt als Ontologio-Begriff (D-14) und in die Constitution erst mit seiner eigenen Spec (Fluida Marko / Etoso).
 - Kein Jugxo nötig: Art. V wird **erweitert**, nicht gebrochen. Der Satz „Quellmaterial anderer Systeme wird dem Coding-Tool nicht vorgelegt" bleibt wörtlich stehen und gilt weiter für jede Sitzung am Kern-Repo – diese Sitzung eingeschlossen.
 - Ein Dokumenttest hält die Version, den neuen Absatz und den Historieneintrag fest.
 
@@ -236,20 +241,23 @@ Ohne dieses Modul gäbe es die Rechnung dreimal; mit ihm nennt jede Anzeige dies
 
 Für die Reguloj ist der rote Lauf besonders einfach und besonders ehrlich: Die Regulo wird eingeführt, die Prüfung läuft über das eigene Modelo und **schlägt fehl** – mit genau den drei Befunden aus research §2. Erst danach ändern sich Werte. Für die Metriken gibt es zusätzlich Fixtures mit erfundenen Rampen, damit auch die Grenzfälle (Gleichstand, Ausreißer, Alpha-Rampe) rot laufen, bevor sie grün sind.
 
-### D-14 Begriff für das Entwurfsziel einer Marke (Vorschlag, Entscheidung offen)
+### D-14 Begriff und Grundsatz in der Ontologio (entschieden 2026-09-20)
 
-`Celo` ist vergeben (Ausgabeziel einer Projekcio, Art. XII), ein zweites „Ziel" daneben würde die Sprache unscharf machen. Vorschlag und Alternativen:
+**`Aspiro`** ist der Begriff für das Entwurfsziel einer Marke; Feld `aspekto.json#/aspiroj`. `Celo` bleibt das Ausgabeziel einer Projekcio (Art. XII), die beiden Wörter stehen nebeneinander ohne Überschneidung. Erwogen und verworfen: `Intenco` (verwechselbar mit den `intents` eines Skemo), `Promeso` (wertender Ton in einer Prüfmeldung), `Strebo` (im Deutschen sperrig).
 
-| Vorschlag | Bedeutung | prefLabel de / en | Feld | Bewertung |
-|---|---|---|---|---|
-| **`Aspiro`** (Empfehlung) | etwas, das man sich selbst vornimmt | Entwurfsziel / brand aspiration | `aspekto.json#/aspiroj` | eigener Wortstamm, keine Kollision, kurz, im Deutschen und Englischen sofort verständlich; „verfehltes Entwurfsziel" liest sich natürlich |
-| `Intenco` | Absicht, Vorhaben | Absicht / intention | `#/intencoj` | näher an „Zweck" als an „messbare Latte"; verwechselbar mit der Absicht eines Ero (`intents` im Skemo) |
-| `Promeso` | Versprechen | Versprechen / promise | `#/promesoj` | schönes Bild („die Marke verspricht sich selbst etwas"), aber wertender Ton in einer Prüfmeldung |
-| `Strebo` | Streben | Streben / striving | `#/streboj` | korrekt, im Deutschen sperrig |
+| Eintrag | Schema | Was daraus folgt |
+|---|---|---|
+| `Aspiro` | `inScheme: terminologio` | gehört in die Terminologie-Tabelle der Constitution (v1.7, D-11); der Drift-Test aus Spec 002 prüft Tabelle und Ontologio gegeneinander |
+| `FluidaMarko` | neues Schema `principoj` | Grundsatz, noch nicht in der Constitution; der Drift-Test bleibt auf `terminologio` beschränkt |
 
-Der Plan schreibt durchgehend **Aspiro**; fällt die Entscheidung anders, ist es eine Umbenennung an vier Stellen (Ontologio, Aspekto-Schema, Prüfmeldung, Vitrino). Eintrag in der Ontologio unter `inScheme: modelo` – wie `Regulo` und `KontrastParo`, also **ohne** Änderung der Terminologie-Tabelle der Constitution.
+**`FluidaMarko`** kommt jetzt in die Ontologio, mit der Definition des Maintainers:
 
-Offene Frage an den Maintainer: Soll **Fluida Marko** als Grundsatz ebenfalls in die Ontologio (und später in die Constitution), oder bleibt es die Begründung in dieser Spec?
+> Die Marke folgt dem Kontext, nicht dem Anbieter; Reguloj erzwingen Zugänglichkeit und Struktur, Aspiroj sind Sache der Marke.
+
+Dazu `related` auf `Aspekto`, `Regulo` und `Aspiro` sowie Verweise auf [`docs/vojmapo.md`](../../docs/vojmapo.md) und [`docs/vizio.md`](../../docs/vizio.md). Weil `inScheme` heute nur `terminologio` und `modelo` kennt, bekommt das Ontologio-Schema ein drittes Schema **`principoj`** („Grundsätze, die das System leiten; sie stehen in einer Spec, bis die Constitution sie aufnimmt"). In die Constitution kommt der Grundsatz erst mit seiner eigenen Spec (Fluida Marko / Etoso), nicht mit v1.7.
+
+Der Begriff `Aspiro` schreibt sich im Feld `term` als ein Wort (Schema-Muster `^[A-Z][A-Za-z]*$`); `FluidaMarko` ebenso, mit `prefLabel.eo` „Fluida Marko".
+
 
 ---
 
@@ -306,7 +314,7 @@ Keine neuen. Genutzt werden `colorjs.io` (bereits für OKLCH und APCA), Playwrig
 | **Achter CI-Schritt** | Gerenderte Prüfungen brauchen Browser und einen vorherigen Build. | CI-Zeit steigt um etwa eine Minute; Phase 3 hat gezeigt, dass schwere Läufe außerhalb des Test-Gates gehören. |
 | **Werte in `core.json` statt im Aspekto-Paket** | komuna ist die Referenz; ihre Werte liegen historisch im Kern-Vortaro. | Unverändert aus Phase 1; die Trennung „Kern = Rollen, Aspekto = Werte" bleibt ein Thema für Phase 7. |
 | **ciferecigo außerhalb** | Privates Paket, eigener Ort. | Nachlauf nach dem Merge, wie Spec 003 T028; bis dahin ist ciferecigo gegen die neuen Reguloj ungeprüft. |
-| **Neuer Begriff `Aspiro`** | Ohne zweite Ebene würde jede Entscheidung von komuna zur Pflicht für jede Marke. | Ein Begriff mehr in Ontologio und Schema; die Terminologie-Tabelle der Constitution bleibt unberührt (D-14). Fällt die Namenswahl anders aus, ist es eine Umbenennung an vier Stellen. |
+| **Neuer Begriff `Aspiro`, neuer Grundsatz `FluidaMarko`** | Ohne zweite Ebene würde jede Entscheidung von komuna zur Pflicht für jede Marke. | `Aspiro` steht in der Terminologie-Tabelle (v1.7) und damit im Drift-Test; `FluidaMarko` braucht ein drittes Ontologio-Schema `principoj` und wartet auf seine eigene Spec, bevor die Constitution ihn führt (D-14). |
 | **Aspiro-Verstoß ist ein Fehler** | Ein selbst gesetztes Ziel soll nicht unbemerkt verloren gehen. | Wer ein Ziel aufgibt, muss es sichtbar in `aspekto.json` streichen oder senken; das ist gewollt, aber es kann sich bei fremden Marken wie eine Vorschrift anfühlen. Bei Bedarf auf `warning` umstellbar. |
 | **57 eigene Dunkelwerte** | komuna bestimmt seinen Dunkelmodus selbst (G9). | Mehr Werte zu pflegen; die generische Umsetzung bleibt für alle anderen Marken der bequeme Weg. |
 | **Etappe B offen** | Import und Bericht laufen in einer eigenen Sitzung. | Die vier Schnittstellen aus D-01 sind festgelegt; ändert Etappe B daran etwas, ist es ein Jugxo. |

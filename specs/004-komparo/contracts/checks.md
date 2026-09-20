@@ -52,4 +52,9 @@ error aspiro-missed  aspekto/komuna#/aspiroj/3
 
 Die Zusammenfassung zählt getrennt, etwa: `2 Regulo-Verstöße, 3 verfehlte Entwurfsziele`; die Stats tragen `reguloViolations` und `aspiroMisses`.
 
-**Fluida Marko, als Test festgehalten:** Eine Fixture-Aspekto mit reinem Weiß als Fläche und einer Größenskala im konstanten Verhältnis 1,5 besteht **jede Regulo** und bekommt kein `aspiro-missed`, weil sie keine Aspiroj erklärt. Regeln erzwingen Zugänglichkeit und Struktur, nie Geschmack.
+**Fluida Marko, als Test festgehalten:**
+
+1. Eine Fixture-Aspekto mit reinem Weiß als Fläche und einer Größenskala im konstanten Verhältnis 1,5 besteht **jede Regulo**.
+2. Eine Palette mit gleichmäßigen, aber kleinen Schritten (ΔL 0,025 überall) besteht `palette-even`: sie ist regelmäßig, nur feiner abgestuft als komuna.
+
+Beide erklären keine Aspiroj und bekommen deshalb kein `aspiro-missed`. Regeln erzwingen Zugänglichkeit und Struktur, nie Geschmack.
