@@ -457,3 +457,18 @@ describe("Spec 003 documentation (F4: the npm org)", () => {
     expect(packages).toContain("make-kit");
   });
 });
+
+describe("Spec 003 documentation: the Ero tools (T025)", () => {
+  const mcp = section(read("README.md"), "MCP server");
+
+  it("the README names the four Ero tools and counts eighteen", () => {
+    for (const tool of ["list_eroj", "get_ero", "suggest_ero", "check_usage"]) {
+      expect(mcp, tool).toContain(`\`${tool}\``);
+    }
+    expect(mcp).toContain("18 tools");
+  });
+
+  it("the README points at the Phase-3 tool contract", () => {
+    expect(mcp).toContain("specs/003-butono-durchstich/contracts/mcp-tools.md");
+  });
+});

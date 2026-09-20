@@ -57,7 +57,7 @@ describe("describeModelo (D-14)", () => {
   it("names Dimensioj, Aspektoj and counts per group in the sentence", () => {
     const { sentence, tokensByGroup } = describeModelo(project);
     expect(sentence).toMatch(
-      /^Fundamento v0\.1\.0: six Dimensioj \(aspekto, viewport, density, color-scheme, contrast, motion\), two Aspektoj \(`komuna`: reference, MIT, Geist; `ekzemplo`: external, MIT, Ekzempla Grotesk\), \d+ tokens in \w+ types \(.+\), \w+ rules with reasons \(\w+ automatic\), \w+ Jugxoj, one Ero\. Ask explain why a value is what it is\.$/,
+      /^Fundamento v0\.1\.0: six Dimensioj \(aspekto, viewport, density, color-scheme, contrast, motion\), two Aspektoj \(`komuna`: reference, MIT, Geist; `ekzemplo`: external, MIT, Ekzempla Grotesk\), \d+ tokens in \w+ types \(.+\), \w+ rules with reasons \(\w+ automatic\), \w+ Jugxoj, one Ero \(`butono`\)\. Ask explain why a value is what it is\.$/,
     );
     expect(sentence).toContain(`color ${tokensByGroup.color}`);
     expect(sentence).toContain(`typography ${tokensByGroup.typography}`);

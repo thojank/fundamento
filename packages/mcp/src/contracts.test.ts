@@ -16,6 +16,14 @@ const ISSUE = {
   suggestion: "Use light or dark.",
 };
 
+const REGULO_REF = {
+  id: "reg_01M2XMV80DG7JCJDTZGE66MGHW",
+  name: "one-primary-per-container",
+  statement: "A container holds at most one butono with variant=primary.",
+  kialo: "One primary action makes the next step obvious.",
+  checkability: "automatic",
+};
+
 const SUMMARY = {
   name: "komuna",
   reference: true,
@@ -291,10 +299,125 @@ const EXAMPLES: Record<string, { input: unknown; output: unknown; badInput: unkn
     },
     badInput: { name: "color.text.default", celo: "sketch" },
   },
+  list_eroj: {
+    input: {},
+    output: {
+      eroj: [
+        {
+          id: "ero_01M2XN0PHDBBD6MNFN75DB9NQ5",
+          name: "butono",
+          description: "A button: starts an action.",
+          variants: ["primary", "secondary", "tertiary"],
+          props: ["variant", "label"],
+        },
+      ],
+    },
+    badInput: { name: "butono" },
+  },
+  get_ero: {
+    input: { name: "butono" },
+    output: {
+      ero: {
+        id: "ero_01M2XN0PHDBBD6MNFN75DB9NQ5",
+        name: "butono",
+        description: "A button: starts an action.",
+      },
+      skemo: {
+        id: "ske_01M2XN0PWS92GP7VFHW161EH0D",
+        props: [{ name: "variant", kind: "enum", values: ["primary"], default: "primary" }],
+        states: ["rest"],
+        slots: [{ name: "label", default: true, text: true }],
+        parts: { surface: { fill: { by: ["variant"] } } },
+        bindings: [
+          {
+            part: "surface",
+            property: "fill",
+            when: { variant: "primary" },
+            token: "color.action.primary.rest",
+          },
+        ],
+        a11y: { role: "button", name: ["slot:label"], states: {}, keys: ["Enter"] },
+        intents: [
+          {
+            intent: "destructive",
+            keywords: { de: ["löschen"] },
+            props: { variant: "primary", tone: "danger" },
+          },
+        ],
+      },
+      reguloj: [REGULO_REF],
+      examples: [
+        {
+          jugxo: "jug_01M2XN0Q7YGPVYC981A9D98PSZ",
+          decision: "approved",
+          kialo: "One primary action per dialog.",
+          regulo: REGULO_REF,
+          instances: [
+            {
+              ero: "butono",
+              props: { variant: "primary" },
+              container: "dialog",
+              label: "Speichern",
+            },
+          ],
+        },
+      ],
+      projekcioj: {
+        webComponent: {
+          tag: "fm-butono",
+          attributes: { variant: ["primary"], label: "string" },
+          slots: ["label"],
+        },
+        react: {
+          package: "@fundamento/eroj/react",
+          component: "Butono",
+          props: { variant: ["primary"], label: "string" },
+        },
+        figma: {
+          componentSet: "butono",
+          properties: { variant: ["primary"], label: "text" },
+          pluginData: { namespace: "fundamento", key: "ero", value: "butono" },
+        },
+        css: { files: ["fundamento.css"], attributes: ["data-fm-aspekto"] },
+        tailwind: { classes: { "surface.fill": ["bg-fm-action-primary-rest"] } },
+        makeKit: { package: "@fundamento/make-kit-komuna" },
+      },
+    },
+    badInput: {},
+  },
+  suggest_ero: {
+    input: { intent: "Löschen" },
+    output: {
+      intent: "Löschen",
+      matched: { intent: "destructive", keyword: "löschen", lingvo: "de" },
+      suggestion: { ero: "butono", props: { variant: "primary", tone: "danger" } },
+      kialo: REGULO_REF.kialo,
+      regulo: REGULO_REF,
+    },
+    badInput: { intent: "Löschen", lingvo: "fr" },
+  },
+  check_usage: {
+    input: { instances: [{ ero: "butono", props: { variant: "primary" }, label: "Speichern" }] },
+    output: {
+      instances: 2,
+      valid: false,
+      violations: [
+        {
+          instance: [0, 1],
+          issue: {
+            ...ISSUE,
+            rule: "one-primary-per-container",
+            regulo: { id: REGULO_REF.id, name: REGULO_REF.name, kialo: REGULO_REF.kialo },
+          },
+        },
+      ],
+    },
+    badInput: { instances: [] },
+  },
 };
 
 describe("tool schemas (contracts/mcp-tools.md)", () => {
-  it("defines the ten tools of FR-16 and the Gvidanto tools of Spec 002, snake_case, verb first", () => {
+  it("defines the ten tools of FR-16 and the Gvidanto tools of Spec 002 and 003, snake_case, verb first", () => {
     expect([...TOOL_NAMES]).toEqual([
       "describe",
       "list_dimensioj",
@@ -310,6 +433,10 @@ describe("tool schemas (contracts/mcp-tools.md)", () => {
       "explain",
       "explain_regulo",
       "describe_term",
+      "list_eroj",
+      "get_ero",
+      "suggest_ero",
+      "check_usage",
     ]);
   });
 

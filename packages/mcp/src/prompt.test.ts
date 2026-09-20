@@ -25,9 +25,17 @@ describe("prompt gvidanto", () => {
       "explain_regulo",
       "describe_term",
       "validate",
+      "list_eroj",
+      "get_ero",
+      "suggest_ero",
+      "check_usage",
     ]) {
       expect(text, tool).toContain(`\`${tool}\``);
     }
+  });
+
+  it("asks for check_usage before a handover (Spec 003 T025)", () => {
+    expect(text).toMatch(/Before you hand over a design or code, call `check_usage`/);
   });
 
   it("is listed and served by the server", async () => {

@@ -70,3 +70,16 @@ Registry-Stände per `npm view` am 2026-09-19; Doku-Stände am selben Tag abgeru
 - **Trusted Publishing und pnpm.** `pnpm publish` führt den Publish nicht selbst aus, sondern reicht ihn an die npm-CLI weiter; deshalb hängt die OIDC-Unterstützung an der npm-Version, nicht an pnpm. npm verlangt für Trusted Publishing **npm ≥ 11.5.1** und Node ≥ 22.14. pnpm 10 arbeitet damit; für pnpm 11 ist ein Rückschritt gemeldet, weshalb Projekte bewusst auf 10.x bleiben. Quellen: https://docs.npmjs.com/trusted-publishers/ · https://github.blog/changelog/2025-07-31-npm-trusted-publishing-with-oidc-is-generally-available/ · https://github.com/pnpm/pnpm/issues/9812 · https://github.com/pnpm/pnpm/issues/11513
 - **Stand im Repo:** Node 24 (`.nvmrc`) bringt npm 11.19.0 mit, pnpm ist auf 10.34.5 festgelegt. Der Release-Workflow prüft die npm-Version vor dem Publish und bricht unter 11.5.1 ab, statt still auf einen Token zurückzufallen.
 - **Provenance** verlangt, dass `repository.url` des Pakets auf dasselbe Repository zeigt, aus dem der Workflow läuft; die Make Kits tragen deshalb `repository` mit `directory`, `homepage` und `license`.
+
+## 8. Leistungs-Baseline Phase 3 (2026-09-20, T026)
+
+Gemessen auf dem Entwicklungsrechner (Node 24.21, Apple Silicon), jeweils allein über `pnpm perf`, Rohwerte auf stderr. Budget 100 ms je Aufruf bzw. 10 s für die Generierung, unter `CI=true` Faktor 3 (Jugxo jug_01M2W3K1YPP05F4XF86J71RGTK).
+
+| Messung | min | Median | max | Budget |
+|---|---|---|---|---|
+| `get_ero` (100 Aufrufe, über stdio) | 0,4 ms | 0,6 ms | 2,3 ms | 100 ms |
+| `suggest_ero` (100 Aufrufe) | 0,1 ms | 0,1 ms | 1,2 ms | 100 ms |
+| `check_usage` (100 Aufrufe, je drei Instanzen) | 0,1 ms | 0,2 ms | 1,1 ms | 100 ms |
+| `fm projekcioj build` (drei Läufe, alle Celoj inklusive Kit-Bundles) | 596 ms | 602 ms | 775 ms | 10 s |
+
+Nichts davon musste optimiert werden. Die Mutationsprüfung (Budget auf 0,001 ms bzw. 1 ms gesetzt) lässt alle vier Zeitmessungen fehlschlagen, die Schranken greifen also.

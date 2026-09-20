@@ -45,6 +45,11 @@ describe("S7 with ekzemplo (AK-06)", () => {
       explain: { token: "color.text.default" },
       explain_regulo: { name: "text-hierarchy" },
       describe_term: { term: "Aspekto" },
+      get_ero: { name: "butono" },
+      suggest_ero: { intent: "Löschen" },
+      check_usage: {
+        instances: [{ ero: "butono", props: { variant: "primary" }, label: "Speichern" }],
+      },
     };
     for (const name of TOOL_NAMES) {
       const result = await call(client, name, inputs[name] ?? {});

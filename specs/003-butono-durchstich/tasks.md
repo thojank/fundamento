@@ -130,21 +130,26 @@ A mutation check (one changed value must make the test fail) replaces the red ru
 
 ## Stage 7 – Gvidanto
 
-- [ ] **T022 `list_eroj` and `get_ero`** (FR-13, D-16, contracts/mcp-tools §1)
+- [x] **T022 `list_eroj` and `get_ero`** (FR-13, D-16, contracts/mcp-tools §1)
   - Red: `gvidanto/eroj.test.ts`: the output shape of the contract; Reguloj via `appliesTo.eroj` with kialo; examples from the Jugxoj; every projection name equals what the generators emit (read from the build, not restated); `ero-unknown` with nearest names; tool schema contract tests.
   - Green: `gvidanto/eroj.ts`, tools and schemas.
-- [ ] **T023 [P] `suggest_ero`** (FR-13, D-16 §2)
+  - Done notes: the Gvidanto is published and `@fundamento/projekcioj` is private, so `get_ero` cannot call the generators; it derives the projection surface from the Skemo and the NomReguloj (`modelo/src/gvidanto/eroj.ts`), and `projekcioj/src/get-ero.test.ts` compares that answer with the built projections — the element, the kit's `index.d.ts` (through the T021 reader), `plan.json`, the CSS files and attributes, the Tailwind theme keys and the kit manifest. That cross-check is a verification test: it was written after the answer existed and passed once its own assertion on `plan.json` was corrected, so it drove nothing. The driver was `gvidanto/eroj.test.ts`, red because the module did not exist. `tailwind.classes` names one utility per part property (fill → `bg-`, label colour → `text-`, border colour → `border-`, radius → `rounded-`, gap → `gap-`, inline padding → `px-`); a part whose token has no Tailwind namespace has no class. Writing the cross-check made the namespace lint fail on the test file itself (an unverifiable `customElements.define`), which is the FR-14 negative check working as intended; the test now spells the call at run time.
+- [x] **T023 [P] `suggest_ero`** (FR-13, D-16 §2)
   - Red: „Löschen", „delete", „Entfernen!" → `destructive` → `primary` + `danger` with the Regulo; „Abbrechen" → `tertiary`; „Speichern" → `primary`; unknown → `intent-unknown` with the known intents in `allowed`; deterministic (same input, same output).
   - Green: tool and schemas.
-- [ ] **T024 [P] `check_usage`** (FR-13, D-16 §3)
+  - Done notes: `intentOf` gained an optional `lingvo`, so `suggest_ero` can be asked in one language; "delete" with `lingvo: "de"` is `intent-unknown`. The answer carries the kialo of the Regulo the intent names, quoted, not paraphrased.
+- [x] **T024 [P] `check_usage`** (FR-13, D-16 §3)
   - Red: the cases of T006 through the MCP tool, plus `mcp-input-invalid` with `allowed` for an unknown prop value; the output equals the usage evaluation.
   - Green: tool and schemas.
-- [ ] **T025 `describe`, prompt and the AK-09 dialog** (FR-14, AK-09)
+  - Done notes: the judgement is `evaluateUsage` unchanged; `check_usage` adds the input validation the contract asks for — an unknown prop or an unknown value is `mcp-input-invalid` with `allowed` (invalid input), an unknown Ero stays `ero-unknown` (a finding about the instance).
+- [x] **T025 `describe`, prompt and the AK-09 dialog** (FR-14, AK-09)
   - Red: `describe` counts Eroj and its sentence names them; every backticked tool in `prompts/gvidanto.md` is registered and the four new tools are named, with the sentence about `check_usage` before a handover; `packages/mcp/src/e2e/ak09-dialog.test.ts` with the three questions of contracts/mcp-tools against `core + aspekto-ekzemplo`, every value recomputed from the Skemo and `reguloj.json`; mutation check.
   - Green: prompt and `describe`; fixes only where the dialog finds a gap. README MCP section: 18 tools.
-- [ ] **T026 Performance** (plan: Technical Context)
+  - Done notes: red first for the sentence (`two Eroj (\`button\`, \`ligilo\`)`), for the prompt (the four tools and the handover sentence) and for the README (the four tools, "18 tools", the Phase-3 contract link). The AK-09 dialog test was green on its first run — the tools already answered correctly — so it is an acceptance test with a mutation check instead of a red run: mutating the answer path (the destructive intent's `tone` in `suggest_ero`, and one variant value dropped in the Figma surface of `get_ero`) failed two of the three questions; mutating the Skemo alone does not, because the test recomputes its expectation from the same file, which is what "recomputed, never restated" means. Three earlier sentence assertions (`describe-phase1`, `export/build`, `e2e/export`) were updated with the new wording, and the S7 sweep of Spec 002 now passes an input to the three tools that require one.
+- [x] **T026 Performance** (plan: Technical Context)
   - Red: `perf.test.ts`: 100 calls each of `get_ero`, `suggest_ero`, `check_usage` < 100 ms per call (factor 3 under `CI=true`), raw numbers logged; generation of all projections < 10 s. Mutation check for the timing assertions.
   - Green: optimise only if red; baseline into `research.md`.
+  - Done notes: the Ero tools are measured over stdio in `mcp/src/e2e/perf.test.ts`, the generation in the new `projekcioj/src/perf.test.ts` (own `pnpm perf` script, three runs). Nothing had to be optimised: `get_ero` max 2.3 ms, `suggest_ero` 1.2 ms, `check_usage` 1.1 ms, a full `fm projekcioj build` 596–775 ms. Mutation check: with the budgets set to 0.001 ms and 1 ms every timing assertion failed. Baseline in `research.md` §8.
 
 ## Stage 8 – Quickstart and docs
 

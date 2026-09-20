@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ciferecigo.com/fundamento/schema/mcp/list_eroj.input.json",
+  "title": "list_eroj input",
+  "description": "Every Ero of the served Modelo with its variants and its props. Takes no input.",
+  "type": "object",
+  "properties": {},
+  "additionalProperties": false
+}

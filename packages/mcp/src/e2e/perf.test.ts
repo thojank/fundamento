@@ -98,4 +98,55 @@ describe("performance (AK-07)", { timeout: 60_000 }, () => {
       expect(Math.max(...timings)).toBeLessThan(RESOLVE_BUDGET_MS);
     },
   );
+
+  // Spec 003 T026: the Ero tools under 100 ms per call. get_ero is the heaviest: Skemo, Reguloj,
+  // examples and every projection surface in one answer.
+  it.each([
+    ["get_ero", () => ({ name: "butono" })],
+    [
+      "suggest_ero",
+      (index: number) => ({ intent: ["Löschen", "Speichern", "Abbrechen"][index % 3] }),
+    ],
+    [
+      "check_usage",
+      (index: number) => ({
+        instances: [
+          {
+            ero: "butono",
+            props: { variant: "primary" },
+            container: `dialog-${index}`,
+            label: "Speichern",
+          },
+          {
+            ero: "butono",
+            props: { variant: "primary" },
+            container: `dialog-${index}`,
+            label: "Weiter",
+          },
+          {
+            ero: "butono",
+            props: { variant: "tertiary" },
+            container: `dialog-${index}`,
+            label: "Abbrechen",
+          },
+        ],
+      }),
+    ],
+  ])(
+    `answers 100 %s calls within ${RESOLVE_BUDGET_MS} ms each (Spec 003 T026)`,
+    async (tool, input) => {
+      const timings: number[] = [];
+      for (let index = 0; index < 100; index++) {
+        const started = performance.now();
+        const result = await client.callTool({ name: tool, arguments: input(index) as never });
+        timings.push(performance.now() - started);
+        expect(result.isError, tool).toBeFalsy();
+      }
+      const sorted = [...timings].sort((a, b) => a - b);
+      process.stderr.write(
+        `T026 ${tool} ms: min ${sorted[0]?.toFixed(1)}, median ${sorted[50]?.toFixed(1)}, max ${sorted[99]?.toFixed(1)}; raw ${timings.map((t) => t.toFixed(1)).join(" ")}\n`,
+      );
+      expect(Math.max(...timings)).toBeLessThan(RESOLVE_BUDGET_MS);
+    },
+  );
 });

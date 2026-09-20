@@ -75,12 +75,13 @@ Everything lives in one workspace; the npm org for published packages is
 
 - Tools: `describe`, `list_dimensioj`, `list_aspektoj`, `search_tokens`, `get_token`, `resolve`, `list_reguloj`, `list_jugxoj`, `validate`, `derive_name`. Every input and output has a JSON Schema (`packages/mcp/schema/`); errors carry the same issues as the checks, plus the allowed values.
 - Gvidanto tools (Spec 002): `check_contrast` (the contrast of any colour pair, grouped by result, with every combination listed), `explain` (why a token has its value: alias chain, the Reguloj with kialo and result, its KontrastParoj), `explain_regulo` (a Regulo, its threshold and its violations per Aspekto) and `describe_term` (a term of the Ontologio, also from English or German words).
-- Prompt: `gvidanto` tells a client agent how to answer: values only from tools, reasons with Regulo ID and kialo, check when unsure.
+- Ero tools (Spec 003): `list_eroj` (every component with its variants and props), `get_ero` (one component: Skemo, the Reguloj that judge it with their kialo, the recorded examples, and its names in every projection — element, React, Figma, CSS, Tailwind, Make Kit), `suggest_ero` ("Löschen" → `variant=primary`, `tone=danger`, with the Regulo behind it) and `check_usage` (instances of a design or of code against the Ero Reguloj). 18 tools in all.
+- Prompt: `gvidanto` tells a client agent how to answer: values only from tools, reasons with Regulo ID and kialo, check when unsure, and `check_usage` before a handover.
 - Resources: `fundamento://export/modelo.json`, `modelo.schema.json` and `rezolvoj.json`, the bytes of `fm modelo export`; `fundamento://ontologio.json`, the terminology as data, in every mode.
 - `--config <file>` serves a project with its Aspekto packages; `--export <dir>` serves an export as is.
 - `--http [--port <n>]` serves Streamable HTTP at `http://127.0.0.1:<port>/mcp` (default port 7300), loopback only, with a Host/Origin guard; `validate` refuses local paths there.
 
-The contracts are [`specs/001-vortaro-aspektoj-mcp/contracts/mcp-tools.md`](specs/001-vortaro-aspektoj-mcp/contracts/mcp-tools.md) and the Phase-2 delta [`specs/002-regularo-gvidanto/contracts/mcp-tools.md`](specs/002-regularo-gvidanto/contracts/mcp-tools.md).
+The contracts are [`specs/001-vortaro-aspektoj-mcp/contracts/mcp-tools.md`](specs/001-vortaro-aspektoj-mcp/contracts/mcp-tools.md) the Phase-2 delta [`specs/002-regularo-gvidanto/contracts/mcp-tools.md`](specs/002-regularo-gvidanto/contracts/mcp-tools.md) and the Phase-3 delta [`specs/003-butono-durchstich/contracts/mcp-tools.md`](specs/003-butono-durchstich/contracts/mcp-tools.md).
 
 ## Checks
 

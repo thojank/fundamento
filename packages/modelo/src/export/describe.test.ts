@@ -116,6 +116,20 @@ describe("describeModelo", () => {
       }),
     );
     expect(description.sentence).toContain("no Aspektoj");
-    expect(description.sentence).toMatch(/one Ero\. Ask explain why a value is what it is\.$/);
+    expect(description.sentence).toMatch(
+      /one Ero \(`button`\)\. Ask explain why a value is what it is\.$/,
+    );
+  });
+
+  it("names the Eroj it counts (Spec 003 T025)", () => {
+    const description = describeModelo(
+      modeloJson({
+        eroj: [
+          { id: "ero_1", name: "button", skemo: "ske_1", description: "A button." },
+          { id: "ero_2", name: "ligilo", skemo: "ske_2", description: "A link." },
+        ],
+      }),
+    );
+    expect(description.sentence).toContain("two Eroj (`button`, `ligilo`)");
   });
 });

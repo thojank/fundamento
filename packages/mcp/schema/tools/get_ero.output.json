@@ -1,0 +1,288 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ciferecigo.com/fundamento/schema/mcp/get_ero.output.json",
+  "title": "get_ero output",
+  "description": "One Ero as the Gvidanto states it (Spec 003 FR-13, contracts/mcp-tools §1). The projections are the surfaces the generators emit: element, React wrapper, Figma component set, CSS, Tailwind and Make Kit.",
+  "type": "object",
+  "properties": {
+    "ero": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/EroId"
+        },
+        "name": {
+          "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": ["id", "name", "description"],
+      "additionalProperties": false
+    },
+    "skemo": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/SkemoId"
+        },
+        "props": {
+          "type": "array",
+          "items": {
+            "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/SkemoProp"
+          }
+        },
+        "states": {
+          "type": "array",
+          "items": {
+            "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+          },
+          "minItems": 1
+        },
+        "slots": {
+          "type": "array",
+          "items": {
+            "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/SkemoSlot"
+          }
+        },
+        "parts": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/SkemoPart"
+          }
+        },
+        "bindings": {
+          "type": "array",
+          "items": {
+            "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/SkemoBinding"
+          }
+        },
+        "a11y": {
+          "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/SkemoA11y"
+        },
+        "intents": {
+          "type": "array",
+          "items": {
+            "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/SkemoIntent"
+          }
+        }
+      },
+      "required": ["id", "props", "states", "slots", "parts", "bindings", "a11y"],
+      "additionalProperties": false
+    },
+    "reguloj": {
+      "type": "array",
+      "items": {
+        "$ref": "https://ciferecigo.com/fundamento/schema/mcp/common.json#/$defs/ReguloRef"
+      }
+    },
+    "examples": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "jugxo": {
+            "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/JugxoId"
+          },
+          "decision": {
+            "enum": ["approved", "rejected", "deviation-recorded"]
+          },
+          "kialo": {
+            "type": "string",
+            "minLength": 1
+          },
+          "regulo": {
+            "$ref": "https://ciferecigo.com/fundamento/schema/mcp/common.json#/$defs/ReguloRef"
+          },
+          "instances": {
+            "type": "array",
+            "items": {
+              "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/EroInstance"
+            },
+            "minItems": 1
+          }
+        },
+        "required": ["jugxo", "decision", "kialo", "instances"],
+        "additionalProperties": false
+      }
+    },
+    "projekcioj": {
+      "type": "object",
+      "properties": {
+        "webComponent": {
+          "type": "object",
+          "properties": {
+            "tag": {
+              "type": "string",
+              "minLength": 1
+            },
+            "attributes": {
+              "type": "object",
+              "propertyNames": {
+                "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+              },
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+                    },
+                    "minItems": 1
+                  },
+                  {
+                    "enum": ["boolean", "string", "number"]
+                  }
+                ]
+              }
+            },
+            "slots": {
+              "type": "array",
+              "items": {
+                "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+              }
+            }
+          },
+          "required": ["tag", "attributes", "slots"],
+          "additionalProperties": false
+        },
+        "react": {
+          "type": "object",
+          "properties": {
+            "package": {
+              "type": "string",
+              "minLength": 1
+            },
+            "component": {
+              "type": "string",
+              "minLength": 1
+            },
+            "props": {
+              "type": "object",
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+                    },
+                    "minItems": 1
+                  },
+                  {
+                    "enum": ["boolean", "string", "number"]
+                  }
+                ]
+              }
+            }
+          },
+          "required": ["package", "component", "props"],
+          "additionalProperties": false
+        },
+        "figma": {
+          "type": "object",
+          "properties": {
+            "componentSet": {
+              "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+            },
+            "properties": {
+              "type": "object",
+              "propertyNames": {
+                "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+              },
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+                    },
+                    "minItems": 1
+                  },
+                  {
+                    "enum": ["boolean", "text"]
+                  }
+                ]
+              }
+            },
+            "pluginData": {
+              "type": "object",
+              "properties": {
+                "namespace": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "key": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "value": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": ["namespace", "key", "value"],
+              "additionalProperties": false
+            }
+          },
+          "required": ["componentSet", "properties", "pluginData"],
+          "additionalProperties": false
+        },
+        "css": {
+          "type": "object",
+          "properties": {
+            "files": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "attributes": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          },
+          "required": ["files", "attributes"],
+          "additionalProperties": false
+        },
+        "tailwind": {
+          "type": "object",
+          "properties": {
+            "classes": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          },
+          "required": ["classes"],
+          "additionalProperties": false
+        },
+        "makeKit": {
+          "type": "object",
+          "properties": {
+            "package": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": ["package"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["webComponent", "react", "figma", "css", "tailwind", "makeKit"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["ero", "skemo", "reguloj", "examples", "projekcioj"],
+  "additionalProperties": false
+}

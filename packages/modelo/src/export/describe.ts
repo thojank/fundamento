@@ -114,7 +114,8 @@ export function describeModelo(modelo: ModeloJson): ModeloDescription {
     reguloWithKialoCount === reguloCount
       ? `${counted(reguloCount, "rule", "rules")} with reasons ${automaticPart}`
       : `${counted(reguloCount, "rule", "rules")}, ${countWord(reguloWithKialoCount)} with reasons ${automaticPart}`;
-  const eroPart = counted(eroCount, "Ero", "Eroj");
+  const eroNames = modelo.eroj.map((ero) => `\`${ero.name}\``).join(", ");
+  const eroPart = `${counted(eroCount, "Ero", "Eroj")}${eroNames === "" ? "" : ` (${eroNames})`}`;
 
   return {
     version,

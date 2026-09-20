@@ -51,10 +51,12 @@ export function wordsOf(text: string): string[] {
 export function intentOf(
   skemo: Skemo,
   text: string,
+  options: { lingvo?: string } = {},
 ): { intent: NonNullable<Skemo["intents"]>[number]; keyword: string; lingvo: string } | undefined {
   const words = new Set(wordsOf(text));
   for (const intent of skemo.intents ?? []) {
     for (const [lingvo, keywords] of Object.entries(intent.keywords)) {
+      if (options.lingvo !== undefined && lingvo !== options.lingvo) continue;
       const keyword = keywords.find((candidate) =>
         words.has(candidate.normalize("NFC").toLowerCase()),
       );

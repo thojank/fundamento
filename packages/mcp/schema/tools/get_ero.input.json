@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ciferecigo.com/fundamento/schema/mcp/get_ero.input.json",
+  "title": "get_ero input",
+  "description": "One Ero with its Skemo, the Reguloj that judge it, the recorded examples and its projections in every Celo. Name the Ero by name or by ID.",
+  "type": "object",
+  "properties": {
+    "name": {
+      "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+    },
+    "id": {
+      "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/EroId"
+    }
+  },
+  "oneOf": [
+    {
+      "properties": {
+        "name": true
+      },
+      "required": ["name"]
+    },
+    {
+      "properties": {
+        "id": true
+      },
+      "required": ["id"]
+    }
+  ],
+  "additionalProperties": false
+}
