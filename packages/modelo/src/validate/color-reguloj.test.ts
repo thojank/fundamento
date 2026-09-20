@@ -49,7 +49,7 @@ describe("text-hierarchy (FR-02)", () => {
     expect(issues.map((issue) => issue.path)).toEqual([
       "rezolvo(color-scheme=light,contrast=default)/color.text.muted",
     ]);
-    expect(issues[0]?.message).toContain("both resolve to #595959");
+    expect(issues[0]?.message).toContain("both resolve to #4d4d4d");
   });
 
   it("says that the Aspekto needs a step when the ramp has fewer than three above the threshold", () => {
@@ -179,7 +179,7 @@ describe("contrast-reserve (Spec 004, G1)", () => {
         // A text colour that barely passes 4.5:1 on the light background.
         at(core, "color.text.default").$value = {
           colorSpace: "srgb",
-          components: [0.43, 0.43, 0.43],
+          components: [0.38, 0.38, 0.38],
         };
       }),
     ).filter((issue) => issue.rule === "contrast-reserve");

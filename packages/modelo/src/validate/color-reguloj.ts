@@ -20,6 +20,7 @@ import type { ColorValue } from "../generated/modelo-schema.js";
 import { isJsonObject } from "../load/guards.js";
 import { wcag2Reserve } from "../metrikoj/contrast.js";
 import type { CombinationChecker, CombinationContext } from "./combination-reguloj.js";
+import { SPEC004_CHECKERS } from "./spec004-reguloj.js";
 
 const BACKDROP = "color.background.default";
 const SURFACES = [
@@ -335,6 +336,7 @@ export const contrastReserve: CombinationChecker = (context) => {
 
 /** Per-combination checkers by Regulo name (plan D-04); `explain` uses the same table. */
 export const COMBINATION_CHECKERS: Readonly<Record<string, CombinationChecker>> = {
+  ...SPEC004_CHECKERS,
   "contrast-reserve": contrastReserve,
   "surface-distinct": surfaceDistinct,
   "surface-order": surfaceOrder,
