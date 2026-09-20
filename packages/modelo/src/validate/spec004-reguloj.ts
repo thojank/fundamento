@@ -4,13 +4,14 @@
 // ramp and which ratio it picks is its own business (Fluida Marko). Measured on the resolved
 // values of one combination, so every Aspekto and every Dimensio value is covered. Pure.
 
-import { oklchLightness, readDtcgColor } from "../checks/alirebleco/color.js";
+import { readDtcgColor } from "../checks/alirebleco/color.js";
 import { formatIssuePath } from "../contracts/issues.js";
 import { isJsonObject } from "../load/guards.js";
 import {
   oklchLAlign,
   oklchLStep,
   oklchLStepConsistency,
+  palettePikoj,
   type RampStep,
   srgbGamut,
   typeRhythm,
@@ -18,11 +19,8 @@ import {
 } from "../metrikoj/index.js";
 import type { CombinationChecker, CombinationContext } from "./combination-reguloj.js";
 
-const PALETTE = /^color\.palette\.([a-z0-9-]+)\.(\d+)$/;
 const SIZE_SCALE = /^font\.size\.scale\.(\d+)$/;
 const TYPOGRAPHY = /^typography\./;
-/** A step this close to white or black is an anchor, not a step of a perceptual progression. */
-const ANCHOR = 0.001;
 const EPSILON = 1e-9;
 
 const percent = (value: number): string => `${(Math.trunc(value * 1000) / 10).toFixed(1)} %`;
@@ -32,35 +30,13 @@ function dimensionOf(value: unknown): number | undefined {
   return isJsonObject(value) && typeof value.value === "number" ? value.value : undefined;
 }
 
-/** The opaque, non-anchor steps of every palette ramp of this combination. */
-function rampsOf(context: CombinationContext): Map<string, RampStep[]> {
-  const ramps = new Map<string, RampStep[]>();
-  const translucent = new Set<string>();
-  for (const [name, token] of Object.entries(context.resolution.tokens)) {
-    const match = PALETTE.exec(name);
-    if (match?.[1] === undefined || match[2] === undefined) continue;
-    const color = readDtcgColor(token.value);
-    if (color === undefined) continue;
-    // An alpha ramp (transparent black, for shadows and scrims) has no lightness progression.
-    if ((color.alpha ?? 1) < 1) {
-      translucent.add(match[1]);
-      continue;
-    }
-    const lightness = oklchLightness(color);
-    if (lightness >= 1 - ANCHOR || lightness <= ANCHOR) continue;
-    ramps.set(match[1], [...(ramps.get(match[1]) ?? []), { step: Number(match[2]), value: color }]);
-  }
-  for (const ramp of translucent) ramps.delete(ramp);
-  return ramps;
-}
-
 const stepName = (ramp: string, step: number): string => `color.palette.${ramp}.${step}`;
 
 /** `palette-even`: strictly monotone, and the inner steps stay near the median of the ramp. */
 export const paletteEven: CombinationChecker = (context) => {
   const max = context.regulo.sojlo?.max;
   if (max === undefined) return [];
-  return [...rampsOf(context)].flatMap(([ramp, steps]) => {
+  return [...palettePikoj(context.resolution.tokens)].flatMap(([ramp, steps]) => {
     if (steps.length < 3) return [];
     const reversed = oklchLStep(steps).find((step) => step.delta <= EPSILON);
     if (reversed !== undefined) {
@@ -90,7 +66,7 @@ export const paletteEven: CombinationChecker = (context) => {
 export const paletteAligned: CombinationChecker = (context) => {
   const max = context.regulo.sojlo?.max;
   if (max === undefined) return [];
-  const ramps = rampsOf(context);
+  const ramps = palettePikoj(context.resolution.tokens);
   if (ramps.size < 2) return [];
   return oklchLAlign(Object.fromEntries(ramps))
     .filter((entry) => entry.spread > max + EPSILON)

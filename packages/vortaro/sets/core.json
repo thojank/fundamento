@@ -1336,6 +1336,25 @@
             }
           }
         },
+        "8": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0,
+              0,
+              0
+            ],
+            "alpha": 0.08,
+            "hex": "#000000"
+          },
+          "$description": "Black at 8 % opacity: the hover overlay of an action that has no surface of its own.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2ZTAJSS6M6EB14W69S71P4H",
+              "role": "palette"
+            }
+          }
+        },
         "10": {
           "$value": {
             "colorSpace": "srgb",
@@ -1351,6 +1370,25 @@
           "$extensions": {
             "com.ciferecigo.fundamento": {
               "id": "tok_01M2W9400ZA1K81R0W23SG0XVF",
+              "role": "palette"
+            }
+          }
+        },
+        "12": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0,
+              0,
+              0
+            ],
+            "alpha": 0.12,
+            "hex": "#000000"
+          },
+          "$description": "Black at 12 % opacity: the pressed overlay of an action that has no surface of its own.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2ZTAJSS6M6EB14W69S71P4J",
               "role": "palette"
             }
           }
@@ -1389,6 +1427,47 @@
           "$extensions": {
             "com.ciferecigo.fundamento": {
               "id": "tok_01M2W9400ZA1K81R0W23SG0XVG",
+              "role": "palette"
+            }
+          }
+        }
+      },
+      "tint": {
+        "$description": "Transparent white: overlays for a dark surface, the counterpart of shade.",
+        "8": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              1,
+              1,
+              1
+            ],
+            "alpha": 0.08,
+            "hex": "#ffffff"
+          },
+          "$description": "White at 8 % opacity: the hover overlay on a dark surface.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2ZTAJSS6M6EB14W69S71P4K",
+              "role": "palette"
+            }
+          }
+        },
+        "12": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              1,
+              1,
+              1
+            ],
+            "alpha": 0.12,
+            "hex": "#ffffff"
+          },
+          "$description": "White at 12 % opacity: the pressed overlay on a dark surface.",
+          "$extensions": {
+            "com.ciferecigo.fundamento": {
+              "id": "tok_01M2ZTAJSS6M6EB14W69S71P4M",
               "role": "palette"
             }
           }
@@ -1710,7 +1789,7 @@
       },
       "tertiary": {
         "rest": {
-          "$value": "{color.palette.neutral.0}",
+          "$value": "{color.palette.shade.0}",
           "$description": "Tertiary action: fill at rest.",
           "$extensions": {
             "com.ciferecigo.fundamento": {
@@ -1720,7 +1799,7 @@
           }
         },
         "hover": {
-          "$value": "{color.palette.neutral.100}",
+          "$value": "{color.palette.shade.8}",
           "$description": "Tertiary action: fill on hover.",
           "$extensions": {
             "com.ciferecigo.fundamento": {
@@ -1730,7 +1809,7 @@
           }
         },
         "pressed": {
-          "$value": "{color.palette.neutral.200}",
+          "$value": "{color.palette.shade.12}",
           "$description": "Tertiary action: fill while pressed.",
           "$extensions": {
             "com.ciferecigo.fundamento": {
@@ -1740,7 +1819,7 @@
           }
         },
         "selected": {
-          "$value": "{color.palette.accent.100}",
+          "$value": "{color.palette.accent.200}",
           "$description": "Tertiary action: fill when selected.",
           "$extensions": {
             "com.ciferecigo.fundamento": {
@@ -1750,7 +1829,7 @@
           }
         },
         "disabled": {
-          "$value": "{color.palette.neutral.0}",
+          "$value": "{color.palette.shade.0}",
           "$description": "Tertiary action: fill when disabled.",
           "$extensions": {
             "com.ciferecigo.fundamento": {

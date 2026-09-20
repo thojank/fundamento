@@ -1632,6 +1632,10 @@
         "background": {
           "$ref": "#/$defs/TokenName"
         },
+        "backdrop": {
+          "description": "The surface a translucent background lies on. An overlay has no colour of its own; with a backdrop the check composites background over it and measures the result (Spec 004). The backdrop itself must be opaque.",
+          "$ref": "#/$defs/TokenName"
+        },
         "kategorio": {
           "$ref": "#/$defs/KontrastKategorio"
         },

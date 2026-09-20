@@ -2,7 +2,7 @@
 // Regulo or an Aspiro compares them with its own bound. All of them read OKLCH lightness through
 // `oklchLightness` of Spec 002, so there is one colour mathematics in the repository (Art. XI).
 
-import { oklchLightness } from "../checks/alirebleco/color.js";
+import { oklchLightness, readDtcgColor } from "../checks/alirebleco/color.js";
 import type { ColorValue } from "../generated/modelo-schema.js";
 
 /** One step of a ramp: its number (`color.palette.accent.500` → 500) and its value. */
@@ -130,4 +130,40 @@ export function oklchLAlign(ramps: Readonly<Record<string, readonly RampStep[]>>
     .filter(([, values]) => values.length > 1)
     .map(([step, values]) => ({ step, spread: Math.max(...values) - Math.min(...values) }))
     .sort((a, b) => a.step - b.step);
+}
+
+const PALETTE_STEP = /^color\.palette\.([a-z0-9-]+)\.(\d+)$/;
+/** A step this close to white or black is an anchor, not a step of a perceptual progression. */
+const ANCHOR = 0.001;
+
+/**
+ * The opaque, non-anchor steps of every palette ramp among resolved tokens (Spec 004). Alpha
+ * ramps (shade, tint) drop out whole: overlays have no lightness progression. The Regulo
+ * `palette-even` and the Vitrino read the same ramps, so one number cannot contradict the other.
+ */
+export function palettePikoj(
+  tokens: Readonly<Record<string, { value: unknown }>>,
+): Map<string, RampStep[]> {
+  const ramps = new Map<string, RampStep[]>();
+  const translucent = new Set<string>();
+  for (const [name, token] of Object.entries(tokens)) {
+    const match = PALETTE_STEP.exec(name);
+    if (match?.[1] === undefined || match[2] === undefined) continue;
+    const color = readDtcgColor(token.value);
+    if (color === undefined) continue;
+    if ((color.alpha ?? 1) < 1) {
+      translucent.add(match[1]);
+      continue;
+    }
+    const lightness = oklchLightness(color);
+    if (lightness >= 1 - ANCHOR || lightness <= ANCHOR) continue;
+    ramps.set(match[1], [...(ramps.get(match[1]) ?? []), { step: Number(match[2]), value: color }]);
+  }
+  for (const ramp of translucent) ramps.delete(ramp);
+  for (const [name, steps] of ramps)
+    ramps.set(
+      name,
+      [...steps].sort((a, b) => a.step - b.step),
+    );
+  return ramps;
 }

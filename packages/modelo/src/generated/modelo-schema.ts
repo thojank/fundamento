@@ -170,6 +170,10 @@ export type KontrastParo = {
   name: Name;
   foreground: TokenName;
   background: TokenName;
+  /**
+   * The surface a translucent background lies on. An overlay has no colour of its own; with a backdrop the check composites background over it and measures the result (Spec 004). The backdrop itself must be opaque.
+   */
+  backdrop?: string;
   kategorio: KontrastKategorio;
   /**
    * Alternative pair (aŭ, 'or'): the KontrastParo holds when the main pair or this pair meets the threshold of the same kategorio (Spec 002, FR-07). Not allowed for text categories; requires a kialo.

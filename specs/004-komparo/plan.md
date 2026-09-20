@@ -191,6 +191,60 @@ Die Zahlen rechnet der Build, nicht der Browser (sonst gäbe es eine zweite Kont
 - **Gegenüberstellung:** Der Vergleichsschalter stellt zwei Aspektoj nebeneinander (zwei Spalten, jede mit eigenem `data-fm-aspekto` an ihrem Wurzelelement, damit dieselbe Seite beide Marken zeigt). Je Kriterium (die Metriken aus D-02, die WCAG-Bestehensquote, die kleinste Reserve und die Abdeckung je Dimensio) stehen beide Werte und die Kennzeichnung **vorn / gleich / hinten**. Aspiroj stehen dabei nie im Vergleich: Sie gehören einer Marke, ein Vergleich daraus wäre Geschmack gegen Geschmack. Kein Gesamturteil (das gehört zu FR-17 und damit zu Etappe B; die Vitrino hält sich schon jetzt daran).
 - In Etappe A sind die beiden Seiten **komuna ↔ ekzemplo**. Die Auswahl ist nicht fest verdrahtet: sie listet die Aspektoj des geladenen Modelo, damit Etappe B nur ihr Paket hinzufügen muss.
 
+### D-07b Flächen ohne eigene Fläche: die tertiäre Aktion (Durchsicht 2026-09-20)
+
+Eine tertiäre Aktion übernimmt die Fläche, auf der sie liegt: `color.action.tertiary.rest` und
+`.disabled` sind vollständig durchsichtig (`color.palette.shade.0`), `hover` und `pressed` sind
+**Auflagen** (`shade` 8 % / 12 % im Hellen, `tint` 8 % / 12 % im Dunkeln), `selected` bleibt eine
+echte Fläche, weil eine dauerhafte Auswahl keine Auflage ist. Vorher lag die Ruhe im Hellen auf
+reinem Weiß — heller als jede Seitenfläche — und im Dunkeln auf der Stufe von `sunken`.
+
+Damit eine Auflage messbar bleibt, nennt eine KontrastParo mit **`backdrop`** die Fläche, auf der
+gemessen wird (hier `color.background.default`); der Prüfer setzt den Wert darüber zusammen, statt
+das Paar abzulehnen. Ohne `backdrop` bleibt eine durchsichtige Fläche ein Fehler, ein
+durchsichtiger `backdrop` ebenfalls. Dieselbe Rechnung schrieb `state-distinct` schon vor; jetzt
+steht sie allen Prüfungen zur Verfügung (Jugxo `jug_01M2ZTV1WRHXQ7C31W7FQ4YZP7`).
+
+Die Grenzen sind eng und stammen aus den Regeln, nicht aus dem Geschmack: `state-distinct`
+verlangt mindestens 0,05 Helligkeitsabstand zur Ruhe, die Kontrastreserve begrenzt nach oben. Im
+Hellen bleibt das Band zwischen 8 % und 12 % Deckung (Reserve 25 % und 13 %), im Dunkeln liegt es
+bei denselben Werten (36 % und 19 %).
+
+**Reichweite des Ziels „keine reinen Endpunkte als Fläche" (Frage des Maintainers).** Das Aspiro
+`oklch-l-extreme` von komuna gilt ab jetzt für **jede undurchsichtige Fläche**: Seitenflächen
+(`color.background.**`), Aktionsflächen (`color.action.*.rest|hover|pressed|selected|disabled`)
+und Statusflächen (`color.status.*.basic|weak|subtle`). Nicht dafür gelten Textfarben, Ränder und
+Ringe — sie liegen auf einer Fläche, sie sind keine. Durchsichtige Werte bleiben außen vor: eine
+Auflage hat keine eigene Fläche und deshalb keinen Abstand zu einem Anker. Für andere Marken
+ändert sich nichts; es ist ein Ziel von komuna, keine Regulo (Fluida Marko).
+
+### D-08c Die Kriterien der Gegenüberstellung (FR-08, Durchsicht 2026-09-20)
+
+Die Gegenüberstellung zeigt jede Kennzahl, die die Vitrino ohnehin misst, je mit **vorn / gleich /
+hinten**: kleinste Kontrast-Reserve, Bestehensquote der KontrastParoj, Regelmäßigkeit der Paletten,
+Abstand zum Anker, Regelmäßigkeit der Typo-Skala, beratende APCA-Hinweise und die Abdeckung **je
+Dimensio-Wert** (eine Zeile für `color-scheme=dark`, `contrast=high`, `density=compact` und so
+weiter). Jedes Kriterium trägt seine Richtung: weniger APCA-Hinweise ist vorn, mehr Abstand zum
+Anker ist vorn. Zwei Werte, die gleich angezeigt werden, gelten als gleich — was der Leser sieht,
+ist das Urteil. Die Regelmäßigkeit liest dieselben Rampen wie die Regulo `palette-even`
+(`palettePikoj`: undurchsichtig, ohne Ankerstufen), damit eine Zahl der anderen nicht widerspricht.
+
+### D-08b Der Vergleichsstand `mezuroj-main.json` (T010)
+
+`specs/004-komparo/mezuroj-main.json` ist **erzeugt**, nicht geschrieben: 22 800 Zeilen, je Paar und
+Kombination das WCAG-Verhältnis und der APCA-Wert des Standes, gegen den die Vitrino vergleicht. Er
+entsteht mit
+
+```sh
+git switch main            # oder der Stand, gegen den verglichen werden soll
+pnpm install && pnpm build
+pnpm fm modelo mezuroj --out specs/004-komparo/mezuroj-main.json
+```
+
+und ist über zwei Läufe byte-gleich (Prüfung in `bazo.test.ts`). In `.gitattributes` steht er als
+`linguist-generated=true`, damit ein Diff lesbar bleibt; dasselbe gilt für die Bildschirmfotos unter
+`specs/004-komparo/bildoj/` und für `ids.lock.json`.
+
 ### D-09 Prüfung der Vitrino (FR-09, AK-02)
 
 | Eigenschaft | Prüfung | Ort |

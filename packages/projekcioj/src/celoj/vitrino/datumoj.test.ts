@@ -139,6 +139,21 @@ describe("the sections of FR-06", () => {
     expect(reserve?.amplekso).toBe("alle Tokens");
   });
 
+  // A translucent action value is an overlay: showing it as #000000 with lightness 0.000 read like
+  // pure black (maintainer's review of 2026-09-20).
+  it("shows a translucent action value as an overlay, with its opacity", () => {
+    const rows = datumoj.roloj["komuna|light|default"]?.agoj ?? [];
+    const rest = rows.find((row) => row.token === "color.action.tertiary.rest");
+    expect(rest?.hex).toBe("durchsichtig");
+    expect(rest?.l).toBeUndefined();
+    const hover = rows.find((row) => row.token === "color.action.tertiary.hover");
+    expect(hover?.hex).toBe("#000000, 8 % Deckung");
+    expect(hover?.l).toBeUndefined();
+    const opaque = rows.find((row) => row.token === "color.action.primary.rest");
+    expect(opaque?.hex).toMatch(/^#[0-9a-f]{6}$/);
+    expect(opaque?.l).toBeGreaterThan(0);
+  });
+
   it("carries the coverage per Dimensio value", () => {
     const coverage = datumoj.kovrado.komuna ?? [];
     const dark = coverage.find(

@@ -29,9 +29,19 @@
       "metriko": "oklch-l-extreme",
       "min": 0.02,
       "appliesTo": {
-        "tokens": ["color.background.**"]
+        "tokens": [
+          "color.background.**",
+          "color.action.*.rest",
+          "color.action.*.hover",
+          "color.action.*.pressed",
+          "color.action.*.selected",
+          "color.action.*.disabled",
+          "color.status.*.basic",
+          "color.status.*.weak",
+          "color.status.*.subtle"
+        ]
       },
-      "kialo": "Reines Weiß und reines Schwarz lassen keinen Platz mehr nach oben oder unten; komuna hält jede Fläche einen Schritt von den Ankern entfernt, damit der Dunkelmodus ein Entwurf bleibt und kein Spiegelbild."
+      "kialo": "Reines Weiß und reines Schwarz lassen keinen Platz mehr nach oben oder unten; komuna hält jede Fläche einen Schritt von den Ankern entfernt — die Seitenflächen ebenso wie die Flächen von Aktionen und Status, damit der Dunkelmodus ein Entwurf bleibt und kein Spiegelbild. Durchsichtige Werte bleiben außen vor: eine Auflage hat keine eigene Fläche."
     },
     {
       "metriko": "type-scale-ratio",

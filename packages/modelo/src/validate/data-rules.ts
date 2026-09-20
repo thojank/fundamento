@@ -16,6 +16,8 @@ export const ASPEKTO_DIMENSIO = "aspekto";
 export interface CheckableKontrastParo {
   name: string;
   background: string;
+  /** The opaque surface a translucent background is composited over before measuring (Spec 004). */
+  backdrop?: string;
   /** `<file>#/kontrastParoj/<i>/background`. */
   backgroundPath: string;
 }
@@ -373,10 +375,12 @@ function kontrastParoIssues(
             `Set ${field} to a color token.`,
           ),
         );
-      } else if (field === "background") {
+      } else if (field === "background" && holder === entry) {
+        const backdrop = entry.backdrop;
         checkable.push({
           name,
           background: token.name,
+          ...(typeof backdrop === "string" ? { backdrop } : {}),
           backgroundPath: formatIssuePath({ file: document.file, pointer }),
         });
       }

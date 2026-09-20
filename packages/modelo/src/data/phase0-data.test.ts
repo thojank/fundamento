@@ -371,14 +371,13 @@ describe("Phase 0 repo Modelo: KontrastParoj (FR-16)", () => {
     return wcag2;
   }
 
+  /** The colour of a resolved value. Translucent values keep their alpha for compositing. */
   function toColor(value: unknown): Color {
-    const { colorSpace, components, alpha } = value as {
+    const { colorSpace, components } = value as {
       colorSpace: string;
       components: number[];
-      alpha?: number;
     };
     expect(colorSpace).toBe("srgb");
-    expect(alpha ?? 1).toBe(1);
     return new Color("srgb", components as [number, number, number]);
   }
 
@@ -408,7 +407,29 @@ describe("Phase 0 repo Modelo: KontrastParoj (FR-16)", () => {
       const thresholds = wcag2Thresholds(modelo, rezolvo.assignment.contrast ?? "");
       for (const pair of modelo.kontrastParoj) {
         const fg = toColor(resolvedToken(rezolvo, pair.foreground).value);
-        const bg = toColor(resolvedToken(rezolvo, pair.background).value);
+        const raw = resolvedToken(rezolvo, pair.background).value as {
+          components: [number, number, number];
+          alpha?: number;
+        };
+        // An overlay is measured on the surface the pair names (Spec 004), as the checks do.
+        const alpha = raw.alpha ?? 1;
+        const backdrop =
+          alpha < 1 && pair.backdrop !== undefined
+            ? toColor(resolvedToken(rezolvo, pair.backdrop).value)
+            : undefined;
+        const bg =
+          backdrop === undefined
+            ? toColor(raw)
+            : new Color(
+                "srgb",
+                toColor(raw)
+                  .to("srgb")
+                  .coords.map(
+                    (channel, index) =>
+                      (channel ?? 0) * alpha +
+                      (backdrop.to("srgb").coords[index] ?? 0) * (1 - alpha),
+                  ) as [number, number, number],
+              );
         const ratio = bg.contrast(fg, "WCAG21");
         const where = `${pair.name} @ ${formatCombination(modelo, assignment)}`;
         expect(ratio, where).toBeGreaterThanOrEqual(thresholds[pair.kategorio]);

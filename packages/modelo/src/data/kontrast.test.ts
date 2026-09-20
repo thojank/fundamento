@@ -57,10 +57,28 @@ describe("AK-02: komuna text pairs reach AAA (7:1) under contrast=high", () => {
         const colour = (name: string) => {
           const value = outcome.rezolvo.tokens[name]?.value as {
             components: [number, number, number];
+            alpha?: number;
           };
-          return new Color("srgb", value.components);
+          return { color: new Color("srgb", value.components), alpha: value.alpha ?? 1 };
         };
-        const ratio = colour(pair.background).contrast(colour(pair.foreground), "WCAG21");
+        // An overlay is measured on the surface the pair names (Spec 004), as the checks do.
+        const foreground = colour(pair.foreground).color;
+        const raw = colour(pair.background);
+        const backdrop = pair.backdrop === undefined ? undefined : colour(pair.backdrop);
+        const background =
+          raw.alpha < 1 && backdrop !== undefined
+            ? new Color(
+                "srgb",
+                raw.color
+                  .to("srgb")
+                  .coords.map(
+                    (channel, index) =>
+                      (channel ?? 0) * raw.alpha +
+                      (backdrop.color.to("srgb").coords[index] ?? 0) * (1 - raw.alpha),
+                  ) as [number, number, number],
+              )
+            : raw.color;
+        const ratio = background.contrast(foreground, "WCAG21");
         minimum = Math.min(minimum, ratio);
         expect(ratio, `${pair.name} @ ${JSON.stringify(assignment)}`).toBeGreaterThanOrEqual(7);
       }

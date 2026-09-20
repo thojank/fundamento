@@ -87,19 +87,19 @@
       },
       "tertiary": {
         "rest": {
-          "$value": "{color.palette.neutral.975}"
-        },
-        "hover": {
-          "$value": "{color.palette.neutral.900}"
-        },
-        "pressed": {
-          "$value": "{color.palette.neutral.800}"
-        },
-        "selected": {
-          "$value": "{color.palette.accent.900}"
+          "$value": "{color.palette.shade.0}"
         },
         "disabled": {
-          "$value": "{color.palette.neutral.975}"
+          "$value": "{color.palette.shade.0}"
+        },
+        "hover": {
+          "$value": "{color.palette.tint.8}"
+        },
+        "pressed": {
+          "$value": "{color.palette.tint.12}"
+        },
+        "selected": {
+          "$value": "{color.palette.accent.800}"
         },
         "text": {
           "$value": "{color.palette.accent.300}"

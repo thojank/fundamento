@@ -86,6 +86,33 @@ Etappe A umfasst FR-01 bis FR-09, FR-19 und den vorbereitenden Teil von FR-15. *
   - Fertig wenn: der Lauf außerhalb des Test-Gates steht und in der CI unter zwei Minuten bleibt; Mutationsprüfung für axe (ein entfernter Tabellenkopf lässt die Prüfung fehlschlagen).
   - Done-Notiz: Roter Lauf zuerst (sechs Fehlschläge, darunter `docs.test.ts`: `expect(ci).toContain("Check: Vitrino")`), dann Skript, CI-Schritt und README-Zeile. Der Lauf braucht lokal **15,6 s** für zwölf Prüfungen. **Befund der Mutationsprüfung:** Die verlangte Mutation – jeder Spaltenkopf ohne Text – ließ alle vier axe-Läufe grün; axe-core hat keine Regel für eine leere Kopfzelle. Die Prüfung hat darum einen eigenen Strukturtest bekommen („every table names itself and its columns": jede Tabelle mit Beschriftung, jede Kopfzelle mit Text), der die Mutation fängt (eine Meldung je leerer Kopfzelle). Dass axe selbst greift, ist mit einer zweiten Mutation belegt: ohne `lang` am `<html>` meldet axe `html-has-lang` und die Prüfung schlägt fehl. **Last im Test-Gate:** Die neuen Vitrino-Tests bauen das Modelo mehrfach; im ersten vollständigen `pnpm check` liefen zwei MCP-Tests in ihre 30-s-Grenze. `bazo.test.ts` nimmt den Messstand jetzt einmal je Datei statt viermal (ein `beforeAll` statt vier CLI-Läufen); `pnpm test` allein ist grün (12/12 in mcp, 109 in modelo, 15 in projekcioj), und Die CI hat dann gezeigt, dass das nicht reicht: `bazo.test.ts` brauchte auf dem Runner **105,9 s** (vier vollständige Bauten) und ließ `rules-resolve.test.ts` in `mcp` in seine 30-s-Grenze laufen. Der Test steht deshalb jetzt außerhalb des parallelen Gates und läuft als erster Teil von `pnpm check:vitrino` (`pnpm --filter @fundamento/projekcioj run check:bazo`, eigene Vitest-Konfiguration), wie schon `src/perf.test.ts` aus demselben Grund. Der Schritt „Check: Vitrino" dauert damit lokal 24 s für vier plus zwölf Prüfungen. Das allein reichte nicht: im nächsten CI-Lauf lief derselbe MCP-Test wieder in seine Grenze, weil die Etappe A jeden `validate` teurer macht (sieben neue Reguloj über alle Tokens und Kombinationen) und `gvidanto-tools` 63,9 s sowie `eroj-tools` 60,2 s für je sieben Tests brauchten. Die MCP-Tests bekommen darum den in Phase 3 festgehaltenen Faktor 3 unter `CI=true` (Jugxo `jug_01M2W3K1YPP05F4XF86J71RGTK`, 30 s → 90 s); ein einzelnes `fm modelo validate` dauert weiterhin 1,1 s, die Grenze kauft also Zeit für die Last, nicht für die Arbeit. Für eine Budgetänderung gibt es keinen roten Lauf; sie steht hier statt in einem Test.
 
+### Durchsicht T007–T012 (Maintainer, 2026-09-20)
+
+- **Tertiäre Aktion.** Befund bestätigt und behoben: `rest` und `disabled` sind durchsichtig
+  (`shade.0`), `hover` und `pressed` sind Auflagen (`shade` 8 % / 12 % hell, neue `tint`-Rampe im
+  Dunkeln), `selected` bleibt eine Fläche (`accent.200` hell, `accent.800` dunkel). Dafür bekam die
+  KontrastParo das Feld `backdrop`: eine durchsichtige Fläche wird über der genannten Fläche
+  zusammengesetzt, statt das Paar abzulehnen — in `validate`, `check:alirebleco`, `check_contrast`,
+  der Regulo `contrast-reserve` und den Aspiroj, eine Rechnung für alle. Rote Läufe zuerst
+  (`colour.test.ts`: „rest ist in jeder Kombination durchsichtig"; `index.test.ts`: „misst die
+  Auflage über der genannten Fläche"). Festgehalten als Jugxo `jug_01M2ZTV1WRHXQ7C31W7FQ4YZP7`,
+  im Plan als D-07b. **Reichweite des Ziels:** komunas `oklch-l-extreme` gilt jetzt für jede
+  undurchsichtige Fläche (Seiten-, Aktions- und Statusflächen), nicht für Text, Rand oder Ring;
+  durchsichtige Werte bleiben außen vor.
+- **Gegenüberstellung.** Statt drei jetzt 13 Kriterien, je mit Richtung (D-08c). Zwei Fehler dabei
+  gefunden: die Regelmäßigkeit zählte die Auflagen-Rampen mit (100 % statt 25 %) — sie liest jetzt
+  über `palettePikoj` dieselben Rampen wie die Regulo `palette-even` —, und der Abstand zum Anker
+  zeigte „−0.000".
+- **Bildschirmfotos.** Kopf mit Schaltern, Paletten, Kontrastmatrix, Regularo und Abdeckung kommen
+  dazu; alle sieben liegen unter `specs/004-komparo/bildoj/`.
+- **Erzeugte Dateien.** `.gitattributes` markiert `mezuroj-main.json`, die Bilder und
+  `ids.lock.json` als `linguist-generated`; der Befehl für den Vergleichsstand steht als D-08b im
+  Plan.
+- **Folgearbeiten aus der Änderung:** die Fixture `invalid/aspekto-incomplete` und die Marke
+  `ekzemplo` haben die vier neuen Palettenstufen bekommen (sonst wären sie unvollständig); zwei
+  Datentests, die Paare selbst nachrechnen (`kontrast.test.ts`, `phase0-data.test.ts`), setzen die
+  Auflage jetzt genauso zusammen wie die Prüfungen.
+
 ## Etappe 5 – Clean Room
 
 - [ ] **T013 Fingerprintquellen mit Herkunft** (FR-15 vorbereitend, AK-06 Teil, D-10, contracts/checks §1)

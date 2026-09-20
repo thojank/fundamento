@@ -5,7 +5,7 @@
 // that declares it. A brand without aspiroj is completely valid; a brand that gives one up removes
 // it from its aspekto.json, where the decision is visible. Pure.
 
-import { readDtcgColor } from "../checks/alirebleco/color.js";
+import { alphaOf, onBackdrop, readDtcgColor } from "../checks/alirebleco/color.js";
 import { kontrastSojlojOf } from "../checks/alirebleco/evaluate.js";
 import { measureBranch } from "../checks/alirebleco/measure.js";
 import { WCAG2_METRIC } from "../checks/alirebleco/metrics.js";
@@ -112,10 +112,15 @@ function measure(modelo: Modelo, aspekto: string, aspiro: AspektoAspiro): Measur
         const sojloj = kontrastSojlojOf(modelo, assignment);
         for (const pair of modelo.kontrastParoj) {
           const branches = [pair, ...(pair.aux === undefined ? [] : [pair.aux])];
+          const backdrop =
+            pair.backdrop === undefined ? undefined : readDtcgColor(tokens[pair.backdrop]?.value);
           const reserves = branches.flatMap((branch) => {
             const foreground = readDtcgColor(tokens[branch.foreground]?.value);
-            const background = readDtcgColor(tokens[branch.background]?.value);
-            if (foreground === undefined || background === undefined) return [];
+            const raw = readDtcgColor(tokens[branch.background]?.value);
+            if (foreground === undefined || raw === undefined) return [];
+            // An overlay is measured on the surface the pair names (Spec 004).
+            const background = branch === pair ? onBackdrop(raw, backdrop) : raw;
+            if (alphaOf(background) < 1) return [];
             const measurement = measureBranch(
               { foreground: branch.foreground, background: branch.background },
               foreground,
@@ -137,7 +142,9 @@ function measure(modelo: Modelo, aspekto: string, aspiro: AspektoAspiro): Measur
         for (const [name, token] of Object.entries(tokens)) {
           if (!inScope(name, aspiro)) continue;
           const color = readDtcgColor(token.value);
-          if (color !== undefined) {
+          // A translucent value is an overlay, not a surface: it has no lightness of its own
+          // until it lies on one (Spec 004).
+          if (color !== undefined && alphaOf(color) === 1) {
             measured.push({ value: oklchLExtreme(color), at: name, format: fmt3 });
           }
         }

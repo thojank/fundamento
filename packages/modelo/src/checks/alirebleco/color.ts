@@ -115,3 +115,14 @@ export function oklchLightness(color: ColorValue, backdrop?: ColorValue): number
     backdrop !== undefined && alphaOf(color) < 1 ? compositeOver(color, backdrop) : color;
   return Number(toColorjs(seen).to("oklch").coords[0] ?? 0);
 }
+
+/**
+ * The colour a translucent background shows on the surface its KontrastParo names (Spec 004): an
+ * overlay has no colour of its own. Opaque colours and a missing or translucent backdrop are
+ * returned unchanged — the caller then reports why the pair cannot be measured.
+ */
+export function onBackdrop(background: ColorValue, backdrop: ColorValue | undefined): ColorValue {
+  if (alphaOf(background) >= 1 || backdrop === undefined || alphaOf(backdrop) < 1)
+    return background;
+  return compositeOver(background, backdrop);
+}

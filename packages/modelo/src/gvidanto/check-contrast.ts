@@ -4,7 +4,7 @@
 // Results are grouped by identical result, each group with the complete list of its
 // combinations. Pure.
 
-import { alphaOf, readDtcgColor } from "../checks/alirebleco/color.js";
+import { alphaOf, onBackdrop, readDtcgColor } from "../checks/alirebleco/color.js";
 import { DEFAULT_METRIC_BINDINGS, kontrastSojlojOf } from "../checks/alirebleco/evaluate.js";
 import {
   type BranchMeasurement,
@@ -140,9 +140,12 @@ export function checkContrast(modelo: Modelo, input: CheckContrastInput): CheckC
   const main =
     pair === undefined ? input : { foreground: pair.foreground, background: pair.background };
   const aux = pair?.aux;
+  // A translucent fill is measured on the surface the pair names (Spec 004).
+  const backdropName = typeof pair?.backdrop === "string" ? pair.backdrop : undefined;
   const wanted = [
     main.foreground,
     main.background,
+    ...(backdropName === undefined ? [] : [backdropName]),
     ...(aux === undefined ? [] : [aux.foreground, aux.background]),
   ];
   const metrics = DEFAULT_METRIC_BINDINGS.map((binding) => binding.metric);
@@ -156,13 +159,16 @@ export function checkContrast(modelo: Modelo, input: CheckContrastInput): CheckC
     const combination = formatCombination(modelo, complete);
     const sojloj = kontrastSojlojOf(modelo, complete);
     const colorOf = (name: string) => readDtcgColor(resolution.tokens[name]?.value);
+    const backdrop = backdropName === undefined ? undefined : colorOf(backdropName);
     const branch = (names: {
       foreground: string;
       background: string;
     }): BranchMeasurement | undefined => {
       const fg = colorOf(names.foreground);
-      const bg = colorOf(names.background);
-      if (fg === undefined || bg === undefined || alphaOf(bg) < 1) return undefined;
+      const raw = colorOf(names.background);
+      if (fg === undefined || raw === undefined) return undefined;
+      const bg = names.background === main.background ? onBackdrop(raw, backdrop) : raw;
+      if (alphaOf(bg) < 1) return undefined;
       return measureBranch(names, fg, bg, kategorio, sojloj, metrics);
     };
     const mainMeasured = branch(main);

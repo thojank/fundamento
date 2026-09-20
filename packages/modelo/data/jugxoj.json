@@ -241,6 +241,16 @@
       "kialo": "type-rhythm vergleicht nur innerhalb einer Rollenfamilie (display, headline, body, label). Ein Label bei 14 px ist absichtlich enger gesetzt als Fließtext bei 16 px; über Familien hinweg misst die Regel eine Entscheidung der Marke statt ihres Rhythmus und meldete im Repo vier Scheinbefunde. Befund aus T004.",
       "date": "2026-09-20",
       "context": "Spec 004, Etappe A, T004; bestätigt vom Maintainer im Zwischenbericht zu T006."
+    },
+    {
+      "id": "jug_01M2ZTV1WRHXQ7C31W7FQ4YZP7",
+      "ref": {
+        "regulo": "reg_01M2VEEE5280TGESDHQQ14EA33"
+      },
+      "decision": "approved",
+      "kialo": "Eine tertiäre Aktion hat keine eigene Fläche: ihre Ruhe- und Deaktiviert-Werte sind vollständig durchsichtig (color.palette.shade.0), Hover und Pressed sind Auflagen (shade 8 % / 12 % im Hellen, tint 8 % / 12 % im Dunkeln). Vorher lag sie im Hellen auf reinem Weiß und damit heller als jede Seitenfläche, im Dunkeln auf der Stufe von sunken. Damit eine Auflage messbar bleibt, nennt eine KontrastParo mit `backdrop` die Fläche, auf der gemessen wird (hier color.background.default): Der Prüfer setzt den Wert darüber zusammen, statt das Paar abzulehnen — dieselbe Rechnung, die state-distinct schon vorschrieb. Ohne `backdrop` bleibt eine durchsichtige Fläche ein Fehler, und ein durchsichtiger backdrop ebenfalls. Gemessene Folge: Reserve 25 % (Hover) und 13 % (Pressed) im Hellen, 36 % und 19 % im Dunkeln, überall über komunas Ziel von 10 %. Die Grenzen sind eng: state-distinct verlangt mindestens 0,05 Helligkeitsabstand zur Ruhe, die Reserve begrenzt nach oben — im Hellen bleibt das Band zwischen 8 % und 12 % Deckung. `selected` bleibt eine echte Fläche (accent.200 hell, accent.800 dunkel), weil eine dauerhafte Auswahl keine Auflage ist.",
+      "date": "2026-09-20",
+      "context": "Spec 004, Etappe A; Befund des Maintainers bei der Durchsicht der Vitrino (T007–T012). Zugleich die Antwort auf seine Frage nach der Reichweite: komunas Aspiro „keine reinen Endpunkte als Fläche\" gilt ab jetzt für jede undurchsichtige Fläche — Seitenflächen, Aktionsflächen und Statusflächen —, nicht nur für color.background.**. Durchsichtige Werte bleiben außen vor."
     }
   ]
 }

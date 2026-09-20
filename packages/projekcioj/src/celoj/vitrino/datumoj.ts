@@ -14,9 +14,11 @@ import {
   oklchLExtreme,
   oklchLightness,
   oklchLStepConsistency,
+  palettePikoj,
   readDtcgColor,
   regularoEnforcementIssues,
   STATE_KEY,
+  typeScaleConsistency,
   type ValidationIssue,
 } from "@fundamento/modelo";
 import type { CeloInput } from "../../build.js";
@@ -29,11 +31,20 @@ const SURFACES = [
   "color.background.raised",
 ];
 const TEXT = ["color.text.default", "color.text.subtle", "color.text.muted"];
+/** Opaque roles that are a surface: the page, an action's fill, a status fill (Spec 004). */
+const SURFACE_PATTERNS = [
+  /^color\.background\./,
+  /^color\.action\.[a-z-]+\.(rest|hover|pressed|selected|disabled)$/,
+  /^color\.status\.[a-z-]+\.(basic|weak|subtle)$/,
+];
+const TYPE_SCALE = /^font\.size\.scale\.(\d+)$/;
 
 export interface VitrinoRolo {
   token: string;
+  /** The value as text: a hex, or `durchsichtig` / `#rrggbb, N % Deckung` for an overlay. */
   hex: string;
-  l: number;
+  /** OKLCH lightness; absent for an overlay, which has none until it lies on a surface. */
+  l?: number;
   /** Lightness distance to the previous row, where the roles form a ladder. */
   alNaskbo?: number;
   /** Distance to the nearer anchor (pure white, pure black). */
@@ -118,6 +129,23 @@ export interface VitrinoBazo {
 const round = (value: number, digits = 3): number =>
   Number(Math.round(Number(`${value}e${digits}`)) + `e-${digits}`);
 
+const plainHex = (color: { hex?: string; components: readonly (number | "none")[] }): string => {
+  if (typeof color.hex === "string") return color.hex;
+  const channel = (component: number | "none") =>
+    Math.round((component === "none" ? 0 : component) * 255)
+      .toString(16)
+      .padStart(2, "0");
+  return `#${color.components.map(channel).join("")}`;
+};
+
+/** An overlay is named as one: a fully transparent value has no colour, a translucent one a cover. */
+const overlayText = (value: unknown): string | undefined => {
+  const color = readDtcgColor(value);
+  const alpha = color?.alpha ?? 1;
+  if (color === undefined || alpha >= 1) return undefined;
+  return alpha === 0 ? "durchsichtig" : `${plainHex(color)}, ${Math.round(alpha * 100)} % Deckung`;
+};
+
 const hexOf = (value: unknown): string => {
   const color = readDtcgColor(value);
   if (color === undefined) return "";
@@ -154,14 +182,20 @@ function roleRows(
     if (entry === undefined) continue;
     const color = readDtcgColor(entry.value);
     if (color === undefined) continue;
+    const overlay = overlayText(entry.value);
+    if (overlay !== undefined) {
+      // An overlay has no lightness of its own until it lies on a surface (Spec 004).
+      rows.push({ token, hex: overlay });
+      continue;
+    }
     const l = round(oklchLightness(color));
-    const previous = rows.at(-1);
+    const previousL = rows.at(-1)?.l;
     rows.push({
       token,
       hex: hexOf(entry.value),
       l,
-      ...(ladder && previous !== undefined && index > 0
-        ? { alNaskbo: round(Math.abs(l - previous.l)) }
+      ...(ladder && previousL !== undefined && index > 0
+        ? { alNaskbo: round(Math.abs(l - previousL)) }
         : {}),
       ...(ladder ? { alEkstremo: round(oklchLExtreme(color)) } : {}),
     });
@@ -275,6 +309,11 @@ export function vitrinoDatumoj({ input, bazo }: VitrinoDatumojInput): VitrinoDat
 
   const paletroj: VitrinoDatumoj["paletroj"] = {};
   const roloj: VitrinoDatumoj["roloj"] = {};
+  // Per Aspekto, for the comparison (FR-08): the worst ramp regularity, the smallest distance an
+  // opaque surface keeps from an anchor, and the regularity of the type scale.
+  const rampoj = new Map<string, number>();
+  const ankroj = new Map<string, number>();
+  const tipoj = new Map<string, number>();
   for (const rezolvo of input.rezolvoj.rezolvoj) {
     const assignment = rezolvo.assignment as Record<string, string>;
     const tokens = rezolvo.tokens as Record<string, { value: unknown }>;
@@ -298,6 +337,9 @@ export function vitrinoDatumoj({ input, bazo }: VitrinoDatumojInput): VitrinoDat
           },
         ]);
       }
+      for (const [, steps] of palettePikoj(tokens)) {
+        rampoj.set(aspekto, Math.max(rampoj.get(aspekto) ?? 0, oklchLStepConsistency(steps).worst));
+      }
       paletroj[aspekto] = [...ramps.entries()]
         .sort(([a], [b]) => (a < b ? -1 : 1))
         .map(([rampo, stupoj]) => {
@@ -314,6 +356,31 @@ export function vitrinoDatumoj({ input, bazo }: VitrinoDatumojInput): VitrinoDat
           };
         });
     }
+    for (const [name, token] of Object.entries(tokens)) {
+      if (!SURFACE_PATTERNS.some((pattern) => pattern.test(name))) continue;
+      const colour = readDtcgColor(token.value);
+      // An overlay has no surface of its own, so it keeps no distance from an anchor.
+      if (colour === undefined || (colour.alpha ?? 1) < 1) continue;
+      ankroj.set(
+        aspekto,
+        Math.min(ankroj.get(aspekto) ?? Number.POSITIVE_INFINITY, oklchLExtreme(colour)),
+      );
+    }
+    if (tipoj.get(aspekto) === undefined) {
+      const sizes = Object.entries(tokens)
+        .filter(([name]) => TYPE_SCALE.test(name))
+        .sort(([a], [b]) => Number(TYPE_SCALE.exec(a)?.[1]) - Number(TYPE_SCALE.exec(b)?.[1]))
+        .flatMap(([, token]) => {
+          const value = (token as { value: unknown }).value;
+          const size =
+            typeof value === "object" && value !== null && "value" in value
+              ? Number((value as { value: unknown }).value)
+              : Number.NaN;
+          return Number.isFinite(size) ? [size] : [];
+        });
+      if (sizes.length > 2) tipoj.set(aspekto, typeScaleConsistency(sizes).worst);
+    }
+
     const key = rolesKey(assignment);
     if (roloj[key] === undefined) {
       roloj[key] = {
@@ -328,6 +395,7 @@ export function vitrinoDatumoj({ input, bazo }: VitrinoDatumojInput): VitrinoDat
   const mezuroj: VitrinoDatumoj["mezuroj"] = {};
   let apcaNun = 0;
   let apcaKomunaj = 0;
+  const apcaPerAspekto = new Map<string, number>();
   const komunajKombinoj = new Set<string>();
   for (const measurement of evaluation.measurements ?? []) {
     const key = kombinoKey(modelo, measurement.combination);
@@ -339,6 +407,8 @@ export function vitrinoDatumoj({ input, bazo }: VitrinoDatumojInput): VitrinoDat
     const advisory =
       apca !== undefined && apca.threshold !== undefined && apca.passed === false ? 1 : 0;
     apcaNun += advisory;
+    const aspektoOfKey = key.slice(0, key.indexOf("|"));
+    apcaPerAspekto.set(aspektoOfKey, (apcaPerAspekto.get(aspektoOfKey) ?? 0) + advisory);
     if (bazo?.mezuroj[key] !== undefined) {
       apcaKomunaj += advisory;
       komunajKombinoj.add(key);
@@ -406,7 +476,17 @@ export function vitrinoDatumoj({ input, bazo }: VitrinoDatumojInput): VitrinoDat
     regularo: regularoOf(modelo, regularoEnforcementIssues(modelo)),
     aspiroj: aspirojOf(evaluateAspiroj(modelo)),
     kovrado,
-    komparo: komparoOf(aspektoj, mezuroj, kovrado, modelo),
+    komparo: komparoOf({
+      aspektoj,
+      mezuroj,
+      kovrado,
+      paletroj,
+      roloj,
+      apca: apcaPerAspekto,
+      tipoj,
+      rampoj,
+      ankroj,
+    }),
     butono: butonoMarkup(modelo.eroj),
     apcaHintoj: {
       nun: apcaNun,
@@ -423,73 +503,119 @@ export function vitrinoDatumoj({ input, bazo }: VitrinoDatumojInput): VitrinoDat
   };
 }
 
-/** Criterion by criterion, two Aspektoj side by side; no overall verdict (FR-17). */
-function komparoOf(
-  aspektoj: readonly string[],
-  mezuroj: VitrinoDatumoj["mezuroj"],
-  kovrado: VitrinoDatumoj["kovrado"],
-  modelo: Modelo,
-): VitrinoDatumoj["komparo"] {
+/**
+ * Criterion by criterion, two Aspektoj side by side; no overall verdict (FR-17). Every criterion
+ * says which direction is ahead: fewer advisory APCA findings is better, a larger distance to the
+ * anchor is better (maintainer's review of 2026-09-20).
+ */
+function komparoOf(input: {
+  aspektoj: readonly string[];
+  mezuroj: VitrinoDatumoj["mezuroj"];
+  kovrado: VitrinoDatumoj["kovrado"];
+  paletroj: VitrinoDatumoj["paletroj"];
+  roloj: VitrinoDatumoj["roloj"];
+  apca: ReadonlyMap<string, number>;
+  tipoj: ReadonlyMap<string, number>;
+  rampoj: ReadonlyMap<string, number>;
+  ankroj: ReadonlyMap<string, number>;
+}): VitrinoDatumoj["komparo"] {
+  const { aspektoj, mezuroj, kovrado, apca, tipoj, rampoj: rampWorst, ankroj: anchor } = input;
   const result: VitrinoDatumoj["komparo"] = {};
+  const rowsOf = (aspekto: string) =>
+    Object.entries(mezuroj).flatMap(([key, rows]) => (key.startsWith(`${aspekto}|`) ? rows : []));
   const minReserve = (aspekto: string): number => {
-    let worst = Number.POSITIVE_INFINITY;
-    for (const [key, rows] of Object.entries(mezuroj)) {
-      if (!key.startsWith(`${aspekto}|`)) continue;
-      for (const row of rows) if (row.rezervo !== undefined) worst = Math.min(worst, row.rezervo);
-    }
-    return worst === Number.POSITIVE_INFINITY ? 0 : worst;
+    const reserves = rowsOf(aspekto).flatMap((row) =>
+      row.rezervo === undefined ? [] : [row.rezervo],
+    );
+    return reserves.length === 0 ? 0 : Math.min(...reserves);
   };
   const passRate = (aspekto: string): number => {
-    let total = 0;
-    let passed = 0;
-    for (const [key, rows] of Object.entries(mezuroj)) {
-      if (!key.startsWith(`${aspekto}|`)) continue;
-      for (const row of rows) {
-        total += 1;
-        if (row.pasis) passed += 1;
-      }
-    }
-    return total === 0 ? 0 : passed / total;
+    const rows = rowsOf(aspekto);
+    return rows.length === 0 ? 0 : rows.filter((row) => row.pasis).length / rows.length;
   };
-  const darkCoverage = (aspekto: string): number =>
-    kovrado[aspekto]?.find((entry) => entry.dimensio === "color-scheme" && entry.valoro === "dark")
+  const coverage = (aspekto: string, dimensio: string, valoro: string): number =>
+    kovrado[aspekto]?.find((entry) => entry.dimensio === dimensio && entry.valoro === valoro)
       ?.parto ?? 0;
+  const percent = (value: number): string => `${(value * 100).toFixed(1)} %`;
   const criteria: {
     kriterio: string;
     of: (aspekto: string) => number;
-    format: (v: number) => string;
+    format: (value: number) => string;
+    /** Which side is ahead: "higher" for a reserve, "lower" for a finding count. */
+    better: "higher" | "lower";
   }[] = [
-    {
-      kriterio: "kleinste Kontrast-Reserve",
-      of: minReserve,
-      format: (v) => `${(v * 100).toFixed(1)} %`,
-    },
+    { kriterio: "kleinste Kontrast-Reserve", of: minReserve, format: percent, better: "higher" },
     {
       kriterio: "Bestehensquote der KontrastParoj",
       of: passRate,
-      format: (v) => `${(v * 100).toFixed(1)} %`,
+      format: percent,
+      better: "higher",
     },
     {
-      kriterio: "eigene Werte im Dunkelmodus (alle Tokens)",
-      of: darkCoverage,
-      format: (v) => `${(v * 100).toFixed(1)} %`,
+      kriterio: "Regelmäßigkeit der Paletten",
+      of: (aspekto) => (input.paletroj[aspekto] === undefined ? 0 : (rampWorst.get(aspekto) ?? 0)),
+      format: (value) => `${(value * 100).toFixed(1)} % vom Median`,
+      better: "lower",
+    },
+    {
+      kriterio: "Abstand zum Anker",
+      of: (aspekto) => Math.max(0, anchor.get(aspekto) ?? 0),
+      format: (value) => value.toFixed(3),
+      better: "higher",
+    },
+    {
+      kriterio: "Regelmäßigkeit der Typo-Skala",
+      of: (aspekto) => tipoj.get(aspekto) ?? 0,
+      format: (value) => `${(value * 100).toFixed(1)} % vom Median`,
+      better: "lower",
+    },
+    {
+      kriterio: "beratende APCA-Hinweise",
+      of: (aspekto) => apca.get(aspekto) ?? 0,
+      format: (value) => String(value),
+      better: "lower",
     },
   ];
+  // One row per Dimensio value the coverage knows: every brand decides for itself how much of a
+  // Dimensio it sets (G10), and the comparison shows it value by value, not only for dark.
+  const dimensioValues = new Map<string, { dimensio: string; valoro: string }>();
+  for (const aspekto of aspektoj) {
+    for (const entry of kovrado[aspekto] ?? []) {
+      dimensioValues.set(`${entry.dimensio}=${entry.valoro}`, {
+        dimensio: entry.dimensio,
+        valoro: entry.valoro,
+      });
+    }
+  }
+  for (const [label, { dimensio, valoro }] of [...dimensioValues.entries()].sort(([a], [b]) =>
+    a < b ? -1 : 1,
+  )) {
+    criteria.push({
+      kriterio: `eigene Werte in ${label}`,
+      of: (aspekto) => coverage(aspekto, dimensio, valoro),
+      format: percent,
+      better: "higher",
+    });
+  }
+
   for (const [index, a] of aspektoj.entries()) {
     for (const b of aspektoj.slice(index + 1)) {
       result[`${a}|${b}`] = criteria.map((criterion) => {
         const valueA = criterion.of(a);
         const valueB = criterion.of(b);
-        const same = Math.abs(valueA - valueB) < 1e-6;
+        const shownA = criterion.format(valueA);
+        const shownB = criterion.format(valueB);
+        // Equal is what the reader sees: two values that print the same are not a lead.
+        const same = shownA === shownB;
+        const aAhead = criterion.better === "higher" ? valueA > valueB : valueA < valueB;
         return {
           kriterio: criterion.kriterio,
-          a: criterion.format(valueA),
-          b: criterion.format(valueB),
-          pli: same ? ("egale" as const) : valueA > valueB ? ("a" as const) : ("b" as const),
+          a: shownA,
+          b: shownB,
+          pli: same ? ("egale" as const) : aAhead ? ("a" as const) : ("b" as const),
         };
       });
     }
   }
-  void modelo;
   return result;
 }

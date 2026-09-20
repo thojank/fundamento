@@ -831,6 +831,18 @@
             "hex": "#000000"
           }
         },
+        "8": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0,
+              0,
+              0
+            ],
+            "alpha": 0.08,
+            "hex": "#000000"
+          }
+        },
         "10": {
           "$value": {
             "colorSpace": "srgb",
@@ -840,6 +852,18 @@
               0
             ],
             "alpha": 0.1,
+            "hex": "#000000"
+          }
+        },
+        "12": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0,
+              0,
+              0
+            ],
+            "alpha": 0.12,
             "hex": "#000000"
           }
         },
@@ -865,6 +889,32 @@
             ],
             "alpha": 0.5,
             "hex": "#000000"
+          }
+        }
+      },
+      "tint": {
+        "8": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              1,
+              1,
+              1
+            ],
+            "alpha": 0.08,
+            "hex": "#ffffff"
+          }
+        },
+        "12": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              1,
+              1,
+              1
+            ],
+            "alpha": 0.12,
+            "hex": "#ffffff"
           }
         }
       }

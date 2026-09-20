@@ -103,6 +103,27 @@ Reine Funktionen, stabile IDs, gemeinsame Nutzung durch Prüfung, Vitrino und sp
 
 Jede Metrik liefert Zahlen, keine Urteile; das Urteil bildet die Regulo mit ihrem `sojlo` – oder die Aspiro mit ihrer Schranke. So kann die Vitrino dieselbe Zahl zeigen, die die Prüfung bewertet.
 
+## 3b. KontrastParo mit `backdrop` (Durchsicht 2026-09-20)
+
+```jsonc
+{
+  "id": "kpa_…",
+  "name": "action-tertiary-text-on-action-tertiary-rest",
+  "foreground": "color.action.tertiary.text",
+  "background": "color.action.tertiary.rest",   // durchsichtig: eine Auflage
+  "backdrop": "color.background.default",        // die Fläche, auf der gemessen wird
+  "kategorio": "text-normal"
+}
+```
+
+- `backdrop` ist optional und nennt eine **undurchsichtige** Fläche. Ist der Hintergrund des Paares
+  durchsichtig, setzt der Prüfer ihn darüber zusammen (Porter-Duff, in gamma-kodiertem sRGB, wie der
+  Browser) und misst das Ergebnis.
+- Ohne `backdrop` bleibt eine durchsichtige Fläche der Fehler `kontrastparo-background-transparent`;
+  ein durchsichtiger `backdrop` ebenfalls, mit eigener Meldung.
+- Dieselbe Zusammensetzung gilt in `validate`, in der Alirebleco-Prüfung, in der Regulo
+  `contrast-reserve` und in einer Aspiro mit `wcag2-reserve`: eine Rechnung, vier Leser.
+
 ## 4. Vitrino-Daten (JSON-Insel)
 
 Eine Insel `<script type="application/json" id="fm-vitrino">`, kanonisch sortiert, Zahlen mit fester Stellenzahl. Geschnitten nach dem, was tatsächlich variiert:

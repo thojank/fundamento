@@ -100,7 +100,7 @@ function roleTable(caption: string, rows: VitrinoDatumoj["roloj"][string]["surfa
     ["Rolle", "Farbe", "Hex", "OKLCH L", "Abstand zur Nachbarin", "Abstand zum Anker"],
     rows.map(
       (row) =>
-        `<tr><th scope="row"><code>${escapeHtml(row.token)}</code></th><td>${swatch(row.token)}</td><td>${escapeHtml(row.hex)}</td><td>${row.l.toFixed(3)}</td><td>${row.alNaskbo === undefined ? "–" : row.alNaskbo.toFixed(3)}</td><td>${row.alEkstremo === undefined ? "–" : row.alEkstremo.toFixed(3)}</td></tr>`,
+        `<tr><th scope="row"><code>${escapeHtml(row.token)}</code></th><td>${swatch(row.token)}</td><td>${escapeHtml(row.hex)}</td><td>${row.l === undefined ? "–" : row.l.toFixed(3)}</td><td>${row.alNaskbo === undefined ? "–" : row.alNaskbo.toFixed(3)}</td><td>${row.alEkstremo === undefined ? "–" : row.alEkstremo.toFixed(3)}</td></tr>`,
     ),
   );
 }

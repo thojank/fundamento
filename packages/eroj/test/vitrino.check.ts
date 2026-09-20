@@ -148,8 +148,12 @@ test("the comparison shows both values and names the side in words", async ({ pa
   await open(page);
   const table = page.locator("#fm-vitrino-komparo-tabelo");
   await expect(table).toContainText("kleinste Kontrast-Reserve");
-  // Named in full: the comparison counts every token, the design goal only its four role groups.
-  await expect(table).toContainText("eigene Werte im Dunkelmodus (alle Tokens)");
+  // Every measurement the Vitrino has, one row per Dimensio value (maintainer's review).
+  await expect(table).toContainText("beratende APCA-Hinweise");
+  await expect(table).toContainText("eigene Werte in color-scheme=dark");
+  await expect(table).toContainText("eigene Werte in contrast=high");
+  // The caption says why two coverage numbers differ: all tokens here, role groups in the goal.
+  await expect(table).toContainText("die Abdeckung zählt alle Tokens des Dimensio-Satzes");
   await expect(table.locator("tbody")).toContainText("vorn");
   await page.getByRole("button", { name: "Gegenüberstellung" }).click();
   expect(await page.locator("#fm-vitrino-komparo").getAttribute("data-fm-komparo")).toBe("on");

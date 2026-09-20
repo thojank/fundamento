@@ -76,7 +76,8 @@ function renderKomparo() {
     '<tr><th scope="row">' + esc(row.kriterio) + '</th><td>' + esc(row.a) + '</td><td>' + esc(row.b) +
     '</td><td>' + (row.pli === "egale" ? "gleich" : row.pli === "a" ? esc(a) + " vorn" : esc(b) + " vorn") + '</td></tr>');
   document.getElementById("fm-vitrino-komparo-tabelo").innerHTML =
-    table("Gegenüberstellung " + a + " ↔ " + b, ["Kriterium", a, b, "Ergebnis"], rows);
+    table("Gegenüberstellung " + a + " ↔ " + b + " · die Abdeckung zählt alle Tokens des Dimensio-Satzes, ein Entwurfsziel nur seine Rollengruppen",
+      ["Kriterium", a, b, "Ergebnis"], rows);
 }
 
 function renderRoloj() {

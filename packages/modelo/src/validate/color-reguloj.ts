@@ -7,6 +7,7 @@ import {
   alphaOf,
   compositeOver,
   oklchLightness,
+  onBackdrop,
   readDtcgColor,
   srgbComponentsOf,
 } from "../checks/alirebleco/color.js";
@@ -295,10 +296,14 @@ export const contrastReserve: CombinationChecker = (context) => {
       { ...pair, branch: "main" as const },
       ...(pair.aux === undefined ? [] : [{ ...pair.aux, branch: "aux" as const }]),
     ];
+    const backdrop = pair.backdrop === undefined ? undefined : colorOf(context, pair.backdrop);
     const measured = branches.flatMap((branch) => {
       const foreground = colorOf(context, branch.foreground);
-      const background = colorOf(context, branch.background);
-      if (foreground === undefined || background === undefined) return [];
+      const raw = colorOf(context, branch.background);
+      if (foreground === undefined || raw === undefined) return [];
+      // An overlay is measured on the surface the pair names (Spec 004).
+      const background = branch.branch === "main" ? onBackdrop(raw, backdrop) : raw;
+      if (alphaOf(background) < 1) return [];
       const measurement = measureBranch(
         { foreground: branch.foreground, background: branch.background },
         foreground,

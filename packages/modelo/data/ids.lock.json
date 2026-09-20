@@ -128,6 +128,10 @@
       "status": "active",
       "type": "jugxo"
     },
+    "jug_01M2ZTV1WRHXQ7C31W7FQ4YZP7": {
+      "status": "active",
+      "type": "jugxo"
+    },
     "kpa_01M2VEEE9HREQTY2499C9JS05Q": {
       "status": "active",
       "type": "kontrastParo"
@@ -1929,6 +1933,22 @@
       "type": "token"
     },
     "tok_01M2ZK6BZ6KRV3T89HNAJ4G8FK": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M2ZTAJSS6M6EB14W69S71P4H": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M2ZTAJSS6M6EB14W69S71P4J": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M2ZTAJSS6M6EB14W69S71P4K": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M2ZTAJSS6M6EB14W69S71P4M": {
       "status": "active",
       "type": "token"
     }

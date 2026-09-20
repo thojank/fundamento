@@ -10,7 +10,7 @@ import { appendPointer } from "../../json/pointer.js";
 import { isJsonObject } from "../../load/guards.js";
 import { allAssignments, formatCombination } from "../../resolve/assignment.js";
 import { resolveCombination } from "../../resolve/resolve.js";
-import { alphaOf, readDtcgColor } from "./color.js";
+import { alphaOf, compositeOver, readDtcgColor } from "./color.js";
 import {
   type BranchMeasurement,
   combineBranches,
@@ -269,6 +269,7 @@ export function evaluateAlirebleco(
       const path = `rezolvo(${combination})/kontrastParo/${name}`;
       const context = { path, combination: { ...complete } };
       const auxPair = isJsonObject(pair.aux) ? pair.aux : undefined;
+      const backdropName = typeof pair.backdrop === "string" ? pair.backdrop : undefined;
 
       /** Resolved colours of one branch, or undefined after reporting why they are missing. */
       const branchColors = (
@@ -302,8 +303,36 @@ export function evaluateAlirebleco(
           }
           colors[field] = color;
         }
-        const { foreground, background } = colors;
+        const { foreground } = colors;
+        let { background } = colors;
         if (foreground === undefined || background === undefined) return undefined;
+        // An overlay has no colour until it lies on something: with a backdrop the pair says what
+        // that is, and the composited colour is what a person sees (Spec 004).
+        if (alphaOf(background) < 1 && backdropName !== undefined) {
+          const resolvedBackdrop = own(resolution.tokens, backdropName);
+          const backdrop = readDtcgColor(resolvedBackdrop?.value);
+          if (backdrop === undefined) {
+            errors.push({
+              rule: "kontrastparo-background-transparent",
+              severity: "error",
+              ...context,
+              message: `KontrastParo '${name}': ${label}backdrop '${backdropName}' does not resolve to a DTCG color in ${combination}.`,
+              suggestion: `Give '${backdropName}' a color value in every combination, or drop the backdrop and use an opaque background.`,
+            });
+            return undefined;
+          }
+          if (alphaOf(backdrop) < 1) {
+            errors.push({
+              rule: "kontrastparo-background-transparent",
+              severity: "error",
+              ...context,
+              message: `KontrastParo '${name}': ${label}backdrop '${backdropName}' has alpha ${alphaOf(backdrop)} in ${combination}; an overlay on an overlay still has no colour.`,
+              suggestion: `Name an opaque surface as the backdrop of '${name}' (for example color.background.default).`,
+            });
+            return undefined;
+          }
+          background = compositeOver(background, backdrop);
+        }
         if (alphaOf(background) < 1) {
           const origin = own(resolution.tokens, names.background)?.origin.set ?? CORE_SET_NAME;
           errors.push({
@@ -311,7 +340,7 @@ export function evaluateAlirebleco(
             severity: "error",
             ...context,
             message: `KontrastParo '${name}': ${label}background '${names.background}' has alpha ${alphaOf(background)} in ${combination}; contrast against an unknown backdrop cannot be determined.`,
-            suggestion: `Make '${names.background}' opaque (alpha 1) in set '${origin}', or pair the foreground with an opaque background token.`,
+            suggestion: `Make '${names.background}' opaque (alpha 1) in set '${origin}', name the surface it lies on with "backdrop", or pair the foreground with an opaque background token.`,
           });
           return undefined;
         }

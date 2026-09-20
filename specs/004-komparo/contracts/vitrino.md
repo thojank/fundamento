@@ -49,7 +49,8 @@ Begleitet [`../plan.md`](../plan.md) D-06 bis D-09. Das ist die Oberfläche, auf
 
 - Der Vergleichsschalter schaltet auf zwei Spalten. Jede Spalte trägt ihre eigenen `data-fm-*`-Attribute an ihrem Wurzelelement, damit beide Aspektoj gleichzeitig sichtbar sind; alle übrigen Dimensioj bleiben gleich.
 - Je Kriterium eine Zeile: Wert A, Wert B, Kennzeichnung `vorn` / `gleich` / `hinten` – als Wort, nicht als Farbe.
-- Kriterien in Etappe A: kleinste Kontrast-Reserve, Bestehensquote der KontrastParoj, kleinster Flächenabstand, kleinster Abstand zum Anker, Bandbreite der Palettenstufen, Rampenausrichtung, Gamut-Treue, Regelmäßigkeit der Typo-Skala, Regularo-Ergebnis (bestanden / Verstöße) und die Abdeckung je Dimensio (`dimensio-kovrado`).
+- Kriterien in Etappe A: kleinste Kontrast-Reserve, Bestehensquote der KontrastParoj, Regelmäßigkeit der Paletten, Abstand zum Anker, Regelmäßigkeit der Typo-Skala, beratende APCA-Hinweise und die Abdeckung je **Dimensio-Wert** (`dimensio-kovrado`, eine Zeile je Wert).
+- Jedes Kriterium trägt seine Richtung: bei Reserve, Abstand und Abdeckung ist der größere Wert vorn, bei APCA-Hinweisen und den Regelmäßigkeiten der kleinere. Gleich angezeigte Werte gelten als gleich.
 - **Aspiroj stehen nie im Vergleich.** Sie gehören einer Marke; ein Vergleich daraus wäre Geschmack gegen Geschmack. Sie erscheinen nur im Abschnitt der jeweiligen Marke, als „Entwurfsziel: Soll / Ist / erreicht".
 - **Kein Gesamturteil** (FR-17 gilt schon hier).
 - Kriterien nennen ihren Geltungsbereich, wo zwei Zahlen dieselbe Metrik messen: die Zeile „eigene Werte im Dunkelmodus (alle Tokens)" zählt jedes Token des Dunkelsatzes, das gleichnamige Entwurfsziel nur seine vier Rollengruppen. Die Tabelle der Entwurfsziele hat dafür die Spalte **Geltungsbereich** (die Tokenmuster der Aspiro oder „alle Tokens").
