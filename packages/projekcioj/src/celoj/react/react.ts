@@ -72,6 +72,7 @@ export const ${name} = forwardRef<HTMLElement, ${name}Props>(function ${name}(
   { ${names.join(", ")}, children, ...rest },
   ref,
 ) {
+  ensureDefined();
   const attributes: Record<string, unknown> = {
 ${attributes.join("\n")}
   };
@@ -102,8 +103,18 @@ ${eroj.map((entry) => propsInterface(entry)).join("")}`;
   return `import { createElement, forwardRef, type HTMLAttributes, type ReactNode } from "react";
 import { defineEroj } from "${importPath}";
 
-// Registering on import keeps one line of setup for React users; skipped where there is no DOM.
-if (typeof customElements !== "undefined") defineEroj();
+let defined = false;
+
+/**
+ * Registers the elements on the first render, not on import: in a bundle the wrapper and the
+ * elements can be in one import cycle, where the class is not initialised yet at import time.
+ * Server-side rendering never reaches this either, because it has no customElements.
+ */
+function ensureDefined(): void {
+  if (defined || typeof customElements === "undefined") return;
+  defined = true;
+  defineEroj();
+}
 ${eroj.map(wrapper).join("")}`;
 }
 

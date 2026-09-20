@@ -77,3 +77,7 @@ jobs:
       # Rendered accessibility of the Eroj: axe-core, keyboard, focus ring (Spec 003 T013, D-09).
       - name: "Check: Alirebleco (Eroj)"
         run: pnpm check:alirebleco-eroj
+
+      # AK-08: the Make Kit installs from its tarball and builds in a fresh project (T019).
+      - name: "Check: Make Kit"
+        run: pnpm check:make-kit

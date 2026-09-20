@@ -21,6 +21,7 @@ const CHECK_STEPS: ReadonlyArray<readonly [name: string, script: string]> = [
 /** Rendered checks of the Eroj (Spec 003 T013, plan D-09): axe-core, keyboard, focus, ARIA. */
 const ERO_CHECK_STEPS: ReadonlyArray<readonly [name: string, script: string]> = [
   ["Check: Alirebleco (Eroj)", "check:alirebleco-eroj"],
+  ["Check: Make Kit", "check:make-kit"],
 ];
 
 const GATE_STEPS: ReadonlyArray<readonly [name: string, run: string]> = [
@@ -201,6 +202,10 @@ describe("root package.json check script", () => {
     expect(scripts["check:alirebleco-eroj"]).toBe(
       "pnpm --filter @fundamento/eroj run check:alirebleco",
     );
+  });
+
+  it("runs the Make Kit check through @fundamento/eroj (Spec 003 T019)", () => {
+    expect(scripts["check:make-kit"]).toBe("pnpm --filter @fundamento/eroj run check:make-kit");
   });
 
   it("defines every check script it invokes", () => {
