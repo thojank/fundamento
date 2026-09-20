@@ -228,9 +228,25 @@ describe("built runner", () => {
     expect(rulesAndPaths(result.errors)).toEqual(readExpected("invalid/parity-mismatch").issues);
   });
 
-  it("prints a concise human summary and exits 0 on the default run", () => {
-    const child = spawnSync(process.execPath, [builtRunner, "parity"], { encoding: "utf8" });
-    expect(child.status).toBe(0);
+  it("prints a concise human summary and exits 0 on a built projection", () => {
+    // `pnpm check:parity` builds the projections first; the runner is pointed at one here, since
+    // the test gate runs before any build wrote `.fundamento/projekcioj` (Spec 003 T021).
+    const child = spawnSync(
+      process.execPath,
+      [builtRunner, "parity", "--projekcioj", writeProjections()],
+      { encoding: "utf8" },
+    );
+    expect(child.status, child.stderr).toBe(0);
     expect(child.stdout.split("\n")[0]).toMatch(/^PASS parity: /);
+  });
+
+  it("exits 1 and says what to build when there are no projections", () => {
+    const empty = mkdtempSync(join(tmpdir(), "fm-parity-none-"));
+    tempDirs.push(empty);
+    const child = spawnSync(process.execPath, [builtRunner, "parity", "--projekcioj", empty], {
+      encoding: "utf8",
+    });
+    expect(child.status).toBe(1);
+    expect(child.stdout).toContain("fm projekcioj build");
   });
 });

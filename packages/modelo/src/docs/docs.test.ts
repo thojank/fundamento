@@ -496,15 +496,21 @@ describe("Spec 003 documentation: quickstart, checks and traceability (T027)", (
     const checks = section(readme, "Checks");
     expect(checks).toContain("pnpm check:alirebleco-eroj");
     expect(checks).toContain("pnpm check:make-kit");
+    expect(checks).toContain("pnpm check:quickstart");
     expect(checks).toContain("playwright install");
     // Parity is no longer the empty comparator of Phase 0.
     expect(checks).not.toContain("empty inventory in Phase 0");
     expect(checks).toContain("parity/");
   });
 
-  it("the CI workflow runs the three steps the README names", () => {
+  it("the CI workflow runs the four steps the README names", () => {
     const ci = read(".github/workflows/ci.yml");
-    for (const step of ["Playwright browsers", "Check: Alirebleco (Eroj)", "Check: Make Kit"]) {
+    for (const step of [
+      "Playwright browsers",
+      "Check: Alirebleco (Eroj)",
+      "Check: Make Kit",
+      "Check: Quickstart",
+    ]) {
       expect(ci, step).toContain(step);
     }
   });

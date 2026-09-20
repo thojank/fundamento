@@ -6,6 +6,8 @@ import { defineConfig, devices } from "@playwright/test";
 export default defineConfig({
   testDir: "test",
   testMatch: "**/*.spec.ts",
+  // The quickstart installs and builds a project of its own; it has its own config and CI step.
+  testIgnore: "**/quickstart.spec.ts",
   timeout: 120_000,
   reporter: [["list"]],
   projects: [

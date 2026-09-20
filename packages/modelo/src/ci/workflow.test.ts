@@ -22,6 +22,9 @@ const CHECK_STEPS: ReadonlyArray<readonly [name: string, script: string]> = [
 const ERO_CHECK_STEPS: ReadonlyArray<readonly [name: string, script: string]> = [
   ["Check: Alirebleco (Eroj)", "check:alirebleco-eroj"],
   ["Check: Make Kit", "check:make-kit"],
+  // The quickstart installs and builds a project of its own; like the Make Kit check it stays
+  // out of the parallel test gate (Spec 003 T027).
+  ["Check: Quickstart", "check:quickstart"],
 ];
 
 const GATE_STEPS: ReadonlyArray<readonly [name: string, run: string]> = [
@@ -206,6 +209,10 @@ describe("root package.json check script", () => {
 
   it("runs the Make Kit check through @fundamento/eroj (Spec 003 T019)", () => {
     expect(scripts["check:make-kit"]).toBe("pnpm --filter @fundamento/eroj run check:make-kit");
+  });
+
+  it("runs the quickstart through @fundamento/eroj (Spec 003 T027)", () => {
+    expect(scripts["check:quickstart"]).toBe("pnpm --filter @fundamento/eroj run check:quickstart");
   });
 
   it("defines every check script it invokes", () => {

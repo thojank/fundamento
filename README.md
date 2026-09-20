@@ -127,8 +127,9 @@ Each check is its own command and its own named CI step. Exit 0 = pass, 1 = chec
 | `pnpm check:clean-room` | Nothing from a benchmark directory is in or referenced by the repo; every identifier is in the Fundamento namespace (Art. V). |
 | `pnpm check:alirebleco-eroj` | axe-core and the focus ring on the rendered `fm-butono` in Chromium, Firefox and WebKit, in every colour class of both Aspektoj. |
 | `pnpm check:make-kit` | Each Make Kit installs from its packed tarball into a fresh Vite project and builds and renders there, with React 18.3 and with React 19.3 + Tailwind 4.3, in plain HTML without React, and on a server without a DOM. |
+| `pnpm check:quickstart` | The quickstart of this README, run as a user would and timed: pack `@fundamento/eroj`, install it in a fresh Vite project, render both projections, switch Aspekto and colour scheme without a reload — under five minutes (AK-07). |
 
-The last two render in a real browser: install the engines once with `pnpm --filter @fundamento/eroj exec playwright install --with-deps chromium firefox webkit` (CI does it in its own step).
+The last three render in a real browser: install the engines once with `pnpm --filter @fundamento/eroj exec playwright install --with-deps chromium firefox webkit` (CI does it in its own step).
 
 Every check accepts `--json` (stdout carries only the result JSON), `--fixture <dir>` (checks that directory instead of the repo; relative paths resolve against the directory you run pnpm from, like `fm`) and `--help`; parity also takes `--projekcioj <dir>` to compare another build:
 

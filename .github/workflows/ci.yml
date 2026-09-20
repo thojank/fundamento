@@ -81,3 +81,7 @@ jobs:
       # AK-08: the Make Kit installs from its tarball and builds in a fresh project (T019).
       - name: "Check: Make Kit"
         run: pnpm check:make-kit
+
+      # AK-07: the quickstart of the README, run as a user would and timed (T027).
+      - name: "Check: Quickstart"
+        run: pnpm check:quickstart
