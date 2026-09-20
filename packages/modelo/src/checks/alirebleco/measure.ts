@@ -46,6 +46,8 @@ export interface PairMeasurement {
   passed: boolean;
   /** The branch that carries the result; null when both fail. */
   branch: "main" | "aux" | null;
+  /** For a translucent background: the surface it was measured on, the worst of the ladder. */
+  surface?: string;
 }
 
 /** Measures one branch; `metrics[0]` is binding, the rest are advisory. */

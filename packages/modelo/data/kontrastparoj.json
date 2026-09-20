@@ -194,7 +194,6 @@
       "name": "action-tertiary-text-on-action-tertiary-rest",
       "foreground": "color.action.tertiary.text",
       "background": "color.action.tertiary.rest",
-      "backdrop": "color.background.default",
       "kategorio": "text-normal"
     },
     {
@@ -202,7 +201,6 @@
       "name": "action-tertiary-text-on-action-tertiary-hover",
       "foreground": "color.action.tertiary.text",
       "background": "color.action.tertiary.hover",
-      "backdrop": "color.background.default",
       "kategorio": "text-normal"
     },
     {
@@ -210,7 +208,6 @@
       "name": "action-tertiary-text-on-action-tertiary-pressed",
       "foreground": "color.action.tertiary.text",
       "background": "color.action.tertiary.pressed",
-      "backdrop": "color.background.default",
       "kategorio": "text-normal"
     },
     {

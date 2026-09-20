@@ -16,8 +16,8 @@ export const ASPEKTO_DIMENSIO = "aspekto";
 export interface CheckableKontrastParo {
   name: string;
   background: string;
-  /** The opaque surface a translucent background is composited over before measuring (Spec 004). */
-  backdrop?: string;
+  /** The surfaces a translucent background may lie on; the worst decides (Spec 004). */
+  backdrop?: string[];
   /** `<file>#/kontrastParoj/<i>/background`. */
   backgroundPath: string;
 }
@@ -380,7 +380,7 @@ function kontrastParoIssues(
         checkable.push({
           name,
           background: token.name,
-          ...(typeof backdrop === "string" ? { backdrop } : {}),
+          ...(Array.isArray(backdrop) ? { backdrop: backdrop.map((entry) => String(entry)) } : {}),
           backgroundPath: formatIssuePath({ file: document.file, pointer }),
         });
       }

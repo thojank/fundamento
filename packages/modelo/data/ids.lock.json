@@ -1941,7 +1941,7 @@
       "type": "token"
     },
     "tok_01M2ZTAJSS6M6EB14W69S71P4J": {
-      "status": "active",
+      "status": "retired",
       "type": "token"
     },
     "tok_01M2ZTAJSS6M6EB14W69S71P4K": {
@@ -1949,6 +1949,10 @@
       "type": "token"
     },
     "tok_01M2ZTAJSS6M6EB14W69S71P4M": {
+      "status": "retired",
+      "type": "token"
+    },
+    "tok_01M2ZWW86NCFY7WFB51XCHX8RF": {
       "status": "active",
       "type": "token"
     }

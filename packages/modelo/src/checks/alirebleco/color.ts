@@ -117,10 +117,49 @@ export function oklchLightness(color: ColorValue, backdrop?: ColorValue): number
 }
 
 /**
- * The colour a translucent background shows on the surface its KontrastParo names (Spec 004): an
- * overlay has no colour of its own. Opaque colours and a missing or translucent backdrop are
- * returned unchanged — the caller then reports why the pair cannot be measured.
+ * The surface ladder of a page, deepest first. A component without a surface of its own may sit on
+ * any of them, so a translucent value is measured on each (Spec 004, maintainer's review of
+ * 2026-09-20). Not part of it: `color.background.inverse`, which carries its own text roles.
  */
+export const SURFACE_LADDER = [
+  "color.background.sunken",
+  "color.background.canvas",
+  "color.background.default",
+  "color.background.raised",
+] as const;
+
+export interface BackdropSurface {
+  /** The token name, so a finding can say which surface decided the result. */
+  name: string;
+  color: ColorValue;
+}
+
+/**
+ * The surfaces a translucent background is measured on: the ones its KontrastParo names, or the
+ * opaque steps of the ladder. An opaque background needs none and gets none. Named surfaces that
+ * are themselves translucent come back in `translucent`; the caller reports them.
+ */
+export function backdropSurfaces(
+  background: ColorValue,
+  named: readonly string[] | undefined,
+  colorOf: (name: string) => ColorValue | undefined,
+): { surfaces: BackdropSurface[]; translucent: string[] } {
+  if (alphaOf(background) >= 1) return { surfaces: [], translucent: [] };
+  const surfaces: BackdropSurface[] = [];
+  const translucent: string[] = [];
+  for (const name of named ?? SURFACE_LADDER) {
+    const color = colorOf(name);
+    if (color === undefined) continue;
+    if (alphaOf(color) < 1) {
+      translucent.push(name);
+      continue;
+    }
+    surfaces.push({ name, color });
+  }
+  return { surfaces, translucent };
+}
+
+/** The colour of a translucent value on one surface; an opaque value is returned unchanged. */
 export function onBackdrop(background: ColorValue, backdrop: ColorValue | undefined): ColorValue {
   if (alphaOf(background) >= 1 || backdrop === undefined || alphaOf(backdrop) < 1)
     return background;

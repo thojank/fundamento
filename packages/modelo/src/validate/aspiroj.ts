@@ -5,7 +5,12 @@
 // that declares it. A brand without aspiroj is completely valid; a brand that gives one up removes
 // it from its aspekto.json, where the decision is visible. Pure.
 
-import { alphaOf, onBackdrop, readDtcgColor } from "../checks/alirebleco/color.js";
+import {
+  alphaOf,
+  backdropSurfaces,
+  onBackdrop,
+  readDtcgColor,
+} from "../checks/alirebleco/color.js";
 import { kontrastSojlojOf } from "../checks/alirebleco/evaluate.js";
 import { measureBranch } from "../checks/alirebleco/measure.js";
 import { WCAG2_METRIC } from "../checks/alirebleco/metrics.js";
@@ -112,14 +117,28 @@ function measure(modelo: Modelo, aspekto: string, aspiro: AspektoAspiro): Measur
         const sojloj = kontrastSojlojOf(modelo, assignment);
         for (const pair of modelo.kontrastParoj) {
           const branches = [pair, ...(pair.aux === undefined ? [] : [pair.aux])];
-          const backdrop =
-            pair.backdrop === undefined ? undefined : readDtcgColor(tokens[pair.backdrop]?.value);
           const reserves = branches.flatMap((branch) => {
             const foreground = readDtcgColor(tokens[branch.foreground]?.value);
             const raw = readDtcgColor(tokens[branch.background]?.value);
             if (foreground === undefined || raw === undefined) return [];
-            // An overlay is measured on the surface the pair names (Spec 004).
-            const background = branch === pair ? onBackdrop(raw, backdrop) : raw;
+            // An overlay is measured on every surface it may lie on; the worst decides (Spec 004).
+            const { surfaces } =
+              branch === pair
+                ? backdropSurfaces(raw, pair.backdrop, (token) =>
+                    readDtcgColor(tokens[token]?.value),
+                  )
+                : { surfaces: [] };
+            const background =
+              surfaces.length === 0
+                ? raw
+                : surfaces
+                    .map((surface) => onBackdrop(raw, surface.color))
+                    .reduce((least, candidate) =>
+                      WCAG2_METRIC.compute(foreground, candidate) <
+                      WCAG2_METRIC.compute(foreground, least)
+                        ? candidate
+                        : least,
+                    );
             if (alphaOf(background) < 1) return [];
             const measurement = measureBranch(
               { foreground: branch.foreground, background: branch.background },

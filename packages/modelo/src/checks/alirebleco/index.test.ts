@@ -346,7 +346,7 @@ describe("KontrastParo aux branches (Spec 002 FR-07, D-09, AK-03)", () => {
 // that something with `backdrop`; the check then measures the composited colour instead of
 // refusing the pair.
 describe("KontrastParo with a backdrop (translucent background)", () => {
-  const withOverlay = (backdrop?: string): string =>
+  const withOverlay = (backdrop?: readonly string[]): string =>
     mutatedFixture("minimal", (edit) => {
       edit("vortaro/sets/core.json", (file: never) => {
         const colour = (file as { color: Record<string, Record<string, unknown>> }).color;
@@ -380,21 +380,80 @@ describe("KontrastParo with a backdrop (translucent background)", () => {
   };
 
   it("measures the overlay over the named surface instead of refusing it", () => {
-    const issues = issuesOf(withOverlay("color.background.default"));
+    const issues = issuesOf(withOverlay(["color.background.default"]));
     expect(issues.filter((issue) => issue.rule === "kontrastparo-background-transparent")).toEqual(
       [],
     );
   });
 
-  it("still refuses a translucent background that names no backdrop", () => {
-    const issues = issuesOf(withOverlay());
+  // Without a backdrop the ladder is taken; only when none of the named surfaces resolves does
+  // the pair stay unmeasurable.
+  it("refuses a translucent background when no surface it may lie on resolves", () => {
+    const issues = issuesOf(withOverlay(["color.background.absent"]));
     expect(
       issues.filter((issue) => issue.rule === "kontrastparo-background-transparent").length,
     ).toBeGreaterThan(0);
   });
 
+  // A button with no surface of its own can sit on any surface of the ladder, so the worst one
+  // decides (maintainer's review of 2026-09-20): an overlay that passes on raised and fails on
+  // sunken must make the pair fail, and the finding must say on which surface.
+  it("measures the overlay on every surface of the ladder and reports the worst one", () => {
+    const root = mutatedFixture("minimal", (edit) => {
+      edit("vortaro/sets/core.json", (file: never) => {
+        const model = file as {
+          color: { palette: Record<string, unknown>; background: Record<string, unknown> };
+        };
+        const step = (hex: string, component: number, id: string) => ({
+          $value: { colorSpace: "srgb", components: [component, component, component], hex },
+          $extensions: { "com.ciferecigo.fundamento": { id, role: "palette" } },
+        });
+        const neutral = model.color.palette.neutral as Record<string, unknown>;
+        neutral["500"] = step("#8a8a8a", 0.541, "tok_01K5FMAJ0K2ES2P0S3VGVDAXAE");
+        const alias = (target: string, id: string) => ({
+          $value: `{${target}}`,
+          $extensions: { "com.ciferecigo.fundamento": { id, role: "background" } },
+        });
+        // raised is white, sunken a mid grey: the same overlay passes on one and fails on the other.
+        model.color.background.raised = alias(
+          "color.palette.neutral.0",
+          "tok_01K5FMAJ0K2ES2P0S3VGVDAXAC",
+        );
+        model.color.background.sunken = alias(
+          "color.palette.neutral.500",
+          "tok_01K5FMAJ0K2ES2P0S3VGVDAXAD",
+        );
+        model.color.background.overlay = {
+          $value: { colorSpace: "srgb", components: [0, 0, 0], alpha: 0.12, hex: "#000000" },
+          $extensions: {
+            "com.ciferecigo.fundamento": {
+              id: "tok_01K5FMAJ0K2ES2P0S3VGVDAXAA",
+              role: "background",
+            },
+          },
+        };
+      });
+      edit("data/kontrastparoj.json", (file: { kontrastParoj: Record<string, unknown>[] }) => {
+        file.kontrastParoj.push({
+          id: "kpa_01K5FMAJ0K2ES2P0S3VGVDAXAB",
+          name: "text-on-overlay",
+          foreground: "color.text.default",
+          background: "color.background.overlay",
+          kategorio: "text-normal",
+        });
+      });
+    });
+    const issues = issuesOf(root).filter(
+      (issue) => issue.rule === "contrast-below-threshold" && issue.message.includes("overlay"),
+    );
+    const light = issues.find((issue) => issue.combination?.["color-scheme"] === "light");
+    expect(light, "an overlay that fails on sunken must fail the pair").toBeDefined();
+    expect(light?.message).toContain("over color.background.sunken");
+    expect(light?.suggestion).toContain("which is an overlay");
+  });
+
   it("refuses a backdrop that is itself translucent", () => {
-    const issues = issuesOf(withOverlay("color.background.overlay"));
+    const issues = issuesOf(withOverlay(["color.background.overlay"]));
     const transparent = issues.filter(
       (issue) => issue.rule === "kontrastparo-background-transparent",
     );

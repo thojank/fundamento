@@ -195,20 +195,24 @@ Die Zahlen rechnet der Build, nicht der Browser (sonst gäbe es eine zweite Kont
 
 Eine tertiäre Aktion übernimmt die Fläche, auf der sie liegt: `color.action.tertiary.rest` und
 `.disabled` sind vollständig durchsichtig (`color.palette.shade.0`), `hover` und `pressed` sind
-**Auflagen** (`shade` 8 % / 12 % im Hellen, `tint` 8 % / 12 % im Dunkeln), `selected` bleibt eine
+**Auflagen** (`shade` 8 % / 10 % im Hellen, `tint` 8 % / 10 % im Dunkeln), `selected` bleibt eine
 echte Fläche, weil eine dauerhafte Auswahl keine Auflage ist. Vorher lag die Ruhe im Hellen auf
 reinem Weiß — heller als jede Seitenfläche — und im Dunkeln auf der Stufe von `sunken`.
 
-Damit eine Auflage messbar bleibt, nennt eine KontrastParo mit **`backdrop`** die Fläche, auf der
-gemessen wird (hier `color.background.default`); der Prüfer setzt den Wert darüber zusammen, statt
-das Paar abzulehnen. Ohne `backdrop` bleibt eine durchsichtige Fläche ein Fehler, ein
-durchsichtiger `backdrop` ebenfalls. Dieselbe Rechnung schrieb `state-distinct` schon vor; jetzt
-steht sie allen Prüfungen zur Verfügung (Jugxo `jug_01M2ZTV1WRHXQ7C31W7FQ4YZP7`).
+**Gemessen wird auf jeder Fläche, auf der die Auflage liegen kann; der schlechteste Fall
+entscheidet, und die Meldung nennt die Fläche** („… über `color.background.sunken`"). Vorgabe ist
+die Flächenleiter `sunken`, `canvas`, `default`, `raised`. Nicht dabei: `color.background.inverse`
+— sie trägt eigene Textrollen und ist keine Stufe der Leiter. Eine KontrastParo darf die Liste mit
+`backdrop: ["…"]` enger fassen; ohne eine opake Fläche bleibt eine durchsichtige Fläche ein Fehler,
+eine durchsichtige Fläche in der Liste ebenfalls. Dieselbe Rechnung schrieb `state-distinct` schon
+vor; jetzt steht sie allen Prüfungen zur Verfügung (Jugxo `jug_01M2ZTV1WRHXQ7C31W7FQ4YZP7`).
 
-Die Grenzen sind eng und stammen aus den Regeln, nicht aus dem Geschmack: `state-distinct`
-verlangt mindestens 0,05 Helligkeitsabstand zur Ruhe, die Kontrastreserve begrenzt nach oben. Im
-Hellen bleibt das Band zwischen 8 % und 12 % Deckung (Reserve 25 % und 13 %), im Dunkeln liegt es
-bei denselben Werten (36 % und 19 %).
+Die Grenzen stammen aus den Regeln, nicht aus dem Geschmack: `state-distinct` verlangt mindestens
+0,05 Helligkeitsabstand zur Ruhe (also ≥ 8 % Deckung), die Kontrastreserve begrenzt nach oben.
+Weil der schlechteste Fall zählt — `sunken` im Hellen, `raised` im Dunkeln —, trägt der Text eine
+Stufe kräftiger: `accent.800` hell, `accent.200` dunkel, `accent.50` unter dunkel + hoher Kontrast.
+Reserve im schlechtesten Fall: 46 % / 40 % hell, 23 % / 17 % dunkel, 26 % / 21 % hell + hoher
+Kontrast, 23 % / 15 % dunkel + hoher Kontrast.
 
 **Reichweite des Ziels „keine reinen Endpunkte als Fläche" (Frage des Maintainers).** Das Aspiro
 `oklch-l-extreme` von komuna gilt ab jetzt für **jede undurchsichtige Fläche**: Seitenflächen

@@ -1366,29 +1366,10 @@
             "alpha": 0.1,
             "hex": "#000000"
           },
-          "$description": "Black at 10 % opacity, for shadows and backdrops.",
+          "$description": "Black at 10 % opacity: the pressed overlay of an action without a surface, and shadows.",
           "$extensions": {
             "com.ciferecigo.fundamento": {
               "id": "tok_01M2W9400ZA1K81R0W23SG0XVF",
-              "role": "palette"
-            }
-          }
-        },
-        "12": {
-          "$value": {
-            "colorSpace": "srgb",
-            "components": [
-              0,
-              0,
-              0
-            ],
-            "alpha": 0.12,
-            "hex": "#000000"
-          },
-          "$description": "Black at 12 % opacity: the pressed overlay of an action that has no surface of its own.",
-          "$extensions": {
-            "com.ciferecigo.fundamento": {
-              "id": "tok_01M2ZTAJSS6M6EB14W69S71P4J",
               "role": "palette"
             }
           }
@@ -1453,7 +1434,7 @@
             }
           }
         },
-        "12": {
+        "10": {
           "$value": {
             "colorSpace": "srgb",
             "components": [
@@ -1461,13 +1442,13 @@
               1,
               1
             ],
-            "alpha": 0.12,
+            "alpha": 0.1,
             "hex": "#ffffff"
           },
-          "$description": "White at 12 % opacity: the pressed overlay on a dark surface.",
+          "$description": "White at 10 % opacity: the pressed overlay on a dark surface.",
           "$extensions": {
             "com.ciferecigo.fundamento": {
-              "id": "tok_01M2ZTAJSS6M6EB14W69S71P4M",
+              "id": "tok_01M2ZWW86NCFY7WFB51XCHX8RF",
               "role": "palette"
             }
           }
@@ -1809,7 +1790,7 @@
           }
         },
         "pressed": {
-          "$value": "{color.palette.shade.12}",
+          "$value": "{color.palette.shade.10}",
           "$description": "Tertiary action: fill while pressed.",
           "$extensions": {
             "com.ciferecigo.fundamento": {
@@ -1839,7 +1820,7 @@
           }
         },
         "text": {
-          "$value": "{color.palette.accent.700}",
+          "$value": "{color.palette.accent.800}",
           "$description": "Tertiary action: text on the fill.",
           "$extensions": {
             "com.ciferecigo.fundamento": {

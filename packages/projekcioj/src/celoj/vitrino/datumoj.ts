@@ -52,6 +52,8 @@ export interface VitrinoRolo {
 }
 
 export interface VitrinoMezuro {
+  /** For an overlay: the surface the pair was measured on, the worst it may lie on (Spec 004). */
+  surfaco?: string;
   paro: string;
   kategorio: string;
   wcag2: number;
@@ -424,6 +426,7 @@ export function vitrinoDatumoj({ input, bazo }: VitrinoDatumojInput): VitrinoDat
           : { sojlo: wcag2.threshold, rezervo: round(branch.ratio / wcag2.threshold - 1, 4) }),
         apca: round(apca?.value ?? 0, 1),
         ...(apca?.threshold === undefined ? {} : { apcaSojlo: apca.threshold }),
+        ...(measurement.surface === undefined ? {} : { surfaco: measurement.surface }),
         pasis: measurement.passed,
         brancxo: measurement.branch ?? "none",
         ...(bazoEntry === undefined

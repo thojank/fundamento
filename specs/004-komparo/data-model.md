@@ -108,21 +108,27 @@ Jede Metrik liefert Zahlen, keine Urteile; das Urteil bildet die Regulo mit ihre
 ```jsonc
 {
   "id": "kpa_…",
-  "name": "action-tertiary-text-on-action-tertiary-rest",
+  "name": "action-tertiary-text-on-action-tertiary-hover",
   "foreground": "color.action.tertiary.text",
-  "background": "color.action.tertiary.rest",   // durchsichtig: eine Auflage
-  "backdrop": "color.background.default",        // die Fläche, auf der gemessen wird
+  "background": "color.action.tertiary.hover",   // durchsichtig: eine Auflage
+  // optional; ohne diese Zeile gilt die Flächenleiter
+  "backdrop": ["color.background.default", "color.background.raised"],
   "kategorio": "text-normal"
 }
 ```
 
-- `backdrop` ist optional und nennt eine **undurchsichtige** Fläche. Ist der Hintergrund des Paares
-  durchsichtig, setzt der Prüfer ihn darüber zusammen (Porter-Duff, in gamma-kodiertem sRGB, wie der
-  Browser) und misst das Ergebnis.
-- Ohne `backdrop` bleibt eine durchsichtige Fläche der Fehler `kontrastparo-background-transparent`;
-  ein durchsichtiger `backdrop` ebenfalls, mit eigener Meldung.
-- Dieselbe Zusammensetzung gilt in `validate`, in der Alirebleco-Prüfung, in der Regulo
-  `contrast-reserve` und in einer Aspiro mit `wcag2-reserve`: eine Rechnung, vier Leser.
+- Ist der Hintergrund des Paares durchsichtig, wird er über **jeder** genannten Fläche
+  zusammengesetzt (Porter-Duff in gamma-kodiertem sRGB, wie der Browser) und **der schlechteste
+  Fall entscheidet**. Die Meldung nennt die Fläche: „… über `color.background.sunken`".
+- **Vorgabe ohne `backdrop`:** die Flächenleiter `sunken`, `canvas`, `default`, `raised` — alle
+  undurchsichtigen Stufen, die in der Kombination auflösen. `color.background.inverse` gehört nicht
+  dazu: sie trägt eigene Textrollen.
+- Löst keine der Flächen undurchsichtig auf, bleibt der Fehler
+  `kontrastparo-background-transparent`; eine durchsichtige Fläche in der Liste ebenfalls, mit
+  eigener Meldung.
+- Dieselbe Rechnung gilt in `validate`, in der Alirebleco-Prüfung, im Gvidanto-Werkzeug
+  `check_contrast`, in der Regulo `contrast-reserve` und in einer Aspiro mit `wcag2-reserve`: eine
+  Rechnung, fünf Leser. Die Vitrino zeigt die Fläche in der Zeile des Paares (`surfaco`).
 
 ## 4. Vitrino-Daten (JSON-Insel)
 

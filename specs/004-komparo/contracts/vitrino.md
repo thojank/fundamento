@@ -71,5 +71,6 @@ Begleitet [`../plan.md`](../plan.md) D-06 bis D-09. Das ist die Oberfläche, auf
 | Aspiroj der gezeigten Marke stehen mit Soll, Ist und Kialo da, als Entwurfsziel bezeichnet | Vitest über das erzeugte HTML |
 | jede Tabelle hat eine Beschriftung und Kopfzellen mit Text | Playwright (axe hat dafür keine Regel) |
 | der APCA-Vergleich zählt nur Kombinationen, die beide Stände haben | Vitest: Vergleichsstand mit 72 Kombinationen gegen einen Build mit 144 |
+| eine Auflage nennt die Fläche, auf der sie gemessen wurde | Vitest über die Insel (`surfaco`), Playwright über die Tabelle |
 
 Kommando: `pnpm check:vitrino` (eigener CI-Schritt „Check: Vitrino"), nach `pnpm fm projekcioj build`.

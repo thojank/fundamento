@@ -32,7 +32,9 @@ function renderKontrasto() {
     const reserve = row.rezervo === undefined ? "–" : percent(row.rezervo);
     const delta = row.bazo === undefined ? "–" :
       (row.wcag2 - row.bazo.wcag2).toFixed(2) + " / " + (row.apca - row.bazo.apca).toFixed(1);
-    return '<tr><th scope="row">' + esc(row.paro) + '</th><td>' + esc(row.kategorio) + '</td><td>' +
+    // An overlay was measured on the worst surface it may lie on; the table says which one.
+    const paro = row.surfaco === undefined ? row.paro : row.paro + " über " + row.surfaco;
+    return '<tr><th scope="row">' + esc(paro) + '</th><td>' + esc(row.kategorio) + '</td><td>' +
       row.wcag2.toFixed(2) + '</td><td>' + (row.sojlo === undefined ? "–" : row.sojlo) + '</td><td>' +
       reserve + '</td><td>' + row.apca.toFixed(1) + '</td><td>' + (row.apcaSojlo === undefined ? "–" : row.apcaSojlo) +
       '</td><td>' + (row.pasis ? "bestanden" : "verfehlt") + '</td><td>' + delta + '</td></tr>';

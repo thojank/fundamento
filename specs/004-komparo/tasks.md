@@ -108,6 +108,18 @@ Etappe A umfasst FR-01 bis FR-09, FR-19 und den vorbereitenden Teil von FR-15. *
 - **Erzeugte Dateien.** `.gitattributes` markiert `mezuroj-main.json`, die Bilder und
   `ids.lock.json` als `linguist-generated`; der Befehl für den Vergleichsstand steht als D-08b im
   Plan.
+- **Rückfrage des Maintainers (backdrop: eine Fläche oder mehrere?).** Mehrere, und der
+  schlechteste Fall entscheidet: `backdrop` nimmt eine Liste, Vorgabe ist die Flächenleiter
+  `sunken`, `canvas`, `default`, `raised` (ohne `inverse`, die eigene Textrollen trägt). Die
+  Meldung und die Vitrino nennen die Fläche, die den Ausschlag gab („über
+  `color.background.sunken`"). Roter Lauf wie verlangt: eine Auflage, die auf `raised` besteht und
+  auf `sunken` durchfällt, lässt das Paar fehlschlagen und nennt `sunken`
+  (`index.test.ts`: „measures the overlay on every surface of the ladder and reports the worst
+  one"). Weil damit der schlechteste Fall zählt, tragen die Werte nach: Auflagen 8 % / 10 % statt
+  8 % / 12 %, Text eine Stufe kräftiger (`accent.800` hell, `accent.200` dunkel, `accent.50`
+  dunkel + hoher Kontrast). Reserve im schlechtesten Fall: 46 % / 40 % hell, 23 % / 17 % dunkel,
+  26 % / 21 % hell + hoher Kontrast, 23 % / 15 % dunkel + hoher Kontrast. Beratende APCA-Hinweise
+  1 746 → 1 764.
 - **Folgearbeiten aus der Änderung:** die Fixture `invalid/aspekto-incomplete` und die Marke
   `ekzemplo` haben die vier neuen Palettenstufen bekommen (sonst wären sie unvollständig); zwei
   Datentests, die Paare selbst nachrechnen (`kontrast.test.ts`, `phase0-data.test.ts`), setzen die

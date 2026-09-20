@@ -154,6 +154,16 @@ describe("the sections of FR-06", () => {
     expect(opaque?.l).toBeGreaterThan(0);
   });
 
+  // An overlay is measured on the worst surface it may lie on; the table says which one it was
+  // (maintainer's review of 2026-09-20).
+  it("names the surface that decided an overlay pair", () => {
+    const rows = datumoj.mezuroj["komuna|medium|default|light|default|default"] ?? [];
+    const hover = rows.find((row) => row.paro === "action-tertiary-text-on-action-tertiary-hover");
+    expect(hover?.surfaco).toBe("color.background.sunken");
+    const plain = rows.find((row) => row.paro === "text-on-background");
+    expect(plain?.surfaco).toBeUndefined();
+  });
+
   it("carries the coverage per Dimensio value", () => {
     const coverage = datumoj.kovrado.komuna ?? [];
     const dark = coverage.find(

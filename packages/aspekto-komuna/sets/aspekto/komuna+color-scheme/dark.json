@@ -96,13 +96,13 @@
           "$value": "{color.palette.tint.8}"
         },
         "pressed": {
-          "$value": "{color.palette.tint.12}"
+          "$value": "{color.palette.tint.10}"
         },
         "selected": {
           "$value": "{color.palette.accent.800}"
         },
         "text": {
-          "$value": "{color.palette.accent.300}"
+          "$value": "{color.palette.accent.200}"
         }
       },
       "danger": {

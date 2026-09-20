@@ -171,9 +171,11 @@ export type KontrastParo = {
   foreground: TokenName;
   background: TokenName;
   /**
-   * The surface a translucent background lies on. An overlay has no colour of its own; with a backdrop the check composites background over it and measures the result (Spec 004). The backdrop itself must be opaque.
+   * The surfaces a translucent background may lie on. An overlay has no colour of its own; the check composites the background over each of them and the worst result decides, naming the surface. Without this field every opaque surface role of the ladder (sunken, canvas, default, raised) is taken. Each named token must be opaque.
+   *
+   * @minItems 1
    */
-  backdrop?: string;
+  backdrop?: TokenName[];
   kategorio: KontrastKategorio;
   /**
    * Alternative pair (aŭ, 'or'): the KontrastParo holds when the main pair or this pair meets the threshold of the same kategorio (Spec 002, FR-07). Not allowed for text categories; requires a kialo.

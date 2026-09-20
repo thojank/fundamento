@@ -5,6 +5,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import Color from "colorjs.io";
 import { describe, expect, it } from "vitest";
+import { SURFACE_LADDER } from "../checks/alirebleco/color.js";
 import { createModeloAjv, getModeloValidator } from "../contracts/ajv.js";
 import { DTCG_TYPES } from "../contracts/dtcg.js";
 import { entityTypeOfId } from "../contracts/entity-ids.js";
@@ -411,26 +412,28 @@ describe("Phase 0 repo Modelo: KontrastParoj (FR-16)", () => {
           components: [number, number, number];
           alpha?: number;
         };
-        // An overlay is measured on the surface the pair names (Spec 004), as the checks do.
+        // An overlay is measured on every surface it may lie on; the worst decides (Spec 004).
         const alpha = raw.alpha ?? 1;
-        const backdrop =
-          alpha < 1 && pair.backdrop !== undefined
-            ? toColor(resolvedToken(rezolvo, pair.backdrop).value)
-            : undefined;
-        const bg =
-          backdrop === undefined
-            ? toColor(raw)
-            : new Color(
-                "srgb",
-                toColor(raw)
-                  .to("srgb")
-                  .coords.map(
-                    (channel, index) =>
-                      (channel ?? 0) * alpha +
-                      (backdrop.to("srgb").coords[index] ?? 0) * (1 - alpha),
-                  ) as [number, number, number],
-              );
-        const ratio = bg.contrast(fg, "WCAG21");
+        const over = (surface: string): Color =>
+          new Color(
+            "srgb",
+            toColor(raw)
+              .to("srgb")
+              .coords.map(
+                (channel, index) =>
+                  (channel ?? 0) * alpha +
+                  (toColor(resolvedToken(rezolvo, surface).value).to("srgb").coords[index] ?? 0) *
+                    (1 - alpha),
+              ) as [number, number, number],
+          );
+        const ratio =
+          alpha < 1
+            ? Math.min(
+                ...(pair.backdrop ?? SURFACE_LADDER).map((surface) =>
+                  over(surface).contrast(fg, "WCAG21"),
+                ),
+              )
+            : toColor(raw).contrast(fg, "WCAG21");
         const where = `${pair.name} @ ${formatCombination(modelo, assignment)}`;
         expect(ratio, where).toBeGreaterThanOrEqual(thresholds[pair.kategorio]);
         const key = `${pair.name}/contrast=${rezolvo.assignment.contrast}`;

@@ -10,7 +10,13 @@ import { appendPointer } from "../../json/pointer.js";
 import { isJsonObject } from "../../load/guards.js";
 import { allAssignments, formatCombination } from "../../resolve/assignment.js";
 import { resolveCombination } from "../../resolve/resolve.js";
-import { alphaOf, compositeOver, readDtcgColor } from "./color.js";
+import {
+  alphaOf,
+  type BackdropSurface,
+  backdropSurfaces,
+  compositeOver,
+  readDtcgColor,
+} from "./color.js";
 import {
   type BranchMeasurement,
   combineBranches,
@@ -269,13 +275,15 @@ export function evaluateAlirebleco(
       const path = `rezolvo(${combination})/kontrastParo/${name}`;
       const context = { path, combination: { ...complete } };
       const auxPair = isJsonObject(pair.aux) ? pair.aux : undefined;
-      const backdropName = typeof pair.backdrop === "string" ? pair.backdrop : undefined;
+      const backdropNames = Array.isArray(pair.backdrop)
+        ? pair.backdrop.map((entry) => String(entry))
+        : undefined;
 
       /** Resolved colours of one branch, or undefined after reporting why they are missing. */
       const branchColors = (
         names: { foreground: string; background: string },
         label: string,
-      ): { foreground: ColorValue; background: ColorValue } | undefined => {
+      ): { foreground: ColorValue; background: ColorValue; surface?: string } | undefined => {
         const colors: Partial<Record<"foreground" | "background", ColorValue>> = {};
         for (const field of ["foreground", "background"] as const) {
           const tokenName = names[field];
@@ -303,52 +311,59 @@ export function evaluateAlirebleco(
           }
           colors[field] = color;
         }
-        const { foreground } = colors;
-        let { background } = colors;
+        const { foreground, background } = colors;
         if (foreground === undefined || background === undefined) return undefined;
-        // An overlay has no colour until it lies on something: with a backdrop the pair says what
-        // that is, and the composited colour is what a person sees (Spec 004).
-        if (alphaOf(background) < 1 && backdropName !== undefined) {
-          const resolvedBackdrop = own(resolution.tokens, backdropName);
-          const backdrop = readDtcgColor(resolvedBackdrop?.value);
-          if (backdrop === undefined) {
-            errors.push({
-              rule: "kontrastparo-background-transparent",
-              severity: "error",
-              ...context,
-              message: `KontrastParo '${name}': ${label}backdrop '${backdropName}' does not resolve to a DTCG color in ${combination}.`,
-              suggestion: `Give '${backdropName}' a color value in every combination, or drop the backdrop and use an opaque background.`,
-            });
-            return undefined;
-          }
-          if (alphaOf(backdrop) < 1) {
-            errors.push({
-              rule: "kontrastparo-background-transparent",
-              severity: "error",
-              ...context,
-              message: `KontrastParo '${name}': ${label}backdrop '${backdropName}' has alpha ${alphaOf(backdrop)} in ${combination}; an overlay on an overlay still has no colour.`,
-              suggestion: `Name an opaque surface as the backdrop of '${name}' (for example color.background.default).`,
-            });
-            return undefined;
-          }
-          background = compositeOver(background, backdrop);
-        }
+        // An overlay has no colour until it lies on something. The pair names the surfaces it may
+        // lie on, or the ladder is taken; every one of them is measured and the worst decides
+        // (Spec 004, maintainer's review of 2026-09-20).
         if (alphaOf(background) < 1) {
-          const origin = own(resolution.tokens, names.background)?.origin.set ?? CORE_SET_NAME;
-          errors.push({
-            rule: "kontrastparo-background-transparent",
-            severity: "error",
-            ...context,
-            message: `KontrastParo '${name}': ${label}background '${names.background}' has alpha ${alphaOf(background)} in ${combination}; contrast against an unknown backdrop cannot be determined.`,
-            suggestion: `Make '${names.background}' opaque (alpha 1) in set '${origin}', name the surface it lies on with "backdrop", or pair the foreground with an opaque background token.`,
-          });
-          return undefined;
+          const { surfaces, translucent } = backdropSurfaces(background, backdropNames, (token) =>
+            readDtcgColor(own(resolution.tokens, token)?.value),
+          );
+          if (translucent.length > 0) {
+            errors.push({
+              rule: "kontrastparo-background-transparent",
+              severity: "error",
+              ...context,
+              message: `KontrastParo '${name}': ${label}backdrop '${translucent[0]}' is translucent in ${combination}; an overlay on an overlay still has no colour.`,
+              suggestion: `Name opaque surfaces in the backdrop of '${name}' (for example color.background.default).`,
+            });
+            return undefined;
+          }
+          if (surfaces.length === 0) {
+            const origin = own(resolution.tokens, names.background)?.origin.set ?? CORE_SET_NAME;
+            errors.push({
+              rule: "kontrastparo-background-transparent",
+              severity: "error",
+              ...context,
+              message: `KontrastParo '${name}': ${label}background '${names.background}' has alpha ${alphaOf(background)} in ${combination} and no opaque surface to lie on.`,
+              suggestion: `Make '${names.background}' opaque (alpha 1) in set '${origin}', name the surfaces it lies on with "backdrop", or pair the foreground with an opaque background token.`,
+            });
+            return undefined;
+          }
+          // The worst surface decides: it is the one a person can meet.
+          const worst = surfaces
+            .map((surface) => ({
+              surface: surface.name,
+              color: compositeOver(background, surface.color),
+            }))
+            .reduce((least, entry) =>
+              WCAG2_METRIC.compute(foreground, entry.color) <
+              WCAG2_METRIC.compute(foreground, least.color)
+                ? entry
+                : least,
+            );
+          return { foreground, background: worst.color, surface: worst.surface };
         }
         return { foreground, background };
       };
 
       const mainNames = { foreground: pair.foreground, background: pair.background };
       const mainColors = branchColors(mainNames, "");
+      const onSurface = (branchValue: BranchMeasurement): string =>
+        branchValue === main && mainColors?.surface !== undefined
+          ? ` over ${mainColors.surface}`
+          : "";
       if (mainColors === undefined) {
         continue;
       }
@@ -428,6 +443,7 @@ export function evaluateAlirebleco(
           ...(aux === undefined ? {} : { aux }),
           passed,
           branch,
+          ...(mainColors.surface === undefined ? {} : { surface: mainColors.surface }),
         };
         measurements.push(measured);
       }
@@ -451,7 +467,7 @@ export function evaluateAlirebleco(
           const translucency = branchValue.composited
             ? ` (foreground alpha ${branchValue.foregroundAlpha} composited)`
             : "";
-          return `${branchValue.foreground} on ${branchValue.background} has ${metric.label} ${metric.formatValue(value)}${translucency}`;
+          return `${branchValue.foreground} on ${branchValue.background}${onSurface(branchValue)} has ${metric.label} ${metric.formatValue(value)}${translucency}`;
         };
         const alternative =
           position === 0 && aux !== undefined ? `, and the alternative pair ${describe(aux)}` : "";
@@ -465,7 +481,9 @@ export function evaluateAlirebleco(
           suggestion:
             position === 0 && aux !== undefined
               ? `Adjust '${pair.foreground}' or '${pair.background}', or give the alternative '${aux.foreground}' (set '${own(tokens, aux.foreground)?.origin.set ?? CORE_SET_NAME}') a step that reaches the threshold; do not lower the threshold.`
-              : `Adjust the token values of '${source.foreground}' (set '${fgSet}') or '${source.background}' (set '${bgSet}') for this combination; do not lower the threshold.`,
+              : mainColors?.surface !== undefined && source === main
+                ? `Adjust '${source.foreground}' (set '${fgSet}') or '${source.background}' (set '${bgSet}'), which is an overlay: on ${mainColors.surface} it has the least contrast of the surfaces it may lie on. Do not lower the threshold.`
+                : `Adjust the token values of '${source.foreground}' (set '${fgSet}') or '${source.background}' (set '${bgSet}') for this combination; do not lower the threshold.`,
         };
         (binding.severity === "error" ? errors : warnings).push(issue);
       }

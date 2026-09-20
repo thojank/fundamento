@@ -182,8 +182,10 @@ test("the contrast table shows WCAG, APCA and the change against the comparison 
   await expect(row.locator("td").nth(6)).toContainText(/bestanden|verfehlt/);
   // The rise of the advisory APCA findings against main, counted where both states have the
   // combination: this build has 144, the snapshot of main 72 (Spec 004 T010).
+  // An overlay names the surface it was measured on: the worst of the ladder (Spec 004).
+  await expect(table).toContainText("über color.background.");
   await expect(page.locator("#fm-vitrino-kontrasto p").first()).toContainText(
-    "In den 72 Kombinationen des Vergleichsstands: 1746 gegen 1296 (Veränderung +450)",
+    "In den 72 Kombinationen des Vergleichsstands: 1764 gegen 1296 (Veränderung +468)",
   );
 });
 

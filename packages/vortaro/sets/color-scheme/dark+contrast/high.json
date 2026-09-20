@@ -68,7 +68,7 @@
       },
       "tertiary": {
         "text": {
-          "$value": "{color.palette.accent.100}"
+          "$value": "{color.palette.accent.50}"
         }
       },
       "danger": {

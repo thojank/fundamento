@@ -1633,8 +1633,10 @@
           "$ref": "#/$defs/TokenName"
         },
         "backdrop": {
-          "description": "The surface a translucent background lies on. An overlay has no colour of its own; with a backdrop the check composites background over it and measures the result (Spec 004). The backdrop itself must be opaque.",
-          "$ref": "#/$defs/TokenName"
+          "description": "The surfaces a translucent background may lie on. An overlay has no colour of its own; the check composites the background over each of them and the worst result decides, naming the surface. Without this field every opaque surface role of the ladder (sunken, canvas, default, raised) is taken. Each named token must be opaque.",
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/TokenName" }
         },
         "kategorio": {
           "$ref": "#/$defs/KontrastKategorio"
