@@ -285,8 +285,8 @@
     {
       "id": "reg_01M2ZJ0YJ1VJKMQSNPR6TWCCV2",
       "name": "palette-even",
-      "statement": "In every combination of every Aspekto, a palette ramp falls strictly in OKLCH lightness, and no inner step differs from the median step of its ramp by more than the sojlo. The first and the last step of a ramp, the anchors (pure white, pure black) and alpha ramps are out.",
-      "kialo": "A ramp is a tool: whoever says 'one step darker' must get the same effect in the middle of every ramp. How fine a brand grades the ends is its own business — near white the eye needs smaller steps — but a jump in the middle makes the ramp unusable and shows up as a band in every gradient built from it.",
+      "statement": "In every combination of every Aspekto, a palette ramp falls strictly in OKLCH lightness, and no inner step differs from the median step of its ramp by more than the sojlo. Steps are measured as the rate per 100 step units, not as the raw distance. The first and the last step of a ramp, the anchors (pure white, pure black) and alpha ramps are out.",
+      "kialo": "A ramp is a tool: whoever says 'one step darker' must get the same effect in the middle of every ramp. Measured per 100 step units, because a ramp may number its steps unevenly (50, 100, 200, 300, 600) and still progress evenly; the raw distance would call such a ramp irregular although its rate is constant. How fine a brand grades the ends is its own business — near white the eye needs smaller steps and at the dark end a half step is common — but a jump in the middle makes the ramp unusable and shows up as a band in every gradient built from it.",
       "scope": "vortaro: color.palette.<ramp>.<step> in every combination",
       "checkability": "automatic",
       "appliesTo": {
@@ -349,8 +349,8 @@
     {
       "id": "reg_01M2ZJ0YJ3CWC217Q7VC1RS6VS",
       "name": "type-rhythm",
-      "statement": "In every combination of every Aspekto, the line height and the letter spacing of the typography roles fall as the font size grows.",
-      "kialo": "Long lines of large type need less leading and tighter tracking to stay one block of text; leading that grows with the size tears a headline apart. That is legibility, measurable and independent of taste.",
+      "statement": "In every combination of every Aspekto, inside a role family (display, headline, body, label, …) the line height and the letter spacing of the typography roles fall as the font size grows.",
+      "kialo": "Long lines of large type need less leading and tighter tracking to stay one block of text; leading that grows with the size tears a headline apart. Compared inside a family, because a label at 14 px is deliberately snugger than body text at 16 px: across families the measurement would judge a decision of the brand, not its rhythm. That is legibility, measurable and independent of taste.",
       "scope": "vortaro: typography.* in every combination",
       "checkability": "automatic",
       "appliesTo": {
