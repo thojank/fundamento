@@ -12,6 +12,25 @@ Almost every box on that sheet now has a name in Fundamento: the engine is the *
 
 Most of the tools named on the sketch have since disappeared or stalled. The architecture did not. That is the strongest argument for starting with a model: tools are projections, and projections can be replaced.
 
+## 2022: eight theses and a vision
+
+In May 2022 the same founder gave a talk called *The Future of Design – as Thorsten sees it (highly subjective)*. Its argument: every team uses the same tools, shares the same ideas, builds the same components, applies similar semantics and technologies on similar architectures – and still implements design by hand. Multiply those nine shared things by six forces from outside (AI, low code, standard platforms, automated pipelines, libraries, code first) and the result is **design automation**.
+
+The eight theses, as stated then:
+
+1. UI design and frontend development will be standardized above technical touchpoints and tools.
+2. Every possible interaction will be developed; additional ones will no longer be accepted by users or funded by companies.
+3. Handcrafted digital designs will become luxury goods, like haute couture.
+4. The worlds will converge through the integration of services between homegrown, low-code and standard platforms.
+5. Designers will need even more technical expertise.
+6. Microservices and microfrontends will prevail.
+7. Monolithic standard platforms become adaptable and invisible through design token pipelines.
+8. Everything that can be automated will be automated – including design.
+
+And the vision: AI-driven crawlers identify design tokens from public brand websites; design systems are created with configurators in a few steps, and by machines; designs are implemented through token APIs and pipelines; applications become throwaway goods; designers spend most of their time on users and processes, not pixels.
+
+Four years later most of this is observable. Tokens are extracted from websites by tools, the token format is a stable standard, agents read design systems through MCP, interfaces are generated per request. One prediction took a different path: it was not low-code platforms that took over implementation, but AI agents writing code. The direction held; the vehicle changed. Fundamento is the attempt to build the rest of that vision in the open: the importer, the configurator, the token pipeline, and the brand that follows its context – thesis 6 and 7 turned into a model.
+
 ## The question changed
 
 The first question was an operational one: how do we bring a new brand into a multi-brand design system without rebuilding it by hand? Shared core plus brand themes answered part of it. Colors, type, spacing, radius and motion became parameters of one system.
