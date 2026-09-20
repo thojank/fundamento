@@ -18,7 +18,7 @@ const config = new URL(
 test("every --fm-* property equals rezolvoj.json in every combination", async ({ page }) => {
   const source = projectModeloSource(config);
   const out = mkdtempSync(join(tmpdir(), "fm-computed-"));
-  const built = buildProjekcioj({ outDir: out, source });
+  const built = await buildProjekcioj({ outDir: out, source });
   expect(built.ok).toBe(true);
   const prepared = celoInputOf(source);
   if (!prepared.ok) throw new Error("unreachable");

@@ -28,7 +28,7 @@ Options:
 Exit codes: 0 written, 1 the Modelo is invalid (nothing written), 2 usage error.
 `;
 
-function run(args: readonly string[], context: CliContext): number {
+async function run(args: readonly string[], context: CliContext): Promise<number> {
   const { values, positionals } = parseFlags(
     args,
     { config: { type: "string" }, out: { type: "string" } },
@@ -48,7 +48,7 @@ function run(args: readonly string[], context: CliContext): number {
     context.baseDir,
     typeof values.out === "string" ? values.out : DEFAULT_OUT,
   );
-  const result = buildProjekcioj({ outDir, source });
+  const result = await buildProjekcioj({ outDir, source });
   for (const warning of result.warnings) context.stderr(`${formatIssue(warning)}\n`);
   if (!result.ok) {
     for (const error of result.errors) context.stderr(`${formatIssue(error)}\n`);

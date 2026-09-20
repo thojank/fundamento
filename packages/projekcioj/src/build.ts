@@ -4,7 +4,7 @@
 // regenerated with the same bytes. Nothing is written for an invalid Modelo.
 
 import { createHash } from "node:crypto";
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import {
   buildModelo,
@@ -21,7 +21,7 @@ import {
 import { CODE_CONNECT_CELO } from "./celoj/code-connect/code-connect.js";
 import { CSS_CELO } from "./celoj/css/css.js";
 import { FIGMA_CELO } from "./celoj/figma/figma.js";
-import { MAKE_KIT_CELO } from "./celoj/make-kit/make-kit.js";
+import { bundleMakeKits, MAKE_KIT_CELO } from "./celoj/make-kit/make-kit.js";
 import { REACT_CELO } from "./celoj/react/react.js";
 import { TAILWIND_CELO } from "./celoj/tailwind/tailwind.js";
 import { WEB_COMPONENT_CELO } from "./celoj/web-component/web-component.js";
@@ -68,6 +68,7 @@ export interface BuildOptions {
   fixtureRoot?: string;
 }
 
+/** The Celoj that only write sources; their package is bundled after the generation (D-14). */
 export type BuildResult =
   | { ok: true; celoj: string[]; files: string[]; warnings: ValidationIssue[] }
   | { ok: false; errors: ValidationIssue[]; warnings: ValidationIssue[] };
@@ -94,8 +95,8 @@ export function celoInputOf(
   };
 }
 
-/** Generates every Celo into `outDir`. */
-export function buildProjekcioj(options: BuildOptions): BuildResult {
+/** Generates every Celo into `outDir`; the Make Kits are bundled afterwards (`bundle`). */
+export async function buildProjekcioj(options: BuildOptions): Promise<BuildResult> {
   const source =
     options.source ??
     (options.fixtureRoot === undefined
@@ -122,6 +123,16 @@ export function buildProjekcioj(options: BuildOptions): BuildResult {
     files: hashes,
   };
   mkdirSync(options.outDir, { recursive: true });
+  writeFileSync(join(options.outDir, MANIFEST_FILE), `${JSON.stringify(manifest, null, 2)}\n`);
+  // The Make Kits are packages: after their sources come their bundles and types (D-14, T019).
+  // They are written by a bundler, not by a Celo, so the manifest hashes them from disk.
+  const bundled = await bundleMakeKits(options.outDir, prepared.input);
+  for (const file of bundled) {
+    hashes[file] = createHash("sha256")
+      .update(readFileSync(join(options.outDir, file)))
+      .digest("hex");
+  }
+  manifest.files = hashes;
   writeFileSync(join(options.outDir, MANIFEST_FILE), `${JSON.stringify(manifest, null, 2)}\n`);
   return {
     ok: true,

@@ -9,7 +9,7 @@ import { expect, test } from "@playwright/test";
 import { axeViolations, focusRingContrasts, TAB } from "./alirebleco.js";
 import { buildProjections, serve } from "./serve.js";
 
-const { out, input } = buildProjections();
+const { out, input } = await buildProjections();
 const butono = input.modelo.eroj.find((entry) => entry.ero.name === "butono");
 if (butono === undefined) throw new Error("butono missing");
 const combos = combinationsOf(butono.skemo, ["variant", "tone", "size"]);

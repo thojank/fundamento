@@ -6,7 +6,7 @@ import { expect, test } from "@playwright/test";
 import { build } from "vite";
 import { buildProjections, ORIGIN } from "./serve.js";
 
-const { out } = buildProjections();
+const { out } = await buildProjections();
 const dist = fileURLToPath(new URL("../dist/", import.meta.url));
 
 const ENTRY = `

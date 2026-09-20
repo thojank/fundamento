@@ -19,10 +19,10 @@ export const EKZEMPLO_CONFIG = fileURLToPath(
 );
 
 /** Builds the projections of core + komuna + ekzemplo once per worker. */
-export function buildProjections() {
+export async function buildProjections() {
   const source = projectModeloSource(EKZEMPLO_CONFIG);
   const out = mkdtempSync(join(tmpdir(), "fm-eroj-"));
-  const built = buildProjekcioj({ outDir: out, source });
+  const built = await buildProjekcioj({ outDir: out, source });
   if (!built.ok) throw new Error("core + ekzemplo must build");
   const prepared = celoInputOf(source);
   if (!prepared.ok) throw new Error("unreachable");

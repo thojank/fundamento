@@ -7,7 +7,9 @@
 // `MAKE_KIT_CELO` writes the sources; `buildMakeKits` additionally bundles them with Vite (ESM and
 // CJS) and writes the type declarations, so the package can be packed and installed (AK-08).
 
+import { execFileSync } from "node:child_process";
 import { mkdirSync, writeFileSync } from "node:fs";
+import { createRequire } from "node:module";
 import { dirname, join } from "node:path";
 import {
   type DtcgType,
@@ -20,7 +22,6 @@ import {
   nomRegulo,
   type Regulo,
 } from "@fundamento/modelo";
-import { build } from "vite";
 import { type Celo, type CeloInput, celoInputOf, type GeneratedFile } from "../../build.js";
 import { aspektoStylesheet } from "../css/css.js";
 import { componentName, reactSource } from "../react/react.js";
@@ -393,28 +394,64 @@ export async function buildMakeKits(
     mkdirSync(dirname(target), { recursive: true });
     writeFileSync(target, file.text);
   }
-  const kits: Record<string, string> = {};
-  for (const aspekto of aspektojOf(prepared.input.modelo)) {
+  const bundled = await bundleMakeKits(outDir, prepared.input);
+  // `bundled` lists files; a kit is the directory two levels above them.
+  return Object.fromEntries(
+    [...new Set(bundled.map((path) => path.split("/")[1] ?? ""))].map((aspekto) => [
+      aspekto,
+      join(outDir, DIR, aspekto),
+    ]),
+  );
+}
+
+/**
+ * Bundles the kit sources already written under `outDir` (ESM and CJS, React external) and writes
+ * the type declarations. Returns the relative directory of each kit.
+ */
+export async function bundleMakeKits(outDir: string, input: CeloInput): Promise<string[]> {
+  const kits: string[] = [];
+  for (const aspekto of aspektojOf(input.modelo)) {
     const dir = join(outDir, DIR, aspekto);
-    kits[aspekto] = dir;
-    await build({
-      configFile: false,
-      logLevel: "silent",
-      root: dir,
-      build: {
-        lib: {
-          entry: join(dir, "src/index.ts"),
-          formats: ["es", "cjs"],
-          // Vite 8 takes the returned name literally, extension included.
-          fileName: (format) => (format === "cjs" ? "index.cjs" : "index.js"),
-        },
-        outDir: join(dir, "dist"),
-        emptyOutDir: true,
-        minify: false,
-        rollupOptions: { external: ["react", "react-dom", "react/jsx-runtime"] },
-      },
-    });
-    writeFileSync(join(dir, "dist", "index.d.ts"), declarations(prepared.input));
+    kits.push(
+      `${DIR}/${aspekto}/dist/index.js`,
+      `${DIR}/${aspekto}/dist/index.cjs`,
+      `${DIR}/${aspekto}/dist/index.d.ts`,
+    );
+    bundle(dir);
+    writeFileSync(join(dir, "dist", "index.d.ts"), declarations(input));
   }
   return kits;
+}
+
+/**
+ * Bundles one kit in a child process whose working directory is the kit: the bundler writes module
+ * paths relative to the working directory, so building the same kit in two places gives the same
+ * bytes (AK-02).
+ */
+function bundle(dir: string): void {
+  const vite = createRequire(import.meta.url).resolve("vite");
+  const script = `
+import { pathToFileURL } from "node:url";
+const { build } = await import(pathToFileURL(${JSON.stringify(vite)}).href);
+await build({
+  configFile: false,
+  logLevel: "silent",
+  root: ".",
+  build: {
+    lib: {
+      entry: "src/index.ts",
+      formats: ["es", "cjs"],
+      fileName: (format) => (format === "cjs" ? "index.cjs" : "index.js"),
+    },
+    outDir: "dist",
+    emptyOutDir: true,
+    minify: false,
+    rollupOptions: { external: ["react", "react-dom", "react/jsx-runtime"] },
+  },
+});
+`;
+  execFileSync(process.execPath, ["--input-type=module", "-e", script], {
+    cwd: dir,
+    stdio: "pipe",
+  });
 }

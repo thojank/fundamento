@@ -24,4 +24,19 @@ describe("fm projekcioj build (T008)", () => {
     expect(run.stdout).toMatch(/^fm projekcioj build: wrote \d+ files for the Celoj .+ to /);
     expect(existsSync(join(out, "projekcioj.json"))).toBe(true);
   });
+
+  it("bundles every Make kit, so the output can be packed and published (T020)", () => {
+    const out = mkdtempSync(join(tmpdir(), "fm-cli-kits-"));
+    const env: NodeJS.ProcessEnv = { ...process.env, INIT_CWD: repoRoot };
+    const run = spawnSync(process.execPath, [built, "projekcioj", "build", "--out", out], {
+      cwd: repoRoot,
+      env,
+      encoding: "utf8",
+    });
+    expect(run.status).toBe(0);
+    for (const file of ["dist/index.js", "dist/index.cjs", "dist/index.d.ts", "package.json"]) {
+      expect(existsSync(join(out, "make-kit/komuna", file)), file).toBe(true);
+    }
+    expect(run.stdout).toContain("make-kit");
+  }, 300_000);
 });

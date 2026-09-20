@@ -463,4 +463,19 @@ One entry per Article of Constitution v1.5.
 
 ### Publish dry run (Q2)
 
-**Status:** pending (task T020). Records, per kit, the command, version, dist-tag, file list and packed size of `pnpm publish --dry-run --tag next --access public`.
+**Status:** done (T020, 2026-09-20). Nothing was published; the maintainer publishes after the acceptance, through the workflow `.github/workflows/release.yml` (npm Trusted Publishing, OIDC, no token anywhere).
+
+Command per kit, in `.fundamento/projekcioj/make-kit/<aspekto>/`:
+
+```
+pnpm publish --dry-run --tag next --provenance --access public --no-git-checks
+```
+
+Result (`--provenance` only works in the workflow, where the OIDC token exists; locally the same run without it):
+
+| Kit | Version | dist-tag | Files | Tarball | Unpacked |
+|---|---|---|---|---|---|
+| `@fundamento/make-kit-komuna` | 0.1.0-next.0 | next | 14 | 24 KiB | 172 KiB |
+| `@fundamento/make-kit-ekzemplo` | 0.1.0-next.0 | next | 14 | 24 KiB | 196 KiB |
+
+Both tarballs hold exactly: `package.json`, `README.md`, `styles.css`, `tailwind.css`, `dist/index.js`, `dist/index.cjs`, `dist/index.d.ts` and the seven `guidelines/` files. No sources, no tests, no workspace file, no font file. The unpacked content passes the clean-room fingerprints (T018).

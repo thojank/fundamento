@@ -9,7 +9,7 @@ const TAB = (browserName: string) => (browserName === "webkit" ? "Alt+Tab" : "Ta
 
 import { buildProjections, serve } from "./serve.js";
 
-const { out, input } = buildProjections();
+const { out, input } = await buildProjections();
 const butono = input.modelo.eroj.find((entry) => entry.ero.name === "butono");
 if (butono === undefined) throw new Error("butono missing");
 const skemo = butono.skemo;

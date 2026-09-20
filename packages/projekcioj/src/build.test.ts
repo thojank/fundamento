@@ -23,9 +23,9 @@ function hashes(dir: string): Record<string, string> {
 }
 
 describe("buildProjekcioj (T008)", () => {
-  it("writes a manifest listing every Celo and the SHA-256 of every file it wrote", () => {
+  it("writes a manifest listing every Celo and the SHA-256 of every file it wrote", async () => {
     const out = mkdtempSync(join(tmpdir(), "fm-projekcioj-"));
-    const result = buildProjekcioj({ outDir: out });
+    const result = await buildProjekcioj({ outDir: out });
     if (!result.ok) throw new Error("the repo Modelo must build");
     expect(result.celoj).toEqual(CELOJ.map((celo) => celo.name));
     const manifest = JSON.parse(readFileSync(join(out, "projekcioj.json"), "utf8")) as {
@@ -38,28 +38,28 @@ describe("buildProjekcioj (T008)", () => {
     expect(manifest.files).toEqual(written);
   });
 
-  it("is byte-identical over two builds (AK-02)", () => {
+  it("is byte-identical over two builds (AK-02)", async () => {
     const first = mkdtempSync(join(tmpdir(), "fm-projekcioj-"));
     const second = mkdtempSync(join(tmpdir(), "fm-projekcioj-"));
-    buildProjekcioj({ outDir: first });
-    buildProjekcioj({ outDir: second });
+    await buildProjekcioj({ outDir: first });
+    await buildProjekcioj({ outDir: second });
     expect(hashes(second)).toEqual(hashes(first));
   });
 
-  it("regenerates deleted outputs with the same SHA-256 (AK-02)", () => {
+  it("regenerates deleted outputs with the same SHA-256 (AK-02)", async () => {
     const out = mkdtempSync(join(tmpdir(), "fm-projekcioj-"));
-    buildProjekcioj({ outDir: out });
+    await buildProjekcioj({ outDir: out });
     const before = hashes(out);
     rmSync(out, { recursive: true, force: true });
-    buildProjekcioj({ outDir: out });
+    await buildProjekcioj({ outDir: out });
     expect(hashes(out)).toEqual(before);
   });
 
-  it("refuses an invalid Modelo and writes nothing", () => {
+  it("refuses an invalid Modelo and writes nothing", async () => {
     const out = mkdtempSync(join(tmpdir(), "fm-projekcioj-"));
     const invalid = new URL("../../modelo/test/fixtures/invalid/skemo-schema/", import.meta.url)
       .pathname;
-    const result = buildProjekcioj({ outDir: out, fixtureRoot: invalid });
+    const result = await buildProjekcioj({ outDir: out, fixtureRoot: invalid });
     expect(result.ok).toBe(false);
     expect(readdirSync(out)).toEqual([]);
   });

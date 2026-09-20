@@ -5,7 +5,7 @@ import { expect, test } from "@playwright/test";
 import { TAB } from "./alirebleco.js";
 import { buildProjections, serve } from "./serve.js";
 
-const { out } = buildProjections();
+const { out } = await buildProjections();
 
 /** Pseudo-localisation: accented and non-Latin characters, padded to `factor` of the length. */
 function pseudo(text: string, factor: number): string {
