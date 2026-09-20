@@ -153,9 +153,10 @@ A mutation check (one changed value must make the test fail) replaces the red ru
 
 ## Stage 8 – Quickstart and docs
 
-- [ ] **T027 Quickstart, README, vojmapo, traceability** (Art. XIII, AK-07, D-18)
+- [x] **T027 Quickstart, README, vojmapo, traceability** (Art. XIII, AK-07, D-18)
   - Red: `packages/eroj/test/quickstart.spec.ts` packs `eroj`, creates a Vite project, imports one CSS file, renders `<fm-butono>` and `<Butono>`, switches `data-fm-aspekto` and `data-fm-color-scheme` without reload, all under five minutes; `docs/docs.test.ts`: README lists `projekcioj`, `eroj`, the CSS attributes, the Make Kits and the three new CI steps; `plan.md` traceability maps every FR/AK to task IDs; vojmapo Phase 3 status.
   - Green: README, vojmapo, plan traceability; byte-identical export and `check:clean-room` confirmed. Then the Phase-3 PR.
+  - Done notes: both red runs happened. The documentation test failed on four of five points (no "Eroj quickstart" section, the two rendered checks missing from the README, no task IDs in the plan's traceability, the vojmapo still saying "in Umsetzung"). The quickstart test failed on the switch: after `data-fm-aspekto="ekzemplo"` the control still showed komuna's colour, because the fill transitions (`motion.duration.fast`) and the first read caught the old value — the test now polls, which is what a user sees. It runs in Chromium only (the other two engines skip it; one build proves the path) and took 6–17 s of the five-minute budget. The plan's traceability table became requirement → design → tasks, with `FR-18` recorded as a decision without a task and `AK-10` pointing at the manual acceptance M3.
 
 ## Manual acceptance (maintainer, after the PR)
 

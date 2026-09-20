@@ -53,6 +53,37 @@ An Aspekto (a brand) is a package: a folder with `aspekto.json` (owner, license,
 
 Every Aspekto must set every token the reference Aspekto sets (`aspekto-incomplete` lists what is missing) and must pass Alirebleco in every combination. The fixture `packages/modelo/test/fixtures/valid/aspekto-ekzemplo/` is a complete example.
 
+## Eroj quickstart
+
+The path a user takes, proved end to end in under five minutes by `packages/eroj/test/quickstart.spec.ts` (AK-07): generate, install, render, switch.
+
+```sh
+pnpm fm projekcioj build --config fundamento.config.json --out .fundamento/projekcioj
+# .fundamento/projekcioj/css/fundamento.css carries every loaded Aspekto
+npm pack --pack-destination /tmp packages/eroj     # a workspace package, installed like any tarball
+```
+
+In a fresh Vite project with `@fundamento/eroj` installed and `fundamento.css` copied in:
+
+```jsx
+import "./fundamento.css";
+import "@fundamento/eroj/define";            // registers <fm-butono> once
+import { Butono } from "@fundamento/eroj/react";
+
+<html lang="de" data-fm-aspekto="komuna" data-fm-color-scheme="light">
+  <fm-butono variant="primary">Speichern</fm-butono>   {/* plain HTML */}
+  <Butono variant="primary" type="submit">Weiter</Butono>  {/* React 18 and 19 */}
+```
+
+Both projections are the same element with the same tokens. Switching brand or colour scheme is one attribute on `<html>`, without a reload and without a rebuild:
+
+```js
+document.documentElement.setAttribute("data-fm-aspekto", "ekzemplo");
+document.documentElement.setAttribute("data-fm-color-scheme", "dark");
+```
+
+The other Dimensioj work the same way: `data-fm-contrast`, `data-fm-density`, `data-fm-viewport`, `data-fm-motion`. For Tailwind v4, import `tailwind/fundamento.tailwind.css` as well and use `bg-fm-action-primary-rest` and friends. A designer gets the same Ero through the Figma plan (`figma/plan.json` with its plugin) and through the Make Kit of an Aspekto.
+
 ## Packages
 
 Everything lives in one workspace; the npm org for published packages is
@@ -90,12 +121,16 @@ Each check is its own command and its own named CI step. Exit 0 = pass, 1 = chec
 | Command | Proves |
 |---|---|
 | `pnpm check:vortaro-lint` | No literal values in Projekcio CSS; the `--fm-` / `fm-` / `@fundamento/` namespace rule over the repo (Art. X gate 1). |
-| `pnpm check:parity` | Two normalized inventories agree in props, values and states (Art. X gate 2; empty inventory in Phase 0). |
+| `pnpm check:parity` | Every projection agrees with the Skemo of its Ero in props, values, states and documented defaults (Art. X gate 2). The command builds the projections first; each Celo writes what it emitted to `parity/<side>.json`, and the check compares those files with the Modelo. |
 | `pnpm check:regularo` | Every Regulo has a `kialo`; every Jugxo references something that exists (Art. X gate 3). Automatic Reguloj are enforced by `fm modelo validate`, and every issue they raise cites the Regulo with its ID and kialo. |
 | `pnpm check:alirebleco` | Every KontrastParo meets its thresholds in all 72 combinations: WCAG 2.x binding, APCA advisory (Art. X gate 4). A non-text pair may name an alternative pair `aux` (e.g. a status border); `--json` lists the pair × combination results the alternative carries under `branches`. |
 | `pnpm check:clean-room` | Nothing from a benchmark directory is in or referenced by the repo; every identifier is in the Fundamento namespace (Art. V). |
+| `pnpm check:alirebleco-eroj` | axe-core and the focus ring on the rendered `fm-butono` in Chromium, Firefox and WebKit, in every colour class of both Aspektoj. |
+| `pnpm check:make-kit` | Each Make Kit installs from its packed tarball into a fresh Vite project and builds and renders there, with React 18.3 and with React 19.3 + Tailwind 4.3, in plain HTML without React, and on a server without a DOM. |
 
-Every check accepts `--json` (stdout carries only the result JSON), `--fixture <dir>` (checks that directory instead of the repo; relative paths resolve against the directory you run pnpm from, like `fm`) and `--help`:
+The last two render in a real browser: install the engines once with `pnpm --filter @fundamento/eroj exec playwright install --with-deps chromium firefox webkit` (CI does it in its own step).
+
+Every check accepts `--json` (stdout carries only the result JSON), `--fixture <dir>` (checks that directory instead of the repo; relative paths resolve against the directory you run pnpm from, like `fm`) and `--help`; parity also takes `--projekcioj <dir>` to compare another build:
 
 ```sh
 pnpm check:regularo --fixture packages/modelo/test/fixtures/invalid/regularo-without-kialo

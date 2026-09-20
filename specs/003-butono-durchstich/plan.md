@@ -429,37 +429,39 @@ One entry per Article of Constitution v1.5.
 7. Gvidanto tools and the dialog (AK-09); quickstart (AK-07); README and vojmapo.
 8. Manual acceptance by the maintainer: Figma library (S3), Make Kits (S4), S5 run.
 
-## Traceability (requirement → decision)
+## Traceability (requirement → design → tasks)
 
-| Requirement | Design |
-|---|---|
-| FR-01, FR-02 | D-02 |
-| FR-03 | D-04, D-02 (constraint), Q1 |
-| FR-04 | D-03 |
-| FR-05 | D-05 |
-| FR-06 | D-06 |
-| FR-07 | D-07 |
-| FR-08 | D-08 |
-| FR-09 | D-12 |
-| FR-10 | D-13 |
-| FR-06 (amended naming) | D-06, Constitution v1.6 |
-| FR-11 | D-14, Q2 |
-| FR-12 | D-15 |
-| FR-13, FR-14 | D-16 |
-| FR-15 | D-09 |
-| FR-16 | D-17 |
-| FR-17 | D-10 |
-| FR-18 | D-11 |
-| AK-01 | D-03 |
-| AK-02 | D-01 |
-| AK-03 | D-05, D-12 (simulator), D-09 |
-| AK-04 | D-15 |
-| AK-05 | D-09 |
-| AK-06 | D-17 |
-| AK-07 | D-18 |
-| AK-08 | D-14 |
-| AK-09 | D-16 |
-| AK-10 | D-13 (manual) |
+Task IDs are those of [`tasks.md`](tasks.md); M1–M3 are the maintainer's manual acceptance.
+
+| Requirement | Design | Tasks |
+|---|---|---|
+| FR-01, FR-02 | D-02 | T001, T002, T003 |
+| FR-03 | D-04, D-02 (constraint), Q1 | T003, T006 |
+| FR-04 | D-03 | T004, T005 |
+| FR-05 | D-05 | T009, T015 |
+| FR-06 | D-06 | T010 |
+| FR-07 | D-07 | T011, T012 |
+| FR-08 | D-08 | T012 |
+| FR-09 | D-12 | T016, T017 |
+| FR-10 | D-13 | T017 |
+| FR-06 (amended naming) | D-06, Constitution v1.6 | T010 |
+| FR-11 | D-14, Q2 | T018, T019, T020 |
+| FR-12 | D-15 | T021 |
+| FR-13, FR-14 | D-16 | T022, T023, T024, T025 |
+| FR-15 | D-09 | T008, T011, T013 |
+| FR-16 | D-17 | T014 |
+| FR-17 | D-10 | T002 |
+| FR-18 | D-11 | decision only, no task |
+| AK-01 | D-03 | T004, T005 |
+| AK-02 | D-01 | T008 |
+| AK-03 | D-05, D-12 (simulator), D-09 | T009, T011, T015, T016 |
+| AK-04 | D-15 | T021 |
+| AK-05 | D-09 | T011, T013 |
+| AK-06 | D-17 | T014 |
+| AK-07 | D-18 | T027, T026 (budgets); M1 |
+| AK-08 | D-14 | T018, T019, T020; M2 |
+| AK-09 | D-16 | T025 |
+| AK-10 | D-13 (manual) | M3 |
 
 ## Manual acceptance results
 
