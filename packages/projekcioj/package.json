@@ -18,6 +18,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "test": "vitest run",
+    "check:bazo": "vitest run --config vitest.bazo.config.ts",
     "perf": "vitest run --config vitest.perf.config.ts",
     "lint": "tsc -p tsconfig.json --noEmit && biome check ."
   },

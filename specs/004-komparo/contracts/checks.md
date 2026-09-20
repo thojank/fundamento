@@ -20,8 +20,14 @@ pnpm check:clean-room --config fundamento.config.json   # Listen aus "markoSpuro
 
 ```sh
 pnpm fm projekcioj build --out .fundamento/projekcioj   # erzeugt vitrino/index.html
-pnpm check:vitrino                                      # Playwright, Chromium
+pnpm check:vitrino                                      # Vergleichsstand (Vitest) + Playwright, Chromium
 ```
+
+Der Schritt besteht aus zwei Teilen: `pnpm --filter @fundamento/projekcioj run check:bazo` prüft den
+Vergleichsstand (`fm modelo mezuroj`, Veränderung je Paar, Zählung nur über gemeinsame Kombinationen),
+danach läuft die gerenderte Prüfung in Chromium. Beide stehen außerhalb des parallelen Test-Gates: der
+Vergleichsstand baut das Modelo viermal und brauchte auf dem CI-Runner 105,9 s, genug, um den
+MCP-Tests ihre 30-s-Grenze zu nehmen.
 
 - Läuft außerhalb des parallelen Test-Gates, wie `check:make-kit` und `check:quickstart` (Erfahrung aus Phase 3).
 - Prüft, was in [`vitrino.md`](vitrino.md) §5 als gerendert markiert ist.

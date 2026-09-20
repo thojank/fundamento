@@ -22,7 +22,7 @@
     "check:alirebleco-eroj": "pnpm --filter @fundamento/eroj run check:alirebleco",
     "check:make-kit": "pnpm --filter @fundamento/eroj run check:make-kit",
     "check:quickstart": "pnpm --filter @fundamento/eroj run check:quickstart",
-    "check:vitrino": "pnpm --filter @fundamento/eroj run check:vitrino",
+    "check:vitrino": "pnpm --filter @fundamento/projekcioj run check:bazo && pnpm --filter @fundamento/eroj run check:vitrino",
     "id:new": "node packages/modelo/dist/ids/cli.js new",
     "id:retire": "node packages/modelo/dist/ids/cli.js retire",
     "vortaro:themes": "node packages/modelo/dist/themes/cli.js",
