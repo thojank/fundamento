@@ -216,4 +216,115 @@ Results go into `plan.md` → „Manual acceptance results".
 | Q2 | T018, T020 |
 | Q3, Q4 | T028; vojmapo Phase 7 (done with the plan) |
 
+## Nachtrag aus der Abnahme M1 (2026-09-20)
+
+- [x] **F8 Die Figma-Projektion gibt den Alphawert wieder** (Abnahme M1, FR-06, AK-04)
+  - Befund: `setBoundVariableForPaint(paint, "color", variable)` bindet nur RGB; die Deckkraft des
+    SolidPaint bleibt 1. `plan.json` trägt Alpha korrekt (`figmaColor` schreibt `a`), der Verlust
+    entsteht beim Binden. 22 Variablen tragen Alpha, 14 davon sichtbar; tatsächlich gebunden sind
+    vier Rollen — `color/action/tertiary/{rest,hover,pressed,disabled}`, je an `surface.fill` und
+    `border.color`. Beobachtet an `tertiary/rest` (a = 0), das deckend schwarz rendert.
+  - Rot 1 (Prüfung zuerst): Die Parity-Seiten führen **aufgelöste Werte**. Die Figma-Seite gibt
+    wieder, was das Plugin anwendet (Paint samt Deckkraft), nicht was die Variable enthält; die
+    Skemo-Seite gibt den Wert des Modelo. F8 wird damit in `check:parity` sichtbar, bevor eine
+    Zeile Plugin geändert ist.
+  - Rot 2 (gemockte Plugin-API): ein Token mit a = 0 ist nach der Bindung nicht deckend; ein Token
+    mit 8 % Deckung hat `opacity === 0.08` und behält die Bindung an `color`.
+  - Grün: **eine** Regel, kein Sonderfall für a = 0 — `paint.opacity = a`, die Bindung an `color`
+    bleibt in jedem Fall bestehen. Ein entfernter Paint (`fills = []`) würde die Bindung tilgen:
+    im Figma-File wäre nicht mehr zu sehen, welche Variable die Fläche regiert, und ein späterer
+    Moduswechsel könnte sie nicht zurückholen. Verhält sich Figma bei Deckkraft 0 unerwartet, wird
+    das gemessen und berichtet, nicht angenommen.
+  - Grün: Die Fallentscheidung quantifiziert über **alle Modi aller Dimensioj, `aspekto`
+    eingeschlossen**. Eine Marke, deren tertiäre Fläche deckend ist, darf nicht die Entscheidung
+    der Referenzmarke aufgedrückt bekommen; kommt eine Aspekto hinzu, wird neu ausgewertet oder
+    die Prüfung bricht hörbar.
+  - Grün: Modusabhängiges Alpha (`color/shadow/key` 0,25 → 0,5, `color/shadow/ambient` 0,1 → 0,25)
+    ist mit einer statischen Deckkraft nicht darstellbar. Festgehalten als Jugxo mit der Grenze und
+    der Option „Auflagen-Knoten mit FLOAT-Begleitvariable", **und durchgesetzt** von einem Wächter
+    in den Projektionsprüfungen: Wird ein Token mit modusabhängigem Alpha an einen Paint gebunden,
+    schlägt die Prüfung fehl und die Meldung zeigt auf den Jugxo. Kein dauerhaft roter Test.
+  - Fertig wenn: `check:parity` vergleicht Werte, die vier tertiären Rollen erscheinen in Figma mit
+    ihrer Deckkraft, der Wächter ist grün und bricht bei einer Verletzung.
+  - Done notes (2026-09-20): Gemessen an komuna + ekzemplo: genau vier gebundene Rollen betroffen
+    (`color/action/tertiary/{rest,hover,pressed,disabled}`), je `surface.fill` und `border.color`,
+    8 Bindungen, 36 Befunde bei zwei Marken, grün bei einer. Roter Lauf zuerst
+    (`expected undefined to be +0`). Vergleichssemantik ausdrücklich entschieden: Die Skemo-Seite
+    behält den konkreten Wert (das Modelo spricht nicht über Flächen und Deckkraft eines
+    Werkzeugs, Art. VIII), die Figma-Seite meldet `alpha varies by mode (<variable>)`, und das Paar
+    ist eine benannte Differenz unter `parity-alpha-varies-by-mode` — keine stille Gleichheit.
+    Jugxoj: `jug_01M307X4DQQWRFTDXB1S5CGPN9` (Grenze samt Auslösebedingung),
+    `jug_01M307X4DSSZY7Y72NR9V9086N` (Treue wird vom manuellen Lauf belegt, nicht von den
+    Prüfungen). Gemessen wird an **allen drei** gebundenen Farbstellen: `surface.fill` (fills des
+    control), `border.color` (strokes des control) und `label.color` (fills des label), je 0 /
+    0,08 / 1 mit vorhandener Bindung — „durch Bauart belegt" zählt nicht (Maintainer). Die
+    Mutation (`bound.opacity` entfernt) lässt alle fünf Tests fallen. Befund am Rande, der mehr wog als der Anlass: Das Double der Plugin-API schluckte
+    jede direkte Zuweisung; es zeichnet sie jetzt auf und wirft bei einem Mitglied, das es nicht
+    modelliert (`jug_01M3094ZC6F3XZ1H0MWQZ62MYV`). AK-12 wurde dabei auf das eingeengt, was es
+    sagt: `ref.celo` als strukturiertes Feld, Prosa darf das Werkzeug nennen, geprüft von
+    `celo-mappings.ts` mit rotem Test am echten Export.
+
+- [x] **F9 Composite-Tokens werden nie zu einer Zeichenkette** (Abnahme M1, FR-06)
+  - Befund: `elevation/shadow/{raised,overlay,modal,floating}` stehen als sichtbare STRING-Variablen
+    mit dem Wert `[object Object]` bzw. `[object Object],[object Object]` im Plan — sie gingen so in
+    die veröffentlichte Bibliothek. Die übrigen STRING-Werte (Schriftfamilien, Bezierkurven,
+    Strichart) sind sauber.
+  - Rot: Ein Composite-Fixture erzeugt heute eine solche Zeichenkette; erwartet wird stattdessen
+    entweder ein Figma-Effekt oder gar keine Variable mit Kialo. Dazu ein genereller Wächter: kein
+    Variablenwert entsteht durch implizite String-Umwandlung eines Objekts.
+  - Grün: Schatten werden übersetzt oder mit Kialo weggelassen; der Wächter läuft über den ganzen
+    Plan.
+  - Fertig wenn: kein Variablenwert im Plan enthält `[object Object]`, und der Wächter fängt einen
+    neu eingeführten Fall.
+  - Done notes (2026-09-20): Übersetzt statt weggelassen. Ein Verbund wird feldweise projiziert wie
+    Typografie und Rahmen (`elevation/shadow/raised/blur`), ein Schatten mit mehreren Lagen
+    nummeriert sie (`elevation/shadow/floating/2/color`). Die Zahl der Lagen wird über alle
+    Kombinationen entschieden, `aspekto` eingeschlossen; eine Aspekto mit weniger Lagen bekommt für
+    die fehlende eine durchsichtige Farbe und Maße 0 (ekzemplo wirft nach Marken-Regulo gar keinen
+    Schatten). Wächter: `figmaValue` wirft bei jedem Objekt, das ohne Feldzerlegung in den Plan
+    wollte. Roter Lauf zuerst, vier Fehlschläge, darunter
+    `expected [ 'border/default/style', …(33) ] to deeply equal []` (die Prüfung fand die vier
+    Schatten) und `expected [Function] to throw an error` (der Wächter). AK-03 läuft unverändert
+    gegen `rezolvoj.json`. Jugxo `jug_01M309V3ZRGTFGNK9DHKAD2R74`; das Binden an einen Effekt steht
+    in der Vojmapo, heute verlangt keine Ero Höhe.
+
+- [x] **F10 Befund: 71 statt 72 Varianten im Figma-File** (Abnahme M1)
+  - Befund zuerst, Korrektur danach. Stand der Untersuchung: `plan.json` enthält **72** Varianten
+    mit 72 eindeutigen Namen (Kreuzprodukt 108 minus die 36 Kombinationen, die die Skemo-Regel
+    `tone=danger` nur mit `variant=primary` erlaubt). Der Verlust entsteht also erst beim Anwenden.
+  - Zu prüfen: (a) ein zweiter Lauf gegen ein Set, das ein älterer Plan angelegt hat — `made`
+    sammelt nur neue Knoten, vorhandene werden nur aktualisiert; (b) ein Variantenknoten, dessen
+    `sharedPluginData` verloren ging; (c) Figmas Verhalten in `combineAsVariants`.
+  - Grün: Das Plugin meldet je Komponente, wie viele Varianten es angelegt, aktualisiert und
+    vorgefunden hat, und warnt, wenn das Set nach dem Lauf eine andere Zahl Kinder hat als der Plan
+    Varianten — aus „71 statt 72" wird ein Befund, den eine Prüfung sieht.
+  - Done notes (2026-09-20): Variante 1 wie entschieden, keine Sicht per MCP. Der Bericht nennt je
+    Komponente `created`, `updated`, `missing` und `extra` mit den Namen der Varianten, warnt
+    symmetrisch in beide Richtungen und steht vollständig in `console.log`; die Kopfzeile geht in
+    den Toast („Der ganze Bericht steht in der Konsole."). Eine abgelehnte Zusage verschwindet
+    nicht mehr: `.catch` schreibt `console.error` und meldet „Lauf fehlgeschlagen" als Fehler-Toast.
+    Roter Lauf zuerst, vier Fehlschläge (`expected undefined to be 'butono'`,
+    `expected '' to contain 'Inter fehlt'`). Der Lauf in einer frisch angelegten, leeren Datei
+    steht beim Maintainer aus; erst er entscheidet, ob „71 statt 72" Dateigeschichte war.
+
+- [ ] **F11 Die Figma-Projektion überträgt keine Geometrie und keine Beschriftung** (Abnahme M1,
+  FR-06, AK-04)
+  - Befund (Maintainer, 2026-09-20, aus der Liste der blinden Stellen zu F8): Das Plugin setzt nie
+    `layoutMode`. Damit sind die Bindungen an `paddingLeft`, `itemSpacing`, `minWidth` und
+    `minHeight` in Figma wirkungslos — Maße, Innenabstände, Abstand und damit die Größe des Ero
+    sind nicht die Werte des Modells. Das erklärt die 100 × 100 aus der Abnahme: Figmas Vorgabewert
+    für einen leeren Rahmen, kein Wert von uns. Zusammen mit `characters`, das nie gesetzt wird,
+    heißt das: **Die Projektion trägt heute Farben und nichts sonst.**
+  - Rot zuerst: (a) eine Prüfung, die für eine Variante Höhe, Breite, Innenabstand, Abstand und
+    Radius aus dem Modelo gegen den Knoten hält; (b) eine Prüfung, die die Beschriftung des
+    label-Knotens gegen die Skemo hält; (c) im Double: eine Bindung an `paddingLeft`,
+    `itemSpacing`, `minWidth` oder `minHeight` ohne gesetzten Layoutmodus **muss laut scheitern** —
+    die erste echte Anwendung von `jug_01M3094ZC6F3XZ1H0MWQZ62MYV`, denn ein Double, das diese
+    Bindung stillschweigend annimmt, schluckt wieder.
+  - Grün: Layoutmodus und Beschriftung werden gesetzt; die Projektionsprüfung deckt Geometrie ab,
+    nicht nur Farbe (Parity-Aspekt über Maße, nicht nur `paints`).
+  - Fertig wenn: Eine Variante in Figma trägt die Maße und die Beschriftung des Modells, die
+    Prüfung sieht eine Abweichung, und das Double weist die Bindung ohne Layoutmodus zurück.
+  - Nicht Teil des PRs zu F8–F10: eigener Befund, eigener Durchstich.
+
 Consistency check before tasks (`/speckit.analyze` scope): every FR and AK maps to at least one task or a recorded decision; every task maps to a plan decision; two new packages (Art. XI); the lockfile changes in T008 only; no task lowers a threshold; nothing is published.

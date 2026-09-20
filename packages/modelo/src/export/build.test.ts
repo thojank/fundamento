@@ -14,8 +14,8 @@ import { readModeloSchema } from "../contracts/schema.js";
 import { buildModelo } from "../load/build.js";
 import { readModeloFiles } from "../load/files.js";
 import { defaultModeloSource } from "../load/source.js";
-import { TAILWIND_NAMESPACES } from "../nomreguloj/tailwind.js";
 import { fixtureRoot } from "../resolve/test-doubles/fixtures.js";
+import { celoMappingLeaks } from "./celo-mappings.js";
 import { describeModelo } from "./describe.js";
 import { EXPORT_FILE_NAMES, exportModelo } from "./export-modelo.js";
 
@@ -136,46 +136,19 @@ describe("the S6 dialog from dist/modelo.json alone (AK-06)", () => {
 });
 
 describe("no Celo-specific mappings in the export (AK-12, Art. VIII)", () => {
-  const FORBIDDEN_KEY_WORDS = ["tailwind", "css", "figma"];
-  const FORBIDDEN_TEXT = [
-    "--fm-",
-    "--color-",
-    "@theme",
-    "tailwind",
-    "figma",
-    ...TAILWIND_NAMESPACES.map((entry) => entry.namespace.replace("*", "")),
-  ];
-
-  function collectKeys(node: unknown, out: string[] = []): string[] {
-    if (Array.isArray(node)) {
-      for (const item of node) collectKeys(item, out);
-    } else if (typeof node === "object" && node !== null) {
-      for (const [key, value] of Object.entries(node)) {
-        out.push(key);
-        collectKeys(value, out);
-      }
-    }
-    return out;
-  }
-
-  it.each([EXPORT_FILE_NAMES.modelo, EXPORT_FILE_NAMES.schema])("%s has no Celo keys", (name) => {
-    const keys = collectKeys(JSON.parse(readDist(name)));
-    expect(keys.length).toBeGreaterThan(0);
-    for (const word of FORBIDDEN_KEY_WORDS) {
-      expect(
-        keys.filter((key) => key.toLowerCase().includes(word)),
-        word,
-      ).toEqual([]);
-    }
+  // Narrowed on 2026-09-20: the check asks for mappings, not for words. A Jugxo that declares its
+  // Celo in `ref.celo` may name the tool in its prose; see `celo-mappings.ts`.
+  it.each([EXPORT_FILE_NAMES.modelo, EXPORT_FILE_NAMES.schema])("%s carries none", (name) => {
+    const document = JSON.parse(readDist(name)) as unknown;
+    expect(celoMappingLeaks(document)).toEqual([]);
   });
 
-  it.each([EXPORT_FILE_NAMES.modelo, EXPORT_FILE_NAMES.schema])(
-    "%s contains no Tailwind namespaces or derived CSS names",
-    (name) => {
-      const text = readDist(name).toLowerCase();
-      for (const needle of FORBIDDEN_TEXT) {
-        expect(text, needle).not.toContain(needle);
-      }
-    },
-  );
+  // The guard for the narrowing: a real mapping — a token that carries the name a Celo gives it —
+  // still trips the check, in the real export, not only in a fixture.
+  it("still trips when a token carries the name a Celo gives it", () => {
+    const document = JSON.parse(readDist(EXPORT_FILE_NAMES.modelo)) as Record<string, unknown>;
+    const token = (document.tokens as Record<string, unknown>[])[0] ?? {};
+    token.nomo = "--color-border-default";
+    expect(celoMappingLeaks(document)).toEqual([{ pointer: "/tokens/0/nomo", needle: "--color-" }]);
+  });
 });

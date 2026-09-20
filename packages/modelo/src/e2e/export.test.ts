@@ -6,10 +6,9 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import type { ModeloJson } from "../contracts/modelo.js";
+import { celoMappingLeaks } from "../export/celo-mappings.js";
 import { EXPORT_FILE_NAMES } from "../export/export-modelo.js";
 import { describeModelo } from "../index.js";
-import { CELOJ } from "../nomreguloj/index.js";
-import { TAILWIND_NAMESPACES } from "../nomreguloj/tailwind.js";
 import {
   MODELO_DIST,
   type Run,
@@ -86,46 +85,27 @@ describe("AK-10: building twice is byte-identical", () => {
 });
 
 describe("AK-12: the export carries no Celo-specific mappings", () => {
+  // Narrowed on 2026-09-20 (maintainer's decision): AK-12 asks for mappings. A Jugxo that declares
+  // its Celo in `ref.celo` may name the tool in its prose — `celo-mappings.ts` holds the reading.
   const texts = [EXPORT_FILE_NAMES.modelo, EXPORT_FILE_NAMES.schema].map(
     (name) => [name, readFileSync(join(MODELO_DIST, name), "utf8")] as const,
   );
 
-  function keysOf(node: unknown, out: string[] = []): string[] {
-    if (Array.isArray(node)) {
-      for (const item of node) keysOf(item, out);
-    } else if (typeof node === "object" && node !== null) {
-      for (const [key, value] of Object.entries(node)) {
-        out.push(key);
-        keysOf(value, out);
-      }
-    }
-    return out;
-  }
-
-  it.each(texts)("AK-12: %s has no key naming a Celo", (_name, text) => {
-    const keys = keysOf(JSON.parse(text)).map((key) => key.toLowerCase());
-    expect(keys.length).toBeGreaterThan(0);
-    for (const celo of CELOJ.filter((candidate) => candidate !== "dtcg")) {
-      expect(
-        keys.filter((key) => key.includes(celo)),
-        celo,
-      ).toEqual([]);
-    }
+  it.each(texts)("AK-12: %s carries no Celo-specific mapping", (_name, text) => {
+    expect(celoMappingLeaks(JSON.parse(text))).toEqual([]);
   });
 
-  it.each(texts)(
-    "AK-12: %s contains no derived Celo names or Tailwind namespaces",
-    (_name, text) => {
-      const lower = text.toLowerCase();
-      for (const needle of [
-        "--fm-",
-        "@theme",
-        "tailwind",
-        "figma",
-        ...TAILWIND_NAMESPACES.map((entry) => entry.namespace.replace("*", "")),
-      ]) {
-        expect(lower, needle).not.toContain(needle);
-      }
-    },
-  );
+  // The narrowing did not soften the check: a Jugxo that names a tool without declaring it still
+  // trips, and so does a key that names a Celo.
+  it("AK-12: a Celo named in prose without the typed reference still trips", () => {
+    const document = JSON.parse(texts[0]?.[1] ?? "{}") as { jugxoj: Record<string, unknown>[] };
+    const jugxo = document.jugxoj.find(
+      (entry) => (entry.ref as { celo?: string }).celo !== undefined,
+    );
+    if (jugxo === undefined) throw new Error("the Modelo must carry a Jugxo of a Celo");
+    const ref = jugxo.ref as { celo: string };
+    const celo = ref.celo;
+    delete (jugxo.ref as { celo?: string }).celo;
+    expect(celoMappingLeaks(document).map((leak) => leak.needle)).toContain(celo);
+  });
 });

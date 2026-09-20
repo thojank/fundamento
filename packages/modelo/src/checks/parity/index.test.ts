@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterEach, describe, expect, it } from "vitest";
 import type { CheckResult } from "../../contracts/checks.js";
-import { skemoParityInventory } from "../../eroj/inventories.js";
+import { baseResolution, skemoParityInventory } from "../../eroj/inventories.js";
 import { loadModelo } from "../../load/load-modelo.js";
 import { defaultModeloSource } from "../../load/source.js";
 import { check } from "./index.js";
@@ -52,6 +52,8 @@ const EMPTY = '{ "items": {} }';
 
 const { modelo } = loadModelo(defaultModeloSource());
 const EROJ = modelo?.eroj ?? [];
+/** The base combination, the state the sides state their resolved values in (F8). */
+const RESOLVED = modelo === undefined ? {} : baseResolution(modelo);
 
 /** The inventories a correct build writes, one file per side (T021). */
 function correctSides(): Record<string, ParityInventory> {
@@ -61,8 +63,15 @@ function correctSides(): Record<string, ParityInventory> {
       props: "styled",
     }),
     "react.json": skemoParityInventory(EROJ, { aspects: ["props"] }),
-    "figma.json": skemoParityInventory(EROJ, { aspects: ["props", "states"] }),
-    "guidelines-komuna.json": skemoParityInventory(EROJ),
+    // The Figma side restates the resolved paints as well (Spec 003 F8), so a correct build
+    // carries them; the guidelines document props, states and defaults.
+    "figma.json": skemoParityInventory(EROJ, {
+      aspects: ["props", "states", "paints"],
+      resolved: RESOLVED,
+    }),
+    "guidelines-komuna.json": skemoParityInventory(EROJ, {
+      aspects: ["props", "states", "values"],
+    }),
   };
 }
 

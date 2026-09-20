@@ -86,6 +86,7 @@ export const RULE_IDS = [
   // Regularo (FUND-3.2, FUND-4.4)
   "regulo-kialo-missing",
   "jugxo-ref-missing",
+  "jugxo-celo-unknown",
   // KontrastParoj (FUND-3.2, FUND-4.5)
   "kontrastparo-token-missing",
   "kontrastparo-not-color",
@@ -119,6 +120,7 @@ export const RULE_IDS = [
   "parity-value-mismatch",
   "parity-state-mismatch",
   "parity-binding-mismatch",
+  "parity-alpha-varies-by-mode",
   // Eroj and Skemoj (Spec 003, data-model §7)
   "skemo-token-missing",
   "skemo-token-type",

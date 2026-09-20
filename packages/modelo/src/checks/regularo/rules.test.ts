@@ -77,6 +77,47 @@ describe("checkRegularo: kialo", () => {
   });
 });
 
+// A Jugxo that belongs to a Celo declares it in the typed field `ref.celo` (maintainer's decision
+// of 2026-09-20 on AK-12). The reference itself stays what it was: a Regulo, an Ero or an Article.
+describe("checkRegularo: the Celo of a Jugxo", () => {
+  it("passes a Jugxo that names its Celo beside the Article", () => {
+    const result = run(
+      { reguloj: [regulo()] },
+      { jugxoj: [jugxo({ artikolo: "VIII", celo: "figma" })] },
+    );
+    expect(result.issues).toEqual([]);
+    expect(result.stats).toEqual({ reguloj: 1, jugxoj: 1 });
+  });
+
+  it("reports a celo that names no Celo the code knows, at ref/celo", () => {
+    const result = run(
+      { reguloj: [regulo()] },
+      { jugxoj: [jugxo({ artikolo: "VIII", celo: "sketch" })] },
+    );
+    expect(rulesAndPaths(result.issues)).toEqual([
+      { rule: "jugxo-celo-unknown", path: "data/jugxoj.json#/jugxoj/0/ref/celo" },
+    ]);
+    expect(result.issues[0]?.suggestion).toContain("figma");
+  });
+
+  it("reports a celo that is not a string", () => {
+    const result = run({ reguloj: [regulo()] }, { jugxoj: [jugxo({ artikolo: "VIII", celo: 3 })] });
+    expect(rulesAndPaths(result.issues)).toEqual([
+      { rule: "jugxo-celo-unknown", path: "data/jugxoj.json#/jugxoj/0/ref/celo" },
+    ]);
+  });
+
+  it("takes no other key beside the reference", () => {
+    const result = run(
+      { reguloj: [regulo()] },
+      { jugxoj: [jugxo({ artikolo: "VIII", aspekto: "komuna" })] },
+    );
+    expect(rulesAndPaths(result.issues)).toEqual([
+      { rule: "jugxo-ref-missing", path: "data/jugxoj.json#/jugxoj/0/ref" },
+    ]);
+  });
+});
+
 describe("checkRegularo: Jugxo references", () => {
   it("passes a Jugxo that references a constitution Article", () => {
     const result = run({ reguloj: [regulo()] }, { jugxoj: [jugxo({ artikolo: "X" })] });

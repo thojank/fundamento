@@ -706,6 +706,10 @@ export interface Jugxo {
  */
 export interface JugxoReguloRef {
   regulo: ReguloId;
+  /**
+   * The Celo this Jugxo belongs to. Which names exist is knowledge of the projections and lives in code, not here (Article VIII).
+   */
+  celo?: string;
 }
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema
@@ -713,6 +717,10 @@ export interface JugxoReguloRef {
  */
 export interface JugxoEroRef {
   ero: EroId;
+  /**
+   * The Celo this Jugxo belongs to. Which names exist is knowledge of the projections and lives in code, not here (Article VIII).
+   */
+  celo?: string;
 }
 /**
  * A constitution Article (I to XIII), for Jugxoj that record a deviation from the constitution itself.
@@ -723,6 +731,10 @@ export interface JugxoEroRef {
 export interface JugxoArtikoloRef {
   artikolo:
     "I" | "II" | "III" | "IV" | "V" | "VI" | "VII" | "VIII" | "IX" | "X" | "XI" | "XII" | "XIII";
+  /**
+   * The Celo this Jugxo belongs to. Which names exist is knowledge of the projections and lives in code, not here (Article VIII).
+   */
+  celo?: string;
 }
 /**
  * A machine-readable example of the Jugxo: instances right (approved) or wrong (rejected), optionally for one Regulo.

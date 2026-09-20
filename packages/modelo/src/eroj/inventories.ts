@@ -5,24 +5,51 @@
 // the side all of them are compared with, and this module states it. Reading a projection is Celo
 // knowledge and stays in `@fundamento/projekcioj` (Art. VIII); only the comparison lives here.
 
+import { alphaOf, readDtcgColor } from "../checks/alirebleco/color.js";
 import type { ParityInventory, ParityItem } from "../checks/parity/inventory.js";
 import type {
   LoadedEro,
+  Modelo,
+  ResolvedToken,
   Skemo,
   SkemoPartProperty,
   SkemoPartSource,
   SkemoProp,
 } from "../contracts/modelo.js";
-import { STATE_KEY } from "./skemo-rules.js";
+import type { ColorValue } from "../generated/modelo-schema.js";
+import { allAssignments } from "../resolve/assignment.js";
+import { resolveCombination } from "../resolve/resolve.js";
+import { boundToken, combinationsOf, PART_PROPERTY_TYPES, STATE_KEY } from "./skemo-rules.js";
 
-/** What a side of the comparison restates; a side that has no states compares props only. */
-export const PARITY_ASPECTS = ["props", "states", "values"] as const;
+/**
+ * What a side of the comparison restates; a side that has no states compares props only. `values`
+ * are the named values a side documents (`default.<prop>`), `paints` the resolved colours per
+ * variant and part (`<part>.<property>@<variant>`, F8). Both live in the same `values` map of the
+ * file; the key shape says which aspect a value belongs to.
+ */
+export const PARITY_ASPECTS = ["props", "states", "values", "paints"] as const;
+
+/** A resolved part colour, not a documented default: `surface.fill@size=…,state=…`. */
+export const isParityPaintKey = (key: string): boolean => key.includes("@");
+
+/**
+ * What a side writes for a binding it cannot express because the alpha of the token is not the
+ * same in every mode (F8). The comparison treats it as a named difference, never as equal: the
+ * Modelo keeps its value, the projection says it cannot show it.
+ */
+export const PARITY_ALPHA_VARIES = "alpha varies by mode";
 
 export type ParityAspect = (typeof PARITY_ASPECTS)[number];
 
 export interface SkemoInventoryOptions {
   /** Defaults to every aspect. */
   aspects?: readonly ParityAspect[];
+  /**
+   * Resolved tokens of the base combination. With them the inventory states the colour every
+   * projection has to show, per variant and part — the values F8 showed a projection can lose
+   * (Abnahme M1). Without them the inventory keeps only the defaults, as before.
+   */
+  resolved?: Readonly<Record<string, ResolvedToken>>;
   /**
    * `all` (default) takes every prop; `styled` takes only the props a part binding is keyed by,
    * the ones a stylesheet can express.
@@ -72,7 +99,11 @@ export function restrictParityInventory(
     items[name] = {
       props: aspects.includes("props") ? item.props : {},
       states: aspects.includes("states") ? [...item.states] : [],
-      values: aspects.includes("values") ? { ...item.values } : {},
+      values: Object.fromEntries(
+        Object.entries(item.values).filter(([key]) =>
+          aspects.includes(isParityPaintKey(key) ? "paints" : "values"),
+        ),
+      ),
     };
   }
   return { items };
@@ -99,7 +130,90 @@ export function skemoParityInventory(
       props[prop.name] = propValues(prop);
       if (prop.default !== undefined) values[`default.${prop.name}`] = String(prop.default);
     }
+    if (options.resolved !== undefined) {
+      Object.assign(values, skemoPartValues(skemo, options.resolved));
+    }
     items[entry.ero.name] = { props, states: [...skemo.states], values };
   }
   return restrictParityInventory({ items }, aspects);
+}
+
+/** The resolved tokens of the base combination: every Dimensio at its default (Spec 003 T021). */
+export function baseResolution(modelo: Modelo): Readonly<Record<string, ResolvedToken>> {
+  const base: Record<string, string> = {};
+  for (const dimensio of modelo.dimensioj) base[dimensio.name] = dimensio.default;
+  return resolveCombination(modelo, base).tokens;
+}
+
+/** Every combination of every Dimensio, resolved — the view a decision over all modes needs. */
+export function allResolutions(
+  modelo: Modelo,
+): { assignment: Record<string, string>; tokens: Readonly<Record<string, ResolvedToken>> }[] {
+  return allAssignments(modelo).map((assignment) => ({
+    assignment,
+    tokens: resolveCombination(modelo, assignment).tokens,
+  }));
+}
+
+/** `#rrggbb` for an opaque colour, `#rrggbb/<alpha>` for a translucent one. Canonical text. */
+export function parityColorText(color: ColorValue): string {
+  const channel = (component: number | "none"): string =>
+    Math.round((component === "none" ? 0 : component) * 255)
+      .toString(16)
+      .padStart(2, "0");
+  const hex =
+    typeof color.hex === "string"
+      ? color.hex.toLowerCase().slice(0, 7)
+      : `#${color.components.map(channel).join("")}`;
+  const alpha = alphaOf(color);
+  return alpha >= 1 ? hex : `${hex}/${Number(alpha.toFixed(4))}`;
+}
+
+/** The variant name a value key carries: every keyed prop and the state, in canonical order. */
+export function parityVariantKey(combination: Readonly<Record<string, string>>): string {
+  return Object.keys(combination)
+    .sort()
+    .map((key) => `${key}=${combination[key]}`)
+    .join(",");
+}
+
+/** The keys a Skemo varies its part bindings by: the keyed enum props and the state. */
+function variantKeys(skemo: Skemo): string[] {
+  const keyed = new Set<string>();
+  for (const partProperties of Object.values(skemo.parts)) {
+    for (const source of Object.values(partProperties)) {
+      if (source !== undefined && "by" in source) for (const key of source.by) keyed.add(key);
+    }
+  }
+  return [
+    ...skemo.props
+      .filter((prop) => prop.kind === "enum" && keyed.has(prop.name))
+      .map((prop) => prop.name),
+    STATE_KEY,
+  ];
+}
+
+/**
+ * Per variant and colour-bearing part property, the resolved colour as canonical text. A
+ * projection that shows something else — a lost alpha, a wrong step — differs here, and
+ * `check:parity` says so (F8).
+ */
+export function skemoPartValues(
+  skemo: Skemo,
+  resolved: Readonly<Record<string, ResolvedToken>>,
+): Record<string, string> {
+  const values: Record<string, string> = {};
+  for (const combination of combinationsOf(skemo, variantKeys(skemo))) {
+    for (const [part, partProperties] of Object.entries(skemo.parts)) {
+      for (const property of Object.keys(partProperties)) {
+        if (PART_PROPERTY_TYPES[property as SkemoPartProperty] !== "color") continue;
+        const bound = boundToken(skemo, part, property, combination);
+        if (bound === undefined) continue;
+        const color = readDtcgColor(resolved[bound.token]?.value);
+        if (color === undefined) continue;
+        values[`${part}.${property}@${parityVariantKey(combination)}`] = parityColorText(color);
+      }
+    }
+  }
+  return values;
 }

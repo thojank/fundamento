@@ -5,6 +5,12 @@
 import { formatIssuePath, type RuleId, type ValidationIssue } from "../../contracts/issues.js";
 import { isKonstitucioArtikolo, KONSTITUCIO_ARTIKOLOJ } from "../../contracts/jugxo.js";
 import { appendPointer } from "../../json/pointer.js";
+import { CELOJ } from "../../nomreguloj/types.js";
+
+/** Celo names are Celo knowledge: they live in code, never in the schema or the data (Art. VIII). */
+function isCelo(value: unknown): boolean {
+  return typeof value === "string" && (CELOJ as readonly string[]).includes(value);
+}
 
 /** One strictly parsed data file; `file` is relative to the Modelo root. */
 export interface RegularoDocument {
@@ -153,7 +159,7 @@ export function checkRegularo(input: RegularoInput): RegularoResult {
             const refPointer = appendPointer(pointer, "ref");
             issues.push(
               issue(
-                "jugxo-ref-missing",
+                finding.rule ?? "jugxo-ref-missing",
                 file,
                 finding.key === undefined ? refPointer : appendPointer(refPointer, finding.key),
                 finding.message,
@@ -176,12 +182,19 @@ function documents(
   return Array.isArray(value) ? value : [value as RegularoDocument];
 }
 
+interface RefFinding {
+  key?: "regulo" | "ero" | "artikolo" | "celo";
+  rule?: RuleId;
+  message: string;
+  suggestion: string;
+}
+
 function checkRef(
   jugxo: Record<string, unknown>,
   name: string,
   reguloIds: ReadonlySet<string>,
   eroIds: ReadonlySet<string>,
-): { key?: "regulo" | "ero" | "artikolo"; message: string; suggestion: string } | undefined {
+): RefFinding | undefined {
   const shape = `Give Jugxo ${name} a ref of exactly { "regulo": "<reg_ id>" }, { "ero": "<ero_ id>" } or { "artikolo": "<I..XIII>" }.`;
   const ref = jugxo.ref;
   if (!isPlainObject(ref)) {
@@ -190,12 +203,23 @@ function checkRef(
       suggestion: shape,
     };
   }
-  const keys = Object.keys(ref);
+  // `celo` is the one key that may stand beside the reference: the typed name of the Celo a Jugxo
+  // belongs to (AK-12, narrowed on 2026-09-20). Which names exist is Celo knowledge, so it lives
+  // in code, never in the schema or the data (Art. VIII).
+  const keys = Object.keys(ref).filter((candidate) => candidate !== "celo");
   const [key] = keys;
   if (keys.length !== 1 || (key !== "regulo" && key !== "ero" && key !== "artikolo")) {
     return {
       message: `Jugxo ${name} must reference exactly one Regulo, Ero or Article; its ref has ${keys.length === 0 ? "no keys" : `the keys ${keys.join(", ")}`}.`,
       suggestion: shape,
+    };
+  }
+  if ("celo" in ref && !isCelo(ref.celo)) {
+    return {
+      key: "celo",
+      rule: "jugxo-celo-unknown",
+      message: `Jugxo ${name} names the Celo ${JSON.stringify(ref.celo)}, which no Celo of Fundamento is called.`,
+      suggestion: `Use one of the Celoj ${CELOJ.join(", ")}, or drop "celo".`,
     };
   }
   const target = ref[key];

@@ -23,12 +23,13 @@
     {
       "id": "jug_01M2XKF2X28C4EGJ8R4VMVGCB8",
       "ref": {
-        "artikolo": "XII"
+        "artikolo": "XII",
+        "celo": "tailwind"
       },
       "decision": "deviation-recorded",
-      "kialo": "Die NomRegulo von Celo 2 legt den Namensraum fm in den Theme-Schlüssel statt prefix(fm) zu nutzen, denn prefix() benennt alle Klassen des Projekts um, auch die des Host-Projekts, etwa in einem Make Kit.",
+      "kialo": "Die NomRegulo von Celo 2 (Tailwind) legt den Namensraum fm in den Theme-Schlüssel statt prefix(fm) zu nutzen, denn prefix() benennt alle Klassen des Projekts um, auch die des Host-Projekts, etwa in einem Make Kit.",
       "date": "2026-09-19",
-      "context": "Constitution v1.6, Art. XII Celo 2 (Spec 003, D-06, T002). Breaking change of that NomRegulo: the Phase-0 form assumed prefix(fm), so a colour token gave the utility fm:bg-action-primary-rest and every class of the host project needed the fm: prefix; the new form puts fm after the namespace in the theme key, giving bg-fm-action-primary-rest, whose value refers to the CSS Celo's variable. derive_name returns the new form; no consumer of the old form existed."
+      "context": "Constitution v1.6, Art. XII Celo 2, Tailwind (Spec 003, D-06, T002). Der Celo steht als ref.celo, deshalb darf die Prosa ihn beim Namen nennen (AK-12 in der Lesart vom 2026-09-20). Breaking change of that NomRegulo: the Phase-0 form assumed prefix(fm), so a colour token gave the utility fm:bg-action-primary-rest and every class of the host project needed the fm: prefix; the new form puts fm after the namespace in the theme key, giving bg-fm-action-primary-rest, whose value refers to the CSS Celo's variable. derive_name returns the new form; no consumer of the old form existed."
     },
     {
       "id": "jug_01M2XKF38358Z6WQH9KARYJ6F3",
@@ -261,6 +262,50 @@
       "kialo": "Keine Aspiro „APCA nicht schlechter als Stand X\". Alle Textpaare bestehen beide Maße mit Reserve, und APCA ist noch nicht normativ; ein Ziel auf eine Zahl, die kein Standard nennt, würde eine Bewegung der Werte binden, die WCAG 2 gerade verbessert. Der Anstieg der beratenden Hinweise (1 296 → 1 764 in denselben 72 Kombinationen) ist die gewollte Folge von komuna 2: die Flächen sind von reinem Weiß und reinem Schwarz weggerückt, das hebt die schwächsten Verhältnisse und senkt die Helligkeitsdifferenz, die APCA misst. Statt einer Aspiro zeigt die Vitrino die Hinweise je Kategorie mit Anzahl, schlechtestem Lc und Veränderung gegenüber dem Vergleichsstand — eine bloße Gesamtzahl sagt nichts.",
       "date": "2026-09-20",
       "context": "Spec 004, Etappe A; Entscheidung des Maintainers bei der Durchsicht von 4678259, ergänzend zu jug_01M2XKF38358Z6WQH9KARYJ6F3 (APCA bleibt beratend, Spec 003 FR-17). Neu zu prüfen, wenn der Kontrast von WCAG 3 Candidate Recommendation erreicht."
+    },
+    {
+      "id": "jug_01M307X4DQQWRFTDXB1S5CGPN9",
+      "ref": {
+        "artikolo": "VIII",
+        "celo": "figma"
+      },
+      "decision": "deviation-recorded",
+      "kialo": "Figma bindet an einer Fläche nur die Farbe an eine Variable; die Deckkraft der Fläche ist dort nicht bindbar. Die Projektion setzt sie deshalb fest — in jedem Fall, auch bei 0, damit die Bindung im Dokument sichtbar bleibt. Das trägt jede Deckkraft, die in allen Modi dieselbe ist. **Auslösebedingung der Grenze:** Sobald eine zweite Aspekto auf einer gebundenen Rolle eine andere Transparenz hat als die erste, ist diese Rolle dort nicht mehr treu darstellbar — eine Fläche trägt eine Deckkraft, die Modusumschaltung verlangt zwei. Gemessen am 2026-09-20 an der Komposition komuna + ekzemplo: betroffen sind genau vier gebundene Rollen, color.action.tertiary.rest, .hover, .pressed und .disabled, je an surface.fill und border.color; keine weitere. Die Projektionsprüfung meldet den Fall als parity-alpha-varies-by-mode und lässt ihn nicht als Gleichheit durchgehen. Weg aus der Grenze (Option, nicht umgesetzt): ein Auflagen-Knoten je gebundenem Teil, dessen Deckkraft an eine Zahl-Variable gebunden ist; die Transparenz läuft dann durch dieselbe Kaskade versteckter Helfer wie die Farben — derselbe Mechanismus auf einen zweiten Typ angewandt, neu ist nur der Knoten. Aufgenommen in die Vojmapo für die Phase, in der die zweite Aspekto ankommt.",
+      "date": "2026-09-20",
+      "context": "Spec 003 F8, Befund der Abnahme M1; Prüfung: check:parity, Regel parity-alpha-varies-by-mode. Der Celo steht als ref.celo, deshalb darf die Prosa das Werkzeug beim Namen nennen (AK-12 in der Lesart vom 2026-09-20)."
+    },
+    {
+      "id": "jug_01M307X4DSSZY7Y72NR9V9086N",
+      "ref": {
+        "artikolo": "X",
+        "celo": "figma"
+      },
+      "decision": "approved",
+      "kialo": "Die Treue der Projektion nach Figma wird durch den manuellen Lauf des Maintainers belegt, nicht durch die Prüfungen. Kein dateibasierter Vergleich sieht, was das Werkzeug zur Laufzeit tut; die Prüfungen laufen gegen ein Double, und das ist unsere Annahme über das Werkzeug, nicht das Werkzeug. Weicht das Double ab, ist die Projektion blind geprüft — mit grüner CI. Deshalb ist die manuelle Abnahme keine Zeremonie, sondern die einzige Messung am echten Ziel. Damit dieser Lauf eine Messung und kein Augenschein ist, meldet die Projektion je Komponente angelegte, aktualisierte und vorgefundene Varianten und warnt symmetrisch, wenn die Komponente nach dem Lauf mehr oder weniger Teile hat als der Plan Varianten, mit den Namen der fehlenden und der überzähligen. Befund, der das nötig machte: 71 statt 72 Varianten in einem Dokument mit gemischter Vorgeschichte.",
+      "date": "2026-09-20",
+      "context": "Spec 003 F8 und F10, Abnahme M1. Ergänzt AK-04 (Parität) um die Grenze des Prüfbaren."
+    },
+    {
+      "id": "jug_01M3094ZC6F3XZ1H0MWQZ62MYV",
+      "ref": {
+        "artikolo": "X",
+        "celo": "figma"
+      },
+      "decision": "approved",
+      "kialo": "Ein Double, das schluckt, ist schlechter als gar keines: Was ein Testdouble nicht modelliert, muss laut scheitern — stillschweigend annehmen darf es nichts. Sonst ist die grüne CI eine Aussage über nichts. Beleg vom heutigen Tag: Das Double der Figma-Plugin-API war ein einfaches Objekt. Das Plugin setzt Flächen und Maße direkt am Knoten (node.fills = […], minHeight, cornerRadius); das Double legte diese Zuweisungen weder ab noch meldete es sie, und snapshot() zeigte sie nicht. Der verlorene Alphakanal (F8) war damit für jede Prüfung unsichtbar, unabhängig von der Güte der Tests — auch der Idempotenzvergleich verglich an dieser Stelle nichts mit nichts. Umgestellt: Das Double zeichnet jede direkte Zuweisung auf, snapshot() zeigt sie, und der Zugriff auf ein Mitglied der API, das es nicht modelliert, wirft einen Fehler, der das Mitglied benennt. Die zweite Unterscheidung gehört dazu: aufgezeichnet ist nicht zugesichert. Was das Double festhält und kein Test liest, bleibt eine blinde Stelle und gehört in den Bericht — heute: die Knotenbindungen für strokeWeight, minHeight, minWidth, paddingLeft, itemSpacing, cornerRadius und fontSize, die Fläche des label-Knotens, der nie gesetzte Beschriftungstext, und alle Vorbedingungen, die Figma prüft und das Double nicht (Auto-Layout für Abstände und Mindestmaße, Typverträglichkeit einer Bindung, Zahl der Modi je Sammlung, gelesene Eigenschaften, die nie geschrieben wurden).",
+      "date": "2026-09-20",
+      "context": "Spec 003 F8, Abnahme M1; Befund und Vorgabe des Maintainers vom 2026-09-20 bei der Durchsicht von Schritt 4. Gilt für jedes Double in diesem Repository, nicht nur für dieses. Prüfung: packages/projekcioj/src/celoj/figma/test-doubles/plugin.ts mit den Tests in plugin.test.ts („refuses an API member it does not model\", „the paint carries the alpha of its token\")."
+    },
+    {
+      "id": "jug_01M309V3ZRGTFGNK9DHKAD2R74",
+      "ref": {
+        "artikolo": "VIII",
+        "celo": "figma"
+      },
+      "decision": "deviation-recorded",
+      "kialo": "Figma-Variablen tragen COLOR, FLOAT, STRING und BOOLEAN — keinen Verbund und keine Liste. Ein Schatten ist beides. Bis heute kam er als Zeichenkette \"[object Object]\" im Plan an: ein Wert, der aussieht wie ein Wert und keiner ist. Entschieden: Ein Verbund wird feldweise projiziert, wie Typografie und Rahmen es schon werden (elevation/shadow/raised/blur), und ein Schatten mit mehreren Lagen nummeriert sie (elevation/shadow/floating/2/color). Die Zahl der Lagen wird über alle Kombinationen entschieden, aspekto eingeschlossen; eine Aspekto mit weniger Lagen bekommt für die fehlende eine vollständig durchsichtige Farbe und Maße von 0 — in einer Datei, deren Variablen in jedem Modus dieselben sind, heißt „diese Lage gibt es hier nicht\" genau das. Grenze, die bleibt: Die Variablen sind angelegt und benannt, aber an keinen Effekt gebunden; keine Ero verlangt heute Höhe. Der Wächter gegen den Rückfall ist eine Ausnahme in figmaValue: Wer einen Verbund ohne Feldzerlegung in den Plan schreiben will, bekommt einen Fehler mit dem Namen des Typs, keine Zeichenkette.",
+      "date": "2026-09-20",
+      "context": "Spec 003 F9, Befund der Abnahme M1 (Maintainer, 2026-09-20). Prüfungen: figma.test.ts „leaves no variable holding an object as a string\", „refuses to write an object as a string instead of stringifying it (guard)\" und der Lauf gegen rezolvoj.json (AK-03). Das Binden der Schattenvariablen an einen Effekt steht in docs/vojmapo.md."
     }
   ]
 }

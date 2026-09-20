@@ -7,6 +7,7 @@ import { formatIssuePath, type RuleId, type ValidationIssue } from "../contracts
 import { isKonstitucioArtikolo, KONSTITUCIO_ARTIKOLOJ } from "../contracts/jugxo.js";
 import type { Modelo } from "../contracts/modelo.js";
 import type { ModeloDocument, ModeloFiles } from "../load/files.js";
+import { CELOJ } from "../nomreguloj/types.js";
 import { isJsonObject, type JsonObject, rawEntries } from "./raw.js";
 
 export const CONTRAST_DIMENSIO = "contrast";
@@ -249,6 +250,11 @@ function reguloIssues(document: ModeloDocument): ValidationIssue[] {
   });
 }
 
+/** Celo names are Celo knowledge: they live in code, never in the schema or the data (Art. VIII). */
+function isCelo(value: unknown): boolean {
+  return typeof value === "string" && (CELOJ as readonly string[]).includes(value);
+}
+
 /**
  * `jugxo-ref-missing`: a Jugxo refers to an existing Regulo (`{ regulo: id }`), Ero
  * (`{ ero: id }`, an Ero in `data/eroj/`) or constitution
@@ -268,7 +274,21 @@ function jugxoIssues(
     const pointer = `/jugxoj/${index}`;
     const name = typeof entry.id === "string" ? entry.id : `#${index}`;
     const ref = entry.ref;
-    if (isJsonObject(ref) && typeof ref.regulo === "string" && Object.keys(ref).length === 1) {
+    // `celo` may stand beside the reference: the Celo a Jugxo belongs to, as a typed field
+    // (AK-12, narrowed on 2026-09-20). The names live in code, never in the data (Art. VIII).
+    const keys = isJsonObject(ref) ? Object.keys(ref).filter((key) => key !== "celo").length : 0;
+    if (isJsonObject(ref) && "celo" in ref && !isCelo(ref.celo)) {
+      return [
+        issueAt(
+          document,
+          `${pointer}/ref/celo`,
+          "jugxo-celo-unknown",
+          `Jugxo ${name} names the Celo ${JSON.stringify(ref.celo)}, which no Celo of Fundamento is called.`,
+          `Use one of the Celoj ${CELOJ.join(", ")}, or drop "celo".`,
+        ),
+      ];
+    }
+    if (isJsonObject(ref) && typeof ref.regulo === "string" && keys === 1) {
       return reguloIds.has(ref.regulo)
         ? []
         : [
@@ -281,7 +301,7 @@ function jugxoIssues(
             ),
           ];
     }
-    if (isJsonObject(ref) && "artikolo" in ref && Object.keys(ref).length === 1) {
+    if (isJsonObject(ref) && "artikolo" in ref && keys === 1) {
       return isKonstitucioArtikolo(ref.artikolo)
         ? []
         : [
@@ -294,7 +314,7 @@ function jugxoIssues(
             ),
           ];
     }
-    if (isJsonObject(ref) && typeof ref.ero === "string" && Object.keys(ref).length === 1) {
+    if (isJsonObject(ref) && typeof ref.ero === "string" && keys === 1) {
       return eroIds.has(ref.ero)
         ? []
         : [
