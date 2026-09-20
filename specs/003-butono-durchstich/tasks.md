@@ -255,7 +255,10 @@ Results go into `plan.md` → „Manual acceptance results".
     ist eine benannte Differenz unter `parity-alpha-varies-by-mode` — keine stille Gleichheit.
     Jugxoj: `jug_01M307X4DQQWRFTDXB1S5CGPN9` (Grenze samt Auslösebedingung),
     `jug_01M307X4DSSZY7Y72NR9V9086N` (Treue wird vom manuellen Lauf belegt, nicht von den
-    Prüfungen). Befund am Rande, der mehr wog als der Anlass: Das Double der Plugin-API schluckte
+    Prüfungen). Gemessen wird an **allen drei** gebundenen Farbstellen: `surface.fill` (fills des
+    control), `border.color` (strokes des control) und `label.color` (fills des label), je 0 /
+    0,08 / 1 mit vorhandener Bindung — „durch Bauart belegt" zählt nicht (Maintainer). Die
+    Mutation (`bound.opacity` entfernt) lässt alle fünf Tests fallen. Befund am Rande, der mehr wog als der Anlass: Das Double der Plugin-API schluckte
     jede direkte Zuweisung; es zeichnet sie jetzt auf und wirft bei einem Mitglied, das es nicht
     modelliert (`jug_01M3094ZC6F3XZ1H0MWQZ62MYV`). AK-12 wurde dabei auf das eingeengt, was es
     sagt: `ref.celo` als strukturiertes Feld, Prosa darf das Werkzeug nennen, geprüft von
@@ -303,5 +306,25 @@ Results go into `plan.md` → „Manual acceptance results".
     Roter Lauf zuerst, vier Fehlschläge (`expected undefined to be 'butono'`,
     `expected '' to contain 'Inter fehlt'`). Der Lauf in einer frisch angelegten, leeren Datei
     steht beim Maintainer aus; erst er entscheidet, ob „71 statt 72" Dateigeschichte war.
+
+- [ ] **F11 Die Figma-Projektion überträgt keine Geometrie und keine Beschriftung** (Abnahme M1,
+  FR-06, AK-04)
+  - Befund (Maintainer, 2026-09-20, aus der Liste der blinden Stellen zu F8): Das Plugin setzt nie
+    `layoutMode`. Damit sind die Bindungen an `paddingLeft`, `itemSpacing`, `minWidth` und
+    `minHeight` in Figma wirkungslos — Maße, Innenabstände, Abstand und damit die Größe des Ero
+    sind nicht die Werte des Modells. Das erklärt die 100 × 100 aus der Abnahme: Figmas Vorgabewert
+    für einen leeren Rahmen, kein Wert von uns. Zusammen mit `characters`, das nie gesetzt wird,
+    heißt das: **Die Projektion trägt heute Farben und nichts sonst.**
+  - Rot zuerst: (a) eine Prüfung, die für eine Variante Höhe, Breite, Innenabstand, Abstand und
+    Radius aus dem Modelo gegen den Knoten hält; (b) eine Prüfung, die die Beschriftung des
+    label-Knotens gegen die Skemo hält; (c) im Double: eine Bindung an `paddingLeft`,
+    `itemSpacing`, `minWidth` oder `minHeight` ohne gesetzten Layoutmodus **muss laut scheitern** —
+    die erste echte Anwendung von `jug_01M3094ZC6F3XZ1H0MWQZ62MYV`, denn ein Double, das diese
+    Bindung stillschweigend annimmt, schluckt wieder.
+  - Grün: Layoutmodus und Beschriftung werden gesetzt; die Projektionsprüfung deckt Geometrie ab,
+    nicht nur Farbe (Parity-Aspekt über Maße, nicht nur `paints`).
+  - Fertig wenn: Eine Variante in Figma trägt die Maße und die Beschriftung des Modells, die
+    Prüfung sieht eine Abweichung, und das Double weist die Bindung ohne Layoutmodus zurück.
+  - Nicht Teil des PRs zu F8–F10: eigener Befund, eigener Durchstich.
 
 Consistency check before tasks (`/speckit.analyze` scope): every FR and AK maps to at least one task or a recorded decision; every task maps to a plan decision; two new packages (Art. XI); the lockfile changes in T008 only; no task lowers a threshold; nothing is published.

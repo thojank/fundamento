@@ -152,6 +152,14 @@ describe("the paint carries the alpha of its token (F8)", () => {
       Object.entries(props).every(([key, value]) => entry.props[key] === value),
     );
 
+  type Paint = { opacity?: number; boundVariables?: unknown } | undefined;
+
+  /**
+   * The three paints of one variant. The fix touches every colour binding, so every colour binding
+   * is measured: `surface.fill` on the control, `border.color` on its strokes and `label.color` on
+   * the label. Measuring only the fill would leave the other two "proved by construction" — which
+   * is no proof (maintainer, 2026-09-20).
+   */
   async function paintsOf(props: Record<string, string>) {
     const double = figmaDouble();
     await run(double, repoFiles["figma/plugin/code.js"] ?? "");
@@ -161,23 +169,54 @@ describe("the paint carries the alpha of its token (F8)", () => {
       .join(", ");
     const variant = set?.children.find((child) => child.name === name);
     const control = variant?.children.find((child) => child.name === "control");
-    return (control?.properties.fills ?? []) as { opacity?: number; boundVariables?: unknown }[];
+    const label = control?.children.find((child) => child.name === "label");
+    const paints = (node: typeof control, field: string) =>
+      ((node?.properties[field] ?? []) as Paint[])[0];
+    return {
+      fill: paints(control, "fills"),
+      stroke: paints(control, "strokes"),
+      label: paints(label, "fills"),
+    };
   }
 
   it("a fully transparent fill is not opaque, and keeps its binding", async () => {
-    const [fill] = await paintsOf({ variant: "tertiary", tone: "default", state: "rest" });
+    const { fill } = await paintsOf({ variant: "tertiary", tone: "default", state: "rest" });
     expect(fill?.opacity).toBe(0);
     expect(fill?.boundVariables).toBeDefined();
   });
 
   it("an overlay carries its deckkraft", async () => {
-    const [fill] = await paintsOf({ variant: "tertiary", tone: "default", state: "hover" });
+    const { fill } = await paintsOf({ variant: "tertiary", tone: "default", state: "hover" });
     expect(fill?.opacity).toBe(0.08);
   });
 
   it("an opaque fill stays opaque", async () => {
-    const [fill] = await paintsOf({ variant: "primary", tone: "default", state: "rest" });
+    const { fill } = await paintsOf({ variant: "primary", tone: "default", state: "rest" });
     expect(fill?.opacity).toBe(1);
+  });
+
+  // `border.color` is the second of the two parts every tertiary role is bound to, and it carries
+  // the same three cases as the fill.
+  it("the border of a variant carries the same deckkraft as its fill", async () => {
+    const rest = await paintsOf({ variant: "tertiary", tone: "default", state: "rest" });
+    expect(rest.stroke?.opacity).toBe(0);
+    expect(rest.stroke?.boundVariables).toBeDefined();
+    const hover = await paintsOf({ variant: "tertiary", tone: "default", state: "hover" });
+    expect(hover.stroke?.opacity).toBe(0.08);
+    expect(hover.stroke?.boundVariables).toBeDefined();
+    const primary = await paintsOf({ variant: "primary", tone: "default", state: "rest" });
+    expect(primary.stroke?.opacity).toBe(1);
+  });
+
+  // The label is the third bound paint. No label colour is translucent today — that is what the
+  // measurement says, and it would catch the day a label arrives at deckkraft 1 by accident.
+  it("the label carries its deckkraft and keeps its binding", async () => {
+    const tertiary = await paintsOf({ variant: "tertiary", tone: "default", state: "rest" });
+    expect(tertiary.label?.opacity).toBe(1);
+    expect(tertiary.label?.boundVariables).toBeDefined();
+    const disabled = await paintsOf({ variant: "tertiary", tone: "default", state: "disabled" });
+    expect(disabled.label?.opacity).toBe(1);
+    expect(disabled.label?.boundVariables).toBeDefined();
   });
 });
 
