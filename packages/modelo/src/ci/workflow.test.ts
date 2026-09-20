@@ -210,8 +210,15 @@ describe("root package.json check script", () => {
 
   it("defines every check script it invokes", () => {
     for (const [, script] of CHECK_STEPS) {
+      if (script === "check:parity") continue;
       expect(scripts[script]).toBe(`node packages/modelo/dist/checks/run.js ${script.slice(6)}`);
     }
+  });
+
+  it("builds the projections before the parity check reads them (Spec 003 T021)", () => {
+    expect(scripts["check:parity"]).toBe(
+      "pnpm fm projekcioj build --out .fundamento/projekcioj && node packages/modelo/dist/checks/run.js parity",
+    );
   });
 });
 

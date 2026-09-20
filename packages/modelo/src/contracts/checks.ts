@@ -28,6 +28,11 @@ export interface CheckOptions {
   fixture?: string;
   /** A project's fundamento.config.json: core + reference Aspekto + its packages (Spec 001). */
   config?: string;
+  /**
+   * Parity only: the projections to compare with the Skemo (`fm projekcioj build --out`).
+   * Defaults to `<repoRoot>/.fundamento/projekcioj` (Spec 003 T021).
+   */
+  projekcioj?: string;
   repoRoot: string;
 }
 

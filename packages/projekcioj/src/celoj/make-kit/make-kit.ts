@@ -20,6 +20,7 @@ import {
   type Modelo,
   type ModeloSource,
   nomRegulo,
+  type ParityItem,
   type Regulo,
 } from "@fundamento/modelo";
 import { type Celo, type CeloInput, celoInputOf, type GeneratedFile } from "../../build.js";
@@ -44,6 +45,24 @@ function aspektojOf(modelo: Modelo): string[] {
       ?.valoroj.map((valoro) => valoro.name) ?? []
   );
 }
+
+/** The Aspektoj a kit is built for (a kit per Aspekto, Art. IV). */
+export function kitAspektoj(modelo: Modelo): string[] {
+  return aspektojOf(modelo);
+}
+
+/** The Aspekto whose kit stands for all of them where one has to be picked (the reference). */
+export function kitReferenceAspekto(modelo: Modelo): string {
+  const dimensio = modelo.dimensioj.find((entry) => entry.name === "aspekto");
+  return dimensio?.referenceAspekto ?? dimensio?.valoroj[0]?.name ?? "";
+}
+
+/** Where a kit's guideline of one Ero is written inside the projections. */
+export const guidelinePath = (aspekto: string, ero: string): string =>
+  `${DIR}/${aspekto}/guidelines/components/${ero}.md`;
+
+/** The declaration file a bundled kit ships. */
+export const kitTypesPath = (aspekto: string): string => `${DIR}/${aspekto}/dist/index.d.ts`;
 
 const tokenVariable = (name: string) => nomRegulo("css").derive(name);
 
@@ -495,4 +514,28 @@ await build({
     cwd: dir,
     stdio: "pipe",
   });
+}
+
+/** The names in backticks of a piece of a guideline: `` `primary`, `secondary` `` → two names. */
+const ticked = (text: string): string[] =>
+  [...text.matchAll(/`([^`]+)`/g)].map(([, value = ""]) => value);
+
+/**
+ * What the component guideline of a kit documents (Spec 003 T021, FR-12): the props table with
+ * its values and defaults, and the states sentence. Read from the Markdown a Make user reads, so
+ * a guideline that documents a value the Skemo does not have fails the parity check.
+ */
+export function guidelinesInventory(markdown: string): ParityItem {
+  const props: Record<string, string[]> = {};
+  const values: Record<string, string> = {};
+  for (const [, name = "", valueCell = "", defaultCell = ""] of markdown.matchAll(
+    /^\|\s*`([a-z0-9-]+)`\s*\|([^|]*)\|([^|]*)\|/gm,
+  )) {
+    const listed = ticked(valueCell);
+    props[name] = listed.length > 0 ? listed : [valueCell.trim()];
+    const [fallback] = ticked(defaultCell);
+    if (fallback !== undefined) values[`default.${name}`] = fallback;
+  }
+  const states = /States:([^.]*)\./.exec(markdown);
+  return { props, states: states === null ? [] : ticked(states[1] ?? ""), values };
 }

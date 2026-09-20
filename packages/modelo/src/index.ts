@@ -14,6 +14,7 @@ export * from "./checks/vortaro-lint/css-physical.js";
 export * from "./checks/vortaro-lint/ero-strings.js";
 export * from "./config/index.js";
 export * from "./contracts/index.js";
+export * from "./eroj/inventories.js";
 export * from "./eroj/skemo-rules.js";
 export * from "./eroj/usage.js";
 export * from "./export/index.js";

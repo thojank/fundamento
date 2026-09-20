@@ -38,12 +38,12 @@ export interface RunCheckEnv {
   stderr: (text: string) => void;
 }
 
-const USAGE = `Usage: run.js <check> [--json] [--fixture <path>]\nChecks: ${CHECK_NAMES.join(", ")}\nRun with --help for details.\n`;
+const USAGE = `Usage: run.js <check> [--json] [--fixture <path>] [--projekcioj <dir>]\nChecks: ${CHECK_NAMES.join(", ")}\nRun with --help for details.\n`;
 
 const CHECK_SUMMARIES: Readonly<Record<CheckName, string>> = {
   "vortaro-lint":
     "No literal values in Projekcio CSS; all identifiers in the Fundamento namespace.",
-  parity: "Compare two normalized inventories (props, values, states).",
+  parity: "Compare the Skemo of every Ero with the inventories of the built projections.",
   regularo: "Every Regulo has a kialo; every Jugxo references an existing target.",
   alirebleco:
     "Contrast of every KontrastParo in every combination (WCAG 2.x binding, APCA advisory).",
@@ -51,7 +51,7 @@ const CHECK_SUMMARIES: Readonly<Record<CheckName, string>> = {
 };
 
 export const HELP = [
-  "Usage: pnpm check:<check> [--json] [--fixture <path>]",
+  "Usage: pnpm check:<check> [--json] [--fixture <path>] [--projekcioj <dir>]",
   "       node packages/modelo/dist/checks/run.js <check> [--json] [--fixture <path>]",
   "",
   "Runs one conformance check (FR-15).",
@@ -65,6 +65,8 @@ export const HELP = [
   "                    against the directory pnpm was invoked from (INIT_CWD), else the cwd.",
   "  --config <file>   Run against a project: the core, komuna and the Aspekto packages its",
   "                    fundamento.config.json lists (relative paths as for --fixture).",
+  "  --projekcioj <dir>  Parity only: the projections to compare with the Skemo; defaults to",
+  "                    .fundamento/projekcioj (written by `fm projekcioj build`).",
   "  -h, --help        Show this help.",
   "",
   "Exit codes: 0 = pass, 1 = check failed, 2 = usage or internal error.",
@@ -80,6 +82,7 @@ type ParsedArgs =
       json: boolean;
       fixture: string | undefined;
       config: string | undefined;
+      projekcioj: string | undefined;
     }
   | { ok: false; message: string };
 
@@ -121,6 +124,9 @@ export function parseCheckArgs(argv: readonly string[]): ParsedArgs {
   if (parsed.values.fixture !== undefined && parsed.values.config !== undefined) {
     return { ok: false, message: "Use either --fixture or --config, not both." };
   }
+  if (parsed.values.fixture !== undefined && parsed.values.projekcioj !== undefined) {
+    return { ok: false, message: "Use either --fixture or --projekcioj, not both." };
+  }
   return {
     ok: true,
     help: false,
@@ -128,6 +134,7 @@ export function parseCheckArgs(argv: readonly string[]): ParsedArgs {
     json: parsed.values.json,
     fixture: parsed.values.fixture,
     config: parsed.values.config,
+    projekcioj: parsed.values.projekcioj,
   };
 }
 
@@ -140,6 +147,7 @@ function parseArgsStrict(argv: readonly string[]) {
       json: { type: "boolean", default: false },
       fixture: { type: "string" },
       config: { type: "string" },
+      projekcioj: { type: "string" },
       help: { type: "boolean", short: "h", default: false },
     },
   });
@@ -250,6 +258,7 @@ export async function runCheck(argv: readonly string[], env: RunCheckEnv): Promi
   const options: CheckOptions = { json: args.json, repoRoot: env.repoRoot };
   if (fixture !== undefined) options.fixture = fixture;
   if (args.config !== undefined) options.config = resolve(env.cwd, args.config);
+  if (args.projekcioj !== undefined) options.projekcioj = resolve(env.cwd, args.projekcioj);
 
   let result: unknown;
   try {

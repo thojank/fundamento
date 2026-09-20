@@ -123,9 +123,10 @@ A mutation check (one changed value must make the test fail) replaces the red ru
 
 ## Stage 6 – Parity
 
-- [ ] **T021 Parity with real inventories** (FR-12, D-15, AK-04)
+- [x] **T021 Parity with real inventories** (FR-12, D-15, AK-04)
   - Red: one fixture per side (Web Component, React `.d.ts`, Figma plan, guidelines) flips one prop value and makes `check:parity` fail with the side, the prop and the value; the empty comparator no longer passes on missing inventories.
   - Green: the inventory readers in `modelo/src/eroj/inventories.ts`; "Check: Parity" is real in CI.
+  - Done notes: the flip happens in the **artefact**, not in a hand-written fixture — `parity.test.ts` builds the projections, edits `data-size="large"` in the stylesheet, `"tertiary"` in the kit's `index.d.ts`, `type` in `plan.json` and the tone cell of `butono.md`, reads the inventories again and expects `parity-prop-mismatch` naming the side and both values. Who reads what stays where it belongs (Art. VIII): each Celo parses its own artefact and the build writes `parity/<side>.json` next to it; `modelo` only states the Skemo side and compares (`eroj/inventories.ts`, `checks/parity/index.ts`). Compared are the API surfaces — props with their values, states, and the defaults the guidelines document; the token bindings are proved by AK-03 (computed styles against `rezolvoj.json`) and the Figma simulator, not a second time here. The Web Component side is compared against the props the Skemo's parts are keyed by (`variant`, `tone`, `size`), the only ones a stylesheet expresses; the React side has no states. `check:parity` now builds the projections into `.fundamento/projekcioj` before the runner reads them, `--projekcioj <dir>` points the check at another build, and `--fixture <dir>` stays the plain comparator of two inventories. The assertions in `ci/workflow.test.ts` and `e2e/checks.test.ts` on the shape of the check script were changed with it (red first).
 
 ## Stage 7 – Gvidanto
 

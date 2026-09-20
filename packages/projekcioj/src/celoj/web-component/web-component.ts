@@ -10,6 +10,7 @@ import {
   combinationsOf,
   type LoadedEro,
   nomRegulo,
+  type ParityItem,
   type Skemo,
   type SkemoPartProperty,
   type SkemoPartSource,
@@ -195,6 +196,9 @@ export function namesOf(ero: LoadedEro["ero"]): {
 
 export const GENERATED_DIR = "eroj/src/generated";
 
+/** Where the stylesheet of one Ero is written inside the projections. */
+export const stylesheetPath = (ero: string): string => `${GENERATED_DIR}/${ero}.styles.ts`;
+
 export const WEB_COMPONENT_CELO: Celo = {
   name: "web-component",
   generate({ modelo }: CeloInput): GeneratedFile[] {
@@ -236,3 +240,42 @@ export const WEB_COMPONENT_CELO: Celo = {
     return files;
   },
 };
+
+/** The CSS of a generated stylesheet module (`export const BUTONO_CSS = "…";`). */
+function cssOf(moduleText: string): string {
+  const match = /=\s*(".*")\s*;/s.exec(moduleText);
+  return match?.[1] === undefined ? moduleText : (JSON.parse(match[1]) as string);
+}
+
+/** The state a selector addresses; the inverse of `STATE_SELECTORS` plus the focus ring (T021). */
+function stateOf(selector: string): string {
+  if (selector.includes('[aria-busy="true"]')) return "loading";
+  if (selector.includes(":disabled")) return "disabled";
+  if (selector.includes(":focus-visible")) return "focus";
+  if (selector.includes(":hover")) return "hover";
+  if (selector.includes(":active")) return "pressed";
+  return "rest";
+}
+
+/**
+ * What the generated stylesheet emitted (Spec 003 T021, FR-12): the props it keys on with the
+ * values it styles, and the states it addresses. Read from the stylesheet itself, so a value the
+ * generator drops or misspells does not reach `parity/web-component.json`.
+ */
+export function stylesheetInventory(moduleText: string): ParityItem {
+  const css = cssOf(moduleText);
+  const props = new Map<string, string[]>();
+  const states = new Set<string>();
+  for (const [, rawSelector = ""] of css.matchAll(/([^{}]+)\{[^{}]*\}/g)) {
+    // `:focus:not(:focus-visible)` resets the ring; the state is what stays outside the :not().
+    const selector = rawSelector.replaceAll(/:not\([^()]*\)/g, "");
+    if (!selector.includes('[part="control"]')) continue;
+    states.add(stateOf(selector));
+    for (const [, name = "", value = ""] of selector.matchAll(/\[data-([a-z0-9-]+)="([^"]*)"\]/g)) {
+      const values = props.get(name) ?? [];
+      if (!values.includes(value)) values.push(value);
+      props.set(name, values);
+    }
+  }
+  return { props: Object.fromEntries(props), states: [...states], values: {} };
+}

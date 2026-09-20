@@ -8,3 +8,4 @@ export * from "./celoj/react/react.js";
 export * from "./celoj/tailwind/tailwind.js";
 export * from "./celoj/web-component/web-component.js";
 export * from "./eroj-sources.js";
+export * from "./parity.js";

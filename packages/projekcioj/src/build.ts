@@ -25,6 +25,7 @@ import { bundleMakeKits, MAKE_KIT_CELO } from "./celoj/make-kit/make-kit.js";
 import { REACT_CELO } from "./celoj/react/react.js";
 import { TAILWIND_CELO } from "./celoj/tailwind/tailwind.js";
 import { WEB_COMPONENT_CELO } from "./celoj/web-component/web-component.js";
+import { writeParityInventories } from "./parity.js";
 
 /** What a Celo gets: the loaded Modelo and its export, never raw files (Art. I). */
 export interface CeloInput {
@@ -127,7 +128,9 @@ export async function buildProjekcioj(options: BuildOptions): Promise<BuildResul
   // The Make Kits are packages: after their sources come their bundles and types (D-14, T019).
   // They are written by a bundler, not by a Celo, so the manifest hashes them from disk.
   const bundled = await bundleMakeKits(options.outDir, prepared.input);
-  for (const file of bundled) {
+  // Every Celo states what it emitted; `check:parity` compares that with the Skemo (T021).
+  const inventories = writeParityInventories(options.outDir, prepared.input);
+  for (const file of [...bundled, ...inventories]) {
     hashes[file] = createHash("sha256")
       .update(readFileSync(join(options.outDir, file)))
       .digest("hex");

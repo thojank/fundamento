@@ -1,11 +1,15 @@
 import { spawnSync } from "node:child_process";
-import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterEach, describe, expect, it } from "vitest";
 import type { CheckResult } from "../../contracts/checks.js";
+import { skemoParityInventory } from "../../eroj/inventories.js";
+import { loadModelo } from "../../load/load-modelo.js";
+import { defaultModeloSource } from "../../load/source.js";
 import { check } from "./index.js";
+import type { ParityInventory } from "./inventory.js";
 
 const repoRoot = fileURLToPath(new URL("../../../../../", import.meta.url));
 const fixture = (path: string): string =>
@@ -46,12 +50,100 @@ function tempFixture(files: { a?: string; b?: string }): string {
 
 const EMPTY = '{ "items": {} }';
 
-describe("parity default run", () => {
-  it("compares the empty inventory with itself and passes", async () => {
-    const result = await check({ json: true, repoRoot });
+const { modelo } = loadModelo(defaultModeloSource());
+const EROJ = modelo?.eroj ?? [];
+
+/** The inventories a correct build writes, one file per side (T021). */
+function correctSides(): Record<string, ParityInventory> {
+  return {
+    "web-component.json": skemoParityInventory(EROJ, {
+      aspects: ["props", "states"],
+      props: "styled",
+    }),
+    "react.json": skemoParityInventory(EROJ, { aspects: ["props"] }),
+    "figma.json": skemoParityInventory(EROJ, { aspects: ["props", "states"] }),
+    "guidelines-komuna.json": skemoParityInventory(EROJ),
+  };
+}
+
+/** A projections directory with a `parity/` folder; `change` may flip one side before writing. */
+function writeProjections(change: (sides: Record<string, ParityInventory>) => void = () => {}) {
+  const root = mkdtempSync(join(tmpdir(), "fm-parity-projekcioj-"));
+  tempDirs.push(root);
+  const sides = correctSides();
+  change(sides);
+  mkdirSync(join(root, "parity"), { recursive: true });
+  for (const [file, inventory] of Object.entries(sides)) {
+    writeFileSync(join(root, "parity", file), `${JSON.stringify(inventory, null, 2)}\n`);
+  }
+  return root;
+}
+
+describe("parity default run (T021)", () => {
+  it("compares the Skemo with every side of a correct build", async () => {
+    const result = await check({ json: true, repoRoot, projekcioj: writeProjections() });
     expect(result).toMatchObject({ check: "parity", ok: true, errors: [], warnings: [] });
-    expect(result.stats).toEqual({ itemsA: 0, itemsB: 0, differences: 0 });
-    expect(result.summary).toContain("empty inventory");
+    expect(result.stats.sides).toBe(4);
+    expect(result.stats.differences).toBe(0);
+    expect(result.summary).toContain("Skemo");
+  });
+
+  it("fails when the projections are missing instead of comparing nothing", async () => {
+    const empty = mkdtempSync(join(tmpdir(), "fm-parity-empty-"));
+    tempDirs.push(empty);
+    const result = await check({ json: true, repoRoot: empty });
+    expect(result.ok).toBe(false);
+    expect(result.errors.length).toBeGreaterThanOrEqual(4);
+    expect(result.errors.every((issue) => issue.rule === "file-missing")).toBe(true);
+    expect(result.errors[0]?.path).toContain(".fundamento/projekcioj/parity/");
+    expect(result.errors[0]?.suggestion).toContain("fm projekcioj build");
+  });
+
+  it("names the side, the prop and both value lists when a side flips a prop value", async () => {
+    const dir = writeProjections((sides) => {
+      const item = sides["figma.json"]?.items.butono;
+      if (item !== undefined) item.props.size = ["small", "medium", "huge"];
+    });
+    const result = await check({ json: true, repoRoot, projekcioj: dir });
+    expect(result.ok).toBe(false);
+    expect(rulesAndPaths(result.errors)).toEqual([
+      { rule: "parity-prop-mismatch", path: "items.butono.props.size" },
+    ]);
+    const [issue] = result.errors;
+    expect(issue?.message).toContain("figma");
+    expect(issue?.message).toContain("huge");
+    expect(issue?.message).toContain("large");
+  });
+
+  it("reports a state a side does not restate", async () => {
+    const dir = writeProjections((sides) => {
+      const item = sides["guidelines-komuna.json"]?.items.butono;
+      if (item !== undefined) item.states = item.states.filter((state) => state !== "loading");
+    });
+    const result = await check({ json: true, repoRoot, projekcioj: dir });
+    expect(rulesAndPaths(result.errors)).toEqual([
+      { rule: "parity-state-mismatch", path: "items.butono.states.loading" },
+    ]);
+    expect(result.errors[0]?.message).toContain("guidelines(komuna)");
+  });
+
+  it("reports a default the guidelines state differently", async () => {
+    const dir = writeProjections((sides) => {
+      const item = sides["guidelines-komuna.json"]?.items.butono;
+      if (item !== undefined) item.values["default.variant"] = "primary";
+    });
+    const result = await check({ json: true, repoRoot, projekcioj: dir });
+    expect(rulesAndPaths(result.errors)).toEqual([
+      { rule: "parity-value-mismatch", path: 'items.butono.values["default.variant"]' },
+    ]);
+  });
+
+  it("reports an inventory file that is not a valid inventory", async () => {
+    const dir = writeProjections();
+    writeFileSync(join(dir, "parity", "react.json"), '{ "items": { "butono": {} } }');
+    const result = await check({ json: true, repoRoot, projekcioj: dir });
+    expect(result.ok).toBe(false);
+    expect(result.errors.some((issue) => issue.rule === "schema-violation")).toBe(true);
   });
 });
 

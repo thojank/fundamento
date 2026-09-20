@@ -3,7 +3,7 @@
 // values as string unions); icon slots take React nodes. One behaviour implementation, the
 // element, serves React 18 and 19 alike. Pure.
 
-import type { LoadedEro } from "@fundamento/modelo";
+import type { LoadedEro, ParityItem } from "@fundamento/modelo";
 import type { Celo, CeloInput, GeneratedFile } from "../../build.js";
 import { GENERATED_DIR, namesOf } from "../web-component/web-component.js";
 
@@ -124,3 +124,43 @@ ${reactSource(modelo.eroj, (entry) => `./${namesOf(entry.ero).tag}.js`)}`;
     return [{ path: `${GENERATED_DIR}/react.ts`, text }];
   },
 };
+
+/** `fullWidth` → `full-width`: the wrapper's camelCase back to the Skemo's prop name. */
+const kebab = (name: string) => name.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
+
+/** The body of `export interface <Name>Props … { … }`, or undefined. */
+function propsBlock(dts: string, name: string): string | undefined {
+  const start = dts.indexOf(`interface ${name}Props`);
+  if (start === -1) return undefined;
+  const open = dts.indexOf("{", start);
+  const end = dts.indexOf("\n}", open);
+  return open === -1 || end === -1 ? undefined : dts.slice(open + 1, end);
+}
+
+/**
+ * What the declaration file of the React wrapper states (Spec 003 T021, FR-12): every prop with
+ * its values, in the Skemo's spelling. Slots are React nodes and no prop of the Skemo, so props
+ * typed `ReactNode` are left out. Read from the `.d.ts` a user's editor reads.
+ */
+export function reactTypesInventory(
+  dts: string,
+  eroj: readonly string[],
+): Record<string, ParityItem> {
+  const items: Record<string, ParityItem> = {};
+  for (const ero of eroj) {
+    const pascal = ero.replace(/(^|-)([a-z0-9])/g, (_match, _dash, letter: string) =>
+      letter.toUpperCase(),
+    );
+    const block = propsBlock(dts, pascal);
+    if (block === undefined) continue;
+    const props: Record<string, string[]> = {};
+    for (const [, name = "", type = ""] of block.matchAll(/^\s*([A-Za-z0-9]+)\??:\s*([^;]+);/gm)) {
+      const literals = [...type.matchAll(/"([^"]*)"/g)].map(([, value = ""]) => value);
+      if (literals.length > 0) props[kebab(name)] = literals;
+      else if (["boolean", "string", "number"].includes(type.trim()))
+        props[kebab(name)] = [type.trim()];
+    }
+    items[ero] = { props, states: [], values: {} };
+  }
+  return items;
+}

@@ -16,6 +16,8 @@ import {
   type LoadedEro,
   type Modelo,
   nomRegulo,
+  type ParityItem,
+  STATE_KEY,
 } from "@fundamento/modelo";
 import type { Celo, CeloInput, GeneratedFile } from "../../build.js";
 import { pluginManifest, pluginSource } from "./plugin.js";
@@ -377,4 +379,35 @@ export const FIGMA_CELO: Celo = {
 
 function sortVariables(variables: readonly FigmaVariable[]): FigmaVariable[] {
   return [...variables].sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
+}
+
+/**
+ * What the Figma plan states about the components (Spec 003 T021, FR-12): every component
+ * property with its values (`BOOLEAN` and `TEXT` as the kinds they stand for) and the state
+ * property as the states. Read from `plan.json`, the file the plugin applies.
+ */
+export function figmaPlanInventory(plan: unknown): Record<string, ParityItem> {
+  const components =
+    typeof plan === "object" &&
+    plan !== null &&
+    "components" in plan &&
+    Array.isArray(plan.components)
+      ? (plan.components as FigmaComponentSet[])
+      : [];
+  const items: Record<string, ParityItem> = {};
+  for (const component of components) {
+    const props: Record<string, string[]> = {};
+    for (const [name, values] of Object.entries(component.properties)) {
+      if (name === STATE_KEY) continue;
+      if (Array.isArray(values)) props[name] = [...values];
+      else props[name] = [values === "BOOLEAN" ? "boolean" : "string"];
+    }
+    const states = component.properties[STATE_KEY];
+    items[component.set] = {
+      props,
+      states: Array.isArray(states) ? [...states] : [],
+      values: {},
+    };
+  }
+  return items;
 }

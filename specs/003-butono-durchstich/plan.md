@@ -240,6 +240,8 @@ The comparator from Phase 0 finally gets inventories:
 - A fixture flips one prop value on one side and must fail (AK-04).
 - Figma is compared through its plan, not through the file. Hand edits in the Figma file are not a source: re-applying the plan overwrites them (D-12).
 
+**As built (T021).** Reading an artefact is knowledge of the Celo that wrote it (Art. VIII), so the readers live in the Celoj, not in the check: after a build every Celo states what it emitted in `parity/<side>.json` (the stylesheet's `data-*` selectors and state selectors, the props table and states sentence of each kit's guideline, the component properties of `plan.json`, the prop types of the kit's `dist/index.d.ts` — the declaration file a user's editor reads, instead of parsing TypeScript sources). `modelo` states the Skemo side and compares (`eroj/inventories.ts`); `pnpm check:parity` builds the projections into `.fundamento/projekcioj` first, and a missing inventory is `file-missing`, not a silent pass. Compared are the API surfaces: props with their values, states, and the defaults a guideline documents. The token bindings per part are not compared a second time here — AK-03 proves them in the browser against `rezolvoj.json` and the Figma simulator proves them for the plan; a comparison in the check would have had to restate each Celo's mapping of parts to CSS or variables inside `modelo` and would have made that knowledge exist twice. The Web Component side therefore restates only the props its parts are keyed by (`variant`, `tone`, `size`), the React side no states.
+
 ### D-16 Gvidanto (FR-13, FR-14)
 
 - **`list_eroj`** lists the Eroj with their variants.
