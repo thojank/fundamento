@@ -201,6 +201,36 @@
       ]
     },
     {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Aspiro",
+      "term": "Aspiro",
+      "inScheme": "terminologio",
+      "prefLabel": {
+        "eo": "Aspiro",
+        "en": "brand aspiration",
+        "de": "Entwurfsziel"
+      },
+      "altLabel": {
+        "en": [
+          "design goal",
+          "self-imposed goal"
+        ],
+        "de": [
+          "Markenziel",
+          "Anspruch"
+        ]
+      },
+      "definition": {
+        "en": "A measurable design goal one brand sets itself, with its reason; it is checked only for that brand, never for another Aspekto.",
+        "de": "Ein messbares Entwurfsziel, das eine Marke sich selbst setzt, mit Begründung; es wird nur für diese Marke geprüft, nie für eine andere Aspekto."
+      },
+      "broader": [
+        "#Aspekto"
+      ],
+      "related": [
+        "#Regulo"
+      ]
+    },
+    {
       "uri": "https://fundamento.ciferecigo.com/ontologio#Dimensio",
       "term": "Dimensio",
       "inScheme": "terminologio",

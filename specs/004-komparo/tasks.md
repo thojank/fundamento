@@ -24,6 +24,7 @@ Etappe A umfasst FR-01 bis FR-09, FR-19 und den vorbereitenden Teil von FR-15. *
   - Rot: `packages/modelo/src/docs/docs.test.ts` erwartet Version `1.7`, den Absatz „Benchmark-Aspekto" im Wortlaut aus FR-19 unter Artikel V, eine Zeile **Aspiro** in der Terminologie-Tabelle, den Historieneintrag `v1.7 (Spec 004) …` und den unveränderten Satz „Quellmaterial anderer Systeme wird dem Coding-Tool nicht vorgelegt". Der Ontologio-Drift-Test schlägt an, solange die Tabellenzeile ohne Ontologio-Begriff dasteht (`table-term-missing`) – er wird in T005 grün.
   - Grün: `.specify/memory/constitution.md` auf v1.7, mit der Terminologie-Zeile „**Aspiro** | Ein messbares Entwurfsziel einer einzelnen Marke, mit Kialo; gilt nur für sie | `aspekto.json#/aspiroj`".
   - Fertig wenn: Dokumenttest grün; kein Jugxo nötig (Erweiterung, kein Bruch), Begründung in plan.md D-11. Der Grundsatz „Fluida Marko" kommt **nicht** in v1.7.
+  - Done-Notiz: Der Ontologio-Begriff `Aspiro` ist hier entstanden statt in T005. Grund: Der Drift-Test prüft Tabelle und Ontologio in beide Richtungen; eine Tabellenzeile ohne Begriff hätte den Baum über mehrere Commits rot gelassen. T005 ergänzt nur noch `FluidaMarko` und das Schema `principoj`. Rot gelaufen sind vier Zusicherungen (Version 1.7, Art.-V-Absatz, Tabellenzeile, Historieneintrag) sowie der Drift-Test `table-term-missing`; die Zahl der Terminologie-Begriffe steigt von 17 auf 18.
 
 ## Etappe 1 – Metriken
 
