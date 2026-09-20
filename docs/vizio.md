@@ -2,6 +2,16 @@
 
 *Why Fundamento starts with a data model, conjunction sets and rulings instead of a component library.*
 
+## Origin: a sketch from 2017
+
+![Hand-drawn sketch from 2017: existing designs and research flow into a central engine ("Rakete") that exports design systems and code components](img/skizze-2017.jpg)
+
+The idea is older than the tools that can build it. In 2017 the founder of Fundamento drew it on one sheet of paper: existing designs, websites, apps and enterprise platforms flow in; a style editor and an import step shape them; a single engine in the middle (the "Rakete", the rocket) turns them into design systems and code components for every target; test and iteration feed back into research. The vision in the corner reads: *automated software creation based on virtual user research.*
+
+Almost every box on that sheet now has a name in Fundamento: the engine is the **Modelo**, the import is the **Enportilo**, the style editor the **Agordilo**, the cross export the **Projekcioj**, "adopt to any design" the **Aspekto** and the fluid brand, test and iteration the **Regularo** in which every finding becomes a rule. Virtual user research is being built as a separate module next to Fundamento.
+
+Most of the tools named on the sketch have since disappeared or stalled. The architecture did not. That is the strongest argument for starting with a model: tools are projections, and projections can be replaced.
+
 ## The question changed
 
 The first question was an operational one: how do we bring a new brand into a multi-brand design system without rebuilding it by hand? Shared core plus brand themes answered part of it. Colors, type, spacing, radius and motion became parameters of one system.

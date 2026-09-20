@@ -2,7 +2,7 @@
 
 **Stand:** 2026-09-19 · **Pflege:** Maintainer; jede gemergte Spec aktualisiert ihren Eintrag hier · **Verbindlich ist die Constitution**, diese Datei ist ihr Fahrplan.
 
-Diese Datei ist die eine Stelle, an der der gesamte Weg von Fundamento steht: was fertig ist, was läuft, was geplant ist, welche Ideen gesammelt sind und wo sie herkommen. Die Vision dahinter steht in [`vizio.md`](vizio.md), die Regeln in der [Constitution](../.specify/memory/constitution.md).
+Diese Datei ist die eine Stelle, an der der gesamte Weg von Fundamento steht: was fertig ist, was läuft, was geplant ist, welche Ideen gesammelt sind und wo sie herkommen. Die Vision dahinter steht in [`vizio.md`](vizio.md) (Ursprung: eine Skizze von 2017, [`img/skizze-2017.jpg`](img/skizze-2017.jpg)), die Regeln in der [Constitution](../.specify/memory/constitution.md).
 
 ## Zielbild in einem Satz
 
@@ -42,6 +42,7 @@ Eine Marke wird als ausführbare Spezifikation beschrieben (Modelo); daraus ents
 | **Fluida Marko** | Die Marke folgt dem Kontext, nicht dem Anbieter: Markenfamilie, Gastgeber, Gast, Vorrang-Regel als Daten, geschützte Rollen (Details im Abschnitt unten) | Leitbegriff seit 2026-09-20; eigene Spec nach Spec 004, gemeinsam mit Etoso | Konzept |
 | **Etoso** | Dimensio für Kontext und Stimmung, Laufzeit-Umschaltung mit weichem Übergang, Stimmungsraum statt Themenliste, Gast-Aspekto (Details im Abschnitt unten) | eigene Spec nach Spec 004; Phase-1-Test belegt: neue Dimensio rein über Daten; Vitrino (Spec 004) ist der erste sichtbare Beleg der Laufzeit-Umschaltung | Kandidat, Konzept unten |
 | **Tavoloj / Brand DNA** | Aspekto-Paket trägt weitere Schichten neben `vida`: Sprache (Voice), Verhalten, Governance | `aspekto.json#/tavoloj` reserviert (Phase 1) | Kandidat |
+| **Virtueller User Research** | Virtuelle Personas, Milieus und Probanden prüfen generierte Oberflächen; ihre Befunde werden Anforderungen und Regulo-Kandidaten. Stern der Skizze von 2017 („automatisierte Softwareerstellung auf Basis von virtuellem User Research“) | **eigenes Modul, eigenes Repo, eigener Stream** (Maintainer arbeitet bereits daran); Fundamento definiert nur die Schnittstelle: Befunde kommen als Daten mit Herkunft herein und durchlaufen „Befund wird Regel“ (Art. VI); Anschluss an Phase 8 (Design-Agenten + Evals) | außerhalb dieses Repos |
 | **Inspiro** | Muster aus kuratierten Sammlungen (Pinterest-API, Browser-Extension, DOM-Analyse) → abstrahierte Muster → Sxablonoj; nie Inhalte Dritter | Phase 8; Vorstufe MCP-Werkzeug `inspiro_analyze` ab Phase 5 | Idee |
 | **Kreilo** | Plattform für iterative Markenerschaffung, jede Iteration ein gültiger, vollständiger Aspekto | eigenes Projekt auf Fundamento, nach Phase 7 | Idee |
 
