@@ -10,6 +10,7 @@ import type { CheckOptions, CheckResult } from "../../contracts/checks.js";
 import type { ValidationIssue } from "../../contracts/issues.js";
 import type { Modelo } from "../../contracts/modelo.js";
 import {
+  baseResolution,
   PARITY_ASPECTS,
   type ParityAspect,
   restrictParityInventory,
@@ -68,11 +69,13 @@ export function paritySides(modelo: Modelo): ParitySide[] {
       props: "styled",
     },
     { file: "react.json", label: "react", aspects: ["props"] },
-    { file: "figma.json", label: "figma", aspects: ["props", "states"] },
+    { file: "figma.json", label: "figma", aspects: ["props", "states", "paints"] },
+    // The guidelines document props, states and the defaults; the resolved paints are the Figma
+    // side's business (F8), so they are not compared here.
     ...aspektojOf(modelo).map((aspekto) => ({
       file: `guidelines-${aspekto}.json`,
       label: `guidelines(${aspekto})`,
-      aspects: PARITY_ASPECTS,
+      aspects: ["props", "states", "values"] as ParityAspect[],
     })),
   ];
 }
@@ -145,6 +148,8 @@ export async function check(options: CheckOptions): Promise<CheckResult> {
     const expected = skemoParityInventory(modelo.eroj, {
       aspects: side.aspects,
       props: side.props ?? "all",
+      // F8: the sides that restate values are compared with the resolved values of the Modelo.
+      resolved: baseResolution(modelo),
     });
     const read = readInventory(inventoryDir, side.file, join(display, side.file));
     if (read.inventory === undefined) {

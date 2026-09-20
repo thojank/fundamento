@@ -5,7 +5,14 @@
 import { projectModeloSource } from "@fundamento/modelo";
 import { describe, expect, it } from "vitest";
 import { celoInputOf } from "../../build.js";
-import { FIGMA_CELO, type FigmaPlan, figmaValues, resolveFigmaPlan } from "./figma.js";
+import {
+  ALPHA_VARIES,
+  FIGMA_CELO,
+  type FigmaPlan,
+  figmaPlanInventory,
+  figmaValues,
+  resolveFigmaPlan,
+} from "./figma.js";
 
 const config = new URL(
   "../../../../modelo/test/fixtures/valid/aspekto-ekzemplo/fundamento.config.json",
@@ -116,5 +123,29 @@ describe("Figma plan (T015)", () => {
 
   it("generates the same bytes twice", () => {
     expect(FIGMA_CELO.generate(prepared.input)).toEqual(files);
+  });
+});
+
+// F8 (Abnahme M1): the Figma side states what the *plugin applies*, not what the variable holds —
+// otherwise a projection that drops the alpha stays invisible. This fixture composes two brands,
+// and komuna's translucent tertiary fill is opaque in ekzemplo: the decision is therefore not the
+// same in every mode, and the plan must say so instead of picking one brand's value.
+describe("resolved paint values of the Figma side (F8)", () => {
+  const values = figmaPlanInventory(plan).butono?.values ?? {};
+
+  it("names the paint of every bound colour part, per variant", () => {
+    expect(values["surface.fill@size=medium,state=rest,tone=default,variant=primary"]).toMatch(
+      /^#[0-9a-f]{6}$/,
+    );
+  });
+
+  it("refuses to pick one brand when the alpha differs by mode", () => {
+    expect(values["surface.fill@size=medium,state=hover,tone=default,variant=tertiary"]).toBe(
+      `${ALPHA_VARIES} (color/action/tertiary/hover)`,
+    );
+    const variant = plan.components[0]?.variants.find(
+      (entry) => entry.props.variant === "tertiary" && entry.props.state === "hover",
+    );
+    expect(variant?.paints?.["surface.fill"]).toEqual({ hex: "#000000", alphaVariesByMode: true });
   });
 });

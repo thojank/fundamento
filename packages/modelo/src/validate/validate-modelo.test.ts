@@ -224,6 +224,29 @@ describe("rule variants", () => {
     expect(report.summary.jugxoj).toBe(1);
   });
 
+  // A Jugxo that belongs to a Celo names it beside the reference (AK-12, narrowed 2026-09-20).
+  it("accepts a Jugxo that names its Celo beside the Article", () => {
+    const report = validateMutation((edit) => {
+      edit("data/ids.lock.json", (v: { ids: Record<string, unknown> }) => {
+        v.ids[JUG_ID] = { status: "active", type: "jugxo" };
+      });
+      edit("data/jugxoj.json", () => ({
+        jugxoj: [
+          {
+            id: JUG_ID,
+            ref: { artikolo: "VIII", celo: "figma" },
+            decision: "deviation-recorded",
+            kialo: "A recorded deviation from the constitution.",
+            date: "2026-09-20",
+            context: "Validation test.",
+          },
+        ],
+      }));
+    });
+    expect(report.errors).toEqual([]);
+    expect(report.summary.jugxoj).toBe(1);
+  });
+
   it("reports an unknown Article once, at ref/artikolo", () => {
     expect(withArtikoloJugxo("XIV").errors.map(({ rule, path }) => ({ rule, path }))).toEqual([
       { rule: "jugxo-ref-missing", path: "data/jugxoj.json#/jugxoj/0/ref/artikolo" },

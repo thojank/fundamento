@@ -1534,6 +1534,10 @@
       "properties": {
         "regulo": {
           "$ref": "#/$defs/ReguloId"
+        },
+        "celo": {
+          "description": "The Celo this Jugxo belongs to. Which names exist is knowledge of the projections and lives in code, not here (Article VIII).",
+          "$ref": "#/$defs/Name"
         }
       },
       "required": ["regulo"],
@@ -1544,6 +1548,10 @@
       "properties": {
         "ero": {
           "$ref": "#/$defs/EroId"
+        },
+        "celo": {
+          "description": "The Celo this Jugxo belongs to. Which names exist is knowledge of the projections and lives in code, not here (Article VIII).",
+          "$ref": "#/$defs/Name"
         }
       },
       "required": ["ero"],
@@ -1555,6 +1563,10 @@
       "properties": {
         "artikolo": {
           "enum": ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII", "XIII"]
+        },
+        "celo": {
+          "description": "The Celo this Jugxo belongs to. Which names exist is knowledge of the projections and lives in code, not here (Article VIII).",
+          "$ref": "#/$defs/Name"
         }
       },
       "required": ["artikolo"],

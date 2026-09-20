@@ -3,6 +3,7 @@
 // comparator is pure so later phases can feed it whatever they extract.
 
 import { formatIssuePath, type ValidationIssue } from "../../contracts/issues.js";
+import { PARITY_ALPHA_VARIES } from "../../eroj/inventories.js";
 import { appendPointer } from "../../json/pointer.js";
 
 export interface ParityItem {
@@ -210,6 +211,19 @@ export function compareInventories(
         value === undefined
           ? `${label} does not declare it`
           : `${label} has ${JSON.stringify(value)}`;
+      // A side that cannot express the value says so; that is a difference with a name, never
+      // equality by exception (F8, Abnahme M1).
+      const varies = [valueA, valueB].find((value) => value?.startsWith(PARITY_ALPHA_VARIES));
+      if (varies !== undefined) {
+        const [side, other] = valueA === varies ? [labelA, labelB] : [labelB, labelA];
+        add(
+          "parity-alpha-varies-by-mode",
+          ["items", name, "values", key],
+          `Value "${key}" of item "${name}" cannot be projected: ${side} reports ${JSON.stringify(varies)}, ${other} has ${JSON.stringify(valueA === varies ? valueB : valueA)}. A paint carries one deckkraft, so a token whose alpha differs per mode has no faithful projection.`,
+          "Give the role the same alpha in every mode, or give the projection the overlay node with a FLOAT companion variable the Jugxo names (Spec 003 F8).",
+        );
+        continue;
+      }
       add(
         "parity-value-mismatch",
         ["items", name, "values", key],

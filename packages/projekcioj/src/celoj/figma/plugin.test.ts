@@ -1,7 +1,7 @@
 // The generated development plugin (Spec 003 T016; plan D-12): it applies plan.json idempotently.
 // Run against the Plugin-API double, so the proof needs no Figma.
 
-import { projectModeloSource } from "@fundamento/modelo";
+import { defaultModeloSource, projectModeloSource } from "@fundamento/modelo";
 import { describe, expect, it } from "vitest";
 import { celoInputOf } from "../../build.js";
 import { FIGMA_CELO, type FigmaPlan } from "./figma.js";
@@ -105,6 +105,18 @@ describe("Figma development plugin (T016)", () => {
     expect(double.collections.some((collection) => collection.name === "fundamento")).toBe(false);
   });
 
+  // A double that swallows is worse than none: it turns green into a statement about nothing
+  // (Jugxo of 2026-09-20). What the double does not model must fail loudly, with the member named.
+  it("refuses an API member it does not model, instead of pretending it exists", () => {
+    const double = figmaDouble();
+    const api = double.figma as Record<string, unknown>;
+    expect(() => api.createEllipse).toThrow(/createEllipse/);
+    expect(() => api.getNodeByIdAsync).toThrow(/does not model/);
+    // What it does model stays reachable, including the members the plugin only probes.
+    expect(typeof api.createFrame).toBe("function");
+    expect(api.command).toBeUndefined();
+  });
+
   it("never touches a node without Fundamento plugin data", async () => {
     const double = figmaDouble();
     const page = double.root.children[0];
@@ -118,5 +130,53 @@ describe("Figma development plugin (T016)", () => {
     expect(stranger.parent).toBe(page);
     expect(stranger.pluginData).toEqual({});
     expect(stranger.children).toEqual([]);
+  });
+});
+
+// F8 (Abnahme M1): Figma binds only the RGB of a variable to a paint — the deckkraft stays 1 and a
+// translucent token renders opaque. The plugin therefore sets `paint.opacity` from the plan, in
+// every case, and keeps the binding to `color` so the file still shows which variable rules the
+// fill.
+describe("the paint carries the alpha of its token (F8)", () => {
+  // One brand: the decision is unambiguous in every mode. With a second brand whose tertiary fill
+  // is opaque the plan says `alphaVariesByMode`, and the guard refuses the binding — see the
+  // Figma-side test.
+  const repo = celoInputOf(defaultModeloSource());
+  if (!repo.ok) throw new Error("the repo Modelo must be valid");
+  const repoFiles = Object.fromEntries(
+    FIGMA_CELO.generate(repo.input).map((file) => [file.path, file.text]),
+  );
+  const repoPlan = JSON.parse(repoFiles["figma/plan.json"] ?? "{}") as FigmaPlan;
+  const variantOf = (props: Record<string, string>) =>
+    repoPlan.components[0]?.variants.find((entry) =>
+      Object.entries(props).every(([key, value]) => entry.props[key] === value),
+    );
+
+  async function paintsOf(props: Record<string, string>) {
+    const double = figmaDouble();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    const set = double.root.children[0]?.children.find((child) => child.name === "butono");
+    const name = Object.entries(variantOf(props)?.props ?? {})
+      .map(([key, value]) => `${key}=${value}`)
+      .join(", ");
+    const variant = set?.children.find((child) => child.name === name);
+    const control = variant?.children.find((child) => child.name === "control");
+    return (control?.properties.fills ?? []) as { opacity?: number; boundVariables?: unknown }[];
+  }
+
+  it("a fully transparent fill is not opaque, and keeps its binding", async () => {
+    const [fill] = await paintsOf({ variant: "tertiary", tone: "default", state: "rest" });
+    expect(fill?.opacity).toBe(0);
+    expect(fill?.boundVariables).toBeDefined();
+  });
+
+  it("an overlay carries its deckkraft", async () => {
+    const [fill] = await paintsOf({ variant: "tertiary", tone: "default", state: "hover" });
+    expect(fill?.opacity).toBe(0.08);
+  });
+
+  it("an opaque fill stays opaque", async () => {
+    const [fill] = await paintsOf({ variant: "primary", tone: "default", state: "rest" });
+    expect(fill?.opacity).toBe(1);
   });
 });

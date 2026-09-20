@@ -107,20 +107,23 @@ function ours(parent, key, value) {
   );
 }
 
-function bind(control, label, bindings, variables) {
+function bind(control, label, bindings, paints, variables) {
   for (const [part, name] of Object.entries(bindings)) {
     const target = BINDINGS[part];
     const variable = variables.get(name);
     if (target === undefined || variable === undefined) continue;
     const node = target.node === "label" ? label : control;
     if (target.paint === true) {
-      node[target.field] = [
-        figma.variables.setBoundVariableForPaint(
-          { type: "SOLID", color: { r: 0, g: 0, b: 0 } },
-          "color",
-          variable,
-        ),
-      ];
+      // Figma binds only the RGB of a variable to a paint; the deckkraft comes from the plan and
+      // is set here, in every case — also at 0, so the binding stays visible in the file (F8).
+      const paint = (paints || {})[part];
+      const bound = figma.variables.setBoundVariableForPaint(
+        { type: "SOLID", color: { r: 0, g: 0, b: 0 } },
+        "color",
+        variable,
+      );
+      if (paint !== undefined && typeof paint.opacity === "number") bound.opacity = paint.opacity;
+      node[target.field] = [bound];
     } else {
       node.setBoundVariable(target.field, variable);
     }
@@ -159,7 +162,7 @@ async function applyComponents(variables) {
       }
       control.name = "control";
       label.name = "label";
-      bind(control, label, variant.bindings, variables);
+      bind(control, label, variant.bindings, variant.paints, variables);
       if (existing === undefined) made.push(node);
     }
     if (set === undefined) {

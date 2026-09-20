@@ -216,4 +216,59 @@ Results go into `plan.md` → „Manual acceptance results".
 | Q2 | T018, T020 |
 | Q3, Q4 | T028; vojmapo Phase 7 (done with the plan) |
 
+## Nachtrag aus der Abnahme M1 (2026-09-20)
+
+- [ ] **F8 Die Figma-Projektion gibt den Alphawert wieder** (Abnahme M1, FR-06, AK-04)
+  - Befund: `setBoundVariableForPaint(paint, "color", variable)` bindet nur RGB; die Deckkraft des
+    SolidPaint bleibt 1. `plan.json` trägt Alpha korrekt (`figmaColor` schreibt `a`), der Verlust
+    entsteht beim Binden. 22 Variablen tragen Alpha, 14 davon sichtbar; tatsächlich gebunden sind
+    vier Rollen — `color/action/tertiary/{rest,hover,pressed,disabled}`, je an `surface.fill` und
+    `border.color`. Beobachtet an `tertiary/rest` (a = 0), das deckend schwarz rendert.
+  - Rot 1 (Prüfung zuerst): Die Parity-Seiten führen **aufgelöste Werte**. Die Figma-Seite gibt
+    wieder, was das Plugin anwendet (Paint samt Deckkraft), nicht was die Variable enthält; die
+    Skemo-Seite gibt den Wert des Modelo. F8 wird damit in `check:parity` sichtbar, bevor eine
+    Zeile Plugin geändert ist.
+  - Rot 2 (gemockte Plugin-API): ein Token mit a = 0 ist nach der Bindung nicht deckend; ein Token
+    mit 8 % Deckung hat `opacity === 0.08` und behält die Bindung an `color`.
+  - Grün: **eine** Regel, kein Sonderfall für a = 0 — `paint.opacity = a`, die Bindung an `color`
+    bleibt in jedem Fall bestehen. Ein entfernter Paint (`fills = []`) würde die Bindung tilgen:
+    im Figma-File wäre nicht mehr zu sehen, welche Variable die Fläche regiert, und ein späterer
+    Moduswechsel könnte sie nicht zurückholen. Verhält sich Figma bei Deckkraft 0 unerwartet, wird
+    das gemessen und berichtet, nicht angenommen.
+  - Grün: Die Fallentscheidung quantifiziert über **alle Modi aller Dimensioj, `aspekto`
+    eingeschlossen**. Eine Marke, deren tertiäre Fläche deckend ist, darf nicht die Entscheidung
+    der Referenzmarke aufgedrückt bekommen; kommt eine Aspekto hinzu, wird neu ausgewertet oder
+    die Prüfung bricht hörbar.
+  - Grün: Modusabhängiges Alpha (`color/shadow/key` 0,25 → 0,5, `color/shadow/ambient` 0,1 → 0,25)
+    ist mit einer statischen Deckkraft nicht darstellbar. Festgehalten als Jugxo mit der Grenze und
+    der Option „Auflagen-Knoten mit FLOAT-Begleitvariable", **und durchgesetzt** von einem Wächter
+    in den Projektionsprüfungen: Wird ein Token mit modusabhängigem Alpha an einen Paint gebunden,
+    schlägt die Prüfung fehl und die Meldung zeigt auf den Jugxo. Kein dauerhaft roter Test.
+  - Fertig wenn: `check:parity` vergleicht Werte, die vier tertiären Rollen erscheinen in Figma mit
+    ihrer Deckkraft, der Wächter ist grün und bricht bei einer Verletzung.
+
+- [ ] **F9 Composite-Tokens werden nie zu einer Zeichenkette** (Abnahme M1, FR-06)
+  - Befund: `elevation/shadow/{raised,overlay,modal,floating}` stehen als sichtbare STRING-Variablen
+    mit dem Wert `[object Object]` bzw. `[object Object],[object Object]` im Plan — sie gingen so in
+    die veröffentlichte Bibliothek. Die übrigen STRING-Werte (Schriftfamilien, Bezierkurven,
+    Strichart) sind sauber.
+  - Rot: Ein Composite-Fixture erzeugt heute eine solche Zeichenkette; erwartet wird stattdessen
+    entweder ein Figma-Effekt oder gar keine Variable mit Kialo. Dazu ein genereller Wächter: kein
+    Variablenwert entsteht durch implizite String-Umwandlung eines Objekts.
+  - Grün: Schatten werden übersetzt oder mit Kialo weggelassen; der Wächter läuft über den ganzen
+    Plan.
+  - Fertig wenn: kein Variablenwert im Plan enthält `[object Object]`, und der Wächter fängt einen
+    neu eingeführten Fall.
+
+- [ ] **F10 Befund: 71 statt 72 Varianten im Figma-File** (Abnahme M1)
+  - Befund zuerst, Korrektur danach. Stand der Untersuchung: `plan.json` enthält **72** Varianten
+    mit 72 eindeutigen Namen (Kreuzprodukt 108 minus die 36 Kombinationen, die die Skemo-Regel
+    `tone=danger` nur mit `variant=primary` erlaubt). Der Verlust entsteht also erst beim Anwenden.
+  - Zu prüfen: (a) ein zweiter Lauf gegen ein Set, das ein älterer Plan angelegt hat — `made`
+    sammelt nur neue Knoten, vorhandene werden nur aktualisiert; (b) ein Variantenknoten, dessen
+    `sharedPluginData` verloren ging; (c) Figmas Verhalten in `combineAsVariants`.
+  - Grün: Das Plugin meldet je Komponente, wie viele Varianten es angelegt, aktualisiert und
+    vorgefunden hat, und warnt, wenn das Set nach dem Lauf eine andere Zahl Kinder hat als der Plan
+    Varianten — aus „71 statt 72" wird ein Befund, den eine Prüfung sieht.
+
 Consistency check before tasks (`/speckit.analyze` scope): every FR and AK maps to at least one task or a recorded decision; every task maps to a plan decision; two new packages (Art. XI); the lockfile changes in T008 only; no task lowers a threshold; nothing is published.

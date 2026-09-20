@@ -65,17 +65,23 @@ const id = (prefix: string) => `${prefix}:${++sequence}`;
 
 function node(type: string, name: string, counts: DoubleCounts): DoubleNode {
   counts.nodes++;
+  // The proxy is the node's identity: children and parents must point at it, not at the raw
+  // object, or a comparison by identity fails.
+  let recorded: DoubleNode;
   const self: DoubleNode = {
     id: id(type),
     type,
     name,
     children: [],
+    // Declared here so the recording proxy treats it as a field of the node, not as a property
+    // the plugin sets.
+    parent: undefined,
     properties: {},
     boundVariables: {},
     pluginData: {},
     appendChild(child) {
       child.parent?.children.splice(child.parent.children.indexOf(child), 1);
-      child.parent = self;
+      child.parent = recorded;
       self.children.push(child);
     },
     setSharedPluginData(namespace, key, value) {
@@ -89,11 +95,49 @@ function node(type: string, name: string, counts: DoubleCounts): DoubleNode {
       else self.boundVariables[field] = variable.name;
     },
     remove() {
-      self.parent?.children.splice(self.parent.children.indexOf(self), 1);
+      self.parent?.children.splice(self.parent.children.indexOf(recorded), 1);
       self.parent = undefined;
     },
   };
-  return self;
+  // Everything the plugin assigns directly — `node.fills`, `node.minHeight`, `node.characters` —
+  // lands in `properties`, so the double records it and `snapshot()` shows it. Without this the
+  // double swallowed every such assignment, and a projection could lose a value unseen (F8).
+  recorded = new Proxy(self, {
+    set(target, key, value) {
+      if (typeof key === "string" && !(key in target)) {
+        target.properties[key] = value;
+        return true;
+      }
+      return Reflect.set(target, key, value);
+    },
+    get(target, key) {
+      if (typeof key === "string" && !(key in target) && key in target.properties) {
+        return target.properties[key];
+      }
+      return Reflect.get(target, key);
+    },
+  });
+  return recorded;
+}
+
+/**
+ * A double that swallows is worse than none (Jugxo jug_01M3094ZC6F3XZ1H0MWQZ62MYV): reaching for
+ * an API member this double does not model must fail loudly and name the member, instead of
+ * handing out `undefined` and letting a green run say nothing. Symbols are left alone — they are
+ * how the runtime and the test framework inspect an object, not how the plugin calls Figma.
+ */
+function strict<T extends object>(name: string, api: T): T {
+  return new Proxy(api, {
+    get(target, key, receiver) {
+      if (typeof key === "string" && !(key in target)) {
+        throw new Error(
+          `The Figma double does not model ${name}.${key}. Model it in test-doubles/plugin.ts — ` +
+            "a double that silently answers for the tool proves nothing.",
+        );
+      }
+      return Reflect.get(target, key, receiver);
+    },
+  });
 }
 
 /** A fresh double with an empty document. */
@@ -149,10 +193,10 @@ export function figmaDouble(): FigmaDouble {
     return variable;
   };
 
-  const figma = {
+  const figma = strict("figma", {
     root,
     currentPage: page,
-    variables: {
+    variables: strict("figma.variables", {
       getLocalVariableCollectionsAsync: async () => [...collections],
       getLocalVariablesAsync: async () => [...variables],
       createVariableCollection: createCollection,
@@ -165,7 +209,7 @@ export function figmaDouble(): FigmaDouble {
         ...(paint as Record<string, unknown>),
         boundVariables: { color: { type: "VARIABLE_ALIAS", id: variable.id, name: variable.name } },
       }),
-    },
+    }),
     createComponent: () => node("COMPONENT", "Component", counts),
     createFrame: () => node("FRAME", "Frame", counts),
     createText: () => {
@@ -183,7 +227,10 @@ export function figmaDouble(): FigmaDouble {
     loadFontAsync: async () => undefined,
     notify: () => undefined,
     closePlugin: () => undefined,
-  };
+    // Declared because the generated plugin probes it before it runs itself: what the double
+    // models, it models on purpose.
+    command: undefined,
+  });
 
   const snapshot = () =>
     JSON.stringify(

@@ -11,12 +11,19 @@
 // Pure.
 
 import {
+  allResolutions,
+  alphaOf,
+  baseResolution,
   boundToken,
   combinationsOf,
   type LoadedEro,
   type Modelo,
   nomRegulo,
+  PARITY_ALPHA_VARIES,
   type ParityItem,
+  parityColorText,
+  parityVariantKey,
+  readDtcgColor,
   STATE_KEY,
 } from "@fundamento/modelo";
 import type { Celo, CeloInput, GeneratedFile } from "../../build.js";
@@ -47,10 +54,30 @@ export interface FigmaCollection {
   variables: FigmaVariable[];
 }
 
+/**
+ * The paint the plugin applies for one colour binding (F8, Abnahme M1). Figma binds only the RGB
+ * of a variable to a paint, so the deckkraft is part of the plan: the plugin sets
+ * `paint.opacity = alpha` and keeps the binding to `color` in every case. The decision is taken
+ * over **all modes of all Dimensioj, aspekto included**; where the alpha is not the same in all of
+ * them, the plan says so instead of picking one mode (a projection projects the Modelo, never one
+ * brand), and the projection check refuses the binding.
+ */
+export type FigmaPaint =
+  | { hex: string; opacity: number }
+  | { hex: string; alphaVariesByMode: true };
+
+/** What a Figma side writes for a binding whose alpha is not the same in every mode. */
+export const ALPHA_VARIES = PARITY_ALPHA_VARIES;
+
 export interface FigmaComponentSet {
   set: string;
   properties: Record<string, string[] | "BOOLEAN" | "TEXT">;
-  variants: { props: Record<string, string>; bindings: Record<string, string> }[];
+  variants: {
+    props: Record<string, string>;
+    bindings: Record<string, string>;
+    /** Per colour binding the paint the plugin applies; absent for non-colour bindings. */
+    paints?: Record<string, FigmaPaint>;
+  }[];
   pluginData: { fundamento: { ero: string; skemo: string; version: string } };
 }
 
@@ -274,8 +301,44 @@ function modeValue(type: string, value: unknown, field?: string): FigmaValue {
   return figmaValue(FIELD_TYPES[field] ?? "dimension", (value as Record<string, unknown>)?.[field]);
 }
 
+/** The six-digit hex of a colour, whatever its alpha: the paint's colour channel. */
+function hexOf(color: Parameters<typeof alphaOf>[0]): string {
+  return parityColorText({ ...color, alpha: 1 });
+}
+
+/**
+ * The paint of one token, decided over every combination the Modelo has — `aspekto` included, so
+ * a second brand cannot inherit the first one's decision (F8). Returns `undefined` for a token
+ * that is no colour anywhere.
+ */
+function paintOf(
+  token: string,
+  resolutions: ReturnType<typeof allResolutions>,
+  base: Readonly<Record<string, { value: unknown }>>,
+): FigmaPaint | undefined {
+  const alphas = new Set<number>();
+  for (const { tokens } of resolutions) {
+    const color = readDtcgColor(tokens[token]?.value);
+    if (color !== undefined) alphas.add(alphaOf(color));
+  }
+  // The colour follows the bound variable and therefore the mode; the hex here is the one of the
+  // base combination, the state a side can compare. Only the deckkraft is static (F8).
+  const baseColor = readDtcgColor(base[token]?.value);
+  const hex = baseColor === undefined ? undefined : hexOf(baseColor);
+  if (hex === undefined) return undefined;
+  const [only] = [...alphas];
+  return alphas.size === 1 && only !== undefined
+    ? { hex, opacity: only }
+    : { hex, alphaVariesByMode: true };
+}
+
 /** The component set of one Ero: every variant with its variable bindings (D-12). */
-function componentSetOf(entry: LoadedEro, version: string): FigmaComponentSet {
+function componentSetOf(
+  entry: LoadedEro,
+  version: string,
+  resolutions: ReturnType<typeof allResolutions>,
+  base: Readonly<Record<string, { value: unknown }>>,
+): FigmaComponentSet {
   const skemo = entry.skemo;
   const properties: FigmaComponentSet["properties"] = {};
   for (const prop of skemo.props) {
@@ -300,13 +363,17 @@ function componentSetOf(entry: LoadedEro, version: string): FigmaComponentSet {
   ];
   const variants = combinationsOf(skemo, keys).map((combination) => {
     const bindings: Record<string, string> = {};
+    const paints: Record<string, FigmaPaint> = {};
     for (const [part, partProperties] of Object.entries(skemo.parts)) {
       for (const property of Object.keys(partProperties)) {
         const bound = boundToken(skemo, part, property, combination);
-        if (bound !== undefined) bindings[`${part}.${property}`] = variableName(bound.token);
+        if (bound === undefined) continue;
+        bindings[`${part}.${property}`] = variableName(bound.token);
+        const paint = paintOf(bound.token, resolutions, base);
+        if (paint !== undefined) paints[`${part}.${property}`] = paint;
       }
     }
-    return { props: { ...combination }, bindings };
+    return { props: { ...combination }, bindings, paints };
   });
   return {
     set: entry.ero.name,
@@ -367,7 +434,14 @@ export const FIGMA_CELO: Celo = {
     const plan: FigmaPlan = {
       fundamento: modeloJson.fundamento.version,
       collections,
-      components: modelo.eroj.map((entry) => componentSetOf(entry, modeloJson.fundamento.version)),
+      components: modelo.eroj.map((entry) =>
+        componentSetOf(
+          entry,
+          modeloJson.fundamento.version,
+          allResolutions(modelo),
+          baseResolution(modelo),
+        ),
+      ),
     };
     return [
       { path: "figma/plan.json", text: `${JSON.stringify(plan, null, 2)}\n` },
@@ -403,10 +477,26 @@ export function figmaPlanInventory(plan: unknown): Record<string, ParityItem> {
       else props[name] = [values === "BOOLEAN" ? "boolean" : "string"];
     }
     const states = component.properties[STATE_KEY];
+    // F8: the side states what the plugin applies — the paint with its deckkraft, or the marker
+    // for a binding whose alpha is not the same in every mode.
+    const values: Record<string, string> = {};
+    for (const variant of component.variants ?? []) {
+      for (const [binding, paint] of Object.entries(variant.paints ?? {})) {
+        values[`${binding}@${parityVariantKey(variant.props)}`] =
+          "alphaVariesByMode" in paint
+            ? `${ALPHA_VARIES} (${variant.bindings[binding]})`
+            : parityColorText({
+                colorSpace: "srgb",
+                components: [0, 0, 0],
+                alpha: paint.opacity,
+                hex: paint.hex,
+              });
+      }
+    }
     items[component.set] = {
       props,
       states: Array.isArray(states) ? [...states] : [],
-      values: {},
+      values,
     };
   }
   return items;

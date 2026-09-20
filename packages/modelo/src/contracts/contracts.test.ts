@@ -78,9 +78,12 @@ describe("entity ID prefixes (§2.3)", () => {
 describe("rule catalog (§2.6)", () => {
   it("contains every rule ID exactly once", () => {
     expect(new Set(RULE_IDS).size).toBe(RULE_IDS.length);
-    // 115 since Spec 004 T013: a named fingerprint list that does not exist is its own finding.
-    expect(RULE_IDS).toHaveLength(115);
+    // 117: Spec 004 T013 added the missing fingerprint list, Spec 003 F8 the value a projection
+    // cannot express and the Celo a Jugxo names in its typed reference.
+    expect(RULE_IDS).toHaveLength(117);
     expect(RULE_IDS).toContain("clean-room-spuro-file-missing");
+    expect(RULE_IDS).toContain("parity-alpha-varies-by-mode");
+    expect(RULE_IDS).toContain("jugxo-celo-unknown");
     expect(RULE_IDS).toContain("nomregulo-no-target");
     expect(RULE_IDS).toContain("id-namespace-mismatch");
     expect(RULE_IDS).toContain("id-namespace-duplicate");
@@ -183,6 +186,16 @@ describe("Jugxo vocabulary", () => {
       "XII",
       "XIII",
     ]);
+  });
+
+  // AK-12 narrowed on 2026-09-20: a Jugxo may say which Celo it belongs to — as a typed field.
+  // Which names are allowed stays in code, so the schema names no Celo (Art. VIII).
+  it("lets every Jugxo reference carry a celo, without naming one", () => {
+    for (const name of ["JugxoReguloRef", "JugxoEroRef", "JugxoArtikoloRef"]) {
+      const ref = defs[name] as { properties: Record<string, unknown>; required?: string[] };
+      expect(ref.properties.celo, name).toMatchObject({ $ref: "#/$defs/Name" });
+      expect(ref.required ?? [], name).not.toContain("celo");
+    }
   });
 
   it("matches the schema's artikolo enum and decision enum", () => {
