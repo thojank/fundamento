@@ -68,7 +68,7 @@ Jedes Ziel nennt: was gemessen wird, warum (Kialo), den heutigen Wert, den Zielw
 | G1b | komunas eigene Reserve | dieselbe Messung | min +3,6 % | **≥ +10 %** | **Aspiro komuna** | Die Referenzmarke soll vormachen, was erreichbar ist, ohne es jeder Marke vorzuschreiben. |
 | G2 | Flächen bleiben unterscheidbar | `oklch-l-delta` benachbarter Flächenrollen | 0,000 (zweimal) | **≥ 0,02** | **Regulo** | Wenn zwei Flächen gleich hell sind, trägt nur der Schatten die Schichtung; ohne Schatten (hoher Kontrast, Druck, forced colors) verschwindet sie ganz. Das ist Struktur, nicht Geschmack. |
 | G3 | Keine reinen Endpunkte als Fläche | `oklch-l-extreme` je Flächenrolle | 0,000 (viermal) | **≥ 0,02** | **Aspiro komuna** | Reines Weiß und reines Schwarz lassen keinen Platz mehr nach oben oder unten. Eine Marke darf sich trotzdem dafür entscheiden – komuna nicht. |
-| G4 | Rampe ist regelmäßig | `oklch-l-step-consistency` (relative Abweichung eines Schritts vom Median der Rampe), dazu strenge Monotonie | 62,5 % (58,7 % bei `danger`) | **≤ 75 %**, streng monoton | **Regulo** | Eine Rampe ist ein Werkzeug: Wer „eine Stufe dunkler" sagt, muss überall ungefähr dieselbe Wirkung bekommen. **Wie fein** eine Marke abstuft, ist ihre Sache – nur der Sprung mitten in der Rampe ist es nicht. |
+| G4 | Rampe ist regelmäßig | `oklch-l-step-consistency` über die **inneren** Schritte (relative Abweichung vom Median), dazu strenge Monotonie | 31,3 % (28,0 % bei `danger`) | **≤ 50 %**, streng monoton | **Regulo** | Eine Rampe ist ein Werkzeug: Wer „eine Stufe dunkler" sagt, muss mitten in der Rampe überall dieselbe Wirkung bekommen. **Wie fein** eine Marke die Enden abstuft, ist ihre Sache – ein Sprung in der Mitte ist es nicht. |
 | G4b | komunas Schrittweite | `oklch-l-step` (ΔL je 100 Stufeneinheiten) | 0,055 … 0,160 | **0,04 … 0,20** | **Aspiro komuna** | Die Referenzmarke legt sich auf eine Schrittweite fest, damit ihre Rampen untereinander gleich schnell laufen und eine abgeleitete Marke sie übernehmen kann. |
 | G5 | Rampen untereinander ausgerichtet | `oklch-l-align` | ≤ 0,013 | **≤ 0,02** | **Regulo** | Gleiche Stufennummer, gleiche Helligkeit: sonst wirkt dieselbe Rolle je nach Farbe verschieden schwer. |
 | G6 | Alle Werte im sRGB-Gamut | `srgb-gamut` | erfüllt | bleibt erfüllt, geprüft | **Regulo** | Was außerhalb des Gamuts liegt, beschneidet der Browser – dann stimmt der gemessene Kontrast nicht mehr mit dem gezeigten überein. |
@@ -90,13 +90,15 @@ APCA bleibt beratend (Art. X, Jugxo `jug_01M2XKF38358Z6WQH9KARYJ6F3`).
 |---|---|---|---|
 | `contrast-reserve` | `roles: [foreground, background, border, focus]` | `{ metric: "wcag2-reserve", min: 0.05 }` | jede KontrastParo × Kombination |
 | `surface-distinct` | `tokens: ["color.background.*"]` | `{ metric: "oklch-l-delta", min: 0.02 }` | benachbarte Flächenrollen je Kombination |
-| `palette-even` | `tokens: ["color.palette.*"]` | `{ metric: "oklch-l-step-consistency", max: 0.75 }` | **Regelmäßigkeit**: strenge Monotonie, und kein Schritt weicht mehr als 75 % vom Median seiner Rampe ab – **keine** feste Schrittweite |
+| `palette-even` | `tokens: ["color.palette.*"]` | `{ metric: "oklch-l-step-consistency", max: 0.5 }` | **Regelmäßigkeit**: strenge Monotonie, und kein **innerer** Schritt weicht mehr als 50 % vom Median der inneren Schritte ab – **keine** feste Schrittweite |
 | `palette-aligned` | `tokens: ["color.palette.*"]` | `{ metric: "oklch-l-align", max: 0.02 }` | gleiche Stufennummer über Rampen |
 | `srgb-gamut` | `types: ["color"]` | – | jede Komponente in 0 … 1 |
 | `type-scale` | `tokens: ["font.size.scale.*"]` | `{ metric: "type-scale-consistency", max: 0.1 }` | **Regelmäßigkeit**: jedes Verhältnis höchstens 10 % vom Median der Skala entfernt, streng monoton – **kein** fester Bereich |
 | `type-rhythm` | `tokens: ["font.lineheight.*", "font.tracking.*"]` | – | Monotonie gegen die Größenrolle |
 
-Zwei Ausnahmen mit Kialo in der Regulo selbst: **Alpha-Rampen** (`shade`) fallen aus `palette-even` und `palette-aligned`, **Ankerstufen** (0 = Weiß, 1000 = Schwarz) aus `palette-even`.
+Drei Ausnahmen mit Kialo in der Regulo selbst: **Alpha-Rampen** (`shade`) fallen aus `palette-even` und `palette-aligned`; **Ankerstufen** (0 = Weiß, 1000 = Schwarz) fallen aus `palette-even`; und dort fallen auch die **Randschritte** heraus – der erste und der letzte Schritt der Rampe, nachdem die Anker entfernt sind. Kialo: An den Enden darf eine Marke bewusst feiner abstufen (näher an Weiß braucht das Auge kleinere Schritte, am dunklen Ende sitzt oft eine halbe Stufe); die Aussage der Regel gilt der **Mitte** der Rampe, wo ein Sprung die Rampe als Werkzeug unbrauchbar macht. Die Grenze ist an den eigenen Daten gewählt: Die inneren Schritte von komuna weichen heute um höchstens 31,3 % vom Median ab (research §2.4), die Grenze von 50 % lässt Spielraum und schlägt bei einem doppelten Schritt (100 %) sicher an.
+
+
 
 `surface-order` (Phase 2) bleibt unverändert: Reihenfolge dort, Abstand in `surface-distinct`.
 
@@ -122,7 +124,7 @@ Zwei Ausnahmen mit Kialo in der Regulo selbst: **Alpha-Rampen** (`shade`) fallen
 - **Geprüft** wird eine Aspiro nur in den Kombinationen der erklärenden Aspekto.
 - **Ausgabe getrennt:** Ein Regulo-Verstoß ist `<regulo-name>`, ein verfehltes Ziel ist `aspiro-missed`; die Zusammenfassung zählt beide getrennt („3 Regulo-Verstöße, 1 verfehltes Entwurfsziel").
 - **Schweregrad:** `error` für die erklärende Marke. Begründung: Eine Marke, die sich ein Ziel setzt, soll es nicht unbemerkt verlieren; wer es aufgeben will, streicht oder senkt es sichtbar in `aspekto.json` (und begründet das dort, wo es steht).
-- **Negativtests (Fluida Marko):** (1) Eine Fixture-Aspekto mit reinem Weiß als Fläche und einem konstanten Verhältnis von 1,5 in der Typo-Skala **besteht alle Reguloj**. (2) Eine Palette mit gleichmäßigen, aber **kleinen** Schritten (ΔL 0,025 überall) besteht `palette-even` – sie ist regelmäßig, nur feiner abgestuft als komuna. Beide Fixtures erklären keine Aspiroj und bekommen deshalb auch keinen `aspiro-missed`.
+- **Negativtests (Fluida Marko):** (1) Eine Fixture-Aspekto mit reinem Weiß als Fläche und einem konstanten Verhältnis von 1,5 in der Typo-Skala **besteht alle Reguloj**. (2) Eine Palette mit gleichmäßigen, aber **kleinen** Schritten (ΔL 0,025 überall) besteht `palette-even`. (3) Ein feinerer **Randschritt** (0,03 neben einem Median von 0,08) besteht ebenfalls; ein **innerer** Schritt mit dem doppelten Median schlägt an. Die Fixtures erklären keine Aspiroj und bekommen deshalb auch keinen `aspiro-missed`.
 
 ### D-04 komuna 2: was sich an Werten ändert (FR-01)
 

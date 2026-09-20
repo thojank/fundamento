@@ -56,5 +56,6 @@ Die Zusammenfassung zählt getrennt, etwa: `2 Regulo-Verstöße, 3 verfehlte Ent
 
 1. Eine Fixture-Aspekto mit reinem Weiß als Fläche und einer Größenskala im konstanten Verhältnis 1,5 besteht **jede Regulo**.
 2. Eine Palette mit gleichmäßigen, aber kleinen Schritten (ΔL 0,025 überall) besteht `palette-even`: sie ist regelmäßig, nur feiner abgestuft als komuna.
+3. Ein feinerer **Randschritt** (0,03 neben einem Median von 0,08) besteht `palette-even`; ein **innerer** Schritt mit dem doppelten Median schlägt an.
 
 Beide erklären keine Aspiroj und bekommen deshalb kein `aspiro-missed`. Regeln erzwingen Zugänglichkeit und Struktur, nie Geschmack.

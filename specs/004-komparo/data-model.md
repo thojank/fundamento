@@ -37,7 +37,7 @@ Form wie bisher; `kialo` ist Pflicht (Art. VI), `sojlo` nur, wo es eine Zahl gib
 |---|---|---|---|
 | `contrast-reserve` | `roles` (fore/back/border/focus) | `{ metric: "wcag2-reserve", min: 0.05 }` | je Paar × Kombination, auf der Messung von `evaluateAlirebleco` |
 | `surface-distinct` | `tokens: ["color.background.*"]` | `{ metric: "oklch-l-delta", min: 0.02 }` | je Kombination, benachbarte Flächenrollen in der Reihenfolge von `surface-order` |
-| `palette-even` | `tokens: ["color.palette.*"]` | `{ metric: "oklch-l-step-consistency", max: 0.75 }` | je Rampe im Kern-Satz: strenge Monotonie, kein Schritt mehr als 75 % vom Median entfernt; Alpha-Rampen und Ankerstufen ausgenommen |
+| `palette-even` | `tokens: ["color.palette.*"]` | `{ metric: "oklch-l-step-consistency", max: 0.5 }` | je Rampe im Kern-Satz: strenge Monotonie über alle Schritte, und kein **innerer** Schritt mehr als 50 % vom Median der inneren Schritte entfernt; Alpha-Rampen, Ankerstufen und die beiden Randschritte ausgenommen |
 | `palette-aligned` | `tokens: ["color.palette.*"]` | `{ metric: "oklch-l-align", max: 0.02 }` | je Stufennummer über alle Buntrampen |
 | `srgb-gamut` | `types: ["color"]` | – | je Farbtoken, auch in jedem Aspekto-Satz |
 | `type-scale` | `tokens: ["font.size.scale.*"]` | `{ metric: "type-scale-consistency", max: 0.1 }` | Regelmäßigkeit: jedes Verhältnis höchstens 10 % vom Median entfernt, streng monoton |
@@ -48,7 +48,8 @@ Nicht als Regulo, sondern als Aspiro von komuna (Plan D-03, „Fluida Marko"): d
 Zwei Ausnahmen, jede mit eigenem Satz im `kialo` der betroffenen Regulo:
 
 - **Alpha-Rampen** (jede Stufe mit Alpha < 1, heute `shade`) fallen aus `palette-even` und `palette-aligned`: transparentes Schwarz hat keine Helligkeitskurve.
-- **Ankerstufen** (Stufe 0 = reines Weiß, Stufe 1000 = reines Schwarz) fallen aus `palette-even`: sie sind absolute Anker, keine Stufen einer wahrnehmbaren Progression. Dass keine **Fläche** sie benutzt, sichert `surface-not-extreme`.
+- **Ankerstufen** (Stufe 0 = reines Weiß, Stufe 1000 = reines Schwarz) fallen aus `palette-even`: sie sind absolute Anker, keine Stufen einer wahrnehmbaren Progression. Dass keine **Fläche** sie benutzt, ist eine Aspiro von komuna.
+- **Randschritte** (der erste und der letzte Schritt, nachdem die Anker entfernt sind) fallen aus `palette-even`: An den Enden darf eine Marke bewusst feiner abstufen; geprüft wird die Mitte der Rampe. Die Monotonie gilt weiter für **alle** Schritte.
 
 ## 2b. Aspiroj (`aspekto.json#/aspiroj`)
 
@@ -96,7 +97,7 @@ Reine Funktionen, stabile IDs, gemeinsame Nutzung durch Prüfung, Vitrino und sp
 | `srgb-gamut` | `(a: ColorValue) => { inside: boolean; worst: number }` | größte Überschreitung von 0 … 1 |
 | `type-scale-ratio` | `(sizes: number[]) => number[]` | Verhältnisse benachbarter Stufen |
 | `type-scale-consistency` | `(sizes: number[]) => { median: number; worst: number; at: number }` | größte **relative** Abweichung eines Verhältnisses vom Median |
-| `oklch-l-step-consistency` | `(ramp: RampStep[]) => { median: number; worst: number; at: number }` | größte **relative** Abweichung eines Schritts vom Median der Rampe |
+| `oklch-l-step-consistency` | `(ramp: RampStep[]) => { median: number; worst: number; at: number; edges: [number, number] }` | Median und größte relative Abweichung der **inneren** Schritte; `edges` nennt die beiden ausgenommenen Randschritte |
 | `type-rhythm` | `(rows: { size: number; lineHeight: number; tracking: number }[]) => { monotone: boolean; breaks: … }` | Verstöße gegen die Monotonie |
 | `dimensio-kovrado` | `(modelo, { aspekto, dimensio, valoro, scope? }) => { own: number; total: number; share: number }` | Anteil der Tokens eines Dimensio-Werts, die die Marke selbst setzt |
 

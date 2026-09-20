@@ -62,6 +62,16 @@ Sieben Rampen, 72 Palettentokens. `shade` ist eine Alpha-Rampe (transparentes Sc
 
 Gemessen an der **Regelmäßigkeit** – wie weit ein Schritt vom Median seiner eigenen Rampe abweicht, Ankerstufen und Alpha-Rampe ausgenommen – liegt jede Buntrampe bei **62,5 %** (`danger` 58,7 %); der Ausreißer ist immer derselbe: der erste Schritt 50 → 100 mit ΔL 0,030 gegen einen Median von 0,080. Das helle Ende ist also bewusst feiner abgestuft.
 
+Lässt man die **Randschritte** weg (den ersten und den letzten Schritt, nachdem die Ankerstufen entfernt sind) und misst nur die Mitte der Rampe, bleibt:
+
+| Rampe | innere Schritte | Median ΔL | größte Abweichung |
+|---|---|---|---|
+| `neutral`, `accent`, `warning`, `info` | 8 | 0,080 | **31,3 %** |
+| `success` | 8 | 0,080 | 31,2 % |
+| `danger` | 8 | 0,080 | 28,0 % |
+
+Die Mitte ist also deutlich gleichmäßiger als die Ränder – die Zahl, an der die Regulo `palette-even` ihre Grenze bekommt (Plan D-03: ≤ 50 %).
+
 Die Rampen sind **streng monoton** und untereinander **eng ausgerichtet**: bei gleicher Stufennummer weichen die Helligkeiten der fünf Buntrampen um höchstens 0,013 voneinander ab. Die Ausreißer entstehen an zwei Stellen: der Sprung 900 → 950 ist ein halber Schritt (deshalb 0,160 je 100 Einheiten) und die neutralen Endpunkte 0 und 1000 sind reines Weiß und Schwarz (0,400).
 
 ### 2.5 Typografie
@@ -121,7 +131,7 @@ Die drei engsten Paare von ekzemplo sind `status-success-on-basic` (+4,1 %), `te
 | `oklch-l-delta` (Flächen) | Helligkeitsabstand benachbarter Flächenrollen | 0,000 an zwei Stellen |
 | `oklch-l-extreme` | Abstand einer Flächenrolle zu reinem Weiß/Schwarz | 0,000 an vier Stellen |
 | `oklch-l-step` | ΔL je 100 Stufeneinheiten innerhalb einer Rampe | 0,055 … 0,160 (ohne Anker) |
-| `oklch-l-step-consistency` | größte relative Abweichung eines Schritts vom Median seiner Rampe | 62,5 % |
+| `oklch-l-step-consistency` | größte relative Abweichung eines **inneren** Schritts vom Median der inneren Schritte | 31,3 % (mit Randschritten 62,5 %) |
 | `oklch-l-align` | Abweichung der Helligkeit gleicher Stufennummern zwischen Rampen | ≤ 0,013 |
 | `srgb-gamut` | jede Komponente in 0 … 1 | erfüllt |
 | `type-scale-ratio` | Verhältnis benachbarter Größenstufen | 1,111 … 1,250 |
