@@ -64,13 +64,23 @@ describe("Make Kit sources (T018)", () => {
     expect(String(manifest.version)).toMatch(/^0\.\d+\.\d+-/);
     expect(manifest.license).toBe("MIT");
     expect(manifest.publishConfig).toEqual({ access: "public", tag: "next" });
+    // Tree shaking in a user's build must keep the registration and the stylesheets (K1).
+    expect(manifest.sideEffects).toEqual([
+      "**/*.css",
+      "./dist/element.js",
+      "./dist/element.cjs",
+      "./dist/index.js",
+      "./dist/index.cjs",
+    ]);
     expect(manifest.dependencies).toBeUndefined();
     expect(manifest.peerDependencies).toEqual({ react: ">=18", "react-dom": ">=18" });
     // Provenance fails when repository.url does not match the repository the workflow runs in (F7).
+    // The directory must exist in the repository, so the link from npm leads somewhere: the kit
+    // is generated, its source is the generator (K2).
     expect(manifest.repository).toEqual({
       type: "git",
       url: "git+https://github.com/thojank/fundamento.git",
-      directory: `packages/projekcioj/dist/make-kit/${aspekto}`,
+      directory: "packages/projekcioj",
     });
     expect(manifest.homepage).toBe("https://github.com/thojank/fundamento#readme");
     expect(Object.keys(manifest.exports as object).sort()).toEqual([

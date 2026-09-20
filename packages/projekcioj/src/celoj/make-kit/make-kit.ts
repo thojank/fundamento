@@ -317,7 +317,9 @@ export const MAKE_KIT_CELO: Celo = {
             repository: {
               type: "git",
               url: "git+https://github.com/thojank/fundamento.git",
-              directory: `packages/projekcioj/dist/${DIR}/${aspekto}`,
+              // The generator, not the generated folder: only this path exists in the repository,
+              // so the link from npm leads somewhere (K2).
+              directory: "packages/projekcioj",
             },
             homepage: "https://github.com/thojank/fundamento#readme",
             type: "module",
@@ -344,7 +346,14 @@ export const MAKE_KIT_CELO: Celo = {
             files: ["dist", "guidelines", "styles.css", "tailwind.css", "README.md"],
             peerDependencies: { react: ">=18", "react-dom": ">=18" },
             publishConfig: { access: "public", tag: "next" },
-            sideEffects: ["*.css"],
+            // Tree shaking must keep the registration of the elements and the stylesheets (K1).
+            sideEffects: [
+              "**/*.css",
+              "./dist/element.js",
+              "./dist/element.cjs",
+              "./dist/index.js",
+              "./dist/index.cjs",
+            ],
           },
           null,
           2,

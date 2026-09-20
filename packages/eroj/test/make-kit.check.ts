@@ -182,6 +182,66 @@ test("the kit's bundle imports in Node without a DOM (server-side rendering, F6)
   expect(output.trim()).toBe("function function undefined");
 }, 600_000);
 
+test("a user build that imports only the element entry keeps the registration (K1)", async ({
+  page,
+}) => {
+  const work = mkdtempSync(join(tmpdir(), "fm-kit-side-"));
+  const kits = await buildMakeKits(join(work, "kits"), source);
+  const packed = npm(["pack", "--pack-destination", work], kits.komuna ?? "").trim();
+  const dir = join(work, "app");
+  mkdirSync(join(dir, "src"), { recursive: true });
+  writeFileSync(
+    join(dir, "package.json"),
+    `${JSON.stringify(
+      {
+        name: "fm-kit-sideeffects",
+        private: true,
+        type: "module",
+        scripts: { build: "vite build" },
+        dependencies: { "@fundamento/make-kit-komuna": `file:${join(work, packed)}` },
+        devDependencies: { vite: "8.3.0" },
+      },
+      null,
+      2,
+    )}\n`,
+  );
+  writeFileSync(
+    join(dir, "index.html"),
+    `<!doctype html><html lang="de"><head><meta charset="utf-8"><title>Kit</title><script type="module" src="/src/main.js"></script></head><body><fm-butono id="a" variant="primary">Speichern</fm-butono></body></html>\n`,
+  );
+  // Only the side-effect import: a bundler that trusts a wrong sideEffects field drops it.
+  writeFileSync(
+    join(dir, "src/main.js"),
+    'import "@fundamento/make-kit-komuna/element";\nimport "@fundamento/make-kit-komuna/styles.css";\n',
+  );
+  npm(["install", "--no-audit", "--no-fund", "--loglevel=error"], dir);
+  npm(["run", "build"], dir);
+  const dist = join(dir, "dist");
+  await page.route(`${ORIGIN}/**`, async (route) => {
+    const path = new URL(route.request().url()).pathname;
+    const file = join(dist, path === "/" ? "index.html" : path);
+    try {
+      await route.fulfill({
+        contentType: TYPES[extname(file)] ?? "application/octet-stream",
+        body: readFileSync(file),
+      });
+    } catch {
+      await route.fulfill({ status: 404, body: "" });
+    }
+  });
+  await page.goto(`${ORIGIN}/`);
+  await page.waitForFunction(() => customElements.get("fm-butono") !== undefined);
+  await expect(page.getByRole("button", { name: "Speichern" })).toBeVisible();
+  const fill = await page
+    .locator("#a")
+    .evaluate(
+      (element) =>
+        getComputedStyle(element.shadowRoot?.querySelector('[part="control"]') as Element)
+          .backgroundColor,
+    );
+  expect(fill).toBe(rgb(token("color.action.primary.rest")));
+}, 600_000);
+
 for (const [label, react, tailwind] of [
   ["React 18.3", "18.3.1", false],
   ["React 19.3 + Tailwind 4.3", "19.3.0", true],
