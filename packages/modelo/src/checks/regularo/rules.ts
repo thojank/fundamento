@@ -20,7 +20,7 @@ export interface RegularoInput {
   reguloj?: RegularoDocument | readonly RegularoDocument[];
   /** `data/jugxoj.json` (plus package `jugxoj.json` files); absent when it could not be read. */
   jugxoj?: RegularoDocument | readonly RegularoDocument[];
-  /** IDs of existing Eroj. Phase 0 has none, so every Ero reference is dangling. */
+  /** IDs of existing Eroj (`data/eroj/<name>/skemo.json`); absent means none. */
   eroIds?: ReadonlySet<string>;
 }
 
@@ -224,7 +224,7 @@ function checkRef(
     message:
       key === "regulo"
         ? `Jugxo ${name} references Regulo ${target}, which does not exist.`
-        : `Jugxo ${name} references Ero ${target}, which does not exist (the Modelo has no Eroj yet).`,
+        : `Jugxo ${name} references Ero ${target}, which does not exist.`,
     suggestion: `Point Jugxo ${name} at an existing ${entity}, or add the ${entity} ${target} first.`,
   };
 }

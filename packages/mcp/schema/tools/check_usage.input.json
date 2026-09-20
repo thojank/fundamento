@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ciferecigo.com/fundamento/schema/mcp/check_usage.input.json",
+  "title": "check_usage input",
+  "description": "Judges instances of a design or of code against the Ero Reguloj and the Skemo constraints. Call it before handing over a design or code.",
+  "type": "object",
+  "properties": {
+    "instances": {
+      "type": "array",
+      "items": {
+        "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/EroInstance"
+      },
+      "minItems": 1
+    }
+  },
+  "required": ["instances"],
+  "additionalProperties": false
+}

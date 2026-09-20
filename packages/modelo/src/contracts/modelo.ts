@@ -6,12 +6,14 @@ import type {
   DimensioValoro,
   DtcgType,
   EntityType,
+  Ero,
   Fonto,
   IdsLock,
   Jugxo,
   KontrastParo,
   Regulo,
   Rezolvo,
+  Skemo,
   TextTransform,
   TokenRole,
 } from "../generated/modelo-schema.js";
@@ -23,7 +25,11 @@ export type {
   Dimensio,
   DimensiojFile,
   DimensioValoro,
+  Ero,
+  EroFile,
+  EroInstance,
   Jugxo,
+  JugxoEkzemplo,
   JugxojFile,
   KontrastKategorio,
   KontrastParo,
@@ -35,8 +41,22 @@ export type {
   ResolvedToken,
   ResolvedTokenOrigin,
   Rezolvo,
+  Skemo,
+  SkemoBinding,
+  SkemoPart,
+  SkemoPartProperty,
+  SkemoPartSource,
+  SkemoProp,
   TokenSetFile,
 } from "../generated/modelo-schema.js";
+
+/** One Ero with its Skemo, loaded from `data/eroj/<name>/skemo.json` (Spec 003, D-02). */
+export interface LoadedEro {
+  /** Path relative to the Modelo root. */
+  file: string;
+  ero: Ero;
+  skemo: Skemo;
+}
 
 /**
  * Where a Modelo lives: the vortaro directory (`$themes.json`, `$metadata.json`, `sets/`), the
@@ -124,6 +144,8 @@ export interface Modelo {
   reguloj: Regulo[];
   jugxoj: Jugxo[];
   kontrastParoj: KontrastParo[];
+  /** Eroj with their Skemoj, sorted by Ero name (Spec 003). */
+  eroj: LoadedEro[];
   /** Union of the core registry and every package registry. */
   idsLock: IdsLock;
   /** Composed Aspekto packages in config order (D-08). */

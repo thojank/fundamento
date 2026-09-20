@@ -83,10 +83,11 @@ Ein Agent entwirft per Figma-MCP einen Screen mit `butono`-Instanzen. Ein Coding
 - **FR-17** Entscheidung APCA: bleibt beratend oder wird unter `contrast=high` verbindlich (Grundlage: Baseline Spec 001 §8).
 - **FR-18** Neubewertung Zustands-Textfarben im Kern (offener Befund aus Spec 002, FR-05) anhand der realen Komponente.
 
-## Constitution-Änderungen (v1.4 → v1.5)
+## Constitution-Änderungen (v1.4 → v1.5, v1.6)
 
 - **Art. XII, Celoj:** neues Celo „**Figma Make Kit** je Aspekto (React-Paket, Tailwind-Tokens, generierte Guidelines)", eingeordnet nach Celo 5 (Figma).
 - **Phasenfolge:** Phase 3 um das Make Kit ergänzt; Verweis auf `docs/vojmapo.md`.
+- **v1.6, Art. XII, Celo 2 (Maintainer-Entscheidung im Plan-Review):** „Tailwind v4: Tokens im `@theme` unter dem Namensraum `fm` (`--color-fm-*` → `bg-fm-*`), nicht per `prefix()`, weil `prefix()` alle Klassen des Projekts umbenennt." Grund: `prefix(fm)` benennt in jedem Host-Projekt (auch Figma Make) alle Klassen um. Migration: die Tailwind-NomRegulo und `derive_name` liefern die neuen Namen; es gibt noch keinen Verbraucher der alten Namen; Jugxo zu Art. XII (T002).
 
 ## Akzeptanzkriterien
 

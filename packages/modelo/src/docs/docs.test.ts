@@ -398,3 +398,139 @@ describe("Spec 002 documentation (T025)", () => {
     expect(findBrandValues(file, read(file), repoFingerprints())).toEqual([]);
   });
 });
+
+describe("Spec 003 documentation (T001, Constitution v1.6)", () => {
+  const constitution = read(".specify/memory/constitution.md");
+  const TAILWIND_SENTENCE =
+    "Tailwind v4: Tokens im `@theme` unter dem Namensraum `fm` (`--color-fm-*` → `bg-fm-*`), nicht per `prefix()`, weil `prefix()` alle Klassen des Projekts umbenennt.";
+
+  it("the Constitution header says version 1.6", () => {
+    expect(constitution.split("\n")[2]).toMatch(/^Version 1\.6 · /);
+  });
+
+  it("Art. XII Celo 2 carries the Tailwind naming sentence", () => {
+    const article = section(
+      constitution,
+      "Artikel XII – Interoperebleco (Interoperabilität statt Insel)",
+    );
+    const celo2 = article.split("\n").find((line) => line.startsWith("2. ")) ?? "";
+    expect(celo2).toContain(TAILWIND_SENTENCE);
+  });
+
+  it("the change history names v1.6 (Spec 003) with Art. XII", () => {
+    const history = section(constitution, "Governance");
+    expect(history).toMatch(/v1\.6 \(Spec 003\) Art\. XII/);
+  });
+
+  it("Spec 003 lists the v1.6 amendment and the plan header names v1.6", () => {
+    const spec = read("specs/003-butono-durchstich/spec.md");
+    const amendments = section(spec, "Constitution-Änderungen (v1.4 → v1.5, v1.6)");
+    expect(amendments).toContain("v1.6");
+    expect(amendments).toContain("prefix()");
+    expect(read("specs/003-butono-durchstich/plan.md").split("\n")[2]).toContain("v1.6");
+  });
+});
+
+describe("Spec 003 documentation (F4: the npm org)", () => {
+  const ORG = "https://www.npmjs.com/org/fundamento";
+
+  it("names the npm org at Phase 3 of the vojmapo", () => {
+    const vojmapo = read("docs/vojmapo.md");
+    const phase3 = vojmapo.split("\n").find((line) => line.startsWith("| 3 |")) ?? "";
+    expect(phase3).toContain(ORG);
+  });
+
+  it("lists the packages with the npm org in the README", () => {
+    const packages = section(read("README.md"), "Packages");
+    expect(packages).toContain(ORG);
+    for (const name of [
+      "@fundamento/modelo",
+      "@fundamento/vortaro",
+      "@fundamento/mcp",
+      "@fundamento/cli",
+      "@fundamento/projekcioj",
+      "@fundamento/eroj",
+      "@fundamento/aspekto-komuna",
+    ]) {
+      expect(packages, name).toContain(name);
+    }
+    expect(packages).toContain("make-kit");
+  });
+});
+
+describe("Spec 003 documentation: the Ero tools (T025)", () => {
+  const mcp = section(read("README.md"), "MCP server");
+
+  it("the README names the four Ero tools and counts eighteen", () => {
+    for (const tool of ["list_eroj", "get_ero", "suggest_ero", "check_usage"]) {
+      expect(mcp, tool).toContain(`\`${tool}\``);
+    }
+    expect(mcp).toContain("18 tools");
+  });
+
+  it("the README points at the Phase-3 tool contract", () => {
+    expect(mcp).toContain("specs/003-butono-durchstich/contracts/mcp-tools.md");
+  });
+});
+
+describe("Spec 003 documentation: quickstart, checks and traceability (T027)", () => {
+  const readme = read("README.md");
+  const plan = read("specs/003-butono-durchstich/plan.md");
+  const spec = read("specs/003-butono-durchstich/spec.md");
+
+  it("the README has an Eroj quickstart that switches Aspekto and colour scheme", () => {
+    const quickstart = section(readme, "Eroj quickstart");
+    for (const part of [
+      "fundamento.css",
+      "<fm-butono",
+      "Butono",
+      "data-fm-aspekto",
+      "data-fm-color-scheme",
+      "fm projekcioj build",
+    ]) {
+      expect(quickstart, part).toContain(part);
+    }
+  });
+
+  it("the README names the two rendered checks and the browsers they need", () => {
+    const checks = section(readme, "Checks");
+    expect(checks).toContain("pnpm check:alirebleco-eroj");
+    expect(checks).toContain("pnpm check:make-kit");
+    expect(checks).toContain("pnpm check:quickstart");
+    expect(checks).toContain("playwright install");
+    // Parity is no longer the empty comparator of Phase 0.
+    expect(checks).not.toContain("empty inventory in Phase 0");
+    expect(checks).toContain("parity/");
+  });
+
+  it("the CI workflow runs the four steps the README names", () => {
+    const ci = read(".github/workflows/ci.yml");
+    for (const step of [
+      "Playwright browsers",
+      "Check: Alirebleco (Eroj)",
+      "Check: Make Kit",
+      "Check: Quickstart",
+    ]) {
+      expect(ci, step).toContain(step);
+    }
+  });
+
+  it("the plan maps every FR and AK of the spec to the tasks that implement it", () => {
+    const required = [...spec.matchAll(/\*\*(FR-\d\d|AK-\d\d)/g)].map(([, id]) => id ?? "");
+    expect(required.length).toBeGreaterThan(20);
+    const table = section(plan, "Traceability (requirement → design → tasks)");
+    for (const id of new Set(required)) {
+      const row = table.split("\n").find((line) => new RegExp(`\\|[^|]*\\b${id}\\b`).test(line));
+      expect(row, id).toBeDefined();
+      // A task, a manual acceptance step, or a recorded reason why neither exists.
+      expect(row ?? "", id).toMatch(/T0\d\d|M[1-3]|no task/);
+    }
+  });
+
+  it("the vojmapo records Phase 3 as implemented and awaiting the acceptance", () => {
+    const vojmapo = read("docs/vojmapo.md");
+    const phase3 = vojmapo.split("\n").find((line) => line.startsWith("| 3 |")) ?? "";
+    expect(phase3).toContain("umgesetzt");
+    expect(phase3).toContain("Abnahme");
+  });
+});

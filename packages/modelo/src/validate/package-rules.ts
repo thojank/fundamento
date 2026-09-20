@@ -213,7 +213,8 @@ export function packageRegularoIssues(modelo: Modelo, files: ModeloFiles): Valid
     files.data["jugxoj.json"],
     ...files.packages.flatMap((pkg) => (pkg.jugxoj ? [pkg.jugxoj] : [])),
   ];
-  const issues = checkRegularo({ reguloj, jugxoj }).issues;
+  const eroIds = new Set(modelo.eroj.map((entry) => entry.ero.id));
+  const issues = checkRegularo({ reguloj, jugxoj, eroIds }).issues;
 
   const aspekto = modelo.dimensioj.find((dimensio) => dimensio.name === ASPEKTO_DIMENSIO);
   const known = new Set((aspekto?.valoroj ?? []).map((valoro) => valoro.name));

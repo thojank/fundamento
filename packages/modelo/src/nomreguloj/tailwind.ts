@@ -1,5 +1,7 @@
-// Tailwind v4 `@theme` Celo (FR-13b). Tailwind is loaded with `prefix(fm)`, so the `@theme`
-// entry `--<segments joined by ->` yields the same variable as the CSS Celo (`--fm-…`).
+// Tailwind v4 `@theme` Celo (FR-13b). Constitution v1.6, Art. XII: tokens sit in the `@theme`
+// under the namespace `fm`, `--<namespace>-fm-<key>` (`--color-fm-action-primary-rest` →
+// `bg-fm-action-primary-rest`), never through `prefix(fm)`, because `prefix()` renames every class
+// of the host project. The generated theme value is `var(--fm-…)`, the CSS Celo's variable.
 //
 // The namespace table below is Celo knowledge. It lives only here, never in the schema, the
 // Modelo data or `modelo.json` (Art. VIII), and is deliberately not re-exported from the package.
@@ -43,8 +45,9 @@ export interface TailwindNamespace {
  * `--font-weight-bold` to `--font-weight-*` rather than `--font-*`. Hence `font.weight.bold`
  * belongs to `--font-weight-*` (fontWeight only) and a fontFamily token must not be named
  * `font.weight.…`; it gets `NoTarget` instead of a misfiled entry. Because segments contain no
- * `-`, the entry itself (`--` + segments joined by `-`) stays injective and invertible whatever
- * the namespace. A namespace needs at least one key segment (`color` alone has no target).
+ * `-`, the entry (`--` + namespace path, `fm`, key, joined by `-`) stays injective and
+ * invertible whatever the namespace. A namespace needs at least one key segment (`color` alone
+ * has no target).
  * Types without a namespace (duration, strokeStyle, border, gradient, transition, typography,
  * …) have no Tailwind target and remain available as `--fm-*`.
  */
@@ -74,6 +77,9 @@ const BY_SPECIFICITY = [...TAILWIND_NAMESPACES]
   .sort((a, b) => b.segments.length - a.segments.length);
 
 const TAILWIND_ENTRY_PATTERN = /^--([a-z0-9]+(?:-[a-z0-9]+)*)$/;
+
+/** The segment that marks Fundamento's keys inside a Tailwind namespace (Constitution v1.6). */
+const FM_SEGMENT = "fm";
 
 type Classification =
   | { kind: "namespace"; entry: TailwindNamespace }
@@ -120,7 +126,8 @@ export const TAILWIND_NOM_REGULO: NomRegulo & { celo: "tailwind" } = {
         `$type ${type} is not allowed in ${found.entry.namespace}, which accepts ${found.entry.types.join(", ")}.`,
       );
     }
-    return `--${segments.join("-")}`;
+    const path = found.entry.path.split(".");
+    return `--${[...path, FM_SEGMENT, ...segments.slice(path.length)].join("-")}`;
   },
   invert(target) {
     const match = TAILWIND_ENTRY_PATTERN.exec(target);
@@ -128,6 +135,15 @@ export const TAILWIND_NOM_REGULO: NomRegulo & { celo: "tailwind" } = {
       return null;
     }
     const segments = match[1].split("-");
-    return classify(segments).kind === "namespace" ? segments.join(".") : null;
+    // A key is `<namespace path> fm <rest>`; the name must classify into that same namespace, so
+    // `--font-fm-weight-bold` (font.weight.bold belongs to `--font-weight-*`) has no inverse.
+    for (const { entry, segments: path } of BY_SPECIFICITY) {
+      const inNamespace = path.every((segment, index) => segments[index] === segment);
+      if (!inNamespace || segments[path.length] !== FM_SEGMENT) continue;
+      const name = [...path, ...segments.slice(path.length + 1)];
+      const found = classify(name);
+      if (found.kind === "namespace" && found.entry === entry) return name.join(".");
+    }
+    return null;
   },
 };

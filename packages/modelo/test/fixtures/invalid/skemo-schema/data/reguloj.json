@@ -1,0 +1,12 @@
+{
+  "reguloj": [
+    {
+      "id": "reg_01K5FMAJ0J14KNVH5BXJ93VFBG",
+      "name": "semantic-colors-alias-palette",
+      "statement": "Semantic color tokens reference palette tokens instead of literal values.",
+      "kialo": "A palette change then reaches every semantic use in one place.",
+      "scope": "vortaro",
+      "checkability": "manual"
+    }
+  ]
+}

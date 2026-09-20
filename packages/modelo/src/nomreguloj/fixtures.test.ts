@@ -88,22 +88,24 @@ const STRING_FIXTURES: Readonly<Record<Exclude<Celo, "tailwind">, readonly Row[]
 type TailwindRow = readonly [name: string, type: DtcgType | undefined, target: string | null];
 
 const TAILWIND_FIXTURES: readonly TailwindRow[] = [
-  ["color.action.primary.rest", "color", "--color-action-primary-rest"],
-  ["color.palette.blue.600", "color", "--color-palette-blue-600"],
-  ["color.h2o.a1b2", "color", "--color-h2o-a1b2"],
-  ["color.class.new.default", "color", "--color-class-new-default"],
-  ["color.a.b.c.d.e.f.g.h", "color", "--color-a-b-c-d-e-f-g-h"],
-  ["spacing.4", "dimension", "--spacing-4"],
-  ["spacing.0", "dimension", "--spacing-0"],
-  ["radius.md", "dimension", "--radius-md"],
-  ["font.sans", "fontFamily", "--font-sans"],
-  ["font.weight.bold", "fontWeight", "--font-weight-bold"],
-  ["font.weight.700", "fontWeight", "--font-weight-700"],
-  ["shadow.lg", "shadow", "--shadow-lg"],
-  ["ease.out", "cubicBezier", "--ease-out"],
-  ["text.xl", "dimension", "--text-xl"],
-  ["leading.tight", "number", "--leading-tight"],
-  ["inset.shadow.sm", "shadow", "--inset-shadow-sm"],
+  ["color.action.primary.rest", "color", "--color-fm-action-primary-rest"],
+  ["color.palette.blue.600", "color", "--color-fm-palette-blue-600"],
+  ["color.h2o.a1b2", "color", "--color-fm-h2o-a1b2"],
+  ["color.class.new.default", "color", "--color-fm-class-new-default"],
+  ["color.a.b.c.d.e.f.g.h", "color", "--color-fm-a-b-c-d-e-f-g-h"],
+  ["spacing.4", "dimension", "--spacing-fm-4"],
+  ["spacing.medium", "dimension", "--spacing-fm-medium"],
+  ["color.fm.x", "color", "--color-fm-fm-x"],
+  ["spacing.0", "dimension", "--spacing-fm-0"],
+  ["radius.md", "dimension", "--radius-fm-md"],
+  ["font.sans", "fontFamily", "--font-fm-sans"],
+  ["font.weight.bold", "fontWeight", "--font-weight-fm-bold"],
+  ["font.weight.700", "fontWeight", "--font-weight-fm-700"],
+  ["shadow.lg", "shadow", "--shadow-fm-lg"],
+  ["ease.out", "cubicBezier", "--ease-fm-out"],
+  ["text.xl", "dimension", "--text-fm-xl"],
+  ["leading.tight", "number", "--leading-fm-tight"],
+  ["inset.shadow.sm", "shadow", "--inset-shadow-fm-sm"],
   // No namespace for the first segment.
   ["duration.fast", "duration", null],
   ["opacity", "number", null],
@@ -151,7 +153,7 @@ describe("tailwind NomRegulo fixtures", () => {
       "--color-",
       "--spacing-",
       "--radius-",
-      "--font-sans",
+      "--font-fm-sans",
       "--font-weight-",
       "--shadow-",
       "--ease-",
@@ -190,11 +192,12 @@ describe("tailwind NomRegulo fixtures", () => {
     expect(isNoTarget(wrongType) && wrongType.reason).toMatch(/fontFamily/);
   });
 
-  it("produces the same variable as the CSS Celo under prefix(fm)", () => {
-    const entry = regulo.derive("color.action.primary.rest", "color");
-    expect(typeof entry === "string" && `--fm-${entry.slice(2)}`).toBe(
-      nomRegulo("css").derive("color.action.primary.rest"),
+  it("puts fm into the theme key, not into a global prefix (Constitution v1.6, Art. XII)", () => {
+    expect(regulo.derive("color.action.primary.rest", "color")).toBe(
+      "--color-fm-action-primary-rest",
     );
+    expect(regulo.derive("font.weight.bold", "fontWeight")).toBe("--font-weight-fm-bold");
+    expect(regulo.invert("--color-action-primary-rest")).toBeNull();
   });
 });
 
@@ -241,6 +244,11 @@ describe("invert rejects strings outside the target grammar", () => {
       "--color_primary",
       "color-primary",
       "--font-weight",
+      "--color-action-primary-rest",
+      "--color-fm",
+      "--color-fm-",
+      "--font-fm-weight-bold",
+      "--fm-color-fm-primary",
     ],
     dtcg: ["", "Color", "color.", ".color", "color..x", "color-x", "color_x", "color x", "colör"],
   };

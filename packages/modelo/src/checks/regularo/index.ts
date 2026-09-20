@@ -1,8 +1,9 @@
 // Regularo check (Art. X gate 3, S5.3, FR-08, FR-15). Reads only `data/reguloj.json` and
 // `data/jugxoj.json` of the repo Modelo (or of the `--fixture` Modelo root), strictly parsed but
-// without schema validation, so the check works even when the rest of the Modelo is broken.
+// without schema validation, so the check works even when the rest of the Modelo is broken. The
+// Ero IDs come from `data/eroj/<name>/skemo.json` (Spec 003), for Jugxoj that refer to an Ero.
 
-import { existsSync } from "node:fs";
+import { existsSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import type { CheckOptions, CheckResult } from "../../contracts/checks.js";
 import type { ValidationIssue } from "../../contracts/issues.js";
@@ -48,7 +49,7 @@ export async function check(options: CheckOptions): Promise<CheckResult> {
     (document): document is RegularoDocument => document !== undefined,
   );
 
-  const input = { reguloj, jugxoj };
+  const input = { reguloj, jugxoj, eroIds: eroIdsIn(join(source.dataDir, "eroj"), readIn) };
   const { issues, stats } = checkRegularo(input);
   const errors = [...readIssues, ...issues];
   const ok = errors.length === 0;
@@ -65,4 +66,32 @@ export async function check(options: CheckOptions): Promise<CheckResult> {
     warnings: [],
     stats,
   };
+}
+
+/** IDs of the Eroj in `<erojDir>/<name>/skemo.json`; unreadable files are reported by `read`. */
+function eroIdsIn(
+  erojDir: string,
+  read: (dir: string, name: string) => RegularoDocument | undefined,
+): Set<string> {
+  let names: string[];
+  try {
+    names = readdirSync(erojDir, { withFileTypes: true })
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => entry.name)
+      .sort();
+  } catch {
+    return new Set();
+  }
+  const ids = new Set<string>();
+  for (const name of names) {
+    const dir = join(erojDir, name);
+    if (!existsSync(join(dir, "skemo.json"))) continue;
+    const value = read(dir, "skemo.json")?.value;
+    const ero =
+      typeof value === "object" && value !== null && "ero" in value ? value.ero : undefined;
+    if (typeof ero === "object" && ero !== null && "id" in ero && typeof ero.id === "string") {
+      ids.add(ero.id);
+    }
+  }
+  return ids;
 }

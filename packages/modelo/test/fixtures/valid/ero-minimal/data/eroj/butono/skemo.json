@@ -1,0 +1,33 @@
+{
+  "$schema": "../../../../../../../schema/modelo.schema.json#/$defs/EroFile",
+  "ero": {
+    "id": "ero_01M2XM2NGN3KJSKJ4JTXQWMF72",
+    "name": "butono",
+    "skemo": "ske_01M2XM2NWJ39A7BEZ9A2S8GANE",
+    "description": "Fixture Ero: one variant, one state, a label on a surface."
+  },
+  "skemo": {
+    "id": "ske_01M2XM2NWJ39A7BEZ9A2S8GANE",
+    "ero": "ero_01M2XM2NGN3KJSKJ4JTXQWMF72",
+    "props": [
+      { "name": "variant", "kind": "enum", "values": ["primary"], "default": "primary" },
+      { "name": "label", "kind": "string" }
+    ],
+    "states": ["rest"],
+    "slots": [{ "name": "label", "default": true, "text": true }],
+    "parts": {
+      "surface": { "fill": { "by": ["variant", "state"] } },
+      "label": { "color": { "fixed": "color.text.default" } },
+      "box": { "gap": { "fixed": "spacing.small" } }
+    },
+    "bindings": [
+      {
+        "part": "surface",
+        "property": "fill",
+        "when": { "variant": "primary", "state": "rest" },
+        "token": "color.background.default"
+      }
+    ],
+    "a11y": { "role": "button", "name": ["slot:label", "prop:label"], "states": {}, "keys": ["Enter", "Space"] }
+  }
+}

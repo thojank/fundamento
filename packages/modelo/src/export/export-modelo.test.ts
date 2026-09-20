@@ -77,7 +77,7 @@ function collectRefs(node: unknown, out: string[] = []): string[] {
 }
 
 describe("exportModelo: shape (§2.9)", () => {
-  it("has exactly the §2.9 top-level keys plus core (Spec 001 FR-10)", () => {
+  it("has exactly the §2.9 top-level keys plus core (Spec 001 FR-10) and skemoj (Spec 003)", () => {
     expect(Object.keys(modeloJson).sort()).toEqual(
       [
         "$schema",
@@ -91,6 +91,7 @@ describe("exportModelo: shape (§2.9)", () => {
         "reguloj",
         "rezolvo",
         "setoj",
+        "skemoj",
         "tokenTypes",
         "tokens",
       ].sort(),
@@ -182,11 +183,12 @@ describe("exportModelo: shape (§2.9)", () => {
     expect(modeloJson.setoj.find((set) => set.name === "core")?.kondicxoj).toEqual([]);
   });
 
-  it("exports Reguloj, Jugxoj, KontrastParoj as in the data and no Eroj", () => {
+  it("exports Reguloj, Jugxoj, KontrastParoj and Eroj as in the data", () => {
     expect(modeloJson.reguloj).toEqual(modelo.reguloj);
     expect(modeloJson.jugxoj).toEqual(modelo.jugxoj);
     expect(modeloJson.kontrastParoj).toEqual(modelo.kontrastParoj);
-    expect(modeloJson.eroj).toEqual([]);
+    expect(modeloJson.eroj).toEqual(modelo.eroj.map((entry) => entry.ero));
+    expect(modeloJson.skemoj).toEqual(modelo.eroj.map((entry) => entry.skemo));
   });
 
   it("embeds the default-assignment Rezolvo with provenance", () => {

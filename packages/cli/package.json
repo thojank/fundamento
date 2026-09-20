@@ -24,7 +24,8 @@
   },
   "dependencies": {
     "@fundamento/mcp": "workspace:*",
-    "@fundamento/modelo": "workspace:*"
+    "@fundamento/modelo": "workspace:*",
+    "@fundamento/projekcioj": "workspace:*"
   },
   "devDependencies": {
     "@modelcontextprotocol/client": "2.0.0",

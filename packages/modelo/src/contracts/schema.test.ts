@@ -373,7 +373,7 @@ const samples: Sample[] = [
   },
   {
     def: "Ero",
-    valid: [{ id: id("ero"), name: "butono", skemo: id("ske") }],
+    valid: [{ id: id("ero"), name: "butono", skemo: id("ske"), description: "A button." }],
     invalid: [{ id: id("ske"), name: "butono", skemo: id("ske") }, { id: id("ero") }],
   },
   {
@@ -392,6 +392,18 @@ const samples: Sample[] = [
           { name: "disabled", kind: "boolean", default: false },
         ],
         states: ["rest", "hover", "pressed", "disabled"],
+        // Spec 003: slots, parts, bindings and a11y are required.
+        slots: [{ name: "label", default: true, text: true }],
+        parts: { surface: { fill: { by: ["variant", "state"] } } },
+        bindings: [
+          {
+            part: "surface",
+            property: "fill",
+            when: { variant: "primary", state: "rest" },
+            token: "color.action.primary.rest",
+          },
+        ],
+        a11y: { role: "button", name: ["slot:label"], states: {}, keys: ["Enter", "Space"] },
       },
     ],
     invalid: [
@@ -450,6 +462,7 @@ const modeloJson = {
   jugxoj: [jugxo],
   kontrastParoj: [kontrastParo],
   eroj: [],
+  skemoj: [],
   rezolvo,
 };
 

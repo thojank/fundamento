@@ -166,13 +166,17 @@ describe.each(CELOJ)("%s NomRegulo properties", (celo) => {
   });
 });
 
-describe("tailwind and css produce the same variable under prefix(fm)", () => {
-  it('"--fm-" + entry.slice(2) equals the CSS derivation', () => {
+describe("tailwind keys carry fm after the namespace and name the CSS variable's segments", () => {
+  it("dropping the fm segment of the key gives the CSS derivation's segments", () => {
     fc.assert(
       fc.property(caseArb, ([name, type]) => {
         const entry = target("tailwind", name, type);
         fc.pre(entry !== null);
-        expect(`--fm-${(entry ?? "").slice(2)}`).toBe(nomRegulo("css").derive(name));
+        const segments = (entry ?? "").slice(2).split("-");
+        const fm = segments.indexOf("fm");
+        expect(fm).toBeGreaterThan(0);
+        segments.splice(fm, 1);
+        expect(`--fm-${segments.join("-")}`).toBe(nomRegulo("css").derive(name));
       }),
       PARAMS,
     );

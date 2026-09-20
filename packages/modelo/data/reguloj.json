@@ -138,6 +138,42 @@
         ]
       },
       "sojlo": { "metric": "oklch-l-delta", "min": 0.05 }
+    },
+    {
+      "id": "reg_01M2XMV80DG7JCJDTZGE66MGHW",
+      "name": "one-primary-per-container",
+      "statement": "A container holds at most one butono with variant=primary; instances without a named container count as one container.",
+      "kialo": "Two equal calls to action move the decision onto the user; one primary action makes the next step obvious, and every other action steps back as secondary or tertiary.",
+      "scope": "eroj: butono instances in a design or in code (check_usage)",
+      "checkability": "automatic",
+      "appliesTo": { "eroj": ["butono"] }
+    },
+    {
+      "id": "reg_01M2XMV80DG7JCJDTZGE66MGHX",
+      "name": "destructive-not-primary-color",
+      "statement": "An action that destroys data is never a butono with variant=primary and tone=default: as the main action (a confirmation dialog) it is primary with tone=danger, next to another primary action it is secondary.",
+      "kialo": "The primary colour promises the expected next step; a destructive action needs a colour that warns before it acts, and a danger fill only where the destruction is the step the user came for.",
+      "scope": "eroj: butono instances whose intent is destructive or whose label is a destructive keyword of the Skemo",
+      "checkability": "automatic",
+      "appliesTo": { "eroj": ["butono"] }
+    },
+    {
+      "id": "reg_01M2XMV80DG7JCJDTZGE66MGHY",
+      "name": "label-required",
+      "statement": "Every butono has a visible label or, when it shows only an icon, a label prop as its accessible name.",
+      "kialo": "A button without a name cannot be found or understood by assistive technology, and an icon alone is not understood by everyone; the name is what a screen reader announces and what voice control listens for.",
+      "scope": "eroj: butono instances; the rendered check (axe) confirms the accessible name",
+      "checkability": "automatic",
+      "appliesTo": { "eroj": ["butono"] }
+    },
+    {
+      "id": "reg_01M2XMV80DG7JCJDTZGE66MGHZ",
+      "name": "touch-target-min",
+      "statement": "In every combination of every Aspekto, every size.control.* resolves to at least size.target.min, the minimum pointer target of WCAG 2.5.8 (24 px).",
+      "kialo": "WCAG 2.5.8 (AA) requires a target of at least 24 by 24 px; smaller targets fail people with tremor, with large fingers or on a moving device. The threshold is a token, so the rule and the rendered component read the same value.",
+      "scope": "vortaro: size.control.* against size.target.min in every combination",
+      "checkability": "automatic",
+      "appliesTo": { "tokens": ["size.control.*", "size.target.min"] }
     }
   ]
 }

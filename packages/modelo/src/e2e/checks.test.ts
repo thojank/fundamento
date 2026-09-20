@@ -18,6 +18,7 @@ import {
   removeTempDirs,
   rulesAndPaths,
   runCheck,
+  tempDir,
 } from "./test-doubles/harness.js";
 
 const failing = checkFailingFixtures();
@@ -26,8 +27,15 @@ const repoRuns = new Map<CheckName, Run>();
 const fixtureRuns = new Map<string, Run>();
 
 beforeAll(async () => {
+  // Parity reads what the projections emitted, so the repo run needs a build first (Spec 003
+  // T021); `pnpm check:parity` does the same with `--out .fundamento/projekcioj`.
+  const projekcioj = tempDir("projekcioj");
+  const build = await fm(["projekcioj", "build", "--out", projekcioj]);
+  if (build.code !== 0) throw new Error(`fm projekcioj build failed: ${build.stderr}`);
+  const repoArgs = (name: CheckName): string[] =>
+    name === "parity" ? [name, "--json", "--projekcioj", projekcioj] : [name, "--json"];
   const [repo, fixtures] = await Promise.all([
-    Promise.all(CHECK_NAMES.map((name) => runCheck([name, "--json"]))),
+    Promise.all(CHECK_NAMES.map((name) => runCheck(repoArgs(name)))),
     Promise.all(
       failing.map((fixture) =>
         runCheck([fixture.expected.check, "--json", "--fixture", checkFixtureRoot(fixture)]),
@@ -71,7 +79,12 @@ describe("AK-05: every check passes on the repo", () => {
     };
     for (const name of CHECK_NAMES) {
       expect(runs).toContain(`"run":"pnpm check:${name}"`);
-      expect(pkg.scripts[`check:${name}`]).toBe(`node packages/modelo/dist/checks/run.js ${name}`);
+      // Parity builds the projections it compares before it runs (Spec 003 T021).
+      const prefix =
+        name === "parity" ? "pnpm fm projekcioj build --out .fundamento/projekcioj && " : "";
+      expect(pkg.scripts[`check:${name}`]).toBe(
+        `${prefix}node packages/modelo/dist/checks/run.js ${name}`,
+      );
     }
   });
 });

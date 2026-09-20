@@ -3,6 +3,7 @@
 // "manual" for an automatically checkable rule is an error (maintainer, 2026-09-19).
 
 import { describe, expect, it } from "vitest";
+import { USAGE_ENFORCERS } from "../eroj/usage.js";
 import { loadModelo } from "../load/load-modelo.js";
 import { defaultModeloSource } from "../load/source.js";
 import { REGULO_ENFORCERS } from "../validate/regularo-enforcement.js";
@@ -63,12 +64,15 @@ describe("Regularo of the repo (D-19)", () => {
     expect(wrong).toEqual([]);
   });
 
-  it("has an enforcer (or an always-on rule) for every automatic Regulo", () => {
+  // Ero Reguloj judge instances, not Modelo data: their enforcers are the usage table (Spec 003).
+  it("has an enforcer (Modelo or usage) or an always-on rule for every automatic Regulo", () => {
     const unenforced = reguloj
       .filter((regulo) => regulo.checkability === "automatic")
       .filter(
         (regulo) =>
-          REGULO_ENFORCERS[regulo.name] === undefined && ALWAYS_ON[regulo.name] === undefined,
+          REGULO_ENFORCERS[regulo.name] === undefined &&
+          USAGE_ENFORCERS[regulo.name] === undefined &&
+          ALWAYS_ON[regulo.name] === undefined,
       )
       .map((regulo) => regulo.name);
     expect(unenforced).toEqual([]);

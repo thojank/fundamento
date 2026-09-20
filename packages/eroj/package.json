@@ -1,0 +1,63 @@
+{
+  "name": "@fundamento/eroj",
+  "version": "0.1.0",
+  "description": "Fundamento Eroj: the generated Web Components (fm-*) and their React wrappers.",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./define": {
+      "types": "./dist/define.d.ts",
+      "default": "./dist/define.js"
+    },
+    "./react": {
+      "types": "./dist/react.d.ts",
+      "default": "./dist/react.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "node scripts/generate.mjs && tsc -p tsconfig.build.json",
+    "test": "vitest run --passWithNoTests && playwright test",
+    "lint": "node scripts/generate.mjs && tsc -p tsconfig.json --noEmit && biome check .",
+    "check:alirebleco": "playwright test --config playwright.alirebleco.config.ts",
+    "check:make-kit": "playwright test --config playwright.make-kit.config.ts",
+    "check:quickstart": "playwright test --config playwright.quickstart.config.ts"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
+    "@fundamento/modelo": "workspace:*",
+    "@fundamento/projekcioj": "workspace:*",
+    "@playwright/test": "1.63.0",
+    "@types/node": "^24.13.5",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "axe-core": "4.13.0",
+    "react": "19.3.0",
+    "react-18": "npm:react@18.3.1",
+    "react-dom": "19.3.0",
+    "react-dom-18": "npm:react-dom@18.3.1",
+    "typescript": "^7.0.2",
+    "vite": "8.3.0",
+    "vitest": "^5.0.1"
+  }
+}

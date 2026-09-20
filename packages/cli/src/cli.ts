@@ -11,6 +11,7 @@ import {
 import { mcp } from "./commands/mcp.js";
 import { modeloExport } from "./commands/modelo-export.js";
 import { modeloValidate } from "./commands/modelo-validate.js";
+import { projekciojBuild } from "./commands/projekcioj-build.js";
 import { closest } from "./suggest.js";
 
 type Entry = Command | CommandGroup;
@@ -21,6 +22,11 @@ const ENTRIES: readonly Entry[] = [
     name: "modelo",
     summary: "Work with the Modelo: tokens, Dimensioj, Reguloj and Jugxoj.",
     commands: [modeloValidate, modeloExport],
+  },
+  {
+    name: "projekcioj",
+    summary: "Generate the projections of the Modelo: CSS, Tailwind, Eroj, Figma, Make Kits.",
+    commands: [projekciojBuild],
   },
   mcp,
 ];

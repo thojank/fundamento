@@ -15,6 +15,157 @@
       "kialo": "Tests that spawn processes must have timeouts sized for a cold CI runner, otherwise the gate flakes and loses authority.",
       "date": "2026-09-19",
       "context": "CI #1 failed when the cli integration test 'reports modelo-regulo-kialo-missing' took 5295 ms to spawn the built fm binary on a cold runner, over Vitest's 5 s default. packages/cli/vitest.config.ts now gives the cli tests a 30 s testTimeout (not global, not for modelo), and its global setup builds the cli and its workspace dependencies so `pnpm test` in packages/cli does not rely on a warm Turborepo cache."
+    },
+    {
+      "id": "jug_01M2XKF2X28C4EGJ8R4VMVGCB8",
+      "ref": { "artikolo": "XII" },
+      "decision": "deviation-recorded",
+      "kialo": "Die NomRegulo von Celo 2 legt den Namensraum fm in den Theme-Schlüssel statt prefix(fm) zu nutzen, denn prefix() benennt alle Klassen des Projekts um, auch die des Host-Projekts, etwa in einem Make Kit.",
+      "date": "2026-09-19",
+      "context": "Constitution v1.6, Art. XII Celo 2 (Spec 003, D-06, T002). Breaking change of that NomRegulo: the Phase-0 form assumed prefix(fm), so a colour token gave the utility fm:bg-action-primary-rest and every class of the host project needed the fm: prefix; the new form puts fm after the namespace in the theme key, giving bg-fm-action-primary-rest, whose value refers to the CSS Celo's variable. derive_name returns the new form; no consumer of the old form existed."
+    },
+    {
+      "id": "jug_01M2XKF38358Z6WQH9KARYJ6F3",
+      "ref": { "artikolo": "X" },
+      "decision": "deviation-recorded",
+      "kialo": "APCA stays advisory: WCAG 3 has not settled its contrast method, so a binding APCA threshold would hold brands to a method no standard names; revisit when WCAG 3 contrast reaches Candidate Recommendation.",
+      "date": "2026-09-19",
+      "context": "Spec 003 FR-17, plan D-10. WCAG 2 contrast stays binding (4.5:1, 3:1, and 7:1 for text under contrast=high); APCA is still reported by check:alirebleco, check_contrast and explain (baseline Spec 001 §8, Spec 002 research §8.7)."
+    },
+    {
+      "id": "jug_01M2XN0Q7YGPVYC981A9D98PSZ",
+      "ref": { "ero": "ero_01M2XN0PHDBBD6MNFN75DB9NQ5" },
+      "decision": "approved",
+      "kialo": "One primary action per dialog: Speichern leads, Abbrechen steps back as tertiary.",
+      "date": "2026-09-19",
+      "context": "Example CORRECT for the Regulo named in ekzemplo.regulo (Spec 003 T007); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M2XMV80DG7JCJDTZGE66MGHW",
+        "instances": [
+          {
+            "ero": "butono",
+            "props": { "variant": "primary", "type": "submit" },
+            "container": "dialog",
+            "label": "Speichern"
+          },
+          {
+            "ero": "butono",
+            "props": { "variant": "tertiary" },
+            "container": "dialog",
+            "label": "Abbrechen"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M2XN0Q7YGPVYC981A9D98PT0",
+      "ref": { "ero": "ero_01M2XN0PHDBBD6MNFN75DB9NQ5" },
+      "decision": "rejected",
+      "kialo": "Two primary buttons in one dialog: the user has to decide which one is the main action.",
+      "date": "2026-09-19",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 003 T007); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M2XMV80DG7JCJDTZGE66MGHW",
+        "instances": [
+          {
+            "ero": "butono",
+            "props": { "variant": "primary" },
+            "container": "dialog",
+            "label": "Speichern"
+          },
+          {
+            "ero": "butono",
+            "props": { "variant": "primary" },
+            "container": "dialog",
+            "label": "Weiter"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M2XN0Q7YGPVYC981A9D98PT1",
+      "ref": { "ero": "ero_01M2XN0PHDBBD6MNFN75DB9NQ5" },
+      "decision": "approved",
+      "kialo": "A confirmation dialog whose main action destroys data uses the danger fill; the escape stays tertiary.",
+      "date": "2026-09-19",
+      "context": "Example CORRECT for the Regulo named in ekzemplo.regulo (Spec 003 T007); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M2XMV80DG7JCJDTZGE66MGHX",
+        "instances": [
+          {
+            "ero": "butono",
+            "props": { "variant": "primary", "tone": "danger" },
+            "container": "confirm-delete",
+            "intent": "destructive",
+            "label": "Löschen"
+          },
+          {
+            "ero": "butono",
+            "props": { "variant": "tertiary" },
+            "container": "confirm-delete",
+            "label": "Abbrechen"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M2XN0Q7YGPVYC981A9D98PT2",
+      "ref": { "ero": "ero_01M2XN0PHDBBD6MNFN75DB9NQ5" },
+      "decision": "rejected",
+      "kialo": "Löschen in the neutral primary colour promises the expected next step instead of warning before data is lost.",
+      "date": "2026-09-19",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 003 T007); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M2XMV80DG7JCJDTZGE66MGHX",
+        "instances": [
+          {
+            "ero": "butono",
+            "props": { "variant": "primary" },
+            "container": "confirm-delete",
+            "label": "Löschen"
+          },
+          {
+            "ero": "butono",
+            "props": { "variant": "tertiary" },
+            "container": "confirm-delete",
+            "label": "Abbrechen"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M2XN0Q7YGPVYC981A9D98PT3",
+      "ref": { "ero": "ero_01M2XN0PHDBBD6MNFN75DB9NQ5" },
+      "decision": "approved",
+      "kialo": "An icon-only button names itself with the label prop, so assistive technology can announce it.",
+      "date": "2026-09-19",
+      "context": "Example CORRECT for the Regulo named in ekzemplo.regulo (Spec 003 T007); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M2XMV80DG7JCJDTZGE66MGHY",
+        "instances": [
+          { "ero": "butono", "props": { "variant": "tertiary", "size": "small", "label": "Schließen" } }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M2XN0Q7YGPVYC981A9D98PT4",
+      "ref": { "ero": "ero_01M2XN0PHDBBD6MNFN75DB9NQ5" },
+      "decision": "rejected",
+      "kialo": "An icon-only button without a name: a screen reader announces only \"button\".",
+      "date": "2026-09-19",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 003 T007); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M2XMV80DG7JCJDTZGE66MGHY",
+        "instances": [{ "ero": "butono", "props": { "variant": "tertiary", "size": "small" } }]
+      }
+    },
+    {
+      "id": "jug_01M2YDYBYFMRS7PREH2WQTCBZW",
+      "ref": { "artikolo": "VI" },
+      "decision": "deviation-recorded",
+      "kialo": "An Ero stylesheet carries structure as well as design: display, cursor or box-sizing are structure, have no token and cannot become one, while every design value must stay a token. The Phase-0 literal rule was written for token CSS and treats every keyword as a literal, so it is refined for Ero stylesheets instead of being weakened.",
+      "date": "2026-09-20",
+      "context": "Spec 003, review of Stages 2-4 (decision 3). The refined rule (css-literal-value in checks/vortaro-lint/component-css.ts) has a small, explicit allowlist of structural properties where keywords and 0 are allowed, requires a token reference for every design property (colour, background, border, outline, spacing, size, type, radius, shadow, opacity, motion), and reports any property in neither list, so both lists stay conscious decisions. Negative tests: color: red and padding: 8px are reported. The Phase-0 rule is unchanged for token CSS and every other file."
     }
   ]
 }

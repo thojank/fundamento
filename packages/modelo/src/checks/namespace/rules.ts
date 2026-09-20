@@ -148,7 +148,7 @@ export function checkCssCustomProperties(file: string, css: string): CountedIssu
             "namespace-custom-property",
             path,
             `@theme entry "${prop}" is not a name the Tailwind NomRegulo derives from a token.`,
-            "Name @theme entries after a token in a Tailwind namespace (e.g. --color-<token path>); Tailwind prefix(fm) turns them into --fm-*.",
+            "Name @theme entries after a token in a Tailwind namespace with fm after the namespace (e.g. --color-fm-<rest of the token path>), and set them to var(--fm-<token path>); never use prefix(fm) (Constitution v1.6, Art. XII).",
           ),
         );
       }
@@ -174,6 +174,18 @@ export function checkCssCustomProperties(file: string, css: string): CountedIssu
 const DEFINE_CALL_PATTERN = /\bcustomElements\s*\.\s*define\s*\(\s*([^,)]*)/g;
 const STRING_LITERAL_PATTERN = /^(["'`])([^"'`\\$]*)\1$/;
 
+/**
+ * Sources that write element code instead of running it (Spec 003, plan D-07): their registration
+ * is a template whose name is interpolated, and the literal it writes is checked on the generated
+ * output. Only there is an interpolated name allowed; a literal name is checked as everywhere
+ * else, and hand-written code keeps the full rule.
+ */
+const GENERATOR_PATH = /(^|\/)packages\/projekcioj\/src\/celoj\//;
+
+export function isEroGeneratorSource(file: string): boolean {
+  return GENERATOR_PATH.test(file);
+}
+
 export function checkCustomElements(file: string, text: string): CountedIssues {
   const issues: ValidationIssue[] = [];
   let definitions = 0;
@@ -184,6 +196,10 @@ export function checkCustomElements(file: string, text: string): CountedIssues {
     const argument = (match[1] ?? "").trim();
     const literal = STRING_LITERAL_PATTERN.exec(argument);
     const name = literal?.[2];
+    // A generator writes the name; the literal it writes is checked on the generated source.
+    if (name === undefined && isEroGeneratorSource(file) && /\$\{/.test(argument)) {
+      continue;
+    }
     if (name === undefined) {
       issues.push(
         issue(

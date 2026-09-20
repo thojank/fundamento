@@ -1,0 +1,13 @@
+{
+  "description": "A Skemo part property named after a CSS property (background) instead of the platform-neutral vocabulary (fill): schema-violation at the part (Art. VIII, T004).",
+  "issues": [
+    {
+      "rule": "schema-violation",
+      "path": "data/eroj/butono/skemo.json#/skemo/parts/surface"
+    },
+    {
+      "rule": "schema-violation",
+      "path": "data/eroj/butono/skemo.json#/skemo/bindings/0/property"
+    }
+  ]
+}

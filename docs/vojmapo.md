@@ -22,11 +22,11 @@ Eine Marke wird als ausführbare Spezifikation beschrieben (Modelo); daraus ents
 | 0 | [000](../specs/000-fundamento-repo/) | Monorepo, Modelo-Schema, DTCG-Vortaro, Konjunktions-Sets, ULID-IDs, 5 CI-Prüfungen, CLI `fm modelo validate` | ✅ abgenommen |
 | 1 | [001](../specs/001-vortaro-aspektoj-mcp/) | 340 Tokens, 6 Dimensioj, Referenzmarke `komuna` (Geist), Aspekto-Pakete intern/extern, MCP-Server (10 Werkzeuge), Export je Aspekto, externes Paket `ciferecigo` (abgeleitet, privat) | ✅ abgenommen |
 | 2 | [002](../specs/002-regularo-gvidanto/) | Reguloj aus Abnahme-Befunden (`surface-order`, `text-hierarchy`, `state-distinct`, `semantic-described`), komuna-Reparatur, KontrastParo mit Rand-Alternative, Gvidanto-Werkzeuge (`check_contrast`, `explain`, `explain_regulo`, `describe_term`), MCP-Prompt, Ontologio Stufe 1, MCP-SDK 2; Nachtrag T027 (Mindestabstand der Textrollen) | ✅ abgenommen |
-| 3 | [003](../specs/003-butono-durchstich/) | Erster Ero `butono` durch alle Ebenen: Skemo → CSS/Tailwind → Web Component + React → Figma-Komponente → Code-Zuordnung → **Figma Make Kit** je Aspekto → Gvidanto → Prüfung. Internacia und Alirebleco (Fokus, Tastatur, ARIA) erstmals an einem Ero | 📝 bereit für /speckit.plan |
+| 3 | [003](../specs/003-butono-durchstich/) | Erster Ero `butono` durch alle Ebenen: Skemo → CSS/Tailwind → Web Component + React → Figma-Komponente → Code-Zuordnung → **Figma Make Kit** je Aspekto → Gvidanto → Prüfung. Internacia und Alirebleco (Fokus, Tastatur, ARIA) erstmals an einem Ero | 🚧 umgesetzt, Abnahme offen (M1 Figma-Library, M2 Make Kits, M3 S5-Lauf; Constitution v1.6 in dieser Phase); npm-Org für die Make Kits: https://www.npmjs.com/org/fundamento (Scope `@fundamento`, Veröffentlichung erst nach der Abnahme durch den Maintainer) |
 | 4 | – | Eroj in der Breite (Formular, Navigation, Feedback, Daten), Sxablonoj | geplant |
 | 5 | – | Generatoren in voller Breite: Figma-Library je Aspekto, Penpot, Icons, Fonts, JSON-LD-Projekcio der Ontologio, Laufzeit-Umschaltung aller Dimensioj | geplant |
 | 6 | – | CLI + Registry: `fm init / add / aspekto use / lint / diff`, shadcn-kompatible Registry | geplant |
-| 7 | – | Agordilo (Konfigurator) + Enportilo (Importer); Prototyp ist die ciferecigo-Ableitung aus Phase 1 | geplant |
+| 7 | – | Agordilo (Konfigurator) + Enportilo (Importer); Prototyp ist die ciferecigo-Ableitung aus Phase 1. Anforderung: Enportilo erzeugt Zwischenstufen, wenn Regeln auf der Rampe kollidieren (Befund ciferecigo sunken) | geplant |
 | 8 | – | Design-Agenten + Evals: Agent baut Screen per MCP konform ohne Korrektur; Inspiro | geplant |
 | 9 | – | Veröffentlichung (npm, öffentliche Make Kits), Governance, Versionierung, Cache-Site | geplant |
 
@@ -61,7 +61,7 @@ Eine Marke wird als ausführbare Spezifikation beschrieben (Modelo); daraus ents
 | Paket | Repo | Lizenz | Stand |
 |---|---|---|---|
 | `@fundamento/aspekto-komuna` | im Kern | MIT | Referenz |
-| `fundamento-aspekto-ciferecigo` | privat (`thojank/fundamento-aspekto-ciferecigo`) | proprietär | v0.1.0; nach Phase 2 neu ableiten |
+| `fundamento-aspekto-ciferecigo` | privat (`thojank/fundamento-aspekto-ciferecigo`) | proprietär | v0.2.0 abgeleitet gegen den Kern nach Phase 2 (T026), Archiv übergeben; Repo-Push durch den Maintainer |
 
 ## Wo Entscheidungen stehen
 

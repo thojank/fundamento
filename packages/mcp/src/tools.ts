@@ -4,9 +4,11 @@
 import {
   CELOJ,
   type CheckContrastInput,
+  type CheckUsageInput,
   CORE_SET_NAME,
   checkContrast,
   checkTokenName,
+  checkUsage,
   completeAssignment,
   type DescribeTermInput,
   describeModelo,
@@ -15,9 +17,14 @@ import {
   type ExplainReguloInput,
   explain,
   explainRegulo,
+  type GetEroInput,
+  getEro,
   isNoTarget,
+  listEroj,
   NOM_REGULOJ,
   resolve as resolveAssignment,
+  type SuggestEroInput,
+  suggestEro,
   type ValidationIssue,
   validateModelo,
   valoroNames,
@@ -428,6 +435,39 @@ const describeTermTool: Tool = (served, args) => {
   return ok(JSON.parse(JSON.stringify(result.output)) as Record<string, unknown>);
 };
 
+/** The answer of a Gvidanto function as a tool result (Spec 002, Spec 003). */
+function gvidanto(
+  result:
+    | { ok: true; output: unknown }
+    | { ok: false; issues: ValidationIssue[]; allowed?: string[] },
+): ToolResult {
+  if (!result.ok) {
+    return {
+      ok: false,
+      envelope: {
+        issues: result.issues,
+        ...(result.allowed === undefined ? {} : { allowed: result.allowed }),
+      },
+    };
+  }
+  return ok(JSON.parse(JSON.stringify(result.output)) as Record<string, unknown>);
+}
+
+/** list_eroj (Spec 003 FR-13): every Ero with its variants and props. */
+const listErojTool: Tool = (served) => ok(listEroj(served.modelo));
+
+/** get_ero (Spec 003 FR-13): one Ero with Skemo, Reguloj, examples and projections. */
+const getEroTool: Tool = (served, args) =>
+  gvidanto(getEro(served.modelo, args as unknown as GetEroInput));
+
+/** suggest_ero (Spec 003 FR-13): the Ero and the props an intent asks for. */
+const suggestEroTool: Tool = (served, args) =>
+  gvidanto(suggestEro(served.modelo, args as unknown as SuggestEroInput));
+
+/** check_usage (Spec 003 FR-13): instances against the Ero Reguloj. */
+const checkUsageTool: Tool = (served, args) =>
+  gvidanto(checkUsage(served.modelo, args as unknown as CheckUsageInput));
+
 export const TOOLS: Record<ToolName, Tool> = {
   describe,
   list_dimensioj: listDimensioj,
@@ -443,4 +483,8 @@ export const TOOLS: Record<ToolName, Tool> = {
   explain: explainTool,
   explain_regulo: explainReguloTool,
   describe_term: describeTermTool,
+  list_eroj: listErojTool,
+  get_ero: getEroTool,
+  suggest_ero: suggestEroTool,
+  check_usage: checkUsageTool,
 };

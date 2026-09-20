@@ -72,11 +72,51 @@
       "status": "active",
       "type": "dimensioValoro"
     },
+    "ero_01M2XN0PHDBBD6MNFN75DB9NQ5": {
+      "status": "active",
+      "type": "ero"
+    },
     "jug_01M2VRT7KQ77W91MVXB4GXSRZ4": {
       "status": "active",
       "type": "jugxo"
     },
     "jug_01M2W3K1YPP05F4XF86J71RGTK": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M2XKF2X28C4EGJ8R4VMVGCB8": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M2XKF38358Z6WQH9KARYJ6F3": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M2XN0Q7YGPVYC981A9D98PSZ": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M2XN0Q7YGPVYC981A9D98PT0": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M2XN0Q7YGPVYC981A9D98PT1": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M2XN0Q7YGPVYC981A9D98PT2": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M2XN0Q7YGPVYC981A9D98PT3": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M2XN0Q7YGPVYC981A9D98PT4": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M2YDYBYFMRS7PREH2WQTCBZW": {
       "status": "active",
       "type": "jugxo"
     },
@@ -320,6 +360,18 @@
       "status": "active",
       "type": "kontrastParo"
     },
+    "kpa_01M2XKQ2JPCM7KHWKW5JQARB3A": {
+      "status": "active",
+      "type": "kontrastParo"
+    },
+    "kpa_01M2XKQ2JQPSK3CAVAYNQ90236": {
+      "status": "active",
+      "type": "kontrastParo"
+    },
+    "kpa_01M2XKQ2JQPSK3CAVAYNQ90237": {
+      "status": "active",
+      "type": "kontrastParo"
+    },
     "reg_01M2VEEE5280TGESDHQQ14EA33": {
       "status": "active",
       "type": "regulo"
@@ -376,6 +428,22 @@
       "status": "active",
       "type": "regulo"
     },
+    "reg_01M2XMV80DG7JCJDTZGE66MGHW": {
+      "status": "active",
+      "type": "regulo"
+    },
+    "reg_01M2XMV80DG7JCJDTZGE66MGHX": {
+      "status": "active",
+      "type": "regulo"
+    },
+    "reg_01M2XMV80DG7JCJDTZGE66MGHY": {
+      "status": "active",
+      "type": "regulo"
+    },
+    "reg_01M2XMV80DG7JCJDTZGE66MGHZ": {
+      "status": "active",
+      "type": "regulo"
+    },
     "set_01M2VEEDW32MC4ZQPRN0GC9JRR": {
       "status": "active",
       "type": "tokenSet"
@@ -411,6 +479,10 @@
     "set_01M2W9405H78SEPQEPVE8KH9MB": {
       "status": "active",
       "type": "tokenSet"
+    },
+    "ske_01M2XN0PWS92GP7VFHW161EH0D": {
+      "status": "active",
+      "type": "skemo"
     },
     "tok_01M2VEEE0PMRFBGM9Z8B2DWBQF": {
       "status": "active",
@@ -1785,6 +1857,26 @@
       "type": "token"
     },
     "tok_01M2X7P56E9TCC4H8FW10YM7Q9": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M2XKPB5B8ZHNVRJJDC0TDTBN": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M2XKPB5CWJD16SX2RNJZ398S": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M2XKPB5CWJD16SX2RNJZ398T": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M2XKPB5DHNTHAYCE5HP5SQKB": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M2XKPB5DHNTHAYCE5HP5SQKC": {
       "status": "active",
       "type": "token"
     }

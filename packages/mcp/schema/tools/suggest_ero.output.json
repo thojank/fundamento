@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ciferecigo.com/fundamento/schema/mcp/suggest_ero.output.json",
+  "title": "suggest_ero output",
+  "description": "The Ero and the props an intent asks for, with the Regulo behind the choice (Spec 003 FR-13, contracts/mcp-tools §2).",
+  "type": "object",
+  "properties": {
+    "intent": {
+      "type": "string",
+      "minLength": 1
+    },
+    "matched": {
+      "anyOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "intent": {
+              "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+            },
+            "keyword": {
+              "type": "string",
+              "minLength": 1
+            },
+            "lingvo": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": ["intent", "keyword", "lingvo"],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "suggestion": {
+      "anyOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "ero": {
+              "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+            },
+            "props": {
+              "type": "object",
+              "propertyNames": {
+                "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+              },
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "required": ["ero", "props"],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "kialo": {
+      "type": "string",
+      "minLength": 1
+    },
+    "regulo": {
+      "$ref": "https://ciferecigo.com/fundamento/schema/mcp/common.json#/$defs/ReguloRef"
+    }
+  },
+  "required": ["intent", "matched", "suggestion"],
+  "additionalProperties": false
+}

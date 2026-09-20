@@ -11,3 +11,8 @@ _benchmark/
 **/ds-benchmark-*/
 # Default output of `fm modelo export` (Spec 001, D-09)
 .fundamento/
+# Generated Ero sources (Spec 003, Art. I: generated from the Skemo, never edited or committed)
+packages/eroj/src/generated/
+# Playwright run artefacts
+test-results/
+playwright-report/

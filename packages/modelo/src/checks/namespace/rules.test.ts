@@ -114,7 +114,7 @@ describe("checkCssCustomProperties", () => {
   it("accepts @theme entries invertible by the Tailwind NomRegulo", () => {
     const result = checkCssCustomProperties(
       "a.css",
-      "@theme { --color-text-default: var(--fm-color-text-default); }",
+      "@theme { --color-fm-text-default: var(--fm-color-text-default); }",
     );
     expect(result.issues).toEqual([]);
   });
@@ -122,7 +122,7 @@ describe("checkCssCustomProperties", () => {
   it("accepts @theme entries inside @theme inline", () => {
     const result = checkCssCustomProperties(
       "a.css",
-      "@theme inline { --spacing-small: var(--fm-spacing-small); }",
+      "@theme inline { --spacing-fm-small: var(--fm-spacing-small); }",
     );
     expect(result.issues).toEqual([]);
   });
@@ -130,11 +130,12 @@ describe("checkCssCustomProperties", () => {
   it("rejects @theme entries the Tailwind NomRegulo cannot invert, including --fm- ones", () => {
     const result = checkCssCustomProperties(
       "a.css",
-      "@theme {\n  --xy-color: red;\n  --fm-color-a: red;\n}",
+      "@theme {\n  --xy-color: red;\n  --fm-color-a: red;\n  --color-text-default: red;\n}",
     );
     expect(rulesAndPaths(result.issues)).toEqual([
       { rule: "namespace-custom-property", path: "a.css:2:3" },
       { rule: "namespace-custom-property", path: "a.css:3:3" },
+      { rule: "namespace-custom-property", path: "a.css:4:3" },
     ]);
   });
 
@@ -148,6 +149,27 @@ describe("checkCssCustomProperties", () => {
     const result = checkCssCustomProperties("a.css", ":root { --fm-a: 1px;");
     expect(result.issues.map((issue) => issue.rule)).toEqual(["namespace-custom-property"]);
     expect(result.issues[0]?.path).toMatch(/^a\.css:\d+:\d+$/);
+  });
+});
+
+describe("checkCustomElements: the generator path (Spec 003 F3)", () => {
+  const GENERATOR = "packages/projekcioj/src/celoj/web-component/web-component.ts";
+  const HANDWRITTEN = "packages/eroj/src/define.ts";
+
+  it("accepts an interpolated name in a generator source: it writes the literal name", () => {
+    const result = checkCustomElements(GENERATOR, `${DEFINE}("\${tag}", \${className});`);
+    expect(result.issues).toEqual([]);
+    expect(result.definitions).toBe(1);
+  });
+
+  it("still rejects a literal outside the fm- namespace in a generator source", () => {
+    const result = checkCustomElements(GENERATOR, `${DEFINE}("x-foo", XFoo);`);
+    expect(result.issues.map((issue) => issue.rule)).toEqual(["namespace-custom-element"]);
+  });
+
+  it("rejects an interpolated name in hand-written code", () => {
+    const result = checkCustomElements(HANDWRITTEN, `${DEFINE}("\${tag}", Thing);`);
+    expect(result.issues.map((issue) => issue.rule)).toEqual(["namespace-custom-element"]);
   });
 });
 

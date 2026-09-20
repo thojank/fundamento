@@ -1,0 +1,67 @@
+# Release path of the Figma Make kits (Spec 003, T020, maintainer decision Q2).
+#
+# This workflow never publishes by itself: it builds the kits and runs `pnpm publish --dry-run`,
+# so the contents and the provenance of a release can be reviewed before anything leaves the
+# repository. The publish itself is the maintainer's, after the acceptance of Phase 3, through npm
+# Trusted Publishing: the registry trusts this repository and this workflow file (OIDC), so no
+# publish token, no secret and no auth entry in .npmrc exists anywhere in this repository.
+name: Release (dry run)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  dry-run:
+    name: Build the Make kits and show what a publish would contain
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
+
+      # pnpm hands the publish and the OIDC exchange to the npm CLI, which needs npm >= 11.5.1 for
+      # Trusted Publishing (research §7). Without it npm would silently look for a token.
+      - name: Check the npm version
+        run: |
+          required=11.5.1
+          installed=$(npm --version)
+          if [ "$(printf '%s\n%s\n' "$required" "$installed" | sort -V | head -1)" != "$required" ]; then
+            echo "npm $installed is older than $required, which npm Trusted Publishing needs." >&2
+            exit 1
+          fi
+          echo "npm $installed is new enough for Trusted Publishing."
+
+      - name: Generate the projections
+        run: pnpm fm projekcioj build --out .fundamento/projekcioj
+
+      - name: Dry run, komuna
+        run: |
+          cd .fundamento/projekcioj/make-kit/komuna
+          pnpm publish --dry-run --tag next --provenance --access public --no-git-checks
+
+      - name: Dry run, ekzemplo
+        run: |
+          cd .fundamento/projekcioj/make-kit/ekzemplo
+          pnpm publish --dry-run --tag next --provenance --access public --no-git-checks

@@ -172,7 +172,9 @@ export function buildModeloJson(input: ModeloExportInput): ModeloJson {
     reguloj: structuredClone(modelo.reguloj),
     jugxoj: structuredClone(modelo.jugxoj),
     kontrastParoj: structuredClone(modelo.kontrastParoj),
-    eroj: [],
+    // Sorted by Ero name at load time; the Skemoj follow the same order (Spec 003, D-02).
+    eroj: modelo.eroj.map((entry) => structuredClone(entry.ero)),
+    skemoj: modelo.eroj.map((entry) => structuredClone(entry.skemo)),
     rezolvo: resolveOrThrow(modelo, {}),
   };
   if (reference !== undefined) {

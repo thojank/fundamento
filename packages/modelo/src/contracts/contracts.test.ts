@@ -78,7 +78,7 @@ describe("entity ID prefixes (§2.3)", () => {
 describe("rule catalog (§2.6)", () => {
   it("contains every rule ID exactly once", () => {
     expect(new Set(RULE_IDS).size).toBe(RULE_IDS.length);
-    expect(RULE_IDS).toHaveLength(88);
+    expect(RULE_IDS).toHaveLength(106);
     expect(RULE_IDS).toContain("nomregulo-no-target");
     expect(RULE_IDS).toContain("id-namespace-mismatch");
     expect(RULE_IDS).toContain("id-namespace-duplicate");

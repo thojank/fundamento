@@ -41,18 +41,18 @@ describe("AK-06: the S6 dialog is answered from dist/modelo.json alone", () => {
       typeCount: new Set(modeloJson.tokens.map((token) => token.type)).size,
       reguloCount: modeloJson.reguloj.length,
       reguloWithKialoCount: modeloJson.reguloj.length,
-      eroCount: 0,
+      eroCount: modeloJson.eroj.length,
     });
     // Independent recomputation of the counts, straight from the JSON.
     expect(modeloJson.tokens).toHaveLength(description.tokenCount);
     expect(new Set(modeloJson.tokens.map((token) => token.type)).size).toBe(description.typeCount);
     expect(modeloJson.reguloj.every((regulo) => regulo.kialo.trim() !== "")).toBe(true);
-    expect(modeloJson.eroj).toEqual([]);
+    expect(modeloJson.eroj.map((ero) => ero.name)).toEqual(["butono"]);
   });
 
   it("AK-06: states the S6 sentence", () => {
     expect(describeModelo(modeloJson).sentence).toMatch(
-      /^Fundamento v0\.1\.0: six Dimensioj \(aspekto, viewport, density, color-scheme, contrast, motion\), one Aspekto \(`komuna`: reference, MIT, Geist\), \d+ tokens in \w+ types \(.+\), \w+ rules with reasons \(\w+ automatic\), \w+ Jugxoj, no Eroj\. Ask explain why a value is what it is\.$/,
+      /^Fundamento v0\.1\.0: six Dimensioj \(aspekto, viewport, density, color-scheme, contrast, motion\), one Aspekto \(`komuna`: reference, MIT, Geist\), \d+ tokens in \w+ types \(.+\), \w+ rules with reasons \(\w+ automatic\), \w+ Jugxoj, one Ero \(`butono`\)\. Ask explain why a value is what it is\.$/,
     );
   });
 });

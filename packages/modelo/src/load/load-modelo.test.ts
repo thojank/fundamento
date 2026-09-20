@@ -199,6 +199,7 @@ describe("buildModelo: robustness against structurally odd input", () => {
       "ids.lock.json": doc("data/ids.lock.json", { ids: {} }),
       ...overrides,
     },
+    eroj: [],
     themes: doc("vortaro/$themes.json", []),
     metadata: doc("vortaro/$metadata.json", { tokenSetOrder: [] }),
   });

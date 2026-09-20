@@ -170,6 +170,45 @@ export type KontrastKategorio = "text-normal" | "text-large" | "ui";
  */
 export type SkemoId = string;
 /**
+ * Where a part property gets its token: bindings keyed by props and state (by), one token (fixed), or the token of another part property (sameAs, 'part.property').
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "SkemoPartSource".
+ */
+export type SkemoPartSource =
+  | {
+      /**
+       * @minItems 1
+       */
+      by: Name[];
+    }
+  | {
+      fixed: TokenName;
+    }
+  | {
+      sameAs: string;
+    };
+/**
+ * Platform-neutral part properties (Art. VIII); the mapping to CSS or another platform is Celo knowledge in the projections.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "SkemoPartProperty".
+ */
+export type SkemoPartProperty =
+  | "fill"
+  | "color"
+  | "typography"
+  | "width"
+  | "height"
+  | "inline-padding"
+  | "gap"
+  | "radius"
+  | "ring"
+  | "offset"
+  | "size"
+  | "duration"
+  | "easing";
+/**
  * Text transformation of a typography role (Spec 001, D-11). DTCG has no field for it; the values are platform-neutral.
  *
  * This interface was referenced by `ModeloJson`'s JSON-Schema
@@ -349,6 +388,7 @@ export interface ModeloJson {
   jugxoj: Jugxo[];
   kontrastParoj: KontrastParo[];
   eroj: Ero[];
+  skemoj: Skemo[];
   rezolvo: Rezolvo;
   /**
    * Facts of the core (Spec 001, FR-10): the reference Aspekto whose values live in core.
@@ -573,6 +613,10 @@ export interface ReguloAppliesTo {
    * @minItems 1
    */
   types?: DtcgType[];
+  /**
+   * @minItems 1
+   */
+  eroj?: Name[];
 }
 /**
  * The numeric threshold of a measuring Regulo; the enforcer reads it and agents cite it (Spec 002, D-02, D-06).
@@ -599,6 +643,7 @@ export interface Jugxo {
    * Scopes the entry to one Aspekto; entries in an Aspekto package carry their Aspekto (Spec 001, D-10).
    */
   aspekto?: string;
+  ekzemplo?: JugxoEkzemplo;
 }
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema
@@ -625,7 +670,35 @@ export interface JugxoArtikoloRef {
     "I" | "II" | "III" | "IV" | "V" | "VI" | "VII" | "VIII" | "IX" | "X" | "XI" | "XII" | "XIII";
 }
 /**
- * A component. Schema only in Phase 0.
+ * A machine-readable example of the Jugxo: instances right (approved) or wrong (rejected), optionally for one Regulo.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "JugxoEkzemplo".
+ */
+export interface JugxoEkzemplo {
+  regulo?: ReguloId;
+  /**
+   * @minItems 1
+   */
+  instances: EroInstance[];
+}
+/**
+ * One use of an Ero in a design or code: the input of check_usage and of a Jugxo ekzemplo.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "EroInstance".
+ */
+export interface EroInstance {
+  ero: Name;
+  props: {
+    [k: string]: string | number | boolean;
+  };
+  container?: string;
+  intent?: Name;
+  label?: string;
+}
+/**
+ * A component (Spec 003). Lives with its Skemo in data/eroj/<name>/skemo.json.
  *
  * This interface was referenced by `ModeloJson`'s JSON-Schema
  * via the `definition` "Ero".
@@ -634,7 +707,121 @@ export interface Ero {
   id: EroId;
   name: Name;
   skemo: SkemoId;
-  description?: string;
+  description: NonEmptyText;
+}
+/**
+ * The machine-readable specification of an Ero (Spec 003, data-model §2): the single source of every projection.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "Skemo".
+ */
+export interface Skemo {
+  id: SkemoId;
+  ero: EroId;
+  props: SkemoProp[];
+  /**
+   * @minItems 1
+   */
+  states: Name[];
+  slots: SkemoSlot[];
+  parts: {
+    [k: string]: SkemoPart;
+  };
+  bindings: SkemoBinding[];
+  a11y: SkemoA11Y;
+  constraints?: SkemoConstraint[];
+  intents?: SkemoIntent[];
+}
+/**
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "SkemoProp".
+ */
+export interface SkemoProp {
+  name: Name;
+  kind: "enum" | "boolean" | "string" | "number";
+  /**
+   * @minItems 1
+   */
+  values?: Name[];
+  default?: string | number | boolean;
+  description?: NonEmptyText;
+}
+/**
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "SkemoSlot".
+ */
+export interface SkemoSlot {
+  name: Name;
+  default?: boolean;
+  text?: boolean;
+  decorative?: boolean;
+}
+/**
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "SkemoPart".
+ */
+export interface SkemoPart {
+  [k: string]: SkemoPartSource;
+}
+/**
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "SkemoBinding".
+ */
+export interface SkemoBinding {
+  part: Name;
+  property: SkemoPartProperty;
+  when?: {
+    [k: string]: Name;
+  };
+  token: TokenName;
+}
+/**
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "SkemoA11y".
+ */
+export interface SkemoA11Y {
+  role: Name;
+  /**
+   * @minItems 1
+   */
+  name: string[];
+  states: {
+    [k: string]: string[];
+  };
+  keys: string[];
+}
+/**
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "SkemoConstraint".
+ */
+export interface SkemoConstraint {
+  when: {
+    [k: string]: Name;
+  };
+  allowed: {
+    /**
+     * @minItems 1
+     */
+    [k: string]: Name[];
+  };
+  kialo: NonEmptyText;
+}
+/**
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "SkemoIntent".
+ */
+export interface SkemoIntent {
+  intent: Name;
+  keywords: {
+    /**
+     * @minItems 1
+     */
+    [k: string]: string[];
+  };
+  props: {
+    [k: string]: string | number | boolean;
+  };
+  regulo?: Name;
 }
 /**
  * Result of one resolution: the complete assignment (dimensio -> valoro) and every token with value and provenance.
@@ -899,26 +1086,15 @@ export interface IdsLock {
   };
 }
 /**
- * This interface was referenced by `ModeloJson`'s JSON-Schema
- * via the `definition` "SkemoProp".
- */
-export interface SkemoProp {
-  name: Name;
-  kind: "enum" | "boolean" | "string" | "number";
-  values?: Name[];
-  default?: string | number | boolean;
-}
-/**
- * The machine-readable specification of an Ero: props and states. Schema only in Phase 0.
+ * data/eroj/<name>/skemo.json: one Ero and its Skemo, two entities with their own IDs (plan D-02).
  *
  * This interface was referenced by `ModeloJson`'s JSON-Schema
- * via the `definition` "Skemo".
+ * via the `definition` "EroFile".
  */
-export interface Skemo {
-  id: SkemoId;
-  ero: EroId;
-  props: SkemoProp[];
-  states: Name[];
+export interface EroFile {
+  $schema?: string;
+  ero: Ero;
+  skemo: Skemo;
 }
 /**
  * A template or pattern (layout, page type, flow). Schema only in Phase 0.

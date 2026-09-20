@@ -215,11 +215,43 @@ export const stateDistinct: CombinationChecker = (context) => {
   });
 };
 
+/** A dimension in px (rem at 16 px), or `undefined` for anything else. */
+function pixelsOf(value: unknown): number | undefined {
+  if (!isJsonObject(value) || typeof value.value !== "number") return undefined;
+  if (value.unit === "px") return value.value;
+  if (value.unit === "rem") return value.value * 16;
+  return undefined;
+}
+
+/**
+ * Spec 003 T006, WCAG 2.5.8: every size.control.* is at least size.target.min. The threshold is the
+ * token, so the Regulo and the rendered component (T011) read the same value.
+ */
+export const touchTargetMin: CombinationChecker = (context) => {
+  const target = pixelsOf(context.resolution.tokens["size.target.min"]?.value);
+  if (target === undefined) return [];
+  return Object.entries(context.resolution.tokens)
+    .filter(([name]) => name.startsWith("size.control."))
+    .flatMap(([name, token]) => {
+      const size = pixelsOf(token.value);
+      if (size === undefined || size >= target) return [];
+      return [
+        {
+          subject: name,
+          values: `${size} ${target}`,
+          message: `${name} is ${size}px, below size.target.min (${target}px): a pointer target must be at least that wide and high (WCAG 2.5.8).`,
+          suggestion: `Alias ${name} to a size step of at least ${target}px in this combination, or lower no control below size.target.min.`,
+        },
+      ];
+    });
+};
+
 /** Per-combination checkers by Regulo name (plan D-04); `explain` uses the same table. */
 export const COMBINATION_CHECKERS: Readonly<Record<string, CombinationChecker>> = {
   "surface-order": surfaceOrder,
   "text-hierarchy": textHierarchy,
   "state-distinct": stateDistinct,
+  "touch-target-min": touchTargetMin,
 };
 
 /** Reguloj whose checker needs a `sojlo`. */

@@ -63,13 +63,13 @@ describe("the repo server", async () => {
     const action = (await call(client, "search_tokens", { prefix: "color.action" }))
       .structuredContent;
     const tokens = action?.tokens as { name: string }[];
-    expect(action?.total).toBe(18);
+    expect(action?.total).toBe(22); // 3 variants × 6 + danger × 4 (Spec 003 T003)
     expect(tokens.every((token) => token.name.startsWith("color.action."))).toBe(true);
     expect(
       (await call(client, "search_tokens", { prefix: "color.actio" })).structuredContent?.total,
     ).toBe(0);
     const page = (
-      await call(client, "search_tokens", { prefix: "color.action", limit: 5, offset: 15 })
+      await call(client, "search_tokens", { prefix: "color.action", limit: 5, offset: 19 })
     ).structuredContent;
     expect(((page?.tokens ?? []) as unknown[]).length).toBe(3);
     const roles = (await call(client, "search_tokens", { type: "color", role: "focus" }))

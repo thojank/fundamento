@@ -61,10 +61,16 @@ describe("build artifacts in dist/", () => {
   });
 });
 
+/**
+ * Spawns the build twice: sized for a cold or loaded runner (Jugxo jug_01M2W3K1YPP05F4XF86J71RGTK).
+ * One run takes about a second; the budget is for a runner that is busy with the rest of the gate,
+ * which Spec 003 made heavier (two more projection builds run in parallel with this file).
+ */
+const BUILD_TWICE_TIMEOUT_MS = 30_000 * (process.env.CI === "true" ? 3 : 1);
+
 describe("building twice is byte-identical (AK-10)", () => {
-  // Spawns the build twice: sized for a cold or loaded runner (Jugxo jug_01M2W3K1YPP05F4XF86J71RGTK).
   it("two runs of the export build give the same SHA-256 hashes as dist/", {
-    timeout: 30_000,
+    timeout: BUILD_TWICE_TIMEOUT_MS,
   }, () => {
     const first = tempDir();
     const second = tempDir();
@@ -115,7 +121,7 @@ describe("the S6 dialog from dist/modelo.json alone (AK-06)", () => {
     expect(description.typeCount).toBe(new Set(modeloJson.tokens.map((t) => t.type)).size);
     expect(description.reguloCount).toBe(modeloJson.reguloj.length);
     expect(description.reguloWithKialoCount).toBe(modeloJson.reguloj.length);
-    expect(description.eroCount).toBe(0);
+    expect(description.eroCount).toBe(modeloJson.eroj.length);
   });
 
   it("states the S6 sentence", () => {
@@ -124,7 +130,7 @@ describe("the S6 dialog from dist/modelo.json alone (AK-06)", () => {
     );
     // Counts change while Spec 001 fills the Vortaro; the shape of the sentence does not.
     expect(description.sentence).toMatch(
-      /^Fundamento v0\.1\.0: six Dimensioj \(aspekto, viewport, density, color-scheme, contrast, motion\), one Aspekto \(`komuna`: reference, MIT, Geist\), \d+ tokens in \w+ types \(.+\), \w+ rules with reasons \(\w+ automatic\), \w+ Jugxoj, no Eroj\. Ask explain why a value is what it is\.$/,
+      /^Fundamento v0\.1\.0: six Dimensioj \(aspekto, viewport, density, color-scheme, contrast, motion\), one Aspekto \(`komuna`: reference, MIT, Geist\), \d+ tokens in \w+ types \(.+\), \w+ rules with reasons \(\w+ automatic\), \w+ Jugxoj, one Ero \(`butono`\)\. Ask explain why a value is what it is\.$/,
     );
   });
 });

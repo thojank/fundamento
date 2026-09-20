@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ciferecigo.com/fundamento/schema/mcp/suggest_ero.input.json",
+  "title": "suggest_ero input",
+  "description": "Which Ero and which props an action asks for: give the action in one word or one sentence (\"Löschen\"). Deterministic, from the intents of the Skemoj; lingvo limits the keywords to one language.",
+  "type": "object",
+  "properties": {
+    "intent": {
+      "type": "string",
+      "minLength": 1
+    },
+    "lingvo": {
+      "enum": ["en", "de"]
+    }
+  },
+  "required": ["intent"],
+  "additionalProperties": false
+}

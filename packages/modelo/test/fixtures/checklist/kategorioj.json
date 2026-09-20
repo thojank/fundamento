@@ -100,7 +100,11 @@
         "color.action.tertiary.pressed",
         "color.action.tertiary.selected",
         "color.action.tertiary.disabled",
-        "color.action.tertiary.text"
+        "color.action.tertiary.text",
+        "color.action.danger.rest",
+        "color.action.danger.hover",
+        "color.action.danger.pressed",
+        "color.action.danger.text"
       ]
     },
     {
@@ -450,7 +454,8 @@
         "size.container.large",
         "size.container.max",
         "size.breakpoint.medium",
-        "size.breakpoint.expanded"
+        "size.breakpoint.expanded",
+        "size.target.min"
       ]
     },
     {

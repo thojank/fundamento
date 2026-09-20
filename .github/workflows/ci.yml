@@ -42,6 +42,10 @@ jobs:
       - name: Install
         run: pnpm install --frozen-lockfile
 
+      # The rendered checks of @fundamento/eroj run in Chromium, Firefox and WebKit (Spec 003).
+      - name: Playwright browsers
+        run: pnpm --filter @fundamento/eroj exec playwright install --with-deps chromium firefox webkit
+
       - name: Build
         run: pnpm build
 
@@ -69,3 +73,15 @@ jobs:
 
       - name: "Check: Clean-Room"
         run: pnpm check:clean-room
+
+      # Rendered accessibility of the Eroj: axe-core, keyboard, focus ring (Spec 003 T013, D-09).
+      - name: "Check: Alirebleco (Eroj)"
+        run: pnpm check:alirebleco-eroj
+
+      # AK-08: the Make Kit installs from its tarball and builds in a fresh project (T019).
+      - name: "Check: Make Kit"
+        run: pnpm check:make-kit
+
+      # AK-07: the quickstart of the README, run as a user would and timed (T027).
+      - name: "Check: Quickstart"
+        run: pnpm check:quickstart

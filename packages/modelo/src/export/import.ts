@@ -50,6 +50,13 @@ export function modeloFromExport(modeloJson: ModeloJson): Modelo {
     reguloj: structuredClone(modeloJson.reguloj),
     jugxoj: structuredClone(modeloJson.jugxoj),
     kontrastParoj: structuredClone(modeloJson.kontrastParoj),
+    // eroj and skemoj are exported in the same order (Ero name); the files are not exported.
+    eroj: modeloJson.eroj.flatMap((ero) => {
+      const skemo = modeloJson.skemoj.find((candidate) => candidate.id === ero.skemo);
+      return skemo === undefined
+        ? []
+        : [{ file: "", ero: structuredClone(ero), skemo: structuredClone(skemo) }];
+    }),
     idsLock: { ids: {} },
     aspektoPackages,
     themesFile: [],

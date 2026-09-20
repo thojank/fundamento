@@ -25,3 +25,61 @@ Zu benennen und zu begründen: ein Regelwerk für automatische WCAG-Prüfungen g
 ## 5. Internacia
 
 Logische Eigenschaften und `dir`: https://www.w3.org/International/questions/qa-html-dir. Pseudo-Lokalisierung als Testtechnik für Textexpansion und Zeichensätze; die Expansionsannahme von 35 % stammt aus der Constitution (Art. VIII) und wird im Plan mit einer Quelle belegt.
+
+## 6. Marktlage, geprüft für den Plan (2026-09-19)
+
+Registry-Stände per `npm view` am 2026-09-19; Doku-Stände am selben Tag abgerufen.
+
+### 6.1 Figma Make Kits (präzisiert §1)
+
+- **Guidelines liegen im Kit, nicht im Paket.** „When you start a Make kit, a guidelines folder is created in the file explorer with at least one markdown file"; Make liest `guidelines/Guidelines.md` zuerst, weitere Dateien in keiner festen Reihenfolge. Einen Import von Guideline-Dateien aus dem npm-Paket beschreibt die Doku nicht. Quellen: https://help.figma.com/hc/en-us/articles/39241689698839-Get-started-with-Make-kits · https://developers.figma.com/docs/code/bring-your-design-system-package/
+- **Aufbau der Guidelines:** `Guidelines.md` (Einstieg, verweist weiter), `setup.md`, Unterordner `foundations/` und `components/`; viele kurze Dateien, imperative Sprache, Tabellen Token ↔ Tailwind-Klasse, Beispiele „CORRECT/WRONG". Quelle: https://developers.figma.com/docs/code/write-design-system-guidelines/
+- **Paket:** „Compatible with Vite (the default build system)"; Workspace-Abhängigkeiten vor dem Veröffentlichen entfernen; öffentliche npm-Pakete in jedem Plan nutzbar, private nur in bezahlten Plänen über Figmas Registry. Nur React. Quelle: https://help.figma.com/hc/en-us/articles/35946832653975-Use-your-design-system-package-in-Make-kits
+- **React-Version:** Die Figma-Doku nennt keine Version; eine Sekundärquelle (Mantlr, 2026) schreibt „React 18 (older React versions are not supported)" und empfiehlt `main`, `module`, `types` und `exports` mit ESM und CJS. Quelle: https://mantlr.com/blog/figma-make-kits-design-system-2026 — Folgerung: `peerDependencies` React ≥ 18, Build-Test gegen React 18 und 19.
+- **Kits** erstellen Full Seats in bezahlten Plänen; Rollout ab 2026-03-26; ein neu veröffentlichtes Kit wird an nutzende Dateien verteilt. Make kann Guidelines selbst generieren; Fundamento nutzt das nicht (Art. VII: Guidelines sind Projekcio).
+- Aktuelle Werkzeugstände: Vite 8.3.0, `@vitejs/plugin-react` 6.1.1 (Peer `vite ^8`), React 19.3.0, Tailwind 4.3.3, `@tailwindcss/vite` 4.3.3 (alle MIT).
+
+### 6.2 Figma: Plugin-API, Modes, Code Connect
+
+- Variablen und Komponenten lassen sich über die Plugin-API in jedem Plan anlegen (`figma.variables.createVariableCollection`, `createVariable`, `addMode`, `setBoundVariable`). Quelle: https://developers.figma.com/docs/plugins/api/properties/figma-variables-createvariablecollection/
+- **Modes je Collection sind planabhängig.** Stand 2026-09-20, gegen die Figma-Hilfe geprüft: Professional „Up to 10 modes per collection", Organization „Up to 20 modes per collection", Enterprise „Unlimited modes with extended collections"; Starter nennt die Tabelle nicht (eine Collection mit einem Mode). Quellen: https://help.figma.com/hc/en-us/articles/360040328273-Figma-plans-and-features · https://help.figma.com/hc/en-us/articles/15343816063383-Modes-for-variables — Die Grenze von 4 aus der ersten Recherche (Forum-Stand) ist überholt; sie wurde für Pro auf 10 und für Organization auf 20 angehoben. Folgerung: eine Collection je Dimensio bleibt der Aufbau, der Plan braucht höchstens 3 Modi (viewport, density), also läuft der Import ab Professional vollständig. Eine Library kann damit bis zu 10 Aspektoj tragen, nicht nur 4.
+- Code Connect: „Available on the Organization and Enterprise plans", Full- oder Dev-Seat; CLI und UI; React und HTML/Web Components werden unterstützt (`@figma/code-connect` 2.0.1, `@figma/code-connect/html`); Figmas MCP-Server nutzt die Zuordnungen. Quellen: https://help.figma.com/hc/en-us/articles/23920389749655-Code-Connect · https://github.com/figma/code-connect/blob/main/docs/html.md
+- Messung am Modelo (core + komuna + ekzemplo): höchstens drei Dimensioj beeinflussen denselben Token (aspekto × color-scheme × contrast: 33 Tokens; aspekto × color-scheme: 45; nur aspekto: 94; keine: 126).
+
+### 6.3 Barrierefreiheit (beantwortet §4)
+
+- `axe-core` 4.13.0 (MPL-2.0, 2026-09-18) mit `@axe-core/playwright` 4.13.0 (MPL-2.0); `@playwright/test` 1.63.0 (Apache-2.0, Chromium, Firefox, WebKit). Beide offen lizenziert, CI-tauglich, Ergebnisse als JSON. axe prüft Regeln (Namen, Rollen, ARIA, Kontrast im gerenderten DOM, auch durch Shadow DOM); Tastatur und Fokus prüft Playwright im echten Browser.
+
+### 6.4 APCA (FR-17)
+
+- WCAG 3.0 ist Working Draft (zuletzt 2026-09), Empfehlung nicht vor etwa 2029; der Kontrast-Algorithmus ist offen („yet to be determined"), APCA wurde im Juli 2023 aus dem Entwurf genommen und ist nicht normativ. Quellen: https://www.w3.org/TR/wcag-3.0/ · https://adrianroselli.com/2026/04/wcag3-contrast-as-of-april-2026.html
+- Das Referenzpaket `apca-w3` steht unter einer eingeschränkten Lizenz („Limited W3 License"); Fundamento rechnet APCA über colorjs.io (MIT).
+- Baseline im Repo: 1260 beratende APCA-Hinweise in komuna (Spec 002 research §8.7).
+
+### 6.5 Web Components und React
+
+- `lit` 3.3.3 (BSD-3-Clause) ist die verbreitete Basisbibliothek; native Custom Elements brauchen keine Abhängigkeit. React 19 setzt Properties und Events an Custom Elements nativ; React 18 reicht Props als Attribute durch und fängt Klick-Events über die Ereignisdelegation, die aus dem Shadow DOM `composed` herausblubbern.
+- Tailwinds Preflight setzt `button` auf transparenten Hintergrund und erbt Schrift; ein Button im Light DOM würde in jedem Tailwind-Projekt (also in Figma Make) zurückgesetzt, einer im Shadow DOM nicht.
+
+### 6.6 Internacia (präzisiert §5)
+
+- Textexpansion: Übersetzungen aus dem Englischen werden für kurze Texte bis zu 200–300 % länger, für mittlere Absätze um etwa 30–40 %. Quelle: https://www.w3.org/International/articles/article-text-size — die 35 % der Constitution entsprechen der mittleren Stufe; für die kurzen Beschriftungen von `butono` prüft der Plan zusätzlich das Doppelte.
+
+## 7. Nachtrag zum Release-Pfad (2026-09-20, Review Stage 5)
+
+- **Trusted Publishing und pnpm.** `pnpm publish` führt den Publish nicht selbst aus, sondern reicht ihn an die npm-CLI weiter; deshalb hängt die OIDC-Unterstützung an der npm-Version, nicht an pnpm. npm verlangt für Trusted Publishing **npm ≥ 11.5.1** und Node ≥ 22.14. pnpm 10 arbeitet damit; für pnpm 11 ist ein Rückschritt gemeldet, weshalb Projekte bewusst auf 10.x bleiben. Quellen: https://docs.npmjs.com/trusted-publishers/ · https://github.blog/changelog/2025-07-31-npm-trusted-publishing-with-oidc-is-generally-available/ · https://github.com/pnpm/pnpm/issues/9812 · https://github.com/pnpm/pnpm/issues/11513
+- **Stand im Repo:** Node 24 (`.nvmrc`) bringt npm 11.19.0 mit, pnpm ist auf 10.34.5 festgelegt. Der Release-Workflow prüft die npm-Version vor dem Publish und bricht unter 11.5.1 ab, statt still auf einen Token zurückzufallen.
+- **Provenance** verlangt, dass `repository.url` des Pakets auf dasselbe Repository zeigt, aus dem der Workflow läuft; die Make Kits tragen deshalb `repository` mit `directory`, `homepage` und `license`.
+
+## 8. Leistungs-Baseline Phase 3 (2026-09-20, T026)
+
+Gemessen auf dem Entwicklungsrechner (Node 24.21, Apple Silicon), jeweils allein über `pnpm perf`, Rohwerte auf stderr. Budget 100 ms je Aufruf bzw. 10 s für die Generierung, unter `CI=true` Faktor 3 (Jugxo jug_01M2W3K1YPP05F4XF86J71RGTK).
+
+| Messung | min | Median | max | Budget |
+|---|---|---|---|---|
+| `get_ero` (100 Aufrufe, über stdio) | 0,4 ms | 0,6 ms | 2,3 ms | 100 ms |
+| `suggest_ero` (100 Aufrufe) | 0,1 ms | 0,1 ms | 1,2 ms | 100 ms |
+| `check_usage` (100 Aufrufe, je drei Instanzen) | 0,1 ms | 0,2 ms | 1,1 ms | 100 ms |
+| `fm projekcioj build` (drei Läufe, alle Celoj inklusive Kit-Bundles) | 596 ms | 602 ms | 775 ms | 10 s |
+
+Nichts davon musste optimiert werden. Die Mutationsprüfung (Budget auf 0,001 ms bzw. 1 ms gesetzt) lässt alle vier Zeitmessungen fehlschlagen, die Schranken greifen also.

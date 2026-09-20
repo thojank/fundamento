@@ -9,12 +9,18 @@ import type {
   KontrastParo,
   LoadedAspektoPackage,
   LoadedDimensio,
+  LoadedEro,
   LoadedSet,
   Modelo,
   Regulo,
 } from "../contracts/modelo.js";
 import type { Fonto } from "../generated/modelo-schema.js";
-import type { AspektoPackageFiles, ModeloFiles, ModeloSetDocument } from "./files.js";
+import type {
+  AspektoPackageFiles,
+  ModeloDocument,
+  ModeloFiles,
+  ModeloSetDocument,
+} from "./files.js";
 import { flattenTokenTree, fundamentoExtension, parseKondicxoj } from "./flatten.js";
 import { isJsonObject, type JsonObject } from "./guards.js";
 import { MODELO_VERSION } from "./version.js";
@@ -67,12 +73,36 @@ export function buildModelo(files: ModeloFiles): BuildModeloResult {
       ...packageEntries<Jugxo>(files.packages, aspektoPackages, "jugxoj"),
     ],
     kontrastParoj: entriesOf<KontrastParo>(files.data["kontrastparoj.json"].value, "kontrastParoj"),
+    eroj: loadedEroj(files.eroj),
     idsLock,
     aspektoPackages,
     themesFile: files.themes.value,
     metadataFile: files.metadata.value,
   };
   return { modelo, issues };
+}
+
+/**
+ * Eroj from `data/eroj/<name>/skemo.json`, sorted by Ero name. Like the other entities they are
+ * only trustworthy after schema validation; a file without an `ero` and a `skemo` object is
+ * dropped here and reported by the schema step.
+ */
+function loadedEroj(documents: readonly ModeloDocument[]): LoadedEro[] {
+  return documents
+    .flatMap((document) => {
+      const value = document.value;
+      if (!isJsonObject(value) || !isJsonObject(value.ero) || !isJsonObject(value.skemo)) {
+        return [];
+      }
+      return [
+        {
+          file: document.file,
+          ero: value.ero as unknown as LoadedEro["ero"],
+          skemo: value.skemo as unknown as LoadedEro["skemo"],
+        },
+      ];
+    })
+    .sort((a, b) => (a.ero.name < b.ero.name ? -1 : a.ero.name > b.ero.name ? 1 : 0));
 }
 
 /** Name of the Dimensio whose values are Aspektoj. */

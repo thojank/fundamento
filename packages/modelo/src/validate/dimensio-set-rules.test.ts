@@ -52,6 +52,7 @@ function modelo(setoj: LoadedSet[]): Modelo {
     reguloj: [],
     jugxoj: [],
     kontrastParoj: [],
+    eroj: [],
     idsLock: { ids: {} },
     aspektoPackages: [],
     themesFile: [],

@@ -21,6 +21,7 @@ export const SCHEMA_DEFS = {
   resolvedToken: "ResolvedToken",
   ero: "Ero",
   skemo: "Skemo",
+  eroFile: "EroFile",
   sxablono: "Sxablono",
   projekcio: "Projekcio",
   celo: "Celo",
