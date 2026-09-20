@@ -12,12 +12,20 @@ export interface ElementNames {
   constant: string;
   /** `butono` (file name of the stylesheet) */
   ero: string;
+  /**
+   * The Make Kit builds one file per Aspekto: the descriptor and the stylesheet are then constants
+   * above the element instead of imports (D-14).
+   */
+  inline?: boolean;
 }
 
 /** The TypeScript source of one element. */
-export function elementSource({ tag, className, constant, ero }: ElementNames): string {
-  return `import { ${constant}_SKEMO as SKEMO } from "./skemo.js";
-import { ${constant}_CSS as CSS } from "./${ero}.styles.js";
+export function elementSource({ tag, className, constant, ero, inline }: ElementNames): string {
+  const head =
+    inline === true
+      ? `const SKEMO = ${constant}_SKEMO;\nconst CSS = ${constant}_CSS;`
+      : `import { ${constant}_SKEMO as SKEMO } from "./skemo.js";\nimport { ${constant}_CSS as CSS } from "./${ero}.styles.js";`;
+  return `${head}
 
 type Value = string | boolean;
 

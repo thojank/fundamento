@@ -3,6 +3,7 @@ export * from "./checks/alirebleco/color.js";
 export * from "./checks/alirebleco/evaluate.js";
 export * from "./checks/alirebleco/measure.js";
 export * from "./checks/alirebleco/metrics.js";
+export * from "./checks/clean-room/marko-spuro.js";
 export { checkCssCustomProperties, checkCustomElements } from "./checks/namespace/rules.js";
 export * from "./checks/parity/inventory.js";
 export * from "./checks/regularo/rules.js";

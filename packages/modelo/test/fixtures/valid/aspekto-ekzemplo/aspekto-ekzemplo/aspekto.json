@@ -2,7 +2,7 @@
   "id": "dva_ekz_01M2WA1QAAE4DSTCDX190GBSRZ",
   "name": "ekzemplo",
   "owner": "Ekzemplo Studio (fictitious, test only)",
-  "license": "proprietary",
+  "license": "MIT",
   "idNamespace": "ekz",
   "fonts": [
     {

@@ -21,6 +21,7 @@ import {
 import { CODE_CONNECT_CELO } from "./celoj/code-connect/code-connect.js";
 import { CSS_CELO } from "./celoj/css/css.js";
 import { FIGMA_CELO } from "./celoj/figma/figma.js";
+import { MAKE_KIT_CELO } from "./celoj/make-kit/make-kit.js";
 import { REACT_CELO } from "./celoj/react/react.js";
 import { TAILWIND_CELO } from "./celoj/tailwind/tailwind.js";
 import { WEB_COMPONENT_CELO } from "./celoj/web-component/web-component.js";
@@ -54,6 +55,7 @@ export const CELOJ: readonly Celo[] = [
   REACT_CELO,
   FIGMA_CELO,
   CODE_CONNECT_CELO,
+  MAKE_KIT_CELO,
 ];
 
 export const MANIFEST_FILE = "projekcioj.json";

@@ -98,9 +98,9 @@ A mutation check (one changed value must make the test fail) replaces the red ru
 
 ## Stage 5 – Make Kits
 
-- [ ] **T018 Make Kit packages** (FR-11, D-14, AK-08 automated part, Q2)
+- [x] **T018 Make Kit packages** (FR-11, D-14, AK-08 automated part, Q2)
   - Red: `celoj/make-kit/make-kit.test.ts` for komuna and ekzemplo: `package.json` has name, 0.x pre-release version, license MIT, `publishConfig.access: public`, the `exports` of contracts §6, no `dependencies`; every guidelines file of D-14 exists and is generated; every Ero Regulo appears with its kialo; every CORRECT/WRONG example comes from a Jugxo; every referenced Tailwind class and `--fm-*` name exists; no hex value (grep); no font file in the package, the ekzemplo font appears only as the name „Ekzempla Grotesk" followed by generic families (`ui-sans-serif, system-ui, sans-serif`), never next to the name of a real typeface; two builds are byte-identical. The ekzemplo fixture's `aspekto.json` license is `MIT`. **Clean room on the tarball:** `npm pack` each kit, unpack it, and run the clean-room brand fingerprints (`findBrandValues` with the repo's `marko-spuroj.json`) over every text file, generated guidelines included; red first with a prepared fingerprint that matches a value the kit contains.
-  - Green: `celoj/make-kit/` with the Vite 8 library build; the ekzemplo license change.
+  - Green: `celoj/make-kit/` with the Vite 8 library build (`buildMakeKits`); the ekzemplo license change to MIT. Done notes: the kit is one self-contained source file per Aspekto (the element inline, the React wrapper beside it), so it carries no workspace dependency; the type declarations are generated text, not a type build; the clean-room case plants the fingerprint of a colour the kit really contains, so the check is shown to have teeth.
 - [ ] **T019 Fresh-project tests** (AK-08, D-14)
   - Red: a fresh Vite 8 project with React 18.3, and one with React 19.3 and Tailwind 4.3.3, install the packed tarball, import `styles.css` (and `tailwind.css`), render `<Butono>`, build; the test fails while the kit is not packable.
   - Green: the rendered pages pass axe and the computed-style check; the test runs in CI.
