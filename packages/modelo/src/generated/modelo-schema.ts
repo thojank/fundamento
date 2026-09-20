@@ -123,6 +123,35 @@ export type ReguloId = string;
  */
 export type TokenPattern = string;
 /**
+ * The numeric threshold of a measuring Regulo; the enforcer reads it and agents cite it (Spec 002, D-02, D-06; Spec 004 adds the metrics and the upper bound).
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "ReguloSojlo".
+ */
+export type ReguloSojlo = ReguloSojlo1 & {
+  metric:
+    | "oklch-l-delta"
+    | "oklch-l-extreme"
+    | "oklch-l-step"
+    | "oklch-l-step-consistency"
+    | "oklch-l-align"
+    | "wcag2-reserve"
+    | "srgb-gamut"
+    | "type-scale-ratio"
+    | "type-scale-consistency"
+    | "type-rhythm"
+    | "dimensio-kovrado";
+  min?: number;
+  max?: number;
+};
+export type ReguloSojlo1 =
+  | {
+      min: unknown;
+    }
+  | {
+      max: unknown;
+    };
+/**
  * This interface was referenced by `ModeloJson`'s JSON-Schema
  * via the `definition` "JugxoId".
  */
@@ -365,6 +394,36 @@ export type DtcgToken = {
   $extensions?: TokenExtensions;
   $deprecated?: Deprecated;
 };
+/**
+ * A design goal one Aspekto sets itself (Spec 004, plan D-03): the same measurement as a Regulo, its own bound and its own reason, checked only for this Aspekto. Reguloj enforce accessibility and structure for every brand; an Aspiro is taste, and taste belongs to the brand.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "AspektoAspiro".
+ */
+export type AspektoAspiro = AspektoAspiro1 & {
+  metriko:
+    | "wcag2-reserve"
+    | "oklch-l-extreme"
+    | "oklch-l-step"
+    | "oklch-l-step-consistency"
+    | "oklch-l-align"
+    | "type-scale-ratio"
+    | "type-scale-consistency"
+    | "dimensio-kovrado";
+  min?: number;
+  max?: number;
+  appliesTo?: ReguloAppliesTo;
+  dimensio?: Name;
+  valoro?: Name;
+  kialo: NonEmptyText;
+};
+export type AspektoAspiro1 =
+  | {
+      min: unknown;
+    }
+  | {
+      max: unknown;
+    };
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema
  * via the `definition` "IdStatus".
@@ -617,16 +676,6 @@ export interface ReguloAppliesTo {
    * @minItems 1
    */
   eroj?: Name[];
-}
-/**
- * The numeric threshold of a measuring Regulo; the enforcer reads it and agents cite it (Spec 002, D-02, D-06).
- *
- * This interface was referenced by `ModeloJson`'s JSON-Schema
- * via the `definition` "ReguloSojlo".
- */
-export interface ReguloSojlo {
-  metric: "oklch-l-delta";
-  min: number;
 }
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema
@@ -1037,6 +1086,7 @@ export interface AspektoFile {
   idNamespace?: IdNamespace;
   fonts: Fonto[];
   tavoloj?: Tavoloj;
+  aspiroj?: AspektoAspiro[];
 }
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema

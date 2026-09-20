@@ -16,6 +16,13 @@
         "en": "Entity types of the Modelo schema that the terminology table does not name.",
         "de": "Entitätsarten des Modelo-Schemas, die die Terminologie-Tabelle nicht nennt."
       }
+    },
+    {
+      "id": "principoj",
+      "definition": {
+        "en": "Principles that guide the system; they live in a spec until the Constitution takes them up.",
+        "de": "Grundsätze, die das System leiten; sie stehen in einer Spec, bis die Constitution sie aufnimmt."
+      }
     }
   ],
   "predicates": [
@@ -798,6 +805,33 @@
           "predicate": "references",
           "target": "#Token"
         }
+      ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#FluidaMarko",
+      "term": "FluidaMarko",
+      "inScheme": "principoj",
+      "prefLabel": {
+        "eo": "Fluida Marko",
+        "en": "fluid brand",
+        "de": "Fluide Marke"
+      },
+      "altLabel": {
+        "en": [
+          "brand follows context"
+        ],
+        "de": [
+          "Marke folgt dem Kontext"
+        ]
+      },
+      "definition": {
+        "en": "The brand follows the context, not the vendor; Reguloj enforce accessibility and structure, Aspiroj are the brand's own business. See docs/vojmapo.md and docs/vizio.md.",
+        "de": "Die Marke folgt dem Kontext, nicht dem Anbieter; Reguloj erzwingen Zugänglichkeit und Struktur, Aspiroj sind Sache der Marke. Siehe docs/vojmapo.md und docs/vizio.md."
+      },
+      "related": [
+        "#Aspekto",
+        "#Regulo",
+        "#Aspiro"
       ]
     }
   ]

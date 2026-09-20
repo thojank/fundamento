@@ -2,6 +2,7 @@
 // never persisted, so written by hand; persisted shapes come from the generated schema types.
 
 import type {
+  AspektoAspiro,
   Dimensio,
   DimensioValoro,
   DtcgType,
@@ -21,6 +22,7 @@ import type { IssueLocation, ValidationIssue } from "./issues.js";
 
 export type {
   AliasLink,
+  AspektoAspiro,
   AspektoMetadata,
   Dimensio,
   DimensiojFile,
@@ -87,6 +89,8 @@ export interface LoadedAspektoPackage {
   owner?: string;
   license?: string;
   fonts?: Fonto[];
+  /** `aspiroj` from `aspekto.json`: the design goals this brand sets itself (Spec 004). */
+  aspiroj?: AspektoAspiro[];
   /** `aspekto.json` path relative to the Modelo root. */
   aspektoFile: string;
   /** `ids.lock.json` path relative to the Modelo root. */

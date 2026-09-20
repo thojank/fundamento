@@ -1322,6 +1322,12 @@
         },
         "tavoloj": {
           "$ref": "#/$defs/Tavoloj"
+        },
+        "aspiroj": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/AspektoAspiro"
+          }
         }
       },
       "required": ["id", "name", "owner", "license", "fonts"],
@@ -2440,6 +2446,59 @@
         }
       },
       "required": ["id", "name", "kondicxoj", "tree"],
+      "additionalProperties": false
+    },
+    "AspektoAspiro": {
+      "description": "A design goal one Aspekto sets itself (Spec 004, plan D-03): the same measurement as a Regulo, its own bound and its own reason, checked only for this Aspekto. Reguloj enforce accessibility and structure for every brand; an Aspiro is taste, and taste belongs to the brand.",
+      "type": "object",
+      "properties": {
+        "metriko": {
+          "type": "string",
+          "enum": [
+            "wcag2-reserve",
+            "oklch-l-extreme",
+            "oklch-l-step",
+            "oklch-l-step-consistency",
+            "oklch-l-align",
+            "type-scale-ratio",
+            "type-scale-consistency",
+            "dimensio-kovrado"
+          ]
+        },
+        "min": {
+          "type": "number"
+        },
+        "max": {
+          "type": "number"
+        },
+        "appliesTo": {
+          "$ref": "#/$defs/ReguloAppliesTo"
+        },
+        "dimensio": {
+          "$ref": "#/$defs/Name"
+        },
+        "valoro": {
+          "$ref": "#/$defs/Name"
+        },
+        "kialo": {
+          "$ref": "#/$defs/NonEmptyText"
+        }
+      },
+      "required": ["metriko", "kialo"],
+      "anyOf": [
+        {
+          "properties": {
+            "min": true
+          },
+          "required": ["min"]
+        },
+        {
+          "properties": {
+            "max": true
+          },
+          "required": ["max"]
+        }
+      ],
       "additionalProperties": false
     }
   }

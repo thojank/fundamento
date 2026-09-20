@@ -22,7 +22,7 @@
         "type": "object",
         "properties": {
           "id": {
-            "enum": ["terminologio", "modelo"]
+            "enum": ["terminologio", "modelo", "principoj"]
           },
           "definition": {
             "$ref": "#/$defs/EnDe"
@@ -95,7 +95,7 @@
           "pattern": "^[A-Z][A-Za-z]*$"
         },
         "inScheme": {
-          "enum": ["terminologio", "modelo"]
+          "enum": ["terminologio", "modelo", "principoj"]
         },
         "notation": {
           "type": "string",

@@ -136,6 +136,7 @@ export const RULE_IDS = [
   "ero-unknown",
   "intent-unknown",
   // Reguloj of Spec 004 (T003, T004); their rule IDs are the Regulo names (plan D-03)
+  "aspiro-missed",
   "contrast-reserve",
   "surface-distinct",
   "palette-even",

@@ -109,3 +109,28 @@ describe("ontologio.json (FR-15, FR-16, AK-07)", () => {
     expect(kinds(problems)).toContain("cycle");
   });
 });
+
+describe("ontologio: the principle Fluida Marko (Spec 004 T005)", () => {
+  const concepts = (ontologio as unknown as { concepts: Concept[] }).concepts;
+  const schemes = (ontologio as unknown as { schemes: { id: string }[] }).schemes;
+
+  it("carries a scheme for principles", () => {
+    expect(schemes.map((scheme) => scheme.id)).toContain("principoj");
+  });
+
+  it("states Fluida Marko with its definition and its sources", () => {
+    const concept = concepts.find((entry) => entry.term === "FluidaMarko") as unknown as
+      | { inScheme: string; prefLabel: Record<string, string>; definition: Record<string, string> }
+      | undefined;
+    expect(concept?.inScheme).toBe("principoj");
+    expect(concept?.prefLabel.eo).toBe("Fluida Marko");
+    expect(concept?.definition.de).toContain("Reguloj erzwingen Zugänglichkeit und Struktur");
+    expect(concept?.definition.de).toContain("Aspiroj sind Sache der Marke");
+    expect(JSON.stringify(concept)).toContain("docs/vojmapo.md");
+    expect(JSON.stringify(concept)).toContain("docs/vizio.md");
+  });
+
+  it("keeps the principle out of the Constitution terminology for now", () => {
+    expect(concepts.filter((entry) => entry.inScheme === "terminologio")).toHaveLength(18);
+  });
+});

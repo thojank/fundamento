@@ -292,8 +292,8 @@ export const contrastReserve: CombinationChecker = (context) => {
   return context.modelo.kontrastParoj.flatMap((pair) => {
     const kategorio = pair.kategorio as KontrastKategorio;
     const branches = [
-      { name: "main", ...pair },
-      ...(pair.aux === undefined ? [] : [{ name: "aux", ...pair.aux }]),
+      { ...pair, branch: "main" as const },
+      ...(pair.aux === undefined ? [] : [{ ...pair.aux, branch: "aux" as const }]),
     ];
     const measured = branches.flatMap((branch) => {
       const foreground = colorOf(context, branch.foreground);
@@ -327,7 +327,7 @@ export const contrastReserve: CombinationChecker = (context) => {
       {
         subject: pair.name,
         values: `${fmt2(best.ratio)} ${best.threshold}`,
-        message: `${pair.name} exceeds its threshold by ${fmt2(best.reserve * 100)} %, below the ${min * 100} % the Regulo asks for (${fmt2(best.ratio)}:1 against ${best.threshold}:1${best.branch.name === "aux" ? ", carried by its alternative pair" : ""}).`,
+        message: `${pair.name} exceeds its threshold by ${fmt2(best.reserve * 100)} %, below the ${min * 100} % the Regulo asks for (${fmt2(best.ratio)}:1 against ${best.threshold}:1${best.branch.branch === "aux" ? ", carried by its alternative pair" : ""}).`,
         suggestion: `Move ${best.branch.foreground} or ${best.branch.background} one palette step apart until the pair keeps its reserve; a value that only just passes fails on the next screen.`,
       },
     ];
