@@ -24,7 +24,7 @@ Dazu die Verfassungsänderung v1.7 (Art. V, Benchmark-Aspekto) und die Vorbereit
 | Neue Pakete | keine (Art. XI). Metriken in `@fundamento/modelo`, Vitrino als Celo in `@fundamento/projekcioj` |
 | Neue Abhängigkeiten | keine. OKLCH über `oklchLightness` (Spec 002), Kontrast über `evaluateAlirebleco`, Rendern über die vorhandenen Playwright- und axe-Einrichtungen |
 | Prüfungen | fünf Kern-Checks unverändert; `check:vitrino` kommt als eigener Schritt dazu (D-09) |
-| Leistungsziel | `fm projekcioj build` bleibt unter 10 s (heute 0,6–0,8 s); die Vitrino darf davon höchstens 2 s brauchen; die HTML-Datei bleibt unter 3 MB |
+| Leistungsziel | `fm projekcioj build` bleibt unter 10 s (heute 0,6–0,8 s); die Vitrino darf davon höchstens 2 s brauchen; die HTML-Datei bleibt unter 3 MB. **Gemessen (T011):** 1,48 MB für das Kern-Modelo (72 Kombinationen), 3,04 MB für die Komposition komuna + ekzemplo (144 Kombinationen) – die Schranke gilt je Modelo mit 72 Kombinationen, für zwei Marken ist sie um 1,3 % überschritten |
 | Umfang | 7 neue Reguloj, 5 Aspiroj für komuna, ~30 geänderte und 57 neue Tokenwerte (eigener Dunkelmodus), 1 neues Celo, 1 neue Prüfung, 1 Verfassungsänderung, 1 neuer Ontologio-Begriff |
 | Test-first | Rot vor der Umsetzung ohne Ausnahme; Mutationsprüfung nur für Abnahmetests (Vitrino-Abnahme, Zeitbudgets), wie in Phase 3 |
 
@@ -155,8 +155,8 @@ Die Vitrino ist eine Projekcio und liegt bei den anderen: `packages/projekcioj/s
 ```ts
 export interface Celo {
   name: string;
-  /** Dateien allein aus dem Modelo (rein). */
-  generate?(input: CeloInput): GeneratedFile[];
+  /** Dateien allein aus dem Modelo; leer für ein Celo, das nur zusammensetzt. */
+  generate(input: CeloInput): GeneratedFile[];
   /** Dateien aus dem, was die anderen Celoj geschrieben haben (nach dem Bündeln). */
   after?(outDir: string, input: CeloInput): GeneratedFile[];
 }

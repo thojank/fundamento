@@ -137,7 +137,16 @@ Eine Insel `<script type="application/json" id="fm-vitrino">`, kanonisch sortier
     "komuna": [ { "dimensio": "color-scheme", "valoro": "dark", "propraj": 57, "entute": 76, "parto": 0.75 } ]
   },
   "aspiroj": {                        // je Aspekto: erklärte Ziele mit Messwert (Plan D-03)
-    "komuna": [ { "metriko": "wcag2-reserve", "min": 0.1, "mezurita": 0.104, "atingita": true, "kialo": "…" } ]
+    // amplekso: die Tokenmuster des Ziels oder "alle Tokens" – ohne das lesen sich zwei
+    // Abdeckungszahlen derselben Metrik wie ein Widerspruch
+    "komuna": [ { "metriko": "wcag2-reserve", "limo": "min 0.1", "amplekso": "alle Tokens",
+                  "mezurita": "0.110", "atingita": true, "kialo": "…" } ]
+  },
+  "apcaHintoj": {                     // beratende APCA-Befunde, gezählt je Stand (T010)
+    "nun": 3528, "kombinoj": 144,     // dieser Build
+    "bazo": 1296, "bazoKombinoj": 72, // der Vergleichsstand aus `fm modelo mezuroj`
+    "komunaj": { "nun": 1746, "kombinoj": 72 },  // nur Kombinationen, die beide Stände haben
+    "mankantaj": 0                    // Kombinationen des Vergleichsstands, die hier fehlen
   },
   "komparo": {                        // je Kriterium: zwei Aspektoj nebeneinander (FR-08)
     "komuna|ekzemplo": [
@@ -151,7 +160,7 @@ Regeln für die Insel:
 
 - **Nur Zahlen, die der Build gerechnet hat.** Der Browser wählt die Scheibe aus, er rechnet nichts (Art. VIII).
 - **Kanonische Reihenfolge:** Aspekto, dann Kombination in Dimensio-Priorität, dann Paar- bzw. Tokenname. So sind zwei Builds byte-gleich.
-- **Schlüssel der Kombination:** `aspekto|color-scheme|contrast|density|viewport|motion`, in Prioritätsreihenfolge der Dimensioj.
+- **Schlüssel der Kombination:** `aspekto|viewport|density|color-scheme|contrast|motion`, in der Reihenfolge, in der die Dimensioj im Modelo stehen.
 - **Keine Farbe ohne Text:** Jeder Farbwert steht neben Tokenname und Messwert, damit die Anzeige WCAG 1.4.1 erfüllt.
 
 ## 5. Fingerprintquellen mit Herkunft
@@ -176,7 +185,7 @@ Ein Fund nennt die Herkunft im Text (`clean-room-marko-spuro` bleibt die Regel-I
 ```ts
 export interface Celo {
   name: string;
-  generate?(input: CeloInput): GeneratedFile[];   // rein, aus dem Modelo
+  generate(input: CeloInput): GeneratedFile[];   // rein, aus dem Modelo; leer beim Zusammensetzer
   after?(outDir: string, input: CeloInput): GeneratedFile[];  // aus den Artefakten der anderen
 }
 ```

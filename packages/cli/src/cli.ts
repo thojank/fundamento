@@ -10,6 +10,7 @@ import {
 } from "./command.js";
 import { mcp } from "./commands/mcp.js";
 import { modeloExport } from "./commands/modelo-export.js";
+import { modeloMezuroj } from "./commands/modelo-mezuroj.js";
 import { modeloValidate } from "./commands/modelo-validate.js";
 import { projekciojBuild } from "./commands/projekcioj-build.js";
 import { closest } from "./suggest.js";
@@ -21,7 +22,7 @@ const ENTRIES: readonly Entry[] = [
   {
     name: "modelo",
     summary: "Work with the Modelo: tokens, Dimensioj, Reguloj and Jugxoj.",
-    commands: [modeloValidate, modeloExport],
+    commands: [modeloValidate, modeloExport, modeloMezuroj],
   },
   {
     name: "projekcioj",

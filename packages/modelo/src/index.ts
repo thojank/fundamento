@@ -26,4 +26,6 @@ export * from "./nomreguloj/index.js";
 export * from "./ontologio/check.js";
 export * from "./resolve/index.js";
 export * from "./themes/index.js";
+export * from "./validate/aspiroj.js";
 export * from "./validate/index.js";
+export * from "./validate/regularo-enforcement.js";

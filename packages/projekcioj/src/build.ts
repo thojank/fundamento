@@ -24,6 +24,7 @@ import { FIGMA_CELO } from "./celoj/figma/figma.js";
 import { bundleMakeKits, MAKE_KIT_CELO } from "./celoj/make-kit/make-kit.js";
 import { REACT_CELO } from "./celoj/react/react.js";
 import { TAILWIND_CELO } from "./celoj/tailwind/tailwind.js";
+import { VITRINO_CELO, type VitrinoBazo } from "./celoj/vitrino/vitrino.js";
 import { WEB_COMPONENT_CELO } from "./celoj/web-component/web-component.js";
 import { writeParityInventories } from "./parity.js";
 
@@ -34,6 +35,8 @@ export interface CeloInput {
   rezolvoj: RezolvojJson;
   /** Environment of the build; only the optional Code Connect Celo reads it (D-13). */
   env?: Readonly<Record<string, string | undefined>>;
+  /** A measurement snapshot of another state, for the Vitrino's comparison (Spec 004, `--bazo`). */
+  bazo?: VitrinoBazo;
 }
 
 /** One generated file: a path relative to the output directory and its text. */
@@ -42,10 +45,17 @@ export interface GeneratedFile {
   text: string;
 }
 
-/** An output target of the projections (Art. XII). */
+/**
+ * An output target of the projections (Art. XII). A Celo writes files from the Modelo alone
+ * (`generate`), or from what the other Celoj wrote (`after`, Spec 004 D-06: the Vitrino embeds the
+ * stylesheet and the bundled element), or both.
+ */
 export interface Celo {
   name: string;
+  /** Files from the Modelo alone; empty for a Celo that only composes. */
   generate(input: CeloInput): GeneratedFile[];
+  /** Files composed from what the other Celoj wrote, after the Make Kits are bundled. */
+  after?(outDir: string, input: CeloInput): GeneratedFile[];
 }
 
 /** Every Celo, in the order of Art. XII. Each task of Spec 003 adds its Celo here. */
@@ -57,12 +67,15 @@ export const CELOJ: readonly Celo[] = [
   FIGMA_CELO,
   CODE_CONNECT_CELO,
   MAKE_KIT_CELO,
+  VITRINO_CELO,
 ];
 
 export const MANIFEST_FILE = "projekcioj.json";
 
 export interface BuildOptions {
   outDir: string;
+  /** A measurement snapshot to compare with; the Vitrino shows the change (Spec 004 T010). */
+  bazo?: VitrinoBazo;
   /** A Modelo source; defaults to the repository's Modelo. */
   source?: ModeloSource;
   /** Shortcut for a fixture Modelo root (`<root>/vortaro`, `<root>/data`). */
@@ -105,6 +118,7 @@ export async function buildProjekcioj(options: BuildOptions): Promise<BuildResul
       : fixtureModeloSource(options.fixtureRoot));
   const prepared = celoInputOf(source);
   if (!prepared.ok) return prepared;
+  if (options.bazo !== undefined) prepared.input.bazo = options.bazo;
 
   const generated = CELOJ.flatMap((celo) => celo.generate(prepared.input));
   const paths = generated.map((file) => file.path);
@@ -130,7 +144,17 @@ export async function buildProjekcioj(options: BuildOptions): Promise<BuildResul
   const bundled = await bundleMakeKits(options.outDir, prepared.input);
   // Every Celo states what it emitted; `check:parity` compares that with the Skemo (T021).
   const inventories = writeParityInventories(options.outDir, prepared.input);
-  for (const file of [...bundled, ...inventories]) {
+  // Second phase: Celoj that compose what the others wrote (Spec 004, D-06).
+  const composed: string[] = [];
+  for (const celo of CELOJ) {
+    for (const file of celo.after?.(options.outDir, prepared.input) ?? []) {
+      const target = join(options.outDir, file.path);
+      mkdirSync(dirname(target), { recursive: true });
+      writeFileSync(target, file.text);
+      composed.push(file.path);
+    }
+  }
+  for (const file of [...bundled, ...inventories, ...composed]) {
     hashes[file] = createHash("sha256")
       .update(readFileSync(join(options.outDir, file)))
       .digest("hex");

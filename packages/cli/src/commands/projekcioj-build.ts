@@ -2,6 +2,7 @@
 // projection (Spec 003, plan D-01): CSS, Tailwind, Web Component, React, Figma plan, Code Connect
 // and Make Kits, plus `projekcioj.json` with the SHA-256 of every file. Nothing is written for an
 // invalid Modelo.
+import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { defaultModeloSource, projectModeloSource } from "@fundamento/modelo";
 import { buildProjekcioj } from "@fundamento/projekcioj";
@@ -23,6 +24,8 @@ Options:
   --config <file>  A project's fundamento.config.json: the core, komuna and the Aspekto
                    packages it lists
   --out <dir>      Output directory (default: ${DEFAULT_OUT})
+  --bazo <file>    A measurement snapshot of another state (fm modelo mezuroj); the Vitrino
+                   then shows the change against it, pair by pair
   -h, --help       Show this help
 
 Exit codes: 0 written, 1 the Modelo is invalid (nothing written), 2 usage error.
@@ -31,7 +34,7 @@ Exit codes: 0 written, 1 the Modelo is invalid (nothing written), 2 usage error.
 async function run(args: readonly string[], context: CliContext): Promise<number> {
   const { values, positionals } = parseFlags(
     args,
-    { config: { type: "string" }, out: { type: "string" } },
+    { config: { type: "string" }, out: { type: "string" }, bazo: { type: "string" } },
     COMMAND_LINE,
   );
   if (positionals.length > 0) {
@@ -48,7 +51,15 @@ async function run(args: readonly string[], context: CliContext): Promise<number
     context.baseDir,
     typeof values.out === "string" ? values.out : DEFAULT_OUT,
   );
-  const result = await buildProjekcioj({ outDir, source });
+  const bazoFile =
+    typeof values.bazo === "string" ? resolve(context.baseDir, values.bazo) : undefined;
+  const bazo =
+    bazoFile === undefined
+      ? undefined
+      : (JSON.parse(readFileSync(bazoFile, "utf8")) as Parameters<
+          typeof buildProjekcioj
+        >[0]["bazo"]);
+  const result = await buildProjekcioj({ outDir, source, ...(bazo === undefined ? {} : { bazo }) });
   for (const warning of result.warnings) context.stderr(`${formatIssue(warning)}\n`);
   if (!result.ok) {
     for (const error of result.errors) context.stderr(`${formatIssue(error)}\n`);

@@ -42,7 +42,8 @@ Begleitet [`../plan.md`](../plan.md) D-06 bis D-09. Das ist die Oberfläche, auf
 
 - Ein Schalter setzt genau ein `data-fm-*`-Attribut am `<html>`-Element; das CSS-Celo schaltet die Werte, ohne Neuladen.
 - Dasselbe Ereignis wählt die passende Scheibe der JSON-Insel und schreibt die Zahlen neu (`mezuroj`, `regularo`, `roloj`).
-- Der Zustand steht zusätzlich im Fragment der URL (`#aspekto=komuna&color-scheme=dark`), damit ein Screenshot teilbar ist; beim Laden wird das Fragment angewandt.
+- Der Zustand steht zusätzlich im Fragment der URL (`#aspekto=komuna&color-scheme=dark`), damit ein Screenshot teilbar ist; beim Laden **und bei jedem `hashchange`** wird das Fragment angewandt, damit ein später eingefügtes Fragment ebenfalls wirkt. Geschrieben wird es mit `location.replace`, also ohne Eintrag in der Chronik.
+- **Nicht jede Dimensio bewegt dieselbe Zahl.** `color-scheme`, `contrast` und `aspekto` ändern die Messwerte eines Paares, `viewport` eine Schriftgröße, `density` einen Abstand, `motion` eine Dauer. Die Prüfung nennt je Dimensio einen Zeugen dieser Art.
 
 ## 4. Gegenüberstellung (FR-08)
 
@@ -51,6 +52,7 @@ Begleitet [`../plan.md`](../plan.md) D-06 bis D-09. Das ist die Oberfläche, auf
 - Kriterien in Etappe A: kleinste Kontrast-Reserve, Bestehensquote der KontrastParoj, kleinster Flächenabstand, kleinster Abstand zum Anker, Bandbreite der Palettenstufen, Rampenausrichtung, Gamut-Treue, Regelmäßigkeit der Typo-Skala, Regularo-Ergebnis (bestanden / Verstöße) und die Abdeckung je Dimensio (`dimensio-kovrado`).
 - **Aspiroj stehen nie im Vergleich.** Sie gehören einer Marke; ein Vergleich daraus wäre Geschmack gegen Geschmack. Sie erscheinen nur im Abschnitt der jeweiligen Marke, als „Entwurfsziel: Soll / Ist / erreicht".
 - **Kein Gesamturteil** (FR-17 gilt schon hier).
+- Kriterien nennen ihren Geltungsbereich, wo zwei Zahlen dieselbe Metrik messen: die Zeile „eigene Werte im Dunkelmodus (alle Tokens)" zählt jedes Token des Dunkelsatzes, das gleichnamige Entwurfsziel nur seine vier Rollengruppen. Die Tabelle der Entwurfsziele hat dafür die Spalte **Geltungsbereich** (die Tokenmuster der Aspiro oder „alle Tokens").
 
 ## 5. Garantien, die geprüft werden
 
@@ -66,5 +68,7 @@ Begleitet [`../plan.md`](../plan.md) D-06 bis D-09. Das ist die Oberfläche, auf
 | `fm-butono` ist aufgewertet und trägt die Tokens des Aspekto | Playwright: `customElements.get`, berechnete Farbe gegen `rezolvoj.json` |
 | Abschnitt „Eigene Werte je Dimensio" zeigt je Dimensio-Wert die Abdeckung | Vitest über das erzeugte HTML |
 | Aspiroj der gezeigten Marke stehen mit Soll, Ist und Kialo da, als Entwurfsziel bezeichnet | Vitest über das erzeugte HTML |
+| jede Tabelle hat eine Beschriftung und Kopfzellen mit Text | Playwright (axe hat dafür keine Regel) |
+| der APCA-Vergleich zählt nur Kombinationen, die beide Stände haben | Vitest: Vergleichsstand mit 72 Kombinationen gegen einen Build mit 144 |
 
 Kommando: `pnpm check:vitrino` (eigener CI-Schritt „Check: Vitrino"), nach `pnpm fm projekcioj build`.

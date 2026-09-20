@@ -223,6 +223,62 @@ function bounds(aspiro: AspektoAspiro, format: (value: number) => string): strin
   return parts.join(" and ");
 }
 
+/** One declared goal with the measurement that stands furthest outside its bounds. */
+export interface AspiroResult {
+  aspekto: string;
+  /** Index in `aspekto.json#/aspiroj`, for the issue path. */
+  index: number;
+  aspiro: AspektoAspiro;
+  /** The measurement that decides; absent when the metric measured nothing. */
+  measured?: { value: number; at?: string; text: string };
+  reached: boolean;
+}
+
+/** Every Aspiro of every Aspekto with its measurement, whether it holds or not. */
+export function evaluateAspiroj(modelo: Modelo): AspiroResult[] {
+  return modelo.aspektoPackages.flatMap((pkg: LoadedAspektoPackage) => {
+    const aspekto = pkg.aspekto;
+    if (aspekto === undefined) return [];
+    return (pkg.aspiroj ?? []).map((aspiro, index) => {
+      const all = measure(modelo, aspekto, aspiro);
+      const worst = missed(all, aspiro);
+      const decisive = worst ?? nearest(all, aspiro);
+      return {
+        aspekto,
+        index,
+        aspiro,
+        ...(decisive === undefined
+          ? {}
+          : {
+              measured: {
+                value: decisive.value,
+                ...(decisive.at === undefined ? {} : { at: decisive.at }),
+                text: decisive.format(decisive.value),
+              },
+            }),
+        reached: worst === undefined,
+      };
+    });
+  });
+}
+
+/** The measurement closest to a bound: what a reached goal shows as its tightest spot. */
+function nearest(measured: readonly Measured[], aspiro: AspektoAspiro): Measured | undefined {
+  let best: Measured | undefined;
+  let distance = Number.POSITIVE_INFINITY;
+  for (const entry of measured) {
+    const room = Math.min(
+      aspiro.min === undefined ? Number.POSITIVE_INFINITY : entry.value - aspiro.min,
+      aspiro.max === undefined ? Number.POSITIVE_INFINITY : aspiro.max - entry.value,
+    );
+    if (room < distance) {
+      distance = room;
+      best = entry;
+    }
+  }
+  return best;
+}
+
 /** One issue per design goal a brand declares and misses (`aspiro-missed`). */
 export function aspirojIssues(modelo: Modelo): ValidationIssue[] {
   return modelo.aspektoPackages.flatMap((pkg: LoadedAspektoPackage) => {
