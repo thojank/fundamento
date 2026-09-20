@@ -2,7 +2,9 @@
   "jugxoj": [
     {
       "id": "jug_01M2VRT7KQ77W91MVXB4GXSRZ4",
-      "ref": { "artikolo": "X" },
+      "ref": {
+        "artikolo": "X"
+      },
       "decision": "deviation-recorded",
       "kialo": "FUND-4.1 wrote tests before code but ran them only afterwards, so they were never observed failing; from now on the red run is part of ticket completion",
       "date": "2026-09-19",
@@ -10,7 +12,9 @@
     },
     {
       "id": "jug_01M2W3K1YPP05F4XF86J71RGTK",
-      "ref": { "artikolo": "X" },
+      "ref": {
+        "artikolo": "X"
+      },
       "decision": "deviation-recorded",
       "kialo": "Tests that spawn processes must have timeouts sized for a cold CI runner, otherwise the gate flakes and loses authority.",
       "date": "2026-09-19",
@@ -18,7 +22,9 @@
     },
     {
       "id": "jug_01M2XKF2X28C4EGJ8R4VMVGCB8",
-      "ref": { "artikolo": "XII" },
+      "ref": {
+        "artikolo": "XII"
+      },
       "decision": "deviation-recorded",
       "kialo": "Die NomRegulo von Celo 2 legt den Namensraum fm in den Theme-Schlüssel statt prefix(fm) zu nutzen, denn prefix() benennt alle Klassen des Projekts um, auch die des Host-Projekts, etwa in einem Make Kit.",
       "date": "2026-09-19",
@@ -26,7 +32,9 @@
     },
     {
       "id": "jug_01M2XKF38358Z6WQH9KARYJ6F3",
-      "ref": { "artikolo": "X" },
+      "ref": {
+        "artikolo": "X"
+      },
       "decision": "deviation-recorded",
       "kialo": "APCA stays advisory: WCAG 3 has not settled its contrast method, so a binding APCA threshold would hold brands to a method no standard names; revisit when WCAG 3 contrast reaches Candidate Recommendation.",
       "date": "2026-09-19",
@@ -34,7 +42,9 @@
     },
     {
       "id": "jug_01M2XN0Q7YGPVYC981A9D98PSZ",
-      "ref": { "ero": "ero_01M2XN0PHDBBD6MNFN75DB9NQ5" },
+      "ref": {
+        "ero": "ero_01M2XN0PHDBBD6MNFN75DB9NQ5"
+      },
       "decision": "approved",
       "kialo": "One primary action per dialog: Speichern leads, Abbrechen steps back as tertiary.",
       "date": "2026-09-19",
@@ -44,13 +54,18 @@
         "instances": [
           {
             "ero": "butono",
-            "props": { "variant": "primary", "type": "submit" },
+            "props": {
+              "variant": "primary",
+              "type": "submit"
+            },
             "container": "dialog",
             "label": "Speichern"
           },
           {
             "ero": "butono",
-            "props": { "variant": "tertiary" },
+            "props": {
+              "variant": "tertiary"
+            },
             "container": "dialog",
             "label": "Abbrechen"
           }
@@ -59,7 +74,9 @@
     },
     {
       "id": "jug_01M2XN0Q7YGPVYC981A9D98PT0",
-      "ref": { "ero": "ero_01M2XN0PHDBBD6MNFN75DB9NQ5" },
+      "ref": {
+        "ero": "ero_01M2XN0PHDBBD6MNFN75DB9NQ5"
+      },
       "decision": "rejected",
       "kialo": "Two primary buttons in one dialog: the user has to decide which one is the main action.",
       "date": "2026-09-19",
@@ -69,13 +86,17 @@
         "instances": [
           {
             "ero": "butono",
-            "props": { "variant": "primary" },
+            "props": {
+              "variant": "primary"
+            },
             "container": "dialog",
             "label": "Speichern"
           },
           {
             "ero": "butono",
-            "props": { "variant": "primary" },
+            "props": {
+              "variant": "primary"
+            },
             "container": "dialog",
             "label": "Weiter"
           }
@@ -84,7 +105,9 @@
     },
     {
       "id": "jug_01M2XN0Q7YGPVYC981A9D98PT1",
-      "ref": { "ero": "ero_01M2XN0PHDBBD6MNFN75DB9NQ5" },
+      "ref": {
+        "ero": "ero_01M2XN0PHDBBD6MNFN75DB9NQ5"
+      },
       "decision": "approved",
       "kialo": "A confirmation dialog whose main action destroys data uses the danger fill; the escape stays tertiary.",
       "date": "2026-09-19",
@@ -94,14 +117,19 @@
         "instances": [
           {
             "ero": "butono",
-            "props": { "variant": "primary", "tone": "danger" },
+            "props": {
+              "variant": "primary",
+              "tone": "danger"
+            },
             "container": "confirm-delete",
             "intent": "destructive",
             "label": "Löschen"
           },
           {
             "ero": "butono",
-            "props": { "variant": "tertiary" },
+            "props": {
+              "variant": "tertiary"
+            },
             "container": "confirm-delete",
             "label": "Abbrechen"
           }
@@ -110,7 +138,9 @@
     },
     {
       "id": "jug_01M2XN0Q7YGPVYC981A9D98PT2",
-      "ref": { "ero": "ero_01M2XN0PHDBBD6MNFN75DB9NQ5" },
+      "ref": {
+        "ero": "ero_01M2XN0PHDBBD6MNFN75DB9NQ5"
+      },
       "decision": "rejected",
       "kialo": "Löschen in the neutral primary colour promises the expected next step instead of warning before data is lost.",
       "date": "2026-09-19",
@@ -120,13 +150,17 @@
         "instances": [
           {
             "ero": "butono",
-            "props": { "variant": "primary" },
+            "props": {
+              "variant": "primary"
+            },
             "container": "confirm-delete",
             "label": "Löschen"
           },
           {
             "ero": "butono",
-            "props": { "variant": "tertiary" },
+            "props": {
+              "variant": "tertiary"
+            },
             "container": "confirm-delete",
             "label": "Abbrechen"
           }
@@ -135,7 +169,9 @@
     },
     {
       "id": "jug_01M2XN0Q7YGPVYC981A9D98PT3",
-      "ref": { "ero": "ero_01M2XN0PHDBBD6MNFN75DB9NQ5" },
+      "ref": {
+        "ero": "ero_01M2XN0PHDBBD6MNFN75DB9NQ5"
+      },
       "decision": "approved",
       "kialo": "An icon-only button names itself with the label prop, so assistive technology can announce it.",
       "date": "2026-09-19",
@@ -143,29 +179,88 @@
       "ekzemplo": {
         "regulo": "reg_01M2XMV80DG7JCJDTZGE66MGHY",
         "instances": [
-          { "ero": "butono", "props": { "variant": "tertiary", "size": "small", "label": "Schließen" } }
+          {
+            "ero": "butono",
+            "props": {
+              "variant": "tertiary",
+              "size": "small",
+              "label": "Schließen"
+            }
+          }
         ]
       }
     },
     {
       "id": "jug_01M2XN0Q7YGPVYC981A9D98PT4",
-      "ref": { "ero": "ero_01M2XN0PHDBBD6MNFN75DB9NQ5" },
+      "ref": {
+        "ero": "ero_01M2XN0PHDBBD6MNFN75DB9NQ5"
+      },
       "decision": "rejected",
       "kialo": "An icon-only button without a name: a screen reader announces only \"button\".",
       "date": "2026-09-19",
       "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 003 T007); generated into get_ero and the Make Kit guidelines.",
       "ekzemplo": {
         "regulo": "reg_01M2XMV80DG7JCJDTZGE66MGHY",
-        "instances": [{ "ero": "butono", "props": { "variant": "tertiary", "size": "small" } }]
+        "instances": [
+          {
+            "ero": "butono",
+            "props": {
+              "variant": "tertiary",
+              "size": "small"
+            }
+          }
+        ]
       }
     },
     {
       "id": "jug_01M2YDYBYFMRS7PREH2WQTCBZW",
-      "ref": { "artikolo": "VI" },
+      "ref": {
+        "artikolo": "VI"
+      },
       "decision": "deviation-recorded",
       "kialo": "An Ero stylesheet carries structure as well as design: display, cursor or box-sizing are structure, have no token and cannot become one, while every design value must stay a token. The Phase-0 literal rule was written for token CSS and treats every keyword as a literal, so it is refined for Ero stylesheets instead of being weakened.",
       "date": "2026-09-20",
       "context": "Spec 003, review of Stages 2-4 (decision 3). The refined rule (css-literal-value in checks/vortaro-lint/component-css.ts) has a small, explicit allowlist of structural properties where keywords and 0 are allowed, requires a token reference for every design property (colour, background, border, outline, spacing, size, type, radius, shadow, opacity, motion), and reports any property in neither list, so both lists stay conscious decisions. Negative tests: color: red and padding: 8px are reported. The Phase-0 rule is unchanged for token CSS and every other file."
+    },
+    {
+      "id": "jug_01M2ZNS5HAR6JG9K9KA06M4KA2",
+      "ref": {
+        "regulo": "reg_01M2ZJ0YJ1VJKMQSNPR6TWCCV2"
+      },
+      "decision": "approved",
+      "kialo": "palette-even misst die Rate je 100 Stufeneinheiten, nicht den rohen Abstand zweier Nachbarstufen. Eine Rampe darf ihre Stufen ungleich nummerieren (50, 100, 200, 300, 600) und trotzdem gleichmäßig fortschreiten; der rohe Abstand hätte sie als unregelmäßig gemeldet, obwohl ihre Rate konstant ist. Befund aus T004, an der Fixture regularo-kombinoj entdeckt.",
+      "date": "2026-09-20",
+      "context": "Spec 004, Etappe A, T004; bestätigt vom Maintainer im Zwischenbericht zu T006."
+    },
+    {
+      "id": "jug_01M2ZNS5HBWQ9X3WE3BBBTN5N7",
+      "ref": {
+        "regulo": "reg_01M2ZJ0YJ3CWC217Q7VC1RS6VS"
+      },
+      "decision": "approved",
+      "kialo": "type-rhythm vergleicht nur innerhalb einer Rollenfamilie (display, headline, body, label). Ein Label bei 14 px ist absichtlich enger gesetzt als Fließtext bei 16 px; über Familien hinweg misst die Regel eine Entscheidung der Marke statt ihres Rhythmus und meldete im Repo vier Scheinbefunde. Befund aus T004.",
+      "date": "2026-09-20",
+      "context": "Spec 004, Etappe A, T004; bestätigt vom Maintainer im Zwischenbericht zu T006."
+    },
+    {
+      "id": "jug_01M2ZTV1WRHXQ7C31W7FQ4YZP7",
+      "ref": {
+        "regulo": "reg_01M2VEEE5280TGESDHQQ14EA33"
+      },
+      "decision": "approved",
+      "kialo": "Eine tertiäre Aktion hat keine eigene Fläche: ihre Ruhe- und Deaktiviert-Werte sind vollständig durchsichtig (color.palette.shade.0), Hover und Pressed sind Auflagen (shade 8 % / 10 % im Hellen, tint 8 % / 10 % im Dunkeln). Vorher lag sie im Hellen auf reinem Weiß und damit heller als jede Seitenfläche, im Dunkeln auf der Stufe von sunken. Damit eine Auflage messbar bleibt, wird sie über jeder Fläche gemessen, auf der sie liegen kann, und der schlechteste Fall entscheidet; die Meldung nennt die Fläche („über color.background.sunken\"). Die Vorgabe ist die Flächenleiter sunken, canvas, default, raised — nicht color.background.inverse, die ihre eigenen Textrollen trägt und keine Stufe der Leiter ist. Eine KontrastParo darf die Liste mit `backdrop` enger fassen; ohne eine opake Fläche bleibt eine durchsichtige Fläche ein Fehler. Gemessene Folge (schlechtester Fall): Reserve 46 % und 40 % im Hellen, 23 % und 17 % im Dunkeln, 26 % und 21 % unter hohem Kontrast hell, 23 % und 15 % dunkel — überall über komunas Ziel von 10 %. Die Grenzen sind eng: state-distinct verlangt mindestens 0,05 Helligkeitsabstand zur Ruhe, die Reserve begrenzt nach oben; deshalb trägt der Text eine Stufe kräftiger (accent.800 hell, accent.200 dunkel, accent.50 dunkel/hoher Kontrast). `selected` bleibt eine echte Fläche (accent.200 hell, accent.800 dunkel), weil eine dauerhafte Auswahl keine Auflage ist.",
+      "date": "2026-09-20",
+      "context": "Spec 004, Etappe A; Befund des Maintainers bei der Durchsicht der Vitrino (T007–T012) und seine Rückfrage vom selben Tag, ob backdrop eine Fläche oder mehrere nimmt. Zugleich die Antwort auf die Frage nach der Reichweite: komunas Aspiro „keine reinen Endpunkte als Fläche\" gilt ab jetzt für jede undurchsichtige Fläche — Seitenflächen, Aktionsflächen und Statusflächen —, nicht nur für color.background.**. Durchsichtige Werte bleiben außen vor."
+    },
+    {
+      "id": "jug_01M2ZXYQ2S8YARKYXM3JAJ5ATM",
+      "ref": {
+        "artikolo": "X"
+      },
+      "decision": "approved",
+      "kialo": "Keine Aspiro „APCA nicht schlechter als Stand X\". Alle Textpaare bestehen beide Maße mit Reserve, und APCA ist noch nicht normativ; ein Ziel auf eine Zahl, die kein Standard nennt, würde eine Bewegung der Werte binden, die WCAG 2 gerade verbessert. Der Anstieg der beratenden Hinweise (1 296 → 1 764 in denselben 72 Kombinationen) ist die gewollte Folge von komuna 2: die Flächen sind von reinem Weiß und reinem Schwarz weggerückt, das hebt die schwächsten Verhältnisse und senkt die Helligkeitsdifferenz, die APCA misst. Statt einer Aspiro zeigt die Vitrino die Hinweise je Kategorie mit Anzahl, schlechtestem Lc und Veränderung gegenüber dem Vergleichsstand — eine bloße Gesamtzahl sagt nichts.",
+      "date": "2026-09-20",
+      "context": "Spec 004, Etappe A; Entscheidung des Maintainers bei der Durchsicht von 4678259, ergänzend zu jug_01M2XKF38358Z6WQH9KARYJ6F3 (APCA bleibt beratend, Spec 003 FR-17). Neu zu prüfen, wenn der Kontrast von WCAG 3 Candidate Recommendation erreicht."
     }
   ]
 }

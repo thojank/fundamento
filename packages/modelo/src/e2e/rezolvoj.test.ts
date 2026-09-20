@@ -108,11 +108,12 @@ describe("AK-04: all 72 combinations resolve to unique values with provenance", 
 });
 
 describe("AK-04: priority, late binding and conjunction sets on the repo data", () => {
-  it("AK-04 priority: color.text.subtle comes from the most specific active set", () => {
+  it("AK-04 priority: color.border.strong comes from the most specific active set", () => {
+    // komuna states its own text in dark (Spec 004, G9); the borders stay with the generic sets.
     const origin = (assignment: Record<string, string>) =>
-      tokenIn(rezolvoWhere(assignment), "color.text.subtle").origin.set;
+      tokenIn(rezolvoWhere(assignment), "color.border.strong").origin.set;
     for (const set of ["color-scheme/dark", "contrast/high", "color-scheme/dark+contrast/high"]) {
-      expect(definesToken(set, "color.text.subtle"), set).toBe(true);
+      expect(definesToken(set, "color.border.strong"), set).toBe(true);
     }
     // contrast (priority 5) beats color-scheme (4); their conjunction beats both.
     expect(origin({ "color-scheme": "light", contrast: "high" })).toBe("contrast/high");
@@ -123,18 +124,16 @@ describe("AK-04: priority, late binding and conjunction sets on the repo data", 
     expect(origin({ "color-scheme": "light", contrast: "default" })).toBe("core");
   });
 
-  it("AK-04 late binding: color.action.primary.rest in dark is re-pointed by color-scheme/dark", () => {
+  it("AK-04 late binding: color.link.rest in dark is re-pointed by color-scheme/dark", () => {
     const dark = rezolvoWhere({ "color-scheme": "dark" });
     const light = rezolvoWhere({ "color-scheme": "light" });
-    const token = tokenIn(dark, "color.action.primary.rest");
+    // komuna states its own actions in dark (Spec 004, G9); the links stay with the generic set.
+    const token = tokenIn(dark, "color.link.rest");
     // The generic set only re-points the alias (D-03); the value comes from the core palette.
     expect(token.origin.set).toBe("color-scheme/dark");
-    expect(token.aliasChain).toEqual([
-      { set: "color-scheme/dark", token: "color.action.primary.rest" },
-      { set: "core", token: "color.palette.accent.300" },
-    ]);
-    expect(token.value).toEqual(tokenIn(dark, "color.palette.accent.300").value);
-    expect(token.value).not.toEqual(tokenIn(light, "color.action.primary.rest").value);
+    expect(token.aliasChain[0]).toEqual({ set: "color-scheme/dark", token: "color.link.rest" });
+    expect(token.aliasChain.at(-1)?.set).toBe("core");
+    expect(token.value).not.toEqual(tokenIn(light, "color.link.rest").value);
   });
 
   it("AK-04 conjunction: komuna tints color.palette.neutral.950 in dark via its conjunction set", () => {
@@ -145,7 +144,7 @@ describe("AK-04: priority, late binding and conjunction sets on the repo data", 
       expect(tokenIn(rezolvo, "color.palette.neutral.950").origin.set).toBe(
         "aspekto/komuna+color-scheme/dark",
       );
-      expect(tokenIn(rezolvo, "color.background.default").aliasChain.at(-1)).toEqual({
+      expect(tokenIn(rezolvo, "color.background.canvas").aliasChain.at(-1)).toEqual({
         set: "aspekto/komuna+color-scheme/dark",
         token: "color.palette.neutral.950",
       });

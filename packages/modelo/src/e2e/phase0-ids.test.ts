@@ -40,9 +40,14 @@ describe("AK-04: Phase-0 IDs after the migration", () => {
     expect(newDva).toEqual([]);
   });
 
-  it("has retired nothing (FR-14)", () => {
+  // FR-14: the migration keeps every Phase-0 ID. Later specs may retire an ID of their own — Spec
+  // 004 retired two overlay steps it had minted the same day — but no ID of Phase 0.
+  it("has retired no Phase-0 ID (FR-14)", () => {
     for (const lock of [coreLock, komunaLock]) {
-      expect(Object.values(lock.ids).filter((entry) => entry.status === "retired")).toEqual([]);
+      const retired = Object.entries(lock.ids)
+        .filter(([, entry]) => entry.status === "retired")
+        .map(([id]) => id);
+      expect(retired.filter((id) => phase0.ids[id] !== undefined)).toEqual([]);
     }
   });
 

@@ -25,6 +25,8 @@ const ERO_CHECK_STEPS: ReadonlyArray<readonly [name: string, script: string]> = 
   // The quickstart installs and builds a project of its own; like the Make Kit check it stays
   // out of the parallel test gate (Spec 003 T027).
   ["Check: Quickstart", "check:quickstart"],
+  // The Vitrino needs a projection build of its own before it can be driven (Spec 004 D-09).
+  ["Check: Vitrino", "check:vitrino"],
 ];
 
 const GATE_STEPS: ReadonlyArray<readonly [name: string, run: string]> = [
@@ -213,6 +215,14 @@ describe("root package.json check script", () => {
 
   it("runs the quickstart through @fundamento/eroj (Spec 003 T027)", () => {
     expect(scripts["check:quickstart"]).toBe("pnpm --filter @fundamento/eroj run check:quickstart");
+  });
+
+  // The snapshot comparison builds the whole Modelo four times (106 s on the CI runner) and
+  // starved the MCP tests next to it, so it runs with the Vitrino check instead of in the gate.
+  it("runs the Vitrino check, snapshot comparison first (Spec 004 T012)", () => {
+    expect(scripts["check:vitrino"]).toBe(
+      "pnpm --filter @fundamento/projekcioj run check:bazo && pnpm --filter @fundamento/eroj run check:vitrino",
+    );
   });
 
   it("defines every check script it invokes", () => {

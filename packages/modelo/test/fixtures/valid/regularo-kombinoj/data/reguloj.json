@@ -70,6 +70,123 @@
       "kialo": "Agents read values from token files but not the purpose.",
       "scope": "vortaro: core role tokens",
       "checkability": "automatic"
+    },
+    {
+      "id": "reg_01M2ZHPC5CR9BVV0NCKJ8W47NS",
+      "name": "contrast-reserve",
+      "statement": "In every combination of every Aspekto, every KontrastParo exceeds the WCAG 2.x threshold that binds it by at least the sojlo; the branch that carries the result is the one measured.",
+      "kialo": "Meeting a threshold exactly means missing it on the next screen: font smoothing, a cheap panel, a translucent edge or a rounded value all cost a few percent. A reserve makes the promise hold outside the calculation, and it is the difference between a value that passes a test and a value that works.",
+      "scope": "vortaro: every KontrastParo in every combination",
+      "checkability": "automatic",
+      "appliesTo": {
+        "roles": [
+          "foreground",
+          "background",
+          "border",
+          "focus"
+        ]
+      },
+      "sojlo": {
+        "metric": "wcag2-reserve",
+        "min": 0.05
+      }
+    },
+    {
+      "id": "reg_01M2ZHPC5DX6B7AJ7Y5KKE2N1R",
+      "name": "surface-distinct",
+      "statement": "In every combination of every Aspekto, neighbouring surface roles (sunken, canvas, default, raised) differ in OKLCH lightness by at least the sojlo.",
+      "kialo": "If two surfaces share a lightness, only the shadow carries the layering — and the shadow is gone in high contrast, in forced colours, in print and on a screenshot. A layer that exists in the model must be visible in the value, not only in an effect.",
+      "scope": "vortaro: color.background.sunken, canvas, default, raised in every combination",
+      "checkability": "automatic",
+      "appliesTo": {
+        "tokens": [
+          "color.background.sunken",
+          "color.background.canvas",
+          "color.background.default",
+          "color.background.raised"
+        ]
+      },
+      "sojlo": {
+        "metric": "oklch-l-delta",
+        "min": 0.02
+      }
+    },
+    {
+      "id": "reg_01M2ZJ0YQ374R7JKJXMT029244",
+      "name": "palette-even",
+      "statement": "In every combination of every Aspekto, a palette ramp falls strictly in OKLCH lightness, and no inner step differs from the median step of its ramp by more than the sojlo. The first and the last step of a ramp, the anchors (pure white, pure black) and alpha ramps are out.",
+      "kialo": "A ramp is a tool: whoever says 'one step darker' must get the same effect in the middle of every ramp. How fine a brand grades the ends is its own business — near white the eye needs smaller steps — but a jump in the middle makes the ramp unusable and shows up as a band in every gradient built from it.",
+      "scope": "vortaro: color.palette.<ramp>.<step> in every combination",
+      "checkability": "automatic",
+      "appliesTo": {
+        "tokens": [
+          "color.palette.**"
+        ]
+      },
+      "sojlo": {
+        "metric": "oklch-l-step-consistency",
+        "max": 0.5
+      }
+    },
+    {
+      "id": "reg_01M2ZJ0YQ479H93DRJA1Y1GT0D",
+      "name": "palette-aligned",
+      "statement": "In every combination of every Aspekto, ramps that share a step number stay within the sojlo of each other in OKLCH lightness.",
+      "kialo": "A role picks a step number, not a colour. If step 700 is dark in one ramp and mid in another, the same role weighs differently depending on its hue, and every rule built on steps stops being portable.",
+      "scope": "vortaro: color.palette.<ramp>.<step> across ramps, in every combination",
+      "checkability": "automatic",
+      "appliesTo": {
+        "tokens": [
+          "color.palette.**"
+        ]
+      },
+      "sojlo": {
+        "metric": "oklch-l-align",
+        "max": 0.02
+      }
+    },
+    {
+      "id": "reg_01M2ZJ0YQ479H93DRJA1Y1GT0E",
+      "name": "srgb-gamut",
+      "statement": "Every colour token resolves to components inside 0 … 1 of its colour space, in every combination of every Aspekto.",
+      "kialo": "A component outside the gamut is clipped by the browser. The clipped colour is not the colour the contrast was computed from, so a value outside the gamut turns every measurement in this repository into a guess.",
+      "scope": "vortaro: every colour token in every combination",
+      "checkability": "automatic",
+      "appliesTo": {
+        "types": [
+          "color"
+        ]
+      }
+    },
+    {
+      "id": "reg_01M2ZJ0YQ479H93DRJA1Y1GT0F",
+      "name": "type-scale",
+      "statement": "In every combination of every Aspekto, the ratios of neighbouring steps of font.size.scale stay within the sojlo of the median ratio of the scale.",
+      "kialo": "A scale must be predictable: a designer who moves one step up expects the same jump everywhere, and a brand that is derived from another needs a rule it can recompute. Which ratio a brand picks, and whether it rounds to whole pixels, stays its own decision.",
+      "scope": "vortaro: font.size.scale.* in every combination",
+      "checkability": "automatic",
+      "appliesTo": {
+        "tokens": [
+          "font.size.scale.*"
+        ]
+      },
+      "sojlo": {
+        "metric": "type-scale-consistency",
+        "max": 0.1
+      }
+    },
+    {
+      "id": "reg_01M2ZJ0YQ479H93DRJA1Y1GT0G",
+      "name": "type-rhythm",
+      "statement": "In every combination of every Aspekto, the line height and the letter spacing of the typography roles fall as the font size grows.",
+      "kialo": "Long lines of large type need less leading and tighter tracking to stay one block of text; leading that grows with the size tears a headline apart. That is legibility, measurable and independent of taste.",
+      "scope": "vortaro: typography.* in every combination",
+      "checkability": "automatic",
+      "appliesTo": {
+        "tokens": [
+          "typography.**"
+        ]
+      }
     }
   ]
 }

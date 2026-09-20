@@ -11,16 +11,16 @@
     "$type": "color",
     "background": {
       "default": {
-        "$value": "{color.palette.neutral.950}"
-      },
-      "canvas": {
-        "$value": "{color.palette.neutral.1000}"
-      },
-      "raised": {
         "$value": "{color.palette.neutral.900}"
       },
+      "canvas": {
+        "$value": "{color.palette.neutral.950}"
+      },
+      "raised": {
+        "$value": "{color.palette.neutral.800}"
+      },
       "sunken": {
-        "$value": "{color.palette.neutral.1000}"
+        "$value": "{color.palette.neutral.975}"
       },
       "inverse": {
         "$value": "{color.palette.neutral.50}"
@@ -55,6 +55,9 @@
       },
       "disabled": {
         "$value": "{color.palette.neutral.700}"
+      },
+      "default": {
+        "$value": "{color.palette.neutral.400}"
       }
     },
     "link": {
@@ -111,22 +114,22 @@
       },
       "tertiary": {
         "rest": {
-          "$value": "{color.palette.neutral.950}"
-        },
-        "hover": {
-          "$value": "{color.palette.neutral.900}"
-        },
-        "pressed": {
-          "$value": "{color.palette.neutral.800}"
-        },
-        "selected": {
-          "$value": "{color.palette.accent.900}"
+          "$value": "{color.palette.shade.0}"
         },
         "disabled": {
-          "$value": "{color.palette.neutral.950}"
+          "$value": "{color.palette.shade.0}"
+        },
+        "hover": {
+          "$value": "{color.palette.tint.8}"
+        },
+        "pressed": {
+          "$value": "{color.palette.tint.10}"
+        },
+        "selected": {
+          "$value": "{color.palette.accent.800}"
         },
         "text": {
-          "$value": "{color.palette.accent.300}"
+          "$value": "{color.palette.accent.200}"
         }
       },
       "danger": {

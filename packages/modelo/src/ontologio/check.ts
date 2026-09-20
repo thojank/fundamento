@@ -14,7 +14,7 @@ export const ONTOLOGIO_BASE = "https://fundamento.ciferecigo.com/ontologio";
 export interface OntologioConcept {
   uri: string;
   term: string;
-  inScheme: "terminologio" | "modelo";
+  inScheme: "terminologio" | "modelo" | "principoj";
   notation?: string;
   prefLabel: { eo: string; en: string; de: string };
   altLabel?: Partial<Record<"eo" | "en" | "de", string[]>>;

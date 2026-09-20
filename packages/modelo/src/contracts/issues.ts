@@ -135,6 +135,15 @@ export const RULE_IDS = [
   "ero-prop-constraint",
   "ero-unknown",
   "intent-unknown",
+  // Reguloj of Spec 004 (T003, T004); their rule IDs are the Regulo names (plan D-03)
+  "aspiro-missed",
+  "contrast-reserve",
+  "surface-distinct",
+  "palette-even",
+  "palette-aligned",
+  "srgb-gamut",
+  "type-scale",
+  "type-rhythm",
   // Projekcio lints (Spec 003, D-17)
   "css-physical-property",
   "ero-hardcoded-string",

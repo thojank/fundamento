@@ -11,13 +11,13 @@
     "$type": "color",
     "background": {
       "default": {
-        "$value": "{color.palette.neutral.950}"
+        "$value": "{color.palette.neutral.900}"
       },
       "canvas": {
-        "$value": "{color.palette.neutral.1000}"
+        "$value": "{color.palette.neutral.950}"
       },
       "raised": {
-        "$value": "{color.palette.neutral.900}"
+        "$value": "{color.palette.neutral.800}"
       },
       "sunken": {
         "$value": "{color.palette.neutral.1000}"

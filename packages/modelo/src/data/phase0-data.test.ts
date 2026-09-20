@@ -5,6 +5,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import Color from "colorjs.io";
 import { describe, expect, it } from "vitest";
+import { SURFACE_LADDER } from "../checks/alirebleco/color.js";
 import { createModeloAjv, getModeloValidator } from "../contracts/ajv.js";
 import { DTCG_TYPES } from "../contracts/dtcg.js";
 import { entityTypeOfId } from "../contracts/entity-ids.js";
@@ -271,7 +272,12 @@ describe("Phase 0 repo Modelo: sets (FR-10, FR-12)", () => {
     const dark = setNamed(modelo, DARK).tokens;
     const high = setNamed(modelo, HIGH).tokens;
     const both = setNamed(modelo, DARK_HIGH).tokens;
-    const shared = Object.keys(dark).filter((name) => high[name]?.type === "color");
+    // komuna states the surfaces, text, actions and status of its own dark mode (Spec 004, G9),
+    // so the generic set carries the rest; those are the tokens this rule is about.
+    const komunaDark = setNamed(modelo, KOMUNA_DARK).tokens;
+    const shared = Object.keys(dark).filter(
+      (name) => high[name]?.type === "color" && komunaDark[name] === undefined,
+    );
     expect(shared.length).toBeGreaterThan(0);
     const rezolvo = resolveOk(modelo, { "color-scheme": "dark", contrast: "high" });
     for (const name of shared) {
@@ -291,11 +297,11 @@ describe("Phase 0 repo Modelo: sets (FR-10, FR-12)", () => {
       { dimensio: "aspekto", valoro: "komuna" },
       { dimensio: "color-scheme", valoro: "dark" },
     ]);
-    expect(Object.keys(conjunction.tokens)).toEqual(["color.palette.neutral.950"]);
-    const background = resolveOk(modelo, { "color-scheme": "dark" }).tokens[
-      "color.background.default"
-    ];
-    expect(background?.aliasChain.at(-1)).toEqual({
+    // Since Spec 004 komuna states its whole dark mode here; the tinted step is one of them.
+    expect(Object.keys(conjunction.tokens)).toContain("color.palette.neutral.950");
+    expect(Object.keys(conjunction.tokens).length).toBeGreaterThan(50);
+    const canvas = resolveOk(modelo, { "color-scheme": "dark" }).tokens["color.background.canvas"];
+    expect(canvas?.aliasChain.at(-1)).toEqual({
       token: "color.palette.neutral.950",
       set: KOMUNA_DARK,
     });
@@ -305,14 +311,13 @@ describe("Phase 0 repo Modelo: sets (FR-10, FR-12)", () => {
     const modelo = repoModelo();
     const dark = setNamed(modelo, DARK).tokens;
     expect(Object.keys(dark).some((name) => name.startsWith("color.palette."))).toBe(false);
-    const rest = resolveOk(modelo, { "color-scheme": "dark" }).tokens["color.action.primary.rest"];
-    expect(rest?.origin.set).toBe(DARK);
-    expect(rest?.aliasChain).toEqual([
-      { token: "color.action.primary.rest", set: DARK },
-      { token: "color.palette.accent.300", set: CORE },
-    ]);
+    // komuna states actions and text of its own dark mode (Spec 004, G9); links stay generic.
+    const link = resolveOk(modelo, { "color-scheme": "dark" }).tokens["color.link.rest"];
+    expect(link?.origin.set).toBe(DARK);
+    expect(link?.aliasChain[0]).toEqual({ token: "color.link.rest", set: DARK });
+    expect(link?.aliasChain.at(-1)?.set).toBe(CORE);
     const text = resolveOk(modelo, { "color-scheme": "dark" }).tokens["color.text.default"];
-    expect(text?.aliasChain.at(-1)).toEqual({ token: "color.palette.neutral.50", set: CORE });
+    expect(text?.origin.set).toBe(KOMUNA_DARK);
   });
 
   it("resolves all 72 combinations with zero issues and zero warnings", () => {
@@ -367,14 +372,13 @@ describe("Phase 0 repo Modelo: KontrastParoj (FR-16)", () => {
     return wcag2;
   }
 
+  /** The colour of a resolved value. Translucent values keep their alpha for compositing. */
   function toColor(value: unknown): Color {
-    const { colorSpace, components, alpha } = value as {
+    const { colorSpace, components } = value as {
       colorSpace: string;
       components: number[];
-      alpha?: number;
     };
     expect(colorSpace).toBe("srgb");
-    expect(alpha ?? 1).toBe(1);
     return new Color("srgb", components as [number, number, number]);
   }
 
@@ -404,8 +408,32 @@ describe("Phase 0 repo Modelo: KontrastParoj (FR-16)", () => {
       const thresholds = wcag2Thresholds(modelo, rezolvo.assignment.contrast ?? "");
       for (const pair of modelo.kontrastParoj) {
         const fg = toColor(resolvedToken(rezolvo, pair.foreground).value);
-        const bg = toColor(resolvedToken(rezolvo, pair.background).value);
-        const ratio = bg.contrast(fg, "WCAG21");
+        const raw = resolvedToken(rezolvo, pair.background).value as {
+          components: [number, number, number];
+          alpha?: number;
+        };
+        // An overlay is measured on every surface it may lie on; the worst decides (Spec 004).
+        const alpha = raw.alpha ?? 1;
+        const over = (surface: string): Color =>
+          new Color(
+            "srgb",
+            toColor(raw)
+              .to("srgb")
+              .coords.map(
+                (channel, index) =>
+                  (channel ?? 0) * alpha +
+                  (toColor(resolvedToken(rezolvo, surface).value).to("srgb").coords[index] ?? 0) *
+                    (1 - alpha),
+              ) as [number, number, number],
+          );
+        const ratio =
+          alpha < 1
+            ? Math.min(
+                ...(pair.backdrop ?? SURFACE_LADDER).map((surface) =>
+                  over(surface).contrast(fg, "WCAG21"),
+                ),
+              )
+            : toColor(raw).contrast(fg, "WCAG21");
         const where = `${pair.name} @ ${formatCombination(modelo, assignment)}`;
         expect(ratio, where).toBeGreaterThanOrEqual(thresholds[pair.kategorio]);
         const key = `${pair.name}/contrast=${rezolvo.assignment.contrast}`;
@@ -433,9 +461,19 @@ describe("Phase 0 repo Modelo: IDs and derived files", () => {
     }
     // Since Spec 003, data also references IDs (an Ero's Skemo, Jugxo refs and examples), so an ID
     // may occur more than once; checkIds reports real duplicates (id-duplicate) in validation.
-    expect([...new Set(used)].sort()).toEqual(Object.keys(lock.ids).sort());
+    // A retired ID is the other half of the contract: its entity is gone, so the data must not
+    // name it, and it can never come back (Spec 004 retired two overlay steps).
+    const active = Object.entries(lock.ids)
+      .filter(([, entry]) => entry.status === "active")
+      .map(([id]) => id);
+    const retired = Object.entries(lock.ids)
+      .filter(([, entry]) => entry.status === "retired")
+      .map(([id]) => id);
+    expect([...new Set(used)].sort()).toEqual(active.sort());
+    expect(retired.filter((id) => used.includes(id))).toEqual([]);
     for (const [id, entry] of Object.entries(lock.ids)) {
-      expect(entry).toEqual({ type: entityTypeOfId(id), status: "active" });
+      expect(entry.type, id).toBe(entityTypeOfId(id));
+      expect(["active", "retired"], id).toContain(entry.status);
     }
   });
 

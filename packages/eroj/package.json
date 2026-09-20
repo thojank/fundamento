@@ -29,7 +29,8 @@
     "lint": "node scripts/generate.mjs && tsc -p tsconfig.json --noEmit && biome check .",
     "check:alirebleco": "playwright test --config playwright.alirebleco.config.ts",
     "check:make-kit": "playwright test --config playwright.make-kit.config.ts",
-    "check:quickstart": "playwright test --config playwright.quickstart.config.ts"
+    "check:quickstart": "playwright test --config playwright.quickstart.config.ts",
+    "check:vitrino": "playwright test --config playwright.vitrino.config.ts"
   },
   "peerDependencies": {
     "react": ">=18",

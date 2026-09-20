@@ -74,7 +74,12 @@
         "$ref": "#/$defs/Ero"
       }
     },
-    "skemoj": { "type": "array", "items": { "$ref": "#/$defs/Skemo" } },
+    "skemoj": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Skemo"
+      }
+    },
     "rezolvo": {
       "$ref": "#/$defs/Rezolvo"
     },
@@ -1250,14 +1255,24 @@
       "description": "A font family an Aspekto uses. Font files never enter the core repository; the fallback stack lives only in the fontFamily token value.",
       "type": "object",
       "properties": {
-        "family": { "$ref": "#/$defs/NonEmptyText" },
-        "license": { "$ref": "#/$defs/License" },
-        "source": { "$ref": "#/$defs/NonEmptyText" },
-        "redistributable": { "type": "boolean" },
+        "family": {
+          "$ref": "#/$defs/NonEmptyText"
+        },
+        "license": {
+          "$ref": "#/$defs/License"
+        },
+        "source": {
+          "$ref": "#/$defs/NonEmptyText"
+        },
+        "redistributable": {
+          "type": "boolean"
+        },
         "scripts": {
           "description": "Writing systems the family covers, as ISO 15924 codes (Latn, Cyrl, Arab, Hans, …); at least one (Spec 001, T018b).",
           "type": "array",
-          "items": { "$ref": "#/$defs/Iso15924" },
+          "items": {
+            "$ref": "#/$defs/Iso15924"
+          },
           "minItems": 1,
           "uniqueItems": true
         }
@@ -1274,20 +1289,46 @@
       "description": "Layers of the brand package (Spec 001, D-20): the Aspekto package is the brand package and the Vortaro is one of its layers. Phase 1 reserves only the key vida, with the empty value {}; other keys are allowed and ignored by validation.",
       "type": "object",
       "properties": {
-        "vida": { "type": "object", "maxProperties": 0 }
+        "vida": {
+          "type": "object",
+          "maxProperties": 0
+        }
       }
     },
     "AspektoFile": {
       "description": "aspekto.json of an Aspekto package (Spec 001, D-05). `id` is the DimensioValoro ID of the Aspekto; `idNamespace` is required for every package except the reference Aspekto (checked on composition).",
       "type": "object",
       "properties": {
-        "id": { "$ref": "#/$defs/DimensioValoroId" },
-        "name": { "$ref": "#/$defs/Name" },
-        "owner": { "$ref": "#/$defs/NonEmptyText" },
-        "license": { "$ref": "#/$defs/License" },
-        "idNamespace": { "$ref": "#/$defs/IdNamespace" },
-        "fonts": { "type": "array", "items": { "$ref": "#/$defs/Fonto" } },
-        "tavoloj": { "$ref": "#/$defs/Tavoloj" }
+        "id": {
+          "$ref": "#/$defs/DimensioValoroId"
+        },
+        "name": {
+          "$ref": "#/$defs/Name"
+        },
+        "owner": {
+          "$ref": "#/$defs/NonEmptyText"
+        },
+        "license": {
+          "$ref": "#/$defs/License"
+        },
+        "idNamespace": {
+          "$ref": "#/$defs/IdNamespace"
+        },
+        "fonts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Fonto"
+          }
+        },
+        "tavoloj": {
+          "$ref": "#/$defs/Tavoloj"
+        },
+        "aspiroj": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/AspektoAspiro"
+          }
+        }
       },
       "required": ["id", "name", "owner", "license", "fonts"],
       "additionalProperties": false
@@ -1382,8 +1423,12 @@
           "description": "Scopes the entry to one Aspekto; entries in an Aspekto package carry their Aspekto (Spec 001, D-10).",
           "$ref": "#/$defs/Name"
         },
-        "appliesTo": { "$ref": "#/$defs/ReguloAppliesTo" },
-        "sojlo": { "$ref": "#/$defs/ReguloSojlo" }
+        "appliesTo": {
+          "$ref": "#/$defs/ReguloAppliesTo"
+        },
+        "sojlo": {
+          "$ref": "#/$defs/ReguloSojlo"
+        }
       },
       "required": ["id", "name", "statement", "kialo", "scope", "checkability"],
       "additionalProperties": false
@@ -1395,14 +1440,30 @@
         "tokens": {
           "type": "array",
           "minItems": 1,
-          "items": { "$ref": "#/$defs/TokenPattern" }
+          "items": {
+            "$ref": "#/$defs/TokenPattern"
+          }
         },
-        "roles": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/TokenRole" } },
-        "types": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/DtcgType" } },
+        "roles": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/TokenRole"
+          }
+        },
+        "types": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/DtcgType"
+          }
+        },
         "eroj": {
           "type": "array",
           "minItems": 1,
-          "items": { "$ref": "#/$defs/Name" },
+          "items": {
+            "$ref": "#/$defs/Name"
+          },
           "uniqueItems": true
         }
       },
@@ -1410,14 +1471,50 @@
       "additionalProperties": false
     },
     "ReguloSojlo": {
-      "description": "The numeric threshold of a measuring Regulo; the enforcer reads it and agents cite it (Spec 002, D-02, D-06).",
+      "description": "The numeric threshold of a measuring Regulo; the enforcer reads it and agents cite it (Spec 002, D-02, D-06; Spec 004 adds the metrics and the upper bound).",
       "type": "object",
       "properties": {
-        "metric": { "type": "string", "enum": ["oklch-l-delta"] },
-        "min": { "type": "number", "exclusiveMinimum": 0 }
+        "metric": {
+          "type": "string",
+          "enum": [
+            "oklch-l-delta",
+            "oklch-l-extreme",
+            "oklch-l-step",
+            "oklch-l-step-consistency",
+            "oklch-l-align",
+            "wcag2-reserve",
+            "srgb-gamut",
+            "type-scale-ratio",
+            "type-scale-consistency",
+            "type-rhythm",
+            "dimensio-kovrado"
+          ]
+        },
+        "min": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "max": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
       },
-      "required": ["metric", "min"],
-      "additionalProperties": false
+      "required": ["metric"],
+      "additionalProperties": false,
+      "anyOf": [
+        {
+          "properties": {
+            "min": true
+          },
+          "required": ["min"]
+        },
+        {
+          "properties": {
+            "max": true
+          },
+          "required": ["max"]
+        }
+      ]
     },
     "RegulojFile": {
       "type": "object",
@@ -1500,7 +1597,9 @@
           "description": "Scopes the entry to one Aspekto; entries in an Aspekto package carry their Aspekto (Spec 001, D-10).",
           "$ref": "#/$defs/Name"
         },
-        "ekzemplo": { "$ref": "#/$defs/JugxoEkzemplo" }
+        "ekzemplo": {
+          "$ref": "#/$defs/JugxoEkzemplo"
+        }
       },
       "required": ["id", "ref", "decision", "kialo", "date", "context"],
       "additionalProperties": false
@@ -1533,6 +1632,12 @@
         "background": {
           "$ref": "#/$defs/TokenName"
         },
+        "backdrop": {
+          "description": "The surfaces a translucent background may lie on. An overlay has no colour of its own; the check composites the background over each of them and the worst result decides, naming the surface. Without this field every opaque surface role of the ladder (sunken, canvas, default, raised) is taken. Each named token must be opaque.",
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/TokenName" }
+        },
         "kategorio": {
           "$ref": "#/$defs/KontrastKategorio"
         },
@@ -1540,8 +1645,12 @@
           "description": "Alternative pair (aŭ, 'or'): the KontrastParo holds when the main pair or this pair meets the threshold of the same kategorio (Spec 002, FR-07). Not allowed for text categories; requires a kialo.",
           "type": "object",
           "properties": {
-            "foreground": { "$ref": "#/$defs/TokenName" },
-            "background": { "$ref": "#/$defs/TokenName" }
+            "foreground": {
+              "$ref": "#/$defs/TokenName"
+            },
+            "background": {
+              "$ref": "#/$defs/TokenName"
+            }
           },
           "required": ["foreground", "background"],
           "additionalProperties": false
@@ -1554,15 +1663,36 @@
       "required": ["id", "name", "foreground", "background", "kategorio"],
       "allOf": [
         {
-          "if": { "properties": { "aux": true }, "required": ["aux"] },
-          "then": { "properties": { "kialo": true }, "required": ["kialo"] }
+          "if": {
+            "properties": {
+              "aux": true
+            },
+            "required": ["aux"]
+          },
+          "then": {
+            "properties": {
+              "kialo": true
+            },
+            "required": ["kialo"]
+          }
         },
         {
           "if": {
-            "properties": { "kategorio": { "enum": ["text-normal", "text-large"] } },
+            "properties": {
+              "kategorio": {
+                "enum": ["text-normal", "text-large"]
+              }
+            },
             "required": ["kategorio"]
           },
-          "then": { "not": { "properties": { "aux": true }, "required": ["aux"] } }
+          "then": {
+            "not": {
+              "properties": {
+                "aux": true
+              },
+              "required": ["aux"]
+            }
+          }
         }
       ],
       "additionalProperties": false
@@ -1721,10 +1851,18 @@
       "description": "A component (Spec 003). Lives with its Skemo in data/eroj/<name>/skemo.json.",
       "type": "object",
       "properties": {
-        "id": { "$ref": "#/$defs/EroId" },
-        "name": { "$ref": "#/$defs/Name" },
-        "skemo": { "$ref": "#/$defs/SkemoId" },
-        "description": { "$ref": "#/$defs/NonEmptyText" }
+        "id": {
+          "$ref": "#/$defs/EroId"
+        },
+        "name": {
+          "$ref": "#/$defs/Name"
+        },
+        "skemo": {
+          "$ref": "#/$defs/SkemoId"
+        },
+        "description": {
+          "$ref": "#/$defs/NonEmptyText"
+        }
       },
       "required": ["id", "name", "skemo", "description"],
       "additionalProperties": false
@@ -1732,51 +1870,116 @@
     "SkemoProp": {
       "type": "object",
       "properties": {
-        "name": { "$ref": "#/$defs/Name" },
-        "kind": { "type": "string", "enum": ["enum", "boolean", "string", "number"] },
+        "name": {
+          "$ref": "#/$defs/Name"
+        },
+        "kind": {
+          "type": "string",
+          "enum": ["enum", "boolean", "string", "number"]
+        },
         "values": {
           "type": "array",
           "minItems": 1,
-          "items": { "$ref": "#/$defs/Name" },
+          "items": {
+            "$ref": "#/$defs/Name"
+          },
           "uniqueItems": true
         },
         "default": {
-          "anyOf": [{ "type": "string" }, { "type": "number" }, { "type": "boolean" }]
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "boolean"
+            }
+          ]
         },
-        "description": { "$ref": "#/$defs/NonEmptyText" }
+        "description": {
+          "$ref": "#/$defs/NonEmptyText"
+        }
       },
       "required": ["name", "kind"],
-      "if": { "properties": { "kind": { "const": "enum" } }, "required": ["kind"] },
-      "then": { "properties": { "values": true }, "required": ["values"] },
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "enum"
+          }
+        },
+        "required": ["kind"]
+      },
+      "then": {
+        "properties": {
+          "values": true
+        },
+        "required": ["values"]
+      },
       "additionalProperties": false
     },
     "Skemo": {
       "description": "The machine-readable specification of an Ero (Spec 003, data-model §2): the single source of every projection.",
       "type": "object",
       "properties": {
-        "id": { "$ref": "#/$defs/SkemoId" },
-        "ero": { "$ref": "#/$defs/EroId" },
-        "props": { "type": "array", "items": { "$ref": "#/$defs/SkemoProp" } },
+        "id": {
+          "$ref": "#/$defs/SkemoId"
+        },
+        "ero": {
+          "$ref": "#/$defs/EroId"
+        },
+        "props": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SkemoProp"
+          }
+        },
         "states": {
           "type": "array",
           "minItems": 1,
-          "items": { "$ref": "#/$defs/Name" },
+          "items": {
+            "$ref": "#/$defs/Name"
+          },
           "uniqueItems": true
         },
-        "slots": { "type": "array", "items": { "$ref": "#/$defs/SkemoSlot" } },
+        "slots": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SkemoSlot"
+          }
+        },
         "parts": {
           "type": "object",
           "minProperties": 1,
-          "propertyNames": { "$ref": "#/$defs/Name" },
-          "additionalProperties": { "$ref": "#/$defs/SkemoPart" }
+          "propertyNames": {
+            "$ref": "#/$defs/Name"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/SkemoPart"
+          }
         },
-        "bindings": { "type": "array", "items": { "$ref": "#/$defs/SkemoBinding" } },
-        "a11y": { "$ref": "#/$defs/SkemoA11y" },
+        "bindings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SkemoBinding"
+          }
+        },
+        "a11y": {
+          "$ref": "#/$defs/SkemoA11y"
+        },
         "constraints": {
           "type": "array",
-          "items": { "$ref": "#/$defs/SkemoConstraint" }
+          "items": {
+            "$ref": "#/$defs/SkemoConstraint"
+          }
         },
-        "intents": { "type": "array", "items": { "$ref": "#/$defs/SkemoIntent" } }
+        "intents": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SkemoIntent"
+          }
+        }
       },
       "required": ["id", "ero", "props", "states", "slots", "parts", "bindings", "a11y"],
       "additionalProperties": false
@@ -1784,10 +1987,18 @@
     "SkemoSlot": {
       "type": "object",
       "properties": {
-        "name": { "$ref": "#/$defs/Name" },
-        "default": { "type": "boolean" },
-        "text": { "type": "boolean" },
-        "decorative": { "type": "boolean" }
+        "name": {
+          "$ref": "#/$defs/Name"
+        },
+        "default": {
+          "type": "boolean"
+        },
+        "text": {
+          "type": "boolean"
+        },
+        "decorative": {
+          "type": "boolean"
+        }
       },
       "required": ["name"],
       "additionalProperties": false
@@ -1820,7 +2031,9 @@
             "by": {
               "type": "array",
               "minItems": 1,
-              "items": { "$ref": "#/$defs/Name" },
+              "items": {
+                "$ref": "#/$defs/Name"
+              },
               "uniqueItems": true
             }
           },
@@ -1829,7 +2042,11 @@
         },
         {
           "type": "object",
-          "properties": { "fixed": { "$ref": "#/$defs/TokenName" } },
+          "properties": {
+            "fixed": {
+              "$ref": "#/$defs/TokenName"
+            }
+          },
           "required": ["fixed"],
           "additionalProperties": false
         },
@@ -1849,20 +2066,34 @@
     "SkemoPart": {
       "type": "object",
       "minProperties": 1,
-      "propertyNames": { "$ref": "#/$defs/SkemoPartProperty" },
-      "additionalProperties": { "$ref": "#/$defs/SkemoPartSource" }
+      "propertyNames": {
+        "$ref": "#/$defs/SkemoPartProperty"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/SkemoPartSource"
+      }
     },
     "SkemoBinding": {
       "type": "object",
       "properties": {
-        "part": { "$ref": "#/$defs/Name" },
-        "property": { "$ref": "#/$defs/SkemoPartProperty" },
+        "part": {
+          "$ref": "#/$defs/Name"
+        },
+        "property": {
+          "$ref": "#/$defs/SkemoPartProperty"
+        },
         "when": {
           "type": "object",
-          "propertyNames": { "$ref": "#/$defs/Name" },
-          "additionalProperties": { "$ref": "#/$defs/Name" }
+          "propertyNames": {
+            "$ref": "#/$defs/Name"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/Name"
+          }
         },
-        "token": { "$ref": "#/$defs/TokenName" }
+        "token": {
+          "$ref": "#/$defs/TokenName"
+        }
       },
       "required": ["part", "property", "token"],
       "additionalProperties": false
@@ -1870,7 +2101,9 @@
     "SkemoA11y": {
       "type": "object",
       "properties": {
-        "role": { "$ref": "#/$defs/Name" },
+        "role": {
+          "$ref": "#/$defs/Name"
+        },
         "name": {
           "type": "array",
           "minItems": 1,
@@ -1881,7 +2114,9 @@
         },
         "states": {
           "type": "object",
-          "propertyNames": { "$ref": "#/$defs/Name" },
+          "propertyNames": {
+            "$ref": "#/$defs/Name"
+          },
           "additionalProperties": {
             "type": "array",
             "items": {
@@ -1893,7 +2128,10 @@
         },
         "keys": {
           "type": "array",
-          "items": { "type": "string", "minLength": 1 },
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
           "uniqueItems": true
         }
       },
@@ -1906,21 +2144,31 @@
         "when": {
           "type": "object",
           "minProperties": 1,
-          "propertyNames": { "$ref": "#/$defs/Name" },
-          "additionalProperties": { "$ref": "#/$defs/Name" }
+          "propertyNames": {
+            "$ref": "#/$defs/Name"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/Name"
+          }
         },
         "allowed": {
           "type": "object",
           "minProperties": 1,
-          "propertyNames": { "$ref": "#/$defs/Name" },
+          "propertyNames": {
+            "$ref": "#/$defs/Name"
+          },
           "additionalProperties": {
             "type": "array",
             "minItems": 1,
-            "items": { "$ref": "#/$defs/Name" },
+            "items": {
+              "$ref": "#/$defs/Name"
+            },
             "uniqueItems": true
           }
         },
-        "kialo": { "$ref": "#/$defs/NonEmptyText" }
+        "kialo": {
+          "$ref": "#/$defs/NonEmptyText"
+        }
       },
       "required": ["when", "allowed", "kialo"],
       "additionalProperties": false
@@ -1928,11 +2176,16 @@
     "SkemoIntent": {
       "type": "object",
       "properties": {
-        "intent": { "$ref": "#/$defs/Name" },
+        "intent": {
+          "$ref": "#/$defs/Name"
+        },
         "keywords": {
           "type": "object",
           "minProperties": 1,
-          "propertyNames": { "type": "string", "pattern": "^[a-z]{2}$" },
+          "propertyNames": {
+            "type": "string",
+            "pattern": "^[a-z]{2}$"
+          },
           "additionalProperties": {
             "type": "array",
             "minItems": 1,
@@ -1945,12 +2198,26 @@
         },
         "props": {
           "type": "object",
-          "propertyNames": { "$ref": "#/$defs/Name" },
+          "propertyNames": {
+            "$ref": "#/$defs/Name"
+          },
           "additionalProperties": {
-            "anyOf": [{ "type": "string" }, { "type": "number" }, { "type": "boolean" }]
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              }
+            ]
           }
         },
-        "regulo": { "$ref": "#/$defs/Name" }
+        "regulo": {
+          "$ref": "#/$defs/Name"
+        }
       },
       "required": ["intent", "keywords", "props"],
       "additionalProperties": false
@@ -1959,9 +2226,16 @@
       "description": "data/eroj/<name>/skemo.json: one Ero and its Skemo, two entities with their own IDs (plan D-02).",
       "type": "object",
       "properties": {
-        "$schema": { "type": "string", "minLength": 1 },
-        "ero": { "$ref": "#/$defs/Ero" },
-        "skemo": { "$ref": "#/$defs/Skemo" }
+        "$schema": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ero": {
+          "$ref": "#/$defs/Ero"
+        },
+        "skemo": {
+          "$ref": "#/$defs/Skemo"
+        }
       },
       "required": ["ero", "skemo"],
       "additionalProperties": false
@@ -1970,17 +2244,38 @@
       "description": "One use of an Ero in a design or code: the input of check_usage and of a Jugxo ekzemplo.",
       "type": "object",
       "properties": {
-        "ero": { "$ref": "#/$defs/Name" },
+        "ero": {
+          "$ref": "#/$defs/Name"
+        },
         "props": {
           "type": "object",
-          "propertyNames": { "$ref": "#/$defs/Name" },
+          "propertyNames": {
+            "$ref": "#/$defs/Name"
+          },
           "additionalProperties": {
-            "anyOf": [{ "type": "string" }, { "type": "number" }, { "type": "boolean" }]
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              }
+            ]
           }
         },
-        "container": { "type": "string", "minLength": 1 },
-        "intent": { "$ref": "#/$defs/Name" },
-        "label": { "type": "string" }
+        "container": {
+          "type": "string",
+          "minLength": 1
+        },
+        "intent": {
+          "$ref": "#/$defs/Name"
+        },
+        "label": {
+          "type": "string"
+        }
       },
       "required": ["ero", "props"],
       "additionalProperties": false
@@ -1989,11 +2284,15 @@
       "description": "A machine-readable example of the Jugxo: instances right (approved) or wrong (rejected), optionally for one Regulo.",
       "type": "object",
       "properties": {
-        "regulo": { "$ref": "#/$defs/ReguloId" },
+        "regulo": {
+          "$ref": "#/$defs/ReguloId"
+        },
         "instances": {
           "type": "array",
           "minItems": 1,
-          "items": { "$ref": "#/$defs/EroInstance" }
+          "items": {
+            "$ref": "#/$defs/EroInstance"
+          }
         }
       },
       "required": ["instances"],
@@ -2153,6 +2452,59 @@
         }
       },
       "required": ["id", "name", "kondicxoj", "tree"],
+      "additionalProperties": false
+    },
+    "AspektoAspiro": {
+      "description": "A design goal one Aspekto sets itself (Spec 004, plan D-03): the same measurement as a Regulo, its own bound and its own reason, checked only for this Aspekto. Reguloj enforce accessibility and structure for every brand; an Aspiro is taste, and taste belongs to the brand.",
+      "type": "object",
+      "properties": {
+        "metriko": {
+          "type": "string",
+          "enum": [
+            "wcag2-reserve",
+            "oklch-l-extreme",
+            "oklch-l-step",
+            "oklch-l-step-consistency",
+            "oklch-l-align",
+            "type-scale-ratio",
+            "type-scale-consistency",
+            "dimensio-kovrado"
+          ]
+        },
+        "min": {
+          "type": "number"
+        },
+        "max": {
+          "type": "number"
+        },
+        "appliesTo": {
+          "$ref": "#/$defs/ReguloAppliesTo"
+        },
+        "dimensio": {
+          "$ref": "#/$defs/Name"
+        },
+        "valoro": {
+          "$ref": "#/$defs/Name"
+        },
+        "kialo": {
+          "$ref": "#/$defs/NonEmptyText"
+        }
+      },
+      "required": ["metriko", "kialo"],
+      "anyOf": [
+        {
+          "properties": {
+            "min": true
+          },
+          "required": ["min"]
+        },
+        {
+          "properties": {
+            "max": true
+          },
+          "required": ["max"]
+        }
+      ],
       "additionalProperties": false
     }
   }

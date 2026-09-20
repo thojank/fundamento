@@ -120,6 +120,22 @@
       "status": "active",
       "type": "jugxo"
     },
+    "jug_01M2ZNS5HAR6JG9K9KA06M4KA2": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M2ZNS5HBWQ9X3WE3BBBTN5N7": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M2ZTV1WRHXQ7C31W7FQ4YZP7": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M2ZXYQ2S8YARKYXM3JAJ5ATM": {
+      "status": "active",
+      "type": "jugxo"
+    },
     "kpa_01M2VEEE9HREQTY2499C9JS05Q": {
       "status": "active",
       "type": "kontrastParo"
@@ -441,6 +457,34 @@
       "type": "regulo"
     },
     "reg_01M2XMV80DG7JCJDTZGE66MGHZ": {
+      "status": "active",
+      "type": "regulo"
+    },
+    "reg_01M2ZHPC0G6PFCX6YH5YVPPG70": {
+      "status": "active",
+      "type": "regulo"
+    },
+    "reg_01M2ZHPC0HH52JQJDZ2KMVECVP": {
+      "status": "active",
+      "type": "regulo"
+    },
+    "reg_01M2ZJ0YJ1VJKMQSNPR6TWCCV2": {
+      "status": "active",
+      "type": "regulo"
+    },
+    "reg_01M2ZJ0YJ3CWC217Q7VC1RS6VP": {
+      "status": "active",
+      "type": "regulo"
+    },
+    "reg_01M2ZJ0YJ3CWC217Q7VC1RS6VQ": {
+      "status": "active",
+      "type": "regulo"
+    },
+    "reg_01M2ZJ0YJ3CWC217Q7VC1RS6VR": {
+      "status": "active",
+      "type": "regulo"
+    },
+    "reg_01M2ZJ0YJ3CWC217Q7VC1RS6VS": {
       "status": "active",
       "type": "regulo"
     },
@@ -1877,6 +1921,42 @@
       "type": "token"
     },
     "tok_01M2XKPB5DHNTHAYCE5HP5SQKC": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M2ZJT4NMX0YFV2WF1FYH9KX4": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M2ZJT4NNCAAV172FDYB1JATG": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M2ZJT4NNCAAV172FDYB1JATH": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M2ZK6BZ6KRV3T89HNAJ4G8FK": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M2ZTAJSS6M6EB14W69S71P4H": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M2ZTAJSS6M6EB14W69S71P4J": {
+      "status": "retired",
+      "type": "token"
+    },
+    "tok_01M2ZTAJSS6M6EB14W69S71P4K": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M2ZTAJSS6M6EB14W69S71P4M": {
+      "status": "retired",
+      "type": "token"
+    },
+    "tok_01M2ZWW86NCFY7WFB51XCHX8RF": {
       "status": "active",
       "type": "token"
     }

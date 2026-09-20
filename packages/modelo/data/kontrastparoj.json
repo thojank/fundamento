@@ -419,7 +419,10 @@
       "foreground": "color.status.success.basic",
       "background": "color.background.default",
       "kategorio": "ui",
-      "aux": { "foreground": "color.status.success.border", "background": "color.background.default" },
+      "aux": {
+        "foreground": "color.status.success.border",
+        "background": "color.background.default"
+      },
       "kialo": "WCAG 1.4.11 asks 3:1 for the visual information that identifies a component, which may be its fill or its border. A status border that reaches 3:1 on the page identifies the status surface even when its fill does not, so warm brands are not forced into olive warning fills; text on the surface keeps its own threshold."
     },
     {
@@ -428,7 +431,10 @@
       "foreground": "color.status.warning.basic",
       "background": "color.background.default",
       "kategorio": "ui",
-      "aux": { "foreground": "color.status.warning.border", "background": "color.background.default" },
+      "aux": {
+        "foreground": "color.status.warning.border",
+        "background": "color.background.default"
+      },
       "kialo": "WCAG 1.4.11 asks 3:1 for the visual information that identifies a component, which may be its fill or its border. A status border that reaches 3:1 on the page identifies the status surface even when its fill does not, so warm brands are not forced into olive warning fills; text on the surface keeps its own threshold."
     },
     {
@@ -437,7 +443,10 @@
       "foreground": "color.status.danger.basic",
       "background": "color.background.default",
       "kategorio": "ui",
-      "aux": { "foreground": "color.status.danger.border", "background": "color.background.default" },
+      "aux": {
+        "foreground": "color.status.danger.border",
+        "background": "color.background.default"
+      },
       "kialo": "WCAG 1.4.11 asks 3:1 for the visual information that identifies a component, which may be its fill or its border. A status border that reaches 3:1 on the page identifies the status surface even when its fill does not, so warm brands are not forced into olive warning fills; text on the surface keeps its own threshold."
     },
     {
@@ -446,7 +455,10 @@
       "foreground": "color.status.info.basic",
       "background": "color.background.default",
       "kategorio": "ui",
-      "aux": { "foreground": "color.status.info.border", "background": "color.background.default" },
+      "aux": {
+        "foreground": "color.status.info.border",
+        "background": "color.background.default"
+      },
       "kialo": "WCAG 1.4.11 asks 3:1 for the visual information that identifies a component, which may be its fill or its border. A status border that reaches 3:1 on the page identifies the status surface even when its fill does not, so warm brands are not forced into olive warning fills; text on the surface keeps its own threshold."
     }
   ]

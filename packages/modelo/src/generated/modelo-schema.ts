@@ -123,6 +123,35 @@ export type ReguloId = string;
  */
 export type TokenPattern = string;
 /**
+ * The numeric threshold of a measuring Regulo; the enforcer reads it and agents cite it (Spec 002, D-02, D-06; Spec 004 adds the metrics and the upper bound).
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "ReguloSojlo".
+ */
+export type ReguloSojlo = ReguloSojlo1 & {
+  metric:
+    | "oklch-l-delta"
+    | "oklch-l-extreme"
+    | "oklch-l-step"
+    | "oklch-l-step-consistency"
+    | "oklch-l-align"
+    | "wcag2-reserve"
+    | "srgb-gamut"
+    | "type-scale-ratio"
+    | "type-scale-consistency"
+    | "type-rhythm"
+    | "dimensio-kovrado";
+  min?: number;
+  max?: number;
+};
+export type ReguloSojlo1 =
+  | {
+      min: unknown;
+    }
+  | {
+      max: unknown;
+    };
+/**
  * This interface was referenced by `ModeloJson`'s JSON-Schema
  * via the `definition` "JugxoId".
  */
@@ -141,6 +170,12 @@ export type KontrastParo = {
   name: Name;
   foreground: TokenName;
   background: TokenName;
+  /**
+   * The surfaces a translucent background may lie on. An overlay has no colour of its own; the check composites the background over each of them and the worst result decides, naming the surface. Without this field every opaque surface role of the ladder (sunken, canvas, default, raised) is taken. Each named token must be opaque.
+   *
+   * @minItems 1
+   */
+  backdrop?: TokenName[];
   kategorio: KontrastKategorio;
   /**
    * Alternative pair (aŭ, 'or'): the KontrastParo holds when the main pair or this pair meets the threshold of the same kategorio (Spec 002, FR-07). Not allowed for text categories; requires a kialo.
@@ -365,6 +400,36 @@ export type DtcgToken = {
   $extensions?: TokenExtensions;
   $deprecated?: Deprecated;
 };
+/**
+ * A design goal one Aspekto sets itself (Spec 004, plan D-03): the same measurement as a Regulo, its own bound and its own reason, checked only for this Aspekto. Reguloj enforce accessibility and structure for every brand; an Aspiro is taste, and taste belongs to the brand.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "AspektoAspiro".
+ */
+export type AspektoAspiro = AspektoAspiro1 & {
+  metriko:
+    | "wcag2-reserve"
+    | "oklch-l-extreme"
+    | "oklch-l-step"
+    | "oklch-l-step-consistency"
+    | "oklch-l-align"
+    | "type-scale-ratio"
+    | "type-scale-consistency"
+    | "dimensio-kovrado";
+  min?: number;
+  max?: number;
+  appliesTo?: ReguloAppliesTo;
+  dimensio?: Name;
+  valoro?: Name;
+  kialo: NonEmptyText;
+};
+export type AspektoAspiro1 =
+  | {
+      min: unknown;
+    }
+  | {
+      max: unknown;
+    };
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema
  * via the `definition` "IdStatus".
@@ -617,16 +682,6 @@ export interface ReguloAppliesTo {
    * @minItems 1
    */
   eroj?: Name[];
-}
-/**
- * The numeric threshold of a measuring Regulo; the enforcer reads it and agents cite it (Spec 002, D-02, D-06).
- *
- * This interface was referenced by `ModeloJson`'s JSON-Schema
- * via the `definition` "ReguloSojlo".
- */
-export interface ReguloSojlo {
-  metric: "oklch-l-delta";
-  min: number;
 }
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema
@@ -1037,6 +1092,7 @@ export interface AspektoFile {
   idNamespace?: IdNamespace;
   fonts: Fonto[];
   tavoloj?: Tavoloj;
+  aspiroj?: AspektoAspiro[];
 }
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema

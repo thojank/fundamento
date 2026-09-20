@@ -6,6 +6,7 @@ export * from "./celoj/figma/figma.js";
 export * from "./celoj/make-kit/make-kit.js";
 export * from "./celoj/react/react.js";
 export * from "./celoj/tailwind/tailwind.js";
+export * from "./celoj/vitrino/vitrino.js";
 export * from "./celoj/web-component/web-component.js";
 export * from "./eroj-sources.js";
 export * from "./parity.js";

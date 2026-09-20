@@ -1,0 +1,12 @@
+# Generated files: they are written by a command, not edited by hand. Marked so that GitHub
+# collapses them in a diff and keeps them out of the language statistics (Spec 004).
+
+# The measurement snapshot the Vitrino compares against; written by
+# `pnpm fm modelo mezuroj --out specs/004-komparo/mezuroj-main.json` on the state to compare with.
+specs/004-komparo/mezuroj-main.json linguist-generated=true
+
+# Screenshots of the Vitrino for a review; written by a projection build and a browser run.
+specs/004-komparo/bildoj/** linguist-generated=true
+
+# The ID registry grows by `pnpm id:new`; every line is issued, never written by hand.
+packages/modelo/data/ids.lock.json linguist-generated=true

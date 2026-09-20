@@ -176,6 +176,20 @@ export const REGULO_ENFORCERS: Readonly<Record<string, Enforcer>> = {
   },
   /** D-03, K4: generic Dimensio sets hold aliases only and re-point roles only. */
   "dimensio-sets-alias-only": dimensioSetIssues,
+  /** Spec 004 G4: a ramp stays regular in its middle. */
+  "palette-even": perCombination("palette-even"),
+  /** Spec 004 G5: the same step number weighs the same in every ramp. */
+  "palette-aligned": perCombination("palette-aligned"),
+  /** Spec 004 G6: every colour stays inside the sRGB gamut. */
+  "srgb-gamut": perCombination("srgb-gamut"),
+  /** Spec 004 G7: the type scale is regular, whatever ratio the brand picks. */
+  "type-scale": perCombination("type-scale"),
+  /** Spec 004 G8: line height and tracking fall as the size grows. */
+  "type-rhythm": perCombination("type-rhythm"),
+  /** Spec 004 G1: every KontrastParo keeps a reserve above its threshold. */
+  "contrast-reserve": perCombination("contrast-reserve"),
+  /** Spec 004 G2: neighbouring surfaces stay apart in lightness, without a shadow. */
+  "surface-distinct": perCombination("surface-distinct"),
   /** Spec 002 FR-01: surfaces ordered by lightness in every combination. */
   "surface-order": perCombination("surface-order"),
   /** Spec 002 FR-02: the text roles stay distinct and ordered in every combination. */

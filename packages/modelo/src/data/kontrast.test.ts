@@ -3,6 +3,7 @@
 
 import Color from "colorjs.io";
 import { describe, expect, it } from "vitest";
+import { SURFACE_LADDER } from "../checks/alirebleco/color.js";
 import type { Modelo } from "../contracts/modelo.js";
 import { loadModelo } from "../load/load-modelo.js";
 import { defaultModeloSource } from "../load/source.js";
@@ -57,10 +58,32 @@ describe("AK-02: komuna text pairs reach AAA (7:1) under contrast=high", () => {
         const colour = (name: string) => {
           const value = outcome.rezolvo.tokens[name]?.value as {
             components: [number, number, number];
+            alpha?: number;
           };
-          return new Color("srgb", value.components);
+          return { color: new Color("srgb", value.components), alpha: value.alpha ?? 1 };
         };
-        const ratio = colour(pair.background).contrast(colour(pair.foreground), "WCAG21");
+        // An overlay is measured on every surface it may lie on; the worst decides (Spec 004).
+        const foreground = colour(pair.foreground).color;
+        const raw = colour(pair.background);
+        const over = (surface: string): Color =>
+          new Color(
+            "srgb",
+            raw.color
+              .to("srgb")
+              .coords.map(
+                (channel, index) =>
+                  (channel ?? 0) * raw.alpha +
+                  (colour(surface).color.to("srgb").coords[index] ?? 0) * (1 - raw.alpha),
+              ) as [number, number, number],
+          );
+        const ratio =
+          raw.alpha < 1
+            ? Math.min(
+                ...(pair.backdrop ?? SURFACE_LADDER).map((surface) =>
+                  over(surface).contrast(foreground, "WCAG21"),
+                ),
+              )
+            : raw.color.contrast(foreground, "WCAG21");
         minimum = Math.min(minimum, ratio);
         expect(ratio, `${pair.name} @ ${JSON.stringify(assignment)}`).toBeGreaterThanOrEqual(7);
       }

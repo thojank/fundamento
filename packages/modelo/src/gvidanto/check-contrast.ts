@@ -4,14 +4,20 @@
 // Results are grouped by identical result, each group with the complete list of its
 // combinations. Pure.
 
-import { alphaOf, readDtcgColor } from "../checks/alirebleco/color.js";
+import {
+  alphaOf,
+  backdropSurfaces,
+  onBackdrop,
+  readDtcgColor,
+  SURFACE_LADDER,
+} from "../checks/alirebleco/color.js";
 import { DEFAULT_METRIC_BINDINGS, kontrastSojlojOf } from "../checks/alirebleco/evaluate.js";
 import {
   type BranchMeasurement,
   combineBranches,
   measureBranch,
 } from "../checks/alirebleco/measure.js";
-import { truncate2 } from "../checks/alirebleco/metrics.js";
+import { truncate2, WCAG2_METRIC } from "../checks/alirebleco/metrics.js";
 import { CORE_SET_NAME } from "../contracts/grammar.js";
 import type { ValidationIssue } from "../contracts/issues.js";
 import type { KontrastParo, Modelo } from "../contracts/modelo.js";
@@ -140,9 +146,14 @@ export function checkContrast(modelo: Modelo, input: CheckContrastInput): CheckC
   const main =
     pair === undefined ? input : { foreground: pair.foreground, background: pair.background };
   const aux = pair?.aux;
+  // A translucent fill is measured on every surface it may lie on; the worst decides (Spec 004).
+  const backdropNames = Array.isArray(pair?.backdrop)
+    ? pair.backdrop.map((entry) => String(entry))
+    : [...SURFACE_LADDER];
   const wanted = [
     main.foreground,
     main.background,
+    ...backdropNames,
     ...(aux === undefined ? [] : [aux.foreground, aux.background]),
   ];
   const metrics = DEFAULT_METRIC_BINDINGS.map((binding) => binding.metric);
@@ -161,8 +172,20 @@ export function checkContrast(modelo: Modelo, input: CheckContrastInput): CheckC
       background: string;
     }): BranchMeasurement | undefined => {
       const fg = colorOf(names.foreground);
-      const bg = colorOf(names.background);
-      if (fg === undefined || bg === undefined || alphaOf(bg) < 1) return undefined;
+      const raw = colorOf(names.background);
+      if (fg === undefined || raw === undefined) return undefined;
+      const { surfaces } = backdropSurfaces(raw, backdropNames, colorOf);
+      const bg =
+        surfaces.length === 0
+          ? raw
+          : surfaces
+              .map((surface) => onBackdrop(raw, surface.color))
+              .reduce((least, candidate) =>
+                WCAG2_METRIC.compute(fg, candidate) < WCAG2_METRIC.compute(fg, least)
+                  ? candidate
+                  : least,
+              );
+      if (alphaOf(bg) < 1) return undefined;
       return measureBranch(names, fg, bg, kategorio, sojloj, metrics);
     };
     const mainMeasured = branch(main);

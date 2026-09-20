@@ -49,10 +49,11 @@ Wer das Kern-Repo prüft, findet keine Spectrum-Werte oder -Namen. Die Clean-Roo
 - **FR-01 Qualitätsziele vor Werten:** Bevor Werte geändert werden, legt der Plan messbare Ziele fest und begründet jedes (Kialo). Mindestens:
   - Jeder KontrastParo besteht in jeder Kombination mit Reserve (Zielwert im Plan, Vorschlag ≥ 5 % über der WCAG-Schwelle).
   - Paletten: gleichmäßige Helligkeitsstufen in OKLCH (Streuung der Abstände unter einem Grenzwert), alle Werte im sRGB-Gamut, Dunkelmodus eigens abgestimmt statt invertiert.
-  - `contrast=high`, `density`, `viewport`, `motion` mit echten, geprüften Werten.
+  - **Eigener Dunkelmodus (Maintainer-Entscheidung 2026-09-20):** komuna 2 bringt eigene Werte für Flächen, Text, Aktion und Status unter `color-scheme=dark`, statt sie dem generischen Satz `color-scheme/dark` zu überlassen. Messgröße ist der **Anteil eigener Werte je Dimensio-Wert**; er steht in der Vitrino und im Bericht.
+  - `contrast=high`, `density`, `viewport`, `motion` mit echten, geprüften Werten – gemessen mit derselben Größe (Anteil eigener Werte je Dimensio), ohne Zielwert.
   - Typografie-Skala mit dokumentiertem Verhältnis; Zeilenhöhe und Laufweite folgen einer Regel.
   - APCA wird berichtet (beratend, Art. X).
-- **FR-02 Ziele werden Reguloj:** Wo ein Ziel messbar ist, wird es als Regulo mit Kialo ins Regularo aufgenommen (Art. VI) und gilt damit für jede Aspekto.
+- **FR-02 Ziele werden Reguloj oder Aspiroj (Fluida Marko, Maintainer-Entscheidung 2026-09-20):** Ein messbares Ziel, das **Zugänglichkeit oder Struktur** sichert, wird eine Regulo mit Kialo (Art. VI) und gilt für jede Aspekto. Ein Ziel, das **Geschmack** einer Marke ist, wird ein Entwurfsziel dieser Marke (`aspekto.json`, eigener Kialo) und wird nur für sie geprüft. Die Prüfausgabe unterscheidet „Regulo verletzt" von „Entwurfsziel verfehlt".
 - **FR-03 Unabhängige Gestaltung:** komuna 2 wird ohne Kenntnis der Spectrum-Werte gestaltet. Die Coding-Sitzung für komuna sieht nur Fundamento-Daten und Berichte mit Kennzahlen, nie Werte oder Namen aus `komparo`.
 - **FR-04 Folgen für andere Aspektoj:** ekzemplo und ciferecigo müssen die neuen Reguloj bestehen; ciferecigo wird wie in T028 neu abgeleitet.
 
@@ -95,6 +96,8 @@ Wer das Kern-Repo prüft, findet keine Spectrum-Werte oder -Namen. Die Clean-Roo
 
   Die Regel „Quellmaterial anderer Systeme wird dem Coding-Tool nicht vorgelegt" gilt weiter für das Kern-Repo und jede Sitzung, die daran arbeitet.
 
+  v1.7 ergänzt außerdem die Terminologie-Tabelle um **Aspiro** (Entwurfsziel einer Marke, `aspekto.json#/aspiroj`; Klärung 4). Der Grundsatz „Fluida Marko" bleibt für v1.7 außen vor und kommt mit seiner eigenen Spec.
+
 ---
 
 ## Akzeptanzkriterien
@@ -109,11 +112,21 @@ Wer das Kern-Repo prüft, findet keine Spectrum-Werte oder -Namen. Die Clean-Roo
 - **AK-08** Die Constitution steht auf v1.7 mit Änderungshistorie.
 - **AK-09** Manuelle Abnahme: Der Maintainer beurteilt komuna 2 in der Vitrino visuell und in der Gegenüberstellung. Befunde werden Reguloj oder Jugxoj.
 
-## Klärungen (vom Maintainer zu entscheiden, mit Empfehlung)
+## Klärungen (vom Maintainer entschieden, 2026-09-20)
 
-1. **komparo-Repo öffentlich oder privat?** Empfehlung: öffentlich. Apache-2.0 erlaubt es, und der offene Vergleich stützt die Positionierung. Veröffentlichung erst nach Abnahme.
-2. **Skala Desktop/Mobile → `viewport` oder `density`?** Empfehlung: `density` (Spectrum skaliert Bedienelemente, nicht das Layout); der Plan prüft das an den Daten.
-3. **Reihenfolge:** Empfehlung: erst FR-01 bis FR-04 (komuna 2) und die Vitrino, dann der Import. So entsteht komuna 2 nachweislich ohne Blick auf die Vergleichswerte.
+1. **komparo-Repo öffentlich oder privat?** **Entschieden: öffentlich**, `thojank/fundamento-aspekto-komparo`. Sichtbar geschaltet wird es erst nach der Abnahme.
+2. **Skala Desktop/Mobile → `viewport` oder `density`?** **Entschieden: `density`.** Die Zuordnung wird in Etappe B am importierten Datensatz geprüft und, falls die Daten dagegen sprechen, mit Kialo als Jugxo korrigiert.
+3. **Reihenfolge:** **Entschieden: Etappe A zuerst** (FR-01 bis FR-09, FR-19, FR-15 vorbereitend), Etappe B danach (FR-10 bis FR-14, FR-16 bis FR-18). So entsteht komuna 2 nachweislich ohne Blick auf die Vergleichswerte; Etappe B läuft in einer eigenen Sitzung im komparo-Repo.
+
+4. **Begriff für das Entwurfsziel einer Marke** (Plan D-14): **Entschieden: `Aspiro`**, Feld `aspekto.json#/aspiroj`. Der Begriff kommt in die Ontologio und mit v1.7 in die Terminologie-Tabelle der Constitution.
+5. **Grundsatz „Fluida Marko"**: **Entschieden: jetzt als Ontologio-Begriff** („Die Marke folgt dem Kontext, nicht dem Anbieter; Reguloj erzwingen Zugänglichkeit und Struktur, Aspiroj sind Sache der Marke"), mit Verweis auf `docs/vojmapo.md` und `docs/vizio.md`. In die Constitution kommt er erst mit der eigenen Spec Fluida Marko / Etoso, **nicht** mit v1.7.
+
+### Etappen
+
+| Etappe | Umfang | Ort | Status |
+|---|---|---|---|
+| **A** | FR-01 – FR-09 (komuna 2, Vitrino), FR-19 (Constitution v1.7), FR-15 vorbereitend (Clean-Room liest Fingerprints externer Benchmark-Aspektoj) | Kern-Repo | geplant in [`plan.md`](plan.md), Aufgaben in [`tasks.md`](tasks.md) |
+| **B** | FR-10 – FR-14 (Import komparo), FR-16 – FR-18 (Bericht) | `fundamento-aspekto-komparo`, eigene Sitzung | noch nicht geplant |
 
 ## Referenzen
 

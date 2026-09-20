@@ -404,10 +404,6 @@ describe("Spec 003 documentation (T001, Constitution v1.6)", () => {
   const TAILWIND_SENTENCE =
     "Tailwind v4: Tokens im `@theme` unter dem Namensraum `fm` (`--color-fm-*` → `bg-fm-*`), nicht per `prefix()`, weil `prefix()` alle Klassen des Projekts umbenennt.";
 
-  it("the Constitution header says version 1.6", () => {
-    expect(constitution.split("\n")[2]).toMatch(/^Version 1\.6 · /);
-  });
-
   it("Art. XII Celo 2 carries the Tailwind naming sentence", () => {
     const article = section(
       constitution,
@@ -532,5 +528,59 @@ describe("Spec 003 documentation: quickstart, checks and traceability (T027)", (
     const phase3 = vojmapo.split("\n").find((line) => line.startsWith("| 3 |")) ?? "";
     expect(phase3).toContain("umgesetzt");
     expect(phase3).toContain("Abnahme");
+  });
+});
+
+describe("Spec 004: the Vitrino check (T012)", () => {
+  const readme = read("README.md");
+
+  it("the README names the Vitrino check and where the Vitrino is written", () => {
+    const checks = section(readme, "Checks");
+    expect(checks).toContain("pnpm check:vitrino");
+    expect(checks).toContain("vitrino/index.html");
+  });
+
+  it("the CI runs the Vitrino as a step of its own, after the quickstart", () => {
+    const ci = read(".github/workflows/ci.yml");
+    expect(ci).toContain("Check: Vitrino");
+    expect(ci).toContain("pnpm check:vitrino");
+    expect(ci.indexOf("Check: Vitrino")).toBeGreaterThan(ci.indexOf("Check: Quickstart"));
+  });
+});
+
+describe("Spec 004 documentation (T001, Constitution v1.7)", () => {
+  const constitution = read(".specify/memory/constitution.md");
+  const BENCHMARK_SENTENCE =
+    "Ein fremdes System mit offener, nachgewiesener Lizenz darf als Benchmark-Aspekto importiert werden, um es mit denselben Prüfungen zu messen.";
+  const SOURCE_RULE = "Quellmaterial anderer Systeme wird dem Coding-Tool nicht vorgelegt.";
+
+  it("the Constitution header says version 1.7", () => {
+    expect(constitution.split("\n")[2]).toMatch(/^Version 1\.7 · /);
+  });
+
+  it("Art. V carries the Benchmark-Aspekto paragraph and keeps the source rule", () => {
+    const article = section(constitution, "Artikel V – Pura Cxambro (Clean Room)");
+    expect(article).toContain("Benchmark-Aspekto");
+    expect(article).toContain(BENCHMARK_SENTENCE);
+    expect(article).toContain("in einem eigenen Repo und einer eigenen Coding-Sitzung");
+    expect(article).toContain("nur Kennzahlen und Fingerprints");
+    expect(article).toContain(SOURCE_RULE);
+  });
+
+  it("the terminology table names Aspiro with its field", () => {
+    const table = section(constitution, "Terminologio (verbindliches Vokabular)");
+    const row = table.split("\n").find((line) => line.startsWith("| **Aspiro**")) ?? "";
+    expect(row).toContain("Entwurfsziel");
+    expect(row).toContain("`aspekto.json#/aspiroj`");
+  });
+
+  it("the change history names v1.7 (Spec 004) with Art. V and Aspiro", () => {
+    const history = section(constitution, "Governance");
+    expect(history).toMatch(/v1\.7 \(Spec 004\) Art\. V/);
+    expect(history).toContain("Aspiro");
+  });
+
+  it("v1.7 does not yet carry the principle Fluida Marko", () => {
+    expect(constitution).not.toContain("Fluida Marko");
   });
 });

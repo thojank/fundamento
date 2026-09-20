@@ -68,18 +68,18 @@
       },
       "tertiary": {
         "text": {
-          "$value": "{color.palette.accent.200}"
+          "$value": "{color.palette.accent.50}"
         }
       },
       "danger": {
         "rest": {
-          "$value": "{color.palette.danger.200}"
+          "$value": "{color.palette.danger.300}"
         },
         "hover": {
-          "$value": "{color.palette.danger.100}"
+          "$value": "{color.palette.danger.200}"
         },
         "pressed": {
-          "$value": "{color.palette.danger.50}"
+          "$value": "{color.palette.danger.100}"
         }
       }
     },
@@ -135,6 +135,11 @@
         "basic": {
           "$value": "{color.palette.info.300}"
         }
+      }
+    },
+    "background": {
+      "raised": {
+        "$value": "{color.palette.neutral.850}"
       }
     }
   }

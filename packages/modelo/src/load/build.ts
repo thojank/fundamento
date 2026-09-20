@@ -14,7 +14,7 @@ import type {
   Modelo,
   Regulo,
 } from "../contracts/modelo.js";
-import type { Fonto } from "../generated/modelo-schema.js";
+import type { AspektoAspiro, Fonto } from "../generated/modelo-schema.js";
 import type {
   AspektoPackageFiles,
   ModeloDocument,
@@ -154,6 +154,8 @@ function composeAspektoValues(
     // Typed after schema validation (AspektoFile); the loader only guarantees objects.
     if (Array.isArray(raw.fonts))
       entry.fonts = raw.fonts.filter(isJsonObject) as unknown as Fonto[];
+    if (Array.isArray(raw.aspiroj))
+      entry.aspiroj = raw.aspiroj.filter(isJsonObject) as unknown as AspektoAspiro[];
     if (typeof raw.idNamespace === "string") entry.namespace = raw.idNamespace;
     return entry;
   });

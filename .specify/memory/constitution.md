@@ -1,6 +1,6 @@
 # Fundamento – Constitution
 
-Version 1.6 · 2026-09-19 · Status: ratifiziert
+Version 1.7 · 2026-09-20 · Status: ratifiziert
 
 Fundamento ist ein maschinenlesbares, nativ mehrmarkenfähiges Design System. Sein kanonischer Zustand ist ein Datenmodell; Figma, Code, Dokumentation und Werkzeuge sind Projektionen dieses Modells. Diese Constitution definiert die Prinzipien, gegen die jede Spezifikation, jeder Plan und jede Implementierung geprüft wird. Sie ist bewusst kurz. Was hier nicht steht, ist verhandelbar; was hier steht, nicht.
 
@@ -27,6 +27,7 @@ Fundamento verwendet Esperanto als Fachsprache. Die Begriffe sind im Modell, im 
 | **Agordilo** | Brand Design Configurator | `packages/agordilo` |
 | **Gvidanto** | Der Doku-Agent („was gibt's hier?") | `packages/gvidanto` |
 | **Celo** | Ein Ausgabeziel einer Projekcio (Tailwind, daisyUI, Penpot, …) | `projekcioj/<celo>` |
+| **Aspiro** | Ein messbares Entwurfsziel einer einzelnen Marke, mit Kialo; es gilt nur für sie, nie für andere Aspektoj | `aspekto.json#/aspiroj` |
 | **Tavolo** | Eine Schicht eines Aspekto-Pakets; das Vortaro ist die Schicht `vida` (visuell), weitere Schichten (Sprache, Verhalten) folgen durch Spec | `aspekto.json#/tavoloj/vida` |
 | **Ontologio** | Die maschinenlesbare Fassung dieser Terminologie: Begriffe, Definitionen, Beziehungen | `packages/modelo/data/ontologio.json` |
 
@@ -73,6 +74,10 @@ Regeln für jede Spec und jeden Plan:
 - Wo ein Bereich neu aufgebaut wird (UX Writing, Motion, Barrierefreiheit, Datenvisualisierung, Contribution), wird vorher der weltweit stärkste öffentliche Benchmark recherchiert, benannt und als Anforderungsquelle dokumentiert (`research.md`).
 - Schriften und Icon-Sets im Kern-Repo sind Open Source mit permissiver Lizenz. Ein Aspekto darf proprietäre Schriften und Assets verwenden; sie werden als Familienname referenziert und mit Fallback versehen, die Dateien liegen nie im Kern-Repo, sondern im Aspekto-Paket oder werden zur Laufzeit geladen. Fremde Marken kommen ausschließlich über den Enportilo als Aspekto ins System, und nur mit nachgewiesenen Rechten.
 
+
+**Benchmark-Aspekto.** Ein fremdes System mit offener, nachgewiesener Lizenz darf als Benchmark-Aspekto importiert werden, um es mit denselben Prüfungen zu messen. Import und Pflege laufen in einem eigenen Repo und einer eigenen Coding-Sitzung; das Kern-Repo erhält nur Kennzahlen und Fingerprints, nie Werte, Namen oder Quellmaterial. Die Clean-Room-Prüfung des Kerns prüft gegen die Fingerprints jedes Benchmark-Aspekto. Gestaltungsarbeit an Aspektoj des Kerns sieht nur Kennzahlen.
+
+Die Regel „Quellmaterial anderer Systeme wird dem Coding-Tool nicht vorgelegt." gilt weiter für das Kern-Repo und jede Sitzung, die daran arbeitet.
 ## Artikel VI – Regularo kun Kialoj (Regeln mit Gründen)
 
 Jede Regel im System trägt ihre Begründung. Ein Constraint ohne `kialo` (Grund) ist ungültig. Beispiel: „Ein Container hat höchstens eine primäre Aktion, weil zwei gleichrangige Handlungsaufforderungen die Entscheidung auf den Nutzer verlagern." Die Begründung ist maschinenlesbar und wird vom Gvidanto und vom Prüf-Agenten zitiert.
@@ -138,7 +143,7 @@ Prüfkriterium für jede Spec: Ein Entwickler ohne Vorwissen nutzt ein Ero in un
 
 ## Governance
 
-- Diese Constitution ändert sich nur durch eine Spec mit dem Titel „Constitution Amendment", die den geänderten Artikel, den Grund und die Migration bestehender Artefakte beschreibt. Änderungshistorie: v1.1 Art. XII/XIII ergänzt; v1.2 DTCG verbindlich, Mehrdimensionalität; v1.3 (Spec 001) Art. IV Aspekto-Pakete und Vollständigkeit, Art. V Schriften je Aspekto, Art. VI Jugxo-Bezug auf Artikel; v1.4 (Spec 002) Terminologie Tavolo und Ontologio, Art. III Ontologio, Art. VI Befund wird Regel, Art. VIII Internacia; v1.5 (Spec 003) Art. XII Celo Figma Make Kit, Verweis auf `docs/vojmapo.md`; v1.6 (Spec 003) Art. XII Tailwind-Namensraum `fm` im `@theme` statt `prefix(fm)` (bricht die Tailwind-NomRegulo, Jugxo zu Art. XII).
+- Diese Constitution ändert sich nur durch eine Spec mit dem Titel „Constitution Amendment", die den geänderten Artikel, den Grund und die Migration bestehender Artefakte beschreibt. Änderungshistorie: v1.1 Art. XII/XIII ergänzt; v1.2 DTCG verbindlich, Mehrdimensionalität; v1.3 (Spec 001) Art. IV Aspekto-Pakete und Vollständigkeit, Art. V Schriften je Aspekto, Art. VI Jugxo-Bezug auf Artikel; v1.4 (Spec 002) Terminologie Tavolo und Ontologio, Art. III Ontologio, Art. VI Befund wird Regel, Art. VIII Internacia; v1.5 (Spec 003) Art. XII Celo Figma Make Kit, Verweis auf `docs/vojmapo.md`; v1.6 (Spec 003) Art. XII Tailwind-Namensraum `fm` im `@theme` statt `prefix(fm)` (bricht die Tailwind-NomRegulo, Jugxo zu Art. XII); v1.7 (Spec 004) Art. V Benchmark-Aspekto (fremde Systeme als eigene Aspektoj in getrennten Repos, Kern erhält nur Kennzahlen und Fingerprints) und Terminologie um **Aspiro** ergänzt.
 - Jeder `plan.md` enthält einen Abschnitt „Constitutional Compliance Review" mit einem Eintrag pro Artikel: konform / Ausnahme mit Grund.
 - `/speckit.analyze` prüft jede Phase gegen diese Constitution, bevor Tasks erzeugt werden.
 - Die Constitution hat Vorrang vor jeder anderen Praxis, jedem Template und jeder Bequemlichkeit.

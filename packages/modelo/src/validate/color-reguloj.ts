@@ -5,18 +5,24 @@
 
 import {
   alphaOf,
+  backdropSurfaces,
   compositeOver,
   oklchLightness,
+  onBackdrop,
   readDtcgColor,
   srgbComponentsOf,
 } from "../checks/alirebleco/color.js";
+import { kontrastSojlojOf } from "../checks/alirebleco/evaluate.js";
+import { measureBranch } from "../checks/alirebleco/measure.js";
 import { WCAG2_METRIC } from "../checks/alirebleco/metrics.js";
 import { aliasTarget, CORE_SET_NAME } from "../contracts/grammar.js";
 import { formatIssuePath, type ValidationIssue } from "../contracts/issues.js";
-import type { Modelo, Regulo } from "../contracts/modelo.js";
+import type { KontrastKategorio, Modelo, Regulo } from "../contracts/modelo.js";
 import type { ColorValue } from "../generated/modelo-schema.js";
 import { isJsonObject } from "../load/guards.js";
+import { wcag2Reserve } from "../metrikoj/contrast.js";
 import type { CombinationChecker, CombinationContext } from "./combination-reguloj.js";
+import { SPEC004_CHECKERS } from "./spec004-reguloj.js";
 
 const BACKDROP = "color.background.default";
 const SURFACES = [
@@ -246,8 +252,112 @@ export const touchTargetMin: CombinationChecker = (context) => {
     });
 };
 
+/**
+ * `surface-distinct` (Spec 004, G2): neighbouring surface roles differ in OKLCH lightness by at
+ * least `sojlo.min`. `surface-order` keeps the order, this keeps the distance: a layer that only
+ * a shadow shows is gone in high contrast, in forced colours and in print.
+ */
+export const surfaceDistinct: CombinationChecker = (context) => {
+  const min = context.regulo.sojlo?.min;
+  if (min === undefined) return [];
+  const lightness = SURFACES.map((name) => {
+    const color = seenColor(context, name);
+    return color === undefined ? undefined : oklchLightness(color);
+  });
+  return SURFACES.slice(0, -1).flatMap((lower, index) => {
+    const upper = SURFACES[index + 1] as string;
+    const low = lightness[index];
+    const high = lightness[index + 1];
+    if (low === undefined || high === undefined) return [];
+    const delta = Math.abs(high - low);
+    if (delta >= min - EPSILON) return [];
+    return [
+      {
+        subject: upper,
+        values: `${fmt3(low)} ${fmt3(high)}`,
+        message: `${upper} and ${lower} differ by ${fmt3(delta)} in OKLCH lightness, below ${min}; neighbouring surfaces must stay apart without a shadow.`,
+        suggestion: `Re-point ${upper} (set '${originOf(context, upper)}') to a palette step at least ${min} away from ${lower}, or give ${lower} its own step.`,
+      },
+    ];
+  });
+};
+
+/**
+ * `contrast-reserve` (Spec 004, G1): every KontrastParo exceeds the WCAG threshold that binds it
+ * by at least `sojlo.min`. Measured on the branch that carries the result, exactly as the
+ * Alirebleco check measures it — one contrast mathematics (Art. XI).
+ */
+export const contrastReserve: CombinationChecker = (context) => {
+  const min = context.regulo.sojlo?.min;
+  if (min === undefined) return [];
+  const sojloj = kontrastSojlojOf(context.modelo, context.assignment);
+  return context.modelo.kontrastParoj.flatMap((pair) => {
+    const kategorio = pair.kategorio as KontrastKategorio;
+    const branches = [
+      { ...pair, branch: "main" as const },
+      ...(pair.aux === undefined ? [] : [{ ...pair.aux, branch: "aux" as const }]),
+    ];
+    const measured = branches.flatMap((branch) => {
+      const foreground = colorOf(context, branch.foreground);
+      const raw = colorOf(context, branch.background);
+      if (foreground === undefined || raw === undefined) return [];
+      // An overlay is measured on every surface it may lie on; the worst one decides (Spec 004).
+      const { surfaces } =
+        branch.branch === "main"
+          ? backdropSurfaces(raw, pair.backdrop, (token) => colorOf(context, token))
+          : { surfaces: [] };
+      const background =
+        surfaces.length === 0
+          ? raw
+          : surfaces
+              .map((surface) => onBackdrop(raw, surface.color))
+              .reduce((least, candidate) =>
+                WCAG2_METRIC.compute(foreground, candidate) <
+                WCAG2_METRIC.compute(foreground, least)
+                  ? candidate
+                  : least,
+              );
+      if (alphaOf(background) < 1) return [];
+      const measurement = measureBranch(
+        { foreground: branch.foreground, background: branch.background },
+        foreground,
+        background,
+        kategorio,
+        sojloj,
+        [WCAG2_METRIC],
+      );
+      const threshold = measurement.metrics[WCAG2_METRIC.id]?.threshold;
+      return threshold === undefined
+        ? []
+        : [
+            {
+              branch,
+              reserve: wcag2Reserve(measurement.ratio, threshold),
+              ratio: measurement.ratio,
+              threshold,
+            },
+          ];
+    });
+    // The branch that carries the pair is the one with the most room; a failing pair is the
+    // Alirebleco check's finding, not this one.
+    const best = measured.sort((a, b) => b.reserve - a.reserve)[0];
+    if (best === undefined || best.reserve < 0 || best.reserve >= min - EPSILON) return [];
+    return [
+      {
+        subject: pair.name,
+        values: `${fmt2(best.ratio)} ${best.threshold}`,
+        message: `${pair.name} exceeds its threshold by ${fmt2(best.reserve * 100)} %, below the ${min * 100} % the Regulo asks for (${fmt2(best.ratio)}:1 against ${best.threshold}:1${best.branch.branch === "aux" ? ", carried by its alternative pair" : ""}).`,
+        suggestion: `Move ${best.branch.foreground} or ${best.branch.background} one palette step apart until the pair keeps its reserve; a value that only just passes fails on the next screen.`,
+      },
+    ];
+  });
+};
+
 /** Per-combination checkers by Regulo name (plan D-04); `explain` uses the same table. */
 export const COMBINATION_CHECKERS: Readonly<Record<string, CombinationChecker>> = {
+  ...SPEC004_CHECKERS,
+  "contrast-reserve": contrastReserve,
+  "surface-distinct": surfaceDistinct,
   "surface-order": surfaceOrder,
   "text-hierarchy": textHierarchy,
   "state-distinct": stateDistinct,
