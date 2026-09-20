@@ -95,7 +95,47 @@ const BASE_MODE = "value";
 const COMPOSITE_FIELDS: Readonly<Record<string, readonly string[]>> = {
   typography: ["fontFamily", "fontSize", "fontWeight", "letterSpacing", "lineHeight"],
   border: ["color", "width", "style"],
+  shadow: ["color", "offsetX", "offsetY", "blur", "spread"],
 };
+
+/**
+ * The fields one composite token needs, given every value it has across the Modelo (F9). A shadow
+ * of several layers numbers them — `elevation/shadow/floating/2/blur` — because Figma holds no
+ * list in a variable. The layer count is taken over **all** combinations: where one Aspekto has
+ * two layers and another one, the variables exist for two, and the mode that has fewer says so
+ * with a transparent colour and zero measures (see `layerValue`).
+ */
+export function compositeFields(type: string, values: readonly unknown[]): readonly string[] {
+  const fields = COMPOSITE_FIELDS[type] ?? [];
+  if (type !== "shadow") return fields;
+  const layers = Math.max(1, ...values.map((value) => (Array.isArray(value) ? value.length : 1)));
+  if (layers === 1) return fields;
+  return Array.from({ length: layers }, (_, index) =>
+    fields.map((field) => `${index + 1}/${field}`),
+  ).flat();
+}
+
+/** The last segment of a field path: `2/offsetX` is an `offsetX`. */
+const fieldKind = (field: string) => field.slice(field.lastIndexOf("/") + 1);
+
+/**
+ * The value of one field of a composite, following a layer number when there is one. A layer the
+ * value does not have renders nothing, so its colour is fully transparent and its measures are 0
+ * — that is what "this mode has fewer layers" means in a file whose variables are fixed (F9).
+ */
+function fieldValue(value: unknown, field: string): unknown {
+  const kind = fieldKind(field);
+  // A value that is no list is the first (and only) layer: one Aspekto may have one shadow layer
+  // where another has two.
+  const layers = Array.isArray(value) ? value : value === undefined ? [] : [value];
+  const layer = field === kind ? value : layers[Number(field.slice(0, field.indexOf("/"))) - 1];
+  if (layer === undefined) {
+    return kind === "color"
+      ? { colorSpace: "srgb", components: [0, 0, 0], alpha: 0 }
+      : { value: 0, unit: "px" };
+  }
+  return (layer as Record<string, unknown>)[kind];
+}
 
 const ALIAS = /^\{([a-z0-9]+(?:\.[a-z0-9]+)*)\}$/;
 
@@ -130,13 +170,24 @@ export function figmaValue(type: string, value: unknown, field?: string): FigmaV
     case "cubicBezier":
       return Array.isArray(value) ? `cubic-bezier(${value.join(", ")})` : String(value);
     default:
-      return typeof value === "number" ? value : String(value);
+      if (typeof value === "number") return value;
+      // The guard (F9): a composite that reached this point would arrive in Figma as
+      // "[object Object]" — a value that looks like a value and is none. Whoever adds a token type
+      // decides here: decompose it into fields (COMPOSITE_FIELDS) or leave it out with a kialo.
+      if (typeof value === "object" && value !== null) {
+        throw new Error(
+          `The Figma Celo has no variable for a ${type} value: Figma variables hold COLOR, FLOAT, ` +
+            "STRING and BOOLEAN, never a composite. Decompose the type into fields in " +
+            "COMPOSITE_FIELDS, or leave it out of the plan with a kialo.",
+        );
+      }
+      return String(value);
   }
 }
 
 /** Figma variable type of a token type (and field). */
 export function figmaType(type: string, field?: string): FigmaVariable["type"] {
-  const effective = field === undefined ? type : (FIELD_TYPES[field] ?? "dimension");
+  const effective = field === undefined ? type : (FIELD_TYPES[fieldKind(field)] ?? "dimension");
   switch (effective) {
     case "color":
       return "COLOR";
@@ -161,25 +212,29 @@ const FIELD_TYPES: Readonly<Record<string, string>> = {
   style: "strokeStyle",
 };
 
-/** Every Figma variable of one token with its value: one, or one per field for composites. */
+/**
+ * Every Figma variable of one token with its value: one, or one per field for composites. `fields`
+ * is the field list the whole plan uses for this token; without it the fields are read from this
+ * one value, which is right for a single combination and wrong for a shadow whose layer count
+ * follows a Dimensio (F9).
+ */
 export function figmaValues(
   name: string,
   type: string,
   value: unknown,
+  fields?: readonly string[],
 ): Record<string, FigmaValue> {
-  const fields = COMPOSITE_FIELDS[type];
-  if (fields === undefined) return { [variableName(name)]: figmaValue(type, value) };
+  if (COMPOSITE_FIELDS[type] === undefined) {
+    return { [variableName(name)]: figmaValue(type, value) };
+  }
   const alias = typeof value === "string" ? ALIAS.exec(value)?.[1] : undefined;
   const out: Record<string, FigmaValue> = {};
-  for (const field of fields) {
+  for (const field of fields ?? compositeFields(type, [value])) {
     const property = variableName(name, field);
     out[property] =
       alias !== undefined
         ? { alias: variableName(alias, field) }
-        : figmaValue(
-            FIELD_TYPES[field] ?? "dimension",
-            (value as Record<string, unknown>)?.[field],
-          );
+        : figmaValue(FIELD_TYPES[fieldKind(field)] ?? "dimension", fieldValue(value, field));
   }
   return out;
 }
@@ -236,6 +291,11 @@ function orderedSets(modelo: Modelo): Modelo["setoj"] {
   return sorted;
 }
 
+/** Every value a token has across the Modelo, for deciding the fields of a composite (F9). */
+function valuesOf(resolutions: ReturnType<typeof allResolutions>, token: string): unknown[] {
+  return resolutions.map(({ tokens }) => tokens[token]?.value);
+}
+
 /** Builds the variables of every token, including the hidden helpers of the cascade. */
 function variablesOf(modelo: Modelo, input: CeloInput): Map<string, FigmaVariable[]> {
   const byCollection = new Map<string, FigmaVariable[]>();
@@ -244,11 +304,16 @@ function variablesOf(modelo: Modelo, input: CeloInput): Map<string, FigmaVariabl
   };
   const dimensioj = dimensiojOf(modelo);
   const modesOf = (name: string) => dimensioj.find((d) => d.name === name)?.modes ?? [];
+  // How many layers a shadow has may itself depend on a Dimensio, `aspekto` included, so the
+  // fields of a composite are decided over every combination the Modelo has (F9).
+  const resolutions = allResolutions(modelo);
 
   for (const token of input.modeloJson.tokens) {
     const dims = dimensiojOfToken(modelo, token.name);
-    const fields = COMPOSITE_FIELDS[token.type];
-    const names = fields === undefined ? [undefined] : [...fields];
+    const composite = COMPOSITE_FIELDS[token.type] !== undefined;
+    const names: (string | undefined)[] = composite
+      ? [...compositeFields(token.type, valuesOf(resolutions, token.name))]
+      : [undefined];
     for (const field of names) {
       const name = variableName(token.name, field);
       const type = figmaType(token.type, field);
@@ -294,11 +359,12 @@ function variablesOf(modelo: Modelo, input: CeloInput): Map<string, FigmaVariabl
 }
 
 function modeValue(type: string, value: unknown, field?: string): FigmaValue {
-  const fields = COMPOSITE_FIELDS[type];
-  if (fields === undefined || field === undefined) return figmaValue(type, value, field);
+  if (COMPOSITE_FIELDS[type] === undefined || field === undefined) {
+    return figmaValue(type, value, field);
+  }
   const alias = typeof value === "string" ? ALIAS.exec(value)?.[1] : undefined;
   if (alias !== undefined) return { alias: variableName(alias, field) };
-  return figmaValue(FIELD_TYPES[field] ?? "dimension", (value as Record<string, unknown>)?.[field]);
+  return figmaValue(FIELD_TYPES[fieldKind(field)] ?? "dimension", fieldValue(value, field));
 }
 
 /** The six-digit hex of a colour, whatever its alpha: the paint's colour channel. */

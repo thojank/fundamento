@@ -7,6 +7,7 @@ import { describe, expect, it } from "vitest";
 import { celoInputOf } from "../../build.js";
 import {
   ALPHA_VARIES,
+  compositeFields,
   FIGMA_CELO,
   type FigmaPlan,
   figmaPlanInventory,
@@ -64,11 +65,20 @@ describe("Figma plan (T015)", () => {
 
   it("resolves to rezolvoj.json in every combination (AK-03 for Figma)", () => {
     let compared = 0;
+    // A composite has the same fields in every combination, even where one combination has fewer
+    // shadow layers than another (F9): the field list is decided over all of them.
+    const values = new Map<string, unknown[]>();
+    for (const rezolvo of prepared.input.rezolvoj.rezolvoj) {
+      for (const [name, token] of Object.entries(rezolvo.tokens)) {
+        values.set(name, [...(values.get(name) ?? []), token.value]);
+      }
+    }
     for (const rezolvo of prepared.input.rezolvoj.rezolvoj) {
       const resolved = resolveFigmaPlan(plan, rezolvo.assignment);
       for (const [name, token] of Object.entries(rezolvo.tokens)) {
+        const fields = compositeFields(token.type, values.get(name) ?? []);
         for (const [variable, expected] of Object.entries(
-          figmaValues(name, token.type, token.value),
+          figmaValues(name, token.type, token.value, fields),
         )) {
           expect(
             resolved[variable],
@@ -147,5 +157,85 @@ describe("resolved paint values of the Figma side (F8)", () => {
       (entry) => entry.props.variant === "tertiary" && entry.props.state === "hover",
     );
     expect(variant?.paints?.["surface.fill"]).toEqual({ hex: "#000000", alphaVariesByMode: true });
+  });
+});
+
+// F9 (Abnahme M1): a shadow arrived in the plan as the string "[object Object]". Figma holds no
+// composite variable, so a composite is decomposed field by field — as typography and border
+// already are — and a shadow of several layers numbers them. What cannot be decomposed must not be
+// stringified behind our back: the guard refuses every implicit conversion of an object.
+describe("composite tokens reach Figma field by field (F9)", () => {
+  const variables = plan.collections.flatMap((collection) => collection.variables);
+  const named = (name: string) => variables.find((variable) => variable.name === name);
+
+  it("gives a shadow of one layer its five fields, with the colour as an alias", () => {
+    expect(named("elevation/shadow/raised")).toBeUndefined();
+    expect(named("elevation/shadow/raised/color")).toMatchObject({
+      type: "COLOR",
+      values: { komuna: { alias: "color/shadow/key" } },
+    });
+    expect(named("elevation/shadow/raised/offset-y")).toMatchObject({
+      type: "FLOAT",
+      values: { komuna: 2 },
+    });
+    expect(named("elevation/shadow/raised/blur")).toMatchObject({ values: { komuna: 6 } });
+    expect(named("elevation/shadow/raised/spread")).toMatchObject({ values: { komuna: 0 } });
+    expect(named("elevation/shadow/raised/offset-x")).toMatchObject({ values: { komuna: 0 } });
+  });
+
+  // A layer an Aspekto does not have renders nothing: transparent colour, zero measures. That is
+  // the honest translation in a file whose variables are the same in every mode (F9).
+  it("says with a transparent layer that an Aspekto has fewer layers", () => {
+    expect(named("elevation/shadow/floating/2/color")?.values.ekzemplo).toEqual({
+      r: 0,
+      g: 0,
+      b: 0,
+      a: 0,
+    });
+    expect(named("elevation/shadow/floating/2/blur")?.values.ekzemplo).toBe(0);
+    // komuna has both layers for real; ekzemplo's brand casts no shadow at all, so its first layer
+    // is a transparent zero of its own making — the second is the filler.
+    expect(named("elevation/shadow/floating/1/blur")?.values.komuna).toBe(24);
+    expect(named("elevation/shadow/floating/2/blur")?.values.komuna).toBe(4);
+  });
+
+  it("fills a layer the value does not have with nothing at all", () => {
+    const layer = {
+      color: { colorSpace: "srgb", components: [0, 0, 0], alpha: 0.5 },
+      offsetX: { value: 0, unit: "px" },
+      offsetY: { value: 1, unit: "px" },
+      blur: { value: 2, unit: "px" },
+      spread: { value: 0, unit: "px" },
+    };
+    const out = figmaValues(
+      "elevation.shadow.probo",
+      "shadow",
+      layer,
+      compositeFields("shadow", [[layer, layer]]),
+    );
+    expect(out["elevation/shadow/probo/1/blur"]).toBe(2);
+    expect(out["elevation/shadow/probo/2/blur"]).toBe(0);
+    expect(out["elevation/shadow/probo/2/color"]).toEqual({ r: 0, g: 0, b: 0, a: 0 });
+  });
+
+  it("numbers the layers of a shadow that has several", () => {
+    expect(named("elevation/shadow/floating/1/blur")).toMatchObject({ type: "FLOAT" });
+    expect(named("elevation/shadow/floating/2/color")).toMatchObject({ type: "COLOR" });
+    expect(named("elevation/shadow/floating")).toBeUndefined();
+  });
+
+  it("leaves no variable holding an object as a string", () => {
+    const stringified = variables.filter((variable) =>
+      Object.values(variable.values).some(
+        (value) => typeof value === "string" && value.includes("[object"),
+      ),
+    );
+    expect(stringified.map((variable) => variable.name)).toEqual([]);
+  });
+
+  it("refuses to write an object as a string instead of stringifying it (guard)", () => {
+    expect(() =>
+      figmaValues("gradient.brand", "gradient", [{ color: "#fff", position: 0 }]),
+    ).toThrow(/gradient/);
   });
 });

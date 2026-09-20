@@ -127,6 +127,7 @@ Stand der Idee: Konzept, keine Spec. Quelle: Gespräche mit dem Maintainer am 20
 | „Text oder Icon genügt" als Nicht-Text-Kontrast | WCAG 1.4.11 | Spec 003 (braucht Ero-Wissen) |
 | APCA verbindlich unter `contrast=high`? | Baseline Spec 001 §8 | Spec 003 |
 | Prüfwerkzeug für Fokus/Tastatur/ARIA unbenannt | seit Phase 0 | Spec 003 |
+| Schattenvariablen in Figma sind angelegt, aber an keinen Effekt gebunden | Spec 003 F9 (Jugxo `jug_01M309V3ZRGTFGNK9DHKAD2R74`) | Sobald eine Ero Höhe verlangt: die Felder `elevation/shadow/<rolle>[/<lage>]/…` über `setBoundVariableForEffect` an einen DROP_SHADOW-Effekt des Knotens binden; heute trägt keine Ero eine Erhebung, deshalb bleiben die Variablen ungebunden |
 | Textrollen verschieden, aber optisch flach (dark/high `#ffffff` / `#f6f7f7` / `#ecedee`) | Gvidanto-Abnahme (Claude Code, Phase 2) | Spec 002 FR-02 ergänzt, T027: Mindestabstand \|ΔL\| ≥ 0,05 (OKLCH) zwischen benachbarten Textrollen |
 
 ## Externe Pakete

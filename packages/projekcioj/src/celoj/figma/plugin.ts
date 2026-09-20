@@ -138,12 +138,22 @@ function variantName(props) {
 
 async function applyComponents(variables) {
   await figma.loadFontAsync({ family: "Inter", style: "Regular" });
+  const reports = [];
   for (const component of PLAN.components) {
     let set = ours(figma.currentPage, "ero", component.set);
+    const report = {
+      set: component.set,
+      found: set !== undefined,
+      created: [],
+      updated: [],
+      missing: [],
+      extra: [],
+    };
     const made = [];
     for (const variant of component.variants) {
       const name = variantName(variant.props);
       const existing = set === undefined ? undefined : ours(set, "variant", name);
+      (existing === undefined ? report.created : report.updated).push(name);
       const node = existing ?? figma.createComponent();
       node.name = name;
       node.setSharedPluginData(NAMESPACE, "variant", name);
@@ -173,28 +183,78 @@ async function applyComponents(variables) {
     set.setSharedPluginData(NAMESPACE, "skemo", component.pluginData.fundamento.skemo);
     set.setSharedPluginData(NAMESPACE, "version", component.pluginData.fundamento.version);
     for (const node of made) if (node.parent !== set) set.appendChild(node);
+    // Symmetric (F10): the plan against the file, in both directions, with names. The finding
+    // behind this was a document that held 71 of 72 variants while nothing said so.
+    const planned = component.variants.map((variant) => variantName(variant.props));
+    const present = set.children.map((child) => child.name);
+    report.missing = planned.filter((name) => present.indexOf(name) === -1);
+    report.extra = present.filter((name) => planned.indexOf(name) === -1);
+    reports.push(report);
   }
+  return reports;
 }
 
-/** Applies the whole plan; safe to run again. */
+/** Applies the whole plan; safe to run again. Returns the report of this run (F10). */
 async function applyPlan() {
   const { collections, modeIds } = await applyCollections();
   const variables = await applyVariables(collections, modeIds);
-  await applyComponents(variables);
+  const components = await applyComponents(variables);
+  const warnings = [];
+  for (const report of components) {
+    if (report.missing.length === 0 && report.extra.length === 0) continue;
+    warnings.push(
+      report.set + ": " + report.missing.length + " fehlen" +
+        (report.missing.length === 0 ? "" : " (" + report.missing.join("; ") + ")") +
+        ", " + report.extra.length + " überzählig" +
+        (report.extra.length === 0 ? "" : " (" + report.extra.join("; ") + ")"),
+    );
+  }
   return {
+    fundamento: PLAN.fundamento,
     collections: PLAN.collections.length,
     variables: variables.size,
-    components: PLAN.components.length,
+    components: components,
+    warnings: warnings,
   };
 }
 
+/** One place for the report: everything in the console, the headline in the toast (F10). */
+function announce(result) {
+  console.log(
+    "Fundamento " + result.fundamento + " – Bericht:" + "\\n" + JSON.stringify(result, null, 2),
+  );
+  const counted = result.components
+    .map((report) =>
+      report.set + " " + report.created.length + " neu, " + report.updated.length + " aktualisiert",
+    )
+    .join("; ");
+  const headline =
+    result.warnings.length === 0
+      ? "Fundamento " + result.fundamento + ": " + result.variables + " Variablen, " + counted + "."
+      : "Fundamento " + result.fundamento + ": " + result.warnings.length +
+        " Warnung(en) — " + result.warnings.join(" | ");
+  figma.notify(
+    headline + " Der ganze Bericht steht in der Konsole.",
+    result.warnings.length === 0 ? undefined : { error: true, timeout: 10000 },
+  );
+}
+
 if (typeof figma !== "undefined" && typeof figma.closePlugin === "function" && figma.command !== undefined) {
-  applyPlan().then((result) => {
-    figma.notify(
-      "Fundamento " + PLAN.fundamento + ": " + result.variables + " variables applied.",
-    );
-    figma.closePlugin();
-  });
+  applyPlan()
+    .then((result) => {
+      announce(result);
+      figma.closePlugin();
+    })
+    // A rejection used to disappear: no toast, no console, a plugin that seemed to do nothing.
+    .catch((error) => {
+      console.error("Fundamento " + PLAN.fundamento + " – Lauf fehlgeschlagen:", error);
+      figma.notify(
+        "Fundamento " + PLAN.fundamento + ": Lauf fehlgeschlagen — " + String(error && error.message ? error.message : error) +
+          ". Einzelheiten in der Konsole.",
+        { error: true, timeout: 10000 },
+      );
+      figma.closePlugin();
+    });
 }
 `;
 }

@@ -218,7 +218,7 @@ Results go into `plan.md` → „Manual acceptance results".
 
 ## Nachtrag aus der Abnahme M1 (2026-09-20)
 
-- [ ] **F8 Die Figma-Projektion gibt den Alphawert wieder** (Abnahme M1, FR-06, AK-04)
+- [x] **F8 Die Figma-Projektion gibt den Alphawert wieder** (Abnahme M1, FR-06, AK-04)
   - Befund: `setBoundVariableForPaint(paint, "color", variable)` bindet nur RGB; die Deckkraft des
     SolidPaint bleibt 1. `plan.json` trägt Alpha korrekt (`figmaColor` schreibt `a`), der Verlust
     entsteht beim Binden. 22 Variablen tragen Alpha, 14 davon sichtbar; tatsächlich gebunden sind
@@ -246,8 +246,22 @@ Results go into `plan.md` → „Manual acceptance results".
     schlägt die Prüfung fehl und die Meldung zeigt auf den Jugxo. Kein dauerhaft roter Test.
   - Fertig wenn: `check:parity` vergleicht Werte, die vier tertiären Rollen erscheinen in Figma mit
     ihrer Deckkraft, der Wächter ist grün und bricht bei einer Verletzung.
+  - Done notes (2026-09-20): Gemessen an komuna + ekzemplo: genau vier gebundene Rollen betroffen
+    (`color/action/tertiary/{rest,hover,pressed,disabled}`), je `surface.fill` und `border.color`,
+    8 Bindungen, 36 Befunde bei zwei Marken, grün bei einer. Roter Lauf zuerst
+    (`expected undefined to be +0`). Vergleichssemantik ausdrücklich entschieden: Die Skemo-Seite
+    behält den konkreten Wert (das Modelo spricht nicht über Flächen und Deckkraft eines
+    Werkzeugs, Art. VIII), die Figma-Seite meldet `alpha varies by mode (<variable>)`, und das Paar
+    ist eine benannte Differenz unter `parity-alpha-varies-by-mode` — keine stille Gleichheit.
+    Jugxoj: `jug_01M307X4DQQWRFTDXB1S5CGPN9` (Grenze samt Auslösebedingung),
+    `jug_01M307X4DSSZY7Y72NR9V9086N` (Treue wird vom manuellen Lauf belegt, nicht von den
+    Prüfungen). Befund am Rande, der mehr wog als der Anlass: Das Double der Plugin-API schluckte
+    jede direkte Zuweisung; es zeichnet sie jetzt auf und wirft bei einem Mitglied, das es nicht
+    modelliert (`jug_01M3094ZC6F3XZ1H0MWQZ62MYV`). AK-12 wurde dabei auf das eingeengt, was es
+    sagt: `ref.celo` als strukturiertes Feld, Prosa darf das Werkzeug nennen, geprüft von
+    `celo-mappings.ts` mit rotem Test am echten Export.
 
-- [ ] **F9 Composite-Tokens werden nie zu einer Zeichenkette** (Abnahme M1, FR-06)
+- [x] **F9 Composite-Tokens werden nie zu einer Zeichenkette** (Abnahme M1, FR-06)
   - Befund: `elevation/shadow/{raised,overlay,modal,floating}` stehen als sichtbare STRING-Variablen
     mit dem Wert `[object Object]` bzw. `[object Object],[object Object]` im Plan — sie gingen so in
     die veröffentlichte Bibliothek. Die übrigen STRING-Werte (Schriftfamilien, Bezierkurven,
@@ -259,8 +273,19 @@ Results go into `plan.md` → „Manual acceptance results".
     Plan.
   - Fertig wenn: kein Variablenwert im Plan enthält `[object Object]`, und der Wächter fängt einen
     neu eingeführten Fall.
+  - Done notes (2026-09-20): Übersetzt statt weggelassen. Ein Verbund wird feldweise projiziert wie
+    Typografie und Rahmen (`elevation/shadow/raised/blur`), ein Schatten mit mehreren Lagen
+    nummeriert sie (`elevation/shadow/floating/2/color`). Die Zahl der Lagen wird über alle
+    Kombinationen entschieden, `aspekto` eingeschlossen; eine Aspekto mit weniger Lagen bekommt für
+    die fehlende eine durchsichtige Farbe und Maße 0 (ekzemplo wirft nach Marken-Regulo gar keinen
+    Schatten). Wächter: `figmaValue` wirft bei jedem Objekt, das ohne Feldzerlegung in den Plan
+    wollte. Roter Lauf zuerst, vier Fehlschläge, darunter
+    `expected [ 'border/default/style', …(33) ] to deeply equal []` (die Prüfung fand die vier
+    Schatten) und `expected [Function] to throw an error` (der Wächter). AK-03 läuft unverändert
+    gegen `rezolvoj.json`. Jugxo `jug_01M309V3ZRGTFGNK9DHKAD2R74`; das Binden an einen Effekt steht
+    in der Vojmapo, heute verlangt keine Ero Höhe.
 
-- [ ] **F10 Befund: 71 statt 72 Varianten im Figma-File** (Abnahme M1)
+- [x] **F10 Befund: 71 statt 72 Varianten im Figma-File** (Abnahme M1)
   - Befund zuerst, Korrektur danach. Stand der Untersuchung: `plan.json` enthält **72** Varianten
     mit 72 eindeutigen Namen (Kreuzprodukt 108 minus die 36 Kombinationen, die die Skemo-Regel
     `tone=danger` nur mit `variant=primary` erlaubt). Der Verlust entsteht also erst beim Anwenden.
@@ -270,5 +295,13 @@ Results go into `plan.md` → „Manual acceptance results".
   - Grün: Das Plugin meldet je Komponente, wie viele Varianten es angelegt, aktualisiert und
     vorgefunden hat, und warnt, wenn das Set nach dem Lauf eine andere Zahl Kinder hat als der Plan
     Varianten — aus „71 statt 72" wird ein Befund, den eine Prüfung sieht.
+  - Done notes (2026-09-20): Variante 1 wie entschieden, keine Sicht per MCP. Der Bericht nennt je
+    Komponente `created`, `updated`, `missing` und `extra` mit den Namen der Varianten, warnt
+    symmetrisch in beide Richtungen und steht vollständig in `console.log`; die Kopfzeile geht in
+    den Toast („Der ganze Bericht steht in der Konsole."). Eine abgelehnte Zusage verschwindet
+    nicht mehr: `.catch` schreibt `console.error` und meldet „Lauf fehlgeschlagen" als Fehler-Toast.
+    Roter Lauf zuerst, vier Fehlschläge (`expected undefined to be 'butono'`,
+    `expected '' to contain 'Inter fehlt'`). Der Lauf in einer frisch angelegten, leeren Datei
+    steht beim Maintainer aus; erst er entscheidet, ob „71 statt 72" Dateigeschichte war.
 
 Consistency check before tasks (`/speckit.analyze` scope): every FR and AK maps to at least one task or a recorded decision; every task maps to a plan decision; two new packages (Art. XI); the lockfile changes in T008 only; no task lowers a threshold; nothing is published.

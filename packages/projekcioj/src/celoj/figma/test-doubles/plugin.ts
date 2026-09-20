@@ -50,8 +50,15 @@ export interface DoubleCounts {
   valueWrites: number;
 }
 
+export interface DoubleNotification {
+  message: string;
+  options?: Record<string, unknown> | undefined;
+}
+
 export interface FigmaDouble {
   figma: Record<string, unknown>;
+  /** Every toast the plugin asked for, in order (F10). */
+  notifications: DoubleNotification[];
   counts: DoubleCounts;
   collections: DoubleCollection[];
   variables: DoubleVariable[];
@@ -143,6 +150,7 @@ function strict<T extends object>(name: string, api: T): T {
 /** A fresh double with an empty document. */
 export function figmaDouble(): FigmaDouble {
   const counts: DoubleCounts = { collections: 0, variables: 0, nodes: 0, valueWrites: 0 };
+  const notifications: DoubleNotification[] = [];
   const collections: DoubleCollection[] = [];
   const variables: DoubleVariable[] = [];
   const root = node("DOCUMENT", "Document", counts);
@@ -225,7 +233,9 @@ export function figmaDouble(): FigmaDouble {
       return set;
     },
     loadFontAsync: async () => undefined,
-    notify: () => undefined,
+    notify: (message: string, options?: Record<string, unknown>) => {
+      notifications.push({ message, options });
+    },
     closePlugin: () => undefined,
     // Declared because the generated plugin probes it before it runs itself: what the double
     // models, it models on purpose.
@@ -253,7 +263,7 @@ export function figmaDouble(): FigmaDouble {
       1,
     );
 
-  return { figma, counts, collections, variables, root, snapshot };
+  return { figma, notifications, counts, collections, variables, root, snapshot };
 }
 
 function describe(current: DoubleNode): unknown {

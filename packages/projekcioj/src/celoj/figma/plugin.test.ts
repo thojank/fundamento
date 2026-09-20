@@ -5,7 +5,7 @@ import { defaultModeloSource, projectModeloSource } from "@fundamento/modelo";
 import { describe, expect, it } from "vitest";
 import { celoInputOf } from "../../build.js";
 import { FIGMA_CELO, type FigmaPlan } from "./figma.js";
-import { figmaDouble } from "./test-doubles/plugin.js";
+import { type DoubleNode, figmaDouble } from "./test-doubles/plugin.js";
 
 const config = new URL(
   "../../../../modelo/test/fixtures/valid/aspekto-ekzemplo/fundamento.config.json",
@@ -178,5 +178,111 @@ describe("the paint carries the alpha of its token (F8)", () => {
   it("an opaque fill stays opaque", async () => {
     const [fill] = await paintsOf({ variant: "primary", tone: "default", state: "rest" });
     expect(fill?.opacity).toBe(1);
+  });
+});
+
+// F10 (Abnahme M1): the run in Figma has to be a measurement, not a look. The plugin reports per
+// component what it created, updated and found, warns symmetrically when the component holds more
+// or fewer variants than the plan names, prints the whole report to the console and puts the
+// headline in the toast. A rejected run no longer disappears: it says so.
+describe("the plugin reports what it did (F10)", () => {
+  const variants = plan.components[0]?.variants.length ?? 0;
+  const nameOf = (index: number) =>
+    Object.entries(plan.components[0]?.variants[index]?.props ?? {})
+      .map(([key, value]) => `${key}=${value}`)
+      .join(", ");
+
+  async function report(double: ReturnType<typeof figmaDouble>) {
+    const module = new Function(
+      "figma",
+      `${files["figma/plugin/code.js"] ?? ""}\nreturn applyPlan();`,
+    );
+    return (await module(double.figma)) as {
+      collections: number;
+      variables: number;
+      components: {
+        set: string;
+        created: string[];
+        updated: string[];
+        missing: string[];
+        extra: string[];
+      }[];
+      warnings: string[];
+    };
+  }
+
+  it("counts every variant as created on the first run and as updated on the second", async () => {
+    const double = figmaDouble();
+    const first = await report(double);
+    expect(first.components[0]?.set).toBe("butono");
+    expect(first.components[0]?.created).toHaveLength(variants);
+    expect(first.components[0]?.updated).toEqual([]);
+    expect(first.warnings).toEqual([]);
+    const second = await report(double);
+    expect(second.components[0]?.created).toEqual([]);
+    expect(second.components[0]?.updated).toHaveLength(variants);
+    expect(second.warnings).toEqual([]);
+  });
+
+  // The finding that made this necessary: a document of mixed history held 71 of 72 variants, and
+  // nothing said so. Both directions are named, with the names of the variants.
+  it("names the variants that are missing and the ones too many", async () => {
+    const double = figmaDouble();
+    await report(double);
+    const set = double.root.children[0]?.children.find((child) => child.name === "butono");
+    if (set === undefined) throw new Error("no component set");
+    const gone = nameOf(0);
+    set.children.find((child) => child.name === gone)?.remove();
+    const stranger = double.figma.createFrame as () => DoubleNode;
+    const extra = stranger();
+    extra.name = "variant=phantom";
+    extra.setSharedPluginData("fundamento", "variant", "variant=phantom");
+    set.appendChild(extra);
+    const again = await report(double);
+    expect(again.components[0]?.created).toEqual([gone]);
+    expect(again.components[0]?.extra).toEqual(["variant=phantom"]);
+    expect(again.warnings.join(" ")).toContain("variant=phantom");
+  });
+
+  it("prints the whole report and puts the headline in the toast", async () => {
+    const double = figmaDouble();
+    const lines: string[] = [];
+    const log = console.log;
+    console.log = (...parts: unknown[]) => lines.push(parts.map(String).join(" "));
+    try {
+      const source = `${files["figma/plugin/code.js"] ?? ""}`;
+      const module = new Function("figma", "console", source);
+      await module({ ...double.figma, command: "run" }, { log: console.log, error: console.log });
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    } finally {
+      console.log = log;
+    }
+    expect(lines.join("\n")).toContain('"set": "butono"');
+    expect(double.notifications.map((entry) => entry.message).join(" ")).toContain("butono");
+    expect(double.notifications[0]?.message).toContain("Konsole");
+  });
+
+  it("says it when the run fails instead of swallowing the rejection", async () => {
+    const double = figmaDouble();
+    const lines: string[] = [];
+    const source = `${files["figma/plugin/code.js"] ?? ""}`;
+    const module = new Function("figma", "console", source);
+    await module(
+      {
+        ...double.figma,
+        command: "run",
+        loadFontAsync: async () => {
+          throw new Error("Inter fehlt");
+        },
+      },
+      {
+        log: () => undefined,
+        error: (...parts: unknown[]) => lines.push(parts.map(String).join(" ")),
+      },
+    );
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(lines.join("\n")).toContain("Inter fehlt");
+    expect(double.notifications[0]?.message).toContain("fehlgeschlagen");
+    expect(double.notifications[0]?.options).toMatchObject({ error: true });
   });
 });

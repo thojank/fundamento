@@ -3,6 +3,7 @@
 
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import { CELOJ } from "../nomreguloj/types.js";
 
 interface Jugxo {
   id: string;
@@ -69,12 +70,12 @@ describe("Jugxoj that belong to a Celo (F8, AK-12)", () => {
   const ofCelo = jugxoj.filter((jugxo) => jugxo.ref.celo !== undefined);
 
   it("names the Celo in the reference, not only in the prose", () => {
-    expect(ofCelo.map((jugxo) => jugxo.ref.celo).sort()).toEqual([
-      "figma",
-      "figma",
+    expect(ofCelo.length).toBeGreaterThan(1);
+    expect([...new Set(ofCelo.map((jugxo) => jugxo.ref.celo))].sort()).toEqual([
       "figma",
       "tailwind",
     ]);
+    for (const jugxo of ofCelo) expect(CELOJ, jugxo.id).toContain(jugxo.ref.celo);
     for (const jugxo of ofCelo) {
       expect(`${jugxo.kialo} ${jugxo.context}`.toLowerCase(), jugxo.id).toContain(
         String(jugxo.ref.celo),
