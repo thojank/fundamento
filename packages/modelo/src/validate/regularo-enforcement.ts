@@ -176,6 +176,10 @@ export const REGULO_ENFORCERS: Readonly<Record<string, Enforcer>> = {
   },
   /** D-03, K4: generic Dimensio sets hold aliases only and re-point roles only. */
   "dimensio-sets-alias-only": dimensioSetIssues,
+  /** Spec 004 G1: every KontrastParo keeps a reserve above its threshold. */
+  "contrast-reserve": perCombination("contrast-reserve"),
+  /** Spec 004 G2: neighbouring surfaces stay apart in lightness, without a shadow. */
+  "surface-distinct": perCombination("surface-distinct"),
   /** Spec 002 FR-01: surfaces ordered by lightness in every combination. */
   "surface-order": perCombination("surface-order"),
   /** Spec 002 FR-02: the text roles stay distinct and ordered in every combination. */

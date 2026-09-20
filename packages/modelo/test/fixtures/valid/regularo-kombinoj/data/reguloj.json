@@ -70,6 +70,46 @@
       "kialo": "Agents read values from token files but not the purpose.",
       "scope": "vortaro: core role tokens",
       "checkability": "automatic"
+    },
+    {
+      "id": "reg_01M2ZHPC5CR9BVV0NCKJ8W47NS",
+      "name": "contrast-reserve",
+      "statement": "In every combination of every Aspekto, every KontrastParo exceeds the WCAG 2.x threshold that binds it by at least the sojlo; the branch that carries the result is the one measured.",
+      "kialo": "Meeting a threshold exactly means missing it on the next screen: font smoothing, a cheap panel, a translucent edge or a rounded value all cost a few percent. A reserve makes the promise hold outside the calculation, and it is the difference between a value that passes a test and a value that works.",
+      "scope": "vortaro: every KontrastParo in every combination",
+      "checkability": "automatic",
+      "appliesTo": {
+        "roles": [
+          "foreground",
+          "background",
+          "border",
+          "focus"
+        ]
+      },
+      "sojlo": {
+        "metric": "wcag2-reserve",
+        "min": 0.05
+      }
+    },
+    {
+      "id": "reg_01M2ZHPC5DX6B7AJ7Y5KKE2N1R",
+      "name": "surface-distinct",
+      "statement": "In every combination of every Aspekto, neighbouring surface roles (sunken, canvas, default, raised) differ in OKLCH lightness by at least the sojlo.",
+      "kialo": "If two surfaces share a lightness, only the shadow carries the layering — and the shadow is gone in high contrast, in forced colours, in print and on a screenshot. A layer that exists in the model must be visible in the value, not only in an effect.",
+      "scope": "vortaro: color.background.sunken, canvas, default, raised in every combination",
+      "checkability": "automatic",
+      "appliesTo": {
+        "tokens": [
+          "color.background.sunken",
+          "color.background.canvas",
+          "color.background.default",
+          "color.background.raised"
+        ]
+      },
+      "sojlo": {
+        "metric": "oklch-l-delta",
+        "min": 0.02
+      }
     }
   ]
 }

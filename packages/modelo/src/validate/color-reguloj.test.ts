@@ -145,3 +145,52 @@ describe("text-hierarchy with a minimum lightness difference (Spec 002 FR-02, T0
     expect(issues.map((issue) => issue.path)).toEqual(["data/reguloj.json#/reguloj/2"]);
   });
 });
+
+describe("surface-distinct (Spec 004, G2)", () => {
+  it("reports two neighbouring surfaces that resolve to the same lightness", () => {
+    const issues = errors((edit) =>
+      edit("vortaro/sets/core.json", (core: Json) => {
+        at(core, "color.background.raised").$value = at(core, "color.background.default")
+          .$value as string;
+      }),
+    ).filter((issue) => issue.rule === "surface-distinct");
+    expect(issues).toHaveLength(1);
+    expect(issues[0]?.path).toContain("color.background.raised");
+    expect(issues[0]?.message).toContain("0.000");
+    expect(issues[0]?.message).toContain("0.02");
+  });
+
+  it("accepts a distance at the threshold and says nothing about the order", () => {
+    const issues = errors((edit) =>
+      edit("vortaro/sets/core.json", (core: Json) => {
+        // Two steps apart in the ramp: a distance well above the threshold.
+        at(core, "color.background.raised").$value = "{color.palette.neutral.0}";
+        at(core, "color.background.default").$value = "{color.palette.neutral.100}";
+      }),
+    ).filter((issue) => issue.rule === "surface-distinct");
+    expect(issues).toEqual([]);
+  });
+});
+
+describe("contrast-reserve (Spec 004, G1)", () => {
+  it("reports a pair that sits just above its threshold", () => {
+    const issues = errors((edit) =>
+      edit("vortaro/sets/core.json", (core: Json) => {
+        // A text colour that barely passes 4.5:1 on the light background.
+        at(core, "color.text.default").$value = {
+          colorSpace: "srgb",
+          components: [0.43, 0.43, 0.43],
+        };
+      }),
+    ).filter((issue) => issue.rule === "contrast-reserve");
+    expect(issues.length).toBeGreaterThan(0);
+    expect(issues[0]?.path).toContain("text-on-background");
+    expect(issues[0]?.message).toMatch(/exceeds its threshold by \d/);
+    expect(issues[0]?.suggestion).toContain("reserve");
+  });
+
+  it("says nothing when every pair keeps its reserve", () => {
+    const issues = errors(() => {}).filter((issue) => issue.rule === "contrast-reserve");
+    expect(issues).toEqual([]);
+  });
+});

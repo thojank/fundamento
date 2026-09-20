@@ -7,7 +7,14 @@
       "kialo": "Contrast must be provable per combination (Art. X): the Alirebleco check only evaluates declared KontrastParoj across all resolutions, so an undeclared text-on-background or border-on-background pairing is an unchecked accessibility risk.",
       "scope": "vortaro: color tokens with role foreground, background or border",
       "checkability": "automatic",
-      "appliesTo": { "roles": ["foreground", "background", "border", "focus"] }
+      "appliesTo": {
+        "roles": [
+          "foreground",
+          "background",
+          "border",
+          "focus"
+        ]
+      }
     },
     {
       "id": "reg_01M2VEEE53WJ4R0H861BN7MJYF",
@@ -16,7 +23,11 @@
       "kialo": "Aspektoj and Dimensioj then change a color by overriding one palette token, and late binding carries the change to every semantic use in every combination; a literal in a semantic token would silently opt out of that and drift between combinations.",
       "scope": "vortaro: core color tokens outside color.palette",
       "checkability": "automatic",
-      "appliesTo": { "types": ["color"] }
+      "appliesTo": {
+        "types": [
+          "color"
+        ]
+      }
     },
     {
       "id": "reg_01M2W940AP0XFAPQCMW136QEGJ",
@@ -25,7 +36,11 @@
       "kialo": "Roles tell the contrast gate which colours must be paired and tell agents how a colour may be used; a colour without a role can be neither checked nor explained.",
       "scope": "vortaro: color tokens in core",
       "checkability": "automatic",
-      "appliesTo": { "types": ["color"] }
+      "appliesTo": {
+        "types": [
+          "color"
+        ]
+      }
     },
     {
       "id": "reg_01M2W9R5XBN0FFGBR4J0BF138T",
@@ -42,7 +57,12 @@
       "kialo": "Density is layout compactness, font size is legibility and belongs to viewport. If viewport and density shifted the same token, the result would depend on their priority order and be predictable for nobody.",
       "scope": "vortaro: sets density/*",
       "checkability": "automatic",
-      "appliesTo": { "tokens": ["spacing.*", "size.control.*"] }
+      "appliesTo": {
+        "tokens": [
+          "spacing.*",
+          "size.control.*"
+        ]
+      }
     },
     {
       "id": "reg_01M2W9W6WAVG6QE0S6DNDJNX7J",
@@ -59,7 +79,12 @@
       "kialo": "WCAG 2.x exempts inactive components (1.4.3) and decoration that carries no information (1.4.11). Forcing contrast on them would make disabled controls look actionable and dividers look like content.",
       "scope": "vortaro: color tokens with role disabled or decorative",
       "checkability": "manual",
-      "appliesTo": { "roles": ["disabled", "decorative"] }
+      "appliesTo": {
+        "roles": [
+          "disabled",
+          "decorative"
+        ]
+      }
     },
     {
       "id": "reg_01M2W9W6WB2TWHVZQTJ2SND87J",
@@ -68,7 +93,11 @@
       "kialo": "Dimensioj then shift role tokens along the scales and never restate a composite, which would overwrite an Aspekto's weight or family; one role per text style keeps every Projekcio and every agent on the same names.",
       "scope": "vortaro: typography.*",
       "checkability": "automatic",
-      "appliesTo": { "tokens": ["typography.**"] }
+      "appliesTo": {
+        "tokens": [
+          "typography.**"
+        ]
+      }
     },
     {
       "id": "reg_01M2W9W6WB2TWHVZQTJ2SND87K",
@@ -77,7 +106,12 @@
       "kialo": "People who ask their system to reduce motion must not see animated transitions; making every duration instant through the scale keeps components working without special cases and lets each Aspekto define what instant means.",
       "scope": "vortaro: sets motion/reduced",
       "checkability": "automatic",
-      "appliesTo": { "tokens": ["motion.duration.*", "motion.easing.*"] }
+      "appliesTo": {
+        "tokens": [
+          "motion.duration.*",
+          "motion.easing.*"
+        ]
+      }
     },
     {
       "id": "reg_01M2WBXFPVWAZ8RW7VWCWAYAMY",
@@ -86,7 +120,11 @@
       "kialo": "A single ring colour cannot reach 3:1 against a white surface, a dark inverse surface and a filled primary action at the same time. The ring therefore sits on its own gap colour and must contrast with that gap and with the surface around it, as WCAG 2.4.13 describes for focus indicators.",
       "scope": "vortaro: color tokens with role focus; data/kontrastparoj.json",
       "checkability": "automatic",
-      "appliesTo": { "roles": ["focus"] }
+      "appliesTo": {
+        "roles": [
+          "focus"
+        ]
+      }
     },
     {
       "id": "reg_01M2X5AMA1FH06H7BARC9QSTJB",
@@ -119,8 +157,17 @@
       "kialo": "The text roles carry a distinction of meaning. High contrast must strengthen them, not erase them, and a contrast check does not see a collapse because every collapsed role still passes. Under contrast=high the main role takes the maximum contrast the ramp offers, so subtle and muted keep their own steps. Distinct is not distinguishable; a hierarchy the eye does not see does not exist.",
       "scope": "vortaro: color.text.default, subtle and muted in every combination",
       "checkability": "automatic",
-      "appliesTo": { "tokens": ["color.text.default", "color.text.subtle", "color.text.muted"] },
-      "sojlo": { "metric": "oklch-l-delta", "min": 0.05 }
+      "appliesTo": {
+        "tokens": [
+          "color.text.default",
+          "color.text.subtle",
+          "color.text.muted"
+        ]
+      },
+      "sojlo": {
+        "metric": "oklch-l-delta",
+        "min": 0.05
+      }
     },
     {
       "id": "reg_01M2X5G6TX43QJ21SFD4WFNM3W",
@@ -137,7 +184,10 @@
           "color.action.*.rest"
         ]
       },
-      "sojlo": { "metric": "oklch-l-delta", "min": 0.05 }
+      "sojlo": {
+        "metric": "oklch-l-delta",
+        "min": 0.05
+      }
     },
     {
       "id": "reg_01M2XMV80DG7JCJDTZGE66MGHW",
@@ -146,7 +196,11 @@
       "kialo": "Two equal calls to action move the decision onto the user; one primary action makes the next step obvious, and every other action steps back as secondary or tertiary.",
       "scope": "eroj: butono instances in a design or in code (check_usage)",
       "checkability": "automatic",
-      "appliesTo": { "eroj": ["butono"] }
+      "appliesTo": {
+        "eroj": [
+          "butono"
+        ]
+      }
     },
     {
       "id": "reg_01M2XMV80DG7JCJDTZGE66MGHX",
@@ -155,7 +209,11 @@
       "kialo": "The primary colour promises the expected next step; a destructive action needs a colour that warns before it acts, and a danger fill only where the destruction is the step the user came for.",
       "scope": "eroj: butono instances whose intent is destructive or whose label is a destructive keyword of the Skemo",
       "checkability": "automatic",
-      "appliesTo": { "eroj": ["butono"] }
+      "appliesTo": {
+        "eroj": [
+          "butono"
+        ]
+      }
     },
     {
       "id": "reg_01M2XMV80DG7JCJDTZGE66MGHY",
@@ -164,7 +222,11 @@
       "kialo": "A button without a name cannot be found or understood by assistive technology, and an icon alone is not understood by everyone; the name is what a screen reader announces and what voice control listens for.",
       "scope": "eroj: butono instances; the rendered check (axe) confirms the accessible name",
       "checkability": "automatic",
-      "appliesTo": { "eroj": ["butono"] }
+      "appliesTo": {
+        "eroj": [
+          "butono"
+        ]
+      }
     },
     {
       "id": "reg_01M2XMV80DG7JCJDTZGE66MGHZ",
@@ -173,7 +235,52 @@
       "kialo": "WCAG 2.5.8 (AA) requires a target of at least 24 by 24 px; smaller targets fail people with tremor, with large fingers or on a moving device. The threshold is a token, so the rule and the rendered component read the same value.",
       "scope": "vortaro: size.control.* against size.target.min in every combination",
       "checkability": "automatic",
-      "appliesTo": { "tokens": ["size.control.*", "size.target.min"] }
+      "appliesTo": {
+        "tokens": [
+          "size.control.*",
+          "size.target.min"
+        ]
+      }
+    },
+    {
+      "id": "reg_01M2ZHPC0G6PFCX6YH5YVPPG70",
+      "name": "contrast-reserve",
+      "statement": "In every combination of every Aspekto, every KontrastParo exceeds the WCAG 2.x threshold that binds it by at least the sojlo; the branch that carries the result is the one measured.",
+      "kialo": "Meeting a threshold exactly means missing it on the next screen: font smoothing, a cheap panel, a translucent edge or a rounded value all cost a few percent. A reserve makes the promise hold outside the calculation, and it is the difference between a value that passes a test and a value that works.",
+      "scope": "vortaro: every KontrastParo in every combination",
+      "checkability": "automatic",
+      "appliesTo": {
+        "roles": [
+          "foreground",
+          "background",
+          "border",
+          "focus"
+        ]
+      },
+      "sojlo": {
+        "metric": "wcag2-reserve",
+        "min": 0.05
+      }
+    },
+    {
+      "id": "reg_01M2ZHPC0HH52JQJDZ2KMVECVP",
+      "name": "surface-distinct",
+      "statement": "In every combination of every Aspekto, neighbouring surface roles (sunken, canvas, default, raised) differ in OKLCH lightness by at least the sojlo.",
+      "kialo": "If two surfaces share a lightness, only the shadow carries the layering — and the shadow is gone in high contrast, in forced colours, in print and on a screenshot. A layer that exists in the model must be visible in the value, not only in an effect.",
+      "scope": "vortaro: color.background.sunken, canvas, default, raised in every combination",
+      "checkability": "automatic",
+      "appliesTo": {
+        "tokens": [
+          "color.background.sunken",
+          "color.background.canvas",
+          "color.background.default",
+          "color.background.raised"
+        ]
+      },
+      "sojlo": {
+        "metric": "oklch-l-delta",
+        "min": 0.02
+      }
     }
   ]
 }

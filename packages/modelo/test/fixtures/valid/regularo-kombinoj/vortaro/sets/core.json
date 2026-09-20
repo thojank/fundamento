@@ -287,7 +287,7 @@
     },
     "background": {
       "default": {
-        "$value": "{color.palette.neutral.0}",
+        "$value": "{color.palette.neutral.100}",
         "$description": "Default page background.",
         "$extensions": {
           "com.ciferecigo.fundamento": {
@@ -297,7 +297,7 @@
         }
       },
       "canvas": {
-        "$value": "{color.palette.neutral.50}",
+        "$value": "{color.palette.neutral.200}",
         "$description": "Page canvas behind content areas.",
         "$extensions": {
           "com.ciferecigo.fundamento": {
@@ -317,7 +317,7 @@
         }
       },
       "sunken": {
-        "$value": "{color.palette.neutral.100}",
+        "$value": "{color.palette.neutral.300}",
         "$description": "Surfaces set into the page, such as wells.",
         "$extensions": {
           "com.ciferecigo.fundamento": {
