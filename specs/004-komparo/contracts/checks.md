@@ -27,9 +27,11 @@ pnpm check:vitrino                                      # Playwright, Chromium
 - Prüft, was in [`vitrino.md`](vitrino.md) §5 als gerendert markiert ist.
 - Eigener CI-Schritt „Check: Vitrino" nach „Check: Quickstart"; der Schritt baut die Projektionen selbst.
 
-## 3. Reguloj im Prüflauf
+## 3. Reguloj und Aspiroj im Prüflauf
 
-Die acht neuen Reguloj laufen in `fm modelo validate` und damit in jedem Lauf, der das Modelo prüft – nicht als eigener Check. Jeder Verstoß nennt wie bisher die Regulo mit ID und Kialo, dazu den gemessenen und den geforderten Wert:
+Beide laufen in `fm modelo validate` und damit in jedem Lauf, der das Modelo prüft – nicht als eigener Check. Die Ausgabe trennt sie sichtbar.
+
+**Regulo-Verstoß** (gilt für jede Marke):
 
 ```
 error contrast-reserve  rezolvo(aspekto=komuna,color-scheme=light,contrast=high,…)/status-success-on-basic
@@ -37,3 +39,17 @@ error contrast-reserve  rezolvo(aspekto=komuna,color-scheme=light,contrast=high,
   suggestion: Move the status surface one palette step, or the text role one step, until the reserve holds.
   regulo: reg_… contrast-reserve — "Meeting a threshold exactly means missing it …"
 ```
+
+**Verfehltes Entwurfsziel** (gilt nur für die Marke, die es erklärt):
+
+```
+error aspiro-missed  aspekto/komuna#/aspiroj/3
+  Design goal of komuna: own dark values cover 1.3 % of color-scheme=dark, the goal asks for 100 %.
+  suggestion: Set the roles of background, text, action and status in aspekto/komuna+color-scheme/dark,
+              or lower the goal in aspekto.json and say there why.
+  aspiro: dimensio-kovrado — "Ein Dunkelmodus, den alle Marken teilen, ist eine Umsetzung, kein Entwurf."
+```
+
+Die Zusammenfassung zählt getrennt, etwa: `2 Regulo-Verstöße, 3 verfehlte Entwurfsziele`; die Stats tragen `reguloViolations` und `aspiroMisses`.
+
+**Fluida Marko, als Test festgehalten:** Eine Fixture-Aspekto mit reinem Weiß als Fläche und einer Größenskala im konstanten Verhältnis 1,5 besteht **jede Regulo** und bekommt kein `aspiro-missed`, weil sie keine Aspiroj erklärt. Regeln erzwingen Zugänglichkeit und Struktur, nie Geschmack.

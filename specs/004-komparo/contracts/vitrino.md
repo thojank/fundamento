@@ -27,6 +27,7 @@ Begleitet [`../plan.md`](../plan.md) D-06 bis D-09. Das ist die Oberfläche, auf
       <section id="fm-vitrino-butono">…</section>
       <section id="fm-vitrino-kontrasto">…</section>
       <section id="fm-vitrino-regularo">…</section>
+      <section id="fm-vitrino-kovrado">…</section>
     </main>
     <script id="fm-vitrino-skripto" type="module">…</script>
   </body>
@@ -47,7 +48,8 @@ Begleitet [`../plan.md`](../plan.md) D-06 bis D-09. Das ist die Oberfläche, auf
 
 - Der Vergleichsschalter schaltet auf zwei Spalten. Jede Spalte trägt ihre eigenen `data-fm-*`-Attribute an ihrem Wurzelelement, damit beide Aspektoj gleichzeitig sichtbar sind; alle übrigen Dimensioj bleiben gleich.
 - Je Kriterium eine Zeile: Wert A, Wert B, Kennzeichnung `vorn` / `gleich` / `hinten` – als Wort, nicht als Farbe.
-- Kriterien in Etappe A: kleinste Kontrast-Reserve, Bestehensquote der KontrastParoj, kleinster Flächenabstand, kleinster Abstand zum Anker, Bandbreite der Palettenstufen, Rampenausrichtung, Gamut-Treue, Verhältnisband der Typo-Skala, Regularo-Ergebnis (bestanden / Verstöße).
+- Kriterien in Etappe A: kleinste Kontrast-Reserve, Bestehensquote der KontrastParoj, kleinster Flächenabstand, kleinster Abstand zum Anker, Bandbreite der Palettenstufen, Rampenausrichtung, Gamut-Treue, Regelmäßigkeit der Typo-Skala, Regularo-Ergebnis (bestanden / Verstöße) und die Abdeckung je Dimensio (`dimensio-kovrado`).
+- **Aspiroj stehen nie im Vergleich.** Sie gehören einer Marke; ein Vergleich daraus wäre Geschmack gegen Geschmack. Sie erscheinen nur im Abschnitt der jeweiligen Marke, als „Entwurfsziel: Soll / Ist / erreicht".
 - **Kein Gesamturteil** (FR-17 gilt schon hier).
 
 ## 5. Garantien, die geprüft werden
@@ -62,5 +64,7 @@ Begleitet [`../plan.md`](../plan.md) D-06 bis D-09. Das ist die Oberfläche, auf
 | Gegenüberstellung zeigt beide Werte und die Kennzeichnung | Playwright |
 | axe ohne Befund, hell und dunkel, beide Kontraststufen | `@axe-core/playwright` |
 | `fm-butono` ist aufgewertet und trägt die Tokens des Aspekto | Playwright: `customElements.get`, berechnete Farbe gegen `rezolvoj.json` |
+| Abschnitt „Eigene Werte je Dimensio" zeigt je Dimensio-Wert die Abdeckung | Vitest über das erzeugte HTML |
+| Aspiroj der gezeigten Marke stehen mit Soll, Ist und Kialo da, als Entwurfsziel bezeichnet | Vitest über das erzeugte HTML |
 
 Kommando: `pnpm check:vitrino` (eigener CI-Schritt „Check: Vitrino"), nach `pnpm fm projekcioj build`.

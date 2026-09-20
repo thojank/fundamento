@@ -49,10 +49,11 @@ Wer das Kern-Repo prüft, findet keine Spectrum-Werte oder -Namen. Die Clean-Roo
 - **FR-01 Qualitätsziele vor Werten:** Bevor Werte geändert werden, legt der Plan messbare Ziele fest und begründet jedes (Kialo). Mindestens:
   - Jeder KontrastParo besteht in jeder Kombination mit Reserve (Zielwert im Plan, Vorschlag ≥ 5 % über der WCAG-Schwelle).
   - Paletten: gleichmäßige Helligkeitsstufen in OKLCH (Streuung der Abstände unter einem Grenzwert), alle Werte im sRGB-Gamut, Dunkelmodus eigens abgestimmt statt invertiert.
-  - `contrast=high`, `density`, `viewport`, `motion` mit echten, geprüften Werten.
+  - **Eigener Dunkelmodus (Maintainer-Entscheidung 2026-09-20):** komuna 2 bringt eigene Werte für Flächen, Text, Aktion und Status unter `color-scheme=dark`, statt die gemeinsame Umsetzung zu erben. Messgröße ist der **Anteil eigener Werte je Dimensio-Wert**; er steht in der Vitrino und im Bericht.
+  - `contrast=high`, `density`, `viewport`, `motion` mit echten, geprüften Werten – gemessen mit derselben Größe (Anteil eigener Werte je Dimensio), ohne Zielwert.
   - Typografie-Skala mit dokumentiertem Verhältnis; Zeilenhöhe und Laufweite folgen einer Regel.
   - APCA wird berichtet (beratend, Art. X).
-- **FR-02 Ziele werden Reguloj:** Wo ein Ziel messbar ist, wird es als Regulo mit Kialo ins Regularo aufgenommen (Art. VI) und gilt damit für jede Aspekto.
+- **FR-02 Ziele werden Reguloj oder Aspiroj (Fluida Marko, Maintainer-Entscheidung 2026-09-20):** Ein messbares Ziel, das **Zugänglichkeit oder Struktur** sichert, wird eine Regulo mit Kialo (Art. VI) und gilt für jede Aspekto. Ein Ziel, das **Geschmack** einer Marke ist, wird ein Entwurfsziel dieser Marke (`aspekto.json`, eigener Kialo) und wird nur für sie geprüft. Die Prüfausgabe unterscheidet „Regulo verletzt" von „Entwurfsziel verfehlt".
 - **FR-03 Unabhängige Gestaltung:** komuna 2 wird ohne Kenntnis der Spectrum-Werte gestaltet. Die Coding-Sitzung für komuna sieht nur Fundamento-Daten und Berichte mit Kennzahlen, nie Werte oder Namen aus `komparo`.
 - **FR-04 Folgen für andere Aspektoj:** ekzemplo und ciferecigo müssen die neuen Reguloj bestehen; ciferecigo wird wie in T028 neu abgeleitet.
 

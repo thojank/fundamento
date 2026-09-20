@@ -64,7 +64,7 @@ Die Rampen sind **streng monoton** und untereinander **eng ausgerichtet**: bei g
 
 ### 2.5 Typografie
 
-Größenskala (px): 12 · 14 · 16 · 18 · 20 · 24 · 28 · 32 · 40 · 48 · 56 · 64. Verhältnisse benachbarter Stufen: 1,111 … 1,250, ohne dokumentiertes Verhältnis. Zeilenhöhen fallen mit der Größe (body 1,5 · label/headline 1,25 · display 1,1), Laufweite ist 0 bis Stufe 800 und wird darüber negativ (−0,4 bis −1 px), `caps` +0,6 px. Beides folgt einer Regel, die nirgends aufgeschrieben ist.
+Größenskala (px): 12 · 14 · 16 · 18 · 20 · 24 · 28 · 32 · 40 · 48 · 56 · 64. Verhältnisse benachbarter Stufen: 1,111 … 1,250, Median 1,167, größte **relative** Abweichung vom Median 7,1 % (der Schritt 32 → 40). Die Skala ist also regelmäßig, ohne ein einziges dokumentiertes Verhältnis zu haben. Zeilenhöhen fallen mit der Größe (body 1,5 · label/headline 1,25 · display 1,1), Laufweite ist 0 bis Stufe 800 und wird darüber negativ (−0,4 bis −1 px), `caps` +0,6 px. Beides folgt einer Regel, die nirgends aufgeschrieben ist.
 
 ### 2.6 Gamut
 
@@ -72,7 +72,33 @@ Alle 72 Palettenwerte liegen im sRGB-Gamut (keine Komponente außerhalb 0 … 1)
 
 ### 2.7 Dimensioj
 
-Alle sechs Dimensioj tragen echte Werte: `contrast=high` setzt 31 Rollen um (dunkel) bzw. eigene Sätze hell, `density` und `viewport` setzen Abstände und Bedienelementgrößen um, `motion=reduced` setzt jede Dauer auf den Sofort-Schritt. Geprüft sind sie heute über `density-affects-layout-only`, `motion-reduced-instant` und `dimensio-sets-alias-only`.
+Alle sechs Dimensioj tragen echte Werte: `contrast=high` setzt 34 Rollen um, `density` und `viewport` setzen Abstände und Bedienelementgrößen um, `motion=reduced` setzt jede Dauer auf den Sofort-Schritt. Geprüft sind sie heute über `density-affects-layout-only`, `motion-reduced-instant` und `dimensio-sets-alias-only`.
+
+### 2.8 Eigene Werte je Dimensio (neues Maß)
+
+„Echte Werte je Dimensio" (FR-01) lässt sich zählen: Wie viele der Tokens, die eine Dimensio umsetzt, setzt die **Marke selbst** – gegenüber der gemeinsamen, generischen Umsetzung, die für alle Marken gleich ist?
+
+| Dimensio-Wert | umgesetzte Tokens | davon generisch | eigene komuna | eigene ekzemplo | Abdeckung komuna |
+|---|---|---|---|---|---|
+| `color-scheme=dark` | 76 | 75 | 1 | 1 | **1,3 %** |
+| `contrast=high` | 34 | 32 | 0 | 4 | **0 %** |
+| `density=compact` | 9 | 9 | 0 | 0 | 0 % |
+| `density=comfortable` | 9 | 9 | 0 | 0 | 0 % |
+| `viewport=compact` | 18 | 18 | 0 | 0 | 0 % |
+| `viewport=expanded` | 18 | 18 | 0 | 0 | 0 % |
+| `motion=reduced` | 8 | 8 | 0 | 0 | 0 % |
+
+Der eine eigene Dunkelwert von komuna ist dazu ein Palettenprimitiv (`color.palette.neutral.950`), keine Rolle. Im Dunkelmodus verteilen sich die umgesetzten Rollen so:
+
+| Gruppe | Tokens |
+|---|---|
+| `color.action` | 22 |
+| `color.status` | 24 |
+| `color.text` | 6 |
+| `color.background` | 5 |
+| übrige (`border`, `link`, `navigation`, `brand`, `focus`, `shadow`, `palette`) | 19 |
+
+Die vier erstgenannten Gruppen sind zusammen **57 Tokens**: das ist der Umfang, wenn komuna seinen Dunkelmodus selbst bestimmen soll.
 
 ## 3. Ist-Stand ekzemplo (Folgen für FR-04)
 
@@ -96,7 +122,9 @@ Die drei engsten Paare von ekzemplo sind `status-success-on-basic` (+4,1 %), `te
 | `oklch-l-align` | Abweichung der Helligkeit gleicher Stufennummern zwischen Rampen | ≤ 0,013 |
 | `srgb-gamut` | jede Komponente in 0 … 1 | erfüllt |
 | `type-scale-ratio` | Verhältnis benachbarter Größenstufen | 1,111 … 1,250 |
+| `type-scale-consistency` | größte relative Abweichung eines Verhältnisses vom Median der Skala | 7,1 % |
 | `type-rhythm` | Zeilenhöhe und Laufweite fallen monoton mit der Größe | erfüllt |
+| `dimensio-kovrado` | Anteil der Tokens einer Dimensio, die die Marke selbst setzt | dark 1,3 %, sonst 0 % |
 
 Die ersten fünf Metriken rechnen auf OKLCH; die Funktion `oklchLightness` existiert seit Spec 002 und wird wiederverwendet (keine zweite Farbmathematik, Art. XI).
 
