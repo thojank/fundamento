@@ -61,10 +61,16 @@ describe("build artifacts in dist/", () => {
   });
 });
 
+/**
+ * Spawns the build twice: sized for a cold or loaded runner (Jugxo jug_01M2W3K1YPP05F4XF86J71RGTK).
+ * One run takes about a second; the budget is for a runner that is busy with the rest of the gate,
+ * which Spec 003 made heavier (two more projection builds run in parallel with this file).
+ */
+const BUILD_TWICE_TIMEOUT_MS = 30_000 * (process.env.CI === "true" ? 3 : 1);
+
 describe("building twice is byte-identical (AK-10)", () => {
-  // Spawns the build twice: sized for a cold or loaded runner (Jugxo jug_01M2W3K1YPP05F4XF86J71RGTK).
   it("two runs of the export build give the same SHA-256 hashes as dist/", {
-    timeout: 30_000,
+    timeout: BUILD_TWICE_TIMEOUT_MS,
   }, () => {
     const first = tempDir();
     const second = tempDir();
