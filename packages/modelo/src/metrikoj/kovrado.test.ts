@@ -87,7 +87,7 @@ describe("dimensio-kovrado", () => {
     ).toMatchObject({ own: 0, total: 0, share: 1 });
   });
 
-  it("measures the repository: komuna sets one of the tokens its dark mode re-points", () => {
+  it("measures the repository: komuna states its own dark mode (Spec 004, G9)", () => {
     const { modelo } = loadModelo(defaultModeloSource());
     if (modelo === undefined) throw new Error("the repository Modelo could not be loaded");
     const dark = dimensioKovrado(modelo, {
@@ -96,13 +96,13 @@ describe("dimensio-kovrado", () => {
       valoro: "dark",
     });
     expect(dark.total).toBe(76);
-    expect(dark.own).toBe(1);
+    expect(dark.own).toBe(57);
     const roles = dimensioKovrado(modelo, {
       aspekto: "komuna",
       dimensio: "color-scheme",
       valoro: "dark",
       scope: ["color.background.**", "color.text.**", "color.action.**", "color.status.**"],
     });
-    expect(roles).toMatchObject({ own: 0, total: 56 });
+    expect(roles).toMatchObject({ own: 56, total: 56, share: 1 });
   });
 });

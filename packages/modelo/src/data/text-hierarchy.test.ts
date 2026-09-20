@@ -40,7 +40,7 @@ describe.each(["komuna", "ekzemplo"])("text roles of %s under contrast=high", (a
   // black, so its 950 lies too close to 1000 and light/high moves one step further.
   const STEPS: Record<string, Record<"light" | "dark", string[]>> = {
     komuna: {
-      light: ["neutral.1000", "neutral.950", "neutral.900"],
+      light: ["neutral.1000", "neutral.975", "neutral.900"],
       dark: ["neutral.0", "neutral.100", "neutral.200"],
     },
     ekzemplo: {

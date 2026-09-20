@@ -246,9 +246,11 @@ describe("built runner", () => {
   it("exits 0 on the repo and 1 on the AK-13 fixture, printing only JSON with --json", () => {
     expect(existsSync(builtRunner), `missing ${builtRunner}; run the build first`).toBe(true);
     const env = { ...process.env, INIT_CWD: repoRoot };
+    // The advisory APCA warnings alone fill more than the default 1 MB pipe buffer.
     const pass = spawnSync(process.execPath, [builtRunner, "alirebleco"], {
       encoding: "utf8",
       env,
+      maxBuffer: 16 * 1024 * 1024,
     });
     expect(pass.status).toBe(0);
     expect(pass.stdout).toContain("PASS alirebleco");

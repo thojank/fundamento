@@ -271,7 +271,12 @@ describe("Phase 0 repo Modelo: sets (FR-10, FR-12)", () => {
     const dark = setNamed(modelo, DARK).tokens;
     const high = setNamed(modelo, HIGH).tokens;
     const both = setNamed(modelo, DARK_HIGH).tokens;
-    const shared = Object.keys(dark).filter((name) => high[name]?.type === "color");
+    // komuna states the surfaces, text, actions and status of its own dark mode (Spec 004, G9),
+    // so the generic set carries the rest; those are the tokens this rule is about.
+    const komunaDark = setNamed(modelo, KOMUNA_DARK).tokens;
+    const shared = Object.keys(dark).filter(
+      (name) => high[name]?.type === "color" && komunaDark[name] === undefined,
+    );
     expect(shared.length).toBeGreaterThan(0);
     const rezolvo = resolveOk(modelo, { "color-scheme": "dark", contrast: "high" });
     for (const name of shared) {
@@ -291,11 +296,11 @@ describe("Phase 0 repo Modelo: sets (FR-10, FR-12)", () => {
       { dimensio: "aspekto", valoro: "komuna" },
       { dimensio: "color-scheme", valoro: "dark" },
     ]);
-    expect(Object.keys(conjunction.tokens)).toEqual(["color.palette.neutral.950"]);
-    const background = resolveOk(modelo, { "color-scheme": "dark" }).tokens[
-      "color.background.default"
-    ];
-    expect(background?.aliasChain.at(-1)).toEqual({
+    // Since Spec 004 komuna states its whole dark mode here; the tinted step is one of them.
+    expect(Object.keys(conjunction.tokens)).toContain("color.palette.neutral.950");
+    expect(Object.keys(conjunction.tokens).length).toBeGreaterThan(50);
+    const canvas = resolveOk(modelo, { "color-scheme": "dark" }).tokens["color.background.canvas"];
+    expect(canvas?.aliasChain.at(-1)).toEqual({
       token: "color.palette.neutral.950",
       set: KOMUNA_DARK,
     });
@@ -305,14 +310,13 @@ describe("Phase 0 repo Modelo: sets (FR-10, FR-12)", () => {
     const modelo = repoModelo();
     const dark = setNamed(modelo, DARK).tokens;
     expect(Object.keys(dark).some((name) => name.startsWith("color.palette."))).toBe(false);
-    const rest = resolveOk(modelo, { "color-scheme": "dark" }).tokens["color.action.primary.rest"];
-    expect(rest?.origin.set).toBe(DARK);
-    expect(rest?.aliasChain).toEqual([
-      { token: "color.action.primary.rest", set: DARK },
-      { token: "color.palette.accent.300", set: CORE },
-    ]);
+    // komuna states actions and text of its own dark mode (Spec 004, G9); links stay generic.
+    const link = resolveOk(modelo, { "color-scheme": "dark" }).tokens["color.link.rest"];
+    expect(link?.origin.set).toBe(DARK);
+    expect(link?.aliasChain[0]).toEqual({ token: "color.link.rest", set: DARK });
+    expect(link?.aliasChain.at(-1)?.set).toBe(CORE);
     const text = resolveOk(modelo, { "color-scheme": "dark" }).tokens["color.text.default"];
-    expect(text?.aliasChain.at(-1)).toEqual({ token: "color.palette.neutral.50", set: CORE });
+    expect(text?.origin.set).toBe(KOMUNA_DARK);
   });
 
   it("resolves all 72 combinations with zero issues and zero warnings", () => {

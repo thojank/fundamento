@@ -123,6 +123,27 @@ Die vier erstgenannten Gruppen umfassen zusammen **56 verschiedene Tokens** (die
 
 Die drei engsten Paare von ekzemplo sind `status-success-on-basic` (+4,1 %), `text-muted-on-background-sunken` (+4,4 %) und `action-tertiary-text-on-action-tertiary-pressed` (+4,4 %). Jede neue Regulo trifft also beide Aspektoj im Repo; `ciferecigo` liegt außerhalb und wird nach dem Merge neu abgeleitet (wie Spec 003 T028).
 
+## 3b. Nachher: komuna 2 (T006, 2026-09-20)
+
+Dieselben Messungen nach der Umsetzung, mit denselben Funktionen erhoben.
+
+| Kennzahl | komuna vorher | komuna nachher | ekzemplo vorher | ekzemplo nachher |
+|---|---|---|---|---|
+| kleinste Kontrast-Reserve | +3,6 % | **+11,0 %** | +4,1 % | **+6,0 %** |
+| Messungen unter +5 % | 36 | **0** | 54 | **0** |
+| Messungen unter +10 % | 54 | **0** | 54 | 54 |
+| kleinster Flächenabstand hell | 0,000 | **0,025** | 0,000 | **0,025** |
+| kleinster Flächenabstand dunkel | 0,000 | **0,040** | 0,000 | **0,040** |
+| Flächen auf einem Anker | 4 | **0** | 2 (Abstand 0,003) | **0** |
+| eigene Werte in `color-scheme=dark` | 1 von 76 (1,3 %) | **57 von 76 (75 %)**, in den vier Rollengruppen 56 von 56 (100 %) | 1 | 1 (unverändert, Fluida Marko) |
+| Regelmäßigkeit der Rampen (innere Schritte) | 62,5 % | **25,0 %** | – | 25,0 % |
+| kleinstes WCAG-Verhältnis (`check:alirebleco`) | 3,79:1 | **4,22:1** | – | – |
+| APCA-Hinweise (beratend) | 1 296 | **1 746** | – | – |
+
+Die Helligkeitskurve aller Rampen ist jetzt eine gemeinsame: 0 (Weiß), 25 → 0,975, 50 → 0,95, 100 → 0,92, 150 → 0,89, 200 → 0,86, 300 → 0,80, 400 → 0,71, 500 → 0,61, 600 → 0,52, 700 → 0,44, 800 → 0,36, 850 → 0,32, 900 → 0,28, 950 → 0,24, 975 → 0,20, 1000 (Schwarz). Vier Stufen sind neu (25, 150, 850, 975); sie tragen die Flächen, die vorher auf den Ankern lagen.
+
+**Ein Befund für die Vitrino und die nächste Runde:** Die beratenden APCA-Hinweise steigen von 1 296 auf 1 746. WCAG misst ein Verhältnis, APCA eine wahrgenommene Helligkeitsdifferenz; dunklere Flächen im hellen Modus verbessern das eine und verschlechtern das andere. Der Wert bleibt beratend (Jugxo zu Art. X), die Gegenüberstellung wird ihn zeigen, und er ist ein Kandidat für eine Aspiro von komuna in der nächsten Runde.
+
 ## 4. Metriken, die Etappe A braucht
 
 | Metrik | Definition | Heute |
