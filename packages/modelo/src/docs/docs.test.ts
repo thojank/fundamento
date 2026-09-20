@@ -531,6 +531,23 @@ describe("Spec 003 documentation: quickstart, checks and traceability (T027)", (
   });
 });
 
+describe("Spec 004: the Vitrino check (T012)", () => {
+  const readme = read("README.md");
+
+  it("the README names the Vitrino check and where the Vitrino is written", () => {
+    const checks = section(readme, "Checks");
+    expect(checks).toContain("pnpm check:vitrino");
+    expect(checks).toContain("vitrino/index.html");
+  });
+
+  it("the CI runs the Vitrino as a step of its own, after the quickstart", () => {
+    const ci = read(".github/workflows/ci.yml");
+    expect(ci).toContain("Check: Vitrino");
+    expect(ci).toContain("pnpm check:vitrino");
+    expect(ci.indexOf("Check: Vitrino")).toBeGreaterThan(ci.indexOf("Check: Quickstart"));
+  });
+});
+
 describe("Spec 004 documentation (T001, Constitution v1.7)", () => {
   const constitution = read(".specify/memory/constitution.md");
   const BENCHMARK_SENTENCE =
