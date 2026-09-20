@@ -109,11 +109,18 @@ Wer das Kern-Repo prüft, findet keine Spectrum-Werte oder -Namen. Die Clean-Roo
 - **AK-08** Die Constitution steht auf v1.7 mit Änderungshistorie.
 - **AK-09** Manuelle Abnahme: Der Maintainer beurteilt komuna 2 in der Vitrino visuell und in der Gegenüberstellung. Befunde werden Reguloj oder Jugxoj.
 
-## Klärungen (vom Maintainer zu entscheiden, mit Empfehlung)
+## Klärungen (vom Maintainer entschieden, 2026-09-20)
 
-1. **komparo-Repo öffentlich oder privat?** Empfehlung: öffentlich. Apache-2.0 erlaubt es, und der offene Vergleich stützt die Positionierung. Veröffentlichung erst nach Abnahme.
-2. **Skala Desktop/Mobile → `viewport` oder `density`?** Empfehlung: `density` (Spectrum skaliert Bedienelemente, nicht das Layout); der Plan prüft das an den Daten.
-3. **Reihenfolge:** Empfehlung: erst FR-01 bis FR-04 (komuna 2) und die Vitrino, dann der Import. So entsteht komuna 2 nachweislich ohne Blick auf die Vergleichswerte.
+1. **komparo-Repo öffentlich oder privat?** **Entschieden: öffentlich**, `thojank/fundamento-aspekto-komparo`. Sichtbar geschaltet wird es erst nach der Abnahme.
+2. **Skala Desktop/Mobile → `viewport` oder `density`?** **Entschieden: `density`.** Die Zuordnung wird in Etappe B am importierten Datensatz geprüft und, falls die Daten dagegen sprechen, mit Kialo als Jugxo korrigiert.
+3. **Reihenfolge:** **Entschieden: Etappe A zuerst** (FR-01 bis FR-09, FR-19, FR-15 vorbereitend), Etappe B danach (FR-10 bis FR-14, FR-16 bis FR-18). So entsteht komuna 2 nachweislich ohne Blick auf die Vergleichswerte; Etappe B läuft in einer eigenen Sitzung im komparo-Repo.
+
+### Etappen
+
+| Etappe | Umfang | Ort | Status |
+|---|---|---|---|
+| **A** | FR-01 – FR-09 (komuna 2, Vitrino), FR-19 (Constitution v1.7), FR-15 vorbereitend (Clean-Room liest Fingerprints externer Benchmark-Aspektoj) | Kern-Repo | geplant in [`plan.md`](plan.md), Aufgaben in [`tasks.md`](tasks.md) |
+| **B** | FR-10 – FR-14 (Import komparo), FR-16 – FR-18 (Bericht) | `fundamento-aspekto-komparo`, eigene Sitzung | noch nicht geplant |
 
 ## Referenzen
 
