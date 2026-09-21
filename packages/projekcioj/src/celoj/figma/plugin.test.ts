@@ -735,8 +735,8 @@ describe("the focus ring is drawn, and never clipped (F11)", () => {
   it("lets the variant wrap its content, so no 100 × 100 tile is left", async () => {
     const variant = await variantOf(modelDouble(), "rest");
     expect(variant?.properties.layoutMode).toBe("HORIZONTAL");
-    expect(variant?.properties.primaryAxisSizingMode).toBe("AUTO");
-    expect(variant?.properties.counterAxisSizingMode).toBe("AUTO");
+    expect(variant?.properties.layoutSizingHorizontal).toBe("HUG");
+    expect(variant?.properties.layoutSizingVertical).toBe("HUG");
   });
 
   // A file an older plugin made keeps its control directly under the variant; the run moves it
@@ -765,12 +765,19 @@ describe("every property the plugin owns is from the plan or neutral", () => {
     "opacity",
     "clipsContent",
     "layoutMode",
+    // F14: the flow and the sizing belong to the plugin too; a default here left the variants
+    // at 0 × 0 in Figma's grid.
+    "layoutPositioning",
+    "layoutSizingHorizontal",
+    "layoutSizingVertical",
   ];
 
   it("leaves no tool default on any node it drew, the component set included", async () => {
     const double = modelDouble();
     await run(double, repoFiles["figma/plugin/code.js"] ?? "");
-    expect(double.untouchedDefaults(OWNED)).toEqual([]);
+    // The set lies on the page, in no flow: its position among siblings is not the plugin's.
+    const onPage = "Document/Page 1/butono: layoutPositioning";
+    expect(double.untouchedDefaults(OWNED).filter((entry) => entry !== onPage)).toEqual([]);
     const set = double.root.children[0]?.children.find((child) => child.name === "butono");
     expect(set?.properties.strokes).toEqual([]);
     expect(set?.properties.dashPattern).toEqual([]);
@@ -872,17 +879,15 @@ describe("the label is a text property of the component (F11)", () => {
     double.root.children[0]?.children.find((child) => child.name === "butono");
   type Definitions = Record<string, { type: string; defaultValue: string }>;
 
-  it("declares one TEXT property label, with the Vitrino's text as its default", async () => {
+  // F14 (Maintainer): one neutral word — Figma keeps one default per property, not per variant.
+  it("declares one TEXT property label, with the neutral word as its default", async () => {
     const double = modelDouble();
     await run(double, repoFiles["figma/plugin/code.js"] ?? "");
     const definitions = (setOf(double)?.properties.componentPropertyDefinitions ??
       {}) as Definitions;
     const keys = Object.keys(definitions).filter((key) => key.startsWith("label#"));
     expect(keys).toHaveLength(1);
-    expect(definitions[keys[0] ?? ""]).toEqual({
-      type: "TEXT",
-      defaultValue: "secondary · default · medium",
-    });
+    expect(definitions[keys[0] ?? ""]).toEqual({ type: "TEXT", defaultValue: "Aktion" });
   });
 
   it("connects every label to it", async () => {
@@ -905,5 +910,127 @@ describe("the label is a text property of the component (F11)", () => {
     const definitions = (setOf(double)?.properties.componentPropertyDefinitions ??
       {}) as Definitions;
     expect(Object.keys(definitions)).toHaveLength(1);
+  });
+});
+
+// F14 (Abnahme M1, Maintainer 2026-09-21): Das Raster wirkte nicht, und niemand merkte es. Alle 72
+// Varianten lagen übereinander, der Bericht meldete keine Warnung. Belegte Ursache: Das Raster maß
+// jede Variante als 0 × 0 — von Hand auf „Inhalt umschließen" gestellt, war das Set 48 × 96, genau
+// Innenabstand plus Lücken bei Spuren der Größe null (8 + 5·8, 8 + 11·8). Die Zusage „die Variante
+// umschließt ihren Inhalt" hielt im echten Figma nicht; das Double hatte sie geglaubt.
+describe("the double measures sizes the way Figma did (F14)", () => {
+  async function gridSet(double: ReturnType<typeof figmaDouble>, sized: boolean) {
+    const api = double.figma as {
+      createComponent: () => DoubleNode;
+      createText: () => DoubleNode;
+      combineAsVariants: (nodes: DoubleNode[], parent: DoubleNode) => DoubleNode;
+      loadFontAsync: (font: { family: string; style: string }) => Promise<void>;
+    };
+    await api.loadFontAsync({ family: "Inter", style: "Regular" });
+    const variants = Array.from({ length: 72 }, () => {
+      const variant = api.createComponent();
+      variant.layoutMode = "HORIZONTAL";
+      if (sized) {
+        Object.assign(variant, { layoutSizingHorizontal: "HUG", layoutSizingVertical: "HUG" });
+      }
+      const text = api.createText();
+      Object.assign(text, { characters: "Aktion" });
+      variant.appendChild(text);
+      return variant;
+    });
+    const set = api.combineAsVariants(variants, double.root.children[0] as DoubleNode);
+    Object.assign(set, {
+      layoutMode: "GRID",
+      gridColumnCount: 6,
+      gridRowCount: 12,
+      gridColumnGap: 8,
+      gridRowGap: 8,
+      paddingLeft: 4,
+      paddingRight: 4,
+      paddingTop: 4,
+      paddingBottom: 4,
+      layoutSizingHorizontal: "HUG",
+      layoutSizingVertical: "HUG",
+    });
+    return { set, variants };
+  }
+  const size = (node: DoubleNode | undefined) => [
+    (node as { width?: number } | undefined)?.width,
+    (node as { height?: number } | undefined)?.height,
+  ];
+
+  it("reproduces the measurement: unsized variants are 0 × 0, the hugging set 48 × 96", async () => {
+    const { set, variants } = await gridSet(modelDouble(), false);
+    expect(size(set)).toEqual([48, 96]);
+    expect(size(variants[0])).toEqual([0, 0]);
+  });
+
+  it("gives a variant that hugs its content the size of that content", async () => {
+    const { variants } = await gridSet(modelDouble(), true);
+    const [width, height] = size(variants[0]);
+    expect(width).toBeGreaterThan(0);
+    expect(height).toBeGreaterThan(0);
+  });
+});
+
+describe("every variant has its size and its own place in the grid (F14)", () => {
+  const setOf = (double: ReturnType<typeof figmaDouble>) =>
+    double.root.children[0]?.children.find((child) => child.name === "butono");
+  const box = (node: DoubleNode | undefined) =>
+    node as unknown as { width: number; height: number; x: number; y: number } | undefined;
+
+  it("sizes every variant to its content, never 0", async () => {
+    const double = modelDouble();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    for (const variant of setOf(double)?.children ?? []) {
+      const ring = descendant(variant, "focus-ring");
+      expect(box(variant)?.width, variant.name).toBeGreaterThan(0);
+      expect(box(variant)?.width, variant.name).toBeGreaterThanOrEqual(box(ring)?.width ?? 0);
+      expect(box(variant)?.height, variant.name).toBeGreaterThanOrEqual(box(ring)?.height ?? 0);
+    }
+  });
+
+  it("puts the 72 variants on 72 places: 6 columns, 12 rows", async () => {
+    const double = modelDouble();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    const places = (setOf(double)?.children ?? []).map((variant) => box(variant));
+    expect(new Set(places.map((place) => `${place?.x},${place?.y}`)).size).toBe(72);
+    expect(new Set(places.map((place) => place?.x)).size).toBe(6);
+    expect(new Set(places.map((place) => place?.y)).size).toBe(12);
+  });
+
+  it("keeps every child of a variant in the flow, not freely placed", async () => {
+    const double = modelDouble();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    const variant = setOf(double)?.children[0];
+    for (const part of ["focus-ring", "focus-gap", "control", "label"]) {
+      expect(descendant(variant, part)?.properties.layoutPositioning, part).toBe("AUTO");
+    }
+  });
+
+  // Die Wirkung messen, nicht den Aufruf: In einem Werkzeug, das das Raster annimmt und nichts
+  // bewirkt, darf der Bericht nicht warnings: [] melden.
+  it("says so with numbers when the tool leaves the variants at 0 × 0", async () => {
+    const double = figmaDouble({ fonts: MODEL_FONTS, gridIgnoresSizing: true });
+    const report = (await new Function(
+      "figma",
+      `${repoFiles["figma/plugin/code.js"] ?? ""}\nreturn applyPlan();`,
+    )(double.figma)) as { warnings: string[] };
+    const text = report.warnings.join(" ");
+    expect(text).toContain("72 von 72 Varianten");
+    expect(text).toContain("0 × 0");
+    expect(text).toContain("48 × 96");
+  });
+
+  it("labels every variant with the neutral word", async () => {
+    const double = modelDouble();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    const definitions = (setOf(double)?.properties.componentPropertyDefinitions ?? {}) as Record<
+      string,
+      { defaultValue: string }
+    >;
+    expect(Object.values(definitions).map((definition) => definition.defaultValue)).toEqual([
+      "Aktion",
+    ]);
   });
 });

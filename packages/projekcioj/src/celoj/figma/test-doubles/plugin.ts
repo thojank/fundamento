@@ -109,6 +109,11 @@ const FIGMA_DEFAULTS: Readonly<Record<string, Readonly<Record<string, unknown>>>
     opacity: 1,
     clipsContent: true,
     layoutMode: "NONE",
+    layoutPositioning: "AUTO",
+    layoutSizingHorizontal: "FIXED",
+    layoutSizingVertical: "FIXED",
+    width: 100,
+    height: 100,
   },
   COMPONENT: {
     fills: [{ type: "SOLID", color: { r: 1, g: 1, b: 1 } }],
@@ -118,6 +123,11 @@ const FIGMA_DEFAULTS: Readonly<Record<string, Readonly<Record<string, unknown>>>
     opacity: 1,
     clipsContent: true,
     layoutMode: "NONE",
+    layoutPositioning: "AUTO",
+    layoutSizingHorizontal: "FIXED",
+    layoutSizingVertical: "FIXED",
+    width: 100,
+    height: 100,
   },
   // combineAsVariants draws Figma's own frame around a set: a purple dashed line with rounded
   // corners. It is a default like any other — on the list of what the plugin owns.
@@ -130,6 +140,11 @@ const FIGMA_DEFAULTS: Readonly<Record<string, Readonly<Record<string, unknown>>>
     opacity: 1,
     clipsContent: true,
     layoutMode: "NONE",
+    layoutPositioning: "AUTO",
+    layoutSizingHorizontal: "FIXED",
+    layoutSizingVertical: "FIXED",
+    width: 100,
+    height: 100,
   },
   TEXT: {
     fills: [{ type: "SOLID", color: { r: 0, g: 0, b: 0 } }],
@@ -137,6 +152,10 @@ const FIGMA_DEFAULTS: Readonly<Record<string, Readonly<Record<string, unknown>>>
     opacity: 1,
     characters: "",
     fontName: { family: "Inter", style: "Regular" },
+    fontSize: 12,
+    layoutPositioning: "AUTO",
+    layoutSizingHorizontal: "HUG",
+    layoutSizingVertical: "HUG",
   },
 };
 
@@ -155,12 +174,29 @@ const FIGMA_FONTS = ["Regular", "Medium", "SemiBold", "Bold"].map((style) => ({
   style,
 }));
 
+/** Where a node lies and how large it is, as the layout of the file computes it (F14). */
+export interface DoubleBox {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+/** What a node needs from the file around it: the loaded fonts and the computed layout. */
+interface NodeContext {
+  loaded: ReadonlySet<string>;
+  box?: (node: DoubleNode) => DoubleBox;
+}
+
+const GEOMETRY_KEYS: ReadonlySet<string> = new Set(["x", "y", "width", "height"]);
+
 function node(
   type: string,
   name: string,
   counts: DoubleCounts,
-  loaded: ReadonlySet<string> = new Set(),
+  context: NodeContext = { loaded: new Set() },
 ): DoubleNode {
+  const loaded = context.loaded;
   counts.nodes++;
   // The proxy is the node's identity: children and parents must point at it, not at the raw
   // object, or a comparison by identity fails.
@@ -233,6 +269,11 @@ function node(
       return Reflect.set(target, key, value);
     },
     get(target, key) {
+      // Size and place are computed by the layout of the file, never read from what was last
+      // written: the double does not assume a size the tool would compute differently (F14).
+      if (typeof key === "string" && GEOMETRY_KEYS.has(key) && context.box !== undefined) {
+        return context.box(recorded)[key as keyof DoubleBox];
+      }
       if (typeof key === "string" && !(key in target) && key in target.properties) {
         return target.properties[key];
       }
@@ -240,6 +281,163 @@ function node(
     },
   });
   return recorded;
+}
+
+/**
+ * The layout of a file, as far as the plugin relies on it (F14). It follows what Figma was
+ * measured to do, not a theory of it:
+ * - a text is as wide as its characters (0.6 × font size each) and 1.25 × its font size high —
+ *   an estimate; tests compare sizes with each other, never with a text width;
+ * - an auto-layout frame hugs an axis when it says so (layoutSizing HUG, or the older AUTO sizing
+ *   modes), adds its paddings and the spacing between its children in the flow, and grows to its
+ *   minimum sizes; otherwise it keeps its width and height (Figma's default 100 × 100);
+ * - a grid lays its children out row by row; its tracks are as large as their largest child. A
+ *   child whose size the plugin did not set counts as 0 × 0 — measured in Figma on 2026-09-21: an
+ *   unsized variant was 0 × 0 and the hugging set 48 × 96, padding and gaps only. Why Figma does
+ *   that is not known; the double reproduces the measurement.
+ * Numbers bound to a variable take its value in the first mode of its collection.
+ */
+function layoutOf(
+  root: DoubleNode,
+  resolve: (name: string) => unknown,
+  gridIgnoresSizing: boolean,
+): Map<DoubleNode, DoubleBox> {
+  const boxes = new Map<DoubleNode, DoubleBox>();
+  const sizes = new Map<DoubleNode, { width: number; height: number }>();
+  const num = (current: DoubleNode, field: string): number => {
+    const bound = current.boundVariables[field];
+    const value = bound === undefined ? current.properties[field] : resolve(bound);
+    return typeof value === "number" ? value : 0;
+  };
+  const prop = (current: DoubleNode, field: string) => current.properties[field];
+  const hugs = (current: DoubleNode, axis: "H" | "V"): boolean => {
+    if (prop(current, axis === "H" ? "layoutSizingHorizontal" : "layoutSizingVertical") === "HUG") {
+      return true;
+    }
+    const mode = prop(current, "layoutMode");
+    const primary = (axis === "H") === (mode === "HORIZONTAL");
+    return prop(current, primary ? "primaryAxisSizingMode" : "counterAxisSizingMode") === "AUTO";
+  };
+  const inFlow = (current: DoubleNode) =>
+    current.children.filter((child) => prop(child, "layoutPositioning") !== "ABSOLUTE");
+  /** In a grid, a child counts with its size only when the plugin set it (see above). */
+  const sized = (child: DoubleNode, axis: "H" | "V") =>
+    !gridIgnoresSizing &&
+    !child.defaults.has(axis === "H" ? "layoutSizingHorizontal" : "layoutSizingVertical");
+
+  const measure = (current: DoubleNode): { width: number; height: number } => {
+    const known = sizes.get(current);
+    if (known !== undefined) return known;
+    let size: { width: number; height: number };
+    const mode = prop(current, "layoutMode");
+    if (current.type === "TEXT") {
+      const fontSize = num(current, "fontSize") || 12;
+      const characters = String(prop(current, "characters") ?? "");
+      size = { width: characters.length * fontSize * 0.6, height: fontSize * 1.25 };
+    } else if (mode === "HORIZONTAL" || mode === "VERTICAL") {
+      const children = inFlow(current).map(measure);
+      const along = (child: { width: number; height: number }) =>
+        mode === "HORIZONTAL" ? child.width : child.height;
+      const across = (child: { width: number; height: number }) =>
+        mode === "HORIZONTAL" ? child.height : child.width;
+      const spacing = num(current, "itemSpacing") * Math.max(0, children.length - 1);
+      const main = children.reduce((sum, child) => sum + along(child), 0) + spacing;
+      const cross = Math.max(0, ...children.map(across));
+      const padX = num(current, "paddingLeft") + num(current, "paddingRight");
+      const padY = num(current, "paddingTop") + num(current, "paddingBottom");
+      const contentW = (mode === "HORIZONTAL" ? main : cross) + padX;
+      const contentH = (mode === "HORIZONTAL" ? cross : main) + padY;
+      size = {
+        width: Math.max(
+          hugs(current, "H") ? contentW : num(current, "width"),
+          num(current, "minWidth"),
+        ),
+        height: Math.max(
+          hugs(current, "V") ? contentH : num(current, "height"),
+          num(current, "minHeight"),
+        ),
+      };
+    } else if (mode === "GRID") {
+      const { columns, cells } = gridOf(current);
+      const padX = num(current, "paddingLeft") + num(current, "paddingRight");
+      const padY = num(current, "paddingTop") + num(current, "paddingBottom");
+      const gapX = num(current, "gridColumnGap") * Math.max(0, columns.length - 1);
+      const rows = [...new Set(cells.map((cell) => cell.row))].map((row) =>
+        Math.max(0, ...cells.filter((cell) => cell.row === row).map((cell) => cell.height)),
+      );
+      const gapY = num(current, "gridRowGap") * Math.max(0, rows.length - 1);
+      const contentW = padX + gapX + columns.reduce((sum, width) => sum + width, 0);
+      const contentH = padY + gapY + rows.reduce((sum, height) => sum + height, 0);
+      size = {
+        width: hugs(current, "H") ? contentW : num(current, "width"),
+        height: hugs(current, "V") ? contentH : num(current, "height"),
+      };
+    } else {
+      size = { width: num(current, "width"), height: num(current, "height") };
+    }
+    sizes.set(current, size);
+    return size;
+  };
+
+  const gridOf = (current: DoubleNode) => {
+    const count = Math.max(1, num(current, "gridColumnCount"));
+    const cells = current.children.map((child, index) => {
+      const own = measure(child);
+      return {
+        child,
+        row: Math.floor(index / count),
+        column: index % count,
+        width: sized(child, "H") ? own.width : 0,
+        height: sized(child, "V") ? own.height : 0,
+      };
+    });
+    const columns = Array.from({ length: count }, (_, column) =>
+      Math.max(0, ...cells.filter((cell) => cell.column === column).map((cell) => cell.width)),
+    );
+    return { columns, cells };
+  };
+
+  const place = (current: DoubleNode, box: DoubleBox): void => {
+    boxes.set(current, box);
+    const mode = prop(current, "layoutMode");
+    if (mode === "GRID") {
+      const { columns, cells } = gridOf(current);
+      const rowHeights = new Map<number, number>();
+      for (const cell of cells) {
+        rowHeights.set(cell.row, Math.max(rowHeights.get(cell.row) ?? 0, cell.height));
+      }
+      for (const cell of cells) {
+        let x = num(current, "paddingLeft");
+        for (let column = 0; column < cell.column; column++) {
+          x += (columns[column] ?? 0) + num(current, "gridColumnGap");
+        }
+        let y = num(current, "paddingTop");
+        for (let row = 0; row < cell.row; row++) {
+          y += (rowHeights.get(row) ?? 0) + num(current, "gridRowGap");
+        }
+        // The track gives the child its size: an unsized child is as large as the track says.
+        place(cell.child, { x, y, width: cell.width, height: cell.height });
+      }
+      return;
+    }
+    if (mode === "HORIZONTAL" || mode === "VERTICAL") {
+      let cursor = mode === "HORIZONTAL" ? num(current, "paddingLeft") : num(current, "paddingTop");
+      for (const child of inFlow(current)) {
+        const size = measure(child);
+        const x = mode === "HORIZONTAL" ? cursor : num(current, "paddingLeft");
+        const y = mode === "HORIZONTAL" ? num(current, "paddingTop") : cursor;
+        place(child, { x, y, ...size });
+        cursor += (mode === "HORIZONTAL" ? size.width : size.height) + num(current, "itemSpacing");
+      }
+      return;
+    }
+    for (const child of current.children) {
+      place(child, { x: num(child, "x"), y: num(child, "y"), ...measure(child) });
+    }
+  };
+
+  place(root, { x: 0, y: 0, ...measure(root) });
+  return boxes;
 }
 
 /**
@@ -264,16 +462,22 @@ function strict<T extends object>(name: string, api: T): T {
 
 /** A fresh double with an empty document; `fonts` are the fonts the file has besides Inter. */
 export function figmaDouble(
-  options: { fonts?: readonly { family: string; style: string }[] } = {},
+  options: {
+    fonts?: readonly { family: string; style: string }[];
+    /** A tool that accepts the grid and ignores every size in it — the failure of F14. */
+    gridIgnoresSizing?: boolean;
+  } = {},
 ): FigmaDouble {
   const counts: DoubleCounts = { collections: 0, variables: 0, nodes: 0, valueWrites: 0 };
   const available = new Set([...FIGMA_FONTS, ...(options.fonts ?? [])].map(fontKey));
   const loaded = new Set<string>();
+  // Filled below, once the document and the variables exist.
+  const context: NodeContext = { loaded };
   const notifications: DoubleNotification[] = [];
   const collections: DoubleCollection[] = [];
   const variables: DoubleVariable[] = [];
-  const root = node("DOCUMENT", "Document", counts);
-  const page = node("PAGE", "Page 1", counts);
+  const root = node("DOCUMENT", "Document", counts, context);
+  const page = node("PAGE", "Page 1", counts, context);
   root.appendChild(page);
 
   const createCollection = (name: string): DoubleCollection => {
@@ -337,12 +541,12 @@ export function figmaDouble(
         boundVariables: { color: { type: "VARIABLE_ALIAS", id: variable.id, name: variable.name } },
       }),
     }),
-    createComponent: () => node("COMPONENT", "Component", counts),
-    createFrame: () => node("FRAME", "Frame", counts),
-    createText: () => node("TEXT", "Text", counts, loaded),
-    createRectangle: () => node("RECTANGLE", "Rectangle", counts),
+    createComponent: () => node("COMPONENT", "Component", counts, context),
+    createFrame: () => node("FRAME", "Frame", counts, context),
+    createText: () => node("TEXT", "Text", counts, context),
+    createRectangle: () => node("RECTANGLE", "Rectangle", counts, context),
     combineAsVariants: (components: DoubleNode[], parent: DoubleNode) => {
-      const set = node("COMPONENT_SET", "Component Set", counts);
+      const set = node("COMPONENT_SET", "Component Set", counts, context);
       // Component properties live on the set (F11): a TEXT property the labels are connected to.
       const definitions: Record<string, { type: string; defaultValue: string }> = {};
       set.properties.componentPropertyDefinitions = definitions;
@@ -398,6 +602,25 @@ export function figmaDouble(
       null,
       1,
     );
+
+  // A number bound to a variable: its value in the first mode of its collection, aliases followed.
+  const resolve = (name: string): unknown => {
+    let variable = variables.find((candidate) => candidate.name === name);
+    for (let depth = 0; variable !== undefined && depth < 32; depth++) {
+      const collection = collections.find((candidate) => candidate.id === variable?.collectionId);
+      const value = variable.valuesByMode[collection?.modes[0]?.modeId ?? ""];
+      const alias = value as { type?: string; id?: string } | undefined;
+      if (alias?.type !== "VARIABLE_ALIAS") return value;
+      variable = variables.find((candidate) => candidate.id === alias.id);
+    }
+    return undefined;
+  };
+  context.box = (current: DoubleNode) => {
+    let top = current;
+    while (top.parent !== undefined) top = top.parent;
+    const box = layoutOf(top, resolve, options.gridIgnoresSizing === true).get(current);
+    return box ?? { x: 0, y: 0, width: 0, height: 0 };
+  };
 
   const untouchedDefaults = (keys: readonly string[]) => {
     const found: string[] = [];
