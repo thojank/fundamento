@@ -473,6 +473,45 @@ const dims = (box) => px(box.width) + " × " + px(box.height);
  * against its content, the places the variants took, and the size of the set. Figma accepted a
  * grid once and left every variant at 0 × 0 — only a measurement says so.
  */
+/** Properties of the grid Figma may hold at the set; names it does not know are reported so. */
+const HELD_AT_SET = [
+  "type", "layoutMode", "layoutWrap", "layoutSizingHorizontal", "layoutSizingVertical",
+  "primaryAxisSizingMode", "counterAxisSizingMode", "gridRowCount", "gridColumnCount",
+  "gridRowGap", "gridColumnGap", "gridRowSizes", "gridColumnSizes", "paddingLeft", "paddingRight",
+  "paddingTop", "paddingBottom", "itemSpacing", "counterAxisSpacing", "clipsContent", "width",
+  "height",
+];
+
+/** What Figma may hold at a child of the grid: its place, its sizing and its cell. */
+const HELD_AT_VARIANT = [
+  "name", "type", "layoutPositioning", "layoutSizingHorizontal", "layoutSizingVertical",
+  "layoutAlign", "layoutGrow", "gridRowAnchorIndex", "gridColumnAnchorIndex", "gridRowSpan",
+  "gridColumnSpan", "gridChildHorizontalAlign", "gridChildVerticalAlign", "layoutMode", "x", "y",
+  "width", "height",
+];
+
+/**
+ * Reads the named properties as the tool holds them — raw, no interpretation (F14: erst messen,
+ * dann bauen). A property the tool does not have reads "nicht vorhanden"; one it throws on reads
+ * "wirft: <its message>". Objects are kept as JSON, so track definitions arrive whole.
+ */
+function held(node, names) {
+  const out = {};
+  for (const name of names) {
+    try {
+      const value = node[name];
+      out[name] = value === undefined
+        ? "nicht vorhanden"
+        : typeof value === "object" && value !== null
+          ? JSON.parse(JSON.stringify(value))
+          : value;
+    } catch (error) {
+      out[name] = "wirft: " + String(error && error.message ? error.message : error);
+    }
+  }
+  return out;
+}
+
 function measureLayout(set, component) {
   const nodes = component.variants
     .map((variant) => ours(set, "variant", variantName(variant.props)))
@@ -493,7 +532,21 @@ function measureLayout(set, component) {
     (box) => box.width !== 0 && box.height !== 0 &&
       (box.width < box.content.width || box.height < box.content.height),
   );
+  const first = nodes[0];
+  const last = nodes[nodes.length - 1];
+  const withParent = (node) =>
+    node === undefined
+      ? {}
+      : Object.assign(held(node, HELD_AT_VARIANT), {
+          parent: node.parent ? node.parent.type : "kein Elternknoten",
+          index: set.children.indexOf(node),
+        });
   return {
+    held: {
+      set: Object.assign(held(set, HELD_AT_SET), { children: set.children.length }),
+      variant: withParent(first),
+      last: withParent(last),
+    },
     set: { width: set.width, height: set.height },
     variants: boxes.length,
     places: new Set(boxes.map((box) => box.x + "," + box.y)).size,

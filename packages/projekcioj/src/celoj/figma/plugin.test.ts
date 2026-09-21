@@ -23,6 +23,14 @@ const plan = JSON.parse(files["figma/plan.json"] ?? "{}") as FigmaPlan;
 const MODEL_FONTS = [{ family: "Geist", style: "Medium" }] as const;
 const modelDouble = () => figmaDouble({ fonts: MODEL_FONTS });
 
+/**
+ * The warnings of a run without the one about the grid. F14 is open: Figma lays the variants on
+ * one place, the double reproduces that observation, and so **every** run warns about it until
+ * the cause is measured. Tests of other warnings say what they mean by leaving that one out.
+ */
+const otherThanLayout = (warnings: readonly string[]) =>
+  warnings.filter((warning) => !warning.includes("verschiedene Positionen statt"));
+
 /** Runs the generated plugin source against a double. */
 async function run(
   double: ReturnType<typeof figmaDouble>,
@@ -275,11 +283,11 @@ describe("the plugin reports what it did (F10)", () => {
     expect(first.components[0]?.set).toBe("butono");
     expect(first.components[0]?.created).toHaveLength(variants);
     expect(first.components[0]?.updated).toEqual([]);
-    expect(first.warnings).toEqual([]);
+    expect(otherThanLayout(first.warnings)).toEqual([]);
     const second = await report(double);
     expect(second.components[0]?.created).toEqual([]);
     expect(second.components[0]?.updated).toHaveLength(variants);
-    expect(second.warnings).toEqual([]);
+    expect(otherThanLayout(second.warnings)).toEqual([]);
   });
 
   // The finding that made this necessary: a document of mixed history held 71 of 72 variants, and
@@ -422,7 +430,7 @@ describe("a run that creates in a set it found warns, and says what it found (F1
     const double = modelDouble();
     const first = await run2(double);
     expect(first.components[0]?.after).toEqual({ children: 72, marked: 72 });
-    expect(first.warnings).toEqual([]);
+    expect(otherThanLayout(first.warnings)).toEqual([]);
   });
 
   it("warns when a child of the set has no mark after the run", async () => {
@@ -459,10 +467,11 @@ describe("a run that creates in a set it found warns, and says what it found (F1
     expect(again.components[0]?.before?.children).toBe(71);
     // Zwei Warnungen: die Regel („vorgefunden und trotzdem angelegt") und die Deutung des Paars
     // aus dem Endstand des vorigen Laufs und dem Anfangsstand dieses Laufs.
-    expect(again.warnings).toHaveLength(2);
-    expect(again.warnings[0]).toContain(LAST);
-    expect(again.warnings[0]).toContain("vorgefunden");
-    expect(again.warnings[1]).toContain("zwischen den Läufen");
+    const warnings = otherThanLayout(again.warnings);
+    expect(warnings).toHaveLength(2);
+    expect(warnings[0]).toContain(LAST);
+    expect(warnings[0]).toContain("vorgefunden");
+    expect(warnings[1]).toContain("zwischen den Läufen");
   });
 
   // End state two: the node is there but lost our mark. Then the run creates a second node of the
@@ -524,7 +533,7 @@ describe("the run reads its own last state and says what happened (F10b)", () =>
     const second = await run2(double);
     expect(second.components[0]?.left).toEqual({ children: 72, marked: 72 });
     expect(second.components[0]?.diagnosis).toBe("");
-    expect(second.warnings).toEqual([]);
+    expect(otherThanLayout(second.warnings)).toEqual([]);
   });
 
   it("says 'gone between the runs' when the last run left the set complete", async () => {
@@ -959,11 +968,28 @@ describe("the double measures sizes the way Figma did (F14)", () => {
     (node as { height?: number } | undefined)?.height,
   ];
 
-  it("reproduces the measurement: unsized variants are 0 × 0, the hugging set 48 × 96", async () => {
-    const { set, variants } = await gridSet(modelDouble(), false);
-    expect(size(set)).toEqual([48, 96]);
-    expect(size(variants[0])).toEqual([0, 0]);
-  });
+  // Messlauf 2 (Datei E7shE7m0z6O8VWPoGyN8ZT, 2026-09-21) hat die Theorie „das Raster misst eine
+  // Variante als 0 × 0" widerlegt: Die Varianten hatten ihre richtige Größe (zero: [], smaller:
+  // []), das Set maß trotzdem 48 × 96 und alle Kinder lagen an einer Stelle. Das Double gibt genau
+  // diese Beobachtung wieder — ohne Theorie, warum. Ob die Größe einer Variante gesetzt ist, ändert
+  // an der Beobachtung nichts.
+  it.each([
+    ["sized", true],
+    ["unsized", false],
+  ])(
+    "reproduces the observation with %s variants: set 48 × 96, one place",
+    async (_name, sized) => {
+      const { set, variants } = await gridSet(modelDouble(), sized);
+      expect(size(set)).toEqual([48, 96]);
+      const places = new Set(
+        variants.map((variant) => {
+          const at = variant as unknown as { x: number; y: number };
+          return `${at.x},${at.y}`;
+        }),
+      );
+      expect(places.size).toBe(1);
+    },
+  );
 
   it("gives a variant that hugs its content the size of that content", async () => {
     const { variants } = await gridSet(modelDouble(), true);
@@ -990,13 +1016,20 @@ describe("every variant has its size and its own place in the grid (F14)", () =>
     }
   });
 
-  it("puts the 72 variants on 72 places: 6 columns, 12 rows", async () => {
+  // Die Zusicherung „72 Plätze in 6 Spalten und 12 Zeilen" stand hier und war grün — gegen ein
+  // Double, das eine widerlegte Theorie nachrechnete. Sie kommt zurück, wenn die Ursache aus den
+  // Zahlen des nächsten Messlaufs feststeht (erst messen, dann bauen). Bis dahin gilt, was Figma
+  // tut: Der Bericht nennt das Bild beim Namen.
+  it("says with numbers that the grid did not take effect", async () => {
     const double = modelDouble();
-    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
-    const places = (setOf(double)?.children ?? []).map((variant) => box(variant));
-    expect(new Set(places.map((place) => `${place?.x},${place?.y}`)).size).toBe(72);
-    expect(new Set(places.map((place) => place?.x)).size).toBe(6);
-    expect(new Set(places.map((place) => place?.y)).size).toBe(12);
+    const report = (await new Function(
+      "figma",
+      `${repoFiles["figma/plugin/code.js"] ?? ""}\nreturn applyPlan();`,
+    )(double.figma)) as { warnings: string[] };
+    const text = report.warnings.join(" ");
+    expect(text).toContain("1 verschiedene Positionen statt 72");
+    expect(text).toContain("1 Spalten statt 6");
+    expect(text).toContain("48 × 96");
   });
 
   it("keeps every child of a variant in the flow, not freely placed", async () => {
@@ -1008,18 +1041,72 @@ describe("every variant has its size and its own place in the grid (F14)", () =>
     }
   });
 
-  // Die Wirkung messen, nicht den Aufruf: In einem Werkzeug, das das Raster annimmt und nichts
-  // bewirkt, darf der Bericht nicht warnings: [] melden.
-  it("says so with numbers when the tool leaves the variants at 0 × 0", async () => {
-    const double = figmaDouble({ fonts: MODEL_FONTS, gridIgnoresSizing: true });
+  // Erst messen, dann bauen (Maintainer, 2026-09-21): Der Bericht trägt, was das Werkzeug
+  // tatsächlich hält — Rohdaten, keine Deutung. Am Set die Definition der Spuren, an einer
+  // Beispielvariante Lage, Positionierung und Zellenzuordnung. Eine Eigenschaft, die das Werkzeug
+  // nicht kennt, steht als „nicht vorhanden" da; eine, bei der es wirft, mit seiner Meldung.
+  it("reports what the tool holds: the tracks of the set and the cell of a variant", async () => {
+    const double = modelDouble();
     const report = (await new Function(
       "figma",
       `${repoFiles["figma/plugin/code.js"] ?? ""}\nreturn applyPlan();`,
-    )(double.figma)) as { warnings: string[] };
-    const text = report.warnings.join(" ");
-    expect(text).toContain("72 von 72 Varianten");
-    expect(text).toContain("0 × 0");
-    expect(text).toContain("48 × 96");
+    )(double.figma)) as {
+      components: {
+        layout: {
+          held: {
+            set: Record<string, unknown>;
+            variant: Record<string, unknown>;
+            last: Record<string, unknown>;
+          };
+        };
+      }[];
+    };
+    const held = report.components[0]?.layout.held;
+    expect(held?.set).toMatchObject({
+      type: "COMPONENT_SET",
+      layoutMode: "GRID",
+      gridRowCount: 12,
+      gridColumnCount: 6,
+      gridRowGap: 8,
+      gridColumnGap: 8,
+      children: 72,
+    });
+    // Names the double does not know are reported as absent, not left out.
+    expect(held?.set.gridRowSizes).toBe("nicht vorhanden");
+    expect(held?.variant).toMatchObject({
+      name: "variant=primary, tone=default, size=small, state=rest",
+      parent: "COMPONENT_SET",
+      layoutPositioning: "AUTO",
+      layoutSizingHorizontal: "HUG",
+    });
+    expect(held?.variant).toHaveProperty("gridRowAnchorIndex");
+    expect(held?.variant).toHaveProperty("gridColumnAnchorIndex");
+    expect(held?.last.name).toBe("variant=tertiary, tone=default, size=large, state=loading");
+  });
+
+  it("reports a property the tool throws on with the tool's message", async () => {
+    const double = modelDouble();
+    const api = double.figma as { combineAsVariants: (...args: unknown[]) => DoubleNode };
+    const combine = api.combineAsVariants;
+    const figma = {
+      ...double.figma,
+      combineAsVariants: (...args: unknown[]) => {
+        const set = combine(...args);
+        return new Proxy(set, {
+          get(target, key, receiver) {
+            if (key === "gridRowSizes") throw new Error("in get_gridRowSizes: not supported");
+            return Reflect.get(target, key, receiver);
+          },
+        });
+      },
+    };
+    const report = (await new Function(
+      "figma",
+      `${repoFiles["figma/plugin/code.js"] ?? ""}\nreturn applyPlan();`,
+    )(figma)) as { components: { layout: { held: { set: Record<string, unknown> } } }[] };
+    expect(report.components[0]?.layout.held.set.gridRowSizes).toBe(
+      "wirft: in get_gridRowSizes: not supported",
+    );
   });
 
   it("labels every variant with the neutral word", async () => {

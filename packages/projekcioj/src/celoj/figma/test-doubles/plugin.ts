@@ -291,16 +291,18 @@ function node(
  * - an auto-layout frame hugs an axis when it says so (layoutSizing HUG, or the older AUTO sizing
  *   modes), adds its paddings and the spacing between its children in the flow, and grows to its
  *   minimum sizes; otherwise it keeps its width and height (Figma's default 100 × 100);
- * - a grid lays its children out row by row; its tracks are as large as their largest child. A
- *   child whose size the plugin did not set counts as 0 × 0 — measured in Figma on 2026-09-21: an
- *   unsized variant was 0 × 0 and the hugging set 48 × 96, padding and gaps only. Why Figma does
- *   that is not known; the double reproduces the measurement.
+ * - a grid is modelled as it was **observed**, and only so (run 2 in file E7shE7m0z6O8VWPoGyN8ZT,
+ *   2026-09-21): the variants had their own, correct size, yet the hugging set measured 48 × 96 —
+ *   paddings and gaps around tracks of size zero — and all 72 children lay at one place. The
+ *   children evidently did not take part in the grid. An earlier version of this double explained
+ *   the 48 × 96 with "an unsized child counts as 0 × 0"; the run refuted that, and the theory is
+ *   gone. Why Figma does what it does is **not known**; until a measurement says, the double
+ *   claims nothing beyond the observation.
  * Numbers bound to a variable take its value in the first mode of its collection.
  */
 function layoutOf(
   root: DoubleNode,
   resolve: (name: string) => unknown,
-  gridIgnoresSizing: boolean,
 ): Map<DoubleNode, DoubleBox> {
   const boxes = new Map<DoubleNode, DoubleBox>();
   const sizes = new Map<DoubleNode, { width: number; height: number }>();
@@ -320,10 +322,6 @@ function layoutOf(
   };
   const inFlow = (current: DoubleNode) =>
     current.children.filter((child) => prop(child, "layoutPositioning") !== "ABSOLUTE");
-  /** In a grid, a child counts with its size only when the plugin set it (see above). */
-  const sized = (child: DoubleNode, axis: "H" | "V") =>
-    !gridIgnoresSizing &&
-    !child.defaults.has(axis === "H" ? "layoutSizingHorizontal" : "layoutSizingVertical");
 
   const measure = (current: DoubleNode): { width: number; height: number } => {
     const known = sizes.get(current);
@@ -358,16 +356,17 @@ function layoutOf(
         ),
       };
     } else if (mode === "GRID") {
-      const { columns, cells } = gridOf(current);
-      const padX = num(current, "paddingLeft") + num(current, "paddingRight");
-      const padY = num(current, "paddingTop") + num(current, "paddingBottom");
-      const gapX = num(current, "gridColumnGap") * Math.max(0, columns.length - 1);
-      const rows = [...new Set(cells.map((cell) => cell.row))].map((row) =>
-        Math.max(0, ...cells.filter((cell) => cell.row === row).map((cell) => cell.height)),
-      );
-      const gapY = num(current, "gridRowGap") * Math.max(0, rows.length - 1);
-      const contentW = padX + gapX + columns.reduce((sum, width) => sum + width, 0);
-      const contentH = padY + gapY + rows.reduce((sum, height) => sum + height, 0);
+      // Observed: tracks of size zero, so a hugging grid is its paddings and its gaps.
+      const columns = Math.max(1, num(current, "gridColumnCount"));
+      const rows = Math.max(1, num(current, "gridRowCount"));
+      const contentW =
+        num(current, "paddingLeft") +
+        num(current, "paddingRight") +
+        num(current, "gridColumnGap") * (columns - 1);
+      const contentH =
+        num(current, "paddingTop") +
+        num(current, "paddingBottom") +
+        num(current, "gridRowGap") * (rows - 1);
       size = {
         width: hugs(current, "H") ? contentW : num(current, "width"),
         height: hugs(current, "V") ? contentH : num(current, "height"),
@@ -379,44 +378,17 @@ function layoutOf(
     return size;
   };
 
-  const gridOf = (current: DoubleNode) => {
-    const count = Math.max(1, num(current, "gridColumnCount"));
-    const cells = current.children.map((child, index) => {
-      const own = measure(child);
-      return {
-        child,
-        row: Math.floor(index / count),
-        column: index % count,
-        width: sized(child, "H") ? own.width : 0,
-        height: sized(child, "V") ? own.height : 0,
-      };
-    });
-    const columns = Array.from({ length: count }, (_, column) =>
-      Math.max(0, ...cells.filter((cell) => cell.column === column).map((cell) => cell.width)),
-    );
-    return { columns, cells };
-  };
-
   const place = (current: DoubleNode, box: DoubleBox): void => {
     boxes.set(current, box);
     const mode = prop(current, "layoutMode");
     if (mode === "GRID") {
-      const { columns, cells } = gridOf(current);
-      const rowHeights = new Map<number, number>();
-      for (const cell of cells) {
-        rowHeights.set(cell.row, Math.max(rowHeights.get(cell.row) ?? 0, cell.height));
-      }
-      for (const cell of cells) {
-        let x = num(current, "paddingLeft");
-        for (let column = 0; column < cell.column; column++) {
-          x += (columns[column] ?? 0) + num(current, "gridColumnGap");
-        }
-        let y = num(current, "paddingTop");
-        for (let row = 0; row < cell.row; row++) {
-          y += (rowHeights.get(row) ?? 0) + num(current, "gridRowGap");
-        }
-        // The track gives the child its size: an unsized child is as large as the track says.
-        place(cell.child, { x, y, width: cell.width, height: cell.height });
+      // Observed: every child at one place, each with its own size.
+      for (const child of current.children) {
+        place(child, {
+          x: num(current, "paddingLeft"),
+          y: num(current, "paddingTop"),
+          ...measure(child),
+        });
       }
       return;
     }
@@ -462,11 +434,7 @@ function strict<T extends object>(name: string, api: T): T {
 
 /** A fresh double with an empty document; `fonts` are the fonts the file has besides Inter. */
 export function figmaDouble(
-  options: {
-    fonts?: readonly { family: string; style: string }[];
-    /** A tool that accepts the grid and ignores every size in it — the failure of F14. */
-    gridIgnoresSizing?: boolean;
-  } = {},
+  options: { fonts?: readonly { family: string; style: string }[] } = {},
 ): FigmaDouble {
   const counts: DoubleCounts = { collections: 0, variables: 0, nodes: 0, valueWrites: 0 };
   const available = new Set([...FIGMA_FONTS, ...(options.fonts ?? [])].map(fontKey));
@@ -618,7 +586,7 @@ export function figmaDouble(
   context.box = (current: DoubleNode) => {
     let top = current;
     while (top.parent !== undefined) top = top.parent;
-    const box = layoutOf(top, resolve, options.gridIgnoresSizing === true).get(current);
+    const box = layoutOf(top, resolve).get(current);
     return box ?? { x: 0, y: 0, width: 0, height: 0 };
   };
 

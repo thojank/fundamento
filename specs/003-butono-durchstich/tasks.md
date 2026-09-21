@@ -487,7 +487,7 @@ Results go into `plan.md` → „Manual acceptance results".
     Beschriftungstext unterliegen derselben Zusicherung mit F11. Nicht modelliert und damit
     weiterhin blind: die Vorgaben des Komponentensets, das `combineAsVariants` anlegt.
 
-- [x] **F14 Das Raster wirkt nicht, und niemand merkt es** (Abnahme M1, Jugxo
+- [ ] **F14 Das Raster wirkt nicht, und niemand merkt es** (Abnahme M1, Jugxo
   `jug_01M327FC8MRXSEF63AHQHFQJ28`)
   - Befund (Maintainer, 2026-09-21): Kein Abbruch, keine Warnung, aber alle 72 Varianten lagen auf
     derselben Stelle. Die Annahme „Figma lehnt GRID ab ⇒ der Lauf bricht ab" hielt nicht: Figma
@@ -511,5 +511,23 @@ Results go into `plan.md` → „Manual acceptance results".
     Messpunkt.
   - Beschriftung im selben Zug auf das neutrale Wort „Aktion" (Figma kennt einen Vorgabewert je
     Eigenschaft, nicht je Variante).
+  - **Messlauf 2 (Datei `E7shE7m0z6O8VWPoGyN8ZT`, 2026-09-21): die Erklärung ist widerlegt.**
+    Idempotent (72 angelegt, dann 0/72), die neue Warnung griff und nannte die Zahlen — aber das
+    Raster wirkte weiterhin nicht: Set 48 × 96, 1 Position, 1 Spalte, 1 Zeile, und zugleich
+    `zero: []`, `smaller: []`. Die Varianten haben ihre richtige Größe und nehmen am Raster
+    trotzdem nicht teil. Das Double hatte 48 × 96 über die 0 × 0-Theorie nachgerechnet und damit
+    wieder eine Annahme über Figma bestätigt, die nicht stimmt.
+  - Vorgabe des Maintainers: **erst messen, dann bauen.** Umgesetzt: (a) Das Double modelliert die
+    0 × 0-Theorie nicht mehr, es gibt nur die Beobachtung wieder (Set = Innenabstand plus Lücken,
+    alle Kinder an einer Stelle, jedes in seiner eigenen Größe). Die Zusicherung „72 Plätze in 6
+    Spalten und 12 Zeilen" war gegen die widerlegte Theorie grün und ist entfernt, bis die Ursache
+    feststeht; an ihrer Stelle steht, was gilt — der Bericht nennt das Bild mit Zahlen. (b) Der
+    Bericht trägt als Rohdaten, was Figma hält (`layout.held`): am Set `layoutMode`, Spurenzahl,
+    Lücken, Bemessung und die Spurdefinitionen, an der ersten und der letzten Variante
+    `layoutPositioning`, Bemessung, Zellenanker und -spanne, Lage und Größe. Unbekannte
+    Eigenschaften stehen als „nicht vorhanden" da, werfende mit der Meldung des Werkzeugs.
+  - Offen: Lauf beim Maintainer mit dem erweiterten Bericht, dann die Ursache aus den Zahlen, dann
+    roter Test und Korrektur. Bis dahin warnt jeder Lauf über das Raster — das ist der Stand, keine
+    Störung.
 
 Consistency check before tasks (`/speckit.analyze` scope): every FR and AK maps to at least one task or a recorded decision; every task maps to a plan decision; two new packages (Art. XI); the lockfile changes in T008 only; no task lowers a threshold; nothing is published.
