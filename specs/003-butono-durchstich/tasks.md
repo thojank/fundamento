@@ -381,10 +381,37 @@ Results go into `plan.md` → „Manual acceptance results".
     aber einen Lauf, der **alle acht Celoj** schreibt. Lokal 2,3 s, im CI-Lauf von #17 14,8 s, auf
     einem langsameren Runner darüber. Das Budget hatte als einziges der spawnlastigen Tests den
     Faktor für die CI nicht.
-  - Grün: Faktor 3 unter `CI=true` nach `jug_01M2W3K1YPP05F4XF86J71RGTK` — für die Last, nicht für
-    die Arbeit; kein Schwellwert einer Prüfung wird gesenkt. Derselbe Faktor für
-    `per-aspekto.test.ts` in modelo, der unter voller Parallellast dasselbe tat.
-  - Bleibt zu beobachten: Fällt der Test auch mit 90 s, liegt es an der Arbeit und nicht an der
-    Last; dann wird er zerlegt (ein Celo je Fall statt aller acht in einem Aufruf).
+  - Zwischenschritt: Faktor 3 unter `CI=true` nach `jug_01M2W3K1YPP05F4XF86J71RGTK`. Verworfen als
+    Dauerlösung (Maintainer): 90 s Budget bei 2,3 s Arbeit ist das Vierzigfache — der Test wäre
+    auch bei einer echten dreißigfachen Verlangsamung noch grün und würde nichts mehr messen. Auf
+    das nächste Rot zu warten hieße, auf einen zufälligen Zeitpunkt zu warten.
+  - Grün, zerlegt: Der Bau nimmt `--celo <name>` (mehrfach oder mit Komma) und baut nur die
+    genannten Celoj; ein Celo, der zusammensetzt, was die anderen schrieben (Vitrino), wird ohne
+    sie mit einer erklärenden Meldung abgelehnt. Der Verdrahtungstest baut jetzt **einen** Celo
+    (`--celo css`, gemessen 1,4 s lokal) mit einem Budget von 10 s; der Make-Kit-Test baut genau
+    den Celo, dessen Bündel er behauptet (`--celo make-kit`). Der pauschale CI-Faktor im cli-Paket
+    entfällt wieder.
+  - Der vollständige Bau aller acht Celoj bleibt in der CI abgedeckt, ohne zweiten Rauchtest: Der
+    Schritt `Check: Parity` ruft `fm projekcioj build --out .fundamento/projekcioj` auf und prüft
+    das Ergebnis; ein Rot dort heißt „der vollständige Bau", ein Rot im cli-Paket heißt „die
+    Verdrahtung des Befehls".
+  - Der Faktor für `per-aspekto.test.ts` in modelo bleibt: Dieser Test **ist** die Arbeit, die er
+    behauptet (vier vollständige Exporte, byte-identisch), er prüft keine Verdrahtung.
+
+- [ ] **F13 Figmas Vorgabefüllung deckt die Projektion zu** (Abnahme M1, Maintainer 2026-09-21)
+  - Befund: Jede Variante trägt Figmas Vorgabefüllung `#FFFFFF` 100 %, die das Plugin nie entfernt.
+    Sie stammt nicht aus dem Modell. Folge: Die durchsichtige tertiäre Aktion sitzt in Figma immer
+    auf Weiß, auch im Dunkelmodus — F8 ist im Bild wieder zugedeckt, obwohl die Deckkraft am Paint
+    stimmt.
+  - Anforderung: Das Plugin setzt an Variante und `control` nur Werte aus dem Plan und räumt
+    Figmas Vorgaben ab. Ein Test sichert zu, dass **keine Knoteneigenschaft einen Wert trägt, der
+    nicht aus dem Plan kommt**.
+  - Rot zuerst: (a) am Double — ein Knoten, den das Werkzeug mit einer Vorgabe anlegt, darf nach
+    dem Lauf keine Eigenschaft tragen, die der Plan nicht nennt; (b) die Vorgabefüllung der
+    Variante selbst ist nach dem Lauf leer oder aus dem Plan.
+  - Anmerkung zum Double (`jug_01M3094ZC6F3XZ1H0MWQZ62MYV`): Das Double legt Knoten heute ohne
+    jede Vorgabe an und ist damit genau an der Stelle blind, an der dieser Befund entstand. Es
+    lernt die Vorgaben des Werkzeugs mit — `createComponent`, `createFrame` und `createRectangle`
+    beginnen mit Figmas `fills`, `createText` mit seiner Schrift —, sonst prüft der Test nichts.
 
 Consistency check before tasks (`/speckit.analyze` scope): every FR and AK maps to at least one task or a recorded decision; every task maps to a plan decision; two new packages (Art. XI); the lockfile changes in T008 only; no task lowers a threshold; nothing is published.
