@@ -363,6 +363,13 @@ Results go into `plan.md` → „Manual acceptance results".
   - Fertig wenn: Eine Variante in Figma trägt die Maße und die Beschriftung des Modells, die
     Prüfung sieht eine Abweichung, und das Double weist die Bindung ohne Layoutmodus zurück.
   - Nicht Teil des PRs zu F8–F10: eigener Befund, eigener Durchstich.
+  - Zwischenstand (2026-09-21, Paket „Figma zeigt das Ero", Schritt 2a): Das Double beginnt einen
+    Rahmen mit `layoutMode: "NONE"` und weist eine Bindung an `paddingLeft/Right`, `itemSpacing`,
+    Mindest- oder Höchstmaße dort laut zurück; damit fiel jeder Plugin-Lauf (`FRAME "control":
+    minWidth only takes effect with auto layout, and layoutMode is "NONE"`). Das Plugin legt das
+    `control` jetzt horizontal und mittig an, Größe nach Inhalt, und bindet den Innenabstand an
+    **beiden** Seiten (bisher nur links). Offen: Geometrie in `check:parity` (2b), Beschriftung und
+    Schrift (3), Anordnung der Varianten (4).
 
 - [x] **F12 Der Bau aller Projektionen wackelt in der CI** (eigener Befund aus der CI von PR #18)
   - Fakten: Zwei Läufe desselben Commits `7e14ded`, derselbe Workflow. Der `push`-Lauf
