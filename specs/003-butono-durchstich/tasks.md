@@ -364,4 +364,27 @@ Results go into `plan.md` → „Manual acceptance results".
     Prüfung sieht eine Abweichung, und das Double weist die Bindung ohne Layoutmodus zurück.
   - Nicht Teil des PRs zu F8–F10: eigener Befund, eigener Durchstich.
 
+- [x] **F12 Der Bau aller Projektionen wackelt in der CI** (eigener Befund aus der CI von PR #18)
+  - Fakten: Zwei Läufe desselben Commits `7e14ded`, derselbe Workflow. Der `push`-Lauf
+    (35583680462) fiel durch, der `pull_request`-Lauf (35583732628) bestand. Einziger Fehlschlag:
+    `packages/cli/src/projekcioj.test.ts > fm projekcioj build (T008) > writes the projections to
+    --out and lists the Celoj`, **30 430 ms gegen ein Budget von 30 000 ms**. Alle anderen Pakete
+    grün (modelo 2 116, mcp 114, projekcioj 135, eroj 1); die Meldungen `locator.evaluate: Test
+    ended` sind der Abbruch des parallelen Playwright-Laufs, kein eigener Fehlschlag.
+  - Verworfene Vermutung: Der Branch liege auf einem main-Stand vor #17, wodurch der Verweis in
+    `jug_01M31MH4KAGYSK5CPTY51E7MDV` auf `jug_01M3094ZC6F3XZ1H0MWQZ62MYV` offen bliebe. Die Basis
+    des Branches ist `32178e9`, der Merge-Commit von #17; beide Jugxoj liegen in derselben
+    Historie. Im Log steht auch kein Verweisfehler — `check:regularo` lief gar nicht mehr, der Job
+    brach im Schritt `Test` ab. Damit ist es kein Stand-Problem, sondern ein wackelnder Test:
+    derselbe Commit, einmal rot, einmal grün.
+  - Ursache: Der Test misst die Verdrahtung des Befehls, nicht seine Geschwindigkeit, spawnt dafür
+    aber einen Lauf, der **alle acht Celoj** schreibt. Lokal 2,3 s, im CI-Lauf von #17 14,8 s, auf
+    einem langsameren Runner darüber. Das Budget hatte als einziges der spawnlastigen Tests den
+    Faktor für die CI nicht.
+  - Grün: Faktor 3 unter `CI=true` nach `jug_01M2W3K1YPP05F4XF86J71RGTK` — für die Last, nicht für
+    die Arbeit; kein Schwellwert einer Prüfung wird gesenkt. Derselbe Faktor für
+    `per-aspekto.test.ts` in modelo, der unter voller Parallellast dasselbe tat.
+  - Bleibt zu beobachten: Fällt der Test auch mit 90 s, liegt es an der Arbeit und nicht an der
+    Last; dann wird er zerlegt (ein Celo je Fall statt aller acht in einem Aufruf).
+
 Consistency check before tasks (`/speckit.analyze` scope): every FR and AK maps to at least one task or a recorded decision; every task maps to a plan decision; two new packages (Art. XI); the lockfile changes in T008 only; no task lowers a threshold; nothing is published.
