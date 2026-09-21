@@ -42,6 +42,7 @@ export interface DoubleNode {
   setSharedPluginData(namespace: string, key: string, value: string): void;
   getSharedPluginData(namespace: string, key: string): string;
   setBoundVariable(field: string, variable: DoubleVariable | null): void;
+  layoutMode?: string;
   remove(): void;
 }
 
@@ -75,14 +76,39 @@ export interface FigmaDouble {
 }
 
 /**
+ * Fields Figma only honours on an auto-layout frame (F11). Bound on a frame whose `layoutMode` is
+ * "NONE" they change nothing in the file — the double refuses them, so a projection that forgets
+ * the layout mode cannot pass unseen.
+ */
+const AUTO_LAYOUT_FIELDS: ReadonlySet<string> = new Set([
+  "paddingLeft",
+  "paddingRight",
+  "paddingTop",
+  "paddingBottom",
+  "itemSpacing",
+  "minWidth",
+  "minHeight",
+  "maxWidth",
+  "maxHeight",
+]);
+
+/**
  * What Figma gives a new node before the plugin writes anything (F13). A frame and a component
  * start with a white fill, a text with a black one, an empty string and Inter; the double starts
  * the same way, or it cannot see a default that nobody clears. Size (100 × 100) is modelled with
  * F11, where the geometry becomes the plugin's business.
  */
 const FIGMA_DEFAULTS: Readonly<Record<string, Readonly<Record<string, unknown>>>> = {
-  FRAME: { fills: [{ type: "SOLID", color: { r: 1, g: 1, b: 1 } }], strokes: [] },
-  COMPONENT: { fills: [{ type: "SOLID", color: { r: 1, g: 1, b: 1 } }], strokes: [] },
+  FRAME: {
+    fills: [{ type: "SOLID", color: { r: 1, g: 1, b: 1 } }],
+    strokes: [],
+    layoutMode: "NONE",
+  },
+  COMPONENT: {
+    fills: [{ type: "SOLID", color: { r: 1, g: 1, b: 1 } }],
+    strokes: [],
+    layoutMode: "NONE",
+  },
   TEXT: { fills: [{ type: "SOLID", color: { r: 0, g: 0, b: 0 } }], characters: "" },
 };
 
@@ -118,6 +144,12 @@ function node(type: string, name: string, counts: DoubleCounts): DoubleNode {
       return self.pluginData[`${namespace}/${key}`] ?? "";
     },
     setBoundVariable(field, variable) {
+      if (AUTO_LAYOUT_FIELDS.has(field) && (self.properties.layoutMode ?? "NONE") === "NONE") {
+        throw new Error(
+          `${self.type} "${self.name}": ${field} only takes effect with auto layout, and ` +
+            'layoutMode is "NONE". Set layoutMode before binding it (F11).',
+        );
+      }
       if (variable === null) delete self.boundVariables[field];
       else self.boundVariables[field] = variable.name;
     },

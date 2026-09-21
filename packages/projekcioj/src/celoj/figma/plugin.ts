@@ -15,18 +15,33 @@ import type { FigmaPlan } from "./figma.js";
 
 /** Part property -> the node and field the plugin binds it to (Celo knowledge, Art. VIII). */
 const BINDINGS: Readonly<
-  Record<string, { node: "control" | "label"; field: string; paint?: boolean }>
+  Record<string, { node: "control" | "label"; fields: readonly string[]; paint?: boolean }>
 > = {
-  "surface.fill": { node: "control", field: "fills", paint: true },
-  "border.color": { node: "control", field: "strokes", paint: true },
-  "border.width": { node: "control", field: "strokeWeight" },
-  "box.height": { node: "control", field: "minHeight" },
-  "box.width": { node: "control", field: "minWidth" },
-  "box.inline-padding": { node: "control", field: "paddingLeft" },
-  "box.gap": { node: "control", field: "itemSpacing" },
-  "box.radius": { node: "control", field: "cornerRadius" },
-  "label.color": { node: "label", field: "fills", paint: true },
-  "label.typography": { node: "label", field: "fontSize" },
+  "surface.fill": { node: "control", fields: ["fills"], paint: true },
+  "border.color": { node: "control", fields: ["strokes"], paint: true },
+  "border.width": { node: "control", fields: ["strokeWeight"] },
+  "box.height": { node: "control", fields: ["minHeight"] },
+  "box.width": { node: "control", fields: ["minWidth"] },
+  // Inline padding is one value for both sides (F11): binding only the left one left the right
+  // side at Figma's default.
+  "box.inline-padding": { node: "control", fields: ["paddingLeft", "paddingRight"] },
+  "box.gap": { node: "control", fields: ["itemSpacing"] },
+  "box.radius": { node: "control", fields: ["cornerRadius"] },
+  "label.color": { node: "label", fields: ["fills"], paint: true },
+  "label.typography": { node: "label", fields: ["fontSize"] },
+};
+
+/**
+ * The layout the control needs so its bound measures take effect (F11). Without auto layout Figma
+ * ignores padding, gap and minimum sizes, and the frame keeps its default 100 × 100: the label sits
+ * centred in a row whose height is at least `box.height` and whose width follows its content.
+ */
+const CONTROL_LAYOUT: Readonly<Record<string, string>> = {
+  layoutMode: "HORIZONTAL",
+  primaryAxisAlignItems: "CENTER",
+  counterAxisAlignItems: "CENTER",
+  primaryAxisSizingMode: "AUTO",
+  counterAxisSizingMode: "AUTO",
 };
 
 export const PLUGIN_NAMESPACE = "fundamento";
@@ -37,6 +52,7 @@ export function pluginSource(plan: FigmaPlan): string {
 const PLAN = ${JSON.stringify(plan)};
 const NAMESPACE = ${JSON.stringify(PLUGIN_NAMESPACE)};
 const BINDINGS = ${JSON.stringify(BINDINGS)};
+const CONTROL_LAYOUT = ${JSON.stringify(CONTROL_LAYOUT)};
 
 /** The collection of a name, its modes renamed and completed, without duplicating anything. */
 async function applyCollections() {
@@ -123,9 +139,9 @@ function bind(control, label, bindings, paints, variables) {
         variable,
       );
       if (paint !== undefined && typeof paint.opacity === "number") bound.opacity = paint.opacity;
-      node[target.field] = [bound];
+      for (const field of target.fields) node[field] = [bound];
     } else {
-      node.setBoundVariable(target.field, variable);
+      for (const field of target.fields) node.setBoundVariable(field, variable);
     }
   }
 }
@@ -235,6 +251,9 @@ async function applyComponents(variables) {
       control.fills = [];
       control.strokes = [];
       label.fills = [];
+      // Auto layout before any measure is bound: padding, gap and minimum sizes only take effect
+      // on an auto-layout frame (F11).
+      for (const [field, value] of Object.entries(CONTROL_LAYOUT)) control[field] = value;
       bind(control, label, variant.bindings, variant.paints, variables);
       if (existing === undefined) made.push(node);
     }

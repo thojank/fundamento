@@ -596,3 +596,60 @@ describe("no paint in the file that the plan did not put there (F13)", () => {
     expect(double.untouchedDefaults(["fills", "strokes"])).toEqual([]);
   });
 });
+
+// F11, Geometrie (Paket „Figma zeigt das Ero", Schritt 2): Das Plugin setzte nie `layoutMode`. In
+// Figma sind Innenabstände, Abstand und Mindestmaße ohne Auto-Layout wirkungslos — die Maße des
+// Ero kamen nicht an, und die Abnahme sah Figmas 100 × 100. Das Double hat diese Bindungen
+// stillschweigend angenommen; ab jetzt kennt es die Vorbedingung und scheitert laut
+// (jug_01M3094ZC6F3XZ1H0MWQZ62MYV, erste Anwendung auf eine Vorbedingung des Werkzeugs).
+describe("the geometry of the Ero reaches Figma (F11)", () => {
+  const AUTO_LAYOUT_FIELDS = [
+    "paddingLeft",
+    "paddingRight",
+    "itemSpacing",
+    "minWidth",
+    "minHeight",
+  ];
+
+  it("refuses an auto-layout binding on a frame without a layout mode", () => {
+    const double = figmaDouble();
+    const api = double.figma as { createFrame: () => DoubleNode };
+    const frame = api.createFrame();
+    const variable = { name: "size/box/padding" } as unknown as Parameters<
+      DoubleNode["setBoundVariable"]
+    >[1];
+    for (const field of AUTO_LAYOUT_FIELDS) {
+      expect(() => frame.setBoundVariable(field, variable), field).toThrow(/layoutMode/);
+    }
+    frame.layoutMode = "HORIZONTAL";
+    expect(() => frame.setBoundVariable("paddingLeft", variable)).not.toThrow();
+  });
+
+  async function controlOf(props: Record<string, string>) {
+    const double = figmaDouble();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    const set = double.root.children[0]?.children.find((child) => child.name === "butono");
+    const name = Object.entries(props)
+      .map(([key, value]) => `${key}=${value}`)
+      .join(", ");
+    const variant = set?.children.find((child) => child.name === name);
+    return variant?.children.find((child) => child.name === "control");
+  }
+
+  it("lays the control out horizontally, centred, and binds both inline paddings", async () => {
+    const control = await controlOf({
+      variant: "primary",
+      tone: "default",
+      size: "medium",
+      state: "rest",
+    });
+    expect(control?.properties.layoutMode).toBe("HORIZONTAL");
+    expect(control?.properties.primaryAxisAlignItems).toBe("CENTER");
+    expect(control?.properties.counterAxisAlignItems).toBe("CENTER");
+    const bound = control?.boundVariables ?? {};
+    expect(bound.paddingLeft).toBeDefined();
+    expect(bound.paddingRight).toBe(bound.paddingLeft);
+    expect(bound.itemSpacing).toBeDefined();
+    expect(bound.minHeight).toBeDefined();
+  });
+});
