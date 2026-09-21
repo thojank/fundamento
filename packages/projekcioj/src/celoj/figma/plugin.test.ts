@@ -459,10 +459,11 @@ describe("a run that creates in a set it found warns, and says what it found (F1
     expect(again.components[0]?.before?.children).toBe(71);
     // Zwei Warnungen: die Regel („vorgefunden und trotzdem angelegt") und die Deutung des Paars
     // aus dem Endstand des vorigen Laufs und dem Anfangsstand dieses Laufs.
-    expect(again.warnings).toHaveLength(2);
-    expect(again.warnings[0]).toContain(LAST);
-    expect(again.warnings[0]).toContain("vorgefunden");
-    expect(again.warnings[1]).toContain("zwischen den Läufen");
+    const warnings = again.warnings;
+    expect(warnings).toHaveLength(2);
+    expect(warnings[0]).toContain(LAST);
+    expect(warnings[0]).toContain("vorgefunden");
+    expect(warnings[1]).toContain("zwischen den Läufen");
   });
 
   // End state two: the node is there but lost our mark. Then the run creates a second node of the
@@ -735,8 +736,8 @@ describe("the focus ring is drawn, and never clipped (F11)", () => {
   it("lets the variant wrap its content, so no 100 × 100 tile is left", async () => {
     const variant = await variantOf(modelDouble(), "rest");
     expect(variant?.properties.layoutMode).toBe("HORIZONTAL");
-    expect(variant?.properties.primaryAxisSizingMode).toBe("AUTO");
-    expect(variant?.properties.counterAxisSizingMode).toBe("AUTO");
+    expect(variant?.properties.layoutSizingHorizontal).toBe("HUG");
+    expect(variant?.properties.layoutSizingVertical).toBe("HUG");
   });
 
   // A file an older plugin made keeps its control directly under the variant; the run moves it
@@ -765,12 +766,19 @@ describe("every property the plugin owns is from the plan or neutral", () => {
     "opacity",
     "clipsContent",
     "layoutMode",
+    // F14: the flow and the sizing belong to the plugin too; a default here left the variants
+    // at 0 × 0 in Figma's grid.
+    "layoutPositioning",
+    "layoutSizingHorizontal",
+    "layoutSizingVertical",
   ];
 
   it("leaves no tool default on any node it drew, the component set included", async () => {
     const double = modelDouble();
     await run(double, repoFiles["figma/plugin/code.js"] ?? "");
-    expect(double.untouchedDefaults(OWNED)).toEqual([]);
+    // The set lies on the page, in no flow: its position among siblings is not the plugin's.
+    const onPage = "Document/Page 1/butono: layoutPositioning";
+    expect(double.untouchedDefaults(OWNED).filter((entry) => entry !== onPage)).toEqual([]);
     const set = double.root.children[0]?.children.find((child) => child.name === "butono");
     expect(set?.properties.strokes).toEqual([]);
     expect(set?.properties.dashPattern).toEqual([]);
@@ -810,6 +818,12 @@ describe("the variants stand in the grid of the Vitrino (F11)", () => {
       ?.remove();
     await run(double, repoFiles["figma/plugin/code.js"] ?? "");
     expect(setOf(double)?.children.map((child) => child.name)).toEqual(names);
+    // Bestätigend (F14): die neu angelegte Variante bekommt ihre freie Zelle wieder.
+    const cells = (setOf(double)?.children ?? []).map(
+      (child) => `${child.gridRowAnchorIndex}/${child.gridColumnAnchorIndex}`,
+    );
+    expect(new Set(cells).size).toBe(72);
+    expect(cells[3]).toBe("0/3");
   });
 });
 
@@ -872,17 +886,15 @@ describe("the label is a text property of the component (F11)", () => {
     double.root.children[0]?.children.find((child) => child.name === "butono");
   type Definitions = Record<string, { type: string; defaultValue: string }>;
 
-  it("declares one TEXT property label, with the Vitrino's text as its default", async () => {
+  // F14 (Maintainer): one neutral word — Figma keeps one default per property, not per variant.
+  it("declares one TEXT property label, with the neutral word as its default", async () => {
     const double = modelDouble();
     await run(double, repoFiles["figma/plugin/code.js"] ?? "");
     const definitions = (setOf(double)?.properties.componentPropertyDefinitions ??
       {}) as Definitions;
     const keys = Object.keys(definitions).filter((key) => key.startsWith("label#"));
     expect(keys).toHaveLength(1);
-    expect(definitions[keys[0] ?? ""]).toEqual({
-      type: "TEXT",
-      defaultValue: "secondary · default · medium",
-    });
+    expect(definitions[keys[0] ?? ""]).toEqual({ type: "TEXT", defaultValue: "Aktion" });
   });
 
   it("connects every label to it", async () => {
@@ -905,5 +917,322 @@ describe("the label is a text property of the component (F11)", () => {
     const definitions = (setOf(double)?.properties.componentPropertyDefinitions ??
       {}) as Definitions;
     expect(Object.keys(definitions)).toHaveLength(1);
+  });
+});
+
+// F14 (Abnahme M1, Maintainer 2026-09-21): Das Raster wirkte nicht, und niemand merkte es. Alle 72
+// Varianten lagen übereinander, der Bericht meldete keine Warnung. Belegte Ursache: Das Raster maß
+// jede Variante als 0 × 0 — von Hand auf „Inhalt umschließen" gestellt, war das Set 48 × 96, genau
+// Innenabstand plus Lücken bei Spuren der Größe null (8 + 5·8, 8 + 11·8). Die Zusage „die Variante
+// umschließt ihren Inhalt" hielt im echten Figma nicht; das Double hatte sie geglaubt.
+describe("the double measures sizes the way Figma did (F14)", () => {
+  async function gridSet(double: ReturnType<typeof figmaDouble>, sized: boolean) {
+    const api = double.figma as {
+      createComponent: () => DoubleNode;
+      createText: () => DoubleNode;
+      combineAsVariants: (nodes: DoubleNode[], parent: DoubleNode) => DoubleNode;
+      loadFontAsync: (font: { family: string; style: string }) => Promise<void>;
+    };
+    await api.loadFontAsync({ family: "Inter", style: "Regular" });
+    const variants = Array.from({ length: 72 }, () => {
+      const variant = api.createComponent();
+      variant.layoutMode = "HORIZONTAL";
+      if (sized) {
+        Object.assign(variant, { layoutSizingHorizontal: "HUG", layoutSizingVertical: "HUG" });
+      }
+      const text = api.createText();
+      Object.assign(text, { characters: "Aktion" });
+      variant.appendChild(text);
+      return variant;
+    });
+    const set = api.combineAsVariants(variants, double.root.children[0] as DoubleNode);
+    Object.assign(set, {
+      layoutMode: "GRID",
+      gridColumnCount: 6,
+      gridRowCount: 12,
+      gridColumnGap: 8,
+      gridRowGap: 8,
+      paddingLeft: 4,
+      paddingRight: 4,
+      paddingTop: 4,
+      paddingBottom: 4,
+      layoutSizingHorizontal: "HUG",
+      layoutSizingVertical: "HUG",
+    });
+    return { set, variants };
+  }
+  const size = (node: DoubleNode | undefined) => [
+    (node as { width?: number } | undefined)?.width,
+    (node as { height?: number } | undefined)?.height,
+  ];
+
+  // Messlauf 3 (Datei wSYaaAsB2EujMxGra84PoM, 2026-09-21) hat die Ursache aus den Rohdaten
+  // geliefert: Set und Varianten waren korrekt (GRID 12 × 6, alle Spuren HUG, Varianten AUTO und
+  // HUG in ihrer Größe), aber gridRowAnchorIndex und gridColumnAnchorIndex standen auf −1 — keine
+  // Variante lag in einer Zelle. Figma verteilte die angehängten Kinder nicht selbst. Das erklärt
+  // alle drei Messungen: leere HUG-Spuren sind 0 (48 × 96), alle Kinder liegen bei 0/0, und
+  // zero/smaller sind leer. Das Double gibt genau das wieder.
+  it.each([
+    ["sized", true],
+    ["unsized", false],
+  ])(
+    "leaves appended %s children unplaced: anchor −1, at 0/0, set 48 × 96",
+    async (_name, sized) => {
+      const { set, variants } = await gridSet(modelDouble(), sized);
+      expect(size(set)).toEqual([48, 96]);
+      for (const variant of variants) {
+        const at = variant as unknown as {
+          x: number;
+          y: number;
+          gridRowAnchorIndex: number;
+          gridColumnAnchorIndex: number;
+        };
+        expect([at.gridRowAnchorIndex, at.gridColumnAnchorIndex, at.x, at.y]).toEqual([
+          -1, -1, 0, 0,
+        ]);
+      }
+    },
+  );
+
+  // What the API documents for a child of a grid (plugin-api.d.ts, GridChildrenMixin): out of
+  // bounds throws, an occupied cell throws, and ROW_AUTO_FLOW refuses manual positions.
+  it("places a child in its cell, and refuses what the API refuses", async () => {
+    const { set, variants } = await gridSet(modelDouble(), true);
+    type Placed = DoubleNode & {
+      setGridChildPosition: (row: number, column: number) => void;
+      gridRowAnchorIndex: number;
+      gridColumnAnchorIndex: number;
+    };
+    const [first, second] = variants as Placed[];
+    if (first === undefined || second === undefined) throw new Error("no variants");
+    first.setGridChildPosition(2, 3);
+    expect([first.gridRowAnchorIndex, first.gridColumnAnchorIndex]).toEqual([2, 3]);
+    expect(() => second.setGridChildPosition(2, 3)).toThrow(/occupied/);
+    expect(() => second.setGridChildPosition(12, 0)).toThrow(/out of bounds/);
+    Object.assign(set, { gridItemsPositioning: "ROW_AUTO_FLOW" });
+    expect(() => second.setGridChildPosition(0, 0)).toThrow(/ROW_AUTO_FLOW/);
+  });
+
+  it("lets only placed children size a track", async () => {
+    const { set, variants } = await gridSet(modelDouble(), true);
+    const first = variants[0] as DoubleNode & {
+      setGridChildPosition: (row: number, column: number) => void;
+    };
+    const [width, height] = size(first);
+    first.setGridChildPosition(0, 0);
+    // One track of each axis now has the size of that child; the others stay 0.
+    expect(size(set)).toEqual([48 + (width ?? 0), 96 + (height ?? 0)]);
+  });
+
+  it("gives a variant that hugs its content the size of that content", async () => {
+    const { variants } = await gridSet(modelDouble(), true);
+    const [width, height] = size(variants[0]);
+    expect(width).toBeGreaterThan(0);
+    expect(height).toBeGreaterThan(0);
+  });
+});
+
+describe("every variant has its size and its own place in the grid (F14)", () => {
+  const setOf = (double: ReturnType<typeof figmaDouble>) =>
+    double.root.children[0]?.children.find((child) => child.name === "butono");
+  const box = (node: DoubleNode | undefined) =>
+    node as unknown as { width: number; height: number; x: number; y: number } | undefined;
+
+  it("sizes every variant to its content, never 0", async () => {
+    const double = modelDouble();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    for (const variant of setOf(double)?.children ?? []) {
+      const ring = descendant(variant, "focus-ring");
+      expect(box(variant)?.width, variant.name).toBeGreaterThan(0);
+      expect(box(variant)?.width, variant.name).toBeGreaterThanOrEqual(box(ring)?.width ?? 0);
+      expect(box(variant)?.height, variant.name).toBeGreaterThanOrEqual(box(ring)?.height ?? 0);
+    }
+  });
+
+  // Korrektur (Maintainer, Messlauf 3): Jede Variante bekommt ihre Zelle ausdrücklich — Zeile nach
+  // variant × tone × size, Spalte nach state, in der Reihenfolge der Vitrino, jede Zelle einmal.
+  type Anchored = DoubleNode & { gridRowAnchorIndex: number; gridColumnAnchorIndex: number };
+  const butono = repo.ok ? repo.input.modelo.eroj.find((e) => e.ero.name === "butono") : undefined;
+
+  it("gives every variant its own cell: 72 anchors ≥ 0, all pairs different", async () => {
+    const double = modelDouble();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    const variants = (setOf(double)?.children ?? []) as Anchored[];
+    expect(variants).toHaveLength(72);
+    for (const variant of variants) {
+      expect(variant.gridRowAnchorIndex, variant.name).toBeGreaterThanOrEqual(0);
+      expect(variant.gridColumnAnchorIndex, variant.name).toBeGreaterThanOrEqual(0);
+    }
+    const cells = variants.map((v) => `${v.gridRowAnchorIndex}/${v.gridColumnAnchorIndex}`);
+    expect(new Set(cells).size).toBe(72);
+  });
+
+  it("orders the cells like the Vitrino: a row per combination, a column per state", async () => {
+    const double = modelDouble();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    const states = butono?.skemo.states ?? [];
+    const rows = new Map<number, string>();
+    for (const variant of (setOf(double)?.children ?? []) as Anchored[]) {
+      const props = Object.fromEntries(variant.name.split(", ").map((pair) => pair.split("=")));
+      expect(variant.gridColumnAnchorIndex, variant.name).toBe(states.indexOf(props.state));
+      const combination = `${props.variant} · ${props.tone} · ${props.size}`;
+      const known = rows.get(variant.gridRowAnchorIndex);
+      if (known === undefined) rows.set(variant.gridRowAnchorIndex, combination);
+      else expect(known, variant.name).toBe(combination);
+    }
+    // Rows in the order the Vitrino lists the combinations: the order of the plan.
+    const planned = [
+      ...new Set(
+        (repoPlan.components[0]?.variants ?? []).map(
+          (variant) => `${variant.props.variant} · ${variant.props.tone} · ${variant.props.size}`,
+        ),
+      ),
+    ];
+    expect([...rows.entries()].sort(([a], [b]) => a - b).map(([, name]) => name)).toEqual(planned);
+  });
+
+  it("puts the 72 variants on 72 places, 6 columns by 12 rows, and says nothing", async () => {
+    const double = modelDouble();
+    const report = (await new Function(
+      "figma",
+      `${repoFiles["figma/plugin/code.js"] ?? ""}\nreturn applyPlan();`,
+    )(double.figma)) as { warnings: string[] };
+    const places = (setOf(double)?.children ?? []).map((variant) => box(variant));
+    expect(new Set(places.map((place) => `${place?.x},${place?.y}`)).size).toBe(72);
+    expect(new Set(places.map((place) => place?.x)).size).toBe(6);
+    expect(new Set(places.map((place) => place?.y)).size).toBe(12);
+    expect(report.warnings).toEqual([]);
+  });
+
+  it("keeps every cell on a second run, without moving anything", async () => {
+    const double = modelDouble();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    const before = ((setOf(double)?.children ?? []) as Anchored[]).map(
+      (v) => `${v.name}@${v.gridRowAnchorIndex}/${v.gridColumnAnchorIndex}`,
+    );
+    const report = (await new Function(
+      "figma",
+      `${repoFiles["figma/plugin/code.js"] ?? ""}\nreturn applyPlan();`,
+    )(double.figma)) as { warnings: string[] };
+    const after = ((setOf(double)?.children ?? []) as Anchored[]).map(
+      (v) => `${v.name}@${v.gridRowAnchorIndex}/${v.gridColumnAnchorIndex}`,
+    );
+    expect(after).toEqual(before);
+    expect(report.warnings).toEqual([]);
+  });
+
+  // Bericht: Varianten ohne Zelle werden gezählt und genannt. Hier lehnt das Werkzeug jede
+  // Zuweisung ab — der Lauf bricht nicht ab, er sagt, was geschah, mit der Meldung des Werkzeugs.
+  it("counts and names the variants without a cell, with the tool's message", async () => {
+    const double = modelDouble();
+    const api = double.figma as { createComponent: () => DoubleNode };
+    const create = api.createComponent;
+    const figma = {
+      ...double.figma,
+      createComponent: () =>
+        Object.assign(create(), {
+          setGridChildPosition: () => {
+            throw new Error("in setGridChildPosition: refused");
+          },
+        }),
+    };
+    const report = (await new Function(
+      "figma",
+      `${repoFiles["figma/plugin/code.js"] ?? ""}\nreturn applyPlan();`,
+    )(figma)) as { warnings: string[]; components: { layout: { unplaced: string[] } }[] };
+    expect(report.components[0]?.layout.unplaced).toHaveLength(72);
+    const text = report.warnings.join(" ");
+    expect(text).toContain("72 von 72 Varianten liegen in keiner Zelle");
+    expect(text).toContain("in setGridChildPosition: refused");
+  });
+
+  it("keeps every child of a variant in the flow, not freely placed", async () => {
+    const double = modelDouble();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    const variant = setOf(double)?.children[0];
+    for (const part of ["focus-ring", "focus-gap", "control", "label"]) {
+      expect(descendant(variant, part)?.properties.layoutPositioning, part).toBe("AUTO");
+    }
+  });
+
+  // Erst messen, dann bauen (Maintainer, 2026-09-21): Der Bericht trägt, was das Werkzeug
+  // tatsächlich hält — Rohdaten, keine Deutung. Am Set die Definition der Spuren, an einer
+  // Beispielvariante Lage, Positionierung und Zellenzuordnung. Eine Eigenschaft, die das Werkzeug
+  // nicht kennt, steht als „nicht vorhanden" da; eine, bei der es wirft, mit seiner Meldung.
+  it("reports what the tool holds: the tracks of the set and the cell of a variant", async () => {
+    const double = modelDouble();
+    const report = (await new Function(
+      "figma",
+      `${repoFiles["figma/plugin/code.js"] ?? ""}\nreturn applyPlan();`,
+    )(double.figma)) as {
+      components: {
+        layout: {
+          held: {
+            set: Record<string, unknown>;
+            variant: Record<string, unknown>;
+            last: Record<string, unknown>;
+          };
+        };
+      }[];
+    };
+    const held = report.components[0]?.layout.held;
+    expect(held?.set).toMatchObject({
+      type: "COMPONENT_SET",
+      layoutMode: "GRID",
+      gridRowCount: 12,
+      gridColumnCount: 6,
+      gridRowGap: 8,
+      gridColumnGap: 8,
+      gridItemsPositioning: "MANUAL",
+      children: 72,
+    });
+    // Names the double does not know are reported as absent, not left out.
+    expect(held?.set.gridRowSizes).toBe("nicht vorhanden");
+    expect(held?.variant).toMatchObject({
+      name: "variant=primary, tone=default, size=small, state=rest",
+      parent: "COMPONENT_SET",
+      layoutPositioning: "AUTO",
+      layoutSizingHorizontal: "HUG",
+    });
+    expect(held?.variant).toMatchObject({ gridRowAnchorIndex: 0, gridColumnAnchorIndex: 0 });
+    expect(held?.last).toMatchObject({ gridRowAnchorIndex: 11, gridColumnAnchorIndex: 5 });
+    expect(held?.last.name).toBe("variant=tertiary, tone=default, size=large, state=loading");
+  });
+
+  it("reports a property the tool throws on with the tool's message", async () => {
+    const double = modelDouble();
+    const api = double.figma as { combineAsVariants: (...args: unknown[]) => DoubleNode };
+    const combine = api.combineAsVariants;
+    const figma = {
+      ...double.figma,
+      combineAsVariants: (...args: unknown[]) => {
+        const set = combine(...args);
+        return new Proxy(set, {
+          get(target, key, receiver) {
+            if (key === "gridRowSizes") throw new Error("in get_gridRowSizes: not supported");
+            return Reflect.get(target, key, receiver);
+          },
+        });
+      },
+    };
+    const report = (await new Function(
+      "figma",
+      `${repoFiles["figma/plugin/code.js"] ?? ""}\nreturn applyPlan();`,
+    )(figma)) as { components: { layout: { held: { set: Record<string, unknown> } } }[] };
+    expect(report.components[0]?.layout.held.set.gridRowSizes).toBe(
+      "wirft: in get_gridRowSizes: not supported",
+    );
+  });
+
+  it("labels every variant with the neutral word", async () => {
+    const double = modelDouble();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    const definitions = (setOf(double)?.properties.componentPropertyDefinitions ?? {}) as Record<
+      string,
+      { defaultValue: string }
+    >;
+    expect(Object.values(definitions).map((definition) => definition.defaultValue)).toEqual([
+      "Aktion",
+    ]);
   });
 });

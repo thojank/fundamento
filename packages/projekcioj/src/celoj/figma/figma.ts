@@ -30,7 +30,6 @@ import {
   STATE_KEY,
 } from "@fundamento/modelo";
 import type { Celo, CeloInput, GeneratedFile } from "../../build.js";
-import { VITRINO_ROW_KEYS, vitrinoLabelOf } from "../vitrino/datumoj.js";
 import { DRAWN_PART_PROPERTIES, pluginManifest, pluginSource } from "./plugin.js";
 
 /** A variable value: a literal, or an alias to another variable of the plan. */
@@ -106,6 +105,12 @@ export interface FigmaComponentSet {
     radii?: { "focus-ring": number; "focus-gap": number };
     /** The font of the label, from its typography token: family and the style of its weight. */
     font?: { family: string; style: string };
+    /**
+     * The cell of the variant in the grid, as the Vitrino orders it: the row is its combination of
+     * the keyed props (variant × tone × size) in the order of the plan, the column its state.
+     * Figma does not distribute appended children itself (F14, measured): every variant is placed.
+     */
+    cell?: { row: number; column: number };
   }[];
   pluginData: { fundamento: { ero: string; skemo: string; version: string } };
   /**
@@ -115,8 +120,9 @@ export interface FigmaComponentSet {
    */
   grid?: { rows: number; columns: number; gap: number; padding: number };
   /**
-   * The label as a text property of the component (Maintainer, 2026-09-21): its default is the
-   * Vitrino's text for the default combination; every instance may override it.
+   * The label as a text property of the component (Maintainer, 2026-09-21): one neutral word as
+   * its default — Figma keeps one default per property, not one per variant, so the Vitrino's text
+   * per combination cannot be the default of 72 templates. Every instance may override it.
    */
   label?: { property: string; defaultValue: string };
 }
@@ -542,10 +548,14 @@ function componentSetOf(
     };
   });
   const columns = skemo.states.length;
-  const defaults: Record<string, string> = {};
-  for (const key of VITRINO_ROW_KEYS) {
-    const prop = skemo.props.find((candidate) => candidate.name === key);
-    if (typeof prop?.default === "string") defaults[key] = prop.default;
+  const rowOf = new Map<string, number>();
+  for (const variant of variants) {
+    const { [STATE_KEY]: state, ...combination } = variant.props;
+    const key = JSON.stringify(combination);
+    if (!rowOf.has(key)) rowOf.set(key, rowOf.size);
+    Object.assign(variant, {
+      cell: { row: rowOf.get(key) ?? 0, column: skemo.states.indexOf(state ?? "") },
+    });
   }
   const cell = parityPx(base[VITRINO_CELL_PADDING]?.value);
   return {
@@ -554,12 +564,12 @@ function componentSetOf(
     variants,
     pluginData: { fundamento: { ero: entry.ero.name, skemo: skemo.id, version } },
     grid: {
-      rows: Math.ceil(variants.length / Math.max(1, columns)),
+      rows: rowOf.size,
       columns,
       gap: 2 * cell,
       padding: cell,
     },
-    label: { property: "label", defaultValue: vitrinoLabelOf(defaults) },
+    label: { property: "label", defaultValue: LABEL_DEFAULT },
   };
 }
 
@@ -591,6 +601,9 @@ function fontOf(value: unknown): { family: string; style: string } | undefined {
   if (typeof family !== "string") return undefined;
   return { family, style: FONT_STYLES[Math.round(weight / 100) * 100] ?? "Regular" };
 }
+
+/** The neutral word every label template shows; instances override it (Maintainer, F14). */
+const LABEL_DEFAULT = "Aktion";
 
 /** The padding of a table cell in the Vitrino; the grid in Figma keeps the same distances. */
 const VITRINO_CELL_PADDING = "spacing.small";

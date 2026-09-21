@@ -76,13 +76,17 @@ const NEUTRAL: Readonly<Record<string, unknown>> = {
 /** A text has no line, radius or clipping of its own. */
 const NEUTRAL_TEXT: Readonly<Record<string, unknown>> = { fills: [], effects: [], opacity: 1 };
 
-/** A frame that wraps its content: the variant, the ring and the gap (F11). */
+/**
+ * A frame that wraps its content in both axes: the variant, the ring and the gap (F11). The sizing
+ * is set with layoutSizing, which Figma honours both for the frame itself and for it as a child of
+ * the grid: without it the grid measured every variant as 0 × 0 (F14).
+ */
 const HUG_LAYOUT: Readonly<Record<string, unknown>> = {
   layoutMode: "HORIZONTAL",
   primaryAxisAlignItems: "CENTER",
   counterAxisAlignItems: "CENTER",
-  primaryAxisSizingMode: "AUTO",
-  counterAxisSizingMode: "AUTO",
+  layoutSizingHorizontal: "HUG",
+  layoutSizingVertical: "HUG",
   itemSpacing: 0,
   paddingLeft: 0,
   paddingRight: 0,
@@ -99,8 +103,17 @@ const CONTROL_LAYOUT: Readonly<Record<string, string>> = {
   layoutMode: "HORIZONTAL",
   primaryAxisAlignItems: "CENTER",
   counterAxisAlignItems: "CENTER",
-  primaryAxisSizingMode: "AUTO",
-  counterAxisSizingMode: "AUTO",
+  layoutSizingHorizontal: "HUG",
+  layoutSizingVertical: "HUG",
+};
+
+/** Every child of a variant lies in the flow of its parent, never freely placed (F14). */
+const IN_FLOW: Readonly<Record<string, string>> = { layoutPositioning: "AUTO" };
+
+/** A text that is as large as its characters. */
+const TEXT_SIZING: Readonly<Record<string, string>> = {
+  layoutSizingHorizontal: "HUG",
+  layoutSizingVertical: "HUG",
 };
 
 export const PLUGIN_NAMESPACE = "fundamento";
@@ -119,6 +132,8 @@ const NAMESPACE = ${JSON.stringify(PLUGIN_NAMESPACE)};
 const BINDINGS = ${JSON.stringify(BINDINGS)};
 const CONTROL_LAYOUT = ${JSON.stringify(CONTROL_LAYOUT)};
 const HUG_LAYOUT = ${JSON.stringify(HUG_LAYOUT)};
+const IN_FLOW = ${JSON.stringify(IN_FLOW)};
+const TEXT_SIZING = ${JSON.stringify(TEXT_SIZING)};
 const NEUTRAL = ${JSON.stringify(NEUTRAL)};
 const NEUTRAL_TEXT = ${JSON.stringify(NEUTRAL_TEXT)};
 
@@ -367,6 +382,9 @@ async function applyComponents(variables, warnings) {
       // an auto-layout frame (F11). The variant, ring and gap wrap their content.
       for (const frame of [node, ring, gap]) own(frame, HUG_LAYOUT);
       own(control, CONTROL_LAYOUT);
+      // The variant lies in the grid's flow, its parts in the variant's (F14).
+      for (const child of [node, ring, gap, control, label]) own(child, IN_FLOW);
+      own(label, TEXT_SIZING);
       ring.cornerRadius = variant.radii["focus-ring"];
       gap.cornerRadius = variant.radii["focus-gap"];
       bind({ "focus-ring": ring, "focus-gap": gap, control, label }, variant, variables);
@@ -393,6 +411,10 @@ async function applyComponents(variables, warnings) {
         paddingRight: grid.padding,
         paddingTop: grid.padding,
         paddingBottom: grid.padding,
+        layoutSizingHorizontal: "HUG",
+        layoutSizingVertical: "HUG",
+        // Manual positions: every variant is given its cell below (F14).
+        gridItemsPositioning: "MANUAL",
       });
     }
     set.setSharedPluginData(NAMESPACE, "ero", component.set);
@@ -419,6 +441,26 @@ async function applyComponents(variables, warnings) {
       const node = ours(set, "variant", variantName(variant.props));
       if (node !== undefined && set.children.indexOf(node) !== index) set.insertChild(index, node);
     });
+    // Figma does not distribute appended children over the grid (F14, measured: every anchor read
+    // −1, the HUG tracks stayed empty, all variants lay at 0/0). Every variant is given its cell
+    // with the API for a grid child — only where it is not there already: an occupied cell
+    // throws, and what Figma does for the node that occupies it itself is not measured.
+    const refused = [];
+    if (grid !== undefined) {
+      for (const variant of component.variants) {
+        const node = ours(set, "variant", variantName(variant.props));
+        if (node === undefined || variant.cell === undefined) continue;
+        if (node.gridRowAnchorIndex === variant.cell.row &&
+          node.gridColumnAnchorIndex === variant.cell.column) continue;
+        try {
+          node.setGridChildPosition(variant.cell.row, variant.cell.column);
+        } catch (error) {
+          refused.push(node.name + ": " + String(error && error.message ? error.message : error));
+        }
+      }
+    }
+    report.layout = measureLayout(set, component);
+    report.layout.refused = refused;
     // Symmetric (F10): the plan against the file, in both directions, with names. The finding
     // behind this was a document that held 71 of 72 variants while nothing said so.
     const planned = component.variants.map((variant) => variantName(variant.props));
@@ -444,6 +486,150 @@ async function applyComponents(variables, warnings) {
   return reports;
 }
 
+const px = (value) => Math.round(value * 100) / 100;
+const dims = (box) => px(box.width) + " × " + px(box.height);
+
+/**
+ * Reads back what the layout did, instead of trusting the call (F14): the size of every variant
+ * against its content, the places the variants took, and the size of the set. Figma accepted a
+ * grid once and left every variant at 0 × 0 — only a measurement says so.
+ */
+/**
+ * Properties of the grid Figma may hold at the set; names it does not know are reported so. This
+ * block stays in the report for good: exactly these raw data decided F14 (Maintainer, 2026-09-21).
+ */
+const HELD_AT_SET = [
+  "type", "layoutMode", "layoutWrap", "gridItemsPositioning", "gridAutoTracks", "layoutSizingHorizontal", "layoutSizingVertical",
+  "primaryAxisSizingMode", "counterAxisSizingMode", "gridRowCount", "gridColumnCount",
+  "gridRowGap", "gridColumnGap", "gridRowSizes", "gridColumnSizes", "paddingLeft", "paddingRight",
+  "paddingTop", "paddingBottom", "itemSpacing", "counterAxisSpacing", "clipsContent", "width",
+  "height",
+];
+
+/** What Figma may hold at a child of the grid: its place, its sizing and its cell. */
+const HELD_AT_VARIANT = [
+  "name", "type", "layoutPositioning", "layoutSizingHorizontal", "layoutSizingVertical",
+  "layoutAlign", "layoutGrow", "gridRowAnchorIndex", "gridColumnAnchorIndex", "gridRowSpan",
+  "gridColumnSpan", "gridChildHorizontalAlign", "gridChildVerticalAlign", "layoutMode", "x", "y",
+  "width", "height",
+];
+
+/**
+ * Reads the named properties as the tool holds them — raw, no interpretation (F14: erst messen,
+ * dann bauen). A property the tool does not have reads "nicht vorhanden"; one it throws on reads
+ * "wirft: <its message>". Objects are kept as JSON, so track definitions arrive whole.
+ */
+function held(node, names) {
+  const out = {};
+  for (const name of names) {
+    try {
+      const value = node[name];
+      out[name] = value === undefined
+        ? "nicht vorhanden"
+        : typeof value === "object" && value !== null
+          ? JSON.parse(JSON.stringify(value))
+          : value;
+    } catch (error) {
+      out[name] = "wirft: " + String(error && error.message ? error.message : error);
+    }
+  }
+  return out;
+}
+
+function measureLayout(set, component) {
+  const nodes = component.variants
+    .map((variant) => ours(set, "variant", variantName(variant.props)))
+    .filter((node) => node !== undefined);
+  const boxes = nodes.map((node) => {
+    const content = ours(node, "part", "focus-ring");
+    return {
+      name: node.name,
+      x: node.x,
+      y: node.y,
+      width: node.width,
+      height: node.height,
+      content: content === undefined ? { width: 0, height: 0 } : { width: content.width, height: content.height },
+    };
+  });
+  const zero = boxes.filter((box) => box.width === 0 || box.height === 0);
+  const smaller = boxes.filter(
+    (box) => box.width !== 0 && box.height !== 0 &&
+      (box.width < box.content.width || box.height < box.content.height),
+  );
+  const unplaced = nodes
+    .filter((node) => !(node.gridRowAnchorIndex >= 0 && node.gridColumnAnchorIndex >= 0))
+    .map((node) => node.name);
+  const first = nodes[0];
+  const last = nodes[nodes.length - 1];
+  const withParent = (node) =>
+    node === undefined
+      ? {}
+      : Object.assign(held(node, HELD_AT_VARIANT), {
+          parent: node.parent ? node.parent.type : "kein Elternknoten",
+          index: set.children.indexOf(node),
+        });
+  return {
+    held: {
+      set: Object.assign(held(set, HELD_AT_SET), { children: set.children.length }),
+      variant: withParent(first),
+      last: withParent(last),
+    },
+    set: { width: set.width, height: set.height },
+    unplaced: unplaced,
+    variants: boxes.length,
+    places: new Set(boxes.map((box) => box.x + "," + box.y)).size,
+    columns: new Set(boxes.map((box) => box.x)).size,
+    rows: new Set(boxes.map((box) => box.y)).size,
+    zero: zero.map((box) => box.name),
+    smaller: smaller.map((box) => box.name),
+    example: zero[0] || smaller[0] || null,
+  };
+}
+
+/** The warnings of a layout that did not take effect, with its numbers. */
+function layoutWarnings(report, grid) {
+  const layout = report.layout;
+  if (layout === undefined) return [];
+  const out = [];
+  const set = "das Set misst " + dims(layout.set);
+  const example = layout.example === null
+    ? ""
+    : " (z. B. " + layout.example.name + ": " + dims(layout.example) + " bei Inhalt " +
+      dims(layout.example.content) + ")";
+  if (layout.unplaced.length > 0) {
+    out.push(
+      report.set + ": " + layout.unplaced.length + " von " + layout.variants +
+        " Varianten liegen in keiner Zelle (Anker −1)" +
+        (layout.unplaced.length <= 3 ? ": " + layout.unplaced.join("; ") : ", z. B. " + layout.unplaced[0]) +
+        "; " + set + "." +
+        (layout.refused && layout.refused.length > 0
+          ? " Das Werkzeug lehnte " + layout.refused.length + " Zuweisung(en) ab, z. B. " + layout.refused[0] + "."
+          : ""),
+    );
+  }
+  if (layout.zero.length > 0) {
+    out.push(
+      report.set + ": " + layout.zero.length + " von " + layout.variants +
+        " Varianten haben die Größe 0 × 0 oder eine Achse 0" + example + "; " + set + ".",
+    );
+  }
+  if (layout.smaller.length > 0) {
+    out.push(
+      report.set + ": " + layout.smaller.length + " von " + layout.variants +
+        " Varianten sind kleiner als ihr Inhalt" + example + "; " + set + ".",
+    );
+  }
+  if (grid !== undefined &&
+    (layout.places !== layout.variants || layout.columns !== grid.columns || layout.rows !== grid.rows)) {
+    out.push(
+      report.set + ": " + layout.places + " verschiedene Positionen statt " + layout.variants +
+        ", " + layout.columns + " Spalten statt " + grid.columns + ", " + layout.rows +
+        " Zeilen statt " + grid.rows + "; " + set + ".",
+    );
+  }
+  return out;
+}
+
 /** Applies the whole plan; safe to run again. Returns the report of this run (F10). */
 async function applyPlan() {
   const { collections, modeIds } = await applyCollections();
@@ -451,6 +637,8 @@ async function applyPlan() {
   const warnings = [];
   const components = await applyComponents(variables, warnings);
   for (const report of components) {
+    const component = PLAN.components.find((candidate) => candidate.set === report.set);
+    warnings.push(...layoutWarnings(report, component === undefined ? undefined : component.grid));
     // Ein zweiter Lauf, der in einem vorgefundenen Set etwas anlegt, darf nie still durchgehen
     // (F10b): Entweder fehlte der Knoten, oder er hat seine Markierung verloren — beides ist ein
     // Befund, kein Normalfall.

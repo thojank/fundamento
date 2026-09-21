@@ -343,6 +343,12 @@ Results go into `plan.md` → „Manual acceptance results".
   - Offen, beim Maintainer: Neue leere Datei, Lauf 1, **sofort** Lauf 2, keine Aktion dazwischen,
     beide Konsolenausgaben kopieren. Ablesen am Set ist nicht nötig und wäre ein Eingriff — die
     Zahl steht als `after` im Bericht. Die Ursache bleibt bis dahin ausdrücklich offen.
+  - **Geschlossen: nicht reproduziert, überwacht** (Messung M1 gegen main `f91c5b3`, 2026-09-21,
+    frische Datei, zwei Läufe ohne Eingriff): Lauf 1 `created: 72`, `after` 72/72; Lauf 2
+    `left` = `before` = 72/72, `created: 0`, `updated: 72`, `warnings: []`. Unter sauberen
+    Bedingungen idempotent; die frühere Neuanlage ist nicht reproduziert, ihre Ursache bleibt
+    offen. Der Wächter (before/after/left, „vorgefunden und angelegt ⇒ Warnung") bleibt aktiv; der
+    Jugxo `jug_01M31MH4KAGYSK5CPTY51E7MDV` trägt die Messung nach.
 
 - [x] **F11 Die Figma-Projektion überträgt keine Geometrie und keine Beschriftung** (Abnahme M1,
   FR-06, AK-04)
@@ -480,5 +486,70 @@ Results go into `plan.md` → „Manual acceptance results".
   - Geltungsbereich: Flächen und Linien. Die Vorgabegröße 100 × 100 und der leere
     Beschriftungstext unterliegen derselben Zusicherung mit F11. Nicht modelliert und damit
     weiterhin blind: die Vorgaben des Komponentensets, das `combineAsVariants` anlegt.
+
+- [ ] **F14 Das Raster wirkt nicht, und niemand merkt es** (Abnahme M1, Jugxo
+  `jug_01M327FC8MRXSEF63AHQHFQJ28`)
+  - Befund (Maintainer, 2026-09-21): Kein Abbruch, keine Warnung, aber alle 72 Varianten lagen auf
+    derselben Stelle. Die Annahme „Figma lehnt GRID ab ⇒ der Lauf bricht ab" hielt nicht: Figma
+    nahm an und bewirkte nichts. Belegte Ursache: Das Raster maß jede Variante als 0 × 0; von Hand
+    auf „Inhalt umschließen" gestellt maß das Set 48 × 96 = Innenabstand plus Lücken bei Spuren
+    der Größe null (8 + 5·8, 8 + 11·8). Der sichtbare Knopf ragte aus seiner Variante heraus. Das
+    Double hatte „die Variante umschließt ihren Inhalt" geglaubt.
+  - Rot zuerst: Das Double rechnet Größen und Positionen aus und reproduziert die Messung
+    zahlengenau (0 × 0 je Variante, 48 × 96 für das Set); danach fiel „sizes every variant to its
+    content, never 0" (`expected 0 to be greater than 0`), und der Bericht meldete für ein Werkzeug,
+    das das Raster annimmt und nichts bewirkt, `warnings: []` (`expected '' to contain '72 von 72
+    Varianten'`).
+  - Grün: Variante, Ring, Abstand, `control` und Set umschließen in beiden Achsen
+    (`layoutSizingHorizontal/Vertical: HUG`), jedes Kind liegt im Fluss (`layoutPositioning:
+    AUTO`) — beides auf der Liste der Eigenschaften, die das Plugin besitzt. Das Plugin liest nach
+    dem Anordnen die Wirkung zurück: Größe jeder Variante gegen ihren Inhalt, Positionen, Spalten,
+    Zeilen, Größe des Set, und warnt mit Zahlen („72 von 72 Varianten haben die Größe 0 × 0 …; das
+    Set misst 48 × 96").
+  - Beobachtet dabei: Die Positionen allein erkennen den Fehler nicht — die Lücken verschieben auch
+    leere Zellen, 72 Positionen in 6 Spalten und 12 Zeilen gab es auch bei 0 × 0. Die Größe ist der
+    Messpunkt.
+  - Beschriftung im selben Zug auf das neutrale Wort „Aktion" (Figma kennt einen Vorgabewert je
+    Eigenschaft, nicht je Variante).
+  - **Messlauf 2 (Datei `E7shE7m0z6O8VWPoGyN8ZT`, 2026-09-21): die Erklärung ist widerlegt.**
+    Idempotent (72 angelegt, dann 0/72), die neue Warnung griff und nannte die Zahlen — aber das
+    Raster wirkte weiterhin nicht: Set 48 × 96, 1 Position, 1 Spalte, 1 Zeile, und zugleich
+    `zero: []`, `smaller: []`. Die Varianten haben ihre richtige Größe und nehmen am Raster
+    trotzdem nicht teil. Das Double hatte 48 × 96 über die 0 × 0-Theorie nachgerechnet und damit
+    wieder eine Annahme über Figma bestätigt, die nicht stimmt.
+  - Vorgabe des Maintainers: **erst messen, dann bauen.** Umgesetzt: (a) Das Double modelliert die
+    0 × 0-Theorie nicht mehr, es gibt nur die Beobachtung wieder (Set = Innenabstand plus Lücken,
+    alle Kinder an einer Stelle, jedes in seiner eigenen Größe). Die Zusicherung „72 Plätze in 6
+    Spalten und 12 Zeilen" war gegen die widerlegte Theorie grün und ist entfernt, bis die Ursache
+    feststeht; an ihrer Stelle steht, was gilt — der Bericht nennt das Bild mit Zahlen. (b) Der
+    Bericht trägt als Rohdaten, was Figma hält (`layout.held`): am Set `layoutMode`, Spurenzahl,
+    Lücken, Bemessung und die Spurdefinitionen, an der ersten und der letzten Variante
+    `layoutPositioning`, Bemessung, Zellenanker und -spanne, Lage und Größe. Unbekannte
+    Eigenschaften stehen als „nicht vorhanden" da, werfende mit der Meldung des Werkzeugs.
+  - **Messlauf 3 (Datei `wSYaaAsB2EujMxGra84PoM`): Ursache aus den Rohdaten.** Set korrekt (GRID,
+    12 × 6, alle Spuren HUG, Lücken 8, Innenabstand 4, Bemessung HUG), Varianten korrekt
+    (`layoutPositioning: AUTO`, HUG, 51 × 36 bzw. 77 × 48) — aber `gridRowAnchorIndex` und
+    `gridColumnAnchorIndex` bei erster und letzter Variante **−1**: Keine Variante lag in einer
+    Zelle, Figma verteilte die angehängten Kinder nicht selbst. Das erklärt alle drei Messungen:
+    leere HUG-Spuren sind 0 (48 × 96), alle Kinder liegen bei 0/0, `zero`/`smaller` sind leer.
+  - Rot zuerst: Das Double gibt einem angehängten Kind den Anker −1, legt es auf 0/0 und lässt es
+    keine Spur bemessen; `setGridChildPosition` lehnt ab, was die API ablehnt (außerhalb, belegte
+    Zelle, `ROW_AUTO_FLOW`). Danach fielen „72 anchors ≥ 0, all pairs different", die Reihenfolge
+    der Vitrino und „72 places, 6 columns by 12 rows".
+  - Grün: Der Plan trägt je Variante ihre Zelle — Zeile aus der Kombination variant × tone × size
+    in der Reihenfolge der Vitrino, Spalte aus dem Zustand —, das Plugin weist sie mit
+    `setGridChildPosition` zu (nur, wo die Variante nicht schon liegt; `gridItemsPositioning:
+    MANUAL` gehört zu den Eigenschaften, die es besitzt). Der Bericht zählt Varianten mit Anker −1
+    und nennt sie als Warnung, samt der Meldung des Werkzeugs bei einer abgelehnten Zuweisung.
+    `layout.held` bleibt dauerhaft im Bericht — genau diese Rohdaten haben die Frage entschieden.
+  - Eigener Fehler, in der CI aufgefallen und behoben: Das Double rechnete das Layout des ganzen
+    Dokuments bei **jedem** Lesen von x, y, Breite oder Höhe neu. Die Plugin-Tests brauchten damit
+    lokal 117 s statt rund 10 s, und „changes nothing on a second run" lief im `push`-Lauf
+    35635990971 in sein 60-s-Budget (der `pull_request`-Lauf desselben Commits bestand). Keine
+    Last, sondern Arbeit: Das Layout wird jetzt einmal je Zustand des Dokuments gerechnet (ein
+    Zähler, den jede Änderung erhöht). Danach 4,3 s. Das Budget blieb unangetastet.
+  - Offen bis zum Lauf: dass platzierte Kinder ihre HUG-Spuren bemessen. So ist es dokumentiert;
+    gemessen ist es noch nicht. Der Lauf belegt es über `layout` (72 Positionen, 6 Spalten, 12
+    Zeilen, Größe des Sets) — oder widerlegt es mit Zahlen.
 
 Consistency check before tasks (`/speckit.analyze` scope): every FR and AK maps to at least one task or a recorded decision; every task maps to a plan decision; two new packages (Art. XI); the lockfile changes in T008 only; no task lowers a threshold; nothing is published.
