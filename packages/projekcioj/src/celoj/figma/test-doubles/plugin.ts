@@ -44,6 +44,7 @@ export interface DoubleNode {
   getSharedPluginData(namespace: string, key: string): string;
   setBoundVariable(field: string, variable: DoubleVariable | null): void;
   layoutMode?: string;
+  fontName?: { family: string; style: string };
   remove(): void;
 }
 
@@ -135,13 +136,31 @@ const FIGMA_DEFAULTS: Readonly<Record<string, Readonly<Record<string, unknown>>>
     effects: [],
     opacity: 1,
     characters: "",
+    fontName: { family: "Inter", style: "Regular" },
   },
 };
 
 let sequence = 0;
 const id = (prefix: string) => `${prefix}:${++sequence}`;
 
-function node(type: string, name: string, counts: DoubleCounts): DoubleNode {
+/** "Geist Medium": how a font is named in a message and in the loaded set. */
+const fontKey = (font: { family: string; style: string }) => `${font.family} ${font.style}`;
+
+/**
+ * The fonts a new Figma file has without anything installed: Inter in its styles. Everything
+ * else must be given to the double, as a file would have it (F11).
+ */
+const FIGMA_FONTS = ["Regular", "Medium", "SemiBold", "Bold"].map((style) => ({
+  family: "Inter",
+  style,
+}));
+
+function node(
+  type: string,
+  name: string,
+  counts: DoubleCounts,
+  loaded: ReadonlySet<string> = new Set(),
+): DoubleNode {
   counts.nodes++;
   // The proxy is the node's identity: children and parents must point at it, not at the raw
   // object, or a comparison by identity fails.
@@ -194,6 +213,17 @@ function node(type: string, name: string, counts: DoubleCounts): DoubleNode {
   // double swallowed every such assignment, and a projection could lose a value unseen (F8).
   recorded = new Proxy(self, {
     set(target, key, value) {
+      // Figma refuses a text in a font that is not loaded: setting it, or setting characters in
+      // the font the text has (F11). The double does too, instead of accepting it silently.
+      if (target.type === "TEXT" && (key === "fontName" || key === "characters")) {
+        const font = (key === "fontName" ? value : target.properties.fontName) as {
+          family: string;
+          style: string;
+        };
+        if (!loaded.has(fontKey(font))) {
+          throw new Error(`The font "${fontKey(font)}" is not loaded; call loadFontAsync first.`);
+        }
+      }
       if (typeof key === "string" && !(key in target)) {
         target.properties[key] = value;
         // Written by the plugin: from now on the value is the plugin's, not the tool's.
@@ -232,9 +262,13 @@ function strict<T extends object>(name: string, api: T): T {
   });
 }
 
-/** A fresh double with an empty document. */
-export function figmaDouble(): FigmaDouble {
+/** A fresh double with an empty document; `fonts` are the fonts the file has besides Inter. */
+export function figmaDouble(
+  options: { fonts?: readonly { family: string; style: string }[] } = {},
+): FigmaDouble {
   const counts: DoubleCounts = { collections: 0, variables: 0, nodes: 0, valueWrites: 0 };
+  const available = new Set([...FIGMA_FONTS, ...(options.fonts ?? [])].map(fontKey));
+  const loaded = new Set<string>();
   const notifications: DoubleNotification[] = [];
   const collections: DoubleCollection[] = [];
   const variables: DoubleVariable[] = [];
@@ -305,7 +339,7 @@ export function figmaDouble(): FigmaDouble {
     }),
     createComponent: () => node("COMPONENT", "Component", counts),
     createFrame: () => node("FRAME", "Frame", counts),
-    createText: () => node("TEXT", "Text", counts),
+    createText: () => node("TEXT", "Text", counts, loaded),
     createRectangle: () => node("RECTANGLE", "Rectangle", counts),
     combineAsVariants: (components: DoubleNode[], parent: DoubleNode) => {
       const set = node("COMPONENT_SET", "Component Set", counts);
@@ -313,7 +347,12 @@ export function figmaDouble(): FigmaDouble {
       for (const component of components) set.appendChild(component);
       return set;
     },
-    loadFontAsync: async () => undefined,
+    loadFontAsync: async (font: { family: string; style: string }) => {
+      if (!available.has(fontKey(font))) {
+        throw new Error(`The font "${fontKey(font)}" is not available in this file.`);
+      }
+      loaded.add(fontKey(font));
+    },
     notify: (message: string, options?: Record<string, unknown>) => {
       notifications.push({ message, options });
     },

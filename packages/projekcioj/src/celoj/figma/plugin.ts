@@ -274,8 +274,34 @@ function diagnose(report) {
   return "";
 }
 
-async function applyComponents(variables) {
-  await figma.loadFontAsync({ family: "Inter", style: "Regular" });
+/**
+ * Loads the model's font; when the file does not have it, the one named fallback in the same
+ * style, and says so. Nothing else is tried: a silent substitute would draw a different label
+ * than the model (F11).
+ */
+async function loadFont(font, warnings) {
+  try {
+    await figma.loadFontAsync(font);
+    return font;
+  } catch (error) {
+    const fallback = { family: PLAN.fontFallback, style: font.style };
+    await figma.loadFontAsync(fallback);
+    warnings.push(
+      "Schrift " + font.family + " " + font.style + " ist in dieser Datei nicht verfügbar; " +
+        "die Beschriftung steht ersatzweise in " + fallback.family + " " + fallback.style + ".",
+    );
+    return fallback;
+  }
+}
+
+async function applyComponents(variables, warnings) {
+  const fonts = new Map();
+  for (const component of PLAN.components) {
+    for (const variant of component.variants) {
+      const key = variant.font.family + " " + variant.font.style;
+      if (!fonts.has(key)) fonts.set(key, await loadFont(variant.font, warnings));
+    }
+  }
   const reports = [];
   for (const component of PLAN.components) {
     let set = ours(figma.currentPage, "ero", component.set);
@@ -330,6 +356,7 @@ async function applyComponents(variables) {
       if (control.parent !== gap) gap.appendChild(control);
       control.name = "control";
       const label = part(control, "label", () => figma.createText());
+      label.fontName = fonts.get(variant.font.family + " " + variant.font.style);
       // Only values from the plan (F13): every owned property neutral first — Figma's white fill,
       // its clipping and its line would otherwise cover what the plan draws.
       for (const frame of [node, ring, gap, control]) own(frame, NEUTRAL);
@@ -403,8 +430,8 @@ async function applyComponents(variables) {
 async function applyPlan() {
   const { collections, modeIds } = await applyCollections();
   const variables = await applyVariables(collections, modeIds);
-  const components = await applyComponents(variables);
   const warnings = [];
+  const components = await applyComponents(variables, warnings);
   for (const report of components) {
     // Ein zweiter Lauf, der in einem vorgefundenen Set etwas anlegt, darf nie still durchgehen
     // (F10b): Entweder fehlte der Knoten, oder er hat seine Markierung verloren — beides ist ein

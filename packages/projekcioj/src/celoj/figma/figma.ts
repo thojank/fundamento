@@ -103,6 +103,8 @@ export interface FigmaComponentSet {
     focusVisible?: boolean;
     /** Corner radii of the ring and its gap: the control's radius grown by what lies inside. */
     radii?: { "focus-ring": number; "focus-gap": number };
+    /** The font of the label, from its typography token: family and the style of its weight. */
+    font?: { family: string; style: string };
   }[];
   pluginData: { fundamento: { ero: string; skemo: string; version: string } };
   /**
@@ -115,6 +117,11 @@ export interface FigmaComponentSet {
 
 export interface FigmaPlan {
   fundamento: string;
+  /**
+   * The one font the plugin falls back to when the model's font is not in the file — named, in
+   * the same style, and reported as a warning (Maintainer, 2026-09-21).
+   */
+  fontFallback?: string;
   collections: FigmaCollection[];
   components: FigmaComponentSet[];
 }
@@ -515,6 +522,8 @@ function componentSetOf(
       "focus-gap": gapRadius,
       "focus-ring": gapRadius + px("focus-ring", "ring", "width"),
     };
+    const typography = boundToken(skemo, "label", "typography", combination);
+    const font = fontOf(typography === undefined ? undefined : base[typography.token]?.value);
     return {
       props: { ...combination },
       bindings,
@@ -523,6 +532,7 @@ function componentSetOf(
       notDrawn,
       focusVisible: combination[STATE_KEY] === FOCUS_STATE,
       radii,
+      ...(font === undefined ? {} : { font }),
     };
   });
   const columns = skemo.states.length;
@@ -539,6 +549,35 @@ function componentSetOf(
       padding: cell,
     },
   };
+}
+
+/** Figma's names for the weights of a font. Knowledge of this Celo (Art. VIII). */
+const FONT_STYLES: Readonly<Record<number, string>> = {
+  100: "Thin",
+  200: "ExtraLight",
+  300: "Light",
+  400: "Regular",
+  500: "Medium",
+  600: "SemiBold",
+  700: "Bold",
+  800: "ExtraBold",
+  900: "Black",
+};
+
+/** The font Figma cannot do without in a new file, and so the one the plugin falls back to. */
+export const FIGMA_FONT_FALLBACK = "Inter";
+
+/**
+ * The Figma font of a typography value: the first family of its stack — the others (system-ui,
+ * sans-serif) are fallbacks of the browser — and the style of its weight.
+ */
+function fontOf(value: unknown): { family: string; style: string } | undefined {
+  const typography = value as { fontFamily?: unknown; fontWeight?: unknown } | undefined;
+  const stack = typography?.fontFamily;
+  const family = Array.isArray(stack) ? stack[0] : stack;
+  const weight = typeof typography?.fontWeight === "number" ? typography.fontWeight : 400;
+  if (typeof family !== "string") return undefined;
+  return { family, style: FONT_STYLES[Math.round(weight / 100) * 100] ?? "Regular" };
 }
 
 /** The padding of a table cell in the Vitrino; the grid in Figma keeps the same distances. */
@@ -600,6 +639,7 @@ export const FIGMA_CELO: Celo = {
     ];
     const plan: FigmaPlan = {
       fundamento: modeloJson.fundamento.version,
+      fontFallback: FIGMA_FONT_FALLBACK,
       collections,
       components: modelo.eroj.map((entry) =>
         componentSetOf(
