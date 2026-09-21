@@ -136,6 +136,38 @@ function variantName(props) {
     .join(", ");
 }
 
+/**
+ * Das Paar aus dem Endstand des vorigen Laufs ("left") und dem Anfangsstand dieses Laufs
+ * ("before") gelesen — die Zeilen einzeln zu deuten führt in die Irre (F10b).
+ */
+function diagnose(report) {
+  const planned = report.planned;
+  if (!report.found) return "";
+  const complete =
+    report.created.length === 0 &&
+    report.before.children === planned &&
+    report.before.marked === planned;
+  if (complete) return "";
+  if (report.before.marked < report.before.children) {
+    return "Ein Kind des Sets stand ohne Markierung da: die Markierung ist verloren gegangen, " +
+      "der Knoten nicht.";
+  }
+  if (report.left === null) {
+    return "Am Set steht kein Endstand eines früheren Laufs. Damit lassen sich „nie im Set " +
+      "angekommen“ und „zwischen den Läufen verschwunden“ für dieses Set noch nicht trennen; " +
+      "der nächste Lauf kann es.";
+  }
+  if (report.left.children < planned) {
+    return "Schon der vorige Lauf hinterließ " + report.left.children + " statt " + planned +
+      " Kinder: die Variante ist beim Anlegen nie im Set angekommen.";
+  }
+  if (report.before.children < report.left.children) {
+    return "Der vorige Lauf hinterließ " + report.left.children + " Kinder, dieser fand " +
+      report.before.children + ": zwischen den Läufen ist etwas verschwunden.";
+  }
+  return "";
+}
+
 async function applyComponents(variables) {
   await figma.loadFontAsync({ family: "Inter", style: "Regular" });
   const reports = [];
@@ -153,9 +185,15 @@ async function applyComponents(variables) {
             marked: set.children.filter((child) => mark(child) !== "").length,
             unmarked: set.children.filter((child) => mark(child) === "").map((child) => child.name),
           };
+    // Was der vorige Lauf am Set hinterlassen hat. Lauf 2 lässt sich nur im Licht von Lauf 1
+    // deuten: „71 Kinder beim Start" heißt nur dann „zwischen den Läufen verschwunden", wenn Lauf 1
+    // mit 72 geendet hat (F10b). Deshalb legt jeder Lauf seinen Endstand hier ab.
+    const stored = set === undefined ? "" : set.getSharedPluginData(NAMESPACE, "after");
     const report = {
       set: component.set,
       found: set !== undefined,
+      planned: component.variants.length,
+      left: stored === "" ? null : JSON.parse(stored),
       before: before,
       created: [],
       updated: [],
@@ -163,6 +201,7 @@ async function applyComponents(variables) {
       extra: [],
       duplicates: [],
       after: { children: 0, marked: 0 },
+      diagnosis: "",
     };
     const made = [];
     for (const variant of component.variants) {
@@ -214,6 +253,10 @@ async function applyComponents(variables) {
       children: set.children.length,
       marked: set.children.filter((child) => mark(child) !== "").length,
     };
+    report.diagnosis = diagnose(report);
+    // Ohne Zeitstempel: Zwei gleiche Läufe hinterlassen denselben Stand, sonst wäre der Lauf nicht
+    // mehr idempotent.
+    set.setSharedPluginData(NAMESPACE, "after", JSON.stringify(report.after));
     reports.push(report);
   }
   return reports;
@@ -240,6 +283,7 @@ async function applyPlan() {
           ".",
       );
     }
+    if (report.diagnosis !== "") warnings.push(report.set + ": " + report.diagnosis);
     if (report.after.marked !== report.after.children) {
       warnings.push(
         report.set + ": " + (report.after.children - report.after.marked) +

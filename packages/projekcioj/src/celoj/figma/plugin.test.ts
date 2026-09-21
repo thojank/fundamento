@@ -440,9 +440,12 @@ describe("a run that creates in a set it found warns, and says what it found (F1
     expect(again.components[0]?.found).toBe(true);
     expect(again.components[0]?.created).toEqual([LAST]);
     expect(again.components[0]?.before?.children).toBe(71);
-    expect(again.warnings).toHaveLength(1);
+    // Zwei Warnungen: die Regel („vorgefunden und trotzdem angelegt") und die Deutung des Paars
+    // aus dem Endstand des vorigen Laufs und dem Anfangsstand dieses Laufs.
+    expect(again.warnings).toHaveLength(2);
     expect(again.warnings[0]).toContain(LAST);
     expect(again.warnings[0]).toContain("vorgefunden");
+    expect(again.warnings[1]).toContain("zwischen den Läufen");
   });
 
   // End state two: the node is there but lost our mark. Then the run creates a second node of the
@@ -460,5 +463,87 @@ describe("a run that creates in a set it found warns, and says what it found (F1
     expect(again.components[0]?.duplicates).toEqual([LAST]);
     expect(setOf(double).children).toHaveLength(73);
     expect(again.warnings.join(" ")).toContain("doppelt");
+  });
+});
+
+// F10b, dritter Teil (Maintainer, 2026-09-21): Lauf 2 lässt sich nur im Licht von Lauf 1 deuten.
+// `before: 71` heißt „zwischen den Läufen verschwunden" nur dann, wenn Lauf 1 mit `after: 72`
+// geendet hat; endete Lauf 1 schon mit 71, war der Knoten nie im Set. Der Lauf wertet dieses Paar
+// selbst aus: Er legt seinen `after`-Stand als Plugin-Daten am Set ab und liest ihn beim nächsten
+// Mal als `left` wieder ein. Damit braucht der Maintainer zwischen den Läufen nichts abzulesen —
+// Ablesen hieße auswählen, und das wäre schon ein Eingriff.
+describe("the run reads its own last state and says what happened (F10b)", () => {
+  async function run2(double: ReturnType<typeof figmaDouble>) {
+    const module = new Function(
+      "figma",
+      `${repoFiles["figma/plugin/code.js"] ?? ""}\nreturn applyPlan();`,
+    );
+    return (await module(double.figma)) as {
+      components: {
+        planned: number;
+        before: { children: number; marked: number; unmarked: string[] };
+        after: { children: number; marked: number };
+        left: { children: number; marked: number } | null;
+        diagnosis: string;
+        created: string[];
+      }[];
+      warnings: string[];
+    };
+  }
+
+  const setOf = (double: ReturnType<typeof figmaDouble>) => {
+    const found = double.root.children[0]?.children.find((child) => child.name === "butono");
+    if (found === undefined) throw new Error("no component set");
+    return found;
+  };
+  const LAST = "variant=tertiary, tone=default, size=large, state=loading";
+
+  it("leaves its state at the set and finds it again next time", async () => {
+    const double = figmaDouble();
+    const first = await run2(double);
+    expect(first.components[0]?.planned).toBe(72);
+    expect(first.components[0]?.left).toBeNull();
+    expect(first.components[0]?.diagnosis).toBe("");
+    const second = await run2(double);
+    expect(second.components[0]?.left).toEqual({ children: 72, marked: 72 });
+    expect(second.components[0]?.diagnosis).toBe("");
+    expect(second.warnings).toEqual([]);
+  });
+
+  it("says 'gone between the runs' when the last run left the set complete", async () => {
+    const double = figmaDouble();
+    await run2(double);
+    setOf(double)
+      .children.find((child) => child.name === LAST)
+      ?.remove();
+    const again = await run2(double);
+    expect(again.components[0]?.left).toEqual({ children: 72, marked: 72 });
+    expect(again.components[0]?.diagnosis).toContain("zwischen den Läufen");
+    expect(again.warnings.join(" ")).toContain("zwischen den Läufen");
+  });
+
+  // Der wahrscheinlichste Fall, und der, der zur alten Datei von gestern passt: Schon der erste
+  // Lauf hinterließ 71 — die Variante ist beim Anlegen nie im Set angekommen.
+  it("says 'never arrived' when the last run already left the set short", async () => {
+    const double = figmaDouble();
+    await run2(double);
+    const set = setOf(double);
+    set.children.find((child) => child.name === LAST)?.remove();
+    set.setSharedPluginData("fundamento", "after", JSON.stringify({ children: 71, marked: 71 }));
+    const again = await run2(double);
+    expect(again.components[0]?.left).toEqual({ children: 71, marked: 71 });
+    expect(again.components[0]?.diagnosis).toContain("nie im Set angekommen");
+    expect(again.components[0]?.created).toEqual([LAST]);
+  });
+
+  it("says that the pair cannot be read yet when no earlier state is at the set", async () => {
+    const double = figmaDouble();
+    await run2(double);
+    const set = setOf(double);
+    set.children.find((child) => child.name === LAST)?.remove();
+    set.setSharedPluginData("fundamento", "after", "");
+    const again = await run2(double);
+    expect(again.components[0]?.left).toBeNull();
+    expect(again.components[0]?.diagnosis).toContain("früheren Laufs");
   });
 });

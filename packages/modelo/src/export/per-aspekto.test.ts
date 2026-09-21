@@ -78,9 +78,11 @@ describe("Tokens-Studio folder per Aspekto (D-09)", () => {
     );
   });
 
-  // Four full exports (two with 144 combinations): ~2.5 s alone, more on a loaded CI runner.
+  // Four full exports (two with 144 combinations): ~2.5 s alone, more on a loaded CI runner. Under
+  // the full gate it ran into the 30 s budget, so it gets the usual factor 3 under CI
+  // (jug_01M2W3K1YPP05F4XF86J71RGTK) — time for the load, not for the work.
   it("is byte-identical over two exports, with and without the external package (AK-10)", {
-    timeout: 30_000,
+    timeout: 30_000 * (process.env.CI === "true" ? 3 : 1),
   }, () => {
     const hash = (value: ModeloExport) =>
       createHash("sha256").update(JSON.stringify(value)).digest("hex");

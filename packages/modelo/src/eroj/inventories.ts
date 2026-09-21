@@ -145,14 +145,28 @@ export function baseResolution(modelo: Modelo): Readonly<Record<string, Resolved
   return resolveCombination(modelo, base).tokens;
 }
 
+type Resolutions = {
+  assignment: Record<string, string>;
+  tokens: Readonly<Record<string, ResolvedToken>>;
+}[];
+
+/**
+ * Resolving every combination is the most expensive thing a projection does, and a Celo needs the
+ * same view several times (the paints of a component, the fields of a composite). The result only
+ * depends on the Modelo, so it is kept per Modelo. Callers read it, they never change it.
+ */
+const resolutionsCache: WeakMap<Modelo, Resolutions> = new WeakMap();
+
 /** Every combination of every Dimensio, resolved — the view a decision over all modes needs. */
-export function allResolutions(
-  modelo: Modelo,
-): { assignment: Record<string, string>; tokens: Readonly<Record<string, ResolvedToken>> }[] {
-  return allAssignments(modelo).map((assignment) => ({
+export function allResolutions(modelo: Modelo): Resolutions {
+  const cached = resolutionsCache.get(modelo);
+  if (cached !== undefined) return cached;
+  const resolutions = allAssignments(modelo).map((assignment) => ({
     assignment,
     tokens: resolveCombination(modelo, assignment).tokens,
   }));
+  resolutionsCache.set(modelo, resolutions);
+  return resolutions;
 }
 
 /** `#rrggbb` for an opaque colour, `#rrggbb/<alpha>` for a translucent one. Canonical text. */

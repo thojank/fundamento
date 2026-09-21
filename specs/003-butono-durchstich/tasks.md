@@ -323,14 +323,26 @@ Results go into `plan.md` → „Manual acceptance results".
   - Grün, Regel: Ist das Set vorgefunden (`found: true`) und wird trotzdem etwas angelegt, ist das
     **immer** eine Warnung, mit den Namen der angelegten Varianten. Dazu warnt der Lauf bei
     doppelten Variantennamen und bei Kindern, die nach dem Lauf ohne Markierung dastehen.
-  - Grün, Messpunkte statt Vermutung: Der Bericht nennt je Komponente `before`
-    (Kinder, davon markiert, unmarkierte mit Namen) und `after` (Kinder, davon markiert). Damit
-    trennt der nächste Lauf ohne weitere Fragen „der Knoten fehlte" (Lauf 2 sieht 71 Kinder beim
-    Start) von „die Markierung hat nicht gehaftet" (Lauf 1 hinterlässt 72 Kinder, davon 71
-    markiert).
-  - Offen, beim Maintainer: der saubere Messpunkt — in einer neuen Datei Lauf 1, die Variantenzahl
-    am Set ablesen, ohne etwas anzuklicken, sofort Lauf 2. Das trennt „Plugin" von „zwischen den
-    Läufen passiert". Die Ursache bleibt bis dahin ausdrücklich offen.
+  - Grün, Messpunkte statt Vermutung: Der Bericht nennt je Komponente `before` (Kinder, davon
+    markiert, unmarkierte mit Namen), `after` (Kinder, davon markiert) und `left` — den Endstand,
+    den der **vorige** Lauf am Set hinterlassen hat. Jeder Lauf legt seinen `after`-Stand als
+    Plugin-Daten am Set ab und liest ihn beim nächsten Mal als `left` wieder ein (ohne Zeitstempel,
+    sonst wäre der Lauf nicht mehr idempotent).
+  - Grün, Deutung des **Paars** statt einzelner Zeilen (Korrektur des Maintainers, 2026-09-21):
+    Lauf 2 ist nur im Licht von Lauf 1 zu lesen. Der Lauf schreibt die Deutung selbst als
+    `diagnosis` in den Bericht und in die Warnungen:
+
+    | `left` (Ende des vorigen Laufs) | `before` (Start dieses Laufs) | Deutung |
+    |---|---|---|
+    | 71 Kinder | beliebig | Die Variante ist beim Anlegen **nie im Set angekommen** — der
+      wahrscheinlichste Fall, er passt zur alten Datei mit 71 nach dem ersten Lauf |
+    | 72 Kinder, 72 markiert | 71 Kinder | Zwischen den Läufen verschwunden |
+    | 72 Kinder, 72 markiert | 72 Kinder, 71 markiert | Der Knoten steht da, die Markierung ist weg |
+    | kein Stand am Set | unvollständig | Noch nicht zu trennen; der nächste Lauf kann es |
+
+  - Offen, beim Maintainer: Neue leere Datei, Lauf 1, **sofort** Lauf 2, keine Aktion dazwischen,
+    beide Konsolenausgaben kopieren. Ablesen am Set ist nicht nötig und wäre ein Eingriff — die
+    Zahl steht als `after` im Bericht. Die Ursache bleibt bis dahin ausdrücklich offen.
 
 - [ ] **F11 Die Figma-Projektion überträgt keine Geometrie und keine Beschriftung** (Abnahme M1,
   FR-06, AK-04)
