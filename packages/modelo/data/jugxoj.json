@@ -306,6 +306,17 @@
       "kialo": "Figma-Variablen tragen COLOR, FLOAT, STRING und BOOLEAN — keinen Verbund und keine Liste. Ein Schatten ist beides. Bis heute kam er als Zeichenkette \"[object Object]\" im Plan an: ein Wert, der aussieht wie ein Wert und keiner ist. Entschieden: Ein Verbund wird feldweise projiziert, wie Typografie und Rahmen es schon werden (elevation/shadow/raised/blur), und ein Schatten mit mehreren Lagen nummeriert sie (elevation/shadow/floating/2/color). Die Zahl der Lagen wird über alle Kombinationen entschieden, aspekto eingeschlossen; eine Aspekto mit weniger Lagen bekommt für die fehlende eine vollständig durchsichtige Farbe und Maße von 0 — in einer Datei, deren Variablen in jedem Modus dieselben sind, heißt „diese Lage gibt es hier nicht\" genau das. Grenze, die bleibt: Die Variablen sind angelegt und benannt, aber an keinen Effekt gebunden; keine Ero verlangt heute Höhe. Der Wächter gegen den Rückfall ist eine Ausnahme in figmaValue: Wer einen Verbund ohne Feldzerlegung in den Plan schreiben will, bekommt einen Fehler mit dem Namen des Typs, keine Zeichenkette.",
       "date": "2026-09-20",
       "context": "Spec 003 F9, Befund der Abnahme M1 (Maintainer, 2026-09-20). Prüfungen: figma.test.ts „leaves no variable holding an object as a string\", „refuses to write an object as a string instead of stringifying it (guard)\" und der Lauf gegen rezolvoj.json (AK-03). Das Binden der Schattenvariablen an einen Effekt steht in docs/vojmapo.md."
+    },
+    {
+      "id": "jug_01M31MH4KAGYSK5CPTY51E7MDV",
+      "ref": {
+        "artikolo": "X",
+        "celo": "figma"
+      },
+      "decision": "deviation-recorded",
+      "kialo": "Das Double bildet den zweiten Lauf nicht so ab wie Figma. Gemessen am 2026-09-21 in einer frisch angelegten Datei: Lauf 1 legte 72 Varianten an, ohne Warnung; Lauf 2 fand das Set vor, aktualisierte 71 und legte eine neu an — die letzte Variante des Plans (variant=tertiary, tone=default, size=large, state=loading, Index 71 von 72). Danach trug das Set 72 Kinder, neben dem Set lag nichts. Derselbe Ablauf gegen das Double: zwei Läufe, 72 angelegt, 72 aktualisiert, nichts neu — der Fall tritt dort nicht ein. Nach jug_01M3094ZC6F3XZ1H0MWQZ62MYV ist die gescheiterte Reproduktion selbst der Befund: Das Double ist unsere Annahme über das Werkzeug, und an dieser Stelle stimmt die Annahme nicht. Die Ursache ist offen und wird nicht geraten; die beiden Vermutungen des Maintainers (Dateigeschichte, lose Variante neben dem Set) sind durch die Messung widerlegt. Statt einer Vermutung trägt der Lauf jetzt die Messpunkte, die die Frage entscheiden: Er meldet, wie er das Set vorgefunden hat (Kinder, davon markiert, unmarkierte mit Namen) und wie er es hinterlässt (Kinder, davon markiert). Haftet eine Markierung im Werkzeug nicht, sagt das schon Lauf 1; fehlt der Knoten, sagt es Lauf 2 mit „beim Start 71 Kinder\". Zusätzlich gilt ab jetzt: Ist das Set vorgefunden und wird trotzdem etwas angelegt, ist das immer eine Warnung — ein zweiter Lauf, der Varianten neu erzeugt, darf nicht mit leerer Warnungsliste durchgehen.",
+      "date": "2026-09-21",
+      "context": "Spec 003 F10b, Abnahme M1 in der Datei QtJRsTlm7NnIPC8wqNuAVm (Maintainer, 2026-09-21). Ergänzt jug_01M3094ZC6F3XZ1H0MWQZ62MYV um den ersten gemessenen Fall einer Abweichung zwischen Double und Werkzeug. Prüfungen: plugin.test.ts, „a second run creates nothing (F10b)\" und „a run that creates in a set it found warns, and says what it found (F10b)\"."
     }
   ]
 }

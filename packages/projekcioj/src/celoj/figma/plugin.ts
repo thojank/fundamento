@@ -141,13 +141,28 @@ async function applyComponents(variables) {
   const reports = [];
   for (const component of PLAN.components) {
     let set = ours(figma.currentPage, "ero", component.set);
+    // How the run found the set, before it changed anything (F10b). Ohne diesen Blick lässt sich
+    // hinterher nicht mehr unterscheiden, ob ein Knoten fehlte oder ob er nur seine Markierung
+    // verloren hatte — der frisch angelegte Knoten verdeckt beides.
+    const mark = (child) => child.getSharedPluginData(NAMESPACE, "variant");
+    const before =
+      set === undefined
+        ? { children: 0, marked: 0, unmarked: [] }
+        : {
+            children: set.children.length,
+            marked: set.children.filter((child) => mark(child) !== "").length,
+            unmarked: set.children.filter((child) => mark(child) === "").map((child) => child.name),
+          };
     const report = {
       set: component.set,
       found: set !== undefined,
+      before: before,
       created: [],
       updated: [],
       missing: [],
       extra: [],
+      duplicates: [],
+      after: { children: 0, marked: 0 },
     };
     const made = [];
     for (const variant of component.variants) {
@@ -189,6 +204,16 @@ async function applyComponents(variables) {
     const present = set.children.map((child) => child.name);
     report.missing = planned.filter((name) => present.indexOf(name) === -1);
     report.extra = present.filter((name) => planned.indexOf(name) === -1);
+    report.duplicates = present.filter(
+      (name, index) => present.indexOf(name) !== index && report.duplicates.indexOf(name) === -1,
+    );
+    // Wie der Lauf das Set hinterlässt, Markierungen eingeschlossen. Haftet eine Markierung im
+    // Werkzeug nicht, sagt das schon dieser Lauf und nicht erst der nächste über den Umweg
+    // „created: 1" (F10b).
+    report.after = {
+      children: set.children.length,
+      marked: set.children.filter((child) => mark(child) !== "").length,
+    };
     reports.push(report);
   }
   return reports;
@@ -201,6 +226,34 @@ async function applyPlan() {
   const components = await applyComponents(variables);
   const warnings = [];
   for (const report of components) {
+    // Ein zweiter Lauf, der in einem vorgefundenen Set etwas anlegt, darf nie still durchgehen
+    // (F10b): Entweder fehlte der Knoten, oder er hat seine Markierung verloren — beides ist ein
+    // Befund, kein Normalfall.
+    if (report.found && report.created.length > 0) {
+      warnings.push(
+        report.set + ": Das Set war vorgefunden, trotzdem wurden " + report.created.length +
+          " Variante(n) neu angelegt (" + report.created.join("; ") + "). Beim Start trug es " +
+          report.before.children + " Kinder, davon " + report.before.marked + " markiert" +
+          (report.before.unmarked.length === 0
+            ? ""
+            : ", ohne Markierung: " + report.before.unmarked.join("; ")) +
+          ".",
+      );
+    }
+    if (report.after.marked !== report.after.children) {
+      warnings.push(
+        report.set + ": " + (report.after.children - report.after.marked) +
+          " von " + report.after.children +
+          " Kindern sind nach dem Lauf ohne Markierung — der nächste Lauf würde sie nicht " +
+          "wiederfinden und neu anlegen.",
+      );
+    }
+    if (report.duplicates.length > 0) {
+      warnings.push(
+        report.set + ": " + report.duplicates.length +
+          " Variantenname(n) doppelt (" + report.duplicates.join("; ") + ").",
+      );
+    }
     if (report.missing.length === 0 && report.extra.length === 0) continue;
     warnings.push(
       report.set + ": " + report.missing.length + " fehlen" +

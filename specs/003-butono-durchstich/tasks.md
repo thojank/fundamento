@@ -307,6 +307,31 @@ Results go into `plan.md` → „Manual acceptance results".
     `expected '' to contain 'Inter fehlt'`). Der Lauf in einer frisch angelegten, leeren Datei
     steht beim Maintainer aus; erst er entscheidet, ob „71 statt 72" Dateigeschichte war.
 
+- [x] **F10b Der zweite Lauf ist nicht idempotent** (Abnahme M1, Jugxo
+  `jug_01M31MH4KAGYSK5CPTY51E7MDV`)
+  - Fakten (Maintainer, 2026-09-21, frische Datei `QtJRsTlm7NnIPC8wqNuAVm`): Lauf 1 `created: 72`,
+    keine Warnung. Lauf 2 `found: true`, `created: 1`, `updated: 71`, `warnings: []`. Die neu
+    angelegte Variante ist `variant=tertiary, tone=default, size=large, state=loading` — **die
+    letzte des Plans**, Index 71 von 72. Danach 72 Kinder im Set, nichts daneben auf der Seite. In
+    der alten Datei lagen gestern 71 im Set, der Fall bestand also schon vor PR #17. Die beiden
+    ursprünglichen Erklärungen (Dateigeschichte, lose Variante neben dem Set) sind damit widerlegt
+    und werden nicht weiterverfolgt.
+  - Reproduktion am Double: **gescheitert.** Zwei Läufe gegen den Plan dieses Repositories geben
+    72 angelegt, dann 72 aktualisiert, nichts neu. Nach `jug_01M3094ZC6F3XZ1H0MWQZ62MYV` ist das
+    selbst der Befund: Das Double weicht an dieser Stelle von Figma ab. Festgehalten, nicht
+    geraten.
+  - Grün, Regel: Ist das Set vorgefunden (`found: true`) und wird trotzdem etwas angelegt, ist das
+    **immer** eine Warnung, mit den Namen der angelegten Varianten. Dazu warnt der Lauf bei
+    doppelten Variantennamen und bei Kindern, die nach dem Lauf ohne Markierung dastehen.
+  - Grün, Messpunkte statt Vermutung: Der Bericht nennt je Komponente `before`
+    (Kinder, davon markiert, unmarkierte mit Namen) und `after` (Kinder, davon markiert). Damit
+    trennt der nächste Lauf ohne weitere Fragen „der Knoten fehlte" (Lauf 2 sieht 71 Kinder beim
+    Start) von „die Markierung hat nicht gehaftet" (Lauf 1 hinterlässt 72 Kinder, davon 71
+    markiert).
+  - Offen, beim Maintainer: der saubere Messpunkt — in einer neuen Datei Lauf 1, die Variantenzahl
+    am Set ablesen, ohne etwas anzuklicken, sofort Lauf 2. Das trennt „Plugin" von „zwischen den
+    Läufen passiert". Die Ursache bleibt bis dahin ausdrücklich offen.
+
 - [ ] **F11 Die Figma-Projektion überträgt keine Geometrie und keine Beschriftung** (Abnahme M1,
   FR-06, AK-04)
   - Befund (Maintainer, 2026-09-20, aus der Liste der blinden Stellen zu F8): Das Plugin setzt nie
