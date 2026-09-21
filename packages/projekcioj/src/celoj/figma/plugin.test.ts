@@ -863,3 +863,47 @@ describe("the label is set in the model's font (F11)", () => {
     expect(report.warnings.join(" ")).toContain("Inter Medium");
   });
 });
+
+// Beschriftung (Maintainer, 2026-09-21): Text wie in der Vitrino, als Text-Eigenschaft der
+// Komponente (label: TEXT) mit dem Vitrino-Text als Vorgabewert. Jede Instanz kann ihn
+// überschreiben; realistische Maße entstehen dort, nicht in der Vorlage.
+describe("the label is a text property of the component (F11)", () => {
+  const setOf = (double: ReturnType<typeof figmaDouble>) =>
+    double.root.children[0]?.children.find((child) => child.name === "butono");
+  type Definitions = Record<string, { type: string; defaultValue: string }>;
+
+  it("declares one TEXT property label, with the Vitrino's text as its default", async () => {
+    const double = modelDouble();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    const definitions = (setOf(double)?.properties.componentPropertyDefinitions ??
+      {}) as Definitions;
+    const keys = Object.keys(definitions).filter((key) => key.startsWith("label#"));
+    expect(keys).toHaveLength(1);
+    expect(definitions[keys[0] ?? ""]).toEqual({
+      type: "TEXT",
+      defaultValue: "secondary · default · medium",
+    });
+  });
+
+  it("connects every label to it", async () => {
+    const double = modelDouble();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    const set = setOf(double);
+    const [key] = Object.keys((set?.properties.componentPropertyDefinitions ?? {}) as Definitions);
+    for (const variant of set?.children ?? []) {
+      const label = descendant(variant, "label");
+      expect(label?.properties.componentPropertyReferences, variant.name).toEqual({
+        characters: key,
+      });
+    }
+  });
+
+  it("declares it once, also on a second run", async () => {
+    const double = modelDouble();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    const definitions = (setOf(double)?.properties.componentPropertyDefinitions ??
+      {}) as Definitions;
+    expect(Object.keys(definitions)).toHaveLength(1);
+  });
+});

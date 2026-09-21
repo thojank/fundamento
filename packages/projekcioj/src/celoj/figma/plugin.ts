@@ -336,6 +336,7 @@ async function applyComponents(variables, warnings) {
       diagnosis: "",
     };
     const made = [];
+    const labels = [];
     for (const variant of component.variants) {
       const name = variantName(variant.props);
       const existing = set === undefined ? undefined : ours(set, "variant", name);
@@ -357,6 +358,7 @@ async function applyComponents(variables, warnings) {
       control.name = "control";
       const label = part(control, "label", () => figma.createText());
       label.fontName = fonts.get(variant.font.family + " " + variant.font.style);
+      labels.push(label);
       // Only values from the plan (F13): every owned property neutral first — Figma's white fill,
       // its clipping and its line would otherwise cover what the plan draws.
       for (const frame of [node, ring, gap, control]) own(frame, NEUTRAL);
@@ -397,6 +399,22 @@ async function applyComponents(variables, warnings) {
     set.setSharedPluginData(NAMESPACE, "skemo", component.pluginData.fundamento.skemo);
     set.setSharedPluginData(NAMESPACE, "version", component.pluginData.fundamento.version);
     for (const node of made) if (node.parent !== set) set.appendChild(node);
+    // The label is a text property of the component (F11): declared once on the set, its default
+    // the Vitrino's text, every label connected to it — an instance overrides it.
+    if (component.label !== undefined) {
+      const spec = component.label;
+      const definitions = set.componentPropertyDefinitions || {};
+      let key = Object.keys(definitions).find(
+        (candidate) =>
+          candidate.split("#")[0] === spec.property && definitions[candidate].type === "TEXT",
+      );
+      if (key === undefined) key = set.addComponentProperty(spec.property, "TEXT", spec.defaultValue);
+      else set.editComponentProperty(key, { defaultValue: spec.defaultValue });
+      for (const label of labels) {
+        label.characters = spec.defaultValue;
+        label.componentPropertyReferences = { characters: key };
+      }
+    }
     component.variants.forEach((variant, index) => {
       const node = ours(set, "variant", variantName(variant.props));
       if (node !== undefined && set.children.indexOf(node) !== index) set.insertChild(index, node);

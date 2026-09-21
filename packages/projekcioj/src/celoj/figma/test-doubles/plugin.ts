@@ -343,6 +343,22 @@ export function figmaDouble(
     createRectangle: () => node("RECTANGLE", "Rectangle", counts),
     combineAsVariants: (components: DoubleNode[], parent: DoubleNode) => {
       const set = node("COMPONENT_SET", "Component Set", counts);
+      // Component properties live on the set (F11): a TEXT property the labels are connected to.
+      const definitions: Record<string, { type: string; defaultValue: string }> = {};
+      set.properties.componentPropertyDefinitions = definitions;
+      Object.assign(set, {
+        addComponentProperty(name: string, type: string, defaultValue: string) {
+          const key = `${name}#${id("property")}`;
+          definitions[key] = { type, defaultValue };
+          return key;
+        },
+        editComponentProperty(key: string, change: { defaultValue?: string }) {
+          const definition = definitions[key];
+          if (definition === undefined) throw new Error(`No component property ${key}.`);
+          if (change.defaultValue !== undefined) definition.defaultValue = change.defaultValue;
+          return key;
+        },
+      });
       parent.appendChild(set);
       for (const component of components) set.appendChild(component);
       return set;

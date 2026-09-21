@@ -30,6 +30,7 @@ import {
   STATE_KEY,
 } from "@fundamento/modelo";
 import type { Celo, CeloInput, GeneratedFile } from "../../build.js";
+import { VITRINO_ROW_KEYS, vitrinoLabelOf } from "../vitrino/datumoj.js";
 import { DRAWN_PART_PROPERTIES, pluginManifest, pluginSource } from "./plugin.js";
 
 /** A variable value: a literal, or an alias to another variable of the plan. */
@@ -113,6 +114,11 @@ export interface FigmaComponentSet {
    * the padding spacing.small, so two cells put 2 × spacing.small between two buttons (F11).
    */
   grid?: { rows: number; columns: number; gap: number; padding: number };
+  /**
+   * The label as a text property of the component (Maintainer, 2026-09-21): its default is the
+   * Vitrino's text for the default combination; every instance may override it.
+   */
+  label?: { property: string; defaultValue: string };
 }
 
 export interface FigmaPlan {
@@ -536,6 +542,11 @@ function componentSetOf(
     };
   });
   const columns = skemo.states.length;
+  const defaults: Record<string, string> = {};
+  for (const key of VITRINO_ROW_KEYS) {
+    const prop = skemo.props.find((candidate) => candidate.name === key);
+    if (typeof prop?.default === "string") defaults[key] = prop.default;
+  }
   const cell = parityPx(base[VITRINO_CELL_PADDING]?.value);
   return {
     set: entry.ero.name,
@@ -548,6 +559,7 @@ function componentSetOf(
       gap: 2 * cell,
       padding: cell,
     },
+    label: { property: "label", defaultValue: vitrinoLabelOf(defaults) },
   };
 }
 
