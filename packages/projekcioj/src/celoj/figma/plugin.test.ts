@@ -1432,3 +1432,136 @@ describe("every variant has the same outer size in all six states (F17)", () => 
     expect(parts?.label).toHaveProperty("width");
   });
 });
+
+// F19 (Abnahme M1, Maintainer 2026-09-22): Der Standardmodus jeder Sammlung ist der Standardwert
+// der Dimension aus dem Modelo. Gemessen: density zeigte „Automatisch (compact)", weil compact der
+// erste Modus war; richtig ist default. In Figma ist der Standardmodus der erste Modus
+// (`defaultModeId` ist nur lesbar), also entscheidet die Reihenfolge.
+describe("the default mode of every collection is the Modelo's default (F19)", () => {
+  const defaults = new Map(
+    (repo.ok ? repo.input.modelo.dimensioj : []).map((dimensio) => [
+      dimensio.name,
+      dimensio.default,
+    ]),
+  );
+
+  it("names the default in the plan, and puts it first", () => {
+    const collections = repoPlan.collections.filter((collection) => defaults.has(collection.name));
+    expect(collections).toHaveLength(6);
+    for (const collection of collections) {
+      expect(collection.defaultMode, collection.name).toBe(defaults.get(collection.name));
+      expect(collection.modes[0], collection.name).toBe(defaults.get(collection.name));
+    }
+  });
+
+  it("leaves every collection with that default mode in the file", async () => {
+    const double = modelDouble();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    const ofDimensioj = double.collections.filter((collection) => defaults.has(collection.name));
+    expect(ofDimensioj).toHaveLength(6);
+    for (const collection of ofDimensioj) {
+      const mode = collection.modes.find((entry) => entry.modeId === collection.defaultModeId);
+      expect(mode?.name, collection.name).toBe(defaults.get(collection.name));
+    }
+  });
+
+  // Eine Datei, die ein älteres Plugin anlegte, behält ihren ersten Modus — die Reihenfolge lässt
+  // sich dort nicht ändern. Der Lauf misst die Wirkung und sagt es.
+  it("says so when a file keeps another default mode", async () => {
+    const double = modelDouble();
+    const api = double.figma as {
+      variables: {
+        createVariableCollection: (name: string) => (typeof double.collections)[number];
+      };
+    };
+    const old = api.variables.createVariableCollection("density");
+    old.renameMode(old.defaultModeId, "compact");
+    const report = (await new Function(
+      "figma",
+      `${repoFiles["figma/plugin/code.js"] ?? ""}\nreturn applyPlan();`,
+    )(double.figma)) as { warnings: string[] };
+    const text = report.warnings.join(" ");
+    expect(text).toContain("density");
+    expect(text).toContain("compact");
+    expect(text).toContain("default");
+  });
+});
+
+// F20 (Abnahme M1, Maintainer 2026-09-22): Das Set umschließt sein Raster. Gemessen: Set 518 × 688,
+// der Untergrund endet dort; die Spalte loading ragt rechts ca. 50 px hinaus, die Zeile
+// tertiary · large liegt komplett unterhalb des Sets. Das Double hat es nicht erkannt: Zugesichert
+// waren gesetzte Eigenschaften (layoutSizing HUG), nicht die Geometrie.
+describe("the set encloses its grid (F20)", () => {
+  const setOf = (double: ReturnType<typeof figmaDouble>) =>
+    double.root.children[0]?.children.find((child) => child.name === "butono");
+  type Box = { x: number; y: number; width: number; height: number };
+
+  it("holds every child inside its bounds plus padding, after the first and the second run", async () => {
+    const double = modelDouble();
+    for (const _ of [1, 2]) {
+      await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+      const set = setOf(double);
+      const bounds = set as unknown as Box;
+      const padding = Number(set?.properties.paddingRight ?? 0);
+      expect(set?.children).toHaveLength(72);
+      for (const child of set?.children ?? []) {
+        const box = child as unknown as Box;
+        expect(box.x, child.name).toBeGreaterThanOrEqual(0);
+        expect(box.y, child.name).toBeGreaterThanOrEqual(0);
+        expect(box.x + box.width + padding, child.name).toBeLessThanOrEqual(bounds.width);
+        expect(box.y + box.height + padding, child.name).toBeLessThanOrEqual(bounds.height);
+      }
+    }
+  });
+
+  it("reports the size of the set and the bounding box of its children, raw", async () => {
+    const double = modelDouble();
+    const report = (await new Function(
+      "figma",
+      `${repoFiles["figma/plugin/code.js"] ?? ""}\nreturn applyPlan();`,
+    )(double.figma)) as {
+      components: {
+        layout: {
+          set: { width: number; height: number };
+          bounds: { minX: number; minY: number; maxX: number; maxY: number };
+          outside: string[];
+        };
+      }[];
+    };
+    const layout = report.components[0]?.layout;
+    const set = setOf(double) as unknown as Box;
+    expect(layout?.set).toEqual({ width: set.width, height: set.height });
+    expect(layout?.bounds.minX).toBeGreaterThanOrEqual(0);
+    expect(layout?.bounds.maxX).toBeLessThanOrEqual(set.width);
+    expect(layout?.bounds.maxY).toBeLessThanOrEqual(set.height);
+    expect(layout?.outside).toEqual([]);
+  });
+
+  // Die Wirkung messen: ein Werkzeug, dessen Set kleiner bleibt als sein Raster — die gemessenen
+  // 518 × 688 —, während die Kinder darüber hinausreichen.
+  it("warns with numbers when children lie outside the set", async () => {
+    const double = modelDouble();
+    const api = double.figma as { combineAsVariants: (...args: unknown[]) => DoubleNode };
+    const combine = api.combineAsVariants;
+    const figma = {
+      ...double.figma,
+      combineAsVariants: (...args: unknown[]) =>
+        new Proxy(combine(...args), {
+          get(target, key, receiver) {
+            if (key === "width") return 300;
+            if (key === "height") return 200;
+            return Reflect.get(target, key, receiver);
+          },
+        }),
+    };
+    const report = (await new Function(
+      "figma",
+      `${repoFiles["figma/plugin/code.js"] ?? ""}\nreturn applyPlan();`,
+    )(figma)) as { warnings: string[]; components: { layout: { outside: string[] } }[] };
+    expect(report.components[0]?.layout.outside.length).toBeGreaterThan(0);
+    const text = report.warnings.join(" ");
+    expect(text).toContain("liegen außerhalb des Sets");
+    expect(text).toContain("300 × 200");
+    expect(text).toMatch(/Kinder reichen bis \d+(\.\d+)? × \d+(\.\d+)?/);
+  });
+});

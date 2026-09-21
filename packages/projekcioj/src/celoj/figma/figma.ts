@@ -54,7 +54,13 @@ export interface FigmaVariable {
 
 export interface FigmaCollection {
   name: string;
+  /**
+   * The modes, the default first: Figma's default mode of a collection is its first mode
+   * (`defaultModeId` is read-only), so the order decides what "Automatisch" shows (F19).
+   */
   modes: string[];
+  /** The mode a frame gets without a choice: the default of the Dimensio in the Modelo. */
+  defaultMode?: string;
   variables: FigmaVariable[];
 }
 
@@ -297,11 +303,16 @@ export function figmaValues(
 }
 
 /** Dimensioj in priority order (ascending), as the collections follow them. */
-function dimensiojOf(modelo: Modelo): { name: string; modes: string[] }[] {
-  return modelo.dimensioj.map((dimensio) => ({
-    name: dimensio.name,
-    modes: (dimensio.valoroj ?? []).map((valoro) => valoro.name),
-  }));
+function dimensiojOf(modelo: Modelo): { name: string; modes: string[]; defaultMode: string }[] {
+  return modelo.dimensioj.map((dimensio) => {
+    const names = (dimensio.valoroj ?? []).map((valoro) => valoro.name);
+    // The Modelo's default first, the others in the order of the Modelo (F19).
+    return {
+      name: dimensio.name,
+      modes: [dimensio.default, ...names.filter((name) => name !== dimensio.default)],
+      defaultMode: dimensio.default,
+    };
+  });
 }
 
 /** The Dimensioj whose sets define `token`, in priority order (ascending). */
@@ -668,11 +679,13 @@ export const FIGMA_CELO: Celo = {
       {
         name: BASE_COLLECTION,
         modes: [BASE_MODE],
+        defaultMode: BASE_MODE,
         variables: sortVariables(variables.get(BASE_COLLECTION) ?? []),
       },
       ...dimensiojOf(modelo).map((dimensio) => ({
         name: dimensio.name,
         modes: dimensio.modes,
+        defaultMode: dimensio.defaultMode,
         variables: sortVariables(variables.get(dimensio.name) ?? []),
       })),
     ];

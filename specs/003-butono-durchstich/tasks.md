@@ -611,8 +611,51 @@ Results go into `plan.md` → „Manual acceptance results".
     statt 57.2 × 36"), und `layout.held.rest` / `.focus` nennen für Variante, Ring, Abstand,
     `control` und Beschriftung, was Figma hält (Größe, Strichlage, Strichbreite,
     `strokesIncludedInLayout`, Innenabstände).
+  - Hinweis zur Messung vom 2026-09-22: Die Datei `Q7LOiRGeDyJ0JgdajzXg81` stammt vom Stand
+    `6113127`, also **vor** dieser Korrektur (`95f2f30`). Die dort gemessenen 59 × 44 / 73 × 48 /
+    85 × 56 sind der Befund, nicht das Ergebnis der Korrektur.
   - Offen bis zum Lauf: dass `false` den Strich tatsächlich in die Reserve legt — dokumentiert,
     nicht gemessen. Und bewusst nicht angefasst: `control`. Dort ist nichts gemessen; ob sein Rand
     wie im CSS (`box-sizing: border-box`) zur Breite zählt, sagen die Rohdaten des nächsten Laufs.
+
+- [ ] **F19 Der Standardmodus jeder Sammlung ist der Standardwert des Modelo** (Abnahme M1, Jugxo
+  `jug_01M32TW9JHEXZ5QGB13AJGWY16`)
+  - Befund (2026-09-22): density zeigte „Automatisch (compact)", weil compact der erste Modus war;
+    richtig ist `default`. color-scheme (light) und contrast (default) stimmten. Der rote Test fand
+    dasselbe bei viewport (compact statt medium).
+  - Rot zuerst: `aspekto: expected undefined to be 'komuna'` (der Plan nannte keinen Standard), und
+    in der Datei nach dem Lauf density und viewport mit dem falschen Standardmodus.
+  - Grün: In Figma ist der Standardmodus der erste Modus (`defaultModeId` ist nur lesbar). Der Plan
+    nennt je Sammlung `defaultMode` und stellt ihn an den Anfang. Nur der Platzhaltermodus einer
+    Sammlung, die dieser Lauf selbst anlegt, wird umbenannt; in einer älteren Datei bleibt die
+    Reihenfolge, und der Bericht nennt Sammlung, vorgefundenen und erwarteten Standardmodus.
+  - Folge: Die festen Zahlen des Plans (Rasterabstände, Radien) stammen aus der Basiskombination
+    mit density `default`; bisher lösten die gebundenen Variablen in Figma mit compact auf. Nach
+    F19 passen beide zusammen. Erwartete Größen in einer frischen Datei damit: die der Dichte
+    `default`, nicht mehr 51 × 36 / 65 × 40 / 77 × 48.
+
+- [ ] **F20 Das Set umschließt sein Raster** (Abnahme M1)
+  - Befund (2026-09-22, Datei `Q7LOiRGeDyJ0JgdajzXg81`): Set 518 × 688, der Untergrund endet dort;
+    die Spalte loading ragt rechts ca. 50 px hinaus, die Zeile tertiary · large liegt komplett
+    unterhalb des Sets. Das Double hat es nicht erkannt: Zugesichert waren gesetzte Eigenschaften
+    (`layoutSizing: HUG`), nicht die Geometrie.
+  - Rot zuerst: Der Bericht nannte weder die Ausdehnung der Kinder noch Kinder außerhalb
+    (`Cannot read properties of undefined (reading 'minX')`), und bei einem Set, das kleiner bleibt
+    als sein Raster, schwieg er.
+  - Grün, Messung: Der Bericht nennt Set-Maße und die Bounding-Box der Kinder als Rohdaten
+    (`layout.set`, `layout.bounds`, `layout.outside`) und warnt mit Zahlen („… liegen außerhalb des
+    Sets …; das Set misst 300 × 200, die Kinder reichen bis …"). Zugesichert ist die Geometrie nach
+    dem ersten und dem zweiten Lauf: jedes Kind innerhalb des Sets abzüglich Innenabstand.
+  - **Ursache offen — eine Rechnung, keine Feststellung:** 518 × 688 ist genau die Summe der Spuren
+    bei density compact (5 × 77 + 85 + 5 × 8 + 8 = 518; 4 × (44 + 48 + 56) + 11 × 8 + 8 = 688). Die
+    gemeldeten Überstände passen zu den Positionen bei density **default**: Spalte loading bei
+    4 + 4 × 85 + 93 + 40 = 477, rechte Kante 562, also 44 über 518 (mit Innenabstand 48, „ca. 50");
+    letzte Zeile bei 4 + 608 + 88 = 700, also unter 688. Danach hätten die Kinder die Größen und
+    Plätze der Dichte default, das Set aber noch die Maße der Dichte compact — etwa wenn nach dem
+    Lauf der density-Modus umgeschaltet wurde und das Set sich nicht neu bemessen hat. Das ist aus
+    zwei Zahlen hergeleitet und nicht gemessen; `layout.bounds` am Ende des Laufs und eine Messung
+    nach dem Umschalten von density entscheiden es.
+  - Fertig wenn: der Maintainer es in der Datei misst — in light/default und dark/high, und nach
+    dem Umschalten von density.
 
 Consistency check before tasks (`/speckit.analyze` scope): every FR and AK maps to at least one task or a recorded decision; every task maps to a plan decision; two new packages (Art. XI); the lockfile changes in T008 only; no task lowers a threshold; nothing is published.

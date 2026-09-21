@@ -350,6 +350,17 @@
       "kialo": "In Figma nimmt ein sichtbarer Strich Platz. Gemessen am 2026-09-22 (Datei Q7LOiRGeDyJ0JgdajzXg81): Alle 12 Fokus-Varianten waren 8 px breiter und höher als die übrigen Zustände ihrer Zeile (small 59 × 44 statt 51 × 36, medium 73 × 48 statt 65 × 40, large 85 × 56 statt 77 × 48). Die Reserve aus Innenabständen wirkte in jedem Zustand (Höhe 28 + 8 = 36 bei density compact); im Fokus kamen 2 × (2 + 2) = 8 dazu, weil die Rahmen von Ring und Abstand dort einen Strich mit Farbe tragen. In den anderen Zuständen war die Strichbreite gebunden, aber keine Farbe gesetzt, und nichts kam dazu. In der Web Component ändert outline die Größe nicht. Das Double hatte den Unterschied nicht gesehen, weil sein Layout Striche nie mitzählte — eine stille Annahme, die niemand gemessen hatte; es zählt sie jetzt wie gemessen. Entschieden: strokesIncludedInLayout gehört zu den Eigenschaften, die das Plugin besitzt, und steht an Variante, Ring und Abstand auf false — die Striche liegen in der Reserve, sie kommen nicht zu ihr hinzu. Dass false genau das bewirkt, ist die dokumentierte Bedeutung der Eigenschaft und bis zum nächsten Lauf nicht gemessen. Der Lauf misst die Wirkung selbst: Haben die sechs Zustände einer Zeile nicht dieselbe Breite und Höhe, warnt der Bericht mit Zahlen. Am control bleibt die Eigenschaft unberührt: Dort ist nichts gemessen, und die Rohdaten (layout.held.rest und .focus) nennen jetzt, was Figma hält.",
       "date": "2026-09-22",
       "context": "Spec 003 F17, Abnahme M1 (Maintainer, 2026-09-22), Folge von F15. Prüfungen: plugin.test.ts, „a visible stroke takes space, as measured (F17)“ und „every variant has the same outer size in all six states (F17)“."
+    },
+    {
+      "id": "jug_01M32TW9JHEXZ5QGB13AJGWY16",
+      "ref": {
+        "artikolo": "VIII",
+        "celo": "figma"
+      },
+      "decision": "approved",
+      "kialo": "Der Standardmodus jeder Sammlung in Figma ist der Standardwert der Dimensio im Modelo. Gemessen am 2026-09-22 (Datei Q7LOiRGeDyJ0JgdajzXg81): density zeigte „Automatisch (compact)“, weil compact der erste Modus war; das Modelo nennt default. Dasselbe galt unbemerkt für viewport (compact statt medium). Figma nimmt den ersten Modus einer Sammlung als Standard, defaultModeId ist nur lesbar — also entscheidet die Reihenfolge: Der Plan nennt den Standard des Modelo zuerst, die übrigen Modi in der Reihenfolge des Modelo. Folge, die vorher niemand gesehen hatte: Die festen Zahlen des Plans (Abstände des Rasters, Radien des Fokusrings) stammen aus der Basiskombination mit density default, die gebundenen Variablen lösten in Figma aber mit compact auf. Zweite Entscheidung: Nur der Platzhaltermodus einer Sammlung, die dieser Lauf selbst anlegt, wird umbenannt. In einer Datei, die ein älteres Plugin anlegte, ist der erste Modus ein echter Modus mit Bedeutung; ihn umzubenennen würde stillschweigend ändern, was jeder Rahmen zeigt, der ihn gewählt hat. Dort bleibt die Reihenfolge, und der Lauf misst die Wirkung: Weicht der Standardmodus vom Modelo ab, nennt der Bericht die Sammlung, den vorgefundenen und den erwarteten Modus.",
+      "date": "2026-09-22",
+      "context": "Spec 003 F19, Abnahme M1 (Maintainer, 2026-09-22). Prüfungen: plugin.test.ts, „the default mode of every collection is the Modelo's default (F19)“ — im Plan, in der Datei nach dem Lauf und als Warnung für eine Datei mit anderer Reihenfolge."
     }
   ]
 }

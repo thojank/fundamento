@@ -154,11 +154,13 @@ async function applyCollections() {
   const byName = new Map(existing.map((collection) => [collection.name, collection]));
   const collections = new Map();
   const modeIds = new Map();
+  const modeWarnings = [];
   for (const spec of PLAN.collections) {
     // A collection without variables is not created: in a Modelo with an external Aspekto every
     // token hangs on the aspekto Dimensio (Art. IV completeness), so fundamento can be empty.
     if (spec.variables.length === 0) continue;
-    const collection = byName.get(spec.name) ?? figma.variables.createVariableCollection(spec.name);
+    const found = byName.get(spec.name);
+    const collection = found ?? figma.variables.createVariableCollection(spec.name);
     collections.set(spec.name, collection);
     const ids = {};
     spec.modes.forEach((mode, index) => {
@@ -167,7 +169,10 @@ async function applyCollections() {
         ids[mode] = known.modeId;
         return;
       }
-      const spare = collection.modes[index];
+      // Only the placeholder mode of a collection this run created is renamed. In a file an older
+      // plugin made, the first mode is a real mode with a meaning — renaming it would silently
+      // change what every frame that chose it shows (F19).
+      const spare = found === undefined ? collection.modes[index] : undefined;
       if (index === 0 && spare !== undefined) {
         collection.renameMode(spare.modeId, mode);
         ids[mode] = spare.modeId;
@@ -176,8 +181,19 @@ async function applyCollections() {
       ids[mode] = collection.addMode(mode);
     });
     modeIds.set(spec.name, ids);
+    // The effect, not the call (F19): Figma's default mode is the first mode and cannot be set.
+    // A fresh collection gets the Modelo's default first; a file an older plugin made keeps its
+    // order, and the run says so.
+    const actual = collection.modes.find((mode) => mode.modeId === collection.defaultModeId);
+    if (spec.defaultMode !== undefined && actual !== undefined && actual.name !== spec.defaultMode) {
+      modeWarnings.push(
+        "Sammlung " + spec.name + ": Der Standardmodus ist " + actual.name + ", das Modelo nennt " +
+          spec.defaultMode + ". Figma nimmt den ersten Modus als Standard und lässt die " +
+          "Reihenfolge nicht ändern; eine frisch angelegte Datei hat ihn richtig.",
+      );
+    }
   }
-  return { collections, modeIds };
+  return { collections, modeIds, warnings: modeWarnings };
 }
 
 async function applyVariables(collections, modeIds) {
@@ -630,6 +646,23 @@ function measureLayout(set, component) {
     }
     return out;
   };
+  // The set against the extent of its children (F20), raw: measured in Figma, a set of 518 × 688
+  // ended before its last column and its last row. Geometry, not the properties that were set.
+  const all = set.children.map((child) => ({
+    name: child.name, x: child.x, y: child.y, width: child.width, height: child.height,
+  }));
+  const bounds = {
+    minX: Math.min(...all.map((box) => box.x)),
+    minY: Math.min(...all.map((box) => box.y)),
+    maxX: Math.max(...all.map((box) => box.x + box.width)),
+    maxY: Math.max(...all.map((box) => box.y + box.height)),
+  };
+  const padRight = typeof set.paddingRight === "number" ? set.paddingRight : 0;
+  const padBottom = typeof set.paddingBottom === "number" ? set.paddingBottom : 0;
+  const outside = all
+    .filter((box) => box.x < 0 || box.y < 0 ||
+      box.x + box.width + padRight > set.width || box.y + box.height + padBottom > set.height)
+    .map((box) => box.name);
   const first = nodes[0];
   const last = nodes[nodes.length - 1];
   const withParent = (node) =>
@@ -651,6 +684,8 @@ function measureLayout(set, component) {
     set: { width: set.width, height: set.height },
     unplaced: unplaced,
     uneven: uneven,
+    bounds: bounds,
+    outside: outside,
     variants: boxes.length,
     places: new Set(boxes.map((box) => box.x + "," + box.y)).size,
     columns: new Set(boxes.map((box) => box.x)).size,
@@ -680,6 +715,14 @@ function layoutWarnings(report, grid) {
         (layout.refused && layout.refused.length > 0
           ? " Das Werkzeug lehnte " + layout.refused.length + " Zuweisung(en) ab, z. B. " + layout.refused[0] + "."
           : ""),
+    );
+  }
+  if (layout.outside.length > 0) {
+    out.push(
+      report.set + ": " + layout.outside.length + " von " + layout.variants +
+        " Varianten liegen außerhalb des Sets oder in seinem Innenabstand, z. B. " +
+        layout.outside[layout.outside.length - 1] + "; " + set + ", die Kinder reichen bis " +
+        px(layout.bounds.maxX) + " × " + px(layout.bounds.maxY) + ".",
     );
   }
   if (layout.uneven.length > 0) {
@@ -717,9 +760,9 @@ function layoutWarnings(report, grid) {
 
 /** Applies the whole plan; safe to run again. Returns the report of this run (F10). */
 async function applyPlan() {
-  const { collections, modeIds } = await applyCollections();
+  const { collections, modeIds, warnings: modeWarnings } = await applyCollections();
   const variables = await applyVariables(collections, modeIds);
-  const warnings = [];
+  const warnings = [...modeWarnings];
   const components = await applyComponents(variables, warnings);
   for (const report of components) {
     const component = PLAN.components.find((candidate) => candidate.set === report.set);
