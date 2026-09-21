@@ -193,6 +193,12 @@ export interface DoubleBox {
 interface NodeContext {
   loaded: ReadonlySet<string>;
   box?: (node: DoubleNode) => DoubleBox;
+  /**
+   * Counts every change to the document. The layout is computed once per state of the document,
+   * not once per read: reading x, y, width and height of 72 variants recomputed the whole tree
+   * hundreds of times and took the plugin tests from 10 s to 117 s (and past 60 s on the CI).
+   */
+  version: number;
 }
 
 const GEOMETRY_KEYS: ReadonlySet<string> = new Set(["x", "y", "width", "height"]);
@@ -201,7 +207,7 @@ function node(
   type: string,
   name: string,
   counts: DoubleCounts,
-  context: NodeContext = { loaded: new Set() },
+  context: NodeContext = { loaded: new Set(), version: 0 },
 ): DoubleNode {
   const loaded = context.loaded;
   counts.nodes++;
@@ -257,6 +263,7 @@ function node(
       }
       anchor.row = rowIndex;
       anchor.column = columnIndex;
+      context.version++;
     },
     children: [],
     // Declared here so the recording proxy treats it as a field of the node, not as a property
@@ -272,12 +279,14 @@ function node(
       if (child.parent !== recorded) (child as unknown as { leaveCell?: () => void }).leaveCell?.();
       child.parent = recorded;
       self.children.push(child);
+      context.version++;
     },
     insertChild(index, child) {
       child.parent?.children.splice(child.parent.children.indexOf(child), 1);
       if (child.parent !== recorded) (child as unknown as { leaveCell?: () => void }).leaveCell?.();
       child.parent = recorded;
       self.children.splice(index, 0, child);
+      context.version++;
     },
     setSharedPluginData(namespace, key, value) {
       self.pluginData[`${namespace}/${key}`] = value;
@@ -294,11 +303,13 @@ function node(
       }
       if (variable === null) delete self.boundVariables[field];
       else self.boundVariables[field] = variable.name;
+      context.version++;
     },
     remove() {
       self.parent?.children.splice(self.parent.children.indexOf(recorded), 1);
       self.parent = undefined;
       leaveCell();
+      context.version++;
     },
   };
   Object.defineProperty(self, "leaveCell", { value: leaveCell, enumerable: false });
@@ -310,6 +321,7 @@ function node(
       if (key === "gridRowAnchorIndex" || key === "gridColumnAnchorIndex") {
         throw new Error(`${String(key)} is read-only; use setGridChildPosition.`);
       }
+      context.version++;
       // Figma refuses a text in a font that is not loaded: setting it, or setting characters in
       // the font the text has (F11). The double does too, instead of accepting it silently.
       if (target.type === "TEXT" && (key === "fontName" || key === "characters")) {
@@ -528,7 +540,7 @@ export function figmaDouble(
   const available = new Set([...FIGMA_FONTS, ...(options.fonts ?? [])].map(fontKey));
   const loaded = new Set<string>();
   // Filled below, once the document and the variables exist.
-  const context: NodeContext = { loaded };
+  const context: NodeContext = { loaded, version: 0 };
   const notifications: DoubleNotification[] = [];
   const collections: DoubleCollection[] = [];
   const variables: DoubleVariable[] = [];
@@ -573,6 +585,7 @@ export function figmaDouble(
       valuesByMode: {},
       setValueForMode(modeId, value) {
         counts.valueWrites++;
+        context.version++;
         variable.valuesByMode[modeId] = value;
       },
     };
@@ -661,21 +674,32 @@ export function figmaDouble(
 
   // A number bound to a variable: its value in the first mode of its collection, aliases followed.
   const resolve = (name: string): unknown => {
-    let variable = variables.find((candidate) => candidate.name === name);
+    const byName = new Map(variables.map((variable) => [variable.name, variable]));
+    const byId = new Map(variables.map((variable) => [variable.id, variable]));
+    const firstMode = new Map(collections.map((c) => [c.id, c.modes[0]?.modeId ?? ""]));
+    let variable = byName.get(name);
     for (let depth = 0; variable !== undefined && depth < 32; depth++) {
-      const collection = collections.find((candidate) => candidate.id === variable?.collectionId);
-      const value = variable.valuesByMode[collection?.modes[0]?.modeId ?? ""];
+      const value = variable.valuesByMode[firstMode.get(variable.collectionId) ?? ""];
       const alias = value as { type?: string; id?: string } | undefined;
       if (alias?.type !== "VARIABLE_ALIAS") return value;
-      variable = variables.find((candidate) => candidate.id === alias.id);
+      variable = byId.get(alias.id ?? "");
     }
     return undefined;
   };
+  // One layout per state of the document (see NodeContext.version), with its resolved numbers.
+  let computed: { version: number; top: DoubleNode; boxes: Map<DoubleNode, DoubleBox> } | undefined;
   context.box = (current: DoubleNode) => {
     let top = current;
     while (top.parent !== undefined) top = top.parent;
-    const box = layoutOf(top, resolve).get(current);
-    return box ?? { x: 0, y: 0, width: 0, height: 0 };
+    if (computed === undefined || computed.version !== context.version || computed.top !== top) {
+      const resolved = new Map<string, unknown>();
+      const once = (name: string) => {
+        if (!resolved.has(name)) resolved.set(name, resolve(name));
+        return resolved.get(name);
+      };
+      computed = { version: context.version, top, boxes: layoutOf(top, once) };
+    }
+    return computed.boxes.get(current) ?? { x: 0, y: 0, width: 0, height: 0 };
   };
 
   const untouchedDefaults = (keys: readonly string[]) => {

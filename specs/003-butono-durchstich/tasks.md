@@ -542,6 +542,12 @@ Results go into `plan.md` → „Manual acceptance results".
     MANUAL` gehört zu den Eigenschaften, die es besitzt). Der Bericht zählt Varianten mit Anker −1
     und nennt sie als Warnung, samt der Meldung des Werkzeugs bei einer abgelehnten Zuweisung.
     `layout.held` bleibt dauerhaft im Bericht — genau diese Rohdaten haben die Frage entschieden.
+  - Eigener Fehler, in der CI aufgefallen und behoben: Das Double rechnete das Layout des ganzen
+    Dokuments bei **jedem** Lesen von x, y, Breite oder Höhe neu. Die Plugin-Tests brauchten damit
+    lokal 117 s statt rund 10 s, und „changes nothing on a second run" lief im `push`-Lauf
+    35635990971 in sein 60-s-Budget (der `pull_request`-Lauf desselben Commits bestand). Keine
+    Last, sondern Arbeit: Das Layout wird jetzt einmal je Zustand des Dokuments gerechnet (ein
+    Zähler, den jede Änderung erhöht). Danach 4,3 s. Das Budget blieb unangetastet.
   - Offen bis zum Lauf: dass platzierte Kinder ihre HUG-Spuren bemessen. So ist es dokumentiert;
     gemessen ist es noch nicht. Der Lauf belegt es über `layout` (72 Positionen, 6 Spalten, 12
     Zeilen, Größe des Sets) — oder widerlegt es mit Zahlen.
