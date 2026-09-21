@@ -34,6 +34,8 @@ export interface DoubleNode {
   children: DoubleNode[];
   parent?: DoubleNode | undefined;
   properties: Record<string, unknown>;
+  /** Properties that still hold the value the tool gave the node, not one the plugin wrote (F13). */
+  defaults: Set<string>;
   boundVariables: Record<string, string>;
   pluginData: Record<string, string>;
   appendChild(child: DoubleNode): void;
@@ -65,7 +67,24 @@ export interface FigmaDouble {
   root: DoubleNode;
   /** A snapshot for comparing two runs. */
   snapshot(): string;
+  /**
+   * Every node property among `keys` that still holds the tool's default, as "<path>: <property>".
+   * Empty means: nothing in the file carries a value the plan did not put there (F13).
+   */
+  untouchedDefaults(keys: readonly string[]): string[];
 }
+
+/**
+ * What Figma gives a new node before the plugin writes anything (F13). A frame and a component
+ * start with a white fill, a text with a black one, an empty string and Inter; the double starts
+ * the same way, or it cannot see a default that nobody clears. Size (100 × 100) is modelled with
+ * F11, where the geometry becomes the plugin's business.
+ */
+const FIGMA_DEFAULTS: Readonly<Record<string, Readonly<Record<string, unknown>>>> = {
+  FRAME: { fills: [{ type: "SOLID", color: { r: 1, g: 1, b: 1 } }], strokes: [] },
+  COMPONENT: { fills: [{ type: "SOLID", color: { r: 1, g: 1, b: 1 } }], strokes: [] },
+  TEXT: { fills: [{ type: "SOLID", color: { r: 0, g: 0, b: 0 } }], characters: "" },
+};
 
 let sequence = 0;
 const id = (prefix: string) => `${prefix}:${++sequence}`;
@@ -83,7 +102,8 @@ function node(type: string, name: string, counts: DoubleCounts): DoubleNode {
     // Declared here so the recording proxy treats it as a field of the node, not as a property
     // the plugin sets.
     parent: undefined,
-    properties: {},
+    properties: structuredClone({ ...(FIGMA_DEFAULTS[type] ?? {}) }),
+    defaults: new Set(Object.keys(FIGMA_DEFAULTS[type] ?? {})),
     boundVariables: {},
     pluginData: {},
     appendChild(child) {
@@ -113,6 +133,8 @@ function node(type: string, name: string, counts: DoubleCounts): DoubleNode {
     set(target, key, value) {
       if (typeof key === "string" && !(key in target)) {
         target.properties[key] = value;
+        // Written by the plugin: from now on the value is the plugin's, not the tool's.
+        target.defaults.delete(key);
         return true;
       }
       return Reflect.set(target, key, value);
@@ -220,11 +242,7 @@ export function figmaDouble(): FigmaDouble {
     }),
     createComponent: () => node("COMPONENT", "Component", counts),
     createFrame: () => node("FRAME", "Frame", counts),
-    createText: () => {
-      const text = node("TEXT", "Text", counts);
-      text.properties.characters = "";
-      return text;
-    },
+    createText: () => node("TEXT", "Text", counts),
     createRectangle: () => node("RECTANGLE", "Rectangle", counts),
     combineAsVariants: (components: DoubleNode[], parent: DoubleNode) => {
       const set = node("COMPONENT_SET", "Component Set", counts);
@@ -263,7 +281,28 @@ export function figmaDouble(): FigmaDouble {
       1,
     );
 
-  return { figma, notifications, counts, collections, variables, root, snapshot };
+  const untouchedDefaults = (keys: readonly string[]) => {
+    const found: string[] = [];
+    const walk = (current: DoubleNode, path: string) => {
+      for (const key of keys) {
+        if (current.defaults.has(key)) found.push(`${path}: ${key}`);
+      }
+      for (const child of current.children) walk(child, `${path}/${child.name}`);
+    };
+    walk(root, root.name);
+    return found;
+  };
+
+  return {
+    figma,
+    notifications,
+    counts,
+    collections,
+    variables,
+    root,
+    snapshot,
+    untouchedDefaults,
+  };
 }
 
 function describe(current: DoubleNode): unknown {

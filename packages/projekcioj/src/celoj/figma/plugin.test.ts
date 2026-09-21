@@ -547,3 +547,52 @@ describe("the run reads its own last state and says what happened (F10b)", () =>
     expect(again.components[0]?.diagnosis).toContain("früheren Laufs");
   });
 });
+
+// F13 (Abnahme M1, Maintainer 2026-09-21): Jede Variante trug Figmas Vorgabefüllung #FFFFFF 100 %,
+// die das Plugin nie entfernt hat — sie stammt nicht aus dem Modell und deckte die durchsichtige
+// tertiäre Aktion wieder zu. Das Double legte Knoten ohne jede Vorgabe an und war genau an dieser
+// Stelle blind (jug_01M3094ZC6F3XZ1H0MWQZ62MYV). Es lernt deshalb zuerst die Vorgaben des Werkzeugs;
+// danach sichert der Test zu, dass nach dem Lauf keine Fläche mehr eine Vorgabe trägt.
+//
+// Geltungsbereich dieses Schritts: Flächen (`fills`, `strokes`). Die Vorgabegröße 100 × 100 und der
+// leere Beschriftungstext sind F11 und werden dort derselben Zusicherung unterstellt.
+describe("no paint in the file that the plan did not put there (F13)", () => {
+  const WHITE = [{ type: "SOLID", color: { r: 1, g: 1, b: 1 } }];
+
+  it("knows the tool's defaults: a new frame and component are white, a text is black", () => {
+    const double = figmaDouble();
+    const api = double.figma as {
+      createFrame: () => DoubleNode;
+      createComponent: () => DoubleNode;
+      createText: () => DoubleNode;
+    };
+    expect(api.createFrame().properties.fills).toEqual(WHITE);
+    expect(api.createComponent().properties.fills).toEqual(WHITE);
+    expect(api.createText().properties.fills).toEqual([
+      { type: "SOLID", color: { r: 0, g: 0, b: 0 } },
+    ]);
+  });
+
+  it("leaves no variant, control or label holding a paint the tool put there", async () => {
+    const double = figmaDouble();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    expect(double.untouchedDefaults(["fills", "strokes"])).toEqual([]);
+  });
+
+  it("gives the variant itself no fill, so a transparent control shows what lies beneath", async () => {
+    const double = figmaDouble();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    const set = double.root.children[0]?.children.find((child) => child.name === "butono");
+    for (const variant of set?.children ?? []) {
+      expect(variant.properties.fills, variant.name).toEqual([]);
+    }
+  });
+
+  // Der Vorgabewert muss auch in einer Datei verschwinden, die ein älteres Plugin angelegt hat.
+  it("clears the default on the second run too", async () => {
+    const double = figmaDouble();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    expect(double.untouchedDefaults(["fills", "strokes"])).toEqual([]);
+  });
+});

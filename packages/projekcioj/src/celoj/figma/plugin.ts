@@ -226,6 +226,15 @@ async function applyComponents(variables) {
       }
       control.name = "control";
       label.name = "label";
+      // Nur Werte aus dem Plan (F13). Figma gibt einem neuen Rahmen und einer neuen Komponente
+      // eine weiße Fläche mit, die nicht aus dem Modell stammt und eine durchsichtige Fläche
+      // wieder zudeckt. Jede Fläche wird deshalb geleert; was der Plan nennt, setzt die Bindung
+      // gleich danach. Das gilt in jedem Lauf, auch in einer Datei, die ein älteres Plugin anlegte.
+      node.fills = [];
+      node.strokes = [];
+      control.fills = [];
+      control.strokes = [];
+      label.fills = [];
       bind(control, label, variant.bindings, variant.paints, variables);
       if (existing === undefined) made.push(node);
     }

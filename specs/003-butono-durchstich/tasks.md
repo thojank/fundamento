@@ -419,7 +419,7 @@ Results go into `plan.md` → „Manual acceptance results".
   - Der Faktor für `per-aspekto.test.ts` in modelo bleibt: Dieser Test **ist** die Arbeit, die er
     behauptet (vier vollständige Exporte, byte-identisch), er prüft keine Verdrahtung.
 
-- [ ] **F13 Figmas Vorgabefüllung deckt die Projektion zu** (Abnahme M1, Maintainer 2026-09-21)
+- [x] **F13 Figmas Vorgabefüllung deckt die Projektion zu** (Abnahme M1, Maintainer 2026-09-21)
   - Befund: Jede Variante trägt Figmas Vorgabefüllung `#FFFFFF` 100 %, die das Plugin nie entfernt.
     Sie stammt nicht aus dem Modell. Folge: Die durchsichtige tertiäre Aktion sitzt in Figma immer
     auf Weiß, auch im Dunkelmodus — F8 ist im Bild wieder zugedeckt, obwohl die Deckkraft am Paint
@@ -434,5 +434,16 @@ Results go into `plan.md` → „Manual acceptance results".
     jede Vorgabe an und ist damit genau an der Stelle blind, an der dieser Befund entstand. Es
     lernt die Vorgaben des Werkzeugs mit — `createComponent`, `createFrame` und `createRectangle`
     beginnen mit Figmas `fills`, `createText` mit seiner Schrift —, sonst prüft der Test nichts.
+  - Done notes (2026-09-21, Paket „Figma zeigt das Ero", Schritt 1): Das Double kennt jetzt Figmas
+    Vorgaben für einen neuen Rahmen und eine neue Komponente (weiße Fläche, keine Linie) und einen
+    neuen Text (schwarze Fläche, leerer Text) und führt Buch, welche Eigenschaft noch die Vorgabe
+    trägt (`untouchedDefaults`). Roter Lauf zuerst: `expected undefined to deeply equal [ { type:
+    'SOLID', …(1) } ]` (das Double kannte die Vorgabe nicht), danach `expected [ …(144) ] to deeply
+    equal []` — 72 Varianten × Fläche und Linie trugen die Vorgabe. Das Plugin leert in jedem Lauf
+    Fläche und Linie an Variante und `control` und die Fläche der Beschriftung, bevor die Bindungen
+    setzen, was der Plan nennt; auch in einer Datei, die ein älteres Plugin angelegt hat.
+  - Geltungsbereich: Flächen und Linien. Die Vorgabegröße 100 × 100 und der leere
+    Beschriftungstext unterliegen derselben Zusicherung mit F11. Nicht modelliert und damit
+    weiterhin blind: die Vorgaben des Komponentensets, das `combineAsVariants` anlegt.
 
 Consistency check before tasks (`/speckit.analyze` scope): every FR and AK maps to at least one task or a recorded decision; every task maps to a plan decision; two new packages (Art. XI); the lockfile changes in T008 only; no task lowers a threshold; nothing is published.
