@@ -611,6 +611,7 @@ Results go into `plan.md` → „Manual acceptance results".
     statt 57.2 × 36"), und `layout.held.rest` / `.focus` nennen für Variante, Ring, Abstand,
     `control` und Beschriftung, was Figma hält (Größe, Strichlage, Strichbreite,
     `strokesIncludedInLayout`, Innenabstände).
+  - Vom Maintainer akzeptiert (2026-09-22): Seine Messung lag vor `95f2f30`.
   - Hinweis zur Messung vom 2026-09-22: Die Datei `Q7LOiRGeDyJ0JgdajzXg81` stammt vom Stand
     `6113127`, also **vor** dieser Korrektur (`95f2f30`). Die dort gemessenen 59 × 44 / 73 × 48 /
     85 × 56 sind der Befund, nicht das Ergebnis der Korrektur.
@@ -629,6 +630,8 @@ Results go into `plan.md` → „Manual acceptance results".
     nennt je Sammlung `defaultMode` und stellt ihn an den Anfang. Nur der Platzhaltermodus einer
     Sammlung, die dieser Lauf selbst anlegt, wird umbenannt; in einer älteren Datei bleibt die
     Reihenfolge, und der Bericht nennt Sammlung, vorgefundenen und erwarteten Standardmodus.
+  - Vom Maintainer als Vorgehen abgenommen (2026-09-22): viewport mitgefunden; ältere Dateien nur
+    melden, nicht umbenennen. Die Abnahme in der Datei steht mit dem nächsten Lauf aus.
   - Folge: Die festen Zahlen des Plans (Rasterabstände, Radien) stammen aus der Basiskombination
     mit density `default`; bisher lösten die gebundenen Variablen in Figma mit compact auf. Nach
     F19 passen beide zusammen. Erwartete Größen in einer frischen Datei damit: die der Dichte
@@ -655,6 +658,24 @@ Results go into `plan.md` → „Manual acceptance results".
     Lauf der density-Modus umgeschaltet wurde und das Set sich nicht neu bemessen hat. Das ist aus
     zwei Zahlen hergeleitet und nicht gemessen; `layout.bounds` am Ende des Laufs und eine Messung
     nach dem Umschalten von density entscheiden es.
+  - Antwort des Maintainers (2026-09-22, zum Stand `e9db633`): Ja — density stand am Set
+    **ausdrücklich auf default** (Haken gesetzt), „Automatisch" zeigte compact. Das stützt die
+    Rechnung. **Arbeitshypothese:** Das Set bemisst sich nach einem Moduswechsel nicht neu.
+    Ausdrücklich: nicht bauen, bevor der Lauf es belegt.
+  - Messung, die es entscheidet (durch Thorsten, gelesen per Figma-MCP): frische Datei, zwei Läufe,
+    Konsole beider Läufe (`layout.set`, `layout.bounds`, `layout.outside`); danach density am Set
+    auf compact und auf comfortable umschalten und jeweils Set gegen Kinder messen.
+
+    | Am Ende des Laufs (`layout`) | Nach dem Umschalten von density | Bedeutung |
+    |---|---|---|
+    | `outside: []`, Set ≥ Kinder | Set folgt den Kindern | Kein Befund mehr — F19 hat den Auslöser
+      beseitigt, das Raster bemisst sich neu |
+    | `outside: []`, Set ≥ Kinder | Set bleibt, Kinder ragen hinaus oder Set zu groß | Hypothese
+      belegt: das Set bemisst sich nach einem Moduswechsel nicht neu — dann folgt die Korrektur
+      mit rotem Test |
+    | Kinder schon am Ende des Laufs außerhalb | — | Hypothese widerlegt: der Fehler entsteht im
+      Lauf selbst, nicht beim Umschalten |
+
   - Fertig wenn: der Maintainer es in der Datei misst — in light/default und dark/high, und nach
     dem Umschalten von density.
 
