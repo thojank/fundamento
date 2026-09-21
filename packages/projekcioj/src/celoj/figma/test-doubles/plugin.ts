@@ -43,6 +43,10 @@ export interface DoubleNode {
   setSharedPluginData(namespace: string, key: string, value: string): void;
   getSharedPluginData(namespace: string, key: string): string;
   setBoundVariable(field: string, variable: DoubleVariable | null): void;
+  /** The cell of a child of a grid (GridChildrenMixin); −1/−1 until it is placed (F14). */
+  setGridChildPosition(rowIndex: number, columnIndex: number): void;
+  readonly gridRowAnchorIndex: number;
+  readonly gridColumnAnchorIndex: number;
   layoutMode?: string;
   fontName?: { family: string; style: string };
   remove(): void;
@@ -109,6 +113,7 @@ const FIGMA_DEFAULTS: Readonly<Record<string, Readonly<Record<string, unknown>>>
     opacity: 1,
     clipsContent: true,
     layoutMode: "NONE",
+    gridItemsPositioning: "MANUAL",
     layoutPositioning: "AUTO",
     layoutSizingHorizontal: "FIXED",
     layoutSizingVertical: "FIXED",
@@ -123,6 +128,7 @@ const FIGMA_DEFAULTS: Readonly<Record<string, Readonly<Record<string, unknown>>>
     opacity: 1,
     clipsContent: true,
     layoutMode: "NONE",
+    gridItemsPositioning: "MANUAL",
     layoutPositioning: "AUTO",
     layoutSizingHorizontal: "FIXED",
     layoutSizingVertical: "FIXED",
@@ -140,6 +146,7 @@ const FIGMA_DEFAULTS: Readonly<Record<string, Readonly<Record<string, unknown>>>
     opacity: 1,
     clipsContent: true,
     layoutMode: "NONE",
+    gridItemsPositioning: "MANUAL",
     layoutPositioning: "AUTO",
     layoutSizingHorizontal: "FIXED",
     layoutSizingVertical: "FIXED",
@@ -201,10 +208,56 @@ function node(
   // The proxy is the node's identity: children and parents must point at it, not at the raw
   // object, or a comparison by identity fails.
   let recorded: DoubleNode;
+  // The cell of this node in a grid. Measured on 2026-09-21 (file wSYaaAsB2EujMxGra84PoM): a child
+  // that was appended, not placed, reads −1/−1 — Figma did not distribute the children itself.
+  const anchor = { row: -1, column: -1 };
+  const leaveCell = () => {
+    anchor.row = -1;
+    anchor.column = -1;
+  };
   const self: DoubleNode = {
     id: id(type),
     type,
     name,
+    get gridRowAnchorIndex() {
+      return anchor.row;
+    },
+    get gridColumnAnchorIndex() {
+      return anchor.column;
+    },
+    // As the API documents it (plugin-api.d.ts, GridChildrenMixin.setGridChildPosition): out of
+    // bounds throws, an occupied cell throws, ROW_AUTO_FLOW refuses manual positions.
+    setGridChildPosition(rowIndex, columnIndex) {
+      const grid = self.parent;
+      if (grid === undefined || grid.properties.layoutMode !== "GRID") {
+        throw new Error(
+          `${self.type} "${self.name}": setGridChildPosition needs a parent with layoutMode "GRID".`,
+        );
+      }
+      if (grid.properties.gridItemsPositioning === "ROW_AUTO_FLOW") {
+        throw new Error("setGridChildPosition: the grid positions its items by ROW_AUTO_FLOW.");
+      }
+      const rows = Number(grid.properties.gridRowCount ?? 0);
+      const columns = Number(grid.properties.gridColumnCount ?? 0);
+      if (rowIndex < 0 || columnIndex < 0 || rowIndex >= rows || columnIndex >= columns) {
+        throw new Error(
+          `setGridChildPosition: ${rowIndex}/${columnIndex} is out of bounds (${rows} × ${columns}).`,
+        );
+      }
+      const holder = grid.children.find(
+        (child) =>
+          child.gridRowAnchorIndex === rowIndex && child.gridColumnAnchorIndex === columnIndex,
+      );
+      if (holder !== undefined) {
+        // Also for the node that already sits there: what Figma does then is not measured, so the
+        // double does not pretend to know — the plugin must not rely on it.
+        throw new Error(
+          `setGridChildPosition: the cell ${rowIndex}/${columnIndex} is occupied by "${holder.name}".`,
+        );
+      }
+      anchor.row = rowIndex;
+      anchor.column = columnIndex;
+    },
     children: [],
     // Declared here so the recording proxy treats it as a field of the node, not as a property
     // the plugin sets.
@@ -215,11 +268,14 @@ function node(
     pluginData: {},
     appendChild(child) {
       child.parent?.children.splice(child.parent.children.indexOf(child), 1);
+      // A node that comes from elsewhere has no cell here; appending does not give it one (F14).
+      if (child.parent !== recorded) (child as unknown as { leaveCell?: () => void }).leaveCell?.();
       child.parent = recorded;
       self.children.push(child);
     },
     insertChild(index, child) {
       child.parent?.children.splice(child.parent.children.indexOf(child), 1);
+      if (child.parent !== recorded) (child as unknown as { leaveCell?: () => void }).leaveCell?.();
       child.parent = recorded;
       self.children.splice(index, 0, child);
     },
@@ -242,13 +298,18 @@ function node(
     remove() {
       self.parent?.children.splice(self.parent.children.indexOf(recorded), 1);
       self.parent = undefined;
+      leaveCell();
     },
   };
+  Object.defineProperty(self, "leaveCell", { value: leaveCell, enumerable: false });
   // Everything the plugin assigns directly — `node.fills`, `node.minHeight`, `node.characters` —
   // lands in `properties`, so the double records it and `snapshot()` shows it. Without this the
   // double swallowed every such assignment, and a projection could lose a value unseen (F8).
   recorded = new Proxy(self, {
     set(target, key, value) {
+      if (key === "gridRowAnchorIndex" || key === "gridColumnAnchorIndex") {
+        throw new Error(`${String(key)} is read-only; use setGridChildPosition.`);
+      }
       // Figma refuses a text in a font that is not loaded: setting it, or setting characters in
       // the font the text has (F11). The double does too, instead of accepting it silently.
       if (target.type === "TEXT" && (key === "fontName" || key === "characters")) {
@@ -291,13 +352,14 @@ function node(
  * - an auto-layout frame hugs an axis when it says so (layoutSizing HUG, or the older AUTO sizing
  *   modes), adds its paddings and the spacing between its children in the flow, and grows to its
  *   minimum sizes; otherwise it keeps its width and height (Figma's default 100 × 100);
- * - a grid is modelled as it was **observed**, and only so (run 2 in file E7shE7m0z6O8VWPoGyN8ZT,
- *   2026-09-21): the variants had their own, correct size, yet the hugging set measured 48 × 96 —
- *   paddings and gaps around tracks of size zero — and all 72 children lay at one place. The
- *   children evidently did not take part in the grid. An earlier version of this double explained
- *   the 48 × 96 with "an unsized child counts as 0 × 0"; the run refuted that, and the theory is
- *   gone. Why Figma does what it does is **not known**; until a measurement says, the double
- *   claims nothing beyond the observation.
+ * - a grid as it was **measured** (run 3 in file wSYaaAsB2EujMxGra84PoM, 2026-09-21): set and
+ *   variants were correct — GRID, 12 × 6, every track HUG, the variants AUTO and HUG in their own
+ *   size — but every anchor read −1: no child lay in a cell. A child without a cell sizes no track
+ *   and lies at 0/0, so a hugging grid is its paddings and gaps (48 × 96). A child that was placed
+ *   (setGridChildPosition) lies in its cell and its tracks are as large as their largest placed
+ *   child — that is what HUG tracks are documented to do, and what the next run has to confirm.
+ *   Two earlier explanations were refuted by measurement and are gone: "Figma rejects the grid"
+ *   and "an unsized child counts as 0 × 0".
  * Numbers bound to a variable take its value in the first mode of its collection.
  */
 function layoutOf(
@@ -356,17 +418,17 @@ function layoutOf(
         ),
       };
     } else if (mode === "GRID") {
-      // Observed: tracks of size zero, so a hugging grid is its paddings and its gaps.
-      const columns = Math.max(1, num(current, "gridColumnCount"));
-      const rows = Math.max(1, num(current, "gridRowCount"));
+      const tracks = tracksOf(current);
       const contentW =
         num(current, "paddingLeft") +
         num(current, "paddingRight") +
-        num(current, "gridColumnGap") * (columns - 1);
+        num(current, "gridColumnGap") * (tracks.columns.length - 1) +
+        tracks.columns.reduce((sum, width) => sum + width, 0);
       const contentH =
         num(current, "paddingTop") +
         num(current, "paddingBottom") +
-        num(current, "gridRowGap") * (rows - 1);
+        num(current, "gridRowGap") * (tracks.rows.length - 1) +
+        tracks.rows.reduce((sum, height) => sum + height, 0);
       size = {
         width: hugs(current, "H") ? contentW : num(current, "width"),
         height: hugs(current, "V") ? contentH : num(current, "height"),
@@ -378,15 +440,41 @@ function layoutOf(
     return size;
   };
 
+  /** The HUG tracks of a grid: each as large as its largest **placed** child, else 0. */
+  const tracksOf = (current: DoubleNode) => {
+    const columns = Array.from({ length: Math.max(1, num(current, "gridColumnCount")) }, () => 0);
+    const rows = Array.from({ length: Math.max(1, num(current, "gridRowCount")) }, () => 0);
+    for (const child of current.children) {
+      const row = child.gridRowAnchorIndex;
+      const column = child.gridColumnAnchorIndex;
+      if (row < 0 || column < 0) continue;
+      const own = measure(child);
+      columns[column] = Math.max(columns[column] ?? 0, own.width);
+      rows[row] = Math.max(rows[row] ?? 0, own.height);
+    }
+    return { columns, rows };
+  };
+
   const place = (current: DoubleNode, box: DoubleBox): void => {
     boxes.set(current, box);
     const mode = prop(current, "layoutMode");
     if (mode === "GRID") {
-      // Observed: every child at one place, each with its own size.
+      const tracks = tracksOf(current);
+      const before = (sizes: number[], index: number, gap: number) =>
+        sizes.slice(0, index).reduce((sum, track) => sum + track + gap, 0);
       for (const child of current.children) {
+        const row = child.gridRowAnchorIndex;
+        const column = child.gridColumnAnchorIndex;
+        const placed = row >= 0 && column >= 0;
         place(child, {
-          x: num(current, "paddingLeft"),
-          y: num(current, "paddingTop"),
+          // Measured: a child without a cell lies at 0/0, not inside the padding.
+          x: placed
+            ? num(current, "paddingLeft") +
+              before(tracks.columns, column, num(current, "gridColumnGap"))
+            : 0,
+          y: placed
+            ? num(current, "paddingTop") + before(tracks.rows, row, num(current, "gridRowGap"))
+            : 0,
           ...measure(child),
         });
       }

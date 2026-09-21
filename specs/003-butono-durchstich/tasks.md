@@ -526,8 +526,24 @@ Results go into `plan.md` → „Manual acceptance results".
     Lücken, Bemessung und die Spurdefinitionen, an der ersten und der letzten Variante
     `layoutPositioning`, Bemessung, Zellenanker und -spanne, Lage und Größe. Unbekannte
     Eigenschaften stehen als „nicht vorhanden" da, werfende mit der Meldung des Werkzeugs.
-  - Offen: Lauf beim Maintainer mit dem erweiterten Bericht, dann die Ursache aus den Zahlen, dann
-    roter Test und Korrektur. Bis dahin warnt jeder Lauf über das Raster — das ist der Stand, keine
-    Störung.
+  - **Messlauf 3 (Datei `wSYaaAsB2EujMxGra84PoM`): Ursache aus den Rohdaten.** Set korrekt (GRID,
+    12 × 6, alle Spuren HUG, Lücken 8, Innenabstand 4, Bemessung HUG), Varianten korrekt
+    (`layoutPositioning: AUTO`, HUG, 51 × 36 bzw. 77 × 48) — aber `gridRowAnchorIndex` und
+    `gridColumnAnchorIndex` bei erster und letzter Variante **−1**: Keine Variante lag in einer
+    Zelle, Figma verteilte die angehängten Kinder nicht selbst. Das erklärt alle drei Messungen:
+    leere HUG-Spuren sind 0 (48 × 96), alle Kinder liegen bei 0/0, `zero`/`smaller` sind leer.
+  - Rot zuerst: Das Double gibt einem angehängten Kind den Anker −1, legt es auf 0/0 und lässt es
+    keine Spur bemessen; `setGridChildPosition` lehnt ab, was die API ablehnt (außerhalb, belegte
+    Zelle, `ROW_AUTO_FLOW`). Danach fielen „72 anchors ≥ 0, all pairs different", die Reihenfolge
+    der Vitrino und „72 places, 6 columns by 12 rows".
+  - Grün: Der Plan trägt je Variante ihre Zelle — Zeile aus der Kombination variant × tone × size
+    in der Reihenfolge der Vitrino, Spalte aus dem Zustand —, das Plugin weist sie mit
+    `setGridChildPosition` zu (nur, wo die Variante nicht schon liegt; `gridItemsPositioning:
+    MANUAL` gehört zu den Eigenschaften, die es besitzt). Der Bericht zählt Varianten mit Anker −1
+    und nennt sie als Warnung, samt der Meldung des Werkzeugs bei einer abgelehnten Zuweisung.
+    `layout.held` bleibt dauerhaft im Bericht — genau diese Rohdaten haben die Frage entschieden.
+  - Offen bis zum Lauf: dass platzierte Kinder ihre HUG-Spuren bemessen. So ist es dokumentiert;
+    gemessen ist es noch nicht. Der Lauf belegt es über `layout` (72 Positionen, 6 Spalten, 12
+    Zeilen, Größe des Sets) — oder widerlegt es mit Zahlen.
 
 Consistency check before tasks (`/speckit.analyze` scope): every FR and AK maps to at least one task or a recorded decision; every task maps to a plan decision; two new packages (Art. XI); the lockfile changes in T008 only; no task lowers a threshold; nothing is published.

@@ -413,6 +413,8 @@ async function applyComponents(variables, warnings) {
         paddingBottom: grid.padding,
         layoutSizingHorizontal: "HUG",
         layoutSizingVertical: "HUG",
+        // Manual positions: every variant is given its cell below (F14).
+        gridItemsPositioning: "MANUAL",
       });
     }
     set.setSharedPluginData(NAMESPACE, "ero", component.set);
@@ -439,7 +441,26 @@ async function applyComponents(variables, warnings) {
       const node = ours(set, "variant", variantName(variant.props));
       if (node !== undefined && set.children.indexOf(node) !== index) set.insertChild(index, node);
     });
+    // Figma does not distribute appended children over the grid (F14, measured: every anchor read
+    // −1, the HUG tracks stayed empty, all variants lay at 0/0). Every variant is given its cell
+    // with the API for a grid child — only where it is not there already: an occupied cell
+    // throws, and what Figma does for the node that occupies it itself is not measured.
+    const refused = [];
+    if (grid !== undefined) {
+      for (const variant of component.variants) {
+        const node = ours(set, "variant", variantName(variant.props));
+        if (node === undefined || variant.cell === undefined) continue;
+        if (node.gridRowAnchorIndex === variant.cell.row &&
+          node.gridColumnAnchorIndex === variant.cell.column) continue;
+        try {
+          node.setGridChildPosition(variant.cell.row, variant.cell.column);
+        } catch (error) {
+          refused.push(node.name + ": " + String(error && error.message ? error.message : error));
+        }
+      }
+    }
     report.layout = measureLayout(set, component);
+    report.layout.refused = refused;
     // Symmetric (F10): the plan against the file, in both directions, with names. The finding
     // behind this was a document that held 71 of 72 variants while nothing said so.
     const planned = component.variants.map((variant) => variantName(variant.props));
@@ -473,9 +494,12 @@ const dims = (box) => px(box.width) + " × " + px(box.height);
  * against its content, the places the variants took, and the size of the set. Figma accepted a
  * grid once and left every variant at 0 × 0 — only a measurement says so.
  */
-/** Properties of the grid Figma may hold at the set; names it does not know are reported so. */
+/**
+ * Properties of the grid Figma may hold at the set; names it does not know are reported so. This
+ * block stays in the report for good: exactly these raw data decided F14 (Maintainer, 2026-09-21).
+ */
 const HELD_AT_SET = [
-  "type", "layoutMode", "layoutWrap", "layoutSizingHorizontal", "layoutSizingVertical",
+  "type", "layoutMode", "layoutWrap", "gridItemsPositioning", "gridAutoTracks", "layoutSizingHorizontal", "layoutSizingVertical",
   "primaryAxisSizingMode", "counterAxisSizingMode", "gridRowCount", "gridColumnCount",
   "gridRowGap", "gridColumnGap", "gridRowSizes", "gridColumnSizes", "paddingLeft", "paddingRight",
   "paddingTop", "paddingBottom", "itemSpacing", "counterAxisSpacing", "clipsContent", "width",
@@ -532,6 +556,9 @@ function measureLayout(set, component) {
     (box) => box.width !== 0 && box.height !== 0 &&
       (box.width < box.content.width || box.height < box.content.height),
   );
+  const unplaced = nodes
+    .filter((node) => !(node.gridRowAnchorIndex >= 0 && node.gridColumnAnchorIndex >= 0))
+    .map((node) => node.name);
   const first = nodes[0];
   const last = nodes[nodes.length - 1];
   const withParent = (node) =>
@@ -548,6 +575,7 @@ function measureLayout(set, component) {
       last: withParent(last),
     },
     set: { width: set.width, height: set.height },
+    unplaced: unplaced,
     variants: boxes.length,
     places: new Set(boxes.map((box) => box.x + "," + box.y)).size,
     columns: new Set(boxes.map((box) => box.x)).size,
@@ -568,6 +596,17 @@ function layoutWarnings(report, grid) {
     ? ""
     : " (z. B. " + layout.example.name + ": " + dims(layout.example) + " bei Inhalt " +
       dims(layout.example.content) + ")";
+  if (layout.unplaced.length > 0) {
+    out.push(
+      report.set + ": " + layout.unplaced.length + " von " + layout.variants +
+        " Varianten liegen in keiner Zelle (Anker −1)" +
+        (layout.unplaced.length <= 3 ? ": " + layout.unplaced.join("; ") : ", z. B. " + layout.unplaced[0]) +
+        "; " + set + "." +
+        (layout.refused && layout.refused.length > 0
+          ? " Das Werkzeug lehnte " + layout.refused.length + " Zuweisung(en) ab, z. B. " + layout.refused[0] + "."
+          : ""),
+    );
+  }
   if (layout.zero.length > 0) {
     out.push(
       report.set + ": " + layout.zero.length + " von " + layout.variants +

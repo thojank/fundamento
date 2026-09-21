@@ -105,6 +105,12 @@ export interface FigmaComponentSet {
     radii?: { "focus-ring": number; "focus-gap": number };
     /** The font of the label, from its typography token: family and the style of its weight. */
     font?: { family: string; style: string };
+    /**
+     * The cell of the variant in the grid, as the Vitrino orders it: the row is its combination of
+     * the keyed props (variant × tone × size) in the order of the plan, the column its state.
+     * Figma does not distribute appended children itself (F14, measured): every variant is placed.
+     */
+    cell?: { row: number; column: number };
   }[];
   pluginData: { fundamento: { ero: string; skemo: string; version: string } };
   /**
@@ -542,6 +548,15 @@ function componentSetOf(
     };
   });
   const columns = skemo.states.length;
+  const rowOf = new Map<string, number>();
+  for (const variant of variants) {
+    const { [STATE_KEY]: state, ...combination } = variant.props;
+    const key = JSON.stringify(combination);
+    if (!rowOf.has(key)) rowOf.set(key, rowOf.size);
+    Object.assign(variant, {
+      cell: { row: rowOf.get(key) ?? 0, column: skemo.states.indexOf(state ?? "") },
+    });
+  }
   const cell = parityPx(base[VITRINO_CELL_PADDING]?.value);
   return {
     set: entry.ero.name,
@@ -549,7 +564,7 @@ function componentSetOf(
     variants,
     pluginData: { fundamento: { ero: entry.ero.name, skemo: skemo.id, version } },
     grid: {
-      rows: Math.ceil(variants.length / Math.max(1, columns)),
+      rows: rowOf.size,
       columns,
       gap: 2 * cell,
       padding: cell,

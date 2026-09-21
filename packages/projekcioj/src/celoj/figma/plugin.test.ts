@@ -23,14 +23,6 @@ const plan = JSON.parse(files["figma/plan.json"] ?? "{}") as FigmaPlan;
 const MODEL_FONTS = [{ family: "Geist", style: "Medium" }] as const;
 const modelDouble = () => figmaDouble({ fonts: MODEL_FONTS });
 
-/**
- * The warnings of a run without the one about the grid. F14 is open: Figma lays the variants on
- * one place, the double reproduces that observation, and so **every** run warns about it until
- * the cause is measured. Tests of other warnings say what they mean by leaving that one out.
- */
-const otherThanLayout = (warnings: readonly string[]) =>
-  warnings.filter((warning) => !warning.includes("verschiedene Positionen statt"));
-
 /** Runs the generated plugin source against a double. */
 async function run(
   double: ReturnType<typeof figmaDouble>,
@@ -283,11 +275,11 @@ describe("the plugin reports what it did (F10)", () => {
     expect(first.components[0]?.set).toBe("butono");
     expect(first.components[0]?.created).toHaveLength(variants);
     expect(first.components[0]?.updated).toEqual([]);
-    expect(otherThanLayout(first.warnings)).toEqual([]);
+    expect(first.warnings).toEqual([]);
     const second = await report(double);
     expect(second.components[0]?.created).toEqual([]);
     expect(second.components[0]?.updated).toHaveLength(variants);
-    expect(otherThanLayout(second.warnings)).toEqual([]);
+    expect(second.warnings).toEqual([]);
   });
 
   // The finding that made this necessary: a document of mixed history held 71 of 72 variants, and
@@ -430,7 +422,7 @@ describe("a run that creates in a set it found warns, and says what it found (F1
     const double = modelDouble();
     const first = await run2(double);
     expect(first.components[0]?.after).toEqual({ children: 72, marked: 72 });
-    expect(otherThanLayout(first.warnings)).toEqual([]);
+    expect(first.warnings).toEqual([]);
   });
 
   it("warns when a child of the set has no mark after the run", async () => {
@@ -467,7 +459,7 @@ describe("a run that creates in a set it found warns, and says what it found (F1
     expect(again.components[0]?.before?.children).toBe(71);
     // Zwei Warnungen: die Regel („vorgefunden und trotzdem angelegt") und die Deutung des Paars
     // aus dem Endstand des vorigen Laufs und dem Anfangsstand dieses Laufs.
-    const warnings = otherThanLayout(again.warnings);
+    const warnings = again.warnings;
     expect(warnings).toHaveLength(2);
     expect(warnings[0]).toContain(LAST);
     expect(warnings[0]).toContain("vorgefunden");
@@ -533,7 +525,7 @@ describe("the run reads its own last state and says what happened (F10b)", () =>
     const second = await run2(double);
     expect(second.components[0]?.left).toEqual({ children: 72, marked: 72 });
     expect(second.components[0]?.diagnosis).toBe("");
-    expect(otherThanLayout(second.warnings)).toEqual([]);
+    expect(second.warnings).toEqual([]);
   });
 
   it("says 'gone between the runs' when the last run left the set complete", async () => {
@@ -826,6 +818,12 @@ describe("the variants stand in the grid of the Vitrino (F11)", () => {
       ?.remove();
     await run(double, repoFiles["figma/plugin/code.js"] ?? "");
     expect(setOf(double)?.children.map((child) => child.name)).toEqual(names);
+    // Bestätigend (F14): die neu angelegte Variante bekommt ihre freie Zelle wieder.
+    const cells = (setOf(double)?.children ?? []).map(
+      (child) => `${child.gridRowAnchorIndex}/${child.gridColumnAnchorIndex}`,
+    );
+    expect(new Set(cells).size).toBe(72);
+    expect(cells[3]).toBe("0/3");
   });
 });
 
@@ -968,28 +966,63 @@ describe("the double measures sizes the way Figma did (F14)", () => {
     (node as { height?: number } | undefined)?.height,
   ];
 
-  // Messlauf 2 (Datei E7shE7m0z6O8VWPoGyN8ZT, 2026-09-21) hat die Theorie „das Raster misst eine
-  // Variante als 0 × 0" widerlegt: Die Varianten hatten ihre richtige Größe (zero: [], smaller:
-  // []), das Set maß trotzdem 48 × 96 und alle Kinder lagen an einer Stelle. Das Double gibt genau
-  // diese Beobachtung wieder — ohne Theorie, warum. Ob die Größe einer Variante gesetzt ist, ändert
-  // an der Beobachtung nichts.
+  // Messlauf 3 (Datei wSYaaAsB2EujMxGra84PoM, 2026-09-21) hat die Ursache aus den Rohdaten
+  // geliefert: Set und Varianten waren korrekt (GRID 12 × 6, alle Spuren HUG, Varianten AUTO und
+  // HUG in ihrer Größe), aber gridRowAnchorIndex und gridColumnAnchorIndex standen auf −1 — keine
+  // Variante lag in einer Zelle. Figma verteilte die angehängten Kinder nicht selbst. Das erklärt
+  // alle drei Messungen: leere HUG-Spuren sind 0 (48 × 96), alle Kinder liegen bei 0/0, und
+  // zero/smaller sind leer. Das Double gibt genau das wieder.
   it.each([
     ["sized", true],
     ["unsized", false],
   ])(
-    "reproduces the observation with %s variants: set 48 × 96, one place",
+    "leaves appended %s children unplaced: anchor −1, at 0/0, set 48 × 96",
     async (_name, sized) => {
       const { set, variants } = await gridSet(modelDouble(), sized);
       expect(size(set)).toEqual([48, 96]);
-      const places = new Set(
-        variants.map((variant) => {
-          const at = variant as unknown as { x: number; y: number };
-          return `${at.x},${at.y}`;
-        }),
-      );
-      expect(places.size).toBe(1);
+      for (const variant of variants) {
+        const at = variant as unknown as {
+          x: number;
+          y: number;
+          gridRowAnchorIndex: number;
+          gridColumnAnchorIndex: number;
+        };
+        expect([at.gridRowAnchorIndex, at.gridColumnAnchorIndex, at.x, at.y]).toEqual([
+          -1, -1, 0, 0,
+        ]);
+      }
     },
   );
+
+  // What the API documents for a child of a grid (plugin-api.d.ts, GridChildrenMixin): out of
+  // bounds throws, an occupied cell throws, and ROW_AUTO_FLOW refuses manual positions.
+  it("places a child in its cell, and refuses what the API refuses", async () => {
+    const { set, variants } = await gridSet(modelDouble(), true);
+    type Placed = DoubleNode & {
+      setGridChildPosition: (row: number, column: number) => void;
+      gridRowAnchorIndex: number;
+      gridColumnAnchorIndex: number;
+    };
+    const [first, second] = variants as Placed[];
+    if (first === undefined || second === undefined) throw new Error("no variants");
+    first.setGridChildPosition(2, 3);
+    expect([first.gridRowAnchorIndex, first.gridColumnAnchorIndex]).toEqual([2, 3]);
+    expect(() => second.setGridChildPosition(2, 3)).toThrow(/occupied/);
+    expect(() => second.setGridChildPosition(12, 0)).toThrow(/out of bounds/);
+    Object.assign(set, { gridItemsPositioning: "ROW_AUTO_FLOW" });
+    expect(() => second.setGridChildPosition(0, 0)).toThrow(/ROW_AUTO_FLOW/);
+  });
+
+  it("lets only placed children size a track", async () => {
+    const { set, variants } = await gridSet(modelDouble(), true);
+    const first = variants[0] as DoubleNode & {
+      setGridChildPosition: (row: number, column: number) => void;
+    };
+    const [width, height] = size(first);
+    first.setGridChildPosition(0, 0);
+    // One track of each axis now has the size of that child; the others stay 0.
+    expect(size(set)).toEqual([48 + (width ?? 0), 96 + (height ?? 0)]);
+  });
 
   it("gives a variant that hugs its content the size of that content", async () => {
     const { variants } = await gridSet(modelDouble(), true);
@@ -1016,20 +1049,101 @@ describe("every variant has its size and its own place in the grid (F14)", () =>
     }
   });
 
-  // Die Zusicherung „72 Plätze in 6 Spalten und 12 Zeilen" stand hier und war grün — gegen ein
-  // Double, das eine widerlegte Theorie nachrechnete. Sie kommt zurück, wenn die Ursache aus den
-  // Zahlen des nächsten Messlaufs feststeht (erst messen, dann bauen). Bis dahin gilt, was Figma
-  // tut: Der Bericht nennt das Bild beim Namen.
-  it("says with numbers that the grid did not take effect", async () => {
+  // Korrektur (Maintainer, Messlauf 3): Jede Variante bekommt ihre Zelle ausdrücklich — Zeile nach
+  // variant × tone × size, Spalte nach state, in der Reihenfolge der Vitrino, jede Zelle einmal.
+  type Anchored = DoubleNode & { gridRowAnchorIndex: number; gridColumnAnchorIndex: number };
+  const butono = repo.ok ? repo.input.modelo.eroj.find((e) => e.ero.name === "butono") : undefined;
+
+  it("gives every variant its own cell: 72 anchors ≥ 0, all pairs different", async () => {
+    const double = modelDouble();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    const variants = (setOf(double)?.children ?? []) as Anchored[];
+    expect(variants).toHaveLength(72);
+    for (const variant of variants) {
+      expect(variant.gridRowAnchorIndex, variant.name).toBeGreaterThanOrEqual(0);
+      expect(variant.gridColumnAnchorIndex, variant.name).toBeGreaterThanOrEqual(0);
+    }
+    const cells = variants.map((v) => `${v.gridRowAnchorIndex}/${v.gridColumnAnchorIndex}`);
+    expect(new Set(cells).size).toBe(72);
+  });
+
+  it("orders the cells like the Vitrino: a row per combination, a column per state", async () => {
+    const double = modelDouble();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    const states = butono?.skemo.states ?? [];
+    const rows = new Map<number, string>();
+    for (const variant of (setOf(double)?.children ?? []) as Anchored[]) {
+      const props = Object.fromEntries(variant.name.split(", ").map((pair) => pair.split("=")));
+      expect(variant.gridColumnAnchorIndex, variant.name).toBe(states.indexOf(props.state));
+      const combination = `${props.variant} · ${props.tone} · ${props.size}`;
+      const known = rows.get(variant.gridRowAnchorIndex);
+      if (known === undefined) rows.set(variant.gridRowAnchorIndex, combination);
+      else expect(known, variant.name).toBe(combination);
+    }
+    // Rows in the order the Vitrino lists the combinations: the order of the plan.
+    const planned = [
+      ...new Set(
+        (repoPlan.components[0]?.variants ?? []).map(
+          (variant) => `${variant.props.variant} · ${variant.props.tone} · ${variant.props.size}`,
+        ),
+      ),
+    ];
+    expect([...rows.entries()].sort(([a], [b]) => a - b).map(([, name]) => name)).toEqual(planned);
+  });
+
+  it("puts the 72 variants on 72 places, 6 columns by 12 rows, and says nothing", async () => {
     const double = modelDouble();
     const report = (await new Function(
       "figma",
       `${repoFiles["figma/plugin/code.js"] ?? ""}\nreturn applyPlan();`,
     )(double.figma)) as { warnings: string[] };
+    const places = (setOf(double)?.children ?? []).map((variant) => box(variant));
+    expect(new Set(places.map((place) => `${place?.x},${place?.y}`)).size).toBe(72);
+    expect(new Set(places.map((place) => place?.x)).size).toBe(6);
+    expect(new Set(places.map((place) => place?.y)).size).toBe(12);
+    expect(report.warnings).toEqual([]);
+  });
+
+  it("keeps every cell on a second run, without moving anything", async () => {
+    const double = modelDouble();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    const before = ((setOf(double)?.children ?? []) as Anchored[]).map(
+      (v) => `${v.name}@${v.gridRowAnchorIndex}/${v.gridColumnAnchorIndex}`,
+    );
+    const report = (await new Function(
+      "figma",
+      `${repoFiles["figma/plugin/code.js"] ?? ""}\nreturn applyPlan();`,
+    )(double.figma)) as { warnings: string[] };
+    const after = ((setOf(double)?.children ?? []) as Anchored[]).map(
+      (v) => `${v.name}@${v.gridRowAnchorIndex}/${v.gridColumnAnchorIndex}`,
+    );
+    expect(after).toEqual(before);
+    expect(report.warnings).toEqual([]);
+  });
+
+  // Bericht: Varianten ohne Zelle werden gezählt und genannt. Hier lehnt das Werkzeug jede
+  // Zuweisung ab — der Lauf bricht nicht ab, er sagt, was geschah, mit der Meldung des Werkzeugs.
+  it("counts and names the variants without a cell, with the tool's message", async () => {
+    const double = modelDouble();
+    const api = double.figma as { createComponent: () => DoubleNode };
+    const create = api.createComponent;
+    const figma = {
+      ...double.figma,
+      createComponent: () =>
+        Object.assign(create(), {
+          setGridChildPosition: () => {
+            throw new Error("in setGridChildPosition: refused");
+          },
+        }),
+    };
+    const report = (await new Function(
+      "figma",
+      `${repoFiles["figma/plugin/code.js"] ?? ""}\nreturn applyPlan();`,
+    )(figma)) as { warnings: string[]; components: { layout: { unplaced: string[] } }[] };
+    expect(report.components[0]?.layout.unplaced).toHaveLength(72);
     const text = report.warnings.join(" ");
-    expect(text).toContain("1 verschiedene Positionen statt 72");
-    expect(text).toContain("1 Spalten statt 6");
-    expect(text).toContain("48 × 96");
+    expect(text).toContain("72 von 72 Varianten liegen in keiner Zelle");
+    expect(text).toContain("in setGridChildPosition: refused");
   });
 
   it("keeps every child of a variant in the flow, not freely placed", async () => {
@@ -1069,6 +1183,7 @@ describe("every variant has its size and its own place in the grid (F14)", () =>
       gridColumnCount: 6,
       gridRowGap: 8,
       gridColumnGap: 8,
+      gridItemsPositioning: "MANUAL",
       children: 72,
     });
     // Names the double does not know are reported as absent, not left out.
@@ -1079,8 +1194,8 @@ describe("every variant has its size and its own place in the grid (F14)", () =>
       layoutPositioning: "AUTO",
       layoutSizingHorizontal: "HUG",
     });
-    expect(held?.variant).toHaveProperty("gridRowAnchorIndex");
-    expect(held?.variant).toHaveProperty("gridColumnAnchorIndex");
+    expect(held?.variant).toMatchObject({ gridRowAnchorIndex: 0, gridColumnAnchorIndex: 0 });
+    expect(held?.last).toMatchObject({ gridRowAnchorIndex: 11, gridColumnAnchorIndex: 5 });
     expect(held?.last.name).toBe("variant=tertiary, tone=default, size=large, state=loading");
   });
 
