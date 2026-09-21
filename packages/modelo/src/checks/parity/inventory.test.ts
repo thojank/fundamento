@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { PARITY_NOT_DRAWN } from "../../eroj/inventories.js";
 import {
   compareInventories,
   EMPTY_PARITY_INVENTORY,
@@ -219,5 +220,49 @@ describe("parseParityInventory", () => {
       expect(issue.message).not.toBe("");
       expect(issue.suggestion).not.toBe("");
     }
+  });
+});
+
+// Paket „Figma zeigt das Ero" (Maintainer, 2026-09-21): Eine Seite meldet nur, was sie anwendet.
+// Einen Teil, den sie nicht zeichnet, nennt sie mit der Markierung und dem Jugxo, der die
+// Differenz freigibt. Das ist eine benannte, freigegebene Differenz — eine Warnung mit Namen,
+// kein Fehler und nie eine stille Gleichheit. Ohne Jugxo bleibt es ein Fehler.
+describe("a part a side does not draw (named, released difference)", () => {
+  const KEY = "icon.color@size=medium,state=rest,tone=default,variant=primary";
+  const skemo: ParityInventory = { items: { butono: item({ values: { [KEY]: "#ffffff" } }) } };
+
+  it("is a warning that names the Jugxo, not an error", () => {
+    const figma: ParityInventory = {
+      items: {
+        butono: item({ values: { [KEY]: `${PARITY_NOT_DRAWN} (jug_01M31MH4KAGYSK5CPTY51E7MDV)` } }),
+      },
+    };
+    const issues = compareInventories(skemo, figma, { labels: ["skemo", "figma"] });
+    expect(issues.map(({ rule, severity }) => ({ rule, severity }))).toEqual([
+      { rule: "parity-part-not-drawn", severity: "warning" },
+    ]);
+    expect(issues[0]?.message).toContain("jug_01M31MH4KAGYSK5CPTY51E7MDV");
+  });
+
+  it("stays an error when no Jugxo releases it", () => {
+    const figma: ParityInventory = {
+      items: { butono: item({ values: { [KEY]: PARITY_NOT_DRAWN } }) },
+    };
+    const issues = compareInventories(skemo, figma, { labels: ["skemo", "figma"] });
+    expect(issues.map(({ rule, severity }) => ({ rule, severity }))).toEqual([
+      { rule: "parity-value-mismatch", severity: "error" },
+    ]);
+  });
+
+  it("stays an error when the side simply does not declare the part", () => {
+    const figma: ParityInventory = { items: { butono: item() } };
+    expect(rulesAndPaths(compareInventories(skemo, figma, { labels: ["skemo", "figma"] }))).toEqual(
+      [
+        {
+          rule: "parity-value-mismatch",
+          path: formatParityPath(["items", "butono", "values", KEY]),
+        },
+      ],
+    );
   });
 });

@@ -20,14 +20,18 @@ import {
   type Modelo,
   nomRegulo,
   PARITY_ALPHA_VARIES,
+  PARITY_NOT_DRAWN,
+  PART_PROPERTY_TYPES,
   type ParityItem,
   parityColorText,
+  parityDimensionText,
   parityVariantKey,
   readDtcgColor,
   STATE_KEY,
 } from "@fundamento/modelo";
 import type { Celo, CeloInput, GeneratedFile } from "../../build.js";
-import { pluginManifest, pluginSource } from "./plugin.js";
+import { VITRINO_ROW_KEYS, vitrinoLabelOf } from "../vitrino/datumoj.js";
+import { DRAWN_PART_PROPERTIES, pluginManifest, pluginSource } from "./plugin.js";
 
 /** A variable value: a literal, or an alias to another variable of the plan. */
 export type FigmaValue = { alias: string } | string | number | FigmaColor | boolean;
@@ -69,20 +73,61 @@ export type FigmaPaint =
 /** What a Figma side writes for a binding whose alpha is not the same in every mode. */
 export const ALPHA_VARIES = PARITY_ALPHA_VARIES;
 
+/**
+ * The state in which the web component shows its focus ring (:focus-visible). Which state that is
+ * is knowledge of this Celo, not of the Modelo (Art. VIII).
+ */
+const FOCUS_STATE = "focus";
+
+/**
+ * Parts the Figma Celo does not draw, each with the Jugxo that releases the difference. The
+ * Vitrino decides: it shows no icons, so Figma draws none; the day it shows one, this entry goes
+ * and the icon is drawn (Maintainer, 2026-09-21).
+ */
+export const FIGMA_NOT_DRAWN: Readonly<Record<string, string>> = {
+  icon: "jug_01M31TV1V4S3RNBPWSRB2CGEDK",
+};
+
 export interface FigmaComponentSet {
   set: string;
   properties: Record<string, string[] | "BOOLEAN" | "TEXT">;
   variants: {
     props: Record<string, string>;
     bindings: Record<string, string>;
-    /** Per colour binding the paint the plugin applies; absent for non-colour bindings. */
+    /** Per colour binding the plugin draws, the paint it applies. */
     paints?: Record<string, FigmaPaint>;
+    /** Per measure the plugin draws, its value in the base combination: `40px` (F11). */
+    geometry?: Record<string, string>;
+    /** Parts this Celo does not draw, with the Jugxo that releases each (named difference). */
+    notDrawn?: Record<string, string>;
+    /** Whether this variant shows the focus ring (F11); the space for it is always reserved. */
+    focusVisible?: boolean;
+    /** Corner radii of the ring and its gap: the control's radius grown by what lies inside. */
+    radii?: { "focus-ring": number; "focus-gap": number };
+    /** The font of the label, from its typography token: family and the style of its weight. */
+    font?: { family: string; style: string };
   }[];
   pluginData: { fundamento: { ero: string; skemo: string; version: string } };
+  /**
+   * The grid the variants stand in, as the Vitrino shows them: one row per combination of the
+   * keyed props, one column per state. Gap and padding are the Vitrino's: every table cell has
+   * the padding spacing.small, so two cells put 2 × spacing.small between two buttons (F11).
+   */
+  grid?: { rows: number; columns: number; gap: number; padding: number };
+  /**
+   * The label as a text property of the component (Maintainer, 2026-09-21): its default is the
+   * Vitrino's text for the default combination; every instance may override it.
+   */
+  label?: { property: string; defaultValue: string };
 }
 
 export interface FigmaPlan {
   fundamento: string;
+  /**
+   * The one font the plugin falls back to when the model's font is not in the file — named, in
+   * the same style, and reported as a warning (Maintainer, 2026-09-21).
+   */
+  fontFallback?: string;
   collections: FigmaCollection[];
   components: FigmaComponentSet[];
 }
@@ -381,15 +426,19 @@ function paintOf(
   token: string,
   resolutions: ReturnType<typeof allResolutions>,
   base: Readonly<Record<string, { value: unknown }>>,
+  field?: string,
 ): FigmaPaint | undefined {
+  // A composite (the focus ring's border) carries its colour in a field.
+  const colorOf = (value: unknown) =>
+    field === undefined ? value : (value as Record<string, unknown> | undefined)?.[field];
   const alphas = new Set<number>();
   for (const { tokens } of resolutions) {
-    const color = readDtcgColor(tokens[token]?.value);
+    const color = readDtcgColor(colorOf(tokens[token]?.value));
     if (color !== undefined) alphas.add(alphaOf(color));
   }
   // The colour follows the bound variable and therefore the mode; the hex here is the one of the
   // base combination, the state a side can compare. Only the deckkraft is static (F8).
-  const baseColor = readDtcgColor(base[token]?.value);
+  const baseColor = readDtcgColor(colorOf(base[token]?.value));
   const hex = baseColor === undefined ? undefined : hexOf(baseColor);
   if (hex === undefined) return undefined;
   const [only] = [...alphas];
@@ -427,26 +476,129 @@ function componentSetOf(
       .map((prop) => prop.name),
     "state",
   ];
+  const drawn = new Set(DRAWN_PART_PROPERTIES);
   const variants = combinationsOf(skemo, keys).map((combination) => {
     const bindings: Record<string, string> = {};
     const paints: Record<string, FigmaPaint> = {};
+    const geometry: Record<string, string> = {};
+    const notDrawn: Record<string, string> = {};
     for (const [part, partProperties] of Object.entries(skemo.parts)) {
       for (const property of Object.keys(partProperties)) {
         const bound = boundToken(skemo, part, property, combination);
         if (bound === undefined) continue;
-        bindings[`${part}.${property}`] = variableName(bound.token);
-        const paint = paintOf(bound.token, resolutions, base);
-        if (paint !== undefined) paints[`${part}.${property}`] = paint;
+        const key = `${part}.${property}`;
+        bindings[key] = variableName(bound.token);
+        const type = PART_PROPERTY_TYPES[property as keyof typeof PART_PROPERTY_TYPES];
+        if (type !== "color" && type !== "dimension") continue;
+        // What the plugin does not draw is named with its Jugxo, never claimed (Paket „Figma
+        // zeigt das Ero"). What it does not draw and no Jugxo releases is simply absent, and
+        // check:parity says so.
+        const release = FIGMA_NOT_DRAWN[part];
+        if (release !== undefined) {
+          notDrawn[key] = release;
+          continue;
+        }
+        if (!drawn.has(key)) continue;
+        if (type === "color") {
+          const paint = paintOf(bound.token, resolutions, base);
+          if (paint !== undefined) paints[key] = paint;
+        } else {
+          const text = parityDimensionText(base[bound.token]?.value);
+          if (text !== undefined) geometry[key] = text;
+        }
       }
     }
-    return { props: { ...combination }, bindings, paints };
+    // The focus ring (F11). Its colour sits in a field of a composite token and is compared by
+    // no side, so it is kept out of the parity inventory (only colour-typed parts are reported).
+    const ring = boundToken(skemo, "focus-ring", "ring", combination);
+    if (ring !== undefined) {
+      const paint = paintOf(ring.token, resolutions, base, "color");
+      if (paint !== undefined) paints["focus-ring.ring"] = paint;
+    }
+    const px = (part: string, property: string, field?: string): number => {
+      const bound = boundToken(skemo, part, property, combination);
+      const value = bound === undefined ? undefined : base[bound.token]?.value;
+      const measure = field === undefined ? value : (value as Record<string, unknown>)?.[field];
+      return typeof (measure as { value?: unknown })?.value === "number"
+        ? (measure as { value: number }).value
+        : 0;
+    };
+    const gapRadius = px("box", "radius") + px("focus-ring", "offset");
+    const radii = {
+      "focus-gap": gapRadius,
+      "focus-ring": gapRadius + px("focus-ring", "ring", "width"),
+    };
+    const typography = boundToken(skemo, "label", "typography", combination);
+    const font = fontOf(typography === undefined ? undefined : base[typography.token]?.value);
+    return {
+      props: { ...combination },
+      bindings,
+      paints,
+      geometry,
+      notDrawn,
+      focusVisible: combination[STATE_KEY] === FOCUS_STATE,
+      radii,
+      ...(font === undefined ? {} : { font }),
+    };
   });
+  const columns = skemo.states.length;
+  const defaults: Record<string, string> = {};
+  for (const key of VITRINO_ROW_KEYS) {
+    const prop = skemo.props.find((candidate) => candidate.name === key);
+    if (typeof prop?.default === "string") defaults[key] = prop.default;
+  }
+  const cell = parityPx(base[VITRINO_CELL_PADDING]?.value);
   return {
     set: entry.ero.name,
     properties,
     variants,
     pluginData: { fundamento: { ero: entry.ero.name, skemo: skemo.id, version } },
+    grid: {
+      rows: Math.ceil(variants.length / Math.max(1, columns)),
+      columns,
+      gap: 2 * cell,
+      padding: cell,
+    },
+    label: { property: "label", defaultValue: vitrinoLabelOf(defaults) },
   };
+}
+
+/** Figma's names for the weights of a font. Knowledge of this Celo (Art. VIII). */
+const FONT_STYLES: Readonly<Record<number, string>> = {
+  100: "Thin",
+  200: "ExtraLight",
+  300: "Light",
+  400: "Regular",
+  500: "Medium",
+  600: "SemiBold",
+  700: "Bold",
+  800: "ExtraBold",
+  900: "Black",
+};
+
+/** The font Figma cannot do without in a new file, and so the one the plugin falls back to. */
+export const FIGMA_FONT_FALLBACK = "Inter";
+
+/**
+ * The Figma font of a typography value: the first family of its stack — the others (system-ui,
+ * sans-serif) are fallbacks of the browser — and the style of its weight.
+ */
+function fontOf(value: unknown): { family: string; style: string } | undefined {
+  const typography = value as { fontFamily?: unknown; fontWeight?: unknown } | undefined;
+  const stack = typography?.fontFamily;
+  const family = Array.isArray(stack) ? stack[0] : stack;
+  const weight = typeof typography?.fontWeight === "number" ? typography.fontWeight : 400;
+  if (typeof family !== "string") return undefined;
+  return { family, style: FONT_STYLES[Math.round(weight / 100) * 100] ?? "Regular" };
+}
+
+/** The padding of a table cell in the Vitrino; the grid in Figma keeps the same distances. */
+const VITRINO_CELL_PADDING = "spacing.small";
+
+/** The px of a resolved dimension, 0 for anything else. */
+function parityPx(value: unknown): number {
+  const amount = (value as { value?: unknown } | undefined)?.value;
+  return typeof amount === "number" ? amount : 0;
 }
 
 /** Resolves the plan by Figma's mode rules: the proof that the projection matches the resolver. */
@@ -499,6 +651,7 @@ export const FIGMA_CELO: Celo = {
     ];
     const plan: FigmaPlan = {
       fundamento: modeloJson.fundamento.version,
+      fontFallback: FIGMA_FONT_FALLBACK,
       collections,
       components: modelo.eroj.map((entry) =>
         componentSetOf(
@@ -547,7 +700,17 @@ export function figmaPlanInventory(plan: unknown): Record<string, ParityItem> {
     // for a binding whose alpha is not the same in every mode.
     const values: Record<string, string> = {};
     for (const variant of component.variants ?? []) {
+      const at = `@${parityVariantKey(variant.props)}`;
+      for (const [key, text] of Object.entries(variant.geometry ?? {}))
+        values[`${key}${at}`] = text;
+      for (const [key, jugxo] of Object.entries(variant.notDrawn ?? {})) {
+        values[`${key}${at}`] = `${PARITY_NOT_DRAWN} (${jugxo})`;
+      }
       for (const [binding, paint] of Object.entries(variant.paints ?? {})) {
+        // Only colour parts are compared; a colour inside a composite (the ring) is drawn, not
+        // reported.
+        const property = binding.slice(binding.lastIndexOf(".") + 1);
+        if (PART_PROPERTY_TYPES[property as keyof typeof PART_PROPERTY_TYPES] !== "color") continue;
         values[`${binding}@${parityVariantKey(variant.props)}`] =
           "alphaVariesByMode" in paint
             ? `${ALPHA_VARIES} (${variant.bindings[binding]})`

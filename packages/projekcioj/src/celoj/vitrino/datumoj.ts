@@ -227,10 +227,21 @@ const byPrefix = (tokens: Record<string, { value: unknown }>, prefix: string): s
     .sort();
 
 /** The `fm-butono` grid: every variant, tone and size the Skemo declares. */
+/** The props the Vitrino lays out in rows; the states stand in columns. */
+export const VITRINO_ROW_KEYS = ["variant", "tone", "size"] as const;
+
+/**
+ * The text a button carries in the Vitrino: its combination, joined by " · ". Figma uses the same
+ * rule for the default of its label property, so both pictures say the same (F11).
+ */
+export function vitrinoLabelOf(combination: Readonly<Record<string, string>>): string {
+  return Object.values(combination).join(" · ");
+}
+
 export function butonoMarkup(eroj: readonly LoadedEro[]): string {
   const entry = eroj.find((candidate) => candidate.ero.name === "butono");
   if (entry === undefined) return "<p>Kein Ero <code>butono</code> im Modelo.</p>";
-  const keys = ["variant", "tone", "size"].filter((key) =>
+  const keys = VITRINO_ROW_KEYS.filter((key) =>
     entry.skemo.props.some((prop) => prop.name === key),
   );
   const rows = combinationsOf(entry.skemo, keys)
@@ -239,7 +250,7 @@ export function butonoMarkup(eroj: readonly LoadedEro[]): string {
       const attributes = Object.entries(combination)
         .map(([key, value]) => ` ${key}="${value}"`)
         .join("");
-      const label = Object.values(combination).join(" · ");
+      const label = vitrinoLabelOf(combination);
       return `<tr><th scope="row">${label}</th><td><fm-butono${attributes}>${label}</fm-butono></td><td><fm-butono${attributes} disabled>${label}</fm-butono></td><td><fm-butono${attributes} loading>${label}</fm-butono></td></tr>`;
     })
     .join("");

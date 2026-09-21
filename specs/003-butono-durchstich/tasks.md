@@ -344,7 +344,7 @@ Results go into `plan.md` → „Manual acceptance results".
     beide Konsolenausgaben kopieren. Ablesen am Set ist nicht nötig und wäre ein Eingriff — die
     Zahl steht als `after` im Bericht. Die Ursache bleibt bis dahin ausdrücklich offen.
 
-- [ ] **F11 Die Figma-Projektion überträgt keine Geometrie und keine Beschriftung** (Abnahme M1,
+- [x] **F11 Die Figma-Projektion überträgt keine Geometrie und keine Beschriftung** (Abnahme M1,
   FR-06, AK-04)
   - Befund (Maintainer, 2026-09-20, aus der Liste der blinden Stellen zu F8): Das Plugin setzt nie
     `layoutMode`. Damit sind die Bindungen an `paddingLeft`, `itemSpacing`, `minWidth` und
@@ -363,6 +363,41 @@ Results go into `plan.md` → „Manual acceptance results".
   - Fertig wenn: Eine Variante in Figma trägt die Maße und die Beschriftung des Modells, die
     Prüfung sieht eine Abweichung, und das Double weist die Bindung ohne Layoutmodus zurück.
   - Nicht Teil des PRs zu F8–F10: eigener Befund, eigener Durchstich.
+  - Zwischenstand (2026-09-21, Paket „Figma zeigt das Ero", Schritt 2a): Das Double beginnt einen
+    Rahmen mit `layoutMode: "NONE"` und weist eine Bindung an `paddingLeft/Right`, `itemSpacing`,
+    Mindest- oder Höchstmaße dort laut zurück; damit fiel jeder Plugin-Lauf (`FRAME "control":
+    minWidth only takes effect with auto layout, and layoutMode is "NONE"`). Das Plugin legt das
+    `control` jetzt horizontal und mittig an, Größe nach Inhalt, und bindet den Innenabstand an
+    **beiden** Seiten (bisher nur links). Offen: Geometrie in `check:parity` (2b), Beschriftung und
+    Schrift (3), Anordnung der Varianten (4).
+  - Done notes (2026-09-21, Paket „Figma zeigt das Ero", Entscheidungen und Auflagen des
+    Maintainers vom selben Tag):
+    - **Parität meldet nur Angewandtes.** Neuer Aspekt `geometry`; die Skemo-Seite nennt jedes
+      gebundene Maß je Variante in px. Roter Lauf: `check:parity` 576 Differenzen (72 Varianten ×
+      8 Maße). Nach der ehrlichen Meldung der Figma-Seite blieben 144 Fehler am Fokusring.
+    - **Icon** als benannte, freigegebene Differenz (`jug_01M31TV1V4S3RNBPWSRB2CGEDK`, Regel
+      `parity-part-not-drawn` als Warnung, Vojmapo). Die Vitrino zeigt keine Icons.
+    - **Fokusring gezeichnet** wie in der Web Component: Ring (Breite und Farbe aus `focus.ring`),
+      darin der Abstand in `color.focus.inner`, nur im Zustand `focus` sichtbar, Platz in jedem
+      Zustand reserviert, nichts abgeschnitten. Danach `check:parity`: 0 Fehler, 144 Warnungen.
+    - **Besessene Eigenschaften** (Füllung, Rand, Effekte, Radius, Deckkraft, Abschneiden, Layout)
+      an jedem gezeichneten Knoten Wert aus dem Plan oder neutral, auch am Komponentenset. Die
+      Zusicherung fand im ersten Lauf das `layoutMode` des Sets, das noch Figmas Vorgabe trug.
+    - **Höhe** wie in der Web Component als Mindesthöhe (`min-block-size` → `minHeight`), die
+      Variante umschließt ihren Inhalt.
+    - **Raster** wie in der Vitrino: 12 Zeilen × 6 Spalten, Abstände aus der Vitrino
+      (2 × `spacing.small` zwischen, `spacing.small` am Rand), Reihenfolge des Plans auch nach
+      einem Neuanlegen. Setzt Figmas Raster-Auto-Layout (`layoutMode: "GRID"`) voraus — die einzige
+      Stelle, die nur der Lauf in Figma belegen kann.
+    - **Schrift aus dem Modell** (Geist Medium), Rückfall nur auf Inter im selben Schnitt, mit
+      Warnung. Das Double kennt jetzt die Schriften einer neuen Datei.
+    - **Beschriftung** als Text-Eigenschaft `label` am Set, Vorgabewert nach der Regel der Vitrino
+      (`secondary · default · medium` für die Vorgabekombination), jede Beschriftung verbunden.
+      Offene Frage an den Maintainer: Figma kennt einen Vorgabewert je Eigenschaft, nicht je
+      Variante — alle 72 Vorlagen zeigen damit denselben Text.
+    - Nebenbei gefunden: `label.typography` band `fontSize` an einen Variablennamen, den es nicht
+      gibt; die Schriftgröße kam nie an. Jetzt an `…/font-size` gebunden.
+    - Abnahme: der Lauf in einer frisch angelegten Datei, zugleich die ausstehende F10b-Messung.
 
 - [x] **F12 Der Bau aller Projektionen wackelt in der CI** (eigener Befund aus der CI von PR #18)
   - Fakten: Zwei Läufe desselben Commits `7e14ded`, derselbe Workflow. Der `push`-Lauf
@@ -419,7 +454,7 @@ Results go into `plan.md` → „Manual acceptance results".
   - Der Faktor für `per-aspekto.test.ts` in modelo bleibt: Dieser Test **ist** die Arbeit, die er
     behauptet (vier vollständige Exporte, byte-identisch), er prüft keine Verdrahtung.
 
-- [ ] **F13 Figmas Vorgabefüllung deckt die Projektion zu** (Abnahme M1, Maintainer 2026-09-21)
+- [x] **F13 Figmas Vorgabefüllung deckt die Projektion zu** (Abnahme M1, Maintainer 2026-09-21)
   - Befund: Jede Variante trägt Figmas Vorgabefüllung `#FFFFFF` 100 %, die das Plugin nie entfernt.
     Sie stammt nicht aus dem Modell. Folge: Die durchsichtige tertiäre Aktion sitzt in Figma immer
     auf Weiß, auch im Dunkelmodus — F8 ist im Bild wieder zugedeckt, obwohl die Deckkraft am Paint
@@ -434,5 +469,16 @@ Results go into `plan.md` → „Manual acceptance results".
     jede Vorgabe an und ist damit genau an der Stelle blind, an der dieser Befund entstand. Es
     lernt die Vorgaben des Werkzeugs mit — `createComponent`, `createFrame` und `createRectangle`
     beginnen mit Figmas `fills`, `createText` mit seiner Schrift —, sonst prüft der Test nichts.
+  - Done notes (2026-09-21, Paket „Figma zeigt das Ero", Schritt 1): Das Double kennt jetzt Figmas
+    Vorgaben für einen neuen Rahmen und eine neue Komponente (weiße Fläche, keine Linie) und einen
+    neuen Text (schwarze Fläche, leerer Text) und führt Buch, welche Eigenschaft noch die Vorgabe
+    trägt (`untouchedDefaults`). Roter Lauf zuerst: `expected undefined to deeply equal [ { type:
+    'SOLID', …(1) } ]` (das Double kannte die Vorgabe nicht), danach `expected [ …(144) ] to deeply
+    equal []` — 72 Varianten × Fläche und Linie trugen die Vorgabe. Das Plugin leert in jedem Lauf
+    Fläche und Linie an Variante und `control` und die Fläche der Beschriftung, bevor die Bindungen
+    setzen, was der Plan nennt; auch in einer Datei, die ein älteres Plugin angelegt hat.
+  - Geltungsbereich: Flächen und Linien. Die Vorgabegröße 100 × 100 und der leere
+    Beschriftungstext unterliegen derselben Zusicherung mit F11. Nicht modelliert und damit
+    weiterhin blind: die Vorgaben des Komponentensets, das `combineAsVariants` anlegt.
 
 Consistency check before tasks (`/speckit.analyze` scope): every FR and AK maps to at least one task or a recorded decision; every task maps to a plan decision; two new packages (Art. XI); the lockfile changes in T008 only; no task lowers a threshold; nothing is published.
