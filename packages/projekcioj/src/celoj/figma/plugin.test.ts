@@ -137,16 +137,18 @@ describe("Figma development plugin (T016)", () => {
 // translucent token renders opaque. The plugin therefore sets `paint.opacity` from the plan, in
 // every case, and keeps the binding to `color` so the file still shows which variable rules the
 // fill.
+// The Modelo of this repository — the plan the maintainer runs in Figma.
+const repo = celoInputOf(defaultModeloSource());
+if (!repo.ok) throw new Error("the repo Modelo must be valid");
+const repoFiles = Object.fromEntries(
+  FIGMA_CELO.generate(repo.input).map((file) => [file.path, file.text]),
+);
+const repoPlan = JSON.parse(repoFiles["figma/plan.json"] ?? "{}") as FigmaPlan;
+
 describe("the paint carries the alpha of its token (F8)", () => {
   // One brand: the decision is unambiguous in every mode. With a second brand whose tertiary fill
   // is opaque the plan says `alphaVariesByMode`, and the guard refuses the binding — see the
   // Figma-side test.
-  const repo = celoInputOf(defaultModeloSource());
-  if (!repo.ok) throw new Error("the repo Modelo must be valid");
-  const repoFiles = Object.fromEntries(
-    FIGMA_CELO.generate(repo.input).map((file) => [file.path, file.text]),
-  );
-  const repoPlan = JSON.parse(repoFiles["figma/plan.json"] ?? "{}") as FigmaPlan;
   const variantOf = (props: Record<string, string>) =>
     repoPlan.components[0]?.variants.find((entry) =>
       Object.entries(props).every(([key, value]) => entry.props[key] === value),
@@ -323,5 +325,225 @@ describe("the plugin reports what it did (F10)", () => {
     expect(lines.join("\n")).toContain("Inter fehlt");
     expect(double.notifications[0]?.message).toContain("fehlgeschlagen");
     expect(double.notifications[0]?.options).toMatchObject({ error: true });
+  });
+});
+
+// F10b (Abnahme M1, frische Datei QtJRsTlm7NnIPC8wqNuAVm): Lauf 1 legte 72 Varianten an, Lauf 2
+// meldete `found: true`, `created: 1` — und zwar die **letzte** Variante des Plans
+// (variant=tertiary, tone=default, size=large, state=loading), bei `updated: 71` und `warnings: []`.
+// Hier wird der Fall nachgestellt: zwei Läufe hintereinander gegen den Plan dieses Repositories.
+describe("a second run creates nothing (F10b, the maintainer's case)", () => {
+  async function run2(double: ReturnType<typeof figmaDouble>) {
+    const module = new Function(
+      "figma",
+      `${repoFiles["figma/plugin/code.js"] ?? ""}\nreturn applyPlan();`,
+    );
+    return (await module(double.figma)) as {
+      components: { set: string; found: boolean; created: string[]; updated: string[] }[];
+      warnings: string[];
+    };
+  }
+
+  it("finds all 72 variants again, creates none", async () => {
+    const double = figmaDouble();
+    const first = await run2(double);
+    expect(first.components[0]?.created).toHaveLength(72);
+    const second = await run2(double);
+    expect(second.components[0]?.found).toBe(true);
+    expect(second.components[0]?.created).toEqual([]);
+    expect(second.components[0]?.updated).toHaveLength(72);
+    // The variant Figma re-created is the last one of the plan; name it, so a failure here is
+    // immediately comparable with the measurement in Figma.
+    const last = repoPlan.components[0]?.variants.at(-1)?.props ?? {};
+    expect(
+      Object.entries(last)
+        .map(([key, value]) => `${key}=${value}`)
+        .join(", "),
+    ).toBe("variant=tertiary, tone=default, size=large, state=loading");
+  });
+});
+
+// F10b, zweiter Teil: Der Lauf in Figma ging mit `warnings: []` durch, obwohl er in einem
+// vorgefundenen Set eine Variante neu angelegt hat. Regel des Maintainers: Ist das Set
+// vorgefunden und wird trotzdem etwas angelegt, ist das **immer** eine Warnung. Dazu meldet der
+// Lauf, wie er das Set vorgefunden hat — das trennt „Knoten weg" von „Markierung weg", ohne zu
+// raten.
+describe("a run that creates in a set it found warns, and says what it found (F10b)", () => {
+  async function run2(double: ReturnType<typeof figmaDouble>) {
+    const module = new Function(
+      "figma",
+      `${repoFiles["figma/plugin/code.js"] ?? ""}\nreturn applyPlan();`,
+    );
+    return (await module(double.figma)) as {
+      components: {
+        set: string;
+        found: boolean;
+        created: string[];
+        updated: string[];
+        missing: string[];
+        extra: string[];
+        duplicates: string[];
+        before: { children: number; marked: number; unmarked: string[] };
+        after: { children: number; marked: number };
+      }[];
+      warnings: string[];
+    };
+  }
+
+  const setOf = (double: ReturnType<typeof figmaDouble>) => {
+    const found = double.root.children[0]?.children.find((child) => child.name === "butono");
+    if (found === undefined) throw new Error("no component set");
+    return found;
+  };
+  const LAST = "variant=tertiary, tone=default, size=large, state=loading";
+
+  // Der entscheidende Messpunkt für den nächsten Lauf in Figma: Nach dem Lauf steht im Bericht,
+  // wie viele Kinder das Set trägt und wie viele davon unsere Markierung tragen. Bleibt die
+  // Markierung des letzten Knotens in Figma nicht haften, sagt das schon Lauf 1 — und nicht erst
+  // Lauf 2 über den Umweg „created: 1".
+  it("reports how it left the set, marks included", async () => {
+    const double = figmaDouble();
+    const first = await run2(double);
+    expect(first.components[0]?.after).toEqual({ children: 72, marked: 72 });
+    expect(first.warnings).toEqual([]);
+  });
+
+  it("warns when a child of the set has no mark after the run", async () => {
+    const double = figmaDouble();
+    await run2(double);
+    setOf(double)
+      .children.find((child) => child.name === LAST)
+      ?.setSharedPluginData("fundamento", "variant", "");
+    // Der Lauf legt die Variante neu an; der unmarkierte Knoten bleibt daneben stehen.
+    const again = await run2(double);
+    expect(again.components[0]?.after).toEqual({ children: 73, marked: 72 });
+    expect(again.warnings.join(" ")).toContain("ohne Markierung");
+  });
+
+  it("reports how it found the set before it changed anything", async () => {
+    const double = figmaDouble();
+    const first = await run2(double);
+    expect(first.components[0]?.before).toEqual({ children: 0, marked: 0, unmarked: [] });
+    const second = await run2(double);
+    expect(second.components[0]?.before).toEqual({ children: 72, marked: 72, unmarked: [] });
+  });
+
+  // End state one: the node is gone. That is what the maintainer's numbers say — 71 children at
+  // the start of run 2, 72 after it.
+  it("warns when it creates a variant in a set it found, and names it", async () => {
+    const double = figmaDouble();
+    await run2(double);
+    setOf(double)
+      .children.find((child) => child.name === LAST)
+      ?.remove();
+    const again = await run2(double);
+    expect(again.components[0]?.found).toBe(true);
+    expect(again.components[0]?.created).toEqual([LAST]);
+    expect(again.components[0]?.before?.children).toBe(71);
+    // Zwei Warnungen: die Regel („vorgefunden und trotzdem angelegt") und die Deutung des Paars
+    // aus dem Endstand des vorigen Laufs und dem Anfangsstand dieses Laufs.
+    expect(again.warnings).toHaveLength(2);
+    expect(again.warnings[0]).toContain(LAST);
+    expect(again.warnings[0]).toContain("vorgefunden");
+    expect(again.warnings[1]).toContain("zwischen den Läufen");
+  });
+
+  // End state two: the node is there but lost our mark. Then the run creates a second node of the
+  // same name — the set ends with 73 children and a duplicate, and both are said out loud.
+  it("names a child that lost its mark, and the duplicate it causes", async () => {
+    const double = figmaDouble();
+    await run2(double);
+    setOf(double)
+      .children.find((child) => child.name === LAST)
+      ?.setSharedPluginData("fundamento", "variant", "");
+    const again = await run2(double);
+    expect(again.components[0]?.before?.unmarked).toEqual([LAST]);
+    expect(again.components[0]?.before?.marked).toBe(71);
+    expect(again.components[0]?.created).toEqual([LAST]);
+    expect(again.components[0]?.duplicates).toEqual([LAST]);
+    expect(setOf(double).children).toHaveLength(73);
+    expect(again.warnings.join(" ")).toContain("doppelt");
+  });
+});
+
+// F10b, dritter Teil (Maintainer, 2026-09-21): Lauf 2 lässt sich nur im Licht von Lauf 1 deuten.
+// `before: 71` heißt „zwischen den Läufen verschwunden" nur dann, wenn Lauf 1 mit `after: 72`
+// geendet hat; endete Lauf 1 schon mit 71, war der Knoten nie im Set. Der Lauf wertet dieses Paar
+// selbst aus: Er legt seinen `after`-Stand als Plugin-Daten am Set ab und liest ihn beim nächsten
+// Mal als `left` wieder ein. Damit braucht der Maintainer zwischen den Läufen nichts abzulesen —
+// Ablesen hieße auswählen, und das wäre schon ein Eingriff.
+describe("the run reads its own last state and says what happened (F10b)", () => {
+  async function run2(double: ReturnType<typeof figmaDouble>) {
+    const module = new Function(
+      "figma",
+      `${repoFiles["figma/plugin/code.js"] ?? ""}\nreturn applyPlan();`,
+    );
+    return (await module(double.figma)) as {
+      components: {
+        planned: number;
+        before: { children: number; marked: number; unmarked: string[] };
+        after: { children: number; marked: number };
+        left: { children: number; marked: number } | null;
+        diagnosis: string;
+        created: string[];
+      }[];
+      warnings: string[];
+    };
+  }
+
+  const setOf = (double: ReturnType<typeof figmaDouble>) => {
+    const found = double.root.children[0]?.children.find((child) => child.name === "butono");
+    if (found === undefined) throw new Error("no component set");
+    return found;
+  };
+  const LAST = "variant=tertiary, tone=default, size=large, state=loading";
+
+  it("leaves its state at the set and finds it again next time", async () => {
+    const double = figmaDouble();
+    const first = await run2(double);
+    expect(first.components[0]?.planned).toBe(72);
+    expect(first.components[0]?.left).toBeNull();
+    expect(first.components[0]?.diagnosis).toBe("");
+    const second = await run2(double);
+    expect(second.components[0]?.left).toEqual({ children: 72, marked: 72 });
+    expect(second.components[0]?.diagnosis).toBe("");
+    expect(second.warnings).toEqual([]);
+  });
+
+  it("says 'gone between the runs' when the last run left the set complete", async () => {
+    const double = figmaDouble();
+    await run2(double);
+    setOf(double)
+      .children.find((child) => child.name === LAST)
+      ?.remove();
+    const again = await run2(double);
+    expect(again.components[0]?.left).toEqual({ children: 72, marked: 72 });
+    expect(again.components[0]?.diagnosis).toContain("zwischen den Läufen");
+    expect(again.warnings.join(" ")).toContain("zwischen den Läufen");
+  });
+
+  // Der wahrscheinlichste Fall, und der, der zur alten Datei von gestern passt: Schon der erste
+  // Lauf hinterließ 71 — die Variante ist beim Anlegen nie im Set angekommen.
+  it("says 'never arrived' when the last run already left the set short", async () => {
+    const double = figmaDouble();
+    await run2(double);
+    const set = setOf(double);
+    set.children.find((child) => child.name === LAST)?.remove();
+    set.setSharedPluginData("fundamento", "after", JSON.stringify({ children: 71, marked: 71 }));
+    const again = await run2(double);
+    expect(again.components[0]?.left).toEqual({ children: 71, marked: 71 });
+    expect(again.components[0]?.diagnosis).toContain("nie im Set angekommen");
+    expect(again.components[0]?.created).toEqual([LAST]);
+  });
+
+  it("says that the pair cannot be read yet when no earlier state is at the set", async () => {
+    const double = figmaDouble();
+    await run2(double);
+    const set = setOf(double);
+    set.children.find((child) => child.name === LAST)?.remove();
+    set.setSharedPluginData("fundamento", "after", "");
+    const again = await run2(double);
+    expect(again.components[0]?.left).toBeNull();
+    expect(again.components[0]?.diagnosis).toContain("früheren Laufs");
   });
 });

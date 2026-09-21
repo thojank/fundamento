@@ -307,6 +307,43 @@ Results go into `plan.md` → „Manual acceptance results".
     `expected '' to contain 'Inter fehlt'`). Der Lauf in einer frisch angelegten, leeren Datei
     steht beim Maintainer aus; erst er entscheidet, ob „71 statt 72" Dateigeschichte war.
 
+- [x] **F10b Der zweite Lauf ist nicht idempotent** (Abnahme M1, Jugxo
+  `jug_01M31MH4KAGYSK5CPTY51E7MDV`)
+  - Fakten (Maintainer, 2026-09-21, frische Datei `QtJRsTlm7NnIPC8wqNuAVm`): Lauf 1 `created: 72`,
+    keine Warnung. Lauf 2 `found: true`, `created: 1`, `updated: 71`, `warnings: []`. Die neu
+    angelegte Variante ist `variant=tertiary, tone=default, size=large, state=loading` — **die
+    letzte des Plans**, Index 71 von 72. Danach 72 Kinder im Set, nichts daneben auf der Seite. In
+    der alten Datei lagen gestern 71 im Set, der Fall bestand also schon vor PR #17. Die beiden
+    ursprünglichen Erklärungen (Dateigeschichte, lose Variante neben dem Set) sind damit widerlegt
+    und werden nicht weiterverfolgt.
+  - Reproduktion am Double: **gescheitert.** Zwei Läufe gegen den Plan dieses Repositories geben
+    72 angelegt, dann 72 aktualisiert, nichts neu. Nach `jug_01M3094ZC6F3XZ1H0MWQZ62MYV` ist das
+    selbst der Befund: Das Double weicht an dieser Stelle von Figma ab. Festgehalten, nicht
+    geraten.
+  - Grün, Regel: Ist das Set vorgefunden (`found: true`) und wird trotzdem etwas angelegt, ist das
+    **immer** eine Warnung, mit den Namen der angelegten Varianten. Dazu warnt der Lauf bei
+    doppelten Variantennamen und bei Kindern, die nach dem Lauf ohne Markierung dastehen.
+  - Grün, Messpunkte statt Vermutung: Der Bericht nennt je Komponente `before` (Kinder, davon
+    markiert, unmarkierte mit Namen), `after` (Kinder, davon markiert) und `left` — den Endstand,
+    den der **vorige** Lauf am Set hinterlassen hat. Jeder Lauf legt seinen `after`-Stand als
+    Plugin-Daten am Set ab und liest ihn beim nächsten Mal als `left` wieder ein (ohne Zeitstempel,
+    sonst wäre der Lauf nicht mehr idempotent).
+  - Grün, Deutung des **Paars** statt einzelner Zeilen (Korrektur des Maintainers, 2026-09-21):
+    Lauf 2 ist nur im Licht von Lauf 1 zu lesen. Der Lauf schreibt die Deutung selbst als
+    `diagnosis` in den Bericht und in die Warnungen:
+
+    | `left` (Ende des vorigen Laufs) | `before` (Start dieses Laufs) | Deutung |
+    |---|---|---|
+    | 71 Kinder | beliebig | Die Variante ist beim Anlegen **nie im Set angekommen** — der
+      wahrscheinlichste Fall, er passt zur alten Datei mit 71 nach dem ersten Lauf |
+    | 72 Kinder, 72 markiert | 71 Kinder | Zwischen den Läufen verschwunden |
+    | 72 Kinder, 72 markiert | 72 Kinder, 71 markiert | Der Knoten steht da, die Markierung ist weg |
+    | kein Stand am Set | unvollständig | Noch nicht zu trennen; der nächste Lauf kann es |
+
+  - Offen, beim Maintainer: Neue leere Datei, Lauf 1, **sofort** Lauf 2, keine Aktion dazwischen,
+    beide Konsolenausgaben kopieren. Ablesen am Set ist nicht nötig und wäre ein Eingriff — die
+    Zahl steht als `after` im Bericht. Die Ursache bleibt bis dahin ausdrücklich offen.
+
 - [ ] **F11 Die Figma-Projektion überträgt keine Geometrie und keine Beschriftung** (Abnahme M1,
   FR-06, AK-04)
   - Befund (Maintainer, 2026-09-20, aus der Liste der blinden Stellen zu F8): Das Plugin setzt nie
@@ -326,5 +363,76 @@ Results go into `plan.md` → „Manual acceptance results".
   - Fertig wenn: Eine Variante in Figma trägt die Maße und die Beschriftung des Modells, die
     Prüfung sieht eine Abweichung, und das Double weist die Bindung ohne Layoutmodus zurück.
   - Nicht Teil des PRs zu F8–F10: eigener Befund, eigener Durchstich.
+
+- [x] **F12 Der Bau aller Projektionen wackelt in der CI** (eigener Befund aus der CI von PR #18)
+  - Fakten: Zwei Läufe desselben Commits `7e14ded`, derselbe Workflow. Der `push`-Lauf
+    (35583680462) fiel durch, der `pull_request`-Lauf (35583732628) bestand. Einziger Fehlschlag:
+    `packages/cli/src/projekcioj.test.ts > fm projekcioj build (T008) > writes the projections to
+    --out and lists the Celoj`, **30 430 ms gegen ein Budget von 30 000 ms**. Alle anderen Pakete
+    grün (modelo 2 116, mcp 114, projekcioj 135, eroj 1); die Meldungen `locator.evaluate: Test
+    ended` sind der Abbruch des parallelen Playwright-Laufs, kein eigener Fehlschlag.
+  - Verworfene Vermutung: Der Branch liege auf einem main-Stand vor #17, wodurch der Verweis in
+    `jug_01M31MH4KAGYSK5CPTY51E7MDV` auf `jug_01M3094ZC6F3XZ1H0MWQZ62MYV` offen bliebe. Die Basis
+    des Branches ist `32178e9`, der Merge-Commit von #17; beide Jugxoj liegen in derselben
+    Historie. Im Log steht auch kein Verweisfehler — `check:regularo` lief gar nicht mehr, der Job
+    brach im Schritt `Test` ab. Damit ist es kein Stand-Problem, sondern ein wackelnder Test:
+    derselbe Commit, einmal rot, einmal grün.
+  - Ursache: Der Test misst die Verdrahtung des Befehls, nicht seine Geschwindigkeit, spawnt dafür
+    aber einen Lauf, der **alle acht Celoj** schreibt. Lokal 2,3 s, im CI-Lauf von #17 14,8 s, auf
+    einem langsameren Runner darüber. Das Budget hatte als einziges der spawnlastigen Tests den
+    Faktor für die CI nicht.
+  - Zwischenschritt: Faktor 3 unter `CI=true` nach `jug_01M2W3K1YPP05F4XF86J71RGTK`. Verworfen als
+    Dauerlösung (Maintainer): 90 s Budget bei 2,3 s Arbeit ist das Vierzigfache — der Test wäre
+    auch bei einer echten dreißigfachen Verlangsamung noch grün und würde nichts mehr messen. Auf
+    das nächste Rot zu warten hieße, auf einen zufälligen Zeitpunkt zu warten.
+  - Grün, zerlegt: Der Bau nimmt `--celo <name>` (mehrfach oder mit Komma) und baut nur die
+    genannten Celoj; ein Celo, der zusammensetzt, was die anderen schrieben (Vitrino), wird ohne
+    sie mit einer erklärenden Meldung abgelehnt. Der Verdrahtungstest baut jetzt **einen** Celo
+    (`--celo css`, gemessen 1,4 s lokal) mit einem eigenen Budget; der Make-Kit-Test baut genau
+    den Celo, dessen Bündel er behauptet (`--celo make-kit`). Der pauschale CI-Faktor im cli-Paket
+    entfällt wieder.
+  - Zerlegung auf der richtigen Achse (Korrektur des Maintainers, 2026-09-21): Die Kosten stecken
+    nicht in der Zahl der Celoj, sondern im Modelo. Der Verdrahtungstest läuft deshalb gegen das
+    **kleinste Fixture-Modelo** des Repositories (`--fixture
+    packages/modelo/test/fixtures/valid/minimal`, eine Aspekto, zwei Dimensioj, vier
+    Kombinationen): gemessen **0,53 s** lokal gegen 1,4 s (ein Celo, echtes Modelo) und 2,3 s
+    (alle acht). Dafür nimmt `fm projekcioj build` jetzt `--fixture <dir>` wie die Prüfungen
+    (`pnpm check:<check> --fixture`); `--config` und `--fixture` schließen einander aus.
+  - Das Budget richtet sich nach dem **langsamsten** beobachteten Runner, nicht nach dem
+    schnellsten: Derselbe vollständige Bau lief 14,8 s und 30,4 s, die Runner schwanken um den
+    Faktor 2. Gemessen am Fixture auf der CI: **2,49 s** (Lauf 35588499623) und **3,20 s** (Lauf
+    35588496138) gegen 0,53 s lokal. Budget daher **10 s** — das Dreifache des langsamsten Laufs,
+    deckt den beobachteten Faktor 2 ab. Im selben Zug bekommt der Make-Kit-Test ein Budget aus
+    seiner Messung (18,9 s und 19,2 s ⇒ 60 s statt 300 s); er tut die Arbeit, die er behauptet,
+    aber das Fünfzehnfache hätte eine echte Verlangsamung verschluckt.
+  - Gemessen nach der ersten Zerlegung: Ein Budget von 10 s war zu knapp — auf dem CI-Runner lief der Bau
+    eines Celo bei 10 s noch (Lauf 35586902757), während er lokal 1,4 s dauert. Der Löwenanteil
+    ist die feste Arbeit **jedes** Baus (Modelo laden, prüfen, alle Kombinationen auflösen), nicht
+    die Zahl der Celoj; die CI ist dabei etwa siebenmal langsamer als der Entwicklungsrechner.
+    Die Zerlegung bringt also Klarheit — ein Rot sagt, welcher Teil es war —, keine große
+    Zeitersparnis. Budget deshalb **an der CI gemessen**: 30 s, rund das Doppelte der dort
+    gemessenen Zeit (vollständiger Bau 14,8 s), statt des Vierzigfachen der lokalen Zeit.
+  - Der vollständige Bau aller acht Celoj bleibt in der CI abgedeckt, ohne zweiten Rauchtest: Der
+    Schritt `Check: Parity` ruft `fm projekcioj build --out .fundamento/projekcioj` auf und prüft
+    das Ergebnis; ein Rot dort heißt „der vollständige Bau", ein Rot im cli-Paket heißt „die
+    Verdrahtung des Befehls".
+  - Der Faktor für `per-aspekto.test.ts` in modelo bleibt: Dieser Test **ist** die Arbeit, die er
+    behauptet (vier vollständige Exporte, byte-identisch), er prüft keine Verdrahtung.
+
+- [ ] **F13 Figmas Vorgabefüllung deckt die Projektion zu** (Abnahme M1, Maintainer 2026-09-21)
+  - Befund: Jede Variante trägt Figmas Vorgabefüllung `#FFFFFF` 100 %, die das Plugin nie entfernt.
+    Sie stammt nicht aus dem Modell. Folge: Die durchsichtige tertiäre Aktion sitzt in Figma immer
+    auf Weiß, auch im Dunkelmodus — F8 ist im Bild wieder zugedeckt, obwohl die Deckkraft am Paint
+    stimmt.
+  - Anforderung: Das Plugin setzt an Variante und `control` nur Werte aus dem Plan und räumt
+    Figmas Vorgaben ab. Ein Test sichert zu, dass **keine Knoteneigenschaft einen Wert trägt, der
+    nicht aus dem Plan kommt**.
+  - Rot zuerst: (a) am Double — ein Knoten, den das Werkzeug mit einer Vorgabe anlegt, darf nach
+    dem Lauf keine Eigenschaft tragen, die der Plan nicht nennt; (b) die Vorgabefüllung der
+    Variante selbst ist nach dem Lauf leer oder aus dem Plan.
+  - Anmerkung zum Double (`jug_01M3094ZC6F3XZ1H0MWQZ62MYV`): Das Double legt Knoten heute ohne
+    jede Vorgabe an und ist damit genau an der Stelle blind, an der dieser Befund entstand. Es
+    lernt die Vorgaben des Werkzeugs mit — `createComponent`, `createFrame` und `createRectangle`
+    beginnen mit Figmas `fills`, `createText` mit seiner Schrift —, sonst prüft der Test nichts.
 
 Consistency check before tasks (`/speckit.analyze` scope): every FR and AK maps to at least one task or a recorded decision; every task maps to a plan decision; two new packages (Art. XI); the lockfile changes in T008 only; no task lowers a threshold; nothing is published.

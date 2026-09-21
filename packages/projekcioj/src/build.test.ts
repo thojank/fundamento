@@ -2,11 +2,11 @@
 // Modelo, byte-identical over two builds, and a deleted output is regenerated with the same bytes.
 
 import { createHash } from "node:crypto";
-import { mkdtempSync, readdirSync, readFileSync, rmSync, statSync } from "node:fs";
+import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, relative } from "node:path";
 import { describe, expect, it } from "vitest";
-import { buildProjekcioj, CELOJ } from "./build.js";
+import { buildProjekcioj, CELOJ, MANIFEST_FILE } from "./build.js";
 
 /** Relative path -> SHA-256 of every file below `dir`. */
 function hashes(dir: string): Record<string, string> {
@@ -62,5 +62,39 @@ describe("buildProjekcioj (T008)", () => {
     const result = await buildProjekcioj({ outDir: out, fixtureRoot: invalid });
     expect(result.ok).toBe(false);
     expect(readdirSync(out)).toEqual([]);
+  });
+});
+
+// F12: Ein Test, der die Verdrahtung eines Befehls prüft, soll nicht die Arbeit aller acht Celoj
+// tun. `celoj` wählt aus, was gebaut wird — dieselbe Auswahl, die auch beim Regenerieren einer
+// einzelnen Projektion gebraucht wird.
+const tempDir = () => mkdtempSync(join(tmpdir(), "fm-projekcioj-elekto-"));
+
+describe("building a selection of Celoj", () => {
+  it("writes only the chosen Celo and lists only it in the manifest", async () => {
+    const out = tempDir();
+    const result = await buildProjekcioj({ outDir: out, celoj: ["css"] });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.celoj).toEqual(["css"]);
+    expect(result.files.every((file) => file.startsWith("css/"))).toBe(true);
+    expect(existsSync(join(out, "figma"))).toBe(false);
+    const manifest = JSON.parse(readFileSync(join(out, MANIFEST_FILE), "utf8")) as {
+      celoj: string[];
+    };
+    expect(manifest.celoj).toEqual(["css"]);
+  });
+
+  it("names the Celoj it knows when one is unknown", async () => {
+    await expect(buildProjekcioj({ outDir: tempDir(), celoj: ["sketch"] })).rejects.toThrow(
+      /sketch.*css/s,
+    );
+  });
+
+  // The Vitrino composes what the others wrote; alone it would read files that do not exist.
+  it("refuses a composing Celo without the Celoj it composes", async () => {
+    await expect(buildProjekcioj({ outDir: tempDir(), celoj: ["vitrino"] })).rejects.toThrow(
+      /vitrino/,
+    );
   });
 });

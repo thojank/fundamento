@@ -72,6 +72,29 @@ export const CELOJ: readonly Celo[] = [
 
 export const MANIFEST_FILE = "projekcioj.json";
 
+/**
+ * The Celoj a build runs: all of them, or the named ones in the order of `CELOJ`. A Celo that
+ * composes what the others wrote cannot run alone — it would read files that were never written.
+ */
+export function selectedCeloj(names: readonly string[] | undefined): readonly Celo[] {
+  if (names === undefined) return CELOJ;
+  const known = CELOJ.map((celo) => celo.name);
+  const unknown = names.filter((name) => !known.includes(name));
+  if (unknown.length > 0) {
+    throw new Error(`Unknown Celo ${unknown.join(", ")}. Known Celoj: ${known.join(", ")}.`);
+  }
+  const chosen = CELOJ.filter((celo) => names.includes(celo.name));
+  const composing = chosen.filter((celo) => celo.after !== undefined);
+  const missing = composing.length === 0 ? [] : known.filter((name) => !names.includes(name));
+  if (composing.length > 0 && missing.length > 0) {
+    throw new Error(
+      `The Celo ${composing.map((celo) => celo.name).join(", ")} composes what the other Celoj ` +
+        `wrote; it cannot be built without them. Add ${missing.join(", ")}, or build all Celoj.`,
+    );
+  }
+  return chosen;
+}
+
 export interface BuildOptions {
   outDir: string;
   /** A measurement snapshot to compare with; the Vitrino shows the change (Spec 004 T010). */
@@ -80,6 +103,12 @@ export interface BuildOptions {
   source?: ModeloSource;
   /** Shortcut for a fixture Modelo root (`<root>/vortaro`, `<root>/data`). */
   fixtureRoot?: string;
+  /**
+   * Build only these Celoj, in the order of `CELOJ`. Default: all of them. A selection is for
+   * regenerating one projection and for tests that check the wiring of the command rather than
+   * the work of every Celo (F12).
+   */
+  celoj?: readonly string[];
 }
 
 /** The Celoj that only write sources; their package is bundled after the generation (D-14). */
@@ -116,11 +145,12 @@ export async function buildProjekcioj(options: BuildOptions): Promise<BuildResul
     (options.fixtureRoot === undefined
       ? defaultModeloSource()
       : fixtureModeloSource(options.fixtureRoot));
+  const celoj = selectedCeloj(options.celoj);
   const prepared = celoInputOf(source);
   if (!prepared.ok) return prepared;
   if (options.bazo !== undefined) prepared.input.bazo = options.bazo;
 
-  const generated = CELOJ.flatMap((celo) => celo.generate(prepared.input));
+  const generated = celoj.flatMap((celo) => celo.generate(prepared.input));
   const paths = generated.map((file) => file.path);
   const duplicate = paths.find((path, index) => paths.indexOf(path) !== index);
   if (duplicate !== undefined) throw new Error(`Two Celoj write ${duplicate}.`);
@@ -134,19 +164,24 @@ export async function buildProjekcioj(options: BuildOptions): Promise<BuildResul
   }
   const manifest = {
     fundamento: prepared.input.modeloJson.fundamento.version,
-    celoj: CELOJ.map((celo) => celo.name),
+    celoj: celoj.map((celo) => celo.name),
     files: hashes,
   };
   mkdirSync(options.outDir, { recursive: true });
   writeFileSync(join(options.outDir, MANIFEST_FILE), `${JSON.stringify(manifest, null, 2)}\n`);
   // The Make Kits are packages: after their sources come their bundles and types (D-14, T019).
-  // They are written by a bundler, not by a Celo, so the manifest hashes them from disk.
-  const bundled = await bundleMakeKits(options.outDir, prepared.input);
-  // Every Celo states what it emitted; `check:parity` compares that with the Skemo (T021).
-  const inventories = writeParityInventories(options.outDir, prepared.input);
+  // They are written by a bundler, not by a Celo, so the manifest hashes them from disk. Both this
+  // and the parity inventories belong to the Celoj that were built: a selection writes neither the
+  // bundle of a Celo it skipped nor an inventory of a side that has no files (F12).
+  const built = (name: string) => celoj.some((celo) => celo.name === name);
+  const bundled = built(MAKE_KIT_CELO.name)
+    ? await bundleMakeKits(options.outDir, prepared.input)
+    : [];
+  const inventories =
+    options.celoj === undefined ? writeParityInventories(options.outDir, prepared.input) : [];
   // Second phase: Celoj that compose what the others wrote (Spec 004, D-06).
   const composed: string[] = [];
-  for (const celo of CELOJ) {
+  for (const celo of celoj) {
     for (const file of celo.after?.(options.outDir, prepared.input) ?? []) {
       const target = join(options.outDir, file.path);
       mkdirSync(dirname(target), { recursive: true });

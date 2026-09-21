@@ -136,18 +136,72 @@ function variantName(props) {
     .join(", ");
 }
 
+/**
+ * Das Paar aus dem Endstand des vorigen Laufs ("left") und dem Anfangsstand dieses Laufs
+ * ("before") gelesen — die Zeilen einzeln zu deuten führt in die Irre (F10b).
+ */
+function diagnose(report) {
+  const planned = report.planned;
+  if (!report.found) return "";
+  const complete =
+    report.created.length === 0 &&
+    report.before.children === planned &&
+    report.before.marked === planned;
+  if (complete) return "";
+  if (report.before.marked < report.before.children) {
+    return "Ein Kind des Sets stand ohne Markierung da: die Markierung ist verloren gegangen, " +
+      "der Knoten nicht.";
+  }
+  if (report.left === null) {
+    return "Am Set steht kein Endstand eines früheren Laufs. Damit lassen sich „nie im Set " +
+      "angekommen“ und „zwischen den Läufen verschwunden“ für dieses Set noch nicht trennen; " +
+      "der nächste Lauf kann es.";
+  }
+  if (report.left.children < planned) {
+    return "Schon der vorige Lauf hinterließ " + report.left.children + " statt " + planned +
+      " Kinder: die Variante ist beim Anlegen nie im Set angekommen.";
+  }
+  if (report.before.children < report.left.children) {
+    return "Der vorige Lauf hinterließ " + report.left.children + " Kinder, dieser fand " +
+      report.before.children + ": zwischen den Läufen ist etwas verschwunden.";
+  }
+  return "";
+}
+
 async function applyComponents(variables) {
   await figma.loadFontAsync({ family: "Inter", style: "Regular" });
   const reports = [];
   for (const component of PLAN.components) {
     let set = ours(figma.currentPage, "ero", component.set);
+    // How the run found the set, before it changed anything (F10b). Ohne diesen Blick lässt sich
+    // hinterher nicht mehr unterscheiden, ob ein Knoten fehlte oder ob er nur seine Markierung
+    // verloren hatte — der frisch angelegte Knoten verdeckt beides.
+    const mark = (child) => child.getSharedPluginData(NAMESPACE, "variant");
+    const before =
+      set === undefined
+        ? { children: 0, marked: 0, unmarked: [] }
+        : {
+            children: set.children.length,
+            marked: set.children.filter((child) => mark(child) !== "").length,
+            unmarked: set.children.filter((child) => mark(child) === "").map((child) => child.name),
+          };
+    // Was der vorige Lauf am Set hinterlassen hat. Lauf 2 lässt sich nur im Licht von Lauf 1
+    // deuten: „71 Kinder beim Start" heißt nur dann „zwischen den Läufen verschwunden", wenn Lauf 1
+    // mit 72 geendet hat (F10b). Deshalb legt jeder Lauf seinen Endstand hier ab.
+    const stored = set === undefined ? "" : set.getSharedPluginData(NAMESPACE, "after");
     const report = {
       set: component.set,
       found: set !== undefined,
+      planned: component.variants.length,
+      left: stored === "" ? null : JSON.parse(stored),
+      before: before,
       created: [],
       updated: [],
       missing: [],
       extra: [],
+      duplicates: [],
+      after: { children: 0, marked: 0 },
+      diagnosis: "",
     };
     const made = [];
     for (const variant of component.variants) {
@@ -189,6 +243,20 @@ async function applyComponents(variables) {
     const present = set.children.map((child) => child.name);
     report.missing = planned.filter((name) => present.indexOf(name) === -1);
     report.extra = present.filter((name) => planned.indexOf(name) === -1);
+    report.duplicates = present.filter(
+      (name, index) => present.indexOf(name) !== index && report.duplicates.indexOf(name) === -1,
+    );
+    // Wie der Lauf das Set hinterlässt, Markierungen eingeschlossen. Haftet eine Markierung im
+    // Werkzeug nicht, sagt das schon dieser Lauf und nicht erst der nächste über den Umweg
+    // „created: 1" (F10b).
+    report.after = {
+      children: set.children.length,
+      marked: set.children.filter((child) => mark(child) !== "").length,
+    };
+    report.diagnosis = diagnose(report);
+    // Ohne Zeitstempel: Zwei gleiche Läufe hinterlassen denselben Stand, sonst wäre der Lauf nicht
+    // mehr idempotent.
+    set.setSharedPluginData(NAMESPACE, "after", JSON.stringify(report.after));
     reports.push(report);
   }
   return reports;
@@ -201,6 +269,35 @@ async function applyPlan() {
   const components = await applyComponents(variables);
   const warnings = [];
   for (const report of components) {
+    // Ein zweiter Lauf, der in einem vorgefundenen Set etwas anlegt, darf nie still durchgehen
+    // (F10b): Entweder fehlte der Knoten, oder er hat seine Markierung verloren — beides ist ein
+    // Befund, kein Normalfall.
+    if (report.found && report.created.length > 0) {
+      warnings.push(
+        report.set + ": Das Set war vorgefunden, trotzdem wurden " + report.created.length +
+          " Variante(n) neu angelegt (" + report.created.join("; ") + "). Beim Start trug es " +
+          report.before.children + " Kinder, davon " + report.before.marked + " markiert" +
+          (report.before.unmarked.length === 0
+            ? ""
+            : ", ohne Markierung: " + report.before.unmarked.join("; ")) +
+          ".",
+      );
+    }
+    if (report.diagnosis !== "") warnings.push(report.set + ": " + report.diagnosis);
+    if (report.after.marked !== report.after.children) {
+      warnings.push(
+        report.set + ": " + (report.after.children - report.after.marked) +
+          " von " + report.after.children +
+          " Kindern sind nach dem Lauf ohne Markierung — der nächste Lauf würde sie nicht " +
+          "wiederfinden und neu anlegen.",
+      );
+    }
+    if (report.duplicates.length > 0) {
+      warnings.push(
+        report.set + ": " + report.duplicates.length +
+          " Variantenname(n) doppelt (" + report.duplicates.join("; ") + ").",
+      );
+    }
     if (report.missing.length === 0 && report.extra.length === 0) continue;
     warnings.push(
       report.set + ": " + report.missing.length + " fehlen" +
