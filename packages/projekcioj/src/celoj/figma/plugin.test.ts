@@ -1304,3 +1304,131 @@ describe("the set stands on the model's background, like the Vitrino (F16)", () 
     }
   });
 });
+
+// F17 (Messlauf #21, Datei Q7LOiRGeDyJ0JgdajzXg81, 2026-09-22): Alle 12 Fokus-Varianten waren 8 px
+// breiter und höher als die übrigen Zustände ihrer Zeile (small 59 × 44 statt 51 × 36, medium
+// 73 × 48 statt 65 × 40, large 85 × 56 statt 77 × 48). Die Reserve aus Innenabständen wirkte in
+// jedem Zustand (28 + 8 = 36); dazu kamen im Fokus 2 × (2 + 2) = 8 — die sichtbaren Striche von
+// Ring und Abstand nahmen zusätzlich Platz. In der Web Component ändert outline die Größe nicht.
+//
+// Warum das Double es nicht sah: Sein Layout zählte Striche nie mit. Es hatte stillschweigend
+// angenommen, ein Strich nehme keinen Platz — gemessen hatte das niemand.
+describe("a visible stroke takes space, as measured (F17)", () => {
+  async function hugging(included: boolean | undefined) {
+    const double = modelDouble();
+    const api = double.figma as {
+      createFrame: () => DoubleNode;
+      createText: () => DoubleNode;
+      loadFontAsync: (font: { family: string; style: string }) => Promise<void>;
+    };
+    await api.loadFontAsync({ family: "Inter", style: "Regular" });
+    const frame = api.createFrame();
+    const text = api.createText();
+    Object.assign(text, { characters: "Aktion" });
+    frame.appendChild(text);
+    Object.assign(frame, {
+      layoutMode: "HORIZONTAL",
+      layoutSizingHorizontal: "HUG",
+      layoutSizingVertical: "HUG",
+      strokeWeight: 2,
+    });
+    if (included !== undefined) Object.assign(frame, { strokesIncludedInLayout: included });
+    const size = () => {
+      const box = frame as unknown as { width: number; height: number };
+      return [box.width, box.height];
+    };
+    const bare = size();
+    Object.assign(frame, { strokes: [{ type: "SOLID", color: { r: 0, g: 0, b: 0 } }] });
+    return { bare, stroked: size() };
+  }
+
+  it("grows a hugging frame by the weight on every side once the stroke is visible", async () => {
+    const { bare, stroked } = await hugging(undefined);
+    expect(stroked).toEqual([(bare[0] ?? 0) + 4, (bare[1] ?? 0) + 4]);
+  });
+
+  it("leaves the size alone when strokesIncludedInLayout is false", async () => {
+    const { bare, stroked } = await hugging(false);
+    expect(stroked).toEqual(bare);
+  });
+});
+
+describe("every variant has the same outer size in all six states (F17)", () => {
+  const rowsOf = (double: ReturnType<typeof figmaDouble>) => {
+    const set = double.root.children[0]?.children.find((child) => child.name === "butono");
+    const rows = new Map<number, string[]>();
+    for (const variant of set?.children ?? []) {
+      const box = variant as unknown as { width: number; height: number };
+      const sizes = rows.get(variant.gridRowAnchorIndex) ?? [];
+      sizes.push(`${box.width} × ${box.height}`);
+      rows.set(variant.gridRowAnchorIndex, sizes);
+    }
+    return rows;
+  };
+
+  it("gives the six variants of a row one width and one height, focus included", async () => {
+    const double = modelDouble();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    const rows = rowsOf(double);
+    expect(rows.size).toBe(12);
+    for (const [row, sizes] of rows) {
+      expect(sizes, `row ${row}`).toHaveLength(6);
+      expect(new Set(sizes).size, `row ${row}: ${sizes.join(", ")}`).toBe(1);
+    }
+  });
+
+  it("owns strokesIncludedInLayout on ring and gap: the stroke lies in the reserve", async () => {
+    const double = modelDouble();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    const set = double.root.children[0]?.children.find((child) => child.name === "butono");
+    const focused = set?.children.find((child) => child.name.endsWith("state=focus"));
+    for (const part of ["focus-ring", "focus-gap"]) {
+      expect(descendant(focused, part)?.properties.strokesIncludedInLayout, part).toBe(false);
+    }
+  });
+
+  // Die Wirkung messen, nicht den Aufruf: In einem Werkzeug, das die Eigenschaft annimmt und
+  // nichts bewirkt, nennt der Bericht die ungleichen Zeilen mit Zahlen.
+  it("warns with numbers when a row is uneven", async () => {
+    const double = modelDouble();
+    const api = double.figma as { createFrame: () => DoubleNode };
+    const create = api.createFrame;
+    const figma = {
+      ...double.figma,
+      createFrame: () =>
+        new Proxy(create(), {
+          set(target, key, value, receiver) {
+            if (key === "strokesIncludedInLayout") return true;
+            return Reflect.set(target, key, value, receiver);
+          },
+        }),
+    };
+    const report = (await new Function(
+      "figma",
+      `${repoFiles["figma/plugin/code.js"] ?? ""}\nreturn applyPlan();`,
+    )(figma)) as { warnings: string[]; components: { layout: { uneven: unknown[] } }[] };
+    expect(report.components[0]?.layout.uneven).toHaveLength(12);
+    const text = report.warnings.join(" ");
+    expect(text).toContain("12 von 12 Zeilen");
+    expect(text).toContain("state=focus");
+    expect(text).toMatch(/\d+(\.\d+)? × \d+(\.\d+)? statt \d+(\.\d+)? × \d+(\.\d+)?/);
+  });
+
+  it("reports what the tool holds at the parts of a focused variant", async () => {
+    const double = modelDouble();
+    const report = (await new Function(
+      "figma",
+      `${repoFiles["figma/plugin/code.js"] ?? ""}\nreturn applyPlan();`,
+    )(double.figma)) as {
+      components: { layout: { held: { focus: Record<string, Record<string, unknown>> } } }[];
+    };
+    const parts = report.components[0]?.layout.held.focus;
+    expect(parts?.variant?.name).toBe("variant=primary, tone=default, size=small, state=focus");
+    expect(parts?.["focus-ring"]).toMatchObject({
+      strokesIncludedInLayout: false,
+      strokeAlign: "INSIDE",
+    });
+    expect(parts?.control).toHaveProperty("strokesIncludedInLayout");
+    expect(parts?.label).toHaveProperty("width");
+  });
+});

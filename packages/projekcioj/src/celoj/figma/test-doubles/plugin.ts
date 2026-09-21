@@ -380,6 +380,13 @@ function node(
  *   child — that is what HUG tracks are documented to do, and what the next run has to confirm.
  *   Two earlier explanations were refuted by measurement and are gone: "Figma rejects the grid"
  *   and "an unsized child counts as 0 × 0".
+ * - a **visible stroke takes space** (measured in run #21, file Q7LOiRGeDyJ0JgdajzXg81,
+ *   2026-09-22): the frames of ring and gap, hugging and with an inside stroke of 2, were 2 larger
+ *   on every side once the stroke had a paint — 8 px per variant in the focus state, none in the
+ *   other states, where the weight was bound but no paint was set. An earlier version of this
+ *   double never counted strokes; nobody had measured that. `strokesIncludedInLayout = false` is
+ *   documented to make strokes overlap the content instead; the double follows the documentation
+ *   there, and the next run has to confirm it.
  * Numbers bound to a variable take its value in the first mode of its collection.
  */
 function layoutOf(
@@ -423,8 +430,14 @@ function layoutOf(
       const spacing = num(current, "itemSpacing") * Math.max(0, children.length - 1);
       const main = children.reduce((sum, child) => sum + along(child), 0) + spacing;
       const cross = Math.max(0, ...children.map(across));
-      const padX = num(current, "paddingLeft") + num(current, "paddingRight");
-      const padY = num(current, "paddingTop") + num(current, "paddingBottom");
+      const strokes = prop(current, "strokes");
+      const visible = Array.isArray(strokes) && strokes.length > 0;
+      const stroke =
+        visible && prop(current, "strokesIncludedInLayout") !== false
+          ? 2 * num(current, "strokeWeight")
+          : 0;
+      const padX = num(current, "paddingLeft") + num(current, "paddingRight") + stroke;
+      const padY = num(current, "paddingTop") + num(current, "paddingBottom") + stroke;
       const contentW = (mode === "HORIZONTAL" ? main : cross) + padX;
       const contentH = (mode === "HORIZONTAL" ? cross : main) + padY;
       size = {

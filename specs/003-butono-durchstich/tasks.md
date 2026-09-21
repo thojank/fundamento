@@ -555,7 +555,7 @@ Results go into `plan.md` → „Manual acceptance results".
     gemessen ist es noch nicht. Der Lauf belegt es über `layout` (72 Positionen, 6 Spalten, 12
     Zeilen, Größe des Sets) — oder widerlegt es mit Zahlen.
 
-- [ ] **F15 Der Fokus der tertiären Aktion ist eine weiße Fläche statt eines Rings** (Abnahme M1,
+- [x] **F15 Der Fokus der tertiären Aktion ist eine weiße Fläche statt eines Rings** (Abnahme M1,
   Maintainer 2026-09-22)
   - Befund: Die Web Component zeichnet den Fokus als `outline` plus `box-shadow: 0 0 0
     var(--fm-focus-offset) var(--fm-color-focus-inner)` — nur als Ring außerhalb, das Innere bleibt
@@ -573,8 +573,10 @@ Results go into `plan.md` → „Manual acceptance results".
     stehen jetzt auf der Liste der Eigenschaften, die das Plugin besitzt (neutral: innen, 0).
   - Fertig wenn: der Maintainer es in der Datei sieht — tertiary im Fokus zeigt den Ring, keinen
     Kasten.
+  - Messlauf #21 (Datei `Q7LOiRGeDyJ0JgdajzXg81`, 2026-09-22): Die Fläche im Fokus ist
+    durchsichtig — erledigt. Folgebefund F17.
 
-- [ ] **F16 Das Set steht auf dem Untergrund des Modells** (Abnahme M1, Maintainer 2026-09-22)
+- [x] **F16 Das Set steht auf dem Untergrund des Modells** (Abnahme M1, Maintainer 2026-09-22)
   - Befund: Die Vitrino zeigt die Knöpfe auf dem Untergrund; in Figma standen sie auf der dunklen
     Leinwand, tertiary war dort unlesbar. Dieselbe Abnahmebedingung „sieht aus wie die Vitrino".
   - Rot zuerst: `expected undefined to deeply equal { variable: 'color/background/canvas', opacity:
@@ -586,5 +588,31 @@ Results go into `plan.md` → „Manual acceptance results".
     Eigenschaften, die das Plugin besitzt.
   - Fertig wenn: letzter Teil von M1 — der Maintainer schaltet in der Datei color-scheme auf dark
     und contrast auf high und prüft das Ergebnis direkt in der Datei.
+  - **Abgenommen** (Messlauf #21, 2026-09-22): Set auf `color/background/canvas`, tertiary lesbar,
+    secondary wie in der Vitrino.
+
+- [ ] **F17 Die Fokus-Varianten sind größer als ihre Zeile** (Abnahme M1, Jugxo
+  `jug_01M32SWY4XJ33VBK04ZZ9337NC`)
+  - Befund (Messlauf #21): Alle 12 Fokus-Varianten 8 px breiter und höher als die übrigen Zustände
+    derselben Zeile (small 59 × 44 statt 51 × 36, medium 73 × 48 statt 65 × 40, large 85 × 56
+    statt 77 × 48). Die Aussage „Platz in jedem Zustand reserviert" stimmte in Figma nicht ganz:
+    Die Reserve aus Innenabständen wirkt in jedem Zustand (28 + 8 = 36), aber im Fokus kamen
+    2 × (2 + 2) = 8 hinzu — der sichtbare Strich nimmt Platz. In der Web Component ändert `outline`
+    die Größe nicht.
+  - Warum das Double es nicht sah: Sein Layout zählte Striche nie mit — eine stille Annahme, die
+    niemand gemessen hatte.
+  - Rot zuerst: Das Double zählt einen sichtbaren Strich wie gemessen (`expected [ 43.2, 15 ] to
+    deeply equal [ 47.2, 19 ]`); danach fiel die Zusicherung des Maintainers — pro Zeile haben alle
+    sechs Varianten dieselbe Breite und Höhe — mit genau dem gemessenen Bild: `57.2 × 36, …,
+    65.2 × 44, …`.
+  - Grün: `strokesIncludedInLayout: false` an Variante, Ring und Abstand, als Eigenschaft, die das
+    Plugin besitzt — die Striche liegen in der Reserve. Der Bericht misst die Wirkung: ungleiche
+    Zeilen als Warnung mit Zahlen („12 von 12 Zeilen …, z. B. Zeile 0: … state=focus misst 65.2 × 44
+    statt 57.2 × 36"), und `layout.held.rest` / `.focus` nennen für Variante, Ring, Abstand,
+    `control` und Beschriftung, was Figma hält (Größe, Strichlage, Strichbreite,
+    `strokesIncludedInLayout`, Innenabstände).
+  - Offen bis zum Lauf: dass `false` den Strich tatsächlich in die Reserve legt — dokumentiert,
+    nicht gemessen. Und bewusst nicht angefasst: `control`. Dort ist nichts gemessen; ob sein Rand
+    wie im CSS (`box-sizing: border-box`) zur Breite zählt, sagen die Rohdaten des nächsten Laufs.
 
 Consistency check before tasks (`/speckit.analyze` scope): every FR and AK maps to at least one task or a recorded decision; every task maps to a plan decision; two new packages (Art. XI); the lockfile changes in T008 only; no task lowers a threshold; nothing is published.

@@ -94,6 +94,10 @@ const HUG_LAYOUT: Readonly<Record<string, unknown>> = {
   counterAxisAlignItems: "CENTER",
   layoutSizingHorizontal: "HUG",
   layoutSizingVertical: "HUG",
+  // The strokes of ring and gap lie **in** the reserve their paddings make, they do not add to it
+  // (F17): measured, a visible stroke made the focus variants 8 px larger than their row. An
+  // outline does not change the size of the web component either.
+  strokesIncludedInLayout: false,
   itemSpacing: 0,
   paddingLeft: 0,
   paddingRight: 0,
@@ -527,6 +531,13 @@ const HELD_AT_SET = [
   "height",
 ];
 
+/** What Figma may hold at a part of a variant: its size, its line and how the line is laid out. */
+const HELD_AT_PART = [
+  "name", "type", "layoutMode", "layoutSizingHorizontal", "layoutSizingVertical",
+  "strokesIncludedInLayout", "strokeAlign", "strokeWeight", "paddingLeft", "paddingRight",
+  "paddingTop", "paddingBottom", "minWidth", "minHeight", "x", "y", "width", "height",
+];
+
 /** What Figma may hold at a child of the grid: its place, its sizing and its cell. */
 const HELD_AT_VARIANT = [
   "name", "type", "layoutPositioning", "layoutSizingHorizontal", "layoutSizingVertical",
@@ -580,6 +591,45 @@ function measureLayout(set, component) {
   const unplaced = nodes
     .filter((node) => !(node.gridRowAnchorIndex >= 0 && node.gridColumnAnchorIndex >= 0))
     .map((node) => node.name);
+  // One size per row (F17): the six states of a combination share their outer size, as in the
+  // web component, where an outline takes no space.
+  const rows = new Map();
+  for (const box of boxes) {
+    const node = nodes.find((candidate) => candidate.name === box.name);
+    const row = node === undefined ? -1 : node.gridRowAnchorIndex;
+    if (!rows.has(row)) rows.set(row, []);
+    rows.get(row).push(box);
+  }
+  const uneven = [];
+  for (const [row, members] of rows) {
+    const sizes = new Map();
+    for (const box of members) {
+      const key = dims(box);
+      if (!sizes.has(key)) sizes.set(key, []);
+      sizes.get(key).push(box.name);
+    }
+    if (sizes.size < 2) continue;
+    const sorted = Array.from(sizes.entries()).sort((a, b) => b[1].length - a[1].length);
+    uneven.push({
+      row: row,
+      usual: sorted[0][0],
+      others: sorted.slice(1).map((entry) => ({ size: entry[0], variants: entry[1] })),
+    });
+  }
+  const focused = nodes.find((node) => {
+    const variant = component.variants.find((entry) => variantName(entry.props) === node.name);
+    return variant !== undefined && variant.focusVisible === true;
+  });
+  const partsOf = (node) => {
+    if (node === undefined) return {};
+    const out = { variant: held(node, HELD_AT_PART) };
+    let current = node;
+    for (const name of ["focus-ring", "focus-gap", "control", "label"]) {
+      current = current === undefined ? undefined : ours(current, "part", name);
+      if (current !== undefined) out[name] = held(current, HELD_AT_PART);
+    }
+    return out;
+  };
   const first = nodes[0];
   const last = nodes[nodes.length - 1];
   const withParent = (node) =>
@@ -594,9 +644,13 @@ function measureLayout(set, component) {
       set: Object.assign(held(set, HELD_AT_SET), { children: set.children.length }),
       variant: withParent(first),
       last: withParent(last),
+      // The parts of the first variant in rest and in focus, side by side (F17).
+      rest: partsOf(first),
+      focus: partsOf(focused),
     },
     set: { width: set.width, height: set.height },
     unplaced: unplaced,
+    uneven: uneven,
     variants: boxes.length,
     places: new Set(boxes.map((box) => box.x + "," + box.y)).size,
     columns: new Set(boxes.map((box) => box.x)).size,
@@ -626,6 +680,16 @@ function layoutWarnings(report, grid) {
         (layout.refused && layout.refused.length > 0
           ? " Das Werkzeug lehnte " + layout.refused.length + " Zuweisung(en) ab, z. B. " + layout.refused[0] + "."
           : ""),
+    );
+  }
+  if (layout.uneven.length > 0) {
+    const worst = layout.uneven[0];
+    const other = worst.others[0];
+    out.push(
+      report.set + ": " + layout.uneven.length + " von " +
+        (grid === undefined ? layout.uneven.length : grid.rows) +
+        " Zeilen haben Varianten unterschiedlicher Größe, z. B. Zeile " + worst.row + ": " +
+        other.variants[0] + " misst " + other.size + " statt " + worst.usual + ".",
     );
   }
   if (layout.zero.length > 0) {
