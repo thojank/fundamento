@@ -3,7 +3,7 @@
 // comparator is pure so later phases can feed it whatever they extract.
 
 import { formatIssuePath, type ValidationIssue } from "../../contracts/issues.js";
-import { PARITY_ALPHA_VARIES } from "../../eroj/inventories.js";
+import { PARITY_ALPHA_VARIES, PARITY_NOT_DRAWN } from "../../eroj/inventories.js";
 import { appendPointer } from "../../json/pointer.js";
 
 export interface ParityItem {
@@ -117,6 +117,9 @@ export function formatParityPath(segments: readonly string[]): string {
 
 const listText = (list: readonly string[]): string => `[${list.join(", ")}]`;
 
+/** `not drawn (jug_…)`: the marker of a released difference, with the Jugxo that releases it. */
+const RELEASED_NOT_DRAWN = new RegExp(`^${PARITY_NOT_DRAWN} \\((jug_[0-9A-Z_]+)\\)$`);
+
 const onlyIn = (list: readonly string[], other: readonly string[]): string[] =>
   list.filter((entry) => !other.includes(entry));
 
@@ -147,8 +150,9 @@ export function compareInventories(
     segments: string[],
     message: string,
     suggestion: string,
+    severity: ValidationIssue["severity"] = "error",
   ): void => {
-    issues.push({ rule, severity: "error", path: formatParityPath(segments), message, suggestion });
+    issues.push({ rule, severity, path: formatParityPath(segments), message, suggestion });
   };
 
   const names = [...new Set([...Object.keys(left.items), ...Object.keys(right.items)])];
@@ -211,6 +215,21 @@ export function compareInventories(
         value === undefined
           ? `${label} does not declare it`
           : `${label} has ${JSON.stringify(value)}`;
+      // A part a side does not draw, released by a Jugxo: a named difference that the report
+      // shows as a warning. Without the Jugxo the marker is an ordinary mismatch below.
+      const notDrawn = [valueA, valueB].find((value) => RELEASED_NOT_DRAWN.test(value ?? ""));
+      if (notDrawn !== undefined) {
+        const [side, other] = valueA === notDrawn ? [labelA, labelB] : [labelB, labelA];
+        const jugxo = RELEASED_NOT_DRAWN.exec(notDrawn)?.[1] ?? "";
+        add(
+          "parity-part-not-drawn",
+          ["items", name, "values", key],
+          `Value "${key}" of item "${name}" is not drawn by ${side}; ${other} has ${JSON.stringify(valueA === notDrawn ? valueB : valueA)}. Released by ${jugxo}.`,
+          `Draw the part in ${side}, or keep ${jugxo} and its entry in the Vojmapo current.`,
+          "warning",
+        );
+        continue;
+      }
       // A side that cannot express the value says so; that is a difference with a name, never
       // equality by exception (F8, Abnahme M1).
       const varies = [valueA, valueB].find((value) => value?.startsWith(PARITY_ALPHA_VARIES));

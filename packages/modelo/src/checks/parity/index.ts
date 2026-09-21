@@ -69,7 +69,9 @@ export function paritySides(modelo: Modelo): ParitySide[] {
       props: "styled",
     },
     { file: "react.json", label: "react", aspects: ["props"] },
-    { file: "figma.json", label: "figma", aspects: ["props", "states", "paints"] },
+    // The Figma side restates the colours and the measures the plugin applies (F8, F11) — and only
+    // those: a part it does not draw is named, never claimed.
+    { file: "figma.json", label: "figma", aspects: ["props", "states", "paints", "geometry"] },
     // The guidelines document props, states and the defaults; the resolved paints are the Figma
     // side's business (F8), so they are not compared here.
     ...aspektojOf(modelo).map((aspekto) => ({
@@ -98,10 +100,13 @@ const itemCount = (inventory: ParityInventory): number =>
 function result(
   ok: boolean,
   summary: string,
-  errors: ValidationIssue[],
+  issues: ValidationIssue[],
   stats: Record<string, number>,
 ): CheckResult {
-  return { check: "parity", ok, summary, errors, warnings: [], stats };
+  // A released difference is reported, not failed: it goes to the warnings (parity-part-not-drawn).
+  const errors = issues.filter((issue) => issue.severity === "error");
+  const warnings = issues.filter((issue) => issue.severity !== "error");
+  return { check: "parity", ok, summary, errors, warnings, stats };
 }
 
 /** `.fundamento/projekcioj/parity/figma.json` for a build inside the repo, else the full path. */
@@ -166,17 +171,20 @@ export async function check(options: CheckOptions): Promise<CheckResult> {
 
   const names = sides.map((side) => side.label).join(", ");
   const items = itemCount(skemoParityInventory(modelo.eroj));
-  const differences = errors.length - loadErrors.length;
+  const released = errors.filter((issue) => issue.severity !== "error").length;
+  const differences = errors.length - loadErrors.length - released;
   const missing = sides.length - compared;
   errors.push(...unread);
+  const failing = errors.length - released;
   const counts = `The Skemo (${items} Ero(j)) compared with ${sides.length} side(s) (${names})`;
+  const named = released === 0 ? "" : `; ${released} released difference(s) named in the warnings`;
   return result(
-    errors.length === 0,
-    errors.length === 0
-      ? `${counts}: equivalent.`
-      : `${counts}: ${differences} difference(s)${missing === 0 ? "" : `, ${missing} inventory file(s) missing`}.`,
+    failing === 0,
+    failing === 0
+      ? `${counts}: equivalent${named}.`
+      : `${counts}: ${differences} difference(s)${missing === 0 ? "" : `, ${missing} inventory file(s) missing`}${named}.`,
     errors,
-    { sides: sides.length, items, differences },
+    { sides: sides.length, items, differences, released },
   );
 }
 

@@ -145,6 +145,16 @@ const repoFiles = Object.fromEntries(
 );
 const repoPlan = JSON.parse(repoFiles["figma/plan.json"] ?? "{}") as FigmaPlan;
 
+/** The node of that name below `node`, at any depth: the control sits inside the focus ring. */
+function descendant(node: DoubleNode | undefined, name: string): DoubleNode | undefined {
+  for (const child of node?.children ?? []) {
+    if (child.name === name) return child;
+    const found = descendant(child, name);
+    if (found !== undefined) return found;
+  }
+  return undefined;
+}
+
 describe("the paint carries the alpha of its token (F8)", () => {
   // One brand: the decision is unambiguous in every mode. With a second brand whose tertiary fill
   // is opaque the plan says `alphaVariesByMode`, and the guard refuses the binding — see the
@@ -170,8 +180,8 @@ describe("the paint carries the alpha of its token (F8)", () => {
       .map(([key, value]) => `${key}=${value}`)
       .join(", ");
     const variant = set?.children.find((child) => child.name === name);
-    const control = variant?.children.find((child) => child.name === "control");
-    const label = control?.children.find((child) => child.name === "label");
+    const control = descendant(variant, "control");
+    const label = descendant(control, "label");
     const paints = (node: typeof control, field: string) =>
       ((node?.properties[field] ?? []) as Paint[])[0];
     return {
@@ -633,7 +643,7 @@ describe("the geometry of the Ero reaches Figma (F11)", () => {
       .map(([key, value]) => `${key}=${value}`)
       .join(", ");
     const variant = set?.children.find((child) => child.name === name);
-    return variant?.children.find((child) => child.name === "control");
+    return descendant(variant, "control");
   }
 
   it("lays the control out horizontally, centred, and binds both inline paddings", async () => {
@@ -651,5 +661,147 @@ describe("the geometry of the Ero reaches Figma (F11)", () => {
     expect(bound.paddingRight).toBe(bound.paddingLeft);
     expect(bound.itemSpacing).toBeDefined();
     expect(bound.minHeight).toBeDefined();
+  });
+});
+
+// Paket „Figma zeigt das Ero" (Maintainer, 2026-09-21): Der Fokusring wird gezeichnet — eine
+// Schaltflächen-Bibliothek ohne sichtbaren Fokuszustand ist ein Mangel an Barrierefreiheit. Wie in
+// der Web Component (outline mit outline-offset, dazwischen box-shadow in color.focus.inner): Ring
+// außen, Abstand innen, Platz für beides in jedem Zustand reserviert, damit nichts abgeschnitten
+// wird und die Varianten gleich groß bleiben. Sichtbar ist er nur im Zustand focus.
+describe("the focus ring is drawn, and never clipped (F11)", () => {
+  const find = (node: DoubleNode | undefined, part: string): DoubleNode | undefined => {
+    if (node === undefined) return undefined;
+    if (node.getSharedPluginData("fundamento", "part") === part) return node;
+    for (const child of node.children) {
+      const found = find(child, part);
+      if (found !== undefined) return found;
+    }
+    return undefined;
+  };
+
+  async function variantOf(double: ReturnType<typeof figmaDouble>, state: string) {
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    const set = double.root.children[0]?.children.find((child) => child.name === "butono");
+    return set?.children.find(
+      (child) => child.name === `variant=primary, tone=default, size=medium, state=${state}`,
+    );
+  }
+
+  it("nests ring, gap and control, and reserves the space in every state", async () => {
+    const variant = await variantOf(figmaDouble(), "rest");
+    const ring = find(variant, "focus-ring");
+    const gap = find(variant, "focus-gap");
+    const control = find(variant, "control");
+    expect(ring?.parent).toBe(variant);
+    expect(gap?.parent).toBe(ring);
+    expect(control?.parent).toBe(gap);
+    expect(ring?.boundVariables.paddingLeft).toBe("focus/ring/width");
+    expect(ring?.boundVariables.paddingTop).toBe("focus/ring/width");
+    expect(gap?.boundVariables.paddingLeft).toBe("focus/offset");
+    expect(gap?.boundVariables.paddingBottom).toBe("focus/offset");
+    // Not focused: the space is there, the ring is not.
+    expect(ring?.properties.fills).toEqual([]);
+    expect(gap?.properties.fills).toEqual([]);
+  });
+
+  it("shows ring and gap in their colours, bound to the tokens, in the focus state", async () => {
+    const variant = await variantOf(figmaDouble(), "focus");
+    const ring = find(variant, "focus-ring");
+    const gap = find(variant, "focus-gap");
+    const [ringPaint] = (ring?.properties.fills ?? []) as {
+      boundVariables?: { color?: unknown };
+    }[];
+    const [gapPaint] = (gap?.properties.fills ?? []) as { boundVariables?: { color?: unknown } }[];
+    expect(ringPaint?.boundVariables?.color).toMatchObject({ name: "focus/ring/color" });
+    expect(gapPaint?.boundVariables?.color).toMatchObject({ name: "color/focus/inner" });
+  });
+
+  it("clips nothing: no frame of the variant cuts its content", async () => {
+    const variant = await variantOf(figmaDouble(), "focus");
+    for (const part of ["focus-ring", "focus-gap", "control"]) {
+      expect(find(variant, part)?.properties.clipsContent, part).toBe(false);
+    }
+    expect(variant?.properties.clipsContent).toBe(false);
+  });
+
+  it("lets the variant wrap its content, so no 100 × 100 tile is left", async () => {
+    const variant = await variantOf(figmaDouble(), "rest");
+    expect(variant?.properties.layoutMode).toBe("HORIZONTAL");
+    expect(variant?.properties.primaryAxisSizingMode).toBe("AUTO");
+    expect(variant?.properties.counterAxisSizingMode).toBe("AUTO");
+  });
+
+  // A file an older plugin made keeps its control directly under the variant; the run moves it
+  // into the new structure instead of creating a second one.
+  it("moves an older control into the ring instead of duplicating it", async () => {
+    const double = figmaDouble();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    const created = double.counts.nodes;
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    expect(double.counts.nodes).toBe(created);
+  });
+});
+
+// Die Liste der Eigenschaften, die das Plugin besitzt (Maintainer, 2026-09-21): Füllung, Rand,
+// Effekte, Radius, Deckkraft, Abschneiden, Layout — jeweils Wert aus dem Plan oder neutral. Das
+// Komponentenset gehört dazu: combineAsVariants zeichnet Figmas lila gestrichelten Rahmen.
+// Im ersten Lauf rot, aus einem echten Grund: Das Set trug noch Figmas layoutMode "NONE" — sein
+// Layout ist das Raster (nächster Test).
+describe("every property the plugin owns is from the plan or neutral", () => {
+  const OWNED = [
+    "fills",
+    "strokes",
+    "dashPattern",
+    "effects",
+    "cornerRadius",
+    "opacity",
+    "clipsContent",
+    "layoutMode",
+  ];
+
+  it("leaves no tool default on any node it drew, the component set included", async () => {
+    const double = figmaDouble();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    expect(double.untouchedDefaults(OWNED)).toEqual([]);
+    const set = double.root.children[0]?.children.find((child) => child.name === "butono");
+    expect(set?.properties.strokes).toEqual([]);
+    expect(set?.properties.dashPattern).toEqual([]);
+  });
+});
+
+// Raster wie in der Vitrino (Maintainer, 2026-09-21): Die Vitrino ordnet die Zeilen nach der
+// Kombination (variant × tone × size), die Zustände nebeneinander. Figma bekommt dasselbe als
+// Raster: 12 Zeilen × 6 Spalten, in der Reihenfolge des Plans — auch nachdem ein Lauf eine
+// Variante neu anlegen musste, die sonst am Ende stünde.
+describe("the variants stand in the grid of the Vitrino (F11)", () => {
+  const names = (repoPlan.components[0]?.variants ?? []).map((variant) =>
+    Object.entries(variant.props)
+      .map(([key, value]) => `${key}=${value}`)
+      .join(", "),
+  );
+  const setOf = (double: ReturnType<typeof figmaDouble>) =>
+    double.root.children[0]?.children.find((child) => child.name === "butono");
+
+  it("is a grid of 12 rows by 6 states, in the order of the plan", async () => {
+    const double = figmaDouble();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    const set = setOf(double);
+    expect(set?.properties.layoutMode).toBe("GRID");
+    expect(set?.properties.gridColumnCount).toBe(6);
+    expect(set?.properties.gridRowCount).toBe(12);
+    expect(set?.children.map((child) => child.name)).toEqual(names);
+    // Row by row: every sixth variant starts a new combination.
+    expect(names[6]).toContain("size=medium");
+  });
+
+  it("puts a variant a later run had to create back in its place", async () => {
+    const double = figmaDouble();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    setOf(double)
+      ?.children.find((child) => child.name === names[3])
+      ?.remove();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    expect(setOf(double)?.children.map((child) => child.name)).toEqual(names);
   });
 });

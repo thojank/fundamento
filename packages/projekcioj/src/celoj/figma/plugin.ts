@@ -13,22 +13,81 @@
 
 import type { FigmaPlan } from "./figma.js";
 
-/** Part property -> the node and field the plugin binds it to (Celo knowledge, Art. VIII). */
-const BINDINGS: Readonly<
-  Record<string, { node: "control" | "label"; fields: readonly string[]; paint?: boolean }>
-> = {
-  "surface.fill": { node: "control", fields: ["fills"], paint: true },
-  "border.color": { node: "control", fields: ["strokes"], paint: true },
-  "border.width": { node: "control", fields: ["strokeWeight"] },
-  "box.height": { node: "control", fields: ["minHeight"] },
-  "box.width": { node: "control", fields: ["minWidth"] },
+/** The nodes of one variant the plugin draws, outside in (F11). */
+type PartNode = "focus-ring" | "focus-gap" | "control" | "label";
+
+interface Binding {
+  node: PartNode;
+  fields: readonly string[];
+  /** A colour: bound to the paint, with the deckkraft from the plan (F8). */
+  paint?: boolean;
+  /** The field of a composite token this binding takes: `focus/ring` + `/width`. */
+  suffix?: string;
+  /** Drawn only in the state that shows the focus ring; neutral in every other. */
+  focusOnly?: boolean;
+}
+
+const PADDINGS = ["paddingLeft", "paddingRight", "paddingTop", "paddingBottom"] as const;
+
+/** Part property -> where the plugin binds it (Celo knowledge, Art. VIII). */
+const BINDINGS: Readonly<Record<string, readonly Binding[]>> = {
+  "surface.fill": [{ node: "control", fields: ["fills"], paint: true }],
+  "border.color": [{ node: "control", fields: ["strokes"], paint: true }],
+  "border.width": [{ node: "control", fields: ["strokeWeight"] }],
+  // The web component sets min-block-size and min-inline-size: minimums, not fixed sizes (F11).
+  "box.height": [{ node: "control", fields: ["minHeight"] }],
+  "box.width": [{ node: "control", fields: ["minWidth"] }],
   // Inline padding is one value for both sides (F11): binding only the left one left the right
   // side at Figma's default.
-  "box.inline-padding": { node: "control", fields: ["paddingLeft", "paddingRight"] },
-  "box.gap": { node: "control", fields: ["itemSpacing"] },
-  "box.radius": { node: "control", fields: ["cornerRadius"] },
-  "label.color": { node: "label", fields: ["fills"], paint: true },
-  "label.typography": { node: "label", fields: ["fontSize"] },
+  "box.inline-padding": [{ node: "control", fields: ["paddingLeft", "paddingRight"] }],
+  "box.gap": [{ node: "control", fields: ["itemSpacing"] }],
+  "box.radius": [{ node: "control", fields: ["cornerRadius"] }],
+  "label.color": [{ node: "label", fields: ["fills"], paint: true }],
+  // A typography token is a composite; Figma holds its fields as separate variables (F9). Bound
+  // to the bare name, the size never arrived — there is no variable of that name.
+  "label.typography": [{ node: "label", fields: ["fontSize"], suffix: "/font-size" }],
+  // The focus ring as the web component draws it: an outline of the ring's width and colour at
+  // outline-offset, the gap filled with color.focus.inner. The space for both is reserved in every
+  // state, so nothing is clipped and every variant has the same size; only the focus state shows
+  // the colours.
+  "focus-ring.ring": [
+    { node: "focus-ring", fields: PADDINGS, suffix: "/width" },
+    { node: "focus-ring", fields: ["fills"], paint: true, suffix: "/color", focusOnly: true },
+  ],
+  "focus-ring.offset": [{ node: "focus-gap", fields: PADDINGS }],
+  "focus-ring.color": [{ node: "focus-gap", fields: ["fills"], paint: true, focusOnly: true }],
+};
+
+/**
+ * What the plugin owns on every node it draws (Maintainer, 2026-09-21): fill, line, effects,
+ * radius, opacity, clipping and layout. Each is a value from the plan or neutral; everything else
+ * on a node the plugin does not touch. Neutral first, then the plan.
+ */
+const NEUTRAL: Readonly<Record<string, unknown>> = {
+  fills: [],
+  strokes: [],
+  dashPattern: [],
+  effects: [],
+  cornerRadius: 0,
+  opacity: 1,
+  clipsContent: false,
+};
+
+/** A text has no line, radius or clipping of its own. */
+const NEUTRAL_TEXT: Readonly<Record<string, unknown>> = { fills: [], effects: [], opacity: 1 };
+
+/** A frame that wraps its content: the variant, the ring and the gap (F11). */
+const HUG_LAYOUT: Readonly<Record<string, unknown>> = {
+  layoutMode: "HORIZONTAL",
+  primaryAxisAlignItems: "CENTER",
+  counterAxisAlignItems: "CENTER",
+  primaryAxisSizingMode: "AUTO",
+  counterAxisSizingMode: "AUTO",
+  itemSpacing: 0,
+  paddingLeft: 0,
+  paddingRight: 0,
+  paddingTop: 0,
+  paddingBottom: 0,
 };
 
 /**
@@ -46,6 +105,12 @@ const CONTROL_LAYOUT: Readonly<Record<string, string>> = {
 
 export const PLUGIN_NAMESPACE = "fundamento";
 
+/**
+ * Every part property the plugin applies to the file. The Figma side of `check:parity` reports
+ * exactly these and nothing else: a side claims only what it does (Paket „Figma zeigt das Ero").
+ */
+export const DRAWN_PART_PROPERTIES: readonly string[] = Object.keys(BINDINGS);
+
 /** `code.js` with the plan embedded. */
 export function pluginSource(plan: FigmaPlan): string {
   return `// Generated by fm projekcioj build; do not edit (Art. I). Fundamento ${plan.fundamento}.
@@ -53,6 +118,9 @@ const PLAN = ${JSON.stringify(plan)};
 const NAMESPACE = ${JSON.stringify(PLUGIN_NAMESPACE)};
 const BINDINGS = ${JSON.stringify(BINDINGS)};
 const CONTROL_LAYOUT = ${JSON.stringify(CONTROL_LAYOUT)};
+const HUG_LAYOUT = ${JSON.stringify(HUG_LAYOUT)};
+const NEUTRAL = ${JSON.stringify(NEUTRAL)};
+const NEUTRAL_TEXT = ${JSON.stringify(NEUTRAL_TEXT)};
 
 /** The collection of a name, its modes renamed and completed, without duplicating anything. */
 async function applyCollections() {
@@ -123,27 +191,49 @@ function ours(parent, key, value) {
   );
 }
 
-function bind(control, label, bindings, paints, variables) {
-  for (const [part, name] of Object.entries(bindings)) {
-    const target = BINDINGS[part];
-    const variable = variables.get(name);
-    if (target === undefined || variable === undefined) continue;
-    const node = target.node === "label" ? label : control;
-    if (target.paint === true) {
-      // Figma binds only the RGB of a variable to a paint; the deckkraft comes from the plan and
-      // is set here, in every case — also at 0, so the binding stays visible in the file (F8).
-      const paint = (paints || {})[part];
-      const bound = figma.variables.setBoundVariableForPaint(
-        { type: "SOLID", color: { r: 0, g: 0, b: 0 } },
-        "color",
-        variable,
-      );
-      if (paint !== undefined && typeof paint.opacity === "number") bound.opacity = paint.opacity;
-      for (const field of target.fields) node[field] = [bound];
-    } else {
-      for (const field of target.fields) node.setBoundVariable(field, variable);
+/** Sets the owned properties to the given values; lists start empty (F13). */
+function own(node, values) {
+  for (const [field, value] of Object.entries(values)) {
+    node[field] = Array.isArray(value) ? [] : value;
+  }
+}
+
+function bind(nodes, variant, variables) {
+  for (const [part, name] of Object.entries(variant.bindings)) {
+    for (const target of BINDINGS[part] || []) {
+      const variable = variables.get(name + (target.suffix || ""));
+      if (variable === undefined) continue;
+      const node = nodes[target.node];
+      if (target.paint === true) {
+        // The focus ring shows only in the focus state; in every other its fill stays neutral.
+        if (target.focusOnly === true && variant.focusVisible !== true) continue;
+        // Figma binds only the RGB of a variable to a paint; the deckkraft comes from the plan
+        // and is set here, in every case — also at 0, so the binding stays visible (F8).
+        const paint = (variant.paints || {})[part];
+        const bound = figma.variables.setBoundVariableForPaint(
+          { type: "SOLID", color: { r: 0, g: 0, b: 0 } },
+          "color",
+          variable,
+        );
+        if (paint !== undefined && typeof paint.opacity === "number") bound.opacity = paint.opacity;
+        for (const field of target.fields) node[field] = [bound];
+      } else {
+        for (const field of target.fields) node.setBoundVariable(field, variable);
+      }
     }
   }
+}
+
+/** The child of parent marked as the part, created when missing. */
+function part(parent, name, create) {
+  let found = ours(parent, "part", name);
+  if (found === undefined) {
+    found = create();
+    found.setSharedPluginData(NAMESPACE, "part", name);
+    parent.appendChild(found);
+  }
+  found.name = name;
+  return found;
 }
 
 function variantName(props) {
@@ -228,43 +318,62 @@ async function applyComponents(variables) {
       node.name = name;
       node.setSharedPluginData(NAMESPACE, "variant", name);
       node.setSharedPluginData(NAMESPACE, "ero", component.set);
-      let control = ours(node, "part", "control");
-      let label;
-      if (control === undefined) {
-        control = figma.createFrame();
-        control.setSharedPluginData(NAMESPACE, "part", "control");
-        label = figma.createText();
-        label.setSharedPluginData(NAMESPACE, "part", "label");
-        control.appendChild(label);
-        node.appendChild(control);
-      } else {
-        label = ours(control, "part", "label");
-      }
+      // The structure (F11): variant → focus-ring → focus-gap → control → label, each found by
+      // its part mark and created when missing. A control an older plugin left directly under
+      // the variant is moved in, never duplicated.
+      const ring = part(node, "focus-ring", () => figma.createFrame());
+      const gap = part(ring, "focus-gap", () => figma.createFrame());
+      const control =
+        ours(gap, "part", "control") ??
+        ours(node, "part", "control") ??
+        part(gap, "control", () => figma.createFrame());
+      if (control.parent !== gap) gap.appendChild(control);
       control.name = "control";
-      label.name = "label";
-      // Nur Werte aus dem Plan (F13). Figma gibt einem neuen Rahmen und einer neuen Komponente
-      // eine weiße Fläche mit, die nicht aus dem Modell stammt und eine durchsichtige Fläche
-      // wieder zudeckt. Jede Fläche wird deshalb geleert; was der Plan nennt, setzt die Bindung
-      // gleich danach. Das gilt in jedem Lauf, auch in einer Datei, die ein älteres Plugin anlegte.
-      node.fills = [];
-      node.strokes = [];
-      control.fills = [];
-      control.strokes = [];
-      label.fills = [];
-      // Auto layout before any measure is bound: padding, gap and minimum sizes only take effect
-      // on an auto-layout frame (F11).
-      for (const [field, value] of Object.entries(CONTROL_LAYOUT)) control[field] = value;
-      bind(control, label, variant.bindings, variant.paints, variables);
+      const label = part(control, "label", () => figma.createText());
+      // Only values from the plan (F13): every owned property neutral first — Figma's white fill,
+      // its clipping and its line would otherwise cover what the plan draws.
+      for (const frame of [node, ring, gap, control]) own(frame, NEUTRAL);
+      own(label, NEUTRAL_TEXT);
+      // Layout before any measure is bound: padding, gap and minimum sizes only take effect on
+      // an auto-layout frame (F11). The variant, ring and gap wrap their content.
+      for (const frame of [node, ring, gap]) own(frame, HUG_LAYOUT);
+      own(control, CONTROL_LAYOUT);
+      ring.cornerRadius = variant.radii["focus-ring"];
+      gap.cornerRadius = variant.radii["focus-gap"];
+      bind({ "focus-ring": ring, "focus-gap": gap, control, label }, variant, variables);
       if (existing === undefined) made.push(node);
     }
     if (set === undefined) {
       set = figma.combineAsVariants(made, figma.currentPage);
       set.name = component.set;
     }
+    // The set is a node the plugin owns too: combineAsVariants draws Figma's purple dashed frame
+    // around it, which is not from the model (Maintainer, 2026-09-21).
+    own(set, NEUTRAL);
+    // The grid of the Vitrino (F11): one row per combination, one column per state, in the order
+    // of the plan — a variant a later run had to create goes back to its place.
+    const grid = component.grid;
+    if (grid !== undefined) {
+      own(set, {
+        layoutMode: "GRID",
+        gridRowCount: grid.rows,
+        gridColumnCount: grid.columns,
+        gridRowGap: grid.gap,
+        gridColumnGap: grid.gap,
+        paddingLeft: grid.padding,
+        paddingRight: grid.padding,
+        paddingTop: grid.padding,
+        paddingBottom: grid.padding,
+      });
+    }
     set.setSharedPluginData(NAMESPACE, "ero", component.set);
     set.setSharedPluginData(NAMESPACE, "skemo", component.pluginData.fundamento.skemo);
     set.setSharedPluginData(NAMESPACE, "version", component.pluginData.fundamento.version);
     for (const node of made) if (node.parent !== set) set.appendChild(node);
+    component.variants.forEach((variant, index) => {
+      const node = ours(set, "variant", variantName(variant.props));
+      if (node !== undefined && set.children.indexOf(node) !== index) set.insertChild(index, node);
+    });
     // Symmetric (F10): the plan against the file, in both directions, with names. The finding
     // behind this was a document that held 71 of 72 variants while nothing said so.
     const planned = component.variants.map((variant) => variantName(variant.props));

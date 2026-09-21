@@ -78,9 +78,11 @@ describe("entity ID prefixes (§2.3)", () => {
 describe("rule catalog (§2.6)", () => {
   it("contains every rule ID exactly once", () => {
     expect(new Set(RULE_IDS).size).toBe(RULE_IDS.length);
-    // 117: Spec 004 T013 added the missing fingerprint list, Spec 003 F8 the value a projection
-    // cannot express and the Celo a Jugxo names in its typed reference.
-    expect(RULE_IDS).toHaveLength(117);
+    // 118: Spec 004 T013 added the missing fingerprint list, Spec 003 F8 the value a projection
+    // cannot express, the Celo a Jugxo names in its typed reference, and the part a side does not
+    // draw (a released, named difference).
+    expect(RULE_IDS).toHaveLength(118);
+    expect(RULE_IDS).toContain("parity-part-not-drawn");
     expect(RULE_IDS).toContain("clean-room-spuro-file-missing");
     expect(RULE_IDS).toContain("parity-alpha-varies-by-mode");
     expect(RULE_IDS).toContain("jugxo-celo-unknown");

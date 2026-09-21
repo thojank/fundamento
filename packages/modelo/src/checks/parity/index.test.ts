@@ -66,7 +66,7 @@ function correctSides(): Record<string, ParityInventory> {
     // The Figma side restates the resolved paints as well (Spec 003 F8), so a correct build
     // carries them; the guidelines document props, states and defaults.
     "figma.json": skemoParityInventory(EROJ, {
-      aspects: ["props", "states", "paints"],
+      aspects: ["props", "states", "paints", "geometry"],
       resolved: RESOLVED,
     }),
     "guidelines-komuna.json": skemoParityInventory(EROJ, {

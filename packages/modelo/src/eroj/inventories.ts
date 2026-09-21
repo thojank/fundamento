@@ -27,10 +27,29 @@ import { boundToken, combinationsOf, PART_PROPERTY_TYPES, STATE_KEY } from "./sk
  * variant and part (`<part>.<property>@<variant>`, F8). Both live in the same `values` map of the
  * file; the key shape says which aspect a value belongs to.
  */
-export const PARITY_ASPECTS = ["props", "states", "values", "paints"] as const;
+export const PARITY_ASPECTS = ["props", "states", "values", "paints", "geometry"] as const;
+
+/**
+ * The aspect a value key belongs to. Without `@` it is a documented default (`default.<prop>`);
+ * with `@` it is a resolved part value per variant (`<part>.<property>@<variant>`), a colour
+ * (`paints`, F8) or a measure (`geometry`, F11) by the type of the part property.
+ */
+export function parityAspectOfKey(key: string): "values" | "paints" | "geometry" {
+  const at = key.indexOf("@");
+  if (at === -1) return "values";
+  const property = key.slice(key.lastIndexOf(".", at) + 1, at) as SkemoPartProperty;
+  return PART_PROPERTY_TYPES[property] === "color" ? "paints" : "geometry";
+}
 
 /** A resolved part colour, not a documented default: `surface.fill@size=…,state=…`. */
-export const isParityPaintKey = (key: string): boolean => key.includes("@");
+export const isParityPaintKey = (key: string): boolean => parityAspectOfKey(key) === "paints";
+
+/**
+ * What a side writes for a part it does not draw. Followed by the ID of the Jugxo that releases
+ * the difference, in parentheses, it is a named and released difference — a warning; without one
+ * it is an ordinary mismatch (Paket „Figma zeigt das Ero", 2026-09-21).
+ */
+export const PARITY_NOT_DRAWN = "not drawn";
 
 /**
  * What a side writes for a binding it cannot express because the alpha of the token is not the
@@ -100,9 +119,7 @@ export function restrictParityInventory(
       props: aspects.includes("props") ? item.props : {},
       states: aspects.includes("states") ? [...item.states] : [],
       values: Object.fromEntries(
-        Object.entries(item.values).filter(([key]) =>
-          aspects.includes(isParityPaintKey(key) ? "paints" : "values"),
-        ),
+        Object.entries(item.values).filter(([key]) => aspects.includes(parityAspectOfKey(key))),
       ),
     };
   }
@@ -169,6 +186,19 @@ export function allResolutions(modelo: Modelo): Resolutions {
   return resolutions;
 }
 
+const colorText = (value: unknown): string | undefined => {
+  const color = readDtcgColor(value);
+  return color === undefined ? undefined : parityColorText(color);
+};
+
+/** A resolved DTCG dimension as canonical text: `40px`. Anything else has no text. */
+export function parityDimensionText(value: unknown): string | undefined {
+  if (typeof value !== "object" || value === null) return undefined;
+  const { value: amount, unit } = value as { value?: unknown; unit?: unknown };
+  if (typeof amount !== "number" || typeof unit !== "string") return undefined;
+  return `${Number(amount.toFixed(4))}${unit}`;
+}
+
 /** `#rrggbb` for an opaque colour, `#rrggbb/<alpha>` for a translucent one. Canonical text. */
 export function parityColorText(color: ColorValue): string {
   const channel = (component: number | "none"): string =>
@@ -220,12 +250,14 @@ export function skemoPartValues(
   for (const combination of combinationsOf(skemo, variantKeys(skemo))) {
     for (const [part, partProperties] of Object.entries(skemo.parts)) {
       for (const property of Object.keys(partProperties)) {
-        if (PART_PROPERTY_TYPES[property as SkemoPartProperty] !== "color") continue;
+        const type = PART_PROPERTY_TYPES[property as SkemoPartProperty];
+        if (type !== "color" && type !== "dimension") continue;
         const bound = boundToken(skemo, part, property, combination);
         if (bound === undefined) continue;
-        const color = readDtcgColor(resolved[bound.token]?.value);
-        if (color === undefined) continue;
-        values[`${part}.${property}@${parityVariantKey(combination)}`] = parityColorText(color);
+        const key = `${part}.${property}@${parityVariantKey(combination)}`;
+        const value = resolved[bound.token]?.value;
+        const text = type === "color" ? colorText(value) : parityDimensionText(value);
+        if (text !== undefined) values[key] = text;
       }
     }
   }

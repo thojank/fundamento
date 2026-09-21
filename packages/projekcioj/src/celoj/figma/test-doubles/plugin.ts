@@ -39,6 +39,7 @@ export interface DoubleNode {
   boundVariables: Record<string, string>;
   pluginData: Record<string, string>;
   appendChild(child: DoubleNode): void;
+  insertChild(index: number, child: DoubleNode): void;
   setSharedPluginData(namespace: string, key: string, value: string): void;
   getSharedPluginData(namespace: string, key: string): string;
   setBoundVariable(field: string, variable: DoubleVariable | null): void;
@@ -102,14 +103,39 @@ const FIGMA_DEFAULTS: Readonly<Record<string, Readonly<Record<string, unknown>>>
   FRAME: {
     fills: [{ type: "SOLID", color: { r: 1, g: 1, b: 1 } }],
     strokes: [],
+    effects: [],
+    cornerRadius: 0,
+    opacity: 1,
+    clipsContent: true,
     layoutMode: "NONE",
   },
   COMPONENT: {
     fills: [{ type: "SOLID", color: { r: 1, g: 1, b: 1 } }],
     strokes: [],
+    effects: [],
+    cornerRadius: 0,
+    opacity: 1,
+    clipsContent: true,
     layoutMode: "NONE",
   },
-  TEXT: { fills: [{ type: "SOLID", color: { r: 0, g: 0, b: 0 } }], characters: "" },
+  // combineAsVariants draws Figma's own frame around a set: a purple dashed line with rounded
+  // corners. It is a default like any other — on the list of what the plugin owns.
+  COMPONENT_SET: {
+    fills: [{ type: "SOLID", color: { r: 1, g: 1, b: 1 } }],
+    strokes: [{ type: "SOLID", color: { r: 0.592, g: 0.278, b: 1 } }],
+    dashPattern: [10, 5],
+    effects: [],
+    cornerRadius: 5,
+    opacity: 1,
+    clipsContent: true,
+    layoutMode: "NONE",
+  },
+  TEXT: {
+    fills: [{ type: "SOLID", color: { r: 0, g: 0, b: 0 } }],
+    effects: [],
+    opacity: 1,
+    characters: "",
+  },
 };
 
 let sequence = 0;
@@ -136,6 +162,11 @@ function node(type: string, name: string, counts: DoubleCounts): DoubleNode {
       child.parent?.children.splice(child.parent.children.indexOf(child), 1);
       child.parent = recorded;
       self.children.push(child);
+    },
+    insertChild(index, child) {
+      child.parent?.children.splice(child.parent.children.indexOf(child), 1);
+      child.parent = recorded;
+      self.children.splice(index, 0, child);
     },
     setSharedPluginData(namespace, key, value) {
       self.pluginData[`${namespace}/${key}`] = value;

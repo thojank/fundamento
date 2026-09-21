@@ -121,6 +121,7 @@ export const RULE_IDS = [
   "parity-state-mismatch",
   "parity-binding-mismatch",
   "parity-alpha-varies-by-mode",
+  "parity-part-not-drawn",
   // Eroj and Skemoj (Spec 003, data-model §7)
   "skemo-token-missing",
   "skemo-token-type",

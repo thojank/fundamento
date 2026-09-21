@@ -5,6 +5,7 @@ import { loadModelo } from "../load/load-modelo.js";
 import { defaultModeloSource } from "../load/source.js";
 import {
   baseResolution,
+  parityAspectOfKey,
   restrictParityInventory,
   skemoParityInventory,
   styledProps,
@@ -119,5 +120,40 @@ describe("resolved part values of the Skemo side (F8)", () => {
 
   it("keeps the defaults it already had", () => {
     expect(values["default.variant"]).toBe("secondary");
+  });
+});
+
+// Paket „Figma zeigt das Ero" (Maintainer, 2026-09-21): Die Projektionsprüfung deckt Geometrie ab,
+// nicht nur Farbe. Die Skemo-Seite nennt deshalb auch jedes gebundene Maß je Variante.
+describe("resolved geometry of the Skemo side (F11)", () => {
+  if (modelo === undefined) throw new Error("the repo Modelo did not load");
+  const inventory = skemoParityInventory(modelo.eroj, { resolved: baseResolution(modelo) });
+  const values = inventory.items.butono?.values ?? {};
+  const key = (part: string) => `${part}@size=medium,state=rest,tone=default,variant=primary`;
+
+  it("names every bound measure per variant, in px", () => {
+    for (const part of [
+      "box.height",
+      "box.width",
+      "box.inline-padding",
+      "box.gap",
+      "box.radius",
+      "border.width",
+      "focus-ring.offset",
+    ]) {
+      expect(values[key(part)], part).toMatch(/^\d+(\.\d+)?px$/);
+    }
+  });
+
+  it("files a measure under geometry and a colour under paints", () => {
+    expect(parityAspectOfKey(key("box.height"))).toBe("geometry");
+    expect(parityAspectOfKey(key("surface.fill"))).toBe("paints");
+    expect(parityAspectOfKey("default.variant")).toBe("values");
+  });
+
+  it("keeps geometry out of a side that does not restate it", () => {
+    const paintsOnly = restrictParityInventory(inventory, ["paints"]);
+    expect(paintsOnly.items.butono?.values[key("box.height")]).toBeUndefined();
+    expect(paintsOnly.items.butono?.values[key("surface.fill")]).toBeDefined();
   });
 });
