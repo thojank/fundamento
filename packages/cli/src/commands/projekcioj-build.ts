@@ -4,7 +4,7 @@
 // invalid Modelo.
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { defaultModeloSource, projectModeloSource } from "@fundamento/modelo";
+import { defaultModeloSource, fixtureModeloSource, projectModeloSource } from "@fundamento/modelo";
 import { buildProjekcioj } from "@fundamento/projekcioj";
 import { parseFlags, UsageError } from "../args.js";
 import { type CliContext, type Command, EXIT_FAIL, EXIT_OK } from "../command.js";
@@ -15,7 +15,7 @@ const DEFAULT_OUT = ".fundamento/projekcioj";
 
 const HELP = `${COMMAND_LINE}: Validate a Modelo and generate every projection.
 
-Usage: ${COMMAND_LINE} [--config <file>] [--out <dir>] [--celo <name>]
+Usage: ${COMMAND_LINE} [--config <file> | --fixture <dir>] [--out <dir>] [--celo <name>]
 
 Writes one folder per Celo and projekcioj.json, the manifest with the SHA-256 of every file.
 Without --config, builds the Modelo of this repository with its reference Aspekto komuna.
@@ -23,6 +23,8 @@ Without --config, builds the Modelo of this repository with its reference Aspekt
 Options:
   --config <file>  A project's fundamento.config.json: the core, komuna and the Aspekto
                    packages it lists
+  --fixture <dir>  A Modelo root (<dir>/vortaro, <dir>/data) instead of this repository's,
+                   as in "pnpm check:<check> --fixture". Not with --config.
   --out <dir>      Output directory (default: ${DEFAULT_OUT})
   --celo <name>    Build only this Celo (repeatable, or comma-separated). Default: all of them.
                    A Celo that composes what the others wrote needs them in the selection.
@@ -38,6 +40,7 @@ async function run(args: readonly string[], context: CliContext): Promise<number
     args,
     {
       config: { type: "string" },
+      fixture: { type: "string" },
       out: { type: "string" },
       bazo: { type: "string", multiple: true },
       celo: { type: "string", multiple: true },
@@ -50,10 +53,18 @@ async function run(args: readonly string[], context: CliContext): Promise<number
     ]);
   }
   const config = typeof values.config === "string" ? values.config : undefined;
+  const fixture = typeof values.fixture === "string" ? values.fixture : undefined;
+  if (config !== undefined && fixture !== undefined) {
+    throw new UsageError("Use either --config or --fixture, not both.", [
+      "--config takes a project's fundamento.config.json, --fixture a Modelo root.",
+    ]);
+  }
   const source =
-    config === undefined
-      ? defaultModeloSource()
-      : projectModeloSource(resolve(context.baseDir, config), config);
+    config !== undefined
+      ? projectModeloSource(resolve(context.baseDir, config), config)
+      : fixture !== undefined
+        ? fixtureModeloSource(resolve(context.baseDir, fixture))
+        : defaultModeloSource();
   const outDir = resolve(
     context.baseDir,
     typeof values.out === "string" ? values.out : DEFAULT_OUT,

@@ -391,7 +391,18 @@ Results go into `plan.md` → „Manual acceptance results".
     (`--celo css`, gemessen 1,4 s lokal) mit einem eigenen Budget; der Make-Kit-Test baut genau
     den Celo, dessen Bündel er behauptet (`--celo make-kit`). Der pauschale CI-Faktor im cli-Paket
     entfällt wieder.
-  - Gemessen nach der Zerlegung: Ein Budget von 10 s war zu knapp — auf dem CI-Runner lief der Bau
+  - Zerlegung auf der richtigen Achse (Korrektur des Maintainers, 2026-09-21): Die Kosten stecken
+    nicht in der Zahl der Celoj, sondern im Modelo. Der Verdrahtungstest läuft deshalb gegen das
+    **kleinste Fixture-Modelo** des Repositories (`--fixture
+    packages/modelo/test/fixtures/valid/minimal`, eine Aspekto, zwei Dimensioj, vier
+    Kombinationen): gemessen **0,53 s** lokal gegen 1,4 s (ein Celo, echtes Modelo) und 2,3 s
+    (alle acht). Dafür nimmt `fm projekcioj build` jetzt `--fixture <dir>` wie die Prüfungen
+    (`pnpm check:<check> --fixture`); `--config` und `--fixture` schließen einander aus.
+  - Das Budget richtet sich nach dem **langsamsten** beobachteten Runner, nicht nach dem
+    schnellsten: Derselbe vollständige Bau lief 14,8 s und 30,4 s, die Runner schwanken um den
+    Faktor 2. Vorläufig 30 s, bis die CI den Lauf am Fixture gemessen hat; danach aus dieser
+    Messung, mit dem langsamsten Lauf als Grundlage.
+  - Gemessen nach der ersten Zerlegung: Ein Budget von 10 s war zu knapp — auf dem CI-Runner lief der Bau
     eines Celo bei 10 s noch (Lauf 35586902757), während er lokal 1,4 s dauert. Der Löwenanteil
     ist die feste Arbeit **jedes** Baus (Modelo laden, prüfen, alle Kombinationen auflösen), nicht
     die Zahl der Celoj; die CI ist dabei etwa siebenmal langsamer als der Entwicklungsrechner.

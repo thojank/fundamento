@@ -1,9 +1,12 @@
 // `fm projekcioj build` (Spec 003 T008, plan D-01): generates every projection of the Modelo.
 //
-// F12: Diese Tests prüfen die Verdrahtung des Befehls, nicht die Arbeit der Celoj. Sie bauen
-// deshalb je einen Celo; den vollständigen Bau aller acht führt die CI im Schritt `Check: Parity`
-// aus (`pnpm check:parity` ruft `fm projekcioj build --out .fundamento/projekcioj` auf und prüft
-// das Ergebnis), und der Make-Kit-Test baut genau den Celo, dessen Bündel er behauptet.
+// F12: Diese Tests prüfen die Verdrahtung des Befehls, nicht die Arbeit, die ein Bau tut. Sie
+// bauen deshalb je einen Celo — und der Verdrahtungstest gegen ein **minimales Fixture-Modelo**:
+// Die Kosten eines Baus stecken nicht in der Zahl der Celoj, sondern im Modelo (laden, prüfen,
+// alle Kombinationen auflösen). 144 Kombinationen des echten Modelos sind wieder Arbeit, die
+// dieser Test nicht behauptet. Den vollständigen Bau mit dem echten Modelo führt die CI im
+// Schritt `Check: Parity` aus (`pnpm check:parity` ruft `fm projekcioj build --out
+// .fundamento/projekcioj` auf und prüft das Ergebnis).
 
 import { spawnSync } from "node:child_process";
 import { existsSync, mkdtempSync, readFileSync } from "node:fs";
@@ -14,6 +17,12 @@ import { describe, expect, it } from "vitest";
 
 const built = fileURLToPath(new URL("../dist/index.js", import.meta.url));
 const repoRoot = dirname(dirname(fileURLToPath(new URL("..", import.meta.url))));
+
+/**
+ * The smallest Modelo the repository has: one Aspekto, two Dimensioj, four combinations. Enough
+ * for the wiring of the command, and a fraction of the work of the real Modelo (F12).
+ */
+const FIXTURE = ["--fixture", "packages/modelo/test/fixtures/valid/minimal"] as const;
 
 /** One spawn of the built binary, in the repository root. */
 function build(args: readonly string[]) {
@@ -28,15 +37,11 @@ function build(args: readonly string[]) {
 }
 
 describe("fm projekcioj build (T008)", () => {
-  // Ein Celo, damit der Test nur die Arbeit tut, die er behauptet: gemessen 1,4 s lokal (alle acht
-  // Celoj: 2,3 s). Das Budget ist an der CI gemessen, nicht am Entwicklungsrechner — dort ist
-  // derselbe Aufruf etwa siebenmal langsamer: der vollständige Bau brauchte 14,8 s (Lauf
-  // 35538715928), ein Celo lief bei 10 s noch (Lauf 35586902757, dort abgebrochen). 30 s sind
-  // rund das Doppelte der gemessenen CI-Zeit: eine echte Verlangsamung fällt auf, Last nicht.
-  // Der Löwenanteil ist die feste Arbeit jedes Baus — Modelo laden, prüfen, alle Kombinationen
-  // auflösen —, nicht die Zahl der Celoj; die Zerlegung bringt Klarheit, keine große Ersparnis.
+  // Budget: vorläufig, bis die CI den Lauf am Fixture gemessen hat; danach nach dem **langsamsten**
+  // beobachteten Runner bemessen, nicht nach dem schnellsten (die Runner schwanken um den Faktor
+  // 2: derselbe vollständige Bau lief 14,8 s und 30,4 s).
   it("writes the projection of the chosen Celo to --out and lists it", { timeout: 30_000 }, () => {
-    const { out, run } = build(["--celo", "css"]);
+    const { out, run } = build([...FIXTURE, "--celo", "css"]);
     expect(run.stderr).toBe("");
     expect(run.status).toBe(0);
     expect(run.stdout).toMatch(/^fm projekcioj build: wrote \d+ files for the Celoj css to /);
@@ -47,11 +52,18 @@ describe("fm projekcioj build (T008)", () => {
 
   // Fällt vor dem Bau: die Auswahl wird geprüft, bevor das Modelo geladen wird.
   it("names the Celoj it knows when --celo names none of them", { timeout: 10_000 }, () => {
-    const { run } = build(["--celo", "sketch"]);
+    const { run } = build([...FIXTURE, "--celo", "sketch"]);
     expect(run.status).toBe(1);
     expect(run.stderr).toContain("sketch");
     expect(run.stderr).toContain("css");
     expect(run.stdout).toBe("");
+  });
+
+  // Bestätigend: die Prüfung stand vor dem Test, sie war im ersten Lauf grün.
+  it("takes either --config or --fixture, not both", { timeout: 10_000 }, () => {
+    const { run } = build([...FIXTURE, "--config", "fundamento.config.json"]);
+    expect(run.status).toBe(2);
+    expect(run.stderr).toContain("--fixture");
   });
 
   it("bundles the Make kit, so the output can be packed and published (T020)", () => {
