@@ -37,10 +37,11 @@ function build(args: readonly string[]) {
 }
 
 describe("fm projekcioj build (T008)", () => {
-  // Budget: vorläufig, bis die CI den Lauf am Fixture gemessen hat; danach nach dem **langsamsten**
-  // beobachteten Runner bemessen, nicht nach dem schnellsten (die Runner schwanken um den Faktor
-  // 2: derselbe vollständige Bau lief 14,8 s und 30,4 s).
-  it("writes the projection of the chosen Celo to --out and lists it", { timeout: 30_000 }, () => {
+  // Budget aus der CI-Messung am Fixture, Grundlage ist der **langsamste** beobachtete Lauf:
+  // 2,49 s (Lauf 35588499623) und 3,20 s (Lauf 35588496138), lokal 0,53 s. 10 s sind das
+  // Dreifache des langsamsten Laufs und decken damit den beobachteten Faktor 2 zwischen den
+  // Runnern ab; eine echte Verlangsamung fällt auf.
+  it("writes the projection of the chosen Celo to --out and lists it", { timeout: 10_000 }, () => {
     const { out, run } = build([...FIXTURE, "--celo", "css"]);
     expect(run.stderr).toBe("");
     expect(run.status).toBe(0);
@@ -66,6 +67,10 @@ describe("fm projekcioj build (T008)", () => {
     expect(run.stderr).toContain("--fixture");
   });
 
+  // Dieser Test tut die Arbeit, die er behauptet: Er bündelt das Make Kit mit einem Bundler, und
+  // das dauert. Gemessen auf der CI 18,9 s und 19,2 s (Läufe 35588499623, 35588496138). 60 s sind
+  // das Dreifache des langsamsten Laufs; die bisherigen 300 s waren das Fünfzehnfache und hätten
+  // eine echte Verlangsamung verschluckt.
   it("bundles the Make kit, so the output can be packed and published (T020)", () => {
     const { out, run } = build(["--celo", "make-kit"]);
     expect(run.status).toBe(0);
@@ -77,5 +82,5 @@ describe("fm projekcioj build (T008)", () => {
       celoj: string[];
     };
     expect(manifest.celoj).toEqual(["make-kit"]);
-  }, 300_000);
+  }, 60_000);
 });

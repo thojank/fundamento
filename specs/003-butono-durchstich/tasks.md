@@ -400,8 +400,11 @@ Results go into `plan.md` → „Manual acceptance results".
     (`pnpm check:<check> --fixture`); `--config` und `--fixture` schließen einander aus.
   - Das Budget richtet sich nach dem **langsamsten** beobachteten Runner, nicht nach dem
     schnellsten: Derselbe vollständige Bau lief 14,8 s und 30,4 s, die Runner schwanken um den
-    Faktor 2. Vorläufig 30 s, bis die CI den Lauf am Fixture gemessen hat; danach aus dieser
-    Messung, mit dem langsamsten Lauf als Grundlage.
+    Faktor 2. Gemessen am Fixture auf der CI: **2,49 s** (Lauf 35588499623) und **3,20 s** (Lauf
+    35588496138) gegen 0,53 s lokal. Budget daher **10 s** — das Dreifache des langsamsten Laufs,
+    deckt den beobachteten Faktor 2 ab. Im selben Zug bekommt der Make-Kit-Test ein Budget aus
+    seiner Messung (18,9 s und 19,2 s ⇒ 60 s statt 300 s); er tut die Arbeit, die er behauptet,
+    aber das Fünfzehnfache hätte eine echte Verlangsamung verschluckt.
   - Gemessen nach der ersten Zerlegung: Ein Budget von 10 s war zu knapp — auf dem CI-Runner lief der Bau
     eines Celo bei 10 s noch (Lauf 35586902757), während er lokal 1,4 s dauert. Der Löwenanteil
     ist die feste Arbeit **jedes** Baus (Modelo laden, prüfen, alle Kombinationen auflösen), nicht
