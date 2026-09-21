@@ -28,10 +28,14 @@ function build(args: readonly string[]) {
 }
 
 describe("fm projekcioj build (T008)", () => {
-  // Ein Celo, damit das Budget zur Arbeit passt: gemessen 1,4 s lokal (alle acht Celoj: 2,3 s).
-  // 10 s lassen Raum für einen kalten oder belasteten Runner, ohne dass eine echte Verlangsamung
-  // unbemerkt bliebe — das Siebenfache der Arbeit, nicht das Vierzigfache (F12).
-  it("writes the projection of the chosen Celo to --out and lists it", { timeout: 10_000 }, () => {
+  // Ein Celo, damit der Test nur die Arbeit tut, die er behauptet: gemessen 1,4 s lokal (alle acht
+  // Celoj: 2,3 s). Das Budget ist an der CI gemessen, nicht am Entwicklungsrechner — dort ist
+  // derselbe Aufruf etwa siebenmal langsamer: der vollständige Bau brauchte 14,8 s (Lauf
+  // 35538715928), ein Celo lief bei 10 s noch (Lauf 35586902757, dort abgebrochen). 30 s sind
+  // rund das Doppelte der gemessenen CI-Zeit: eine echte Verlangsamung fällt auf, Last nicht.
+  // Der Löwenanteil ist die feste Arbeit jedes Baus — Modelo laden, prüfen, alle Kombinationen
+  // auflösen —, nicht die Zahl der Celoj; die Zerlegung bringt Klarheit, keine große Ersparnis.
+  it("writes the projection of the chosen Celo to --out and lists it", { timeout: 30_000 }, () => {
     const { out, run } = build(["--celo", "css"]);
     expect(run.stderr).toBe("");
     expect(run.status).toBe(0);
@@ -41,6 +45,7 @@ describe("fm projekcioj build (T008)", () => {
     expect(existsSync(join(out, "figma"))).toBe(false);
   });
 
+  // Fällt vor dem Bau: die Auswahl wird geprüft, bevor das Modelo geladen wird.
   it("names the Celoj it knows when --celo names none of them", { timeout: 10_000 }, () => {
     const { run } = build(["--celo", "sketch"]);
     expect(run.status).toBe(1);
