@@ -713,16 +713,54 @@ describe("the focus ring is drawn, and never clipped (F11)", () => {
     expect(gap?.properties.fills).toEqual([]);
   });
 
-  it("shows ring and gap in their colours, bound to the tokens, in the focus state", async () => {
-    const variant = await variantOf(modelDouble(), "focus");
-    const ring = find(variant, "focus-ring");
-    const gap = find(variant, "focus-gap");
-    const [ringPaint] = (ring?.properties.fills ?? []) as {
-      boundVariables?: { color?: unknown };
-    }[];
-    const [gapPaint] = (gap?.properties.fills ?? []) as { boundVariables?: { color?: unknown } }[];
-    expect(ringPaint?.boundVariables?.color).toMatchObject({ name: "focus/ring/color" });
-    expect(gapPaint?.boundVariables?.color).toMatchObject({ name: "color/focus/inner" });
+  // F15 (Abnahme M1, Maintainer 2026-09-22): Der Fokus der tertiären Aktion war eine weiße Fläche
+  // statt eines Rings. Die Web Component zeichnet den Fokus als outline plus box-shadow 0 0 0
+  // offset — nur als Ring außerhalb, das Innere bleibt durchsichtig. In Figma füllte focus-gap die
+  // ganze Fläche hinter control mit color.focus.inner; bei tertiary (durchsichtig) entstand ein
+  // weißer Kasten. Ring und Abstand sind deshalb Striche, keine Füllungen.
+  type Stroke = { boundVariables?: { color?: { name?: string } } };
+
+  it("draws ring and gap as strokes bound to the tokens, in the focus state only", async () => {
+    const focused = await variantOf(modelDouble(), "focus");
+    const ring = find(focused, "focus-ring");
+    const gap = find(focused, "focus-gap");
+    const [ringStroke] = (ring?.properties.strokes ?? []) as Stroke[];
+    const [gapStroke] = (gap?.properties.strokes ?? []) as Stroke[];
+    expect(ringStroke?.boundVariables?.color).toMatchObject({ name: "focus/ring/color" });
+    expect(gapStroke?.boundVariables?.color).toMatchObject({ name: "color/focus/inner" });
+    // The stroke lies inside its frame and is as wide as the padding it fills: a band, no area.
+    for (const [node, weight] of [
+      [ring, "focus/ring/width"],
+      [gap, "focus/offset"],
+    ] as const) {
+      expect(node?.properties.strokeAlign).toBe("INSIDE");
+      expect(node?.boundVariables.strokeWeight).toBe(weight);
+      expect(node?.boundVariables.paddingLeft).toBe(weight);
+    }
+    const resting = await variantOf(modelDouble(), "rest");
+    expect(find(resting, "focus-ring")?.properties.strokes).toEqual([]);
+    expect(find(resting, "focus-gap")?.properties.strokes).toEqual([]);
+  });
+
+  // Die rote Zusicherung des Maintainers: Die Fläche innerhalb von control trägt im Zustand focus
+  // keine andere Füllung als in rest — für jede Kombination, tertiary eingeschlossen.
+  it("fills nothing behind the control in focus that it does not fill in rest", async () => {
+    const double = modelDouble();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    const set = double.root.children[0]?.children.find((child) => child.name === "butono");
+    const behind = (variant: DoubleNode | undefined) =>
+      [variant, find(variant, "focus-ring"), find(variant, "focus-gap")].map(
+        (node) => node?.properties.fills,
+      );
+    const focused = (set?.children ?? []).filter((child) => child.name.endsWith("state=focus"));
+    expect(focused).toHaveLength(12);
+    for (const variant of focused) {
+      const rest = set?.children.find(
+        (child) => child.name === variant.name.replace("state=focus", "state=rest"),
+      );
+      expect(behind(variant), variant.name).toEqual(behind(rest));
+      expect(behind(variant), variant.name).toEqual([[], [], []]);
+    }
   });
 
   it("clips nothing: no frame of the variant cuts its content", async () => {
@@ -761,6 +799,8 @@ describe("every property the plugin owns is from the plan or neutral", () => {
     "fills",
     "strokes",
     "dashPattern",
+    "strokeAlign",
+    "strokeWeight",
     "effects",
     "cornerRadius",
     "opacity",
@@ -1234,5 +1274,33 @@ describe("every variant has its size and its own place in the grid (F14)", () =>
     expect(Object.values(definitions).map((definition) => definition.defaultValue)).toEqual([
       "Aktion",
     ]);
+  });
+});
+
+// F16 (Abnahme M1, Maintainer 2026-09-22): Die Vitrino zeigt die Knöpfe auf dem Untergrund des
+// Modells; in Figma standen sie auf der dunklen Leinwand, und tertiary war dort unlesbar. Das Set
+// bekommt die Untergrundfarbe als Füllung — gebunden an die Variable, keine feste Farbe, damit sie
+// mit color-scheme wechselt. Sie gehört zu den Eigenschaften, die das Plugin besitzt.
+describe("the set stands on the model's background, like the Vitrino (F16)", () => {
+  it("names the Vitrino's surface in the plan", () => {
+    expect(repoPlan.components[0]?.surface).toEqual({
+      variable: "color/background/canvas",
+      opacity: 1,
+    });
+  });
+
+  it("fills the set with it, bound to the variable, on both runs", async () => {
+    const double = modelDouble();
+    for (const _ of [1, 2]) {
+      await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+      const set = double.root.children[0]?.children.find((child) => child.name === "butono");
+      const fills = (set?.properties.fills ?? []) as {
+        opacity?: number;
+        boundVariables?: { color?: { name?: string } };
+      }[];
+      expect(fills).toHaveLength(1);
+      expect(fills[0]?.boundVariables?.color).toMatchObject({ name: "color/background/canvas" });
+      expect(fills[0]?.opacity).toBe(1);
+    }
   });
 });

@@ -30,6 +30,7 @@ import {
   STATE_KEY,
 } from "@fundamento/modelo";
 import type { Celo, CeloInput, GeneratedFile } from "../../build.js";
+import { VITRINO_SURFACE } from "../vitrino/datumoj.js";
 import { DRAWN_PART_PROPERTIES, pluginManifest, pluginSource } from "./plugin.js";
 
 /** A variable value: a literal, or an alias to another variable of the plan. */
@@ -125,6 +126,11 @@ export interface FigmaComponentSet {
    * per combination cannot be the default of 72 templates. Every instance may override it.
    */
   label?: { property: string; defaultValue: string };
+  /**
+   * The ground the set stands on: the Vitrino's surface, as a variable, so it follows color-scheme
+   * and contrast (F16). The deckkraft is decided over every combination, like every paint (F8).
+   */
+  surface?: { variable: string; opacity: number };
 }
 
 export interface FigmaPlan {
@@ -547,6 +553,13 @@ function componentSetOf(
       ...(font === undefined ? {} : { font }),
     };
   });
+  const ground = paintOf(VITRINO_SURFACE, resolutions, base);
+  // A ground whose alpha differs per mode has no faithful fill (F8); then the set gets none, and
+  // the missing `surface` is what a test and the run see.
+  const surface =
+    ground !== undefined && "opacity" in ground
+      ? { variable: variableName(VITRINO_SURFACE), opacity: ground.opacity }
+      : undefined;
   const columns = skemo.states.length;
   const rowOf = new Map<string, number>();
   for (const variant of variants) {
@@ -570,6 +583,7 @@ function componentSetOf(
       padding: cell,
     },
     label: { property: "label", defaultValue: LABEL_DEFAULT },
+    ...(surface === undefined ? {} : { surface }),
   };
 }
 

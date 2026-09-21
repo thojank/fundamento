@@ -487,7 +487,7 @@ Results go into `plan.md` → „Manual acceptance results".
     Beschriftungstext unterliegen derselben Zusicherung mit F11. Nicht modelliert und damit
     weiterhin blind: die Vorgaben des Komponentensets, das `combineAsVariants` anlegt.
 
-- [ ] **F14 Das Raster wirkt nicht, und niemand merkt es** (Abnahme M1, Jugxo
+- [x] **F14 Das Raster wirkt nicht, und niemand merkt es** (Abnahme M1, Jugxo
   `jug_01M327FC8MRXSEF63AHQHFQJ28`)
   - Befund (Maintainer, 2026-09-21): Kein Abbruch, keine Warnung, aber alle 72 Varianten lagen auf
     derselben Stelle. Die Annahme „Figma lehnt GRID ab ⇒ der Lauf bricht ab" hielt nicht: Figma
@@ -548,8 +548,43 @@ Results go into `plan.md` → „Manual acceptance results".
     35635990971 in sein 60-s-Budget (der `pull_request`-Lauf desselben Commits bestand). Keine
     Last, sondern Arbeit: Das Layout wird jetzt einmal je Zustand des Dokuments gerechnet (ein
     Zähler, den jede Änderung erhöht). Danach 4,3 s. Das Budget blieb unangetastet.
-  - Offen bis zum Lauf: dass platzierte Kinder ihre HUG-Spuren bemessen. So ist es dokumentiert;
+  - **Abgenommen** (2026-09-22, Datei `QjSfiLMxAfjtjGfnpwjeom`, vom Maintainer direkt in der Datei
+    gelesen): 72 Positionen, 6 × 12, Set 510 × 592, Reihenfolge wie die Vitrino. Damit ist auch
+    gemessen, dass platzierte Kinder ihre HUG-Spuren bemessen. PR #20 gemergt.
+  - Bis zur Abnahme offen gewesen: dass platzierte Kinder ihre HUG-Spuren bemessen. So ist es dokumentiert;
     gemessen ist es noch nicht. Der Lauf belegt es über `layout` (72 Positionen, 6 Spalten, 12
     Zeilen, Größe des Sets) — oder widerlegt es mit Zahlen.
+
+- [ ] **F15 Der Fokus der tertiären Aktion ist eine weiße Fläche statt eines Rings** (Abnahme M1,
+  Maintainer 2026-09-22)
+  - Befund: Die Web Component zeichnet den Fokus als `outline` plus `box-shadow: 0 0 0
+    var(--fm-focus-offset) var(--fm-color-focus-inner)` — nur als Ring außerhalb, das Innere bleibt
+    durchsichtig. In Figma füllte `focus-gap` die ganze Fläche hinter `control` mit
+    `color.focus.inner`. Bei primary und secondary verdeckt die deckende Fläche das; bei tertiary
+    (durchsichtig) entstand ein weißer Kasten.
+  - Rot zuerst (Zusicherung des Maintainers): Die Fläche innerhalb von `control` trägt im Zustand
+    `focus` keine andere Füllung als in `rest` — für alle 12 Kombinationen. `expected [ [], …(2) ]
+    to deeply equal [ [], [], [] ]`, dazu `expected undefined to match object { name:
+    'focus/ring/color' }` (kein Strich).
+  - Grün: Ring und Abstand sind Striche, keine Füllungen. Jeder der beiden Rahmen hat einen
+    Innenabstand in der Breite seines Bandes und einen innen liegenden Strich derselben Breite
+    (`strokeAlign: INSIDE`, `strokeWeight` an `focus/ring/width` bzw. `focus/offset` gebunden) — der
+    Strich füllt genau das Band, das Innere bleibt, wie es in `rest` ist. Strichlage und -breite
+    stehen jetzt auf der Liste der Eigenschaften, die das Plugin besitzt (neutral: innen, 0).
+  - Fertig wenn: der Maintainer es in der Datei sieht — tertiary im Fokus zeigt den Ring, keinen
+    Kasten.
+
+- [ ] **F16 Das Set steht auf dem Untergrund des Modells** (Abnahme M1, Maintainer 2026-09-22)
+  - Befund: Die Vitrino zeigt die Knöpfe auf dem Untergrund; in Figma standen sie auf der dunklen
+    Leinwand, tertiary war dort unlesbar. Dieselbe Abnahmebedingung „sieht aus wie die Vitrino".
+  - Rot zuerst: `expected undefined to deeply equal { variable: 'color/background/canvas', opacity:
+    1 }` (Plan) und `expected [] to have a length of 1` (Füllung des Sets).
+  - Grün: Der Untergrund der Vitrino steht einmal (`VITRINO_SURFACE = color.background.canvas`, die
+    Vitrino selbst liest ihn von dort). Der Plan nennt ihn als Variable mit der Deckkraft über alle
+    Kombinationen (F8); das Plugin füllt das Set damit, **gebunden an die Variable**, keine feste
+    Farbe — sie wechselt mit color-scheme und contrast. Die Füllung des Sets gehört zu den
+    Eigenschaften, die das Plugin besitzt.
+  - Fertig wenn: letzter Teil von M1 — der Maintainer schaltet in der Datei color-scheme auf dark
+    und contrast auf high und prüft das Ergebnis direkt in der Datei.
 
 Consistency check before tasks (`/speckit.analyze` scope): every FR and AK maps to at least one task or a recorded decision; every task maps to a plan decision; two new packages (Art. XI); the lockfile changes in T008 only; no task lowers a threshold; nothing is published.

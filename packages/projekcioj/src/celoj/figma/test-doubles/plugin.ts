@@ -108,6 +108,8 @@ const FIGMA_DEFAULTS: Readonly<Record<string, Readonly<Record<string, unknown>>>
   FRAME: {
     fills: [{ type: "SOLID", color: { r: 1, g: 1, b: 1 } }],
     strokes: [],
+    strokeAlign: "INSIDE",
+    strokeWeight: 1,
     effects: [],
     cornerRadius: 0,
     opacity: 1,
@@ -123,6 +125,8 @@ const FIGMA_DEFAULTS: Readonly<Record<string, Readonly<Record<string, unknown>>>
   COMPONENT: {
     fills: [{ type: "SOLID", color: { r: 1, g: 1, b: 1 } }],
     strokes: [],
+    strokeAlign: "INSIDE",
+    strokeWeight: 1,
     effects: [],
     cornerRadius: 0,
     opacity: 1,
@@ -141,6 +145,8 @@ const FIGMA_DEFAULTS: Readonly<Record<string, Readonly<Record<string, unknown>>>
     fills: [{ type: "SOLID", color: { r: 1, g: 1, b: 1 } }],
     strokes: [{ type: "SOLID", color: { r: 0.592, g: 0.278, b: 1 } }],
     dashPattern: [10, 5],
+    strokeAlign: "INSIDE",
+    strokeWeight: 1,
     effects: [],
     cornerRadius: 5,
     opacity: 1,
@@ -303,6 +309,8 @@ function node(
       }
       if (variable === null) delete self.boundVariables[field];
       else self.boundVariables[field] = variable.name;
+      // Bound by the plugin: the value is the plugin's from now on, not the tool's default.
+      self.defaults.delete(field);
       context.version++;
     },
     remove() {

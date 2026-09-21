@@ -47,15 +47,18 @@ const BINDINGS: Readonly<Record<string, readonly Binding[]>> = {
   // to the bare name, the size never arrived — there is no variable of that name.
   "label.typography": [{ node: "label", fields: ["fontSize"], suffix: "/font-size" }],
   // The focus ring as the web component draws it: an outline of the ring's width and colour at
-  // outline-offset, the gap filled with color.focus.inner. The space for both is reserved in every
-  // state, so nothing is clipped and every variant has the same size; only the focus state shows
-  // the colours.
+  // outline-offset, and a box-shadow of the offset's width in color.focus.inner between them. Both
+  // are rings, never areas (F15): each frame has a padding of the band's width and an inside stroke
+  // of the same width, so the stroke fills exactly the band and the inside stays as transparent as
+  // in rest — a fill put a white box behind the transparent tertiary action. The space for both is
+  // reserved in every state, so nothing is clipped and every variant has the same size; only the
+  // focus state shows the colours.
   "focus-ring.ring": [
-    { node: "focus-ring", fields: PADDINGS, suffix: "/width" },
-    { node: "focus-ring", fields: ["fills"], paint: true, suffix: "/color", focusOnly: true },
+    { node: "focus-ring", fields: [...PADDINGS, "strokeWeight"], suffix: "/width" },
+    { node: "focus-ring", fields: ["strokes"], paint: true, suffix: "/color", focusOnly: true },
   ],
-  "focus-ring.offset": [{ node: "focus-gap", fields: PADDINGS }],
-  "focus-ring.color": [{ node: "focus-gap", fields: ["fills"], paint: true, focusOnly: true }],
+  "focus-ring.offset": [{ node: "focus-gap", fields: [...PADDINGS, "strokeWeight"] }],
+  "focus-ring.color": [{ node: "focus-gap", fields: ["strokes"], paint: true, focusOnly: true }],
 };
 
 /**
@@ -66,6 +69,10 @@ const BINDINGS: Readonly<Record<string, readonly Binding[]>> = {
 const NEUTRAL: Readonly<Record<string, unknown>> = {
   fills: [],
   strokes: [],
+  // A line lies inside its frame, as a CSS border does in a border-box; the rings of the focus
+  // rely on it (F15).
+  strokeAlign: "INSIDE",
+  strokeWeight: 0,
   dashPattern: [],
   effects: [],
   cornerRadius: 0,
@@ -397,6 +404,20 @@ async function applyComponents(variables, warnings) {
     // The set is a node the plugin owns too: combineAsVariants draws Figma's purple dashed frame
     // around it, which is not from the model (Maintainer, 2026-09-21).
     own(set, NEUTRAL);
+    // The ground of the Vitrino (F16): the set is filled with the model's background, bound to the
+    // variable so it follows color-scheme and contrast — never a fixed colour.
+    if (component.surface !== undefined) {
+      const ground = variables.get(component.surface.variable);
+      if (ground !== undefined) {
+        const bound = figma.variables.setBoundVariableForPaint(
+          { type: "SOLID", color: { r: 0, g: 0, b: 0 } },
+          "color",
+          ground,
+        );
+        bound.opacity = component.surface.opacity;
+        set.fills = [bound];
+      }
+    }
     // The grid of the Vitrino (F11): one row per combination, one column per state, in the order
     // of the plan — a variant a later run had to create goes back to its place.
     const grid = component.grid;
