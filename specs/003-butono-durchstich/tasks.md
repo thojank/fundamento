@@ -388,9 +388,16 @@ Results go into `plan.md` → „Manual acceptance results".
   - Grün, zerlegt: Der Bau nimmt `--celo <name>` (mehrfach oder mit Komma) und baut nur die
     genannten Celoj; ein Celo, der zusammensetzt, was die anderen schrieben (Vitrino), wird ohne
     sie mit einer erklärenden Meldung abgelehnt. Der Verdrahtungstest baut jetzt **einen** Celo
-    (`--celo css`, gemessen 1,4 s lokal) mit einem Budget von 10 s; der Make-Kit-Test baut genau
+    (`--celo css`, gemessen 1,4 s lokal) mit einem eigenen Budget; der Make-Kit-Test baut genau
     den Celo, dessen Bündel er behauptet (`--celo make-kit`). Der pauschale CI-Faktor im cli-Paket
     entfällt wieder.
+  - Gemessen nach der Zerlegung: Ein Budget von 10 s war zu knapp — auf dem CI-Runner lief der Bau
+    eines Celo bei 10 s noch (Lauf 35586902757), während er lokal 1,4 s dauert. Der Löwenanteil
+    ist die feste Arbeit **jedes** Baus (Modelo laden, prüfen, alle Kombinationen auflösen), nicht
+    die Zahl der Celoj; die CI ist dabei etwa siebenmal langsamer als der Entwicklungsrechner.
+    Die Zerlegung bringt also Klarheit — ein Rot sagt, welcher Teil es war —, keine große
+    Zeitersparnis. Budget deshalb **an der CI gemessen**: 30 s, rund das Doppelte der dort
+    gemessenen Zeit (vollständiger Bau 14,8 s), statt des Vierzigfachen der lokalen Zeit.
   - Der vollständige Bau aller acht Celoj bleibt in der CI abgedeckt, ohne zweiten Rauchtest: Der
     Schritt `Check: Parity` ruft `fm projekcioj build --out .fundamento/projekcioj` auf und prüft
     das Ergebnis; ein Rot dort heißt „der vollständige Bau", ein Rot im cli-Paket heißt „die
