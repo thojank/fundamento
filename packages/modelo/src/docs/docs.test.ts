@@ -2,7 +2,8 @@
 // AK-09, AK-11). Read-only: nothing here writes into the repo.
 
 import { createHash } from "node:crypto";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync, statSync } from "node:fs";
+import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import {
@@ -650,5 +651,53 @@ describe("Spec 004 documentation (T001, Constitution v1.7)", () => {
 
   it("v1.7 does not yet carry the principle Fluida Marko", () => {
     expect(constitution).not.toContain("Fluida Marko");
+  });
+});
+
+// F23 (Release-Probelauf #1 auf main ac7321e, Maintainer 2026-09-22): "Dry run ekzemplo" scheiterte
+// mit `cd: .fundamento/projekcioj/make-kit/ekzemplo: No such file or directory`. `fm projekcioj
+// build` ohne --config erzeugt nur make-kit/komuna; ekzemplo existiert nur als Fixture. release.yml
+// setzte beide voraus, und der Release-Weg lief nie in der CI. Beide Workflows teilen sich deshalb
+// ein Skript, und die CI führt den Probelauf bei jedem PR aus.
+describe("F23: the release path runs in the CI, both kits, one script", () => {
+  const script = "scripts/release-kits.sh";
+  const releaseYml = read(".github/workflows/release.yml");
+  const ci = read(".github/workflows/ci.yml");
+
+  it("ships the script, executable, and both workflows call it — release.yml no longer cd's", () => {
+    expect(existsSync(join(repoRoot, script)), script).toBe(true);
+    expect(statSync(join(repoRoot, script)).mode & 0o111, "executable").not.toBe(0);
+    expect(releaseYml).toContain(`${script} publish`);
+    expect(releaseYml).not.toContain("cd .fundamento/projekcioj/make-kit");
+    // The CI runs it as a check of its own, through the root script, like every other check.
+    expect(ci).toContain("Check: Release");
+    expect(ci).toContain("pnpm check:release");
+    const scripts = (JSON.parse(read("package.json")) as { scripts: Record<string, string> })
+      .scripts;
+    expect(scripts["check:release"]).toBe(`${script} pack`);
+  });
+
+  it("builds the ekzemplo kit explicitly, from its fixture, and names both kit paths", () => {
+    const text = read(script);
+    expect(text).toContain(
+      "--config packages/modelo/test/fixtures/valid/aspekto-ekzemplo/fundamento.config.json",
+    );
+    expect(text).toContain("--celo make-kit");
+    for (const kit of ["komuna", "ekzemplo"]) expect(text).toContain(`make-kit/${kit}`);
+    // A missing kit is an error with its path, not "cd: No such file".
+    expect(text).toContain("package.json");
+    expect(text).toMatch(/Kit fehlt/);
+  });
+
+  // Q2: the ekzemplo kit is MIT; the fictitious font is a name, never a file in the package.
+  it("keeps Q2: the ekzemplo fixture is MIT and its font ships as a name only", () => {
+    const aspekto = JSON.parse(
+      read("packages/modelo/test/fixtures/valid/aspekto-ekzemplo/aspekto-ekzemplo/aspekto.json"),
+    ) as { license: string; fonts: { family: string; redistributable: boolean; source: string }[] };
+    expect(aspekto.license).toBe("MIT");
+    expect(aspekto.fonts[0]).toMatchObject({ family: "Ekzempla Grotesk", redistributable: false });
+    expect(aspekto.fonts[0]?.source).toContain("no font file exists");
+    // The script refuses a kit that carries a font file.
+    expect(read(script)).toMatch(/woff2?|ttf|otf/);
   });
 });

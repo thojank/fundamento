@@ -776,4 +776,28 @@ Results go into `plan.md` → „Manual acceptance results".
 (`ac7321e`). Offen bleiben F23 (PR #22, abgenommen, Merge und Release-Probelauf durch Thorsten)
 und F24 (Befund, nicht blockierend).
 
+- [ ] **F23 Der Release-Weg lief nie in der CI** (Release-Probelauf #1, main `ac7321e`; Jugxo
+  `jug_01M34CWDAP4K51KV8DSE1HVVSB`)
+  - Befund (Maintainer, 2026-09-22): „Check the npm version" und „Dry run komuna" grün, „Dry run
+    ekzemplo" scheitert mit `cd: .fundamento/projekcioj/make-kit/ekzemplo: No such file or
+    directory`. Ursache, gelesen: `fm projekcioj build` ohne `--config` erzeugt nur
+    `make-kit/komuna`; ekzemplo existiert nur als Fixture. `release.yml` setzte beide voraus.
+  - Rot zuerst: `scripts/release-kits.sh: expected false to be true` (kein Skript), dazu
+    `release.yml` mit `cd …/make-kit/ekzemplo` und `ci.yml` ohne „Check: Release".
+  - Grün, (1): `scripts/release-kits.sh publish|pack` baut komuna aus dem Repository und ekzemplo
+    ausdrücklich aus seiner Fixture (`--config …/aspekto-ekzemplo/fundamento.config.json --celo
+    make-kit`), prüft je Kit `package.json` („Kit fehlt: <Pfad>") und dass keine Schriftdatei im
+    Kit liegt, und führt den Probelauf je Kit aus. `release.yml` ruft `publish` (mit Provenance),
+    nichts wird veröffentlicht.
+  - Grün, (2): `ci.yml` bekommt den Schritt „Check: Release" (`pnpm check:release` =
+    `scripts/release-kits.sh pack`), bei jedem PR. Beide Workflows teilen sich das Skript; der
+    Workflow-Test liest die Befehle samt Skript.
+  - (3) Q2 geprüft: `aspekto.json` der Fixture trägt Lizenz MIT; die Schrift „Ekzempla Grotesk"
+    ist `redistributable: false` mit `source: "… no font file exists"`; das gebaute Kit enthält
+    keine Schriftdatei (der Bau mit der Fixture-Config schreibt 40 Dateien, keine `.woff/.ttf/.otf`),
+    und das Skript weist ein Kit mit Schriftdatei zurück.
+  - (4) Jugxo `jug_01M34CWDAP4K51KV8DSE1HVVSB`.
+  - Fertig wenn: der Probelauf erneut durch Thorsten läuft und der Maintainer die Dateilisten
+    beider Kits prüft.
+
 Consistency check before tasks (`/speckit.analyze` scope): every FR and AK maps to at least one task or a recorded decision; every task maps to a plan decision; two new packages (Art. XI); the lockfile changes in T008 only; no task lowers a threshold; nothing is published.

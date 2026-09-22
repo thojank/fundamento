@@ -82,6 +82,7 @@ jobs:
       - name: "Check: Make Kit"
         run: pnpm check:make-kit
 
+
       # AK-07: the quickstart of the README, run as a user would and timed (T027).
       - name: "Check: Quickstart"
         run: pnpm check:quickstart
@@ -89,3 +90,8 @@ jobs:
       # Spec 004 AK-02: the Vitrino in a browser — switching, comparison, axe (T011, T012).
       - name: "Check: Vitrino"
         run: pnpm check:vitrino
+
+      # F23: the release path itself, on every PR — both kits built as release.yml builds them,
+      # packed as a dry run. A broken release path turns red here, not in the maintainer's run.
+      - name: "Check: Release"
+        run: pnpm check:release

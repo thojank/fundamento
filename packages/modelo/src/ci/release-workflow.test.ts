@@ -20,6 +20,13 @@ function steps(): { name?: string; run?: string; uses?: string }[] {
   return Object.values(jobs)[0]?.steps ?? [];
 }
 
+/** The commands the workflow runs, the shared release script included (F23). */
+function commands(): string {
+  const runs = steps().map((step) => step.run ?? "");
+  const script = readFileSync(`${repoRoot}scripts/release-kits.sh`, "utf8");
+  return [...runs, script].join("\n");
+}
+
 describe("release.yml (T020, Trusted Publishing)", () => {
   it("exists and runs only on demand", () => {
     expect(existsSync(releasePath)).toBe(true);
@@ -31,9 +38,7 @@ describe("release.yml (T020, Trusted Publishing)", () => {
   });
 
   it("builds the kits and runs a dry run with provenance for every Aspekto", () => {
-    const runs = steps()
-      .map((step) => step.run ?? "")
-      .join("\n");
+    const runs = commands();
     expect(runs).toMatch(/fm projekcioj build|projekcioj:make-kit|pnpm build/);
     for (const aspekto of ASPEKTOJ) expect(runs, aspekto).toContain(`make-kit/${aspekto}`);
     expect(runs).toContain("pnpm publish --dry-run --tag next --provenance --access public");
@@ -49,9 +54,9 @@ describe("release.yml (T020, Trusted Publishing)", () => {
   });
 
   it("publishes nothing by itself: every publish command is a dry run", () => {
-    for (const step of steps()) {
-      for (const line of (step.run ?? "").split("\n")) {
-        if (/pnpm publish|npm publish/.test(line)) expect(line, line).toContain("--dry-run");
+    for (const line of commands().split("\n")) {
+      if (/pnpm publish|npm publish/.test(line) && !line.trim().startsWith("#")) {
+        expect(line, line).toContain("--dry-run");
       }
     }
   });
