@@ -202,6 +202,7 @@ export interface DoubleBox {
 interface NodeContext {
   loaded: ReadonlySet<string>;
   box?: (node: DoubleNode) => DoubleBox;
+  resolveColor?: (name: string) => { r: number; g: number; b: number } | undefined;
   /**
    * Counts every change to the document. The layout is computed once per state of the document,
    * not once per read: reading x, y, width and height of 72 variants recomputed the whole tree
@@ -211,6 +212,25 @@ interface NodeContext {
 }
 
 const GEOMETRY_KEYS: ReadonlySet<string> = new Set(["x", "y", "width", "height"]);
+
+/**
+ * A paint as Figma stores and returns it (F22): `visible`, `opacity` and `blendMode` filled in,
+ * the colour as given. Reading `fills` back therefore never equals the object that was written —
+ * a comparison by JSON rewrites on every run; a comparison by variable, opacity and visibility
+ * does not.
+ */
+function asStoredPaint(paint: unknown): unknown {
+  if (typeof paint !== "object" || paint === null) return paint;
+  const given = paint as Record<string, unknown>;
+  return {
+    type: given.type,
+    visible: given.visible === undefined ? true : given.visible,
+    opacity: typeof given.opacity === "number" ? given.opacity : 1,
+    blendMode: given.blendMode === undefined ? "NORMAL" : given.blendMode,
+    color: given.color,
+    ...(given.boundVariables === undefined ? {} : { boundVariables: given.boundVariables }),
+  };
+}
 
 function node(
   type: string,
@@ -372,7 +392,10 @@ function node(
         }
       }
       if (typeof key === "string" && !(key in target)) {
-        target.properties[key] = value;
+        target.properties[key] =
+          (key === "fills" || key === "strokes") && Array.isArray(value)
+            ? value.map(asStoredPaint)
+            : value;
         // Written by the plugin: from now on the value is the plugin's, not the tool's.
         target.defaults.delete(key);
         return true;
@@ -671,10 +694,19 @@ export function figmaDouble(
         type: "VARIABLE_ALIAS",
         id: variable.id,
       }),
-      setBoundVariableForPaint: (paint: unknown, _field: string, variable: DoubleVariable) => ({
-        ...(paint as Record<string, unknown>),
-        boundVariables: { color: { type: "VARIABLE_ALIAS", id: variable.id, name: variable.name } },
-      }),
+      // Measured on 2026-09-22 (F22, file hEWHvBz7uRNrpYSau52OUN): a paint shows the colour it
+      // holds, binding or not — a raw paint with boundVariables and the placeholder {0,0,0}
+      // rendered black. Only this call resolves the variable's colour into the copy it returns.
+      setBoundVariableForPaint: (paint: unknown, _field: string, variable: DoubleVariable) => {
+        const resolved = resolveColor(variable.name);
+        return {
+          ...(paint as Record<string, unknown>),
+          ...(resolved === undefined ? {} : { color: resolved }),
+          boundVariables: {
+            color: { type: "VARIABLE_ALIAS", id: variable.id, name: variable.name },
+          },
+        };
+      },
     }),
     createComponent: () => node("COMPONENT", "Component", counts, context),
     createFrame: () => node("FRAME", "Frame", counts, context),
@@ -752,6 +784,16 @@ export function figmaDouble(
     }
     return undefined;
   };
+  /** The colour a COLOR variable holds in the default mode, aliases followed; `{r,g,b}`. */
+  const resolveColor = (name: string): { r: number; g: number; b: number } | undefined => {
+    const value = resolve(name) as { r?: unknown; g?: unknown; b?: unknown } | undefined;
+    return typeof value?.r === "number" &&
+      typeof value.g === "number" &&
+      typeof value.b === "number"
+      ? { r: value.r, g: value.g, b: value.b }
+      : undefined;
+  };
+  context.resolveColor = resolveColor;
   // One layout per state of the document (see NodeContext.version), with its resolved numbers.
   let computed: { version: number; top: DoubleNode; boxes: Map<DoubleNode, DoubleBox> } | undefined;
   context.box = (current: DoubleNode) => {

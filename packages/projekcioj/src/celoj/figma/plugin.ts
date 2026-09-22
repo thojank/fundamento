@@ -251,17 +251,48 @@ function write(node, field, value) {
   // reading it back to compare would trust the tool's default. A node found from an earlier run is
   // compared first.
   if (!fresh.has(node.id)) {
-    const same = (a, b) => JSON.stringify(a === undefined ? null : a) === JSON.stringify(b);
     let current;
     try {
       current = node[field];
     } catch (error) {
       current = undefined;
     }
-    if (same(current, value)) return false;
+    if (samePaints(field, current, value) || sameJson(current, value)) return false;
   }
   node[field] = value;
   return true;
+}
+
+const sameJson = (a, b) => JSON.stringify(a === undefined ? null : a) === JSON.stringify(b);
+
+/**
+ * Two paint lists hold the same when every paint has the same variable, deckkraft and visibility
+ * (F22). Read back, a paint carries what Figma filled in — visible, blendMode, the colour it
+ * resolved — so a comparison by JSON never matched and rewrote every paint on every run; the
+ * rewrite is what left the set black.
+ */
+function samePaints(field, current, value) {
+  if (field !== "fills" && field !== "strokes") return false;
+  if (!Array.isArray(current) || !Array.isArray(value) || current.length !== value.length) {
+    return false;
+  }
+  return value.every((paint, index) => {
+    const held = current[index];
+    const variableOf = (entry) =>
+      entry && entry.boundVariables && entry.boundVariables.color
+        ? entry.boundVariables.color.id
+        : undefined;
+    const opacityOf = (entry) => (typeof entry.opacity === "number" ? entry.opacity : 1);
+    const visibleOf = (entry) => entry.visible !== false;
+    return (
+      held !== undefined &&
+      held.type === paint.type &&
+      variableOf(held) === variableOf(paint) &&
+      (variableOf(paint) !== undefined || sameJson(held.color, paint.color)) &&
+      opacityOf(held) === opacityOf(paint) &&
+      visibleOf(held) === visibleOf(paint)
+    );
+  });
 }
 
 /** The IDs of the nodes this run created; everything else was found in the file. */
@@ -732,6 +763,38 @@ function measureLayout(set, component) {
     const variant = component.variants.find((entry) => variantName(entry.props) === node.name);
     return variant !== undefined && variant.focusVisible === true;
   });
+  /** The paints of a node, raw (F22): colour, deckkraft, visibility, the bound variable. */
+  const paintsOf = (node) => {
+    const list = (field) => {
+      let paints;
+      try {
+        paints = node[field];
+      } catch (error) {
+        return ["wirft: " + String(error && error.message ? error.message : error)];
+      }
+      return (Array.isArray(paints) ? paints : []).map((paint) => ({
+        type: paint.type,
+        color: paint.color,
+        opacity: typeof paint.opacity === "number" ? paint.opacity : 1,
+        visible: paint.visible !== false,
+        variable:
+          paint.boundVariables && paint.boundVariables.color
+            ? (paint.boundVariables.color.name || paint.boundVariables.color.id)
+            : null,
+      }));
+    };
+    return { fills: list("fills"), strokes: list("strokes") };
+  };
+  const paintedParts = (node) => {
+    if (node === undefined) return {};
+    const out = { variant: paintsOf(node) };
+    let current = node;
+    for (const name of ["focus-ring", "focus-gap", "control", "label"]) {
+      current = current === undefined ? undefined : ours(current, "part", name);
+      if (current !== undefined) out[name] = paintsOf(current);
+    }
+    return out;
+  };
   const partsOf = (node) => {
     if (node === undefined) return {};
     const out = { variant: held(node, HELD_AT_PART) };
@@ -777,6 +840,7 @@ function measureLayout(set, component) {
       rest: partsOf(first),
       focus: partsOf(focused),
     },
+    paints: { set: paintsOf(set), variant: paintedParts(first), last: paintedParts(last) },
     set: { width: set.width, height: set.height },
     unplaced: unplaced,
     uneven: uneven,
@@ -922,12 +986,83 @@ async function applyPlan() {
   };
 }
 
+const PART_LIMIT = 3900;
+
+/** Splits a list into JSON lines below the limit; each line names the part and its slice. */
+function partsOfList(set, part, list) {
+  const out = [];
+  let from = 0;
+  while (from < list.length) {
+    let to = list.length;
+    let text = JSON.stringify({ set, part, from, to, items: list.slice(from, to) });
+    while (text.length > PART_LIMIT && to - from > 1) {
+      to = from + Math.max(1, Math.floor((to - from) / 2));
+      text = JSON.stringify({ set, part, from, to, items: list.slice(from, to) });
+    }
+    out.push(text);
+    from = to;
+  }
+  return out;
+}
+
+/** The report as JSON lines under the limit (F22): headline, then per component its parts. */
+function reportParts(result) {
+  const lines = [
+    JSON.stringify({
+      fundamento: result.fundamento,
+      collections: result.collections,
+      variables: result.variables,
+      warnings: result.warnings,
+      components: result.components.map((report) => ({
+        set: report.set,
+        found: report.found,
+        planned: report.planned,
+        created: report.created.length,
+        updated: report.updated.length,
+        missing: report.missing.length,
+        extra: report.extra.length,
+        duplicates: report.duplicates.length,
+        before: report.before,
+        after: report.after,
+        left: report.left,
+        diagnosis: report.diagnosis,
+      })),
+    }),
+  ];
+  for (const report of result.components) {
+    for (const part of ["created", "updated", "missing", "extra", "duplicates"]) {
+      if (report[part].length > 0) lines.push(...partsOfList(report.set, part, report[part]));
+    }
+    if (report.layout !== undefined) {
+      const layout = Object.assign({}, report.layout);
+      const held = layout.held;
+      const paints = layout.paints;
+      delete layout.held;
+      delete layout.paints;
+      for (const [part, value] of [["layout", layout], ["held", held], ["paints", paints]]) {
+        if (value === undefined) continue;
+        const text = JSON.stringify({ set: report.set, part, value });
+        if (text.length <= PART_LIMIT) {
+          lines.push(text);
+          continue;
+        }
+        for (const [key, entry] of Object.entries(value)) {
+          lines.push(JSON.stringify({ set: report.set, part: part + "." + key, value: entry }));
+        }
+      }
+    }
+  }
+  return lines;
+}
+
 /** One place for the report: everything in the console, the headline in the toast (F10). */
 function announce(result) {
-  // One string per line, the report as a single JSON string: an object viewer folds and cuts
-  // what is copied, a string is copied whole (F21).
-  console.log("Fundamento " + result.fundamento + " – Bericht (JSON, eine Zeile):");
-  console.log(JSON.stringify(result));
+  // One string per line, JSON, in parts under 4 000 characters: an object viewer folds and cuts
+  // what is copied (F21), and Figma cuts a copied line at 5 000 characters (F22). The headline
+  // with the numbers and the warnings comes first; the lists and the layout follow, each its own
+  // part, long lists split.
+  console.log("Fundamento " + result.fundamento + " – Bericht in Teilen (JSON, je eine Zeile):");
+  for (const part of reportParts(result)) console.log(part);
   const counted = result.components
     .map((report) =>
       report.set + " " + report.created.length + " neu, " + report.updated.length + " aktualisiert",

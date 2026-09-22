@@ -684,7 +684,7 @@ Results go into `plan.md` → „Manual acceptance results".
   - Fertig wenn: der Maintainer es in der Datei misst — in light/default und dark/high, und nach
     dem Umschalten von density.
 
-- [ ] **F21 Der zweite Lauf scheitert** (Abnahme M1, blockierte die Abnahme; Jugxo
+- [x] **F21 Der zweite Lauf scheitert** (Abnahme M1, blockierte die Abnahme; Jugxo
   `jug_01M33TKAFM6RSACJN6H90B183A`)
   - Befund (Thorsten, Datei `x8sFFyOkrnlMM4ngAsbnfs`, Stand `e9db633`): Lauf 1 grün (created 72),
     Lauf 2 auf demselben Set ohne Eingriff: Toast „Lauf fehlgeschlagen — in set_layoutMode: Cannot
@@ -715,7 +715,42 @@ Results go into `plan.md` → „Manual acceptance results".
     F14-Abnahme und `e9db633` den zweiten Lauf brach; Kandidaten sind die neuen Eigenschaften am
     Set (F16 Füllung, F17 `strokesIncludedInLayout`, F19 Modusreihenfolge), die den Schreibvorgang
     von `layoutMode` nicht ausgelöst, aber begleitet haben.
-  - Fertig wenn: Abnahmelauf — frische Datei, zwei Läufe, Lauf 2 mit `0 angelegt, 72 aktualisiert,
-    warnings: []`; danach density per Figma-MCP auf compact/comfortable für F20.
+  - **Behoben** (Thorsten, Datei `hEWHvBz7uRNrpYSau52OUN`, 2026-09-22): Lauf 2 ohne Abbruch,
+    created 0, updated 72, after 72/72, Geometrie unverändert (Set 558 × 672). Folgebefund F22.
+
+- [ ] **F22 Nach Lauf 2 ist das ganze Set schwarz** (Abnahme M1, Regression aus F21; Jugxo
+  `jug_01M33Z7E7NHN5GB4GDWKFA3QXQ`)
+  - Befund (Thorsten, Datei `hEWHvBz7uRNrpYSau52OUN`): Nach Lauf 1 alles richtig. Nach Lauf 2 per
+    Plugin-API: Set fills[0] SOLID {0,0,0}, Deckkraft 1, gebunden an `color/background/canvas`;
+    control fills[0] {0,0,0}, gebunden an `primary/rest`; strokes[0] {0,0,0}, Deckkraft 1, **ohne
+    Bindung**; label fills[0] {0,0,0}, gebunden an `primary/text`. Variablenwerte richtig. Figma
+    rendert die Paint-Farbe, nicht die Bindung.
+  - Rot zuerst, (1) Double: `setBoundVariableForPaint` löst die Farbe der Variablen in die Kopie
+    auf (`expected { r: +0, … } to deeply equal { r: 0.2, … }`); ein Paint zeigt die Farbe, die er
+    hält, und wird wie Figma zurückgelesen (`visible`, `opacity`, `blendMode` ergänzt). Danach
+    fiel „rewrites no paint on the second run" mit genau der Mechanik der Regression: **241
+    Paint-Schreibvorgänge in Lauf 2**, weil der JSON-Vergleich einen zurückgelesenen Paint nie als
+    gleich erkannte.
+  - Grün, (2) Wirkung: nach Lauf 1 **und** Lauf 2 je Knoten Hex und Deckkraft des Paints gleich
+    dem Planwert im Standardmodus (Fläche, Rand, Beschriftung; primary large rest und tertiary
+    medium hover), Rand mit Bindung und Deckkraft (F8), Untergrund des Sets gebunden und nicht
+    schwarz.
+  - Grün, (3) Vergleich: Ein Paint gilt als vorhanden bei gleicher Variable, gleicher Deckkraft,
+    gleicher Sichtbarkeit (ohne Variable: gleiche Farbe). Lauf 2: 0 Schreibvorgänge.
+  - Grün, (4) Rohdaten `layout.paints` für Set, erste und letzte Variante: je Füllung und Rand
+    Typ, Farbe, Deckkraft, Sichtbarkeit, gebundene Variable; ein Feld, bei dem Figma wirft, mit
+    seiner Meldung.
+  - Grün, (5) Konsole in Teilen unter 4 000 Zeichen: Kopfzeile mit Zahlen, Warnungen, `before`,
+    `after`, `left`, `diagnosis` zuerst; dann je Komponente die Listen (`created`, `updated`, …,
+    bei Bedarf geteilt, mit `from`/`to`), `layout`, `held` und `paints` je eigene Zeile, große
+    Blöcke je Schlüssel geteilt. Der Bericht eines Laufs des Repo-Plans: 10 822 Zeichen in einer
+    Zeile vorher.
+  - **Zur Ursache, offen:** Warum das Neuschreiben eines Paints, der aus `setBoundVariableForPaint`
+    kam, in Figma die Platzhalterfarbe hinterließ und am Rand die Bindung tilgte, ist nicht
+    gemessen. Das Double reproduziert das Neuschreiben und seine Zahl, nicht die Schwärzung. Die
+    Korrektur vermeidet das Neuschreiben; sie erklärt es nicht.
+  - Fertig wenn: Abnahmelauf — frische Datei, zwei Läufe; nach Lauf 2 Farben wie nach Lauf 1
+    (`layout.paints` beider Läufe gleich), `warnings: []`; danach density per Figma-MCP auf
+    compact/comfortable für F20.
 
 Consistency check before tasks (`/speckit.analyze` scope): every FR and AK maps to at least one task or a recorded decision; every task maps to a plan decision; two new packages (Art. XI); the lockfile changes in T008 only; no task lowers a threshold; nothing is published.

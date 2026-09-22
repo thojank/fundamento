@@ -1685,3 +1685,208 @@ describe("a failed run leaves everything readable in the console (F21)", () => {
     expect(JSON.parse(json ?? "{}")).toMatchObject({ fundamento: expect.any(String) });
   });
 });
+
+// F22 (Messung Thorsten, Datei hEWHvBz7uRNrpYSau52OUN, 2026-09-22): Nach Lauf 2 war das ganze Set
+// schwarz. Per Plugin-API gelesen: Set fills[0] SOLID {0,0,0}, Deckkraft 1, gebunden an
+// color/background/canvas; control fills[0] {0,0,0}, gebunden an primary/rest; strokes[0]
+// {0,0,0}, Deckkraft 1, OHNE Bindung; label fills[0] {0,0,0}, gebunden an primary/text. Die
+// Variablenwerte selbst waren richtig. Figma rendert also die Farbe, die im Paint steht, nicht die
+// Bindung; nur setBoundVariableForPaint löst die Farbe in die Kopie auf. Das Double bildet das ab.
+describe("a paint shows the colour it holds; only setBoundVariableForPaint resolves it (F22)", () => {
+  async function paintedFrame(double: ReturnType<typeof figmaDouble>) {
+    const api = double.figma as {
+      createFrame: () => DoubleNode;
+      variables: {
+        createVariableCollection: (name: string) => (typeof double.collections)[number];
+        createVariable: (
+          name: string,
+          c: unknown,
+          type: string,
+        ) => (typeof double.variables)[number];
+        setBoundVariableForPaint: (
+          paint: unknown,
+          field: string,
+          v: unknown,
+        ) => Record<string, unknown>;
+      };
+    };
+    const collection = api.variables.createVariableCollection("farben");
+    const variable = api.variables.createVariable("color/probo", collection, "COLOR");
+    variable.setValueForMode(collection.defaultModeId, { r: 0.2, g: 0.4, b: 0.6, a: 1 });
+    const frame = api.createFrame();
+    return { api, variable, frame };
+  }
+
+  it("resolves the variable's colour into the copy that setBoundVariableForPaint returns", async () => {
+    const { api, variable } = await paintedFrame(modelDouble());
+    const bound = api.variables.setBoundVariableForPaint(
+      { type: "SOLID", color: { r: 0, g: 0, b: 0 } },
+      "color",
+      variable,
+    );
+    expect(bound.color).toEqual({ r: 0.2, g: 0.4, b: 0.6 });
+    expect(bound.boundVariables).toMatchObject({ color: { id: variable.id } });
+  });
+
+  it("renders a raw paint with a binding in the colour it holds, and reads it back like Figma", async () => {
+    const { frame, variable } = await paintedFrame(modelDouble());
+    Object.assign(frame, {
+      fills: [
+        {
+          type: "SOLID",
+          color: { r: 0, g: 0, b: 0 },
+          boundVariables: { color: { type: "VARIABLE_ALIAS", id: variable.id } },
+        },
+      ],
+    });
+    const [fill] = frame.properties.fills as {
+      color: unknown;
+      visible: boolean;
+      opacity: number;
+      blendMode: string;
+    }[];
+    expect(fill?.color).toEqual({ r: 0, g: 0, b: 0 });
+    expect([fill?.visible, fill?.opacity, fill?.blendMode]).toEqual([true, 1, "NORMAL"]);
+    expect(double_shown(frame, "fills")).toEqual({ r: 0, g: 0, b: 0 });
+  });
+});
+
+/** The colour a node shows for a paint field: what the first visible paint holds. */
+function double_shown(node: DoubleNode, field: "fills" | "strokes") {
+  const [paint] = (node.properties[field] ?? []) as { color?: unknown; visible?: boolean }[];
+  return paint === undefined || paint.visible === false ? undefined : paint.color;
+}
+
+describe("every bound paint shows the plan's colour after the first and the second run (F22)", () => {
+  type Paint = {
+    color: { r: number; g: number; b: number };
+    opacity: number;
+    visible: boolean;
+    boundVariables?: { color?: { id: string; name?: string } };
+  };
+  const paintsOf = (node: DoubleNode | undefined, field: "fills" | "strokes") =>
+    (node?.properties[field] ?? []) as Paint[];
+  const hex = (c: { r: number; g: number; b: number }) =>
+    `#${[c.r, c.g, c.b]
+      .map((v) =>
+        Math.round(v * 255)
+          .toString(16)
+          .padStart(2, "0"),
+      )
+      .join("")}`;
+
+  // The plan's paint per part and variant, in the default mode: hex and opacity (F8).
+  const planned = (props: Record<string, string>) =>
+    repoPlan.components[0]?.variants.find((v) =>
+      Object.entries(props).every(([k, val]) => v.props[k] === val),
+    )?.paints ?? {};
+
+  it("matches hex, opacity and binding on both runs — fills, strokes and the label", async () => {
+    const double = modelDouble();
+    for (const run of [1, 2]) {
+      await new Function(
+        "figma",
+        `${repoFiles["figma/plugin/code.js"] ?? ""}\nreturn applyPlan();`,
+      )(double.figma);
+      const set = double.root.children[0]?.children.find((child) => child.name === "butono");
+      for (const [props, name] of [
+        [{ variant: "primary", tone: "default", size: "large", state: "rest" }, "primary"],
+        [{ variant: "tertiary", tone: "default", size: "medium", state: "hover" }, "tertiary"],
+      ] as const) {
+        const variant = set?.children.find(
+          (child) =>
+            child.name ===
+            Object.entries(props)
+              .map(([k, v]) => `${k}=${v}`)
+              .join(", "),
+        );
+        const control = descendant(variant, "control");
+        const label = descendant(control, "label");
+        const plan = planned(props);
+        for (const [node, field, part] of [
+          [control, "fills", "surface.fill"],
+          [control, "strokes", "border.color"],
+          [label, "fills", "label.color"],
+        ] as const) {
+          const [paint] = paintsOf(node, field);
+          const expected = plan[part] as { hex: string; opacity: number } | undefined;
+          const where = `run ${run}, ${name} ${part}`;
+          if (paint === undefined) throw new Error(`${where}: no paint`);
+          expect(hex(paint.color), where).toBe(expected?.hex);
+          expect(paint.opacity, where).toBe(expected?.opacity);
+          expect(paint.visible, where).toBe(true);
+          expect(paint.boundVariables?.color?.id, where).toBeDefined();
+        }
+      }
+      const [ground] = paintsOf(set, "fills");
+      if (ground === undefined) throw new Error(`run ${run}: no ground`);
+      expect(ground.boundVariables?.color?.name, `run ${run} ground`).toBe(
+        "color/background/canvas",
+      );
+      expect(hex(ground.color), `run ${run} ground`).not.toBe("#000000");
+    }
+  });
+
+  it("rewrites no paint on the second run when variable, opacity and visibility hold", async () => {
+    const double = modelDouble();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    const written = double.counts.writes;
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    expect(double.counts.writes - written).toBe(0);
+  });
+
+  it("reports the paints of the set and of the first and last variant, raw", async () => {
+    const double = modelDouble();
+    const report = (await new Function(
+      "figma",
+      `${repoFiles["figma/plugin/code.js"] ?? ""}\nreturn applyPlan();`,
+    )(double.figma)) as {
+      components: {
+        layout: {
+          paints: {
+            set: { fills: unknown[]; strokes: unknown[] };
+            variant: Record<string, { fills: unknown[]; strokes: unknown[] }>;
+            last: Record<string, { fills: unknown[]; strokes: unknown[] }>;
+          };
+        };
+      }[];
+    };
+    const paints = report.components[0]?.layout.paints;
+    expect(paints?.set.fills[0]).toMatchObject({ opacity: 1, variable: "color/background/canvas" });
+    expect(paints?.set.fills[0]).toHaveProperty("color");
+    expect(paints?.variant.control?.fills[0]).toMatchObject({
+      variable: "color/action/primary/rest",
+    });
+    expect(paints?.variant.control?.strokes[0]).toHaveProperty("variable");
+    expect(paints?.variant.label?.fills[0]).toHaveProperty("opacity");
+    expect(paints?.last.control?.fills[0]).toMatchObject({ opacity: 0 });
+  });
+
+  // Figma kappt kopierte Konsolenzeilen bei 5 000 Zeichen: der Bericht kommt in Teilen unter 4 000.
+  it("prints the report in parts under 4 000 characters, the headline with numbers first", async () => {
+    const double = modelDouble();
+    const lines: string[] = [];
+    const module = new Function("figma", "console", `${repoFiles["figma/plugin/code.js"] ?? ""}`);
+    await module(
+      { ...double.figma, command: "run" },
+      {
+        log: (...parts: unknown[]) => lines.push(parts.map(String).join(" ")),
+        error: () => undefined,
+      },
+    );
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    for (const line of lines) expect(line.length, line.slice(0, 60)).toBeLessThan(4000);
+    const first = lines.find((line) => line.startsWith("{"));
+    expect(JSON.parse(first ?? "{}")).toMatchObject({
+      fundamento: expect.any(String),
+      variables: expect.any(Number),
+      warnings: [],
+      components: [{ set: "butono", created: 72, updated: 0 }],
+    });
+    const json = lines
+      .filter((line) => line.startsWith("{"))
+      .map((line) => JSON.parse(line) as Record<string, unknown>);
+    expect(json.some((part) => part.part === "layout")).toBe(true);
+    expect(json.some((part) => part.part === "created")).toBe(true);
+  });
+});
