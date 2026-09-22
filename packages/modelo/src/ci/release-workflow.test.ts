@@ -42,7 +42,7 @@ describe("release.yml (T020, Trusted Publishing)", () => {
     const runs = commands();
     expect(runs).toMatch(/fm projekcioj build|projekcioj:make-kit|pnpm build/);
     for (const aspekto of ASPEKTOJ) expect(runs, aspekto).toContain(`make-kit/${aspekto}`);
-    expect(runs).toContain("pnpm publish --dry-run --tag next --provenance --access public");
+    expect(runs).toContain("--tag next --provenance --access public");
   });
 
   it("refuses an npm older than 11.5.1, which Trusted Publishing needs (F7, research §7)", () => {
@@ -54,12 +54,12 @@ describe("release.yml (T020, Trusted Publishing)", () => {
     expect(runs).toMatch(/exit 1/);
   });
 
-  it("publishes nothing by itself: every publish command is a dry run", () => {
-    for (const line of commands().split("\n")) {
-      if (/pnpm publish|npm publish/.test(line) && !line.trim().startsWith("#")) {
-        expect(line, line).toContain("--dry-run");
-      }
-    }
+  it("publishes only through the script's mode publish; the workflow file itself runs no publish", () => {
+    const runs = steps()
+      .map((step) => step.run ?? "")
+      .join("\n");
+    expect(runs).not.toMatch(/pnpm publish|npm publish/);
+    expect(commands()).toContain("--dry-run --tag next --provenance");
   });
 
   it("uses no token: no secret in any workflow, no auth entry in .npmrc", () => {
@@ -77,7 +77,7 @@ describe("release.yml (T020, Trusted Publishing)", () => {
 // Befehlszeile selbst fest: `--print` gibt je Kit den Befehl aus, den das Skript ausführen würde.
 describe("release-kits.sh assembles the publish command with provenance", () => {
   it("prints, for both kits, a dry-run publish with --provenance, --tag next and --access public", () => {
-    const run = spawnSync("sh", ["scripts/release-kits.sh", "publish", "--print"], {
+    const run = spawnSync("sh", ["scripts/release-kits.sh", "dry-run", "--print"], {
       cwd: repoRoot,
       encoding: "utf8",
     });
@@ -93,5 +93,75 @@ describe("release-kits.sh assembles the publish command with provenance", () => 
     }
     expect(run.stdout).toContain("make-kit/komuna");
     expect(run.stdout).toContain("make-kit/ekzemplo");
+  });
+});
+
+// The real release step (maintainer, 2026-09-22): on demand, on main, chosen by the maintainer —
+// mode "publish" publishes with provenance under the tag next, mode "dry-run" (the default) only
+// shows what it would contain; the pre-release number is an input. Nothing else changed: no token,
+// the npm version check stays, id-token: write stays.
+describe("release.yml publishes only when the maintainer says so (F25 release step)", () => {
+  const inputs = () =>
+    ((workflow().on as { workflow_dispatch?: { inputs?: Record<string, unknown> } })
+      .workflow_dispatch?.inputs ?? {}) as Record<
+      string,
+      { type?: string; options?: string[]; default?: unknown; required?: boolean }
+    >;
+
+  it("takes a mode, dry-run by default, and a required pre-release version", () => {
+    expect(inputs().mode).toMatchObject({
+      type: "choice",
+      options: ["dry-run", "publish"],
+      default: "dry-run",
+    });
+    expect(inputs().version).toMatchObject({ type: "string", required: true });
+  });
+
+  it("runs the publish only in mode publish on main, the dry run otherwise", () => {
+    const publish = steps().find((step) => (step.run ?? "").includes("release-kits.sh publish"));
+    const dry = steps().find((step) => (step.run ?? "").includes("release-kits.sh dry-run"));
+    expect(publish, "publish step").toBeDefined();
+    expect(dry, "dry-run step").toBeDefined();
+    const guard = String((publish as { if?: string } | undefined)?.if ?? "");
+    expect(guard).toContain("inputs.mode == 'publish'");
+    expect(guard).toContain("github.ref == 'refs/heads/main'");
+    expect(String((dry as { if?: string } | undefined)?.if ?? "")).toContain(
+      "inputs.mode == 'dry-run'",
+    );
+  });
+
+  it("hands the version to the build as FUNDAMENTO_KIT_VERSION", () => {
+    const text = readFileSync(releasePath, "utf8");
+    expect(text).toContain("FUNDAMENTO_KIT_VERSION: ${{ inputs.version }}");
+  });
+
+  it("prints a real publish with provenance and without --dry-run in mode publish", () => {
+    const run = spawnSync("sh", ["scripts/release-kits.sh", "publish", "--print"], {
+      cwd: repoRoot,
+      encoding: "utf8",
+      env: { ...process.env, FUNDAMENTO_KIT_VERSION: "0.1.0-next.1" },
+    });
+    expect(run.status, run.stderr).toBe(0);
+    const lines = run.stdout.split("\n").filter((line) => line.includes("pnpm publish"));
+    expect(lines).toHaveLength(2);
+    for (const line of lines) {
+      expect(line).not.toContain("--dry-run");
+      expect(line).toContain("--provenance");
+      expect(line).toContain("--tag next");
+      expect(line).toContain("--access public");
+    }
+    expect(run.stdout).toContain("0.1.0-next.1");
+  });
+
+  it("refuses mode publish without a version", () => {
+    const env = { ...process.env };
+    delete env.FUNDAMENTO_KIT_VERSION;
+    const run = spawnSync("sh", ["scripts/release-kits.sh", "publish", "--print"], {
+      cwd: repoRoot,
+      encoding: "utf8",
+      env,
+    });
+    expect(run.status).not.toBe(0);
+    expect(run.stderr).toContain("FUNDAMENTO_KIT_VERSION");
   });
 });

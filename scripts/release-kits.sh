@@ -4,20 +4,31 @@
 # exists and carries no font file (Q2: the fictitious font of ekzemplo is a name, never a file),
 # then runs the dry run of the given mode in every kit.
 #
-# Usage: scripts/release-kits.sh publish|pack [--print]
-#   publish  `pnpm publish --dry-run --tag next --provenance --access public` (release.yml)
+# Usage: scripts/release-kits.sh dry-run|publish|pack [--print]
+#   dry-run  `pnpm publish --dry-run --tag next --provenance --access public` — the preview
+#            (release.yml, mode dry-run)
+#   publish  the same without --dry-run: the real release, only from release.yml on main, mode
+#            publish, chosen by the maintainer; needs FUNDAMENTO_KIT_VERSION (e.g. 0.1.0-next.1)
 #   pack     `pnpm pack --dry-run` (ci.yml, every PR)
 #   --print  builds nothing, prints the command the mode would run in every kit — pnpm shows
 #            --provenance nowhere in a dry run's output, so the assembled line is what a test holds.
-# Nothing here publishes: every command is a dry run. Exit 1 with the path names what is missing.
+# Exit 1 with the path names what is missing. No token anywhere: publish goes through npm Trusted
+# Publishing (OIDC) of the workflow.
 set -eu
 
 mode="${1:-}"
 case "$mode" in
-  publish|pack) ;;
-  *) echo "Usage: $0 publish|pack [--print]" >&2; exit 2 ;;
+  dry-run|publish|pack) ;;
+  *) echo "Usage: $0 dry-run|publish|pack [--print]" >&2; exit 2 ;;
 esac
 print="${2:-}"
+
+# The real release names its pre-release number; the build writes it into every kit.
+if [ "$mode" = "publish" ] && [ -z "${FUNDAMENTO_KIT_VERSION:-}" ]; then
+  echo "publish braucht FUNDAMENTO_KIT_VERSION (z. B. 0.1.0-next.1): die Vorabnummer des Releases." >&2
+  exit 2
+fi
+version="${FUNDAMENTO_KIT_VERSION:-<modelo>-next.0}"
 
 out=".fundamento/release"
 KITS="$out/repo/make-kit/komuna $out/ekzemplo/make-kit/ekzemplo"
@@ -25,12 +36,14 @@ KITS="$out/repo/make-kit/komuna $out/ekzemplo/make-kit/ekzemplo"
 # The one command of each mode, in every kit. Kept in one place so what --print shows is what runs.
 command_for() {
   case "$1" in
-    publish) echo "pnpm publish --dry-run --tag next --provenance --access public --no-git-checks" ;;
+    dry-run) echo "pnpm publish --dry-run --tag next --provenance --access public --no-git-checks" ;;
+    publish) echo "pnpm publish --tag next --provenance --access public --no-git-checks" ;;
     pack) echo "pnpm pack --dry-run" ;;
   esac
 }
 
 if [ "$print" = "--print" ]; then
+  echo "version: $version"
   for kit in $KITS; do
     echo "$kit: $(command_for "$mode")"
   done

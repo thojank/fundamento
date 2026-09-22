@@ -812,4 +812,36 @@ und F24 (Befund, nicht blockierend).
     Trusted Publishing; wird er in einen Workflow gehoben, ist `--provenance` dort erneut
     festzuhalten.
 
+- [ ] **F25 Die Lizenzdatei fehlt im veröffentlichten Paket** (npm, 2026-09-22)
+  - Stand: `@fundamento/make-kit-komuna` und `-ekzemplo` liegen öffentlich auf npm als
+    0.1.0-next.0 (MIT, Maintainer tjango); Trusted Publishing ist für beide eingerichtet
+    (thojank/fundamento, `release.yml`, Rechte publish und stage publish, „2FA, keine
+    bypass-Token"). Die erste Veröffentlichung lief von Hand, weil npm ein existierendes Paket
+    verlangt, bevor Trusted Publishing einrichtbar ist.
+  - Befund (`npm view`): fileCount 17, unpackedSize 146 903; abgenommen waren 18 Dateien und
+    148 032. Es fehlt die LICENSE. Ursache: von Hand mit `npm publish` veröffentlicht; pnpm nimmt
+    die LICENSE aus der Projektwurzel mit, npm nicht.
+  - Rot zuerst: `expected [ 'README.md', …(16) ] to have a length of 18 but got 17`, dazu die
+    Version aus der Umgebung (`expected '0.1.0-next.0' to be '0.1.0-next.1'`) und die sechs Tests
+    zum Release-Schritt (Eingaben, Schritte, `--print` ohne `--dry-run`).
+  - Grün: Der Generator schreibt die LICENSE ins Kit (Inhalt = `LICENSE` des Repositories, `files`
+    in `package.json` nennt sie); die Zusicherung liegt auf dem **Inhalt des gepackten Kits** —
+    18 Dateien, LICENSE vorhanden und byte-gleich mit der Wurzel —, nicht auf dem Erfolg des
+    Packens.
+  - **Release-Schritt** in `release.yml`: Eingaben `mode` (`dry-run` Vorgabe | `publish`) und
+    `version` (Pflicht, die Vorabnummer); Schritt „publish" nur bei `inputs.mode == 'publish' &&
+    github.ref == 'refs/heads/main'`, mit `--provenance --tag next --access public
+    --no-git-checks` und ohne `--dry-run`; der Trockenlauf bleibt als eigener Schritt. Die Version
+    geht als `FUNDAMENTO_KIT_VERSION` in den Bau; der Generator nimmt sie nur als Vorabkennung der
+    Modelo-Version an (`0.1.0-<…>`) und lehnt alles andere mit Meldung ab. `id-token: write` und
+    die Prüfung der npm-Version bleiben; `scripts/release-kits.sh publish` verlangt die Version und
+    zeigt mit `--print` die Befehlszeile samt Version.
+  - Fertig wenn: der Maintainer 0.1.0-next.1 aus GitHub veröffentlicht und auf npm prüft: 18
+    Dateien, LICENSE vorhanden, Herkunftsnachweis sichtbar.
+
+- [ ] **F26 dist-tag `latest` zeigt auf 0.1.0-next.0** (nur festgehalten)
+  - npm setzt beim ersten Publish eines Pakets immer `latest`, auch mit `--tag next`. Beim ersten
+    stabilen Release wird `latest` umgehängt (`npm dist-tag add @fundamento/make-kit-<aspekto>@<v>
+    latest`). Nichts zu bauen.
+
 Consistency check before tasks (`/speckit.analyze` scope): every FR and AK maps to at least one task or a recorded decision; every task maps to a plan decision; two new packages (Art. XI); the lockfile changes in T008 only; no task lowers a threshold; nothing is published.

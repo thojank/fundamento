@@ -8,7 +8,7 @@
 // CJS) and writes the type declarations, so the package can be packed and installed (AK-08).
 
 import { execFileSync } from "node:child_process";
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { dirname, join } from "node:path";
 import {
@@ -319,11 +319,37 @@ export * from "./react.js";
   ];
 }
 
+/**
+ * The licence of every kit, MIT, taken from the repository's LICENSE so the two never drift. It is
+ * written into the kit (F25): `pnpm publish` had taken it from the repository root, `npm publish`
+ * by hand did not, and the published 0.1.0-next.0 carried 17 files instead of 18.
+ */
+const LICENSE = readFileSync(new URL("../../../../../LICENSE", import.meta.url), "utf8");
+
+/**
+ * The version of the kits: `<modelo>-next.0` unless FUNDAMENTO_KIT_VERSION asks for another
+ * pre-release of the Modelo's version (release.yml hands the maintainer's input through). A
+ * number the Modelo does not have is refused: the kit would claim a version of nothing.
+ */
+export function kitVersion(input: CeloInput): string {
+  const modelo = input.modeloJson.fundamento.version;
+  const requested = input.env?.FUNDAMENTO_KIT_VERSION;
+  if (requested === undefined || requested === "") return `${modelo}-next.0`;
+  if (!requested.startsWith(`${modelo}-`) || !/^\d+\.\d+\.\d+-[0-9A-Za-z.-]+$/.test(requested)) {
+    throw new Error(
+      `FUNDAMENTO_KIT_VERSION=${requested} is not a pre-release of the Modelo's version ${modelo} ` +
+        `(expected ${modelo}-<Vorabkennung>, e.g. ${modelo}-next.1).`,
+    );
+  }
+  return requested;
+}
+
 export const MAKE_KIT_CELO: Celo = {
   name: "make-kit",
   generate(input: CeloInput): GeneratedFile[] {
-    const version = `${input.modeloJson.fundamento.version}-next.0`;
+    const version = kitVersion(input);
     return aspektojOf(input.modelo).flatMap((aspekto) => [
+      { path: `${DIR}/${aspekto}/LICENSE`, text: LICENSE },
       {
         path: `${DIR}/${aspekto}/package.json`,
         text: `${JSON.stringify(
@@ -362,7 +388,7 @@ export const MAKE_KIT_CELO: Celo = {
               "./guidelines/*": "./guidelines/*",
               "./package.json": "./package.json",
             },
-            files: ["dist", "guidelines", "styles.css", "tailwind.css", "README.md"],
+            files: ["dist", "guidelines", "styles.css", "tailwind.css", "README.md", "LICENSE"],
             peerDependencies: { react: ">=18", "react-dom": ">=18" },
             publishConfig: { access: "public", tag: "next" },
             // Tree shaking must keep the registration of the elements and the stylesheets (K1).

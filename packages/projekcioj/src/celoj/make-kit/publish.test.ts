@@ -3,7 +3,7 @@
 // through npm Trusted Publishing (OIDC), never with a token.
 
 import { execFileSync } from "node:child_process";
-import { mkdtempSync } from "node:fs";
+import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { projectModeloSource } from "@fundamento/modelo";
@@ -49,7 +49,11 @@ describe("what a publish would contain (T020)", () => {
       expect(result.name).toBe(makeKitName(aspekto));
       expect(result.version).toMatch(/^0\.\d+\.\d+-next\.\d+$/);
       const files = result.files.map((file) => file.path).sort();
+      // F25: the LICENSE is written by the generator, so it lands in the package whatever tool
+      // packs it — `npm publish` by hand left it out, pnpm had taken it from the repository root.
+      expect(files).toHaveLength(18);
       expect(files).toEqual([
+        "LICENSE",
         "README.md",
         "dist/element.cjs",
         "dist/element.d.ts",
@@ -69,6 +73,9 @@ describe("what a publish would contain (T020)", () => {
         "tailwind.css",
       ]);
       expect(files.some((file) => file.startsWith("src/"))).toBe(false);
+      expect(readFileSync(join(kits[aspekto] ?? "", "LICENSE"), "utf8")).toBe(
+        readFileSync(new URL("../../../../../LICENSE", import.meta.url), "utf8"),
+      );
     },
   );
 });

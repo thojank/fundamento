@@ -1,14 +1,27 @@
-# Release path of the Figma Make kits (Spec 003, T020, maintainer decision Q2).
+# Release path of the Figma Make kits (Spec 003, T020, maintainer decision Q2; release step F25).
 #
-# This workflow never publishes by itself: it builds the kits and runs `pnpm publish --dry-run`,
-# so the contents and the provenance of a release can be reviewed before anything leaves the
-# repository. The publish itself is the maintainer's, after the acceptance of Phase 3, through npm
-# Trusted Publishing: the registry trusts this repository and this workflow file (OIDC), so no
-# publish token, no secret and no auth entry in .npmrc exists anywhere in this repository.
-name: Release (dry run)
+# Two modes, chosen by the maintainer on demand: `dry-run` (default) builds the kits and runs
+# `pnpm publish --dry-run`, so the contents of a release can be reviewed before anything leaves
+# the repository; `publish` releases both kits under the dist-tag `next` with provenance — only
+# from main. Both go through npm Trusted Publishing: the registry trusts this repository and this
+# workflow file (OIDC), so no publish token, no secret and no auth entry in .npmrc exists anywhere
+# in this repository. The pre-release number is an input (F25): 0.1.0-next.1 is the next one.
+name: Release
 
 on:
   workflow_dispatch:
+    inputs:
+      mode:
+        description: "dry-run shows what a publish would contain; publish releases (main only)"
+        type: choice
+        options:
+          - dry-run
+          - publish
+        default: dry-run
+      version:
+        description: "The pre-release number of the kits, a pre-release of the Modelo's version (e.g. 0.1.0-next.1)"
+        type: string
+        required: true
 
 permissions:
   id-token: write
@@ -55,6 +68,17 @@ jobs:
 
       # One script for the release path and for the CI (F23): it builds both kits — komuna from the
       # repository, ekzemplo from its fixture —, checks that each exists and carries no font file,
-      # and runs the publish dry run in every kit.
-      - name: Build both kits and dry-run the publish
+      # and runs the command of the mode in every kit.
+      - name: Build both kits and show what a publish would contain
+        if: inputs.mode == 'dry-run'
+        run: scripts/release-kits.sh dry-run
+        env:
+          FUNDAMENTO_KIT_VERSION: ${{ inputs.version }}
+
+      # The release itself: only when the maintainer chose it, only from main. Provenance ties the
+      # packages to this workflow run; the version is the input above, written into every kit.
+      - name: Build both kits and publish them under the tag next
+        if: inputs.mode == 'publish' && github.ref == 'refs/heads/main'
         run: scripts/release-kits.sh publish
+        env:
+          FUNDAMENTO_KIT_VERSION: ${{ inputs.version }}
