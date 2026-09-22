@@ -4,19 +4,39 @@
 # exists and carries no font file (Q2: the fictitious font of ekzemplo is a name, never a file),
 # then runs the dry run of the given mode in every kit.
 #
-# Usage: scripts/release-kits.sh publish|pack
+# Usage: scripts/release-kits.sh publish|pack [--print]
 #   publish  `pnpm publish --dry-run --tag next --provenance --access public` (release.yml)
 #   pack     `pnpm pack --dry-run` (ci.yml, every PR)
+#   --print  builds nothing, prints the command the mode would run in every kit — pnpm shows
+#            --provenance nowhere in a dry run's output, so the assembled line is what a test holds.
 # Nothing here publishes: every command is a dry run. Exit 1 with the path names what is missing.
 set -eu
 
 mode="${1:-}"
 case "$mode" in
   publish|pack) ;;
-  *) echo "Usage: $0 publish|pack" >&2; exit 2 ;;
+  *) echo "Usage: $0 publish|pack [--print]" >&2; exit 2 ;;
 esac
+print="${2:-}"
 
 out=".fundamento/release"
+KITS="$out/repo/make-kit/komuna $out/ekzemplo/make-kit/ekzemplo"
+
+# The one command of each mode, in every kit. Kept in one place so what --print shows is what runs.
+command_for() {
+  case "$1" in
+    publish) echo "pnpm publish --dry-run --tag next --provenance --access public --no-git-checks" ;;
+    pack) echo "pnpm pack --dry-run" ;;
+  esac
+}
+
+if [ "$print" = "--print" ]; then
+  for kit in $KITS; do
+    echo "$kit: $(command_for "$mode")"
+  done
+  exit 0
+fi
+
 rm -rf "$out"
 
 # komuna from the Modelo of this repository; ekzemplo from its fixture — `fm projekcioj build`
@@ -42,17 +62,14 @@ check_kit() {
 
 dry_run() {
   dir="$1"
-  echo "== $dir ($mode, dry run)"
-  case "$mode" in
-    publish) (cd "$dir" && pnpm publish --dry-run --tag next --provenance --access public --no-git-checks) ;;
-    pack) (cd "$dir" && pnpm pack --dry-run) ;;
-  esac
+  echo "== $dir: $(command_for "$mode")"
+  (cd "$dir" && sh -c "$(command_for "$mode")")
 }
 
-for kit in "$out/repo/make-kit/komuna" "$out/ekzemplo/make-kit/ekzemplo"; do
+for kit in $KITS; do
   check_kit "$kit"
 done
-for kit in "$out/repo/make-kit/komuna" "$out/ekzemplo/make-kit/ekzemplo"; do
+for kit in $KITS; do
   dry_run "$kit"
 done
 echo "Beide Kits gebaut und im Probelauf ($mode) durch: komuna, ekzemplo."
