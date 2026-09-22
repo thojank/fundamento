@@ -640,7 +640,7 @@ Results go into `plan.md` → „Manual acceptance results".
     F19 passen beide zusammen. Erwartete Größen in einer frischen Datei damit: die der Dichte
     `default`, nicht mehr 51 × 36 / 65 × 40 / 77 × 48.
 
-- [ ] **F20 Das Set umschließt sein Raster** (Abnahme M1)
+- [x] **F20 Das Set umschließt sein Raster** (Abnahme M1)
   - Befund (2026-09-22, Datei `Q7LOiRGeDyJ0JgdajzXg81`): Set 518 × 688, der Untergrund endet dort;
     die Spalte loading ragt rechts ca. 50 px hinaus, die Zeile tertiary · large liegt komplett
     unterhalb des Sets. Das Double hat es nicht erkannt: Zugesichert waren gesetzte Eigenschaften
@@ -681,8 +681,11 @@ Results go into `plan.md` → „Manual acceptance results".
 
   - **Bei density default bestätigt** (Datei `x8sFFyOkrnlMM4ngAsbnfs`): Set 558 × 672 =
     Bounding-Box der Kinder (554 × 668) + Innenabstand 4. Das Umschalten der Dichte folgt nach F21.
-  - Fertig wenn: der Maintainer es in der Datei misst — in light/default und dark/high, und nach
-    dem Umschalten von density.
+  - **Abgenommen** (Maintainer, 2026-09-22, Datei `nYtNJuGBkrmHKDrJHXqIU2`, Stand `9c913df`), per
+    Figma-MCP umgeschaltet: default 558 × 672, compact 510 × 592, comfortable 606 × 768, jeweils
+    nichts außerhalb; Fokus = Ruhe in jeder Dichte. Die Arbeitshypothese „das Set bemisst sich
+    nach einem Moduswechsel nicht neu" ist damit **widerlegt**: Das Set folgt den Kindern. Der
+    Befund vom Vormittag (518 × 688 bei density default) trat mit F19 nicht mehr auf.
 
 - [x] **F21 Der zweite Lauf scheitert** (Abnahme M1, blockierte die Abnahme; Jugxo
   `jug_01M33TKAFM6RSACJN6H90B183A`)
@@ -718,7 +721,7 @@ Results go into `plan.md` → „Manual acceptance results".
   - **Behoben** (Thorsten, Datei `hEWHvBz7uRNrpYSau52OUN`, 2026-09-22): Lauf 2 ohne Abbruch,
     created 0, updated 72, after 72/72, Geometrie unverändert (Set 558 × 672). Folgebefund F22.
 
-- [ ] **F22 Nach Lauf 2 ist das ganze Set schwarz** (Abnahme M1, Regression aus F21; Jugxo
+- [x] **F22 Nach Lauf 2 ist das ganze Set schwarz** (Abnahme M1, Regression aus F21; Jugxo
   `jug_01M33Z7E7NHN5GB4GDWKFA3QXQ`)
   - Befund (Thorsten, Datei `hEWHvBz7uRNrpYSau52OUN`): Nach Lauf 1 alles richtig. Nach Lauf 2 per
     Plugin-API: Set fills[0] SOLID {0,0,0}, Deckkraft 1, gebunden an `color/background/canvas`;
@@ -749,8 +752,28 @@ Results go into `plan.md` → „Manual acceptance results".
     kam, in Figma die Platzhalterfarbe hinterließ und am Rand die Bindung tilgte, ist nicht
     gemessen. Das Double reproduziert das Neuschreiben und seine Zahl, nicht die Schwärzung. Die
     Korrektur vermeidet das Neuschreiben; sie erklärt es nicht.
-  - Fertig wenn: Abnahmelauf — frische Datei, zwei Läufe; nach Lauf 2 Farben wie nach Lauf 1
-    (`layout.paints` beider Läufe gleich), `warnings: []`; danach density per Figma-MCP auf
-    compact/comfortable für F20.
+  - **Abgenommen** (Maintainer, 2026-09-22, Datei `nYtNJuGBkrmHKDrJHXqIU2`): Lauf 1 created 72;
+    Lauf 2 created 0, updated 72, `warnings: []`, kein Abbruch. `layout.paints` nach Lauf 2
+    identisch mit Lauf 1 — canvas `#e4e4e5`, primary `#375479`, Text weiß, tertiary Deckkraft 0,
+    alle gebunden, Rand gebunden. Kaskade dark + high: primary im Export `#c4d2e5` (der
+    high-Wert, nicht default). Folgebefund F24 (nicht blockierend).
+
+- [ ] **F24 Repariert der Stand eine von F22 geschwärzte Datei?** (offen, nicht blockierend;
+  Maintainer 2026-09-22)
+  - Frage: Ein Paint mit richtiger Bindung, aber falscher Farbe (die Platzhalterfarbe {0,0,0},
+    die Lauf 2 vor F22 hinterließ) gilt nach der neuen Vergleichsregel — gleiche Variable,
+    gleiche Deckkraft, gleiche Sichtbarkeit — als „vorhanden" und wird nicht angefasst. Eine
+    Datei, die F22 geschwärzt hat, bliebe damit schwarz.
+  - Nicht jetzt bauen. Zu klären, wenn es ansteht: ob der Vergleich zusätzlich die Farbe gegen den
+    aufgelösten Variablenwert hält (ein Paint, dessen Farbe nicht die der Variablen ist, wird über
+    `setBoundVariableForPaint` neu gesetzt) — und ob das in Figma dasselbe Neuschreiben auslöst,
+    das F22 verursachte. Erst messen: eine geschwärzte Datei mit dem aktuellen Stand laufen lassen
+    und `layout.paints` lesen.
+  - Bis dahin gilt: Eine frische Datei ist richtig (F22 abgenommen); eine vor `9c913df`
+    zweimal bespielte Datei ist nicht repariert und wird neu angelegt.
+
+**M1 abgenommen** (Maintainer, 2026-09-22, 15:15): F8–F22 gemessen in echtem Figma, #21 gemergt
+(`ac7321e`). Offen bleiben F23 (PR #22, abgenommen, Merge und Release-Probelauf durch Thorsten)
+und F24 (Befund, nicht blockierend).
 
 Consistency check before tasks (`/speckit.analyze` scope): every FR and AK maps to at least one task or a recorded decision; every task maps to a plan decision; two new packages (Art. XI); the lockfile changes in T008 only; no task lowers a threshold; nothing is published.
