@@ -2,6 +2,7 @@
 // Publishing through OIDC, a dry run in the repository — the publish itself is the maintainer's,
 // after the acceptance. No token anywhere: no secret in a workflow, no auth entry in .npmrc.
 
+import { spawnSync } from "node:child_process";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
@@ -68,5 +69,29 @@ describe("release.yml (T020, Trusted Publishing)", () => {
       expect(text, file).not.toMatch(/NPM_TOKEN|NODE_AUTH_TOKEN/);
     }
     expect(readFileSync(`${repoRoot}.npmrc`, "utf8")).not.toMatch(/_authToken|_auth=/);
+  });
+});
+
+// F23, Nachfrage des Maintainers nach dem Probelauf #3: Im Protokoll steht kein --provenance, weil
+// pnpm die Fahne im Trockenlauf nicht ausgibt. Der Test hält deshalb die zusammengebaute
+// Befehlszeile selbst fest: `--print` gibt je Kit den Befehl aus, den das Skript ausführen würde.
+describe("release-kits.sh assembles the publish command with provenance", () => {
+  it("prints, for both kits, a dry-run publish with --provenance, --tag next and --access public", () => {
+    const run = spawnSync("sh", ["scripts/release-kits.sh", "publish", "--print"], {
+      cwd: repoRoot,
+      encoding: "utf8",
+    });
+    expect(run.status, run.stderr).toBe(0);
+    expect(run.stderr).not.toContain("Kit fehlt");
+    const lines = run.stdout.split("\n").filter((line) => line.includes("pnpm publish"));
+    expect(lines).toHaveLength(2);
+    for (const line of lines) {
+      expect(line).toContain("--dry-run");
+      expect(line).toContain("--provenance");
+      expect(line).toContain("--tag next");
+      expect(line).toContain("--access public");
+    }
+    expect(run.stdout).toContain("make-kit/komuna");
+    expect(run.stdout).toContain("make-kit/ekzemplo");
   });
 });

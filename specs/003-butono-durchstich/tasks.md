@@ -797,7 +797,19 @@ und F24 (Befund, nicht blockierend).
     keine Schriftdatei (der Bau mit der Fixture-Config schreibt 40 Dateien, keine `.woff/.ttf/.otf`),
     und das Skript weist ein Kit mit Schriftdatei zurück.
   - (4) Jugxo `jug_01M34CWDAP4K51KV8DSE1HVVSB`.
-  - Fertig wenn: der Probelauf erneut durch Thorsten läuft und der Maintainer die Dateilisten
-    beider Kits prüft.
+  - **Abgenommen** (Release-Probelauf #3 auf main `96119a0`, 2026-09-22): beide Kits je 18
+    Dateien — LICENSE, README, dist, guidelines, styles.css, tailwind.css, package.json; keine
+    Tests, Specs, .DS_Store oder Schriftdateien; 0.1.0-next.0, Tag next, public.
+  - Nachfrage: Im Protokoll steht kein `--provenance`, weil pnpm die Fahne im Trockenlauf nicht
+    ausgibt. Bestätigt am Skript: die Befehlszeile lautet `pnpm publish --dry-run --tag next
+    --provenance --access public --no-git-checks`. Abgesichert: `scripts/release-kits.sh publish
+    --print` gibt je Kit den Befehl aus, den das Skript ausführen würde, ohne zu bauen, und ein Test
+    hält `--provenance`, `--tag next`, `--access public` und `--dry-run` darauf fest (rot zuerst:
+    ohne `--print` baute der Aufruf und gab keine Befehlszeile aus). Der Befehl steht im Skript an
+    genau einer Stelle, `command_for`, damit `--print` zeigt, was läuft.
+  - Klarstellung: Das Skript kennt kein echtes Veröffentlichen — jeder Befehl darin ist ein
+    Trockenlauf. Der Publish bleibt der bewusste Schritt des Maintainers nach der Abnahme, über
+    Trusted Publishing; wird er in einen Workflow gehoben, ist `--provenance` dort erneut
+    festzuhalten.
 
 Consistency check before tasks (`/speckit.analyze` scope): every FR and AK maps to at least one task or a recorded decision; every task maps to a plan decision; two new packages (Art. XI); the lockfile changes in T008 only; no task lowers a threshold; nothing is published.
