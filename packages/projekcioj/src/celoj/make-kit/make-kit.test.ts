@@ -42,6 +42,7 @@ describe("Make Kit sources (T018)", () => {
       .map((path) => path.slice(`make-kit/${aspekto}/`.length))
       .sort();
     expect(paths).toEqual([
+      "LICENSE",
       "README.md",
       "guidelines/Guidelines.md",
       "guidelines/components/butono.md",
@@ -236,4 +237,37 @@ describe("Make Kit tarball (T018, clean room)", () => {
     },
     120_000,
   );
+});
+
+// The pre-release number of a kit is set from outside (release.yml, F25): the next publish is
+// 0.1.0-next.1, and nothing in the repository changes for it. It has to be a pre-release of the
+// Modelo's version — anything else would publish under a number the Modelo does not have.
+describe("the kit version comes from FUNDAMENTO_KIT_VERSION (release step)", () => {
+  if (!prepared.ok) throw new Error("core + ekzemplo must be valid");
+  const withEnv = (value: string | undefined) => ({
+    ...prepared.input,
+    env: value === undefined ? {} : { FUNDAMENTO_KIT_VERSION: value },
+  });
+  const versionOf = (files: { path: string; text: string }[]) =>
+    (
+      JSON.parse(files.find((f) => f.path.endsWith("komuna/package.json"))?.text ?? "{}") as {
+        version: string;
+      }
+    ).version;
+  const modelo = prepared.input.modeloJson.fundamento.version;
+
+  it("defaults to <modelo>-next.0", () => {
+    expect(versionOf(MAKE_KIT_CELO.generate(withEnv(undefined)))).toBe(`${modelo}-next.0`);
+  });
+
+  it("takes the requested pre-release of the Modelo's version", () => {
+    expect(versionOf(MAKE_KIT_CELO.generate(withEnv(`${modelo}-next.1`)))).toBe(`${modelo}-next.1`);
+  });
+
+  it("refuses a version that is not a pre-release of the Modelo's version, and says why", () => {
+    expect(() => MAKE_KIT_CELO.generate(withEnv("0.2.0-next.0"))).toThrow(
+      new RegExp(`0\\.2\\.0-next\\.0.*${modelo.replaceAll(".", "\\.")}`),
+    );
+    expect(() => MAKE_KIT_CELO.generate(withEnv(modelo))).toThrow(/pre-release|Vorab/);
+  });
 });

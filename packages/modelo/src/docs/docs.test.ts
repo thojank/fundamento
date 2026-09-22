@@ -667,6 +667,7 @@ describe("F23: the release path runs in the CI, both kits, one script", () => {
   it("ships the script, executable, and both workflows call it — release.yml no longer cd's", () => {
     expect(existsSync(join(repoRoot, script)), script).toBe(true);
     expect(statSync(join(repoRoot, script)).mode & 0o111, "executable").not.toBe(0);
+    expect(releaseYml).toContain(`${script} dry-run`);
     expect(releaseYml).toContain(`${script} publish`);
     expect(releaseYml).not.toContain("cd .fundamento/projekcioj/make-kit");
     // The CI runs it as a check of its own, through the root script, like every other check.
