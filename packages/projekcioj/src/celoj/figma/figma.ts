@@ -30,6 +30,7 @@ import {
   STATE_KEY,
 } from "@fundamento/modelo";
 import type { Celo, CeloInput, GeneratedFile } from "../../build.js";
+import { VITRINO_SURFACE } from "../vitrino/datumoj.js";
 import { DRAWN_PART_PROPERTIES, pluginManifest, pluginSource } from "./plugin.js";
 
 /** A variable value: a literal, or an alias to another variable of the plan. */
@@ -53,7 +54,13 @@ export interface FigmaVariable {
 
 export interface FigmaCollection {
   name: string;
+  /**
+   * The modes, the default first: Figma's default mode of a collection is its first mode
+   * (`defaultModeId` is read-only), so the order decides what "Automatisch" shows (F19).
+   */
   modes: string[];
+  /** The mode a frame gets without a choice: the default of the Dimensio in the Modelo. */
+  defaultMode?: string;
   variables: FigmaVariable[];
 }
 
@@ -125,6 +132,11 @@ export interface FigmaComponentSet {
    * per combination cannot be the default of 72 templates. Every instance may override it.
    */
   label?: { property: string; defaultValue: string };
+  /**
+   * The ground the set stands on: the Vitrino's surface, as a variable, so it follows color-scheme
+   * and contrast (F16). The deckkraft is decided over every combination, like every paint (F8).
+   */
+  surface?: { variable: string; opacity: number };
 }
 
 export interface FigmaPlan {
@@ -291,11 +303,16 @@ export function figmaValues(
 }
 
 /** Dimensioj in priority order (ascending), as the collections follow them. */
-function dimensiojOf(modelo: Modelo): { name: string; modes: string[] }[] {
-  return modelo.dimensioj.map((dimensio) => ({
-    name: dimensio.name,
-    modes: (dimensio.valoroj ?? []).map((valoro) => valoro.name),
-  }));
+function dimensiojOf(modelo: Modelo): { name: string; modes: string[]; defaultMode: string }[] {
+  return modelo.dimensioj.map((dimensio) => {
+    const names = (dimensio.valoroj ?? []).map((valoro) => valoro.name);
+    // The Modelo's default first, the others in the order of the Modelo (F19).
+    return {
+      name: dimensio.name,
+      modes: [dimensio.default, ...names.filter((name) => name !== dimensio.default)],
+      defaultMode: dimensio.default,
+    };
+  });
 }
 
 /** The Dimensioj whose sets define `token`, in priority order (ascending). */
@@ -547,6 +564,13 @@ function componentSetOf(
       ...(font === undefined ? {} : { font }),
     };
   });
+  const ground = paintOf(VITRINO_SURFACE, resolutions, base);
+  // A ground whose alpha differs per mode has no faithful fill (F8); then the set gets none, and
+  // the missing `surface` is what a test and the run see.
+  const surface =
+    ground !== undefined && "opacity" in ground
+      ? { variable: variableName(VITRINO_SURFACE), opacity: ground.opacity }
+      : undefined;
   const columns = skemo.states.length;
   const rowOf = new Map<string, number>();
   for (const variant of variants) {
@@ -570,6 +594,7 @@ function componentSetOf(
       padding: cell,
     },
     label: { property: "label", defaultValue: LABEL_DEFAULT },
+    ...(surface === undefined ? {} : { surface }),
   };
 }
 
@@ -654,11 +679,13 @@ export const FIGMA_CELO: Celo = {
       {
         name: BASE_COLLECTION,
         modes: [BASE_MODE],
+        defaultMode: BASE_MODE,
         variables: sortVariables(variables.get(BASE_COLLECTION) ?? []),
       },
       ...dimensiojOf(modelo).map((dimensio) => ({
         name: dimensio.name,
         modes: dimensio.modes,
+        defaultMode: dimensio.defaultMode,
         variables: sortVariables(variables.get(dimensio.name) ?? []),
       })),
     ];

@@ -47,15 +47,18 @@ const BINDINGS: Readonly<Record<string, readonly Binding[]>> = {
   // to the bare name, the size never arrived — there is no variable of that name.
   "label.typography": [{ node: "label", fields: ["fontSize"], suffix: "/font-size" }],
   // The focus ring as the web component draws it: an outline of the ring's width and colour at
-  // outline-offset, the gap filled with color.focus.inner. The space for both is reserved in every
-  // state, so nothing is clipped and every variant has the same size; only the focus state shows
-  // the colours.
+  // outline-offset, and a box-shadow of the offset's width in color.focus.inner between them. Both
+  // are rings, never areas (F15): each frame has a padding of the band's width and an inside stroke
+  // of the same width, so the stroke fills exactly the band and the inside stays as transparent as
+  // in rest — a fill put a white box behind the transparent tertiary action. The space for both is
+  // reserved in every state, so nothing is clipped and every variant has the same size; only the
+  // focus state shows the colours.
   "focus-ring.ring": [
-    { node: "focus-ring", fields: PADDINGS, suffix: "/width" },
-    { node: "focus-ring", fields: ["fills"], paint: true, suffix: "/color", focusOnly: true },
+    { node: "focus-ring", fields: [...PADDINGS, "strokeWeight"], suffix: "/width" },
+    { node: "focus-ring", fields: ["strokes"], paint: true, suffix: "/color", focusOnly: true },
   ],
-  "focus-ring.offset": [{ node: "focus-gap", fields: PADDINGS }],
-  "focus-ring.color": [{ node: "focus-gap", fields: ["fills"], paint: true, focusOnly: true }],
+  "focus-ring.offset": [{ node: "focus-gap", fields: [...PADDINGS, "strokeWeight"] }],
+  "focus-ring.color": [{ node: "focus-gap", fields: ["strokes"], paint: true, focusOnly: true }],
 };
 
 /**
@@ -66,6 +69,10 @@ const BINDINGS: Readonly<Record<string, readonly Binding[]>> = {
 const NEUTRAL: Readonly<Record<string, unknown>> = {
   fills: [],
   strokes: [],
+  // A line lies inside its frame, as a CSS border does in a border-box; the rings of the focus
+  // rely on it (F15).
+  strokeAlign: "INSIDE",
+  strokeWeight: 0,
   dashPattern: [],
   effects: [],
   cornerRadius: 0,
@@ -87,6 +94,10 @@ const HUG_LAYOUT: Readonly<Record<string, unknown>> = {
   counterAxisAlignItems: "CENTER",
   layoutSizingHorizontal: "HUG",
   layoutSizingVertical: "HUG",
+  // The strokes of ring and gap lie **in** the reserve their paddings make, they do not add to it
+  // (F17): measured, a visible stroke made the focus variants 8 px larger than their row. An
+  // outline does not change the size of the web component either.
+  strokesIncludedInLayout: false,
   itemSpacing: 0,
   paddingLeft: 0,
   paddingRight: 0,
@@ -143,11 +154,13 @@ async function applyCollections() {
   const byName = new Map(existing.map((collection) => [collection.name, collection]));
   const collections = new Map();
   const modeIds = new Map();
+  const modeWarnings = [];
   for (const spec of PLAN.collections) {
     // A collection without variables is not created: in a Modelo with an external Aspekto every
     // token hangs on the aspekto Dimensio (Art. IV completeness), so fundamento can be empty.
     if (spec.variables.length === 0) continue;
-    const collection = byName.get(spec.name) ?? figma.variables.createVariableCollection(spec.name);
+    const found = byName.get(spec.name);
+    const collection = found ?? figma.variables.createVariableCollection(spec.name);
     collections.set(spec.name, collection);
     const ids = {};
     spec.modes.forEach((mode, index) => {
@@ -156,7 +169,10 @@ async function applyCollections() {
         ids[mode] = known.modeId;
         return;
       }
-      const spare = collection.modes[index];
+      // Only the placeholder mode of a collection this run created is renamed. In a file an older
+      // plugin made, the first mode is a real mode with a meaning — renaming it would silently
+      // change what every frame that chose it shows (F19).
+      const spare = found === undefined ? collection.modes[index] : undefined;
       if (index === 0 && spare !== undefined) {
         collection.renameMode(spare.modeId, mode);
         ids[mode] = spare.modeId;
@@ -165,8 +181,19 @@ async function applyCollections() {
       ids[mode] = collection.addMode(mode);
     });
     modeIds.set(spec.name, ids);
+    // The effect, not the call (F19): Figma's default mode is the first mode and cannot be set.
+    // A fresh collection gets the Modelo's default first; a file an older plugin made keeps its
+    // order, and the run says so.
+    const actual = collection.modes.find((mode) => mode.modeId === collection.defaultModeId);
+    if (spec.defaultMode !== undefined && actual !== undefined && actual.name !== spec.defaultMode) {
+      modeWarnings.push(
+        "Sammlung " + spec.name + ": Der Standardmodus ist " + actual.name + ", das Modelo nennt " +
+          spec.defaultMode + ". Figma nimmt den ersten Modus als Standard und lässt die " +
+          "Reihenfolge nicht ändern; eine frisch angelegte Datei hat ihn richtig.",
+      );
+    }
   }
-  return { collections, modeIds };
+  return { collections, modeIds, warnings: modeWarnings };
 }
 
 async function applyVariables(collections, modeIds) {
@@ -179,7 +206,7 @@ async function applyVariables(collections, modeIds) {
       const found =
         byName.get(variable.name) ??
         figma.variables.createVariable(variable.name, collection, variable.type);
-      found.hiddenFromPublishing = variable.hidden === true;
+      write(found, "hiddenFromPublishing", variable.hidden === true);
       variables.set(variable.name, found);
     }
   }
@@ -192,6 +219,13 @@ async function applyVariables(collections, modeIds) {
         const target = value !== null && typeof value === "object" && "alias" in value
           ? figma.variables.createVariableAlias(variables.get(value.alias))
           : value;
+        // An alias is compared by the variable it points at; a literal by its value.
+        const current = found.valuesByMode === undefined ? undefined : found.valuesByMode[ids[mode]];
+        const sameAlias =
+          current !== undefined && current !== null && typeof current === "object" &&
+          current.type === "VARIABLE_ALIAS" && target !== null && typeof target === "object" &&
+          target.type === "VARIABLE_ALIAS" && current.id === target.id;
+        if (sameAlias || JSON.stringify(current) === JSON.stringify(target)) continue;
         found.setValueForMode(ids[mode], target);
       }
     }
@@ -206,14 +240,116 @@ function ours(parent, key, value) {
   );
 }
 
-/** Sets the owned properties to the given values; lists start empty (F13). */
+/**
+ * Written only when the value does not hold yet (F21). Figma refuses some writes on a document
+ * that already has the value — setting layoutMode on a grid with occupied cells threw "Cannot
+ * delete occupied row/column." on the second run — and a write that changes nothing is noise in
+ * the file's history. Compared by JSON, so paints with the same binding count as equal.
+ */
+function write(node, field, value) {
+  // A node this run created is written whole: what the tool gave it is not the plan's (F13), and
+  // reading it back to compare would trust the tool's default. A node found from an earlier run is
+  // compared first.
+  if (!fresh.has(node.id)) {
+    let current;
+    try {
+      current = node[field];
+    } catch (error) {
+      current = undefined;
+    }
+    if (samePaints(field, current, value) || sameJson(current, value)) return false;
+  }
+  node[field] = value;
+  return true;
+}
+
+const sameJson = (a, b) => JSON.stringify(a === undefined ? null : a) === JSON.stringify(b);
+
+/**
+ * Two paint lists hold the same when every paint has the same variable, deckkraft and visibility
+ * (F22). Read back, a paint carries what Figma filled in — visible, blendMode, the colour it
+ * resolved — so a comparison by JSON never matched and rewrote every paint on every run; the
+ * rewrite is what left the set black.
+ */
+function samePaints(field, current, value) {
+  if (field !== "fills" && field !== "strokes") return false;
+  if (!Array.isArray(current) || !Array.isArray(value) || current.length !== value.length) {
+    return false;
+  }
+  return value.every((paint, index) => {
+    const held = current[index];
+    const variableOf = (entry) =>
+      entry && entry.boundVariables && entry.boundVariables.color
+        ? entry.boundVariables.color.id
+        : undefined;
+    const opacityOf = (entry) => (typeof entry.opacity === "number" ? entry.opacity : 1);
+    const visibleOf = (entry) => entry.visible !== false;
+    return (
+      held !== undefined &&
+      held.type === paint.type &&
+      variableOf(held) === variableOf(paint) &&
+      (variableOf(paint) !== undefined || sameJson(held.color, paint.color)) &&
+      opacityOf(held) === opacityOf(paint) &&
+      visibleOf(held) === visibleOf(paint)
+    );
+  });
+}
+
+/** The IDs of the nodes this run created; everything else was found in the file. */
+const fresh = new Set();
+
+function create(make) {
+  const node = make();
+  fresh.add(node.id);
+  return node;
+}
+
+/** Plugin data, written only when it changes. */
+function stamp(node, key, value) {
+  if (node.getSharedPluginData(NAMESPACE, key) === value) return;
+  node.setSharedPluginData(NAMESPACE, key, value);
+}
+
+/**
+ * The values a node is going to get, gathered first and written once (F21): "neutral first, then
+ * the plan" as two writes would set a found node's fill to [] and back to its paint on every run.
+ * Insertion order is kept, so layoutMode still precedes the paddings that need it.
+ */
+const pending = new Map();
+function gather(node) {
+  let values = pending.get(node.id);
+  if (values === undefined) {
+    values = {};
+    pending.set(node.id, values);
+  }
+  return values;
+}
+
+/** Notes the owned properties as neutral or as the plan says; lists start empty (F13). */
 function own(node, values) {
+  const target = gather(node);
   for (const [field, value] of Object.entries(values)) {
-    node[field] = Array.isArray(value) ? [] : value;
+    target[field] = Array.isArray(value) ? [] : value;
   }
 }
 
+/** Writes what was gathered for a node, each property once, only where it does not hold yet. */
+function flush(node) {
+  const values = pending.get(node.id);
+  if (values === undefined) return;
+  pending.delete(node.id);
+  for (const [field, value] of Object.entries(values)) write(node, field, value);
+}
+
+/** The ID of the variable a field is bound to, in the form the tool holds it. */
+function boundId(node, field) {
+  const bound = node.boundVariables === undefined ? undefined : node.boundVariables[field];
+  if (bound === undefined || bound === null) return undefined;
+  return typeof bound === "object" ? bound.id : bound;
+}
+
 function bind(nodes, variant, variables) {
+  const deferred = [];
   for (const [part, name] of Object.entries(variant.bindings)) {
     for (const target of BINDINGS[part] || []) {
       const variable = variables.get(name + (target.suffix || ""));
@@ -231,23 +367,26 @@ function bind(nodes, variant, variables) {
           variable,
         );
         if (paint !== undefined && typeof paint.opacity === "number") bound.opacity = paint.opacity;
-        for (const field of target.fields) node[field] = [bound];
+        for (const field of target.fields) gather(node)[field] = [bound];
       } else {
-        for (const field of target.fields) node.setBoundVariable(field, variable);
+        // A measure is bound after the frame's layout is written: padding, gap and minimum sizes
+        // only take effect on an auto-layout frame, and the tool refuses them before (F11).
+        for (const field of target.fields) deferred.push({ node, field, variable });
       }
     }
   }
+  return deferred;
 }
 
 /** The child of parent marked as the part, created when missing. */
-function part(parent, name, create) {
+function part(parent, name, make) {
   let found = ours(parent, "part", name);
   if (found === undefined) {
-    found = create();
+    found = create(make);
     found.setSharedPluginData(NAMESPACE, "part", name);
     parent.appendChild(found);
   }
-  found.name = name;
+  write(found, "name", name);
   return found;
 }
 
@@ -350,16 +489,18 @@ async function applyComponents(variables, warnings) {
       after: { children: 0, marked: 0 },
       diagnosis: "",
     };
+    progress.components.push(report);
     const made = [];
     const labels = [];
     for (const variant of component.variants) {
       const name = variantName(variant.props);
       const existing = set === undefined ? undefined : ours(set, "variant", name);
+      const node = existing ?? create(() => figma.createComponent());
+      // Counted once the node exists: a run that fails while creating reports what it made.
       (existing === undefined ? report.created : report.updated).push(name);
-      const node = existing ?? figma.createComponent();
-      node.name = name;
-      node.setSharedPluginData(NAMESPACE, "variant", name);
-      node.setSharedPluginData(NAMESPACE, "ero", component.set);
+      write(node, "name", name);
+      stamp(node, "variant", name);
+      stamp(node, "ero", component.set);
       // The structure (F11): variant → focus-ring → focus-gap → control → label, each found by
       // its part mark and created when missing. A control an older plugin left directly under
       // the variant is moved in, never duplicated.
@@ -370,9 +511,9 @@ async function applyComponents(variables, warnings) {
         ours(node, "part", "control") ??
         part(gap, "control", () => figma.createFrame());
       if (control.parent !== gap) gap.appendChild(control);
-      control.name = "control";
+      write(control, "name", "control");
       const label = part(control, "label", () => figma.createText());
-      label.fontName = fonts.get(variant.font.family + " " + variant.font.style);
+      write(label, "fontName", fonts.get(variant.font.family + " " + variant.font.style));
       labels.push(label);
       // Only values from the plan (F13): every owned property neutral first — Figma's white fill,
       // its clipping and its line would otherwise cover what the plan draws.
@@ -385,18 +526,42 @@ async function applyComponents(variables, warnings) {
       // The variant lies in the grid's flow, its parts in the variant's (F14).
       for (const child of [node, ring, gap, control, label]) own(child, IN_FLOW);
       own(label, TEXT_SIZING);
-      ring.cornerRadius = variant.radii["focus-ring"];
-      gap.cornerRadius = variant.radii["focus-gap"];
-      bind({ "focus-ring": ring, "focus-gap": gap, control, label }, variant, variables);
+      gather(ring).cornerRadius = variant.radii["focus-ring"];
+      gather(gap).cornerRadius = variant.radii["focus-gap"];
+      const measures = bind(
+        { "focus-ring": ring, "focus-gap": gap, control, label },
+        variant,
+        variables,
+      );
+      // Everything gathered is written once, layout before the parts inside it; the measures
+      // are bound after that, when every frame has its layout.
+      for (const each of [node, ring, gap, control, label]) flush(each);
+      for (const { node: target, field, variable } of measures) {
+        if (boundId(target, field) !== variable.id) target.setBoundVariable(field, variable);
+      }
       if (existing === undefined) made.push(node);
     }
     if (set === undefined) {
-      set = figma.combineAsVariants(made, figma.currentPage);
-      set.name = component.set;
+      set = create(() => figma.combineAsVariants(made, figma.currentPage));
+      write(set, "name", component.set);
     }
     // The set is a node the plugin owns too: combineAsVariants draws Figma's purple dashed frame
     // around it, which is not from the model (Maintainer, 2026-09-21).
     own(set, NEUTRAL);
+    // The ground of the Vitrino (F16): the set is filled with the model's background, bound to the
+    // variable so it follows color-scheme and contrast — never a fixed colour.
+    if (component.surface !== undefined) {
+      const ground = variables.get(component.surface.variable);
+      if (ground !== undefined) {
+        const bound = figma.variables.setBoundVariableForPaint(
+          { type: "SOLID", color: { r: 0, g: 0, b: 0 } },
+          "color",
+          ground,
+        );
+        bound.opacity = component.surface.opacity;
+        gather(set).fills = [bound];
+      }
+    }
     // The grid of the Vitrino (F11): one row per combination, one column per state, in the order
     // of the plan — a variant a later run had to create goes back to its place.
     const grid = component.grid;
@@ -417,9 +582,10 @@ async function applyComponents(variables, warnings) {
         gridItemsPositioning: "MANUAL",
       });
     }
-    set.setSharedPluginData(NAMESPACE, "ero", component.set);
-    set.setSharedPluginData(NAMESPACE, "skemo", component.pluginData.fundamento.skemo);
-    set.setSharedPluginData(NAMESPACE, "version", component.pluginData.fundamento.version);
+    flush(set);
+    stamp(set, "ero", component.set);
+    stamp(set, "skemo", component.pluginData.fundamento.skemo);
+    stamp(set, "version", component.pluginData.fundamento.version);
     for (const node of made) if (node.parent !== set) set.appendChild(node);
     // The label is a text property of the component (F11): declared once on the set, its default
     // the Vitrino's text, every label connected to it — an instance overrides it.
@@ -431,10 +597,12 @@ async function applyComponents(variables, warnings) {
           candidate.split("#")[0] === spec.property && definitions[candidate].type === "TEXT",
       );
       if (key === undefined) key = set.addComponentProperty(spec.property, "TEXT", spec.defaultValue);
-      else set.editComponentProperty(key, { defaultValue: spec.defaultValue });
+      else if (definitions[key].defaultValue !== spec.defaultValue) {
+        set.editComponentProperty(key, { defaultValue: spec.defaultValue });
+      }
       for (const label of labels) {
-        label.characters = spec.defaultValue;
-        label.componentPropertyReferences = { characters: key };
+        write(label, "characters", spec.defaultValue);
+        write(label, "componentPropertyReferences", { characters: key });
       }
     }
     component.variants.forEach((variant, index) => {
@@ -480,7 +648,7 @@ async function applyComponents(variables, warnings) {
     report.diagnosis = diagnose(report);
     // Ohne Zeitstempel: Zwei gleiche Läufe hinterlassen denselben Stand, sonst wäre der Lauf nicht
     // mehr idempotent.
-    set.setSharedPluginData(NAMESPACE, "after", JSON.stringify(report.after));
+    stamp(set, "after", JSON.stringify(report.after));
     reports.push(report);
   }
   return reports;
@@ -504,6 +672,13 @@ const HELD_AT_SET = [
   "gridRowGap", "gridColumnGap", "gridRowSizes", "gridColumnSizes", "paddingLeft", "paddingRight",
   "paddingTop", "paddingBottom", "itemSpacing", "counterAxisSpacing", "clipsContent", "width",
   "height",
+];
+
+/** What Figma may hold at a part of a variant: its size, its line and how the line is laid out. */
+const HELD_AT_PART = [
+  "name", "type", "layoutMode", "layoutSizingHorizontal", "layoutSizingVertical",
+  "strokesIncludedInLayout", "strokeAlign", "strokeWeight", "paddingLeft", "paddingRight",
+  "paddingTop", "paddingBottom", "minWidth", "minHeight", "x", "y", "width", "height",
 ];
 
 /** What Figma may hold at a child of the grid: its place, its sizing and its cell. */
@@ -559,6 +734,94 @@ function measureLayout(set, component) {
   const unplaced = nodes
     .filter((node) => !(node.gridRowAnchorIndex >= 0 && node.gridColumnAnchorIndex >= 0))
     .map((node) => node.name);
+  // One size per row (F17): the six states of a combination share their outer size, as in the
+  // web component, where an outline takes no space.
+  const rows = new Map();
+  for (const box of boxes) {
+    const node = nodes.find((candidate) => candidate.name === box.name);
+    const row = node === undefined ? -1 : node.gridRowAnchorIndex;
+    if (!rows.has(row)) rows.set(row, []);
+    rows.get(row).push(box);
+  }
+  const uneven = [];
+  for (const [row, members] of rows) {
+    const sizes = new Map();
+    for (const box of members) {
+      const key = dims(box);
+      if (!sizes.has(key)) sizes.set(key, []);
+      sizes.get(key).push(box.name);
+    }
+    if (sizes.size < 2) continue;
+    const sorted = Array.from(sizes.entries()).sort((a, b) => b[1].length - a[1].length);
+    uneven.push({
+      row: row,
+      usual: sorted[0][0],
+      others: sorted.slice(1).map((entry) => ({ size: entry[0], variants: entry[1] })),
+    });
+  }
+  const focused = nodes.find((node) => {
+    const variant = component.variants.find((entry) => variantName(entry.props) === node.name);
+    return variant !== undefined && variant.focusVisible === true;
+  });
+  /** The paints of a node, raw (F22): colour, deckkraft, visibility, the bound variable. */
+  const paintsOf = (node) => {
+    const list = (field) => {
+      let paints;
+      try {
+        paints = node[field];
+      } catch (error) {
+        return ["wirft: " + String(error && error.message ? error.message : error)];
+      }
+      return (Array.isArray(paints) ? paints : []).map((paint) => ({
+        type: paint.type,
+        color: paint.color,
+        opacity: typeof paint.opacity === "number" ? paint.opacity : 1,
+        visible: paint.visible !== false,
+        variable:
+          paint.boundVariables && paint.boundVariables.color
+            ? (paint.boundVariables.color.name || paint.boundVariables.color.id)
+            : null,
+      }));
+    };
+    return { fills: list("fills"), strokes: list("strokes") };
+  };
+  const paintedParts = (node) => {
+    if (node === undefined) return {};
+    const out = { variant: paintsOf(node) };
+    let current = node;
+    for (const name of ["focus-ring", "focus-gap", "control", "label"]) {
+      current = current === undefined ? undefined : ours(current, "part", name);
+      if (current !== undefined) out[name] = paintsOf(current);
+    }
+    return out;
+  };
+  const partsOf = (node) => {
+    if (node === undefined) return {};
+    const out = { variant: held(node, HELD_AT_PART) };
+    let current = node;
+    for (const name of ["focus-ring", "focus-gap", "control", "label"]) {
+      current = current === undefined ? undefined : ours(current, "part", name);
+      if (current !== undefined) out[name] = held(current, HELD_AT_PART);
+    }
+    return out;
+  };
+  // The set against the extent of its children (F20), raw: measured in Figma, a set of 518 × 688
+  // ended before its last column and its last row. Geometry, not the properties that were set.
+  const all = set.children.map((child) => ({
+    name: child.name, x: child.x, y: child.y, width: child.width, height: child.height,
+  }));
+  const bounds = {
+    minX: Math.min(...all.map((box) => box.x)),
+    minY: Math.min(...all.map((box) => box.y)),
+    maxX: Math.max(...all.map((box) => box.x + box.width)),
+    maxY: Math.max(...all.map((box) => box.y + box.height)),
+  };
+  const padRight = typeof set.paddingRight === "number" ? set.paddingRight : 0;
+  const padBottom = typeof set.paddingBottom === "number" ? set.paddingBottom : 0;
+  const outside = all
+    .filter((box) => box.x < 0 || box.y < 0 ||
+      box.x + box.width + padRight > set.width || box.y + box.height + padBottom > set.height)
+    .map((box) => box.name);
   const first = nodes[0];
   const last = nodes[nodes.length - 1];
   const withParent = (node) =>
@@ -573,9 +836,16 @@ function measureLayout(set, component) {
       set: Object.assign(held(set, HELD_AT_SET), { children: set.children.length }),
       variant: withParent(first),
       last: withParent(last),
+      // The parts of the first variant in rest and in focus, side by side (F17).
+      rest: partsOf(first),
+      focus: partsOf(focused),
     },
+    paints: { set: paintsOf(set), variant: paintedParts(first), last: paintedParts(last) },
     set: { width: set.width, height: set.height },
     unplaced: unplaced,
+    uneven: uneven,
+    bounds: bounds,
+    outside: outside,
     variants: boxes.length,
     places: new Set(boxes.map((box) => box.x + "," + box.y)).size,
     columns: new Set(boxes.map((box) => box.x)).size,
@@ -607,6 +877,24 @@ function layoutWarnings(report, grid) {
           : ""),
     );
   }
+  if (layout.outside.length > 0) {
+    out.push(
+      report.set + ": " + layout.outside.length + " von " + layout.variants +
+        " Varianten liegen außerhalb des Sets oder in seinem Innenabstand, z. B. " +
+        layout.outside[layout.outside.length - 1] + "; " + set + ", die Kinder reichen bis " +
+        px(layout.bounds.maxX) + " × " + px(layout.bounds.maxY) + ".",
+    );
+  }
+  if (layout.uneven.length > 0) {
+    const worst = layout.uneven[0];
+    const other = worst.others[0];
+    out.push(
+      report.set + ": " + layout.uneven.length + " von " +
+        (grid === undefined ? layout.uneven.length : grid.rows) +
+        " Zeilen haben Varianten unterschiedlicher Größe, z. B. Zeile " + worst.row + ": " +
+        other.variants[0] + " misst " + other.size + " statt " + worst.usual + ".",
+    );
+  }
   if (layout.zero.length > 0) {
     out.push(
       report.set + ": " + layout.zero.length + " von " + layout.variants +
@@ -630,12 +918,25 @@ function layoutWarnings(report, grid) {
   return out;
 }
 
+/**
+ * What the run has done so far: printed whole when the run fails, so the console shows the report
+ * up to the point of the abort and not only "Error" (F21).
+ */
+const progress = { phase: "start", collections: 0, variables: 0, components: [], warnings: [] };
+
 /** Applies the whole plan; safe to run again. Returns the report of this run (F10). */
 async function applyPlan() {
-  const { collections, modeIds } = await applyCollections();
+  progress.phase = "collections";
+  const { collections, modeIds, warnings: modeWarnings } = await applyCollections();
+  progress.collections = collections.size;
+  progress.phase = "variables";
   const variables = await applyVariables(collections, modeIds);
-  const warnings = [];
+  progress.variables = variables.size;
+  progress.warnings = [...modeWarnings];
+  progress.phase = "components";
+  const warnings = [...modeWarnings];
   const components = await applyComponents(variables, warnings);
+  progress.phase = "done";
   for (const report of components) {
     const component = PLAN.components.find((candidate) => candidate.set === report.set);
     warnings.push(...layoutWarnings(report, component === undefined ? undefined : component.grid));
@@ -685,11 +986,83 @@ async function applyPlan() {
   };
 }
 
+const PART_LIMIT = 3900;
+
+/** Splits a list into JSON lines below the limit; each line names the part and its slice. */
+function partsOfList(set, part, list) {
+  const out = [];
+  let from = 0;
+  while (from < list.length) {
+    let to = list.length;
+    let text = JSON.stringify({ set, part, from, to, items: list.slice(from, to) });
+    while (text.length > PART_LIMIT && to - from > 1) {
+      to = from + Math.max(1, Math.floor((to - from) / 2));
+      text = JSON.stringify({ set, part, from, to, items: list.slice(from, to) });
+    }
+    out.push(text);
+    from = to;
+  }
+  return out;
+}
+
+/** The report as JSON lines under the limit (F22): headline, then per component its parts. */
+function reportParts(result) {
+  const lines = [
+    JSON.stringify({
+      fundamento: result.fundamento,
+      collections: result.collections,
+      variables: result.variables,
+      warnings: result.warnings,
+      components: result.components.map((report) => ({
+        set: report.set,
+        found: report.found,
+        planned: report.planned,
+        created: report.created.length,
+        updated: report.updated.length,
+        missing: report.missing.length,
+        extra: report.extra.length,
+        duplicates: report.duplicates.length,
+        before: report.before,
+        after: report.after,
+        left: report.left,
+        diagnosis: report.diagnosis,
+      })),
+    }),
+  ];
+  for (const report of result.components) {
+    for (const part of ["created", "updated", "missing", "extra", "duplicates"]) {
+      if (report[part].length > 0) lines.push(...partsOfList(report.set, part, report[part]));
+    }
+    if (report.layout !== undefined) {
+      const layout = Object.assign({}, report.layout);
+      const held = layout.held;
+      const paints = layout.paints;
+      delete layout.held;
+      delete layout.paints;
+      for (const [part, value] of [["layout", layout], ["held", held], ["paints", paints]]) {
+        if (value === undefined) continue;
+        const text = JSON.stringify({ set: report.set, part, value });
+        if (text.length <= PART_LIMIT) {
+          lines.push(text);
+          continue;
+        }
+        for (const [key, entry] of Object.entries(value)) {
+          lines.push(JSON.stringify({ set: report.set, part: part + "." + key, value: entry }));
+        }
+      }
+    }
+  }
+  return lines;
+}
+
 /** One place for the report: everything in the console, the headline in the toast (F10). */
 function announce(result) {
-  console.log(
-    "Fundamento " + result.fundamento + " – Bericht:" + "\\n" + JSON.stringify(result, null, 2),
-  );
+  // One string per line, JSON, in parts under 4 000 characters: an object viewer folds and cuts
+  // what is copied (F21), and Figma cuts a copied line at 5 000 characters (F22). The headline
+  // with the numbers and the warnings comes first; the lists and the layout follow, each its own
+  // part, long lists split.
+  console.log("Fundamento " + result.fundamento + " – Bericht in Teilen (JSON, je eine Zeile):");
+  for (const part of reportParts(result)) console.log(part);
   const counted = result.components
     .map((report) =>
       report.set + " " + report.created.length + " neu, " + report.updated.length + " aktualisiert",
@@ -714,7 +1087,12 @@ if (typeof figma !== "undefined" && typeof figma.closePlugin === "function" && f
     })
     // A rejection used to disappear: no toast, no console, a plugin that seemed to do nothing.
     .catch((error) => {
-      console.error("Fundamento " + PLAN.fundamento + " – Lauf fehlgeschlagen:", error);
+      // Message, stack and the report up to the abort, each as one string (F21): "Error" alone
+      // said nothing, and the folded report was cut when copied.
+      const message = String(error && error.message ? error.message : error);
+      console.error("Fundamento " + PLAN.fundamento + " – Lauf fehlgeschlagen in Phase " + progress.phase + ": " + message);
+      console.error(String(error && error.stack ? error.stack : "(kein Stack)"));
+      console.error(JSON.stringify(progress));
       figma.notify(
         "Fundamento " + PLAN.fundamento + ": Lauf fehlgeschlagen — " + String(error && error.message ? error.message : error) +
           ". Einzelheiten in der Konsole.",

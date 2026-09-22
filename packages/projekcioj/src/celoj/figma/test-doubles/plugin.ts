@@ -36,7 +36,8 @@ export interface DoubleNode {
   properties: Record<string, unknown>;
   /** Properties that still hold the value the tool gave the node, not one the plugin wrote (F13). */
   defaults: Set<string>;
-  boundVariables: Record<string, string>;
+  /** Per field the alias Figma holds: `{ type: "VARIABLE_ALIAS", id, name }`. */
+  boundVariables: Record<string, { type: "VARIABLE_ALIAS"; id: string; name: string }>;
   pluginData: Record<string, string>;
   appendChild(child: DoubleNode): void;
   insertChild(index: number, child: DoubleNode): void;
@@ -57,6 +58,8 @@ export interface DoubleCounts {
   variables: number;
   nodes: number;
   valueWrites: number;
+  /** Every write to the document: a property, a binding, a cell, plugin data, a value (F21). */
+  writes: number;
 }
 
 export interface DoubleNotification {
@@ -108,6 +111,8 @@ const FIGMA_DEFAULTS: Readonly<Record<string, Readonly<Record<string, unknown>>>
   FRAME: {
     fills: [{ type: "SOLID", color: { r: 1, g: 1, b: 1 } }],
     strokes: [],
+    strokeAlign: "INSIDE",
+    strokeWeight: 1,
     effects: [],
     cornerRadius: 0,
     opacity: 1,
@@ -123,6 +128,8 @@ const FIGMA_DEFAULTS: Readonly<Record<string, Readonly<Record<string, unknown>>>
   COMPONENT: {
     fills: [{ type: "SOLID", color: { r: 1, g: 1, b: 1 } }],
     strokes: [],
+    strokeAlign: "INSIDE",
+    strokeWeight: 1,
     effects: [],
     cornerRadius: 0,
     opacity: 1,
@@ -141,6 +148,8 @@ const FIGMA_DEFAULTS: Readonly<Record<string, Readonly<Record<string, unknown>>>
     fills: [{ type: "SOLID", color: { r: 1, g: 1, b: 1 } }],
     strokes: [{ type: "SOLID", color: { r: 0.592, g: 0.278, b: 1 } }],
     dashPattern: [10, 5],
+    strokeAlign: "INSIDE",
+    strokeWeight: 1,
     effects: [],
     cornerRadius: 5,
     opacity: 1,
@@ -193,6 +202,7 @@ export interface DoubleBox {
 interface NodeContext {
   loaded: ReadonlySet<string>;
   box?: (node: DoubleNode) => DoubleBox;
+  resolveColor?: (name: string) => { r: number; g: number; b: number } | undefined;
   /**
    * Counts every change to the document. The layout is computed once per state of the document,
    * not once per read: reading x, y, width and height of 72 variants recomputed the whole tree
@@ -202,6 +212,25 @@ interface NodeContext {
 }
 
 const GEOMETRY_KEYS: ReadonlySet<string> = new Set(["x", "y", "width", "height"]);
+
+/**
+ * A paint as Figma stores and returns it (F22): `visible`, `opacity` and `blendMode` filled in,
+ * the colour as given. Reading `fills` back therefore never equals the object that was written —
+ * a comparison by JSON rewrites on every run; a comparison by variable, opacity and visibility
+ * does not.
+ */
+function asStoredPaint(paint: unknown): unknown {
+  if (typeof paint !== "object" || paint === null) return paint;
+  const given = paint as Record<string, unknown>;
+  return {
+    type: given.type,
+    visible: given.visible === undefined ? true : given.visible,
+    opacity: typeof given.opacity === "number" ? given.opacity : 1,
+    blendMode: given.blendMode === undefined ? "NORMAL" : given.blendMode,
+    color: given.color,
+    ...(given.boundVariables === undefined ? {} : { boundVariables: given.boundVariables }),
+  };
+}
 
 function node(
   type: string,
@@ -263,6 +292,7 @@ function node(
       }
       anchor.row = rowIndex;
       anchor.column = columnIndex;
+      counts.writes++;
       context.version++;
     },
     children: [],
@@ -290,6 +320,7 @@ function node(
     },
     setSharedPluginData(namespace, key, value) {
       self.pluginData[`${namespace}/${key}`] = value;
+      counts.writes++;
     },
     getSharedPluginData(namespace, key) {
       return self.pluginData[`${namespace}/${key}`] ?? "";
@@ -302,7 +333,15 @@ function node(
         );
       }
       if (variable === null) delete self.boundVariables[field];
-      else self.boundVariables[field] = variable.name;
+      else
+        self.boundVariables[field] = {
+          type: "VARIABLE_ALIAS",
+          id: variable.id,
+          name: variable.name,
+        };
+      // Bound by the plugin: the value is the plugin's from now on, not the tool's default.
+      self.defaults.delete(field);
+      counts.writes++;
       context.version++;
     },
     remove() {
@@ -321,6 +360,25 @@ function node(
       if (key === "gridRowAnchorIndex" || key === "gridColumnAnchorIndex") {
         throw new Error(`${String(key)} is read-only; use setGridChildPosition.`);
       }
+      // Measured on 2026-09-22 (file x8sFFyOkrnlMM4ngAsbnfs, F21): setting layoutMode on a grid
+      // whose cells are occupied — even to "GRID" again — threw "in set_layoutMode: Cannot set
+      // grid row count: Cannot delete occupied row/column." The double throws the same; and it
+      // refuses a track count below an occupied cell, which is what the message says.
+      if (typeof key === "string" && target.properties.layoutMode === "GRID") {
+        const rows = Math.max(-1, ...target.children.map((child) => child.gridRowAnchorIndex)) + 1;
+        const columns =
+          Math.max(-1, ...target.children.map((child) => child.gridColumnAnchorIndex)) + 1;
+        const occupied = rows > 0 && columns > 0;
+        const shrinks =
+          (key === "gridRowCount" && Number(value) < rows) ||
+          (key === "gridColumnCount" && Number(value) < columns);
+        if (occupied && (key === "layoutMode" || shrinks)) {
+          throw new Error(
+            `in set_${key}: Cannot set grid row count: Cannot delete occupied row/column.`,
+          );
+        }
+      }
+      counts.writes++;
       context.version++;
       // Figma refuses a text in a font that is not loaded: setting it, or setting characters in
       // the font the text has (F11). The double does too, instead of accepting it silently.
@@ -334,7 +392,10 @@ function node(
         }
       }
       if (typeof key === "string" && !(key in target)) {
-        target.properties[key] = value;
+        target.properties[key] =
+          (key === "fills" || key === "strokes") && Array.isArray(value)
+            ? value.map(asStoredPaint)
+            : value;
         // Written by the plugin: from now on the value is the plugin's, not the tool's.
         target.defaults.delete(key);
         return true;
@@ -372,6 +433,13 @@ function node(
  *   child — that is what HUG tracks are documented to do, and what the next run has to confirm.
  *   Two earlier explanations were refuted by measurement and are gone: "Figma rejects the grid"
  *   and "an unsized child counts as 0 × 0".
+ * - a **visible stroke takes space** (measured in run #21, file Q7LOiRGeDyJ0JgdajzXg81,
+ *   2026-09-22): the frames of ring and gap, hugging and with an inside stroke of 2, were 2 larger
+ *   on every side once the stroke had a paint — 8 px per variant in the focus state, none in the
+ *   other states, where the weight was bound but no paint was set. An earlier version of this
+ *   double never counted strokes; nobody had measured that. `strokesIncludedInLayout = false` is
+ *   documented to make strokes overlap the content instead; the double follows the documentation
+ *   there, and the next run has to confirm it.
  * Numbers bound to a variable take its value in the first mode of its collection.
  */
 function layoutOf(
@@ -382,7 +450,7 @@ function layoutOf(
   const sizes = new Map<DoubleNode, { width: number; height: number }>();
   const num = (current: DoubleNode, field: string): number => {
     const bound = current.boundVariables[field];
-    const value = bound === undefined ? current.properties[field] : resolve(bound);
+    const value = bound === undefined ? current.properties[field] : resolve(bound.name);
     return typeof value === "number" ? value : 0;
   };
   const prop = (current: DoubleNode, field: string) => current.properties[field];
@@ -415,8 +483,14 @@ function layoutOf(
       const spacing = num(current, "itemSpacing") * Math.max(0, children.length - 1);
       const main = children.reduce((sum, child) => sum + along(child), 0) + spacing;
       const cross = Math.max(0, ...children.map(across));
-      const padX = num(current, "paddingLeft") + num(current, "paddingRight");
-      const padY = num(current, "paddingTop") + num(current, "paddingBottom");
+      const strokes = prop(current, "strokes");
+      const visible = Array.isArray(strokes) && strokes.length > 0;
+      const stroke =
+        visible && prop(current, "strokesIncludedInLayout") !== false
+          ? 2 * num(current, "strokeWeight")
+          : 0;
+      const padX = num(current, "paddingLeft") + num(current, "paddingRight") + stroke;
+      const padY = num(current, "paddingTop") + num(current, "paddingBottom") + stroke;
       const contentW = (mode === "HORIZONTAL" ? main : cross) + padX;
       const contentH = (mode === "HORIZONTAL" ? cross : main) + padY;
       size = {
@@ -536,7 +610,13 @@ function strict<T extends object>(name: string, api: T): T {
 export function figmaDouble(
   options: { fonts?: readonly { family: string; style: string }[] } = {},
 ): FigmaDouble {
-  const counts: DoubleCounts = { collections: 0, variables: 0, nodes: 0, valueWrites: 0 };
+  const counts: DoubleCounts = {
+    collections: 0,
+    variables: 0,
+    nodes: 0,
+    valueWrites: 0,
+    writes: 0,
+  };
   const available = new Set([...FIGMA_FONTS, ...(options.fonts ?? [])].map(fontKey));
   const loaded = new Set<string>();
   // Filled below, once the document and the variables exist.
@@ -559,10 +639,12 @@ export function figmaDouble(
       renameMode(modeId, next) {
         const mode = modes.find((candidate) => candidate.modeId === modeId);
         if (mode !== undefined) mode.name = next;
+        counts.writes++;
       },
       addMode(next) {
         const modeId = id("mode");
         modes.push({ modeId, name: next });
+        counts.writes++;
         return modeId;
       },
     };
@@ -585,12 +667,19 @@ export function figmaDouble(
       valuesByMode: {},
       setValueForMode(modeId, value) {
         counts.valueWrites++;
+        counts.writes++;
         context.version++;
         variable.valuesByMode[modeId] = value;
       },
     };
     variables.push(variable);
-    return variable;
+    // Every direct assignment on a variable is a write of the document as well.
+    return new Proxy(variable, {
+      set(target, key, value) {
+        counts.writes++;
+        return Reflect.set(target, key, value);
+      },
+    });
   };
 
   const figma = strict("figma", {
@@ -605,10 +694,19 @@ export function figmaDouble(
         type: "VARIABLE_ALIAS",
         id: variable.id,
       }),
-      setBoundVariableForPaint: (paint: unknown, _field: string, variable: DoubleVariable) => ({
-        ...(paint as Record<string, unknown>),
-        boundVariables: { color: { type: "VARIABLE_ALIAS", id: variable.id, name: variable.name } },
-      }),
+      // Measured on 2026-09-22 (F22, file hEWHvBz7uRNrpYSau52OUN): a paint shows the colour it
+      // holds, binding or not — a raw paint with boundVariables and the placeholder {0,0,0}
+      // rendered black. Only this call resolves the variable's colour into the copy it returns.
+      setBoundVariableForPaint: (paint: unknown, _field: string, variable: DoubleVariable) => {
+        const resolved = resolveColor(variable.name);
+        return {
+          ...(paint as Record<string, unknown>),
+          ...(resolved === undefined ? {} : { color: resolved }),
+          boundVariables: {
+            color: { type: "VARIABLE_ALIAS", id: variable.id, name: variable.name },
+          },
+        };
+      },
     }),
     createComponent: () => node("COMPONENT", "Component", counts, context),
     createFrame: () => node("FRAME", "Frame", counts, context),
@@ -686,6 +784,16 @@ export function figmaDouble(
     }
     return undefined;
   };
+  /** The colour a COLOR variable holds in the default mode, aliases followed; `{r,g,b}`. */
+  const resolveColor = (name: string): { r: number; g: number; b: number } | undefined => {
+    const value = resolve(name) as { r?: unknown; g?: unknown; b?: unknown } | undefined;
+    return typeof value?.r === "number" &&
+      typeof value.g === "number" &&
+      typeof value.b === "number"
+      ? { r: value.r, g: value.g, b: value.b }
+      : undefined;
+  };
+  context.resolveColor = resolveColor;
   // One layout per state of the document (see NodeContext.version), with its resolved numbers.
   let computed: { version: number; top: DoubleNode; boxes: Map<DoubleNode, DoubleBox> } | undefined;
   context.box = (current: DoubleNode) => {

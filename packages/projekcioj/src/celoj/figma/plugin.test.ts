@@ -315,7 +315,7 @@ describe("the plugin reports what it did (F10)", () => {
     } finally {
       console.log = log;
     }
-    expect(lines.join("\n")).toContain('"set": "butono"');
+    expect(lines.join("\n")).toContain('"set":"butono"');
     expect(double.notifications.map((entry) => entry.message).join(" ")).toContain("butono");
     expect(double.notifications[0]?.message).toContain("Konsole");
   });
@@ -666,7 +666,7 @@ describe("the geometry of the Ero reaches Figma (F11)", () => {
     expect(control?.properties.counterAxisAlignItems).toBe("CENTER");
     const bound = control?.boundVariables ?? {};
     expect(bound.paddingLeft).toBeDefined();
-    expect(bound.paddingRight).toBe(bound.paddingLeft);
+    expect(bound.paddingRight).toEqual(bound.paddingLeft);
     expect(bound.itemSpacing).toBeDefined();
     expect(bound.minHeight).toBeDefined();
   });
@@ -704,25 +704,63 @@ describe("the focus ring is drawn, and never clipped (F11)", () => {
     expect(ring?.parent).toBe(variant);
     expect(gap?.parent).toBe(ring);
     expect(control?.parent).toBe(gap);
-    expect(ring?.boundVariables.paddingLeft).toBe("focus/ring/width");
-    expect(ring?.boundVariables.paddingTop).toBe("focus/ring/width");
-    expect(gap?.boundVariables.paddingLeft).toBe("focus/offset");
-    expect(gap?.boundVariables.paddingBottom).toBe("focus/offset");
+    expect(ring?.boundVariables.paddingLeft?.name).toBe("focus/ring/width");
+    expect(ring?.boundVariables.paddingTop?.name).toBe("focus/ring/width");
+    expect(gap?.boundVariables.paddingLeft?.name).toBe("focus/offset");
+    expect(gap?.boundVariables.paddingBottom?.name).toBe("focus/offset");
     // Not focused: the space is there, the ring is not.
     expect(ring?.properties.fills).toEqual([]);
     expect(gap?.properties.fills).toEqual([]);
   });
 
-  it("shows ring and gap in their colours, bound to the tokens, in the focus state", async () => {
-    const variant = await variantOf(modelDouble(), "focus");
-    const ring = find(variant, "focus-ring");
-    const gap = find(variant, "focus-gap");
-    const [ringPaint] = (ring?.properties.fills ?? []) as {
-      boundVariables?: { color?: unknown };
-    }[];
-    const [gapPaint] = (gap?.properties.fills ?? []) as { boundVariables?: { color?: unknown } }[];
-    expect(ringPaint?.boundVariables?.color).toMatchObject({ name: "focus/ring/color" });
-    expect(gapPaint?.boundVariables?.color).toMatchObject({ name: "color/focus/inner" });
+  // F15 (Abnahme M1, Maintainer 2026-09-22): Der Fokus der tertiären Aktion war eine weiße Fläche
+  // statt eines Rings. Die Web Component zeichnet den Fokus als outline plus box-shadow 0 0 0
+  // offset — nur als Ring außerhalb, das Innere bleibt durchsichtig. In Figma füllte focus-gap die
+  // ganze Fläche hinter control mit color.focus.inner; bei tertiary (durchsichtig) entstand ein
+  // weißer Kasten. Ring und Abstand sind deshalb Striche, keine Füllungen.
+  type Stroke = { boundVariables?: { color?: { name?: string } } };
+
+  it("draws ring and gap as strokes bound to the tokens, in the focus state only", async () => {
+    const focused = await variantOf(modelDouble(), "focus");
+    const ring = find(focused, "focus-ring");
+    const gap = find(focused, "focus-gap");
+    const [ringStroke] = (ring?.properties.strokes ?? []) as Stroke[];
+    const [gapStroke] = (gap?.properties.strokes ?? []) as Stroke[];
+    expect(ringStroke?.boundVariables?.color).toMatchObject({ name: "focus/ring/color" });
+    expect(gapStroke?.boundVariables?.color).toMatchObject({ name: "color/focus/inner" });
+    // The stroke lies inside its frame and is as wide as the padding it fills: a band, no area.
+    for (const [node, weight] of [
+      [ring, "focus/ring/width"],
+      [gap, "focus/offset"],
+    ] as const) {
+      expect(node?.properties.strokeAlign).toBe("INSIDE");
+      expect(node?.boundVariables.strokeWeight?.name).toBe(weight);
+      expect(node?.boundVariables.paddingLeft?.name).toBe(weight);
+    }
+    const resting = await variantOf(modelDouble(), "rest");
+    expect(find(resting, "focus-ring")?.properties.strokes).toEqual([]);
+    expect(find(resting, "focus-gap")?.properties.strokes).toEqual([]);
+  });
+
+  // Die rote Zusicherung des Maintainers: Die Fläche innerhalb von control trägt im Zustand focus
+  // keine andere Füllung als in rest — für jede Kombination, tertiary eingeschlossen.
+  it("fills nothing behind the control in focus that it does not fill in rest", async () => {
+    const double = modelDouble();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    const set = double.root.children[0]?.children.find((child) => child.name === "butono");
+    const behind = (variant: DoubleNode | undefined) =>
+      [variant, find(variant, "focus-ring"), find(variant, "focus-gap")].map(
+        (node) => node?.properties.fills,
+      );
+    const focused = (set?.children ?? []).filter((child) => child.name.endsWith("state=focus"));
+    expect(focused).toHaveLength(12);
+    for (const variant of focused) {
+      const rest = set?.children.find(
+        (child) => child.name === variant.name.replace("state=focus", "state=rest"),
+      );
+      expect(behind(variant), variant.name).toEqual(behind(rest));
+      expect(behind(variant), variant.name).toEqual([[], [], []]);
+    }
   });
 
   it("clips nothing: no frame of the variant cuts its content", async () => {
@@ -761,6 +799,8 @@ describe("every property the plugin owns is from the plan or neutral", () => {
     "fills",
     "strokes",
     "dashPattern",
+    "strokeAlign",
+    "strokeWeight",
     "effects",
     "cornerRadius",
     "opacity",
@@ -1234,5 +1274,619 @@ describe("every variant has its size and its own place in the grid (F14)", () =>
     expect(Object.values(definitions).map((definition) => definition.defaultValue)).toEqual([
       "Aktion",
     ]);
+  });
+});
+
+// F16 (Abnahme M1, Maintainer 2026-09-22): Die Vitrino zeigt die Knöpfe auf dem Untergrund des
+// Modells; in Figma standen sie auf der dunklen Leinwand, und tertiary war dort unlesbar. Das Set
+// bekommt die Untergrundfarbe als Füllung — gebunden an die Variable, keine feste Farbe, damit sie
+// mit color-scheme wechselt. Sie gehört zu den Eigenschaften, die das Plugin besitzt.
+describe("the set stands on the model's background, like the Vitrino (F16)", () => {
+  it("names the Vitrino's surface in the plan", () => {
+    expect(repoPlan.components[0]?.surface).toEqual({
+      variable: "color/background/canvas",
+      opacity: 1,
+    });
+  });
+
+  it("fills the set with it, bound to the variable, on both runs", async () => {
+    const double = modelDouble();
+    for (const _ of [1, 2]) {
+      await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+      const set = double.root.children[0]?.children.find((child) => child.name === "butono");
+      const fills = (set?.properties.fills ?? []) as {
+        opacity?: number;
+        boundVariables?: { color?: { name?: string } };
+      }[];
+      expect(fills).toHaveLength(1);
+      expect(fills[0]?.boundVariables?.color).toMatchObject({ name: "color/background/canvas" });
+      expect(fills[0]?.opacity).toBe(1);
+    }
+  });
+});
+
+// F17 (Messlauf #21, Datei Q7LOiRGeDyJ0JgdajzXg81, 2026-09-22): Alle 12 Fokus-Varianten waren 8 px
+// breiter und höher als die übrigen Zustände ihrer Zeile (small 59 × 44 statt 51 × 36, medium
+// 73 × 48 statt 65 × 40, large 85 × 56 statt 77 × 48). Die Reserve aus Innenabständen wirkte in
+// jedem Zustand (28 + 8 = 36); dazu kamen im Fokus 2 × (2 + 2) = 8 — die sichtbaren Striche von
+// Ring und Abstand nahmen zusätzlich Platz. In der Web Component ändert outline die Größe nicht.
+//
+// Warum das Double es nicht sah: Sein Layout zählte Striche nie mit. Es hatte stillschweigend
+// angenommen, ein Strich nehme keinen Platz — gemessen hatte das niemand.
+describe("a visible stroke takes space, as measured (F17)", () => {
+  async function hugging(included: boolean | undefined) {
+    const double = modelDouble();
+    const api = double.figma as {
+      createFrame: () => DoubleNode;
+      createText: () => DoubleNode;
+      loadFontAsync: (font: { family: string; style: string }) => Promise<void>;
+    };
+    await api.loadFontAsync({ family: "Inter", style: "Regular" });
+    const frame = api.createFrame();
+    const text = api.createText();
+    Object.assign(text, { characters: "Aktion" });
+    frame.appendChild(text);
+    Object.assign(frame, {
+      layoutMode: "HORIZONTAL",
+      layoutSizingHorizontal: "HUG",
+      layoutSizingVertical: "HUG",
+      strokeWeight: 2,
+    });
+    if (included !== undefined) Object.assign(frame, { strokesIncludedInLayout: included });
+    const size = () => {
+      const box = frame as unknown as { width: number; height: number };
+      return [box.width, box.height];
+    };
+    const bare = size();
+    Object.assign(frame, { strokes: [{ type: "SOLID", color: { r: 0, g: 0, b: 0 } }] });
+    return { bare, stroked: size() };
+  }
+
+  it("grows a hugging frame by the weight on every side once the stroke is visible", async () => {
+    const { bare, stroked } = await hugging(undefined);
+    expect(stroked).toEqual([(bare[0] ?? 0) + 4, (bare[1] ?? 0) + 4]);
+  });
+
+  it("leaves the size alone when strokesIncludedInLayout is false", async () => {
+    const { bare, stroked } = await hugging(false);
+    expect(stroked).toEqual(bare);
+  });
+});
+
+describe("every variant has the same outer size in all six states (F17)", () => {
+  const rowsOf = (double: ReturnType<typeof figmaDouble>) => {
+    const set = double.root.children[0]?.children.find((child) => child.name === "butono");
+    const rows = new Map<number, string[]>();
+    for (const variant of set?.children ?? []) {
+      const box = variant as unknown as { width: number; height: number };
+      const sizes = rows.get(variant.gridRowAnchorIndex) ?? [];
+      sizes.push(`${box.width} × ${box.height}`);
+      rows.set(variant.gridRowAnchorIndex, sizes);
+    }
+    return rows;
+  };
+
+  it("gives the six variants of a row one width and one height, focus included", async () => {
+    const double = modelDouble();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    const rows = rowsOf(double);
+    expect(rows.size).toBe(12);
+    for (const [row, sizes] of rows) {
+      expect(sizes, `row ${row}`).toHaveLength(6);
+      expect(new Set(sizes).size, `row ${row}: ${sizes.join(", ")}`).toBe(1);
+    }
+  });
+
+  it("owns strokesIncludedInLayout on ring and gap: the stroke lies in the reserve", async () => {
+    const double = modelDouble();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    const set = double.root.children[0]?.children.find((child) => child.name === "butono");
+    const focused = set?.children.find((child) => child.name.endsWith("state=focus"));
+    for (const part of ["focus-ring", "focus-gap"]) {
+      expect(descendant(focused, part)?.properties.strokesIncludedInLayout, part).toBe(false);
+    }
+  });
+
+  // Die Wirkung messen, nicht den Aufruf: In einem Werkzeug, das die Eigenschaft annimmt und
+  // nichts bewirkt, nennt der Bericht die ungleichen Zeilen mit Zahlen.
+  it("warns with numbers when a row is uneven", async () => {
+    const double = modelDouble();
+    const api = double.figma as { createFrame: () => DoubleNode };
+    const create = api.createFrame;
+    const figma = {
+      ...double.figma,
+      createFrame: () =>
+        new Proxy(create(), {
+          set(target, key, value, receiver) {
+            if (key === "strokesIncludedInLayout") return true;
+            return Reflect.set(target, key, value, receiver);
+          },
+        }),
+    };
+    const report = (await new Function(
+      "figma",
+      `${repoFiles["figma/plugin/code.js"] ?? ""}\nreturn applyPlan();`,
+    )(figma)) as { warnings: string[]; components: { layout: { uneven: unknown[] } }[] };
+    expect(report.components[0]?.layout.uneven).toHaveLength(12);
+    const text = report.warnings.join(" ");
+    expect(text).toContain("12 von 12 Zeilen");
+    expect(text).toContain("state=focus");
+    expect(text).toMatch(/\d+(\.\d+)? × \d+(\.\d+)? statt \d+(\.\d+)? × \d+(\.\d+)?/);
+  });
+
+  it("reports what the tool holds at the parts of a focused variant", async () => {
+    const double = modelDouble();
+    const report = (await new Function(
+      "figma",
+      `${repoFiles["figma/plugin/code.js"] ?? ""}\nreturn applyPlan();`,
+    )(double.figma)) as {
+      components: { layout: { held: { focus: Record<string, Record<string, unknown>> } } }[];
+    };
+    const parts = report.components[0]?.layout.held.focus;
+    expect(parts?.variant?.name).toBe("variant=primary, tone=default, size=small, state=focus");
+    expect(parts?.["focus-ring"]).toMatchObject({
+      strokesIncludedInLayout: false,
+      strokeAlign: "INSIDE",
+    });
+    expect(parts?.control).toHaveProperty("strokesIncludedInLayout");
+    expect(parts?.label).toHaveProperty("width");
+  });
+});
+
+// F19 (Abnahme M1, Maintainer 2026-09-22): Der Standardmodus jeder Sammlung ist der Standardwert
+// der Dimension aus dem Modelo. Gemessen: density zeigte „Automatisch (compact)", weil compact der
+// erste Modus war; richtig ist default. In Figma ist der Standardmodus der erste Modus
+// (`defaultModeId` ist nur lesbar), also entscheidet die Reihenfolge.
+describe("the default mode of every collection is the Modelo's default (F19)", () => {
+  const defaults = new Map(
+    (repo.ok ? repo.input.modelo.dimensioj : []).map((dimensio) => [
+      dimensio.name,
+      dimensio.default,
+    ]),
+  );
+
+  it("names the default in the plan, and puts it first", () => {
+    const collections = repoPlan.collections.filter((collection) => defaults.has(collection.name));
+    expect(collections).toHaveLength(6);
+    for (const collection of collections) {
+      expect(collection.defaultMode, collection.name).toBe(defaults.get(collection.name));
+      expect(collection.modes[0], collection.name).toBe(defaults.get(collection.name));
+    }
+  });
+
+  it("leaves every collection with that default mode in the file", async () => {
+    const double = modelDouble();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    const ofDimensioj = double.collections.filter((collection) => defaults.has(collection.name));
+    expect(ofDimensioj).toHaveLength(6);
+    for (const collection of ofDimensioj) {
+      const mode = collection.modes.find((entry) => entry.modeId === collection.defaultModeId);
+      expect(mode?.name, collection.name).toBe(defaults.get(collection.name));
+    }
+  });
+
+  // Eine Datei, die ein älteres Plugin anlegte, behält ihren ersten Modus — die Reihenfolge lässt
+  // sich dort nicht ändern. Der Lauf misst die Wirkung und sagt es.
+  it("says so when a file keeps another default mode", async () => {
+    const double = modelDouble();
+    const api = double.figma as {
+      variables: {
+        createVariableCollection: (name: string) => (typeof double.collections)[number];
+      };
+    };
+    const old = api.variables.createVariableCollection("density");
+    old.renameMode(old.defaultModeId, "compact");
+    const report = (await new Function(
+      "figma",
+      `${repoFiles["figma/plugin/code.js"] ?? ""}\nreturn applyPlan();`,
+    )(double.figma)) as { warnings: string[] };
+    const text = report.warnings.join(" ");
+    expect(text).toContain("density");
+    expect(text).toContain("compact");
+    expect(text).toContain("default");
+  });
+});
+
+// F20 (Abnahme M1, Maintainer 2026-09-22): Das Set umschließt sein Raster. Gemessen: Set 518 × 688,
+// der Untergrund endet dort; die Spalte loading ragt rechts ca. 50 px hinaus, die Zeile
+// tertiary · large liegt komplett unterhalb des Sets. Das Double hat es nicht erkannt: Zugesichert
+// waren gesetzte Eigenschaften (layoutSizing HUG), nicht die Geometrie.
+describe("the set encloses its grid (F20)", () => {
+  const setOf = (double: ReturnType<typeof figmaDouble>) =>
+    double.root.children[0]?.children.find((child) => child.name === "butono");
+  type Box = { x: number; y: number; width: number; height: number };
+
+  it("holds every child inside its bounds plus padding, after the first and the second run", async () => {
+    const double = modelDouble();
+    for (const _ of [1, 2]) {
+      await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+      const set = setOf(double);
+      const bounds = set as unknown as Box;
+      const padding = Number(set?.properties.paddingRight ?? 0);
+      expect(set?.children).toHaveLength(72);
+      for (const child of set?.children ?? []) {
+        const box = child as unknown as Box;
+        expect(box.x, child.name).toBeGreaterThanOrEqual(0);
+        expect(box.y, child.name).toBeGreaterThanOrEqual(0);
+        expect(box.x + box.width + padding, child.name).toBeLessThanOrEqual(bounds.width);
+        expect(box.y + box.height + padding, child.name).toBeLessThanOrEqual(bounds.height);
+      }
+    }
+  });
+
+  it("reports the size of the set and the bounding box of its children, raw", async () => {
+    const double = modelDouble();
+    const report = (await new Function(
+      "figma",
+      `${repoFiles["figma/plugin/code.js"] ?? ""}\nreturn applyPlan();`,
+    )(double.figma)) as {
+      components: {
+        layout: {
+          set: { width: number; height: number };
+          bounds: { minX: number; minY: number; maxX: number; maxY: number };
+          outside: string[];
+        };
+      }[];
+    };
+    const layout = report.components[0]?.layout;
+    const set = setOf(double) as unknown as Box;
+    expect(layout?.set).toEqual({ width: set.width, height: set.height });
+    expect(layout?.bounds.minX).toBeGreaterThanOrEqual(0);
+    expect(layout?.bounds.maxX).toBeLessThanOrEqual(set.width);
+    expect(layout?.bounds.maxY).toBeLessThanOrEqual(set.height);
+    expect(layout?.outside).toEqual([]);
+  });
+
+  // Die Wirkung messen: ein Werkzeug, dessen Set kleiner bleibt als sein Raster — die gemessenen
+  // 518 × 688 —, während die Kinder darüber hinausreichen.
+  it("warns with numbers when children lie outside the set", async () => {
+    const double = modelDouble();
+    const api = double.figma as { combineAsVariants: (...args: unknown[]) => DoubleNode };
+    const combine = api.combineAsVariants;
+    const figma = {
+      ...double.figma,
+      combineAsVariants: (...args: unknown[]) =>
+        new Proxy(combine(...args), {
+          get(target, key, receiver) {
+            if (key === "width") return 300;
+            if (key === "height") return 200;
+            return Reflect.get(target, key, receiver);
+          },
+        }),
+    };
+    const report = (await new Function(
+      "figma",
+      `${repoFiles["figma/plugin/code.js"] ?? ""}\nreturn applyPlan();`,
+    )(figma)) as { warnings: string[]; components: { layout: { outside: string[] } }[] };
+    expect(report.components[0]?.layout.outside.length).toBeGreaterThan(0);
+    const text = report.warnings.join(" ");
+    expect(text).toContain("liegen außerhalb des Sets");
+    expect(text).toContain("300 × 200");
+    expect(text).toMatch(/Kinder reichen bis \d+(\.\d+)? × \d+(\.\d+)?/);
+  });
+});
+
+// F21 (Messung Thorsten, Datei x8sFFyOkrnlMM4ngAsbnfs, 2026-09-22): Lauf 2 auf demselben Set, ohne
+// Eingriff, scheiterte mit „in set_layoutMode: Cannot set grid row count: Cannot delete occupied
+// row/column." Im Stand der F14-Abnahme lief Lauf 2 sauber — eine Regression. Hypothese des
+// Maintainers, ungemessen: Das Neusetzen von layoutMode (oder der Spurenzahl) an einem Set mit
+// belegten Zellen verkleinert das Raster kurzzeitig, und Figma lehnt das ab. Das Double lehnt
+// dasselbe ab, mit genau dieser Meldung.
+describe("the double refuses what Figma refused on the second run (F21)", () => {
+  async function placedGrid() {
+    const double = modelDouble();
+    const api = double.figma as {
+      createComponent: () => DoubleNode;
+      combineAsVariants: (nodes: DoubleNode[], parent: DoubleNode) => DoubleNode;
+    };
+    const variants = Array.from({ length: 4 }, () => api.createComponent());
+    const set = api.combineAsVariants(variants, double.root.children[0] as DoubleNode);
+    Object.assign(set, { layoutMode: "GRID", gridRowCount: 2, gridColumnCount: 2 });
+    variants.forEach((variant, index) => {
+      variant.setGridChildPosition(index >> 1, index & 1);
+    });
+    return set;
+  }
+  const MESSAGE = "Cannot set grid row count: Cannot delete occupied row/column.";
+
+  it("throws Figma's message when layoutMode is set again on a grid with occupied cells", async () => {
+    const set = await placedGrid();
+    expect(() => Object.assign(set, { layoutMode: "GRID" })).toThrow(
+      `in set_layoutMode: ${MESSAGE}`,
+    );
+  });
+
+  it("throws when a track count is lowered below an occupied cell, keeps equal or larger", async () => {
+    const set = await placedGrid();
+    expect(() => Object.assign(set, { gridRowCount: 1 })).toThrow(
+      `in set_gridRowCount: ${MESSAGE}`,
+    );
+    expect(() => Object.assign(set, { gridRowCount: 2 })).not.toThrow();
+    expect(() => Object.assign(set, { gridColumnCount: 3 })).not.toThrow();
+  });
+});
+
+describe("the second run writes nothing that already holds (F21)", () => {
+  it("updates 72, creates none, warns of nothing, and writes no property that already holds", async () => {
+    const double = modelDouble();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    const written = double.counts.writes;
+    const report = (await new Function(
+      "figma",
+      `${repoFiles["figma/plugin/code.js"] ?? ""}\nreturn applyPlan();`,
+    )(double.figma)) as {
+      components: { created: string[]; updated: string[] }[];
+      warnings: string[];
+    };
+    expect(report.components[0]?.created).toEqual([]);
+    expect(report.components[0]?.updated).toHaveLength(72);
+    expect(report.warnings).toEqual([]);
+    expect(double.counts.writes - written).toBe(0);
+  });
+});
+
+describe("a failed run leaves everything readable in the console (F21)", () => {
+  it("prints message, stack and the report up to the abort, each as one string", async () => {
+    const double = modelDouble();
+    const calls: unknown[][] = [];
+    const source = `${files["figma/plugin/code.js"] ?? ""}`;
+    const module = new Function("figma", "console", source);
+    const api = double.figma as { createComponent: () => DoubleNode };
+    const create = api.createComponent;
+    let made = 0;
+    await module(
+      {
+        ...double.figma,
+        command: "run",
+        createComponent: () => {
+          if (++made === 40)
+            throw new Error("in set_layoutMode: Cannot delete occupied row/column.");
+          return create();
+        },
+      },
+      { log: () => undefined, error: (...parts: unknown[]) => calls.push(parts) },
+    );
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    // Every console.error call carries exactly one string: nothing an object viewer would fold.
+    for (const call of calls) {
+      expect(call).toHaveLength(1);
+      expect(typeof call[0]).toBe("string");
+    }
+    const text = calls.map((call) => String(call[0])).join("\n");
+    expect(text).toContain("Cannot delete occupied row/column");
+    expect(text).toMatch(/\n\s+at /);
+    const json = calls.map((call) => String(call[0])).find((line) => line.startsWith("{"));
+    const partial = JSON.parse(json ?? "{}") as {
+      phase: string;
+      collections: number;
+      variables: number;
+      components: { set: string; created: string[] }[];
+    };
+    expect(partial.phase).toBe("components");
+    expect(partial.variables).toBeGreaterThan(0);
+    expect(partial.components[0]?.set).toBe("butono");
+    expect(partial.components[0]?.created).toHaveLength(39);
+  });
+
+  it("prints the report of a good run as one JSON string too", async () => {
+    const double = modelDouble();
+    const lines: string[] = [];
+    const module = new Function("figma", "console", `${files["figma/plugin/code.js"] ?? ""}`);
+    await module(
+      { ...double.figma, command: "run" },
+      {
+        log: (...parts: unknown[]) => lines.push(parts.map(String).join(" ")),
+        error: () => undefined,
+      },
+    );
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    const json = lines.find((line) => line.startsWith("{"));
+    expect(json).toBeDefined();
+    expect(JSON.parse(json ?? "{}")).toMatchObject({ fundamento: expect.any(String) });
+  });
+});
+
+// F22 (Messung Thorsten, Datei hEWHvBz7uRNrpYSau52OUN, 2026-09-22): Nach Lauf 2 war das ganze Set
+// schwarz. Per Plugin-API gelesen: Set fills[0] SOLID {0,0,0}, Deckkraft 1, gebunden an
+// color/background/canvas; control fills[0] {0,0,0}, gebunden an primary/rest; strokes[0]
+// {0,0,0}, Deckkraft 1, OHNE Bindung; label fills[0] {0,0,0}, gebunden an primary/text. Die
+// Variablenwerte selbst waren richtig. Figma rendert also die Farbe, die im Paint steht, nicht die
+// Bindung; nur setBoundVariableForPaint löst die Farbe in die Kopie auf. Das Double bildet das ab.
+describe("a paint shows the colour it holds; only setBoundVariableForPaint resolves it (F22)", () => {
+  async function paintedFrame(double: ReturnType<typeof figmaDouble>) {
+    const api = double.figma as {
+      createFrame: () => DoubleNode;
+      variables: {
+        createVariableCollection: (name: string) => (typeof double.collections)[number];
+        createVariable: (
+          name: string,
+          c: unknown,
+          type: string,
+        ) => (typeof double.variables)[number];
+        setBoundVariableForPaint: (
+          paint: unknown,
+          field: string,
+          v: unknown,
+        ) => Record<string, unknown>;
+      };
+    };
+    const collection = api.variables.createVariableCollection("farben");
+    const variable = api.variables.createVariable("color/probo", collection, "COLOR");
+    variable.setValueForMode(collection.defaultModeId, { r: 0.2, g: 0.4, b: 0.6, a: 1 });
+    const frame = api.createFrame();
+    return { api, variable, frame };
+  }
+
+  it("resolves the variable's colour into the copy that setBoundVariableForPaint returns", async () => {
+    const { api, variable } = await paintedFrame(modelDouble());
+    const bound = api.variables.setBoundVariableForPaint(
+      { type: "SOLID", color: { r: 0, g: 0, b: 0 } },
+      "color",
+      variable,
+    );
+    expect(bound.color).toEqual({ r: 0.2, g: 0.4, b: 0.6 });
+    expect(bound.boundVariables).toMatchObject({ color: { id: variable.id } });
+  });
+
+  it("renders a raw paint with a binding in the colour it holds, and reads it back like Figma", async () => {
+    const { frame, variable } = await paintedFrame(modelDouble());
+    Object.assign(frame, {
+      fills: [
+        {
+          type: "SOLID",
+          color: { r: 0, g: 0, b: 0 },
+          boundVariables: { color: { type: "VARIABLE_ALIAS", id: variable.id } },
+        },
+      ],
+    });
+    const [fill] = frame.properties.fills as {
+      color: unknown;
+      visible: boolean;
+      opacity: number;
+      blendMode: string;
+    }[];
+    expect(fill?.color).toEqual({ r: 0, g: 0, b: 0 });
+    expect([fill?.visible, fill?.opacity, fill?.blendMode]).toEqual([true, 1, "NORMAL"]);
+    expect(double_shown(frame, "fills")).toEqual({ r: 0, g: 0, b: 0 });
+  });
+});
+
+/** The colour a node shows for a paint field: what the first visible paint holds. */
+function double_shown(node: DoubleNode, field: "fills" | "strokes") {
+  const [paint] = (node.properties[field] ?? []) as { color?: unknown; visible?: boolean }[];
+  return paint === undefined || paint.visible === false ? undefined : paint.color;
+}
+
+describe("every bound paint shows the plan's colour after the first and the second run (F22)", () => {
+  type Paint = {
+    color: { r: number; g: number; b: number };
+    opacity: number;
+    visible: boolean;
+    boundVariables?: { color?: { id: string; name?: string } };
+  };
+  const paintsOf = (node: DoubleNode | undefined, field: "fills" | "strokes") =>
+    (node?.properties[field] ?? []) as Paint[];
+  const hex = (c: { r: number; g: number; b: number }) =>
+    `#${[c.r, c.g, c.b]
+      .map((v) =>
+        Math.round(v * 255)
+          .toString(16)
+          .padStart(2, "0"),
+      )
+      .join("")}`;
+
+  // The plan's paint per part and variant, in the default mode: hex and opacity (F8).
+  const planned = (props: Record<string, string>) =>
+    repoPlan.components[0]?.variants.find((v) =>
+      Object.entries(props).every(([k, val]) => v.props[k] === val),
+    )?.paints ?? {};
+
+  it("matches hex, opacity and binding on both runs — fills, strokes and the label", async () => {
+    const double = modelDouble();
+    for (const run of [1, 2]) {
+      await new Function(
+        "figma",
+        `${repoFiles["figma/plugin/code.js"] ?? ""}\nreturn applyPlan();`,
+      )(double.figma);
+      const set = double.root.children[0]?.children.find((child) => child.name === "butono");
+      for (const [props, name] of [
+        [{ variant: "primary", tone: "default", size: "large", state: "rest" }, "primary"],
+        [{ variant: "tertiary", tone: "default", size: "medium", state: "hover" }, "tertiary"],
+      ] as const) {
+        const variant = set?.children.find(
+          (child) =>
+            child.name ===
+            Object.entries(props)
+              .map(([k, v]) => `${k}=${v}`)
+              .join(", "),
+        );
+        const control = descendant(variant, "control");
+        const label = descendant(control, "label");
+        const plan = planned(props);
+        for (const [node, field, part] of [
+          [control, "fills", "surface.fill"],
+          [control, "strokes", "border.color"],
+          [label, "fills", "label.color"],
+        ] as const) {
+          const [paint] = paintsOf(node, field);
+          const expected = plan[part] as { hex: string; opacity: number } | undefined;
+          const where = `run ${run}, ${name} ${part}`;
+          if (paint === undefined) throw new Error(`${where}: no paint`);
+          expect(hex(paint.color), where).toBe(expected?.hex);
+          expect(paint.opacity, where).toBe(expected?.opacity);
+          expect(paint.visible, where).toBe(true);
+          expect(paint.boundVariables?.color?.id, where).toBeDefined();
+        }
+      }
+      const [ground] = paintsOf(set, "fills");
+      if (ground === undefined) throw new Error(`run ${run}: no ground`);
+      expect(ground.boundVariables?.color?.name, `run ${run} ground`).toBe(
+        "color/background/canvas",
+      );
+      expect(hex(ground.color), `run ${run} ground`).not.toBe("#000000");
+    }
+  });
+
+  it("rewrites no paint on the second run when variable, opacity and visibility hold", async () => {
+    const double = modelDouble();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    const written = double.counts.writes;
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    expect(double.counts.writes - written).toBe(0);
+  });
+
+  it("reports the paints of the set and of the first and last variant, raw", async () => {
+    const double = modelDouble();
+    const report = (await new Function(
+      "figma",
+      `${repoFiles["figma/plugin/code.js"] ?? ""}\nreturn applyPlan();`,
+    )(double.figma)) as {
+      components: {
+        layout: {
+          paints: {
+            set: { fills: unknown[]; strokes: unknown[] };
+            variant: Record<string, { fills: unknown[]; strokes: unknown[] }>;
+            last: Record<string, { fills: unknown[]; strokes: unknown[] }>;
+          };
+        };
+      }[];
+    };
+    const paints = report.components[0]?.layout.paints;
+    expect(paints?.set.fills[0]).toMatchObject({ opacity: 1, variable: "color/background/canvas" });
+    expect(paints?.set.fills[0]).toHaveProperty("color");
+    expect(paints?.variant.control?.fills[0]).toMatchObject({
+      variable: "color/action/primary/rest",
+    });
+    expect(paints?.variant.control?.strokes[0]).toHaveProperty("variable");
+    expect(paints?.variant.label?.fills[0]).toHaveProperty("opacity");
+    expect(paints?.last.control?.fills[0]).toMatchObject({ opacity: 0 });
+  });
+
+  // Figma kappt kopierte Konsolenzeilen bei 5 000 Zeichen: der Bericht kommt in Teilen unter 4 000.
+  it("prints the report in parts under 4 000 characters, the headline with numbers first", async () => {
+    const double = modelDouble();
+    const lines: string[] = [];
+    const module = new Function("figma", "console", `${repoFiles["figma/plugin/code.js"] ?? ""}`);
+    await module(
+      { ...double.figma, command: "run" },
+      {
+        log: (...parts: unknown[]) => lines.push(parts.map(String).join(" ")),
+        error: () => undefined,
+      },
+    );
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    for (const line of lines) expect(line.length, line.slice(0, 60)).toBeLessThan(4000);
+    const first = lines.find((line) => line.startsWith("{"));
+    expect(JSON.parse(first ?? "{}")).toMatchObject({
+      fundamento: expect.any(String),
+      variables: expect.any(Number),
+      warnings: [],
+      components: [{ set: "butono", created: 72, updated: 0 }],
+    });
+    const json = lines
+      .filter((line) => line.startsWith("{"))
+      .map((line) => JSON.parse(line) as Record<string, unknown>);
+    expect(json.some((part) => part.part === "layout")).toBe(true);
+    expect(json.some((part) => part.part === "created")).toBe(true);
   });
 });

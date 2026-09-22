@@ -3,7 +3,7 @@
 // from the build. Every colour stands in a table row next to its token name and its measurement,
 // so colour is never the only information (WCAG 1.4.1).
 
-import type { VitrinoDatumoj } from "./datumoj.js";
+import { VITRINO_SURFACE, type VitrinoDatumoj } from "./datumoj.js";
 import { vitrinoSkripto } from "./skripto.js";
 
 export interface VitrinoInput {
@@ -27,7 +27,7 @@ const jsonIsland = (value: unknown): string =>
   JSON.stringify(value).replaceAll("</", "<\\/").replaceAll("<!--", "<\\!--");
 
 const LAYOUT = `:root { color-scheme: light dark; }
-body { margin: 0; font-family: var(--fm-typography-body-1-font-family); background-color: var(--fm-color-background-canvas); color: var(--fm-color-text-default); }
+body { margin: 0; font-family: var(--fm-typography-body-1-font-family); background-color: var(--fm-${VITRINO_SURFACE.replaceAll(".", "-")}); color: var(--fm-color-text-default); }
 header, main { padding: var(--fm-spacing-large); display: flex; flex-direction: column; gap: var(--fm-spacing-large); }
 h1, h2 { margin: 0; font-family: var(--fm-typography-headline-2-font-family); }
 table { border-collapse: collapse; width: 100%; font-size: var(--fm-typography-label-1-font-size); }

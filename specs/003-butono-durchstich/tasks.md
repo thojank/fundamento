@@ -487,7 +487,7 @@ Results go into `plan.md` → „Manual acceptance results".
     Beschriftungstext unterliegen derselben Zusicherung mit F11. Nicht modelliert und damit
     weiterhin blind: die Vorgaben des Komponentensets, das `combineAsVariants` anlegt.
 
-- [ ] **F14 Das Raster wirkt nicht, und niemand merkt es** (Abnahme M1, Jugxo
+- [x] **F14 Das Raster wirkt nicht, und niemand merkt es** (Abnahme M1, Jugxo
   `jug_01M327FC8MRXSEF63AHQHFQJ28`)
   - Befund (Maintainer, 2026-09-21): Kein Abbruch, keine Warnung, aber alle 72 Varianten lagen auf
     derselben Stelle. Die Annahme „Figma lehnt GRID ab ⇒ der Lauf bricht ab" hielt nicht: Figma
@@ -548,8 +548,209 @@ Results go into `plan.md` → „Manual acceptance results".
     35635990971 in sein 60-s-Budget (der `pull_request`-Lauf desselben Commits bestand). Keine
     Last, sondern Arbeit: Das Layout wird jetzt einmal je Zustand des Dokuments gerechnet (ein
     Zähler, den jede Änderung erhöht). Danach 4,3 s. Das Budget blieb unangetastet.
-  - Offen bis zum Lauf: dass platzierte Kinder ihre HUG-Spuren bemessen. So ist es dokumentiert;
+  - **Abgenommen** (2026-09-22, Datei `QjSfiLMxAfjtjGfnpwjeom`, vom Maintainer direkt in der Datei
+    gelesen): 72 Positionen, 6 × 12, Set 510 × 592, Reihenfolge wie die Vitrino. Damit ist auch
+    gemessen, dass platzierte Kinder ihre HUG-Spuren bemessen. PR #20 gemergt.
+  - Bis zur Abnahme offen gewesen: dass platzierte Kinder ihre HUG-Spuren bemessen. So ist es dokumentiert;
     gemessen ist es noch nicht. Der Lauf belegt es über `layout` (72 Positionen, 6 Spalten, 12
     Zeilen, Größe des Sets) — oder widerlegt es mit Zahlen.
+
+- [x] **F15 Der Fokus der tertiären Aktion ist eine weiße Fläche statt eines Rings** (Abnahme M1,
+  Maintainer 2026-09-22)
+  - Befund: Die Web Component zeichnet den Fokus als `outline` plus `box-shadow: 0 0 0
+    var(--fm-focus-offset) var(--fm-color-focus-inner)` — nur als Ring außerhalb, das Innere bleibt
+    durchsichtig. In Figma füllte `focus-gap` die ganze Fläche hinter `control` mit
+    `color.focus.inner`. Bei primary und secondary verdeckt die deckende Fläche das; bei tertiary
+    (durchsichtig) entstand ein weißer Kasten.
+  - Rot zuerst (Zusicherung des Maintainers): Die Fläche innerhalb von `control` trägt im Zustand
+    `focus` keine andere Füllung als in `rest` — für alle 12 Kombinationen. `expected [ [], …(2) ]
+    to deeply equal [ [], [], [] ]`, dazu `expected undefined to match object { name:
+    'focus/ring/color' }` (kein Strich).
+  - Grün: Ring und Abstand sind Striche, keine Füllungen. Jeder der beiden Rahmen hat einen
+    Innenabstand in der Breite seines Bandes und einen innen liegenden Strich derselben Breite
+    (`strokeAlign: INSIDE`, `strokeWeight` an `focus/ring/width` bzw. `focus/offset` gebunden) — der
+    Strich füllt genau das Band, das Innere bleibt, wie es in `rest` ist. Strichlage und -breite
+    stehen jetzt auf der Liste der Eigenschaften, die das Plugin besitzt (neutral: innen, 0).
+  - Fertig wenn: der Maintainer es in der Datei sieht — tertiary im Fokus zeigt den Ring, keinen
+    Kasten.
+  - Messlauf #21 (Datei `Q7LOiRGeDyJ0JgdajzXg81`, 2026-09-22): Die Fläche im Fokus ist
+    durchsichtig — erledigt. Folgebefund F17.
+
+- [x] **F16 Das Set steht auf dem Untergrund des Modells** (Abnahme M1, Maintainer 2026-09-22)
+  - Befund: Die Vitrino zeigt die Knöpfe auf dem Untergrund; in Figma standen sie auf der dunklen
+    Leinwand, tertiary war dort unlesbar. Dieselbe Abnahmebedingung „sieht aus wie die Vitrino".
+  - Rot zuerst: `expected undefined to deeply equal { variable: 'color/background/canvas', opacity:
+    1 }` (Plan) und `expected [] to have a length of 1` (Füllung des Sets).
+  - Grün: Der Untergrund der Vitrino steht einmal (`VITRINO_SURFACE = color.background.canvas`, die
+    Vitrino selbst liest ihn von dort). Der Plan nennt ihn als Variable mit der Deckkraft über alle
+    Kombinationen (F8); das Plugin füllt das Set damit, **gebunden an die Variable**, keine feste
+    Farbe — sie wechselt mit color-scheme und contrast. Die Füllung des Sets gehört zu den
+    Eigenschaften, die das Plugin besitzt.
+  - Fertig wenn: letzter Teil von M1 — der Maintainer schaltet in der Datei color-scheme auf dark
+    und contrast auf high und prüft das Ergebnis direkt in der Datei.
+  - **Abgenommen** (Messlauf #21, 2026-09-22): Set auf `color/background/canvas`, tertiary lesbar,
+    secondary wie in der Vitrino.
+
+- [x] **F17 Die Fokus-Varianten sind größer als ihre Zeile** (Abnahme M1, Jugxo
+  `jug_01M32SWY4XJ33VBK04ZZ9337NC`)
+  - Befund (Messlauf #21): Alle 12 Fokus-Varianten 8 px breiter und höher als die übrigen Zustände
+    derselben Zeile (small 59 × 44 statt 51 × 36, medium 73 × 48 statt 65 × 40, large 85 × 56
+    statt 77 × 48). Die Aussage „Platz in jedem Zustand reserviert" stimmte in Figma nicht ganz:
+    Die Reserve aus Innenabständen wirkt in jedem Zustand (28 + 8 = 36), aber im Fokus kamen
+    2 × (2 + 2) = 8 hinzu — der sichtbare Strich nimmt Platz. In der Web Component ändert `outline`
+    die Größe nicht.
+  - Warum das Double es nicht sah: Sein Layout zählte Striche nie mit — eine stille Annahme, die
+    niemand gemessen hatte.
+  - Rot zuerst: Das Double zählt einen sichtbaren Strich wie gemessen (`expected [ 43.2, 15 ] to
+    deeply equal [ 47.2, 19 ]`); danach fiel die Zusicherung des Maintainers — pro Zeile haben alle
+    sechs Varianten dieselbe Breite und Höhe — mit genau dem gemessenen Bild: `57.2 × 36, …,
+    65.2 × 44, …`.
+  - Grün: `strokesIncludedInLayout: false` an Variante, Ring und Abstand, als Eigenschaft, die das
+    Plugin besitzt — die Striche liegen in der Reserve. Der Bericht misst die Wirkung: ungleiche
+    Zeilen als Warnung mit Zahlen („12 von 12 Zeilen …, z. B. Zeile 0: … state=focus misst 65.2 × 44
+    statt 57.2 × 36"), und `layout.held.rest` / `.focus` nennen für Variante, Ring, Abstand,
+    `control` und Beschriftung, was Figma hält (Größe, Strichlage, Strichbreite,
+    `strokesIncludedInLayout`, Innenabstände).
+  - Vom Maintainer akzeptiert (2026-09-22): Seine Messung lag vor `95f2f30`.
+  - Hinweis zur Messung vom 2026-09-22: Die Datei `Q7LOiRGeDyJ0JgdajzXg81` stammt vom Stand
+    `6113127`, also **vor** dieser Korrektur (`95f2f30`). Die dort gemessenen 59 × 44 / 73 × 48 /
+    85 × 56 sind der Befund, nicht das Ergebnis der Korrektur.
+  - **Bestätigt** (Thorsten, Datei `x8sFFyOkrnlMM4ngAsbnfs`, 2026-09-22): jede Zeile gleiche
+    Außengröße (55 × 40 / 69 × 48 / 85 × 56 — die Dichte default, nach F19).
+  - Offen bis zum Lauf gewesen: dass `false` den Strich tatsächlich in die Reserve legt — dokumentiert,
+    nicht gemessen. Und bewusst nicht angefasst: `control`. Dort ist nichts gemessen; ob sein Rand
+    wie im CSS (`box-sizing: border-box`) zur Breite zählt, sagen die Rohdaten des nächsten Laufs.
+
+- [x] **F19 Der Standardmodus jeder Sammlung ist der Standardwert des Modelo** (Abnahme M1, Jugxo
+  `jug_01M32TW9JHEXZ5QGB13AJGWY16`)
+  - Befund (2026-09-22): density zeigte „Automatisch (compact)", weil compact der erste Modus war;
+    richtig ist `default`. color-scheme (light) und contrast (default) stimmten. Der rote Test fand
+    dasselbe bei viewport (compact statt medium).
+  - Rot zuerst: `aspekto: expected undefined to be 'komuna'` (der Plan nannte keinen Standard), und
+    in der Datei nach dem Lauf density und viewport mit dem falschen Standardmodus.
+  - Grün: In Figma ist der Standardmodus der erste Modus (`defaultModeId` ist nur lesbar). Der Plan
+    nennt je Sammlung `defaultMode` und stellt ihn an den Anfang. Nur der Platzhaltermodus einer
+    Sammlung, die dieser Lauf selbst anlegt, wird umbenannt; in einer älteren Datei bleibt die
+    Reihenfolge, und der Bericht nennt Sammlung, vorgefundenen und erwarteten Standardmodus.
+  - Vom Maintainer als Vorgehen abgenommen (2026-09-22): viewport mitgefunden; ältere Dateien nur
+    melden, nicht umbenennen. **Bestätigt** in der Datei `x8sFFyOkrnlMM4ngAsbnfs`: Plan trägt
+    `defaultMode` je Sammlung, Figma löst density default auf.
+  - Folge: Die festen Zahlen des Plans (Rasterabstände, Radien) stammen aus der Basiskombination
+    mit density `default`; bisher lösten die gebundenen Variablen in Figma mit compact auf. Nach
+    F19 passen beide zusammen. Erwartete Größen in einer frischen Datei damit: die der Dichte
+    `default`, nicht mehr 51 × 36 / 65 × 40 / 77 × 48.
+
+- [ ] **F20 Das Set umschließt sein Raster** (Abnahme M1)
+  - Befund (2026-09-22, Datei `Q7LOiRGeDyJ0JgdajzXg81`): Set 518 × 688, der Untergrund endet dort;
+    die Spalte loading ragt rechts ca. 50 px hinaus, die Zeile tertiary · large liegt komplett
+    unterhalb des Sets. Das Double hat es nicht erkannt: Zugesichert waren gesetzte Eigenschaften
+    (`layoutSizing: HUG`), nicht die Geometrie.
+  - Rot zuerst: Der Bericht nannte weder die Ausdehnung der Kinder noch Kinder außerhalb
+    (`Cannot read properties of undefined (reading 'minX')`), und bei einem Set, das kleiner bleibt
+    als sein Raster, schwieg er.
+  - Grün, Messung: Der Bericht nennt Set-Maße und die Bounding-Box der Kinder als Rohdaten
+    (`layout.set`, `layout.bounds`, `layout.outside`) und warnt mit Zahlen („… liegen außerhalb des
+    Sets …; das Set misst 300 × 200, die Kinder reichen bis …"). Zugesichert ist die Geometrie nach
+    dem ersten und dem zweiten Lauf: jedes Kind innerhalb des Sets abzüglich Innenabstand.
+  - **Ursache offen — eine Rechnung, keine Feststellung:** 518 × 688 ist genau die Summe der Spuren
+    bei density compact (5 × 77 + 85 + 5 × 8 + 8 = 518; 4 × (44 + 48 + 56) + 11 × 8 + 8 = 688). Die
+    gemeldeten Überstände passen zu den Positionen bei density **default**: Spalte loading bei
+    4 + 4 × 85 + 93 + 40 = 477, rechte Kante 562, also 44 über 518 (mit Innenabstand 48, „ca. 50");
+    letzte Zeile bei 4 + 608 + 88 = 700, also unter 688. Danach hätten die Kinder die Größen und
+    Plätze der Dichte default, das Set aber noch die Maße der Dichte compact — etwa wenn nach dem
+    Lauf der density-Modus umgeschaltet wurde und das Set sich nicht neu bemessen hat. Das ist aus
+    zwei Zahlen hergeleitet und nicht gemessen; `layout.bounds` am Ende des Laufs und eine Messung
+    nach dem Umschalten von density entscheiden es.
+  - Antwort des Maintainers (2026-09-22, zum Stand `e9db633`): Ja — density stand am Set
+    **ausdrücklich auf default** (Haken gesetzt), „Automatisch" zeigte compact. Das stützt die
+    Rechnung. **Arbeitshypothese:** Das Set bemisst sich nach einem Moduswechsel nicht neu.
+    Ausdrücklich: nicht bauen, bevor der Lauf es belegt.
+  - Messung, die es entscheidet (durch Thorsten, gelesen per Figma-MCP): frische Datei, zwei Läufe,
+    Konsole beider Läufe (`layout.set`, `layout.bounds`, `layout.outside`); danach density am Set
+    auf compact und auf comfortable umschalten und jeweils Set gegen Kinder messen.
+
+    | Am Ende des Laufs (`layout`) | Nach dem Umschalten von density | Bedeutung |
+    |---|---|---|
+    | `outside: []`, Set ≥ Kinder | Set folgt den Kindern | Kein Befund mehr — F19 hat den Auslöser
+      beseitigt, das Raster bemisst sich neu |
+    | `outside: []`, Set ≥ Kinder | Set bleibt, Kinder ragen hinaus oder Set zu groß | Hypothese
+      belegt: das Set bemisst sich nach einem Moduswechsel nicht neu — dann folgt die Korrektur
+      mit rotem Test |
+    | Kinder schon am Ende des Laufs außerhalb | — | Hypothese widerlegt: der Fehler entsteht im
+      Lauf selbst, nicht beim Umschalten |
+
+  - **Bei density default bestätigt** (Datei `x8sFFyOkrnlMM4ngAsbnfs`): Set 558 × 672 =
+    Bounding-Box der Kinder (554 × 668) + Innenabstand 4. Das Umschalten der Dichte folgt nach F21.
+  - Fertig wenn: der Maintainer es in der Datei misst — in light/default und dark/high, und nach
+    dem Umschalten von density.
+
+- [x] **F21 Der zweite Lauf scheitert** (Abnahme M1, blockierte die Abnahme; Jugxo
+  `jug_01M33TKAFM6RSACJN6H90B183A`)
+  - Befund (Thorsten, Datei `x8sFFyOkrnlMM4ngAsbnfs`, Stand `e9db633`): Lauf 1 grün (created 72),
+    Lauf 2 auf demselben Set ohne Eingriff: Toast „Lauf fehlgeschlagen — in set_layoutMode: Cannot
+    set grid row count: Cannot delete occupied row/column." Regression gegenüber der F14-Abnahme.
+    Hypothese des Maintainers, ungemessen: Das Neusetzen von `layoutMode` (oder der Spurenzahl)
+    an einem Set mit belegten Zellen verkleinert das Raster kurzzeitig, und Figma lehnt das ab.
+  - Rot zuerst, (1) Double: Es wirft genau diese Meldung, wenn `layoutMode` an einem Raster mit
+    belegten Zellen gesetzt wird — auch wieder auf `GRID` — oder eine Spurenzahl unter eine
+    belegte Zelle sinkt. Danach fiel „changes nothing on a second run" wie in Figma, und mit ihm
+    jeder Test mit zweitem Lauf (24 rot).
+  - Grün, (2) Lauf 2: Das Plugin schreibt eine Eigenschaft nur, wenn ihr Wert nicht schon gilt.
+    Ein Knoten, den der Lauf selbst anlegt, wird ganz beschrieben (F13); ein vorgefundener wird
+    erst gelesen und verglichen. Die Werte eines Knotens werden gesammelt und einmal geschrieben —
+    „neutral zuerst, dann der Plan" als zwei Schreibvorgänge setzte auf jedem Lauf eine Füllung
+    auf leer und zurück (gemessen im Double: 770 Schreibvorgänge in Lauf 2, davon 288 Radien, 192
+    Linien, 288 Füllungen). Maße werden gebunden, nachdem jeder Rahmen sein Layout hat. Zugesichert:
+    Lauf 2 gegen ein vorgefundenes Set legt 0 an, aktualisiert 72, `warnings: []`, **0
+    Schreibvorgänge** (Zähler im Double: Eigenschaften, Bindungen, Zellen, Plugin-Daten, Werte,
+    Modi).
+  - Grün, (3) Fehlerausgabe: Bei „Lauf fehlgeschlagen" stehen Meldung mit Phase, Stack und der
+    Bericht bis zur Abbruchstelle in der Konsole — jede Zeile als eine Zeichenkette, der Bericht als
+    JSON in einer Zeile (`{"phase":"components","collections":…,"components":[…]}`); ebenso der
+    Bericht eines guten Laufs. Rot: `expected [ …(2) ] to have a length of 1` (Meldung und Objekt in
+    einem Aufruf) und der Bericht zählte eine Variante mit, die nie entstand.
+  - (4) Jugxo mit Verweis auf die Regression: `jug_01M33TKAFM6RSACJN6H90B183A`.
+  - Zur Ursache: nicht gemessen. Die Korrektur macht die Hypothese unerheblich — nichts wird mehr
+    neu gesetzt, was schon gilt —, belegt sie aber nicht. Offen, was genau zwischen der
+    F14-Abnahme und `e9db633` den zweiten Lauf brach; Kandidaten sind die neuen Eigenschaften am
+    Set (F16 Füllung, F17 `strokesIncludedInLayout`, F19 Modusreihenfolge), die den Schreibvorgang
+    von `layoutMode` nicht ausgelöst, aber begleitet haben.
+  - **Behoben** (Thorsten, Datei `hEWHvBz7uRNrpYSau52OUN`, 2026-09-22): Lauf 2 ohne Abbruch,
+    created 0, updated 72, after 72/72, Geometrie unverändert (Set 558 × 672). Folgebefund F22.
+
+- [ ] **F22 Nach Lauf 2 ist das ganze Set schwarz** (Abnahme M1, Regression aus F21; Jugxo
+  `jug_01M33Z7E7NHN5GB4GDWKFA3QXQ`)
+  - Befund (Thorsten, Datei `hEWHvBz7uRNrpYSau52OUN`): Nach Lauf 1 alles richtig. Nach Lauf 2 per
+    Plugin-API: Set fills[0] SOLID {0,0,0}, Deckkraft 1, gebunden an `color/background/canvas`;
+    control fills[0] {0,0,0}, gebunden an `primary/rest`; strokes[0] {0,0,0}, Deckkraft 1, **ohne
+    Bindung**; label fills[0] {0,0,0}, gebunden an `primary/text`. Variablenwerte richtig. Figma
+    rendert die Paint-Farbe, nicht die Bindung.
+  - Rot zuerst, (1) Double: `setBoundVariableForPaint` löst die Farbe der Variablen in die Kopie
+    auf (`expected { r: +0, … } to deeply equal { r: 0.2, … }`); ein Paint zeigt die Farbe, die er
+    hält, und wird wie Figma zurückgelesen (`visible`, `opacity`, `blendMode` ergänzt). Danach
+    fiel „rewrites no paint on the second run" mit genau der Mechanik der Regression: **241
+    Paint-Schreibvorgänge in Lauf 2**, weil der JSON-Vergleich einen zurückgelesenen Paint nie als
+    gleich erkannte.
+  - Grün, (2) Wirkung: nach Lauf 1 **und** Lauf 2 je Knoten Hex und Deckkraft des Paints gleich
+    dem Planwert im Standardmodus (Fläche, Rand, Beschriftung; primary large rest und tertiary
+    medium hover), Rand mit Bindung und Deckkraft (F8), Untergrund des Sets gebunden und nicht
+    schwarz.
+  - Grün, (3) Vergleich: Ein Paint gilt als vorhanden bei gleicher Variable, gleicher Deckkraft,
+    gleicher Sichtbarkeit (ohne Variable: gleiche Farbe). Lauf 2: 0 Schreibvorgänge.
+  - Grün, (4) Rohdaten `layout.paints` für Set, erste und letzte Variante: je Füllung und Rand
+    Typ, Farbe, Deckkraft, Sichtbarkeit, gebundene Variable; ein Feld, bei dem Figma wirft, mit
+    seiner Meldung.
+  - Grün, (5) Konsole in Teilen unter 4 000 Zeichen: Kopfzeile mit Zahlen, Warnungen, `before`,
+    `after`, `left`, `diagnosis` zuerst; dann je Komponente die Listen (`created`, `updated`, …,
+    bei Bedarf geteilt, mit `from`/`to`), `layout`, `held` und `paints` je eigene Zeile, große
+    Blöcke je Schlüssel geteilt. Der Bericht eines Laufs des Repo-Plans: 10 822 Zeichen in einer
+    Zeile vorher.
+  - **Zur Ursache, offen:** Warum das Neuschreiben eines Paints, der aus `setBoundVariableForPaint`
+    kam, in Figma die Platzhalterfarbe hinterließ und am Rand die Bindung tilgte, ist nicht
+    gemessen. Das Double reproduziert das Neuschreiben und seine Zahl, nicht die Schwärzung. Die
+    Korrektur vermeidet das Neuschreiben; sie erklärt es nicht.
+  - Fertig wenn: Abnahmelauf — frische Datei, zwei Läufe; nach Lauf 2 Farben wie nach Lauf 1
+    (`layout.paints` beider Läufe gleich), `warnings: []`; danach density per Figma-MCP auf
+    compact/comfortable für F20.
 
 Consistency check before tasks (`/speckit.analyze` scope): every FR and AK maps to at least one task or a recorded decision; every task maps to a plan decision; two new packages (Art. XI); the lockfile changes in T008 only; no task lowers a threshold; nothing is published.
