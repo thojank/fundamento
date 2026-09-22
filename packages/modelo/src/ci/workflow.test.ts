@@ -27,6 +27,8 @@ const ERO_CHECK_STEPS: ReadonlyArray<readonly [name: string, script: string]> = 
   ["Check: Quickstart", "check:quickstart"],
   // The Vitrino needs a projection build of its own before it can be driven (Spec 004 D-09).
   ["Check: Vitrino", "check:vitrino"],
+  // The release path itself, as release.yml runs it, packed as a dry run (Spec 003 F23).
+  ["Check: Release", "check:release"],
 ];
 
 const GATE_STEPS: ReadonlyArray<readonly [name: string, run: string]> = [

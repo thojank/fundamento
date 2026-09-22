@@ -53,15 +53,8 @@ jobs:
           fi
           echo "npm $installed is new enough for Trusted Publishing."
 
-      - name: Generate the projections
-        run: pnpm fm projekcioj build --out .fundamento/projekcioj
-
-      - name: Dry run, komuna
-        run: |
-          cd .fundamento/projekcioj/make-kit/komuna
-          pnpm publish --dry-run --tag next --provenance --access public --no-git-checks
-
-      - name: Dry run, ekzemplo
-        run: |
-          cd .fundamento/projekcioj/make-kit/ekzemplo
-          pnpm publish --dry-run --tag next --provenance --access public --no-git-checks
+      # One script for the release path and for the CI (F23): it builds both kits — komuna from the
+      # repository, ekzemplo from its fixture —, checks that each exists and carries no font file,
+      # and runs the publish dry run in every kit.
+      - name: Build both kits and dry-run the publish
+        run: scripts/release-kits.sh publish
