@@ -315,7 +315,7 @@ describe("the plugin reports what it did (F10)", () => {
     } finally {
       console.log = log;
     }
-    expect(lines.join("\n")).toContain('"set": "butono"');
+    expect(lines.join("\n")).toContain('"set":"butono"');
     expect(double.notifications.map((entry) => entry.message).join(" ")).toContain("butono");
     expect(double.notifications[0]?.message).toContain("Konsole");
   });
@@ -666,7 +666,7 @@ describe("the geometry of the Ero reaches Figma (F11)", () => {
     expect(control?.properties.counterAxisAlignItems).toBe("CENTER");
     const bound = control?.boundVariables ?? {};
     expect(bound.paddingLeft).toBeDefined();
-    expect(bound.paddingRight).toBe(bound.paddingLeft);
+    expect(bound.paddingRight).toEqual(bound.paddingLeft);
     expect(bound.itemSpacing).toBeDefined();
     expect(bound.minHeight).toBeDefined();
   });
@@ -704,10 +704,10 @@ describe("the focus ring is drawn, and never clipped (F11)", () => {
     expect(ring?.parent).toBe(variant);
     expect(gap?.parent).toBe(ring);
     expect(control?.parent).toBe(gap);
-    expect(ring?.boundVariables.paddingLeft).toBe("focus/ring/width");
-    expect(ring?.boundVariables.paddingTop).toBe("focus/ring/width");
-    expect(gap?.boundVariables.paddingLeft).toBe("focus/offset");
-    expect(gap?.boundVariables.paddingBottom).toBe("focus/offset");
+    expect(ring?.boundVariables.paddingLeft?.name).toBe("focus/ring/width");
+    expect(ring?.boundVariables.paddingTop?.name).toBe("focus/ring/width");
+    expect(gap?.boundVariables.paddingLeft?.name).toBe("focus/offset");
+    expect(gap?.boundVariables.paddingBottom?.name).toBe("focus/offset");
     // Not focused: the space is there, the ring is not.
     expect(ring?.properties.fills).toEqual([]);
     expect(gap?.properties.fills).toEqual([]);
@@ -734,8 +734,8 @@ describe("the focus ring is drawn, and never clipped (F11)", () => {
       [gap, "focus/offset"],
     ] as const) {
       expect(node?.properties.strokeAlign).toBe("INSIDE");
-      expect(node?.boundVariables.strokeWeight).toBe(weight);
-      expect(node?.boundVariables.paddingLeft).toBe(weight);
+      expect(node?.boundVariables.strokeWeight?.name).toBe(weight);
+      expect(node?.boundVariables.paddingLeft?.name).toBe(weight);
     }
     const resting = await variantOf(modelDouble(), "rest");
     expect(find(resting, "focus-ring")?.properties.strokes).toEqual([]);
@@ -1563,5 +1563,125 @@ describe("the set encloses its grid (F20)", () => {
     expect(text).toContain("liegen außerhalb des Sets");
     expect(text).toContain("300 × 200");
     expect(text).toMatch(/Kinder reichen bis \d+(\.\d+)? × \d+(\.\d+)?/);
+  });
+});
+
+// F21 (Messung Thorsten, Datei x8sFFyOkrnlMM4ngAsbnfs, 2026-09-22): Lauf 2 auf demselben Set, ohne
+// Eingriff, scheiterte mit „in set_layoutMode: Cannot set grid row count: Cannot delete occupied
+// row/column." Im Stand der F14-Abnahme lief Lauf 2 sauber — eine Regression. Hypothese des
+// Maintainers, ungemessen: Das Neusetzen von layoutMode (oder der Spurenzahl) an einem Set mit
+// belegten Zellen verkleinert das Raster kurzzeitig, und Figma lehnt das ab. Das Double lehnt
+// dasselbe ab, mit genau dieser Meldung.
+describe("the double refuses what Figma refused on the second run (F21)", () => {
+  async function placedGrid() {
+    const double = modelDouble();
+    const api = double.figma as {
+      createComponent: () => DoubleNode;
+      combineAsVariants: (nodes: DoubleNode[], parent: DoubleNode) => DoubleNode;
+    };
+    const variants = Array.from({ length: 4 }, () => api.createComponent());
+    const set = api.combineAsVariants(variants, double.root.children[0] as DoubleNode);
+    Object.assign(set, { layoutMode: "GRID", gridRowCount: 2, gridColumnCount: 2 });
+    variants.forEach((variant, index) => {
+      variant.setGridChildPosition(index >> 1, index & 1);
+    });
+    return set;
+  }
+  const MESSAGE = "Cannot set grid row count: Cannot delete occupied row/column.";
+
+  it("throws Figma's message when layoutMode is set again on a grid with occupied cells", async () => {
+    const set = await placedGrid();
+    expect(() => Object.assign(set, { layoutMode: "GRID" })).toThrow(
+      `in set_layoutMode: ${MESSAGE}`,
+    );
+  });
+
+  it("throws when a track count is lowered below an occupied cell, keeps equal or larger", async () => {
+    const set = await placedGrid();
+    expect(() => Object.assign(set, { gridRowCount: 1 })).toThrow(
+      `in set_gridRowCount: ${MESSAGE}`,
+    );
+    expect(() => Object.assign(set, { gridRowCount: 2 })).not.toThrow();
+    expect(() => Object.assign(set, { gridColumnCount: 3 })).not.toThrow();
+  });
+});
+
+describe("the second run writes nothing that already holds (F21)", () => {
+  it("updates 72, creates none, warns of nothing, and writes no property that already holds", async () => {
+    const double = modelDouble();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    const written = double.counts.writes;
+    const report = (await new Function(
+      "figma",
+      `${repoFiles["figma/plugin/code.js"] ?? ""}\nreturn applyPlan();`,
+    )(double.figma)) as {
+      components: { created: string[]; updated: string[] }[];
+      warnings: string[];
+    };
+    expect(report.components[0]?.created).toEqual([]);
+    expect(report.components[0]?.updated).toHaveLength(72);
+    expect(report.warnings).toEqual([]);
+    expect(double.counts.writes - written).toBe(0);
+  });
+});
+
+describe("a failed run leaves everything readable in the console (F21)", () => {
+  it("prints message, stack and the report up to the abort, each as one string", async () => {
+    const double = modelDouble();
+    const calls: unknown[][] = [];
+    const source = `${files["figma/plugin/code.js"] ?? ""}`;
+    const module = new Function("figma", "console", source);
+    const api = double.figma as { createComponent: () => DoubleNode };
+    const create = api.createComponent;
+    let made = 0;
+    await module(
+      {
+        ...double.figma,
+        command: "run",
+        createComponent: () => {
+          if (++made === 40)
+            throw new Error("in set_layoutMode: Cannot delete occupied row/column.");
+          return create();
+        },
+      },
+      { log: () => undefined, error: (...parts: unknown[]) => calls.push(parts) },
+    );
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    // Every console.error call carries exactly one string: nothing an object viewer would fold.
+    for (const call of calls) {
+      expect(call).toHaveLength(1);
+      expect(typeof call[0]).toBe("string");
+    }
+    const text = calls.map((call) => String(call[0])).join("\n");
+    expect(text).toContain("Cannot delete occupied row/column");
+    expect(text).toMatch(/\n\s+at /);
+    const json = calls.map((call) => String(call[0])).find((line) => line.startsWith("{"));
+    const partial = JSON.parse(json ?? "{}") as {
+      phase: string;
+      collections: number;
+      variables: number;
+      components: { set: string; created: string[] }[];
+    };
+    expect(partial.phase).toBe("components");
+    expect(partial.variables).toBeGreaterThan(0);
+    expect(partial.components[0]?.set).toBe("butono");
+    expect(partial.components[0]?.created).toHaveLength(39);
+  });
+
+  it("prints the report of a good run as one JSON string too", async () => {
+    const double = modelDouble();
+    const lines: string[] = [];
+    const module = new Function("figma", "console", `${files["figma/plugin/code.js"] ?? ""}`);
+    await module(
+      { ...double.figma, command: "run" },
+      {
+        log: (...parts: unknown[]) => lines.push(parts.map(String).join(" ")),
+        error: () => undefined,
+      },
+    );
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    const json = lines.find((line) => line.startsWith("{"));
+    expect(json).toBeDefined();
+    expect(JSON.parse(json ?? "{}")).toMatchObject({ fundamento: expect.any(String) });
   });
 });

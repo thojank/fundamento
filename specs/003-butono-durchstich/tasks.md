@@ -591,7 +591,7 @@ Results go into `plan.md` → „Manual acceptance results".
   - **Abgenommen** (Messlauf #21, 2026-09-22): Set auf `color/background/canvas`, tertiary lesbar,
     secondary wie in der Vitrino.
 
-- [ ] **F17 Die Fokus-Varianten sind größer als ihre Zeile** (Abnahme M1, Jugxo
+- [x] **F17 Die Fokus-Varianten sind größer als ihre Zeile** (Abnahme M1, Jugxo
   `jug_01M32SWY4XJ33VBK04ZZ9337NC`)
   - Befund (Messlauf #21): Alle 12 Fokus-Varianten 8 px breiter und höher als die übrigen Zustände
     derselben Zeile (small 59 × 44 statt 51 × 36, medium 73 × 48 statt 65 × 40, large 85 × 56
@@ -615,11 +615,13 @@ Results go into `plan.md` → „Manual acceptance results".
   - Hinweis zur Messung vom 2026-09-22: Die Datei `Q7LOiRGeDyJ0JgdajzXg81` stammt vom Stand
     `6113127`, also **vor** dieser Korrektur (`95f2f30`). Die dort gemessenen 59 × 44 / 73 × 48 /
     85 × 56 sind der Befund, nicht das Ergebnis der Korrektur.
-  - Offen bis zum Lauf: dass `false` den Strich tatsächlich in die Reserve legt — dokumentiert,
+  - **Bestätigt** (Thorsten, Datei `x8sFFyOkrnlMM4ngAsbnfs`, 2026-09-22): jede Zeile gleiche
+    Außengröße (55 × 40 / 69 × 48 / 85 × 56 — die Dichte default, nach F19).
+  - Offen bis zum Lauf gewesen: dass `false` den Strich tatsächlich in die Reserve legt — dokumentiert,
     nicht gemessen. Und bewusst nicht angefasst: `control`. Dort ist nichts gemessen; ob sein Rand
     wie im CSS (`box-sizing: border-box`) zur Breite zählt, sagen die Rohdaten des nächsten Laufs.
 
-- [ ] **F19 Der Standardmodus jeder Sammlung ist der Standardwert des Modelo** (Abnahme M1, Jugxo
+- [x] **F19 Der Standardmodus jeder Sammlung ist der Standardwert des Modelo** (Abnahme M1, Jugxo
   `jug_01M32TW9JHEXZ5QGB13AJGWY16`)
   - Befund (2026-09-22): density zeigte „Automatisch (compact)", weil compact der erste Modus war;
     richtig ist `default`. color-scheme (light) und contrast (default) stimmten. Der rote Test fand
@@ -631,7 +633,8 @@ Results go into `plan.md` → „Manual acceptance results".
     Sammlung, die dieser Lauf selbst anlegt, wird umbenannt; in einer älteren Datei bleibt die
     Reihenfolge, und der Bericht nennt Sammlung, vorgefundenen und erwarteten Standardmodus.
   - Vom Maintainer als Vorgehen abgenommen (2026-09-22): viewport mitgefunden; ältere Dateien nur
-    melden, nicht umbenennen. Die Abnahme in der Datei steht mit dem nächsten Lauf aus.
+    melden, nicht umbenennen. **Bestätigt** in der Datei `x8sFFyOkrnlMM4ngAsbnfs`: Plan trägt
+    `defaultMode` je Sammlung, Figma löst density default auf.
   - Folge: Die festen Zahlen des Plans (Rasterabstände, Radien) stammen aus der Basiskombination
     mit density `default`; bisher lösten die gebundenen Variablen in Figma mit compact auf. Nach
     F19 passen beide zusammen. Erwartete Größen in einer frischen Datei damit: die der Dichte
@@ -676,7 +679,43 @@ Results go into `plan.md` → „Manual acceptance results".
     | Kinder schon am Ende des Laufs außerhalb | — | Hypothese widerlegt: der Fehler entsteht im
       Lauf selbst, nicht beim Umschalten |
 
+  - **Bei density default bestätigt** (Datei `x8sFFyOkrnlMM4ngAsbnfs`): Set 558 × 672 =
+    Bounding-Box der Kinder (554 × 668) + Innenabstand 4. Das Umschalten der Dichte folgt nach F21.
   - Fertig wenn: der Maintainer es in der Datei misst — in light/default und dark/high, und nach
     dem Umschalten von density.
+
+- [ ] **F21 Der zweite Lauf scheitert** (Abnahme M1, blockierte die Abnahme; Jugxo
+  `jug_01M33TKAFM6RSACJN6H90B183A`)
+  - Befund (Thorsten, Datei `x8sFFyOkrnlMM4ngAsbnfs`, Stand `e9db633`): Lauf 1 grün (created 72),
+    Lauf 2 auf demselben Set ohne Eingriff: Toast „Lauf fehlgeschlagen — in set_layoutMode: Cannot
+    set grid row count: Cannot delete occupied row/column." Regression gegenüber der F14-Abnahme.
+    Hypothese des Maintainers, ungemessen: Das Neusetzen von `layoutMode` (oder der Spurenzahl)
+    an einem Set mit belegten Zellen verkleinert das Raster kurzzeitig, und Figma lehnt das ab.
+  - Rot zuerst, (1) Double: Es wirft genau diese Meldung, wenn `layoutMode` an einem Raster mit
+    belegten Zellen gesetzt wird — auch wieder auf `GRID` — oder eine Spurenzahl unter eine
+    belegte Zelle sinkt. Danach fiel „changes nothing on a second run" wie in Figma, und mit ihm
+    jeder Test mit zweitem Lauf (24 rot).
+  - Grün, (2) Lauf 2: Das Plugin schreibt eine Eigenschaft nur, wenn ihr Wert nicht schon gilt.
+    Ein Knoten, den der Lauf selbst anlegt, wird ganz beschrieben (F13); ein vorgefundener wird
+    erst gelesen und verglichen. Die Werte eines Knotens werden gesammelt und einmal geschrieben —
+    „neutral zuerst, dann der Plan" als zwei Schreibvorgänge setzte auf jedem Lauf eine Füllung
+    auf leer und zurück (gemessen im Double: 770 Schreibvorgänge in Lauf 2, davon 288 Radien, 192
+    Linien, 288 Füllungen). Maße werden gebunden, nachdem jeder Rahmen sein Layout hat. Zugesichert:
+    Lauf 2 gegen ein vorgefundenes Set legt 0 an, aktualisiert 72, `warnings: []`, **0
+    Schreibvorgänge** (Zähler im Double: Eigenschaften, Bindungen, Zellen, Plugin-Daten, Werte,
+    Modi).
+  - Grün, (3) Fehlerausgabe: Bei „Lauf fehlgeschlagen" stehen Meldung mit Phase, Stack und der
+    Bericht bis zur Abbruchstelle in der Konsole — jede Zeile als eine Zeichenkette, der Bericht als
+    JSON in einer Zeile (`{"phase":"components","collections":…,"components":[…]}`); ebenso der
+    Bericht eines guten Laufs. Rot: `expected [ …(2) ] to have a length of 1` (Meldung und Objekt in
+    einem Aufruf) und der Bericht zählte eine Variante mit, die nie entstand.
+  - (4) Jugxo mit Verweis auf die Regression: `jug_01M33TKAFM6RSACJN6H90B183A`.
+  - Zur Ursache: nicht gemessen. Die Korrektur macht die Hypothese unerheblich — nichts wird mehr
+    neu gesetzt, was schon gilt —, belegt sie aber nicht. Offen, was genau zwischen der
+    F14-Abnahme und `e9db633` den zweiten Lauf brach; Kandidaten sind die neuen Eigenschaften am
+    Set (F16 Füllung, F17 `strokesIncludedInLayout`, F19 Modusreihenfolge), die den Schreibvorgang
+    von `layoutMode` nicht ausgelöst, aber begleitet haben.
+  - Fertig wenn: Abnahmelauf — frische Datei, zwei Läufe, Lauf 2 mit `0 angelegt, 72 aktualisiert,
+    warnings: []`; danach density per Figma-MCP auf compact/comfortable für F20.
 
 Consistency check before tasks (`/speckit.analyze` scope): every FR and AK maps to at least one task or a recorded decision; every task maps to a plan decision; two new packages (Art. XI); the lockfile changes in T008 only; no task lowers a threshold; nothing is published.

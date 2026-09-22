@@ -36,7 +36,8 @@ export interface DoubleNode {
   properties: Record<string, unknown>;
   /** Properties that still hold the value the tool gave the node, not one the plugin wrote (F13). */
   defaults: Set<string>;
-  boundVariables: Record<string, string>;
+  /** Per field the alias Figma holds: `{ type: "VARIABLE_ALIAS", id, name }`. */
+  boundVariables: Record<string, { type: "VARIABLE_ALIAS"; id: string; name: string }>;
   pluginData: Record<string, string>;
   appendChild(child: DoubleNode): void;
   insertChild(index: number, child: DoubleNode): void;
@@ -57,6 +58,8 @@ export interface DoubleCounts {
   variables: number;
   nodes: number;
   valueWrites: number;
+  /** Every write to the document: a property, a binding, a cell, plugin data, a value (F21). */
+  writes: number;
 }
 
 export interface DoubleNotification {
@@ -269,6 +272,7 @@ function node(
       }
       anchor.row = rowIndex;
       anchor.column = columnIndex;
+      counts.writes++;
       context.version++;
     },
     children: [],
@@ -296,6 +300,7 @@ function node(
     },
     setSharedPluginData(namespace, key, value) {
       self.pluginData[`${namespace}/${key}`] = value;
+      counts.writes++;
     },
     getSharedPluginData(namespace, key) {
       return self.pluginData[`${namespace}/${key}`] ?? "";
@@ -308,9 +313,15 @@ function node(
         );
       }
       if (variable === null) delete self.boundVariables[field];
-      else self.boundVariables[field] = variable.name;
+      else
+        self.boundVariables[field] = {
+          type: "VARIABLE_ALIAS",
+          id: variable.id,
+          name: variable.name,
+        };
       // Bound by the plugin: the value is the plugin's from now on, not the tool's default.
       self.defaults.delete(field);
+      counts.writes++;
       context.version++;
     },
     remove() {
@@ -329,6 +340,25 @@ function node(
       if (key === "gridRowAnchorIndex" || key === "gridColumnAnchorIndex") {
         throw new Error(`${String(key)} is read-only; use setGridChildPosition.`);
       }
+      // Measured on 2026-09-22 (file x8sFFyOkrnlMM4ngAsbnfs, F21): setting layoutMode on a grid
+      // whose cells are occupied — even to "GRID" again — threw "in set_layoutMode: Cannot set
+      // grid row count: Cannot delete occupied row/column." The double throws the same; and it
+      // refuses a track count below an occupied cell, which is what the message says.
+      if (typeof key === "string" && target.properties.layoutMode === "GRID") {
+        const rows = Math.max(-1, ...target.children.map((child) => child.gridRowAnchorIndex)) + 1;
+        const columns =
+          Math.max(-1, ...target.children.map((child) => child.gridColumnAnchorIndex)) + 1;
+        const occupied = rows > 0 && columns > 0;
+        const shrinks =
+          (key === "gridRowCount" && Number(value) < rows) ||
+          (key === "gridColumnCount" && Number(value) < columns);
+        if (occupied && (key === "layoutMode" || shrinks)) {
+          throw new Error(
+            `in set_${key}: Cannot set grid row count: Cannot delete occupied row/column.`,
+          );
+        }
+      }
+      counts.writes++;
       context.version++;
       // Figma refuses a text in a font that is not loaded: setting it, or setting characters in
       // the font the text has (F11). The double does too, instead of accepting it silently.
@@ -397,7 +427,7 @@ function layoutOf(
   const sizes = new Map<DoubleNode, { width: number; height: number }>();
   const num = (current: DoubleNode, field: string): number => {
     const bound = current.boundVariables[field];
-    const value = bound === undefined ? current.properties[field] : resolve(bound);
+    const value = bound === undefined ? current.properties[field] : resolve(bound.name);
     return typeof value === "number" ? value : 0;
   };
   const prop = (current: DoubleNode, field: string) => current.properties[field];
@@ -557,7 +587,13 @@ function strict<T extends object>(name: string, api: T): T {
 export function figmaDouble(
   options: { fonts?: readonly { family: string; style: string }[] } = {},
 ): FigmaDouble {
-  const counts: DoubleCounts = { collections: 0, variables: 0, nodes: 0, valueWrites: 0 };
+  const counts: DoubleCounts = {
+    collections: 0,
+    variables: 0,
+    nodes: 0,
+    valueWrites: 0,
+    writes: 0,
+  };
   const available = new Set([...FIGMA_FONTS, ...(options.fonts ?? [])].map(fontKey));
   const loaded = new Set<string>();
   // Filled below, once the document and the variables exist.
@@ -580,10 +616,12 @@ export function figmaDouble(
       renameMode(modeId, next) {
         const mode = modes.find((candidate) => candidate.modeId === modeId);
         if (mode !== undefined) mode.name = next;
+        counts.writes++;
       },
       addMode(next) {
         const modeId = id("mode");
         modes.push({ modeId, name: next });
+        counts.writes++;
         return modeId;
       },
     };
@@ -606,12 +644,19 @@ export function figmaDouble(
       valuesByMode: {},
       setValueForMode(modeId, value) {
         counts.valueWrites++;
+        counts.writes++;
         context.version++;
         variable.valuesByMode[modeId] = value;
       },
     };
     variables.push(variable);
-    return variable;
+    // Every direct assignment on a variable is a write of the document as well.
+    return new Proxy(variable, {
+      set(target, key, value) {
+        counts.writes++;
+        return Reflect.set(target, key, value);
+      },
+    });
   };
 
   const figma = strict("figma", {

@@ -206,7 +206,7 @@ async function applyVariables(collections, modeIds) {
       const found =
         byName.get(variable.name) ??
         figma.variables.createVariable(variable.name, collection, variable.type);
-      found.hiddenFromPublishing = variable.hidden === true;
+      write(found, "hiddenFromPublishing", variable.hidden === true);
       variables.set(variable.name, found);
     }
   }
@@ -219,6 +219,13 @@ async function applyVariables(collections, modeIds) {
         const target = value !== null && typeof value === "object" && "alias" in value
           ? figma.variables.createVariableAlias(variables.get(value.alias))
           : value;
+        // An alias is compared by the variable it points at; a literal by its value.
+        const current = found.valuesByMode === undefined ? undefined : found.valuesByMode[ids[mode]];
+        const sameAlias =
+          current !== undefined && current !== null && typeof current === "object" &&
+          current.type === "VARIABLE_ALIAS" && target !== null && typeof target === "object" &&
+          target.type === "VARIABLE_ALIAS" && current.id === target.id;
+        if (sameAlias || JSON.stringify(current) === JSON.stringify(target)) continue;
         found.setValueForMode(ids[mode], target);
       }
     }
@@ -233,14 +240,85 @@ function ours(parent, key, value) {
   );
 }
 
-/** Sets the owned properties to the given values; lists start empty (F13). */
+/**
+ * Written only when the value does not hold yet (F21). Figma refuses some writes on a document
+ * that already has the value — setting layoutMode on a grid with occupied cells threw "Cannot
+ * delete occupied row/column." on the second run — and a write that changes nothing is noise in
+ * the file's history. Compared by JSON, so paints with the same binding count as equal.
+ */
+function write(node, field, value) {
+  // A node this run created is written whole: what the tool gave it is not the plan's (F13), and
+  // reading it back to compare would trust the tool's default. A node found from an earlier run is
+  // compared first.
+  if (!fresh.has(node.id)) {
+    const same = (a, b) => JSON.stringify(a === undefined ? null : a) === JSON.stringify(b);
+    let current;
+    try {
+      current = node[field];
+    } catch (error) {
+      current = undefined;
+    }
+    if (same(current, value)) return false;
+  }
+  node[field] = value;
+  return true;
+}
+
+/** The IDs of the nodes this run created; everything else was found in the file. */
+const fresh = new Set();
+
+function create(make) {
+  const node = make();
+  fresh.add(node.id);
+  return node;
+}
+
+/** Plugin data, written only when it changes. */
+function stamp(node, key, value) {
+  if (node.getSharedPluginData(NAMESPACE, key) === value) return;
+  node.setSharedPluginData(NAMESPACE, key, value);
+}
+
+/**
+ * The values a node is going to get, gathered first and written once (F21): "neutral first, then
+ * the plan" as two writes would set a found node's fill to [] and back to its paint on every run.
+ * Insertion order is kept, so layoutMode still precedes the paddings that need it.
+ */
+const pending = new Map();
+function gather(node) {
+  let values = pending.get(node.id);
+  if (values === undefined) {
+    values = {};
+    pending.set(node.id, values);
+  }
+  return values;
+}
+
+/** Notes the owned properties as neutral or as the plan says; lists start empty (F13). */
 function own(node, values) {
+  const target = gather(node);
   for (const [field, value] of Object.entries(values)) {
-    node[field] = Array.isArray(value) ? [] : value;
+    target[field] = Array.isArray(value) ? [] : value;
   }
 }
 
+/** Writes what was gathered for a node, each property once, only where it does not hold yet. */
+function flush(node) {
+  const values = pending.get(node.id);
+  if (values === undefined) return;
+  pending.delete(node.id);
+  for (const [field, value] of Object.entries(values)) write(node, field, value);
+}
+
+/** The ID of the variable a field is bound to, in the form the tool holds it. */
+function boundId(node, field) {
+  const bound = node.boundVariables === undefined ? undefined : node.boundVariables[field];
+  if (bound === undefined || bound === null) return undefined;
+  return typeof bound === "object" ? bound.id : bound;
+}
+
 function bind(nodes, variant, variables) {
+  const deferred = [];
   for (const [part, name] of Object.entries(variant.bindings)) {
     for (const target of BINDINGS[part] || []) {
       const variable = variables.get(name + (target.suffix || ""));
@@ -258,23 +336,26 @@ function bind(nodes, variant, variables) {
           variable,
         );
         if (paint !== undefined && typeof paint.opacity === "number") bound.opacity = paint.opacity;
-        for (const field of target.fields) node[field] = [bound];
+        for (const field of target.fields) gather(node)[field] = [bound];
       } else {
-        for (const field of target.fields) node.setBoundVariable(field, variable);
+        // A measure is bound after the frame's layout is written: padding, gap and minimum sizes
+        // only take effect on an auto-layout frame, and the tool refuses them before (F11).
+        for (const field of target.fields) deferred.push({ node, field, variable });
       }
     }
   }
+  return deferred;
 }
 
 /** The child of parent marked as the part, created when missing. */
-function part(parent, name, create) {
+function part(parent, name, make) {
   let found = ours(parent, "part", name);
   if (found === undefined) {
-    found = create();
+    found = create(make);
     found.setSharedPluginData(NAMESPACE, "part", name);
     parent.appendChild(found);
   }
-  found.name = name;
+  write(found, "name", name);
   return found;
 }
 
@@ -377,16 +458,18 @@ async function applyComponents(variables, warnings) {
       after: { children: 0, marked: 0 },
       diagnosis: "",
     };
+    progress.components.push(report);
     const made = [];
     const labels = [];
     for (const variant of component.variants) {
       const name = variantName(variant.props);
       const existing = set === undefined ? undefined : ours(set, "variant", name);
+      const node = existing ?? create(() => figma.createComponent());
+      // Counted once the node exists: a run that fails while creating reports what it made.
       (existing === undefined ? report.created : report.updated).push(name);
-      const node = existing ?? figma.createComponent();
-      node.name = name;
-      node.setSharedPluginData(NAMESPACE, "variant", name);
-      node.setSharedPluginData(NAMESPACE, "ero", component.set);
+      write(node, "name", name);
+      stamp(node, "variant", name);
+      stamp(node, "ero", component.set);
       // The structure (F11): variant → focus-ring → focus-gap → control → label, each found by
       // its part mark and created when missing. A control an older plugin left directly under
       // the variant is moved in, never duplicated.
@@ -397,9 +480,9 @@ async function applyComponents(variables, warnings) {
         ours(node, "part", "control") ??
         part(gap, "control", () => figma.createFrame());
       if (control.parent !== gap) gap.appendChild(control);
-      control.name = "control";
+      write(control, "name", "control");
       const label = part(control, "label", () => figma.createText());
-      label.fontName = fonts.get(variant.font.family + " " + variant.font.style);
+      write(label, "fontName", fonts.get(variant.font.family + " " + variant.font.style));
       labels.push(label);
       // Only values from the plan (F13): every owned property neutral first — Figma's white fill,
       // its clipping and its line would otherwise cover what the plan draws.
@@ -412,14 +495,24 @@ async function applyComponents(variables, warnings) {
       // The variant lies in the grid's flow, its parts in the variant's (F14).
       for (const child of [node, ring, gap, control, label]) own(child, IN_FLOW);
       own(label, TEXT_SIZING);
-      ring.cornerRadius = variant.radii["focus-ring"];
-      gap.cornerRadius = variant.radii["focus-gap"];
-      bind({ "focus-ring": ring, "focus-gap": gap, control, label }, variant, variables);
+      gather(ring).cornerRadius = variant.radii["focus-ring"];
+      gather(gap).cornerRadius = variant.radii["focus-gap"];
+      const measures = bind(
+        { "focus-ring": ring, "focus-gap": gap, control, label },
+        variant,
+        variables,
+      );
+      // Everything gathered is written once, layout before the parts inside it; the measures
+      // are bound after that, when every frame has its layout.
+      for (const each of [node, ring, gap, control, label]) flush(each);
+      for (const { node: target, field, variable } of measures) {
+        if (boundId(target, field) !== variable.id) target.setBoundVariable(field, variable);
+      }
       if (existing === undefined) made.push(node);
     }
     if (set === undefined) {
-      set = figma.combineAsVariants(made, figma.currentPage);
-      set.name = component.set;
+      set = create(() => figma.combineAsVariants(made, figma.currentPage));
+      write(set, "name", component.set);
     }
     // The set is a node the plugin owns too: combineAsVariants draws Figma's purple dashed frame
     // around it, which is not from the model (Maintainer, 2026-09-21).
@@ -435,7 +528,7 @@ async function applyComponents(variables, warnings) {
           ground,
         );
         bound.opacity = component.surface.opacity;
-        set.fills = [bound];
+        gather(set).fills = [bound];
       }
     }
     // The grid of the Vitrino (F11): one row per combination, one column per state, in the order
@@ -458,9 +551,10 @@ async function applyComponents(variables, warnings) {
         gridItemsPositioning: "MANUAL",
       });
     }
-    set.setSharedPluginData(NAMESPACE, "ero", component.set);
-    set.setSharedPluginData(NAMESPACE, "skemo", component.pluginData.fundamento.skemo);
-    set.setSharedPluginData(NAMESPACE, "version", component.pluginData.fundamento.version);
+    flush(set);
+    stamp(set, "ero", component.set);
+    stamp(set, "skemo", component.pluginData.fundamento.skemo);
+    stamp(set, "version", component.pluginData.fundamento.version);
     for (const node of made) if (node.parent !== set) set.appendChild(node);
     // The label is a text property of the component (F11): declared once on the set, its default
     // the Vitrino's text, every label connected to it — an instance overrides it.
@@ -472,10 +566,12 @@ async function applyComponents(variables, warnings) {
           candidate.split("#")[0] === spec.property && definitions[candidate].type === "TEXT",
       );
       if (key === undefined) key = set.addComponentProperty(spec.property, "TEXT", spec.defaultValue);
-      else set.editComponentProperty(key, { defaultValue: spec.defaultValue });
+      else if (definitions[key].defaultValue !== spec.defaultValue) {
+        set.editComponentProperty(key, { defaultValue: spec.defaultValue });
+      }
       for (const label of labels) {
-        label.characters = spec.defaultValue;
-        label.componentPropertyReferences = { characters: key };
+        write(label, "characters", spec.defaultValue);
+        write(label, "componentPropertyReferences", { characters: key });
       }
     }
     component.variants.forEach((variant, index) => {
@@ -521,7 +617,7 @@ async function applyComponents(variables, warnings) {
     report.diagnosis = diagnose(report);
     // Ohne Zeitstempel: Zwei gleiche Läufe hinterlassen denselben Stand, sonst wäre der Lauf nicht
     // mehr idempotent.
-    set.setSharedPluginData(NAMESPACE, "after", JSON.stringify(report.after));
+    stamp(set, "after", JSON.stringify(report.after));
     reports.push(report);
   }
   return reports;
@@ -758,12 +854,25 @@ function layoutWarnings(report, grid) {
   return out;
 }
 
+/**
+ * What the run has done so far: printed whole when the run fails, so the console shows the report
+ * up to the point of the abort and not only "Error" (F21).
+ */
+const progress = { phase: "start", collections: 0, variables: 0, components: [], warnings: [] };
+
 /** Applies the whole plan; safe to run again. Returns the report of this run (F10). */
 async function applyPlan() {
+  progress.phase = "collections";
   const { collections, modeIds, warnings: modeWarnings } = await applyCollections();
+  progress.collections = collections.size;
+  progress.phase = "variables";
   const variables = await applyVariables(collections, modeIds);
+  progress.variables = variables.size;
+  progress.warnings = [...modeWarnings];
+  progress.phase = "components";
   const warnings = [...modeWarnings];
   const components = await applyComponents(variables, warnings);
+  progress.phase = "done";
   for (const report of components) {
     const component = PLAN.components.find((candidate) => candidate.set === report.set);
     warnings.push(...layoutWarnings(report, component === undefined ? undefined : component.grid));
@@ -815,9 +924,10 @@ async function applyPlan() {
 
 /** One place for the report: everything in the console, the headline in the toast (F10). */
 function announce(result) {
-  console.log(
-    "Fundamento " + result.fundamento + " – Bericht:" + "\\n" + JSON.stringify(result, null, 2),
-  );
+  // One string per line, the report as a single JSON string: an object viewer folds and cuts
+  // what is copied, a string is copied whole (F21).
+  console.log("Fundamento " + result.fundamento + " – Bericht (JSON, eine Zeile):");
+  console.log(JSON.stringify(result));
   const counted = result.components
     .map((report) =>
       report.set + " " + report.created.length + " neu, " + report.updated.length + " aktualisiert",
@@ -842,7 +952,12 @@ if (typeof figma !== "undefined" && typeof figma.closePlugin === "function" && f
     })
     // A rejection used to disappear: no toast, no console, a plugin that seemed to do nothing.
     .catch((error) => {
-      console.error("Fundamento " + PLAN.fundamento + " – Lauf fehlgeschlagen:", error);
+      // Message, stack and the report up to the abort, each as one string (F21): "Error" alone
+      // said nothing, and the folded report was cut when copied.
+      const message = String(error && error.message ? error.message : error);
+      console.error("Fundamento " + PLAN.fundamento + " – Lauf fehlgeschlagen in Phase " + progress.phase + ": " + message);
+      console.error(String(error && error.stack ? error.stack : "(kein Stack)"));
+      console.error(JSON.stringify(progress));
       figma.notify(
         "Fundamento " + PLAN.fundamento + ": Lauf fehlgeschlagen — " + String(error && error.message ? error.message : error) +
           ". Einzelheiten in der Konsole.",
