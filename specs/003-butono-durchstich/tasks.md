@@ -1129,6 +1129,29 @@ und F24 (Befund, nicht blockierend).
   - Fertig wenn: Der Maintainer misst in Figma — der Ring folgt in ekzemplo dem eckigen Knopf, und
     die Beschriftung steht im Modus ekzemplo in Archivo Black.
 
+- [ ] **F33 Constitution: Artikel V präzisiert, VI und VII ergänzt** (An P0, Maintainer
+  2026-09-23; nur Dokumentation) — **v1.9 → v2.0**, als v1.7 → v1.8 entworfen
+  - **Artikel V:** Öffentlich beobachtbare Erscheinung ist kein Quelltext. Die Grenze verläuft
+    nicht zwischen Auge und Werkzeug, sondern zwischen Beobachtung und Übernahme — ein gemessener
+    Wert darf ins System, ein abgeschriebener Name nicht. Die Übernahmeregel selbst steht
+    unverändert daneben; die Klarstellung weitet sie nicht auf.
+  - **Artikel VI — „Kein Trittbrett":** Was mit dem Ergebnis geschieht, gehört zur Regel. Maßstab
+    ist die **Verwechselbarkeit**, nicht die Ähnlichkeit: Zwei Marken dürfen dieselbe
+    Schriftgröße und dasselbe Blau haben; verwechselbar wird es, wo die Herkunft nicht mehr
+    auseinanderzuhalten ist. Die Prüfung ist eine Jugxo, keine Messung — ein Eindruck wird
+    begründet, nicht gerechnet.
+  - **Artikel VII — „Herkunftsnachweis":** Jeder Import führt mit, was wann woher und in welcher
+    Form gelesen wurde, und die Angabe reist mit dem Ergebnis, nicht nur mit dem Werkzeug. Jede
+    gelesene Schrift wird als „Name gelesen, Lizenz ungeklärt" geführt, bis die Lizenz
+    nachgewiesen ist. Ein Name ist keine Lizenz.
+  - **Nummerierung unverändert.** Die drei Ergänzungen stehen in den Artikeln, deren Gegenstand
+    sie fortschreiben — was gelesen werden darf (V), was mit dem Ergebnis geschehen darf (VI),
+    was mitreisen muss (VII). Neue Artikel hätten alles ab VI verschoben, und jeder Verweis auf
+    „Art. VIII" im Repo zeigte danach woanders hin.
+  - **Ausdrücklich nicht gebaut:** keine Regulo, die den Nachweis erzwingt. Der Enportilo
+    existiert nicht; eine Regel gegen eine Maschine zu schreiben, die es nicht gibt, hieße bauen
+    vor messen. Drei Tests halten den Wortlaut fest, mehr nicht.
+
 - [ ] **F41 Das System führt seine Lücken — und muss sie noch nachprüfen** (An P0, Maintainer
   2026-09-23; Constitution-Amendment Art. VI „Lücken werden geführt", Terminologie **Manko**)
   - **Gebaut, Modelo-Teil:** Datenart `data/mankoj.json` mit Schema und ID-Präfix `man_`, eigene
@@ -1163,12 +1186,14 @@ und F24 (Befund, nicht blockierend).
        gemeldet" bleibt die Prüfung grün, wenn das Werkzeug die Lücke längst geschlossen hat.
     `textDecoration` kommt in der Figma-Projektion überhaupt noch nicht vor; Manko 2 hat also
     keinen Lauf, der sie messen könnte.
-  - **Versionsnummer, entschieden** (Maintainer, 2026-09-23): F33 (PR #31, Art. V/VI/VII) hebt die
-    Constitution ebenfalls auf 1.8, ist älter und geht zuerst nach `main`; F41 trägt deshalb
-    **1.9**. Bis #31 gemergt ist, springt die Änderungshistorie von v1.7 auf v1.9 — der Rebase auf
-    das gemergte F33 schließt die Lücke. Gemerkt: Die Nummer wird gegen den Basis-Commit geprüft,
-    nicht aus der Datei fortgeschrieben; der Header-Test vergleicht nur einen String und hätte zwei
-    Amendments unter einer Nummer nie gemeldet.
+  - **Versionsnummer, wie sie ausging** (Maintainer, 2026-09-23, korrigiert 2026-09-24): Geplant war
+    F33 (PR #31) zuerst als 1.8, danach F41 als 1.9, und der Rebase sollte die Lücke schließen.
+    Gemergt wurde andersherum: #33 mit F41 ging zuerst und nahm die **1.9**, #31 landet als **2.0**.
+    Eine v1.8 hat es damit nie gegeben; die Lücke in der Änderungshistorie wird dort benannt, nicht
+    geschlossen — eine übersprungene Nummer, die niemand erklärt, ist eine stille Korrektur.
+    Gemerkt: Die Nummer wird gegen den Basis-Commit geprüft, nicht aus der Datei fortgeschrieben;
+    der Header-Test vergleicht nur einen String und hätte zwei Amendments unter einer Nummer nie
+    gemeldet. Auf 1.9 folgt 2.0, nicht 1.10.
 
 - [ ] **F42 Der Lauf prüft die geführten Lücken nach** (aus F41 abgetrennt, Maintainer 2026-09-23)
   - Die drei Stücke aus dem F41-Abschnitt: Der Lauf versucht die Bindung immer und wertet den
