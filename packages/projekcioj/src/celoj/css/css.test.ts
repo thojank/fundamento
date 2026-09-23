@@ -12,6 +12,7 @@ import {
 } from "@fundamento/modelo";
 import { describe, expect, it } from "vitest";
 import { celoInputOf } from "../../build.js";
+import { WEB_COMPONENT_CELO } from "../web-component/web-component.js";
 import { CSS_CELO } from "./css.js";
 
 const config = new URL(
@@ -97,5 +98,34 @@ describe("css-physical-property (T009, D-17)", () => {
       ["css-physical-property", "a.css:2:3"],
       ["css-physical-property", "a.css:4:3"],
     ]);
+  });
+});
+
+// F31 (An P0, Maintainer 2026-09-23): Versalien und Sperrsatz sind ein typografisches Paar — kein
+// Werkzeug braucht das eine ohne das andere. `letterSpacing` kam schon an; `textTransform` stand im
+// Modelo und im Rezolvo, aber in keiner Projektion. Die kommende dritte Marke setzt ihre
+// Mikro-Beschriftungen auf Versalien mit positivem Sperrsatz und ist ohne beides nicht ausdrückbar.
+describe("capitals and tracking reach the web projection (F31)", () => {
+  const css = combined;
+
+  it("gives every typography role a text-transform property", () => {
+    for (const role of ["display-1", "label-1", "kicker", "body-1"]) {
+      expect(css, role).toContain(`--fm-typography-${role}-text-transform:`);
+      expect(css, role).toContain(`--fm-typography-${role}-letter-spacing:`);
+    }
+  });
+
+  // komunas kicker steht seit Spec 001 auf uppercase, ohne dass es je jemand gesehen hätte.
+  it("carries the case the Modelo states, and none where it states none", () => {
+    expect(css).toMatch(/--fm-typography-kicker-text-transform:\s*uppercase;/);
+    expect(css).toMatch(/--fm-typography-body-1-text-transform:\s*none;/);
+  });
+
+  it("applies both wherever the component applies its typography", () => {
+    const component = WEB_COMPONENT_CELO.generate(prepared.input)
+      .map((file) => file.text)
+      .join("\n");
+    expect(component).toContain("text-transform: var(--fm-typography-label-1-text-transform)");
+    expect(component).toContain("letter-spacing: var(--fm-typography-label-1-letter-spacing)");
   });
 });

@@ -1018,7 +1018,41 @@ und F24 (Befund, nicht blockierend).
     Beschriftung steht in Archivo SemiBold; der Bericht nennt die gebundenen Variablen und die
     Schrift je Aspekto.
 
-- [ ] **F31 Versalien werden projiziert** (An P0, Maintainer 2026-09-23) — **noch nicht begonnen**
+- [ ] **F31 Versalien und Sperrsatz werden projiziert** (An P0, Maintainer 2026-09-23, freigegeben
+  und um `letterSpacing` erweitert)
+  - Anlass, jetzt konkret: Die kommende dritte Marke setzt ihre Mikro-Beschriftungen auf Versalien
+    mit positivem Sperrsatz. Gesperrte Versalien sind ein typografisches Paar; kein Werkzeug
+    braucht das eine ohne das andere.
+  - Befund, gemessen: **Der Sperrsatz kam schon an** — `--fm-typography-<rolle>-letter-spacing`
+    steht in der CSS, die Komponente setzt es, und im Figma-Plan gibt es die Variable. Er war nur
+    **an nichts gebunden**: Der Textknoten bekam ihn nie. Die Schreibweise fehlte ganz —
+    `textTransform` stand im Modelo und im Rezolvo, in keiner Projektion. Das betraf auch komunas
+    `typography.kicker`, das seit Spec 001 auf `uppercase` steht, ohne dass es je jemand gesehen
+    hätte.
+  - Rot zuerst, Web: `expected … to contain '--fm-typography-display-1-text-transform'` und
+    `expected … to contain 'text-transform: var(--fm-typography-label-1-text-transform)'`.
+  - Rot zuerst, Figma: `expected undefined to be 'ORIGINAL'` (der Plan nannte keine Schreibweise)
+    und im Lauf `expected undefined to be 'ORIGINAL'` sowie `expected '' to contain
+    'Schreibweise'`.
+  - Grün, Web: Die Schreibweise ist ein Feld der Typografie wie der Sperrsatz. **Die Kaskade war
+    die eigentliche Arbeit:** Die Schreibweise steht im Modelo *neben* dem Wert, und der letzte
+    Satz, der sie nennt, gewinnt (D-11). In CSS heißt das: Wer sie nicht nennt, schreibt auch
+    nichts — sonst löschte der Satz einer Marke, der die Rolle nur neu belegt, die Versalien des
+    Kerns. Nur der Grundsatz schreibt die Vorgabe `none`, damit die Eigenschaft überall einen Wert
+    hat. Gemessen: `--fm-typography-kicker-text-transform: uppercase` aus dem Kern,
+    `--fm-typography-display-1-text-transform: uppercase` im Block von ekzemplo über dem `none`
+    des Kerns.
+  - Grün, Figma: Der Sperrsatz wird **gebunden** (`letterSpacing` ist ein bindbares Feld des
+    Textknotens) und folgt damit dem Modus. Die Schreibweise wird **geschrieben**, weil `textCase`
+    keines ist — der Plan nennt sie je Variante. Wo zwei Modi sich unterscheiden, nennt er
+    `TEXT_CASE_VARIES` statt eines Werts, der Lauf schreibt nichts und warnt mit Namen: dieselbe
+    Ehrlichkeit wie bei einer Deckkraft, die dem Modus nicht folgen kann (F8).
+  - Nebenbefund: `text-transform` war in der Komponenten-CSS-Prüfung weder als Struktur noch als
+    Gestaltung geführt und fiel deshalb durch. Es ist jetzt eine Gestaltungseigenschaft — sie
+    kommt aus dem Vortaro, nie aus der Komponente.
+  - Nicht gemessen: der Lauf in echtem Figma. Das Double prüft Bindung und geschriebenen Wert;
+    ob Figma eine Bindung von `textCase` erlaubte, ist offen — der Plan trägt die Werte, eine
+    Bindung wäre ein kleiner Schritt.
   - `textTransform` steht im Modelo und im Rezolvo, aber keine Projektion trägt es: weder die
     CSS-Variablen (`--fm-typography-display-1-*` kennt kein `text-transform`) noch der Figma-Plan.
     Betrifft auch komunas `typography.kicker` seit Spec 001. Anforderung: Die Web-Projektion setzt
