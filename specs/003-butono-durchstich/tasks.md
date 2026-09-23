@@ -1129,4 +1129,65 @@ und F24 (Befund, nicht blockierend).
   - Fertig wenn: Der Maintainer misst in Figma — der Ring folgt in ekzemplo dem eckigen Knopf, und
     die Beschriftung steht im Modus ekzemplo in Archivo Black.
 
+- [ ] **F41 Das System führt seine Lücken — und muss sie noch nachprüfen** (An P0, Maintainer
+  2026-09-23; Constitution-Amendment Art. VI „Lücken werden geführt", Terminologie **Manko**)
+  - **Gebaut, Modelo-Teil:** Datenart `data/mankoj.json` mit Schema und ID-Präfix `man_`, eigene
+    Prüfung `check:mankoj` als eigener CI-Schritt, `mankoj` im Export. Zwei Mankoj stehen darin,
+    beide am Textknoten gemessen: `setBoundVariable` lehnt `textCase` und `textDecoration` ab,
+    während dieselbe Eigenschaft als Wert angenommen wird. Jede trägt ihre Schließbedingung.
+  - **AK-12 als Regel statt als Feldliste** (Maintainer, 2026-09-23): Ein Satz, der sein Ziel in
+    einem typisierten Feld deklariert, darf es in seinen eigenen Feldern nennen — der Jugxo in
+    `ref.celo`, die Manko in `celo`. Eine Aufzählung erlaubter Prosafelder wäre mit jedem neuen
+    Feld gewachsen und hätte die Prosa zum Schlupfloch gemacht. `celoMappingLeaks` kennt das Wort
+    `mankoj` deshalb nicht: Die Manko besteht die Prüfung, weil sie deklariert, und ihr Link nach
+    außen darf das Werkzeug nennen wie ihre Prosa.
+  - **AK-10:** Das `date` einer Manko ist der Tag der Messung aus den Daten, wie das `date` eines
+    Jugxo der Tag der Entscheidung — kein Build-Zeitstempel. Der Test vergleicht beide gegen die
+    Eingabe, damit ein Datum, das der Build erfände, weiterhin auffällt.
+  - **Rot zuerst, zwei Fixtures:** `invalid/manko-closing-missing` — eine Lücke ohne
+    Schließbedingung ist ungültig wie ein Constraint ohne Kialo — und
+    `invalid/manko-evidence-missing`: Eine Lücke, die nicht sagt, woran sie gemessen wurde, ist
+    eine Behauptung.
+  - **Abgetrennt als F42, der Projektionsteil** (Maintainer, 2026-09-23): F41 liefert Datenart,
+    Prüfung und Export; das Nachprüfen wird ein eigener Strang. Bis der steht, ist F41 ausdrücklich
+    die Hälfte — das System führt seine Lücken, aber es prüft sie nicht nach. Nicht gebaut ist:
+    1. Der Lauf verdrahtet die Unfähigkeit noch, statt sie zu messen
+       (`packages/projekcioj/src/celoj/figma/plugin.ts`, Schreibweise der Beschriftung): Er
+       versucht die Bindung nie, und wo die Modi sich unterscheiden, schreibt er gar nichts statt
+       des aufgelösten Werts. Art. VI verlangt das Gegenteil — der Versuch ist die Messung.
+    2. Der Bericht führt keine `mankoj: { open, closed }`; der Cockpit-Check, der alle bekannten
+       Lücken eines Celo abarbeitet, fehlt ganz.
+    3. Der rote Test kennt keinen der beiden Zweige: Das Double lehnt heute nur Schrift- und
+       Auto-Layout-Felder ab, und der bestehende Test zementiert die Unfähigkeit, statt sie zu
+       messen. Ohne den Zweig „Double nimmt die Bindung an → dieselbe Manko wird als geschlossen
+       gemeldet" bleibt die Prüfung grün, wenn das Werkzeug die Lücke längst geschlossen hat.
+    `textDecoration` kommt in der Figma-Projektion überhaupt noch nicht vor; Manko 2 hat also
+    keinen Lauf, der sie messen könnte.
+  - **Versionsnummer, entschieden** (Maintainer, 2026-09-23): F33 (PR #31, Art. V/VI/VII) hebt die
+    Constitution ebenfalls auf 1.8, ist älter und geht zuerst nach `main`; F41 trägt deshalb
+    **1.9**. Bis #31 gemergt ist, springt die Änderungshistorie von v1.7 auf v1.9 — der Rebase auf
+    das gemergte F33 schließt die Lücke. Gemerkt: Die Nummer wird gegen den Basis-Commit geprüft,
+    nicht aus der Datei fortgeschrieben; der Header-Test vergleicht nur einen String und hätte zwei
+    Amendments unter einer Nummer nie gemeldet.
+
+- [ ] **F42 Der Lauf prüft die geführten Lücken nach** (aus F41 abgetrennt, Maintainer 2026-09-23)
+  - Die drei Stücke aus dem F41-Abschnitt: Der Lauf versucht die Bindung immer und wertet den
+    Fehlschlag aus (statt die Unfähigkeit zu verdrahten), der Bericht führt
+    `mankoj: { open, closed }` über alle Lücken seines Celo, und der rote Test kennt beide Zweige —
+    Double lehnt ab: geschrieben und gemeldet; Double nimmt an: gebunden und dieselbe Manko als
+    geschlossen gemeldet. Ohne den zweiten Zweig bleibt die Prüfung grün, wenn das Ziel die Lücke
+    längst geschlossen hat, und niemand merkt es.
+  - Fasst die Projektion an: gehört damit in dieselbe Messung in echtem Figma wie #28, #29, #30.
+  - **Aufräumen, eigene Änderung (nicht in diesem PR):** neun `noUnusedImports`-Warnungen in
+    `packages/modelo/src/checks/alirebleco/*`, `checks/parity/index.ts`, `export/build.ts` und
+    `validate/spec004-reguloj.ts` sowie ein `noTemplateCurlyInString` in
+    `ci/release-workflow.test.ts`. Alle älter als dieser Branch, keine bricht die Prüfung.
+    Dazu: `validate/validate-modelo.ts` enthält zwei rohe NUL-Bytes als Trennzeichen im
+    Issue-Schlüssel (`${severity}\0${rule}\0${path}`). Absicht und älter als dieser Branch, aber
+    git hält die Datei deshalb für binär und zeigt keinen Diff mehr. Als `\0`-Escape geschrieben
+    wäre dieselbe Absicht lesbar — eigene Änderung, eigener PR.
+  - Fertig wenn: Der Maintainer misst in echtem Figma — der Lauf versucht beide Bindungen, meldet
+    beide Mankoj als offen, und derselbe Lauf würde sie als geschlossen melden, sobald das Ziel sie
+    annimmt. Grüne CI ist hier keine Abnahme.
+
 Consistency check before tasks (`/speckit.analyze` scope): every FR and AK maps to at least one task or a recorded decision; every task maps to a plan decision; two new packages (Art. XI); the lockfile changes in T008 only; no task lowers a threshold; nothing is published.

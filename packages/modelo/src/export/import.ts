@@ -49,6 +49,7 @@ export function modeloFromExport(modeloJson: ModeloJson): Modelo {
     setoj,
     reguloj: structuredClone(modeloJson.reguloj),
     jugxoj: structuredClone(modeloJson.jugxoj),
+    mankoj: structuredClone(modeloJson.mankoj),
     kontrastParoj: structuredClone(modeloJson.kontrastParoj),
     // eroj and skemoj are exported in the same order (Ero name); the files are not exported.
     eroj: modeloJson.eroj.flatMap((ero) => {

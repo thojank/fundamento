@@ -623,8 +623,12 @@ describe("Spec 004 documentation (T001, Constitution v1.7)", () => {
     "Ein fremdes System mit offener, nachgewiesener Lizenz darf als Benchmark-Aspekto importiert werden, um es mit denselben Prüfungen zu messen.";
   const SOURCE_RULE = "Quellmaterial anderer Systeme wird dem Coding-Tool nicht vorgelegt.";
 
-  it("the Constitution header says version 1.7", () => {
-    expect(constitution.split("\n")[2]).toMatch(/^Version 1\.7 · /);
+  // F41 numbers itself 1.9, not 1.8: F33 (PR #31, Art. V/VI/VII) claims the 1.8 and goes to main
+  // first (maintainer, 2026-09-23). Until #31 is merged the change history jumps from v1.7 to v1.9
+  // — the rebase onto the merged F33 closes the gap. A header test compares one string and would
+  // never notice two amendments under one number; the number is checked against the base commit.
+  it("the Constitution header says version 1.9", () => {
+    expect(constitution.split("\n")[2]).toMatch(/^Version 1\.9 · /);
   });
 
   it("Art. V carries the Benchmark-Aspekto paragraph and keeps the source rule", () => {
@@ -651,6 +655,34 @@ describe("Spec 004 documentation (T001, Constitution v1.7)", () => {
 
   it("v1.7 does not yet carry the principle Fluida Marko", () => {
     expect(constitution).not.toContain("Fluida Marko");
+  });
+});
+
+// F41: the amendment that makes the register of gaps constitutional. Art. VI now says that a gap is
+// kept with its closing condition and that no projection wires an incapability — the attempt is the
+// measurement, never a version query.
+describe("F41 documentation (Constitution v1.9, Art. VI Manko)", () => {
+  const constitution = read(".specify/memory/constitution.md");
+
+  it("Art. VI says gaps are kept, with a mandatory closing condition", () => {
+    const article = section(constitution, "Artikel VI – Regularo kun Kialoj (Regeln mit Gründen)");
+    expect(article).toContain("Lücken werden geführt");
+    expect(article).toContain("Eine Manko ohne Schließbedingung ist ungültig");
+    expect(article).toContain("Keine Projektion verdrahtet eine Unfähigkeit");
+    expect(article).toContain("der Versuch ist die Messung");
+  });
+
+  it("the terminology table names Manko with its file", () => {
+    const table = section(constitution, "Terminologio (verbindliches Vokabular)");
+    const row = table.split("\n").find((line) => line.startsWith("| **Manko**")) ?? "";
+    expect(row).toContain("gemessene Lücke");
+    expect(row).toContain("`packages/modelo/data/mankoj.json`");
+  });
+
+  it("the change history names v1.9 (Spec 003, F41) with Art. VI and Manko", () => {
+    const history = section(constitution, "Governance");
+    expect(history).toMatch(/v1\.9 \(Spec 003, F41\) Art\. VI/);
+    expect(history).toContain("**Manko**");
   });
 });
 

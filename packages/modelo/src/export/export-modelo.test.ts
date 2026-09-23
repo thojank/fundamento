@@ -77,7 +77,7 @@ function collectRefs(node: unknown, out: string[] = []): string[] {
 }
 
 describe("exportModelo: shape (§2.9)", () => {
-  it("has exactly the §2.9 top-level keys plus core (Spec 001 FR-10) and skemoj (Spec 003)", () => {
+  it("has exactly the §2.9 top-level keys plus core (Spec 001 FR-10), skemoj (Spec 003) and mankoj (F41)", () => {
     expect(Object.keys(modeloJson).sort()).toEqual(
       [
         "$schema",
@@ -88,6 +88,7 @@ describe("exportModelo: shape (§2.9)", () => {
         "fundamento",
         "jugxoj",
         "kontrastParoj",
+        "mankoj",
         "reguloj",
         "rezolvo",
         "setoj",
@@ -286,10 +287,16 @@ describe("exportModelo: canonical, deterministic serialization (AK-10)", () => {
     const text = exported.modeloJson + exported.rezolvojJson;
     expect(text).not.toMatch(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/);
     expect(text).not.toMatch(/"(generatedAt|timestamp|builtAt)"/);
-    // A Jugxo's `date` is the decision date from the data, not a build time; nothing else has one.
-    const { jugxoj, ...rest } = JSON.parse(exported.modeloJson) as { jugxoj: { date: string }[] };
+    // A Jugxo's `date` is the decision date and a Manko's the day of the measurement (F41) — both
+    // come from the data, not from the build; nothing else has one. Both are compared against the
+    // input, so a date the build invented would still be caught.
+    const { jugxoj, mankoj, ...rest } = JSON.parse(exported.modeloJson) as {
+      jugxoj: { date: string }[];
+      mankoj: { date: string }[];
+    };
     expect(JSON.stringify(rest) + exported.rezolvojJson).not.toMatch(/"date"/);
     expect(jugxoj.map((jugxo) => jugxo.date)).toEqual(modelo.jugxoj.map((jugxo) => jugxo.date));
+    expect(mankoj.map((manko) => manko.date)).toEqual(modelo.mankoj.map((manko) => manko.date));
   });
 
   it("does not mutate its inputs", () => {

@@ -1,0 +1,7 @@
+{
+  "description": "Copy of valid/minimal with one Manko that says everything except how a run recognises that the gap is gone. Article VI: a Manko without a closing condition is invalid, as a Regulo without a kialo — it would stand in the data forever, and a tool that had long since caught up would go unnoticed. The schema rejects it too; the mankoj check reports it on its own.",
+  "check": "mankoj",
+  "issues": [
+    { "rule": "manko-closing-missing", "path": "data/mankoj.json#/mankoj/0/closing" }
+  ]
+}
