@@ -4,7 +4,7 @@
 import { defaultModeloSource, projectModeloSource } from "@fundamento/modelo";
 import { describe, expect, it } from "vitest";
 import { celoInputOf } from "../../build.js";
-import { FIGMA_CELO, type FigmaPlan } from "./figma.js";
+import { FIGMA_CELO, type FigmaPlan, resolveFigmaPlan } from "./figma.js";
 import { type DoubleNode, figmaDouble } from "./test-doubles/plugin.js";
 
 const config = new URL(
@@ -2185,5 +2185,105 @@ describe("the report names the font that was applied, not the one that was plann
     const fonts = result.components[0]?.fonts;
     expect(fonts?.perAspekto.ekzemplo).toBe("Inter Black");
     expect(fonts?.missing).toEqual(["Archivo Black"]);
+  });
+});
+
+// F34 (An P0, Maintainer 2026-09-23, gemessen in aRrK0MFZri9D5sE0j3NooQ): Der Bericht nannte für
+// denselben Knoten in Lauf 1 `opacity: 0` und in Lauf 2 `opacity: 1`, ohne Eingriff dazwischen —
+// und `#000000 α1` gibt es in keiner der acht Kombinationen. Ein gebundener Paint behält die Farbe,
+// mit der er zuletzt geschrieben wurde, und eine eigene Deckkraft; wer beide zusammen abliest,
+// bekommt ein Paar, das kein Modus zeigt. Gemessen wird deshalb der aufgelöste Zustand.
+describe("every paint the report names exists somewhere (F34)", () => {
+  /** Every colour the plan can resolve for `variable`, as "<hex> <alpha>". */
+  const shownSomewhere = (variable: string) => {
+    const out = new Set<string>();
+    for (const aspekto of ["komuna", "ekzemplo"]) {
+      for (const scheme of ["light", "dark"]) {
+        for (const contrast of ["default", "high"]) {
+          const value = resolveFigmaPlan(plan, {
+            aspekto,
+            "color-scheme": scheme,
+            contrast,
+          })[variable] as { r: number; g: number; b: number; a: number } | undefined;
+          if (value !== undefined) out.add(paintKey(value.r, value.g, value.b, value.a));
+        }
+      }
+    }
+    return out;
+  };
+  const paintKey = (r: number, g: number, b: number, a: number) =>
+    `${[r, g, b].map((channel) => Math.round(channel * 255)).join(",")} a${Math.round(a * 100) / 100}`;
+
+  async function paintsAfter(runs: number) {
+    const double = modelDouble();
+    let result: { components: { layout?: { paints?: Record<string, unknown> } }[] } = {
+      components: [],
+    };
+    for (let index = 0; index < runs; index++) {
+      result = (await new Function(
+        "figma",
+        `${files["figma/plugin/code.js"] ?? ""}\nreturn applyPlan();`,
+      )(double.figma)) as typeof result;
+    }
+    const found: { where: string; variable: string; key: string }[] = [];
+    const walk = (where: string, value: unknown) => {
+      if (Array.isArray(value)) {
+        for (const paint of value) {
+          const entry = paint as {
+            variable?: string | null;
+            color?: { r: number; g: number; b: number };
+            opacity?: number;
+          };
+          if (typeof entry.variable !== "string" || entry.color === undefined) continue;
+          found.push({
+            where,
+            variable: entry.variable,
+            key: paintKey(entry.color.r, entry.color.g, entry.color.b, entry.opacity ?? 1),
+          });
+        }
+        return;
+      }
+      if (typeof value === "object" && value !== null) {
+        for (const [key, inner] of Object.entries(value)) walk(`${where}.${key}`, inner);
+      }
+    };
+    for (const component of result.components) walk("paints", component.layout?.paints);
+    return found;
+  }
+
+  it.each([1, 2])("names only paints a mode can show, after run %i", async (runs) => {
+    const paints = await paintsAfter(runs);
+    expect(paints.length).toBeGreaterThan(4);
+    const nowhere = paints.filter((paint) => !shownSomewhere(paint.variable).has(paint.key));
+    expect(nowhere.map((paint) => `${paint.where} ${paint.variable} = ${paint.key}`)).toEqual([]);
+  });
+});
+
+// F35 (An P0, Maintainer 2026-09-23): Nach beiden Läufen trug das Set
+// explicitVariableModes = { aspekto: ekzemplo, contrast: default } — wer die Bibliothek öffnet,
+// sieht die Beispielmarke als „den" Knopf. Und es erklärt F34 mit, weil zwei Läufe dann in
+// verschiedenen Kontexten lesen.
+describe("the set is left on no mode of its own (F35)", () => {
+  async function setAfter(runs: number) {
+    const double = modelDouble();
+    for (let index = 0; index < runs; index++) await run(double);
+    const set = double.root.children[0]?.children.find((child) => child.type === "COMPONENT_SET");
+    return { double, set };
+  }
+
+  it.each([1, 2])("leaves the set with no explicit mode after run %i", async (runs) => {
+    const { set } = await setAfter(runs);
+    expect(set?.explicitVariableModes).toEqual({});
+  });
+
+  it("clears a mode a previous run or a designer left on the set", async () => {
+    const { double, set } = await setAfter(1);
+    const aspekto = double.collections.find((collection) => collection.name === "aspekto");
+    const ekzemplo = aspekto?.modes.find((mode) => mode.name === "ekzemplo");
+    if (aspekto === undefined || ekzemplo === undefined) throw new Error("no ekzemplo mode");
+    set?.setExplicitVariableModeForCollection(aspekto, ekzemplo.modeId);
+    expect(set?.explicitVariableModes).not.toEqual({});
+    await run(double);
+    expect(set?.explicitVariableModes).toEqual({});
   });
 });
