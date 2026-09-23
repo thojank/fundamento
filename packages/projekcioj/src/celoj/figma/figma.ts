@@ -81,6 +81,21 @@ export type FigmaPaint =
 export const ALPHA_VARIES = PARITY_ALPHA_VARIES;
 
 /**
+ * Figma's names for the writing case; the Vortaro says it in CSS words (F31). `textCase` is a
+ * property of the text node, not a bindable field, so the plan can state one value — and where two
+ * modes disagree it says that instead of picking a brand, exactly as it does for a paint's alpha.
+ */
+const TEXT_CASES: Readonly<Record<string, string>> = {
+  none: "ORIGINAL",
+  uppercase: "UPPER",
+  lowercase: "LOWER",
+  capitalize: "TITLE",
+};
+
+/** What the plan writes where two modes want a different case. */
+export const TEXT_CASE_VARIES = "text case varies by mode";
+
+/**
  * The state in which the web component shows its focus ring (:focus-visible). Which state that is
  * is knowledge of this Celo, not of the Modelo (Art. VIII).
  */
@@ -107,6 +122,12 @@ export interface FigmaComponentSet {
     geometry?: Record<string, string>;
     /** Parts this Celo does not draw, with the Jugxo that releases each (named difference). */
     notDrawn?: Record<string, string>;
+    /**
+     * The writing case of the label's typography role, as Figma names it (F31), or
+     * `TEXT_CASE_VARIES` where the modes disagree — `textCase` is written, not bound, so one value
+     * has to stand for every mode, and choosing one brand would be no projection.
+     */
+    textCase?: string;
     /** Whether this variant shows the focus ring (F11); the space for it is always reserved. */
     focusVisible?: boolean;
     /**
@@ -772,12 +793,25 @@ function componentSetOf(
     const radii = { "focus-gap": "radius/focus/gap", "focus-ring": "radius/focus/ring" };
     const typography = boundToken(skemo, "label", "typography", combination);
     const font = fontOf(typography === undefined ? undefined : base[typography.token]?.value);
+    // Die Schreibweise über alle Kombinationen entschieden, wie die Deckkraft (F8): Zwei Marken
+    // dürfen sich unterscheiden, und dann nennt der Plan keinen Wert, sondern den Befund.
+    const cases = new Set(
+      typography === undefined
+        ? []
+        : resolutions.map(
+            ({ tokens }) =>
+              TEXT_CASES[tokens[typography.token]?.textTransform?.value ?? "none"] ?? "ORIGINAL",
+          ),
+    );
+    const [onlyCase] = [...cases];
+    const textCase = cases.size <= 1 ? (onlyCase ?? "ORIGINAL") : TEXT_CASE_VARIES;
     return {
       props: { ...combination },
       bindings,
       paints,
       geometry,
       notDrawn,
+      textCase,
       focusVisible: combination[STATE_KEY] === FOCUS_STATE,
       radii,
       ...(font === undefined ? {} : { font }),

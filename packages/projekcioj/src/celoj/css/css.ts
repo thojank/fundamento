@@ -26,6 +26,11 @@ const COMPOSITE_FIELDS: Readonly<Record<string, readonly (readonly [string, stri
     ["fontWeight", "font-weight"],
     ["letterSpacing", "letter-spacing"],
     ["lineHeight", "line-height"],
+    // F31: Versalien stehen im Modelo neben dem Wert, nicht darin — die Rolle sagt „uppercase",
+    // der Wert sagt Größe und Gewicht. In CSS ist beides eine Deklaration, also trägt die Rolle
+    // beide Eigenschaften, und wo das Modelo nichts sagt, steht `none`. Ohne die Vorgabe wäre
+    // `text-transform: var(--fm-…)` eine Deklaration ohne Wert und fiele aus.
+    ["textTransform", "text-transform"],
   ],
   border: [
     ["color", "color"],
@@ -113,15 +118,28 @@ function shadowLayer(layer: unknown): string {
 }
 
 /** The declarations of one token: one for simple types, one per field for composites. */
-export function tokenDeclarations(name: string, type: string, value: unknown): [string, string][] {
+export function tokenDeclarations(
+  name: string,
+  type: string,
+  value: unknown,
+  options: { textTransform?: string | undefined; base?: boolean } = {},
+): [string, string][] {
   const fields = COMPOSITE_FIELDS[type];
   if (fields === undefined) return [[cssVariable(name), cssValue(type, value)]];
   const alias = typeof value === "string" ? ALIAS.exec(value)?.[1] : undefined;
-  return fields.map(([field, suffix]) => {
+  return fields.flatMap(([field, suffix]): [string, string][] => {
     const property = `${cssVariable(name)}-${suffix}`;
-    if (alias !== undefined) return [property, `var(${cssVariable(alias)}-${suffix})`];
+    if (field === "textTransform") {
+      // Die Schreibweise steht im Modelo neben dem Wert, und der letzte Satz, der sie nennt,
+      // gewinnt (D-11). In CSS heißt das: Wer sie nicht nennt, schreibt auch nichts — sonst
+      // löschte jeder spätere Satz die Versalien eines früheren. Nur der Grundsatz schreibt die
+      // Vorgabe, damit die Eigenschaft überall einen Wert hat (F31).
+      if (options.textTransform !== undefined) return [[property, options.textTransform]];
+      return options.base === true ? [[property, "none"]] : [];
+    }
+    if (alias !== undefined) return [[property, `var(${cssVariable(alias)}-${suffix})`]];
     const fieldValue = (value as Record<string, unknown> | undefined)?.[field];
-    return [property, cssValue(FIELD_TYPES[field] ?? "dimension", fieldValue)];
+    return [[property, cssValue(FIELD_TYPES[field] ?? "dimension", fieldValue)]];
   });
 }
 
@@ -140,7 +158,10 @@ const FIELD_TYPES: Readonly<Record<string, string>> = {
 export function cssDeclarationsOf(rezolvo: Rezolvo): Record<string, string> {
   const out: Record<string, string> = {};
   for (const [name, token] of Object.entries(rezolvo.tokens)) {
-    for (const [property, value] of tokenDeclarations(name, token.type, token.value)) {
+    for (const [property, value] of tokenDeclarations(name, token.type, token.value, {
+      textTransform: token.textTransform?.value,
+      base: true,
+    })) {
       out[property] = value;
     }
   }
@@ -181,7 +202,12 @@ function stylesheet(
     .map((set) => {
       const declarations = Object.values(set.tokens)
         .sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0))
-        .flatMap((token) => tokenDeclarations(token.name, tokenTypeOf(modelo, token), token.value))
+        .flatMap((token) =>
+          tokenDeclarations(token.name, tokenTypeOf(modelo, token), token.value, {
+            textTransform: token.textTransform,
+            base: set.name === CORE_SET_NAME,
+          }),
+        )
         .map(([property, value]) => `  ${property}: ${value};`);
       return `/* set ${set.name} */\n${selectorOf(modelo, set, dropAspekto)} {\n${declarations.join("\n")}\n}\n`;
     });

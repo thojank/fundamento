@@ -66,6 +66,9 @@ const DESIGN_PREFIXES: readonly string[] = [
   "font",
   "line-height",
   "letter-spacing",
+  // F31: Die Schreibweise ist eine Gestaltungsentscheidung wie der Sperrsatz, nicht Struktur —
+  // sie kommt aus dem Vortaro, nie aus der Komponente.
+  "text-transform",
   "text-shadow",
   "box-shadow",
   "opacity",

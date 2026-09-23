@@ -11,7 +11,7 @@
 // variable.setValueForMode, createComponent/createFrame/createText, combineAsVariants,
 // appendChild, setBoundVariable, set/getSharedPluginData.
 
-import type { FigmaPlan } from "./figma.js";
+import { type FigmaPlan, TEXT_CASE_VARIES } from "./figma.js";
 
 /** The nodes of one variant the plugin draws, outside in (F11). */
 type PartNode = "focus-ring" | "focus-gap" | "control" | "label";
@@ -54,6 +54,9 @@ const BINDINGS: Readonly<Record<string, readonly Binding[]>> = {
     { node: "label", fields: ["fontSize"], suffix: "/font-size" },
     { node: "label", fields: ["fontFamily"], suffix: "/font-family", font: true },
     { node: "label", fields: ["fontStyle"], suffix: "/font-style", font: true },
+    // Gesperrte Versalien sind ein Paar (F31). Der Sperrsatz ist ein bindbares Feld des
+    // Textknotens und folgt damit dem Modus; die Schreibweise ist keines und wird geschrieben.
+    { node: "label", fields: ["letterSpacing"], suffix: "/letter-spacing" },
   ],
   // The focus ring as the web component draws it: an outline of the ring's width and colour at
   // outline-offset, and a box-shadow of the offset's width in color.focus.inner between them. Both
@@ -166,6 +169,7 @@ const IN_FLOW = ${JSON.stringify(IN_FLOW)};
 const TEXT_SIZING = ${JSON.stringify(TEXT_SIZING)};
 const NEUTRAL = ${JSON.stringify(NEUTRAL)};
 const NEUTRAL_TEXT = ${JSON.stringify(NEUTRAL_TEXT)};
+const TEXT_CASE_VARIES = ${JSON.stringify(TEXT_CASE_VARIES)};
 const MODE_LIMIT = ${FIGMA_MODE_LIMIT};
 
 /** The collection of a name, its modes renamed and completed, without duplicating anything. */
@@ -531,6 +535,7 @@ async function loadFont(font, warnings) {
 
 async function applyComponents(variables, warnings) {
   const fonts = new Map();
+  const casesVarying = [];
   // Every font of every mode, not only the one of the base combination (F30): a binding to a font
   // variable only holds once Figma has loaded every font that variable can show. What did not
   // arrive is named here, with the Aspektoj that ask for it, and the run falls back for it.
@@ -657,6 +662,21 @@ async function applyComponents(variables, warnings) {
       if (control.parent !== gap) gap.appendChild(control);
       write(control, "name", "control");
       const label = part(control, "label", () => figma.createText());
+      // Die Schreibweise steht im Plan als ein Wert für alle Modi, weil textCase kein bindbares
+      // Feld ist (F31). Wo die Modi sich unterscheiden, nennt der Plan den Befund statt eines
+      // Werts — dann schreibt der Lauf nichts und sagt, was er nicht konnte.
+      if (variant.textCase === TEXT_CASE_VARIES) {
+        if (casesVarying.indexOf(component.set) === -1) {
+          casesVarying.push(component.set);
+          warnings.push(
+            component.set + ": Die Schreibweise der Beschriftung ist nicht in allen Modi " +
+              "dieselbe. textCase ist in Figma kein bindbares Feld, also bleibt sie ungesetzt — " +
+              "eine Marke auszuwählen wäre keine Projektion.",
+          );
+        }
+      } else if (typeof variant.textCase === "string") {
+        write(label, "textCase", variant.textCase);
+      }
       write(label, "fontName", fonts.get(variant.font.family + " " + variant.font.style));
       labels.push(label);
       // Only values from the plan (F13): every owned property neutral first — Figma's white fill,

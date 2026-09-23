@@ -2187,3 +2187,50 @@ describe("the report names the font that was applied, not the one that was plann
     expect(fonts?.missing).toEqual(["Archivo Black"]);
   });
 });
+
+// F31: Der Lauf bindet den Sperrsatz und schreibt die Schreibweise. Gebunden, wo Figma es zulässt
+// — `letterSpacing` ist ein bindbares Feld des Textknotens, `textCase` ist es nicht.
+describe("the label carries its tracking and its case (F31)", () => {
+  const labelOf = (double: ReturnType<typeof figmaDouble>) => {
+    const set = double.root.children[0]?.children.find((child) => child.type === "COMPONENT_SET");
+    const find = (node: DoubleNode): DoubleNode | undefined =>
+      node.type === "TEXT" ? node : node.children.map(find).find((found) => found !== undefined);
+    return find(set as DoubleNode);
+  };
+
+  it("binds the tracking to the role's variable", async () => {
+    const double = modelDouble();
+    await run(double);
+    const label = labelOf(double);
+    expect(label?.boundVariables.letterSpacing?.name).toMatch(
+      /^typography\/label\/[12]\/letter-spacing$/,
+    );
+  });
+
+  it("writes the case the plan states", async () => {
+    const double = modelDouble();
+    await run(double);
+    expect(labelOf(double)?.properties.textCase).toBe("ORIGINAL");
+  });
+
+  // Wo zwei Marken sich über die Schreibweise nicht einig sind, schreibt der Lauf keine und sagt
+  // es mit Namen — dieselbe Ehrlichkeit wie bei einer Deckkraft, die dem Modus nicht folgen kann.
+  it("warns instead of choosing a brand when the case varies by mode", async () => {
+    const double = modelDouble();
+    const changed = JSON.parse(JSON.stringify(plan)) as FigmaPlan;
+    for (const variant of changed.components[0]?.variants ?? []) {
+      variant.textCase = "text case varies by mode";
+    }
+    const source = (files["figma/plugin/code.js"] ?? "").replace(
+      /^const PLAN = .*$/m,
+      `const PLAN = ${JSON.stringify(changed)};`,
+    );
+    const result = (await new Function("figma", `${source}\nreturn applyPlan();`)(
+      double.figma,
+    )) as {
+      warnings: string[];
+    };
+    expect(result.warnings.join(" | ")).toContain("Schreibweise");
+    expect(labelOf(double)?.properties.textCase).toBeUndefined();
+  });
+});
