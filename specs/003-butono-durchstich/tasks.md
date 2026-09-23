@@ -1095,4 +1095,22 @@ und F24 (Befund, nicht blockierend).
   - Fertig wenn: Der Maintainer misst in Figma — der Ring folgt in ekzemplo dem eckigen Knopf, und
     die Beschriftung steht im Modus ekzemplo in Archivo Black.
 
+- [ ] **F36 ekzemplo: der tertiäre Knopf ist in beiden Schemata durchsichtig** (An P0,
+  Markenentscheidung des Maintainers 2026-09-23; nur Fixture-Daten)
+  - Befund: `color.action.tertiary.*` war in ekzemplo im hellen Schema deckend weiß (`#ffffff α1`)
+    und nur im dunklen durchsichtig — ein tertiärer Knopf, der eine Fläche hinstellt, ist keiner.
+  - Rot zuerst, auf den **aufgelösten Alphawert je Schema**, nicht auf den Tokennamen:
+    `expected 1 to be +0`, `color.action.tertiary.hover: expected 1 to be less than 1`, und die
+    Gegenüberstellung mit der Referenz `expected false to be true`.
+  - Grün: rest und disabled auf `shade.0`, hover auf `shade.8`, pressed auf `shade.10` — wie in
+    komuna. Zugesichert ist dreierlei je Schema: rest und disabled lösen auf Alpha 0 auf, hover und
+    pressed liegen dazwischen (Auflage, keine Fläche), und ekzemplo ist genau dort durchsichtig, wo
+    die Referenz es auch ist. `state-distinct` hält weiter: Die Auflagen werden vor dem Vergleich
+    über `background.default` gerechnet.
+  - **Folge für F8, gemessen:** Damit sagen beide Marken auf diesen Rollen dasselbe Alpha, und
+    **keine einzige Rolle im Plan trägt noch `alphaVariesByMode`**. Der tertiäre Knopf steht wieder
+    mit seiner echten Deckkraft im Plan (`{hex: "#000000", opacity: 0.08}`). Die Weigerung selbst
+    ist nicht weg, nur ihr Anlass: Sie bleibt an einer Fixture geprüft, die den Knopf wieder
+    deckend anlegt, damit die Zusicherung nicht verrottet.
+
 Consistency check before tasks (`/speckit.analyze` scope): every FR and AK maps to at least one task or a recorded decision; every task maps to a plan decision; two new packages (Art. XI); the lockfile changes in T008 only; no task lowers a threshold; nothing is published.

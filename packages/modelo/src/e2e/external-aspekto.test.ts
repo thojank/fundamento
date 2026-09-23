@@ -264,3 +264,38 @@ describe("ekzemplo is a brand of its own, in every category (F29)", () => {
     expect(px("motion.duration.medium")).toBeLessThan(reference("motion.duration.medium") ?? 0);
   });
 });
+
+// F36 (An P0, Maintainer 2026-09-23, Markenentscheidung): Der tertiäre Knopf von ekzemplo war im
+// hellen Schema deckend weiß und nur im dunklen durchsichtig. Er soll in beiden Schemata
+// durchsichtig sein, wie in der Referenz — gemessen am aufgelösten Alphawert, nicht am Tokennamen.
+describe("ekzemplo's tertiary action has no surface of its own (F36)", () => {
+  const alphaOf = (aspekto: string, scheme: string, token: string) => {
+    const value = tokens({ aspekto, "color-scheme": scheme })[token]?.value as
+      | { alpha?: number }
+      | undefined;
+    return value?.alpha ?? 1;
+  };
+
+  it.each(["light", "dark"])("rests and disables on nothing at all in %s", (scheme) => {
+    expect(alphaOf("ekzemplo", scheme, "color.action.tertiary.rest")).toBe(0);
+    expect(alphaOf("ekzemplo", scheme, "color.action.tertiary.disabled")).toBe(0);
+  });
+
+  // Hover und Pressed sind auch in der Referenz keine Flächen, sondern Auflagen: durchsichtig,
+  // aber sichtbar. Was zählt, ist, dass die Marke dort nichts Deckendes hinstellt.
+  it.each(["light", "dark"])("lays hover and pressed on, never over, in %s", (scheme) => {
+    for (const state of ["hover", "pressed"]) {
+      const token = `color.action.tertiary.${state}`;
+      expect(alphaOf("ekzemplo", scheme, token), token).toBeLessThan(1);
+      expect(alphaOf("ekzemplo", scheme, token), token).toBeGreaterThan(0);
+    }
+  });
+
+  it.each(["light", "dark"])("is transparent wherever the reference is, in %s", (scheme) => {
+    for (const state of ["rest", "hover", "pressed", "disabled", "selected"]) {
+      const token = `color.action.tertiary.${state}`;
+      const reference = alphaOf("komuna", scheme, token) < 1;
+      expect(alphaOf("ekzemplo", scheme, token) < 1, `${token} in ${scheme}`).toBe(reference);
+    }
+  });
+});
