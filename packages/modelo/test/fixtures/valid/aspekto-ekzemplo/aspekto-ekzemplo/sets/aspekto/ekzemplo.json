@@ -1012,19 +1012,19 @@
       },
       "tertiary": {
         "rest": {
-          "$value": "{color.palette.neutral.0}"
+          "$value": "{color.palette.shade.0}"
         },
         "hover": {
-          "$value": "{color.palette.neutral.100}"
+          "$value": "{color.palette.shade.8}"
         },
         "pressed": {
-          "$value": "{color.palette.neutral.200}"
+          "$value": "{color.palette.shade.10}"
         },
         "selected": {
           "$value": "{color.palette.accent.100}"
         },
         "disabled": {
-          "$value": "{color.palette.neutral.0}"
+          "$value": "{color.palette.shade.0}"
         },
         "text": {
           "$value": "{color.palette.neutral.1000}"

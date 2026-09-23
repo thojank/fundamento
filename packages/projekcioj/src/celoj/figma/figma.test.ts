@@ -159,14 +159,53 @@ describe("resolved paint values of the Figma side (F8)", () => {
     );
   });
 
-  it("refuses to pick one brand when the alpha differs by mode", () => {
+  // Seit F36 legt auch ekzemplo den tertiären Knopf als Auflage an, nicht als Fläche: Beide Marken
+  // sagen dort dasselbe Alpha, und die Deckkraft steht wieder als Zahl im Plan. Genau das war die
+  // Bedingung, unter der F8 sich weigerte — sie ist weg, nicht die Regel.
+  it("names the real alpha once both brands agree on it", () => {
     expect(values["surface.fill@size=medium,state=hover,tone=default,variant=tertiary"]).toBe(
-      `${ALPHA_VARIES} (color/action/tertiary/hover)`,
+      "#000000/0.08",
     );
     const variant = plan.components[0]?.variants.find(
       (entry) => entry.props.variant === "tertiary" && entry.props.state === "hover",
     );
+    expect(variant?.paints?.["surface.fill"]).toEqual({ hex: "#000000", opacity: 0.08 });
+  });
+
+  // Die Weigerung selbst bleibt geprüft, damit sie nicht verrottet: Eine Marke, die den tertiären
+  // Knopf wieder deckend anlegt, bringt den Plan zurück in den Zustand, den F8 gefunden hat.
+  it("still refuses to pick one brand when a brand makes the alpha differ again", () => {
+    const root = mkdtempSync(join(tmpdir(), "fm-alpha-"));
+    cpSync(
+      new URL("../../../../modelo/test/fixtures/valid/aspekto-ekzemplo/", import.meta.url).pathname,
+      root,
+      { recursive: true },
+    );
+    const setFile = join(root, "aspekto-ekzemplo/sets/aspekto/ekzemplo.json");
+    const document = JSON.parse(readFileSync(setFile, "utf8")) as Record<string, unknown>;
+    let node = document;
+    for (const key of ["color", "action", "tertiary", "hover"]) {
+      const next = node[key];
+      if (typeof next !== "object" || next === null) throw new Error(`no ${key} in the set`);
+      node = next as Record<string, unknown>;
+    }
+    node.$value = "{color.palette.neutral.100}";
+    writeFileSync(setFile, `${JSON.stringify(document, null, 2)}\n`);
+    const opaque = celoInputOf(projectModeloSource(join(root, "fundamento.config.json")));
+    if (!opaque.ok) throw new Error("the fixture must stay valid");
+    const opaquePlan = JSON.parse(
+      FIGMA_CELO.generate(opaque.input).find((file) => file.path === "figma/plan.json")?.text ??
+        "{}",
+    ) as FigmaPlan;
+    const variant = opaquePlan.components[0]?.variants.find(
+      (entry) => entry.props.variant === "tertiary" && entry.props.state === "hover",
+    );
     expect(variant?.paints?.["surface.fill"]).toEqual({ hex: "#000000", alphaVariesByMode: true });
+    expect(
+      figmaPlanInventory(opaquePlan).butono?.values[
+        "surface.fill@size=medium,state=hover,tone=default,variant=tertiary"
+      ],
+    ).toBe(`${ALPHA_VARIES} (color/action/tertiary/hover)`);
   });
 });
 
