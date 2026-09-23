@@ -60,6 +60,9 @@ describe("get_ero", () => {
       "one-primary-per-container",
       "destructive-not-primary-color",
       "label-required",
+      // F32: how the focus ring is drawn is part of what the Ero promises, so an agent asking
+      // for the Ero is told the rule and its reason.
+      "focus-ring-concentric",
     ]);
     for (const regulo of output.reguloj) {
       expect(regulo.kialo.length).toBeGreaterThan(0);

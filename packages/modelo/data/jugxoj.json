@@ -425,6 +425,17 @@
       "date": "2026-09-23",
       "context": "An P0, F32 Teil 1: Fokusring-Radius folgt der Marke",
       "kialo": "Gemessen in der Datei D8do10CeWekxtFO5no9Fxz, Set butono: Der Radius des Fokusrings (8) und seines Abstands (6) stand in beiden Modi gleich und an keiner Variablen — er kam aus der Basiskombination. In ekzemplo, dessen Kontrollradius 0 ist, umschloss damit ein runder Ring einen eckigen Knopf, mit bloßem Auge zu sehen. Entschieden: Der Radius wird projiziert, nicht eingetragen. Ein Ring um ein abgerundetes Rechteck hat den Radius dessen, was er umschließt, plus den Abstand dazu — das ist Geometrie, keine Entscheidung, und gehört deshalb nicht als zwei weitere Wörter ins Vortaro, das jede Marke belegen müsste. Figma bindet Werte, keine Ausdrücke, also rechnet der Celo die Summe je Kombination aus und legt sie als eigene Variable an: radius/focus/gap und radius/focus/ring, mit derselben Kaskade wie ein Token, damit sie dem Modus folgen. Wo sie wohnen, entscheidet nicht die Herkunft der Teile, sondern die Wirkung: Ein Vergleich über alle 144 Kombinationen nennt jede Dimensio, an der die Summe sich wirklich ändert. Das ist mehr als die Dimensioj der Quelltokens — die Strichstärke des Rings hängt in ekzemplo an contrast und in komuna nicht, und nur der Vergleich sieht das. Gemessen danach: komuna 4/6/8 in beiden Kontrasten, ekzemplo 0/2/4 und in contrast=high 0/2/5. Zugesichert ist die Wirkung, nicht die gesetzte Eigenschaft: Ring minus Abstand ist die Strichstärke, Abstand minus Kontrollradius ist der Versatz — in jedem Modus der Sammlung aspekto."
+    },
+    {
+      "id": "jug_01M375NS7T7VW41Q1HJM98RZXJ",
+      "ref": {
+        "artikolo": "XII",
+        "celo": "figma"
+      },
+      "decision": "approved",
+      "date": "2026-09-23",
+      "context": "An P0, F32: Platzierung einer abgeleiteten Variablen",
+      "kialo": "Entschieden (Maintainer, 2026-09-23), für die abgeleiteten Variablen des Figma-Celo: Die Dimensionsmenge einer abgeleiteten Variablen ist die Vereinigung über alle Marken, nicht die je Marke. Eine Variable, die der Celo aus mehreren Tokens ausrechnet, wohnt in der Sammlung der höchsten Dimensio, an der ihr Wert sich ändert — und welche das sind, entscheidet ein Vergleich über alle Kombinationen, nicht die Herkunft der Quelltokens und nicht die Sicht einer einzelnen Marke. Beleg, gemessen am Fokusring: Die Strichstärke hängt in ekzemplo an contrast — Kontrolle/Abstand/Ring sind 0/2/4 bei contrast=default und 0/2/5 bei contrast=high, weil das Set aspekto/ekzemplo+contrast/high die Strichstärke auf 3 setzt. In komuna hängt sie nicht daran: 4/6/8 in beiden Kontrasten. Hätte die Ableitung nur die Dimensioj der Quelltokens genommen, wäre contrast durchgefallen — die Kern-Sets ändern border.width.focus nicht, nur das Set einer Marke tut es. Hätte sie nur die Referenzmarke befragt, ebenso. Die Variable hätte dann in der Sammlung aspekto gewohnt und in ekzemplo/contrast=high den falschen Wert gezeigt, ohne dass eine Prüfung es sähe. Die Regel gilt für jede künftige abgeleitete Variable: erst über alle Kombinationen messen, dann platzieren."
     }
   ]
 }

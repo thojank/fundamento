@@ -78,10 +78,11 @@ describe("entity ID prefixes (§2.3)", () => {
 describe("rule catalog (§2.6)", () => {
   it("contains every rule ID exactly once", () => {
     expect(new Set(RULE_IDS).size).toBe(RULE_IDS.length);
-    // 119: Spec 004 T013 added the missing fingerprint list, Spec 003 F8 the value a projection
+    // 120: Spec 004 T013 added the missing fingerprint list, Spec 003 F8 the value a projection
     // cannot express, the Celo a Jugxo names in its typed reference, the part a side does not
-    // draw (a released, named difference), and F28 the floor a brand may not lower.
-    expect(RULE_IDS).toHaveLength(119);
+    // draw (a released, named difference), F28 the floor a brand may not lower and F32 the parts
+    // a concentric focus ring is derived from.
+    expect(RULE_IDS).toHaveLength(120);
     expect(RULE_IDS).toContain("protected-minimum");
     expect(RULE_IDS).toContain("parity-part-not-drawn");
     expect(RULE_IDS).toContain("clean-room-spuro-file-missing");

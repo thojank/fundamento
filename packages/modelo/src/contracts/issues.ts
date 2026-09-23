@@ -138,6 +138,8 @@ export const RULE_IDS = [
   "touch-target-min",
   // F28: a floor a brand may raise but never lower (its Regulo name is its rule ID).
   "protected-minimum",
+  // F32: the parts a concentric focus ring is derived from.
+  "focus-ring-concentric",
   "ero-prop-constraint",
   "ero-unknown",
   "intent-unknown",

@@ -2,6 +2,9 @@
 // a pure description of collections, variables and the component set; resolving it by Figma's mode
 // rules must give rezolvoj.json for every combination, so the projection is provable without Figma.
 
+import { cpSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { projectModeloSource } from "@fundamento/modelo";
 import { describe, expect, it } from "vitest";
 import { celoInputOf } from "../../build.js";
@@ -438,6 +441,11 @@ describe("the focus ring follows the brand's radius (F32)", () => {
       const control = resolved["radius/role/control"];
       const width = resolved["focus/ring/width"];
       const offset = resolved["focus/offset"];
+      // Beide Marken hier zeichnen Rechtecke; eine Marke, deren Kontrollradius die halbe
+      // Controlhöhe erreicht, zeichnet Pillen und wird eigens gemessen (siehe unten).
+      expect(Number(control), `${aspekto} draws rectangles, not pills`).toBeLessThan(
+        Number(resolved["size/control/medium"]) / 2,
+      );
       expect(Number(ring) - Number(gap), `${aspekto}: ring − gap is the ring's width`).toBe(
         Number(width),
       );
@@ -487,5 +495,80 @@ describe("ekzemplo carries its weight (F32)", () => {
       { family: "Archivo", style: "Black", aspektoj: ["ekzemplo"] },
       { family: "Geist", style: "Medium", aspektoj: ["komuna"] },
     ]);
+  });
+});
+
+// F32 Nachtrag (Maintainer, 2026-09-23): Eine Marke, deren Kontrollradius mindestens die halbe
+// Controlhöhe ist, zeichnet Pillen; dann sind Abstand und Ring ebenfalls gesättigt. Gemessen an
+// einer Fixture-Marke, die nie veröffentlicht wird: Die additive Prüfung **entfällt dort nicht**.
+// Figma kappt jeden Radius auf die halbe Höhe seines eigenen Kastens, und jeder umschließende
+// Kasten wächst um genau das Doppelte des Abstands — 36/40/44 werden zu 18/20/22, die Differenzen
+// bleiben Versatz und Strichstärke. Der Fall steht hier, damit eine Änderung, die das bricht,
+// auffällt.
+describe("a brand that draws pills (F32)", () => {
+  const root = mkdtempSync(join(tmpdir(), "fm-pill-"));
+  cpSync(
+    new URL("../../../../modelo/test/fixtures/valid/aspekto-ekzemplo/", import.meta.url).pathname,
+    root,
+    { recursive: true },
+  );
+  const setFile = join(root, "aspekto-ekzemplo/sets/aspekto/ekzemplo.json");
+  const document = JSON.parse(readFileSync(setFile, "utf8")) as Record<string, unknown>;
+  /** Re-points a token of the copied set; the fixture must have it, or the case proves nothing. */
+  const put = (path: string, value: unknown) => {
+    let node = document;
+    for (const key of path.split(".")) {
+      const next = node[key];
+      if (typeof next !== "object" || next === null) throw new Error(`${path} is no token`);
+      node = next as Record<string, unknown>;
+    }
+    node.$value = value;
+  };
+  put("radius.full", { value: 9999, unit: "px" });
+  put("radius.role.control", "{radius.full}");
+  writeFileSync(setFile, `${JSON.stringify(document, null, 2)}\n`);
+  const pillPrepared = celoInputOf(projectModeloSource(join(root, "fundamento.config.json")));
+  if (!pillPrepared.ok) throw new Error("the pill fixture must stay valid");
+  const pillPlan = JSON.parse(
+    FIGMA_CELO.generate(pillPrepared.input).find((file) => file.path === "figma/plan.json")?.text ??
+      "{}",
+  ) as FigmaPlan;
+
+  const resolved = () => resolveFigmaPlan(pillPlan, { aspekto: "ekzemplo" });
+  const number = (name: string) => Number(resolved()[name]);
+
+  it("saturates the control, its gap and its ring alike", () => {
+    const height = number("size/control/medium");
+    const offset = number("focus/offset");
+    const width = number("focus/ring/width");
+    expect(number("radius/role/control")).toBeGreaterThanOrEqual(height / 2);
+    expect(number("radius/focus/gap")).toBeGreaterThanOrEqual((height + 2 * offset) / 2);
+    expect(number("radius/focus/ring")).toBeGreaterThanOrEqual(
+      (height + 2 * offset + 2 * width) / 2,
+    );
+  });
+
+  // What Figma draws once it has capped each radius at half of its own box.
+  it("keeps ring, gap and control one band apart even after Figma caps them", () => {
+    const height = number("size/control/medium");
+    const offset = number("focus/offset");
+    const width = number("focus/ring/width");
+    const capped = (radius: number, box: number) => Math.min(radius, box / 2);
+    const control = capped(number("radius/role/control"), height);
+    const gap = capped(number("radius/focus/gap"), height + 2 * offset);
+    const ring = capped(number("radius/focus/ring"), height + 2 * offset + 2 * width);
+    expect([control, gap, ring]).toEqual([
+      height / 2,
+      height / 2 + offset,
+      height / 2 + offset + width,
+    ]);
+    expect(ring - gap).toBe(width);
+    expect(gap - control).toBe(offset);
+  });
+
+  it("leaves the reference brand round in the ordinary way", () => {
+    const komuna = resolveFigmaPlan(pillPlan, { aspekto: "komuna" });
+    expect(Number(komuna["radius/role/control"])).toBe(4);
+    expect(Number(komuna["radius/focus/gap"])).toBe(6);
   });
 });

@@ -196,6 +196,10 @@
       "status": "active",
       "type": "jugxo"
     },
+    "jug_01M375NS7T7VW41Q1HJM98RZXJ": {
+      "status": "active",
+      "type": "jugxo"
+    },
     "kpa_01M2VEEE9HREQTY2499C9JS05Q": {
       "status": "active",
       "type": "kontrastParo"
@@ -549,6 +553,10 @@
       "type": "regulo"
     },
     "reg_01M36S7HS7MG5EPKKH3M5CC8Z0": {
+      "status": "active",
+      "type": "regulo"
+    },
+    "reg_01M375NS2RRDA1DWRHEK2MK15X": {
       "status": "active",
       "type": "regulo"
     },

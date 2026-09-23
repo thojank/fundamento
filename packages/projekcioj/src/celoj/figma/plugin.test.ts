@@ -2147,3 +2147,43 @@ describe("the focus ring's radius is bound, not written (F32)", () => {
     expect(gap?.properties.cornerRadius).toBe(0);
   });
 });
+
+// F32 Nachtrag (Maintainer, 2026-09-23): „Ein Bericht, der Absicht statt Wirkung meldet, ist
+// schlimmer als kein Bericht." fonts.perAspekto nannte die geplante Schrift, auch wenn der Lauf
+// eine andere angewandt hatte. Gemeldet wird jetzt, was wirklich geladen wurde — und der Rückfall
+// bleibt zuerst in der Familie der Marke: Archivo Regular sagt mehr über die Marke als Inter Black.
+describe("the report names the font that was applied, not the one that was planned (F32)", () => {
+  async function report(double: ReturnType<typeof figmaDouble>) {
+    return (await new Function(
+      "figma",
+      `${files["figma/plugin/code.js"] ?? ""}\nreturn applyPlan();`,
+    )(double.figma)) as {
+      warnings: string[];
+      components: { fonts: { perAspekto: Record<string, string>; missing: string[] } }[];
+    };
+  }
+
+  it("names Archivo Regular when the file has the family but not the cut", async () => {
+    const double = figmaDouble({
+      fonts: [
+        { family: "Geist", style: "Medium" },
+        { family: "Archivo", style: "Regular" },
+      ],
+    });
+    const result = await report(double);
+    const fonts = result.components[0]?.fonts;
+    expect(fonts?.perAspekto.ekzemplo).toBe("Archivo Regular");
+    expect(fonts?.perAspekto.komuna).toBe("Geist Medium");
+    // What the plan asked for and did not get keeps its name, so both are readable.
+    expect(fonts?.missing).toEqual(["Archivo Black"]);
+    expect(result.warnings.join(" | ")).toContain("Archivo Regular");
+  });
+
+  it("leaves the family only when the family itself is missing", async () => {
+    const double = figmaDouble({ fonts: [{ family: "Geist", style: "Medium" }] });
+    const result = await report(double);
+    const fonts = result.components[0]?.fonts;
+    expect(fonts?.perAspekto.ekzemplo).toBe("Inter Black");
+    expect(fonts?.missing).toEqual(["Archivo Black"]);
+  });
+});

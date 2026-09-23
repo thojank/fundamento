@@ -1063,6 +1063,35 @@ und F24 (Befund, nicht blockierend).
     auf `Regular` zurück, und die Warnung nennt, was wirklich steht.
   - Gemessen am erzeugten Plugin: `fonts.perAspekto = {komuna: "Geist Medium", ekzemplo: "Archivo
     Black"}`, `missing: []`, `crossing: []`, `refused: []`, 72 Varianten, keine Warnung.
+  - **Nachträge des Maintainers vor dem Merge (2026-09-23), drei Punkte:**
+    1. **Der Bericht meldete Absicht statt Wirkung.** Bestätigt: `fonts.perAspekto` trug den
+       *geplanten* Schlüssel, auch wenn der Lauf eine andere Schrift angewandt hatte. Rot zuerst:
+       `expected 'Archivo Black' to be 'Archivo Regular'`. Gemeldet wird jetzt, was geladen wurde;
+       was der Plan wollte und nicht bekam, bleibt unter `missing` lesbar. Dazu ist der Rückfall
+       eine Leiter geworden: erst dieselbe Familie in Regular, dann die Rückfallfamilie im Schnitt
+       des Modells, dann deren Regular — eine Marke erkennt man an ihrer Schrift lange vor ihrem
+       Gewicht, also geht die Familie zuletzt. Schlägt jede Sprosse fehl, wirft der Lauf: Ein
+       zweiter roter Test hat gezeigt, dass er sonst später an einer Stelle scheitert, die nichts
+       über die Ursache sagt.
+    2. **Pillenradien.** Als Fixture-Marke gebaut (Kontrollradius auf `radius.full`, nie
+       veröffentlicht) — und dabei gemessen, dass die additive Prüfung dort **nicht entfällt**:
+       Figma kappt jeden Radius auf die halbe Höhe seines eigenen Kastens, und jeder umschließende
+       Kasten wächst um genau das Doppelte des Abstands. 36/40/44 werden zu 18/20/22, die
+       Differenzen bleiben Versatz und Strichstärke. Der Fall ist als eigener Testfall festgehalten,
+       samt der Sättigung selbst; die allgemeine Zusicherung nennt jetzt ihre Vorbedingung
+       (Kontrollradius unter halber Controlhöhe), damit sie nicht mehr behauptet, als sie misst.
+    3. **Platzierungsregel als Jugxo** `jug_01M375NS7T7VW41Q1HJM98RZXJ`: Die Dimensionsmenge einer
+       abgeleiteten Variablen ist die Vereinigung über alle Marken, nicht die je Marke — mit den
+       gemessenen Zahlen als Beleg.
+  - **Regulo `focus-ring-concentric`** (`reg_01M375NS2RRDA1DWRHEK2MK15X`, automatic): „Der
+    Fokusring ist konzentrisch zu dem, was er umschließt." Der Kialo sagt, dass das eine Setzung
+    von Fundamento ist und keine Naturkonstante — es gibt Marken, die anders zeichnen — und dass
+    eine Änderung durch die Regularo geht, nicht still durchs Vortaro. Die Regulo nennt kein
+    Werkzeug: Sie gilt für jede Projektion, die den Ring zeichnet. Ihr Enforcer prüft, was das
+    Modelo besitzt — jedes Ero mit Fokusring bindet umschlossenen Radius, Versatz und Strichstärke
+    an je ein Token über alle Varianten; sonst gibt es keinen Radius, aus dem zu wachsen wäre.
+    `get_ero` nennt die Regel jetzt mit, denn wie der Ring gezeichnet wird, gehört zu dem, was das
+    Ero verspricht.
   - Fertig wenn: Der Maintainer misst in Figma — der Ring folgt in ekzemplo dem eckigen Knopf, und
     die Beschriftung steht im Modus ekzemplo in Archivo Black.
 
