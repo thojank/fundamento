@@ -6,7 +6,14 @@ import { CHECK_NAMES, runCheck } from "./index.js";
 describe("@fundamento/modelo public entry", () => {
   it("exposes the check runner", () => {
     expect(typeof runCheck).toBe("function");
-    expect(CHECK_NAMES).toEqual(["vortaro-lint", "parity", "regularo", "alirebleco", "clean-room"]);
+    expect(CHECK_NAMES).toEqual([
+      "vortaro-lint",
+      "parity",
+      "regularo",
+      "mankoj",
+      "alirebleco",
+      "clean-room",
+    ]);
   });
 
   it("locates @fundamento/vortaro through its exported package.json", async () => {

@@ -68,6 +68,10 @@ jobs:
       - name: "Check: Regularo"
         run: pnpm check:regularo
 
+      # Die Lücken, die das System von seinen Werkzeugen kennt (F41).
+      - name: "Check: Mankoj"
+        run: pnpm check:mankoj
+
       - name: "Check: Alirebleco"
         run: pnpm check:alirebleco
 

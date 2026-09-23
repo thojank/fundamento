@@ -57,6 +57,7 @@ describe("entity ID prefixes (§2.3)", () => {
       dimensioValoro: "dva",
       regulo: "reg",
       jugxo: "jug",
+      manko: "man",
       kontrastParo: "kpa",
       ero: "ero",
       skemo: "ske",
@@ -78,11 +79,12 @@ describe("entity ID prefixes (§2.3)", () => {
 describe("rule catalog (§2.6)", () => {
   it("contains every rule ID exactly once", () => {
     expect(new Set(RULE_IDS).size).toBe(RULE_IDS.length);
-    // 120: Spec 004 T013 added the missing fingerprint list, Spec 003 F8 the value a projection
+    // 123: Spec 004 T013 added the missing fingerprint list, Spec 003 F8 the value a projection
     // cannot express, the Celo a Jugxo names in its typed reference, the part a side does not
-    // draw (a released, named difference), F28 the floor a brand may not lower and F32 the parts
-    // a concentric focus ring is derived from.
-    expect(RULE_IDS).toHaveLength(120);
+    // draw (a released, named difference), F28 the floor a brand may not lower, F32 the parts
+    // a concentric focus ring is derived from and F41 the three findings of the register of gaps.
+    expect(RULE_IDS).toHaveLength(123);
+    expect(RULE_IDS).toContain("manko-closing-missing");
     expect(RULE_IDS).toContain("protected-minimum");
     expect(RULE_IDS).toContain("parity-part-not-drawn");
     expect(RULE_IDS).toContain("clean-room-spuro-file-missing");
@@ -139,7 +141,14 @@ describe("shared constants", () => {
       "decorative",
     ]);
     expect(FUNDAMENTO_EXTENSION_KEY).toBe("com.ciferecigo.fundamento");
-    expect(CHECK_NAMES).toEqual(["vortaro-lint", "parity", "regularo", "alirebleco", "clean-room"]);
+    expect(CHECK_NAMES).toEqual([
+      "vortaro-lint",
+      "parity",
+      "regularo",
+      "mankoj",
+      "alirebleco",
+      "clean-room",
+    ]);
   });
 
   it("shares its union types with the generated schema types", () => {

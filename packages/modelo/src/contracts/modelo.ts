@@ -12,6 +12,7 @@ import type {
   IdsLock,
   Jugxo,
   KontrastParo,
+  Manko,
   Regulo,
   Rezolvo,
   Skemo,
@@ -37,6 +38,9 @@ export type {
   KontrastParo,
   KontrastParojFile,
   KontrastSojloj,
+  Manko,
+  MankoClosing,
+  MankojFile,
   ModeloJson,
   Regulo,
   RegulojFile,
@@ -147,6 +151,8 @@ export interface Modelo {
   setoj: LoadedSet[];
   reguloj: Regulo[];
   jugxoj: Jugxo[];
+  /** The measured gaps of the tools, kept by the system itself (F41). */
+  mankoj: Manko[];
   kontrastParoj: KontrastParo[];
   /** Eroj with their Skemoj, sorted by Ero name (Spec 003). */
   eroj: LoadedEro[];
@@ -179,6 +185,7 @@ export interface ValidationReport {
     combinations: number;
     reguloj: number;
     jugxoj: number;
+    mankoj: number;
     kontrastParoj: number;
   };
 }

@@ -11,6 +11,7 @@ import type {
   LoadedDimensio,
   LoadedEro,
   LoadedSet,
+  Manko,
   Modelo,
   Regulo,
 } from "../contracts/modelo.js";
@@ -72,6 +73,7 @@ export function buildModelo(files: ModeloFiles): BuildModeloResult {
       ...entriesOf<Jugxo>(files.data["jugxoj.json"].value, "jugxoj"),
       ...packageEntries<Jugxo>(files.packages, aspektoPackages, "jugxoj"),
     ],
+    mankoj: entriesOf<Manko>(files.data["mankoj.json"].value, "mankoj"),
     kontrastParoj: entriesOf<KontrastParo>(files.data["kontrastparoj.json"].value, "kontrastParoj"),
     eroj: loadedEroj(files.eroj),
     idsLock,

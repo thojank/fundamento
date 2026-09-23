@@ -3,10 +3,13 @@
 // consumer what something is called in a Celo. The mere word is not a mapping — Article X of the
 // constitution names the tool itself.
 //
-// A Jugxo that belongs to a Celo therefore declares it in the typed field `ref.celo`; its prose
-// (`kialo`, `context`) may then name that Celo and names derived from it. Everywhere else the ban
-// stands: no key naming a Celo, no derived name in any value, and no Celo named in prose that does
-// not declare it.
+// The licence is a rule, not a list of permitted fields (maintainer, 2026-09-23): a sentence that
+// declares its Celo in a typed field may name that Celo, and the names derived from it, in its own
+// fields; a sentence that declares none may not. A Jugxo declares it in `ref.celo`, a Manko in
+// `celo` (F41). A list would have to grow with every new field, and prose would become the
+// loophole — as a condition the rule carries the next kind of sentence without anyone maintaining
+// it. Everywhere else the ban stands: no key naming a Celo, no derived name in any value, and no
+// Celo named in prose that does not declare it.
 
 import { TAILWIND_NAMESPACES } from "../nomreguloj/tailwind.js";
 import { CELOJ } from "../nomreguloj/types.js";
@@ -29,9 +32,6 @@ const DERIVED_NAMES = [
   ...TAILWIND_NAMESPACES.map((entry) => entry.namespace.replace("*", "")),
 ];
 
-/** Prose of a Jugxo: written for the maintainer, not read by a Celo. */
-const JUGXO_PROSE = ["kialo", "context"];
-
 export interface CeloMappingLeak {
   /** JSON pointer of the offending key or value. */
   pointer: string;
@@ -46,17 +46,28 @@ export function celoMappingLeaks(document: unknown): CeloMappingLeak[] {
   return out;
 }
 
-const JUGXO_ENTRY = /(^|\/)jugxoj\/\d+$/;
-
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-/** The Celo a Jugxo declares in `ref.celo`, if this node is a Jugxo entry. */
-function declaredCelo(node: Record<string, unknown>, pointer: string): string | undefined {
-  if (!JUGXO_ENTRY.test(pointer)) return undefined;
+/** What a sentence declares, and the field it stands in — relative to the sentence. */
+interface Declaration {
+  pointer: string;
+  /** What the field says; not necessarily a Celo the code knows. */
+  celo: string;
+}
+
+/**
+ * The Celo this sentence declares in a typed field: a Manko says it in `celo`, a Jugxo in
+ * `ref.celo`. No typed field, no declaration — and no licence to name a Celo.
+ */
+function declaration(node: Record<string, unknown>): Declaration | undefined {
+  if (typeof node.celo === "string") return { pointer: "/celo", celo: node.celo };
   const ref = node.ref;
-  return isRecord(ref) && typeof ref.celo === "string" ? ref.celo : undefined;
+  if (isRecord(ref) && typeof ref.celo === "string") {
+    return { pointer: "/ref/celo", celo: ref.celo };
+  }
+  return undefined;
 }
 
 function walk(node: unknown, pointer: string, celo: string | undefined, out: CeloMappingLeak[]) {
@@ -71,8 +82,20 @@ function walk(node: unknown, pointer: string, celo: string | undefined, out: Cel
     return;
   }
   if (!isRecord(node)) return;
-  const jugxo = JUGXO_ENTRY.test(pointer);
-  const scope = jugxo ? declaredCelo(node, pointer) : celo;
+  // A sentence that declares a Celo opens the licence for its own fields. One that declares a name
+  // no Celo of Fundamento carries opens nothing: the typed field is wrong, and the fields that
+  // leaned on it fall with it.
+  const declared = declaration(node);
+  let scope = celo;
+  if (declared !== undefined) {
+    if ((CELOJ as readonly string[]).includes(declared.celo)) {
+      scope = declared.celo;
+    } else {
+      scope = undefined;
+      out.push({ pointer: `${pointer}${declared.pointer}`, needle: declared.celo });
+    }
+  }
+  const declaringKey = declared?.pointer.split("/")[1];
   for (const [key, value] of Object.entries(node)) {
     const here = `${pointer}/${key}`;
     const found = KEY_NAMES.find((name) => key.toLowerCase().includes(name));
@@ -80,17 +103,15 @@ function walk(node: unknown, pointer: string, celo: string | undefined, out: Cel
       out.push({ pointer: here, needle: found });
       continue;
     }
-    // The typed reference is the one place a Celo may be named outright; it has to name one.
-    if (jugxo && key === "ref" && isRecord(value) && typeof value.celo === "string") {
-      if (!(CELOJ as readonly string[]).includes(value.celo)) {
-        out.push({ pointer: `${here}/celo`, needle: value.celo });
-      }
-      for (const [refKey, refValue] of Object.entries(value)) {
+    // The declaring field is the one place a Celo stands as itself; it was read above.
+    if (key === declaringKey) {
+      if (declared?.pointer === `/${key}`) continue;
+      for (const [refKey, refValue] of Object.entries(value as Record<string, unknown>)) {
         if (refKey !== "celo") walk(refValue, `${here}/${refKey}`, scope, out);
       }
       continue;
     }
-    walk(value, here, jugxo && JUGXO_PROSE.includes(key) ? scope : undefined, out);
+    walk(value, here, scope, out);
   }
 }
 

@@ -163,6 +163,11 @@ export type JugxoId = string;
 export type EroId = string;
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "MankoId".
+ */
+export type MankoId = string;
+/**
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
  * via the `definition` "KontrastParo".
  */
 export type KontrastParo = {
@@ -266,6 +271,7 @@ export type EntityType =
   | "dimensioValoro"
   | "regulo"
   | "jugxo"
+  | "manko"
   | "kontrastParo"
   | "ero"
   | "skemo"
@@ -451,6 +457,7 @@ export interface ModeloJson {
   setoj: ExportedSet[];
   reguloj: Regulo[];
   jugxoj: Jugxo[];
+  mankoj: Manko[];
   kontrastParoj: KontrastParo[];
   eroj: Ero[];
   skemoj: Skemo[];
@@ -763,6 +770,57 @@ export interface EroInstance {
   container?: string;
   intent?: Name;
   label?: string;
+}
+/**
+ * A measured gap of a tool: something the Modelo can express and the target cannot carry. It holds the evidence in the tool's own words, the date it was measured and the condition under which a run may call it closed. It is never a version query: the attempt is the measurement.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "Manko".
+ */
+export interface Manko {
+  id: MankoId;
+  /**
+   * The Celo whose target has the gap. Which names exist is knowledge of the projections and lives in code, not here (Article VIII).
+   */
+  celo: string;
+  /**
+   * The affected property, as the target names it.
+   */
+  property: string;
+  /**
+   * What the Modelo can express about this property.
+   */
+  modelo: string;
+  /**
+   * What the target does instead of what the Modelo asks of it.
+   */
+  instead: string;
+  /**
+   * The proof in the tool's own words: the message a run measured.
+   */
+  evidence: string;
+  /**
+   * The day the gap was measured.
+   */
+  date: string;
+  /**
+   * The outward reference: a forum thread, an issue, or the documentation the measurement was held against.
+   */
+  external: string;
+  closing: MankoClosing;
+}
+/**
+ * How a run recognises that the gap is gone. A Manko without it is invalid, as a Regulo without kialo (Article VI): a gap nobody can measure away is a complaint, not a finding.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "MankoClosing".
+ */
+export interface MankoClosing {
+  /**
+   * The kind of measurement a run performs. `binding-accepted`: the run binds the property to a variable of the target and the target does not refuse it.
+   */
+  measure: "binding-accepted";
+  statement: NonEmptyText;
 }
 /**
  * A component (Spec 003). Lives with its Skemo in data/eroj/<name>/skemo.json.
@@ -1126,6 +1184,13 @@ export interface RegulojFile {
  */
 export interface JugxojFile {
   jugxoj: Jugxo[];
+}
+/**
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "MankojFile".
+ */
+export interface MankojFile {
+  mankoj: Manko[];
 }
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema

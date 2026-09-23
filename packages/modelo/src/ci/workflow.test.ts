@@ -14,6 +14,7 @@ const CHECK_STEPS: ReadonlyArray<readonly [name: string, script: string]> = [
   ["Check: Vortaro-Lint", "check:vortaro-lint"],
   ["Check: Parity", "check:parity"],
   ["Check: Regularo", "check:regularo"],
+  ["Check: Mankoj", "check:mankoj"],
   ["Check: Alirebleco", "check:alirebleco"],
   ["Check: Clean-Room", "check:clean-room"],
 ];

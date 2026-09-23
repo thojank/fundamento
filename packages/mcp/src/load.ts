@@ -130,6 +130,7 @@ function partialModeloJson(modelo: Modelo): ModeloJson {
     setoj: [],
     reguloj: modelo.reguloj,
     jugxoj: modelo.jugxoj,
+    mankoj: modelo.mankoj,
     kontrastParoj: modelo.kontrastParoj,
     eroj: modelo.eroj.map((entry) => entry.ero),
     skemoj: modelo.eroj.map((entry) => entry.skemo),

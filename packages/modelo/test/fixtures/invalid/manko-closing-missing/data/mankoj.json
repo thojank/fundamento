@@ -1,0 +1,14 @@
+{
+  "mankoj": [
+    {
+      "id": "man_01M37TQHMAZZZZZZZZZZZZZZZZ",
+      "celo": "figma",
+      "property": "textCase",
+      "modelo": "Die Schreibweise eines Textes ist je Marke ausdrückbar und kaskadiert wie jedes andere Token.",
+      "instead": "Das Ziel nimmt die Bindung nicht an. Der Lauf schreibt den aufgelösten Wert.",
+      "evidence": "in setBoundVariable: Unknown field: 'textCase' — gemessen an einem TextNode.",
+      "date": "2026-09-23",
+      "external": "https://forum.figma.com/t/add-variable-support-for-letter-case/69878"
+    }
+  ]
+}

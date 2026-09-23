@@ -14,6 +14,7 @@ export const SCHEMA_DEFS = {
   dimensiojFile: "DimensiojFile",
   regulojFile: "RegulojFile",
   jugxojFile: "JugxojFile",
+  mankojFile: "MankojFile",
   kontrastParojFile: "KontrastParojFile",
   idsLock: "IdsLock",
   aspektoFile: "AspektoFile",
@@ -34,6 +35,7 @@ export const DATA_FILE_SCHEMA_DEFS = {
   "dimensioj.json": "DimensiojFile",
   "reguloj.json": "RegulojFile",
   "jugxoj.json": "JugxojFile",
+  "mankoj.json": "MankojFile",
   "kontrastparoj.json": "KontrastParojFile",
   "ids.lock.json": "IdsLock",
 } as const;

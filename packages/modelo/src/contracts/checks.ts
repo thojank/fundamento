@@ -6,6 +6,7 @@ export const CHECK_NAMES = [
   "vortaro-lint",
   "parity",
   "regularo",
+  "mankoj",
   "alirebleco",
   "clean-room",
 ] as const;

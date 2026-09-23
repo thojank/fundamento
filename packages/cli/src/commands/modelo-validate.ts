@@ -27,6 +27,7 @@ const SUMMARY_KEYS = [
   "combinations",
   "reguloj",
   "jugxoj",
+  "mankoj",
   "kontrastParoj",
 ] as const satisfies readonly (keyof ValidationReport["summary"])[];
 
@@ -38,7 +39,8 @@ Usage: ${COMMAND_LINE} [path] [--aspekto <dir>]… [--json]
 Without a path, validates the Modelo of this repository with its reference Aspekto komuna.
 With a path, validates the Modelo root there: a directory containing
   vortaro/   $themes.json, $metadata.json and sets/
-  data/      dimensioj.json, reguloj.json, jugxoj.json, kontrastparoj.json, ids.lock.json
+  data/      dimensioj.json, reguloj.json, jugxoj.json, mankoj.json, kontrastparoj.json,
+             ids.lock.json
 Relative paths resolve against the directory you ran the command from.
 
 Options:
@@ -78,6 +80,7 @@ function emptyReport(errors: ValidationIssue[]): ValidationReport {
       combinations: 0,
       reguloj: 0,
       jugxoj: 0,
+      mankoj: 0,
       kontrastParoj: 0,
     },
   };

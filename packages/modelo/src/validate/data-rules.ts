@@ -1,7 +1,8 @@
 // Rules over the data files in pipeline step 3: Dimensioj (FR-11, FR-16, Aspekto metadata),
-// Reguloj and Jugxoj (Regularo), KontrastParoj (FR-16). They read the raw documents so pointers
-// follow document order. Pure.
+// Reguloj and Jugxoj (Regularo), Mankoj (F41), KontrastParoj (FR-16). They read the raw documents
+// so pointers follow document order. Pure.
 
+import { checkMankoj } from "../checks/mankoj/rules.js";
 import { CORE_SET_NAME } from "../contracts/grammar.js";
 import { formatIssuePath, type RuleId, type ValidationIssue } from "../contracts/issues.js";
 import { isKonstitucioArtikolo, KONSTITUCIO_ARTIKOLOJ } from "../contracts/jugxo.js";
@@ -35,6 +36,9 @@ export function dataIssues(modelo: Modelo, files: ModeloFiles): DataRulesResult 
       ...dimensioIssues(files.data["dimensioj.json"], kontrast.count, composedAspektoNames(modelo)),
       ...reguloIssues(files.data["reguloj.json"]),
       ...jugxoIssues(files.data["jugxoj.json"], files.data["reguloj.json"], eroIdsOf(files)),
+      // The register of gaps follows the same rules here as in its own check (F41): one
+      // implementation, so `fm validate` and `pnpm check:mankoj` can never disagree.
+      ...checkMankoj({ mankoj: files.data["mankoj.json"] }).issues,
       ...kontrast.issues,
     ],
     kontrastParoj: kontrast.checkable,
