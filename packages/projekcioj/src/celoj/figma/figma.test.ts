@@ -14,6 +14,7 @@ import {
   figmaValues,
   resolveFigmaPlan,
 } from "./figma.js";
+import { FIGMA_MODE_LIMIT } from "./plugin.js";
 
 const config = new URL(
   "../../../../modelo/test/fixtures/valid/aspekto-ekzemplo/fundamento.config.json",
@@ -45,9 +46,12 @@ describe("Figma plan (T015)", () => {
     ]);
   });
 
-  it("keeps every collection within four modes (Figma Professional)", () => {
+  // Figma Professional allows 10 modes per collection, Organization 20 (research §6.2, checked
+  // 2026-09-20; the four of the first research were a forum answer and are overtaken). With the
+  // brand as a mode (F27), this number is how many Aspektoj one library carries.
+  it("keeps every collection within the modes a Professional file allows", () => {
     for (const collection of plan.collections) {
-      expect(collection.modes.length, collection.name).toBeLessThanOrEqual(4);
+      expect(collection.modes.length, collection.name).toBeLessThanOrEqual(FIGMA_MODE_LIMIT);
     }
   });
 
@@ -237,5 +241,171 @@ describe("composite tokens reach Figma field by field (F9)", () => {
     expect(() =>
       figmaValues("gradient.brand", "gradient", [{ color: "#fff", position: 0 }]),
     ).toThrow(/gradient/);
+  });
+});
+
+// F27 (An P0, M2-Vorstufe): switching the brand in a Figma file is switching a mode, exactly as
+// color-scheme and contrast already are. What is measured here is the plan a Modelo with two
+// Aspektoj produces — one mode per Aspekto, and no variable of the collection without a value in
+// either of them. A collection with two modes whose variables hold the same value in both would
+// switch nothing, so the count of the ones that really differ is part of the assurance.
+describe("the brand is a mode of the collection aspekto (F27)", () => {
+  const collection = plan.collections.find((candidate) => candidate.name === "aspekto");
+  const aspektoj = (
+    prepared.input.modelo.dimensioj.find((dimensio) => dimensio.name === "aspekto")?.valoroj ?? []
+  ).map((valoro) => valoro.name);
+
+  it("carries one mode per Aspekto of the Modelo, the reference first", () => {
+    expect([...aspektoj].sort()).toEqual(["ekzemplo", "komuna"]);
+    expect(collection?.modes).toHaveLength(aspektoj.length);
+    expect([...(collection?.modes ?? [])].sort()).toEqual([...aspektoj].sort());
+    expect(collection?.modes[0]).toBe("komuna");
+    expect(collection?.defaultMode).toBe("komuna");
+  });
+
+  it("gives every brand-dependent variable a value in every mode", () => {
+    const missing = (collection?.variables ?? []).flatMap((variable) =>
+      (collection?.modes ?? [])
+        .filter((mode) => variable.values[mode] === undefined)
+        .map((mode) => `${variable.name}@${mode}`),
+    );
+    expect(missing).toEqual([]);
+    expect(collection?.variables.length).toBeGreaterThan(300);
+  });
+
+  it("holds two brands, not one brand twice", () => {
+    const differing = (collection?.variables ?? []).filter((variable) => {
+      const values = (collection?.modes ?? []).map((mode) => JSON.stringify(variable.values[mode]));
+      return new Set(values).size > 1;
+    });
+    expect(differing.length).toBeGreaterThan(50);
+  });
+});
+
+// F27: the cascade must survive the second brand. A role that several Dimensioj change lives in
+// the collection of its highest one and aliases down; the proof that aspekto is just another step
+// of that ladder is the resolution of named roles in every combination of the three Dimensioj a
+// designer switches by hand — brand, scheme and contrast.
+describe("aspekto × color-scheme × contrast resolve together (F27)", () => {
+  const ROLES = [
+    "color.action.primary.rest",
+    "color.action.primary.text",
+    "color.text.default",
+    "color.border.default",
+    "color.background.canvas",
+    "color.focus.ring",
+  ] as const;
+  // The Dimensioj the maintainer does not touch in this measurement stay at the Modelo's default.
+  const REST = { density: "default", motion: "default", viewport: "medium" } as const;
+  const combinations = ["komuna", "ekzemplo"].flatMap((aspekto) =>
+    ["light", "dark"].flatMap((scheme) =>
+      ["default", "high"].map((contrast) => ({
+        aspekto,
+        "color-scheme": scheme,
+        contrast,
+        ...REST,
+      })),
+    ),
+  );
+
+  const rezolvoOf = (assignment: Record<string, string>) => {
+    const found = prepared.input.rezolvoj.rezolvoj.find((rezolvo) =>
+      Object.entries(assignment).every(
+        ([dimensio, valoro]) => rezolvo.assignment[dimensio] === valoro,
+      ),
+    );
+    if (found === undefined) throw new Error(`no rezolvo for ${JSON.stringify(assignment)}`);
+    return found;
+  };
+
+  for (const assignment of combinations) {
+    const label = `${assignment.aspekto} · ${assignment["color-scheme"]} · ${assignment.contrast}`;
+    it(`resolves the named roles in ${label}`, () => {
+      const rezolvo = rezolvoOf(assignment);
+      const resolved = resolveFigmaPlan(plan, assignment);
+      for (const role of ROLES) {
+        const token = rezolvo.tokens[role];
+        if (token === undefined) throw new Error(`${role} is no role of this Modelo`);
+        for (const [variable, expected] of Object.entries(
+          figmaValues(role, token.type, token.value),
+        )) {
+          expect(resolved[variable], `${variable} in ${label}`).toEqual(expected);
+        }
+      }
+    });
+  }
+
+  // Every switch is visible: changing exactly one of the three Dimensioj changes the primary
+  // action. Two combinations that differ in two of them may well share a value — a brand is free
+  // to use the same yellow on a light screen and in a dark high-contrast one — so the claim is
+  // about each single switch, which is what a designer performs in Figma.
+  it("changes the primary action whenever one of the three Dimensioj changes", () => {
+    const primary = (assignment: Record<string, string>) =>
+      JSON.stringify(resolveFigmaPlan(plan, assignment)["color/action/primary/rest"]);
+    const DIMENSIOJ = ["aspekto", "color-scheme", "contrast"] as const;
+    let compared = 0;
+    for (const one of combinations) {
+      for (const other of combinations) {
+        const differing = DIMENSIOJ.filter((dimensio) => one[dimensio] !== other[dimensio]);
+        if (differing.length !== 1) continue;
+        expect(primary(one), `${JSON.stringify(one)} vs ${JSON.stringify(other)}`).not.toEqual(
+          primary(other),
+        );
+        compared++;
+      }
+    }
+    expect(compared).toBe(24);
+  });
+});
+
+// F30 (An P0, Maintainer 2026-09-23): in Figma the label's typeface must follow the brand. The
+// plan therefore has to offer what a binding needs — a variable holding a font family Figma can
+// actually pick (not a CSS stack), a variable holding the style name Figma asks for, and the list
+// of fonts the set can need over every combination, so the run can load them all before it binds.
+describe("the label's font is a variable, not a fixed name (F30)", () => {
+  const variables = plan.collections.flatMap((collection) => collection.variables);
+  const named = (name: string) => variables.find((variable) => variable.name === name);
+
+  it("holds the family Figma picks, without the browser's fallbacks", () => {
+    expect(named("font/family/body")?.values).toEqual({
+      komuna: "Geist",
+      ekzemplo: "Archivo",
+    });
+    expect(named("font/family/body")?.type).toBe("STRING");
+  });
+
+  // Figma names a cut, the Vortaro a number: the style variable is derived from the weight and
+  // cascades with it, so an Aspekto that changes its weight changes its cut in the same mode.
+  it("derives a style variable from every weight, with the same modes", () => {
+    expect(named("font/style/medium")).toMatchObject({
+      type: "STRING",
+      values: { komuna: "Medium", ekzemplo: "Medium" },
+    });
+    expect(named("font/style/black")?.values).toEqual({ komuna: "Black", ekzemplo: "Black" });
+    expect(named("font/weight/black")?.values).toEqual({ komuna: 900, ekzemplo: 900 });
+  });
+
+  it("gives every typography role a font-style field beside its font-weight", () => {
+    expect(named("typography/label/1/font-style")?.type).toBe("STRING");
+    expect(named("typography/label/1/font-weight")?.type).toBe("FLOAT");
+    expect(named("typography/display/1/font-style")).toBeDefined();
+  });
+
+  it("resolves the label's family and style per brand", () => {
+    const komuna = resolveFigmaPlan(plan, { aspekto: "komuna" });
+    const ekzemplo = resolveFigmaPlan(plan, { aspekto: "ekzemplo" });
+    expect(komuna["typography/label/1/font-family"]).toBe("Geist");
+    expect(ekzemplo["typography/label/1/font-family"]).toBe("Archivo");
+    expect(komuna["typography/label/1/font-style"]).toBe("Medium");
+    expect(ekzemplo["typography/label/1/font-style"]).toBe("SemiBold");
+  });
+
+  // What the run must load before it binds: every pair, with the Aspektoj that ask for it.
+  it("lists every font the set can need, with the brand that asks for it", () => {
+    const set = plan.components.find((component) => component.set === "butono");
+    expect(set?.fonts).toEqual([
+      { family: "Archivo", style: "SemiBold", aspektoj: ["ekzemplo"] },
+      { family: "Geist", style: "Medium", aspektoj: ["komuna"] },
+    ]);
   });
 });

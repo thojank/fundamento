@@ -20,7 +20,15 @@ const plan = JSON.parse(files["figma/plan.json"] ?? "{}") as FigmaPlan;
  * A file that has the model's font, as a prepared test file would. Only the tests of the fallback
  * run in a bare file, where the label falls back to Inter with a warning.
  */
-const MODEL_FONTS = [{ family: "Geist", style: "Medium" }] as const;
+// The fonts the two-brand fixture asks for: komuna's Geist Medium and ekzemplo's Archivo SemiBold,
+// and the two crossings a field-by-field binding passes through. A prepared file has all four; a
+// real Geist and a real Archivo both ship these cuts (F30).
+const MODEL_FONTS = [
+  { family: "Geist", style: "Medium" },
+  { family: "Geist", style: "SemiBold" },
+  { family: "Archivo", style: "Medium" },
+  { family: "Archivo", style: "SemiBold" },
+] as const;
 const modelDouble = () => figmaDouble({ fonts: MODEL_FONTS });
 
 /** Runs the generated plugin source against a double. */
@@ -1888,5 +1896,222 @@ describe("every bound paint shows the plan's colour after the first and the seco
       .map((line) => JSON.parse(line) as Record<string, unknown>);
     expect(json.some((part) => part.part === "layout")).toBe(true);
     expect(json.some((part) => part.part === "created")).toBe(true);
+  });
+});
+
+// F27 (An P0, M2-Vorstufe): Die Marke ist ein Modus, und Modi je Sammlung sind in Figma begrenzt
+// (Professional 10, Organization 20, Enterprise unbegrenzt; research §6.2, geprüft 2026-09-20).
+// Ein Lauf, der mehr Aspektoj mitbringt, als die Sammlung tragen kann, darf nicht mit einem rohen
+// Fehler abbrechen: Er sagt mit Zahlen, was nicht hineinpasst, und bringt den Rest zu Ende.
+describe("the run says it when a collection has more modes than Figma allows (F27)", () => {
+  /** A plan whose aspekto collection carries `count` brands, each an own mode. */
+  function planWithAspektoj(count: number): FigmaPlan {
+    const changed = JSON.parse(JSON.stringify(plan)) as FigmaPlan;
+    const collection = changed.collections.find((candidate) => candidate.name === "aspekto");
+    if (collection === undefined) throw new Error("no aspekto collection");
+    const [first] = collection.modes;
+    if (first === undefined) throw new Error("no mode");
+    const names = [
+      ...collection.modes,
+      ...Array.from({ length: count - collection.modes.length }, (_, index) => `marko${index + 1}`),
+    ];
+    for (const variable of collection.variables) {
+      const reference = variable.values[first];
+      if (reference === undefined) throw new Error(`${variable.name} has no value in ${first}`);
+      for (const mode of names) {
+        if (variable.values[mode] === undefined) variable.values[mode] = reference;
+      }
+    }
+    collection.modes = names;
+    return changed;
+  }
+
+  const sourceOf = (changed: FigmaPlan) =>
+    (files["figma/plugin/code.js"] ?? "").replace(
+      /^const PLAN = .*$/m,
+      `const PLAN = ${JSON.stringify(changed)};`,
+    );
+
+  it("warns with the numbers and keeps going when the modes do not fit", async () => {
+    const double = figmaDouble({ fonts: MODEL_FONTS, modeLimit: 10 });
+    const report = (await new Function(
+      "figma",
+      `${sourceOf(planWithAspektoj(12))}\nreturn applyPlan();`,
+    )(double.figma)) as { warnings: string[]; components: { set: string; created: string[] }[] };
+    const warning = report.warnings.find((entry) => entry.includes("aspekto"));
+    expect(warning).toContain("12");
+    expect(warning).toContain("10");
+    // The run does not stop at the limit: the component set is built either way.
+    expect(report.components[0]?.created).toHaveLength(72);
+  });
+
+  it("names the Aspektoj that did not reach the file", async () => {
+    const double = figmaDouble({ fonts: MODEL_FONTS, modeLimit: 10 });
+    const report = (await new Function(
+      "figma",
+      `${sourceOf(planWithAspektoj(12))}\nreturn applyPlan();`,
+    )(double.figma)) as { warnings: string[] };
+    expect(report.warnings.join(" ")).toContain("marko9");
+    expect(report.warnings.join(" ")).toContain("marko10");
+    const collection = double.collections.find((candidate) => candidate.name === "aspekto");
+    expect(collection?.modes).toHaveLength(10);
+  });
+
+  it("says nothing about the limit while the brands fit", async () => {
+    const double = figmaDouble({ fonts: MODEL_FONTS, modeLimit: 10 });
+    const report = (await new Function(
+      "figma",
+      `${sourceOf(planWithAspektoj(10))}\nreturn applyPlan();`,
+    )(double.figma)) as { warnings: string[] };
+    expect(report.warnings).toEqual([]);
+  });
+});
+
+// F27: Die Messung in Figma soll ohne Ablesen möglich sein. Der Bericht nennt deshalb je Sammlung
+// die Modi, die der Plan vorsieht, und die, die nach dem Lauf in der Datei stehen — Rohdaten, aus
+// denen „aspekto hat zwei Modi" folgt, ohne die Oberfläche zu befragen.
+describe("the report names the modes of every collection (F27)", () => {
+  interface ModeReport {
+    collection: string;
+    planned: string[];
+    actual: string[];
+    default: string;
+  }
+
+  async function modesOf(double: ReturnType<typeof figmaDouble>, source: string) {
+    const result = (await new Function("figma", `${source}\nreturn applyPlan();`)(
+      double.figma,
+    )) as {
+      modes: ModeReport[];
+    };
+    return result.modes;
+  }
+
+  it("names planned and applied modes per collection, the brand among them", async () => {
+    const double = modelDouble();
+    const modes = await modesOf(double, files["figma/plugin/code.js"] ?? "");
+    const aspekto = modes.find((entry) => entry.collection === "aspekto");
+    expect(aspekto?.planned).toEqual(["komuna", "ekzemplo"]);
+    expect(aspekto?.actual).toEqual(["komuna", "ekzemplo"]);
+    expect(aspekto?.default).toBe("komuna");
+    expect(modes.map((entry) => entry.collection)).toEqual(
+      plan.collections
+        .filter((collection) => collection.variables.length > 0)
+        .map((collection) => collection.name),
+    );
+  });
+
+  it("shows a file whose modes differ from the plan", async () => {
+    const double = modelDouble();
+    const api = double.figma as {
+      variables: {
+        createVariableCollection: (name: string) => (typeof double.collections)[number];
+      };
+    };
+    const old = api.variables.createVariableCollection("aspekto");
+    old.renameMode(old.defaultModeId, "ekzemplo");
+    const modes = await modesOf(double, files["figma/plugin/code.js"] ?? "");
+    const aspekto = modes.find((entry) => entry.collection === "aspekto");
+    expect(aspekto?.planned).toEqual(["komuna", "ekzemplo"]);
+    expect(aspekto?.actual).toEqual(["ekzemplo", "komuna"]);
+    expect(aspekto?.default).toBe("ekzemplo");
+  });
+
+  it("puts the modes into the printed report, in the headline part", async () => {
+    const double = modelDouble();
+    const lines: string[] = [];
+    const module = new Function("figma", "console", `${files["figma/plugin/code.js"] ?? ""}`);
+    await module(
+      { ...double.figma, command: "run" },
+      {
+        log: (...parts: unknown[]) => lines.push(parts.map(String).join(" ")),
+        error: () => undefined,
+      },
+    );
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    const first = lines.find((line) => line.startsWith("{"));
+    expect(first?.length ?? 0).toBeLessThan(4000);
+    const headline = JSON.parse(first ?? "{}") as { modes?: ModeReport[] };
+    expect(headline.modes?.find((entry) => entry.collection === "aspekto")?.actual).toEqual([
+      "komuna",
+      "ekzemplo",
+    ]);
+  });
+});
+
+// F30 (An P0, Maintainer 2026-09-23): the label's typeface follows the brand. Figma allows
+// setBoundVariable("fontFamily", …) and ("fontStyle", …); the condition is that every font the
+// bound variables resolve to — over **all** modes — is loaded before the binding is written,
+// otherwise Figma throws. The double models exactly that condition, so the run can be measured
+// here instead of guessed at.
+describe("the label's font is bound, not written (F30)", () => {
+  const BOTH = MODEL_FONTS;
+
+  async function report(double: ReturnType<typeof figmaDouble>) {
+    return (await new Function(
+      "figma",
+      `${files["figma/plugin/code.js"] ?? ""}\nreturn applyPlan();`,
+    )(double.figma)) as {
+      warnings: string[];
+      components: { set: string; fonts?: unknown }[];
+    };
+  }
+
+  const labelOf = (double: ReturnType<typeof figmaDouble>) => {
+    const set = double.root.children[0]?.children.find((child) => child.type === "COMPONENT_SET");
+    const find = (node: DoubleNode): DoubleNode | undefined =>
+      node.type === "TEXT" ? node : node.children.map(find).find((found) => found !== undefined);
+    return find(set as DoubleNode);
+  };
+
+  it("binds the family and the cut to the role's variables", async () => {
+    const double = figmaDouble({ fonts: BOTH });
+    const result = await report(double);
+    expect(result.warnings).toEqual([]);
+    const label = labelOf(double);
+    // The label's typography role follows the size, so which of them a given variant carries
+    // depends on the variant; both fields must name the same role, and it must be a label role.
+    const family = label?.boundVariables.fontFamily?.name ?? "";
+    const style = label?.boundVariables.fontStyle?.name ?? "";
+    expect(family).toMatch(/^typography\/label\/[12]\/font-family$/);
+    expect(style).toBe(family.replace("font-family", "font-style"));
+  });
+
+  it("loads every font of every mode before it binds, not only the base one", async () => {
+    const double = figmaDouble({ fonts: BOTH });
+    await report(double);
+    expect(double.loadedFonts).toContain("Geist Medium");
+    expect(double.loadedFonts).toContain("Archivo SemiBold");
+  });
+
+  // A file that has only the reference's font: the run says which one is missing and what it
+  // falls back to, and it does not die on the binding.
+  it("warns with the name and the fallback when a mode's font is missing", async () => {
+    const double = figmaDouble({ fonts: [{ family: "Geist", style: "Medium" }] });
+    const result = await report(double);
+    const warning = result.warnings.join(" | ");
+    expect(warning).toContain("Archivo SemiBold");
+    expect(warning).toContain("Inter");
+    const label = labelOf(double);
+    expect(label?.boundVariables.fontFamily).toBeUndefined();
+    expect(label?.properties.fontName).toBeDefined();
+  });
+
+  // Rohdaten im Bericht: welche Variable an welchem Text hängt, und welche Familie je Modus
+  // dahinter steht.
+  it("names the bound variables and the family per mode in the report", async () => {
+    const double = figmaDouble({ fonts: BOTH });
+    const result = await report(double);
+    expect(result.components[0]?.fonts).toEqual({
+      bound: {
+        fontFamily: ["typography/label/2/font-family", "typography/label/1/font-family"],
+        fontStyle: ["typography/label/2/font-style", "typography/label/1/font-style"],
+      },
+      loaded: ["Archivo SemiBold", "Geist Medium"],
+      missing: [],
+      crossing: [],
+      refused: [],
+      perAspekto: { ekzemplo: "Archivo SemiBold", komuna: "Geist Medium" },
+    });
   });
 });

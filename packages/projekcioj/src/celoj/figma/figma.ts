@@ -11,6 +11,7 @@
 // Pure.
 
 import {
+  ASPEKTO_DIMENSIO,
   allResolutions,
   alphaOf,
   baseResolution,
@@ -133,6 +134,12 @@ export interface FigmaComponentSet {
    */
   label?: { property: string; defaultValue: string };
   /**
+   * Every font the set can need, over **all** combinations, with the Aspektoj that ask for it
+   * (F30). A binding to a font variable only holds once every value the variable takes is loaded,
+   * so the run loads this list before it binds — the base combination's font alone is not enough.
+   */
+  fonts?: { family: string; style: string; aspektoj: string[] }[];
+  /**
    * The ground the set stands on: the Vitrino's surface, as a variable, so it follows color-scheme
    * and contrast (F16). The deckkraft is decided over every combination, like every paint (F8).
    */
@@ -156,7 +163,10 @@ const BASE_MODE = "value";
 
 /** Composite fields Figma gets as separate variables (Figma variables hold no composites). */
 const COMPOSITE_FIELDS: Readonly<Record<string, readonly string[]>> = {
-  typography: ["fontFamily", "fontSize", "fontWeight", "letterSpacing", "lineHeight"],
+  // `fontStyle` is no field of the DTCG type: Figma binds a text to a family and a *cut* ("Medium"),
+  // where the Vortaro states a weight (500). It is derived from `fontWeight` and follows it through
+  // the same cascade, so a brand that changes its weight changes its cut in the same mode (F30).
+  typography: ["fontFamily", "fontSize", "fontWeight", "fontStyle", "letterSpacing", "lineHeight"],
   border: ["color", "width", "style"],
   shadow: ["color", "offsetX", "offsetY", "blur", "spread"],
 };
@@ -188,6 +198,8 @@ const fieldKind = (field: string) => field.slice(field.lastIndexOf("/") + 1);
  */
 function fieldValue(value: unknown, field: string): unknown {
   const kind = fieldKind(field);
+  // The cut is no field of the value: it is read from the weight beside it (F30).
+  const property = kind === "fontStyle" ? "fontWeight" : kind;
   // A value that is no list is the first (and only) layer: one Aspekto may have one shadow layer
   // where another has two.
   const layers = Array.isArray(value) ? value : value === undefined ? [] : [value];
@@ -197,7 +209,7 @@ function fieldValue(value: unknown, field: string): unknown {
       ? { colorSpace: "srgb", components: [0, 0, 0], alpha: 0 }
       : { value: 0, unit: "px" };
   }
-  return (layer as Record<string, unknown>)[kind];
+  return (layer as Record<string, unknown>)[property];
 }
 
 const ALIAS = /^\{([a-z0-9]+(?:\.[a-z0-9]+)*)\}$/;
@@ -215,6 +227,9 @@ function figmaColor(value: unknown): FigmaColor {
 
 /** The Figma value of a token value of `type`, or an alias when the token aliases another. */
 export function figmaValue(type: string, value: unknown, field?: string): FigmaValue {
+  // The derived cut reads the weight and keeps its alias, pointed at the twin variable (F30); the
+  // generic alias branch below would point it at the weight itself.
+  if (type === "fontStyle") return styleValue(value);
   if (typeof value === "string") {
     const alias = ALIAS.exec(value);
     if (alias?.[1] !== undefined) return { alias: variableName(alias[1], field) };
@@ -229,7 +244,9 @@ export function figmaValue(type: string, value: unknown, field?: string): FigmaV
     case "fontWeight":
       return typeof value === "number" ? value : Number(value);
     case "fontFamily":
-      return (Array.isArray(value) ? value : [value]).map(String).join(", ");
+      // The first family of the stack; the others (system-ui, sans-serif) are the browser's
+      // fallbacks and name no font Figma could pick. A binding needs a family that exists (F30).
+      return String((Array.isArray(value) ? value[0] : value) ?? "");
     case "cubicBezier":
       return Array.isArray(value) ? `cubic-bezier(${value.join(", ")})` : String(value);
     default:
@@ -246,6 +263,56 @@ export function figmaValue(type: string, value: unknown, field?: string): FigmaV
       }
       return String(value);
   }
+}
+
+/** Figma names a cut where the Vortaro names a weight; the rounding is Figma's own (F30). */
+function styleOfWeight(weight: number): string {
+  return FONT_STYLES[Math.round(weight / 100) * 100] ?? "Regular";
+}
+
+/** The prefixes the derived style variables are twinned from (F30). */
+const WEIGHT_PREFIX = "font/weight/";
+const STYLE_PREFIX = "font/style/";
+
+/**
+ * The value of the derived `fontStyle` field of a typography role: the cut of the weight the role
+ * names. A role names its weight with an alias, and the cut keeps that alias — pointed at the twin
+ * variable — so Figma resolves the cut with the same mode as the weight (F30).
+ */
+function styleValue(weight: unknown): FigmaValue {
+  if (typeof weight === "string") {
+    const target = ALIAS.exec(weight)?.[1];
+    if (target !== undefined) {
+      const name = variableName(target);
+      if (!name.startsWith(WEIGHT_PREFIX)) {
+        throw new Error(
+          `The Figma Celo derives the font style of a typography role from its fontWeight, and ` +
+            `${target} is no font.weight.* token. Point the role's fontWeight at a font.weight.* ` +
+            "token, or give the Celo a rule for deriving a cut from this token.",
+        );
+      }
+      return { alias: `${STYLE_PREFIX}${name.slice(WEIGHT_PREFIX.length)}` };
+    }
+  }
+  const number = typeof weight === "number" ? weight : Number(weight);
+  return Number.isFinite(number) ? styleOfWeight(number) : "Regular";
+}
+
+/** The STRING twin of a weight variable: the same modes, the same cascade, cuts instead of numbers. */
+function styleTwin(variable: FigmaVariable): FigmaVariable {
+  const values: Record<string, FigmaValue> = {};
+  for (const [mode, value] of Object.entries(variable.values)) {
+    values[mode] =
+      typeof value === "object" && value !== null && "alias" in value
+        ? { alias: `${STYLE_PREFIX}${value.alias.slice(WEIGHT_PREFIX.length)}` }
+        : styleOfWeight(Number(value));
+  }
+  return {
+    name: `${STYLE_PREFIX}${variable.name.slice(WEIGHT_PREFIX.length)}`,
+    type: "STRING",
+    hidden: variable.hidden ?? false,
+    values,
+  };
 }
 
 /** Figma variable type of a token type (and field). */
@@ -266,6 +333,7 @@ export function figmaType(type: string, field?: string): FigmaVariable["type"] {
 
 const FIELD_TYPES: Readonly<Record<string, string>> = {
   fontFamily: "fontFamily",
+  fontStyle: "fontStyle",
   fontSize: "dimension",
   fontWeight: "fontWeight",
   letterSpacing: "dimension",
@@ -423,6 +491,12 @@ function variablesOf(modelo: Modelo, input: CeloInput): Map<string, FigmaVariabl
       build(dims.length - 1, "", {});
     }
   }
+  // Figma binds a text to a family and a cut, the Vortaro states a weight: every weight variable
+  // gets a STRING twin in its own collection, with its modes and its place in the cascade (F30).
+  for (const [collection, list] of byCollection) {
+    const twins = list.filter((variable) => variable.name.startsWith(WEIGHT_PREFIX)).map(styleTwin);
+    if (twins.length > 0) byCollection.set(collection, [...list, ...twins]);
+  }
   return byCollection;
 }
 
@@ -564,6 +638,29 @@ function componentSetOf(
       ...(font === undefined ? {} : { font }),
     };
   });
+  // Every font the label can carry, over every combination (F30). The typography role follows the
+  // variant (size), and its family and weight follow the Dimensioj, so the pairs are collected over
+  // both — each with the Aspektoj that ask for it, which is what the report names per mode.
+  const fontsNeeded = new Map<string, { family: string; style: string; aspektoj: Set<string> }>();
+  for (const { assignment, tokens } of resolutions) {
+    for (const variant of variants) {
+      const typography = boundToken(skemo, "label", "typography", variant.props);
+      const font = typography === undefined ? undefined : fontOf(tokens[typography.token]?.value);
+      if (font === undefined) continue;
+      const key = `${font.family}\u0000${font.style}`;
+      const seen = fontsNeeded.get(key) ?? { ...font, aspektoj: new Set<string>() };
+      const aspekto = assignment[ASPEKTO_DIMENSIO];
+      if (aspekto !== undefined) seen.aspektoj.add(aspekto);
+      fontsNeeded.set(key, seen);
+    }
+  }
+  const fonts = [...fontsNeeded.values()]
+    .map((entry) => ({
+      family: entry.family,
+      style: entry.style,
+      aspektoj: [...entry.aspektoj].sort(),
+    }))
+    .sort((a, b) => (`${a.family} ${a.style}` < `${b.family} ${b.style}` ? -1 : 1));
   const ground = paintOf(VITRINO_SURFACE, resolutions, base);
   // A ground whose alpha differs per mode has no faithful fill (F8); then the set gets none, and
   // the missing `surface` is what a test and the run see.
@@ -594,6 +691,7 @@ function componentSetOf(
       padding: cell,
     },
     label: { property: "label", defaultValue: LABEL_DEFAULT },
+    fonts,
     ...(surface === undefined ? {} : { surface }),
   };
 }

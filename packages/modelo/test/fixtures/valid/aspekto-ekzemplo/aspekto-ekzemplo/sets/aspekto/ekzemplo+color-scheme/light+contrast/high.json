@@ -25,6 +25,37 @@
       "muted": {
         "$value": "{color.palette.neutral.800}"
       }
+    },
+    "action": {
+      "primary": {
+        "rest": {
+          "$value": "{color.palette.accent.100}"
+        },
+        "hover": {
+          "$value": "{color.palette.accent.200}"
+        },
+        "pressed": {
+          "$value": "{color.palette.accent.300}"
+        },
+        "selected": {
+          "$value": "{color.palette.accent.200}"
+        }
+      },
+      "secondary": {
+        "text": {
+          "$value": "{color.palette.neutral.0}"
+        }
+      }
+    },
+    "brand": {
+      "fill": {
+        "$value": "{color.palette.accent.100}"
+      }
+    },
+    "focus": {
+      "ring": {
+        "$value": "{color.palette.neutral.1000}"
+      }
     }
   }
 }

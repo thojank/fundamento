@@ -358,6 +358,20 @@
           "typography.**"
         ]
       }
+    },
+    {
+      "id": "reg_01M36S7HS7MG5EPKKH3M5CC8Z0",
+      "name": "protected-minimum",
+      "statement": "In every combination, every protected role of every Aspekto resolves to at least the value the reference Aspekto gives it in the same combination. A brand may exceed a floor, never fall below it.",
+      "kialo": "An Aspekto may differ from the reference in every category — colour, spacing, size, motion, layout (F28). Two of those measures are not a brand decision but a floor that protects a person: the minimum pointer target of WCAG 2.5.8 and the thickness of the focus indicator that WCAG 2.4.7 asks to be visible. Both are tokens, so touch-target-min and the rendered component read the same value — and so a brand could lower the threshold that protects it and pass every check. The floor is therefore the reference Aspekto's value: it is written once, in core, and no Aspekto may undercut it.",
+      "scope": "vortaro: size.target.min and focus.ring of every Aspekto against the reference Aspekto, in every combination",
+      "checkability": "automatic",
+      "appliesTo": {
+        "tokens": [
+          "size.target.min",
+          "focus.ring"
+        ]
+      }
     }
   ]
 }

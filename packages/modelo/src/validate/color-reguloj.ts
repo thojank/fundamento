@@ -222,7 +222,7 @@ export const stateDistinct: CombinationChecker = (context) => {
 };
 
 /** A dimension in px (rem at 16 px), or `undefined` for anything else. */
-function pixelsOf(value: unknown): number | undefined {
+export function pixelsOf(value: unknown): number | undefined {
   if (!isJsonObject(value) || typeof value.value !== "number") return undefined;
   if (value.unit === "px") return value.value;
   if (value.unit === "rem") return value.value * 16;

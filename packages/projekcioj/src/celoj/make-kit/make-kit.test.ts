@@ -153,7 +153,7 @@ describe("Make Kit sources (T018)", () => {
 
   it("ekzemplo ships its font as a name with generic fallbacks, never a file", () => {
     const styles = kit("ekzemplo", "styles.css");
-    expect(styles).toContain("Ekzempla Grotesk");
+    expect(styles).toContain("Archivo");
     expect(styles).toMatch(/ui-sans-serif|system-ui|sans-serif/);
     expect(Object.keys(files).filter((path) => /\.(woff2?|ttf|otf)$/.test(path))).toEqual([]);
     const aspekto = JSON.parse(

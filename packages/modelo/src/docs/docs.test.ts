@@ -690,14 +690,16 @@ describe("F23: the release path runs in the CI, both kits, one script", () => {
     expect(text).toMatch(/Kit fehlt/);
   });
 
-  // Q2: the ekzemplo kit is MIT; the fictitious font is a name, never a file in the package.
+  // Q2: the ekzemplo kit is MIT; its font ships as a name, never as a file in the package. Since
+  // F29 the name is Archivo (OFL-1.1) instead of the invented „Ekzempla Grotesk": a designer has
+  // to be able to pick the same family in Figma, where it comes from Google Fonts.
   it("keeps Q2: the ekzemplo fixture is MIT and its font ships as a name only", () => {
     const aspekto = JSON.parse(
       read("packages/modelo/test/fixtures/valid/aspekto-ekzemplo/aspekto-ekzemplo/aspekto.json"),
-    ) as { license: string; fonts: { family: string; redistributable: boolean; source: string }[] };
+    ) as { license: string; fonts: { family: string; license: string; source: string }[] };
     expect(aspekto.license).toBe("MIT");
-    expect(aspekto.fonts[0]).toMatchObject({ family: "Ekzempla Grotesk", redistributable: false });
-    expect(aspekto.fonts[0]?.source).toContain("no font file exists");
+    expect(aspekto.fonts[0]).toMatchObject({ family: "Archivo", license: "OFL-1.1" });
+    expect(aspekto.fonts[0]?.source).toContain("Archivo");
     // The script refuses a kit that carries a font file.
     expect(read(script)).toMatch(/woff2?|ttf|otf/);
   });

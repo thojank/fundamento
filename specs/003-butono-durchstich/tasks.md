@@ -844,4 +844,185 @@ und F24 (Befund, nicht blockierend).
     stabilen Release wird `latest` umgehängt (`npm dist-tag add @fundamento/make-kit-<aspekto>@<v>
     latest`). Nichts zu bauen.
 
+- [ ] **F27 Die Marke ist in Figma umschaltbar** (An P0, M2-Vorstufe, Maintainer 2026-09-23)
+  - Befund (gemessen an `.fundamento/projekcioj/figma/plan.json` auf main): Die Sammlung `aspekto`
+    trägt einen Modus, `komuna`. Nicht, weil die Projektion die Marke nicht als Modus kennte —
+    sondern weil der Lauf ohne `--config` das Repository-Modelo mit seiner Referenz-Aspekto allein
+    baut. In Figma gibt es deshalb nichts umzuschalten.
+  - **Entscheidung (Punkt 5, Maintainer-Vorschlag bestätigt): ein Modelo mit mehreren Aspektoj,
+    ein Lauf, eine `--config`.** Mehrere Läufe schreiben je Marke eine `plan.json` mit je einem
+    Modus; in keiner Datei ließe sich etwas umschalten. Die Modi entstehen nur, wenn **ein** Modelo
+    alle Marken trägt. Der Messlauf nimmt die Config, die schon beide Make Kits baut:
+    `pnpm fm projekcioj build --config packages/modelo/test/fixtures/valid/aspekto-ekzemplo/fundamento.config.json`.
+    Dokumentiert in `README.md`, `quickstart.md` (S3) und `plan.md` (D-12).
+  - Punkte 1 und 2 waren **grün, bevor eine Zeile fiel** — das ist der Befund, nicht der Plan: Aus
+    dem Modelo mit komuna + ekzemplo trägt die Sammlung `aspekto` zwei Modi (`komuna` zuerst, der
+    Standard des Modelo), alle 657 Variablen der Sammlung haben in beiden Modi einen Wert, 123
+    davon unterschiedliche, und die Kaskade löst `aspekto × color-scheme × contrast` in allen acht
+    Kombinationen auf die Rollen des Rezolvo auf. Zugesichert ist das jetzt ausdrücklich und mit
+    Namen (`figma.test.ts`: sechs Rollen je Kombination, acht verschiedene Werte für
+    `color/action/primary/rest`), statt nur im großen Durchlauf über alle 144 Kombinationen
+    mitzulaufen.
+  - Rot zuerst (Punkte 3 und 4, `plugin.test.ts`): Bei zwölf Aspektoj in einer Sammlung mit zehn
+    erlaubten Modi gab es keine Warnung (`the given combination of arguments (undefined and
+    string) is invalid`), die abgelehnten Modi standen nirgends (`expected '' to contain
+    'marko9'`), und der Bericht nannte je Sammlung nur eine Zahl, keine Modi (`expected undefined
+    to deeply equal [ 'komuna', 'ekzemplo' ]`). Das Double kannte die Grenze nicht und hätte jede
+    Zahl angenommen; es lehnt jetzt wie Figma ab (`modeLimit`, Vorgabe `FIGMA_MODE_LIMIT`).
+  - Grün (Punkt 3): `FIGMA_MODE_LIMIT = 10` (Professional; Organization 20, Enterprise
+    unbegrenzt — research §6.2, geprüft 2026-09-20; die vier aus der ersten Recherche waren ein
+    Forenstand und sind überholt, der Test „höchstens vier Modi" stand noch darauf). Der Lauf warnt
+    **vor** dem ersten Versuch mit Zahlen („12 Modi geplant, Figma Professional erlaubt 10 je
+    Sammlung …, 2 mehr, als in eine Professional-Datei passen") und nach dem Versuch mit dem, was
+    die Datei **wirklich** abgelehnt hat, mit Namen. Der Plan wird nicht gekürzt: Er projiziert das
+    Modelo, nicht ein Abonnement. Ein abgelehnter Modus bricht den Lauf nicht mehr ab — seine Werte
+    werden übersprungen, Variablen und Komponenten laufen zu Ende.
+  - Grün (Punkt 4): Der Bericht trägt `modes` — je Sammlung die geplanten Modi, die Modi der Datei
+    nach dem Lauf und den Standardmodus, den Figma nimmt. Rohdaten in der Kopfzeile des Berichts,
+    unter 4 000 Zeichen; „aspekto hat zwei Modi" ist damit zu lesen, ohne das Modusmenü abzulesen.
+  - Folge, vor der Messung zu wissen (F8, Jugxo `jug_01M307X4DQQWRFTDXB1S5CGPN9`, Vojmapo Phase 4):
+    Sobald zwei Marken im Plan stehen, ist die Deckkraft der tertiären Aktion nicht mehr in allen
+    Modi gleich (komuna durchscheinend, ekzemplo deckend). Der Plan sagt das ehrlich
+    (`alphaVariesByMode`), der Lauf setzt dann **keine** Deckkraft, und die vier Rollen
+    `color.action.tertiary.{rest,hover,pressed,disabled}` stehen in komuna deckend statt
+    durchscheinend da. Für die Messung an ekzemplo ist das ohne Wirkung; die Lösung (Auflagen-Knoten
+    mit gebundener FLOAT-Deckkraft) steht in Phase 4 und ist hier nicht gebaut.
+  - Fertig wenn: Der Maintainer baut mit der Config oben, wendet den Plan auf eine frische Datei an
+    und schaltet im Rahmen `aspekto` von `komuna` auf `ekzemplo`: alle 72 Varianten folgen, die
+    Farben entsprechen dem ekzemplo-Kit, und der Bericht nennt `aspekto: ["komuna", "ekzemplo"]`.
+
+- [ ] **F28 Eine Aspekto darf jede Dimension überschreiben — und die Schutzregeln halten trotzdem**
+  (An P0, Maintainer 2026-09-23)
+  - Befund (Plan eines Zwei-Marken-Laufs komuna + ekzemplo): 123 von 657 Variablen der Sammlung
+    `aspekto` unterscheiden sich, und zwar nur Farbe, Elevation, Schriftfamilie, Radius, Typografie
+    und Randstärke. spacing (30), size (29), layout (15), motion (26), focus (4) und opacity (4)
+    waren identisch. Entscheidung des Maintainers: Marken dürfen sich fundamental unterscheiden,
+    ausdrücklich auch in Abständen, Größen, Layout, Motion und Deckkraft.
+  - Gemessen, bevor etwas gebaut wurde: **Das Modelo verbot das nie.** Eine Kopie der Fixture, die
+    spacing, size, motion, layout und opacity verschiebt, ist ohne eine Zeile Änderung gültig
+    (0 Fehler, 144 Kombinationen). Der Befund lag nicht an einer Regel, sondern daran, dass
+    ekzemplo diese Werte aus dem Kern abschrieb. Zugesichert ist das jetzt
+    (`validate/aspekto-override.test.ts`): eine Marke, die in jeder Kategorie etwas ändert,
+    validiert und löst je Modus auf andere Werte auf.
+  - Rot zuerst, und zwar an der Stelle, die die Entscheidung erst gefährlich macht: **Zwei
+    Schutzregeln konnte die Marke selbst abschalten.**
+    1. `size.target.min` ist ein Token. Eine Marke, die es auf 12 px setzt und ihre Bedienelemente
+       auf 16 px schrumpft, war gültig — `touch-target-min` liest seine Schwelle aus genau diesem
+       Token und war damit zufrieden. `VALID: 0 errors`.
+    2. `border.width.focus` ist ein Token. Eine Marke mit 0 px Fokusring war gültig; der Ring ist
+       unsichtbar, und keine Regel sah es. `VALID: 0 errors`.
+    Die beiden anderen Zusicherungen hielten schon: eine Marke, die ihre Bedienelemente unter
+    `size.target.min` drückt, fällt mit Name und Zahl durch (`size.control.small is 20px, below
+    size.target.min (24px)`), und eine, die ein Kontrastpaar reißt, fällt in
+    `check:alirebleco --config` durch (`action-primary-text-on-fill … ratio 1.50:1`). Beides ist
+    jetzt festgehalten, damit es nicht still verschwindet.
+  - Grün: neue Regulo **`protected-minimum`** (`reg_01M36S7HS7MG5EPKKH3M5CC8Z0`, automatic): Jede
+    Rolle, die die Regulo nennt, löst in jeder Aspekto in jeder Kombination auf **mindestens den
+    Wert der Referenz-Aspekto** auf. Genannt sind `size.target.min` (WCAG 2.5.8) und `focus.ring`
+    — bei einem Verbund zählt seine `width`, damit eine Marke nicht das Breiten-Token stehen lässt
+    und den Ring auf ein dünneres umhängt. Eine Marke darf einen Boden **anheben**, nie
+    unterschreiten; der Vergleich läuft je Kombination gegen die schon vorhandene Auflösung der
+    Referenz, also ohne zweiten Auflösungsdurchgang. Meldung mit Name und beiden Zahlen.
+  - Dokumentiert (Punkt 3), im README unter „What an Aspekto decides, and what it never does": fünf
+    Dinge gehören nicht der Marke — das Vortaro selbst (kein Token dazu, keines weg, kein Typ
+    geändert), die Dimensioj samt `kontrastSojloj`, die KontrastParoj, das Kern-Regularo (eine
+    Marke kann eine Kern-Regulo nicht als `manual` neu erklären; gemessen: die Kern-Regulo feuert
+    weiter) und die geschützten Böden. Jede Zeile nennt, wo der Wert liegt und warum er dort liegt.
+  - **Jugxo `jug_01M36WWZ178CDZEJSFS2WG2K7R`** (Maintainer, 2026-09-23): „Eine Prüfung, die ihre
+    Schwelle aus dem geprüften Datum liest, prüft nichts." Die Begründung nennt beide gemessenen
+    Lücken, beide Rollen und den Grund, warum der Boden im Kern liegt und keiner Marke gehört.
+  - Fertig wenn: F29 beweist es an einer echten Marke.
+
+- [ ] **F29 ekzemplo wird eine eigenständige Beispielmarke** (An P0, Maintainer 2026-09-23)
+  - Befund: leicht verschobene Palette, fiktive Schrift ohne Datei — in Figma kaum vom Original zu
+    unterscheiden. Neu und plakativ: Archivo, kräftiges Gelb mit schwarzem Text, Schwarz mit
+    weißem Text, reines Weiß und Schwarz als Flächen, Radien 0, flache Elevation, engere Maße.
+  - Rot zuerst (gemessen an der alten Fixture, `e2e/external-aspekto.test.ts`): zehn Tests rot,
+    darunter genau der Befund — `spacing: expected 0 to be greater than or equal to 10`, dasselbe
+    für size, layout, motion und opacity —, dazu `expected '#005f60' to be '#edd200'`,
+    `radius.full: expected 9999 to be +0`, `expected [ 'Ekzempla Grotesk', …(2) ]` und
+    `spacing.small: expected 4 to be less than 4`.
+  - Grün, die Marke: Die Helligkeitsleiter der Rampen bleibt, weil `palette-even` und
+    `palette-aligned` Aussagen über Helligkeit sind und die Dimensio-Sets des Kerns je Stufennummer
+    umhängen; getauscht sind Farbton und Buntheit. neutral ist buntfrei und rechnet sich für eine
+    unbunte Farbe direkt aus (Weiß landet exakt auf 1, Schwarz auf 0), accent ist Gelb
+    (`#edd200` auf Stufe 200), warning Orange, damit nichts Gelbes als Marke missverstanden wird.
+    Die Rollen: primäre Aktion Gelb mit schwarzem Text, sekundäre Aktion Schwarz mit weißem Text,
+    Markenfläche Gelb mit schwarzem Text, Fokusring Schwarz, Flächen von reinem Weiß abwärts,
+    Text reines Schwarz. Form: jeder Radius 0 (auch `radius.full` — die Marke kennt keine runde
+    Ecke), Elevation bleibt durchsichtig (ihre eigene Regulo `elevation-flat`). Maße: engere
+    Abstände, kleinere Bedienelemente (28/36/44 statt 32/40/48, in `density=compact` 26/28/36),
+    schnellere Motion, zwölfspaltiges Raster, eigene Deckkraftwerte. Schrift: Archivo (OFL-1.1),
+    Body 500, Headlines 700, Display 900 **in Versalien** (`textTransform: "uppercase"` — das darf
+    ein Override als einzige Erweiterung tragen).
+  - „Wo Gelb mit Weiß kollidiert, gilt Schwarz" ist die Regel der Marke, und sie hat Folgen in
+    `contrast=high`: Der Kern hängt dort die primäre Aktion auf eine **dunkle** Stufe um, was mit
+    schwarzem Text nicht trägt. ekzemplo hält im Set `aspekto/ekzemplo+color-scheme/light+contrast/high`
+    dagegen — das Gelb geht die Rampe **hinauf** statt hinab, der schwarze Text bleibt, der weiße
+    Text der schwarzen Aktion bleibt weiß, der Fokusring bleibt schwarz. Auf der dunklen
+    Warnfläche gilt weiter weißer Text: die Regel meint gelbe Flächen, nicht jede.
+  - Ergebnis, gemessen: **239 von 356 Tokens** unterscheiden sich in der Basiskombination (vorher
+    182), und **jede** Kategorie ist dabei — color 144, font 21, spacing 15, typography 14,
+    size 13, motion 8, radius 8, layout 4, elevation 4, opacity 4, border 3, focus 1.
+    `fm modelo validate --config` 0 Fehler in 144 Kombinationen; `check:alirebleco --config` 0
+    Fehler, kleinstes Verhältnis 4.22:1 (ein ui-Paar, Schwelle 3:1). Clean Room: `brandValues=0`.
+  - Offener Befund (F30-Kandidat, **vor der Messung zu wissen**): `textTransform` steht im Modelo
+    und im Rezolvo, aber **keine Projektion trägt es**. Weder die CSS (`--fm-typography-display-1-*`
+    kennt kein `text-transform`) noch der Figma-Plan setzen es. Die Versalien stehen damit in den
+    Daten und sind in Figma und im Browser nicht zu sehen. Das ist älter als F29 — komunas
+    `typography.kicker` trägt seit Spec 001 `uppercase` und wird ebenso wenig gesetzt.
+  - Fertig wenn: Der Maintainer schaltet in Figma `aspekto` von komuna auf ekzemplo und sieht
+    andere Farben, Radien, Schriften **und Maße**; die Vitrino zeigt denselben Unterschied im
+    Browser.
+
+- [ ] **F30 In Figma folgt die Schrift der Marke** (An P0, Maintainer 2026-09-23; Jugxo
+  `jug_01M36YXFN43P7077598KRWYMGN`)
+  - Befund (F29, gemessen am Zwei-Marken-Plan): Die Variable stimmte
+    (`font/family/body`: komuna → Geist, ekzemplo → Archivo), aber das Plugin schrieb den Font der
+    Beschriftung fest — `{"family":"Geist","style":"Medium"}` aus der Basiskombination, in alle 72
+    Varianten. **Korrektur des Maintainers:** Das ist keine Grenze der Plugin-API.
+    `setBoundVariable("fontFamily", …)` und `("fontStyle", …)` sind zulässig; die Bedingung ist,
+    dass jeder Wert der Variablen über alle Modi vorher per `loadFontAsync` geladen ist. Erst
+    messen, dann urteilen.
+  - Rot zuerst, Plan (`figma.test.ts`, 5 Tests): `expected 'Geist, system-ui, sans-serif' to be
+    'Geist'`, `expected undefined to match object { type: 'STRING' … }` (kein
+    `font/style/medium`), `expected undefined to be 'STRING'` (kein
+    `typography/label/1/font-style`) und `expected undefined to deeply equal [ { family:
+    'Archivo', … } ]` (der Plan nannte die Schriften nicht, die ein Lauf laden muss).
+  - Rot zuerst, Lauf (`plugin.test.ts`, 4 Tests): `expected undefined to be
+    'typography/label/1/font-family'`, `expected '' to contain 'Archivo SemiBold'` und der Bericht
+    ohne Rohdaten.
+  - Grün, Plan: (1) Eine Figma-Variable für eine Familie trägt **eine** Familie, nicht den
+    CSS-Stack — die übrigen sind Rückfallfamilien des Browsers und benennen keine Schrift, die
+    Figma wählen könnte. (2) Figma bindet einen Schnitt, das Vortaro nennt ein Gewicht: Jede
+    `font.weight.*`-Variable bekommt einen STRING-Zwilling `font/style/*` mit denselben Modi und
+    derselben Stelle in der Kaskade, und jede Typografie-Rolle ein Feld `font-style`, das den
+    **Alias** des Gewichts behält — der Schnitt löst im selben Modus auf wie das Gewicht. (3) Je
+    Set nennt der Plan `fonts`: jede Schrift über alle 144 Kombinationen, mit den Aspektoj, die sie
+    verlangen (`Archivo SemiBold → ekzemplo`, `Geist Medium → komuna`).
+  - Grün, Lauf: Vor dem Binden lädt der Lauf jede Schrift des Plans; fehlt eine, nennt er sie mit
+    Namen und nennt den Rückfall (Inter). **Vom Double gefunden, nicht geraten:** Gebunden wird
+    Feld für Feld, und zwischen Familie und Schnitt steht der Text in einem Paar, das kein Modus
+    zeigt — `the variable typography/label/2/font-family can show "Archivo Medium", which is not
+    loaded`. Der Lauf lädt deshalb auch jede Kreuzung der Familien mit den Schnitten, still, weil
+    kein Modus sie zeigt. Lehnt Figma eine Bindung dennoch ab, fängt der Lauf die Ablehnung, nennt
+    sie mit der Meldung von Figma und lässt die geschriebene Schrift stehen.
+  - Rohdaten im Bericht, je Set: `fonts.bound` (je Feld die gebundenen Variablen — die Rolle folgt
+    der Größe, also sind es zwei je Feld), `fonts.loaded`, `fonts.missing`, `fonts.crossing`,
+    `fonts.refused` und `fonts.perAspekto` (`{komuna: "Geist Medium", ekzemplo: "Archivo
+    SemiBold"}`).
+  - Nicht gemessen: Ob die echte Figma-API die Bindung unter genau diesen Bedingungen annimmt. Das
+    Double modelliert die vom Maintainer genannte Bedingung; die Messung in Figma entscheidet, und
+    eine Ablehnung steht dann mit Figmas eigener Meldung im Bericht.
+  - Fertig wenn: Der Maintainer schaltet in Figma `aspekto` von komuna auf ekzemplo und die
+    Beschriftung steht in Archivo SemiBold; der Bericht nennt die gebundenen Variablen und die
+    Schrift je Aspekto.
+
+- [ ] **F31 Versalien werden projiziert** (An P0, Maintainer 2026-09-23) — **noch nicht begonnen**
+  - `textTransform` steht im Modelo und im Rezolvo, aber keine Projektion trägt es: weder die
+    CSS-Variablen (`--fm-typography-display-1-*` kennt kein `text-transform`) noch der Figma-Plan.
+    Betrifft auch komunas `typography.kicker` seit Spec 001. Anforderung: Die Web-Projektion setzt
+    `text-transform`, Figma setzt `textCase`; Zusicherung je Projektion, Rohdaten im Bericht.
+  - Reihenfolge laut Maintainer: F30 vor F31. F30 ist gebaut, F31 steht offen.
+
 Consistency check before tasks (`/speckit.analyze` scope): every FR and AK maps to at least one task or a recorded decision; every task maps to a plan decision; two new packages (Art. XI); the lockfile changes in T008 only; no task lowers a threshold; nothing is published.
