@@ -13,6 +13,13 @@ export interface DoubleVariable {
   hiddenFromPublishing: boolean;
   valuesByMode: Record<string, unknown>;
   setValueForMode(modeId: string, value: unknown): void;
+  /**
+   * The value this variable has *for that node*: the mode the node stands in decides, aliases
+   * followed (F34). What a paint stores is not that value — a bound paint keeps the colour it was
+   * last written with and an opacity of its own, and reading those two together yields a pair no
+   * mode ever shows.
+   */
+  resolveForConsumer(node: DoubleNode): { value: unknown; resolvedType: string };
 }
 
 export interface DoubleMode {
@@ -30,6 +37,12 @@ export interface DoubleCollection {
 }
 
 export interface DoubleNode {
+  /** The modes the node sets for itself, by collection id (F35). */
+  explicitVariableModes: Record<string, string>;
+  /** Every mode the node stands in: its own, and the default of every other collection. */
+  resolvedVariableModes: Record<string, string>;
+  setExplicitVariableModeForCollection(collection: DoubleCollection, modeId: string): void;
+  clearExplicitVariableModeForCollection(collection: DoubleCollection): void;
   id: string;
   type: string;
   name: string;
@@ -265,6 +278,8 @@ export interface DoubleBox {
 /** What a node needs from the file around it: the loaded fonts and the computed layout. */
 interface NodeContext {
   loaded: ReadonlySet<string>;
+  /** Every collection of the file, for the modes a node stands in (F34, F35). */
+  collections?: () => readonly DoubleCollection[];
   /** The variables of the file, for resolving what a binding would show (F30). */
   variableById?: (id: string) => DoubleVariable | undefined;
   /** The collection a variable belongs to, with its mode ids in order (F30). */
@@ -370,6 +385,23 @@ function node(
     properties: structuredClone({ ...(FIGMA_DEFAULTS[type] ?? {}) }),
     defaults: new Set(Object.keys(FIGMA_DEFAULTS[type] ?? {})),
     boundVariables: {},
+    explicitVariableModes: {},
+    get resolvedVariableModes() {
+      // A node stands in its own modes; for every collection it says nothing about, in the one
+      // Figma takes as the default — the first mode of the collection (F19).
+      const modes: Record<string, string> = {};
+      for (const collection of context.collections?.() ?? []) {
+        modes[collection.id] = collection.modes[0]?.modeId ?? "";
+      }
+      let current: DoubleNode | undefined = recorded;
+      const chain: DoubleNode[] = [];
+      while (current !== undefined) {
+        chain.unshift(current);
+        current = current.parent;
+      }
+      for (const ancestor of chain) Object.assign(modes, ancestor.explicitVariableModes);
+      return modes;
+    },
     pluginData: {},
     appendChild(child) {
       child.parent?.children.splice(child.parent.children.indexOf(child), 1);
@@ -384,6 +416,16 @@ function node(
       if (child.parent !== recorded) (child as unknown as { leaveCell?: () => void }).leaveCell?.();
       child.parent = recorded;
       self.children.splice(index, 0, child);
+      context.version++;
+    },
+    setExplicitVariableModeForCollection(collection, modeId) {
+      self.explicitVariableModes[collection.id] = modeId;
+      counts.writes++;
+      context.version++;
+    },
+    clearExplicitVariableModeForCollection(collection) {
+      delete self.explicitVariableModes[collection.id];
+      counts.writes++;
       context.version++;
     },
     setSharedPluginData(namespace, key, value) {
@@ -768,6 +810,21 @@ export function figmaDouble(
         context.version++;
         variable.valuesByMode[modeId] = value;
       },
+      resolveForConsumer(consumer) {
+        // What Figma answers for this node: the mode the node stands in for the variable's own
+        // collection, then the same question again for every alias on the way (F34).
+        const modes = consumer.resolvedVariableModes;
+        let current: DoubleVariable | undefined = variable;
+        for (let depth = 0; current !== undefined && depth < 32; depth++) {
+          const value = current.valuesByMode[modes[current.collectionId] ?? ""];
+          const alias = value as { type?: string; id?: string } | undefined;
+          if (alias?.type !== "VARIABLE_ALIAS") {
+            return { value, resolvedType: current.resolvedType };
+          }
+          current = variables.find((candidate) => candidate.id === alias.id);
+        }
+        return { value: undefined, resolvedType: variable.resolvedType };
+      },
     };
     variables.push(variable);
     // Every direct assignment on a variable is a write of the document as well.
@@ -891,6 +948,7 @@ export function figmaDouble(
       : undefined;
   };
   context.resolveColor = resolveColor;
+  context.collections = () => collections;
   // One layout per state of the document (see NodeContext.version), with its resolved numbers.
   let computed: { version: number; top: DoubleNode; boxes: Map<DoubleNode, DoubleBox> } | undefined;
   context.box = (current: DoubleNode) => {
