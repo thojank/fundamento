@@ -1095,4 +1095,44 @@ und F24 (Befund, nicht blockierend).
   - Fertig wenn: Der Maintainer misst in Figma — der Ring folgt in ekzemplo dem eckigen Knopf, und
     die Beschriftung steht im Modus ekzemplo in Archivo Black.
 
+- [ ] **F34 Der Bericht meldete einen Zustand, den es nicht gibt** (An P0, Maintainer 2026-09-23,
+  gemessen in aRrK0MFZri9D5sE0j3NooQ, Set butono, variant=tertiary/tone=default/size=large/
+  state=loading, Knoten control)
+  - Befund: Lauf 1 meldete `fills[0] = {color:{0,0,0}, opacity:0}`, Lauf 2 `{color:{0,0,0},
+    opacity:1}` — dieselbe frische Datei, kein Eingriff dazwischen. Auf der Zeichenfläche gibt es
+    in allen acht Kombinationen nur: komuna viermal `#000000 α0`, ekzemplo/light `#ffffff α1`,
+    ekzemplo/dark `#000000 α0`. **`#000000 α1` existiert nirgends.**
+  - Ursache, gelesen: Ein gebundener Paint behält die Farbe, mit der er zuletzt geschrieben wurde,
+    und trägt eine Deckkraft von sich aus. `paintsOf` las beide roh und nebeneinander ab — eine
+    Farbe aus dem einen Kontext, eine Zahl aus dem anderen. Wo der Plan `alphaVariesByMode` sagt,
+    setzt der Lauf gar keine Deckkraft (F8), also stand dort Figmas Vorgabe 1.
+  - Rot zuerst: Eine Zusicherung, dass jeder gemeldete Paint in mindestens einer Modus-Kombination
+    auflösbar ist — `paints.last.control.fills color/action/tertiary/rest = 0,0,0 a1` und dasselbe
+    für `strokes`. Rot schon nach Lauf 1, nicht erst nach Lauf 2: Das Double schreibt die Vorgabe
+    von Anfang an, während Figma sie im ersten Lauf noch mit dem gerade aufgelösten Wert füllt.
+  - Grün: Der Bericht nennt den **aufgelösten** Zustand — `variable.resolveForConsumer(node)`, also
+    der Wert, den *dieser* Knoten in *seinen* Modi zeigt, Alias für Alias. Was die Datei roh hält,
+    steht daneben unter `stored`, denn F22 wollte die Rohdaten. Und der Abschnitt nennt seinen
+    Kontext: `modes.own` (was der Knoten selbst setzt) und `modes.standing` (worin er steht) —
+    allgemein, nicht nur hier: Jeder Abschnitt, der Werte nennt, nennt den Kontext, in dem sie
+    gelten. Ohne ihn ist eine Farbe eine Zahl ohne Aussage.
+  - Das Double kann die Frage jetzt beantworten: `resolveForConsumer` am Variablenobjekt,
+    `explicitVariableModes` und `resolvedVariableModes` am Knoten — die Modi eines Knotens sind
+    seine eigenen und, wo er schweigt, die Standardmodi seiner Sammlungen.
+  - Fertig wenn: Der Maintainer liest den Bericht zweier Läufe in derselben Datei und findet
+    zweimal dieselben Zahlen, jede mit ihrem Kontext.
+
+- [ ] **F35 Das Set blieb auf einem Nicht-Standard-Modus stehen** (An P0, Maintainer 2026-09-23)
+  - Befund: Nach beiden Läufen trug das Komponentenset
+    `explicitVariableModes = { aspekto: ekzemplo, contrast: default }`. Der Standard von `aspekto`
+    ist `komuna`. Wer die Bibliothek öffnet, sähe die Beispielmarke als „den" Knopf — und zwei
+    Läufe lesen ihre Werte in verschiedenen Kontexten, was F34 mit erklärt.
+  - Rot zuerst: `expected { 'collection:…': 'mode:…' } to deeply equal {}` — ein Modus, den ein
+    früherer Lauf oder eine Designerin auf dem Set hinterlassen hat, blieb stehen.
+  - Grün: Nach dem Lauf trägt das Set keinen eigenen Modus mehr; es folgt damit dem Standard jeder
+    Sammlung, und der ist der Standard des Modelo (F19). Der Bericht nennt unter `modes.cleared`,
+    welche eigenen Modi es vorgefunden und geleert hat, und unter `modes.set`, worin es danach
+    steht — geräumt wird nichts still.
+  - Fertig wenn: Der Maintainer öffnet die Bibliothek und sieht komuna, ohne etwas umzustellen.
+
 Consistency check before tasks (`/speckit.analyze` scope): every FR and AK maps to at least one task or a recorded decision; every task maps to a plan decision; two new packages (Art. XI); the lockfile changes in T008 only; no task lowers a threshold; nothing is published.

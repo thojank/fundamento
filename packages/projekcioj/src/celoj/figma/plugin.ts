@@ -621,6 +621,8 @@ async function applyComponents(variables, warnings) {
       duplicates: [],
       after: { children: 0, marked: 0 },
       diagnosis: "",
+      // Welche eigenen Modi das Set trug und was nach dem Lauf steht (F35).
+      modes: { cleared: [], set: {} },
       // Rohdaten der Schrift (F30): welche Variable an welchem Feld hängt, was geladen wurde,
       // was fehlt und welche Schrift je Aspekto dahinter steht.
       fonts: fontReports.get(component.set) || {
@@ -721,6 +723,26 @@ async function applyComponents(variables, warnings) {
       set = create(() => figma.combineAsVariants(made, figma.currentPage));
       write(set, "name", component.set);
     }
+    // Das Set steht in keinem eigenen Modus (F35). Gemessen trug es nach zwei Läufen
+    // { aspekto: ekzemplo, contrast: default }: Wer die Bibliothek öffnet, sähe die Beispielmarke
+    // als „den" Knopf, und zwei Läufe läsen ihre Werte in verschiedenen Kontexten. Ohne eigenen
+    // Modus folgt es dem Standard jeder Sammlung — dem, was das Modelo als Standard nennt (F19).
+    const leftModes = [];
+    for (const collection of collectionIndex) {
+      let before;
+      try {
+        before = (set.explicitVariableModes || {})[collection.id];
+      } catch (error) {
+        before = undefined;
+      }
+      if (before === undefined) continue;
+      const mode = collection.modes.filter((candidate) => candidate.modeId === before)[0];
+      leftModes.push(collection.name + "=" + ((mode && mode.name) || before));
+      if (typeof set.clearExplicitVariableModeForCollection === "function") {
+        set.clearExplicitVariableModeForCollection(collection);
+      }
+    }
+    report.modes = { cleared: leftModes.sort(), set: modesOfNode(set) };
     // The set is a node the plugin owns too: combineAsVariants draws Figma's purple dashed frame
     // around it, which is not from the model (Maintainer, 2026-09-21).
     own(set, NEUTRAL);
@@ -887,6 +909,46 @@ function held(node, names) {
   return out;
 }
 
+/** The variable of an id, for resolving what a bound paint really shows (F34). */
+function variableById(id) {
+  const found = (variableIndex || []).filter((variable) => variable.id === id);
+  return found.length === 1 ? found[0] : undefined;
+}
+
+/** Every variable of the run, by the time the report is written. */
+let variableIndex = [];
+
+/**
+ * The modes a node stands in, by collection name (F34, F35). Jeder Abschnitt des Berichts, der
+ * Werte nennt, nennt auch den Kontext, in dem sie gelten — ohne ihn ist eine Farbe eine Zahl ohne
+ * Aussage.
+ */
+function modesOfNode(node) {
+  const out = { own: {}, standing: {} };
+  const name = {};
+  for (const collection of collectionIndex || []) {
+    name[collection.id] = collection.name;
+    for (const mode of collection.modes) name[mode.modeId] = mode.name;
+  }
+  const label = (modes) => {
+    const named = {};
+    for (const [collection, mode] of Object.entries(modes || {})) {
+      named[name[collection] || collection] = name[mode] || mode;
+    }
+    return named;
+  };
+  try {
+    out.own = label(node.explicitVariableModes);
+    out.standing = label(node.resolvedVariableModes);
+  } catch (error) {
+    out.own = "wirft: " + String(error && error.message ? error.message : error);
+  }
+  return out;
+}
+
+/** Every collection of the run, for naming the modes a node stands in. */
+let collectionIndex = [];
+
 function measureLayout(set, component) {
   const nodes = component.variants
     .map((variant) => ours(set, "variant", variantName(variant.props)))
@@ -939,7 +1001,13 @@ function measureLayout(set, component) {
     const variant = component.variants.find((entry) => variantName(entry.props) === node.name);
     return variant !== undefined && variant.focusVisible === true;
   });
-  /** The paints of a node, raw (F22): colour, deckkraft, visibility, the bound variable. */
+  /**
+   * The paints of a node (F22), as the node really shows them (F34). Ein gebundener Paint behält
+   * die Farbe, mit der er zuletzt geschrieben wurde, und eine Deckkraft von sich aus; beide
+   * zusammen abgelesen ergeben ein Paar, das kein Modus zeigt — gemessen: derselbe Knoten meldete
+   * in zwei Läufen 0 und 1, und "#000000 α1" gibt es in keiner Kombination. Gemeldet wird deshalb
+   * der aufgelöste Wert für diesen Knoten; was die Datei roh hält, steht daneben unter "stored".
+   */
   const paintsOf = (node) => {
     const list = (field) => {
       let paints;
@@ -948,18 +1016,36 @@ function measureLayout(set, component) {
       } catch (error) {
         return ["wirft: " + String(error && error.message ? error.message : error)];
       }
-      return (Array.isArray(paints) ? paints : []).map((paint) => ({
-        type: paint.type,
-        color: paint.color,
-        opacity: typeof paint.opacity === "number" ? paint.opacity : 1,
-        visible: paint.visible !== false,
-        variable:
-          paint.boundVariables && paint.boundVariables.color
-            ? (paint.boundVariables.color.name || paint.boundVariables.color.id)
-            : null,
-      }));
+      return (Array.isArray(paints) ? paints : []).map((paint) => {
+        const bound =
+          paint.boundVariables && paint.boundVariables.color ? paint.boundVariables.color : undefined;
+        const variable = bound === undefined ? undefined : variableById(bound.id);
+        const shown =
+          variable === undefined || typeof variable.resolveForConsumer !== "function"
+            ? undefined
+            : variable.resolveForConsumer(node).value;
+        const color = shown === undefined ? paint.color : { r: shown.r, g: shown.g, b: shown.b };
+        const opacity =
+          shown !== undefined && typeof shown.a === "number"
+            ? shown.a
+            : typeof paint.opacity === "number"
+              ? paint.opacity
+              : 1;
+        return {
+          type: paint.type,
+          color: color,
+          opacity: opacity,
+          resolved: shown !== undefined,
+          stored: {
+            color: paint.color,
+            opacity: typeof paint.opacity === "number" ? paint.opacity : 1,
+          },
+          visible: paint.visible !== false,
+          variable: bound === undefined ? null : bound.name || bound.id,
+        };
+      });
     };
-    return { fills: list("fills"), strokes: list("strokes") };
+    return { fills: list("fills"), strokes: list("strokes"), modes: modesOfNode(node) };
   };
   const paintedParts = (node) => {
     if (node === undefined) return {};
@@ -1108,6 +1194,10 @@ async function applyPlan() {
   progress.phase = "variables";
   const variables = await applyVariables(collections, modeIds);
   progress.variables = variables.size;
+  // The report resolves what a paint shows and names the modes it read in (F34): both need the
+  // file's variables and collections, and both exist only now.
+  variableIndex = [...variables.values()];
+  collectionIndex = [...collections.values()];
   progress.warnings = [...modeWarnings];
   progress.phase = "components";
   const warnings = [...modeWarnings];
@@ -1204,6 +1294,7 @@ function reportParts(result) {
         after: report.after,
         left: report.left,
         diagnosis: report.diagnosis,
+        modes: report.modes,
         fonts: report.fonts,
       })),
     }),
