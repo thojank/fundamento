@@ -264,6 +264,20 @@ Results go into `plan.md` → „Manual acceptance results".
     sagt: `ref.celo` als strukturiertes Feld, Prosa darf das Werkzeug nennen, geprüft von
     `celo-mappings.ts` mit rotem Test am echten Export.
 
+  - **Geschlossen (F37, 2026-09-23, Jugxo `jug_01M37BYR772C5N3AF7J5451DRB`).** Die offene Frage
+    war, ob die Deckkraft der Marke folgen kann, weil ein Paint seine `opacity` als feste Zahl
+    trägt. Die Annahme lautete nein. **Sie war falsch:** Figmas COLOR-Variablen führen den
+    Alphakanal mit, und der aufgelöste Alphawert erscheint am Paint als `opacity`. Beleg, gemessen
+    an ein und demselben Knoten bei identischer Bindung auf `color/action/tertiary/rest` in zwei
+    Modi: komuna `#000000 α0`, ekzemplo/light `#ffffff α1`. Eine Fläche hat so viele Deckkräfte,
+    wie die Sammlung Modi hat — die Variable trägt sie. Der Auflagen-Knoten mit eigener
+    FLOAT-Variablen, der dafür in Phase 4 stand, wird nicht gebraucht und ist dort gestrichen; die
+    falsche Annahme bleibt korrigiert stehen statt gelöscht, weil sie erklärt, warum die
+    Projektion sich so lange geweigert hat. Was bleibt: `alphaVariesByMode`, wo zwei Marken auf
+    einer gebundenen Rolle verschiedene Deckkräfte verlangen — nicht weil Figma es nicht könnte,
+    sondern weil der Plan dort eine feste Zahl schreibt und eine von zwei Marken zu wählen keine
+    Projektion wäre. Seit F36 verlangt keine Rolle mehr zwei.
+
 - [x] **F9 Composite-Tokens werden nie zu einer Zeichenkette** (Abnahme M1, FR-06)
   - Befund: `elevation/shadow/{raised,overlay,modal,floating}` stehen als sichtbare STRING-Variablen
     mit dem Wert `[object Object]` bzw. `[object Object],[object Object]` im Plan — sie gingen so in
@@ -838,6 +852,12 @@ und F24 (Befund, nicht blockierend).
     zeigt mit `--print` die Befehlszeile samt Version.
   - Fertig wenn: der Maintainer 0.1.0-next.1 aus GitHub veröffentlicht und auf npm prüft: 18
     Dateien, LICENSE vorhanden, Herkunftsnachweis sichtbar.
+
+- [ ] **Bekannte Flakes** (nur festgehalten, damit beim dritten Mal jemand sieht, dass es das
+  dritte Mal ist)
+  - `packages/mcp/src/resources-http.test.ts`, `ECONNRESET` beim Lesen, 2026-09-23 (PR #27, Lauf
+    auf `push`; derselbe Commit lief auf `pull_request` grün, und die Datei lief lokal dreimal
+    hintereinander durch). Nicht nachgegangen.
 
 - [ ] **F26 dist-tag `latest` zeigt auf 0.1.0-next.0** (nur festgehalten)
   - npm setzt beim ersten Publish eines Pakets immer `latest`, auch mit `--tag next`. Beim ersten
