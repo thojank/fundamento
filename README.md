@@ -51,7 +51,23 @@ An Aspekto (a brand) is a package: a folder with `aspekto.json` (owner, license,
 { "aspektoj": ["../fundamento-aspekto-<name>"] }
 ```
 
-Every Aspekto must set every token the reference Aspekto sets (`aspekto-incomplete` lists what is missing) and must pass Alirebleco in every combination. The fixture `packages/modelo/test/fixtures/valid/aspekto-ekzemplo/` is a complete example.
+Every Aspekto must set every token the reference Aspekto sets (`aspekto-incomplete` lists what is missing) and must pass Alirebleco in every combination. The fixture `packages/modelo/test/fixtures/valid/aspekto-ekzemplo/` is a complete example, and a deliberately loud one: Archivo, a strong yellow with black text, black surfaces with white text, no corner radius, no shadow and tighter measures than the reference — so that switching the brand is visible at a glance and not a shade apart.
+
+### What an Aspekto decides, and what it never does
+
+A brand may differ from the reference **in every category** — not only in colour, but in spacing, sizes, radii, layout, motion, typography and opacity. Whatever the Vortaro names, an Aspekto assigns. Five things are not its to assign, and each is checked:
+
+| Not the brand's | Where it lives | Why |
+|---|---|---|
+| The Vortaro itself: no token added, none dropped, no type changed | `packages/vortaro/sets/core.json` | The vocabulary is the contract between brands, components and agents; a brand that renames a role breaks every projection and every question an agent can ask (`aspekto-incomplete`, `modelo-set-introduces-token`, `modelo-set-changes-type`). |
+| The Dimensioj, their values and their `kontrastSojloj` | `packages/modelo/data/dimensioj.json` | `contrast=high` must mean the same threshold everywhere, or the promise of a mode is a brand's opinion. A package carries sets, never Dimensioj. |
+| The KontrastParoj | `packages/modelo/data/kontrastparoj.json` | Which foreground is read on which background is a statement about where text appears, not a taste. A brand that may drop a pair may drop the pair it fails. |
+| The core Regularo | `packages/modelo/data/reguloj.json` | A package adds Reguloj scoped to its own Aspekto; it cannot switch a core one off. Redeclaring a core Regulo as `manual` changes nothing — the core one keeps firing. |
+| The protected floors `size.target.min` and the width of `focus.ring` | core, through the Regulo `protected-minimum` | Both are measures that protect a person: the minimum pointer target of WCAG 2.5.8 and the focus indicator WCAG 2.4.7 asks to be visible. Both are tokens — so a brand could otherwise lower the very threshold that protects it and pass every check. A brand may **raise** a floor, never fall below the reference's value. |
+
+The guarantees that hold whatever measures a brand picks: every control at least `size.target.min` (`touch-target-min`), every KontrastParo above its binding WCAG threshold with a reserve (`contrast-reserve`, `check:alirebleco`), a focus ring that contrasts with both the surface and its gap (`focus-ring-dual-contrast`) and action states that differ from rest in lightness (`state-distinct`). A brand that breaks one fails the check by name and by number.
+
+**One run carries every brand of its Modelo.** Whatever the config lists arrives in one build: the CSS carries every Aspekto, and the Figma plan gives the collection `aspekto` one mode per Aspekto, so a designer switches the brand as they switch `color-scheme` and `contrast`. A run per brand would write a plan with a single mode and nothing to switch — the brands must therefore stand in **one** config, not in several runs. Figma Professional holds ten modes per collection and Organization twenty; the plan is not cut to that, the run says with numbers what did not fit.
 
 ## Eroj quickstart
 

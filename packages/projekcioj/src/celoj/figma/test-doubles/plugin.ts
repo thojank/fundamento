@@ -3,6 +3,8 @@
 // changes, so idempotency can be proved without Figma. Every method here must exist in the real
 // API with the same shape.
 
+import { FIGMA_MODE_LIMIT } from "../plugin.js";
+
 export interface DoubleVariable {
   id: string;
   name: string;
@@ -82,6 +84,8 @@ export interface FigmaDouble {
    * Empty means: nothing in the file carries a value the plan did not put there (F13).
    */
   untouchedDefaults(keys: readonly string[]): string[];
+  /** Every font the run loaded, as "<family> <style>" (F30). */
+  loadedFonts: string[];
 }
 
 /**
@@ -181,6 +185,66 @@ const id = (prefix: string) => `${prefix}:${++sequence}`;
 /** "Geist Medium": how a font is named in a message and in the loaded set. */
 const fontKey = (font: { family: string; style: string }) => `${font.family} ${font.style}`;
 
+/** The text fields that carry a font; binding one needs every font it can show to be loaded. */
+const FONT_FIELDS: ReadonlySet<string> = new Set(["fontFamily", "fontStyle"]);
+
+/**
+ * Every font a text would show once `field` is bound to `variable` (F30). Figma resolves family
+ * and cut **per mode**, so the pairs are taken mode by mode where both variables sit in the same
+ * collection; where they do not, every combination is taken, which is the safe reading. The other
+ * half of the pair is the variable already bound to the node, or the font the node carries.
+ */
+function fontsOfBinding(
+  node: DoubleNode,
+  field: string,
+  variable: DoubleVariable,
+  context: NodeContext,
+): { family: string; style: string }[] {
+  const partner = field === "fontFamily" ? "fontStyle" : "fontFamily";
+  const boundPartner = node.boundVariables[partner];
+  const other = boundPartner === undefined ? undefined : context.variableById?.(boundPartner.id);
+  const current = node.properties.fontName as { family: string; style: string } | undefined;
+  const fallback = field === "fontFamily" ? current?.style : current?.family;
+  const pair = (own: string, theirs: string) =>
+    field === "fontFamily" ? { family: own, style: theirs } : { family: theirs, style: own };
+  const collection = context.collectionOf?.(variable);
+  const modes = collection?.modes ?? [];
+  const own = (mode: string) => resolveString(variable.valuesByMode[mode], context, mode);
+  if (other === undefined) {
+    return modes.map((mode) => pair(own(mode.modeId), fallback ?? "Regular"));
+  }
+  const sameCollection = context.collectionOf?.(other)?.id === collection?.id;
+  // Figma resolves family and cut with the same chosen mode; taking every combination of the two
+  // would ask for fonts no mode ever shows (Geist in ekzemplo's cut).
+  if (sameCollection) {
+    return modes.map((mode) =>
+      pair(own(mode.modeId), resolveString(other.valuesByMode[mode.modeId], context, mode.modeId)),
+    );
+  }
+  const theirs = (context.collectionOf?.(other)?.modes ?? []).map((mode) =>
+    resolveString(other.valuesByMode[mode.modeId], context, mode.modeId),
+  );
+  return modes.flatMap((mode) => theirs.map((cut) => pair(own(mode.modeId), cut)));
+}
+
+/**
+ * The string a variable value stands for in one mode, following an alias to its target. An alias
+ * into the same collection keeps the mode; one into another collection reads that collection's
+ * first mode, which is Figma's default (F19).
+ */
+function resolveString(value: unknown, context: NodeContext, mode: string, depth = 0): string {
+  if (typeof value === "string") return value;
+  if (depth > 32 || value === null || typeof value !== "object") return "";
+  const alias = value as { type?: string; id?: string };
+  if (alias.type !== "VARIABLE_ALIAS" || alias.id === undefined) return "";
+  const target = context.variableById?.(alias.id);
+  if (target === undefined) return "";
+  const next = Object.hasOwn(target.valuesByMode, mode)
+    ? mode
+    : (context.collectionOf?.(target)?.modes[0]?.modeId ?? "");
+  return resolveString(target.valuesByMode[next], context, next, depth + 1);
+}
+
 /**
  * The fonts a new Figma file has without anything installed: Inter in its styles. Everything
  * else must be given to the double, as a file would have it (F11).
@@ -201,6 +265,10 @@ export interface DoubleBox {
 /** What a node needs from the file around it: the loaded fonts and the computed layout. */
 interface NodeContext {
   loaded: ReadonlySet<string>;
+  /** The variables of the file, for resolving what a binding would show (F30). */
+  variableById?: (id: string) => DoubleVariable | undefined;
+  /** The collection a variable belongs to, with its mode ids in order (F30). */
+  collectionOf?: (variable: DoubleVariable) => DoubleCollection | undefined;
   box?: (node: DoubleNode) => DoubleBox;
   resolveColor?: (name: string) => { r: number; g: number; b: number } | undefined;
   /**
@@ -326,6 +394,18 @@ function node(
       return self.pluginData[`${namespace}/${key}`] ?? "";
     },
     setBoundVariable(field, variable) {
+      // Figma refuses a font binding whose variable can show a font the file has not loaded: the
+      // value of every mode must be loaded first, not only the one the node shows today (F30).
+      if (FONT_FIELDS.has(field) && variable !== null) {
+        for (const font of fontsOfBinding(self, field, variable, context)) {
+          if (context.loaded.has(fontKey(font))) continue;
+          throw new Error(
+            `Cannot bind ${field} on "${self.name}": the variable "${variable.name}" can show ` +
+              `"${fontKey(font)}", which is not loaded. Load every font of every mode with ` +
+              "loadFontAsync before binding.",
+          );
+        }
+      }
       if (AUTO_LAYOUT_FIELDS.has(field) && (self.properties.layoutMode ?? "NONE") === "NONE") {
         throw new Error(
           `${self.type} "${self.name}": ${field} only takes effect with auto layout, and ` +
@@ -606,9 +686,14 @@ function strict<T extends object>(name: string, api: T): T {
   });
 }
 
-/** A fresh double with an empty document; `fonts` are the fonts the file has besides Inter. */
+/**
+ * A fresh double with an empty document; `fonts` are the fonts the file has besides Inter, and
+ * `modeLimit` is the number of modes a collection of this file may hold — the Figma plan's limit
+ * (Professional 10, `FIGMA_MODE_LIMIT`). Figma refuses every mode beyond it, and so does the
+ * double: a run with more Aspektoj than modes is otherwise not measurable without Figma (F27).
+ */
 export function figmaDouble(
-  options: { fonts?: readonly { family: string; style: string }[] } = {},
+  options: { fonts?: readonly { family: string; style: string }[]; modeLimit?: number } = {},
 ): FigmaDouble {
   const counts: DoubleCounts = {
     collections: 0,
@@ -618,9 +703,16 @@ export function figmaDouble(
     writes: 0,
   };
   const available = new Set([...FIGMA_FONTS, ...(options.fonts ?? [])].map(fontKey));
+  const modeLimit = options.modeLimit ?? FIGMA_MODE_LIMIT;
   const loaded = new Set<string>();
   // Filled below, once the document and the variables exist.
-  const context: NodeContext = { loaded, version: 0 };
+  const context: NodeContext = {
+    loaded,
+    version: 0,
+    variableById: (id) => variables.find((variable) => variable.id === id),
+    collectionOf: (variable) =>
+      collections.find((collection) => collection.id === variable.collectionId),
+  };
   const notifications: DoubleNotification[] = [];
   const collections: DoubleCollection[] = [];
   const variables: DoubleVariable[] = [];
@@ -642,6 +734,11 @@ export function figmaDouble(
         counts.writes++;
       },
       addMode(next) {
+        if (modes.length >= modeLimit) {
+          throw new Error(
+            `Limit of ${modeLimit} modes reached for collection ${name}; upgrade the Figma plan.`,
+          );
+        }
         const modeId = id("mode");
         modes.push({ modeId, name: next });
         counts.writes++;
@@ -831,6 +928,9 @@ export function figmaDouble(
     root,
     snapshot,
     untouchedDefaults,
+    get loadedFonts() {
+      return [...loaded].sort();
+    },
   };
 }
 

@@ -25,6 +25,8 @@ interface Binding {
   suffix?: string;
   /** Drawn only in the state that shows the focus ring; neutral in every other. */
   focusOnly?: boolean;
+  /** A font field: bound only after every font of every mode is loaded, and never fatal (F30). */
+  font?: boolean;
 }
 
 const PADDINGS = ["paddingLeft", "paddingRight", "paddingTop", "paddingBottom"] as const;
@@ -44,8 +46,15 @@ const BINDINGS: Readonly<Record<string, readonly Binding[]>> = {
   "box.radius": [{ node: "control", fields: ["cornerRadius"] }],
   "label.color": [{ node: "label", fields: ["fills"], paint: true }],
   // A typography token is a composite; Figma holds its fields as separate variables (F9). Bound
-  // to the bare name, the size never arrived — there is no variable of that name.
-  "label.typography": [{ node: "label", fields: ["fontSize"], suffix: "/font-size" }],
+  // to the bare name, the size never arrived — there is no variable of that name. Family and cut
+  // are bound too (F30), so the label follows the brand when the mode changes instead of keeping
+  // the typeface of the combination the plan was written from; both are marked `font`, because a
+  // font binding only holds once every font it can show is loaded.
+  "label.typography": [
+    { node: "label", fields: ["fontSize"], suffix: "/font-size" },
+    { node: "label", fields: ["fontFamily"], suffix: "/font-family", font: true },
+    { node: "label", fields: ["fontStyle"], suffix: "/font-style", font: true },
+  ],
   // The focus ring as the web component draws it: an outline of the ring's width and colour at
   // outline-offset, and a box-shadow of the offset's width in color.focus.inner between them. Both
   // are rings, never areas (F15): each frame has a padding of the band's width and an inside stroke
@@ -130,6 +139,16 @@ const TEXT_SIZING: Readonly<Record<string, string>> = {
 export const PLUGIN_NAMESPACE = "fundamento";
 
 /**
+ * Modes a Figma plan allows per collection (help.figma.com, checked 2026-09-20, research §6.2):
+ * Professional 10, Organization 20, Enterprise unlimited with extended collections; Starter has
+ * one mode. Every Aspekto of the Modelo is one mode of the collection `aspekto` (F27), so this
+ * number is the number of brands one library can carry on the plan we build for. The plan itself
+ * is never cut to it — a projection projects the Modelo, not one Figma subscription; the run says
+ * with numbers what does not fit.
+ */
+export const FIGMA_MODE_LIMIT = 10;
+
+/**
  * Every part property the plugin applies to the file. The Figma side of `check:parity` reports
  * exactly these and nothing else: a side claims only what it does (Paket „Figma zeigt das Ero").
  */
@@ -147,6 +166,7 @@ const IN_FLOW = ${JSON.stringify(IN_FLOW)};
 const TEXT_SIZING = ${JSON.stringify(TEXT_SIZING)};
 const NEUTRAL = ${JSON.stringify(NEUTRAL)};
 const NEUTRAL_TEXT = ${JSON.stringify(NEUTRAL_TEXT)};
+const MODE_LIMIT = ${FIGMA_MODE_LIMIT};
 
 /** The collection of a name, its modes renamed and completed, without duplicating anything. */
 async function applyCollections() {
@@ -155,6 +175,7 @@ async function applyCollections() {
   const collections = new Map();
   const modeIds = new Map();
   const modeWarnings = [];
+  const modeReports = [];
   for (const spec of PLAN.collections) {
     // A collection without variables is not created: in a Modelo with an external Aspekto every
     // token hangs on the aspekto Dimensio (Art. IV completeness), so fundamento can be empty.
@@ -163,6 +184,18 @@ async function applyCollections() {
     const collection = found ?? figma.variables.createVariableCollection(spec.name);
     collections.set(spec.name, collection);
     const ids = {};
+    // Die Grenze vor dem ersten Versuch, mit Zahlen (F27): Jeder Aspekto des Modelo ist ein Modus,
+    // und ein Plan, der mehr mitbringt, als die Sammlung tragen kann, ist nicht der Fehler der
+    // Datei, sondern der des Abonnements. Der Plan wird deshalb nicht gekürzt.
+    if (spec.modes.length > MODE_LIMIT) {
+      modeWarnings.push(
+        "Sammlung " + spec.name + ": " + spec.modes.length + " Modi geplant, Figma Professional " +
+          "erlaubt " + MODE_LIMIT + " je Sammlung (Organization 20, Enterprise unbegrenzt). " +
+          (spec.modes.length - MODE_LIMIT) + " mehr, als in eine Professional-Datei passen.",
+      );
+    }
+    const refused = [];
+    let refusal = "";
     spec.modes.forEach((mode, index) => {
       const known = collection.modes.find((candidate) => candidate.name === mode);
       if (known !== undefined) {
@@ -178,8 +211,23 @@ async function applyCollections() {
         ids[mode] = spare.modeId;
         return;
       }
-      ids[mode] = collection.addMode(mode);
+      // Figma lehnt einen Modus jenseits der Grenze ab. Der Lauf nimmt die Ablehnung an, statt mit
+      // einem rohen Fehler abzubrechen: Was nicht hineinpasst, steht mit Namen im Bericht, und der
+      // Rest des Laufs — Variablen, Komponenten — wird fertig (F27).
+      try {
+        ids[mode] = collection.addMode(mode);
+      } catch (error) {
+        refused.push(mode);
+        refusal = String(error && error.message ? error.message : error);
+      }
     });
+    if (refused.length > 0) {
+      modeWarnings.push(
+        "Sammlung " + spec.name + ": " + (spec.modes.length - refused.length) + " von " +
+          spec.modes.length + " Modi stehen in der Datei, " + refused.length +
+          " hat Figma abgelehnt (" + refused.join(", ") + "): " + refusal,
+      );
+    }
     modeIds.set(spec.name, ids);
     // The effect, not the call (F19): Figma's default mode is the first mode and cannot be set.
     // A fresh collection gets the Modelo's default first; a file an older plugin made keeps its
@@ -192,8 +240,17 @@ async function applyCollections() {
           "Reihenfolge nicht ändern; eine frisch angelegte Datei hat ihn richtig.",
       );
     }
+    // Rohdaten je Sammlung (F27): geplante Modi, die Modi der Datei nach dem Lauf und der, den
+    // Figma als Standard nimmt. Damit ist „aspekto hat zwei Modi" zu messen, ohne die Oberfläche
+    // abzulesen.
+    modeReports.push({
+      collection: spec.name,
+      planned: spec.modes.slice(),
+      actual: collection.modes.map((mode) => mode.name),
+      default: actual === undefined ? "" : actual.name,
+    });
   }
-  return { collections, modeIds, warnings: modeWarnings };
+  return { collections, modeIds, warnings: modeWarnings, modes: modeReports };
 }
 
 async function applyVariables(collections, modeIds) {
@@ -216,6 +273,9 @@ async function applyVariables(collections, modeIds) {
     for (const variable of spec.variables) {
       const found = variables.get(variable.name);
       for (const [mode, value] of Object.entries(variable.values)) {
+        // Ein Modus, den die Datei abgelehnt hat, hat keine Kennung; sein Wert wird nicht
+        // geschrieben, und der Lauf läuft weiter (F27).
+        if (ids[mode] === undefined) continue;
         const target = value !== null && typeof value === "object" && "alias" in value
           ? figma.variables.createVariableAlias(variables.get(value.alias))
           : value;
@@ -371,7 +431,9 @@ function bind(nodes, variant, variables) {
       } else {
         // A measure is bound after the frame's layout is written: padding, gap and minimum sizes
         // only take effect on an auto-layout frame, and the tool refuses them before (F11).
-        for (const field of target.fields) deferred.push({ node, field, variable });
+        for (const field of target.fields) {
+          deferred.push({ node, field, variable, font: target.font === true });
+        }
       }
     }
   }
@@ -450,11 +512,60 @@ async function loadFont(font, warnings) {
 
 async function applyComponents(variables, warnings) {
   const fonts = new Map();
+  // Every font of every mode, not only the one of the base combination (F30): a binding to a font
+  // variable only holds once Figma has loaded every font that variable can show. What did not
+  // arrive is named here, with the Aspektoj that ask for it, and the run falls back for it.
+  const fontReports = new Map();
   for (const component of PLAN.components) {
+    const loadedFonts = [];
+    const missing = [];
+    const crossing = [];
+    const perAspekto = {};
+    // What a mode really shows: missing here is a finding, with the name and the fallback.
+    for (const font of component.fonts || []) {
+      const key = font.family + " " + font.style;
+      const pair = { family: font.family, style: font.style };
+      if (!fonts.has(key)) fonts.set(key, await loadFont(pair, warnings));
+      const arrived = fonts.get(key);
+      if (arrived.family + " " + arrived.style === key) loadedFonts.push(key);
+      else missing.push(key);
+      for (const aspekto of font.aspektoj || []) perAspekto[aspekto] = key;
+    }
+    // Binding is field by field: between the family and the cut the text stands for a moment in a
+    // pair no mode ever shows — Archivo in komuna's cut. Figma reads that state too, so every
+    // crossing of the families with the cuts is loaded as well (F30). A crossing no mode shows is
+    // loaded quietly; only what a mode shows is worth a warning.
+    const families = [];
+    const cuts = [];
+    for (const font of component.fonts || []) {
+      if (families.indexOf(font.family) === -1) families.push(font.family);
+      if (cuts.indexOf(font.style) === -1) cuts.push(font.style);
+    }
+    for (const family of families) {
+      for (const style of cuts) {
+        const key = family + " " + style;
+        if (fonts.has(key)) continue;
+        try {
+          await figma.loadFontAsync({ family: family, style: style });
+          fonts.set(key, { family: family, style: style });
+        } catch (error) {
+          crossing.push(key);
+        }
+      }
+    }
+    // A plan from before F30 names no fonts; then the base font of every variant is loaded, as
+    // it always was, and nothing is bound.
     for (const variant of component.variants) {
       const key = variant.font.family + " " + variant.font.style;
       if (!fonts.has(key)) fonts.set(key, await loadFont(variant.font, warnings));
     }
+    fontReports.set(component.set, {
+      bound: {},
+      loaded: loadedFonts.sort(),
+      missing: missing.sort(),
+      crossing: crossing.sort(),
+      perAspekto: perAspekto,
+    });
   }
   const reports = [];
   for (const component of PLAN.components) {
@@ -488,7 +599,18 @@ async function applyComponents(variables, warnings) {
       duplicates: [],
       after: { children: 0, marked: 0 },
       diagnosis: "",
+      // Rohdaten der Schrift (F30): welche Variable an welchem Feld hängt, was geladen wurde,
+      // was fehlt und welche Schrift je Aspekto dahinter steht.
+      fonts: fontReports.get(component.set) || {
+        bound: {},
+        loaded: [],
+        missing: [],
+        crossing: [],
+        perAspekto: {},
+      },
     };
+    report.fonts.refused = [];
+    report.fonts.bound = {};
     progress.components.push(report);
     const made = [];
     const labels = [];
@@ -536,8 +658,32 @@ async function applyComponents(variables, warnings) {
       // Everything gathered is written once, layout before the parts inside it; the measures
       // are bound after that, when every frame has its layout.
       for (const each of [node, ring, gap, control, label]) flush(each);
-      for (const { node: target, field, variable } of measures) {
-        if (boundId(target, field) !== variable.id) target.setBoundVariable(field, variable);
+      for (const { node: target, field, variable, font } of measures) {
+        if (boundId(target, field) === variable.id) continue;
+        if (font !== true) {
+          target.setBoundVariable(field, variable);
+          continue;
+        }
+        // A font binding is the one Figma may refuse — when a font of some mode is missing, the
+        // file cannot show it (F30). Refused is no reason to stop: the label keeps the written
+        // font of the base combination, and the run says which binding did not take.
+        try {
+          target.setBoundVariable(field, variable);
+          // The label's role follows the size, so a set binds more than one role per field; the
+          // report names every one of them, sorted, not the last one that happened to run.
+          const list = report.fonts.bound[field] || (report.fonts.bound[field] = []);
+          if (list.indexOf(variable.name) === -1) list.push(variable.name);
+        } catch (error) {
+          const message = String(error && error.message ? error.message : error);
+          if (report.fonts.refused.indexOf(field) === -1) {
+            report.fonts.refused.push(field);
+            warnings.push(
+              component.set + ": Figma hat die Bindung von " + field + " an " + variable.name +
+                " abgelehnt — die Beschriftung bleibt in " + variant.font.family + " " +
+                variant.font.style + ", gleich welcher Modus gewählt ist. " + message,
+            );
+          }
+        }
       }
       if (existing === undefined) made.push(node);
     }
@@ -927,7 +1073,7 @@ const progress = { phase: "start", collections: 0, variables: 0, components: [],
 /** Applies the whole plan; safe to run again. Returns the report of this run (F10). */
 async function applyPlan() {
   progress.phase = "collections";
-  const { collections, modeIds, warnings: modeWarnings } = await applyCollections();
+  const { collections, modeIds, warnings: modeWarnings, modes } = await applyCollections();
   progress.collections = collections.size;
   progress.phase = "variables";
   const variables = await applyVariables(collections, modeIds);
@@ -980,6 +1126,7 @@ async function applyPlan() {
   return {
     fundamento: PLAN.fundamento,
     collections: PLAN.collections.length,
+    modes: modes,
     variables: variables.size,
     components: components,
     warnings: warnings,
@@ -1011,6 +1158,7 @@ function reportParts(result) {
     JSON.stringify({
       fundamento: result.fundamento,
       collections: result.collections,
+      modes: result.modes,
       variables: result.variables,
       warnings: result.warnings,
       components: result.components.map((report) => ({
@@ -1026,6 +1174,7 @@ function reportParts(result) {
         after: report.after,
         left: report.left,
         diagnosis: report.diagnosis,
+        fonts: report.fonts,
       })),
     }),
   ];

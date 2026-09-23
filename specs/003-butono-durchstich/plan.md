@@ -172,7 +172,15 @@ The decision stands until an Ero needs inverted text in a state (for example a f
 
 **Application (plan-independent).** The same generator emits a development plugin (`figma/plugin/manifest.json`, `code.js`), which the maintainer imports from the manifest in Figma desktop. Development plugins run on every plan. It applies `plan.json` idempotently: it finds existing nodes by plugin data, updates them, and never duplicates. An agent can run the same code through the Figma MCP (`use_figma`). The library is published in the separate Fundamento team of the test account (spec clarification); republishing after a Modelo change is the documented update path. **Nothing lives only in Figma:** deleting the file and re-applying the plan recreates it.
 
-**Limit.** On the Professional plan, a library holds at most four Aspektoj (four modes). More brands need either Organization/Enterprise or one library per Aspekto. The generator can emit one plan per Aspekto on request (Complexity Tracking).
+**Limit.** On the Professional plan, a library holds at most ten Aspektoj (ten modes per collection, research §6.2); Organization carries twenty. More brands need Enterprise or one library per Aspekto. The plan is never cut to the limit — a projection projects the Modelo, not one Figma subscription; the run names with numbers what does not fit into the file, and the Aspektoj that did fit are applied (F27). The generator can emit one plan per Aspekto on request (Complexity Tracking).
+
+**One run, several brands (F27, decision 2026-09-23).** The brand is switched in Figma like color-scheme and contrast: one set, one mode per Aspekto in the collection `aspekto`. Those modes exist only if **one Modelo carries all the brands**, so the maintainer builds them in **one run with one `--config` that lists every Aspekto package** — not one run per brand. Several runs would write one `plan.json` per brand, each with a single mode, and nothing in the file to switch. The repository measures with the config that already builds both Make Kits:
+
+```sh
+pnpm fm projekcioj build --config packages/modelo/test/fixtures/valid/aspekto-ekzemplo/fundamento.config.json
+```
+
+A bare `pnpm fm projekcioj build` stays what it is: the repository Modelo with its reference Aspekto `komuna` alone, and therefore a collection `aspekto` with one mode.
 
 ### D-13 Figma ↔ Code mapping (FR-10)
 
@@ -222,7 +230,7 @@ README.md               generated
 - **Test (AK-08).** A fresh Vite 8 + React 18 project, and one with React 19 and Tailwind 4.3, installs the packed tarball, imports the CSS, renders `<Butono>`, builds, and passes axe and the computed-style check.
 - **Getting the guidelines into Figma.** Figma reads guidelines from the kit, not the package (research §6.1). The maintainer creates the kit, adds the package and copies the `guidelines/` folder into the kit's `guidelines/` (one manual step, documented in `quickstart.md`). The package keeps them so the kit can be rebuilt from any version.
 - **Release path (review).** `.github/workflows/release.yml`, `workflow_dispatch` only, `permissions: id-token: write, contents: read`, npm Trusted Publishing with provenance; no `NPM_TOKEN` secret, no token in `.npmrc`. The maintainer registers the Trusted Publisher after the acceptance; the scope `@fundamento` belongs to the npm org „fundamento" (https://www.npmjs.com/org/fundamento, owner: the maintainer). Nothing is published before the acceptance of Phase 3. Every kit tarball passes the clean-room fingerprints (T018).
-- **Publishing (Q2).** `@fundamento/make-kit-komuna` and `@fundamento/make-kit-ekzemplo` become public pre-releases on npm under the dist-tag `next`, version 0.x; no organisation registry. The kits' license is MIT; for ekzemplo that follows from its invented values, and its fictitious font ships as the name „Ekzempla Grotesk" with generic fallback families only, never as a file and never next to a real typeface. The phase prepares `pnpm publish --dry-run --tag next` and documents the result below; the maintainer publishes after the acceptance.
+- **Publishing (Q2).** `@fundamento/make-kit-komuna` and `@fundamento/make-kit-ekzemplo` become public pre-releases on npm under the dist-tag `next`, version 0.x; no organisation registry. The kits' license is MIT; for ekzemplo that follows from its invented values, and its font ships as a name with generic fallback families only, never as a file. **Since F29** that name is `Archivo` (OFL-1.1, Omnibus-Type) instead of the invented „Ekzempla Grotesk": a designer must be able to pick the same family in Figma, where it comes from Google Fonts, and an invented family cannot be picked at all. Shipping the name of a freely licensed family is not shipping the family. The phase prepares `pnpm publish --dry-run --tag next` and documents the result below; the maintainer publishes after the acceptance.
 
 ### D-15 Parity (FR-12, Art. X gate 2)
 

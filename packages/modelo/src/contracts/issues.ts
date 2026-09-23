@@ -136,6 +136,8 @@ export const RULE_IDS = [
   "destructive-not-primary-color",
   "label-required",
   "touch-target-min",
+  // F28: a floor a brand may raise but never lower (its Regulo name is its rule ID).
+  "protected-minimum",
   "ero-prop-constraint",
   "ero-unknown",
   "intent-unknown",

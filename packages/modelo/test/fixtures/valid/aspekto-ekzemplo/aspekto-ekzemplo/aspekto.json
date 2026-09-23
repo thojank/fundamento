@@ -6,10 +6,10 @@
   "idNamespace": "ekz",
   "fonts": [
     {
-      "family": "Ekzempla Grotesk",
-      "license": "proprietary",
-      "source": "fictitious family for tests; no font file exists",
-      "redistributable": false,
+      "family": "Archivo",
+      "license": "OFL-1.1",
+      "source": "https://github.com/Omnibus-Type/Archivo",
+      "redistributable": true,
       "scripts": [
         "Latn"
       ]

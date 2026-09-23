@@ -33,7 +33,13 @@ Switch the brand or the scheme by changing `data-fm-aspekto` or `data-fm-color-s
 2. Drag `butono` into a frame.
 3. In the frame's variable modes, switch `aspekto` from `komuna` to `ekzemplo`, `color-scheme` to `dark`. No token name is typed.
 
-Maintainer setup, once per Modelo change: `pnpm fm projekcioj build`, then in Figma desktop *Plugins → Development → Import plugin from manifest…* → `packages/projekcioj/dist/figma/plugin/manifest.json`, run "Fundamento: apply plan", publish the library.
+Maintainer setup, once per Modelo change. The collection `aspekto` holds one mode per Aspekto **of the Modelo that was built**, so a file in which the brand can be switched needs one run over one Modelo that carries every brand (F27) — the bare `pnpm fm projekcioj build` builds the repository Modelo with `komuna` alone and leaves one mode:
+
+```sh
+pnpm fm projekcioj build --config packages/modelo/test/fixtures/valid/aspekto-ekzemplo/fundamento.config.json
+```
+
+Then in Figma desktop *Plugins → Development → Import plugin from manifest…* → `.fundamento/projekcioj/figma/plugin/manifest.json`, run "Fundamento: apply plan", publish the library. The run's report names the modes of every collection as raw data (`modes`), so `aspekto: ["komuna", "ekzemplo"]` is read from the console, not from the mode menu.
 
 ## Figma Make (S4)
 

@@ -5,11 +5,17 @@
 import { aliasTarget, CORE_SET_NAME } from "../contracts/grammar.js";
 import { formatIssuePath, type ValidationIssue } from "../contracts/issues.js";
 import type { Modelo, Regulo } from "../contracts/modelo.js";
-import { ASPEKTO_DIMENSIO } from "../load/build.js";
+import { ASPEKTO_DIMENSIO, referenceAspektoOf } from "../load/build.js";
 import { resolve } from "../resolve/resolve.js";
-import { COMBINATION_CHECKERS, semanticDescribedIssues, sojloIssues } from "./color-reguloj.js";
-import { runCombinationChecker } from "./combination-reguloj.js";
+import {
+  COMBINATION_CHECKERS,
+  pixelsOf,
+  semanticDescribedIssues,
+  sojloIssues,
+} from "./color-reguloj.js";
+import { findingIssue, runCombinationChecker } from "./combination-reguloj.js";
 import { dimensioSetIssues } from "./dimensio-set-rules.js";
+import { resolutionsOf } from "./resolutions.js";
 
 const PALETTE_PREFIX = "color.palette.";
 const FOCUS_SURFACE = "color.background.default";
@@ -44,6 +50,77 @@ const perCombination =
       ? []
       : runCombinationChecker(modelo, regulo, COMBINATION_CHECKERS[name] ?? (() => []))),
   ];
+
+/**
+ * F28: the measure of a protected role, in px. A plain dimension is the value itself; a composite
+ * that draws a line (`focus.ring`) is protected by its `width`, so a brand cannot keep the width
+ * token and re-point the ring at a thinner one.
+ */
+function protectedPixels(value: unknown): number | undefined {
+  const direct = pixelsOf(value);
+  if (direct !== undefined) return direct;
+  return typeof value === "object" && value !== null
+    ? pixelsOf((value as { width?: unknown }).width)
+    : undefined;
+}
+
+/**
+ * F28 `protected-minimum`: a brand may differ from the reference in every category, but a floor
+ * that protects a person is not a brand decision. Every role the Regulo names resolves in every
+ * Aspekto to at least the reference's value in the same combination — compared per combination,
+ * so a Dimensio that moves the floor moves it for everyone. The reference Aspekto is its own
+ * baseline and is never reported.
+ */
+const protectedMinimum: Enforcer = (modelo, regulo) => {
+  const reference = referenceAspektoOf(modelo);
+  const roles = regulo.appliesTo?.tokens ?? [];
+  if (reference === undefined || roles.length === 0) return [];
+  // The reference's resolution of the same combination is already in the list: index it by the
+  // assignment without the Aspekto, so no combination is resolved twice.
+  const keyOf = (assignment: Record<string, string>) =>
+    JSON.stringify(
+      Object.entries(assignment)
+        .filter(([dimensio]) => dimensio !== ASPEKTO_DIMENSIO)
+        .sort(),
+    );
+  const baseline = new Map<string, Record<string, { value: unknown }>>();
+  for (const { assignment, resolution } of resolutionsOf(modelo)) {
+    if (assignment[ASPEKTO_DIMENSIO] === reference)
+      baseline.set(keyOf(assignment), resolution.tokens);
+  }
+  const groups = new Map<string, { issue: ValidationIssue; count: number }>();
+  for (const { assignment, resolution } of resolutionsOf(modelo)) {
+    const aspekto = assignment[ASPEKTO_DIMENSIO] ?? "";
+    if (aspekto === reference) continue;
+    const floors = baseline.get(keyOf(assignment));
+    if (floors === undefined) continue;
+    for (const role of roles) {
+      const floor = protectedPixels(floors[role]?.value);
+      const actual = protectedPixels(resolution.tokens[role]?.value);
+      if (floor === undefined || actual === undefined || actual >= floor) continue;
+      const finding = {
+        subject: role,
+        values: `${actual} ${floor}`,
+        message:
+          `${role} is ${actual}px in ${aspekto}, below the ${floor}px of the reference Aspekto ` +
+          `${reference}: it is a protected role, a floor a brand may raise but never lower.`,
+        suggestion:
+          `Give ${role} at least ${floor}px in ${aspekto}, or change the floor in core — where it ` +
+          `holds for every Aspekto (Regulo protected-minimum).`,
+      };
+      const key = [aspekto, finding.subject, finding.values].join("\n");
+      const group = groups.get(key);
+      if (group === undefined) {
+        groups.set(key, { issue: findingIssue(modelo, regulo, assignment, finding), count: 1 });
+      } else {
+        group.count += 1;
+      }
+    }
+  }
+  return [...groups.values()].map(({ issue, count }) =>
+    count === 1 ? issue : { ...issue, message: `${issue.message} Same in ${count} combinations.` },
+  );
+};
 
 /** Enforceable Reguloj by name. A Regulo declared "automatic" must have an entry here. */
 export const REGULO_ENFORCERS: Readonly<Record<string, Enforcer>> = {
@@ -198,6 +275,8 @@ export const REGULO_ENFORCERS: Readonly<Record<string, Enforcer>> = {
   "state-distinct": perCombination("state-distinct"),
   /** Spec 003 T006: size.control.* ≥ size.target.min (WCAG 2.5.8). */
   "touch-target-min": perCombination("touch-target-min"),
+  /** F28: no Aspekto lowers a protected floor below the reference's value. */
+  "protected-minimum": protectedMinimum,
   /** Spec 002 FR-04: every core role token has a $description of its use. */
   "semantic-described": (modelo) => semanticDescribedIssues(modelo),
   /** FR-08: every colour token declares its role (in core, where roles live). */
