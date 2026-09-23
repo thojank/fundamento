@@ -249,7 +249,7 @@ function resolveString(value: unknown, context: NodeContext, mode: string, depth
  * The fonts a new Figma file has without anything installed: Inter in its styles. Everything
  * else must be given to the double, as a file would have it (F11).
  */
-const FIGMA_FONTS = ["Regular", "Medium", "SemiBold", "Bold"].map((style) => ({
+const FIGMA_FONTS = ["Regular", "Medium", "SemiBold", "Bold", "Black"].map((style) => ({
   family: "Inter",
   style,
 }));

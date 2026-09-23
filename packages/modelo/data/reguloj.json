@@ -372,6 +372,19 @@
           "focus.ring"
         ]
       }
+    },
+    {
+      "id": "reg_01M375NS2RRDA1DWRHEK2MK15X",
+      "name": "focus-ring-concentric",
+      "statement": "Der Fokusring ist konzentrisch zu dem, was er umschließt: Sein Radius ist der Radius des umschlossenen Teils, gewachsen um den Abstand dazu — der Abstandsrahmen um den Versatz, der Ring zusätzlich um seine Strichstärke. Jedes Ero mit einem Fokusring bindet deshalb den umschlossenen Radius, den Versatz und die Strichstärke an je ein Token über alle seine Varianten; die Projektion rechnet die Radien daraus aus und trägt keinen eigenen ein.",
+      "kialo": "Das ist eine Setzung von Fundamento, keine Naturkonstante: Es gibt Marken, die einen Ring mit eigener Rundung zeichnen, abgesetzt von der Form darunter. Fundamento zeichnet ihn konzentrisch, weil ein Ring, dessen Rundung nicht zur Form passt, als Fehler gelesen wird und nicht als Absicht — gemessen an einer Marke mit Radius 0, um die ein Ring mit Radius 8 lief (F32). Wer das ändern will, ändert diese Regulo und begründet es hier, statt still zwei Tokens ins Vortaro zu legen, die jede Marke einzeln belegen und deren Verhältnis niemand mehr prüft. Was die Regel im Modelo verlangt, prüft ihr Enforcer: Ohne je ein Token für den umschlossenen Radius, den Versatz und die Strichstärke ist kein konzentrischer Ring abzuleiten. Was sie in der Projektion verlangt, halten die Zusicherungen der Projektion fest — je Modus und auch für eine Marke, die Pillen zeichnet.",
+      "scope": "eroj: das Ero und seine Teile box, focus-ring; jede Projektion, die den Ring zeichnet",
+      "checkability": "automatic",
+      "appliesTo": {
+        "eroj": [
+          "butono"
+        ]
+      }
     }
   ]
 }

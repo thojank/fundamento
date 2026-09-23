@@ -84,3 +84,39 @@ describe("violations", () => {
     ).toEqual([["density-set-scope", "vortaro/sets/density/compact.json#/font/size/display/1"]]);
   });
 });
+
+// F32 `focus-ring-concentric`: was das Modelo von der Regel besitzt. Ein Ring ist nur dann als
+// konzentrisch ableitbar, wenn das Ero für jede Variante gleich sagt, welchen Radius er umschließt,
+// wie weit er absteht und wie stark er ist. Fehlt eines davon, müsste die Projektion eine Zahl
+// erfinden — genau die Zahl, die in der Datei in jedem Modus gleich stand.
+describe("focus-ring-concentric", () => {
+  it("accepts the repo Modelo", () => {
+    expect(enforce("focus-ring-concentric")).toEqual([]);
+  });
+
+  it("names the part when an Ero binds no token for the distance", () => {
+    const issues = enforce("focus-ring-concentric", (modelo) => {
+      const butono = modelo.eroj.find((entry) => entry.ero.name === "butono");
+      if (butono !== undefined) delete butono.skemo.parts["focus-ring"]?.offset;
+    });
+    expect(issues.map(([rule]) => rule)).toEqual(["focus-ring-concentric"]);
+    expect(issues[0]?.[1]).toContain("focus-ring/offset");
+  });
+
+  it("refuses an Ero whose variants disagree about the radius it encloses", () => {
+    const issues = enforce("focus-ring-concentric", (modelo) => {
+      const butono = modelo.eroj.find((entry) => entry.ero.name === "butono");
+      if (butono === undefined) return;
+      // The radius stops being one value for the set: the large size takes another token, so
+      // there is no single radius the ring could grow from.
+      butono.skemo.parts.box = { ...butono.skemo.parts.box, radius: { by: ["size"] } };
+      butono.skemo.bindings = [
+        ...butono.skemo.bindings,
+        { part: "box", property: "radius", token: "radius.role.control" },
+        { part: "box", property: "radius", token: "radius.small", when: { size: "large" } },
+      ] as typeof butono.skemo.bindings;
+    });
+    expect(issues.map(([rule]) => rule)).toEqual(["focus-ring-concentric"]);
+    expect(issues[0]?.[1]).toContain("box/radius");
+  });
+});

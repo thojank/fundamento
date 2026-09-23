@@ -219,6 +219,31 @@ describe("ekzemplo is a brand of its own, in every category (F29)", () => {
     expect(ekzemplo["typography.display.1"]?.textTransform?.value).toBe("uppercase");
   });
 
+  // F32 Teil 2: 500 gegen 600 war im Vergleichsbild nicht zu erkennen. Was eine Marke behauptet,
+  // steht in der Beschriftung und in den Überschriften; der Lesetext bleibt, wie er war.
+  it("puts weight where the brand speaks, and leaves the reading text alone", () => {
+    const weight = (token: string) =>
+      (ekzemplo[token]?.value as { fontWeight?: number } | undefined)?.fontWeight;
+    for (const role of [
+      "typography.label.1",
+      "typography.label.2",
+      "typography.display.1",
+      "typography.display.2",
+      "typography.display.3",
+      "typography.headline.1",
+      "typography.headline.2",
+      "typography.headline.3",
+      "typography.headline.4",
+    ]) {
+      expect(weight(role), role).toBe(900);
+    }
+    for (const role of ["typography.body.1", "typography.body.2", "typography.caption"]) {
+      expect(weight(role), role).toBe(500);
+    }
+    // The reference is untouched, and the distance between the two brands is what is measured.
+    expect((komuna["typography.label.1"]?.value as { fontWeight?: number })?.fontWeight).toBe(500);
+  });
+
   // The measures F28 opened: every spacing role and every control is smaller than the reference's,
   // and the floor of the pointer target is untouched.
   it("is tighter than the reference and still above the floor", () => {

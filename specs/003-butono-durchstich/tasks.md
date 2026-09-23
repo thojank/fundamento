@@ -1023,6 +1023,76 @@ und F24 (Befund, nicht blockierend).
     CSS-Variablen (`--fm-typography-display-1-*` kennt kein `text-transform`) noch der Figma-Plan.
     Betrifft auch komunas `typography.kicker` seit Spec 001. Anforderung: Die Web-Projektion setzt
     `text-transform`, Figma setzt `textCase`; Zusicherung je Projektion, Rohdaten im Bericht.
-  - Reihenfolge laut Maintainer: F30 vor F31. F30 ist gebaut, F31 steht offen.
+  - Reihenfolge laut Maintainer: F30 vor F31. F30 ist gebaut; F31 bleibt ungestartet, bis der PR
+    mit F30 und F32 gemergt und vom Maintainer abgenommen ist (2026-09-23).
+
+- [ ] **F32 Fokusring-Radius folgt der Marke, und ekzemplo bekommt Gewicht** (An P0, Maintainer
+  2026-09-23; Teil 1 Jugxo `jug_01M3743C1B0DYVBK6WW30D183J`)
+  - **Teil 1, Befund** (gemessen in D8do10CeWekxtFO5no9Fxz, Set butono 1:1227):
+    `focus-ring.cornerRadius = 8` und `focus-gap.cornerRadius = 6` standen in beiden Modi gleich
+    und an keiner Variablen; `boundVariables` trug dort nur Paddings, Strichstärken und Striche.
+    Der Kontrollradius war dagegen richtig gebunden. In ekzemplo umschloss ein runder Ring einen
+    eckigen Knopf.
+  - **Rot zuerst**, auf die Wirkung statt auf die gesetzte Eigenschaft, in **beiden** Modi:
+    `ekzemplo: gap − control is the offset: expected 6 to be 2`; komuna war grün (6 − 4 = 2).
+    Dazu `expected 'number' to be 'string'` — der Plan nannte Zahlen, keine Variablen — und im
+    Lauf `expected undefined to be 'radius/focus/ring'`.
+  - **Grün:** Zwei abgeleitete Variablen, `radius/focus/gap` und `radius/focus/ring`, mit
+    derselben Kaskade wie ein Token. Sie stehen nicht im Vortaro: Ein Ring um ein abgerundetes
+    Rechteck hat den Radius dessen, was er umschließt, plus den Abstand dazu — Geometrie, keine
+    Entscheidung, die jede Marke noch einmal treffen müsste. Wo die Variable wohnt, entscheidet
+    ein Vergleich über alle 144 Kombinationen: jede Dimensio, an der die Summe sich wirklich
+    ändert. Das ist mehr als die Dimensioj der Quelltokens — die Strichstärke des Rings hängt in
+    ekzemplo an `contrast` und in komuna nicht. Der Lauf bindet beide Radien, statt sie
+    einzutragen.
+  - Gemessen danach: komuna 4/6/8 in beiden Kontrasten, ekzemplo 0/2/4 und in `contrast=high`
+    0/2/5. Im Lauf gegen das Double: `ring → radius/focus/ring`, `gap → radius/focus/gap`, und
+    auf keinem der beiden Knoten bleibt eine Zahl stehen.
+  - **Teil 2, Anlass:** Geist Medium gegen Archivo SemiBold — 500 gegen 600, im Vergleichsbild
+    nicht zu erkennen. **Rot zuerst** auf beiden Ebenen: `typography.label.1: expected 600 to be
+    900` (Vertrag) und `expected 'SemiBold' to be 'Black'` (aufgelöste Bindung je Modus).
+  - **Grün:** In ekzemplo hängen `typography.label.{1,2}`, `typography.display.*` und
+    `typography.headline.*` auf `font.weight.black`; `typography.body.*` und `typography.caption`
+    bleiben bei 500. Keine neue Mechanik — `font/weight/black` und sein STRING-Zwilling
+    `font/style/black` gibt es seit F30 in beiden Modi. Die Familie bleibt Archivo, nicht die
+    eigene Familie „Archivo Black", deren Stil „Regular" hieße und die Familienbindung verschieben
+    würde.
+  - **Nebenbefund, vom roten Test gefunden:** Der Rückfall selbst konnte den Lauf töten. Fehlt die
+    Schrift der Marke, lädt der Lauf Inter im selben Schnitt — und „Inter Black" hat nicht jede
+    Datei. Der zweite Fehlschlag war ungefangen, der ganze Lauf brach ab. Jetzt fällt der Schnitt
+    auf `Regular` zurück, und die Warnung nennt, was wirklich steht.
+  - Gemessen am erzeugten Plugin: `fonts.perAspekto = {komuna: "Geist Medium", ekzemplo: "Archivo
+    Black"}`, `missing: []`, `crossing: []`, `refused: []`, 72 Varianten, keine Warnung.
+  - **Nachträge des Maintainers vor dem Merge (2026-09-23), drei Punkte:**
+    1. **Der Bericht meldete Absicht statt Wirkung.** Bestätigt: `fonts.perAspekto` trug den
+       *geplanten* Schlüssel, auch wenn der Lauf eine andere Schrift angewandt hatte. Rot zuerst:
+       `expected 'Archivo Black' to be 'Archivo Regular'`. Gemeldet wird jetzt, was geladen wurde;
+       was der Plan wollte und nicht bekam, bleibt unter `missing` lesbar. Dazu ist der Rückfall
+       eine Leiter geworden: erst dieselbe Familie in Regular, dann die Rückfallfamilie im Schnitt
+       des Modells, dann deren Regular — eine Marke erkennt man an ihrer Schrift lange vor ihrem
+       Gewicht, also geht die Familie zuletzt. Schlägt jede Sprosse fehl, wirft der Lauf: Ein
+       zweiter roter Test hat gezeigt, dass er sonst später an einer Stelle scheitert, die nichts
+       über die Ursache sagt.
+    2. **Pillenradien.** Als Fixture-Marke gebaut (Kontrollradius auf `radius.full`, nie
+       veröffentlicht) — und dabei gemessen, dass die additive Prüfung dort **nicht entfällt**:
+       Figma kappt jeden Radius auf die halbe Höhe seines eigenen Kastens, und jeder umschließende
+       Kasten wächst um genau das Doppelte des Abstands. 36/40/44 werden zu 18/20/22, die
+       Differenzen bleiben Versatz und Strichstärke. Der Fall ist als eigener Testfall festgehalten,
+       samt der Sättigung selbst; die allgemeine Zusicherung nennt jetzt ihre Vorbedingung
+       (Kontrollradius unter halber Controlhöhe), damit sie nicht mehr behauptet, als sie misst.
+    3. **Platzierungsregel als Jugxo** `jug_01M375NS7T7VW41Q1HJM98RZXJ`: Die Dimensionsmenge einer
+       abgeleiteten Variablen ist die Vereinigung über alle Marken, nicht die je Marke — mit den
+       gemessenen Zahlen als Beleg.
+  - **Regulo `focus-ring-concentric`** (`reg_01M375NS2RRDA1DWRHEK2MK15X`, automatic): „Der
+    Fokusring ist konzentrisch zu dem, was er umschließt." Der Kialo sagt, dass das eine Setzung
+    von Fundamento ist und keine Naturkonstante — es gibt Marken, die anders zeichnen — und dass
+    eine Änderung durch die Regularo geht, nicht still durchs Vortaro. Die Regulo nennt kein
+    Werkzeug: Sie gilt für jede Projektion, die den Ring zeichnet. Ihr Enforcer prüft, was das
+    Modelo besitzt — jedes Ero mit Fokusring bindet umschlossenen Radius, Versatz und Strichstärke
+    an je ein Token über alle Varianten; sonst gibt es keinen Radius, aus dem zu wachsen wäre.
+    `get_ero` nennt die Regel jetzt mit, denn wie der Ring gezeichnet wird, gehört zu dem, was das
+    Ero verspricht.
+  - Fertig wenn: Der Maintainer misst in Figma — der Ring folgt in ekzemplo dem eckigen Knopf, und
+    die Beschriftung steht im Modus ekzemplo in Archivo Black.
 
 Consistency check before tasks (`/speckit.analyze` scope): every FR and AK maps to at least one task or a recorded decision; every task maps to a plan decision; two new packages (Art. XI); the lockfile changes in T008 only; no task lowers a threshold; nothing is published.

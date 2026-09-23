@@ -5,6 +5,7 @@
 import { aliasTarget, CORE_SET_NAME } from "../contracts/grammar.js";
 import { formatIssuePath, type ValidationIssue } from "../contracts/issues.js";
 import type { Modelo, Regulo } from "../contracts/modelo.js";
+import { boundToken, combinationsOf, STATE_KEY } from "../eroj/skemo-rules.js";
 import { ASPEKTO_DIMENSIO, referenceAspektoOf } from "../load/build.js";
 import { resolve } from "../resolve/resolve.js";
 import {
@@ -121,6 +122,56 @@ const protectedMinimum: Enforcer = (modelo, regulo) => {
     count === 1 ? issue : { ...issue, message: `${issue.message} Same in ${count} combinations.` },
   );
 };
+
+/**
+ * F32 `focus-ring-concentric`: what the Modelo owns of the rule. A ring can only be derived as
+ * concentric when the Ero names, for every variant alike, the radius it encloses, the distance to
+ * it and its own width. An Ero whose variants disagree, or that leaves one of the three unbound,
+ * has no one radius to grow — the projection would have to invent one, and that is the number that
+ * stood in the file in every mode (F32).
+ */
+const focusRingConcentric: Enforcer = (modelo, regulo) => {
+  const wanted = regulo.appliesTo?.eroj;
+  const issues: ValidationIssue[] = [];
+  for (const entry of modelo.eroj) {
+    if (wanted !== undefined && !wanted.includes(entry.ero.name)) continue;
+    if (entry.skemo.parts["focus-ring"] === undefined) continue;
+    const keyed = new Set<string>();
+    for (const partProperties of Object.values(entry.skemo.parts)) {
+      for (const source of Object.values(partProperties)) {
+        if (source !== undefined && "by" in source) for (const key of source.by) keyed.add(key);
+      }
+    }
+    const keys = [
+      ...entry.skemo.props
+        .filter((prop) => prop.kind === "enum" && keyed.has(prop.name))
+        .map((prop) => prop.name),
+      STATE_KEY,
+    ];
+    for (const part of CONCENTRIC_PARTS) {
+      const [name = "", property = ""] = part.split(".");
+      const tokens = new Set(
+        combinationsOf(entry.skemo, keys).map(
+          (combination) => boundToken(entry.skemo, name, property, combination)?.token ?? "",
+        ),
+      );
+      if (tokens.size === 1 && !tokens.has("")) continue;
+      issues.push({
+        rule: "focus-ring-concentric",
+        severity: "error",
+        path: `${entry.file}#/skemo/parts/${name}/${property}`,
+        message: tokens.has("")
+          ? `${entry.ero.name} draws a focus ring but binds no token to ${part}; a concentric ring is the enclosed radius grown by the distance to it, and that distance has to be a value.`
+          : `${entry.ero.name} binds ${tokens.size} different tokens to ${part} across its variants (${[...tokens].sort().join(", ")}); a concentric ring needs one radius to grow.`,
+        suggestion: `Bind ${part} to one token for every variant of ${entry.ero.name} (Regulo focus-ring-concentric).`,
+      });
+    }
+  }
+  return issues;
+};
+
+/** The parts a concentric focus ring is derived from (F32). */
+const CONCENTRIC_PARTS = ["box.radius", "focus-ring.offset", "focus-ring.ring"] as const;
 
 /** Enforceable Reguloj by name. A Regulo declared "automatic" must have an entry here. */
 export const REGULO_ENFORCERS: Readonly<Record<string, Enforcer>> = {
@@ -277,6 +328,8 @@ export const REGULO_ENFORCERS: Readonly<Record<string, Enforcer>> = {
   "touch-target-min": perCombination("touch-target-min"),
   /** F28: no Aspekto lowers a protected floor below the reference's value. */
   "protected-minimum": protectedMinimum,
+  /** F32: the focus ring is derivable as concentric with what it encloses. */
+  "focus-ring-concentric": focusRingConcentric,
   /** Spec 002 FR-04: every core role token has a $description of its use. */
   "semantic-described": (modelo) => semanticDescribedIssues(modelo),
   /** FR-08: every colour token declares its role (in core, where roles live). */

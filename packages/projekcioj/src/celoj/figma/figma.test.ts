@@ -2,6 +2,9 @@
 // a pure description of collections, variables and the component set; resolving it by Figma's mode
 // rules must give rezolvoj.json for every combination, so the projection is provable without Figma.
 
+import { cpSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { projectModeloSource } from "@fundamento/modelo";
 import { describe, expect, it } from "vitest";
 import { celoInputOf } from "../../build.js";
@@ -10,9 +13,11 @@ import {
   compositeFields,
   FIGMA_CELO,
   type FigmaPlan,
+  type FigmaValue,
   figmaPlanInventory,
   figmaValues,
   resolveFigmaPlan,
+  styleOfWeight,
 } from "./figma.js";
 import { FIGMA_MODE_LIMIT } from "./plugin.js";
 
@@ -397,15 +402,173 @@ describe("the label's font is a variable, not a fixed name (F30)", () => {
     expect(komuna["typography/label/1/font-family"]).toBe("Geist");
     expect(ekzemplo["typography/label/1/font-family"]).toBe("Archivo");
     expect(komuna["typography/label/1/font-style"]).toBe("Medium");
-    expect(ekzemplo["typography/label/1/font-style"]).toBe("SemiBold");
+    expect(ekzemplo["typography/label/1/font-style"]).toBe("Black");
   });
 
   // What the run must load before it binds: every pair, with the Aspektoj that ask for it.
   it("lists every font the set can need, with the brand that asks for it", () => {
     const set = plan.components.find((component) => component.set === "butono");
     expect(set?.fonts).toEqual([
-      { family: "Archivo", style: "SemiBold", aspektoj: ["ekzemplo"] },
+      { family: "Archivo", style: "Black", aspektoj: ["ekzemplo"] },
       { family: "Geist", style: "Medium", aspektoj: ["komuna"] },
     ]);
+  });
+});
+
+// F32 Teil 1 (An P0, Maintainer 2026-09-23, gemessen in D8do10CeWekxtFO5no9Fxz, Set butono):
+// focus-ring.cornerRadius = 8 und focus-gap.cornerRadius = 6 standen in beiden Modi gleich und an
+// keiner Variablen — sie kamen aus der Basiskombination. In ekzemplo umschloss damit ein Ring mit
+// Radius 8 einen Knopf mit Radius 0. Gemessen wird die Wirkung, nicht die gesetzte Eigenschaft:
+// die Geometrie eines Rings um ein abgerundetes Rechteck ist erzwungen, also muss sie in jedem
+// Modus aufgehen.
+describe("the focus ring follows the brand's radius (F32)", () => {
+  const set = plan.components.find((component) => component.set === "butono");
+  const variant = set?.variants.find(
+    (entry) => entry.props.state === "focus" && entry.props.size === "medium",
+  );
+
+  /** The radius of a ring part, whatever the plan states: a number, or a variable to resolve. */
+  const radiusOf = (part: "focus-ring" | "focus-gap", resolved: Record<string, FigmaValue>) => {
+    const stated = variant?.radii?.[part];
+    return typeof stated === "number" ? stated : resolved[String(stated)];
+  };
+
+  for (const aspekto of ["komuna", "ekzemplo"]) {
+    it(`keeps ring, gap and control one band apart in ${aspekto}`, () => {
+      const resolved = resolveFigmaPlan(plan, { aspekto });
+      const ring = radiusOf("focus-ring", resolved);
+      const gap = radiusOf("focus-gap", resolved);
+      const control = resolved["radius/role/control"];
+      const width = resolved["focus/ring/width"];
+      const offset = resolved["focus/offset"];
+      // Beide Marken hier zeichnen Rechtecke; eine Marke, deren Kontrollradius die halbe
+      // Controlhöhe erreicht, zeichnet Pillen und wird eigens gemessen (siehe unten).
+      expect(Number(control), `${aspekto} draws rectangles, not pills`).toBeLessThan(
+        Number(resolved["size/control/medium"]) / 2,
+      );
+      expect(Number(ring) - Number(gap), `${aspekto}: ring − gap is the ring's width`).toBe(
+        Number(width),
+      );
+      expect(Number(gap) - Number(control), `${aspekto}: gap − control is the offset`).toBe(
+        Number(offset),
+      );
+    });
+  }
+
+  it("states the radii as variables, not as numbers", () => {
+    expect(typeof variant?.radii?.["focus-ring"]).toBe("string");
+    expect(typeof variant?.radii?.["focus-gap"]).toBe("string");
+  });
+});
+
+// F32 Teil 2 (An P0, Maintainer 2026-09-23): Der Markenunterschied war in der Typografie zu
+// schwach — Geist Medium gegen Archivo SemiBold, 500 gegen 600, im Vergleichsbild nicht zu
+// erkennen. ekzemplo setzt Beschriftung, Anzeige und Überschrift auf 900; die Familie bleibt
+// Archivo, nicht die eigene Familie „Archivo Black", deren Stil „Regular" hieße.
+describe("ekzemplo carries its weight (F32)", () => {
+  it("names the cut of 900 the way Figma does", () => {
+    expect(styleOfWeight(900)).toBe("Black");
+    expect(styleOfWeight(500)).toBe("Medium");
+  });
+
+  it("resolves the label to Archivo Black in ekzemplo and Geist Medium in komuna", () => {
+    const komuna = resolveFigmaPlan(plan, { aspekto: "komuna" });
+    const ekzemplo = resolveFigmaPlan(plan, { aspekto: "ekzemplo" });
+    expect(komuna["typography/label/1/font-family"]).toBe("Geist");
+    expect(komuna["typography/label/1/font-style"]).toBe("Medium");
+    expect(ekzemplo["typography/label/1/font-family"]).toBe("Archivo");
+    expect(ekzemplo["typography/label/1/font-style"]).toBe("Black");
+    expect(ekzemplo["typography/label/2/font-style"]).toBe("Black");
+    expect(ekzemplo["typography/display/1/font-style"]).toBe("Black");
+    expect(ekzemplo["typography/headline/1/font-style"]).toBe("Black");
+  });
+
+  it("leaves the reading sizes alone", () => {
+    const ekzemplo = resolveFigmaPlan(plan, { aspekto: "ekzemplo" });
+    expect(ekzemplo["typography/body/1/font-style"]).toBe("Medium");
+    expect(ekzemplo["typography/caption/font-style"]).toBe("Medium");
+  });
+
+  it("asks the run for Archivo Black, not Archivo SemiBold", () => {
+    const set = plan.components.find((component) => component.set === "butono");
+    expect(set?.fonts).toEqual([
+      { family: "Archivo", style: "Black", aspektoj: ["ekzemplo"] },
+      { family: "Geist", style: "Medium", aspektoj: ["komuna"] },
+    ]);
+  });
+});
+
+// F32 Nachtrag (Maintainer, 2026-09-23): Eine Marke, deren Kontrollradius mindestens die halbe
+// Controlhöhe ist, zeichnet Pillen; dann sind Abstand und Ring ebenfalls gesättigt. Gemessen an
+// einer Fixture-Marke, die nie veröffentlicht wird: Die additive Prüfung **entfällt dort nicht**.
+// Figma kappt jeden Radius auf die halbe Höhe seines eigenen Kastens, und jeder umschließende
+// Kasten wächst um genau das Doppelte des Abstands — 36/40/44 werden zu 18/20/22, die Differenzen
+// bleiben Versatz und Strichstärke. Der Fall steht hier, damit eine Änderung, die das bricht,
+// auffällt.
+describe("a brand that draws pills (F32)", () => {
+  const root = mkdtempSync(join(tmpdir(), "fm-pill-"));
+  cpSync(
+    new URL("../../../../modelo/test/fixtures/valid/aspekto-ekzemplo/", import.meta.url).pathname,
+    root,
+    { recursive: true },
+  );
+  const setFile = join(root, "aspekto-ekzemplo/sets/aspekto/ekzemplo.json");
+  const document = JSON.parse(readFileSync(setFile, "utf8")) as Record<string, unknown>;
+  /** Re-points a token of the copied set; the fixture must have it, or the case proves nothing. */
+  const put = (path: string, value: unknown) => {
+    let node = document;
+    for (const key of path.split(".")) {
+      const next = node[key];
+      if (typeof next !== "object" || next === null) throw new Error(`${path} is no token`);
+      node = next as Record<string, unknown>;
+    }
+    node.$value = value;
+  };
+  put("radius.full", { value: 9999, unit: "px" });
+  put("radius.role.control", "{radius.full}");
+  writeFileSync(setFile, `${JSON.stringify(document, null, 2)}\n`);
+  const pillPrepared = celoInputOf(projectModeloSource(join(root, "fundamento.config.json")));
+  if (!pillPrepared.ok) throw new Error("the pill fixture must stay valid");
+  const pillPlan = JSON.parse(
+    FIGMA_CELO.generate(pillPrepared.input).find((file) => file.path === "figma/plan.json")?.text ??
+      "{}",
+  ) as FigmaPlan;
+
+  const resolved = () => resolveFigmaPlan(pillPlan, { aspekto: "ekzemplo" });
+  const number = (name: string) => Number(resolved()[name]);
+
+  it("saturates the control, its gap and its ring alike", () => {
+    const height = number("size/control/medium");
+    const offset = number("focus/offset");
+    const width = number("focus/ring/width");
+    expect(number("radius/role/control")).toBeGreaterThanOrEqual(height / 2);
+    expect(number("radius/focus/gap")).toBeGreaterThanOrEqual((height + 2 * offset) / 2);
+    expect(number("radius/focus/ring")).toBeGreaterThanOrEqual(
+      (height + 2 * offset + 2 * width) / 2,
+    );
+  });
+
+  // What Figma draws once it has capped each radius at half of its own box.
+  it("keeps ring, gap and control one band apart even after Figma caps them", () => {
+    const height = number("size/control/medium");
+    const offset = number("focus/offset");
+    const width = number("focus/ring/width");
+    const capped = (radius: number, box: number) => Math.min(radius, box / 2);
+    const control = capped(number("radius/role/control"), height);
+    const gap = capped(number("radius/focus/gap"), height + 2 * offset);
+    const ring = capped(number("radius/focus/ring"), height + 2 * offset + 2 * width);
+    expect([control, gap, ring]).toEqual([
+      height / 2,
+      height / 2 + offset,
+      height / 2 + offset + width,
+    ]);
+    expect(ring - gap).toBe(width);
+    expect(gap - control).toBe(offset);
+  });
+
+  it("leaves the reference brand round in the ordinary way", () => {
+    const komuna = resolveFigmaPlan(pillPlan, { aspekto: "komuna" });
+    expect(Number(komuna["radius/role/control"])).toBe(4);
+    expect(Number(komuna["radius/focus/gap"])).toBe(6);
   });
 });

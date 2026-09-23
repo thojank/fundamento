@@ -491,23 +491,42 @@ function diagnose(report) {
 }
 
 /**
- * Loads the model's font; when the file does not have it, the one named fallback in the same
- * style, and says so. Nothing else is tried: a silent substitute would draw a different label
- * than the model (F11).
+ * Loads the model's font, and when the file does not have it, the nearest thing it does have —
+ * in this order: the same family in its Regular cut, then the named fallback family in the model's
+ * cut, then that family's Regular. The family goes last on purpose (F32): a brand is recognised by
+ * its typeface long before its weight, so Archivo Regular says more about the model than Inter
+ * Black does. Whatever is returned is what the label really carries; the caller reports that, not
+ * what was asked for.
  */
 async function loadFont(font, warnings) {
-  try {
-    await figma.loadFontAsync(font);
-    return font;
-  } catch (error) {
-    const fallback = { family: PLAN.fontFallback, style: font.style };
-    await figma.loadFontAsync(fallback);
+  const ladder = [
+    font,
+    { family: font.family, style: "Regular" },
+    { family: PLAN.fontFallback, style: font.style },
+    { family: PLAN.fontFallback, style: "Regular" },
+  ];
+  let applied;
+  let last;
+  for (const candidate of ladder) {
+    if (applied !== undefined) continue;
+    try {
+      await figma.loadFontAsync(candidate);
+      applied = candidate;
+    } catch (error) {
+      // The next rung; the last one is Inter Regular, which every Figma file has.
+      last = error;
+    }
+  }
+  // Not even Inter Regular: this file cannot draw a label at all, and a run that carried on would
+  // fail later at a place that says nothing about the cause.
+  if (applied === undefined) throw last;
+  if (applied.family !== font.family || applied.style !== font.style) {
     warnings.push(
       "Schrift " + font.family + " " + font.style + " ist in dieser Datei nicht verfügbar; " +
-        "die Beschriftung steht ersatzweise in " + fallback.family + " " + fallback.style + ".",
+        "die Beschriftung steht ersatzweise in " + applied.family + " " + applied.style + ".",
     );
-    return fallback;
   }
+  return applied;
 }
 
 async function applyComponents(variables, warnings) {
@@ -527,9 +546,12 @@ async function applyComponents(variables, warnings) {
       const pair = { family: font.family, style: font.style };
       if (!fonts.has(key)) fonts.set(key, await loadFont(pair, warnings));
       const arrived = fonts.get(key);
-      if (arrived.family + " " + arrived.style === key) loadedFonts.push(key);
+      const applied = arrived.family + " " + arrived.style;
+      if (applied === key) loadedFonts.push(key);
       else missing.push(key);
-      for (const aspekto of font.aspektoj || []) perAspekto[aspekto] = key;
+      // Die Wirkung, nicht die Absicht (F32): Der Bericht nennt je Aspekto die Schrift, die
+      // wirklich geladen wurde. Was der Plan wollte und nicht bekam, steht unter "missing".
+      for (const aspekto of font.aspektoj || []) perAspekto[aspekto] = applied;
     }
     // Binding is field by field: between the family and the cut the text stands for a moment in a
     // pair no mode ever shows — Archivo in komuna's cut. Figma reads that state too, so every
@@ -648,13 +670,21 @@ async function applyComponents(variables, warnings) {
       // The variant lies in the grid's flow, its parts in the variant's (F14).
       for (const child of [node, ring, gap, control, label]) own(child, IN_FLOW);
       own(label, TEXT_SIZING);
-      gather(ring).cornerRadius = variant.radii["focus-ring"];
-      gather(gap).cornerRadius = variant.radii["focus-gap"];
       const measures = bind(
         { "focus-ring": ring, "focus-gap": gap, control, label },
         variant,
         variables,
       );
+      // Der Radius des Rings und seines Abstands wird gebunden, nicht eingetragen (F32): als Zahl
+      // stand er in jedem Modus gleich und umschloss in einer Marke mit Radius 0 einen eckigen
+      // Knopf rund. Er geht denselben Weg wie die übrigen Maße, also nach dem Layout.
+      for (const part of ["focus-ring", "focus-gap"]) {
+        const variable = variables.get((variant.radii || {})[part]);
+        const target = part === "focus-ring" ? ring : gap;
+        if (variable !== undefined) {
+          measures.push({ node: target, field: "cornerRadius", variable: variable });
+        }
+      }
       // Everything gathered is written once, layout before the parts inside it; the measures
       // are bound after that, when every frame has its layout.
       for (const each of [node, ring, gap, control, label]) flush(each);
