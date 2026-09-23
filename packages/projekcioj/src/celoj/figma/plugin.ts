@@ -501,7 +501,15 @@ async function loadFont(font, warnings) {
     return font;
   } catch (error) {
     const fallback = { family: PLAN.fontFallback, style: font.style };
-    await figma.loadFontAsync(fallback);
+    try {
+      await figma.loadFontAsync(fallback);
+    } catch (second) {
+      // Auch der Rückfall kann den Schnitt nicht haben — eine Marke in Black trifft auf eine
+      // Datei ohne Black (F32). Dann bleibt der Regular-Schnitt des Rückfalls; daran stirbt der
+      // Lauf nicht, er sagt es.
+      fallback.style = "Regular";
+      await figma.loadFontAsync(fallback);
+    }
     warnings.push(
       "Schrift " + font.family + " " + font.style + " ist in dieser Datei nicht verfügbar; " +
         "die Beschriftung steht ersatzweise in " + fallback.family + " " + fallback.style + ".",
@@ -648,13 +656,21 @@ async function applyComponents(variables, warnings) {
       // The variant lies in the grid's flow, its parts in the variant's (F14).
       for (const child of [node, ring, gap, control, label]) own(child, IN_FLOW);
       own(label, TEXT_SIZING);
-      gather(ring).cornerRadius = variant.radii["focus-ring"];
-      gather(gap).cornerRadius = variant.radii["focus-gap"];
       const measures = bind(
         { "focus-ring": ring, "focus-gap": gap, control, label },
         variant,
         variables,
       );
+      // Der Radius des Rings und seines Abstands wird gebunden, nicht eingetragen (F32): als Zahl
+      // stand er in jedem Modus gleich und umschloss in einer Marke mit Radius 0 einen eckigen
+      // Knopf rund. Er geht denselben Weg wie die übrigen Maße, also nach dem Layout.
+      for (const part of ["focus-ring", "focus-gap"]) {
+        const variable = variables.get((variant.radii || {})[part]);
+        const target = part === "focus-ring" ? ring : gap;
+        if (variable !== undefined) {
+          measures.push({ node: target, field: "cornerRadius", variable: variable });
+        }
+      }
       // Everything gathered is written once, layout before the parts inside it; the measures
       // are bound after that, when every frame has its layout.
       for (const each of [node, ring, gap, control, label]) flush(each);

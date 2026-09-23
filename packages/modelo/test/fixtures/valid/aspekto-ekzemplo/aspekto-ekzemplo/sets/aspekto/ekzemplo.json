@@ -1922,7 +1922,7 @@
         "$value": {
           "fontFamily": "{font.family.display}",
           "fontSize": "{font.size.headline.1}",
-          "fontWeight": "{font.weight.bold}",
+          "fontWeight": "{font.weight.black}",
           "letterSpacing": "{font.tracking.headline.1}",
           "lineHeight": "{font.lineheight.headline.1}"
         }
@@ -1931,7 +1931,7 @@
         "$value": {
           "fontFamily": "{font.family.display}",
           "fontSize": "{font.size.headline.2}",
-          "fontWeight": "{font.weight.bold}",
+          "fontWeight": "{font.weight.black}",
           "letterSpacing": "{font.tracking.headline.2}",
           "lineHeight": "{font.lineheight.headline.2}"
         }
@@ -1940,7 +1940,7 @@
         "$value": {
           "fontFamily": "{font.family.display}",
           "fontSize": "{font.size.headline.3}",
-          "fontWeight": "{font.weight.bold}",
+          "fontWeight": "{font.weight.black}",
           "letterSpacing": "{font.tracking.headline.3}",
           "lineHeight": "{font.lineheight.headline.3}"
         }
@@ -1949,7 +1949,7 @@
         "$value": {
           "fontFamily": "{font.family.display}",
           "fontSize": "{font.size.headline.4}",
-          "fontWeight": "{font.weight.bold}",
+          "fontWeight": "{font.weight.black}",
           "letterSpacing": "{font.tracking.headline.4}",
           "lineHeight": "{font.lineheight.headline.4}"
         }
@@ -1980,7 +1980,7 @@
         "$value": {
           "fontFamily": "{font.family.body}",
           "fontSize": "{font.size.label.1}",
-          "fontWeight": "{font.weight.semibold}",
+          "fontWeight": "{font.weight.black}",
           "letterSpacing": "{font.tracking.label.1}",
           "lineHeight": "{font.lineheight.label.1}"
         }
@@ -1989,7 +1989,7 @@
         "$value": {
           "fontFamily": "{font.family.body}",
           "fontSize": "{font.size.label.2}",
-          "fontWeight": "{font.weight.semibold}",
+          "fontWeight": "{font.weight.black}",
           "letterSpacing": "{font.tracking.label.2}",
           "lineHeight": "{font.lineheight.label.2}"
         }

@@ -109,8 +109,12 @@ export interface FigmaComponentSet {
     notDrawn?: Record<string, string>;
     /** Whether this variant shows the focus ring (F11); the space for it is always reserved. */
     focusVisible?: boolean;
-    /** Corner radii of the ring and its gap: the control's radius grown by what lies inside. */
-    radii?: { "focus-ring": number; "focus-gap": number };
+    /**
+     * The variables holding the corner radii of the ring and its gap: the control's radius grown
+     * by what lies inside. Written as a number, the ring kept the base combination's radius in
+     * every mode and enclosed a square button with a round ring (F32).
+     */
+    radii?: { "focus-ring": string; "focus-gap": string };
     /** The font of the label, from its typography token: family and the style of its weight. */
     font?: { family: string; style: string };
     /**
@@ -266,7 +270,7 @@ export function figmaValue(type: string, value: unknown, field?: string): FigmaV
 }
 
 /** Figma names a cut where the Vortaro names a weight; the rounding is Figma's own (F30). */
-function styleOfWeight(weight: number): string {
+export function styleOfWeight(weight: number): string {
   return FONT_STYLES[Math.round(weight / 100) * 100] ?? "Regular";
 }
 
@@ -430,6 +434,159 @@ function orderedSets(modelo: Modelo): Modelo["setoj"] {
 /** Every value a token has across the Modelo, for deciding the fields of a composite (F9). */
 function valuesOf(resolutions: ReturnType<typeof allResolutions>, token: string): unknown[] {
   return resolutions.map(({ tokens }) => tokens[token]?.value);
+}
+
+/** The name of the variable a derived radius gets, and how it is computed from the parts (F32). */
+const DERIVED_RADII = [
+  {
+    name: "radius/focus/gap",
+    of: (px: (part: string, field?: string) => number) =>
+      px("box.radius") + px("focus-ring.offset"),
+  },
+  {
+    name: "radius/focus/ring",
+    of: (px: (part: string, field?: string) => number) =>
+      px("box.radius") + px("focus-ring.offset") + px("focus-ring.ring", "width"),
+  },
+] as const;
+
+/** The parts a derived radius is computed from, as `<part>.<property>` of the Skemo. */
+const RADIUS_PARTS = ["box.radius", "focus-ring.offset", "focus-ring.ring"] as const;
+
+/** The px of a resolved dimension, optionally inside a field of a composite. */
+function measureOf(value: unknown, field?: string): number {
+  const measure =
+    field === undefined ? value : (value as Record<string, unknown> | undefined)?.[field];
+  return typeof (measure as { value?: unknown } | undefined)?.value === "number"
+    ? (measure as { value: number }).value
+    : 0;
+}
+
+/**
+ * The tokens an Ero binds to the parts a derived radius reads. Every variant must agree: the ring
+ * is one geometry, and a set whose variants disagreed would need one variable per variant.
+ */
+function radiusTokensOf(entry: LoadedEro): Record<string, string> | undefined {
+  const keyed = new Set<string>();
+  for (const partProperties of Object.values(entry.skemo.parts)) {
+    for (const source of Object.values(partProperties)) {
+      if (source !== undefined && "by" in source) for (const key of source.by) keyed.add(key);
+    }
+  }
+  const keys = [
+    ...entry.skemo.props
+      .filter((prop) => prop.kind === "enum" && keyed.has(prop.name))
+      .map((prop) => prop.name),
+    STATE_KEY,
+  ];
+  let tokens: Record<string, string> | undefined;
+  for (const combination of combinationsOf(entry.skemo, keys)) {
+    const here: Record<string, string> = {};
+    for (const part of RADIUS_PARTS) {
+      const [name, property] = part.split(".");
+      const bound = boundToken(entry.skemo, name ?? "", property ?? "", combination);
+      if (bound !== undefined) here[part] = bound.token;
+    }
+    if (Object.keys(here).length !== RADIUS_PARTS.length) return undefined;
+    if (tokens === undefined) tokens = here;
+    else if (JSON.stringify(tokens) !== JSON.stringify(here)) {
+      throw new Error(
+        `The Ero ${entry.ero.name} binds different tokens to ${RADIUS_PARTS.join(", ")} in ` +
+          "different variants; the Figma Celo derives one focus radius per set. Give the parts one " +
+          "token each, or derive the radius per variant.",
+      );
+    }
+  }
+  return tokens;
+}
+
+/**
+ * The radii of the focus ring and its gap, as variables (F32). A ring around a rounded rectangle
+ * has the radius of what it encloses plus the distance to it — geometry, not a decision, and
+ * therefore computed here instead of asked of every brand. Figma binds values, not expressions, so
+ * the sum is a variable of its own; it cascades like a token, so it follows the mode. Where it
+ * lives is decided by the Dimensioj along which the sum really changes: the width of the ring
+ * moves with `contrast` in one Aspekto and not in another, and only a comparison over every
+ * combination sees that.
+ */
+function derivedRadiusVariables(
+  modelo: Modelo,
+  resolutions: ReturnType<typeof allResolutions>,
+): Map<string, FigmaVariable[]> {
+  const out = new Map<string, FigmaVariable[]>();
+  const [entry] = modelo.eroj;
+  const tokens = entry === undefined ? undefined : radiusTokensOf(entry);
+  if (tokens === undefined) return out;
+  const dimensioj = dimensiojOf(modelo);
+  const defaults: Record<string, string> = {};
+  for (const dimensio of dimensioj) defaults[dimensio.name] = dimensio.defaultMode;
+  const key = (assignment: Record<string, string>) =>
+    dimensioj.map((dimensio) => assignment[dimensio.name] ?? "").join("\u0000");
+  const byAssignment = new Map(resolutions.map((entry) => [key(entry.assignment), entry.tokens]));
+  const valueAt = (
+    assignment: Record<string, string>,
+    of: (typeof DERIVED_RADII)[number]["of"],
+  ) => {
+    const found = byAssignment.get(key({ ...defaults, ...assignment }));
+    return of((part, field) => measureOf(found?.[tokens[part] ?? ""]?.value, field));
+  };
+
+  for (const derived of DERIVED_RADII) {
+    // Every Dimensio along which two combinations that differ in it alone give different sums.
+    const dims = dimensioj
+      .filter((dimensio) =>
+        resolutions.some((one) =>
+          dimensio.modes.some(
+            (mode) =>
+              mode !== one.assignment[dimensio.name] &&
+              derived.of((part, field) =>
+                measureOf(
+                  byAssignment.get(key({ ...one.assignment, [dimensio.name]: mode }))?.[
+                    tokens[part] ?? ""
+                  ]?.value,
+                  field,
+                ),
+              ) !==
+                derived.of((part, field) =>
+                  measureOf(one.tokens[tokens[part] ?? ""]?.value, field),
+                ),
+          ),
+        ),
+      )
+      .map((dimensio) => dimensio.name);
+    const add = (collection: string, variable: FigmaVariable) => {
+      out.set(collection, [...(out.get(collection) ?? []), variable]);
+    };
+    if (dims.length === 0) {
+      add(BASE_COLLECTION, {
+        name: derived.name,
+        type: "FLOAT",
+        hidden: false,
+        values: { [BASE_MODE]: valueAt({}, derived.of) },
+      });
+      continue;
+    }
+    const build = (level: number, suffix: string, chosen: Record<string, string>): void => {
+      const dimensio = dims[level] ?? "";
+      const variable: FigmaVariable = {
+        name: `${derived.name}${suffix}`,
+        type: "FLOAT",
+        hidden: suffix !== "",
+        values: {},
+      };
+      for (const mode of dimensioj.find((one) => one.name === dimensio)?.modes ?? []) {
+        const assignment = { ...chosen, [dimensio]: mode };
+        if (level === 0) variable.values[mode] = valueAt(assignment, derived.of);
+        else {
+          variable.values[mode] = { alias: `${derived.name}${suffix}@${dimensio}=${mode}` };
+          build(level - 1, `${suffix}@${dimensio}=${mode}`, assignment);
+        }
+      }
+      add(dimensio, variable);
+    };
+    build(dims.length - 1, "", {});
+  }
+  return out;
 }
 
 /** Builds the variables of every token, including the hidden helpers of the cascade. */
@@ -612,19 +769,7 @@ function componentSetOf(
       const paint = paintOf(ring.token, resolutions, base, "color");
       if (paint !== undefined) paints["focus-ring.ring"] = paint;
     }
-    const px = (part: string, property: string, field?: string): number => {
-      const bound = boundToken(skemo, part, property, combination);
-      const value = bound === undefined ? undefined : base[bound.token]?.value;
-      const measure = field === undefined ? value : (value as Record<string, unknown>)?.[field];
-      return typeof (measure as { value?: unknown })?.value === "number"
-        ? (measure as { value: number }).value
-        : 0;
-    };
-    const gapRadius = px("box", "radius") + px("focus-ring", "offset");
-    const radii = {
-      "focus-gap": gapRadius,
-      "focus-ring": gapRadius + px("focus-ring", "ring", "width"),
-    };
+    const radii = { "focus-gap": "radius/focus/gap", "focus-ring": "radius/focus/ring" };
     const typography = boundToken(skemo, "label", "typography", combination);
     const font = fontOf(typography === undefined ? undefined : base[typography.token]?.value);
     return {
@@ -773,6 +918,9 @@ export const FIGMA_CELO: Celo = {
   generate(input: CeloInput): GeneratedFile[] {
     const { modelo, modeloJson } = input;
     const variables = variablesOf(modelo, input);
+    for (const [collection, derived] of derivedRadiusVariables(modelo, allResolutions(modelo))) {
+      variables.set(collection, [...(variables.get(collection) ?? []), ...derived]);
+    }
     const collections: FigmaCollection[] = [
       {
         name: BASE_COLLECTION,

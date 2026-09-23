@@ -25,9 +25,9 @@ const plan = JSON.parse(files["figma/plan.json"] ?? "{}") as FigmaPlan;
 // real Geist and a real Archivo both ship these cuts (F30).
 const MODEL_FONTS = [
   { family: "Geist", style: "Medium" },
-  { family: "Geist", style: "SemiBold" },
+  { family: "Geist", style: "Black" },
   { family: "Archivo", style: "Medium" },
-  { family: "Archivo", style: "SemiBold" },
+  { family: "Archivo", style: "Black" },
 ] as const;
 const modelDouble = () => figmaDouble({ fonts: MODEL_FONTS });
 
@@ -2081,7 +2081,7 @@ describe("the label's font is bound, not written (F30)", () => {
     const double = figmaDouble({ fonts: BOTH });
     await report(double);
     expect(double.loadedFonts).toContain("Geist Medium");
-    expect(double.loadedFonts).toContain("Archivo SemiBold");
+    expect(double.loadedFonts).toContain("Archivo Black");
   });
 
   // A file that has only the reference's font: the run says which one is missing and what it
@@ -2090,7 +2090,7 @@ describe("the label's font is bound, not written (F30)", () => {
     const double = figmaDouble({ fonts: [{ family: "Geist", style: "Medium" }] });
     const result = await report(double);
     const warning = result.warnings.join(" | ");
-    expect(warning).toContain("Archivo SemiBold");
+    expect(warning).toContain("Archivo Black");
     expect(warning).toContain("Inter");
     const label = labelOf(double);
     expect(label?.boundVariables.fontFamily).toBeUndefined();
@@ -2107,11 +2107,43 @@ describe("the label's font is bound, not written (F30)", () => {
         fontFamily: ["typography/label/2/font-family", "typography/label/1/font-family"],
         fontStyle: ["typography/label/2/font-style", "typography/label/1/font-style"],
       },
-      loaded: ["Archivo SemiBold", "Geist Medium"],
+      loaded: ["Archivo Black", "Geist Medium"],
       missing: [],
       crossing: [],
       refused: [],
-      perAspekto: { ekzemplo: "Archivo SemiBold", komuna: "Geist Medium" },
+      perAspekto: { ekzemplo: "Archivo Black", komuna: "Geist Medium" },
     });
+  });
+});
+
+// F32 Teil 1: Der Lauf bindet die Radien des Rings und seines Abstands, statt Zahlen einzutragen.
+// Gemessen wurde in der Datei das Gegenteil: boundVariables der beiden Knoten trug Paddings,
+// Strichstärken und Striche — keinen Radius.
+describe("the focus ring's radius is bound, not written (F32)", () => {
+  async function file() {
+    const double = figmaDouble({ fonts: MODEL_FONTS });
+    await run(double);
+    const set = double.root.children[0]?.children.find((child) => child.type === "COMPONENT_SET");
+    const variant = set?.children[0];
+    const ring = variant?.children.find(
+      (child) => child.getSharedPluginData("fundamento", "part") === "focus-ring",
+    );
+    const gap = ring?.children.find(
+      (child) => child.getSharedPluginData("fundamento", "part") === "focus-gap",
+    );
+    return { ring, gap };
+  }
+
+  it("binds both radii to the variables the plan names", async () => {
+    const { ring, gap } = await file();
+    expect(ring?.boundVariables.cornerRadius?.name).toBe("radius/focus/ring");
+    expect(gap?.boundVariables.cornerRadius?.name).toBe("radius/focus/gap");
+  });
+
+  it("leaves no number behind on either node", async () => {
+    const { ring, gap } = await file();
+    // Neutral is what the plugin owns; anything else would be the base combination's radius.
+    expect(ring?.properties.cornerRadius).toBe(0);
+    expect(gap?.properties.cornerRadius).toBe(0);
   });
 });

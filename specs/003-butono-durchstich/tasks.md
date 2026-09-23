@@ -1023,6 +1023,47 @@ und F24 (Befund, nicht blockierend).
     CSS-Variablen (`--fm-typography-display-1-*` kennt kein `text-transform`) noch der Figma-Plan.
     Betrifft auch komunas `typography.kicker` seit Spec 001. Anforderung: Die Web-Projektion setzt
     `text-transform`, Figma setzt `textCase`; Zusicherung je Projektion, Rohdaten im Bericht.
-  - Reihenfolge laut Maintainer: F30 vor F31. F30 ist gebaut, F31 steht offen.
+  - Reihenfolge laut Maintainer: F30 vor F31. F30 ist gebaut; F31 bleibt ungestartet, bis der PR
+    mit F30 und F32 gemergt und vom Maintainer abgenommen ist (2026-09-23).
+
+- [ ] **F32 Fokusring-Radius folgt der Marke, und ekzemplo bekommt Gewicht** (An P0, Maintainer
+  2026-09-23; Teil 1 Jugxo `jug_01M3743C1B0DYVBK6WW30D183J`)
+  - **Teil 1, Befund** (gemessen in D8do10CeWekxtFO5no9Fxz, Set butono 1:1227):
+    `focus-ring.cornerRadius = 8` und `focus-gap.cornerRadius = 6` standen in beiden Modi gleich
+    und an keiner Variablen; `boundVariables` trug dort nur Paddings, Strichstärken und Striche.
+    Der Kontrollradius war dagegen richtig gebunden. In ekzemplo umschloss ein runder Ring einen
+    eckigen Knopf.
+  - **Rot zuerst**, auf die Wirkung statt auf die gesetzte Eigenschaft, in **beiden** Modi:
+    `ekzemplo: gap − control is the offset: expected 6 to be 2`; komuna war grün (6 − 4 = 2).
+    Dazu `expected 'number' to be 'string'` — der Plan nannte Zahlen, keine Variablen — und im
+    Lauf `expected undefined to be 'radius/focus/ring'`.
+  - **Grün:** Zwei abgeleitete Variablen, `radius/focus/gap` und `radius/focus/ring`, mit
+    derselben Kaskade wie ein Token. Sie stehen nicht im Vortaro: Ein Ring um ein abgerundetes
+    Rechteck hat den Radius dessen, was er umschließt, plus den Abstand dazu — Geometrie, keine
+    Entscheidung, die jede Marke noch einmal treffen müsste. Wo die Variable wohnt, entscheidet
+    ein Vergleich über alle 144 Kombinationen: jede Dimensio, an der die Summe sich wirklich
+    ändert. Das ist mehr als die Dimensioj der Quelltokens — die Strichstärke des Rings hängt in
+    ekzemplo an `contrast` und in komuna nicht. Der Lauf bindet beide Radien, statt sie
+    einzutragen.
+  - Gemessen danach: komuna 4/6/8 in beiden Kontrasten, ekzemplo 0/2/4 und in `contrast=high`
+    0/2/5. Im Lauf gegen das Double: `ring → radius/focus/ring`, `gap → radius/focus/gap`, und
+    auf keinem der beiden Knoten bleibt eine Zahl stehen.
+  - **Teil 2, Anlass:** Geist Medium gegen Archivo SemiBold — 500 gegen 600, im Vergleichsbild
+    nicht zu erkennen. **Rot zuerst** auf beiden Ebenen: `typography.label.1: expected 600 to be
+    900` (Vertrag) und `expected 'SemiBold' to be 'Black'` (aufgelöste Bindung je Modus).
+  - **Grün:** In ekzemplo hängen `typography.label.{1,2}`, `typography.display.*` und
+    `typography.headline.*` auf `font.weight.black`; `typography.body.*` und `typography.caption`
+    bleiben bei 500. Keine neue Mechanik — `font/weight/black` und sein STRING-Zwilling
+    `font/style/black` gibt es seit F30 in beiden Modi. Die Familie bleibt Archivo, nicht die
+    eigene Familie „Archivo Black", deren Stil „Regular" hieße und die Familienbindung verschieben
+    würde.
+  - **Nebenbefund, vom roten Test gefunden:** Der Rückfall selbst konnte den Lauf töten. Fehlt die
+    Schrift der Marke, lädt der Lauf Inter im selben Schnitt — und „Inter Black" hat nicht jede
+    Datei. Der zweite Fehlschlag war ungefangen, der ganze Lauf brach ab. Jetzt fällt der Schnitt
+    auf `Regular` zurück, und die Warnung nennt, was wirklich steht.
+  - Gemessen am erzeugten Plugin: `fonts.perAspekto = {komuna: "Geist Medium", ekzemplo: "Archivo
+    Black"}`, `missing: []`, `crossing: []`, `refused: []`, 72 Varianten, keine Warnung.
+  - Fertig wenn: Der Maintainer misst in Figma — der Ring folgt in ekzemplo dem eckigen Knopf, und
+    die Beschriftung steht im Modus ekzemplo in Archivo Black.
 
 Consistency check before tasks (`/speckit.analyze` scope): every FR and AK maps to at least one task or a recorded decision; every task maps to a plan decision; two new packages (Art. XI); the lockfile changes in T008 only; no task lowers a threshold; nothing is published.
