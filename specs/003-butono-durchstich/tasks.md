@@ -1173,8 +1173,10 @@ und F24 (Befund, nicht blockierend).
     `color.action.secondary.text` (`neutral.25` statt `neutral.50`) und `color.palette.neutral.950`,
     das nur dort steht. Die Datei ist deshalb **nicht** entbehrlich: Wird sie entfernt, ändern sich
     378 aufgelöste Werte in den dunklen Kombinationen, weil `neutral.950` unter Canvas, Texten und
-    Navigation hängt. Eine Aufräumung darf nur die 55 Wiederholungen streichen und die zwei
-    Entscheidungen behalten — und muss dabei gemessen werden, nicht nebenbei gemacht.
+    Navigation hängt. **Auftrag für die Aufräumung:** Nur die 55 Wiederholungen streichen; die zwei
+    Aussagen `color.action.secondary.text` und `color.palette.neutral.950` bleiben stehen. Die
+    Wirkung wird **gemessen, nicht geschätzt** — der Vergleich aller aufgelösten Werte über alle
+    Kombinationen vor und nach dem Streichen gehört zur Änderung, nicht in ihre Begründung.
 
 - [ ] **F41 Das System führt seine Lücken — und muss sie noch nachprüfen** (An P0, Maintainer
   2026-09-23; Constitution-Amendment Art. VI „Lücken werden geführt", Terminologie **Manko**)
@@ -1236,5 +1238,18 @@ und F24 (Befund, nicht blockierend).
   - Fertig wenn: Der Maintainer misst in echtem Figma — der Lauf versucht beide Bindungen, meldet
     beide Mankoj als offen, und derselbe Lauf würde sie als geschlossen melden, sobald das Ziel sie
     annimmt. Grüne CI ist hier keine Abnahme.
+
+- [ ] **Befund über einen Test: `mcp/resources-http` fällt unter Last** (2026-09-24, beim vollen
+  `pnpm check` auf dem F36-Branch beobachtet)
+  - `packages/mcp/src/resources-http.test.ts` → „the HTTP transport > serves the tools" fiel mit
+    `TypeError: fetch failed`, `Caused by: Error: read ECONNRESET`, nach 4896 ms. Isoliert
+    (`npx vitest run src/resources-http.test.ts`) grün, und im zweiten vollen Lauf ebenfalls grün.
+  - Das ist ein Befund über den Test, nicht über den Code: Ein Test, der unter Last fällt und
+    isoliert durchläuft, fällt irgendwann wieder — und dann sucht jemand eine Stunde nach einer
+    Ursache, die hier schon einmal notiert war. Der Verdacht gehört zum Aufsetzen und Abräumen des
+    Servers im Test (Port, `close()`, offene Verbindung beim Abbruch), nicht zur Transportlogik:
+    Die drei Geschwistertests derselben Datei — Bindung an 127.0.0.1, Ablehnung fremder Header,
+    `mcp-input-invalid` — liefen im selben Lauf grün.
+  - Eigene Änderung, eigener PR. Nicht in einem Branch mitreparieren, der etwas anderes tut.
 
 Consistency check before tasks (`/speckit.analyze` scope): every FR and AK maps to at least one task or a recorded decision; every task maps to a plan decision; two new packages (Art. XI); the lockfile changes in T008 only; no task lowers a threshold; nothing is published.
