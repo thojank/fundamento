@@ -8,17 +8,25 @@ import {
   readModeloFiles,
   resolve,
 } from "@fundamento/modelo";
-import { afterAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import {
+  type Connected,
   closeClients,
   connect,
   EKZEMPLO_CONFIG,
   EKZEMPLO_PACKAGE,
   INCOMPLETE_CONFIG,
   output,
+  preload,
 } from "./test-doubles/client.js";
 
 afterAll(closeClients);
+
+// Der Modelo wird hier geladen, nicht im Hook: reines Rechnen ohne Leitung, und das `connect` im
+// `beforeAll` kostet danach nur noch den Handschlag des Transports.
+preload();
+preload({ config: EKZEMPLO_CONFIG });
+preload({ config: INCOMPLETE_CONFIG });
 
 type Issue = { rule: string; severity: string; path: string };
 type Envelope = { issues: Issue[]; allowed?: string[] };
@@ -33,12 +41,17 @@ const INCOMPLETE_PACKAGE = new URL(
   import.meta.url,
 ).pathname;
 
-describe("resolve", async () => {
-  const { client, served } = await connect({ config: EKZEMPLO_CONFIG });
+describe("resolve", () => {
   const { files } = readModeloFiles(projectModeloSource(EKZEMPLO_CONFIG));
   if (files === undefined) throw new Error("ekzemplo did not load");
   const direct = buildModelo(files).modelo;
   const DARK = { aspekto: "ekzemplo", "color-scheme": "dark" };
+  let client: Connected["client"];
+  let served: Connected["served"];
+
+  beforeAll(async () => {
+    ({ client, served } = await connect({ config: EKZEMPLO_CONFIG }));
+  });
 
   it("equals the direct resolver, provenance and package included", async () => {
     const answer = await output<Resolved>(client, "resolve", {
@@ -85,9 +98,15 @@ describe("resolve", async () => {
   });
 });
 
-describe("list_reguloj and list_jugxoj", async () => {
-  const { client, served } = await connect({ config: EKZEMPLO_CONFIG });
-  const core = served.modeloJson.reguloj.filter((regulo) => regulo.aspekto === undefined);
+describe("list_reguloj and list_jugxoj", () => {
+  let client: Connected["client"];
+  let served: Connected["served"];
+  let core: Connected["served"]["modeloJson"]["reguloj"];
+
+  beforeAll(async () => {
+    ({ client, served } = await connect({ config: EKZEMPLO_CONFIG }));
+    core = served.modeloJson.reguloj.filter((regulo) => regulo.aspekto === undefined);
+  });
 
   it("lists the core Reguloj without an Aspekto, and adds that Aspekto's with one", async () => {
     const plain = await output<{ reguloj: Regulo[] }>(client, "list_reguloj");
@@ -129,9 +148,14 @@ describe("list_reguloj and list_jugxoj", async () => {
   });
 });
 
-describe("validate", async () => {
-  const repo = await connect();
-  const incomplete = await connect({ config: INCOMPLETE_CONFIG });
+describe("validate", () => {
+  let repo: Connected;
+  let incomplete: Connected;
+
+  beforeAll(async () => {
+    repo = await connect();
+    incomplete = await connect({ config: INCOMPLETE_CONFIG });
+  });
 
   it("reports the served Modelo", async () => {
     expect(await output(repo.client, "validate")).toEqual({
@@ -162,8 +186,13 @@ describe("validate", async () => {
   });
 });
 
-describe("derive_name", async () => {
-  const { client, served } = await connect();
+describe("derive_name", () => {
+  let client: Connected["client"];
+  let served: Connected["served"];
+
+  beforeAll(async () => {
+    ({ client, served } = await connect());
+  });
 
   it("derives the five Celoj with the Phase-0 NomReguloj", async () => {
     const name = "color.text.default";

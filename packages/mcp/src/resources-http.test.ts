@@ -7,13 +7,22 @@ import {
   StreamableHTTPClientTransport,
   type Transport,
 } from "@modelcontextprotocol/client";
-import { afterAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { startHttpServer } from "./http.js";
-import { loadServed } from "./load.js";
 import { TOOL_NAMES } from "./schemas.js";
-import { closeClients, connect, EKZEMPLO_PACKAGE } from "./test-doubles/client.js";
+import {
+  type Connected,
+  closeClients,
+  connect,
+  EKZEMPLO_PACKAGE,
+  preload,
+} from "./test-doubles/client.js";
 
 afterAll(closeClients);
+
+// Der Modelo wird hier geladen, nicht im Hook: reines Rechnen ohne Leitung, und das `connect` im
+// `beforeAll` kostet danach nur noch den Handschlag des Transports.
+preload();
 
 const DIST = new URL("../../modelo/dist/", import.meta.url).pathname;
 const RESOURCES = [
@@ -22,8 +31,12 @@ const RESOURCES = [
   ["fundamento://export/rezolvoj.json", "rezolvoj.json"],
 ] as const;
 
-describe("resources", async () => {
-  const { client } = await connect();
+describe("resources", () => {
+  let client: Connected["client"];
+
+  beforeAll(async () => {
+    ({ client } = await connect());
+  });
 
   it("lists the three export files and the Ontologio as JSON", async () => {
     const { resources } = await client.listResources();
@@ -78,10 +91,18 @@ function rawPost(port: number, headers: Record<string, string>) {
   });
 }
 
-describe("the HTTP transport", async () => {
-  const http = await startHttpServer(loadServed(), { port: 0 });
-  const client = new Client({ name: "test", version: "0" });
-  await client.connect(new StreamableHTTPClientTransport(new URL(http.url)) as Transport);
+describe("the HTTP transport", () => {
+  let http: Awaited<ReturnType<typeof startHttpServer>>;
+  let client: Client;
+
+  // Die Leitung entsteht, wenn diese Datei läuft — nicht beim Einsammeln aller Dateien. Sonst liegen
+  // Minuten zwischen dem Verbindungsaufbau und der ersten Anfrage, und die Leitung ist dann tot.
+  beforeAll(async () => {
+    http = await startHttpServer(preload(), { port: 0 });
+    client = new Client({ name: "test", version: "0" });
+    await client.connect(new StreamableHTTPClientTransport(new URL(http.url)) as Transport);
+  });
+
   afterAll(async () => {
     await client.close();
     await http.close();
