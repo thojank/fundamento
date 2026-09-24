@@ -1204,17 +1204,36 @@ und F24 (Befund, nicht blockierend).
     aller übrigen elf Dateien. `binds to 127.0.0.1` prüft nur Felder und braucht die Leitung nicht —
     `serves the tools` ist die erste Anfrage darüber, und genau sie fällt. Ein Test, der seine
     Verbindung zur Sammelzeit aufbaut, misst nicht, was er behauptet.
-  - **Umfang: neun Stellen, nicht eine.** Das Muster stand neunmal im Paket —
+  - **Umfang: vierzehn Stellen, nicht eine.** In der Form `describe(…, async)` neunmal —
     `resources-http.test.ts` 25 und 81, `rules-resolve.test.ts` 36, 88, 132 und 165,
-    `server.test.ts` 17, 117 und 140. Acht davon fallen nie, weil ihr Transport in-process ist und
-    keinen Socket hat, der zurückgesetzt werden kann. **Sie sind nicht gesünder — sie sind nur
-    stumm.** Dass acht Stellen halten, liegt am Transport, nicht am Test. Alle neun sind auf
-    `beforeAll` mit passendem `afterAll` umgestellt.
+    `server.test.ts` 17, 117 und 140. Dazu **fünf `await` auf Modulebene** in drei weiteren Dateien,
+    gefunden auf den Hinweis des Maintainers, der Wächter verspreche mehr als er prüfe:
+    `e2e/ak09-dialog.test.ts` 36, `e2e/s7-dialog.test.ts` 26 und 27, `e2e/s7-gvidanto.test.ts` 26 und
+    27 — und in `s7-gvidanto` zusätzlich ein Objektliteral, das sechs Werkzeugaufrufe zur Sammelzeit
+    stellte. Nur die eine Stelle mit einem echten Socket fiel je. **Die anderen sind nicht gesünder —
+    sie sind nur stumm.** Dass sie halten, liegt am Transport, nicht am Test. Alle vierzehn sind auf
+    `beforeAll` mit passendem `afterAll` umgestellt; die beiden Indizes des Mutationstests lesen ihre
+    Antworten jetzt als Funktion, weil der Rumpf eines `describe` ebenfalls zur Sammelzeit läuft.
   - **Rot zuerst, und zwar statisch:** `packages/modelo/src/ci/test-setup.test.ts` durchsucht jede
-    `*.test.ts` unter `packages/<paket>/src` nach einem asynchronen `describe` und nennt jede
-    Fundstelle als `datei:zeile`. Gegen den Stand vor der Änderung listet er genau die neun Zeilen
-    oben. Ein zweiter Test bewacht die Erkennung selbst: Sie muss den Kopf des `describe` treffen
-    und ein `async` im Rumpf — also jedes gewöhnliche `it` — in Ruhe lassen.
+    `*.test.ts` unter `packages/<paket>/src` und nennt jede Fundstelle als `datei:zeile`. Es sind
+    **zwei** Prüfungen, weil es zwei Formen gibt: ein asynchrones `describe` und ein `await` in einer
+    Anweisung auf Modulebene. Die zweite kam auf den Hinweis dazu, dass „kein `describe(…, async)`"
+    etwas anderes ist als „keine Verbindung zur Sammelzeit" — und sie hat die fünf Stellen oben
+    gefunden. Für eine Anweisung gilt: Sie beginnt am Zeilenanfang und reicht bis zur nächsten Zeile
+    am Zeilenanfang, sodass auch ein eingerücktes `await` in einem Objektliteral gefunden wird, wo
+    eine reine Zeilenprüfung vorbeiliefe. Zwei weitere Tests bewachen die Erkennungen selbst, mit
+    allen Formen, die im Repo standen.
+  - **Grenzen, und zwar im Test selbst.** Der Test prüft zwei **Formen**, nicht die Bedeutung: Er
+    weiß nicht, ob ein Aufruf eine Leitung öffnet. `preload()` steht absichtlich auf Modulebene und
+    ist dort richtig, weil es rechnet, ohne zu verbinden; umgekehrt käme ein `void connect()` ohne
+    `await` an ihm vorbei. Beides steht als Absatz „Was dieser Test prüft — und was nicht" im Kopf
+    der Datei, zusammen mit der Playwright-Grenze — nicht nur hier in `tasks.md`, denn wer in einem
+    Jahr den Test öffnet und nur den Namen liest, glaubt sonst mehr, als die Datei liefert.
+  - **Zwei Fehler in der Erkennung, beim Bauen gefunden und behoben:** Sie las erst ihre eigenen
+    Kommentare als Code (jetzt werden Kommentare und Zeichenketten entfernt, unter Erhalt der
+    Zeilenzahl), und das `) {` einer mehrzeiligen Signatur galt als eigener Anweisungskopf, wodurch
+    der Rumpf der Funktion darunter zur Modulebene wurde (jetzt muss ein Kopf mit einem Namen
+    beginnen). Beide Fälle stehen als Testfall dabei.
   - **Kein Retry, kein erhöhtes Timeout.** Ein Wiederholungsversuch macht den Befund unsichtbar,
     statt ihn zu beheben — und diese Unsichtbarkeit hat einen unbeteiligten PR rot gemacht, dessen
     Diff das Paket nicht einmal berührte.

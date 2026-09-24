@@ -10,11 +10,20 @@ import {
   readModeloFiles,
   resolve,
 } from "@fundamento/modelo";
-import { afterAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { TOOL_NAMES } from "../schemas.js";
-import { call, closeClients, connect, EKZEMPLO_CONFIG, output } from "../test-doubles/client.js";
+import {
+  type Connected,
+  call,
+  closeClients,
+  connect,
+  EKZEMPLO_CONFIG,
+  output,
+  preload,
+} from "../test-doubles/client.js";
 
 afterAll(closeClients);
+preload({ config: EKZEMPLO_CONFIG });
 
 type Resolved = {
   tokens: Record<
@@ -23,9 +32,16 @@ type Resolved = {
   >;
 };
 
-const { client } = await connect({ config: EKZEMPLO_CONFIG });
-const { contents } = await client.readResource({ uri: "fundamento://export/modelo.json" });
-const modeloJson = JSON.parse((contents[0] as { text: string }).text) as ModeloJson;
+// Die Verbindung entsteht im `beforeAll`, nicht auf Modulebene: Modulcode läuft, während Vitest
+// alle Dateien einsammelt — die Leitung stünde dann offen, bis dieser Test an der Reihe ist.
+let client: Connected["client"];
+let modeloJson: ModeloJson;
+
+beforeAll(async () => {
+  ({ client } = await connect({ config: EKZEMPLO_CONFIG }));
+  const { contents } = await client.readResource({ uri: "fundamento://export/modelo.json" });
+  modeloJson = JSON.parse((contents[0] as { text: string }).text) as ModeloJson;
+});
 const { files } = readModeloFiles(projectModeloSource(EKZEMPLO_CONFIG));
 if (files === undefined) throw new Error("ekzemplo did not load");
 const source = buildModelo(files).modelo;
