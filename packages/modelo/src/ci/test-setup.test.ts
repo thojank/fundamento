@@ -3,15 +3,18 @@
 // Modulcode und ein `describe("…", async () => { … })` laufen, während Vitest die Dateien
 // einsammelt — nicht, wenn der Test dran ist. Wer dort einen Server startet oder eine Verbindung
 // aufbaut, hält sie über die gesamte Sammel- und Laufzeit aller übrigen Dateien offen: Zwischen dem
-// Aufbau und der ersten Anfrage liegen Minuten, und eine Leitung, die so lange unbenutzt
-// offensteht, wird zurückgesetzt. Gemessen an `packages/mcp/src/resources-http.test.ts` („serves the
-// tools"): derselbe Commit, zwei CI-Läufe, einer grün, einer rot mit `read ECONNRESET` — die erste
-// Anfrage über die alte Leitung.
+// Aufbau und der ersten Anfrage liegen Minuten. Vierzehn Stellen trugen das Muster; eine davon hielt
+// dabei einen echten Socket offen.
 //
-// Vierzehn Stellen trugen das Muster, aber nur diese eine fiel je: Sie ist die einzige mit einem
-// echten Socket. Die anderen sind nicht gesünder, sie sind nur stumm. Deshalb prüft dieser Test das
-// Muster und nicht den Fehlerfall — und deshalb steht hier kein `retry` und kein höheres Timeout:
-// Ein Wiederholungsversuch macht den Befund unsichtbar, statt ihn zu beheben.
+// **Was dieser Test nicht geleistet hat.** Der Anlass war ein flakender Test in
+// `packages/mcp/src/resources-http.test.ts` („serves the tools", `read ECONNRESET`). Die Umstellung
+// auf `beforeAll` hat ihn **nicht** behoben: Er fiel danach erneut, im Push-Lauf von `a7ba401`, nach
+// 8799 ms. Die Sammelzeit war also nicht seine Ursache. Der offene Verdacht steht in `tasks.md`
+// (Nodes `keepAliveTimeout` von 5000 ms, den `http.ts` nicht setzt) — dieser Test bleibt richtig,
+// aber aus eigenem Grund: Aufbau zur Sammelzeit ist falsch, gleich ob etwas davon fällt.
+//
+// Kein `retry` und kein höheres Timeout: Ein Wiederholungsversuch macht einen Befund unsichtbar,
+// statt ihn zu beheben.
 //
 // Der Aufbau gehört in ein `beforeAll` mit dem passenden `afterAll`. Dann entsteht die Verbindung,
 // wenn die Datei läuft, und sie wird geschlossen, wenn die Datei fertig ist.

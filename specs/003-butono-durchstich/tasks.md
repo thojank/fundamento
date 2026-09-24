@@ -1249,6 +1249,22 @@ und F24 (Befund, nicht blockierend).
   - **Nicht im Geltungsbereich:** die Playwright-Specs in `packages/eroj/test/*.spec.ts`. Sie liegen
     außerhalb von `src`, `test.describe` hat ein eigenes Ausführungsmodell — und geprüft: keine von
     ihnen trägt das Muster. Wenn sie es einmal tragen, greift dieser Wächter nicht.
+  - **Korrektur, 2026-09-24: Die Umstellung hat den flakenden Test nicht behoben.** Nach dem
+    Umstellen aller vierzehn Stellen fiel `resources-http > serves the tools` im Push-Lauf von
+    `a7ba401` erneut, mit demselben `read ECONNRESET` nach 8799 ms — der PR-Lauf desselben Commits
+    war grün. Die Sammelzeit war also nicht die Ursache; der grüne Doppellauf davor war Glück, kein
+    Beweis. Die Umstellung bleibt richtig, aber aus eigenem Grund: Aufbau zur Sammelzeit ist falsch,
+    gleich ob etwas davon fällt.
+  - **Offener Verdacht, mit dem, was dafür spricht:** Nodes `keepAliveTimeout` steht auf dem
+    Standard von **5000 ms**, und `packages/mcp/src/http.ts` setzt ihn nicht. Der Server ist
+    zustandslos: Jeder POST bekommt eigenen Server und eigenen Transport, danach liegt der Socket im
+    Verbindungspool des Clients. Vergeht zwischen `client.connect()` und der ersten Anfrage mehr Zeit
+    als das Limit, schließt der Server die Leitung, während der Client sie noch für brauchbar hält —
+    das Ergebnis ist ein Reset, kein Timeout. Dafür sprechen: Alle drei beobachteten Fehlschläge
+    dauerten **4896, 8799 und 12962 ms**, also ab der Fünf-Sekunden-Marke; es fällt ausschließlich
+    der Transport mit einem echten Socket; und es fällt nur unter Last, die genau diese Lücke
+    aufzieht. Zu klären ist, ob das Limit für einen Loopback-Server richtig gesetzt ist — das ist
+    eine Frage an den Server, nicht an den Test, und deshalb nicht in diesem PR entschieden.
   - Fertig wenn: `pnpm check` grün, und der statische Test wird rot, sobald jemand das Muster wieder
     einführt. Kein Figma-Lauf nötig; die Änderung betrifft nur Tests.
 
