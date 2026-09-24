@@ -299,3 +299,40 @@ describe("ekzemplo's tertiary action has no surface of its own (F36)", () => {
     }
   });
 });
+
+// Nachtrag zu F36 (Maintainer, 2026-09-24): Das Alpha allein ist die Hälfte der Zusicherung. Eine
+// Auflage aus reinem Schwarz ist im dunklen Schema unsichtbar — der Token ist gesetzt, der Kontrast
+// ist weg, dieselbe Fehlerklasse wie ein Füllwert, der im Dark Mode auf seinem hellen Wert
+// stehenbleibt. Eine Zustandsüberlagerung, die auf beiden Gründen lesbar sein muss, trägt deshalb
+// die Dimension `color-scheme`, und zugesichert wird die aufgelöste Farbe je Schema, nicht nur ihre
+// Deckkraft. `rest` und `disabled` bleiben davon unberührt: Durchsichtig ist durchsichtig, da gibt
+// es nichts zu spiegeln.
+describe("ekzemplo's tertiary overlay is readable on both grounds (F36)", () => {
+  const overlayOf = (aspekto: string, scheme: string, state: string) => {
+    const value = tokens({ aspekto, "color-scheme": scheme })[`color.action.tertiary.${state}`]
+      ?.value as { hex?: string; alpha?: number } | undefined;
+    return { hex: value?.hex, alpha: value?.alpha };
+  };
+
+  it.each([
+    ["light", "#000000"],
+    ["dark", "#ffffff"],
+  ])("lays hover and pressed in the colour the ground needs, in %s", (scheme, hex) => {
+    expect(overlayOf("ekzemplo", scheme, "hover")).toEqual({ hex, alpha: 0.08 });
+    expect(overlayOf("ekzemplo", scheme, "pressed")).toEqual({ hex, alpha: 0.1 });
+  });
+
+  it.each(["light", "dark"])("says the same as the reference on both overlays, in %s", (scheme) => {
+    for (const state of ["hover", "pressed"]) {
+      expect(overlayOf("ekzemplo", scheme, state), `${state} in ${scheme}`).toEqual(
+        overlayOf("komuna", scheme, state),
+      );
+    }
+  });
+
+  it.each(["light", "dark"])("leaves rest and disabled on nothing at all, in %s", (scheme) => {
+    for (const state of ["rest", "disabled"]) {
+      expect(overlayOf("ekzemplo", scheme, state).alpha, `${state} in ${scheme}`).toBe(0);
+    }
+  });
+});

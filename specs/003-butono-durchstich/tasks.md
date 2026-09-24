@@ -1112,5 +1112,34 @@ und F24 (Befund, nicht blockierend).
     mit seiner echten Deckkraft im Plan (`{hex: "#000000", opacity: 0.08}`). Die Weigerung selbst
     ist nicht weg, nur ihr Anlass: Sie bleibt an einer Fixture geprüft, die den Knopf wieder
     deckend anlegt, damit die Zusicherung nicht verrottet.
+  - **Nachtrag, geprüft am 2026-09-24** (Auftrag des Maintainers: ekzemplos Auflage sei im dunklen
+    Schema reines Schwarz und damit unsichtbar). **Der Befund trifft nicht zu.** Gemessen über
+    `resolve` an den vier Kombinationen: ekzemplo löst im Dunkeln auf `#ffffff` mit α 0.08 (hover)
+    und α 0.10 (pressed) auf, wie die Referenz, und im Hellen auf `#000000` mit denselben Alphas.
+    Grund: Vier Sets zeigen auf `color.action.tertiary.hover` — `core` und `aspekto/ekzemplo` auf
+    `shade.8`, `color-scheme/dark` und `aspekto/komuna+color-scheme/dark` auf `tint.8`. Das Set
+    `color-scheme/dark` trägt **nur** die Bedingung `color-scheme=dark` und gilt deshalb für jede
+    Marke; da `color-scheme` (Priorität 4) über `aspekto` (1) rangiert, schlägt es ekzemplos
+    Basis-Set. Eine Wiederholung in `sets/aspekto/ekzemplo+color-scheme/dark.json` wäre wertgleich.
+  - **Was tatsächlich fehlte, war die Zusicherung, nicht das Set.** Die Tests oben sichern nur
+    `0 < alpha < 1` zu — eine Auflage aus reinem Schwarz auf dunklem Grund wäre da durchgelaufen,
+    dieselbe Fehlerklasse wie ein Füllwert, der im Dark Mode auf seinem hellen Wert stehenbleibt:
+    Der Token ist gesetzt, der Kontrast ist weg. Eine Zustandsüberlagerung, die auf beiden Gründen
+    lesbar sein muss, trägt die Dimension `color-scheme`; zugesichert ist jetzt die **aufgelöste
+    Farbe je Schema** (`#000000` hell, `#ffffff` dunkel, α 0.08/0.10), der Gleichstand mit der
+    Referenz auf beiden Auflagen und α 0 für `rest` und `disabled`. Das gilt für jede Aspekto, nicht
+    nur für ekzemplo.
+  - **Offener, kleinerer Befund:** ekzemplos eigene Zeile (`aspekto/ekzemplo` → `shade.8`) wirkt nur
+    im hellen Schema; im Dunkeln überstimmt sie das generische Set. Heute ist das Ergebnis richtig,
+    aber eine Marke, die im Dunkeln eine *andere* Auflage will, braucht ein eigenes
+    `aspekto/ekzemplo+color-scheme/dark`. Keine Änderung nötig, nur festgehalten.
+  - **Aufräumen, eigene Änderung (nicht in diesem PR), gemessen:**
+    `packages/aspekto-komuna/sets/aspekto/komuna+color-scheme/dark.json` trägt 57 Tokens, von denen
+    **55 wortgleich** das generische `color-scheme/dark` wiederholen. Zwei tun es nicht:
+    `color.action.secondary.text` (`neutral.25` statt `neutral.50`) und `color.palette.neutral.950`,
+    das nur dort steht. Die Datei ist deshalb **nicht** entbehrlich: Wird sie entfernt, ändern sich
+    378 aufgelöste Werte in den dunklen Kombinationen, weil `neutral.950` unter Canvas, Texten und
+    Navigation hängt. Eine Aufräumung darf nur die 55 Wiederholungen streichen und die zwei
+    Entscheidungen behalten — und muss dabei gemessen werden, nicht nebenbei gemacht.
 
 Consistency check before tasks (`/speckit.analyze` scope): every FR and AK maps to at least one task or a recorded decision; every task maps to a plan decision; two new packages (Art. XI); the lockfile changes in T008 only; no task lowers a threshold; nothing is published.
