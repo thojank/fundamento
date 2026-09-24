@@ -171,6 +171,7 @@ export function buildModeloJson(input: ModeloExportInput): ModeloJson {
       .map((set) => exportedSet(set, trees)),
     reguloj: structuredClone(modelo.reguloj),
     jugxoj: structuredClone(modelo.jugxoj),
+    mankoj: structuredClone(modelo.mankoj),
     kontrastParoj: structuredClone(modelo.kontrastParoj),
     // Sorted by Ero name at load time; the Skemoj follow the same order (Spec 003, D-02).
     eroj: modelo.eroj.map((entry) => structuredClone(entry.ero)),

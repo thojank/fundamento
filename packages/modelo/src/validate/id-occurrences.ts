@@ -18,7 +18,7 @@ import {
 
 /**
  * ID occurrences of: core token definitions (overrides in other sets carry no ID), set roots,
- * Dimensioj, DimensioValoroj, Reguloj, Jugxoj, KontrastParoj, Eroj and Skemoj. `$themes.json` is skipped: its
+ * Dimensioj, DimensioValoroj, Reguloj, Jugxoj, Mankoj, KontrastParoj, Eroj and Skemoj. `$themes.json` is skipped: its
  * theme IDs repeat the DimensioValoro IDs by design.
  *
  * A present string ID points at the `id` value itself (e.g.
@@ -88,6 +88,7 @@ export function collectIdOccurrences(files: ModeloFiles): IdOccurrence[] {
   const lists = [
     ["reguloj.json", "reguloj", "regulo"],
     ["jugxoj.json", "jugxoj", "jugxo"],
+    ["mankoj.json", "mankoj", "manko"],
     ["kontrastparoj.json", "kontrastParoj", "kontrastParo"],
   ] as const;
   for (const [fileName, key, entityType] of lists) {

@@ -18,6 +18,7 @@ import {
   figmaValues,
   resolveFigmaPlan,
   styleOfWeight,
+  TEXT_CASE_VARIES,
 } from "./figma.js";
 import { FIGMA_MODE_LIMIT } from "./plugin.js";
 
@@ -609,5 +610,64 @@ describe("a brand that draws pills (F32)", () => {
     const komuna = resolveFigmaPlan(pillPlan, { aspekto: "komuna" });
     expect(Number(komuna["radius/role/control"])).toBe(4);
     expect(Number(komuna["radius/focus/gap"])).toBe(6);
+  });
+});
+
+// F31 (An P0, Maintainer 2026-09-23): Gesperrte Versalien sind ein typografisches Paar. Der
+// Sperrsatz kam als Variable schon an, war aber an nichts gebunden; die Schreibweise fehlte ganz.
+describe("capitals and tracking reach the Figma plan (F31)", () => {
+  const set = plan.components.find((component) => component.set === "butono");
+  const variant = set?.variants.find(
+    (entry) => entry.props.size === "medium" && entry.props.state === "rest",
+  );
+
+  it("states the case of the label's role, per variant", () => {
+    expect(variant?.textCase).toBe("ORIGINAL");
+    for (const entry of set?.variants ?? []) {
+      expect(["ORIGINAL", "UPPER", "LOWER", "TITLE"], entry.props.size).toContain(entry.textCase);
+    }
+  });
+
+  it("keeps the tracking a variable, so it follows the brand", () => {
+    const variables = plan.collections.flatMap((collection) => collection.variables);
+    const tracking = variables.find(
+      (candidate) => candidate.name === "typography/label/1/letter-spacing",
+    );
+    expect(tracking?.type).toBe("FLOAT");
+    const komuna = resolveFigmaPlan(plan, { aspekto: "komuna" });
+    const ekzemplo = resolveFigmaPlan(plan, { aspekto: "ekzemplo" });
+    expect(typeof komuna["typography/label/1/letter-spacing"]).toBe("number");
+    expect(typeof ekzemplo["typography/label/1/letter-spacing"]).toBe("number");
+  });
+
+  // Eine Marke, die ihre Beschriftung in Versalien setzt, und eine, die es nicht tut: Der Plan
+  // kann für einen geschriebenen Wert nur einen nennen und sagt das, statt eine Marke zu wählen.
+  it("says so when two brands disagree about the case", () => {
+    const root = mkdtempSync(join(tmpdir(), "fm-case-"));
+    cpSync(
+      new URL("../../../../modelo/test/fixtures/valid/aspekto-ekzemplo/", import.meta.url).pathname,
+      root,
+      { recursive: true },
+    );
+    const setFile = join(root, "aspekto-ekzemplo/sets/aspekto/ekzemplo.json");
+    const document = JSON.parse(readFileSync(setFile, "utf8")) as Record<string, unknown>;
+    let node = document;
+    for (const key of ["typography", "label", "1"]) {
+      const next = node[key];
+      if (typeof next !== "object" || next === null) throw new Error(`no ${key}`);
+      node = next as Record<string, unknown>;
+    }
+    node.$extensions = { "com.ciferecigo.fundamento": { textTransform: "uppercase" } };
+    writeFileSync(setFile, `${JSON.stringify(document, null, 2)}\n`);
+    const mixed = celoInputOf(projectModeloSource(join(root, "fundamento.config.json")));
+    if (!mixed.ok) throw new Error("the fixture must stay valid");
+    const mixedPlan = JSON.parse(
+      FIGMA_CELO.generate(mixed.input).find((file) => file.path === "figma/plan.json")?.text ??
+        "{}",
+    ) as FigmaPlan;
+    const medium = mixedPlan.components[0]?.variants.find(
+      (entry) => entry.props.size === "medium" && entry.props.state === "rest",
+    );
+    expect(medium?.textCase).toBe(TEXT_CASE_VARIES);
   });
 });

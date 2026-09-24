@@ -1,0 +1,7 @@
+{
+  "description": "Copy of valid/minimal with one Manko that carries no evidence. A gap that does not say what it was measured against is a claim, not a finding: the tool's own words are what a later run compares itself to.",
+  "check": "mankoj",
+  "issues": [
+    { "rule": "manko-incomplete", "path": "data/mankoj.json#/mankoj/0/evidence" }
+  ]
+}

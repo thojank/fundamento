@@ -45,6 +45,7 @@ const CHECK_SUMMARIES: Readonly<Record<CheckName, string>> = {
     "No literal values in Projekcio CSS; all identifiers in the Fundamento namespace.",
   parity: "Compare the Skemo of every Ero with the inventories of the built projections.",
   regularo: "Every Regulo has a kialo; every Jugxo references an existing target.",
+  mankoj: "Every Manko is complete and says how a run recognises that the gap is gone.",
   alirebleco:
     "Contrast of every KontrastParo in every combination (WCAG 2.x binding, APCA advisory).",
   "clean-room": "No benchmark files or references; identifiers match the Fundamento allowlist.",

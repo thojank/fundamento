@@ -402,6 +402,44 @@
       ]
     },
     {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Manko",
+      "term": "Manko",
+      "inScheme": "terminologio",
+      "notation": "manko",
+      "prefLabel": {
+        "eo": "Manko",
+        "en": "gap",
+        "de": "Lücke"
+      },
+      "altLabel": {
+        "en": [
+          "tool gap",
+          "shortcoming"
+        ],
+        "de": [
+          "Werkzeuglücke",
+          "Manko"
+        ]
+      },
+      "definition": {
+        "en": "A measured gap of a tool: something the Modelo can express and a target cannot carry, kept with the evidence in the tool's own words, the date of the measurement and the condition under which a run may call it closed.",
+        "de": "Eine gemessene Lücke eines Werkzeugs: Was das Modelo ausdrückt und ein Ausgabeziel nicht tragen kann, geführt mit dem Beleg im Wortlaut, dem Datum der Messung und der Bedingung, unter der ein Lauf sie geschlossen nennen darf."
+      },
+      "broader": [
+        "#Modelo"
+      ],
+      "relations": [
+        {
+          "predicate": "partOf",
+          "target": "#Modelo"
+        },
+        {
+          "predicate": "references",
+          "target": "#Celo"
+        }
+      ]
+    },
+    {
       "uri": "https://fundamento.ciferecigo.com/ontologio#Sxablono",
       "term": "Sxablono",
       "inScheme": "terminologio",

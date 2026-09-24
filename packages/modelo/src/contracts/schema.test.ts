@@ -84,6 +84,21 @@ const jugxo = {
   context: "Divider on the landing page.",
 };
 
+const manko = {
+  id: id("man"),
+  celo: "figma",
+  property: "textCase",
+  modelo: "A typography role carries its case as a Fundamento extension.",
+  instead: "The target takes the case only as a value, never as a binding.",
+  evidence: "Unknown field",
+  date: "2026-09-23",
+  external: "Measured on the text node; the tool's documentation does not list the field.",
+  closing: {
+    measure: "binding-accepted",
+    statement: "A run binds the property to a variable and the target does not refuse it.",
+  },
+};
+
 const kontrastParo = {
   id: id("kpa"),
   name: "text-on-surface",
@@ -329,6 +344,22 @@ const samples: Sample[] = [
     ],
   },
   {
+    def: "MankojFile",
+    valid: [{ mankoj: [] }, { mankoj: [manko, { ...manko, property: "textDecoration" }] }],
+    invalid: [
+      // A Manko without a closing condition is invalid, as a Regulo without a kialo (Art. VI).
+      { mankoj: [{ ...manko, closing: undefined }] },
+      { mankoj: [{ ...manko, closing: { statement: "Someday." } }] },
+      { mankoj: [{ ...manko, closing: { measure: "someone-says-so", statement: "Someday." } }] },
+      { mankoj: [{ ...manko, closing: { measure: "binding-accepted", statement: "" } }] },
+      { mankoj: [{ ...manko, evidence: "" }] },
+      { mankoj: [{ ...manko, date: "23.09.2026" }] },
+      { mankoj: [{ ...manko, id: id("jug") }] },
+      { mankoj: [{ ...manko, celo: "Figma" }] },
+      { mankoj: [{ ...manko, kialo: "beside the point" }] },
+    ],
+  },
+  {
     def: "KontrastParojFile",
     valid: [{ kontrastParoj: [] }, { kontrastParoj: [kontrastParo] }],
     invalid: [
@@ -460,6 +491,7 @@ const modeloJson = {
   ],
   reguloj: [regulo],
   jugxoj: [jugxo],
+  mankoj: [manko],
   kontrastParoj: [kontrastParo],
   eroj: [],
   skemoj: [],

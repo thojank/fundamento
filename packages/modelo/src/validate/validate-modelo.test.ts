@@ -73,6 +73,7 @@ describe("positive fixtures", () => {
       combinations: 4,
       reguloj: 1,
       jugxoj: 0,
+      mankoj: 0,
       kontrastParoj: 1,
     });
   });

@@ -87,6 +87,10 @@ export const RULE_IDS = [
   "regulo-kialo-missing",
   "jugxo-ref-missing",
   "jugxo-celo-unknown",
+  // Mankoj: the gaps the system keeps of its own tools (F41)
+  "manko-incomplete",
+  "manko-celo-unknown",
+  "manko-closing-missing",
   // KontrastParoj (FUND-3.2, FUND-4.5)
   "kontrastparo-token-missing",
   "kontrastparo-not-color",

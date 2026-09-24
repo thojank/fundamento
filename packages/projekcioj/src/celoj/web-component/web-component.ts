@@ -68,6 +68,9 @@ function declarations(skemo: Skemo, part: string, property: string, token: strin
         `font-weight: ${variable(token, "font-weight")};`,
         `letter-spacing: ${variable(token, "letter-spacing")};`,
         `line-height: ${variable(token, "line-height")};`,
+        // Gesperrte Versalien sind ein Paar (F31): Wer die Rolle setzt, setzt beide Werte, und die
+        // Rolle trägt sie je Modus — eine Marke in Versalien schaltet mit, ohne Sonderregel.
+        `text-transform: ${variable(token, "text-transform")};`,
       ];
     case "width":
       return part === "border"

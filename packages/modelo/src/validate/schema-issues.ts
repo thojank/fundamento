@@ -34,6 +34,10 @@ const DATA_FILE_SEMANTIC: Record<DataFileName, RegExp[]> = {
   ],
   "reguloj.json": [/^\/reguloj\/\d+\/(id|kialo)(\/|$)/],
   "jugxoj.json": [/^\/jugxoj\/\d+\/(id|ref)(\/|$)/],
+  // Completeness, the Celo and the closing condition are the Manko rules' business (F41).
+  "mankoj.json": [
+    /^\/mankoj\/\d+\/(id|celo|property|modelo|instead|evidence|date|external|closing)(\/|$)/,
+  ],
   "kontrastparoj.json": [/^\/kontrastParoj\/\d+\/(id|foreground|background)(\/|$)/],
   "ids.lock.json": [],
 };
@@ -52,6 +56,7 @@ const DATA_FILE_SUBTREE_RULES: Record<DataFileName, { pattern: RegExp; rule: Rul
   ],
   "reguloj.json": [],
   "jugxoj.json": [],
+  "mankoj.json": [],
   "kontrastparoj.json": [],
   "ids.lock.json": [],
 };

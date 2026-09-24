@@ -1,6 +1,6 @@
 # Fundamento – Constitution
 
-Version 1.7 · 2026-09-20 · Status: ratifiziert
+Version 1.9 · 2026-09-23 · Status: ratifiziert
 
 Fundamento ist ein maschinenlesbares, nativ mehrmarkenfähiges Design System. Sein kanonischer Zustand ist ein Datenmodell; Figma, Code, Dokumentation und Werkzeuge sind Projektionen dieses Modells. Diese Constitution definiert die Prinzipien, gegen die jede Spezifikation, jeder Plan und jede Implementierung geprüft wird. Sie ist bewusst kurz. Was hier nicht steht, ist verhandelbar; was hier steht, nicht.
 
@@ -21,6 +21,7 @@ Fundamento verwendet Esperanto als Fachsprache. Die Begriffe sind im Modell, im 
 | **Skemo** | Die maschinenlesbare Spezifikation eines Ero | `eroj/butono/skemo.json` |
 | **Regularo** | Regelsammlung mit Begründungen (Constraints, Kompositionsregeln) | Teil des Modelo |
 | **Jugxo** | Ein Einzelurteil: Präzedenzfall mit Begründung, positiv oder negativ | Sammlung im Regularo |
+| **Manko** | Eine gemessene Lücke eines Werkzeugs: Was das Modelo ausdrückt und ein Celo nicht tragen kann, mit Beleg im Wortlaut und Schließbedingung | `packages/modelo/data/mankoj.json` |
 | **Sxablono** | Template / Pattern (Layout, Seitentyp, Flow) | `packages/sxablonoj` |
 | **Projekcio** | Eine Ableitung aus dem Modelo (CSS, Figma, Doku, …) | `packages/projekcioj/*` |
 | **Enportilo** | Brand Design Importer | `packages/enportilo` |
@@ -84,6 +85,8 @@ Jede Regel im System trägt ihre Begründung. Ein Constraint ohne `kialo` (Grund
 
 Das Regularo wächst durch Jugxoj: Jede Entscheidung über Konformität oder Abweichung wird als Präzedenzfall mit Grund gespeichert, Ablehnungen ebenso wie Freigaben. Eine Jugxo verweist auf eine Regulo, ein Ero oder einen Artikel dieser Constitution; auch Abweichungen von der Constitution selbst werden so festgehalten (erste Jugxo: `jug_01M2VRT7KQ77W91MVXB4GXSRZ4`, Artikel X, 2026-09-19). Das Regularo ist damit keine Verfassung, die vorab alles regelt, sondern eine Rechtsprechung, die aus Fällen lernt.
 
+**Lücken werden geführt (Manko).** Was ein Werkzeug nicht kann, obwohl das Modelo es ausdrückt, wird als Manko festgehalten: mit dem betroffenen Celo, der betroffenen Eigenschaft, dem Beleg im Wortlaut, dem Datum der Messung, einem Verweis nach außen und — verpflichtend — der Schließbedingung, woran ein Lauf erkennt, dass die Lücke weg ist. Eine Manko ohne Schließbedingung ist ungültig, wie ein Constraint ohne Kialo. Keine Projektion verdrahtet eine Unfähigkeit: Der Lauf versucht immer, was das Modelo verlangt, schreibt bei Ablehnung den aufgelösten Wert und meldet die Manko als offen oder geschlossen — der Versuch ist die Messung, nie eine Versionsabfrage. Jeder Lauf arbeitet alle Mankoj seines Celo ab; ein System, das seine Lücken führt, ist etwas anderes als eines, das sie verschweigt.
+
 **Befund wird Regel.** Jeder Befund aus einer menschlichen Abnahme (visuell, redaktionell, fachlich), den keine Prüfung gefunden hat, wird als Regulo-Kandidat mit Kialo festgehalten und, wo er maschinell prüfbar ist, mit der nächsten Spec zu einer automatischen Regulo. Kontrast ist notwendig, aber nicht hinreichend: Ordnung von Flächen, Hierarchie von Textrollen und Unterscheidbarkeit von Zuständen sind ebenso prüfbare Eigenschaften einer Marke. Wenige Invarianten sind fest; alles andere darf innerhalb der Invarianten variieren.
 
 ## Artikel VII – Agenta Dokumentado (agentische Dokumentation)
@@ -143,7 +146,7 @@ Prüfkriterium für jede Spec: Ein Entwickler ohne Vorwissen nutzt ein Ero in un
 
 ## Governance
 
-- Diese Constitution ändert sich nur durch eine Spec mit dem Titel „Constitution Amendment", die den geänderten Artikel, den Grund und die Migration bestehender Artefakte beschreibt. Änderungshistorie: v1.1 Art. XII/XIII ergänzt; v1.2 DTCG verbindlich, Mehrdimensionalität; v1.3 (Spec 001) Art. IV Aspekto-Pakete und Vollständigkeit, Art. V Schriften je Aspekto, Art. VI Jugxo-Bezug auf Artikel; v1.4 (Spec 002) Terminologie Tavolo und Ontologio, Art. III Ontologio, Art. VI Befund wird Regel, Art. VIII Internacia; v1.5 (Spec 003) Art. XII Celo Figma Make Kit, Verweis auf `docs/vojmapo.md`; v1.6 (Spec 003) Art. XII Tailwind-Namensraum `fm` im `@theme` statt `prefix(fm)` (bricht die Tailwind-NomRegulo, Jugxo zu Art. XII); v1.7 (Spec 004) Art. V Benchmark-Aspekto (fremde Systeme als eigene Aspektoj in getrennten Repos, Kern erhält nur Kennzahlen und Fingerprints) und Terminologie um **Aspiro** ergänzt.
+- Diese Constitution ändert sich nur durch eine Spec mit dem Titel „Constitution Amendment", die den geänderten Artikel, den Grund und die Migration bestehender Artefakte beschreibt. Änderungshistorie: v1.1 Art. XII/XIII ergänzt; v1.2 DTCG verbindlich, Mehrdimensionalität; v1.3 (Spec 001) Art. IV Aspekto-Pakete und Vollständigkeit, Art. V Schriften je Aspekto, Art. VI Jugxo-Bezug auf Artikel; v1.4 (Spec 002) Terminologie Tavolo und Ontologio, Art. III Ontologio, Art. VI Befund wird Regel, Art. VIII Internacia; v1.5 (Spec 003) Art. XII Celo Figma Make Kit, Verweis auf `docs/vojmapo.md`; v1.6 (Spec 003) Art. XII Tailwind-Namensraum `fm` im `@theme` statt `prefix(fm)` (bricht die Tailwind-NomRegulo, Jugxo zu Art. XII); v1.7 (Spec 004) Art. V Benchmark-Aspekto (fremde Systeme als eigene Aspektoj in getrennten Repos, Kern erhält nur Kennzahlen und Fingerprints) und Terminologie um **Aspiro** ergänzt; v1.9 (Spec 003, F41) Art. VI Lücken werden geführt und Terminologie um **Manko** ergänzt (neue Datenart `data/mankoj.json`, eigene Prüfung `check:mankoj` in der CI).
 - Jeder `plan.md` enthält einen Abschnitt „Constitutional Compliance Review" mit einem Eintrag pro Artikel: konform / Ausnahme mit Grund.
 - `/speckit.analyze` prüft jede Phase gegen diese Constitution, bevor Tasks erzeugt werden.
 - Die Constitution hat Vorrang vor jeder anderen Praxis, jedem Template und jeder Bequemlichkeit.

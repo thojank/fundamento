@@ -1018,7 +1018,41 @@ und F24 (Befund, nicht blockierend).
     Beschriftung steht in Archivo SemiBold; der Bericht nennt die gebundenen Variablen und die
     Schrift je Aspekto.
 
-- [ ] **F31 Versalien werden projiziert** (An P0, Maintainer 2026-09-23) — **noch nicht begonnen**
+- [ ] **F31 Versalien und Sperrsatz werden projiziert** (An P0, Maintainer 2026-09-23, freigegeben
+  und um `letterSpacing` erweitert)
+  - Anlass, jetzt konkret: Die kommende dritte Marke setzt ihre Mikro-Beschriftungen auf Versalien
+    mit positivem Sperrsatz. Gesperrte Versalien sind ein typografisches Paar; kein Werkzeug
+    braucht das eine ohne das andere.
+  - Befund, gemessen: **Der Sperrsatz kam schon an** — `--fm-typography-<rolle>-letter-spacing`
+    steht in der CSS, die Komponente setzt es, und im Figma-Plan gibt es die Variable. Er war nur
+    **an nichts gebunden**: Der Textknoten bekam ihn nie. Die Schreibweise fehlte ganz —
+    `textTransform` stand im Modelo und im Rezolvo, in keiner Projektion. Das betraf auch komunas
+    `typography.kicker`, das seit Spec 001 auf `uppercase` steht, ohne dass es je jemand gesehen
+    hätte.
+  - Rot zuerst, Web: `expected … to contain '--fm-typography-display-1-text-transform'` und
+    `expected … to contain 'text-transform: var(--fm-typography-label-1-text-transform)'`.
+  - Rot zuerst, Figma: `expected undefined to be 'ORIGINAL'` (der Plan nannte keine Schreibweise)
+    und im Lauf `expected undefined to be 'ORIGINAL'` sowie `expected '' to contain
+    'Schreibweise'`.
+  - Grün, Web: Die Schreibweise ist ein Feld der Typografie wie der Sperrsatz. **Die Kaskade war
+    die eigentliche Arbeit:** Die Schreibweise steht im Modelo *neben* dem Wert, und der letzte
+    Satz, der sie nennt, gewinnt (D-11). In CSS heißt das: Wer sie nicht nennt, schreibt auch
+    nichts — sonst löschte der Satz einer Marke, der die Rolle nur neu belegt, die Versalien des
+    Kerns. Nur der Grundsatz schreibt die Vorgabe `none`, damit die Eigenschaft überall einen Wert
+    hat. Gemessen: `--fm-typography-kicker-text-transform: uppercase` aus dem Kern,
+    `--fm-typography-display-1-text-transform: uppercase` im Block von ekzemplo über dem `none`
+    des Kerns.
+  - Grün, Figma: Der Sperrsatz wird **gebunden** (`letterSpacing` ist ein bindbares Feld des
+    Textknotens) und folgt damit dem Modus. Die Schreibweise wird **geschrieben**, weil `textCase`
+    keines ist — der Plan nennt sie je Variante. Wo zwei Modi sich unterscheiden, nennt er
+    `TEXT_CASE_VARIES` statt eines Werts, der Lauf schreibt nichts und warnt mit Namen: dieselbe
+    Ehrlichkeit wie bei einer Deckkraft, die dem Modus nicht folgen kann (F8).
+  - Nebenbefund: `text-transform` war in der Komponenten-CSS-Prüfung weder als Struktur noch als
+    Gestaltung geführt und fiel deshalb durch. Es ist jetzt eine Gestaltungseigenschaft — sie
+    kommt aus dem Vortaro, nie aus der Komponente.
+  - Nicht gemessen: der Lauf in echtem Figma. Das Double prüft Bindung und geschriebenen Wert;
+    ob Figma eine Bindung von `textCase` erlaubte, ist offen — der Plan trägt die Werte, eine
+    Bindung wäre ein kleiner Schritt.
   - `textTransform` steht im Modelo und im Rezolvo, aber keine Projektion trägt es: weder die
     CSS-Variablen (`--fm-typography-display-1-*` kennt kein `text-transform`) noch der Figma-Plan.
     Betrifft auch komunas `typography.kicker` seit Spec 001. Anforderung: Die Web-Projektion setzt
@@ -1141,5 +1175,66 @@ und F24 (Befund, nicht blockierend).
     378 aufgelöste Werte in den dunklen Kombinationen, weil `neutral.950` unter Canvas, Texten und
     Navigation hängt. Eine Aufräumung darf nur die 55 Wiederholungen streichen und die zwei
     Entscheidungen behalten — und muss dabei gemessen werden, nicht nebenbei gemacht.
+
+- [ ] **F41 Das System führt seine Lücken — und muss sie noch nachprüfen** (An P0, Maintainer
+  2026-09-23; Constitution-Amendment Art. VI „Lücken werden geführt", Terminologie **Manko**)
+  - **Gebaut, Modelo-Teil:** Datenart `data/mankoj.json` mit Schema und ID-Präfix `man_`, eigene
+    Prüfung `check:mankoj` als eigener CI-Schritt, `mankoj` im Export. Zwei Mankoj stehen darin,
+    beide am Textknoten gemessen: `setBoundVariable` lehnt `textCase` und `textDecoration` ab,
+    während dieselbe Eigenschaft als Wert angenommen wird. Jede trägt ihre Schließbedingung.
+  - **AK-12 als Regel statt als Feldliste** (Maintainer, 2026-09-23): Ein Satz, der sein Ziel in
+    einem typisierten Feld deklariert, darf es in seinen eigenen Feldern nennen — der Jugxo in
+    `ref.celo`, die Manko in `celo`. Eine Aufzählung erlaubter Prosafelder wäre mit jedem neuen
+    Feld gewachsen und hätte die Prosa zum Schlupfloch gemacht. `celoMappingLeaks` kennt das Wort
+    `mankoj` deshalb nicht: Die Manko besteht die Prüfung, weil sie deklariert, und ihr Link nach
+    außen darf das Werkzeug nennen wie ihre Prosa.
+  - **AK-10:** Das `date` einer Manko ist der Tag der Messung aus den Daten, wie das `date` eines
+    Jugxo der Tag der Entscheidung — kein Build-Zeitstempel. Der Test vergleicht beide gegen die
+    Eingabe, damit ein Datum, das der Build erfände, weiterhin auffällt.
+  - **Rot zuerst, zwei Fixtures:** `invalid/manko-closing-missing` — eine Lücke ohne
+    Schließbedingung ist ungültig wie ein Constraint ohne Kialo — und
+    `invalid/manko-evidence-missing`: Eine Lücke, die nicht sagt, woran sie gemessen wurde, ist
+    eine Behauptung.
+  - **Abgetrennt als F42, der Projektionsteil** (Maintainer, 2026-09-23): F41 liefert Datenart,
+    Prüfung und Export; das Nachprüfen wird ein eigener Strang. Bis der steht, ist F41 ausdrücklich
+    die Hälfte — das System führt seine Lücken, aber es prüft sie nicht nach. Nicht gebaut ist:
+    1. Der Lauf verdrahtet die Unfähigkeit noch, statt sie zu messen
+       (`packages/projekcioj/src/celoj/figma/plugin.ts`, Schreibweise der Beschriftung): Er
+       versucht die Bindung nie, und wo die Modi sich unterscheiden, schreibt er gar nichts statt
+       des aufgelösten Werts. Art. VI verlangt das Gegenteil — der Versuch ist die Messung.
+    2. Der Bericht führt keine `mankoj: { open, closed }`; der Cockpit-Check, der alle bekannten
+       Lücken eines Celo abarbeitet, fehlt ganz.
+    3. Der rote Test kennt keinen der beiden Zweige: Das Double lehnt heute nur Schrift- und
+       Auto-Layout-Felder ab, und der bestehende Test zementiert die Unfähigkeit, statt sie zu
+       messen. Ohne den Zweig „Double nimmt die Bindung an → dieselbe Manko wird als geschlossen
+       gemeldet" bleibt die Prüfung grün, wenn das Werkzeug die Lücke längst geschlossen hat.
+    `textDecoration` kommt in der Figma-Projektion überhaupt noch nicht vor; Manko 2 hat also
+    keinen Lauf, der sie messen könnte.
+  - **Versionsnummer, entschieden** (Maintainer, 2026-09-23): F33 (PR #31, Art. V/VI/VII) hebt die
+    Constitution ebenfalls auf 1.8, ist älter und geht zuerst nach `main`; F41 trägt deshalb
+    **1.9**. Bis #31 gemergt ist, springt die Änderungshistorie von v1.7 auf v1.9 — der Rebase auf
+    das gemergte F33 schließt die Lücke. Gemerkt: Die Nummer wird gegen den Basis-Commit geprüft,
+    nicht aus der Datei fortgeschrieben; der Header-Test vergleicht nur einen String und hätte zwei
+    Amendments unter einer Nummer nie gemeldet.
+
+- [ ] **F42 Der Lauf prüft die geführten Lücken nach** (aus F41 abgetrennt, Maintainer 2026-09-23)
+  - Die drei Stücke aus dem F41-Abschnitt: Der Lauf versucht die Bindung immer und wertet den
+    Fehlschlag aus (statt die Unfähigkeit zu verdrahten), der Bericht führt
+    `mankoj: { open, closed }` über alle Lücken seines Celo, und der rote Test kennt beide Zweige —
+    Double lehnt ab: geschrieben und gemeldet; Double nimmt an: gebunden und dieselbe Manko als
+    geschlossen gemeldet. Ohne den zweiten Zweig bleibt die Prüfung grün, wenn das Ziel die Lücke
+    längst geschlossen hat, und niemand merkt es.
+  - Fasst die Projektion an: gehört damit in dieselbe Messung in echtem Figma wie #28, #29, #30.
+  - **Aufräumen, eigene Änderung (nicht in diesem PR):** neun `noUnusedImports`-Warnungen in
+    `packages/modelo/src/checks/alirebleco/*`, `checks/parity/index.ts`, `export/build.ts` und
+    `validate/spec004-reguloj.ts` sowie ein `noTemplateCurlyInString` in
+    `ci/release-workflow.test.ts`. Alle älter als dieser Branch, keine bricht die Prüfung.
+    Dazu: `validate/validate-modelo.ts` enthält zwei rohe NUL-Bytes als Trennzeichen im
+    Issue-Schlüssel (`${severity}\0${rule}\0${path}`). Absicht und älter als dieser Branch, aber
+    git hält die Datei deshalb für binär und zeigt keinen Diff mehr. Als `\0`-Escape geschrieben
+    wäre dieselbe Absicht lesbar — eigene Änderung, eigener PR.
+  - Fertig wenn: Der Maintainer misst in echtem Figma — der Lauf versucht beide Bindungen, meldet
+    beide Mankoj als offen, und derselbe Lauf würde sie als geschlossen melden, sobald das Ziel sie
+    annimmt. Grüne CI ist hier keine Abnahme.
 
 Consistency check before tasks (`/speckit.analyze` scope): every FR and AK maps to at least one task or a recorded decision; every task maps to a plan decision; two new packages (Art. XI); the lockfile changes in T008 only; no task lowers a threshold; nothing is published.
