@@ -1129,6 +1129,55 @@ und F24 (Befund, nicht blockierend).
   - Fertig wenn: Der Maintainer misst in Figma — der Ring folgt in ekzemplo dem eckigen Knopf, und
     die Beschriftung steht im Modus ekzemplo in Archivo Black.
 
+- [ ] **F36 ekzemplo: der tertiäre Knopf ist in beiden Schemata durchsichtig** (An P0,
+  Markenentscheidung des Maintainers 2026-09-23; nur Fixture-Daten)
+  - Befund: `color.action.tertiary.*` war in ekzemplo im hellen Schema deckend weiß (`#ffffff α1`)
+    und nur im dunklen durchsichtig — ein tertiärer Knopf, der eine Fläche hinstellt, ist keiner.
+  - Rot zuerst, auf den **aufgelösten Alphawert je Schema**, nicht auf den Tokennamen:
+    `expected 1 to be +0`, `color.action.tertiary.hover: expected 1 to be less than 1`, und die
+    Gegenüberstellung mit der Referenz `expected false to be true`.
+  - Grün: rest und disabled auf `shade.0`, hover auf `shade.8`, pressed auf `shade.10` — wie in
+    komuna. Zugesichert ist dreierlei je Schema: rest und disabled lösen auf Alpha 0 auf, hover und
+    pressed liegen dazwischen (Auflage, keine Fläche), und ekzemplo ist genau dort durchsichtig, wo
+    die Referenz es auch ist. `state-distinct` hält weiter: Die Auflagen werden vor dem Vergleich
+    über `background.default` gerechnet.
+  - **Folge für F8, gemessen:** Damit sagen beide Marken auf diesen Rollen dasselbe Alpha, und
+    **keine einzige Rolle im Plan trägt noch `alphaVariesByMode`**. Der tertiäre Knopf steht wieder
+    mit seiner echten Deckkraft im Plan (`{hex: "#000000", opacity: 0.08}`). Die Weigerung selbst
+    ist nicht weg, nur ihr Anlass: Sie bleibt an einer Fixture geprüft, die den Knopf wieder
+    deckend anlegt, damit die Zusicherung nicht verrottet.
+  - **Nachtrag, geprüft am 2026-09-24** (Auftrag des Maintainers: ekzemplos Auflage sei im dunklen
+    Schema reines Schwarz und damit unsichtbar). **Der Befund trifft nicht zu.** Gemessen über
+    `resolve` an den vier Kombinationen: ekzemplo löst im Dunkeln auf `#ffffff` mit α 0.08 (hover)
+    und α 0.10 (pressed) auf, wie die Referenz, und im Hellen auf `#000000` mit denselben Alphas.
+    Grund: Vier Sets zeigen auf `color.action.tertiary.hover` — `core` und `aspekto/ekzemplo` auf
+    `shade.8`, `color-scheme/dark` und `aspekto/komuna+color-scheme/dark` auf `tint.8`. Das Set
+    `color-scheme/dark` trägt **nur** die Bedingung `color-scheme=dark` und gilt deshalb für jede
+    Marke; da `color-scheme` (Priorität 4) über `aspekto` (1) rangiert, schlägt es ekzemplos
+    Basis-Set. Eine Wiederholung in `sets/aspekto/ekzemplo+color-scheme/dark.json` wäre wertgleich.
+  - **Was tatsächlich fehlte, war die Zusicherung, nicht das Set.** Die Tests oben sichern nur
+    `0 < alpha < 1` zu — eine Auflage aus reinem Schwarz auf dunklem Grund wäre da durchgelaufen,
+    dieselbe Fehlerklasse wie ein Füllwert, der im Dark Mode auf seinem hellen Wert stehenbleibt:
+    Der Token ist gesetzt, der Kontrast ist weg. Eine Zustandsüberlagerung, die auf beiden Gründen
+    lesbar sein muss, trägt die Dimension `color-scheme`; zugesichert ist jetzt die **aufgelöste
+    Farbe je Schema** (`#000000` hell, `#ffffff` dunkel, α 0.08/0.10), der Gleichstand mit der
+    Referenz auf beiden Auflagen und α 0 für `rest` und `disabled`. Das gilt für jede Aspekto, nicht
+    nur für ekzemplo.
+  - **Offener, kleinerer Befund:** ekzemplos eigene Zeile (`aspekto/ekzemplo` → `shade.8`) wirkt nur
+    im hellen Schema; im Dunkeln überstimmt sie das generische Set. Heute ist das Ergebnis richtig,
+    aber eine Marke, die im Dunkeln eine *andere* Auflage will, braucht ein eigenes
+    `aspekto/ekzemplo+color-scheme/dark`. Keine Änderung nötig, nur festgehalten.
+  - **Aufräumen, eigene Änderung (nicht in diesem PR), gemessen:**
+    `packages/aspekto-komuna/sets/aspekto/komuna+color-scheme/dark.json` trägt 57 Tokens, von denen
+    **55 wortgleich** das generische `color-scheme/dark` wiederholen. Zwei tun es nicht:
+    `color.action.secondary.text` (`neutral.25` statt `neutral.50`) und `color.palette.neutral.950`,
+    das nur dort steht. Die Datei ist deshalb **nicht** entbehrlich: Wird sie entfernt, ändern sich
+    378 aufgelöste Werte in den dunklen Kombinationen, weil `neutral.950` unter Canvas, Texten und
+    Navigation hängt. **Auftrag für die Aufräumung:** Nur die 55 Wiederholungen streichen; die zwei
+    Aussagen `color.action.secondary.text` und `color.palette.neutral.950` bleiben stehen. Die
+    Wirkung wird **gemessen, nicht geschätzt** — der Vergleich aller aufgelösten Werte über alle
+    Kombinationen vor und nach dem Streichen gehört zur Änderung, nicht in ihre Begründung.
+
 - [ ] **F41 Das System führt seine Lücken — und muss sie noch nachprüfen** (An P0, Maintainer
   2026-09-23; Constitution-Amendment Art. VI „Lücken werden geführt", Terminologie **Manko**)
   - **Gebaut, Modelo-Teil:** Datenart `data/mankoj.json` mit Schema und ID-Präfix `man_`, eigene
@@ -1189,5 +1238,18 @@ und F24 (Befund, nicht blockierend).
   - Fertig wenn: Der Maintainer misst in echtem Figma — der Lauf versucht beide Bindungen, meldet
     beide Mankoj als offen, und derselbe Lauf würde sie als geschlossen melden, sobald das Ziel sie
     annimmt. Grüne CI ist hier keine Abnahme.
+
+- [ ] **Befund über einen Test: `mcp/resources-http` fällt unter Last** (2026-09-24, beim vollen
+  `pnpm check` auf dem F36-Branch beobachtet)
+  - `packages/mcp/src/resources-http.test.ts` → „the HTTP transport > serves the tools" fiel mit
+    `TypeError: fetch failed`, `Caused by: Error: read ECONNRESET`, nach 4896 ms. Isoliert
+    (`npx vitest run src/resources-http.test.ts`) grün, und im zweiten vollen Lauf ebenfalls grün.
+  - Das ist ein Befund über den Test, nicht über den Code: Ein Test, der unter Last fällt und
+    isoliert durchläuft, fällt irgendwann wieder — und dann sucht jemand eine Stunde nach einer
+    Ursache, die hier schon einmal notiert war. Der Verdacht gehört zum Aufsetzen und Abräumen des
+    Servers im Test (Port, `close()`, offene Verbindung beim Abbruch), nicht zur Transportlogik:
+    Die drei Geschwistertests derselben Datei — Bindung an 127.0.0.1, Ablehnung fremder Header,
+    `mcp-input-invalid` — liefen im selben Lauf grün.
+  - Eigene Änderung, eigener PR. Nicht in einem Branch mitreparieren, der etwas anderes tut.
 
 Consistency check before tasks (`/speckit.analyze` scope): every FR and AK maps to at least one task or a recorded decision; every task maps to a plan decision; two new packages (Art. XI); the lockfile changes in T008 only; no task lowers a threshold; nothing is published.
