@@ -27,7 +27,9 @@
 // Er weiß **nicht**, ob ein Aufruf eine Leitung öffnet. `preload()` steht absichtlich auf
 // Modulebene und ist richtig dort: Es rechnet, ohne zu verbinden. Umgekehrt bliebe ein Aufruf, der
 // eine Verbindung öffnet, ohne erwartet zu werden (`void connect()`), unbemerkt — er trägt kein
-// `await`. Wer eine solche Zeile schreibt, kommt an diesem Test vorbei.
+// `await`. Wer eine solche Zeile schreibt, kommt an diesem Test vorbei. In die strenge Richtung
+// irrt er bei einer Pfeilfunktion, deren Parameterliste über mehrere Zeilen läuft: Steht der Pfeil
+// nicht auf der ersten Zeile, gilt ein `await` in ihrem Rumpf als Modulebene.
 //
 // Außerhalb des Geltungsbereichs liegen die Playwright-Specs in `packages/eroj/test/*.spec.ts`:
 // Sie liegen nicht unter `src`, und `test.describe` hat ein eigenes Ausführungsmodell. Geprüft am
@@ -128,9 +130,18 @@ function asyncDescribes(source: string): number[] {
 /** Eröffnet diese Zeile einen Vitest-Rückruf? Dessen Rumpf läuft später, nicht beim Einsammeln. */
 const CALLBACK = /^(describe|it|test|before(All|Each)|after(All|Each))\b/;
 
-/** Definiert diese Zeile eine Funktion? Ihr Rumpf läuft erst, wenn jemand sie aufruft. */
-const FUNCTION_DEF =
-  /^(export\s+)?((async\s+)?function\b|(const|let|var)\s+[\w{},\s:]+=\s*(async\s*)?(\(|<|function\b))/;
+/**
+ * Definiert diese Zeile eine Funktion? Ihr Rumpf läuft erst, wenn jemand sie aufruft. Eine
+ * Deklaration mit `function` zählt immer; eine Zuweisung — an eine Konstante wie an eine Eigenschaft,
+ * `globalThis.fetch = async (…) => …` — nur, wenn der Pfeil schon auf dieser Zeile steht. Sonst wäre
+ * `const y = (await f()).z` eine Funktion, nur weil rechts eine Klammer beginnt.
+ */
+function definesFunction(head: string): boolean {
+  if (/^(export\s+)?(async\s+)?function\b/.test(head)) return true;
+  const assignsExpression =
+    /^(export\s+)?((const|let|var)\s+)?[\w$.{},\s:]+=\s*(async\s*)?(\(|<|function\b)/.test(head);
+  return assignsExpression && (head.includes("=>") || /=\s*(async\s+)?function\b/.test(head));
+}
 
 /**
  * `await` in einer Anweisung auf Modulebene. Eine Anweisung beginnt am Zeilenanfang und reicht bis
@@ -149,7 +160,7 @@ function moduleLevelAwaits(source: string): number[] {
     if (!/^[A-Za-z_$]/.test(head)) continue;
     let end = start + 1;
     while (end < lines.length && (/^\s/.test(lines[end] ?? "") || (lines[end] ?? "") === "")) end++;
-    if (!CALLBACK.test(head) && !FUNCTION_DEF.test(head)) {
+    if (!CALLBACK.test(head) && !definesFunction(head)) {
       for (let i = start; i < end; i++) {
         if (/\bawait\b/.test(lines[i] ?? "")) found.push(i + 1);
       }
@@ -205,6 +216,13 @@ describe("no test sets up its suite at collection time", () => {
       [],
     );
     expect(moduleLevelAwaits("async function read() {\n  await open();\n}")).toEqual([]);
+    // Zuweisung einer Funktion an eine Eigenschaft: ihr Rumpf läuft später (Falschmeldung bis
+    // 2026-09-25, gefunden, als der Wächter eine Messinstrumentierung anschlug).
+    expect(
+      moduleLevelAwaits("globalThis.fetch = async (input) => {\n  await original(input);\n};"),
+    ).toEqual([]);
+    // Eine Klammer rechts vom Gleichheitszeichen macht noch keine Funktion.
+    expect(moduleLevelAwaits("const y = (await f()).z;")).toEqual([1]);
     // Mehrzeilige Signatur: Das `) {` in Spalte 0 setzt fort, es beginnt keine neue Anweisung.
     expect(moduleLevelAwaits("async function run(\n  a: A,\n) {\n  await a.go();\n}")).toEqual([]);
   });
