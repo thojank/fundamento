@@ -9,9 +9,9 @@
 // **Was dieser Test nicht geleistet hat.** Der Anlass war ein flakender Test in
 // `packages/mcp/src/resources-http.test.ts` („serves the tools", `read ECONNRESET`). Die Umstellung
 // auf `beforeAll` hat ihn **nicht** behoben: Er fiel danach erneut, im Push-Lauf von `a7ba401`, nach
-// 8799 ms. Die Sammelzeit war also nicht seine Ursache. Der offene Verdacht steht in `tasks.md`
-// (Nodes `keepAliveTimeout` von 5000 ms, den `http.ts` nicht setzt) — dieser Test bleibt richtig,
-// aber aus eigenem Grund: Aufbau zur Sammelzeit ist falsch, gleich ob etwas davon fällt.
+// 8799 ms. Die Sammelzeit war also nicht seine Ursache; welche es ist, ist offen und wird außerhalb
+// dieses Tests untersucht. Dieser Test bleibt richtig, aber aus eigenem Grund: Aufbau zur Sammelzeit
+// ist falsch, gleich ob etwas davon fällt.
 //
 // Kein `retry` und kein höheres Timeout: Ein Wiederholungsversuch macht einen Befund unsichtbar,
 // statt ihn zu beheben.

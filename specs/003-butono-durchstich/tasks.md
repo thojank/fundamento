@@ -1255,16 +1255,16 @@ und F24 (Befund, nicht blockierend).
     war grün. Die Sammelzeit war also nicht die Ursache; der grüne Doppellauf davor war Glück, kein
     Beweis. Die Umstellung bleibt richtig, aber aus eigenem Grund: Aufbau zur Sammelzeit ist falsch,
     gleich ob etwas davon fällt.
-  - **Offener Verdacht, mit dem, was dafür spricht:** Nodes `keepAliveTimeout` steht auf dem
-    Standard von **5000 ms**, und `packages/mcp/src/http.ts` setzt ihn nicht. Der Server ist
-    zustandslos: Jeder POST bekommt eigenen Server und eigenen Transport, danach liegt der Socket im
-    Verbindungspool des Clients. Vergeht zwischen `client.connect()` und der ersten Anfrage mehr Zeit
-    als das Limit, schließt der Server die Leitung, während der Client sie noch für brauchbar hält —
-    das Ergebnis ist ein Reset, kein Timeout. Dafür sprechen: Alle drei beobachteten Fehlschläge
-    dauerten **4896, 8799 und 12962 ms**, also ab der Fünf-Sekunden-Marke; es fällt ausschließlich
-    der Transport mit einem echten Socket; und es fällt nur unter Last, die genau diese Lücke
-    aufzieht. Zu klären ist, ob das Limit für einen Loopback-Server richtig gesetzt ist — das ist
-    eine Frage an den Server, nicht an den Test, und deshalb nicht in diesem PR entschieden.
+  - **Die Ursache ist offen, und sie gehört nicht in diesen PR.** Der hier zunächst notierte
+    Verdacht — Nodes `keepAliveTimeout` von 5000 ms, den `packages/mcp/src/http.ts` nicht setzt —
+    stand mit einem Beleg da, der keiner war: den Dauern der drei fehlgeschlagenen Tests, 4896, 8799
+    und 12962 ms, „also ab der Fünf-Sekunden-Marke". Der erste Wert liegt unter fünf Sekunden, und
+    vor allem messen die drei Zahlen die Dauer des Tests, nicht den Leerlauf auf dem Socket. Die
+    Größe, von der der Verdacht handelt, ist die Zeit zwischen dem letzten Byte auf dem Socket und dem
+    ersten Byte der fallenden Anfrage; sie wird in einem Wegwerf-Zweig gemessen, und ein
+    Falsifikationsversuch (`keepAliveTimeout = 0`, zwanzig volle Läufe unter Last) entscheidet. Ob
+    daraus ein Produktbefund wird, klärt ein eigener Zweig mit einer Spec-Frage davor („Welche
+    Keep-Alive-Politik hat ein Fundamento-MCP-Server?") — nicht dieser PR und keine Aufräumzeile.
   - Fertig wenn: `pnpm check` grün, und der statische Test wird rot, sobald jemand das Muster wieder
     einführt. Kein Figma-Lauf nötig; die Änderung betrifft nur Tests.
 
