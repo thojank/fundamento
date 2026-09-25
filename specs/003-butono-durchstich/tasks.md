@@ -1190,4 +1190,82 @@ und F24 (Befund, nicht blockierend).
     beide Mankoj als offen, und derselbe Lauf würde sie als geschlossen melden, sobald das Ziel sie
     annimmt. Grüne CI ist hier keine Abnahme.
 
+- [ ] **Testaufbau: keine Verbindung zur Sammelzeit** (2026-09-24, aus dem Befund zu
+  `mcp/resources-http`; eigener Branch, weil eine Testinfrastruktur-Reparatur in einem
+  Verfassungs-Amendment den Diff unehrlich macht)
+  - **Befund.** `packages/mcp/src/resources-http.test.ts` → „the HTTP transport > serves the tools"
+    fiel mit `TypeError: fetch failed`, `Caused by: Error: read ECONNRESET` (errno −104). Der Beleg
+    ist ein Vergleich, keine Vermutung: **derselbe Commit, zwei CI-Läufe — PR-Lauf grün in 13m42s,
+    Push-Lauf rot in 3m54s**, und in beiden Läufen war das einzige Paket mit einem Fehler
+    `@fundamento/mcp`. Vorher schon einmal lokal im vollen Lauf beobachtet, isoliert immer grün.
+  - **Ursache.** Ein `describe("…", async () => { … })` läuft, während Vitest die Dateien
+    einsammelt, nicht wenn der Test dran ist. Server und Verbindung entstanden also im Kopf des
+    `describe`; zwischen dem Aufbau und der ersten Anfrage lag die gesamte Sammel- und Laufzeit
+    aller übrigen elf Dateien. `binds to 127.0.0.1` prüft nur Felder und braucht die Leitung nicht —
+    `serves the tools` ist die erste Anfrage darüber, und genau sie fällt. Ein Test, der seine
+    Verbindung zur Sammelzeit aufbaut, misst nicht, was er behauptet.
+  - **Umfang: vierzehn Stellen, nicht eine.** In der Form `describe(…, async)` neunmal —
+    `resources-http.test.ts` 25 und 81, `rules-resolve.test.ts` 36, 88, 132 und 165,
+    `server.test.ts` 17, 117 und 140. Dazu **fünf `await` auf Modulebene** in drei weiteren Dateien,
+    gefunden auf den Hinweis des Maintainers, der Wächter verspreche mehr als er prüfe:
+    `e2e/ak09-dialog.test.ts` 36, `e2e/s7-dialog.test.ts` 26 und 27, `e2e/s7-gvidanto.test.ts` 26 und
+    27 — und in `s7-gvidanto` zusätzlich ein Objektliteral, das sechs Werkzeugaufrufe zur Sammelzeit
+    stellte. Nur die eine Stelle mit einem echten Socket fiel je. **Die anderen sind nicht gesünder —
+    sie sind nur stumm.** Dass sie halten, liegt am Transport, nicht am Test. Alle vierzehn sind auf
+    `beforeAll` mit passendem `afterAll` umgestellt; die beiden Indizes des Mutationstests lesen ihre
+    Antworten jetzt als Funktion, weil der Rumpf eines `describe` ebenfalls zur Sammelzeit läuft.
+  - **Rot zuerst, und zwar statisch:** `packages/modelo/src/ci/test-setup.test.ts` durchsucht jede
+    `*.test.ts` unter `packages/<paket>/src` und nennt jede Fundstelle als `datei:zeile`. Es sind
+    **zwei** Prüfungen, weil es zwei Formen gibt: ein asynchrones `describe` und ein `await` in einer
+    Anweisung auf Modulebene. Die zweite kam auf den Hinweis dazu, dass „kein `describe(…, async)`"
+    etwas anderes ist als „keine Verbindung zur Sammelzeit" — und sie hat die fünf Stellen oben
+    gefunden. Für eine Anweisung gilt: Sie beginnt am Zeilenanfang und reicht bis zur nächsten Zeile
+    am Zeilenanfang, sodass auch ein eingerücktes `await` in einem Objektliteral gefunden wird, wo
+    eine reine Zeilenprüfung vorbeiliefe. Zwei weitere Tests bewachen die Erkennungen selbst, mit
+    allen Formen, die im Repo standen.
+  - **Grenzen, und zwar im Test selbst.** Der Test prüft zwei **Formen**, nicht die Bedeutung: Er
+    weiß nicht, ob ein Aufruf eine Leitung öffnet. `preload()` steht absichtlich auf Modulebene und
+    ist dort richtig, weil es rechnet, ohne zu verbinden; umgekehrt käme ein `void connect()` ohne
+    `await` an ihm vorbei. Beides steht als Absatz „Was dieser Test prüft — und was nicht" im Kopf
+    der Datei, zusammen mit der Playwright-Grenze — nicht nur hier in `tasks.md`, denn wer in einem
+    Jahr den Test öffnet und nur den Namen liest, glaubt sonst mehr, als die Datei liefert.
+  - **Zwei Fehler in der Erkennung, beim Bauen gefunden und behoben:** Sie las erst ihre eigenen
+    Kommentare als Code (jetzt werden Kommentare und Zeichenketten entfernt, unter Erhalt der
+    Zeilenzahl), und das `) {` einer mehrzeiligen Signatur galt als eigener Anweisungskopf, wodurch
+    der Rumpf der Funktion darunter zur Modulebene wurde (jetzt muss ein Kopf mit einem Namen
+    beginnen). Beide Fälle stehen als Testfall dabei.
+  - **Kein Retry, kein erhöhtes Timeout.** Ein Wiederholungsversuch macht den Befund unsichtbar,
+    statt ihn zu beheben — und diese Unsichtbarkeit hat einen unbeteiligten PR rot gemacht, dessen
+    Diff das Paket nicht einmal berührte.
+  - **Folgebefund beim Umstellen, und warum kein höheres Limit die Antwort war.** Im `beforeAll`
+    lief die Ladearbeit in das Zehn-Sekunden-Limit für Hooks — zur Sammelzeit galt kein Limit, das
+    Problem war also vorher nur unsichtbar. Gemessen: `loadServed` kostet 0,5–1,1 s, ein `connect`
+    rund 1 s, unter der Parallellast des vollen Laufs das Zehnfache. Statt das Limit zu heben, ist
+    die Arbeit aus dem Hook heraus: `preload()` im Testdouble lädt den Modelo je Konfiguration
+    einmal auf Modulebene — reines Rechnen, keine Leitung, kein Server, zur Sammelzeit erlaubt — und
+    das `connect` im Hook kostet danach nur noch den Handschlag des In-Memory-Transports. Nebenwert:
+    Mehrere Suiten einer Datei teilen den geladenen Modelo, statt ihn je Suite neu zu bauen; geteilt
+    wird nur gelesen, jede Verbindung bekommt ihren eigenen Server.
+  - **Nicht im Geltungsbereich:** die Playwright-Specs in `packages/eroj/test/*.spec.ts`. Sie liegen
+    außerhalb von `src`, `test.describe` hat ein eigenes Ausführungsmodell — und geprüft: keine von
+    ihnen trägt das Muster. Wenn sie es einmal tragen, greift dieser Wächter nicht.
+  - **Korrektur, 2026-09-24: Die Umstellung hat den flakenden Test nicht behoben.** Nach dem
+    Umstellen aller vierzehn Stellen fiel `resources-http > serves the tools` im Push-Lauf von
+    `a7ba401` erneut, mit demselben `read ECONNRESET` nach 8799 ms — der PR-Lauf desselben Commits
+    war grün. Die Sammelzeit war also nicht die Ursache; der grüne Doppellauf davor war Glück, kein
+    Beweis. Die Umstellung bleibt richtig, aber aus eigenem Grund: Aufbau zur Sammelzeit ist falsch,
+    gleich ob etwas davon fällt.
+  - **Die Ursache ist offen, und sie gehört nicht in diesen PR.** Der hier zunächst notierte
+    Verdacht — Nodes `keepAliveTimeout` von 5000 ms, den `packages/mcp/src/http.ts` nicht setzt —
+    stand mit einem Beleg da, der keiner war: den Dauern der drei fehlgeschlagenen Tests, 4896, 8799
+    und 12962 ms, „also ab der Fünf-Sekunden-Marke". Der erste Wert liegt unter fünf Sekunden, und
+    vor allem messen die drei Zahlen die Dauer des Tests, nicht den Leerlauf auf dem Socket. Die
+    Größe, von der der Verdacht handelt, ist die Zeit zwischen dem letzten Byte auf dem Socket und dem
+    ersten Byte der fallenden Anfrage; sie wird in einem Wegwerf-Zweig gemessen, und ein
+    Falsifikationsversuch (`keepAliveTimeout = 0`, zwanzig volle Läufe unter Last) entscheidet. Ob
+    daraus ein Produktbefund wird, klärt ein eigener Zweig mit einer Spec-Frage davor („Welche
+    Keep-Alive-Politik hat ein Fundamento-MCP-Server?") — nicht dieser PR und keine Aufräumzeile.
+  - Fertig wenn: `pnpm check` grün, und der statische Test wird rot, sobald jemand das Muster wieder
+    einführt. Kein Figma-Lauf nötig; die Änderung betrifft nur Tests.
+
 Consistency check before tasks (`/speckit.analyze` scope): every FR and AK maps to at least one task or a recorded decision; every task maps to a plan decision; two new packages (Art. XI); the lockfile changes in T008 only; no task lowers a threshold; nothing is published.
