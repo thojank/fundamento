@@ -1,6 +1,7 @@
 // Resources and the HTTP transport (Spec 001, D-13, contracts/mcp-tools.md; task T026).
 
 import { readFileSync } from "node:fs";
+import { performance } from "node:perf_hooks";
 import { request } from "node:http";
 import {
   Client,
@@ -8,6 +9,7 @@ import {
   type Transport,
 } from "@modelcontextprotocol/client";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { probe, probedFetch, resetLag } from "./econnreset-probe.js";
 import { startHttpServer } from "./http.js";
 import { TOOL_NAMES } from "./schemas.js";
 import {
@@ -94,13 +96,20 @@ function rawPost(port: number, headers: Record<string, string>) {
 describe("the HTTP transport", () => {
   let http: Awaited<ReturnType<typeof startHttpServer>>;
   let client: Client;
+  let connectedAt = 0;
 
   // Die Leitung entsteht, wenn diese Datei läuft — nicht beim Einsammeln aller Dateien. Sonst liegen
   // Minuten zwischen dem Verbindungsaufbau und der ersten Anfrage, und die Leitung ist dann tot.
   beforeAll(async () => {
     http = await startHttpServer(preload(), { port: 0 });
     client = new Client({ name: "test", version: "0" });
-    await client.connect(new StreamableHTTPClientTransport(new URL(http.url)) as Transport);
+    probe("test.beforeAll.connect.start");
+    await client.connect(
+      new StreamableHTTPClientTransport(new URL(http.url), { fetch: probedFetch }) as Transport,
+    );
+    connectedAt = performance.now();
+    resetLag();
+    probe("test.connect.returned");
   });
 
   afterAll(async () => {
@@ -114,7 +123,16 @@ describe("the HTTP transport", () => {
   });
 
   it("serves the tools", async () => {
-    const { tools } = await client.listTools();
+    const before = performance.now();
+    probe("test.listTools.before", { deltaSinceConnectMs: Math.round(before - connectedAt) });
+    let listed: Awaited<ReturnType<Client["listTools"]>>;
+    try {
+      listed = await client.listTools();
+    } catch (error) {
+      probe("test.listTools.threw", { message: String(error), cause: String((error as Error).cause) });
+      throw error;
+    }
+    const { tools } = listed;
     expect(tools).toHaveLength(TOOL_NAMES.length);
     const described = await client.callTool({ name: "describe", arguments: {} });
     expect(described.isError).toBeFalsy();
