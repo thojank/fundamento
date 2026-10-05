@@ -95,8 +95,7 @@ describe("the HTTP transport", () => {
   let http: Awaited<ReturnType<typeof startHttpServer>>;
   let client: Client;
 
-  // Die Leitung entsteht, wenn diese Datei läuft — nicht beim Einsammeln aller Dateien. Sonst liegen
-  // Minuten zwischen dem Verbindungsaufbau und der ersten Anfrage, und die Leitung ist dann tot.
+  // Die Leitung entsteht, wenn diese Datei läuft — nicht beim Einsammeln aller Dateien.
   beforeAll(async () => {
     http = await startHttpServer(preload(), { port: 0 });
     client = new Client({ name: "test", version: "0" });
