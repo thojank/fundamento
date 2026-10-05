@@ -7,6 +7,7 @@ import type { AddressInfo } from "node:net";
 import { NodeStreamableHTTPServerTransport } from "@modelcontextprotocol/node";
 import type { Transport } from "@modelcontextprotocol/server";
 import type { Served } from "./load.js";
+import { probeServer } from "./econnreset-probe.js";
 import { createFundamentoServer } from "./server.js";
 
 export const HTTP_HOST = "127.0.0.1";
@@ -68,6 +69,7 @@ export async function startHttpServer(
         if (!response.headersSent) reject(response, 500, "Internal server error.");
       });
   });
+  probeServer(http); // WEGWERF F-ECONNRESET: nur Listener
   await new Promise<void>((resolve, fail) => {
     http.once("error", fail);
     http.listen(port, HTTP_HOST, () => resolve());

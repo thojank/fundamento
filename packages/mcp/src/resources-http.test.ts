@@ -1,6 +1,7 @@
 // Resources and the HTTP transport (Spec 001, D-13, contracts/mcp-tools.md; task T026).
 
 import { readFileSync } from "node:fs";
+import { performance } from "node:perf_hooks";
 import { request } from "node:http";
 import {
   Client,
@@ -8,6 +9,7 @@ import {
   type Transport,
 } from "@modelcontextprotocol/client";
 import { afterAll, describe, expect, it } from "vitest";
+import { probe, probedFetch, resetLag } from "./econnreset-probe.js";
 import { startHttpServer } from "./http.js";
 import { loadServed } from "./load.js";
 import { TOOL_NAMES } from "./schemas.js";
@@ -81,7 +83,13 @@ function rawPost(port: number, headers: Record<string, string>) {
 describe("the HTTP transport", async () => {
   const http = await startHttpServer(loadServed(), { port: 0 });
   const client = new Client({ name: "test", version: "0" });
-  await client.connect(new StreamableHTTPClientTransport(new URL(http.url)) as Transport);
+  probe("test.describe.connect.start");
+  await client.connect(
+    new StreamableHTTPClientTransport(new URL(http.url), { fetch: probedFetch }) as Transport,
+  );
+  const connectedAt = performance.now();
+  resetLag();
+  probe("test.connect.returned");
   afterAll(async () => {
     await client.close();
     await http.close();
@@ -93,7 +101,16 @@ describe("the HTTP transport", async () => {
   });
 
   it("serves the tools", async () => {
-    const { tools } = await client.listTools();
+    const before = performance.now();
+    probe("test.listTools.before", { deltaSinceConnectMs: Math.round(before - connectedAt) });
+    let listed: Awaited<ReturnType<Client["listTools"]>>;
+    try {
+      listed = await client.listTools();
+    } catch (error) {
+      probe("test.listTools.threw", { message: String(error), cause: String((error as Error).cause) });
+      throw error;
+    }
+    const { tools } = listed;
     expect(tools).toHaveLength(TOOL_NAMES.length);
     const described = await client.callTool({ name: "describe", arguments: {} });
     expect(described.isError).toBeFalsy();
