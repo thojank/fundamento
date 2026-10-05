@@ -1,8 +1,8 @@
 // Resources and the HTTP transport (Spec 001, D-13, contracts/mcp-tools.md; task T026).
 
 import { readFileSync } from "node:fs";
-import { performance } from "node:perf_hooks";
 import { request } from "node:http";
+import { performance } from "node:perf_hooks";
 import {
   Client,
   StreamableHTTPClientTransport,
@@ -129,12 +129,18 @@ describe("the HTTP transport", () => {
     try {
       listed = await client.listTools();
     } catch (error) {
-      probe("test.listTools.threw", { message: String(error), cause: String((error as Error).cause) });
+      probe("test.listTools.threw", {
+        message: String(error),
+        cause: String((error as Error).cause),
+      });
       throw error;
     }
     const { tools } = listed;
+    probe("test.listTools.returned");
     expect(tools).toHaveLength(TOOL_NAMES.length);
+    probe("test.callTool.describe.before");
     const described = await client.callTool({ name: "describe", arguments: {} });
+    probe("test.callTool.describe.returned");
     expect(described.isError).toBeFalsy();
   });
 

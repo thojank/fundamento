@@ -63,7 +63,11 @@ export function probeServer(http: Server): void {
       probe("server.response.finish", { n, id: socket.remotePort, status: response.statusCode });
     });
     response.on("close", () =>
-      probe("server.response.close", { n, id: socket.remotePort, finished: response.writableFinished }),
+      probe("server.response.close", {
+        n,
+        id: socket.remotePort,
+        finished: response.writableFinished,
+      }),
     );
   });
   http.on("clientError", (error: NodeJS.ErrnoException) =>

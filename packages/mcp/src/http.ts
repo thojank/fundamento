@@ -6,8 +6,8 @@ import { createServer, type IncomingMessage, type ServerResponse } from "node:ht
 import type { AddressInfo } from "node:net";
 import { NodeStreamableHTTPServerTransport } from "@modelcontextprotocol/node";
 import type { Transport } from "@modelcontextprotocol/server";
-import type { Served } from "./load.js";
 import { probeServer } from "./econnreset-probe.js";
+import type { Served } from "./load.js";
 import { createFundamentoServer } from "./server.js";
 
 export const HTTP_HOST = "127.0.0.1";
