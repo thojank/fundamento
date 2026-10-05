@@ -139,6 +139,9 @@ describe("the HTTP transport", () => {
     probe("test.listTools.returned");
     expect(tools).toHaveLength(TOOL_NAMES.length);
     probe("test.callTool.describe.before");
+    const blockMs = Number(process.env.ECONNRESET_BLOCK_MS ?? 6000);
+    const until = performance.now() + blockMs;
+    while (performance.now() < until) {}
     const described = await client.callTool({ name: "describe", arguments: {} });
     probe("test.callTool.describe.returned");
     expect(described.isError).toBeFalsy();

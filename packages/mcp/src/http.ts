@@ -70,6 +70,7 @@ export async function startHttpServer(
       });
   });
   probeServer(http); // WEGWERF F-ECONNRESET: nur Listener
+  if (process.env.ECONNRESET_KA0) http.keepAliveTimeout = 0;
   await new Promise<void>((resolve, fail) => {
     http.once("error", fail);
     http.listen(port, HTTP_HOST, () => resolve());
