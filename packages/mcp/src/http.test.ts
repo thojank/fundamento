@@ -81,10 +81,16 @@ describe("the HTTP server", () => {
   afterAll(() => http.close());
 
   // Spec 006, Auflage zu K2 (jug_01M4817FY2CAJEEH6EXPS1QSVJ): Leerlauf-Leitungen offen zu halten
-  // ist nur richtig, solange nur lokale Clients den Server erreichen.
-  it("refuses a connection over a non-loopback address", async () => {
+  // ist nur richtig, solange nur lokale Clients den Server erreichen. Maßgeblich ist die Adresse,
+  // die das Betriebssystem für den lauschenden Socket meldet; ein Verbindungsversuch allein wäre
+  // ohne Nicht-Loopback-Adresse falsch rot und hinter einem Paketfilter falsch grün.
+  it("listens on 127.0.0.1 only, as the operating system reports it", () => {
+    expect(http.address).toBe("127.0.0.1");
+  });
+
+  it("refuses a connection over a non-loopback address", async (context) => {
     const address = nonLoopbackAddress();
-    expect(address, "this machine has no non-loopback IPv4 address to test against").toBeDefined();
+    if (address === undefined) context.skip("this machine has no non-loopback IPv4 address");
     expect(await tryConnect("127.0.0.1", http.port)).toBe("connected");
     expect(await tryConnect(address as string, http.port)).toBe("ECONNREFUSED");
   });
@@ -116,9 +122,13 @@ describe("the HTTP server", () => {
     const port = await new Promise<number>((resolve) => child.once("message", resolve));
     const socket = connect({ host: "127.0.0.1", port });
     await new Promise((resolve) => socket.once("connect", resolve));
+    // The child reports when its server has the head of the request; only then is the connection
+    // busy rather than idle. Waiting on a clock instead would leave the test green without
+    // closeAllConnections() whenever the fragment arrived late.
+    const received = new Promise((resolve) => child.once("message", resolve));
     try {
       // Headers the transport accepts, so it waits for a body that never completes; without them
-      // it answers 406 at once and the connection is merely idle.
+      // it answers 406 at once and the connection is merely idle (Spec 006, B5).
       socket.write(
         [
           "POST /mcp HTTP/1.1",
@@ -130,7 +140,7 @@ describe("the HTTP server", () => {
           "{",
         ].join("\r\n"),
       );
-      await new Promise((resolve) => setTimeout(resolve, 200));
+      expect(await received).toBe("request");
       const closed = new Promise<string>((resolve) => child.once("message", resolve));
       child.send("close");
       expect(await closed).toBe("closed");
@@ -148,11 +158,15 @@ const after = (ms: number, value: string) =>
   new Promise<string>((resolve) => setTimeout(resolve, ms, value));
 
 /**
- * The child serves on a free port and reports it. On a message it calls close() against a deadline
- * of its own, reports "closed" or the missed deadline, and leaves nothing else running.
+ * The child serves on a free port and reports it, then reports "request" when its server has the
+ * head of a request (Node's public `http.server.request.start` channel). On a message it calls
+ * close() against a deadline of its own, reports "closed" or the missed deadline, and leaves nothing
+ * else running.
  */
 const CHILD = `
+import { subscribe } from "node:diagnostics_channel";
 import { loadServed, startHttpServer } from ${JSON.stringify(new URL("../dist/index.js", import.meta.url).href)};
+subscribe("http.server.request.start", () => process.send("request"));
 const http = await startHttpServer(loadServed(), { port: 0 });
 process.send(http.port);
 process.once("message", async () => {
