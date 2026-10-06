@@ -108,3 +108,19 @@ Ein grüner Lauf ohne Blockade wäre keine Messung. Die Kontrolle ohne T2 ist ro
 - **Punkt 3, `--no-file-parallelism` bzw. `singleFork`.** Nicht ausgeführt. Andere Testdateien teilen keine Leitung mit diesem Test. Parallelität wirkt nur als CPU-Last, die die Blockade verlängert. Ein grüner Lauf ohne Parallelität hätte nichts unterschieden.
 - **Punkt 4, `preload()`.** Nicht gesondert geprüft. #31 fiel mit `loadServed()` ohne `preload()`, also ist `preload()` keine Voraussetzung.
 - **K3 aus `spec.md`** (`Connection: close` vom Server). Die Produktentscheidung liegt beim Maintainer und braucht keine weitere Messung.
+
+## 8. Bindung des HTTP-Servers, geprüft vor der Entscheidung
+
+**Stand:** `main` ab `21b7444`, gebaut. **Frage:** Bindet `startHttpServer` nur an `127.0.0.1`? Die Entscheidung für K2 setzt das voraus.
+
+- **Code:** `http.listen(port, HTTP_HOST, …)` mit `HTTP_HOST = "127.0.0.1"` (`packages/mcp/src/http.ts`), im gebauten `dist/http.js` genauso.
+- **Am laufenden Prozess** (`node dist/index.js --http --port 7399`, macOS):
+
+| Prüfung | Ergebnis |
+|---|---|
+| `lsof -iTCP -sTCP:LISTEN` des Prozesses | ein Socket: `TCP 127.0.0.1:7399 (LISTEN)`, nur IPv4 |
+| `POST tools/list` über `127.0.0.1` | 200 |
+| Verbindung über die Nicht-Loopback-Adresse der Maschine (`192.168.178.171`) | abgelehnt, `curl` exit 7 |
+| Verbindung über `[::1]` | abgelehnt, `curl` exit 7 |
+
+Die Prämisse trägt: Der Server bindet heute nur an `127.0.0.1`.

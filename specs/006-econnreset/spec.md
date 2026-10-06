@@ -1,6 +1,6 @@
 # Spec 006 – ECONNRESET: Keep-Alive und eine blockierte Client-Loop
 
-**Branch:** `006-econnreset` · **Status:** Befund belegt, Produktfrage und Testaufbau offen · **Constitution:** keine Änderung · **Erstellt:** 2026-10-06 · **Voraussetzung:** `main` ab `4fd3e94`
+**Branch:** `006-econnreset` · **Status:** Befund belegt, Produktfrage entschieden (K2, `jug_01M4817FY2CAJEEH6EXPS1QSVJ`) · **Constitution:** keine Änderung · **Erstellt:** 2026-10-06 · **Voraussetzung:** `main` ab `4fd3e94`
 
 ## Zweck
 
@@ -46,7 +46,7 @@ Ein früher `callTool` zum Aufwärmen hilft nicht. Der erste `callTool` nach ein
 - `keepAliveTimeout` setzen, damit ein Test grün wird. Das wäre eine Antwort auf die Produktfrage, nicht auf den Test.
 - Ein natürlich roter Lauf mit Messpunkten. Er fehlt, alle fünf natürlichen Messläufe waren grün. Das ist eine Einschränkung, keine Aufgabe: Die Probe und die Gegenprobe beantworten die Frage.
 
-## Produktfrage (offen)
+## Produktfrage
 
 Der Server ist zustandslos: ein `McpServer` je Anfrage, nur auf 127.0.0.1. Keep-Alive spart einem lokalen Client den TCP-Handschlag und sonst nichts. Dafür schließt der Server Leitungen, die der Client noch für lebendig hält, sobald dessen Loop länger als rund 6 s blockiert. undici wiederholt ein `POST` dann nicht.
 
@@ -56,7 +56,21 @@ Zu entscheiden, jeweils mit Kialo:
 - **K2:** Der Server hält Leerlauf-Leitungen länger oder unbegrenzt (`keepAliveTimeout = 0`). Die Gegenprobe zeigt: Damit verschwindet ECONNRESET. Offen ist, was ungenutzte Leitungen auf einem Loopback-Server kosten.
 - **K3:** Der Server beantwortet jede Anfrage mit `Connection: close`. Das passt zur Zustandslosigkeit und kostet je Anfrage einen Handschlag. Nicht gemessen.
 
-## Testaufbau (offen)
+## Entscheidung
+
+**K2: `keepAliveTimeout = 0`.** Maintainer, 2026-10-06, festgehalten als `jug_01M4817FY2CAJEEH6EXPS1QSVJ` (Art. XIII).
+
+**Begründung.** Mit der Voreinstellung schließt der Server eine Leitung, die der Client noch im Pool hält, sobald dessen Loop länger als rund 6 s blockiert, und ein `POST` geht verloren. Die Gegenprobe mit `keepAliveTimeout = 0` ist grün, auch mit dem Server in einem eigenen Prozess (`research.md` §4, §5). Der Server ist zustandslos und nur auf Loopback erreichbar. Ungenutzte Leitungen kosten deshalb nur Dateideskriptoren lokaler Clients, und `close()` schließt alle Leitungen.
+
+**Verworfen:**
+- **K1**, weil die Voreinstellung den Fehler im Produkt lässt. Er trifft jeden Client, nicht nur den Test (B1).
+- **K3**, weil es unbelegt ist und eine Fallunterscheidung verlangt: Ein `POST` darf die Leitung schließen, der Stream-GET nicht.
+
+**Auflage: Loopback-Bindung.** Die Entscheidung setzt voraus, dass der Server nur an `127.0.0.1` bindet. Geprüft am 2026-10-06 (`research.md` §8): `lsof` zeigt einen einzigen lauschenden Socket `127.0.0.1:<port>`, und Verbindungen über die Nicht-Loopback-Adresse der Maschine und über `::1` werden abgelehnt. Ein eigener Test hält das fest. Ein Verbindungsversuch über eine Nicht-Loopback-Adresse muss scheitern.
+
+**Bedingung, unter der K3 wieder richtig wird:** sobald der Server über `127.0.0.1` hinaus erreichbar ist. Dann sind unbegrenzt gehaltene Leitungen fremder Clients ein Ressourcenrisiko und nicht mehr nur Deskriptoren lokaler Clients. K2 gilt dann nicht mehr, und K3 oder ein endliches Limit ist neu zu entscheiden. Der Bindungstest wird in diesem Fall rot und erzwingt die Neuentscheidung.
+
+## Testaufbau
 
 **T1 – Server in einem eigenen Prozess, wie `quickstart.test.ts`.** Gemessen: Das löst den Mechanismus **nicht** auf, weil die Blockade auf der Client-Seite liegt (`research.md` §5). Der Test-Prozess würde nur die Arbeit des Servers los. Ob das die Blockade im CI unter die Schwelle drückt, ist nicht gemessen. Belegt wäre es dann ohnehin nicht.
 
@@ -67,6 +81,8 @@ Zu entscheiden, jeweils mit Kialo:
 
 **Auflage, wenn T2 genommen wird:** T2 macht den Test grün, indem es die Bedingung entfernt, unter der der Fehler entsteht. Das ist zulässig, solange der Zweck des Tests ist: „Der Transport bedient die Werkzeuge.“ Danach deckt **kein Test mehr** ab, wie sich der Server gegenüber einem Client verhält, der Leitungen wiederverwendet und dessen Loop länger als `keepAliveTimeout` + 1 s blockiert. Diese Lücke ist bekannt und gemessen, sie wird hier geführt und nicht verschwiegen. Sie schließt sich mit T3, sobald die Produktfrage entschieden ist. Die Probe dafür liegt in `mess/econnreset-falsifikation-block6s` und `mess/econnreset-t2-aus`.
 
+**T2 ist mit der Entscheidung entfallen.** T2 ist gemessen und wirkt (Tags `mess/econnreset-t2-aus`, `mess/econnreset-t2-an`). Es wird nicht gebaut: Mit K2 hält der Server die Leitung, und der Test-Client muss die Wiederverwendung nicht mehr meiden. Damit entfällt auch die Lücke aus der Auflage zu T2. Der Test behält die Wiederverwendung, und T3 prüft den Mechanismus ausdrücklich. Die Tags auf dem Messstand bleiben.
+
 **T3 – Der Test prüft den Mechanismus ausdrücklich.** Abhängig von der Produktfrage: Bei K2 oder K3 belegt ein Test mit erzwungener Blockade von mehr als 6 s, dass der Server die Leitung hält bzw. nicht wiederverwenden lässt. Die Probe dafür existiert (`mess/econnreset-falsifikation-block6s`).
 
 ## Abnahme
@@ -76,7 +92,10 @@ Für die Reparatur, die aus der Entscheidung folgt:
 1. Die Probe aus `mess/econnreset-falsifikation-block6s` (6 s synchrone Blockade vor `callTool describe`), auf den neuen Stand angewandt, ist grün: lokal und in einem CI-Lauf.
 2. Die Probe ist auf dem alten Stand rot. Eine Prüfung, die nie rot war, ist keine Prüfung.
 3. Weiter geprüft werden: Bindung an 127.0.0.1, die Tools, `validate.aspektoPath` und die DNS-Rebinding-Abwehr.
-4. Ändert die Reparatur Produktcode, hat die Produktfrage vorher eine Jugxo mit Kialo.
+4. Ändert die Reparatur Produktcode, hat die Produktfrage vorher eine Jugxo mit Kialo (`jug_01M4817FY2CAJEEH6EXPS1QSVJ`).
+5. Die Loopback-Bindung hat einen eigenen Test: Ein Verbindungsversuch über eine Nicht-Loopback-Adresse scheitert. Gezeigt wird er rot gegen einen Server ohne Host-Angabe.
+6. Eine Leerlauf-Leitung lebt länger als `keepAliveTimeout` + 1 s der Voreinstellung (T3). Rot auf dem alten Stand.
+7. Nach `close()` endet der Prozess, auch wenn ein Client eine Leerlauf-Leitung hält. Rot ohne das Schließen der Leitungen in `close()`.
 
 ## Belege
 
