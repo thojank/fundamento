@@ -22,6 +22,10 @@
       "env": ["PLAYWRIGHT_ENGINES"],
       "outputs": []
     },
+    "@fundamento/modelo#test": {
+      "dependsOn": ["build", "@fundamento/cli#build"],
+      "outputs": []
+    },
     "lint": {
       "dependsOn": ["^build"],
       "outputs": []
