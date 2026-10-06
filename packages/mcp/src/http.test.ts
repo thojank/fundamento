@@ -7,7 +7,7 @@ import { connect, type Socket } from "node:net";
 import { networkInterfaces } from "node:os";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { type HttpServer, startHttpServer } from "./http.js";
-import { loadServed } from "./load.js";
+import { preload } from "./test-doubles/client.js";
 
 /** The first IPv4 address of this machine that is not loopback. */
 function nonLoopbackAddress(): string | undefined {
@@ -71,11 +71,15 @@ function exchange(socket: Socket, port: number) {
   });
 }
 
+// Der Modelo wird hier geladen, nicht im Hook: reines Rechnen ohne Leitung, und das
+// `startHttpServer` im `beforeAll` kostet danach nur noch das Lauschen.
+preload();
+
 describe("the HTTP server", () => {
   let http: HttpServer;
 
   beforeAll(async () => {
-    http = await startHttpServer(loadServed(), { port: 0 });
+    http = await startHttpServer(preload(), { port: 0 });
   });
 
   afterAll(() => http.close());
@@ -113,7 +117,7 @@ describe("the HTTP server", () => {
   // halb gesendete Anfrage nur closeAllConnections() in close(). Ohne sie hielte ein Client den
   // Prozess am Leben.
   it("lets its process end after close(), while a client holds a half-sent request", async () => {
-    const child = spawn(process.execPath, ["--input-type=module", "-e", CHILD], {
+    const child = spawn(process.execPath, [CHILD], {
       stdio: ["ignore", "ignore", "inherit", "ipc"],
     });
     const exited = new Promise<string>((resolve) =>
@@ -157,23 +161,5 @@ describe("the HTTP server", () => {
 const after = (ms: number, value: string) =>
   new Promise<string>((resolve) => setTimeout(resolve, ms, value));
 
-/**
- * The child serves on a free port and reports it, then reports "request" when its server has the
- * head of a request (Node's public `http.server.request.start` channel). On a message it calls
- * close() against a deadline of its own, reports "closed" or the missed deadline, and leaves nothing
- * else running.
- */
-const CHILD = `
-import { subscribe } from "node:diagnostics_channel";
-import { loadServed, startHttpServer } from ${JSON.stringify(new URL("../dist/index.js", import.meta.url).href)};
-subscribe("http.server.request.start", () => process.send("request"));
-const http = await startHttpServer(loadServed(), { port: 0 });
-process.send(http.port);
-process.once("message", async () => {
-  const deadline = new Promise((resolve) =>
-    setTimeout(resolve, 1500, "close() did not finish within 1.5 s").unref(),
-  );
-  const result = await Promise.race([http.close().then(() => "closed"), deadline]);
-  process.send(result, () => process.disconnect());
-});
-`;
+/** The child process: serves on a free port and reports what its server sees (see the file). */
+const CHILD = new URL("./test-doubles/http-server-child.mjs", import.meta.url).pathname;
