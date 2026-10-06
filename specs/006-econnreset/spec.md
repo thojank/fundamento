@@ -46,6 +46,8 @@ Im selben Briefing standen zwei Behauptungen über den Server, beide aus dem Zwe
 
 **B4 – Eine Auflage gegen die falsche Node-Fassung.** Gefordert war, im Teardown `closeIdleConnections()` zu ergänzen, sonst warte `server.close()` auf Leerlauf-Leitungen, die nie von selbst zugehen. Das ging von Node vor 19 aus. Seit Node 19 schließt `server.close()` Leerlauf-Leitungen selbst, und `close()` ruft bereits `closeAllConnections()` auf. Die Auflage war redundant. Gemessen auf Node 24.21 (`research.md` §9): Eine Leerlauf-Leitung hält `close()` nicht auf, mit und ohne `closeAllConnections()`. Eine halb gesendete Anfrage hält `close()` auf, ohne `closeAllConnections()` auch nach 4 s noch. Geprüft wird deshalb dieser Fall, und `closeIdleConnections()` wird nicht hinzugefügt.
 
+**B5 – Ein Teardown-Test, grün aus dem falschen Grund.** Die erste Fassung des Tests mit der halb gesendeten Anfrage blieb auch ohne `closeAllConnections()` grün. Der Anfrage fehlte der `Accept`-Header. Der Server antwortete deshalb sofort mit 406 Not Acceptable, die Anfrage war erledigt, und die Leitung lag nur im Leerlauf. Leerlauf-Leitungen schließt `server.close()` selbst (B4). Gefunden hat das die Rot-zuerst-Regel: Der Test ließ sich nicht rot zeigen. Mit `Accept` und `Content-Type` wartet der Transport auf den Rumpf, und der Test wird ohne `closeAllConnections()` rot. Aus demselben Grund wartet der Test auf keine Uhr. Das Kind meldet über Nodes Kanal `http.server.request.start`, dass sein Server den Anfang der Anfrage hat, und erst dann folgt `close()`. Käme das Fragment nach einer festen Wartezeit zu spät an, wäre die Leitung wieder nur im Leerlauf. Das ist der fünfte Fall desselben Musters, nach der Sammelzeit (#34), dem abgelesenen Zähler (B2), dem Stream-GET (B3) und der Node-Fassung (B4): Ein Maß zeigte an eine andere Stelle als angenommen.
+
 ## Nicht im Scope
 
 - Den Lauf wiederholen, bis er grün ist. Den Test überspringen oder mit `retry` versehen.
@@ -99,9 +101,9 @@ Für die Reparatur, die aus der Entscheidung folgt:
 2. Die Probe ist auf dem alten Stand rot. Eine Prüfung, die nie rot war, ist keine Prüfung.
 3. Weiter geprüft werden: Bindung an 127.0.0.1, die Tools, `validate.aspektoPath` und die DNS-Rebinding-Abwehr.
 4. Ändert die Reparatur Produktcode, hat die Produktfrage vorher eine Jugxo mit Kialo (`jug_01M4817FY2CAJEEH6EXPS1QSVJ`).
-5. Die Loopback-Bindung hat einen eigenen Test: Ein Verbindungsversuch über eine Nicht-Loopback-Adresse scheitert. Gezeigt wird er rot gegen einen Server ohne Host-Angabe.
+5. Die Loopback-Bindung hat einen eigenen Test. Hauptprüfung ist die Adresse, die das Betriebssystem für den lauschenden Socket meldet (`127.0.0.1`), denn ein Verbindungsversuch allein wäre ohne Nicht-Loopback-Adresse falsch rot und hinter einem Paketfilter falsch grün. Als zweite Zusicherung muss ein Verbindungsversuch über eine Nicht-Loopback-Adresse scheitern. Er wird mit Grund übersprungen, wenn die Maschine keine solche Adresse hat. Gezeigt wird beides rot gegen einen Server ohne Host-Angabe (gemeldet: `::`). Eine Zusicherung auf `keepAliveTimeout === 0` gibt es nicht: Sie wäre ein Echo des Codes, und der Verhaltenstest (Punkt 6) scheitert bereits lesbar.
 6. Eine Leerlauf-Leitung lebt länger als `keepAliveTimeout` + 1 s der Voreinstellung (T3). Rot auf dem alten Stand.
-7. Nach `close()` endet der Prozess, auch wenn ein Client eine halb gesendete Anfrage offen hält (B4). Rot ohne `closeAllConnections()` in `close()`, und zwar schnell und lesbar: `close()` läuft gegen eine eigene Frist von 1,5 s und scheitert mit einer Meldung, nicht als Timeout der Suite.
+7. Nach `close()` endet der Prozess, auch wenn ein Client eine halb gesendete Anfrage offen hält (B4, B5). Rot ohne `closeAllConnections()` in `close()`, und zwar schnell und lesbar: `close()` läuft gegen eine eigene Frist von 1,5 s und scheitert mit einer Meldung, nicht als Timeout der Suite. `close()` folgt erst, wenn der Server den Anfang der Anfrage gemeldet hat, nicht nach einer Wartezeit.
 
 ## Belege
 
