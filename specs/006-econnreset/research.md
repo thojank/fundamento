@@ -124,3 +124,14 @@ Ein grüner Lauf ohne Blockade wäre keine Messung. Die Kontrolle ohne T2 ist ro
 | Verbindung über `[::1]` | abgelehnt, `curl` exit 7 |
 
 Die Prämisse trägt: Der Server bindet heute nur an `127.0.0.1`.
+
+## 9. Was `close()` aufhält, Node 24.21
+
+Minimal-Aufbau: `node:http`-Server mit `keepAliveTimeout = 0`, eine Leitung eines Clients, danach `server.close()` mit einer Frist von 4 s.
+
+| Leitung beim `close()` | ohne `closeAllConnections()` | mit `closeAllConnections()` |
+|---|---|---|
+| im Leerlauf (Antwort gelesen) | fertig nach 1 ms | fertig nach 0 ms |
+| halb gesendete Anfrage (`Content-Length: 100`, 1 Byte gesendet) | hängt, nach 4 s abgebrochen | fertig nach 1 ms |
+
+Seit Node 19 ruft `server.close()` selbst `closeIdleConnections()` auf. Eine Leerlauf-Leitung kann einen Teardown-Test deshalb nicht rot machen. Eine halb gesendete Anfrage kann es.

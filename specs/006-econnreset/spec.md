@@ -40,6 +40,12 @@ Ein früher `callTool` zum Aufwärmen hilft nicht. Der erste `callTool` nach ein
 
 **B2 – Eine Prüfung falsch gelesen.** Beim Schreiben dieser Spec liefen `check:vortaro-lint` und `check:clean-room`. Weil die Dateizahl vor und nach dem Commit gleich blieb (653), stand in der ersten Fassung, die beiden Prüfungen läsen `specs/*.md` nicht. Das war falsch. `loadScanTree` listet mit `git ls-files --cached --others` und zählt unversionierte Dateien also mit. Der Scan-Baum enthält beide Dateien dieser Spec. `clean-room` prüft sie auf Benchmark-Pfade und auf Marken-Fingerabdrücke (`.md` steht in `FINGERPRINT_EXTENSIONS`). `vortaro-lint` liest nur Projekcio-CSS und Bezeichner, Markdown gehört nicht zu seinem Gegenstand. Das Maß zeigte nicht an die falsche Stelle, es wurde falsch abgelesen: aus einem Zähler geschlossen statt im Code nachgesehen. Das ist derselbe Fehlertyp wie die Sammelzeit-Erklärung in #34.
 
+**B3 – Eine Eigenschaft des Servers aus dem Protokoll geschlossen.** Der Maintainer begründete die Verwerfung von K3 zunächst mit einer Fallunterscheidung zwischen `POST` und Stream-GET. Streamable HTTP kennt diesen Stream, dieser Server nicht: Jede Anfrage, die kein `POST` ist, beantwortet er mit 405 (`http.ts`, „this stateless server takes POST only“). Die Eigenschaft war aus der Protokollform geschlossen, nicht aus dem Code gelesen. Die Begründung ist aus der Jugxo gestrichen, ohne Ersatz. K3 bleibt verworfen, weil es unbelegt ist, und nur deswegen.
+
+Im selben Briefing standen zwei Behauptungen über den Server, beide aus dem Zweck geschlossen: die Loopback-Bindung und der Stream-GET. Die Loopback-Bindung trifft zu und war als unbelegt gekennzeichnet. Der Stream-GET ist falsch und war als Begründung gesetzt. Gekennzeichnet war die richtige, nicht die falsche.
+
+**B4 – Eine Auflage gegen die falsche Node-Fassung.** Gefordert war, im Teardown `closeIdleConnections()` zu ergänzen, sonst warte `server.close()` auf Leerlauf-Leitungen, die nie von selbst zugehen. Das ging von Node vor 19 aus. Seit Node 19 schließt `server.close()` Leerlauf-Leitungen selbst, und `close()` ruft bereits `closeAllConnections()` auf. Die Auflage war redundant. Gemessen auf Node 24.21 (`research.md` §9): Eine Leerlauf-Leitung hält `close()` nicht auf, mit und ohne `closeAllConnections()`. Eine halb gesendete Anfrage hält `close()` auf, ohne `closeAllConnections()` auch nach 4 s noch. Geprüft wird deshalb dieser Fall, und `closeIdleConnections()` wird nicht hinzugefügt.
+
 ## Nicht im Scope
 
 - Den Lauf wiederholen, bis er grün ist. Den Test überspringen oder mit `retry` versehen.
@@ -58,13 +64,13 @@ Zu entscheiden, jeweils mit Kialo:
 
 ## Entscheidung
 
-**K2: `keepAliveTimeout = 0`.** Maintainer, 2026-10-06, festgehalten als `jug_01M4817FY2CAJEEH6EXPS1QSVJ` (Art. XIII).
+**K2: `keepAliveTimeout = 0`.** Maintainer, 2026-10-06, festgehalten als `jug_01M4817FY2CAJEEH6EXPS1QSVJ`, bezogen auf Art. III. Gegenstand ist die Verlässlichkeit der MCP-Schnittstelle gegenüber ihrem Agenten-Konsumenten (Art. III, Satz 1), nicht Nutzungskomfort. Art. XIII hat eigene Maße (fünf Minuten, eine Minute), an denen sich eine Socket-Politik nicht prüfen lässt. Art. XI ist geprüft und verworfen: Er regelt Bauaufwand, nicht Schnittstellenverhalten.
 
 **Begründung.** Mit der Voreinstellung schließt der Server eine Leitung, die der Client noch im Pool hält, sobald dessen Loop länger als rund 6 s blockiert, und ein `POST` geht verloren. Die Gegenprobe mit `keepAliveTimeout = 0` ist grün, auch mit dem Server in einem eigenen Prozess (`research.md` §4, §5). Der Server ist zustandslos und nur auf Loopback erreichbar. Ungenutzte Leitungen kosten deshalb nur Dateideskriptoren lokaler Clients, und `close()` schließt alle Leitungen.
 
 **Verworfen:**
 - **K1**, weil die Voreinstellung den Fehler im Produkt lässt. Er trifft jeden Client, nicht nur den Test (B1).
-- **K3**, weil es unbelegt ist und eine Fallunterscheidung verlangt: Ein `POST` darf die Leitung schließen, der Stream-GET nicht.
+- **K3**, weil es unbelegt ist.
 
 **Auflage: Loopback-Bindung.** Die Entscheidung setzt voraus, dass der Server nur an `127.0.0.1` bindet. Geprüft am 2026-10-06 (`research.md` §8): `lsof` zeigt einen einzigen lauschenden Socket `127.0.0.1:<port>`, und Verbindungen über die Nicht-Loopback-Adresse der Maschine und über `::1` werden abgelehnt. Ein eigener Test hält das fest. Ein Verbindungsversuch über eine Nicht-Loopback-Adresse muss scheitern.
 
@@ -95,7 +101,7 @@ Für die Reparatur, die aus der Entscheidung folgt:
 4. Ändert die Reparatur Produktcode, hat die Produktfrage vorher eine Jugxo mit Kialo (`jug_01M4817FY2CAJEEH6EXPS1QSVJ`).
 5. Die Loopback-Bindung hat einen eigenen Test: Ein Verbindungsversuch über eine Nicht-Loopback-Adresse scheitert. Gezeigt wird er rot gegen einen Server ohne Host-Angabe.
 6. Eine Leerlauf-Leitung lebt länger als `keepAliveTimeout` + 1 s der Voreinstellung (T3). Rot auf dem alten Stand.
-7. Nach `close()` endet der Prozess, auch wenn ein Client eine Leerlauf-Leitung hält. Rot ohne das Schließen der Leitungen in `close()`.
+7. Nach `close()` endet der Prozess, auch wenn ein Client eine halb gesendete Anfrage offen hält (B4). Rot ohne `closeAllConnections()` in `close()`, und zwar schnell und lesbar: `close()` läuft gegen eine eigene Frist von 1,5 s und scheitert mit einer Meldung, nicht als Timeout der Suite.
 
 ## Belege
 

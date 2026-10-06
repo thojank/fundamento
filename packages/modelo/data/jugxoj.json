@@ -451,12 +451,12 @@
     {
       "id": "jug_01M4817FY2CAJEEH6EXPS1QSVJ",
       "ref": {
-        "artikolo": "XIII"
+        "artikolo": "III"
       },
       "decision": "approved",
       "date": "2026-10-06",
       "context": "Spec 006 (ECONNRESET), Entscheidung zur Keep-Alive-Politik des HTTP-Transports (Spec 001, D-13). Optionen: K1 Voreinstellung von Node behalten, K2 keepAliveTimeout = 0, K3 Connection: close.",
-      "kialo": "Der HTTP-Transport hält Leerlauf-Leitungen offen (keepAliveTimeout = 0), denn mit Nodes Voreinstellung schließt der Server nach 5 s plus 1 s eine Leitung, die der Client noch im Pool hält, sobald dessen Event-Loop so lange blockiert — die nächste Anfrage erreicht den Handler nie und endet in ECONNRESET, und undici wiederholt ein POST nicht. Gemessen in Spec 006: Probe mit 6 s Blockade rot wie der CI-Befund, Gegenprobe mit keepAliveTimeout = 0 grün, auch mit dem Server in einem eigenen Prozess. Der Server bleibt zustandslos und bindet nur an 127.0.0.1; ungenutzte Leitungen kosten deshalb nur Dateideskriptoren lokaler Clients, und close() schließt alle Leitungen. K3 (Connection: close) ist verworfen: unbelegt, und es verlangt eine Fallunterscheidung zwischen POST und dem Stream-GET. Auflage: Diese Entscheidung setzt die Loopback-Bindung voraus. Wird der Server über 127.0.0.1 hinaus erreichbar, gilt sie nicht mehr — unbegrenzt gehaltene Leitungen fremder Clients sind dann ein Ressourcenrisiko, und K3 oder ein endliches Limit ist neu zu entscheiden."
+      "kialo": "Der HTTP-Transport hält Leerlauf-Leitungen offen (keepAliveTimeout = 0), denn mit Nodes Voreinstellung schließt der Server nach 5 s plus 1 s eine Leitung, die der Client noch im Pool hält, sobald dessen Event-Loop so lange blockiert — die nächste Anfrage erreicht den Handler nie und endet in ECONNRESET, und undici wiederholt ein POST nicht. Gemessen in Spec 006: Probe mit 6 s Blockade rot wie der CI-Befund, Gegenprobe mit keepAliveTimeout = 0 grün, auch mit dem Server in einem eigenen Prozess. Der Server bleibt zustandslos und bindet nur an 127.0.0.1; ungenutzte Leitungen kosten deshalb nur Dateideskriptoren lokaler Clients, und close() schließt alle Leitungen. K3 (Connection: close) ist verworfen, weil es unbelegt ist. Auflage: Diese Entscheidung setzt die Loopback-Bindung voraus. Wird der Server über 127.0.0.1 hinaus erreichbar, gilt sie nicht mehr — unbegrenzt gehaltene Leitungen fremder Clients sind dann ein Ressourcenrisiko, und K3 oder ein endliches Limit ist neu zu entscheiden."
     }
   ]
 }
