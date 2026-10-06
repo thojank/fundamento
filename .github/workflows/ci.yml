@@ -21,6 +21,12 @@ jobs:
     name: Build, test, lint and conformance checks
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    # The merge run on main proves the rendering of the Eroj in Chromium, Firefox and WebKit
+    # (Spec 003); every other run in Chromium only. "Check: Alirebleco (Eroj)" took 201 to 205 s of
+    # 734 to 805 s in three engines (Vojmapo). An engine-specific defect therefore shows on main,
+    # not in the PR. Read by packages/eroj/playwright.config.ts.
+    env:
+      PLAYWRIGHT_ENGINES: ${{ (github.ref == 'refs/heads/main' && github.event_name != 'pull_request') && 'chromium firefox webkit' || 'chromium' }}
     steps:
       # Default fetch depth (1) is enough: the checks only need `git ls-files`.
       - name: Checkout
@@ -57,7 +63,8 @@ jobs:
       - name: Install
         run: pnpm install --frozen-lockfile
 
-      # The rendered checks of @fundamento/eroj run in Chromium, Firefox and WebKit (Spec 003).
+      # All three engines are installed in every run, also where PLAYWRIGHT_ENGINES runs only one:
+      # the browsers come from the cache, and workflow.test.ts pins this line.
       - name: Playwright browsers
         run: pnpm --filter @fundamento/eroj exec playwright install --with-deps chromium firefox webkit
 
