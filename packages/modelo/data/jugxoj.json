@@ -436,6 +436,17 @@
       "date": "2026-09-23",
       "context": "An P0, F32: Platzierung einer abgeleiteten Variablen",
       "kialo": "Entschieden (Maintainer, 2026-09-23), für die abgeleiteten Variablen des Figma-Celo: Die Dimensionsmenge einer abgeleiteten Variablen ist die Vereinigung über alle Marken, nicht die je Marke. Eine Variable, die der Celo aus mehreren Tokens ausrechnet, wohnt in der Sammlung der höchsten Dimensio, an der ihr Wert sich ändert — und welche das sind, entscheidet ein Vergleich über alle Kombinationen, nicht die Herkunft der Quelltokens und nicht die Sicht einer einzelnen Marke. Beleg, gemessen am Fokusring: Die Strichstärke hängt in ekzemplo an contrast — Kontrolle/Abstand/Ring sind 0/2/4 bei contrast=default und 0/2/5 bei contrast=high, weil das Set aspekto/ekzemplo+contrast/high die Strichstärke auf 3 setzt. In komuna hängt sie nicht daran: 4/6/8 in beiden Kontrasten. Hätte die Ableitung nur die Dimensioj der Quelltokens genommen, wäre contrast durchgefallen — die Kern-Sets ändern border.width.focus nicht, nur das Set einer Marke tut es. Hätte sie nur die Referenzmarke befragt, ebenso. Die Variable hätte dann in der Sammlung aspekto gewohnt und in ekzemplo/contrast=high den falschen Wert gezeigt, ohne dass eine Prüfung es sähe. Die Regel gilt für jede künftige abgeleitete Variable: erst über alle Kombinationen messen, dann platzieren."
+    },
+    {
+      "id": "jug_01M37BYR772C5N3AF7J5451DRB",
+      "ref": {
+        "artikolo": "VIII",
+        "celo": "figma"
+      },
+      "decision": "approved",
+      "date": "2026-09-23",
+      "context": "An P0, F37: F8 geschlossen, die Annahme war falsch",
+      "kialo": "F8 stand seit Wochen mit einer offenen Frage: Kann die Deckkraft der Marke folgen, wenn ein Paint seine opacity als feste Zahl trägt? Die Annahme in den Notizen lautete nein — „eine Fläche hat eine Deckkraft, die Modusumschaltung verlangt zwei\" — und daraus folgte der Plan, jedem gebundenen Teil einen Auflagen-Knoten mit einer eigenen FLOAT-Variablen zu geben. Die Annahme ist widerlegt. Gemessen (Maintainer, 2026-09-23): Figmas COLOR-Variablen führen den Alphakanal mit, und der aufgelöste Alphawert erscheint am Paint als opacity. Beleg an ein und demselben Knoten, bei identischer Bindung auf color/action/tertiary/rest, in zwei Modi: komuna #000000 α0, ekzemplo/light #ffffff α1. Eine Fläche hat also so viele Deckkräfte, wie die Sammlung Modi hat — die Variable trägt sie. Der Auflagen-Knoten wird damit nicht gebraucht und ist aus Phase 4 gestrichen; die falsche Annahme bleibt im Protokoll stehen, korrigiert statt gelöscht, weil sie erklärt, warum die Projektion sich so lange geweigert hat. Was bleibt: Der Plan sagt weiterhin alphaVariesByMode, wo zwei Marken auf einer gebundenen Rolle verschiedene Deckkräfte verlangen — nicht weil Figma es nicht könnte, sondern weil der Plan eine feste Zahl schreibt, wo er eine schreibt, und eine von zwei Marken zu wählen keine Projektion wäre. Seit F36 verlangt keine Rolle mehr zwei; der Fall bleibt an einer Fixture geprüft."
     }
   ]
 }
