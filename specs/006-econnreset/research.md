@@ -80,9 +80,31 @@ Zur Abgrenzung derselbe Minimal-Aufbau in **einem** Prozess: 5500 ms 3/3 grün, 
 
 **Folgerung:** Die gemeinsame Loop ist keine Bedingung. Bedingung ist eine Blockade der Client-Loop von mehr als rund 6 s, während der Client eine Leitung im Pool hält. Ein eigener Server-Prozess beseitigt das nicht.
 
-## 6. Was nicht gemessen wurde
+## 6. T2: keine Wiederverwendung im Test-Client
+
+**a) Kann Nodes `fetch` das ohne neue Abhängigkeit?** Gemessen mit dem Minimal-Aufbau aus §5 im selben Prozess. Der Server zählt Sockets und protokolliert den `Connection`-Header jeder Anfrage:
+
+| Variante | Blockade | Ergebnis | Sockets für 4 Anfragen | `Connection` am Server |
+|---|---|---|---|---|
+| Voreinstellung | 0 | 2/2 | 2 | `keep-alive` |
+| Voreinstellung | 6000 ms | 1/2, ECONNRESET | 3 | `keep-alive` |
+| Header `connection: close` | 0 | 2/2 | 4 | `close` |
+| Header `connection: close` | 6000 / 8000 ms | 7/7 Läufe 2/2 | 4 | `close` |
+
+Nodes `fetch` gibt den Header weiter und öffnet je Anfrage eine neue Leitung. Ein eigener `dispatcher` mit `pipelining: 0` wirkt auch, geht aber nur über `Symbol.for("undici.globalDispatcher.1")` an die Agent-Klasse. Das sind undici-Interna, und dieser Weg ist verworfen.
+
+**b) Wird der Test damit grün, mit künstlicher Blockade?** Stand `main`, 6 s synchrone Blockade nach `listTools()` und vor dem ersten `callTool`:
+
+| Test-Client | lokal | CI |
+|---|---|---|
+| Voreinstellung | 3/3 rot, `read ECONNRESET` | 37420659402 rot, 7014 ms, `errno -104`, 1 failed \| 113 passed |
+| T2 (`connection: close`) | 3/3 grün | 37420661627 grün, 7555 ms, 114/114 |
+
+Ein grüner Lauf ohne Blockade wäre keine Messung. Die Kontrolle ohne T2 ist rot, also misst die Gegenprobe etwas.
+
+## 7. Was nicht gemessen wurde
 
 - **Ein natürlich roter Lauf mit Probe.** Alle natürlichen Messläufe waren grün. Dass die Blockade in den roten Läufen über 6 s lag, ist aus deren Testdauern geschlossen, nicht gemessen.
 - **Punkt 3, `--no-file-parallelism` bzw. `singleFork`.** Nicht ausgeführt. Andere Testdateien teilen keine Leitung mit diesem Test. Parallelität wirkt nur als CPU-Last, die die Blockade verlängert. Ein grüner Lauf ohne Parallelität hätte nichts unterschieden.
 - **Punkt 4, `preload()`.** Nicht gesondert geprüft. #31 fiel mit `loadServed()` ohne `preload()`, also ist `preload()` keine Voraussetzung.
-- **K3 und T2 aus `spec.md`.**
+- **K3 aus `spec.md`** (`Connection: close` vom Server). Die Produktentscheidung liegt beim Maintainer und braucht keine weitere Messung.

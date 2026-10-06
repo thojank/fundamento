@@ -32,6 +32,14 @@ Widerlegt ist damit:
 - **Die Sammelzeit als Ursache.** In der Fassung von #34 liegen zwischen `connect()` und `listTools()` in CI 1 bis 5 ms, und der Test fiel trotzdem.
 - **Die gemeinsame Loop als Bedingung.** Mit dem echten `fundamento-mcp --http` als eigenem Prozess und einem echten SDK-Client führen 6 s Blockade im Client-Prozess in 6 von 6 Läufen zu ECONNRESET.
 
+## Weitere Befunde
+
+**B1 – Das SDK blockiert beim ersten `callTool`, unabhängig von Keep-Alive.** `@modelcontextprotocol/client` 2.0.0 (`ClientResponseCache.outputValidator`, `dist/index.mjs` ab Zeile 2192) kompiliert nach jedem neuen Stand von `tools/list` beim nächsten `callTool()` die `outputSchema`s **aller** gelisteten Tools synchron mit ajv, nicht nur die des aufgerufenen Tools. Gemessen wurden lokal 93 ms und in fünf grünen CI-Läufen 670 bis 1640 ms. In den roten Läufen auf #34 dauerte der ganze Test 7745 bis 9393 ms. Wie viel davon das Kompilieren war, ist **nicht gemessen**, nur dass es über rund 6 s gelegen haben muss, damit der Mechanismus greift. Das trifft jeden Verbraucher dieses SDK gegen diesen Server: Ein Client friert beim ersten Werkzeugaufruf für die Dauer dieses Kompilierens ein, und unter Last kann das länger als `keepAliveTimeout` sein. Fundamento kann das im SDK nicht beheben. Beeinflussen kann es die Größe und Zahl der `outputSchema`s, die es listet. Das ist nicht gemessen und nicht entschieden.
+
+Ein früher `callTool` zum Aufwärmen hilft nicht. Der erste `callTool` nach einem `tools/list` bezahlt das Kompilieren immer, und währenddessen liegt die Leitung aus der vorigen Antwort brach. Ein Aufwärmen verschiebt nur, welcher Aufruf der erste ist. Das ist aus der Messung hergeleitet, nicht gemessen.
+
+**B2 – Eine Prüfung falsch gelesen.** Beim Schreiben dieser Spec liefen `check:vortaro-lint` und `check:clean-room`. Weil die Dateizahl vor und nach dem Commit gleich blieb (653), stand in der ersten Fassung, die beiden Prüfungen läsen `specs/*.md` nicht. Das war falsch. `loadScanTree` listet mit `git ls-files --cached --others` und zählt unversionierte Dateien also mit. Der Scan-Baum enthält beide Dateien dieser Spec. `clean-room` prüft sie auf Benchmark-Pfade und auf Marken-Fingerabdrücke (`.md` steht in `FINGERPRINT_EXTENSIONS`). `vortaro-lint` liest nur Projekcio-CSS und Bezeichner, Markdown gehört nicht zu seinem Gegenstand. Das Maß zeigte nicht an die falsche Stelle, es wurde falsch abgelesen: aus einem Zähler geschlossen statt im Code nachgesehen. Das ist derselbe Fehlertyp wie die Sammelzeit-Erklärung in #34.
+
 ## Nicht im Scope
 
 - Den Lauf wiederholen, bis er grün ist. Den Test überspringen oder mit `retry` versehen.
@@ -52,7 +60,12 @@ Zu entscheiden, jeweils mit Kialo:
 
 **T1 – Server in einem eigenen Prozess, wie `quickstart.test.ts`.** Gemessen: Das löst den Mechanismus **nicht** auf, weil die Blockade auf der Client-Seite liegt (`research.md` §5). Der Test-Prozess würde nur die Arbeit des Servers los. Ob das die Blockade im CI unter die Schwelle drückt, ist nicht gemessen. Belegt wäre es dann ohnehin nicht.
 
-**T2 – Der Test-Client nutzt keine Leitung wieder.** Ein `fetch` für den `StreamableHTTPClientTransport`, das jede Anfrage auf einer eigenen Verbindung schickt. Das beseitigt die Voraussetzung des Mechanismus auf der Client-Seite, ohne Produktcode. Dafür prüft der Test Keep-Alive dann nicht mehr. Noch nicht gemessen, insbesondere nicht, ob Nodes `fetch` das ohne zusätzliche Abhängigkeit erlaubt.
+**T2 – Der Test-Client nutzt keine Leitung wieder.** Der `StreamableHTTPClientTransport` bekommt ein `fetch`, das jeder Anfrage `connection: close` mitgibt. Gemessen (`research.md` §6):
+- Nodes eingebautes `fetch` hält sich daran, ohne zusätzliche Abhängigkeit. Vier Anfragen öffnen vier Sockets.
+- Im echten Test mit 6 s künstlicher Blockade vor dem ersten `callTool`: ohne T2 rot wie das Original, lokal 3/3 und in CI. Mit T2 grün, lokal 3/3 und in CI.
+- Der Weg über einen eigenen `dispatcher` geht nur über undici-Interna und ist verworfen.
+
+**Auflage, wenn T2 genommen wird:** T2 macht den Test grün, indem es die Bedingung entfernt, unter der der Fehler entsteht. Das ist zulässig, solange der Zweck des Tests ist: „Der Transport bedient die Werkzeuge.“ Danach deckt **kein Test mehr** ab, wie sich der Server gegenüber einem Client verhält, der Leitungen wiederverwendet und dessen Loop länger als `keepAliveTimeout` + 1 s blockiert. Diese Lücke ist bekannt und gemessen, sie wird hier geführt und nicht verschwiegen. Sie schließt sich mit T3, sobald die Produktfrage entschieden ist. Die Probe dafür liegt in `mess/econnreset-falsifikation-block6s` und `mess/econnreset-t2-aus`.
 
 **T3 – Der Test prüft den Mechanismus ausdrücklich.** Abhängig von der Produktfrage: Bei K2 oder K3 belegt ein Test mit erzwungener Blockade von mehr als 6 s, dass der Server die Leitung hält bzw. nicht wiederverwenden lässt. Die Probe dafür existiert (`mess/econnreset-falsifikation-block6s`).
 
@@ -75,3 +88,5 @@ Vier annotierte Tags mit Grund und Ergebnis im Tag-Text (Art. VI). Die Wegwerf-Z
 | `mess/econnreset-messung-pr34` | Messung 1 + 5 auf #34, Messpunkte um `callTool` | 37371050199 (Versuche 2–5) |
 | `mess/econnreset-falsifikation-block6s` | 6 s Blockade, Keep-Alive unverändert | 37377609398 (rot, wie das Original) |
 | `mess/econnreset-falsifikation-block6s-ka0` | 6 s Blockade, `keepAliveTimeout = 0` | 37377611301 (grün) |
+| `mess/econnreset-t2-aus` | Stand `main`, 6 s Blockade, Leitungen wiederverwendet | 37420659402 (rot) |
+| `mess/econnreset-t2-an` | Stand `main`, 6 s Blockade, T2 (`connection: close`) | 37420661627 (grün) |
