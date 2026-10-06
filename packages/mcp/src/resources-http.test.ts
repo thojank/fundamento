@@ -2,6 +2,7 @@
 
 import { readFileSync } from "node:fs";
 import { request } from "node:http";
+import { performance } from "node:perf_hooks";
 import {
   Client,
   StreamableHTTPClientTransport,
@@ -78,10 +79,22 @@ function rawPost(port: number, headers: Record<string, string>) {
   });
 }
 
+// T2: jede Anfrage auf einer eigenen Leitung. Nodes fetch hält sich an `connection: close`.
+const withoutReuse: typeof fetch = (input, init) => {
+  const headers = new Headers(init?.headers);
+  headers.set("connection", "close");
+  return fetch(input, { ...init, headers });
+};
+
 describe("the HTTP transport", async () => {
   const http = await startHttpServer(loadServed(), { port: 0 });
   const client = new Client({ name: "test", version: "0" });
-  await client.connect(new StreamableHTTPClientTransport(new URL(http.url)) as Transport);
+  await client.connect(
+    new StreamableHTTPClientTransport(
+      new URL(http.url),
+      process.env.ECONNRESET_T2 ? { fetch: withoutReuse } : {},
+    ) as Transport,
+  );
   afterAll(async () => {
     await client.close();
     await http.close();
@@ -95,6 +108,9 @@ describe("the HTTP transport", async () => {
   it("serves the tools", async () => {
     const { tools } = await client.listTools();
     expect(tools).toHaveLength(TOOL_NAMES.length);
+    // WEGWERF Probe: synchrone Blockade der Client-Loop vor dem ersten callTool.
+    const until = performance.now() + Number(process.env.ECONNRESET_BLOCK_MS ?? 6000);
+    while (performance.now() < until) {}
     const described = await client.callTool({ name: "describe", arguments: {} });
     expect(described.isError).toBeFalsy();
   });
