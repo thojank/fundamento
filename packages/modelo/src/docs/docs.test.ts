@@ -617,18 +617,22 @@ describe("Spec 004 documentation: Etappe A (T014)", () => {
   });
 });
 
-describe("Spec 004 documentation (T001, Constitution v1.7)", () => {
+/** Die Übernahmeregel des Artikels V: von zwei Amendments zitiert, deshalb nur einmal geschrieben. */
+const SOURCE_RULE = "Quellmaterial anderer Systeme wird dem Coding-Tool nicht vorgelegt.";
+
+describe("Spec 004 documentation (T001, Art. V Benchmark-Aspekto)", () => {
   const constitution = read(".specify/memory/constitution.md");
   const BENCHMARK_SENTENCE =
     "Ein fremdes System mit offener, nachgewiesener Lizenz darf als Benchmark-Aspekto importiert werden, um es mit denselben Prüfungen zu messen.";
-  const SOURCE_RULE = "Quellmaterial anderer Systeme wird dem Coding-Tool nicht vorgelegt.";
 
-  // F41 numbers itself 1.9, not 1.8: F33 (PR #31, Art. V/VI/VII) claims the 1.8 and goes to main
-  // first (maintainer, 2026-09-23). Until #31 is merged the change history jumps from v1.7 to v1.9
-  // — the rebase onto the merged F33 closes the gap. A header test compares one string and would
-  // never notice two amendments under one number; the number is checked against the base commit.
-  it("the Constitution header says version 1.9", () => {
-    expect(constitution.split("\n")[2]).toMatch(/^Version 1\.9 · /);
+  // Die Nummer folgt der Landung, nicht dem Entwurf: #33 (F41) ging zuerst nach main und nahm die
+  // 1.9, dieser Strang war als 1.8 entworfen und landet als 2.0 (Maintainer, 2026-09-24). Eine v1.8
+  // hat es damit nie gegeben; die Lücke wird in der Änderungshistorie benannt, nicht geschlossen.
+  // 2.0 statt 1.10, weil „Kein Trittbrett" die erste Regel ist, die nicht den Erbauer bindet,
+  // sondern den Benutzer. Dieser Test ist der einzige Gegenleser der Nummer — ein Vergleich über
+  // einen String, der zwei Amendments unter einer Nummer nie melden würde.
+  it("the Constitution header says version 2.0", () => {
+    expect(constitution.split("\n")[2]).toMatch(/^Version 2\.0 · /);
   });
 
   it("Art. V carries the Benchmark-Aspekto paragraph and keeps the source rule", () => {
@@ -653,7 +657,7 @@ describe("Spec 004 documentation (T001, Constitution v1.7)", () => {
     expect(history).toContain("Aspiro");
   });
 
-  it("v1.7 does not yet carry the principle Fluida Marko", () => {
+  it("the Constitution does not yet carry the principle Fluida Marko", () => {
     expect(constitution).not.toContain("Fluida Marko");
   });
 });
@@ -683,6 +687,51 @@ describe("F41 documentation (Constitution v1.9, Art. VI Manko)", () => {
     const history = section(constitution, "Governance");
     expect(history).toMatch(/v1\.9 \(Spec 003, F41\) Art\. VI/);
     expect(history).toContain("**Manko**");
+  });
+});
+
+// F33: drei Ergänzungen, jede in dem Artikel, dessen Gegenstand sie fortschreibt — was gelesen
+// werden darf (V), was mit dem Ergebnis geschehen darf (VI) und was mitreisen muss (VII). Keine
+// neue Nummerierung: Jeder Verweis auf „Art. VIII" im Repo bliebe sonst stehen und zeigte woanders
+// hin. Artikel V verweist auf den ersten Absatz des Artikels VI, deshalb steht „Kein Trittbrett"
+// dort vor dem Manko-Absatz.
+describe("F33 documentation (Constitution v2.0, Art. V/VI/VII)", () => {
+  const constitution = read(".specify/memory/constitution.md");
+
+  it("Art. V says that public appearance is no source", () => {
+    const article = section(constitution, "Artikel V – Pura Cxambro (Clean Room)");
+    expect(article).toContain("Öffentlich beobachtbare Erscheinung ist kein Quelltext");
+    expect(article).toContain("zwischen Beobachtung und Übernahme");
+    // Die Klarstellung weitet nichts auf: Die Übernahmeregel steht unverändert daneben.
+    expect(article).toContain(SOURCE_RULE);
+  });
+
+  it("Art. VI carries Kein Trittbrett, with confusability as the measure", () => {
+    const article = section(constitution, "Artikel VI – Regularo kun Kialoj (Regeln mit Gründen)");
+    expect(article).toContain("**Kein Trittbrett.**");
+    expect(article).toContain("Maßstab ist die Verwechselbarkeit, nicht die Ähnlichkeit");
+    expect(article).toContain("eine Jugxo, keine Messung");
+    // Und die ältere Regel dieses Artikels bleibt, wo sie war.
+    expect(article).toContain("**Befund wird Regel.**");
+  });
+
+  it("Art. VII asks every import for its provenance and marks a font that was only read", () => {
+    const article = section(
+      constitution,
+      "Artikel VII – Agenta Dokumentado (agentische Dokumentation)",
+    );
+    expect(article).toContain("**Herkunftsnachweis.**");
+    expect(article).toContain("Ohne Herkunftsnachweis ist ein Import unvollständig");
+    expect(article).toContain("Name gelesen, Lizenz ungeklärt");
+    expect(article).toContain("Ein Name ist keine Lizenz.");
+  });
+
+  it("the change history names v2.0 (Spec 003, F33) and says the v1.8 never existed", () => {
+    const history = section(constitution, "Governance");
+    expect(history).toMatch(/v2\.0 \(Spec 003, F33\) Art\. V/);
+    expect(history).toContain("**Kein Trittbrett**");
+    expect(history).toContain("**Herkunftsnachweis**");
+    expect(history).toContain("eine v1.8 hat es nie gegeben");
   });
 });
 
