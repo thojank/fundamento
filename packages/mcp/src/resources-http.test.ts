@@ -92,7 +92,7 @@ describe("the HTTP transport", async () => {
   await client.connect(
     new StreamableHTTPClientTransport(
       new URL(http.url),
-      process.env.ECONNRESET_T2 ? { fetch: withoutReuse } : {},
+      process.env.ECONNRESET_T2 !== "0" ? { fetch: withoutReuse } : {},
     ) as Transport,
   );
   afterAll(async () => {
