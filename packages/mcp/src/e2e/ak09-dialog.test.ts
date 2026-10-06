@@ -6,10 +6,18 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import type { RegulojFile, Skemo } from "@fundamento/modelo";
-import { afterAll, describe, expect, it } from "vitest";
-import { closeClients, connect, EKZEMPLO_CONFIG, output } from "../test-doubles/client.js";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import {
+  type Connected,
+  closeClients,
+  connect,
+  EKZEMPLO_CONFIG,
+  output,
+  preload,
+} from "../test-doubles/client.js";
 
 afterAll(closeClients);
+preload({ config: EKZEMPLO_CONFIG });
 
 const DATA = new URL("../../../modelo/data/", import.meta.url);
 const read = <T>(path: string): T =>
@@ -33,7 +41,13 @@ const valuesOf = (prop: string) => {
   return [...found.values];
 };
 
-const { client } = await connect({ config: EKZEMPLO_CONFIG });
+// Die Verbindung entsteht im `beforeAll`, nicht auf Modulebene: Modulcode läuft, während Vitest
+// alle Dateien einsammelt — die Leitung stünde dann offen, bis dieser Test an der Reihe ist.
+let client: Connected["client"];
+
+beforeAll(async () => {
+  ({ client } = await connect({ config: EKZEMPLO_CONFIG }));
+});
 
 describe("AK-09: the Phase-3 dialog with ekzemplo", () => {
   it("'Welchen Button nehme ich für Löschen?': suggest_ero names variant, tone and the Regulo", async () => {

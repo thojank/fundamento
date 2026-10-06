@@ -16,16 +16,31 @@ import {
   resolveCombination,
   truncate2,
 } from "@fundamento/modelo";
-import { afterAll, describe, expect, it } from "vitest";
-import { closeClients, connect, EKZEMPLO_CONFIG, output } from "../test-doubles/client.js";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import {
+  type Connected,
+  closeClients,
+  connect,
+  EKZEMPLO_CONFIG,
+  output,
+  preload,
+} from "../test-doubles/client.js";
 
 afterAll(closeClients);
+preload({ config: EKZEMPLO_CONFIG });
 
 type Json = Record<string, unknown>;
 
-const { client } = await connect({ config: EKZEMPLO_CONFIG });
-const { contents } = await client.readResource({ uri: "fundamento://export/modelo.json" });
-const modeloJson = JSON.parse((contents[0] as { text: string }).text) as ModeloJson;
+// Die Verbindung entsteht im `beforeAll`, nicht auf Modulebene: Modulcode läuft, während Vitest
+// alle Dateien einsammelt — die Leitung stünde dann offen, bis dieser Test an der Reihe ist.
+let client: Connected["client"];
+let modeloJson: ModeloJson;
+
+beforeAll(async () => {
+  ({ client } = await connect({ config: EKZEMPLO_CONFIG }));
+  const { contents } = await client.readResource({ uri: "fundamento://export/modelo.json" });
+  modeloJson = JSON.parse((contents[0] as { text: string }).text) as ModeloJson;
+});
 const { files } = readModeloFiles(projectModeloSource(EKZEMPLO_CONFIG));
 if (files === undefined) throw new Error("ekzemplo did not load");
 const source = buildModelo(files).modelo;
@@ -142,20 +157,34 @@ function verifyAspekto(answer: Json): void {
   expect((answer.instances as { count: number }).count).toBe(modeloJson.aspektoj.length);
 }
 
-const answers = {
-  describe: await output(client, "describe"),
-  explainSubtle: await output(client, "explain", Q2),
-  checkContrast: await output(client, "check_contrast", {
-    foreground: "color.text.muted",
-    background: "color.background.sunken",
-  }),
-  warningBorder: await output(client, "explain", {
-    token: "color.status.warning.border",
-    assignment: { aspekto: "ekzemplo" },
-  }),
-  aspekto: await output(client, "describe_term", { term: "Aspekto" }),
-  marke: await output(client, "describe_term", { term: "Marke" }),
+// Sechs Fragen, einmal gestellt und danach nur noch nachgerechnet. Sie werden im Hook gestellt,
+// nicht beim Einsammeln der Dateien: Sonst liefe der ganze Dialog über eine Leitung, die zu diesem
+// Zeitpunkt nur aufgebaut wurde, weil Vitest die Datei gelesen hat.
+let answers: {
+  describe: Json;
+  explainSubtle: Json;
+  checkContrast: Json;
+  warningBorder: Json;
+  aspekto: Json;
+  marke: Json;
 };
+
+beforeAll(async () => {
+  answers = {
+    describe: await output(client, "describe"),
+    explainSubtle: await output(client, "explain", Q2),
+    checkContrast: await output(client, "check_contrast", {
+      foreground: "color.text.muted",
+      background: "color.background.sunken",
+    }),
+    warningBorder: await output(client, "explain", {
+      token: "color.status.warning.border",
+      assignment: { aspekto: "ekzemplo" },
+    }),
+    aspekto: await output(client, "describe_term", { term: "Aspekto" }),
+    marke: await output(client, "describe_term", { term: "Marke" }),
+  };
+});
 
 describe("S7 Gvidanto dialog with ekzemplo (Spec 002 AK-06)", () => {
   it("1 'Was gibt's hier?': describe", () => verifyDescribe(answers.describe));
@@ -180,12 +209,14 @@ describe("mutation check: one wrong number fails the dialog", () => {
     node[last] = (node[last] as number) + 1;
     return copy;
   };
-  const subtlePair = (answers.explainSubtle.kontrastParoj as { name: string }[]).findIndex(
-    (entry) => entry.name === "text-subtle-on-background-default",
-  );
-  const borderPair = (answers.warningBorder.kontrastParoj as { name: string }[]).findIndex(
-    (entry) => entry.name === "status-warning-basic-on-background-default",
-  );
+  const subtlePair = () =>
+    (answers.explainSubtle.kontrastParoj as { name: string }[]).findIndex(
+      (entry) => entry.name === "text-subtle-on-background-default",
+    );
+  const borderPair = () =>
+    (answers.warningBorder.kontrastParoj as { name: string }[]).findIndex(
+      (entry) => entry.name === "status-warning-basic-on-background-default",
+    );
 
   it.each([
     [
@@ -197,7 +228,7 @@ describe("mutation check: one wrong number fails the dialog", () => {
       "explain pair ratio",
       () =>
         verifyExplainSubtle(
-          bump(answers.explainSubtle, ["kontrastParoj", subtlePair, "main", "ratio"]),
+          bump(answers.explainSubtle, ["kontrastParoj", subtlePair(), "main", "ratio"]),
         ),
     ],
     [
@@ -212,7 +243,7 @@ describe("mutation check: one wrong number fails the dialog", () => {
       "border aux ratio",
       () =>
         verifyWarningBorder(
-          bump(answers.warningBorder, ["kontrastParoj", borderPair, "aux", "ratio"]),
+          bump(answers.warningBorder, ["kontrastParoj", borderPair(), "aux", "ratio"]),
         ),
     ],
     ["Aspekto instance count", () => verifyAspekto(bump(answers.aspekto, ["instances", "count"]))],

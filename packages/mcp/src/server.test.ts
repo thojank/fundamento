@@ -2,20 +2,33 @@
 // in-process through the SDK client over an in-memory transport.
 
 import { describeModelo } from "@fundamento/modelo";
-import { afterAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import {
+  type Connected,
   call,
   closeClients,
   connect,
   EKZEMPLO_CONFIG as EKZEMPLO,
   INCOMPLETE_CONFIG as INCOMPLETE,
+  preload,
   toolSchemas as schemas,
 } from "./test-doubles/client.js";
 
 afterAll(closeClients);
 
-describe("the repo server", async () => {
-  const { client, served } = await connect();
+// Der Modelo wird hier geladen, nicht im Hook: reines Rechnen ohne Leitung, und das `connect` im
+// `beforeAll` kostet danach nur noch den Handschlag des Transports.
+preload();
+preload({ config: EKZEMPLO });
+preload({ config: INCOMPLETE });
+
+describe("the repo server", () => {
+  let client: Connected["client"];
+  let served: Connected["served"];
+
+  beforeAll(async () => {
+    ({ client, served } = await connect());
+  });
 
   it("lists the read-only tools with input and output schemas", async () => {
     const { tools } = await client.listTools();
@@ -114,8 +127,12 @@ describe("the repo server", async () => {
   });
 });
 
-describe("a project server (core + komuna + ekzemplo)", async () => {
-  const { client } = await connect({ config: EKZEMPLO });
+describe("a project server (core + komuna + ekzemplo)", () => {
+  let client: Connected["client"];
+
+  beforeAll(async () => {
+    ({ client } = await connect({ config: EKZEMPLO }));
+  });
 
   it("list_aspektoj describes both Aspektoj with package, namespace and sets", async () => {
     const aspektoj = (await call(client, "list_aspektoj")).structuredContent?.aspektoj as Record<
@@ -137,8 +154,12 @@ describe("a project server (core + komuna + ekzemplo)", async () => {
   });
 });
 
-describe("a server over an invalid Modelo", async () => {
-  const { client } = await connect({ config: INCOMPLETE });
+describe("a server over an invalid Modelo", () => {
+  let client: Connected["client"];
+
+  beforeAll(async () => {
+    ({ client } = await connect({ config: INCOMPLETE }));
+  });
 
   it("starts and reports the errors in describe", async () => {
     const { structuredContent } = await call(client, "describe");
