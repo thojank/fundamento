@@ -68,6 +68,8 @@ export async function startHttpServer(
         if (!response.headersSent) reject(response, 500, "Internal server error.");
       });
   });
+  // Spec 006, K2: jug_01M4817FY2CAJEEH6EXPS1QSVJ.
+  http.keepAliveTimeout = 0;
   await new Promise<void>((resolve, fail) => {
     http.once("error", fail);
     http.listen(port, HTTP_HOST, () => resolve());
