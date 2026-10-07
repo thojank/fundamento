@@ -56,26 +56,12 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
 
-      # The browser binaries are keyed by the Playwright version: a new version brings new builds.
-      # @fundamento/eroj pins it exactly, so the key is known before the install.
-      - name: Playwright version
-        id: playwright
-        run: echo "version=$(node -p "require('./packages/eroj/package.json').devDependencies['@playwright/test']")" >> "$GITHUB_OUTPUT"
-
-      # The download took 49 to 103 s per run (Vojmapo). Restored here, beside the pnpm store; the
-      # step "Playwright browsers" then skips what is present. The system packages (`--with-deps`)
-      # are not in the cache and are installed every run.
-      - name: Cache Playwright browsers
-        uses: actions/cache@v6
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}-chromium-firefox-webkit
-
       - name: Install
         run: pnpm install --frozen-lockfile
 
       # All three engines are installed in every run, also where PLAYWRIGHT_ENGINES runs only one:
-      # the browsers come from the cache, and workflow.test.ts pins this line.
+      # workflow.test.ts pins this line. The time of this step is apt (`--with-deps`), not the
+      # browser download (Vojmapo); a cache of ~/.cache/ms-playwright was measured and taken back.
       - name: Playwright browsers
         run: pnpm --filter @fundamento/eroj exec playwright install --with-deps chromium firefox webkit
 
