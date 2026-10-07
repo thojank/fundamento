@@ -817,9 +817,9 @@ export interface Manko {
  */
 export interface MankoClosing {
   /**
-   * The kind of measurement a run performs. `binding-accepted`: the run binds the property to a variable of the target and the target does not refuse it. `import-kept`: a file of the Celo is imported into the target and the target keeps what it previously skipped. `theme-conjunction`: the target activates a set listed under themes of two groups only while both themes are active.
+   * The kind of measurement a run performs. `binding-accepted`: the run binds the property to a variable of the target and the target does not refuse it. `import-kept`: a file of the Celo is imported into the target and the target keeps what it previously skipped. `theme-conjunction`: the target activates a set listed under themes of two groups only while both themes are active. `library-sync`: a second file of the target that links the Celo file as a library shows its sets and themes without an import of its own, and a change to the Vortaro reaches it.
    */
-  measure: "binding-accepted" | "import-kept" | "theme-conjunction";
+  measure: "binding-accepted" | "import-kept" | "theme-conjunction" | "library-sync";
   statement: NonEmptyText;
 }
 /**
