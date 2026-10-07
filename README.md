@@ -188,7 +188,7 @@ The Penpot Celo writes one folder per Aspekto that Penpot imports as it is (Art.
 2. Open a Penpot file, go to the **Tokens** panel, choose **Import** and select that folder, or a ZIP of its contents. It holds `$themes.json`, `$metadata.json` and one `<set name>.json` per set. Menu labels differ between Penpot versions.
 3. The defaults are active right after the import. Switch themes in the theme selector, e.g. `color-scheme+contrast` → `dark+high`. No token name is typed.
 
-One file per brand. An import replaces the file's whole token library (tokens, sets and themes), so each brand goes into its own Penpot file, and switching the brand means switching the file. The brand is folded into the sets; Penpot activates the union of the sets of the active themes and cannot bind one set to brand and colour scheme at once (Manko `man_01M4AZ8C2AXY2TJ2W9NQWYBKM1`).
+One file per brand. An import replaces the file's whole token library (tokens, sets and themes), so each brand goes into its own Penpot file, and switching the brand means switching the file. The brand is folded into the sets; Penpot activates the union of the sets of the active themes and cannot bind one set to brand and colour scheme at once (Manko `man_01M4AZ8C2AXY2TJ2W9NQWYBKM1`). A combined group `aspekto+color-scheme+contrast` would work, but its themes multiply with every brand (eight for two, four hundred for a hundred); it was rejected for that reason, not because Penpot forbids it (Jugxo `jug_01M4B0SHBZRKX1C6SJ2JHXZTMD`).
 
 What to expect for `komuna`:
 
