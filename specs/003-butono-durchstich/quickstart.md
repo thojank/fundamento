@@ -39,7 +39,7 @@ Maintainer setup, once per Modelo change. The collection `aspekto` holds one mod
 pnpm fm projekcioj build --config packages/modelo/test/fixtures/valid/aspekto-ekzemplo/fundamento.config.json
 ```
 
-Then in Figma desktop *Plugins → Development → Import plugin from manifest…* → `.fundamento/projekcioj/figma/plugin/manifest.json`, run "Fundamento: apply plan", publish the library. The run's report names the modes of every collection as raw data (`modes`), so `aspekto: ["komuna", "ekzemplo"]` is read from the console, not from the mode menu.
+Then in Figma desktop *Plugins → Development → Import plugin from manifest…* → `.fundamento/projekcioj/figma/plugin/manifest.json`, run "Fundamento: apply plan" → "Plan anwenden", publish the library. A run that would create a variant in a set it already found aborts before its first write and names every such variant (F10c); "Plan anwenden – auch in vorgefundenem Set anlegen" goes on deliberately. The run's report names the modes of every collection as raw data (`modes`), so `aspekto: ["komuna", "ekzemplo"]` is read from the console, not from the mode menu.
 
 ## Figma Make (S4)
 
