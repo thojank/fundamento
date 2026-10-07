@@ -1,8 +1,17 @@
 name: CI
 
+# A branch is checked by its pull request; a push runs CI only on main (the merge run). Before,
+# every commit of a PR ran twice, once per event (Vojmapo, 37442271925 and 37442276408).
+# That double run was also the only repetition on one tree, and it showed the hook timeout in
+# ak09-dialog.test.ts (red in the push run, green in the PR run). The nightly full run on main keeps
+# a repetition without doubling every commit; workflow_dispatch repeats a tree on demand.
 on:
   push:
+    branches: [main]
   pull_request:
+  schedule:
+    - cron: "17 2 * * *"
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -12,8 +21,10 @@ env:
   TURBO_TELEMETRY_DISABLED: "1"
   DO_NOT_TRACK: "1"
 
+# The event is part of the group: the nightly run and a merge run share refs/heads/main and must not
+# cancel each other.
 concurrency:
-  group: ci-${{ github.workflow }}-${{ github.ref }}
+  group: ci-${{ github.workflow }}-${{ github.ref }}-${{ github.event_name }}
   cancel-in-progress: true
 
 jobs:
@@ -21,6 +32,12 @@ jobs:
     name: Build, test, lint and conformance checks
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    # A run on main (the merge run, the nightly run) proves the rendering of the Eroj in Chromium,
+    # Firefox and WebKit (Spec 003); a PR run in Chromium only. "Check: Alirebleco (Eroj)" took 201 to 205 s of
+    # 734 to 805 s in three engines (Vojmapo). An engine-specific defect therefore shows on main,
+    # not in the PR. Read by packages/eroj/playwright.config.ts.
+    env:
+      PLAYWRIGHT_ENGINES: ${{ (github.ref == 'refs/heads/main' && github.event_name != 'pull_request') && 'chromium firefox webkit' || 'chromium' }}
     steps:
       # Default fetch depth (1) is enough: the checks only need `git ls-files`.
       - name: Checkout
@@ -42,7 +59,9 @@ jobs:
       - name: Install
         run: pnpm install --frozen-lockfile
 
-      # The rendered checks of @fundamento/eroj run in Chromium, Firefox and WebKit (Spec 003).
+      # All three engines are installed in every run, also where PLAYWRIGHT_ENGINES runs only one:
+      # workflow.test.ts pins this line. The time of this step is apt (`--with-deps`), not the
+      # browser download (Vojmapo); a cache of ~/.cache/ms-playwright was measured and taken back.
       - name: Playwright browsers
         run: pnpm --filter @fundamento/eroj exec playwright install --with-deps chromium firefox webkit
 
