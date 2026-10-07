@@ -194,7 +194,7 @@ describe("derive_name", () => {
     ({ client, served } = await connect());
   });
 
-  it("derives the five Celoj with the Phase-0 NomReguloj", async () => {
+  it("derives the six Celoj with their NomReguloj", async () => {
     const name = "color.text.default";
     expect(await output(client, "derive_name", { name })).toEqual({
       name,
@@ -204,6 +204,7 @@ describe("derive_name", () => {
         typescript: NOM_REGULOJ.typescript.derive(name, "color"),
         tailwind: NOM_REGULOJ.tailwind.derive(name, "color"),
         dtcg: NOM_REGULOJ.dtcg.derive(name, "color"),
+        penpot: NOM_REGULOJ.penpot.derive(name, "color"),
       },
     });
     expect(await output(client, "derive_name", { name, celo: "figma" })).toEqual({
@@ -229,7 +230,13 @@ describe("derive_name", () => {
       "derive_name",
       { name: opacity.name },
     );
-    expect(Object.keys(answer.derivations)).toEqual(["css", "figma", "typescript", "dtcg"]);
+    expect(Object.keys(answer.derivations)).toEqual([
+      "css",
+      "figma",
+      "typescript",
+      "dtcg",
+      "penpot",
+    ]);
     expect(answer.issues.map((issue) => [issue.rule, issue.severity])).toEqual([
       ["nomregulo-no-target", "warning"],
     ]);

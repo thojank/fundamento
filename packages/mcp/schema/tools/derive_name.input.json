@@ -10,7 +10,7 @@
       "minLength": 1
     },
     "celo": {
-      "enum": ["css", "figma", "typescript", "tailwind", "dtcg"]
+      "enum": ["css", "figma", "typescript", "tailwind", "dtcg", "penpot"]
     }
   },
   "additionalProperties": false,
