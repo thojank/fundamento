@@ -724,6 +724,137 @@ describe("a run that would create in a set it found aborts before it writes (F10
   });
 });
 
+// F10d (Maintainer, 2026-10-07): Gemessen ist an QtJRsTlm7NnIPC8wqNuAVm nur, dass 1:895/896/897
+// fehlen und 1:899/900/901 da sind — nicht, wann und wodurch. Das Plugin ruft nirgends remove()
+// auf; verschwindet etwas, dann durch Figma. Deshalb misst jeder Lauf: Er nimmt beim Start jeden
+// Knoten des Sets mit seiner ID auf, zählt am Ende erneut und meldet laut jede ID, die fehlt — mit
+// der Angabe, ob der Knoten entfernt ist oder nur aus dem Set verdrängt. Eine Messung, kein Wächter:
+// Der Lauf bricht deshalb nicht ab.
+describe("a run reports every node of the set that was there at its start and is gone at its end (F10d)", () => {
+  interface Lost {
+    id: string;
+    name: string;
+    type: string;
+    removed: boolean;
+    parent: { id: string; type: string; name: string } | null;
+  }
+  interface Report {
+    components: { nodes: { start: number; end: number }; lost: Lost[]; created: string[] }[];
+    warnings: string[];
+  }
+  async function runWith(
+    double: ReturnType<typeof figmaDouble>,
+    figma: Record<string, unknown>,
+    options?: typeof LIFT,
+  ) {
+    const module = new Function(
+      "figma",
+      "options",
+      `${repoFiles["figma/plugin/code.js"] ?? ""}\nreturn applyPlan(options);`,
+    );
+    return (await module({ ...double.figma, ...figma }, options)) as Report;
+  }
+  const setOf = (double: ReturnType<typeof figmaDouble>) => {
+    const found = double.root.children[0]?.children.find((child) => child.name === "butono");
+    if (found === undefined) throw new Error("no component set");
+    return found;
+  };
+  const LAST = "variant=tertiary, tone=default, size=large, state=loading";
+  /** Variant, focus ring, focus gap, control, label: five nodes per variant, plus the set. */
+  const NODES = 72 * 5 + 1;
+
+  it("counts the same nodes at start and end of a clean run, and loses none", async () => {
+    const double = modelDouble();
+    const first = await runWith(double, {});
+    expect(first.components[0]?.nodes).toEqual({ start: 0, end: NODES });
+    expect(first.components[0]?.lost).toEqual([]);
+    const second = await runWith(double, {});
+    expect(second.components[0]?.nodes).toEqual({ start: NODES, end: NODES });
+    expect(second.components[0]?.lost).toEqual([]);
+    expect(second.warnings).toEqual([]);
+  });
+
+  it("names a node the tool removed during the run, by its ID", async () => {
+    const double = modelDouble();
+    await runWith(double, {});
+    const old = setOf(double).children.find((child) => child.name === LAST);
+    if (old === undefined) throw new Error("no last variant");
+    old.setSharedPluginData("fundamento", "variant", "");
+    const create = (double.figma as { createComponent: () => DoubleNode }).createComponent;
+    // Stands in for Figma: while the run creates the variant anew, the old node goes.
+    const again = await runWith(
+      double,
+      {
+        createComponent: () => {
+          old.remove();
+          return create();
+        },
+      },
+      LIFT,
+    );
+    expect(again.components[0]?.created).toEqual([LAST]);
+    expect(again.components[0]?.lost.map((entry) => entry.id)).toContain(old.id);
+    expect(again.components[0]?.lost.find((entry) => entry.id === old.id)).toMatchObject({
+      name: LAST,
+      type: "COMPONENT",
+      removed: true,
+      parent: null,
+    });
+    expect(again.warnings.join(" ")).toContain(old.id);
+    expect(again.warnings.join(" ")).toContain("entfernt");
+  });
+
+  it("names a node the tool pushed out of the set, and where it lies now", async () => {
+    const double = modelDouble();
+    await runWith(double, {});
+    const page = double.root.children[0];
+    const old = setOf(double).children.find((child) => child.name === LAST);
+    if (old === undefined || page === undefined) throw new Error("no last variant");
+    old.setSharedPluginData("fundamento", "variant", "");
+    const create = (double.figma as { createComponent: () => DoubleNode }).createComponent;
+    const again = await runWith(
+      double,
+      {
+        createComponent: () => {
+          page.appendChild(old);
+          return create();
+        },
+      },
+      LIFT,
+    );
+    expect(again.components[0]?.lost.find((entry) => entry.id === old.id)).toMatchObject({
+      removed: false,
+      parent: { id: page.id, type: "PAGE" },
+    });
+    expect(again.warnings.join(" ")).toContain("verdrängt");
+  });
+
+  it("says it out loud even when the run is otherwise clean", async () => {
+    const double = modelDouble();
+    await runWith(double, {});
+    const variant = setOf(double).children[0];
+    const label = descendant(variant, "label");
+    if (label === undefined) throw new Error("no label");
+    const load = (double.figma as { loadFontAsync: (font: unknown) => Promise<void> })
+      .loadFontAsync;
+    let done = false;
+    const again = await runWith(double, {
+      loadFontAsync: async (font: unknown) => {
+        if (!done) {
+          done = true;
+          label.remove();
+        }
+        return load(font);
+      },
+    });
+    expect(again.components[0]?.created).toEqual([]);
+    expect(again.components[0]?.nodes).toEqual({ start: NODES, end: NODES });
+    expect(again.components[0]?.lost.map((entry) => entry.id)).toEqual([label.id]);
+    expect(again.warnings).toHaveLength(1);
+    expect(again.warnings[0]).toContain(label.id);
+  });
+});
+
 // F13 (Abnahme M1, Maintainer 2026-09-21): Jede Variante trug Figmas Vorgabefüllung #FFFFFF 100 %,
 // die das Plugin nie entfernt hat — sie stammt nicht aus dem Modell und deckte die durchsichtige
 // tertiäre Aktion wieder zu. Das Double legte Knoten ohne jede Vorgabe an und war genau an dieser

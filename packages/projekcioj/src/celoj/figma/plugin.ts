@@ -522,6 +522,57 @@ function creationsInFoundSets() {
   return blocked;
 }
 
+/** The set and every node below it, outside in. */
+function nodesOf(set) {
+  const out = [];
+  const walk = (node) => {
+    out.push(node);
+    for (const child of node.children || []) walk(child);
+  };
+  walk(set);
+  return out;
+}
+
+/**
+ * Jeder Knoten jedes vorgefundenen Sets, aufgenommen beim Start des Laufs, vor dem ersten Schreiben
+ * (F10d). Das Plugin entfernt nie etwas; fehlt am Ende ein Knoten, dann hat Figma ihn entfernt oder
+ * verdrängt — und der Lauf nennt ihn mit seiner ID.
+ */
+const seenAtStart = new Map();
+function recordStart() {
+  for (const component of PLAN.components) {
+    const set = ours(figma.currentPage, "ero", component.set);
+    if (set === undefined) continue;
+    seenAtStart.set(component.set, { set: set, nodes: nodesOf(set) });
+  }
+}
+
+/** Was beim Start im Set war und am Ende nicht mehr, je Knoten: entfernt oder wohin verdrängt. */
+function lostSince(name) {
+  const seen = seenAtStart.get(name);
+  if (seen === undefined) return [];
+  const now = new Set(seen.set.removed === true ? [] : nodesOf(seen.set).map((node) => node.id));
+  return seen.nodes
+    .filter((node) => !now.has(node.id))
+    .map((node) => {
+      let parent = null;
+      if (node.removed !== true) {
+        try {
+          parent = node.parent || null;
+        } catch (error) {
+          parent = null;
+        }
+      }
+      return {
+        id: node.id,
+        name: node.name,
+        type: node.type,
+        removed: parent === null,
+        parent: parent === null ? null : { id: parent.id, type: parent.type, name: parent.name },
+      };
+    });
+}
+
 /** The abort of F10c: one sentence per set, the details whole at \`error.abort\`. */
 function abortError(blocked) {
   const sentences = blocked.map((entry) => {
@@ -703,6 +754,12 @@ async function applyComponents(variables, warnings) {
       extra: [],
       duplicates: [],
       after: { children: 0, marked: 0 },
+      // Knoten des Sets beim Start und am Ende, und jeder, der dazwischen verschwand (F10d).
+      nodes: {
+        start: seenAtStart.has(component.set) ? seenAtStart.get(component.set).nodes.length : 0,
+        end: 0,
+      },
+      lost: [],
       diagnosis: "",
       // Welche eigenen Modi das Set trug und was nach dem Lauf steht (F35).
       modes: { cleared: [], set: {} },
@@ -1294,6 +1351,7 @@ async function applyPlan(options) {
   progress.phase = "check";
   const blocked = creationsInFoundSets();
   if (blocked.length > 0 && !createInFoundSet) throw abortError(blocked);
+  recordStart();
   progress.phase = "collections";
   const { collections, modeIds, warnings: modeWarnings, modes } = await applyCollections();
   progress.collections = collections.size;
@@ -1310,6 +1368,9 @@ async function applyPlan(options) {
   const components = await applyComponents(variables, warnings);
   progress.phase = "done";
   for (const report of components) {
+    const set = ours(figma.currentPage, "ero", report.set);
+    report.nodes.end = set === undefined ? 0 : nodesOf(set).length;
+    report.lost = lostSince(report.set);
     const component = PLAN.components.find((candidate) => candidate.set === report.set);
     warnings.push(...layoutWarnings(report, component === undefined ? undefined : component.grid));
     // Ein zweiter Lauf, der in einem vorgefundenen Set etwas anlegt, darf nie still durchgehen
@@ -1327,6 +1388,22 @@ async function applyPlan(options) {
       );
     }
     if (report.diagnosis !== "") warnings.push(report.set + ": " + report.diagnosis);
+    // Laut, auch wenn der Lauf sonst sauber ist (F10d): ein verschwundener Knoten ist ein Befund.
+    if (report.lost.length > 0) {
+      warnings.push(
+        report.set + ": " + report.lost.length + " von " + report.nodes.start +
+          " Knoten, die beim Start im Set waren, fehlen am Ende: " +
+          report.lost
+            .map((node) =>
+              node.id + " " + node.type + " „" + node.name + "“ – " +
+              (node.removed
+                ? "entfernt"
+                : "aus dem Set verdrängt nach " + node.parent.type + " " + node.parent.id),
+            )
+            .join("; ") +
+          ". Das Plugin entfernt nichts; das hat Figma getan.",
+      );
+    }
     if (report.after.marked !== report.after.children) {
       warnings.push(
         report.set + ": " + (report.after.children - report.after.marked) +
@@ -1396,6 +1473,8 @@ function reportParts(result) {
         missing: report.missing.length,
         extra: report.extra.length,
         duplicates: report.duplicates.length,
+        nodes: report.nodes,
+        lost: report.lost.length,
         before: report.before,
         after: report.after,
         left: report.left,
@@ -1406,7 +1485,7 @@ function reportParts(result) {
     }),
   ];
   for (const report of result.components) {
-    for (const part of ["created", "updated", "missing", "extra", "duplicates"]) {
+    for (const part of ["created", "updated", "missing", "extra", "duplicates", "lost"]) {
       if (report[part].length > 0) lines.push(...partsOfList(report.set, part, report[part]));
     }
     if (report.layout !== undefined) {
@@ -1485,6 +1564,14 @@ if (typeof figma !== "undefined" && typeof figma.closePlugin === "function" && f
       }
       console.error("Fundamento " + PLAN.fundamento + " – Lauf fehlgeschlagen in Phase " + progress.phase + ": " + message);
       console.error(String(error && error.stack ? error.stack : "(kein Stack)"));
+      // Auch ein abgebrochener Lauf sagt, was bis dahin aus dem Set verschwunden ist (F10d).
+      try {
+        progress.lost = [...seenAtStart.keys()].flatMap((name) =>
+          lostSince(name).map((node) => Object.assign({ set: name }, node)),
+        );
+      } catch (lostError) {
+        progress.lost = "nicht messbar: " + String(lostError && lostError.message ? lostError.message : lostError);
+      }
       console.error(JSON.stringify(progress));
       figma.notify(
         "Fundamento " + PLAN.fundamento + ": Lauf fehlgeschlagen — " + String(error && error.message ? error.message : error) +
