@@ -155,22 +155,22 @@ Stand der Idee: Konzept, keine Spec. Quelle: Gespräche mit dem Maintainer am 20
 
 ## Geteilte Bibliotheken: gemessen in beiden Zielen (2026-10-07)
 
-Penpot synchronisiert ueber geteilte Bibliotheken Assets, aber keine
+Penpot synchronisiert über geteilte Bibliotheken Assets, aber keine
 Tokens; der Ersatzweg ist ein Import, der alle Tokens, Sets und Themes der
 Zieldatei ersetzt. Gemessen am Import des Penpot-Celo und belegt durch das
 Penpot-Team (2025-05-15) und das Hilfe-Center.
 
 Gegengemessen in Figma am selben Tag: Probe-Bibliothek mit einer Sammlung
 und zwei Modi, verbraucht in einer zweiten Datei. Die verbrauchende Datei
-hat vor und nach dem Verknuepfen keine lokale Sammlung (remote: true). Eine
-Aenderung an einer Variable im hellen Modus erreichte sie ueber
-"Aktualisieren"; der nicht geaenderte Modus blieb unveraendert. Alle Werte
-ueber die jeweilige Plugin-API gelesen, nicht per Augenschein.
+hat vor und nach dem Verknüpfen keine lokale Sammlung (remote: true). Eine
+Änderung an einer Variable im hellen Modus erreichte sie über
+"Aktualisieren"; der nicht geänderte Modus blieb unverändert. Alle Werte
+über die jeweilige Plugin-API gelesen, nicht per Augenschein.
 
 Daraus folgt: In einem Ziel mit Variablen-Bibliotheken hat der Vortaro
 einen Ort, auf den sich Dateien beziehen. In Penpot gibt es nur Kopien.
 Die Manko ist eine Grenze des Ziels, keine des Modelos.
 
 Nicht gemessen: ob die Dimensioj des Modelos in ihrer vollen Zahl das
-Veroeffentlichen unbeschadet ueberstehen. Geprueft wurde eine Sammlung mit
+Veröffentlichen unbeschadet überstehen. Geprüft wurde eine Sammlung mit
 zwei Modi.
