@@ -27,6 +27,76 @@
         "measure": "binding-accepted",
         "statement": "Die Bindung auf textDecoration wirft keine Ausnahme mehr, und der gebundene Wert löst je Modus verschieden auf."
       }
+    },
+    {
+      "id": "man_01M4AZ8C29YTSMWK0HXHVXMJFW",
+      "celo": "penpot",
+      "property": "$type border",
+      "modelo": "Ein Rahmen ist ein Komposit aus Farbe, Strichart und Breite und kaskadiert je Marke und Dimensio wie jedes andere Token (4 Tokens je Aspekto).",
+      "instead": "Penpot kennt den Typ nicht und überspringt jedes Token mit $type border beim Import. Der Celo schreibt die Tokens trotzdem unverändert im DTCG-Format in die Datei: Kennt Penpot den Typ eines Tages, bleiben sie ohne Änderung am Celo.",
+      "evidence": "Import was successful, but some tokens were skipped because they use unsupported $type values. — Type 'border' is not supported. Gelesen in penpot/penpot@fc8a126 (2026-10-06): `token-type->dtcg-token-type` führt border nicht, die Meldung steht in frontend/translations/en.po; nachgestellt mit Penpots Import-Pfad. Die Messung durch einen Import steht aus.",
+      "date": "2026-10-06",
+      "external": "https://help.penpot.app/user-guide/design-systems/design-tokens/ · https://github.com/penpot/penpot/blob/fc8a126048863b3ad60a37cbee1b4d83c8cd1696/common/src/app/common/types/token.cljc",
+      "closing": {
+        "measure": "import-kept",
+        "statement": "Ein Import der Penpot-Datei des Celo behält die Tokens mit $type border; die Meldung über übersprungene Typen nennt border nicht mehr."
+      }
+    },
+    {
+      "id": "man_01M4AZ8C2AXY2TJ2W9NQWYBKKY",
+      "celo": "penpot",
+      "property": "$type duration",
+      "modelo": "Eine Dauer der Bewegung ist ein Token mit Wert und Einheit und wechselt mit motion=reduced (9 Tokens je Aspekto).",
+      "instead": "Penpot kennt den Typ nicht und überspringt jedes Token mit $type duration beim Import. Der Celo schreibt die Tokens trotzdem unverändert im DTCG-Format in die Datei: Kennt Penpot den Typ eines Tages, bleiben sie ohne Änderung am Celo.",
+      "evidence": "Import was successful, but some tokens were skipped because they use unsupported $type values. — Type 'duration' is not supported. Gelesen in penpot/penpot@fc8a126 (2026-10-06): `token-type->dtcg-token-type` führt duration nicht, die Meldung steht in frontend/translations/en.po; nachgestellt mit Penpots Import-Pfad. Die Messung durch einen Import steht aus.",
+      "date": "2026-10-06",
+      "external": "https://help.penpot.app/user-guide/design-systems/design-tokens/ · https://github.com/penpot/penpot/blob/fc8a126048863b3ad60a37cbee1b4d83c8cd1696/common/src/app/common/types/token.cljc",
+      "closing": {
+        "measure": "import-kept",
+        "statement": "Ein Import der Penpot-Datei des Celo behält die Tokens mit $type duration; die Meldung über übersprungene Typen nennt duration nicht mehr."
+      }
+    },
+    {
+      "id": "man_01M4AZ8C2AXY2TJ2W9NQWYBKKZ",
+      "celo": "penpot",
+      "property": "$type cubicBezier",
+      "modelo": "Eine Beschleunigungskurve ist ein Token aus vier Zahlen und wechselt mit motion=reduced (9 Tokens je Aspekto).",
+      "instead": "Penpot kennt den Typ nicht und überspringt jedes Token mit $type cubicBezier beim Import. Der Celo schreibt die Tokens trotzdem unverändert im DTCG-Format in die Datei: Kennt Penpot den Typ eines Tages, bleiben sie ohne Änderung am Celo.",
+      "evidence": "Import was successful, but some tokens were skipped because they use unsupported $type values. — Type 'cubicBezier' is not supported. Gelesen in penpot/penpot@fc8a126 (2026-10-06): `token-type->dtcg-token-type` führt cubicBezier nicht, die Meldung steht in frontend/translations/en.po; nachgestellt mit Penpots Import-Pfad. Die Messung durch einen Import steht aus.",
+      "date": "2026-10-06",
+      "external": "https://help.penpot.app/user-guide/design-systems/design-tokens/ · https://github.com/penpot/penpot/blob/fc8a126048863b3ad60a37cbee1b4d83c8cd1696/common/src/app/common/types/token.cljc",
+      "closing": {
+        "measure": "import-kept",
+        "statement": "Ein Import der Penpot-Datei des Celo behält die Tokens mit $type cubicBezier; die Meldung über übersprungene Typen nennt cubicBezier nicht mehr."
+      }
+    },
+    {
+      "id": "man_01M4AZ8C2AXY2TJ2W9NQWYBKM0",
+      "celo": "penpot",
+      "property": "$type strokeStyle",
+      "modelo": "Die Strichart (durchgezogen, gestrichelt) ist ein Token, auf das sich die Rahmen beziehen (2 Tokens je Aspekto).",
+      "instead": "Penpot kennt den Typ nicht und überspringt jedes Token mit $type strokeStyle beim Import. Der Celo schreibt die Tokens trotzdem unverändert im DTCG-Format in die Datei: Kennt Penpot den Typ eines Tages, bleiben sie ohne Änderung am Celo.",
+      "evidence": "Import was successful, but some tokens were skipped because they use unsupported $type values. — Type 'strokeStyle' is not supported. Gelesen in penpot/penpot@fc8a126 (2026-10-06): `token-type->dtcg-token-type` führt strokeStyle nicht, die Meldung steht in frontend/translations/en.po; nachgestellt mit Penpots Import-Pfad. Die Messung durch einen Import steht aus.",
+      "date": "2026-10-06",
+      "external": "https://help.penpot.app/user-guide/design-systems/design-tokens/ · https://github.com/penpot/penpot/blob/fc8a126048863b3ad60a37cbee1b4d83c8cd1696/common/src/app/common/types/token.cljc",
+      "closing": {
+        "measure": "import-kept",
+        "statement": "Ein Import der Penpot-Datei des Celo behält die Tokens mit $type strokeStyle; die Meldung über übersprungene Typen nennt strokeStyle nicht mehr."
+      }
+    },
+    {
+      "id": "man_01M4AZ8C2AXY2TJ2W9NQWYBKM1",
+      "celo": "penpot",
+      "property": "themes",
+      "modelo": "Die Marke ist eine Dimensio wie color-scheme und contrast: Ein Set kann an Marke und Farbschema zugleich gebunden sein, und jede Kombination löst eindeutig auf. In einem Ziel mit Modi ist die Marke deshalb ein Mode, den ein Designer umschaltet wie jeden anderen.",
+      "instead": "Penpot aktiviert die Vereinigung aller Sets der aktiven Themes; ein Set, das nur gilt, wenn Marke und Farbschema zugleich gewählt sind, lässt sich an keine Theme-Gruppe binden, ohne in anderen Kombinationen falsche Werte zu geben. Der Celo schreibt deshalb eine Datei je Marke und faltet die Marke in deren Sets. Die Marke wechselt man in Penpot mit der Datei, nicht mit einem Theme.",
+      "evidence": "Get merged tokens from all active sets, in set order. — `get-tokens-in-active-sets` in penpot/penpot@fc8a126 (2026-10-06), common/src/app/common/files/tokens.cljc; ein Theme trägt eine Menge von Set-Namen ohne Bedingung. Nachgestellt: Mit Themes je Dimensio waren in komuna hell/normal 56 von 201 Farben falsch, weil das dunkle Markenset über das Theme aspekto/komuna immer aktiv war. Die Messung durch einen Import steht aus.",
+      "date": "2026-10-06",
+      "external": "https://help.penpot.app/user-guide/design-systems/design-tokens/ · https://github.com/penpot/penpot/blob/fc8a126048863b3ad60a37cbee1b4d83c8cd1696/common/src/app/common/files/tokens.cljc",
+      "closing": {
+        "measure": "theme-conjunction",
+        "statement": "Ein Set, das in der importierten Datei unter Themes zweier Gruppen steht, ist nur aktiv, solange beide Themes aktiv sind. Dann trägt eine Penpot-Datei alle Marken als eigene Theme-Gruppe."
+      }
     }
   ]
 }

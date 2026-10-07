@@ -817,9 +817,9 @@ export interface Manko {
  */
 export interface MankoClosing {
   /**
-   * The kind of measurement a run performs. `binding-accepted`: the run binds the property to a variable of the target and the target does not refuse it.
+   * The kind of measurement a run performs. `binding-accepted`: the run binds the property to a variable of the target and the target does not refuse it. `import-kept`: a file of the Celo is imported into the target and the target keeps what it previously skipped. `theme-conjunction`: the target activates a set listed under themes of two groups only while both themes are active.
    */
-  measure: "binding-accepted";
+  measure: "binding-accepted" | "import-kept" | "theme-conjunction";
   statement: NonEmptyText;
 }
 /**
