@@ -182,22 +182,22 @@ Every maintainer command explains itself with `--help`.
 
 ## Penpot quickstart
 
-The export writes one complete Tokens-Studio multi-file folder per Aspekto, so Penpot can import each brand without a converter (Art. XII, AK-09):
+The Penpot Celo writes one folder per Aspekto that Penpot imports as it is (Art. XII):
 
-1. Run `pnpm build` (the repo Modelo with `komuna`) or `pnpm fm modelo export --config <file>` (a project with its Aspektoj).
-2. Open a Penpot file, go to the **Tokens** panel, choose **Import** and select the folder `packages/modelo/dist/vortaro/<aspekto>/` (after `fm modelo export`: `<out>/vortaro/<aspekto>/`), or a ZIP of it. It contains `$themes.json`, `$metadata.json` and one `<set name>.json` per set (e.g. `core.json`, `color-scheme/dark.json`), so the file path is the set name Penpot shows. Menu labels differ between Penpot versions.
-3. Activate themes in the theme selector, e.g. `color-scheme` → `dark`, then `contrast` → `high`. After the import no theme is active, so pick one per group.
+1. Run `pnpm fm projekcioj build [--config <file>] --out <dir>` (all Celoj) or with `--celo penpot` (this one only). The folder of a brand is `<dir>/penpot/<aspekto>/`.
+2. Open a Penpot file, go to the **Tokens** panel, choose **Import** and select that folder, or a ZIP of its contents. It holds `$themes.json`, `$metadata.json` and one `<set name>.json` per set. Menu labels differ between Penpot versions.
+3. The defaults are active right after the import. Switch themes in the theme selector, e.g. `color-scheme+contrast` → `dark+high`. No token name is typed.
 
-An import replaces the file's whole token library: tokens, sets and themes. A second brand therefore goes into its own Penpot file; importing it into the same file deletes the first. Switching the brand in Penpot means switching the file, not a theme.
+One file per brand. An import replaces the file's whole token library (tokens, sets and themes), so each brand goes into its own Penpot file, and switching the brand means switching the file. The brand is folded into the sets; Penpot activates the union of the sets of the active themes and cannot bind one set to brand and colour scheme at once (Manko `man_01M4AZ8C2AXY2TJ2W9NQWYBKM1`).
 
 What to expect for `komuna`:
 
-- 6 theme groups (`aspekto`, `viewport`, `density`, `color-scheme`, `contrast`, `motion`) with 13 themes, and 11 sets in resolver order (`core` first, marked `source`).
-- The conjunction set `aspekto/komuna+color-scheme/dark` is listed under **both** the `aspekto/komuna` and the `color-scheme/dark` theme.
-- Values are DTCG 2025.10 objects: `color` as `{colorSpace, components, hex}`, `dimension` as `{value, unit: "px"}`, `duration` as `{value, unit}`. A Penpot version that does not read this object format yet may show such tokens as invalid or skip them. This is documented, not solved by changing the Modelo format.
-- Fundamento metadata sits in `$extensions["com.ciferecigo.fundamento"]` and is ignored by Penpot.
+- 4 theme groups: `viewport`, `density` and `motion` with one theme per value, and `color-scheme+contrast` with one theme per combination (`light+default`, `light+high`, `dark+default`, `dark+high`). Dimensioj that a conjunction set ties together share one group; that is how every combination shows the resolver's values (Jugxo `jug_01M4AZQTHNQDZ39MAN2VJ8DJYP`).
+- 9 sets. A set that depends on two Dimensioj is named after the higher one first (`contrast/high+color-scheme/dark`), because Penpot applies sets folder by folder, not in `tokenSetOrder`.
+- Values as Penpot reads them: a dimension as `"16"`, a colour as `#rrggbb` or `#rrggbbaa`, `$type` from Penpot's table (`fontSizes`, `letterSpacing`, `opacity` where Penpot's fields ask for them).
+- 24 tokens of four types Penpot does not know (`border`, `duration`, `cubicBezier`, `strokeStyle`) stay in the file in DTCG form; Penpot skips them with a notice. Each type is a Manko with celo `penpot` and a closing condition.
 
-`packages/vortaro` alone holds only the core, without any Aspekto; import the per-Aspekto folder instead. The recorded outcomes live in [`specs/000-fundamento-repo/plan.md`](specs/000-fundamento-repo/plan.md) (Phase 0) and [`specs/001-vortaro-aspektoj-mcp/plan.md`](specs/001-vortaro-aspektoj-mcp/plan.md) ("Penpot import result", one entry per Aspekto).
+The export's `packages/modelo/dist/vortaro/<aspekto>/` (and `packages/vortaro` with only the core) is the Vortaro as it is stored, DTCG 2025.10 with `$themes.json` and `$metadata.json` for Tokens Studio; Penpot does not read its value objects. The recorded outcomes live in [`specs/000-fundamento-repo/plan.md`](specs/000-fundamento-repo/plan.md) (Phase 0) and [`specs/001-vortaro-aspektoj-mcp/plan.md`](specs/001-vortaro-aspektoj-mcp/plan.md) ("Penpot import result", one entry per Aspekto).
 
 ## Clean room
 
