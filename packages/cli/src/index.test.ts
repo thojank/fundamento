@@ -317,7 +317,7 @@ describe("fm modelo export (Spec 001 T019, D-09)", () => {
       expect(files).toContain(file);
     }
     expect(files).toContain("vortaro/ekzemplo/$themes.json");
-    expect(files).toContain("vortaro/komuna/sets/core.json");
+    expect(files).toContain("vortaro/komuna/core.json");
     rmSync(out, { recursive: true, force: true });
   });
 

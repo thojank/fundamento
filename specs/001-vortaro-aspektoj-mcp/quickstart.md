@@ -39,6 +39,8 @@ Notes for package authors:
 
 1. After `pnpm build`, import `packages/modelo/dist/vortaro/komuna/` into Penpot (Tokens → Import, folder).
 2. Switch the theme group `color-scheme` to `dark` and `contrast` to `high`. No token name is typed.
-3. For a second brand, import its folder (`dist/vortaro/<aspekto>/` from `fm modelo export`) and switch between the imported theme sets.
+3. For a second brand, open a second Penpot file and import its folder (`dist/vortaro/<aspekto>/` from `fm modelo export`) there. Switching the brand means switching the file.
+
+> Corrected 2026-10-07: step 3 used to say "import its folder and switch between the imported theme sets". A Penpot import replaces the file's whole token library (tokens, sets and themes), so a second import into the same file deletes the first brand. Read from Penpot's import code (`import-tokens-lib` sets the library as a whole) while preparing the first real Penpot measurement; the guide was wrong, not the protocol around it.
 
 Record the Penpot version, date, result and deviations in `plan.md` → "Penpot import result".

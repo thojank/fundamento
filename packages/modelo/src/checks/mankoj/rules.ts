@@ -29,11 +29,16 @@ export interface MankojResult {
 }
 
 /**
- * The measurements a run can perform. `binding-accepted`: the run binds the property to a
- * variable of the target and the target does not refuse the binding — the attempt is the
- * measurement, so no run ever asks a tool for its version.
+ * The measurements a run can perform; in each the attempt is the measurement, so no run ever asks
+ * a tool for its version.
+ * - `binding-accepted`: the run binds the property to a variable of the target and the target
+ *   does not refuse the binding.
+ * - `import-kept`: a file of the Celo is imported into the target and the target keeps what it
+ *   skipped before (a token type, a value).
+ * - `theme-conjunction`: the target activates a set listed under themes of two groups only while
+ *   both themes are active.
  */
-export const MANKO_MEASURES = ["binding-accepted"] as const;
+export const MANKO_MEASURES = ["binding-accepted", "import-kept", "theme-conjunction"] as const;
 
 /** The fields every Manko carries besides `celo` and `closing`, in the order they are reported. */
 const REQUIRED_FIELDS = [

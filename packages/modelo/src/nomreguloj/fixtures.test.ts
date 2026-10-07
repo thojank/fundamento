@@ -77,12 +77,37 @@ const DTCG_FIXTURES: readonly Row[] = [
   ["0", "0"],
 ];
 
+// Penpot names a token by its DTCG path. Its own rule (tokens_lib, `token-name-validation-regex`)
+// allows letters, digits, `_`, `-` and `$` per segment; every row is checked against it below.
+const PENPOT_NAME_RULE = /^[a-zA-Z0-9_-][a-zA-Z0-9$_-]*(\.[a-zA-Z0-9$_-]+)*$/;
+
+const PENPOT_FIXTURES: readonly Row[] = [
+  ["color.action.primary.rest", "color.action.primary.rest"],
+  ["color.palette.neutral.950", "color.palette.neutral.950"],
+  ["font.size.body.1", "font.size.body.1"],
+  ["font.tracking.scale.100", "font.tracking.scale.100"],
+  ["opacity.disabled", "opacity.disabled"],
+  ["typography.headline.1", "typography.headline.1"],
+  ["elevation.shadow.floating", "elevation.shadow.floating"],
+  ["motion.easing.curve.accelerate", "motion.easing.curve.accelerate"],
+  ["a.b.c.d.e.f.g.h.i.j", "a.b.c.d.e.f.g.h.i.j"],
+  ["0", "0"],
+  ["z.007.x9", "z.007.x9"],
+];
+
 const STRING_FIXTURES: Readonly<Record<Exclude<Celo, "tailwind">, readonly Row[]>> = {
   css: CSS_FIXTURES,
   figma: FIGMA_FIXTURES,
   typescript: TYPESCRIPT_FIXTURES,
   dtcg: DTCG_FIXTURES,
+  penpot: PENPOT_FIXTURES,
 };
+
+describe("penpot: every derived name passes Penpot's own name rule", () => {
+  it.each(PENPOT_FIXTURES)("%s", (name) => {
+    expect(nomRegulo("penpot").derive(name)).toMatch(PENPOT_NAME_RULE);
+  });
+});
 
 // Tailwind: `[name, $type, target | null]`; `null` means NoTarget.
 type TailwindRow = readonly [name: string, type: DtcgType | undefined, target: string | null];
@@ -251,6 +276,7 @@ describe("invert rejects strings outside the target grammar", () => {
       "--fm-color-fm-primary",
     ],
     dtcg: ["", "Color", "color.", ".color", "color..x", "color-x", "color_x", "color x", "colör"],
+    penpot: ["", "Color", "color.", ".color", "color..x", "color_x", "color x", "$color", "colör"],
   };
 
   it.each(CELOJ.flatMap((celo) => cases[celo].map((target) => [celo, target] as const)))(
@@ -328,8 +354,8 @@ describe("invalid canonical names (token-name-grammar)", () => {
 });
 
 describe("NOM_REGULOJ lookup", () => {
-  it("has exactly the five Celoj", () => {
-    expect([...CELOJ]).toEqual(["css", "figma", "typescript", "tailwind", "dtcg"]);
+  it("has exactly the six Celoj", () => {
+    expect([...CELOJ]).toEqual(["css", "figma", "typescript", "tailwind", "dtcg", "penpot"]);
     expect(Object.keys(NOM_REGULOJ).sort()).toEqual([...CELOJ].sort());
   });
 

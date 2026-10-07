@@ -2,8 +2,8 @@
 // canonical token name and inverts it again; target names are never typed by hand (Art. II).
 import type { DtcgType } from "../contracts/index.js";
 
-/** The five Celoj with a NomRegulo, in canonical order. */
-export const CELOJ = ["css", "figma", "typescript", "tailwind", "dtcg"] as const;
+/** The six Celoj with a NomRegulo, in canonical order. */
+export const CELOJ = ["css", "figma", "typescript", "tailwind", "dtcg", "penpot"] as const;
 
 export type Celo = (typeof CELOJ)[number];
 

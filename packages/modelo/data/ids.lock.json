@@ -208,6 +208,14 @@
       "status": "active",
       "type": "jugxo"
     },
+    "jug_01M4AZQTHNQDZ39MAN2VJ8DJYP": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M4B0SHBZRKX1C6SJ2JHXZTMD": {
+      "status": "active",
+      "type": "jugxo"
+    },
     "kpa_01M2VEEE9HREQTY2499C9JS05Q": {
       "status": "active",
       "type": "kontrastParo"
@@ -465,6 +473,26 @@
       "type": "manko"
     },
     "man_01M37TQHM9WX3GWDM8Z069RFMF": {
+      "status": "active",
+      "type": "manko"
+    },
+    "man_01M4AZ8C29YTSMWK0HXHVXMJFW": {
+      "status": "active",
+      "type": "manko"
+    },
+    "man_01M4AZ8C2AXY2TJ2W9NQWYBKKY": {
+      "status": "active",
+      "type": "manko"
+    },
+    "man_01M4AZ8C2AXY2TJ2W9NQWYBKKZ": {
+      "status": "active",
+      "type": "manko"
+    },
+    "man_01M4AZ8C2AXY2TJ2W9NQWYBKM0": {
+      "status": "active",
+      "type": "manko"
+    },
+    "man_01M4AZ8C2AXY2TJ2W9NQWYBKM1": {
       "status": "active",
       "type": "manko"
     },

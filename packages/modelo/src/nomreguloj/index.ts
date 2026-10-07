@@ -2,6 +2,7 @@
 import { CSS_NOM_REGULO } from "./css.js";
 import { DTCG_NOM_REGULO } from "./dtcg.js";
 import { FIGMA_NOM_REGULO } from "./figma.js";
+import { PENPOT_NOM_REGULO } from "./penpot.js";
 import { TAILWIND_NOM_REGULO } from "./tailwind.js";
 import type { Celo, NomRegulo, TotalNomRegulo } from "./types.js";
 import { TYPESCRIPT_NOM_REGULO } from "./typescript.js";
@@ -9,6 +10,7 @@ import { TYPESCRIPT_NOM_REGULO } from "./typescript.js";
 export { CSS_NOM_REGULO } from "./css.js";
 export { DTCG_NOM_REGULO } from "./dtcg.js";
 export { FIGMA_NOM_REGULO } from "./figma.js";
+export { PENPOT_NOM_REGULO } from "./penpot.js";
 export { TAILWIND_NOM_REGULO } from "./tailwind.js";
 export { checkTokenName, TokenNameError } from "./token-name.js";
 export {
@@ -21,7 +23,7 @@ export {
 } from "./types.js";
 export { TYPESCRIPT_NOM_REGULO } from "./typescript.js";
 
-/** All NomReguloj keyed by Celo. The four total rules keep their `string`-returning type. */
+/** All NomReguloj keyed by Celo. The five total rules keep their `string`-returning type. */
 export const NOM_REGULOJ: {
   readonly [C in Celo]: C extends "tailwind" ? NomRegulo & { celo: "tailwind" } : TotalNomRegulo;
 } = {
@@ -30,6 +32,7 @@ export const NOM_REGULOJ: {
   typescript: TYPESCRIPT_NOM_REGULO,
   tailwind: TAILWIND_NOM_REGULO,
   dtcg: DTCG_NOM_REGULO,
+  penpot: PENPOT_NOM_REGULO,
 };
 
 export function nomRegulo<C extends Celo>(celo: C): (typeof NOM_REGULOJ)[C] {

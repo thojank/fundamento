@@ -73,6 +73,7 @@ describe("Jugxoj that belong to a Celo (F8, AK-12)", () => {
     expect(ofCelo.length).toBeGreaterThan(1);
     expect([...new Set(ofCelo.map((jugxo) => jugxo.ref.celo))].sort()).toEqual([
       "figma",
+      "penpot",
       "tailwind",
     ]);
     for (const jugxo of ofCelo) expect(CELOJ, jugxo.id).toContain(jugxo.ref.celo);

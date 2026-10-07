@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { checkMankoj } from "./rules.js";
+import { readModeloSchema } from "../../contracts/schema.js";
+import { checkMankoj, MANKO_MEASURES } from "./rules.js";
 
 const MAN_A = "man_01M37TMJ0J14KNVH5BXJ93VFBG";
 const MAN_B = "man_01M37TMJ0Z0000000000000000";
@@ -59,6 +60,24 @@ describe("checkMankoj: the closing condition", () => {
     expect(rulesAndPaths(result.issues)).toEqual([
       { rule: "manko-closing-missing", path: "data/mankoj.json#/mankoj/0/closing/statement" },
     ]);
+  });
+
+  // Penpot's gaps are measured by an import, not by a binding (2026-10-07).
+  it.each([
+    ["import-kept", "A file of the Celo is imported, and the target keeps the token."],
+    ["theme-conjunction", "A set listed under two themes is active only while both are."],
+  ])("accepts the measurement %s", (measure, statement) => {
+    const result = run({ mankoj: [manko({ celo: "penpot", closing: { measure, statement } })] });
+    expect(result.issues).toEqual([]);
+  });
+
+  it("knows exactly the measurements the schema allows", () => {
+    const defs = readModeloSchema().$defs as Record<
+      string,
+      { properties: Record<string, unknown> }
+    >;
+    const measure = defs.MankoClosing?.properties.measure as { enum: string[] };
+    expect(measure.enum).toEqual([...MANKO_MEASURES]);
   });
 
   // The measurement is what a run performs; a kind no run knows cannot be measured away either.

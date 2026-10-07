@@ -1,7 +1,9 @@
 // One complete Tokens-Studio folder per Aspekto (Spec 001, D-09): `$themes.json`, `$metadata.json`
-// and `sets/**` of the core plus that Aspekto's package. Tokens Studio and Penpot know no
-// conjunctions, so a shared folder would apply one brand's conjunction set to another brand
-// (research §4); one folder per brand keeps the approximation inside a single brand. Pure.
+// and one file per set of the core plus that Aspekto's package, at `<set name>.json`. Tokens Studio
+// and Penpot name a set after its path in the folder, so the Vortaro's storage prefix `sets/` stays
+// out of the export. Both know no conjunctions, so a shared folder would apply one brand's
+// conjunction set to another brand (research §4); one folder per brand keeps the approximation
+// inside a single brand. Pure.
 
 import type { Modelo } from "../contracts/modelo.js";
 import { ASPEKTO_DIMENSIO } from "../load/build.js";
@@ -61,7 +63,7 @@ export function buildVortaroFolders(
     for (const set of [...view.setoj].sort((a, b) =>
       a.name < b.name ? -1 : a.name > b.name ? 1 : 0,
     )) {
-      files[`sets/${set.name}.json`] = serializeCanonicalJson(trees.get(set.name));
+      files[`${set.name}.json`] = serializeCanonicalJson(trees.get(set.name));
     }
     folders[aspekto] = files;
   }
