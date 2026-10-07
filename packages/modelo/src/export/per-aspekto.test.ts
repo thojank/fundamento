@@ -42,18 +42,12 @@ describe("Tokens-Studio folder per Aspekto (D-09)", () => {
     const { vortaro } = exportOf();
     expect(Object.keys(vortaro)).toEqual(["komuna"]);
     const folder = vortaro.komuna ?? {};
-    expect(folder["sets/core.json"]).toBeDefined();
-    expect(folder["sets/aspekto/komuna.json"]).toBeDefined();
-    expect(folder["sets/aspekto/komuna+color-scheme/dark.json"]).toBeDefined();
-    expect(folder["sets/color-scheme/dark.json"]).toBeDefined();
+    expect(folder["core.json"]).toBeDefined();
+    expect(folder["aspekto/komuna.json"]).toBeDefined();
+    expect(folder["aspekto/komuna+color-scheme/dark.json"]).toBeDefined();
+    expect(folder["color-scheme/dark.json"]).toBeDefined();
     const metadata = JSON.parse(folder["$metadata.json"] ?? "{}") as TokensStudioMetadata;
     expect(metadata.tokenSetOrder[0]).toBe("core");
-    expect(
-      Object.keys(folder)
-        .filter((file) => file.startsWith("sets/"))
-        .map((file) => file.slice("sets/".length, -".json".length))
-        .sort(),
-    ).toEqual([...metadata.tokenSetOrder].sort());
     expect(
       themes(folder)
         .filter((theme) => theme.group === "aspekto")
@@ -66,7 +60,7 @@ describe("Tokens-Studio folder per Aspekto (D-09)", () => {
     expect(Object.keys(vortaro)).toEqual(["ekzemplo", "komuna"]);
     const ekzemplo = vortaro.ekzemplo ?? {};
     expect(Object.keys(ekzemplo).some((file) => file.includes("aspekto/komuna"))).toBe(false);
-    expect(ekzemplo["sets/aspekto/ekzemplo+color-scheme/dark.json"]).toBeDefined();
+    expect(ekzemplo["aspekto/ekzemplo+color-scheme/dark.json"]).toBeDefined();
     expect(
       themes(ekzemplo)
         .filter((t) => t.group === "aspekto")
@@ -76,6 +70,22 @@ describe("Tokens-Studio folder per Aspekto (D-09)", () => {
     expect(Object.keys(dark?.selectedTokenSets ?? {})).not.toContain(
       "aspekto/komuna+color-scheme/dark",
     );
+  });
+
+  // Tokens Studio and Penpot name a set after its file path relative to the folder; the folder
+  // must therefore hold each set under its set name, not under the Vortaro's storage prefix
+  // `sets/` (Penpot would import `sets/core` while every theme asks for `core`).
+  it("names every set file after the set name that $themes.json and $metadata.json use", () => {
+    for (const [aspekto, folder] of Object.entries(exportOf(EKZEMPLO()).vortaro)) {
+      const metadata = JSON.parse(folder["$metadata.json"] ?? "{}") as TokensStudioMetadata;
+      const fileSets = Object.keys(folder)
+        .filter((file) => !file.startsWith("$"))
+        .map((file) => file.slice(0, -".json".length))
+        .sort();
+      expect(fileSets, aspekto).toEqual([...metadata.tokenSetOrder].sort());
+      const themed = new Set(themes(folder).flatMap((t) => Object.keys(t.selectedTokenSets)));
+      for (const name of themed) expect(fileSets, `${aspekto}: ${name}`).toContain(name);
+    }
   });
 
   // Four full exports (two with 144 combinations): ~2.5 s alone, more on a loaded CI runner. Under

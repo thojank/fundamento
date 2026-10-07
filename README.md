@@ -185,7 +185,7 @@ Every maintainer command explains itself with `--help`.
 The export writes one complete Tokens-Studio multi-file folder per Aspekto, so Penpot can import each brand without a converter (Art. XII, AK-09):
 
 1. Run `pnpm build` (the repo Modelo with `komuna`) or `pnpm fm modelo export --config <file>` (a project with its Aspektoj).
-2. Open a Penpot file, go to the **Tokens** panel, choose **Import** and select the folder `packages/modelo/dist/vortaro/<aspekto>/` (after `fm modelo export`: `<out>/vortaro/<aspekto>/`), or a ZIP of it. It contains `$themes.json`, `$metadata.json` and `sets/**.json`. Menu labels differ between Penpot versions.
+2. Open a Penpot file, go to the **Tokens** panel, choose **Import** and select the folder `packages/modelo/dist/vortaro/<aspekto>/` (after `fm modelo export`: `<out>/vortaro/<aspekto>/`), or a ZIP of it. It contains `$themes.json`, `$metadata.json` and one `<set name>.json` per set (e.g. `core.json`, `color-scheme/dark.json`), so the file path is the set name Penpot shows. Menu labels differ between Penpot versions.
 3. Activate themes in the theme selector, e.g. `color-scheme` → `dark`, then `contrast` → `high`. For a second brand, import its folder and switch between the imported theme sets.
 
 What to expect for `komuna`:
