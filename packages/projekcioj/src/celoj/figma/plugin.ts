@@ -547,6 +547,20 @@ function recordStart() {
   }
 }
 
+/** The sets this run created; a set that was not there at the start is counted on this object. */
+const madeThisRun = new Map();
+
+/**
+ * Knoten des Sets am Ende, gezählt am selben Objekt wie beim Start (F10d) — nicht über eine neue
+ * Suche: Verlöre das Set seine Markierung, stünde sonst \`end: 0\` neben \`lost: []\`.
+ */
+function nodesAtEnd(name) {
+  const seen = seenAtStart.get(name);
+  const set = seen !== undefined ? seen.set : madeThisRun.get(name);
+  if (set === undefined || set.removed === true) return 0;
+  return nodesOf(set).length;
+}
+
 /** Was beim Start im Set war und am Ende nicht mehr, je Knoten: entfernt oder wohin verdrängt. */
 function lostSince(name) {
   const seen = seenAtStart.get(name);
@@ -876,6 +890,7 @@ async function applyComponents(variables, warnings) {
     }
     if (set === undefined) {
       set = create(() => figma.combineAsVariants(made, figma.currentPage));
+      madeThisRun.set(component.set, set);
       write(set, "name", component.set);
     }
     // Das Set steht in keinem eigenen Modus (F35). Gemessen trug es nach zwei Läufen
@@ -1368,8 +1383,7 @@ async function applyPlan(options) {
   const components = await applyComponents(variables, warnings);
   progress.phase = "done";
   for (const report of components) {
-    const set = ours(figma.currentPage, "ero", report.set);
-    report.nodes.end = set === undefined ? 0 : nodesOf(set).length;
+    report.nodes.end = nodesAtEnd(report.set);
     report.lost = lostSince(report.set);
     const component = PLAN.components.find((candidate) => candidate.set === report.set);
     warnings.push(...layoutWarnings(report, component === undefined ? undefined : component.grid));
