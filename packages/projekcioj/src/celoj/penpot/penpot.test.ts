@@ -4,6 +4,7 @@ import { type CeloInput, celoInputOf } from "../../build.js";
 import {
   assertConjunctionsInGroups,
   PENPOT_CELO,
+  PENPOT_TYPE_TABLE,
   PenpotCeloError,
   penpotApplicationOrder,
   penpotFolders,
@@ -126,32 +127,64 @@ describe("Penpot Celo: values and types as Penpot reads them", () => {
 
   // The table is keyed on names; the typography composites are the Modelo's own statement of what
   // a font size is. Both must agree, or the table has fallen behind the Vortaro.
-  it("agrees with the typography composites about what a font size and a letter spacing are", () => {
-    const tokens = new Map(input.modeloJson.tokens.map((token) => [token.name, token.type]));
-    const core = input.modeloJson.setoj.find((set) => set.name === "core")?.tree;
-    const flows = new Map<string, Set<string>>();
-    const values = new Map<string, unknown>();
-    walkTokens(core, (name, token) => values.set(name, token.$value));
-    const follow = (value: unknown, field: string) => {
-      const match = typeof value === "string" ? /^\{([^}]+)\}$/.exec(value) : null;
-      if (match?.[1] === undefined) return;
-      const target = match[1];
-      if (!flows.has(field)) flows.set(field, new Set());
-      flows.get(field)?.add(target);
-      follow(values.get(target), field);
+  // What a composite field reaches, over the alias edges of every set (core and both brands).
+  const reached = (() => {
+    const edges = new Map<string, Set<string>>();
+    const typography: Record<string, unknown>[] = [];
+    for (const set of input.modeloJson.setoj) {
+      walkTokens(set.tree, (name, token) => {
+        const value = token.$value;
+        if (isRecord(value) && "fontSize" in value) typography.push(value);
+        const match = typeof value === "string" ? /^\{([^}]+)\}$/.exec(value) : null;
+        if (match?.[1] === undefined) return;
+        if (!edges.has(name)) edges.set(name, new Set());
+        edges.get(name)?.add(match[1]);
+      });
+    }
+    const of = (field: string) => {
+      const seen = new Set<string>();
+      const queue = typography
+        .map((value) => value[field])
+        .flatMap((value) => {
+          const match = typeof value === "string" ? /^\{([^}]+)\}$/.exec(value) : null;
+          return match?.[1] === undefined ? [] : [match[1]];
+        });
+      while (queue.length > 0) {
+        const name = queue.pop() as string;
+        if (seen.has(name)) continue;
+        seen.add(name);
+        queue.push(...(edges.get(name) ?? []));
+      }
+      return seen;
     };
-    for (const [name, value] of values) {
-      if (tokens.get(name) !== "typography" || !isRecord(value)) continue;
-      follow(value.fontSize, "fontSize");
-      follow(value.letterSpacing, "letterSpacing");
+    return { fontSizes: of("fontSize"), letterSpacing: of("letterSpacing") } as Record<
+      string,
+      Set<string>
+    >;
+  })();
+
+  // A row that says it rests on a composite must be borne out for every token under its path,
+  // and every token a composite field reaches must get the row's type.
+  it("holds every composite row against the typography composites", () => {
+    const names = input.modeloJson.tokens.map((token) => token.name);
+    for (const row of PENPOT_TYPE_TABLE.filter((entry) => entry.basis === "composite")) {
+      const field = reached[row.penpot];
+      expect(field, row.path).toBeDefined();
+      const under = names.filter((name) => name.startsWith(`${row.path}.`));
+      expect(under.length, row.path).toBeGreaterThan(0);
+      for (const name of under) expect(field?.has(name), `${name} -> ${row.penpot}`).toBe(true);
+      for (const name of field ?? []) {
+        expect(penpotType(name, "dimension"), name).toBe(row.penpot);
+      }
     }
-    for (const name of flows.get("fontSize") ?? []) {
-      expect(penpotType(name, "dimension"), name).toBe("fontSizes");
-    }
-    for (const name of flows.get("letterSpacing") ?? []) {
-      expect(penpotType(name, "dimension"), name).toBe("letterSpacing");
-    }
-    expect(flows.get("fontSize")?.size).toBeGreaterThan(10);
+  });
+
+  // Befund (2026-10-07): for these rows the Modelo does not say what the tokens mean; the Celo
+  // reads it off the name. A row leaves this list only when the Modelo comes to state it.
+  it("names the rows that rest on the name alone", () => {
+    expect(
+      PENPOT_TYPE_TABLE.filter((entry) => entry.basis === "name").map((entry) => entry.path),
+    ).toEqual(["opacity"]);
   });
 
   it("keeps the tokens Penpot cannot read, in DTCG form, and each such type has a Manko", () => {

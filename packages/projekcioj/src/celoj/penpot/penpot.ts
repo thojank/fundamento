@@ -15,7 +15,9 @@
 // - Values and types as Penpot reads them: a px dimension as its number in a string, a colour as
 //   #rrggbb[aa], the `$type` from Penpot's table. A token of a type Penpot does not know stays in
 //   the file in DTCG form — Penpot skips it on import — and the Celo stops unless a Manko records
-//   that type.
+//   that type. Keeping it is what makes the Manko close itself: its closing condition is
+//   `import-kept`, and the very import that skips the token today measures it; the day Penpot
+//   keeps it, the Manko is closed without a change to this Celo.
 //
 // Pure: a function of the export (`modeloJson`), byte-identical over runs.
 
@@ -43,19 +45,33 @@ interface PenpotPathType {
   path: string;
   types: readonly DtcgType[];
   penpot: string;
+  /**
+   * What the row rests on. `composite`: the Modelo itself says what these tokens are — a
+   * typography composite takes them in the field Penpot's type names, and a test holds every
+   * token under the path against that. `name`: only the name path says it; the row is a guess,
+   * and that it has to guess is a finding about the Modelo, which does not state what these
+   * tokens mean.
+   */
+  basis: "composite" | "name";
 }
 
 /**
  * Where Penpot's fields ask for a narrower type than the DTCG one: a font size field takes only
  * `fontSizes`, a letter spacing field only `letterSpacing`, an opacity field only `opacity`. Keyed
- * on the canonical name path, as the Tailwind namespaces are; a test holds the table against the
- * typography composites, which say in the Modelo itself what a font size is.
+ * on the canonical name path, as the Tailwind namespaces are. Each row says what it rests on.
  */
 const PENPOT_PATH_TYPES: readonly PenpotPathType[] = [
-  { path: "font.size", types: ["dimension"], penpot: "fontSizes" },
-  { path: "font.tracking", types: ["dimension"], penpot: "letterSpacing" },
-  { path: "opacity", types: ["number"], penpot: "opacity" },
+  // Every font.size token reaches a typography composite's fontSize field.
+  { path: "font.size", types: ["dimension"], penpot: "fontSizes", basis: "composite" },
+  // Every font.tracking token reaches a typography composite's letterSpacing field.
+  { path: "font.tracking", types: ["dimension"], penpot: "letterSpacing", basis: "composite" },
+  // Guessed (2026-10-07): no composite, no Ero and no Regulo refers to an opacity token; that
+  // these numbers are opacities stands only in their name and $description.
+  { path: "opacity", types: ["number"], penpot: "opacity", basis: "name" },
 ];
+
+/** The rows of the table, for the test that holds each against what it rests on. */
+export const PENPOT_TYPE_TABLE: readonly PenpotPathType[] = PENPOT_PATH_TYPES;
 
 /** Every other DTCG type Penpot reads, under Penpot's name for it. */
 const PENPOT_TYPES: Partial<Record<DtcgType, string>> = {
