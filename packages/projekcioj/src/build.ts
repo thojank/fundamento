@@ -22,6 +22,7 @@ import { CODE_CONNECT_CELO } from "./celoj/code-connect/code-connect.js";
 import { CSS_CELO } from "./celoj/css/css.js";
 import { FIGMA_CELO } from "./celoj/figma/figma.js";
 import { bundleMakeKits, MAKE_KIT_CELO } from "./celoj/make-kit/make-kit.js";
+import { PENPOT_CELO } from "./celoj/penpot/penpot.js";
 import { REACT_CELO } from "./celoj/react/react.js";
 import { TAILWIND_CELO } from "./celoj/tailwind/tailwind.js";
 import { VITRINO_CELO, type VitrinoBazo } from "./celoj/vitrino/vitrino.js";
@@ -65,6 +66,7 @@ export const CELOJ: readonly Celo[] = [
   WEB_COMPONENT_CELO,
   REACT_CELO,
   FIGMA_CELO,
+  PENPOT_CELO,
   CODE_CONNECT_CELO,
   MAKE_KIT_CELO,
   VITRINO_CELO,
