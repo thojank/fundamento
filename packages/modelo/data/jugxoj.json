@@ -457,6 +457,17 @@
       "date": "2026-10-06",
       "context": "Spec 006 (ECONNRESET), Entscheidung zur Keep-Alive-Politik des HTTP-Transports (Spec 001, D-13). Optionen: K1 Voreinstellung von Node behalten, K2 keepAliveTimeout = 0, K3 Connection: close.",
       "kialo": "Der HTTP-Transport hält Leerlauf-Leitungen offen (keepAliveTimeout = 0), denn mit Nodes Voreinstellung schließt der Server nach 5 s plus 1 s eine Leitung, die der Client noch im Pool hält, sobald dessen Event-Loop so lange blockiert — die nächste Anfrage erreicht den Handler nie und endet in ECONNRESET, und undici wiederholt ein POST nicht. Gemessen in Spec 006: Probe mit 6 s Blockade rot wie der CI-Befund, Gegenprobe mit keepAliveTimeout = 0 grün, auch mit dem Server in einem eigenen Prozess. Der Server bleibt zustandslos und bindet nur an 127.0.0.1; ungenutzte Leitungen kosten deshalb nur Dateideskriptoren lokaler Clients, und close() schließt alle Leitungen. K3 (Connection: close) ist verworfen, weil es unbelegt ist. Auflage: Diese Entscheidung setzt die Loopback-Bindung voraus. Wird der Server über 127.0.0.1 hinaus erreichbar, gilt sie nicht mehr — unbegrenzt gehaltene Leitungen fremder Clients sind dann ein Ressourcenrisiko, und K3 oder ein endliches Limit ist neu zu entscheiden."
+    },
+    {
+      "id": "jug_01M4AZQTHNQDZ39MAN2VJ8DJYP",
+      "ref": {
+        "artikolo": "XII",
+        "celo": "penpot"
+      },
+      "decision": "approved",
+      "kialo": "Der Penpot-Celo bildet seine Theme-Gruppen aus den Konjunktionen: Dimensioj, zwischen denen es Konjunktions-Sets gibt, bilden eine Theme-Gruppe mit einem Theme je Kombination; jede übrige Dimensio behält ihre eigene Gruppe mit einem Theme je Wert. Penpot aktiviert die Vereinigung der Sets aller aktiven Themes und kennt kein „und“; ein Set, das nur bei dunkel und hohem Kontrast gilt, wäre unter Themes je Dimensio in anderen Kombinationen aktiv oder in seiner eigenen nicht. Richtigkeit vor Bequemlichkeit: Ein Theme je Kombination gibt in jeder Kombination die Werte des Resolvers. Trifft der Celo auf ein Konjunktions-Set, dessen Dimensioj nicht in derselben Gruppe liegen, bricht er mit benannter Ursache ab, denn eine neue Konjunktion im Vortaro fiele sonst erst in Penpot auf, und dort als falsche Farbe statt als Fehler.",
+      "date": "2026-10-07",
+      "context": "Entscheidung des Maintainers zur ersten Penpot-Messung (Befund 2026-10-06, Punkt 3, Option A, auf die Konjunktionen beschränkt). Gemessen vor dem Bau: Nach dem Falten der Marke in die Sets (eine Datei je Marke) bleiben color-scheme/dark+contrast/high (32 Tokens, Kern) und bei ekzemplo color-scheme/light+contrast/high (10 Tokens); jede Zuordnung zu Themes je Dimensio war in mindestens einer Kombination falsch (bis zu 35 Tokens). Heute ergibt die Regel die Gruppe color-scheme+contrast mit vier Themes; viewport, density und motion bleiben unverändert. Art. IV ist nicht berührt: Die Sets bleiben dimensional, nur die Theme-Liste des Celo zählt Kombinationen auf; themes/derive.ts bleibt für die übrigen Verbraucher unverändert. Abnahme: alle 72 Kombinationen je Marke gegen rezolvoj.json ohne Abweichung. Die Marke selbst wird nicht so behandelt, sondern in die Datei gefaltet; der Verlust gegenüber einem Mode steht als Manko man_01M4AZ8C2AXY2TJ2W9NQWYBKM1."
     }
   ]
 }
