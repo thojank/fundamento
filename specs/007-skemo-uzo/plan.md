@@ -1,6 +1,6 @@
 # Plan – Spec 007: Uzo, der Gebrauch eines Ero
 
-**Spec:** [`spec.md`](spec.md) · **Research:** [`research.md`](research.md) (Abschnitt „Messungen“ von diesem Plan ergänzt) · **Datenmodell:** [`data-model.md`](data-model.md) · **Verträge:** [`contracts/mcp-tools.md`](contracts/mcp-tools.md) · **Aufgaben:** [`tasks.md`](tasks.md) · **Constitution:** v2.0 bindend, in dieser Spec auf **v2.1** erweitert (D-11) · **Rahmen:** [`docs/vojmapo.md`](../../docs/vojmapo.md) Zeile 3c · **Stand:** Entwurf zur Prüfung durch den Maintainer, nichts umgesetzt · **Datum:** 2026-10-08 · **Basis:** `main` @ `8d1870e`
+**Spec:** [`spec.md`](spec.md) · **Research:** [`research.md`](research.md) (Abschnitt „Messungen“ von diesem Plan ergänzt) · **Datenmodell:** [`data-model.md`](data-model.md) · **Verträge:** [`contracts/mcp-tools.md`](contracts/mcp-tools.md) · **Aufgaben:** [`tasks.md`](tasks.md) · **Constitution:** v2.0 bindend, in dieser Spec auf **v2.1** erweitert (D-11) · **Rahmen:** [`docs/vojmapo.md`](../../docs/vojmapo.md) Zeile 3c · **Stand:** vom Maintainer geprüft am 2026-10-08, Entscheidungen eingearbeitet (Abschnitt „Offene Punkte – entschieden“); Stufe A freigegeben · **Datum:** 2026-10-08 · **Basis:** `main` @ `8d1870e`
 
 Dieser Plan legt den technischen Entwurf von Spec 007 fest. Er trennt, was vor der Abnahme von Spec 003 laufen darf und was erst danach. Die Umbenennung F1 plant er als eigenen Strang mit eigenem PR. Der Entwurf wird gegen jeden Artikel der Constitution v2.0 geprüft. Die Fragen an den Maintainer stehen am Ende unter „Offene Punkte für den Maintainer“. Umgesetzt wird erst nach der Freigabe von Plan und Aufgaben.
 
@@ -44,7 +44,7 @@ Die Abnahme von Spec 003 ist offen (M1 Figma-Library, M2 Make Kits, M3 S5-Lauf).
 | Stufe | Inhalt | Warum hier | PR |
 |---|---|---|---|
 | **A – vor der Abnahme** | Fehlerfixtures A11 (rot), Schema `UzoFile`, Entitätstyp `uzo`, Laden und Validierung der Uzo, Warnung „Skemo ohne Uzo“, Web-Begriff-Test, `EroInstance`- und `Tavoloj`-Schema (additiv), Constitution v2.1 und Ontologio-Eintrag | Berührt keine Ausgabe, die M1 bis M3 prüfen: Es gibt noch keine `uzo.json` für `butono`, also bleiben Export, `get_ero`, Guidelines und Figma byte-gleich. `describe_term Uzo` ist eine neue Antwort, keine geänderte | PR „Spec 007 Stufe A“ |
-| **F1 – nach der Abnahme** | Umbenennung `variant` → `emphasis`, `tone` → `intent` | Spec: eigene Aufgabe nach der Abnahme von 003. Sie bricht Figma-Komponente und Make Kits, also genau die Abnahmegegenstände | eigener PR „F1 Achsennamen“ |
+| **F1 – nach der Abnahme** | Umbenennung der Absicht `intent` → `goal` (F1-T00, OP-4), danach `variant` → `emphasis`, `tone` → `intent` | Spec: eigene Aufgabe nach der Abnahme von 003. Sie bricht Figma-Komponente und Make Kits, also genau die Abnahmegegenstände | eigener PR „F1 Achsennamen“ |
 | **B – nach der Abnahme und nach F1** | `butono/uzo.json`, neue Reguloj und Jugxoj, geänderte Beispiel-Labels, Export, `get_ero` mit Uzo und `brief`, `suggest_ero`, `check_usage`, Prompt, Make-Kit-Guidelines, Vitrino, Figma-Beschreibung, Manko-Messung, Abnahme-Dialog | Ändert die Ausgaben von M2 und M3. Nach F1, damit neue Beispiele gleich mit den neuen Achsennamen entstehen und nicht zweimal angefasst werden | PR „Spec 007 Stufe B“ |
 
 ## Entwurfsentscheidungen
@@ -57,12 +57,14 @@ Die Abnahme von Spec 003 ist offen (M1 Figma-Library, M2 Make Kits, M3 S5-Lauf).
 
 ### D-02 Text-Regeln sind Reguloj; fest oder anpassbar sagt die Uzo (A7, F2)
 
-Jede Text-Regel ist eine gewöhnliche Regulo in `reguloj.json` mit Statement und Kialo, `appliesTo.eroj: ["butono"]`. Die Uzo verweist auf sie und trägt `fixed` und die deterministische Prüfung (`names-intent`, `verb-and-object`, `not-words`). Daraus folgt dreierlei:
+Jede Text-Regel ist eine gewöhnliche Regulo in `reguloj.json` mit Statement und Kialo, `appliesTo.eroj: ["butono"]`. Die Uzo verweist auf sie und trägt `fixed` und die deterministische Prüfung (`names-goal`, `verb-and-object`, `not-words`). Daraus folgt dreierlei:
 - Jugxo-Beispiele hängen über das bestehende `ekzemplo.regulo` an der Regel. Der bestehende Test „approved ergibt keine Verletzung, rejected genau eine“ deckt die Text-Regeln ohne neuen Mechanismus ab.
 - `explain_regulo` und `list_reguloj` erklären die Text-Regeln, ohne dass sie geändert werden.
 - Die Eigenschaft `fixed` steht an einer Stelle (Art. I), nämlich in der Uzo und nicht zusätzlich in der Regulo.
 
-Geprüft wird ohne Sprachmodell (D-16 aus Spec 003). „Nennt die Aktion als Verb“ heißt: Das Label enthält ein Schlüsselwort eines Skemo-Intents. Das ist eine Näherung und steht so im Statement.
+Geprüft wird ohne Sprachmodell (D-16 aus Spec 003). „Nennt die Aktion als Verb“ heißt: Das Label enthält ein Schlüsselwort einer Absicht (goal) des Ero. Das ist eine Näherung und steht so im Statement.
+
+**Entscheidung 2026-10-08:** `label-names-action` meldet vorerst nur `severity: warning` und keinen Fehler. Die Schlüsselwortliste würde legitime Verben wie „Senden“ oder „Teilen“ abweisen, solange sie nicht in einer Absicht stehen. Die Stufe steht in der Uzo (`content[].severity`); eine feste Regel ist immer `error`. **Regulo-Kandidat:** eine bessere Prüfung für „nennt die Aktion als Verb“, die ohne Sprachmodell auskommt (etwa eine Verbliste je Sprache im Modelo statt der Absichts-Schlüsselwörter). Danach wird die Regel neu bewertet und erst dann ein Fehler (Art. VI, „Befund wird Regel“).
 
 *Verworfen:* Text-Regeln als eigener Satztyp mit eigener Id in der Uzo. Er bräuchte eigene Jugxo-Verweise, eigene Erklärwerkzeuge und eigene Fixtures. Das wäre eine neue Abstraktion ohne zweiten Nutzer (Art. XI).
 
@@ -86,7 +88,18 @@ Begründung: Ein Agent, der ein Ero liest, soll den Gebrauch im selben Aufruf be
 
 ### D-06 `suggest_ero` kennt Grenzen und Alternativen (A9)
 
-Reihenfolge: zuerst die Schlüsselwörter aus `boundary` und `instead` aller Uzoj, danach die Skemo-Intents. Eine Grenze wiegt schwerer als eine Vermutung. Wer „Weiter zur Kasse“ sagt, meint eine Navigation, auch wenn „weiter“ ein Schlüsselwort des Intents `confirm` ist. Ein Treffer liefert `ok` mit `suggestion: null` (oder dem Ero bei `use-instead`), dazu `boundary: { ero, case, action, kialo }`. Ohne Treffer bleibt die heutige Antwort `intent-unknown` mit `allowed`. Ihr `suggestion`-Text sagt dann ausdrücklich, dass Fundamento die Absicht nicht abdeckt und ein Mensch entscheidet. Siehe OP-6 zur Frage „`null` oder Fehler“. Vertrag in [`contracts/mcp-tools.md`](contracts/mcp-tools.md) §2.
+**Schlüsselwörter ohne Präpositionen (Entscheidung OP-12).** Präpositionen und Allerweltsverben sind keine Schlüsselwörter: `zur`, `zum`, `go`, `open` fallen weg, und aus demselben Grund auch `gehe` und `öffnen`. Navigation trifft über `navigieren`, `übersicht`, `navigate` und `overview`.
+
+**Zusammengesetzte Wörter.** Ohne `zur` träfe „zur Projektübersicht“ (Beispiel-Dialog der Spec) nichts mehr, weil die Wortsuche nur ganze Wörter vergleicht. Für die Schlüsselwörter einer Uzo (`boundary`, `instead`) gilt deshalb zusätzlich: Ein Wort trifft, wenn es auf das Schlüsselwort **endet** und das Schlüsselwort mindestens 6 Zeichen hat. Im Deutschen steht das Grundwort am Ende, so trifft „projektübersicht“ das Schlüsselwort „übersicht“. Die Skemo-Absichten behalten den Vergleich ganzer Wörter, damit sich bestehende Antworten nicht ändern. Diese Folge der Entscheidung OP-12 ist neu und steht als N-1 unten zur Bestätigung.
+
+**Grenze und Absicht zugleich (Entscheidung OP-12).** Geprüft werden alle Uzo-Schlüsselwörter und alle Absichten der Skemoj:
+- Trifft nur eine Grenze oder Alternative: `ok` mit `suggestion: null` (oder dem Ero bei `use-instead`) und `boundary: { ero, case, action, kialo }`.
+- Trifft nur eine Absicht: unverändert.
+- Trifft beides: `ok` mit `action: "ask-human"` und `candidates`, darin die Grenze und die Absicht mit ihrem Kialo. Fundamento entscheidet nicht, welche Lesart gilt; ein Mensch entscheidet.
+
+**Ohne Treffer (Entscheidung OP-6):** Die Fehlerform bleibt (nach F1-T00 `goal-unknown` mit `allowed`). Der `suggestion`-Text sagt, dass Fundamento die Absicht nicht abdeckt und ein Mensch entscheidet.
+
+Pflicht-Testfälle (T023): „Zur Übersicht“ und „zur Projektübersicht“ ergeben `navigation`. „Zum Warenkorb hinzufügen“ darf **nicht** als Navigation enden. „Weiter zur Kasse“ ergibt die Absicht `confirm`, keine Grenze. Vertrag in [`contracts/mcp-tools.md`](contracts/mcp-tools.md) §2.
 
 ### D-07 `check_usage` prüft den Gebrauch (A10)
 
@@ -125,7 +138,7 @@ Zwei Sicherungen: Das Schema lässt in `layout` nur geschlossene Wortmengen zu. 
 
 Die CI vergleicht die Terminologio-Tabelle der Constitution mit der Ontologio (`table-term-missing`, `table-term-extra`) und die Ontologio mit den Entitätstypen des Schemas (`entity-type-missing`, `entity-type-extra`). Tabellenzeile, Ontologio-Begriff und Entitätstyp `uzo` landen daher im selben Commit (T010). Sonst ist ein Zwischenstand rot. Änderungshistorie: „v2.1 (Spec 007) Terminologie um **Uzo** ergänzt (neue Datenart `data/eroj/<ero>/uzo.json` neben der Skemo; Text-Regeln fest oder anpassbar, Überstimmung nur mit Jugxo)“. `docs/docs.test.ts` hält Version und Historie fest, wie bei v2.0.
 
-Ontologio: `#Uzo`, `inScheme: terminologio`, `notation: uzo`, `prefLabel { eo: Uzo, en: usage, de: Gebrauch }`, `altLabel { en: [usage rules], de: [Verwendung] }`, Beziehungen `partOf #Modelo`, `references #Ero`, `references #Skemo`, `references #Regulo`, `references #Jugxo`, `related #Tavolo`. Ob die Prädikate dafür reichen, prüft T010 gegen `predicates` in `ontologio.json`. Ein neues Prädikat wäre eine eigene Frage an den Maintainer.
+Ontologio: `#Uzo`, `inScheme: terminologio`, `notation: uzo`, `prefLabel { eo: Uzo, en: usage, de: Gebrauch }`, `altLabel { en: [usage rules], de: [Verwendung] }`. **Abgrenzung zu Art. XIII (Entscheidung OP-1):** Der Titel von Art. XIII bleibt. Die Definition endet mit dem Satz „Nicht gemeint ist die Einfachheit der Nutzung des Systems nach Art. XIII (Simpleco de Uzo).“ (en: „Not the ease of use of the system itself, which Art. XIII calls Simpleco de Uzo.“). Beziehungen `partOf #Modelo`, `references #Ero`, `references #Skemo`, `references #Regulo`, `references #Jugxo`, `related #Tavolo`. Ob die Prädikate dafür reichen, prüft T010 gegen `predicates` in `ontologio.json`. Ein neues Prädikat wäre eine eigene Frage an den Maintainer.
 
 ### D-12 Gvidanto-Prompt (A9)
 
@@ -145,9 +158,11 @@ Neue Regel 12 in `packages/mcp/prompts/gvidanto.md`: „When `suggest_ero` or `c
 | `projekcioj/src` | Figma-Plan und Plugin, Web Component, Vitrino-Daten, Make Kit |
 | Tests und Fixtures | `eroj/test/*`, `mcp/src/e2e/*`, `fixtures/invalid/parity-mismatch`, `invalid/skemo-schema`, `valid/ero-minimal`, `valid/parity-equivalent` |
 | Prompt | Regel 8 („Name a variant as get_ero names it“) |
-| Constitution | Art. II nennt `variant: primary | secondary | tertiary` als Beispiel (OP-3) |
+| Constitution | Art. II nennt `variant: primary | secondary | tertiary` als Beispiel; Änderung im F1-PR (OP-3, entschieden) |
 
-Abgeschlossene Specs (`specs/003…`) bleiben unverändert; sie beschreiben den Stand ihrer Zeit. Die Umbenennung ist mechanisch, aber nicht blind: `EroSummary.variants` braucht eine Regel, welcher Prop die Varianten nennt (Vorschlag: der erste Enum-Prop der Skemo, also `emphasis`). Wie F1 mit der bestehenden Instanz-Eigenschaft `intent` zusammenpasst, ist OP-4.
+Abgeschlossene Specs (`specs/003…`) bleiben unverändert; sie beschreiben den Stand ihrer Zeit. Die Umbenennung ist mechanisch, aber nicht blind: `EroSummary.variants` braucht eine Regel, welcher Prop die Varianten nennt (Vorschlag: der erste Enum-Prop der Skemo, also `emphasis`). **`goal` für die Absicht (Entscheidung OP-4).** Der Prop `intent` (`neutral|danger`) bleibt. Die Absicht heißt überall `goal`: `Skemo.intents` → `goals`, `EroInstance.intent` → `goal`, der Parameter von `suggest_ero` → `goal`, dazu `matched.goal`, `goal-unknown`, `intentOf` → `goalOf`. Die Uzo heißt von Anfang an so (`instead[].goal`, `content[].when.goal`), weil sie in Stufe A neu entsteht (data-model §9). Die Umbenennung gehört zu F1 und läuft als eigene Aufgabe F1-T00 **vor** F1-T01. Erst danach heißen beide Wörter eindeutig.
+
+**Art. II (Entscheidung OP-3):** Der F1-PR ändert das Beispiel in Art. II auf `emphasis: high | medium | low`. Das ist ein eigenes kleines Amendment mit eigener Versionsnummer, bestimmt gegen die Basis des F1-PR (F1-T06).
 
 ### D-14 Rot zuerst: die Fehlerfixtures aus A11 vor allem anderen
 
@@ -178,10 +193,10 @@ Keine neuen. Werkzeuge aus `research/benchmarks.md` (Abschnitt 2026-10-08) werde
 ## Constitutional Compliance Review
 
 ### Artikel I – Modelo-First
-Konform. Die Uzo ist ein Eintrag des Modelo mit Id und Schema. Guidelines, Vitrino, Figma-Beschreibung und Kurzfassung werden aus ihr erzeugt. `fixed` steht nur in der Uzo, Statement und Kialo nur in der Regulo (D-02). Eine Absicht steht nur einmal, entweder in `instead` oder in `boundary` (`uzo-intent-twice`).
+Konform. Die Uzo ist ein Eintrag des Modelo mit Id und Schema. Guidelines, Vitrino, Figma-Beschreibung und Kurzfassung werden aus ihr erzeugt. `fixed` steht nur in der Uzo, Statement und Kialo nur in der Regulo (D-02). Eine Absicht steht nur einmal, entweder in `instead` oder in `boundary` (`uzo-goal-twice`).
 
 ### Artikel II – Unu Vortaro
-Konform für Spec 007: Die Uzo führt keine Namen ein, die eine Projekcio umbenennen müsste. Slot-, Prop- und Ero-Namen werden aus der Skemo übernommen und validiert. **Für F1:** Das Beispiel in Art. II (`variant: primary | secondary | tertiary`) ist nach der Umbenennung veraltet (OP-3). Die Regel selbst, ein Name überall, verlangt F1 sogar, weil Figma, CSS und React danach dieselben neuen Namen tragen.
+Konform für Spec 007: Die Uzo führt keine Namen ein, die eine Projekcio umbenennen müsste. Slot-, Prop- und Ero-Namen werden aus der Skemo übernommen und validiert. **Für F1:** Das Beispiel in Art. II (`variant: primary | secondary | tertiary`) ist nach der Umbenennung veraltet; der F1-PR ändert es mit eigenem Amendment (OP-3, entschieden). Die Regel selbst, ein Name überall, verlangt F1 sogar, weil Figma, CSS und React danach dieselben neuen Namen tragen.
 
 ### Artikel III – Masxinlegebleco
 Konform und das Ziel der Spec: Ein Agent erfährt per MCP Zweck, Grenze und Alternative, und `describe_term` erklärt den neuen Begriff (A13). Zielablauf: Der prüfende Agent bekommt mit `check_usage` Gebrauchsregeln, die er heute aus eigenen Faustregeln ableiten müsste. Der entwerfende Agent bekommt mit `get_ero brief` weniger und Treffenderes.
@@ -214,7 +229,7 @@ Konform. Kein neues Paket. Kein neues MCP-Werkzeug, `get_ero` wird erweitert (D-
 Konform. Das Vortaro bleibt unberührt (DTCG). Die Uzo ist Ero-Wissen und kein Token. Make Kit und Figma bekommen sie als generierte Ausgabe. Was ein Celo nicht trägt, wird gemessen (Manko).
 
 ### Artikel XIII – Simpleco de Uzo
-Konform. `get_ero brief` macht den Einstieg für Agenten kürzer. Für Entwickler und Designer ändert sich an Befehlen und Libraries nichts. Der Quickstart bleibt gleich und wird in T031 erneut ausgeführt. Zum Titel des Artikels siehe OP-1: Dort bedeutet „Uzo“ Nutzung.
+Konform. `get_ero brief` macht den Einstieg für Agenten kürzer. Für Entwickler und Designer ändert sich an Befehlen und Libraries nichts. Der Quickstart bleibt gleich und wird in T031 erneut ausgeführt. Zum Titel des Artikels: Er bleibt, und die Ontologio-Definition von Uzo grenzt sich von ihm ab (OP-1, entschieden; D-11).
 
 ## Complexity Tracking
 
@@ -249,29 +264,36 @@ Konform. `get_ero brief` macht den Einstieg für Agenten kürzer. Für Entwickle
 | A12 Parität | D-10 | T026, T027, T028, T029 |
 | A13 Ontologio | D-11 | T010 |
 | Amendment | D-11 | T010 |
-| F1 | D-13 | F1-T01 bis F1-T06 |
+| F1 | D-13 | F1-T00 bis F1-T06 |
 | Abnahme 1–9 | – | T030, T031, M1, M2 |
 
-## Offene Punkte für den Maintainer
+## Offene Punkte – entschieden 2026-10-08
 
-Beim Lesen von Spec und Research gegen Constitution und Code sind die folgenden Widersprüche und Lücken aufgefallen. Die Spec-Dateien sind unverändert; jeder Punkt nennt einen Vorschlag.
+Der Maintainer hat Plan und Aufgaben am 2026-10-08 geprüft. Die Entscheidungen sind in Plan, Datenmodell, Vertrag und Aufgaben eingearbeitet. Die Spec-Dateien bleiben unverändert.
 
-- **OP-1 „Uzo“ ist schon belegt.** Art. XIII heißt „Simpleco de Uzo (Einfachheit der Nutzung)“. Dort bedeutet Uzo die Nutzung des Systems durch Entwickler und Designer, in Spec 007 den Gebrauch eines Ero. Die Ontologio-Prüfung sieht das nicht, weil sie nur Tabellenbegriffe vergleicht. *Vorschlag:* Der Titel von Art. XIII bleibt Prosa. Die Ontologio-Definition von Uzo grenzt sich in einem Satz von ihm ab („nicht die Einfachheit der Nutzung nach Art. XIII“). Oder Art. XIII bekommt in v2.1 einen anderen Titel. Bitte entscheiden.
-- **OP-2 `ref` für F3.** Das Jugxo-Schema kennt nur `regulo`, `ero` und `artikolo`, keinen Verweis auf die Terminologio. F3 steht deshalb wie im Auftrag unter `artikolo: VI`. *Frage:* Passt Art. III besser, weil er die Ontologio trägt? Oder soll das Schema einen Verweis `terminologio` bekommen? Ein solcher Verweis wäre eine Schemaänderung und gehörte in Stufe A.
-- **OP-3 F1 und das Beispiel in Art. II.** Art. II nennt `variant: primary | secondary | tertiary` als Beispiel für „ein Name überall“. Nach F1 stimmt das Beispiel nicht mehr. *Vorschlag:* Der F1-PR trägt eine kleine Änderung von Art. II mit eigener Versionsnummer, die dann gegen die Basis bestimmt wird. In v2.1 gehört sie nicht, weil v2.1 vor F1 landet und die Constitution sonst dem Code vorausliefe.
-- **OP-4 `intent` zweimal.** F1 macht `intent` zum Prop (`neutral|danger`). Daneben heißt die Absicht einer Instanz schon heute `intent` (`EroInstance.intent`, `Skemo.intents`, Werte wie `destructive`, `confirm`). Nach F1 trüge eine Instanz `props.intent: "danger"` und `intent: "destructive"`. Ein Agent müsste dann raten, und genau das soll F1 verhindern. *Optionen:* (a) Die Skemo-Absichten werden in F1 mit umbenannt, etwa `actions`/`action`. (b) Der Prop heißt anders. Das widerspräche F1. (c) Beides bleibt, und die Beschreibung erklärt es. Empfehlung: (a).
-- **OP-5 Bestehende Beispiele verletzen die neue feste Regel.** `jug_01M2XN0Q7YGPVYC981A9D98PT1` (approved) und `…PT2` (rejected) tragen das Label „Löschen“. Nach `destructive-label-names-object` ist das approved-Beispiel ein Verstoß, und das rejected-Beispiel verletzt zwei Regeln statt einer. `data/butono.test.ts` bräche. *Vorschlag:* beide Labels auf „Projekt löschen“ ändern und das in `context` vermerken. Eine Jugxo ist ein Präzedenzfall, deshalb fragt der Plan, statt das selbst zu tun.
-- **OP-6 `suggest_ero` liefert heute nicht `null`.** Spec S1 und A9 sagen: „Heute bekommt er `null`“. Der Code antwortet ohne Treffer aber mit dem Fehler `intent-unknown` und `allowed` (Vertrag Spec 003, `mcp-tools.md` §2). *Vorschlag (D-06):* Die Fehlerform bleibt. Der Satz „Fundamento deckt diese Absicht nicht ab; ein Mensch entscheidet“ steht in `suggestion`, ein Treffer auf eine Grenze kommt als `ok` mit `boundary`. Alternativ wird der Fall ohne Treffer zu `ok` mit `matched: null`. Das wäre ein Vertragsbruch für bestehende Aufrufer.
-- **OP-7 Containernamen sind ein offenes Vokabular.** Instanzen nennen heute `dialog` und `confirm-delete`. Für „Fußleiste“ schlägt der Plan `action-bar` vor, weil `footer` ein HTML-Begriff ist (Art. VIII). „Kompakter Viewport“ ist kein Container, sondern der Dimensio-Wert `viewport=compact` (D-04). *Frage:* Name bestätigen? Ein geschlossenes Containervokabular entsteht erst mit den Sxablonoj.
-- **OP-8 Sprachen in A7.** „Sprachen: `de` und `en`“ ist im Plan so gelesen: Beispiele je Text-Regel in beiden Sprachen, Uzo-Texte (`purpose`, Kialoj) englisch wie Skemo und Reguloj. *Bitte bestätigen.*
-- **OP-9 Figma-Mankoj erst nach Messung.** A12 will Slot-Regeln, die Figma nicht tragen kann, als Manko führen. Art. VI verlangt für jede Manko einen Beleg im Wortlaut aus einem Versuch. Der Versuch braucht echtes Figma, also die Zeit nach M1. Der Plan legt deshalb keine Manko auf Verdacht an (T029).
-- **OP-10 Enportilo Stufe 1 (Befund F38).** Einen Befund F38 gibt es im Repo nicht: Spec 003 springt von F37 auf F41. Einen Spec- oder Research-Ort für eine erste Enportilo-Stufe gibt es ebenfalls nicht. Spec 004 nennt ihren Spectrum-Import „die erste Stufe des Enportilo“. *Frage:* Ist das gemeint? Dann käme ein Verweis nach `specs/004-komparo/research.md`. Bis zur Antwort steht der Werkzeugbefund nur in `research/benchmarks.md`.
-- **OP-11 Basis-Commit von `research.md`.** Research nennt `159ee07` (2026-10-07). Geprüft wurde gegen `8d1870e`, dazwischen liegen #40 und #43 (Figma-Plugin). Die Aussagen über Skemo, Reguloj und Werkzeuge gelten unverändert. Mit F1 bis F3 sind es jetzt 38 Jugxoj statt 35, davon weiter 6 mit `ekzemplo`. Research ist nicht angepasst, weil es unverändert übernommen werden sollte.
-- **OP-12 Schlüsselwörter für Navigation.** Die Wortsuche trifft nur ganze Wörter. „zur Projektübersicht“ trifft „zur“, aber nicht „übersicht“. Dafür trifft „zur“ auch „Weiter zur Kasse“, und die Grenze gewinnt dann gegen den Intent `confirm` (D-06). *Bitte bestätigen,* dass eine Aktion, die zugleich navigiert, als Navigation gelten soll.
-- **OP-13 Maß für Tokens.** Ohne neue Abhängigkeit zählt der Test `ceil(Bytes / 3)` statt echter Tokens (D-08). Eine echte Zählung bräuchte einen Tokenizer als Abhängigkeit oder einen Netzaufruf im Test. *Bitte bestätigen.*
-- **OP-14 Phasennummer.** In der Vojmapo steht Spec 007 als Phase „3c“ zwischen 3b und 4. Die Nummer ist vom Plan gewählt.
-- **OP-15 Voraussetzung in der Spec.** Der Spec-Kopf sagt „Voraussetzung: Spec 003 auf `main` und abgenommen“. Der Auftrag erlaubt Vorarbeit vor der Abnahme. Der Plan folgt dem Auftrag mit Stufe A, die keine abgenommene Ausgabe berührt.
-- **OP-16 `/speckit.analyze`.** Im Repo sind weder spec-kit-Vorlagen noch der Befehl installiert (`.specify/` enthält nur `memory/`). Die Analyse ist von Hand gemacht und steht am Ende von [`tasks.md`](tasks.md).
+| Punkt | Frage | Entscheidung | Wo eingearbeitet |
+|---|---|---|---|
+| OP-1 | „Uzo“ steht schon im Titel von Art. XIII („Simpleco de Uzo“, dort: Nutzung) | ✅ Der Titel bleibt. Die Ontologio-Definition von Uzo grenzt sich in einem Satz ab | D-11, T010 |
+| OP-2 | `ref` der F3-Jugxo | ✅ `artikolo: III` statt `VI`, weil Art. III die Ontologio trägt | `jug_01M4DNSD0SV43Y943T21RQF7EP` in diesem Commit geändert |
+| OP-3 | Beispiel in Art. II nach F1 | ✅ wie vorgeschlagen: Änderung im F1-PR mit eigener Versionsnummer | D-13, F1-T06 |
+| OP-4 | `intent` zweimal nach F1 | ✅ Der Prop bleibt `intent` (`neutral|danger`). Die Absicht heißt überall `goal` (Skemo `goals`, `EroInstance.goal`, `suggest_ero { goal }`, Uzo `instead[].goal`, `when.goal`). Teil von F1, eigene Aufgabe vor F1-T01 | D-13, data-model §9, F1-T00 |
+| OP-5 | „Löschen“ in `…PT1` und `…PT2` | ✅ Beide Labels werden „Projekt löschen“, mit Vermerk in `context` | data-model §8, T021 |
+| OP-6 | `suggest_ero` ohne Treffer: Fehler statt `null` | ✅ wie vorgeschlagen: Die Fehlerform bleibt, der `suggestion`-Text sagt „ein Mensch entscheidet“ | D-06, T023 |
+| OP-7 | Name für „Fußleiste“ | ✅ `action-bar` | data-model §2.3 |
+| OP-8 | Sprachen in A7 | ✅ wie vorgeschlagen: Beispiele in `de` und `en`, Uzo-Texte englisch | data-model §5 |
+| OP-9 | Figma-Mankoj erst nach Messung | ✅ wie vorgeschlagen | D-10, T029 |
+| OP-10 | Ort für Enportilo Stufe 1 (Befund F38) | ⏳ **noch offen.** In der Entscheidung stand der Platzhalter „[Ort von F38 eintragen]“ ohne Ort. Bis ein Ort genannt ist, bleibt der Werkzeugbefund nur in `research/benchmarks.md` | – |
+| OP-11 | Basis-Commit von `research.md` | ✅ wie vorgeschlagen: Research bleibt unverändert | – |
+| OP-12 | Navigation gegen Bestätigung | ✅ Keine Präpositionen in Schlüsselwörtern (`zur`, `zum`, `go`, `open` fallen weg). Trifft eine Eingabe Grenze und Absicht, liefert `suggest_ero` beide Kandidaten mit `action: ask-human`. Testfall: „Zum Warenkorb hinzufügen“ darf nicht als Navigation enden | D-06, data-model §2.3, contracts §2, T023 |
+| OP-13 | Maß `ceil(Bytes / 3)` | ✅ wie vorgeschlagen | D-08 |
+| OP-14 | Phasennummer 3c | ✅ wie vorgeschlagen | Vojmapo |
+| OP-15 | Stufe A vor der Abnahme von Spec 003 | ✅ wie vorgeschlagen | Abschnitt „Voraussetzung“ |
+| OP-16 | `/speckit.analyze` nicht installiert | ✅ wie vorgeschlagen: Analyse von Hand | tasks.md |
+| neu | Prüfung von `label-names-action` | ✅ vorerst nur `severity: warning`, weil die Schlüsselwortliste legitime Verben wie „Senden“ oder „Teilen“ abweisen würde. Regulo-Kandidat für eine bessere Prüfung | D-02, data-model §2.1, §4 |
+
+### Neu aus der Einarbeitung, zur Bestätigung
+
+- **N-1 Zusammengesetzte Wörter (Folge von OP-12).** Ohne `zur` trifft der Beispiel-Dialog der Spec („zur Projektübersicht“) nichts mehr, und Abnahme 4 würde scheitern. D-06 lässt deshalb nur für Uzo-Schlüsselwörter ab 6 Zeichen auch das Wortende gelten („projektübersicht“ trifft „übersicht“). Die Skemo-Absichten vergleichen weiter ganze Wörter. Das betrifft erst Stufe B (T023), nicht Stufe A. *Bitte bestätigen oder eine andere Lösung nennen.*
 
 ## Manuelle Abnahme (Maintainer, nach Stufe B)
 

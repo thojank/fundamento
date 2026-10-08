@@ -1,13 +1,13 @@
 # Aufgaben – Spec 007
 
-**Plan:** [`plan.md`](plan.md) (D-01–D-14, OP-1–OP-16) · **Datenmodell:** [`data-model.md`](data-model.md) · **Verträge:** [`contracts/mcp-tools.md`](contracts/mcp-tools.md) · **Stand:** Entwurf zur Prüfung durch den Maintainer, nichts umgesetzt · **Datum:** 2026-10-08 · **Basis:** `main` @ `8d1870e`
+**Plan:** [`plan.md`](plan.md) (D-01–D-14, Entscheidungen OP-1–OP-16 vom 2026-10-08) · **Datenmodell:** [`data-model.md`](data-model.md) · **Verträge:** [`contracts/mcp-tools.md`](contracts/mcp-tools.md) · **Stand:** vom Maintainer geprüft am 2026-10-08, Entscheidungen eingearbeitet; Stufe A freigegeben · **Datum:** 2026-10-08 · **Basis:** `main` @ `8d1870e`
 
 Drei Stränge mit je einem PR (plan, „Voraussetzung Spec 003“):
 
 | Strang | Aufgaben | Wann |
 |---|---|---|
 | **Stufe A** | T001–T017 | jetzt möglich; berührt keine Ausgabe, die M1 bis M3 von Spec 003 prüfen |
-| **F1** | F1-T01–F1-T06 | nach der Abnahme von Spec 003, eigener PR |
+| **F1** | F1-T00–F1-T06 | nach der Abnahme von Spec 003, eigener PR |
 | **Stufe B** | T019–T031 | nach der Abnahme von Spec 003 und nach dem Merge von F1 |
 
 **Regel für jede Aufgabe, ohne Ausnahme (Art. X, Jugxo `jug_01M2VRT7KQ77W91MVXB4GXSRZ4`):**
@@ -60,7 +60,7 @@ Jede Fixture ist eine Kopie von `test/fixtures/valid/ero-minimal` mit einer `dat
 - [ ] **T010 Constitution v2.1, Ontologio-Begriff Uzo, Entitätstyp `uzo`** (Amendment, A13, D-11). Eigene Aufgabe, ein Commit.
   - Vorher: Versionsnummer gegen den dann aktuellen `main` und alle offenen PRs prüfen (`gh pr list`, Diff auf `.specify/memory/constitution.md`). Ist v2.1 vergeben, die nächste freie nehmen und Plan, Spec-Verweis und diese Aufgabe nachziehen (Lehre aus Spec 005).
   - Rot: `docs/docs.test.ts`: Kopf „Version 2.1“; Terminologio-Zeile **Uzo** mit Verwendung `data/eroj/<ero>/uzo.json`; Änderungshistorie nennt „v2.1 (Spec 007)“ und „Uzo“. `ontologio`-Drift: Die Tabellenzeile allein macht `table-term-missing` rot. Erst danach wird der Ontologio-Begriff geschrieben; ohne Entitätstyp ist `entity-type-missing` rot. `gvidanto/describe-term.test.ts`: `Uzo`, `Gebrauch` und `usage` liefern `#Uzo` mit der Definition aus A13. Jedes dieser Rot wird einzeln beobachtet.
-  - Grün: `.specify/memory/constitution.md` (Kopf, Tabelle, Historie; Wortlaut in plan D-11 und spec, Abschnitt Amendment), `data/ontologio.json`, `ENTITY_ID_PREFIXES.uzo = "uzo"`, `ENTITY_TYPES`, Schema `UzoId`. Der Vorschlag zu OP-1 (Abgrenzung zu Art. XIII) wird nach der Entscheidung des Maintainers eingearbeitet.
+  - Grün: `.specify/memory/constitution.md` (Kopf, Tabelle, Historie; Wortlaut in plan D-11 und spec, Abschnitt Amendment), `data/ontologio.json`, `ENTITY_ID_PREFIXES.uzo = "uzo"`, `ENTITY_TYPES`, Schema `UzoId`. Die Ontologio-Definition endet mit der Abgrenzung zu Art. XIII aus plan D-11 (Entscheidung OP-1); `describe-term.test.ts` prüft den Satz.
 
 ### A.3 Schema, Laden, Validierung
 
@@ -69,7 +69,7 @@ Jede Fixture ist eine Kopie von `test/fixtures/valid/ero-minimal` mit einer `dat
   - Grün: `schema/modelo.schema.json` (`UzoFile`, `Uzo`, `UzoInstead`, `UzoBoundary` mit `if/then` für `use-instead`, `UzoComposes`, `UzoSlot`, `UzoLayout`, `UzoContent`, `Keywords`; `SkemoIntent.keywords` → `$ref Keywords`), `generated/modelo-schema.ts`, Lader, Export-Schlüssel `uzoj`. Die Fixtures T003 und T006 werden mit dem Schema grün (`schema-violation`); die eigenen Meldungen kommen mit T012.
   - Fertig: Die Export-Bytes des Repos bleiben gleich, weil es noch keine Uzo gibt (AK-10).
 - [ ] **T012 Validierung über das Schema hinaus** (`eroj/uzo-rules.ts`, data-model §2.2)
-  - Rot: T001–T004, T006 und T007 rot (eigene Regel-Ids). Neue Unit-Tests in `eroj/uzo-rules.test.ts`, alle rot gegen eine leere Regelfunktion: `uzo-intent-twice`, `uzo-regulo-unknown` (Text-Regel nennt eine Regulo ohne `appliesTo.eroj: [butono]`), `uzo-prop-unknown` (`layout.dense` ist kein boolean-Prop), `uzo-use-instead-ero-missing`.
+  - Rot: T001–T004, T006 und T007 rot (eigene Regel-Ids). Neue Unit-Tests in `eroj/uzo-rules.test.ts`, alle rot gegen eine leere Regelfunktion: `uzo-goal-twice`, `uzo-regulo-unknown` (Text-Regel nennt eine Regulo ohne `appliesTo.eroj: [butono]`), `uzo-prop-unknown` (`layout.dense` ist kein boolean-Prop), `uzo-use-instead-ero-missing`.
   - Grün: Regeln in `uzo-rules.ts`, aufgerufen aus `skemo-rules.ts` neben `ekzemploIssues`, Regel-Ids in `contracts/issues.ts`.
 - [ ] **T013 [P] Kein Web-Begriff in der Uzo** (A6, D-09)
   - Rot: T005 rot. Dazu ein Property-Test (fast-check wie in `nomreguloj`): Jede CSS-Eigenschaft aus der Liste von `checks/vortaro-lint/css-literal.ts`, an eine beliebige String-Stelle einer gültigen Uzo gesetzt, ergibt `uzo-web-term`. Rot gegen die leere Regel.
@@ -97,7 +97,11 @@ Jede Fixture ist eine Kopie von `test/fixtures/valid/ero-minimal` mit einer `dat
 
 ## F1 – Achsennamen am Butono (eigener PR, nach der Abnahme von Spec 003)
 
-Entscheidung F1, Jugxo `jug_01M4DNSD0SV43Y943T21RQF7EM`, plan D-13. Getrennt von A1–A13. Vor F1-T01 entscheidet der Maintainer OP-3 (Art. II) und OP-4 (`intent` zweimal).
+Entscheidung F1, Jugxo `jug_01M4DNSD0SV43Y943T21RQF7EM`, plan D-13. Getrennt von A1–A13. OP-3 und OP-4 sind entschieden: F1-T00 benennt zuerst die Absicht in `goal` um, F1-T06 ändert Art. II.
+
+- [ ] **F1-T00 Die Absicht heißt `goal`** (Entscheidung OP-4, data-model §9). Eigene Aufgabe vor F1-T01, im selben F1-PR.
+  - Rot: `data/butono.test.ts`: Die Skemo hat `goals` mit `goal` je Eintrag und kein `intents`. `eroj/usage.test.ts`: Eine Instanz mit `goal: "destructive"` löst `destructive-not-primary-color` aus. `gvidanto/suggest-ero.test.ts` und `packages/mcp/src/contracts.test.ts`: `suggest_ero { goal }` antwortet mit `matched.goal`; ohne Treffer kommt `goal-unknown`. Neu: Das Wort `intent` steht in `data/` nur noch als Prop-Name. Alle rot gegen den alten Stand.
+  - Grün: Schema (`SkemoGoal`, `Skemo.goals`, `EroInstance.goal`), `skemo.json`, Jugxo-Beispiele (`intent` → `goal` in Instanzen), `eroj/usage.ts` (`goalOf`), `gvidanto/suggest-ero.ts` (`knownGoals`), `packages/mcp/src/schemas.ts`, Regel-Id `goal-unknown` in `contracts/issues.ts`, Prompt-Regel 9, e2e-Dialoge. Die Uzo-Validierung prüft `when.goal` jetzt gegen `Skemo.goals`.
 
 - [ ] **F1-T01 Modelo: Skemo, Reguloj, Jugxo-Beispiele, Vortaro-Beschreibungen**
   - Rot: `data/butono.test.ts`: Props `emphasis` (`high|medium|low`, Standard `medium`) und `intent` (`neutral|danger`, Standard `neutral`); `forbiddenBy(skemo, { emphasis: "medium", intent: "danger" })` ist gesetzt. Neu: Kein Wort `variant` oder `tone` kommt in `data/` und `vortaro/sets/` vor. Rot.
@@ -113,7 +117,7 @@ Entscheidung F1, Jugxo `jug_01M4DNSD0SV43Y943T21RQF7EM`, plan D-13. Getrennt von
 - [ ] **F1-T05 MCP: Prompt-Regel 8, e2e-Dialoge**
   - Rot: `packages/mcp/src/e2e/*` mit den neuen Namen, `prompt.test.ts`. Rot.
 - [ ] **F1-T06 Abschluss F1**
-  - Art. II nach Entscheidung OP-3, Vojmapo Phase 4 („umbenannt“ statt „umzubenennen“), Figma-Library und Make Kits neu erzeugen. Der Maintainer prüft in Figma, dass die alte Komponente ersetzt und nicht verdoppelt ist. PR „F1 Achsennamen“.
+  - Art. II: Das Beispiel wird `emphasis: high | medium | low` (Entscheidung OP-3), als eigenes Amendment. Die Versionsnummer wird gegen die Basis des F1-PR bestimmt; `docs/docs.test.ts` hält sie fest (Rot zuerst). Vojmapo Phase 4 („umbenannt“ statt „umzubenennen“), Figma-Library und Make Kits neu erzeugen. Der Maintainer prüft in Figma, dass die alte Komponente ersetzt und nicht verdoppelt ist. PR „F1 Achsennamen“.
 
 ---
 
@@ -124,14 +128,14 @@ Die Achsennamen in Stufe B sind die nach F1.
 ### B.1 Daten
 
 - [ ] **T019 Fünf Reguloj** (A4, A6, A7, data-model §4)
-  - Rot: `data/butono.test.ts`: `USAGE_REGULOJ` enthält `full-width-in-action-bar-or-compact`, `label-names-action`, `destructive-label-names-object` und `destructive-label-not-generic`. `spacing-owned-by-container` steht mit `checkability: manual`. Der Test „approved ergibt keine Verletzung, rejected genau eine“ wird damit für vier neue Namen rot (keine Beispiele, keine Enforcer).
+  - Rot: `data/butono.test.ts`: `USAGE_REGULOJ` enthält `full-width-in-action-bar-or-compact`, `label-names-action`, `destructive-label-names-object` und `destructive-label-not-generic`. `spacing-owned-by-container` steht mit `checkability: manual`. `label-names-action` meldet nur `severity: warning` (Entscheidung 2026-10-08, plan D-02); der Test zählt Warnungen als Verletzung ihrer Regel, `valid` bleibt aber `true`. Der Test „approved ergibt keine Verletzung, rejected genau eine“ wird damit für vier neue Namen rot (keine Beispiele, keine Enforcer).
   - Grün: Einträge in `reguloj.json` (Ids per `pnpm id:new regulo --count 5`), Enforcer in `USAGE_ENFORCERS` (für T024 vorbereitet, noch nicht über `check_usage` erreichbar).
 - [ ] **T020 `butono/uzo.json` und Export** (A1–A6, D-01)
   - Rot: `data/butono.test.ts`: Uzo vorhanden, `boundary` enthält die vier Fälle aus A3, `slots` aus A5, `layout` aus A6. Rot, die Datei fehlt. `checks/regularo`: Die Warnung `skemo-uzo-missing` für `butono` verschwindet. Rot. Der Test „keeps visible strings out“ wird auf die Uzo ausgeweitet.
   - Grün: Datei nach data-model §2.3, Id per `pnpm id:new uzo`. Export-Fixtures neu erzeugt, zwei Builds byte-gleich.
 - [ ] **T021 Jugxo-Beispiele je Text-Regel und die zwei geänderten Labels** (A7, data-model §5, §8, OP-5)
   - Rot: `uzo-content-example-missing` für alle drei Text-Regeln am echten Repo (T012). Dazu `data/butono.test.ts`: `…PT1` (approved) verletzt `destructive-label-names-object`. Beide Rot beobachten.
-  - Grün: 12 Jugxoj (3 Regeln × approved/rejected × de/en), Ids per `pnpm id:new jugxo --count 12`. Labels von `…PT1` und `…PT2` nach Entscheidung OP-5, mit Vermerk in `context`.
+  - Grün: 12 Jugxoj (3 Regeln × approved/rejected × de/en), Ids per `pnpm id:new jugxo --count 12`. Labels von `…PT1` und `…PT2` werden „Projekt löschen“ (Entscheidung OP-5), mit Vermerk in `context`.
 
 ### B.2 Gvidanto
 
@@ -140,13 +144,13 @@ Die Achsennamen in Stufe B sind die nach F1.
   - Messung: erzeugte Kurzfassung messen, Wert nach plan D-08 bestimmen, in `research.md` unter „Messungen“ als M-4 eintragen, `BRIEF_LIMIT` setzen. Danach eine Mutation: ein zusätzlicher `boundary`-Eintrag mit 2 KB Kialo muss den Test brechen.
   - Grün: `gvidanto/eroj.ts`, `packages/mcp/src/schemas.ts` (`brief`), Werkzeugbeschreibung in `describe`.
 - [ ] **T023 `suggest_ero` mit Grenze und Alternative** (A2, A3, A9, D-06, contracts §2)
-  - Rot: `gvidanto/suggest-ero.test.ts`: „Zur Übersicht“ ergibt `boundary.case = navigation`, `action = ask-human`, `suggestion = null` (S1). „Weiter zur Kasse“ ergibt eine Grenze und nicht `confirm` (OP-12). „umschalten“ ergibt `instead` mit `ero: null`. „Löschen“ ergibt unverändert `destructive`. Ohne Treffer bleibt `intent-unknown`, mit dem neuen `suggestion`-Text. Rot.
+  - Rot: `gvidanto/suggest-ero.test.ts`: „Zur Übersicht“ und „zur Projektübersicht“ ergeben `boundary.case = navigation`, `action = ask-human`, `suggestion = null` (S1, Beispiel-Dialog). „Zum Warenkorb hinzufügen“ endet **nicht** als `navigation` (Entscheidung OP-12). „Weiter zur Kasse“ ergibt die Absicht `confirm`. „Übersicht speichern“ trifft Grenze und Absicht und ergibt `action = ask-human` mit beiden `candidates`. „umschalten“ ergibt `instead` mit `ero: null`. „Löschen“ ergibt unverändert `destructive`. Ohne Treffer kommt `goal-unknown` mit dem neuen `suggestion`-Text. Ein Datentest prüft, dass kein Uzo-Schlüsselwort eine Präposition aus einer Liste je Sprache ist. Rot.
   - Grün: `suggest-ero.ts`, Ausgabe-Schema in `packages/mcp/src/schemas.ts`.
 - [ ] **T024 `check_usage` prüft den Gebrauch** (A3, A5, A6, A7, A10, D-07, contracts §3)
-  - Rot: `gvidanto/check-usage.test.ts` mit den Fällen S2, S3 und S4 aus contracts §3, dazu je ein Fall für `uzo-slot-accepts`, `uzo-slot-max`, `uzo-slot-nesting` und `full-width-in-action-bar-or-compact` (erlaubt mit `container: "action-bar"`, erlaubt mit `dimensioj.viewport: "compact"`, verboten ohne beides). Für S4 trägt die Test-Aspekto `ekzemplo` eine Überstimmung von `label-names-action` mit Jugxo. Alle rot.
+  - Rot: `gvidanto/check-usage.test.ts` mit den Fällen S2, S3 und S4 aus contracts §3, dazu je ein Fall für `uzo-slot-accepts`, `uzo-slot-max`, `uzo-slot-nesting` und `full-width-in-action-bar-or-compact` (erlaubt mit `container: "action-bar"`, erlaubt mit `dimensioj.viewport: "compact"`, verboten ohne beides). Für S4 trägt die Test-Aspekto `ekzemplo` eine Überstimmung von `label-names-action` mit Jugxo. Ohne Überstimmung ergibt „Los geht's!“ eine Warnung bei `valid: true`. Alle rot.
   - Grün: `eroj/usage.ts` (Enforcer für Uzo-Regeln, `info` bei Überstimmung), `suggestion` aus dem approved-Beispiel der Regel in der Sprache der Instanz.
 - [ ] **T025 Gvidanto-Prompt Regel 12 und Regel 8** (A9, D-12)
-  - Rot: `packages/mcp/src/prompt.test.ts`: Regel 12 enthält „ask-human“ und „Do not propose a solution of your own“, Regel 8 nennt `brief` und `uzo`. Rot.
+  - Rot: `packages/mcp/src/prompt.test.ts`: Regel 12 enthält „ask-human“, „Do not propose a solution of your own“ und die Weitergabe beider `candidates`, Regel 8 nennt `brief` und `uzo`. Rot.
   - Grün: `packages/mcp/prompts/gvidanto.md`.
 
 ### B.3 Projekcioj
@@ -184,15 +188,15 @@ Die Achsennamen in Stufe B sind die nach F1.
 
 | Fund | Schwere | Ort | Behandlung |
 |---|---|---|---|
-| „Uzo“ ist im Titel von Art. XIII schon in anderer Bedeutung benutzt | mittel | Constitution | OP-1 |
-| F1 macht das Beispiel in Art. II falsch | mittel | Constitution | OP-3, F1-T06 |
-| F1-Prop `intent` und `EroInstance.intent`/`Skemo.intents` überschneiden sich | **hoch**: genau die Verwechslung, die F1 vermeiden soll | Code nach F1 | OP-4, vor F1-T01 |
-| Feste Text-Regel macht ein bestehendes approved-Beispiel ungültig | hoch: `data/butono.test.ts` bricht | Daten | OP-5, T021 |
-| `suggest_ero` liefert ohne Treffer einen Fehler, nicht `null` wie in S1/A9 | niedrig | Spec ↔ Code | OP-6, D-06 |
-| Spec-Kopf verlangt die Abnahme von 003 vor allem; der Auftrag erlaubt Vorarbeit | niedrig | Spec ↔ Auftrag | OP-15, Stufe A |
-| Research nennt Basis `159ee07`, geprüft ist `8d1870e` | niedrig | Research | OP-11 |
+| „Uzo“ ist im Titel von Art. XIII schon in anderer Bedeutung benutzt | mittel | Constitution | OP-1 ✅ Titel bleibt, Abgrenzung in der Ontologio |
+| F1 macht das Beispiel in Art. II falsch | mittel | Constitution | OP-3 ✅, F1-T06 |
+| F1-Prop `intent` und `EroInstance.intent`/`Skemo.intents` überschneiden sich | **hoch**: genau die Verwechslung, die F1 vermeiden soll | Code nach F1 | OP-4 ✅ Absicht heißt `goal`, F1-T00 |
+| Feste Text-Regel macht ein bestehendes approved-Beispiel ungültig | hoch: `data/butono.test.ts` bricht | Daten | OP-5 ✅ „Projekt löschen“, T021 |
+| `suggest_ero` liefert ohne Treffer einen Fehler, nicht `null` wie in S1/A9 | niedrig | Spec ↔ Code | OP-6 ✅, D-06 |
+| Spec-Kopf verlangt die Abnahme von 003 vor allem; der Auftrag erlaubt Vorarbeit | niedrig | Spec ↔ Auftrag | OP-15 ✅, Stufe A |
+| Research nennt Basis `159ee07`, geprüft ist `8d1870e` | niedrig | Research | OP-11 ✅ |
 
-**Mehrdeutigkeiten:** Containervokabular (OP-7), Sprachen in A7 (OP-8), Tokenmaß (OP-13), Navigation gegen Bestätigung (OP-12), `ref` für F3 (OP-2), Enportilo Stufe 1 (OP-10).
+**Mehrdeutigkeiten:** entschieden am 2026-10-08: Containervokabular (OP-7), Sprachen in A7 (OP-8), Tokenmaß (OP-13), Navigation gegen Bestätigung (OP-12), `ref` für F3 (OP-2). **Offen:** Enportilo Stufe 1 (OP-10, in der Entscheidung stand nur ein Platzhalter) und N-1 (Wortende bei Uzo-Schlüsselwörtern, plan D-06). Keines davon betrifft Stufe A.
 
 **Unterbestimmt in der Spec, im Plan festgelegt:** Prüfung der Text-Regeln ohne Sprachmodell (D-02, data-model §2.3). Ohne die Prüfart `verb-and-object` wäre S4 mit „Weg damit!“ durchgegangen; eine bloße Wortzählung hätte nicht gereicht. Ort der Überstimmung (D-03). Herkunft der Lösung in `check_usage` (D-07).
 

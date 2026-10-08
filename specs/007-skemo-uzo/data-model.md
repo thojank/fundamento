@@ -1,6 +1,6 @@
 # Datenmodell – Spec 007, Uzo
 
-**Spec:** [`spec.md`](spec.md) · **Plan:** [`plan.md`](plan.md) · **Stand:** Entwurf zur Prüfung durch den Maintainer · **Datum:** 2026-10-08 · **Basis:** `main` @ `8d1870e`
+**Spec:** [`spec.md`](spec.md) · **Plan:** [`plan.md`](plan.md) · **Stand:** vom Maintainer geprüft, Entscheidungen vom 2026-10-08 eingearbeitet (plan, „Offene Punkte – entschieden“) · **Datum:** 2026-10-08 · **Basis:** `main` @ `8d1870e`
 
 Dieses Dokument legt das Schema von `data/eroj/<ero>/uzo.json` fest, die Änderungen an bestehenden Definitionen und die neuen Regeln im Regelkatalog. Die Texte im Beispiel für `butono` sind ein **Entwurf**. Sie werden mit T014 in die Daten übernommen und dort vom Maintainer geprüft. Wie Skemo und Reguloj sind sie englisch; deutsche und englische Beispiele stehen als Daten in Jugxoj (A7).
 
@@ -37,7 +37,7 @@ Uzo      = {
   content:   UzoContent[]                                darf leer sein; für butono mindestens drei (A7)
 }
 
-UzoInstead  = { intent: Name, keywords: Keywords, ero: Name | null, kialo: NonEmptyText }
+UzoInstead  = { goal: Name, keywords: Keywords, ero: Name | null, kialo: NonEmptyText }
 UzoBoundary = { case: Name, action: "use-instead" | "ask-human" | "not-supported",
                 ero?: Name,                              Pflicht genau bei action = use-instead
                 keywords?: Keywords,                     macht die Grenze für suggest_ero auffindbar (A9)
@@ -55,9 +55,10 @@ UzoLayout   = { size: "content" | "container",
                 "full-width"?: { allowedIn: { containers?: Name[], dimensioj?: { <Dimensio>: Name[] } },
                                  regulo: Name } }        Schlüssel muss ein boolean-Prop der Skemo sein
 UzoContent  = { regulo: Name, fixed: boolean,            fixed ist Pflicht (A7, Fixture 6)
-                when?: { intent: Name[] },               nur für Instanzen mit diesen Skemo-Intents
-                check: { kind: "names-intent" }
-                     | { kind: "verb-and-object", intent: Name }   ein Schlüsselwort dieses Skemo-Intents und mindestens ein weiteres Wort
+                severity?: "error" | "warning",          Standard error; eine feste Regel ist immer error (Schema, if/then)
+                when?: { goal: Name[] },                 nur für Instanzen mit diesen Absichten (goals)
+                check: { kind: "names-goal" }
+                     | { kind: "verb-and-object", goal: Name }   ein Schlüsselwort dieser Absicht und mindestens ein weiteres Wort
                      | { kind: "not-words", words: Keywords } }
 Keywords    = wie SkemoIntent.keywords (Sprachcode ^[a-z]{2}$ → nicht leere Wortliste)
 ```
@@ -80,7 +81,7 @@ Keywords    = wie SkemoIntent.keywords (Sprachcode ^[a-z]{2}$ → nicht leere Wo
 | `uzo-override-fixed`: eine Aspekto überstimmt eine feste Regel | error | 8 `uzo-override-fixed` |
 | `uzo-override-jugxo-missing`: eine Aspekto überstimmt ohne Jugxo, oder die Jugxo nennt nicht dieselbe Aspekto und Regulo | error | 9 `uzo-override-jugxo-missing` |
 | `uzo-use-instead-ero-missing`: `action: use-instead` ohne `ero` | error | – (Schema, `if/then`) |
-| `uzo-intent-twice`: dieselbe Absicht steht in `instead` und als `case` in `boundary` (Art. I) | error | – (Unit-Test) |
+| `uzo-goal-twice`: dieselbe Absicht steht in `instead` und als `case` in `boundary` (Art. I) | error | – (Unit-Test) |
 | `uzo-regulo-unknown`: `content[].regulo`, `layout.*.regulo`, `composes.spacing.regulo` oder `via.regulo` nennt keine Regulo, deren `appliesTo.eroj` das Ero enthält | error | – (Unit-Test) |
 | `uzo-prop-unknown`: Schlüssel in `layout` außer `size`/`wrap` ist kein boolean-Prop der Skemo | error | – (Unit-Test) |
 | `skemo-uzo-missing`: Skemo ohne Uzo | **warning** in `check:regularo` | – (Unit-Test mit `valid/ero-minimal`) |
@@ -98,13 +99,13 @@ Die neun nummerierten Fixtures sind die aus A11. Sie liegen unter `packages/mode
     "purpose": "Starts an action on the current view: it saves, sends, confirms, cancels or deletes something here.",
     "instead": [
       {
-        "intent": "toggle",
+        "goal": "toggle",
         "keywords": { "en": ["toggle", "switch", "enable", "disable"], "de": ["umschalten", "einschalten", "ausschalten", "aktivieren", "deaktivieren"] },
         "ero": null,
         "kialo": "A button acts once and forgets; a setting that stays on or off needs a control that shows its state. Fundamento has no such Ero yet."
       },
       {
-        "intent": "choose",
+        "goal": "choose",
         "keywords": { "en": ["choose", "select", "pick"], "de": ["auswählen", "wählen"] },
         "ero": null,
         "kialo": "Choosing one of several values is a selection, not an action; a row of buttons hides which value is chosen. Fundamento has no such Ero yet."
@@ -114,7 +115,7 @@ Die neun nummerierten Fixtures sind die aus A11. Sie liegen unter `packages/mode
       {
         "case": "navigation",
         "action": "ask-human",
-        "keywords": { "en": ["navigate", "go", "open", "overview"], "de": ["zur", "zum", "gehe", "öffnen", "übersicht"] },
+        "keywords": { "en": ["navigate", "overview"], "de": ["navigieren", "übersicht"] },
         "kialo": "A button starts an action on the current view. Moving to another view is navigation: it is announced differently, and the way back works differently. Fundamento does not cover navigation yet, so a person decides."
       },
       {
@@ -162,9 +163,9 @@ Die neun nummerierten Fixtures sind die aus A11. Sie liegen unter `packages/mode
       }
     },
     "content": [
-      { "regulo": "label-names-action", "fixed": false, "check": { "kind": "names-intent" } },
-      { "regulo": "destructive-label-names-object", "fixed": true, "when": { "intent": ["destructive"] }, "check": { "kind": "verb-and-object", "intent": "destructive" } },
-      { "regulo": "destructive-label-not-generic", "fixed": true, "when": { "intent": ["destructive"] }, "check": { "kind": "not-words", "words": { "en": ["ok", "okay", "yes"], "de": ["ok", "okay", "ja"] } } }
+      { "regulo": "label-names-action", "fixed": false, "severity": "warning", "check": { "kind": "names-goal" } },
+      { "regulo": "destructive-label-names-object", "fixed": true, "when": { "goal": ["destructive"] }, "check": { "kind": "verb-and-object", "goal": "destructive" } },
+      { "regulo": "destructive-label-not-generic", "fixed": true, "when": { "goal": ["destructive"] }, "check": { "kind": "not-words", "words": { "en": ["ok", "okay", "yes"], "de": ["ok", "okay", "ja"] } } }
     ]
   }
 }
@@ -172,11 +173,11 @@ Die neun nummerierten Fixtures sind die aus A11. Sie liegen unter `packages/mode
 
 `never` ist leer, weil es neben `butono` noch kein Ero gibt, mit dem es nie zusammenstehen darf. Ein Butono im Butono ist schon über `slots.*.nesting: 0` ausgeschlossen. Phase 4 füllt `never`.
 
-**Wann eine Instanz zerstörend ist (`when.intent`):** wenn `instance.intent` `destructive` ist oder ihr Label ein Schlüsselwort des Skemo-Intents `destructive` enthält. Diese Regel benutzt `destructive-not-primary-color` schon heute (`intentOf`), und sie wird wiederverwendet.
+**Wann eine Instanz zerstörend ist (`when.goal`):** wenn `instance.goal` `destructive` ist oder ihr Label ein Schlüsselwort der Absicht `destructive` enthält. Diese Regel benutzt `destructive-not-primary-color` schon heute (`intentOf`), und sie wird wiederverwendet.
 
-**`verb-and-object`:** Das Label enthält ein Schlüsselwort des genannten Intents (das Verb) und mindestens ein weiteres Wort (den Gegenstand). „Löschen“ verletzt die Regel, ebenso „Weg damit!“, das kein Verb der Zerstörung nennt. „Projekt löschen“ erfüllt sie. Eine bloße Wortzählung hätte „Weg damit!“ durchgelassen und S4 verfehlt.
+**`verb-and-object`:** Das Label enthält ein Schlüsselwort der genannten Absicht (das Verb) und mindestens ein weiteres Wort (den Gegenstand). „Löschen“ verletzt die Regel, ebenso „Weg damit!“, das kein Verb der Zerstörung nennt. „Projekt löschen“ erfüllt sie. Eine bloße Wortzählung hätte „Weg damit!“ durchgelassen und S4 verfehlt.
 
-**`names-intent`:** Das Label enthält ein Schlüsselwort irgendeines Skemo-Intents dieses Ero. Die Schlüsselwörter der Intents sind heute Verben (`löschen`, `speichern`, `abbrechen`, …). Mehr Grammatik prüft Fundamento nicht, weil es kein Sprachmodell benutzt (D-16 aus Spec 003). „Los geht's!“ verletzt die Regel, und genau das macht S4 prüfbar.
+**`names-goal`:** Das Label enthält ein Schlüsselwort irgendeiner Absicht (goal) dieses Ero. Die Schlüsselwörter der Absichten sind heute Verben (`löschen`, `speichern`, `abbrechen`, …). Mehr Grammatik prüft Fundamento nicht, weil es kein Sprachmodell benutzt (D-16 aus Spec 003). „Los geht's!“ verletzt die Regel, und genau das macht S4 prüfbar. **Entscheidung 2026-10-08:** Die Prüfung meldet nur `severity: warning`. Die Schlüsselwortliste würde sonst legitime Verben wie „Senden“ oder „Teilen“ als Fehler abweisen. Eine bessere Prüfung ist Regulo-Kandidat (plan D-02).
 
 ## 3. Was die Uzo nicht enthält
 
@@ -190,7 +191,7 @@ Die neun nummerierten Fixtures sind die aus A11. Sie liegen unter `packages/mode
 |---|---|---|---|
 | `spacing-owned-by-container` | The space between sibling Eroj belongs to their container; an Ero carries no outer spacing. | An Ero does not know its neighbours. If each one brought its own distance, two Eroj side by side would add up their distances, and the rhythm of a view would depend on which Ero stands where. | `manual` (A4) |
 | `full-width-in-action-bar-or-compact` | A butono takes the full inline size only in a container of kind action-bar or under viewport=compact. | A full-width button claims the whole row. It reads as the single next step, which is right at the end of a narrow view or in a bar of actions, and wrong anywhere else, where it pushes every other action out of sight. | `automatic` |
-| `label-names-action` | The label of a butono names its action as a verb. | A person decides from the label alone what happens on activation. A verb says it; a noun or a mood makes them guess. | `automatic`, **anpassbar** |
+| `label-names-action` | The label of a butono names its action as a verb. | A person decides from the label alone what happens on activation. A verb says it; a noun or a mood makes them guess. | `automatic`, **anpassbar**, meldet nur **Warnung** (Regulo-Kandidat für eine bessere Prüfung, plan D-02) |
 | `destructive-label-names-object` | A destructive label names what it destroys. | „Löschen“ alone does not say whether the draft, the project or the account goes. Only the object makes the consequence clear before it cannot be undone. | `automatic`, **fest** |
 | `destructive-label-not-generic` | A destructive action is never labelled with a generic confirmation (OK, Ja, Yes). | A generic word confirms whatever the person thinks they are confirming. Before a loss that cannot be undone, the label must say the loss. | `automatic`, **fest** |
 
@@ -215,7 +216,7 @@ Die Sprache einer Instanz ergibt sich aus dem Schlüsselwort, das sie trifft (`i
 ## 6. `EroInstance` (geändert, nur additiv)
 
 ```
-EroInstance = { ero, props, container?, intent?, label?,
+EroInstance = { ero, props, container?, intent?, label?,      intent? heißt ab F1-T00 goal? (§9)
                 aspekto?:  Name,                         für A10: die Aspekto, deren Überstimmungen gelten
                 dimensioj?: { <Dimensio>: Name },        für full-width (viewport=compact)
                 slots?:    { <Slot>: ("text" | "icon" | { ero: Name })[] } }
@@ -242,6 +243,20 @@ aspekto.json#/tavoloj/lingvo = { overrides: { regulo: Name, jugxo: JugxoId }[] }
 ## 8. Migration
 
 - **Bestehende Daten bleiben gültig.** Eine Skemo ohne Uzo erzeugt eine Warnung, keinen Fehler.
-- **Eine bestehende Beispiel-Instanz ändert sich.** `jug_01M2XN0Q7YGPVYC981A9D98PT1` (approved, `destructive-not-primary-color`) trägt das Label „Löschen“. Nach der festen Regel `destructive-label-names-object` wäre dieses approved-Beispiel ein Verstoß, und `data/butono.test.ts` bräche. Vorschlag: Label auf „Projekt löschen“ ändern und die Änderung in `context` vermerken. Dasselbe gilt für das rejected-Beispiel `…PT2`: Es soll nur `destructive-not-primary-color` verletzen. **Offener Punkt für den Maintainer** (plan.md, OP-5).
+- **Eine bestehende Beispiel-Instanz ändert sich.** `jug_01M2XN0Q7YGPVYC981A9D98PT1` (approved, `destructive-not-primary-color`) trägt das Label „Löschen“. Nach der festen Regel `destructive-label-names-object` wäre dieses approved-Beispiel ein Verstoß, und `data/butono.test.ts` bräche. **Entschieden (OP-5):** Das Label wird „Projekt löschen“, mit Vermerk in `context`. Dasselbe gilt für das rejected-Beispiel `…PT2`, damit es nur `destructive-not-primary-color` verletzt (T021).
 - **Export:** `uzoj` kommt als neuer Schlüssel in den Export (wie `mankoj` mit Spec 005). Die Export-Fixtures werden einmal neu erzeugt, und die Bytes sind über zwei Builds gleich (AK-10).
 - **Ids:** neuer Entitätstyp `uzo` in `ENTITY_ID_PREFIXES` und in der Ontologio (`entity-type-missing` prüft beides gegeneinander).
+
+## 9. Benennung: `goal` für die Absicht (Entscheidung OP-4)
+
+Der Prop `intent` (`neutral|danger`) bleibt, wie F1 ihn festlegt. Die Absicht einer Nutzerin oder eines Nutzers heißt überall `goal`:
+
+| Heute | Danach | Wann |
+|---|---|---|
+| `Skemo.intents`, `SkemoIntent.intent` | `Skemo.goals`, `SkemoGoal.goal` | F1-T00 |
+| `EroInstance.intent` | `EroInstance.goal` | F1-T00 |
+| `suggest_ero { intent }`, Ausgabe `matched.intent`, Fehler `intent-unknown` | `suggest_ero { goal }`, `matched.goal`, `goal-unknown` | F1-T00 |
+| Code: `intentOf`, `knownIntents` | `goalOf`, `knownGoals` | F1-T00 |
+| Uzo `instead[].goal`, `content[].when.goal`, `check.goal` | – | **von Anfang an `goal`** (Stufe A), weil die Uzo neu ist und nicht umbenannt werden muss |
+
+Bis F1-T00 gemergt ist, prüft die Validierung der Uzo `when.goal` und `check.goal` gegen `Skemo.intents`. Danach prüft sie gegen `Skemo.goals`. Die Uzo selbst ändert sich dabei nicht.
