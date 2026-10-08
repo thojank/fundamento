@@ -513,6 +513,19 @@ function node(
           throw new Error(`The font "${fontKey(font)}" is not loaded; call loadFontAsync first.`);
         }
       }
+      // Gemessen 2026-10-08 (Datei 9qNldNFlofRCwlkpnEKOS1, F-A): textCase auf einem frischen
+      // Textknoten, dessen Schrift Inter Regular nicht geladen war, warf genau diese Meldung. Der
+      // Text braucht seine aktuelle Schrift geladen, bevor er seine Schreibweise ändert.
+      if (target.type === "TEXT" && key === "textCase") {
+        const font = target.properties.fontName as { family: string; style: string };
+        if (!loaded.has(fontKey(font))) {
+          throw new Error(
+            `in set_textCase: Cannot write to node with unloaded font "${fontKey(font)}". ` +
+              `Please call figma.loadFontAsync({ family: "${font.family}", style: ` +
+              `"${font.style}" }) and await the returned promise first.`,
+          );
+        }
+      }
       if (typeof key === "string" && !(key in target)) {
         target.properties[key] =
           (key === "fills" || key === "strokes") && Array.isArray(value)
@@ -761,6 +774,10 @@ export function figmaDouble(
   const root = node("DOCUMENT", "Document", counts, context);
   const page = node("PAGE", "Page 1", counts, context);
   root.appendChild(page);
+  const onPage = (created: DoubleNode): DoubleNode => {
+    page.appendChild(created);
+    return created;
+  };
 
   const createCollection = (name: string): DoubleCollection => {
     counts.collections++;
@@ -862,10 +879,12 @@ export function figmaDouble(
         };
       },
     }),
-    createComponent: () => node("COMPONENT", "Component", counts, context),
-    createFrame: () => node("FRAME", "Frame", counts, context),
-    createText: () => node("TEXT", "Text", counts, context),
-    createRectangle: () => node("RECTANGLE", "Rectangle", counts, context),
+    // Figma legt jeden neuen Knoten auf der aktuellen Seite ab, bis er umgehängt wird. Gemessen
+    // 2026-10-08 (F-B): Ein abgestürzter Lauf hinterließ seine Komponente lose auf der Seite.
+    createComponent: () => onPage(node("COMPONENT", "Component", counts, context)),
+    createFrame: () => onPage(node("FRAME", "Frame", counts, context)),
+    createText: () => onPage(node("TEXT", "Text", counts, context)),
+    createRectangle: () => onPage(node("RECTANGLE", "Rectangle", counts, context)),
     combineAsVariants: (components: DoubleNode[], parent: DoubleNode) => {
       const set = node("COMPONENT_SET", "Component Set", counts, context);
       // Component properties live on the set (F11): a TEXT property the labels are connected to.

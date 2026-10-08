@@ -587,6 +587,57 @@ function lostSince(name) {
     });
 }
 
+/**
+ * Markierte Komponenten außerhalb ihres Sets (F-B), gesucht vor dem ersten Schreiben. Ein
+ * abgestürzter Lauf hinterlässt die Variante, die er gerade anlegte, lose auf der Seite — markiert
+ * mit \`variant\` und \`ero\`. Der nächste Lauf sucht seine Varianten nur im Set, fände sie nicht und
+ * legte sie neu an. Gefunden wird jede Komponente mit beiden Markierungen, deren Eltern kein Set
+ * mit derselben \`ero\`-Markierung ist; übernommen oder gelöscht wird keine.
+ */
+function orphansOnPage() {
+  const names = PLAN.components.map((component) => component.set);
+  const orphans = [];
+  const walk = (node) => {
+    for (const child of node.children || []) {
+      const ero = child.getSharedPluginData(NAMESPACE, "ero");
+      if (child.type === "COMPONENT" && names.indexOf(ero) !== -1 && mark(child) !== "") {
+        const parent = child.parent;
+        const inSet =
+          parent.type === "COMPONENT_SET" && parent.getSharedPluginData(NAMESPACE, "ero") === ero;
+        if (!inSet) {
+          orphans.push({
+            id: child.id,
+            name: child.name,
+            set: ero,
+            parent: { id: parent.id, type: parent.type },
+          });
+        }
+      }
+      walk(child);
+    }
+  };
+  walk(figma.currentPage);
+  return orphans;
+}
+
+/** The abort of F-B: the orphans with ID and name; the maintainer decides, not the run. */
+function orphanError(orphans) {
+  const error = new Error(
+    "Abbruch vor dem ersten Schreiben, nichts wurde geändert (F-B). " + orphans.length +
+      " markierte Komponente(n) außerhalb ihres Sets: " +
+      orphans
+        .map((orphan) =>
+          orphan.id + " „" + orphan.name + "“ (" + orphan.set + ", liegt in " + orphan.parent.type +
+          " " + orphan.parent.id + ")",
+        )
+        .join("; ") +
+      ". Ein Lauf fände sie nicht und legte dieselbe Variante erneut an. Das Plugin übernimmt und " +
+      "löscht sie nicht still: bitte von Hand löschen oder klären, dann erneut ausführen.",
+  );
+  error.abort = { orphans: orphans };
+  return error;
+}
+
 /** The abort of F10c: one sentence per set, the details whole at \`error.abort\`. */
 function abortError(blocked) {
   const sentences = blocked.map((entry) => {
@@ -683,6 +734,34 @@ async function loadFont(font, warnings) {
     );
   }
   return applied;
+}
+
+/** The fonts a text carried when the run first touched it, loaded once per run (F-A). */
+const currentFonts = new Set();
+
+/**
+ * Loads the font a text carries now and waits for it, before anything is written to it (F-A) —
+ * the canonical order, not only for the font of the plan. A text in several fonts carries
+ * figma.mixed, a symbol; then every font of its characters is loaded.
+ */
+async function loadCurrentFont(text) {
+  const held = text.fontName;
+  const list =
+    typeof held === "symbol" ? text.getRangeAllFontNames(0, text.characters.length) : [held];
+  for (const font of list) {
+    const key = font.family + " " + font.style;
+    if (currentFonts.has(key)) continue;
+    try {
+      await figma.loadFontAsync({ family: font.family, style: font.style });
+    } catch (error) {
+      throw new Error(
+        "Die Schrift „" + key + "“, die die Beschriftung " + text.id + " trägt, lässt sich nicht " +
+          "laden; ohne sie nimmt Figma kein Schreiben an. " +
+          String(error && error.message ? error.message : error),
+      );
+    }
+    currentFonts.add(key);
+  }
 }
 
 async function applyComponents(variables, warnings) {
@@ -813,6 +892,10 @@ async function applyComponents(variables, warnings) {
       if (control.parent !== gap) gap.appendChild(control);
       write(control, "name", "control");
       const label = part(control, "label", () => figma.createText());
+      // Erst die Schrift, die der Text jetzt trägt, dann jedes Schreiben (F-A): Figma lehnt
+      // textCase auf einem Text ab, dessen aktuelle Schrift nicht geladen ist — ein neuer Text trägt
+      // Inter Regular, nicht die Schrift des Plans.
+      await loadCurrentFont(label);
       // Die Schreibweise steht im Plan als ein Wert für alle Modi, weil textCase kein bindbares
       // Feld ist (F31). Wo die Modi sich unterscheiden, nennt der Plan den Befund statt eines
       // Werts — dann schreibt der Lauf nichts und sagt, was er nicht konnte.
@@ -1364,6 +1447,10 @@ const progress = { phase: "start", collections: 0, variables: 0, components: [],
 async function applyPlan(options) {
   const createInFoundSet = options != null && options.createInFoundSet === true;
   progress.phase = "check";
+  // Zuerst die Waisen (F-B): Eine lose Variante trägt \`ero\` wie das Set und würde sonst unten für
+  // das Set gehalten.
+  const orphans = orphansOnPage();
+  if (orphans.length > 0) throw orphanError(orphans);
   const blocked = creationsInFoundSets();
   if (blocked.length > 0 && !createInFoundSet) throw abortError(blocked);
   recordStart();
@@ -1563,7 +1650,10 @@ if (typeof figma !== "undefined" && typeof figma.closePlugin === "function" && f
       // as JSON lines under the limit like every report (F22).
       if (error && error.abort !== undefined) {
         console.error("Fundamento " + PLAN.fundamento + " – " + message);
-        for (const entry of error.abort.sets) {
+        if (error.abort.orphans !== undefined) {
+          for (const line of partsOfList("", "orphans", error.abort.orphans)) console.error(line);
+        }
+        for (const entry of error.abort.sets || []) {
           const before = Object.assign({}, entry.before, { unmarked: entry.before.unmarked.length });
           const head = Object.assign({}, entry, { before, wouldCreate: entry.wouldCreate.length });
           console.error(JSON.stringify(head));

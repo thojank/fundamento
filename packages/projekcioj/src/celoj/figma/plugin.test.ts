@@ -855,6 +855,95 @@ describe("a run reports every node of the set that was there at its start and is
   });
 });
 
+// F-A (Messung 2026-10-08, Datei 9qNldNFlofRCwlkpnEKOS1, Build d1be8f0): Lauf 1 in einer leeren
+// Datei stürzte ab mit „in set_textCase: Cannot write to node with unloaded font "Inter Regular"".
+// Ein neuer Textknoten trägt Inter Regular; das Plugin schrieb textCase, bevor diese Schrift geladen
+// war. In Dateien, in denen Inter Regular schon geladen war, fiel das nicht auf — im Double auch
+// nicht, bis es das gemessene Verhalten lernte.
+describe("a text is written only after its current font is loaded (F-A)", () => {
+  it("runs through in an empty file where no font is loaded yet", async () => {
+    const double = modelDouble();
+    await expect(run(double, repoFiles["figma/plugin/code.js"] ?? "")).resolves.toBeUndefined();
+    const set = double.root.children[0]?.children.find((child) => child.name === "butono");
+    expect(set?.children).toHaveLength(72);
+  });
+});
+
+// F-B (Messung 2026-10-08): Zwei lose, vollständig markierte Komponenten
+// „variant=primary, tone=default, size=small, state=rest" auf der Seite, in keinem Set. Jeder
+// abgestürzte Lauf hinterließ eine; der nächste fand sie nicht (ours sucht im Set) und legte die
+// Variante erneut an. F10c greift nicht, denn es gibt kein vorgefundenes Set. Vor dem ersten
+// Schreiben sucht der Lauf deshalb auch markierte Komponenten außerhalb des Sets und bricht ab,
+// wenn er welche findet — ohne sie still zu übernehmen und ohne sie still zu löschen.
+describe("a marked component outside the set stops the run before it writes (F-B)", () => {
+  const FIRST = "variant=primary, tone=default, size=small, state=rest";
+  type Orphan = { id: string; name: string; set: string; parent: { id: string; type: string } };
+
+  /** A run that crashes once its first component stands, as Figma's run did (F-A). */
+  async function crashedRun(double: ReturnType<typeof figmaDouble>) {
+    const module = new Function(
+      "figma",
+      `${repoFiles["figma/plugin/code.js"] ?? ""}\nreturn applyPlan();`,
+    );
+    await module({
+      ...double.figma,
+      createText: () => {
+        throw new Error("abgestürzt");
+      },
+    }).catch(() => undefined);
+  }
+  /**
+   * F-B for itself, apart from F-A: a file where Inter Regular is already loaded, as in every file
+   * before 2026-10-08 where the crash did not show.
+   */
+  const interLoaded = async (double: ReturnType<typeof figmaDouble>) =>
+    (double.figma as { loadFontAsync: (font: object) => Promise<void> }).loadFontAsync({
+      family: "Inter",
+      style: "Regular",
+    });
+  const componentsNamed = (double: ReturnType<typeof figmaDouble>, name: string) => {
+    const out: DoubleNode[] = [];
+    const walk = (node: DoubleNode) => {
+      if (node.type === "COMPONENT" && node.name === name) out.push(node);
+      for (const child of node.children) walk(child);
+    };
+    walk(double.root);
+    return out;
+  };
+
+  it("leaves no double behind after a crash and a new run, and names the orphan", async () => {
+    const double = modelDouble();
+    await crashedRun(double);
+    const page = double.root.children[0];
+    const orphans = componentsNamed(double, FIRST);
+    expect(orphans).toHaveLength(1);
+    expect(orphans[0]?.parent).toBe(page);
+    await interLoaded(double);
+    const counts = { ...double.counts };
+    const error = await run(double, repoFiles["figma/plugin/code.js"] ?? "").then(
+      () => undefined,
+      (caught: unknown) => caught as Error & { abort?: { orphans: Orphan[] } },
+    );
+    expect(componentsNamed(double, FIRST)).toHaveLength(1);
+    expect(error?.message).toContain(orphans[0]?.id ?? "?");
+    expect(error?.abort?.orphans).toEqual([
+      { id: orphans[0]?.id, name: FIRST, set: "butono", parent: { id: page?.id, type: "PAGE" } },
+    ]);
+    expect(double.counts).toEqual(counts);
+  });
+
+  it("is not stopped by a component without Fundamento's mark", async () => {
+    const double = modelDouble();
+    const api = double.figma as { createComponent: () => DoubleNode };
+    const stranger = api.createComponent();
+    stranger.name = FIRST;
+    await interLoaded(double);
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    expect(stranger.parent).toBe(double.root.children[0]);
+    expect(componentsNamed(double, FIRST)).toHaveLength(2);
+  });
+});
+
 // F13 (Abnahme M1, Maintainer 2026-09-21): Jede Variante trug Figmas Vorgabefüllung #FFFFFF 100 %,
 // die das Plugin nie entfernt hat — sie stammt nicht aus dem Modell und deckte die durchsichtige
 // tertiäre Aktion wieder zu. Das Double legte Knoten ohne jede Vorgabe an und war genau an dieser
