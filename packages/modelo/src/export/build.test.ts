@@ -18,10 +18,19 @@ import { fixtureRoot } from "../resolve/test-doubles/fixtures.js";
 import { celoMappingLeaks } from "./celo-mappings.js";
 import { describeModelo } from "./describe.js";
 import { EXPORT_FILE_NAMES, exportModelo } from "./export-modelo.js";
+import { distDriftReport, turboCacheDir } from "./test-doubles/dist-drift.js";
 
 const DIST_DIR = fileURLToPath(new URL("../../dist/", import.meta.url));
 const BUILD_SCRIPT = join(DIST_DIR, "export/build.js");
 const FILE_NAMES = Object.values(EXPORT_FILE_NAMES);
+const REPO_ROOT = fileURLToPath(new URL("../../../../", import.meta.url));
+/** What the export build reads: the Modelo data and schema, the Vortaro and the reference Aspekto. */
+const SOURCE_DIRS = [
+  "packages/modelo/data",
+  "packages/modelo/schema",
+  "packages/vortaro",
+  "packages/aspekto-komuna",
+].map((dir) => join(REPO_ROOT, dir));
 
 const readDist = (name: string) => readFileSync(join(DIST_DIR, name), "utf8");
 const sha256 = (text: string) => createHash("sha256").update(text, "utf8").digest("hex");
@@ -79,7 +88,16 @@ describe("building twice is byte-identical (AK-10)", () => {
       expect(run.status, run.stderr).toBe(0);
     }
     expect(hashDir(first)).toEqual(hashDir(second));
-    expect(hashDir(first)).toEqual(hashDir(DIST_DIR));
+    // A bare hash mismatch here once pointed nowhere (Vojmapo, CI findings); say what differs.
+    const drift = distDriftReport({
+      distDir: DIST_DIR,
+      freshDir: first,
+      fileNames: FILE_NAMES,
+      sourceDirs: SOURCE_DIRS,
+      repoRoot: REPO_ROOT,
+      turboCacheDir: turboCacheDir(REPO_ROOT),
+    });
+    expect(drift === "", drift).toBe(true);
   });
 });
 
