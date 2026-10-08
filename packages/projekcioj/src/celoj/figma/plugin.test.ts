@@ -944,6 +944,63 @@ describe("a marked component outside the set stops the run before it writes (F-B
   });
 });
 
+// Build-Stempel (Maintainer, 2026-10-08): Mit d1be8f0 hätte F10c beim zweiten Klick abbrechen
+// müssen; gemessen war kein Abbruch, und welcher Stand wirklich lief, ließ sich aus der Datei nicht
+// lesen. Jeder Lauf nennt deshalb seinen Build: im Bericht, im Toast, im Menünamen, und am Set als
+// Plugin-Daten `build` — so zeigt jede Datei, welcher Stand sie zuletzt beschrieben hat.
+describe("every run names its build", () => {
+  const stamped = Object.fromEntries(
+    FIGMA_CELO.generate({ ...repo.input, build: "abc1234" }).map((file) => [file.path, file.text]),
+  );
+  const LAST = "variant=tertiary, tone=default, size=large, state=loading";
+  const setOf = (double: ReturnType<typeof figmaDouble>) =>
+    double.root.children[0]?.children.find((child) => child.name === "butono");
+
+  it("carries the build in the source and in the menu name", () => {
+    expect(stamped["figma/plugin/code.js"]?.split("\n")[0]).toContain("Build abc1234");
+    const manifest = JSON.parse(stamped["figma/plugin/manifest.json"] ?? "{}") as { name: string };
+    expect(manifest.name).toContain("abc1234");
+  });
+
+  it("names it in the report and stamps it on the set", async () => {
+    const double = modelDouble();
+    const module = new Function(
+      "figma",
+      `${stamped["figma/plugin/code.js"] ?? ""}\nreturn applyPlan();`,
+    );
+    const report = (await module(double.figma)) as { build: string };
+    expect(report.build).toBe("abc1234");
+    expect(setOf(double)?.getSharedPluginData("fundamento", "build")).toBe("abc1234");
+  });
+
+  it("says 'unbekannt' when the build was not given", async () => {
+    const double = modelDouble();
+    const module = new Function(
+      "figma",
+      `${repoFiles["figma/plugin/code.js"] ?? ""}\nreturn applyPlan();`,
+    );
+    const report = (await module(double.figma)) as { build: string };
+    expect(report.build).toBe("unbekannt");
+  });
+
+  it("names it in the toast of a run and of an abort", async () => {
+    const runAs = async (double: ReturnType<typeof figmaDouble>, command: string) => {
+      const module = new Function("figma", "console", stamped["figma/plugin/code.js"] ?? "");
+      await module({ ...double.figma, command }, { log: () => undefined, error: () => undefined });
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    };
+    const double = modelDouble();
+    await runAs(double, "apply");
+    expect(double.notifications.at(-1)?.message).toContain("abc1234");
+    setOf(double)
+      ?.children.find((child) => child.name === LAST)
+      ?.remove();
+    await runAs(double, "apply");
+    expect(double.notifications.at(-1)?.message).toContain("Abbruch");
+    expect(double.notifications.at(-1)?.message).toContain("abc1234");
+  });
+});
+
 // F13 (Abnahme M1, Maintainer 2026-09-21): Jede Variante trug Figmas Vorgabefüllung #FFFFFF 100 %,
 // die das Plugin nie entfernt hat — sie stammt nicht aus dem Modell und deckte die durchsichtige
 // tertiäre Aktion wieder zu. Das Double legte Knoten ohne jede Vorgabe an und war genau an dieser

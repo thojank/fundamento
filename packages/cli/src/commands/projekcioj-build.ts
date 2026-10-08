@@ -2,8 +2,10 @@
 // projection (Spec 003, plan D-01): CSS, Tailwind, Web Component, React, Figma plan, Code Connect
 // and Make Kits, plus `projekcioj.json` with the SHA-256 of every file. Nothing is written for an
 // invalid Modelo.
+import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { defaultModeloSource, fixtureModeloSource, projectModeloSource } from "@fundamento/modelo";
 import { buildProjekcioj } from "@fundamento/projekcioj";
 import { parseFlags, UsageError } from "../args.js";
@@ -28,12 +30,40 @@ Options:
   --out <dir>      Output directory (default: ${DEFAULT_OUT})
   --celo <name>    Build only this Celo (repeatable, or comma-separated). Default: all of them.
                    A Celo that composes what the others wrote needs them in the selection.
+  --build <id>     The state the build comes from, named by the Figma plugin in every run.
+                   Default: the commit of this Fundamento checkout, "-dirty" when the working
+                   tree has changes; "unbekannt" outside a checkout
   --bazo <file>    A measurement snapshot of another state (fm modelo mezuroj); the Vitrino
                    then shows the change against it, pair by pair
   -h, --help       Show this help
 
 Exit codes: 0 written, 1 the Modelo is invalid (nothing written), 2 usage error.
 `;
+
+/**
+ * The commit this command's own Fundamento checkout stands on (Maintainer, 2026-10-08): the code
+ * of the Figma plugin comes from here, not from the project being built. Outside a checkout — the
+ * CLI installed as a package — there is no commit to name, and the plugin says "unbekannt".
+ */
+function checkoutBuild(): string | undefined {
+  const git = (args: readonly string[], cwd: string) =>
+    execFileSync("git", args, {
+      cwd,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    }).trim();
+  try {
+    const here = fileURLToPath(new URL(".", import.meta.url));
+    const root = git(["rev-parse", "--show-toplevel"], here);
+    const name = (JSON.parse(readFileSync(join(root, "package.json"), "utf8")) as { name?: string })
+      .name;
+    if (name !== "fundamento") return undefined;
+    const head = git(["rev-parse", "--short", "HEAD"], root);
+    return git(["status", "--porcelain"], root) === "" ? head : `${head}-dirty`;
+  } catch {
+    return undefined;
+  }
+}
 
 async function run(args: readonly string[], context: CliContext): Promise<number> {
   const { values, positionals } = parseFlags(
@@ -43,6 +73,7 @@ async function run(args: readonly string[], context: CliContext): Promise<number
       fixture: { type: "string" },
       out: { type: "string" },
       bazo: { type: "string", multiple: true },
+      build: { type: "string" },
       celo: { type: "string", multiple: true },
     },
     COMMAND_LINE,
@@ -85,12 +116,14 @@ async function run(args: readonly string[], context: CliContext): Promise<number
           .map((name) => name.trim()),
       )
     : undefined;
+  const build = typeof values.build === "string" ? values.build : checkoutBuild();
   let result: Awaited<ReturnType<typeof buildProjekcioj>>;
   try {
     result = await buildProjekcioj({
       outDir,
       source,
       ...(bazo === undefined ? {} : { bazo }),
+      ...(build === undefined ? {} : { build }),
       ...(celoj === undefined ? {} : { celoj }),
     });
   } catch (error) {

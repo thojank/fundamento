@@ -61,6 +61,26 @@ describe("fm projekcioj build (T008)", () => {
   });
 
   // Bestätigend: die Prüfung stand vor dem Test, sie war im ersten Lauf grün.
+  // Build-Stempel (Maintainer, 2026-10-08): Der Bau schreibt den Stand, aus dem er kommt, in das
+  // Figma-Plugin — den Commit, mit „-dirty", wenn der Arbeitsbaum Änderungen trägt.
+  it("stamps the Figma plugin with the commit it was built from", { timeout: 10_000 }, () => {
+    const head = spawnSync("git", ["rev-parse", "--short", "HEAD"], {
+      cwd: repoRoot,
+      encoding: "utf8",
+    }).stdout.trim();
+    const { out, run } = build([...FIXTURE, "--celo", "figma"]);
+    expect(run.status).toBe(0);
+    const code = readFileSync(join(out, "figma/plugin/code.js"), "utf8");
+    expect(code).toMatch(new RegExp(`^const BUILD = "${head}(-dirty)?";$`, "m"));
+  });
+
+  it("takes the build from --build when it is given", { timeout: 10_000 }, () => {
+    const { out, run } = build([...FIXTURE, "--celo", "figma", "--build", "release-1"]);
+    expect(run.status).toBe(0);
+    const code = readFileSync(join(out, "figma/plugin/code.js"), "utf8");
+    expect(code).toMatch(/^const BUILD = "release-1";$/m);
+  });
+
   it("takes either --config or --fixture, not both", { timeout: 10_000 }, () => {
     const { run } = build([...FIXTURE, "--config", "fundamento.config.json"]);
     expect(run.status).toBe(2);
