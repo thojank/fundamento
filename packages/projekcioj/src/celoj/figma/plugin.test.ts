@@ -31,13 +31,20 @@ const MODEL_FONTS = [
 ] as const;
 const modelDouble = () => figmaDouble({ fonts: MODEL_FONTS });
 
+/**
+ * The abort of F10c lifted: a test that takes a variant out of a set the plugin made and runs it
+ * again measures what such a run reports — which is only there once the run goes on.
+ */
+const LIFT = { createInFoundSet: true } as const;
+
 /** Runs the generated plugin source against a double. */
 async function run(
   double: ReturnType<typeof figmaDouble>,
   source = files["figma/plugin/code.js"] ?? "",
+  options?: typeof LIFT,
 ) {
-  const module = new Function("figma", `${source}\nreturn applyPlan();`);
-  await module(double.figma);
+  const module = new Function("figma", "options", `${source}\nreturn applyPlan(options);`);
+  await module(double.figma, options);
 }
 
 describe("Figma development plugin (T016)", () => {
@@ -258,12 +265,13 @@ describe("the plugin reports what it did (F10)", () => {
       .map(([key, value]) => `${key}=${value}`)
       .join(", ");
 
-  async function report(double: ReturnType<typeof figmaDouble>) {
+  async function report(double: ReturnType<typeof figmaDouble>, options?: typeof LIFT) {
     const module = new Function(
       "figma",
-      `${files["figma/plugin/code.js"] ?? ""}\nreturn applyPlan();`,
+      "options",
+      `${files["figma/plugin/code.js"] ?? ""}\nreturn applyPlan(options);`,
     );
-    return (await module(double.figma)) as {
+    return (await module(double.figma, options)) as {
       collections: number;
       variables: number;
       components: {
@@ -304,7 +312,7 @@ describe("the plugin reports what it did (F10)", () => {
     extra.name = "variant=phantom";
     extra.setSharedPluginData("fundamento", "variant", "variant=phantom");
     set.appendChild(extra);
-    const again = await report(double);
+    const again = await report(double, LIFT);
     expect(again.components[0]?.created).toEqual([gone]);
     expect(again.components[0]?.extra).toEqual(["variant=phantom"]);
     expect(again.warnings.join(" ")).toContain("variant=phantom");
@@ -358,12 +366,13 @@ describe("the plugin reports what it did (F10)", () => {
 // (variant=tertiary, tone=default, size=large, state=loading), bei `updated: 71` und `warnings: []`.
 // Hier wird der Fall nachgestellt: zwei Läufe hintereinander gegen den Plan dieses Repositories.
 describe("a second run creates nothing (F10b, the maintainer's case)", () => {
-  async function run2(double: ReturnType<typeof figmaDouble>) {
+  async function run2(double: ReturnType<typeof figmaDouble>, options?: typeof LIFT) {
     const module = new Function(
       "figma",
-      `${repoFiles["figma/plugin/code.js"] ?? ""}\nreturn applyPlan();`,
+      "options",
+      `${repoFiles["figma/plugin/code.js"] ?? ""}\nreturn applyPlan(options);`,
     );
-    return (await module(double.figma)) as {
+    return (await module(double.figma, options)) as {
       components: { set: string; found: boolean; created: string[]; updated: string[] }[];
       warnings: string[];
     };
@@ -394,12 +403,13 @@ describe("a second run creates nothing (F10b, the maintainer's case)", () => {
 // Lauf, wie er das Set vorgefunden hat — das trennt „Knoten weg" von „Markierung weg", ohne zu
 // raten.
 describe("a run that creates in a set it found warns, and says what it found (F10b)", () => {
-  async function run2(double: ReturnType<typeof figmaDouble>) {
+  async function run2(double: ReturnType<typeof figmaDouble>, options?: typeof LIFT) {
     const module = new Function(
       "figma",
-      `${repoFiles["figma/plugin/code.js"] ?? ""}\nreturn applyPlan();`,
+      "options",
+      `${repoFiles["figma/plugin/code.js"] ?? ""}\nreturn applyPlan(options);`,
     );
-    return (await module(double.figma)) as {
+    return (await module(double.figma, options)) as {
       components: {
         set: string;
         found: boolean;
@@ -440,7 +450,7 @@ describe("a run that creates in a set it found warns, and says what it found (F1
       .children.find((child) => child.name === LAST)
       ?.setSharedPluginData("fundamento", "variant", "");
     // Der Lauf legt die Variante neu an; der unmarkierte Knoten bleibt daneben stehen.
-    const again = await run2(double);
+    const again = await run2(double, LIFT);
     expect(again.components[0]?.after).toEqual({ children: 73, marked: 72 });
     expect(again.warnings.join(" ")).toContain("ohne Markierung");
   });
@@ -461,7 +471,7 @@ describe("a run that creates in a set it found warns, and says what it found (F1
     setOf(double)
       .children.find((child) => child.name === LAST)
       ?.remove();
-    const again = await run2(double);
+    const again = await run2(double, LIFT);
     expect(again.components[0]?.found).toBe(true);
     expect(again.components[0]?.created).toEqual([LAST]);
     expect(again.components[0]?.before?.children).toBe(71);
@@ -482,7 +492,7 @@ describe("a run that creates in a set it found warns, and says what it found (F1
     setOf(double)
       .children.find((child) => child.name === LAST)
       ?.setSharedPluginData("fundamento", "variant", "");
-    const again = await run2(double);
+    const again = await run2(double, LIFT);
     expect(again.components[0]?.before?.unmarked).toEqual([LAST]);
     expect(again.components[0]?.before?.marked).toBe(71);
     expect(again.components[0]?.created).toEqual([LAST]);
@@ -499,12 +509,13 @@ describe("a run that creates in a set it found warns, and says what it found (F1
 // Mal als `left` wieder ein. Damit braucht der Maintainer zwischen den Läufen nichts abzulesen —
 // Ablesen hieße auswählen, und das wäre schon ein Eingriff.
 describe("the run reads its own last state and says what happened (F10b)", () => {
-  async function run2(double: ReturnType<typeof figmaDouble>) {
+  async function run2(double: ReturnType<typeof figmaDouble>, options?: typeof LIFT) {
     const module = new Function(
       "figma",
-      `${repoFiles["figma/plugin/code.js"] ?? ""}\nreturn applyPlan();`,
+      "options",
+      `${repoFiles["figma/plugin/code.js"] ?? ""}\nreturn applyPlan(options);`,
     );
-    return (await module(double.figma)) as {
+    return (await module(double.figma, options)) as {
       components: {
         planned: number;
         before: { children: number; marked: number; unmarked: string[] };
@@ -542,7 +553,7 @@ describe("the run reads its own last state and says what happened (F10b)", () =>
     setOf(double)
       .children.find((child) => child.name === LAST)
       ?.remove();
-    const again = await run2(double);
+    const again = await run2(double, LIFT);
     expect(again.components[0]?.left).toEqual({ children: 72, marked: 72 });
     expect(again.components[0]?.diagnosis).toContain("zwischen den Läufen");
     expect(again.warnings.join(" ")).toContain("zwischen den Läufen");
@@ -556,7 +567,7 @@ describe("the run reads its own last state and says what happened (F10b)", () =>
     const set = setOf(double);
     set.children.find((child) => child.name === LAST)?.remove();
     set.setSharedPluginData("fundamento", "after", JSON.stringify({ children: 71, marked: 71 }));
-    const again = await run2(double);
+    const again = await run2(double, LIFT);
     expect(again.components[0]?.left).toEqual({ children: 71, marked: 71 });
     expect(again.components[0]?.diagnosis).toContain("nie im Set angekommen");
     expect(again.components[0]?.created).toEqual([LAST]);
@@ -568,9 +579,425 @@ describe("the run reads its own last state and says what happened (F10b)", () =>
     const set = setOf(double);
     set.children.find((child) => child.name === LAST)?.remove();
     set.setSharedPluginData("fundamento", "after", "");
-    const again = await run2(double);
+    const again = await run2(double, LIFT);
     expect(again.components[0]?.left).toBeNull();
     expect(again.components[0]?.diagnosis).toContain("früheren Laufs");
+  });
+});
+
+// F10c (Maintainer, 2026-10-07): Schadensbegrenzung, nicht die Ursache. In Figma legte Lauf 2 in
+// einem vorgefundenen Set die letzte Variante neu an, und das Double bildet das nicht ab — warum,
+// ist offen. Bis es gemessen ist, darf ein solcher Lauf die Bibliothek nicht mehr verändern: Er
+// bricht ab, bevor er irgendetwas schreibt, und nennt, was er angelegt hätte. Eine Warnung allein
+// schützt die Bibliothek nicht. Wer bewusst weitermachen will, hebt den Abbruch auf; Default: aus.
+describe("a run that would create in a set it found aborts before it writes (F10c)", () => {
+  interface Abort {
+    sets: {
+      set: string;
+      before: { children: number; marked: number; unmarked: string[] };
+      left: { children: number; marked: number } | null;
+      wouldCreate: { name: string; props: Record<string, string>; node: boolean }[];
+    }[];
+  }
+  async function run2(double: ReturnType<typeof figmaDouble>, options?: unknown) {
+    const module = new Function(
+      "figma",
+      "options",
+      `${repoFiles["figma/plugin/code.js"] ?? ""}\nreturn applyPlan(options);`,
+    );
+    return (await module(double.figma, options)) as {
+      components: { created: string[] }[];
+      warnings: string[];
+    };
+  }
+  async function abortOf(double: ReturnType<typeof figmaDouble>) {
+    const error = await run2(double).then(
+      () => undefined,
+      (caught: unknown) => caught as Error & { abort?: Abort },
+    );
+    if (error === undefined) throw new Error("the run did not abort");
+    return error;
+  }
+
+  const setOf = (double: ReturnType<typeof figmaDouble>) => {
+    const found = double.root.children[0]?.children.find((child) => child.name === "butono");
+    if (found === undefined) throw new Error("no component set");
+    return found;
+  };
+  const LAST = "variant=tertiary, tone=default, size=large, state=loading";
+  const LAST_PROPS = { variant: "tertiary", tone: "default", size: "large", state: "loading" };
+
+  it("aborts when a variant is missing from the set it found, and has created no node", async () => {
+    const double = modelDouble();
+    await run2(double);
+    setOf(double)
+      .children.find((child) => child.name === LAST)
+      ?.remove();
+    const counts = { ...double.counts };
+    const before = double.snapshot();
+    await expect(run2(double)).rejects.toThrow();
+    expect(double.counts).toEqual(counts);
+    expect(double.snapshot()).toBe(before);
+    expect(setOf(double).children).toHaveLength(71);
+  });
+
+  it("names the set, how it found it, and every variant it would have created, with props", async () => {
+    const double = modelDouble();
+    await run2(double);
+    setOf(double)
+      .children.find((child) => child.name === LAST)
+      ?.remove();
+    const error = await abortOf(double);
+    expect(error.message).toContain("butono");
+    expect(error.message).toContain(LAST);
+    expect(error.abort).toEqual({
+      sets: [
+        {
+          set: "butono",
+          before: { children: 71, marked: 71, unmarked: [] },
+          left: { children: 72, marked: 72 },
+          wouldCreate: [{ name: LAST, props: LAST_PROPS, node: false }],
+        },
+      ],
+    });
+  });
+
+  it("says when a node of that name is there but carries no mark", async () => {
+    const double = modelDouble();
+    await run2(double);
+    setOf(double)
+      .children.find((child) => child.name === LAST)
+      ?.setSharedPluginData("fundamento", "variant", "");
+    const counts = { ...double.counts };
+    const error = await abortOf(double);
+    expect(double.counts).toEqual(counts);
+    expect(error.abort?.sets[0]?.before).toEqual({ children: 72, marked: 71, unmarked: [LAST] });
+    expect(error.abort?.sets[0]?.wouldCreate).toEqual([
+      { name: LAST, props: LAST_PROPS, node: true },
+    ]);
+  });
+
+  it("does not abort a first run, nor a second run that finds every variant", async () => {
+    const double = modelDouble();
+    const first = await run2(double);
+    expect(first.components[0]?.created).toHaveLength(72);
+    const second = await run2(double);
+    expect(second.components[0]?.created).toEqual([]);
+  });
+
+  it("goes on when the maintainer lifts the abort on purpose, and still warns", async () => {
+    const double = modelDouble();
+    await run2(double);
+    setOf(double)
+      .children.find((child) => child.name === LAST)
+      ?.remove();
+    const again = await run2(double, { createInFoundSet: true });
+    expect(again.components[0]?.created).toEqual([LAST]);
+    expect(again.warnings.join(" ")).toContain("vorgefunden");
+  });
+
+  it("offers the lift as its own menu command; the plain command aborts and says so", async () => {
+    const manifest = JSON.parse(repoFiles["figma/plugin/manifest.json"] ?? "{}") as {
+      menu?: { name: string; command: string }[];
+    };
+    const commands = (manifest.menu ?? []).map((entry) => entry.command);
+    expect(commands).toEqual(["apply", "apply-create-in-found-set"]);
+
+    const runAs = async (double: ReturnType<typeof figmaDouble>, command: string) => {
+      const module = new Function("figma", "console", repoFiles["figma/plugin/code.js"] ?? "");
+      await module({ ...double.figma, command }, { log: () => undefined, error: () => undefined });
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    };
+    const double = modelDouble();
+    await runAs(double, "apply");
+    setOf(double)
+      .children.find((child) => child.name === LAST)
+      ?.remove();
+    const counts = { ...double.counts };
+    await runAs(double, "apply");
+    expect(double.counts).toEqual(counts);
+    expect(double.notifications.at(-1)?.message).toContain("Abbruch");
+    expect(double.notifications.at(-1)?.message).toContain(LAST);
+    expect(double.notifications.at(-1)?.options).toMatchObject({ error: true });
+    await runAs(double, "apply-create-in-found-set");
+    expect(setOf(double).children).toHaveLength(72);
+  });
+});
+
+// F10d (Maintainer, 2026-10-07): Gemessen ist an QtJRsTlm7NnIPC8wqNuAVm nur, dass 1:895/896/897
+// fehlen und 1:899/900/901 da sind — nicht, wann und wodurch. Das Plugin ruft nirgends remove()
+// auf; verschwindet etwas, dann durch Figma. Deshalb misst jeder Lauf: Er nimmt beim Start jeden
+// Knoten des Sets mit seiner ID auf, zählt am Ende erneut und meldet laut jede ID, die fehlt — mit
+// der Angabe, ob der Knoten entfernt ist oder nur aus dem Set verdrängt. Eine Messung, kein Wächter:
+// Der Lauf bricht deshalb nicht ab.
+describe("a run reports every node of the set that was there at its start and is gone at its end (F10d)", () => {
+  interface Lost {
+    id: string;
+    name: string;
+    type: string;
+    removed: boolean;
+    parent: { id: string; type: string; name: string } | null;
+  }
+  interface Report {
+    components: { nodes: { start: number; end: number }; lost: Lost[]; created: string[] }[];
+    warnings: string[];
+  }
+  async function runWith(
+    double: ReturnType<typeof figmaDouble>,
+    figma: Record<string, unknown>,
+    options?: typeof LIFT,
+  ) {
+    const module = new Function(
+      "figma",
+      "options",
+      `${repoFiles["figma/plugin/code.js"] ?? ""}\nreturn applyPlan(options);`,
+    );
+    return (await module({ ...double.figma, ...figma }, options)) as Report;
+  }
+  const setOf = (double: ReturnType<typeof figmaDouble>) => {
+    const found = double.root.children[0]?.children.find((child) => child.name === "butono");
+    if (found === undefined) throw new Error("no component set");
+    return found;
+  };
+  const LAST = "variant=tertiary, tone=default, size=large, state=loading";
+  /** Variant, focus ring, focus gap, control, label: five nodes per variant, plus the set. */
+  const NODES = 72 * 5 + 1;
+
+  it("counts the same nodes at start and end of a clean run, and loses none", async () => {
+    const double = modelDouble();
+    const first = await runWith(double, {});
+    expect(first.components[0]?.nodes).toEqual({ start: 0, end: NODES });
+    expect(first.components[0]?.lost).toEqual([]);
+    const second = await runWith(double, {});
+    expect(second.components[0]?.nodes).toEqual({ start: NODES, end: NODES });
+    expect(second.components[0]?.lost).toEqual([]);
+    expect(second.warnings).toEqual([]);
+  });
+
+  it("names a node the tool removed during the run, by its ID", async () => {
+    const double = modelDouble();
+    await runWith(double, {});
+    const old = setOf(double).children.find((child) => child.name === LAST);
+    if (old === undefined) throw new Error("no last variant");
+    old.setSharedPluginData("fundamento", "variant", "");
+    const create = (double.figma as { createComponent: () => DoubleNode }).createComponent;
+    // Stands in for Figma: while the run creates the variant anew, the old node goes.
+    const again = await runWith(
+      double,
+      {
+        createComponent: () => {
+          old.remove();
+          return create();
+        },
+      },
+      LIFT,
+    );
+    expect(again.components[0]?.created).toEqual([LAST]);
+    expect(again.components[0]?.lost.map((entry) => entry.id)).toContain(old.id);
+    expect(again.components[0]?.lost.find((entry) => entry.id === old.id)).toMatchObject({
+      name: LAST,
+      type: "COMPONENT",
+      removed: true,
+      parent: null,
+    });
+    expect(again.warnings.join(" ")).toContain(old.id);
+    expect(again.warnings.join(" ")).toContain("entfernt");
+  });
+
+  it("names a node the tool pushed out of the set, and where it lies now", async () => {
+    const double = modelDouble();
+    await runWith(double, {});
+    const page = double.root.children[0];
+    const old = setOf(double).children.find((child) => child.name === LAST);
+    if (old === undefined || page === undefined) throw new Error("no last variant");
+    old.setSharedPluginData("fundamento", "variant", "");
+    const create = (double.figma as { createComponent: () => DoubleNode }).createComponent;
+    const again = await runWith(
+      double,
+      {
+        createComponent: () => {
+          page.appendChild(old);
+          return create();
+        },
+      },
+      LIFT,
+    );
+    expect(again.components[0]?.lost.find((entry) => entry.id === old.id)).toMatchObject({
+      removed: false,
+      parent: { id: page.id, type: "PAGE" },
+    });
+    expect(again.warnings.join(" ")).toContain("verdrängt");
+  });
+
+  it("says it out loud even when the run is otherwise clean", async () => {
+    const double = modelDouble();
+    await runWith(double, {});
+    const variant = setOf(double).children[0];
+    const label = descendant(variant, "label");
+    if (label === undefined) throw new Error("no label");
+    const load = (double.figma as { loadFontAsync: (font: unknown) => Promise<void> })
+      .loadFontAsync;
+    let done = false;
+    const again = await runWith(double, {
+      loadFontAsync: async (font: unknown) => {
+        if (!done) {
+          done = true;
+          label.remove();
+        }
+        return load(font);
+      },
+    });
+    expect(again.components[0]?.created).toEqual([]);
+    expect(again.components[0]?.nodes).toEqual({ start: NODES, end: NODES });
+    expect(again.components[0]?.lost.map((entry) => entry.id)).toEqual([label.id]);
+    expect(again.warnings).toHaveLength(1);
+    expect(again.warnings[0]).toContain(label.id);
+  });
+});
+
+// F-A (Messung 2026-10-08, Datei 9qNldNFlofRCwlkpnEKOS1, Build d1be8f0): Lauf 1 in einer leeren
+// Datei stürzte ab mit „in set_textCase: Cannot write to node with unloaded font "Inter Regular"".
+// Ein neuer Textknoten trägt Inter Regular; das Plugin schrieb textCase, bevor diese Schrift geladen
+// war. In Dateien, in denen Inter Regular schon geladen war, fiel das nicht auf — im Double auch
+// nicht, bis es das gemessene Verhalten lernte.
+describe("a text is written only after its current font is loaded (F-A)", () => {
+  it("runs through in an empty file where no font is loaded yet", async () => {
+    const double = modelDouble();
+    await expect(run(double, repoFiles["figma/plugin/code.js"] ?? "")).resolves.toBeUndefined();
+    const set = double.root.children[0]?.children.find((child) => child.name === "butono");
+    expect(set?.children).toHaveLength(72);
+  });
+});
+
+// F-B (Messung 2026-10-08): Zwei lose, vollständig markierte Komponenten
+// „variant=primary, tone=default, size=small, state=rest" auf der Seite, in keinem Set. Jeder
+// abgestürzte Lauf hinterließ eine; der nächste fand sie nicht (ours sucht im Set) und legte die
+// Variante erneut an. F10c greift nicht, denn es gibt kein vorgefundenes Set. Vor dem ersten
+// Schreiben sucht der Lauf deshalb auch markierte Komponenten außerhalb des Sets und bricht ab,
+// wenn er welche findet — ohne sie still zu übernehmen und ohne sie still zu löschen.
+describe("a marked component outside the set stops the run before it writes (F-B)", () => {
+  const FIRST = "variant=primary, tone=default, size=small, state=rest";
+  type Orphan = { id: string; name: string; set: string; parent: { id: string; type: string } };
+
+  /** A run that crashes once its first component stands, as Figma's run did (F-A). */
+  async function crashedRun(double: ReturnType<typeof figmaDouble>) {
+    const module = new Function(
+      "figma",
+      `${repoFiles["figma/plugin/code.js"] ?? ""}\nreturn applyPlan();`,
+    );
+    await module({
+      ...double.figma,
+      createText: () => {
+        throw new Error("abgestürzt");
+      },
+    }).catch(() => undefined);
+  }
+  /**
+   * F-B for itself, apart from F-A: a file where Inter Regular is already loaded, as in every file
+   * before 2026-10-08 where the crash did not show.
+   */
+  const interLoaded = async (double: ReturnType<typeof figmaDouble>) =>
+    (double.figma as { loadFontAsync: (font: object) => Promise<void> }).loadFontAsync({
+      family: "Inter",
+      style: "Regular",
+    });
+  const componentsNamed = (double: ReturnType<typeof figmaDouble>, name: string) => {
+    const out: DoubleNode[] = [];
+    const walk = (node: DoubleNode) => {
+      if (node.type === "COMPONENT" && node.name === name) out.push(node);
+      for (const child of node.children) walk(child);
+    };
+    walk(double.root);
+    return out;
+  };
+
+  it("leaves no double behind after a crash and a new run, and names the orphan", async () => {
+    const double = modelDouble();
+    await crashedRun(double);
+    const page = double.root.children[0];
+    const orphans = componentsNamed(double, FIRST);
+    expect(orphans).toHaveLength(1);
+    expect(orphans[0]?.parent).toBe(page);
+    await interLoaded(double);
+    const counts = { ...double.counts };
+    const error = await run(double, repoFiles["figma/plugin/code.js"] ?? "").then(
+      () => undefined,
+      (caught: unknown) => caught as Error & { abort?: { orphans: Orphan[] } },
+    );
+    expect(componentsNamed(double, FIRST)).toHaveLength(1);
+    expect(error?.message).toContain(orphans[0]?.id ?? "?");
+    expect(error?.abort?.orphans).toEqual([
+      { id: orphans[0]?.id, name: FIRST, set: "butono", parent: { id: page?.id, type: "PAGE" } },
+    ]);
+    expect(double.counts).toEqual(counts);
+  });
+
+  it("is not stopped by a component without Fundamento's mark", async () => {
+    const double = modelDouble();
+    const api = double.figma as { createComponent: () => DoubleNode };
+    const stranger = api.createComponent();
+    stranger.name = FIRST;
+    await interLoaded(double);
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    expect(stranger.parent).toBe(double.root.children[0]);
+    expect(componentsNamed(double, FIRST)).toHaveLength(2);
+  });
+});
+
+// Build-Stempel (Maintainer, 2026-10-08): Mit d1be8f0 hätte F10c beim zweiten Klick abbrechen
+// müssen; gemessen war kein Abbruch, und welcher Stand wirklich lief, ließ sich aus der Datei nicht
+// lesen. Jeder Lauf nennt deshalb seinen Build: im Bericht, im Toast, im Menünamen, und am Set als
+// Plugin-Daten `build` — so zeigt jede Datei, welcher Stand sie zuletzt beschrieben hat.
+describe("every run names its build", () => {
+  const stamped = Object.fromEntries(
+    FIGMA_CELO.generate({ ...repo.input, build: "abc1234" }).map((file) => [file.path, file.text]),
+  );
+  const LAST = "variant=tertiary, tone=default, size=large, state=loading";
+  const setOf = (double: ReturnType<typeof figmaDouble>) =>
+    double.root.children[0]?.children.find((child) => child.name === "butono");
+
+  it("carries the build in the source and in the menu name", () => {
+    expect(stamped["figma/plugin/code.js"]?.split("\n")[0]).toContain("Build abc1234");
+    const manifest = JSON.parse(stamped["figma/plugin/manifest.json"] ?? "{}") as { name: string };
+    expect(manifest.name).toContain("abc1234");
+  });
+
+  it("names it in the report and stamps it on the set", async () => {
+    const double = modelDouble();
+    const module = new Function(
+      "figma",
+      `${stamped["figma/plugin/code.js"] ?? ""}\nreturn applyPlan();`,
+    );
+    const report = (await module(double.figma)) as { build: string };
+    expect(report.build).toBe("abc1234");
+    expect(setOf(double)?.getSharedPluginData("fundamento", "build")).toBe("abc1234");
+  });
+
+  it("says 'unbekannt' when the build was not given", async () => {
+    const double = modelDouble();
+    const module = new Function(
+      "figma",
+      `${repoFiles["figma/plugin/code.js"] ?? ""}\nreturn applyPlan();`,
+    );
+    const report = (await module(double.figma)) as { build: string };
+    expect(report.build).toBe("unbekannt");
+  });
+
+  it("names it in the toast of a run and of an abort", async () => {
+    const runAs = async (double: ReturnType<typeof figmaDouble>, command: string) => {
+      const module = new Function("figma", "console", stamped["figma/plugin/code.js"] ?? "");
+      await module({ ...double.figma, command }, { log: () => undefined, error: () => undefined });
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    };
+    const double = modelDouble();
+    await runAs(double, "apply");
+    expect(double.notifications.at(-1)?.message).toContain("abc1234");
+    setOf(double)
+      ?.children.find((child) => child.name === LAST)
+      ?.remove();
+    await runAs(double, "apply");
+    expect(double.notifications.at(-1)?.message).toContain("Abbruch");
+    expect(double.notifications.at(-1)?.message).toContain("abc1234");
   });
 });
 
@@ -864,7 +1291,7 @@ describe("the variants stand in the grid of the Vitrino (F11)", () => {
     setOf(double)
       ?.children.find((child) => child.name === names[3])
       ?.remove();
-    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "", LIFT);
     expect(setOf(double)?.children.map((child) => child.name)).toEqual(names);
     // Bestätigend (F14): die neu angelegte Variante bekommt ihre freie Zelle wieder.
     const cells = (setOf(double)?.children ?? []).map(

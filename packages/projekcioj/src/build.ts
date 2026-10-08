@@ -38,6 +38,8 @@ export interface CeloInput {
   env?: Readonly<Record<string, string | undefined>>;
   /** A measurement snapshot of another state, for the Vitrino's comparison (Spec 004, `--bazo`). */
   bazo?: VitrinoBazo;
+  /** The state the build comes from (a commit); the Figma plugin names it in every run. */
+  build?: string;
 }
 
 /** One generated file: a path relative to the output directory and its text. */
@@ -101,6 +103,8 @@ export interface BuildOptions {
   outDir: string;
   /** A measurement snapshot to compare with; the Vitrino shows the change (Spec 004 T010). */
   bazo?: VitrinoBazo;
+  /** The state the build comes from, e.g. the commit; see `CeloInput.build`. */
+  build?: string;
   /** A Modelo source; defaults to the repository's Modelo. */
   source?: ModeloSource;
   /** Shortcut for a fixture Modelo root (`<root>/vortaro`, `<root>/data`). */
@@ -151,6 +155,7 @@ export async function buildProjekcioj(options: BuildOptions): Promise<BuildResul
   const prepared = celoInputOf(source);
   if (!prepared.ok) return prepared;
   if (options.bazo !== undefined) prepared.input.bazo = options.bazo;
+  if (options.build !== undefined) prepared.input.build = options.build;
 
   const generated = celoj.flatMap((celo) => celo.generate(prepared.input));
   const paths = generated.map((file) => file.path);

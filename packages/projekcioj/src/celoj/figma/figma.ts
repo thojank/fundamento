@@ -984,8 +984,8 @@ export const FIGMA_CELO: Celo = {
     };
     return [
       { path: "figma/plan.json", text: `${JSON.stringify(plan, null, 2)}\n` },
-      { path: "figma/plugin/manifest.json", text: pluginManifest(plan) },
-      { path: "figma/plugin/code.js", text: pluginSource(plan) },
+      { path: "figma/plugin/manifest.json", text: pluginManifest(plan, input.build) },
+      { path: "figma/plugin/code.js", text: pluginSource(plan, input.build) },
     ];
   },
 };
