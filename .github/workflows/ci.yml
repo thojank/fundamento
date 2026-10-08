@@ -37,7 +37,8 @@ jobs:
     # 734 to 805 s in three engines (Vojmapo). An engine-specific defect therefore shows on main,
     # not in the PR. Read by packages/eroj/playwright.config.ts.
     env:
-      PLAYWRIGHT_ENGINES: ${{ (github.ref == 'refs/heads/main' && github.event_name != 'pull_request') && 'chromium firefox webkit' || 'chromium' }}
+      # MESSUNG Strang D, geht vor dem Merge wieder weg: alle drei Engines auch im PR-Lauf.
+      PLAYWRIGHT_ENGINES: chromium firefox webkit
     steps:
       # Default fetch depth (1) is enough: the checks only need `git ls-files`.
       - name: Checkout
