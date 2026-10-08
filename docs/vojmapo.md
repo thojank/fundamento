@@ -120,7 +120,7 @@ Stand der Idee: Konzept, keine Spec. Quelle: Gespräche mit dem Maintainer am 20
 
 | Befund | Herkunft | Auflösung |
 |---|---|---|
-| **CI, größtes Risiko:** apt bei `playwright install --with-deps` lädt 115 MB mit 178 bis 240 kB/s, 8 min 44 s bis 10 min 44 s. Der Browser-Download selbst ist 17 s. Die 20-Minuten-Schranke des Jobs bleibt, wie sie ist: Sie ist kein Fehler, sie ist der Melder für apt. Wer sie anhebt, schaltet den Melder ab | Belegt am 06./07.10. an 37535373175 (am 20-Minuten-Limit abgebrochen) und 37541588092 #1 (1191 von 1200 s) | Offen. **Hypothese, zu messen:** Das Abbild `ubuntu-latest` bringt die Systemabhängigkeiten von Playwright womöglich schon mit. Zu prüfen: `--with-deps` weglassen und sehen, ob die Browser trotzdem starten. Wenn ja, entfallen die 115 MB apt ganz. Noch nicht gebaut |
+| **CI, größtes Risiko:** apt bei `playwright install --with-deps` lädt 115 MB mit 178 bis 240 kB/s, 8 min 44 s bis 10 min 44 s. Der Browser-Download selbst ist 17 s. Die 20-Minuten-Schranke des Jobs bleibt, wie sie ist: Sie ist kein Fehler, sie ist der Melder für apt. Wer sie anhebt, schaltet den Melder ab | Belegt am 06./07.10. an 37535373175 (am 20-Minuten-Limit abgebrochen) und 37541588092 #1 (1191 von 1200 s) | **Strang D, gemessen am 08.10.** (Hypothese: `ubuntu-latest` bringt die Systemabhängigkeiten von Playwright schon mit): Sie gilt für Chromium und Firefox, nicht für WebKit. `--with-deps` bleibt. Läufe, Zahlen und die 34 fehlenden Bibliotheken im Abschnitt „Strang D“ unter dieser Tabelle. Offen als **Strang E:** ob `--with-deps` nur für WebKit die Menge senkt |
 | Statusflächen: Kontrast über Rand statt Füllung | Abnahme ciferecigo | Spec 002 FR-07 |
 | subtle = muted unter `contrast=high` in komuna | Abnahme ciferecigo | Spec 002 FR-02/FR-05 |
 | Kontrast nur „nach eigener Rechnung" des Agenten | Claude-Code-Test Phase 1 | Spec 002 FR-09 |
@@ -137,6 +137,54 @@ Stand der Idee: Konzept, keine Spec. Quelle: Gespräche mit dem Maintainer am 20
 | CI: Drei Browser-Engines in jedem PR-Lauf | „Check: Alirebleco (Eroj)“: 201 bis 205 s bei 734 bis 805 s Job-Dauer, über 3 grüne Läufe (37421765370, 37421812132, 37422222657) | **Umgesetzt (#38):** `PLAYWRIGHT_ENGINES` (gelesen in `packages/eroj/playwright.config.ts`, durchgereicht in `turbo.json`) ist auf `main` alle drei, sonst Chromium. „Check: Alirebleco (Eroj)“ danach 53 bis 84 s statt 139 bis 205 s, Job 368 bis 573 s statt 510 bis 743 s (6 grüne Läufe mit warmem Cache, 37537987424 #2–4, 37541588092 #2–4). **Befund:** Die Eroj-Tests im Schritt „Test“ brauchten in Chromium allein 3,7 min für 17 Tests, vorher 3,5 min für 51 Tests in drei Engines. Ihre Dauer hängt nicht an den Engines; der Schritt „Test“ streut weiter (151 bis 271 s). Abtausch: Ein Fehler nur in Firefox oder WebKit zeigt sich erst auf `main` |
 | CI: Der Wächter auf `await` zur Modulebene (`packages/modelo/src/ci/test-setup.test.ts`, #34) entfernt Zeichenketten zeilenweise und hält mehrzeilige Template-Literale für Code | Fehlalarm, belegt am 2026-10-06 am Skript des Kindprozesses in `packages/mcp/src/http.test.ts` (Spec 006) | Umgangen durch Auslagerung in `packages/mcp/src/test-doubles/http-server-child.mjs`. Der Wächter ist unverändert, der Befund offen |
 | Test: `fm --version` fiel einmal im vollen parallelen Lauf mit Exit 2 (Usage-Fehler) statt 0 (`packages/modelo/src/e2e/cli.test.ts`, FR-02). Isoliert grün, das Binary druckt `0.1.0` mit Exit 0. Der Test hält stderr nicht fest, also ist unbekannt, was `fm` gesagt hat | Lokal, 2026-10-06, `pnpm test --force` auf dem Rebase von #29 (`7f0c9e5`); 1 von 7 vollen Läufen an diesem Tag, in CI nicht gesehen. Nicht die Ursache: Der Global-Setup der cli-Tests baut unter turbo nicht neu (`TURBO_HASH`), ein Rebuild-Wettlauf scheidet aus | Offen. Erster Schritt, bevor etwas repariert wird: stderr in der Zusicherung mitführen, damit der nächste Fehlschlag sagt, was er sah. **Hypothese (#38, nicht belegt):** Unter `pnpm test --force` lief `cli#build` neben `modelo#test`, weil `modelo#test` nicht auf `cli#build` wartete; `fm` könnte ein halb geschriebenes `dist` gestartet haben. `turbo.json` schließt den Wettlauf jetzt aus |
+
+### Strang D – Playwright ohne `--with-deps` (gemessen 2026-10-08, #44)
+
+Hypothese aus dem 06.10.: Das Abbild `ubuntu-latest` bringt die Systemabhängigkeiten von Playwright schon mit, `--with-deps` lädt 115 MB umsonst. Gemessen mit `playwright install chromium firefox webkit` ohne `--with-deps`.
+
+- **Lauf 37772202593** (`aaba801`, PR-Lauf, nur Chromium): „Playwright browsers“ 16 s. Messschritt `playwright install-deps chromium firefox webkit` zuletzt im Lauf, 51 s: `2 upgraded, 181 newly installed, 0 to remove and 15 not upgraded.` · `Need to get 115 MB of archives.` · `Fetched 115 MB in 32s (3593 kB/s)`.
+- **Lauf 37776235194** (`38368e1`, Messcommit mit `PLAYWRIGHT_ENGINES: chromium firefox webkit`): Chromium 17/17, Firefox 16/17 (der eine ist der absichtliche Skip in `forced-colors.spec.ts`: `test.skip(browserName !== "chromium", …)`), WebKit 0/17, alle 17 an `browserType.launch`. Die Schritte nach „Test“ liefen nicht, der Messschritt also auch nicht.
+
+WebKit meldete bei jedem Start „Host system is missing dependencies to run browsers“ mit diesen 34 Bibliotheken; dieselbe Liste stand schon in 37772202593 als Warnung von `playwright install`:
+
+- `libgtk-4.so.1`
+- `libgraphene-1.0.so.0`
+- `libevent-2.1.so.7`
+- `libopus.so.0`
+- `libgstallocators-1.0.so.0`
+- `libgstapp-1.0.so.0`
+- `libgstpbutils-1.0.so.0`
+- `libgstaudio-1.0.so.0`
+- `libgsttag-1.0.so.0`
+- `libgstvideo-1.0.so.0`
+- `libgstgl-1.0.so.0`
+- `libgstcodecparsers-1.0.so.0`
+- `libgstfft-1.0.so.0`
+- `libflite.so.1`
+- `libflite_usenglish.so.1`
+- `libflite_cmu_grapheme_lang.so.1`
+- `libflite_cmu_grapheme_lex.so.1`
+- `libflite_cmu_indic_lang.so.1`
+- `libflite_cmu_indic_lex.so.1`
+- `libflite_cmulex.so.1`
+- `libflite_cmu_time_awb.so.1`
+- `libflite_cmu_us_awb.so.1`
+- `libflite_cmu_us_kal16.so.1`
+- `libflite_cmu_us_kal.so.1`
+- `libflite_cmu_us_rms.so.1`
+- `libflite_cmu_us_slt.so.1`
+- `libavif.so.16`
+- `libharfbuzz-icu.so.0`
+- `libwayland-server.so.0`
+- `libmanette-0.2.so.0`
+- `libhyphen.so.0`
+- `libsecret-1.so.0`
+- `libGLESv2.so.2`
+- `libx264.so`
+
+**Schluss:** `ubuntu-latest` trägt die Bibliotheken für Chromium und Firefox, nicht für WebKit. `ci.yml` bleibt bei `--with-deps`.
+
+**Offen, Strang E:** ob `--with-deps` nur für WebKit die Menge senkt. Zu messen auf eigenem Branch, nach #44: `playwright install chromium firefox` und `playwright install --with-deps webkit`, dazu „Need to get …“ und alle drei Engines mit den Ero-Checks.
 
 ## Externe Pakete
 
