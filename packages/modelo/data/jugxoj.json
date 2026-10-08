@@ -479,6 +479,36 @@
       "kialo": "Die Marke in eine kombinierte Theme-Gruppe aspekto+color-scheme+contrast zu legen, wäre in Penpot technisch möglich: Nach der Regel aus jug_01M4AZQTHNQDZ39MAN2VJ8DJYP gäbe jede Kombination die Werte des Resolvers, und alle Marken lägen in einer Datei. Verworfen wegen der Skalierung: Die Zahl der Themes dieser Gruppe ist Marken × Schemata × Kontraste, bei zwei Marken acht, bei hundert vierhundert. Die Marke ist die Dimensio, die in diesem System unbegrenzt wächst. Der Penpot-Celo schreibt deshalb eine Datei je Marke. Penpot hat uns das nicht aufgezwungen; es verhindert nur eine eigene Marken-Gruppe neben den anderen (Manko man_01M4AZ8C2AXY2TJ2W9NQWYBKM1).",
       "date": "2026-10-07",
       "context": "Entscheidung des Maintainers zur ersten Penpot-Messung, nachdem die Regel „Dimensioj mit Konjunktions-Sets bilden eine Theme-Gruppe“ gebaut war und sich zeigte, dass sie auch die Marke tragen könnte. Die Manko bleibt richtig: Eine eigene Theme-Gruppe aspekto geht in Penpot nicht, weil Penpot die Sets aktiver Themes vereinigt statt sie zu verknüpfen. Dieser Jugxo hält fest, dass die Datei je Marke eine Wahl ist, keine Grenze des Werkzeugs. Neu zu prüfen, wenn die Manko schließt (theme-conjunction): Dann trägt eine Datei alle Marken als eigene Gruppe, ohne dass die Theme-Zahl mit den Marken multipliziert."
+    },
+    {
+      "id": "jug_01M4DNSD0SV43Y943T21RQF7EM",
+      "ref": {
+        "ero": "ero_01M2XN0PHDBBD6MNFN75DB9NQ5"
+      },
+      "decision": "approved",
+      "kialo": "Die Achse variant wird emphasis (high, medium, low), die Achse tone wird intent (neutral, danger). Die Namen sagen, was die Achse bedeutet, nicht welchen Rang oder welches Aussehen sie hat; ein Agent muss nicht raten. Umbenannt wird jetzt, weil noch nichts veröffentlicht ist und der Bruch nur eigene Projekcioj, Make Kits und Jugxoj trifft.",
+      "date": "2026-10-08",
+      "context": "Entscheidung des Maintainers zu Spec 007, Abschnitt Entscheidungen F1/F2/F3."
+    },
+    {
+      "id": "jug_01M4DNSD0SV43Y943T21RQF7EN",
+      "ref": {
+        "artikolo": "VI"
+      },
+      "decision": "approved",
+      "kialo": "Text-Regeln stehen markenneutral in der Uzo eines Ero und sind fest oder anpassbar. Eine Aspekto überstimmt eine anpassbare Regel nur mit einer Jugxo, eine feste nie. Vorbild sind die geschützten Rollen der Fluida Marko: Die Stimme der Marke fließt, Verständlichkeit an kritischen Stellen nicht.",
+      "date": "2026-10-08",
+      "context": "Entscheidung des Maintainers zu Spec 007, Abschnitt Entscheidungen F1/F2/F3."
+    },
+    {
+      "id": "jug_01M4DNSD0SV43Y943T21RQF7EP",
+      "ref": {
+        "artikolo": "III"
+      },
+      "decision": "approved",
+      "kialo": "Eine Marke und ihre Bausteine verhalten sich, und dieses Verhalten ist mehr als ihr Bauplan in der Skemo. Deshalb bekommt es einen eigenen Begriff, Uzo, und eine eigene Datei neben der Skemo statt Felder in ihr.",
+      "date": "2026-10-08",
+      "context": "Entscheidung des Maintainers zu Spec 007, Abschnitt Entscheidungen F1/F2/F3."
     }
   ]
 }
