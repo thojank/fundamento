@@ -86,3 +86,40 @@ Der Benchmark-Artikel vom 05.10. bestätigt das Etoso-Konzept und schärft einen
 ## Nebenbefund Messung des Agenten
 
 Der Benchmark sagt, ein „sieht gut aus" einer zweiten KI dürfe nichts blockieren. Fundamento folgt dem bereits: Alle Prüfungen in Art. X sind deterministisch. Für Phase 8 heißt das, dass die Evals mit denselben Skripten bewerten, die auch Menschen prüfen (`check_usage`, Vortaro-Lint, Alirebleco), nicht mit einem Bewertungsmodell.
+
+## Messungen
+
+Ergänzt vom Plan (D-08), 2026-10-08, an `main` @ `8d1870e` mit dem gebauten Stand (`pnpm build`). Die Abschnitte oben sind unverändert.
+
+### M-1 Größe von `get_ero butono` heute
+
+Gemessen an der Antwort von `getEro(modelo, { name: "butono" })` über den MCP-Lader (`loadServed()`). Der Server gibt sie als kompaktes JSON aus (`JSON.stringify(body)` in `packages/mcp/src/server.ts`).
+
+| Teil | Bytes (kompakt) |
+|---|---|
+| `ero` | 180 |
+| `skemo` | 10 517, davon `bindings` 7 628, `props` 1 219, `parts` 685, `intents` 543 |
+| `reguloj` | 2 797 |
+| `examples` | 4 811 |
+| `projekcioj` | 2 665 |
+| **gesamt** | **21 053** (eingerückt 32 922) |
+
+Mehr als ein Drittel der Antwort sind Token-Bindungen. Für die Wahl eines Ero braucht ein Agent sie nicht, wohl aber für den Bau.
+
+### M-2 Größe der Kurzfassung (Entwurf)
+
+Erzeugt nach der Regel aus A8 und plan D-05: Achsen aus der heutigen Skemo, `instead` und `boundary` aus dem Uzo-Entwurf in `data-model.md` §2.3, ohne Schlüsselwörter und `via`.
+
+| Fassung | Bytes | `ceil(Bytes / 3)` | `ceil(Bytes / 4)` |
+|---|---|---|---|
+| Kurzfassung | 1 661 | **554** | 416 |
+| Kurzfassung mit Schlüsselwörtern und `via` | 2 053 | 685 | 514 |
+| ganze Uzo | 3 053 | 1 018 | 764 |
+
+Die Kurzfassung ist etwa 8 % der heutigen Antwort.
+
+### M-3 Maß und Obergrenze
+
+- **Maß:** `ceil(Bytes UTF-8 / 3)` der kompakten JSON-Ausgabe. Das Maß ist ungünstig gewählt: Kompaktes JSON mit vielen Satzzeichen und kurzen Schlüsseln liegt eher bei 3 als bei 4 Bytes je Token. Einen echten Tokenizer gibt es ohne neue Abhängigkeit oder Netzaufruf im Test nicht (plan OP-13).
+- **Vorläufige Obergrenze:** 750 je Ero (Entwurf 554 × 1,25 = 693, aufgerundet auf 50 ergibt 700, dazu 50 Reserve für die Übersetzung der Kialoj aus dem Entwurf in die Daten).
+- **Endgültig:** in T022 an der erzeugten Kurzfassung gemessen und hier eingetragen. Wert = Messwert × 1,25, aufgerundet auf 50, höchstens 800.
