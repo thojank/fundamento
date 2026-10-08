@@ -5,7 +5,8 @@
 // shared plugin data `fundamento`, updates it, and never duplicates. A run that would create a
 // variant in a set it found aborts before its first write and names what it would have created
 // (F10c); the menu command „auch in vorgefundenem Set anlegen" lifts that on purpose. Nothing else
-// in the file is touched. An agent can run the same code through the Figma MCP.
+// in the file is touched. The plugin runs as a Figma development plugin; through the Figma MCP an
+// agent reads the result back (the generated code.js exceeds the MCP's 50 KB per call).
 //
 // The plugin uses this slice of the Plugin API (the test double covers exactly it):
 // variables.getLocalVariableCollectionsAsync/getLocalVariablesAsync, createVariableCollection,
