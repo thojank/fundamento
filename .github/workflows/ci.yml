@@ -60,10 +60,11 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       # All three engines are installed in every run, also where PLAYWRIGHT_ENGINES runs only one:
-      # workflow.test.ts pins this line. The time of this step is apt (`--with-deps`), not the
-      # browser download (Vojmapo); a cache of ~/.cache/ms-playwright was measured and taken back.
+      # workflow.test.ts pins this line. Strang D (Vojmapo): without --with-deps. The time of the
+      # step was apt, 115 MB at times at 178 to 240 kB/s, not the browser download; measured here
+      # whether ubuntu-latest already brings the system libraries the engines need.
       - name: Playwright browsers
-        run: pnpm --filter @fundamento/eroj exec playwright install --with-deps chromium firefox webkit
+        run: pnpm --filter @fundamento/eroj exec playwright install chromium firefox webkit
 
       - name: Build
         run: pnpm build
@@ -118,3 +119,8 @@ jobs:
       # packed as a dry run. A broken release path turns red here, not in the maintainer's run.
       - name: "Check: Release"
         run: pnpm check:release
+
+      # Strang D, Messung: the apt that --with-deps ran, last, so no check above sees its libraries.
+      # Its log carries "Need to get …" and "Fetched … in … (… kB/s)". Goes once it is read.
+      - name: "Messung: apt (playwright install-deps)"
+        run: pnpm --filter @fundamento/eroj exec playwright install-deps chromium firefox webkit

@@ -34,9 +34,11 @@ const ERO_CHECK_STEPS: ReadonlyArray<readonly [name: string, script: string]> = 
 
 const GATE_STEPS: ReadonlyArray<readonly [name: string, run: string]> = [
   // The rendered checks of @fundamento/eroj run in Chromium, Firefox and WebKit (Spec 003).
+  // Strang D (Vojmapo, 2026-10-08): without --with-deps — measured whether ubuntu-latest already
+  // brings Playwright's system libraries.
   [
     "Playwright browsers",
-    "pnpm --filter @fundamento/eroj exec playwright install --with-deps chromium firefox webkit",
+    "pnpm --filter @fundamento/eroj exec playwright install chromium firefox webkit",
   ],
   ["Build", "pnpm build"],
   ["Test", "pnpm test"],
@@ -45,6 +47,12 @@ const GATE_STEPS: ReadonlyArray<readonly [name: string, run: string]> = [
   ["Lint", "pnpm lint"],
   ...CHECK_STEPS.map(([name, script]) => [name, `pnpm ${script}`] as const),
   ...ERO_CHECK_STEPS.map(([name, script]) => [name, `pnpm ${script}`] as const),
+  // Strang D, Messung: the apt of --with-deps, run last so no check above sees its libraries. Its
+  // log carries the download size and rate; the step goes once the measurement is read.
+  [
+    "Messung: apt (playwright install-deps)",
+    "pnpm --filter @fundamento/eroj exec playwright install-deps chromium firefox webkit",
+  ],
 ];
 
 interface Step {
