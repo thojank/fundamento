@@ -1,4 +1,4 @@
-# Benchmarks (Stand 2026-09-18)
+# Benchmarks (Stand 2026-10-08)
 
 Lebende Liste. Jede Phase ergänzt hier den weltweit stärksten öffentlichen Benchmark für die Bereiche, die sie neu aufbaut, mit Quelle und abgeleiteten Anforderungen. Fremde Systeme sind Benchmark, nie Quelle (Constitution Art. V).
 
@@ -17,3 +17,18 @@ Lebende Liste. Jede Phase ergänzt hier den weltweit stärksten öffentlichen Be
 | Barrierefreiheit / Prüfung | axe-core 4.13 (MPL-2.0) über `@axe-core/playwright` 4.13 in Playwright 1.63 (Apache-2.0), Chromium, Firefox, WebKit; WCAG 2.2 A/AA; APCA nur beratend (Jugxo zu Art. X) | Werkzeug, kein Inhalt: prüft gerenderte Eroj, übernimmt nichts in das Modelo | Spec 003 D-09, T013 (`check:alirebleco-eroj`) |
 | Datenvisualisierung | (Phase 4 recherchieren) | | |
 | Contribution / Governance | (Phase 9 recherchieren) | | |
+
+## Werkzeuge und Ansätze, gesichtet 2026-10-08
+
+Befunde über die Werkzeuge, nicht über die Seiten, an denen sie erprobt wurden. Markenwerte einer beobachteten Seite stehen hier nicht und kommen nicht ins Repo (Art. V; Kein Trittbrett, Art. VI). Keines der Werkzeuge ist eine Abhängigkeit von Fundamento; ob und wie der Enportilo eines davon nutzt, entscheidet eine eigene Spec.
+
+| Werkzeug | Lizenz | Was es ist | Befund | Folgerung für Fundamento |
+|---|---|---|---|---|
+| **Dembrandt** | MIT | Extrahiert Tokens aus einer laufenden Seite; Export nach DTCG 2025.10, MCP-Server, DESIGN.md | Testlauf gegen eine Shop-Seite, verglichen mit einer Vermessung von Hand. Das Werkzeug sieht berechnete Werte, keine Absichten. Die eigenen Custom Properties des Themes erfasst es nicht, die Variablen eingebetteter Fremd-Apps dagegen schon. Farbrollen ordnet es falsch zu. Abgeschaltete Schatten sieht es nicht, ein Overlay-Trick erscheint als Schatten-Token. Gemessen wird nur ein Viewport. Der DTCG-Export setzt `letterSpacing` auf 0 und verliert die Großschreibung, obwohl beides in den Rohdaten steht. Brauchbar sind Motion, Breakpoints, Logos und Flächenanteile | **Enportilo:** als Sensor nutzbar, und zwar über das Rohdaten-JSON, nicht über den DTCG-Export und nicht über DESIGN.md. Dazu gehören ein eigener Parser für die Theme-Variablen und ein Filter für Fremd-Apps. Rollen und Kialoj bleiben Interpretationsarbeit; Herkunftsnachweis nach Art. VII |
+| **OpenDesign** | Apache-2.0 | Arbeitsbereich für Agenten in der Art von Claude Design oder v0; ein Design System ist dort eine DESIGN.md | Keine Alternative zu Figma oder Penpot, sondern eine andere Kategorie | Kandidat als **Celo** (eine generierte DESIGN.md je Aspekto) und als Vertriebskanal (Katalog per Pull Request). Abgrenzung: DESIGN.md ist die flache Fassung; Fundamento ist DESIGN.md plus Kialoj, Dimensioj und Jugxoj |
+| **Penpot** und Plugin **Token Lint** | MPL-2.0 (Penpot) | Penpot: offizieller MCP-Server, native Tokens, DTCG-Import. Token Lint: misst, wie weit ein Dokument Tokens verwendet | Penpot deckt, was Art. XII verlangt; Token Lint liefert eine Abdeckungszahl je Dokument | Penpot bleibt nach Art. XII nachrangig. Token Lint ist ein möglicher Qualitätsnachweis, sobald ein Aspekto in Penpot liegt |
+| **OpenPencil** | MIT | Öffnet `.fig`-Dateien, MCP-Server, Vue-SDK für eigene Editoren | Reife ungeprüft | Möglicher Unterbau für Agordilo oder Vitrino; vor einer Nutzung zu messen |
+
+**Artikelreihe von Florian Gampert („2027 Design System Stack“, LinkedIn, 15.09. bis 05.10.2026):** Abgleich in eigenen Worten und die daraus abgeleiteten Lücken L1 bis L10 in [`specs/007-skemo-uzo/research.md`](../specs/007-skemo-uzo/research.md).
+
+**Enportilo Stufe 1:** Ein eigener Spec- oder Research-Ort für die erste Stufe des Enportilo (Befund F38) existiert im Repo noch nicht; dieser Abschnitt ist bis dahin die Ablage. Offene Frage in [`specs/007-skemo-uzo/plan.md`](../specs/007-skemo-uzo/plan.md).
