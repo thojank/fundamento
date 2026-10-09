@@ -632,9 +632,10 @@ describe("Spec 004 documentation (T001, Art. V Benchmark-Aspekto)", () => {
   // hat es damit nie gegeben; die Lücke wird in der Änderungshistorie benannt, nicht geschlossen.
   // 2.0 statt 1.10, weil „Kein Trittbrett" die erste Regel ist, die nicht den Erbauer bindet,
   // sondern den Benutzer. Dieser Test ist der einzige Gegenleser der Nummer — ein Vergleich über
-  // einen String, der zwei Amendments unter einer Nummer nie melden würde.
-  it("the Constitution header says version 2.0", () => {
-    expect(constitution.split("\n")[2]).toMatch(/^Version 2\.0 · /);
+  // einen String, der zwei Amendments unter einer Nummer nie melden würde. Seit Spec 007 (T010)
+  // steht hier 2.1: Die Nummer wurde gegen main und die offenen PRs geprüft, keiner beanspruchte sie.
+  it("the Constitution header says version 2.1", () => {
+    expect(constitution.split("\n")[2]).toMatch(/^Version 2\.1 · /);
   });
 
   it("Art. V carries the Benchmark-Aspekto paragraph and keeps the source rule", () => {
@@ -734,6 +735,108 @@ describe("F33 documentation (Constitution v2.0, Art. V/VI/VII)", () => {
     expect(history).toContain("**Kein Trittbrett**");
     expect(history).toContain("**Herkunftsnachweis**");
     expect(history).toContain("eine v1.8 hat es nie gegeben");
+  });
+});
+
+// Spec 007 (T010, plan D-11): Die Uzo ist Wissen eigener Art neben der Skemo, also ein Begriff der
+// Terminologio. Tabellenzeile, Ontologio-Begriff und Entitätstyp landen in einem Commit, weil die
+// Drift-Prüfung jeden Zwischenstand rot machen würde.
+describe("Spec 007 documentation (Constitution v2.1, Uzo)", () => {
+  const constitution = read(".specify/memory/constitution.md");
+
+  it("the terminology table names Uzo with its file and the two kinds of text rules", () => {
+    const table = section(constitution, "Terminologio (verbindliches Vokabular)");
+    const row = table.split("\n").find((line) => line.startsWith("| **Uzo**")) ?? "";
+    expect(row).toContain("Der Gebrauch eines Ero");
+    expect(row).toContain("fest oder anpassbar");
+    expect(row).toContain("`data/eroj/<ero>/uzo.json`");
+  });
+
+  it("the change history names v2.1 (Spec 007) with both points, in the maintainer's words", () => {
+    const history = section(constitution, "Governance");
+    expect(history).toContain(
+      "v2.1 (Spec 007): Begriff Uzo; Art. XII Punkt 5 und Phase 5: eine Library, ein Kit, Marken als Modi (Zielbild Chamäleon, Maintainer 2026-10-09)",
+    );
+  });
+
+  // Zweiter Punkt des Amendments (Nachtrag „Zielbild Chamäleon“, Maintainer 2026-10-09): „je
+  // Aspekto“ beschrieb den Übergang des Durchstichs und wurde als Ziel gelesen.
+  it("Art. XII point 5 asks for one Make Kit for all Aspektoj, one per Aspekto only as a bridge", () => {
+    const article = section(
+      constitution,
+      "Artikel XII – Interoperebleco (Interoperabilität statt Insel)",
+    );
+    expect(article).toContain(
+      "**Figma Make Kit**: ein Kit für alle Aspektoj, umschaltbar zur Laufzeit; bis Make das kann, ein Kit je Aspekto als Übergang. React-Paket, Tailwind-Tokens und aus dem Modelo generierte Guidelines (keine handgeschriebene Zeile, Art. VII)",
+    );
+    expect(article).not.toContain("**Figma Make Kit** je Aspekto");
+  });
+
+  it("the phase table of the Constitution asks for one library with brands as modes in Phase 5", () => {
+    const row = constitution.split("\n").find((line) => line.startsWith("| 5 |")) ?? "";
+    expect(row).toMatch(
+      /\| Eine publizierbare Library, Marken als Modi; Penpot-Paket mit Markenschalter \|$/,
+    );
+    expect(row).not.toContain("Library je Aspekto");
+  });
+
+  it("spec.md carries the second point of the amendment with reason and migration", () => {
+    const amendment = section(read("specs/007-skemo-uzo/spec.md"), "Constitution Amendment");
+    expect(amendment).toContain("Art. XII Punkt 5 (Make Kit) und Phasentabelle Zeile 5");
+    expect(amendment).toContain(
+      "Das Zielbild ist das Chamäleon: eine Library, ein Kit, Marken als Modi, Umschaltung zur Laufzeit in Figma, Penpot und Code. ‚Je Aspekto‘ beschrieb den Übergang des Durchstichs und wurde als Ziel gelesen.",
+    );
+    expect(amendment).toContain(
+      "Keine. Die Figma-Projektion erzeugt schon eine Library mit Modi (F27, M1). Die Make Kits bleiben je Aspekto, bis eine Messung zeigt, ob Make ein umschaltbares Kit trägt.",
+    );
+  });
+
+  it("the vojmapo states the target picture Chamäleon in the maintainer's words", () => {
+    const vojmapo = read("docs/vojmapo.md");
+    const target = section(vojmapo, "Zielbild in einem Satz");
+    expect(target).toContain(
+      "daraus entstehen Tokens, Komponenten, eine Figma-Library, Code und Dokumentation, die jede Marke und jede Situation tragen,",
+    );
+    expect(target).toContain(
+      "Fundamento ist ein markenagnostisches Design System, das sich wie ein Chamäleon an jede Marke anpasst. Auch in Figma: Ein Entwurf, in Marke A gebaut und nach Marke B verschoben, sieht aus wie Marke B. Ein Markenschalter stellt einen ganzen Entwurf von A auf B um – in Figma, in Penpot und in jedem Code, zur Laufzeit; wenn es geht, auch in Figma Make. (Maintainer, 2026-10-09)",
+    );
+    expect(target).not.toContain("Figma-Libraries");
+  });
+
+  it("the vojmapo plans Phase 5 as switching, not copying, with the Penpot Manko as its closing", () => {
+    const row = read("docs/vojmapo.md")
+      .split("\n")
+      .find((line) => line.startsWith("| 5 |"));
+    expect(row).toBe(
+      "| 5 | – | Generatoren in voller Breite: eine generische Figma-Library, Marken als Modi der Sammlung aspekto (F27, gemessen in M1); Penpot mit demselben Anspruch – Umschalten, nicht Kopieren (heute Manko man_01M4AZ8C2AXY2TJ2W9NQWYBKM1: eine Datei je Marke; Schließbedingung ist der Markenschalter in einer Datei); Icons, Fonts, JSON-LD-Projekcio der Ontologio, Laufzeit-Umschaltung aller Dimensioj | geplant |",
+    );
+  });
+
+  it("the vojmapo names one switchable Make Kit as the goal and the kit per Aspekto as the bridge", () => {
+    const row = read("docs/vojmapo.md")
+      .split("\n")
+      .find((line) => line.startsWith("| **Figma Make Kits** |"));
+    expect(row?.split(" | ")[1]).toBe(
+      "Durchstich (Spec 003): Kit je Aspekto, weil ein npm-Paket keine Modi kennt. Ziel: ein Kit, das alle Aspektoj trägt und in Make zur Laufzeit umschaltet. Ob Make das mitmacht, ist eine Messung, keine Annahme – offen, nach Spec 007",
+    );
+  });
+
+  // Der README beschreibt den gemessenen Stand mit Manko-Id, kein Ziel; er bleibt.
+  it("the README keeps the measured Penpot state, one file per brand, with its Manko", () => {
+    const readme = read("README.md");
+    expect(readme).toContain("One file per brand.");
+    expect(readme).toContain("Manko `man_01M4AZ8C2AXY2TJ2W9NQWYBKM1`");
+  });
+
+  // T017: Plan, Datenmodell, Verträge und Aufgaben liegen seit #45 auf main; „Plan offen“ war falsch.
+  it("the vojmapo records Stufe A of Spec 007 as implemented, F1 and Stufe B open", () => {
+    const row = read("docs/vojmapo.md")
+      .split("\n")
+      .find((line) => line.startsWith("| 3c |"));
+    expect(row).toMatch(
+      /\| 📝 Spec, Plan und Tasks auf `main` \(#45\); Stufe A umgesetzt \(PR #\d+\), F1 und Stufe B offen \|$/,
+    );
+    expect(row).not.toContain("Plan offen");
   });
 });
 

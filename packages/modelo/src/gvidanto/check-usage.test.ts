@@ -79,6 +79,50 @@ describe("check_usage", () => {
     expect(result.allowed).toEqual(["primary", "secondary", "tertiary"]);
   });
 
+  // Spec 007 T014 (data-model §6): the new fields are checked as input; their rules come in Stufe B.
+  it("answers an unknown Aspekto with mcp-input-invalid and the Aspektoj of the Modelo", () => {
+    const result = checkUsage(modelo, {
+      instances: [{ ero: "butono", props: {}, label: "Speichern", aspekto: "gibtsnicht" }],
+    });
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.issues.map((issue) => issue.rule)).toEqual(["mcp-input-invalid"]);
+    expect(result.issues[0]?.path).toBe("check_usage/instances/0/aspekto");
+    expect(result.allowed).toEqual(["komuna"]);
+  });
+
+  it("answers an unknown Dimensio or Dimensio value with mcp-input-invalid", () => {
+    const unknownDimensio = checkUsage(modelo, {
+      instances: [{ ero: "butono", props: {}, label: "Speichern", dimensioj: { breite: "x" } }],
+    });
+    expect(unknownDimensio.ok).toBe(false);
+    if (!unknownDimensio.ok) {
+      expect(unknownDimensio.issues[0]?.path).toBe("check_usage/instances/0/dimensioj/breite");
+      expect(unknownDimensio.allowed).toContain("viewport");
+    }
+    const unknownValue = checkUsage(modelo, {
+      instances: [
+        { ero: "butono", props: {}, label: "Speichern", dimensioj: { viewport: "riesig" } },
+      ],
+    });
+    expect(unknownValue.ok).toBe(false);
+    if (!unknownValue.ok) {
+      expect(unknownValue.issues[0]?.path).toBe("check_usage/instances/0/dimensioj/viewport");
+      expect(unknownValue.allowed).toEqual(["compact", "medium", "expanded"]);
+    }
+  });
+
+  it("judges an instance with a known Aspekto, Dimensio values and slots as before", () => {
+    const plain = { ero: "butono", props: { variant: "primary" }, label: "Speichern" };
+    const described = {
+      ...plain,
+      aspekto: "komuna",
+      dimensioj: { viewport: "compact" },
+      slots: { label: ["text" as const] },
+    };
+    expect(check([described])).toEqual(check([plain]));
+  });
+
   it("answers an unknown prop name with mcp-input-invalid and the props of the Skemo", () => {
     const result = checkUsage(modelo, {
       instances: [{ ero: "butono", props: { variante: "primary" }, label: "Speichern" }],

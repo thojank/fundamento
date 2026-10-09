@@ -1,6 +1,6 @@
 # Fundamento – Constitution
 
-Version 2.0 · 2026-09-24 · Status: ratifiziert
+Version 2.1 · 2026-10-09 · Status: ratifiziert
 
 Fundamento ist ein maschinenlesbares, nativ mehrmarkenfähiges Design System. Sein kanonischer Zustand ist ein Datenmodell; Figma, Code, Dokumentation und Werkzeuge sind Projektionen dieses Modells. Diese Constitution definiert die Prinzipien, gegen die jede Spezifikation, jeder Plan und jede Implementierung geprüft wird. Sie ist bewusst kurz. Was hier nicht steht, ist verhandelbar; was hier steht, nicht.
 
@@ -19,6 +19,7 @@ Fundamento verwendet Esperanto als Fachsprache. Die Begriffe sind im Modell, im 
 | **Dimensio** | Eine Adaptionsdimension (Farbmodus, Dichte, Kontrast, …) | Figma-Mode ≙ Dimensio-Wert |
 | **Ero** | Eine Komponente (Element) | `fm-butono`, `packages/eroj` |
 | **Skemo** | Die maschinenlesbare Spezifikation eines Ero | `eroj/butono/skemo.json` |
+| **Uzo** | Der Gebrauch eines Ero (später auch einer Sxablono): wofür und wofür nicht, Grenzen, Beziehungen, Slot-Regeln, Layout-Verhalten, Text-Regeln. Steht neben der Skemo, weil Verhalten mehr ist als Bauplan. Text-Regeln sind fest oder anpassbar; eine Aspekto überstimmt anpassbare Regeln nur mit Jugxo, feste nie | `data/eroj/<ero>/uzo.json` |
 | **Regularo** | Regelsammlung mit Begründungen (Constraints, Kompositionsregeln) | Teil des Modelo |
 | **Jugxo** | Ein Einzelurteil: Präzedenzfall mit Begründung, positiv oder negativ | Sammlung im Regularo |
 | **Manko** | Eine gemessene Lücke eines Werkzeugs: Was das Modelo ausdrückt und ein Celo nicht tragen kann, mit Beleg im Wortlaut und Schließbedingung | `packages/modelo/data/mankoj.json` |
@@ -138,7 +139,7 @@ Verbindliche Celoj (Ausgabeziele) der Projekcioj, in dieser Priorität:
 3. **shadcn-kompatible Registry**: Eroj als kopierbarer Quellcode per CLI, mit `--fm-*`-Variablen statt Hardcodes
 4. **Web Components** (`fm-*`) mit Wrappern für React, Vue, Angular, Svelte
 5. **Figma** (Variablen mit Modes, Library, Code Connect) und **Penpot** (DTCG-Import, Tokens, Komponenten), Penpot nachrangig, aber im Modelo von Anfang an mitgedacht
-   - **Figma Make Kit** je Aspekto: React-Paket, Tailwind-Tokens und aus dem Modelo generierte Guidelines (keine handgeschriebene Zeile, Art. VII)
+   - **Figma Make Kit**: ein Kit für alle Aspektoj, umschaltbar zur Laufzeit; bis Make das kann, ein Kit je Aspekto als Übergang. React-Paket, Tailwind-Tokens und aus dem Modelo generierte Guidelines (keine handgeschriebene Zeile, Art. VII)
 6. **Tokens Studio** (Sync in beide Richtungen über das DTCG-Repo)
 
 Ein neues Celo wird durch Spec eingeführt und muss aus dem Modelo ohne Modeländerung erzeugbar sein (Artikel I). Welche Frameworks aktuell relevant sind, wird pro Phase gegen den Markt geprüft (`research.md`); die Liste oben ist der Stand von 2026-09.
@@ -155,7 +156,7 @@ Prüfkriterium für jede Spec: Ein Entwickler ohne Vorwissen nutzt ein Ero in un
 
 ## Governance
 
-- Diese Constitution ändert sich nur durch eine Spec mit dem Titel „Constitution Amendment", die den geänderten Artikel, den Grund und die Migration bestehender Artefakte beschreibt. Änderungshistorie: v1.1 Art. XII/XIII ergänzt; v1.2 DTCG verbindlich, Mehrdimensionalität; v1.3 (Spec 001) Art. IV Aspekto-Pakete und Vollständigkeit, Art. V Schriften je Aspekto, Art. VI Jugxo-Bezug auf Artikel; v1.4 (Spec 002) Terminologie Tavolo und Ontologio, Art. III Ontologio, Art. VI Befund wird Regel, Art. VIII Internacia; v1.5 (Spec 003) Art. XII Celo Figma Make Kit, Verweis auf `docs/vojmapo.md`; v1.6 (Spec 003) Art. XII Tailwind-Namensraum `fm` im `@theme` statt `prefix(fm)` (bricht die Tailwind-NomRegulo, Jugxo zu Art. XII); v1.7 (Spec 004) Art. V Benchmark-Aspekto (fremde Systeme als eigene Aspektoj in getrennten Repos, Kern erhält nur Kennzahlen und Fingerprints) und Terminologie um **Aspiro** ergänzt; v1.9 (Spec 003, F41) Art. VI Lücken werden geführt und Terminologie um **Manko** ergänzt (neue Datenart `data/mankoj.json`, eigene Prüfung `check:mankoj` in der CI); v2.0 (Spec 003, F33) Art. V öffentlich beobachtbare Erscheinung ist kein Quelltext, Art. VI **Kein Trittbrett** (Verwendung des Ergebnisses, Maßstab Verwechselbarkeit), Art. VII **Herkunftsnachweis** je Import und die Markierung „Name gelesen, Lizenz ungeklärt" für jede gelesene Schrift — als v1.8 entworfen und nach v1.9 gelandet; die Nummer folgt der Landung, nicht dem Entwurf, eine v1.8 hat es nie gegeben.
+- Diese Constitution ändert sich nur durch eine Spec mit dem Titel „Constitution Amendment", die den geänderten Artikel, den Grund und die Migration bestehender Artefakte beschreibt. Änderungshistorie: v1.1 Art. XII/XIII ergänzt; v1.2 DTCG verbindlich, Mehrdimensionalität; v1.3 (Spec 001) Art. IV Aspekto-Pakete und Vollständigkeit, Art. V Schriften je Aspekto, Art. VI Jugxo-Bezug auf Artikel; v1.4 (Spec 002) Terminologie Tavolo und Ontologio, Art. III Ontologio, Art. VI Befund wird Regel, Art. VIII Internacia; v1.5 (Spec 003) Art. XII Celo Figma Make Kit, Verweis auf `docs/vojmapo.md`; v1.6 (Spec 003) Art. XII Tailwind-Namensraum `fm` im `@theme` statt `prefix(fm)` (bricht die Tailwind-NomRegulo, Jugxo zu Art. XII); v1.7 (Spec 004) Art. V Benchmark-Aspekto (fremde Systeme als eigene Aspektoj in getrennten Repos, Kern erhält nur Kennzahlen und Fingerprints) und Terminologie um **Aspiro** ergänzt; v1.9 (Spec 003, F41) Art. VI Lücken werden geführt und Terminologie um **Manko** ergänzt (neue Datenart `data/mankoj.json`, eigene Prüfung `check:mankoj` in der CI); v2.0 (Spec 003, F33) Art. V öffentlich beobachtbare Erscheinung ist kein Quelltext, Art. VI **Kein Trittbrett** (Verwendung des Ergebnisses, Maßstab Verwechselbarkeit), Art. VII **Herkunftsnachweis** je Import und die Markierung „Name gelesen, Lizenz ungeklärt" für jede gelesene Schrift — als v1.8 entworfen und nach v1.9 gelandet; die Nummer folgt der Landung, nicht dem Entwurf, eine v1.8 hat es nie gegeben; v2.1 (Spec 007): Begriff Uzo; Art. XII Punkt 5 und Phase 5: eine Library, ein Kit, Marken als Modi (Zielbild Chamäleon, Maintainer 2026-10-09).
 - Jeder `plan.md` enthält einen Abschnitt „Constitutional Compliance Review" mit einem Eintrag pro Artikel: konform / Ausnahme mit Grund.
 - `/speckit.analyze` prüft jede Phase gegen diese Constitution, bevor Tasks erzeugt werden.
 - Die Constitution hat Vorrang vor jeder anderen Praxis, jedem Template und jeder Bequemlichkeit.
@@ -173,7 +174,7 @@ Der gepflegte End-to-End-Fahrplan mit Status, Querschnittsthemen und Ideen steht
 | 2 | Regularo + Gvidanto (Kern) + Ontologio | Befunde aus Phase 1 als automatische Reguloj, komuna repariert, Gvidanto-Werkzeuge (warum, Kontrast, Begriffe), Ontologio |
 | 3 | Ero `butono` als Durchstich | Modelo → CSS/Tailwind → Web Component + React → Figma → Zuordnung Figma↔Code → Figma Make Kit → Gvidanto → Prüfung |
 | 4 | Eroj in der Breite, Sxablonoj | Abdeckung eines reifen Systems |
-| 5 | Figma-Library-Generator, Penpot-Export, Icon- und Font-Pipeline | Publizierbare Library je Aspekto, Penpot-Paket |
+| 5 | Figma-Library-Generator, Penpot-Export, Icon- und Font-Pipeline | Eine publizierbare Library, Marken als Modi; Penpot-Paket mit Markenschalter |
 | 6 | CLI + Registry | `fm init / add / aspekto / lint / sync / export`, shadcn-kompatible Registry |
 | 7 | Agordilo + Enportilo | Fremde Marke in unter einer Stunde als Aspekto |
 | 8 | Design-Agenten + Eval | Agent baut Screen per MCP konform ohne Korrektur |

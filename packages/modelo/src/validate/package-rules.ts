@@ -5,6 +5,7 @@ import type { IdsLock } from "../contracts/entity-ids.js";
 import { CORE_SET_NAME } from "../contracts/grammar.js";
 import { formatIssuePath, type ValidationIssue } from "../contracts/issues.js";
 import type { Modelo } from "../contracts/modelo.js";
+import { lingvoOverrideIssues } from "../eroj/uzo-rules.js";
 import { checkIdNamespaces, type IdRegistry } from "../ids/check-ids.js";
 import { ASPEKTO_DIMENSIO, referenceAspektoOf } from "../load/build.js";
 import type { ModeloDocument, ModeloFiles } from "../load/files.js";
@@ -18,7 +19,8 @@ function escapePointerSegment(segment: string): string {
 
 /**
  * `aspekto-set-foreign`, `aspekto-name-duplicate`, `aspekto-reference-missing`, the ID namespace
- * rules over every registry, and `id-duplicate` for an ID registered in two registries.
+ * rules over every registry, `id-duplicate` for an ID registered in two registries, and the
+ * overrides of text rules in the Tavolo lingvo (Spec 007, D-03).
  */
 export function packageIssues(modelo: Modelo, files: ModeloFiles): ValidationIssue[] {
   const issues: ValidationIssue[] = [];
@@ -132,6 +134,7 @@ export function packageIssues(modelo: Modelo, files: ModeloFiles): ValidationIss
       }
     }
   }
+  issues.push(...lingvoOverrideIssues(modelo, files));
   return issues;
 }
 

@@ -1,0 +1,9 @@
+{
+  "description": "Spec 007 A11/2 (A2): instead[0] sends the agent to the Ero verknuepfo, which does not exist. An alternative that cannot be found is no alternative; null says 'not covered' honestly.",
+  "issues": [
+    {
+      "rule": "uzo-ero-unknown",
+      "path": "data/eroj/butono/uzo.json#/uzo/instead/0/ero"
+    }
+  ]
+}

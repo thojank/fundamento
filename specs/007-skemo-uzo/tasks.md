@@ -85,7 +85,8 @@ Jede Fixture ist eine Kopie von `test/fixtures/valid/ero-minimal` mit einer `dat
   - Grün: Warnung in `checks/regularo`. Die Statistikzeile nennt `uzoj=0`.
 - [ ] **T017 Abschluss Stufe A**
   - `docs/vojmapo.md` Zeile 3c: „Stufe A umgesetzt“. PR „Spec 007 Stufe A“ mit den beobachteten Rotläufen je Aufgabe.
-  - Fertig: Export, `get_ero`, Make-Kit-Guidelines und Figma-Plan sind byte-gleich mit `main` (Diff der Build-Ausgaben im PR-Text). Das ist der Beleg, dass Stufe A die Abnahme von Spec 003 nicht berührt.
+  - Nachtrag „Zielbild Chamäleon“ (Maintainer, 2026-10-09): Vojmapo „Zielbild in einem Satz“ mit dem Zielsatz, Phase 5 und Thema „Figma Make Kits“; in der Constitution Art. XII Punkt 5 und Phasentabelle Zeile 5 als zweiter Punkt des Amendments v2.1 (Grund und Migration in spec.md, „Constitution Amendment“). `docs/docs.test.ts` hält den Wortlaut fest (Rot zuerst). Der Penpot-Abschnitt des README bleibt: gemessener Stand mit Manko-Id, kein Ziel.
+  - Fertig: Export (`modelo.json`, `rezolvoj.json`), `get_ero`, Make-Kit-Guidelines und Figma-Plan sind byte-gleich mit `main` (Diff der Build-Ausgaben im PR-Text). Das ist der Beleg, dass Stufe A die Abnahme von Spec 003 nicht berührt. `modelo.schema.json` zählt nicht dazu: Stufe A erweitert das Schema (T010, T011, T014, T015), und eine additive Erweiterung ist zulässig; keine Definition darf entfallen oder enger werden (Entscheidung des Maintainers, 2026-10-09, PR #49). Der Build-Stempel im Figma-Plugin wechselt mit jedem Commit und zählt ebenfalls nicht.
 
 ---
 

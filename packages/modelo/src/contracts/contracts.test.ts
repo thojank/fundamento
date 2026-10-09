@@ -1,9 +1,12 @@
+import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, expectTypeOf, it } from "vitest";
 import type {
   DtcgType as GeneratedDtcgType,
   EntityType as GeneratedEntityType,
   TokenRole as GeneratedTokenRole,
 } from "../generated/modelo-schema.js";
+import { FIXTURES_DIR } from "../validate/test-doubles/fixtures.js";
 import {
   CHECK_NAMES,
   type CheckResult,
@@ -61,6 +64,7 @@ describe("entity ID prefixes (§2.3)", () => {
       kontrastParo: "kpa",
       ero: "ero",
       skemo: "ske",
+      uzo: "uzo",
       sxablono: "sxa",
       projekcio: "prj",
       celo: "cel",
@@ -82,8 +86,28 @@ describe("rule catalog (§2.6)", () => {
     // 123: Spec 004 T013 added the missing fingerprint list, Spec 003 F8 the value a projection
     // cannot express, the Celo a Jugxo names in its typed reference, the part a side does not
     // draw (a released, named difference), F28 the floor a brand may not lower, F32 the parts
-    // a concentric focus ring is derived from and F41 the three findings of the register of gaps.
-    expect(RULE_IDS).toHaveLength(123);
+    // a concentric focus ring is derived from, F41 the three findings of the register of gaps and
+    // Spec 007 T012 the ten Uzo rules beyond the schema, T013 the web term in a Uzo, T015 the
+    // two findings of an override and T016 the warning about a Skemo without a Uzo.
+    expect(RULE_IDS).toHaveLength(137);
+    for (const rule of [
+      "uzo-skemo-missing",
+      "uzo-ero-unknown",
+      "uzo-kialo-missing",
+      "uzo-slot-unknown",
+      "uzo-content-fixed-missing",
+      "uzo-content-example-missing",
+      "uzo-use-instead-ero-missing",
+      "uzo-goal-twice",
+      "uzo-regulo-unknown",
+      "uzo-prop-unknown",
+      "uzo-web-term",
+      "uzo-override-fixed",
+      "uzo-override-jugxo-missing",
+      "skemo-uzo-missing",
+    ]) {
+      expect(RULE_IDS).toContain(rule);
+    }
     expect(RULE_IDS).toContain("manko-closing-missing");
     expect(RULE_IDS).toContain("protected-minimum");
     expect(RULE_IDS).toContain("parity-part-not-drawn");
@@ -111,6 +135,24 @@ describe("rule catalog (§2.6)", () => {
       expect(isRuleId(rule), rule).toBe(true);
     }
     expect(isRuleId("made-up-rule")).toBe(false);
+  });
+
+  // A fixture that expects a rule the catalog does not know can never pass (Spec 007, A11).
+  it("knows every rule a fixture expects", () => {
+    const unknown = (["valid", "invalid"] as const).flatMap((kind) =>
+      readdirSync(join(FIXTURES_DIR, kind)).flatMap((name) => {
+        const file = join(FIXTURES_DIR, kind, name, "expected-issues.json");
+        if (!existsSync(file)) return [];
+        const expected = JSON.parse(readFileSync(file, "utf8")) as {
+          issues?: { rule: string }[];
+          warnings?: { rule: string }[];
+        };
+        return [...(expected.issues ?? []), ...(expected.warnings ?? [])]
+          .filter(({ rule }) => !isRuleId(rule))
+          .map(({ rule }) => `${kind}/${name}: ${rule}`);
+      }),
+    );
+    expect(unknown).toEqual([]);
   });
 
   it("formats located issue paths as <file>#<JSON Pointer>", () => {

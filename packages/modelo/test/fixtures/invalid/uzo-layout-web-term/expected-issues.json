@@ -1,0 +1,9 @@
+{
+  "description": "Spec 007 A11/5 (A6, Art. VIII): layout.full-width allows the container flex, a CSS property. The schema allows free container names; only the web-term rule catches this. The Skemo gains the boolean prop full-width that layout.full-width needs.",
+  "issues": [
+    {
+      "rule": "uzo-web-term",
+      "path": "data/eroj/butono/uzo.json#/uzo/layout/full-width/allowedIn/containers/0"
+    }
+  ]
+}

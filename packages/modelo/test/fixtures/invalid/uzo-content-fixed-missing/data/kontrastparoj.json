@@ -1,0 +1,11 @@
+{
+  "kontrastParoj": [
+    {
+      "id": "kpa_01K5FMAJ0K2ES2P0S3VGVDAX3Q",
+      "name": "text-on-background",
+      "foreground": "color.text.default",
+      "background": "color.background.default",
+      "kategorio": "text-normal"
+    }
+  ]
+}

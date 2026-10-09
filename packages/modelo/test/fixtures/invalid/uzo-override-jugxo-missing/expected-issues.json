@@ -1,0 +1,9 @@
+{
+  "description": "Spec 007 A11/9 (A7, D-03): the Aspekto ekzemplo overrides the adjustable rule destructive-label-not-generic and names a Jugxo that does not exist. An override without its Jugxo is a deviation nobody has to answer for.",
+  "issues": [
+    {
+      "rule": "uzo-override-jugxo-missing",
+      "path": "aspekto-ekzemplo/aspekto.json#/tavoloj/lingvo/overrides/0/jugxo"
+    }
+  ]
+}

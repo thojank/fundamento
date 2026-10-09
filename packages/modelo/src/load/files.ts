@@ -48,6 +48,11 @@ export interface ModeloFiles {
   data: Record<DataFileName, ModeloDocument>;
   /** `data/eroj/<name>/skemo.json`, sorted by path; empty when the directory does not exist. */
   eroj: ModeloDocument[];
+  /**
+   * `data/eroj/<name>/uzo.json`, sorted by path, also in folders without a Skemo (validation
+   * reports those: uzo-skemo-missing). Spec 007, D-01.
+   */
+  uzoj: ModeloDocument[];
   themes: ModeloDocument;
   metadata: ModeloDocument;
 }
@@ -66,6 +71,8 @@ export const SETS_DIR_NAME = "sets";
 export const EROJ_DIR_NAME = "eroj";
 /** The file in each Ero folder: the Ero and its Skemo. */
 export const SKEMO_FILE_NAME = "skemo.json";
+/** The file next to the Skemo that says how the Ero is used (Spec 007, D-01). */
+export const UZO_FILE_NAME = "uzo.json";
 
 /**
  * Reads `<vortaroDir>/sets/**.json`, `<vortaroDir>/$themes.json`, `<vortaroDir>/$metadata.json`
@@ -150,9 +157,14 @@ export function readModeloFiles(source: ModeloSource): ReadModeloFilesResult {
   }
 
   const eroj: ModeloDocument[] = [];
-  for (const path of listEroFiles(join(source.dataDir, EROJ_DIR_NAME))) {
+  for (const path of listEroFiles(join(source.dataDir, EROJ_DIR_NAME), SKEMO_FILE_NAME)) {
     const document = read(path);
     if (document !== undefined) eroj.push(document);
+  }
+  const uzoj: ModeloDocument[] = [];
+  for (const path of listEroFiles(join(source.dataDir, EROJ_DIR_NAME), UZO_FILE_NAME)) {
+    const document = read(path);
+    if (document !== undefined) uzoj.push(document);
   }
 
   const blocking = issues.some(
@@ -167,11 +179,11 @@ export function readModeloFiles(source: ModeloSource): ReadModeloFilesResult {
   ) {
     return { issues };
   }
-  return { files: { sets, packages, data, eroj, themes, metadata }, issues };
+  return { files: { sets, packages, data, eroj, uzoj, themes, metadata }, issues };
 }
 
-/** `<erojDir>/<name>/skemo.json` for every folder that has one, sorted by path. */
-function listEroFiles(erojDir: string): string[] {
+/** `<erojDir>/<name>/<fileName>` for every folder that has one, sorted by path. */
+function listEroFiles(erojDir: string, fileName: string): string[] {
   let entries: Dirent[];
   try {
     entries = readdirSync(erojDir, { withFileTypes: true });
@@ -180,7 +192,7 @@ function listEroFiles(erojDir: string): string[] {
   }
   return entries
     .filter((entry) => entry.isDirectory())
-    .map((entry) => join(erojDir, entry.name, SKEMO_FILE_NAME))
+    .map((entry) => join(erojDir, entry.name, fileName))
     .filter((path) => existsSync(path))
     .sort();
 }

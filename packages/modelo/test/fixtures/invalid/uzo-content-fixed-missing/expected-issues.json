@@ -1,0 +1,13 @@
+{
+  "description": "Spec 007 A11/6 (A7): content[0] does not say whether the text rule is fixed. Without it no Aspekto knows whether it may override the rule. The schema rejects it too (schema-violation at the same entry).",
+  "issues": [
+    {
+      "rule": "uzo-content-fixed-missing",
+      "path": "data/eroj/butono/uzo.json#/uzo/content/0"
+    },
+    {
+      "rule": "schema-violation",
+      "path": "data/eroj/butono/uzo.json#/uzo/content/0"
+    }
+  ]
+}

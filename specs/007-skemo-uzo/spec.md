@@ -84,6 +84,19 @@ Für `butono` mindestens: „Das Label nennt die Aktion als Verb" (anpassbar), �
 
 **Migration:** Bestehende Eroj (`butono`) bekommen ihre Uzo in dieser Spec. Kein bestehendes Artefakt wird ungültig (A1: Skemo ohne Uzo bleibt gültig, Warnung).
 
+**Zweiter Punkt: Zielbild Chamäleon (Nachtrag, Maintainer 2026-10-09).**
+
+Zielsatz: „Fundamento ist ein markenagnostisches Design System, das sich wie ein Chamäleon an jede Marke anpasst. Auch in Figma: Ein Entwurf, in Marke A gebaut und nach Marke B verschoben, sieht aus wie Marke B. Ein Markenschalter stellt einen ganzen Entwurf von A auf B um – in Figma, in Penpot und in jedem Code, zur Laufzeit; wenn es geht, auch in Figma Make.“
+
+**Geänderter Artikel:** Art. XII Punkt 5 (Make Kit) und Phasentabelle Zeile 5.
+
+- Art. XII Punkt 5, Unterpunkt: „Figma Make Kit: ein Kit für alle Aspektoj, umschaltbar zur Laufzeit; bis Make das kann, ein Kit je Aspekto als Übergang. React-Paket, Tailwind-Tokens und aus dem Modelo generierte Guidelines (keine handgeschriebene Zeile, Art. VII)“
+- Phasentabelle Zeile 5, Spalte Ergebnis: „Eine publizierbare Library, Marken als Modi; Penpot-Paket mit Markenschalter“
+
+**Grund:** Das Zielbild ist das Chamäleon: eine Library, ein Kit, Marken als Modi, Umschaltung zur Laufzeit in Figma, Penpot und Code. ‚Je Aspekto‘ beschrieb den Übergang des Durchstichs und wurde als Ziel gelesen.
+
+**Migration:** Keine. Die Figma-Projektion erzeugt schon eine Library mit Modi (F27, M1). Die Make Kits bleiben je Aspekto, bis eine Messung zeigt, ob Make ein umschaltbares Kit trägt.
+
 **Verhältnis zur Tavolo „Verhalten":** Die Vojmapo führt „Verhalten" als Kandidat einer Tavolo (Schicht) im Aspekto-Paket. Uzo ist das markenneutrale Verhalten eines Ero, die Tavolo wäre das markenspezifische. A7 legt die Brücke fest: Die Tavolo darf anpassbare Uzo-Regeln überstimmen, feste nicht. Die Tavolo selbst bleibt Kandidat.
 
 ## Gvidanto (Art. VII)

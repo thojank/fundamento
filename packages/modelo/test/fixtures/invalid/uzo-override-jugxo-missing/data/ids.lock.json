@@ -1,0 +1,116 @@
+{
+  "ids": {
+    "dim_01M2WRK8G0DDDDDDDDDDDDDDDD": {
+      "status": "active",
+      "type": "dimensio"
+    },
+    "dim_01M2WRK8G0DDDDDDDDDDDDDDDE": {
+      "status": "active",
+      "type": "dimensio"
+    },
+    "dim_01M2WRK8G0DDDDDDDDDDDDDDDF": {
+      "status": "active",
+      "type": "dimensio"
+    },
+    "dva_01M2WRK8G0DDDDDDDDDDDDDDDG": {
+      "status": "active",
+      "type": "dimensioValoro"
+    },
+    "dva_01M2WRK8G0DDDDDDDDDDDDDDDH": {
+      "status": "active",
+      "type": "dimensioValoro"
+    },
+    "dva_01M2WRK8G0DDDDDDDDDDDDDDDJ": {
+      "status": "active",
+      "type": "dimensioValoro"
+    },
+    "dva_01M2WRK8G0DDDDDDDDDDDDDDDK": {
+      "status": "active",
+      "type": "dimensioValoro"
+    },
+    "dva_01M2WRK8G0DDDDDDDDDDDDDDDM": {
+      "status": "active",
+      "type": "dimensioValoro"
+    },
+    "ero_01M2XM2NGN3KJSKJ4JTXQWMF72": {
+      "status": "active",
+      "type": "ero"
+    },
+    "jug_01M4H2T2MBP5TZTQR7QSRW9JSY": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M4H2T2MCNX6CEYZ90CGJT0VP": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "kpa_01M4H2W3PC4S248ABQNYHWSHMD": {
+      "status": "active",
+      "type": "kontrastParo"
+    },
+    "reg_01M4H2T2FKDP91NR287MM0ZC7Z": {
+      "status": "active",
+      "type": "regulo"
+    },
+    "reg_01M4H2T2FMBDRRZ9P6M0204C9S": {
+      "status": "active",
+      "type": "regulo"
+    },
+    "set_01M2WRK8G0DDDDDDDDDDDDDDDN": {
+      "status": "active",
+      "type": "tokenSet"
+    },
+    "set_01M2WRK8G0DDDDDDDDDDDDDDDP": {
+      "status": "active",
+      "type": "tokenSet"
+    },
+    "set_01M2WRK8G0DDDDDDDDDDDDDDDQ": {
+      "status": "active",
+      "type": "tokenSet"
+    },
+    "set_01M2WRK8G0DDDDDDDDDDDDDDDR": {
+      "status": "active",
+      "type": "tokenSet"
+    },
+    "ske_01M2XM2NWJ39A7BEZ9A2S8GANE": {
+      "status": "active",
+      "type": "skemo"
+    },
+    "tok_01M2WRK8G0DDDDDDDDDDDDDDDS": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M2WRK8G0DDDDDDDDDDDDDDDT": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M2WRK8G0DDDDDDDDDDDDDDDV": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M2WRK8G0DDDDDDDDDDDDDDDW": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M2WRK8G0DDDDDDDDDDDDDDDX": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M2WRK8G0DDDDDDDDDDDDDDDY": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M2WRK8G0DDDDDDDDDDDDDDDZ": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M2WRK8G0DDDDDDDDDDDDDDE0": {
+      "status": "active",
+      "type": "token"
+    },
+    "uzo_01M4H39SZBPN8VKA70309EJ35G": {
+      "status": "active",
+      "type": "uzo"
+    }
+  }
+}

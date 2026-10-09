@@ -1,0 +1,9 @@
+{
+  "description": "Spec 007 A11/4 (A5): slots.badge rules a slot the Skemo of butono does not have. A rule for a slot that does not exist is checked against nothing.",
+  "issues": [
+    {
+      "rule": "uzo-slot-unknown",
+      "path": "data/eroj/butono/uzo.json#/uzo/slots/badge"
+    }
+  ]
+}

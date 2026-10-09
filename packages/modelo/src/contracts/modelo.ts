@@ -18,6 +18,7 @@ import type {
   Skemo,
   TextTransform,
   TokenRole,
+  Uzo,
 } from "../generated/modelo-schema.js";
 import type { IssueLocation, ValidationIssue } from "./issues.js";
 
@@ -34,6 +35,7 @@ export type {
   Jugxo,
   JugxoEkzemplo,
   JugxojFile,
+  Keywords,
   KontrastKategorio,
   KontrastParo,
   KontrastParojFile,
@@ -54,6 +56,13 @@ export type {
   SkemoPartSource,
   SkemoProp,
   TokenSetFile,
+  Uzo,
+  UzoBoundary,
+  UzoContent,
+  UzoFile,
+  UzoInstead,
+  UzoLayout,
+  UzoSlot,
 } from "../generated/modelo-schema.js";
 
 /** One Ero with its Skemo, loaded from `data/eroj/<name>/skemo.json` (Spec 003, D-02). */
@@ -62,6 +71,10 @@ export interface LoadedEro {
   file: string;
   ero: Ero;
   skemo: Skemo;
+  /** The Uzo from `uzo.json` next to the Skemo, if the Ero has one (Spec 007, D-01). */
+  uzo?: Uzo;
+  /** Path of that `uzo.json` relative to the Modelo root; set together with `uzo`. */
+  uzoFile?: string;
 }
 
 /**

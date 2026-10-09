@@ -8,7 +8,7 @@ import type { ValidationIssue } from "../../contracts/issues.js";
 import { lineColumn, textPath } from "../namespace/paths.js";
 
 /** Attributes whose value is read out or shown; a literal here is a translatable string. */
-const NAMING_ATTRIBUTES = [
+export const NAMING_ATTRIBUTES: readonly string[] = [
   "aria-label",
   "aria-placeholder",
   "aria-roledescription",

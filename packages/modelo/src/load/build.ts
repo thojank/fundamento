@@ -75,7 +75,7 @@ export function buildModelo(files: ModeloFiles): BuildModeloResult {
     ],
     mankoj: entriesOf<Manko>(files.data["mankoj.json"].value, "mankoj"),
     kontrastParoj: entriesOf<KontrastParo>(files.data["kontrastparoj.json"].value, "kontrastParoj"),
-    eroj: loadedEroj(files.eroj),
+    eroj: loadedEroj(files.eroj, files.uzoj),
     idsLock,
     aspektoPackages,
     themesFile: files.themes.value,
@@ -85,26 +85,45 @@ export function buildModelo(files: ModeloFiles): BuildModeloResult {
 }
 
 /**
- * Eroj from `data/eroj/<name>/skemo.json`, sorted by Ero name. Like the other entities they are
- * only trustworthy after schema validation; a file without an `ero` and a `skemo` object is
- * dropped here and reported by the schema step.
+ * Eroj from `data/eroj/<name>/skemo.json`, sorted by Ero name, each with the Uzo from the
+ * `uzo.json` in the same folder (Spec 007, D-01). Like the other entities they are only
+ * trustworthy after schema validation; a file without an `ero` and a `skemo` object, or a
+ * `uzo.json` without a `uzo` object, is dropped here and reported by the schema step.
  */
-function loadedEroj(documents: readonly ModeloDocument[]): LoadedEro[] {
+function loadedEroj(
+  documents: readonly ModeloDocument[],
+  uzoDocuments: readonly ModeloDocument[],
+): LoadedEro[] {
+  const uzoByFolder = new Map(
+    uzoDocuments.map((document) => [folderOf(document.file), document] as const),
+  );
   return documents
     .flatMap((document) => {
       const value = document.value;
       if (!isJsonObject(value) || !isJsonObject(value.ero) || !isJsonObject(value.skemo)) {
         return [];
       }
-      return [
-        {
-          file: document.file,
-          ero: value.ero as unknown as LoadedEro["ero"],
-          skemo: value.skemo as unknown as LoadedEro["skemo"],
-        },
-      ];
+      const entry: LoadedEro = {
+        file: document.file,
+        ero: value.ero as unknown as LoadedEro["ero"],
+        skemo: value.skemo as unknown as LoadedEro["skemo"],
+      };
+      const uzoDocument = uzoByFolder.get(folderOf(document.file));
+      if (uzoDocument !== undefined && isJsonObject(uzoDocument.value)) {
+        const uzo = uzoDocument.value.uzo;
+        if (isJsonObject(uzo)) {
+          entry.uzo = uzo as unknown as NonNullable<LoadedEro["uzo"]>;
+          entry.uzoFile = uzoDocument.file;
+        }
+      }
+      return [entry];
     })
     .sort((a, b) => (a.ero.name < b.ero.name ? -1 : a.ero.name > b.ero.name ? 1 : 0));
+}
+
+/** The folder part of a Modelo-relative path (`data/eroj/butono/skemo.json` → `data/eroj/butono`). */
+function folderOf(file: string): string {
+  return file.slice(0, file.lastIndexOf("/"));
 }
 
 /** Name of the Dimensio whose values are Aspektoj. */

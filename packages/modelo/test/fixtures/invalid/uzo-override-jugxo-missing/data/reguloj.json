@@ -1,0 +1,30 @@
+{
+  "reguloj": [
+    {
+      "id": "reg_01M4H2T2FKDP91NR287MM0ZC7Z",
+      "name": "spacing-owned-by-container",
+      "statement": "The space between sibling Eroj belongs to their container; an Ero carries no outer spacing.",
+      "kialo": "An Ero does not know its neighbours; if each brought its own distance, two side by side would add up.",
+      "scope": "eroj: butono instances in a design or in code",
+      "checkability": "manual",
+      "appliesTo": {
+        "eroj": [
+          "butono"
+        ]
+      }
+    },
+    {
+      "id": "reg_01M4H2T2FMBDRRZ9P6M0204C9S",
+      "name": "destructive-label-not-generic",
+      "statement": "A destructive action is never labelled with a generic confirmation (OK, Ja, Yes).",
+      "kialo": "A generic word confirms whatever the person thinks they are confirming; before a loss the label must say the loss.",
+      "scope": "eroj: butono instances in a design or in code",
+      "checkability": "manual",
+      "appliesTo": {
+        "eroj": [
+          "butono"
+        ]
+      }
+    }
+  ]
+}

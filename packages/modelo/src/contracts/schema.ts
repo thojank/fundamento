@@ -23,6 +23,7 @@ export const SCHEMA_DEFS = {
   ero: "Ero",
   skemo: "Skemo",
   eroFile: "EroFile",
+  uzoFile: "UzoFile",
   sxablono: "Sxablono",
   projekcio: "Projekcio",
   celo: "Celo",
