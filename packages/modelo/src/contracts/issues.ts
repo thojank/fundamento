@@ -167,6 +167,7 @@ export const RULE_IDS = [
   "uzo-goal-twice",
   "uzo-regulo-unknown",
   "uzo-prop-unknown",
+  "uzo-web-term",
   // Projekcio lints (Spec 003, D-17)
   "css-physical-property",
   "ero-hardcoded-string",

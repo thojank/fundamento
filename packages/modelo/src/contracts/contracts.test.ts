@@ -87,8 +87,8 @@ describe("rule catalog (§2.6)", () => {
     // cannot express, the Celo a Jugxo names in its typed reference, the part a side does not
     // draw (a released, named difference), F28 the floor a brand may not lower, F32 the parts
     // a concentric focus ring is derived from, F41 the three findings of the register of gaps and
-    // Spec 007 T012 the ten Uzo rules beyond the schema.
-    expect(RULE_IDS).toHaveLength(133);
+    // Spec 007 T012 the ten Uzo rules beyond the schema and T013 the web term in a Uzo.
+    expect(RULE_IDS).toHaveLength(134);
     for (const rule of [
       "uzo-skemo-missing",
       "uzo-ero-unknown",
@@ -100,6 +100,7 @@ describe("rule catalog (§2.6)", () => {
       "uzo-goal-twice",
       "uzo-regulo-unknown",
       "uzo-prop-unknown",
+      "uzo-web-term",
     ]) {
       expect(RULE_IDS).toContain(rule);
     }

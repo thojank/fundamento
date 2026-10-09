@@ -4,6 +4,9 @@
 // and the Reguloj that apply to the Ero. Like the Skemo rules they read the Uzo after schema
 // validation, but never trust its shape: a value the schema rejected is skipped, not reported twice.
 
+import { DESIGN_PREFIXES, STRUCTURAL_PROPERTIES } from "../checks/vortaro-lint/component-css.js";
+import { PHYSICAL_PROPERTIES } from "../checks/vortaro-lint/css-physical.js";
+import { NAMING_ATTRIBUTES } from "../checks/vortaro-lint/ero-strings.js";
 import { formatIssuePath, type RuleId, type ValidationIssue } from "../contracts/issues.js";
 import type { Jugxo, LoadedEro, Modelo, Regulo } from "../contracts/modelo.js";
 import { appendPointer } from "../json/pointer.js";
@@ -49,6 +52,7 @@ export function uzoIssues(modelo: Modelo, files: ModeloFiles): ValidationIssue[]
     if (entry.uzo === undefined || entry.uzoFile === undefined) continue;
     const uzo = entry.uzo as unknown as JsonObject;
     const at = atIn(entry.uzoFile);
+    issues.push(...uzoWebTermIssues(entry.uzoFile, uzo));
     pairIssues(entry, uzo, at);
     eroIssues(entry, uzo, eroNames, at);
     kialoIssues(entry, uzo, at);
@@ -59,6 +63,78 @@ export function uzoIssues(modelo: Modelo, files: ModeloFiles): ValidationIssue[]
     contentIssues(entry, uzo, modelo, at);
   }
   return issues;
+}
+
+/**
+ * `uzo-web-term` (A6, Art. VIII, D-09): a string of the Uzo that is a CSS property, a CSS value
+ * with a unit or a DOM term. `uzo` is the value of the file's `uzo` key; paths point into `file`.
+ */
+export function uzoWebTermIssues(file: string, uzo: unknown): ValidationIssue[] {
+  const issues: ValidationIssue[] = [];
+  const visit = (value: unknown, pointer: string): void => {
+    if (typeof value === "string") {
+      const term = webTermIn(value);
+      if (term === undefined) return;
+      issues.push({
+        rule: "uzo-web-term",
+        severity: "error",
+        path: formatIssuePath({ file, pointer }),
+        message: `${JSON.stringify(term)} in the Uzo is a web term (CSS or DOM); a Uzo speaks of the Ero, not of one platform (Art. VIII).`,
+        suggestion:
+          "Use the platform-neutral words of the Uzo (size content or container, wrap never or allowed, a container kind such as action-bar); the projections translate them.",
+      });
+    } else if (Array.isArray(value)) {
+      value.forEach((item, index) => {
+        visit(item, `${pointer}/${index}`);
+      });
+    } else if (isJsonObject(value)) {
+      for (const [key, item] of Object.entries(value)) visit(item, appendPointer(pointer, key));
+    }
+  };
+  visit(uzo, "/uzo");
+  return issues;
+}
+
+/**
+ * Units a CSS length, time or angle carries. The Modelo knows px, ms and s (DTCG); the rest are
+ * the CSS units a hand-written layout rule would reach for.
+ */
+const CSS_UNITS = ["px", "rem", "em", "%", "vh", "vw", "vmin", "vmax", "dvh", "svh", "lvh"]
+  .concat(["ch", "ex", "pt", "fr", "deg", "ms", "s"])
+  .join("|");
+const CSS_VALUE_WITH_UNIT = new RegExp(`^[+-]?(\\d+(\\.\\d*)?|\\.\\d+)(${CSS_UNITS})$`);
+
+/** CSS properties as check:vortaro-lint lists them (component and physical-property rules). */
+const CSS_PROPERTIES: ReadonlySet<string> = new Set([
+  ...STRUCTURAL_PROPERTIES,
+  ...Object.keys(PHYSICAL_PROPERTIES),
+  ...Object.values(PHYSICAL_PROPERTIES),
+]);
+
+/** DOM terms: the attributes check:vortaro-lint reads as spoken or shown text. */
+const DOM_TERMS: ReadonlySet<string> = new Set(NAMING_ATTRIBUTES);
+
+const isCssProperty = (word: string): boolean =>
+  CSS_PROPERTIES.has(word) ||
+  DESIGN_PREFIXES.some((prefix) => word === prefix || word.startsWith(`${prefix}-`));
+
+/**
+ * The web term a string is or contains. The whole string is a term when it is a CSS property, a
+ * value with a unit or a DOM term. Inside a sentence only what cannot be prose counts: a
+ * hyphenated property (`white-space`), a DOM term or a value with a unit. A plain word such as
+ * "height" or "color" in a kialo is English, not CSS.
+ */
+function webTermIn(value: string): string | undefined {
+  const whole = value.trim().toLowerCase();
+  if (isCssProperty(whole) || DOM_TERMS.has(whole) || CSS_VALUE_WITH_UNIT.test(whole)) {
+    return whole;
+  }
+  for (const raw of whole.split(/[^a-z0-9%.+-]+/)) {
+    const word = raw.replace(/^[.+-]+|[.-]+$/g, "");
+    if (word.includes("-") && (isCssProperty(word) || DOM_TERMS.has(word))) return word;
+    if (CSS_VALUE_WITH_UNIT.test(word)) return word;
+  }
+  return undefined;
 }
 
 /** The folder part of a Modelo-relative path. */

@@ -40,7 +40,7 @@ export const STRUCTURAL_PROPERTIES: readonly string[] = [
 ];
 
 /** Design properties: their value must come from a token (prefix match on the property name). */
-const DESIGN_PREFIXES: readonly string[] = [
+export const DESIGN_PREFIXES: readonly string[] = [
   "color",
   "background",
   "border-color",
