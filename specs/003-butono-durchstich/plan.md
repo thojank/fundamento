@@ -473,7 +473,53 @@ Task IDs are those of [`tasks.md`](tasks.md); M1–M3 are the maintainer's manua
 
 ## Manual acceptance results
 
-**Status:** pending, after implementation. Figma library (S3), Make Kits (S4, AK-08) and the S5 run (AK-10) are recorded here by the maintainer.
+**Status:** M1 (Figma library, S3) and M2 (Make Kits, S4, AK-08) recorded, 2026-10-09; M3 (S5 run, AK-10) open. Each measurement follows a check sheet written before it (expectation before measurement); the maintainer's files are `pruefblatt-m1-2026-10-09.md` / `messung-m1-2026-10-09.md` and `pruefblatt-m2-2026-10-09.md` / `messung-m2-2026-10-09.md`.
+
+### M1 – Figma library (S3, AK-07)
+
+**Nachtrag:** repeat of M1 (first accepted 2026-09-22, see `tasks.md`) with build `d36790a`: four Dimensioj through the publish. Measured 2026-10-09, 14:27–14:46. **Result: 16 of 16.**
+
+Source `f10b-2` (set `butono` 2:1067, build stamp `d36790a`), consumer `buzz`. Expected values from `packages/modelo/dist/rezolvoj.json` (export 2026-10-07 13:41). All values read through the plugin API (Figma MCP `use_figma`), not by eye; probe rectangles removed after each reading.
+
+| Part | Checks | Measured |
+|---|---|---|
+| A – source before publishing | A1–A3 ✓ | Build stamp `d36790a`. 7 collections, 698 variables: fundamento 364, aspekto 158 (komuna), color-scheme 108, contrast 33, viewport 18, density 9, motion 8. `color/text/default`: light/default `#27292c`, light/high `#000000`, dark/default `#eeeeef`, dark/high `#ffffff` |
+| B – publish (Figma UI) | B1–B2 ✓ | Dialog „Änderungen (8 von 8)“: aspekto, color-scheme (44), contrast (33), density (9), fundamento (364), motion (8), viewport (18), `butono`; „Versteckt (2)“. Published as „M1 d36790a“, twice more for D1 and D4 |
+| C – consumer `buzz` | C1–C7 ✓ | 7 library collections, all `remote: true`, modes complete: motion 8, color-scheme 44, density 9, contrast 33, aspekto 0, viewport 18, fundamento 364. `color/text/default` resolves to the four values of A3. `size/control/medium` compact 32 · default 40 · comfortable 48; `font/size/display/1` compact 40 · medium 56 · expanded 64; `motion/duration/medium` default 200 · reduced 0. Local collections `[]` |
+| D – a change reaches the consumer | D1–D4 ✓ | `size/control/medium` compact 32 → 33 in the source, published: `buzz` reads compact 33 · default 40 · comfortable 48 after „Aktualisieren“, C3 unchanged. Rollback to the alias on `size/scale/600`: `buzz` reads 32 |
+
+Findings:
+
+1. **Hidden cascade steps do not arrive, but they still resolve.** color-scheme brings 44 of 108 variables into the consumer, aspekto 0 of 158: exactly the ones the plugin creates with `hiddenFromPublishing` (the suffixed cascade steps `@contrast=…`, `@color-scheme=…`). `color/text/default` points to such hidden variables and still resolves correctly in the consumer (C3). No Manko.
+2. **No „Aktualisieren“ button at D4.** The value was 32 anyway; `buzz` held no bound instance at that moment. Not measured: whether a bound instance stays old without the button.
+3. **Alias instead of a number.** `size/control/medium@compact` is an alias on `size/scale/600`; a mode value changed by hand in Figma cuts the chain to the Vortaro, the plugin rebuilds it on the next run.
+4. „Versteckt (2)“ in the publish dialog: not measured.
+
+M1 is shown. Open from F43: M3, the full paint line (`resolved`, `stored`, `modes`) — not part of this check sheet.
+
+### M2 – Make Kits in Figma Make (S4, AK-08)
+
+Measured 2026-10-09, 15:08–16:10. Test-account checklist 0a–0d (Art. V) confirmed by the maintainer at 15:08. Both kits from npm `0.1.0-next.1`; generated code read as text, tokens checked against the kit's `styles.css` and `tailwind.css`.
+
+| Part | Checks | Measured |
+|---|---|---|
+| A – release | A1 red (finding 1), A2–A4 ✓ | Workflow „Release“, publish `0.1.0-next.1`: red after 44 s in „Build both kits and publish them under the tag next“ — both kits built (18 files, 26.0 kB, LICENSE), provenance signed (sigstore logIndex 3164886942), then `E403 … You cannot publish over the previously published versions: 0.1.0-next.1`. On npm, `0.1.0-next.1` was published on 22.09. from the workflow, green provenance seal; code tab: `dist/` 67.2 kB, `guidelines/` 24 kB, LICENSE 1.09 kB, README, package.json, `styles.css` 41 kB, `tailwind.css` 12.8 kB. dist-tags: `next` → next.1, `latest` → next.1 (F26) |
+| B – kit komuna | B1–B8 ✓ | `package.json`: `"@fundamento/make-kit-komuna": "0.1.0-next.1"` (exact). `guidelines/` copied (`Guidelines.md`, `setup.md`, `foundations/{color,dimensioj,spacing,typography}.md`, `components/butono.md`). Prompt „Ein Formular mit zwei Feldern und Speichern/Abbrechen.“ → 48 s, fields Name and E-Mail, `pnpm build` green. `import { Butono } from "@fundamento/make-kit-komuna"`, both buttons `<Butono>`; Speichern `variant="primary"`, Abbrechen `variant="tertiary"`. `App.tsx` 0 hex, only `*-fm-*` classes and `var(--fm-…)`; `index.css` 0 hex, 23 distinct `--fm-*` variables, all present in the kit; both kit imports in `index.css`. Preview by eye: primary dark blue, tertiary as text, fields light |
+| C – kit ekzemplo, same prompt | C1 ✓ except B7 (not measured), C2 ✓ | Make had already built the form in the setup step; the prompt answered after 3 s that it was present. `import { Butono } from '@fundamento/make-kit-ekzemplo'`, one primary (Speichern), Abbrechen tertiary, 0 hex. `index.css` 0 hex, only `--fm-*`, but only `@import 'tailwindcss'` — the two kit imports are not there; the preview shows ekzemplo colours anyway, the import is presumably in `main.tsx` (not read). Preview: cream background, dark green primary, angular radii; button order Speichern/Abbrechen (komuna: Abbrechen/Speichern) |
+
+Findings (numbered as in the measurement; finding 1 closes F25 in `tasks.md`):
+
+2. **Make writes into the guidelines.** At the assistant step „Weiter“, Make added its own notes to `guidelines/setup.md`. For Spec 007 A12 (parity of the guidelines): generated files cannot be kept byte-identical in the target; the check must read „contains“, not equality.
+3. **Make fills the gap silently, but with tokens.** The kit has no heading, label or input field. In both runs Make wrote its own CSS for them entirely from `--fm-*` tokens (typography headline-3/body-1/label-1, `size-control-medium`, border, radius, focus ring, motion), without one raw value. With komuna the own classes were named `fm-heading`, `fm-body`, `fm-label`, `fm-input` — like system classes, which they are not; with ekzemplo `form-field`, `form-card`. In neither run did Make say that the kit has no field. This is the before-measurement for Spec 007 S1/S2 (`suggest_ero` with `action: ask-human`): the guidelines act on the values, not on the boundary.
+4. **Token in the wrong role (ekzemplo).** Border and ring width `var(--fm-spacing-scale-50)` instead of `--fm-border-width-default`/`--fm-border-width-focus`; stroke `solid` instead of `--fm-stroke-solid`. A hex grep does not see this; `check_usage` (Spec 007 A10) would have to. With komuna the same place was right.
+
+Not measured: ekzemplo `main.tsx` (B7), the hex of the rendered buttons from the DOM (B8 was by eye); the kits were not published in Make (assistant step 5, not needed for M2).
+
+M2 / AK-08 is shown: both kits load from npm in Figma Make, Make builds the quickstart prompt with the kit's `Butono`, exactly one primary, Tailwind `*-fm-*` and no hex value — in both brands, with a visibly different result.
+
+### M3 – S5 run (AK-10)
+
+**Status:** offen.
 
 ### Publish dry run (Q2)
 

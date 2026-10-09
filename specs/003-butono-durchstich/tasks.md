@@ -826,7 +826,7 @@ und F24 (Befund, nicht blockierend).
     Trusted Publishing; wird er in einen Workflow gehoben, ist `--provenance` dort erneut
     festzuhalten.
 
-- [ ] **F25 Die Lizenzdatei fehlt im veröffentlichten Paket** (npm, 2026-09-22)
+- [x] **F25 Die Lizenzdatei fehlt im veröffentlichten Paket** (npm, 2026-09-22)
   - Stand: `@fundamento/make-kit-komuna` und `-ekzemplo` liegen öffentlich auf npm als
     0.1.0-next.0 (MIT, Maintainer tjango); Trusted Publishing ist für beide eingerichtet
     (thojank/fundamento, `release.yml`, Rechte publish und stage publish, „2FA, keine
@@ -852,6 +852,14 @@ und F24 (Befund, nicht blockierend).
     zeigt mit `--print` die Befehlszeile samt Version.
   - Fertig wenn: der Maintainer 0.1.0-next.1 aus GitHub veröffentlicht und auf npm prüft: 18
     Dateien, LICENSE vorhanden, Herkunftsnachweis sichtbar.
+  - **Erledigt** (Messung M2, 2026-10-09, Prüfungen A2–A4): `0.1.0-next.1` liegt seit dem 22.09.
+    aus dem Workflow auf npm — 18 Dateien, LICENSE (1,09 kB) im Code-Reiter, grünes
+    Provenance-Siegel; dist-tags `next` → next.1, `latest` → next.1 (F26). F25 war damit seit dem
+    22.09. erledigt, nur diese Liste wusste es nicht.
+  - Beleg, dass Überschreiben abgewiesen wird: Der Workflow-Lauf „Release“ (publish
+    `0.1.0-next.1`) vom 09.10. baute beide Kits (18 Dateien, 26,0 kB, LICENSE) und signierte die
+    Provenance (sigstore logIndex 3164886942), dann rot nach 44 s mit `E403 … You cannot publish
+    over the previously published versions: 0.1.0-next.1`. Auf npm hat sich nichts verändert.
 
 - [ ] **Bekannte Flakes** (nur festgehalten, damit beim dritten Mal jemand sieht, dass es das
   dritte Mal ist)
