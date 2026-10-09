@@ -1,0 +1,9 @@
+{
+  "description": "Spec 007 A11/7 (A7): the text rule destructive-label-not-generic has an approved example but no rejected one. A text rule is learnt from both sides; the examples are data, not prose in the kialo.",
+  "issues": [
+    {
+      "rule": "uzo-content-example-missing",
+      "path": "data/eroj/butono/uzo.json#/uzo/content/0/regulo"
+    }
+  ]
+}
