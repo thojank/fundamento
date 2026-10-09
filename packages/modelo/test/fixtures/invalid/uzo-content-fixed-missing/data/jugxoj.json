@@ -1,0 +1,44 @@
+{
+  "jugxoj": [
+    {
+      "id": "jug_01M4H2T2MBP5TZTQR7QSRW9JSY",
+      "ref": {
+        "regulo": "reg_01M4H2T2FMBDRRZ9P6M0204C9S"
+      },
+      "decision": "approved",
+      "kialo": "The label says what is lost.",
+      "date": "2026-10-09",
+      "context": "Fixture example for the text rule of the Uzo (Spec 007, A7).",
+      "ekzemplo": {
+        "regulo": "reg_01M4H2T2FMBDRRZ9P6M0204C9S",
+        "instances": [
+          {
+            "ero": "butono",
+            "props": {},
+            "label": "Discard draft"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4H2T2MCNX6CEYZ90CGJT0VP",
+      "ref": {
+        "regulo": "reg_01M4H2T2FMBDRRZ9P6M0204C9S"
+      },
+      "decision": "rejected",
+      "kialo": "A generic confirmation says nothing about the loss.",
+      "date": "2026-10-09",
+      "context": "Fixture example for the text rule of the Uzo (Spec 007, A7).",
+      "ekzemplo": {
+        "regulo": "reg_01M4H2T2FMBDRRZ9P6M0204C9S",
+        "instances": [
+          {
+            "ero": "butono",
+            "props": {},
+            "label": "OK"
+          }
+        ]
+      }
+    }
+  ]
+}

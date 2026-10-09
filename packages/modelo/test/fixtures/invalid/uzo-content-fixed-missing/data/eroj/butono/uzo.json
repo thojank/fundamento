@@ -1,0 +1,49 @@
+{
+  "$schema": "../../../../../../../schema/modelo.schema.json#/$defs/UzoFile",
+  "uzo": {
+    "id": "uzo_01M4H2T2RZWEKY5PFR6E1WPEQJ",
+    "ero": "ero_01M2XM2NGN3KJSKJ4JTXQWMF72",
+    "skemo": "ske_01M2XM2NWJ39A7BEZ9A2S8GANE",
+    "purpose": "Fixture Uzo: starts an action on the current view.",
+    "instead": [],
+    "boundary": [
+      {
+        "case": "navigation",
+        "action": "ask-human",
+        "kialo": "Moving to another view is navigation, which the fixture Ero does not cover; a person decides."
+      }
+    ],
+    "composes": {
+      "containers": [],
+      "with": [],
+      "never": [],
+      "spacing": {
+        "owner": "container",
+        "regulo": "spacing-owned-by-container"
+      }
+    },
+    "slots": {},
+    "layout": {
+      "size": "content",
+      "wrap": "never"
+    },
+    "content": [
+      {
+        "regulo": "destructive-label-not-generic",
+        "check": {
+          "kind": "not-words",
+          "words": {
+            "en": [
+              "ok",
+              "yes"
+            ],
+            "de": [
+              "ok",
+              "ja"
+            ]
+          }
+        }
+      }
+    ]
+  }
+}
