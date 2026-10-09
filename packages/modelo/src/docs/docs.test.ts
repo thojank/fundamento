@@ -757,6 +757,17 @@ describe("Spec 007 documentation (Constitution v2.1, Uzo)", () => {
     expect(history).toMatch(/v2\.1 \(Spec 007\) Terminologie um \*\*Uzo\*\* ergänzt/);
     expect(history).toContain("Überstimmung nur mit Jugxo");
   });
+
+  // T017: Plan, Datenmodell, Verträge und Aufgaben liegen seit #45 auf main; „Plan offen“ war falsch.
+  it("the vojmapo records Stufe A of Spec 007 as implemented, F1 and Stufe B open", () => {
+    const row = read("docs/vojmapo.md")
+      .split("\n")
+      .find((line) => line.startsWith("| 3c |"));
+    expect(row).toMatch(
+      /\| 📝 Spec, Plan und Tasks auf `main` \(#45\); Stufe A umgesetzt \(PR #\d+\), F1 und Stufe B offen \|$/,
+    );
+    expect(row).not.toContain("Plan offen");
+  });
 });
 
 // F23 (Release-Probelauf #1 auf main ac7321e, Maintainer 2026-09-22): "Dry run ekzemplo" scheiterte
