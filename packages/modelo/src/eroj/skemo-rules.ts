@@ -11,6 +11,7 @@ import type { Skemo, SkemoPartProperty, SkemoPartSource } from "../generated/mod
 import { appendPointer } from "../json/pointer.js";
 import type { ModeloDocument, ModeloFiles } from "../load/files.js";
 import { isJsonObject, rawEntries } from "../validate/raw.js";
+import { uzoIssues } from "./uzo-rules.js";
 
 /** The key of a binding or `by` list that stands for the Ero's state. */
 export const STATE_KEY = "state";
@@ -180,6 +181,7 @@ export function skemoIssues(modelo: Modelo, files: ModeloFiles): ValidationIssue
     intentIssues(entry, reguloNames, at);
   }
   issues.push(...ekzemploIssues(modelo, files));
+  issues.push(...uzoIssues(modelo, files));
   return issues;
 }
 

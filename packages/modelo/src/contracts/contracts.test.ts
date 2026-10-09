@@ -86,8 +86,23 @@ describe("rule catalog (§2.6)", () => {
     // 123: Spec 004 T013 added the missing fingerprint list, Spec 003 F8 the value a projection
     // cannot express, the Celo a Jugxo names in its typed reference, the part a side does not
     // draw (a released, named difference), F28 the floor a brand may not lower, F32 the parts
-    // a concentric focus ring is derived from and F41 the three findings of the register of gaps.
-    expect(RULE_IDS).toHaveLength(123);
+    // a concentric focus ring is derived from, F41 the three findings of the register of gaps and
+    // Spec 007 T012 the ten Uzo rules beyond the schema.
+    expect(RULE_IDS).toHaveLength(133);
+    for (const rule of [
+      "uzo-skemo-missing",
+      "uzo-ero-unknown",
+      "uzo-kialo-missing",
+      "uzo-slot-unknown",
+      "uzo-content-fixed-missing",
+      "uzo-content-example-missing",
+      "uzo-use-instead-ero-missing",
+      "uzo-goal-twice",
+      "uzo-regulo-unknown",
+      "uzo-prop-unknown",
+    ]) {
+      expect(RULE_IDS).toContain(rule);
+    }
     expect(RULE_IDS).toContain("manko-closing-missing");
     expect(RULE_IDS).toContain("protected-minimum");
     expect(RULE_IDS).toContain("parity-part-not-drawn");

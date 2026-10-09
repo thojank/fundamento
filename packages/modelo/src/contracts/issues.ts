@@ -156,6 +156,17 @@ export const RULE_IDS = [
   "srgb-gamut",
   "type-scale",
   "type-rhythm",
+  // Uzo: the use of an Ero, beyond its schema (Spec 007, data-model §2.2)
+  "uzo-skemo-missing",
+  "uzo-ero-unknown",
+  "uzo-kialo-missing",
+  "uzo-slot-unknown",
+  "uzo-content-fixed-missing",
+  "uzo-content-example-missing",
+  "uzo-use-instead-ero-missing",
+  "uzo-goal-twice",
+  "uzo-regulo-unknown",
+  "uzo-prop-unknown",
   // Projekcio lints (Spec 003, D-17)
   "css-physical-property",
   "ero-hardcoded-string",
