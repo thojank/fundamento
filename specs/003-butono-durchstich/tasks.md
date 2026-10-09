@@ -167,6 +167,7 @@ A mutation check (one changed value must make the test fail) replaces the red ru
   - [ ] nothing published into the VW registry; kits only from the public `next` pre-release or local;
   - [ ] no ciferecigo in Figma, Make or any registry.
 - **M3 – S5 / AK-10:** a real Figma draft through design agent, coding agent and checking agent.
+  - **Done** (2026-10-09, 20:05–20:32): 11 of 11 checks as expected, P1 and P2 byte-identical; see `plan.md` → „Manual acceptance results“ → M3. Spec 003 accepted by the maintainer on 2026-10-09, 20:34.
 
 Results go into `plan.md` → „Manual acceptance results".
 
@@ -871,6 +872,11 @@ und F24 (Befund, nicht blockierend).
   - npm setzt beim ersten Publish eines Pakets immer `latest`, auch mit `--tag next`. Beim ersten
     stabilen Release wird `latest` umgehängt (`npm dist-tag add @fundamento/make-kit-<aspekto>@<v>
     latest`). Nichts zu bauen.
+  - Stand 2026-10-09, 20:48, gemessen nach Release #6 (publish `0.1.0-next.2` unter `next`):
+    `npm view @fundamento/make-kit-komuna dist-tags --json` und dasselbe für `-ekzemplo` geben
+    beide `{ "next": "0.1.0-next.2", "latest": "0.1.0-next.1" }`. `latest` zeigt nicht mehr auf
+    next.0 (Stand der Überschrift), aber auch nicht auf next.2; offen bis zum ersten stabilen
+    Release.
 
 - [ ] **F27 Die Marke ist in Figma umschaltbar** (An P0, M2-Vorstufe, Maintainer 2026-09-23)
   - Befund (gemessen an `.fundamento/projekcioj/figma/plan.json` auf main): Die Sammlung `aspekto`

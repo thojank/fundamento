@@ -473,7 +473,7 @@ Task IDs are those of [`tasks.md`](tasks.md); M1–M3 are the maintainer's manua
 
 ## Manual acceptance results
 
-**Status:** M1 (Figma library, S3) and M2 (Make Kits, S4, AK-08) recorded, 2026-10-09; M3 (S5 run, AK-10) open. Each measurement follows a check sheet written before it (expectation before measurement); the maintainer's files are `pruefblatt-m1-2026-10-09.md` / `messung-m1-2026-10-09.md` and `pruefblatt-m2-2026-10-09.md` / `messung-m2-2026-10-09.md`.
+**Status:** M1, M2 and M3 recorded, 2026-10-09. **Spec 003 accepted by the maintainer on 2026-10-09, 20:34.** Each measurement follows a check sheet written before it (expectation before measurement); the maintainer's files are `pruefblatt-m1-2026-10-09.md` / `messung-m1-2026-10-09.md`, `pruefblatt-m2-2026-10-09.md` / `messung-m2-2026-10-09.md` and `pruefblatt-m3-2026-10-09.md` / `messung-m3-2026-10-09.md`.
 
 ### M1 – Figma library (S3, AK-07)
 
@@ -503,7 +503,7 @@ Measured 2026-10-09, 15:08–16:10. Test-account checklist 0a–0d (Art. V) conf
 
 | Part | Checks | Measured |
 |---|---|---|
-| A – release | A1 red (finding 1), A2–A4 ✓ | Workflow „Release“, publish `0.1.0-next.1`: red after 44 s in „Build both kits and publish them under the tag next“ — both kits built (18 files, 26.0 kB, LICENSE), provenance signed (sigstore logIndex 3164886942), then `E403 … You cannot publish over the previously published versions: 0.1.0-next.1`. On npm, `0.1.0-next.1` was published on 22.09. from the workflow, green provenance seal; code tab: `dist/` 67.2 kB, `guidelines/` 24 kB, LICENSE 1.09 kB, README, package.json, `styles.css` 41 kB, `tailwind.css` 12.8 kB. dist-tags: `next` → next.1, `latest` → next.1 (F26) |
+| A – release | A1 red (finding 1), A2–A4 ✓ | Workflow „Release“, publish `0.1.0-next.1`: red after 44 s in „Build both kits and publish them under the tag next“ — both kits built (18 files, 26.0 kB, LICENSE), provenance signed (sigstore logIndex 3164886942), then `E403 … You cannot publish over the previously published versions: 0.1.0-next.1`. On npm, `0.1.0-next.1` was published on 22.09. from the workflow, green provenance seal; code tab: `dist/` 67.2 kB, `guidelines/` 24 kB, LICENSE 1.09 kB, README, package.json, `styles.css` 41 kB, `tailwind.css` 12.8 kB. dist-tags: `next` → next.1, `latest` → next.1 (F26). **Nachtrag 09.10., 20:07:** Release #6 (workflow `Release`, publish `0.1.0-next.2`, from 7615b72) green – both kits published under tag `next`. Decision of the maintainer: next.2 stays; no unpublish. dist-tags measured afterwards (2026-10-09, 20:48, `npm view @fundamento/make-kit-<aspekto> dist-tags --json`), komuna and ekzemplo alike: `{ "next": "0.1.0-next.2", "latest": "0.1.0-next.1" }` – `next` → next.2, `latest` → next.1 (F26) |
 | B – kit komuna | B1–B8 ✓ | `package.json`: `"@fundamento/make-kit-komuna": "0.1.0-next.1"` (exact). `guidelines/` copied (`Guidelines.md`, `setup.md`, `foundations/{color,dimensioj,spacing,typography}.md`, `components/butono.md`). Prompt „Ein Formular mit zwei Feldern und Speichern/Abbrechen.“ → 48 s, fields Name and E-Mail, `pnpm build` green. `import { Butono } from "@fundamento/make-kit-komuna"`, both buttons `<Butono>`; Speichern `variant="primary"`, Abbrechen `variant="tertiary"`. `App.tsx` 0 hex, only `*-fm-*` classes and `var(--fm-…)`; `index.css` 0 hex, 23 distinct `--fm-*` variables, all present in the kit; both kit imports in `index.css`. Preview by eye: primary dark blue, tertiary as text, fields light |
 | C – kit ekzemplo, same prompt | C1 ✓ except B7 (not measured), C2 ✓ | Make had already built the form in the setup step; the prompt answered after 3 s that it was present. `import { Butono } from '@fundamento/make-kit-ekzemplo'`, one primary (Speichern), Abbrechen tertiary, 0 hex. `index.css` 0 hex, only `--fm-*`, but only `@import 'tailwindcss'` — the two kit imports are not there; the preview shows ekzemplo colours anyway, the import is presumably in `main.tsx` (not read). Preview: cream background, dark green primary, angular radii; button order Speichern/Abbrechen (komuna: Abbrechen/Speichern) |
 
@@ -519,7 +519,37 @@ M2 / AK-08 is shown: both kits load from npm in Figma Make, Make builds the quic
 
 ### M3 – S5 run (AK-10)
 
-**Status:** offen.
+Measured 2026-10-09, 20:05–20:32, against the check sheet `pruefblatt-m3-2026-10-09.md` (written 18:02, before the measurement). Raw data: `p1-design.json`, `p2-code.json`, `p4-ok-only.json` (output of the harness `mcp-call.mjs`, unchanged). **Result: 11 of 11 checks as expected. P1 and P2 byte-identical. No abort condition triggered.**
+
+State: `main` 1f6b78c. MCP server `packages/mcp/dist/index.js` from `pnpm build` 09.10. 18:18 (5 tasks, no cache), Node v24.21.0 in the maintainer's terminal; server stderr on every call: `fundamento-mcp: serving 356 tokens (Aspektoj: komuna); 0 error(s), 0 warning(s).` Figma: library `f10b-2` (`CEnnyzdTkzwZfD9gIb1Xfv`, set `butono` 2:1067, build `d36790a`), consumer `buzz` (`oASg3O3dYmB4rkoTZxh1tF`). All three roles — design agent, coding agent, checking agent — played by Claude, each as its own step. The harness `mcp-call.mjs` calls the tools of the Fundamento MCP server over stdio; it is a measuring tool outside the packages, not Fundamento code, and is not part of the repository.
+
+Draft: frame `m3-dialog` 19:561 with `dialog-ok` 19:562 (conforming: „Abbrechen“ secondary, „Projekt löschen“ primary/danger) and `dialog-bad` 19:573 (planted violation: „Abbrechen“ and „Löschen“, both primary/default). Variants imported with `importComponentByKeyAsync` (secondary `eb0af9e9…`, primary/danger `9f752f84…`, primary `2fabe7af…`; set key `fb23cb2f…`).
+
+| Part | Checks | Measured |
+|---|---|---|
+| D – draft (design agent, `use_figma` in `buzz`) | D1–D4 ✓ | D1: 19:563, 19:568, 19:574, 19:579; all `remote: true`. D2: 4 × `sharedPluginData fundamento/ero = butono`. D3: `componentProperties` ok: secondary/default/medium/rest, primary/danger/medium/rest; bad: primary/default/medium/rest ×2. D4: text property `label#2:0`: „Abbrechen“, „Projekt löschen“, „Abbrechen“, „Löschen“ |
+| C – code (coding agent, `get_ero { name: "butono" }`) | C1–C3 ✓ | C1: `projekcioj.figma.properties` and `projekcioj.react.props` carry the same names and values for variant, tone, size, type, disabled, loading, label. Two expected differences: React `fullWidth` (camelCase) vs. Figma/Skemo `full-width`; Figma additionally `state` (rest…loading), which lives in `skemo.states` and is not a prop. `react.package = @fundamento/eroj/react`, `component = Butono`; `figma.componentSet = butono`, `pluginData fundamento/ero = butono`. C2: `state` drops out (not a prop), the rest 1:1; defaults (tone=default, size=medium) left out of the JSX, as `skemo.props[].default` allows. C3: only props and label text |
+| P – check (checking agent, `check_usage`) | P1–P4 ✓ | P1, from the draft (all props explicit): `instances: 4, valid: false`; 2 violations: `one-primary-per-container` instance [2,3] „2 instances with variant=primary in container dialog-bad (instances 2, 3).“; `destructive-not-primary-color` instance [3] „Instance 3 is a destructive action with variant=primary, tone=default.“ No violation for instances 0/1 (`dialog-ok`). P2, from the code (only the props that are set): sha256 `p1-design.json` = `p2-code.json` = `f9ea88ab24ed013d924859e3c1592ef6652df96896dd0aed3376898aa2fc36ae`; the server added the tone/size defaults itself. P3: `reg_01M2XMV80DG7JCJDTZGE66MGHW` one-primary-per-container, kialo „Two equal calls to action move the decision onto the user; one primary action makes the next step obvious, and every other action steps back as secondary or tertiary.“; `reg_01M2XMV80DG7JCJDTZGE66MGHX` destructive-not-primary-color, kialo „The primary colour promises the expected next step; a destructive action needs a colour that warns before it acts, and a danger fill only where the destruction is the step the user came for.“; both with `severity: error`, `path`, `suggestion`. P4, `dialog-ok` alone: `instances: 2, valid: true, violations: []` |
+
+The JSX of the coding agent (C2, C3):
+
+```tsx
+// dialog-ok
+<Butono variant="secondary">Abbrechen</Butono>
+<Butono variant="primary" tone="danger">Projekt löschen</Butono>
+// dialog-bad
+<Butono variant="primary">Abbrechen</Butono>
+<Butono variant="primary">Löschen</Butono>
+```
+
+Findings — two observations, no Manko:
+
+1. **`state=default` in the check sheet, `rest` in Figma.** The check sheet wrote `state=default`; the value in Figma is called `rest` (values: rest, hover, pressed, focus, disabled, loading — the same in `get_ero` → `projekcioj.figma.properties.state`). `state` is not a Skemo prop and drops out of the mapping (C2). A deviation from the check sheet, not a finding.
+2. **Destructive detection through the label.** In P1/P2 the destructive action was recognised from the German label „Löschen“ (`intents[destructive].keywords.de`), without an `intent` field in the request. Not expected in the check sheet.
+
+Limits: one run, one Ero, one Aspekto (komuna). The instances for P1 were copied by Claude from the `use_figma` answers, not exported from Figma by a script. The coding and checking agents ran in the maintainer's terminal (Node 24); the Cowork VM has Node 22 and no network access, the server does not start there.
+
+M3 / AK-10 is shown: design and code tell the Modelo the same thing; the checker finds exactly the two planted violations with Regulo id and kialo, and the conforming dialog alone is valid.
 
 ### Publish dry run (Q2)
 
