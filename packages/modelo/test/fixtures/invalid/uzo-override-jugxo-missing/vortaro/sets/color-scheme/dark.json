@@ -1,0 +1,46 @@
+{
+  "$extensions": {
+    "com.ciferecigo.fundamento": {
+      "id": "set_01M2WRK8G0DDDDDDDDDDDDDDDP",
+      "kondicxoj": [
+        "color-scheme=dark"
+      ]
+    }
+  },
+  "color": {
+    "$type": "color",
+    "palette": {
+      "neutral": {
+        "900": {
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [
+              0.9,
+              0.9,
+              0.9
+            ],
+            "hex": "#e6e6e6"
+          }
+        }
+      }
+    },
+    "border": {
+      "default": {
+        "$value": {
+          "colorSpace": "srgb",
+          "components": [
+            0.3,
+            0.3,
+            0.3
+          ],
+          "hex": "#4d4d4d"
+        }
+      }
+    },
+    "background": {
+      "default": {
+        "$value": "{color.palette.neutral.1000}"
+      }
+    }
+  }
+}

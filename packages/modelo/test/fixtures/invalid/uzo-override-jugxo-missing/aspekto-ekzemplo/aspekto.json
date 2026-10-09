@@ -1,0 +1,28 @@
+{
+  "id": "dva_ekz_01M2WRK8G0EEEEEEEEEEEEEEE0",
+  "name": "ekzemplo",
+  "owner": "Ekzemplo test owner",
+  "license": "proprietary",
+  "idNamespace": "ekz",
+  "fonts": [
+    {
+      "family": "Ekzempla Sans",
+      "license": "proprietary",
+      "source": "invented for tests",
+      "redistributable": false,
+      "scripts": [
+        "Latn"
+      ]
+    }
+  ],
+  "tavoloj": {
+    "lingvo": {
+      "overrides": [
+        {
+          "regulo": "destructive-label-not-generic",
+          "jugxo": "jug_01M4H2T2XR6ZX2Y6FN0YT72XZK"
+        }
+      ]
+    }
+  }
+}
