@@ -168,6 +168,8 @@ export const RULE_IDS = [
   "uzo-regulo-unknown",
   "uzo-prop-unknown",
   "uzo-web-term",
+  "uzo-override-fixed",
+  "uzo-override-jugxo-missing",
   // Projekcio lints (Spec 003, D-17)
   "css-physical-property",
   "ero-hardcoded-string",

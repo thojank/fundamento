@@ -1,10 +1,12 @@
 // Aspekto completeness and the reference Aspekto (Spec 001, FR-10, D-04; task T008).
 
-import { rmSync } from "node:fs";
+import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { afterAll, describe, expect, it } from "vitest";
 import type { ValidationIssue } from "../contracts/issues.js";
 import { fixtureModeloSource } from "../load/source.js";
-import { mutatedFixture } from "./test-doubles/fixtures.js";
+import { fixtureRoot, mutatedFixture } from "./test-doubles/fixtures.js";
 import { validateModelo } from "./validate-modelo.js";
 
 const SET = "aspekto-ekzemplo/sets/aspekto/ekzemplo.json";
@@ -130,5 +132,99 @@ describe("the reference Aspekto (FR-10)", () => {
     expect(new Set(report.errors.map((issue) => issue.rule))).toEqual(
       new Set(["aspekto-reference-set-not-empty"]),
     );
+  });
+});
+
+// Spec 007 T015 (A7, D-03, data-model §7): an Aspekto overrides an adjustable text rule of a Uzo
+// in its Tavolo lingvo, and only with a Jugxo that names the Aspekto, the Regulo and the deviation.
+// The base is invalid/uzo-override-jugxo-missing with the override pointed at the package's Jugxo:
+// an adjustable rule, overridden correctly.
+describe("overrides of text rules in tavoloj.lingvo (T015)", () => {
+  const ASPEKTO = "aspekto-ekzemplo/aspekto.json";
+  const JUGXOJ = "aspekto-ekzemplo/jugxoj.json";
+  const UZO = "data/eroj/butono/uzo.json";
+  const OVERRIDE_JUGXO = "jug_ekz_01M4H2T3CAV3NJRYE8XFW0EMP3";
+  type AspektoJson = { tavoloj: { lingvo: { overrides: [{ regulo: string; jugxo?: string }] } } };
+  type JugxojJson = { jugxoj: Record<string, unknown>[] };
+  type UzoJson = { uzo: { content: [{ fixed: boolean }] } };
+  type Edit = <T>(file: string, f: (value: T) => void) => void;
+
+  function validateOverride(change: (edit: Edit) => void) {
+    const root = mkdtempSync(join(tmpdir(), "fm-override-"));
+    roots.push(root);
+    cpSync(fixtureRoot("invalid", "uzo-override-jugxo-missing"), root, { recursive: true });
+    const edit: Edit = <T>(file: string, f: (value: T) => void) => {
+      const value = JSON.parse(readFileSync(join(root, file), "utf8")) as T;
+      f(value);
+      writeFileSync(join(root, file), `${JSON.stringify(value, null, 2)}\n`);
+    };
+    edit(ASPEKTO, (aspekto: AspektoJson) => {
+      aspekto.tavoloj.lingvo.overrides[0].jugxo = OVERRIDE_JUGXO;
+    });
+    change(edit);
+    return validateModelo(fixtureModeloSource(root));
+  }
+  const rulesAndPaths = (issues: readonly ValidationIssue[]) =>
+    issues.map(({ rule, path }) => ({ rule, path }));
+
+  it("accepts an override of an adjustable rule with its Jugxo", () => {
+    const report = validateOverride(() => {});
+    expect(report.errors).toEqual([]);
+    expect(report.warnings).toEqual([]);
+  });
+
+  it.each([
+    ["names another Aspekto", (jugxo: Record<string, unknown>) => (jugxo.aspekto = "komuna")],
+    [
+      "approves instead of recording a deviation",
+      (jugxo: Record<string, unknown>) => (jugxo.decision = "approved"),
+    ],
+    [
+      "refers to the Ero, not to the Regulo",
+      (jugxo: Record<string, unknown>) => (jugxo.ref = { ero: "ero_01M2XM2NGN3KJSKJ4JTXQWMF72" }),
+    ],
+  ])("reports uzo-override-jugxo-missing when the Jugxo %s", (_what, change) => {
+    const report = validateOverride((edit) =>
+      edit(JUGXOJ, (file: JugxojJson) => change(file.jugxoj[0] ?? {})),
+    );
+    expect(rulesAndPaths(report.errors)).toContainEqual({
+      rule: "uzo-override-jugxo-missing",
+      path: `${ASPEKTO}#/tavoloj/lingvo/overrides/0/jugxo`,
+    });
+  });
+
+  it("reports an override of a Regulo that is no text rule of a Uzo", () => {
+    const report = validateOverride((edit) =>
+      edit(ASPEKTO, (aspekto: AspektoJson) => {
+        aspekto.tavoloj.lingvo.overrides[0].regulo = "spacing-owned-by-container";
+      }),
+    );
+    expect(rulesAndPaths(report.errors)).toEqual([
+      { rule: "uzo-regulo-unknown", path: `${ASPEKTO}#/tavoloj/lingvo/overrides/0/regulo` },
+    ]);
+  });
+
+  it("rejects an override without a Jugxo in the schema too", () => {
+    const report = validateOverride((edit) =>
+      edit(ASPEKTO, (aspekto: AspektoJson) => {
+        delete aspekto.tavoloj.lingvo.overrides[0].jugxo;
+      }),
+    );
+    expect(rulesAndPaths(report.errors)).toEqual([
+      { rule: "schema-violation", path: `${ASPEKTO}#/tavoloj/lingvo/overrides/0` },
+      { rule: "uzo-override-jugxo-missing", path: `${ASPEKTO}#/tavoloj/lingvo/overrides/0/jugxo` },
+    ]);
+  });
+
+  // Mutation of the first test (tasks.md T015): the same override of a fixed rule must fail.
+  it("reports uzo-override-fixed once the overridden rule is fixed", () => {
+    const report = validateOverride((edit) =>
+      edit(UZO, (file: UzoJson) => {
+        file.uzo.content[0].fixed = true;
+      }),
+    );
+    expect(rulesAndPaths(report.errors)).toEqual([
+      { rule: "uzo-override-fixed", path: `${ASPEKTO}#/tavoloj/lingvo/overrides/0` },
+    ]);
   });
 });

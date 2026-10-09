@@ -1347,13 +1347,29 @@ export interface DtcgGroup {
   [k: string]: DtcgNode | DtcgType | string | GroupExtensions | Deprecated | undefined;
 }
 /**
- * Layers of the brand package (Spec 001, D-20): the Aspekto package is the brand package and the Vortaro is one of its layers. Phase 1 reserves only the key vida, with the empty value {}; other keys are allowed and ignored by validation.
+ * Layers of the brand package (Spec 001, D-20): the Aspekto package is the brand package and the Vortaro is one of its layers. Phase 1 reserves only the key vida, with the empty value {}; Spec 007 gives lingvo its overrides of adjustable text rules. Other keys are allowed and ignored by validation.
  *
  * This interface was referenced by `ModeloJson`'s JSON-Schema
  * via the `definition` "Tavoloj".
  */
 export interface Tavoloj {
   vida?: {};
+  /**
+   * The voice of the brand. Only overrides is specified (Spec 007, D-03); the rest of the layer is a candidate.
+   */
+  lingvo?: {
+    overrides?: LingvoOverride[];
+  };
+}
+/**
+ * An Aspekto overrides an adjustable text rule of a Uzo, with the Jugxo that records the deviation (Spec 007, A7, D-03). A fixed rule cannot be overridden.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "LingvoOverride".
+ */
+export interface LingvoOverride {
+  regulo: Name;
+  jugxo: JugxoId;
 }
 /**
  * aspekto.json of an Aspekto package (Spec 001, D-05). `id` is the DimensioValoro ID of the Aspekto; `idNamespace` is required for every package except the reference Aspekto (checked on composition).

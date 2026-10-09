@@ -66,6 +66,82 @@ export function uzoIssues(modelo: Modelo, files: ModeloFiles): ValidationIssue[]
 }
 
 /**
+ * Overrides of text rules in `aspekto.json#/tavoloj/lingvo/overrides` (A7, D-03, data-model §7),
+ * checked when the packages are composed, because an external package is only visible there. The
+ * overridden Regulo must be a text rule of a Uzo (`uzo-regulo-unknown`), adjustable
+ * (`uzo-override-fixed`), and the Jugxo must exist, carry this Aspekto, refer to the Regulo and
+ * record a deviation (`uzo-override-jugxo-missing`).
+ */
+export function lingvoOverrideIssues(modelo: Modelo, files: ModeloFiles): ValidationIssue[] {
+  const textRules = new Map<string, boolean>();
+  for (const entry of modelo.eroj) {
+    for (const { item } of objects((entry.uzo as unknown as JsonObject | undefined)?.content)) {
+      if (typeof item.regulo !== "string") continue;
+      // One fixed use of a Regulo makes it fixed: a rule that protects somewhere protects.
+      textRules.set(item.regulo, textRules.get(item.regulo) === true || item.fixed === true);
+    }
+  }
+  const issues: ValidationIssue[] = [];
+  files.packages.forEach((pkg, index) => {
+    const aspekto = modelo.aspektoPackages[index]?.aspekto;
+    const raw = isJsonObject(pkg.aspekto.value) ? pkg.aspekto.value : {};
+    const overrides = objectAt(objectAt(raw, "tavoloj"), "lingvo").overrides;
+    const at = (pointer: string, rule: RuleId, message: string, suggestion: string) =>
+      issues.push({
+        rule,
+        severity: "error",
+        path: formatIssuePath({ file: pkg.aspekto.file, pointer }),
+        message,
+        suggestion,
+      });
+    for (const { item, index: position } of objects(overrides)) {
+      const base = `/tavoloj/lingvo/overrides/${position}`;
+      const name = stringAt(item, "regulo");
+      if (name === undefined) continue;
+      const fixed = textRules.get(name);
+      if (fixed === undefined) {
+        at(
+          `${base}/regulo`,
+          "uzo-regulo-unknown",
+          `The Aspekto ${aspekto ?? pkg.name} overrides ${name}, which is no text rule of a Uzo.`,
+          `Override a text rule that a Uzo lists in content (${[...textRules.keys()].join(", ") || "none"}).`,
+        );
+        continue;
+      }
+      if (fixed) {
+        at(
+          base,
+          "uzo-override-fixed",
+          `The Aspekto ${aspekto ?? pkg.name} overrides ${name}, which a Uzo marks fixed.`,
+          "Remove the override: a fixed text rule protects safety, trust or accessibility and holds for every Aspekto (A7).",
+        );
+        continue;
+      }
+      const regulo = modelo.reguloj.find((candidate) => candidate.name === name);
+      const id = stringAt(item, "jugxo");
+      const jugxo = modelo.jugxoj.find((candidate) => candidate.id === id);
+      const ref = jugxo?.ref as { regulo?: string } | undefined;
+      if (
+        jugxo === undefined ||
+        jugxo.aspekto !== aspekto ||
+        ref?.regulo !== regulo?.id ||
+        jugxo.decision !== "deviation-recorded"
+      ) {
+        at(
+          `${base}/jugxo`,
+          "uzo-override-jugxo-missing",
+          id === undefined
+            ? `The Aspekto ${aspekto ?? pkg.name} overrides ${name} without a Jugxo.`
+            : `The override of ${name} by ${aspekto ?? pkg.name} names the Jugxo ${id}, which ${jugxo === undefined ? "does not exist" : "does not record this deviation"}.`,
+          `Record the deviation as a Jugxo with aspekto ${aspekto ?? "of the package"}, ref.regulo ${regulo?.id ?? name} and decision deviation-recorded, and name its ID here.`,
+        );
+      }
+    }
+  });
+  return issues;
+}
+
+/**
  * `uzo-web-term` (A6, Art. VIII, D-09): a string of the Uzo that is a CSS property, a CSS value
  * with a unit or a DOM term. `uzo` is the value of the file's `uzo` key; paths point into `file`.
  */
