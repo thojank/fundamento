@@ -87,9 +87,9 @@ describe("rule catalog (§2.6)", () => {
     // cannot express, the Celo a Jugxo names in its typed reference, the part a side does not
     // draw (a released, named difference), F28 the floor a brand may not lower, F32 the parts
     // a concentric focus ring is derived from, F41 the three findings of the register of gaps and
-    // Spec 007 T012 the ten Uzo rules beyond the schema, T013 the web term in a Uzo and T015 the
-    // two findings of an override.
-    expect(RULE_IDS).toHaveLength(136);
+    // Spec 007 T012 the ten Uzo rules beyond the schema, T013 the web term in a Uzo, T015 the
+    // two findings of an override and T016 the warning about a Skemo without a Uzo.
+    expect(RULE_IDS).toHaveLength(137);
     for (const rule of [
       "uzo-skemo-missing",
       "uzo-ero-unknown",
@@ -104,6 +104,7 @@ describe("rule catalog (§2.6)", () => {
       "uzo-web-term",
       "uzo-override-fixed",
       "uzo-override-jugxo-missing",
+      "skemo-uzo-missing",
     ]) {
       expect(RULE_IDS).toContain(rule);
     }

@@ -40,10 +40,16 @@ function minimalCopy(): string {
 }
 
 describe("regularo on the repo", () => {
-  it("passes with the repo Reguloj and Jugxoj", async () => {
+  // Until Stufe B of Spec 007 brings butono/uzo.json, the repo's only Ero has no Uzo: a warning,
+  // not an error (A1).
+  it("passes with the repo Reguloj and Jugxoj and warns about butono without a Uzo", async () => {
     const result = await check({ json: true, repoRoot });
     expect(result.errors).toEqual([]);
-    expect(result).toMatchObject({ check: "regularo", ok: true, warnings: [] });
+    expect(result).toMatchObject({ check: "regularo", ok: true });
+    // The repo's Modelo root is packages/ (vortaro and modelo/data), as in every regularo path.
+    expect(rulesAndPaths(result.warnings)).toEqual([
+      { rule: "skemo-uzo-missing", path: "modelo/data/eroj/butono/skemo.json#/skemo" },
+    ]);
     const count = (file: string, key: string) =>
       (
         JSON.parse(
@@ -53,6 +59,7 @@ describe("regularo on the repo", () => {
     expect(result.stats).toEqual({
       reguloj: count("reguloj.json", "reguloj"),
       jugxoj: count("jugxoj.json", "jugxoj"),
+      uzoj: 0,
     });
   });
 });
@@ -61,7 +68,30 @@ describe("regularo fixtures", () => {
   it("passes valid/minimal", async () => {
     const result = await check({ json: true, repoRoot, fixture: fixture("valid/minimal") });
     expect(result.errors).toEqual([]);
-    expect(result.stats).toEqual({ reguloj: 1, jugxoj: 0 });
+    expect(result.stats).toEqual({ reguloj: 1, jugxoj: 0, uzoj: 0 });
+    expect(result.warnings).toEqual([]);
+  });
+
+  // Spec 007 T016 (A1): a Skemo without a Uzo stays valid (Eroj of earlier phases), with a warning.
+  it("warns once about valid/ero-minimal, whose Skemo has no Uzo, and passes", async () => {
+    const result = await check({ json: true, repoRoot, fixture: fixture("valid/ero-minimal") });
+    expect(result.ok).toBe(true);
+    expect(result.errors).toEqual([]);
+    expect(rulesAndPaths(result.warnings)).toEqual([
+      { rule: "skemo-uzo-missing", path: "data/eroj/butono/skemo.json#/skemo" },
+    ]);
+    expect(result.warnings[0]?.severity).toBe("warning");
+    expect(result.stats).toMatchObject({ uzoj: 0 });
+  });
+
+  it("counts the Uzo of valid/ero-uzo-minimal and does not warn", async () => {
+    const result = await check({
+      json: true,
+      repoRoot,
+      fixture: fixture("valid/ero-uzo-minimal"),
+    });
+    expect(result.warnings).toEqual([]);
+    expect(result.stats).toMatchObject({ uzoj: 1 });
   });
 
   it.each(["invalid/regularo-without-kialo", "invalid/regularo-dangling-jugxo"])(
@@ -117,5 +147,17 @@ describe("built runner", () => {
     const child = spawnSync(process.execPath, [builtRunner, "regularo"], { encoding: "utf8" });
     expect(child.status).toBe(0);
     expect(child.stdout.split("\n")[0]).toMatch(/^PASS regularo: /);
+    expect(child.stdout).toMatch(/stats: .*uzoj=0/);
+  });
+
+  it("exits 0 with the warning on valid/ero-minimal", () => {
+    const child = spawnSync(
+      process.execPath,
+      [builtRunner, "regularo", "--json", "--fixture", fixture("valid/ero-minimal")],
+      { encoding: "utf8" },
+    );
+    expect(child.status).toBe(0);
+    const result = JSON.parse(child.stdout) as CheckResult;
+    expect(result.warnings.map(({ rule }) => rule)).toEqual(["skemo-uzo-missing"]);
   });
 });
