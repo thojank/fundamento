@@ -2761,3 +2761,55 @@ describe("the set is left on no mode of its own (F35)", () => {
     expect(set?.explicitVariableModes).toEqual({});
   });
 });
+
+// F43 (An P0, Maintainer 2026-10-06): Zwei Läufe in derselben Datei meldeten für die Füllung des
+// Knotens control der Variante tertiary/large/loading dieselbe Variable und dieselbe Farbe, aber
+// Deckkraft 0 nach dem ersten und 1 nach dem zweiten Lauf. Zugesichert wird beides, was eine Zeile
+// "opacity" im Bericht bedeuten kann: die Deckkraft, die der Paint im Knoten hält, und der Wert,
+// den der Bericht meldet — nach jedem der beiden Läufe.
+// Grün seit #29 (F36); Befund vom 06.10. als Messung mit einem Plugin vor #29 erklärt, seit #40
+// nennt jeder Lauf seinen Build.
+describe("the tertiary fill keeps its deckkraft over two runs (F43)", () => {
+  const props = { variant: "tertiary", tone: "default", size: "large", state: "loading" };
+  const name = Object.entries(props)
+    .map(([key, value]) => `${key}=${value}`)
+    .join(", ");
+  type StoredPaint = { opacity?: number; boundVariables?: { color?: { id: string } } };
+  type ReportedPaint = { opacity: number; resolved: boolean; stored: { opacity: number } };
+
+  it("is the last variant of the plan, the one the report shows, and planned at deckkraft 0", () => {
+    const variants = plan.components[0]?.variants ?? [];
+    expect(variants.at(-1)?.props).toEqual(props);
+    expect(variants.at(-1)?.paints?.["surface.fill"]).toEqual({ hex: "#000000", opacity: 0 });
+    expect(variants.at(-1)?.paints?.["border.color"]).toEqual({ hex: "#000000", opacity: 0 });
+  });
+
+  it("holds deckkraft 0 on fill and stroke after the first and the second run", async () => {
+    const double = modelDouble();
+    for (const index of [1, 2]) {
+      const report = (await new Function(
+        "figma",
+        `${files["figma/plugin/code.js"] ?? ""}\nreturn applyPlan();`,
+      )(double.figma)) as {
+        components: {
+          layout: { paints: { last: Record<string, { fills: unknown[]; strokes: unknown[] }> } };
+        }[];
+      };
+      const set = double.root.children[0]?.children.find((child) => child.name === "butono");
+      const control = descendant(
+        set?.children.find((child) => child.name === name),
+        "control",
+      );
+      const reported = report.components[0]?.layout.paints.last.control;
+      for (const field of ["fills", "strokes"] as const) {
+        const where = `run ${index}, control ${field}`;
+        const held = ((control?.properties[field] ?? []) as StoredPaint[])[0];
+        expect(held?.boundVariables?.color?.id, where).toBeDefined();
+        expect(held?.opacity, `${where}, held`).toBe(0);
+        const line = (reported?.[field] ?? [])[0] as ReportedPaint | undefined;
+        expect(line?.opacity, `${where}, reported`).toBe(0);
+        expect(line?.stored.opacity, `${where}, reported stored`).toBe(0);
+      }
+    }
+  });
+});

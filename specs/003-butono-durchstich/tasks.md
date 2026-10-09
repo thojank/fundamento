@@ -1402,6 +1402,12 @@ und F24 (Befund, nicht blockierend).
     Wirkung wird **gemessen, nicht geschätzt** — der Vergleich aller aufgelösten Werte über alle
     Kombinationen vor und nach dem Streichen gehört zur Änderung, nicht in ihre Begründung.
 
+- [x] **F43 Die Deckkraft der tertiären Füllung über zwei Läufe** (An P0, Maintainer 2026-10-06)
+  - Gemeldet: butono, tertiary/large/loading, `control`: Lauf 1 opacity 0, Lauf 2 opacity 1.
+  - Erklärt durch F34: derselbe Ausschnitt, gemessen mit einem Plugin vor #29; F36 hat es behoben.
+  - Absicherung: Test „…over two runs (F43)“ in `plugin.test.ts`, grün seit #29, rot auf `ed3fa36`.
+  - M2 erledigt durch den Build-Stempel (#40). Offen nur M3: beim nächsten Figma-Lauf mit `d36790a` die vollständige Paint-Zeile (`resolved`, `stored`, `modes`) mitlesen.
+
 - [ ] **Befund über einen Test: `mcp/resources-http` fällt unter Last** (2026-09-24, beim vollen
   `pnpm check` auf dem F36-Branch beobachtet)
   - `packages/mcp/src/resources-http.test.ts` → „the HTTP transport > serves the tools" fiel mit
