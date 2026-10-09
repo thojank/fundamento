@@ -632,9 +632,10 @@ describe("Spec 004 documentation (T001, Art. V Benchmark-Aspekto)", () => {
   // hat es damit nie gegeben; die Lücke wird in der Änderungshistorie benannt, nicht geschlossen.
   // 2.0 statt 1.10, weil „Kein Trittbrett" die erste Regel ist, die nicht den Erbauer bindet,
   // sondern den Benutzer. Dieser Test ist der einzige Gegenleser der Nummer — ein Vergleich über
-  // einen String, der zwei Amendments unter einer Nummer nie melden würde.
-  it("the Constitution header says version 2.0", () => {
-    expect(constitution.split("\n")[2]).toMatch(/^Version 2\.0 · /);
+  // einen String, der zwei Amendments unter einer Nummer nie melden würde. Seit Spec 007 (T010)
+  // steht hier 2.1: Die Nummer wurde gegen main und die offenen PRs geprüft, keiner beanspruchte sie.
+  it("the Constitution header says version 2.1", () => {
+    expect(constitution.split("\n")[2]).toMatch(/^Version 2\.1 · /);
   });
 
   it("Art. V carries the Benchmark-Aspekto paragraph and keeps the source rule", () => {
@@ -734,6 +735,27 @@ describe("F33 documentation (Constitution v2.0, Art. V/VI/VII)", () => {
     expect(history).toContain("**Kein Trittbrett**");
     expect(history).toContain("**Herkunftsnachweis**");
     expect(history).toContain("eine v1.8 hat es nie gegeben");
+  });
+});
+
+// Spec 007 (T010, plan D-11): Die Uzo ist Wissen eigener Art neben der Skemo, also ein Begriff der
+// Terminologio. Tabellenzeile, Ontologio-Begriff und Entitätstyp landen in einem Commit, weil die
+// Drift-Prüfung jeden Zwischenstand rot machen würde.
+describe("Spec 007 documentation (Constitution v2.1, Uzo)", () => {
+  const constitution = read(".specify/memory/constitution.md");
+
+  it("the terminology table names Uzo with its file and the two kinds of text rules", () => {
+    const table = section(constitution, "Terminologio (verbindliches Vokabular)");
+    const row = table.split("\n").find((line) => line.startsWith("| **Uzo**")) ?? "";
+    expect(row).toContain("Der Gebrauch eines Ero");
+    expect(row).toContain("fest oder anpassbar");
+    expect(row).toContain("`data/eroj/<ero>/uzo.json`");
+  });
+
+  it("the change history names v2.1 (Spec 007) and Uzo", () => {
+    const history = section(constitution, "Governance");
+    expect(history).toMatch(/v2\.1 \(Spec 007\) Terminologie um \*\*Uzo\*\* ergänzt/);
+    expect(history).toContain("Überstimmung nur mit Jugxo");
   });
 });
 

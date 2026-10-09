@@ -164,6 +164,7 @@
         "kontrastParo",
         "ero",
         "skemo",
+        "uzo",
         "sxablono",
         "projekcio",
         "celo"
@@ -171,7 +172,7 @@
     },
     "AnyId": {
       "type": "string",
-      "pattern": "^(tok|set|dim|dva|reg|jug|man|kpa|ero|ske|sxa|prj|cel)_(?:[a-z]{2,8}_)?[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+      "pattern": "^(tok|set|dim|dva|reg|jug|man|kpa|ero|ske|uzo|sxa|prj|cel)_(?:[a-z]{2,8}_)?[0-7][0-9A-HJKMNP-TV-Z]{25}$"
     },
     "TokenId": {
       "type": "string",
@@ -212,6 +213,10 @@
     "SkemoId": {
       "type": "string",
       "pattern": "^ske_(?:[a-z]{2,8}_)?[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+    },
+    "UzoId": {
+      "type": "string",
+      "pattern": "^uzo_(?:[a-z]{2,8}_)?[0-7][0-9A-HJKMNP-TV-Z]{25}$"
     },
     "SxablonoId": {
       "type": "string",

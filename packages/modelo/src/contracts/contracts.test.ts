@@ -64,6 +64,7 @@ describe("entity ID prefixes (§2.3)", () => {
       kontrastParo: "kpa",
       ero: "ero",
       skemo: "ske",
+      uzo: "uzo",
       sxablono: "sxa",
       projekcio: "prj",
       celo: "cel",

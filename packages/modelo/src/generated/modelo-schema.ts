@@ -275,6 +275,7 @@ export type EntityType =
   | "kontrastParo"
   | "ero"
   | "skemo"
+  | "uzo"
   | "sxablono"
   | "projekcio"
   | "celo";
@@ -283,6 +284,11 @@ export type EntityType =
  * via the `definition` "AnyId".
  */
 export type AnyId = string;
+/**
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "UzoId".
+ */
+export type UzoId = string;
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema
  * via the `definition` "SxablonoId".

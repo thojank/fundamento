@@ -333,6 +333,57 @@
       ]
     },
     {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Uzo",
+      "term": "Uzo",
+      "inScheme": "terminologio",
+      "notation": "uzo",
+      "prefLabel": {
+        "eo": "Uzo",
+        "en": "usage",
+        "de": "Gebrauch"
+      },
+      "altLabel": {
+        "en": [
+          "usage rules"
+        ],
+        "de": [
+          "Verwendung"
+        ]
+      },
+      "definition": {
+        "en": "The use of an Ero (later also of a Sxablono): what it is for and what not, its boundaries, relations, slot rules, layout behaviour and text rules. It stands next to the Skemo, because behaviour is more than a blueprint. Text rules are fixed or adjustable; an Aspekto overrides an adjustable rule only with a Jugxo, a fixed one never. Not the ease of use of the system itself, which Art. XIII calls Simpleco de Uzo.",
+        "de": "Der Gebrauch eines Ero (später auch einer Sxablono): wofür und wofür nicht, Grenzen, Beziehungen, Slot-Regeln, Layout-Verhalten, Text-Regeln. Steht neben der Skemo, weil Verhalten mehr ist als Bauplan. Text-Regeln sind fest oder anpassbar; eine Aspekto überstimmt anpassbare Regeln nur mit Jugxo, feste nie. Nicht gemeint ist die Einfachheit der Nutzung des Systems nach Art. XIII (Simpleco de Uzo)."
+      },
+      "broader": [
+        "#Modelo"
+      ],
+      "related": [
+        "#Tavolo"
+      ],
+      "relations": [
+        {
+          "predicate": "partOf",
+          "target": "#Modelo"
+        },
+        {
+          "predicate": "references",
+          "target": "#Ero"
+        },
+        {
+          "predicate": "references",
+          "target": "#Skemo"
+        },
+        {
+          "predicate": "references",
+          "target": "#Regulo"
+        },
+        {
+          "predicate": "references",
+          "target": "#Jugxo"
+        }
+      ]
+    },
+    {
       "uri": "https://fundamento.ciferecigo.com/ontologio#Regularo",
       "term": "Regularo",
       "inScheme": "terminologio",

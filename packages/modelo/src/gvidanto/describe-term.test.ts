@@ -59,6 +59,33 @@ describe("describe_term (FR-12)", () => {
     expect(success(term).instances?.count).toBe(count);
   });
 
+  // Spec 007 (A13, plan D-11, OP-1): the Uzo is found under its German and English names, and its
+  // definition says what it is not: the ease of use that Art. XIII calls Simpleco de Uzo.
+  it.each([
+    ["Uzo", "term"],
+    ["Gebrauch", "prefLabel"],
+    ["usage", "prefLabel"],
+  ])("finds Uzo from %s (%s)", (word, matchedBy) => {
+    expect(success(word)).toMatchObject({
+      term: "Uzo",
+      uri: "https://fundamento.ciferecigo.com/ontologio#Uzo",
+      inScheme: "terminologio",
+      notation: "uzo",
+      matchedBy,
+    });
+  });
+
+  it("defines Uzo apart from Art. XIII", () => {
+    const { definition } = success("Uzo");
+    expect(definition.de).toContain("Der Gebrauch eines Ero");
+    expect(definition.de).toMatch(
+      /Nicht gemeint ist die Einfachheit der Nutzung des Systems nach Art\. XIII \(Simpleco de Uzo\)\.$/,
+    );
+    expect(definition.en).toMatch(
+      /Not the ease of use of the system itself, which Art\. XIII calls Simpleco de Uzo\.$/,
+    );
+  });
+
   it("has no instances for a concept without them", () => {
     expect(success("Gvidanto").instances).toBeUndefined();
   });
