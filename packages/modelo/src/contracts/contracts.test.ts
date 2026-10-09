@@ -1,9 +1,12 @@
+import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, expectTypeOf, it } from "vitest";
 import type {
   DtcgType as GeneratedDtcgType,
   EntityType as GeneratedEntityType,
   TokenRole as GeneratedTokenRole,
 } from "../generated/modelo-schema.js";
+import { FIXTURES_DIR } from "../validate/test-doubles/fixtures.js";
 import {
   CHECK_NAMES,
   type CheckResult,
@@ -111,6 +114,24 @@ describe("rule catalog (§2.6)", () => {
       expect(isRuleId(rule), rule).toBe(true);
     }
     expect(isRuleId("made-up-rule")).toBe(false);
+  });
+
+  // A fixture that expects a rule the catalog does not know can never pass (Spec 007, A11).
+  it("knows every rule a fixture expects", () => {
+    const unknown = (["valid", "invalid"] as const).flatMap((kind) =>
+      readdirSync(join(FIXTURES_DIR, kind)).flatMap((name) => {
+        const file = join(FIXTURES_DIR, kind, name, "expected-issues.json");
+        if (!existsSync(file)) return [];
+        const expected = JSON.parse(readFileSync(file, "utf8")) as {
+          issues?: { rule: string }[];
+          warnings?: { rule: string }[];
+        };
+        return [...(expected.issues ?? []), ...(expected.warnings ?? [])]
+          .filter(({ rule }) => !isRuleId(rule))
+          .map(({ rule }) => `${kind}/${name}: ${rule}`);
+      }),
+    );
+    expect(unknown).toEqual([]);
   });
 
   it("formats located issue paths as <file>#<JSON Pointer>", () => {

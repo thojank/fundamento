@@ -1,0 +1,9 @@
+{
+  "description": "Spec 007 A11/1 (A1): data/eroj/verknuepfo/ holds only a uzo.json. A Uzo describes how an Ero is used; without the Skemo next to it there is no Ero whose use it describes. butono keeps its valid Uzo.",
+  "issues": [
+    {
+      "rule": "uzo-skemo-missing",
+      "path": "data/eroj/verknuepfo/uzo.json#/uzo/skemo"
+    }
+  ]
+}
