@@ -780,6 +780,27 @@ export interface EroInstance {
   container?: string;
   intent?: Name;
   label?: string;
+  /**
+   * The Aspekto the instance is shown in; its overrides of adjustable text rules apply (Spec 007, A10).
+   */
+  aspekto?: string;
+  /**
+   * Dimensio values the instance is shown under, e.g. viewport=compact (Spec 007, A6).
+   */
+  dimensioj?: {
+    [k: string]: Name;
+  };
+  /**
+   * What stands in each slot: text, an icon or another Ero by name (Spec 007, A5). An unknown Ero name is allowed here; it describes the design.
+   */
+  slots?: {
+    [k: string]: (
+      | ("text" | "icon")
+      | {
+          ero: Name;
+        }
+    )[];
+  };
 }
 /**
  * A measured gap of a tool: something the Modelo can express and the target cannot carry. It holds the evidence in the tool's own words, the date it was measured and the condition under which a run may call it closed. It is never a version query: the attempt is the measurement.

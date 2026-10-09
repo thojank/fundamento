@@ -2816,6 +2816,48 @@
         },
         "label": {
           "type": "string"
+        },
+        "aspekto": {
+          "description": "The Aspekto the instance is shown in; its overrides of adjustable text rules apply (Spec 007, A10).",
+          "$ref": "#/$defs/Name"
+        },
+        "dimensioj": {
+          "description": "Dimensio values the instance is shown under, e.g. viewport=compact (Spec 007, A6).",
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/Name"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/Name"
+          }
+        },
+        "slots": {
+          "description": "What stands in each slot: text, an icon or another Ero by name (Spec 007, A5). An unknown Ero name is allowed here; it describes the design.",
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/Name"
+          },
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "enum": ["text", "icon"]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "ero": {
+                      "$ref": "#/$defs/Name"
+                    }
+                  },
+                  "required": ["ero"],
+                  "additionalProperties": false
+                }
+              ]
+            }
+          }
         }
       },
       "required": ["ero", "props"],
