@@ -1,0 +1,11 @@
+[
+  {
+    "group": "aspekto",
+    "id": "dva_ekz_01M2WRK8G0EEEEEEEEEEEEEEE0",
+    "name": "ekzemplo",
+    "selectedTokenSets": {
+      "aspekto/ekzemplo": "enabled",
+      "core": "source"
+    }
+  }
+]

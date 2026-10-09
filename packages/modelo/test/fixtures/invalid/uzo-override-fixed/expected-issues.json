@@ -1,0 +1,9 @@
+{
+  "description": "Spec 007 A11/8 (A7, D-03): the Aspekto ekzemplo overrides destructive-label-not-generic, which the Uzo marks fixed. A fixed text rule protects safety or trust at a critical place; no Aspekto may override it, not even with a Jugxo.",
+  "issues": [
+    {
+      "rule": "uzo-override-fixed",
+      "path": "aspekto-ekzemplo/aspekto.json#/tavoloj/lingvo/overrides/0"
+    }
+  ]
+}
