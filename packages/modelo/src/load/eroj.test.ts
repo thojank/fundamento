@@ -11,6 +11,7 @@ import { loadModelo } from "./load-modelo.js";
 import { defaultModeloSource, fixtureModeloSource } from "./source.js";
 
 const ERO_MINIMAL = fixtureModeloSource(fixtureRoot("valid", "ero-minimal"));
+const ERO_UZO_MINIMAL = fixtureModeloSource(fixtureRoot("valid", "ero-uzo-minimal"));
 
 describe("Eroj in the Modelo (T004)", () => {
   it("loads data/eroj/<ero>/skemo.json as one Ero with its Skemo and file", () => {
@@ -39,6 +40,27 @@ describe("Eroj in the Modelo (T004)", () => {
     const json = buildModeloJson({ modelo, sets: files.sets, schema: readModeloSchema() });
     expect(json.eroj.map((ero) => ero.name)).toEqual(["butono"]);
     expect(json.skemoj.map((skemo) => skemo.ero)).toEqual([json.eroj[0]?.id]);
+  });
+
+  // Spec 007 (T011, D-01): the Uzo lies next to the Skemo and is loaded with it.
+  it("loads data/eroj/<ero>/uzo.json as the Uzo of that Ero", () => {
+    const { modelo } = loadModelo(ERO_UZO_MINIMAL);
+    const [entry] = modelo?.eroj ?? [];
+    expect(entry?.uzo?.id).toMatch(/^uzo_/);
+    expect(entry?.uzo?.ero).toBe(entry?.ero.id);
+    expect(entry?.uzo?.skemo).toBe(entry?.skemo.id);
+    expect(entry?.uzoFile).toBe("data/eroj/butono/uzo.json");
+  });
+
+  it("validates the smallest Uzo the schema allows without issues", () => {
+    const report = validateModelo(ERO_UZO_MINIMAL);
+    expect(report.errors).toEqual([]);
+    expect(report.warnings).toEqual([]);
+  });
+
+  it("leaves an Ero without uzo.json without a Uzo", () => {
+    const { modelo } = loadModelo(ERO_MINIMAL);
+    expect(modelo?.eroj[0]?.uzo).toBeUndefined();
   });
 
   it("the repo Modelo loads (with or without Eroj)", () => {

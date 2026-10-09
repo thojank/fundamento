@@ -22,6 +22,13 @@ describe("generated TS types", () => {
     expect(committed).toBe(fresh);
   });
 
+  // Spec 007 (T011): the Uzo is a type of its own, generated from the schema like the Skemo.
+  it("contain the Uzo and its file", async () => {
+    const committed = await readFile(GENERATED_TYPES_URL, "utf8");
+    expect(committed).toContain("export interface Uzo {");
+    expect(committed).toContain("export interface UzoFile {");
+  });
+
   it("generate the config types from config.schema.json (no drift)", async () => {
     const committed = await readFile(GENERATED_CONFIG_TYPES_URL, "utf8");
     // On failure run: pnpm --filter @fundamento/modelo generate:types

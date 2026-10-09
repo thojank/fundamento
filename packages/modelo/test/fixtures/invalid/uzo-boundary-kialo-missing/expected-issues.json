@@ -1,5 +1,5 @@
 {
-  "description": "Spec 007 A11/3 (A3, Art. VI): boundary[0] has no kialo. A boundary without its reason is an order; the agent could neither pass it on nor judge a case next to it. The schema rejects it too (schema-violation at the missing member).",
+  "description": "Spec 007 A11/3 (A3, Art. VI): boundary[0] has no kialo. A boundary without its reason is an order; the agent could neither pass it on nor judge a case next to it. The schema rejects it too (schema-violation at the same entry).",
   "issues": [
     {
       "rule": "uzo-kialo-missing",
@@ -7,7 +7,7 @@
     },
     {
       "rule": "schema-violation",
-      "path": "data/eroj/butono/uzo.json#/uzo/boundary/0/kialo"
+      "path": "data/eroj/butono/uzo.json#/uzo/boundary/0"
     }
   ]
 }

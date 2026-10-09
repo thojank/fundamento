@@ -18,7 +18,7 @@ import {
 
 /**
  * ID occurrences of: core token definitions (overrides in other sets carry no ID), set roots,
- * Dimensioj, DimensioValoroj, Reguloj, Jugxoj, Mankoj, KontrastParoj, Eroj and Skemoj. `$themes.json` is skipped: its
+ * Dimensioj, DimensioValoroj, Reguloj, Jugxoj, Mankoj, KontrastParoj, Eroj, Skemoj and Uzoj. `$themes.json` is skipped: its
  * theme IDs repeat the DimensioValoro IDs by design.
  *
  * A present string ID points at the `id` value itself (e.g.
@@ -109,6 +109,13 @@ export function collectIdOccurrences(files: ModeloFiles): IdOccurrence[] {
       const entity = isJsonObject(value?.[key]) ? (value?.[key] as JsonObject) : undefined;
       add(entityType, document.file, `/${key}`, entity, `/${key}`);
     }
+  }
+
+  // Spec 007: the Uzo next to the Skemo is an entity with its own ID.
+  for (const document of files.uzoj) {
+    const value = isJsonObject(document.value) ? document.value : undefined;
+    const uzo = isJsonObject(value?.uzo) ? (value?.uzo as JsonObject) : undefined;
+    add("uzo", document.file, "/uzo", uzo, "/uzo");
   }
   return occurrences;
 }

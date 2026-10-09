@@ -103,6 +103,10 @@
     "tok_01K5FMAJ0H4CZYQST4Y5HHM8HV": {
       "status": "active",
       "type": "token"
+    },
+    "uzo_01M4H39SZBPN8VKA70309EJ35G": {
+      "status": "active",
+      "type": "uzo"
     }
   }
 }

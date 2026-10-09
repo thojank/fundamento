@@ -204,6 +204,37 @@ describe("exportModelo: shape (§2.9)", () => {
   });
 });
 
+// Spec 007 (T011, D-01): the Uzo goes into the export like the Mankoj did with F41. While no Ero
+// has a Uzo the key stays out, so the export of the repo keeps its bytes (AK-10, T017).
+describe("exportModelo: uzoj (Spec 007)", () => {
+  const exportOf = (name: string): ModeloJson => {
+    const fixtureFiles = readFiles(fixtureModeloSource(fixtureRoot("valid", name)));
+    const { modelo: fixtureModelo } = buildModelo(fixtureFiles);
+    const { modeloJson: text } = exportModelo({
+      modelo: fixtureModelo,
+      sets: fixtureFiles.sets,
+      schema,
+    });
+    return JSON.parse(text) as ModeloJson;
+  };
+
+  it("exports the Uzo of every Ero into uzoj", () => {
+    const json = exportOf("ero-uzo-minimal");
+    expect(json.uzoj?.map((uzo) => uzo.ero)).toEqual([json.eroj[0]?.id]);
+    expect(json.uzoj?.[0]?.purpose).toBe("Fixture Uzo: starts an action on the current view.");
+  });
+
+  it("leaves uzoj out while no Ero has a Uzo", () => {
+    expect(exportOf("ero-minimal")).not.toHaveProperty("uzoj");
+    expect(modeloJson).not.toHaveProperty("uzoj");
+  });
+
+  it("the export with uzoj validates against the exported schema", () => {
+    const validate = getModeloValidator(createModeloAjv());
+    expect(validate(exportOf("ero-uzo-minimal")), JSON.stringify(validate.errors)).toBe(true);
+  });
+});
+
 describe("exportModelo: schema (self-contained, validates modelo.json)", () => {
   it("modelo.json validates against the exported modelo.schema.json", () => {
     const ajv = createModeloAjv();

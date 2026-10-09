@@ -52,11 +52,19 @@ export function modeloFromExport(modeloJson: ModeloJson): Modelo {
     mankoj: structuredClone(modeloJson.mankoj),
     kontrastParoj: structuredClone(modeloJson.kontrastParoj),
     // eroj and skemoj are exported in the same order (Ero name); the files are not exported.
+    // A Uzo finds its Ero by ID (Spec 007).
     eroj: modeloJson.eroj.flatMap((ero) => {
       const skemo = modeloJson.skemoj.find((candidate) => candidate.id === ero.skemo);
-      return skemo === undefined
-        ? []
-        : [{ file: "", ero: structuredClone(ero), skemo: structuredClone(skemo) }];
+      if (skemo === undefined) return [];
+      const uzo = modeloJson.uzoj?.find((candidate) => candidate.ero === ero.id);
+      return [
+        {
+          file: "",
+          ero: structuredClone(ero),
+          skemo: structuredClone(skemo),
+          ...(uzo === undefined ? {} : { uzo: structuredClone(uzo), uzoFile: "" }),
+        },
+      ];
     }),
     idsLock: { ids: {} },
     aspektoPackages,

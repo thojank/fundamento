@@ -181,6 +181,14 @@ export function buildModeloJson(input: ModeloExportInput): ModeloJson {
   if (reference !== undefined) {
     modeloJson.core = { referenceAspekto: reference };
   }
+  // Spec 007: in Ero order, like eroj. Absent while no Ero has a Uzo, so an export without Uzoj
+  // keeps its bytes (AK-10).
+  const uzoj = modelo.eroj.flatMap((entry) =>
+    entry.uzo === undefined ? [] : [structuredClone(entry.uzo)],
+  );
+  if (uzoj.length > 0) {
+    modeloJson.uzoj = uzoj;
+  }
   return modeloJson;
 }
 

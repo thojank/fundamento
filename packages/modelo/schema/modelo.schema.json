@@ -68,6 +68,13 @@
         "$ref": "#/$defs/Manko"
       }
     },
+    "uzoj": {
+      "description": "The Uzoj of the Eroj (Spec 007); absent while no Ero has one.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Uzo"
+      }
+    },
     "kontrastParoj": {
       "type": "array",
       "items": {
@@ -2291,21 +2298,7 @@
           "$ref": "#/$defs/Name"
         },
         "keywords": {
-          "type": "object",
-          "minProperties": 1,
-          "propertyNames": {
-            "type": "string",
-            "pattern": "^[a-z]{2}$"
-          },
-          "additionalProperties": {
-            "type": "array",
-            "minItems": 1,
-            "items": {
-              "type": "string",
-              "minLength": 1
-            },
-            "uniqueItems": true
-          }
+          "$ref": "#/$defs/Keywords"
         },
         "props": {
           "type": "object",
@@ -2349,6 +2342,443 @@
         }
       },
       "required": ["ero", "skemo"],
+      "additionalProperties": false
+    },
+    "Keywords": {
+      "description": "Search vocabulary per language (ISO 639-1 code to a non-empty word list). Keywords find an entry for suggest_ero; they are never shown (Spec 003 D-16, Spec 007 data-model §2.1).",
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {
+        "type": "string",
+        "pattern": "^[a-z]{2}$"
+      },
+      "additionalProperties": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "type": "string",
+          "minLength": 1
+        },
+        "uniqueItems": true
+      }
+    },
+    "UzoFile": {
+      "description": "data/eroj/<name>/uzo.json: the Uzo of the Ero whose Skemo lies in the same folder (Spec 007, D-01).",
+      "type": "object",
+      "properties": {
+        "$schema": {
+          "type": "string",
+          "minLength": 1
+        },
+        "uzo": {
+          "$ref": "#/$defs/Uzo"
+        }
+      },
+      "required": ["uzo"],
+      "additionalProperties": false
+    },
+    "Uzo": {
+      "description": "How an Ero is used (Spec 007, data-model §2): what it is for and what not, where it stops, what it stands with, its slot, layout and text rules. Brand-neutral; holds no visible text.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/UzoId"
+        },
+        "ero": {
+          "$ref": "#/$defs/EroId"
+        },
+        "skemo": {
+          "$ref": "#/$defs/SkemoId"
+        },
+        "purpose": {
+          "description": "One sentence: what the Ero is for (A2).",
+          "$ref": "#/$defs/NonEmptyText"
+        },
+        "instead": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/UzoInstead"
+          }
+        },
+        "boundary": {
+          "description": "The cases the Ero does not cover; every Ero has at least one (A3).",
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/UzoBoundary"
+          }
+        },
+        "composes": {
+          "$ref": "#/$defs/UzoComposes"
+        },
+        "slots": {
+          "description": "Rules per slot of the Skemo (A5); the keys must be slots of the Skemo.",
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/Name"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/UzoSlot"
+          }
+        },
+        "layout": {
+          "$ref": "#/$defs/UzoLayout"
+        },
+        "content": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/UzoContent"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "ero",
+        "skemo",
+        "purpose",
+        "instead",
+        "boundary",
+        "composes",
+        "slots",
+        "layout",
+        "content"
+      ],
+      "additionalProperties": false
+    },
+    "UzoInstead": {
+      "description": "A goal the Ero does not serve and what to take instead: another Ero, or null for 'not covered' (A2).",
+      "type": "object",
+      "properties": {
+        "goal": {
+          "$ref": "#/$defs/Name"
+        },
+        "keywords": {
+          "$ref": "#/$defs/Keywords"
+        },
+        "ero": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Name"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "kialo": {
+          "$ref": "#/$defs/NonEmptyText"
+        }
+      },
+      "required": ["goal", "keywords", "ero", "kialo"],
+      "additionalProperties": false
+    },
+    "UzoBoundary": {
+      "description": "A case the Ero does not cover, with what to do about it (A3). use-instead names the other Ero.",
+      "type": "object",
+      "properties": {
+        "case": {
+          "$ref": "#/$defs/Name"
+        },
+        "action": {
+          "type": "string",
+          "enum": ["use-instead", "ask-human", "not-supported"]
+        },
+        "ero": {
+          "$ref": "#/$defs/Name"
+        },
+        "keywords": {
+          "$ref": "#/$defs/Keywords"
+        },
+        "via": {
+          "description": "The check by which check_usage recognises the case (A10).",
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "slot": {
+                  "$ref": "#/$defs/Name"
+                }
+              },
+              "required": ["slot"],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "layout": {
+                  "const": "wrap"
+                }
+              },
+              "required": ["layout"],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "regulo": {
+                  "$ref": "#/$defs/Name"
+                }
+              },
+              "required": ["regulo"],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "kialo": {
+          "$ref": "#/$defs/NonEmptyText"
+        }
+      },
+      "required": ["case", "action", "kialo"],
+      "if": {
+        "properties": {
+          "action": {
+            "const": "use-instead"
+          }
+        },
+        "required": ["action"]
+      },
+      "then": {
+        "properties": {
+          "ero": true
+        },
+        "required": ["ero"]
+      },
+      "additionalProperties": false
+    },
+    "UzoComposes": {
+      "description": "Where the Ero stands and with whom (A4). The space between siblings belongs to the container.",
+      "type": "object",
+      "properties": {
+        "containers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "$ref": "#/$defs/Name"
+              },
+              "kialo": {
+                "$ref": "#/$defs/NonEmptyText"
+              }
+            },
+            "required": ["name", "kialo"],
+            "additionalProperties": false
+          }
+        },
+        "with": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/UzoEroRelation"
+          }
+        },
+        "never": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/UzoEroRelation"
+          }
+        },
+        "spacing": {
+          "type": "object",
+          "properties": {
+            "owner": {
+              "const": "container"
+            },
+            "regulo": {
+              "$ref": "#/$defs/Name"
+            }
+          },
+          "required": ["owner", "regulo"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["containers", "with", "never", "spacing"],
+      "additionalProperties": false
+    },
+    "UzoEroRelation": {
+      "type": "object",
+      "properties": {
+        "ero": {
+          "$ref": "#/$defs/Name"
+        },
+        "kialo": {
+          "$ref": "#/$defs/NonEmptyText"
+        }
+      },
+      "required": ["ero", "kialo"],
+      "additionalProperties": false
+    },
+    "UzoSlot": {
+      "description": "What a slot accepts (text, icon or an Ero name), how many, whether it is required and how deep it may nest (A5).",
+      "type": "object",
+      "properties": {
+        "accepts": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/Name"
+          },
+          "uniqueItems": true
+        },
+        "max": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "nesting": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "UzoLayout": {
+      "description": "Layout behaviour in platform-neutral words (A6, Art. VIII). Every key besides size and wrap is a boolean prop of the Skemo with the containers or Dimensio values it is allowed in.",
+      "type": "object",
+      "properties": {
+        "size": {
+          "type": "string",
+          "enum": ["content", "container"]
+        },
+        "wrap": {
+          "type": "string",
+          "enum": ["never", "allowed"]
+        }
+      },
+      "required": ["size", "wrap"],
+      "propertyNames": {
+        "$ref": "#/$defs/Name"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/UzoLayoutAllowance"
+      }
+    },
+    "UzoLayoutAllowance": {
+      "type": "object",
+      "properties": {
+        "allowedIn": {
+          "type": "object",
+          "properties": {
+            "containers": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/Name"
+              },
+              "uniqueItems": true
+            },
+            "dimensioj": {
+              "type": "object",
+              "propertyNames": {
+                "$ref": "#/$defs/Name"
+              },
+              "additionalProperties": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "$ref": "#/$defs/Name"
+                },
+                "uniqueItems": true
+              }
+            }
+          },
+          "minProperties": 1,
+          "additionalProperties": false
+        },
+        "regulo": {
+          "$ref": "#/$defs/Name"
+        }
+      },
+      "required": ["allowedIn", "regulo"],
+      "additionalProperties": false
+    },
+    "UzoContent": {
+      "description": "A text rule (A7): the Regulo it enforces, whether an Aspekto may override it, and its deterministic check. A fixed rule always reports an error.",
+      "type": "object",
+      "properties": {
+        "regulo": {
+          "$ref": "#/$defs/Name"
+        },
+        "fixed": {
+          "type": "boolean"
+        },
+        "severity": {
+          "type": "string",
+          "enum": ["error", "warning"]
+        },
+        "when": {
+          "type": "object",
+          "properties": {
+            "goal": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/Name"
+              },
+              "uniqueItems": true
+            }
+          },
+          "required": ["goal"],
+          "additionalProperties": false
+        },
+        "check": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "const": "names-goal"
+                }
+              },
+              "required": ["kind"],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "const": "verb-and-object"
+                },
+                "goal": {
+                  "$ref": "#/$defs/Name"
+                }
+              },
+              "required": ["kind", "goal"],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "const": "not-words"
+                },
+                "words": {
+                  "$ref": "#/$defs/Keywords"
+                }
+              },
+              "required": ["kind", "words"],
+              "additionalProperties": false
+            }
+          ]
+        }
+      },
+      "required": ["regulo", "fixed", "check"],
+      "if": {
+        "properties": {
+          "fixed": {
+            "const": true
+          }
+        },
+        "required": ["fixed"]
+      },
+      "then": {
+        "properties": {
+          "severity": {
+            "const": "error"
+          }
+        }
+      },
       "additionalProperties": false
     },
     "EroInstance": {

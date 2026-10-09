@@ -168,6 +168,16 @@ export type EroId = string;
 export type MankoId = string;
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "UzoId".
+ */
+export type UzoId = string;
+/**
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "SkemoId".
+ */
+export type SkemoId = string;
+/**
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
  * via the `definition` "KontrastParo".
  */
 export type KontrastParo = {
@@ -204,11 +214,6 @@ export type KontrastParoId = string;
  * via the `definition` "KontrastKategorio".
  */
 export type KontrastKategorio = "text-normal" | "text-large" | "ui";
-/**
- * This interface was referenced by `ModeloJson`'s JSON-Schema
- * via the `definition` "SkemoId".
- */
-export type SkemoId = string;
 /**
  * Where a part property gets its token: bindings keyed by props and state (by), one token (fixed), or the token of another part property (sameAs, 'part.property').
  *
@@ -284,11 +289,6 @@ export type EntityType =
  * via the `definition` "AnyId".
  */
 export type AnyId = string;
-/**
- * This interface was referenced by `ModeloJson`'s JSON-Schema
- * via the `definition` "UzoId".
- */
-export type UzoId = string;
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema
  * via the `definition` "SxablonoId".
@@ -464,6 +464,10 @@ export interface ModeloJson {
   reguloj: Regulo[];
   jugxoj: Jugxo[];
   mankoj: Manko[];
+  /**
+   * The Uzoj of the Eroj (Spec 007); absent while no Ero has one.
+   */
+  uzoj?: Uzo[];
   kontrastParoj: KontrastParo[];
   eroj: Ero[];
   skemoj: Skemo[];
@@ -829,6 +833,187 @@ export interface MankoClosing {
   statement: NonEmptyText;
 }
 /**
+ * How an Ero is used (Spec 007, data-model §2): what it is for and what not, where it stops, what it stands with, its slot, layout and text rules. Brand-neutral; holds no visible text.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "Uzo".
+ */
+export interface Uzo {
+  id: UzoId;
+  ero: EroId;
+  skemo: SkemoId;
+  /**
+   * One sentence: what the Ero is for (A2).
+   */
+  purpose: string;
+  instead: UzoInstead[];
+  /**
+   * The cases the Ero does not cover; every Ero has at least one (A3).
+   *
+   * @minItems 1
+   */
+  boundary: UzoBoundary[];
+  composes: UzoComposes;
+  /**
+   * Rules per slot of the Skemo (A5); the keys must be slots of the Skemo.
+   */
+  slots: {
+    [k: string]: UzoSlot;
+  };
+  layout: UzoLayout;
+  content: UzoContent[];
+}
+/**
+ * A goal the Ero does not serve and what to take instead: another Ero, or null for 'not covered' (A2).
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "UzoInstead".
+ */
+export interface UzoInstead {
+  goal: Name;
+  keywords: Keywords;
+  ero: Name | null;
+  kialo: NonEmptyText;
+}
+/**
+ * Search vocabulary per language (ISO 639-1 code to a non-empty word list). Keywords find an entry for suggest_ero; they are never shown (Spec 003 D-16, Spec 007 data-model §2.1).
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "Keywords".
+ */
+export interface Keywords {
+  /**
+   * @minItems 1
+   */
+  [k: string]: string[];
+}
+/**
+ * A case the Ero does not cover, with what to do about it (A3). use-instead names the other Ero.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "UzoBoundary".
+ */
+export interface UzoBoundary {
+  case: Name;
+  action: "use-instead" | "ask-human" | "not-supported";
+  ero?: Name;
+  keywords?: Keywords;
+  /**
+   * The check by which check_usage recognises the case (A10).
+   */
+  via?:
+    | {
+        slot: Name;
+      }
+    | {
+        layout: "wrap";
+      }
+    | {
+        regulo: Name;
+      };
+  kialo: NonEmptyText;
+}
+/**
+ * Where the Ero stands and with whom (A4). The space between siblings belongs to the container.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "UzoComposes".
+ */
+export interface UzoComposes {
+  containers: {
+    name: Name;
+    kialo: NonEmptyText;
+  }[];
+  with: UzoEroRelation[];
+  never: UzoEroRelation[];
+  spacing: {
+    owner: "container";
+    regulo: Name;
+  };
+}
+/**
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "UzoEroRelation".
+ */
+export interface UzoEroRelation {
+  ero: Name;
+  kialo: NonEmptyText;
+}
+/**
+ * What a slot accepts (text, icon or an Ero name), how many, whether it is required and how deep it may nest (A5).
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "UzoSlot".
+ */
+export interface UzoSlot {
+  /**
+   * @minItems 1
+   */
+  accepts?: Name[];
+  max?: number;
+  required?: boolean;
+  nesting?: number;
+}
+/**
+ * Layout behaviour in platform-neutral words (A6, Art. VIII). Every key besides size and wrap is a boolean prop of the Skemo with the containers or Dimensio values it is allowed in.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "UzoLayout".
+ */
+export interface UzoLayout {
+  size: "content" | "container";
+  wrap: "never" | "allowed";
+  [k: string]: UzoLayoutAllowance | "content" | "container" | "never" | "allowed";
+}
+/**
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "UzoLayoutAllowance".
+ */
+export interface UzoLayoutAllowance {
+  allowedIn: {
+    /**
+     * @minItems 1
+     */
+    containers?: Name[];
+    dimensioj?: {
+      /**
+       * @minItems 1
+       */
+      [k: string]: Name[];
+    };
+  };
+  regulo: Name;
+}
+/**
+ * A text rule (A7): the Regulo it enforces, whether an Aspekto may override it, and its deterministic check. A fixed rule always reports an error.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "UzoContent".
+ */
+export interface UzoContent {
+  regulo: Name;
+  fixed: boolean;
+  severity?: "error" | "warning";
+  when?: {
+    /**
+     * @minItems 1
+     */
+    goal: Name[];
+  };
+  check:
+    | {
+        kind: "names-goal";
+      }
+    | {
+        kind: "verb-and-object";
+        goal: Name;
+      }
+    | {
+        kind: "not-words";
+        words: Keywords;
+      };
+}
+/**
  * A component (Spec 003). Lives with its Skemo in data/eroj/<name>/skemo.json.
  *
  * This interface was referenced by `ModeloJson`'s JSON-Schema
@@ -943,12 +1128,7 @@ export interface SkemoConstraint {
  */
 export interface SkemoIntent {
   intent: Name;
-  keywords: {
-    /**
-     * @minItems 1
-     */
-    [k: string]: string[];
-  };
+  keywords: Keywords;
   props: {
     [k: string]: string | number | boolean;
   };
@@ -1234,6 +1414,16 @@ export interface EroFile {
   $schema?: string;
   ero: Ero;
   skemo: Skemo;
+}
+/**
+ * data/eroj/<name>/uzo.json: the Uzo of the Ero whose Skemo lies in the same folder (Spec 007, D-01).
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "UzoFile".
+ */
+export interface UzoFile {
+  $schema?: string;
+  uzo: Uzo;
 }
 /**
  * A template or pattern (layout, page type, flow). Schema only in Phase 0.

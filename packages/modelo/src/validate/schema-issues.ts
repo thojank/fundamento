@@ -141,6 +141,19 @@ export function schemaIssues(files: ModeloFiles, ajv: ModeloAjv): ValidationIssu
       );
     }
   }
+  for (const document of files.uzoj) {
+    const validate = getModeloValidator(ajv, SCHEMA_DEFS.uzoFile);
+    if (!validate(document.value)) {
+      issues.push(
+        ...mapErrors(validate.errors ?? [], document, SCHEMA_DEFS.uzoFile, {
+          // The Uzo's ID is checked by `checkIds` (id-missing, id-format).
+          semantic: [/^\/uzo\/id(\/|$)/],
+          subtrees: [],
+          isSetFile: false,
+        }),
+      );
+    }
+  }
   for (const name of Object.keys(DATA_FILE_SCHEMA_DEFS) as DataFileName[]) {
     const document = files.data[name];
     const defName = DATA_FILE_SCHEMA_DEFS[name];

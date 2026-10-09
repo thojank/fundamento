@@ -134,6 +134,13 @@ function partialModeloJson(modelo: Modelo): ModeloJson {
     kontrastParoj: modelo.kontrastParoj,
     eroj: modelo.eroj.map((entry) => entry.ero),
     skemoj: modelo.eroj.map((entry) => entry.skemo),
+    ...uzojOf(modelo),
     rezolvo: { assignment: {}, tokens: {} },
   };
+}
+
+/** The Uzoj of the Eroj, or nothing while no Ero has one (Spec 007, like the export). */
+function uzojOf(modelo: Modelo): Pick<ModeloJson, "uzoj"> {
+  const uzoj = modelo.eroj.flatMap((entry) => (entry.uzo === undefined ? [] : [entry.uzo]));
+  return uzoj.length === 0 ? {} : { uzoj };
 }
