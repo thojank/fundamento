@@ -528,11 +528,13 @@ describe("Spec 003 documentation: quickstart, checks and traceability (T027)", (
     }
   });
 
-  it("the vojmapo records Phase 3 as implemented and awaiting the acceptance", () => {
+  it("the vojmapo records Phase 3 as accepted after M1–M3", () => {
     const vojmapo = read("docs/vojmapo.md");
     const phase3 = vojmapo.split("\n").find((line) => line.startsWith("| 3 |")) ?? "";
-    expect(phase3).toContain("umgesetzt");
-    expect(phase3).toContain("Abnahme");
+    expect(phase3).toContain("✅ abgenommen 2026-10-09");
+    for (const step of ["M1", "M2", "M3"]) {
+      expect(phase3, step).toContain(step);
+    }
   });
 });
 
