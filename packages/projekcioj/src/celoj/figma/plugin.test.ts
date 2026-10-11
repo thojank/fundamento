@@ -5,7 +5,12 @@ import { defaultModeloSource, projectModeloSource } from "@fundamento/modelo";
 import { describe, expect, it } from "vitest";
 import { celoInputOf } from "../../build.js";
 import { FIGMA_CELO, type FigmaPlan, resolveFigmaPlan } from "./figma.js";
-import { type DoubleNode, figmaDouble } from "./test-doubles/plugin.js";
+import {
+  type DoubleCollection,
+  type DoubleNode,
+  type DoubleVariable,
+  figmaDouble,
+} from "./test-doubles/plugin.js";
 
 const config = new URL(
   "../../../../modelo/test/fixtures/valid/aspekto-ekzemplo/fundamento.config.json",
@@ -2811,5 +2816,203 @@ describe("the tertiary fill keeps its deckkraft over two runs (F43)", () => {
         expect(line?.stored.opacity, `${where}, reported stored`).toBe(0);
       }
     }
+  });
+});
+
+// Sammlungswechsel (Maintainer, Messung 2026-10-09 in f10b-2, Plugin 7f57ee2): Die Datei hielt 364
+// Variablen in `fundamento`, gebaut mit dem Ein-Marken-Plan; der Zwei-Marken-Plan legt sie in
+// `aspekto` und lässt `fundamento` leer. Der Lauf fand jede am Namen, nahm den Modus von `aspekto`,
+// und Figma lehnte ab: „in setValueForMode: mode with id 2:1 not defined for variable". Die
+// Plugin-API kann eine Variable nicht in eine andere Sammlung verschieben: `variableCollectionId`
+// ist nur lesbar (plugin-api.d.ts 1.138.0), und weder Variable noch VariableCollection noch
+// VariablesAPI kennen einen Aufruf dafür. Löschen und Neuanlegen gäbe ihr eine neue Id, und jede
+// Bindung an einen Knoten und jeder Alias einer anderen Variable verlöre sein Ziel. Also bricht der
+// Lauf vor dem ersten Schreiben ab, wie F10c, und nennt jede betroffene Variable mit der Sammlung,
+// in der sie liegt, und der, in die der Plan sie legt. Entscheidung des Maintainers (2026-10-11):
+// `fundamento` darf leer sein, keine Modelo-Änderung; eine leere Sammlung wird gemeldet, nie
+// gelöscht.
+describe("a variable the file holds in another collection stops the run before it writes (Sammlung gewechselt)", () => {
+  type Switched = { name: string; from: string; to: string };
+  type SwitchAbort = Error & { abort?: { switched?: Switched[] } };
+  interface VariablesApi {
+    variables: {
+      createVariableCollection: (name: string) => DoubleCollection;
+      createVariable: (name: string, collection: DoubleCollection, type: string) => DoubleVariable;
+    };
+  }
+  const TWO_BRANDS = files["figma/plugin/code.js"] ?? "";
+  const ONE_BRAND = repoFiles["figma/plugin/code.js"] ?? "";
+
+  /** The abort of a run instead of its rejection; undefined when the run went through. */
+  const abortOf = (double: ReturnType<typeof figmaDouble>, source: string) =>
+    (
+      new Function("figma", `${source}\nreturn applyPlan();`)(double.figma) as Promise<unknown>
+    ).then(
+      () => undefined,
+      (caught: unknown) => caught as SwitchAbort,
+    );
+  const named = (of: FigmaPlan, collection: string) =>
+    of.collections.find((candidate) => candidate.name === collection)?.variables ?? [];
+  /**
+   * Every variable the one-brand file holds in another collection than the two-brand plan puts it
+   * in, in the plan's order: the 364 of fundamento (362 to aspekto, 2 to contrast) and one more
+   * the one-brand plan had in color-scheme — computed from the plans, not copied from the plugin.
+   */
+  const expectedSwitches = (): Switched[] => {
+    const held = new Map<string, string>();
+    for (const collection of repoPlan.collections) {
+      for (const variable of collection.variables) held.set(variable.name, collection.name);
+    }
+    return plan.collections.flatMap((collection) =>
+      collection.variables.flatMap((variable) => {
+        const from = held.get(variable.name);
+        return from === undefined || from === collection.name
+          ? []
+          : [{ name: variable.name, from, to: collection.name }];
+      }),
+    );
+  };
+  const firstOfAspekto = () => {
+    const [first] = named(plan, "aspekto");
+    if (first === undefined) throw new Error("the two-brand plan has no variable in aspekto");
+    return first;
+  };
+
+  it("is the maintainer's case: the one-brand plan fills fundamento, the two-brand plan leaves it empty", () => {
+    expect(named(repoPlan, "fundamento").length).toBeGreaterThan(0);
+    expect(named(plan, "fundamento")).toEqual([]);
+    const switches = expectedSwitches();
+    expect(switches.length).toBeGreaterThan(0);
+    // Most go to aspekto; the contrast tokens the one-brand plan kept in fundamento go to contrast.
+    const targets = new Set(switches.map((entry) => entry.to));
+    expect(targets.has("aspekto")).toBe(true);
+    expect(targets.has("fundamento")).toBe(false);
+  });
+
+  it("the double refuses a value for a mode its collection does not have, with Figma's words", () => {
+    const double = modelDouble();
+    const api = double.figma as unknown as VariablesApi;
+    const a = api.variables.createVariableCollection("A");
+    const b = api.variables.createVariableCollection("B");
+    const x = api.variables.createVariable("x", a, "FLOAT");
+    expect(() => x.setValueForMode(b.defaultModeId, 1)).toThrow(
+      `in setValueForMode: mode with id ${b.defaultModeId} not defined for variable`,
+    );
+    x.setValueForMode(a.defaultModeId, 1);
+    expect(x.valuesByMode).toEqual({ [a.defaultModeId]: 1 });
+  });
+
+  it("aborts before the first write when the file holds the brand's variables in fundamento", async () => {
+    const double = modelDouble();
+    await run(double, ONE_BRAND);
+    const counts = { ...double.counts };
+    const before = double.snapshot();
+    const error = await abortOf(double, TWO_BRANDS);
+    expect(error?.message).toContain("Abbruch vor dem ersten Schreiben");
+    expect(error?.message).toContain("Sammlung gewechselt");
+    expect(error?.message).toContain("fundamento");
+    expect(error?.message).toContain("aspekto");
+    expect(double.counts).toEqual(counts);
+    expect(double.snapshot()).toBe(before);
+    // The plugin removes nothing: fundamento stands, with every variable it had.
+    expect(double.collections.some((collection) => collection.name === "fundamento")).toBe(true);
+  });
+
+  it("names every affected variable, the collection it lies in and the one the plan puts it in", async () => {
+    const double = modelDouble();
+    await run(double, ONE_BRAND);
+    const error = await abortOf(double, TWO_BRANDS);
+    const expected = expectedSwitches();
+    expect(error?.abort?.switched).toEqual(expected);
+    expect(error?.message).toContain(String(expected.length));
+    expect(error?.message).toContain(expected[0]?.name ?? "?");
+  });
+
+  it("aborts for a single variable in a foreign collection, and leaves that collection standing", async () => {
+    const double = modelDouble();
+    const api = double.figma as unknown as VariablesApi;
+    const other = api.variables.createVariableCollection("alt");
+    const spec = firstOfAspekto();
+    api.variables.createVariable(spec.name, other, spec.type);
+    const counts = { ...double.counts };
+    const error = await abortOf(double, TWO_BRANDS);
+    expect(error?.abort?.switched).toEqual([{ name: spec.name, from: "alt", to: "aspekto" }]);
+    expect(double.counts).toEqual(counts);
+    expect(double.collections.map((collection) => collection.name)).toEqual(["alt"]);
+  });
+
+  it("is not stopped by a same-named variable elsewhere when the planned collection has its own", async () => {
+    const double = modelDouble();
+    await run(double, TWO_BRANDS);
+    const api = double.figma as unknown as VariablesApi;
+    const other = api.variables.createVariableCollection("alt");
+    const spec = firstOfAspekto();
+    const stranger = api.variables.createVariable(spec.name, other, spec.type);
+    const error = await abortOf(double, TWO_BRANDS);
+    expect(error).toBeUndefined();
+    expect(stranger.valuesByMode).toEqual({});
+    expect(stranger.variableCollectionId).toBe(other.id);
+  });
+
+  it("says it in the toast and prints the whole list as JSON lines in the console", async () => {
+    const double = modelDouble();
+    await run(double, ONE_BRAND);
+    const lines: string[] = [];
+    const module = new Function("figma", "console", TWO_BRANDS);
+    await module(
+      { ...double.figma, command: "apply" },
+      {
+        log: () => undefined,
+        error: (...parts: unknown[]) => lines.push(parts.map(String).join(" ")),
+      },
+    );
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    const toast = double.notifications.at(-1);
+    expect(toast?.message).toContain("Abbruch");
+    expect(toast?.message).toContain("Sammlung gewechselt");
+    expect(toast?.options).toMatchObject({ error: true });
+    // Every line under Figma's limit for a copied line (F22), the list in parts, complete.
+    for (const line of lines) expect(line.length).toBeLessThan(4000);
+    const listed = lines
+      .filter((line) => line.startsWith("{"))
+      .map((line) => JSON.parse(line) as { part?: string; items?: Switched[] })
+      .filter((part) => part.part === "switched")
+      .flatMap((part) => part.items ?? []);
+    expect(listed).toEqual(expectedSwitches());
+  });
+
+  it("reports a collection of the plan that stands empty in the file, and does not remove it", async () => {
+    const double = modelDouble();
+    const api = double.figma as unknown as VariablesApi;
+    // The file after the maintainer moved the brand's variables out of fundamento by hand.
+    api.variables.createVariableCollection("fundamento");
+    const report = (await new Function("figma", `${TWO_BRANDS}\nreturn applyPlan();`)(
+      double.figma,
+    )) as { empty: string[]; warnings: string[]; variables: number };
+    expect(report.empty).toEqual(["fundamento"]);
+    expect(report.variables).toBeGreaterThan(0);
+    expect(double.collections.some((collection) => collection.name === "fundamento")).toBe(true);
+    // Raw data, not a warning: an empty fundamento is in order (Maintainer, 2026-10-11).
+    expect(report.warnings.filter((warning) => warning.includes("fundamento"))).toEqual([]);
+  });
+
+  it("puts the empty collections into the headline of the printed report", async () => {
+    const double = modelDouble();
+    const api = double.figma as unknown as VariablesApi;
+    api.variables.createVariableCollection("fundamento");
+    const lines: string[] = [];
+    const module = new Function("figma", "console", TWO_BRANDS);
+    await module(
+      { ...double.figma, command: "apply" },
+      {
+        log: (...parts: unknown[]) => lines.push(parts.map(String).join(" ")),
+        error: () => undefined,
+      },
+    );
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    const headline = JSON.parse(lines.find((line) => line.startsWith("{")) ?? "{}") as {
+      empty?: string[];
+    };
+    expect(headline.empty).toEqual(["fundamento"]);
   });
 });

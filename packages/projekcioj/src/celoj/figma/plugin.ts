@@ -4,15 +4,18 @@
 // a plugin reads no repository files — idempotently: it finds what it made by name and by the
 // shared plugin data `fundamento`, updates it, and never duplicates. A run that would create a
 // variant in a set it found aborts before its first write and names what it would have created
-// (F10c); the menu command „auch in vorgefundenem Set anlegen" lifts that on purpose. Nothing else
-// in the file is touched. The plugin runs as a Figma development plugin; through the Figma MCP an
-// agent reads the result back (the generated code.js exceeds the MCP's 50 KB per call).
+// (F10c); the menu command „auch in vorgefundenem Set anlegen" lifts that on purpose. A run that
+// finds a planned variable in another collection than the plan puts it in aborts the same way and
+// names every such variable (Sammlung gewechselt): the Plugin API cannot move a variable, and
+// re-creating it would cut every binding and alias. Nothing else in the file is touched. The
+// plugin runs as a Figma development plugin; through the Figma MCP an agent reads the result back
+// (the generated code.js exceeds the MCP's 50 KB per call).
 //
 // The plugin uses this slice of the Plugin API (the test double covers exactly it):
 // variables.getLocalVariableCollectionsAsync/getLocalVariablesAsync, createVariableCollection,
 // createVariable, createVariableAlias, setBoundVariableForPaint, collection.addMode/renameMode,
-// variable.setValueForMode, createComponent/createFrame/createText, combineAsVariants,
-// appendChild, setBoundVariable, set/getSharedPluginData.
+// variable.setValueForMode/variableCollectionId, createComponent/createFrame/createText,
+// combineAsVariants, appendChild, setBoundVariable, set/getSharedPluginData.
 
 import { type FigmaPlan, TEXT_CASE_VARIES } from "./figma.js";
 
@@ -281,13 +284,18 @@ async function applyCollections() {
 
 async function applyVariables(collections, modeIds) {
   const existing = await figma.variables.getLocalVariablesAsync();
-  const byName = new Map(existing.map((variable) => [variable.name, variable]));
+  // By name within its collection: a variable of the same name in another collection is not this
+  // one (Sammlung gewechselt) — taken for it, it was given a value for a mode its collection does
+  // not have, and Figma refused. A collection id holds no slash, so the key splits cleanly.
+  const byKey = new Map(
+    existing.map((variable) => [variable.variableCollectionId + "/" + variable.name, variable]),
+  );
   const variables = new Map();
   for (const spec of PLAN.collections) {
     const collection = collections.get(spec.name);
     for (const variable of spec.variables) {
       const found =
-        byName.get(variable.name) ??
+        byKey.get(collection.id + "/" + variable.name) ??
         figma.variables.createVariable(variable.name, collection, variable.type);
       write(found, "hiddenFromPublishing", variable.hidden === true);
       variables.set(variable.name, found);
@@ -645,6 +653,77 @@ function orphanError(orphans) {
       "löscht sie nicht still: bitte von Hand löschen oder klären, dann erneut ausführen.",
   );
   error.abort = { orphans: orphans };
+  return error;
+}
+
+/**
+ * Jede geplante Variable, die die Datei in einer anderen Sammlung hält, als der Plan sie legt
+ * (Sammlung gewechselt), gelesen vor dem ersten Schreiben. Gemessen 2026-10-09 in f10b-2: Der
+ * Ein-Marken-Plan hatte 364 Variablen in fundamento angelegt, der Zwei-Marken-Plan legt sie in
+ * aspekto und lässt fundamento leer. Am Namen gefunden, bekam jede einen Wert für einen Modus,
+ * den ihre Sammlung nicht hat, und Figma lehnte ab („in setValueForMode: mode with id 2:1 not
+ * defined for variable"). Die Plugin-API kann eine Variable nicht verschieben —
+ * variableCollectionId ist nur lesbar (plugin-api.d.ts 1.138.0), und weder Variable noch
+ * VariableCollection noch VariablesAPI haben einen Aufruf dafür. Löschen und Neuanlegen gäbe ihr
+ * eine neue Id: Jede Bindung an einen Knoten und jeder Alias einer anderen Variable verlöre sein
+ * Ziel. Also bricht der Lauf ab wie F10c und nennt jede. Daneben jede Sammlung des Plans, die in
+ * der Datei ohne Variable steht: Sie bleibt stehen, der Lauf meldet sie nur (Maintainer,
+ * 2026-10-11: eine leere Sammlung fundamento ist in Ordnung).
+ */
+async function readCollections() {
+  const collections = await figma.variables.getLocalVariableCollectionsAsync();
+  const variables = await figma.variables.getLocalVariablesAsync();
+  const nameOf = new Map(collections.map((collection) => [collection.id, collection.name]));
+  // Where the file holds each name: a name may stand in more than one collection.
+  const held = new Map();
+  for (const variable of variables) {
+    const list = held.get(variable.name) || [];
+    list.push(nameOf.get(variable.variableCollectionId) || variable.variableCollectionId);
+    held.set(variable.name, list);
+  }
+  const switched = [];
+  for (const spec of PLAN.collections) {
+    for (const variable of spec.variables) {
+      const where = held.get(variable.name);
+      if (where === undefined || where.indexOf(spec.name) !== -1) continue;
+      for (const from of where) switched.push({ name: variable.name, from: from, to: spec.name });
+    }
+  }
+  const occupied = new Set(variables.map((variable) => variable.variableCollectionId));
+  const planned = new Set(PLAN.collections.map((spec) => spec.name));
+  const empty = collections
+    .filter((collection) => planned.has(collection.name) && !occupied.has(collection.id))
+    .map((collection) => collection.name);
+  return { switched: switched, empty: empty };
+}
+
+/**
+ * The abort for a switched collection: one sentence per pair of collections with its count and
+ * first names, the whole list at \`error.abort.switched\` and in the console (F22: a line stays
+ * under the limit, 364 names do not).
+ */
+function switchError(switched) {
+  const pairs = new Map();
+  for (const entry of switched) {
+    const key = entry.from + " → " + entry.to;
+    const list = pairs.get(key) || [];
+    list.push(entry.name);
+    pairs.set(key, list);
+  }
+  const sentences = [...pairs.entries()].map(
+    ([pair, names]) =>
+      pair + ": " + names.length + " Variable(n), z. B. " + names.slice(0, 3).join("; ") +
+      (names.length > 3 ? " …" : ""),
+  );
+  const error = new Error(
+    "Abbruch vor dem ersten Schreiben, nichts wurde geändert (Sammlung gewechselt). " +
+      switched.length + " Variable(n) liegen in der Datei in einer anderen Sammlung, als der Plan " +
+      "sie legt: " + sentences.join(" | ") + ". Die Plugin-API kann eine Variable nicht in eine " +
+      "andere Sammlung verschieben (variableCollectionId ist nur lesbar); löschte und legte der " +
+      "Lauf sie neu an, verlören Knoten ihre Bindungen und Aliasse ihr Ziel. Bitte in Figma " +
+      "verschieben oder klären, dann erneut ausführen. Die vollständige Liste steht in der Konsole.",
+  );
+  error.abort = { switched: switched };
   return error;
 }
 
@@ -1464,6 +1543,10 @@ async function applyPlan(options) {
   if (orphans.length > 0) throw orphanError(orphans);
   const blocked = creationsInFoundSets();
   if (blocked.length > 0 && !createInFoundSet) throw abortError(blocked);
+  // A variable the file holds in another collection than the plan puts it in: abort, nothing
+  // written (Sammlung gewechselt). Read here, before the first write, like the two aborts above.
+  const { switched, empty } = await readCollections();
+  if (switched.length > 0) throw switchError(switched);
   recordStart();
   progress.phase = "collections";
   const { collections, modeIds, warnings: modeWarnings, modes } = await applyCollections();
@@ -1543,6 +1626,8 @@ async function applyPlan(options) {
     build: BUILD,
     collections: PLAN.collections.length,
     modes: modes,
+    // Collections of the plan that stand empty in the file: reported, never removed.
+    empty: empty,
     variables: variables.size,
     components: components,
     warnings: warnings,
@@ -1576,6 +1661,7 @@ function reportParts(result) {
       build: result.build,
       collections: result.collections,
       modes: result.modes,
+      empty: result.empty,
       variables: result.variables,
       warnings: result.warnings,
       components: result.components.map((report) => ({
@@ -1665,6 +1751,10 @@ if (typeof figma !== "undefined" && typeof figma.closePlugin === "function" && f
         console.error(WHO + " – " + message);
         if (error.abort.orphans !== undefined) {
           for (const line of partsOfList("", "orphans", error.abort.orphans)) console.error(line);
+        }
+        // Sammlung gewechselt: every variable with the collection it lies in and the planned one.
+        if (error.abort.switched !== undefined) {
+          for (const line of partsOfList("", "switched", error.abort.switched)) console.error(line);
         }
         for (const entry of error.abort.sets || []) {
           const before = Object.assign({}, entry.before, { unmarked: entry.before.unmarked.length });
