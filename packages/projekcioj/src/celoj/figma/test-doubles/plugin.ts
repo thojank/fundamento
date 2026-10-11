@@ -9,7 +9,7 @@ export interface DoubleVariable {
   id: string;
   name: string;
   resolvedType: string;
-  collectionId: string;
+  variableCollectionId: string;
   hiddenFromPublishing: boolean;
   valuesByMode: Record<string, unknown>;
   setValueForMode(modeId: string, value: unknown): void;
@@ -766,7 +766,7 @@ export function figmaDouble(
     version: 0,
     variableById: (id) => variables.find((variable) => variable.id === id),
     collectionOf: (variable) =>
-      collections.find((collection) => collection.id === variable.collectionId),
+      collections.find((collection) => collection.id === variable.variableCollectionId),
   };
   const notifications: DoubleNotification[] = [];
   const collections: DoubleCollection[] = [];
@@ -818,10 +818,16 @@ export function figmaDouble(
       id: id("variable"),
       name,
       resolvedType: type,
-      collectionId: collection.id,
+      variableCollectionId: collection.id,
       hiddenFromPublishing: false,
       valuesByMode: {},
       setValueForMode(modeId, value) {
+        // A mode belongs to one collection, and Figma refuses a value for a mode its variable's
+        // collection does not have — measured on 2026-10-09 in f10b-2, where a variable the file
+        // held in `fundamento` was given a value for a mode of `aspekto`. The message is Figma's.
+        if (!collection.modes.some((mode) => mode.modeId === modeId)) {
+          throw new Error(`in setValueForMode: mode with id ${modeId} not defined for variable`);
+        }
         counts.valueWrites++;
         counts.writes++;
         context.version++;
@@ -833,7 +839,7 @@ export function figmaDouble(
         const modes = consumer.resolvedVariableModes;
         let current: DoubleVariable | undefined = variable;
         for (let depth = 0; current !== undefined && depth < 32; depth++) {
-          const value = current.valuesByMode[modes[current.collectionId] ?? ""];
+          const value = current.valuesByMode[modes[current.variableCollectionId] ?? ""];
           const alias = value as { type?: string; id?: string } | undefined;
           if (alias?.type !== "VARIABLE_ALIAS") {
             return { value, resolvedType: current.resolvedType };
@@ -950,7 +956,7 @@ export function figmaDouble(
     const firstMode = new Map(collections.map((c) => [c.id, c.modes[0]?.modeId ?? ""]));
     let variable = byName.get(name);
     for (let depth = 0; variable !== undefined && depth < 32; depth++) {
-      const value = variable.valuesByMode[firstMode.get(variable.collectionId) ?? ""];
+      const value = variable.valuesByMode[firstMode.get(variable.variableCollectionId) ?? ""];
       const alias = value as { type?: string; id?: string } | undefined;
       if (alias?.type !== "VARIABLE_ALIAS") return value;
       variable = byId.get(alias.id ?? "");
