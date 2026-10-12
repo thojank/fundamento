@@ -141,6 +141,15 @@ describe("Figma plan (T015)", () => {
     }
   });
 
+  // Spec 007 T028 (A12, D-10): the purpose of the Uzo is the description of the component set.
+  it("describes the component set with the purpose of the Uzo (T028)", () => {
+    const set = plan.components.find((component) => component.set === "butono");
+    const uzo = prepared.input.modelo.eroj.find((entry) => entry.ero.name === "butono")?.uzo;
+    expect(uzo?.purpose).toBeDefined();
+    expect(set?.description).toBe(uzo?.purpose);
+    expect(set?.description).not.toContain("\n");
+  });
+
   it("generates the same bytes twice", () => {
     expect(FIGMA_CELO.generate(prepared.input)).toEqual(files);
   });

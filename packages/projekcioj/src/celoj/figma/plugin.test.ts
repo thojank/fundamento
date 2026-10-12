@@ -182,6 +182,18 @@ function descendant(node: DoubleNode | undefined, name: string): DoubleNode | un
   return undefined;
 }
 
+// Spec 007 T028 (A12, D-10): the plugin writes the purpose of the Uzo as the set's description.
+describe("the set carries the purpose of the Uzo as its description (T028)", () => {
+  it("writes plan.components[].description to the component set", async () => {
+    const double = modelDouble();
+    await run(double);
+    const set = double.root.children[0]?.children.find((child) => child.name === "butono");
+    const planned = plan.components.find((component) => component.set === "butono");
+    expect(planned?.description).toBeDefined();
+    expect(set?.properties.description).toBe(planned?.description);
+  });
+});
+
 describe("the paint carries the alpha of its token (F8)", () => {
   // One brand: the decision is unambiguous in every mode. With a second brand whose tertiary fill
   // is opaque the plan says `alphaVariesByMode`, and the guard refuses the binding — see the

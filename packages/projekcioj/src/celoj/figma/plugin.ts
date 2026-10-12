@@ -1065,6 +1065,11 @@ async function applyComponents(variables, warnings) {
       madeThisRun.set(component.set, set);
       write(set, "name", component.set);
     }
+    // The purpose of the Uzo as the set's description (Spec 007 T028): one line, written only
+    // when it does not hold yet, like every other field.
+    if (typeof component.description === "string") {
+      write(set, "description", component.description);
+    }
     // Das Set steht in keinem eigenen Modus (F35). Gemessen trug es nach zwei Läufen
     // { aspekto: ekzemplo, contrast: default }: Wer die Bibliothek öffnet, sähe die Beispielmarke
     // als „den" Knopf, und zwei Läufe läsen ihre Werte in verschiedenen Kontexten. Ohne eigenen

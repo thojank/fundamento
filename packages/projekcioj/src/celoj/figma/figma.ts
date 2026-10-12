@@ -112,6 +112,8 @@ export const FIGMA_NOT_DRAWN: Readonly<Record<string, string>> = {
 
 export interface FigmaComponentSet {
   set: string;
+  /** The purpose of the Uzo, one line, as the description of the set (Spec 007 T028, A12). */
+  description?: string;
   properties: Record<string, string[] | "BOOLEAN" | "TEXT">;
   variants: {
     props: Record<string, string>;
@@ -730,6 +732,7 @@ function componentSetOf(
   base: Readonly<Record<string, { value: unknown }>>,
 ): FigmaComponentSet {
   const skemo = entry.skemo;
+  const description = entry.uzo?.purpose.replace(/\s*\n\s*/g, " ").trim();
   const properties: FigmaComponentSet["properties"] = {};
   for (const prop of skemo.props) {
     if (prop.kind === "enum") properties[prop.name] = [...(prop.values ?? [])];
@@ -860,6 +863,7 @@ function componentSetOf(
   const cell = parityPx(base[VITRINO_CELL_PADDING]?.value);
   return {
     set: entry.ero.name,
+    ...(description === undefined ? {} : { description }),
     properties,
     variants,
     pluginData: { fundamento: { ero: entry.ero.name, skemo: skemo.id, version } },
