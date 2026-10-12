@@ -46,7 +46,8 @@
     "boundary": [
       {
         "case": "navigation",
-        "action": "ask-human",
+        "action": "use-instead",
+        "ero": "ligilo",
         "keywords": {
           "en": [
             "navigate",
@@ -57,7 +58,7 @@
             "übersicht"
           ]
         },
-        "kialo": "A button starts an action on the current view; moving to another view is navigation, because it is announced differently and the way back works differently. Fundamento does not cover navigation yet, so a person decides."
+        "kialo": "A button starts an action on the current view; moving to another view is navigation, because it is announced differently and the way back works differently. Fundamento covers it with ligilo."
       },
       {
         "case": "form-in-slot",

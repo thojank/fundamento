@@ -851,6 +851,281 @@
           }
         ]
       }
+    },
+    {
+      "id": "jug_01M4RYCY60R9VN700X7FYVQ85R",
+      "ref": {
+        "ero": "ero_01M4RYCX28WNYSGMANDBK8TK04"
+      },
+      "decision": "approved",
+      "kialo": "The label names where the link goes; read out of context it still says what opens.",
+      "date": "2026-10-12",
+      "context": "Example CORRECT for the Regulo named in ekzemplo.regulo (Spec 008 T007, A3); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4RYCWPBKKHNBR908WP6Y6V0",
+        "instances": [
+          {
+            "ero": "ligilo",
+            "props": {},
+            "label": "Projektübersicht öffnen",
+            "lingvo": "de"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4RYCY61NK92JM6XYD00M00Q",
+      "ref": {
+        "ero": "ero_01M4RYCX28WNYSGMANDBK8TK04"
+      },
+      "decision": "approved",
+      "kialo": "The label names the destination; a list of links stays readable.",
+      "date": "2026-10-12",
+      "context": "Example CORRECT for the Regulo named in ekzemplo.regulo (Spec 008 T007, A3); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4RYCWPBKKHNBR908WP6Y6V0",
+        "instances": [
+          {
+            "ero": "ligilo",
+            "props": {},
+            "label": "Open the project overview",
+            "lingvo": "en"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4RYCY61NK92JM6XYD00M00R",
+      "ref": {
+        "ero": "ero_01M4RYCX28WNYSGMANDBK8TK04"
+      },
+      "decision": "rejected",
+      "kialo": "The label names the gesture, not the place; in a list of links it says nothing.",
+      "date": "2026-10-12",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 008 T007, A3); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4RYCWPBKKHNBR908WP6Y6V0",
+        "instances": [
+          {
+            "ero": "ligilo",
+            "props": {},
+            "label": "hier klicken",
+            "lingvo": "de"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4RYCY61NK92JM6XYD00M00S",
+      "ref": {
+        "ero": "ero_01M4RYCX28WNYSGMANDBK8TK04"
+      },
+      "decision": "rejected",
+      "kialo": "The label names the gesture, not the place; out of context it is empty.",
+      "date": "2026-10-12",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 008 T007, A3); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4RYCWPBKKHNBR908WP6Y6V0",
+        "instances": [
+          {
+            "ero": "ligilo",
+            "props": {},
+            "label": "click here",
+            "lingvo": "en"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4RYCY61NK92JM6XYD00M00T",
+      "ref": {
+        "ero": "ero_01M4RYCX28WNYSGMANDBK8TK04"
+      },
+      "decision": "approved",
+      "kialo": "A place, not an action: the link moves there and the back command returns.",
+      "date": "2026-10-12",
+      "context": "Example CORRECT for the Regulo named in ekzemplo.regulo (Spec 008 T007, A3); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4RYCWPBKKHNBR908WP6Y6TY",
+        "instances": [
+          {
+            "ero": "ligilo",
+            "props": {
+              "placement": "standalone"
+            },
+            "label": "Projektübersicht",
+            "lingvo": "de"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4RYCY61NK92JM6XYD00M00V",
+      "ref": {
+        "ero": "ero_01M4RYCX28WNYSGMANDBK8TK04"
+      },
+      "decision": "approved",
+      "kialo": "A place, not an action; the link is what moves there.",
+      "date": "2026-10-12",
+      "context": "Example CORRECT for the Regulo named in ekzemplo.regulo (Spec 008 T007, A3); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4RYCWPBKKHNBR908WP6Y6TY",
+        "instances": [
+          {
+            "ero": "ligilo",
+            "props": {
+              "placement": "standalone"
+            },
+            "label": "Project overview",
+            "lingvo": "en"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4RYCY61NK92JM6XYD00M00W",
+      "ref": {
+        "ero": "ero_01M4RYCX28WNYSGMANDBK8TK04"
+      },
+      "decision": "rejected",
+      "kialo": "Saving is an action on this view; a link announces a move and the keyboard operates it as one. That is the butono.",
+      "date": "2026-10-12",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 008 T007, A3); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4RYCWPBKKHNBR908WP6Y6TY",
+        "instances": [
+          {
+            "ero": "ligilo",
+            "props": {},
+            "label": "Speichern",
+            "lingvo": "de"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4RYCY61NK92JM6XYD00M00X",
+      "ref": {
+        "ero": "ero_01M4RYCX28WNYSGMANDBK8TK04"
+      },
+      "decision": "rejected",
+      "kialo": "Saving is an action on this view, not a move; use the butono.",
+      "date": "2026-10-12",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 008 T007, A3); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4RYCWPBKKHNBR908WP6Y6TY",
+        "instances": [
+          {
+            "ero": "ligilo",
+            "props": {},
+            "label": "Save",
+            "lingvo": "en"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4RYCY61NK92JM6XYD00M00Y",
+      "ref": {
+        "ero": "ero_01M4RYCX28WNYSGMANDBK8TK04"
+      },
+      "decision": "approved",
+      "kialo": "Words name the destination; the address stays in to.",
+      "date": "2026-10-12",
+      "context": "Example CORRECT for the Regulo named in ekzemplo.regulo (Spec 008 T007, A3); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4RYCWPBKKHNBR908WP6Y6V2",
+        "instances": [
+          {
+            "ero": "ligilo",
+            "props": {
+              "external": true
+            },
+            "label": "Dokumentation",
+            "lingvo": "de"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4RYCY61NK92JM6XYD00M00Z",
+      "ref": {
+        "ero": "ero_01M4RYCX28WNYSGMANDBK8TK04"
+      },
+      "decision": "approved",
+      "kialo": "Words name the destination; the address is the target, not the label.",
+      "date": "2026-10-12",
+      "context": "Example CORRECT for the Regulo named in ekzemplo.regulo (Spec 008 T007, A3); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4RYCWPBKKHNBR908WP6Y6V2",
+        "instances": [
+          {
+            "ero": "ligilo",
+            "props": {
+              "external": true
+            },
+            "label": "Documentation",
+            "lingvo": "en"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4RYCY61NK92JM6XYD00M010",
+      "ref": {
+        "ero": "ero_01M4RYCX28WNYSGMANDBK8TK04"
+      },
+      "decision": "rejected",
+      "kialo": "An address as label is hard to read and to hear; it belongs in to, the label says what it is.",
+      "date": "2026-10-12",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 008 T007, A3); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4RYCWPBKKHNBR908WP6Y6V2",
+        "instances": [
+          {
+            "ero": "ligilo",
+            "props": {
+              "external": true
+            },
+            "label": "https://beispiel.example/dokumentation",
+            "lingvo": "de"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4RYCY61NK92JM6XYD00M011",
+      "ref": {
+        "ero": "ero_01M4RYCX28WNYSGMANDBK8TK04"
+      },
+      "decision": "rejected",
+      "kialo": "An address as label is read character by character; the label names the place in words.",
+      "date": "2026-10-12",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 008 T007, A3); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4RYCWPBKKHNBR908WP6Y6V2",
+        "instances": [
+          {
+            "ero": "ligilo",
+            "props": {
+              "external": true
+            },
+            "label": "https://docs.example/start",
+            "lingvo": "en"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4RYCY61NK92JM6XYD00M012",
+      "ref": {
+        "artikolo": "VIII",
+        "celo": "figma"
+      },
+      "decision": "approved",
+      "kialo": "Figma zeichnet die Unterstreichung des ligilo als Textdekoration des Beschriftungsknotens, je Variante an oder aus, wie die Skemo es bindet. Dicke und Farbe der Linie bindet Figma an keine Variable: die Linie hat die Dicke, die Figma ihr gibt, und die Farbe des Textes. Der Teil underline (width an border.width.default, color gleich label.color) bleibt im Modelo; die Figma-Seite von check:parity meldet ihn als „not drawn (dieser Jugxo)“ – eine benannte Differenz, keine stille Gleichheit. Bindet Figma eines Tages textDecorationThickness an eine Variable, entfällt dieser Eintrag.",
+      "date": "2026-10-12",
+      "context": "Spec 008 T017, plan D-11 (Figma zeigt das Ero, wie bei den Icons jug_01M31TV1V4S3RNBPWSRB2CGEDK). Von P0 in der Nachtschicht angelegt; Befund B-1 im Plan: zur Bestätigung durch den Maintainer."
     }
   ]
 }

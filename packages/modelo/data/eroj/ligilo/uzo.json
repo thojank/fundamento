@@ -1,0 +1,190 @@
+{
+  "$schema": "../../../schema/modelo.schema.json#/$defs/UzoFile",
+  "uzo": {
+    "id": "uzo_01M4RYCXT5HJ3776EF81MZABY4",
+    "ero": "ero_01M4RYCX28WNYSGMANDBK8TK04",
+    "skemo": "ske_01M4RYCXE78XSCQ4Q4V8WA4FZH",
+    "purpose": "Moves to another view or place: it opens an overview, a detail, a document or an outside site.",
+    "instead": [
+      {
+        "goal": "action",
+        "keywords": {
+          "en": [
+            "save",
+            "submit",
+            "confirm",
+            "continue",
+            "cancel",
+            "close",
+            "delete",
+            "remove",
+            "destroy",
+            "discard"
+          ],
+          "de": [
+            "speichern",
+            "senden",
+            "bestätigen",
+            "weiter",
+            "abbrechen",
+            "schließen",
+            "löschen",
+            "entfernen",
+            "verwerfen"
+          ]
+        },
+        "ero": "butono",
+        "kialo": "A link moves to another view or place and a button starts an action here, because screen readers announce them differently, the keyboard operates them differently and the way back is different; an action on a link promises a move that does not happen."
+      }
+    ],
+    "boundary": [
+      {
+        "case": "button-look",
+        "action": "ask-human",
+        "keywords": {
+          "en": [
+            "cta",
+            "call-to-action"
+          ],
+          "de": [
+            "cta",
+            "handlungsaufforderung"
+          ]
+        },
+        "kialo": "A link that looks like a button is read as an action, because the shape promises one; whether a brand wants that is a decision of a person, not of the Ero."
+      },
+      {
+        "case": "download",
+        "action": "ask-human",
+        "keywords": {
+          "en": [
+            "download"
+          ],
+          "de": [
+            "download",
+            "herunterladen"
+          ]
+        },
+        "kialo": "A download does not leave the view and needs a mark with type and size, because the person decides before the file arrives; Fundamento has no such mark yet."
+      },
+      {
+        "case": "disabled-link",
+        "action": "not-supported",
+        "kialo": "A link one cannot follow is text, because a grey link promises a destination that is not there; show the text, or leave the link out."
+      },
+      {
+        "case": "multi-line-label",
+        "action": "not-supported",
+        "via": {
+          "layout": "wrap"
+        },
+        "kialo": "A standalone link that breaks into lines no longer reads as one destination, because its neighbours stand in one line; in running text the label breaks with the text."
+      }
+    ],
+    "composes": {
+      "containers": [
+        {
+          "name": "text",
+          "kialo": "A reference stands where the thought needs it, because a reader follows it from the sentence, not from a list."
+        },
+        {
+          "name": "navigation",
+          "kialo": "A navigation is a list of places, because each entry moves somewhere and none acts here."
+        },
+        {
+          "name": "footer",
+          "kialo": "A footer holds the places a person looks for last (imprint, help), because they belong to every view and to none."
+        },
+        {
+          "name": "card",
+          "kialo": "A card ends with the way to its detail, because the card is a summary and the detail its destination."
+        }
+      ],
+      "with": [
+        {
+          "ero": "ligilo",
+          "kialo": "Links of one list stand together, because a list of places is read as one choice."
+        }
+      ],
+      "never": [
+        {
+          "ero": "butono",
+          "kialo": "A link stands in no slot of a button, because a button is one target with one name; and not in an action-bar, because a bar of actions reads a link as an action."
+        }
+      ],
+      "spacing": {
+        "owner": "container",
+        "regulo": "spacing-owned-by-container"
+      }
+    },
+    "slots": {
+      "label": {
+        "accepts": [
+          "text"
+        ],
+        "max": 1,
+        "nesting": 0
+      },
+      "icon-end": {
+        "accepts": [
+          "icon"
+        ],
+        "max": 1,
+        "nesting": 0
+      }
+    },
+    "layout": {
+      "size": "content",
+      "wrap": "with-text"
+    },
+    "content": [
+      {
+        "regulo": "link-label-names-destination",
+        "fixed": true,
+        "check": {
+          "kind": "not-words",
+          "words": {
+            "de": [
+              "hier",
+              "klicken",
+              "mehr",
+              "link"
+            ],
+            "en": [
+              "here",
+              "click",
+              "more",
+              "link"
+            ]
+          }
+        }
+      },
+      {
+        "regulo": "link-navigates-button-acts",
+        "fixed": true,
+        "check": {
+          "kind": "not-instead"
+        }
+      },
+      {
+        "regulo": "link-label-not-url",
+        "fixed": false,
+        "check": {
+          "kind": "not-words",
+          "words": {
+            "de": [
+              "http",
+              "https",
+              "www"
+            ],
+            "en": [
+              "http",
+              "https",
+              "www"
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

@@ -460,6 +460,27 @@
         "background": "color.background.default"
       },
       "kialo": "WCAG 1.4.11 asks 3:1 for the visual information that identifies a component, which may be its fill or its border. A status border that reaches 3:1 on the page identifies the status surface even when its fill does not, so warm brands are not forced into olive warning fills; text on the surface keeps its own threshold."
+    },
+    {
+      "id": "kpa_01M4RYCYHTC8QD4ATWY05P5VA8",
+      "name": "link-rest-on-background-canvas",
+      "foreground": "color.link.rest",
+      "background": "color.background.canvas",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M4RYCYHVJ23PPETWR30QDQV7",
+      "name": "link-hover-on-background-canvas",
+      "foreground": "color.link.hover",
+      "background": "color.background.canvas",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M4RYCYHVJ23PPETWR30QDQV8",
+      "name": "link-visited-on-background-canvas",
+      "foreground": "color.link.visited",
+      "background": "color.background.canvas",
+      "kategorio": "text-normal"
     }
   ]
 }
