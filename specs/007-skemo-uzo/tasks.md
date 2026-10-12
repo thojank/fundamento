@@ -92,7 +92,7 @@ Jede Fixture ist eine Kopie von `test/fixtures/valid/ero-minimal` mit einer `dat
 
 ## Tor
 
-- [ ] **T018 Tor: Abnahme Spec 003 (M1, M2, M3) und Merge F1.** Nichts aus Stufe B beginnt vorher.
+- [x] **T018 Tor: Abnahme Spec 003 (M1, M2, M3) und Merge F1.** Nichts aus Stufe B beginnt vorher. Offen seit 2026-10-12: Spec 003 abgenommen (2026-10-09), F1 in `main` (#51) und in Figma `f10b-4` abgenommen (6 von 6).
 
 ---
 
@@ -128,54 +128,54 @@ Die Achsennamen in Stufe B sind die nach F1.
 
 ### B.1 Daten
 
-- [ ] **T019 Fünf Reguloj** (A4, A6, A7, data-model §4)
+- [x] **T019 Fünf Reguloj** (A4, A6, A7, data-model §4)
   - Rot: `data/butono.test.ts`: `USAGE_REGULOJ` enthält `full-width-in-action-bar-or-compact`, `label-names-action`, `destructive-label-names-object` und `destructive-label-not-generic`. `spacing-owned-by-container` steht mit `checkability: manual`. `label-names-action` meldet nur `severity: warning` (Entscheidung 2026-10-08, plan D-02); der Test zählt Warnungen als Verletzung ihrer Regel, `valid` bleibt aber `true`. Der Test „approved ergibt keine Verletzung, rejected genau eine“ wird damit für vier neue Namen rot (keine Beispiele, keine Enforcer).
   - Grün: Einträge in `reguloj.json` (Ids per `pnpm id:new regulo --count 5`), Enforcer in `USAGE_ENFORCERS` (für T024 vorbereitet, noch nicht über `check_usage` erreichbar).
-- [ ] **T020 `butono/uzo.json` und Export** (A1–A6, D-01)
+- [x] **T020 `butono/uzo.json` und Export** (A1–A6, D-01)
   - Rot: `data/butono.test.ts`: Uzo vorhanden, `boundary` enthält die vier Fälle aus A3, `slots` aus A5, `layout` aus A6. Rot, die Datei fehlt. `checks/regularo`: Die Warnung `skemo-uzo-missing` für `butono` verschwindet. Rot. Der Test „keeps visible strings out“ wird auf die Uzo ausgeweitet.
   - Grün: Datei nach data-model §2.3, Id per `pnpm id:new uzo`. Export-Fixtures neu erzeugt, zwei Builds byte-gleich.
-- [ ] **T021 Jugxo-Beispiele je Text-Regel und die zwei geänderten Labels** (A7, data-model §5, §8, OP-5)
+- [x] **T021 Jugxo-Beispiele je Text-Regel und die zwei geänderten Labels** (A7, data-model §5, §8, OP-5)
   - Rot: `uzo-content-example-missing` für alle drei Text-Regeln am echten Repo (T012). Dazu `data/butono.test.ts`: `…PT1` (approved) verletzt `destructive-label-names-object`. Beide Rot beobachten.
   - Grün: 12 Jugxoj (3 Regeln × approved/rejected × de/en), Ids per `pnpm id:new jugxo --count 12`. Labels von `…PT1` und `…PT2` werden „Projekt löschen“ (Entscheidung OP-5), mit Vermerk in `context`.
 
 ### B.2 Gvidanto
 
-- [ ] **T022 `get_ero` mit `uzo` und `brief`, Messung der Obergrenze** (A8, D-05, D-08, contracts §1)
+- [x] **T022 `get_ero` mit `uzo` und `brief`, Messung der Obergrenze** (A8, D-05, D-08, contracts §1)
   - Rot: `gvidanto/eroj.test.ts`: `getEro(butono).uzo.boundary` hat vier Einträge, und die Reguloj sind als `ReguloRef` aufgelöst. `getEro({ name, brief: true })` hat genau die Schlüssel aus contracts §1. `packages/mcp/src/eroj-tools.test.ts`: `ceil(bytes/3) ≤ BRIEF_LIMIT`, mit `BRIEF_LIMIT = 0` als Platzhalter. Alle rot.
   - Messung: erzeugte Kurzfassung messen, Wert nach plan D-08 bestimmen, in `research.md` unter „Messungen“ als M-4 eintragen, `BRIEF_LIMIT` setzen. Danach eine Mutation: ein zusätzlicher `boundary`-Eintrag mit 2 KB Kialo muss den Test brechen.
   - Grün: `gvidanto/eroj.ts`, `packages/mcp/src/schemas.ts` (`brief`), Werkzeugbeschreibung in `describe`.
-- [ ] **T023 `suggest_ero` mit Grenze und Alternative** (A2, A3, A9, D-06, contracts §2)
+- [x] **T023 `suggest_ero` mit Grenze und Alternative** (A2, A3, A9, D-06, contracts §2)
   - Rot: `gvidanto/suggest-ero.test.ts`: „Zur Übersicht“ und „zur Projektübersicht“ ergeben `boundary.case = navigation`, `action = ask-human`, `suggestion = null` (S1, Beispiel-Dialog). „Zum Warenkorb hinzufügen“ endet **nicht** als `navigation` (Entscheidung OP-12). „Weiter zur Kasse“ ergibt die Absicht `confirm`. „Übersicht speichern“ trifft Grenze und Absicht und ergibt `action = ask-human` mit beiden `candidates`. „umschalten“ ergibt `instead` mit `ero: null`. „Löschen“ ergibt unverändert `destructive`. Ohne Treffer kommt `goal-unknown` mit dem neuen `suggestion`-Text. Ein Datentest prüft, dass kein Uzo-Schlüsselwort eine Präposition aus einer Liste je Sprache ist. Rot.
   - Grün: `suggest-ero.ts`, Ausgabe-Schema in `packages/mcp/src/schemas.ts`.
-- [ ] **T024 `check_usage` prüft den Gebrauch** (A3, A5, A6, A7, A10, D-07, contracts §3)
+- [x] **T024 `check_usage` prüft den Gebrauch** (A3, A5, A6, A7, A10, D-07, contracts §3)
   - Rot: `gvidanto/check-usage.test.ts` mit den Fällen S2, S3 und S4 aus contracts §3, dazu je ein Fall für `uzo-slot-accepts`, `uzo-slot-max`, `uzo-slot-nesting` und `full-width-in-action-bar-or-compact` (erlaubt mit `container: "action-bar"`, erlaubt mit `dimensioj.viewport: "compact"`, verboten ohne beides). Für S4 trägt die Test-Aspekto `ekzemplo` eine Überstimmung von `label-names-action` mit Jugxo. Ohne Überstimmung ergibt „Los geht's!“ eine Warnung bei `valid: true`. Alle rot.
   - Grün: `eroj/usage.ts` (Enforcer für Uzo-Regeln, `info` bei Überstimmung), `suggestion` aus dem approved-Beispiel der Regel in der Sprache der Instanz.
-- [ ] **T025 Gvidanto-Prompt Regel 12 und Regel 8** (A9, D-12)
+- [x] **T025 Gvidanto-Prompt Regel 12 und Regel 8** (A9, D-12)
   - Rot: `packages/mcp/src/prompt.test.ts`: Regel 12 enthält „ask-human“, „Do not propose a solution of your own“ und die Weitergabe beider `candidates`, Regel 8 nennt `brief` und `uzo`. Rot.
   - Grün: `packages/mcp/prompts/gvidanto.md`.
 
 ### B.3 Projekcioj
 
-- [ ] **T026 [P] Make-Kit-Guidelines mit Uzo** (A12, D-10)
+- [x] **T026 [P] Make-Kit-Guidelines mit Uzo** (A12, D-10)
   - Rot: `celoj/make-kit/make-kit.test.ts`: `guidelines/components/butono.md` enthält die Abschnitte „Wofür“, „Nicht dafür“, „Zusammen mit“, „Slots“, „Layout“ und „Text“. Jede Grenze steht mit Kialo und Aktion darin, jede Text-Regel mit „fest“ oder „anpassbar“ und je einem approved- und rejected-Beispiel. `guidelinesInventory` kennt die Abschnitte. Rot.
   - Grün: `make-kit.ts`. Keine handgeschriebene Zeile.
-- [ ] **T027 [P] Vitrino: Gebrauch je Ero** (A12, S5)
+- [x] **T027 [P] Vitrino: Gebrauch je Ero** (A12, S5)
   - Rot: `celoj/vitrino/datumoj.test.ts`: Die Daten der Vitrino enthalten `uzo` von `butono` gleich `getEro(butono).uzo` (eine Quelle, S5). `vitrino.test.ts`: Der Abschnitt wird gerendert. Rot.
   - Grün: `datumoj.ts`, `html.ts`.
-- [ ] **T028 [P] Figma: `purpose` als Beschreibung** (A12, D-10)
+- [x] **T028 [P] Figma: `purpose` als Beschreibung** (A12, D-10)
   - Rot: Figma-Plan-Test: Das Komponentenset `butono` hat `description = uzo.purpose`. Test-Double des Plugins: `description` wird gesetzt. Rot.
   - Grün: `celoj/figma/figma.ts`, `plugin.ts`.
-- [ ] **T029 Figma: Slot-Regeln, Grenzen und Text-Regeln versuchen und messen** (A12, D-10, OP-9)
+- [x] **T029 Figma: Slot-Regeln, Grenzen und Text-Regeln versuchen und messen** (A12, D-10, OP-9)
   - Rot: Gegen zwei Doubles, wie in Spec 005 A6: Lehnt das Double eine Eigenschaft ab, meldet der Bericht die Manko als `open`. Nimmt es sie an, meldet er sie als `closed`. Rot, weil der Lauf heute nichts davon versucht.
-  - Messung in echtem Figma (Maintainer oder P0 mit dem Testkonto). Erst mit dem Beleg im Wortlaut entstehen die Mankoj in `mankoj.json`, mit Schließbedingung.
+  - Messung in echtem Figma (Maintainer oder P0 mit dem Testkonto). Erst mit dem Beleg im Wortlaut entstehen die Mankoj in `mankoj.json`, mit Schließbedingung. **Stand PR #52:** gegen die Doubles gebaut (Feld `descriptionMarkdown`, Teile boundary, slots, content; Bericht `mankoj.open`/`closed` mit dem Wortlaut des Werkzeugs). Messung in echtem Figma durch den Maintainer in `f10b-5` (neue Datei, Weg aus #50); bis dahin offen, keine Manko in `mankoj.json`.
 
 ### B.4 Abnahme und Abschluss
 
-- [ ] **T030 Szenarien S1 bis S4 und der Beispiel-Dialog gegen den MCP-Server** (Abnahme 3, 4)
+- [x] **T030 Szenarien S1 bis S4 und der Beispiel-Dialog gegen den MCP-Server** (Abnahme 3, 4)
   - Rot: `packages/mcp/src/e2e/s007-uzo.test.ts` mit S1 bis S4 über den echten Server (`test-doubles/client.ts`). Der Beispiel-Dialog als Werkzeugfolge: `suggest_ero("zur Projektübersicht")`, dann `ask-human`, dann der Kialo. Bei Rot zuerst prüfen, dass der Test die Werkzeuge über den Server aufruft und nicht direkt. Ist alles aus T022 bis T025 schon da und der Test trotzdem grün, gilt die Mutationsprüfung wie bei AK-09 in Spec 003: Eine geänderte Aktion in der Uzo muss den Test brechen.
-- [ ] **T031 Abschluss Stufe B**
+- [x] **T031 Abschluss Stufe B**
   - `docs/vojmapo.md` Zeile 3c (Status), Phase 4 (Uzo je Ero als Pflicht für neue Eroj), Quickstart von Spec 003 erneut ausgeführt (Art. XIII). Abnahme 1 bis 9 der Spec einzeln abgehakt. PR „Spec 007 Stufe B“.
-  - Manuell (Maintainer): M1 Dialog in einer frischen Sitzung, M2 S5 an der Vitrino (plan, „Manuelle Abnahme“).
+  - Manuell (Maintainer): M1 Dialog in einer frischen Sitzung, M2 S5 an der Vitrino (plan, „Manuelle Abnahme“). **Stand PR #52:** umgesetzt, Abnahme offen (M1, M2, T029-Messung).
 
 ---
 

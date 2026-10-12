@@ -830,15 +830,27 @@ describe("Spec 007 documentation (Constitution v2.1, Uzo)", () => {
   });
 
   // T017: Plan, Datenmodell, Verträge und Aufgaben liegen seit #45 auf main; „Plan offen“ war falsch.
-  // F1-T06: F1 ist umgesetzt; die Abnahme ist der Lauf des Maintainers in einer neuen Figma-Datei.
-  it("the vojmapo records Stufe A and F1 of Spec 007 as implemented, Stufe B open", () => {
+  // F1-T06: F1 ist umgesetzt; abgenommen in Figma f10b-4 (6 von 6, Messung 2026-10-12).
+  // T031: Stufe B ist umgesetzt; die Abnahme (M1 Dialog, M2 Vitrino, T029 Figma) ist offen.
+  it("the vojmapo records Stufe A, F1 and Stufe B of Spec 007 as implemented, the acceptance of B open", () => {
     const row = read("docs/vojmapo.md")
       .split("\n")
       .find((line) => line.startsWith("| 3c |"));
     expect(row).toMatch(
-      /\| 📝 Spec, Plan und Tasks auf `main` \(#45\); Stufe A umgesetzt \(PR #\d+\); F1 umgesetzt \(PR #\d+, Abnahme in Figma `f10b-4` offen\); Stufe B offen \|$/,
+      /\| 📝 Spec, Plan und Tasks auf `main` \(#45\); Stufe A umgesetzt \(PR #\d+\); F1 umgesetzt \(PR #\d+, in Figma `f10b-4` abgenommen 2026-10-12\); Stufe B umgesetzt \(PR #\d+\), Abnahme offen \(M1 Dialog, M2 Vitrino, T029 Figma\) \|$/,
     );
     expect(row).not.toContain("Plan offen");
+    expect(row).not.toContain("Stufe B offen");
+  });
+
+  // T031: a Uzo per Ero is mandatory for every new Ero of Phase 4.
+  it("the vojmapo makes a Uzo per Ero mandatory for new Eroj in Phase 4", () => {
+    const row = read("docs/vojmapo.md")
+      .split("\n")
+      .find((line) => line.startsWith("| 4 |"));
+    expect(row).toContain(
+      "Jedes Ero bekommt neben seiner Skemo eine Uzo (Pflicht für neue Eroj seit Spec 007 Stufe B; `check:regularo` warnt mit `skemo-uzo-missing`)",
+    );
   });
 });
 
