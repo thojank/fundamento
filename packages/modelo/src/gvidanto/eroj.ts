@@ -38,7 +38,10 @@ export interface EroSummary {
   id: string;
   name: string;
   description: string;
-  /** The values of the `variant` prop, the prop that names an Ero's variants; else empty. */
+  /**
+   * The values of the prop that names an Ero's variants: its first enum prop (plan D-13), for the
+   * butono `emphasis`; else empty.
+   */
   variants: string[];
   props: string[];
 }
@@ -235,7 +238,7 @@ export function listEroj(modelo: Modelo): { eroj: EroSummary[] } {
       id: entry.ero.id,
       name: entry.ero.name,
       description: entry.ero.description,
-      variants: [...(entry.skemo.props.find((prop) => prop.name === "variant")?.values ?? [])],
+      variants: [...(entry.skemo.props.find((prop) => prop.kind === "enum")?.values ?? [])],
       props: entry.skemo.props.map((prop) => prop.name),
     })),
   };

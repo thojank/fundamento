@@ -138,7 +138,9 @@ describe("the axes of the butono are emphasis and intent (F1-T01)", () => {
         return;
       }
       if (Array.isArray(value)) {
-        value.forEach((item, index) => visit(item, `${pointer}/${index}`));
+        value.forEach((item, index) => {
+          visit(item, `${pointer}/${index}`);
+        });
         return;
       }
       if (typeof value !== "object" || value === null) return;

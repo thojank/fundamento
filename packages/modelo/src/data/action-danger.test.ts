@@ -1,6 +1,6 @@
 // Danger action and target size (Spec 003 T003; plan Q1, D-04; WCAG 2.5.8).
 //
-// `tone=danger` of `butono` binds four role tokens: a filled surface in three states and its
+// `intent=danger` of `butono` binds four role tokens: a filled surface in three states and its
 // text. The three text-on-fill pairs are KontrastParoj like every action, and `state-distinct`
 // applies to hover and pressed through its appliesTo. `size.target.min` is the threshold of the
 // Ero Regulo `touch-target-min`: one core value, changed by no Dimensio and no Aspekto.

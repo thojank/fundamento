@@ -25,6 +25,15 @@ export interface UsageResult {
 /** The implicit container of instances that name none. */
 const NO_CONTAINER = "";
 
+/**
+ * The axes the two butono Reguloj read (F1, Jugxo jug_01M4DNSD0SV43Y943T21RQF7EM): `emphasis`
+ * says how much an action stands out, `intent` what it does; the primary action is the one with
+ * emphasis=high. Until F1 the axes were `variant=primary` and `tone`.
+ */
+const EMPHASIS = "emphasis";
+const INTENT = "intent";
+const PRIMARY = "high";
+
 /** Props of an instance with the Skemo's defaults filled in, as strings for comparison. */
 export function effectiveProps(skemo: Skemo, props: EroInstance["props"]): Record<string, string> {
   const effective: Record<string, string> = {};
@@ -85,7 +94,7 @@ export const USAGE_ENFORCERS: Readonly<Record<string, UsageEnforcer>> = {
     instances.forEach((instance, index) => {
       const ero = eroOf(instance);
       if (ero === undefined || !applies(regulo, ero)) return;
-      if (effectiveProps(ero.skemo, instance.props).variant !== "primary") return;
+      if (effectiveProps(ero.skemo, instance.props)[EMPHASIS] !== PRIMARY) return;
       const container = instance.container ?? NO_CONTAINER;
       groups.set(container, [...(groups.get(container) ?? []), index]);
     });
@@ -93,8 +102,8 @@ export const USAGE_ENFORCERS: Readonly<Record<string, UsageEnforcer>> = {
       .filter(([, indices]) => indices.length > 1)
       .map(([container, indices]) => ({
         instance: indices,
-        message: `${indices.length} instances with variant=primary in ${container === NO_CONTAINER ? "one container" : `container ${container}`} (instances ${indices.join(", ")}).`,
-        suggestion: "Keep one primary action per container; make the others secondary or tertiary.",
+        message: `${indices.length} instances with ${EMPHASIS}=${PRIMARY} in ${container === NO_CONTAINER ? "one container" : `container ${container}`} (instances ${indices.join(", ")}).`,
+        suggestion: `Keep one ${PRIMARY}-${EMPHASIS} action per container; give the others ${EMPHASIS}=medium or low.`,
       }));
   },
   "destructive-not-primary-color": ({ instances, eroOf, regulo }) =>
@@ -108,14 +117,15 @@ export const USAGE_ENFORCERS: Readonly<Record<string, UsageEnforcer>> = {
         goalOf(ero.skemo, instance.label ?? "")?.goal === destructive;
       if (!named) return [];
       const props = effectiveProps(ero.skemo, instance.props);
-      const primary = String(destructive.props.variant ?? "primary");
-      const tone = destructive.props.tone;
-      if (props.variant !== primary || tone === undefined || props.tone === String(tone)) return [];
+      const primary = String(destructive.props[EMPHASIS] ?? PRIMARY);
+      const intent = destructive.props[INTENT];
+      if (props[EMPHASIS] !== primary || intent === undefined || props[INTENT] === String(intent))
+        return [];
       return [
         {
           instance: [index],
-          message: `Instance ${index} is a destructive action with ${describeCombination(props, ["variant", "tone"])}.`,
-          suggestion: `As the main action use ${describeCombination(Object.fromEntries(Object.entries(destructive.props).map(([k, v]) => [k, String(v)])), Object.keys(destructive.props))}; next to another primary action use variant=secondary.`,
+          message: `Instance ${index} is a destructive action with ${describeCombination(props, [EMPHASIS, INTENT])}.`,
+          suggestion: `As the main action use ${describeCombination(Object.fromEntries(Object.entries(destructive.props).map(([k, v]) => [k, String(v)])), Object.keys(destructive.props))}; next to another ${PRIMARY}-${EMPHASIS} action use ${EMPHASIS}=medium.`,
         },
       ];
     }),

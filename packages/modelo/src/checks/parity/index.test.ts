@@ -139,11 +139,11 @@ describe("parity default run (T021)", () => {
   it("reports a default the guidelines state differently", async () => {
     const dir = writeProjections((sides) => {
       const item = sides["guidelines-komuna.json"]?.items.butono;
-      if (item !== undefined) item.values["default.variant"] = "primary";
+      if (item !== undefined) item.values["default.emphasis"] = "high";
     });
     const result = await check({ json: true, repoRoot, projekcioj: dir });
     expect(rulesAndPaths(result.errors)).toEqual([
-      { rule: "parity-value-mismatch", path: 'items.butono.values["default.variant"]' },
+      { rule: "parity-value-mismatch", path: 'items.butono.values["default.emphasis"]' },
     ]);
   });
 

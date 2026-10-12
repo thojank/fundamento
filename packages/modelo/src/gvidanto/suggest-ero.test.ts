@@ -23,21 +23,21 @@ describe("suggest_ero", () => {
       expect(output.matched?.goal).toBe("destructive");
       expect(output.suggestion).toEqual({
         ero: "butono",
-        props: { variant: "primary", tone: "danger" },
+        props: { emphasis: "high", intent: "danger" },
       });
       expect(output.regulo?.name).toBe("destructive-not-primary-color");
       expect(output.kialo).toBe(output.regulo?.kialo);
     }
   });
 
-  it("suggests tertiary for Abbrechen and primary for Speichern", () => {
+  it("suggests low emphasis for Abbrechen and high for Speichern", () => {
     expect(suggest("Abbrechen").suggestion).toEqual({
       ero: "butono",
-      props: { variant: "tertiary" },
+      props: { emphasis: "low" },
     });
     const confirm = suggest("Speichern");
     expect(confirm.matched?.goal).toBe("confirm");
-    expect(confirm.suggestion).toEqual({ ero: "butono", props: { variant: "primary" } });
+    expect(confirm.suggestion).toEqual({ ero: "butono", props: { emphasis: "high" } });
     expect(confirm.regulo?.name).toBe("one-primary-per-container");
   });
 

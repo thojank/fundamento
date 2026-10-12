@@ -21,7 +21,7 @@ describe("normalizeInventory", () => {
     const normalized = normalizeInventory({
       items: {
         " b ": item({
-          props: { " variant ": ["secondary", " primary", "primary  "] },
+          props: { " emphasis ": ["medium", " high", "high  "] },
           states: ["hover", "  default", "hover"],
           values: { " border ": " 1px   solid " },
         }),
@@ -32,7 +32,7 @@ describe("normalizeInventory", () => {
       items: {
         a: { props: {}, states: [], values: {} },
         b: {
-          props: { variant: ["primary", "secondary"] },
+          props: { emphasis: ["high", "medium"] },
           states: ["default", "hover"],
           values: { border: "1px solid" },
         },
@@ -61,7 +61,7 @@ describe("compareInventories", () => {
     const a: ParityInventory = {
       items: {
         x: item({
-          props: { variant: ["primary", "secondary"] },
+          props: { emphasis: ["high", "medium"] },
           states: ["default", "hover"],
           values: { padding: "8px" },
         }),
@@ -70,7 +70,7 @@ describe("compareInventories", () => {
     const b: ParityInventory = {
       items: {
         " x": item({
-          props: { "variant ": [" secondary", "primary"] },
+          props: { "emphasis ": [" medium", "high"] },
           states: ["hover ", "default"],
           values: { padding: " 8px" },
         }),
@@ -95,18 +95,18 @@ describe("compareInventories", () => {
 
   it("reports differing and one-sided props", () => {
     const issues = compareInventories(
-      { items: { x: item({ props: { variant: ["primary", "secondary"], size: ["s"] } }) } },
-      { items: { x: item({ props: { variant: ["primary", "tertiary"] } }) } },
+      { items: { x: item({ props: { emphasis: ["high", "medium"], size: ["s"] } }) } },
+      { items: { x: item({ props: { emphasis: ["high", "low"] } }) } },
     );
     expect(rulesAndPaths(issues)).toEqual([
+      { rule: "parity-prop-mismatch", path: "items.x.props.emphasis" },
       { rule: "parity-prop-mismatch", path: "items.x.props.size" },
-      { rule: "parity-prop-mismatch", path: "items.x.props.variant" },
     ]);
-    const variant = issues[1];
-    expect(variant?.message).toContain("secondary");
-    expect(variant?.message).toContain("tertiary");
-    expect(variant?.severity).toBe("error");
-    expect(variant?.suggestion).not.toBe("");
+    const emphasis = issues[0];
+    expect(emphasis?.message).toContain("medium");
+    expect(emphasis?.message).toContain("low");
+    expect(emphasis?.severity).toBe("error");
+    expect(emphasis?.suggestion).not.toBe("");
   });
 
   it("reports each state present on one side only", () => {
@@ -147,7 +147,7 @@ describe("compareInventories", () => {
 
 describe("formatParityPath", () => {
   it("joins plain segments with dots and quotes ambiguous ones", () => {
-    expect(formatParityPath(["items", "x", "props", "variant"])).toBe("items.x.props.variant");
+    expect(formatParityPath(["items", "x", "props", "emphasis"])).toBe("items.x.props.emphasis");
     expect(formatParityPath(["items", "color.text", "values", "a b"])).toBe(
       'items["color.text"].values["a b"]',
     );
@@ -228,7 +228,7 @@ describe("parseParityInventory", () => {
 // Differenz freigibt. Das ist eine benannte, freigegebene Differenz — eine Warnung mit Namen,
 // kein Fehler und nie eine stille Gleichheit. Ohne Jugxo bleibt es ein Fehler.
 describe("a part a side does not draw (named, released difference)", () => {
-  const KEY = "icon.color@size=medium,state=rest,tone=default,variant=primary";
+  const KEY = "icon.color@emphasis=high,intent=neutral,size=medium,state=rest";
   const skemo: ParityInventory = { items: { butono: item({ values: { [KEY]: "#ffffff" } }) } };
 
   it("is a warning that names the Jugxo, not an error", () => {
