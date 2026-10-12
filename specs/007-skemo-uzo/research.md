@@ -123,3 +123,16 @@ Die Kurzfassung ist etwa 8 % der heutigen Antwort.
 - **Maß:** `ceil(Bytes UTF-8 / 3)` der kompakten JSON-Ausgabe. Das Maß ist ungünstig gewählt: Kompaktes JSON mit vielen Satzzeichen und kurzen Schlüsseln liegt eher bei 3 als bei 4 Bytes je Token. Einen echten Tokenizer gibt es ohne neue Abhängigkeit oder Netzaufruf im Test nicht (plan OP-13).
 - **Vorläufige Obergrenze:** 750 je Ero (Entwurf 554 × 1,25 = 693, aufgerundet auf 50 ergibt 700, dazu 50 Reserve für die Übersetzung der Kialoj aus dem Entwurf in die Daten).
 - **Endgültig:** in T022 an der erzeugten Kurzfassung gemessen und hier eingetragen. Wert = Messwert × 1,25, aufgerundet auf 50, höchstens 800.
+
+### M-4 Obergrenze der Kurzfassung, gemessen (T022, 2026-10-12)
+
+Gemessen an der Antwort von `get_ero { name: "butono", brief: true }` über den MCP-Server (`packages/mcp/src/eroj-tools.test.ts`, In-Memory-Client, Konfiguration `core + aspekto-ekzemplo`), kompaktes JSON wie der Server es sendet, an der Uzo aus `data/eroj/butono/uzo.json` (T020) mit zwei `instead`- und vier `boundary`-Einträgen.
+
+| Fassung | Bytes | `ceil(Bytes / 3)` |
+|---|---|---|
+| Kurzfassung (ero, purpose, axes, required, instead, boundary) | 1 721 | **574** |
+
+Nach D-08: 574 × 1,25 = 717,5, aufgerundet auf 50 ergibt **750**, unter der Kappe 800. `BRIEF_LIMIT = 750` steht als Konstante im Test. Der Messwert liegt 60 Bytes über dem Entwurf aus M-2 (1 661), weil die Kialoj der Grenzen in den Daten je einen Satz mit „because“ tragen (Briefing 2026-10-12) und `required` neu dazukam. Die Kurzfassung blieb unter dem Ziel; kein Kialo musste gekürzt werden.
+
+Mutation (tasks.md T022): ein zusätzlicher `boundary`-Eintrag mit einem Kialo von 2 000 Zeichen hebt die Messung auf 3 776 Bytes, `ceil(/3)` = 1 259 > 750, und der Test bricht. Ergebnis im PR-Text.
+

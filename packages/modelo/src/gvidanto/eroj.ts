@@ -18,6 +18,12 @@ import type {
   SkemoPartProperty,
   SkemoPartSource,
   SkemoProp,
+  Uzo,
+  UzoBoundary,
+  UzoContent,
+  UzoInstead,
+  UzoLayout,
+  UzoSlot,
 } from "../contracts/modelo.js";
 import { ASPEKTO_DIMENSIO } from "../load/build.js";
 import { nomRegulo } from "../nomreguloj/index.js";
@@ -70,6 +76,52 @@ export interface EroProjekcioj {
   makeKit: { package: string };
 }
 
+/**
+ * The Uzo as get_ero states it (Spec 007, D-05, contracts/mcp-tools §1): the whole object without
+ * the ids of Ero and Skemo (they stand in the answer already), every Regulo it names resolved as
+ * a ReguloRef, so an agent quotes the kialo without a second call.
+ */
+export interface UzoOutput {
+  purpose: string;
+  instead: UzoInstead[];
+  boundary: UzoBoundary[];
+  composes: {
+    containers: { name: string; kialo: string }[];
+    with: { ero: string; kialo: string }[];
+    never: { ero: string; kialo: string }[];
+    spacing: { owner: "container"; regulo: ReguloRef };
+  };
+  slots: Record<string, UzoSlot>;
+  layout: {
+    size: UzoLayout["size"];
+    wrap: UzoLayout["wrap"];
+    [prop: string]:
+      | UzoLayout["size"]
+      | UzoLayout["wrap"]
+      | {
+          allowedIn: { containers?: string[]; dimensioj?: Record<string, string[]> };
+          regulo: ReguloRef;
+        };
+  };
+  content: (Omit<UzoContent, "regulo"> & { regulo: ReguloRef })[];
+}
+
+/**
+ * The brief answer (A8): what a choice needs, generated from Skemo and Uzo, never written by hand
+ * (Art. VII). Without a Uzo only `ero`, `axes` and `required`, with the warning in `issues`.
+ */
+export interface GetEroBrief {
+  ero: string;
+  purpose?: string;
+  /** Every enum prop of the Skemo with its values and default. */
+  axes: { name: string; values: string[]; default?: string }[];
+  /** Props without a default (the caller has to decide them) and slots the Uzo requires. */
+  required: { props: string[]; slots: string[] };
+  instead?: { goal: string; ero: string | null; kialo: string }[];
+  boundary?: { case: string; action: UzoBoundary["action"]; ero?: string; kialo: string }[];
+  issues?: ValidationIssue[];
+}
+
 export interface GetEroOutput {
   ero: { id: string; name: string; description: string };
   skemo: {
@@ -85,13 +137,22 @@ export interface GetEroOutput {
   reguloj: ReguloRef[];
   examples: EroExample[];
   projekcioj: EroProjekcioj;
+  /** Absent when the Ero has no Uzo (Spec 007). */
+  uzo?: UzoOutput;
 }
 
-export type GetEroInput = { name: string } | { id: string };
+type EroSelector = { name: string } | { id: string };
 
-export type GetEroResult =
-  | { ok: true; output: GetEroOutput }
-  | { ok: false; issues: ValidationIssue[]; allowed?: string[] };
+export type GetEroInput = EroSelector & {
+  /** Only the brief answer (A8, Spec 007); default false. */
+  brief?: boolean;
+};
+
+export type GetEroFailure = { ok: false; issues: ValidationIssue[]; allowed?: string[] };
+
+export type GetEroResult = { ok: true; output: GetEroOutput } | GetEroFailure;
+
+export type GetEroBriefResult = { ok: true; output: GetEroBrief } | GetEroFailure;
 
 /** `butono` → `Butono`: the React component and the class name behind `fm-butono`. */
 function pascal(name: string): string {
@@ -264,7 +325,94 @@ export function examplesOf(modelo: Modelo, entry: LoadedEro): EroExample[] {
   return examples;
 }
 
-export function getEro(modelo: Modelo, input: GetEroInput): GetEroResult {
+/** A Regulo name of the Uzo as a ReguloRef; a name the Modelo does not know stays a name. */
+function reguloRefNamed(modelo: Modelo, name: string): ReguloRef {
+  const regulo = modelo.reguloj.find((candidate) => candidate.name === name);
+  if (regulo === undefined) {
+    return { id: "", name, statement: "", kialo: "", checkability: "manual" };
+  }
+  return reguloRef(regulo);
+}
+
+/** The Uzo of an Ero as get_ero states it (D-05), or nothing. */
+export function uzoOf(modelo: Modelo, uzo: Uzo | undefined): UzoOutput | undefined {
+  if (uzo === undefined) return undefined;
+  const layout: UzoOutput["layout"] = { size: uzo.layout.size, wrap: uzo.layout.wrap };
+  for (const [prop, allowance] of Object.entries(uzo.layout)) {
+    if (typeof allowance !== "object") continue;
+    layout[prop] = {
+      allowedIn: structuredClone(allowance.allowedIn),
+      regulo: reguloRefNamed(modelo, allowance.regulo),
+    };
+  }
+  return {
+    purpose: uzo.purpose,
+    instead: structuredClone(uzo.instead),
+    boundary: structuredClone(uzo.boundary),
+    composes: {
+      containers: structuredClone(uzo.composes.containers),
+      with: structuredClone(uzo.composes.with),
+      never: structuredClone(uzo.composes.never),
+      spacing: {
+        owner: uzo.composes.spacing.owner,
+        regulo: reguloRefNamed(modelo, uzo.composes.spacing.regulo),
+      },
+    },
+    slots: structuredClone(uzo.slots),
+    layout,
+    content: uzo.content.map((entry) => ({
+      ...structuredClone(entry),
+      regulo: reguloRefNamed(modelo, entry.regulo),
+    })),
+  };
+}
+
+/** The brief answer of an Ero (A8), generated from its Skemo and Uzo. */
+export function briefOf(entry: LoadedEro): GetEroBrief {
+  const { skemo, uzo } = entry;
+  const brief: GetEroBrief = {
+    ero: entry.ero.name,
+    axes: skemo.props
+      .filter((prop) => prop.kind === "enum")
+      .map((prop) => ({
+        name: prop.name,
+        values: [...(prop.values ?? [])],
+        ...(prop.default === undefined ? {} : { default: String(prop.default) }),
+      })),
+    required: {
+      props: skemo.props.filter((prop) => prop.default === undefined).map((prop) => prop.name),
+      slots: Object.entries(uzo?.slots ?? {})
+        .filter(([, rule]) => rule.required === true)
+        .map(([slot]) => slot),
+    },
+  };
+  if (uzo === undefined) {
+    brief.issues = [
+      {
+        rule: "skemo-uzo-missing",
+        severity: "warning",
+        path: `get_ero/${entry.ero.name}`,
+        message: `The Ero ${entry.ero.name} has a Skemo but no Uzo: the brief says how it is built, not what it is for and where it stops.`,
+        suggestion: `Add ${entry.ero.name}/uzo.json next to the Skemo (Spec 007).`,
+      },
+    ];
+    return brief;
+  }
+  brief.purpose = uzo.purpose;
+  brief.instead = uzo.instead.map(({ goal, ero, kialo }) => ({ goal, ero, kialo }));
+  brief.boundary = uzo.boundary.map(({ case: name, action, ero, kialo }) => ({
+    case: name,
+    action,
+    ...(ero === undefined ? {} : { ero }),
+    kialo,
+  }));
+  return brief;
+}
+
+export function getEro(modelo: Modelo, input: EroSelector & { brief: true }): GetEroBriefResult;
+export function getEro(modelo: Modelo, input: EroSelector & { brief?: false }): GetEroResult;
+export function getEro(modelo: Modelo, input: GetEroInput): GetEroResult | GetEroBriefResult;
+export function getEro(modelo: Modelo, input: GetEroInput): GetEroResult | GetEroBriefResult {
   const field = "id" in input ? "id" : "name";
   const wanted = "id" in input ? input.id : input.name;
   const entry = modelo.eroj.find((candidate) =>
@@ -288,7 +436,9 @@ export function getEro(modelo: Modelo, input: GetEroInput): GetEroResult {
       ),
     };
   }
+  if (input.brief === true) return { ok: true, output: briefOf(entry) };
   const { skemo } = entry;
+  const uzo = uzoOf(modelo, entry.uzo);
   return {
     ok: true,
     output: {
@@ -306,6 +456,7 @@ export function getEro(modelo: Modelo, input: GetEroInput): GetEroResult {
       reguloj: regulojOf(modelo, entry.ero.name).map(reguloRef),
       examples: examplesOf(modelo, entry),
       projekcioj: projekciojOf(modelo, entry),
+      ...(uzo === undefined ? {} : { uzo }),
     },
   };
 }

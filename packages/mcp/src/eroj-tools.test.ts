@@ -34,6 +34,38 @@ describe("get_ero (FR-13)", () => {
   });
 });
 
+// Spec 007 T022 (A8, D-08, contracts/mcp-tools §1): the brief answer stays under a measured
+// ceiling. The measure is ceil(UTF-8 bytes / 3) of the compact JSON the server sends (OP-13);
+// the ceiling is the measurement × 1.25, rounded up to 50, at most 800 (research.md, M-4).
+// Measured 2026-10-12 on the butono with its Uzo: 1 721 bytes, 574 → 574 × 1.25 = 717.5 → 750.
+// A boundary entry with a 2 KB kialo breaks this test (mutation of T022); that is the point.
+const BRIEF_LIMIT = 750;
+
+describe("get_ero brief (Spec 007 A8)", () => {
+  it("answers with the generated brief, equal to getEro with brief", async () => {
+    const { client, served } = await connect({ config: EKZEMPLO_CONFIG });
+    const direct = getEro(served.modelo, { name: "butono", brief: true });
+    if (!direct.ok) throw new Error("direct call failed");
+    const answer = await output(client, "get_ero", { name: "butono", brief: true });
+    expect(answer).toEqual(plain(direct.output));
+    expect(Object.keys(answer).sort()).toEqual([
+      "axes",
+      "boundary",
+      "ero",
+      "instead",
+      "purpose",
+      "required",
+    ]);
+  });
+
+  it(`stays under the ceiling of ${BRIEF_LIMIT} (ceil(bytes / 3) of the compact JSON)`, async () => {
+    const { client } = await connect({ config: EKZEMPLO_CONFIG });
+    const answer = await output(client, "get_ero", { name: "butono", brief: true });
+    const bytes = Buffer.byteLength(JSON.stringify(answer), "utf8");
+    expect(Math.ceil(bytes / 3), `${bytes} bytes`).toBeLessThanOrEqual(BRIEF_LIMIT);
+  });
+});
+
 describe("suggest_ero (FR-13)", () => {
   it("returns what suggestEro computes", async () => {
     const { client, served } = await connect({ config: EKZEMPLO_CONFIG });

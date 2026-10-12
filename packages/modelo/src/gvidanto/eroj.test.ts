@@ -2,7 +2,8 @@
 
 import { describe, expect, it } from "vitest";
 import { loadModelo } from "../load/load-modelo.js";
-import { defaultModeloSource } from "../load/source.js";
+import { defaultModeloSource, fixtureModeloSource } from "../load/source.js";
+import { fixtureRoot } from "../validate/test-doubles/fixtures.js";
 import { getEro, listEroj } from "./eroj.js";
 
 const { modelo } = loadModelo(defaultModeloSource());
@@ -196,5 +197,102 @@ describe("get_ero", () => {
     expect(missing.issues.map((issue) => issue.rule)).toEqual(["ero-unknown"]);
     expect(missing.issues[0]?.path).toBe("get_ero/name");
     expect(missing.allowed).toEqual(["butono"]);
+  });
+});
+
+// Spec 007 T022 (A8, D-05, D-08, contracts/mcp-tools §1): get_ero carries the Uzo with its Reguloj
+// resolved, and with `brief: true` only what a choice needs, generated from Skemo and Uzo.
+describe("get_ero with the Uzo and brief (T022)", () => {
+  const isReguloRef = (value: unknown) => {
+    expect(value).toEqual(
+      expect.objectContaining({
+        id: expect.stringMatching(/^reg_/),
+        name: expect.any(String),
+        statement: expect.any(String),
+        kialo: expect.any(String),
+        checkability: expect.stringMatching(/^(automatic|manual)$/),
+      }),
+    );
+  };
+
+  it("carries the Uzo of the butono without its ids, the Reguloj resolved as ReguloRef", () => {
+    const uzo = output.uzo;
+    expect(uzo).toBeDefined();
+    expect(uzo).not.toHaveProperty("id");
+    expect(uzo).not.toHaveProperty("ero");
+    expect(uzo).not.toHaveProperty("skemo");
+    expect(uzo?.purpose).toBe(butono.uzo?.purpose);
+    expect(uzo?.boundary).toHaveLength(4);
+    expect(uzo?.boundary.map((entry) => entry.case)).toEqual(
+      butono.uzo?.boundary.map((entry) => entry.case),
+    );
+    expect(uzo?.instead.map((entry) => entry.goal)).toEqual(["toggle", "choose"]);
+    expect(uzo?.slots).toEqual(butono.uzo?.slots);
+    isReguloRef(uzo?.composes.spacing.regulo);
+    expect(uzo?.composes.spacing.regulo.name).toBe("spacing-owned-by-container");
+    const fullWidth = uzo?.layout["full-width"];
+    expect(typeof fullWidth).toBe("object");
+    if (typeof fullWidth === "object") {
+      isReguloRef(fullWidth.regulo);
+      expect(fullWidth.regulo.name).toBe("full-width-in-action-bar-or-compact");
+    }
+    expect(uzo?.content.map((entry) => entry.regulo.name)).toEqual([
+      "label-names-action",
+      "destructive-label-names-object",
+      "destructive-label-not-generic",
+    ]);
+    for (const entry of uzo?.content ?? []) isReguloRef(entry.regulo);
+  });
+
+  it("brief: exactly the keys of contracts §1, axes from the Skemo, no keywords and no via", () => {
+    const brief = getEro(modelo, { name: "butono", brief: true });
+    expect(brief.ok).toBe(true);
+    if (!brief.ok) return;
+    expect(Object.keys(brief.output).sort()).toEqual([
+      "axes",
+      "boundary",
+      "ero",
+      "instead",
+      "purpose",
+      "required",
+    ]);
+    expect(brief.output.ero).toBe("butono");
+    expect(brief.output.purpose).toBe(butono.uzo?.purpose);
+    expect(brief.output.axes).toEqual(
+      butono.skemo.props
+        .filter((prop) => prop.kind === "enum")
+        .map((prop) => ({ name: prop.name, values: prop.values, default: prop.default })),
+    );
+    expect(brief.output.required).toEqual({ props: ["label"], slots: [] });
+    for (const entry of brief.output.instead ?? []) {
+      expect(Object.keys(entry).sort()).toEqual(["ero", "goal", "kialo"]);
+    }
+    for (const entry of brief.output.boundary ?? []) {
+      expect(entry).not.toHaveProperty("keywords");
+      expect(entry).not.toHaveProperty("via");
+      expect(entry.kialo.length).toBeGreaterThan(0);
+    }
+    expect(brief.output.boundary?.map((entry) => entry.action)).toEqual([
+      "ask-human",
+      "not-supported",
+      "not-supported",
+      "not-supported",
+    ]);
+  });
+
+  it("brief for an Ero without a Uzo: ero, axes, required and the warning skemo-uzo-missing", () => {
+    const { modelo: minimal } = loadModelo(
+      fixtureModeloSource(fixtureRoot("valid", "ero-minimal")),
+    );
+    if (minimal === undefined) throw new Error("ero-minimal must load");
+    const brief = getEro(minimal, { name: "butono", brief: true });
+    expect(brief.ok).toBe(true);
+    if (!brief.ok) return;
+    expect(Object.keys(brief.output).sort()).toEqual(["axes", "ero", "issues", "required"]);
+    expect(brief.output.issues?.map((issue) => [issue.rule, issue.severity])).toEqual([
+      ["skemo-uzo-missing", "warning"],
+    ]);
+    const full = getEro(minimal, { name: "butono" });
+    expect(full.ok && full.output).not.toHaveProperty("uzo");
   });
 });
