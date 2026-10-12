@@ -9,6 +9,7 @@ import {
   dimensioKovrado,
   evaluateAlirebleco,
   evaluateAspiroj,
+  getEro,
   type LoadedEro,
   type Modelo,
   oklchLExtreme,
@@ -19,6 +20,7 @@ import {
   regularoEnforcementIssues,
   STATE_KEY,
   typeScaleConsistency,
+  type UzoOutput,
   type ValidationIssue,
 } from "@fundamento/modelo";
 import type { CeloInput } from "../../build.js";
@@ -105,6 +107,11 @@ export interface VitrinoDatumoj {
   komparo: Record<string, { kriterio: string; a: string; b: string; pli: "a" | "b" | "egale" }[]>;
   /** The `fm-butono` grid as markup; the element upgrades it in the browser. */
   butono: string;
+  /**
+   * The Uzo of every Ero that has one, as get_ero states it (Spec 007 T027, S5): the Vitrino
+   * answers "Wann nehme ich den Butono nicht?" from the same data as the Gvidanto.
+   */
+  uzo: Record<string, UzoOutput>;
   /** Sum of the advisory APCA findings, now and in the baseline. */
   /**
    * Advisory APCA findings. `nun` counts this build, `kombinoj` how many combinations that is.
@@ -244,6 +251,16 @@ export const VITRINO_ROW_KEYS = ["emphasis", "intent", "size"] as const;
  */
 export function vitrinoLabelOf(combination: Readonly<Record<string, string>>): string {
   return Object.values(combination).join(" · ");
+}
+
+/** The Uzo of every Ero of the Modelo that has one, from get_ero (one source, S5). */
+export function uzojOf(modelo: Modelo): Record<string, UzoOutput> {
+  const uzoj: Record<string, UzoOutput> = {};
+  for (const entry of modelo.eroj) {
+    const answer = getEro(modelo, { name: entry.ero.name });
+    if (answer.ok && answer.output.uzo !== undefined) uzoj[entry.ero.name] = answer.output.uzo;
+  }
+  return uzoj;
 }
 
 export function butonoMarkup(eroj: readonly LoadedEro[]): string {
@@ -573,6 +590,7 @@ export function vitrinoDatumoj({ input, bazo }: VitrinoDatumojInput): VitrinoDat
       ankroj,
     }),
     butono: butonoMarkup(modelo.eroj),
+    uzo: uzojOf(modelo),
     apcaHintoj: {
       nun: apcaNun,
       kombinoj: Object.keys(mezuroj).length,

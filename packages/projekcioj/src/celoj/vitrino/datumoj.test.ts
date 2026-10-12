@@ -4,7 +4,7 @@
 import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { defaultModeloSource, evaluateAlirebleco, loadModelo } from "@fundamento/modelo";
+import { defaultModeloSource, evaluateAlirebleco, getEro, loadModelo } from "@fundamento/modelo";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { buildProjekcioj } from "../../build.js";
 import type { VitrinoDatumoj } from "./datumoj.js";
@@ -191,5 +191,27 @@ describe("the sections of FR-06", () => {
     expect(dark?.propraj).toBe(57);
     expect(dark?.entute).toBe(76);
     expect(coverage.some((entry) => entry.dimensio === "motion")).toBe(true);
+  });
+});
+
+// Spec 007 T027 (A12, S5): the Vitrino answers "Wann nehme ich den Butono nicht?" from the same
+// data as get_ero; there is no second source.
+describe("the Vitrino carries the Uzo of every Ero (T027, S5)", () => {
+  it("the data island holds the Uzo of the butono, equal to get_ero", () => {
+    const { modelo } = loadModelo(defaultModeloSource());
+    if (modelo === undefined) throw new Error("the repo Modelo must load");
+    const direct = getEro(modelo, { name: "butono" });
+    if (!direct.ok) throw new Error("get_ero butono failed");
+    expect(datumoj.uzo?.butono).toEqual(JSON.parse(JSON.stringify(direct.output.uzo)));
+  });
+
+  it("renders the section Gebrauch with the boundaries and their kialo", () => {
+    expect(html).toContain('id="fm-vitrino-uzo"');
+    expect(html).toContain("<h2>Gebrauch</h2>");
+    for (const boundary of datumoj.uzo?.butono?.boundary ?? []) {
+      expect(html).toContain(boundary.case);
+      expect(html).toContain(boundary.kialo);
+    }
+    expect(html).toContain("Wann nehme ich den Butono nicht?");
   });
 });
