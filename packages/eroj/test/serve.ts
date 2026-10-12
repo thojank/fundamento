@@ -47,7 +47,7 @@ export async function serve(
     if (path === "/") {
       await route.fulfill({
         contentType: "text/html; charset=utf-8",
-        body: `<!doctype html><html lang="de" data-fm-motion="reduced"><head><meta charset="utf-8"><title>fm-butono</title><link rel="stylesheet" href="/css/fundamento.css"><style>body { background-color: var(--fm-color-background-default); }</style>${head}<script type="module">import "/eroj/define.js";</script></head><body>${body}</body></html>`,
+        body: `<!doctype html><html lang="de" data-fm-motion="reduced"><head><meta charset="utf-8"><title>Fundamento Eroj</title><link rel="stylesheet" href="/css/fundamento.css"><style>body { background-color: var(--fm-color-background-default); }</style>${head}<script type="module">import "/eroj/define.js";</script></head><body>${body}</body></html>`,
       });
       return;
     }
@@ -60,5 +60,10 @@ export async function serve(
     });
   });
   await page.goto(`${ORIGIN}/`);
-  await page.waitForFunction(() => customElements.get("fm-butono") !== undefined);
+  // Every Ero of the Modelo registers on import (Spec 008: butono and ligilo alike).
+  await page.waitForFunction(
+    () =>
+      customElements.get("fm-butono") !== undefined &&
+      customElements.get("fm-ligilo") !== undefined,
+  );
 }

@@ -30,7 +30,7 @@ describe("get_ero (FR-13)", () => {
     const { client } = await connect();
     const result = await call(client, "get_ero", { name: "butonno" });
     expect(result.isError).toBe(true);
-    expect(result.structuredContent?.allowed).toEqual(["butono"]);
+    expect(result.structuredContent?.allowed).toEqual(["butono", "ligilo"]);
   });
 });
 
@@ -58,12 +58,16 @@ describe("get_ero brief (Spec 007 A8)", () => {
     ]);
   });
 
-  it(`stays under the ceiling of ${BRIEF_LIMIT} (ceil(bytes / 3) of the compact JSON)`, async () => {
-    const { client } = await connect({ config: EKZEMPLO_CONFIG });
-    const answer = await output(client, "get_ero", { name: "butono", brief: true });
-    const bytes = Buffer.byteLength(JSON.stringify(answer), "utf8");
-    expect(Math.ceil(bytes / 3), `${bytes} bytes`).toBeLessThanOrEqual(BRIEF_LIMIT);
-  });
+  // Spec 008 T014 (A5, E of Spec 009): every Ero's brief, measured; the ceiling stays 750.
+  it.each(["butono", "ligilo"])(
+    `%s stays under the ceiling of ${BRIEF_LIMIT} (ceil(bytes / 3) of the compact JSON)`,
+    async (name) => {
+      const { client } = await connect({ config: EKZEMPLO_CONFIG });
+      const answer = await output(client, "get_ero", { name, brief: true });
+      const bytes = Buffer.byteLength(JSON.stringify(answer), "utf8");
+      expect(Math.ceil(bytes / 3), `${bytes} bytes`).toBeLessThanOrEqual(BRIEF_LIMIT);
+    },
+  );
 });
 
 describe("suggest_ero (FR-13)", () => {
@@ -81,7 +85,7 @@ describe("suggest_ero (FR-13)", () => {
     expect(result.structuredContent?.issues).toEqual([
       expect.objectContaining({ rule: "goal-unknown", path: "suggest_ero/goal" }),
     ]);
-    expect(result.structuredContent?.allowed).toEqual(["destructive", "confirm", "dismiss"]);
+    expect(result.structuredContent?.allowed).toEqual(["destructive", "confirm", "dismiss", "navigate", "external"]);
   });
 });
 

@@ -3,6 +3,8 @@
 
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import { loadModelo } from "../load/load-modelo.js";
+import { defaultModeloSource } from "../load/source.js";
 import { checkOntologio, type OntologioProblem, readOntologio } from "../ontologio/check.js";
 
 const constitution = readFileSync(
@@ -10,6 +12,9 @@ const constitution = readFileSync(
   "utf8",
 );
 const ontologio = readOntologio();
+// Spec 008 (D-15): the scheme eroj is checked against the Eroj of the repo Modelo.
+const { modelo } = loadModelo(defaultModeloSource());
+const eroNames = (modelo?.eroj ?? []).map((entry) => entry.ero.name);
 
 type Concept = Record<string, unknown> & { term: string; uri: string };
 const mutate = (change: (copy: { concepts: Concept[]; predicates: { id: string }[] }) => void) => {
@@ -18,7 +23,7 @@ const mutate = (change: (copy: { concepts: Concept[]; predicates: { id: string }
     predicates: { id: string }[];
   };
   change(copy);
-  return checkOntologio(copy, constitution);
+  return checkOntologio(copy, constitution, eroNames);
 };
 const kinds = (problems: OntologioProblem[]) => [
   ...new Set(problems.map((problem) => problem.check)),
@@ -26,7 +31,7 @@ const kinds = (problems: OntologioProblem[]) => [
 
 describe("ontologio.json (FR-15, FR-16, AK-07)", () => {
   it("passes every drift check against the Constitution and the Modelo schema", () => {
-    expect(checkOntologio(ontologio, constitution)).toEqual([]);
+    expect(checkOntologio(ontologio, constitution, eroNames)).toEqual([]);
   });
 
   it("holds the 20 terms of the Constitution table and the 5 entity-type concepts", () => {
@@ -132,5 +137,48 @@ describe("ontologio: the principle Fluida Marko (Spec 004 T005)", () => {
 
   it("keeps the principle out of the Constitution terminology for now", () => {
     expect(concepts.filter((entry) => entry.inScheme === "terminologio")).toHaveLength(20);
+  });
+});
+
+// Spec 008 T009 (A8, plan D-15): the Eroj of the Modelo as concepts of the scheme eroj, each with
+// its relation to the other, kept in step with data/eroj.
+describe("the scheme eroj (Spec 008 T009)", () => {
+  const concepts = (ontologio as unknown as { concepts: Concept[] }).concepts;
+  const eroj = concepts.filter((concept) => concept.inScheme === "eroj");
+
+  it("holds one concept per Ero of the Modelo, under #Ero, related to each other", () => {
+    expect(eroNames).toEqual(["butono", "ligilo"]);
+    expect(eroj.map((concept) => concept.term).sort()).toEqual(["Butono", "Ligilo"]);
+    for (const concept of eroj) {
+      expect(concept.broader).toEqual(["#Ero"]);
+      expect(concept.notation).toBeUndefined();
+    }
+    const relations = (term: string) =>
+      (eroj.find((concept) => concept.term === term)?.relations ?? []) as {
+        predicate: string;
+        target: string;
+      }[];
+    expect(relations("Ligilo")).toEqual([{ predicate: "references", target: "#Butono" }]);
+    expect(relations("Butono")).toEqual([{ predicate: "references", target: "#Ligilo" }]);
+  });
+
+  it("reports an Ero without a concept and a concept without an Ero", () => {
+    expect(
+      kinds(mutate((copy) => {
+        copy.concepts = copy.concepts.filter((concept) => concept.term !== "Ligilo");
+      })),
+    ).toContain("ero-concept-missing");
+    expect(
+      kinds(mutate((copy) => {
+        copy.concepts.push({
+          ...(copy.concepts.find((concept) => concept.term === "Ligilo") as Concept),
+          term: "Kampo",
+          uri: "https://fundamento.ciferecigo.com/ontologio#Kampo",
+          relations: [],
+        });
+      })),
+    ).toContain("ero-concept-extra");
+    // Without the Ero names the scheme is not judged (a caller without a Modelo).
+    expect(checkOntologio(ontologio, constitution)).toEqual([]);
   });
 });

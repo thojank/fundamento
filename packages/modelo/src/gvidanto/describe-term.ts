@@ -84,8 +84,10 @@ function instancesOf(modelo: Modelo, term: string): DescribeTermOutput["instance
       };
     case "TokenSet":
       return listed(modelo.setoj.map((set) => set.name));
+    // Spec 008: the Eroj of the Modelo are the instances of Ero and Skemo.
     case "Ero":
     case "Skemo":
+      return listed(modelo.eroj.map((entry) => entry.ero.name));
     case "Sxablono":
       return { count: 0 };
     default:

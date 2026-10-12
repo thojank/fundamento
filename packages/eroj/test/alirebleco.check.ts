@@ -107,3 +107,65 @@ for (const aspekto of ["komuna", "ekzemplo"]) {
     }
   }
 }
+
+// Spec 008 T022 (A6): the rendered fm-ligilo in every colour class of komuna and ekzemplo: axe on
+// every placement × size in rest, hover and pressed, external included; the focus ring of a
+// standalone link contrasts at least 3:1 with the gap colour and with the page background.
+const ligilo = input.modelo.eroj.find((entry) => entry.ero.name === "ligilo");
+if (ligilo === undefined) throw new Error("ligilo missing");
+const linkCombos = combinationsOf(ligilo.skemo, ["placement", "size"]);
+const links = linkCombos
+  .map(
+    (c, i) =>
+      `<p>Ein Satz mit <fm-ligilo id="l${i}" to="#l${i}" placement="${c.placement}" size="${c.size}">Ziel ${i}</fm-ligilo> darin.</p>`,
+  )
+  .join(" ")
+  .concat(
+    `<p><fm-ligilo id="ext" to="https://docs.example/" placement="standalone" external>Dokumentation</fm-ligilo></p>`,
+  );
+
+for (const aspekto of ["komuna", "ekzemplo"]) {
+  for (const scheme of ["light", "dark"]) {
+    for (const contrast of ["default", "high"]) {
+      test(`${aspekto} ${scheme}/${contrast}: axe on every placement × size and state of the ligilo, focus ring ≥ 3:1`, async ({
+        page,
+        browserName,
+      }) => {
+        // The running text around the inline links is the page's, in the page's text colour
+        // (the butono page has no text of its own; a link lives in a sentence).
+        await serve(page, out, links, "<style>body { color: var(--fm-color-text-default); }</style>");
+        await page.evaluate(
+          ([a, s, c]) => {
+            const root = document.documentElement;
+            root.setAttribute("data-fm-aspekto", a ?? "");
+            root.setAttribute("data-fm-color-scheme", s ?? "");
+            root.setAttribute("data-fm-contrast", c ?? "");
+          },
+          [aspekto, scheme, contrast],
+        );
+        expect(await axeViolations(page), "rest").toEqual([]);
+        for (const [i] of linkCombos.entries()) {
+          const host = page.locator(`#l${i}`);
+          await host.hover();
+          expect(await axeViolations(page, `#l${i}`), `#l${i} hover`).toEqual([]);
+          await page.mouse.down();
+          expect(await axeViolations(page, `#l${i}`), `#l${i} pressed`).toEqual([]);
+          await page.mouse.up();
+        }
+        await page.mouse.move(0, 0);
+        const standalone = linkCombos
+          .map((c, i) => (c.placement === "standalone" ? `#l${i}` : undefined))
+          .filter((id): id is string => id !== undefined);
+        const rings = await focusRingContrasts(page, [...standalone, "#ext"], browserName);
+        expect(rings).toHaveLength(standalone.length + 1);
+        for (const ring of rings) {
+          expect(ring.gap, `${ring.selector} ring on gap`).toBeGreaterThanOrEqual(3);
+          expect(ring.page, `${ring.selector} ring on page`).toBeGreaterThanOrEqual(3);
+        }
+        expect(
+          boundToken(ligilo.skemo, "label", "color", { ...linkCombos[0], state: "visited" })?.token,
+        ).toBe("color.link.visited");
+      });
+    }
+  }
+}
