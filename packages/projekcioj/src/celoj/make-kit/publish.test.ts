@@ -51,7 +51,8 @@ describe("what a publish would contain (T020)", () => {
       const files = result.files.map((file) => file.path).sort();
       // F25: the LICENSE is written by the generator, so it lands in the package whatever tool
       // packs it — `npm publish` by hand left it out, pnpm had taken it from the repository root.
-      expect(files).toHaveLength(18);
+      // Spec 008: one guideline per Ero, the ligilo's next to the butono's.
+      expect(files).toHaveLength(19);
       expect(files).toEqual([
         "LICENSE",
         "README.md",
@@ -63,6 +64,7 @@ describe("what a publish would contain (T020)", () => {
         "dist/index.js",
         "guidelines/Guidelines.md",
         "guidelines/components/butono.md",
+        "guidelines/components/ligilo.md",
         "guidelines/foundations/color.md",
         "guidelines/foundations/dimensioj.md",
         "guidelines/foundations/spacing.md",

@@ -31,6 +31,10 @@ const plan = JSON.parse(files["figma/plan.json"] ?? "{}") as FigmaPlan;
 const MODEL_FONTS = [
   { family: "Geist", style: "Medium" },
   { family: "Geist", style: "Black" },
+  // Spec 008: the inline ligilo takes the running text's role (typography.body.1), Regular in
+  // komuna and Medium in ekzemplo (plan D-11).
+  { family: "Geist", style: "Regular" },
+  { family: "Archivo", style: "Regular" },
   { family: "Archivo", style: "Medium" },
   { family: "Archivo", style: "Black" },
 ] as const;
@@ -227,8 +231,14 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
     expect(butono?.uzo?.status).toBe("open");
     expect(butono?.uzo?.evidence).toContain("descriptionMarkdown");
     expect(result.mankoj.closed).toEqual([]);
-    expect(result.mankoj.open.map((manko) => manko.part)).toEqual(["boundary", "slots", "content"]);
-    for (const manko of result.mankoj.open) {
+    // Spec 008: two sets, three parts each; the butono's are read here, the ligilo's alike.
+    const openButono = result.mankoj.open.filter((manko) => manko.set === "butono");
+    expect(openButono.map((manko) => manko.part)).toEqual(["boundary", "slots", "content"]);
+    expect(result.mankoj.open.map((manko) => manko.set)).toEqual([
+      ...["boundary", "slots", "content"].map(() => "butono"),
+      ...["boundary", "slots", "content"].map(() => "ligilo"),
+    ]);
+    for (const manko of openButono) {
       expect(manko.set).toBe("butono");
       expect(manko.field).toBe("descriptionMarkdown");
       expect(manko.evidence).toContain("descriptionMarkdown");
@@ -246,10 +256,17 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
     const butono = result.components.find((component) => component.set === "butono");
     expect(butono?.uzo?.status).toBe("closed");
     expect(result.mankoj.open).toEqual([]);
-    expect(result.mankoj.closed.map((manko) => manko.part)).toEqual([
-      "boundary",
-      "slots",
-      "content",
+    // Spec 008: both sets close their three parts; the butono's are read here.
+    expect(
+      result.mankoj.closed.filter((manko) => manko.set === "butono").map((manko) => manko.part),
+    ).toEqual(["boundary", "slots", "content"]);
+    expect(result.mankoj.closed.map((manko) => manko.set)).toEqual([
+      "butono",
+      "butono",
+      "butono",
+      "ligilo",
+      "ligilo",
+      "ligilo",
     ]);
   });
 });
@@ -1329,8 +1346,8 @@ describe("every property the plugin owns is from the plan or neutral", () => {
     const double = modelDouble();
     await run(double, repoFiles["figma/plugin/code.js"] ?? "");
     // The set lies on the page, in no flow: its position among siblings is not the plugin's.
-    const onPage = "Document/Page 1/butono: layoutPositioning";
-    expect(double.untouchedDefaults(OWNED).filter((entry) => entry !== onPage)).toEqual([]);
+    const onPage = ["Document/Page 1/butono: layoutPositioning", "Document/Page 1/ligilo: layoutPositioning"];
+    expect(double.untouchedDefaults(OWNED).filter((entry) => !onPage.includes(entry))).toEqual([]);
     const set = double.root.children[0]?.children.find((child) => child.name === "butono");
     expect(set?.properties.strokes).toEqual([]);
     expect(set?.properties.dashPattern).toEqual([]);
@@ -1409,7 +1426,13 @@ describe("the label is set in the model's font (F11)", () => {
   });
 
   it("uses the model's font when the file has it", async () => {
-    const double = figmaDouble({ fonts: [{ family: "Geist", style: "Medium" }] });
+    const double = figmaDouble({
+      fonts: [
+        { family: "Geist", style: "Medium" },
+        // Spec 008: the inline ligilo shows the running text's role (Regular).
+        { family: "Geist", style: "Regular" },
+      ],
+    });
     const report = (await new Function(
       "figma",
       `${repoFiles["figma/plugin/code.js"] ?? ""}\nreturn applyPlan();`,
@@ -2394,7 +2417,11 @@ describe("every bound paint shows the plan's colour after the first and the seco
       fundamento: expect.any(String),
       variables: expect.any(Number),
       warnings: [],
-      components: [{ set: "butono", created: 72, updated: 0 }],
+      // Spec 008: two sets; the ligilo has placement × size × state = 30 variants.
+      components: [
+        { set: "butono", created: 72, updated: 0 },
+        { set: "ligilo", created: 30, updated: 0 },
+      ],
     });
     const json = lines
       .filter((line) => line.startsWith("{"))

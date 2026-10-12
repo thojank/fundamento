@@ -74,8 +74,7 @@ export function elementSource({
       ? `const SKEMO = ${constant}_SKEMO;\nconst CSS = ${constant}_CSS;`
       : `import { ${constant}_SKEMO as SKEMO } from "./skemo.js";\nimport { ${constant}_CSS as CSS } from "./${ero}.styles.js";`;
   const control = host === "a" ? "a" : "button";
-  return `${head}
-
+  const body = `
 type Value = string | boolean;
 
 const PROPS = SKEMO.props as readonly {
@@ -298,6 +297,20 @@ for (const prop of PROPS) {
       else this.setAttribute(prop.name, String(next));
     },
   });
-}
+}`;
+  if (inline !== true) return `${head}
+${body}
+`;
+  // The Make Kit holds every Ero in one module (D-14): each element's module-level names live in
+  // a function scope of their own, so two Eroj never collide (Spec 008).
+  const scoped = body
+    .replace(`export class ${className} extends Base`, `class ${className} extends Base`)
+    .replace(`export function define${className}()`, `function define${className}()`);
+  return `const { ${className}, define${className} } = (() => {
+${head}
+${scoped}
+  return { ${className}, define${className} };
+})();
+export { ${className}, define${className} };
 `;
 }

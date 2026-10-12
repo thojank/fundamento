@@ -54,9 +54,6 @@ describe("Make Kit sources (T018)", () => {
       "guidelines/setup.md",
       "package.json",
       "src/element.ts",
-      // Spec 008: one module per Ero, joined by element.ts (the template's names would collide).
-      "src/fm-butono.ts",
-      "src/fm-ligilo.ts",
       "src/index.ts",
       "src/react.ts",
       "styles.css",
@@ -258,7 +255,7 @@ describe("Make Kit guidelines carry the Uzo (T026)", () => {
     const item = guidelinesInventory(text);
     expect(item.sections).toEqual([
       "Props",
-      "Which button for which goal",
+      "Which butono for which goal",
       "Rules",
       "Examples",
       "What it is for",

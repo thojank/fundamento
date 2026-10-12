@@ -201,7 +201,9 @@ export function vitrinoHtml({ css, elementJs, datumoj }: VitrinoInput): string {
 <main>
 ${section("paletroj", "Paletten", paletroj(datumoj))}
 ${section("roloj", "Flächen, Text, Status und Aktionen", roles)}
-${section("butono", "butono", datumoj.butono)}
+${Object.entries(datumoj.eroj)
+  .map(([ero, markup]) => section(ero, ero, markup))
+  .join("\n")}
 ${section("uzo", "Gebrauch", uzo(datumoj))}
 ${section("kontrasto", "Kontrastmatrix", '<div id="fm-vitrino-kontrasto-tabelo"></div>')}
 ${section("regularo", "Regularo und Ziele", '<div id="fm-vitrino-regularo-tabelo"></div>')}
