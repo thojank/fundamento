@@ -12,6 +12,7 @@ import { appendPointer } from "../json/pointer.js";
 import type { ModeloDocument, ModeloFiles } from "../load/files.js";
 import { isJsonObject, rawEntries } from "../validate/raw.js";
 import { uzoIssues } from "./uzo-rules.js";
+import { isSkemoWebTerm, skemoWebTermSuggestion } from "./web-terms.js";
 
 /** The key of a binding or `by` list that stands for the Ero's state. */
 export const STATE_KEY = "state";
@@ -21,6 +22,20 @@ export const REST_STATE = "rest";
 
 /** States whose text pair is exempt from contrast (Phase-1 Regulo: disabled is not read). */
 const CONTRAST_EXEMPT_STATES: ReadonlySet<string> = new Set(["disabled"]);
+
+/**
+ * The two values a binding may carry besides a token (Spec 008, E6, plan D-03): `inherit`, the
+ * property comes from the container (a link in a sentence is part of the sentence), and `none`,
+ * the property is not set in that combination (a standalone link has no underline at rest). Both
+ * are words of the Modelo, not of a platform; the projections translate them. Known here, in one
+ * place, so that no rule and no Celo keeps its own list.
+ */
+export const BINDING_KEYWORDS = ["inherit", "none"] as const;
+
+export type BindingKeyword = (typeof BINDING_KEYWORDS)[number];
+
+export const isBindingKeyword = (token: string): token is BindingKeyword =>
+  (BINDING_KEYWORDS as readonly string[]).includes(token);
 
 /** Token type each platform-neutral part property needs (data-model §4). */
 export const PART_PROPERTY_TYPES: Readonly<Record<SkemoPartProperty, DtcgType>> = {
@@ -179,6 +194,8 @@ export function skemoIssues(modelo: Modelo, files: ModeloFiles): ValidationIssue
     if (keysValid) pairIssues(entry, pairs, invalidTokens, at);
     constraintIssues(entry, at);
     goalIssues(entry, reguloNames, at);
+    nameIssues(entry, at);
+    a11yIssues(entry, at);
   }
   issues.push(...ekzemploIssues(modelo, files));
   issues.push(...uzoIssues(modelo, files));
@@ -196,6 +213,8 @@ function tokenIssues(
   const { ero, skemo } = entry;
   const invalid = new Set<string>();
   const check = (part: string, property: string, token: string, pointer: string) => {
+    // inherit and none are no tokens (D-03); what they mean is checked by the Reguloj.
+    if (isBindingKeyword(token)) return;
     const defined = core[token];
     if (defined === undefined) {
       invalid.add(token);
@@ -442,6 +461,51 @@ function goalIssues(entry: LoadedEro, reguloNames: ReadonlySet<string>, at: At):
       );
     }
   });
+}
+
+/**
+ * `skemo-web-term` (Spec 008 A7, Art. VIII, plan D-13): no prop, slot, part or state is named with
+ * a word of the web platform (`href`, `aria-*`, `input`, …). The list lives in web-terms.ts.
+ */
+function nameIssues(entry: LoadedEro, at: At): void {
+  const { ero, skemo } = entry;
+  const report = (pointer: string, kind: string, name: string) =>
+    at(
+      pointer,
+      "skemo-web-term",
+      `Skemo of ${ero.name} names the ${kind} ${name}, which is a word of the web platform; a Skemo speaks of the Ero, not of one platform (Art. VIII).`,
+      skemoWebTermSuggestion(name),
+    );
+  skemo.props.forEach((prop, index) => {
+    if (isSkemoWebTerm(prop.name)) report(`/skemo/props/${index}/name`, "prop", prop.name);
+  });
+  skemo.slots.forEach((slot, index) => {
+    if (isSkemoWebTerm(slot.name)) report(`/skemo/slots/${index}/name`, "slot", slot.name);
+  });
+  skemo.states.forEach((state, index) => {
+    if (isSkemoWebTerm(state)) report(`/skemo/states/${index}`, "state", state);
+  });
+  for (const part of Object.keys(skemo.parts)) {
+    if (isSkemoWebTerm(part)) report(appendPointer("/skemo/parts", part), "part", part);
+  }
+}
+
+/**
+ * `skemo-a11y-invalid` (Spec 008 A1, plan D-02): every key of `a11y.texts` is a boolean prop of
+ * the Skemo — the text is heard when that prop is true, and a text without its prop is never heard.
+ */
+function a11yIssues(entry: LoadedEro, at: At): void {
+  const { ero, skemo } = entry;
+  const booleans = skemo.props.filter((prop) => prop.kind === "boolean").map((prop) => prop.name);
+  for (const key of Object.keys(skemo.a11y.texts ?? {})) {
+    if (booleans.includes(key)) continue;
+    at(
+      appendPointer("/skemo/a11y/texts", key),
+      "skemo-a11y-invalid",
+      `Skemo of ${ero.name} carries an a11y text for ${key}, which is no boolean prop of ${ero.name}; the text would never be heard.`,
+      `Key a11y.texts by a boolean prop (${booleans.join(", ") || "none"}), or add the prop first.`,
+    );
+  }
 }
 
 /** Why `value` is not allowed for prop `key`, or `undefined` when it is. */

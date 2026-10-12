@@ -59,10 +59,63 @@ export function uzoIssues(modelo: Modelo, files: ModeloFiles): ValidationIssue[]
     slotIssues(entry, uzo, at);
     layoutIssues(entry, uzo, at);
     boundaryIssues(entry, uzo, at);
+    coveredIssues(entry, uzo, modelo, at);
     reguloIssues(entry, uzo, modelo, at);
     contentIssues(entry, uzo, modelo, at);
   }
   return issues;
+}
+
+/**
+ * `uzo-boundary-covered` (Spec 008 A4, plan D-14): a boundary that says ask-human, or an instead
+ * entry that says null, for words another Ero's Skemo names as a goal. When Fundamento has the
+ * Ero, the answer is use-instead; ask-human is for what no Ero covers.
+ */
+function coveredIssues(entry: LoadedEro, uzo: JsonObject, modelo: Modelo, at: At): void {
+  const covering = (keywords: unknown): string | undefined => {
+    if (!isJsonObject(keywords)) return undefined;
+    for (const other of modelo.eroj) {
+      if (other.ero.name === entry.ero.name) continue;
+      for (const goal of other.skemo.goals ?? []) {
+        for (const [lingvo, words] of Object.entries(goal.keywords)) {
+          const own = keywords[lingvo];
+          if (!Array.isArray(own)) continue;
+          const lower = new Set(words.map((word) => word.normalize("NFC").toLowerCase()));
+          if (
+            own.some(
+              (word: unknown) =>
+                typeof word === "string" && lower.has(word.normalize("NFC").toLowerCase()),
+            )
+          ) {
+            return `${other.ero.name} (goal ${goal.goal})`;
+          }
+        }
+      }
+    }
+    return undefined;
+  };
+  for (const { item, index } of objects(uzo.boundary)) {
+    if (item.action !== "ask-human") continue;
+    const covered = covering(item.keywords);
+    if (covered === undefined) continue;
+    at(
+      `/uzo/boundary/${index}/action`,
+      "uzo-boundary-covered",
+      `The boundary ${String(item.case)} of the Uzo of ${entry.ero.name} says ask-human, but its keywords name a goal of ${covered}; Fundamento covers this case.`,
+      `Set action to use-instead and ero to the Ero that covers it; ask-human is for what no Ero covers.`,
+    );
+  }
+  for (const { item, index } of objects(uzo.instead)) {
+    if (item.ero !== null) continue;
+    const covered = covering(item.keywords);
+    if (covered === undefined) continue;
+    at(
+      `/uzo/instead/${index}/ero`,
+      "uzo-boundary-covered",
+      `The alternative ${String(item.goal)} of the Uzo of ${entry.ero.name} says null (not covered), but its keywords name a goal of ${covered}; Fundamento covers this case.`,
+      "Name that Ero in ero; null is for what no Ero covers.",
+    );
+  }
 }
 
 /**

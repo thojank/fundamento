@@ -178,6 +178,14 @@ export const RULE_IDS = [
   "uzo-slot-accepts",
   "uzo-slot-max",
   "uzo-slot-nesting",
+  // Spec 008 (plan D-13, D-14): a Skemo name that is a web term, an a11y text without its boolean
+  // prop, a boundary that says ask-human for a goal another Ero covers, and the two Skemo-level
+  // Reguloj of the ligilo (their rule IDs are the Regulo names).
+  "skemo-web-term",
+  "skemo-a11y-invalid",
+  "uzo-boundary-covered",
+  "link-not-color-only",
+  "external-link-marked",
   // Projekcio lints (Spec 003, D-17)
   "css-physical-property",
   "ero-hardcoded-string",
