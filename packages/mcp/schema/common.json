@@ -11,7 +11,7 @@
           "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
         },
         "severity": {
-          "enum": ["error", "warning"]
+          "enum": ["error", "warning", "info"]
         },
         "path": {
           "type": "string"

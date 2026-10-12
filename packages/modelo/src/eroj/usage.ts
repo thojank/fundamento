@@ -3,10 +3,10 @@
 // enforcers live here and not in Modelo validation; `check_usage` and the Jugxo examples use this.
 // Pure.
 
-import type { RuleId, ValidationIssue } from "../contracts/issues.js";
+import type { IssueSeverity, RuleId, ValidationIssue } from "../contracts/issues.js";
 import { formatIssuePath } from "../contracts/issues.js";
 import type { EroInstance, LoadedEro, Modelo, Regulo } from "../contracts/modelo.js";
-import type { Skemo } from "../generated/modelo-schema.js";
+import type { Skemo, UzoContent, UzoLayoutAllowance } from "../generated/modelo-schema.js";
 import { describeCombination, forbiddenBy } from "./skemo-rules.js";
 
 /** One finding: the indices of the instances involved and the issue. */
@@ -76,6 +76,49 @@ export function goalOf(
   return undefined;
 }
 
+/**
+ * A keyword of the named goal that is a word of the text, with its language. Unlike `goalOf` it
+ * asks for one goal, not the first that matches (Spec 007, text rule `verb-and-object`).
+ */
+export function hitsGoal(
+  skemo: Skemo,
+  goalName: string,
+  text: string,
+): { keyword: string; lingvo: string } | undefined {
+  const goal = (skemo.goals ?? []).find((candidate) => candidate.goal === goalName);
+  if (goal === undefined) return undefined;
+  const words = new Set(wordsOf(text));
+  for (const [lingvo, keywords] of Object.entries(goal.keywords)) {
+    const keyword = keywords.find((candidate) =>
+      words.has(candidate.normalize("NFC").toLowerCase()),
+    );
+    if (keyword !== undefined) return { keyword, lingvo };
+  }
+  return undefined;
+}
+
+/** The visible text of an instance: the label slot, else the label prop (icon-only). */
+export function textOf(instance: EroInstance): string | undefined {
+  const text = instance.label ?? instance.props.label;
+  return typeof text === "string" && text.trim() !== "" ? text : undefined;
+}
+
+/** The goal of an instance: the one it states, else the one its text names (data-model §2.3). */
+export function goalOfInstance(skemo: Skemo, instance: EroInstance): string | undefined {
+  return instance.goal ?? goalOf(skemo, textOf(instance) ?? "")?.goal.goal;
+}
+
+/**
+ * The language of a text: that of the goal keyword it hits. A text that hits no keyword has no
+ * language (data-model §5); the enforcers then take German (decision of 2026-10-12).
+ */
+export function lingvoOf(skemo: Skemo, text: string): string | undefined {
+  return goalOf(skemo, text)?.lingvo;
+}
+
+/** The language the text rules fall back to when the instance names none. */
+export const DEFAULT_LINGVO = "de";
+
 type Context = {
   modelo: Modelo;
   regulo: Regulo;
@@ -83,9 +126,165 @@ type Context = {
   eroOf: (instance: EroInstance) => LoadedEro | undefined;
 };
 
-type UsageEnforcer = (
-  context: Context,
-) => { instance: number[]; message: string; suggestion: string }[];
+/** One finding of an enforcer; `severity` defaults to error (a text rule may only warn, D-02). */
+export interface UsageFinding {
+  instance: number[];
+  message: string;
+  suggestion: string;
+  severity?: IssueSeverity;
+}
+
+type UsageEnforcer = (context: Context) => UsageFinding[];
+
+/** Why a text fails a check of a Uzo text rule (data-model §2.1, `UzoContent.check`), or nothing. */
+export function textCheckFailure(
+  skemo: Skemo,
+  check: UzoContent["check"],
+  text: string,
+): string | undefined {
+  switch (check.kind) {
+    case "names-goal":
+      return goalOf(skemo, text) === undefined
+        ? "it names no verb of a goal of the Ero (nothing says what happens on activation)"
+        : undefined;
+    case "verb-and-object": {
+      const hit = hitsGoal(skemo, check.goal, text);
+      if (hit === undefined) return `it names no verb of the goal ${check.goal}`;
+      if (wordsOf(text).length < 2)
+        return `it names the verb "${hit.keyword}" but not what it acts on`;
+      return undefined;
+    }
+    case "not-words": {
+      const words = new Set(wordsOf(text));
+      for (const list of Object.values(check.words)) {
+        const generic = list.find((word) => words.has(word.normalize("NFC").toLowerCase()));
+        if (generic !== undefined) return `it uses the generic word "${generic}"`;
+      }
+      return undefined;
+    }
+    default:
+      return undefined;
+  }
+}
+
+/** The language of a text that hits a generic word of a `not-words` check, if any. */
+function genericLingvo(check: UzoContent["check"], text: string): string | undefined {
+  if (check.kind !== "not-words") return undefined;
+  const words = new Set(wordsOf(text));
+  for (const [lingvo, list] of Object.entries(check.words)) {
+    if (list.some((word) => words.has(word.normalize("NFC").toLowerCase()))) return lingvo;
+  }
+  return undefined;
+}
+
+/**
+ * The label of an approved example of the Regulo in the given language (D-07, S3): the solution
+ * comes from the data, not from a guess. Without one in that language, German, then any.
+ */
+export function approvedLabel(
+  modelo: Modelo,
+  regulo: Regulo,
+  lingvo: string,
+  eroOf: (instance: EroInstance) => LoadedEro | undefined,
+): string | undefined {
+  const labels: { label: string; lingvo: string | undefined }[] = [];
+  for (const jugxo of modelo.jugxoj) {
+    if (jugxo.decision !== "approved" || jugxo.ekzemplo?.regulo !== regulo.id) continue;
+    for (const instance of jugxo.ekzemplo.instances) {
+      const label = textOf(instance);
+      const skemo = eroOf(instance)?.skemo;
+      if (label === undefined || skemo === undefined) continue;
+      labels.push({ label, lingvo: lingvoOf(skemo, label) });
+    }
+  }
+  return (
+    labels.find((entry) => entry.lingvo === lingvo) ??
+    labels.find((entry) => entry.lingvo === DEFAULT_LINGVO) ??
+    labels[0]
+  )?.label;
+}
+
+/**
+ * The enforcer of every text rule of a Uzo (Spec 007, A7, D-02, data-model §2.3): the Uzo entry
+ * whose `regulo` is this Regulo says whether the rule is fixed, which goals it applies to and how
+ * it is checked. An Ero without a Uzo, or a Uzo without this rule, is not judged.
+ */
+const textRule: UsageEnforcer = ({ modelo, regulo, instances, eroOf }) =>
+  instances.flatMap((instance, index) => {
+    const ero = eroOf(instance);
+    if (ero === undefined || !applies(regulo, ero)) return [];
+    const rule = ero.uzo?.content.find((entry) => entry.regulo === regulo.name);
+    if (rule === undefined) return [];
+    // Text rules judge a text; an instance without one violates label-required alone (§5).
+    const text = textOf(instance);
+    if (text === undefined) return [];
+    if (rule.when !== undefined) {
+      const goal = goalOfInstance(ero.skemo, instance);
+      if (goal === undefined || !rule.when.goal.includes(goal)) return [];
+    }
+    const failure = textCheckFailure(ero.skemo, rule.check, text);
+    if (failure === undefined) return [];
+    const lingvo = lingvoOf(ero.skemo, text) ?? genericLingvo(rule.check, text) ?? DEFAULT_LINGVO;
+    const example = approvedLabel(modelo, regulo, lingvo, eroOf);
+    return [
+      {
+        instance: [index],
+        severity: rule.fixed ? "error" : (rule.severity ?? "error"),
+        message: `Instance ${index} of ${ero.ero.name} is labelled "${text}": ${failure}.`,
+        suggestion:
+          example === undefined
+            ? `Write a label that follows the rule: ${regulo.statement}`
+            : `Write the label as the approved example does, e.g. "${example}".`,
+      },
+    ];
+  });
+
+/** Where a layout allowance lets an instance stand, in words for a message. */
+function allowedPlaces(allowance: UzoLayoutAllowance): string {
+  const places = [
+    ...(allowance.allowedIn.containers ?? []).map((name) => `a container of kind ${name}`),
+    ...Object.entries(allowance.allowedIn.dimensioj ?? {}).flatMap(([dimensio, values]) =>
+      values.map((value) => `${dimensio}=${value}`),
+    ),
+  ];
+  return places.join(" or ") || "nowhere";
+}
+
+/**
+ * The enforcer of a layout allowance of a Uzo (Spec 007, A6): a boolean prop the Uzo lists under
+ * `layout` with this Regulo is allowed only in the named containers or Dimensio values.
+ */
+const layoutAllowance: UsageEnforcer = ({ regulo, instances, eroOf }) =>
+  instances.flatMap((instance, index) => {
+    const ero = eroOf(instance);
+    if (ero === undefined || !applies(regulo, ero) || ero.uzo === undefined) return [];
+    const props = effectiveProps(ero.skemo, instance.props);
+    return Object.entries(ero.uzo.layout).flatMap(([prop, allowance]) => {
+      if (typeof allowance !== "object" || allowance.regulo !== regulo.name) return [];
+      if (props[prop] !== "true") return [];
+      const containers = allowance.allowedIn.containers ?? [];
+      const inContainer =
+        instance.container !== undefined && containers.includes(instance.container);
+      const inDimensio = Object.entries(allowance.allowedIn.dimensioj ?? {}).some(
+        ([dimensio, values]) => values.includes(instance.dimensioj?.[dimensio] ?? ""),
+      );
+      if (inContainer || inDimensio) return [];
+      const where =
+        instance.container === undefined
+          ? "without a container"
+          : `in the container ${instance.container}`;
+      const under = Object.entries(instance.dimensioj ?? {})
+        .map(([dimensio, value]) => `${dimensio}=${value}`)
+        .join(", ");
+      return [
+        {
+          instance: [index],
+          message: `Instance ${index} of ${ero.ero.name} takes ${prop} ${where}${under === "" ? "" : ` under ${under}`}.`,
+          suggestion: `Use ${prop} only in ${allowedPlaces(allowance)}; otherwise leave ${prop} out.`,
+        },
+      ];
+    });
+  });
 
 /** Enforcers of the Ero Reguloj by name (the repo test accepts this table next to the Modelo's). */
 export const USAGE_ENFORCERS: Readonly<Record<string, UsageEnforcer>> = {
@@ -145,6 +344,12 @@ export const USAGE_ENFORCERS: Readonly<Record<string, UsageEnforcer>> = {
         },
       ];
     }),
+  // Spec 007 T019 (A6, A7, data-model §4): the layout rule and the text rules of the Uzo. Each
+  // reads the Uzo of the Ero; until an Ero has one, none of them finds anything.
+  "full-width-in-action-bar-or-compact": layoutAllowance,
+  "label-names-action": textRule,
+  "destructive-label-names-object": textRule,
+  "destructive-label-not-generic": textRule,
 };
 
 function applies(regulo: Regulo, ero: LoadedEro): boolean {
@@ -162,10 +367,11 @@ export function evaluateUsage(modelo: Modelo, instances: readonly EroInstance[])
     message: string,
     suggestion: string,
     regulo?: Regulo,
+    severity: IssueSeverity = "error",
   ) => {
     const issue: ValidationIssue = {
       rule,
-      severity: "error",
+      severity,
       path: formatIssuePath({ file: "instances", pointer: `/${instance[0] ?? 0}` }),
       message,
       suggestion,
@@ -204,7 +410,14 @@ export function evaluateUsage(modelo: Modelo, instances: readonly EroInstance[])
     const enforcer = USAGE_ENFORCERS[regulo.name];
     if (enforcer === undefined || regulo.checkability !== "automatic") continue;
     for (const finding of enforcer({ modelo, regulo, instances, eroOf })) {
-      at(finding.instance, regulo.name as RuleId, finding.message, finding.suggestion, regulo);
+      at(
+        finding.instance,
+        regulo.name as RuleId,
+        finding.message,
+        finding.suggestion,
+        regulo,
+        finding.severity,
+      );
     }
   }
 
@@ -213,5 +426,10 @@ export function evaluateUsage(modelo: Modelo, instances: readonly EroInstance[])
       (a.instance[0] ?? 0) - (b.instance[0] ?? 0) ||
       (a.issue.rule < b.issue.rule ? -1 : a.issue.rule > b.issue.rule ? 1 : 0),
   );
-  return { instances: instances.length, valid: violations.length === 0, violations };
+  // A warning or an info is reported, but does not make the instances invalid (D-02, D-03).
+  return {
+    instances: instances.length,
+    valid: violations.every((violation) => violation.issue.severity !== "error"),
+    violations,
+  };
 }

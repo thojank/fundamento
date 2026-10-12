@@ -620,6 +620,26 @@
       "status": "active",
       "type": "regulo"
     },
+    "reg_01M4RPB19GDEJE9T2S21VNRE0H": {
+      "status": "active",
+      "type": "regulo"
+    },
+    "reg_01M4RPB19HEMSFTRDZNPTHJV7N": {
+      "status": "active",
+      "type": "regulo"
+    },
+    "reg_01M4RPB19HEMSFTRDZNPTHJV7P": {
+      "status": "active",
+      "type": "regulo"
+    },
+    "reg_01M4RPB19HEMSFTRDZNPTHJV7Q": {
+      "status": "active",
+      "type": "regulo"
+    },
+    "reg_01M4RPB19HEMSFTRDZNPTHJV7R": {
+      "status": "active",
+      "type": "regulo"
+    },
     "set_01M2VEEDW32MC4ZQPRN0GC9JRR": {
       "status": "active",
       "type": "tokenSet"

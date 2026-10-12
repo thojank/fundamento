@@ -72,11 +72,20 @@ describe("get_ero", () => {
       // F32: how the focus ring is drawn is part of what the Ero promises, so an agent asking
       // for the Ero is told the rule and its reason.
       "focus-ring-concentric",
+      // Spec 007 T019 (data-model §4): the spacing candidate, the layout rule and the text rules.
+      "spacing-owned-by-container",
+      "full-width-in-action-bar-or-compact",
+      "label-names-action",
+      "destructive-label-names-object",
+      "destructive-label-not-generic",
     ]);
     for (const regulo of output.reguloj) {
       expect(regulo.kialo.length).toBeGreaterThan(0);
       expect(regulo.statement.length).toBeGreaterThan(0);
-      expect(regulo.checkability).toBe("automatic");
+      // The spacing rule is a candidate (A4): manual until an instance can state its spacing.
+      expect(regulo.checkability).toBe(
+        regulo.name === "spacing-owned-by-container" ? "manual" : "automatic",
+      );
     }
   });
 

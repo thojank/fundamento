@@ -179,7 +179,11 @@ export const RULE_IDS = [
 
 export type RuleId = (typeof RULE_IDS)[number];
 
-export type IssueSeverity = "error" | "warning";
+/**
+ * `info` (Spec 007, D-03, D-07): a rule an Aspekto has overridden with a Jugxo. The finding stays
+ * visible (Art. VI, a deviation is never silent) but is no violation; `valid` stays true.
+ */
+export type IssueSeverity = "error" | "warning" | "info";
 
 export interface ValidationIssue {
   rule: RuleId;

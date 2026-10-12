@@ -7,7 +7,7 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { combinationsOf, forbiddenBy } from "../eroj/skemo-rules.js";
-import { evaluateUsage } from "../eroj/usage.js";
+import { evaluateUsage, USAGE_ENFORCERS } from "../eroj/usage.js";
 import { loadModelo } from "../load/load-modelo.js";
 import { defaultModeloSource } from "../load/source.js";
 import { validateModelo } from "../validate/validate-modelo.js";
@@ -19,7 +19,19 @@ const USAGE_REGULOJ = [
   "one-primary-per-container",
   "destructive-not-primary-color",
   "label-required",
+  // Spec 007 T019 (A6, A7, data-model §4): the layout rule and the three text rules of the Uzo.
+  "full-width-in-action-bar-or-compact",
+  "label-names-action",
+  "destructive-label-names-object",
+  "destructive-label-not-generic",
 ];
+
+/**
+ * `label-names-action` only warns (Spec 007, plan D-02, decision of 2026-10-08): the keyword list
+ * would refuse legitimate verbs such as "Senden" or "Teilen". A warning still counts as a
+ * violation of its rule, but leaves `valid` true.
+ */
+const WARNING_REGULOJ = new Set(["label-names-action"]);
 
 describe("butono in the repo Modelo (T007)", () => {
   it("lives in data/eroj/butono/skemo.json and the repo Modelo stays valid", () => {
@@ -85,10 +97,16 @@ describe("butono in the repo Modelo (T007)", () => {
       expect(examples.map((jugxo) => jugxo.decision).sort()).toEqual(["approved", "rejected"]);
       for (const jugxo of examples) {
         expect(jugxo.ref).toEqual({ ero: butono?.ero.id });
-        const rules = evaluateUsage(modelo, jugxo.ekzemplo?.instances ?? []).violations.map(
-          (violation) => violation.issue.rule,
-        );
+        const result = evaluateUsage(modelo, jugxo.ekzemplo?.instances ?? []);
+        const rules = result.violations.map((violation) => violation.issue.rule);
         expect(rules, `${jugxo.id}`).toEqual(jugxo.decision === "rejected" ? [name] : []);
+        const severities = result.violations.map((violation) => violation.issue.severity);
+        expect(severities, `${jugxo.id}`).toEqual(
+          jugxo.decision === "rejected" ? [WARNING_REGULOJ.has(name) ? "warning" : "error"] : [],
+        );
+        expect(result.valid, `${jugxo.id}`).toBe(
+          jugxo.decision === "approved" || WARNING_REGULOJ.has(name),
+        );
       }
     },
   );
@@ -96,6 +114,40 @@ describe("butono in the repo Modelo (T007)", () => {
   it("keeps visible strings out of the Skemo: labels live only in Jugxo examples", () => {
     const text = JSON.stringify(butono?.skemo);
     expect(text).not.toMatch(/Speichern|Löschen|Abbrechen|Save|Delete|Cancel/);
+  });
+});
+
+// Spec 007 T019 (A4, A6, A7, data-model §4): five Reguloj of the Uzo. The spacing rule is a
+// candidate with checkability manual (A4); the other four judge instances through the usage table.
+describe("the five Reguloj of the Uzo (T019)", () => {
+  const named = (name: string) => modelo.reguloj.find((regulo) => regulo.name === name);
+
+  it.each([
+    "spacing-owned-by-container",
+    "full-width-in-action-bar-or-compact",
+    "label-names-action",
+    "destructive-label-names-object",
+    "destructive-label-not-generic",
+  ])("%s applies to butono with a kialo", (name) => {
+    const regulo = named(name);
+    expect(regulo?.appliesTo).toEqual({ eroj: ["butono"] });
+    expect(regulo?.kialo.length ?? 0).toBeGreaterThan(40);
+    expect(regulo?.statement.length ?? 0).toBeGreaterThan(20);
+  });
+
+  it("spacing-owned-by-container is a candidate with checkability manual (A4)", () => {
+    expect(named("spacing-owned-by-container")?.checkability).toBe("manual");
+    expect(USAGE_ENFORCERS["spacing-owned-by-container"]).toBeUndefined();
+  });
+
+  it.each([
+    "full-width-in-action-bar-or-compact",
+    "label-names-action",
+    "destructive-label-names-object",
+    "destructive-label-not-generic",
+  ])("%s is automatic and has an enforcer in the usage table", (name) => {
+    expect(named(name)?.checkability).toBe("automatic");
+    expect(USAGE_ENFORCERS[name]).toBeDefined();
   });
 });
 
