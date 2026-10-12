@@ -29,8 +29,8 @@ describe("butono in the repo Modelo (T007)", () => {
 
   it("has the props, states and slots of data-model §2", () => {
     expect(butono?.skemo.props.map((prop) => [prop.name, prop.values ?? prop.kind])).toEqual([
-      ["variant", ["primary", "secondary", "tertiary"]],
-      ["tone", ["default", "danger"]],
+      ["emphasis", ["high", "medium", "low"]],
+      ["intent", ["neutral", "danger"]],
       ["size", ["small", "medium", "large"]],
       ["type", ["button", "submit", "reset"]],
       ["disabled", "boolean"],
@@ -68,13 +68,13 @@ describe("butono in the repo Modelo (T007)", () => {
     ).toEqual([]);
   });
 
-  it("forbids tone=danger with secondary and tertiary", () => {
+  it("forbids intent=danger with emphasis medium and low", () => {
     if (butono === undefined) throw new Error("butono missing");
     const skemo = butono.skemo;
-    expect(forbiddenBy(skemo, { variant: "secondary", tone: "danger" })).toBeDefined();
-    expect(forbiddenBy(skemo, { variant: "tertiary", tone: "danger" })).toBeDefined();
-    expect(forbiddenBy(skemo, { variant: "primary", tone: "danger" })).toBeUndefined();
-    expect(combinationsOf(skemo, ["variant", "tone"])).toHaveLength(4);
+    expect(forbiddenBy(skemo, { emphasis: "medium", intent: "danger" })).toBeDefined();
+    expect(forbiddenBy(skemo, { emphasis: "low", intent: "danger" })).toBeDefined();
+    expect(forbiddenBy(skemo, { emphasis: "high", intent: "danger" })).toBeUndefined();
+    expect(combinationsOf(skemo, ["emphasis", "intent"])).toHaveLength(4);
   });
 
   it.each(USAGE_REGULOJ)(
@@ -109,6 +109,52 @@ function jsonFilesUnder(dir: string): string[] {
   }
   return files;
 }
+
+// F1-T01 (Spec 007, Jugxo jug_01M4DNSD0SV43Y943T21RQF7EM, plan D-13): the axes of the butono say
+// what they mean. `variant` (primary|secondary|tertiary) is `emphasis` (high|medium|low), `tone`
+// (default|danger) is `intent` (neutral|danger). The tokens keep their names (color.action.primary).
+describe("the axes of the butono are emphasis and intent (F1-T01)", () => {
+  it("emphasis defaults to medium and intent to neutral", () => {
+    const defaults = Object.fromEntries(
+      (butono?.skemo.props ?? []).map((prop) => [prop.name, prop.default]),
+    );
+    expect(defaults.emphasis).toBe("medium");
+    expect(defaults.intent).toBe("neutral");
+  });
+
+  it("no word variant or tone is left in data/ and vortaro/sets/", () => {
+    const dataDir = fileURLToPath(new URL("../../data/", import.meta.url));
+    const setsDir = fileURLToPath(new URL("../../../vortaro/sets/", import.meta.url));
+    const files = [...jsonFilesUnder(dataDir), ...jsonFilesUnder(setsDir)];
+    expect(files.length).toBeGreaterThan(10);
+    // The kialo and context of a Jugxo are its record and stay as written (the measurements of
+    // Spec 003 name the old axes, and the Jugxo of F1 itself names both names); everything else —
+    // keys, prop values, descriptions, statements — must use the new names.
+    const RECORD_KEYS = new Set(["kialo", "context"]);
+    const offending: string[] = [];
+    const visit = (value: unknown, pointer: string) => {
+      if (typeof value === "string") {
+        if (/\b(variant|tone)\b/.test(value)) offending.push(pointer);
+        return;
+      }
+      if (Array.isArray(value)) {
+        value.forEach((item, index) => visit(item, `${pointer}/${index}`));
+        return;
+      }
+      if (typeof value !== "object" || value === null) return;
+      for (const [key, child] of Object.entries(value as Record<string, unknown>)) {
+        if (/\b(variant|tone)\b/.test(key)) offending.push(`${pointer}/${key}`);
+        if (RECORD_KEYS.has(key) && pointer.includes("jugxoj")) continue;
+        visit(child, `${pointer}/${key}`);
+      }
+    };
+    for (const file of files) {
+      const root = file.startsWith(dataDir) ? dataDir : setsDir;
+      visit(JSON.parse(readFileSync(file, "utf8")), file.slice(root.length));
+    }
+    expect(offending).toEqual([]);
+  });
+});
 
 // F1-T00 (Spec 007, OP-4, data-model §9): the goal of a user is `goal` everywhere, so that after F1
 // the prop `intent` (neutral|danger) and the goal never share a word.

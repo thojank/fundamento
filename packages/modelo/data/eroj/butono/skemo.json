@@ -10,18 +10,18 @@
     "ero": "ero_01M2XN0PHDBBD6MNFN75DB9NQ5",
     "props": [
       {
-        "name": "variant",
+        "name": "emphasis",
         "kind": "enum",
-        "values": ["primary", "secondary", "tertiary"],
-        "default": "secondary",
-        "description": "Emphasis: at most one primary per container (Regulo one-primary-per-container)."
+        "values": ["high", "medium", "low"],
+        "default": "medium",
+        "description": "Emphasis: at most one high per container (Regulo one-primary-per-container)."
       },
       {
-        "name": "tone",
+        "name": "intent",
         "kind": "enum",
-        "values": ["default", "danger"],
-        "default": "default",
-        "description": "Meaning: danger marks an action that destroys data (Regulo destructive-not-primary-color); only with variant=primary."
+        "values": ["neutral", "danger"],
+        "default": "neutral",
+        "description": "Intent: danger marks an action that destroys data (Regulo destructive-not-primary-color); only with emphasis=high."
       },
       {
         "name": "size",
@@ -68,10 +68,10 @@
       { "name": "icon-end", "decorative": true }
     ],
     "parts": {
-      "surface": { "fill": { "by": ["variant", "tone", "state"] } },
-      "label": { "color": { "by": ["variant", "tone", "state"] }, "typography": { "by": ["size"] } },
+      "surface": { "fill": { "by": ["emphasis", "intent", "state"] } },
+      "label": { "color": { "by": ["emphasis", "intent", "state"] }, "typography": { "by": ["size"] } },
       "border": {
-        "color": { "by": ["variant", "tone", "state"] },
+        "color": { "by": ["emphasis", "intent", "state"] },
         "width": { "fixed": "border.width.default" }
       },
       "focus-ring": {
@@ -96,289 +96,289 @@
       {
         "part": "surface",
         "property": "fill",
-        "when": { "variant": "primary", "tone": "default", "state": "rest" },
+        "when": { "emphasis": "high", "intent": "neutral", "state": "rest" },
         "token": "color.action.primary.rest"
       },
       {
         "part": "surface",
         "property": "fill",
-        "when": { "variant": "primary", "tone": "default", "state": "hover" },
+        "when": { "emphasis": "high", "intent": "neutral", "state": "hover" },
         "token": "color.action.primary.hover"
       },
       {
         "part": "surface",
         "property": "fill",
-        "when": { "variant": "primary", "tone": "default", "state": "pressed" },
+        "when": { "emphasis": "high", "intent": "neutral", "state": "pressed" },
         "token": "color.action.primary.pressed"
       },
       {
         "part": "surface",
         "property": "fill",
-        "when": { "variant": "primary", "tone": "default", "state": "disabled" },
+        "when": { "emphasis": "high", "intent": "neutral", "state": "disabled" },
         "token": "color.action.primary.disabled"
       },
       {
         "part": "surface",
         "property": "fill",
-        "when": { "variant": "primary", "tone": "danger", "state": "rest" },
+        "when": { "emphasis": "high", "intent": "danger", "state": "rest" },
         "token": "color.action.danger.rest"
       },
       {
         "part": "surface",
         "property": "fill",
-        "when": { "variant": "primary", "tone": "danger", "state": "hover" },
+        "when": { "emphasis": "high", "intent": "danger", "state": "hover" },
         "token": "color.action.danger.hover"
       },
       {
         "part": "surface",
         "property": "fill",
-        "when": { "variant": "primary", "tone": "danger", "state": "pressed" },
+        "when": { "emphasis": "high", "intent": "danger", "state": "pressed" },
         "token": "color.action.danger.pressed"
       },
       {
         "part": "surface",
         "property": "fill",
-        "when": { "variant": "primary", "tone": "danger", "state": "disabled" },
+        "when": { "emphasis": "high", "intent": "danger", "state": "disabled" },
         "token": "color.action.primary.disabled"
       },
       {
         "part": "surface",
         "property": "fill",
-        "when": { "variant": "secondary", "tone": "default", "state": "rest" },
+        "when": { "emphasis": "medium", "intent": "neutral", "state": "rest" },
         "token": "color.action.secondary.rest"
       },
       {
         "part": "surface",
         "property": "fill",
-        "when": { "variant": "secondary", "tone": "default", "state": "hover" },
+        "when": { "emphasis": "medium", "intent": "neutral", "state": "hover" },
         "token": "color.action.secondary.hover"
       },
       {
         "part": "surface",
         "property": "fill",
-        "when": { "variant": "secondary", "tone": "default", "state": "pressed" },
+        "when": { "emphasis": "medium", "intent": "neutral", "state": "pressed" },
         "token": "color.action.secondary.pressed"
       },
       {
         "part": "surface",
         "property": "fill",
-        "when": { "variant": "secondary", "tone": "default", "state": "disabled" },
+        "when": { "emphasis": "medium", "intent": "neutral", "state": "disabled" },
         "token": "color.action.secondary.disabled"
       },
       {
         "part": "surface",
         "property": "fill",
-        "when": { "variant": "tertiary", "tone": "default", "state": "rest" },
+        "when": { "emphasis": "low", "intent": "neutral", "state": "rest" },
         "token": "color.action.tertiary.rest"
       },
       {
         "part": "surface",
         "property": "fill",
-        "when": { "variant": "tertiary", "tone": "default", "state": "hover" },
+        "when": { "emphasis": "low", "intent": "neutral", "state": "hover" },
         "token": "color.action.tertiary.hover"
       },
       {
         "part": "surface",
         "property": "fill",
-        "when": { "variant": "tertiary", "tone": "default", "state": "pressed" },
+        "when": { "emphasis": "low", "intent": "neutral", "state": "pressed" },
         "token": "color.action.tertiary.pressed"
       },
       {
         "part": "surface",
         "property": "fill",
-        "when": { "variant": "tertiary", "tone": "default", "state": "disabled" },
+        "when": { "emphasis": "low", "intent": "neutral", "state": "disabled" },
         "token": "color.action.tertiary.disabled"
       },
       {
         "part": "label",
         "property": "color",
-        "when": { "variant": "primary", "tone": "default", "state": "rest" },
+        "when": { "emphasis": "high", "intent": "neutral", "state": "rest" },
         "token": "color.action.primary.text"
       },
       {
         "part": "label",
         "property": "color",
-        "when": { "variant": "primary", "tone": "default", "state": "hover" },
+        "when": { "emphasis": "high", "intent": "neutral", "state": "hover" },
         "token": "color.action.primary.text"
       },
       {
         "part": "label",
         "property": "color",
-        "when": { "variant": "primary", "tone": "default", "state": "pressed" },
+        "when": { "emphasis": "high", "intent": "neutral", "state": "pressed" },
         "token": "color.action.primary.text"
       },
       {
         "part": "label",
         "property": "color",
-        "when": { "variant": "primary", "tone": "default", "state": "disabled" },
+        "when": { "emphasis": "high", "intent": "neutral", "state": "disabled" },
         "token": "color.text.disabled"
       },
       {
         "part": "label",
         "property": "color",
-        "when": { "variant": "primary", "tone": "danger", "state": "rest" },
+        "when": { "emphasis": "high", "intent": "danger", "state": "rest" },
         "token": "color.action.danger.text"
       },
       {
         "part": "label",
         "property": "color",
-        "when": { "variant": "primary", "tone": "danger", "state": "hover" },
+        "when": { "emphasis": "high", "intent": "danger", "state": "hover" },
         "token": "color.action.danger.text"
       },
       {
         "part": "label",
         "property": "color",
-        "when": { "variant": "primary", "tone": "danger", "state": "pressed" },
+        "when": { "emphasis": "high", "intent": "danger", "state": "pressed" },
         "token": "color.action.danger.text"
       },
       {
         "part": "label",
         "property": "color",
-        "when": { "variant": "primary", "tone": "danger", "state": "disabled" },
+        "when": { "emphasis": "high", "intent": "danger", "state": "disabled" },
         "token": "color.text.disabled"
       },
       {
         "part": "label",
         "property": "color",
-        "when": { "variant": "secondary", "tone": "default", "state": "rest" },
+        "when": { "emphasis": "medium", "intent": "neutral", "state": "rest" },
         "token": "color.action.secondary.text"
       },
       {
         "part": "label",
         "property": "color",
-        "when": { "variant": "secondary", "tone": "default", "state": "hover" },
+        "when": { "emphasis": "medium", "intent": "neutral", "state": "hover" },
         "token": "color.action.secondary.text"
       },
       {
         "part": "label",
         "property": "color",
-        "when": { "variant": "secondary", "tone": "default", "state": "pressed" },
+        "when": { "emphasis": "medium", "intent": "neutral", "state": "pressed" },
         "token": "color.action.secondary.text"
       },
       {
         "part": "label",
         "property": "color",
-        "when": { "variant": "secondary", "tone": "default", "state": "disabled" },
+        "when": { "emphasis": "medium", "intent": "neutral", "state": "disabled" },
         "token": "color.text.disabled"
       },
       {
         "part": "label",
         "property": "color",
-        "when": { "variant": "tertiary", "tone": "default", "state": "rest" },
+        "when": { "emphasis": "low", "intent": "neutral", "state": "rest" },
         "token": "color.action.tertiary.text"
       },
       {
         "part": "label",
         "property": "color",
-        "when": { "variant": "tertiary", "tone": "default", "state": "hover" },
+        "when": { "emphasis": "low", "intent": "neutral", "state": "hover" },
         "token": "color.action.tertiary.text"
       },
       {
         "part": "label",
         "property": "color",
-        "when": { "variant": "tertiary", "tone": "default", "state": "pressed" },
+        "when": { "emphasis": "low", "intent": "neutral", "state": "pressed" },
         "token": "color.action.tertiary.text"
       },
       {
         "part": "label",
         "property": "color",
-        "when": { "variant": "tertiary", "tone": "default", "state": "disabled" },
+        "when": { "emphasis": "low", "intent": "neutral", "state": "disabled" },
         "token": "color.text.disabled"
       },
       {
         "part": "border",
         "property": "color",
-        "when": { "variant": "primary", "tone": "default", "state": "rest" },
+        "when": { "emphasis": "high", "intent": "neutral", "state": "rest" },
         "token": "color.action.primary.rest"
       },
       {
         "part": "border",
         "property": "color",
-        "when": { "variant": "primary", "tone": "default", "state": "hover" },
+        "when": { "emphasis": "high", "intent": "neutral", "state": "hover" },
         "token": "color.action.primary.hover"
       },
       {
         "part": "border",
         "property": "color",
-        "when": { "variant": "primary", "tone": "default", "state": "pressed" },
+        "when": { "emphasis": "high", "intent": "neutral", "state": "pressed" },
         "token": "color.action.primary.pressed"
       },
       {
         "part": "border",
         "property": "color",
-        "when": { "variant": "primary", "tone": "default", "state": "disabled" },
+        "when": { "emphasis": "high", "intent": "neutral", "state": "disabled" },
         "token": "color.border.disabled"
       },
       {
         "part": "border",
         "property": "color",
-        "when": { "variant": "primary", "tone": "danger", "state": "rest" },
+        "when": { "emphasis": "high", "intent": "danger", "state": "rest" },
         "token": "color.action.danger.rest"
       },
       {
         "part": "border",
         "property": "color",
-        "when": { "variant": "primary", "tone": "danger", "state": "hover" },
+        "when": { "emphasis": "high", "intent": "danger", "state": "hover" },
         "token": "color.action.danger.hover"
       },
       {
         "part": "border",
         "property": "color",
-        "when": { "variant": "primary", "tone": "danger", "state": "pressed" },
+        "when": { "emphasis": "high", "intent": "danger", "state": "pressed" },
         "token": "color.action.danger.pressed"
       },
       {
         "part": "border",
         "property": "color",
-        "when": { "variant": "primary", "tone": "danger", "state": "disabled" },
+        "when": { "emphasis": "high", "intent": "danger", "state": "disabled" },
         "token": "color.border.disabled"
       },
       {
         "part": "border",
         "property": "color",
-        "when": { "variant": "secondary", "tone": "default", "state": "rest" },
+        "when": { "emphasis": "medium", "intent": "neutral", "state": "rest" },
         "token": "color.border.default"
       },
       {
         "part": "border",
         "property": "color",
-        "when": { "variant": "secondary", "tone": "default", "state": "hover" },
+        "when": { "emphasis": "medium", "intent": "neutral", "state": "hover" },
         "token": "color.border.default"
       },
       {
         "part": "border",
         "property": "color",
-        "when": { "variant": "secondary", "tone": "default", "state": "pressed" },
+        "when": { "emphasis": "medium", "intent": "neutral", "state": "pressed" },
         "token": "color.border.default"
       },
       {
         "part": "border",
         "property": "color",
-        "when": { "variant": "secondary", "tone": "default", "state": "disabled" },
+        "when": { "emphasis": "medium", "intent": "neutral", "state": "disabled" },
         "token": "color.border.disabled"
       },
       {
         "part": "border",
         "property": "color",
-        "when": { "variant": "tertiary", "tone": "default", "state": "rest" },
+        "when": { "emphasis": "low", "intent": "neutral", "state": "rest" },
         "token": "color.action.tertiary.rest"
       },
       {
         "part": "border",
         "property": "color",
-        "when": { "variant": "tertiary", "tone": "default", "state": "hover" },
+        "when": { "emphasis": "low", "intent": "neutral", "state": "hover" },
         "token": "color.action.tertiary.hover"
       },
       {
         "part": "border",
         "property": "color",
-        "when": { "variant": "tertiary", "tone": "default", "state": "pressed" },
+        "when": { "emphasis": "low", "intent": "neutral", "state": "pressed" },
         "token": "color.action.tertiary.pressed"
       },
       {
         "part": "border",
         "property": "color",
-        "when": { "variant": "tertiary", "tone": "default", "state": "disabled" },
+        "when": { "emphasis": "low", "intent": "neutral", "state": "disabled" },
         "token": "color.action.tertiary.disabled"
       },
       {
@@ -462,8 +462,8 @@
     },
     "constraints": [
       {
-        "when": { "tone": "danger" },
-        "allowed": { "variant": ["primary"] },
+        "when": { "intent": "danger" },
+        "allowed": { "emphasis": ["high"] },
         "kialo": "The danger tokens describe a filled surface and its text; a danger label on a neutral surface has no tokens, and next to another primary action a destructive action is secondary."
       }
     ],
@@ -474,7 +474,7 @@
           "en": ["delete", "remove", "destroy", "discard"],
           "de": ["löschen", "entfernen", "verwerfen"]
         },
-        "props": { "variant": "primary", "tone": "danger" },
+        "props": { "emphasis": "high", "intent": "danger" },
         "regulo": "destructive-not-primary-color"
       },
       {
@@ -483,7 +483,7 @@
           "en": ["save", "submit", "confirm", "continue"],
           "de": ["speichern", "senden", "bestätigen", "weiter"]
         },
-        "props": { "variant": "primary" },
+        "props": { "emphasis": "high" },
         "regulo": "one-primary-per-container"
       },
       {
@@ -492,7 +492,7 @@
           "en": ["cancel", "close", "back"],
           "de": ["abbrechen", "schließen", "zurück"]
         },
-        "props": { "variant": "tertiary" }
+        "props": { "emphasis": "low" }
       }
     ]
   }

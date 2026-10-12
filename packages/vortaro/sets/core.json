@@ -1833,7 +1833,7 @@
       "danger": {
         "rest": {
           "$value": "{color.palette.danger.700}",
-          "$description": "Danger action: fill at rest, for the main action that destroys data (butono tone=danger).",
+          "$description": "Danger action: fill at rest, for the main action that destroys data (butono intent=danger).",
           "$extensions": {
             "com.ciferecigo.fundamento": {
               "id": "tok_01M2XKPB5B8ZHNVRJJDC0TDTBN",
