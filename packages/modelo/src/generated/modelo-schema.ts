@@ -228,7 +228,10 @@ export type SkemoPartSource =
       by: Name[];
     }
   | {
-      fixed: TokenName;
+      /**
+       * A role token of core, or one of the two keywords of Spec 008 (plan D-03): inherit (the property comes from the container, E6) or none (the property is not set). The Skemo rules know the keywords; the projections translate them.
+       */
+      fixed: string;
     }
   | {
       sameAs: string;
@@ -800,6 +803,10 @@ export interface EroInstance {
   goal?: string;
   label?: string;
   /**
+   * The language of the instance's texts (ISO 639-1), so that check_usage answers with an example in that language (Spec 008, plan D-06). Without it the language is read from the label.
+   */
+  lingvo?: string;
+  /**
    * The Aspekto the instance is shown in; its overrides of adjustable text rules apply (Spec 007, A10).
    */
   aspekto?: string;
@@ -1002,8 +1009,11 @@ export interface UzoSlot {
  */
 export interface UzoLayout {
   size: "content" | "container";
-  wrap: "never" | "allowed";
-  [k: string]: UzoLayoutAllowance | "content" | "container" | "never" | "allowed";
+  /**
+   * never: the label stays on one line; allowed: it may break; with-text: it breaks only with the running text it stands in (a container of kind text), standing alone it never breaks (Spec 008, plan D-04).
+   */
+  wrap: "never" | "allowed" | "with-text";
+  [k: string]: UzoLayoutAllowance | "content" | "container" | "never" | "allowed" | "with-text";
 }
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema
@@ -1043,6 +1053,9 @@ export interface UzoContent {
   check:
     | {
         kind: "names-goal";
+      }
+    | {
+        kind: "not-instead";
       }
     | {
         kind: "verb-and-object";
@@ -1132,7 +1145,10 @@ export interface SkemoBinding {
   when?: {
     [k: string]: Name;
   };
-  token: TokenName;
+  /**
+   * A role token of core, or the keyword inherit or none (Spec 008, plan D-03; see SkemoPartSource.fixed).
+   */
+  token: string;
 }
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema
@@ -1148,6 +1164,16 @@ export interface SkemoA11Y {
     [k: string]: string[];
   };
   keys: string[];
+  /**
+   * What assistive technology hears in addition when a boolean prop is true (Spec 008 A1, plan D-02): per prop a text per language (ISO 639-1), never shown. The key must be a boolean prop of the Skemo (skemo-a11y-invalid); de and en are required.
+   */
+  texts?: {
+    [k: string]: {
+      de: NonEmptyText;
+      en: NonEmptyText;
+      [k: string]: NonEmptyText;
+    };
+  };
 }
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema

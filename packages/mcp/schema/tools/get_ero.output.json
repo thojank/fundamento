@@ -370,7 +370,7 @@
                   "enum": ["content", "container"]
                 },
                 "wrap": {
-                  "enum": ["never", "allowed"]
+                  "enum": ["never", "allowed", "with-text"]
                 }
               },
               "required": ["size", "wrap"],

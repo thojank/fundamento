@@ -2191,6 +2191,7 @@
           "type": "object",
           "properties": {
             "fixed": {
+              "description": "A role token of core, or one of the two keywords of Spec 008 (plan D-03): inherit (the property comes from the container, E6) or none (the property is not set). The Skemo rules know the keywords; the projections translate them.",
               "$ref": "#/$defs/TokenName"
             }
           },
@@ -2239,6 +2240,7 @@
           }
         },
         "token": {
+          "description": "A role token of core, or the keyword inherit or none (Spec 008, plan D-03; see SkemoPartSource.fixed).",
           "$ref": "#/$defs/TokenName"
         }
       },
@@ -2280,6 +2282,32 @@
             "minLength": 1
           },
           "uniqueItems": true
+        },
+        "texts": {
+          "description": "What assistive technology hears in addition when a boolean prop is true (Spec 008 A1, plan D-02): per prop a text per language (ISO 639-1), never shown. The key must be a boolean prop of the Skemo (skemo-a11y-invalid); de and en are required.",
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/Name"
+          },
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "de": {
+                "$ref": "#/$defs/NonEmptyText"
+              },
+              "en": {
+                "$ref": "#/$defs/NonEmptyText"
+              }
+            },
+            "propertyNames": {
+              "type": "string",
+              "pattern": "^[a-z]{2}$"
+            },
+            "additionalProperties": {
+              "$ref": "#/$defs/NonEmptyText"
+            },
+            "required": ["de", "en"]
+          }
         }
       },
       "required": ["role", "name", "states", "keys"],
@@ -2671,8 +2699,9 @@
           "enum": ["content", "container"]
         },
         "wrap": {
+          "description": "never: the label stays on one line; allowed: it may break; with-text: it breaks only with the running text it stands in (a container of kind text), standing alone it never breaks (Spec 008, plan D-04).",
           "type": "string",
-          "enum": ["never", "allowed"]
+          "enum": ["never", "allowed", "with-text"]
         }
       },
       "required": ["size", "wrap"],
@@ -2764,6 +2793,17 @@
               "additionalProperties": false
             },
             {
+              "description": "The text names no goal of an instead entry of the same Uzo (Spec 008, plan D-07): a label that names what another Ero does is that Ero's job.",
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "const": "not-instead"
+                }
+              },
+              "required": ["kind"],
+              "additionalProperties": false
+            },
+            {
               "type": "object",
               "properties": {
                 "kind": {
@@ -2846,6 +2886,11 @@
         },
         "label": {
           "type": "string"
+        },
+        "lingvo": {
+          "description": "The language of the instance's texts (ISO 639-1), so that check_usage answers with an example in that language (Spec 008, plan D-06). Without it the language is read from the label.",
+          "type": "string",
+          "pattern": "^[a-z]{2}$"
         },
         "aspekto": {
           "description": "The Aspekto the instance is shown in; its overrides of adjustable text rules apply (Spec 007, A10).",
