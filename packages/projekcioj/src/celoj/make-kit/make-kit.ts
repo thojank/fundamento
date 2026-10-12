@@ -152,7 +152,7 @@ function uzoSections(input: CeloInput, uzo: Uzo, reguloj: readonly Regulo[]): st
   ].join("\n");
   const spacing = reguloNamed(uzo.composes.spacing.regulo);
   const together = [
-    ...uzo.composes.containers.map((entry) => `- in a \`${entry.name}\` — ${entry.kialo}`),
+    ...uzo.composes.containers.map((entry) => `- in \`${entry.name}\` — ${entry.kialo}`),
     ...uzo.composes.with.map((entry) => `- with \`${entry.ero}\` — ${entry.kialo}`),
     ...uzo.composes.never.map((entry) => `- never with \`${entry.ero}\` — ${entry.kialo}`),
     `- spacing: the space between siblings belongs to the ${uzo.composes.spacing.owner} (${uzo.composes.spacing.regulo})${spacing === undefined ? "" : ` — ${spacing.statement}`}`,
