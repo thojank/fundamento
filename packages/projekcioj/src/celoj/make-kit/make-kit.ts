@@ -22,6 +22,7 @@ import {
   nomRegulo,
   type ParityItem,
   type Regulo,
+  type Uzo,
 } from "@fundamento/modelo";
 import { type Celo, type CeloInput, celoInputOf, type GeneratedFile } from "../../build.js";
 import { aspektoStylesheet } from "../css/css.js";
@@ -106,6 +107,118 @@ function exampleBlock(jugxo: Jugxo, tag: string): string {
   return `**${verdict}** — ${jugxo.kialo}\n\n\`\`\`html\n${instances}\n\`\`\``;
 }
 
+/** The first label of an example Jugxo of a Regulo with the given decision, if any. */
+function exampleLabel(
+  input: CeloInput,
+  reguloId: string | undefined,
+  decision: Jugxo["decision"],
+): string | undefined {
+  if (reguloId === undefined) return undefined;
+  for (const jugxo of input.modelo.jugxoj) {
+    if (jugxo.decision !== decision || jugxo.ekzemplo?.regulo !== reguloId) continue;
+    const label = jugxo.ekzemplo.instances.find((instance) => instance.label !== undefined)?.label;
+    if (label !== undefined) return label;
+  }
+  return undefined;
+}
+
+/**
+ * The sections of the Uzo (Spec 007 T026, A12, D-10): what the Ero is for, what it is not for
+ * (boundaries and alternatives with action and kialo), what it stands with, what its slots take,
+ * how it behaves in the layout, and what its label may say (fixed or adjustable, with an example
+ * each way). Generated from the Uzo, the Reguloj and the Jugxoj; no hand-written line (Art. VII).
+ */
+function uzoSections(input: CeloInput, uzo: Uzo, reguloj: readonly Regulo[]): string {
+  const reguloNamed = (name: string) => reguloj.find((regulo) => regulo.name === name);
+  const notFor = [
+    ...uzo.boundary.map(
+      (boundary) =>
+        `- **${boundary.case}** — ${
+          boundary.action === "use-instead"
+            ? `use \`${boundary.ero ?? ""}\` instead`
+            : boundary.action === "ask-human"
+              ? "ask-human: ask a person, Fundamento does not cover this yet"
+              : "not-supported: the component stops here"
+        }. ${boundary.kialo}`,
+    ),
+    ...uzo.instead.map(
+      (alternative) =>
+        `- **${alternative.goal}** — ${
+          alternative.ero === null
+            ? "not covered yet (ask-human: ask a person)"
+            : `use \`${alternative.ero}\` instead`
+        }. ${alternative.kialo}`,
+    ),
+  ].join("\n");
+  const spacing = reguloNamed(uzo.composes.spacing.regulo);
+  const together = [
+    ...uzo.composes.containers.map((entry) => `- in a \`${entry.name}\` — ${entry.kialo}`),
+    ...uzo.composes.with.map((entry) => `- with \`${entry.ero}\` — ${entry.kialo}`),
+    ...uzo.composes.never.map((entry) => `- never with \`${entry.ero}\` — ${entry.kialo}`),
+    `- spacing: the space between siblings belongs to the ${uzo.composes.spacing.owner} (${uzo.composes.spacing.regulo})${spacing === undefined ? "" : ` — ${spacing.statement}`}`,
+  ].join("\n");
+  const slots = Object.entries(uzo.slots)
+    .map(
+      ([slot, rule]) =>
+        `| \`${slot}\` | ${(rule.accepts ?? []).join(", ") || "–"} | ${rule.max ?? "–"} | ${rule.required === true ? "yes" : "no"} | ${rule.nesting ?? "–"} |`,
+    )
+    .join("\n");
+  const allowances = Object.entries(uzo.layout)
+    .flatMap(([prop, allowance]) => {
+      if (typeof allowance !== "object") return [];
+      const places = [
+        ...(allowance.allowedIn.containers ?? []).map((name) => `a container of kind ${name}`),
+        ...Object.entries(allowance.allowedIn.dimensioj ?? {}).flatMap(([dimensio, values]) =>
+          values.map((value) => `${dimensio}=${value}`),
+        ),
+      ];
+      const regulo = reguloNamed(allowance.regulo);
+      return [
+        `- \`${prop}\` only in ${places.join(" or ")} (${allowance.regulo})${regulo === undefined ? "" : `.\n  Why: ${regulo.kialo}`}`,
+      ];
+    })
+    .join("\n");
+  const text = uzo.content
+    .map((rule) => {
+      const regulo = reguloNamed(rule.regulo);
+      const kind = rule.fixed
+        ? "fixed: no brand overrides it"
+        : `adjustable: a brand may override it with a Jugxo${rule.severity === "warning" ? "; reports a warning" : ""}`;
+      const correct = exampleLabel(input, regulo?.id, "approved");
+      const wrong = exampleLabel(input, regulo?.id, "rejected");
+      return `- **${rule.regulo}** (${kind}) — ${regulo?.statement ?? ""}\n  Why: ${regulo?.kialo ?? ""}\n  CORRECT: "${correct ?? ""}" · WRONG: "${wrong ?? ""}"`;
+    })
+    .join("\n");
+  return `
+## What it is for
+
+${uzo.purpose}
+
+## Not for this
+
+${notFor}
+
+## Together with
+
+${together}
+
+## Slots
+
+| Slot | Accepts | Max | Required | Nesting |
+|---|---|---|---|---|
+${slots}
+
+## Layout
+
+Size from the ${uzo.layout.size} (\`${uzo.layout.size}\`); the label ${uzo.layout.wrap === "never" ? "never wraps" : "may wrap"} (\`${uzo.layout.wrap}\`).
+${allowances}
+
+## Text
+
+${text}
+`;
+}
+
 function componentGuideline(
   input: CeloInput,
   entry: LoadedEro,
@@ -173,7 +286,7 @@ ${rules}
 ## Examples
 
 ${examples}
-`;
+${entry.uzo === undefined ? "" : uzoSections(input, entry.uzo, reguloj)}`;
 }
 
 function guidelines(input: CeloInput, aspekto: string): GeneratedFile[] {
@@ -546,22 +659,43 @@ await build({
 const ticked = (text: string): string[] =>
   [...text.matchAll(/`([^`]+)`/g)].map(([, value = ""]) => value);
 
+/** The `## ` headings of a guideline, in order. */
+export function guidelineSections(markdown: string): string[] {
+  return [...markdown.matchAll(/^## (.+)$/gm)].map(([, heading = ""]) => heading.trim());
+}
+
+/** The body of one `## ` section of a guideline, or nothing. */
+function sectionBody(markdown: string, heading: string): string | undefined {
+  const start = markdown.indexOf(`\n## ${heading}\n`);
+  if (start === -1) return undefined;
+  const rest = markdown.slice(start + heading.length + 5);
+  const end = rest.indexOf("\n## ");
+  return end === -1 ? rest : rest.slice(0, end);
+}
+
 /**
  * What the component guideline of a kit documents (Spec 003 T021, FR-12): the props table with
  * its values and defaults, and the states sentence. Read from the Markdown a Make user reads, so
- * a guideline that documents a value the Skemo does not have fails the parity check.
+ * a guideline that documents a value the Skemo does not have fails the parity check. Since Spec
+ * 007 the guideline also carries the Uzo (slots, layout, text); the inventory knows the sections
+ * and reads props only from the Props table, so a slot table is not mistaken for a prop.
  */
-export function guidelinesInventory(markdown: string): ParityItem {
+export function guidelinesInventory(markdown: string): ParityItem & { sections: string[] } {
   const props: Record<string, string[]> = {};
   const values: Record<string, string> = {};
-  for (const [, name = "", valueCell = "", defaultCell = ""] of markdown.matchAll(
-    /^\|\s*`([a-z0-9-]+)`\s*\|([^|]*)\|([^|]*)\|/gm,
-  )) {
+  for (const [, name = "", valueCell = "", defaultCell = ""] of (
+    sectionBody(markdown, "Props") ?? markdown
+  ).matchAll(/^\|\s*`([a-z0-9-]+)`\s*\|([^|]*)\|([^|]*)\|/gm)) {
     const listed = ticked(valueCell);
     props[name] = listed.length > 0 ? listed : [valueCell.trim()];
     const [fallback] = ticked(defaultCell);
     if (fallback !== undefined) values[`default.${name}`] = fallback;
   }
   const states = /States:([^.]*)\./.exec(markdown);
-  return { props, states: states === null ? [] : ticked(states[1] ?? ""), values };
+  return {
+    props,
+    states: states === null ? [] : ticked(states[1] ?? ""),
+    values,
+    sections: guidelineSections(markdown),
+  };
 }
