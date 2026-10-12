@@ -11,7 +11,7 @@ import {
 import { describe, expect, it } from "vitest";
 import { celoInputOf } from "../../build.js";
 import { REACT_CELO } from "../react/react.js";
-import { WEB_COMPONENT_CELO } from "./web-component.js";
+import { stylesheetInventory, WEB_COMPONENT_CELO } from "./web-component.js";
 
 const prepared = celoInputOf(defaultModeloSource());
 if (!prepared.ok) throw new Error("the repo Modelo must be valid");
@@ -31,17 +31,20 @@ const DESIGN =
 
 describe("Web Component Celo (T011)", () => {
   it("generates the descriptor, the stylesheet, the element and an index", () => {
+    // Spec 008: the ligilo on the same path as the butono (Art. IX, Art. XI).
     expect(Object.keys(files).sort()).toEqual([
       "eroj/src/generated/butono.styles.ts",
       "eroj/src/generated/fm-butono.ts",
+      "eroj/src/generated/fm-ligilo.ts",
       "eroj/src/generated/index.ts",
+      "eroj/src/generated/ligilo.styles.ts",
       "eroj/src/generated/react.ts",
       "eroj/src/generated/skemo.ts",
     ]);
   });
 
   it("puts the Skemo into the descriptor unchanged", () => {
-    const skemo = /export const BUTONO_SKEMO = (\{.*\}) as const;/s.exec(
+    const skemo = /export const BUTONO_SKEMO = (\{.*?\}) as const;\n/s.exec(
       files["eroj/src/generated/skemo.ts"] ?? "",
     )?.[1];
     expect(JSON.parse(skemo ?? "null")).toEqual(butono?.skemo);
@@ -89,5 +92,81 @@ describe("Web Component Celo (T011)", () => {
     const templates = [...element.matchAll(/`(<[^`]*)`/g)].map((m) => m[1] ?? "");
     expect(templates.length).toBeGreaterThan(0);
     for (const template of templates) expect(template).not.toMatch(/>[^<\s$][^<]*</);
+  });
+});
+
+// Spec 008 T015 (A5, plan D-09): the ligilo from the same template, rendered as a native link.
+describe("Web Component Celo for the ligilo (Spec 008 T015)", () => {
+  const ligilo = prepared.input.modelo.eroj.find((entry) => entry.ero.name === "ligilo");
+  const ligiloStyles = files["eroj/src/generated/ligilo.styles.ts"] ?? "";
+  const ligiloElement = files["eroj/src/generated/fm-ligilo.ts"] ?? "";
+  const ligiloCss = JSON.parse(
+    /export const LIGILO_CSS = (".*");/s.exec(ligiloStyles)?.[1] ?? '""',
+  ) as string;
+
+  it("renders a native link as the control, with href from to and no form association", () => {
+    expect(ligilo).toBeDefined();
+    expect(ligiloElement).toContain('<a part="control">');
+    expect(ligiloElement).not.toContain("<button");
+    expect(ligiloElement).toContain('control.setAttribute("href", to)');
+    expect(ligiloElement).toContain('"external noopener noreferrer"');
+    expect(ligiloElement).toContain("static formAssociated = false;");
+    expect(ligiloElement).toContain('customElements.define("fm-ligilo", FmLigilo)');
+    // The slots of the Skemo: the label and icon-end, no icon-start (E3).
+    expect(ligiloElement).toContain('<slot></slot><slot name="icon-end">');
+    expect(ligiloElement).not.toContain('name="icon-start"');
+  });
+
+  it("speaks the a11y text as the description and shows the mark while external is true (D-02, D-05)", () => {
+    expect(ligiloElement).toContain('control.setAttribute("aria-describedby", "fm-texts")');
+    expect(ligiloElement).toContain('control.setAttribute("data-marked", "true")');
+    expect(ligiloCss).toContain(':not([data-marked="true"])');
+    // No text of its own: the texts come from the Skemo descriptor at runtime (Art. VIII).
+    expect(ligiloElement).not.toContain("öffnet extern");
+    expect([...ligiloElement.matchAll(/part="([a-z-]+)"/g)].map((m) => m[1])).toEqual(["control"]);
+  });
+
+  it("underlines inline in every state and standalone from hover and focus on; visited has a colour", () => {
+    expect(ligiloCss).toContain('[data-placement="inline"]');
+    expect(ligiloCss).toMatch(
+      /\[data-placement="inline"\]\) \{\n\s+text-decoration-line: underline;\n\s+text-decoration-thickness: var\(--fm-border-width-default\);/,
+    );
+    expect(ligiloCss).toMatch(/\[data-placement="standalone"\]\) \{\n\s+text-decoration-line: none;/);
+    expect(ligiloCss).toMatch(/\[data-placement="standalone"\]:hover\) \{\n\s+text-decoration-line: underline;/);
+    expect(ligiloCss).toMatch(/:visited\) \{\n\s+color: var\(--fm-color-link-visited\);/);
+    expect(ligiloCss).toMatch(/:focus-visible\) \{\n(\s+[a-z-]+: [^;]+;\n)*\s+color: var\(--fm-color-link-rest\);/);
+    expect(ligiloCss).toContain("text-decoration-color: var(--fm-color-link-rest);");
+  });
+
+  it("inherits the typography inline and flows with the text; the host is inline (E6, D-04)", () => {
+    expect(ligiloCss).toMatch(/^:host \{ display: inline; vertical-align: baseline; \}/);
+    expect(ligiloCss).toMatch(
+      /\[data-placement="inline"\]\[data-size="medium"\]\) \{\n\s+display: inline;\n\s+white-space: normal;/,
+    );
+    expect(ligiloCss).toMatch(/\[data-placement="standalone"\]\[data-size="small"\]\) \{\n\s+font-family: var\(--fm-typography-label-2-font-family\);/);
+    // The minimum target stands standalone only (D-10); inline writes none (no literal).
+    expect(ligiloCss).toMatch(
+      /\[data-placement="standalone"\]\) \{\n\s+text-decoration-line: none;\n\s+min-block-size: var\(--fm-size-target-min\);/,
+    );
+    expect(ligiloCss).toMatch(
+      /\[data-placement="inline"\]\) \{\n\s+text-decoration-line: underline;\n\s+text-decoration-thickness: var\(--fm-border-width-default\);\n\}/,
+    );
+    expect(ligiloCss).not.toContain("auto;");
+    expect(ligiloCss).not.toContain("var(--fm-inherit)");
+    expect(ligiloCss).not.toContain("var(--fm-none)");
+  });
+
+  it("keeps every design property a token and logical, like the butono (Art. X gate 1)", () => {
+    expect(componentCssIssues("ligilo.css", ligiloCss)).toEqual([]);
+    expect(cssPhysicalPropertyIssues("ligilo.css", ligiloCss)).toEqual([]);
+    expect(css).toMatch(/^:host \{ display: inline-block; vertical-align: middle; \}/);
+    // The stylesheet inventory reads the visited state (parity).
+    expect([...stylesheetInventory(ligiloStyles).states].sort()).toEqual([
+      "focus",
+      "hover",
+      "pressed",
+      "rest",
+      "visited",
+    ]);
   });
 });

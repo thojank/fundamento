@@ -8,6 +8,7 @@
 import {
   boundToken,
   combinationsOf,
+  isBindingKeyword,
   type LoadedEro,
   nomRegulo,
   type ParityItem,
@@ -15,37 +16,71 @@ import {
   type SkemoPartProperty,
   type SkemoPartSource,
   STATE_KEY,
+  type Uzo,
 } from "@fundamento/modelo";
 import type { Celo, CeloInput, GeneratedFile } from "../../build.js";
-import { elementSource } from "./element-template.js";
+import { elementSource, hostOf } from "./element-template.js";
 
 /** Slotted icons: a pseudo-element, so it follows the :where() of the control. */
 const ICONS = 'slot[name^="icon-"]::slotted(*)';
 
+/** The mark an icon slot falls back to (Spec 008, D-05): styled like a slotted icon. */
+const MARK = 'slot[name^="icon-"] > svg';
+
 /** The selector of a part in the shadow tree; `control` carries the combination and state. */
 function partSelector(part: string, control: string): string {
-  if (part === "icon") return `:where(${control}) ${ICONS}`;
+  if (part === "icon") return `:where(${control}) ${ICONS}, :where(${control}) ${MARK}`;
   if (part === "focus-ring") return `:where(${control}:focus-visible)`;
   return `:where(${control})`;
 }
 
-/** CSS selector suffix of each state; `focus` changes only the focus ring, so it has none. */
+/**
+ * CSS selector suffix of each state. `focus` is :focus-visible (the focus ring and, since Spec
+ * 008, a label colour of its own); `visited` is the link's own state (Spec 008, D-09).
+ */
 const STATE_SELECTORS: Readonly<Record<string, string | undefined>> = {
   rest: "",
+  visited: ":visited",
+  focus: ":focus-visible",
   hover: ":hover",
   pressed: ":active",
   loading: '[aria-busy="true"]',
   disabled: ":disabled",
 };
 
-/** Later states win: they come later in the source (all selectors have the same specificity). */
-const STATE_ORDER = ["rest", "hover", "pressed", "loading", "disabled"];
+/**
+ * Later states win: they come later in the source (all selectors have the same specificity).
+ * Visited and focus before hover and pressed, so a pointer on a visited link shows hover.
+ */
+const STATE_ORDER = ["rest", "visited", "focus", "hover", "pressed", "loading", "disabled"];
 
 const variable = (token: string, field?: string) =>
   `var(${nomRegulo("css").derive(token)}${field === undefined ? "" : `-${field}`})`;
 
+/**
+ * CSS declarations of a binding keyword (Spec 008, D-03, D-09). `inherit`: the typography is the
+ * text's, so the control flows in the text (inline, breaking with it) and sets no font of its own.
+ * `none`: the property is not set — the underline is off, a minimum is not written.
+ */
+function keywordDeclarations(part: string, property: string, token: string): string[] {
+  if (token === "inherit") {
+    return property === "typography" ? ["display: inline;", "white-space: normal;"] : [];
+  }
+  // The underline is switched off; a minimum that is none is simply not written.
+  if (part === "underline" && property === "width") return ["text-decoration-line: none;"];
+  return [];
+}
+
 /** CSS declarations of one part property bound to `token` (Celo knowledge, Art. VIII). */
 function declarations(skemo: Skemo, part: string, property: string, token: string): string[] {
+  if (isBindingKeyword(token)) return keywordDeclarations(part, property, token);
+  // The underline of a link (Spec 008): a text decoration of the width and colour bound.
+  if (part === "underline") {
+    if (property === "width") {
+      return ["text-decoration-line: underline;", `text-decoration-thickness: ${variable(token)};`];
+    }
+    if (property === "color") return [`text-decoration-color: ${variable(token)};`];
+  }
   switch (property as SkemoPartProperty) {
     case "fill":
       return [`background-color: ${variable(token)};`];
@@ -107,18 +142,38 @@ function fixedToken(source: SkemoPartSource | undefined): string | undefined {
   return source !== undefined && "fixed" in source ? source.fixed : undefined;
 }
 
-/** Layout that carries no design value: keywords only (the design values come from tokens). */
-const STRUCTURE = `:host { display: inline-block; vertical-align: middle; }
-:host([full-width]) { display: block; }
-:where([part="control"]) { display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; margin: 0; border-style: solid; cursor: pointer; appearance: none; text-decoration: none; white-space: nowrap; transition-property: background-color, color, border-color; }
-:host([full-width]) :where([part="control"]) { display: flex; }
-:where([part="control"]:focus:not(:focus-visible)) { outline-width: 0; }
-:where([part="control"]:disabled, [part="control"][aria-disabled="true"]) { cursor: not-allowed; }
-:where([part="control"]) ${ICONS} { flex: none; }`;
+/**
+ * Layout that carries no design value: keywords only (the design values come from tokens). An Ero
+ * whose Uzo says `wrap: with-text` (Spec 008, D-04) has an inline host, so it breaks with the text
+ * it stands in; every other host is an inline block. The mark in an icon slot shows only while a
+ * prop with an a11y text is true (`data-marked`, D-05).
+ */
+const structure = (inlineHost: boolean, disables: boolean): string =>
+  [
+    `:host { display: ${inlineHost ? "inline" : "inline-block"}; vertical-align: ${inlineHost ? "baseline" : "middle"}; }`,
+    ":host([full-width]) { display: block; }",
+    ':where([part="control"]) { display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; margin: 0; border-style: solid; cursor: pointer; appearance: none; text-decoration: none; white-space: nowrap; transition-property: background-color, color, border-color, text-decoration-color; }',
+    ':host([full-width]) :where([part="control"]) { display: flex; }',
+    ':where([part="control"]:focus:not(:focus-visible)) { outline-width: 0; }',
+    // Only an Ero that can be disabled has the rule: the inventory reads the state from it.
+    ...(disables
+      ? [':where([part="control"]:disabled, [part="control"][aria-disabled="true"]) { cursor: not-allowed; }']
+      : []),
+    `:where([part="control"]) ${ICONS}, :where([part="control"]) ${MARK} { flex: none; vertical-align: middle; }`,
+    `:where([part="control"]:not([data-marked="true"])) ${MARK} { display: none; }`,
+  ].join("\n");
 
-/** The stylesheet of one Ero: structure, then one rule per part property and combination. */
-export function stylesheetOf(skemo: Skemo): string {
-  const rules = new Map<string, string[]>();
+/**
+ * The stylesheet of one Ero: structure, then one rule per part property and combination (a state
+ * without a binding of its own repeats rest, so every state of the Skemo has a rule the parity
+ * inventory reads). The Uzo decides the host (D-04).
+ */
+export function stylesheetOf(skemo: Skemo, uzo?: Uzo): string {
+  // Fixed rules stand before the keyed ones (Spec 008): a state rule that shares a selector with
+  // a fixed rule (focus-visible: the ring and the focus colour) must still come after rest.
+  const fixedRules = new Map<string, string[]>();
+  const keyedRules = new Map<string, string[]>();
+  let rules = fixedRules;
   const add = (selector: string, lines: readonly string[]) => {
     if (lines.length === 0) return;
     rules.set(selector, [...(rules.get(selector) ?? []), ...lines]);
@@ -133,6 +188,7 @@ export function stylesheetOf(skemo: Skemo): string {
     }
   }
   // Keyed properties, state by state, so later states win by source order.
+  rules = keyedRules;
   const keyed: { part: string; property: string; keys: string[] }[] = [];
   for (const [part, properties] of Object.entries(skemo.parts)) {
     for (const [property, source] of Object.entries(properties)) {
@@ -151,10 +207,11 @@ export function stylesheetOf(skemo: Skemo): string {
       }
     }
   }
-  const tokenRules = [...rules.entries()].map(
+  const tokenRules = [...fixedRules.entries(), ...keyedRules.entries()].map(
     ([selector, lines]) => `${selector} {\n${lines.map((line) => `  ${line}`).join("\n")}\n}`,
   );
-  return `${STRUCTURE}\n${tokenRules.join("\n")}\n`;
+  const disables = skemo.states.includes("disabled") || skemo.states.includes("loading");
+  return `${structure(uzo?.layout.wrap === "with-text", disables)}\n${tokenRules.join("\n")}\n`;
 }
 
 function keysOf(skemo: Skemo, source: SkemoPartSource | undefined, depth = 0): string[] {
@@ -197,6 +254,21 @@ export function namesOf(ero: LoadedEro["ero"]): {
   };
 }
 
+/** Everything the element template needs of one Ero: names, the native control, the slots. */
+export function elementNamesOf(entry: LoadedEro, inline = false) {
+  return {
+    ...namesOf(entry.ero),
+    ero: entry.ero.name,
+    host: hostOf(entry.skemo.a11y.role),
+    slots: entry.skemo.slots.map((slot) => ({
+      name: slot.name,
+      ...(slot.default === undefined ? {} : { default: slot.default }),
+      ...(slot.decorative === undefined ? {} : { decorative: slot.decorative }),
+    })),
+    inline,
+  };
+}
+
 export const GENERATED_DIR = "eroj/src/generated";
 
 /** Where the stylesheet of one Ero is written inside the projections. */
@@ -223,11 +295,11 @@ export const WEB_COMPONENT_CELO: Celo = {
     for (const { entry, tag, className, constant } of eroj) {
       files.push({
         path: `${GENERATED_DIR}/${entry.ero.name}.styles.ts`,
-        text: `${header}export const ${constant}_CSS = ${JSON.stringify(stylesheetOf(entry.skemo))};\n`,
+        text: `${header}export const ${constant}_CSS = ${JSON.stringify(stylesheetOf(entry.skemo, entry.uzo))};\n`,
       });
       files.push({
         path: `${GENERATED_DIR}/${tag}.ts`,
-        text: header + elementSource({ tag, className, constant, ero: entry.ero.name }),
+        text: header + elementSource(elementNamesOf(entry)),
       });
     }
     // Every element module registers itself on import and exports its registration (F6);
@@ -257,6 +329,7 @@ function stateOf(selector: string): string {
   if (selector.includes(":focus-visible")) return "focus";
   if (selector.includes(":hover")) return "hover";
   if (selector.includes(":active")) return "pressed";
+  if (selector.includes(":visited")) return "visited";
   return "rest";
 }
 

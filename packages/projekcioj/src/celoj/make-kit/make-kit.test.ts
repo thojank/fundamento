@@ -46,6 +46,7 @@ describe("Make Kit sources (T018)", () => {
       "README.md",
       "guidelines/Guidelines.md",
       "guidelines/components/butono.md",
+      "guidelines/components/ligilo.md",
       "guidelines/foundations/color.md",
       "guidelines/foundations/dimensioj.md",
       "guidelines/foundations/spacing.md",
@@ -53,6 +54,9 @@ describe("Make Kit sources (T018)", () => {
       "guidelines/setup.md",
       "package.json",
       "src/element.ts",
+      // Spec 008: one module per Ero, joined by element.ts (the template's names would collide).
+      "src/fm-butono.ts",
+      "src/fm-ligilo.ts",
       "src/index.ts",
       "src/react.ts",
       "styles.css",
