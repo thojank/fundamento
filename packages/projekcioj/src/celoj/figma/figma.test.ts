@@ -841,7 +841,7 @@ describe("Figma plan for the kampo (Spec 009 T010)", () => {
     expect(variant("medium", "readonly")?.bindings["surface.fill"]).toBe("color/background/sunken");
     expect(rest?.notDrawn?.["placeholder.color"]).toBe("jug_01M4S2R85WRAC5SV7CARH8RE7S");
     expect(rest?.notDrawn?.["required-mark.color"]).toBe("jug_01M4S2R85WRAC5SV7CARH8RE7S");
-    expect(rest?.paints?.["text.color"]).toMatch(/^#/);
+    expect(rest?.paints?.["text.color"]).toMatchObject({ hex: expect.stringMatching(/^#/) });
     expect(rest?.geometry?.["box.height"]).toBe("40px");
     // Fonts of every text part, over every mode: the caption and the body roles too.
     expect((set?.fonts?.length ?? 0) >= (plan.components[0]?.fonts?.length ?? 0)).toBe(true);
