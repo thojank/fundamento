@@ -144,7 +144,7 @@ describe("Make Kit sources (T018)", () => {
         const token = (match[0].split("-fm-")[1] ?? "").slice(0, -1);
         expect(tailwind, match[0]).toContain(`-fm-${token}`);
       }
-      for (const match of text.matchAll(/`(variant|tone|size|type)=([a-z-]+)`/g)) {
+      for (const match of text.matchAll(/`(emphasis|intent|size|type)=([a-z-]+)`/g)) {
         const prop = skemo?.props.find((candidate) => candidate.name === match[1]);
         expect(prop?.values, match[0]).toContain(match[2]);
       }

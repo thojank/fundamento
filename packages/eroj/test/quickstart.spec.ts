@@ -89,7 +89,7 @@ test.describe("quickstart (AK-07, Art. XIII)", () => {
       );
       writeFileSync(
         join(project, "index.html"),
-        `<!doctype html><html lang="de" data-fm-aspekto="komuna" data-fm-color-scheme="light"><head><meta charset="utf-8"><title>Quickstart</title></head><body><fm-butono id="element" variant="primary">Speichern</fm-butono><div id="root"></div><script type="module" src="/src/main.jsx"></script></body></html>\n`,
+        `<!doctype html><html lang="de" data-fm-aspekto="komuna" data-fm-color-scheme="light"><head><meta charset="utf-8"><title>Quickstart</title></head><body><fm-butono id="element" emphasis="high">Speichern</fm-butono><div id="root"></div><script type="module" src="/src/main.jsx"></script></body></html>\n`,
       );
       writeFileSync(
         join(project, "src/main.jsx"),
@@ -100,7 +100,7 @@ import { createRoot } from "react-dom/client";
 import { Butono } from "@fundamento/eroj/react";
 
 createRoot(document.getElementById("root")).render(
-  createElement(Butono, { id: "react", variant: "primary", type: "submit" }, "Weiter"),
+  createElement(Butono, { id: "react", emphasis: "high", type: "submit" }, "Weiter"),
 );
 `,
       );

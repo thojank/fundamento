@@ -140,7 +140,7 @@ export interface FigmaComponentSet {
     font?: { family: string; style: string };
     /**
      * The cell of the variant in the grid, as the Vitrino orders it: the row is its combination of
-     * the keyed props (variant × tone × size) in the order of the plan, the column its state.
+     * the keyed props (emphasis × intent × size) in the order of the plan, the column its state.
      * Figma does not distribute appended children itself (F14, measured): every variant is placed.
      */
     cell?: { row: number; column: number };

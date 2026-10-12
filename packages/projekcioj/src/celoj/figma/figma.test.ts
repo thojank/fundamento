@@ -131,7 +131,7 @@ describe("Figma plan (T015)", () => {
       if (prop.kind === "string") expect(set?.properties[prop.name]).toBe("TEXT");
     }
     expect(set?.properties.state).toEqual(skemo?.states);
-    // Four variant × tone combinations (the danger constraint removes two) × 3 sizes × 6 states.
+    // Four emphasis × intent combinations (the danger constraint removes two) × 3 sizes × 6 states.
     expect(set?.variants.length).toBe(4 * 3 * 6);
     for (const variant of set?.variants ?? []) {
       expect(Object.keys(variant.bindings).length).toBeGreaterThan(3);
@@ -154,7 +154,7 @@ describe("resolved paint values of the Figma side (F8)", () => {
   const values = figmaPlanInventory(plan).butono?.values ?? {};
 
   it("names the paint of every bound colour part, per variant", () => {
-    expect(values["surface.fill@size=medium,state=rest,tone=default,variant=primary"]).toMatch(
+    expect(values["surface.fill@emphasis=high,intent=neutral,size=medium,state=rest"]).toMatch(
       /^#[0-9a-f]{6}$/,
     );
   });
@@ -163,11 +163,11 @@ describe("resolved paint values of the Figma side (F8)", () => {
   // sagen dort dasselbe Alpha, und die Deckkraft steht wieder als Zahl im Plan. Genau das war die
   // Bedingung, unter der F8 sich weigerte — sie ist weg, nicht die Regel.
   it("names the real alpha once both brands agree on it", () => {
-    expect(values["surface.fill@size=medium,state=hover,tone=default,variant=tertiary"]).toBe(
+    expect(values["surface.fill@emphasis=low,intent=neutral,size=medium,state=hover"]).toBe(
       "#000000/0.08",
     );
     const variant = plan.components[0]?.variants.find(
-      (entry) => entry.props.variant === "tertiary" && entry.props.state === "hover",
+      (entry) => entry.props.emphasis === "low" && entry.props.state === "hover",
     );
     expect(variant?.paints?.["surface.fill"]).toEqual({ hex: "#000000", opacity: 0.08 });
   });
@@ -198,12 +198,12 @@ describe("resolved paint values of the Figma side (F8)", () => {
         "{}",
     ) as FigmaPlan;
     const variant = opaquePlan.components[0]?.variants.find(
-      (entry) => entry.props.variant === "tertiary" && entry.props.state === "hover",
+      (entry) => entry.props.emphasis === "low" && entry.props.state === "hover",
     );
     expect(variant?.paints?.["surface.fill"]).toEqual({ hex: "#000000", alphaVariesByMode: true });
     expect(
       figmaPlanInventory(opaquePlan).butono?.values[
-        "surface.fill@size=medium,state=hover,tone=default,variant=tertiary"
+        "surface.fill@emphasis=low,intent=neutral,size=medium,state=hover"
       ],
     ).toBe(`${ALPHA_VARIES} (color/action/tertiary/hover)`);
   });

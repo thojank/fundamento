@@ -218,7 +218,7 @@ test("every table names itself and its columns", async ({ page }) => {
 
 test("fm-butono is upgraded and carries the tokens of its Aspekto", async ({ page }) => {
   await open(page);
-  const control = page.locator("fm-butono[variant='primary']").first().locator("button");
+  const control = page.locator("fm-butono[emphasis='high']").first().locator("button");
   const fill = await control.evaluate((element) => getComputedStyle(element).backgroundColor);
   const expected = await page.evaluate(() =>
     getComputedStyle(document.documentElement)

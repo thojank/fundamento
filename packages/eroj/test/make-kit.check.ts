@@ -104,8 +104,8 @@ ${tailwind ? 'import "./app.css";\n' : ""}import { Butono } from "@fundamento/ma
 
 createRoot(document.getElementById("root")).render(
   createElement("main", ${tailwind ? '{ className: "p-fm-medium" }' : "null"},
-    createElement(Butono, { id: "save", variant: "primary", type: "submit" }, "Speichern"),
-    createElement(Butono, { id: "cancel", variant: "tertiary" }, "Abbrechen"),
+    createElement(Butono, { id: "save", emphasis: "high", type: "submit" }, "Speichern"),
+    createElement(Butono, { id: "cancel", emphasis: "low" }, "Abbrechen"),
   ),
 );
 `,
@@ -137,7 +137,7 @@ test("the kit works in plain HTML without React, and a double import is harmless
     if (path === "/") {
       await route.fulfill({
         contentType: "text/html; charset=utf-8",
-        body: `<!doctype html><html lang="de"><head><meta charset="utf-8"><title>Kit</title><link rel="stylesheet" href="/styles.css"><script type="module">import "/dist/element.js"; import "/dist/element.js";</script></head><body><fm-butono id="a" variant="primary">Speichern</fm-butono></body></html>`,
+        body: `<!doctype html><html lang="de"><head><meta charset="utf-8"><title>Kit</title><link rel="stylesheet" href="/styles.css"><script type="module">import "/dist/element.js"; import "/dist/element.js";</script></head><body><fm-butono id="a" emphasis="high">Speichern</fm-butono></body></html>`,
       });
       return;
     }
@@ -207,7 +207,7 @@ test("a user build that imports only the element entry keeps the registration (K
   );
   writeFileSync(
     join(dir, "index.html"),
-    `<!doctype html><html lang="de"><head><meta charset="utf-8"><title>Kit</title><script type="module" src="/src/main.js"></script></head><body><fm-butono id="a" variant="primary">Speichern</fm-butono></body></html>\n`,
+    `<!doctype html><html lang="de"><head><meta charset="utf-8"><title>Kit</title><script type="module" src="/src/main.js"></script></head><body><fm-butono id="a" emphasis="high">Speichern</fm-butono></body></html>\n`,
   );
   // Only the side-effect import: a bundler that trusts a wrong sideEffects field drops it.
   writeFileSync(

@@ -98,8 +98,8 @@ describe("every Celo reads what it emitted", () => {
     const text = readFileSync(join(base, "eroj/src/generated/butono.styles.ts"), "utf8");
     const item = stylesheetInventory(text);
     expect(item.props).toEqual({
-      variant: ["primary", "secondary", "tertiary"],
-      tone: ["default", "danger"],
+      emphasis: ["high", "medium", "low"],
+      intent: ["neutral", "danger"],
       size: ["small", "medium", "large"],
     });
     expect([...item.states].sort()).toEqual([
@@ -116,8 +116,8 @@ describe("every Celo reads what it emitted", () => {
     const text = readFileSync(join(base, "make-kit/komuna/dist/index.d.ts"), "utf8");
     const items = reactTypesInventory(text, ["butono"]);
     expect(items.butono?.props).toEqual({
-      variant: ["primary", "secondary", "tertiary"],
-      tone: ["default", "danger"],
+      emphasis: ["high", "medium", "low"],
+      intent: ["neutral", "danger"],
       size: ["small", "medium", "large"],
       type: ["button", "submit", "reset"],
       disabled: ["boolean"],
@@ -130,7 +130,7 @@ describe("every Celo reads what it emitted", () => {
   it("the Figma plan: the component properties and the state property", () => {
     const plan: unknown = JSON.parse(readFileSync(join(base, "figma/plan.json"), "utf8"));
     const items = figmaPlanInventory(plan);
-    expect(items.butono?.props.variant).toEqual(["primary", "secondary", "tertiary"]);
+    expect(items.butono?.props.emphasis).toEqual(["high", "medium", "low"]);
     expect(items.butono?.props.label).toEqual(["string"]);
     expect(items.butono?.props["full-width"]).toEqual(["boolean"]);
     expect(items.butono?.states).toEqual([
@@ -149,9 +149,9 @@ describe("every Celo reads what it emitted", () => {
       "utf8",
     );
     const item = guidelinesInventory(text);
-    expect(item.props.tone).toEqual(["default", "danger"]);
+    expect(item.props.intent).toEqual(["neutral", "danger"]);
     expect(item.props.label).toEqual(["string"]);
-    expect(item.values["default.variant"]).toBe("secondary");
+    expect(item.values["default.emphasis"]).toBe("medium");
     expect(item.values["default.label"]).toBeUndefined();
     expect(item.states).toEqual(["rest", "hover", "pressed", "focus", "disabled", "loading"]);
   });
@@ -181,10 +181,10 @@ describe("a flipped prop value in one artefact fails the check (AK-04)", () => {
   it("the React declaration file", () => {
     const dir = flipped((root) =>
       edit(join(root, "make-kit/komuna/dist/index.d.ts"), (text) =>
-        text.replace('"tertiary"', '"terciary"'),
+        text.replace('"low"', '"loww"'),
       ),
     );
-    expectFlip(dir, "react", "variant", "terciary");
+    expectFlip(dir, "react", "emphasis", "loww");
   });
 
   it("the Figma plan", () => {
@@ -203,9 +203,9 @@ describe("a flipped prop value in one artefact fails the check (AK-04)", () => {
   it("the guidelines", () => {
     const dir = flipped((root) =>
       edit(join(root, "make-kit/komuna/guidelines/components/butono.md"), (text) =>
-        text.replace("| `default`, `danger` |", "| `default`, `gefahr` |"),
+        text.replace("| `neutral`, `danger` |", "| `neutral`, `gefahr` |"),
       ),
     );
-    expectFlip(dir, "guidelines(komuna)", "tone", "gefahr");
+    expectFlip(dir, "guidelines(komuna)", "intent", "gefahr");
   });
 });

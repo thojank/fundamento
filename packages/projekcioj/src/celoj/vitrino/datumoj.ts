@@ -226,15 +226,17 @@ const byPrefix = (tokens: Record<string, { value: unknown }>, prefix: string): s
     .filter((name) => name.startsWith(prefix))
     .sort();
 
-/** The `fm-butono` grid: every variant, tone and size the Skemo declares. */
 /**
  * The surface the Vitrino shows its Eroj on: the background of its page. Figma fills the component
  * set with the same token, so both pictures stand on the same ground (F16).
  */
 export const VITRINO_SURFACE = "color.background.canvas";
 
-/** The props the Vitrino lays out in rows; the states stand in columns. */
-export const VITRINO_ROW_KEYS = ["variant", "tone", "size"] as const;
+/**
+ * The props the Vitrino lays out in rows; the states stand in columns. The axes of the butono are
+ * `emphasis` and `intent` since F1 (Spec 007, Jugxo jug_01M4DNSD0SV43Y943T21RQF7EM).
+ */
+export const VITRINO_ROW_KEYS = ["emphasis", "intent", "size"] as const;
 
 /**
  * The text a button carries in the Vitrino: its combination, joined by " · ". Figma uses the same
