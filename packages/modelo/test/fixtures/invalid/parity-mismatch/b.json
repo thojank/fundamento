@@ -1,7 +1,7 @@
 {
   "items": {
     "x": {
-      "props": { "size": ["small", "large"], "variant": ["primary", "tertiary"] },
+      "props": { "size": ["small", "large"], "emphasis": ["high", "low"] },
       "states": ["default", "hover"],
       "values": { "padding": "12px" }
     }
