@@ -201,8 +201,11 @@ export class ${className} extends Base {
     this.#render();
   }
 
-  /** The value of a prop after validation: an invalid value falls back to the default. */
-  value(name: string): Value | undefined {
+  /**
+   * The value of a prop after validation: an invalid value falls back to the default. Named apart
+   * from the props: a field has a prop \`value\` (Spec 009), whose accessor must not shadow this.
+   */
+  propValue(name: string): Value | undefined {
     const prop = PROPS.find((candidate) => candidate.name === name);
     if (prop === undefined) return undefined;
     if (prop.kind === "boolean") return this.hasAttribute(name);
@@ -221,7 +224,7 @@ export class ${className} extends Base {
   #enums(): Record<string, string> {
     const values: Record<string, string> = {};
     for (const prop of PROPS) {
-      if (prop.kind === "enum") values[prop.name] = String(this.value(prop.name));
+      if (prop.kind === "enum") values[prop.name] = String(this.propValue(prop.name));
     }
     for (const constraint of CONSTRAINTS) {
       const applies = Object.entries(constraint.when).every(([key, value]) => values[key] === value);
@@ -259,10 +262,10 @@ export class ${className} extends Base {
       if (root !== control) control.setAttribute(\`data-\${name}\`, value);
     }
     if (HAS_PROP.has("disabled") && "disabled" in control) {
-      (control as HTMLButtonElement).disabled = this.value("disabled") === true;
+      (control as HTMLButtonElement).disabled = this.propValue("disabled") === true;
     }
     if (HAS_PROP.has("loading")) {
-      const busy = this.value("loading") === true;
+      const busy = this.propValue("loading") === true;
       if (busy) {
         control.setAttribute("aria-busy", "true");
         control.setAttribute("aria-disabled", "true");
@@ -274,13 +277,13 @@ export class ${className} extends Base {
     // A link: \`to\` is its target (Art. VIII, the Web Celo spells it href); \`external\` marks
     // that the target lies outside the application (Spec 008, D-09).
     if (control instanceof HTMLAnchorElement) {
-      const to = this.value("to");
+      const to = this.propValue("to");
       if (typeof to === "string" && to !== "") control.setAttribute("href", to);
       else {
         control.removeAttribute("href");
         warn(\`${tag}: to is required; a link without a target is text (boundary disabled-link).\`);
       }
-      if (this.value("external") === true) control.setAttribute("rel", "external noopener noreferrer");
+      if (this.propValue("external") === true) control.setAttribute("rel", "external noopener noreferrer");
       else control.removeAttribute("rel");
     }
     // A field (Spec 009, D-08): the props of the Skemo on the native input, \`kind\` as its type,
@@ -288,31 +291,31 @@ export class ${className} extends Base {
     // disabled wins over readonly; help and error show only while they have text.
     const described: string[] = [];
     if (control instanceof HTMLInputElement) {
-      const kind = this.value("kind");
+      const kind = this.propValue("kind");
       control.type = typeof kind === "string" && kind !== "" ? kind : "text";
-      const value = this.value("value");
+      const value = this.propValue("value");
       const text = typeof value === "string" ? value : "";
       if (control.value !== text) control.value = text;
       this.#internals.setFormValue(text);
-      const placeholder = this.value("placeholder");
+      const placeholder = this.propValue("placeholder");
       if (typeof placeholder === "string" && placeholder !== "") control.setAttribute("placeholder", placeholder);
       else control.removeAttribute("placeholder");
-      const formName = this.value("name");
+      const formName = this.propValue("name");
       if (typeof formName === "string" && formName !== "") control.setAttribute("name", formName);
       else control.removeAttribute("name");
-      const required = this.value("required") === true;
+      const required = this.propValue("required") === true;
       control.required = required;
       if (required) control.setAttribute("aria-required", "true");
       else control.removeAttribute("aria-required");
-      const disabled = this.value("disabled") === true;
-      control.readOnly = !disabled && this.value("readonly") === true;
-      const invalid = this.value("invalid") === true || this.#filled("error");
+      const disabled = this.propValue("disabled") === true;
+      control.readOnly = !disabled && this.propValue("readonly") === true;
+      const invalid = this.propValue("invalid") === true || this.#filled("error");
       if (invalid) control.setAttribute("aria-invalid", "true");
       else control.removeAttribute("aria-invalid");
       for (const source of DESCRIPTION) {
         const [kind, name = ""] = source.split(":");
         const holder = this.shadowRoot?.getElementById(name);
-        const has = kind === "slot" ? this.#filled(name) : typeof this.value(name) === "string";
+        const has = kind === "slot" ? this.#filled(name) : typeof this.propValue(name) === "string";
         if (holder instanceof HTMLElement) holder.hidden = !has;
         if (has) described.push(name);
       }
@@ -321,12 +324,14 @@ export class ${className} extends Base {
     // language of the document, as the description of the control; the mark shows with them.
     const lingvo = this.#lingvo();
     const heard = Object.entries(TEXTS)
-      .filter(([prop]) => this.value(prop) === true)
+      .filter(([prop]) => this.propValue(prop) === true)
       .map(([, byLingvo]) => byLingvo[lingvo] ?? byLingvo.en ?? Object.values(byLingvo)[0] ?? "");
     this.#texts.textContent = heard.join(" ");
     if (heard.length > 0) described.push("fm-texts");
+    // Removed and set again on purpose: a changed text in a hidden target alone does not reach
+    // the accessibility tree of every engine; the attribute change does.
+    control.removeAttribute("aria-describedby");
     if (described.length > 0) control.setAttribute("aria-describedby", described.join(" "));
-    else control.removeAttribute("aria-describedby");
     if (heard.length > 0) {
       root.setAttribute("data-marked", "true");
       if (root !== control) control.setAttribute("data-marked", "true");
@@ -339,19 +344,19 @@ export class ${className} extends Base {
       .map((node) => node.textContent ?? "")
       .join("")
       .trim();
-    const name = this.value("label");
+    const name = this.propValue("label");
     if (text === "" && typeof name === "string" && name !== "") control.setAttribute("aria-label", name);
     else control.removeAttribute("aria-label");
   }
 
   #activate(event: Event): void {
-    if (this.value("loading") === true || this.value("disabled") === true) {
+    if (this.propValue("loading") === true || this.propValue("disabled") === true) {
       event.preventDefault();
       event.stopImmediatePropagation();
       return;
     }
     if (!(this.#control instanceof HTMLButtonElement)) return;
-    const type = this.value("type");
+    const type = this.propValue("type");
     const form = this.#internals.form;
     if (form === null) return;
     if (type === "submit") form.requestSubmit();
@@ -376,7 +381,7 @@ for (const prop of PROPS) {
     configurable: true,
     enumerable: true,
     get(this: ${className}) {
-      return this.value(prop.name);
+      return this.propValue(prop.name);
     },
     set(this: ${className}, next: unknown) {
       if (prop.kind === "boolean") this.toggleAttribute(prop.name, next === true);

@@ -178,12 +178,18 @@ for (const factor of [1.35, 2]) {
       `<div style="inline-size: 16rem"><fm-kampo id="a" invalid>E-Mail<span slot="help" id="h">Wir schreiben nur zur Bestellung.</span><span slot="error" id="e">Gib eine E-Mail-Adresse mit @ ein</span></fm-kampo></div>`,
     );
     const before = await page.locator("#a").boundingBox();
+    // Expanded by words (a translation adds words, not one unbreakable run of characters).
+    const sentence = "Wir schreiben nur zur Bestellung und geben die Adresse nicht weiter.";
+    const words = sentence.split(" ");
+    const expanded = [...words, ...words.slice(0, Math.ceil(words.length * (factor - 1)))].join(
+      " ",
+    );
     for (const id of ["h", "e"]) {
       await page.locator(`#${id}`).evaluate(
         (element, text) => {
           element.textContent = text;
         },
-        pseudo("Wir schreiben nur zur Bestellung und geben die Adresse nicht weiter.", factor),
+        pseudo(expanded, 1),
       );
     }
     const after = await page.locator("#a").boundingBox();

@@ -801,3 +801,63 @@ describe("Figma plan for the ligilo (Spec 008 T017)", () => {
     );
   });
 });
+
+// Spec 009 T010 (A5, plan D-09): the third set, a field. Its structure is a column of label,
+// control with the typed text, help and error; size × state are the axes; required is a BOOLEAN
+// property, label, help, error, value and placeholder TEXT properties of the plan.
+describe("Figma plan for the kampo (Spec 009 T010)", () => {
+  const set = plan.components.find((component) => component.set === "kampo");
+  const variant = (size: string, state: string) =>
+    set?.variants.find((entry) => entry.props.size === size && entry.props.state === state);
+
+  it("plans a field of size × state with the properties of the Skemo", () => {
+    expect(set?.structure).toBe("field");
+    expect(plan.components[0]?.structure).toBe("control");
+    expect(set?.properties).toEqual({
+      kind: ["text", "email", "tel", "url", "search"],
+      value: "TEXT",
+      placeholder: "TEXT",
+      required: "BOOLEAN",
+      disabled: "BOOLEAN",
+      readonly: "BOOLEAN",
+      invalid: "BOOLEAN",
+      size: ["small", "medium", "large"],
+      name: "TEXT",
+      state: ["rest", "hover", "focus", "disabled", "readonly", "invalid"],
+    });
+    expect(set?.variants).toHaveLength(3 * 6);
+    expect(set?.grid).toMatchObject({ rows: 3, columns: 6 });
+  });
+
+  it("binds the parts of the field and releases the placeholder and the mark (B-2)", () => {
+    const rest = variant("medium", "rest");
+    expect(rest?.bindings["text.typography"]).toBe("typography/body/1");
+    expect(rest?.bindings["help.typography"]).toBe("typography/caption");
+    expect(rest?.bindings["error.color"]).toBe("color/status/danger/text");
+    expect(rest?.bindings["border.color"]).toBe("color/border/default");
+    expect(variant("medium", "invalid")?.bindings["border.color"]).toBe(
+      "color/status/danger/border",
+    );
+    expect(variant("medium", "readonly")?.bindings["surface.fill"]).toBe("color/background/sunken");
+    expect(rest?.notDrawn?.["placeholder.color"]).toBe("jug_01M4S2R85WRAC5SV7CARH8RE7S");
+    expect(rest?.notDrawn?.["required-mark.color"]).toBe("jug_01M4S2R85WRAC5SV7CARH8RE7S");
+    expect(rest?.paints?.["text.color"]).toMatch(/^#/);
+    expect(rest?.geometry?.["box.height"]).toBe("40px");
+    // Fonts of every text part, over every mode: the caption and the body roles too.
+    expect((set?.fonts?.length ?? 0) >= (plan.components[0]?.fonts?.length ?? 0)).toBe(true);
+  });
+
+  it("states the kampo in the parity inventory with its six states", () => {
+    const items = figmaPlanInventory(plan);
+    expect(items.kampo?.states).toEqual([
+      "rest",
+      "hover",
+      "focus",
+      "disabled",
+      "readonly",
+      "invalid",
+    ]);
+    expect(items.kampo?.props.kind).toEqual(["text", "email", "tel", "url", "search"]);
+    expect(items.kampo?.values["text.color@size=medium,state=rest"]).toMatch(/^#[0-9a-f]{6}$/);
+  });
+});
