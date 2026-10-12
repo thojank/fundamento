@@ -172,6 +172,12 @@ export const RULE_IDS = [
   "uzo-override-fixed",
   "uzo-override-jugxo-missing",
   "skemo-uzo-missing",
+  // Uzo in check_usage (Spec 007, A10, D-07): a boundary recognised via a slot, the wrap or a
+  // Regulo, and the slot rules of the Uzo.
+  "uzo-boundary",
+  "uzo-slot-accepts",
+  "uzo-slot-max",
+  "uzo-slot-nesting",
   // Projekcio lints (Spec 003, D-17)
   "css-physical-property",
   "ero-hardcoded-string",
@@ -179,7 +185,11 @@ export const RULE_IDS = [
 
 export type RuleId = (typeof RULE_IDS)[number];
 
-export type IssueSeverity = "error" | "warning";
+/**
+ * `info` (Spec 007, D-03, D-07): a rule an Aspekto has overridden with a Jugxo. The finding stays
+ * visible (Art. VI, a deviation is never silent) but is no violation; `valid` stays true.
+ */
+export type IssueSeverity = "error" | "warning" | "info";
 
 export interface ValidationIssue {
   rule: RuleId;

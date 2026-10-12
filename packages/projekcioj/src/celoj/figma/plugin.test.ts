@@ -182,6 +182,78 @@ function descendant(node: DoubleNode | undefined, name: string): DoubleNode | un
   return undefined;
 }
 
+// Spec 007 T028 (A12, D-10): the plugin writes the purpose of the Uzo as the set's description.
+describe("the set carries the purpose of the Uzo as its description (T028)", () => {
+  it("writes plan.components[].description to the component set", async () => {
+    const double = modelDouble();
+    await run(double);
+    const set = double.root.children[0]?.children.find((child) => child.name === "butono");
+    const planned = plan.components.find((component) => component.set === "butono");
+    expect(planned?.description).toBeDefined();
+    // Befund B1: description and descriptionMarkdown are one field; the purpose is its first line.
+    expect(String(set?.properties.description).split("\n")[0]).toBe(planned?.description);
+  });
+});
+
+// Spec 007 T029 (A12, D-10, OP-9): the plugin tries to carry the boundaries, slot rules and text
+// rules of the Uzo into the file and measures the answer, as Spec 005 A6 did for bindings. Against
+// a double that refuses the field, the report lists the Manko as open; against one that accepts
+// it, as closed. The Mankoj in mankoj.json come only with the measurement in real Figma.
+describe("the plugin tries the Uzo beyond the purpose and reports open or closed (T029)", () => {
+  type UzoReport = {
+    components: { set: string; uzo?: { field: string; status: string; evidence: string } }[];
+    mankoj: {
+      open: { set: string; part: string; field: string; evidence: string }[];
+      closed: { set: string; part: string; field: string; evidence: string }[];
+    };
+  };
+  async function report(double: ReturnType<typeof figmaDouble>): Promise<UzoReport> {
+    const module = new Function(
+      "figma",
+      "options",
+      `${files["figma/plugin/code.js"] ?? ""}\nreturn applyPlan(options);`,
+    );
+    return (await module(double.figma, undefined)) as UzoReport;
+  }
+  const planned = plan.components.find((component) => component.set === "butono");
+
+  it("against a double that refuses descriptionMarkdown: open, with the tool's words", async () => {
+    const double = figmaDouble({ fonts: MODEL_FONTS, refuse: ["descriptionMarkdown"] });
+    const result = await report(double);
+    const set = double.root.children[0]?.children.find((child) => child.name === "butono");
+    expect(set?.properties.description).toBe(planned?.description);
+    expect(set?.properties.descriptionMarkdown).toBeUndefined();
+    const butono = result.components.find((component) => component.set === "butono");
+    expect(butono?.uzo?.status).toBe("open");
+    expect(butono?.uzo?.evidence).toContain("descriptionMarkdown");
+    expect(result.mankoj.closed).toEqual([]);
+    expect(result.mankoj.open.map((manko) => manko.part)).toEqual(["boundary", "slots", "content"]);
+    for (const manko of result.mankoj.open) {
+      expect(manko.set).toBe("butono");
+      expect(manko.field).toBe("descriptionMarkdown");
+      expect(manko.evidence).toContain("descriptionMarkdown");
+    }
+  });
+
+  it("against a double that accepts it: closed, the Markdown written to the set", async () => {
+    const double = modelDouble();
+    const result = await report(double);
+    const set = double.root.children[0]?.children.find((child) => child.name === "butono");
+    expect(set?.properties.descriptionMarkdown).toBe(planned?.uzo?.markdown);
+    // Befund B1 (Maintainer, f10b-5, 2026-10-12): Markdown and description are one field, so
+    // the purpose (T028) has to be the first line of what T029 writes, or it is gone.
+    expect(String(set?.properties.description).split("\n")[0]).toBe(planned?.description);
+    const butono = result.components.find((component) => component.set === "butono");
+    expect(butono?.uzo?.status).toBe("closed");
+    expect(result.mankoj.open).toEqual([]);
+    expect(result.mankoj.closed.map((manko) => manko.part)).toEqual([
+      "boundary",
+      "slots",
+      "content",
+    ]);
+  });
+});
+
 describe("the paint carries the alpha of its token (F8)", () => {
   // One brand: the decision is unambiguous in every mode. With a second brand whose tertiary fill
   // is opaque the plan says `alphaVariesByMode`, and the guard refuses the binding — see the

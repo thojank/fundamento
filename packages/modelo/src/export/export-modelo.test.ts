@@ -77,7 +77,7 @@ function collectRefs(node: unknown, out: string[] = []): string[] {
 }
 
 describe("exportModelo: shape (§2.9)", () => {
-  it("has exactly the §2.9 top-level keys plus core (Spec 001 FR-10), skemoj (Spec 003) and mankoj (F41)", () => {
+  it("has exactly the §2.9 top-level keys plus core (Spec 001 FR-10), skemoj (Spec 003), mankoj (F41) and uzoj (Spec 007)", () => {
     expect(Object.keys(modeloJson).sort()).toEqual(
       [
         "$schema",
@@ -95,6 +95,7 @@ describe("exportModelo: shape (§2.9)", () => {
         "skemoj",
         "tokenTypes",
         "tokens",
+        "uzoj",
       ].sort(),
     );
   });
@@ -224,9 +225,9 @@ describe("exportModelo: uzoj (Spec 007)", () => {
     expect(json.uzoj?.[0]?.purpose).toBe("Fixture Uzo: starts an action on the current view.");
   });
 
-  it("leaves uzoj out while no Ero has a Uzo", () => {
+  it("leaves uzoj out while no Ero has a Uzo, and carries the butono's since Stufe B (T020)", () => {
     expect(exportOf("ero-minimal")).not.toHaveProperty("uzoj");
-    expect(modeloJson).not.toHaveProperty("uzoj");
+    expect(modeloJson.uzoj?.map((uzo) => uzo.ero)).toEqual([modeloJson.eroj[0]?.id]);
   });
 
   it("the export with uzoj validates against the exported schema", () => {

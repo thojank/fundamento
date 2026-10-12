@@ -15,7 +15,7 @@ import type {
   Modelo,
   Regulo,
 } from "../contracts/modelo.js";
-import type { AspektoAspiro, Fonto } from "../generated/modelo-schema.js";
+import type { AspektoAspiro, Fonto, LingvoOverride } from "../generated/modelo-schema.js";
 import type {
   AspektoPackageFiles,
   ModeloDocument,
@@ -177,6 +177,11 @@ function composeAspektoValues(
       entry.fonts = raw.fonts.filter(isJsonObject) as unknown as Fonto[];
     if (Array.isArray(raw.aspiroj))
       entry.aspiroj = raw.aspiroj.filter(isJsonObject) as unknown as AspektoAspiro[];
+    // Spec 007 (D-03): the overrides of adjustable text rules, for check_usage.
+    const tavoloj = isJsonObject(raw.tavoloj) ? raw.tavoloj : {};
+    const lingvo = isJsonObject(tavoloj.lingvo) ? tavoloj.lingvo : {};
+    if (Array.isArray(lingvo.overrides))
+      entry.overrides = lingvo.overrides.filter(isJsonObject) as unknown as LingvoOverride[];
     if (typeof raw.idNamespace === "string") entry.namespace = raw.idNamespace;
     return entry;
   });

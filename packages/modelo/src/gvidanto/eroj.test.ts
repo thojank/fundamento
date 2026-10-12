@@ -2,7 +2,8 @@
 
 import { describe, expect, it } from "vitest";
 import { loadModelo } from "../load/load-modelo.js";
-import { defaultModeloSource } from "../load/source.js";
+import { defaultModeloSource, fixtureModeloSource } from "../load/source.js";
+import { fixtureRoot } from "../validate/test-doubles/fixtures.js";
 import { getEro, listEroj } from "./eroj.js";
 
 const { modelo } = loadModelo(defaultModeloSource());
@@ -72,16 +73,27 @@ describe("get_ero", () => {
       // F32: how the focus ring is drawn is part of what the Ero promises, so an agent asking
       // for the Ero is told the rule and its reason.
       "focus-ring-concentric",
+      // Spec 007 T019 (data-model §4): the spacing candidate, the layout rule and the text rules.
+      "spacing-owned-by-container",
+      "full-width-in-action-bar-or-compact",
+      "label-names-action",
+      "destructive-label-names-object",
+      "destructive-label-not-generic",
     ]);
     for (const regulo of output.reguloj) {
       expect(regulo.kialo.length).toBeGreaterThan(0);
       expect(regulo.statement.length).toBeGreaterThan(0);
-      expect(regulo.checkability).toBe("automatic");
+      // The spacing rule is a candidate (A4): manual until an instance can state its spacing.
+      expect(regulo.checkability).toBe(
+        regulo.name === "spacing-owned-by-container" ? "manual" : "automatic",
+      );
     }
   });
 
   it("carries the examples of the Jugxoj with their instances", () => {
-    expect(output.examples).toHaveLength(6);
+    // Six of Spec 003 and, since Spec 007 T021, twelve of the three text rules (A7) and two of
+    // the full-width rule (A6).
+    expect(output.examples).toHaveLength(20);
     const [first] = output.examples;
     expect(first?.decision).toBe("approved");
     expect(first?.kialo.length).toBeGreaterThan(0);
@@ -95,7 +107,7 @@ describe("get_ero", () => {
       },
       { ero: "butono", props: { emphasis: "low" }, container: "dialog", label: "Abbrechen" },
     ]);
-    expect(output.examples.map((example) => example.decision)).toEqual([
+    expect(output.examples.slice(0, 6).map((example) => example.decision)).toEqual([
       "approved",
       "rejected",
       "approved",
@@ -103,6 +115,17 @@ describe("get_ero", () => {
       "approved",
       "rejected",
     ]);
+    for (const regulo of [
+      "label-names-action",
+      "destructive-label-names-object",
+      "destructive-label-not-generic",
+    ]) {
+      const examples = output.examples.filter((example) => example.regulo?.name === regulo);
+      expect(
+        examples.map((example) => example.decision),
+        regulo,
+      ).toEqual(["approved", "approved", "rejected", "rejected"]);
+    }
   });
 
   it("names every projection of the Ero", () => {
@@ -174,5 +197,102 @@ describe("get_ero", () => {
     expect(missing.issues.map((issue) => issue.rule)).toEqual(["ero-unknown"]);
     expect(missing.issues[0]?.path).toBe("get_ero/name");
     expect(missing.allowed).toEqual(["butono"]);
+  });
+});
+
+// Spec 007 T022 (A8, D-05, D-08, contracts/mcp-tools §1): get_ero carries the Uzo with its Reguloj
+// resolved, and with `brief: true` only what a choice needs, generated from Skemo and Uzo.
+describe("get_ero with the Uzo and brief (T022)", () => {
+  const isReguloRef = (value: unknown) => {
+    expect(value).toEqual(
+      expect.objectContaining({
+        id: expect.stringMatching(/^reg_/),
+        name: expect.any(String),
+        statement: expect.any(String),
+        kialo: expect.any(String),
+        checkability: expect.stringMatching(/^(automatic|manual)$/),
+      }),
+    );
+  };
+
+  it("carries the Uzo of the butono without its ids, the Reguloj resolved as ReguloRef", () => {
+    const uzo = output.uzo;
+    expect(uzo).toBeDefined();
+    expect(uzo).not.toHaveProperty("id");
+    expect(uzo).not.toHaveProperty("ero");
+    expect(uzo).not.toHaveProperty("skemo");
+    expect(uzo?.purpose).toBe(butono.uzo?.purpose);
+    expect(uzo?.boundary).toHaveLength(4);
+    expect(uzo?.boundary.map((entry) => entry.case)).toEqual(
+      butono.uzo?.boundary.map((entry) => entry.case),
+    );
+    expect(uzo?.instead.map((entry) => entry.goal)).toEqual(["toggle", "choose"]);
+    expect(uzo?.slots).toEqual(butono.uzo?.slots);
+    isReguloRef(uzo?.composes.spacing.regulo);
+    expect(uzo?.composes.spacing.regulo.name).toBe("spacing-owned-by-container");
+    const fullWidth = uzo?.layout["full-width"];
+    expect(typeof fullWidth).toBe("object");
+    if (typeof fullWidth === "object") {
+      isReguloRef(fullWidth.regulo);
+      expect(fullWidth.regulo.name).toBe("full-width-in-action-bar-or-compact");
+    }
+    expect(uzo?.content.map((entry) => entry.regulo.name)).toEqual([
+      "label-names-action",
+      "destructive-label-names-object",
+      "destructive-label-not-generic",
+    ]);
+    for (const entry of uzo?.content ?? []) isReguloRef(entry.regulo);
+  });
+
+  it("brief: exactly the keys of contracts §1, axes from the Skemo, no keywords and no via", () => {
+    const brief = getEro(modelo, { name: "butono", brief: true });
+    expect(brief.ok).toBe(true);
+    if (!brief.ok) return;
+    expect(Object.keys(brief.output).sort()).toEqual([
+      "axes",
+      "boundary",
+      "ero",
+      "instead",
+      "purpose",
+      "required",
+    ]);
+    expect(brief.output.ero).toBe("butono");
+    expect(brief.output.purpose).toBe(butono.uzo?.purpose);
+    expect(brief.output.axes).toEqual(
+      butono.skemo.props
+        .filter((prop) => prop.kind === "enum")
+        .map((prop) => ({ name: prop.name, values: prop.values, default: prop.default })),
+    );
+    expect(brief.output.required).toEqual({ props: ["label"], slots: [] });
+    for (const entry of brief.output.instead ?? []) {
+      expect(Object.keys(entry).sort()).toEqual(["ero", "goal", "kialo"]);
+    }
+    for (const entry of brief.output.boundary ?? []) {
+      expect(entry).not.toHaveProperty("keywords");
+      expect(entry).not.toHaveProperty("via");
+      expect(entry.kialo.length).toBeGreaterThan(0);
+    }
+    expect(brief.output.boundary?.map((entry) => entry.action)).toEqual([
+      "ask-human",
+      "not-supported",
+      "not-supported",
+      "not-supported",
+    ]);
+  });
+
+  it("brief for an Ero without a Uzo: ero, axes, required and the warning skemo-uzo-missing", () => {
+    const { modelo: minimal } = loadModelo(
+      fixtureModeloSource(fixtureRoot("valid", "ero-minimal")),
+    );
+    if (minimal === undefined) throw new Error("ero-minimal must load");
+    const brief = getEro(minimal, { name: "butono", brief: true });
+    expect(brief.ok).toBe(true);
+    if (!brief.ok) return;
+    expect(Object.keys(brief.output).sort()).toEqual(["axes", "ero", "issues", "required"]);
+    expect(brief.output.issues?.map((issue) => [issue.rule, issue.severity])).toEqual([
+      ["skemo-uzo-missing", "warning"],
+    ]);
+    const full = getEro(minimal, { name: "butono" });
+    expect(full.ok && full.output).not.toHaveProperty("uzo");
   });
 });

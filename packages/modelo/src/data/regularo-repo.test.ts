@@ -35,6 +35,9 @@ const PHASE1_APPLIES_TO: Record<string, unknown> = {
 const NOT_CHECKABLE: Record<string, string> = {
   "disabled-exempt-from-contrast":
     "an exemption: it grants a permission, so no data can violate it",
+  // Spec 007 A4: a Regulo candidate; an instance does not state the spacing of its container.
+  "spacing-owned-by-container":
+    "a candidate (Spec 007, A4): instances carry no spacing, so nothing can violate it yet",
 };
 
 /** Automatic Reguloj enforced by an always-on rule instead of an enforcer (Constitution). */

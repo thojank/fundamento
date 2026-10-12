@@ -228,6 +228,62 @@
       "status": "active",
       "type": "jugxo"
     },
+    "jug_01M4RPN9JR3E1KG87JKCNSCEMH": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M4RPN9JS360DTY0PNP68DBNB": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M4RPN9JS360DTY0PNP68DBNC": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M4RPN9JS360DTY0PNP68DBND": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M4RPN9JS360DTY0PNP68DBNE": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M4RPN9JS360DTY0PNP68DBNF": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M4RPN9JS360DTY0PNP68DBNG": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M4RPN9JS360DTY0PNP68DBNH": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M4RPN9JS360DTY0PNP68DBNJ": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M4RPN9JS360DTY0PNP68DBNK": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M4RPN9JS360DTY0PNP68DBNM": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M4RPN9JS360DTY0PNP68DBNN": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M4RPQWREQ525AG7EQKJE64AF": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M4RPQWREQ525AG7EQKJE64AG": {
+      "status": "active",
+      "type": "jugxo"
+    },
     "kpa_01M2VEEE9HREQTY2499C9JS05Q": {
       "status": "active",
       "type": "kontrastParo"
@@ -617,6 +673,26 @@
       "type": "regulo"
     },
     "reg_01M375NS2RRDA1DWRHEK2MK15X": {
+      "status": "active",
+      "type": "regulo"
+    },
+    "reg_01M4RPB19GDEJE9T2S21VNRE0H": {
+      "status": "active",
+      "type": "regulo"
+    },
+    "reg_01M4RPB19HEMSFTRDZNPTHJV7N": {
+      "status": "active",
+      "type": "regulo"
+    },
+    "reg_01M4RPB19HEMSFTRDZNPTHJV7P": {
+      "status": "active",
+      "type": "regulo"
+    },
+    "reg_01M4RPB19HEMSFTRDZNPTHJV7Q": {
+      "status": "active",
+      "type": "regulo"
+    },
+    "reg_01M4RPB19HEMSFTRDZNPTHJV7R": {
       "status": "active",
       "type": "regulo"
     },
@@ -2091,6 +2167,10 @@
     "tok_01M2ZWW86NCFY7WFB51XCHX8RF": {
       "status": "active",
       "type": "token"
+    },
+    "uzo_01M4RPK0VYYXNCF41ME86Q4Z8P": {
+      "status": "active",
+      "type": "uzo"
     }
   }
 }

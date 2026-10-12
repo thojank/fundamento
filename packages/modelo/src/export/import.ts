@@ -38,6 +38,7 @@ export function modeloFromExport(modeloJson: ModeloJson): Modelo {
     if (aspekto.idNamespace !== undefined) pkg.namespace = aspekto.idNamespace;
     if (aspekto.license !== undefined) pkg.license = aspekto.license;
     if (aspekto.fonts !== undefined) pkg.fonts = structuredClone(aspekto.fonts);
+    if (aspekto.overrides !== undefined) pkg.overrides = structuredClone(aspekto.overrides);
     return [pkg];
   });
   return {

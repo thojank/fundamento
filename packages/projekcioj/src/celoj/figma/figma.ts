@@ -27,8 +27,10 @@ import {
   parityColorText,
   parityDimensionText,
   parityVariantKey,
+  type Regulo,
   readDtcgColor,
   STATE_KEY,
+  type Uzo,
 } from "@fundamento/modelo";
 import type { Celo, CeloInput, GeneratedFile } from "../../build.js";
 import { VITRINO_SURFACE } from "../vitrino/datumoj.js";
@@ -112,6 +114,14 @@ export const FIGMA_NOT_DRAWN: Readonly<Record<string, string>> = {
 
 export interface FigmaComponentSet {
   set: string;
+  /** The purpose of the Uzo, one line, as the description of the set (Spec 007 T028, A12). */
+  description?: string;
+  /**
+   * What the set should carry beyond the purpose (Spec 007 T029, A12, D-10, OP-9): boundaries,
+   * slot rules and text rules, as Markdown for the field the plugin tries. Whether Figma takes it
+   * is measured by the run (Art. VI); a part the tool refuses is reported as an open Manko.
+   */
+  uzo?: { field: "descriptionMarkdown"; parts: UzoPart[]; markdown: string };
   properties: Record<string, string[] | "BOOLEAN" | "TEXT">;
   variants: {
     props: Record<string, string>;
@@ -169,6 +179,53 @@ export interface FigmaComponentSet {
    * and contrast (F16). The deckkraft is decided over every combination, like every paint (F8).
    */
   surface?: { variable: string; opacity: number };
+}
+
+/** The parts of a Uzo the plugin tries to carry beyond the purpose (T029). */
+export type UzoPart = "boundary" | "slots" | "content";
+
+/** The field the plugin tries for the Uzo beyond the purpose: Figma's Markdown description. */
+export const UZO_FIELD = "descriptionMarkdown" as const;
+
+/**
+ * The purpose, then the boundaries, slot rules and text rules of a Uzo as Markdown (T029): the
+ * words of the rules, not their enforcement — a description tells a designer, it does not stop
+ * an instance. The purpose is the first line (Befund B1, measured 2026-10-12 in f10b-5):
+ * `descriptionMarkdown` and `description` are one field in Figma, so what T029 writes is what
+ * the set shows, and the purpose of T028 would otherwise be gone.
+ */
+export function uzoMarkdown(uzo: Uzo, reguloj: readonly Regulo[]): string {
+  const statement = (name: string) => reguloj.find((regulo) => regulo.name === name)?.statement;
+  const notFor = [
+    ...uzo.boundary.map(
+      (boundary) => `- **${boundary.case}** (${boundary.action}): ${boundary.kialo}`,
+    ),
+    ...uzo.instead.map(
+      (alternative) =>
+        `- **${alternative.goal}** (${alternative.ero === null ? "ask-human" : `use-instead: ${alternative.ero}`}): ${alternative.kialo}`,
+    ),
+  ];
+  const slots = Object.entries(uzo.slots).map(
+    ([slot, rule]) =>
+      `- **${slot}**: ${(rule.accepts ?? []).join(", ") || "anything"}${rule.max === undefined ? "" : `, at most ${rule.max}`}${rule.nesting === undefined ? "" : `, nesting ${rule.nesting}`}`,
+  );
+  const content = uzo.content.map(
+    (rule) =>
+      `- **${rule.regulo}** (${rule.fixed ? "fixed" : "adjustable"}): ${statement(rule.regulo) ?? ""}`,
+  );
+  return [
+    uzo.purpose.replace(/\s*\n\s*/g, " ").trim(),
+    "",
+    "## Not for this",
+    ...notFor,
+    "",
+    "## Slots",
+    ...slots,
+    "",
+    "## Text",
+    ...content,
+    "",
+  ].join("\n");
 }
 
 export interface FigmaPlan {
@@ -728,8 +785,18 @@ function componentSetOf(
   version: string,
   resolutions: ReturnType<typeof allResolutions>,
   base: Readonly<Record<string, { value: unknown }>>,
+  reguloj: readonly Regulo[],
 ): FigmaComponentSet {
   const skemo = entry.skemo;
+  const description = entry.uzo?.purpose.replace(/\s*\n\s*/g, " ").trim();
+  const uzo =
+    entry.uzo === undefined
+      ? undefined
+      : {
+          field: UZO_FIELD,
+          parts: ["boundary", "slots", "content"] as UzoPart[],
+          markdown: uzoMarkdown(entry.uzo, reguloj),
+        };
   const properties: FigmaComponentSet["properties"] = {};
   for (const prop of skemo.props) {
     if (prop.kind === "enum") properties[prop.name] = [...(prop.values ?? [])];
@@ -860,6 +927,8 @@ function componentSetOf(
   const cell = parityPx(base[VITRINO_CELL_PADDING]?.value);
   return {
     set: entry.ero.name,
+    ...(description === undefined ? {} : { description }),
+    ...(uzo === undefined ? {} : { uzo }),
     properties,
     variants,
     pluginData: { fundamento: { ero: entry.ero.name, skemo: skemo.id, version } },
@@ -979,6 +1048,7 @@ export const FIGMA_CELO: Celo = {
           modeloJson.fundamento.version,
           allResolutions(modelo),
           baseResolution(modelo),
+          modelo.reguloj,
         ),
       ),
     };

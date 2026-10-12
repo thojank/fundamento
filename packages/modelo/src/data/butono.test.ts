@@ -7,7 +7,7 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { combinationsOf, forbiddenBy } from "../eroj/skemo-rules.js";
-import { evaluateUsage } from "../eroj/usage.js";
+import { evaluateUsage, USAGE_ENFORCERS } from "../eroj/usage.js";
 import { loadModelo } from "../load/load-modelo.js";
 import { defaultModeloSource } from "../load/source.js";
 import { validateModelo } from "../validate/validate-modelo.js";
@@ -19,7 +19,19 @@ const USAGE_REGULOJ = [
   "one-primary-per-container",
   "destructive-not-primary-color",
   "label-required",
+  // Spec 007 T019 (A6, A7, data-model §4): the layout rule and the three text rules of the Uzo.
+  "full-width-in-action-bar-or-compact",
+  "label-names-action",
+  "destructive-label-names-object",
+  "destructive-label-not-generic",
 ];
+
+/**
+ * `label-names-action` only warns (Spec 007, plan D-02, decision of 2026-10-08): the keyword list
+ * would refuse legitimate verbs such as "Senden" or "Teilen". A warning still counts as a
+ * violation of its rule, but leaves `valid` true.
+ */
+const WARNING_REGULOJ = new Set(["label-names-action"]);
 
 describe("butono in the repo Modelo (T007)", () => {
   it("lives in data/eroj/butono/skemo.json and the repo Modelo stays valid", () => {
@@ -82,20 +94,147 @@ describe("butono in the repo Modelo (T007)", () => {
     (name) => {
       const regulo = modelo.reguloj.find((candidate) => candidate.name === name);
       const examples = modelo.jugxoj.filter((jugxo) => jugxo.ekzemplo?.regulo === regulo?.id);
-      expect(examples.map((jugxo) => jugxo.decision).sort()).toEqual(["approved", "rejected"]);
+      // At least one of each; the text rules carry one per language (Spec 007, A7).
+      expect(new Set(examples.map((jugxo) => jugxo.decision))).toEqual(
+        new Set(["approved", "rejected"]),
+      );
       for (const jugxo of examples) {
         expect(jugxo.ref).toEqual({ ero: butono?.ero.id });
-        const rules = evaluateUsage(modelo, jugxo.ekzemplo?.instances ?? []).violations.map(
-          (violation) => violation.issue.rule,
-        );
+        const result = evaluateUsage(modelo, jugxo.ekzemplo?.instances ?? []);
+        const rules = result.violations.map((violation) => violation.issue.rule);
         expect(rules, `${jugxo.id}`).toEqual(jugxo.decision === "rejected" ? [name] : []);
+        const severities = result.violations.map((violation) => violation.issue.severity);
+        expect(severities, `${jugxo.id}`).toEqual(
+          jugxo.decision === "rejected" ? [WARNING_REGULOJ.has(name) ? "warning" : "error"] : [],
+        );
+        expect(result.valid, `${jugxo.id}`).toBe(
+          jugxo.decision === "approved" || WARNING_REGULOJ.has(name),
+        );
       }
     },
   );
 
-  it("keeps visible strings out of the Skemo: labels live only in Jugxo examples", () => {
+  it("keeps visible strings out of the Skemo and the Uzo: labels live only in Jugxo examples", () => {
     const text = JSON.stringify(butono?.skemo);
     expect(text).not.toMatch(/Speichern|Löschen|Abbrechen|Save|Delete|Cancel/);
+    // Spec 007 T020 (data-model §3): the Uzo carries keywords as search vocabulary, never a label.
+    const uzo = JSON.stringify(butono?.uzo ?? {});
+    expect(uzo).not.toMatch(
+      /Speichern|Löschen|Abbrechen|Projekt löschen|Save|Cancel|Delete project/,
+    );
+  });
+});
+
+// Spec 007 T020 (A1–A6, D-01, data-model §2.3): the Uzo of the butono next to its Skemo.
+describe("the Uzo of the butono (T020)", () => {
+  const uzo = butono?.uzo;
+
+  it("lives in data/eroj/butono/uzo.json, names its Ero and Skemo, and says what the Ero is for", () => {
+    expect(butono?.uzoFile).toBe("modelo/data/eroj/butono/uzo.json");
+    expect(uzo?.id).toMatch(/^uzo_[0-9A-HJKMNP-TV-Z]{26}$/);
+    expect(uzo?.ero).toBe(butono?.ero.id);
+    expect(uzo?.skemo).toBe(butono?.skemo.id);
+    expect(uzo?.purpose.length ?? 0).toBeGreaterThan(20);
+  });
+
+  it("names the four boundaries of A3, each with an action and a kialo", () => {
+    expect(uzo?.boundary.map((entry) => [entry.case, entry.action])).toEqual([
+      ["navigation", "ask-human"],
+      ["form-in-slot", "not-supported"],
+      ["multi-line-label", "not-supported"],
+      ["no-accessible-label", "not-supported"],
+    ]);
+    for (const entry of uzo?.boundary ?? []) expect(entry.kialo).toMatch(/\bbecause\b/);
+    // The boundaries check_usage recognises (A10) say how: a slot, the wrap, a Regulo.
+    expect(uzo?.boundary.map((entry) => entry.via)).toEqual([
+      undefined,
+      { slot: "label" },
+      { layout: "wrap" },
+      { regulo: "label-required" },
+    ]);
+  });
+
+  it("answers toggle and choose with instead, not covered yet, each with a kialo", () => {
+    expect(uzo?.instead.map((entry) => [entry.goal, entry.ero])).toEqual([
+      ["toggle", null],
+      ["choose", null],
+    ]);
+    for (const entry of uzo?.instead ?? []) expect(entry.kialo).toMatch(/\bbecause\b/);
+  });
+
+  it("rules the slots of A5: text in the label, one decorative icon at each end, no nesting", () => {
+    expect(uzo?.slots).toEqual({
+      label: { accepts: ["text"], max: 1, nesting: 0 },
+      "icon-start": { accepts: ["icon"], max: 1, nesting: 0 },
+      "icon-end": { accepts: ["icon"], max: 1, nesting: 0 },
+    });
+  });
+
+  it("states the layout of A6 in platform-neutral words", () => {
+    expect(uzo?.layout).toEqual({
+      size: "content",
+      wrap: "never",
+      "full-width": {
+        allowedIn: { containers: ["action-bar"], dimensioj: { viewport: ["compact"] } },
+        regulo: "full-width-in-action-bar-or-compact",
+      },
+    });
+  });
+
+  it("composes in dialog, action-bar and form, and leaves spacing to the container (A4)", () => {
+    expect(uzo?.composes.containers.map((entry) => entry.name)).toEqual([
+      "dialog",
+      "action-bar",
+      "form",
+    ]);
+    expect(uzo?.composes.spacing).toEqual({
+      owner: "container",
+      regulo: "spacing-owned-by-container",
+    });
+  });
+
+  it("carries the three text rules of A7: one adjustable warning, two fixed", () => {
+    expect(
+      uzo?.content.map((entry) => [entry.regulo, entry.fixed, entry.severity ?? "error"]),
+    ).toEqual([
+      ["label-names-action", false, "warning"],
+      ["destructive-label-names-object", true, "error"],
+      ["destructive-label-not-generic", true, "error"],
+    ]);
+  });
+});
+
+// Spec 007 T019 (A4, A6, A7, data-model §4): five Reguloj of the Uzo. The spacing rule is a
+// candidate with checkability manual (A4); the other four judge instances through the usage table.
+describe("the five Reguloj of the Uzo (T019)", () => {
+  const named = (name: string) => modelo.reguloj.find((regulo) => regulo.name === name);
+
+  it.each([
+    "spacing-owned-by-container",
+    "full-width-in-action-bar-or-compact",
+    "label-names-action",
+    "destructive-label-names-object",
+    "destructive-label-not-generic",
+  ])("%s applies to butono with a kialo", (name) => {
+    const regulo = named(name);
+    expect(regulo?.appliesTo).toEqual({ eroj: ["butono"] });
+    expect(regulo?.kialo.length ?? 0).toBeGreaterThan(40);
+    expect(regulo?.statement.length ?? 0).toBeGreaterThan(20);
+  });
+
+  it("spacing-owned-by-container is a candidate with checkability manual (A4)", () => {
+    expect(named("spacing-owned-by-container")?.checkability).toBe("manual");
+    expect(USAGE_ENFORCERS["spacing-owned-by-container"]).toBeUndefined();
+  });
+
+  it.each([
+    "full-width-in-action-bar-or-compact",
+    "label-names-action",
+    "destructive-label-names-object",
+    "destructive-label-not-generic",
+  ])("%s is automatic and has an enforcer in the usage table", (name) => {
+    expect(named(name)?.checkability).toBe("automatic");
+    expect(USAGE_ENFORCERS[name]).toBeDefined();
   });
 });
 

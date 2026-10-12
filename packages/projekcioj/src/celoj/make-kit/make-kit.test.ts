@@ -15,7 +15,7 @@ import {
 } from "@fundamento/modelo";
 import { beforeAll, describe, expect, it } from "vitest";
 import { celoInputOf } from "../../build.js";
-import { buildMakeKits, MAKE_KIT_CELO, makeKitName } from "./make-kit.js";
+import { buildMakeKits, guidelinesInventory, MAKE_KIT_CELO, makeKitName } from "./make-kit.js";
 
 const config = new URL(
   "../../../../modelo/test/fixtures/valid/aspekto-ekzemplo/fundamento.config.json",
@@ -170,6 +170,105 @@ describe("Make Kit sources (T018)", () => {
 
   it("generates the same bytes twice", () => {
     expect(MAKE_KIT_CELO.generate(prepared.input)).toEqual(MAKE_KIT_CELO.generate(prepared.input));
+  });
+});
+
+// Spec 007 T026 (A12, D-10): the component guideline carries the Uzo, generated, no hand-written
+// line. The sections are the ones plan D-10 names (Wofür, Nicht dafür, Zusammen mit, Slots,
+// Layout, Text), in the English the guideline is written in.
+describe("Make Kit guidelines carry the Uzo (T026)", () => {
+  const uzo = prepared.input.modelo.eroj.find((entry) => entry.ero.name === "butono")?.uzo;
+  const text = kit("komuna", "guidelines/components/butono.md");
+  const section = (heading: string) => {
+    const start = text.indexOf(`\n## ${heading}\n`);
+    expect(start, heading).toBeGreaterThan(-1);
+    const rest = text.slice(start + heading.length + 5);
+    const end = rest.indexOf("\n## ");
+    return end === -1 ? rest : rest.slice(0, end);
+  };
+
+  it.each(["What it is for", "Not for this", "Together with", "Slots", "Layout", "Text"])(
+    "has the section %s",
+    (heading) => {
+      expect(text).toContain(`\n## ${heading}\n`);
+    },
+  );
+
+  it("What it is for: the purpose of the Uzo", () => {
+    expect(section("What it is for")).toContain(uzo?.purpose ?? "?");
+  });
+
+  it("Not for this: every boundary and alternative with its action and kialo", () => {
+    const body = section("Not for this");
+    for (const boundary of uzo?.boundary ?? []) {
+      expect(body, boundary.case).toContain(`**${boundary.case}**`);
+      expect(body, boundary.case).toContain(boundary.action);
+      expect(body, boundary.case).toContain(boundary.kialo);
+    }
+    for (const alternative of uzo?.instead ?? []) {
+      expect(body, alternative.goal).toContain(`**${alternative.goal}**`);
+      expect(body, alternative.goal).toContain(alternative.kialo);
+    }
+  });
+
+  it("Together with: containers, companions and who owns the spacing, each with its kialo", () => {
+    const body = section("Together with");
+    for (const container of uzo?.composes.containers ?? []) {
+      expect(body).toContain(`\`${container.name}\``);
+      expect(body).toContain(container.kialo);
+    }
+    for (const companion of uzo?.composes.with ?? []) expect(body).toContain(companion.kialo);
+    expect(body).toContain("spacing-owned-by-container");
+  });
+
+  it("Slots: what each slot accepts, how many, and the nesting", () => {
+    const body = section("Slots");
+    for (const [slot, rule] of Object.entries(uzo?.slots ?? {})) {
+      expect(body).toContain(`\`${slot}\``);
+      for (const accepted of rule.accepts ?? []) expect(body).toContain(accepted);
+    }
+  });
+
+  it("Layout: size, wrap and the full-width allowance with its Regulo", () => {
+    const body = section("Layout");
+    expect(body).toContain(uzo?.layout.size ?? "?");
+    expect(body).toContain(uzo?.layout.wrap ?? "?");
+    expect(body).toContain("action-bar");
+    expect(body).toContain("viewport=compact");
+    expect(body).toContain("full-width-in-action-bar-or-compact");
+  });
+
+  it("Text: every text rule as fixed or adjustable, with one CORRECT and one WRONG label", () => {
+    const body = section("Text");
+    for (const rule of uzo?.content ?? []) {
+      expect(body, rule.regulo).toContain(`**${rule.regulo}**`);
+      expect(body, rule.regulo).toContain(rule.fixed ? "fixed" : "adjustable");
+    }
+    expect(body).toContain("Projekt löschen");
+    expect(body).toContain("Entwurf verwerfen");
+    expect(body).toMatch(/CORRECT/);
+    expect(body).toMatch(/WRONG/);
+  });
+
+  it("guidelinesInventory knows the sections and still reads only the props table", () => {
+    const item = guidelinesInventory(text);
+    expect(item.sections).toEqual([
+      "Props",
+      "Which button for which goal",
+      "Rules",
+      "Examples",
+      "What it is for",
+      "Not for this",
+      "Together with",
+      "Slots",
+      "Layout",
+      "Text",
+    ]);
+    // The slot and layout tables name `label`, `icon-start`, `size`: none of them is a prop value.
+    expect(Object.keys(item.props).sort()).toEqual(
+      (skemo?.props ?? []).map((prop) => prop.name).sort(),
+    );
+    expect(item.props.label).toEqual(["string"]);
   });
 });
 

@@ -52,6 +52,11 @@ export type Iso15924 = string;
 export type IdNamespace = string;
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "JugxoId".
+ */
+export type JugxoId = string;
+/**
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
  * via the `definition` "DtcgType".
  */
 export type DtcgType =
@@ -151,11 +156,6 @@ export type ReguloSojlo1 =
   | {
       max: unknown;
     };
-/**
- * This interface was referenced by `ModeloJson`'s JSON-Schema
- * via the `definition` "JugxoId".
- */
-export type JugxoId = string;
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema
  * via the `definition` "EroId".
@@ -570,6 +570,12 @@ export interface AspektoEntry {
   external?: boolean;
   package?: NonEmptyText;
   idNamespace?: IdNamespace;
+  /**
+   * The adjustable text rules of a Uzo this Aspekto overrides, with the Jugxo that records each deviation (Spec 007, D-03); absent when it overrides nothing.
+   *
+   * @minItems 1
+   */
+  overrides?: LingvoOverride[];
 }
 /**
  * A font family an Aspekto uses. Font files never enter the core repository; the fallback stack lives only in the fontFamily token value.
@@ -588,6 +594,16 @@ export interface Fonto {
    * @minItems 1
    */
   scripts: Iso15924[];
+}
+/**
+ * An Aspekto overrides an adjustable text rule of a Uzo, with the Jugxo that records the deviation (Spec 007, A7, D-03). A fixed rule cannot be overridden.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "LingvoOverride".
+ */
+export interface LingvoOverride {
+  regulo: Name;
+  jugxo: JugxoId;
 }
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema
@@ -1366,16 +1382,6 @@ export interface Tavoloj {
   lingvo?: {
     overrides?: LingvoOverride[];
   };
-}
-/**
- * An Aspekto overrides an adjustable text rule of a Uzo, with the Jugxo that records the deviation (Spec 007, A7, D-03). A fixed rule cannot be overridden.
- *
- * This interface was referenced by `ModeloJson`'s JSON-Schema
- * via the `definition` "LingvoOverride".
- */
-export interface LingvoOverride {
-  regulo: Name;
-  jugxo: JugxoId;
 }
 /**
  * aspekto.json of an Aspekto package (Spec 001, D-05). `id` is the DimensioValoro ID of the Aspekto; `idNamespace` is required for every package except the reference Aspekto (checked on composition).

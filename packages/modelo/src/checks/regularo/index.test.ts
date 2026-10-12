@@ -46,10 +46,8 @@ describe("regularo on the repo", () => {
     const result = await check({ json: true, repoRoot });
     expect(result.errors).toEqual([]);
     expect(result).toMatchObject({ check: "regularo", ok: true });
-    // The repo's Modelo root is packages/ (vortaro and modelo/data), as in every regularo path.
-    expect(rulesAndPaths(result.warnings)).toEqual([
-      { rule: "skemo-uzo-missing", path: "modelo/data/eroj/butono/skemo.json#/skemo" },
-    ]);
+    // Spec 007 T020: the butono has its Uzo, so the repo Modelo warns about nothing.
+    expect(rulesAndPaths(result.warnings)).toEqual([]);
     const count = (file: string, key: string) =>
       (
         JSON.parse(
@@ -59,7 +57,7 @@ describe("regularo on the repo", () => {
     expect(result.stats).toEqual({
       reguloj: count("reguloj.json", "reguloj"),
       jugxoj: count("jugxoj.json", "jugxoj"),
-      uzoj: 0,
+      uzoj: 1,
     });
   });
 });
@@ -147,7 +145,7 @@ describe("built runner", () => {
     const child = spawnSync(process.execPath, [builtRunner, "regularo"], { encoding: "utf8" });
     expect(child.status).toBe(0);
     expect(child.stdout.split("\n")[0]).toMatch(/^PASS regularo: /);
-    expect(child.stdout).toMatch(/stats: .*uzoj=0/);
+    expect(child.stdout).toMatch(/stats: .*uzoj=1/);
   });
 
   it("exits 0 with the warning on valid/ero-minimal", () => {

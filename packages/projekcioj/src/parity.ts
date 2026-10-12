@@ -46,7 +46,13 @@ export function parityInventories(outDir: string, input: CeloInput): GeneratedFi
   };
   for (const aspekto of kitAspektoj(input.modelo)) {
     sides[`guidelines-${aspekto}.json`] = inventoryOf(
-      perEro((ero) => guidelinesInventory(read(guidelinePath(aspekto, ero)))),
+      // The sections are the guideline's own business (Spec 007); parity compares the rest.
+      perEro((ero) => {
+        const { sections: _sections, ...item } = guidelinesInventory(
+          read(guidelinePath(aspekto, ero)),
+        );
+        return item;
+      }),
     );
   }
   return Object.entries(sides).map(([file, inventory]) => ({

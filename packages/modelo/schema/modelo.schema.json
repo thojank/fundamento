@@ -1780,7 +1780,9 @@
           "description": "The surfaces a translucent background may lie on. An overlay has no colour of its own; the check composites the background over each of them and the worst result decides, naming the surface. Without this field every opaque surface role of the ladder (sunken, canvas, default, raised) is taken. Each named token must be opaque.",
           "type": "array",
           "minItems": 1,
-          "items": { "$ref": "#/$defs/TokenName" }
+          "items": {
+            "$ref": "#/$defs/TokenName"
+          }
         },
         "kategorio": {
           "$ref": "#/$defs/KontrastKategorio"
@@ -3011,6 +3013,14 @@
         },
         "idNamespace": {
           "$ref": "#/$defs/IdNamespace"
+        },
+        "overrides": {
+          "description": "The adjustable text rules of a Uzo this Aspekto overrides, with the Jugxo that records each deviation (Spec 007, D-03); absent when it overrides nothing.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LingvoOverride"
+          },
+          "minItems": 1
         }
       },
       "required": ["id", "name", "owner"],

@@ -66,6 +66,72 @@ function switcher(datumoj: VitrinoDatumoj): string {
 const section = (id: string, title: string, body: string): string =>
   `<section id="fm-vitrino-${id}"><h2>${escapeHtml(title)}</h2>${body}</section>`;
 
+/** `butono` → `Butono`, for the question of a section. */
+const capitalised = (name: string): string => name.charAt(0).toUpperCase() + name.slice(1);
+
+/**
+ * The use of every Ero (Spec 007 T027, S5): purpose, what not to use it for, what to use instead,
+ * what its slots take, how it lays out and what its label may say — the same data as get_ero.
+ */
+function uzo(datumoj: VitrinoDatumoj): string {
+  const entries = Object.entries(datumoj.uzo);
+  if (entries.length === 0) return "<p>Kein Ero mit Uzo im Modelo.</p>";
+  return entries
+    .map(([ero, use]) => {
+      const boundaries = [
+        ...use.boundary.map(
+          (boundary) =>
+            `<li><strong>${escapeHtml(boundary.case)}</strong> (${escapeHtml(boundary.action)}${boundary.ero === undefined ? "" : `: ${escapeHtml(boundary.ero)}`}): ${escapeHtml(boundary.kialo)}</li>`,
+        ),
+        ...use.instead.map(
+          (alternative) =>
+            `<li><strong>${escapeHtml(alternative.goal)}</strong> (${alternative.ero === null ? "nicht abgedeckt, ask-human" : `stattdessen ${escapeHtml(alternative.ero)}`}): ${escapeHtml(alternative.kialo)}</li>`,
+        ),
+      ].join("");
+      const together = [
+        ...use.composes.containers.map(
+          (entry) =>
+            `<li>in <code>${escapeHtml(entry.name)}</code>: ${escapeHtml(entry.kialo)}</li>`,
+        ),
+        ...use.composes.with.map(
+          (entry) =>
+            `<li>mit <code>${escapeHtml(entry.ero)}</code>: ${escapeHtml(entry.kialo)}</li>`,
+        ),
+        ...use.composes.never.map(
+          (entry) =>
+            `<li>nie mit <code>${escapeHtml(entry.ero)}</code>: ${escapeHtml(entry.kialo)}</li>`,
+        ),
+        `<li>Abstand: beim ${escapeHtml(use.composes.spacing.owner)} (<code>${escapeHtml(use.composes.spacing.regulo.name)}</code>)</li>`,
+      ].join("");
+      const slots = Object.entries(use.slots).map(
+        ([slot, rule]) =>
+          `<tr><th scope="row"><code>${escapeHtml(slot)}</code></th><td>${escapeHtml((rule.accepts ?? []).join(", "))}</td><td>${rule.max ?? "–"}</td><td>${rule.nesting ?? "–"}</td></tr>`,
+      );
+      const allowances = Object.entries(use.layout)
+        .flatMap(([prop, allowance]) => {
+          if (typeof allowance !== "object") return [];
+          const places = [
+            ...(allowance.allowedIn.containers ?? []).map((name) => `Container ${name}`),
+            ...Object.entries(allowance.allowedIn.dimensioj ?? {}).flatMap(([dimensio, values]) =>
+              values.map((value) => `${dimensio}=${value}`),
+            ),
+          ];
+          return [
+            `<li><code>${escapeHtml(prop)}</code> nur in ${escapeHtml(places.join(" oder "))} (<code>${escapeHtml(allowance.regulo.name)}</code>): ${escapeHtml(allowance.regulo.kialo)}</li>`,
+          ];
+        })
+        .join("");
+      const text = use.content
+        .map(
+          (rule) =>
+            `<li><strong>${escapeHtml(rule.regulo.name)}</strong> (${rule.fixed ? "fest" : "anpassbar"}): ${escapeHtml(rule.regulo.statement)} <em>${escapeHtml(rule.regulo.kialo)}</em></li>`,
+        )
+        .join("");
+      return `<article><h3>${escapeHtml(ero)}</h3><p>${escapeHtml(use.purpose)}</p><h4>Wann nehme ich den ${escapeHtml(capitalised(ero))} nicht?</h4><ul>${boundaries}</ul><h4>Zusammen mit</h4><ul>${together}</ul>${table("Slots", ["Slot", "nimmt auf", "max", "Verschachtelung"], slots)}<h4>Layout</h4><p>Größe aus dem ${use.layout.size === "content" ? "Inhalt" : "Container"}, Label ${use.layout.wrap === "never" ? "bricht nie um" : "darf umbrechen"}.</p><ul>${allowances}</ul><h4>Text</h4><ul>${text}</ul></article>`;
+    })
+    .join("");
+}
+
 const table = (caption: string, head: readonly string[], rows: readonly string[]): string =>
   `<table><caption>${escapeHtml(caption)}</caption><thead><tr>${head
     .map((cell) => `<th scope="col">${escapeHtml(cell)}</th>`)
@@ -136,6 +202,7 @@ export function vitrinoHtml({ css, elementJs, datumoj }: VitrinoInput): string {
 ${section("paletroj", "Paletten", paletroj(datumoj))}
 ${section("roloj", "Flächen, Text, Status und Aktionen", roles)}
 ${section("butono", "butono", datumoj.butono)}
+${section("uzo", "Gebrauch", uzo(datumoj))}
 ${section("kontrasto", "Kontrastmatrix", '<div id="fm-vitrino-kontrasto-tabelo"></div>')}
 ${section("regularo", "Regularo und Ziele", '<div id="fm-vitrino-regularo-tabelo"></div>')}
 ${section("kovrado", "Eigene Werte je Dimensio", '<div id="fm-vitrino-kovrado-tabelo"></div>')}

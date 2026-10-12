@@ -385,6 +385,71 @@
           "butono"
         ]
       }
+    },
+    {
+      "id": "reg_01M4RPB19GDEJE9T2S21VNRE0H",
+      "name": "spacing-owned-by-container",
+      "statement": "The space between sibling Eroj belongs to their container; an Ero carries no outer spacing.",
+      "kialo": "An Ero does not know its neighbours. If each one brought its own distance, two Eroj side by side would add up their distances, and the rhythm of a view would depend on which Ero stands where.",
+      "scope": "eroj: butono and every Ero beside it in a container; the gap of the container, never a margin of the Ero (Regulo candidate, Spec 007 A4)",
+      "checkability": "manual",
+      "appliesTo": {
+        "eroj": [
+          "butono"
+        ]
+      }
+    },
+    {
+      "id": "reg_01M4RPB19HEMSFTRDZNPTHJV7N",
+      "name": "full-width-in-action-bar-or-compact",
+      "statement": "A butono takes the full inline size only in a container of kind action-bar or under viewport=compact.",
+      "kialo": "A full-width button claims the whole row. It reads as the single next step, which is right at the end of a narrow view or in a bar of actions, and wrong anywhere else, where it pushes every other action out of sight.",
+      "scope": "eroj: butono instances with full-width in a design or in code (check_usage); the Uzo names the containers and Dimensio values that allow it",
+      "checkability": "automatic",
+      "appliesTo": {
+        "eroj": [
+          "butono"
+        ]
+      }
+    },
+    {
+      "id": "reg_01M4RPB19HEMSFTRDZNPTHJV7P",
+      "name": "label-names-action",
+      "statement": "The label of a butono names its action as a verb.",
+      "kialo": "A person decides from the label alone what happens on activation. A verb says it; a noun or a mood makes them guess.",
+      "scope": "eroj: butono instances with a label; checked against the keywords of the Skemo's goals, so it only warns until a better check exists (plan D-02)",
+      "checkability": "automatic",
+      "appliesTo": {
+        "eroj": [
+          "butono"
+        ]
+      }
+    },
+    {
+      "id": "reg_01M4RPB19HEMSFTRDZNPTHJV7Q",
+      "name": "destructive-label-names-object",
+      "statement": "A destructive label names what it destroys.",
+      "kialo": "\"Löschen\" alone does not say whether the draft, the project or the account goes. Only the object makes the consequence clear before it cannot be undone.",
+      "scope": "eroj: butono instances whose goal is destructive or whose label is a destructive keyword of the Skemo; fixed, no Aspekto overrides it (Uzo content)",
+      "checkability": "automatic",
+      "appliesTo": {
+        "eroj": [
+          "butono"
+        ]
+      }
+    },
+    {
+      "id": "reg_01M4RPB19HEMSFTRDZNPTHJV7R",
+      "name": "destructive-label-not-generic",
+      "statement": "A destructive action is never labelled with a generic confirmation (OK, Ja, Yes).",
+      "kialo": "A generic word confirms whatever the person thinks they are confirming. Before a loss that cannot be undone, the label must say the loss.",
+      "scope": "eroj: butono instances whose goal is destructive or whose label is a destructive keyword of the Skemo; fixed, no Aspekto overrides it (Uzo content)",
+      "checkability": "automatic",
+      "appliesTo": {
+        "eroj": [
+          "butono"
+        ]
+      }
     }
   ]
 }

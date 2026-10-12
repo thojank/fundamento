@@ -14,5 +14,15 @@
         "Latn"
       ]
     }
-  ]
+  ],
+  "tavoloj": {
+    "lingvo": {
+      "overrides": [
+        {
+          "regulo": "label-names-action",
+          "jugxo": "jug_ekz_01M4RQ7GHM00275HN6PD79154N"
+        }
+      ]
+    }
+  }
 }

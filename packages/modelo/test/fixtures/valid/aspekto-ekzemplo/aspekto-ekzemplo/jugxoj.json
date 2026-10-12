@@ -1,0 +1,15 @@
+{
+  "jugxoj": [
+    {
+      "id": "jug_ekz_01M4RQ7GHM00275HN6PD79154N",
+      "ref": {
+        "regulo": "reg_01M4RPB19HEMSFTRDZNPTHJV7P"
+      },
+      "aspekto": "ekzemplo",
+      "decision": "deviation-recorded",
+      "kialo": "Ekzemplo speaks playfully: a start button may say Los geht's! instead of naming the verb, because the brand's voice carries the invitation and the surrounding screen says what starts. The rule is adjustable; the fixed rules for destructive labels stay untouched.",
+      "date": "2026-10-12",
+      "context": "Override of the adjustable text rule label-names-action by the test Aspekto ekzemplo (Spec 007 T024, S4, data-model §7)."
+    }
+  ]
+}

@@ -154,6 +154,11 @@ export function buildModeloJson(input: ModeloExportInput): ModeloJson {
       if (pkg.license !== undefined) entry.license = pkg.license;
       if (pkg.namespace !== undefined) entry.idNamespace = pkg.namespace;
       if (pkg.fonts !== undefined) entry.fonts = structuredClone(pkg.fonts);
+      // Spec 007 (D-03): the overrides travel with the export, so check_usage over a served
+      // export knows them; absent when the package overrides nothing, so an export without
+      // overrides keeps its bytes.
+      if (pkg.overrides !== undefined && pkg.overrides.length > 0)
+        entry.overrides = structuredClone(pkg.overrides);
       return [entry];
     }),
   ];

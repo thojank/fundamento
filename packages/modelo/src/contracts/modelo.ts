@@ -12,6 +12,7 @@ import type {
   IdsLock,
   Jugxo,
   KontrastParo,
+  LingvoOverride,
   Manko,
   Regulo,
   Rezolvo,
@@ -108,6 +109,11 @@ export interface LoadedAspektoPackage {
   fonts?: Fonto[];
   /** `aspiroj` from `aspekto.json`: the design goals this brand sets itself (Spec 004). */
   aspiroj?: AspektoAspiro[];
+  /**
+   * `tavoloj.lingvo.overrides` from `aspekto.json`: the adjustable text rules this Aspekto
+   * overrides, each with the Jugxo that records the deviation (Spec 007, A7, D-03).
+   */
+  overrides?: LingvoOverride[];
   /** `aspekto.json` path relative to the Modelo root. */
   aspektoFile: string;
   /** `ids.lock.json` path relative to the Modelo root. */

@@ -66,8 +66,9 @@ function propIssue(
 }
 
 /**
- * The Aspekto or the first Dimensio value of an instance the Modelo does not know (D-04). Slots
- * and the layout of the Uzo are judged in Stufe B (T024); here they are only input.
+ * The Aspekto or the first Dimensio value of an instance the Modelo does not know (D-04). What
+ * stands in the slots is judged by `evaluateUsage` against the Uzo (T024); only a slot the Skemo
+ * does not have is invalid input (`slotIssue`).
  */
 function contextIssue(
   modelo: Modelo,
@@ -117,6 +118,27 @@ function contextIssue(
   return undefined;
 }
 
+/** The first slot of an instance its Skemo does not have (Spec 007, A5): invalid input. */
+function slotIssue(
+  skemo: Skemo,
+  instance: EroInstance,
+  index: number,
+): { issue: ValidationIssue; allowed: string[] } | undefined {
+  const slots = skemo.slots.map((slot) => slot.name);
+  for (const name of Object.keys(instance.slots ?? {})) {
+    if (slots.includes(name)) continue;
+    return {
+      issue: invalid(
+        `check_usage/instances/${index}/slots/${name}`,
+        `The Ero ${instance.ero} has no slot ${name}.`,
+        "Use one of the slots in allowed; get_ero lists them, and its Uzo says what each accepts.",
+      ),
+      allowed: slots,
+    };
+  }
+  return undefined;
+}
+
 export function checkUsage(modelo: Modelo, input: CheckUsageInput): CheckUsageResult {
   const byName = new Map(modelo.eroj.map((entry) => [entry.ero.name, entry]));
   for (const [index, instance] of input.instances.entries()) {
@@ -127,7 +149,8 @@ export function checkUsage(modelo: Modelo, input: CheckUsageInput): CheckUsageRe
     // An unknown Ero is a finding of the evaluation (ero-unknown), not invalid input.
     const entry = byName.get(instance.ero);
     if (entry === undefined) continue;
-    const found = propIssue(entry.skemo, instance, index);
+    const found =
+      propIssue(entry.skemo, instance, index) ?? slotIssue(entry.skemo, instance, index);
     if (found !== undefined) return { ok: false, issues: [found.issue], allowed: found.allowed };
   }
   return { ok: true, output: evaluateUsage(modelo, input.instances) };
