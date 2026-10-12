@@ -190,7 +190,8 @@ describe("the set carries the purpose of the Uzo as its description (T028)", () 
     const set = double.root.children[0]?.children.find((child) => child.name === "butono");
     const planned = plan.components.find((component) => component.set === "butono");
     expect(planned?.description).toBeDefined();
-    expect(set?.properties.description).toBe(planned?.description);
+    // Befund B1: description and descriptionMarkdown are one field; the purpose is its first line.
+    expect(String(set?.properties.description).split("\n")[0]).toBe(planned?.description);
   });
 });
 
@@ -239,6 +240,9 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
     const result = await report(double);
     const set = double.root.children[0]?.children.find((child) => child.name === "butono");
     expect(set?.properties.descriptionMarkdown).toBe(planned?.uzo?.markdown);
+    // Befund B1 (Maintainer, f10b-5, 2026-10-12): Markdown and description are one field, so
+    // the purpose (T028) has to be the first line of what T029 writes, or it is gone.
+    expect(String(set?.properties.description).split("\n")[0]).toBe(planned?.description);
     const butono = result.components.find((component) => component.set === "butono");
     expect(butono?.uzo?.status).toBe("closed");
     expect(result.mankoj.open).toEqual([]);

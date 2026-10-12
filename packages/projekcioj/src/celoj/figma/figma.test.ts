@@ -157,6 +157,9 @@ describe("Figma plan (T015)", () => {
     const uzo = prepared.input.modelo.eroj.find((entry) => entry.ero.name === "butono")?.uzo;
     expect(set?.uzo?.field).toBe("descriptionMarkdown");
     expect(set?.uzo?.parts).toEqual(["boundary", "slots", "content"]);
+    // Befund B1: the Markdown replaces the description, so its first line is the purpose.
+    expect(set?.uzo?.markdown.split("\n")[0]).toBe(uzo?.purpose);
+    expect(set?.uzo?.markdown.split("\n")[0]).toBe(set?.description);
     for (const boundary of uzo?.boundary ?? []) {
       expect(set?.uzo?.markdown).toContain(boundary.case);
       expect(set?.uzo?.markdown).toContain(boundary.kialo);

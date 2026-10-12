@@ -188,8 +188,11 @@ export type UzoPart = "boundary" | "slots" | "content";
 export const UZO_FIELD = "descriptionMarkdown" as const;
 
 /**
- * The boundaries, slot rules and text rules of a Uzo as Markdown (T029): the words of the rules,
- * not their enforcement — a description tells a designer, it does not stop an instance.
+ * The purpose, then the boundaries, slot rules and text rules of a Uzo as Markdown (T029): the
+ * words of the rules, not their enforcement — a description tells a designer, it does not stop
+ * an instance. The purpose is the first line (Befund B1, measured 2026-10-12 in f10b-5):
+ * `descriptionMarkdown` and `description` are one field in Figma, so what T029 writes is what
+ * the set shows, and the purpose of T028 would otherwise be gone.
  */
 export function uzoMarkdown(uzo: Uzo, reguloj: readonly Regulo[]): string {
   const statement = (name: string) => reguloj.find((regulo) => regulo.name === name)?.statement;
@@ -211,6 +214,8 @@ export function uzoMarkdown(uzo: Uzo, reguloj: readonly Regulo[]): string {
       `- **${rule.regulo}** (${rule.fixed ? "fixed" : "adjustable"}): ${statement(rule.regulo) ?? ""}`,
   );
   return [
+    uzo.purpose.replace(/\s*\n\s*/g, " ").trim(),
+    "",
     "## Not for this",
     ...notFor,
     "",

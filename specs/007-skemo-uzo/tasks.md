@@ -167,7 +167,7 @@ Die Achsennamen in Stufe B sind die nach F1.
   - Grün: `celoj/figma/figma.ts`, `plugin.ts`.
 - [x] **T029 Figma: Slot-Regeln, Grenzen und Text-Regeln versuchen und messen** (A12, D-10, OP-9)
   - Rot: Gegen zwei Doubles, wie in Spec 005 A6: Lehnt das Double eine Eigenschaft ab, meldet der Bericht die Manko als `open`. Nimmt es sie an, meldet er sie als `closed`. Rot, weil der Lauf heute nichts davon versucht.
-  - Messung in echtem Figma (Maintainer oder P0 mit dem Testkonto). Erst mit dem Beleg im Wortlaut entstehen die Mankoj in `mankoj.json`, mit Schließbedingung. **Stand PR #52:** gegen die Doubles gebaut (Feld `descriptionMarkdown`, Teile boundary, slots, content; Bericht `mankoj.open`/`closed` mit dem Wortlaut des Werkzeugs). Messung in echtem Figma durch den Maintainer in `f10b-5` (neue Datei, Weg aus #50); bis dahin offen, keine Manko in `mankoj.json`.
+  - Messung in echtem Figma (Maintainer oder P0 mit dem Testkonto). Erst mit dem Beleg im Wortlaut entstehen die Mankoj in `mankoj.json`, mit Schließbedingung. **Stand PR #52:** gegen die Doubles gebaut (Feld `descriptionMarkdown`, Teile boundary, slots, content; Bericht `mankoj.open`/`closed` mit dem Wortlaut des Werkzeugs). Messung in echtem Figma durch den Maintainer in `f10b-5` (neue Datei, Weg aus #50): 2026-10-12, 21:35, Build 621780f – `descriptionMarkdown` angenommen, keine offene Manko (`messung-stufe-b-abnahme-2026-10-12.md`). **Befund B1:** `description` und `descriptionMarkdown` sind in Figma ein Feld, das Markdown aus T029 hatte den Zweck aus T028 überschrieben; behoben: der Zweck ist die erste Zeile des Markdown, das Plugin schreibt bei vorhandenem Markdown nur dieses (Rot zuerst am Double, das jetzt ein Feld modelliert).
 
 ### B.4 Abnahme und Abschluss
 

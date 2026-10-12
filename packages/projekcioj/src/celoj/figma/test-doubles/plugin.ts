@@ -536,6 +536,12 @@ function node(
           );
         }
       }
+      // Gemessen 2026-10-12 (Datei f10b-5, Befund B1): description und descriptionMarkdown sind
+      // in Figma ein Feld; der zuletzt geschriebene Markdown ist, was die Beschreibung zeigt.
+      if (key === "descriptionMarkdown" && typeof value === "string") {
+        target.properties.description = value;
+        target.defaults.delete("description");
+      }
       if (typeof key === "string" && !(key in target)) {
         target.properties[key] =
           (key === "fills" || key === "strokes") && Array.isArray(value)

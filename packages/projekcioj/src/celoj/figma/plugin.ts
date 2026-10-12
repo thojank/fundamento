@@ -1066,8 +1066,11 @@ async function applyComponents(variables, warnings) {
       write(set, "name", component.set);
     }
     // The purpose of the Uzo as the set's description (Spec 007 T028): one line, written only
-    // when it does not hold yet, like every other field.
-    if (typeof component.description === "string") {
+    // when it does not hold yet, like every other field. Gemessen 2026-10-12 (f10b-5, Befund
+    // B1): description und descriptionMarkdown sind in Figma ein Feld. Trägt der Plan Markdown
+    // (T029), steht der Zweck als dessen erste Zeile, und nur das Markdown wird geschrieben;
+    // sonst schriebe jeder Lauf erst den Zweck, dann das Markdown darüber.
+    if (typeof component.description === "string" && component.uzo === undefined) {
       write(set, "description", component.description);
     }
     // Beyond the purpose (Spec 007 T029, Art. VI): the boundaries, slot rules and text rules are
@@ -1090,6 +1093,10 @@ async function applyComponents(variables, warnings) {
           status: "open",
           evidence: String(error && error.message ? error.message : error),
         };
+        // Refused: the purpose still has to stand, so the plain description carries it (T028).
+        if (typeof component.description === "string") {
+          write(set, "description", component.description);
+        }
       }
     }
     // Das Set steht in keinem eigenen Modus (F35). Gemessen trug es nach zwei Läufen
