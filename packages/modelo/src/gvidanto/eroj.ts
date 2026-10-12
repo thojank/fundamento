@@ -77,7 +77,7 @@ export interface GetEroOutput {
     parts: Skemo["parts"];
     bindings: Skemo["bindings"];
     a11y: Skemo["a11y"];
-    intents?: Skemo["intents"];
+    goals?: Skemo["goals"];
   };
   reguloj: ReguloRef[];
   examples: EroExample[];
@@ -298,7 +298,7 @@ export function getEro(modelo: Modelo, input: GetEroInput): GetEroResult {
         parts: skemo.parts,
         bindings: skemo.bindings,
         a11y: skemo.a11y,
-        ...(skemo.intents === undefined ? {} : { intents: skemo.intents }),
+        ...(skemo.goals === undefined ? {} : { goals: skemo.goals }),
       },
       reguloj: regulojOf(modelo, entry.ero.name).map(reguloRef),
       examples: examplesOf(modelo, entry),

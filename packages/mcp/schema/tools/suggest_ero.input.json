@@ -2,10 +2,10 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ciferecigo.com/fundamento/schema/mcp/suggest_ero.input.json",
   "title": "suggest_ero input",
-  "description": "Which Ero and which props an action asks for: give the action in one word or one sentence (\"Löschen\"). Deterministic, from the intents of the Skemoj; lingvo limits the keywords to one language.",
+  "description": "Which Ero and which props a goal asks for: give the goal in one word or one sentence (\"Löschen\"). Deterministic, from the goals of the Skemoj; lingvo limits the keywords to one language. The parameter is goal since F1-T00 (Spec 007, OP-4): intent is a prop.",
   "type": "object",
   "properties": {
-    "intent": {
+    "goal": {
       "type": "string",
       "minLength": 1
     },
@@ -13,6 +13,6 @@
       "enum": ["en", "de"]
     }
   },
-  "required": ["intent"],
+  "required": ["goal"],
   "additionalProperties": false
 }

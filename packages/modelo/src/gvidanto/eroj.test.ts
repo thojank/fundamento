@@ -51,7 +51,7 @@ describe("get_ero", () => {
       parts: butono.skemo.parts,
       bindings: butono.skemo.bindings,
       a11y: butono.skemo.a11y,
-      intents: butono.skemo.intents,
+      goals: butono.skemo.goals,
     });
   });
 

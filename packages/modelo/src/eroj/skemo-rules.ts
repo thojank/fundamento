@@ -178,7 +178,7 @@ export function skemoIssues(modelo: Modelo, files: ModeloFiles): ValidationIssue
     // Pairs with a missing or mistyped token are reported by the token rules only.
     if (keysValid) pairIssues(entry, pairs, invalidTokens, at);
     constraintIssues(entry, at);
-    intentIssues(entry, reguloNames, at);
+    goalIssues(entry, reguloNames, at);
   }
   issues.push(...ekzemploIssues(modelo, files));
   issues.push(...uzoIssues(modelo, files));
@@ -405,19 +405,19 @@ function constraintIssues(entry: LoadedEro, at: At): void {
   });
 }
 
-/** `skemo-intent-invalid`: props and values exist, no constraint is violated, the Regulo exists. */
-function intentIssues(entry: LoadedEro, reguloNames: ReadonlySet<string>, at: At): void {
+/** `skemo-goal-invalid`: props and values exist, no constraint is violated, the Regulo exists. */
+function goalIssues(entry: LoadedEro, reguloNames: ReadonlySet<string>, at: At): void {
   const { ero, skemo } = entry;
-  (skemo.intents ?? []).forEach((intent, index) => {
+  (skemo.goals ?? []).forEach((goal, index) => {
     const combination: Record<string, string> = {};
-    for (const [key, value] of Object.entries(intent.props)) {
-      const pointer = appendPointer(`/skemo/intents/${index}/props`, key);
+    for (const [key, value] of Object.entries(goal.props)) {
+      const pointer = appendPointer(`/skemo/goals/${index}/props`, key);
       const problem = propValueProblem(skemo, key, value);
       if (problem !== undefined) {
         at(
           pointer,
-          "skemo-intent-invalid",
-          `Intent ${intent.intent} of ${ero.name} sets ${key}=${String(value)}; ${problem}.`,
+          "skemo-goal-invalid",
+          `Goal ${goal.goal} of ${ero.name} sets ${key}=${String(value)}; ${problem}.`,
           "Use a prop and value the Skemo allows.",
         );
       } else {
@@ -427,17 +427,17 @@ function intentIssues(entry: LoadedEro, reguloNames: ReadonlySet<string>, at: At
     const forbidden = forbiddenBy(skemo, combination);
     if (forbidden !== undefined) {
       at(
-        `/skemo/intents/${index}/props`,
-        "skemo-intent-invalid",
-        `Intent ${intent.intent} of ${ero.name} sets ${describeCombination(combination, Object.keys(combination))}, which a constraint forbids: ${forbidden.kialo}`,
+        `/skemo/goals/${index}/props`,
+        "skemo-goal-invalid",
+        `Goal ${goal.goal} of ${ero.name} sets ${describeCombination(combination, Object.keys(combination))}, which a constraint forbids: ${forbidden.kialo}`,
         "Suggest a combination the constraints allow.",
       );
     }
-    if (intent.regulo !== undefined && !reguloNames.has(intent.regulo)) {
+    if (goal.regulo !== undefined && !reguloNames.has(goal.regulo)) {
       at(
-        `/skemo/intents/${index}/regulo`,
-        "skemo-intent-invalid",
-        `Intent ${intent.intent} of ${ero.name} cites the Regulo ${intent.regulo}, which does not exist.`,
+        `/skemo/goals/${index}/regulo`,
+        "skemo-goal-invalid",
+        `Goal ${goal.goal} of ${ero.name} cites the Regulo ${goal.regulo}, which does not exist.`,
         "Cite the name of an existing Regulo (list_reguloj).",
       );
     }

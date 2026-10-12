@@ -30,10 +30,10 @@ const reguloNamed = (name: string) => {
   if (regulo === undefined) throw new Error(`no Regulo ${name}`);
   return regulo;
 };
-const intentNamed = (name: string) => {
-  const intent = (skemo.intents ?? []).find((entry) => entry.intent === name);
-  if (intent === undefined) throw new Error(`no intent ${name}`);
-  return intent;
+const goalNamed = (name: string) => {
+  const goal = (skemo.goals ?? []).find((entry) => entry.goal === name);
+  if (goal === undefined) throw new Error(`no goal ${name}`);
+  return goal;
 };
 const valuesOf = (prop: string) => {
   const found = skemo.props.find((entry) => entry.name === prop);
@@ -51,16 +51,16 @@ beforeAll(async () => {
 
 describe("AK-09: the Phase-3 dialog with ekzemplo", () => {
   it("'Welchen Button nehme ich für Löschen?': suggest_ero names variant, tone and the Regulo", async () => {
-    const destructive = intentNamed("destructive");
+    const destructive = goalNamed("destructive");
     const regulo = reguloNamed(String(destructive.regulo));
     const answer = await output<{
-      matched: { intent: string; keyword: string; lingvo: string } | null;
+      matched: { goal: string; keyword: string; lingvo: string } | null;
       suggestion: { ero: string; props: Record<string, string> } | null;
       kialo?: string;
       regulo?: { id: string; name: string; kialo: string };
-    }>(client, "suggest_ero", { intent: "Löschen" });
+    }>(client, "suggest_ero", { goal: "Löschen" });
 
-    expect(answer.matched?.intent).toBe(destructive.intent);
+    expect(answer.matched?.goal).toBe(destructive.goal);
     expect(answer.matched?.keyword).toBe("löschen");
     expect(answer.suggestion).toEqual({
       ero: "butono",

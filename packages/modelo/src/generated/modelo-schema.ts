@@ -778,7 +778,10 @@ export interface EroInstance {
     [k: string]: string | number | boolean;
   };
   container?: string;
-  intent?: Name;
+  /**
+   * The goal of the instance, a goal of its Skemo (destructive, confirm, dismiss). Called goal since F1-T00 (Spec 007, OP-4); intent is a prop.
+   */
+  goal?: string;
   label?: string;
   /**
    * The Aspekto the instance is shown in; its overrides of adjustable text rules apply (Spec 007, A10).
@@ -1067,7 +1070,10 @@ export interface Skemo {
   bindings: SkemoBinding[];
   a11y: SkemoA11Y;
   constraints?: SkemoConstraint[];
-  intents?: SkemoIntent[];
+  /**
+   * The goals a user may have with the Ero (delete, save, cancel); suggest_ero matches a word of the user against their keywords. Called goals, not intents, so that the word intent is free for a prop (Spec 007, OP-4, F1-T00).
+   */
+  goals?: SkemoGoal[];
 }
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema
@@ -1145,10 +1151,10 @@ export interface SkemoConstraint {
 }
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema
- * via the `definition` "SkemoIntent".
+ * via the `definition` "SkemoGoal".
  */
-export interface SkemoIntent {
-  intent: Name;
+export interface SkemoGoal {
+  goal: Name;
   keywords: Keywords;
   props: {
     [k: string]: string | number | boolean;

@@ -337,9 +337,9 @@ const EXAMPLES: Record<string, { input: unknown; output: unknown; badInput: unkn
           },
         ],
         a11y: { role: "button", name: ["slot:label"], states: {}, keys: ["Enter"] },
-        intents: [
+        goals: [
           {
-            intent: "destructive",
+            goal: "destructive",
             keywords: { de: ["löschen"] },
             props: { variant: "primary", tone: "danger" },
           },
@@ -386,15 +386,15 @@ const EXAMPLES: Record<string, { input: unknown; output: unknown; badInput: unkn
     badInput: {},
   },
   suggest_ero: {
-    input: { intent: "Löschen" },
+    input: { goal: "Löschen" },
     output: {
-      intent: "Löschen",
-      matched: { intent: "destructive", keyword: "löschen", lingvo: "de" },
+      goal: "Löschen",
+      matched: { goal: "destructive", keyword: "löschen", lingvo: "de" },
       suggestion: { ero: "butono", props: { variant: "primary", tone: "danger" } },
       kialo: REGULO_REF.kialo,
       regulo: REGULO_REF,
     },
-    badInput: { intent: "Löschen", lingvo: "fr" },
+    badInput: { goal: "Löschen", lingvo: "fr" },
   },
   check_usage: {
     input: { instances: [{ ero: "butono", props: { variant: "primary" }, label: "Speichern" }] },

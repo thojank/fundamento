@@ -109,8 +109,8 @@ describe("Uzo rules without a fixture of their own (T012)", () => {
     expect(issues).toEqual([{ rule: "uzo-skemo-missing", path: `${UZO}#/uzo/skemo` }]);
   });
 
-  // data-model §9: until F1-T00 the goals of a text rule are checked against Skemo.intents.
-  it("intent-unknown: a text rule applies to a goal the Skemo does not know", () => {
+  // data-model §9: since F1-T00 the goals of a text rule are checked against Skemo.goals.
+  it("goal-unknown: a text rule applies to a goal the Skemo does not know", () => {
     const issues = issuesWith((file) => {
       file.uzo.content = [
         {
@@ -122,11 +122,11 @@ describe("Uzo rules without a fixture of their own (T012)", () => {
       ];
     });
     expect(issues).toContainEqual({
-      rule: "intent-unknown",
+      rule: "goal-unknown",
       path: `${UZO}#/uzo/content/0/when/goal/0`,
     });
     expect(issues).toContainEqual({
-      rule: "intent-unknown",
+      rule: "goal-unknown",
       path: `${UZO}#/uzo/content/0/check/goal`,
     });
   });

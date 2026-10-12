@@ -1,6 +1,6 @@
 // Ero Reguloj and the usage evaluation (Spec 003 T006; FR-03, plan D-04, data-model §3). The
 // Reguloj come from the repo's data/reguloj.json, so their kialoj are the stored ones; the Skemo
-// is a copy of valid/ero-minimal with the butono props, the danger constraint and the intents.
+// is a copy of valid/ero-minimal with the butono props, the danger constraint and the goals.
 
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
@@ -38,9 +38,9 @@ const root = mutatedFixture("ero-minimal", (edit) => {
     file.skemo.constraints = [
       { when: { tone: "danger" }, allowed: { variant: ["primary"] }, kialo: "Filled danger only." },
     ];
-    file.skemo.intents = [
+    file.skemo.goals = [
       {
-        intent: "destructive",
+        goal: "destructive",
         keywords: { en: ["delete"], de: ["löschen", "entfernen"] },
         props: { variant: "primary", tone: "danger" },
         regulo: "destructive-not-primary-color",
@@ -112,10 +112,10 @@ describe("evaluateUsage (T006)", () => {
     ).toEqual([]);
   });
 
-  it("destructive-not-primary-color: primary + default fails, by intent and by label", () => {
+  it("destructive-not-primary-color: primary + default fails, by goal and by label", () => {
     expect(
       rulesOf([
-        button({ variant: "primary" }, { intent: "destructive", container: "a" }),
+        button({ variant: "primary" }, { goal: "destructive", container: "a" }),
         button({ variant: "primary" }, { label: "Löschen", container: "b" }),
       ]),
     ).toEqual([
@@ -127,7 +127,7 @@ describe("evaluateUsage (T006)", () => {
   it("destructive-not-primary-color: primary + danger and secondary + default pass", () => {
     expect(
       rulesOf([
-        button({ variant: "primary", tone: "danger" }, { intent: "destructive", container: "a" }),
+        button({ variant: "primary", tone: "danger" }, { goal: "destructive", container: "a" }),
         button({}, { label: "Löschen", container: "b" }),
       ]),
     ).toEqual([]);

@@ -34,6 +34,14 @@ describe("prompt gvidanto", () => {
     }
   });
 
+  // F1-T00 (Spec 007, OP-4): the goal is `goal`; `intent` is a prop of the butono after F1.
+  it("rule 9 asks suggest_ero for the goal in the user's words", () => {
+    expect(text).toMatch(
+      /From a goal to a component: call `suggest_ero` with the goal in the words the user uses/,
+    );
+    expect(text).not.toMatch(/From an action to a component/);
+  });
+
   it("asks for check_usage before a handover (Spec 003 T025)", () => {
     expect(text).toMatch(/Before you hand over a design or code, call `check_usage`/);
   });

@@ -207,7 +207,7 @@
       "name": "destructive-not-primary-color",
       "statement": "An action that destroys data is never a butono with variant=primary and tone=default: as the main action (a confirmation dialog) it is primary with tone=danger, next to another primary action it is secondary.",
       "kialo": "The primary colour promises the expected next step; a destructive action needs a colour that warns before it acts, and a danger fill only where the destruction is the step the user came for.",
-      "scope": "eroj: butono instances whose intent is destructive or whose label is a destructive keyword of the Skemo",
+      "scope": "eroj: butono instances whose goal is destructive or whose label is a destructive keyword of the Skemo",
       "checkability": "automatic",
       "appliesTo": {
         "eroj": [

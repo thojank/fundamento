@@ -71,9 +71,9 @@ const MINIMAL_ERO_FILE = {
         kialo: "The danger tokens describe a filled surface.",
       },
     ],
-    intents: [
+    goals: [
       {
-        intent: "destructive",
+        goal: "destructive",
         keywords: { en: ["delete"], de: ["löschen"] },
         props: { variant: "primary", tone: "danger" },
         regulo: "destructive-not-primary-color",
@@ -121,9 +121,9 @@ describe("EroFile and Skemo (T004, data-model §2)", () => {
       },
     ],
     [
-      "an intent without keywords",
+      "a goal without keywords",
       (f: ReturnType<typeof clone>) => {
-        delete (f.skemo.intents[0] as Record<string, unknown>).keywords;
+        delete (f.skemo.goals[0] as Record<string, unknown>).keywords;
       },
     ],
     [
@@ -201,8 +201,14 @@ describe("rule catalog of Spec 003 (data-model §7)", () => {
     );
     const listed = [...section.matchAll(/`([a-z0-9-]+)`/g)].map((m) => m[1] ?? "");
     expect(listed.length).toBeGreaterThanOrEqual(17);
+    // Spec 003 describes the state of its time and stays unchanged; F1-T00 (Spec 007, OP-4)
+    // renamed the two rules about the goal, because `intent` is a prop after F1.
+    const RENAMED_BY_F1_T00: Record<string, string> = {
+      "skemo-intent-invalid": "skemo-goal-invalid",
+      "intent-unknown": "goal-unknown",
+    };
     for (const rule of listed) {
-      expect(RULE_IDS, rule).toContain(rule);
+      expect(RULE_IDS, rule).toContain(RENAMED_BY_F1_T00[rule] ?? rule);
     }
   });
 });

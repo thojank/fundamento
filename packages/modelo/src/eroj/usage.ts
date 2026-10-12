@@ -45,22 +45,23 @@ export function wordsOf(text: string): string[] {
 }
 
 /**
- * The Skemo intent a text names: the first intent (declaration order) one of whose keywords, in
- * any language, is a word of the text. Deterministic, no model (D-16).
+ * The Skemo goal a text names: the first goal (declaration order) one of whose keywords, in any
+ * language, is a word of the text. Deterministic, no model (D-16). Called goal since F1-T00
+ * (Spec 007, OP-4): `intent` is the name of a prop.
  */
-export function intentOf(
+export function goalOf(
   skemo: Skemo,
   text: string,
   options: { lingvo?: string } = {},
-): { intent: NonNullable<Skemo["intents"]>[number]; keyword: string; lingvo: string } | undefined {
+): { goal: NonNullable<Skemo["goals"]>[number]; keyword: string; lingvo: string } | undefined {
   const words = new Set(wordsOf(text));
-  for (const intent of skemo.intents ?? []) {
-    for (const [lingvo, keywords] of Object.entries(intent.keywords)) {
+  for (const goal of skemo.goals ?? []) {
+    for (const [lingvo, keywords] of Object.entries(goal.keywords)) {
       if (options.lingvo !== undefined && lingvo !== options.lingvo) continue;
       const keyword = keywords.find((candidate) =>
         words.has(candidate.normalize("NFC").toLowerCase()),
       );
-      if (keyword !== undefined) return { intent, keyword, lingvo };
+      if (keyword !== undefined) return { goal, keyword, lingvo };
     }
   }
   return undefined;
@@ -100,11 +101,11 @@ export const USAGE_ENFORCERS: Readonly<Record<string, UsageEnforcer>> = {
     instances.flatMap((instance, index) => {
       const ero = eroOf(instance);
       if (ero === undefined || !applies(regulo, ero)) return [];
-      const destructive = (ero.skemo.intents ?? []).find((intent) => intent.regulo === regulo.name);
+      const destructive = (ero.skemo.goals ?? []).find((goal) => goal.regulo === regulo.name);
       if (destructive === undefined) return [];
       const named =
-        instance.intent === destructive.intent ||
-        intentOf(ero.skemo, instance.label ?? "")?.intent === destructive;
+        instance.goal === destructive.goal ||
+        goalOf(ero.skemo, instance.label ?? "")?.goal === destructive;
       if (!named) return [];
       const props = effectiveProps(ero.skemo, instance.props);
       const primary = String(destructive.props.variant ?? "primary");

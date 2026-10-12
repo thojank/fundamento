@@ -2118,10 +2118,11 @@
             "$ref": "#/$defs/SkemoConstraint"
           }
         },
-        "intents": {
+        "goals": {
+          "description": "The goals a user may have with the Ero (delete, save, cancel); suggest_ero matches a word of the user against their keywords. Called goals, not intents, so that the word intent is free for a prop (Spec 007, OP-4, F1-T00).",
           "type": "array",
           "items": {
-            "$ref": "#/$defs/SkemoIntent"
+            "$ref": "#/$defs/SkemoGoal"
           }
         }
       },
@@ -2317,10 +2318,10 @@
       "required": ["when", "allowed", "kialo"],
       "additionalProperties": false
     },
-    "SkemoIntent": {
+    "SkemoGoal": {
       "type": "object",
       "properties": {
-        "intent": {
+        "goal": {
           "$ref": "#/$defs/Name"
         },
         "keywords": {
@@ -2349,7 +2350,7 @@
           "$ref": "#/$defs/Name"
         }
       },
-      "required": ["intent", "keywords", "props"],
+      "required": ["goal", "keywords", "props"],
       "additionalProperties": false
     },
     "EroFile": {
@@ -2837,7 +2838,8 @@
           "type": "string",
           "minLength": 1
         },
-        "intent": {
+        "goal": {
+          "description": "The goal of the instance, a goal of its Skemo (destructive, confirm, dismiss). Called goal since F1-T00 (Spec 007, OP-4); intent is a prop.",
           "$ref": "#/$defs/Name"
         },
         "label": {

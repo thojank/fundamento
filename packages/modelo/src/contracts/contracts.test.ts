@@ -114,6 +114,11 @@ describe("rule catalog (§2.6)", () => {
     expect(RULE_IDS).toContain("clean-room-spuro-file-missing");
     expect(RULE_IDS).toContain("parity-alpha-varies-by-mode");
     expect(RULE_IDS).toContain("jugxo-celo-unknown");
+    // F1-T00 (Spec 007, OP-4): the goal is `goal`, in the rule IDs too.
+    expect(RULE_IDS).toContain("goal-unknown");
+    expect(RULE_IDS).toContain("skemo-goal-invalid");
+    expect(RULE_IDS).not.toContain("intent-unknown");
+    expect(RULE_IDS).not.toContain("skemo-intent-invalid");
     expect(RULE_IDS).toContain("nomregulo-no-target");
     expect(RULE_IDS).toContain("id-namespace-mismatch");
     expect(RULE_IDS).toContain("id-namespace-duplicate");

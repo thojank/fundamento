@@ -124,13 +124,13 @@ function componentGuideline(
       return `| \`${prop.name}\` | ${values} | ${fallback} | ${prop.description ?? ""} |`;
     })
     .join("\n");
-  const intents = (skemo.intents ?? [])
-    .map((intent) => {
-      const props = Object.entries(intent.props)
+  const goals = (skemo.goals ?? [])
+    .map((goal) => {
+      const props = Object.entries(goal.props)
         .map(([key, value]) => `\`${key}=${String(value)}\``)
         .join(", ");
-      const words = Object.values(intent.keywords).flat().slice(0, 4).join(", ");
-      return `| ${intent.intent} | ${words} | ${props} | ${intent.regulo === undefined ? "–" : `\`${intent.regulo}\``} |`;
+      const words = Object.values(goal.keywords).flat().slice(0, 4).join(", ");
+      return `| ${goal.goal} | ${words} | ${props} | ${goal.regulo === undefined ? "–" : `\`${goal.regulo}\``} |`;
     })
     .join("\n");
   const rules = reguloj
@@ -160,11 +160,11 @@ ${props}
 States: ${states}. They come from the browser (hover, press, focus) or from \`disabled\` and
 \`loading\`; never style them yourself.
 
-## Which button for which intent
+## Which button for which goal
 
-| Intent | Words | Use | Rule |
+| Goal | Words | Use | Rule |
 |---|---|---|---|
-${intents}
+${goals}
 
 ## Rules
 

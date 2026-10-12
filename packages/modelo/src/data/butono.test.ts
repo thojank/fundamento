@@ -2,6 +2,9 @@
 // repo Modelo, bound only to role tokens, with its label-on-surface pairs declared, the danger
 // constraint, and examples right and wrong for every usage Regulo.
 
+import { readdirSync, readFileSync, statSync } from "node:fs";
+import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { combinationsOf, forbiddenBy } from "../eroj/skemo-rules.js";
 import { evaluateUsage } from "../eroj/usage.js";
@@ -93,5 +96,61 @@ describe("butono in the repo Modelo (T007)", () => {
   it("keeps visible strings out of the Skemo: labels live only in Jugxo examples", () => {
     const text = JSON.stringify(butono?.skemo);
     expect(text).not.toMatch(/Speichern|Löschen|Abbrechen|Save|Delete|Cancel/);
+  });
+});
+
+/** Every JSON file under a directory, recursively. */
+function jsonFilesUnder(dir: string): string[] {
+  const files: string[] = [];
+  for (const entry of readdirSync(dir)) {
+    const path = join(dir, entry);
+    if (statSync(path).isDirectory()) files.push(...jsonFilesUnder(path));
+    else if (entry.endsWith(".json")) files.push(path);
+  }
+  return files;
+}
+
+// F1-T00 (Spec 007, OP-4, data-model §9): the goal of a user is `goal` everywhere, so that after F1
+// the prop `intent` (neutral|danger) and the goal never share a word.
+describe("the goal is called goal (F1-T00)", () => {
+  it("names its goals under goals, one goal per entry, and has no intents", () => {
+    expect(butono?.skemo.goals?.map((goal) => goal.goal)).toEqual([
+      "destructive",
+      "confirm",
+      "dismiss",
+    ]);
+    expect(butono?.skemo).not.toHaveProperty("intents");
+  });
+
+  it("the word intent appears in data/ only as a prop name", () => {
+    const dataDir = fileURLToPath(new URL("../../data/", import.meta.url));
+    const files = jsonFilesUnder(dataDir);
+    expect(files.length).toBeGreaterThan(3);
+    // A key `intent`/`intents` may only name the prop: under props, when or allowed. The string
+    // "intent" may only be the prop's name or a key in `by`.
+    const PROP_PARENTS = new Set(["props", "when", "allowed"]);
+    const offending: string[] = [];
+    const visit = (value: unknown, pointer: string, parentKey: string | undefined) => {
+      if (Array.isArray(value)) {
+        value.forEach((item, index) => {
+          if (item === "intent" && parentKey !== "by") offending.push(`${pointer}/${index}`);
+          visit(item, `${pointer}/${index}`, parentKey);
+        });
+        return;
+      }
+      if (typeof value !== "object" || value === null) return;
+      const record = value as Record<string, unknown>;
+      for (const [key, child] of Object.entries(record)) {
+        if ((key === "intent" || key === "intents") && !PROP_PARENTS.has(parentKey ?? ""))
+          offending.push(`${pointer}/${key}`);
+        if (child === "intent" && !(key === "name" && "kind" in record))
+          offending.push(`${pointer}/${key}`);
+        visit(child, `${pointer}/${key}`, key);
+      }
+    };
+    for (const file of files) {
+      visit(JSON.parse(readFileSync(file, "utf8")), file.slice(dataDir.length), undefined);
+    }
+    expect(offending).toEqual([]);
   });
 });

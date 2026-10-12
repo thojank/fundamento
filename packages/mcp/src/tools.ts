@@ -460,7 +460,7 @@ const listErojTool: Tool = (served) => ok(listEroj(served.modelo));
 const getEroTool: Tool = (served, args) =>
   gvidanto(getEro(served.modelo, args as unknown as GetEroInput));
 
-/** suggest_ero (Spec 003 FR-13): the Ero and the props an intent asks for. */
+/** suggest_ero (Spec 003 FR-13): the Ero and the props a goal asks for (goal since F1-T00). */
 const suggestEroTool: Tool = (served, args) =>
   gvidanto(suggestEro(served.modelo, args as unknown as SuggestEroInput));
 

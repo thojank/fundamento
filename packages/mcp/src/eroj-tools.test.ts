@@ -37,17 +37,18 @@ describe("get_ero (FR-13)", () => {
 describe("suggest_ero (FR-13)", () => {
   it("returns what suggestEro computes", async () => {
     const { client, served } = await connect({ config: EKZEMPLO_CONFIG });
-    const direct = suggestEro(served.modelo, { intent: "Löschen" });
+    const direct = suggestEro(served.modelo, { goal: "Löschen" });
     if (!direct.ok) throw new Error("direct call failed");
-    expect(await output(client, "suggest_ero", { intent: "Löschen" })).toEqual(
-      plain(direct.output),
-    );
+    expect(await output(client, "suggest_ero", { goal: "Löschen" })).toEqual(plain(direct.output));
   });
 
-  it("answers an unknown intent with intent-unknown and the known intents", async () => {
+  it("answers an unknown goal with goal-unknown and the known goals", async () => {
     const { client } = await connect();
-    const result = await call(client, "suggest_ero", { intent: "hüpfen" });
+    const result = await call(client, "suggest_ero", { goal: "hüpfen" });
     expect(result.isError).toBe(true);
+    expect(result.structuredContent?.issues).toEqual([
+      expect.objectContaining({ rule: "goal-unknown", path: "suggest_ero/goal" }),
+    ]);
     expect(result.structuredContent?.allowed).toEqual(["destructive", "confirm", "dismiss"]);
   });
 });

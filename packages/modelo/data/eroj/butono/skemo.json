@@ -467,9 +467,9 @@
         "kialo": "The danger tokens describe a filled surface and its text; a danger label on a neutral surface has no tokens, and next to another primary action a destructive action is secondary."
       }
     ],
-    "intents": [
+    "goals": [
       {
-        "intent": "destructive",
+        "goal": "destructive",
         "keywords": {
           "en": ["delete", "remove", "destroy", "discard"],
           "de": ["löschen", "entfernen", "verwerfen"]
@@ -478,7 +478,7 @@
         "regulo": "destructive-not-primary-color"
       },
       {
-        "intent": "confirm",
+        "goal": "confirm",
         "keywords": {
           "en": ["save", "submit", "confirm", "continue"],
           "de": ["speichern", "senden", "bestätigen", "weiter"]
@@ -487,7 +487,7 @@
         "regulo": "one-primary-per-container"
       },
       {
-        "intent": "dismiss",
+        "goal": "dismiss",
         "keywords": {
           "en": ["cancel", "close", "back"],
           "de": ["abbrechen", "schließen", "zurück"]

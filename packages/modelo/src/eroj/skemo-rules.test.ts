@@ -16,7 +16,7 @@ type EroFile = {
     parts: Record<string, Record<string, Record<string, unknown>>>;
     bindings: { part: string; property: string; when?: Record<string, string>; token: string }[];
     constraints?: unknown[];
-    intents?: unknown[];
+    goals?: unknown[];
   };
 };
 
@@ -161,12 +161,12 @@ describe("Skemo ↔ Vortaro rules (T005)", () => {
     ]);
   });
 
-  it("skemo-intent-invalid: an intent with a value the prop does not allow and an unknown Regulo", () => {
+  it("skemo-goal-invalid: a goal with a value the prop does not allow and an unknown Regulo", () => {
     expect(
       issuesOf((file) => {
-        file.skemo.intents = [
+        file.skemo.goals = [
           {
-            intent: "confirm",
+            goal: "confirm",
             keywords: { en: ["save"] },
             props: { variant: "ghost" },
             regulo: "no-such-regulo",
@@ -175,14 +175,14 @@ describe("Skemo ↔ Vortaro rules (T005)", () => {
       }),
     ).toEqual([
       {
-        rule: "skemo-intent-invalid",
-        path: `${FILE}#/skemo/intents/0/props/variant`,
-        message: "Intent confirm of butono sets variant=ghost; variant allows primary.",
+        rule: "skemo-goal-invalid",
+        path: `${FILE}#/skemo/goals/0/props/variant`,
+        message: "Goal confirm of butono sets variant=ghost; variant allows primary.",
       },
       {
-        rule: "skemo-intent-invalid",
-        path: `${FILE}#/skemo/intents/0/regulo`,
-        message: "Intent confirm of butono cites the Regulo no-such-regulo, which does not exist.",
+        rule: "skemo-goal-invalid",
+        path: `${FILE}#/skemo/goals/0/regulo`,
+        message: "Goal confirm of butono cites the Regulo no-such-regulo, which does not exist.",
       },
     ]);
   });
