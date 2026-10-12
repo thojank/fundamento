@@ -15,6 +15,9 @@ export type Version = string;
  */
 export type DimensioId = string;
 /**
+ * This interface was referenced by `undefined`'s JSON-Schema definition
+ * via the `patternProperty` "^[a-z0-9]+(-[a-z0-9]+)*$".
+ *
  * This interface was referenced by `ModeloJson`'s JSON-Schema
  * via the `definition` "Name".
  */
@@ -807,6 +810,12 @@ export interface EroInstance {
    */
   lingvo?: string;
   /**
+   * The texts of the other text slots of the instance, by slot name (Spec 009, plan D-06): help, error. The label stays label.
+   */
+  texts?: {
+    [k: string]: string;
+  };
+  /**
    * The Aspekto the instance is shown in; its overrides of adjustable text rules apply (Spec 007, A10).
    */
   aspekto?: string;
@@ -1043,6 +1052,10 @@ export interface UzoLayoutAllowance {
 export interface UzoContent {
   regulo: Name;
   fixed: boolean;
+  /**
+   * The text the rule judges (Spec 009, plan D-06): a slot or a prop of the Skemo; default slot:label.
+   */
+  of?: string;
   severity?: "error" | "warning";
   when?: {
     /**
@@ -1053,6 +1066,14 @@ export interface UzoContent {
   check:
     | {
         kind: "names-goal";
+      }
+    | {
+        kind: "min-words";
+        count: number;
+      }
+    | {
+        kind: "max-sentences";
+        count: number;
       }
     | {
         kind: "not-instead";
@@ -1165,6 +1186,12 @@ export interface SkemoA11Y {
   };
   keys: string[];
   /**
+   * Where the accessible description comes from, in order (Spec 009 A1, plan D-02): slots or props, like name. The Web Celo renders it as aria-describedby.
+   *
+   * @minItems 1
+   */
+  description?: string[];
+  /**
    * What assistive technology hears in addition when a boolean prop is true (Spec 008 A1, plan D-02): per prop a text per language (ISO 639-1), never shown. The key must be a boolean prop of the Skemo (skemo-a11y-invalid); de and en are required.
    */
   texts?: {
@@ -1180,8 +1207,15 @@ export interface SkemoA11Y {
  * via the `definition` "SkemoConstraint".
  */
 export interface SkemoConstraint {
+  /**
+   * Prop values the constraint applies to; a key slot:<name> with filled or empty reads a slot (Spec 009, plan D-04).
+   */
   when: {
-    [k: string]: Name;
+    /**
+     * This interface was referenced by `undefined`'s JSON-Schema definition
+     * via the `patternProperty` "^slot:[a-z0-9]+(-[a-z0-9]+)*$".
+     */
+    [k: string]: "filled" | "empty" | Name;
   };
   allowed: {
     /**
