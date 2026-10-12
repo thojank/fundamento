@@ -49,7 +49,9 @@ describe("check_usage", () => {
 
   it("finds a destructive action in the primary colour and a forbidden combination", () => {
     const destructive = check([{ ero: "butono", props: { emphasis: "high" }, label: "Löschen" }]);
+    // Since Spec 007 (T021) "Löschen" alone also fails the fixed text rule: it names no object.
     expect(destructive.violations.map((entry) => entry.issue.rule)).toEqual([
+      "destructive-label-names-object",
       "destructive-not-primary-color",
     ]);
     const forbidden = check([

@@ -94,7 +94,10 @@ describe("butono in the repo Modelo (T007)", () => {
     (name) => {
       const regulo = modelo.reguloj.find((candidate) => candidate.name === name);
       const examples = modelo.jugxoj.filter((jugxo) => jugxo.ekzemplo?.regulo === regulo?.id);
-      expect(examples.map((jugxo) => jugxo.decision).sort()).toEqual(["approved", "rejected"]);
+      // At least one of each; the text rules carry one per language (Spec 007, A7).
+      expect(new Set(examples.map((jugxo) => jugxo.decision))).toEqual(
+        new Set(["approved", "rejected"]),
+      );
       for (const jugxo of examples) {
         expect(jugxo.ref).toEqual({ ero: butono?.ero.id });
         const result = evaluateUsage(modelo, jugxo.ekzemplo?.instances ?? []);

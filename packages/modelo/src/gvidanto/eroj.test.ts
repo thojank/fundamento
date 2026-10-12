@@ -90,7 +90,9 @@ describe("get_ero", () => {
   });
 
   it("carries the examples of the Jugxoj with their instances", () => {
-    expect(output.examples).toHaveLength(6);
+    // Six of Spec 003 and, since Spec 007 T021, twelve of the three text rules (A7) and two of
+    // the full-width rule (A6).
+    expect(output.examples).toHaveLength(20);
     const [first] = output.examples;
     expect(first?.decision).toBe("approved");
     expect(first?.kialo.length).toBeGreaterThan(0);
@@ -104,7 +106,7 @@ describe("get_ero", () => {
       },
       { ero: "butono", props: { emphasis: "low" }, container: "dialog", label: "Abbrechen" },
     ]);
-    expect(output.examples.map((example) => example.decision)).toEqual([
+    expect(output.examples.slice(0, 6).map((example) => example.decision)).toEqual([
       "approved",
       "rejected",
       "approved",
@@ -112,6 +114,17 @@ describe("get_ero", () => {
       "approved",
       "rejected",
     ]);
+    for (const regulo of [
+      "label-names-action",
+      "destructive-label-names-object",
+      "destructive-label-not-generic",
+    ]) {
+      const examples = output.examples.filter((example) => example.regulo?.name === regulo);
+      expect(
+        examples.map((example) => example.decision),
+        regulo,
+      ).toEqual(["approved", "approved", "rejected", "rejected"]);
+    }
   });
 
   it("names every projection of the Ero", () => {

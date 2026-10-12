@@ -112,7 +112,7 @@
       "decision": "approved",
       "kialo": "A confirmation dialog whose main action destroys data uses the danger fill; the escape stays tertiary.",
       "date": "2026-09-19",
-      "context": "Example CORRECT for the Regulo named in ekzemplo.regulo (Spec 003 T007); generated into get_ero and the Make Kit guidelines.",
+      "context": "Example CORRECT for the Regulo named in ekzemplo.regulo (Spec 003 T007); generated into get_ero and the Make Kit guidelines. Label „Projekt löschen“ statt „Löschen“ seit Spec 007 (Entscheidung OP-5, T021): die feste Text-Regel destructive-label-names-object verlangt den Gegenstand; der Kialo bleibt wörtlich.",
       "ekzemplo": {
         "regulo": "reg_01M2XMV80DG7JCJDTZGE66MGHX",
         "instances": [
@@ -124,7 +124,7 @@
             },
             "container": "confirm-delete",
             "goal": "destructive",
-            "label": "Löschen"
+            "label": "Projekt löschen"
           },
           {
             "ero": "butono",
@@ -145,7 +145,7 @@
       "decision": "rejected",
       "kialo": "Löschen in the neutral primary colour promises the expected next step instead of warning before data is lost.",
       "date": "2026-09-19",
-      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 003 T007); generated into get_ero and the Make Kit guidelines.",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 003 T007); generated into get_ero and the Make Kit guidelines. Label „Projekt löschen“ statt „Löschen“ seit Spec 007 (Entscheidung OP-5, T021): die feste Text-Regel destructive-label-names-object verlangt den Gegenstand; der Kialo bleibt wörtlich.",
       "ekzemplo": {
         "regulo": "reg_01M2XMV80DG7JCJDTZGE66MGHX",
         "instances": [
@@ -155,7 +155,7 @@
               "emphasis": "high"
             },
             "container": "confirm-delete",
-            "label": "Löschen"
+            "label": "Projekt löschen"
           },
           {
             "ero": "butono",
@@ -509,6 +509,348 @@
       "kialo": "Eine Marke und ihre Bausteine verhalten sich, und dieses Verhalten ist mehr als ihr Bauplan in der Skemo. Deshalb bekommt es einen eigenen Begriff, Uzo, und eine eigene Datei neben der Skemo statt Felder in ihr.",
       "date": "2026-10-08",
       "context": "Entscheidung des Maintainers zu Spec 007, Abschnitt Entscheidungen F1/F2/F3."
+    },
+    {
+      "id": "jug_01M4RPN9JR3E1KG87JKCNSCEMH",
+      "ref": {
+        "ero": "ero_01M2XN0PHDBBD6MNFN75DB9NQ5"
+      },
+      "decision": "approved",
+      "kialo": "Speichern names the action as a verb: a person knows from the label alone what happens on activation.",
+      "date": "2026-10-12",
+      "context": "Example CORRECT for the Regulo named in ekzemplo.regulo (Spec 007 T021, A7, data-model §5); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4RPB19HEMSFTRDZNPTHJV7P",
+        "instances": [
+          {
+            "ero": "butono",
+            "props": {
+              "emphasis": "high",
+              "type": "submit"
+            },
+            "container": "form",
+            "label": "Speichern"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4RPN9JS360DTY0PNP68DBNB",
+      "ref": {
+        "ero": "ero_01M2XN0PHDBBD6MNFN75DB9NQ5"
+      },
+      "decision": "approved",
+      "kialo": "Save names the action as a verb: the label says what happens, nothing is left to guess.",
+      "date": "2026-10-12",
+      "context": "Example CORRECT for the Regulo named in ekzemplo.regulo (Spec 007 T021, A7, data-model §5); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4RPB19HEMSFTRDZNPTHJV7P",
+        "instances": [
+          {
+            "ero": "butono",
+            "props": {
+              "emphasis": "high",
+              "type": "submit"
+            },
+            "container": "form",
+            "label": "Save"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4RPN9JS360DTY0PNP68DBNC",
+      "ref": {
+        "ero": "ero_01M2XN0PHDBBD6MNFN75DB9NQ5"
+      },
+      "decision": "rejected",
+      "kialo": "Fertig! names a mood, not an action: whether it saves, sends or closes is a guess. Only a warning, because the keyword check is an approximation (plan D-02).",
+      "date": "2026-10-12",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 007 T021, A7, data-model §5); generated into get_ero and the Make Kit guidelines. Sprache der Instanz: de (das Label trifft kein Schlüsselwort).",
+      "ekzemplo": {
+        "regulo": "reg_01M4RPB19HEMSFTRDZNPTHJV7P",
+        "instances": [
+          {
+            "ero": "butono",
+            "props": {
+              "emphasis": "high"
+            },
+            "container": "form",
+            "label": "Fertig!"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4RPN9JS360DTY0PNP68DBND",
+      "ref": {
+        "ero": "ero_01M2XN0PHDBBD6MNFN75DB9NQ5"
+      },
+      "decision": "rejected",
+      "kialo": "Done! names a state, not an action: what activation does is left to the reader. Only a warning, because the keyword check is an approximation (plan D-02).",
+      "date": "2026-10-12",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 007 T021, A7, data-model §5); generated into get_ero and the Make Kit guidelines. Language of the instance: en (the label hits no keyword).",
+      "ekzemplo": {
+        "regulo": "reg_01M4RPB19HEMSFTRDZNPTHJV7P",
+        "instances": [
+          {
+            "ero": "butono",
+            "props": {
+              "emphasis": "high"
+            },
+            "container": "form",
+            "label": "Done!"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4RPN9JS360DTY0PNP68DBNE",
+      "ref": {
+        "ero": "ero_01M2XN0PHDBBD6MNFN75DB9NQ5"
+      },
+      "decision": "approved",
+      "kialo": "Projekt löschen names what goes, the project, before the loss cannot be undone.",
+      "date": "2026-10-12",
+      "context": "Example CORRECT for the Regulo named in ekzemplo.regulo (Spec 007 T021, A7, data-model §5); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4RPB19HEMSFTRDZNPTHJV7Q",
+        "instances": [
+          {
+            "ero": "butono",
+            "props": {
+              "emphasis": "high",
+              "intent": "danger"
+            },
+            "container": "confirm-delete",
+            "goal": "destructive",
+            "label": "Projekt löschen"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4RPN9JS360DTY0PNP68DBNF",
+      "ref": {
+        "ero": "ero_01M2XN0PHDBBD6MNFN75DB9NQ5"
+      },
+      "decision": "approved",
+      "kialo": "Delete project names what is destroyed; the consequence is clear before the click.",
+      "date": "2026-10-12",
+      "context": "Example CORRECT for the Regulo named in ekzemplo.regulo (Spec 007 T021, A7, data-model §5); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4RPB19HEMSFTRDZNPTHJV7Q",
+        "instances": [
+          {
+            "ero": "butono",
+            "props": {
+              "emphasis": "high",
+              "intent": "danger"
+            },
+            "container": "confirm-delete",
+            "goal": "destructive",
+            "label": "Delete project"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4RPN9JS360DTY0PNP68DBNG",
+      "ref": {
+        "ero": "ero_01M2XN0PHDBBD6MNFN75DB9NQ5"
+      },
+      "decision": "rejected",
+      "kialo": "Löschen alone does not say whether the draft, the project or the account goes.",
+      "date": "2026-10-12",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 007 T021, A7, data-model §5); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4RPB19HEMSFTRDZNPTHJV7Q",
+        "instances": [
+          {
+            "ero": "butono",
+            "props": {
+              "emphasis": "high",
+              "intent": "danger"
+            },
+            "container": "confirm-delete",
+            "goal": "destructive",
+            "label": "Löschen"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4RPN9JS360DTY0PNP68DBNH",
+      "ref": {
+        "ero": "ero_01M2XN0PHDBBD6MNFN75DB9NQ5"
+      },
+      "decision": "rejected",
+      "kialo": "Delete alone does not say what is destroyed; the person finds out when it is gone.",
+      "date": "2026-10-12",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 007 T021, A7, data-model §5); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4RPB19HEMSFTRDZNPTHJV7Q",
+        "instances": [
+          {
+            "ero": "butono",
+            "props": {
+              "emphasis": "high",
+              "intent": "danger"
+            },
+            "container": "confirm-delete",
+            "goal": "destructive",
+            "label": "Delete"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4RPN9JS360DTY0PNP68DBNJ",
+      "ref": {
+        "ero": "ero_01M2XN0PHDBBD6MNFN75DB9NQ5"
+      },
+      "decision": "approved",
+      "kialo": "Entwurf verwerfen says the loss itself instead of confirming something generic.",
+      "date": "2026-10-12",
+      "context": "Example CORRECT for the Regulo named in ekzemplo.regulo (Spec 007 T021, A7, data-model §5); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4RPB19HEMSFTRDZNPTHJV7R",
+        "instances": [
+          {
+            "ero": "butono",
+            "props": {
+              "emphasis": "high",
+              "intent": "danger"
+            },
+            "container": "confirm-discard",
+            "goal": "destructive",
+            "label": "Entwurf verwerfen"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4RPN9JS360DTY0PNP68DBNK",
+      "ref": {
+        "ero": "ero_01M2XN0PHDBBD6MNFN75DB9NQ5"
+      },
+      "decision": "approved",
+      "kialo": "Discard draft says what is lost; nothing generic stands between the person and the consequence.",
+      "date": "2026-10-12",
+      "context": "Example CORRECT for the Regulo named in ekzemplo.regulo (Spec 007 T021, A7, data-model §5); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4RPB19HEMSFTRDZNPTHJV7R",
+        "instances": [
+          {
+            "ero": "butono",
+            "props": {
+              "emphasis": "high",
+              "intent": "danger"
+            },
+            "container": "confirm-discard",
+            "goal": "destructive",
+            "label": "Discard draft"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4RPN9JS360DTY0PNP68DBNM",
+      "ref": {
+        "ero": "ero_01M2XN0PHDBBD6MNFN75DB9NQ5"
+      },
+      "decision": "rejected",
+      "kialo": "OK, löschen confirms with a generic word before a loss that cannot be undone; the generic word is what a person reads first.",
+      "date": "2026-10-12",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 007 T021, A7, data-model §5); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4RPB19HEMSFTRDZNPTHJV7R",
+        "instances": [
+          {
+            "ero": "butono",
+            "props": {
+              "emphasis": "high",
+              "intent": "danger"
+            },
+            "container": "confirm-delete",
+            "goal": "destructive",
+            "label": "OK, löschen"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4RPN9JS360DTY0PNP68DBNN",
+      "ref": {
+        "ero": "ero_01M2XN0PHDBBD6MNFN75DB9NQ5"
+      },
+      "decision": "rejected",
+      "kialo": "Yes, delete confirms with a generic word; before a loss the label must say the loss, not agree to it.",
+      "date": "2026-10-12",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 007 T021, A7, data-model §5); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4RPB19HEMSFTRDZNPTHJV7R",
+        "instances": [
+          {
+            "ero": "butono",
+            "props": {
+              "emphasis": "high",
+              "intent": "danger"
+            },
+            "container": "confirm-delete",
+            "goal": "destructive",
+            "label": "Yes, delete"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4RPQWREQ525AG7EQKJE64AF",
+      "ref": {
+        "ero": "ero_01M2XN0PHDBBD6MNFN75DB9NQ5"
+      },
+      "decision": "approved",
+      "kialo": "A full-width button at the end of a narrow view is the single next step; the bar of actions is where it belongs.",
+      "date": "2026-10-12",
+      "context": "Example CORRECT for the Regulo named in ekzemplo.regulo (Spec 007 T021, A6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4RPB19HEMSFTRDZNPTHJV7N",
+        "instances": [
+          {
+            "ero": "butono",
+            "props": {
+              "emphasis": "high",
+              "full-width": true
+            },
+            "container": "action-bar",
+            "label": "Weiter"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4RPQWREQ525AG7EQKJE64AG",
+      "ref": {
+        "ero": "ero_01M2XN0PHDBBD6MNFN75DB9NQ5"
+      },
+      "decision": "rejected",
+      "kialo": "A full-width button in a dialog claims the whole row and pushes the other action of the decision out of sight.",
+      "date": "2026-10-12",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 007 T021, A6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4RPB19HEMSFTRDZNPTHJV7N",
+        "instances": [
+          {
+            "ero": "butono",
+            "props": {
+              "emphasis": "high",
+              "full-width": true
+            },
+            "container": "dialog",
+            "label": "Weiter"
+          }
+        ]
+      }
     }
   ]
 }
