@@ -79,13 +79,11 @@ test("ligilo right to left: icon-end sits on the left and the focus ring stays",
     `<fm-ligilo id="a" to="#a" placement="standalone">Projektübersicht<svg id="icon" slot="icon-end" aria-hidden="true" width="16" height="16"></svg></fm-ligilo>`,
   );
   const controlBox = () =>
-    page
-      .locator("#a")
-      .evaluate((element) =>
-        (element.shadowRoot?.querySelector('[part="control"]') as Element)
-          .getBoundingClientRect()
-          .toJSON() as { x: number; width: number },
-      );
+    page.locator("#a").evaluate((element) => {
+      const control = element.shadowRoot?.querySelector('[part="control"]');
+      if (!(control instanceof Element)) throw new Error("no control");
+      return control.getBoundingClientRect().toJSON() as { x: number; width: number };
+    });
   const right = await page.locator("#icon").boundingBox();
   const ltr = await controlBox();
   await page.evaluate(() => document.documentElement.setAttribute("dir", "rtl"));
@@ -136,7 +134,9 @@ for (const factor of [1.35, 2]) {
     expect(clipped).toBe(false);
     const lines = await page
       .locator("#b")
-      .evaluate((e) => e.shadowRoot?.querySelector('[part="control"]')?.getClientRects().length ?? 0);
+      .evaluate(
+        (e) => e.shadowRoot?.querySelector('[part="control"]')?.getClientRects().length ?? 0,
+      );
     expect(lines).toBeGreaterThan(1);
   });
 }

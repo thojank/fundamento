@@ -56,7 +56,9 @@ describe("ligilo in the repo Modelo (T006)", () => {
     const tokens = [
       ...skemo.bindings.map((binding) => binding.token),
       ...Object.values(skemo.parts).flatMap((part) =>
-        Object.values(part).flatMap((source) => (source && "fixed" in source ? [source.fixed] : [])),
+        Object.values(part).flatMap((source) =>
+          source && "fixed" in source ? [source.fixed] : [],
+        ),
       ),
     ];
     expect(tokens.length).toBeGreaterThan(15);
@@ -86,9 +88,9 @@ describe("ligilo in the repo Modelo (T006)", () => {
 
   it("inherits the typography inline and sets it standalone (E6)", () => {
     for (const size of ["small", "medium", "large"]) {
-      expect(
-        boundToken(skemo, "label", "typography", { placement: "inline", size })?.token,
-      ).toBe("inherit");
+      expect(boundToken(skemo, "label", "typography", { placement: "inline", size })?.token).toBe(
+        "inherit",
+      );
     }
     expect(
       boundToken(skemo, "label", "typography", { placement: "standalone", size: "small" })?.token,
@@ -134,7 +136,8 @@ describe("ligilo in the repo Modelo (T006)", () => {
       ["external", { external: true }, "external-link-marked"],
     ]);
     const words = (skemo.goals ?? []).flatMap((goal) => Object.values(goal.keywords).flat());
-    for (const word of ["zur", "zum", "go", "open", "öffnen", "to"]) expect(words).not.toContain(word);
+    for (const word of ["zur", "zum", "go", "open", "öffnen", "to"])
+      expect(words).not.toContain(word);
     for (const word of words) expect(word).not.toMatch(/\s/);
   });
 
@@ -244,7 +247,9 @@ describe("the Reguloj of the ligilo (T005, A2, D-13)", () => {
     (name) => {
       const regulo = named(name);
       const examples = modelo.jugxoj.filter((jugxo) => jugxo.ekzemplo?.regulo === regulo?.id);
-      expect(examples.map((jugxo) => [jugxo.decision, jugxo.ekzemplo?.instances[0]?.lingvo])).toEqual([
+      expect(
+        examples.map((jugxo) => [jugxo.decision, jugxo.ekzemplo?.instances[0]?.lingvo]),
+      ).toEqual([
         ["approved", "de"],
         ["approved", "en"],
         ["rejected", "de"],

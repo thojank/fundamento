@@ -131,10 +131,16 @@ describe("Web Component Celo for the ligilo (Spec 008 T015)", () => {
     expect(ligiloCss).toMatch(
       /\[data-placement="inline"\]\) \{\n\s+text-decoration-line: underline;\n\s+text-decoration-thickness: var\(--fm-border-width-default\);/,
     );
-    expect(ligiloCss).toMatch(/\[data-placement="standalone"\]\) \{\n\s+text-decoration-line: none;/);
-    expect(ligiloCss).toMatch(/\[data-placement="standalone"\]:hover\) \{\n\s+text-decoration-line: underline;/);
+    expect(ligiloCss).toMatch(
+      /\[data-placement="standalone"\]\) \{\n\s+text-decoration-line: none;/,
+    );
+    expect(ligiloCss).toMatch(
+      /\[data-placement="standalone"\]:hover\) \{\n\s+text-decoration-line: underline;/,
+    );
     expect(ligiloCss).toMatch(/:visited\) \{\n\s+color: var\(--fm-color-link-visited\);/);
-    expect(ligiloCss).toMatch(/:focus-visible\) \{\n(\s+[a-z-]+: [^;]+;\n)*\s+color: var\(--fm-color-link-rest\);/);
+    expect(ligiloCss).toMatch(
+      /:focus-visible\) \{\n(\s+[a-z-]+: [^;]+;\n)*\s+color: var\(--fm-color-link-rest\);/,
+    );
     expect(ligiloCss).toContain("text-decoration-color: var(--fm-color-link-rest);");
   });
 
@@ -143,7 +149,9 @@ describe("Web Component Celo for the ligilo (Spec 008 T015)", () => {
     expect(ligiloCss).toMatch(
       /\[data-placement="inline"\]\[data-size="medium"\]\) \{\n\s+display: inline;\n\s+white-space: normal;/,
     );
-    expect(ligiloCss).toMatch(/\[data-placement="standalone"\]\[data-size="small"\]\) \{\n\s+font-family: var\(--fm-typography-label-2-font-family\);/);
+    expect(ligiloCss).toMatch(
+      /\[data-placement="standalone"\]\[data-size="small"\]\) \{\n\s+font-family: var\(--fm-typography-label-2-font-family\);/,
+    );
     // The minimum target stands standalone only (D-10); inline writes none (no literal).
     expect(ligiloCss).toMatch(
       /\[data-placement="standalone"\]\) \{\n\s+text-decoration-line: none;\n\s+min-block-size: var\(--fm-size-target-min\);/,

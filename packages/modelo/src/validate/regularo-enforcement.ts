@@ -219,10 +219,14 @@ const externalLinkMarked: Enforcer = (modelo, regulo) => {
     const external = skemo.props.find((prop) => prop.name === "external");
     if (external?.kind !== "boolean") continue;
     const texts = skemo.a11y.texts?.external;
-    const heard = texts !== undefined && typeof texts.de === "string" && typeof texts.en === "string";
+    const heard =
+      texts !== undefined && typeof texts.de === "string" && typeof texts.en === "string";
     const seen = skemo.slots.some((slot) => slot.name === "icon-end" && slot.decorative === true);
     if (heard && seen) continue;
-    const lacks = [...(heard ? [] : ["a11y.texts.external in de and en"]), ...(seen ? [] : ["a decorative slot icon-end"])];
+    const lacks = [
+      ...(heard ? [] : ["a11y.texts.external in de and en"]),
+      ...(seen ? [] : ["a decorative slot icon-end"]),
+    ];
     issues.push({
       rule: "external-link-marked",
       severity: "error",

@@ -268,7 +268,7 @@ function componentGuideline(
       : `They come from the browser (hover, press, focus) or from ${switched.join(" and ")}`;
   const target =
     skemo.a11y.role === "link"
-      ? " The prop \`to\` is the destination; the element renders it as the link's target."
+      ? " The prop `to` is the destination; the element renders it as the link's target."
       : "";
   return `# ${name}
 

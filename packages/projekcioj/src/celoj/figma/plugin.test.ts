@@ -1346,7 +1346,10 @@ describe("every property the plugin owns is from the plan or neutral", () => {
     const double = modelDouble();
     await run(double, repoFiles["figma/plugin/code.js"] ?? "");
     // The set lies on the page, in no flow: its position among siblings is not the plugin's.
-    const onPage = ["Document/Page 1/butono: layoutPositioning", "Document/Page 1/ligilo: layoutPositioning"];
+    const onPage = [
+      "Document/Page 1/butono: layoutPositioning",
+      "Document/Page 1/ligilo: layoutPositioning",
+    ];
     expect(double.untouchedDefaults(OWNED).filter((entry) => !onPage.includes(entry))).toEqual([]);
     const set = double.root.children[0]?.children.find((child) => child.name === "butono");
     expect(set?.properties.strokes).toEqual([]);

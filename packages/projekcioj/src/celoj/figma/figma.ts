@@ -840,7 +840,10 @@ function componentSetOf(
   ];
   const drawn = new Set(DRAWN_PART_PROPERTIES);
   // The focus radii only for an Ero that has a radius to grow (F32); the ligilo has none.
-  const radiiOf = radiusTokensOf(entry) === undefined ? undefined : { "focus-gap": "radius/focus/gap", "focus-ring": "radius/focus/ring" };
+  const radiiOf =
+    radiusTokensOf(entry) === undefined
+      ? undefined
+      : { "focus-gap": "radius/focus/gap", "focus-ring": "radius/focus/ring" };
   const typographyToken = (combination: Readonly<Record<string, string>>): string | undefined => {
     const bound = boundToken(skemo, "label", "typography", combination);
     if (bound === undefined) return undefined;
@@ -894,9 +897,10 @@ function componentSetOf(
     }
     const typography = typographyToken(combination);
     const font = fontOf(typography === undefined ? undefined : base[typography]?.value);
-    const underlineWidth = skemo.parts.underline?.width === undefined
-      ? undefined
-      : boundToken(skemo, "underline", "width", combination);
+    const underlineWidth =
+      skemo.parts.underline?.width === undefined
+        ? undefined
+        : boundToken(skemo, "underline", "width", combination);
     // Die Schreibweise über alle Kombinationen entschieden, wie die Deckkraft (F8): Zwei Marken
     // dürfen sich unterscheiden, und dann nennt der Plan keinen Wert, sondern den Befund.
     const cases = new Set(

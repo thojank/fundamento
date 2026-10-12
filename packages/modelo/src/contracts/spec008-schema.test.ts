@@ -58,7 +58,11 @@ describe("EroInstance.lingvo (D-06)", () => {
 
 describe("UzoContent.check not-instead (D-07)", () => {
   it("accepts the check kind without further fields", () => {
-    const rule = { regulo: "link-navigates-button-acts", fixed: true, check: { kind: "not-instead" } };
+    const rule = {
+      regulo: "link-navigates-button-acts",
+      fixed: true,
+      check: { kind: "not-instead" },
+    };
     expect(v("UzoContent")(rule), JSON.stringify(v("UzoContent").errors)).toBe(true);
     expect(v("UzoContent")({ ...rule, check: { kind: "not-instead", words: {} } })).toBe(false);
   });

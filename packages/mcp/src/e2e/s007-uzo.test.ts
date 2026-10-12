@@ -85,7 +85,9 @@ describe("S1: the agent does not take the wrong Ero", () => {
     expect(prompt).toMatch(
       /12\. When `suggest_ero` or `check_usage` answers with `action: ask-human`.*pass the kialo to the user.*Do not propose a solution of your own/,
     );
-    expect(prompt).toMatch(/13\. When `suggest_ero` answers with a `boundary` whose action is `use-instead`/);
+    expect(prompt).toMatch(
+      /13\. When `suggest_ero` answers with a `boundary` whose action is `use-instead`/,
+    );
   });
 
   it("'Zum Warenkorb hinzufügen' never ends as navigation", async () => {

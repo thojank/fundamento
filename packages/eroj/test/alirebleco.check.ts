@@ -133,7 +133,12 @@ for (const aspekto of ["komuna", "ekzemplo"]) {
       }) => {
         // The running text around the inline links is the page's, in the page's text colour
         // (the butono page has no text of its own; a link lives in a sentence).
-        await serve(page, out, links, "<style>body { color: var(--fm-color-text-default); }</style>");
+        await serve(
+          page,
+          out,
+          links,
+          "<style>body { color: var(--fm-color-text-default); }</style>",
+        );
         await page.evaluate(
           ([a, s, c]) => {
             const root = document.documentElement;

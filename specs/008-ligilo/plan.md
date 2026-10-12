@@ -192,4 +192,10 @@ docs/vojmapo.md                          Zeile 4
 
 ## Messungen
 
-Werden in [`tasks.md`](tasks.md) (T024, T027) eingetragen: `brief`-Größe, Parität, Alirebleco-Kombinationen, rote Commits.
+Die Werte stehen in [`tasks.md`](tasks.md) → „Messungen“. Kurz: `get_ero ligilo brief:true` = 1 485 Bytes = **495** nach dem Maß von Spec 007 (Grenze 750 bleibt); Parität 2 Eroj × 4 Seiten ohne Differenz; `check:alirebleco` 66 Paare × 72 Kombinationen grün (Link auf Canvas min 6.12:1); Alirebleco der Eroj 8 Kombinationen je Ero in Chromium; `check:regularo` ohne `skemo-uzo-missing`.
+
+## Offen (für den Maintainer, nicht blockierend)
+
+- **Prüfblatt morgen:** S1–S3 per Harness (`packages/mcp/src/e2e/s008-ligilo.test.ts` ist der automatisierte Teil), Figma-Lauf in `f10b-5` (Set `ligilo`, Beschreibung beginnt mit `purpose`, Moduswechsel wechselt `color/link/rest` und die Schrift über `typography/body/1` bzw. `typography/label/*`), Vitrino-Abschnitt `fm-vitrino-ligilo` mit Spalte `external`.
+- **`check_usage` warnt nicht bei `inline` + explizitem `size`** (A1, Prop-Tabelle): Dafür gäbe es keine Regel-Id und keine Regulo; eine Warnung ohne Regulo wäre eine Faustregel im Code (Art. VI). Kandidat: Regulo „prop ohne Wirkung“ als Skemo-Wissen (`size` wirkt nur bei `standalone`), dann in `check_usage`.
+- **Drei Engines:** Die Browser-Tests liefen in Chromium (PR-Lauf); Firefox und WebKit laufen auf `main` (CI-Regel).

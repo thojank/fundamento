@@ -62,12 +62,17 @@ describe("describe_term (FR-12)", () => {
 
   // Spec 008 T009 (A8, D-15): an Ero is a concept of the scheme eroj; an agent asks for it by
   // its name or by the word of its language.
-  it.each(["Ligilo", "ligilo", "Link", "link", "Verweis"])("describes the ligilo for %s", (word) => {
-    const answer = success(word);
-    expect(answer.term).toBe("Ligilo");
-    expect(answer.definition.en).toMatch(/^A link: moves to another view or place/);
-    expect((answer.broader as { term: string }[] | undefined)?.map((b) => b.term)).toEqual(["Ero"]);
-  });
+  it.each(["Ligilo", "ligilo", "Link", "link", "Verweis"])(
+    "describes the ligilo for %s",
+    (word) => {
+      const answer = success(word);
+      expect(answer.term).toBe("Ligilo");
+      expect(answer.definition.en).toMatch(/^A link: moves to another view or place/);
+      expect((answer.broader as { term: string }[] | undefined)?.map((b) => b.term)).toEqual([
+        "Ero",
+      ]);
+    },
+  );
 
   it("names the instances of Ero", () => {
     expect(success("Ero").instances?.names).toEqual(["butono", "ligilo"]);

@@ -164,19 +164,23 @@ describe("the scheme eroj (Spec 008 T009)", () => {
 
   it("reports an Ero without a concept and a concept without an Ero", () => {
     expect(
-      kinds(mutate((copy) => {
-        copy.concepts = copy.concepts.filter((concept) => concept.term !== "Ligilo");
-      })),
+      kinds(
+        mutate((copy) => {
+          copy.concepts = copy.concepts.filter((concept) => concept.term !== "Ligilo");
+        }),
+      ),
     ).toContain("ero-concept-missing");
     expect(
-      kinds(mutate((copy) => {
-        copy.concepts.push({
-          ...(copy.concepts.find((concept) => concept.term === "Ligilo") as Concept),
-          term: "Kampo",
-          uri: "https://fundamento.ciferecigo.com/ontologio#Kampo",
-          relations: [],
-        });
-      })),
+      kinds(
+        mutate((copy) => {
+          copy.concepts.push({
+            ...(copy.concepts.find((concept) => concept.term === "Ligilo") as Concept),
+            term: "Kampo",
+            uri: "https://fundamento.ciferecigo.com/ontologio#Kampo",
+            relations: [],
+          });
+        }),
+      ),
     ).toContain("ero-concept-extra");
     // Without the Ero names the scheme is not judged (a caller without a Modelo).
     expect(checkOntologio(ontologio, constitution)).toEqual([]);

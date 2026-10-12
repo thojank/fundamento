@@ -57,13 +57,16 @@ const WEB_PREFIXES: readonly string[] = ["aria-", "data-", "on"];
 export function isSkemoWebTerm(name: string): boolean {
   const word = name.toLowerCase();
   if (WEB_TERMS.has(word)) return true;
-  return WEB_PREFIXES.some(
-    (prefix) => word.startsWith(prefix) && word.length >= prefix.length + 3 && prefix !== "on",
-  ) || /^on[a-z]{3,}$/.test(word);
+  return (
+    WEB_PREFIXES.some(
+      (prefix) => word.startsWith(prefix) && word.length >= prefix.length + 3 && prefix !== "on",
+    ) || /^on[a-z]{3,}$/.test(word)
+  );
 }
 
 /** What to say instead, for the suggestion of the issue. */
 export function skemoWebTermSuggestion(name: string): string {
-  if (name === "href" || name === "src") return "Name the target to; the Web Celo renders it as href.";
+  if (name === "href" || name === "src")
+    return "Name the target to; the Web Celo renders it as href.";
   return "Name what the Ero means, not how one platform spells it; the Celoj translate (Art. VIII).";
 }

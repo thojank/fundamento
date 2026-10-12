@@ -298,7 +298,8 @@ for (const prop of PROPS) {
     },
   });
 }`;
-  if (inline !== true) return `${head}
+  if (inline !== true)
+    return `${head}
 ${body}
 `;
   // The Make Kit holds every Ero in one module (D-14): each element's module-level names live in

@@ -32,7 +32,11 @@ test.describe("fm-ligilo behaviour", () => {
   test("external: rel for safety, the mark shows, and the description is heard in the document's language (S4)", async ({
     page,
   }) => {
-    await serve(page, out, `<fm-ligilo id="a" to="https://docs.example/" external>Dokumentation</fm-ligilo>`);
+    await serve(
+      page,
+      out,
+      `<fm-ligilo id="a" to="https://docs.example/" external>Dokumentation</fm-ligilo>`,
+    );
     const link = page.getByRole("link", { name: "Dokumentation" });
     await expect(link).toHaveAttribute("rel", "external noopener noreferrer");
     await expect(link).toHaveAccessibleDescription(texts.de);
@@ -118,13 +122,18 @@ test.describe("fm-ligilo behaviour", () => {
     );
     const rects = await page
       .locator("#a")
-      .evaluate((e) => e.shadowRoot?.querySelector('[part="control"]')?.getClientRects().length ?? 0);
+      .evaluate(
+        (e) => e.shadowRoot?.querySelector('[part="control"]')?.getClientRects().length ?? 0,
+      );
     expect(rects).toBeGreaterThan(1);
     expect(await page.locator("#a").evaluate((e) => getComputedStyle(e).display)).toBe("inline");
     expect(
       await page
         .locator("#a")
-        .evaluate((e) => getComputedStyle(e.shadowRoot?.querySelector('[part="control"]') as Element).display),
+        .evaluate(
+          (e) =>
+            getComputedStyle(e.shadowRoot?.querySelector('[part="control"]') as Element).display,
+        ),
     ).toBe("inline");
   });
 });
@@ -240,13 +249,13 @@ test("a standalone link is at least size.target.min wide and high in every densi
         [density, viewport],
       );
       // The host is inline (D-04): its own box is the font's line; the control is the target.
-      const boxes = await page
-        .locator("fm-ligilo")
-        .evaluateAll((elements) =>
-          elements.map((element) =>
-            (element.shadowRoot?.querySelector('[part="control"]') as Element).getBoundingClientRect(),
-          ),
-        );
+      const boxes = await page.locator("fm-ligilo").evaluateAll((elements) =>
+        elements.map((element) => {
+          const control = element.shadowRoot?.querySelector('[part="control"]');
+          if (!(control instanceof Element)) throw new Error("no control");
+          return control.getBoundingClientRect();
+        }),
+      );
       for (const box of boxes) {
         expect(box.width, `${density} ${viewport}`).toBeGreaterThanOrEqual(24);
         expect(box.height, `${density} ${viewport}`).toBeGreaterThanOrEqual(24);

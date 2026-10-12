@@ -157,7 +157,9 @@ const structure = (inlineHost: boolean, disables: boolean): string =>
     ':where([part="control"]:focus:not(:focus-visible)) { outline-width: 0; }',
     // Only an Ero that can be disabled has the rule: the inventory reads the state from it.
     ...(disables
-      ? [':where([part="control"]:disabled, [part="control"][aria-disabled="true"]) { cursor: not-allowed; }']
+      ? [
+          ':where([part="control"]:disabled, [part="control"][aria-disabled="true"]) { cursor: not-allowed; }',
+        ]
       : []),
     `:where([part="control"]) ${ICONS}, :where([part="control"]) ${MARK} { flex: none; vertical-align: middle; }`,
     `:where([part="control"]:not([data-marked="true"])) ${MARK} { display: none; }`,
@@ -292,7 +294,7 @@ export const WEB_COMPONENT_CELO: Celo = {
             .join(""),
       },
     ];
-    for (const { entry, tag, className, constant } of eroj) {
+    for (const { entry, tag, constant } of eroj) {
       files.push({
         path: `${GENERATED_DIR}/${entry.ero.name}.styles.ts`,
         text: `${header}export const ${constant}_CSS = ${JSON.stringify(stylesheetOf(entry.skemo, entry.uzo))};\n`,

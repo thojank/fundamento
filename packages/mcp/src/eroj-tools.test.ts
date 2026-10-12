@@ -85,7 +85,13 @@ describe("suggest_ero (FR-13)", () => {
     expect(result.structuredContent?.issues).toEqual([
       expect.objectContaining({ rule: "goal-unknown", path: "suggest_ero/goal" }),
     ]);
-    expect(result.structuredContent?.allowed).toEqual(["destructive", "confirm", "dismiss", "navigate", "external"]);
+    expect(result.structuredContent?.allowed).toEqual([
+      "destructive",
+      "confirm",
+      "dismiss",
+      "navigate",
+      "external",
+    ]);
   });
 });
 
