@@ -7,7 +7,7 @@
 // language of the document. Console warnings are developer messages.
 
 /** The native control an a11y role is rendered as (Celo knowledge, Art. VIII). */
-export type HostControl = "button" | "a";
+export type HostControl = "button" | "a" | "input";
 
 export interface ElementNames {
   /** `fm-butono` */
@@ -31,7 +31,9 @@ export interface ElementNames {
 
 /** The native control of an a11y role; everything that is not a link is a button. */
 export function hostOf(role: string): HostControl {
-  return role === "link" ? "a" : "button";
+  if (role === "link") return "a";
+  if (role === "textbox") return "input";
+  return "button";
 }
 
 /**
@@ -42,8 +44,32 @@ export function hostOf(role: string): HostControl {
 const MARK =
   '<svg aria-hidden="true" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 10l5-5M7 5h4v4M9 3H4a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V7"/></svg>';
 
+/**
+ * The sign of a required field (Spec 009, A2, D-07): an asterisk as a small vector in the current
+ * colour — a sign of the projection, no text node (Art. VIII); its colour is the part required-mark.
+ */
+const REQUIRED_MARK =
+  '<svg aria-hidden="true" viewBox="0 0 16 16" width="8" height="8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 2v12M2.8 5l10.4 6M13.2 5 2.8 11"/></svg>';
+
+/**
+ * The shadow markup of a field (Spec 009, D-08): the label with the mark of a required field, the
+ * native input, help and error below, each in its own part. The texts of the slots are the
+ * description of the input (a11y.description), the error announced live.
+ */
+function fieldMarkup(slots: NonNullable<ElementNames["slots"]>): string {
+  const texts = slots
+    .filter((slot) => slot.default !== true)
+    .map(
+      (slot) =>
+        `<span part="${slot.name}" id="${slot.name}" hidden${slot.name === "error" ? ' aria-live="polite"' : ""}><slot name="${slot.name}"></slot></span>`,
+    )
+    .join("");
+  return `<div part="field"><label part="label" for="control"><slot></slot><span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span></label><input part="control" id="control">${texts}<span id="fm-texts" hidden></span></div>`;
+}
+
 /** The shadow markup of the control: slots before the label (icon-start), the label, the rest. */
 function markup(host: HostControl, slots: NonNullable<ElementNames["slots"]>): string {
+  if (host === "input") return fieldMarkup(slots);
   const before = slots.filter((slot) => slot.default !== true && slot.name.endsWith("-start"));
   const after = slots.filter((slot) => slot.default !== true && !slot.name.endsWith("-start"));
   const last = after.at(-1)?.name;
@@ -73,7 +99,7 @@ export function elementSource({
     inline === true
       ? `const SKEMO = ${constant}_SKEMO;\nconst CSS = ${constant}_CSS;`
       : `import { ${constant}_SKEMO as SKEMO } from "./skemo.js";\nimport { ${constant}_CSS as CSS } from "./${ero}.styles.js";`;
-  const control = host === "a" ? "a" : "button";
+  const control = host === "a" ? "a" : host === "input" ? "input" : "button";
   const body = `
 type Value = string | boolean;
 
@@ -92,6 +118,8 @@ const CONSTRAINTS = (("constraints" in SKEMO ? SKEMO.constraints : []) ?? []) as
 const TEXTS = (("texts" in SKEMO.a11y ? SKEMO.a11y.texts : {}) ?? {}) as Readonly<
   Record<string, Readonly<Record<string, string>>>
 >;
+/** Where the description comes from, in order: slot:help, slot:error (Spec 009, D-02). */
+const DESCRIPTION = (("description" in SKEMO.a11y ? SKEMO.a11y.description : []) ?? []) as readonly string[];
 const HAS_PROP = new Set(PROPS.map((prop) => prop.name));
 
 let sheet: CSSStyleSheet | undefined;
@@ -116,11 +144,13 @@ const Base = (typeof HTMLElement === "undefined" ? class {} : HTMLElement) as ty
 
 /** Generated from the Skemo of ${ero}; behaviour from the template in @fundamento/projekcioj. */
 export class ${className} extends Base {
-  static formAssociated = ${host === "button" ? "true" : "false"};
+  static formAssociated = ${host === "a" ? "false" : "true"};
   static observedAttributes = PROPS.map((prop) => prop.name);
 
   readonly #internals: ElementInternals;
   readonly #control: HTMLElement;
+  /** The element the combination is written on: the field of a composite, else the control. */
+  readonly #root: HTMLElement;
   readonly #label: HTMLSlotElement;
   readonly #texts: HTMLElement;
 
@@ -145,10 +175,22 @@ export class ${className} extends Base {
       throw new Error("${tag}: shadow template is incomplete");
     }
     this.#control = control;
+    this.#root = root.querySelector('[part="field"]') ?? control;
     this.#label = label;
     this.#texts = texts;
     control.addEventListener("click", (event) => this.#activate(event));
     label.addEventListener("slotchange", () => this.#render());
+    for (const named of root.querySelectorAll("slot[name]")) {
+      named.addEventListener("slotchange", () => this.#render());
+    }
+    if (control instanceof HTMLInputElement) {
+      // The value a person types is the form value (ElementInternals, as fm-butono submits), and
+      // the prop reflects it, so a wrapper reads what stands in the field.
+      control.addEventListener("input", () => {
+        this.#internals.setFormValue(control.value);
+        if (this.getAttribute("value") !== control.value) this.setAttribute("value", control.value);
+      });
+    }
   }
 
   connectedCallback(): void {
@@ -203,10 +245,18 @@ export class ${className} extends Base {
     return lang.toLowerCase().slice(0, 2);
   }
 
+  /** Whether a named slot has content. */
+  #filled(name: string): boolean {
+    const slot = this.shadowRoot?.querySelector(\`slot[name="\${name}"]\`);
+    return slot instanceof HTMLSlotElement && slot.assignedNodes({ flatten: true }).length > 0;
+  }
+
   #render(): void {
     const control = this.#control;
+    const root = this.#root;
     for (const [name, value] of Object.entries(this.#enums())) {
-      control.setAttribute(\`data-\${name}\`, value);
+      root.setAttribute(\`data-\${name}\`, value);
+      if (root !== control) control.setAttribute(\`data-\${name}\`, value);
     }
     if (HAS_PROP.has("disabled") && "disabled" in control) {
       (control as HTMLButtonElement).disabled = this.value("disabled") === true;
@@ -233,6 +283,40 @@ export class ${className} extends Base {
       if (this.value("external") === true) control.setAttribute("rel", "external noopener noreferrer");
       else control.removeAttribute("rel");
     }
+    // A field (Spec 009, D-08): the props of the Skemo on the native input, \`kind\` as its type,
+    // \`invalid\` spoken as aria-invalid and set by a filled error slot (constraint of the Skemo);
+    // disabled wins over readonly; help and error show only while they have text.
+    const described: string[] = [];
+    if (control instanceof HTMLInputElement) {
+      const kind = this.value("kind");
+      control.type = typeof kind === "string" && kind !== "" ? kind : "text";
+      const value = this.value("value");
+      const text = typeof value === "string" ? value : "";
+      if (control.value !== text) control.value = text;
+      this.#internals.setFormValue(text);
+      const placeholder = this.value("placeholder");
+      if (typeof placeholder === "string" && placeholder !== "") control.setAttribute("placeholder", placeholder);
+      else control.removeAttribute("placeholder");
+      const formName = this.value("name");
+      if (typeof formName === "string" && formName !== "") control.setAttribute("name", formName);
+      else control.removeAttribute("name");
+      const required = this.value("required") === true;
+      control.required = required;
+      if (required) control.setAttribute("aria-required", "true");
+      else control.removeAttribute("aria-required");
+      const disabled = this.value("disabled") === true;
+      control.readOnly = !disabled && this.value("readonly") === true;
+      const invalid = this.value("invalid") === true || this.#filled("error");
+      if (invalid) control.setAttribute("aria-invalid", "true");
+      else control.removeAttribute("aria-invalid");
+      for (const source of DESCRIPTION) {
+        const [kind, name = ""] = source.split(":");
+        const holder = this.shadowRoot?.getElementById(name);
+        const has = kind === "slot" ? this.#filled(name) : typeof this.value(name) === "string";
+        if (holder instanceof HTMLElement) holder.hidden = !has;
+        if (has) described.push(name);
+      }
+    }
     // What is heard in addition (Spec 008, D-02): the texts of every true boolean prop, in the
     // language of the document, as the description of the control; the mark shows with them.
     const lingvo = this.#lingvo();
@@ -240,11 +324,14 @@ export class ${className} extends Base {
       .filter(([prop]) => this.value(prop) === true)
       .map(([, byLingvo]) => byLingvo[lingvo] ?? byLingvo.en ?? Object.values(byLingvo)[0] ?? "");
     this.#texts.textContent = heard.join(" ");
+    if (heard.length > 0) described.push("fm-texts");
+    if (described.length > 0) control.setAttribute("aria-describedby", described.join(" "));
+    else control.removeAttribute("aria-describedby");
     if (heard.length > 0) {
-      control.setAttribute("aria-describedby", "fm-texts");
-      control.setAttribute("data-marked", "true");
+      root.setAttribute("data-marked", "true");
+      if (root !== control) control.setAttribute("data-marked", "true");
     } else {
-      control.removeAttribute("aria-describedby");
+      root.removeAttribute("data-marked");
       control.removeAttribute("data-marked");
     }
     const text = this.#label

@@ -65,7 +65,15 @@ describe("suggest_ero", () => {
     expect(result.issues.map((issue) => issue.rule)).toEqual(["goal-unknown"]);
     expect(result.issues[0]?.path).toBe("suggest_ero/goal");
     // Every goal of every Ero, in Ero order (Spec 008: navigate and external of the ligilo).
-    expect(result.allowed).toEqual(["destructive", "confirm", "dismiss", "navigate", "external"]);
+    expect(result.allowed).toEqual([
+      "destructive",
+      "confirm",
+      "dismiss",
+      "enter-text",
+      "email",
+      "navigate",
+      "external",
+    ]);
     // Spec 007 (OP-6, D-06): the system says it does not cover the goal; a person decides.
     expect(result.issues[0]?.suggestion).toBe(
       "Fundamento does not cover this goal. Ask a person; do not build a replacement.",

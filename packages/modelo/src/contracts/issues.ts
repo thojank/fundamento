@@ -186,6 +186,13 @@ export const RULE_IDS = [
   "uzo-boundary-covered",
   "link-not-color-only",
   "external-link-marked",
+  // Spec 009 (plan D-05, D-07): a slot the name depends on that the Uzo does not require, and the
+  // Reguloj of the kampo that judge the Skemo or an instance (their rule IDs are the Regulo names).
+  "uzo-slot-required-missing",
+  "required-marked",
+  "error-not-color-only",
+  "field-label-visible",
+  "placeholder-not-label",
   // Projekcio lints (Spec 003, D-17)
   "css-physical-property",
   "ero-hardcoded-string",

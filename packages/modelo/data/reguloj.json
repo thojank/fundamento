@@ -391,12 +391,13 @@
       "name": "spacing-owned-by-container",
       "statement": "The space between sibling Eroj belongs to their container; an Ero carries no outer spacing.",
       "kialo": "An Ero does not know its neighbours. If each one brought its own distance, two Eroj side by side would add up their distances, and the rhythm of a view would depend on which Ero stands where.",
-      "scope": "eroj: butono and ligilo instances in a design or in code",
+      "scope": "eroj: butono, ligilo and kampo instances in a design or in code",
       "checkability": "manual",
       "appliesTo": {
         "eroj": [
           "butono",
-          "ligilo"
+          "ligilo",
+          "kampo"
         ]
       }
     },
@@ -514,6 +515,110 @@
       "appliesTo": {
         "eroj": [
           "ligilo"
+        ]
+      }
+    },
+    {
+      "id": "reg_01M4S1ZR7F1KE1AV1C7X5W8GD5",
+      "name": "field-label-visible",
+      "statement": "A kampo always has a visible label; an empty label slot is a violation.",
+      "kialo": "WCAG 3.3.2 (Labels or Instructions): a placeholder disappears while typing, and a label only a screen reader hears does not help the sighted person who finds the field half filled.",
+      "scope": "eroj: kampo instances; the label slot has text",
+      "checkability": "automatic",
+      "appliesTo": {
+        "eroj": [
+          "kampo"
+        ]
+      }
+    },
+    {
+      "id": "reg_01M4S1ZR7GEPZSTB9ES3REK3TX",
+      "name": "placeholder-not-label",
+      "statement": "The placeholder of a kampo is an example, not the label: a placeholder without a label is a violation, a placeholder equal to the label a warning.",
+      "kialo": "A placeholder disappears while typing (WCAG 3.3.2), and an example that repeats the label says nothing.",
+      "scope": "eroj: kampo instances with a placeholder",
+      "checkability": "automatic",
+      "appliesTo": {
+        "eroj": [
+          "kampo"
+        ]
+      }
+    },
+    {
+      "id": "reg_01M4S1ZR7GEPZSTB9ES3REK3TY",
+      "name": "error-says-what-to-do",
+      "statement": "The error text of a kampo says what to do, not only that something is wrong.",
+      "kialo": "WCAG 3.3.3 (Error Suggestion): 'Invalid' leaves the person guessing; a sentence with a verb and an object names the way out.",
+      "scope": "eroj: kampo instances with an error text; checked as at least three words (check min-words), an approximation without a model",
+      "checkability": "automatic",
+      "appliesTo": {
+        "eroj": [
+          "kampo"
+        ]
+      }
+    },
+    {
+      "id": "reg_01M4S1ZR7GEPZSTB9ES3REK3TZ",
+      "name": "error-not-color-only",
+      "statement": "An error of a kampo is not a red border alone: the Skemo carries a text slot error and speaks the state with aria-invalid.",
+      "kialo": "WCAG 1.4.1 (Use of Color) and 3.3.1 (Error Identification): a person who does not see the hue must read and hear that the field is wrong.",
+      "scope": "eroj: the Skemo of every Ero with the state invalid",
+      "checkability": "automatic",
+      "appliesTo": {
+        "eroj": [
+          "kampo"
+        ]
+      }
+    },
+    {
+      "id": "reg_01M4S1ZR7GEPZSTB9ES3REK3V0",
+      "name": "required-marked",
+      "statement": "A kampo with required true is marked visibly (part required-mark) and audibly (a11y text required in de and en).",
+      "kialo": "The person should know before sending what may stay empty. The sign of the mark is the Aspekto's; the duty to mark is not.",
+      "scope": "eroj: the Skemo of every Ero with a boolean prop required",
+      "checkability": "automatic",
+      "appliesTo": {
+        "eroj": [
+          "kampo"
+        ]
+      }
+    },
+    {
+      "id": "reg_01M4S1ZR7GEPZSTB9ES3REK3V1",
+      "name": "field-label-names-the-datum",
+      "statement": "The label of a kampo names what is entered, as a noun: 'E-Mail', not 'E-Mail eingeben'.",
+      "kialo": "The label is read as the name of the field, in a form and in a list of fields; a verb in it reads as an instruction, not a name. A brand may show voice here, with a Jugxo.",
+      "scope": "eroj: kampo instances with a label (check not-words: verbs of entering)",
+      "checkability": "automatic",
+      "appliesTo": {
+        "eroj": [
+          "kampo"
+        ]
+      }
+    },
+    {
+      "id": "reg_01M4S1ZR7GEPZSTB9ES3REK3V2",
+      "name": "help-is-one-sentence",
+      "statement": "The help text of a kampo is one sentence.",
+      "kialo": "Help that is a paragraph is skipped; one sentence next to the field is read.",
+      "scope": "eroj: kampo instances with a help text (check max-sentences 1)",
+      "checkability": "automatic",
+      "appliesTo": {
+        "eroj": [
+          "kampo"
+        ]
+      }
+    },
+    {
+      "id": "reg_01M4S1ZR7GEPZSTB9ES3REK3V3",
+      "name": "placeholder-is-example",
+      "statement": "The placeholder of a kampo is an example of a value: 'max@beispiel.example', not 'Hier E-Mail eingeben'.",
+      "kialo": "An example shows the shape of a value; an instruction in the field disappears while typing and is read as a value by some.",
+      "scope": "eroj: kampo instances with a placeholder (check not-words)",
+      "checkability": "automatic",
+      "appliesTo": {
+        "eroj": [
+          "kampo"
         ]
       }
     }

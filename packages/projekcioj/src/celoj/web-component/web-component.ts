@@ -35,6 +35,26 @@ function partSelector(part: string, control: string): string {
 }
 
 /**
+ * The selector of a part of a field (Spec 009, D-08): the combination stands on the field, the
+ * state on the native input inside (`:has()`), and every part is its own element — label, help,
+ * error and the mark of a required field; the placeholder is the input's own pseudo-element; the
+ * gap between the parts belongs to the field itself.
+ */
+function fieldPartSelector(part: string, property: string, data: string, state: string): string {
+  const root = `[part="field"]${data}${state === "" ? "" : `:has([part="control"]${state})`}`;
+  if (part === "box" && property === "gap") return `:where(${root})`;
+  if (part === "placeholder") return `:where(${root}) [part="control"]::placeholder`;
+  if (part === "focus-ring") return `:where(${root}) [part="control"]:focus-visible`;
+  if (["label", "help", "error", "required-mark"].includes(part)) {
+    return `:where(${root}) [part="${part}"]`;
+  }
+  return `:where(${root}) [part="control"]`;
+}
+
+/** Whether the Ero is a field (a composite of label, input, help and error). */
+const isField = (skemo: Skemo): boolean => hostOf(skemo.a11y.role) === "input";
+
+/**
  * CSS selector suffix of each state. `focus` is :focus-visible (the focus ring and, since Spec
  * 008, a label colour of its own); `visited` is the link's own state (Spec 008, D-09).
  */
@@ -44,6 +64,9 @@ const STATE_SELECTORS: Readonly<Record<string, string | undefined>> = {
   focus: ":focus-visible",
   hover: ":hover",
   pressed: ":active",
+  // A field (Spec 009): wrong, read-only (the attribute, not :read-only, which disabled has too).
+  invalid: '[aria-invalid="true"]',
+  readonly: "[readonly]",
   loading: '[aria-busy="true"]',
   disabled: ":disabled",
 };
@@ -52,7 +75,17 @@ const STATE_SELECTORS: Readonly<Record<string, string | undefined>> = {
  * Later states win: they come later in the source (all selectors have the same specificity).
  * Visited and focus before hover and pressed, so a pointer on a visited link shows hover.
  */
-const STATE_ORDER = ["rest", "visited", "focus", "hover", "pressed", "loading", "disabled"];
+const STATE_ORDER = [
+  "rest",
+  "visited",
+  "focus",
+  "hover",
+  "pressed",
+  "invalid",
+  "readonly",
+  "loading",
+  "disabled",
+];
 
 const variable = (token: string, field?: string) =>
   `var(${nomRegulo("css").derive(token)}${field === undefined ? "" : `-${field}`})`;
@@ -168,6 +201,23 @@ const structure = (inlineHost: boolean, disables: boolean, bordered: boolean): s
   ].join("\n");
 
 /**
+ * Layout of a field (Spec 009, D-08), keywords only: the host is a block that takes the width of
+ * its container (E3), the field a column of label, input, help and error; the input fills the
+ * column; the mark of a required field (an asterisk drawn as a small vector, no text) shows only
+ * while the field is marked (data-marked).
+ */
+const fieldStructure = (disables: boolean): string =>
+  [
+    ":host { display: block; }",
+    ':where([part="field"]) { display: flex; flex-direction: column; align-items: stretch; }',
+    ':where([part="label"]) { display: inline-flex; align-items: baseline; }',
+    ':where([part="control"]) { display: block; box-sizing: border-box; margin: 0; border-style: solid; appearance: none; transition-property: background-color, color, border-color; }',
+    ':where([part="control"]:focus:not(:focus-visible)) { outline-width: 0; }',
+    ...(disables ? [':where([part="control"]:disabled) { cursor: not-allowed; }'] : []),
+    ':where([part="field"]:not([data-marked="true"])) [part="required-mark"] { display: none; }',
+  ].join("\n");
+
+/**
  * The stylesheet of one Ero: structure, then one rule per part property and combination (a state
  * without a binding of its own repeats rest, so every state of the Skemo has a rule the parity
  * inventory reads). The Uzo decides the host (D-04).
@@ -187,7 +237,7 @@ export function stylesheetOf(skemo: Skemo, uzo?: Uzo): string {
     for (const [property, source] of Object.entries(properties)) {
       const token = fixedToken(source);
       if (token !== undefined) {
-        add(partSelector(part, '[part="control"]'), declarations(skemo, part, property, token));
+        add(selectorOf(skemo, part, property, {}, []), declarations(skemo, part, property, token));
       }
     }
   }
@@ -207,7 +257,10 @@ export function stylesheetOf(skemo: Skemo, uzo?: Uzo): string {
         if (keys.includes(STATE_KEY) && combination[STATE_KEY] !== state) continue;
         const bound = boundToken(skemo, part, property, combination);
         if (bound === undefined) continue;
-        add(selectorOf(part, combination, keys), declarations(skemo, part, property, bound.token));
+        add(
+          selectorOf(skemo, part, property, combination, keys),
+          declarations(skemo, part, property, bound.token),
+        );
       }
     }
   }
@@ -216,7 +269,10 @@ export function stylesheetOf(skemo: Skemo, uzo?: Uzo): string {
   );
   const disables = skemo.states.includes("disabled") || skemo.states.includes("loading");
   const bordered = skemo.parts.border !== undefined;
-  return `${structure(uzo?.layout.wrap === "with-text", disables, bordered)}\n${tokenRules.join("\n")}\n`;
+  const base = isField(skemo)
+    ? fieldStructure(disables)
+    : structure(uzo?.layout.wrap === "with-text", disables, bordered);
+  return `${base}\n${tokenRules.join("\n")}\n`;
 }
 
 function keysOf(skemo: Skemo, source: SkemoPartSource | undefined, depth = 0): string[] {
@@ -231,7 +287,9 @@ function keysOf(skemo: Skemo, source: SkemoPartSource | undefined, depth = 0): s
 
 /** `:where([part="control"][data-emphasis="high"]:hover)`, or the slotted form for icons. */
 function selectorOf(
+  skemo: Skemo,
   part: string,
+  property: string,
   combination: Readonly<Record<string, string>>,
   keys: readonly string[],
 ): string {
@@ -240,6 +298,7 @@ function selectorOf(
     .map((key) => `[data-${key}="${combination[key] ?? ""}"]`)
     .join("");
   const state = STATE_SELECTORS[combination[STATE_KEY] ?? "rest"] ?? "";
+  if (isField(skemo)) return fieldPartSelector(part, property, data, state);
   return partSelector(part, `[part="control"]${data}${state}`);
 }
 
@@ -335,6 +394,8 @@ function stateOf(selector: string): string {
   if (selector.includes(":hover")) return "hover";
   if (selector.includes(":active")) return "pressed";
   if (selector.includes(":visited")) return "visited";
+  if (selector.includes('[aria-invalid="true"]')) return "invalid";
+  if (selector.includes("[readonly]")) return "readonly";
   return "rest";
 }
 

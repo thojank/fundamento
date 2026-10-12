@@ -1,0 +1,501 @@
+{
+  "ero": {
+    "id": "ero_01M4S1ZQ3PW2DRK02VPJ6JE5NF",
+    "name": "kampo",
+    "skemo": "ske_01M4S1ZQFKVZX7X0A8W94SRGCE",
+    "description": "A text field: takes one line of text from a person. It always shows its label, and can show help and an error."
+  },
+  "skemo": {
+    "id": "ske_01M4S1ZQFKVZX7X0A8W94SRGCE",
+    "ero": "ero_01M4S1ZQ3PW2DRK02VPJ6JE5NF",
+    "props": [
+      {
+        "name": "kind",
+        "kind": "enum",
+        "values": [
+          "text",
+          "email",
+          "tel",
+          "url",
+          "search"
+        ],
+        "default": "text",
+        "description": "What kind of text is expected; changes the keyboard on touch and the input aids, never the look."
+      },
+      {
+        "name": "value",
+        "kind": "string",
+        "description": "The current text."
+      },
+      {
+        "name": "placeholder",
+        "kind": "string",
+        "description": "An example in the empty field; never the label (Regulo placeholder-not-label)."
+      },
+      {
+        "name": "required",
+        "kind": "boolean",
+        "default": false,
+        "description": "Must be filled in; marked visibly and audibly (Regulo required-marked)."
+      },
+      {
+        "name": "disabled",
+        "kind": "boolean",
+        "default": false,
+        "description": "Not available; skipped by the keyboard."
+      },
+      {
+        "name": "readonly",
+        "kind": "boolean",
+        "default": false,
+        "description": "Readable and focusable, not changeable."
+      },
+      {
+        "name": "invalid",
+        "kind": "boolean",
+        "default": false,
+        "description": "The value is wrong; true whenever the slot error is filled (constraint)."
+      },
+      {
+        "name": "size",
+        "kind": "enum",
+        "values": [
+          "small",
+          "medium",
+          "large"
+        ],
+        "default": "medium",
+        "description": "Height of the input line on the scale of the butono (size.control.*), so field and button stand level in one row."
+      },
+      {
+        "name": "name",
+        "kind": "string",
+        "description": "The name in the form; without effect in a design tool, like type on the butono."
+      }
+    ],
+    "states": [
+      "rest",
+      "hover",
+      "focus",
+      "disabled",
+      "readonly",
+      "invalid"
+    ],
+    "slots": [
+      {
+        "name": "label",
+        "default": true,
+        "text": true
+      },
+      {
+        "name": "help",
+        "text": true
+      },
+      {
+        "name": "error",
+        "text": true
+      }
+    ],
+    "parts": {
+      "label": {
+        "color": {
+          "by": [
+            "state"
+          ]
+        },
+        "typography": {
+          "by": [
+            "size"
+          ]
+        }
+      },
+      "required-mark": {
+        "color": {
+          "fixed": "color.status.danger.text"
+        }
+      },
+      "surface": {
+        "fill": {
+          "by": [
+            "state"
+          ]
+        }
+      },
+      "border": {
+        "color": {
+          "by": [
+            "state"
+          ]
+        },
+        "width": {
+          "fixed": "border.width.default"
+        }
+      },
+      "text": {
+        "color": {
+          "by": [
+            "state"
+          ]
+        },
+        "typography": {
+          "by": [
+            "size"
+          ]
+        }
+      },
+      "placeholder": {
+        "color": {
+          "fixed": "color.text.subtle"
+        }
+      },
+      "help": {
+        "color": {
+          "fixed": "color.text.muted"
+        },
+        "typography": {
+          "fixed": "typography.caption"
+        }
+      },
+      "error": {
+        "color": {
+          "fixed": "color.status.danger.text"
+        },
+        "typography": {
+          "fixed": "typography.caption"
+        }
+      },
+      "focus-ring": {
+        "ring": {
+          "fixed": "focus.ring"
+        },
+        "offset": {
+          "fixed": "focus.offset"
+        },
+        "color": {
+          "fixed": "color.focus.inner"
+        }
+      },
+      "box": {
+        "height": {
+          "by": [
+            "size"
+          ]
+        },
+        "inline-padding": {
+          "by": [
+            "size"
+          ]
+        },
+        "gap": {
+          "fixed": "spacing.small"
+        },
+        "radius": {
+          "fixed": "radius.role.control"
+        }
+      },
+      "motion": {
+        "duration": {
+          "fixed": "motion.duration.fast"
+        },
+        "easing": {
+          "fixed": "motion.easing.standard"
+        }
+      }
+    },
+    "bindings": [
+      {
+        "part": "label",
+        "property": "color",
+        "when": {
+          "state": "rest"
+        },
+        "token": "color.text.default"
+      },
+      {
+        "part": "label",
+        "property": "color",
+        "when": {
+          "state": "disabled"
+        },
+        "token": "color.text.disabled"
+      },
+      {
+        "part": "label",
+        "property": "typography",
+        "when": {
+          "size": "small"
+        },
+        "token": "typography.label.2"
+      },
+      {
+        "part": "label",
+        "property": "typography",
+        "when": {
+          "size": "medium"
+        },
+        "token": "typography.label.1"
+      },
+      {
+        "part": "label",
+        "property": "typography",
+        "when": {
+          "size": "large"
+        },
+        "token": "typography.label.1"
+      },
+      {
+        "part": "surface",
+        "property": "fill",
+        "when": {
+          "state": "rest"
+        },
+        "token": "color.background.default"
+      },
+      {
+        "part": "surface",
+        "property": "fill",
+        "when": {
+          "state": "disabled"
+        },
+        "token": "color.background.sunken"
+      },
+      {
+        "part": "surface",
+        "property": "fill",
+        "when": {
+          "state": "readonly"
+        },
+        "token": "color.background.sunken"
+      },
+      {
+        "part": "border",
+        "property": "color",
+        "when": {
+          "state": "rest"
+        },
+        "token": "color.border.default"
+      },
+      {
+        "part": "border",
+        "property": "color",
+        "when": {
+          "state": "hover"
+        },
+        "token": "color.border.strong"
+      },
+      {
+        "part": "border",
+        "property": "color",
+        "when": {
+          "state": "focus"
+        },
+        "token": "color.border.strong"
+      },
+      {
+        "part": "border",
+        "property": "color",
+        "when": {
+          "state": "disabled"
+        },
+        "token": "color.border.disabled"
+      },
+      {
+        "part": "border",
+        "property": "color",
+        "when": {
+          "state": "readonly"
+        },
+        "token": "color.border.default"
+      },
+      {
+        "part": "border",
+        "property": "color",
+        "when": {
+          "state": "invalid"
+        },
+        "token": "color.status.danger.border"
+      },
+      {
+        "part": "text",
+        "property": "color",
+        "when": {
+          "state": "rest"
+        },
+        "token": "color.text.default"
+      },
+      {
+        "part": "text",
+        "property": "color",
+        "when": {
+          "state": "disabled"
+        },
+        "token": "color.text.disabled"
+      },
+      {
+        "part": "text",
+        "property": "typography",
+        "when": {
+          "size": "small"
+        },
+        "token": "typography.body.2"
+      },
+      {
+        "part": "text",
+        "property": "typography",
+        "when": {
+          "size": "medium"
+        },
+        "token": "typography.body.1"
+      },
+      {
+        "part": "text",
+        "property": "typography",
+        "when": {
+          "size": "large"
+        },
+        "token": "typography.body.1"
+      },
+      {
+        "part": "box",
+        "property": "height",
+        "when": {
+          "size": "small"
+        },
+        "token": "size.control.small"
+      },
+      {
+        "part": "box",
+        "property": "height",
+        "when": {
+          "size": "medium"
+        },
+        "token": "size.control.medium"
+      },
+      {
+        "part": "box",
+        "property": "height",
+        "when": {
+          "size": "large"
+        },
+        "token": "size.control.large"
+      },
+      {
+        "part": "box",
+        "property": "inline-padding",
+        "when": {
+          "size": "small"
+        },
+        "token": "spacing.small"
+      },
+      {
+        "part": "box",
+        "property": "inline-padding",
+        "when": {
+          "size": "medium"
+        },
+        "token": "spacing.medium"
+      },
+      {
+        "part": "box",
+        "property": "inline-padding",
+        "when": {
+          "size": "large"
+        },
+        "token": "spacing.medium"
+      }
+    ],
+    "a11y": {
+      "role": "textbox",
+      "name": [
+        "slot:label"
+      ],
+      "description": [
+        "slot:help",
+        "slot:error"
+      ],
+      "states": {
+        "required": [
+          "aria-required"
+        ],
+        "invalid": [
+          "aria-invalid"
+        ],
+        "disabled": [
+          "aria-disabled"
+        ],
+        "readonly": [
+          "aria-readonly"
+        ]
+      },
+      "keys": [],
+      "texts": {
+        "required": {
+          "de": "erforderlich",
+          "en": "required"
+        }
+      }
+    },
+    "constraints": [
+      {
+        "when": {
+          "slot:error": "filled"
+        },
+        "allowed": {
+          "invalid": [
+            "true"
+          ]
+        },
+        "kialo": "An error text without the error state is a contradiction a screen reader cannot resolve: it reads a fault on a field that says it is fine."
+      },
+      {
+        "when": {
+          "disabled": "true"
+        },
+        "allowed": {
+          "readonly": [
+            "false"
+          ]
+        },
+        "kialo": "Two reasons why one cannot type are one too many; disabled wins."
+      }
+    ],
+    "goals": [
+      {
+        "goal": "enter-text",
+        "keywords": {
+          "en": [
+            "name",
+            "address",
+            "textfield",
+            "input"
+          ],
+          "de": [
+            "name",
+            "adresse",
+            "textfeld",
+            "eingabefeld"
+          ]
+        },
+        "props": {},
+        "regulo": "field-label-visible"
+      },
+      {
+        "goal": "email",
+        "keywords": {
+          "en": [
+            "email",
+            "mail"
+          ],
+          "de": [
+            "mail",
+            "mailadresse"
+          ]
+        },
+        "props": {
+          "kind": "email"
+        },
+        "regulo": "field-label-visible"
+      }
+    ]
+  }
+}

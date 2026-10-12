@@ -164,7 +164,7 @@ describe("S3: the agent does not take the link for an action", () => {
 describe("list_eroj and the brief (A5, acceptance 1)", () => {
   it("lists two Eroj and answers get_ero ligilo with Skemo and Uzo", async () => {
     const listed = await output<{ eroj: { name: string }[] }>(client, "list_eroj", {});
-    expect(listed.eroj.map((entry) => entry.name)).toEqual(["butono", "ligilo"]);
+    expect(listed.eroj.map((entry) => entry.name)).toEqual(["butono", "kampo", "ligilo"]);
     const full = await output<{ skemo: { a11y: { role: string } }; uzo?: { purpose: string } }>(
       client,
       "get_ero",

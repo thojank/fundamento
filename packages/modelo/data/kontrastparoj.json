@@ -481,6 +481,27 @@
       "foreground": "color.link.visited",
       "background": "color.background.canvas",
       "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M4S1ZRZTFKTX9KR11BSRB35G",
+      "name": "status-danger-text-on-background-sunken",
+      "foreground": "color.status.danger.text",
+      "background": "color.background.sunken",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M4S1ZRZVK6R7FB0VNGR3DQDV",
+      "name": "status-danger-border-on-background-default",
+      "foreground": "color.status.danger.border",
+      "background": "color.background.default",
+      "kategorio": "ui"
+    },
+    {
+      "id": "kpa_01M4S1ZRZVK6R7FB0VNGR3DQDW",
+      "name": "border-default-on-background-sunken",
+      "foreground": "color.border.default",
+      "background": "color.background.sunken",
+      "kategorio": "ui"
     }
   ]
 }

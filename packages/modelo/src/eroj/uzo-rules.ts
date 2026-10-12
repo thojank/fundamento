@@ -57,6 +57,7 @@ export function uzoIssues(modelo: Modelo, files: ModeloFiles): ValidationIssue[]
     eroIssues(entry, uzo, eroNames, at);
     kialoIssues(entry, uzo, at);
     slotIssues(entry, uzo, at);
+    requiredSlotIssues(entry, uzo, at);
     layoutIssues(entry, uzo, at);
     boundaryIssues(entry, uzo, at);
     coveredIssues(entry, uzo, modelo, at);
@@ -381,6 +382,28 @@ function slotIssues(entry: LoadedEro, uzo: JsonObject, at: At): void {
       "uzo-slot-unknown",
       `The Uzo of ${entry.ero.name} rules the slot ${slot}, which its Skemo does not have.`,
       `Rule a slot of the Skemo (${slots.join(", ") || "none"}), or add the slot to the Skemo first.`,
+    );
+  }
+}
+
+/**
+ * `uzo-slot-required-missing` (Spec 009 A2, E2, plan D-05): when the accessible name of the Ero
+ * comes from slots alone (no `prop:` source), the Uzo marks each of those slots required — an Ero
+ * whose name has one source must not be buildable without it.
+ */
+function requiredSlotIssues(entry: LoadedEro, uzo: JsonObject, at: At): void {
+  const sources = entry.skemo.a11y.name;
+  if (sources.some((source) => source.startsWith("prop:"))) return;
+  const slots = objectAt(uzo, "slots");
+  for (const source of sources) {
+    const slot = source.slice("slot:".length);
+    const rule = slots[slot];
+    if (isJsonObject(rule) && rule.required === true) continue;
+    at(
+      appendPointer("/uzo/slots", slot),
+      "uzo-slot-required-missing",
+      `The accessible name of ${entry.ero.name} comes from the slot ${slot} alone, but the Uzo does not require the slot; the Ero could be built without a name.`,
+      `Set slots.${slot}.required to true in the Uzo (the visible label is the name), or give the Skemo a prop as a second source of the name.`,
     );
   }
 }

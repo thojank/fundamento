@@ -229,7 +229,7 @@ describe("exportModelo: uzoj (Spec 007)", () => {
     expect(exportOf("ero-minimal")).not.toHaveProperty("uzoj");
     // Spec 008: every Ero of the repo has a Uzo, in Ero order.
     expect(modeloJson.uzoj?.map((uzo) => uzo.ero)).toEqual(modeloJson.eroj.map((ero) => ero.id));
-    expect(modeloJson.uzoj).toHaveLength(2);
+    expect(modeloJson.uzoj).toHaveLength(3);
   });
 
   it("the export with uzoj validates against the exported schema", () => {
@@ -328,7 +328,8 @@ describe("exportModelo: canonical, deterministic serialization (AK-10)", () => {
       jugxoj: { date: string }[];
       mankoj: { date: string }[];
     };
-    expect(JSON.stringify(rest) + exported.rezolvojJson).not.toMatch(/"date"/);
+    // A key named date; the value "date" is a boundary case of the kampo (Spec 009).
+    expect(JSON.stringify(rest) + exported.rezolvojJson).not.toMatch(/"date":/);
     expect(jugxoj.map((jugxo) => jugxo.date)).toEqual(modelo.jugxoj.map((jugxo) => jugxo.date));
     expect(mankoj.map((manko) => manko.date)).toEqual(modelo.mankoj.map((manko) => manko.date));
   });

@@ -14,7 +14,13 @@ import type {
   UzoInstead,
   UzoLayoutAllowance,
 } from "../generated/modelo-schema.js";
-import { describeCombination, forbiddenBy } from "./skemo-rules.js";
+import {
+  describeCombination,
+  forbiddenBy,
+  SLOT_EMPTY,
+  SLOT_FILLED,
+  SLOT_KEY_PREFIX,
+} from "./skemo-rules.js";
 
 /** One finding: the indices of the instances involved and the issue. */
 export interface UsageViolation {
@@ -113,6 +119,36 @@ export function textOf(instance: EroInstance): string | undefined {
   return typeof text === "string" && text.trim() !== "" ? text : undefined;
 }
 
+/** The default source of a text rule: the label (Spec 007); Spec 009 adds `of`. */
+const LABEL_SOURCE = "slot:label";
+
+/**
+ * The text a rule judges (Spec 009, D-06): the label, the text of another slot (`texts`) or a
+ * string prop (`props`). Empty when the instance has none there.
+ */
+export function textOfSource(instance: EroInstance, of: string = LABEL_SOURCE): string | undefined {
+  if (of === LABEL_SOURCE) return textOf(instance);
+  const [kind = "", name = ""] = of.split(":");
+  const text = kind === "slot" ? instance.texts?.[name] : instance.props[name];
+  return typeof text === "string" && text.trim() !== "" ? text : undefined;
+}
+
+/**
+ * Whether each slot of the Skemo is filled in an instance (Spec 009, D-04): the label by its text,
+ * another slot by its entries or its text. Keyed `slot:<name>`, so a constraint can read it.
+ */
+export function slotStates(skemo: Skemo, instance: EroInstance): Record<string, string> {
+  const states: Record<string, string> = {};
+  for (const slot of skemo.slots) {
+    const filled =
+      (slot.default === true && textOf(instance) !== undefined) ||
+      (instance.slots?.[slot.name]?.length ?? 0) > 0 ||
+      textOfSource(instance, `slot:${slot.name}`) !== undefined;
+    states[`${SLOT_KEY_PREFIX}${slot.name}`] = filled ? SLOT_FILLED : SLOT_EMPTY;
+  }
+  return states;
+}
+
 /** The goal of an instance: the one it states, else the one its text names (data-model §2.3). */
 export function goalOfInstance(skemo: Skemo, instance: EroInstance): string | undefined {
   return instance.goal ?? goalOf(skemo, textOf(instance) ?? "")?.goal.goal;
@@ -201,6 +237,20 @@ export function textCheckFailure(
       }
       return undefined;
     }
+    // Spec 009 (D-06): a text that says what to do has a verb and an object; an approximation
+    // without a model, like names-goal.
+    case "min-words": {
+      const count = wordsOf(text).length;
+      return count < check.count
+        ? `it has ${count} word${count === 1 ? "" : "s"}, fewer than the ${check.count} a sentence that says what to do needs`
+        : undefined;
+    }
+    case "max-sentences": {
+      const sentences = text.split(/[.!?]+(?:\s+|$)/).filter((part) => part.trim() !== "").length;
+      return sentences > check.count
+        ? `it has ${sentences} sentences, more than ${check.count}`
+        : undefined;
+    }
     default:
       return undefined;
   }
@@ -238,12 +288,13 @@ export function approvedLabel(
   regulo: Regulo,
   lingvo: string,
   eroOf: (instance: EroInstance) => LoadedEro | undefined,
+  of: string = LABEL_SOURCE,
 ): string | undefined {
   const labels: { label: string; lingvo: string | undefined }[] = [];
   for (const jugxo of modelo.jugxoj) {
     if (jugxo.decision !== "approved" || jugxo.ekzemplo?.regulo !== regulo.id) continue;
     for (const instance of jugxo.ekzemplo.instances) {
-      const label = textOf(instance);
+      const label = textOfSource(instance, of);
       const skemo = eroOf(instance)?.skemo;
       if (label === undefined || skemo === undefined) continue;
       labels.push({ label, lingvo: instance.lingvo ?? lingvoOf(skemo, label) });
@@ -267,8 +318,9 @@ const textRule: UsageEnforcer = ({ modelo, regulo, instances, eroOf }) =>
     if (ero === undefined || !applies(regulo, ero)) return [];
     const rule = ero.uzo?.content.find((entry) => entry.regulo === regulo.name);
     if (rule === undefined) return [];
-    // Text rules judge a text; an instance without one violates label-required alone (§5).
-    const text = textOf(instance);
+    // Text rules judge a text; an instance without one violates label-required alone (§5). The
+    // text is the label, or what `of` names (Spec 009, D-06).
+    const text = textOfSource(instance, rule.of);
     if (text === undefined) return [];
     if (rule.when !== undefined) {
       const goal = goalOfInstance(ero.skemo, instance);
@@ -283,7 +335,7 @@ const textRule: UsageEnforcer = ({ modelo, regulo, instances, eroOf }) =>
       genericLingvo(rule.check, text) ??
       insteadHit(ero.uzo, text)?.lingvo ??
       DEFAULT_LINGVO;
-    const example = approvedLabel(modelo, regulo, lingvo, eroOf);
+    const example = approvedLabel(modelo, regulo, lingvo, eroOf, rule.of);
     // A text that names another Ero's goal is that Ero's job (not-instead, D-07): the solution is
     // the other Ero with the kialo of the instead entry, not a better label.
     const instead = rule.check.kind === "not-instead" ? insteadHit(ero.uzo, text) : undefined;
@@ -293,8 +345,8 @@ const textRule: UsageEnforcer = ({ modelo, regulo, instances, eroOf }) =>
           ? `Ask a person; Fundamento does not cover ${instead.entry.goal} yet. ${instead.entry.kialo}`
           : `Use ${instead.entry.ero} instead (use-instead, case ${instead.entry.goal}). ${instead.entry.kialo}`
         : example === undefined
-          ? `Write a label that follows the rule: ${regulo.statement}`
-          : `Write the label as the approved example does, e.g. "${example}".`;
+          ? `Write a text that follows the rule: ${regulo.statement}`
+          : `Write the text as the approved example does, e.g. "${example}".`;
     // Overridden by the Aspekto of the instance: visible as info, not as a violation (Art. VI).
     const jugxo = overrideOf(modelo, instance, rule);
     if (jugxo !== undefined) {
@@ -302,7 +354,7 @@ const textRule: UsageEnforcer = ({ modelo, regulo, instances, eroOf }) =>
         {
           instance: [index],
           severity: "info",
-          message: `Instance ${index} of ${ero.ero.name} is labelled "${text}": ${failure}. The Aspekto ${instance.aspekto} overrides ${regulo.name} with the Jugxo ${jugxo}.`,
+          message: `Instance ${index} of ${ero.ero.name} says "${text}" (${rule.of ?? LABEL_SOURCE}): ${failure}. The Aspekto ${instance.aspekto} overrides ${regulo.name} with the Jugxo ${jugxo}.`,
           suggestion: `Keep the label if the Jugxo ${jugxo} covers it; otherwise ${suggestion.charAt(0).toLowerCase()}${suggestion.slice(1)}`,
         },
       ];
@@ -311,7 +363,7 @@ const textRule: UsageEnforcer = ({ modelo, regulo, instances, eroOf }) =>
       {
         instance: [index],
         severity: rule.fixed ? "error" : (rule.severity ?? "error"),
-        message: `Instance ${index} of ${ero.ero.name} is labelled "${text}": ${failure}.`,
+        message: `Instance ${index} of ${ero.ero.name} says "${text}" (${rule.of ?? LABEL_SOURCE}): ${failure}.`,
         suggestion,
       },
     ];
@@ -543,6 +595,54 @@ export const USAGE_ENFORCERS: Readonly<Record<string, UsageEnforcer>> = {
   "link-navigates-button-acts": textRule,
   "link-label-names-destination": textRule,
   "link-label-not-url": textRule,
+  // Spec 009 T003 (A2, A3, D-05, D-06): the kampo. The label is always visible; the placeholder is
+  // an example, not the label; and the text rules on label, help, error and placeholder.
+  "field-label-visible": ({ instances, eroOf, regulo }) =>
+    instances.flatMap((instance, index) => {
+      const ero = eroOf(instance);
+      if (ero === undefined || !applies(regulo, ero)) return [];
+      if (textOf(instance) !== undefined) return [];
+      return [
+        {
+          instance: [index],
+          message: `Instance ${index} of ${ero.ero.name} has no visible label${typeof instance.props.placeholder === "string" ? ` (only the placeholder "${instance.props.placeholder}")` : ""}.`,
+          suggestion:
+            "Give the label as slot text; a placeholder disappears while typing and names nothing afterwards.",
+        },
+      ];
+    }),
+  "placeholder-not-label": ({ instances, eroOf, regulo }) =>
+    instances.flatMap((instance, index): UsageFinding[] => {
+      const ero = eroOf(instance);
+      if (ero === undefined || !applies(regulo, ero)) return [];
+      const placeholder = instance.props.placeholder;
+      if (typeof placeholder !== "string" || placeholder.trim() === "") return [];
+      const label = textOf(instance);
+      if (label === undefined) {
+        return [
+          {
+            instance: [index],
+            message: `Instance ${index} of ${ero.ero.name} has the placeholder "${placeholder}" and no label: the placeholder stands in for the label.`,
+            suggestion: "Give the label as slot text and keep the placeholder as an example of a value.",
+          },
+        ];
+      }
+      if (label.trim().toLowerCase() === placeholder.trim().toLowerCase()) {
+        return [
+          {
+            instance: [index],
+            severity: "warning",
+            message: `Instance ${index} of ${ero.ero.name} repeats its label "${label}" as the placeholder: an example that repeats the label says nothing.`,
+            suggestion: "Make the placeholder an example of a value, or leave it out.",
+          },
+        ];
+      }
+      return [];
+    }),
+  "field-label-names-the-datum": textRule,
+  "error-says-what-to-do": textRule,
+  "help-is-one-sentence": textRule,
+  "placeholder-is-example": textRule,
 };
 
 function applies(regulo: Regulo, ero: LoadedEro): boolean {
@@ -586,12 +686,14 @@ export function evaluateUsage(modelo: Modelo, instances: readonly EroInstance[])
       return;
     }
     const props = effectiveProps(ero.skemo, instance.props);
-    const forbidden = forbiddenBy(ero.skemo, props);
+    // A constraint may read a slot (Spec 009, D-04): filled or empty stands next to the props.
+    const combination = { ...props, ...slotStates(ero.skemo, instance) };
+    const forbidden = forbiddenBy(ero.skemo, combination);
     if (forbidden !== undefined) {
       at(
         [index],
         "ero-prop-constraint",
-        `Instance ${index} of ${ero.ero.name} combines ${describeCombination(props, [...Object.keys(forbidden.when), ...Object.keys(forbidden.allowed)])}, which the Skemo forbids: ${forbidden.kialo}`,
+        `Instance ${index} of ${ero.ero.name} combines ${describeCombination(combination, [...Object.keys(forbidden.when), ...Object.keys(forbidden.allowed)])}, which the Skemo forbids: ${forbidden.kialo}`,
         `Use ${Object.entries(forbidden.allowed)
           .map(([key, values]) => `${key}=${values.join(" or ")}`)
           .join(", ")} with ${describeCombination(props, Object.keys(forbidden.when))}.`,
