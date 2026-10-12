@@ -150,6 +150,21 @@ describe("Figma plan (T015)", () => {
     expect(set?.description).not.toContain("\n");
   });
 
+  // Spec 007 T029 (A12, D-10, OP-9): what the set should carry beyond the purpose, as the plugin
+  // tries it — boundaries, slot rules and text rules as Markdown for descriptionMarkdown.
+  it("plans the boundaries, slot rules and text rules of the Uzo for the set (T029)", () => {
+    const set = plan.components.find((component) => component.set === "butono");
+    const uzo = prepared.input.modelo.eroj.find((entry) => entry.ero.name === "butono")?.uzo;
+    expect(set?.uzo?.field).toBe("descriptionMarkdown");
+    expect(set?.uzo?.parts).toEqual(["boundary", "slots", "content"]);
+    for (const boundary of uzo?.boundary ?? []) {
+      expect(set?.uzo?.markdown).toContain(boundary.case);
+      expect(set?.uzo?.markdown).toContain(boundary.kialo);
+    }
+    for (const slot of Object.keys(uzo?.slots ?? {})) expect(set?.uzo?.markdown).toContain(slot);
+    for (const rule of uzo?.content ?? []) expect(set?.uzo?.markdown).toContain(rule.regulo);
+  });
+
   it("generates the same bytes twice", () => {
     expect(FIGMA_CELO.generate(prepared.input)).toEqual(files);
   });

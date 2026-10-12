@@ -278,6 +278,11 @@ export interface DoubleBox {
 /** What a node needs from the file around it: the loaded fonts and the computed layout. */
 interface NodeContext {
   loaded: ReadonlySet<string>;
+  /**
+   * Fields the double refuses to set, throwing as Figma does for a field it does not have
+   * (Spec 007 T029): the measurement of a Manko needs a tool that says no, and one that says yes.
+   */
+  refuses?: ReadonlySet<string>;
   /** Every collection of the file, for the modes a node stands in (F34, F35). */
   collections?: () => readonly DoubleCollection[];
   /** The variables of the file, for resolving what a binding would show (F30). */
@@ -481,6 +486,11 @@ function node(
     set(target, key, value) {
       if (key === "gridRowAnchorIndex" || key === "gridColumnAnchorIndex") {
         throw new Error(`${String(key)} is read-only; use setGridChildPosition.`);
+      }
+      if (typeof key === "string" && context.refuses?.has(key)) {
+        throw new Error(
+          `in set_${key}: The Figma double refuses ${key} (option refuse); only the real tool says whether it carries this field.`,
+        );
       }
       // Measured on 2026-09-22 (file x8sFFyOkrnlMM4ngAsbnfs, F21): setting layoutMode on a grid
       // whose cells are occupied — even to "GRID" again — threw "in set_layoutMode: Cannot set
@@ -748,7 +758,12 @@ function strict<T extends object>(name: string, api: T): T {
  * double: a run with more Aspektoj than modes is otherwise not measurable without Figma (F27).
  */
 export function figmaDouble(
-  options: { fonts?: readonly { family: string; style: string }[]; modeLimit?: number } = {},
+  options: {
+    fonts?: readonly { family: string; style: string }[];
+    modeLimit?: number;
+    /** Fields the double refuses to set (Spec 007 T029); by default it accepts every field. */
+    refuse?: readonly string[];
+  } = {},
 ): FigmaDouble {
   const counts: DoubleCounts = {
     collections: 0,
@@ -763,6 +778,7 @@ export function figmaDouble(
   // Filled below, once the document and the variables exist.
   const context: NodeContext = {
     loaded,
+    ...(options.refuse === undefined ? {} : { refuses: new Set(options.refuse) }),
     version: 0,
     variableById: (id) => variables.find((variable) => variable.id === id),
     collectionOf: (variable) =>

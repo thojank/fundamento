@@ -1070,6 +1070,28 @@ async function applyComponents(variables, warnings) {
     if (typeof component.description === "string") {
       write(set, "description", component.description);
     }
+    // Beyond the purpose (Spec 007 T029, Art. VI): the boundaries, slot rules and text rules are
+    // tried on the field the plan names, and the answer is measured, not assumed. A refusal is
+    // reported with the tool's own words as an open Manko per part; an acceptance as closed.
+    if (component.uzo !== undefined) {
+      try {
+        write(set, component.uzo.field, component.uzo.markdown);
+        report.uzo = {
+          field: component.uzo.field,
+          parts: component.uzo.parts.slice(),
+          status: "closed",
+          evidence: component.uzo.field + " accepted the Markdown of the Uzo (" +
+            component.uzo.markdown.length + " characters); carried as words, not enforced.",
+        };
+      } catch (error) {
+        report.uzo = {
+          field: component.uzo.field,
+          parts: component.uzo.parts.slice(),
+          status: "open",
+          evidence: String(error && error.message ? error.message : error),
+        };
+      }
+    }
     // Das Set steht in keinem eigenen Modus (F35). Gemessen trug es nach zwei Läufen
     // { aspekto: ekzemplo, contrast: default }: Wer die Bibliothek öffnet, sähe die Beispielmarke
     // als „den" Knopf, und zwei Läufe läsen ihre Werte in verschiedenen Kontexten. Ohne eigenen
@@ -1636,7 +1658,29 @@ async function applyPlan(options) {
     variables: variables.size,
     components: components,
     warnings: warnings,
+    mankoj: mankojOf(components),
   };
+}
+
+/**
+ * The Mankoj of this run (Spec 007 T029, like Spec 005 A6): per component and part of the Uzo
+ * the plugin tried, whether the tool took the field (closed) or refused it (open), with its words.
+ */
+function mankojOf(components) {
+  const open = [];
+  const closed = [];
+  for (const report of components) {
+    if (report.uzo === undefined) continue;
+    for (const part of report.uzo.parts) {
+      (report.uzo.status === "open" ? open : closed).push({
+        set: report.set,
+        part: part,
+        field: report.uzo.field,
+        evidence: report.uzo.evidence,
+      });
+    }
+  }
+  return { open: open, closed: closed };
 }
 
 const PART_LIMIT = 3900;
@@ -1686,7 +1730,9 @@ function reportParts(result) {
         diagnosis: report.diagnosis,
         modes: report.modes,
         fonts: report.fonts,
+        uzo: report.uzo,
       })),
+      mankoj: result.mankoj,
     }),
   ];
   for (const report of result.components) {
