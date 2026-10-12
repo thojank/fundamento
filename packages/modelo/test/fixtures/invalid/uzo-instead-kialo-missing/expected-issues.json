@@ -1,0 +1,13 @@
+{
+  "description": "Spec 008 A7 (A3, Art. VI): instead[0] has no kialo. An alternative without its reason is an order; the agent could not pass it on. The schema rejects it too (schema-violation at the same entry). Spec 007 already covers this case (uzo-kialo-missing reads instead); the red was observed by mutation (plan D-16).",
+  "issues": [
+    {
+      "rule": "uzo-kialo-missing",
+      "path": "data/eroj/butono/uzo.json#/uzo/instead/0"
+    },
+    {
+      "rule": "schema-violation",
+      "path": "data/eroj/butono/uzo.json#/uzo/instead/0"
+    }
+  ]
+}

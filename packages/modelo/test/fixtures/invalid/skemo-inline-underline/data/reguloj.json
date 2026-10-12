@@ -1,0 +1,38 @@
+{
+  "reguloj": [
+    {
+      "id": "reg_01K5FMAJ0J14KNVH5BXJ93VFBG",
+      "name": "semantic-colors-alias-palette",
+      "statement": "Semantic color tokens reference palette tokens instead of literal values.",
+      "kialo": "A palette change then reaches every semantic use in one place.",
+      "scope": "vortaro",
+      "checkability": "manual"
+    },
+    {
+      "id": "reg_01M4H2T2FKDP91NR287MM0ZC7Z",
+      "name": "spacing-owned-by-container",
+      "statement": "The space between sibling Eroj belongs to their container; an Ero carries no outer spacing.",
+      "kialo": "An Ero does not know its neighbours; if each brought its own distance, two side by side would add up.",
+      "scope": "eroj: butono instances in a design or in code",
+      "checkability": "manual",
+      "appliesTo": {
+        "eroj": [
+          "butono"
+        ]
+      }
+    },
+    {
+      "id": "reg_01M4RXVY3YRR83HZD9GJG4YP5M",
+      "name": "link-not-color-only",
+      "statement": "A link that stands in running text (placement inline) differs from the text by more than colour: its underline is there in every state.",
+      "kialo": "WCAG 1.4.1: colour alone does not carry information; a person who does not see the hue must still find the link.",
+      "scope": "eroj: the Skemo of every Ero with a part underline and a prop placement",
+      "checkability": "automatic",
+      "appliesTo": {
+        "eroj": [
+          "butono"
+        ]
+      }
+    }
+  ]
+}

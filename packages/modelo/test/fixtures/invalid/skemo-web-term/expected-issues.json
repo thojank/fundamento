@@ -1,0 +1,9 @@
+{
+  "description": "Spec 008 A7 (Art. VIII, plan D-13): the Skemo names a prop href. A prop is a word of the Modelo; href is the attribute of one platform. The platform-neutral name is to; the Web Celo translates it.",
+  "issues": [
+    {
+      "rule": "skemo-web-term",
+      "path": "data/eroj/butono/skemo.json#/skemo/props/2/name"
+    }
+  ]
+}
