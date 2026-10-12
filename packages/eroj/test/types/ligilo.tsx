@@ -16,29 +16,29 @@ export const valid = (
   </Ligilo>
 );
 
-// @ts-expect-error placement allows inline and standalone only
 export const wrongPlacement = (
+  // @ts-expect-error placement allows inline and standalone only
   <Ligilo to="/x" placement="block">
     x
   </Ligilo>
 );
 
-// @ts-expect-error size allows small, medium, large only
 export const wrongSize = (
+  // @ts-expect-error size allows small, medium, large only
   <Ligilo to="/x" size="xl">
     x
   </Ligilo>
 );
 
-// @ts-expect-error a link has no disabled (E4)
 export const noDisabled = (
+  // @ts-expect-error a link has no disabled (E4)
   <Ligilo to="/x" disabled>
     x
   </Ligilo>
 );
 
-// @ts-expect-error a link has no icon-start (E3)
 export const noIconStart = (
+  // @ts-expect-error a link has no icon-start (E3)
   <Ligilo to="/x" iconStart={<svg />}>
     x
   </Ligilo>
