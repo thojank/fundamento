@@ -50,6 +50,23 @@ describe("prompt gvidanto", () => {
     expect(text).not.toMatch(/Name a variant/);
   });
 
+  // Spec 007 T025 (A9, D-12): the Uzo and the brief in rule 8; ask-human in rule 12.
+  it("rule 8 names the Uzo and brief of get_ero (Spec 007)", () => {
+    const rule8 = text.split("\n").find((line) => line.startsWith("8. ")) ?? "";
+    expect(rule8).toContain("`brief`");
+    expect(rule8).toMatch(/Uzo/);
+    expect(rule8).toMatch(/what it is for|purpose/i);
+  });
+
+  it("rule 12 passes an ask-human answer on and proposes no solution of its own (Spec 007)", () => {
+    const rule12 = text.split("\n").find((line) => line.startsWith("12. ")) ?? "";
+    expect(rule12).toContain("`action: ask-human`");
+    expect(rule12).toContain("Do not propose a solution of your own");
+    expect(rule12).toMatch(/pass the kialo to the user/);
+    expect(rule12).toMatch(/Fundamento does not cover this yet/);
+    expect(rule12).toMatch(/both `candidates`/);
+  });
+
   it("asks for check_usage before a handover (Spec 003 T025)", () => {
     expect(text).toMatch(/Before you hand over a design or code, call `check_usage`/);
   });
