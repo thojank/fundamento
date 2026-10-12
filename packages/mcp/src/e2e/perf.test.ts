@@ -113,19 +113,19 @@ describe("performance (AK-07)", { timeout: 60_000 }, () => {
         instances: [
           {
             ero: "butono",
-            props: { variant: "primary" },
+            props: { emphasis: "high" },
             container: `dialog-${index}`,
             label: "Speichern",
           },
           {
             ero: "butono",
-            props: { variant: "primary" },
+            props: { emphasis: "high" },
             container: `dialog-${index}`,
             label: "Weiter",
           },
           {
             ero: "butono",
-            props: { variant: "tertiary" },
+            props: { emphasis: "low" },
             container: `dialog-${index}`,
             label: "Abbrechen",
           },

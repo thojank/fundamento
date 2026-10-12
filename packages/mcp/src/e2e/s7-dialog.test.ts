@@ -64,7 +64,7 @@ describe("S7 with ekzemplo (AK-06)", () => {
       get_ero: { name: "butono" },
       suggest_ero: { goal: "Löschen" },
       check_usage: {
-        instances: [{ ero: "butono", props: { variant: "primary" }, label: "Speichern" }],
+        instances: [{ ero: "butono", props: { emphasis: "high" }, label: "Speichern" }],
       },
     };
     for (const name of TOOL_NAMES) {

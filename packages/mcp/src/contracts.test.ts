@@ -19,7 +19,7 @@ const ISSUE = {
 const REGULO_REF = {
   id: "reg_01M2XMV80DG7JCJDTZGE66MGHW",
   name: "one-primary-per-container",
-  statement: "A container holds at most one butono with variant=primary.",
+  statement: "A container holds at most one butono with emphasis=high.",
   kialo: "One primary action makes the next step obvious.",
   checkability: "automatic",
 };
@@ -307,8 +307,8 @@ const EXAMPLES: Record<string, { input: unknown; output: unknown; badInput: unkn
           id: "ero_01M2XN0PHDBBD6MNFN75DB9NQ5",
           name: "butono",
           description: "A button: starts an action.",
-          variants: ["primary", "secondary", "tertiary"],
-          props: ["variant", "label"],
+          variants: ["high", "medium", "low"],
+          props: ["emphasis", "label"],
         },
       ],
     },
@@ -324,15 +324,15 @@ const EXAMPLES: Record<string, { input: unknown; output: unknown; badInput: unkn
       },
       skemo: {
         id: "ske_01M2XN0PWS92GP7VFHW161EH0D",
-        props: [{ name: "variant", kind: "enum", values: ["primary"], default: "primary" }],
+        props: [{ name: "emphasis", kind: "enum", values: ["high"], default: "high" }],
         states: ["rest"],
         slots: [{ name: "label", default: true, text: true }],
-        parts: { surface: { fill: { by: ["variant"] } } },
+        parts: { surface: { fill: { by: ["emphasis"] } } },
         bindings: [
           {
             part: "surface",
             property: "fill",
-            when: { variant: "primary" },
+            when: { emphasis: "high" },
             token: "color.action.primary.rest",
           },
         ],
@@ -341,7 +341,7 @@ const EXAMPLES: Record<string, { input: unknown; output: unknown; badInput: unkn
           {
             goal: "destructive",
             keywords: { de: ["löschen"] },
-            props: { variant: "primary", tone: "danger" },
+            props: { emphasis: "high", intent: "danger" },
           },
         ],
       },
@@ -355,7 +355,7 @@ const EXAMPLES: Record<string, { input: unknown; output: unknown; badInput: unkn
           instances: [
             {
               ero: "butono",
-              props: { variant: "primary" },
+              props: { emphasis: "high" },
               container: "dialog",
               label: "Speichern",
             },
@@ -365,17 +365,17 @@ const EXAMPLES: Record<string, { input: unknown; output: unknown; badInput: unkn
       projekcioj: {
         webComponent: {
           tag: "fm-butono",
-          attributes: { variant: ["primary"], label: "string" },
+          attributes: { emphasis: ["high"], label: "string" },
           slots: ["label"],
         },
         react: {
           package: "@fundamento/eroj/react",
           component: "Butono",
-          props: { variant: ["primary"], label: "string" },
+          props: { emphasis: ["high"], label: "string" },
         },
         figma: {
           componentSet: "butono",
-          properties: { variant: ["primary"], label: "text" },
+          properties: { emphasis: ["high"], label: "text" },
           pluginData: { namespace: "fundamento", key: "ero", value: "butono" },
         },
         css: { files: ["fundamento.css"], attributes: ["data-fm-aspekto"] },
@@ -390,14 +390,14 @@ const EXAMPLES: Record<string, { input: unknown; output: unknown; badInput: unkn
     output: {
       goal: "Löschen",
       matched: { goal: "destructive", keyword: "löschen", lingvo: "de" },
-      suggestion: { ero: "butono", props: { variant: "primary", tone: "danger" } },
+      suggestion: { ero: "butono", props: { emphasis: "high", intent: "danger" } },
       kialo: REGULO_REF.kialo,
       regulo: REGULO_REF,
     },
     badInput: { goal: "Löschen", lingvo: "fr" },
   },
   check_usage: {
-    input: { instances: [{ ero: "butono", props: { variant: "primary" }, label: "Speichern" }] },
+    input: { instances: [{ ero: "butono", props: { emphasis: "high" }, label: "Speichern" }] },
     output: {
       instances: 2,
       valid: false,
