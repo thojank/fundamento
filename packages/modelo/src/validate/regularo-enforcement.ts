@@ -249,10 +249,14 @@ const requiredMarked: Enforcer = (modelo, regulo) => {
     const { skemo, ero } = entry;
     if (!skemo.props.some((prop) => prop.name === "required" && prop.kind === "boolean")) continue;
     const texts = skemo.a11y.texts?.required;
-    const heard = texts !== undefined && typeof texts.de === "string" && typeof texts.en === "string";
+    const heard =
+      texts !== undefined && typeof texts.de === "string" && typeof texts.en === "string";
     const seen = skemo.parts["required-mark"] !== undefined;
     if (heard && seen) continue;
-    const lacks = [...(seen ? [] : ["a part required-mark"]), ...(heard ? [] : ["a11y.texts.required in de and en"])];
+    const lacks = [
+      ...(seen ? [] : ["a part required-mark"]),
+      ...(heard ? [] : ["a11y.texts.required in de and en"]),
+    ];
     issues.push({
       rule: "required-marked",
       severity: "error",
@@ -277,7 +281,10 @@ const errorNotColorOnly: Enforcer = (modelo, regulo) => {
     const text = skemo.slots.some((slot) => slot.name === "error" && slot.text === true);
     const spoken = (skemo.a11y.states.invalid ?? []).includes("aria-invalid");
     if (text && spoken) continue;
-    const lacks = [...(text ? [] : ["a text slot error"]), ...(spoken ? [] : ["aria-invalid in a11y.states.invalid"])];
+    const lacks = [
+      ...(text ? [] : ["a text slot error"]),
+      ...(spoken ? [] : ["aria-invalid in a11y.states.invalid"]),
+    ];
     issues.push({
       rule: "error-not-color-only",
       severity: "error",

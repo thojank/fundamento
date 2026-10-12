@@ -174,3 +174,75 @@ for (const aspekto of ["komuna", "ekzemplo"]) {
     }
   }
 }
+
+// Spec 009 T014 (A6): the rendered fm-kampo in every colour class of komuna and ekzemplo: axe on
+// every size in rest, hover, disabled, readonly and invalid, with help and error, required; the
+// focus ring of the input contrasts at least 3:1 with the gap colour and with the page background.
+const kampo = input.modelo.eroj.find((entry) => entry.ero.name === "kampo");
+if (kampo === undefined) throw new Error("kampo missing");
+const fieldCombos = combinationsOf(kampo.skemo, ["size"]);
+const fields = fieldCombos
+  .map(
+    (c, i) =>
+      `<fm-kampo id="f${i}" size="${c.size}" required placeholder="max@beispiel.example">E-Mail ${i}<span slot="help">Wir schreiben nur zur Bestellung.</span></fm-kampo>`,
+  )
+  .join(" ")
+  .concat(
+    `<fm-kampo id="ferr" invalid>Name<span slot="error">Gib einen Namen mit mindestens zwei Zeichen ein</span></fm-kampo>`,
+  );
+
+for (const aspekto of ["komuna", "ekzemplo"]) {
+  for (const scheme of ["light", "dark"]) {
+    for (const contrast of ["default", "high"]) {
+      test(`${aspekto} ${scheme}/${contrast}: axe on every size and state of the kampo, focus ring ≥ 3:1`, async ({
+        page,
+        browserName,
+      }) => {
+        await serve(
+          page,
+          out,
+          fields,
+          "<style>body { color: var(--fm-color-text-default); }</style>",
+        );
+        await page.evaluate(
+          ([a, s, c]) => {
+            const root = document.documentElement;
+            root.setAttribute("data-fm-aspekto", a ?? "");
+            root.setAttribute("data-fm-color-scheme", s ?? "");
+            root.setAttribute("data-fm-contrast", c ?? "");
+          },
+          [aspekto, scheme, contrast],
+        );
+        expect(await axeViolations(page), "rest").toEqual([]);
+        for (const [i] of fieldCombos.entries()) {
+          await page.locator(`#f${i}`).locator('[part="control"]').hover();
+          expect(await axeViolations(page, `#f${i}`), `#f${i} hover`).toEqual([]);
+        }
+        await page.mouse.move(0, 0);
+        for (const state of ["disabled", "readonly"]) {
+          await page.locator("fm-kampo").evaluateAll((elements, s) => {
+            for (const element of elements) element.toggleAttribute(s, true);
+          }, state);
+          expect(await axeViolations(page), state).toEqual([]);
+          await page.locator("fm-kampo").evaluateAll((elements, s) => {
+            for (const element of elements) element.toggleAttribute(s, false);
+          }, state);
+        }
+        const rings = await focusRingContrasts(
+          page,
+          [...fieldCombos.map((_c, i) => `#f${i}`), "#ferr"],
+          browserName,
+        );
+        expect(rings).toHaveLength(fieldCombos.length + 1);
+        for (const ring of rings) {
+          expect(ring.gap, `${ring.selector} ring on gap`).toBeGreaterThanOrEqual(3);
+          expect(ring.page, `${ring.selector} ring on page`).toBeGreaterThanOrEqual(3);
+        }
+        expect(
+          boundToken(kampo.skemo, "border", "color", { ...fieldCombos[0], state: "invalid" })
+            ?.token,
+        ).toBe("color.status.danger.border");
+      });
+    }
+  }
+}

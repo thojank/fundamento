@@ -714,8 +714,12 @@ describe("Figma plan for the ligilo (Spec 008 T017)", () => {
         entry.props.state === state,
     );
 
-  it("plans two sets, butono first, and gives the ligilo placement × size × state", () => {
-    expect(plan.components.map((component) => component.set)).toEqual(["butono", "ligilo"]);
+  it("plans the sets in Ero order, butono first, and gives the ligilo placement × size × state", () => {
+    expect(plan.components.map((component) => component.set)).toEqual([
+      "butono",
+      "kampo",
+      "ligilo",
+    ]);
     expect(set?.properties).toEqual({
       to: "TEXT",
       placement: ["inline", "standalone"],

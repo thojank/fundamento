@@ -92,9 +92,9 @@ describe("Web Component Celo (T011)", () => {
   it("exposes only ::part(control) and has no text of its own (Art. VIII)", () => {
     // The parts of the markup (the template also names parts in selectors it queries).
     const templates = [...element.matchAll(/`(<[^`]*)`/g)].map((m) => m[1] ?? "");
-    expect(templates.flatMap((t) => [...t.matchAll(/part="([a-z-]+)"/g)].map((m) => m[1]))).toEqual([
-      "control",
-    ]);
+    expect(templates.flatMap((t) => [...t.matchAll(/part="([a-z-]+)"/g)].map((m) => m[1]))).toEqual(
+      ["control"],
+    );
     expect(templates.length).toBeGreaterThan(0);
     for (const template of templates) expect(template).not.toMatch(/>[^<\s$][^<]*</);
   });
@@ -123,16 +123,18 @@ describe("Web Component Celo for the ligilo (Spec 008 T015)", () => {
   });
 
   it("speaks the a11y text as the description and shows the mark while external is true (D-02, D-05)", () => {
-    expect(ligiloElement).toContain('control.setAttribute("aria-describedby", described.join(" "))');
+    expect(ligiloElement).toContain(
+      'control.setAttribute("aria-describedby", described.join(" "))',
+    );
     expect(ligiloElement).toContain('described.push("fm-texts")');
     expect(ligiloElement).toContain('root.setAttribute("data-marked", "true")');
     expect(ligiloCss).toContain(':not([data-marked="true"])');
     // No text of its own: the texts come from the Skemo descriptor at runtime (Art. VIII).
     expect(ligiloElement).not.toContain("öffnet extern");
     const templates = [...ligiloElement.matchAll(/`(<[^`]*)`/g)].map((m) => m[1] ?? "");
-    expect(templates.flatMap((t) => [...t.matchAll(/part="([a-z-]+)"/g)].map((m) => m[1]))).toEqual([
-      "control",
-    ]);
+    expect(templates.flatMap((t) => [...t.matchAll(/part="([a-z-]+)"/g)].map((m) => m[1]))).toEqual(
+      ["control"],
+    );
   });
 
   it("underlines inline in every state and standalone from hover and focus on; visited has a colour", () => {

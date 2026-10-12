@@ -977,3 +977,25 @@ describe("Spec 008 documentation (Vojmapo Phase 4)", () => {
     expect(read("specs/008-ligilo/tasks.md")).toContain("## Messungen");
   });
 });
+
+// Spec 009 T016 (A8): the Vojmapo names Spec 009 in Phase 4.
+describe("Spec 009 documentation (Vojmapo Phase 4)", () => {
+  it("the vojmapo names Spec 009, the composite Ero and the Guidelines sentence", () => {
+    const row = read("docs/vojmapo.md")
+      .split("\n")
+      .find((line) => line.startsWith("| 4 |"));
+    expect(row).toContain("**Spec 009 (`kampo`");
+    expect(row).toContain("das erste zusammengesetzte Ero");
+    expect(row).toContain("Make erfindet kein Eingabefeld mehr");
+  });
+
+  it("specs/009-kampo carries the spec unchanged next to plan and tasks", () => {
+    const spec = read("specs/009-kampo/spec.md");
+    expect(spec).toMatch(/^# Spec 009 – Kampo: das Textfeld/);
+    expect(spec).toContain("**E7 – `kind` statt `type`.**");
+    expect(read("specs/009-kampo/plan.md")).toContain(
+      "### D-03 Der Teil der Eingabe heißt `text`, nicht `input`",
+    );
+    expect(read("specs/009-kampo/tasks.md")).toContain("## Messungen");
+  });
+});

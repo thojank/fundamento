@@ -140,3 +140,58 @@ for (const factor of [1.35, 2]) {
     expect(lines).toBeGreaterThan(1);
   });
 }
+
+// Spec 009 T014 (A6): the kampo right to left, with label, help and error expanded and
+// pseudo-localised; the texts may break, the input line does not.
+test("kampo right to left: the text aligns to the right and the focus ring stays", async ({
+  page,
+  browserName,
+}) => {
+  await serve(page, out, `<fm-kampo id="a" value="Erika">Name</fm-kampo>`);
+  await page.evaluate(() => document.documentElement.setAttribute("dir", "rtl"));
+  const direction = await page
+    .locator("#a")
+    .evaluate(
+      (element) =>
+        getComputedStyle(element.shadowRoot?.querySelector('[part="control"]') as Element)
+          .direction,
+    );
+  expect(direction).toBe("rtl");
+  await page.keyboard.press(TAB(browserName));
+  const outline = await page
+    .locator("#a")
+    .evaluate(
+      (element) =>
+        getComputedStyle(element.shadowRoot?.querySelector('[part="control"]') as Element)
+          .outlineWidth,
+    );
+  expect(Number.parseFloat(outline)).toBeGreaterThan(0);
+});
+
+for (const factor of [1.35, 2]) {
+  test(`kampo text expansion to ${Math.round(factor * 100)} %: label, help and error grow, nothing is clipped`, async ({
+    page,
+  }) => {
+    await serve(
+      page,
+      out,
+      `<div style="inline-size: 16rem"><fm-kampo id="a" invalid>E-Mail<span slot="help" id="h">Wir schreiben nur zur Bestellung.</span><span slot="error" id="e">Gib eine E-Mail-Adresse mit @ ein</span></fm-kampo></div>`,
+    );
+    const before = await page.locator("#a").boundingBox();
+    for (const id of ["h", "e"]) {
+      await page.locator(`#${id}`).evaluate(
+        (element, text) => {
+          element.textContent = text;
+        },
+        pseudo("Wir schreiben nur zur Bestellung und geben die Adresse nicht weiter.", factor),
+      );
+    }
+    const after = await page.locator("#a").boundingBox();
+    expect(after?.height ?? 0).toBeGreaterThan(before?.height ?? 0);
+    const clipped = await page.locator("#a").evaluate((element) => {
+      const field = element.shadowRoot?.querySelector('[part="field"]') as HTMLElement;
+      return field.scrollWidth > field.clientWidth + 1;
+    });
+    expect(clipped).toBe(false);
+  });
+}

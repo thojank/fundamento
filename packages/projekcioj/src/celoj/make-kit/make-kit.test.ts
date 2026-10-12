@@ -46,6 +46,7 @@ describe("Make Kit sources (T018)", () => {
       "README.md",
       "guidelines/Guidelines.md",
       "guidelines/components/butono.md",
+      "guidelines/components/kampo.md",
       "guidelines/components/ligilo.md",
       "guidelines/foundations/color.md",
       "guidelines/foundations/dimensioj.md",

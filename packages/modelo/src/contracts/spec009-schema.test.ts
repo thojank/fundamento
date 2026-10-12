@@ -64,7 +64,12 @@ describe("UzoContent.of, min-words and max-sentences (D-06)", () => {
       }),
     ).toBe(true);
     expect(
-      v("UzoContent")({ regulo: "x", fixed: true, of: "error", check: { kind: "min-words", count: 3 } }),
+      v("UzoContent")({
+        regulo: "x",
+        fixed: true,
+        of: "error",
+        check: { kind: "min-words", count: 3 },
+      }),
     ).toBe(false);
     expect(v("UzoContent")({ regulo: "x", fixed: true, check: { kind: "min-words" } })).toBe(false);
   });

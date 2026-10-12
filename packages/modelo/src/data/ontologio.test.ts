@@ -180,7 +180,7 @@ describe("the scheme eroj (Spec 008 T009)", () => {
           copy.concepts.push({
             ...(copy.concepts.find((concept) => concept.term === "Ligilo") as Concept),
             term: "Tekstareo",
-          uri: "https://fundamento.ciferecigo.com/ontologio#Tekstareo",
+            uri: "https://fundamento.ciferecigo.com/ontologio#Tekstareo",
             relations: [],
           });
         }),

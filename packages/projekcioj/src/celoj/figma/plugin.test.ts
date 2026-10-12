@@ -236,6 +236,7 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
     expect(openButono.map((manko) => manko.part)).toEqual(["boundary", "slots", "content"]);
     expect(result.mankoj.open.map((manko) => manko.set)).toEqual([
       ...["boundary", "slots", "content"].map(() => "butono"),
+      ...["boundary", "slots", "content"].map(() => "kampo"),
       ...["boundary", "slots", "content"].map(() => "ligilo"),
     ]);
     for (const manko of openButono) {
@@ -261,12 +262,9 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
       result.mankoj.closed.filter((manko) => manko.set === "butono").map((manko) => manko.part),
     ).toEqual(["boundary", "slots", "content"]);
     expect(result.mankoj.closed.map((manko) => manko.set)).toEqual([
-      "butono",
-      "butono",
-      "butono",
-      "ligilo",
-      "ligilo",
-      "ligilo",
+      ...["butono", "butono", "butono"],
+      ...["kampo", "kampo", "kampo"],
+      ...["ligilo", "ligilo", "ligilo"],
     ]);
   });
 });
@@ -1348,6 +1346,7 @@ describe("every property the plugin owns is from the plan or neutral", () => {
     // The set lies on the page, in no flow: its position among siblings is not the plugin's.
     const onPage = [
       "Document/Page 1/butono: layoutPositioning",
+      "Document/Page 1/kampo: layoutPositioning",
       "Document/Page 1/ligilo: layoutPositioning",
     ];
     expect(double.untouchedDefaults(OWNED).filter((entry) => !onPage.includes(entry))).toEqual([]);
@@ -2423,6 +2422,8 @@ describe("every bound paint shows the plan's colour after the first and the seco
       // Spec 008: two sets; the ligilo has placement × size × state = 30 variants.
       components: [
         { set: "butono", created: 72, updated: 0 },
+        // Spec 009: the kampo has size × state = 18 variants.
+        { set: "kampo", created: 18, updated: 0 },
         { set: "ligilo", created: 30, updated: 0 },
       ],
     });

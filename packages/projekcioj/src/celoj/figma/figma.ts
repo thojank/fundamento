@@ -114,7 +114,21 @@ export const FIGMA_NOT_DRAWN: Readonly<Record<string, string>> = {
   // Spec 008 (plan D-11, Befund B-1): the underline is written as the label's text decoration,
   // on or off per variant; its thickness and colour bind to no variable in Figma.
   underline: "jug_01M4RYCY61NK92JM6XYD00M012",
+  // Spec 009 (plan D-09, Befund B-2): the placeholder has no node per state, the sign of the
+  // required mark is the projection's.
+  placeholder: "jug_01M4S2R85WRAC5SV7CARH8RE7S",
+  "required-mark": "jug_01M4S2R85WRAC5SV7CARH8RE7S",
 };
+
+/**
+ * How the plugin draws a set (Spec 009, D-09): a control (variant → ring → gap → control → label)
+ * for a button or a link, a field (label above, the control with its text, help and error below)
+ * for a textbox. Celo knowledge from the a11y role (Art. VIII).
+ */
+export type FigmaStructure = "control" | "field";
+
+export const structureOf = (role: string): FigmaStructure =>
+  role === "textbox" ? "field" : "control";
 
 /**
  * The typography a label that inherits from its text (binding keyword `inherit`, Spec 008 E6,
@@ -125,6 +139,8 @@ export const INHERIT_TYPOGRAPHY = "typography.body.1";
 
 export interface FigmaComponentSet {
   set: string;
+  /** How the plugin draws the variants (Spec 009, D-09); a plan without it is a control. */
+  structure?: FigmaStructure;
   /** The purpose of the Uzo, one line, as the description of the set (Spec 007 T028, A12). */
   description?: string;
   /**
@@ -932,16 +948,28 @@ function componentSetOf(
   // variant (size), and its family and weight follow the Dimensioj, so the pairs are collected over
   // both — each with the Aspektoj that ask for it, which is what the report names per mode.
   const fontsNeeded = new Map<string, { family: string; style: string; aspektoj: Set<string> }>();
+  // Every part with a typography (Spec 009: a field has label, text, help and error).
+  const typographyParts = Object.entries(skemo.parts)
+    .filter(([, properties]) => properties.typography !== undefined)
+    .map(([part]) => part);
   for (const { assignment, tokens } of resolutions) {
     for (const variant of variants) {
-      const typography = typographyToken(variant.props);
-      const font = typography === undefined ? undefined : fontOf(tokens[typography]?.value);
-      if (font === undefined) continue;
-      const key = `${font.family}\u0000${font.style}`;
-      const seen = fontsNeeded.get(key) ?? { ...font, aspektoj: new Set<string>() };
-      const aspekto = assignment[ASPEKTO_DIMENSIO];
-      if (aspekto !== undefined) seen.aspektoj.add(aspekto);
-      fontsNeeded.set(key, seen);
+      for (const part of typographyParts) {
+        const bound = boundToken(skemo, part, "typography", variant.props);
+        const typography =
+          bound === undefined
+            ? undefined
+            : bound.token === "inherit"
+              ? INHERIT_TYPOGRAPHY
+              : bound.token;
+        const font = typography === undefined ? undefined : fontOf(tokens[typography]?.value);
+        if (font === undefined) continue;
+        const key = `${font.family}\u0000${font.style}`;
+        const seen = fontsNeeded.get(key) ?? { ...font, aspektoj: new Set<string>() };
+        const aspekto = assignment[ASPEKTO_DIMENSIO];
+        if (aspekto !== undefined) seen.aspektoj.add(aspekto);
+        fontsNeeded.set(key, seen);
+      }
     }
   }
   const fonts = [...fontsNeeded.values()]
@@ -971,6 +999,7 @@ function componentSetOf(
   const cell = parityPx(base[VITRINO_CELL_PADDING]?.value);
   return {
     set: entry.ero.name,
+    structure: structureOf(skemo.a11y.role),
     ...(description === undefined ? {} : { description }),
     ...(uzo === undefined ? {} : { uzo }),
     properties,

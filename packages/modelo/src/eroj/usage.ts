@@ -623,7 +623,8 @@ export const USAGE_ENFORCERS: Readonly<Record<string, UsageEnforcer>> = {
           {
             instance: [index],
             message: `Instance ${index} of ${ero.ero.name} has the placeholder "${placeholder}" and no label: the placeholder stands in for the label.`,
-            suggestion: "Give the label as slot text and keep the placeholder as an example of a value.",
+            suggestion:
+              "Give the label as slot text and keep the placeholder as an example of a value.",
           },
         ];
       }

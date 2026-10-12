@@ -58,7 +58,9 @@ describe("kampo in the repo Modelo (T004)", () => {
     const tokens = [
       ...skemo.bindings.map((binding) => binding.token),
       ...Object.values(skemo.parts).flatMap((part) =>
-        Object.values(part).flatMap((source) => (source && "fixed" in source ? [source.fixed] : [])),
+        Object.values(part).flatMap((source) =>
+          source && "fixed" in source ? [source.fixed] : [],
+        ),
       ),
     ];
     expect(tokens.length).toBeGreaterThan(25);
@@ -136,7 +138,8 @@ describe("kampo in the repo Modelo (T004)", () => {
       ["email", { kind: "email" }],
     ]);
     const words = (skemo.goals ?? []).flatMap((goal) => Object.values(goal.keywords).flat());
-    for (const word of ["eingeben", "enter", "type", "zur", "to"]) expect(words).not.toContain(word);
+    for (const word of ["eingeben", "enter", "type", "zur", "to"])
+      expect(words).not.toContain(word);
   });
 });
 
@@ -189,7 +192,12 @@ describe("the Uzo of the kampo (T004, A3)", () => {
 
   it("carries four text rules: the error rule fixed on the error slot, the others adjustable (D-06)", () => {
     expect(
-      uzo?.content.map((entry) => [entry.regulo, entry.fixed, entry.of ?? "slot:label", entry.check.kind]),
+      uzo?.content.map((entry) => [
+        entry.regulo,
+        entry.fixed,
+        entry.of ?? "slot:label",
+        entry.check.kind,
+      ]),
     ).toEqual([
       ["field-label-names-the-datum", false, "slot:label", "not-words"],
       ["error-says-what-to-do", true, "slot:error", "min-words"],
@@ -235,7 +243,9 @@ describe("the Reguloj of the kampo (T003, T004, A2, D-07)", () => {
     (name) => {
       const regulo = named(name);
       const examples = modelo.jugxoj.filter((jugxo) => jugxo.ekzemplo?.regulo === regulo?.id);
-      expect(examples.map((jugxo) => [jugxo.decision, jugxo.ekzemplo?.instances[0]?.lingvo])).toEqual([
+      expect(
+        examples.map((jugxo) => [jugxo.decision, jugxo.ekzemplo?.instances[0]?.lingvo]),
+      ).toEqual([
         ["approved", "de"],
         ["approved", "en"],
         ["rejected", "de"],
@@ -261,7 +271,12 @@ describe("the Reguloj of the kampo (T003, T004, A2, D-07)", () => {
       "placeholder-not-label",
     ]);
     const vague = evaluateUsage(modelo, [
-      { ero: "kampo", props: { kind: "email", invalid: true }, label: "E-Mail", texts: { error: "Ungültig" } },
+      {
+        ero: "kampo",
+        props: { kind: "email", invalid: true },
+        label: "E-Mail",
+        texts: { error: "Ungültig" },
+      },
     ]);
     expect(vague.violations.map((violation) => violation.issue.rule)).toEqual([
       "error-says-what-to-do",
@@ -271,13 +286,15 @@ describe("the Reguloj of the kampo (T003, T004, A2, D-07)", () => {
       { ero: "kampo", props: { placeholder: "E-Mail" }, label: "E-Mail" },
     ]);
     expect(repeated.valid).toBe(true);
-    expect(repeated.violations.map((violation) => [violation.issue.rule, violation.issue.severity])).toEqual([
-      ["placeholder-not-label", "warning"],
-    ]);
+    expect(
+      repeated.violations.map((violation) => [violation.issue.rule, violation.issue.severity]),
+    ).toEqual([["placeholder-not-label", "warning"]]);
     const both = evaluateUsage(modelo, [
       { ero: "kampo", props: { disabled: true, readonly: true }, label: "E-Mail" },
     ]);
-    expect(both.violations.map((violation) => violation.issue.rule)).toEqual(["ero-prop-constraint"]);
+    expect(both.violations.map((violation) => violation.issue.rule)).toEqual([
+      "ero-prop-constraint",
+    ]);
   });
 
   it("declares the KontrastParoj of the field (A6, B-1)", () => {
