@@ -172,6 +172,12 @@ export const RULE_IDS = [
   "uzo-override-fixed",
   "uzo-override-jugxo-missing",
   "skemo-uzo-missing",
+  // Uzo in check_usage (Spec 007, A10, D-07): a boundary recognised via a slot, the wrap or a
+  // Regulo, and the slot rules of the Uzo.
+  "uzo-boundary",
+  "uzo-slot-accepts",
+  "uzo-slot-max",
+  "uzo-slot-nesting",
   // Projekcio lints (Spec 003, D-17)
   "css-physical-property",
   "ero-hardcoded-string",

@@ -6,7 +6,12 @@
 import type { IssueSeverity, RuleId, ValidationIssue } from "../contracts/issues.js";
 import { formatIssuePath } from "../contracts/issues.js";
 import type { EroInstance, LoadedEro, Modelo, Regulo } from "../contracts/modelo.js";
-import type { Skemo, UzoContent, UzoLayoutAllowance } from "../generated/modelo-schema.js";
+import type {
+  Skemo,
+  UzoBoundary,
+  UzoContent,
+  UzoLayoutAllowance,
+} from "../generated/modelo-schema.js";
 import { describeCombination, forbiddenBy } from "./skemo-rules.js";
 
 /** One finding: the indices of the instances involved and the issue. */
@@ -167,14 +172,27 @@ export function textCheckFailure(
   }
 }
 
-/** The language of a text that hits a generic word of a `not-words` check, if any. */
+/**
+ * The language of a text that hits a generic word of a `not-words` check, when exactly one
+ * language claims it ("OK" is generic in German and English alike, so it names no language).
+ */
 function genericLingvo(check: UzoContent["check"], text: string): string | undefined {
   if (check.kind !== "not-words") return undefined;
   const words = new Set(wordsOf(text));
-  for (const [lingvo, list] of Object.entries(check.words)) {
-    if (list.some((word) => words.has(word.normalize("NFC").toLowerCase()))) return lingvo;
-  }
-  return undefined;
+  const hits = Object.entries(check.words)
+    .filter(([, list]) => list.some((word) => words.has(word.normalize("NFC").toLowerCase())))
+    .map(([lingvo]) => lingvo);
+  return hits.length === 1 ? hits[0] : undefined;
+}
+
+/**
+ * The override of an adjustable text rule by the Aspekto of the instance (A7, D-03): the Jugxo
+ * that records the deviation. A fixed rule is never overridden; validation has refused that.
+ */
+function overrideOf(modelo: Modelo, instance: EroInstance, rule: UzoContent): string | undefined {
+  if (rule.fixed || instance.aspekto === undefined) return undefined;
+  const pkg = modelo.aspektoPackages.find((candidate) => candidate.aspekto === instance.aspekto);
+  return pkg?.overrides?.find((override) => override.regulo === rule.regulo)?.jugxo;
 }
 
 /**
@@ -210,7 +228,7 @@ export function approvedLabel(
  * it is checked. An Ero without a Uzo, or a Uzo without this rule, is not judged.
  */
 const textRule: UsageEnforcer = ({ modelo, regulo, instances, eroOf }) =>
-  instances.flatMap((instance, index) => {
+  instances.flatMap((instance, index): UsageFinding[] => {
     const ero = eroOf(instance);
     if (ero === undefined || !applies(regulo, ero)) return [];
     const rule = ero.uzo?.content.find((entry) => entry.regulo === regulo.name);
@@ -226,18 +244,128 @@ const textRule: UsageEnforcer = ({ modelo, regulo, instances, eroOf }) =>
     if (failure === undefined) return [];
     const lingvo = lingvoOf(ero.skemo, text) ?? genericLingvo(rule.check, text) ?? DEFAULT_LINGVO;
     const example = approvedLabel(modelo, regulo, lingvo, eroOf);
+    const suggestion =
+      example === undefined
+        ? `Write a label that follows the rule: ${regulo.statement}`
+        : `Write the label as the approved example does, e.g. "${example}".`;
+    // Overridden by the Aspekto of the instance: visible as info, not as a violation (Art. VI).
+    const jugxo = overrideOf(modelo, instance, rule);
+    if (jugxo !== undefined) {
+      return [
+        {
+          instance: [index],
+          severity: "info",
+          message: `Instance ${index} of ${ero.ero.name} is labelled "${text}": ${failure}. The Aspekto ${instance.aspekto} overrides ${regulo.name} with the Jugxo ${jugxo}.`,
+          suggestion: `Keep the label if the Jugxo ${jugxo} covers it; otherwise ${suggestion.charAt(0).toLowerCase()}${suggestion.slice(1)}`,
+        },
+      ];
+    }
     return [
       {
         instance: [index],
         severity: rule.fixed ? "error" : (rule.severity ?? "error"),
         message: `Instance ${index} of ${ero.ero.name} is labelled "${text}": ${failure}.`,
-        suggestion:
-          example === undefined
-            ? `Write a label that follows the rule: ${regulo.statement}`
-            : `Write the label as the approved example does, e.g. "${example}".`,
+        suggestion,
       },
     ];
   });
+
+/** What a slot entry of an instance is, for a message: `text`, `icon` or the Ero's name. */
+function slotEntryName(entry: NonNullable<EroInstance["slots"]>[string][number]): string {
+  return typeof entry === "string" ? entry : `the Ero ${entry.ero}`;
+}
+
+/** The action of a boundary as a solution (D-07): the other Ero, a person, or stop. */
+function boundaryAction(boundary: UzoBoundary): string {
+  switch (boundary.action) {
+    case "use-instead":
+      return `Use ${boundary.ero ?? "another Ero"} instead.`;
+    case "ask-human":
+      return "Ask a person; Fundamento does not cover this case yet.";
+    default:
+      return "Not supported: the Ero stops here; change the design, not the Ero.";
+  }
+}
+
+/** A `uzo-boundary` finding for one boundary of the Uzo. */
+function boundaryFinding(
+  index: number,
+  ero: LoadedEro,
+  boundary: UzoBoundary,
+  how: string,
+): UsageFinding & { rule: RuleId } {
+  return {
+    rule: "uzo-boundary",
+    instance: [index],
+    message: `Instance ${index} of ${ero.ero.name} ${how}: the boundary ${boundary.case} (${boundary.action}). ${boundary.kialo}`,
+    suggestion: boundaryAction(boundary),
+  };
+}
+
+/**
+ * The Uzo of an Ero against one instance (Spec 007, A3, A5, A10, D-07): the boundaries it
+ * recognises via a slot or the wrap, and the slot rules. A boundary via a Regulo is recognised
+ * by that Regulo's enforcer alone (label-required for no-accessible-label); a second finding for
+ * the same fault would be noise. A slot entry a boundary already covers is not judged twice.
+ */
+function uzoFindings(
+  index: number,
+  ero: LoadedEro,
+  instance: EroInstance,
+): (UsageFinding & { rule: RuleId })[] {
+  const uzo = ero.uzo;
+  if (uzo === undefined) return [];
+  const findings: (UsageFinding & { rule: RuleId })[] = [];
+  const covered = new Set<string>();
+  const slots = instance.slots ?? {};
+  for (const boundary of uzo.boundary) {
+    const via = boundary.via;
+    if (via === undefined) continue;
+    if ("slot" in via) {
+      const entries = slots[via.slot] ?? [];
+      if (!entries.some((entry) => typeof entry === "object")) continue;
+      covered.add(via.slot);
+      findings.push(boundaryFinding(index, ero, boundary, `holds an Ero in the slot ${via.slot}`));
+    } else if ("layout" in via) {
+      const text = textOf(instance);
+      if (uzo.layout.wrap !== "never" || text === undefined || !/\r?\n/.test(text)) continue;
+      findings.push(boundaryFinding(index, ero, boundary, "has a label that breaks into lines"));
+    }
+  }
+  for (const [slot, entries] of Object.entries(slots)) {
+    const rule = uzo.slots[slot];
+    if (rule === undefined) continue;
+    if (rule.max !== undefined && entries.length > rule.max) {
+      findings.push({
+        rule: "uzo-slot-max",
+        instance: [index],
+        message: `Instance ${index} of ${ero.ero.name} holds ${entries.length} entries in the slot ${slot}, which takes at most ${rule.max}.`,
+        suggestion: `Keep at most ${rule.max}.`,
+      });
+    }
+    if (covered.has(slot)) continue;
+    for (const entry of entries) {
+      const name = typeof entry === "string" ? entry : entry.ero;
+      if (rule.accepts !== undefined && !rule.accepts.includes(name)) {
+        findings.push({
+          rule: "uzo-slot-accepts",
+          instance: [index],
+          message: `Instance ${index} of ${ero.ero.name} holds ${slotEntryName(entry)} in the slot ${slot}, which accepts ${rule.accepts.join(" or ")}.`,
+          suggestion: `Put ${rule.accepts.join(" or ")} in the slot ${slot}.`,
+        });
+      }
+      if (typeof entry === "object" && rule.nesting !== undefined && rule.nesting < 1) {
+        findings.push({
+          rule: "uzo-slot-nesting",
+          instance: [index],
+          message: `Instance ${index} of ${ero.ero.name} nests the Ero ${entry.ero} in the slot ${slot}, which allows no nesting.`,
+          suggestion: "Move the inner Ero next to this one.",
+        });
+      }
+    }
+  }
+  return findings;
+}
 
 /** Where a layout allowance lets an instance stand, in words for a message. */
 function allowedPlaces(allowance: UzoLayoutAllowance): string {
@@ -403,6 +531,9 @@ export function evaluateUsage(modelo: Modelo, instances: readonly EroInstance[])
           .map(([key, values]) => `${key}=${values.join(" or ")}`)
           .join(", ")} with ${describeCombination(props, Object.keys(forbidden.when))}.`,
       );
+    }
+    for (const finding of uzoFindings(index, ero, instance)) {
+      at(finding.instance, finding.rule, finding.message, finding.suggestion);
     }
   });
 
