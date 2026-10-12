@@ -97,6 +97,14 @@ Zielsatz: „Fundamento ist ein markenagnostisches Design System, das sich wie e
 
 **Migration:** Keine. Die Figma-Projektion erzeugt schon eine Library mit Modi (F27, M1). Die Make Kits bleiben je Aspekto, bis eine Messung zeigt, ob Make ein umschaltbares Kit trägt.
 
+**Dritter Punkt: Art. II nach F1 (v2.2, F1-T06).** Eigene Versionsnummer, bestimmt gegen die Basis des F1-PR (`main` 51e9ed9 mit v2.1); eigener Commit im PR #51 (Entscheidung OP-3).
+
+**Geänderter Artikel:** Art. II, das Beispiel der Namenskette: „Ero-Prop `emphasis: high | medium | low` → Figma-Property `emphasis` mit identischen Werten → Code-Prop `emphasis` mit identischem Enum“ statt `variant: primary | secondary | tertiary`.
+
+**Grund:** Die Achsen des `butono` heißen seit F1 `emphasis` (high|medium|low) und `intent` (neutral|danger) (Entscheidung F1, Jugxo `jug_01M4DNSD0SV43Y943T21RQF7EM`). Ein Beispiel in der Constitution, das einen Prop nennt, den es nicht mehr gibt, wäre falsch; die Regel des Artikels – ein Name, überall – ändert sich nicht.
+
+**Migration:** Keine Daten; der Bruch ist F1 selbst (Skemo, Jugxoj, Projekcioj, Make Kits, Figma-Library im selben PR). Spec 003 bleibt unverändert und beschreibt den Stand ihrer Zeit.
+
 **Verhältnis zur Tavolo „Verhalten":** Die Vojmapo führt „Verhalten" als Kandidat einer Tavolo (Schicht) im Aspekto-Paket. Uzo ist das markenneutrale Verhalten eines Ero, die Tavolo wäre das markenspezifische. A7 legt die Brücke fest: Die Tavolo darf anpassbare Uzo-Regeln überstimmen, feste nicht. Die Tavolo selbst bleibt Kandidat.
 
 ## Gvidanto (Art. VII)

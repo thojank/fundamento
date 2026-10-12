@@ -118,7 +118,7 @@ Entscheidung F1, Jugxo `jug_01M4DNSD0SV43Y943T21RQF7EM`, plan D-13. Getrennt von
 - [ ] **F1-T05 MCP: Prompt-Regel 8, e2e-Dialoge**
   - Rot: `packages/mcp/src/e2e/*` mit den neuen Namen, `prompt.test.ts`. Rot.
 - [ ] **F1-T06 Abschluss F1**
-  - Art. II: Das Beispiel wird `emphasis: high | medium | low` (Entscheidung OP-3), als eigenes Amendment. Die Versionsnummer wird gegen die Basis des F1-PR bestimmt; `docs/docs.test.ts` hält sie fest (Rot zuerst). Vojmapo Phase 4 („umbenannt“ statt „umzubenennen“), Figma-Library und Make Kits neu erzeugen. Der Maintainer prüft in Figma, dass die alte Komponente ersetzt und nicht verdoppelt ist. PR „F1 Achsennamen“.
+  - Art. II: Das Beispiel wird `emphasis: high | medium | low` (Entscheidung OP-3), als eigenes Amendment. Die Versionsnummer wird gegen die Basis des F1-PR bestimmt; `docs/docs.test.ts` hält sie fest (Rot zuerst). Vojmapo Phase 4 („umbenannt“ statt „umzubenennen“), Figma-Library und Make Kits neu erzeugen. ~~Der Maintainer prüft in Figma, dass die alte Komponente ersetzt und nicht verdoppelt ist.~~ **Geändert (Befund #50, Messung 2026-10-12):** Der Maintainer erzeugt eine neue Datei `f10b-4` und lässt das Plugin aus dem PR dort laufen (neue Datei je Bruch, Konsument wechselt die Bibliothek); in einer leeren Datei gibt es nichts zu ersetzen. P0 liefert Build-Ausgaben und Tests, veröffentlicht nichts. PR „F1 Achsennamen“ (#51).
 
 ---
 

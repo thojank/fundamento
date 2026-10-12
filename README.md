@@ -87,8 +87,8 @@ import "@fundamento/eroj/define";            // registers <fm-butono> once
 import { Butono } from "@fundamento/eroj/react";
 
 <html lang="de" data-fm-aspekto="komuna" data-fm-color-scheme="light">
-  <fm-butono variant="primary">Speichern</fm-butono>   {/* plain HTML */}
-  <Butono variant="primary" type="submit">Weiter</Butono>  {/* React 18 and 19 */}
+  <fm-butono emphasis="high">Speichern</fm-butono>   {/* plain HTML */}
+  <Butono emphasis="high" type="submit">Weiter</Butono>  {/* React 18 and 19 */}
 ```
 
 Both projections are the same element with the same tokens. Switching brand or colour scheme is one attribute on `<html>`, without a reload and without a rebuild:
@@ -122,7 +122,7 @@ Everything lives in one workspace; the npm org for published packages is
 
 - Tools: `describe`, `list_dimensioj`, `list_aspektoj`, `search_tokens`, `get_token`, `resolve`, `list_reguloj`, `list_jugxoj`, `validate`, `derive_name`. Every input and output has a JSON Schema (`packages/mcp/schema/`); errors carry the same issues as the checks, plus the allowed values.
 - Gvidanto tools (Spec 002): `check_contrast` (the contrast of any colour pair, grouped by result, with every combination listed), `explain` (why a token has its value: alias chain, the Reguloj with kialo and result, its KontrastParoj), `explain_regulo` (a Regulo, its threshold and its violations per Aspekto) and `describe_term` (a term of the Ontologio, also from English or German words).
-- Ero tools (Spec 003): `list_eroj` (every component with its variants and props), `get_ero` (one component: Skemo, the Reguloj that judge it with their kialo, the recorded examples, and its names in every projection — element, React, Figma, CSS, Tailwind, Make Kit), `suggest_ero` ("Löschen" → `variant=primary`, `tone=danger`, with the Regulo behind it) and `check_usage` (instances of a design or of code against the Ero Reguloj). 18 tools in all.
+- Ero tools (Spec 003): `list_eroj` (every component with its variants and props), `get_ero` (one component: Skemo, the Reguloj that judge it with their kialo, the recorded examples, and its names in every projection — element, React, Figma, CSS, Tailwind, Make Kit), `suggest_ero` ("Löschen" → `emphasis=high`, `intent=danger`, with the Regulo behind it) and `check_usage` (instances of a design or of code against the Ero Reguloj). 18 tools in all.
 - Prompt: `gvidanto` tells a client agent how to answer: values only from tools, reasons with Regulo ID and kialo, check when unsure, and `check_usage` before a handover.
 - Resources: `fundamento://export/modelo.json`, `modelo.schema.json` and `rezolvoj.json`, the bytes of `fm modelo export`; `fundamento://ontologio.json`, the terminology as data, in every mode.
 - `--config <file>` serves a project with its Aspekto packages; `--export <dir>` serves an export as is.

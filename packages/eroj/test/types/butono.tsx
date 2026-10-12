@@ -4,8 +4,8 @@ import { Butono } from "@fundamento/eroj/react";
 
 export const valid = (
   <Butono
-    variant="primary"
-    tone="danger"
+    emphasis="high"
+    intent="danger"
     size="small"
     type="submit"
     disabled={false}
@@ -19,11 +19,11 @@ export const valid = (
   </Butono>
 );
 
-// @ts-expect-error variant allows primary, secondary, tertiary only
-export const wrongVariant = <Butono variant="ghost">x</Butono>;
+// @ts-expect-error emphasis allows high, medium, low only
+export const wrongEmphasis = <Butono emphasis="ghost">x</Butono>;
 
-// @ts-expect-error tone is an enum, not a number
-export const wrongTone = <Butono tone={1}>x</Butono>;
+// @ts-expect-error intent is an enum, not a number
+export const wrongIntent = <Butono intent={1}>x</Butono>;
 
 // @ts-expect-error size allows small, medium, large only
 export const wrongSize = <Butono size="xl">x</Butono>;
