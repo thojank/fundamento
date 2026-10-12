@@ -4,7 +4,7 @@
     "button": {
       "values": { "padding": " 8px ", "border": "1px   solid" },
       "states": ["hover", " default", "disabled"],
-      "props": { "variant": ["secondary", "primary "], " size": ["large", "small"] }
+      "props": { "emphasis": ["medium", "high "], " size": ["large", "small"] }
     }
   }
 }

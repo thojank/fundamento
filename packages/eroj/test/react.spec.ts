@@ -16,9 +16,9 @@ import { Butono } from "@fundamento/eroj/react";
 window.clicks = 0;
 createRoot(document.getElementById("root")).render(
   createElement("div", null,
-    createElement(Butono, { id: "a", variant: "primary", size: "large", fullWidth: true, onClick: () => { window.clicks++; },
+    createElement(Butono, { id: "a", emphasis: "high", size: "large", fullWidth: true, onClick: () => { window.clicks++; },
       iconStart: createElement("svg", { id: "icon", "aria-hidden": "true" }) }, "Speichern"),
-    createElement(Butono, { id: "b", tone: "danger", variant: "primary", loading: true }, "Löschen"),
+    createElement(Butono, { id: "b", intent: "danger", emphasis: "high", loading: true }, "Löschen"),
   ),
 );
 `;
@@ -76,7 +76,7 @@ for (const react of ["18", "19"] as const) {
     });
     await page.goto(`${ORIGIN}/`);
     const a = page.locator("#a");
-    await expect(a).toHaveAttribute("variant", "primary");
+    await expect(a).toHaveAttribute("emphasis", "high");
     await expect(a).toHaveAttribute("size", "large");
     expect(await a.evaluate((element) => element.hasAttribute("full-width"))).toBe(true);
     expect(
@@ -86,7 +86,7 @@ for (const react of ["18", "19"] as const) {
     expect(await page.evaluate(() => (window as unknown as { clicks: number }).clicks)).toBe(1);
     const b = page.getByRole("button", { name: "Löschen" });
     await expect(b).toHaveAttribute("aria-busy", "true");
-    await expect(b).toHaveAttribute("data-tone", "danger");
+    await expect(b).toHaveAttribute("data-intent", "danger");
     expect(
       await page.evaluate(() => (window as unknown as { React?: unknown }).React),
     ).toBeUndefined();

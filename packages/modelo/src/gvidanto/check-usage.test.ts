@@ -19,16 +19,16 @@ const check = (instances: Parameters<typeof checkUsage>[1]["instances"]) => {
 describe("check_usage", () => {
   it("equals the usage evaluation", () => {
     const instances = [
-      { ero: "butono", props: { variant: "primary" }, container: "dialog", label: "Speichern" },
-      { ero: "butono", props: { variant: "primary" }, container: "dialog", label: "Weiter" },
+      { ero: "butono", props: { emphasis: "high" }, container: "dialog", label: "Speichern" },
+      { ero: "butono", props: { emphasis: "high" }, container: "dialog", label: "Weiter" },
     ];
     expect(check(instances)).toEqual(evaluateUsage(modelo, instances));
   });
 
   it("finds two primary buttons in one container, with the kialo of the Regulo", () => {
     const output = check([
-      { ero: "butono", props: { variant: "primary" }, container: "dialog", label: "Speichern" },
-      { ero: "butono", props: { variant: "primary" }, container: "dialog", label: "Weiter" },
+      { ero: "butono", props: { emphasis: "high" }, container: "dialog", label: "Speichern" },
+      { ero: "butono", props: { emphasis: "high" }, container: "dialog", label: "Weiter" },
     ]);
     expect(output.valid).toBe(false);
     expect(output.instances).toBe(2);
@@ -41,25 +41,25 @@ describe("check_usage", () => {
 
   it("accepts a correct screen", () => {
     const output = check([
-      { ero: "butono", props: { variant: "primary" }, container: "dialog", label: "Speichern" },
-      { ero: "butono", props: { variant: "tertiary" }, container: "dialog", label: "Abbrechen" },
+      { ero: "butono", props: { emphasis: "high" }, container: "dialog", label: "Speichern" },
+      { ero: "butono", props: { emphasis: "low" }, container: "dialog", label: "Abbrechen" },
     ]);
     expect(output).toEqual({ instances: 2, valid: true, violations: [] });
   });
 
   it("finds a destructive action in the primary colour and a forbidden combination", () => {
-    const destructive = check([{ ero: "butono", props: { variant: "primary" }, label: "Löschen" }]);
+    const destructive = check([{ ero: "butono", props: { emphasis: "high" }, label: "Löschen" }]);
     expect(destructive.violations.map((entry) => entry.issue.rule)).toEqual([
       "destructive-not-primary-color",
     ]);
     const forbidden = check([
-      { ero: "butono", props: { variant: "secondary", tone: "danger" }, label: "Löschen" },
+      { ero: "butono", props: { emphasis: "medium", intent: "danger" }, label: "Löschen" },
     ]);
     expect(forbidden.violations.map((entry) => entry.issue.rule)).toContain("ero-prop-constraint");
   });
 
   it("finds a button without a label", () => {
-    const output = check([{ ero: "butono", props: { variant: "tertiary" } }]);
+    const output = check([{ ero: "butono", props: { emphasis: "low" } }]);
     expect(output.violations.map((entry) => entry.issue.rule)).toEqual(["label-required"]);
   });
 
@@ -70,13 +70,13 @@ describe("check_usage", () => {
 
   it("answers an unknown prop value with mcp-input-invalid and the allowed values", () => {
     const result = checkUsage(modelo, {
-      instances: [{ ero: "butono", props: { variant: "primar" }, label: "Speichern" }],
+      instances: [{ ero: "butono", props: { emphasis: "hig" }, label: "Speichern" }],
     });
     expect(result.ok).toBe(false);
     if (result.ok) return;
     expect(result.issues.map((issue) => issue.rule)).toEqual(["mcp-input-invalid"]);
-    expect(result.issues[0]?.path).toBe("check_usage/instances/0/props/variant");
-    expect(result.allowed).toEqual(["primary", "secondary", "tertiary"]);
+    expect(result.issues[0]?.path).toBe("check_usage/instances/0/props/emphasis");
+    expect(result.allowed).toEqual(["high", "medium", "low"]);
   });
 
   // Spec 007 T014 (data-model §6): the new fields are checked as input; their rules come in Stufe B.
@@ -113,7 +113,7 @@ describe("check_usage", () => {
   });
 
   it("judges an instance with a known Aspekto, Dimensio values and slots as before", () => {
-    const plain = { ero: "butono", props: { variant: "primary" }, label: "Speichern" };
+    const plain = { ero: "butono", props: { emphasis: "high" }, label: "Speichern" };
     const described = {
       ...plain,
       aspekto: "komuna",
@@ -125,11 +125,11 @@ describe("check_usage", () => {
 
   it("answers an unknown prop name with mcp-input-invalid and the props of the Skemo", () => {
     const result = checkUsage(modelo, {
-      instances: [{ ero: "butono", props: { variante: "primary" }, label: "Speichern" }],
+      instances: [{ ero: "butono", props: { emphasiss: "high" }, label: "Speichern" }],
     });
     expect(result.ok).toBe(false);
     if (result.ok) return;
-    expect(result.issues[0]?.path).toBe("check_usage/instances/0/props/variante");
-    expect(result.allowed).toContain("variant");
+    expect(result.issues[0]?.path).toBe("check_usage/instances/0/props/emphasiss");
+    expect(result.allowed).toContain("emphasis");
   });
 });

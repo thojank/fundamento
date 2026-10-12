@@ -1,4 +1,5 @@
-// suggest_ero (Spec 003 T023, FR-13, D-16 §2): a word of intent to an Ero with its props.
+// suggest_ero (Spec 003 T023, FR-13, D-16 §2): a goal in a word to an Ero with its props. The
+// parameter is `goal` since F1-T00 (Spec 007, OP-4): `intent` is the name of a prop.
 
 import { describe, expect, it } from "vitest";
 import { loadModelo } from "../load/load-modelo.js";
@@ -8,9 +9,9 @@ import { suggestEro } from "./suggest-ero.js";
 const { modelo } = loadModelo(defaultModeloSource());
 if (modelo === undefined) throw new Error("the repository Modelo could not be loaded");
 
-const suggest = (intent: string, lingvo?: "en" | "de") => {
-  const result = suggestEro(modelo, lingvo === undefined ? { intent } : { intent, lingvo });
-  if (!result.ok) throw new Error(`suggest_ero ${intent} failed`);
+const suggest = (goal: string, lingvo?: "en" | "de") => {
+  const result = suggestEro(modelo, lingvo === undefined ? { goal } : { goal, lingvo });
+  if (!result.ok) throw new Error(`suggest_ero ${goal} failed`);
   return result.output;
 };
 
@@ -18,31 +19,31 @@ describe("suggest_ero", () => {
   it("suggests the destructive button for Löschen, delete and Entfernen!", () => {
     for (const text of ["Löschen", "delete", "Entfernen!"]) {
       const output = suggest(text);
-      expect(output.intent).toBe(text);
-      expect(output.matched?.intent).toBe("destructive");
+      expect(output.goal).toBe(text);
+      expect(output.matched?.goal).toBe("destructive");
       expect(output.suggestion).toEqual({
         ero: "butono",
-        props: { variant: "primary", tone: "danger" },
+        props: { emphasis: "high", intent: "danger" },
       });
       expect(output.regulo?.name).toBe("destructive-not-primary-color");
       expect(output.kialo).toBe(output.regulo?.kialo);
     }
   });
 
-  it("suggests tertiary for Abbrechen and primary for Speichern", () => {
+  it("suggests low emphasis for Abbrechen and high for Speichern", () => {
     expect(suggest("Abbrechen").suggestion).toEqual({
       ero: "butono",
-      props: { variant: "tertiary" },
+      props: { emphasis: "low" },
     });
     const confirm = suggest("Speichern");
-    expect(confirm.matched?.intent).toBe("confirm");
-    expect(confirm.suggestion).toEqual({ ero: "butono", props: { variant: "primary" } });
+    expect(confirm.matched?.goal).toBe("confirm");
+    expect(confirm.suggestion).toEqual({ ero: "butono", props: { emphasis: "high" } });
     expect(confirm.regulo?.name).toBe("one-primary-per-container");
   });
 
   it("names the keyword and its language", () => {
     expect(suggest("Bitte alles löschen").matched).toEqual({
-      intent: "destructive",
+      goal: "destructive",
       keyword: "löschen",
       lingvo: "de",
     });
@@ -51,18 +52,18 @@ describe("suggest_ero", () => {
 
   it("takes only the given language when lingvo is set", () => {
     expect(suggest("delete", "en").matched?.lingvo).toBe("en");
-    const german = suggestEro(modelo, { intent: "delete", lingvo: "de" });
+    const german = suggestEro(modelo, { goal: "delete", lingvo: "de" });
     expect(german.ok).toBe(false);
     if (german.ok) return;
-    expect(german.issues.map((issue) => issue.rule)).toEqual(["intent-unknown"]);
+    expect(german.issues.map((issue) => issue.rule)).toEqual(["goal-unknown"]);
   });
 
-  it("answers an unknown intent with intent-unknown and the known intents", () => {
-    const result = suggestEro(modelo, { intent: "hüpfen" });
+  it("answers an unknown goal with goal-unknown and the known goals", () => {
+    const result = suggestEro(modelo, { goal: "hüpfen" });
     expect(result.ok).toBe(false);
     if (result.ok) return;
-    expect(result.issues.map((issue) => issue.rule)).toEqual(["intent-unknown"]);
-    expect(result.issues[0]?.path).toBe("suggest_ero/intent");
+    expect(result.issues.map((issue) => issue.rule)).toEqual(["goal-unknown"]);
+    expect(result.issues[0]?.path).toBe("suggest_ero/goal");
     expect(result.allowed).toEqual(["destructive", "confirm", "dismiss"]);
   });
 

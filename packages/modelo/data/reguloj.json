@@ -172,7 +172,7 @@
     {
       "id": "reg_01M2X5G6TX43QJ21SFD4WFNM3W",
       "name": "state-distinct",
-      "statement": "In every combination of every Aspekto, the OKLCH lightness of color.action.<v>.hover, .pressed and .selected differs from .rest by at least 0.05, for every action variant; transparent values are composited over color.background.default first.",
+      "statement": "In every combination of every Aspekto, the OKLCH lightness of color.action.<v>.hover, .pressed and .selected differs from .rest by at least 0.05, for every action role <v>; transparent values are composited over color.background.default first.",
       "kialo": "A state that looks like the rest state gives no feedback, and a difference in hue alone disappears in greyscale and for people with a colour-vision deficiency; no contrast check sees either. The difference must be clear, not just perceptible: 0.05 is 2.5 times the typical just-noticeable difference and leaves a reserve for poor displays and colour-vision deficiency.",
       "scope": "vortaro: color.action.<v>.hover, pressed, selected against rest in every combination",
       "checkability": "automatic",
@@ -192,7 +192,7 @@
     {
       "id": "reg_01M2XMV80DG7JCJDTZGE66MGHW",
       "name": "one-primary-per-container",
-      "statement": "A container holds at most one butono with variant=primary; instances without a named container count as one container.",
+      "statement": "A container holds at most one butono with emphasis=high; instances without a named container count as one container.",
       "kialo": "Two equal calls to action move the decision onto the user; one primary action makes the next step obvious, and every other action steps back as secondary or tertiary.",
       "scope": "eroj: butono instances in a design or in code (check_usage)",
       "checkability": "automatic",
@@ -205,9 +205,9 @@
     {
       "id": "reg_01M2XMV80DG7JCJDTZGE66MGHX",
       "name": "destructive-not-primary-color",
-      "statement": "An action that destroys data is never a butono with variant=primary and tone=default: as the main action (a confirmation dialog) it is primary with tone=danger, next to another primary action it is secondary.",
+      "statement": "An action that destroys data is never a butono with emphasis=high and intent=neutral: as the main action (a confirmation dialog) it is emphasis=high with intent=danger, next to another high-emphasis action it is emphasis=medium.",
       "kialo": "The primary colour promises the expected next step; a destructive action needs a colour that warns before it acts, and a danger fill only where the destruction is the step the user came for.",
-      "scope": "eroj: butono instances whose intent is destructive or whose label is a destructive keyword of the Skemo",
+      "scope": "eroj: butono instances whose goal is destructive or whose label is a destructive keyword of the Skemo",
       "checkability": "automatic",
       "appliesTo": {
         "eroj": [

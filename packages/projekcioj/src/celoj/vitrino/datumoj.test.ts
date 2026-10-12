@@ -74,8 +74,8 @@ describe("the sections of FR-06", () => {
 
   it("renders fm-butono for every combination of the Skemo", () => {
     expect(html).toContain("<fm-butono");
-    expect(html).toContain('variant="primary"');
-    expect(html).toContain('tone="danger"');
+    expect(html).toContain('emphasis="high"');
+    expect(html).toContain('intent="danger"');
     expect(html).toContain("disabled");
     expect(html).toContain("loading");
     expect(html).not.toContain("react");

@@ -1,6 +1,6 @@
 // check:alirebleco-eroj (Spec 003 T013; FR-15, plan D-09, AK-05): the rendered fm-butono in every
-// colour class of komuna and ekzemplo. axe-core with the WCAG 2.2 A/AA tags on every variant ×
-// tone × size in rest, hover, pressed, disabled and loading; the focus ring contrasts at least 3:1
+// colour class of komuna and ekzemplo. axe-core with the WCAG 2.2 A/AA tags on every emphasis ×
+// intent × size in rest, hover, pressed, disabled and loading; the focus ring contrasts at least 3:1
 // with the gap colour and with the page background. Chromium, Firefox, WebKit. The first tests
 // prove the harness finds what it must find.
 
@@ -12,11 +12,11 @@ import { buildProjections, serve } from "./serve.js";
 const { out, input } = await buildProjections();
 const butono = input.modelo.eroj.find((entry) => entry.ero.name === "butono");
 if (butono === undefined) throw new Error("butono missing");
-const combos = combinationsOf(butono.skemo, ["variant", "tone", "size"]);
+const combos = combinationsOf(butono.skemo, ["emphasis", "intent", "size"]);
 const buttons = combos
   .map(
     (c, i) =>
-      `<fm-butono id="b${i}" variant="${c.variant}" tone="${c.tone}" size="${c.size}">Aktion ${i}</fm-butono>`,
+      `<fm-butono id="b${i}" emphasis="${c.emphasis}" intent="${c.intent}" size="${c.size}">Aktion ${i}</fm-butono>`,
   )
   .join(" ");
 
@@ -25,7 +25,7 @@ test.describe("the harness finds what it must find", () => {
     await serve(
       page,
       out,
-      `<fm-butono variant="primary">Speichern</fm-butono>`,
+      `<fm-butono emphasis="high">Speichern</fm-butono>`,
       "<style>:root { --fm-color-action-primary-text: var(--fm-color-action-primary-hover); }</style>",
     );
     expect(await axeViolations(page)).toContain("color-contrast");
@@ -56,7 +56,7 @@ test.describe("the harness finds what it must find", () => {
 for (const aspekto of ["komuna", "ekzemplo"]) {
   for (const scheme of ["light", "dark"]) {
     for (const contrast of ["default", "high"]) {
-      test(`${aspekto} ${scheme}/${contrast}: axe on every variant × tone × size and state, focus ring ≥ 3:1`, async ({
+      test(`${aspekto} ${scheme}/${contrast}: axe on every emphasis × intent × size and state, focus ring ≥ 3:1`, async ({
         page,
         browserName,
       }) => {

@@ -2,10 +2,10 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ciferecigo.com/fundamento/schema/mcp/suggest_ero.output.json",
   "title": "suggest_ero output",
-  "description": "The Ero and the props an intent asks for, with the Regulo behind the choice (Spec 003 FR-13, contracts/mcp-tools §2).",
+  "description": "The Ero and the props a goal asks for, with the Regulo behind the choice (Spec 003 FR-13, contracts/mcp-tools §2; goal since F1-T00, Spec 007).",
   "type": "object",
   "properties": {
-    "intent": {
+    "goal": {
       "type": "string",
       "minLength": 1
     },
@@ -17,7 +17,7 @@
         {
           "type": "object",
           "properties": {
-            "intent": {
+            "goal": {
               "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
             },
             "keyword": {
@@ -29,7 +29,7 @@
               "minLength": 1
             }
           },
-          "required": ["intent", "keyword", "lingvo"],
+          "required": ["goal", "keyword", "lingvo"],
           "additionalProperties": false
         }
       ]
@@ -68,6 +68,6 @@
       "$ref": "https://ciferecigo.com/fundamento/schema/mcp/common.json#/$defs/ReguloRef"
     }
   },
-  "required": ["intent", "matched", "suggestion"],
+  "required": ["goal", "matched", "suggestion"],
   "additionalProperties": false
 }

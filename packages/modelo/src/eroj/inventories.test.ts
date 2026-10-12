@@ -20,8 +20,8 @@ describe("skemoParityInventory", () => {
     const inventory = skemoParityInventory(eroj);
     expect(Object.keys(inventory.items)).toContain("butono");
     expect(inventory.items.butono?.props).toEqual({
-      variant: ["primary", "secondary", "tertiary"],
-      tone: ["default", "danger"],
+      emphasis: ["high", "medium", "low"],
+      intent: ["neutral", "danger"],
       size: ["small", "medium", "large"],
       type: ["button", "submit", "reset"],
       disabled: ["boolean"],
@@ -42,8 +42,8 @@ describe("skemoParityInventory", () => {
       "loading",
     ]);
     expect(inventory.items.butono?.values).toEqual({
-      "default.variant": "secondary",
-      "default.tone": "default",
+      "default.emphasis": "medium",
+      "default.intent": "neutral",
       "default.size": "medium",
       "default.type": "button",
       "default.disabled": "false",
@@ -55,9 +55,9 @@ describe("skemoParityInventory", () => {
   it("restricts the props to the ones the parts are keyed by", () => {
     const inventory = skemoParityInventory(eroj, { props: "styled" });
     expect(Object.keys(inventory.items.butono?.props ?? {}).sort()).toEqual([
+      "emphasis",
+      "intent",
       "size",
-      "tone",
-      "variant",
     ]);
   });
 
@@ -72,9 +72,9 @@ describe("styledProps", () => {
   it("returns the props a part binding is keyed by, without the state key", () => {
     expect(butono).toBeDefined();
     expect(butono === undefined ? [] : styledProps(butono.skemo).sort()).toEqual([
+      "emphasis",
+      "intent",
       "size",
-      "tone",
-      "variant",
     ]);
   });
 });
@@ -98,28 +98,28 @@ describe("resolved part values of the Skemo side (F8)", () => {
   const values = inventory.items.butono?.values ?? {};
 
   it("names the colour of every bound part, per variant", () => {
-    expect(values["surface.fill@size=medium,state=rest,tone=default,variant=primary"]).toMatch(
+    expect(values["surface.fill@emphasis=high,intent=neutral,size=medium,state=rest"]).toMatch(
       /^#[0-9a-f]{6}$/,
     );
-    expect(values["label.color@size=medium,state=rest,tone=default,variant=primary"]).toMatch(
+    expect(values["label.color@emphasis=high,intent=neutral,size=medium,state=rest"]).toMatch(
       /^#[0-9a-f]{6}$/,
     );
   });
 
   it("writes the alpha of a translucent fill, the value Figma has to reproduce", () => {
-    expect(values["surface.fill@size=medium,state=rest,tone=default,variant=tertiary"]).toBe(
+    expect(values["surface.fill@emphasis=low,intent=neutral,size=medium,state=rest"]).toBe(
       "#000000/0",
     );
-    expect(values["surface.fill@size=medium,state=hover,tone=default,variant=tertiary"]).toBe(
+    expect(values["surface.fill@emphasis=low,intent=neutral,size=medium,state=hover"]).toBe(
       "#000000/0.08",
     );
-    expect(values["surface.fill@size=medium,state=pressed,tone=default,variant=tertiary"]).toBe(
+    expect(values["surface.fill@emphasis=low,intent=neutral,size=medium,state=pressed"]).toBe(
       "#000000/0.1",
     );
   });
 
   it("keeps the defaults it already had", () => {
-    expect(values["default.variant"]).toBe("secondary");
+    expect(values["default.emphasis"]).toBe("medium");
   });
 });
 
@@ -129,7 +129,7 @@ describe("resolved geometry of the Skemo side (F11)", () => {
   if (modelo === undefined) throw new Error("the repo Modelo did not load");
   const inventory = skemoParityInventory(modelo.eroj, { resolved: baseResolution(modelo) });
   const values = inventory.items.butono?.values ?? {};
-  const key = (part: string) => `${part}@size=medium,state=rest,tone=default,variant=primary`;
+  const key = (part: string) => `${part}@emphasis=high,intent=neutral,size=medium,state=rest`;
 
   it("names every bound measure per variant, in px", () => {
     for (const part of [
@@ -148,7 +148,7 @@ describe("resolved geometry of the Skemo side (F11)", () => {
   it("files a measure under geometry and a colour under paints", () => {
     expect(parityAspectOfKey(key("box.height"))).toBe("geometry");
     expect(parityAspectOfKey(key("surface.fill"))).toBe("paints");
-    expect(parityAspectOfKey("default.variant")).toBe("values");
+    expect(parityAspectOfKey("default.emphasis")).toBe("values");
   });
 
   it("keeps geometry out of a side that does not restate it", () => {

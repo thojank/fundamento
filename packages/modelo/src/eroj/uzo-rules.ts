@@ -414,17 +414,16 @@ function reguloIssues(entry: LoadedEro, uzo: JsonObject, modelo: Modelo, at: At)
 }
 
 /**
- * Text rules: `uzo-content-fixed-missing`, `uzo-content-example-missing` and `intent-unknown` for
- * goals the Skemo does not know. Until F1-T00 the goals of a Skemo are its `intents`
- * (data-model §9).
+ * Text rules: `uzo-content-fixed-missing`, `uzo-content-example-missing` and `goal-unknown` for
+ * goals the Skemo does not know (`Skemo.goals` since F1-T00, data-model §9).
  */
 function contentIssues(entry: LoadedEro, uzo: JsonObject, modelo: Modelo, at: At): void {
-  const goals = (entry.skemo.intents ?? []).map((intent) => intent.intent);
+  const goals = (entry.skemo.goals ?? []).map((goal) => goal.goal);
   const unknownGoal = (pointer: string, goal: unknown) => {
     if (typeof goal !== "string" || goals.includes(goal)) return;
     at(
       pointer,
-      "intent-unknown",
+      "goal-unknown",
       `A text rule of the Uzo of ${entry.ero.name} applies to the goal ${goal}, which its Skemo does not know.`,
       `Use a goal of the Skemo (${goals.join(", ") || "none"}).`,
     );

@@ -22,8 +22,17 @@ describe("list_eroj", () => {
           id: butono.ero.id,
           name: "butono",
           description: butono.ero.description,
-          variants: ["primary", "secondary", "tertiary"],
-          props: ["variant", "tone", "size", "type", "disabled", "loading", "full-width", "label"],
+          variants: ["high", "medium", "low"],
+          props: [
+            "emphasis",
+            "intent",
+            "size",
+            "type",
+            "disabled",
+            "loading",
+            "full-width",
+            "label",
+          ],
         },
       ],
     });
@@ -51,7 +60,7 @@ describe("get_ero", () => {
       parts: butono.skemo.parts,
       bindings: butono.skemo.bindings,
       a11y: butono.skemo.a11y,
-      intents: butono.skemo.intents,
+      goals: butono.skemo.goals,
     });
   });
 
@@ -80,11 +89,11 @@ describe("get_ero", () => {
     expect(first?.instances).toEqual([
       {
         ero: "butono",
-        props: { variant: "primary", type: "submit" },
+        props: { emphasis: "high", type: "submit" },
         container: "dialog",
         label: "Speichern",
       },
-      { ero: "butono", props: { variant: "tertiary" }, container: "dialog", label: "Abbrechen" },
+      { ero: "butono", props: { emphasis: "low" }, container: "dialog", label: "Abbrechen" },
     ]);
     expect(output.examples.map((example) => example.decision)).toEqual([
       "approved",
@@ -100,8 +109,8 @@ describe("get_ero", () => {
     expect(output.projekcioj.webComponent).toEqual({
       tag: "fm-butono",
       attributes: {
-        variant: ["primary", "secondary", "tertiary"],
-        tone: ["default", "danger"],
+        emphasis: ["high", "medium", "low"],
+        intent: ["neutral", "danger"],
         size: ["small", "medium", "large"],
         type: ["button", "submit", "reset"],
         disabled: "boolean",
@@ -115,8 +124,8 @@ describe("get_ero", () => {
       package: "@fundamento/eroj/react",
       component: "Butono",
       props: {
-        variant: ["primary", "secondary", "tertiary"],
-        tone: ["default", "danger"],
+        emphasis: ["high", "medium", "low"],
+        intent: ["neutral", "danger"],
         size: ["small", "medium", "large"],
         type: ["button", "submit", "reset"],
         disabled: "boolean",
@@ -128,8 +137,8 @@ describe("get_ero", () => {
     expect(output.projekcioj.figma).toEqual({
       componentSet: "butono",
       properties: {
-        variant: ["primary", "secondary", "tertiary"],
-        tone: ["default", "danger"],
+        emphasis: ["high", "medium", "low"],
+        intent: ["neutral", "danger"],
         size: ["small", "medium", "large"],
         type: ["button", "submit", "reset"],
         disabled: "boolean",

@@ -62,10 +62,10 @@
         "a11y": {
           "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/SkemoA11y"
         },
-        "intents": {
+        "goals": {
           "type": "array",
           "items": {
-            "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/SkemoIntent"
+            "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/SkemoGoal"
           }
         }
       },

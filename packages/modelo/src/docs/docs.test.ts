@@ -634,8 +634,9 @@ describe("Spec 004 documentation (T001, Art. V Benchmark-Aspekto)", () => {
   // sondern den Benutzer. Dieser Test ist der einzige Gegenleser der Nummer — ein Vergleich über
   // einen String, der zwei Amendments unter einer Nummer nie melden würde. Seit Spec 007 (T010)
   // steht hier 2.1: Die Nummer wurde gegen main und die offenen PRs geprüft, keiner beanspruchte sie.
-  it("the Constitution header says version 2.1", () => {
-    expect(constitution.split("\n")[2]).toMatch(/^Version 2\.1 · /);
+  // Seit F1 (Spec 007, F1-T06) 2.2: bestimmt gegen die Basis des F1-PR, main 51e9ed9 mit v2.1.
+  it("the Constitution header says version 2.2", () => {
+    expect(constitution.split("\n")[2]).toMatch(/^Version 2\.2 · /);
   });
 
   it("Art. V carries the Benchmark-Aspekto paragraph and keeps the source rule", () => {
@@ -829,14 +830,63 @@ describe("Spec 007 documentation (Constitution v2.1, Uzo)", () => {
   });
 
   // T017: Plan, Datenmodell, Verträge und Aufgaben liegen seit #45 auf main; „Plan offen“ war falsch.
-  it("the vojmapo records Stufe A of Spec 007 as implemented, F1 and Stufe B open", () => {
+  // F1-T06: F1 ist umgesetzt; die Abnahme ist der Lauf des Maintainers in einer neuen Figma-Datei.
+  it("the vojmapo records Stufe A and F1 of Spec 007 as implemented, Stufe B open", () => {
     const row = read("docs/vojmapo.md")
       .split("\n")
       .find((line) => line.startsWith("| 3c |"));
     expect(row).toMatch(
-      /\| 📝 Spec, Plan und Tasks auf `main` \(#45\); Stufe A umgesetzt \(PR #\d+\), F1 und Stufe B offen \|$/,
+      /\| 📝 Spec, Plan und Tasks auf `main` \(#45\); Stufe A umgesetzt \(PR #\d+\); F1 umgesetzt \(PR #\d+, Abnahme in Figma `f10b-4` offen\); Stufe B offen \|$/,
     );
     expect(row).not.toContain("Plan offen");
+  });
+});
+
+// F1 (Spec 007, Jugxo jug_01M4DNSD0SV43Y943T21RQF7EM, Entscheidung OP-3): Art. II nannte
+// `variant: primary | secondary | tertiary` als Beispiel. Nach F1 heißen die Achsen des butono
+// emphasis und intent; das Beispiel folgt als eigenes Amendment mit eigener Nummer (F1-T06).
+describe("F1 documentation (Constitution v2.2, Art. II example)", () => {
+  const constitution = read(".specify/memory/constitution.md");
+
+  it("Art. II gives the example emphasis: high | medium | low, not variant", () => {
+    const article = section(constitution, "Artikel II – Unu Vortaro (ein Vokabular)");
+    expect(article).toContain(
+      "Ero-Prop `emphasis: high | medium | low` → Figma-Property `emphasis` mit identischen Werten → Code-Prop `emphasis` mit identischem Enum",
+    );
+    expect(article).not.toContain("variant: primary | secondary | tertiary");
+  });
+
+  it("the change history names v2.2 (Spec 007, F1) with the Art. II example", () => {
+    const history = section(constitution, "Governance");
+    expect(history).toContain(
+      "v2.2 (Spec 007, F1) Art. II Beispiel `emphasis: high | medium | low` statt `variant: primary | secondary | tertiary` (Achsen des butono umbenannt, Jugxo `jug_01M4DNSD0SV43Y943T21RQF7EM`)",
+    );
+  });
+
+  it("spec.md carries the third point of the amendment with reason and migration", () => {
+    const amendment = section(read("specs/007-skemo-uzo/spec.md"), "Constitution Amendment");
+    expect(amendment).toContain("**Dritter Punkt: Art. II nach F1 (v2.2, F1-T06).**");
+    expect(amendment).toContain("Ero-Prop `emphasis: high | medium | low`");
+    expect(amendment).toMatch(/\*\*Grund:\*\* Die Achsen des `butono` heißen seit F1 `emphasis`/);
+    expect(amendment).toMatch(/\*\*Migration:\*\* Keine Daten; der Bruch ist F1 selbst/);
+  });
+
+  it("the vojmapo says the axes are renamed, not to be renamed", () => {
+    const row = read("docs/vojmapo.md")
+      .split("\n")
+      .find((line) => line.startsWith("| 4 |"));
+    expect(row).toContain(
+      "die Achsen des `butono` heißen seit F1 `emphasis` (high/medium/low) und `intent` (neutral/danger) statt `variant` und `tone` (umbenannt, PR #",
+    );
+    expect(row).not.toContain("heißen nach F1");
+  });
+
+  it("the README shows the butono with emphasis and suggest_ero with the new axes", () => {
+    const readme = read("README.md");
+    expect(readme).toContain('<fm-butono emphasis="high">Speichern</fm-butono>');
+    expect(readme).toContain('<Butono emphasis="high" type="submit">Weiter</Butono>');
+    expect(readme).toContain('`suggest_ero` ("Löschen" → `emphasis=high`, `intent=danger`');
+    expect(readme).not.toMatch(/variant="primary"|`variant=primary`/);
   });
 });
 

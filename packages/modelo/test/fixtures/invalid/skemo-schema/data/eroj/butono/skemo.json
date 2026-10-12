@@ -11,12 +11,12 @@
     "ero": "ero_01M2XM2NGN3KJSKJ4JTXQWMF72",
     "props": [
       {
-        "name": "variant",
+        "name": "emphasis",
         "kind": "enum",
         "values": [
-          "primary"
+          "high"
         ],
-        "default": "primary"
+        "default": "high"
       },
       {
         "name": "label",
@@ -37,7 +37,7 @@
       "surface": {
         "background": {
           "by": [
-            "variant",
+            "emphasis",
             "state"
           ]
         }
@@ -58,7 +58,7 @@
         "part": "surface",
         "property": "background",
         "when": {
-          "variant": "primary",
+          "emphasis": "high",
           "state": "rest"
         },
         "token": "color.background.default"

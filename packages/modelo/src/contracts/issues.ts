@@ -132,7 +132,7 @@ export const RULE_IDS = [
   "skemo-binding-missing",
   "skemo-binding-invalid",
   "skemo-kontrastparo-missing",
-  "skemo-intent-invalid",
+  "skemo-goal-invalid",
   "skemo-constraint-invalid",
   "jugxo-ekzemplo-invalid",
   // Ero Reguloj and usage (Spec 003, D-04, D-16)
@@ -146,7 +146,8 @@ export const RULE_IDS = [
   "focus-ring-concentric",
   "ero-prop-constraint",
   "ero-unknown",
-  "intent-unknown",
+  // F1-T00 (Spec 007, OP-4): the goal is `goal`; `intent` is a prop.
+  "goal-unknown",
   // Reguloj of Spec 004 (T003, T004); their rule IDs are the Regulo names (plan D-03)
   "aspiro-missed",
   "contrast-reserve",

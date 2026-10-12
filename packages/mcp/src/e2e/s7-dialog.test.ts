@@ -62,9 +62,9 @@ describe("S7 with ekzemplo (AK-06)", () => {
       explain_regulo: { name: "text-hierarchy" },
       describe_term: { term: "Aspekto" },
       get_ero: { name: "butono" },
-      suggest_ero: { intent: "Löschen" },
+      suggest_ero: { goal: "Löschen" },
       check_usage: {
-        instances: [{ ero: "butono", props: { variant: "primary" }, label: "Speichern" }],
+        instances: [{ ero: "butono", props: { emphasis: "high" }, label: "Speichern" }],
       },
     };
     for (const name of TOOL_NAMES) {

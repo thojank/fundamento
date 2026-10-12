@@ -1,6 +1,6 @@
 // Ero Reguloj and the usage evaluation (Spec 003 T006; FR-03, plan D-04, data-model §3). The
 // Reguloj come from the repo's data/reguloj.json, so their kialoj are the stored ones; the Skemo
-// is a copy of valid/ero-minimal with the butono props, the danger constraint and the intents.
+// is a copy of valid/ero-minimal with the butono props, the danger constraint and the goals.
 
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
@@ -26,23 +26,23 @@ const root = mutatedFixture("ero-minimal", (edit) => {
   edit("data/eroj/butono/skemo.json", (file: { skemo: Record<string, unknown> }) => {
     file.skemo.props = [
       {
-        name: "variant",
+        name: "emphasis",
         kind: "enum",
-        values: ["primary", "secondary", "tertiary"],
-        default: "secondary",
+        values: ["high", "medium", "low"],
+        default: "medium",
       },
-      { name: "tone", kind: "enum", values: ["default", "danger"], default: "default" },
+      { name: "intent", kind: "enum", values: ["neutral", "danger"], default: "neutral" },
       { name: "disabled", kind: "boolean", default: false },
       { name: "label", kind: "string" },
     ];
     file.skemo.constraints = [
-      { when: { tone: "danger" }, allowed: { variant: ["primary"] }, kialo: "Filled danger only." },
+      { when: { intent: "danger" }, allowed: { emphasis: ["high"] }, kialo: "Filled danger only." },
     ];
-    file.skemo.intents = [
+    file.skemo.goals = [
       {
-        intent: "destructive",
+        goal: "destructive",
         keywords: { en: ["delete"], de: ["löschen", "entfernen"] },
-        props: { variant: "primary", tone: "danger" },
+        props: { emphasis: "high", intent: "danger" },
         regulo: "destructive-not-primary-color",
       },
     ];
@@ -90,15 +90,15 @@ describe("evaluateUsage (T006)", () => {
   it("one-primary-per-container: two primaries in one container give one violation naming both", () => {
     expect(
       rulesOf([
-        button({ variant: "primary" }, { container: "dialog" }),
-        button({ variant: "tertiary" }, { container: "dialog", label: "Abbrechen" }),
-        button({ variant: "primary" }, { container: "dialog", label: "Weiter" }),
+        button({ emphasis: "high" }, { container: "dialog" }),
+        button({ emphasis: "low" }, { container: "dialog", label: "Abbrechen" }),
+        button({ emphasis: "high" }, { container: "dialog", label: "Weiter" }),
       ]),
     ).toEqual([{ instance: [0, 2], rule: "one-primary-per-container" }]);
   });
 
   it("one-primary-per-container: instances without a container form one container", () => {
-    expect(rulesOf([button({ variant: "primary" }), button({ variant: "primary" })])).toEqual([
+    expect(rulesOf([button({ emphasis: "high" }), button({ emphasis: "high" })])).toEqual([
       { instance: [0, 1], rule: "one-primary-per-container" },
     ]);
   });
@@ -106,17 +106,17 @@ describe("evaluateUsage (T006)", () => {
   it("one-primary-per-container: two containers pass", () => {
     expect(
       rulesOf([
-        button({ variant: "primary" }, { container: "form" }),
-        button({ variant: "primary" }, { container: "dialog" }),
+        button({ emphasis: "high" }, { container: "form" }),
+        button({ emphasis: "high" }, { container: "dialog" }),
       ]),
     ).toEqual([]);
   });
 
-  it("destructive-not-primary-color: primary + default fails, by intent and by label", () => {
+  it("destructive-not-primary-color: primary + default fails, by goal and by label", () => {
     expect(
       rulesOf([
-        button({ variant: "primary" }, { intent: "destructive", container: "a" }),
-        button({ variant: "primary" }, { label: "Löschen", container: "b" }),
+        button({ emphasis: "high" }, { goal: "destructive", container: "a" }),
+        button({ emphasis: "high" }, { label: "Löschen", container: "b" }),
       ]),
     ).toEqual([
       { instance: [0], rule: "destructive-not-primary-color" },
@@ -127,7 +127,7 @@ describe("evaluateUsage (T006)", () => {
   it("destructive-not-primary-color: primary + danger and secondary + default pass", () => {
     expect(
       rulesOf([
-        button({ variant: "primary", tone: "danger" }, { intent: "destructive", container: "a" }),
+        button({ emphasis: "high", intent: "danger" }, { goal: "destructive", container: "a" }),
         button({}, { label: "Löschen", container: "b" }),
       ]),
     ).toEqual([]);
@@ -141,7 +141,7 @@ describe("evaluateUsage (T006)", () => {
   });
 
   it("ero-prop-constraint: danger on a secondary button", () => {
-    expect(rulesOf([button({ variant: "secondary", tone: "danger" })])).toEqual([
+    expect(rulesOf([button({ emphasis: "medium", intent: "danger" })])).toEqual([
       { instance: [0], rule: "ero-prop-constraint" },
     ]);
   });
@@ -155,8 +155,8 @@ describe("evaluateUsage (T006)", () => {
   it("every Regulo violation cites the stored Regulo and kialo", () => {
     if (modelo === undefined) throw new Error("unreachable");
     const { violations } = evaluateUsage(modelo, [
-      button({ variant: "primary" }),
-      button({ variant: "primary" }),
+      button({ emphasis: "high" }),
+      button({ emphasis: "high" }),
     ]);
     const stored = repoReguloj.find((regulo) => regulo.name === "one-primary-per-container");
     expect(violations[0]?.issue.regulo).toEqual({

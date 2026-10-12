@@ -16,7 +16,7 @@ type EroFile = {
     parts: Record<string, Record<string, Record<string, unknown>>>;
     bindings: { part: string; property: string; when?: Record<string, string>; token: string }[];
     constraints?: unknown[];
-    intents?: unknown[];
+    goals?: unknown[];
   };
 };
 
@@ -78,15 +78,15 @@ describe("Skemo ↔ Vortaro rules (T005)", () => {
   it("skemo-binding-missing: a variant value without a surface fill", () => {
     expect(
       issuesOf((file) => {
-        const variant = file.skemo.props[0];
-        if (variant !== undefined) variant.values = ["primary", "secondary"];
+        const emphasis = file.skemo.props[0];
+        if (emphasis !== undefined) emphasis.values = ["high", "medium"];
       }),
     ).toEqual([
       {
         rule: "skemo-binding-missing",
         path: `${FILE}#/skemo/parts/surface/fill`,
         message:
-          "Skemo of butono has no binding for surface.fill when variant=secondary, state=rest.",
+          "Skemo of butono has no binding for surface.fill when emphasis=medium, state=rest.",
       },
     ]);
   });
@@ -126,7 +126,7 @@ describe("Skemo ↔ Vortaro rules (T005)", () => {
         rule: "skemo-kontrastparo-missing",
         path: `${FILE}#/skemo/bindings/0`,
         message:
-          "Skemo of butono puts label.color (color.text.default) on surface.fill (color.palette.neutral.0) when variant=primary, state=rest, but no KontrastParo declares that pair.",
+          "Skemo of butono puts label.color (color.text.default) on surface.fill (color.palette.neutral.0) when emphasis=high, state=rest, but no KontrastParo declares that pair.",
       },
     ]);
   });
@@ -149,40 +149,40 @@ describe("Skemo ↔ Vortaro rules (T005)", () => {
     expect(
       issuesOf((file) => {
         file.skemo.constraints = [
-          { when: { tone: "danger" }, allowed: { variant: ["primary"] }, kialo: "Filled only." },
+          { when: { intent: "danger" }, allowed: { emphasis: ["high"] }, kialo: "Filled only." },
         ];
       }),
     ).toEqual([
       {
         rule: "skemo-constraint-invalid",
-        path: `${FILE}#/skemo/constraints/0/when/tone`,
-        message: "Skemo of butono constrains tone, which is not a prop of butono.",
+        path: `${FILE}#/skemo/constraints/0/when/intent`,
+        message: "Skemo of butono constrains intent, which is not a prop of butono.",
       },
     ]);
   });
 
-  it("skemo-intent-invalid: an intent with a value the prop does not allow and an unknown Regulo", () => {
+  it("skemo-goal-invalid: a goal with a value the prop does not allow and an unknown Regulo", () => {
     expect(
       issuesOf((file) => {
-        file.skemo.intents = [
+        file.skemo.goals = [
           {
-            intent: "confirm",
+            goal: "confirm",
             keywords: { en: ["save"] },
-            props: { variant: "ghost" },
+            props: { emphasis: "ghost" },
             regulo: "no-such-regulo",
           },
         ];
       }),
     ).toEqual([
       {
-        rule: "skemo-intent-invalid",
-        path: `${FILE}#/skemo/intents/0/props/variant`,
-        message: "Intent confirm of butono sets variant=ghost; variant allows primary.",
+        rule: "skemo-goal-invalid",
+        path: `${FILE}#/skemo/goals/0/props/emphasis`,
+        message: "Goal confirm of butono sets emphasis=ghost; emphasis allows high.",
       },
       {
-        rule: "skemo-intent-invalid",
-        path: `${FILE}#/skemo/intents/0/regulo`,
-        message: "Intent confirm of butono cites the Regulo no-such-regulo, which does not exist.",
+        rule: "skemo-goal-invalid",
+        path: `${FILE}#/skemo/goals/0/regulo`,
+        message: "Goal confirm of butono cites the Regulo no-such-regulo, which does not exist.",
       },
     ]);
   });
@@ -200,7 +200,7 @@ describe("Skemo ↔ Vortaro rules (T005)", () => {
               kialo: "A made-up variant.",
               date: "2026-09-19",
               context: "Fixture for jugxo-ekzemplo-invalid.",
-              ekzemplo: { instances: [{ ero: "butono", props: { variant: "ghost" } }] },
+              ekzemplo: { instances: [{ ero: "butono", props: { emphasis: "ghost" } }] },
             });
             return value;
           });
@@ -209,9 +209,9 @@ describe("Skemo ↔ Vortaro rules (T005)", () => {
     ).toEqual([
       {
         rule: "jugxo-ekzemplo-invalid",
-        path: "data/jugxoj.json#/jugxoj/0/ekzemplo/instances/0/props/variant",
+        path: "data/jugxoj.json#/jugxoj/0/ekzemplo/instances/0/props/emphasis",
         message:
-          "Example instance 0 of Jugxo jug_01M2XKF38358Z6WQH9KARYJ6F3 sets variant=ghost; butono allows primary.",
+          "Example instance 0 of Jugxo jug_01M2XKF38358Z6WQH9KARYJ6F3 sets emphasis=ghost; butono allows high.",
       },
     ]);
   });

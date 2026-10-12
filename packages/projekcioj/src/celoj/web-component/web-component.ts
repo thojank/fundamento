@@ -167,7 +167,7 @@ function keysOf(skemo: Skemo, source: SkemoPartSource | undefined, depth = 0): s
   return [];
 }
 
-/** `:where([part="control"][data-variant="primary"]:hover)`, or the slotted form for icons. */
+/** `:where([part="control"][data-emphasis="high"]:hover)`, or the slotted form for icons. */
 function selectorOf(
   part: string,
   combination: Readonly<Record<string, string>>,

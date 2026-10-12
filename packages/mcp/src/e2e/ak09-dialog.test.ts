@@ -30,10 +30,10 @@ const reguloNamed = (name: string) => {
   if (regulo === undefined) throw new Error(`no Regulo ${name}`);
   return regulo;
 };
-const intentNamed = (name: string) => {
-  const intent = (skemo.intents ?? []).find((entry) => entry.intent === name);
-  if (intent === undefined) throw new Error(`no intent ${name}`);
-  return intent;
+const goalNamed = (name: string) => {
+  const goal = (skemo.goals ?? []).find((entry) => entry.goal === name);
+  if (goal === undefined) throw new Error(`no goal ${name}`);
+  return goal;
 };
 const valuesOf = (prop: string) => {
   const found = skemo.props.find((entry) => entry.name === prop);
@@ -50,17 +50,17 @@ beforeAll(async () => {
 });
 
 describe("AK-09: the Phase-3 dialog with ekzemplo", () => {
-  it("'Welchen Button nehme ich für Löschen?': suggest_ero names variant, tone and the Regulo", async () => {
-    const destructive = intentNamed("destructive");
+  it("'Welchen Button nehme ich für Löschen?': suggest_ero names emphasis, intent and the Regulo", async () => {
+    const destructive = goalNamed("destructive");
     const regulo = reguloNamed(String(destructive.regulo));
     const answer = await output<{
-      matched: { intent: string; keyword: string; lingvo: string } | null;
+      matched: { goal: string; keyword: string; lingvo: string } | null;
       suggestion: { ero: string; props: Record<string, string> } | null;
       kialo?: string;
       regulo?: { id: string; name: string; kialo: string };
-    }>(client, "suggest_ero", { intent: "Löschen" });
+    }>(client, "suggest_ero", { goal: "Löschen" });
 
-    expect(answer.matched?.intent).toBe(destructive.intent);
+    expect(answer.matched?.goal).toBe(destructive.goal);
     expect(answer.matched?.keyword).toBe("löschen");
     expect(answer.suggestion).toEqual({
       ero: "butono",
@@ -76,8 +76,8 @@ describe("AK-09: the Phase-3 dialog with ekzemplo", () => {
   it("'Ist dieser Screen konform?': check_usage names both instances and the kialo", async () => {
     const regulo = reguloNamed("one-primary-per-container");
     const instances = [
-      { ero: "butono", props: { variant: "primary" }, container: "dialog", label: "Speichern" },
-      { ero: "butono", props: { variant: "primary" }, container: "dialog", label: "Weiter" },
+      { ero: "butono", props: { emphasis: "high" }, container: "dialog", label: "Speichern" },
+      { ero: "butono", props: { emphasis: "high" }, container: "dialog", label: "Weiter" },
     ];
     const answer = await output<{
       instances: number;
@@ -96,7 +96,7 @@ describe("AK-09: the Phase-3 dialog with ekzemplo", () => {
     const fixed = await output<{ valid: boolean }>(client, "check_usage", {
       instances: [
         instances[0],
-        { ero: "butono", props: { variant: "tertiary" }, container: "dialog", label: "Abbrechen" },
+        { ero: "butono", props: { emphasis: "low" }, container: "dialog", label: "Abbrechen" },
       ],
     });
     expect(fixed.valid).toBe(true);
@@ -111,11 +111,11 @@ describe("AK-09: the Phase-3 dialog with ekzemplo", () => {
       };
     }>(client, "get_ero", { name: "butono" });
 
-    const values = valuesOf("variant");
+    const values = valuesOf("emphasis");
     expect(answer.projekcioj.figma.componentSet).toBe("butono");
-    expect(answer.projekcioj.figma.properties.variant).toEqual(values);
-    expect(answer.projekcioj.react.props.variant).toEqual(values);
-    expect(answer.projekcioj.webComponent.attributes.variant).toEqual(values);
+    expect(answer.projekcioj.figma.properties.emphasis).toEqual(values);
+    expect(answer.projekcioj.react.props.emphasis).toEqual(values);
+    expect(answer.projekcioj.webComponent.attributes.emphasis).toEqual(values);
     expect(answer.projekcioj.react.component).toBe("Butono");
     expect(answer.projekcioj.webComponent.tag).toBe("fm-butono");
   });

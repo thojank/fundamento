@@ -219,41 +219,41 @@ describe("the paint carries the alpha of its token (F8)", () => {
   }
 
   it("a fully transparent fill is not opaque, and keeps its binding", async () => {
-    const { fill } = await paintsOf({ variant: "tertiary", tone: "default", state: "rest" });
+    const { fill } = await paintsOf({ emphasis: "low", intent: "neutral", state: "rest" });
     expect(fill?.opacity).toBe(0);
     expect(fill?.boundVariables).toBeDefined();
   });
 
   it("an overlay carries its deckkraft", async () => {
-    const { fill } = await paintsOf({ variant: "tertiary", tone: "default", state: "hover" });
+    const { fill } = await paintsOf({ emphasis: "low", intent: "neutral", state: "hover" });
     expect(fill?.opacity).toBe(0.08);
   });
 
   it("an opaque fill stays opaque", async () => {
-    const { fill } = await paintsOf({ variant: "primary", tone: "default", state: "rest" });
+    const { fill } = await paintsOf({ emphasis: "high", intent: "neutral", state: "rest" });
     expect(fill?.opacity).toBe(1);
   });
 
   // `border.color` is the second of the two parts every tertiary role is bound to, and it carries
   // the same three cases as the fill.
   it("the border of a variant carries the same deckkraft as its fill", async () => {
-    const rest = await paintsOf({ variant: "tertiary", tone: "default", state: "rest" });
+    const rest = await paintsOf({ emphasis: "low", intent: "neutral", state: "rest" });
     expect(rest.stroke?.opacity).toBe(0);
     expect(rest.stroke?.boundVariables).toBeDefined();
-    const hover = await paintsOf({ variant: "tertiary", tone: "default", state: "hover" });
+    const hover = await paintsOf({ emphasis: "low", intent: "neutral", state: "hover" });
     expect(hover.stroke?.opacity).toBe(0.08);
     expect(hover.stroke?.boundVariables).toBeDefined();
-    const primary = await paintsOf({ variant: "primary", tone: "default", state: "rest" });
+    const primary = await paintsOf({ emphasis: "high", intent: "neutral", state: "rest" });
     expect(primary.stroke?.opacity).toBe(1);
   });
 
   // The label is the third bound paint. No label colour is translucent today — that is what the
   // measurement says, and it would catch the day a label arrives at deckkraft 1 by accident.
   it("the label carries its deckkraft and keeps its binding", async () => {
-    const tertiary = await paintsOf({ variant: "tertiary", tone: "default", state: "rest" });
+    const tertiary = await paintsOf({ emphasis: "low", intent: "neutral", state: "rest" });
     expect(tertiary.label?.opacity).toBe(1);
     expect(tertiary.label?.boundVariables).toBeDefined();
-    const disabled = await paintsOf({ variant: "tertiary", tone: "default", state: "disabled" });
+    const disabled = await paintsOf({ emphasis: "low", intent: "neutral", state: "disabled" });
     expect(disabled.label?.opacity).toBe(1);
     expect(disabled.label?.boundVariables).toBeDefined();
   });
@@ -368,7 +368,7 @@ describe("the plugin reports what it did (F10)", () => {
 
 // F10b (Abnahme M1, frische Datei QtJRsTlm7NnIPC8wqNuAVm): Lauf 1 legte 72 Varianten an, Lauf 2
 // meldete `found: true`, `created: 1` — und zwar die **letzte** Variante des Plans
-// (variant=tertiary, tone=default, size=large, state=loading), bei `updated: 71` und `warnings: []`.
+// (emphasis=low, intent=neutral, size=large, state=loading), bei `updated: 71` und `warnings: []`.
 // Hier wird der Fall nachgestellt: zwei Läufe hintereinander gegen den Plan dieses Repositories.
 describe("a second run creates nothing (F10b, the maintainer's case)", () => {
   async function run2(double: ReturnType<typeof figmaDouble>, options?: typeof LIFT) {
@@ -398,7 +398,7 @@ describe("a second run creates nothing (F10b, the maintainer's case)", () => {
       Object.entries(last)
         .map(([key, value]) => `${key}=${value}`)
         .join(", "),
-    ).toBe("variant=tertiary, tone=default, size=large, state=loading");
+    ).toBe("emphasis=low, intent=neutral, size=large, state=loading");
   });
 });
 
@@ -435,7 +435,7 @@ describe("a run that creates in a set it found warns, and says what it found (F1
     if (found === undefined) throw new Error("no component set");
     return found;
   };
-  const LAST = "variant=tertiary, tone=default, size=large, state=loading";
+  const LAST = "emphasis=low, intent=neutral, size=large, state=loading";
 
   // Der entscheidende Messpunkt für den nächsten Lauf in Figma: Nach dem Lauf steht im Bericht,
   // wie viele Kinder das Set trägt und wie viele davon unsere Markierung tragen. Bleibt die
@@ -538,7 +538,7 @@ describe("the run reads its own last state and says what happened (F10b)", () =>
     if (found === undefined) throw new Error("no component set");
     return found;
   };
-  const LAST = "variant=tertiary, tone=default, size=large, state=loading";
+  const LAST = "emphasis=low, intent=neutral, size=large, state=loading";
 
   it("leaves its state at the set and finds it again next time", async () => {
     const double = modelDouble();
@@ -629,8 +629,8 @@ describe("a run that would create in a set it found aborts before it writes (F10
     if (found === undefined) throw new Error("no component set");
     return found;
   };
-  const LAST = "variant=tertiary, tone=default, size=large, state=loading";
-  const LAST_PROPS = { variant: "tertiary", tone: "default", size: "large", state: "loading" };
+  const LAST = "emphasis=low, intent=neutral, size=large, state=loading";
+  const LAST_PROPS = { emphasis: "low", intent: "neutral", size: "large", state: "loading" };
 
   it("aborts when a variant is missing from the set it found, and has created no node", async () => {
     const double = modelDouble();
@@ -764,7 +764,7 @@ describe("a run reports every node of the set that was there at its start and is
     if (found === undefined) throw new Error("no component set");
     return found;
   };
-  const LAST = "variant=tertiary, tone=default, size=large, state=loading";
+  const LAST = "emphasis=low, intent=neutral, size=large, state=loading";
   /** Variant, focus ring, focus gap, control, label: five nodes per variant, plus the set. */
   const NODES = 72 * 5 + 1;
 
@@ -875,13 +875,13 @@ describe("a text is written only after its current font is loaded (F-A)", () => 
 });
 
 // F-B (Messung 2026-10-08): Zwei lose, vollständig markierte Komponenten
-// „variant=primary, tone=default, size=small, state=rest" auf der Seite, in keinem Set. Jeder
+// „emphasis=high, intent=neutral, size=small, state=rest" auf der Seite, in keinem Set. Jeder
 // abgestürzte Lauf hinterließ eine; der nächste fand sie nicht (ours sucht im Set) und legte die
 // Variante erneut an. F10c greift nicht, denn es gibt kein vorgefundenes Set. Vor dem ersten
 // Schreiben sucht der Lauf deshalb auch markierte Komponenten außerhalb des Sets und bricht ab,
 // wenn er welche findet — ohne sie still zu übernehmen und ohne sie still zu löschen.
 describe("a marked component outside the set stops the run before it writes (F-B)", () => {
-  const FIRST = "variant=primary, tone=default, size=small, state=rest";
+  const FIRST = "emphasis=high, intent=neutral, size=small, state=rest";
   type Orphan = { id: string; name: string; set: string; parent: { id: string; type: string } };
 
   /** A run that crashes once its first component stands, as Figma's run did (F-A). */
@@ -957,7 +957,7 @@ describe("every run names its build", () => {
   const stamped = Object.fromEntries(
     FIGMA_CELO.generate({ ...repo.input, build: "abc1234" }).map((file) => [file.path, file.text]),
   );
-  const LAST = "variant=tertiary, tone=default, size=large, state=loading";
+  const LAST = "emphasis=low, intent=neutral, size=large, state=loading";
   const setOf = (double: ReturnType<typeof figmaDouble>) =>
     double.root.children[0]?.children.find((child) => child.name === "butono");
 
@@ -1096,8 +1096,8 @@ describe("the geometry of the Ero reaches Figma (F11)", () => {
 
   it("lays the control out horizontally, centred, and binds both inline paddings", async () => {
     const control = await controlOf({
-      variant: "primary",
-      tone: "default",
+      emphasis: "high",
+      intent: "neutral",
       size: "medium",
       state: "rest",
     });
@@ -1132,7 +1132,7 @@ describe("the focus ring is drawn, and never clipped (F11)", () => {
     await run(double, repoFiles["figma/plugin/code.js"] ?? "");
     const set = double.root.children[0]?.children.find((child) => child.name === "butono");
     return set?.children.find(
-      (child) => child.name === `variant=primary, tone=default, size=medium, state=${state}`,
+      (child) => child.name === `emphasis=high, intent=neutral, size=medium, state=${state}`,
     );
   }
 
@@ -1317,7 +1317,7 @@ describe("the label is set in the model's font (F11)", () => {
       double.root.children[0]?.children
         .find((child) => child.name === "butono")
         ?.children.find(
-          (child) => child.name === "variant=primary, tone=default, size=medium, state=rest",
+          (child) => child.name === "emphasis=high, intent=neutral, size=medium, state=rest",
         ),
       "label",
     );
@@ -1555,7 +1555,7 @@ describe("every variant has its size and its own place in the grid (F14)", () =>
     for (const variant of (setOf(double)?.children ?? []) as Anchored[]) {
       const props = Object.fromEntries(variant.name.split(", ").map((pair) => pair.split("=")));
       expect(variant.gridColumnAnchorIndex, variant.name).toBe(states.indexOf(props.state));
-      const combination = `${props.variant} · ${props.tone} · ${props.size}`;
+      const combination = `${props.emphasis} · ${props.intent} · ${props.size}`;
       const known = rows.get(variant.gridRowAnchorIndex);
       if (known === undefined) rows.set(variant.gridRowAnchorIndex, combination);
       else expect(known, variant.name).toBe(combination);
@@ -1564,7 +1564,8 @@ describe("every variant has its size and its own place in the grid (F14)", () =>
     const planned = [
       ...new Set(
         (repoPlan.components[0]?.variants ?? []).map(
-          (variant) => `${variant.props.variant} · ${variant.props.tone} · ${variant.props.size}`,
+          (variant) =>
+            `${variant.props.emphasis} · ${variant.props.intent} · ${variant.props.size}`,
         ),
       ),
     ];
@@ -1669,14 +1670,14 @@ describe("every variant has its size and its own place in the grid (F14)", () =>
     // Names the double does not know are reported as absent, not left out.
     expect(held?.set.gridRowSizes).toBe("nicht vorhanden");
     expect(held?.variant).toMatchObject({
-      name: "variant=primary, tone=default, size=small, state=rest",
+      name: "emphasis=high, intent=neutral, size=small, state=rest",
       parent: "COMPONENT_SET",
       layoutPositioning: "AUTO",
       layoutSizingHorizontal: "HUG",
     });
     expect(held?.variant).toMatchObject({ gridRowAnchorIndex: 0, gridColumnAnchorIndex: 0 });
     expect(held?.last).toMatchObject({ gridRowAnchorIndex: 11, gridColumnAnchorIndex: 5 });
-    expect(held?.last.name).toBe("variant=tertiary, tone=default, size=large, state=loading");
+    expect(held?.last.name).toBe("emphasis=low, intent=neutral, size=large, state=loading");
   });
 
   it("reports a property the tool throws on with the tool's message", async () => {
@@ -1863,7 +1864,7 @@ describe("every variant has the same outer size in all six states (F17)", () => 
       components: { layout: { held: { focus: Record<string, Record<string, unknown>> } } }[];
     };
     const parts = report.components[0]?.layout.held.focus;
-    expect(parts?.variant?.name).toBe("variant=primary, tone=default, size=small, state=focus");
+    expect(parts?.variant?.name).toBe("emphasis=high, intent=neutral, size=small, state=focus");
     expect(parts?.["focus-ring"]).toMatchObject({
       strokesIncludedInLayout: false,
       strokeAlign: "INSIDE",
@@ -2230,8 +2231,8 @@ describe("every bound paint shows the plan's colour after the first and the seco
       )(double.figma);
       const set = double.root.children[0]?.children.find((child) => child.name === "butono");
       for (const [props, name] of [
-        [{ variant: "primary", tone: "default", size: "large", state: "rest" }, "primary"],
-        [{ variant: "tertiary", tone: "default", size: "medium", state: "hover" }, "tertiary"],
+        [{ emphasis: "high", intent: "neutral", size: "large", state: "rest" }, "high"],
+        [{ emphasis: "low", intent: "neutral", size: "medium", state: "hover" }, "low"],
       ] as const) {
         const variant = set?.children.find(
           (child) =>
@@ -2775,7 +2776,7 @@ describe("the set is left on no mode of its own (F35)", () => {
 // Grün seit #29 (F36); Befund vom 06.10. als Messung mit einem Plugin vor #29 erklärt, seit #40
 // nennt jeder Lauf seinen Build.
 describe("the tertiary fill keeps its deckkraft over two runs (F43)", () => {
-  const props = { variant: "tertiary", tone: "default", size: "large", state: "loading" };
+  const props = { emphasis: "low", intent: "neutral", size: "large", state: "loading" };
   const name = Object.entries(props)
     .map(([key, value]) => `${key}=${value}`)
     .join(", ");

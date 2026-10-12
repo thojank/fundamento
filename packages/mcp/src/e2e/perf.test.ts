@@ -105,7 +105,7 @@ describe("performance (AK-07)", { timeout: 60_000 }, () => {
     ["get_ero", () => ({ name: "butono" })],
     [
       "suggest_ero",
-      (index: number) => ({ intent: ["Löschen", "Speichern", "Abbrechen"][index % 3] }),
+      (index: number) => ({ goal: ["Löschen", "Speichern", "Abbrechen"][index % 3] }),
     ],
     [
       "check_usage",
@@ -113,19 +113,19 @@ describe("performance (AK-07)", { timeout: 60_000 }, () => {
         instances: [
           {
             ero: "butono",
-            props: { variant: "primary" },
+            props: { emphasis: "high" },
             container: `dialog-${index}`,
             label: "Speichern",
           },
           {
             ero: "butono",
-            props: { variant: "primary" },
+            props: { emphasis: "high" },
             container: `dialog-${index}`,
             label: "Weiter",
           },
           {
             ero: "butono",
-            props: { variant: "tertiary" },
+            props: { emphasis: "low" },
             container: `dialog-${index}`,
             label: "Abbrechen",
           },

@@ -104,26 +104,26 @@ test.describe("fm-butono behaviour", () => {
     page.on("console", (message) => {
       if (message.type() === "warning") warnings.push(message.text());
     });
-    await serve(page, out, `<fm-butono id="a" variant="ghost">A</fm-butono>`);
+    await serve(page, out, `<fm-butono id="a" emphasis="ghost">A</fm-butono>`);
     expect(
       await page
         .locator("#a")
-        .evaluate((element) => (element as HTMLElement & { variant: string }).variant),
-    ).toBe("secondary");
+        .evaluate((element) => (element as HTMLElement & { emphasis: string }).emphasis),
+    ).toBe("medium");
     expect(warnings.filter((text) => text.includes("ghost"))).toHaveLength(1);
-    expect(warnings[0]).toContain("primary, secondary, tertiary");
+    expect(warnings[0]).toContain("high, medium, low");
   });
 
-  test("tone=danger with variant=secondary renders tone=default and warns with the kialo", async ({
+  test("intent=danger with emphasis=medium renders intent=neutral and warns with the kialo", async ({
     page,
   }) => {
     const warnings: string[] = [];
     page.on("console", (message) => {
       if (message.type() === "warning") warnings.push(message.text());
     });
-    await serve(page, out, `<fm-butono id="a" variant="secondary" tone="danger">A</fm-butono>`);
+    await serve(page, out, `<fm-butono id="a" emphasis="medium" intent="danger">A</fm-butono>`);
     const control = page.locator("#a").locator('[part="control"]');
-    await expect(control).toHaveAttribute("data-tone", "default");
+    await expect(control).toHaveAttribute("data-intent", "neutral");
     expect(warnings.join("\n")).toContain(skemo.constraints?.[0]?.kialo ?? "?");
   });
 
@@ -157,7 +157,7 @@ function rgb(value: unknown): string {
 }
 
 for (const aspekto of ["komuna", "ekzemplo"]) {
-  test(`${aspekto}: computed styles of every variant × tone × size × state equal the bound tokens (AK-03)`, async ({
+  test(`${aspekto}: computed styles of every emphasis × intent × size × state equal the bound tokens (AK-03)`, async ({
     page,
   }) => {
     const rezolvo = input.rezolvoj.rezolvoj.find(
@@ -170,11 +170,11 @@ for (const aspekto of ["komuna", "ekzemplo"]) {
         candidate.assignment.motion === "reduced",
     );
     if (rezolvo === undefined) throw new Error("combination missing");
-    const combos = combinationsOf(skemo, ["variant", "tone", "size"]);
+    const combos = combinationsOf(skemo, ["emphasis", "intent", "size"]);
     const body = combos
       .map(
         (c, i) =>
-          `<fm-butono id="b${i}" variant="${c.variant}" tone="${c.tone}" size="${c.size}">Aktion</fm-butono>`,
+          `<fm-butono id="b${i}" emphasis="${c.emphasis}" intent="${c.intent}" size="${c.size}">Aktion</fm-butono>`,
       )
       .join(" ");
     await serve(page, out, body);

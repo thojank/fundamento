@@ -34,6 +34,22 @@ describe("prompt gvidanto", () => {
     }
   });
 
+  // F1-T00 (Spec 007, OP-4): the goal is `goal`; `intent` is a prop of the butono after F1.
+  it("rule 9 asks suggest_ero for the goal in the user's words", () => {
+    expect(text).toMatch(
+      /From a goal to a component: call `suggest_ero` with the goal in the words the user uses/,
+    );
+    expect(text).not.toMatch(/From an action to a component/);
+  });
+
+  // F1 (Spec 007, Jugxo jug_01M4DNSD0SV43Y943T21RQF7EM): the axes are emphasis and intent.
+  it("rule 8 names the axes emphasis and intent as get_ero names them", () => {
+    expect(text).toMatch(
+      /Name an emphasis \(high, medium, low\) and an intent \(neutral, danger\) as `get_ero` names them; do not invent props or values\./,
+    );
+    expect(text).not.toMatch(/Name a variant/);
+  });
+
   it("asks for check_usage before a handover (Spec 003 T025)", () => {
     expect(text).toMatch(/Before you hand over a design or code, call `check_usage`/);
   });
