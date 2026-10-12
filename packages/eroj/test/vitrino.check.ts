@@ -190,9 +190,10 @@ test("the contrast table shows WCAG, APCA and the change against the comparison 
   // An overlay names the surface it was measured on: the worst of the ladder (Spec 004).
   await expect(table).toContainText("über color.background.");
   await expect(page.locator("#fm-vitrino-kontrasto p").first()).toContainText(
-    // Spec 008: three KontrastParoj color.link.* on color.background.canvas add their APCA
-    // advisory hints (1764 → 1890 against the unchanged snapshot of 1296).
-    "In den 72 Kombinationen des Vergleichsstands: 1890 gegen 1296 (Veränderung +594)",
+    // Spec 008 added three KontrastParoj color.link.* on color.background.canvas (1764 → 1890),
+    // Spec 009 three more for the field (error text on sunken, error border, border on sunken:
+    // 1890 → 1962); the snapshot of the comparison state stays at 1296.
+    "In den 72 Kombinationen des Vergleichsstands: 1962 gegen 1296 (Veränderung +666)",
   );
 });
 
