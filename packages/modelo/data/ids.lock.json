@@ -2111,6 +2111,10 @@
     "tok_01M2ZWW86NCFY7WFB51XCHX8RF": {
       "status": "active",
       "type": "token"
+    },
+    "uzo_01M4RPK0VYYXNCF41ME86Q4Z8P": {
+      "status": "active",
+      "type": "uzo"
     }
   }
 }

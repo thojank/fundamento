@@ -1,0 +1,202 @@
+{
+  "$schema": "../../../schema/modelo.schema.json#/$defs/UzoFile",
+  "uzo": {
+    "id": "uzo_01M4RPK0VYYXNCF41ME86Q4Z8P",
+    "ero": "ero_01M2XN0PHDBBD6MNFN75DB9NQ5",
+    "skemo": "ske_01M2XN0PWS92GP7VFHW161EH0D",
+    "purpose": "Starts an action on the current view: it saves, sends, confirms, cancels or deletes something here.",
+    "instead": [
+      {
+        "goal": "toggle",
+        "keywords": {
+          "en": [
+            "toggle",
+            "switch",
+            "enable",
+            "disable"
+          ],
+          "de": [
+            "umschalten",
+            "einschalten",
+            "ausschalten",
+            "aktivieren",
+            "deaktivieren"
+          ]
+        },
+        "ero": null,
+        "kialo": "A setting that stays on or off needs a control that shows its state, because a button acts once and forgets; Fundamento has no such Ero yet."
+      },
+      {
+        "goal": "choose",
+        "keywords": {
+          "en": [
+            "choose",
+            "select",
+            "pick"
+          ],
+          "de": [
+            "auswählen",
+            "wählen"
+          ]
+        },
+        "ero": null,
+        "kialo": "Choosing one of several values is a selection, not an action, because a row of buttons hides which value is chosen; Fundamento has no such Ero yet."
+      }
+    ],
+    "boundary": [
+      {
+        "case": "navigation",
+        "action": "ask-human",
+        "keywords": {
+          "en": [
+            "navigate",
+            "overview"
+          ],
+          "de": [
+            "navigieren",
+            "übersicht"
+          ]
+        },
+        "kialo": "A button starts an action on the current view; moving to another view is navigation, because it is announced differently and the way back works differently. Fundamento does not cover navigation yet, so a person decides."
+      },
+      {
+        "case": "form-in-slot",
+        "action": "not-supported",
+        "via": {
+          "slot": "label"
+        },
+        "kialo": "A button is one target with one name, because fields inside it could not be reached on their own and its name would be the text of every field."
+      },
+      {
+        "case": "multi-line-label",
+        "action": "not-supported",
+        "via": {
+          "layout": "wrap"
+        },
+        "kialo": "A label that breaks into lines no longer reads as one action, because the button grows in height next to its neighbours; shorten the label instead."
+      },
+      {
+        "case": "no-accessible-label",
+        "action": "not-supported",
+        "via": {
+          "regulo": "label-required"
+        },
+        "kialo": "An action without a name cannot be found, because assistive technology and voice control only know what is named."
+      }
+    ],
+    "composes": {
+      "containers": [
+        {
+          "name": "dialog",
+          "kialo": "A dialog holds the actions that close it, because it ends in a decision."
+        },
+        {
+          "name": "action-bar",
+          "kialo": "A bar at the end of a view or form holds the actions of that view, because that is where a person looks for the next step."
+        },
+        {
+          "name": "form",
+          "kialo": "A form ends with the action that sends or saves it, because filling it in does nothing by itself."
+        }
+      ],
+      "with": [
+        {
+          "ero": "butono",
+          "kialo": "Actions of one decision stand together, because one primary action leads and the others step back (one-primary-per-container)."
+        }
+      ],
+      "never": [],
+      "spacing": {
+        "owner": "container",
+        "regulo": "spacing-owned-by-container"
+      }
+    },
+    "slots": {
+      "label": {
+        "accepts": [
+          "text"
+        ],
+        "max": 1,
+        "nesting": 0
+      },
+      "icon-start": {
+        "accepts": [
+          "icon"
+        ],
+        "max": 1,
+        "nesting": 0
+      },
+      "icon-end": {
+        "accepts": [
+          "icon"
+        ],
+        "max": 1,
+        "nesting": 0
+      }
+    },
+    "layout": {
+      "size": "content",
+      "wrap": "never",
+      "full-width": {
+        "allowedIn": {
+          "containers": [
+            "action-bar"
+          ],
+          "dimensioj": {
+            "viewport": [
+              "compact"
+            ]
+          }
+        },
+        "regulo": "full-width-in-action-bar-or-compact"
+      }
+    },
+    "content": [
+      {
+        "regulo": "label-names-action",
+        "fixed": false,
+        "severity": "warning",
+        "check": {
+          "kind": "names-goal"
+        }
+      },
+      {
+        "regulo": "destructive-label-names-object",
+        "fixed": true,
+        "when": {
+          "goal": [
+            "destructive"
+          ]
+        },
+        "check": {
+          "kind": "verb-and-object",
+          "goal": "destructive"
+        }
+      },
+      {
+        "regulo": "destructive-label-not-generic",
+        "fixed": true,
+        "when": {
+          "goal": [
+            "destructive"
+          ]
+        },
+        "check": {
+          "kind": "not-words",
+          "words": {
+            "en": [
+              "ok",
+              "okay",
+              "yes"
+            ],
+            "de": [
+              "ok",
+              "okay",
+              "ja"
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

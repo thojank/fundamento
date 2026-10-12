@@ -111,9 +111,93 @@ describe("butono in the repo Modelo (T007)", () => {
     },
   );
 
-  it("keeps visible strings out of the Skemo: labels live only in Jugxo examples", () => {
+  it("keeps visible strings out of the Skemo and the Uzo: labels live only in Jugxo examples", () => {
     const text = JSON.stringify(butono?.skemo);
     expect(text).not.toMatch(/Speichern|Löschen|Abbrechen|Save|Delete|Cancel/);
+    // Spec 007 T020 (data-model §3): the Uzo carries keywords as search vocabulary, never a label.
+    const uzo = JSON.stringify(butono?.uzo ?? {});
+    expect(uzo).not.toMatch(
+      /Speichern|Löschen|Abbrechen|Projekt löschen|Save|Cancel|Delete project/,
+    );
+  });
+});
+
+// Spec 007 T020 (A1–A6, D-01, data-model §2.3): the Uzo of the butono next to its Skemo.
+describe("the Uzo of the butono (T020)", () => {
+  const uzo = butono?.uzo;
+
+  it("lives in data/eroj/butono/uzo.json, names its Ero and Skemo, and says what the Ero is for", () => {
+    expect(butono?.uzoFile).toBe("modelo/data/eroj/butono/uzo.json");
+    expect(uzo?.id).toMatch(/^uzo_[0-9A-HJKMNP-TV-Z]{26}$/);
+    expect(uzo?.ero).toBe(butono?.ero.id);
+    expect(uzo?.skemo).toBe(butono?.skemo.id);
+    expect(uzo?.purpose.length ?? 0).toBeGreaterThan(20);
+  });
+
+  it("names the four boundaries of A3, each with an action and a kialo", () => {
+    expect(uzo?.boundary.map((entry) => [entry.case, entry.action])).toEqual([
+      ["navigation", "ask-human"],
+      ["form-in-slot", "not-supported"],
+      ["multi-line-label", "not-supported"],
+      ["no-accessible-label", "not-supported"],
+    ]);
+    for (const entry of uzo?.boundary ?? []) expect(entry.kialo).toMatch(/\bbecause\b/);
+    // The boundaries check_usage recognises (A10) say how: a slot, the wrap, a Regulo.
+    expect(uzo?.boundary.map((entry) => entry.via)).toEqual([
+      undefined,
+      { slot: "label" },
+      { layout: "wrap" },
+      { regulo: "label-required" },
+    ]);
+  });
+
+  it("answers toggle and choose with instead, not covered yet, each with a kialo", () => {
+    expect(uzo?.instead.map((entry) => [entry.goal, entry.ero])).toEqual([
+      ["toggle", null],
+      ["choose", null],
+    ]);
+    for (const entry of uzo?.instead ?? []) expect(entry.kialo).toMatch(/\bbecause\b/);
+  });
+
+  it("rules the slots of A5: text in the label, one decorative icon at each end, no nesting", () => {
+    expect(uzo?.slots).toEqual({
+      label: { accepts: ["text"], max: 1, nesting: 0 },
+      "icon-start": { accepts: ["icon"], max: 1, nesting: 0 },
+      "icon-end": { accepts: ["icon"], max: 1, nesting: 0 },
+    });
+  });
+
+  it("states the layout of A6 in platform-neutral words", () => {
+    expect(uzo?.layout).toEqual({
+      size: "content",
+      wrap: "never",
+      "full-width": {
+        allowedIn: { containers: ["action-bar"], dimensioj: { viewport: ["compact"] } },
+        regulo: "full-width-in-action-bar-or-compact",
+      },
+    });
+  });
+
+  it("composes in dialog, action-bar and form, and leaves spacing to the container (A4)", () => {
+    expect(uzo?.composes.containers.map((entry) => entry.name)).toEqual([
+      "dialog",
+      "action-bar",
+      "form",
+    ]);
+    expect(uzo?.composes.spacing).toEqual({
+      owner: "container",
+      regulo: "spacing-owned-by-container",
+    });
+  });
+
+  it("carries the three text rules of A7: one adjustable warning, two fixed", () => {
+    expect(
+      uzo?.content.map((entry) => [entry.regulo, entry.fixed, entry.severity ?? "error"]),
+    ).toEqual([
+      ["label-names-action", false, "warning"],
+      ["destructive-label-names-object", true, "error"],
+      ["destructive-label-not-generic", true, "error"],
+    ]);
   });
 });
 
