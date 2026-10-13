@@ -34,7 +34,7 @@ import {
   type Uzo,
 } from "@fundamento/modelo";
 import type { Celo, CeloInput, GeneratedFile } from "../../build.js";
-import { VITRINO_SURFACE } from "../vitrino/datumoj.js";
+import { VITRINO_SLOT_TEXTS, VITRINO_SURFACE } from "../vitrino/datumoj.js";
 import { DRAWN_PART_PROPERTIES, pluginManifest, pluginSource } from "./plugin.js";
 
 /** A variable value: a literal, or an alias to another variable of the plan. */
@@ -129,8 +129,8 @@ export const FIGMA_NOT_DRAWN: Readonly<Record<string, string>> = {
  */
 export const FIELD_TEXTS: Readonly<Record<string, string>> = {
   text: "Beispiel",
-  help: "Hinweis",
-  error: "Fehler",
+  // The same words the Vitrino slots into the field (F-5): one source for both pictures.
+  ...VITRINO_SLOT_TEXTS,
 };
 
 /**

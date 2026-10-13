@@ -1046,7 +1046,8 @@ describe("Nachlese Spec 008/009 and Spec 004 findings (2026-10-13)", () => {
 
   it("the plans of Spec 008 and 009 carry the Nachlese with what was done and what stays open", () => {
     const ligilo = section(read("specs/008-ligilo/plan.md"), "Nachlese 2026-10-13");
-    for (const item of ["F-1", "F-2", "M-3", "R-9", "R-10", "R-11", "R-1", "C8"]) {
+    // R-11 is a finding of Spec 009 (A11) and stands in that plan.
+    for (const item of ["F-1", "F-2", "M-3", "R-9", "R-10", "R-1", "C8"]) {
       expect(ligilo, item).toContain(`**${item}`);
     }
     const kampo = section(read("specs/009-kampo/plan.md"), "Nachlese 2026-10-13");

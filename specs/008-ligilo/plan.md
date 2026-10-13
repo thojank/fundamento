@@ -205,6 +205,20 @@ MCP 11/12, Figma 7/9, Vitrino Markenwechsel und Gebrauch grün; ein Blocker, beh
 - **R-1 (bestätigt):** „Mehr zum Datenschutz“ wird von `link-label-names-destination` beanstandet (Wort `mehr`). Die Wortliste trifft auch ein Label, das das Ziel nennt; Kandidat: `mehr`/`more` nur allein oder als Ein-Wort-Label beanstanden (Prüfart `not-words` → `not-only-words`).
 - **C8 Textnuance:** Der Vitrino-Satz „Label darf umbrechen“ gilt bei `with-text` nur inline; Satz je Wert ausgeben.
 
+## Nachlese 2026-10-13
+
+Nach #53, Briefing P0 Nachtschicht 13./14.10. Umgesetzt im Nachlese-PR (Basis `main` 72a11e3), jede Zeile mit rotem Test zuerst; was Regulo-Semantik berührt, nur geführt (Regel 0):
+
+- **F-1 Figma, umgesetzt:** Ein Set, das der Lauf anlegt, liegt rechts neben dem letzten vorhandenen Set (rechte Kante + `spacing.xlarge`, 24 px, als fester Wert im Plan `section.gap`); vorgefundene Sets behalten ihren Platz. Der Bericht nennt je Set `placement` (`x`, `y`, `after`, `action: created | moved | kept`). Rot zuerst (Commit `9869170`). Double-Annahmen zur Messung in `f10b-5` stehen im PR.
+- **F-2 Figma, umgesetzt:** Alle Sets liegen in einer Section „Fundamento“ (angelegt, wenn sie fehlt; Sets von der Seite werden hineinverschoben; Innenabstand `spacing.xlarge`). Das Plugin setzt und löscht an der Section nie einen Modus – ein Modus an der Section ist der Markenschalter der Bibliothek, die Sets stehen auf „Automatisch“ (F35). Bericht: `section: { found, created, moved }`.
+- **F-2 Gvidanto, umgesetzt:** Prompt-Regel 14: „Wie schalte ich die Marke in Figma um?“ → Modus der Sammlung `aspekto` an der Seite oder an einem Frame/einer Section, nie am einzelnen Set; ein Modus am Set gilt nur für das Set. Geprüft in `prompt.test.ts` und `s008-ligilo.test.ts` (rot `d351096`).
+- **M-3 Standardlabel je Ero, umgesetzt:** butono „Aktion“, ligilo „Ziel“, kampo „Beschriftung“, aus der a11y-Rolle (Celo-Wissen, Art. VIII); ein vorgefundenes Set bekommt das Wort beim nächsten Lauf. Entscheidung des Maintainers (F14) als Jugxo `jug_01M4VCG06S4MWFPVPNWMBN9EWF` festgehalten.
+- **R-9 `suggest_ero`, umgesetzt:** Props bleiben typisiert (`external: true` als Wahrheitswert); Vertrag `suggest_ero.output` nimmt string, number, boolean – wie `EroInstance.props`. Rot `d351096`.
+- **R-10 `brief`, umgesetzt:** `required.props` nennt nur Props, die die Skemo als Pflicht markiert (`SkemoProp.required`, kleinste Änderung: das Feld fehlte); der `ligilo` markiert `to`, sonst keiner. `label` ist der Ersatzname bei leerem Slot, keine Pflicht. Rot `d351096`.
+- **R-1 nur dokumentiert:** `link-label-names-destination` sagt in `scope`, dass `not-words` eine Näherung ist (trifft jedes Vorkommen); Kandidat `not-only-words` in der Vojmapo (Phase 6 Lint). Die Prüfart selbst ist Regulo-Semantik (Regel 0.3) und bleibt.
+- **C8 Textnuance, umgesetzt (Vitrino):** „Label darf umbrechen (inline), standalone nie.“ je Wert von `wrap`; rot `1382e26`.
+- **Offen bleiben:** B-2 externes Icon in Figma (Messung in `f10b-5`), B-4 `label-required` für den `ligilo` (Regulo-Semantik), B-5 Inline-Icon ohne Abstand (Sichtprüfung), `check_usage` bei `inline` + `size` (Regulo-Kandidat).
+
 ## Messungen
 
 Die Werte stehen in [`tasks.md`](tasks.md) → „Messungen“. Kurz: `get_ero ligilo brief:true` = 1 485 Bytes = **495** nach dem Maß von Spec 007 (Grenze 750 bleibt); Parität 2 Eroj × 4 Seiten ohne Differenz; `check:alirebleco` 66 Paare × 72 Kombinationen grün (Link auf Canvas min 6.12:1); Alirebleco der Eroj 8 Kombinationen je Ero in Chromium; `check:regularo` ohne `skemo-uzo-missing`.
