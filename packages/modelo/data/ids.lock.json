@@ -80,6 +80,10 @@
       "status": "active",
       "type": "ero"
     },
+    "ero_01M4S1ZQ3PW2DRK02VPJ6JE5NF": {
+      "status": "active",
+      "type": "ero"
+    },
     "jug_01M2VRT7KQ77W91MVXB4GXSRZ4": {
       "status": "active",
       "type": "jugxo"
@@ -337,6 +341,74 @@
       "type": "jugxo"
     },
     "jug_01M4RYCY61NK92JM6XYD00M012": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M4S1ZRK2HDPJYNT9Y4TEF2T6": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M4S1ZRK3DE9HVVHY5GEADV62": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M4S1ZRK3DE9HVVHY5GEADV63": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M4S1ZRK3DE9HVVHY5GEADV64": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M4S1ZRK3DE9HVVHY5GEADV65": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M4S1ZRK3DE9HVVHY5GEADV66": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M4S1ZRK3DE9HVVHY5GEADV67": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M4S1ZRK3DE9HVVHY5GEADV68": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M4S1ZRK3DE9HVVHY5GEADV69": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M4S1ZRK3DE9HVVHY5GEADV6A": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M4S1ZRK3DE9HVVHY5GEADV6B": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M4S1ZRK3DE9HVVHY5GEADV6C": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M4S1ZRK3DE9HVVHY5GEADV6D": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M4S1ZRK3DE9HVVHY5GEADV6E": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M4S1ZRK3DE9HVVHY5GEADV6F": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M4S1ZRK3DE9HVVHY5GEADV6G": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M4S2R85WRAC5SV7CARH8RE7S": {
       "status": "active",
       "type": "jugxo"
     },
@@ -604,6 +676,18 @@
       "status": "active",
       "type": "kontrastParo"
     },
+    "kpa_01M4S1ZRZTFKTX9KR11BSRB35G": {
+      "status": "active",
+      "type": "kontrastParo"
+    },
+    "kpa_01M4S1ZRZVK6R7FB0VNGR3DQDV": {
+      "status": "active",
+      "type": "kontrastParo"
+    },
+    "kpa_01M4S1ZRZVK6R7FB0VNGR3DQDW": {
+      "status": "active",
+      "type": "kontrastParo"
+    },
     "man_01M37TQHM886J48FX84PZZTY4X": {
       "status": "active",
       "type": "manko"
@@ -784,6 +868,38 @@
       "status": "active",
       "type": "regulo"
     },
+    "reg_01M4S1ZR7F1KE1AV1C7X5W8GD5": {
+      "status": "active",
+      "type": "regulo"
+    },
+    "reg_01M4S1ZR7GEPZSTB9ES3REK3TX": {
+      "status": "active",
+      "type": "regulo"
+    },
+    "reg_01M4S1ZR7GEPZSTB9ES3REK3TY": {
+      "status": "active",
+      "type": "regulo"
+    },
+    "reg_01M4S1ZR7GEPZSTB9ES3REK3TZ": {
+      "status": "active",
+      "type": "regulo"
+    },
+    "reg_01M4S1ZR7GEPZSTB9ES3REK3V0": {
+      "status": "active",
+      "type": "regulo"
+    },
+    "reg_01M4S1ZR7GEPZSTB9ES3REK3V1": {
+      "status": "active",
+      "type": "regulo"
+    },
+    "reg_01M4S1ZR7GEPZSTB9ES3REK3V2": {
+      "status": "active",
+      "type": "regulo"
+    },
+    "reg_01M4S1ZR7GEPZSTB9ES3REK3V3": {
+      "status": "active",
+      "type": "regulo"
+    },
     "set_01M2VEEDW32MC4ZQPRN0GC9JRR": {
       "status": "active",
       "type": "tokenSet"
@@ -825,6 +941,10 @@
       "type": "skemo"
     },
     "ske_01M4RYCXE78XSCQ4Q4V8WA4FZH": {
+      "status": "active",
+      "type": "skemo"
+    },
+    "ske_01M4S1ZQFKVZX7X0A8W94SRGCE": {
       "status": "active",
       "type": "skemo"
     },
@@ -2265,6 +2385,10 @@
       "type": "uzo"
     },
     "uzo_01M4RYCXT5HJ3776EF81MZABY4": {
+      "status": "active",
+      "type": "uzo"
+    },
+    "uzo_01M4S1ZQVJ03HSQDA2SFEKA3DC": {
       "status": "active",
       "type": "uzo"
     }

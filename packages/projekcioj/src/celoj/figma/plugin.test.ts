@@ -236,6 +236,7 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
     expect(openButono.map((manko) => manko.part)).toEqual(["boundary", "slots", "content"]);
     expect(result.mankoj.open.map((manko) => manko.set)).toEqual([
       ...["boundary", "slots", "content"].map(() => "butono"),
+      ...["boundary", "slots", "content"].map(() => "kampo"),
       ...["boundary", "slots", "content"].map(() => "ligilo"),
     ]);
     for (const manko of openButono) {
@@ -261,12 +262,9 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
       result.mankoj.closed.filter((manko) => manko.set === "butono").map((manko) => manko.part),
     ).toEqual(["boundary", "slots", "content"]);
     expect(result.mankoj.closed.map((manko) => manko.set)).toEqual([
-      "butono",
-      "butono",
-      "butono",
-      "ligilo",
-      "ligilo",
-      "ligilo",
+      ...["butono", "butono", "butono"],
+      ...["kampo", "kampo", "kampo"],
+      ...["ligilo", "ligilo", "ligilo"],
     ]);
   });
 });
@@ -1348,6 +1346,7 @@ describe("every property the plugin owns is from the plan or neutral", () => {
     // The set lies on the page, in no flow: its position among siblings is not the plugin's.
     const onPage = [
       "Document/Page 1/butono: layoutPositioning",
+      "Document/Page 1/kampo: layoutPositioning",
       "Document/Page 1/ligilo: layoutPositioning",
     ];
     expect(double.untouchedDefaults(OWNED).filter((entry) => !onPage.includes(entry))).toEqual([]);
@@ -2423,6 +2422,8 @@ describe("every bound paint shows the plan's colour after the first and the seco
       // Spec 008: two sets; the ligilo has placement × size × state = 30 variants.
       components: [
         { set: "butono", created: 72, updated: 0 },
+        // Spec 009: the kampo has size × state = 18 variants.
+        { set: "kampo", created: 18, updated: 0 },
         { set: "ligilo", created: 30, updated: 0 },
       ],
     });
@@ -3117,5 +3118,57 @@ describe("a variable the file holds in another collection stops the run before i
       empty?: string[];
     };
     expect(headline.empty).toEqual(["fundamento"]);
+  });
+});
+
+// Abnahme Spec 009 (2026-10-13), F-4: the control of the kampo was a narrow tall strip — without a
+// text node with content the HUG layout shrinks to its paddings, help and error are invisible. The
+// field shows the placeholder as example text in the control, help and error with a default text.
+describe("the field of the kampo has room and shows its texts (F-4)", () => {
+  type Held = Record<string, Record<string, unknown>>;
+  const fieldReport = async () => {
+    const double = modelDouble();
+    const report = (await new Function(
+      "figma",
+      `${repoFiles["figma/plugin/code.js"] ?? ""}\nreturn applyPlan();`,
+    )(double.figma)) as {
+      components: { set: string; layout: { held: { rest: Held } } }[];
+    };
+    const kampo = report.components.find((component) => component.set === "kampo");
+    return { double, rest: kampo?.layout.held.rest ?? {} };
+  };
+
+  it("the control is wider than high and as high as size.control.medium in rest", async () => {
+    const { rest } = await fieldReport();
+    expect(rest.control).toBeDefined();
+    const width = Number(rest.control?.width);
+    const height = Number(rest.control?.height);
+    expect(height, "size.control.medium of the first variant (size=small: 32)").toBe(32);
+    expect(width, `${width} × ${height}`).toBeGreaterThan(height);
+  });
+
+  it("the text in the control, the help and the error carry a default text and are visible", async () => {
+    const { double } = await fieldReport();
+    const set = double.root.children[0]?.children.find((child) => child.name === "kampo");
+    const variant = set?.children[0];
+    const field = variant?.children.find((child) => child.name === "field");
+    type Node = { name: string; children: Node[]; properties: Record<string, unknown> };
+    const find = (node: Node | undefined, name: string): Node | undefined => {
+      if (node === undefined) return undefined;
+      if (node.name === name) return node;
+      for (const child of node.children) {
+        const found = find(child, name);
+        if (found !== undefined) return found;
+      }
+      return undefined;
+    };
+    const texts = Object.fromEntries(
+      ["text", "help", "error"].map((name) => [
+        name,
+        String(find(field as Node | undefined, name)?.properties.characters ?? ""),
+      ]),
+    );
+    expect(texts).toEqual({ text: "Beispiel", help: "Hinweis", error: "Fehler" });
+    for (const [name, text] of Object.entries(texts)) expect(text, name).not.toBe("");
   });
 });

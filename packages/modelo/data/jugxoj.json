@@ -1126,6 +1126,417 @@
       "kialo": "Figma zeichnet die Unterstreichung des ligilo als Textdekoration des Beschriftungsknotens, je Variante an oder aus, wie die Skemo es bindet. Dicke und Farbe der Linie bindet Figma an keine Variable: die Linie hat die Dicke, die Figma ihr gibt, und die Farbe des Textes. Der Teil underline (width an border.width.default, color gleich label.color) bleibt im Modelo; die Figma-Seite von check:parity meldet ihn als „not drawn (dieser Jugxo)“ – eine benannte Differenz, keine stille Gleichheit. Bindet Figma eines Tages textDecorationThickness an eine Variable, entfällt dieser Eintrag.",
       "date": "2026-10-12",
       "context": "Spec 008 T017, plan D-11 (Figma zeigt das Ero, wie bei den Icons jug_01M31TV1V4S3RNBPWSRB2CGEDK). Von P0 in der Nachtschicht angelegt; Befund B-1 im Plan: zur Bestätigung durch den Maintainer."
+    },
+    {
+      "id": "jug_01M4S1ZRK2HDPJYNT9Y4TEF2T6",
+      "ref": {
+        "ero": "ero_01M4S1ZQ3PW2DRK02VPJ6JE5NF"
+      },
+      "decision": "approved",
+      "kialo": "The label names the datum as a noun; the field is found by that name in the form.",
+      "date": "2026-10-13",
+      "context": "Example CORRECT for the Regulo named in ekzemplo.regulo (Spec 009 T004, A3); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4S1ZR7GEPZSTB9ES3REK3V1",
+        "instances": [
+          {
+            "ero": "kampo",
+            "props": {
+              "kind": "email"
+            },
+            "label": "E-Mail",
+            "lingvo": "de"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4S1ZRK3DE9HVVHY5GEADV62",
+      "ref": {
+        "ero": "ero_01M4S1ZQ3PW2DRK02VPJ6JE5NF"
+      },
+      "decision": "approved",
+      "kialo": "The label names the datum; it reads as the name of the field.",
+      "date": "2026-10-13",
+      "context": "Example CORRECT for the Regulo named in ekzemplo.regulo (Spec 009 T004, A3); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4S1ZR7GEPZSTB9ES3REK3V1",
+        "instances": [
+          {
+            "ero": "kampo",
+            "props": {
+              "kind": "email"
+            },
+            "label": "E-mail address",
+            "lingvo": "en"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4S1ZRK3DE9HVVHY5GEADV63",
+      "ref": {
+        "ero": "ero_01M4S1ZQ3PW2DRK02VPJ6JE5NF"
+      },
+      "decision": "rejected",
+      "kialo": "The label is an instruction, not a name; in a list of fields it does not say what the field holds.",
+      "date": "2026-10-13",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 009 T004, A3); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4S1ZR7GEPZSTB9ES3REK3V1",
+        "instances": [
+          {
+            "ero": "kampo",
+            "props": {
+              "kind": "email"
+            },
+            "label": "E-Mail eingeben",
+            "lingvo": "de"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4S1ZRK3DE9HVVHY5GEADV64",
+      "ref": {
+        "ero": "ero_01M4S1ZQ3PW2DRK02VPJ6JE5NF"
+      },
+      "decision": "rejected",
+      "kialo": "An instruction as label reads wrong once the field is filled.",
+      "date": "2026-10-13",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 009 T004, A3); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4S1ZR7GEPZSTB9ES3REK3V1",
+        "instances": [
+          {
+            "ero": "kampo",
+            "props": {
+              "kind": "email"
+            },
+            "label": "Enter e-mail",
+            "lingvo": "en"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4S1ZRK3DE9HVVHY5GEADV65",
+      "ref": {
+        "ero": "ero_01M4S1ZQ3PW2DRK02VPJ6JE5NF"
+      },
+      "decision": "approved",
+      "kialo": "The error says what to do: a verb and the shape of a right value.",
+      "date": "2026-10-13",
+      "context": "Example CORRECT for the Regulo named in ekzemplo.regulo (Spec 009 T004, A3); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4S1ZR7GEPZSTB9ES3REK3TY",
+        "instances": [
+          {
+            "ero": "kampo",
+            "props": {
+              "kind": "email",
+              "invalid": true
+            },
+            "label": "E-Mail",
+            "texts": {
+              "error": "Gib eine E-Mail-Adresse mit @ ein"
+            },
+            "lingvo": "de"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4S1ZRK3DE9HVVHY5GEADV66",
+      "ref": {
+        "ero": "ero_01M4S1ZQ3PW2DRK02VPJ6JE5NF"
+      },
+      "decision": "approved",
+      "kialo": "The error names the way out, not only the fault.",
+      "date": "2026-10-13",
+      "context": "Example CORRECT for the Regulo named in ekzemplo.regulo (Spec 009 T004, A3); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4S1ZR7GEPZSTB9ES3REK3TY",
+        "instances": [
+          {
+            "ero": "kampo",
+            "props": {
+              "kind": "email",
+              "invalid": true
+            },
+            "label": "E-mail",
+            "texts": {
+              "error": "Enter an e-mail address with an @"
+            },
+            "lingvo": "en"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4S1ZRK3DE9HVVHY5GEADV67",
+      "ref": {
+        "ero": "ero_01M4S1ZQ3PW2DRK02VPJ6JE5NF"
+      },
+      "decision": "rejected",
+      "kialo": "One word says that something is wrong and nothing about what to do; the person guesses.",
+      "date": "2026-10-13",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 009 T004, A3); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4S1ZR7GEPZSTB9ES3REK3TY",
+        "instances": [
+          {
+            "ero": "kampo",
+            "props": {
+              "kind": "email",
+              "invalid": true
+            },
+            "label": "E-Mail",
+            "texts": {
+              "error": "Ungültig"
+            },
+            "lingvo": "de"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4S1ZRK3DE9HVVHY5GEADV68",
+      "ref": {
+        "ero": "ero_01M4S1ZQ3PW2DRK02VPJ6JE5NF"
+      },
+      "decision": "rejected",
+      "kialo": "The fault without the way out leaves the person guessing.",
+      "date": "2026-10-13",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 009 T004, A3); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4S1ZR7GEPZSTB9ES3REK3TY",
+        "instances": [
+          {
+            "ero": "kampo",
+            "props": {
+              "kind": "email",
+              "invalid": true
+            },
+            "label": "E-mail",
+            "texts": {
+              "error": "Invalid"
+            },
+            "lingvo": "en"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4S1ZRK3DE9HVVHY5GEADV69",
+      "ref": {
+        "ero": "ero_01M4S1ZQ3PW2DRK02VPJ6JE5NF"
+      },
+      "decision": "approved",
+      "kialo": "One sentence next to the field is read.",
+      "date": "2026-10-13",
+      "context": "Example CORRECT for the Regulo named in ekzemplo.regulo (Spec 009 T004, A3); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4S1ZR7GEPZSTB9ES3REK3V2",
+        "instances": [
+          {
+            "ero": "kampo",
+            "props": {
+              "kind": "email"
+            },
+            "label": "E-Mail",
+            "texts": {
+              "help": "Wir schreiben nur zur Bestellung."
+            },
+            "lingvo": "de"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4S1ZRK3DE9HVVHY5GEADV6A",
+      "ref": {
+        "ero": "ero_01M4S1ZQ3PW2DRK02VPJ6JE5NF"
+      },
+      "decision": "approved",
+      "kialo": "One sentence is read; it says why the datum is asked for.",
+      "date": "2026-10-13",
+      "context": "Example CORRECT for the Regulo named in ekzemplo.regulo (Spec 009 T004, A3); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4S1ZR7GEPZSTB9ES3REK3V2",
+        "instances": [
+          {
+            "ero": "kampo",
+            "props": {
+              "kind": "email"
+            },
+            "label": "E-mail",
+            "texts": {
+              "help": "We only write about your order."
+            },
+            "lingvo": "en"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4S1ZRK3DE9HVVHY5GEADV6B",
+      "ref": {
+        "ero": "ero_01M4S1ZQ3PW2DRK02VPJ6JE5NF"
+      },
+      "decision": "rejected",
+      "kialo": "Three sentences are a paragraph; next to a field they are skipped.",
+      "date": "2026-10-13",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 009 T004, A3); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4S1ZR7GEPZSTB9ES3REK3V2",
+        "instances": [
+          {
+            "ero": "kampo",
+            "props": {
+              "kind": "email"
+            },
+            "label": "E-Mail",
+            "texts": {
+              "help": "Wir schreiben nur zur Bestellung. Du kannst dich jederzeit abmelden. Deine Adresse geben wir nicht weiter."
+            },
+            "lingvo": "de"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4S1ZRK3DE9HVVHY5GEADV6C",
+      "ref": {
+        "ero": "ero_01M4S1ZQ3PW2DRK02VPJ6JE5NF"
+      },
+      "decision": "rejected",
+      "kialo": "A paragraph of help is skipped; the one sentence that matters is lost in it.",
+      "date": "2026-10-13",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 009 T004, A3); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4S1ZR7GEPZSTB9ES3REK3V2",
+        "instances": [
+          {
+            "ero": "kampo",
+            "props": {
+              "kind": "email"
+            },
+            "label": "E-mail",
+            "texts": {
+              "help": "We only write about your order. You can unsubscribe at any time. We never pass your address on."
+            },
+            "lingvo": "en"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4S1ZRK3DE9HVVHY5GEADV6D",
+      "ref": {
+        "ero": "ero_01M4S1ZQ3PW2DRK02VPJ6JE5NF"
+      },
+      "decision": "approved",
+      "kialo": "The placeholder shows the shape of a value; the label stays the name.",
+      "date": "2026-10-13",
+      "context": "Example CORRECT for the Regulo named in ekzemplo.regulo (Spec 009 T004, A3); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4S1ZR7GEPZSTB9ES3REK3V3",
+        "instances": [
+          {
+            "ero": "kampo",
+            "props": {
+              "kind": "email",
+              "placeholder": "max@beispiel.example"
+            },
+            "label": "E-Mail",
+            "lingvo": "de"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4S1ZRK3DE9HVVHY5GEADV6E",
+      "ref": {
+        "ero": "ero_01M4S1ZQ3PW2DRK02VPJ6JE5NF"
+      },
+      "decision": "approved",
+      "kialo": "An example of a value, not an instruction.",
+      "date": "2026-10-13",
+      "context": "Example CORRECT for the Regulo named in ekzemplo.regulo (Spec 009 T004, A3); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4S1ZR7GEPZSTB9ES3REK3V3",
+        "instances": [
+          {
+            "ero": "kampo",
+            "props": {
+              "kind": "email",
+              "placeholder": "jane@example.org"
+            },
+            "label": "E-mail",
+            "lingvo": "en"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4S1ZRK3DE9HVVHY5GEADV6F",
+      "ref": {
+        "ero": "ero_01M4S1ZQ3PW2DRK02VPJ6JE5NF"
+      },
+      "decision": "rejected",
+      "kialo": "An instruction in the field disappears while typing and is read as a value by some.",
+      "date": "2026-10-13",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 009 T004, A3); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4S1ZR7GEPZSTB9ES3REK3V3",
+        "instances": [
+          {
+            "ero": "kampo",
+            "props": {
+              "kind": "email",
+              "placeholder": "Hier E-Mail eingeben"
+            },
+            "label": "E-Mail",
+            "lingvo": "de"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4S1ZRK3DE9HVVHY5GEADV6G",
+      "ref": {
+        "ero": "ero_01M4S1ZQ3PW2DRK02VPJ6JE5NF"
+      },
+      "decision": "rejected",
+      "kialo": "The placeholder instructs instead of showing a value.",
+      "date": "2026-10-13",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 009 T004, A3); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4S1ZR7GEPZSTB9ES3REK3V3",
+        "instances": [
+          {
+            "ero": "kampo",
+            "props": {
+              "kind": "email",
+              "placeholder": "Enter your e-mail here"
+            },
+            "label": "E-mail",
+            "lingvo": "en"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4S2R85WRAC5SV7CARH8RE7S",
+      "ref": {
+        "artikolo": "VIII",
+        "celo": "figma"
+      },
+      "decision": "approved",
+      "kialo": "Figma zeichnet beim kampo die Farbe des getippten Textes und die Markierung des Pflichtfelds nicht: Das Feld im Komponentenset ist leer und zeigt den Platzhalter (Teil placeholder, gebunden), also hat der getippte Text (Teil text, color.text.default) keinen Knoten; das Zeichen der Markierung stellt die Projekcio (Web: ein kleiner Vektor), nicht das Modelo. Die Teile text.color und required-mark.color bleiben im Modelo; die Figma-Seite von check:parity meldet sie als „not drawn (dieser Jugxo)“ – eine benannte Differenz. Zeichnet das Plugin eines Tages ein gefülltes Feld und den Stern, entfällt dieser Eintrag.",
+      "date": "2026-10-13",
+      "context": "Spec 009 T010, plan D-09 (Befund B-2); nach der Abnahme-Messung F-4 (2026-10-13) vom Platzhalter auf den getippten Text gewechselt: der Platzhalter ist der sichtbare Text des leeren Feldes. Von P0 angelegt; zur Bestätigung durch den Maintainer."
     }
   ]
 }

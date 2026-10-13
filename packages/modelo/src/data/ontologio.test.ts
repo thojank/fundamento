@@ -147,8 +147,8 @@ describe("the scheme eroj (Spec 008 T009)", () => {
   const eroj = concepts.filter((concept) => concept.inScheme === "eroj");
 
   it("holds one concept per Ero of the Modelo, under #Ero, related to each other", () => {
-    expect(eroNames).toEqual(["butono", "ligilo"]);
-    expect(eroj.map((concept) => concept.term).sort()).toEqual(["Butono", "Ligilo"]);
+    expect(eroNames).toEqual(["butono", "kampo", "ligilo"]);
+    expect(eroj.map((concept) => concept.term).sort()).toEqual(["Butono", "Kampo", "Ligilo"]);
     for (const concept of eroj) {
       expect(concept.broader).toEqual(["#Ero"]);
       expect(concept.notation).toBeUndefined();
@@ -159,7 +159,11 @@ describe("the scheme eroj (Spec 008 T009)", () => {
         target: string;
       }[];
     expect(relations("Ligilo")).toEqual([{ predicate: "references", target: "#Butono" }]);
-    expect(relations("Butono")).toEqual([{ predicate: "references", target: "#Ligilo" }]);
+    expect(relations("Butono")).toEqual([
+      { predicate: "references", target: "#Ligilo" },
+      { predicate: "references", target: "#Kampo" },
+    ]);
+    expect(relations("Kampo")).toEqual([{ predicate: "references", target: "#Butono" }]);
   });
 
   it("reports an Ero without a concept and a concept without an Ero", () => {
@@ -175,8 +179,8 @@ describe("the scheme eroj (Spec 008 T009)", () => {
         mutate((copy) => {
           copy.concepts.push({
             ...(copy.concepts.find((concept) => concept.term === "Ligilo") as Concept),
-            term: "Kampo",
-            uri: "https://fundamento.ciferecigo.com/ontologio#Kampo",
+            term: "Tekstareo",
+            uri: "https://fundamento.ciferecigo.com/ontologio#Tekstareo",
             relations: [],
           });
         }),

@@ -2283,6 +2283,15 @@
           },
           "uniqueItems": true
         },
+        "description": {
+          "description": "Where the accessible description comes from, in order (Spec 009 A1, plan D-02): slots or props, like name. The Web Celo renders it as aria-describedby.",
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "pattern": "^(slot|prop):[a-z0-9]+(-[a-z0-9]+)*$"
+          }
+        },
         "texts": {
           "description": "What assistive technology hears in addition when a boolean prop is true (Spec 008 A1, plan D-02): per prop a text per language (ISO 639-1), never shown. The key must be a boolean prop of the Skemo (skemo-a11y-invalid); de and en are required.",
           "type": "object",
@@ -2317,14 +2326,19 @@
       "type": "object",
       "properties": {
         "when": {
+          "description": "Prop values the constraint applies to; a key slot:<name> with filled or empty reads a slot (Spec 009, plan D-04).",
           "type": "object",
           "minProperties": 1,
-          "propertyNames": {
-            "$ref": "#/$defs/Name"
+          "patternProperties": {
+            "^slot:[a-z0-9]+(-[a-z0-9]+)*$": {
+              "type": "string",
+              "enum": ["filled", "empty"]
+            },
+            "^[a-z0-9]+(-[a-z0-9]+)*$": {
+              "$ref": "#/$defs/Name"
+            }
           },
-          "additionalProperties": {
-            "$ref": "#/$defs/Name"
-          }
+          "additionalProperties": false
         },
         "allowed": {
           "type": "object",
@@ -2761,6 +2775,11 @@
         "fixed": {
           "type": "boolean"
         },
+        "of": {
+          "description": "The text the rule judges (Spec 009, plan D-06): a slot or a prop of the Skemo; default slot:label.",
+          "type": "string",
+          "pattern": "^(slot|prop):[a-z0-9]+(-[a-z0-9]+)*$"
+        },
         "severity": {
           "type": "string",
           "enum": ["error", "warning"]
@@ -2790,6 +2809,36 @@
                 }
               },
               "required": ["kind"],
+              "additionalProperties": false
+            },
+            {
+              "description": "The text has at least count words (Spec 009, plan D-06): an error that says what to do has a verb and an object.",
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "const": "min-words"
+                },
+                "count": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              },
+              "required": ["kind", "count"],
+              "additionalProperties": false
+            },
+            {
+              "description": "The text has at most count sentences (Spec 009, plan D-06): help that is a paragraph is skipped.",
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "const": "max-sentences"
+                },
+                "count": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              },
+              "required": ["kind", "count"],
               "additionalProperties": false
             },
             {
@@ -2891,6 +2940,16 @@
           "description": "The language of the instance's texts (ISO 639-1), so that check_usage answers with an example in that language (Spec 008, plan D-06). Without it the language is read from the label.",
           "type": "string",
           "pattern": "^[a-z]{2}$"
+        },
+        "texts": {
+          "description": "The texts of the other text slots of the instance, by slot name (Spec 009, plan D-06): help, error. The label stays label.",
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/Name"
+          },
+          "additionalProperties": {
+            "type": "string"
+          }
         },
         "aspekto": {
           "description": "The Aspekto the instance is shown in; its overrides of adjustable text rules apply (Spec 007, A10).",

@@ -20,7 +20,7 @@
 import { type FigmaPlan, TEXT_CASE_VARIES } from "./figma.js";
 
 /** The nodes of one variant the plugin draws, outside in (F11). */
-type PartNode = "focus-ring" | "focus-gap" | "control" | "label";
+type PartNode = "focus-ring" | "focus-gap" | "control" | "label" | "text" | "help" | "error";
 
 interface Binding {
   node: PartNode;
@@ -77,6 +77,46 @@ const BINDINGS: Readonly<Record<string, readonly Binding[]>> = {
   ],
   "focus-ring.offset": [{ node: "focus-gap", fields: [...PADDINGS, "strokeWeight"] }],
   "focus-ring.color": [{ node: "focus-gap", fields: ["strokes"], paint: true, focusOnly: true }],
+  // A field (Spec 009, D-09): the text in the control, the help and the error are text nodes of
+  // their own, each with its typography bound like the label's. The control of a field in the set
+  // is empty and shows the placeholder (F-4), so the node's fill is the placeholder's colour; the
+  // colour of the typed text has no node (Jugxo B-2).
+  "placeholder.color": [{ node: "text", fields: ["fills"], paint: true }],
+  "text.typography": [
+    { node: "text", fields: ["fontSize"], suffix: "/font-size" },
+    { node: "text", fields: ["fontFamily"], suffix: "/font-family", font: true },
+    { node: "text", fields: ["fontStyle"], suffix: "/font-style", font: true },
+    { node: "text", fields: ["letterSpacing"], suffix: "/letter-spacing" },
+  ],
+  "help.color": [{ node: "help", fields: ["fills"], paint: true }],
+  "help.typography": [
+    { node: "help", fields: ["fontSize"], suffix: "/font-size" },
+    { node: "help", fields: ["fontFamily"], suffix: "/font-family", font: true },
+    { node: "help", fields: ["fontStyle"], suffix: "/font-style", font: true },
+    { node: "help", fields: ["letterSpacing"], suffix: "/letter-spacing" },
+  ],
+  "error.color": [{ node: "error", fields: ["fills"], paint: true }],
+  "error.typography": [
+    { node: "error", fields: ["fontSize"], suffix: "/font-size" },
+    { node: "error", fields: ["fontFamily"], suffix: "/font-family", font: true },
+    { node: "error", fields: ["fontStyle"], suffix: "/font-style", font: true },
+    { node: "error", fields: ["letterSpacing"], suffix: "/letter-spacing" },
+  ],
+};
+
+/** A column of parts: the field of a textbox (Spec 009, D-09): label, control, help, error. */
+const FIELD_LAYOUT = {
+  layoutMode: "VERTICAL",
+  primaryAxisAlignItems: "MIN",
+  counterAxisAlignItems: "MIN",
+  layoutSizingHorizontal: "HUG",
+  layoutSizingVertical: "HUG",
+  strokesIncludedInLayout: false,
+  itemSpacing: 0,
+  paddingLeft: 0,
+  paddingRight: 0,
+  paddingTop: 0,
+  paddingBottom: 0,
 };
 
 /**
@@ -188,6 +228,7 @@ const NAMESPACE = ${JSON.stringify(PLUGIN_NAMESPACE)};
 const BINDINGS = ${JSON.stringify(BINDINGS)};
 const CONTROL_LAYOUT = ${JSON.stringify(CONTROL_LAYOUT)};
 const HUG_LAYOUT = ${JSON.stringify(HUG_LAYOUT)};
+const FIELD_LAYOUT = ${JSON.stringify(FIELD_LAYOUT)};
 const IN_FLOW = ${JSON.stringify(IN_FLOW)};
 const TEXT_SIZING = ${JSON.stringify(TEXT_SIZING)};
 const NEUTRAL = ${JSON.stringify(NEUTRAL)};
@@ -973,7 +1014,12 @@ async function applyComponents(variables, warnings) {
       // The structure (F11): variant → focus-ring → focus-gap → control → label, each found by
       // its part mark and created when missing. A control an older plugin left directly under
       // the variant is moved in, never duplicated.
-      const ring = part(node, "focus-ring", () => figma.createFrame());
+      // A field (Spec 009, D-09) is a column: label, then ring → gap → control with the typed text,
+      // then help and error; a control keeps the label inside.
+      const isField = component.structure === "field";
+      const field = isField ? part(node, "field", () => figma.createFrame()) : undefined;
+      const labelParent = isField ? field : undefined;
+      const ring = part(field || node, "focus-ring", () => figma.createFrame());
       const gap = part(ring, "focus-gap", () => figma.createFrame());
       const control =
         ours(gap, "part", "control") ??
@@ -981,11 +1027,16 @@ async function applyComponents(variables, warnings) {
         part(gap, "control", () => figma.createFrame());
       if (control.parent !== gap) gap.appendChild(control);
       write(control, "name", "control");
-      const label = part(control, "label", () => figma.createText());
+      const label = part(labelParent || control, "label", () => figma.createText());
+      if (isField && field.children.indexOf(label) !== 0) field.insertChild(0, label);
+      const textNode = isField ? part(control, "text", () => figma.createText()) : undefined;
+      const help = isField ? part(field, "help", () => figma.createText()) : undefined;
+      const error = isField ? part(field, "error", () => figma.createText()) : undefined;
+      const texts = [label, textNode, help, error].filter((each) => each !== undefined);
       // Erst die Schrift, die der Text jetzt trägt, dann jedes Schreiben (F-A): Figma lehnt
       // textCase auf einem Text ab, dessen aktuelle Schrift nicht geladen ist — ein neuer Text trägt
       // Inter Regular, nicht die Schrift des Plans.
-      await loadCurrentFont(label);
+      for (const each of texts) await loadCurrentFont(each);
       // Die Schreibweise steht im Plan als ein Wert für alle Modi, weil textCase kein bindbares
       // Feld ist (F31). Wo die Modi sich unterscheiden, nennt der Plan den Befund statt eines
       // Werts — dann schreibt der Lauf nichts und sagt, was er nicht konnte.
@@ -1002,7 +1053,16 @@ async function applyComponents(variables, warnings) {
         write(label, "textCase", variant.textCase);
       }
       if (variant.font !== undefined) {
-        write(label, "fontName", fonts.get(variant.font.family + " " + variant.font.style));
+        for (const each of texts) {
+          write(each, "fontName", fonts.get(variant.font.family + " " + variant.font.style));
+        }
+      }
+      // The texts of a field (F-4): a default per node, so the frames have content to hug and
+      // help and error are visible; the label gets its text with its property below.
+      for (const [name, each] of [["text", textNode], ["help", help], ["error", error]]) {
+        if (each === undefined) continue;
+        const text = (component.texts || {})[name];
+        if (typeof text === "string") write(each, "characters", text);
       }
       // Die Unterstreichung eines Links (Spec 008, D-11): je Variante an oder aus, geschrieben wie
       // textCase – Figma bindet Dicke und Farbe der Linie an keine Variable (Jugxo B-1).
@@ -1012,20 +1072,21 @@ async function applyComponents(variables, warnings) {
       labels.push(label);
       // Only values from the plan (F13): every owned property neutral first — Figma's white fill,
       // its clipping and its line would otherwise cover what the plan draws.
-      for (const frame of [node, ring, gap, control]) own(frame, NEUTRAL);
-      own(label, NEUTRAL_TEXT);
+      for (const frame of [node, ring, gap, control].concat(field ? [field] : [])) own(frame, NEUTRAL);
+      for (const each of texts) own(each, NEUTRAL_TEXT);
       // Layout before any measure is bound: padding, gap and minimum sizes only take effect on
       // an auto-layout frame (F11). The variant, ring and gap wrap their content.
       for (const frame of [node, ring, gap]) own(frame, HUG_LAYOUT);
+      if (field) own(field, FIELD_LAYOUT);
       own(control, CONTROL_LAYOUT);
       // The variant lies in the grid's flow, its parts in the variant's (F14).
-      for (const child of [node, ring, gap, control, label]) own(child, IN_FLOW);
-      own(label, TEXT_SIZING);
-      const measures = bind(
-        { "focus-ring": ring, "focus-gap": gap, control, label },
-        variant,
-        variables,
-      );
+      for (const child of [node, ring, gap, control].concat(field ? [field] : []).concat(texts)) own(child, IN_FLOW);
+      for (const each of texts) own(each, TEXT_SIZING);
+      const nodes = { "focus-ring": ring, "focus-gap": gap, control, label };
+      if (textNode) nodes.text = textNode;
+      if (help) nodes.help = help;
+      if (error) nodes.error = error;
+      const measures = bind(nodes, variant, variables);
       // Der Radius des Rings und seines Abstands wird gebunden, nicht eingetragen (F32): als Zahl
       // stand er in jedem Modus gleich und umschloss in einer Marke mit Radius 0 einen eckigen
       // Knopf rund. Er geht denselben Weg wie die übrigen Maße, also nach dem Layout.
@@ -1038,7 +1099,7 @@ async function applyComponents(variables, warnings) {
       }
       // Everything gathered is written once, layout before the parts inside it; the measures
       // are bound after that, when every frame has its layout.
-      for (const each of [node, ring, gap, control, label]) flush(each);
+      for (const each of [node, ring, gap, control].concat(field ? [field] : []).concat(texts)) flush(each);
       for (const { node: target, field, variable, font } of measures) {
         if (boundId(target, field) === variable.id) continue;
         if (font !== true) {
@@ -1433,24 +1494,40 @@ function measureLayout(set, component) {
     };
     return { fills: list("fills"), strokes: list("strokes"), modes: modesOfNode(node) };
   };
+  // The parts of a variant by name (F-4): a control is variant → ring → gap → control → label; a
+  // field puts a frame in between and holds the label, help and error beside the ring, the text
+  // inside the control.
+  const partNodes = (node) => {
+    const found = {};
+    const field = ours(node, "part", "field");
+    if (field !== undefined) found.field = field;
+    const base = field || node;
+    const ring = ours(base, "part", "focus-ring");
+    if (ring !== undefined) found["focus-ring"] = ring;
+    const gap = ring === undefined ? undefined : ours(ring, "part", "focus-gap");
+    if (gap !== undefined) found["focus-gap"] = gap;
+    const control = gap === undefined ? undefined : ours(gap, "part", "control");
+    if (control !== undefined) found.control = control;
+    const label = control === undefined ? undefined : ours(field || control, "part", "label");
+    if (label !== undefined) found.label = label;
+    if (field !== undefined) {
+      for (const name of ["text", "help", "error"]) {
+        const each = ours(name === "text" ? control : field, "part", name);
+        if (each !== undefined) found[name] = each;
+      }
+    }
+    return found;
+  };
   const paintedParts = (node) => {
     if (node === undefined) return {};
     const out = { variant: paintsOf(node) };
-    let current = node;
-    for (const name of ["focus-ring", "focus-gap", "control", "label"]) {
-      current = current === undefined ? undefined : ours(current, "part", name);
-      if (current !== undefined) out[name] = paintsOf(current);
-    }
+    for (const [name, each] of Object.entries(partNodes(node))) out[name] = paintsOf(each);
     return out;
   };
   const partsOf = (node) => {
     if (node === undefined) return {};
     const out = { variant: held(node, HELD_AT_PART) };
-    let current = node;
-    for (const name of ["focus-ring", "focus-gap", "control", "label"]) {
-      current = current === undefined ? undefined : ours(current, "part", name);
-      if (current !== undefined) out[name] = held(current, HELD_AT_PART);
-    }
+    for (const [name, each] of Object.entries(partNodes(node))) out[name] = held(each, HELD_AT_PART);
     return out;
   };
   // The set against the extent of its children (F20), raw: measured in Figma, a set of 518 × 688
@@ -1738,20 +1815,30 @@ function reportParts(result) {
         missing: report.missing.length,
         extra: report.extra.length,
         duplicates: report.duplicates.length,
-        nodes: report.nodes,
         lost: report.lost.length,
-        before: report.before,
-        after: report.after,
-        left: report.left,
         diagnosis: report.diagnosis,
         modes: report.modes,
-        fonts: report.fonts,
-        uzo: report.uzo,
       })),
       mankoj: result.mankoj,
     }),
   ];
   for (const report of result.components) {
+    // What the headline leaves out of a set (Spec 009: three sets no longer fit one line of
+    // 4 000): how it was found and left, its fonts and its Uzo, one part per set.
+    lines.push(
+      JSON.stringify({
+        set: report.set,
+        part: "state",
+        value: {
+          nodes: report.nodes,
+          before: report.before,
+          after: report.after,
+          left: report.left,
+          fonts: report.fonts,
+          uzo: report.uzo,
+        },
+      }),
+    );
     for (const part of ["created", "updated", "missing", "extra", "duplicates", "lost"]) {
       if (report[part].length > 0) lines.push(...partsOfList(report.set, part, report[part]));
     }

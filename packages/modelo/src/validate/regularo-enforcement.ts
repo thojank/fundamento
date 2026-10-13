@@ -238,6 +238,64 @@ const externalLinkMarked: Enforcer = (modelo, regulo) => {
   return issues;
 };
 
+/**
+ * Spec 009 `required-marked` (A2, plan D-07): an Ero with a boolean prop `required` marks the
+ * requirement visibly (a part `required-mark`) and audibly (`a11y.texts.required` in de and en).
+ * The sign of the mark is the projection's, its colour the part's; the duty is the Skemo's.
+ */
+const requiredMarked: Enforcer = (modelo, regulo) => {
+  const issues: ValidationIssue[] = [];
+  for (const entry of erojOf(modelo, regulo)) {
+    const { skemo, ero } = entry;
+    if (!skemo.props.some((prop) => prop.name === "required" && prop.kind === "boolean")) continue;
+    const texts = skemo.a11y.texts?.required;
+    const heard =
+      texts !== undefined && typeof texts.de === "string" && typeof texts.en === "string";
+    const seen = skemo.parts["required-mark"] !== undefined;
+    if (heard && seen) continue;
+    const lacks = [
+      ...(seen ? [] : ["a part required-mark"]),
+      ...(heard ? [] : ["a11y.texts.required in de and en"]),
+    ];
+    issues.push({
+      rule: "required-marked",
+      severity: "error",
+      path: `${entry.file}#/skemo/${seen ? "a11y" : "parts"}`,
+      message: `${ero.name} has the prop required but lacks ${lacks.join(" and ")}: a person would not know before sending what may stay empty.`,
+      suggestion: `Give the Skemo ${lacks.join(" and ")} (Regulo required-marked).`,
+    });
+  }
+  return issues;
+};
+
+/**
+ * Spec 009 `error-not-color-only` (A2, plan D-07): an Ero with a state `invalid` carries the
+ * error as text (a text slot `error`) and speaks it (`aria-invalid` in `a11y.states.invalid`);
+ * a red border alone is colour alone (WCAG 1.4.1, 3.3.1).
+ */
+const errorNotColorOnly: Enforcer = (modelo, regulo) => {
+  const issues: ValidationIssue[] = [];
+  for (const entry of erojOf(modelo, regulo)) {
+    const { skemo, ero } = entry;
+    if (!skemo.states.includes("invalid")) continue;
+    const text = skemo.slots.some((slot) => slot.name === "error" && slot.text === true);
+    const spoken = (skemo.a11y.states.invalid ?? []).includes("aria-invalid");
+    if (text && spoken) continue;
+    const lacks = [
+      ...(text ? [] : ["a text slot error"]),
+      ...(spoken ? [] : ["aria-invalid in a11y.states.invalid"]),
+    ];
+    issues.push({
+      rule: "error-not-color-only",
+      severity: "error",
+      path: `${entry.file}#/skemo/${text ? "a11y" : "slots"}`,
+      message: `${ero.name} has the state invalid but lacks ${lacks.join(" and ")}: the error would be a colour alone.`,
+      suggestion: `Give the Skemo ${lacks.join(" and ")} (Regulo error-not-color-only).`,
+    });
+  }
+  return issues;
+};
+
 /** Enforceable Reguloj by name. A Regulo declared "automatic" must have an entry here. */
 export const REGULO_ENFORCERS: Readonly<Record<string, Enforcer>> = {
   /** FR-02: semantic colours alias palette tokens, in every set. */
@@ -398,6 +456,9 @@ export const REGULO_ENFORCERS: Readonly<Record<string, Enforcer>> = {
   // Spec 008 (A2, plan D-13): the two Skemo-level Reguloj of the ligilo.
   "link-not-color-only": linkNotColorOnly,
   "external-link-marked": externalLinkMarked,
+  // Spec 009 (A2, plan D-07): the two Skemo-level Reguloj of the kampo.
+  "required-marked": requiredMarked,
+  "error-not-color-only": errorNotColorOnly,
   /** Spec 002 FR-04: every core role token has a $description of its use. */
   "semantic-described": (modelo) => semanticDescribedIssues(modelo),
   /** FR-08: every colour token declares its role (in core, where roles live). */

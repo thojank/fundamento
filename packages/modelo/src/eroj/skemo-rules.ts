@@ -20,6 +20,12 @@ export const STATE_KEY = "state";
 /** The state every other state falls back to when it has no binding of its own. */
 export const REST_STATE = "rest";
 
+/** The prefix of a constraint key that reads a slot: `slot:error` is filled or empty (Spec 009). */
+export const SLOT_KEY_PREFIX = "slot:";
+
+export const SLOT_FILLED = "filled";
+export const SLOT_EMPTY = "empty";
+
 /** States whose text pair is exempt from contrast (Phase-1 Regulo: disabled is not read). */
 const CONTRAST_EXEMPT_STATES: ReadonlySet<string> = new Set(["disabled"]);
 
@@ -398,6 +404,21 @@ function constraintIssues(entry: LoadedEro, at: At): void {
   (skemo.constraints ?? []).forEach((constraint, index) => {
     const check = (section: "when" | "allowed", key: string, values: readonly string[]) => {
       const pointer = appendPointer(`/skemo/constraints/${index}/${section}`, key);
+      // A slot key (Spec 009, D-04): the slot must exist; its values are filled and empty.
+      if (key.startsWith(SLOT_KEY_PREFIX)) {
+        const slot = key.slice(SLOT_KEY_PREFIX.length);
+        if (section === "allowed" || !skemo.slots.some((candidate) => candidate.name === slot)) {
+          at(
+            pointer,
+            "skemo-constraint-invalid",
+            section === "allowed"
+              ? `Skemo of ${ero.name} allows values for ${key}; a slot is read in when, not set in allowed.`
+              : `Skemo of ${ero.name} constrains the slot ${slot}, which the Skemo does not have.`,
+            `Read a slot of the Skemo (${skemo.slots.map((candidate) => candidate.name).join(", ")}) in when, with filled or empty.`,
+          );
+        }
+        return;
+      }
       const allowed = keyValues(skemo, key);
       if (allowed === undefined || key === STATE_KEY) {
         at(

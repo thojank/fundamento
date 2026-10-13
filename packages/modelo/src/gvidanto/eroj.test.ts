@@ -21,7 +21,7 @@ describe("list_eroj", () => {
     expect(listEroj(modelo).eroj.map((entry) => entry.name)).toEqual(
       modelo.eroj.map((entry) => entry.ero.name),
     );
-    expect(listEroj(modelo).eroj.map((entry) => entry.name)).toEqual(["butono", "ligilo"]);
+    expect(listEroj(modelo).eroj.map((entry) => entry.name)).toEqual(["butono", "kampo", "ligilo"]);
     expect(listEroj(modelo).eroj[0]).toEqual({
       id: butono.ero.id,
       name: "butono",
@@ -29,7 +29,7 @@ describe("list_eroj", () => {
       variants: ["high", "medium", "low"],
       props: ["emphasis", "intent", "size", "type", "disabled", "loading", "full-width", "label"],
     });
-    expect(listEroj(modelo).eroj[1]).toMatchObject({
+    expect(listEroj(modelo).eroj[2]).toMatchObject({
       name: "ligilo",
       variants: ["inline", "standalone"],
       props: ["to", "placement", "external", "size", "label"],
@@ -193,7 +193,7 @@ describe("get_ero", () => {
     if (missing.ok) return;
     expect(missing.issues.map((issue) => issue.rule)).toEqual(["ero-unknown"]);
     expect(missing.issues[0]?.path).toBe("get_ero/name");
-    expect(missing.allowed).toEqual(["butono", "ligilo"]);
+    expect(missing.allowed).toEqual(["butono", "kampo", "ligilo"]);
   });
 });
 

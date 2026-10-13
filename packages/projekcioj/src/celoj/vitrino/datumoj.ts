@@ -282,8 +282,9 @@ export function eroMarkup(entry: LoadedEro): string {
         prop.kind === "boolean" && (entry.skemo.states.includes(prop.name) || prop.name in texts),
     )
     .map((prop) => prop.name);
+  // A link needs a target: the section itself (Spec 008); every other string prop stays empty.
   const required = entry.skemo.props
-    .filter((prop) => prop.kind === "string" && prop.default === undefined && prop.name !== "label")
+    .filter((prop) => prop.name === "to")
     .map((prop) => ` ${prop.name}="#fm-vitrino-${entry.ero.name}"`)
     .join("");
   const rows = combinationsOf(entry.skemo, keys)

@@ -959,6 +959,10 @@
         {
           "predicate": "references",
           "target": "#Ligilo"
+        },
+        {
+          "predicate": "references",
+          "target": "#Kampo"
         }
       ]
     },
@@ -984,6 +988,41 @@
       "definition": {
         "en": "A link: moves to another view or place. Its label names the destination.",
         "de": "Ein Link: wechselt zu einer anderen Ansicht oder einem anderen Ort. Seine Beschriftung nennt das Ziel. Der butono verweist für Navigation auf ihn (use-instead), er für Aktionen auf den butono."
+      },
+      "broader": [
+        "#Ero"
+      ],
+      "relations": [
+        {
+          "predicate": "references",
+          "target": "#Butono"
+        }
+      ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Kampo",
+      "term": "Kampo",
+      "inScheme": "eroj",
+      "prefLabel": {
+        "eo": "Kampo",
+        "en": "text field",
+        "de": "Textfeld"
+      },
+      "altLabel": {
+        "en": [
+          "kampo",
+          "field",
+          "input field"
+        ],
+        "de": [
+          "Eingabefeld",
+          "Feld",
+          "kampo"
+        ]
+      },
+      "definition": {
+        "en": "A text field: takes one line of text from a person. It always shows its label, and can show help and an error. Its neighbour tekstareo (several lines) is a candidate, not yet an Ero.",
+        "de": "Ein Textfeld: nimmt eine Zeile Text von einer Person. Es zeigt seine Beschriftung immer und kann Hilfe und Fehler zeigen. Der Nachbar tekstareo (mehrere Zeilen) ist Kandidat, noch kein Ero."
       },
       "broader": [
         "#Ero"

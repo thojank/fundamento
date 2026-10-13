@@ -104,6 +104,10 @@
         {
           "ero": "butono",
           "kialo": "Actions of one decision stand together, because one primary action leads and the others step back (one-primary-per-container)."
+        },
+        {
+          "ero": "kampo",
+          "kialo": "A form ends with the button that sends it, because filling it in does nothing by itself; the button stands after the last field, not beside it (a search excepted)."
         }
       ],
       "never": [],

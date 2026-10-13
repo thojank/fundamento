@@ -1,0 +1,9 @@
+{
+  "description": "Spec 009 A7 (A2 field-label-visible, E2, plan D-05): the accessible name comes from the slot label alone (no prop), but the Uzo does not mark the slot required. An Ero whose name has one source must not be buildable without it.",
+  "issues": [
+    {
+      "rule": "uzo-slot-required-missing",
+      "path": "data/eroj/butono/uzo.json#/uzo/slots/label"
+    }
+  ]
+}

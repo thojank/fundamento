@@ -31,7 +31,7 @@ const SKEMO_REGULOJ = ["link-not-color-only", "external-link-marked"];
 describe("ligilo in the repo Modelo (T006)", () => {
   it("lives in data/eroj/ligilo/skemo.json, after the butono, and the repo Modelo stays valid", () => {
     expect(ligilo.file).toBe("modelo/data/eroj/ligilo/skemo.json");
-    expect(modelo.eroj.map((entry) => entry.ero.name)).toEqual(["butono", "ligilo"]);
+    expect(modelo.eroj.map((entry) => entry.ero.name)).toEqual(["butono", "kampo", "ligilo"]);
     expect(validateModelo(defaultModeloSource()).errors).toEqual([]);
     expect(ligilo.ero.description).toBe(
       "A link: moves to another view or place. Its label names the destination.",
@@ -239,7 +239,11 @@ describe("the Reguloj of the ligilo (T005, A2, D-13)", () => {
   });
 
   it("spacing-owned-by-container applies to butono and ligilo", () => {
-    expect(named("spacing-owned-by-container")?.appliesTo?.eroj).toEqual(["butono", "ligilo"]);
+    expect(named("spacing-owned-by-container")?.appliesTo?.eroj).toEqual([
+      "butono",
+      "ligilo",
+      "kampo",
+    ]);
   });
 
   it.each(TEXT_REGULOJ)(

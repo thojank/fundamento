@@ -1,0 +1,9 @@
+{
+  "description": "Spec 009 A7 (Art. VIII, plan D-03): the Skemo names a part input. A part is a word of the Modelo (the text a person types); input is the element of one platform. The rule skemo-web-term exists since Spec 008; the red of this fixture was observed by mutation (input taken out of the list).",
+  "issues": [
+    {
+      "rule": "skemo-web-term",
+      "path": "data/eroj/butono/skemo.json#/skemo/parts/input"
+    }
+  ]
+}

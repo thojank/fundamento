@@ -312,6 +312,15 @@ function guidelines(input: CeloInput, aspekto: string): GeneratedFile[] {
     )
     .join("\n");
   const ruleLines = reguloj.map((regulo) => `- ${regulo.statement}`).join("\n");
+  // Spec 009 (D-10, Art. VII): an entry of text comes from the field Ero, never from a raw input;
+  // generated from the Uzo of every Ero that is a textbox.
+  const fieldLines = eroj
+    .filter((entry) => entry.skemo.a11y.role === "textbox" && entry.uzo !== undefined)
+    .map(
+      (entry) =>
+        `- Every entry of text is a \`<${componentName(entry.ero)}>\` (${entry.uzo?.purpose ?? ""}); never a raw input element, and never a field without its visible label.`,
+    )
+    .join("\n");
   return [
     {
       path: `${base}/Guidelines.md`,
@@ -325,6 +334,7 @@ components and its tokens; never write a colour, a size or a font value yourself
 - Switch brand, colour scheme, contrast, density, viewport and motion with the \`data-fm-*\`
   attributes on \`<html>\`; never with a second stylesheet.
 ${ruleLines}
+${fieldLines}
 
 Where to look: \`setup.md\` for the imports, \`foundations/\` for the tokens, \`components/\` for
 each component.

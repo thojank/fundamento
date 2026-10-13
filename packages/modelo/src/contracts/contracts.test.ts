@@ -91,7 +91,8 @@ describe("rule catalog (§2.6)", () => {
     // two findings of an override and T016 the warning about a Skemo without a Uzo.
     // Spec 008 (T003, T004): skemo-web-term, skemo-a11y-invalid, uzo-boundary-covered and the two
     // Skemo-level Reguloj of the ligilo, link-not-color-only and external-link-marked.
-    expect(RULE_IDS).toHaveLength(146);
+    // Spec 009 (T003): uzo-slot-required-missing and the four kampo Reguloj enforced by name.
+    expect(RULE_IDS).toHaveLength(151);
     for (const rule of [
       "uzo-skemo-missing",
       "uzo-ero-unknown",
