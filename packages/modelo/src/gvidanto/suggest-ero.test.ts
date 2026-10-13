@@ -121,9 +121,11 @@ describe("suggest_ero with the Uzo (T023)", () => {
     expect(suggest("zur Projektübersicht").matched?.goal).toBe("navigation");
   });
 
-  it("'Dokumentation' is the goal external of the ligilo: external true (Spec 008 A1)", () => {
+  // R-9 (Abnahme Spec 008, A6, 2026-10-13): a boolean prop of the goal stays a boolean in the
+  // answer; "true" as a text is not a value an EroInstance takes.
+  it("'Dokumentation' is the goal external of the ligilo: external true, as a boolean (Spec 008 A1, R-9)", () => {
     const answer = suggest("Dokumentation");
-    expect(answer.suggestion).toEqual({ ero: "ligilo", props: { external: "true" } });
+    expect(answer.suggestion).toEqual({ ero: "ligilo", props: { external: true } });
     expect(answer.regulo?.name).toBe("external-link-marked");
   });
 
@@ -252,5 +254,39 @@ describe("suggest_ero with the Uzo (T023)", () => {
       }
     }
     expect(offending).toEqual([]);
+  });
+});
+
+// R-11 (Abnahme Spec 009, A11, 2026-10-13): "E-Mail-Adresse" fell apart into e, mail, adresse;
+// mail hit the goal email, adresse the goal enter-text, and the first goal in declaration order
+// won. Now a hyphenated compound is checked as its parts and as one word, and the longest keyword
+// that hits wins; a tie keeps the declaration order.
+describe("suggest_ero: the longest keyword wins, hyphenated compounds count as one word (R-11)", () => {
+  it.each(["Feld für die E-Mail-Adresse", "E-Mail-Adresse", "e-mail-adresse eingeben"])(
+    "%s is the kampo with kind email",
+    (text) => {
+      const answer = suggest(text);
+      expect(answer.suggestion).toEqual({ ero: "kampo", props: { kind: "email" } });
+      expect(answer.matched).toEqual({ goal: "email", keyword: "mailadresse", lingvo: "de" });
+    },
+  );
+
+  it("'Adresse' alone stays enter-text, 'E-Mail' alone stays email by the word mail", () => {
+    expect(suggest("Adresse").matched?.goal).toBe("enter-text");
+    expect(suggest("E-Mail").matched).toEqual({ goal: "email", keyword: "mail", lingvo: "de" });
+    expect(suggest("Name").suggestion).toEqual({ ero: "kampo", props: {} });
+  });
+
+  it("a hyphenated compound does not hit a keyword that is only a part of it", () => {
+    // "mailadresse" (11 letters) ends "emailadresse"; "adresse" hits the part, not the whole.
+    const answer = suggest("E-Mail-Adresse");
+    expect(answer.matched?.keyword).not.toBe("adresse");
+  });
+
+  it("the declaration order still decides a tie (Übersicht speichern: butono first)", () => {
+    const answer = suggest("Übersicht speichern");
+    expect(answer.candidates?.[1]).toEqual(
+      expect.objectContaining({ kind: "goal", ero: "butono", goal: "confirm" }),
+    );
   });
 });

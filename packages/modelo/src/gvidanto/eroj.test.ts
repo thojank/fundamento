@@ -260,7 +260,9 @@ describe("get_ero with the Uzo and brief (T022)", () => {
         .filter((prop) => prop.kind === "enum")
         .map((prop) => ({ name: prop.name, values: prop.values, default: prop.default })),
     );
-    expect(brief.output.required).toEqual({ props: ["label"], slots: [] });
+    // R-10 (Abnahme 2026-10-13): required.props names only a prop the Skemo marks as required;
+    // label is the fallback name of an empty slot, not a duty.
+    expect(brief.output.required).toEqual({ props: [], slots: [] });
     for (const entry of brief.output.instead ?? []) {
       expect(Object.keys(entry).sort()).toEqual(["ero", "goal", "kialo"]);
     }
@@ -292,5 +294,30 @@ describe("get_ero with the Uzo and brief (T022)", () => {
     ]);
     const full = getEro(minimal, { name: "butono" });
     expect(full.ok && full.output).not.toHaveProperty("uzo");
+  });
+});
+
+// R-10 (Abnahme Spec 008 A3 und Spec 009 A3, 2026-10-13): "no default" is not "required". The brief
+// of the ligilo named label, that of the kampo value, placeholder and name; a duty is said by the
+// Skemo (`required: true`), nowhere else. The ligilo needs its destination, nothing else is a duty.
+describe("brief: required.props comes from the Skemo, not from a missing default (R-10)", () => {
+  it.each([
+    ["butono", [], []],
+    ["ligilo", ["to"], []],
+    ["kampo", [], ["label"]],
+  ])("%s requires props %j and slots %j", (name, props, slots) => {
+    const brief = getEro(modelo, { name, brief: true });
+    expect(brief.ok).toBe(true);
+    if (!brief.ok) return;
+    expect(brief.output.required).toEqual({ props, slots });
+  });
+
+  it("every required prop of every Skemo has no default: a default would make the duty moot", () => {
+    const offending = modelo.eroj.flatMap((entry) =>
+      entry.skemo.props
+        .filter((prop) => prop.required === true && prop.default !== undefined)
+        .map((prop) => `${entry.ero.name}.${prop.name}`),
+    );
+    expect(offending).toEqual([]);
   });
 });
