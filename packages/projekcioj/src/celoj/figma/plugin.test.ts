@@ -56,6 +56,16 @@ async function run(
   await module(double.figma, options);
 }
 
+/**
+ * The nodes on the page, and those of every section on it in place of the section's children
+ * (F-2): the sets lie in the section „Fundamento", a node a test looks for is found either way.
+ */
+function pageNodes(double: ReturnType<typeof figmaDouble>): DoubleNode[] {
+  return (double.root.children[0]?.children ?? []).flatMap((child) =>
+    child.type === "SECTION" ? [child, ...child.children] : [child],
+  );
+}
+
 describe("Figma development plugin (T016)", () => {
   it("ships a manifest that Figma can import from disk", () => {
     const manifest = JSON.parse(files["figma/plugin/manifest.json"] ?? "{}") as Record<
@@ -76,7 +86,7 @@ describe("Figma development plugin (T016)", () => {
     );
     const planned = plan.collections.flatMap((collection) => collection.variables);
     expect(double.variables).toHaveLength(planned.length);
-    const set = double.root.children[0]?.children.find((child) => child.type === "COMPONENT_SET");
+    const set = pageNodes(double).find((child) => child.type === "COMPONENT_SET");
     expect(set?.name).toBe("butono");
     expect(set?.getSharedPluginData("fundamento", "ero")).toBe("butono");
     expect(set?.children).toHaveLength(plan.components[0]?.variants.length ?? 0);
@@ -191,7 +201,7 @@ describe("the set carries the purpose of the Uzo as its description (T028)", () 
   it("writes plan.components[].description to the component set", async () => {
     const double = modelDouble();
     await run(double);
-    const set = double.root.children[0]?.children.find((child) => child.name === "butono");
+    const set = pageNodes(double).find((child) => child.name === "butono");
     const planned = plan.components.find((component) => component.set === "butono");
     expect(planned?.description).toBeDefined();
     // Befund B1: description and descriptionMarkdown are one field; the purpose is its first line.
@@ -224,7 +234,7 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
   it("against a double that refuses descriptionMarkdown: open, with the tool's words", async () => {
     const double = figmaDouble({ fonts: MODEL_FONTS, refuse: ["descriptionMarkdown"] });
     const result = await report(double);
-    const set = double.root.children[0]?.children.find((child) => child.name === "butono");
+    const set = pageNodes(double).find((child) => child.name === "butono");
     expect(set?.properties.description).toBe(planned?.description);
     expect(set?.properties.descriptionMarkdown).toBeUndefined();
     const butono = result.components.find((component) => component.set === "butono");
@@ -249,7 +259,7 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
   it("against a double that accepts it: closed, the Markdown written to the set", async () => {
     const double = modelDouble();
     const result = await report(double);
-    const set = double.root.children[0]?.children.find((child) => child.name === "butono");
+    const set = pageNodes(double).find((child) => child.name === "butono");
     expect(set?.properties.descriptionMarkdown).toBe(planned?.uzo?.markdown);
     // Befund B1 (Maintainer, f10b-5, 2026-10-12): Markdown and description are one field, so
     // the purpose (T028) has to be the first line of what T029 writes, or it is gone.
@@ -289,7 +299,7 @@ describe("the paint carries the alpha of its token (F8)", () => {
   async function paintsOf(props: Record<string, string>) {
     const double = modelDouble();
     await run(double, repoFiles["figma/plugin/code.js"] ?? "");
-    const set = double.root.children[0]?.children.find((child) => child.name === "butono");
+    const set = pageNodes(double).find((child) => child.name === "butono");
     const name = Object.entries(variantOf(props)?.props ?? {})
       .map(([key, value]) => `${key}=${value}`)
       .join(", ");
@@ -395,7 +405,7 @@ describe("the plugin reports what it did (F10)", () => {
   it("names the variants that are missing and the ones too many", async () => {
     const double = modelDouble();
     await report(double);
-    const set = double.root.children[0]?.children.find((child) => child.name === "butono");
+    const set = pageNodes(double).find((child) => child.name === "butono");
     if (set === undefined) throw new Error("no component set");
     const gone = nameOf(0);
     set.children.find((child) => child.name === gone)?.remove();
@@ -518,7 +528,7 @@ describe("a run that creates in a set it found warns, and says what it found (F1
   }
 
   const setOf = (double: ReturnType<typeof figmaDouble>) => {
-    const found = double.root.children[0]?.children.find((child) => child.name === "butono");
+    const found = pageNodes(double).find((child) => child.name === "butono");
     if (found === undefined) throw new Error("no component set");
     return found;
   };
@@ -621,7 +631,7 @@ describe("the run reads its own last state and says what happened (F10b)", () =>
   }
 
   const setOf = (double: ReturnType<typeof figmaDouble>) => {
-    const found = double.root.children[0]?.children.find((child) => child.name === "butono");
+    const found = pageNodes(double).find((child) => child.name === "butono");
     if (found === undefined) throw new Error("no component set");
     return found;
   };
@@ -712,7 +722,7 @@ describe("a run that would create in a set it found aborts before it writes (F10
   }
 
   const setOf = (double: ReturnType<typeof figmaDouble>) => {
-    const found = double.root.children[0]?.children.find((child) => child.name === "butono");
+    const found = pageNodes(double).find((child) => child.name === "butono");
     if (found === undefined) throw new Error("no component set");
     return found;
   };
@@ -847,7 +857,7 @@ describe("a run reports every node of the set that was there at its start and is
     return (await module({ ...double.figma, ...figma }, options)) as Report;
   }
   const setOf = (double: ReturnType<typeof figmaDouble>) => {
-    const found = double.root.children[0]?.children.find((child) => child.name === "butono");
+    const found = pageNodes(double).find((child) => child.name === "butono");
     if (found === undefined) throw new Error("no component set");
     return found;
   };
@@ -956,7 +966,7 @@ describe("a text is written only after its current font is loaded (F-A)", () => 
   it("runs through in an empty file where no font is loaded yet", async () => {
     const double = modelDouble();
     await expect(run(double, repoFiles["figma/plugin/code.js"] ?? "")).resolves.toBeUndefined();
-    const set = double.root.children[0]?.children.find((child) => child.name === "butono");
+    const set = pageNodes(double).find((child) => child.name === "butono");
     expect(set?.children).toHaveLength(72);
   });
 });
@@ -1046,7 +1056,7 @@ describe("every run names its build", () => {
   );
   const LAST = "emphasis=low, intent=neutral, size=large, state=loading";
   const setOf = (double: ReturnType<typeof figmaDouble>) =>
-    double.root.children[0]?.children.find((child) => child.name === "butono");
+    pageNodes(double).find((child) => child.name === "butono");
 
   it("carries the build in the source and in the menu name", () => {
     expect(stamped["figma/plugin/code.js"]?.split("\n")[0]).toContain("Build abc1234");
@@ -1127,7 +1137,7 @@ describe("no paint in the file that the plan did not put there (F13)", () => {
   it("gives the variant itself no fill, so a transparent control shows what lies beneath", async () => {
     const double = modelDouble();
     await run(double, repoFiles["figma/plugin/code.js"] ?? "");
-    const set = double.root.children[0]?.children.find((child) => child.name === "butono");
+    const set = pageNodes(double).find((child) => child.name === "butono");
     for (const variant of set?.children ?? []) {
       expect(variant.properties.fills, variant.name).toEqual([]);
     }
@@ -1173,7 +1183,7 @@ describe("the geometry of the Ero reaches Figma (F11)", () => {
   async function controlOf(props: Record<string, string>) {
     const double = modelDouble();
     await run(double, repoFiles["figma/plugin/code.js"] ?? "");
-    const set = double.root.children[0]?.children.find((child) => child.name === "butono");
+    const set = pageNodes(double).find((child) => child.name === "butono");
     const name = Object.entries(props)
       .map(([key, value]) => `${key}=${value}`)
       .join(", ");
@@ -1217,7 +1227,7 @@ describe("the focus ring is drawn, and never clipped (F11)", () => {
 
   async function variantOf(double: ReturnType<typeof figmaDouble>, state: string) {
     await run(double, repoFiles["figma/plugin/code.js"] ?? "");
-    const set = double.root.children[0]?.children.find((child) => child.name === "butono");
+    const set = pageNodes(double).find((child) => child.name === "butono");
     return set?.children.find(
       (child) => child.name === `emphasis=high, intent=neutral, size=medium, state=${state}`,
     );
@@ -1274,7 +1284,7 @@ describe("the focus ring is drawn, and never clipped (F11)", () => {
   it("fills nothing behind the control in focus that it does not fill in rest", async () => {
     const double = modelDouble();
     await run(double, repoFiles["figma/plugin/code.js"] ?? "");
-    const set = double.root.children[0]?.children.find((child) => child.name === "butono");
+    const set = pageNodes(double).find((child) => child.name === "butono");
     const behind = (variant: DoubleNode | undefined) =>
       [variant, find(variant, "focus-ring"), find(variant, "focus-gap")].map(
         (node) => node?.properties.fills,
@@ -1350,7 +1360,7 @@ describe("every property the plugin owns is from the plan or neutral", () => {
       "Document/Page 1/ligilo: layoutPositioning",
     ];
     expect(double.untouchedDefaults(OWNED).filter((entry) => !onPage.includes(entry))).toEqual([]);
-    const set = double.root.children[0]?.children.find((child) => child.name === "butono");
+    const set = pageNodes(double).find((child) => child.name === "butono");
     expect(set?.properties.strokes).toEqual([]);
     expect(set?.properties.dashPattern).toEqual([]);
   });
@@ -1367,7 +1377,7 @@ describe("the variants stand in the grid of the Vitrino (F11)", () => {
       .join(", "),
   );
   const setOf = (double: ReturnType<typeof figmaDouble>) =>
-    double.root.children[0]?.children.find((child) => child.name === "butono");
+    pageNodes(double).find((child) => child.name === "butono");
 
   it("is a grid of 12 rows by 6 states, in the order of the plan", async () => {
     const double = modelDouble();
@@ -1405,7 +1415,7 @@ describe("the variants stand in the grid of the Vitrino (F11)", () => {
 describe("the label is set in the model's font (F11)", () => {
   const labelOf = (double: ReturnType<typeof figmaDouble>) =>
     descendant(
-      double.root.children[0]?.children
+      pageNodes(double)
         .find((child) => child.name === "butono")
         ?.children.find(
           (child) => child.name === "emphasis=high, intent=neutral, size=medium, state=rest",
@@ -1460,7 +1470,7 @@ describe("the label is set in the model's font (F11)", () => {
 // überschreiben; realistische Maße entstehen dort, nicht in der Vorlage.
 describe("the label is a text property of the component (F11)", () => {
   const setOf = (double: ReturnType<typeof figmaDouble>) =>
-    double.root.children[0]?.children.find((child) => child.name === "butono");
+    pageNodes(double).find((child) => child.name === "butono");
   type Definitions = Record<string, { type: string; defaultValue: string }>;
 
   // F14 (Maintainer): one neutral word — Figma keeps one default per property, not per variant.
@@ -1611,7 +1621,7 @@ describe("the double measures sizes the way Figma did (F14)", () => {
 
 describe("every variant has its size and its own place in the grid (F14)", () => {
   const setOf = (double: ReturnType<typeof figmaDouble>) =>
-    double.root.children[0]?.children.find((child) => child.name === "butono");
+    pageNodes(double).find((child) => child.name === "butono");
   const box = (node: DoubleNode | undefined) =>
     node as unknown as { width: number; height: number; x: number; y: number } | undefined;
 
@@ -1831,7 +1841,7 @@ describe("the set stands on the model's background, like the Vitrino (F16)", () 
     const double = modelDouble();
     for (const _ of [1, 2]) {
       await run(double, repoFiles["figma/plugin/code.js"] ?? "");
-      const set = double.root.children[0]?.children.find((child) => child.name === "butono");
+      const set = pageNodes(double).find((child) => child.name === "butono");
       const fills = (set?.properties.fills ?? []) as {
         opacity?: number;
         boundVariables?: { color?: { name?: string } };
@@ -1893,7 +1903,7 @@ describe("a visible stroke takes space, as measured (F17)", () => {
 
 describe("every variant has the same outer size in all six states (F17)", () => {
   const rowsOf = (double: ReturnType<typeof figmaDouble>) => {
-    const set = double.root.children[0]?.children.find((child) => child.name === "butono");
+    const set = pageNodes(double).find((child) => child.name === "butono");
     const rows = new Map<number, string[]>();
     for (const variant of set?.children ?? []) {
       const box = variant as unknown as { width: number; height: number };
@@ -1918,7 +1928,7 @@ describe("every variant has the same outer size in all six states (F17)", () => 
   it("owns strokesIncludedInLayout on ring and gap: the stroke lies in the reserve", async () => {
     const double = modelDouble();
     await run(double, repoFiles["figma/plugin/code.js"] ?? "");
-    const set = double.root.children[0]?.children.find((child) => child.name === "butono");
+    const set = pageNodes(double).find((child) => child.name === "butono");
     const focused = set?.children.find((child) => child.name.endsWith("state=focus"));
     for (const part of ["focus-ring", "focus-gap"]) {
       expect(descendant(focused, part)?.properties.strokesIncludedInLayout, part).toBe(false);
@@ -2031,7 +2041,7 @@ describe("the default mode of every collection is the Modelo's default (F19)", (
 // waren gesetzte Eigenschaften (layoutSizing HUG), nicht die Geometrie.
 describe("the set encloses its grid (F20)", () => {
   const setOf = (double: ReturnType<typeof figmaDouble>) =>
-    double.root.children[0]?.children.find((child) => child.name === "butono");
+    pageNodes(double).find((child) => child.name === "butono");
   type Box = { x: number; y: number; width: number; height: number };
 
   it("holds every child inside its bounds plus padding, after the first and the second run", async () => {
@@ -2326,7 +2336,7 @@ describe("every bound paint shows the plan's colour after the first and the seco
         "figma",
         `${repoFiles["figma/plugin/code.js"] ?? ""}\nreturn applyPlan();`,
       )(double.figma);
-      const set = double.root.children[0]?.children.find((child) => child.name === "butono");
+      const set = pageNodes(double).find((child) => child.name === "butono");
       for (const [props, name] of [
         [{ emphasis: "high", intent: "neutral", size: "large", state: "rest" }, "high"],
         [{ emphasis: "low", intent: "neutral", size: "medium", state: "hover" }, "low"],
@@ -2594,7 +2604,7 @@ describe("the label's font is bound, not written (F30)", () => {
   }
 
   const labelOf = (double: ReturnType<typeof figmaDouble>) => {
-    const set = double.root.children[0]?.children.find((child) => child.type === "COMPONENT_SET");
+    const set = pageNodes(double).find((child) => child.type === "COMPONENT_SET");
     const find = (node: DoubleNode): DoubleNode | undefined =>
       node.type === "TEXT" ? node : node.children.map(find).find((found) => found !== undefined);
     return find(set as DoubleNode);
@@ -2659,7 +2669,7 @@ describe("the focus ring's radius is bound, not written (F32)", () => {
   async function file() {
     const double = figmaDouble({ fonts: MODEL_FONTS });
     await run(double);
-    const set = double.root.children[0]?.children.find((child) => child.type === "COMPONENT_SET");
+    const set = pageNodes(double).find((child) => child.type === "COMPONENT_SET");
     const variant = set?.children[0];
     const ring = variant?.children.find(
       (child) => child.getSharedPluginData("fundamento", "part") === "focus-ring",
@@ -2728,7 +2738,7 @@ describe("the report names the font that was applied, not the one that was plann
 // — `letterSpacing` ist ein bindbares Feld des Textknotens, `textCase` ist es nicht.
 describe("the label carries its tracking and its case (F31)", () => {
   const labelOf = (double: ReturnType<typeof figmaDouble>) => {
-    const set = double.root.children[0]?.children.find((child) => child.type === "COMPONENT_SET");
+    const set = pageNodes(double).find((child) => child.type === "COMPONENT_SET");
     const find = (node: DoubleNode): DoubleNode | undefined =>
       node.type === "TEXT" ? node : node.children.map(find).find((found) => found !== undefined);
     return find(set as DoubleNode);
@@ -2850,7 +2860,7 @@ describe("the set is left on no mode of its own (F35)", () => {
   async function setAfter(runs: number) {
     const double = modelDouble();
     for (let index = 0; index < runs; index++) await run(double);
-    const set = double.root.children[0]?.children.find((child) => child.type === "COMPONENT_SET");
+    const set = pageNodes(double).find((child) => child.type === "COMPONENT_SET");
     return { double, set };
   }
 
@@ -2904,7 +2914,7 @@ describe("the tertiary fill keeps its deckkraft over two runs (F43)", () => {
           layout: { paints: { last: Record<string, { fills: unknown[]; strokes: unknown[] }> } };
         }[];
       };
-      const set = double.root.children[0]?.children.find((child) => child.name === "butono");
+      const set = pageNodes(double).find((child) => child.name === "butono");
       const control = descendant(
         set?.children.find((child) => child.name === name),
         "control",
@@ -3149,7 +3159,7 @@ describe("the field of the kampo has room and shows its texts (F-4)", () => {
 
   it("the text in the control, the help and the error carry a default text and are visible", async () => {
     const { double } = await fieldReport();
-    const set = double.root.children[0]?.children.find((child) => child.name === "kampo");
+    const set = pageNodes(double).find((child) => child.name === "kampo");
     const variant = set?.children[0];
     const field = variant?.children.find((child) => child.name === "field");
     type Node = { name: string; children: Node[]; properties: Record<string, unknown> };
@@ -3170,5 +3180,283 @@ describe("the field of the kampo has room and shows its texts (F-4)", () => {
     );
     expect(texts).toEqual({ text: "Beispiel", help: "Hinweis", error: "Fehler" });
     for (const [name, text] of Object.entries(texts)) expect(text, name).not.toBe("");
+  });
+});
+
+// F-1 / F-2 (Nachlese Spec 008/009, gemessen 2026-10-13 in f10b-5): Das neue Set ligilo lag auf
+// dem Set butono bei 0/0 und musste von Hand verschoben werden. Jetzt liegen alle Sets in einer
+// Section „Fundamento": ein neues Set rechts neben dem letzten, mit dem Abstand spacing.xlarge;
+// vorgefundene Sets behalten ihren Platz. Ein Modus auf der Section schaltet die Marke der ganzen
+// Bibliothek; das Plugin setzt und löscht dort nie einen (F35 gilt für Sets).
+describe("every set lies in the section Fundamento, in a row (F-1, F-2)", () => {
+  const source = repoFiles["figma/plugin/code.js"] ?? "";
+  type Placement = { x: number; y: number; after: string | null; action: string };
+  type SectionReport = { name: string; found: boolean; created: boolean; moved: string[] };
+  type Report = {
+    section: SectionReport;
+    components: { set: string; placement: Placement }[];
+    warnings: string[];
+  };
+  async function apply(double: ReturnType<typeof figmaDouble>, options?: typeof LIFT) {
+    const module = new Function("figma", "options", `${source}\nreturn applyPlan(options);`);
+    return (await module(double.figma, options)) as Report;
+  }
+  const pageOf = (double: ReturnType<typeof figmaDouble>) => {
+    const page = double.root.children[0];
+    if (page === undefined) throw new Error("no page");
+    return page;
+  };
+  const sectionsOf = (double: ReturnType<typeof figmaDouble>) =>
+    pageOf(double).children.filter((child) => child.type === "SECTION");
+  const sectionOf = (double: ReturnType<typeof figmaDouble>) => {
+    const [section] = sectionsOf(double);
+    if (section === undefined) throw new Error("no section");
+    return section;
+  };
+  const named = (parent: DoubleNode, name: string) => {
+    const found = parent.children.find((child) => child.name === name);
+    if (found === undefined) throw new Error(`no ${name} in ${parent.name}`);
+    return found;
+  };
+  const box = (node: DoubleNode) => node as unknown as DoubleBoxLike;
+  type DoubleBoxLike = { x: number; y: number; width: number; height: number };
+  const names = repoPlan.components.map((component) => component.set);
+  const layout = repoPlan.section;
+
+  it("creates one section Fundamento, stamped, and puts every set into it", async () => {
+    const double = modelDouble();
+    const report = await apply(double);
+    expect(sectionsOf(double)).toHaveLength(1);
+    const section = sectionOf(double);
+    expect(section.name).toBe("Fundamento");
+    expect(section.getSharedPluginData("fundamento", "section")).toBe("Fundamento");
+    expect(section.children.map((child) => child.name)).toEqual(names);
+    expect(pageOf(double).children.filter((child) => child.type === "COMPONENT_SET")).toEqual([]);
+    expect(report.section).toEqual({ name: "Fundamento", found: false, created: true, moved: [] });
+  });
+
+  it("lays the sets out in a row: padding first, then right edge plus gap, and says so", async () => {
+    const double = modelDouble();
+    const report = await apply(double);
+    const section = sectionOf(double);
+    const sets = names.map((name) => box(named(section, name)));
+    expect(sets[0]).toMatchObject({ x: layout?.padding, y: layout?.padding });
+    for (let index = 1; index < sets.length; index++) {
+      const before = sets[index - 1] as DoubleBoxLike;
+      expect(sets[index]?.x, names[index]).toBe(before.x + before.width + (layout?.gap ?? NaN));
+      expect(sets[index]?.y, names[index]).toBe(before.y);
+    }
+    expect(report.components.map((component) => component.placement)).toEqual(
+      names.map((_, index) => ({
+        x: sets[index]?.x,
+        y: sets[index]?.y,
+        after: index === 0 ? null : names[index - 1],
+        action: "created",
+      })),
+    );
+  });
+
+  it("sizes the section to its sets plus its padding", async () => {
+    const double = modelDouble();
+    await apply(double);
+    const section = box(sectionOf(double));
+    const sets = names.map((name) => box(named(sectionOf(double), name)));
+    const padding = layout?.padding ?? NaN;
+    expect(section.width).toBe(Math.max(...sets.map((set) => set.x + set.width)) + padding);
+    expect(section.height).toBe(Math.max(...sets.map((set) => set.y + set.height)) + padding);
+  });
+
+  it("finds the section again on a second run, moves nothing and makes no second one", async () => {
+    const double = modelDouble();
+    await apply(double);
+    const first = double.snapshot();
+    const places = names.map((name) => ({ ...box(named(sectionOf(double), name)) }));
+    const report = await apply(double);
+    expect(sectionsOf(double)).toHaveLength(1);
+    expect(double.snapshot()).toBe(first);
+    expect(names.map((name) => ({ ...box(named(sectionOf(double), name)) }))).toEqual(places);
+    expect(report.section).toEqual({ name: "Fundamento", found: true, created: false, moved: [] });
+    expect(report.components.map((component) => component.placement.action)).toEqual(
+      names.map(() => "kept"),
+    );
+    expect(report.warnings).toEqual([]);
+  });
+
+  it("keeps a set where the maintainer put it, and places a new one right of the last", async () => {
+    const double = modelDouble();
+    await apply(double);
+    const section = sectionOf(double);
+    const [first, middle, last] = names;
+    if (first === undefined || middle === undefined || last === undefined) throw new Error("3");
+    // The maintainer drags the last set further right and down, and deletes the middle one.
+    Object.assign(named(section, last), { x: 4000, y: 300 });
+    named(section, middle).remove();
+    const kept = { ...box(named(section, first)) };
+    const report = await apply(double);
+    expect({ ...box(named(section, first)) }).toEqual(kept);
+    expect(box(named(section, last))).toMatchObject({ x: 4000, y: 300 });
+    const lastBox = box(named(section, last));
+    expect(box(named(section, middle))).toMatchObject({
+      x: lastBox.x + lastBox.width + (layout?.gap ?? NaN),
+      y: 300,
+    });
+    const placement = report.components.find((component) => component.set === middle)?.placement;
+    expect(placement).toEqual({
+      x: lastBox.x + lastBox.width + (layout?.gap ?? NaN),
+      y: 300,
+      after: last,
+      action: "created",
+    });
+  });
+
+  // The file f10b-5 as measured: the sets lie on the page, ligilo on top of butono at 0/0.
+  it("moves the sets that lie on the page into a new section, in a row, the first kept in place", async () => {
+    const double = modelDouble();
+    await apply(double);
+    const page = pageOf(double);
+    const section = sectionOf(double);
+    for (const name of names) {
+      const set = named(section, name);
+      page.appendChild(set);
+      Object.assign(set, { x: 0, y: 0 });
+    }
+    section.remove();
+    const report = await apply(double);
+    expect(report.section).toEqual({
+      name: "Fundamento",
+      found: false,
+      created: true,
+      moved: names,
+    });
+    const fresh = sectionOf(double);
+    expect(fresh.children.map((child) => child.name)).toEqual(names);
+    expect(page.children.filter((child) => child.type === "COMPONENT_SET")).toEqual([]);
+    const sets = names.map((name) => box(named(fresh, name)));
+    expect(sets[0]).toMatchObject({ x: layout?.padding, y: layout?.padding });
+    for (let index = 1; index < sets.length; index++) {
+      const before = sets[index - 1] as DoubleBoxLike;
+      expect(sets[index]?.x, names[index]).toBe(before.x + before.width + (layout?.gap ?? NaN));
+    }
+    // The first set stays where the maintainer saw it: the section opens around it.
+    expect(box(fresh).x + (sets[0]?.x ?? NaN)).toBe(0);
+    expect(box(fresh).y + (sets[0]?.y ?? NaN)).toBe(0);
+    expect(report.components.map((component) => component.placement.action)).toEqual(
+      names.map(() => "moved"),
+    );
+    // Nothing was created: every variant was found in its set.
+    expect(report.warnings).toEqual([]);
+  });
+
+  it("moves a set from the page into a section it finds, behind the last set", async () => {
+    const double = modelDouble();
+    await apply(double);
+    const section = sectionOf(double);
+    const [first, , last] = names;
+    if (first === undefined || last === undefined) throw new Error("3");
+    pageOf(double).appendChild(named(section, first));
+    const report = await apply(double);
+    expect(report.section).toEqual({
+      name: "Fundamento",
+      found: true,
+      created: false,
+      moved: [first],
+    });
+    const lastBox = box(named(section, last));
+    expect(box(named(section, first))).toMatchObject({
+      x: lastBox.x + lastBox.width + (layout?.gap ?? NaN),
+      y: lastBox.y,
+    });
+  });
+
+  it("never sets and never clears a mode on the section; the sets stay on none (F35)", async () => {
+    const double = modelDouble();
+    await apply(double);
+    const section = sectionOf(double);
+    expect(section.explicitVariableModes).toEqual({});
+    const aspekto = double.collections.find((collection) => collection.name === "aspekto");
+    const mode = aspekto?.modes.at(-1);
+    if (aspekto === undefined || mode === undefined) throw new Error("no aspekto mode");
+    section.setExplicitVariableModeForCollection(aspekto, mode.modeId);
+    // From here on, any call on the section's modes is a failure of the run.
+    const refuse = () => {
+      throw new Error("the plugin touched the mode of the section");
+    };
+    Object.assign(section, {
+      setExplicitVariableModeForCollection: refuse,
+      clearExplicitVariableModeForCollection: refuse,
+    });
+    await apply(double);
+    expect(section.explicitVariableModes).toEqual({ [aspekto.id]: mode.modeId });
+    for (const name of names) {
+      const set = named(section, name);
+      expect(set.explicitVariableModes, name).toEqual({});
+      // The set follows the section: one mode there switches the brand of the whole library.
+      expect(set.resolvedVariableModes[aspekto.id], name).toBe(mode.modeId);
+    }
+  });
+
+  it("names section and placement in the headline of the report", async () => {
+    const double = modelDouble();
+    const lines: string[] = [];
+    const module = new Function("figma", "console", source);
+    await module(
+      { ...double.figma, command: "run" },
+      { log: (...parts: unknown[]) => lines.push(parts.map(String).join(" ")), error: () => {} },
+    );
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    const first = lines.find((line) => line.startsWith("{"));
+    expect(first?.length ?? 0).toBeLessThan(4000);
+    const headline = JSON.parse(first ?? "{}") as Report;
+    expect(headline.section).toEqual({
+      name: "Fundamento",
+      found: false,
+      created: true,
+      moved: [],
+    });
+    expect(headline.components.map((component) => component.placement.after)).toEqual([
+      null,
+      ...names.slice(0, -1),
+    ]);
+  });
+});
+
+// M-3 (Abnahme Spec 008, Befund B-6; Entscheidung des Maintainers F14, 2026-10-13): Die
+// Beschriftung jedes Sets hatte den Vorgabewert „Aktion" — für einen Link und ein Feld falsch.
+// butono „Aktion", ligilo „Ziel", kampo „Beschriftung". Ein vorgefundenes Set bekommt das neue
+// Wort beim nächsten Lauf.
+describe("the label default follows the role of the Ero (M-3)", () => {
+  const source = repoFiles["figma/plugin/code.js"] ?? "";
+  type Definitions = Record<string, { type: string; defaultValue: string }>;
+  const defaultsOf = (set: DoubleNode | undefined) =>
+    Object.values((set?.properties.componentPropertyDefinitions ?? {}) as Definitions).map(
+      (definition) => definition.defaultValue,
+    );
+
+  it("writes Aktion, Beschriftung and Ziel as the defaults of the three sets", async () => {
+    const double = modelDouble();
+    await run(double, source);
+    const of = (name: string) => defaultsOf(pageNodes(double).find((child) => child.name === name));
+    expect(of("butono")).toEqual(["Aktion"]);
+    expect(of("kampo")).toEqual(["Beschriftung"]);
+    expect(of("ligilo")).toEqual(["Ziel"]);
+  });
+
+  it("updates a found ligilo that still says Aktion to Ziel, property and every label", async () => {
+    const double = modelDouble();
+    const older = JSON.parse(JSON.stringify(repoPlan)) as FigmaPlan;
+    for (const component of older.components) {
+      if (component.label !== undefined) component.label.defaultValue = "Aktion";
+    }
+    await run(
+      double,
+      source.replace(/^const PLAN = .*$/m, `const PLAN = ${JSON.stringify(older)};`),
+    );
+    const ligilo = () => pageNodes(double).find((child) => child.name === "ligilo");
+    expect(defaultsOf(ligilo())).toEqual(["Aktion"]);
+    await run(double, source);
+    expect(defaultsOf(ligilo())).toEqual(["Ziel"]);
+    for (const variant of ligilo()?.children ?? []) {
+      expect(descendant(variant, "label")?.properties.characters, variant.name).toBe("Ziel");
+    }
   });
 });

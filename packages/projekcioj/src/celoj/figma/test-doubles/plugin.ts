@@ -179,6 +179,14 @@ const FIGMA_DEFAULTS: Readonly<Record<string, Readonly<Record<string, unknown>>>
     width: 100,
     height: 100,
   },
+  // A section (F-2, Nachlese Spec 008/009) — a belief, not a measurement, until the maintainer
+  // has measured it in f10b-5: createSection gives a section of 100 × 100 on the current page.
+  // Its look (fill, colour) is the maintainer's, not the plugin's, so the double names no paint
+  // here that a test of owned properties would have to see cleared.
+  SECTION: {
+    width: 100,
+    height: 100,
+  },
   TEXT: {
     fills: [{ type: "SOLID", color: { r: 0, g: 0, b: 0 } }],
     effects: [],
@@ -913,6 +921,29 @@ export function figmaDouble(
     createFrame: () => onPage(node("FRAME", "Frame", counts, context)),
     createText: () => onPage(node("TEXT", "Text", counts, context)),
     createRectangle: () => onPage(node("RECTANGLE", "Rectangle", counts, context)),
+    // F-2 (Nachlese Spec 008/009): the section „Fundamento" that holds every set. What the double
+    // does here is a **belief** about the Plugin API until the maintainer measures it in f10b-5
+    // (green CI is no acceptance for what lands in Figma):
+    // - createSection puts a SECTION of 100 × 100 at 0/0 on the current page;
+    // - a child of a section keeps its numbers x/y when it is appended, now relative to the
+    //   section — appending does not keep the place on the page;
+    // - resizeWithoutConstraints(width, height) sets the size of the section and moves no child;
+    // - a section carries explicit variable modes like any node, and a child that has none
+    //   resolves the section's (resolvedVariableModes walks the ancestors).
+    createSection: () => {
+      const section = onPage(node("SECTION", "Section", counts, context));
+      Object.assign(section, {
+        resizeWithoutConstraints(width: number, height: number) {
+          section.properties.width = width;
+          section.properties.height = height;
+          section.defaults.delete("width");
+          section.defaults.delete("height");
+          counts.writes++;
+          context.version++;
+        },
+      });
+      return section;
+    },
     combineAsVariants: (components: DoubleNode[], parent: DoubleNode) => {
       const set = node("COMPONENT_SET", "Component Set", counts, context);
       // Component properties live on the set (F11): a TEXT property the labels are connected to.
