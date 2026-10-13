@@ -308,18 +308,26 @@ describe("fm modelo export (Spec 001 T019, D-09)", () => {
     return out;
   }
 
-  it("writes the export and one Tokens-Studio folder per Aspekto for a project config", () => {
-    const out = mkdtempSync(join(tmpdir(), "fm-export-"));
-    const run = fm(["modelo", "export", "--config", ekzempla, "--out", out]);
-    expect(run.code, run.stderr).toBe(0);
-    const files = Object.keys(sha(out));
-    for (const file of ["modelo.json", "modelo.schema.json", "rezolvoj.json"]) {
-      expect(files).toContain(file);
-    }
-    expect(files).toContain("vortaro/ekzemplo/$themes.json");
-    expect(files).toContain("vortaro/komuna/core.json");
-    rmSync(out, { recursive: true, force: true });
-  });
+  // One export of the whole Modelo, a spawn of the built binary: 27.4 s in the run of #55 and
+  // 32.1 s in the merge run of #54 on main (2026-10-13, 19:10, timed out at 30 s) — the runner's
+  // load, not the export. The recorded factor 3 (Jugxo jug_01M2W3K1YPP05F4XF86J71RGTK), as the
+  // test below has it; no threshold of the check itself moves.
+  it(
+    "writes the export and one Tokens-Studio folder per Aspekto for a project config",
+    () => {
+      const out = mkdtempSync(join(tmpdir(), "fm-export-"));
+      const run = fm(["modelo", "export", "--config", ekzempla, "--out", out]);
+      expect(run.code, run.stderr).toBe(0);
+      const files = Object.keys(sha(out));
+      for (const file of ["modelo.json", "modelo.schema.json", "rezolvoj.json"]) {
+        expect(files).toContain(file);
+      }
+      expect(files).toContain("vortaro/ekzemplo/$themes.json");
+      expect(files).toContain("vortaro/komuna/core.json");
+      rmSync(out, { recursive: true, force: true });
+    },
+    30_000 * (process.env.CI === "true" ? 3 : 1),
+  );
 
   // Two exports of the whole Modelo, each a spawn of the built binary: on a loaded CI runner this
   // measures the machine as much as the export, so it gets the recorded factor 3
