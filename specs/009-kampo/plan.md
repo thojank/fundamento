@@ -90,6 +90,19 @@ MCP 11/13, Figma Set, 18 Varianten, Zweck, Zustände und Moduswechsel grün; ein
 - **R-2 (bestätigt):** siehe Messung A6 des Maintainers.
 - **F-1 Figma (auch hier):** Das Set `kampo` entsteht am Ursprung des `butono`-Sets; Sets nebeneinander oder in eine Section „Fundamento“ (Spec 008, F-1/F-2).
 
+## Nachlese 2026-10-13
+
+Nach #54, Briefing P0 Nachtschicht 13./14.10. Umgesetzt im Nachlese-PR (Basis `main` 72a11e3), jede Zeile mit rotem Test zuerst; was Regulo-Semantik berührt, nur geführt (Regel 0):
+
+- **R-10 `brief`, umgesetzt:** `required.props` des `kampo` ist leer – `value`, `placeholder`, `name` haben keinen Standard, aber keine Pflicht; Pflicht sagt die Skemo (`SkemoProp.required`, neu), der Slot `label` bleibt Pflicht der Uzo. Rot zuerst (Commit `d351096`).
+- **R-11 `suggest_ero`, umgesetzt:** Der längste Schlüsselwort-Treffer gewinnt (Gleichstand: Deklarationsreihenfolge), und ein Bindestrich-Kompositum zählt als seine Teile und als ein Wort („E-Mail-Adresse“ → `emailadresse`, Suffix-Treffer ab sechs Buchstaben wie bei den Uzo-Schlüsselwörtern, D-06/N-1): „Feld für die E-Mail-Adresse“ → `kampo`, `kind: email`, Treffer `mailadresse`. Rot `d351096`.
+- **R-2 nur dokumentiert:** `error-says-what-to-do` sagt in `scope`, dass `min-words` nur zählt („Das ist ungültig“ geht durch); Kandidat für eine bessere Prüfung in der Vojmapo (Phase 6 Lint). Regulo-Semantik (Regel 0.3).
+- **F-1 Figma, umgesetzt:** siehe Spec 008, Nachlese F-1/F-2 – das Set `kampo` liegt in der Section „Fundamento“ rechts neben dem letzten Set; Beschriftung „Beschriftung“ (M-3, Jugxo `jug_01M4VCG06S4MWFPVPNWMBN9EWF`).
+- **F-5 Vitrino, umgesetzt:** Jede Zelle des `kampo` trägt `<span slot="help">Hinweis</span>`, die Spalte `invalid` zusätzlich `<span slot="error">Fehler</span>` – dieselben Wörter wie im Figma-Set (F-4). Die Regel kommt aus der Skemo: ein Text-Slot mit Beispielwort steht in jeder Spalte, außer ein Constraint `slot:<name>: filled ⇒ <prop>: true` beschränkt ihn auf die Spalte dieser Prop. Rot `1382e26`.
+- **F-6 Vitrino, umgesetzt:** Die Slot-Tabelle zeigt die Spalte „Pflicht“ (`ja` für `label`). Rot `1382e26`.
+- **C8 Textnuance, umgesetzt:** „Größe aus dem Container, Eingabezeile bricht nie um.“ – das Subjekt kommt aus der a11y-Rolle (`textbox` → Eingabezeile, sonst Label), die Vitrino trägt dafür `a11yRoloj`. Rot `1382e26`.
+- **Offen bleiben:** **Make-Test** (S1/D, braucht das Kit mit `kampo` auf npm `next` durch den Maintainer; erster Punkt der Make-Runde nach dem Merge), B6 Text-/Boolean-Props als Komponenteneigenschaften in Figma (Manko-Kandidat), B-4 gemeinsame Regulo für `label-required`/`field-label-visible` (Art. XI).
+
 ## Messungen
 
 In [`tasks.md`](tasks.md).

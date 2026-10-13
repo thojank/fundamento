@@ -37,8 +37,6 @@ th, td { text-align: start; padding: var(--fm-spacing-small); border-block-end: 
 .fm-group { display: flex; flex-wrap: wrap; gap: var(--fm-spacing-small); align-items: center; }
 .fm-group button { font: inherit; padding: var(--fm-spacing-small); background-color: var(--fm-color-action-secondary-rest); color: var(--fm-color-action-secondary-text); border: var(--fm-border-width-default) solid var(--fm-color-border-default); border-radius: var(--fm-radius-role-control); cursor: pointer; }
 .fm-group button[aria-pressed="true"] { background-color: var(--fm-color-action-primary-rest); color: var(--fm-color-action-primary-text); }
-.fm-kolumnoj { display: grid; grid-template-columns: 1fr 1fr; gap: var(--fm-spacing-large); }
-.fm-kolumno { padding: var(--fm-spacing-medium); background-color: var(--fm-color-background-default); }
 [hidden] { display: none !important; }`;
 
 function switcher(datumoj: VitrinoDatumoj): string {
@@ -60,11 +58,12 @@ function switcher(datumoj: VitrinoDatumoj): string {
     )
     .join("");
   return `<div class="fm-group" role="group" aria-label="aspekto"><span>aspekto</span>${aspektoj}</div>${dimensioj}
-<div class="fm-group"><button type="button" id="fm-vitrino-komparo-switch" aria-pressed="false">Gegenüberstellung</button></div>`;
+<div class="fm-group"><button type="button" id="fm-vitrino-komparo-switch">Zur Gegenüberstellung</button></div>`;
 }
 
-const section = (id: string, title: string, body: string): string =>
-  `<section id="fm-vitrino-${id}"><h2>${escapeHtml(title)}</h2>${body}</section>`;
+/** A section; one the header's button leads to takes the focus (`tabindex="-1"`). */
+const section = (id: string, title: string, body: string, focusable = false): string =>
+  `<section id="fm-vitrino-${id}"${focusable ? ' tabindex="-1"' : ""}><h2>${escapeHtml(title)}</h2>${body}</section>`;
 
 /** `butono` → `Butono`, for the question of a section. */
 const capitalised = (name: string): string => name.charAt(0).toUpperCase() + name.slice(1);
@@ -103,9 +102,10 @@ function uzo(datumoj: VitrinoDatumoj): string {
         ),
         `<li>Abstand: beim ${escapeHtml(use.composes.spacing.owner)} (<code>${escapeHtml(use.composes.spacing.regulo.name)}</code>)</li>`,
       ].join("");
+      // F-6 (Abnahme Spec 009): the table says which slot is a duty.
       const slots = Object.entries(use.slots).map(
         ([slot, rule]) =>
-          `<tr><th scope="row"><code>${escapeHtml(slot)}</code></th><td>${escapeHtml((rule.accepts ?? []).join(", "))}</td><td>${rule.max ?? "–"}</td><td>${rule.nesting ?? "–"}</td></tr>`,
+          `<tr><th scope="row"><code>${escapeHtml(slot)}</code></th><td>${escapeHtml((rule.accepts ?? []).join(", "))}</td><td>${rule.max ?? "–"}</td><td>${rule.nesting ?? "–"}</td><td>${rule.required === true ? "ja" : "–"}</td></tr>`,
       );
       const allowances = Object.entries(use.layout)
         .flatMap(([prop, allowance]) => {
@@ -127,9 +127,22 @@ function uzo(datumoj: VitrinoDatumoj): string {
             `<li><strong>${escapeHtml(rule.regulo.name)}</strong> (${rule.fixed ? "fest" : "anpassbar"}): ${escapeHtml(rule.regulo.statement)} <em>${escapeHtml(rule.regulo.kialo)}</em></li>`,
         )
         .join("");
-      return `<article><h3>${escapeHtml(ero)}</h3><p>${escapeHtml(use.purpose)}</p><h4>Wann nehme ich den ${escapeHtml(capitalised(ero))} nicht?</h4><ul>${boundaries}</ul><h4>Zusammen mit</h4><ul>${together}</ul>${table("Slots", ["Slot", "nimmt auf", "max", "Verschachtelung"], slots)}<h4>Layout</h4><p>Größe aus dem ${use.layout.size === "content" ? "Inhalt" : "Container"}, Label ${use.layout.wrap === "never" ? "bricht nie um" : "darf umbrechen"}.</p><ul>${allowances}</ul><h4>Text</h4><ul>${text}</ul></article>`;
+      return `<article><h3>${escapeHtml(ero)}</h3><p>${escapeHtml(use.purpose)}</p><h4>Wann nehme ich den ${escapeHtml(capitalised(ero))} nicht?</h4><ul>${boundaries}</ul><h4>Zusammen mit</h4><ul>${together}</ul>${table("Slots", ["Slot", "nimmt auf", "max", "Verschachtelung", "Pflicht"], slots)}<h4>Layout</h4><p>Größe aus dem ${use.layout.size === "content" ? "Inhalt" : "Container"}, ${wrapSentence(datumoj.a11yRoloj[ero], use.layout.wrap)}.</p><ul>${allowances}</ul><h4>Text</h4><ul>${text}</ul></article>`;
     })
     .join("");
+}
+
+/**
+ * The sentence on wrapping (Abnahme Spec 008 and 009, C8): its subject is what the Ero lays out
+ * in one line — the input line of a textbox, the label of everything else — and `with-text` says
+ * where the label may break (inline) and where never (standalone), instead of "darf umbrechen"
+ * for both.
+ */
+function wrapSentence(role: string | undefined, wrap: string): string {
+  const subject = role === "textbox" ? "Eingabezeile" : "Label";
+  if (wrap === "never") return `${subject} bricht nie um`;
+  if (wrap === "with-text") return `${subject} darf umbrechen (inline), standalone nie`;
+  return `${subject} darf umbrechen`;
 }
 
 const table = (caption: string, head: readonly string[], rows: readonly string[]): string =>
@@ -150,7 +163,7 @@ function paletroj(datumoj: VitrinoDatumoj): string {
             ["Stufe", "Farbe", "Token", "Hex", "OKLCH L"],
             ramp.stupoj.map(
               (step) =>
-                `<tr><th scope="row">${step.stupo}</th><td>${swatch(step.token)}</td><td><code>${escapeHtml(step.token)}</code></td><td>${escapeHtml(step.hex)}</td><td>${step.l.toFixed(3)}</td></tr>`,
+                `<tr><th scope="row">${step.stupo}</th><td>${swatch(step.token)}</td><td><code>${escapeHtml(step.token)}</code></td><td>${escapeHtml(step.hex)}</td><td>${step.l === undefined ? "–" : step.l.toFixed(3)}</td></tr>`,
             ),
           ),
         )
@@ -208,7 +221,7 @@ ${section("uzo", "Gebrauch", uzo(datumoj))}
 ${section("kontrasto", "Kontrastmatrix", '<div id="fm-vitrino-kontrasto-tabelo"></div>')}
 ${section("regularo", "Regularo und Ziele", '<div id="fm-vitrino-regularo-tabelo"></div>')}
 ${section("kovrado", "Eigene Werte je Dimensio", '<div id="fm-vitrino-kovrado-tabelo"></div>')}
-${section("komparo", "Gegenüberstellung", '<div id="fm-vitrino-komparo-tabelo"></div>')}
+${section("komparo", "Gegenüberstellung", '<div id="fm-vitrino-komparo-tabelo"></div>', true)}
 </main>
 <script type="module" id="fm-vitrino-elemento">${elementJs}</script>
 <script type="module" id="fm-vitrino-skripto">${vitrinoSkripto()}</script>

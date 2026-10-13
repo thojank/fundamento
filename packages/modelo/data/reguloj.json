@@ -484,7 +484,7 @@
       "name": "link-label-names-destination",
       "statement": "The label of a ligilo names the destination; here, click, more or link alone name none.",
       "kialo": "WCAG 2.4.4 (Link Purpose in Context): a screen reader user reads the links of a page as a list, out of context; a list of here says nothing.",
-      "scope": "eroj: ligilo instances with a label (check not-words)",
+      "scope": "eroj: ligilo instances with a label (check not-words), an approximation without a model: not-words hits every occurrence of a listed word, so a label that names the destination and carries the word as well ('Mehr zum Datenschutz') is reported too (Abnahme Spec 008 A10, R-1; candidate not-only-words in the Vojmapo, Phase 6)",
       "checkability": "automatic",
       "appliesTo": {
         "eroj": [
@@ -549,7 +549,7 @@
       "name": "error-says-what-to-do",
       "statement": "The error text of a kampo says what to do, not only that something is wrong.",
       "kialo": "WCAG 3.3.3 (Error Suggestion): 'Invalid' leaves the person guessing; a sentence with a verb and an object names the way out.",
-      "scope": "eroj: kampo instances with an error text; checked as at least three words (check min-words), an approximation without a model",
+      "scope": "eroj: kampo instances with an error text; checked as at least three words (check min-words), an approximation without a model: min-words only counts the words, so a three-word text without a way out ('Das ist ungültig') passes (Abnahme Spec 009 A6, R-2; candidate for a better check in the Vojmapo, Phase 6)",
       "checkability": "automatic",
       "appliesTo": {
         "eroj": [

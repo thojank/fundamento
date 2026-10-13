@@ -5,17 +5,19 @@
 import { cpSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { projectModeloSource } from "@fundamento/modelo";
+import { baseResolution, defaultModeloSource, projectModeloSource } from "@fundamento/modelo";
 import { describe, expect, it } from "vitest";
 import { celoInputOf } from "../../build.js";
 import {
   ALPHA_VARIES,
   compositeFields,
   FIGMA_CELO,
+  FIGMA_SECTION,
   type FigmaPlan,
   type FigmaValue,
   figmaPlanInventory,
   figmaValues,
+  labelDefaultOf,
   resolveFigmaPlan,
   styleOfWeight,
   TEXT_CASE_VARIES,
@@ -865,5 +867,49 @@ describe("Figma plan for the kampo (Spec 009 T010)", () => {
     expect(items.kampo?.values["placeholder.color@size=medium,state=rest"]).toMatch(
       /^#[0-9a-f]{6}$/,
     );
+  });
+});
+
+// M-3 (Abnahme Spec 008, Befund B-6; Entscheidung des Maintainers F14, 2026-10-13): Der Vorgabewert
+// der Beschriftung folgt der Rolle des Ero — Celo-Wissen aus a11y.role, wie structureOf.
+describe("the label default of a set follows its a11y role (M-3)", () => {
+  it("is Aktion for a button, Ziel for a link, Beschriftung for a textbox", () => {
+    const defaults = Object.fromEntries(
+      plan.components.map((component) => [component.set, component.label?.defaultValue]),
+    );
+    expect(defaults).toEqual({ butono: "Aktion", kampo: "Beschriftung", ligilo: "Ziel" });
+  });
+
+  it("falls back to Aktion for a role the Celo does not know", () => {
+    expect(labelDefaultOf("button")).toBe("Aktion");
+    expect(labelDefaultOf("link")).toBe("Ziel");
+    expect(labelDefaultOf("textbox")).toBe("Beschriftung");
+    expect(labelDefaultOf("slider")).toBe("Aktion");
+  });
+});
+
+// F-1 / F-2 (Nachlese Spec 008/009): Die Sets liegen in der Section „Fundamento", in einer Reihe.
+// Abstand und Innenabstand sind ein Token, keine Zahl: spacing.xlarge, aufgelöst in der
+// Basiskombination wie der Zellabstand der Vitrino.
+describe("the plan places the sets in the section Fundamento (F-1, F-2)", () => {
+  const repo = celoInputOf(defaultModeloSource());
+  if (!repo.ok) throw new Error("the repo Modelo must be valid");
+  const repoPlan = JSON.parse(
+    FIGMA_CELO.generate(repo.input).find((file) => file.path === "figma/plan.json")?.text ?? "{}",
+  ) as FigmaPlan;
+
+  it("takes gap and padding from spacing.xlarge in the base combination", () => {
+    const xlarge = baseResolution(repo.input.modelo)["spacing.xlarge"]?.value as
+      | { value: number; unit: string }
+      | undefined;
+    expect(xlarge?.unit).toBe("px");
+    expect(repoPlan.section).toEqual({
+      name: FIGMA_SECTION,
+      gap: xlarge?.value,
+      padding: xlarge?.value,
+    });
+    // Resolved today: 24 px (spacing.scale.600).
+    expect(repoPlan.section?.gap).toBe(24);
+    expect(FIGMA_SECTION).toBe("Fundamento");
   });
 });

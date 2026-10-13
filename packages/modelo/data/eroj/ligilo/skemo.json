@@ -12,7 +12,8 @@
       {
         "name": "to",
         "kind": "string",
-        "description": "The destination, named platform-neutrally (Art. VIII); the Web Celo renders it as the href of the link."
+        "description": "The destination, named platform-neutrally (Art. VIII); the Web Celo renders it as the href of the link.",
+        "required": true
       },
       {
         "name": "placement",

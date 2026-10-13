@@ -159,13 +159,13 @@ for (const button of document.querySelectorAll("[data-fm-switch]")) {
   });
 }
 
+// The button in the header leads to the comparison (Spec 004 M1, Befund 2, 2026-10-12): it used
+// to toggle a two-column class on the last section, and nothing changed where the button stands.
 const komparoSwitch = document.getElementById("fm-vitrino-komparo-switch");
 const komparoSection = document.getElementById("fm-vitrino-komparo");
 komparoSwitch.addEventListener("click", () => {
-  const on = komparoSwitch.getAttribute("aria-pressed") !== "true";
-  komparoSwitch.setAttribute("aria-pressed", String(on));
-  komparoSection.classList.toggle("fm-kolumnoj", on);
-  komparoSection.dataset.fmKomparo = on ? "on" : "off";
+  komparoSection.scrollIntoView();
+  komparoSection.focus();
 });
 
 function applyFragment() {

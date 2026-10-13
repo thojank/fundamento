@@ -439,6 +439,15 @@ Keine neuen. Genutzt werden `colorjs.io` (bereits für OKLCH und APCA), Playwrig
 | AK-09 (Teil) | D-07, D-08 | M1 |
 | FR-10 – FR-14, FR-16 – FR-18, AK-03 – AK-05, AK-07 | **Etappe B** | nicht in diesem Plan |
 
+## Offene Jugxo-Frage an den Maintainer (Abnahme M1, Befund 3)
+
+Gestellt am 2026-10-13 (Nachlese), **nicht entschieden** – die Entscheidung ist ein Jugxo des Maintainers, P0 trifft sie nicht:
+
+- **Befund 3 der Messung M1 (2026-10-12):** Unter `contrast=high` ist `color.status.*.border` gleich `color.status.*.basic` (dark gemessen: danger `#fca297`/`#fca297`, info `#8dc5ed`, success `#95cea0`, warning `#e2b577`). Der Grundsatz „Kontrast über Rand statt Füllung“ (Spec 002 FR-07) hat unter high keinen Rand mehr.
+- **Frage:** Ist das Absicht (high = Vollfläche, der Rand geht in der Füllung auf) oder Lücke (die generische Satzstufe `contrast/high` müsste dem Rand einen eigenen Wert geben)?
+- **Folgen je Antwort:** Absicht → ein Jugxo in `jugxoj.json` gibt die Gleichheit frei, mit Kialo. Lücke → eigener Wert für `color.status.*.border` in `contrast/high` (und `color-scheme/dark+contrast/high`, Kontrast schlägt Farbschema), roter Lauf zuerst, kein Token neu, keine Schwelle gesenkt.
+- **Bis dahin:** keine Änderung; der Eintrag K3 in [`tasks.md`](tasks.md) bleibt offen.
+
 ## Manuelle Abnahme (Maintainer, nach dem PR)
 
 - **M1 – komuna 2 im Blick:** Der Maintainer öffnet die Vitrino, schaltet alle sechs Dimensioj durch und beurteilt komuna 2 visuell; dann die Gegenüberstellung komuna ↔ ekzemplo. Jeder Befund, den keine Prüfung gefunden hat, wird Regulo-Kandidat mit Kialo (Art. VI) und geht in die nächste Runde.

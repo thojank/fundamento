@@ -79,7 +79,8 @@ export interface VitrinoDatumoj {
     string,
     {
       rampo: string;
-      stupoj: { stupo: number; token: string; hex: string; l: number }[];
+      /** `l` is absent for an overlay (shade, tint): it has no lightness until it lies on a surface. */
+      stupoj: { stupo: number; token: string; hex: string; l?: number }[];
       regula: string;
     }[]
   >;
@@ -108,6 +109,12 @@ export interface VitrinoDatumoj {
   komparo: Record<string, { kriterio: string; a: string; b: string; pli: "a" | "b" | "egale" }[]>;
   /** Per Ero its grid as markup (`fm-<ero>`); the element upgrades it in the browser (Spec 008). */
   eroj: Record<string, string>;
+  /**
+   * The a11y role of every Ero (button, link, textbox): the section "Gebrauch" names the subject
+   * of a layout sentence from it — the line of a textbox that never breaks is the input line, not
+   * the label (Abnahme Spec 009, C8).
+   */
+  a11yRoloj: Record<string, string>;
   /**
    * The Uzo of every Ero that has one, as get_ero states it (Spec 007 T027, S5): the Vitrino
    * answers "Wann nehme ich den Butono nicht?" from the same data as the Gvidanto.
@@ -152,8 +159,15 @@ export interface VitrinoBazo {
   apcaHintoj: number;
 }
 
-const round = (value: number, digits = 3): number =>
-  Number(Math.round(Number(`${value}e${digits}`)) + `e-${digits}`);
+/**
+ * Rounds to `digits` places. Takes any finite number: the earlier form glued "e3" to the number's
+ * text, and a number in exponent notation (1 − L of a pure white, "2e-16") became NaN — seen in
+ * the Vitrino as the anchor distance of color.text.default in dark (Spec 004 M1, Befund 5).
+ */
+export const roundTo = (value: number, digits = 3): number => {
+  const rounded = Number(value.toFixed(digits));
+  return rounded === 0 ? 0 : rounded;
+};
 
 const plainHex = (color: { hex?: string; components: readonly (number | "none")[] }): string => {
   if (typeof color.hex === "string") return color.hex;
@@ -186,7 +200,7 @@ const hexOf = (value: unknown): string => {
 
 const lightnessOf = (value: unknown): number => {
   const color = readDtcgColor(value);
-  return color === undefined ? 0 : round(oklchLightness(color));
+  return color === undefined ? 0 : roundTo(oklchLightness(color));
 };
 
 /** `aspekto|color-scheme|contrast|density|viewport|motion`, in Dimensio priority order. */
@@ -214,16 +228,16 @@ function roleRows(
       rows.push({ token, hex: overlay });
       continue;
     }
-    const l = round(oklchLightness(color));
+    const l = roundTo(oklchLightness(color));
     const previousL = rows.at(-1)?.l;
     rows.push({
       token,
       hex: hexOf(entry.value),
       l,
       ...(ladder && previousL !== undefined && index > 0
-        ? { alNaskbo: round(Math.abs(l - previousL)) }
+        ? { alNaskbo: roundTo(Math.abs(l - previousL)) }
         : {}),
-      ...(ladder ? { alEkstremo: round(oklchLExtreme(color)) } : {}),
+      ...(ladder ? { alEkstremo: roundTo(Math.max(0, oklchLExtreme(color))) } : {}),
     });
   }
   return rows;
@@ -265,10 +279,46 @@ export function uzojOf(modelo: Modelo): Record<string, UzoOutput> {
 }
 
 /**
+ * The example text of every text slot besides the label (Abnahme Spec 009, F-5): one neutral word
+ * per slot, the same words the Figma set shows in its field (F-4: Hinweis, Fehler). Without them
+ * the Vitrino showed a field without help and without error text.
+ */
+export const VITRINO_SLOT_TEXTS: Readonly<Record<string, string>> = {
+  help: "Hinweis",
+  error: "Fehler",
+};
+
+/**
+ * The slotted example texts of one cell (F-5): every text slot besides the default one that has an
+ * example word, and that the Skemo allows in this column. A constraint `slot:<name>: filled ⇒
+ * <prop>: true` keeps the slot out of every column but that prop's (the error of the kampo stands
+ * only under invalid; an error text without the state is a contradiction, Spec 009 D-04).
+ */
+function slotTexts(entry: LoadedEro, column: string | undefined): string {
+  return entry.skemo.slots
+    .filter((slot) => slot.text === true && slot.default !== true)
+    .flatMap((slot) => {
+      const text = VITRINO_SLOT_TEXTS[slot.name];
+      if (text === undefined) return [];
+      const constraint = (entry.skemo.constraints ?? []).find(
+        (candidate) => candidate.when[`slot:${slot.name}`] === "filled",
+      );
+      const allowed =
+        constraint === undefined ||
+        Object.entries(constraint.allowed).every(
+          ([prop, values]) => prop === column && values.includes("true"),
+        );
+      return allowed ? [`<span slot="${slot.name}">${text}</span>`] : [];
+    })
+    .join("");
+}
+
+/**
  * The grid of one Ero (Spec 004 for the butono; Spec 008 D-12 for every Ero): one row per
  * combination of the enum props its parts are keyed by, one column at rest and one per boolean
- * prop that is a state (disabled, loading) or carries an a11y text (external). A string prop
- * without a default (the link's `to`) points at the section itself.
+ * prop that is a state (disabled, loading) or carries an a11y text (external). A required string
+ * prop (the link's `to`, R-10) points at the section itself; the text slots carry their example
+ * word where the Skemo allows it (F-5).
  */
 export function eroMarkup(entry: LoadedEro): string {
   const tag = `fm-${entry.ero.name}`;
@@ -284,7 +334,7 @@ export function eroMarkup(entry: LoadedEro): string {
     .map((prop) => prop.name);
   // A link needs a target: the section itself (Spec 008); every other string prop stays empty.
   const required = entry.skemo.props
-    .filter((prop) => prop.name === "to")
+    .filter((prop) => prop.required === true && prop.kind === "string")
     .map((prop) => ` ${prop.name}="#fm-vitrino-${entry.ero.name}"`)
     .join("");
   const rows = combinationsOf(entry.skemo, keys)
@@ -294,8 +344,11 @@ export function eroMarkup(entry: LoadedEro): string {
         .map(([key, value]) => ` ${key}="${value}"`)
         .join("");
       const label = vitrinoLabelOf(combination);
-      const cells = ["", ...columns.map((column) => ` ${column}`)]
-        .map((extra) => `<td><${tag}${attributes}${required}${extra}>${label}</${tag}></td>`)
+      const cells = [undefined, ...columns]
+        .map(
+          (column) =>
+            `<td><${tag}${attributes}${required}${column === undefined ? "" : ` ${column}`}>${label}${slotTexts(entry, column)}</${tag}></td>`,
+        )
         .join("");
       return `<tr><th scope="row">${label}</th>${cells}</tr>`;
     })
@@ -404,17 +457,20 @@ export function vitrinoDatumoj({ input, bazo }: VitrinoDatumojInput): VitrinoDat
       assignment["color-scheme"] === "light" &&
       assignment.contrast === "default"
     ) {
-      const ramps = new Map<string, { stupo: number; token: string; hex: string; l: number }[]>();
+      const ramps = new Map<string, { stupo: number; token: string; hex: string; l?: number }[]>();
       for (const [name, token] of Object.entries(tokens)) {
         const match = PALETTE.exec(name);
         if (match?.[1] === undefined || match[2] === undefined) continue;
+        // A step with alpha (shade, tint) is an overlay, named like the overlays of the action
+        // roles: "#000000 with L 0.000" read like pure black (Spec 004 M1, Befund 5).
+        const overlay = overlayText(token.value);
         ramps.set(match[1], [
           ...(ramps.get(match[1]) ?? []),
           {
             stupo: Number(match[2]),
             token: name,
-            hex: hexOf(token.value),
-            l: lightnessOf(token.value),
+            hex: overlay ?? hexOf(token.value),
+            ...(overlay === undefined ? { l: lightnessOf(token.value) } : {}),
           },
         ]);
       }
@@ -546,11 +602,11 @@ export function vitrinoDatumoj({ input, bazo }: VitrinoDatumojInput): VitrinoDat
       {
         paro: measurement.pair.name,
         kategorio: measurement.kategorio,
-        wcag2: round(branch.ratio, 2),
+        wcag2: roundTo(branch.ratio, 2),
         ...(wcag2?.threshold === undefined
           ? {}
-          : { sojlo: wcag2.threshold, rezervo: round(branch.ratio / wcag2.threshold - 1, 4) }),
-        apca: round(apca?.value ?? 0, 1),
+          : { sojlo: wcag2.threshold, rezervo: roundTo(branch.ratio / wcag2.threshold - 1, 4) }),
+        apca: roundTo(apca?.value ?? 0, 1),
         ...(apca?.threshold === undefined ? {} : { apcaSojlo: apca.threshold }),
         ...(measurement.surface === undefined ? {} : { surfaco: measurement.surface }),
         pasis: measurement.passed,
@@ -581,7 +637,7 @@ export function vitrinoDatumoj({ input, bazo }: VitrinoDatumojInput): VitrinoDat
             valoro: valoro.name,
             propraj: result.own,
             entute: result.total,
-            parto: round(result.share, 4),
+            parto: roundTo(result.share, 4),
           },
         ];
       }
@@ -617,6 +673,9 @@ export function vitrinoDatumoj({ input, bazo }: VitrinoDatumojInput): VitrinoDat
       ankroj,
     }),
     eroj: erojMarkup(modelo.eroj),
+    a11yRoloj: Object.fromEntries(
+      modelo.eroj.map((entry) => [entry.ero.name, entry.skemo.a11y.role]),
+    ),
     uzo: uzojOf(modelo),
     apcaHintoj: {
       nun: apcaNun,
@@ -631,11 +690,11 @@ export function vitrinoDatumoj({ input, bazo }: VitrinoDatumojInput): VitrinoDat
             tally.sojloMin === tally.sojloMax
               ? String(tally.sojloMin)
               : `${tally.sojloMin}–${tally.sojloMax}`,
-          plejMalbona: round(tally.plejMalbona, 1),
+          plejMalbona: roundTo(tally.plejMalbona, 1),
           plejMalbonaParo: tally.plejMalbonaParo,
           ...(tally.bazoMezuroj === 0
             ? {}
-            : { bazo: tally.bazo, bazoPlejMalbona: round(tally.bazoPlejMalbona, 1) }),
+            : { bazo: tally.bazo, bazoPlejMalbona: roundTo(tally.bazoPlejMalbona, 1) }),
         })),
       ...(bazo === undefined
         ? {}

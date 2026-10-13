@@ -91,6 +91,8 @@ describe("S2: the agent does not leave the label out", () => {
     expect(clean.violations).toEqual([]);
     const brief = await output<Brief>(client, "get_ero", { name: "kampo", brief: true });
     expect(brief.required.slots).toEqual(["label"]);
+    // R-10 (Abnahme 2026-10-13, A3): value, placeholder and name have no default, but no duty.
+    expect(brief.required.props).toEqual([]);
     expect(brief.purpose).toBe(kampo.purpose);
   });
 });
@@ -149,5 +151,15 @@ describe("S4: the agent does not take the field for several lines", () => {
     expect(mail.suggestion).toEqual({ ero: "kampo", props: { kind: "email" } });
     const name = await output<Suggested>(client, "suggest_ero", { goal: "Name" });
     expect(name.suggestion).toEqual({ ero: "kampo", props: {} });
+  });
+
+  // R-11 (Abnahme 2026-10-13, A11): the compound word "E-Mail-Adresse" hit enter-text (adresse)
+  // before email (mail); now the longest keyword wins and the compound counts as one word.
+  it("'Feld für die E-Mail-Adresse' is the kampo with kind email (R-11)", async () => {
+    const answer = await output<Suggested>(client, "suggest_ero", {
+      goal: "Feld für die E-Mail-Adresse",
+    });
+    expect(answer.suggestion).toEqual({ ero: "kampo", props: { kind: "email" } });
+    expect(answer.matched?.goal).toBe("email");
   });
 });

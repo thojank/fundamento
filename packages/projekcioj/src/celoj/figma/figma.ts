@@ -34,7 +34,7 @@ import {
   type Uzo,
 } from "@fundamento/modelo";
 import type { Celo, CeloInput, GeneratedFile } from "../../build.js";
-import { VITRINO_SURFACE } from "../vitrino/datumoj.js";
+import { VITRINO_SLOT_TEXTS, VITRINO_SURFACE } from "../vitrino/datumoj.js";
 import { DRAWN_PART_PROPERTIES, pluginManifest, pluginSource } from "./plugin.js";
 
 /** A variable value: a literal, or an alias to another variable of the plan. */
@@ -124,13 +124,13 @@ export const FIGMA_NOT_DRAWN: Readonly<Record<string, string>> = {
 /**
  * The texts a field shows in the set (Abnahme Spec 009, F-4): the control an example in place of
  * the typed text (the placeholder), help and error a word each. One neutral word per node, like
- * the label's `Aktion` (F14); an instance overrides them. Without content a HUG frame shrinks to
+ * the label's default (F14, M-3); an instance overrides them. Without content a HUG frame shrinks to
  * its paddings and a text node is invisible.
  */
 export const FIELD_TEXTS: Readonly<Record<string, string>> = {
   text: "Beispiel",
-  help: "Hinweis",
-  error: "Fehler",
+  // The same words the Vitrino slots into the field (F-5): one source for both pictures.
+  ...VITRINO_SLOT_TEXTS,
 };
 
 /**
@@ -142,6 +142,37 @@ export type FigmaStructure = "control" | "field";
 
 export const structureOf = (role: string): FigmaStructure =>
   role === "textbox" ? "field" : "control";
+
+/**
+ * The neutral word every label template shows, per a11y role (M-3; Maintainer, F14, 2026-10-13,
+ * Jugxo jug_01M4VCG06S4MWFPVPNWMBN9EWF): a button names an action, a link its target, a field what it asks for.
+ * Celo knowledge from the a11y role (Art. VIII), like `structureOf`; instances override it.
+ */
+const LABEL_DEFAULTS: Readonly<Record<string, string>> = {
+  button: "Aktion",
+  link: "Ziel",
+  textbox: "Beschriftung",
+};
+
+/** The word a role without its own entry shows: the button's, as every set did before M-3. */
+const LABEL_DEFAULT = "Aktion";
+
+export const labelDefaultOf = (role: string): string => LABEL_DEFAULTS[role] ?? LABEL_DEFAULT;
+
+/**
+ * The section every component set of the library lies in (F-2, Nachlese Spec 008/009): one mode
+ * set on the section switches the brand of the whole library, while the sets stay on
+ * „Automatisch" (F35).
+ */
+export const FIGMA_SECTION = "Fundamento";
+
+/**
+ * The distance between two sets in the section and the section's padding (F-1, F-2). The
+ * Vortaro's spacing.xlarge is the gap between the sections of one whole — a set is such a section
+ * of the library; spacing.xxlarge is reserved for the sections of a page, which the Figma page
+ * itself is. Resolved in the base combination, like the cell padding of the Vitrino.
+ */
+const SET_GAP = "spacing.xlarge";
 
 /**
  * The typography a label that inherits from its text (binding keyword `inherit`, Spec 008 E6,
@@ -284,6 +315,13 @@ export interface FigmaPlan {
   fontFallback?: string;
   collections: FigmaCollection[];
   components: FigmaComponentSet[];
+  /**
+   * Where the sets lie (F-1, F-2): in the section of this name on the current page, in a row —
+   * the first at the padding, every set the run creates or moves in to the right of the last set
+   * (right edge + gap). A set the run finds in the section keeps its place. Gap and padding are
+   * px of spacing.xlarge, resolved in the base combination.
+   */
+  section?: { name: string; gap: number; padding: number };
 }
 
 /** The single-mode collection of everything no Dimensio changes, and its mode. */
@@ -1027,7 +1065,7 @@ function componentSetOf(
       gap: 2 * cell,
       padding: cell,
     },
-    label: { property: "label", defaultValue: LABEL_DEFAULT },
+    label: { property: "label", defaultValue: labelDefaultOf(skemo.a11y.role) },
     fonts,
     ...(surface === undefined ? {} : { surface }),
   };
@@ -1061,9 +1099,6 @@ function fontOf(value: unknown): { family: string; style: string } | undefined {
   if (typeof family !== "string") return undefined;
   return { family, style: FONT_STYLES[Math.round(weight / 100) * 100] ?? "Regular" };
 }
-
-/** The neutral word every label template shows; instances override it (Maintainer, F14). */
-const LABEL_DEFAULT = "Aktion";
 
 /** The padding of a table cell in the Vitrino; the grid in Figma keeps the same distances. */
 const VITRINO_CELL_PADDING = "spacing.small";
@@ -1127,6 +1162,8 @@ export const FIGMA_CELO: Celo = {
         variables: sortVariables(variables.get(dimensio.name) ?? []),
       })),
     ];
+    const base = baseResolution(modelo);
+    const gap = parityPx(base[SET_GAP]?.value);
     const plan: FigmaPlan = {
       fundamento: modeloJson.fundamento.version,
       fontFallback: FIGMA_FONT_FALLBACK,
@@ -1136,10 +1173,11 @@ export const FIGMA_CELO: Celo = {
           entry,
           modeloJson.fundamento.version,
           allResolutions(modelo),
-          baseResolution(modelo),
+          base,
           modelo.reguloj,
         ),
       ),
+      section: { name: FIGMA_SECTION, gap, padding: gap },
     };
     return [
       { path: "figma/plan.json", text: `${JSON.stringify(plan, null, 2)}\n` },

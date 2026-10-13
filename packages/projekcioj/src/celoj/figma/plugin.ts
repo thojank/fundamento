@@ -15,7 +15,8 @@
 // variables.getLocalVariableCollectionsAsync/getLocalVariablesAsync, createVariableCollection,
 // createVariable, createVariableAlias, setBoundVariableForPaint, collection.addMode/renameMode,
 // variable.setValueForMode/variableCollectionId, createComponent/createFrame/createText,
-// combineAsVariants, appendChild, setBoundVariable, set/getSharedPluginData.
+// combineAsVariants, appendChild, setBoundVariable, set/getSharedPluginData, and createSection with
+// resizeWithoutConstraints for the section „Fundamento" that holds every set (F-2).
 
 import { type FigmaPlan, TEXT_CASE_VARIES } from "./figma.js";
 
@@ -376,6 +377,110 @@ function ours(parent, key, value) {
 }
 
 /**
+ * The section „Fundamento" on the current page (F-2, Nachlese Spec 008/009), found by its mark
+ * \`section\` like every node the plugin owns, or undefined. Every set lies in it: one variable mode
+ * set on the section switches the brand of the whole library, while the sets themselves stay on
+ * „Automatisch" (F35 clears explicit modes on *sets*). The mode of the section is the
+ * maintainer's: the plugin never sets one there and never clears one.
+ */
+function findSection() {
+  if (PLAN.section === undefined) return undefined;
+  return ours(figma.currentPage, "section", PLAN.section.name);
+}
+
+/**
+ * The set of an Ero: in the section, or still directly on the page, where every run before F-2
+ * left it (gemessen 2026-10-13 in f10b-5: butono und ligilo lagen beide auf der Seite).
+ */
+function findSet(name) {
+  const section = findSection();
+  const inSection = section === undefined ? undefined : ours(section, "ero", name);
+  return inSection !== undefined ? inSection : ours(figma.currentPage, "ero", name);
+}
+
+/** What the run did with the section; the headline of the report carries it (F-2). */
+const sectionReport =
+  PLAN.section === undefined
+    ? undefined
+    : { name: PLAN.section.name, found: false, created: false, moved: [] };
+
+/**
+ * The section of this run: found, or created on the current page and stamped (F-2). A new section
+ * opens around the first set that still lies on the page — that set keeps the place the
+ * maintainer saw it at — or at 0/0 in a file without sets. x and y are written, not left to the
+ * tool: where createSection puts a section is not measured.
+ */
+function openSection() {
+  if (PLAN.section === undefined) return undefined;
+  let section = findSection();
+  sectionReport.found = section !== undefined;
+  if (section !== undefined) {
+    write(section, "name", PLAN.section.name);
+    return section;
+  }
+  const anchor = PLAN.components
+    .map((component) => ours(figma.currentPage, "ero", component.set))
+    .filter((set) => set !== undefined)[0];
+  section = create(() => figma.createSection());
+  stamp(section, "section", PLAN.section.name);
+  write(section, "name", PLAN.section.name);
+  write(section, "x", anchor === undefined ? 0 : anchor.x - PLAN.section.padding);
+  write(section, "y", anchor === undefined ? 0 : anchor.y - PLAN.section.padding);
+  sectionReport.created = true;
+  return section;
+}
+
+/**
+ * Puts a set into the section (F-1, F-2). A set the run finds in the section keeps its place —
+ * a second run moves nothing. A set the run created, or found still lying on the page, goes to
+ * the right of the last set in the section: its right edge plus the gap, top-aligned with it;
+ * the first set of a section lies at the padding. Gemessen 2026-10-13 in f10b-5: ein neues Set
+ * lag bei 0/0 auf dem vorhandenen und musste von Hand verschoben werden (F-1). Figma keeps x and y
+ * of a re-parented node as numbers, now relative to the new parent, so they are written after
+ * appendChild. Returns where the set lies, and after which set, for the report.
+ */
+function placeSet(section, set, name, created) {
+  if (section === undefined) return undefined;
+  if (set.parent === section) return { x: set.x, y: set.y, after: null, action: "kept" };
+  let last;
+  for (const child of section.children) {
+    if (child === set || child.type !== "COMPONENT_SET") continue;
+    if (child.getSharedPluginData(NAMESPACE, "ero") === "") continue;
+    if (last === undefined || child.x + child.width > last.x + last.width) last = child;
+  }
+  const x = last === undefined ? PLAN.section.padding : last.x + last.width + PLAN.section.gap;
+  const y = last === undefined ? PLAN.section.padding : last.y;
+  section.appendChild(set);
+  write(set, "x", x);
+  write(set, "y", y);
+  if (!created) sectionReport.moved.push(name);
+  return {
+    x: set.x,
+    y: set.y,
+    after: last === undefined ? null : last.getSharedPluginData(NAMESPACE, "ero"),
+    action: created ? "created" : "moved",
+  };
+}
+
+/**
+ * The section as large as its content plus the padding on the right and at the bottom (F-2),
+ * resized only when it differs, so a second run writes nothing.
+ */
+function fitSection(section) {
+  if (section === undefined || section.children.length === 0) return;
+  let right = 0;
+  let bottom = 0;
+  for (const child of section.children) {
+    right = Math.max(right, child.x + child.width);
+    bottom = Math.max(bottom, child.y + child.height);
+  }
+  const width = right + PLAN.section.padding;
+  const height = bottom + PLAN.section.padding;
+  if (section.width === width && section.height === height) return;
+  section.resizeWithoutConstraints(width, height);
+}
+
+/**
  * Written only when the value does not hold yet (F21). Figma refuses some writes on a document
  * that already has the value — setting layoutMode on a grid with occupied cells threw "Cannot
  * delete occupied row/column." on the second run — and a write that changes nothing is noise in
@@ -561,7 +666,7 @@ function leftState(set) {
 function creationsInFoundSets() {
   const blocked = [];
   for (const component of PLAN.components) {
-    const set = ours(figma.currentPage, "ero", component.set);
+    const set = findSet(component.set);
     if (set === undefined) continue;
     const wouldCreate = [];
     for (const variant of component.variants) {
@@ -600,7 +705,7 @@ function nodesOf(set) {
 const seenAtStart = new Map();
 function recordStart() {
   for (const component of PLAN.components) {
-    const set = ours(figma.currentPage, "ero", component.set);
+    const set = findSet(component.set);
     if (set === undefined) continue;
     seenAtStart.set(component.set, { set: set, nodes: nodesOf(set) });
   }
@@ -957,8 +1062,11 @@ async function applyComponents(variables, warnings) {
     });
   }
   const reports = [];
+  // The section every set lies in (F-2): found, or created before the first set is placed.
+  const section = openSection();
+  progress.section = sectionReport;
   for (const component of PLAN.components) {
-    let set = ours(figma.currentPage, "ero", component.set);
+    let set = findSet(component.set);
     // How the run found the set, before it changed anything (F10b). Ohne diesen Blick lässt sich
     // hinterher nicht mehr unterscheiden, ob ein Knoten fehlte oder ob er nur seine Markierung
     // verloren hatte — der frisch angelegte Knoten verdeckt beides.
@@ -1272,6 +1380,8 @@ async function applyComponents(variables, warnings) {
         }
       }
     }
+    // Where the set lies (F-1, F-2): kept, or put to the right of the last set in the section.
+    report.placement = placeSet(section, set, component.set, madeThisRun.get(component.set) === set);
     report.layout = measureLayout(set, component);
     report.layout.refused = refused;
     // Symmetric (F10): the plan against the file, in both directions, with names. The finding
@@ -1296,6 +1406,7 @@ async function applyComponents(variables, warnings) {
     stamp(set, "after", JSON.stringify(report.after));
     reports.push(report);
   }
+  fitSection(section);
   return reports;
 }
 
@@ -1749,6 +1860,8 @@ async function applyPlan(options) {
     // Collections of the plan that stand empty in the file: reported, never removed.
     empty: empty,
     variables: variables.size,
+    // Found or created, and which sets the run moved in from the page (F-2).
+    section: sectionReport,
     components: components,
     warnings: warnings,
     mankoj: mankojOf(components),
@@ -1805,6 +1918,7 @@ function reportParts(result) {
       modes: result.modes,
       empty: result.empty,
       variables: result.variables,
+      section: result.section,
       warnings: result.warnings,
       components: result.components.map((report) => ({
         set: report.set,
@@ -1818,6 +1932,7 @@ function reportParts(result) {
         lost: report.lost.length,
         diagnosis: report.diagnosis,
         modes: report.modes,
+        placement: report.placement,
       })),
       mankoj: result.mankoj,
     }),

@@ -98,13 +98,15 @@ describe("S1: the agent gets the link instead of a refusal", () => {
     const brief = await output<Brief>(client, "get_ero", { name: "ligilo", brief: true });
     expect(brief.axes.map((axis) => axis.name)).toEqual(["placement", "size"]);
     expect(brief.axes[0]?.values).toContain("standalone");
-    expect(brief.required.props).toEqual(["to", "label"]);
+    // R-10 (Abnahme 2026-10-13): only the destination is a duty; label is the fallback name.
+    expect(brief.required.props).toEqual(["to"]);
     expect(brief.purpose).toBe(ligilo.purpose);
   });
 
   it("'Dokumentation' is the external ligilo", async () => {
     const answer = await output<Suggested>(client, "suggest_ero", { goal: "Dokumentation" });
-    expect(answer.suggestion).toEqual({ ero: "ligilo", props: { external: "true" } });
+    // R-9 (Abnahme 2026-10-13, A6): a boolean prop is a boolean, not the text "true".
+    expect(answer.suggestion).toEqual({ ero: "ligilo", props: { external: true } });
     expect(answer.regulo?.name).toBe("external-link-marked");
   });
 });
@@ -172,5 +174,20 @@ describe("list_eroj and the brief (A5, acceptance 1)", () => {
     );
     expect(full.skemo.a11y.role).toBe("link");
     expect(full.uzo?.purpose).toBe(ligilo.purpose);
+  });
+});
+
+// F-2 (Abnahme Spec 008, 2026-10-13, Doku): "Wie schalte ich die Marke in Figma um?" The mode is
+// set on the page or on a frame or section, never on a single component set; the sets stand on
+// "Automatisch" and follow. The prompt carries the answer, so a client agent says it right.
+describe("F-2: the prompt says how the brand is switched in Figma", () => {
+  it("rule 14 names the page or frame (section), never the single set, and Automatisch", async () => {
+    const prompt = (await client.getPrompt({ name: "gvidanto" })).messages[0]?.content;
+    const text = prompt?.type === "text" ? prompt.text : "";
+    const rule14 = text.split("\n").find((line) => line.startsWith("14. ")) ?? "";
+    expect(rule14).toMatch(/switch the brand in Figma/i);
+    expect(rule14).toMatch(/mode of the collection `aspekto` on the page or on a frame or section/);
+    expect(rule14).toMatch(/never on a single component set/);
+    expect(rule14).toMatch(/Automatisch/);
   });
 });

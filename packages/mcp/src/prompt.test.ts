@@ -76,6 +76,18 @@ describe("prompt gvidanto", () => {
     expect(rule13).toMatch(/Do not build the Ero the user named/);
   });
 
+  // F-2 (Abnahme Spec 008, 2026-10-13): measured in f10b-5 — a mode set on a component set holds
+  // for that set alone; the page or a frame (section) switches every set that stands on
+  // "Automatisch". The prompt answers the question so no agent sends a person to the set.
+  it("rule 14 answers 'how do I switch the brand in Figma?' with the page or frame, never the set", () => {
+    const rule14 = text.split("\n").find((line) => line.startsWith("14. ")) ?? "";
+    expect(rule14).toMatch(/switch the brand in Figma/i);
+    expect(rule14).toMatch(/mode of the collection `aspekto` on the page or on a frame or section/);
+    expect(rule14).toMatch(/never on a single component set/);
+    expect(rule14).toMatch(/Automatisch/);
+    expect(rule14).toMatch(/holds for that set alone/);
+  });
+
   it("asks for check_usage before a handover (Spec 003 T025)", () => {
     expect(text).toMatch(/Before you hand over a design or code, call `check_usage`/);
   });
