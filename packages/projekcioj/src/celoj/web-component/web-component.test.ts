@@ -164,6 +164,15 @@ describe("Web Component Celo for the ligilo (Spec 008 T015)", () => {
     expect(ligiloCss).not.toContain("var(--fm-none)");
   });
 
+  // Abnahme 2026-10-13, F-3: the structure rule set border-style solid for every Ero; without a
+  // border part nothing sets the width, and the browser drew its initial medium border around
+  // the link. A border style belongs only to an Ero with a border part.
+  it("draws a border only for an Ero with a border part (F-3)", () => {
+    expect(ligiloCss).not.toContain("border-style");
+    expect(css).toContain("border-style: solid;");
+    expect(css).toContain("border-width: var(--fm-border-width-default);");
+  });
+
   it("keeps every design property a token and logical, like the butono (Art. X gate 1)", () => {
     expect(componentCssIssues("ligilo.css", ligiloCss)).toEqual([]);
     expect(cssPhysicalPropertyIssues("ligilo.css", ligiloCss)).toEqual([]);

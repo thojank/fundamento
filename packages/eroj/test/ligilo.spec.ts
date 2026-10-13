@@ -93,6 +93,38 @@ test.describe("fm-ligilo behaviour", () => {
     expect(warnings.filter((text) => text.includes("to is required"))).toHaveLength(1);
   });
 
+  // Abnahme 2026-10-13, F-3: every link showed a border in rest, hover and ekzemplo. A link has
+  // no border part, so no border may be drawn in any state.
+  test("draws no border in any state (F-3)", async ({ page, browserName }) => {
+    await serve(
+      page,
+      out,
+      `<p><fm-ligilo id="a" to="#a">Inline</fm-ligilo></p><p><fm-ligilo id="b" to="#b" placement="standalone">Standalone</fm-ligilo></p>`,
+    );
+    const widths = async () =>
+      page.locator("fm-ligilo").evaluateAll((elements) =>
+        elements.map((element) => {
+          const control = element.shadowRoot?.querySelector('[part="control"]');
+          if (!(control instanceof Element)) throw new Error("no control");
+          const style = getComputedStyle(control);
+          return [style.borderInlineStartWidth, style.borderBlockStartWidth, style.borderStyle];
+        }),
+      );
+    for (const aspekto of ["komuna", "ekzemplo"]) {
+      await page.evaluate((a) => document.documentElement.setAttribute("data-fm-aspekto", a), aspekto);
+      for (const [i, item] of (await widths()).entries()) {
+        expect(item, `${aspekto} rest ${i}`).toEqual(["0px", "0px", "none"]);
+      }
+      await page.locator("#b").hover();
+      for (const item of await widths()) expect(item, `${aspekto} hover`).toEqual(["0px", "0px", "none"]);
+      await page.mouse.move(0, 0);
+      await page.keyboard.press(TAB(browserName));
+      await expect(page.locator("#a")).toBeFocused();
+      for (const item of await widths()) expect(item, `${aspekto} focus`).toEqual(["0px", "0px", "none"]);
+      await page.locator("#a").blur();
+    }
+  });
+
   test("delegates focus to the inner link and exposes only ::part(control)", async ({ page }) => {
     await serve(page, out, `<fm-ligilo id="a" to="#a">A</fm-ligilo>`);
     await page.locator("#a").focus();
