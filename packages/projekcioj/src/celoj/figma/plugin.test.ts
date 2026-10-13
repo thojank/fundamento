@@ -1353,11 +1353,12 @@ describe("every property the plugin owns is from the plan or neutral", () => {
   it("leaves no tool default on any node it drew, the component set included", async () => {
     const double = modelDouble();
     await run(double, repoFiles["figma/plugin/code.js"] ?? "");
-    // The set lies on the page, in no flow: its position among siblings is not the plugin's.
+    // The set lies in the section Fundamento (F-2), in no flow: its position among siblings is
+    // not the plugin's.
     const onPage = [
-      "Document/Page 1/butono: layoutPositioning",
-      "Document/Page 1/kampo: layoutPositioning",
-      "Document/Page 1/ligilo: layoutPositioning",
+      "Document/Page 1/Fundamento/butono: layoutPositioning",
+      "Document/Page 1/Fundamento/kampo: layoutPositioning",
+      "Document/Page 1/Fundamento/ligilo: layoutPositioning",
     ];
     expect(double.untouchedDefaults(OWNED).filter((entry) => !onPage.includes(entry))).toEqual([]);
     const set = pageNodes(double).find((child) => child.name === "butono");
@@ -3218,8 +3219,12 @@ describe("every set lies in the section Fundamento, in a row (F-1, F-2)", () => 
     if (found === undefined) throw new Error(`no ${name} in ${parent.name}`);
     return found;
   };
-  const box = (node: DoubleNode) => node as unknown as DoubleBoxLike;
   type DoubleBoxLike = { x: number; y: number; width: number; height: number };
+  /** Place and size as the double's layout computes them, as a plain object. */
+  const box = (node: DoubleNode): DoubleBoxLike => {
+    const { x, y, width, height } = node as unknown as DoubleBoxLike;
+    return { x, y, width, height };
+  };
   const names = repoPlan.components.map((component) => component.set);
   const layout = repoPlan.section;
 
@@ -3270,11 +3275,11 @@ describe("every set lies in the section Fundamento, in a row (F-1, F-2)", () => 
     const double = modelDouble();
     await apply(double);
     const first = double.snapshot();
-    const places = names.map((name) => ({ ...box(named(sectionOf(double), name)) }));
+    const places = names.map((name) => box(named(sectionOf(double), name)));
     const report = await apply(double);
     expect(sectionsOf(double)).toHaveLength(1);
     expect(double.snapshot()).toBe(first);
-    expect(names.map((name) => ({ ...box(named(sectionOf(double), name)) }))).toEqual(places);
+    expect(names.map((name) => box(named(sectionOf(double), name)))).toEqual(places);
     expect(report.section).toEqual({ name: "Fundamento", found: true, created: false, moved: [] });
     expect(report.components.map((component) => component.placement.action)).toEqual(
       names.map(() => "kept"),
@@ -3291,9 +3296,9 @@ describe("every set lies in the section Fundamento, in a row (F-1, F-2)", () => 
     // The maintainer drags the last set further right and down, and deletes the middle one.
     Object.assign(named(section, last), { x: 4000, y: 300 });
     named(section, middle).remove();
-    const kept = { ...box(named(section, first)) };
+    const kept = box(named(section, first));
     const report = await apply(double);
-    expect({ ...box(named(section, first)) }).toEqual(kept);
+    expect(box(named(section, first))).toEqual(kept);
     expect(box(named(section, last))).toMatchObject({ x: 4000, y: 300 });
     const lastBox = box(named(section, last));
     expect(box(named(section, middle))).toMatchObject({
