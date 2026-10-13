@@ -7,7 +7,7 @@ import { join } from "node:path";
 import { defaultModeloSource, evaluateAlirebleco, getEro, loadModelo } from "@fundamento/modelo";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { buildProjekcioj } from "../../build.js";
-import type { VitrinoDatumoj } from "./datumoj.js";
+import { roundTo, type VitrinoDatumoj } from "./datumoj.js";
 import { VITRINO_FILE } from "./vitrino.js";
 
 const dirs: string[] = [];
@@ -213,5 +213,97 @@ describe("the Vitrino carries the Uzo of every Ero (T027, S5)", () => {
       expect(html).toContain(boundary.kialo);
     }
     expect(html).toContain("Wann nehme ich den Butono nicht?");
+  });
+});
+
+// Nachlese der Abnahmen von Spec 004 (M1, 2026-10-12, Befund 2 und 5), Spec 008 (C8) und Spec 009
+// (F-5, F-6, C8), 2026-10-13: what the maintainer saw in the Vitrino and no test had caught.
+describe("the Vitrino after the acceptances (Nachlese 2026-10-13)", () => {
+  // F-5 (Spec 009 C4): Figma shows "Hinweis" and "Fehler" in the field, the Vitrino showed no
+  // help and no error text. The error text stands only where the Skemo allows it: the constraint
+  // "slot error filled ⇒ invalid" keeps it out of every other column.
+  it("the kampo shows the help text in every cell and the error text only in the invalid column (F-5)", () => {
+    const cells = html.match(/<fm-kampo[^>]*>.*?<\/fm-kampo>/g) ?? [];
+    expect(cells.length).toBeGreaterThan(10);
+    const withHelp = cells.filter((cell) => cell.includes('<span slot="help">Hinweis</span>'));
+    expect(withHelp.length).toBe(cells.length);
+    const invalid = cells.filter((cell) => /<fm-kampo[^>]* invalid[ >]/.test(cell));
+    expect(invalid.length).toBeGreaterThan(0);
+    const withError = cells.filter((cell) => cell.includes('<span slot="error">Fehler</span>'));
+    expect(withError).toEqual(invalid);
+    // The butono and the ligilo have no help or error slot: their cells stay as they were.
+    expect(html.match(/<fm-butono[^>]*>[^<]*<span/g)).toBeNull();
+  });
+
+  // F-6 (Spec 009 C8): the slot table did not say that the label of the kampo is a duty.
+  it("the slot table carries the column Pflicht, ja for the label of the kampo (F-6)", () => {
+    expect(html).toContain("<th scope=\"col\">Pflicht</th>");
+    expect(html).toContain(
+      '<tr><th scope="row"><code>label</code></th><td>text</td><td>1</td><td>0</td><td>ja</td></tr>',
+    );
+    expect(html).toContain(
+      '<tr><th scope="row"><code>help</code></th><td>text</td><td>1</td><td>0</td><td>–</td></tr>',
+    );
+  });
+
+  // C8 (Spec 008 and 009): "Label darf umbrechen" holds for the ligilo only inline, and the kampo's
+  // line that never breaks is the input line, not the label. The subject comes from the a11y role.
+  it("the layout sentence names the subject and the placement (C8)", () => {
+    expect(datumoj.a11yRoloj).toEqual({ butono: "button", kampo: "textbox", ligilo: "link" });
+    expect(html).toContain("Größe aus dem Inhalt, Label bricht nie um.");
+    expect(html).toContain("Größe aus dem Inhalt, Label darf umbrechen (inline), standalone nie.");
+    expect(html).toContain("Größe aus dem Container, Eingabezeile bricht nie um.");
+    expect(html).not.toContain("Container, Label bricht nie um");
+  });
+
+  // Spec 004 M1, Befund 5: shade and tint showed #000000 / #ffffff with L 0.000 / 1.000, the alpha
+  // swallowed — the same words as the overlays of the action roles (maintainer's review of
+  // 2026-09-20), and no lightness, because an overlay has none until it lies on a surface.
+  it("shade and tint show their opacity and no lightness in the palettes (Befund 5)", () => {
+    const ramps = datumoj.paletroj.komuna ?? [];
+    const shade = ramps.find((ramp) => ramp.rampo === "shade");
+    expect(shade).toBeDefined();
+    const zero = shade?.stupoj.find((step) => step.stupo === 0);
+    expect(zero?.hex).toBe("durchsichtig");
+    expect(zero?.l).toBeUndefined();
+    const eight = shade?.stupoj.find((step) => step.stupo === 8);
+    expect(eight?.hex).toBe("#000000, 8 % Deckung");
+    expect(eight?.l).toBeUndefined();
+    const tint = ramps.find((ramp) => ramp.rampo === "tint");
+    expect(tint?.stupoj.find((step) => step.stupo === 8)?.hex).toBe("#ffffff, 8 % Deckung");
+    expect(html).toContain("<td>#000000, 8 % Deckung</td><td>–</td>");
+    const accent = ramps.find((ramp) => ramp.rampo === "accent");
+    expect(accent?.stupoj.every((step) => typeof step.l === "number")).toBe(true);
+  });
+
+  // Spec 004 M1, Befund 5: color.text.default in dark showed "NaN" as its distance to the anchor.
+  // L was 1.000 there; 1 − L is a number in exponent notation ("1e-16"), and the rounding glued
+  // "e3" to it. The document never shows NaN, and the rounding takes any finite number.
+  it("rounds any finite number, and the document shows no NaN (Befund 5)", () => {
+    expect(roundTo(1e-7)).toBe(0);
+    expect(roundTo(1 - 0.9999999999999999)).toBe(0);
+    expect(roundTo(-2.220446049250313e-16)).toBe(0);
+    expect(roundTo(0.0499809)).toBe(0.05);
+    expect(roundTo(48.46, 1)).toBe(48.5);
+    expect(html).not.toContain("NaN");
+    for (const entry of Object.values(datumoj.roloj)) {
+      for (const row of [...entry.surfaces, ...entry.text, ...entry.status, ...entry.agoj]) {
+        if (row.alEkstremo !== undefined) expect(row.alEkstremo, row.token).toBeGreaterThanOrEqual(0);
+      }
+    }
+  });
+
+  // Spec 004 M1, Befund 2: the button "Gegenüberstellung" toggled a class on the last section and
+  // nothing changed where the button stands. Now it leads to the section (maintainer: remove it or
+  // let it jump); the two-column class is gone with the toggle.
+  it("the button leads to the comparison instead of toggling a class (Befund 2)", () => {
+    expect(html).toContain(
+      '<button type="button" id="fm-vitrino-komparo-switch">Zur Gegenüberstellung</button>',
+    );
+    expect(html).not.toContain("fm-kolumnoj");
+    expect(html).not.toContain("fm-kolumno ");
+    expect(html).toContain('<section id="fm-vitrino-komparo" tabindex="-1">');
+    expect(html).toMatch(/komparoSection\.scrollIntoView\(/);
+    expect(html).toMatch(/komparoSection\.focus\(/);
   });
 });
