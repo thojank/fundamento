@@ -1,6 +1,6 @@
 # Plan – Spec 009: Kampo, das Textfeld
 
-**Spec:** [`spec.md`](spec.md) (unverändert kopiert) · **Auftrag:** [`../008-ligilo/briefing-p0-nacht-2026-10-12.md`](../008-ligilo/briefing-p0-nacht-2026-10-12.md) · **Aufgaben:** [`tasks.md`](tasks.md) · **Vorbild:** `butono`, und was Spec 008 für das zweite Ero eingeführt hat ([`../008-ligilo/plan.md`](../008-ligilo/plan.md): `a11y.texts`, `inherit`/`none`, `EroInstance.lingvo`, Web Component nach `a11y.role`) · **Constitution:** v2.2, kein Amendment · **Datum:** 2026-10-12/13 (Nachtschicht) · **Basis:** Branch `261012-spec-008-ligilo-ae9abb` (PR #53), gestapelt; Ziel `main` nach dem Merge von PR A · **Branch:** `261012-spec-009-kampo-ae9abb`
+**Spec:** [`spec.md`](spec.md) (unverändert kopiert) · **Auftrag:** [`../008-ligilo/briefing-p0-nacht-2026-10-12.md`](../008-ligilo/briefing-p0-nacht-2026-10-12.md) · **Aufgaben:** [`tasks.md`](tasks.md) · **Vorbild:** `butono`, und was Spec 008 für das zweite Ero eingeführt hat ([`../008-ligilo/plan.md`](../008-ligilo/plan.md): `a11y.texts`, `inherit`/`none`, `EroInstance.lingvo`, Web Component nach `a11y.role`) · **Constitution:** v2.2, kein Amendment · **Datum:** 2026-10-12/13 (Nachtschicht) · **Basis:** `main` @ `28dd933` (PR #53 gemergt am 2026-10-13; bis dahin gestapelt auf dessen Branch) · **Branch:** `261012-spec-009-kampo-ae9abb`
 
 Das erste zusammengesetzte Ero: Beschriftung, Eingabe, Hilfe, Fehler in **einem** Ero (E2). Der Plan trifft die Entscheidungen, die die Spec offen lässt, und zählt, wo er von ihr abweicht. Regel 0 des Auftrags gilt.
 

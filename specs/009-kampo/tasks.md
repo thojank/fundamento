@@ -1,6 +1,6 @@
 # Aufgaben – Spec 009 Kampo
 
-**Plan:** [`plan.md`](plan.md) (D-01–D-12) · **Datum:** 2026-10-12/13 (Nachtschicht) · **Basis:** Branch von PR #53 (Spec 008), gestapelt · **Branch:** `261012-spec-009-kampo-ae9abb`
+**Plan:** [`plan.md`](plan.md) (D-01–D-12) · **Datum:** 2026-10-12/13 (Nachtschicht) · **Basis:** `main` @ `28dd933` (#53 gemergt; zuvor gestapelt auf PR #53) · **Branch:** `261012-spec-009-kampo-ae9abb`
 
 **Regel für jede Aufgabe (Art. X):** Rot zuerst, dann Grün; `pnpm build && pnpm test && pnpm lint` und jedes `check:*` grün; Ids nur aus `pnpm id:new`.
 
