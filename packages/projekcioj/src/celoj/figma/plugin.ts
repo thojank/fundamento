@@ -903,6 +903,7 @@ async function applyComponents(variables, warnings) {
     // A plan from before F30 names no fonts; then the base font of every variant is loaded, as
     // it always was, and nothing is bound.
     for (const variant of component.variants) {
+      if (variant.font === undefined) continue;
       const key = variant.font.family + " " + variant.font.style;
       if (!fonts.has(key)) fonts.set(key, await loadFont(variant.font, warnings));
     }
@@ -1000,7 +1001,14 @@ async function applyComponents(variables, warnings) {
       } else if (typeof variant.textCase === "string") {
         write(label, "textCase", variant.textCase);
       }
-      write(label, "fontName", fonts.get(variant.font.family + " " + variant.font.style));
+      if (variant.font !== undefined) {
+        write(label, "fontName", fonts.get(variant.font.family + " " + variant.font.style));
+      }
+      // Die Unterstreichung eines Links (Spec 008, D-11): je Variante an oder aus, geschrieben wie
+      // textCase – Figma bindet Dicke und Farbe der Linie an keine Variable (Jugxo B-1).
+      if (typeof variant.underline === "boolean") {
+        write(label, "textDecoration", variant.underline ? "UNDERLINE" : "NONE");
+      }
       labels.push(label);
       // Only values from the plan (F13): every owned property neutral first — Figma's white fill,
       // its clipping and its line would otherwise cover what the plan draws.
@@ -1052,8 +1060,9 @@ async function applyComponents(variables, warnings) {
             report.fonts.refused.push(field);
             warnings.push(
               component.set + ": Figma hat die Bindung von " + field + " an " + variable.name +
-                " abgelehnt — die Beschriftung bleibt in " + variant.font.family + " " +
-                variant.font.style + ", gleich welcher Modus gewählt ist. " + message,
+                " abgelehnt — die Beschriftung bleibt in " +
+                (variant.font ? variant.font.family + " " + variant.font.style : "der Schrift der Datei") +
+                ", gleich welcher Modus gewählt ist. " + message,
             );
           }
         }

@@ -14,7 +14,7 @@ export const ONTOLOGIO_BASE = "https://fundamento.ciferecigo.com/ontologio";
 export interface OntologioConcept {
   uri: string;
   term: string;
-  inScheme: "terminologio" | "modelo" | "principoj";
+  inScheme: "terminologio" | "modelo" | "principoj" | "eroj";
   notation?: string;
   prefLabel: { eo: string; en: string; de: string };
   altLabel?: Partial<Record<"eo" | "en" | "de", string[]>>;
@@ -39,6 +39,8 @@ export interface OntologioProblem {
     | "table-term-extra"
     | "entity-type-missing"
     | "entity-type-extra"
+    | "ero-concept-missing"
+    | "ero-concept-extra"
     | "uri"
     | "reference"
     | "cycle";
@@ -69,8 +71,16 @@ function entityTypes(): string[] {
   return defs.EntityType?.enum ?? [];
 }
 
-/** Every drift problem of an Ontologio value (data-model §4.3); empty when it is in step. */
-export function checkOntologio(value: unknown, constitution: string): OntologioProblem[] {
+/**
+ * Every drift problem of an Ontologio value (data-model §4.3); empty when it is in step. With the
+ * Ero names of the Modelo (Spec 008, D-15) the scheme `eroj` is checked too: one concept per Ero,
+ * no concept without an Ero.
+ */
+export function checkOntologio(
+  value: unknown,
+  constitution: string,
+  eroNames?: readonly string[],
+): OntologioProblem[] {
   const problems: OntologioProblem[] = [];
   const validate = createModeloAjv().compile(
     JSON.parse(readFileSync(ONTOLOGIO_SCHEMA_URL, "utf8")) as Record<string, unknown>,
@@ -130,6 +140,28 @@ export function checkOntologio(value: unknown, constitution: string): OntologioP
         check: "entity-type-extra",
         message: `The notation ${notation} is no entity type of the Modelo schema.`,
       });
+    }
+  }
+
+  if (eroNames !== undefined) {
+    const eroConcepts = concepts
+      .filter((concept) => concept.inScheme === "eroj")
+      .map((concept) => concept.term.toLowerCase());
+    for (const name of eroNames) {
+      if (!eroConcepts.includes(name)) {
+        problems.push({
+          check: "ero-concept-missing",
+          message: `The Ero ${name} has no concept in the scheme eroj.`,
+        });
+      }
+    }
+    for (const term of eroConcepts) {
+      if (!eroNames.includes(term)) {
+        problems.push({
+          check: "ero-concept-extra",
+          message: `The eroj concept ${term} is no Ero of the Modelo.`,
+        });
+      }
     }
   }
 

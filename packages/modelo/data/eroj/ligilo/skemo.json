@@ -1,0 +1,380 @@
+{
+  "ero": {
+    "id": "ero_01M4RYCX28WNYSGMANDBK8TK04",
+    "name": "ligilo",
+    "skemo": "ske_01M4RYCXE78XSCQ4Q4V8WA4FZH",
+    "description": "A link: moves to another view or place. Its label names the destination."
+  },
+  "skemo": {
+    "id": "ske_01M4RYCXE78XSCQ4Q4V8WA4FZH",
+    "ero": "ero_01M4RYCX28WNYSGMANDBK8TK04",
+    "props": [
+      {
+        "name": "to",
+        "kind": "string",
+        "description": "The destination, named platform-neutrally (Art. VIII); the Web Celo renders it as the href of the link."
+      },
+      {
+        "name": "placement",
+        "kind": "enum",
+        "values": [
+          "inline",
+          "standalone"
+        ],
+        "default": "inline",
+        "description": "inline stands in running text and inherits its typography; standalone stands alone (footer, end of a card, navigation) with its own typography and a minimum target (touch-target-min)."
+      },
+      {
+        "name": "external",
+        "kind": "boolean",
+        "default": false,
+        "description": "The destination lies outside the application; marked visibly and audibly, no brand switches that off (Regulo external-link-marked)."
+      },
+      {
+        "name": "size",
+        "kind": "enum",
+        "values": [
+          "small",
+          "medium",
+          "large"
+        ],
+        "default": "medium",
+        "description": "Typography and icon size of a standalone link; without effect when inline (check_usage warns)."
+      },
+      {
+        "name": "label",
+        "kind": "string",
+        "description": "Accessible name when the label slot is empty (icon-only); never shown."
+      }
+    ],
+    "states": [
+      "rest",
+      "hover",
+      "pressed",
+      "focus",
+      "visited"
+    ],
+    "slots": [
+      {
+        "name": "label",
+        "default": true,
+        "text": true
+      },
+      {
+        "name": "icon-end",
+        "decorative": true
+      }
+    ],
+    "parts": {
+      "label": {
+        "color": {
+          "by": [
+            "state"
+          ]
+        },
+        "typography": {
+          "by": [
+            "placement",
+            "size"
+          ]
+        }
+      },
+      "underline": {
+        "width": {
+          "by": [
+            "placement",
+            "state"
+          ]
+        },
+        "color": {
+          "sameAs": "label.color"
+        }
+      },
+      "focus-ring": {
+        "ring": {
+          "fixed": "focus.ring"
+        },
+        "offset": {
+          "fixed": "focus.offset"
+        },
+        "color": {
+          "fixed": "color.focus.inner"
+        }
+      },
+      "icon": {
+        "color": {
+          "sameAs": "label.color"
+        },
+        "size": {
+          "by": [
+            "size"
+          ]
+        }
+      },
+      "box": {
+        "height": {
+          "by": [
+            "placement"
+          ]
+        },
+        "width": {
+          "by": [
+            "placement"
+          ]
+        },
+        "gap": {
+          "fixed": "spacing.small"
+        }
+      },
+      "motion": {
+        "duration": {
+          "fixed": "motion.duration.fast"
+        },
+        "easing": {
+          "fixed": "motion.easing.standard"
+        }
+      }
+    },
+    "bindings": [
+      {
+        "part": "label",
+        "property": "color",
+        "when": {
+          "state": "rest"
+        },
+        "token": "color.link.rest"
+      },
+      {
+        "part": "label",
+        "property": "color",
+        "when": {
+          "state": "hover"
+        },
+        "token": "color.link.hover"
+      },
+      {
+        "part": "label",
+        "property": "color",
+        "when": {
+          "state": "pressed"
+        },
+        "token": "color.link.hover"
+      },
+      {
+        "part": "label",
+        "property": "color",
+        "when": {
+          "state": "focus"
+        },
+        "token": "color.link.rest"
+      },
+      {
+        "part": "label",
+        "property": "color",
+        "when": {
+          "state": "visited"
+        },
+        "token": "color.link.visited"
+      },
+      {
+        "part": "label",
+        "property": "typography",
+        "when": {
+          "placement": "inline"
+        },
+        "token": "inherit"
+      },
+      {
+        "part": "label",
+        "property": "typography",
+        "when": {
+          "placement": "standalone",
+          "size": "small"
+        },
+        "token": "typography.label.2"
+      },
+      {
+        "part": "label",
+        "property": "typography",
+        "when": {
+          "placement": "standalone",
+          "size": "medium"
+        },
+        "token": "typography.label.1"
+      },
+      {
+        "part": "label",
+        "property": "typography",
+        "when": {
+          "placement": "standalone",
+          "size": "large"
+        },
+        "token": "typography.label.1"
+      },
+      {
+        "part": "underline",
+        "property": "width",
+        "when": {
+          "placement": "inline"
+        },
+        "token": "border.width.default"
+      },
+      {
+        "part": "underline",
+        "property": "width",
+        "when": {
+          "placement": "standalone",
+          "state": "rest"
+        },
+        "token": "none"
+      },
+      {
+        "part": "underline",
+        "property": "width",
+        "when": {
+          "placement": "standalone",
+          "state": "hover"
+        },
+        "token": "border.width.default"
+      },
+      {
+        "part": "underline",
+        "property": "width",
+        "when": {
+          "placement": "standalone",
+          "state": "pressed"
+        },
+        "token": "border.width.default"
+      },
+      {
+        "part": "underline",
+        "property": "width",
+        "when": {
+          "placement": "standalone",
+          "state": "focus"
+        },
+        "token": "border.width.default"
+      },
+      {
+        "part": "underline",
+        "property": "width",
+        "when": {
+          "placement": "standalone",
+          "state": "visited"
+        },
+        "token": "none"
+      },
+      {
+        "part": "icon",
+        "property": "size",
+        "when": {
+          "size": "small"
+        },
+        "token": "size.icon.small"
+      },
+      {
+        "part": "icon",
+        "property": "size",
+        "when": {
+          "size": "medium"
+        },
+        "token": "size.icon.medium"
+      },
+      {
+        "part": "icon",
+        "property": "size",
+        "when": {
+          "size": "large"
+        },
+        "token": "size.icon.large"
+      },
+      {
+        "part": "box",
+        "property": "height",
+        "when": {
+          "placement": "standalone"
+        },
+        "token": "size.target.min"
+      },
+      {
+        "part": "box",
+        "property": "height",
+        "when": {
+          "placement": "inline"
+        },
+        "token": "none"
+      },
+      {
+        "part": "box",
+        "property": "width",
+        "when": {
+          "placement": "standalone"
+        },
+        "token": "size.target.min"
+      },
+      {
+        "part": "box",
+        "property": "width",
+        "when": {
+          "placement": "inline"
+        },
+        "token": "none"
+      }
+    ],
+    "a11y": {
+      "role": "link",
+      "name": [
+        "slot:label",
+        "prop:label"
+      ],
+      "states": {},
+      "keys": [
+        "Enter"
+      ],
+      "texts": {
+        "external": {
+          "de": "öffnet extern",
+          "en": "opens external"
+        }
+      }
+    },
+    "goals": [
+      {
+        "goal": "navigate",
+        "keywords": {
+          "en": [
+            "navigate",
+            "navigation",
+            "overview"
+          ],
+          "de": [
+            "navigieren",
+            "navigation",
+            "übersicht"
+          ]
+        },
+        "props": {},
+        "regulo": "link-navigates-button-acts"
+      },
+      {
+        "goal": "external",
+        "keywords": {
+          "en": [
+            "website",
+            "documentation",
+            "external"
+          ],
+          "de": [
+            "webseite",
+            "dokumentation",
+            "extern"
+          ]
+        },
+        "props": {
+          "external": true
+        },
+        "regulo": "external-link-marked"
+      }
+    ]
+  }
+}

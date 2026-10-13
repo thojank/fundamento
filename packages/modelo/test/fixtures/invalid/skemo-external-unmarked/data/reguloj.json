@@ -1,0 +1,38 @@
+{
+  "reguloj": [
+    {
+      "id": "reg_01K5FMAJ0J14KNVH5BXJ93VFBG",
+      "name": "semantic-colors-alias-palette",
+      "statement": "Semantic color tokens reference palette tokens instead of literal values.",
+      "kialo": "A palette change then reaches every semantic use in one place.",
+      "scope": "vortaro",
+      "checkability": "manual"
+    },
+    {
+      "id": "reg_01M4H2T2FKDP91NR287MM0ZC7Z",
+      "name": "spacing-owned-by-container",
+      "statement": "The space between sibling Eroj belongs to their container; an Ero carries no outer spacing.",
+      "kialo": "An Ero does not know its neighbours; if each brought its own distance, two side by side would add up.",
+      "scope": "eroj: butono instances in a design or in code",
+      "checkability": "manual",
+      "appliesTo": {
+        "eroj": [
+          "butono"
+        ]
+      }
+    },
+    {
+      "id": "reg_01M4RXVY3ZJBX9172W9XA14B0H",
+      "name": "external-link-marked",
+      "statement": "An Ero with the prop external marks the leaving of the application visibly and audibly: its Skemo carries an a11y text for external in de and en, and a decorative slot icon-end the projections fill with the mark.",
+      "kialo": "Leaving the application is a moment of trust; the person decides before, not after.",
+      "scope": "eroj: the Skemo of every Ero with a boolean prop external",
+      "checkability": "automatic",
+      "appliesTo": {
+        "eroj": [
+          "butono"
+        ]
+      }
+    }
+  ]
+}

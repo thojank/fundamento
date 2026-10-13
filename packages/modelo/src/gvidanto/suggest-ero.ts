@@ -98,7 +98,12 @@ export function uzoKeywordHit(
   return undefined;
 }
 
-type BoundaryHit = SuggestedBoundary & { keyword: string; lingvo: string };
+type BoundaryHit = SuggestedBoundary & {
+  keyword: string;
+  lingvo: string;
+  /** An alternative (instead) or a boundary entry of the Uzo (Spec 008, D-08). */
+  kind: "instead" | "boundary";
+};
 
 /** The first instead or boundary entry of any Uzo whose keyword hits (declaration order). */
 function boundaryHit(modelo: Modelo, text: string, lingvo?: string): BoundaryHit | undefined {
@@ -113,6 +118,7 @@ function boundaryHit(modelo: Modelo, text: string, lingvo?: string): BoundaryHit
         case: alternative.goal,
         action: alternative.ero === null ? "ask-human" : "use-instead",
         kialo: alternative.kialo,
+        kind: "instead",
         ...hit,
       };
     }
@@ -125,6 +131,7 @@ function boundaryHit(modelo: Modelo, text: string, lingvo?: string): BoundaryHit
         action: boundary.action,
         kialo: boundary.kialo,
         ...hit,
+        kind: "boundary",
       };
     }
   }
@@ -176,6 +183,31 @@ function goalHit(modelo: Modelo, text: string, lingvo?: string): GoalHit | undef
 export function suggestEro(modelo: Modelo, input: SuggestEroInput): SuggestEroResult {
   const boundary = boundaryHit(modelo, input.goal, input.lingvo);
   const goal = goalHit(modelo, input.goal, input.lingvo);
+
+  // Spec 008 D-08: a boundary that says use-instead X and a goal of X say the same thing. The
+  // goal answers (Ero, props, Regulo) and the boundary stands next to it with its kialo, so the
+  // agent can say why the first Ero is not the one. Only two different Eroj are a conflict.
+  if (boundary !== undefined && goal !== undefined && insteadEro(modelo, boundary) === goal.ero) {
+    const output: SuggestEroOutput = {
+      goal: input.goal,
+      matched: { goal: goal.goal, keyword: goal.keyword, lingvo: goal.lingvo },
+      suggestion: { ero: goal.ero, props: goal.props },
+    };
+    // A boundary of the other Ero names why that Ero is not the one (S1: the butono says
+    // navigation is the ligilo's); an instead entry of the other Ero only confirms the choice and
+    // would change answers that stood before (OP-12), so it stays out.
+    if (boundary.kind === "boundary") {
+      output.boundary = {
+        ero: boundary.ero,
+        case: boundary.case,
+        action: boundary.action,
+        kialo: boundary.kialo,
+      };
+    }
+    if (goal.kialo !== undefined) output.kialo = goal.kialo;
+    if (goal.regulo !== undefined) output.regulo = goal.regulo;
+    return { ok: true, output };
+  }
 
   if (boundary !== undefined && goal !== undefined) {
     // Both readings hold; Fundamento does not choose (OP-12). Prompt rule 12 passes both on.

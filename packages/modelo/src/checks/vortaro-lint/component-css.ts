@@ -32,6 +32,9 @@ export const STRUCTURAL_PROPERTIES: readonly string[] = [
   "user-select",
   "white-space",
   "text-decoration",
+  // Spec 008 (ligilo, plan D-09): whether the underline is there is structure (underline, none);
+  // its thickness and colour are design and stand in the design list below.
+  "text-decoration-line",
   "vertical-align",
   "overflow",
   "transition-property",
@@ -69,6 +72,9 @@ export const DESIGN_PREFIXES: readonly string[] = [
   // F31: Die Schreibweise ist eine Gestaltungsentscheidung wie der Sperrsatz, nicht Struktur —
   // sie kommt aus dem Vortaro, nie aus der Komponente.
   "text-transform",
+  // Spec 008: the underline of a link takes its width and colour from tokens (plan D-09).
+  "text-decoration-thickness",
+  "text-decoration-color",
   "text-shadow",
   "box-shadow",
   "opacity",

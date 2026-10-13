@@ -1,0 +1,68 @@
+{
+  "$schema": "../../../../../../../schema/modelo.schema.json#/$defs/EroFile",
+  "ero": {
+    "id": "ero_01M4RXVY3ZEY5Q8G0R254YQJ5F",
+    "name": "ligilo",
+    "skemo": "ske_01M4RXVY3ZEQSA2DRW3CE6330D",
+    "description": "Fixture Ero: a link that covers navigation."
+  },
+  "skemo": {
+    "id": "ske_01M4RXVY3ZEQSA2DRW3CE6330D",
+    "ero": "ero_01M4RXVY3ZEY5Q8G0R254YQJ5F",
+    "props": [
+      {
+        "name": "to",
+        "kind": "string"
+      },
+      {
+        "name": "label",
+        "kind": "string"
+      }
+    ],
+    "states": [
+      "rest"
+    ],
+    "slots": [
+      {
+        "name": "label",
+        "default": true,
+        "text": true
+      }
+    ],
+    "parts": {
+      "label": {
+        "color": {
+          "fixed": "color.text.default"
+        }
+      }
+    },
+    "bindings": [],
+    "a11y": {
+      "role": "link",
+      "name": [
+        "slot:label",
+        "prop:label"
+      ],
+      "states": {},
+      "keys": [
+        "Enter"
+      ]
+    },
+    "goals": [
+      {
+        "goal": "navigate",
+        "keywords": {
+          "en": [
+            "navigate",
+            "overview"
+          ],
+          "de": [
+            "navigieren",
+            "übersicht"
+          ]
+        },
+        "props": {}
+      }
+    ]
+  }
+}

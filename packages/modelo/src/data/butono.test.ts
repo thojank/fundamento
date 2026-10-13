@@ -138,12 +138,16 @@ describe("the Uzo of the butono (T020)", () => {
   });
 
   it("names the four boundaries of A3, each with an action and a kialo", () => {
-    expect(uzo?.boundary.map((entry) => [entry.case, entry.action])).toEqual([
-      ["navigation", "ask-human"],
-      ["form-in-slot", "not-supported"],
-      ["multi-line-label", "not-supported"],
-      ["no-accessible-label", "not-supported"],
+    // Spec 008 A4 (D-14): navigation is use-instead ligilo since the ligilo exists.
+    expect(uzo?.boundary.map((entry) => [entry.case, entry.action, entry.ero])).toEqual([
+      ["navigation", "use-instead", "ligilo"],
+      ["form-in-slot", "not-supported", undefined],
+      ["multi-line-label", "not-supported", undefined],
+      ["no-accessible-label", "not-supported", undefined],
     ]);
+    expect(uzo?.boundary[0]?.kialo).toMatch(
+      /works differently\. Fundamento covers it with ligilo\.$/,
+    );
     for (const entry of uzo?.boundary ?? []) expect(entry.kialo).toMatch(/\bbecause\b/);
     // The boundaries check_usage recognises (A10) say how: a slot, the wrap, a Regulo.
     expect(uzo?.boundary.map((entry) => entry.via)).toEqual([
@@ -217,7 +221,8 @@ describe("the five Reguloj of the Uzo (T019)", () => {
     "destructive-label-not-generic",
   ])("%s applies to butono with a kialo", (name) => {
     const regulo = named(name);
-    expect(regulo?.appliesTo).toEqual({ eroj: ["butono"] });
+    // spacing-owned-by-container applies to the ligilo too since Spec 008 (its Uzo names it).
+    expect(regulo?.appliesTo?.eroj).toContain("butono");
     expect(regulo?.kialo.length ?? 0).toBeGreaterThan(40);
     expect(regulo?.statement.length ?? 0).toBeGreaterThan(20);
   });

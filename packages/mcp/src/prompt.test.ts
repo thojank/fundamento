@@ -67,6 +67,15 @@ describe("prompt gvidanto", () => {
     expect(rule12).toMatch(/both `candidates`/);
   });
 
+  // Spec 008 T013 (D-08): use-instead in rule 13.
+  it("rule 13 takes the Ero a use-instead boundary points to and reads it before naming props (Spec 008)", () => {
+    const rule13 = text.split("\n").find((line) => line.startsWith("13. ")) ?? "";
+    expect(rule13).toContain("`use-instead`");
+    expect(rule13).toMatch(/quote its kialo/);
+    expect(rule13).toMatch(/`get_ero` \(`brief` first\)/);
+    expect(rule13).toMatch(/Do not build the Ero the user named/);
+  });
+
   it("asks for check_usage before a handover (Spec 003 T025)", () => {
     expect(text).toMatch(/Before you hand over a design or code, call `check_usage`/);
   });

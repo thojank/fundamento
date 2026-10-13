@@ -1,0 +1,9 @@
+{
+  "description": "Spec 008 A7 (A2 external-link-marked, plan D-05, D-13): the Skemo has a boolean prop external and the slot icon-end, but no a11y.texts.external — the leaving of the application would be visible, not audible.",
+  "issues": [
+    {
+      "rule": "external-link-marked",
+      "path": "data/eroj/butono/skemo.json#/skemo/a11y"
+    }
+  ]
+}

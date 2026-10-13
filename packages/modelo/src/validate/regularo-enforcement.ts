@@ -5,7 +5,7 @@
 import { aliasTarget, CORE_SET_NAME } from "../contracts/grammar.js";
 import { formatIssuePath, type ValidationIssue } from "../contracts/issues.js";
 import type { Modelo, Regulo } from "../contracts/modelo.js";
-import { boundToken, combinationsOf, STATE_KEY } from "../eroj/skemo-rules.js";
+import { boundToken, combinationsOf, isBindingKeyword, STATE_KEY } from "../eroj/skemo-rules.js";
 import { ASPEKTO_DIMENSIO, referenceAspektoOf } from "../load/build.js";
 import { resolve } from "../resolve/resolve.js";
 import {
@@ -173,6 +173,71 @@ const focusRingConcentric: Enforcer = (modelo, regulo) => {
 /** The parts a concentric focus ring is derived from (F32). */
 const CONCENTRIC_PARTS = ["box.radius", "focus-ring.offset", "focus-ring.ring"] as const;
 
+/** The Eroj a Regulo with `appliesTo.eroj` judges; every Ero when it names none. */
+function erojOf(modelo: Modelo, regulo: Regulo): Modelo["eroj"] {
+  const wanted = regulo.appliesTo?.eroj;
+  return modelo.eroj.filter((entry) => wanted === undefined || wanted.includes(entry.ero.name));
+}
+
+/**
+ * Spec 008 `link-not-color-only` (A2, plan D-13): an Ero that stands in running text (a prop
+ * `placement` with the value `inline`) and draws an `underline` binds `underline.width` in every
+ * state of that placement, and never to `none` — colour alone must not carry the link (WCAG 1.4.1).
+ */
+const linkNotColorOnly: Enforcer = (modelo, regulo) => {
+  const issues: ValidationIssue[] = [];
+  for (const entry of erojOf(modelo, regulo)) {
+    const { skemo, ero } = entry;
+    if (skemo.parts.underline?.width === undefined) continue;
+    const placement = skemo.props.find((prop) => prop.name === "placement");
+    if (placement?.kind !== "enum" || !(placement.values ?? []).includes("inline")) continue;
+    const missing = skemo.states.filter((state) => {
+      const bound = boundToken(skemo, "underline", "width", { placement: "inline", state });
+      return bound === undefined || isBindingKeyword(bound.token);
+    });
+    if (missing.length === 0) continue;
+    issues.push({
+      rule: "link-not-color-only",
+      severity: "error",
+      path: `${entry.file}#/skemo/parts/underline/width`,
+      message: `${ero.name} in placement inline has no underline in the state${missing.length === 1 ? "" : "s"} ${missing.join(", ")}: there it differs from the text by colour alone (WCAG 1.4.1).`,
+      suggestion: `Bind underline.width to a width token for placement inline in every state (Regulo link-not-color-only); none is for standalone only.`,
+    });
+  }
+  return issues;
+};
+
+/**
+ * Spec 008 `external-link-marked` (A2, plan D-05, D-13): an Ero with a boolean prop `external`
+ * says in its Skemo how the leaving of the application is heard (`a11y.texts.external` in de and
+ * en) and where it is seen (a decorative slot `icon-end` the projections fill with the mark).
+ */
+const externalLinkMarked: Enforcer = (modelo, regulo) => {
+  const issues: ValidationIssue[] = [];
+  for (const entry of erojOf(modelo, regulo)) {
+    const { skemo, ero } = entry;
+    const external = skemo.props.find((prop) => prop.name === "external");
+    if (external?.kind !== "boolean") continue;
+    const texts = skemo.a11y.texts?.external;
+    const heard =
+      texts !== undefined && typeof texts.de === "string" && typeof texts.en === "string";
+    const seen = skemo.slots.some((slot) => slot.name === "icon-end" && slot.decorative === true);
+    if (heard && seen) continue;
+    const lacks = [
+      ...(heard ? [] : ["a11y.texts.external in de and en"]),
+      ...(seen ? [] : ["a decorative slot icon-end"]),
+    ];
+    issues.push({
+      rule: "external-link-marked",
+      severity: "error",
+      path: `${entry.file}#/skemo/${heard ? "slots" : "a11y"}`,
+      message: `${ero.name} has the prop external but lacks ${lacks.join(" and ")}: the leaving of the application would be ${heard ? "heard but not seen" : seen ? "seen but not heard" : "neither seen nor heard"}.`,
+      suggestion: `Give the Skemo ${lacks.join(" and ")} (Regulo external-link-marked); the projections fill the slot with the mark and speak the text when external is true.`,
+    });
+  }
+  return issues;
+};
+
 /** Enforceable Reguloj by name. A Regulo declared "automatic" must have an entry here. */
 export const REGULO_ENFORCERS: Readonly<Record<string, Enforcer>> = {
   /** FR-02: semantic colours alias palette tokens, in every set. */
@@ -330,6 +395,9 @@ export const REGULO_ENFORCERS: Readonly<Record<string, Enforcer>> = {
   "protected-minimum": protectedMinimum,
   /** F32: the focus ring is derivable as concentric with what it encloses. */
   "focus-ring-concentric": focusRingConcentric,
+  // Spec 008 (A2, plan D-13): the two Skemo-level Reguloj of the ligilo.
+  "link-not-color-only": linkNotColorOnly,
+  "external-link-marked": externalLinkMarked,
   /** Spec 002 FR-04: every core role token has a $description of its use. */
   "semantic-described": (modelo) => semanticDescribedIssues(modelo),
   /** FR-08: every colour token declares its role (in core, where roles live). */

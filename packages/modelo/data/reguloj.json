@@ -231,8 +231,8 @@
     {
       "id": "reg_01M2XMV80DG7JCJDTZGE66MGHZ",
       "name": "touch-target-min",
-      "statement": "In every combination of every Aspekto, every size.control.* resolves to at least size.target.min, the minimum pointer target of WCAG 2.5.8 (24 px).",
-      "kialo": "WCAG 2.5.8 (AA) requires a target of at least 24 by 24 px; smaller targets fail people with tremor, with large fingers or on a moving device. The threshold is a token, so the rule and the rendered component read the same value.",
+      "statement": "In every combination of every Aspekto, every size.control.* resolves to at least size.target.min, the minimum pointer target of WCAG 2.5.8 (24 px). A ligilo with placement inline is exempt: running text cannot carry 24 px lines, and WCAG 2.5.8 excepts targets that stand in a sentence (Spec 008 A2).",
+      "kialo": "WCAG 2.5.8 (AA) requires a target of at least 24 by 24 px; smaller targets fail people with tremor, with large fingers or on a moving device. The threshold is a token, so the rule and the rendered component read the same value. The exception for inline links is WCAG's own: a target in a block of text is excluded from the minimum, because the line height of the text decides its size.",
       "scope": "vortaro: size.control.* against size.target.min in every combination",
       "checkability": "automatic",
       "appliesTo": {
@@ -391,11 +391,12 @@
       "name": "spacing-owned-by-container",
       "statement": "The space between sibling Eroj belongs to their container; an Ero carries no outer spacing.",
       "kialo": "An Ero does not know its neighbours. If each one brought its own distance, two Eroj side by side would add up their distances, and the rhythm of a view would depend on which Ero stands where.",
-      "scope": "eroj: butono and every Ero beside it in a container; the gap of the container, never a margin of the Ero (Regulo candidate, Spec 007 A4)",
+      "scope": "eroj: butono and ligilo instances in a design or in code",
       "checkability": "manual",
       "appliesTo": {
         "eroj": [
-          "butono"
+          "butono",
+          "ligilo"
         ]
       }
     },
@@ -448,6 +449,71 @@
       "appliesTo": {
         "eroj": [
           "butono"
+        ]
+      }
+    },
+    {
+      "id": "reg_01M4RYCWPBKKHNBR908WP6Y6TY",
+      "name": "link-navigates-button-acts",
+      "statement": "A ligilo moves to another view or place; a butono starts an action here. A ligilo whose label names an action (a goal of the butono: save, delete, cancel) is a violation.",
+      "kialo": "Screen readers announce a link and a button differently, the keyboard operates them differently (Enter against Enter and Space), and the way back is different: a link is left with the back command, an action is undone or not at all. A label that promises an action on a link misleads all three.",
+      "scope": "eroj: ligilo instances with a label; checked against the keywords of the instead entry action of its Uzo (check not-instead)",
+      "checkability": "automatic",
+      "appliesTo": {
+        "eroj": [
+          "ligilo"
+        ]
+      }
+    },
+    {
+      "id": "reg_01M4RYCWPBKKHNBR908WP6Y6TZ",
+      "name": "link-not-color-only",
+      "statement": "A ligilo in running text (placement inline) differs from the text by more than colour: its underline is bound in every state.",
+      "kialo": "WCAG 1.4.1 (Use of Color): colour alone does not carry information. A person who does not see the hue, or reads in a mode that flattens it, must still find the link in the sentence.",
+      "scope": "eroj: the Skemo of every Ero with a part underline and a prop placement; underline.width in placement inline is bound and never none",
+      "checkability": "automatic",
+      "appliesTo": {
+        "eroj": [
+          "ligilo"
+        ]
+      }
+    },
+    {
+      "id": "reg_01M4RYCWPBKKHNBR908WP6Y6V0",
+      "name": "link-label-names-destination",
+      "statement": "The label of a ligilo names the destination; here, click, more or link alone name none.",
+      "kialo": "WCAG 2.4.4 (Link Purpose in Context): a screen reader user reads the links of a page as a list, out of context; a list of here says nothing.",
+      "scope": "eroj: ligilo instances with a label (check not-words)",
+      "checkability": "automatic",
+      "appliesTo": {
+        "eroj": [
+          "ligilo"
+        ]
+      }
+    },
+    {
+      "id": "reg_01M4RYCWPBKKHNBR908WP6Y6V1",
+      "name": "external-link-marked",
+      "statement": "A ligilo with external true marks the leaving of the application visibly and audibly: its Skemo carries an a11y text for external in de and en, and a decorative slot icon-end the projections fill with the mark.",
+      "kialo": "Leaving the application is a moment of trust; the person decides before, not after. No brand switches the mark off; only its look comes from the Aspekto.",
+      "scope": "eroj: the Skemo of every Ero with a boolean prop external",
+      "checkability": "automatic",
+      "appliesTo": {
+        "eroj": [
+          "ligilo"
+        ]
+      }
+    },
+    {
+      "id": "reg_01M4RYCWPBKKHNBR908WP6Y6V2",
+      "name": "link-label-not-url",
+      "statement": "The label of a ligilo is words, not an address (no http, https or www).",
+      "kialo": "An address is hard to read and to hear for a person; technical documentation may show one, with a Jugxo of the brand.",
+      "scope": "eroj: ligilo instances with a label (check not-words); adjustable by an Aspekto with a Jugxo",
+      "checkability": "automatic",
+      "appliesTo": {
+        "eroj": [
+          "ligilo"
         ]
       }
     }

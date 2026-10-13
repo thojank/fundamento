@@ -46,6 +46,7 @@ describe("Make Kit sources (T018)", () => {
       "README.md",
       "guidelines/Guidelines.md",
       "guidelines/components/butono.md",
+      "guidelines/components/ligilo.md",
       "guidelines/foundations/color.md",
       "guidelines/foundations/dimensioj.md",
       "guidelines/foundations/spacing.md",
@@ -254,7 +255,7 @@ describe("Make Kit guidelines carry the Uzo (T026)", () => {
     const item = guidelinesInventory(text);
     expect(item.sections).toEqual([
       "Props",
-      "Which button for which goal",
+      "Which butono for which goal",
       "Rules",
       "Examples",
       "What it is for",

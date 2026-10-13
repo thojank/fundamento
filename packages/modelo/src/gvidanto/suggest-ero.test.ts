@@ -64,7 +64,8 @@ describe("suggest_ero", () => {
     if (result.ok) return;
     expect(result.issues.map((issue) => issue.rule)).toEqual(["goal-unknown"]);
     expect(result.issues[0]?.path).toBe("suggest_ero/goal");
-    expect(result.allowed).toEqual(["destructive", "confirm", "dismiss"]);
+    // Every goal of every Ero, in Ero order (Spec 008: navigate and external of the ligilo).
+    expect(result.allowed).toEqual(["destructive", "confirm", "dismiss", "navigate", "external"]);
     // Spec 007 (OP-6, D-06): the system says it does not cover the goal; a person decides.
     expect(result.issues[0]?.suggestion).toBe(
       "Fundamento does not cover this goal. Ask a person; do not build a replacement.",
@@ -83,22 +84,47 @@ describe("suggest_ero with the Uzo (T023)", () => {
   const butonoUzo = modelo.eroj.find((entry) => entry.ero.name === "butono")?.uzo;
   const navigation = butonoUzo?.boundary.find((entry) => entry.case === "navigation");
 
+  // Spec 008 S1, D-08: the boundary navigation of the butono says use-instead ligilo; the answer
+  // is the ligilo with the kialo of the boundary, no ask-human. "Zur Übersicht" also hits the goal
+  // navigate of the ligilo (whole word); both say ligilo, so the goal answers and the boundary
+  // stands next to it. "zur Projektübersicht" hits the boundary alone (compound word, N-1).
   it.each(["Zur Übersicht", "zur Projektübersicht"])(
-    "%s is navigation: ask-human with the kialo of the Uzo, no suggestion (S1)",
+    "%s is navigation: the ligilo with the kialo of the butono's boundary, no ask-human (S1)",
     (text) => {
       const answer = suggest(text);
-      expect(answer.suggestion).toBeNull();
+      expect(answer.suggestion).toEqual({ ero: "ligilo", props: {} });
       expect(answer.boundary).toEqual({
         ero: "butono",
         case: "navigation",
-        action: "ask-human",
+        action: "use-instead",
         kialo: navigation?.kialo,
       });
-      expect(answer.matched).toEqual({ goal: "navigation", keyword: "übersicht", lingvo: "de" });
+      expect(navigation?.kialo).toMatch(/Fundamento covers it with ligilo\.$/);
+      expect(answer.matched?.keyword).toBe("übersicht");
+      expect(answer.matched?.lingvo).toBe("de");
       expect(answer.action).toBeUndefined();
       expect(answer.candidates).toBeUndefined();
     },
   );
+
+  it("'Zur Übersicht' names the goal navigate with its Regulo; the compound word the boundary alone", () => {
+    expect(suggest("Zur Übersicht").matched?.goal).toBe("navigate");
+    expect(suggest("Zur Übersicht").regulo?.name).toBe("link-navigates-button-acts");
+    expect(suggest("zur Projektübersicht").matched?.goal).toBe("navigation");
+  });
+
+  it("'Dokumentation' is the goal external of the ligilo: external true (Spec 008 A1)", () => {
+    const answer = suggest("Dokumentation");
+    expect(answer.suggestion).toEqual({ ero: "ligilo", props: { external: "true" } });
+    expect(answer.regulo?.name).toBe("external-link-marked");
+  });
+
+  it("'Speichern' as a link is the butono: the instead entry action of the ligilo confirms it", () => {
+    const answer = suggest("Speichern");
+    expect(answer.suggestion).toEqual({ ero: "butono", props: { emphasis: "high" } });
+    expect(answer.boundary).toBeUndefined();
+    expect(answer.candidates).toBeUndefined();
+  });
 
   it("'Zum Warenkorb hinzufügen' does not end as navigation (OP-12)", () => {
     const result = suggestEro(modelo, { goal: "Zum Warenkorb hinzufügen" });
@@ -130,7 +156,9 @@ describe("suggest_ero with the Uzo (T023)", () => {
         kind: "boundary",
         ero: "butono",
         case: "navigation",
-        action: "ask-human",
+        // Spec 008 A4: the boundary says use-instead ligilo; next to the goal confirm of the
+        // butono the two readings still differ (ligilo against butono), so a person decides.
+        action: "use-instead",
         kialo: navigation?.kialo,
         keyword: "übersicht",
       },

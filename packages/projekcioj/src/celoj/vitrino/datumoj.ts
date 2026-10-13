@@ -19,6 +19,7 @@ import {
   readDtcgColor,
   regularoEnforcementIssues,
   STATE_KEY,
+  styledProps,
   typeScaleConsistency,
   type UzoOutput,
   type ValidationIssue,
@@ -105,8 +106,8 @@ export interface VitrinoDatumoj {
     { dimensio: string; valoro: string; propraj: number; entute: number; parto: number }[]
   >;
   komparo: Record<string, { kriterio: string; a: string; b: string; pli: "a" | "b" | "egale" }[]>;
-  /** The `fm-butono` grid as markup; the element upgrades it in the browser. */
-  butono: string;
+  /** Per Ero its grid as markup (`fm-<ero>`); the element upgrades it in the browser (Spec 008). */
+  eroj: Record<string, string>;
   /**
    * The Uzo of every Ero that has one, as get_ero states it (Spec 007 T027, S5): the Vitrino
    * answers "Wann nehme ich den Butono nicht?" from the same data as the Gvidanto.
@@ -263,12 +264,28 @@ export function uzojOf(modelo: Modelo): Record<string, UzoOutput> {
   return uzoj;
 }
 
-export function butonoMarkup(eroj: readonly LoadedEro[]): string {
-  const entry = eroj.find((candidate) => candidate.ero.name === "butono");
-  if (entry === undefined) return "<p>Kein Ero <code>butono</code> im Modelo.</p>";
-  const keys = VITRINO_ROW_KEYS.filter((key) =>
-    entry.skemo.props.some((prop) => prop.name === key),
+/**
+ * The grid of one Ero (Spec 004 for the butono; Spec 008 D-12 for every Ero): one row per
+ * combination of the enum props its parts are keyed by, one column at rest and one per boolean
+ * prop that is a state (disabled, loading) or carries an a11y text (external). A string prop
+ * without a default (the link's `to`) points at the section itself.
+ */
+export function eroMarkup(entry: LoadedEro): string {
+  const tag = `fm-${entry.ero.name}`;
+  const keys = styledProps(entry.skemo).filter((key) =>
+    entry.skemo.props.some((prop) => prop.name === key && prop.kind === "enum"),
   );
+  const texts = entry.skemo.a11y.texts ?? {};
+  const columns = entry.skemo.props
+    .filter(
+      (prop) =>
+        prop.kind === "boolean" && (entry.skemo.states.includes(prop.name) || prop.name in texts),
+    )
+    .map((prop) => prop.name);
+  const required = entry.skemo.props
+    .filter((prop) => prop.kind === "string" && prop.default === undefined && prop.name !== "label")
+    .map((prop) => ` ${prop.name}="#fm-vitrino-${entry.ero.name}"`)
+    .join("");
   const rows = combinationsOf(entry.skemo, keys)
     .filter((combination) => combination[STATE_KEY] === undefined)
     .map((combination) => {
@@ -276,10 +293,19 @@ export function butonoMarkup(eroj: readonly LoadedEro[]): string {
         .map(([key, value]) => ` ${key}="${value}"`)
         .join("");
       const label = vitrinoLabelOf(combination);
-      return `<tr><th scope="row">${label}</th><td><fm-butono${attributes}>${label}</fm-butono></td><td><fm-butono${attributes} disabled>${label}</fm-butono></td><td><fm-butono${attributes} loading>${label}</fm-butono></td></tr>`;
+      const cells = ["", ...columns.map((column) => ` ${column}`)]
+        .map((extra) => `<td><${tag}${attributes}${required}${extra}>${label}</${tag}></td>`)
+        .join("");
+      return `<tr><th scope="row">${label}</th>${cells}</tr>`;
     })
     .join("");
-  return `<table><caption>fm-butono, jede Kombination der Skemo</caption><thead><tr><th scope="col">Kombination</th><th scope="col">rest</th><th scope="col">disabled</th><th scope="col">loading</th></tr></thead><tbody>${rows}</tbody></table>`;
+  const heads = ["rest", ...columns].map((column) => `<th scope="col">${column}</th>`).join("");
+  return `<table><caption>${tag}, jede Kombination der Skemo</caption><thead><tr><th scope="col">Kombination</th>${heads}</tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+/** The grid of every Ero of the Modelo, by name (Spec 008, D-12). */
+export function erojMarkup(eroj: readonly LoadedEro[]): Record<string, string> {
+  return Object.fromEntries(eroj.map((entry) => [entry.ero.name, eroMarkup(entry)]));
 }
 
 function regularoOf(
@@ -589,7 +615,7 @@ export function vitrinoDatumoj({ input, bazo }: VitrinoDatumojInput): VitrinoDat
       rampoj,
       ankroj,
     }),
-    butono: butonoMarkup(modelo.eroj),
+    eroj: erojMarkup(modelo.eroj),
     uzo: uzojOf(modelo),
     apcaHintoj: {
       nun: apcaNun,

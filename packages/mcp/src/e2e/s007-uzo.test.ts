@@ -54,36 +54,39 @@ beforeAll(async () => {
   ({ client } = await connect({ config: EKZEMPLO_CONFIG }));
 });
 
+// Since Spec 008 (A4) the boundary navigation says use-instead ligilo: the agent gets the link.
+// What this scenario proved — the butono itself names the boundary with its kialo — still holds.
 describe("S1: the agent does not take the wrong Ero", () => {
-  it("'Zur Übersicht' is the boundary navigation: ask-human, no suggestion, the kialo of the Uzo", async () => {
+  it("'Zur Übersicht' is the boundary navigation of the butono: use-instead ligilo with the kialo of the Uzo", async () => {
     const navigation = boundaryNamed("navigation");
     const answer = await output<Suggested>(client, "suggest_ero", { goal: "Zur Übersicht" });
-    expect(answer.suggestion).toBeNull();
+    expect(answer.suggestion).toEqual({ ero: "ligilo", props: {} });
     expect(answer.boundary).toEqual({
       ero: "butono",
       case: "navigation",
       action: navigation.action,
       kialo: navigation.kialo,
     });
-    expect(answer.boundary?.action).toBe("ask-human");
+    expect(answer.boundary?.action).toBe("use-instead");
     expect(answer.candidates).toBeUndefined();
   });
 
-  it("the example dialog: 'zur Projektübersicht' → ask-human, the kialo is passed on, no solution of its own", async () => {
+  it("the example dialog of Spec 007: 'zur Projektübersicht' → the ligilo, the kialo is passed on (Spec 008 S1)", async () => {
     const navigation = boundaryNamed("navigation");
     const answer = await output<Suggested>(client, "suggest_ero", {
       goal: "zur Projektübersicht",
     });
-    // The tool answers with the boundary and its action.
     expect(answer.boundary?.case).toBe("navigation");
-    expect(answer.boundary?.action).toBe("ask-human");
-    expect(answer.suggestion).toBeNull();
-    // What the Gvidanto says next: the kialo of the boundary, and that Fundamento does not cover
-    // navigation yet. The prompt rule 12 binds the agent to pass it on and propose nothing.
+    expect(answer.boundary?.action).toBe("use-instead");
+    expect(answer.suggestion?.ero).toBe("ligilo");
     expect(answer.boundary?.kialo).toBe(navigation.kialo);
-    expect(navigation.kialo).toMatch(/does not cover navigation yet/);
+    expect(navigation.kialo).toMatch(/Fundamento covers it with ligilo\./);
+    // Rule 12 still binds the agent for every boundary that stays ask-human; rule 13 for use-instead.
     expect(prompt).toMatch(
       /12\. When `suggest_ero` or `check_usage` answers with `action: ask-human`.*pass the kialo to the user.*Do not propose a solution of your own/,
+    );
+    expect(prompt).toMatch(
+      /13\. When `suggest_ero` answers with a `boundary` whose action is `use-instead`/,
     );
   });
 

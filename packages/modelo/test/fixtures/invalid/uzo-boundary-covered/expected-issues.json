@@ -1,0 +1,9 @@
+{
+  "description": "Spec 008 A4, A7 (plan D-14): the boundary navigation of butono says ask-human, but its keywords are the keywords of the goal navigate of ligilo. When Fundamento has the Ero, the answer is use-instead.",
+  "issues": [
+    {
+      "rule": "uzo-boundary-covered",
+      "path": "data/eroj/butono/uzo.json#/uzo/boundary/0/action"
+    }
+  ]
+}

@@ -698,3 +698,102 @@ describe("capitals and tracking reach the Figma plan (F31)", () => {
     expect(medium?.textCase).toBe(TEXT_CASE_VARIES);
   });
 });
+
+// Spec 008 T017 (A5, plan D-11): the second component set, from the same generator. The axes are
+// the enum props the parts are keyed by (placement, size) and the state; external is a BOOLEAN
+// property of the plan. The underline is a written text decoration per variant, the inherited
+// typography of an inline link is the running text's role, and a link has no radius to grow.
+describe("Figma plan for the ligilo (Spec 008 T017)", () => {
+  const set = plan.components.find((component) => component.set === "ligilo");
+  const ligilo = prepared.input.modelo.eroj.find((entry) => entry.ero.name === "ligilo");
+  const variant = (placement: string, size: string, state: string) =>
+    set?.variants.find(
+      (entry) =>
+        entry.props.placement === placement &&
+        entry.props.size === size &&
+        entry.props.state === state,
+    );
+
+  it("plans two sets, butono first, and gives the ligilo placement × size × state", () => {
+    expect(plan.components.map((component) => component.set)).toEqual(["butono", "ligilo"]);
+    expect(set?.properties).toEqual({
+      to: "TEXT",
+      placement: ["inline", "standalone"],
+      external: "BOOLEAN",
+      size: ["small", "medium", "large"],
+      label: "TEXT",
+      state: ["rest", "hover", "pressed", "focus", "visited"],
+    });
+    expect(set?.variants).toHaveLength(2 * 3 * 5);
+    expect(set?.description).toBe(ligilo?.uzo?.purpose);
+    expect(set?.grid).toMatchObject({ rows: 6, columns: 5 });
+  });
+
+  it("underlines inline in every state and standalone from hover and focus on (D-11, B-1)", () => {
+    for (const state of ["rest", "hover", "pressed", "focus", "visited"]) {
+      expect(variant("inline", "medium", state)?.underline, `inline ${state}`).toBe(true);
+    }
+    expect(variant("standalone", "medium", "rest")?.underline).toBe(false);
+    expect(variant("standalone", "medium", "visited")?.underline).toBe(false);
+    for (const state of ["hover", "pressed", "focus"]) {
+      expect(variant("standalone", "medium", state)?.underline, `standalone ${state}`).toBe(true);
+    }
+    // The part underline is a named, released difference, never a claimed drawing.
+    expect(variant("inline", "medium", "rest")?.notDrawn?.["underline.width"]).toBe(
+      "jug_01M4RYCY61NK92JM6XYD00M012",
+    );
+    expect(variant("inline", "medium", "rest")?.bindings["underline.width"]).toBe(
+      "border/width/default",
+    );
+    expect(variant("standalone", "medium", "rest")?.bindings["underline.width"]).toBeUndefined();
+    // The butono knows no underline.
+    expect(plan.components[0]?.variants[0]?.underline).toBeUndefined();
+  });
+
+  it("takes the running text's role for the inherited typography and binds it (E6, D-11)", () => {
+    const inline = variant("inline", "small", "rest");
+    expect(inline?.bindings["label.typography"]).toBe("typography/body/1");
+    expect(inline?.font).toBeDefined();
+    expect(variant("standalone", "small", "rest")?.bindings["label.typography"]).toBe(
+      "typography/label/2",
+    );
+    expect(set?.fonts?.length ?? 0).toBeGreaterThan(0);
+  });
+
+  it("binds the link colours by state and the minimum target standalone only (D-10)", () => {
+    expect(variant("standalone", "medium", "rest")?.bindings["label.color"]).toBe(
+      "color/link/rest",
+    );
+    expect(variant("standalone", "medium", "visited")?.bindings["label.color"]).toBe(
+      "color/link/visited",
+    );
+    expect(variant("standalone", "medium", "pressed")?.bindings["label.color"]).toBe(
+      "color/link/hover",
+    );
+    expect(variant("standalone", "medium", "rest")?.geometry?.["box.height"]).toBe("24px");
+    expect(variant("inline", "medium", "rest")?.geometry?.["box.height"]).toBeUndefined();
+    expect(variant("inline", "medium", "rest")?.bindings["box.height"]).toBeUndefined();
+  });
+
+  it("grows no focus radius for an Ero without a radius; the butono keeps its radii (F32)", () => {
+    expect(variant("standalone", "medium", "focus")?.radii).toBeUndefined();
+    expect(variant("standalone", "medium", "focus")?.focusVisible).toBe(true);
+    expect(plan.components[0]?.variants[0]?.radii).toEqual({
+      "focus-gap": "radius/focus/gap",
+      "focus-ring": "radius/focus/ring",
+    });
+    const names = plan.collections.flatMap((c) => c.variables.map((v) => v.name));
+    expect(names).toContain("radius/focus/gap");
+  });
+
+  it("states the ligilo in the parity inventory with its states and the released underline", () => {
+    const items = figmaPlanInventory(plan);
+    expect(items.ligilo?.props.placement).toEqual(["inline", "standalone"]);
+    expect(items.ligilo?.props.external).toEqual(["boolean"]);
+    expect(items.ligilo?.props.to).toEqual(["string"]);
+    expect(items.ligilo?.states).toEqual(["rest", "hover", "pressed", "focus", "visited"]);
+    expect(items.ligilo?.values["label.color@placement=standalone,size=medium,state=rest"]).toMatch(
+      /^#[0-9a-f]{6}$/,
+    );
+  });
+});

@@ -8,8 +8,10 @@ import { formatIssuePath } from "../contracts/issues.js";
 import type { EroInstance, LoadedEro, Modelo, Regulo } from "../contracts/modelo.js";
 import type {
   Skemo,
+  Uzo,
   UzoBoundary,
   UzoContent,
+  UzoInstead,
   UzoLayoutAllowance,
 } from "../generated/modelo-schema.js";
 import { describeCombination, forbiddenBy } from "./skemo-rules.js";
@@ -29,6 +31,9 @@ export interface UsageResult {
 
 /** The implicit container of instances that name none. */
 const NO_CONTAINER = "";
+
+/** The container kind of running text; an Ero with `wrap: with-text` breaks only there (D-04). */
+export const TEXT_CONTAINER = "text";
 
 /**
  * The axes the two butono Reguloj read (F1, Jugxo jug_01M4DNSD0SV43Y943T21RQF7EM): `emphasis`
@@ -141,13 +146,42 @@ export interface UsageFinding {
 
 type UsageEnforcer = (context: Context) => UsageFinding[];
 
-/** Why a text fails a check of a Uzo text rule (data-model §2.1, `UzoContent.check`), or nothing. */
+/**
+ * The instead entry of a Uzo whose keyword is a word of the text (Spec 008, plan D-07): the text
+ * names a goal the Ero does not serve. Whole words, like the Skemo goals.
+ */
+export function insteadHit(
+  uzo: Uzo | undefined,
+  text: string,
+): { entry: UzoInstead; keyword: string; lingvo: string } | undefined {
+  const words = new Set(wordsOf(text));
+  for (const entry of uzo?.instead ?? []) {
+    for (const [lingvo, keywords] of Object.entries(entry.keywords)) {
+      const keyword = keywords.find((candidate) =>
+        words.has(candidate.normalize("NFC").toLowerCase()),
+      );
+      if (keyword !== undefined) return { entry, keyword, lingvo };
+    }
+  }
+  return undefined;
+}
+
+/**
+ * Why a text fails a check of a Uzo text rule (data-model §2.1, `UzoContent.check`), or nothing.
+ * `not-instead` reads the instead entries of the Uzo (Spec 008, D-07).
+ */
 export function textCheckFailure(
   skemo: Skemo,
   check: UzoContent["check"],
   text: string,
+  uzo?: Uzo,
 ): string | undefined {
   switch (check.kind) {
+    case "not-instead": {
+      const hit = insteadHit(uzo, text);
+      if (hit === undefined) return undefined;
+      return `it names the goal ${hit.entry.goal} ("${hit.keyword}"), which this Ero does not serve${hit.entry.ero === null ? "" : `; that is the ${hit.entry.ero} (use-instead)`}`;
+    }
     case "names-goal":
       return goalOf(skemo, text) === undefined
         ? "it names no verb of a goal of the Ero (nothing says what happens on activation)"
@@ -212,7 +246,7 @@ export function approvedLabel(
       const label = textOf(instance);
       const skemo = eroOf(instance)?.skemo;
       if (label === undefined || skemo === undefined) continue;
-      labels.push({ label, lingvo: lingvoOf(skemo, label) });
+      labels.push({ label, lingvo: instance.lingvo ?? lingvoOf(skemo, label) });
     }
   }
   return (
@@ -240,14 +274,27 @@ const textRule: UsageEnforcer = ({ modelo, regulo, instances, eroOf }) =>
       const goal = goalOfInstance(ero.skemo, instance);
       if (goal === undefined || !rule.when.goal.includes(goal)) return [];
     }
-    const failure = textCheckFailure(ero.skemo, rule.check, text);
+    const failure = textCheckFailure(ero.skemo, rule.check, text, ero.uzo);
     if (failure === undefined) return [];
-    const lingvo = lingvoOf(ero.skemo, text) ?? genericLingvo(rule.check, text) ?? DEFAULT_LINGVO;
+    // The language of the instance when it says it (Spec 008, D-06), else read from the text.
+    const lingvo =
+      instance.lingvo ??
+      lingvoOf(ero.skemo, text) ??
+      genericLingvo(rule.check, text) ??
+      insteadHit(ero.uzo, text)?.lingvo ??
+      DEFAULT_LINGVO;
     const example = approvedLabel(modelo, regulo, lingvo, eroOf);
+    // A text that names another Ero's goal is that Ero's job (not-instead, D-07): the solution is
+    // the other Ero with the kialo of the instead entry, not a better label.
+    const instead = rule.check.kind === "not-instead" ? insteadHit(ero.uzo, text) : undefined;
     const suggestion =
-      example === undefined
-        ? `Write a label that follows the rule: ${regulo.statement}`
-        : `Write the label as the approved example does, e.g. "${example}".`;
+      instead !== undefined
+        ? instead.entry.ero === null
+          ? `Ask a person; Fundamento does not cover ${instead.entry.goal} yet. ${instead.entry.kialo}`
+          : `Use ${instead.entry.ero} instead (use-instead, case ${instead.entry.goal}). ${instead.entry.kialo}`
+        : example === undefined
+          ? `Write a label that follows the rule: ${regulo.statement}`
+          : `Write the label as the approved example does, e.g. "${example}".`;
     // Overridden by the Aspekto of the instance: visible as info, not as a violation (Art. VI).
     const jugxo = overrideOf(modelo, instance, rule);
     if (jugxo !== undefined) {
@@ -328,8 +375,22 @@ function uzoFindings(
       findings.push(boundaryFinding(index, ero, boundary, `holds an Ero in the slot ${via.slot}`));
     } else if ("layout" in via) {
       const text = textOf(instance);
-      if (uzo.layout.wrap !== "never" || text === undefined || !/\r?\n/.test(text)) continue;
-      findings.push(boundaryFinding(index, ero, boundary, "has a label that breaks into lines"));
+      if (text === undefined || !/\r?\n/.test(text)) continue;
+      const wrap = uzo.layout.wrap;
+      if (wrap === "allowed") continue;
+      // with-text (Spec 008, D-04): the label breaks with the running text it stands in, and
+      // only there; standing alone it never breaks.
+      if (wrap === "with-text" && instance.container === TEXT_CONTAINER) continue;
+      findings.push(
+        boundaryFinding(
+          index,
+          ero,
+          boundary,
+          wrap === "with-text"
+            ? `has a label that breaks into lines outside running text (container ${TEXT_CONTAINER})`
+            : "has a label that breaks into lines",
+        ),
+      );
     }
   }
   for (const [slot, entries] of Object.entries(slots)) {
@@ -478,6 +539,10 @@ export const USAGE_ENFORCERS: Readonly<Record<string, UsageEnforcer>> = {
   "label-names-action": textRule,
   "destructive-label-names-object": textRule,
   "destructive-label-not-generic": textRule,
+  // Spec 008 T005 (A2, A3, D-07, D-13): the three text rules of the ligilo.
+  "link-navigates-button-acts": textRule,
+  "link-label-names-destination": textRule,
+  "link-label-not-url": textRule,
 };
 
 function applies(regulo: Regulo, ero: LoadedEro): boolean {

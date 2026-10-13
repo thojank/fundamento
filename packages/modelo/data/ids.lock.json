@@ -76,6 +76,10 @@
       "status": "active",
       "type": "ero"
     },
+    "ero_01M4RYCX28WNYSGMANDBK8TK04": {
+      "status": "active",
+      "type": "ero"
+    },
     "jug_01M2VRT7KQ77W91MVXB4GXSRZ4": {
       "status": "active",
       "type": "jugxo"
@@ -281,6 +285,58 @@
       "type": "jugxo"
     },
     "jug_01M4RPQWREQ525AG7EQKJE64AG": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M4RYCY60R9VN700X7FYVQ85R": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M4RYCY61NK92JM6XYD00M00Q": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M4RYCY61NK92JM6XYD00M00R": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M4RYCY61NK92JM6XYD00M00S": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M4RYCY61NK92JM6XYD00M00T": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M4RYCY61NK92JM6XYD00M00V": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M4RYCY61NK92JM6XYD00M00W": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M4RYCY61NK92JM6XYD00M00X": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M4RYCY61NK92JM6XYD00M00Y": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M4RYCY61NK92JM6XYD00M00Z": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M4RYCY61NK92JM6XYD00M010": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M4RYCY61NK92JM6XYD00M011": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M4RYCY61NK92JM6XYD00M012": {
       "status": "active",
       "type": "jugxo"
     },
@@ -536,6 +592,18 @@
       "status": "active",
       "type": "kontrastParo"
     },
+    "kpa_01M4RYCYHTC8QD4ATWY05P5VA8": {
+      "status": "active",
+      "type": "kontrastParo"
+    },
+    "kpa_01M4RYCYHVJ23PPETWR30QDQV7": {
+      "status": "active",
+      "type": "kontrastParo"
+    },
+    "kpa_01M4RYCYHVJ23PPETWR30QDQV8": {
+      "status": "active",
+      "type": "kontrastParo"
+    },
     "man_01M37TQHM886J48FX84PZZTY4X": {
       "status": "active",
       "type": "manko"
@@ -696,6 +764,26 @@
       "status": "active",
       "type": "regulo"
     },
+    "reg_01M4RYCWPBKKHNBR908WP6Y6TY": {
+      "status": "active",
+      "type": "regulo"
+    },
+    "reg_01M4RYCWPBKKHNBR908WP6Y6TZ": {
+      "status": "active",
+      "type": "regulo"
+    },
+    "reg_01M4RYCWPBKKHNBR908WP6Y6V0": {
+      "status": "active",
+      "type": "regulo"
+    },
+    "reg_01M4RYCWPBKKHNBR908WP6Y6V1": {
+      "status": "active",
+      "type": "regulo"
+    },
+    "reg_01M4RYCWPBKKHNBR908WP6Y6V2": {
+      "status": "active",
+      "type": "regulo"
+    },
     "set_01M2VEEDW32MC4ZQPRN0GC9JRR": {
       "status": "active",
       "type": "tokenSet"
@@ -733,6 +821,10 @@
       "type": "tokenSet"
     },
     "ske_01M2XN0PWS92GP7VFHW161EH0D": {
+      "status": "active",
+      "type": "skemo"
+    },
+    "ske_01M4RYCXE78XSCQ4Q4V8WA4FZH": {
       "status": "active",
       "type": "skemo"
     },
@@ -2169,6 +2261,10 @@
       "type": "token"
     },
     "uzo_01M4RPK0VYYXNCF41ME86Q4Z8P": {
+      "status": "active",
+      "type": "uzo"
+    },
+    "uzo_01M4RYCXT5HJ3776EF81MZABY4": {
       "status": "active",
       "type": "uzo"
     }

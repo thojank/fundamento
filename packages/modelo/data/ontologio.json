@@ -23,6 +23,13 @@
         "en": "Principles that guide the system; they live in a spec until the Constitution takes them up.",
         "de": "Grundsätze, die das System leiten; sie stehen in einer Spec, bis die Constitution sie aufnimmt."
       }
+    },
+    {
+      "id": "eroj",
+      "definition": {
+        "en": "The Eroj of the Modelo and how they relate: what one does that another does not (Spec 008, A8).",
+        "de": "Die Eroj des Modelo und ihre Beziehungen zueinander: was das eine tut und das andere nicht (Spec 008, A8)."
+      }
     }
   ],
   "predicates": [
@@ -921,6 +928,71 @@
         "#Aspekto",
         "#Regulo",
         "#Aspiro"
+      ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Butono",
+      "term": "Butono",
+      "inScheme": "eroj",
+      "prefLabel": {
+        "eo": "Butono",
+        "en": "button",
+        "de": "Button"
+      },
+      "altLabel": {
+        "en": [
+          "butono"
+        ],
+        "de": [
+          "Schaltfläche",
+          "butono"
+        ]
+      },
+      "definition": {
+        "en": "A button: starts an action. Its label is always visible, or given as the label prop when only an icon shows.",
+        "de": "Ein Button: löst eine Aktion auf der aktuellen Ansicht aus. Seine Beschriftung ist immer sichtbar oder steht als Prop label, wenn nur ein Icon zu sehen ist."
+      },
+      "broader": [
+        "#Ero"
+      ],
+      "relations": [
+        {
+          "predicate": "references",
+          "target": "#Ligilo"
+        }
+      ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Ligilo",
+      "term": "Ligilo",
+      "inScheme": "eroj",
+      "prefLabel": {
+        "eo": "Ligilo",
+        "en": "link",
+        "de": "Link"
+      },
+      "altLabel": {
+        "en": [
+          "ligilo",
+          "hyperlink"
+        ],
+        "de": [
+          "Verweis",
+          "ligilo"
+        ]
+      },
+      "definition": {
+        "en": "A link: moves to another view or place. Its label names the destination.",
+        "de": "Ein Link: wechselt zu einer anderen Ansicht oder einem anderen Ort. Seine Beschriftung nennt das Ziel. Der butono verweist für Navigation auf ihn (use-instead), er für Aktionen auf den butono."
+      },
+      "broader": [
+        "#Ero"
+      ],
+      "relations": [
+        {
+          "predicate": "references",
+          "target": "#Butono"
+        }
       ]
     }
   ]

@@ -66,3 +66,77 @@ for (const factor of [1.35, 2]) {
     expect(clipped).toBe(false);
   });
 }
+
+// Spec 008 T023 (A6): the ligilo right to left, expanded and pseudo-localised; inline it breaks
+// with the text, standalone it grows and clips nothing.
+test("ligilo right to left: icon-end sits on the left and the focus ring stays", async ({
+  page,
+  browserName,
+}) => {
+  await serve(
+    page,
+    out,
+    `<fm-ligilo id="a" to="#a" placement="standalone">Projektübersicht<svg id="icon" slot="icon-end" aria-hidden="true" width="16" height="16"></svg></fm-ligilo>`,
+  );
+  const controlBox = () =>
+    page.locator("#a").evaluate((element) => {
+      const control = element.shadowRoot?.querySelector('[part="control"]');
+      if (!(control instanceof Element)) throw new Error("no control");
+      return control.getBoundingClientRect().toJSON() as { x: number; width: number };
+    });
+  const right = await page.locator("#icon").boundingBox();
+  const ltr = await controlBox();
+  await page.evaluate(() => document.documentElement.setAttribute("dir", "rtl"));
+  const left = await page.locator("#icon").boundingBox();
+  const rtl = await controlBox();
+  // The host is inline (D-04), so the control's box is measured, not the host's.
+  expect(right?.x ?? 0).toBeGreaterThan(ltr.x + ltr.width / 2);
+  expect(left?.x ?? 0).toBeLessThan(rtl.x + rtl.width / 2);
+  await page.keyboard.press(TAB(browserName));
+  const outline = await page
+    .locator("#a")
+    .evaluate(
+      (element) =>
+        getComputedStyle(element.shadowRoot?.querySelector('[part="control"]') as Element)
+          .outlineWidth,
+    );
+  expect(Number.parseFloat(outline)).toBeGreaterThan(0);
+});
+
+for (const factor of [1.35, 2]) {
+  test(`ligilo text expansion to ${Math.round(factor * 100)} %: standalone grows, nothing is clipped; inline breaks with the text`, async ({
+    page,
+  }) => {
+    const label = "Projektübersicht";
+    await serve(
+      page,
+      out,
+      `<fm-ligilo id="a" to="#a" placement="standalone">${label}</fm-ligilo><p style="inline-size: 10rem">Text mit <fm-ligilo id="b" to="#b">${label}</fm-ligilo> darin.</p>`,
+    );
+    const before = await page.locator("#a").boundingBox();
+    for (const id of ["a", "b"]) {
+      await page.locator(`#${id}`).evaluate(
+        (element, text) => {
+          element.textContent = text;
+        },
+        pseudo(label, factor),
+      );
+    }
+    const after = await page.locator("#a").boundingBox();
+    expect(after?.width ?? 0).toBeGreaterThan(before?.width ?? 0);
+    const clipped = await page.locator("#a").evaluate((element) => {
+      const control = element.shadowRoot?.querySelector('[part="control"]') as HTMLElement;
+      return (
+        control.scrollWidth > control.clientWidth + 1 ||
+        control.scrollHeight > control.clientHeight + 1
+      );
+    });
+    expect(clipped).toBe(false);
+    const lines = await page
+      .locator("#b")
+      .evaluate(
+        (e) => e.shadowRoot?.querySelector('[part="control"]')?.getClientRects().length ?? 0,
+      );
+    expect(lines).toBeGreaterThan(1);
+  });
+}

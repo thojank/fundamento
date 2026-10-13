@@ -227,7 +227,9 @@ describe("exportModelo: uzoj (Spec 007)", () => {
 
   it("leaves uzoj out while no Ero has a Uzo, and carries the butono's since Stufe B (T020)", () => {
     expect(exportOf("ero-minimal")).not.toHaveProperty("uzoj");
-    expect(modeloJson.uzoj?.map((uzo) => uzo.ero)).toEqual([modeloJson.eroj[0]?.id]);
+    // Spec 008: every Ero of the repo has a Uzo, in Ero order.
+    expect(modeloJson.uzoj?.map((uzo) => uzo.ero)).toEqual(modeloJson.eroj.map((ero) => ero.id));
+    expect(modeloJson.uzoj).toHaveLength(2);
   });
 
   it("the export with uzoj validates against the exported schema", () => {

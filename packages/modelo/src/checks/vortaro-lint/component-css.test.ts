@@ -33,7 +33,8 @@ describe("componentCssIssues (F2)", () => {
   });
 
   it("keeps the allowlist small and explicit", () => {
-    expect(STRUCTURAL_PROPERTIES.length).toBeLessThanOrEqual(20);
+    // Spec 008 added text-decoration-line (the underline of a link is structure: on or off).
+    expect(STRUCTURAL_PROPERTIES.length).toBeLessThanOrEqual(21);
     for (const property of ["color", "background-color", "padding", "font-size", "gap"]) {
       expect(STRUCTURAL_PROPERTIES, property).not.toContain(property);
     }

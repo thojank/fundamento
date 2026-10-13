@@ -17,6 +17,7 @@ import {
   baseResolution,
   boundToken,
   combinationsOf,
+  isBindingKeyword,
   type LoadedEro,
   type Modelo,
   nomRegulo,
@@ -110,7 +111,17 @@ const FOCUS_STATE = "focus";
  */
 export const FIGMA_NOT_DRAWN: Readonly<Record<string, string>> = {
   icon: "jug_01M31TV1V4S3RNBPWSRB2CGEDK",
+  // Spec 008 (plan D-11, Befund B-1): the underline is written as the label's text decoration,
+  // on or off per variant; its thickness and colour bind to no variable in Figma.
+  underline: "jug_01M4RYCY61NK92JM6XYD00M012",
 };
+
+/**
+ * The typography a label that inherits from its text (binding keyword `inherit`, Spec 008 E6,
+ * plan D-11) shows in Figma: a component set has no container to inherit from, so the running
+ * text's role stands in for it, bound like any role, and switches with the mode.
+ */
+export const INHERIT_TYPOGRAPHY = "typography.body.1";
 
 export interface FigmaComponentSet {
   set: string;
@@ -148,6 +159,11 @@ export interface FigmaComponentSet {
     radii?: { "focus-ring": string; "focus-gap": string };
     /** The font of the label, from its typography token: family and the style of its weight. */
     font?: { family: string; style: string };
+    /**
+     * Whether the label is underlined in this variant (Spec 008, D-11): the part `underline`
+     * bound to a width, not to `none`. Written as the text decoration, not bound (B-1).
+     */
+    underline?: boolean;
     /**
      * The cell of the variant in the grid, as the Vitrino orders it: the row is its combination of
      * the keyed props (emphasis × intent × size) in the order of the plan, the column its state.
@@ -592,8 +608,12 @@ function derivedRadiusVariables(
   resolutions: ReturnType<typeof allResolutions>,
 ): Map<string, FigmaVariable[]> {
   const out = new Map<string, FigmaVariable[]>();
-  const [entry] = modelo.eroj;
-  const tokens = entry === undefined ? undefined : radiusTokensOf(entry);
+  // The first Ero that binds the three parts (Spec 008: the ligilo has no radius and no say here).
+  let tokens: Record<string, string> | undefined;
+  for (const entry of modelo.eroj) {
+    tokens = radiusTokensOf(entry);
+    if (tokens !== undefined) break;
+  }
   if (tokens === undefined) return out;
   const dimensioj = dimensiojOf(modelo);
   const defaults: Record<string, string> = {};
@@ -819,6 +839,16 @@ function componentSetOf(
     "state",
   ];
   const drawn = new Set(DRAWN_PART_PROPERTIES);
+  // The focus radii only for an Ero that has a radius to grow (F32); the ligilo has none.
+  const radiiOf =
+    radiusTokensOf(entry) === undefined
+      ? undefined
+      : { "focus-gap": "radius/focus/gap", "focus-ring": "radius/focus/ring" };
+  const typographyToken = (combination: Readonly<Record<string, string>>): string | undefined => {
+    const bound = boundToken(skemo, "label", "typography", combination);
+    if (bound === undefined) return undefined;
+    return bound.token === "inherit" ? INHERIT_TYPOGRAPHY : bound.token;
+  };
   const variants = combinationsOf(skemo, keys).map((combination) => {
     const bindings: Record<string, string> = {};
     const paints: Record<string, FigmaPaint> = {};
@@ -829,6 +859,14 @@ function componentSetOf(
         const bound = boundToken(skemo, part, property, combination);
         if (bound === undefined) continue;
         const key = `${part}.${property}`;
+        // A keyword binds no variable (D-03): inherit takes the running text's role (D-11), none
+        // leaves the field empty — nothing to bind, nothing to draw, nothing in the inventory.
+        if (isBindingKeyword(bound.token)) {
+          if (bound.token === "inherit" && property === "typography") {
+            bindings[key] = variableName(INHERIT_TYPOGRAPHY);
+          }
+          continue;
+        }
         bindings[key] = variableName(bound.token);
         const type = PART_PROPERTY_TYPES[property as keyof typeof PART_PROPERTY_TYPES];
         if (type !== "color" && type !== "dimension") continue;
@@ -857,9 +895,12 @@ function componentSetOf(
       const paint = paintOf(ring.token, resolutions, base, "color");
       if (paint !== undefined) paints["focus-ring.ring"] = paint;
     }
-    const radii = { "focus-gap": "radius/focus/gap", "focus-ring": "radius/focus/ring" };
-    const typography = boundToken(skemo, "label", "typography", combination);
-    const font = fontOf(typography === undefined ? undefined : base[typography.token]?.value);
+    const typography = typographyToken(combination);
+    const font = fontOf(typography === undefined ? undefined : base[typography]?.value);
+    const underlineWidth =
+      skemo.parts.underline?.width === undefined
+        ? undefined
+        : boundToken(skemo, "underline", "width", combination);
     // Die Schreibweise über alle Kombinationen entschieden, wie die Deckkraft (F8): Zwei Marken
     // dürfen sich unterscheiden, und dann nennt der Plan keinen Wert, sondern den Befund.
     const cases = new Set(
@@ -867,7 +908,7 @@ function componentSetOf(
         ? []
         : resolutions.map(
             ({ tokens }) =>
-              TEXT_CASES[tokens[typography.token]?.textTransform?.value ?? "none"] ?? "ORIGINAL",
+              TEXT_CASES[tokens[typography]?.textTransform?.value ?? "none"] ?? "ORIGINAL",
           ),
     );
     const [onlyCase] = [...cases];
@@ -880,8 +921,11 @@ function componentSetOf(
       notDrawn,
       textCase,
       focusVisible: combination[STATE_KEY] === FOCUS_STATE,
-      radii,
+      ...(radiiOf === undefined ? {} : { radii: radiiOf }),
       ...(font === undefined ? {} : { font }),
+      ...(underlineWidth === undefined
+        ? {}
+        : { underline: !isBindingKeyword(underlineWidth.token) }),
     };
   });
   // Every font the label can carry, over every combination (F30). The typography role follows the
@@ -890,8 +934,8 @@ function componentSetOf(
   const fontsNeeded = new Map<string, { family: string; style: string; aspektoj: Set<string> }>();
   for (const { assignment, tokens } of resolutions) {
     for (const variant of variants) {
-      const typography = boundToken(skemo, "label", "typography", variant.props);
-      const font = typography === undefined ? undefined : fontOf(tokens[typography.token]?.value);
+      const typography = typographyToken(variant.props);
+      const font = typography === undefined ? undefined : fontOf(tokens[typography]?.value);
       if (font === undefined) continue;
       const key = `${font.family}\u0000${font.style}`;
       const seen = fontsNeeded.get(key) ?? { ...font, aspektoj: new Set<string>() };

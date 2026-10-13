@@ -952,3 +952,28 @@ describe("F23: the release path runs in the CI, both kits, one script", () => {
     expect(read(script)).toMatch(/woff2?|ttf|otf/);
   });
 });
+
+// Spec 008 T025 (A8): the Vojmapo names Spec 008 in Phase 4 and the rule every new Ero follows.
+describe("Spec 008 documentation (Vojmapo Phase 4)", () => {
+  it("the vojmapo names Spec 008 and the rule that a new Ero closes a boundary of an existing Ero", () => {
+    const row = read("docs/vojmapo.md")
+      .split("\n")
+      .find((line) => line.startsWith("| 4 |"));
+    expect(row).toContain("**Spec 008 (`ligilo`");
+    expect(row).toContain(
+      "Jedes neue Ero schließt, wo es kann, eine Grenze eines bestehenden Ero (Grenze → use-instead).",
+    );
+    expect(row).toContain("die Grenze `navigation` des `butono` wird `use-instead: ligilo`");
+    expect(row).not.toMatch(/\| geplant \|$/);
+  });
+
+  it("specs/008-ligilo carries the spec unchanged next to plan and tasks", () => {
+    const spec = read("specs/008-ligilo/spec.md");
+    expect(spec).toMatch(/^# Spec 008 – Ligilo: der Link/);
+    expect(spec).toContain("**E6 – `inline` erbt Typografie.**");
+    const plan = read("specs/008-ligilo/plan.md");
+    expect(plan).toContain("## Abweichungen von der Spec");
+    expect(plan).toContain("### D-03 Bindungs-Schlüsselwörter `inherit` und `none`");
+    expect(read("specs/008-ligilo/tasks.md")).toContain("## Messungen");
+  });
+});
