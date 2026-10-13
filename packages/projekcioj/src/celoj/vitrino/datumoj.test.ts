@@ -237,7 +237,7 @@ describe("the Vitrino after the acceptances (Nachlese 2026-10-13)", () => {
 
   // F-6 (Spec 009 C8): the slot table did not say that the label of the kampo is a duty.
   it("the slot table carries the column Pflicht, ja for the label of the kampo (F-6)", () => {
-    expect(html).toContain("<th scope=\"col\">Pflicht</th>");
+    expect(html).toContain('<th scope="col">Pflicht</th>');
     expect(html).toContain(
       '<tr><th scope="row"><code>label</code></th><td>text</td><td>1</td><td>0</td><td>ja</td></tr>',
     );
@@ -288,7 +288,8 @@ describe("the Vitrino after the acceptances (Nachlese 2026-10-13)", () => {
     expect(html).not.toContain("NaN");
     for (const entry of Object.values(datumoj.roloj)) {
       for (const row of [...entry.surfaces, ...entry.text, ...entry.status, ...entry.agoj]) {
-        if (row.alEkstremo !== undefined) expect(row.alEkstremo, row.token).toBeGreaterThanOrEqual(0);
+        if (row.alEkstremo !== undefined)
+          expect(row.alEkstremo, row.token).toBeGreaterThanOrEqual(0);
       }
     }
   });
