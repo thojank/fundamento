@@ -586,11 +586,52 @@ describe("Spec 004 documentation: Etappe A (T014)", () => {
     expect(readme).toMatch(/Aspiro[^.]*\b(Marke|brand)\b/);
   });
 
-  it("the vojmapo records Etappe A as implemented with the acceptance open", () => {
+  // Etappe A was accepted by the maintainer on 2026-10-12 (M1 at the Vitrino, five findings, none
+  // blocking). The documents carry the acceptance, the measurement and the findings as candidates.
+  it("the vojmapo records Etappe A as accepted on 2026-10-12 with the findings as candidates", () => {
     const vojmapo = read("docs/vojmapo.md");
     const row = vojmapo.split("\n").find((line) => line.startsWith("| 3b |")) ?? "";
-    expect(row).toContain("umgesetzt");
-    expect(row).toContain("Abnahme");
+    expect(row).toContain("✅ Etappe A abgenommen 2026-10-12");
+    expect(row).toContain("5 Befunde als Kandidaten in tasks.md");
+    expect(row).toContain("Etappe B");
+    expect(row).not.toContain("Abnahme offen");
+  });
+
+  it("the plan carries the measurement of M1 under the results of the manual acceptance", () => {
+    const plan = read("specs/004-komparo/plan.md");
+    const results = plan.split("## Ergebnisse der manuellen Abnahme")[1] ?? "";
+    expect(results).toContain("**Etappe A abgenommen vom Maintainer am 2026-10-12, 19:17.**");
+    expect(results).toContain("Stand main 51e9ed9");
+    expect(results).not.toContain("**Stand:** offen");
+    // The table V1–V9 and the five findings, in the words of the measurement.
+    for (const row of ["V1", "V2", "V3", "V4", "V5", "V6", "V7", "V8", "V9"]) {
+      expect(results).toMatch(new RegExp(`^\\| ${row} \\|`, "m"));
+    }
+    expect(results).toContain("state-loading-visible");
+    expect(results).toContain("states-pairwise-distinct");
+    expect(results).toContain("Knopf „Gegenüberstellung");
+    expect(results).toContain("contrast=high");
+    expect(results).toContain("NaN");
+  });
+
+  it("the tasks close M1 and carry the five findings as candidates, not as work done", () => {
+    const tasks = read("specs/004-komparo/tasks.md");
+    expect(tasks).toMatch(/- \[x\] \*\*M1 –/);
+    expect(tasks).toContain("2026-10-12");
+    for (const candidate of [
+      "state-loading-visible",
+      "Gegenüberstellung",
+      "contrast=high",
+      "states-pairwise-distinct",
+      "NaN",
+    ]) {
+      expect(tasks).toContain(candidate);
+    }
+    // Each candidate is open: entered, not implemented.
+    const candidates = tasks.split("## Kandidaten aus der Abnahme M1")[1] ?? "";
+    expect(candidates).toContain("- [ ] **K1");
+    expect(candidates).toContain("- [ ] **K5");
+    expect(candidates).not.toContain("- [x]");
   });
 
   it("the vojmapo carries the Regulo candidate for label text in Phase 4", () => {
