@@ -380,7 +380,9 @@ export function briefOf(entry: LoadedEro): GetEroBrief {
         ...(prop.default === undefined ? {} : { default: String(prop.default) }),
       })),
     required: {
-      props: skemo.props.filter((prop) => prop.default === undefined).map((prop) => prop.name),
+      // R-10 (Abnahme 2026-10-13): a duty is what the Skemo marks as required. "No default" is
+      // not a duty: label is the fallback name of an empty slot, value the text of an empty field.
+      props: skemo.props.filter((prop) => prop.required === true).map((prop) => prop.name),
       slots: Object.entries(uzo?.slots ?? {})
         .filter(([, rule]) => rule.required === true)
         .map(([slot]) => slot),

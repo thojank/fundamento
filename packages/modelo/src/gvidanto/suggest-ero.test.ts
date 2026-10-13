@@ -273,7 +273,8 @@ describe("suggest_ero: the longest keyword wins, hyphenated compounds count as o
 
   it("'Adresse' alone stays enter-text, 'E-Mail' alone stays email by the word mail", () => {
     expect(suggest("Adresse").matched?.goal).toBe("enter-text");
-    expect(suggest("E-Mail").matched).toEqual({ goal: "email", keyword: "mail", lingvo: "de" });
+    // mail stands in en and de; a tie keeps the order of the Skemo, en first — as before.
+    expect(suggest("E-Mail").matched).toEqual({ goal: "email", keyword: "mail", lingvo: "en" });
     expect(suggest("Name").suggestion).toEqual({ ero: "kampo", props: {} });
   });
 

@@ -70,8 +70,30 @@ export function wordsOf(text: string): string[] {
 }
 
 /**
- * The Skemo goal a text names: the first goal (declaration order) one of whose keywords, in any
- * language, is a word of the text. Deterministic, no model (D-16). Called goal since F1-T00
+ * The hyphenated compounds of a text as one word each, letters only: "E-Mail-Adresse" →
+ * "emailadresse" (R-11, Abnahme Spec 009 A11). The parts stay words of their own (`wordsOf`).
+ */
+export function compoundsOf(text: string): string[] {
+  return [
+    ...text
+      .normalize("NFC")
+      .toLowerCase()
+      .matchAll(/\p{L}+(?:-\p{L}+)+/gu),
+  ].map((match) => match[0].replaceAll("-", ""));
+}
+
+/**
+ * A keyword of this many letters or more also hits a hyphenated compound that ends with it (R-11):
+ * "mailadresse" hits "e-mail-adresse". Same measure as the Uzo keywords (Spec 007 D-06, N-1).
+ */
+const COMPOUND_SUFFIX_MIN = 6;
+
+/**
+ * The Skemo goal a text names: the goal one of whose keywords, in any language, is a word of the
+ * text. Several goals may hit; the longest keyword wins, and a tie keeps the declaration order
+ * (R-11, Abnahme Spec 009 A11, 2026-10-13: "E-Mail-Adresse" fell to enter-text by `adresse`
+ * because the first goal won; now `mailadresse` wins over `adresse`). A hyphenated compound counts
+ * as its parts and as one word. Deterministic, no model (D-16). Called goal since F1-T00
  * (Spec 007, OP-4): `intent` is the name of a prop.
  */
 export function goalOf(
@@ -80,16 +102,27 @@ export function goalOf(
   options: { lingvo?: string } = {},
 ): { goal: NonNullable<Skemo["goals"]>[number]; keyword: string; lingvo: string } | undefined {
   const words = new Set(wordsOf(text));
+  const compounds = compoundsOf(text);
+  let best:
+    | { goal: NonNullable<Skemo["goals"]>[number]; keyword: string; lingvo: string }
+    | undefined;
   for (const goal of skemo.goals ?? []) {
     for (const [lingvo, keywords] of Object.entries(goal.keywords)) {
       if (options.lingvo !== undefined && lingvo !== options.lingvo) continue;
-      const keyword = keywords.find((candidate) =>
-        words.has(candidate.normalize("NFC").toLowerCase()),
-      );
-      if (keyword !== undefined) return { goal, keyword, lingvo };
+      for (const keyword of keywords) {
+        const needle = keyword.normalize("NFC").toLowerCase();
+        const hit =
+          words.has(needle) ||
+          (needle.length >= COMPOUND_SUFFIX_MIN &&
+            compounds.some((compound) => compound.endsWith(needle)));
+        if (!hit) continue;
+        if (best === undefined || needle.length > best.keyword.length) {
+          best = { goal, keyword, lingvo };
+        }
+      }
     }
   }
-  return undefined;
+  return best;
 }
 
 /**

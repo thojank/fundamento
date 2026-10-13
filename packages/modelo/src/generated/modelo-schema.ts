@@ -1138,6 +1138,10 @@ export interface SkemoProp {
   values?: Name[];
   default?: string | number | boolean;
   description?: NonEmptyText;
+  /**
+   * The prop must be given (get_ero brief lists it under required.props). A prop without a default is not a duty by that alone: label is the fallback name of an empty slot, value the text of an empty field (Abnahme Spec 008/009 R-10, 2026-10-13).
+   */
+  required?: boolean;
 }
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema

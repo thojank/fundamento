@@ -11,6 +11,9 @@ import type { Keywords, Modelo, UzoBoundary } from "../contracts/modelo.js";
 import { goalOf, wordsOf } from "../eroj/usage.js";
 import { type ReguloRef, reguloRef } from "./eroj.js";
 
+/** The props a goal asks for, typed as an EroInstance takes them (R-9): never "true" as a text. */
+export type GoalProps = Record<string, string | number | boolean>;
+
 export interface SuggestEroInput {
   goal: string;
   /** Only the keywords of this language count; without it, every language does. */
@@ -33,7 +36,7 @@ export type SuggestCandidate =
       kind: "goal";
       ero: string;
       goal: string;
-      props: Record<string, string>;
+      props: GoalProps;
       keyword: string;
       kialo?: string;
       regulo?: ReguloRef;
@@ -44,7 +47,7 @@ export interface SuggestEroOutput {
   goal: string;
   /** What hit: a Skemo goal, or the case of a boundary or alternative; null with candidates. */
   matched: { goal: string; keyword: string; lingvo: string } | null;
-  suggestion: { ero: string; props: Record<string, string> } | null;
+  suggestion: { ero: string; props: GoalProps } | null;
   kialo?: string;
   regulo?: ReguloRef;
   /** The boundary or alternative that answers (Spec 007); absent when a Skemo goal answers. */
@@ -150,7 +153,7 @@ function insteadEro(modelo: Modelo, hit: BoundaryHit): string | undefined {
 type GoalHit = {
   ero: string;
   goal: string;
-  props: Record<string, string>;
+  props: GoalProps;
   keyword: string;
   lingvo: string;
   kialo?: string;
@@ -169,9 +172,10 @@ function goalHit(modelo: Modelo, text: string, lingvo?: string): GoalHit | undef
     return {
       ero: entry.ero.name,
       goal: match.goal.goal,
-      props: Object.fromEntries(
-        Object.entries(match.goal.props).map(([key, value]) => [key, String(value)]),
-      ),
+      // R-9 (Abnahme Spec 008 A6, 2026-10-13): the props keep their type. A boolean prop of the
+      // goal (external: true) is a boolean in the answer, as an EroInstance takes it; "true" as a
+      // text was a value no Skemo knows.
+      props: { ...match.goal.props },
       keyword: match.keyword,
       lingvo: match.lingvo,
       ...(regulo === undefined ? {} : { kialo: regulo.kialo, regulo: reguloRef(regulo) }),
