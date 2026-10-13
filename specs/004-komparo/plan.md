@@ -447,4 +447,34 @@ Ergebnisse kommen in diesen Plan unter „Ergebnisse der manuellen Abnahme".
 
 ## Ergebnisse der manuellen Abnahme
 
-**Stand:** offen, nach der Umsetzung.
+**Etappe A abgenommen vom Maintainer am 2026-10-12, 19:17.** Stand main 51e9ed9, Vitrino aus dem Zwei-Marken-Build.
+
+Messung M1 (2026-10-12, 19:02–19:17): Prüfblatt `pruefblatt-m1-vitrino-2026-10-12.md` (19:05), Datei `.fundamento/projekcioj/vitrino/index.html`, Zwei-Marken-Build vom 11.10. (`--config …/aspekto-ekzemplo/fundamento.config.json`, main 51e9ed9), Browser Arc, Maintainer am Bildschirm, Claude liest mit (Screenshots 19:03–19:15). Prüfblatt und Messung liegen beim Maintainer unter `.fundamento/spec004/`; der Wortlaut steht hier.
+
+**Urteil des Maintainers (19:17): komuna 2 ist als Basis-Theme brauchbar – „für den Anfang; optimieren geht immer“. Spec 004 Etappe A abgenommen.** Fünf Befunde, keiner blockiert; sie werden Regulo- bzw. Manko-Kandidaten (Art. VI) und stehen in [`tasks.md`](tasks.md) → „Kandidaten aus der Abnahme M1“.
+
+| # | Erwartung | Gemessen | |
+|---|---|---|---|
+| V1 | eine Seite, alle Abschnitte | ✓ Schalter für 6 Dimensioj + Gegenüberstellung; Paletten, Flächen/Text/Status/Aktionen, butono, Kontrastmatrix, Regularo und Ziele, Eigene Werte je Dimensio, Gegenüberstellung | ✓ |
+| V2 | Paletten gleichmäßig | accent/danger/info/neutral/success/warning L in festen Schritten (0.95 → 0.24; oklch-l-step 0.059). Beobachtung: danger 800–950 reine Rottöne `#780000 #540000 #400603` – kein Befund | ✓ |
+| V3 | Flächen + Text | light: sunken 0.89 / canvas 0.92 / default 0.95 / raised 0.975; Text 0.28 / 0.36 / 0.44 (Δ 0.08). dark: 0.20 / 0.24 / 0.28 / 0.32; Text 1.00 / 0.92 / 0.86 | ✓ |
+| V4 | Status | je Status basic/border/on/subtle/text/weak, light vollständig | ✓ mit Befund 3 |
+| V5 | Aktionen + butono | 3 Varianten × 3 Größen, rest/disabled/loading als Spalten; hover/fokus interaktiv geprüft (Maintainer): funktionieren. tertiär durchsichtig, hover 8 %, pressed 10 % | ✓ mit Befund 1 |
+| V6 | Umschalten ohne Neuladen | dark, high, density, viewport, motion: sofort, URL-Fragment folgt. dark ist eigen (75 % eigene Werte, 57 von 76); contrast=high 0 % eigen (generischer Satz) | ✓ |
+| V7 | Kontrastmatrix | light/default: alle Paare „bestanden“ (WCAG 4.5/3), Reserve min 10.9 %; dark/high: Schwelle 7 / 3, alle bestanden. APCA beratend: 3402 Hinweise in 144 Kombinationen, schlechtester Lc 48.5 `status-danger-on-basic`, 36.2 `border-inverse-on-background-inverse` | ✓ |
+| V8 | Gegenüberstellung komuna ↔ ekzemplo | Tabelle: Kontrastreserve 10.9 % / 5.8 % (komuna vorn), Bestehensquote 100 / 100, Palettenregelmäßigkeit 25.1 / 25.0 % (ekzemplo vorn), Anker 0.025 / 0.000 (komuna vorn), APCA 1764 / 1638 (ekzemplo vorn), eigene Werte dark 75 % / 1.3 %, high 0 % / 31.4 % | ✓ mit Befund 2 |
+| V9 | Urteil | brauchbar, abgenommen | ✓ |
+
+### Befunde (Art. VI: Befund wird Regel)
+
+1. **loading sieht aus wie rest, verhält sich wie disabled** (butono, alle Varianten, light und dark). `state-distinct` fängt es nicht: loading hat dieselben Farben wie rest, der Zustand ist nur `aria-busy`. **Regulo-Kandidat `state-loading-visible`:** loading unterscheidet sich sichtbar von rest (Spinner, Deckkraft oder Label).
+2. **Knopf „Gegenüberstellung“ ohne sichtbare Wirkung am Ort des Knopfs.** Er toggelt nur die Klasse `fm-kolumnoj` am letzten Abschnitt (Überschrift links, Tabelle rechts). FR-08 leistet die Tabelle schon; der Knopf leistet nichts Eigenes. **Vitrino-Befund:** Knopf entfernen oder zum Abschnitt springen lassen.
+3. **Status `border` = `basic` unter contrast=high** (dark gemessen: danger `#fca297`/`#fca297`, info `#8dc5ed`, success `#95cea0`, warning `#e2b577`). „Kontrast über Rand statt Füllung“ (Spec 002 FR-07) hat unter high keinen Rand mehr. **Entscheidung offen:** Absicht (high = Vollfläche) oder Lücke → Jugxo des Maintainers.
+4. **secondary: hover = pressed = selected** in dark+high (`#515356`, L 0.44). `state-distinct` prüft rest ↔ Zustand, nicht Zustand ↔ Zustand. **Regulo-Kandidat `states-pairwise-distinct`:** benachbarte Zustände paarweise unterscheidbar.
+5. **Vitrino-Darstellung:** `shade`/`tint` zeigen `#000000`/`#ffffff` mit L 0.000/1.000 (Alphawert verschluckt); `color.text.default` in dark zeigt „NaN“ bei Abstand zum Anker. **Manko-Kandidat Vitrino** (FR-06): Deckkraft anzeigen, NaN abfangen.
+
+Beobachtung ohne Befund: komuna 2 hat 0 % eigene Werte unter contrast=high; das Argument „eigen statt geerbt“ gilt für dark, nicht für high.
+
+Nicht gemessen: ekzemplo visuell (nur in der Gegenüberstellung); viewport/density/motion nur auf Umschaltung, nicht auf Werte.
+
+Keiner der fünf Befunde wird in diesem Stand umgesetzt (Maintainer-Briefing 2026-10-12): keine Regulo, keine Änderung an der Vitrino. Die Kandidaten kommen in eine spätere Runde, nach Spec 007.

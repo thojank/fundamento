@@ -152,7 +152,33 @@ Etappe A umfasst FR-01 bis FR-09, FR-19 und den vorbereitenden Teil von FR-15. *
 
 ## Manuelle Abnahme (Maintainer, nach dem PR)
 
-- **M1 – komuna 2 und die Vitrino:** Vitrino öffnen, alle sechs Dimensioj durchschalten, komuna 2 visuell beurteilen, dann die Gegenüberstellung komuna ↔ ekzemplo, dann die Abschnitte „Ziele" und „Eigene Werte je Dimensio". Jeder Befund ohne Prüfung wird Regulo-Kandidat (wenn er Zugänglichkeit oder Struktur betrifft) oder Aspiro-Kandidat (wenn er komunas Geschmack betrifft), jeweils mit Kialo. Ergebnis in `plan.md` → „Ergebnisse der manuellen Abnahme".
+- [x] **M1 – komuna 2 und die Vitrino:** Vitrino öffnen, alle sechs Dimensioj durchschalten, komuna 2 visuell beurteilen, dann die Gegenüberstellung komuna ↔ ekzemplo, dann die Abschnitte „Ziele" und „Eigene Werte je Dimensio". Jeder Befund ohne Prüfung wird Regulo-Kandidat (wenn er Zugänglichkeit oder Struktur betrifft) oder Aspiro-Kandidat (wenn er komunas Geschmack betrifft), jeweils mit Kialo. Ergebnis in `plan.md` → „Ergebnisse der manuellen Abnahme".
+  - Done-Notiz: **Abgenommen vom Maintainer am 2026-10-12, 19:17** (Stand main 51e9ed9, Vitrino aus dem Zwei-Marken-Build, Browser Arc). Urteil: „brauchbar für den Anfang; optimieren geht immer". V1–V9 bestanden, fünf Befunde, keiner blockiert; Tabelle und Wortlaut in [`plan.md`](plan.md) → „Ergebnisse der manuellen Abnahme". Die Befunde stehen unten als Kandidaten (K1–K5), **nicht umgesetzt**.
+
+## Kandidaten aus der Abnahme M1 (eingetragen 2026-10-12, nicht umgesetzt)
+
+Jeder Eintrag trägt den Befund im Wortlaut der Messung und die Bedingung, unter der er geschlossen ist. Keiner wird in diesem Stand umgesetzt (Maintainer-Briefing 2026-10-12: keine Regulo umsetzen, keine Vitrino ändern; die Kandidaten kommen in eine spätere Runde, nach Spec 007).
+
+- [ ] **K1 Regulo-Kandidat `state-loading-visible`** (Befund 1, Art. VI)
+  - Befund: „loading sieht aus wie rest, verhält sich wie disabled (butono, alle Varianten, light und dark). `state-distinct` fängt es nicht: loading hat dieselben Farben wie rest, der Zustand ist nur `aria-busy`."
+  - Kandidat: loading unterscheidet sich sichtbar von rest (Spinner, Deckkraft oder Label).
+  - Geschlossen wenn: eine Regulo `state-loading-visible` mit Kialo in `reguloj.json` steht, ihre Prüfung an einer Fixture rot wird, in der loading und rest gleich aussehen, und der `butono` sie in jeder Kombination besteht – oder der Maintainer sie per Jugxo ablehnt.
+- [ ] **K2 Vitrino: Knopf „Gegenüberstellung"** (Befund 2)
+  - Befund: „Knopf „Gegenüberstellung" ohne sichtbare Wirkung am Ort des Knopfs. Er toggelt nur die Klasse `fm-kolumnoj` am letzten Abschnitt (Überschrift links, Tabelle rechts). FR-08 leistet die Tabelle schon; der Knopf leistet nichts Eigenes."
+  - Kandidat: Knopf entfernen oder zum Abschnitt springen lassen.
+  - Geschlossen wenn: die Vitrino den Knopf nicht mehr zeigt oder ein Druck auf den Knopf sichtbar zum Abschnitt „Gegenüberstellung" führt; roter Test in `vitrino.test.ts` zuerst.
+- [ ] **K3 Jugxo-Frage an den Maintainer: Status-Rand unter contrast=high** (Befund 3) – **offen, nicht entscheiden**
+  - Befund: „Status `border` = `basic` unter contrast=high (dark gemessen: danger `#fca297`/`#fca297`, info `#8dc5ed`, success `#95cea0`, warning `#e2b577`). „Kontrast über Rand statt Füllung" (Spec 002 FR-07) hat unter high keinen Rand mehr."
+  - Frage: Absicht (high = Vollfläche) oder Lücke? Die Entscheidung ist ein Jugxo des Maintainers; P0 trifft sie nicht.
+  - Geschlossen wenn: ein Jugxo in `jugxoj.json` die Gleichheit freigibt (Absicht) oder die generische Satzstufe `contrast/high` dem Rand einen eigenen Wert gibt (Lücke), mit rotem Lauf zuerst.
+- [ ] **K4 Regulo-Kandidat `states-pairwise-distinct`** (Befund 4, Art. VI)
+  - Befund: „secondary: hover = pressed = selected in dark+high (`#515356`, L 0.44). `state-distinct` prüft rest ↔ Zustand, nicht Zustand ↔ Zustand."
+  - Kandidat: benachbarte Zustände paarweise unterscheidbar.
+  - Geschlossen wenn: eine Regulo `states-pairwise-distinct` mit Kialo und Schwelle in `reguloj.json` steht, ihre Prüfung an einer Fixture mit zwei gleichen Zuständen rot wird, und komuna sie in allen 72 Kombinationen besteht – oder der Maintainer sie per Jugxo ablehnt.
+- [ ] **K5 Manko-Kandidat Vitrino: Deckkraft bei shade/tint, NaN** (Befund 5, FR-06)
+  - Befund: „Vitrino-Darstellung: `shade`/`tint` zeigen `#000000`/`#ffffff` mit L 0.000/1.000 (Alphawert verschluckt); `color.text.default` in dark zeigt „NaN" bei Abstand zum Anker."
+  - Kandidat: Deckkraft anzeigen, NaN abfangen.
+  - Geschlossen wenn: die Vitrino bei einem Wert mit Alpha < 1 die Deckkraft neben dem Hex zeigt und beim Abstand zum Anker nie „NaN" steht; roter Test in `datumoj.test.ts` zuerst.
 
 ## Nach dem Merge (außerhalb des Repos)
 
