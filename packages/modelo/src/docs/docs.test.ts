@@ -999,3 +999,61 @@ describe("Spec 009 documentation (Vojmapo Phase 4)", () => {
     expect(read("specs/009-kampo/tasks.md")).toContain("## Messungen");
   });
 });
+
+// Nachlese der Abnahmen von Spec 008 und 009 (2026-10-13) und der Befunde von Spec 004 (M1): what
+// was fixed is in the plans, what stays a candidate is in the Vojmapo, and a check that only
+// approximates its Regulo says so in the Regulo's scope (Art. VI: a finding becomes a rule, but
+// not a rule that pretends more than it checks).
+describe("Nachlese Spec 008/009 and Spec 004 findings (2026-10-13)", () => {
+  const reguloj = JSON.parse(read("packages/modelo/data/reguloj.json")) as {
+    reguloj: { name: string; scope: string }[];
+  };
+  const scopeOf = (name: string) =>
+    reguloj.reguloj.find((regulo) => regulo.name === name)?.scope ?? "";
+
+  it("the two text Reguloj say in their scope that their check is an approximation (R-1, R-2)", () => {
+    // R-1: not-words hits every occurrence, "Mehr zum Datenschutz" too, although it names the goal.
+    expect(scopeOf("link-label-names-destination")).toMatch(/approximation/);
+    expect(scopeOf("link-label-names-destination")).toMatch(/every occurrence/);
+    // R-2: min-words only counts, "Das ist ungültig" passes with three words and no way out.
+    expect(scopeOf("error-says-what-to-do")).toMatch(/approximation/);
+    expect(scopeOf("error-says-what-to-do")).toMatch(/only counts/);
+  });
+
+  it("the vojmapo carries the Regulo candidates in Phase 6 (Lint), not as work done", () => {
+    const row = read("docs/vojmapo.md")
+      .split("\n")
+      .find((line) => line.startsWith("| 6 |")) ?? "";
+    expect(row).toContain("Regulo-Kandidaten");
+    for (const candidate of [
+      "state-loading-visible",
+      "states-pairwise-distinct",
+      "not-only-words",
+      "error-says-what-to-do",
+    ]) {
+      expect(row, candidate).toContain(candidate);
+    }
+    expect(row).toMatch(/\| geplant \|$/);
+  });
+
+  it("the plan of Spec 004 asks the maintainer the open Jugxo question and decides nothing", () => {
+    const plan = read("specs/004-komparo/plan.md");
+    const question = section(plan, "Offene Jugxo-Frage an den Maintainer (Abnahme M1, Befund 3)");
+    expect(question).toContain("contrast=high");
+    expect(question).toContain("nicht entschieden");
+    expect(question).toMatch(/Absicht .* oder Lücke/);
+  });
+
+  it("the plans of Spec 008 and 009 carry the Nachlese with what was done and what stays open", () => {
+    const ligilo = section(read("specs/008-ligilo/plan.md"), "Nachlese 2026-10-13");
+    for (const item of ["F-1", "F-2", "M-3", "R-9", "R-10", "R-11", "R-1", "C8"]) {
+      expect(ligilo, item).toContain(`**${item}`);
+    }
+    const kampo = section(read("specs/009-kampo/plan.md"), "Nachlese 2026-10-13");
+    for (const item of ["R-10", "R-11", "R-2", "F-1", "F-5", "F-6", "C8"]) {
+      expect(kampo, item).toContain(`**${item}`);
+    }
+    // Make stays open: it needs the kit on npm (next) by the maintainer.
+    expect(kampo).toMatch(/Make-Test/);
+  });
+});
