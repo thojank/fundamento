@@ -95,7 +95,7 @@ test.describe("fm-ligilo behaviour", () => {
 
   // Abnahme 2026-10-13, F-3: every link showed a border in rest, hover and ekzemplo. A link has
   // no border part, so no border may be drawn in any state.
-  test("draws no border in any state (F-3)", async ({ page, browserName }) => {
+  test("draws no border in any state (F-3)", async ({ page }) => {
     await serve(
       page,
       out,
@@ -111,16 +111,21 @@ test.describe("fm-ligilo behaviour", () => {
         }),
       );
     for (const aspekto of ["komuna", "ekzemplo"]) {
-      await page.evaluate((a) => document.documentElement.setAttribute("data-fm-aspekto", a), aspekto);
+      await page.evaluate(
+        (a) => document.documentElement.setAttribute("data-fm-aspekto", a),
+        aspekto,
+      );
       for (const [i, item] of (await widths()).entries()) {
         expect(item, `${aspekto} rest ${i}`).toEqual(["0px", "0px", "none"]);
       }
       await page.locator("#b").hover();
-      for (const item of await widths()) expect(item, `${aspekto} hover`).toEqual(["0px", "0px", "none"]);
+      for (const item of await widths())
+        expect(item, `${aspekto} hover`).toEqual(["0px", "0px", "none"]);
       await page.mouse.move(0, 0);
-      await page.keyboard.press(TAB(browserName));
+      await page.locator("#a").focus();
       await expect(page.locator("#a")).toBeFocused();
-      for (const item of await widths()) expect(item, `${aspekto} focus`).toEqual(["0px", "0px", "none"]);
+      for (const item of await widths())
+        expect(item, `${aspekto} focus`).toEqual(["0px", "0px", "none"]);
       await page.locator("#a").blur();
     }
   });

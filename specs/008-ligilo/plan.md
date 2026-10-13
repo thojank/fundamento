@@ -190,6 +190,21 @@ docs/vojmapo.md                          Zeile 4
 - **B-5 `inline`-Icon ohne Abstand**: `box.gap` wirkt bei `display: inline` nicht; das externe Icon steht im Fließtext ohne `spacing.small`. Kandidat: `margin-inline-start` aus `box.gap` für den Inline-Fall (Celo-Wissen), nach Sichtprüfung in der Vitrino.
 - **B-6 Figma-Standardlabel „Aktion“** gilt auch für den `ligilo` (`LABEL_DEFAULT`); ein Link liest sich damit falsch. Sichtbarer Text ist eine Entscheidung des Maintainers (F14).
 
+## Abnahme-Messung 2026-10-13 (Maintainer, `messung-abnahme-2026-10-13.md` im Spec-Ordner des Auftrags)
+
+MCP 11/12, Figma 7/9, Vitrino Markenwechsel und Gebrauch grün; ein Blocker, behoben in diesem PR:
+
+- **F-3 (behoben):** `fm-ligilo` zeigte in jedem Zustand einen Rahmen. Ursache: die Strukturregel der Element-Vorlage setzte `border-style: solid` für jedes Ero; der `ligilo` hat keinen Teil `border`, also setzte nichts die Breite, und der Browser zeichnete seinen Anfangswert (`medium`, `currentColor`). Fix: `border-style` steht nur im Stylesheet eines Ero mit Teil `border`. Rot zuerst (Commit `21c255e`): Stylesheet-Test und gerenderter `fm-ligilo` mit `border-width` 0 in rest/hover/focus, in komuna und ekzemplo. Figma braucht nichts: dort gab es den Rahmen nicht.
+
+### Folge-Aufgaben (nicht in #53 geändert)
+
+- **F-1 Figma:** Ein neues Komponentenset entsteht am Ursprung des vorhandenen (gleiche Position); Sets nebeneinander legen oder in eine Section „Fundamento“ (siehe F-2).
+- **F-2 Gvidanto:** Antwort auf „Wie schalte ich die Marke in Figma um?“: Modus an der Seite oder am Frame, nie am einzelnen Set (ein Modus am Set gilt nur für das Set; Sets auf „Automatisch“). Prompt oder `describe`.
+- **R-9 `suggest_ero`:** `props.external` kommt als Text `"true"` statt als Wahrheitswert; die Props der Absicht werden in `goalHit` zu Strings gemacht (Spec 003) – ein boolescher Prop sollte boolesch bleiben (Vertrag `suggest_ero.output`, EroInstance-Props erlauben boolean).
+- **R-10 `brief`:** `required.props` führt `label`, weil es keinen Standard hat; Pflicht ist nur `to`. `label` ist der Ersatzname bei leerem Slot (wie beim `butono`). Kandidat: „Pflicht“ aus der Skemo ausdrücken (ein Prop ohne Standard, den die Uzo nicht als Ersatz kennzeichnet), oder den Ersatznamen in der Skemo markieren.
+- **R-1 (bestätigt):** „Mehr zum Datenschutz“ wird von `link-label-names-destination` beanstandet (Wort `mehr`). Die Wortliste trifft auch ein Label, das das Ziel nennt; Kandidat: `mehr`/`more` nur allein oder als Ein-Wort-Label beanstanden (Prüfart `not-words` → `not-only-words`).
+- **C8 Textnuance:** Der Vitrino-Satz „Label darf umbrechen“ gilt bei `with-text` nur inline; Satz je Wert ausgeben.
+
 ## Messungen
 
 Die Werte stehen in [`tasks.md`](tasks.md) → „Messungen“. Kurz: `get_ero ligilo brief:true` = 1 485 Bytes = **495** nach dem Maß von Spec 007 (Grenze 750 bleibt); Parität 2 Eroj × 4 Seiten ohne Differenz; `check:alirebleco` 66 Paare × 72 Kombinationen grün (Link auf Canvas min 6.12:1); Alirebleco der Eroj 8 Kombinationen je Ero in Chromium; `check:regularo` ohne `skemo-uzo-missing`.

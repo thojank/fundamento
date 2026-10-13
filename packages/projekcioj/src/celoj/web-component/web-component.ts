@@ -148,11 +148,13 @@ function fixedToken(source: SkemoPartSource | undefined): string | undefined {
  * it stands in; every other host is an inline block. The mark in an icon slot shows only while a
  * prop with an a11y text is true (`data-marked`, D-05).
  */
-const structure = (inlineHost: boolean, disables: boolean): string =>
+const structure = (inlineHost: boolean, disables: boolean, bordered: boolean): string =>
   [
     `:host { display: ${inlineHost ? "inline" : "inline-block"}; vertical-align: ${inlineHost ? "baseline" : "middle"}; }`,
     ":host([full-width]) { display: block; }",
-    ':where([part="control"]) { display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; margin: 0; border-style: solid; cursor: pointer; appearance: none; text-decoration: none; white-space: nowrap; transition-property: background-color, color, border-color, text-decoration-color; }',
+    // A border style only for an Ero with a border part (Abnahme 2026-10-13, F-3): without the
+    // part nothing sets the width, and the browser draws its initial medium border.
+    `:where([part="control"]) { display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; margin: 0; ${bordered ? "border-style: solid; " : ""}cursor: pointer; appearance: none; text-decoration: none; white-space: nowrap; transition-property: background-color, color, border-color, text-decoration-color; }`,
     ':host([full-width]) :where([part="control"]) { display: flex; }',
     ':where([part="control"]:focus:not(:focus-visible)) { outline-width: 0; }',
     // Only an Ero that can be disabled has the rule: the inventory reads the state from it.
@@ -213,7 +215,8 @@ export function stylesheetOf(skemo: Skemo, uzo?: Uzo): string {
     ([selector, lines]) => `${selector} {\n${lines.map((line) => `  ${line}`).join("\n")}\n}`,
   );
   const disables = skemo.states.includes("disabled") || skemo.states.includes("loading");
-  return `${structure(uzo?.layout.wrap === "with-text", disables)}\n${tokenRules.join("\n")}\n`;
+  const bordered = skemo.parts.border !== undefined;
+  return `${structure(uzo?.layout.wrap === "with-text", disables, bordered)}\n${tokenRules.join("\n")}\n`;
 }
 
 function keysOf(skemo: Skemo, source: SkemoPartSource | undefined, depth = 0): string[] {
