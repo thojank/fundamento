@@ -1021,9 +1021,10 @@ describe("Nachlese Spec 008/009 and Spec 004 findings (2026-10-13)", () => {
   });
 
   it("the vojmapo carries the Regulo candidates in Phase 6 (Lint), not as work done", () => {
-    const row = read("docs/vojmapo.md")
-      .split("\n")
-      .find((line) => line.startsWith("| 6 |")) ?? "";
+    const row =
+      read("docs/vojmapo.md")
+        .split("\n")
+        .find((line) => line.startsWith("| 6 |")) ?? "";
     expect(row).toContain("Regulo-Kandidaten");
     for (const candidate of [
       "state-loading-visible",

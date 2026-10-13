@@ -157,9 +157,9 @@ test("the comparison shows both values and names the side in words", async ({ pa
   // Spec 004 M1, Befund 2 (2026-10-12): the button leads to the section — the section has the
   // focus afterwards, so a keyboard user lands where the table is.
   await page.getByRole("button", { name: "Zur Gegenüberstellung" }).click();
-  await expect.poll(() => page.evaluate(() => document.activeElement?.id)).toBe(
-    "fm-vitrino-komparo",
-  );
+  await expect
+    .poll(() => page.evaluate(() => document.activeElement?.id))
+    .toBe("fm-vitrino-komparo");
 });
 
 test("the design goals name their scope, so the two coverage numbers can be read", async ({
