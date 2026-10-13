@@ -36,7 +36,7 @@
 | Was | Wert |
 |---|---|
 | `get_ero kampo brief:true`, Bytes / `ceil(Bytes/3)` | 2 124 Bytes / **708** – unter 750 (E5); zum Vergleich butono 570, ligilo 495. Der Verbund trägt drei Slots und sechs Grenzen; die Grenze hält, knapp. |
-| Parität (`pnpm check:parity`) | 3 Eroj, 4 Seiten, 0 Differenzen; benannte Freigaben: icon (butono, ligilo), underline (ligilo), placeholder und required-mark (kampo) |
+| Parität (`pnpm check:parity`) | 3 Eroj, 4 Seiten, 0 Differenzen; benannte Freigaben: icon (butono, ligilo), underline (ligilo), text und required-mark (kampo; seit F-4 wird der Platzhalter gezeichnet) |
 | Alirebleco (Eroj, Chromium) | kampo: 8 Kombinationen (komuna, ekzemplo × light, dark × default, high), je 3 Größen in rest/hover/disabled/readonly plus invalid mit Fehlertext, Fokusring ≥ 3:1 an 4 Feldern |
 | Alirebleco (Modelo) | 69 KontrastParoj × 72 Kombinationen; neu: Fehlertext auf `background.sunken`, Fehlerrand und Rand (`ui`) – Werte im Bericht |
 | Rote Fixtures beobachtet in Commit | `46e7d24` (T001); Schema `6824b55`; Daten und Regeln `2cafdac`; Projekcioj `b337be6` (je Commit-Text) |

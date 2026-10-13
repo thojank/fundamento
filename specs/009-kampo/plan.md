@@ -77,6 +77,19 @@ Fixtures `skemo-web-term-part` (Teil `input`; die Regel gibt es seit Spec 008 �
 - **B-3 `aria-live` am Fehlertext:** `polite` (Empfehlung der Spec); ob Figma/Make etwas davon tragen, ist Messung.
 - **B-4 `label-required` des `butono` gilt nicht für den `kampo`:** der `kampo` hat `field-label-visible`; zwei Regeln für denselben Gedanken sind ein Kandidat für eine gemeinsame Regulo (Art. XI).
 
+## Abnahme-Messung 2026-10-13 (Maintainer)
+
+MCP 11/13, Figma Set, 18 Varianten, Zweck, Zustände und Moduswechsel grün; ein Blocker, behoben in diesem PR:
+
+- **F-4 (behoben):** Die Kontrolle des `kampo` im Figma-Set war ein schmaler hoher Streifen: ohne Textknoten mit Inhalt schrumpft das HUG-Layout auf die Innenabstände, Hilfe und Fehler waren unsichtbar. Fix: Der Plan trägt je Feld Standardtexte (`texts`: `text: Beispiel`, `help: Hinweis`, `error: Fehler`, ein neutrales Wort je Knoten wie `Aktion` beim Label), das Plugin schreibt sie; der Textknoten der Kontrolle zeigt den Platzhalter und bindet `placeholder.color` (`color/text/subtle`), die Schrift bleibt `text.typography` (`typography/body/*`); Hilfe und Fehler stehen sichtbar in `caption`. Der Bericht `held.rest` steigt durch den Knoten `field` und nennt `control`, `text`, `help`, `error`. Rot zuerst (Commit `6aac5e9`): Kontrolle im Bericht nicht vorhanden, Textknoten leer. Folge: Der Jugxo `jug_01M4S2R85WRAC5SV7CARH8RE7S` (B-2) gibt jetzt `text.color` (die Farbe des getippten Textes hat im leeren Feld keinen Knoten) und `required-mark` frei, nicht mehr `placeholder` – der kleinere Weg (Regel 0); der Stern bleibt ungezeichnet.
+
+### Folge-Aufgaben (nicht in #54 geändert)
+
+- **R-10 `brief`:** `required.props` führt `value`, `placeholder`, `name` (Props ohne Standard), Pflicht ist keiner davon. Dieselbe Ursache wie beim `ligilo` (Spec 008, R-10): „Pflicht“ muss die Skemo oder die Uzo sagen, nicht der fehlende Standard.
+- **R-11 `suggest_ero`:** „E-Mail-Adresse“ trifft `kind: email` nicht – das Wort zerfällt in `e`, `mail`, `adresse`; `mail` steht in der Absicht `email`, `adresse` in `enter-text`, und die erste Absicht in Deklarationsreihenfolge gewinnt (D-16). Kandidat: spezifischere Absicht vor allgemeiner, oder Treffer nach Zahl der Wörter.
+- **R-2 (bestätigt):** siehe Messung A6 des Maintainers.
+- **F-1 Figma (auch hier):** Das Set `kampo` entsteht am Ursprung des `butono`-Sets; Sets nebeneinander oder in eine Section „Fundamento“ (Spec 008, F-1/F-2).
+
 ## Messungen
 
 In [`tasks.md`](tasks.md).

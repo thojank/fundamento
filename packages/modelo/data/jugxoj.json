@@ -1534,9 +1534,9 @@
         "celo": "figma"
       },
       "decision": "approved",
-      "kialo": "Figma zeichnet beim kampo den Platzhalter und die Markierung des Pflichtfelds nicht: Der Platzhalter ist der Text eines leeren Feldes und hat im Komponentenset keinen eigenen Knoten je Zustand; das Zeichen der Markierung stellt die Projekcio (Web: ein kleiner Vektor), nicht das Modelo. Die Teile placeholder.color und required-mark.color bleiben im Modelo; die Figma-Seite von check:parity meldet sie als „not drawn (dieser Jugxo)“ – eine benannte Differenz. Zeichnet das Plugin eines Tages beide, entfällt dieser Eintrag.",
+      "kialo": "Figma zeichnet beim kampo die Farbe des getippten Textes und die Markierung des Pflichtfelds nicht: Das Feld im Komponentenset ist leer und zeigt den Platzhalter (Teil placeholder, gebunden), also hat der getippte Text (Teil text, color.text.default) keinen Knoten; das Zeichen der Markierung stellt die Projekcio (Web: ein kleiner Vektor), nicht das Modelo. Die Teile text.color und required-mark.color bleiben im Modelo; die Figma-Seite von check:parity meldet sie als „not drawn (dieser Jugxo)“ – eine benannte Differenz. Zeichnet das Plugin eines Tages ein gefülltes Feld und den Stern, entfällt dieser Eintrag.",
       "date": "2026-10-13",
-      "context": "Spec 009 T010, plan D-09 (Befund B-2). Von P0 in der Nachtschicht angelegt; zur Bestätigung durch den Maintainer."
+      "context": "Spec 009 T010, plan D-09 (Befund B-2); nach der Abnahme-Messung F-4 (2026-10-13) vom Platzhalter auf den getippten Text gewechselt: der Platzhalter ist der sichtbare Text des leeren Feldes. Von P0 angelegt; zur Bestätigung durch den Maintainer."
     }
   ]
 }

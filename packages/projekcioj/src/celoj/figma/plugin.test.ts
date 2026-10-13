@@ -3152,16 +3152,23 @@ describe("the field of the kampo has room and shows its texts (F-4)", () => {
     const set = double.root.children[0]?.children.find((child) => child.name === "kampo");
     const variant = set?.children[0];
     const field = variant?.children.find((child) => child.name === "field");
+    type Node = { name: string; children: Node[]; properties: Record<string, unknown> };
+    const find = (node: Node | undefined, name: string): Node | undefined => {
+      if (node === undefined) return undefined;
+      if (node.name === name) return node;
+      for (const child of node.children) {
+        const found = find(child, name);
+        if (found !== undefined) return found;
+      }
+      return undefined;
+    };
     const texts = Object.fromEntries(
-      ["text", "help", "error"].map((name) => {
-        const node =
-          field?.children.find((child) => child.name === name) ??
-          field?.children
-            .flatMap((child) => [child, ...child.children.flatMap((c) => [c, ...c.children])])
-            .find((child) => child.name === name);
-        return [name, String(node?.properties.characters ?? "")];
-      }),
+      ["text", "help", "error"].map((name) => [
+        name,
+        String(find(field as Node | undefined, name)?.properties.characters ?? ""),
+      ]),
     );
+    expect(texts).toEqual({ text: "Beispiel", help: "Hinweis", error: "Fehler" });
     for (const [name, text] of Object.entries(texts)) expect(text, name).not.toBe("");
   });
 });

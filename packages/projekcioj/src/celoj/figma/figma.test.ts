@@ -839,9 +839,13 @@ describe("Figma plan for the kampo (Spec 009 T010)", () => {
       "color/status/danger/border",
     );
     expect(variant("medium", "readonly")?.bindings["surface.fill"]).toBe("color/background/sunken");
-    expect(rest?.notDrawn?.["placeholder.color"]).toBe("jug_01M4S2R85WRAC5SV7CARH8RE7S");
+    // F-4: the control shows the placeholder, so its colour is drawn and the typed text's is not.
+    expect(rest?.notDrawn?.["text.color"]).toBe("jug_01M4S2R85WRAC5SV7CARH8RE7S");
     expect(rest?.notDrawn?.["required-mark.color"]).toBe("jug_01M4S2R85WRAC5SV7CARH8RE7S");
-    expect(rest?.paints?.["text.color"]).toMatchObject({ hex: expect.stringMatching(/^#/) });
+    expect(rest?.notDrawn?.["placeholder.color"]).toBeUndefined();
+    expect(rest?.paints?.["placeholder.color"]).toMatchObject({ hex: expect.stringMatching(/^#/) });
+    expect(set?.texts).toEqual({ text: "Beispiel", help: "Hinweis", error: "Fehler" });
+    expect(plan.components[0]?.texts).toBeUndefined();
     expect(rest?.geometry?.["box.height"]).toBe("40px");
     // Fonts of every text part, over every mode: the caption and the body roles too.
     expect((set?.fonts?.length ?? 0) >= (plan.components[0]?.fonts?.length ?? 0)).toBe(true);
@@ -858,6 +862,8 @@ describe("Figma plan for the kampo (Spec 009 T010)", () => {
       "invalid",
     ]);
     expect(items.kampo?.props.kind).toEqual(["text", "email", "tel", "url", "search"]);
-    expect(items.kampo?.values["text.color@size=medium,state=rest"]).toMatch(/^#[0-9a-f]{6}$/);
+    expect(items.kampo?.values["placeholder.color@size=medium,state=rest"]).toMatch(
+      /^#[0-9a-f]{6}$/,
+    );
   });
 });

@@ -114,10 +114,23 @@ export const FIGMA_NOT_DRAWN: Readonly<Record<string, string>> = {
   // Spec 008 (plan D-11, Befund B-1): the underline is written as the label's text decoration,
   // on or off per variant; its thickness and colour bind to no variable in Figma.
   underline: "jug_01M4RYCY61NK92JM6XYD00M012",
-  // Spec 009 (plan D-09, Befund B-2): the placeholder has no node per state, the sign of the
-  // required mark is the projection's.
-  placeholder: "jug_01M4S2R85WRAC5SV7CARH8RE7S",
+  // Spec 009 (plan D-09, Befund B-2; Abnahme F-4): the control of a field in the set is empty and
+  // shows the placeholder, so the colour of the typed text has no node; the sign of the required
+  // mark is the projection's.
+  text: "jug_01M4S2R85WRAC5SV7CARH8RE7S",
   "required-mark": "jug_01M4S2R85WRAC5SV7CARH8RE7S",
+};
+
+/**
+ * The texts a field shows in the set (Abnahme Spec 009, F-4): the control an example in place of
+ * the typed text (the placeholder), help and error a word each. One neutral word per node, like
+ * the label's `Aktion` (F14); an instance overrides them. Without content a HUG frame shrinks to
+ * its paddings and a text node is invisible.
+ */
+export const FIELD_TEXTS: Readonly<Record<string, string>> = {
+  text: "Beispiel",
+  help: "Hinweis",
+  error: "Fehler",
 };
 
 /**
@@ -141,6 +154,8 @@ export interface FigmaComponentSet {
   set: string;
   /** How the plugin draws the variants (Spec 009, D-09); a plan without it is a control. */
   structure?: FigmaStructure;
+  /** The default text of every text node of a field besides the label (F-4). */
+  texts?: Record<string, string>;
   /** The purpose of the Uzo, one line, as the description of the set (Spec 007 T028, A12). */
   description?: string;
   /**
@@ -1000,6 +1015,7 @@ function componentSetOf(
   return {
     set: entry.ero.name,
     structure: structureOf(skemo.a11y.role),
+    ...(structureOf(skemo.a11y.role) === "field" ? { texts: { ...FIELD_TEXTS } } : {}),
     ...(description === undefined ? {} : { description }),
     ...(uzo === undefined ? {} : { uzo }),
     properties,

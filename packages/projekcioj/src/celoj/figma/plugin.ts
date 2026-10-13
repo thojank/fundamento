@@ -77,9 +77,11 @@ const BINDINGS: Readonly<Record<string, readonly Binding[]>> = {
   ],
   "focus-ring.offset": [{ node: "focus-gap", fields: [...PADDINGS, "strokeWeight"] }],
   "focus-ring.color": [{ node: "focus-gap", fields: ["strokes"], paint: true, focusOnly: true }],
-  // A field (Spec 009, D-09): the text a person types, the help and the error are text nodes of
-  // their own, each with its colour and its typography bound like the label's.
-  "text.color": [{ node: "text", fields: ["fills"], paint: true }],
+  // A field (Spec 009, D-09): the text in the control, the help and the error are text nodes of
+  // their own, each with its typography bound like the label's. The control of a field in the set
+  // is empty and shows the placeholder (F-4), so the node's fill is the placeholder's colour; the
+  // colour of the typed text has no node (Jugxo B-2).
+  "placeholder.color": [{ node: "text", fields: ["fills"], paint: true }],
   "text.typography": [
     { node: "text", fields: ["fontSize"], suffix: "/font-size" },
     { node: "text", fields: ["fontFamily"], suffix: "/font-family", font: true },
@@ -1055,6 +1057,13 @@ async function applyComponents(variables, warnings) {
           write(each, "fontName", fonts.get(variant.font.family + " " + variant.font.style));
         }
       }
+      // The texts of a field (F-4): a default per node, so the frames have content to hug and
+      // help and error are visible; the label gets its text with its property below.
+      for (const [name, each] of [["text", textNode], ["help", help], ["error", error]]) {
+        if (each === undefined) continue;
+        const text = (component.texts || {})[name];
+        if (typeof text === "string") write(each, "characters", text);
+      }
       // Die Unterstreichung eines Links (Spec 008, D-11): je Variante an oder aus, geschrieben wie
       // textCase – Figma bindet Dicke und Farbe der Linie an keine Variable (Jugxo B-1).
       if (typeof variant.underline === "boolean") {
@@ -1485,24 +1494,40 @@ function measureLayout(set, component) {
     };
     return { fills: list("fills"), strokes: list("strokes"), modes: modesOfNode(node) };
   };
+  // The parts of a variant by name (F-4): a control is variant → ring → gap → control → label; a
+  // field puts a frame in between and holds the label, help and error beside the ring, the text
+  // inside the control.
+  const partNodes = (node) => {
+    const found = {};
+    const field = ours(node, "part", "field");
+    if (field !== undefined) found.field = field;
+    const base = field || node;
+    const ring = ours(base, "part", "focus-ring");
+    if (ring !== undefined) found["focus-ring"] = ring;
+    const gap = ring === undefined ? undefined : ours(ring, "part", "focus-gap");
+    if (gap !== undefined) found["focus-gap"] = gap;
+    const control = gap === undefined ? undefined : ours(gap, "part", "control");
+    if (control !== undefined) found.control = control;
+    const label = control === undefined ? undefined : ours(field || control, "part", "label");
+    if (label !== undefined) found.label = label;
+    if (field !== undefined) {
+      for (const name of ["text", "help", "error"]) {
+        const each = ours(name === "text" ? control : field, "part", name);
+        if (each !== undefined) found[name] = each;
+      }
+    }
+    return found;
+  };
   const paintedParts = (node) => {
     if (node === undefined) return {};
     const out = { variant: paintsOf(node) };
-    let current = node;
-    for (const name of ["focus-ring", "focus-gap", "control", "label"]) {
-      current = current === undefined ? undefined : ours(current, "part", name);
-      if (current !== undefined) out[name] = paintsOf(current);
-    }
+    for (const [name, each] of Object.entries(partNodes(node))) out[name] = paintsOf(each);
     return out;
   };
   const partsOf = (node) => {
     if (node === undefined) return {};
     const out = { variant: held(node, HELD_AT_PART) };
-    let current = node;
-    for (const name of ["focus-ring", "focus-gap", "control", "label"]) {
-      current = current === undefined ? undefined : ours(current, "part", name);
-      if (current !== undefined) out[name] = held(current, HELD_AT_PART);
-    }
+    for (const [name, each] of Object.entries(partNodes(node))) out[name] = held(each, HELD_AT_PART);
     return out;
   };
   // The set against the extent of its children (F20), raw: measured in Figma, a set of 518 × 688
