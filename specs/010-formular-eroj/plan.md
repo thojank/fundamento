@@ -6,7 +6,7 @@ Vier gestapelte PRs, ein Abschnitt je PR. Regel 0 gilt für alles, was die Spec 
 
 ## ① `sxaltilo` – Schalter (PR ①)
 
-**Branch:** `261014-spec-010-sxaltilo-010092` (von `origin/main` @ `ff45de0`; trägt vorab die zwei Commits von F-7, `851b32e` rot / `4830a51` grün) · **Datum:** 2026-10-14 · **Aufgaben und rote Hashes:** [`tasks.md`](tasks.md) ①
+**Branch:** `261014-spec-010-sxaltilo-010092` (von `origin/main` @ `ff45de0`, nach dem Merge von #57 auf `b9e6c17` rebased; F-7 war hier vorab als zwei eigene Commits enthalten und steht jetzt auf `main`: `7357baa` rot / `7bbc4e1` grün) · **Datum:** 2026-10-14 · **Aufgaben und rote Hashes:** [`tasks.md`](tasks.md) ①
 
 Der erste der vier Wahl-Eroj: hält an/aus und wirkt sofort. Was die Spec offen lässt, entscheidet Regel 0; jede Entscheidung unten nennt ihre Stufe.
 
