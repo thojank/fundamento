@@ -54,6 +54,24 @@ function fieldPartSelector(part: string, property: string, data: string, state: 
 /** Whether the Ero is a field (a composite of label, input, help and error). */
 const isField = (skemo: Skemo): boolean => hostOf(skemo.a11y.role) === "input";
 
+/** Whether the Ero is a switch (Spec 010 ①, D-09): the track with its knob, the label beside. */
+const isToggle = (skemo: Skemo): boolean => hostOf(skemo.a11y.role) === "switch";
+
+/**
+ * The selector of a part of a switch (Spec 010 ①, D-09): the combination stands on the field, the
+ * state on the button inside (`:has()`), like the field of the kampo. The track is the button
+ * itself; the knob and the label are elements of their own; the gap between track and label is
+ * the field's. The position of the knob is the alignment of the track (D-04).
+ */
+function togglePartSelector(part: string, property: string, data: string, state: string): string {
+  const root = `[part="field"]${data}${state === "" ? "" : `:has([part="control"]${state})`}`;
+  if (part === "box" && property === "gap") return `:where(${root})`;
+  if (part === "focus-ring") return `:where(${root}) [part="control"]:focus-visible`;
+  if (part === "indicator" && property !== "position") return `:where(${root}) [part="indicator"]`;
+  if (part === "label") return `:where(${root}) [part="label"]`;
+  return `:where(${root}) [part="control"]`;
+}
+
 /**
  * CSS selector suffix of each state. `focus` is :focus-visible (the focus ring and, since Spec
  * 008, a label colour of its own); `visited` is the link's own state (Spec 008, D-09).
@@ -106,6 +124,11 @@ function keywordDeclarations(part: string, property: string, token: string): str
 
 /** CSS declarations of one part property bound to `token` (Celo knowledge, Art. VIII). */
 function declarations(skemo: Skemo, part: string, property: string, token: string): string[] {
+  // A position is a term (Spec 010 ①, D-04): the alignment of the track along the writing
+  // direction, so right to left mirrors itself; structure, no design value.
+  if (property === "position") {
+    return [`justify-content: ${token === "end" ? "flex-end" : "flex-start"};`];
+  }
   if (isBindingKeyword(token)) return keywordDeclarations(part, property, token);
   // The underline of a link (Spec 008): a text decoration of the width and colour bound.
   if (part === "underline") {
@@ -218,6 +241,28 @@ const fieldStructure = (disables: boolean): string =>
   ].join("\n");
 
 /**
+ * Layout of a switch (Spec 010 ①, D-05, D-09), keywords only: the field is a row of track and
+ * label; the track is a native button with a border and no padding, its height the knob's plus
+ * the border (no size of its own); the knob does not shrink; the label never wraps (Uzo wrap
+ * never) and switches the track like a label does.
+ */
+const toggleStructure = (disables: boolean): string =>
+  [
+    ":host { display: inline-block; vertical-align: middle; }",
+    ':where([part="field"]) { display: inline-flex; align-items: center; }',
+    ':where([part="control"]) { display: inline-flex; align-items: center; box-sizing: border-box; margin: 0; padding: 0; border-style: solid; cursor: pointer; appearance: none; transition-property: background-color, border-color; }',
+    ':where([part="indicator"]) { display: block; flex: none; transition-property: background-color; }',
+    ':where([part="label"]) { cursor: pointer; white-space: nowrap; }',
+    ':where([part="control"]:focus:not(:focus-visible)) { outline-width: 0; }',
+    ...(disables
+      ? [
+          ':where([part="control"]:disabled) { cursor: not-allowed; }',
+          ':where([part="field"]:has([part="control"]:disabled)) [part="label"] { cursor: not-allowed; }',
+        ]
+      : []),
+  ].join("\n");
+
+/**
  * The stylesheet of one Ero: structure, then one rule per part property and combination (a state
  * without a binding of its own repeats rest, so every state of the Skemo has a rule the parity
  * inventory reads). The Uzo decides the host (D-04).
@@ -271,7 +316,9 @@ export function stylesheetOf(skemo: Skemo, uzo?: Uzo): string {
   const bordered = skemo.parts.border !== undefined;
   const base = isField(skemo)
     ? fieldStructure(disables)
-    : structure(uzo?.layout.wrap === "with-text", disables, bordered);
+    : isToggle(skemo)
+      ? toggleStructure(disables)
+      : structure(uzo?.layout.wrap === "with-text", disables, bordered);
   return `${base}\n${tokenRules.join("\n")}\n`;
 }
 
@@ -299,6 +346,7 @@ function selectorOf(
     .join("");
   const state = STATE_SELECTORS[combination[STATE_KEY] ?? "rest"] ?? "";
   if (isField(skemo)) return fieldPartSelector(part, property, data, state);
+  if (isToggle(skemo)) return togglePartSelector(part, property, data, state);
   return partSelector(part, `[part="control"]${data}${state}`);
 }
 
@@ -418,6 +466,12 @@ export function stylesheetInventory(moduleText: string): ParityItem {
       if (!values.includes(value)) values.push(value);
       props.set(name, values);
     }
+  }
+  // A boolean prop that keys the parts (Spec 010 ①, D-03: checked) is written as
+  // data-<prop>="true|false"; the inventory names its kind, as React and Figma do.
+  for (const [name, values] of props) {
+    if (values.every((value) => value === "true" || value === "false"))
+      props.set(name, ["boolean"]);
   }
   return { props: Object.fromEntries(props), states: [...states], values: {} };
 }

@@ -316,20 +316,25 @@ function slotTexts(entry: LoadedEro, column: string | undefined): string {
 /**
  * The grid of one Ero (Spec 004 for the butono; Spec 008 D-12 for every Ero): one row per
  * combination of the enum props its parts are keyed by, one column at rest and one per boolean
- * prop that is a state (disabled, loading) or carries an a11y text (external). A required string
- * prop (the link's `to`, R-10) points at the section itself; the text slots carry their example
- * word where the Skemo allows it (F-5).
+ * prop that is a state (disabled, loading), carries an a11y text (external) or keys the parts
+ * (Spec 010 ①, D-11: checked of the switch — a prop, not a state, and its first look). A required
+ * string prop (the link's `to`, R-10) points at the section itself; the text slots carry their
+ * example word where the Skemo allows it (F-5).
  */
 export function eroMarkup(entry: LoadedEro): string {
   const tag = `fm-${entry.ero.name}`;
-  const keys = styledProps(entry.skemo).filter((key) =>
+  const styled = styledProps(entry.skemo);
+  const keys = styled.filter((key) =>
     entry.skemo.props.some((prop) => prop.name === key && prop.kind === "enum"),
   );
   const texts = entry.skemo.a11y.texts ?? {};
   const columns = entry.skemo.props
     .filter(
       (prop) =>
-        prop.kind === "boolean" && (entry.skemo.states.includes(prop.name) || prop.name in texts),
+        prop.kind === "boolean" &&
+        (entry.skemo.states.includes(prop.name) ||
+          prop.name in texts ||
+          styled.includes(prop.name)),
     )
     .map((prop) => prop.name);
   // A link needs a target: the section itself (Spec 008); every other string prop stays empty.

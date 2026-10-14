@@ -270,12 +270,17 @@ function componentGuideline(
     skemo.a11y.role === "link"
       ? " The prop `to` is the destination; the element renders it as the link's target."
       : "";
+  // Only an Ero with a label prop has an icon-only form (Spec 010 ①: the switch, like the field,
+  // always shows its label and has no such prop).
+  const iconOnly = skemo.props.some((prop) => prop.name === "label")
+    ? ` for an icon-only ${entry.ero.name} set \`label\` as its accessible name.`
+    : "";
   return `# ${name}
 
 ${entry.ero.description}
 
 Use \`<${name}>\` in React, or the element \`<${tag}>\` in plain HTML. The label is the children of
-the component; for an icon-only ${entry.ero.name} set \`label\` as its accessible name.${target}
+the component${iconOnly === "" ? "; it always shows." : `;${iconOnly}`}${target}
 
 ## Props
 
@@ -321,6 +326,15 @@ function guidelines(input: CeloInput, aspekto: string): GeneratedFile[] {
         `- Every entry of text is a \`<${componentName(entry.ero)}>\` (${entry.uzo?.purpose ?? ""}); never a raw input element, and never a field without its visible label.`,
     )
     .join("\n");
+  // Spec 010 ① (G7, plan D-12): every on/off setting that applies at once comes from the switch,
+  // never from a button that pretends; generated from every Ero with role switch.
+  const switchLines = eroj
+    .filter((entry) => entry.skemo.a11y.role === "switch" && entry.uzo !== undefined)
+    .map(
+      (entry) =>
+        `- Every on/off setting that applies at once is a \`<${componentName(entry.ero)}>\`; never a button that pretends.`,
+    )
+    .join("\n");
   return [
     {
       path: `${base}/Guidelines.md`,
@@ -335,6 +349,7 @@ components and its tokens; never write a colour, a size or a font value yourself
   attributes on \`<html>\`; never with a second stylesheet.
 ${ruleLines}
 ${fieldLines}
+${switchLines}
 
 Where to look: \`setup.md\` for the imports, \`foundations/\` for the tokens, \`components/\` for
 each component.

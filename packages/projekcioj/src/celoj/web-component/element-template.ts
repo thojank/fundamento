@@ -6,8 +6,11 @@
 // what assistive technology hears in addition comes from `a11y.texts` of the Skemo, in the
 // language of the document. Console warnings are developer messages.
 
-/** The native control an a11y role is rendered as (Celo knowledge, Art. VIII). */
-export type HostControl = "button" | "a" | "input";
+/**
+ * The native control an a11y role is rendered as (Celo knowledge, Art. VIII). `switch` is a
+ * native button with role switch (Spec 010 ①, D-09): the track, with the knob in it.
+ */
+export type HostControl = "button" | "a" | "input" | "switch";
 
 export interface ElementNames {
   /** `fm-butono` */
@@ -33,6 +36,7 @@ export interface ElementNames {
 export function hostOf(role: string): HostControl {
   if (role === "link") return "a";
   if (role === "textbox") return "input";
+  if (role === "switch") return "switch";
   return "button";
 }
 
@@ -67,9 +71,18 @@ function fieldMarkup(slots: NonNullable<ElementNames["slots"]>): string {
   return `<div part="field"><label part="label" for="control"><slot></slot><span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span></label><input part="control" id="control">${texts}<span id="fm-texts" hidden></span></div>`;
 }
 
+/**
+ * The shadow markup of a switch (Spec 010 ①, D-09): a native button with role switch as the track,
+ * the knob in it, the label beside it — named by the label (aria-labelledby), and a click on the
+ * label switches the track like a click on it (for). aria-checked is set when it renders.
+ */
+const SWITCH_MARKUP =
+  '<div part="field"><button part="control" id="control" type="button" role="switch" aria-labelledby="label"><span part="indicator"></span></button><label part="label" id="label" for="control"><slot></slot></label><span id="fm-texts" hidden></span></div>';
+
 /** The shadow markup of the control: slots before the label (icon-start), the label, the rest. */
 function markup(host: HostControl, slots: NonNullable<ElementNames["slots"]>): string {
   if (host === "input") return fieldMarkup(slots);
+  if (host === "switch") return SWITCH_MARKUP;
   const before = slots.filter((slot) => slot.default !== true && slot.name.endsWith("-start"));
   const after = slots.filter((slot) => slot.default !== true && !slot.name.endsWith("-start"));
   const last = after.at(-1)?.name;
@@ -100,6 +113,30 @@ export function elementSource({
       ? `const SKEMO = ${constant}_SKEMO;\nconst CSS = ${constant}_CSS;`
       : `import { ${constant}_SKEMO as SKEMO } from "./skemo.js";\nimport { ${constant}_CSS as CSS } from "./${ero}.styles.js";`;
   const control = host === "a" ? "a" : host === "input" ? "input" : "button";
+  const isSwitch = host === "switch";
+  // Only the element of a switch carries these lines (Spec 010 ①, D-09).
+  const switchRender = isSwitch
+    ? `    // A switch (Spec 010 ①, D-09): checked is spoken as aria-checked; in a form it sends "on"
+    // under its name while checked and nothing while not, as a native checkbox does.
+    const checked = this.propValue("checked") === true;
+    control.setAttribute("aria-checked", String(checked));
+    this.#internals.setFormValue(checked ? "on" : null);
+`
+    : "";
+  // A button submits or resets its form (type); a switch turns instead.
+  const switchActivate = isSwitch
+    ? `    // A switch (Spec 010 ①, D-09): every activation — pointer, Space, Enter, a click on the
+    // label — turns it; the element says so with input and change, as a native checkbox does.
+    this.toggleAttribute("checked", this.propValue("checked") !== true);
+    this.dispatchEvent(new Event("input", { bubbles: true, composed: true }));
+    this.dispatchEvent(new Event("change", { bubbles: true }));
+`
+    : `    const type = this.propValue("type");
+    const form = this.#internals.form;
+    if (form === null) return;
+    if (type === "submit") form.requestSubmit();
+    else if (type === "reset") form.reset();
+`;
   const body = `
 type Value = string | boolean;
 
@@ -121,6 +158,17 @@ const TEXTS = (("texts" in SKEMO.a11y ? SKEMO.a11y.texts : {}) ?? {}) as Readonl
 /** Where the description comes from, in order: slot:help, slot:error (Spec 009, D-02). */
 const DESCRIPTION = (("description" in SKEMO.a11y ? SKEMO.a11y.description : []) ?? []) as readonly string[];
 const HAS_PROP = new Set(PROPS.map((prop) => prop.name));
+/**
+ * Boolean props that key a part (Spec 010 ①, D-03: checked): written on the root as
+ * data-<prop>="true|false", like an enum, because the stylesheet keys on them.
+ */
+const KEYED_BOOLEANS = PROPS.filter(
+  (prop) =>
+    prop.kind === "boolean" &&
+    (Object.values(SKEMO.parts) as readonly Readonly<Record<string, { by?: readonly string[] }>>[]).some(
+      (part) => Object.values(part).some((source) => source.by?.includes(prop.name) === true),
+    ),
+).map((prop) => prop.name);
 
 let sheet: CSSStyleSheet | undefined;
 const warned = new Set<string>();
@@ -261,6 +309,9 @@ export class ${className} extends Base {
       root.setAttribute(\`data-\${name}\`, value);
       if (root !== control) control.setAttribute(\`data-\${name}\`, value);
     }
+    for (const name of KEYED_BOOLEANS) {
+      root.setAttribute(\`data-\${name}\`, String(this.propValue(name) === true));
+    }
     if (HAS_PROP.has("disabled") && "disabled" in control) {
       (control as HTMLButtonElement).disabled = this.propValue("disabled") === true;
     }
@@ -320,7 +371,7 @@ export class ${className} extends Base {
         if (has) described.push(name);
       }
     }
-    // What is heard in addition (Spec 008, D-02): the texts of every true boolean prop, in the
+${switchRender}    // What is heard in addition (Spec 008, D-02): the texts of every true boolean prop, in the
     // language of the document, as the description of the control; the mark shows with them.
     const lingvo = this.#lingvo();
     const heard = Object.entries(TEXTS)
@@ -356,12 +407,7 @@ export class ${className} extends Base {
       return;
     }
     if (!(this.#control instanceof HTMLButtonElement)) return;
-    const type = this.propValue("type");
-    const form = this.#internals.form;
-    if (form === null) return;
-    if (type === "submit") form.requestSubmit();
-    else if (type === "reset") form.reset();
-  }
+${switchActivate}  }
 }
 
 /**

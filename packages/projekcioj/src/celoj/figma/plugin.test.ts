@@ -1361,6 +1361,7 @@ describe("every property the plugin owns is from the plan or neutral", () => {
       "Document/Page 1/Fundamento/butono: layoutPositioning",
       "Document/Page 1/Fundamento/kampo: layoutPositioning",
       "Document/Page 1/Fundamento/ligilo: layoutPositioning",
+      "Document/Page 1/Fundamento/sxaltilo: layoutPositioning",
     ];
     expect(double.untouchedDefaults(OWNED).filter((entry) => !onPage.includes(entry))).toEqual([]);
     const set = pageNodes(double).find((child) => child.name === "butono");
@@ -3368,7 +3369,9 @@ describe("every set lies in the section Fundamento, in a row (F-1, F-2, F-7)", (
     const double = modelDouble();
     await apply(double);
     const section = sectionOf(double);
-    const [first, , last] = names;
+    // Spec 010 ①: four sets; the first goes behind the last of the plan, whatever their number.
+    const first = names[0];
+    const last = names.at(-1);
     if (first === undefined || last === undefined) throw new Error("3");
     pageOf(double).appendChild(named(section, first));
     const report = await apply(double);
@@ -3391,8 +3394,11 @@ describe("every set lies in the section Fundamento, in a row (F-1, F-2, F-7)", (
     const double = modelDouble();
     await apply(double);
     const section = sectionOf(double);
-    const [first, middle, last] = names;
+    // Spec 010 ①: the sets after the third keep their place — their left neighbour is spaced
+    // back to where the first run put it.
+    const [first, middle, last, ...rest] = names;
     if (first === undefined || middle === undefined || last === undefined) throw new Error("3");
+    const restBoxes = rest.map((name) => ({ name, ...box(named(sectionOf(double), name)) }));
     const gap = layout?.gap ?? Number.NaN;
     const firstBox = box(named(section, first));
     Object.assign(named(section, middle), { x: firstBox.x + firstBox.width + gap });
@@ -3417,6 +3423,7 @@ describe("every set lies in the section Fundamento, in a row (F-1, F-2, F-7)", (
         after: middle,
         action: "spaced",
       },
+      ...restBoxes.map((entry) => ({ x: entry.x, y: entry.y, after: null, action: "kept" })),
     ]);
     expect(report.section.moved).toEqual([]);
     // Enough room is kept: a third run moves nothing.

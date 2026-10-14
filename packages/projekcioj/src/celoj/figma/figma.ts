@@ -18,6 +18,7 @@ import {
   boundToken,
   combinationsOf,
   isBindingKeyword,
+  isPositionKeyword,
   type LoadedEro,
   type Modelo,
   nomRegulo,
@@ -32,6 +33,7 @@ import {
   readDtcgColor,
   STATE_KEY,
   type Uzo,
+  variantKeys,
 } from "@fundamento/modelo";
 import type { Celo, CeloInput, GeneratedFile } from "../../build.js";
 import { VITRINO_SLOT_TEXTS, VITRINO_SURFACE } from "../vitrino/datumoj.js";
@@ -136,12 +138,13 @@ export const FIELD_TEXTS: Readonly<Record<string, string>> = {
 /**
  * How the plugin draws a set (Spec 009, D-09): a control (variant → ring → gap → control → label)
  * for a button or a link, a field (label above, the control with its text, help and error below)
- * for a textbox. Celo knowledge from the a11y role (Art. VIII).
+ * for a textbox, a toggle (Spec 010 ①, D-10: a row — ring → gap → control with the knob in it,
+ * the label beside) for a switch. Celo knowledge from the a11y role (Art. VIII).
  */
-export type FigmaStructure = "control" | "field";
+export type FigmaStructure = "control" | "field" | "toggle";
 
 export const structureOf = (role: string): FigmaStructure =>
-  role === "textbox" ? "field" : "control";
+  role === "textbox" ? "field" : role === "switch" ? "toggle" : "control";
 
 /**
  * The neutral word every label template shows, per a11y role (M-3; Maintainer, F14, 2026-10-13,
@@ -152,6 +155,8 @@ const LABEL_DEFAULTS: Readonly<Record<string, string>> = {
   button: "Aktion",
   link: "Ziel",
   textbox: "Beschriftung",
+  // Spec 010 ① (plan D-10): a switch names a setting; for the maintainer to confirm (no Jugxo).
+  switch: "Einstellung",
 };
 
 /** The word a role without its own entry shows: the button's, as every set did before M-3. */
@@ -236,6 +241,12 @@ export interface FigmaComponentSet {
      * bound to a width, not to `none`. Written as the text decoration, not bound (B-1).
      */
     underline?: boolean;
+    /**
+     * Where the knob of a switch stands in this variant (Spec 010 ①, D-04): the term of
+     * `indicator.position`, start or end. A term binds no variable; the plugin writes it as the
+     * alignment of the track, as the underline is written.
+     */
+    position?: "start" | "end";
     /**
      * The cell of the variant in the grid, as the Vitrino orders it: the row is its combination of
      * the keyed props (emphasis × intent × size) in the order of the plan, the column its state.
@@ -642,18 +653,7 @@ function measureOf(value: unknown, field?: string): number {
  * is one geometry, and a set whose variants disagreed would need one variable per variant.
  */
 function radiusTokensOf(entry: LoadedEro): Record<string, string> | undefined {
-  const keyed = new Set<string>();
-  for (const partProperties of Object.values(entry.skemo.parts)) {
-    for (const source of Object.values(partProperties)) {
-      if (source !== undefined && "by" in source) for (const key of source.by) keyed.add(key);
-    }
-  }
-  const keys = [
-    ...entry.skemo.props
-      .filter((prop) => prop.kind === "enum" && keyed.has(prop.name))
-      .map((prop) => prop.name),
-    STATE_KEY,
-  ];
+  const keys = variantKeys(entry.skemo);
   let tokens: Record<string, string> | undefined;
   for (const combination of combinationsOf(entry.skemo, keys)) {
     const here: Record<string, string> = {};
@@ -906,19 +906,9 @@ function componentSetOf(
   }
   properties.state = [...skemo.states];
   // Variants exist for what changes the appearance: the props the parts are keyed by, and state.
-  // `type`, for example, is behaviour in a form and would only multiply the set.
-  const keyed = new Set<string>();
-  for (const partProperties of Object.values(skemo.parts)) {
-    for (const source of Object.values(partProperties)) {
-      if (source !== undefined && "by" in source) for (const key of source.by) keyed.add(key);
-    }
-  }
-  const keys = [
-    ...skemo.props
-      .filter((prop) => prop.kind === "enum" && keyed.has(prop.name))
-      .map((prop) => prop.name),
-    "state",
-  ];
+  // `type`, for example, is behaviour in a form and would only multiply the set. A keyed boolean
+  // prop is an axis too (Spec 010 ①, D-03: checked of the switch).
+  const keys = variantKeys(skemo);
   const drawn = new Set(DRAWN_PART_PROPERTIES);
   // The focus radii only for an Ero that has a radius to grow (F32); the ligilo has none.
   const radiiOf =
@@ -940,6 +930,8 @@ function componentSetOf(
         const bound = boundToken(skemo, part, property, combination);
         if (bound === undefined) continue;
         const key = `${part}.${property}`;
+        // A position is a term (Spec 010 ①, D-04): written per variant below, never bound.
+        if (isPositionKeyword(bound.token)) continue;
         // A keyword binds no variable (D-03): inherit takes the running text's role (D-11), none
         // leaves the field empty — nothing to bind, nothing to draw, nothing in the inventory.
         if (isBindingKeyword(bound.token)) {
@@ -982,6 +974,13 @@ function componentSetOf(
       skemo.parts.underline?.width === undefined
         ? undefined
         : boundToken(skemo, "underline", "width", combination);
+    const position = Object.entries(skemo.parts)
+      .map(([part, properties]) =>
+        properties.position === undefined
+          ? undefined
+          : boundToken(skemo, part, "position", combination)?.token,
+      )
+      .find((token) => token !== undefined && isPositionKeyword(token));
     // Die Schreibweise über alle Kombinationen entschieden, wie die Deckkraft (F8): Zwei Marken
     // dürfen sich unterscheiden, und dann nennt der Plan keinen Wert, sondern den Befund.
     const cases = new Set(
@@ -1007,6 +1006,7 @@ function componentSetOf(
       ...(underlineWidth === undefined
         ? {}
         : { underline: !isBindingKeyword(underlineWidth.token) }),
+      ...(position === undefined ? {} : { position: position as "start" | "end" }),
     };
   });
   // Every font the label can carry, over every combination (F30). The typography role follows the

@@ -21,7 +21,16 @@
 import { type FigmaPlan, TEXT_CASE_VARIES } from "./figma.js";
 
 /** The nodes of one variant the plugin draws, outside in (F11). */
-type PartNode = "focus-ring" | "focus-gap" | "control" | "label" | "text" | "help" | "error";
+type PartNode =
+  | "focus-ring"
+  | "focus-gap"
+  | "control"
+  | "label"
+  | "text"
+  | "help"
+  | "error"
+  | "indicator"
+  | "field";
 
 interface Binding {
   node: PartNode;
@@ -103,6 +112,20 @@ const BINDINGS: Readonly<Record<string, readonly Binding[]>> = {
     { node: "error", fields: ["fontStyle"], suffix: "/font-style", font: true },
     { node: "error", fields: ["letterSpacing"], suffix: "/letter-spacing" },
   ],
+  // A switch (Spec 010 ①, D-10): the knob is a frame of its own in the track, its fill, its size
+  // (width and height alike: a circle) and its radius bound like the control's.
+  "indicator.fill": [{ node: "indicator", fields: ["fills"], paint: true }],
+  "indicator.size": [{ node: "indicator", fields: ["width", "height"] }],
+  "indicator.radius": [{ node: "indicator", fields: ["cornerRadius"] }],
+};
+
+/**
+ * Where a structure binds a part property elsewhere than BINDINGS says (Spec 010 ①, D-10): in a
+ * toggle the gap stands between the track and the label beside it, so it is the field's spacing;
+ * the track holds only the knob.
+ */
+const STRUCTURE_BINDINGS: Readonly<Record<string, Readonly<Record<string, readonly Binding[]>>>> = {
+  toggle: { "box.gap": [{ node: "field", fields: ["itemSpacing"] }] },
 };
 
 /** A column of parts: the field of a textbox (Spec 009, D-09): label, control, help, error. */
@@ -118,6 +141,35 @@ const FIELD_LAYOUT = {
   paddingRight: 0,
   paddingTop: 0,
   paddingBottom: 0,
+};
+
+/**
+ * A row of parts: the field of a switch (Spec 010 ①, D-10): the ring around the track, then the
+ * label beside it, centred on one line; the gap between them is bound to box.gap.
+ */
+const TOGGLE_LAYOUT = {
+  layoutMode: "HORIZONTAL",
+  primaryAxisAlignItems: "MIN",
+  counterAxisAlignItems: "CENTER",
+  layoutSizingHorizontal: "HUG",
+  layoutSizingVertical: "HUG",
+  strokesIncludedInLayout: false,
+  itemSpacing: 0,
+  paddingLeft: 0,
+  paddingRight: 0,
+  paddingTop: 0,
+  paddingBottom: 0,
+};
+
+/**
+ * The knob of a switch (Spec 010 ①, D-10): its size is bound (indicator.size), so it is fixed in
+ * both axes; Figma honours a bound width only on a frame that is not hugging or filling.
+ */
+const INDICATOR_LAYOUT: Readonly<Record<string, string>> = {
+  // The knob holds nothing; it is a filled frame, no layout of its own.
+  layoutMode: "NONE",
+  layoutSizingHorizontal: "FIXED",
+  layoutSizingVertical: "FIXED",
 };
 
 /**
@@ -230,6 +282,9 @@ const BINDINGS = ${JSON.stringify(BINDINGS)};
 const CONTROL_LAYOUT = ${JSON.stringify(CONTROL_LAYOUT)};
 const HUG_LAYOUT = ${JSON.stringify(HUG_LAYOUT)};
 const FIELD_LAYOUT = ${JSON.stringify(FIELD_LAYOUT)};
+const TOGGLE_LAYOUT = ${JSON.stringify(TOGGLE_LAYOUT)};
+const INDICATOR_LAYOUT = ${JSON.stringify(INDICATOR_LAYOUT)};
+const STRUCTURE_BINDINGS = ${JSON.stringify(STRUCTURE_BINDINGS)};
 const IN_FLOW = ${JSON.stringify(IN_FLOW)};
 const TEXT_SIZING = ${JSON.stringify(TEXT_SIZING)};
 const NEUTRAL = ${JSON.stringify(NEUTRAL)};
@@ -633,10 +688,11 @@ function boundId(node, field) {
   return typeof bound === "object" ? bound.id : bound;
 }
 
-function bind(nodes, variant, variables) {
+function bind(nodes, variant, variables, structure) {
   const deferred = [];
+  const moved = STRUCTURE_BINDINGS[structure] || {};
   for (const [part, name] of Object.entries(variant.bindings)) {
-    for (const target of BINDINGS[part] || []) {
+    for (const target of moved[part] || BINDINGS[part] || []) {
       const variable = variables.get(name + (target.suffix || ""));
       if (variable === undefined) continue;
       const node = nodes[target.node];
@@ -1170,8 +1226,11 @@ async function applyComponents(variables, warnings) {
       // A field (Spec 009, D-09) is a column: label, then ring → gap → control with the typed text,
       // then help and error; a control keeps the label inside.
       const isField = component.structure === "field";
-      const field = isField ? part(node, "field", () => figma.createFrame()) : undefined;
-      const labelParent = isField ? field : undefined;
+      // A switch (Spec 010 ①, D-10) is a row: the ring around the track with its knob, then the
+      // label beside it.
+      const isToggle = component.structure === "toggle";
+      const field = isField || isToggle ? part(node, "field", () => figma.createFrame()) : undefined;
+      const labelParent = field;
       const ring = part(field || node, "focus-ring", () => figma.createFrame());
       const gap = part(ring, "focus-gap", () => figma.createFrame());
       const control =
@@ -1182,6 +1241,8 @@ async function applyComponents(variables, warnings) {
       write(control, "name", "control");
       const label = part(labelParent || control, "label", () => figma.createText());
       if (isField && field.children.indexOf(label) !== 0) field.insertChild(0, label);
+      if (isToggle && field.children.indexOf(label) !== 1) field.insertChild(1, label);
+      const indicator = isToggle ? part(control, "indicator", () => figma.createFrame()) : undefined;
       const textNode = isField ? part(control, "text", () => figma.createText()) : undefined;
       const help = isField ? part(field, "help", () => figma.createText()) : undefined;
       const error = isField ? part(field, "error", () => figma.createText()) : undefined;
@@ -1225,21 +1286,36 @@ async function applyComponents(variables, warnings) {
       labels.push(label);
       // Only values from the plan (F13): every owned property neutral first — Figma's white fill,
       // its clipping and its line would otherwise cover what the plan draws.
-      for (const frame of [node, ring, gap, control].concat(field ? [field] : [])) own(frame, NEUTRAL);
+      const frames = [node, ring, gap, control]
+        .concat(field ? [field] : [])
+        .concat(indicator ? [indicator] : []);
+      for (const frame of frames) own(frame, NEUTRAL);
       for (const each of texts) own(each, NEUTRAL_TEXT);
       // Layout before any measure is bound: padding, gap and minimum sizes only take effect on
       // an auto-layout frame (F11). The variant, ring and gap wrap their content.
       for (const frame of [node, ring, gap]) own(frame, HUG_LAYOUT);
-      if (field) own(field, FIELD_LAYOUT);
+      if (field) own(field, isToggle ? TOGGLE_LAYOUT : FIELD_LAYOUT);
       own(control, CONTROL_LAYOUT);
+      if (isToggle) {
+        // The knob stands where the variant says (D-04), along the writing direction; the border
+        // of the track takes its room, as on the web (box-sizing border-box): the track is the
+        // knob plus its border, its width at least box.width.
+        own(control, {
+          primaryAxisAlignItems: variant.position === "end" ? "MAX" : "MIN",
+          strokesIncludedInLayout: true,
+        });
+        own(indicator, INDICATOR_LAYOUT);
+      }
       // The variant lies in the grid's flow, its parts in the variant's (F14).
-      for (const child of [node, ring, gap, control].concat(field ? [field] : []).concat(texts)) own(child, IN_FLOW);
+      for (const child of frames.concat(texts)) own(child, IN_FLOW);
       for (const each of texts) own(each, TEXT_SIZING);
       const nodes = { "focus-ring": ring, "focus-gap": gap, control, label };
+      if (field) nodes.field = field;
+      if (indicator) nodes.indicator = indicator;
       if (textNode) nodes.text = textNode;
       if (help) nodes.help = help;
       if (error) nodes.error = error;
-      const measures = bind(nodes, variant, variables);
+      const measures = bind(nodes, variant, variables, component.structure);
       // Der Radius des Rings und seines Abstands wird gebunden, nicht eingetragen (F32): als Zahl
       // stand er in jedem Modus gleich und umschloss in einer Marke mit Radius 0 einen eckigen
       // Knopf rund. Er geht denselben Weg wie die übrigen Maße, also nach dem Layout.
@@ -1252,7 +1328,7 @@ async function applyComponents(variables, warnings) {
       }
       // Everything gathered is written once, layout before the parts inside it; the measures
       // are bound after that, when every frame has its layout.
-      for (const each of [node, ring, gap, control].concat(field ? [field] : []).concat(texts)) flush(each);
+      for (const each of frames.concat(texts)) flush(each);
       for (const { node: target, field, variable, font } of measures) {
         if (boundId(target, field) === variable.id) continue;
         if (font !== true) {
@@ -1979,7 +2055,13 @@ function reportParts(result) {
         modes: report.modes,
         placement: report.placement,
       })),
-      mankoj: result.mankoj,
+      // The Mankoj by set, part and field; their evidence, the tool's words, stands in the part
+      // state of each set (uzo.evidence). Spec 010 ①: with four sets the evidence of twelve
+      // parts no longer fit the headline of 4 000 characters (F22).
+      mankoj: {
+        open: result.mankoj.open.map(({ set, part, field }) => ({ set, part, field })),
+        closed: result.mankoj.closed.map(({ set, part, field }) => ({ set, part, field })),
+      },
     }),
   ];
   for (const report of result.components) {
