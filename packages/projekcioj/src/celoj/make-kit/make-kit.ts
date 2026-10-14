@@ -373,14 +373,25 @@ function guidelines(input: CeloInput, aspekto: string): GeneratedFile[] {
     )
     .join("\n");
   // Spec 010 ③ (G7, plan ③ D-11): a choice of one among a few visible options comes from the radio
-  // group; six or more go into a list — named once the Modelo has one (elektilo, PR ④), until then
-  // the kit says that it has none.
+  // group; six or more go into a list — named once the Modelo has one (elektilo, Spec 010 ④, plan ④
+  // D-11), until then the kit says that it has none.
   const listName = eroj.find((entry) => entry.skemo.a11y.role === "combobox");
   const radioLines = eroj
     .filter((entry) => entry.skemo.a11y.role === "radiogroup" && entry.uzo !== undefined)
     .map(
       (entry) =>
         `- A choice of one among a few visible options is an \`<${componentName(entry.ero)}>\`; six or more go into ${listName === undefined ? "a list, which this kit does not have yet: ask a person" : `an \`<${componentName(listName.ero)}>\` list`}.`,
+    )
+    .join("\n");
+  // Spec 010 ④ (G7, plan ④ D-11): a choice of one among many options comes from the select, whose
+  // list is the platform's; up to five visible options from the radio group, named where the
+  // Modelo has one. Generated from every Ero with role combobox.
+  const radioName = eroj.find((entry) => entry.skemo.a11y.role === "radiogroup");
+  const selectLines = eroj
+    .filter((entry) => entry.skemo.a11y.role === "combobox" && entry.uzo !== undefined)
+    .map(
+      (entry) =>
+        `- A choice of one among many options is an \`<${componentName(entry.ero)}>\` list${radioName === undefined ? "" : `; up to five visible options are an \`<${componentName(radioName.ero)}>\``}.`,
     )
     .join("\n");
   return [
@@ -400,6 +411,7 @@ ${fieldLines}
 ${switchLines}
 ${checkboxLines}
 ${radioLines}
+${selectLines}
 
 Where to look: \`setup.md\` for the imports, \`foundations/\` for the tokens, \`components/\` for
 each component.

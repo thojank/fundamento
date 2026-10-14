@@ -295,6 +295,13 @@ export const VITRINO_SLOT_TEXTS: Readonly<Record<string, string>> = {
  */
 export const VITRINO_OPTIONS: readonly string[] = ["Eins", "Zwei", "Drei"];
 
+/**
+ * The prompt a select shows while none of its options is chosen (Spec 010 ④, plan ④ D-13): the
+ * closed field, as the Figma set draws it (one source for both pictures). A prompt, not an
+ * example: the Regulo select-placeholder-is-prompt (at least two words).
+ */
+export const VITRINO_PROMPT = "Bitte wählen";
+
 /** The options of one cell: an element per option in its slot, with its value (Web Celo). */
 function optionTexts(entry: LoadedEro): string {
   return entry.skemo.slots
@@ -362,8 +369,15 @@ export function eroMarkup(entry: LoadedEro): string {
     .map((prop) => ` ${prop.name}="#fm-vitrino-${entry.ero.name}"`)
     .join("");
   // The prop an option's value is compared with (Spec 010 ③, E7) holds the first option: one chosen.
+  // An Ero with a placeholder besides (the select, Spec 010 ④, D-13) shows the closed field with
+  // its prompt instead: its options are in the list that opens, the field says that none is chosen.
+  const prompts = entry.skemo.props.some((prop) => prop.name === "placeholder");
   const chosen = entry.skemo.slots
-    .flatMap((slot) => (slot.entry === undefined ? [] : [` ${slot.entry.equals}="1"`]))
+    .flatMap((slot) =>
+      slot.entry === undefined
+        ? []
+        : [prompts ? ` placeholder="${VITRINO_PROMPT}"` : ` ${slot.entry.equals}="1"`],
+    )
     .join("");
   const rows = combinationsOf(entry.skemo, keys)
     .filter((combination) => combination[STATE_KEY] === undefined)

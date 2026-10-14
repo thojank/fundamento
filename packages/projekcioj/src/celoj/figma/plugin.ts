@@ -1486,16 +1486,22 @@ async function applyComponents(variables, warnings) {
       if (isToggle && column === undefined && field.children.indexOf(label) !== 1) field.insertChild(1, label);
       if (column !== undefined && field.children.indexOf(column) !== 1) field.insertChild(1, column);
       if (column !== undefined && column.children.indexOf(label) !== 0) column.insertChild(0, label);
+      const textNode = isField ? part(control, "text", () => figma.createText()) : undefined;
+      // The chevron of a select (Spec 010 ④, D-07): its sign at the end of the field's control,
+      // after the text, imported once like the check mark; a text field has no sign.
+      const fieldSign = isField && typeof component.sign === "string";
       // The knob of a switch is a frame; the check mark of a checkbox is its sign, imported once.
-      const indicator = isToggle
+      const indicator = isToggle || fieldSign
         ? part(control, "indicator", () =>
             typeof component.sign === "string"
               ? figma.createNodeFromSvg(component.sign)
               : figma.createFrame(),
           )
         : undefined;
+      if (fieldSign && control.children.indexOf(indicator) !== control.children.length - 1) {
+        control.appendChild(indicator);
+      }
       const mark = indicator !== undefined && typeof component.sign === "string" ? markOf(indicator) : undefined;
-      const textNode = isField ? part(control, "text", () => figma.createText()) : undefined;
       const help = isField ? part(field, "help", () => figma.createText()) : undefined;
       const errorParent = isField ? field : column;
       const error =
@@ -1566,6 +1572,8 @@ async function applyComponents(variables, warnings) {
         // keeps its place and is not seen.
         own(indicator, { opacity: (variant.hidden || []).indexOf("indicator") === -1 ? 1 : 0 });
       }
+      // The chevron keeps its bound size beside the text (D-07), as the knob does in its track.
+      if (fieldSign) own(indicator, INDICATOR_LAYOUT);
       if (column) {
         own(column, TEXTS_LAYOUT);
         // The box stands at the first line of its label (D-09), as on the web.
@@ -2315,13 +2323,14 @@ function reportParts(result) {
         duplicates: report.duplicates.length,
         lost: report.lost.length,
         diagnosis: report.diagnosis,
-        modes: report.modes,
         placement: report.placement,
       })),
       // The Mankoj by set, part and field; their evidence, the tool's words, stands in the part
       // state of each set (uzo.evidence). Spec 010 ①: with four sets the evidence of twelve
       // parts no longer fit the headline of 4 000 characters (F22). Spec 010 ③: with six sets
       // the list of eighteen objects did not either; grouped by field and set, the same names.
+      // Spec 010 ④ (plan ④ D-07, ③ B-5): with seven sets the headline grew to 4 094 characters;
+      // the modes each set was found and left in moved to its part state, under the same name.
       mankoj: {
         open: groupedMankoj(result.mankoj.open),
         closed: groupedMankoj(result.mankoj.closed),
@@ -2340,6 +2349,7 @@ function reportParts(result) {
           before: report.before,
           after: report.after,
           left: report.left,
+          modes: report.modes,
           fonts: report.fonts,
           uzo: report.uzo,
         },

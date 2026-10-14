@@ -11,9 +11,11 @@
  * native button with the role of the Skemo, a control with its label beside it: the track of a
  * switch with the knob in it (Spec 010 ①, D-09), the box of a checkbox with the check mark in it
  * (Spec 010 ②, D-08). `group` is a radio group (Spec 010 ③, D-06): an element with role
- * radiogroup named by its label, one row with role radio per option of the light DOM.
+ * radiogroup named by its label, one row with role radio per option of the light DOM. `select` is
+ * a select (Spec 010 ④, D-06): the platform's own select, role combobox from the browser, its
+ * options mirrored from the light DOM, the list the platform's (E3).
  */
-export type HostControl = "button" | "a" | "input" | "toggle" | "group";
+export type HostControl = "button" | "a" | "input" | "toggle" | "group" | "select";
 
 export interface ElementNames {
   /** `fm-butono` */
@@ -48,6 +50,7 @@ export function hostOf(role: string): HostControl {
   if (role === "textbox") return "input";
   if (role === "switch" || role === "checkbox") return "toggle";
   if (role === "radiogroup") return "group";
+  if (role === "combobox") return "select";
   return "button";
 }
 
@@ -76,6 +79,13 @@ const DOT_PATH = "M8 4a4 4 0 1 1 0 8a4 4 0 1 1 0-8z";
 const CHECK_PATH = "M6.4 12.6 2.2 8.4l1.4-1.4 2.8 2.8 6-6 1.4 1.4z";
 
 /**
+ * The chevron of a select in a box of 16 × 16 (Spec 010 ④, D-05): a filled outline pointing down,
+ * centred, so that Figma imports one vector whose fill is the colour of the indicator, as for the
+ * check mark (② D-09).
+ */
+const CHEVRON_PATH = "M1.9 5.7 3.3 4.3 8 9l4.7-4.7 1.4 1.4L8 11.8z";
+
+/**
  * The sign the indicator of a toggle shows, per a11y role (Spec 010 ②, D-08, D-09): the check mark
  * of a checkbox, a filled vector in the current colour — the colour of the part indicator; a sign
  * of the projection, no text node (Art. VIII), like the mark of a required field. A knob has none.
@@ -86,6 +96,10 @@ export function signOf(role: string, size = "100%"): string | undefined {
   // The dot of a chosen option (Spec 010 ③, D-05): half the box of the indicator, in its middle.
   if (role === "radiogroup") {
     return `<svg aria-hidden="true" viewBox="0 0 16 16" width="${size}" height="${size}" fill="currentColor"><path d="${DOT_PATH}"/></svg>`;
+  }
+  // The chevron of a select (Spec 010 ④, D-05): the sign that a list opens from the field.
+  if (role === "combobox") {
+    return `<svg aria-hidden="true" viewBox="0 0 16 16" width="${size}" height="${size}" fill="currentColor"><path d="${CHEVRON_PATH}"/></svg>`;
   }
   if (role !== "checkbox") return undefined;
   return `<svg aria-hidden="true" viewBox="0 0 16 16" width="${size}" height="${size}" fill="currentColor"><path d="${CHECK_PATH}"/></svg>`;
@@ -112,6 +126,17 @@ function textsMarkup(slots: NonNullable<ElementNames["slots"]>): string {
  */
 function fieldMarkup(slots: NonNullable<ElementNames["slots"]>): string {
   return `<div part="field"><label part="label" for="control"><slot></slot><span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span></label><input part="control" id="control">${textsMarkup(slots)}<span id="fm-texts" hidden></span></div>`;
+}
+
+/**
+ * The shadow markup of a select (Spec 010 ④, D-06): the field of the kampo — label with the mark
+ * of a required field, help and error below — around the platform's own select (role combobox
+ * from the browser) and the chevron (indicator) at its end, side by side in one row. The options
+ * of the light DOM are written into the select as the platform's options when it renders; the
+ * list that opens is the platform's (E3).
+ */
+function selectMarkup(slots: NonNullable<ElementNames["slots"]>, role: string): string {
+  return `<div part="field"><label part="label" for="control"><slot></slot><span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span></label><div><select part="control" id="control"></select><span part="indicator" aria-hidden="true">${signOf(role) ?? ""}</span></div>${textsMarkup(slots)}<span id="fm-texts" hidden></span></div>`;
 }
 
 /**
@@ -168,6 +193,7 @@ function markup(
   if (host === "input") return fieldMarkup(slots);
   if (host === "toggle") return toggleMarkup(role, slots, marked);
   if (host === "group") return groupMarkup(slots, marked);
+  if (host === "select") return selectMarkup(slots, role);
   const before = slots.filter((slot) => slot.default !== true && slot.name.endsWith("-start"));
   const after = slots.filter((slot) => slot.default !== true && !slot.name.endsWith("-start"));
   const last = after.at(-1)?.name;
@@ -206,9 +232,12 @@ export function elementSource({
         ? "input"
         : host === "group"
           ? "[role=radiogroup]"
-          : "button";
+          : host === "select"
+            ? "select"
+            : "button";
   const isToggle = host === "toggle";
   const isGroup = host === "group";
+  const isSelect = host === "select";
   const listSlot = slots.find((slot) => slot.list === true)?.name ?? "";
   // Only the element of a toggle carries these lines (Spec 010 ①, D-09; ②, D-08).
   const toggleRender = isToggle
@@ -272,6 +301,97 @@ export function elementSource({
     const invalid = this.propValue("invalid") === true || this.#filled("error");
     if (invalid) group.setAttribute("aria-invalid", "true");
     else group.removeAttribute("aria-invalid");
+`
+    : "";
+  // A select (Spec 010 ④, D-06): the options of the light DOM become the platform's options of the
+  // select, in their order; while no option is chosen the select shows the placeholder as a
+  // disabled first option without a value — the prompt, which cannot be chosen back. The chosen
+  // value is the form's, and a required select without a choice keeps the form from being sent.
+  const selectRender = isSelect
+    ? `    const select = control as HTMLSelectElement;
+    const entries = this.#entries();
+    const value = this.propValue("value");
+    const wanted = typeof value === "string" ? value : "";
+    const chosen = wanted === "" ? -1 : entries.findIndex((entry) => entry.value === wanted);
+    const placeholder = this.propValue("placeholder");
+    const options = [
+      ...(chosen === -1
+        ? [{ value: "", text: typeof placeholder === "string" ? placeholder : "", prompt: true }]
+        : []),
+      ...entries.map((entry) => ({ ...entry, prompt: false })),
+    ];
+    const same =
+      select.options.length === options.length &&
+      options.every((option, index) => {
+        const present = select.options[index];
+        return (
+          present !== undefined &&
+          present.value === option.value &&
+          present.text === option.text &&
+          present.disabled === option.prompt
+        );
+      });
+    if (!same) {
+      select.replaceChildren(
+        ...options.map((option) => {
+          const element = document.createElement("option");
+          element.value = option.value;
+          element.textContent = option.text;
+          element.disabled = option.prompt;
+          return element;
+        }),
+      );
+    }
+    select.selectedIndex = chosen === -1 ? 0 : chosen;
+    this.#internals.setFormValue(chosen === -1 ? null : (entries[chosen]?.value ?? null));
+    const formName = this.propValue("name");
+    if (typeof formName === "string" && formName !== "") select.setAttribute("name", formName);
+    else select.removeAttribute("name");
+    const required = this.propValue("required") === true;
+    select.required = required;
+    if (required) select.setAttribute("aria-required", "true");
+    else select.removeAttribute("aria-required");
+    const missing = TEXTS.required?.[this.#lingvo()] ?? TEXTS.required?.en ?? "";
+    if (required && chosen === -1 && missing !== "") {
+      this.#internals.setValidity({ valueMissing: true }, missing, select);
+    } else {
+      this.#internals.setValidity({});
+    }
+    const invalid = this.propValue("invalid") === true || this.#filled("error");
+    if (invalid) select.setAttribute("aria-invalid", "true");
+    else select.removeAttribute("aria-invalid");
+`
+    : "";
+  // The constructor of a select (Spec 010 ④, D-06): it follows the options of the light DOM, and a
+  // choice in the platform's list is the prop value; input comes from the select itself (composed),
+  // change is said again by the element, because the select's own does not leave the shadow root.
+  const selectInit = isSelect
+    ? `    new MutationObserver(() => this.#render()).observe(this, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+      attributes: true,
+      attributeFilter: ["slot", "value"],
+    });
+    control.addEventListener("change", () => {
+      const chosen = (control as HTMLSelectElement).value;
+      if (this.getAttribute("value") !== chosen) this.setAttribute("value", chosen);
+      this.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+`
+    : "";
+  // The methods of a select (Spec 010 ④, D-06): its options, read from the light DOM.
+  const selectMethods = isSelect
+    ? `
+  /** The options of the select: every child in the slot of the options, its value and its text. */
+  #entries(): { value: string; text: string }[] {
+    return [...this.children]
+      .filter((child) => child.getAttribute("slot") === "${listSlot}")
+      .map((child) => {
+        const text = child.textContent?.trim() ?? "";
+        return { value: child.getAttribute("value") ?? text, text };
+      });
+  }
 `
     : "";
   // The constructor of a radio group: it assigns the children to the slots and follows them, and
@@ -500,7 +620,7 @@ export class ${className} extends Base {
     this.#label = label;
     this.#texts = texts;
     control.addEventListener("click", (event) => this.#activate(event));
-${toggleKeys}${groupInit}    label.addEventListener("slotchange", () => this.#render());
+${toggleKeys}${groupInit}${selectInit}    label.addEventListener("slotchange", () => this.#render());
     for (const named of root.querySelectorAll("slot[name]")) {
       named.addEventListener("slotchange", () => this.#render());
     }
@@ -637,7 +757,7 @@ ${isGroup ? "    this.#assign();\n" : ""}    this.#render();
       if (invalid) control.setAttribute("aria-invalid", "true");
       else control.removeAttribute("aria-invalid");
     }
-${toggleRender}${groupRender}    // The texts of the slots that describe the control (Spec 009, D-02; a checkbox, Spec 010 ②):
+${toggleRender}${groupRender}${selectRender}    // The texts of the slots that describe the control (Spec 009, D-02; a checkbox, Spec 010 ②):
     // shown while they have text, and its description in that order.
     for (const source of DESCRIPTION) {
       const [kind, name = ""] = source.split(":");
@@ -692,7 +812,7 @@ ${
     : `    if (!(this.#control instanceof HTMLButtonElement)) return;
 ${toggleActivate}`
 }  }
-${groupMethods}
+${groupMethods}${selectMethods}
 }
 
 /**

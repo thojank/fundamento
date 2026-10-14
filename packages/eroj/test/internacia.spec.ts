@@ -473,13 +473,12 @@ for (const factor of [1.35, 2]) {
     );
     await expect
       .poll(() =>
-        page
-          .locator("#a")
-          .evaluate(
-            (element) =>
-              (element.shadowRoot?.querySelector('[part="control"]') as HTMLSelectElement)
-                .selectedOptions[0]?.textContent ?? "",
-          ),
+        page.locator("#a").evaluate((element) => {
+          const select = element.shadowRoot?.querySelector('[part="control"]');
+          return select instanceof HTMLSelectElement
+            ? (select.selectedOptions[0]?.textContent ?? "")
+            : "";
+        }),
       )
       .toMatch(/^\[/);
     const after = await control();

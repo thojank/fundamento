@@ -14,7 +14,7 @@
       "pattern": "#[A-Z][A-Za-z]*$"
     },
     "inScheme": {
-      "enum": ["terminologio", "modelo"]
+      "enum": ["terminologio", "modelo", "principoj", "eroj"]
     },
     "notation": {
       "type": "string"

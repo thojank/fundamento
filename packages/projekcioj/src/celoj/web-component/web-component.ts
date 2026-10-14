@@ -41,10 +41,24 @@ function partSelector(part: string, control: string): string {
  * error and the mark of a required field; the placeholder is the input's own pseudo-element; the
  * gap between the parts belongs to the field itself.
  */
-function fieldPartSelector(part: string, property: string, data: string, state: string): string {
+function fieldPartSelector(
+  part: string,
+  property: string,
+  data: string,
+  state: string,
+  select = false,
+): string {
   const root = `[part="field"]${data}${state === "" ? "" : `:has([part="control"]${state})`}`;
   if (part === "box" && property === "gap") return `:where(${root})`;
+  // A select (Spec 010 ④, D-06) shows its placeholder as the first option, chosen while nothing
+  // else is: the colour of the placeholder is the select's while that option is the chosen one.
+  // Outside :where(), so that it wins over the colour of the text in every state (specificity).
+  if (part === "placeholder" && select) {
+    return `:where(${root}) [part="control"]:has(> option[value=""]:checked)`;
+  }
   if (part === "placeholder") return `:where(${root}) [part="control"]::placeholder`;
+  // The chevron of a select is an element of its own beside the select (D-06).
+  if (part === "indicator") return `:where(${root}) [part="indicator"]`;
   if (part === "focus-ring") return `:where(${root}) [part="control"]:focus-visible`;
   if (["label", "help", "error", "required-mark"].includes(part)) {
     return `:where(${root}) [part="${part}"]`;
@@ -52,8 +66,14 @@ function fieldPartSelector(part: string, property: string, data: string, state: 
   return `:where(${root}) [part="control"]`;
 }
 
-/** Whether the Ero is a field (a composite of label, input, help and error). */
-const isField = (skemo: Skemo): boolean => hostOf(skemo.a11y.role) === "input";
+/**
+ * Whether the Ero is a field (a composite of label, input, help and error): a text field, or a
+ * select (Spec 010 ④, D-06) — the same field around the platform's select.
+ */
+const isField = (skemo: Skemo): boolean => hostOf(skemo.a11y.role) === "input" || isSelect(skemo);
+
+/** Whether the Ero is a select (Spec 010 ④, D-06): the field of the kampo around a select. */
+const isSelect = (skemo: Skemo): boolean => hostOf(skemo.a11y.role) === "select";
 
 /**
  * Whether the Ero is a toggle: a control with its label beside it — the track of a switch with
@@ -283,7 +303,7 @@ const structure = (inlineHost: boolean, disables: boolean, bordered: boolean): s
  * column; the mark of a required field (an asterisk drawn as a small vector, no text) shows only
  * while the field is marked (data-marked).
  */
-const fieldStructure = (disables: boolean): string =>
+const fieldStructure = (disables: boolean, select = false): string =>
   [
     ":host { display: block; }",
     ':where([part="field"]) { display: flex; flex-direction: column; align-items: stretch; }',
@@ -292,7 +312,64 @@ const fieldStructure = (disables: boolean): string =>
     ':where([part="control"]:focus:not(:focus-visible)) { outline-width: 0; }',
     ...(disables ? [':where([part="control"]:disabled) { cursor: not-allowed; }'] : []),
     ':where([part="field"]:not([data-marked="true"])) [part="required-mark"] { display: none; }',
+    ...(select ? selectStructure : []),
   ].join("\n");
+
+/**
+ * Layout of a select (Spec 010 ④, D-06), keywords only: the select and its chevron stand in one
+ * row; the select fills it, the chevron does not shrink, lies over the end of the select (its
+ * margins, from tokens, below) and lets every pointer through to the select, whose list opens.
+ */
+const selectStructure: readonly string[] = [
+  ':where([part="field"]) > div { display: flex; align-items: center; }',
+  ':where([part="field"]) > div > [part="control"] { flex: 1 1 auto; min-inline-size: 0; cursor: pointer; }',
+  ':where([part="indicator"]) { display: block; flex: none; position: relative; pointer-events: none; }',
+  ':where([part="indicator"]) > svg { display: block; }',
+];
+
+/**
+ * Where the chevron of a select stands (Spec 010 ④, D-06), per combination of the props that key
+ * the measures: inside the end of the control, its border and inline padding away from the edge;
+ * the text of the select ends a gap before it. Arithmetic over the bound tokens only — the
+ * inline padding, the size of the indicator, the gap of the box and the border width — so every
+ * design value is still a token (Art. X gate 1). Celo knowledge (Art. VIII): the Skemo says that a
+ * chevron is part of the field, the Web Celo where it stands.
+ */
+function selectRules(skemo: Skemo): [string, string[]][] {
+  const keys = [
+    ...new Set([
+      ...keysOf(skemo, skemo.parts.box?.["inline-padding"]),
+      ...keysOf(skemo, skemo.parts.indicator?.size),
+    ]),
+  ].filter((key) => key !== STATE_KEY);
+  const rules: [string, string[]][] = [];
+  for (const combination of combinationsOf(skemo, keys)) {
+    const token = (part: string, property: string) =>
+      boundToken(skemo, part, property, combination)?.token;
+    const padding = token("box", "inline-padding");
+    const size = token("indicator", "size");
+    const gap = token("box", "gap");
+    const border = token("border", "width");
+    if (
+      [padding, size, gap, border].some((value) => value === undefined || isBindingKeyword(value))
+    )
+      continue;
+    const v = (name: string | undefined) => variable(name ?? "");
+    const data = keys.map((key) => `[data-${key}="${combination[key] ?? ""}"]`).join("");
+    rules.push([
+      fieldPartSelector("box", "inline-padding", data, "", true),
+      [`padding-inline-end: calc(${v(padding)} + ${v(size)} + ${v(gap)});`],
+    ]);
+    rules.push([
+      fieldPartSelector("indicator", "size", data, "", true),
+      [
+        `margin-inline-start: calc(-1 * (${v(size)} + ${v(padding)} + ${v(border)}));`,
+        `margin-inline-end: calc(${v(padding)} + ${v(border)});`,
+      ],
+    ]);
+  }
+  return rules;
+}
 
 /**
  * Layout of a toggle (Spec 010 ①, D-05, D-09; ②, D-08), keywords only: the field is a row of
@@ -408,13 +485,15 @@ export function stylesheetOf(skemo: Skemo, uzo?: Uzo): string {
       }
     }
   }
-  const tokenRules = [...fixedRules.entries(), ...keyedRules.entries()].map(
+  // The place of the chevron of a select comes last (D-06): it refines the inline padding.
+  const placed = isSelect(skemo) ? selectRules(skemo) : [];
+  const tokenRules = [...fixedRules.entries(), ...keyedRules.entries(), ...placed].map(
     ([selector, lines]) => `${selector} {\n${lines.map((line) => `  ${line}`).join("\n")}\n}`,
   );
   const disables = skemo.states.includes("disabled") || skemo.states.includes("loading");
   const bordered = skemo.parts.border !== undefined;
   const base = isField(skemo)
-    ? fieldStructure(disables)
+    ? fieldStructure(disables, isSelect(skemo))
     : isGroup(skemo)
       ? groupStructure(disables, skemo.parts["required-mark"] !== undefined)
       : isToggle(skemo)
@@ -460,7 +539,7 @@ function selectorOf(
     return groupPartSelector(part, property, data, entry, combination[STATE_KEY] ?? "rest");
   }
   const state = STATE_SELECTORS[combination[STATE_KEY] ?? "rest"] ?? "";
-  if (isField(skemo)) return fieldPartSelector(part, property, data, state);
+  if (isField(skemo)) return fieldPartSelector(part, property, data, state, isSelect(skemo));
   if (isToggle(skemo)) return togglePartSelector(part, property, data, state);
   return partSelector(part, `[part="control"]${data}${state}`);
 }
