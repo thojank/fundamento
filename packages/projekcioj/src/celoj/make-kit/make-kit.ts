@@ -335,6 +335,17 @@ function guidelines(input: CeloInput, aspekto: string): GeneratedFile[] {
         `- Every on/off setting that applies at once is a \`<${componentName(entry.ero)}>\`; never a button that pretends.`,
     )
     .join("\n");
+  // Spec 010 ② (G7, plan ② D-12): every yes/no that applies with the form comes from the checkbox,
+  // and what applies at once from the switch; generated from every Ero with role checkbox, the
+  // switch named where the Modelo has one.
+  const switchName = eroj.find((entry) => entry.skemo.a11y.role === "switch");
+  const checkboxLines = eroj
+    .filter((entry) => entry.skemo.a11y.role === "checkbox" && entry.uzo !== undefined)
+    .map(
+      (entry) =>
+        `- Every yes/no that applies with the form is a \`<${componentName(entry.ero)}>\`${switchName === undefined ? "" : `; a setting that applies at once is a \`<${componentName(switchName.ero)}>\``}.`,
+    )
+    .join("\n");
   return [
     {
       path: `${base}/Guidelines.md`,
@@ -350,6 +361,7 @@ components and its tokens; never write a colour, a size or a font value yourself
 ${ruleLines}
 ${fieldLines}
 ${switchLines}
+${checkboxLines}
 
 Where to look: \`setup.md\` for the imports, \`foundations/\` for the tokens, \`components/\` for
 each component.

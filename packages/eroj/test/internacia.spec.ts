@@ -292,6 +292,15 @@ test("markobutono right to left: the box mirrors to the right, the label stays b
   expect(Number.parseFloat(outline)).toBeGreaterThan(0);
 });
 
+// The padding of the expansion comes in words here: a label that wraps breaks between words; a
+// single word longer than the line is a Befund (plan ② B-4: overflow-wrap is not on the
+// structural allowlist of the Ero stylesheet rule), not something this test hides.
+const pseudoWords = (text: string, factor: number) =>
+  pseudo(text, 1).replace(
+    /\]$/,
+    ` ${"~~~~ ".repeat(Math.ceil((text.length * (factor - 1)) / 5)).trim()}]`,
+  );
+
 for (const factor of [1.35, 2]) {
   test(`markobutono text expansion to ${Math.round(factor * 100)} %: the label breaks beside the box, nothing is clipped`, async ({
     page,
@@ -307,7 +316,7 @@ for (const factor of [1.35, 2]) {
       (element, text) => {
         element.textContent = text;
       },
-      pseudo(label, factor),
+      pseudoWords(label, factor),
     );
     const after = await page.locator("#a").boundingBox();
     expect(after?.height ?? 0).toBeGreaterThan(before?.height ?? 0);

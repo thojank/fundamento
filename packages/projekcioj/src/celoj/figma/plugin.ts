@@ -32,7 +32,9 @@ type PartNode =
   | "help"
   | "error"
   | "indicator"
-  | "field";
+  | "field"
+  | "mark"
+  | "texts";
 
 interface Binding {
   node: PartNode;
@@ -119,6 +121,9 @@ const BINDINGS: Readonly<Record<string, readonly Binding[]>> = {
   "indicator.fill": [{ node: "indicator", fields: ["fills"], paint: true }],
   "indicator.size": [{ node: "indicator", fields: ["width", "height"] }],
   "indicator.radius": [{ node: "indicator", fields: ["cornerRadius"] }],
+  // A checkbox (Spec 010 ②, D-09): the indicator is the frame of the check mark (its size bound
+  // like the knob's), the mark a vector in it whose fill is the colour of the indicator.
+  "indicator.color": [{ node: "mark", fields: ["fills"], paint: true }],
 };
 
 /**
@@ -164,8 +169,42 @@ const TOGGLE_LAYOUT = {
 };
 
 /**
+ * The column beside the box of a checkbox (Spec 010 ②, D-09): the label, then the error under it,
+ * at the start; the box stands at the first line (the field aligns its row at the start), as on
+ * the web.
+ */
+const TEXTS_LAYOUT = {
+  layoutMode: "VERTICAL",
+  primaryAxisAlignItems: "MIN",
+  counterAxisAlignItems: "MIN",
+  layoutSizingHorizontal: "HUG",
+  layoutSizingVertical: "HUG",
+  strokesIncludedInLayout: false,
+  itemSpacing: 0,
+  paddingLeft: 0,
+  paddingRight: 0,
+  paddingTop: 0,
+  paddingBottom: 0,
+};
+
+/**
+ * The vector of a check mark (Spec 010 ②, D-09): no line, no effect, its fill bound to the
+ * indicator's colour; it scales with its frame, whose size is bound — the frame is the sign's box
+ * of 16 the SVG was drawn in.
+ */
+const MARK_NEUTRAL = {
+  fills: [],
+  strokes: [],
+  strokeWeight: 0,
+  effects: [],
+  opacity: 1,
+  constraints: { horizontal: "SCALE", vertical: "SCALE" },
+};
+
+/**
  * The knob of a switch (Spec 010 ①, D-10): its size is bound (indicator.size), so it is fixed in
- * both axes; Figma honours a bound width only on a frame that is not hugging or filling.
+ * both axes; Figma honours a bound width only on a frame that is not hugging or filling. The frame
+ * of a check mark (Spec 010 ②) is laid out the same way.
  */
 const INDICATOR_LAYOUT: Readonly<Record<string, string>> = {
   // The knob holds nothing; it is a filled frame, no layout of its own.
@@ -285,6 +324,8 @@ const CONTROL_LAYOUT = ${JSON.stringify(CONTROL_LAYOUT)};
 const HUG_LAYOUT = ${JSON.stringify(HUG_LAYOUT)};
 const FIELD_LAYOUT = ${JSON.stringify(FIELD_LAYOUT)};
 const TOGGLE_LAYOUT = ${JSON.stringify(TOGGLE_LAYOUT)};
+const TEXTS_LAYOUT = ${JSON.stringify(TEXTS_LAYOUT)};
+const MARK_NEUTRAL = ${JSON.stringify(MARK_NEUTRAL)};
 const INDICATOR_LAYOUT = ${JSON.stringify(INDICATOR_LAYOUT)};
 const STRUCTURE_BINDINGS = ${JSON.stringify(STRUCTURE_BINDINGS)};
 const IN_FLOW = ${JSON.stringify(IN_FLOW)};
@@ -736,6 +777,23 @@ function bind(nodes, variant, variables, structure) {
     }
   }
   return deferred;
+}
+
+/**
+ * The vector of a check mark in its frame (Spec 010 ②, D-09): found by its mark; on a frame the
+ * run imported from the sign, the vector the import made, marked from now on.
+ */
+function markOf(indicator) {
+  let found = ours(indicator, "part", "mark");
+  if (found === undefined) {
+    found = indicator.children.filter((child) => child.type === "VECTOR")[0];
+    if (found === undefined) return undefined;
+    // Made by this run with its frame: written whole, like every node the run creates (F13).
+    fresh.add(found.id);
+    found.setSharedPluginData(NAMESPACE, "part", "mark");
+  }
+  write(found, "name", "mark");
+  return found;
 }
 
 /** The child of parent marked as the part, created when missing. */
@@ -1249,7 +1307,10 @@ async function applyComponents(variables, warnings) {
       // label beside it.
       const isToggle = component.structure === "toggle";
       const field = isField || isToggle ? part(node, "field", () => figma.createFrame()) : undefined;
-      const labelParent = field;
+      // A checkbox (Spec 010 ②, D-09): label and error in a column beside the box.
+      const toggleTexts = isToggle && Object.keys(component.texts || {}).length > 0;
+      const column = toggleTexts ? part(field, "texts", () => figma.createFrame()) : undefined;
+      const labelParent = column || field;
       const ring = part(field || node, "focus-ring", () => figma.createFrame());
       const gap = part(ring, "focus-gap", () => figma.createFrame());
       const control =
@@ -1260,11 +1321,25 @@ async function applyComponents(variables, warnings) {
       write(control, "name", "control");
       const label = part(labelParent || control, "label", () => figma.createText());
       if (isField && field.children.indexOf(label) !== 0) field.insertChild(0, label);
-      if (isToggle && field.children.indexOf(label) !== 1) field.insertChild(1, label);
-      const indicator = isToggle ? part(control, "indicator", () => figma.createFrame()) : undefined;
+      if (isToggle && column === undefined && field.children.indexOf(label) !== 1) field.insertChild(1, label);
+      if (column !== undefined && field.children.indexOf(column) !== 1) field.insertChild(1, column);
+      if (column !== undefined && column.children.indexOf(label) !== 0) column.insertChild(0, label);
+      // The knob of a switch is a frame; the check mark of a checkbox is its sign, imported once.
+      const indicator = isToggle
+        ? part(control, "indicator", () =>
+            typeof component.sign === "string"
+              ? figma.createNodeFromSvg(component.sign)
+              : figma.createFrame(),
+          )
+        : undefined;
+      const mark = indicator !== undefined && typeof component.sign === "string" ? markOf(indicator) : undefined;
       const textNode = isField ? part(control, "text", () => figma.createText()) : undefined;
       const help = isField ? part(field, "help", () => figma.createText()) : undefined;
-      const error = isField ? part(field, "error", () => figma.createText()) : undefined;
+      const errorParent = isField ? field : column;
+      const error =
+        errorParent !== undefined && (isField || typeof (component.texts || {}).error === "string")
+          ? part(errorParent, "error", () => figma.createText())
+          : undefined;
       const texts = [label, textNode, help, error].filter((each) => each !== undefined);
       // Erst die Schrift, die der Text jetzt trägt, dann jedes Schreiben (F-A): Figma lehnt
       // textCase auf einem Text ab, dessen aktuelle Schrift nicht geladen ist — ein neuer Text trägt
@@ -1307,6 +1382,7 @@ async function applyComponents(variables, warnings) {
       // its clipping and its line would otherwise cover what the plan draws.
       const frames = [node, ring, gap, control]
         .concat(field ? [field] : [])
+        .concat(column ? [column] : [])
         .concat(indicator ? [indicator] : []);
       for (const frame of frames) own(frame, NEUTRAL);
       for (const each of texts) own(each, NEUTRAL_TEXT);
@@ -1324,13 +1400,23 @@ async function applyComponents(variables, warnings) {
           strokesIncludedInLayout: true,
         });
         own(indicator, INDICATOR_LAYOUT);
+        // A part the variant does not draw (Spec 010 ②, D-09: the check mark of an unticked box)
+        // keeps its place and is not seen.
+        own(indicator, { opacity: (variant.hidden || []).indexOf("indicator") === -1 ? 1 : 0 });
       }
+      if (column) {
+        own(column, TEXTS_LAYOUT);
+        // The box stands at the first line of its label (D-09), as on the web.
+        own(field, { counterAxisAlignItems: "MIN" });
+      }
+      if (mark) own(mark, MARK_NEUTRAL);
       // The variant lies in the grid's flow, its parts in the variant's (F14).
       for (const child of frames.concat(texts)) own(child, IN_FLOW);
       for (const each of texts) own(each, TEXT_SIZING);
       const nodes = { "focus-ring": ring, "focus-gap": gap, control, label };
       if (field) nodes.field = field;
       if (indicator) nodes.indicator = indicator;
+      if (mark) nodes.mark = mark;
       if (textNode) nodes.text = textNode;
       if (help) nodes.help = help;
       if (error) nodes.error = error;
@@ -1347,7 +1433,7 @@ async function applyComponents(variables, warnings) {
       }
       // Everything gathered is written once, layout before the parts inside it; the measures
       // are bound after that, when every frame has its layout.
-      for (const each of frames.concat(texts)) flush(each);
+      for (const each of frames.concat(texts).concat(mark ? [mark] : [])) flush(each);
       for (const { node: target, field, variable, font } of measures) {
         if (boundId(target, field) === variable.id) continue;
         if (font !== true) {

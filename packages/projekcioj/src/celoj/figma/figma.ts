@@ -37,6 +37,7 @@ import {
 } from "@fundamento/modelo";
 import type { Celo, CeloInput, GeneratedFile } from "../../build.js";
 import { VITRINO_SLOT_TEXTS, VITRINO_SURFACE } from "../vitrino/datumoj.js";
+import { signOf } from "../web-component/element-template.js";
 import { DRAWN_PART_PROPERTIES, pluginManifest, pluginSource } from "./plugin.js";
 
 /** A variable value: a literal, or an alias to another variable of the plan. */
@@ -118,7 +119,8 @@ export const FIGMA_NOT_DRAWN: Readonly<Record<string, string>> = {
   underline: "jug_01M4RYCY61NK92JM6XYD00M012",
   // Spec 009 (plan D-09, Befund B-2; Abnahme F-4): the control of a field in the set is empty and
   // shows the placeholder, so the colour of the typed text has no node; the sign of the required
-  // mark is the projection's.
+  // mark is the projection's — of the kampo and, since Spec 010 ②, of the markobutono (the
+  // Jugxo's wording names both).
   text: "jug_01M4S2R85WRAC5SV7CARH8RE7S",
   "required-mark": "jug_01M4S2R85WRAC5SV7CARH8RE7S",
 };
@@ -139,12 +141,14 @@ export const FIELD_TEXTS: Readonly<Record<string, string>> = {
  * How the plugin draws a set (Spec 009, D-09): a control (variant → ring → gap → control → label)
  * for a button or a link, a field (label above, the control with its text, help and error below)
  * for a textbox, a toggle (Spec 010 ①, D-10: a row — ring → gap → control with the knob in it,
- * the label beside) for a switch. Celo knowledge from the a11y role (Art. VIII).
+ * the label beside) for a switch and a checkbox (Spec 010 ②, D-09: the box with the check mark in
+ * it, label and error in a column beside it; G1 gives the Wahl-Eroj one build, "control + label").
+ * Celo knowledge from the a11y role (Art. VIII).
  */
 export type FigmaStructure = "control" | "field" | "toggle";
 
 export const structureOf = (role: string): FigmaStructure =>
-  role === "textbox" ? "field" : role === "switch" ? "toggle" : "control";
+  role === "textbox" ? "field" : role === "switch" || role === "checkbox" ? "toggle" : "control";
 
 /**
  * The neutral word every label template shows, per a11y role (M-3; Maintainer, F14, 2026-10-13,
@@ -157,6 +161,8 @@ const LABEL_DEFAULTS: Readonly<Record<string, string>> = {
   textbox: "Beschriftung",
   // Spec 010 ① (plan D-10): a switch names a setting; for the maintainer to confirm (no Jugxo).
   switch: "Einstellung",
+  // Spec 010 ② (plan ② D-11): a checkbox names an option; for the maintainer to confirm (O-5).
+  checkbox: "Option",
 };
 
 /** The word a role without its own entry shows: the button's, as every set did before M-3. */
@@ -200,8 +206,17 @@ export interface FigmaComponentSet {
   set: string;
   /** How the plugin draws the variants (Spec 009, D-09); a plan without it is a control. */
   structure?: FigmaStructure;
-  /** The default text of every text node of a field besides the label (F-4). */
+  /**
+   * The default text of every text node of a field besides the label (F-4); of a toggle, of its
+   * error (Spec 010 ②, D-09: the word the kampo's field shows).
+   */
   texts?: Record<string, string>;
+  /**
+   * The sign the indicator of a toggle shows (Spec 010 ②, D-09): the check mark of a checkbox,
+   * the SVG the web draws, in a box of 16. The plugin imports it once (createNodeFromSvg) and binds
+   * the size of its frame and the colour of its vector; a knob has no sign.
+   */
+  sign?: string;
   /** The purpose of the Uzo, one line, as the description of the set (Spec 007 T028, A12). */
   description?: string;
   /**
@@ -247,6 +262,12 @@ export interface FigmaComponentSet {
      * alignment of the track, as the underline is written.
      */
     position?: "start" | "end";
+    /**
+     * The parts not drawn in this variant (Spec 010 ②, D-09): a colour bound to the keyword
+     * none — the check mark of an unticked box. The plugin gives the part opacity 0; its place
+     * stays, as on the web.
+     */
+    hidden?: string[];
     /**
      * The cell of the variant in the grid, as the Vitrino orders it: the row is its combination of
      * the keyed props (emphasis × intent × size) in the order of the plan, the column its state.
@@ -924,6 +945,7 @@ function componentSetOf(
     const paints: Record<string, FigmaPaint> = {};
     const geometry: Record<string, string> = {};
     const notDrawn: Record<string, string> = {};
+    const hidden: string[] = [];
     for (const [part, partProperties] of Object.entries(skemo.parts)) {
       for (const property of Object.keys(partProperties)) {
         const bound = boundToken(skemo, part, property, combination);
@@ -936,6 +958,10 @@ function componentSetOf(
         if (isBindingKeyword(bound.token)) {
           if (bound.token === "inherit" && property === "typography") {
             bindings[key] = variableName(INHERIT_TYPOGRAPHY);
+          }
+          // A colour that is none is a part not drawn in this variant (Spec 010 ②, D-09).
+          if (bound.token === "none" && (property === "color" || property === "fill")) {
+            hidden.push(part);
           }
           continue;
         }
@@ -1006,6 +1032,7 @@ function componentSetOf(
         ? {}
         : { underline: !isBindingKeyword(underlineWidth.token) }),
       ...(position === undefined ? {} : { position: position as "start" | "end" }),
+      ...(hidden.length === 0 ? {} : { hidden }),
     };
   });
   // Every font the label can carry, over every combination (F30). The typography role follows the
@@ -1061,10 +1088,26 @@ function componentSetOf(
     });
   }
   const cell = parityPx(base[VITRINO_CELL_PADDING]?.value);
+  const structure = structureOf(skemo.a11y.role);
+  // A toggle shows the words of its text slots besides the label, as the field does (Spec 010 ②):
+  // the checkbox its error; the switch has none.
+  const toggleTexts = Object.fromEntries(
+    skemo.slots
+      .filter((slot) => slot.default !== true && slot.text === true)
+      .flatMap((slot) => {
+        const text = VITRINO_SLOT_TEXTS[slot.name];
+        return text === undefined ? [] : [[slot.name, text]];
+      }),
+  );
+  const sign = structure === "toggle" ? signOf(skemo.a11y.role, "16") : undefined;
   return {
     set: entry.ero.name,
-    structure: structureOf(skemo.a11y.role),
-    ...(structureOf(skemo.a11y.role) === "field" ? { texts: { ...FIELD_TEXTS } } : {}),
+    structure,
+    ...(structure === "field" ? { texts: { ...FIELD_TEXTS } } : {}),
+    ...(structure === "toggle" && Object.keys(toggleTexts).length > 0
+      ? { texts: toggleTexts }
+      : {}),
+    ...(sign === undefined ? {} : { sign }),
     ...(description === undefined ? {} : { description }),
     ...(uzo === undefined ? {} : { uzo }),
     properties,
