@@ -1,0 +1,9 @@
+{
+  "description": "Spec 010 ③ G7 (Art. VIII, Spec 008 D-13, E7): the Skemo of the radio group names the state of one option aria-checked, the attribute of one platform. The state is selected; the Web Celo speaks it as aria-checked on each radio.",
+  "issues": [
+    {
+      "rule": "skemo-web-term",
+      "path": "data/eroj/elekto/skemo.json#/skemo/slots/1/entry/key"
+    }
+  ]
+}

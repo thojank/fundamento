@@ -30,12 +30,13 @@ describe("get_ero (FR-13)", () => {
     const { client } = await connect();
     const result = await call(client, "get_ero", { name: "butonno" });
     expect(result.isError).toBe(true);
+    // The five nearest names: with six Eroj (Spec 010 ③) the farthest drops out.
     expect(result.structuredContent?.allowed).toEqual([
       "butono",
+      "elekto",
       "kampo",
       "ligilo",
       "markobutono",
-      "sxaltilo",
     ]);
   });
 });
@@ -65,7 +66,7 @@ describe("get_ero brief (Spec 007 A8)", () => {
   });
 
   // Spec 008 T014 (A5, E of Spec 009): every Ero's brief, measured; the ceiling stays 750.
-  it.each(["butono", "kampo", "ligilo", "markobutono", "sxaltilo"])(
+  it.each(["butono", "elekto", "kampo", "ligilo", "markobutono", "sxaltilo"])(
     `%s stays under the ceiling of ${BRIEF_LIMIT} (ceil(bytes / 3) of the compact JSON)`,
     async (name) => {
       const { client } = await connect({ config: EKZEMPLO_CONFIG });
@@ -95,6 +96,7 @@ describe("suggest_ero (FR-13)", () => {
       "destructive",
       "confirm",
       "dismiss",
+      "choose-few",
       "enter-text",
       "email",
       "navigate",

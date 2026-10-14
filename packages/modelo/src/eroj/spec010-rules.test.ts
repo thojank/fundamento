@@ -11,8 +11,14 @@ import { loadModelo } from "../load/load-modelo.js";
 import { fixtureModeloSource } from "../load/source.js";
 import { fixtureRoot } from "../validate/test-doubles/fixtures.js";
 import { validateModelo } from "../validate/validate-modelo.js";
-import { skemoPartValues, styledProps } from "./inventories.js";
-import { boundToken, combinationsOf, isPositionKeyword, POSITION_KEYWORDS } from "./skemo-rules.js";
+import { skemoPartValues, styledProps, variantKeys } from "./inventories.js";
+import {
+  boundToken,
+  combinationsOf,
+  isPositionKeyword,
+  keyValues,
+  POSITION_KEYWORDS,
+} from "./skemo-rules.js";
 
 const SKEMO = "data/eroj/sxaltilo/skemo.json";
 const UZO = "data/eroj/sxaltilo/uzo.json";
@@ -118,6 +124,119 @@ describe("a switch Skemo (D-03, D-04, D-07)", () => {
     expect(Object.keys(values).sort()).toEqual([
       "surface.fill@checked=false,state=rest",
       "surface.fill@checked=true,state=rest",
+    ]);
+  });
+});
+
+// Spec 010 ③ (E7, plan ③ D-02, D-09): a radio group whose options are the entries of the slot
+// options, each with the key selected — true for the option whose value is the prop value. The
+// copy of `invalid/elekto-label-slot-optional` with its one fault repaired.
+const RADIO_SKEMO = "data/eroj/elekto/skemo.json";
+const RADIO_UZO = "data/eroj/elekto/uzo.json";
+
+function radioModelo(
+  change: (edit: (file: string, mutate: (value: never) => void) => void) => void,
+) {
+  const root = mkdtempSync(join(tmpdir(), "fm-elekto-"));
+  cpSync(fixtureRoot("invalid", "elekto-label-slot-optional"), root, { recursive: true });
+  const edit = (file: string, mutate: (value: never) => void) => {
+    const path = join(root, file);
+    const value = JSON.parse(readFileSync(path, "utf8")) as never;
+    mutate(value);
+    writeFileSync(path, `${JSON.stringify(value, null, 2)}\n`);
+  };
+  edit(RADIO_UZO, (value: { uzo: { slots: { label: { required?: boolean } } } }) => {
+    value.uzo.slots.label.required = true;
+  });
+  change(edit);
+  return root;
+}
+
+type RadioSkemoFile = {
+  skemo: {
+    props: { name: string; kind: string }[];
+    slots: { name: string; entry?: { key: string; equals: string } }[];
+    constraints?: {
+      when: Record<string, string>;
+      allowed: Record<string, string[]>;
+      kialo: string;
+    }[];
+  };
+};
+type RadioUzoFile = { uzo: { content: unknown[] } };
+
+describe("a radio group Skemo: selected is the state of one option (③ D-02, E7)", () => {
+  it("is valid: the entry key selected keys the circle and the dot, no prop of that name", () => {
+    expect(rules(radioModelo(() => undefined))).toEqual([]);
+  });
+
+  it("the entry key takes true and false, is no axis of the variants and no styled prop", () => {
+    const { modelo } = loadModelo(fixtureModeloSource(radioModelo(() => undefined)));
+    const entry = modelo?.eroj.find((candidate) => candidate.ero.name === "elekto");
+    if (entry === undefined) throw new Error("elekto missing");
+    expect(keyValues(entry.skemo, "selected")).toEqual(["true", "false"]);
+    expect(variantKeys(entry.skemo)).toEqual(["state"]);
+    expect(styledProps(entry.skemo)).toEqual([]);
+    expect(boundToken(entry.skemo, "indicator", "color", { selected: "false" })?.token).toBe(
+      "none",
+    );
+  });
+
+  it("an entry whose value is compared with no string prop is skemo-binding-invalid", () => {
+    const root = radioModelo((edit) =>
+      edit(RADIO_SKEMO, (value: RadioSkemoFile) => {
+        const options = value.skemo.slots[1];
+        if (options?.entry !== undefined) options.entry.equals = "invalid";
+      }),
+    );
+    expect(rules(root)).toEqual([
+      ["skemo-binding-invalid", "data/eroj/elekto/skemo.json#/skemo/slots/1/entry/equals"],
+    ]);
+  });
+
+  it("an entry key that is also a prop is skemo-binding-invalid: the state of one option is no prop of the group", () => {
+    const root = radioModelo((edit) =>
+      edit(RADIO_SKEMO, (value: RadioSkemoFile) => {
+        value.skemo.props.push({ name: "selected", kind: "boolean" });
+      }),
+    );
+    expect(rules(root)).toEqual([
+      ["skemo-binding-invalid", "data/eroj/elekto/skemo.json#/skemo/slots/1/entry/key"],
+    ]);
+  });
+
+  it("a constraint on the entry key is skemo-constraint-invalid: it is no prop", () => {
+    const root = radioModelo((edit) =>
+      edit(RADIO_SKEMO, (value: RadioSkemoFile) => {
+        value.skemo.constraints?.push({
+          when: { selected: "true" },
+          allowed: { invalid: ["false"] },
+          kialo: "A chosen option is never wrong.",
+        });
+      }),
+    );
+    expect(rules(root)).toEqual([
+      [
+        "skemo-constraint-invalid",
+        "data/eroj/elekto/skemo.json#/skemo/constraints/1/when/selected",
+      ],
+    ]);
+  });
+
+  it("a text rule may name a slot or a prop of the Skemo only; a list check only a slot with entries", () => {
+    const root = radioModelo((edit) =>
+      edit(RADIO_UZO, (value: RadioUzoFile) => {
+        value.uzo.content.push({
+          regulo: "spacing-owned-by-container",
+          fixed: false,
+          of: "prop:placeholder",
+          check: { kind: "max-sentences", count: 1 },
+        });
+      }),
+    );
+    expect(rules(root)).toContainEqual([
+      "uzo-content-of-invalid",
+      "data/eroj/elekto/uzo.json#/uzo/content/0/of",
     ]);
   });
 });

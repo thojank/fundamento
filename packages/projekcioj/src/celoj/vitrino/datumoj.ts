@@ -289,6 +289,25 @@ export const VITRINO_SLOT_TEXTS: Readonly<Record<string, string>> = {
 };
 
 /**
+ * The options of a slot whose entries are options (Spec 010 ③, D-13, E7): three neutral words, the
+ * first chosen — the value of an option is its position. The Figma set shows the same words (one
+ * source for both pictures, like the slot texts).
+ */
+export const VITRINO_OPTIONS: readonly string[] = ["Eins", "Zwei", "Drei"];
+
+/** The options of one cell: an element per option in its slot, with its value (Web Celo). */
+function optionTexts(entry: LoadedEro): string {
+  return entry.skemo.slots
+    .filter((slot) => slot.entry !== undefined)
+    .map((slot) =>
+      VITRINO_OPTIONS.map(
+        (text, index) => `<data slot="${slot.name}" value="${index + 1}">${text}</data>`,
+      ).join(""),
+    )
+    .join("");
+}
+
+/**
  * The slotted example texts of one cell (F-5): every text slot besides the default one that has an
  * example word, and that the Skemo allows in this column. A constraint `slot:<name>: filled ⇒
  * <prop>: true` keeps the slot out of every column but that prop's (the error of the kampo stands
@@ -342,6 +361,10 @@ export function eroMarkup(entry: LoadedEro): string {
     .filter((prop) => prop.required === true && prop.kind === "string")
     .map((prop) => ` ${prop.name}="#fm-vitrino-${entry.ero.name}"`)
     .join("");
+  // The prop an option's value is compared with (Spec 010 ③, E7) holds the first option: one chosen.
+  const chosen = entry.skemo.slots
+    .flatMap((slot) => (slot.entry === undefined ? [] : [` ${slot.entry.equals}="1"`]))
+    .join("");
   const rows = combinationsOf(entry.skemo, keys)
     .filter((combination) => combination[STATE_KEY] === undefined)
     .map((combination) => {
@@ -352,7 +375,7 @@ export function eroMarkup(entry: LoadedEro): string {
       const cells = [undefined, ...columns]
         .map(
           (column) =>
-            `<td><${tag}${attributes}${required}${column === undefined ? "" : ` ${column}`}>${label}${slotTexts(entry, column)}</${tag}></td>`,
+            `<td><${tag}${attributes}${required}${chosen}${column === undefined ? "" : ` ${column}`}>${label}${optionTexts(entry)}${slotTexts(entry, column)}</${tag}></td>`,
         )
         .join("");
       return `<tr><th scope="row">${label}</th>${cells}</tr>`;

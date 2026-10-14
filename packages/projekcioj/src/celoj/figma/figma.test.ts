@@ -720,6 +720,7 @@ describe("Figma plan for the ligilo (Spec 008 T017)", () => {
   it("plans the sets in Ero order, butono first, and gives the ligilo placement × size × state", () => {
     expect(plan.components.map((component) => component.set)).toEqual([
       "butono",
+      "elekto",
       "kampo",
       "ligilo",
       "markobutono",
@@ -883,6 +884,8 @@ describe("the label default of a set follows its a11y role (M-3)", () => {
     // Spec 010 ①: a switch names a setting (plan D-10, for the maintainer to confirm).
     expect(defaults).toEqual({
       butono: "Aktion",
+      // Spec 010 ③: a radio group names its question (plan ③ D-07, for the maintainer to confirm).
+      elekto: "Frage",
       kampo: "Beschriftung",
       ligilo: "Ziel",
       // Spec 010 ②: a checkbox names an option (plan ② D-11, for the maintainer to confirm, O-x).
@@ -897,6 +900,7 @@ describe("the label default of a set follows its a11y role (M-3)", () => {
     expect(labelDefaultOf("textbox")).toBe("Beschriftung");
     expect(labelDefaultOf("switch")).toBe("Einstellung");
     expect(labelDefaultOf("checkbox")).toBe("Option");
+    expect(labelDefaultOf("radiogroup")).toBe("Frage");
     expect(labelDefaultOf("slider")).toBe("Aktion");
   });
 });
@@ -1080,5 +1084,98 @@ describe("Figma plan for the markobutono (Spec 010 ②)", () => {
     expect(
       items.markobutono?.values["indicator.color@checked=false,size=medium,state=rest"],
     ).toBeUndefined();
+  });
+});
+
+// Spec 010 ③ (plan ③ D-07): the radio group in a structure of its own, choice — the question above
+// its options, one row per option (ring → gap → circle with the dot, the option's label beside it),
+// help and error below. Only the axes with a visible effect: size × state = 3 × 5. selected is the
+// state of one option, not of the set (E7): every variant shows the three example options of the
+// Vitrino, the first chosen; the bindings that follow selected stand per value of the key
+// (entries), the circle filled and the dot drawn where chosen, not where not.
+describe("Figma plan for the elekto (Spec 010 ③)", () => {
+  const set = plan.components.find((component) => component.set === "elekto");
+  const elekto = prepared.input.modelo.eroj.find((entry) => entry.ero.name === "elekto");
+  const variant = (size: string, state: string) =>
+    set?.variants.find((entry) => entry.props.size === size && entry.props.state === state);
+
+  it("plans a choice of size × state with the purpose, the word Frage, three options, help and error", () => {
+    expect(set?.structure).toBe("choice");
+    expect(set?.properties).toEqual({
+      value: "TEXT",
+      required: "BOOLEAN",
+      invalid: "BOOLEAN",
+      size: ["small", "medium", "large"],
+      disabled: "BOOLEAN",
+      name: "TEXT",
+      orientation: ["vertical", "horizontal"],
+      state: ["rest", "hover", "focus", "disabled", "invalid"],
+    });
+    expect(set?.variants).toHaveLength(3 * 5);
+    expect(Object.keys(set?.variants[0]?.props ?? {})).toEqual(["size", "state"]);
+    expect(set?.grid).toMatchObject({ rows: 3, columns: 5 });
+    expect(set?.description).toBe(elekto?.uzo?.purpose);
+    expect(set?.label?.defaultValue).toBe("Frage");
+    expect(set?.texts).toEqual({ help: "Hinweis", error: "Fehler" });
+    expect(set?.entry).toEqual({ key: "selected", texts: ["Eins", "Zwei", "Drei"], selected: 0 });
+    expect(set?.sign).toMatch(/^<svg [^>]*viewBox="0 0 16 16"/);
+    // The dot as a path: Figma imports one vector, as for the check mark (② D-09).
+    expect(set?.sign).toContain('<path d="M8 4a4 4 0 1 1 0 8a4 4 0 1 1 0-8z"/>');
+  });
+
+  it("binds what follows selected per value of the key: the chosen circle filled, its dot drawn (G3, E7)", () => {
+    const rest = variant("medium", "rest");
+    expect(rest?.bindings["surface.fill"]).toBeUndefined();
+    expect(rest?.entries?.true?.bindings["surface.fill"]).toBe("color/action/primary/rest");
+    expect(rest?.entries?.false?.bindings["surface.fill"]).toBe("color/background/default");
+    expect(rest?.entries?.true?.bindings["indicator.color"]).toBe("color/action/primary/text");
+    expect(rest?.entries?.true?.paints?.["indicator.color"]).toMatchObject({
+      hex: expect.stringMatching(/^#/),
+    });
+    expect(rest?.entries?.true?.hidden).toBeUndefined();
+    expect(rest?.entries?.false?.bindings["indicator.color"]).toBeUndefined();
+    expect(rest?.entries?.false?.hidden).toEqual(["indicator"]);
+    expect(variant("medium", "hover")?.entries?.true?.bindings["surface.fill"]).toBe(
+      "color/action/primary/hover",
+    );
+  });
+
+  it("binds what does not follow selected once per variant: border, radius, sizes, gaps, texts", () => {
+    const rest = variant("medium", "rest");
+    expect(rest?.bindings["border.color"]).toBe("color/border/strong");
+    expect(variant("small", "invalid")?.bindings["border.color"]).toBe(
+      "color/status/danger/border",
+    );
+    expect(rest?.bindings["box.radius"]).toBe("radius/role/pill");
+    expect(rest?.bindings["indicator.size"]).toBe("size/icon/medium");
+    expect(rest?.geometry?.["indicator.size"]).toBe("20px");
+    expect(rest?.bindings["box.gap"]).toBe("spacing/small");
+    expect(rest?.bindings["options.gap"]).toBe("spacing/medium");
+    expect(rest?.geometry?.["options.gap"]).toBe("8px");
+    expect(rest?.bindings["option-label.typography"]).toBe("typography/body/1");
+    expect(rest?.bindings["option-label.color"]).toBe("color/text/default");
+    expect(rest?.bindings["label.typography"]).toBe("typography/label/1");
+    expect(rest?.bindings["help.color"]).toBe("color/text/muted");
+    expect(rest?.notDrawn).toEqual({ "required-mark.color": FIGMA_NOT_DRAWN["required-mark"] });
+  });
+
+  it("states the elekto in the parity inventory: size only, the circle and the dot per value of selected", () => {
+    const items = figmaPlanInventory(plan);
+    expect(items.elekto?.props.size).toEqual(["small", "medium", "large"]);
+    expect(items.elekto?.props.selected).toBeUndefined();
+    expect(items.elekto?.states).toEqual(["rest", "hover", "focus", "disabled", "invalid"]);
+    expect(items.elekto?.values["surface.fill@selected=true,size=medium,state=rest"]).toMatch(
+      /^#[0-9a-f]{6}$/,
+    );
+    expect(items.elekto?.values["surface.fill@selected=false,size=medium,state=rest"]).toMatch(
+      /^#[0-9a-f]{6}$/,
+    );
+    expect(items.elekto?.values["indicator.color@selected=true,size=small,state=focus"]).toMatch(
+      /^#[0-9a-f]{6}$/,
+    );
+    expect(
+      items.elekto?.values["indicator.color@selected=false,size=small,state=focus"],
+    ).toBeUndefined();
+    expect(items.elekto?.values["options.gap@size=large,state=rest"]).toBe("8px");
   });
 });

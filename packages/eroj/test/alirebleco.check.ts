@@ -446,3 +446,121 @@ for (const aspekto of ["komuna", "ekzemplo"]) {
     }
   }
 }
+
+// Spec 010 ③ (G7, plan ③ D-04): the rendered fm-elekto in every colour class of komuna and ekzemplo:
+// axe (role radiogroup with radio children) on every size, an option chosen and others not, in
+// rest, hover, invalid and disabled; the focus ring of the chosen circle contrasts at least 3:1 with
+// the gap colour and with the page; the dot contrasts at least 3:1 with its circle, and every
+// circle's border with the page, also invalid (WCAG 1.4.11: the border is the circle, the dot the
+// choice).
+const elekto = input.modelo.eroj.find((entry) => entry.ero.name === "elekto");
+if (elekto === undefined) throw new Error("elekto missing");
+const radioCombos = combinationsOf(elekto.skemo, ["size"]);
+const RADIO_OPTIONS =
+  '<data slot="options" value="1">Standard</data><data slot="options" value="2">Express</data><data slot="options" value="3">Abholung</data>';
+const radioGroups = radioCombos
+  .map(
+    (c, i) =>
+      `<fm-elekto id="e${i}" size="${c.size}" value="1">Versandart ${i}${RADIO_OPTIONS}</fm-elekto>`,
+  )
+  .join(" ");
+
+for (const aspekto of ["komuna", "ekzemplo"]) {
+  for (const scheme of ["light", "dark"]) {
+    for (const contrast of ["default", "high"]) {
+      test(`${aspekto} ${scheme}/${contrast}: axe on every size of the elekto, chosen and not, invalid, focus ring and dot ≥ 3:1`, async ({
+        page,
+        browserName,
+      }) => {
+        await serve(
+          page,
+          out,
+          radioGroups,
+          "<style>body { color: var(--fm-color-text-default); }</style>",
+        );
+        await page.evaluate(
+          ([a, s, c]) => {
+            const root = document.documentElement;
+            root.setAttribute("data-fm-aspekto", a ?? "");
+            root.setAttribute("data-fm-color-scheme", s ?? "");
+            root.setAttribute("data-fm-contrast", c ?? "");
+          },
+          [aspekto, scheme, contrast],
+        );
+        expect(await axeViolations(page), "rest").toEqual([]);
+        for (const [i] of radioCombos.entries()) {
+          await page.locator(`#e${i}`).locator('[part="option"]').nth(1).hover();
+          expect(await axeViolations(page, `#e${i}`), `#e${i} hover`).toEqual([]);
+        }
+        await page.mouse.move(0, 0);
+        const measure = () =>
+          page.locator("fm-elekto").evaluateAll((elements) =>
+            elements.flatMap((element) =>
+              [...(element.shadowRoot?.querySelectorAll('[part="option"]') ?? [])].map(
+                (row, index) => {
+                  const control = row.querySelector('[part="control"]') as HTMLElement;
+                  const dot = row.querySelector('[part="indicator"]') as HTMLElement;
+                  return {
+                    id: `${element.id}/${index}`,
+                    chosen: row.getAttribute("aria-checked") === "true",
+                    fill: getComputedStyle(control).backgroundColor,
+                    border: getComputedStyle(control).borderTopColor,
+                    dot: getComputedStyle(dot).color,
+                    page: getComputedStyle(document.body).backgroundColor,
+                  };
+                },
+              ),
+            ),
+          );
+        const parts = await measure();
+        expect(parts.filter((part) => part.chosen)).toHaveLength(radioCombos.length);
+        for (const part of parts) {
+          if (part.chosen) {
+            expect(
+              contrastOf(part.dot, part.fill),
+              `${part.id} dot on circle`,
+            ).toBeGreaterThanOrEqual(3);
+          }
+          expect(
+            contrastOf(part.border, part.page),
+            `${part.id} border on page`,
+          ).toBeGreaterThanOrEqual(3);
+        }
+        // Invalid: the error text under the options, the danger border on the page.
+        await page.locator("fm-elekto").evaluateAll((elements) => {
+          for (const element of elements) {
+            element.toggleAttribute("invalid", true);
+            const error = document.createElement("span");
+            error.slot = "error";
+            error.textContent = "Wähle eine Versandart, um fortzufahren";
+            element.append(error);
+          }
+        });
+        expect(await axeViolations(page), "invalid").toEqual([]);
+        for (const part of await measure()) {
+          expect(
+            contrastOf(part.border, part.page),
+            `${part.id} invalid border on page`,
+          ).toBeGreaterThanOrEqual(3);
+        }
+        await page.locator("fm-elekto").evaluateAll((elements) => {
+          for (const element of elements) element.toggleAttribute("disabled", true);
+        });
+        expect(await axeViolations(page), "disabled").toEqual([]);
+        await page.locator("fm-elekto").evaluateAll((elements) => {
+          for (const element of elements) element.toggleAttribute("disabled", false);
+        });
+        const rings = await focusRingContrasts(
+          page,
+          radioCombos.map((_c, i) => `#e${i}`),
+          browserName,
+        );
+        expect(rings).toHaveLength(radioCombos.length);
+        for (const ring of rings) {
+          expect(ring.gap, `${ring.selector} ring on gap`).toBeGreaterThanOrEqual(3);
+          expect(ring.page, `${ring.selector} ring on page`).toBeGreaterThanOrEqual(3);
+        }
+      });
+    }
+  }
+}

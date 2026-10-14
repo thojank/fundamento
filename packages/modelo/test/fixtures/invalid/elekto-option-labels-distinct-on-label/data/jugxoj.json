@@ -1,0 +1,60 @@
+{
+  "jugxoj": [
+    {
+      "id": "jug_01M4WTB0W33KP7B6TSR82NKD2A",
+      "ref": {
+        "ero": "ero_01M2XM2NGN3KJSKJ4JTXQWMF72"
+      },
+      "decision": "approved",
+      "kialo": "Fixture example: the options as the rule wants them.",
+      "date": "2026-10-14",
+      "context": "Fixture example (Spec 010 ③ G6).",
+      "ekzemplo": {
+        "regulo": "reg_01M4WTB0PYHFPH21GJQCHR85JF",
+        "instances": [
+          {
+            "ero": "elekto",
+            "props": {},
+            "label": "Versandart",
+            "texts": {
+              "options": [
+                "Standard",
+                "Express",
+                "Abholung"
+              ]
+            },
+            "lingvo": "de"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4WTB0W49BFZWZM6NJ902A6D",
+      "ref": {
+        "ero": "ero_01M2XM2NGN3KJSKJ4JTXQWMF72"
+      },
+      "decision": "rejected",
+      "kialo": "Fixture example: the options as the rule forbids them.",
+      "date": "2026-10-14",
+      "context": "Fixture example (Spec 010 ③ G6).",
+      "ekzemplo": {
+        "regulo": "reg_01M4WTB0PYHFPH21GJQCHR85JF",
+        "instances": [
+          {
+            "ero": "elekto",
+            "props": {},
+            "label": "Versandart",
+            "texts": {
+              "options": [
+                "Standard",
+                "Express",
+                "Standard"
+              ]
+            },
+            "lingvo": "de"
+          }
+        ]
+      }
+    }
+  ]
+}

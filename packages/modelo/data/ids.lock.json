@@ -92,6 +92,10 @@
       "status": "active",
       "type": "ero"
     },
+    "ero_01M4WT0RA8VHA64P4RFHAEBK1Q": {
+      "status": "active",
+      "type": "ero"
+    },
     "jug_01M2VRT7KQ77W91MVXB4GXSRZ4": {
       "status": "active",
       "type": "jugxo"
@@ -485,6 +489,54 @@
       "type": "jugxo"
     },
     "jug_01M4WPZWSR006Y8WCECWAQKS8G": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M4WT0SRT3ZHF508WCEJ59WA3": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M4WT0SRVJYMQAS9EMNFRG17V": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M4WT0SRVJYMQAS9EMNFRG17W": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M4WT0SRVJYMQAS9EMNFRG17X": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M4WT0SRVJYMQAS9EMNFRG17Y": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M4WT0SRVJYMQAS9EMNFRG17Z": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M4WT0SRVJYMQAS9EMNFRG180": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M4WT0SRVJYMQAS9EMNFRG181": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M4WT0SRVJYMQAS9EMNFRG182": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M4WT0SRVJYMQAS9EMNFRG183": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M4WT0SRVJYMQAS9EMNFRG184": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M4WT0SRVJYMQAS9EMNFRG185": {
       "status": "active",
       "type": "jugxo"
     },
@@ -988,6 +1040,14 @@
       "status": "active",
       "type": "regulo"
     },
+    "reg_01M4WT0SD6MYJETNVJ4ASJX910": {
+      "status": "active",
+      "type": "regulo"
+    },
+    "reg_01M4WT0SD77GYN9VMJA9ST7VRM": {
+      "status": "active",
+      "type": "regulo"
+    },
     "set_01M2VEEDW32MC4ZQPRN0GC9JRR": {
       "status": "active",
       "type": "tokenSet"
@@ -1041,6 +1101,10 @@
       "type": "skemo"
     },
     "ske_01M4WPZW25ZEQ8AEGHGBKVC4KB": {
+      "status": "active",
+      "type": "skemo"
+    },
+    "ske_01M4WT0RNX8N08R3K1G9V0W6ZN": {
       "status": "active",
       "type": "skemo"
     },
@@ -2493,6 +2557,10 @@
       "type": "uzo"
     },
     "uzo_01M4WPZWDY0CFECQVVJV3TSQJN": {
+      "status": "active",
+      "type": "uzo"
+    },
+    "uzo_01M4WT0S1KPRQ3VGRS1SQE69S3": {
       "status": "active",
       "type": "uzo"
     }

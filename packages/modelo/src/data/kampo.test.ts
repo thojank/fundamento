@@ -26,10 +26,11 @@ const INSTANCE_REGULOJ = ["field-label-visible", "placeholder-not-label"];
 const SKEMO_REGULOJ = ["required-marked", "error-not-color-only"];
 
 describe("kampo in the repo Modelo (T004)", () => {
-  it("lives in data/eroj/kampo/skemo.json, between butono and ligilo, and the repo Modelo stays valid", () => {
+  it("lives in data/eroj/kampo/skemo.json, between elekto and ligilo, and the repo Modelo stays valid", () => {
     expect(kampo.file).toBe("modelo/data/eroj/kampo/skemo.json");
     expect(modelo.eroj.map((entry) => entry.ero.name)).toEqual([
       "butono",
+      "elekto",
       "kampo",
       "ligilo",
       "markobutono",
@@ -162,11 +163,13 @@ describe("the Uzo of the kampo (T004, A3)", () => {
     );
   });
 
-  // Spec 010 ① (G5): toggle is the sxaltilo's since PR ①; multi-line and choose stay open.
-  it("names multi-line and choose as not covered, toggle as the sxaltilo's, and the six boundaries of A3", () => {
+  // Spec 010 ① (G5): toggle is the sxaltilo's since PR ①; multi-line stays open. Spec 010 ③ (G5,
+  // plan ③ D-12): choose is two entries — choose-few the elekto's, choose-many open until PR ④.
+  it("names multi-line and choose-many as not covered, choose-few as the elekto's, toggle as the sxaltilo's, and the six boundaries of A3", () => {
     expect(uzo?.instead.map((entry) => [entry.goal, entry.ero])).toEqual([
       ["multi-line", null],
-      ["choose", null],
+      ["choose-many", null],
+      ["choose-few", "elekto"],
       ["toggle", "sxaltilo"],
     ]);
     expect(uzo?.boundary.map((entry) => [entry.case, entry.action])).toEqual([
@@ -228,6 +231,9 @@ describe("the Reguloj of the kampo (T003, T004, A2, D-07)", () => {
     "required-marked",
     "error-not-color-only",
   ];
+  // Spec 010 ③: the elekto has a label, help, an error and required like the kampo; six of the
+  // kampo's Reguloj are widened to it.
+  const RADIO = [...CHECKBOX, "help-is-one-sentence"];
 
   it.each([...TEXT_REGULOJ, ...INSTANCE_REGULOJ, ...SKEMO_REGULOJ])(
     "%s applies to kampo with a kialo",
@@ -238,6 +244,7 @@ describe("the Reguloj of the kampo (T003, T004, A2, D-07)", () => {
           "kampo",
           ...(WIDENED.includes(name) ? ["sxaltilo"] : []),
           ...(CHECKBOX.includes(name) ? ["markobutono"] : []),
+          ...(RADIO.includes(name) ? ["elekto"] : []),
         ],
       });
       expect(regulo?.checkability).toBe("automatic");
@@ -262,6 +269,7 @@ describe("the Reguloj of the kampo (T003, T004, A2, D-07)", () => {
       "kampo",
       "sxaltilo",
       "markobutono",
+      "elekto",
     ]);
   });
 

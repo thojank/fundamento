@@ -23,6 +23,7 @@ describe("list_eroj", () => {
     );
     expect(listEroj(modelo).eroj.map((entry) => entry.name)).toEqual([
       "butono",
+      "elekto",
       "kampo",
       "ligilo",
       "markobutono",
@@ -35,7 +36,7 @@ describe("list_eroj", () => {
       variants: ["high", "medium", "low"],
       props: ["emphasis", "intent", "size", "type", "disabled", "loading", "full-width", "label"],
     });
-    expect(listEroj(modelo).eroj[2]).toMatchObject({
+    expect(listEroj(modelo).eroj[3]).toMatchObject({
       name: "ligilo",
       variants: ["inline", "standalone"],
       props: ["to", "placement", "external", "size", "label"],
@@ -199,7 +200,8 @@ describe("get_ero", () => {
     if (missing.ok) return;
     expect(missing.issues.map((issue) => issue.rule)).toEqual(["ero-unknown"]);
     expect(missing.issues[0]?.path).toBe("get_ero/name");
-    expect(missing.allowed).toEqual(["butono", "kampo", "ligilo", "markobutono", "sxaltilo"]);
+    // The five nearest names (nearestNames): with six Eroj (Spec 010 ③) the farthest drops out.
+    expect(missing.allowed).toEqual(["butono", "elekto", "kampo", "ligilo", "markobutono"]);
   });
 });
 
@@ -229,7 +231,11 @@ describe("get_ero with the Uzo and brief (T022)", () => {
     expect(uzo?.boundary.map((entry) => entry.case)).toEqual(
       butono.uzo?.boundary.map((entry) => entry.case),
     );
-    expect(uzo?.instead.map((entry) => entry.goal)).toEqual(["toggle", "choose"]);
+    expect(uzo?.instead.map((entry) => entry.goal)).toEqual([
+      "toggle",
+      "choose-many",
+      "choose-few",
+    ]);
     expect(uzo?.slots).toEqual(butono.uzo?.slots);
     isReguloRef(uzo?.composes.spacing.regulo);
     expect(uzo?.composes.spacing.regulo.name).toBe("spacing-owned-by-container");

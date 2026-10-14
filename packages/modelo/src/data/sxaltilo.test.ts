@@ -26,6 +26,7 @@ describe("sxaltilo in the repo Modelo (G1, G2, section 1)", () => {
     expect(sxaltilo.file).toBe("modelo/data/eroj/sxaltilo/skemo.json");
     expect(modelo.eroj.map((entry) => entry.ero.name)).toEqual([
       "butono",
+      "elekto",
       "kampo",
       "ligilo",
       "markobutono",
@@ -189,7 +190,10 @@ describe("the Uzo of the sxaltilo (section 1, G5, D-13)", () => {
       const toggle = uzoOf(name)?.instead.find((entry) => entry.goal === "toggle");
       expect(toggle?.ero, name).toBe("sxaltilo");
       expect(toggle?.kialo, name).toMatch(/in a form, applied with it: markobutono\)\.$/);
-      expect(uzoOf(name)?.instead.find((entry) => entry.goal === "choose")?.ero, name).toBeNull();
+      expect(
+        uzoOf(name)?.instead.find((entry) => entry.goal === "choose-many")?.ero,
+        name,
+      ).toBeNull();
     }
     expect(uzoOf("kampo")?.instead.find((entry) => entry.goal === "multi-line")?.ero).toBeNull();
   });
@@ -209,8 +213,10 @@ describe("the Reguloj of the sxaltilo (G6, E5, D-14)", () => {
   it.each(["field-label-visible", "field-label-names-the-datum"])(
     "%s is widened to the sxaltilo, not duplicated (E5)",
     (name) => {
-      // Spec 010 ②: widened once more, to the markobutono (E5).
-      expect(named(name)?.appliesTo).toEqual({ eroj: ["kampo", "sxaltilo", "markobutono"] });
+      // Spec 010 ②: widened once more, to the markobutono (E5); ③ to the elekto.
+      expect(named(name)?.appliesTo).toEqual({
+        eroj: ["kampo", "sxaltilo", "markobutono", "elekto"],
+      });
       expect(modelo.reguloj.filter((regulo) => regulo.name === name)).toHaveLength(1);
     },
   );
@@ -222,6 +228,7 @@ describe("the Reguloj of the sxaltilo (G6, E5, D-14)", () => {
       "kampo",
       "sxaltilo",
       "markobutono",
+      "elekto",
     ]);
   });
 

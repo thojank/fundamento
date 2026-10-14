@@ -32,8 +32,8 @@
             "optionsfeld"
           ]
         },
-        "ero": null,
-        "kialo": "One of a few options is a radio group, because checkboxes let a person tick several and the form could not tell which one counts; Fundamento has no such Ero yet (elekto, PR ③ of Spec 010)."
+        "ero": "elekto",
+        "kialo": "One of a few options is a radio group, because checkboxes let a person tick several and the form could not tell which one counts; Fundamento covers it with elekto."
       }
     ],
     "boundary": [

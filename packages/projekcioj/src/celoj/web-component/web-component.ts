@@ -9,6 +9,7 @@ import {
   boundToken,
   combinationsOf,
   isBindingKeyword,
+  isEntryKey,
   type LoadedEro,
   nomRegulo,
   type ParityItem,
@@ -74,6 +75,52 @@ function togglePartSelector(part: string, property: string, data: string, state:
   if (part === "indicator" && property !== "position") return `:where(${root}) [part="indicator"]`;
   if (["label", "error", "required-mark"].includes(part)) return `:where(${root}) [part="${part}"]`;
   return `:where(${root}) [part="control"]`;
+}
+
+/** Whether the Ero is a radio group (Spec 010 ③, D-06): a group of rows, one per option. */
+const isGroup = (skemo: Skemo): boolean => hostOf(skemo.a11y.role) === "group";
+
+/**
+ * The states of a radio group (Spec 010 ③, D-06): hover and focus are a row's — the option under
+ * the pointer, the option with the focus — invalid and disabled the group's. The Web Celo spells
+ * them as the group and its rows speak them (aria-invalid, aria-disabled), not as data attributes.
+ */
+const GROUP_STATES: Readonly<Record<string, string | undefined>> = {
+  invalid: '[aria-invalid="true"]',
+  disabled: '[aria-disabled="true"]',
+};
+const ROW_STATES: Readonly<Record<string, string | undefined>> = {
+  hover: ":hover",
+  focus: ":focus-visible",
+};
+
+/**
+ * The selector of a part of a radio group (Spec 010 ③, D-06): the combination and the states of the
+ * group stand on the field, the state of one option (selected, E7) and its hover and focus on the
+ * row; the circle is the row's control with the dot in it, the label of the option beside it. The
+ * gap of the options stands between the parts of the field and between the rows; the gap of the box
+ * between a circle and its label. Every prefix lies in :where(), so the order of the states decides.
+ */
+function groupPartSelector(
+  part: string,
+  property: string,
+  data: string,
+  entry: string,
+  state: string,
+): string {
+  const root = `[part="field"]${data}${GROUP_STATES[state] ?? ""}`;
+  const row = `[part="option"]${entry}${ROW_STATES[state] ?? ""}`;
+  if (part === "options" && property === "gap")
+    return `:where(${root}), :where(${root}) [part="options"]`;
+  if (part === "box" && property === "gap") return `:where(${root} ${row})`;
+  if (part === "focus-ring")
+    return `:where(${root} [part="option"]:focus-visible) [part="control"]`;
+  if (["label", "help", "error", "required-mark"].includes(part)) {
+    return `:where(${root}) [part="${part}"]`;
+  }
+  if (part === "option-label" || part === "indicator")
+    return `:where(${root} ${row}) [part="${part}"]`;
+  return `:where(${root} ${row}) [part="control"]`;
 }
 
 /**
@@ -285,6 +332,36 @@ const toggleStructure = (
   ].join("\n");
 
 /**
+ * Layout of a radio group (Spec 010 ③, D-06), keywords only: the field a column of label, options,
+ * help and error; the options a column, a row where the group is horizontal (aria-orientation),
+ * never breaking (Uzo wrap never); each option a row of circle and label that never breaks; the
+ * circle a box with a border and no padding, its size the dot's plus the border; the focus is shown
+ * on the circle, never as the row's own outline. The mark of a required group shows only while the
+ * group is marked (data-marked), as in the field.
+ */
+const groupStructure = (disables: boolean, marked: boolean): string =>
+  [
+    ":host { display: inline-block; vertical-align: top; }",
+    ':where([part="field"]) { display: flex; flex-direction: column; align-items: flex-start; }',
+    ':where([part="label"]) { display: inline-flex; align-items: baseline; }',
+    ':where([part="options"]) { display: flex; flex-direction: column; align-items: flex-start; }',
+    ':where([part="field"][aria-orientation="horizontal"]) [part="options"] { flex-direction: row; flex-wrap: nowrap; }',
+    ':where([part="option"]) { display: inline-flex; align-items: center; cursor: pointer; white-space: nowrap; }',
+    ':where([part="option"]:focus) { outline-width: 0; }',
+    ':where([part="control"]) { display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; margin: 0; padding: 0; border-style: solid; flex: none; transition-property: background-color, border-color; }',
+    ':where([part="indicator"]) { display: block; flex: none; transition-property: opacity; }',
+    ':where([part="indicator"]) > svg { display: block; }',
+    ...(disables
+      ? [':where([part="field"][aria-disabled="true"]) [part="option"] { cursor: not-allowed; }']
+      : []),
+    ...(marked
+      ? [
+          ':where([part="field"]:not([data-marked="true"])) [part="required-mark"] { display: none; }',
+        ]
+      : []),
+  ].join("\n");
+
+/**
  * The stylesheet of one Ero: structure, then one rule per part property and combination (a state
  * without a binding of its own repeats rest, so every state of the Skemo has a rule the parity
  * inventory reads). The Uzo decides the host (D-04).
@@ -338,14 +415,16 @@ export function stylesheetOf(skemo: Skemo, uzo?: Uzo): string {
   const bordered = skemo.parts.border !== undefined;
   const base = isField(skemo)
     ? fieldStructure(disables)
-    : isToggle(skemo)
-      ? toggleStructure(
-          disables,
-          uzo?.layout.wrap !== undefined && uzo.layout.wrap !== "never",
-          skemo.slots.some((slot) => slot.default !== true && slot.text === true),
-          skemo.parts["required-mark"] !== undefined,
-        )
-      : structure(uzo?.layout.wrap === "with-text", disables, bordered);
+    : isGroup(skemo)
+      ? groupStructure(disables, skemo.parts["required-mark"] !== undefined)
+      : isToggle(skemo)
+        ? toggleStructure(
+            disables,
+            uzo?.layout.wrap !== undefined && uzo.layout.wrap !== "never",
+            skemo.slots.some((slot) => slot.default !== true && slot.text === true),
+            skemo.parts["required-mark"] !== undefined,
+          )
+        : structure(uzo?.layout.wrap === "with-text", disables, bordered);
   return `${base}\n${tokenRules.join("\n")}\n`;
 }
 
@@ -367,10 +446,19 @@ function selectorOf(
   combination: Readonly<Record<string, string>>,
   keys: readonly string[],
 ): string {
+  // The state of one entry (Spec 010 ③, E7: selected) is no data attribute of the Ero: the row of
+  // the option speaks it, as the Skemo names it in a11y.states (aria-checked).
   const data = keys
-    .filter((key) => key !== STATE_KEY)
+    .filter((key) => key !== STATE_KEY && !isEntryKey(skemo, key))
     .map((key) => `[data-${key}="${combination[key] ?? ""}"]`)
     .join("");
+  const entry = keys
+    .filter((key) => isEntryKey(skemo, key))
+    .map((key) => `[${skemo.a11y.states[key]?.[0] ?? `data-${key}`}="${combination[key] ?? ""}"]`)
+    .join("");
+  if (isGroup(skemo)) {
+    return groupPartSelector(part, property, data, entry, combination[STATE_KEY] ?? "rest");
+  }
   const state = STATE_SELECTORS[combination[STATE_KEY] ?? "rest"] ?? "";
   if (isField(skemo)) return fieldPartSelector(part, property, data, state);
   if (isToggle(skemo)) return togglePartSelector(part, property, data, state);
@@ -405,6 +493,7 @@ export function elementNamesOf(entry: LoadedEro, inline = false) {
       name: slot.name,
       ...(slot.default === undefined ? {} : { default: slot.default }),
       ...(slot.decorative === undefined ? {} : { decorative: slot.decorative }),
+      ...(slot.entry === undefined ? {} : { list: true }),
     })),
     inline,
   };
@@ -466,7 +555,9 @@ function cssOf(moduleText: string): string {
 /** The state a selector addresses; the inverse of `STATE_SELECTORS` plus the focus ring (T021). */
 function stateOf(selector: string): string {
   if (selector.includes('[aria-busy="true"]')) return "loading";
-  if (selector.includes(":disabled")) return "disabled";
+  if (selector.includes(":disabled") || selector.includes('[aria-disabled="true"]')) {
+    return "disabled";
+  }
   if (selector.includes(":focus-visible")) return "focus";
   if (selector.includes(":hover")) return "hover";
   if (selector.includes(":active")) return "pressed";

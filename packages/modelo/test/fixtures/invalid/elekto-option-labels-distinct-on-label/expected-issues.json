@@ -1,0 +1,9 @@
+{
+  "description": "Spec 010 ③ G6, G7 (E7): two options with the same label are only found among the entries of the slot options. The check distinct on the label (one text) would never see them: a list check needs a slot whose entries are options.",
+  "issues": [
+    {
+      "rule": "uzo-content-of-invalid",
+      "path": "data/eroj/elekto/uzo.json#/uzo/content/0/of"
+    }
+  ]
+}

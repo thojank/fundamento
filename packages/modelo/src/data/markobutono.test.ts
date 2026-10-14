@@ -23,10 +23,11 @@ const uzoOf = (name: string) => modelo.eroj.find((entry) => entry.ero.name === n
 const kampo = modelo.eroj.find((entry) => entry.ero.name === "kampo");
 
 describe("markobutono in the repo Modelo (G1, G2, section 2)", () => {
-  it("lives in data/eroj/markobutono/skemo.json, between ligilo and sxaltilo, and the repo Modelo stays valid", () => {
+  it("lives in data/eroj/markobutono/skemo.json, after ligilo and before sxaltilo, and the repo Modelo stays valid", () => {
     expect(markobutono?.file).toBe("modelo/data/eroj/markobutono/skemo.json");
     expect(modelo.eroj.map((entry) => entry.ero.name)).toEqual([
       "butono",
+      "elekto",
       "kampo",
       "ligilo",
       "markobutono",
@@ -195,14 +196,15 @@ describe("the Uzo of the markobutono (section 2, G5)", () => {
     expect(uzo?.layout).toEqual({ size: "content", wrap: "allowed" });
   });
 
-  it("sends what applies at once to the sxaltilo and names the radio group of PR ③ as not covered yet", () => {
+  // Spec 010 ③ (G5, plan ③ D-12): the radio group exists; one of a few is its use-instead now.
+  it("sends what applies at once to the sxaltilo and one of a few to the elekto", () => {
     expect(uzo?.instead.map((entry) => [entry.goal, entry.ero])).toEqual([
       ["immediate", "sxaltilo"],
-      ["choose-one-of-few", null],
+      ["choose-one-of-few", "elekto"],
     ]);
     expect(uzo?.instead[0]?.kialo).toMatch(/applies at once is a switch/);
-    expect(uzo?.instead[1]?.kialo).toMatch(/elekto/);
-    expect(uzo?.instead[1]?.kialo).toMatch(/PR ③/);
+    expect(uzo?.instead[1]?.kialo).toMatch(/Fundamento covers it with elekto\.$/);
+    expect(uzo?.instead[1]?.kialo).not.toMatch(/PR ③/);
   });
 
   it("stops at the indeterminate state and at a group, and never without a visible label", () => {
@@ -256,24 +258,26 @@ describe("the Uzo of the markobutono (section 2, G5)", () => {
 
 describe("the Reguloj of the markobutono (G6, E5)", () => {
   it.each([
-    ["field-label-visible", ["kampo", "sxaltilo", "markobutono"]],
-    ["field-label-names-the-datum", ["kampo", "sxaltilo", "markobutono"]],
-    ["error-says-what-to-do", ["kampo", "markobutono"]],
-    ["required-marked", ["kampo", "markobutono"]],
-    ["error-not-color-only", ["kampo", "markobutono"]],
+    // Spec 010 ③: the elekto follows the markobutono in each list (E5).
+    ["field-label-visible", ["kampo", "sxaltilo", "markobutono", "elekto"]],
+    ["field-label-names-the-datum", ["kampo", "sxaltilo", "markobutono", "elekto"]],
+    ["error-says-what-to-do", ["kampo", "markobutono", "elekto"]],
+    ["required-marked", ["kampo", "markobutono", "elekto"]],
+    ["error-not-color-only", ["kampo", "markobutono", "elekto"]],
   ])("%s is widened to the markobutono, not duplicated (E5)", (name, eroj) => {
     expect(named(name)?.appliesTo).toEqual({ eroj });
     expect(named(name)?.statement).toMatch(/markobutono/);
     expect(modelo.reguloj.filter((regulo) => regulo.name === name)).toHaveLength(1);
   });
 
-  it("spacing-owned-by-container applies to all five Eroj", () => {
+  it("spacing-owned-by-container applies to the markobutono and every other Ero", () => {
     expect(named("spacing-owned-by-container")?.appliesTo?.eroj).toEqual([
       "butono",
       "ligilo",
       "kampo",
       "sxaltilo",
       "markobutono",
+      "elekto",
     ]);
   });
 
@@ -407,13 +411,12 @@ describe("suggest_ero and the checkbox (Gvidanto, section 2)", () => {
     });
   });
 
-  it("'Radiobutton' is the alternative choose-one-of-few: not covered until PR ③, ask-human", () => {
+  // Spec 010 ③: the alternative choose-one-of-few says use-instead elekto, and the elekto has
+  // the goal choose-few with the word; both say elekto, so the goal answers (Spec 008 D-08).
+  it("'Radiobutton' is the elekto since PR ③: the goal choose-few answers, no ask-human", () => {
     const answer = suggest("Radiobutton");
-    expect(answer.suggestion).toBeNull();
-    expect(answer.boundary).toMatchObject({
-      ero: "markobutono",
-      case: "choose-one-of-few",
-      action: "ask-human",
-    });
+    expect(answer.suggestion).toEqual({ ero: "elekto", props: {} });
+    expect(answer.matched?.goal).toBe("choose-few");
+    expect(answer.action).toBeUndefined();
   });
 });

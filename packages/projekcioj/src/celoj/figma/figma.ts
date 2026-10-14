@@ -18,6 +18,7 @@ import {
   boundToken,
   combinationsOf,
   isBindingKeyword,
+  isEntryKey,
   isPositionKeyword,
   type LoadedEro,
   type Modelo,
@@ -36,7 +37,7 @@ import {
   variantKeys,
 } from "@fundamento/modelo";
 import type { Celo, CeloInput, GeneratedFile } from "../../build.js";
-import { VITRINO_SLOT_TEXTS, VITRINO_SURFACE } from "../vitrino/datumoj.js";
+import { VITRINO_OPTIONS, VITRINO_SLOT_TEXTS, VITRINO_SURFACE } from "../vitrino/datumoj.js";
 import { signOf } from "../web-component/element-template.js";
 import { DRAWN_PART_PROPERTIES, pluginManifest, pluginSource } from "./plugin.js";
 
@@ -119,8 +120,8 @@ export const FIGMA_NOT_DRAWN: Readonly<Record<string, string>> = {
   underline: "jug_01M4RYCY61NK92JM6XYD00M012",
   // Spec 009 (plan D-09, Befund B-2; Abnahme F-4): the control of a field in the set is empty and
   // shows the placeholder, so the colour of the typed text has no node; the sign of the required
-  // mark is the projection's — of the kampo and, since Spec 010 ②, of the markobutono (the
-  // Jugxo's wording names both).
+  // mark is the projection's — of the kampo and, since Spec 010 ② and ③, of the markobutono and the
+  // elekto (the Jugxo's wording names all three).
   text: "jug_01M4S2R85WRAC5SV7CARH8RE7S",
   "required-mark": "jug_01M4S2R85WRAC5SV7CARH8RE7S",
 };
@@ -145,10 +146,22 @@ export const FIELD_TEXTS: Readonly<Record<string, string>> = {
  * it, label and error in a column beside it; G1 gives the Wahl-Eroj one build, "control + label").
  * Celo knowledge from the a11y role (Art. VIII).
  */
-export type FigmaStructure = "control" | "field" | "toggle";
+export type FigmaStructure = "control" | "field" | "toggle" | "choice";
 
+/**
+ * A radio group (Spec 010 ③, D-07) is a choice: the label (the question) above a column of
+ * options, each a row — ring → gap → circle with the dot, the option's label beside it — and help
+ * and error below. Its options are entries of a slot, not variants: selected is the state of one
+ * option (E7).
+ */
 export const structureOf = (role: string): FigmaStructure =>
-  role === "textbox" ? "field" : role === "switch" || role === "checkbox" ? "toggle" : "control";
+  role === "textbox"
+    ? "field"
+    : role === "switch" || role === "checkbox"
+      ? "toggle"
+      : role === "radiogroup"
+        ? "choice"
+        : "control";
 
 /**
  * The neutral word every label template shows, per a11y role (M-3; Maintainer, F14, 2026-10-13,
@@ -163,6 +176,8 @@ const LABEL_DEFAULTS: Readonly<Record<string, string>> = {
   switch: "Einstellung",
   // Spec 010 ② (plan ② D-11): a checkbox names an option; for the maintainer to confirm (O-5).
   checkbox: "Option",
+  // Spec 010 ③ (plan ③ D-07): a radio group names its question; for the maintainer to confirm.
+  radiogroup: "Frage",
 };
 
 /** The word a role without its own entry shows: the button's, as every set did before M-3. */
@@ -217,6 +232,12 @@ export interface FigmaComponentSet {
    * the size of its frame and the colour of its vector; a knob has no sign.
    */
   sign?: string;
+  /**
+   * The options a choice shows in every variant (Spec 010 ③, D-07): the entry key of its slot
+   * (selected), the words of the options — the Vitrino's — and which of them is chosen. The plugin
+   * draws one row per word and binds each with the entry of the variant for its value of the key.
+   */
+  entry?: { key: string; texts: string[]; selected: number };
   /** The purpose of the Uzo, one line, as the description of the set (Spec 007 T028, A12). */
   description?: string;
   /**
@@ -268,6 +289,20 @@ export interface FigmaComponentSet {
      * stays, as on the web.
      */
     hidden?: string[];
+    /**
+     * What follows the state of one option (Spec 010 ③, E7), per value of the entry key: the
+     * bindings, paints and measures of the parts keyed by selected, and the parts not drawn in it
+     * (the dot of an option not chosen). The plugin binds a row with the entry of its value.
+     */
+    entries?: Record<
+      string,
+      {
+        bindings: Record<string, string>;
+        paints?: Record<string, FigmaPaint>;
+        geometry?: Record<string, string>;
+        hidden?: string[];
+      }
+    >;
     /**
      * The cell of the variant in the grid, as the Vitrino orders it: the row is its combination of
      * the keyed props (emphasis × intent × size) in the order of the plan, the column its state.
@@ -940,14 +975,40 @@ function componentSetOf(
     if (bound === undefined) return undefined;
     return bound.token === "inherit" ? INHERIT_TYPOGRAPHY : bound.token;
   };
-  const variants = combinationsOf(skemo, keys).map((combination) => {
-    const bindings: Record<string, string> = {};
-    const paints: Record<string, FigmaPaint> = {};
-    const geometry: Record<string, string> = {};
-    const notDrawn: Record<string, string> = {};
-    const hidden: string[] = [];
+  // The keys of one entry (Spec 010 ③, E7: selected) are no axis: the parts they key are bound
+  // per value of the key, in the entries of each variant.
+  const entryKeys = [
+    ...new Set(
+      Object.values(skemo.parts).flatMap((properties) =>
+        Object.values(properties).flatMap((source) =>
+          source !== undefined && "by" in source
+            ? source.by.filter((key) => isEntryKey(skemo, key))
+            : [],
+        ),
+      ),
+    ),
+  ];
+  const keyedByEntry = (part: string, property: string): boolean => {
+    const source = skemo.parts[part]?.[property as keyof (typeof skemo.parts)[string]];
+    return (
+      source !== undefined && "by" in source && source.by.some((key) => entryKeys.includes(key))
+    );
+  };
+  const bindParts = (
+    combination: Readonly<Record<string, string>>,
+    which: (part: string, property: string) => boolean,
+    sink: {
+      bindings: Record<string, string>;
+      paints: Record<string, FigmaPaint>;
+      geometry: Record<string, string>;
+      notDrawn: Record<string, string>;
+      hidden: string[];
+    },
+  ) => {
+    const { bindings, paints, geometry, notDrawn, hidden } = sink;
     for (const [part, partProperties] of Object.entries(skemo.parts)) {
       for (const property of Object.keys(partProperties)) {
+        if (!which(part, property)) continue;
         const bound = boundToken(skemo, part, property, combination);
         if (bound === undefined) continue;
         const key = `${part}.${property}`;
@@ -985,6 +1046,32 @@ function componentSetOf(
           if (text !== undefined) geometry[key] = text;
         }
       }
+    }
+  };
+  const variants = combinationsOf(skemo, keys).map((combination) => {
+    const bindings: Record<string, string> = {};
+    const paints: Record<string, FigmaPaint> = {};
+    const geometry: Record<string, string> = {};
+    const notDrawn: Record<string, string> = {};
+    const hidden: string[] = [];
+    bindParts(combination, (part, property) => !keyedByEntry(part, property), {
+      bindings,
+      paints,
+      geometry,
+      notDrawn,
+      hidden,
+    });
+    const entries: NonNullable<FigmaComponentSet["variants"][number]["entries"]> = {};
+    for (const value of combinationsOf(skemo, entryKeys)) {
+      if (entryKeys.length === 0) break;
+      const sink = { bindings: {}, paints: {}, geometry: {}, notDrawn: {}, hidden: [] as string[] };
+      bindParts({ ...combination, ...value }, keyedByEntry, sink);
+      entries[entryKeys.map((key) => value[key]).join(",")] = {
+        bindings: sink.bindings,
+        ...(Object.keys(sink.paints).length === 0 ? {} : { paints: sink.paints }),
+        ...(Object.keys(sink.geometry).length === 0 ? {} : { geometry: sink.geometry }),
+        ...(sink.hidden.length === 0 ? {} : { hidden: sink.hidden }),
+      };
     }
     // The focus ring (F11). Its colour sits in a field of a composite token and is compared by
     // no side, so it is kept out of the parity inventory (only colour-typed parts are reported).
@@ -1033,6 +1120,7 @@ function componentSetOf(
         : { underline: !isBindingKeyword(underlineWidth.token) }),
       ...(position === undefined ? {} : { position: position as "start" | "end" }),
       ...(hidden.length === 0 ? {} : { hidden }),
+      ...(Object.keys(entries).length === 0 ? {} : { entries }),
     };
   });
   // Every font the label can carry, over every combination (F30). The typography role follows the
@@ -1093,21 +1181,29 @@ function componentSetOf(
   // the checkbox its error; the switch has none.
   const toggleTexts = Object.fromEntries(
     skemo.slots
-      .filter((slot) => slot.default !== true && slot.text === true)
+      .filter((slot) => slot.default !== true && slot.text === true && slot.entry === undefined)
       .flatMap((slot) => {
         const text = VITRINO_SLOT_TEXTS[slot.name];
         return text === undefined ? [] : [[slot.name, text]];
       }),
   );
-  const sign = structure === "toggle" ? signOf(skemo.a11y.role, "16") : undefined;
+  const sign =
+    structure === "toggle" || structure === "choice" ? signOf(skemo.a11y.role, "16") : undefined;
+  // The options of a choice (Spec 010 ③, D-07): the Vitrino's words, the first chosen.
+  const [entryKey] = entryKeys;
+  const options =
+    structure === "choice" && entryKey !== undefined
+      ? { key: entryKey, texts: [...VITRINO_OPTIONS], selected: 0 }
+      : undefined;
   return {
     set: entry.ero.name,
     structure,
     ...(structure === "field" ? { texts: { ...FIELD_TEXTS } } : {}),
-    ...(structure === "toggle" && Object.keys(toggleTexts).length > 0
+    ...((structure === "toggle" || structure === "choice") && Object.keys(toggleTexts).length > 0
       ? { texts: toggleTexts }
       : {}),
     ...(sign === undefined ? {} : { sign }),
+    ...(options === undefined ? {} : { entry: options }),
     ...(description === undefined ? {} : { description }),
     ...(uzo === undefined ? {} : { uzo }),
     properties,
@@ -1272,25 +1368,39 @@ export function figmaPlanInventory(plan: unknown): Record<string, ParityItem> {
     const values: Record<string, string> = {};
     for (const variant of component.variants ?? []) {
       const at = `@${parityVariantKey(variant.props)}`;
-      for (const [key, text] of Object.entries(variant.geometry ?? {}))
-        values[`${key}${at}`] = text;
       for (const [key, jugxo] of Object.entries(variant.notDrawn ?? {})) {
         values[`${key}${at}`] = `${PARITY_NOT_DRAWN} (${jugxo})`;
       }
-      for (const [binding, paint] of Object.entries(variant.paints ?? {})) {
-        // Only colour parts are compared; a colour inside a composite (the ring) is drawn, not
-        // reported.
-        const property = binding.slice(binding.lastIndexOf(".") + 1);
-        if (PART_PROPERTY_TYPES[property as keyof typeof PART_PROPERTY_TYPES] !== "color") continue;
-        values[`${binding}@${parityVariantKey(variant.props)}`] =
-          "alphaVariesByMode" in paint
-            ? `${ALPHA_VARIES} (${variant.bindings[binding]})`
-            : parityColorText({
-                colorSpace: "srgb",
-                components: [0, 0, 0],
-                alpha: paint.opacity,
-                hex: paint.hex,
-              });
+      // What follows the state of one option (Spec 010 ③, E7) stands with the value of the entry
+      // key in the variant name, as the Skemo side names it.
+      const sides = [
+        { props: variant.props, part: variant },
+        ...Object.entries(variant.entries ?? {}).map(([value, part]) => ({
+          props: { ...variant.props, [component.entry?.key ?? ""]: value },
+          part,
+        })),
+      ];
+      for (const { props, part } of sides) {
+        const where = `@${parityVariantKey(props)}`;
+        for (const [key, text] of Object.entries(part.geometry ?? {}))
+          values[`${key}${where}`] = text;
+        for (const [binding, paint] of Object.entries(part.paints ?? {})) {
+          // Only colour parts are compared; a colour inside a composite (the ring) is drawn, not
+          // reported.
+          const property = binding.slice(binding.lastIndexOf(".") + 1);
+          if (PART_PROPERTY_TYPES[property as keyof typeof PART_PROPERTY_TYPES] !== "color") {
+            continue;
+          }
+          values[`${binding}${where}`] =
+            "alphaVariesByMode" in paint
+              ? `${ALPHA_VARIES} (${part.bindings[binding]})`
+              : parityColorText({
+                  colorSpace: "srgb",
+                  components: [0, 0, 0],
+                  alpha: paint.opacity,
+                  hex: paint.hex,
+                });
+        }
       }
     }
     items[component.set] = {

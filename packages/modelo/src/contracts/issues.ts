@@ -193,6 +193,10 @@ export const RULE_IDS = [
   "error-not-color-only",
   "field-label-visible",
   "placeholder-not-label",
+  // Spec 010 ③ (plan ③ D-09, D-10): a text rule whose `of` names no slot or prop of the Skemo, or
+  // a list check on a slot without entries; and the fewest entries a slot takes in check_usage.
+  "uzo-content-of-invalid",
+  "uzo-slot-min",
   // Projekcio lints (Spec 003, D-17)
   "css-physical-property",
   "ero-hardcoded-string",

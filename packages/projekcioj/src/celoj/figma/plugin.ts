@@ -34,7 +34,11 @@ type PartNode =
   | "indicator"
   | "field"
   | "mark"
-  | "texts";
+  | "texts"
+  // A radio group (Spec 010 ③, D-07): the column of options, one row per option, its label.
+  | "options"
+  | "option"
+  | "option-label";
 
 interface Binding {
   node: PartNode;
@@ -124,6 +128,19 @@ const BINDINGS: Readonly<Record<string, readonly Binding[]>> = {
   // A checkbox (Spec 010 ②, D-09): the indicator is the frame of the check mark (its size bound
   // like the knob's), the mark a vector in it whose fill is the colour of the indicator.
   "indicator.color": [{ node: "mark", fields: ["fills"], paint: true }],
+  // A radio group (Spec 010 ③, D-07): the label of each option a text of its own, bound like the
+  // label; the gap of the options stands between the parts of the field and between the rows.
+  "option-label.color": [{ node: "option-label", fields: ["fills"], paint: true }],
+  "option-label.typography": [
+    { node: "option-label", fields: ["fontSize"], suffix: "/font-size" },
+    { node: "option-label", fields: ["fontFamily"], suffix: "/font-family", font: true },
+    { node: "option-label", fields: ["fontStyle"], suffix: "/font-style", font: true },
+    { node: "option-label", fields: ["letterSpacing"], suffix: "/letter-spacing" },
+  ],
+  "options.gap": [
+    { node: "field", fields: ["itemSpacing"] },
+    { node: "options", fields: ["itemSpacing"] },
+  ],
 };
 
 /**
@@ -133,6 +150,9 @@ const BINDINGS: Readonly<Record<string, readonly Binding[]>> = {
  */
 const STRUCTURE_BINDINGS: Readonly<Record<string, Readonly<Record<string, readonly Binding[]>>>> = {
   toggle: { "box.gap": [{ node: "field", fields: ["itemSpacing"] }] },
+  // A radio group (Spec 010 ③, D-07): the gap of the box stands between a circle and its label,
+  // in the row of the option.
+  choice: { "box.gap": [{ node: "option", fields: ["itemSpacing"] }] },
 };
 
 /** A column of parts: the field of a textbox (Spec 009, D-09): label, control, help, error. */
@@ -754,6 +774,9 @@ function bind(nodes, variant, variables, structure) {
       const variable = variables.get(name + (target.suffix || ""));
       if (variable === undefined) continue;
       const node = nodes[target.node];
+      // A choice binds a variant in passes, the group and each option (Spec 010 ③, D-07): a part
+      // whose node is not in this pass is bound in another.
+      if (node === undefined) continue;
       if (target.paint === true) {
         // The focus ring shows only in the focus state; in every other its fill stays neutral.
         if (target.focusOnly === true && variant.focusVisible !== true) continue;
@@ -1178,6 +1201,139 @@ async function loadCurrentFont(text) {
 async function applyComponents(variables, warnings) {
   const fonts = new Map();
   const casesVarying = [];
+  /**
+   * Binds the measures of a variant after every frame has its layout (F11); a font binding Figma
+   * refuses is no reason to stop (F30): the text keeps the written font, the run says which.
+   */
+  function bindMeasures(measures, report, component, variant) {
+    for (const { node: target, field, variable, font } of measures) {
+      if (boundId(target, field) === variable.id) continue;
+      if (font !== true) {
+        target.setBoundVariable(field, variable);
+        continue;
+      }
+      try {
+        target.setBoundVariable(field, variable);
+        // The label's role follows the size, so a set binds more than one role per field; the
+        // report names every one of them, sorted, not the last one that happened to run.
+        const list = report.fonts.bound[field] || (report.fonts.bound[field] = []);
+        if (list.indexOf(variable.name) === -1) list.push(variable.name);
+      } catch (error) {
+        const message = String(error && error.message ? error.message : error);
+        if (report.fonts.refused.indexOf(field) === -1) {
+          report.fonts.refused.push(field);
+          warnings.push(
+            component.set + ": Figma hat die Bindung von " + field + " an " + variable.name +
+              " abgelehnt — die Beschriftung bleibt in " +
+              (variant.font ? variant.font.family + " " + variant.font.style : "der Schrift der Datei") +
+              ", gleich welcher Modus gewählt ist. " + message,
+          );
+        }
+      }
+    }
+  }
+  /**
+   * A radio group (Spec 010 ③, D-07): the variant is a column — the label (the question), the
+   * options, help, error — and every option a row: ring → gap → circle (control) with the dot
+   * (indicator, the web's vector) in it, the option's label beside it. The group is bound once,
+   * every option with the entry of the variant for its value of the key (E7): the chosen one
+   * filled with its dot, the others with the ground and the dot at opacity 0. The focus ring shows
+   * on the first option only, in the focus variant.
+   */
+  async function drawChoice(node, component, variant, report, labels) {
+    const field = part(node, "field", () => figma.createFrame());
+    const label = part(field, "label", () => figma.createText());
+    const list = part(field, "options", () => figma.createFrame());
+    const texts = component.texts || {};
+    const help = typeof texts.help === "string" ? part(field, "help", () => figma.createText()) : undefined;
+    const error = typeof texts.error === "string" ? part(field, "error", () => figma.createText()) : undefined;
+    const order = [label, list, help, error].filter((each) => each !== undefined);
+    order.forEach((child, index) => {
+      if (field.children.indexOf(child) !== index) field.insertChild(index, child);
+    });
+    const entry = component.entry || { key: "", texts: [], selected: -1 };
+    const rows = entry.texts.map((word, index) => {
+      const row = part(list, "option-" + (index + 1), () => figma.createFrame());
+      if (list.children.indexOf(row) !== index) list.insertChild(index, row);
+      const ring = part(row, "focus-ring", () => figma.createFrame());
+      const gap = part(ring, "focus-gap", () => figma.createFrame());
+      const control = part(gap, "control", () => figma.createFrame());
+      const indicator = part(control, "indicator", () =>
+        typeof component.sign === "string" ? figma.createNodeFromSvg(component.sign) : figma.createFrame(),
+      );
+      const mark = typeof component.sign === "string" ? markOf(indicator) : undefined;
+      const text = part(row, "option-label", () => figma.createText());
+      if (row.children.indexOf(text) !== 1) row.insertChild(1, text);
+      return { row, ring, gap, control, indicator, mark, text, word, chosen: index === entry.selected };
+    });
+    const all = [label, help, error].concat(rows.map((each) => each.text)).filter((each) => each !== undefined);
+    for (const each of all) await loadCurrentFont(each);
+    if (variant.textCase === TEXT_CASE_VARIES) {
+      if (casesVarying.indexOf(component.set) === -1) {
+        casesVarying.push(component.set);
+        warnings.push(
+          component.set + ": Die Schreibweise der Beschriftung ist nicht in allen Modi " +
+            "dieselbe. textCase ist in Figma kein bindbares Feld, also bleibt sie ungesetzt — " +
+            "eine Marke auszuwählen wäre keine Projektion.",
+        );
+      }
+    } else if (typeof variant.textCase === "string") {
+      write(label, "textCase", variant.textCase);
+    }
+    if (variant.font !== undefined) {
+      for (const each of all) write(each, "fontName", fonts.get(variant.font.family + " " + variant.font.style));
+    }
+    if (help !== undefined) write(help, "characters", texts.help);
+    if (error !== undefined) write(error, "characters", texts.error);
+    for (const each of rows) write(each.text, "characters", each.word);
+    labels.push(label);
+    const frames = [node, field, list].concat(
+      ...rows.map((each) => [each.row, each.ring, each.gap, each.control, each.indicator]),
+    );
+    for (const frame of frames) own(frame, NEUTRAL);
+    for (const each of all) own(each, NEUTRAL_TEXT);
+    own(node, HUG_LAYOUT);
+    own(field, FIELD_LAYOUT);
+    own(list, FIELD_LAYOUT);
+    const measures = bind({ label, field, options: list, help, error }, variant, variables, component.structure);
+    for (const each of rows) {
+      own(each.row, TOGGLE_LAYOUT);
+      for (const frame of [each.ring, each.gap]) own(frame, HUG_LAYOUT);
+      own(each.control, CONTROL_LAYOUT);
+      // The circle is the dot's box plus its border, as on the web (box-sizing border-box).
+      own(each.control, { strokesIncludedInLayout: true });
+      own(each.indicator, INDICATOR_LAYOUT);
+      const values = (variant.entries || {})[each.chosen ? "true" : "false"] || { bindings: {} };
+      // The dot of an option not chosen keeps its place and is not seen (indicator.color none).
+      own(each.indicator, { opacity: (values.hidden || []).indexOf("indicator") === -1 ? 1 : 0 });
+      if (each.mark) own(each.mark, MARK_NEUTRAL);
+      const option = {
+        bindings: Object.assign({}, variant.bindings, values.bindings),
+        paints: Object.assign({}, variant.paints, values.paints),
+        focusVisible: variant.focusVisible === true && each === rows[0],
+      };
+      const nodes = {
+        option: each.row,
+        "focus-ring": each.ring,
+        "focus-gap": each.gap,
+        control: each.control,
+        indicator: each.indicator,
+        "option-label": each.text,
+      };
+      if (each.mark) nodes.mark = each.mark;
+      for (const measure of bind(nodes, option, variables, component.structure)) measures.push(measure);
+      for (const part of ["focus-ring", "focus-gap"]) {
+        const variable = variables.get((variant.radii || {})[part]);
+        const target = part === "focus-ring" ? each.ring : each.gap;
+        if (variable !== undefined) measures.push({ node: target, field: "cornerRadius", variable: variable });
+      }
+    }
+    const owned = frames.concat(all);
+    for (const child of owned) own(child, IN_FLOW);
+    for (const each of all) own(each, TEXT_SIZING);
+    for (const each of owned.concat(rows.map((row) => row.mark).filter((mark) => mark !== undefined))) flush(each);
+    bindMeasures(measures, report, component, variant);
+  }
   // Every font of every mode, not only the one of the base combination (F30): a binding to a font
   // variable only holds once Figma has loaded every font that variable can show. What did not
   // arrive is named here, with the Aspektoj that ask for it, and the run falls back for it.
@@ -1297,6 +1453,12 @@ async function applyComponents(variables, warnings) {
       write(node, "name", name);
       stamp(node, "variant", name);
       stamp(node, "ero", component.set);
+      // A radio group (Spec 010 ③, D-07) is drawn as a choice, in a function of its own.
+      if (component.structure === "choice") {
+        await drawChoice(node, component, variant, report, labels);
+        if (existing === undefined) made.push(node);
+        continue;
+      }
       // The structure (F11): variant → focus-ring → focus-gap → control → label, each found by
       // its part mark and created when missing. A control an older plugin left directly under
       // the variant is moved in, never duplicated.
@@ -1434,34 +1596,10 @@ async function applyComponents(variables, warnings) {
       // Everything gathered is written once, layout before the parts inside it; the measures
       // are bound after that, when every frame has its layout.
       for (const each of frames.concat(texts).concat(mark ? [mark] : [])) flush(each);
-      for (const { node: target, field, variable, font } of measures) {
-        if (boundId(target, field) === variable.id) continue;
-        if (font !== true) {
-          target.setBoundVariable(field, variable);
-          continue;
-        }
-        // A font binding is the one Figma may refuse — when a font of some mode is missing, the
-        // file cannot show it (F30). Refused is no reason to stop: the label keeps the written
-        // font of the base combination, and the run says which binding did not take.
-        try {
-          target.setBoundVariable(field, variable);
-          // The label's role follows the size, so a set binds more than one role per field; the
-          // report names every one of them, sorted, not the last one that happened to run.
-          const list = report.fonts.bound[field] || (report.fonts.bound[field] = []);
-          if (list.indexOf(variable.name) === -1) list.push(variable.name);
-        } catch (error) {
-          const message = String(error && error.message ? error.message : error);
-          if (report.fonts.refused.indexOf(field) === -1) {
-            report.fonts.refused.push(field);
-            warnings.push(
-              component.set + ": Figma hat die Bindung von " + field + " an " + variable.name +
-                " abgelehnt — die Beschriftung bleibt in " +
-                (variant.font ? variant.font.family + " " + variant.font.style : "der Schrift der Datei") +
-                ", gleich welcher Modus gewählt ist. " + message,
-            );
-          }
-        }
-      }
+      // A font binding is the one Figma may refuse — when a font of some mode is missing, the
+      // file cannot show it (F30). Refused is no reason to stop: the label keeps the written font
+      // of the base combination, and the run says which binding did not take.
+      bindMeasures(measures, report, component, variant);
       if (existing === undefined) made.push(node);
     }
     if (set === undefined) {
@@ -1838,7 +1976,12 @@ function measureLayout(set, component) {
     const found = {};
     const field = ours(node, "part", "field");
     if (field !== undefined) found.field = field;
-    const base = field || node;
+    // A choice (Spec 010 ③, D-07): the ring stands in the row of the first option.
+    const list = field === undefined ? undefined : ours(field, "part", "options");
+    const row = list === undefined ? undefined : ours(list, "part", "option-1");
+    if (list !== undefined) found.options = list;
+    if (row !== undefined) found.option = row;
+    const base = row || field || node;
     const ring = ours(base, "part", "focus-ring");
     if (ring !== undefined) found["focus-ring"] = ring;
     const gap = ring === undefined ? undefined : ours(ring, "part", "focus-gap");
@@ -1847,9 +1990,14 @@ function measureLayout(set, component) {
     if (control !== undefined) found.control = control;
     const label = control === undefined ? undefined : ours(field || control, "part", "label");
     if (label !== undefined) found.label = label;
+    if (row !== undefined) {
+      const optionLabel = ours(row, "part", "option-label");
+      if (optionLabel !== undefined) found["option-label"] = optionLabel;
+    }
     if (field !== undefined) {
       for (const name of ["text", "help", "error"]) {
-        const each = ours(name === "text" ? control : field, "part", name);
+        const holder = name === "text" ? control : field;
+        const each = holder === undefined ? undefined : ours(holder, "part", name);
         if (each !== undefined) found[name] = each;
       }
     }
@@ -2134,6 +2282,16 @@ function partsOfList(set, part, list) {
   return out;
 }
 
+/** Mankoj grouped by field, then set: { descriptionMarkdown: { butono: ["boundary", …] } }. */
+function groupedMankoj(list) {
+  const out = {};
+  for (const { set, part, field } of list) {
+    const byField = out[field] || (out[field] = {});
+    (byField[set] || (byField[set] = [])).push(part);
+  }
+  return out;
+}
+
 /** The report as JSON lines under the limit (F22): headline, then per component its parts. */
 function reportParts(result) {
   const lines = [
@@ -2162,10 +2320,11 @@ function reportParts(result) {
       })),
       // The Mankoj by set, part and field; their evidence, the tool's words, stands in the part
       // state of each set (uzo.evidence). Spec 010 ①: with four sets the evidence of twelve
-      // parts no longer fit the headline of 4 000 characters (F22).
+      // parts no longer fit the headline of 4 000 characters (F22). Spec 010 ③: with six sets
+      // the list of eighteen objects did not either; grouped by field and set, the same names.
       mankoj: {
-        open: result.mankoj.open.map(({ set, part, field }) => ({ set, part, field })),
-        closed: result.mankoj.closed.map(({ set, part, field }) => ({ set, part, field })),
+        open: groupedMankoj(result.mankoj.open),
+        closed: groupedMankoj(result.mankoj.closed),
       },
     }),
   ];
@@ -2203,7 +2362,18 @@ function reportParts(result) {
           continue;
         }
         for (const [key, entry] of Object.entries(value)) {
-          lines.push(JSON.stringify({ set: report.set, part: part + "." + key, value: entry }));
+          const line = JSON.stringify({ set: report.set, part: part + "." + key, value: entry });
+          // A choice holds more parts per variant (Spec 010 ③): a part still too long is split
+          // once more, by its parts, under the same names.
+          if (line.length <= PART_LIMIT || typeof entry !== "object" || entry === null) {
+            lines.push(line);
+            continue;
+          }
+          for (const [inner, held] of Object.entries(entry)) {
+            lines.push(
+              JSON.stringify({ set: report.set, part: part + "." + key + "." + inner, value: held }),
+            );
+          }
         }
       }
     }

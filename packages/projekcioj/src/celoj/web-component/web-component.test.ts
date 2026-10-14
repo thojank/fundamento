@@ -34,7 +34,9 @@ describe("Web Component Celo (T011)", () => {
     // Spec 008: the ligilo on the same path as the butono (Art. IX, Art. XI).
     expect(Object.keys(files).sort()).toEqual([
       "eroj/src/generated/butono.styles.ts",
+      "eroj/src/generated/elekto.styles.ts",
       "eroj/src/generated/fm-butono.ts",
+      "eroj/src/generated/fm-elekto.ts",
       "eroj/src/generated/fm-kampo.ts",
       "eroj/src/generated/fm-ligilo.ts",
       "eroj/src/generated/fm-markobutono.ts",
@@ -340,6 +342,120 @@ describe("Web Component Celo for the markobutono (Spec 010 ②)", () => {
       checked: ["boolean"],
       size: ["small", "medium", "large"],
     });
+    expect([...inventory.states].sort()).toEqual(["disabled", "focus", "hover", "invalid", "rest"]);
+  });
+});
+
+// Spec 010 ③ (plan ③ D-06): the radio group. A group (role radiogroup) named by its label, with one
+// row per option built from the light DOM — every child with slot="options" is an option, its
+// value the attribute value (a <data> element: text and value, the platform's own pair), its text
+// the label of the row. The children are assigned to their slots by the element (manual slot
+// assignment), one row per option: role radio and aria-checked on the row, the circle (control)
+// with the dot (indicator) in it, the label of the option beside it. selected is the state of one
+// row (aria-checked), never a data attribute of the group: it is no prop (E7).
+describe("Web Component Celo for the elekto (Spec 010 ③)", () => {
+  const elektoStyles = files["eroj/src/generated/elekto.styles.ts"] ?? "";
+  const elektoElement = files["eroj/src/generated/fm-elekto.ts"] ?? "";
+  const markobutonoElement = files["eroj/src/generated/fm-markobutono.ts"] ?? "";
+  const elektoCss = JSON.parse(
+    /export const ELEKTO_CSS = (".*");/s.exec(elektoStyles)?.[1] ?? '""',
+  ) as string;
+  const templates = (source: string) =>
+    [...source.matchAll(/`(<[^`]*)`/g)].map((match) => match[1] ?? "");
+  const parts = (source: string) =>
+    templates(source).flatMap((t) => [...t.matchAll(/part="([a-z-]+)"/g)].map((m) => m[1]));
+
+  it("renders a group named by its label with the options, help and error, and a row per option", () => {
+    expect(parts(elektoElement)).toEqual([
+      "field",
+      "label",
+      "required-mark",
+      "options",
+      "help",
+      "error",
+      "option",
+      "control",
+      "indicator",
+      "option-label",
+    ]);
+    expect(elektoElement).toContain('role="radiogroup"');
+    expect(elektoElement).toContain('aria-labelledby="label"');
+    expect(elektoElement).toContain('role="radio"');
+    expect(elektoElement).toContain('slotAssignment: "manual"');
+    expect(elektoElement).toContain('<span part="error" id="error" hidden aria-live="polite">');
+    expect(elektoElement).toContain("static formAssociated = true;");
+    expect(elektoElement).toContain('row.setAttribute("aria-checked"');
+    expect(elektoElement).toContain('customElements.define("fm-elekto", FmElekto)');
+    for (const template of templates(elektoElement)) {
+      expect(template).not.toMatch(/>[^<\s$][^<]*</);
+    }
+    // The checkbox is unchanged: no group, no rows (② D-08).
+    expect(parts(markobutonoElement)).toEqual([
+      "field",
+      "control",
+      "indicator",
+      "label",
+      "required-mark",
+      "error",
+    ]);
+    expect(markobutonoElement).not.toContain("slotAssignment");
+  });
+
+  it("moves and chooses with the arrow keys, chooses with Space, is the form's value and validity", () => {
+    for (const key of ["ArrowDown", "ArrowUp", "ArrowLeft", "ArrowRight"]) {
+      expect(elektoElement).toContain(`"${key}"`);
+    }
+    expect(elektoElement).toMatch(/KEYS\.includes\(/);
+    expect(elektoElement).toContain("this.#internals.setFormValue(");
+    expect(elektoElement).toContain("setValidity({ valueMissing: true }");
+    expect(elektoElement).toContain('group.setAttribute("aria-required", "true")');
+    expect(elektoElement).toContain('group.setAttribute("aria-invalid", "true")');
+    expect(elektoElement).toContain('group.setAttribute("aria-orientation"');
+    // One tab stop: the chosen row, else the first (roving tabindex).
+    expect(elektoElement).toContain("row.tabIndex =");
+  });
+
+  it("keys the circle and the dot by aria-checked of the row, never by a data attribute selected", () => {
+    expect(elektoCss).not.toContain("data-selected");
+    expect(elektoCss).toContain('[part="option"][aria-checked="true"]');
+    expect(elektoCss).toContain('[part="option"][aria-checked="false"]');
+    expect(elektoCss).toMatch(
+      /\[aria-checked="false"\]\) \[part="indicator"\] \{\n\s+opacity: 0;\n\}/,
+    );
+    expect(elektoCss).toMatch(
+      /\[aria-checked="true"\]\) \[part="indicator"\] \{\n\s+color: var\(--fm-color-action-primary-text\);\n\}/,
+    );
+    expect(elektoCss).toContain("background-color: var(--fm-color-action-primary-rest);");
+    expect(elektoCss).toContain("background-color: var(--fm-color-background-default);");
+    expect(elektoCss).toContain("border-color: var(--fm-color-status-danger-border);");
+    expect(elektoCss).toContain('[part="field"][aria-invalid="true"]');
+    expect(elektoCss).toContain('[part="field"][aria-disabled="true"]');
+    expect(elektoCss).toContain('[part="option"][aria-checked="true"]:hover');
+    expect(elektoCss).toContain('[part="option"]:focus-visible) [part="control"]');
+    expect(elektoCss).toContain("border-radius: var(--fm-radius-role-pill);");
+    expect(elektoCss).toContain("inline-size: var(--fm-size-icon-medium);");
+    expect(elektoCss).toContain("gap: var(--fm-spacing-medium);");
+    expect(elektoCss).toContain("font-family: var(--fm-typography-body-1-font-family);");
+  });
+
+  it("lays the options out in a column, in a row when horizontal, never breaking (Uzo wrap never)", () => {
+    expect(elektoCss).toContain(
+      ':where([part="field"][aria-orientation="horizontal"]) [part="options"] { flex-direction: row; flex-wrap: nowrap; }',
+    );
+    expect(elektoCss).toContain("white-space: nowrap");
+    expect(elektoCss).toContain(
+      ':where([part="field"]:not([data-marked="true"])) [part="required-mark"] { display: none; }',
+    );
+  });
+
+  it("keeps every design property a token and logical (Art. X gate 1)", () => {
+    expect(componentCssIssues("elekto.css", elektoCss)).toEqual([]);
+    expect(cssPhysicalPropertyIssues("elekto.css", elektoCss)).toEqual([]);
+  });
+
+  it("states size as its only styled prop and the five states in the stylesheet inventory (parity)", () => {
+    const inventory = stylesheetInventory(elektoStyles);
+    expect(inventory.props).toEqual({ size: ["small", "medium", "large"] });
     expect([...inventory.states].sort()).toEqual(["disabled", "focus", "hover", "invalid", "rest"]);
   });
 });

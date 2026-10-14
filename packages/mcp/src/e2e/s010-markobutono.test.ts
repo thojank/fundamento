@@ -108,14 +108,12 @@ describe("the scenarios of section 2: terms, newsletter, dark mode", () => {
     });
   });
 
-  it("'Radiobutton' is one of a few: not covered until PR ③, a person decides", async () => {
+  // Spec 010 ③: the radio group is an Ero; one of a few is its goal choose-few now.
+  it("'Radiobutton' is one of a few: the elekto since PR ③", async () => {
     const answer = await output<Suggested>(client, "suggest_ero", { goal: "Radiobutton" });
-    expect(answer.suggestion).toBeNull();
-    expect(answer.boundary).toMatchObject({
-      ero: "markobutono",
-      case: "choose-one-of-few",
-      action: "ask-human",
-    });
+    expect(answer.suggestion).toEqual({ ero: "elekto", props: {} });
+    expect(answer.matched?.goal).toBe("choose-few");
+    expect(answer.action).toBeUndefined();
   });
 });
 
@@ -169,10 +167,11 @@ describe("check_usage of the checkbox", () => {
 });
 
 describe("list_eroj and the brief (acceptance 1)", () => {
-  it("lists five Eroj; the brief of the markobutono names the purpose, the axes, the label as a duty and its alternatives", async () => {
+  it("lists the Eroj; the brief of the markobutono names the purpose, the axes, the label as a duty and its alternatives", async () => {
     const listed = await output<{ eroj: { name: string }[] }>(client, "list_eroj", {});
     expect(listed.eroj.map((entry) => entry.name)).toEqual([
       "butono",
+      "elekto",
       "kampo",
       "ligilo",
       "markobutono",
@@ -184,7 +183,7 @@ describe("list_eroj and the brief (acceptance 1)", () => {
     expect(brief.axes.map((axis) => axis.name)).toEqual(["size"]);
     expect(brief.instead?.map((entry) => [entry.goal, entry.ero])).toEqual([
       ["immediate", "sxaltilo"],
-      ["choose-one-of-few", null],
+      ["choose-one-of-few", "elekto"],
     ]);
     expect(brief.boundary?.map((entry) => entry.case)).toEqual([
       "indeterminate",
