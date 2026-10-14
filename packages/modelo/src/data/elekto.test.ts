@@ -542,6 +542,17 @@ describe("suggest_ero and the radio group (Gvidanto, section 3)", () => {
     expect(answer.action).toBeUndefined();
   });
 
+  // Many before few: "auswählen" ends with the few's "wählen" (a Uzo keyword of six letters hits
+  // the end of a word, N-1), so the entry of many stands first in the Uzo of butono and kampo.
+  it.each(["Land auswählen", "Sprache aus vielen auswählen"])(
+    "'%s' is choose-many, not choose-few: the list wins over the few",
+    (text) => {
+      const answer = suggest(text);
+      expect(answer.suggestion).toBeNull();
+      expect(answer.boundary).toMatchObject({ case: "choose-many", action: "ask-human" });
+    },
+  );
+
   it("'Land aus einer Liste' is choose-many: not covered until PR ④, a person decides", () => {
     const answer = suggest("Land aus einer Liste");
     expect(answer.suggestion).toBeNull();

@@ -233,8 +233,8 @@ describe("get_ero with the Uzo and brief (T022)", () => {
     );
     expect(uzo?.instead.map((entry) => entry.goal)).toEqual([
       "toggle",
-      "choose-few",
       "choose-many",
+      "choose-few",
     ]);
     expect(uzo?.slots).toEqual(butono.uzo?.slots);
     isReguloRef(uzo?.composes.spacing.regulo);

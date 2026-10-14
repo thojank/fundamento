@@ -163,8 +163,8 @@ describe("the Uzo of the butono (T020)", () => {
   it("answers toggle with the sxaltilo, choose-few with the elekto and choose-many as not covered yet, each with a kialo", () => {
     expect(uzo?.instead.map((entry) => [entry.goal, entry.ero])).toEqual([
       ["toggle", "sxaltilo"],
-      ["choose-few", "elekto"],
       ["choose-many", null],
+      ["choose-few", "elekto"],
     ]);
     for (const entry of uzo?.instead ?? []) expect(entry.kialo).toMatch(/\bbecause\b/);
   });

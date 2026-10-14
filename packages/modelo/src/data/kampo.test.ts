@@ -168,8 +168,8 @@ describe("the Uzo of the kampo (T004, A3)", () => {
   it("names multi-line and choose-many as not covered, choose-few as the elekto's, toggle as the sxaltilo's, and the six boundaries of A3", () => {
     expect(uzo?.instead.map((entry) => [entry.goal, entry.ero])).toEqual([
       ["multi-line", null],
-      ["choose-few", "elekto"],
       ["choose-many", null],
+      ["choose-few", "elekto"],
       ["toggle", "sxaltilo"],
     ]);
     expect(uzo?.boundary.map((entry) => [entry.case, entry.action])).toEqual([
