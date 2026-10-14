@@ -69,6 +69,7 @@ describe("suggest_ero", () => {
       "destructive",
       "confirm",
       "dismiss",
+      "choose-many",
       "choose-few",
       "enter-text",
       "email",

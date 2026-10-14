@@ -1,0 +1,55 @@
+{
+  "$schema": "../../../../../../../schema/modelo.schema.json#/$defs/UzoFile",
+  "uzo": {
+    "id": "uzo_01M4H39SZBPN8VKA70309EJ35G",
+    "ero": "ero_01M2XM2NGN3KJSKJ4JTXQWMF72",
+    "skemo": "ske_01M2XM2NWJ39A7BEZ9A2S8GANE",
+    "purpose": "Fixture Uzo: chooses one of many options from a list that opens on demand.",
+    "instead": [],
+    "boundary": [
+      {
+        "case": "custom-popup",
+        "action": "not-supported",
+        "kialo": "The list is the platform's, because a drawn list would need its own keyboard, scrolling and screen reader behaviour."
+      }
+    ],
+    "composes": {
+      "containers": [],
+      "with": [],
+      "never": [],
+      "spacing": {
+        "owner": "container",
+        "regulo": "spacing-owned-by-container"
+      }
+    },
+    "slots": {
+      "label": {
+        "accepts": [
+          "text"
+        ],
+        "max": 1,
+        "nesting": 0
+      },
+      "options": {
+        "accepts": [
+          "text"
+        ],
+        "required": true,
+        "min": 2,
+        "nesting": 0
+      },
+      "error": {
+        "accepts": [
+          "text"
+        ],
+        "max": 1,
+        "nesting": 0
+      }
+    },
+    "layout": {
+      "size": "container",
+      "wrap": "never"
+    },
+    "content": []
+  }
+}

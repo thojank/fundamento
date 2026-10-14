@@ -1,0 +1,9 @@
+{
+  "description": "Spec 010 ④ G7 (G1, E5, Spec 009 D-05): the select takes its accessible name from the slot label alone (no label prop), but its Uzo does not mark the slot required. A select without its visible label shows a prompt or an option without saying what is chosen; the label slot is a duty.",
+  "issues": [
+    {
+      "rule": "uzo-slot-required-missing",
+      "path": "data/eroj/elektilo/uzo.json#/uzo/slots/label"
+    }
+  ]
+}
