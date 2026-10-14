@@ -75,7 +75,7 @@ describe("describe_term (FR-12)", () => {
   );
 
   it("names the instances of Ero", () => {
-    expect(success("Ero").instances?.names).toEqual(["butono", "kampo", "ligilo"]);
+    expect(success("Ero").instances?.names).toEqual(["butono", "kampo", "ligilo", "sxaltilo"]);
   });
 
   // Spec 007 (A13, plan D-11, OP-1): the Uzo is found under its German and English names, and its

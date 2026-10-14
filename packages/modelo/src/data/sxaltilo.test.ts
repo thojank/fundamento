@@ -276,7 +276,7 @@ describe("the Reguloj of the sxaltilo (G6, E5, D-14)", () => {
     );
   });
 
-  it("declares the KontrastParoj of the switch: knob on the unchecked track, and the track by its border (D-16)", () => {
+  it("declares the KontrastParo of the knob on the unchecked track; the track is found by its border (D-16)", () => {
     const pair = (name: string) =>
       modelo.kontrastParoj.find((candidate) => candidate.name === name);
     expect(pair("border-strong-on-background-sunken")).toMatchObject({
@@ -284,13 +284,10 @@ describe("the Reguloj of the sxaltilo (G6, E5, D-14)", () => {
       background: "color.background.sunken",
       kategorio: "ui",
     });
-    expect(pair("background-sunken-on-background-default")).toMatchObject({
-      foreground: "color.background.sunken",
-      background: "color.background.default",
-      kategorio: "ui",
-      aux: { foreground: "color.border.strong", background: "color.background.default" },
-    });
-    expect(pair("background-sunken-on-background-default")?.kialo).toMatch(/border/);
+    // The unchecked track stands out from the page by its border, not by its fill (sunken on
+    // default is about 1.2:1 by design); the border's pair is the field's (Spec 009).
+    expect(pair("border-strong-on-background-default")?.kategorio).toBe("ui");
+    expect(pair("background-sunken-on-background-default")).toBeUndefined();
     // The knob on the checked track is the pair of the butono's label on its fill (7.76:1 min).
     expect(pair("action-primary-text-on-fill")).toBeDefined();
   });

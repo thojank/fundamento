@@ -221,8 +221,12 @@ export function parityVariantKey(combination: Readonly<Record<string, string>>):
     .join(",");
 }
 
-/** The keys a Skemo varies its part bindings by: the keyed enum props and the state. */
-function variantKeys(skemo: Skemo): string[] {
+/**
+ * The keys a Skemo varies its part bindings by: the keyed enum and boolean props and the state. A
+ * boolean prop that keys a part is an axis like an enum (Spec 010 ①, D-03: `checked` of the
+ * switch); one that keys none (disabled, loading) stays out, its look comes from the state.
+ */
+export function variantKeys(skemo: Skemo): string[] {
   const keyed = new Set<string>();
   for (const partProperties of Object.values(skemo.parts)) {
     for (const source of Object.values(partProperties)) {
@@ -231,7 +235,7 @@ function variantKeys(skemo: Skemo): string[] {
   }
   return [
     ...skemo.props
-      .filter((prop) => prop.kind === "enum" && keyed.has(prop.name))
+      .filter((prop) => (prop.kind === "enum" || prop.kind === "boolean") && keyed.has(prop.name))
       .map((prop) => prop.name),
     STATE_KEY,
   ];

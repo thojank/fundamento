@@ -1,0 +1,139 @@
+{
+  "$schema": "../../../schema/modelo.schema.json#/$defs/UzoFile",
+  "uzo": {
+    "id": "uzo_01M4WMD1GEGR6YWD8Q1WW9D0T3",
+    "ero": "ero_01M4WMD0RAJYZY7QT5VNS47T8M",
+    "skemo": "ske_01M4WMD145A64P8KV15HEH3TQ9",
+    "purpose": "Turns a setting on or off and applies it at once: notifications, dark mode, a feature.",
+    "instead": [
+      {
+        "goal": "needs-confirmation",
+        "keywords": {
+          "en": [
+            "checkbox",
+            "checkboxes"
+          ],
+          "de": [
+            "checkbox",
+            "kontrollkästchen",
+            "häkchen"
+          ]
+        },
+        "ero": null,
+        "kialo": "A setting that applies only when the form is sent is a checkbox, because a switch promises that the change is already done; Fundamento has no such Ero yet (markobutono comes in PR ② of Spec 010)."
+      }
+    ],
+    "boundary": [
+      {
+        "case": "three-states",
+        "action": "not-supported",
+        "keywords": {
+          "en": [
+            "indeterminate",
+            "tristate"
+          ],
+          "de": [
+            "unbestimmt",
+            "dreistufig"
+          ]
+        },
+        "kialo": "A switch holds on or off, because its track has two ends; a third, mixed state has no place the knob could stand."
+      },
+      {
+        "case": "no-visible-label",
+        "action": "not-supported",
+        "via": {
+          "regulo": "field-label-visible"
+        },
+        "kialo": "A switch without a visible label says that something is on, not what, because the track shows the state and only the label names the setting."
+      }
+    ],
+    "composes": {
+      "containers": [
+        {
+          "name": "settings-list",
+          "kialo": "Settings stand one below the other, each switch with its label, because a person scans the list for the setting and reads its state beside it."
+        },
+        {
+          "name": "dialog",
+          "kialo": "A dialog may offer a setting that applies at once, because the change is seen while the dialog is open."
+        }
+      ],
+      "with": [
+        {
+          "ero": "kampo",
+          "kialo": "A settings form holds fields and switches together, because some settings take a value and some are only on or off; the switch applies at once, the field with the form."
+        }
+      ],
+      "never": [
+        {
+          "ero": "butono",
+          "kialo": "A switch stands in no slot of a button, because a button is one target with one name and the switch could not be reached on its own."
+        }
+      ],
+      "spacing": {
+        "owner": "container",
+        "regulo": "spacing-owned-by-container"
+      }
+    },
+    "slots": {
+      "label": {
+        "accepts": [
+          "text"
+        ],
+        "required": true,
+        "max": 1,
+        "nesting": 0
+      }
+    },
+    "layout": {
+      "size": "content",
+      "wrap": "never"
+    },
+    "content": [
+      {
+        "regulo": "switch-label-names-the-setting",
+        "fixed": true,
+        "check": {
+          "kind": "not-words",
+          "words": {
+            "de": [
+              "einschalten",
+              "ausschalten",
+              "aktivieren",
+              "deaktivieren",
+              "umschalten"
+            ],
+            "en": [
+              "enable",
+              "disable",
+              "activate",
+              "deactivate",
+              "toggle",
+              "turn"
+            ]
+          }
+        }
+      },
+      {
+        "regulo": "field-label-names-the-datum",
+        "fixed": false,
+        "check": {
+          "kind": "not-words",
+          "words": {
+            "de": [
+              "eingeben",
+              "eintragen",
+              "ausfüllen"
+            ],
+            "en": [
+              "enter",
+              "type",
+              "complete"
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

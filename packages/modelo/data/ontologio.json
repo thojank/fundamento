@@ -963,6 +963,10 @@
         {
           "predicate": "references",
           "target": "#Kampo"
+        },
+        {
+          "predicate": "references",
+          "target": "#Sxaltilo"
         }
       ]
     },
@@ -1031,6 +1035,47 @@
         {
           "predicate": "references",
           "target": "#Butono"
+        },
+        {
+          "predicate": "references",
+          "target": "#Sxaltilo"
+        }
+      ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Sxaltilo",
+      "term": "Sxaltilo",
+      "inScheme": "eroj",
+      "prefLabel": {
+        "eo": "Sxaltilo",
+        "en": "switch",
+        "de": "Schalter"
+      },
+      "altLabel": {
+        "en": [
+          "sxaltilo",
+          "toggle switch"
+        ],
+        "de": [
+          "Umschalter",
+          "sxaltilo"
+        ]
+      },
+      "definition": {
+        "en": "A switch: turns a setting on or off and applies it at once. Its label names the setting and always shows; the switch shows its state itself. The butono and the kampo send toggle to it (use-instead); a setting that applies only with the form is the coming markobutono.",
+        "de": "Ein Schalter: schaltet eine Einstellung ein oder aus und wendet sie sofort an. Seine Beschriftung nennt die Einstellung und ist immer sichtbar; den Zustand zeigt der Schalter selbst. butono und kampo verweisen für Ein-/Ausschalten auf ihn (use-instead); eine Einstellung, die erst mit dem Formular gilt, ist der kommende markobutono."
+      },
+      "broader": [
+        "#Ero"
+      ],
+      "relations": [
+        {
+          "predicate": "references",
+          "target": "#Butono"
+        },
+        {
+          "predicate": "references",
+          "target": "#Kampo"
         }
       ]
     }

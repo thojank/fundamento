@@ -73,6 +73,7 @@ describe("suggest_ero", () => {
       "email",
       "navigate",
       "external",
+      "toggle",
     ]);
     // Spec 007 (OP-6, D-06): the system says it does not cover the goal; a person decides.
     expect(result.issues[0]?.suggestion).toBe(
@@ -184,16 +185,16 @@ describe("suggest_ero with the Uzo (T023)", () => {
     ]);
   });
 
-  it("'umschalten' is an alternative Fundamento does not cover yet: ask-human, ero null", () => {
+  // Spec 010 ① (G5): the butono's alternative toggle says use-instead sxaltilo, and the sxaltilo
+  // has the goal toggle; both say sxaltilo, so the goal answers (Spec 008 D-08) and an instead
+  // entry of the other Ero only confirms the choice (it stays out of the answer, OP-12).
+  it("'umschalten' is the sxaltilo since Spec 010 ①: the goal toggle answers, no ask-human", () => {
     const answer = suggest("umschalten");
-    expect(answer.suggestion).toBeNull();
-    expect(answer.boundary).toEqual({
-      ero: "butono",
-      case: "toggle",
-      action: "ask-human",
-      kialo: butonoUzo?.instead.find((entry) => entry.goal === "toggle")?.kialo,
-    });
+    expect(answer.suggestion).toEqual({ ero: "sxaltilo", props: {} });
+    expect(answer.boundary).toBeUndefined();
+    expect(answer.action).toBeUndefined();
     expect(answer.matched).toEqual({ goal: "toggle", keyword: "umschalten", lingvo: "de" });
+    expect(butonoUzo?.instead.find((entry) => entry.goal === "toggle")?.ero).toBe("sxaltilo");
   });
 
   it("'Löschen' is unchanged: the destructive goal with its Regulo", () => {

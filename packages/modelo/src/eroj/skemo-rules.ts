@@ -43,8 +43,27 @@ export type BindingKeyword = (typeof BINDING_KEYWORDS)[number];
 export const isBindingKeyword = (token: string): token is BindingKeyword =>
   (BINDING_KEYWORDS as readonly string[]).includes(token);
 
-/** Token type each platform-neutral part property needs (data-model §4). */
-export const PART_PROPERTY_TYPES: Readonly<Record<SkemoPartProperty, DtcgType>> = {
+/**
+ * The part property that takes a term instead of a token (Spec 010 ①, plan D-04): where a part
+ * stands along its control — the knob of a switch at the start or at the end of its track. A
+ * position is no value a brand changes, so no token carries it; the projections translate the
+ * term (a logical margin on the web, the alignment of an auto layout in Figma).
+ */
+export const POSITION_PROPERTY = "position";
+
+/** The two terms a `position` takes; start and end follow the writing direction. */
+export const POSITION_KEYWORDS = ["start", "end"] as const;
+
+export type PositionKeyword = (typeof POSITION_KEYWORDS)[number];
+
+export const isPositionKeyword = (token: string): token is PositionKeyword =>
+  (POSITION_KEYWORDS as readonly string[]).includes(token);
+
+/**
+ * Token type each platform-neutral part property needs (data-model §4). `position` takes a term,
+ * not a token (D-04), and has no type.
+ */
+export const PART_PROPERTY_TYPES: Readonly<Partial<Record<SkemoPartProperty, DtcgType>>> = {
   fill: "color",
   color: "color",
   typography: "typography",
@@ -219,6 +238,22 @@ function tokenIssues(
   const { ero, skemo } = entry;
   const invalid = new Set<string>();
   const check = (part: string, property: string, token: string, pointer: string) => {
+    // A position is a term, start or end (Spec 010 ①, D-04), and the terms belong to it alone.
+    if (property === POSITION_PROPERTY || isPositionKeyword(token)) {
+      if (property === POSITION_PROPERTY && isPositionKeyword(token)) return;
+      invalid.add(token);
+      at(
+        pointer,
+        "skemo-binding-invalid",
+        property === POSITION_PROPERTY
+          ? `Skemo of ${ero.name} binds ${part}.${property} to ${token}; a position is a term, ${POSITION_KEYWORDS.join(" or ")}, not a token.`
+          : `Skemo of ${ero.name} binds ${part}.${property} to the term ${token}; ${POSITION_KEYWORDS.join(" and ")} are positions, and only the property ${POSITION_PROPERTY} takes them.`,
+        property === POSITION_PROPERTY
+          ? `Bind ${part}.${property} to ${POSITION_KEYWORDS.join(" or ")}.`
+          : `Bind ${part}.${property} to a role token, or move the term to ${part}.${POSITION_PROPERTY}.`,
+      );
+      return;
+    }
     // inherit and none are no tokens (D-03); what they mean is checked by the Reguloj.
     if (isBindingKeyword(token)) return;
     const defined = core[token];
@@ -347,7 +382,9 @@ function coverageIssues(entry: LoadedEro, at: At): void {
 /**
  * `skemo-kontrastparo-missing`: in every allowed combination (disabled exempt) the colour of each
  * text part (a part named after a slot with `text: true`) on each part `fill` is a declared pair.
- * One issue per undeclared pair, at the first combination that uses it.
+ * One issue per undeclared pair, at the first combination that uses it. A slot `beside` the
+ * control (Spec 010 ①, D-07) stands on the ground of its container, not on a part of the Ero:
+ * the label of a switch never lies on its track or its knob, so it is not paired with them.
  */
 function pairIssues(
   entry: LoadedEro,
@@ -357,7 +394,10 @@ function pairIssues(
 ): void {
   const { ero, skemo } = entry;
   const textParts = skemo.slots
-    .filter((slot) => slot.text === true && skemo.parts[slot.name]?.color !== undefined)
+    .filter(
+      (slot) =>
+        slot.text === true && slot.beside !== true && skemo.parts[slot.name]?.color !== undefined,
+    )
     .map((slot) => slot.name);
   const surfaces = Object.entries(skemo.parts)
     .filter(([, properties]) => properties.fill !== undefined)

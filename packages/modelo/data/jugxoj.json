@@ -1548,6 +1548,178 @@
       "kialo": "Der Vorgabewert der Text-Eigenschaft label eines Figma-Sets folgt der Rolle des Ero (a11y.role), nicht mehr ein Wort für alle: button „Aktion“, link „Ziel“, textbox „Beschriftung“. Ein Link nennt sein Ziel und ein Feld fragt nach etwas; „Aktion“ auf einem Link oder über einem Eingabefeld beschreibt das Ero falsch. Die Zuordnung ist Wissen der Figma-Celo (Art. VIII) wie die Struktur je Rolle; eine Rolle ohne eigenen Eintrag behält „Aktion“. Figma hält einen Vorgabewert je Eigenschaft, nicht je Variante; jede Instanz überschreibt ihn. Ein vorgefundenes Set bekommt das neue Wort beim nächsten Lauf (Vorgabewert der Eigenschaft und Text jeder Beschriftung).",
       "date": "2026-10-13",
       "context": "Abnahme Spec 008 (Befund B-6 / M-3), Entscheidung des Maintainers F14, 2026-10-13; umgesetzt im Nachlese-PR"
+    },
+    {
+      "id": "jug_01M4WMD28XK5G77EBVFKGDXA0S",
+      "ref": {
+        "ero": "ero_01M4WMD0RAJYZY7QT5VNS47T8M"
+      },
+      "decision": "approved",
+      "kialo": "The label names the setting; the switch says whether it is on.",
+      "date": "2026-10-14",
+      "context": "Example CORRECT for the Regulo named in ekzemplo.regulo (Spec 010 ① G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4WMD1WXQY3DF8GRA0Y848WM",
+        "instances": [
+          {
+            "ero": "sxaltilo",
+            "props": {
+              "checked": true
+            },
+            "label": "Benachrichtigungen",
+            "lingvo": "de"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4WMD28XK5G77EBVFKGDXA0T",
+      "ref": {
+        "ero": "ero_01M4WMD0RAJYZY7QT5VNS47T8M"
+      },
+      "decision": "approved",
+      "kialo": "The label names the setting; the switch says whether it is on.",
+      "date": "2026-10-14",
+      "context": "Example CORRECT for the Regulo named in ekzemplo.regulo (Spec 010 ① G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4WMD1WXQY3DF8GRA0Y848WM",
+        "instances": [
+          {
+            "ero": "sxaltilo",
+            "props": {
+              "checked": true
+            },
+            "label": "Notifications",
+            "lingvo": "en"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4WMD28XK5G77EBVFKGDXA0V",
+      "ref": {
+        "ero": "ero_01M4WMD0RAJYZY7QT5VNS47T8M"
+      },
+      "decision": "rejected",
+      "kialo": "The verb names the change the switch already shows; a screen reader hears the state twice.",
+      "date": "2026-10-14",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 010 ① G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4WMD1WXQY3DF8GRA0Y848WM",
+        "instances": [
+          {
+            "ero": "sxaltilo",
+            "props": {},
+            "label": "Benachrichtigungen einschalten",
+            "lingvo": "de"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4WMD28XK5G77EBVFKGDXA0W",
+      "ref": {
+        "ero": "ero_01M4WMD0RAJYZY7QT5VNS47T8M"
+      },
+      "decision": "rejected",
+      "kialo": "The verb makes the switch read as a button that acts once.",
+      "date": "2026-10-14",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 010 ① G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4WMD1WXQY3DF8GRA0Y848WM",
+        "instances": [
+          {
+            "ero": "sxaltilo",
+            "props": {},
+            "label": "Enable notifications",
+            "lingvo": "en"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4WMD28XK5G77EBVFKGDXA0X",
+      "ref": {
+        "ero": "ero_01M4WMD0RAJYZY7QT5VNS47T8M"
+      },
+      "decision": "approved",
+      "kialo": "The label names the setting as a noun.",
+      "date": "2026-10-14",
+      "context": "Example CORRECT for the Regulo named in ekzemplo.regulo (Spec 010 ① G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4S1ZR7GEPZSTB9ES3REK3V1",
+        "instances": [
+          {
+            "ero": "sxaltilo",
+            "props": {},
+            "label": "Newsletter",
+            "lingvo": "de"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4WMD28XK5G77EBVFKGDXA0Y",
+      "ref": {
+        "ero": "ero_01M4WMD0RAJYZY7QT5VNS47T8M"
+      },
+      "decision": "approved",
+      "kialo": "The label names the setting as a noun.",
+      "date": "2026-10-14",
+      "context": "Example CORRECT for the Regulo named in ekzemplo.regulo (Spec 010 ① G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4S1ZR7GEPZSTB9ES3REK3V1",
+        "instances": [
+          {
+            "ero": "sxaltilo",
+            "props": {},
+            "label": "Dark mode",
+            "lingvo": "en"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4WMD28XK5G77EBVFKGDXA0Z",
+      "ref": {
+        "ero": "ero_01M4WMD0RAJYZY7QT5VNS47T8M"
+      },
+      "decision": "rejected",
+      "kialo": "A verb of entering names a field, not a setting that is on or off.",
+      "date": "2026-10-14",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 010 ① G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4S1ZR7GEPZSTB9ES3REK3V1",
+        "instances": [
+          {
+            "ero": "sxaltilo",
+            "props": {},
+            "label": "Newsletter eintragen",
+            "lingvo": "de"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4WMD28XK5G77EBVFKGDXA10",
+      "ref": {
+        "ero": "ero_01M4WMD0RAJYZY7QT5VNS47T8M"
+      },
+      "decision": "rejected",
+      "kialo": "A verb of entering names a field, not a setting that is on or off.",
+      "date": "2026-10-14",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 010 ① G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4S1ZR7GEPZSTB9ES3REK3V1",
+        "instances": [
+          {
+            "ero": "sxaltilo",
+            "props": {},
+            "label": "Enter dark mode",
+            "lingvo": "en"
+          }
+        ]
+      }
     }
   ]
 }

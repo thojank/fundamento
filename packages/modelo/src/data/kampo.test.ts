@@ -28,7 +28,12 @@ const SKEMO_REGULOJ = ["required-marked", "error-not-color-only"];
 describe("kampo in the repo Modelo (T004)", () => {
   it("lives in data/eroj/kampo/skemo.json, between butono and ligilo, and the repo Modelo stays valid", () => {
     expect(kampo.file).toBe("modelo/data/eroj/kampo/skemo.json");
-    expect(modelo.eroj.map((entry) => entry.ero.name)).toEqual(["butono", "kampo", "ligilo"]);
+    expect(modelo.eroj.map((entry) => entry.ero.name)).toEqual([
+      "butono",
+      "kampo",
+      "ligilo",
+      "sxaltilo",
+    ]);
     expect(validateModelo(defaultModeloSource()).errors).toEqual([]);
   });
 
@@ -156,11 +161,12 @@ describe("the Uzo of the kampo (T004, A3)", () => {
     );
   });
 
-  it("names multi-line, choose and toggle as not covered, and the six boundaries of A3", () => {
+  // Spec 010 ① (G5): toggle is the sxaltilo's since PR ①; multi-line and choose stay open.
+  it("names multi-line and choose as not covered, toggle as the sxaltilo's, and the six boundaries of A3", () => {
     expect(uzo?.instead.map((entry) => [entry.goal, entry.ero])).toEqual([
       ["multi-line", null],
       ["choose", null],
-      ["toggle", null],
+      ["toggle", "sxaltilo"],
     ]);
     expect(uzo?.boundary.map((entry) => [entry.case, entry.action])).toEqual([
       ["password", "not-supported"],
@@ -210,11 +216,17 @@ describe("the Uzo of the kampo (T004, A3)", () => {
 describe("the Reguloj of the kampo (T003, T004, A2, D-07)", () => {
   const named = (name: string) => modelo.reguloj.find((regulo) => regulo.name === name);
 
+  // Spec 010 ① (E5): field-label-visible and field-label-names-the-datum apply to the sxaltilo
+  // as well; the same Regulo, widened, not a second one.
+  const WIDENED = ["field-label-visible", "field-label-names-the-datum"];
+
   it.each([...TEXT_REGULOJ, ...INSTANCE_REGULOJ, ...SKEMO_REGULOJ])(
     "%s applies to kampo with a kialo",
     (name) => {
       const regulo = named(name);
-      expect(regulo?.appliesTo).toEqual({ eroj: ["kampo"] });
+      expect(regulo?.appliesTo).toEqual({
+        eroj: WIDENED.includes(name) ? ["kampo", "sxaltilo"] : ["kampo"],
+      });
       expect(regulo?.checkability).toBe("automatic");
       expect(regulo?.kialo.length ?? 0).toBeGreaterThan(40);
     },
@@ -230,11 +242,12 @@ describe("the Reguloj of the kampo (T003, T004, A2, D-07)", () => {
     expect(USAGE_ENFORCERS[name]).toBeUndefined();
   });
 
-  it("spacing-owned-by-container applies to all three Eroj", () => {
+  it("spacing-owned-by-container applies to the kampo and the other Eroj", () => {
     expect(named("spacing-owned-by-container")?.appliesTo?.eroj).toEqual([
       "butono",
       "ligilo",
       "kampo",
+      "sxaltilo",
     ]);
   });
 
@@ -242,7 +255,13 @@ describe("the Reguloj of the kampo (T003, T004, A2, D-07)", () => {
     "%s has an approved and a rejected example in de and en that evaluate as they say",
     (name) => {
       const regulo = named(name);
-      const examples = modelo.jugxoj.filter((jugxo) => jugxo.ekzemplo?.regulo === regulo?.id);
+      // The kampo's own examples; the sxaltilo brings its own for the widened Regulo (Spec 010 ①).
+      const examples = modelo.jugxoj.filter(
+        (jugxo) =>
+          jugxo.ekzemplo?.regulo === regulo?.id &&
+          "ero" in jugxo.ref &&
+          jugxo.ref.ero === kampo.ero.id,
+      );
       expect(
         examples.map((jugxo) => [jugxo.decision, jugxo.ekzemplo?.instances[0]?.lingvo]),
       ).toEqual([

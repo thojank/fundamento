@@ -240,7 +240,7 @@ export type SkemoPartSource =
       sameAs: string;
     };
 /**
- * Platform-neutral part properties (Art. VIII); the mapping to CSS or another platform is Celo knowledge in the projections.
+ * Platform-neutral part properties (Art. VIII); the mapping to CSS or another platform is Celo knowledge in the projections. position takes a term, not a token: start or end along the control (Spec 010 ①, plan D-04, the knob of a switch).
  *
  * This interface was referenced by `ModeloJson`'s JSON-Schema
  * via the `definition` "SkemoPartProperty".
@@ -258,7 +258,8 @@ export type SkemoPartProperty =
   | "offset"
   | "size"
   | "duration"
-  | "easing";
+  | "easing"
+  | "position";
 /**
  * Text transformation of a typography role (Spec 001, D-11). DTCG has no field for it; the values are platform-neutral.
  *
@@ -1152,6 +1153,10 @@ export interface SkemoSlot {
   default?: boolean;
   text?: boolean;
   decorative?: boolean;
+  /**
+   * The text of the slot stands beside the control, on the ground of the container, not on a part of the Ero (Spec 010 ①, plan D-07): the label of a switch next to its track. skemo-kontrastparo-missing does not pair it with the Ero's fills.
+   */
+  beside?: boolean;
 }
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema
@@ -1171,7 +1176,7 @@ export interface SkemoBinding {
     [k: string]: Name;
   };
   /**
-   * A role token of core, or the keyword inherit or none (Spec 008, plan D-03; see SkemoPartSource.fixed).
+   * A role token of core, or the keyword inherit or none (Spec 008, plan D-03; see SkemoPartSource.fixed); for the property position one of the terms start or end (Spec 010 ①, plan D-04).
    */
   token: string;
 }
