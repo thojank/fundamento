@@ -1,0 +1,50 @@
+// Type test of the React wrapper of the elektilo (Spec 010 ④, plan ④ D-06): props are typed from
+// the Skemo; the options are children with slot="options" and their value (a <data> element), never
+// a prop; the list is the platform's, so there is no prop open (E3). Each line marked as an
+// expected error must fail to compile; every other line must compile.
+import { Elektilo } from "@fundamento/eroj/react";
+
+export const valid = (
+  <Elektilo
+    value="at"
+    placeholder="Bitte wählen"
+    required
+    invalid
+    size="small"
+    name="land"
+    disabled={false}
+    onChange={() => undefined}
+  >
+    Land
+    <data slot="options" value="de">
+      Deutschland
+    </data>
+    <data slot="options" value="at">
+      Österreich
+    </data>
+    <span slot="help">Wir liefern in zwei Länder.</span>
+    <span slot="error">Wähle ein Land, um fortzufahren</span>
+  </Elektilo>
+);
+
+export const nothingChosen = <Elektilo placeholder="Bitte wählen">Land</Elektilo>;
+
+export const wrongSize = (
+  // @ts-expect-error size allows small, medium and large only
+  <Elektilo size="huge">Land</Elektilo>
+);
+
+export const noLabelProp = (
+  // @ts-expect-error the label is the children, never a prop (G1)
+  <Elektilo label="Land">Land</Elektilo>
+);
+
+export const noOptionsProp = (
+  // @ts-expect-error the options are children in the slot options, not a prop (E7)
+  <Elektilo options={["Deutschland", "Österreich"]}>Land</Elektilo>
+);
+
+export const noOpenProp = (
+  // @ts-expect-error open is no state and no prop: the list is the platform's (E3)
+  <Elektilo open>Land</Elektilo>
+);

@@ -7,7 +7,7 @@ import { join } from "node:path";
 import { defaultModeloSource, evaluateAlirebleco, getEro, loadModelo } from "@fundamento/modelo";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { buildProjekcioj } from "../../build.js";
-import { roundTo, VITRINO_OPTIONS, type VitrinoDatumoj } from "./datumoj.js";
+import { roundTo, VITRINO_OPTIONS, VITRINO_PROMPT, type VitrinoDatumoj } from "./datumoj.js";
 import { VITRINO_FILE } from "./vitrino.js";
 
 const dirs: string[] = [];
@@ -251,6 +251,7 @@ describe("the Vitrino after the acceptances (Nachlese 2026-10-13)", () => {
   it("the layout sentence names the subject and the placement (C8)", () => {
     expect(datumoj.a11yRoloj).toEqual({
       butono: "button",
+      elektilo: "combobox",
       elekto: "radiogroup",
       kampo: "textbox",
       ligilo: "link",
@@ -385,5 +386,39 @@ describe("the Vitrino shows the elekto with three options, required, invalid and
 
   it("says that no option of the radio group breaks", () => {
     expect(html).toContain("Größe aus dem Inhalt, keine Option bricht um.");
+  });
+});
+
+// Spec 010 ④ (plan ④ D-13): the select in the Vitrino, from the same grid: a column for required
+// (it carries an a11y text), invalid and disabled (states); every cell the closed field with the
+// prompt "Bitte wählen" — no option chosen, the Figma set's word — and three options in its list,
+// the help everywhere and the error only under invalid (constraint).
+describe("the Vitrino shows the elektilo closed with the prompt, required, invalid and disabled (Spec 010 ④)", () => {
+  const OPTIONS =
+    '<data slot="options" value="1">Eins</data><data slot="options" value="2">Zwei</data><data slot="options" value="3">Drei</data>';
+
+  it("has the columns rest, required, invalid, disabled and a row per size, the prompt and three options in every cell", () => {
+    const grid = datumoj.eroj.elektilo ?? "";
+    expect(grid).toContain(
+      '<th scope="col">rest</th><th scope="col">required</th><th scope="col">invalid</th><th scope="col">disabled</th>',
+    );
+    for (const size of ["small", "medium", "large"]) {
+      expect(grid).toContain(
+        `<fm-elektilo size="${size}" placeholder="Bitte wählen">${size}${OPTIONS}<span slot="help">Hinweis</span></fm-elektilo>`,
+      );
+      expect(grid).toContain(
+        `<fm-elektilo size="${size}" placeholder="Bitte wählen" invalid>${size}${OPTIONS}<span slot="help">Hinweis</span><span slot="error">Fehler</span></fm-elektilo>`,
+      );
+    }
+    expect(grid).not.toMatch(/<fm-elektilo[^>]* value=/);
+    expect(grid.match(/<data slot="options"/g)).toHaveLength(3 * 4 * 3);
+    expect(grid.match(/slot="error"/g)).toHaveLength(3);
+    expect(VITRINO_PROMPT).toBe("Bitte wählen");
+    // The radio group keeps its first option chosen.
+    expect(datumoj.eroj.elekto ?? "").toContain('<fm-elekto size="small" value="1">');
+  });
+
+  it("says that the field of the select never breaks and takes its size from the container", () => {
+    expect(html).toContain("Größe aus dem Container, Feld bricht nie um.");
   });
 });

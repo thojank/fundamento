@@ -564,3 +564,115 @@ for (const aspekto of ["komuna", "ekzemplo"]) {
     }
   }
 }
+
+// Spec 010 ④ (G7, plan ④ D-06): the rendered fm-elektilo in every colour class of komuna and
+// ekzemplo: axe (role combobox, the platform's select) on every size, required, with a prompt and
+// help, in rest, hover, invalid (with the error text) and disabled, one select with a chosen option
+// besides; the focus ring of the select contrasts at least 3:1 with the gap colour and with the
+// page; the chevron at least 3:1 with the field it stands on (WCAG 1.4.11: it says a list opens).
+const elektilo = input.modelo.eroj.find((entry) => entry.ero.name === "elektilo");
+if (elektilo === undefined) throw new Error("elektilo missing");
+const selectCombos = combinationsOf(elektilo.skemo, ["size"]);
+const SELECT_OPTIONS =
+  '<data slot="options" value="de">Deutschland</data><data slot="options" value="at">Österreich</data><data slot="options" value="ch">Schweiz</data>';
+const selects = selectCombos
+  .map(
+    (c, i) =>
+      `<fm-elektilo id="l${i}" size="${c.size}" required placeholder="Bitte wählen">Land ${i}${SELECT_OPTIONS}<span slot="help">Wir liefern in drei Länder.</span></fm-elektilo>`,
+  )
+  .join(" ")
+  .concat(`<fm-elektilo id="lval" value="at">Lieferland${SELECT_OPTIONS}</fm-elektilo>`);
+
+for (const aspekto of ["komuna", "ekzemplo"]) {
+  for (const scheme of ["light", "dark"]) {
+    for (const contrast of ["default", "high"]) {
+      test(`${aspekto} ${scheme}/${contrast}: axe on every size of the elektilo, prompt and chosen, invalid, focus ring and chevron ≥ 3:1`, async ({
+        page,
+        browserName,
+      }) => {
+        await serve(
+          page,
+          out,
+          selects,
+          "<style>body { color: var(--fm-color-text-default); }</style>",
+        );
+        await page.evaluate(
+          ([a, s, c]) => {
+            const root = document.documentElement;
+            root.setAttribute("data-fm-aspekto", a ?? "");
+            root.setAttribute("data-fm-color-scheme", s ?? "");
+            root.setAttribute("data-fm-contrast", c ?? "");
+          },
+          [aspekto, scheme, contrast],
+        );
+        expect(await axeViolations(page), "rest").toEqual([]);
+        for (const [i] of selectCombos.entries()) {
+          await page.locator(`#l${i}`).locator('[part="control"]').hover();
+          expect(await axeViolations(page, `#l${i}`), `#l${i} hover`).toEqual([]);
+        }
+        await page.mouse.move(0, 0);
+        const measure = () =>
+          page.locator("fm-elektilo").evaluateAll((elements) =>
+            elements.map((element) => {
+              const control = element.shadowRoot?.querySelector('[part="control"]') as HTMLElement;
+              const chevron = element.shadowRoot?.querySelector(
+                '[part="indicator"]',
+              ) as HTMLElement;
+              return {
+                id: element.id,
+                fill: getComputedStyle(control).backgroundColor,
+                chevron: getComputedStyle(chevron).color,
+              };
+            }),
+          );
+        for (const part of await measure()) {
+          expect(
+            contrastOf(part.chevron, part.fill),
+            `${part.id} chevron on field`,
+          ).toBeGreaterThanOrEqual(3);
+        }
+        // Invalid: the error text under the select, the danger border.
+        await page.locator("fm-elektilo").evaluateAll((elements) => {
+          for (const element of elements) {
+            element.toggleAttribute("invalid", true);
+            const error = document.createElement("span");
+            error.slot = "error";
+            error.textContent = "Wähle ein Land, um fortzufahren";
+            element.append(error);
+          }
+        });
+        expect(await axeViolations(page), "invalid").toEqual([]);
+        for (const part of await measure()) {
+          expect(
+            contrastOf(part.chevron, part.fill),
+            `${part.id} invalid chevron on field`,
+          ).toBeGreaterThanOrEqual(3);
+        }
+        await page.locator("fm-elektilo").evaluateAll((elements) => {
+          for (const element of elements) {
+            element.toggleAttribute("invalid", false);
+            for (const error of element.querySelectorAll('[slot="error"]')) error.remove();
+            element.toggleAttribute("disabled", true);
+          }
+        });
+        expect(await axeViolations(page), "disabled").toEqual([]);
+        await page.locator("fm-elektilo").evaluateAll((elements) => {
+          for (const element of elements) element.toggleAttribute("disabled", false);
+        });
+        const rings = await focusRingContrasts(
+          page,
+          [...selectCombos.map((_c, i) => `#l${i}`), "#lval"],
+          browserName,
+        );
+        expect(rings).toHaveLength(selectCombos.length + 1);
+        for (const ring of rings) {
+          expect(ring.gap, `${ring.selector} ring on gap`).toBeGreaterThanOrEqual(3);
+          expect(ring.page, `${ring.selector} ring on page`).toBeGreaterThanOrEqual(3);
+        }
+        expect(boundToken(elektilo.skemo, "indicator", "color", {})?.token).toBe(
+          "color.text.muted",
+        );
+      });
+    }
+  }
+}

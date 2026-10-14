@@ -250,6 +250,7 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
     expect(openButono.map((manko) => manko.part)).toEqual(["boundary", "slots", "content"]);
     expect(result.mankoj.open.map((manko) => manko.set)).toEqual([
       ...["boundary", "slots", "content"].map(() => "butono"),
+      ...["boundary", "slots", "content"].map(() => "elektilo"),
       ...["boundary", "slots", "content"].map(() => "elekto"),
       ...["boundary", "slots", "content"].map(() => "kampo"),
       ...["boundary", "slots", "content"].map(() => "ligilo"),
@@ -280,6 +281,7 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
     ).toEqual(["boundary", "slots", "content"]);
     expect(result.mankoj.closed.map((manko) => manko.set)).toEqual([
       ...["butono", "butono", "butono"],
+      ...["elektilo", "elektilo", "elektilo"],
       ...["elekto", "elekto", "elekto"],
       ...["kampo", "kampo", "kampo"],
       ...["ligilo", "ligilo", "ligilo"],
@@ -2439,6 +2441,8 @@ describe("every bound paint shows the plan's colour after the first and the seco
       // Spec 008: two sets; the ligilo has placement × size × state = 30 variants.
       components: [
         { set: "butono", created: 72, updated: 0 },
+        // Spec 010 ④: the elektilo has size × state = 15 variants.
+        { set: "elektilo", created: 15, updated: 0 },
         // Spec 010 ③: the elekto has size × state = 15 variants.
         { set: "elekto", created: 15, updated: 0 },
         // Spec 009: the kampo has size × state = 18 variants.
@@ -3945,6 +3949,96 @@ describe("the elekto is drawn as a choice: question, options with circle and dot
     expect(strokeOf(descendant(focus[1], "focus-ring"))).toBeUndefined();
     const rest = descendant(variant("size=medium, state=rest"), "options")?.children ?? [];
     expect(strokeOf(descendant(rest[0], "focus-ring"))).toBeUndefined();
+  });
+
+  it("a second run writes nothing new", async () => {
+    const { double } = await drawn();
+    const before = double.snapshot();
+    await run(double, source);
+    expect(double.snapshot()).toBe(before);
+  });
+});
+
+// Spec 010 ④ (plan ④ D-07, E3): the select is drawn as the field of the kampo — label above, ring →
+// gap → control, help and error below — and its control holds the prompt and the chevron: the
+// text "Bitte wählen" (the placeholder's colour, bound) and after it the indicator, the web's
+// chevron imported as one vector, its frame sized by indicator.size, its fill bound to
+// indicator.color; the gap between them is box.gap (the control's itemSpacing). Only the closed
+// field is drawn: the list is the platform's (E3). Test-double assumptions until measured in
+// f10b-5: as for the check mark (② D-09) — createNodeFromSvg makes a FRAME of 16 × 16 with one
+// VECTOR per path, a SCALE constraint follows the bound frame.
+describe("the elektilo is drawn as the field of the kampo with the chevron in its control (Spec 010 ④)", () => {
+  const source = repoFiles["figma/plugin/code.js"] ?? "";
+  const bound = (node: DoubleNode | undefined, field: string) => node?.boundVariables[field]?.name;
+  const drawn = async () => {
+    const double = modelDouble();
+    await run(double, source);
+    const set = pageNodes(double).find((child) => child.name === "elektilo");
+    const variant = (name: string) => set?.children.find((child) => child.name === name);
+    return { double, set, variant };
+  };
+
+  it("draws every variant of size × state, named by the plan, and no list", async () => {
+    const { set } = await drawn();
+    expect(set?.children).toHaveLength(15);
+    expect(set?.children[0]?.name).toBe("size=small, state=rest");
+    expect(set?.children.some((child) => /open/.test(child.name))).toBe(false);
+  });
+
+  it("stacks label, ring with the control, help and error; the control holds the prompt, then the chevron", async () => {
+    const { variant } = await drawn();
+    const rest = variant("size=medium, state=rest");
+    const field = rest?.children.find((child) => child.name === "field");
+    expect(field?.properties.layoutMode).toBe("VERTICAL");
+    expect(field?.children.map((child) => child.name)).toEqual([
+      "label",
+      "focus-ring",
+      "help",
+      "error",
+    ]);
+    const control = descendant(rest, "control");
+    expect(control?.children.map((child) => child.name)).toEqual(["text", "indicator"]);
+    expect(control?.properties.layoutMode).toBe("HORIZONTAL");
+    expect(descendant(rest, "label")?.properties.characters).toBe("Auswahl");
+    expect(descendant(rest, "text")?.properties.characters).toBe("Bitte wählen");
+    expect(descendant(rest, "help")?.properties.characters).toBe("Hinweis");
+    expect(descendant(rest, "error")?.properties.characters).toBe("Fehler");
+    expect(bound(control, "itemSpacing")).toBe("spacing/small");
+  });
+
+  it("binds the chevron's frame to size.icon.*, its vector's fill to color.text.muted, the prompt to the placeholder colour", async () => {
+    const { variant } = await drawn();
+    const rest = variant("size=medium, state=rest");
+    const indicator = descendant(rest, "indicator");
+    expect(bound(indicator, "width")).toBe("size/icon/medium");
+    expect(bound(indicator, "height")).toBe("size/icon/medium");
+    expect(indicator?.properties.layoutSizingHorizontal).toBe("FIXED");
+    expect(indicator?.properties.opacity).toBe(1);
+    expect(descendant(rest, "indicator")?.children.map((child) => child.name)).toEqual(["mark"]);
+    const mark = descendant(rest, "mark");
+    expect(mark?.type).toBe("VECTOR");
+    expect(mark?.properties.constraints).toEqual({ horizontal: "SCALE", vertical: "SCALE" });
+    const paint = (node: DoubleNode | undefined) =>
+      ((node?.properties.fills ?? []) as { boundVariables?: { color?: { name: string } } }[])[0]
+        ?.boundVariables?.color?.name;
+    expect(paint(mark)).toBe("color/text/muted");
+    expect(paint(descendant(rest, "text"))).toBe("color/text/subtle");
+    expect(bound(descendant(variant("size=large, state=invalid"), "indicator"), "width")).toBe(
+      "size/icon/large",
+    );
+    const strokes = (
+      (descendant(variant("size=large, state=invalid"), "control")?.properties.strokes ?? []) as {
+        boundVariables?: { color?: { name: string } };
+      }[]
+    )[0];
+    expect(strokes?.boundVariables?.color?.name).toBe("color/status/danger/border");
+  });
+
+  it("keeps the text field without a chevron (Spec 009)", async () => {
+    const { double } = await drawn();
+    const kampo = pageNodes(double).find((child) => child.name === "kampo");
+    const control = descendant(kampo?.children[0], "control");
+    expect(control?.children.map((child) => child.name)).toEqual(["text"]);
   });
 
   it("a second run writes nothing new", async () => {

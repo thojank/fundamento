@@ -306,3 +306,24 @@ test("fm-elekto is upgraded in its section with three options, required, invalid
   const disabled = section.locator("fm-elekto[disabled]").first().getByRole("radiogroup");
   await expect(disabled).toHaveAttribute("aria-disabled", "true");
 });
+
+// Spec 010 ④ (plan ④ D-13): the section of the elektilo shows the select closed, with the prompt
+// "Bitte wählen" and three options in its list, required, invalid with its error and disabled in
+// every size, upgraded. The list is the platform's (E3): the Vitrino shows the closed field.
+test("fm-elektilo is upgraded in its section with the prompt and three options, required, invalid and disabled", async ({
+  page,
+}) => {
+  await open(page);
+  const section = page.locator("#fm-vitrino-elektilo");
+  await expect(section.locator("thead")).toContainText("required");
+  await expect(section.locator("thead")).toContainText("invalid");
+  await expect(section.getByRole("combobox")).toHaveCount(12);
+  const first = section.getByRole("combobox").first();
+  await expect(first).toHaveValue("");
+  await expect(first.locator("option")).toHaveText(["Bitte wählen", "Eins", "Zwei", "Drei"]);
+  await expect(section.locator('fm-elektilo[invalid] [slot="error"]')).toHaveCount(3);
+  const invalid = section.locator("fm-elektilo[invalid]").first().getByRole("combobox");
+  await expect(invalid).toHaveAttribute("aria-invalid", "true");
+  const disabled = section.locator("fm-elektilo[disabled]").first().getByRole("combobox");
+  await expect(disabled).toBeDisabled();
+});

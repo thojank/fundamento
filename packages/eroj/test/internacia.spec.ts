@@ -390,3 +390,102 @@ for (const factor of [1.35, 2]) {
     expect(clipped).toBe(false);
   });
 }
+
+// Spec 010 ④ (G7): the elektilo right to left — the chevron mirrors to the start of the line, on
+// the left, inside the field, the text of the select aligns to the right — and its options
+// expanded and pseudo-localised: the field keeps its line (wrap never), its width from the
+// container, the chosen option and the chevron stay inside it and nothing is clipped.
+const SELECT_OPTIONS =
+  '<data slot="options" value="de">Deutschland</data><data slot="options" value="at">Österreich</data><data slot="options" value="ch">Schweiz</data>';
+
+test("elektilo right to left: the chevron mirrors to the left inside the field, the focus ring stays", async ({
+  page,
+  browserName,
+}) => {
+  await serve(
+    page,
+    out,
+    `<div style="inline-size: 16rem"><fm-elektilo id="a" value="at">Land${SELECT_OPTIONS}</fm-elektilo></div>`,
+  );
+  const sides = () =>
+    page.locator("#a").evaluate((element) => {
+      const control = element.shadowRoot?.querySelector('[part="control"]') as HTMLElement;
+      const chevron = element.shadowRoot?.querySelector('[part="indicator"]') as HTMLElement;
+      const c = control.getBoundingClientRect();
+      const n = chevron.getBoundingClientRect();
+      return {
+        direction: getComputedStyle(control).direction,
+        toStart: n.left - c.left,
+        toEnd: c.right - n.right,
+        inside: n.left >= c.left && n.right <= c.right,
+      };
+    });
+  const ltr = await sides();
+  expect(ltr.inside).toBe(true);
+  expect(ltr.toEnd).toBeLessThan(ltr.toStart);
+  await page.evaluate(() => document.documentElement.setAttribute("dir", "rtl"));
+  const rtl = await sides();
+  expect(rtl.direction).toBe("rtl");
+  expect(rtl.inside).toBe(true);
+  expect(rtl.toStart).toBeLessThan(rtl.toEnd);
+  await page.keyboard.press(TAB(browserName));
+  const outline = await page
+    .locator("#a")
+    .evaluate(
+      (element) =>
+        getComputedStyle(element.shadowRoot?.querySelector('[part="control"]') as Element)
+          .outlineWidth,
+    );
+  expect(Number.parseFloat(outline)).toBeGreaterThan(0);
+});
+
+for (const factor of [1.35, 2]) {
+  test(`elektilo text expansion to ${Math.round(factor * 100)} %: the field keeps its line and width, nothing is clipped`, async ({
+    page,
+  }) => {
+    await serve(
+      page,
+      out,
+      `<div id="w" style="inline-size: 16rem"><fm-elektilo id="a" value="at">Land${SELECT_OPTIONS}</fm-elektilo></div>`,
+    );
+    const control = () =>
+      page.locator("#a").evaluate((element) => {
+        const select = element.shadowRoot?.querySelector('[part="control"]') as HTMLElement;
+        const chevron = element.shadowRoot?.querySelector('[part="indicator"]') as HTMLElement;
+        const c = select.getBoundingClientRect();
+        const n = chevron.getBoundingClientRect();
+        const field = element.shadowRoot?.querySelector('[part="field"]') as HTMLElement;
+        return {
+          width: c.width,
+          height: c.height,
+          inside: n.left >= c.left && n.right <= c.right,
+          clipped: field.scrollWidth > field.clientWidth + 1,
+        };
+      });
+    const before = await control();
+    await page.locator("#a").evaluate(
+      (element, labels) => {
+        element.querySelectorAll('[slot="options"]').forEach((option, index) => {
+          option.textContent = labels[index] ?? "";
+        });
+      },
+      ["Deutschland", "Österreich", "Schweiz"].map((label) => pseudo(label, factor)),
+    );
+    await expect
+      .poll(() =>
+        page
+          .locator("#a")
+          .evaluate(
+            (element) =>
+              (element.shadowRoot?.querySelector('[part="control"]') as HTMLSelectElement)
+                .selectedOptions[0]?.textContent ?? "",
+          ),
+      )
+      .toMatch(/^\[/);
+    const after = await control();
+    expect(after.width).toBeCloseTo(before.width, 0);
+    expect(after.height).toBeCloseTo(before.height, 0);
+    expect(after.inside).toBe(true);
+    expect(after.clipped).toBe(false);
+  });
+}

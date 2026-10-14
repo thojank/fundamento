@@ -46,6 +46,7 @@ describe("Make Kit sources (T018)", () => {
       "README.md",
       "guidelines/Guidelines.md",
       "guidelines/components/butono.md",
+      "guidelines/components/elektilo.md",
       "guidelines/components/elekto.md",
       "guidelines/components/kampo.md",
       "guidelines/components/ligilo.md",
@@ -419,15 +420,15 @@ describe("Make Kit and the markobutono (Spec 010 ②)", () => {
 
 // Spec 010 ③ (G7, plan ③ D-11): Make builds a choice of one among a few visible options from the
 // radio group — one sentence in the guidelines, generated from every Ero with role radiogroup; the
-// list for six or more is named only once the Modelo has it (elektilo, PR ④). The page of the radio
-// group says how an option is written (an element in the slot options with its value) and shows
-// the options of its examples.
+// list for six or more is named only once the Modelo has it (elektilo, PR ④: now it does, plan ④
+// D-11). The page of the radio group says how an option is written (an element in the slot options
+// with its value) and shows the options of its examples.
 describe("Make Kit and the elekto (Spec 010 ③)", () => {
   it.each(ASPEKTOJ)(
     "%s: the guidelines say that a choice of one among a few visible options is an <Elekto>",
     (aspekto) => {
       expect(kit(aspekto, "guidelines/Guidelines.md")).toContain(
-        "- A choice of one among a few visible options is an `<Elekto>`; six or more go into a list, which this kit does not have yet: ask a person.",
+        "- A choice of one among a few visible options is an `<Elekto>`; six or more go into an `<Elektilo>` list.",
       );
       const page = kit(aspekto, "guidelines/components/elekto.md");
       expect(page).toContain("# Elekto");
@@ -441,6 +442,34 @@ describe("Make Kit and the elekto (Spec 010 ③)", () => {
       expect(page).toContain(
         "**elekto-options-few** (adjustable: a brand may override it with a Jugxo; reports a warning)",
       );
+      expect(page).not.toContain("set `label` as its accessible name");
+    },
+  );
+});
+
+// Spec 010 ④ (G7, plan ④ D-11): Make builds a choice of one among many options from the select —
+// one sentence in the guidelines, generated from every Ero with role combobox, the radio group
+// named for up to five visible options; the kit no longer tells Make to ask a person for a list.
+// The page of the select says how an option is written and shows the prompt of its examples.
+describe("Make Kit and the elektilo (Spec 010 ④)", () => {
+  it.each(ASPEKTOJ)(
+    "%s: the guidelines say that a choice of one among many options is an <Elektilo> list",
+    (aspekto) => {
+      const guidelines = kit(aspekto, "guidelines/Guidelines.md");
+      expect(guidelines).toContain(
+        "- A choice of one among many options is an `<Elektilo>` list; up to five visible options are an `<Elekto>`.",
+      );
+      expect(guidelines).not.toContain("which this kit does not have yet");
+      const page = kit(aspekto, "guidelines/components/elektilo.md");
+      expect(page).toContain("# Elektilo");
+      expect(page).toContain("`placeholder`");
+      expect(page).toContain(
+        'Each option is an element in the slot `options` with its value: `<data slot="options" value="express">Express</data>`; the option whose value is `value` is chosen.',
+      );
+      expect(page).toContain(' placeholder="Bitte wählen"');
+      expect(page).toContain('<data slot="options" value="1">Deutschland</data>');
+      expect(page).toContain("**select-placeholder-is-prompt** (adjustable");
+      expect(page).toContain("**option-labels-distinct**");
       expect(page).not.toContain("set `label` as its accessible name");
     },
   );
