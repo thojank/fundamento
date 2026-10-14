@@ -3189,7 +3189,12 @@ describe("the field of the kampo has room and shows its texts (F-4)", () => {
 // Section „Fundamento": ein neues Set rechts neben dem letzten, mit dem Abstand spacing.xlarge;
 // vorgefundene Sets behalten ihren Platz. Ein Modus auf der Section schaltet die Marke der ganzen
 // Bibliothek; das Plugin setzt und löscht dort nie einen (F35 gilt für Sets).
-describe("every set lies in the section Fundamento, in a row (F-1, F-2)", () => {
+// F-7 (gemessen 2026-10-14 in f10b-5): Nach dem Markenwechsel an der Section (komuna → ekzemplo)
+// wurde das Set kampo breiter (Archivo Black) und überlappte ligilo — der Abstand kam aus den
+// Breiten im Standardmodus. Jetzt ist der Abstand nach einem Set mindestens die halbe Breite
+// dieses Sets (Plan: section.reserve), und ein vorgefundenes Set, das seinem linken Nachbarn
+// näher steht, rückt nach rechts (action spaced). Kein Modus wird dafür an der Section gesetzt.
+describe("every set lies in the section Fundamento, in a row (F-1, F-2, F-7)", () => {
   const source = repoFiles["figma/plugin/code.js"] ?? "";
   type Placement = { x: number; y: number; after: string | null; action: string };
   type SectionReport = { name: string; found: boolean; created: boolean; moved: string[] };
@@ -3227,6 +3232,9 @@ describe("every set lies in the section Fundamento, in a row (F-1, F-2)", () => 
   };
   const names = repoPlan.components.map((component) => component.set);
   const layout = repoPlan.section;
+  /** The gap after a set (F-7): the plan's gap, or half the set's width, whichever is larger. */
+  const gapAfter = (node: DoubleBoxLike): number =>
+    Math.max(layout?.gap ?? Number.NaN, node.width * (layout?.reserve ?? Number.NaN));
 
   it("creates one section Fundamento, stamped, and puts every set into it", async () => {
     const double = modelDouble();
@@ -3248,7 +3256,7 @@ describe("every set lies in the section Fundamento, in a row (F-1, F-2)", () => 
     expect(sets[0]).toMatchObject({ x: layout?.padding, y: layout?.padding });
     for (let index = 1; index < sets.length; index++) {
       const before = sets[index - 1] as DoubleBoxLike;
-      expect(sets[index]?.x, names[index]).toBe(before.x + before.width + (layout?.gap ?? NaN));
+      expect(sets[index]?.x, names[index]).toBe(before.x + before.width + gapAfter(before));
       expect(sets[index]?.y, names[index]).toBe(before.y);
     }
     expect(report.components.map((component) => component.placement)).toEqual(
@@ -3302,12 +3310,12 @@ describe("every set lies in the section Fundamento, in a row (F-1, F-2)", () => 
     expect(box(named(section, last))).toMatchObject({ x: 4000, y: 300 });
     const lastBox = box(named(section, last));
     expect(box(named(section, middle))).toMatchObject({
-      x: lastBox.x + lastBox.width + (layout?.gap ?? NaN),
+      x: lastBox.x + lastBox.width + gapAfter(lastBox),
       y: 300,
     });
     const placement = report.components.find((component) => component.set === middle)?.placement;
     expect(placement).toEqual({
-      x: lastBox.x + lastBox.width + (layout?.gap ?? NaN),
+      x: lastBox.x + lastBox.width + gapAfter(lastBox),
       y: 300,
       after: last,
       action: "created",
@@ -3340,7 +3348,7 @@ describe("every set lies in the section Fundamento, in a row (F-1, F-2)", () => 
     expect(sets[0]).toMatchObject({ x: layout?.padding, y: layout?.padding });
     for (let index = 1; index < sets.length; index++) {
       const before = sets[index - 1] as DoubleBoxLike;
-      expect(sets[index]?.x, names[index]).toBe(before.x + before.width + (layout?.gap ?? NaN));
+      expect(sets[index]?.x, names[index]).toBe(before.x + before.width + gapAfter(before));
     }
     // The first set stays where the maintainer saw it: the section opens around it.
     expect(box(fresh).x + (sets[0]?.x ?? NaN)).toBe(0);
@@ -3368,9 +3376,59 @@ describe("every set lies in the section Fundamento, in a row (F-1, F-2)", () => 
     });
     const lastBox = box(named(section, last));
     expect(box(named(section, first))).toMatchObject({
-      x: lastBox.x + lastBox.width + (layout?.gap ?? NaN),
+      x: lastBox.x + lastBox.width + gapAfter(lastBox),
       y: lastBox.y,
     });
+  });
+
+  // The file f10b-5 on 2026-10-14: three sets in the section with the gap of the default mode
+  // (24 px); the brand font widens kampo over ligilo. The run spaces them, the next run keeps them.
+  it("spaces a found set that stands closer to its left neighbour than its gap, once (F-7)", async () => {
+    const double = modelDouble();
+    await apply(double);
+    const section = sectionOf(double);
+    const [first, middle, last] = names;
+    if (first === undefined || middle === undefined || last === undefined) throw new Error("3");
+    const gap = layout?.gap ?? Number.NaN;
+    const firstBox = box(named(section, first));
+    Object.assign(named(section, middle), { x: firstBox.x + firstBox.width + gap });
+    const middleBox = box(named(section, middle));
+    Object.assign(named(section, last), { x: middleBox.x + middleBox.width + gap });
+    expect(gapAfter(firstBox)).toBeGreaterThan(gap);
+    const report = await apply(double);
+    const spacedMiddle = box(named(section, middle));
+    expect(spacedMiddle).toMatchObject({
+      x: firstBox.x + firstBox.width + gapAfter(firstBox),
+      y: firstBox.y,
+    });
+    expect(box(named(section, last))).toMatchObject({
+      x: spacedMiddle.x + spacedMiddle.width + gapAfter(spacedMiddle),
+    });
+    expect(report.components.map((component) => component.placement)).toEqual([
+      { x: firstBox.x, y: firstBox.y, after: null, action: "kept" },
+      { x: spacedMiddle.x, y: spacedMiddle.y, after: first, action: "spaced" },
+      {
+        x: spacedMiddle.x + spacedMiddle.width + gapAfter(spacedMiddle),
+        y: spacedMiddle.y,
+        after: middle,
+        action: "spaced",
+      },
+    ]);
+    expect(report.section.moved).toEqual([]);
+    // Enough room is kept: a third run moves nothing.
+    const snapshot = double.snapshot();
+    const again = await apply(double);
+    expect(double.snapshot()).toBe(snapshot);
+    expect(again.components.map((component) => component.placement.action)).toEqual(
+      names.map(() => "kept"),
+    );
+    // A set the maintainer dragged far to the right keeps its place: only too little room moves.
+    Object.assign(named(section, last), { x: 9000 });
+    const far = await apply(double);
+    expect(box(named(section, last)).x).toBe(9000);
+    expect(far.components.find((component) => component.set === last)?.placement.action).toBe(
+      "kept",
+    );
   });
 
   it("never sets and never clears a mode on the section; the sets stay on none (F35)", async () => {
