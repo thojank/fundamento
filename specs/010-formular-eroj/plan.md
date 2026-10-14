@@ -6,7 +6,7 @@ Vier gestapelte PRs, ein Abschnitt je PR. Regel 0 gilt für alles, was die Spec 
 
 ## ① `sxaltilo` – Schalter (PR ①)
 
-**Branch:** `261014-spec-010-sxaltilo-010092` (von `origin/main` @ `ff45de0`, nach dem Merge von #57 auf `b9e6c17` rebased; F-7 war hier vorab als zwei eigene Commits enthalten und steht jetzt auf `main`: `7357baa` rot / `7bbc4e1` grün) · **Datum:** 2026-10-14 · **Aufgaben und rote Hashes:** [`tasks.md`](tasks.md) ①
+**Branch:** `261014-spec-010-sxaltilo-010092` (von `origin/main` @ `ff45de0`, nach dem Merge von #57 auf `db9ab7f` rebased; F-7 war hier vorab als zwei eigene Commits enthalten und steht jetzt auf `main`: `7357baa` rot / `7bbc4e1` grün) · **Datum:** 2026-10-14 · **Aufgaben und rote Hashes:** [`tasks.md`](tasks.md) ①
 
 Der erste der vier Wahl-Eroj: hält an/aus und wirkt sofort. Was die Spec offen lässt, entscheidet Regel 0; jede Entscheidung unten nennt ihre Stufe.
 
@@ -84,7 +84,7 @@ Neu `border-strong-on-background-sunken` (ui, Knopf auf ungeschalteter Schiene).
 
 #### D-17 Rot zuerst
 
-Fixtures (je `expected-issues.json`, `git check-ignore` leer): `sxaltilo-label-slot-optional` (`uzo-slot-required-missing`), `sxaltilo-web-term` (Prop `aria-checked`, `skemo-web-term`), `sxaltilo-instead-kialo-missing` (`uzo-kialo-missing` + `schema-violation`), `sxaltilo-instead-ero-unknown` (`uzo-ero-unknown`). Sie sind schalterförmig (`checked` schlüsselt, `position`, `beside`) und waren rot, bis Schema und Regeln standen. Der Text-Fall „Benachrichtigungen einschalten“ ist wie beim `kampo` ein `check_usage`-Test (`data/sxaltilo.test.ts`, rot in `2ca28c6`), dazu der MCP-Test des Beispiel-Dialogs.
+Fixtures (je `expected-issues.json`, `git check-ignore` leer): `sxaltilo-label-slot-optional` (`uzo-slot-required-missing`), `sxaltilo-web-term` (Prop `aria-checked`, `skemo-web-term`), `sxaltilo-instead-kialo-missing` (`uzo-kialo-missing` + `schema-violation`), `sxaltilo-instead-ero-unknown` (`uzo-ero-unknown`). Sie sind schalterförmig (`checked` schlüsselt, `position`, `beside`) und waren rot, bis Schema und Regeln standen. Der Text-Fall „Benachrichtigungen einschalten“ ist wie beim `kampo` ein `check_usage`-Test (`data/sxaltilo.test.ts`, rot in `0073212`), dazu der MCP-Test des Beispiel-Dialogs.
 
 ### Abweichungen von der Spec
 
@@ -104,7 +104,7 @@ Fixtures (je `expected-issues.json`, `git check-ignore` leer): `sxaltilo-label-s
 - **B-2 `brief` des `kampo` wächst:** 708 → 730 (Grenze 750) durch die längere Kialo von `toggle`; PR ③/④ teilen `choose` in zwei Einträge – der `kampo` reißt die Grenze dann voraussichtlich. Nicht gekürzt, gemessen.
 - **B-3 Zielgröße:** Die Schiene `small` ist 18 px hoch; Ziel ist Schiene + Label (das Label schaltet mit). Ob das 24 × 24 (WCAG 2.5.8) in jedem Fall trägt, misst die Abnahme.
 - **B-4 Kandidaten:** `beside` am `kampo`; eigene Hover-Farbe der ungeschalteten Schiene; gemeinsame Bindungstabelle für Feld-Bauformen (Spec ④).
-- **F-8 Figma (gemessen 2026-10-14 in f10b-5)** liegt auf diesem Branch als eigene Commits (rot `08286ad`, dann grün), nur Plugin, nicht Teil des `sxaltilo`: die Sets liegen im Frame `Eroj` mit Auto-Layout in der Section „Fundamento“, F-7s Reserve ist entfernt. Eintrag in [`../008-ligilo/plan.md`](../008-ligilo/plan.md) → „Nachlese 2026-10-13“.
+- **F-8 Figma (gemessen 2026-10-14 in f10b-5)** liegt auf diesem Branch als eigene Commits (rot `25e30a5`, dann grün), nur Plugin, nicht Teil des `sxaltilo`: die Sets liegen im Frame `Eroj` mit Auto-Layout in der Section „Fundamento“, F-7s Reserve ist entfernt. Eintrag in [`../008-ligilo/plan.md`](../008-ligilo/plan.md) → „Nachlese 2026-10-13“.
 
 ### Offen (für den Maintainer)
 
