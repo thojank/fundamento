@@ -441,14 +441,28 @@ function openSection() {
  */
 function placeSet(section, set, name, created) {
   if (section === undefined) return undefined;
-  if (set.parent === section) return { x: set.x, y: set.y, after: null, action: "kept" };
+  if (set.parent === section) {
+    // F-7: a found set keeps its place unless its left neighbour's gap runs into it — then it
+    // moves right, once; the next run finds enough room and keeps it.
+    const left = leftNeighbour(section, set);
+    const needed = left === undefined ? undefined : left.x + left.width + gapAfter(left);
+    if (needed === undefined || set.x >= needed) {
+      return { x: set.x, y: set.y, after: null, action: "kept" };
+    }
+    write(set, "x", needed);
+    return {
+      x: set.x,
+      y: set.y,
+      after: left.getSharedPluginData(NAMESPACE, "ero"),
+      action: "spaced",
+    };
+  }
   let last;
-  for (const child of section.children) {
-    if (child === set || child.type !== "COMPONENT_SET") continue;
-    if (child.getSharedPluginData(NAMESPACE, "ero") === "") continue;
+  for (const child of ownedSets(section)) {
+    if (child === set) continue;
     if (last === undefined || child.x + child.width > last.x + last.width) last = child;
   }
-  const x = last === undefined ? PLAN.section.padding : last.x + last.width + PLAN.section.gap;
+  const x = last === undefined ? PLAN.section.padding : last.x + last.width + gapAfter(last);
   const y = last === undefined ? PLAN.section.padding : last.y;
   section.appendChild(set);
   write(set, "x", x);
@@ -460,6 +474,37 @@ function placeSet(section, set, name, created) {
     after: last === undefined ? null : last.getSharedPluginData(NAMESPACE, "ero"),
     action: created ? "created" : "moved",
   };
+}
+
+/** The component sets the plugin owns inside the section. */
+function ownedSets(section) {
+  const sets = [];
+  for (const child of section.children) {
+    if (child.type !== "COMPONENT_SET") continue;
+    if (child.getSharedPluginData(NAMESPACE, "ero") === "") continue;
+    sets.push(child);
+  }
+  return sets;
+}
+
+/**
+ * The gap after a set (F-7): the plan's gap, or the plan's share of the set's own width in the
+ * mode on screen, whichever is larger. Gemessen 2026-10-14 in f10b-5: ekzemplo (Archivo Black)
+ * made the kampo set wider than the gap of komuna; the sets are not measured in every mode (F-2:
+ * the plugin sets no mode on the section), so the set's width stands in for the brand's growth.
+ */
+function gapAfter(set) {
+  return Math.max(PLAN.section.gap, set.width * PLAN.section.reserve);
+}
+
+/** The owned set whose right edge lies furthest right while still left of this set's left edge. */
+function leftNeighbour(section, set) {
+  let left;
+  for (const child of ownedSets(section)) {
+    if (child === set || child.x >= set.x) continue;
+    if (left === undefined || child.x + child.width > left.x + left.width) left = child;
+  }
+  return left;
 }
 
 /**

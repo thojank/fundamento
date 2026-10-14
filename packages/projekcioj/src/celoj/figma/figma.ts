@@ -175,6 +175,16 @@ export const FIGMA_SECTION = "Fundamento";
 const SET_GAP = "spacing.xlarge";
 
 /**
+ * The share of a set's own width the gap after it is at least (F-7, gemessen 2026-10-14 in
+ * f10b-5): after the brand switch on the section (komuna → ekzemplo) the kampo set grew wider
+ * (Archivo Black) and overlapped the ligilo, because the gap was read from the widths of the
+ * default mode. The plugin sets no mode on the section to measure the other brands (F-2: the
+ * section's mode is the maintainer's), so the room is a share of the width: half, more than the
+ * widening measured. The smaller of the two ways that carry both brands (Regel 0).
+ */
+export const SET_WIDTH_RESERVE = 0.5;
+
+/**
  * The typography a label that inherits from its text (binding keyword `inherit`, Spec 008 E6,
  * plan D-11) shows in Figma: a component set has no container to inherit from, so the running
  * text's role stands in for it, bound like any role, and switches with the mode.
@@ -318,10 +328,12 @@ export interface FigmaPlan {
   /**
    * Where the sets lie (F-1, F-2): in the section of this name on the current page, in a row —
    * the first at the padding, every set the run creates or moves in to the right of the last set
-   * (right edge + gap). A set the run finds in the section keeps its place. Gap and padding are
-   * px of spacing.xlarge, resolved in the base combination.
+   * (right edge + gap). A set the run finds in the section keeps its place unless it stands closer
+   * to its left neighbour than that neighbour's gap (F-7). Gap and padding are px of
+   * spacing.xlarge, resolved in the base combination; the gap after a set is at least `reserve`
+   * of that set's own width, so a wider brand font does not run it into the next set.
    */
-  section?: { name: string; gap: number; padding: number };
+  section?: { name: string; gap: number; padding: number; reserve: number };
 }
 
 /** The single-mode collection of everything no Dimensio changes, and its mode. */
@@ -1177,7 +1189,7 @@ export const FIGMA_CELO: Celo = {
           modelo.reguloj,
         ),
       ),
-      section: { name: FIGMA_SECTION, gap, padding: gap },
+      section: { name: FIGMA_SECTION, gap, padding: gap, reserve: SET_WIDTH_RESERVE },
     };
     return [
       { path: "figma/plan.json", text: `${JSON.stringify(plan, null, 2)}\n` },
