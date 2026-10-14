@@ -1282,7 +1282,7 @@ describe("Spec 010 ④ documentation (Vojmapo Phase 4)", () => {
     }
     expect(section(plan)).not.toContain("Folgt in PR ④.");
     expect(section(tasks)).toContain("### Messungen");
-    for (const hash of ["b8615e4", "1b36590", "c91020a"]) {
+    for (const hash of ["db155cf", "3dc0c5f", "aa329ef"]) {
       expect(section(tasks)).toContain(hash);
     }
   });
