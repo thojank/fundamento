@@ -26,6 +26,27 @@
         "kialo": "A text that runs over several lines needs a field that grows with it, because one line hides what was written; Fundamento has no such Ero yet."
       },
       {
+        "goal": "choose-many",
+        "keywords": {
+          "en": [
+            "select",
+            "list",
+            "country",
+            "language",
+            "many"
+          ],
+          "de": [
+            "auswählen",
+            "liste",
+            "land",
+            "sprache",
+            "vielen"
+          ]
+        },
+        "ero": null,
+        "kialo": "Many options are a list, because a field takes any text; no such Ero yet (elektilo)."
+      },
+      {
         "goal": "choose-few",
         "keywords": {
           "en": [
@@ -46,27 +67,6 @@
         },
         "ero": "elekto",
         "kialo": "A few options are chosen, not typed, because a field takes any text; elekto covers it."
-      },
-      {
-        "goal": "choose-many",
-        "keywords": {
-          "en": [
-            "select",
-            "list",
-            "country",
-            "language",
-            "many"
-          ],
-          "de": [
-            "auswählen",
-            "liste",
-            "land",
-            "sprache",
-            "vielen"
-          ]
-        },
-        "ero": null,
-        "kialo": "Many options are a list, because a field takes any text; no such Ero yet (elektilo)."
       },
       {
         "goal": "toggle",
