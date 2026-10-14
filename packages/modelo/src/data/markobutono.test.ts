@@ -195,14 +195,15 @@ describe("the Uzo of the markobutono (section 2, G5)", () => {
     expect(uzo?.layout).toEqual({ size: "content", wrap: "allowed" });
   });
 
-  it("sends what applies at once to the sxaltilo and names the radio group of PR ③ as not covered yet", () => {
+  // Spec 010 ③ (G5, plan ③ D-12): the radio group exists; one of a few is its use-instead now.
+  it("sends what applies at once to the sxaltilo and one of a few to the elekto", () => {
     expect(uzo?.instead.map((entry) => [entry.goal, entry.ero])).toEqual([
       ["immediate", "sxaltilo"],
-      ["choose-one-of-few", null],
+      ["choose-one-of-few", "elekto"],
     ]);
     expect(uzo?.instead[0]?.kialo).toMatch(/applies at once is a switch/);
-    expect(uzo?.instead[1]?.kialo).toMatch(/elekto/);
-    expect(uzo?.instead[1]?.kialo).toMatch(/PR ③/);
+    expect(uzo?.instead[1]?.kialo).toMatch(/Fundamento covers it with elekto\.$/);
+    expect(uzo?.instead[1]?.kialo).not.toMatch(/PR ③/);
   });
 
   it("stops at the indeterminate state and at a group, and never without a visible label", () => {
@@ -407,13 +408,12 @@ describe("suggest_ero and the checkbox (Gvidanto, section 2)", () => {
     });
   });
 
-  it("'Radiobutton' is the alternative choose-one-of-few: not covered until PR ③, ask-human", () => {
+  // Spec 010 ③: the alternative choose-one-of-few says use-instead elekto, and the elekto has
+  // the goal choose-few with the word; both say elekto, so the goal answers (Spec 008 D-08).
+  it("'Radiobutton' is the elekto since PR ③: the goal choose-few answers, no ask-human", () => {
     const answer = suggest("Radiobutton");
-    expect(answer.suggestion).toBeNull();
-    expect(answer.boundary).toMatchObject({
-      ero: "markobutono",
-      case: "choose-one-of-few",
-      action: "ask-human",
-    });
+    expect(answer.suggestion).toEqual({ ero: "elekto", props: {} });
+    expect(answer.matched?.goal).toBe("choose-few");
+    expect(answer.action).toBeUndefined();
   });
 });

@@ -1,0 +1,9 @@
+{
+  "description": "Spec 010 ③ G7 (G1, E5, Spec 009 D-05): the radio group takes its accessible name from the slot label alone (no label prop), but its Uzo does not mark the slot required. A radio group without its visible label shows answers without the question; the label slot is a duty.",
+  "issues": [
+    {
+      "rule": "uzo-slot-required-missing",
+      "path": "data/eroj/elekto/uzo.json#/uzo/slots/label"
+    }
+  ]
+}

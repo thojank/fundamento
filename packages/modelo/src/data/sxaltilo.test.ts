@@ -189,7 +189,10 @@ describe("the Uzo of the sxaltilo (section 1, G5, D-13)", () => {
       const toggle = uzoOf(name)?.instead.find((entry) => entry.goal === "toggle");
       expect(toggle?.ero, name).toBe("sxaltilo");
       expect(toggle?.kialo, name).toMatch(/in a form, applied with it: markobutono\)\.$/);
-      expect(uzoOf(name)?.instead.find((entry) => entry.goal === "choose")?.ero, name).toBeNull();
+      expect(
+        uzoOf(name)?.instead.find((entry) => entry.goal === "choose-many")?.ero,
+        name,
+      ).toBeNull();
     }
     expect(uzoOf("kampo")?.instead.find((entry) => entry.goal === "multi-line")?.ero).toBeNull();
   });

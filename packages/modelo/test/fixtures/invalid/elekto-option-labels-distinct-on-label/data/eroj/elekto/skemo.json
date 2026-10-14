@@ -1,0 +1,161 @@
+{
+  "$schema": "../../../../../../../schema/modelo.schema.json#/$defs/EroFile",
+  "ero": {
+    "id": "ero_01M2XM2NGN3KJSKJ4JTXQWMF72",
+    "name": "elekto",
+    "skemo": "ske_01M2XM2NWJ39A7BEZ9A2S8GANE",
+    "description": "Fixture Ero: a radio group, one of a few options that stay visible, its label above them."
+  },
+  "skemo": {
+    "id": "ske_01M2XM2NWJ39A7BEZ9A2S8GANE",
+    "ero": "ero_01M2XM2NGN3KJSKJ4JTXQWMF72",
+    "props": [
+      {
+        "name": "value",
+        "kind": "string"
+      },
+      {
+        "name": "invalid",
+        "kind": "boolean",
+        "default": false
+      }
+    ],
+    "states": [
+      "rest",
+      "invalid"
+    ],
+    "slots": [
+      {
+        "name": "label",
+        "default": true,
+        "text": true,
+        "beside": true
+      },
+      {
+        "name": "options",
+        "text": true,
+        "beside": true,
+        "entry": {
+          "key": "selected",
+          "equals": "value"
+        }
+      },
+      {
+        "name": "error",
+        "text": true,
+        "beside": true
+      }
+    ],
+    "parts": {
+      "label": {
+        "color": {
+          "fixed": "color.text.default"
+        }
+      },
+      "option-label": {
+        "color": {
+          "fixed": "color.text.default"
+        }
+      },
+      "error": {
+        "color": {
+          "fixed": "color.text.default"
+        }
+      },
+      "surface": {
+        "fill": {
+          "by": [
+            "selected",
+            "state"
+          ]
+        }
+      },
+      "indicator": {
+        "color": {
+          "by": [
+            "selected"
+          ]
+        },
+        "size": {
+          "fixed": "spacing.medium"
+        }
+      },
+      "box": {
+        "gap": {
+          "fixed": "spacing.small"
+        }
+      }
+    },
+    "bindings": [
+      {
+        "part": "surface",
+        "property": "fill",
+        "when": {
+          "selected": "false",
+          "state": "rest"
+        },
+        "token": "color.background.default"
+      },
+      {
+        "part": "surface",
+        "property": "fill",
+        "when": {
+          "selected": "true",
+          "state": "rest"
+        },
+        "token": "color.text.default"
+      },
+      {
+        "part": "indicator",
+        "property": "color",
+        "when": {
+          "selected": "true"
+        },
+        "token": "color.background.default"
+      },
+      {
+        "part": "indicator",
+        "property": "color",
+        "when": {
+          "selected": "false"
+        },
+        "token": "none"
+      }
+    ],
+    "a11y": {
+      "role": "radiogroup",
+      "name": [
+        "slot:label"
+      ],
+      "description": [
+        "slot:error"
+      ],
+      "states": {
+        "selected": [
+          "aria-checked"
+        ],
+        "invalid": [
+          "aria-invalid"
+        ]
+      },
+      "keys": [
+        "ArrowUp",
+        "ArrowDown",
+        "Space"
+      ]
+    },
+    "constraints": [
+      {
+        "when": {
+          "slot:error": "filled"
+        },
+        "allowed": {
+          "invalid": [
+            "true"
+          ]
+        },
+        "kialo": "An error text without the error state is a contradiction a screen reader cannot resolve: it reads a fault on a group that says it is fine."
+      }
+    ]
+  }
+}

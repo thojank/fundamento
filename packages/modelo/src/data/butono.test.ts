@@ -158,11 +158,13 @@ describe("the Uzo of the butono (T020)", () => {
     ]);
   });
 
-  // Spec 010 ① (G5): toggle is the sxaltilo's since PR ①; choose stays open until PR ③/④.
-  it("answers toggle with the sxaltilo and choose as not covered yet, each with a kialo", () => {
+  // Spec 010 ① (G5): toggle is the sxaltilo's since PR ①. Spec 010 ③ (G5, plan ③ D-12): choose is
+  // two entries, one Ero each — choose-few is the elekto's, choose-many stays open until PR ④.
+  it("answers toggle with the sxaltilo, choose-few with the elekto and choose-many as not covered yet, each with a kialo", () => {
     expect(uzo?.instead.map((entry) => [entry.goal, entry.ero])).toEqual([
       ["toggle", "sxaltilo"],
-      ["choose", null],
+      ["choose-few", "elekto"],
+      ["choose-many", null],
     ]);
     for (const entry of uzo?.instead ?? []) expect(entry.kialo).toMatch(/\bbecause\b/);
   });

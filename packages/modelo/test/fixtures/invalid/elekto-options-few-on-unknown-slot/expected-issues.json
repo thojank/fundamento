@@ -1,0 +1,9 @@
+{
+  "description": "Spec 010 ③ G6, G7 (E7): the warning from the sixth option on (seven options in the rejected example) counts the entries of a slot the Skemo does not have. The count belongs to the slot options, whose entries are the options.",
+  "issues": [
+    {
+      "rule": "uzo-content-of-invalid",
+      "path": "data/eroj/elekto/uzo.json#/uzo/content/0/of"
+    }
+  ]
+}
