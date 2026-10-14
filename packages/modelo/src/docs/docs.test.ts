@@ -870,7 +870,7 @@ describe("Spec 007 documentation (Constitution v2.1, Uzo)", () => {
 
   it("the vojmapo carries the Constitution candidate 'ein Konzeptwechsel stellt daneben' as a candidate, not an amendment", () => {
     const vojmapo = read("docs/vojmapo.md");
-    const row = vojmapo.split("\n").find((line) => line.startsWith("| **Konservierung** |")) ?? "";
+    const row = vojmapo.split("\n").find((line) => line.startsWith("| **Konservierung**")) ?? "";
     expect(row).toContain(
       "Ein Konzeptwechsel stellt daneben, er ersetzt nicht; der alte Stand bleibt baubar, gemessen und zurückholbar.",
     );
