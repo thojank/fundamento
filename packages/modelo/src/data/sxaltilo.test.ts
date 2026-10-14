@@ -22,12 +22,13 @@ const named = (name: string) => modelo.reguloj.find((regulo) => regulo.name === 
 const uzoOf = (name: string) => modelo.eroj.find((entry) => entry.ero.name === name)?.uzo;
 
 describe("sxaltilo in the repo Modelo (G1, G2, section 1)", () => {
-  it("lives in data/eroj/sxaltilo/skemo.json, after the three Eroj, and the repo Modelo stays valid", () => {
+  it("lives in data/eroj/sxaltilo/skemo.json, after the other Eroj, and the repo Modelo stays valid", () => {
     expect(sxaltilo.file).toBe("modelo/data/eroj/sxaltilo/skemo.json");
     expect(modelo.eroj.map((entry) => entry.ero.name)).toEqual([
       "butono",
       "kampo",
       "ligilo",
+      "markobutono",
       "sxaltilo",
     ]);
     expect(validateModelo(defaultModeloSource()).errors).toEqual([]);
@@ -141,9 +142,11 @@ describe("the Uzo of the sxaltilo (section 1, G5, D-13)", () => {
     expect(uzo?.layout).toEqual({ size: "content", wrap: "never" });
   });
 
-  it("names the checkbox as not covered yet (PR ②), three states not supported, no visible label via its Regulo", () => {
+  // Spec 010 ② (G5): the checkbox is an Ero now; the alternative says use-instead markobutono
+  // (① D-13 closed).
+  it("sends needs-confirmation to the markobutono, three states not supported, no visible label via its Regulo", () => {
     expect(uzo?.instead.map((entry) => [entry.goal, entry.ero])).toEqual([
-      ["needs-confirmation", null],
+      ["needs-confirmation", "markobutono"],
     ]);
     expect(uzo?.instead[0]?.kialo).toMatch(/checkbox/);
     expect(uzo?.instead[0]?.kialo).toMatch(/markobutono/);
@@ -180,11 +183,12 @@ describe("the Uzo of the sxaltilo (section 1, G5, D-13)", () => {
     ]);
   });
 
-  it("the butono and the kampo send toggle to the sxaltilo, with the checkbox of PR ② in the kialo (G5)", () => {
+  // Spec 010 ②: the checkbox exists, the kialo names it without the PR (G5: one Ero per entry).
+  it("the butono and the kampo send toggle to the sxaltilo, with the checkbox in the kialo (G5)", () => {
     for (const name of ["butono", "kampo"]) {
       const toggle = uzoOf(name)?.instead.find((entry) => entry.goal === "toggle");
       expect(toggle?.ero, name).toBe("sxaltilo");
-      expect(toggle?.kialo, name).toMatch(/in a form, applied with it: markobutono \(PR ②\)/);
+      expect(toggle?.kialo, name).toMatch(/in a form, applied with it: markobutono\)\.$/);
       expect(uzoOf(name)?.instead.find((entry) => entry.goal === "choose")?.ero, name).toBeNull();
     }
     expect(uzoOf("kampo")?.instead.find((entry) => entry.goal === "multi-line")?.ero).toBeNull();
@@ -205,17 +209,19 @@ describe("the Reguloj of the sxaltilo (G6, E5, D-14)", () => {
   it.each(["field-label-visible", "field-label-names-the-datum"])(
     "%s is widened to the sxaltilo, not duplicated (E5)",
     (name) => {
-      expect(named(name)?.appliesTo).toEqual({ eroj: ["kampo", "sxaltilo"] });
+      // Spec 010 ②: widened once more, to the markobutono (E5).
+      expect(named(name)?.appliesTo).toEqual({ eroj: ["kampo", "sxaltilo", "markobutono"] });
       expect(modelo.reguloj.filter((regulo) => regulo.name === name)).toHaveLength(1);
     },
   );
 
-  it("spacing-owned-by-container applies to all four Eroj", () => {
+  it("spacing-owned-by-container applies to every Ero", () => {
     expect(named("spacing-owned-by-container")?.appliesTo?.eroj).toEqual([
       "butono",
       "ligilo",
       "kampo",
       "sxaltilo",
+      "markobutono",
     ]);
   });
 
@@ -314,13 +320,14 @@ describe("suggest_ero and the switch (Gvidanto, example dialog)", () => {
     expect(answer.action).toBeUndefined();
   });
 
-  it("'Checkbox' is the alternative needs-confirmation of the sxaltilo: not covered until PR ②", () => {
+  // Spec 010 ②: the alternative needs-confirmation says use-instead markobutono.
+  it("'Checkbox' is the alternative needs-confirmation of the sxaltilo: the markobutono since PR ②", () => {
     const answer = suggest("Checkbox");
-    expect(answer.suggestion).toBeNull();
+    expect(answer.suggestion).toEqual({ ero: "markobutono", props: {} });
     expect(answer.boundary).toMatchObject({
       ero: "sxaltilo",
       case: "needs-confirmation",
-      action: "ask-human",
+      action: "use-instead",
     });
   });
 });

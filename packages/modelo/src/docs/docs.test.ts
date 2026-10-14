@@ -1174,3 +1174,37 @@ describe("Spec 010 ① documentation (Vojmapo Phase 4)", () => {
     expect(tasks).toContain("0073212");
   });
 });
+
+// Spec 010 ② (G7, acceptance 8): the Vojmapo names Spec 010 ② in Phase 4; plan and tasks carry
+// section ② with its decisions, its deviations and the red hashes.
+describe("Spec 010 ② documentation (Vojmapo Phase 4)", () => {
+  it("the vojmapo names Spec 010 ②, the checkbox and the Guidelines sentence", () => {
+    const row = read("docs/vojmapo.md")
+      .split("\n")
+      .find((line) => line.startsWith("| 4 |"));
+    expect(row).toContain("**Spec 010 ② (`markobutono`");
+    expect(row).toContain("hält ja/nein und gilt mit dem Formular");
+    expect(row).toContain("Make baut jedes Ja/Nein eines Formulars aus dem Kontrollkästchen");
+    expect(row).toContain("Spec 010 ② umgesetzt");
+  });
+
+  it("plan and tasks carry section ② with decisions, deviations, findings and red hashes", () => {
+    const plan = read("specs/010-formular-eroj/plan.md");
+    const tasks = read("specs/010-formular-eroj/tasks.md");
+    const section = (text: string) =>
+      text.slice(text.indexOf("## ② `markobutono`"), text.indexOf("## ③ `elekto`"));
+    for (const heading of [
+      "### Zusammenfassung",
+      "### Entwurfsentscheidungen",
+      "### Abweichungen von der Spec",
+      "### Befunde / Mankoj",
+      "### Offen (für den Maintainer)",
+      "#### D-09 Figma: die Bauform `toggle` trägt das Kontrollkästchen",
+    ]) {
+      expect(section(plan)).toContain(heading);
+    }
+    expect(section(plan)).not.toContain("Folgt in PR ②.");
+    expect(section(tasks)).toContain("### Messungen");
+    for (const hash of ["3f4907b", "0a02f66"]) expect(section(tasks)).toContain(hash);
+  });
+});

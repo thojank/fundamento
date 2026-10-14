@@ -54,21 +54,25 @@ function fieldPartSelector(part: string, property: string, data: string, state: 
 /** Whether the Ero is a field (a composite of label, input, help and error). */
 const isField = (skemo: Skemo): boolean => hostOf(skemo.a11y.role) === "input";
 
-/** Whether the Ero is a switch (Spec 010 ①, D-09): the track with its knob, the label beside. */
-const isToggle = (skemo: Skemo): boolean => hostOf(skemo.a11y.role) === "switch";
+/**
+ * Whether the Ero is a toggle: a control with its label beside it — the track of a switch with
+ * its knob (Spec 010 ①, D-09), the box of a checkbox with its check mark (Spec 010 ②, D-08).
+ */
+const isToggle = (skemo: Skemo): boolean => hostOf(skemo.a11y.role) === "toggle";
 
 /**
- * The selector of a part of a switch (Spec 010 ①, D-09): the combination stands on the field, the
- * state on the button inside (`:has()`), like the field of the kampo. The track is the button
- * itself; the knob and the label are elements of their own; the gap between track and label is
- * the field's. The position of the knob is the alignment of the track (D-04).
+ * The selector of a part of a toggle (Spec 010 ①, D-09): the combination stands on the field, the
+ * state on the button inside (`:has()`), like the field of the kampo. The track or box is the
+ * button itself; the indicator, the label, the error and the mark of a required box are elements
+ * of their own; the gap between control and label is the field's. The position of a knob is the
+ * alignment of the track (D-04).
  */
 function togglePartSelector(part: string, property: string, data: string, state: string): string {
   const root = `[part="field"]${data}${state === "" ? "" : `:has([part="control"]${state})`}`;
   if (part === "box" && property === "gap") return `:where(${root})`;
   if (part === "focus-ring") return `:where(${root}) [part="control"]:focus-visible`;
   if (part === "indicator" && property !== "position") return `:where(${root}) [part="indicator"]`;
-  if (part === "label") return `:where(${root}) [part="label"]`;
+  if (["label", "error", "required-mark"].includes(part)) return `:where(${root}) [part="${part}"]`;
   return `:where(${root}) [part="control"]`;
 }
 
@@ -119,6 +123,9 @@ function keywordDeclarations(part: string, property: string, token: string): str
   }
   // The underline is switched off; a minimum that is none is simply not written.
   if (part === "underline" && property === "width") return ["text-decoration-line: none;"];
+  // A colour that is none (Spec 010 ②, D-08): the part is not drawn in that combination — the
+  // check mark of an unticked box — and keeps its place, so the box does not change its size.
+  if (token === "none" && (property === "color" || property === "fill")) return ["opacity: 0;"];
   return [];
 }
 
@@ -241,23 +248,38 @@ const fieldStructure = (disables: boolean): string =>
   ].join("\n");
 
 /**
- * Layout of a switch (Spec 010 ①, D-05, D-09), keywords only: the field is a row of track and
- * label; the track is a native button with a border and no padding, its height the knob's plus
- * the border (no size of its own); the knob does not shrink; the label never wraps (Uzo wrap
- * never) and switches the track like a label does.
+ * Layout of a toggle (Spec 010 ①, D-05, D-09; ②, D-08), keywords only: the field is a row of
+ * control and label; the control is a native button with a border and no padding, its size the
+ * indicator's plus the border (no size of its own); the indicator does not shrink and its sign
+ * fills it; the label switches the control like a label does. It never wraps where the Uzo says
+ * never (the switch); where it may wrap (the checkbox), it breaks beside the box, which stays at
+ * the first line, and the error stands under it in a column. The mark of a required box shows
+ * only while the box is marked (data-marked), as in the field.
  */
-const toggleStructure = (disables: boolean): string =>
+const toggleStructure = (
+  disables: boolean,
+  wraps: boolean,
+  texts: boolean,
+  marked: boolean,
+): string =>
   [
     ":host { display: inline-block; vertical-align: middle; }",
-    ':where([part="field"]) { display: inline-flex; align-items: center; }',
+    `:where([part="field"]) { display: inline-flex; align-items: ${texts ? "flex-start" : "center"}; }`,
+    ...(texts ? [':where([part="field"]) > div { display: flex; flex-direction: column; }'] : []),
     ':where([part="control"]) { display: inline-flex; align-items: center; box-sizing: border-box; margin: 0; padding: 0; border-style: solid; cursor: pointer; appearance: none; transition-property: background-color, border-color; }',
     ':where([part="indicator"]) { display: block; flex: none; transition-property: background-color; }',
-    ':where([part="label"]) { cursor: pointer; white-space: nowrap; }',
+    ':where([part="indicator"]) > svg { display: block; }',
+    `:where([part="label"]) { cursor: pointer; white-space: ${wraps ? "normal" : "nowrap"}; }`,
     ':where([part="control"]:focus:not(:focus-visible)) { outline-width: 0; }',
     ...(disables
       ? [
           ':where([part="control"]:disabled) { cursor: not-allowed; }',
           ':where([part="field"]:has([part="control"]:disabled)) [part="label"] { cursor: not-allowed; }',
+        ]
+      : []),
+    ...(marked
+      ? [
+          ':where([part="field"]:not([data-marked="true"])) [part="required-mark"] { display: none; }',
         ]
       : []),
   ].join("\n");
@@ -317,7 +339,12 @@ export function stylesheetOf(skemo: Skemo, uzo?: Uzo): string {
   const base = isField(skemo)
     ? fieldStructure(disables)
     : isToggle(skemo)
-      ? toggleStructure(disables)
+      ? toggleStructure(
+          disables,
+          uzo?.layout.wrap !== undefined && uzo.layout.wrap !== "never",
+          skemo.slots.some((slot) => slot.default !== true && slot.text === true),
+          skemo.parts["required-mark"] !== undefined,
+        )
       : structure(uzo?.layout.wrap === "with-text", disables, bordered);
   return `${base}\n${tokenRules.join("\n")}\n`;
 }
@@ -372,6 +399,8 @@ export function elementNamesOf(entry: LoadedEro, inline = false) {
     ...namesOf(entry.ero),
     ero: entry.ero.name,
     host: hostOf(entry.skemo.a11y.role),
+    role: entry.skemo.a11y.role,
+    marked: entry.skemo.parts["required-mark"] !== undefined,
     slots: entry.skemo.slots.map((slot) => ({
       name: slot.name,
       ...(slot.default === undefined ? {} : { default: slot.default }),
@@ -459,7 +488,10 @@ export function stylesheetInventory(moduleText: string): ParityItem {
   for (const [, rawSelector = ""] of css.matchAll(/([^{}]+)\{[^{}]*\}/g)) {
     // `:focus:not(:focus-visible)` resets the ring; the state is what stays outside the :not().
     const selector = rawSelector.replaceAll(/:not\([^()]*\)/g, "");
-    if (!selector.includes('[part="control"]')) continue;
+    // The combination stands on the control, or on the field of a composite (Spec 009) or a
+    // toggle (Spec 010 ②: the size of a checkbox keys only its label and its check mark, never
+    // the box itself — the box is the mark plus its border).
+    if (!selector.includes('[part="control"]') && !selector.includes('[part="field"]')) continue;
     states.add(stateOf(selector));
     for (const [, name = "", value = ""] of selector.matchAll(/\[data-([a-z0-9-]+)="([^"]*)"\]/g)) {
       const values = props.get(name) ?? [];

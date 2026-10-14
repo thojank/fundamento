@@ -32,6 +32,7 @@ describe("kampo in the repo Modelo (T004)", () => {
       "butono",
       "kampo",
       "ligilo",
+      "markobutono",
       "sxaltilo",
     ]);
     expect(validateModelo(defaultModeloSource()).errors).toEqual([]);
@@ -217,15 +218,27 @@ describe("the Reguloj of the kampo (T003, T004, A2, D-07)", () => {
   const named = (name: string) => modelo.reguloj.find((regulo) => regulo.name === name);
 
   // Spec 010 ① (E5): field-label-visible and field-label-names-the-datum apply to the sxaltilo
-  // as well; the same Regulo, widened, not a second one.
+  // as well; the same Regulo, widened, not a second one. Spec 010 ②: the markobutono has a label,
+  // an error and required like the kampo, so five of the kampo's Reguloj are widened to it.
   const WIDENED = ["field-label-visible", "field-label-names-the-datum"];
+  const CHECKBOX = [
+    "field-label-visible",
+    "field-label-names-the-datum",
+    "error-says-what-to-do",
+    "required-marked",
+    "error-not-color-only",
+  ];
 
   it.each([...TEXT_REGULOJ, ...INSTANCE_REGULOJ, ...SKEMO_REGULOJ])(
     "%s applies to kampo with a kialo",
     (name) => {
       const regulo = named(name);
       expect(regulo?.appliesTo).toEqual({
-        eroj: WIDENED.includes(name) ? ["kampo", "sxaltilo"] : ["kampo"],
+        eroj: [
+          "kampo",
+          ...(WIDENED.includes(name) ? ["sxaltilo"] : []),
+          ...(CHECKBOX.includes(name) ? ["markobutono"] : []),
+        ],
       });
       expect(regulo?.checkability).toBe("automatic");
       expect(regulo?.kialo.length ?? 0).toBeGreaterThan(40);
@@ -248,6 +261,7 @@ describe("the Reguloj of the kampo (T003, T004, A2, D-07)", () => {
       "ligilo",
       "kampo",
       "sxaltilo",
+      "markobutono",
     ]);
   });
 

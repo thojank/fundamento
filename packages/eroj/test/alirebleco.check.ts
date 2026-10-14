@@ -337,3 +337,112 @@ for (const aspekto of ["komuna", "ekzemplo"]) {
     }
   }
 }
+
+// Spec 010 ② (G7, plan ② D-06): the rendered fm-markobutono in every colour class of komuna and
+// ekzemplo: axe (role checkbox) on every size, ticked and not, in rest, hover, invalid and disabled;
+// the focus ring of the box contrasts at least 3:1 with the gap colour and with the page; the check
+// mark contrasts at least 3:1 with its box, and the box's border with the page, also invalid
+// (WCAG 1.4.11: the border is the box, the mark is the state).
+const markobutono = input.modelo.eroj.find((entry) => entry.ero.name === "markobutono");
+if (markobutono === undefined) throw new Error("markobutono missing");
+const checkboxCombos = combinationsOf(markobutono.skemo, ["checked", "size"]);
+const checkboxes = checkboxCombos
+  .map(
+    (c, i) =>
+      `<fm-markobutono id="m${i}" size="${c.size}"${c.checked === "true" ? " checked" : ""}>Ich akzeptiere die AGB ${i}</fm-markobutono>`,
+  )
+  .join(" ");
+
+for (const aspekto of ["komuna", "ekzemplo"]) {
+  for (const scheme of ["light", "dark"]) {
+    for (const contrast of ["default", "high"]) {
+      test(`${aspekto} ${scheme}/${contrast}: axe on every size of the markobutono, ticked and not, invalid, focus ring and mark ≥ 3:1`, async ({
+        page,
+        browserName,
+      }) => {
+        await serve(
+          page,
+          out,
+          checkboxes,
+          "<style>body { color: var(--fm-color-text-default); }</style>",
+        );
+        await page.evaluate(
+          ([a, s, c]) => {
+            const root = document.documentElement;
+            root.setAttribute("data-fm-aspekto", a ?? "");
+            root.setAttribute("data-fm-color-scheme", s ?? "");
+            root.setAttribute("data-fm-contrast", c ?? "");
+          },
+          [aspekto, scheme, contrast],
+        );
+        expect(await axeViolations(page), "rest").toEqual([]);
+        for (const [i] of checkboxCombos.entries()) {
+          await page.locator(`#m${i}`).locator('[part="control"]').hover();
+          expect(await axeViolations(page, `#m${i}`), `#m${i} hover`).toEqual([]);
+        }
+        await page.mouse.move(0, 0);
+        const measure = () =>
+          page.locator("fm-markobutono").evaluateAll((elements) =>
+            elements.map((element) => {
+              const control = element.shadowRoot?.querySelector('[part="control"]') as HTMLElement;
+              const mark = element.shadowRoot?.querySelector('[part="indicator"]') as HTMLElement;
+              return {
+                id: element.id,
+                checked: element.hasAttribute("checked"),
+                fill: getComputedStyle(control).backgroundColor,
+                border: getComputedStyle(control).borderTopColor,
+                mark: getComputedStyle(mark).color,
+                page: getComputedStyle(document.body).backgroundColor,
+              };
+            }),
+          );
+        for (const part of await measure()) {
+          if (part.checked) {
+            expect(
+              contrastOf(part.mark, part.fill),
+              `${part.id} mark on box`,
+            ).toBeGreaterThanOrEqual(3);
+          }
+          expect(
+            contrastOf(part.border, part.page),
+            `${part.id} border on page`,
+          ).toBeGreaterThanOrEqual(3);
+        }
+        // Invalid: the error text under the label, the danger border on the page.
+        await page.locator("fm-markobutono").evaluateAll((elements) => {
+          for (const element of elements) {
+            element.toggleAttribute("invalid", true);
+            const error = document.createElement("span");
+            error.slot = "error";
+            error.textContent = "Akzeptiere die AGB, um fortzufahren";
+            element.append(error);
+          }
+        });
+        expect(await axeViolations(page), "invalid").toEqual([]);
+        for (const part of await measure()) {
+          expect(
+            contrastOf(part.border, part.page),
+            `${part.id} invalid border on page`,
+          ).toBeGreaterThanOrEqual(3);
+        }
+        await page.locator("fm-markobutono").evaluateAll((elements) => {
+          for (const element of elements) element.toggleAttribute("disabled", true);
+        });
+        expect(await axeViolations(page), "disabled").toEqual([]);
+        await page.locator("fm-markobutono").evaluateAll((elements) => {
+          for (const element of elements) element.toggleAttribute("disabled", false);
+        });
+        const rings = await focusRingContrasts(
+          page,
+          checkboxCombos.map((_c, i) => `#m${i}`),
+          browserName,
+        );
+        expect(rings).toHaveLength(checkboxCombos.length);
+        for (const ring of rings) {
+          expect(ring.gap, `${ring.selector} ring on gap`).toBeGreaterThanOrEqual(3);
+          expect(ring.page, `${ring.selector} ring on page`).toBeGreaterThanOrEqual(3);
+        }
+      });
+    }
+  }
+}

@@ -25,6 +25,7 @@ describe("list_eroj", () => {
       "butono",
       "kampo",
       "ligilo",
+      "markobutono",
       "sxaltilo",
     ]);
     expect(listEroj(modelo).eroj[0]).toEqual({
@@ -198,7 +199,7 @@ describe("get_ero", () => {
     if (missing.ok) return;
     expect(missing.issues.map((issue) => issue.rule)).toEqual(["ero-unknown"]);
     expect(missing.issues[0]?.path).toBe("get_ero/name");
-    expect(missing.allowed).toEqual(["butono", "kampo", "ligilo", "sxaltilo"]);
+    expect(missing.allowed).toEqual(["butono", "kampo", "ligilo", "markobutono", "sxaltilo"]);
   });
 });
 

@@ -1,0 +1,163 @@
+{
+  "$schema": "../../../schema/modelo.schema.json#/$defs/UzoFile",
+  "uzo": {
+    "id": "uzo_01M4WPZWDY0CFECQVVJV3TSQJN",
+    "ero": "ero_01M4WPZVP7R6HPEMAQ4EJKH3MT",
+    "skemo": "ske_01M4WPZW25ZEQ8AEGHGBKVC4KB",
+    "purpose": "Marks one option as yes or no inside a form; it applies when the form is sent: terms accepted, newsletter, remember me.",
+    "instead": [
+      {
+        "goal": "immediate",
+        "keywords": {
+          "en": [
+            "immediately",
+            "instantly"
+          ],
+          "de": [
+            "sofort"
+          ]
+        },
+        "ero": "sxaltilo",
+        "kialo": "A setting that applies at once is a switch, because a checkbox promises nothing until the form is sent; Fundamento covers it with sxaltilo."
+      },
+      {
+        "goal": "choose-one-of-few",
+        "keywords": {
+          "en": [
+            "radio",
+            "radiobutton"
+          ],
+          "de": [
+            "radiobutton",
+            "optionsfeld"
+          ]
+        },
+        "ero": null,
+        "kialo": "One of a few options is a radio group, because checkboxes let a person tick several and the form could not tell which one counts; Fundamento has no such Ero yet (elekto, PR ③ of Spec 010)."
+      }
+    ],
+    "boundary": [
+      {
+        "case": "indeterminate",
+        "action": "not-supported",
+        "keywords": {
+          "en": [
+            "indeterminate",
+            "tristate"
+          ],
+          "de": [
+            "unbestimmt",
+            "dreistufig"
+          ]
+        },
+        "kialo": "A checkbox holds yes or no, because the form sends it or does not; a mixed state belongs to a group of checkboxes."
+      },
+      {
+        "case": "checkbox-group",
+        "action": "ask-human",
+        "keywords": {
+          "en": [
+            "checkboxes",
+            "checklist"
+          ],
+          "de": [
+            "checkboxen",
+            "checkliste"
+          ]
+        },
+        "kialo": "Several checkboxes stand in a form under a heading the form owns, because the heading names the question and each box one answer; Fundamento has no group Ero yet, so a person decides."
+      },
+      {
+        "case": "no-visible-label",
+        "action": "not-supported",
+        "via": {
+          "regulo": "field-label-visible"
+        },
+        "kialo": "A checkbox without a visible label says that something is ticked, not what, because the box shows the answer and only the label names it."
+      }
+    ],
+    "composes": {
+      "containers": [
+        {
+          "name": "form",
+          "kialo": "A checkbox without a form has no sender, because its answer is only sent with the form."
+        },
+        {
+          "name": "dialog",
+          "kialo": "A dialog may ask for a yes or no before it ends, because the decision it ends in may need it (terms accepted)."
+        }
+      ],
+      "with": [
+        {
+          "ero": "kampo",
+          "kialo": "Checkboxes stand among the fields of a form, one below the other, because a person reads a form top down and answers it in that order."
+        },
+        {
+          "ero": "butono",
+          "kialo": "The form ends with the button that sends it, because ticking a box does nothing by itself; the button stands after the last checkbox."
+        }
+      ],
+      "never": [
+        {
+          "ero": "butono",
+          "kialo": "A checkbox stands in no slot of a button, because a button is one target with one name and the checkbox could not be reached on its own."
+        }
+      ],
+      "spacing": {
+        "owner": "container",
+        "regulo": "spacing-owned-by-container"
+      }
+    },
+    "slots": {
+      "label": {
+        "accepts": [
+          "text"
+        ],
+        "required": true,
+        "max": 1,
+        "nesting": 0
+      },
+      "error": {
+        "accepts": [
+          "text"
+        ],
+        "max": 1,
+        "nesting": 0
+      }
+    },
+    "layout": {
+      "size": "content",
+      "wrap": "allowed"
+    },
+    "content": [
+      {
+        "regulo": "field-label-names-the-datum",
+        "fixed": false,
+        "check": {
+          "kind": "not-words",
+          "words": {
+            "de": [
+              "eingeben",
+              "eintragen",
+              "ausfüllen"
+            ],
+            "en": [
+              "enter",
+              "type",
+              "complete"
+            ]
+          }
+        }
+      },
+      {
+        "regulo": "error-says-what-to-do",
+        "fixed": true,
+        "of": "slot:error",
+        "check": {
+          "kind": "min-words",
+          "count": 3
+        }
+      }
+    ]
+  }
+}

@@ -269,3 +269,21 @@ test("fm-sxaltilo is upgraded in its section, unchecked, checked and disabled", 
   const disabled = section.locator("fm-sxaltilo[disabled]").first().locator("button");
   await expect(disabled).toBeDisabled();
 });
+
+// Spec 010 ② (plan ② D-13): the section of the markobutono shows the checkbox unticked, ticked,
+// required, invalid with its error and disabled in every size, upgraded.
+test("fm-markobutono is upgraded in its section, ticked, required, invalid and disabled", async ({
+  page,
+}) => {
+  await open(page);
+  const section = page.locator("#fm-vitrino-markobutono");
+  await expect(section.locator("thead")).toContainText("checked");
+  await expect(section.locator("thead")).toContainText("invalid");
+  await expect(section.getByRole("checkbox", { checked: true })).toHaveCount(3);
+  await expect(section.getByRole("checkbox", { checked: false })).toHaveCount(12);
+  await expect(section.locator('fm-markobutono[invalid] [slot="error"]')).toHaveCount(3);
+  const invalid = section.locator("fm-markobutono[invalid]").first().locator("button");
+  await expect(invalid).toHaveAttribute("aria-invalid", "true");
+  const disabled = section.locator("fm-markobutono[disabled]").first().locator("button");
+  await expect(disabled).toBeDisabled();
+});

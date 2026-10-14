@@ -7,10 +7,12 @@
 // language of the document. Console warnings are developer messages.
 
 /**
- * The native control an a11y role is rendered as (Celo knowledge, Art. VIII). `switch` is a
- * native button with role switch (Spec 010 ①, D-09): the track, with the knob in it.
+ * The native control an a11y role is rendered as (Celo knowledge, Art. VIII). `toggle` is a
+ * native button with the role of the Skemo, a control with its label beside it: the track of a
+ * switch with the knob in it (Spec 010 ①, D-09), the box of a checkbox with the check mark in it
+ * (Spec 010 ②, D-08).
  */
-export type HostControl = "button" | "a" | "input" | "switch";
+export type HostControl = "button" | "a" | "input" | "toggle";
 
 export interface ElementNames {
   /** `fm-butono` */
@@ -23,6 +25,10 @@ export interface ElementNames {
   ero: string;
   /** The native control of the a11y role; `button` when the role has no mapping. */
   host?: HostControl;
+  /** The a11y role of the Skemo: a toggle renders it on its button (Spec 010 ②, D-08). */
+  role?: string;
+  /** Whether the Skemo has the part required-mark: a toggle shows it in its label (D-08). */
+  marked?: boolean;
   /** Slot names in the order the Skemo declares them; the default slot is the label. */
   slots?: { name: string; default?: boolean; decorative?: boolean }[];
   /**
@@ -36,7 +42,7 @@ export interface ElementNames {
 export function hostOf(role: string): HostControl {
   if (role === "link") return "a";
   if (role === "textbox") return "input";
-  if (role === "switch") return "switch";
+  if (role === "switch" || role === "checkbox") return "toggle";
   return "button";
 }
 
@@ -55,34 +61,75 @@ const MARK =
 const REQUIRED_MARK =
   '<svg aria-hidden="true" viewBox="0 0 16 16" width="8" height="8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 2v12M2.8 5l10.4 6M13.2 5 2.8 11"/></svg>';
 
+/** The outline of the check mark in a box of 16 × 16 (Spec 010 ②, D-08). */
+const CHECK_PATH = "M6.4 12.6 2.2 8.4l1.4-1.4 2.8 2.8 6-6 1.4 1.4z";
+
+/**
+ * The sign the indicator of a toggle shows, per a11y role (Spec 010 ②, D-08, D-09): the check mark
+ * of a checkbox, a filled vector in the current colour — the colour of the part indicator; a sign
+ * of the projection, no text node (Art. VIII), like the mark of a required field. A knob has none.
+ * The web fills the indicator with it (`100%`); the Figma Celo imports the same vector in its own
+ * box of 16 (one shape for both pictures).
+ */
+export function signOf(role: string, size = "100%"): string | undefined {
+  if (role !== "checkbox") return undefined;
+  return `<svg aria-hidden="true" viewBox="0 0 16 16" width="${size}" height="${size}" fill="currentColor"><path d="${CHECK_PATH}"/></svg>`;
+}
+
+/**
+ * The text slots of a composite besides the label (Spec 009, D-08): each in its own part, hidden
+ * while empty; the error announced live. Their texts are the description of the control.
+ */
+function textsMarkup(slots: NonNullable<ElementNames["slots"]>): string {
+  return slots
+    .filter((slot) => slot.default !== true && slot.decorative !== true)
+    .map(
+      (slot) =>
+        `<span part="${slot.name}" id="${slot.name}" hidden${slot.name === "error" ? ' aria-live="polite"' : ""}><slot name="${slot.name}"></slot></span>`,
+    )
+    .join("");
+}
+
 /**
  * The shadow markup of a field (Spec 009, D-08): the label with the mark of a required field, the
  * native input, help and error below, each in its own part. The texts of the slots are the
  * description of the input (a11y.description), the error announced live.
  */
 function fieldMarkup(slots: NonNullable<ElementNames["slots"]>): string {
-  const texts = slots
-    .filter((slot) => slot.default !== true)
-    .map(
-      (slot) =>
-        `<span part="${slot.name}" id="${slot.name}" hidden${slot.name === "error" ? ' aria-live="polite"' : ""}><slot name="${slot.name}"></slot></span>`,
-    )
-    .join("");
-  return `<div part="field"><label part="label" for="control"><slot></slot><span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span></label><input part="control" id="control">${texts}<span id="fm-texts" hidden></span></div>`;
+  return `<div part="field"><label part="label" for="control"><slot></slot><span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span></label><input part="control" id="control">${textsMarkup(slots)}<span id="fm-texts" hidden></span></div>`;
 }
 
 /**
- * The shadow markup of a switch (Spec 010 ①, D-09): a native button with role switch as the track,
- * the knob in it, the label beside it — named by the label (aria-labelledby), and a click on the
- * label switches the track like a click on it (for). aria-checked is set when it renders.
+ * The shadow markup of a toggle (Spec 010 ①, D-09; ②, D-08): a native button with the role of the
+ * Skemo as the control — the track of a switch with its knob, the box of a checkbox with its check
+ * mark — and the label beside it, named by the label (aria-labelledby); a click on the label
+ * turns the control like a click on it (for). A checkbox carries the mark of a required box in
+ * its label and its error under the label, in a column beside the box. aria-checked is set when
+ * it renders.
  */
-const SWITCH_MARKUP =
-  '<div part="field"><button part="control" id="control" type="button" role="switch" aria-labelledby="label"><span part="indicator"></span></button><label part="label" id="label" for="control"><slot></slot></label><span id="fm-texts" hidden></span></div>';
+function toggleMarkup(
+  role: string,
+  slots: NonNullable<ElementNames["slots"]>,
+  marked: boolean,
+): string {
+  const mark = marked
+    ? `<span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span>`
+    : "";
+  const label = `<label part="label" id="label" for="control"><slot></slot>${mark}</label>`;
+  const texts = textsMarkup(slots);
+  const beside = texts === "" ? label : `<div>${label}${texts}</div>`;
+  return `<div part="field"><button part="control" id="control" type="button" role="${role}" aria-labelledby="label"><span part="indicator">${signOf(role) ?? ""}</span></button>${beside}<span id="fm-texts" hidden></span></div>`;
+}
 
 /** The shadow markup of the control: slots before the label (icon-start), the label, the rest. */
-function markup(host: HostControl, slots: NonNullable<ElementNames["slots"]>): string {
+function markup(
+  host: HostControl,
+  slots: NonNullable<ElementNames["slots"]>,
+  role: string,
+  marked: boolean,
+): string {
   if (host === "input") return fieldMarkup(slots);
-  if (host === "switch") return SWITCH_MARKUP;
+  if (host === "toggle") return toggleMarkup(role, slots, marked);
   const before = slots.filter((slot) => slot.default !== true && slot.name.endsWith("-start"));
   const after = slots.filter((slot) => slot.default !== true && !slot.name.endsWith("-start"));
   const last = after.at(-1)?.name;
@@ -102,6 +149,8 @@ export function elementSource({
   ero,
   inline,
   host = "button",
+  role = "button",
+  marked = false,
   slots = [
     { name: "label", default: true },
     { name: "icon-start", decorative: true },
@@ -113,20 +162,49 @@ export function elementSource({
       ? `const SKEMO = ${constant}_SKEMO;\nconst CSS = ${constant}_CSS;`
       : `import { ${constant}_SKEMO as SKEMO } from "./skemo.js";\nimport { ${constant}_CSS as CSS } from "./${ero}.styles.js";`;
   const control = host === "a" ? "a" : host === "input" ? "input" : "button";
-  const isSwitch = host === "switch";
-  // Only the element of a switch carries these lines (Spec 010 ①, D-09).
-  const switchRender = isSwitch
-    ? `    // A switch (Spec 010 ①, D-09): checked is spoken as aria-checked; in a form it sends "on"
+  const isToggle = host === "toggle";
+  // Only the element of a toggle carries these lines (Spec 010 ①, D-09; ②, D-08).
+  const toggleRender = isToggle
+    ? `    // A toggle (Spec 010 ①, D-09): checked is spoken as aria-checked; in a form it sends "on"
     // under its name while checked and nothing while not, as a native checkbox does.
     const checked = this.propValue("checked") === true;
     control.setAttribute("aria-checked", String(checked));
     this.#internals.setFormValue(checked ? "on" : null);
+    // A checkbox (Spec 010 ②, D-08): required is spoken as aria-required and is the validity of
+    // the form — a required box left empty keeps the form from being sent, with the text of
+    // a11y.texts.required as its message; invalid is spoken as aria-invalid and set by a filled
+    // error slot (constraint of the Skemo).
+    const required = this.propValue("required") === true;
+    if (required) control.setAttribute("aria-required", "true");
+    else control.removeAttribute("aria-required");
+    const missing = TEXTS.required?.[this.#lingvo()] ?? TEXTS.required?.en ?? "";
+    if (required && !checked && missing !== "") {
+      this.#internals.setValidity({ valueMissing: true }, missing, control);
+    } else {
+      this.#internals.setValidity({});
+    }
+    if (HAS_PROP.has("invalid")) {
+      const invalid = this.propValue("invalid") === true || this.#filled("error");
+      if (invalid) control.setAttribute("aria-invalid", "true");
+      else control.removeAttribute("aria-invalid");
+    }
 `
     : "";
-  // A button submits or resets its form (type); a switch turns instead.
-  const switchActivate = isSwitch
-    ? `    // A switch (Spec 010 ①, D-09): every activation — pointer, Space, Enter, a click on the
-    // label — turns it; the element says so with input and change, as a native checkbox does.
+  // A checkbox turns with Space alone (Spec 010 ②, D-08): the Skemo names its keys, and Enter on a
+  // native button would turn it too.
+  const toggleKeys = isToggle
+    ? `    if (!KEYS.includes("Enter")) {
+      control.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") event.preventDefault();
+      });
+    }
+`
+    : "";
+  // A button submits or resets its form (type); a toggle turns instead.
+  const toggleActivate = isToggle
+    ? `    // A toggle (Spec 010 ①, D-09): every activation — pointer, Space, Enter where the Skemo
+    // names it, a click on the label — turns it; the element says so with input and change, as a
+    // native checkbox does.
     this.toggleAttribute("checked", this.propValue("checked") !== true);
     this.dispatchEvent(new Event("input", { bubbles: true, composed: true }));
     this.dispatchEvent(new Event("change", { bubbles: true }));
@@ -158,6 +236,8 @@ const TEXTS = (("texts" in SKEMO.a11y ? SKEMO.a11y.texts : {}) ?? {}) as Readonl
 /** Where the description comes from, in order: slot:help, slot:error (Spec 009, D-02). */
 const DESCRIPTION = (("description" in SKEMO.a11y ? SKEMO.a11y.description : []) ?? []) as readonly string[];
 const HAS_PROP = new Set(PROPS.map((prop) => prop.name));
+/** The keys the Skemo names (Space, Enter): a toggle turns with these alone (Spec 010 ②). */
+const KEYS = SKEMO.a11y.keys as readonly string[];
 /**
  * Boolean props that key a part (Spec 010 ①, D-03: checked): written on the root as
  * data-<prop>="true|false", like an enum, because the stylesheet keys on them.
@@ -211,7 +291,7 @@ export class ${className} extends Base {
       sheet.replaceSync(CSS);
     }
     root.adoptedStyleSheets = [sheet];
-    root.innerHTML = \`${markup(host, slots)}\`;
+    root.innerHTML = \`${markup(host, slots, role, marked)}\`;
     const control = root.querySelector("${control}");
     const label = root.querySelector("slot:not([name])");
     const texts = root.querySelector("#fm-texts");
@@ -227,7 +307,7 @@ export class ${className} extends Base {
     this.#label = label;
     this.#texts = texts;
     control.addEventListener("click", (event) => this.#activate(event));
-    label.addEventListener("slotchange", () => this.#render());
+${toggleKeys}    label.addEventListener("slotchange", () => this.#render());
     for (const named of root.querySelectorAll("slot[name]")) {
       named.addEventListener("slotchange", () => this.#render());
     }
@@ -363,15 +443,17 @@ export class ${className} extends Base {
       const invalid = this.propValue("invalid") === true || this.#filled("error");
       if (invalid) control.setAttribute("aria-invalid", "true");
       else control.removeAttribute("aria-invalid");
-      for (const source of DESCRIPTION) {
-        const [kind, name = ""] = source.split(":");
-        const holder = this.shadowRoot?.getElementById(name);
-        const has = kind === "slot" ? this.#filled(name) : typeof this.propValue(name) === "string";
-        if (holder instanceof HTMLElement) holder.hidden = !has;
-        if (has) described.push(name);
-      }
     }
-${switchRender}    // What is heard in addition (Spec 008, D-02): the texts of every true boolean prop, in the
+${toggleRender}    // The texts of the slots that describe the control (Spec 009, D-02; a checkbox, Spec 010 ②):
+    // shown while they have text, and its description in that order.
+    for (const source of DESCRIPTION) {
+      const [kind, name = ""] = source.split(":");
+      const holder = this.shadowRoot?.getElementById(name);
+      const has = kind === "slot" ? this.#filled(name) : typeof this.propValue(name) === "string";
+      if (holder instanceof HTMLElement) holder.hidden = !has;
+      if (has) described.push(name);
+    }
+    // What is heard in addition (Spec 008, D-02): the texts of every true boolean prop, in the
     // language of the document, as the description of the control; the mark shows with them.
     const lingvo = this.#lingvo();
     const heard = Object.entries(TEXTS)
@@ -407,7 +489,7 @@ ${switchRender}    // What is heard in addition (Spec 008, D-02): the texts of e
       return;
     }
     if (!(this.#control instanceof HTMLButtonElement)) return;
-${switchActivate}  }
+${toggleActivate}  }
 }
 
 /**

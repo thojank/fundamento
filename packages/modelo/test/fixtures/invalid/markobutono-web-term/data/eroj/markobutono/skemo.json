@@ -1,0 +1,146 @@
+{
+  "$schema": "../../../../../../../schema/modelo.schema.json#/$defs/EroFile",
+  "ero": {
+    "id": "ero_01M2XM2NGN3KJSKJ4JTXQWMF72",
+    "name": "markobutono",
+    "skemo": "ske_01M2XM2NWJ39A7BEZ9A2S8GANE",
+    "description": "Fixture Ero: a checkbox with its label beside the box, yes or no inside a form."
+  },
+  "skemo": {
+    "id": "ske_01M2XM2NWJ39A7BEZ9A2S8GANE",
+    "ero": "ero_01M2XM2NGN3KJSKJ4JTXQWMF72",
+    "props": [
+      {
+        "name": "aria-checked",
+        "kind": "boolean",
+        "default": false
+      },
+      {
+        "name": "invalid",
+        "kind": "boolean",
+        "default": false
+      }
+    ],
+    "states": [
+      "rest",
+      "invalid"
+    ],
+    "slots": [
+      {
+        "name": "label",
+        "default": true,
+        "text": true,
+        "beside": true
+      },
+      {
+        "name": "error",
+        "text": true,
+        "beside": true
+      }
+    ],
+    "parts": {
+      "label": {
+        "color": {
+          "fixed": "color.text.default"
+        }
+      },
+      "error": {
+        "color": {
+          "fixed": "color.text.default"
+        }
+      },
+      "surface": {
+        "fill": {
+          "by": [
+            "aria-checked",
+            "state"
+          ]
+        }
+      },
+      "indicator": {
+        "color": {
+          "by": [
+            "aria-checked"
+          ]
+        },
+        "size": {
+          "fixed": "spacing.medium"
+        }
+      },
+      "box": {
+        "gap": {
+          "fixed": "spacing.small"
+        }
+      }
+    },
+    "bindings": [
+      {
+        "part": "surface",
+        "property": "fill",
+        "when": {
+          "aria-checked": "false",
+          "state": "rest"
+        },
+        "token": "color.background.default"
+      },
+      {
+        "part": "surface",
+        "property": "fill",
+        "when": {
+          "aria-checked": "true",
+          "state": "rest"
+        },
+        "token": "color.text.default"
+      },
+      {
+        "part": "indicator",
+        "property": "color",
+        "when": {
+          "aria-checked": "true"
+        },
+        "token": "color.background.default"
+      },
+      {
+        "part": "indicator",
+        "property": "color",
+        "when": {
+          "aria-checked": "false"
+        },
+        "token": "none"
+      }
+    ],
+    "a11y": {
+      "role": "checkbox",
+      "name": [
+        "slot:label"
+      ],
+      "description": [
+        "slot:error"
+      ],
+      "states": {
+        "aria-checked": [
+          "aria-checked"
+        ],
+        "invalid": [
+          "aria-invalid"
+        ]
+      },
+      "keys": [
+        "Space"
+      ]
+    },
+    "constraints": [
+      {
+        "when": {
+          "slot:error": "filled"
+        },
+        "allowed": {
+          "invalid": [
+            "true"
+          ]
+        },
+        "kialo": "An error text without the error state is a contradiction a screen reader cannot resolve: it reads a fault on a checkbox that says it is fine."
+      }
+    ]
+  }
+}

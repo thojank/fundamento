@@ -37,10 +37,12 @@ describe("Web Component Celo (T011)", () => {
       "eroj/src/generated/fm-butono.ts",
       "eroj/src/generated/fm-kampo.ts",
       "eroj/src/generated/fm-ligilo.ts",
+      "eroj/src/generated/fm-markobutono.ts",
       "eroj/src/generated/fm-sxaltilo.ts",
       "eroj/src/generated/index.ts",
       "eroj/src/generated/kampo.styles.ts",
       "eroj/src/generated/ligilo.styles.ts",
+      "eroj/src/generated/markobutono.styles.ts",
       "eroj/src/generated/react.ts",
       "eroj/src/generated/skemo.ts",
       "eroj/src/generated/sxaltilo.styles.ts",
@@ -252,5 +254,92 @@ describe("Web Component Celo for the sxaltilo (Spec 010 ①)", () => {
       size: ["small", "medium", "large"],
     });
     expect([...inventory.states].sort()).toEqual(["disabled", "focus", "hover", "rest"]);
+  });
+});
+
+// Spec 010 ② (plan ② D-08): the checkbox from the same template as the switch — a native button
+// with role checkbox and aria-checked as the box, the check mark inside it, the label beside it
+// with the mark of a required box, and the error under the label. checked keys the parts
+// (data-checked on the field); the check mark is not drawn while unchecked (indicator.color none).
+describe("Web Component Celo for the markobutono (Spec 010 ②)", () => {
+  const markobutonoStyles = files["eroj/src/generated/markobutono.styles.ts"] ?? "";
+  const markobutonoElement = files["eroj/src/generated/fm-markobutono.ts"] ?? "";
+  const sxaltiloElement = files["eroj/src/generated/fm-sxaltilo.ts"] ?? "";
+  const markobutonoCss = JSON.parse(
+    /export const MARKOBUTONO_CSS = (".*");/s.exec(markobutonoStyles)?.[1] ?? '""',
+  ) as string;
+  const templates = (source: string) =>
+    [...source.matchAll(/`(<[^`]*)`/g)].map((match) => match[1] ?? "");
+  const parts = (source: string) =>
+    templates(source).flatMap((t) => [...t.matchAll(/part="([a-z-]+)"/g)].map((m) => m[1]));
+
+  it("renders a button with role checkbox as the box, the check mark in it, label, mark and error beside it", () => {
+    expect(parts(markobutonoElement)).toEqual([
+      "field",
+      "control",
+      "indicator",
+      "label",
+      "required-mark",
+      "error",
+    ]);
+    expect(markobutonoElement).toContain('role="checkbox"');
+    expect(markobutonoElement).toContain('aria-labelledby="label"');
+    expect(markobutonoElement).toContain('<label part="label" id="label" for="control">');
+    expect(markobutonoElement).toContain(
+      '<span part="error" id="error" hidden aria-live="polite">',
+    );
+    expect(markobutonoElement).toContain("static formAssociated = true;");
+    expect(markobutonoElement).toContain('control.setAttribute("aria-checked"');
+    expect(markobutonoElement).toContain('customElements.define("fm-markobutono", FmMarkobutono)');
+    for (const template of templates(markobutonoElement)) {
+      expect(template).not.toMatch(/>[^<\s$][^<]*</);
+    }
+    // The switch is unchanged: no mark, no error, no sign in its knob (① D-09).
+    expect(parts(sxaltiloElement)).toEqual(["field", "control", "indicator", "label"]);
+    expect(sxaltiloElement).toContain('role="switch"');
+  });
+
+  it("is the form's validity: a required box left empty is valueMissing, with the text of a11y.texts.required", () => {
+    expect(markobutonoElement).toContain("setValidity({ valueMissing: true }");
+    expect(markobutonoElement).toContain('control.setAttribute("aria-required", "true")');
+    expect(markobutonoElement).toContain('control.setAttribute("aria-invalid", "true")');
+    // Space turns it, Enter does not (a11y.keys of the Skemo: Space only).
+    expect(markobutonoElement).toMatch(/KEYS\.includes\("Enter"\)/);
+  });
+
+  it("keys the parts by checked on the field, hides the mark unchecked and borders the box by state", () => {
+    expect(markobutonoCss).toContain('[part="field"][data-checked="true"]');
+    expect(markobutonoCss).toContain('[part="field"][data-checked="false"]');
+    expect(markobutonoCss).toMatch(
+      /\[data-checked="false"\]\) \[part="indicator"\] \{\n\s+opacity: 0;\n\}/,
+    );
+    expect(markobutonoCss).toMatch(
+      /\[data-checked="true"\]\) \[part="indicator"\] \{\n\s+color: var\(--fm-color-action-primary-text\);\n\}/,
+    );
+    expect(markobutonoCss).toContain("background-color: var(--fm-color-action-primary-rest);");
+    expect(markobutonoCss).toContain("background-color: var(--fm-color-background-default);");
+    expect(markobutonoCss).toContain("border-color: var(--fm-color-status-danger-border);");
+    expect(markobutonoCss).toContain(':has([part="control"][aria-invalid="true"])');
+    expect(markobutonoCss).toContain("border-radius: var(--fm-radius-role-control);");
+    expect(markobutonoCss).toContain("inline-size: var(--fm-size-icon-medium);");
+    // The label may break (Uzo wrap allowed), the switch's never; the mark shows only marked.
+    expect(markobutonoCss).not.toContain("white-space: nowrap");
+    expect(markobutonoCss).toContain(
+      ':where([part="field"]:not([data-marked="true"])) [part="required-mark"] { display: none; }',
+    );
+  });
+
+  it("keeps every design property a token and logical (Art. X gate 1)", () => {
+    expect(componentCssIssues("markobutono.css", markobutonoCss)).toEqual([]);
+    expect(cssPhysicalPropertyIssues("markobutono.css", markobutonoCss)).toEqual([]);
+  });
+
+  it("states checked as a boolean prop and invalid as a state in the stylesheet inventory (parity)", () => {
+    const inventory = stylesheetInventory(markobutonoStyles);
+    expect(inventory.props).toEqual({
+      checked: ["boolean"],
+      size: ["small", "medium", "large"],
+    });
+    expect([...inventory.states].sort()).toEqual(["disabled", "focus", "hover", "invalid", "rest"]);
   });
 });

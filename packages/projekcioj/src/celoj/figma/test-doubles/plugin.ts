@@ -187,6 +187,17 @@ const FIGMA_DEFAULTS: Readonly<Record<string, Readonly<Record<string, unknown>>>
     width: 100,
     height: 100,
   },
+  // A vector of an imported SVG (Spec 010 ②, the check mark) — a belief until the maintainer has
+  // measured it in f10b-5: the fill of the SVG's path (currentColor reads black), no line, the
+  // constraints Figma gives a layer by default.
+  VECTOR: {
+    fills: [{ type: "SOLID", color: { r: 0, g: 0, b: 0 } }],
+    strokes: [],
+    strokeWeight: 1,
+    effects: [],
+    opacity: 1,
+    constraints: { horizontal: "MIN", vertical: "MIN" },
+  },
   TEXT: {
     fills: [{ type: "SOLID", color: { r: 0, g: 0, b: 0 } }],
     effects: [],
@@ -1004,6 +1015,26 @@ export function figmaDouble(
     createFrame: () => onPage(node("FRAME", "Frame", counts, context)),
     createText: () => onPage(node("TEXT", "Text", counts, context)),
     createRectangle: () => onPage(node("RECTANGLE", "Rectangle", counts, context)),
+    // Spec 010 ② (the check mark of the markobutono, plan ② D-09). What the double does here is a
+    // **belief** about the Plugin API until the maintainer measures it in f10b-5:
+    // - createNodeFromSvg puts a FRAME of the SVG's width and height on the current page, with a
+    //   white fill like any new frame, holding one VECTOR per path of the SVG;
+    // - a vector with constraints SCALE follows the size of its frame, also a size bound to a
+    //   variable (the double keeps the vector's numbers: it computes no constraints).
+    createNodeFromSvg: (svg: string) => {
+      const size = (name: string) =>
+        Number(new RegExp(`${name}="([0-9.]+)"`).exec(svg)?.[1] ?? "100");
+      const frame = onPage(node("FRAME", "Frame", counts, context));
+      frame.properties.width = size("width");
+      frame.properties.height = size("height");
+      for (const _path of svg.match(/<path /g) ?? []) {
+        const vector = node("VECTOR", "Vector", counts, context);
+        vector.properties.width = size("width");
+        vector.properties.height = size("height");
+        frame.appendChild(vector);
+      }
+      return frame;
+    },
     // F-2 (Nachlese Spec 008/009): the section „Fundamento" that holds every set. What the double
     // does here is a **belief** about the Plugin API until the maintainer measures it in f10b-5
     // (green CI is no acceptance for what lands in Figma):

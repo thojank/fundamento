@@ -26,36 +26,42 @@ const failing = checkFailingFixtures();
 const repoRuns = new Map<CheckName, Run>();
 const fixtureRuns = new Map<string, Run>();
 
-beforeAll(async () => {
-  // Parity reads what the projections emitted, so the repo run needs a build first (Spec 003
-  // T021); `pnpm check:parity` does the same with `--out .fundamento/projekcioj`.
-  const projekcioj = tempDir("projekcioj");
-  const build = await fm(["projekcioj", "build", "--out", projekcioj]);
-  if (build.code !== 0) throw new Error(`fm projekcioj build failed: ${build.stderr}`);
-  const repoArgs = (name: CheckName): string[] =>
-    name === "parity" ? [name, "--json", "--projekcioj", projekcioj] : [name, "--json"];
-  const [repo, fixtures] = await Promise.all([
-    Promise.all(CHECK_NAMES.map((name) => runCheck(repoArgs(name)))),
-    Promise.all(
-      failing.map((fixture) => {
-        const root = checkFixtureRoot(fixture);
-        // A fixture may say what the check needs besides its root: a path is relative to it.
-        const extra = (fixture.expected.args ?? []).map((arg: string) =>
-          arg.startsWith("--") ? arg : join(root, arg),
-        );
-        return runCheck([fixture.expected.check, "--json", "--fixture", root, ...extra]);
-      }),
-    ),
-  ]);
-  CHECK_NAMES.forEach((name, i) => {
-    const run = repo[i];
-    if (run !== undefined) repoRuns.set(name, run);
-  });
-  failing.forEach((fixture, i) => {
-    const run = fixtures[i];
-    if (run !== undefined) fixtureRuns.set(fixture.name, run);
-  });
-}, 60_000);
+beforeAll(
+  async () => {
+    // Parity reads what the projections emitted, so the repo run needs a build first (Spec 003
+    // T021); `pnpm check:parity` does the same with `--out .fundamento/projekcioj`.
+    const projekcioj = tempDir("projekcioj");
+    const build = await fm(["projekcioj", "build", "--out", projekcioj]);
+    if (build.code !== 0) throw new Error(`fm projekcioj build failed: ${build.stderr}`);
+    const repoArgs = (name: CheckName): string[] =>
+      name === "parity" ? [name, "--json", "--projekcioj", projekcioj] : [name, "--json"];
+    const [repo, fixtures] = await Promise.all([
+      Promise.all(CHECK_NAMES.map((name) => runCheck(repoArgs(name)))),
+      Promise.all(
+        failing.map((fixture) => {
+          const root = checkFixtureRoot(fixture);
+          // A fixture may say what the check needs besides its root: a path is relative to it.
+          const extra = (fixture.expected.args ?? []).map((arg: string) =>
+            arg.startsWith("--") ? arg : join(root, arg),
+          );
+          return runCheck([fixture.expected.check, "--json", "--fixture", root, ...extra]);
+        }),
+      ),
+    ]);
+    CHECK_NAMES.forEach((name, i) => {
+      const run = repo[i];
+      if (run !== undefined) repoRuns.set(name, run);
+    });
+    failing.forEach((fixture, i) => {
+      const run = fixtures[i];
+      if (run !== undefined) fixtureRuns.set(fixture.name, run);
+    });
+    // Seven Eroj make every build and validate dearer; on the CI runner the hook took over 60 s
+    // (PR #62, run 38562664393, 2026-10-14) while it stays well under locally. The recorded factor 3
+    // under CI (Jugxo jug_01M2W3K1YPP05F4XF86J71RGTK), as the MCP and CLI tests have it; no check moves.
+  },
+  60_000 * (process.env.CI === "true" ? 3 : 1),
+);
 
 afterAll(removeTempDirs);
 

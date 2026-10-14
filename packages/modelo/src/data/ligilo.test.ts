@@ -35,6 +35,7 @@ describe("ligilo in the repo Modelo (T006)", () => {
       "butono",
       "kampo",
       "ligilo",
+      "markobutono",
       "sxaltilo",
     ]);
     expect(validateModelo(defaultModeloSource()).errors).toEqual([]);
@@ -249,6 +250,7 @@ describe("the Reguloj of the ligilo (T005, A2, D-13)", () => {
       "ligilo",
       "kampo",
       "sxaltilo",
+      "markobutono",
     ]);
   });
 

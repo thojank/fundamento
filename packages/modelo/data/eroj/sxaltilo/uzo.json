@@ -19,8 +19,8 @@
             "häkchen"
           ]
         },
-        "ero": null,
-        "kialo": "A setting that applies only when the form is sent is a checkbox, because a switch promises that the change is already done; Fundamento has no such Ero yet (markobutono comes in PR ② of Spec 010)."
+        "ero": "markobutono",
+        "kialo": "A setting that applies only when the form is sent is a checkbox, because a switch promises that the change is already done; Fundamento covers it with markobutono."
       }
     ],
     "boundary": [
