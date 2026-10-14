@@ -48,6 +48,7 @@ describe("Make Kit sources (T018)", () => {
       "guidelines/components/butono.md",
       "guidelines/components/kampo.md",
       "guidelines/components/ligilo.md",
+      "guidelines/components/sxaltilo.md",
       "guidelines/foundations/color.md",
       "guidelines/foundations/dimensioj.md",
       "guidelines/foundations/spacing.md",
@@ -371,4 +372,26 @@ describe("the kit version comes from FUNDAMENTO_KIT_VERSION (release step)", () 
     );
     expect(() => MAKE_KIT_CELO.generate(withEnv(modelo))).toThrow(/pre-release|Vorab/);
   });
+});
+
+// Spec 010 ① (G7, plan D-12): Make builds every on/off setting from the switch, never from a
+// button that pretends — one sentence in the guidelines, generated from every Ero with role switch;
+// the switch's own page names no label prop it does not have.
+describe("Make Kit and the sxaltilo (Spec 010 ①)", () => {
+  it.each(ASPEKTOJ)(
+    "%s: the guidelines say that every on/off setting is a <Sxaltilo>",
+    (aspekto) => {
+      expect(kit(aspekto, "guidelines/Guidelines.md")).toContain(
+        "- Every on/off setting that applies at once is a `<Sxaltilo>`; never a button that pretends.",
+      );
+      const page = kit(aspekto, "guidelines/components/sxaltilo.md");
+      expect(page).toContain("# Sxaltilo");
+      expect(page).toContain("`checked`");
+      expect(page).not.toContain("set `label` as its accessible name");
+      // The butono has the label prop, and its page still says how to use it.
+      expect(kit(aspekto, "guidelines/components/butono.md")).toContain(
+        "set `label` as its accessible name",
+      );
+    },
+  );
 });

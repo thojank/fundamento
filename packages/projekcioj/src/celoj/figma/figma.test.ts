@@ -722,6 +722,7 @@ describe("Figma plan for the ligilo (Spec 008 T017)", () => {
       "butono",
       "kampo",
       "ligilo",
+      "sxaltilo",
     ]);
     expect(set?.properties).toEqual({
       to: "TEXT",
@@ -878,13 +879,20 @@ describe("the label default of a set follows its a11y role (M-3)", () => {
     const defaults = Object.fromEntries(
       plan.components.map((component) => [component.set, component.label?.defaultValue]),
     );
-    expect(defaults).toEqual({ butono: "Aktion", kampo: "Beschriftung", ligilo: "Ziel" });
+    // Spec 010 ①: a switch names a setting (plan D-10, for the maintainer to confirm).
+    expect(defaults).toEqual({
+      butono: "Aktion",
+      kampo: "Beschriftung",
+      ligilo: "Ziel",
+      sxaltilo: "Einstellung",
+    });
   });
 
   it("falls back to Aktion for a role the Celo does not know", () => {
     expect(labelDefaultOf("button")).toBe("Aktion");
     expect(labelDefaultOf("link")).toBe("Ziel");
     expect(labelDefaultOf("textbox")).toBe("Beschriftung");
+    expect(labelDefaultOf("switch")).toBe("Einstellung");
     expect(labelDefaultOf("slider")).toBe("Aktion");
   });
 });
@@ -921,5 +929,69 @@ describe("the plan places the sets in the section Fundamento (F-1, F-2)", () => 
   it("carries the reserve of a set's width for the gap after it (F-7)", () => {
     expect(SET_WIDTH_RESERVE).toBe(0.5);
     expect(repoPlan.section?.reserve).toBe(SET_WIDTH_RESERVE);
+  });
+});
+
+// Spec 010 ① (plan D-03, D-04, D-10): the fourth set, a switch. checked is an axis of the
+// variants (a boolean prop that keys the parts), next to size and state: 2 × 3 × 4. The structure
+// is a toggle — the track with the knob in it and the label beside it — and every variant says
+// where its knob stands, start or end, as the underline of a link is written per variant.
+describe("Figma plan for the sxaltilo (Spec 010 ①)", () => {
+  const set = plan.components.find((component) => component.set === "sxaltilo");
+  const sxaltilo = prepared.input.modelo.eroj.find((entry) => entry.ero.name === "sxaltilo");
+  const variant = (checked: string, size: string, state: string) =>
+    set?.variants.find(
+      (entry) =>
+        entry.props.checked === checked && entry.props.size === size && entry.props.state === state,
+    );
+
+  it("plans a toggle of checked × size × state with the purpose as description", () => {
+    expect(set?.structure).toBe("toggle");
+    expect(set?.properties).toEqual({
+      checked: "BOOLEAN",
+      size: ["small", "medium", "large"],
+      disabled: "BOOLEAN",
+      name: "TEXT",
+      state: ["rest", "hover", "focus", "disabled"],
+    });
+    expect(set?.variants).toHaveLength(2 * 3 * 4);
+    expect(Object.keys(set?.variants[0]?.props ?? {})).toEqual(["checked", "size", "state"]);
+    expect(set?.grid).toMatchObject({ rows: 6, columns: 4 });
+    expect(set?.description).toBe(sxaltilo?.uzo?.purpose);
+    expect(set?.label?.defaultValue).toBe("Einstellung");
+    expect(set?.texts).toBeUndefined();
+  });
+
+  it("places the knob at the start unchecked and at the end checked (D-04)", () => {
+    expect(variant("false", "medium", "rest")?.position).toBe("start");
+    expect(variant("true", "medium", "rest")?.position).toBe("end");
+    expect(variant("true", "small", "disabled")?.position).toBe("end");
+    expect(variant("true", "medium", "rest")?.bindings["indicator.position"]).toBeUndefined();
+    expect(plan.components[0]?.variants[0]?.position).toBeUndefined();
+  });
+
+  it("binds track, border and knob by checked and state, and draws them (D-06)", () => {
+    const on = variant("true", "medium", "rest");
+    const off = variant("false", "medium", "rest");
+    expect(on?.bindings["surface.fill"]).toBe("color/action/primary/rest");
+    expect(off?.bindings["surface.fill"]).toBe("color/background/sunken");
+    expect(off?.bindings["border.color"]).toBe("color/border/strong");
+    expect(on?.bindings["indicator.fill"]).toBe("color/action/primary/text");
+    expect(off?.bindings["indicator.fill"]).toBe("color/border/strong");
+    expect(on?.bindings["indicator.size"]).toBe("size/icon/medium");
+    expect(on?.bindings["box.width"]).toBe("size/control/medium");
+    expect(on?.paints?.["indicator.fill"]).toMatchObject({ hex: expect.stringMatching(/^#/) });
+    expect(on?.geometry?.["indicator.size"]).toBe("20px");
+    expect(on?.geometry?.["box.width"]).toBe("40px");
+    expect(on?.notDrawn).toEqual({});
+  });
+
+  it("states the sxaltilo in the parity inventory: checked a boolean, its paints per checked", () => {
+    const items = figmaPlanInventory(plan);
+    expect(items.sxaltilo?.props.checked).toEqual(["boolean"]);
+    expect(items.sxaltilo?.states).toEqual(["rest", "hover", "focus", "disabled"]);
+    expect(items.sxaltilo?.values["indicator.fill@checked=true,size=medium,state=rest"]).toMatch(
+      /^#[0-9a-f]{6}$/,
+    );
   });
 });

@@ -248,6 +248,7 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
       ...["boundary", "slots", "content"].map(() => "butono"),
       ...["boundary", "slots", "content"].map(() => "kampo"),
       ...["boundary", "slots", "content"].map(() => "ligilo"),
+      ...["boundary", "slots", "content"].map(() => "sxaltilo"),
     ]);
     for (const manko of openButono) {
       expect(manko.set).toBe("butono");
@@ -275,6 +276,7 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
       ...["butono", "butono", "butono"],
       ...["kampo", "kampo", "kampo"],
       ...["ligilo", "ligilo", "ligilo"],
+      ...["sxaltilo", "sxaltilo", "sxaltilo"],
     ]);
   });
 });
@@ -2436,6 +2438,8 @@ describe("every bound paint shows the plan's colour after the first and the seco
         // Spec 009: the kampo has size × state = 18 variants.
         { set: "kampo", created: 18, updated: 0 },
         { set: "ligilo", created: 30, updated: 0 },
+        // Spec 010 ①: the sxaltilo has checked × size × state = 24 variants.
+        { set: "sxaltilo", created: 24, updated: 0 },
       ],
     });
     const json = lines
@@ -3502,6 +3506,7 @@ describe("the label default follows the role of the Ero (M-3)", () => {
     expect(of("butono")).toEqual(["Aktion"]);
     expect(of("kampo")).toEqual(["Beschriftung"]);
     expect(of("ligilo")).toEqual(["Ziel"]);
+    expect(of("sxaltilo")).toEqual(["Einstellung"]);
   });
 
   it("updates a found ligilo that still says Aktion to Ziel, property and every label", async () => {
@@ -3521,5 +3526,63 @@ describe("the label default follows the role of the Ero (M-3)", () => {
     for (const variant of ligilo()?.children ?? []) {
       expect(descendant(variant, "label")?.properties.characters, variant.name).toBe("Ziel");
     }
+  });
+});
+
+// Spec 010 ① (plan D-10): the switch is drawn as a toggle — a field in a row: the focus ring
+// around the track (control) with the knob (indicator) in it, the label beside. The knob stands
+// at the start or the end of the track as the variant says; the gap between track and label is
+// the field's. Measured in f10b-5 (the double knows the slice of the API the plugin uses).
+describe("the sxaltilo is drawn as a toggle: track, knob, label beside (Spec 010 ①)", () => {
+  const source = repoFiles["figma/plugin/code.js"] ?? "";
+  const bound = (node: DoubleNode | undefined, field: string) => node?.boundVariables[field]?.name;
+  const drawn = async () => {
+    const double = modelDouble();
+    await run(double, source);
+    const set = pageNodes(double).find((child) => child.name === "sxaltilo");
+    const variant = (name: string) => set?.children.find((child) => child.name === name);
+    return { set, variant };
+  };
+
+  it("draws every variant of checked × size × state, named by the plan", async () => {
+    const { set } = await drawn();
+    expect(set?.children).toHaveLength(24);
+    expect(set?.children[0]?.name).toBe("checked=true, size=small, state=rest");
+  });
+
+  it("puts the label beside the ring, the knob in the track", async () => {
+    const { variant } = await drawn();
+    const on = variant("checked=true, size=medium, state=rest");
+    const field = on?.children.find((child) => child.name === "field");
+    expect(field?.children.map((child) => child.name)).toEqual(["focus-ring", "label"]);
+    expect(field?.properties.layoutMode).toBe("HORIZONTAL");
+    const control = descendant(on, "control");
+    expect(control?.children.map((child) => child.name)).toEqual(["indicator"]);
+    expect(descendant(on, "label")?.properties.characters).toBe("Einstellung");
+    expect(bound(field, "itemSpacing")).toBe("spacing/small");
+  });
+
+  it("stands the knob at the end when checked and at the start when not (D-04)", async () => {
+    const { variant } = await drawn();
+    const on = descendant(variant("checked=true, size=medium, state=rest"), "control");
+    const off = descendant(variant("checked=false, size=medium, state=rest"), "control");
+    expect(on?.properties.primaryAxisAlignItems).toBe("MAX");
+    expect(off?.properties.primaryAxisAlignItems).toBe("MIN");
+    // The border of the track takes its room, as on the web (box-sizing border-box).
+    expect(on?.properties.strokesIncludedInLayout).toBe(true);
+  });
+
+  it("binds the knob's fill, size and radius, and the track's width", async () => {
+    const { variant } = await drawn();
+    const on = variant("checked=true, size=medium, state=rest");
+    const knob = descendant(on, "indicator");
+    expect(bound(knob, "width")).toBe("size/icon/medium");
+    expect(bound(knob, "height")).toBe("size/icon/medium");
+    expect(bound(knob, "cornerRadius")).toBe("radius/role/pill");
+    const fill = (
+      (knob?.properties.fills ?? []) as { boundVariables?: { color?: { id: string } } }[]
+    )[0];
+    expect(fill?.boundVariables?.color).toBeDefined();
+    expect(bound(descendant(on, "control"), "minWidth")).toBe("size/control/medium");
   });
 });

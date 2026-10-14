@@ -6,7 +6,7 @@
 
 import { boundToken, combinationsOf } from "@fundamento/modelo";
 import { expect, test } from "@playwright/test";
-import { axeViolations, focusRingContrasts, TAB } from "./alirebleco.js";
+import { axeViolations, contrast as contrastOf, focusRingContrasts, TAB } from "./alirebleco.js";
 import { buildProjections, serve } from "./serve.js";
 
 const { out, input } = await buildProjections();
@@ -242,6 +242,97 @@ for (const aspekto of ["komuna", "ekzemplo"]) {
           boundToken(kampo.skemo, "border", "color", { ...fieldCombos[0], state: "invalid" })
             ?.token,
         ).toBe("color.status.danger.border");
+      });
+    }
+  }
+}
+
+// Spec 010 ① (G7, plan D-06): the rendered fm-sxaltilo in every colour class of komuna and
+// ekzemplo: axe (role switch) on every size, checked and unchecked, in rest, hover and disabled;
+// the focus ring of the track contrasts at least 3:1 with the gap colour and with the page; the
+// knob contrasts at least 3:1 with its track, and the unchecked track's border with the page
+// (WCAG 1.4.11: the knob's place is the state).
+const sxaltilo = input.modelo.eroj.find((entry) => entry.ero.name === "sxaltilo");
+if (sxaltilo === undefined) throw new Error("sxaltilo missing");
+const switchCombos = combinationsOf(sxaltilo.skemo, ["checked", "size"]);
+const switches = switchCombos
+  .map(
+    (c, i) =>
+      `<fm-sxaltilo id="s${i}" size="${c.size}"${c.checked === "true" ? " checked" : ""}>Benachrichtigungen ${i}</fm-sxaltilo>`,
+  )
+  .join(" ");
+
+for (const aspekto of ["komuna", "ekzemplo"]) {
+  for (const scheme of ["light", "dark"]) {
+    for (const contrast of ["default", "high"]) {
+      test(`${aspekto} ${scheme}/${contrast}: axe on every size of the sxaltilo, checked and not, focus ring and knob ≥ 3:1`, async ({
+        page,
+        browserName,
+      }) => {
+        await serve(
+          page,
+          out,
+          switches,
+          "<style>body { color: var(--fm-color-text-default); }</style>",
+        );
+        await page.evaluate(
+          ([a, s, c]) => {
+            const root = document.documentElement;
+            root.setAttribute("data-fm-aspekto", a ?? "");
+            root.setAttribute("data-fm-color-scheme", s ?? "");
+            root.setAttribute("data-fm-contrast", c ?? "");
+          },
+          [aspekto, scheme, contrast],
+        );
+        expect(await axeViolations(page), "rest").toEqual([]);
+        for (const [i] of switchCombos.entries()) {
+          await page.locator(`#s${i}`).locator('[part="control"]').hover();
+          expect(await axeViolations(page, `#s${i}`), `#s${i} hover`).toEqual([]);
+        }
+        await page.mouse.move(0, 0);
+        const parts = await page.locator("fm-sxaltilo").evaluateAll((elements) =>
+          elements.map((element) => {
+            const track = element.shadowRoot?.querySelector('[part="control"]') as HTMLElement;
+            const knob = element.shadowRoot?.querySelector('[part="indicator"]') as HTMLElement;
+            return {
+              id: element.id,
+              checked: element.hasAttribute("checked"),
+              track: getComputedStyle(track).backgroundColor,
+              border: getComputedStyle(track).borderTopColor,
+              knob: getComputedStyle(knob).backgroundColor,
+              page: getComputedStyle(document.body).backgroundColor,
+            };
+          }),
+        );
+        for (const part of parts) {
+          expect(
+            contrastOf(part.knob, part.track),
+            `${part.id} knob on track`,
+          ).toBeGreaterThanOrEqual(3);
+          if (!part.checked) {
+            expect(
+              contrastOf(part.border, part.page),
+              `${part.id} border on page`,
+            ).toBeGreaterThanOrEqual(3);
+          }
+        }
+        await page.locator("fm-sxaltilo").evaluateAll((elements) => {
+          for (const element of elements) element.toggleAttribute("disabled", true);
+        });
+        expect(await axeViolations(page), "disabled").toEqual([]);
+        await page.locator("fm-sxaltilo").evaluateAll((elements) => {
+          for (const element of elements) element.toggleAttribute("disabled", false);
+        });
+        const rings = await focusRingContrasts(
+          page,
+          switchCombos.map((_c, i) => `#s${i}`),
+          browserName,
+        );
+        expect(rings).toHaveLength(switchCombos.length);
+        for (const ring of rings) {
+          expect(ring.gap, `${ring.selector} ring on gap`).toBeGreaterThanOrEqual(3);
+          expect(ring.page, `${ring.selector} ring on page`).toBeGreaterThanOrEqual(3);
+        }
       });
     }
   }
