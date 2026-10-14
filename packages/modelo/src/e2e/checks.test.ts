@@ -55,7 +55,10 @@ beforeAll(async () => {
     const run = fixtures[i];
     if (run !== undefined) fixtureRuns.set(fixture.name, run);
   });
-}, 60_000);
+  // Seven Eroj make every build and validate dearer; on the CI runner the hook took over 60 s
+  // (PR #62, run 38562664393, 2026-10-14) while it stays well under locally. The recorded factor 3
+  // under CI (Jugxo jug_01M2W3K1YPP05F4XF86J71RGTK), as the MCP and CLI tests have it; no check moves.
+}, 60_000 * (process.env.CI === "true" ? 3 : 1));
 
 afterAll(removeTempDirs);
 
