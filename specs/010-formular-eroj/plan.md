@@ -230,7 +230,7 @@ In [`tasks.md`](tasks.md) ②.
 
 ## ③ `elekto` – Auswahl (Radio-Gruppe) (PR ③)
 
-**Branch:** `261014-spec-010-elekto-010092` (gestapelt auf PR ② `261014-spec-010-markobutono-010092` @ `bf38865`) · **Datum:** 2026-10-14 · **Aufgaben, Commits und rote Hashes:** [`tasks.md`](tasks.md) ③ (alle Hashes in einer Zeile der Messungen)
+**Branch:** `261014-spec-010-elekto-010092` (gestapelt auf PR ② `261014-spec-010-markobutono-010092` @ `3c16ef0`) · **Datum:** 2026-10-14 · **Aufgaben, Commits und rote Hashes:** [`tasks.md`](tasks.md) ③ (alle Hashes in einer Zeile der Messungen)
 
 Der dritte Wahl-Ero: hält eine von wenigen sichtbaren Optionen. Neu gegenüber Schalter und Kontrollkästchen ist, dass ein Ero mehrere Kontrollen trägt – je Option einen Kreis – und dass „gewählt“ ein Zustand der Option ist, nicht der Gruppe (E7). Alles andere trägt der Weg von ① und ② (Regel 0.1); jede Entscheidung unten nennt ihre Stufe.
 
