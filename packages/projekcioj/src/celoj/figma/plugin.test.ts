@@ -3202,7 +3202,7 @@ describe("every set lies in the frame Eroj in the section Fundamento (F-1, F-2, 
   const source = repoFiles["figma/plugin/code.js"] ?? "";
   const FRAME = "Eroj";
   type Placement = { frame: string; action: string };
-  type FrameReport = { name: string; found: boolean; created: boolean };
+  type FrameReport = { name: string; found: boolean; created: boolean; wrap: string };
   type SectionReport = {
     name: string;
     found: boolean;
@@ -3312,7 +3312,7 @@ describe("every set lies in the frame Eroj in the section Fundamento (F-1, F-2, 
       found: false,
       created: true,
       moved: [],
-      frame: { name: FRAME, found: false, created: true },
+      frame: { name: FRAME, found: false, created: true, wrap: "WRAP" },
     });
   });
 
@@ -3400,7 +3400,7 @@ describe("every set lies in the frame Eroj in the section Fundamento (F-1, F-2, 
       found: true,
       created: false,
       moved: [],
-      frame: { name: FRAME, found: true, created: false },
+      frame: { name: FRAME, found: true, created: false, wrap: "WRAP" },
     });
     expect(report.components.map((component) => component.placement)).toEqual(inLayout);
     expect(report.warnings).toEqual([]);
@@ -3426,7 +3426,7 @@ describe("every set lies in the frame Eroj in the section Fundamento (F-1, F-2, 
       found: true,
       created: false,
       moved: names,
-      frame: { name: FRAME, found: false, created: true },
+      frame: { name: FRAME, found: false, created: true, wrap: "WRAP" },
     });
     expect(section.children.map((child) => child.name)).toEqual([FRAME]);
     expect(frameOf(double).children.map((child) => child.name)).toEqual(names);
@@ -3457,7 +3457,7 @@ describe("every set lies in the frame Eroj in the section Fundamento (F-1, F-2, 
       found: false,
       created: true,
       moved: names,
-      frame: { name: FRAME, found: false, created: true },
+      frame: { name: FRAME, found: false, created: true, wrap: "WRAP" },
     });
     expect(frameOf(double).children.map((child) => child.name)).toEqual(names);
     expect(page.children.filter((child) => child.type === "COMPONENT_SET")).toEqual([]);
@@ -3482,10 +3482,39 @@ describe("every set lies in the frame Eroj in the section Fundamento (F-1, F-2, 
       found: true,
       created: false,
       moved: [first],
-      frame: { name: FRAME, found: true, created: false },
+      frame: { name: FRAME, found: true, created: false, wrap: "WRAP" },
     });
     expect(frameOf(double).children.map((child) => child.name)).toEqual([...names.slice(1), first]);
     expect(overlapping(double)).toEqual([]);
+  });
+
+  // WRAP on a frame that hugs its width is not measured yet (F-8): should Figma refuse it, the run
+  // goes on without wrap, in one row, and says so with Figma's words — like a refused font binding.
+  it("goes on when Figma refuses layoutWrap on the frame, and says so (F-8)", async () => {
+    const double = figmaDouble({ fonts: MODEL_FONTS, refuse: ["layoutWrap"] });
+    const report = await apply(double);
+    expect(report.section).toEqual({
+      name: "Fundamento",
+      found: false,
+      created: true,
+      moved: [],
+      frame: { name: FRAME, found: false, created: true, wrap: "refused" },
+    });
+    const frame = frameOf(double);
+    expect(frame.properties.layoutWrap).toBeUndefined();
+    expect(frame.properties.layoutMode).toBe("HORIZONTAL");
+    expect(frame.children.map((child) => child.name)).toEqual(names);
+    expect(report.components.map((component) => component.placement)).toEqual(inLayout);
+    expect(overlapping(double)).toEqual([]);
+    const refusals = report.warnings.filter((warning) => warning.includes("layoutWrap"));
+    expect(refusals).toHaveLength(1);
+    expect(refusals[0]).toContain("Fundamento/Eroj");
+    expect(refusals[0]).toContain("The Figma double refuses layoutWrap");
+    // A second run tries again and says it again; nothing else changes.
+    const snapshot = double.snapshot();
+    const again = await apply(double);
+    expect(double.snapshot()).toBe(snapshot);
+    expect(again.section.frame.wrap).toBe("refused");
   });
 
   it("never sets and never clears a mode on the section; the sets stay on none (F35)", async () => {
@@ -3533,7 +3562,7 @@ describe("every set lies in the frame Eroj in the section Fundamento (F-1, F-2, 
       found: false,
       created: true,
       moved: [],
-      frame: { name: FRAME, found: false, created: true },
+      frame: { name: FRAME, found: false, created: true, wrap: "WRAP" },
     });
     expect(headline.components.map((component) => component.placement)).toEqual(inLayout);
   });

@@ -480,7 +480,7 @@ const sectionReport =
         found: false,
         created: false,
         moved: [],
-        frame: { name: PLAN.section.frame, found: false, created: false },
+        frame: { name: PLAN.section.frame, found: false, created: false, wrap: "WRAP" },
       };
 
 /**
@@ -517,8 +517,12 @@ function openSection() {
  * — horizontal, wrapping, spacing.xlarge between the sets and between the rows, hugging both
  * ways, no fill — so the plugin computes no place of a set (Regel 0: das Werkzeug kann es). What
  * the plugin owns on the frame is neutral or the plan's, like on every node it draws.
+ *
+ * WRAP on a frame that hugs its width is not measured yet: Figma may refuse it. Refused is no
+ * reason to stop, like a refused font binding (F30): the frame stays one row without wrap, the
+ * section report says \`wrap: "refused"\`, and a warning carries Figma's own words.
  */
-function openFrame(section) {
+function openFrame(section, warnings) {
   if (section === undefined) return undefined;
   let frame = findFrame(section);
   sectionReport.frame.found = frame !== undefined;
@@ -534,13 +538,23 @@ function openFrame(section) {
   own(frame, NEUTRAL);
   Object.assign(gather(frame), {
     layoutMode: "HORIZONTAL",
-    layoutWrap: "WRAP",
     itemSpacing: PLAN.section.gap,
     counterAxisSpacing: PLAN.section.gap,
     layoutSizingHorizontal: "HUG",
     layoutSizingVertical: "HUG",
   });
   flush(frame);
+  try {
+    write(frame, "layoutWrap", "WRAP");
+    sectionReport.frame.wrap = "WRAP";
+  } catch (error) {
+    sectionReport.frame.wrap = "refused";
+    warnings.push(
+      PLAN.section.name + "/" + PLAN.section.frame + ": Figma hat layoutWrap WRAP am Frame " +
+        "abgelehnt — die Sets liegen in einer Reihe ohne Umbruch, Figma legt sie weiter aus. " +
+        String(error && error.message ? error.message : error),
+    );
+  }
   return frame;
 }
 
@@ -1166,7 +1180,7 @@ async function applyComponents(variables, warnings) {
   // The section and its frame every set lies in (F-2, F-8): found, or created before the first
   // set is placed.
   const section = openSection();
-  const frame = openFrame(section);
+  const frame = openFrame(section, warnings);
   progress.section = sectionReport;
   for (const component of PLAN.components) {
     let set = findSet(component.set);

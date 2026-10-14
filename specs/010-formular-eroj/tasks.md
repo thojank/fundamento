@@ -42,6 +42,7 @@
 | Kontraste vorab (WCAG 2.x, min. über 72 Kombinationen beider Aspektoj) | `raised` auf `sunken` 1,27; `raised` auf `action.primary.rest` 1,26; `border.strong` auf `sunken` 5,59; `action.primary.text` auf `.rest` 7,76; `sunken` auf `default` 1,18; `action.primary.rest` auf `default` 1,17 (ekzemplo light/high) |
 | Rote Commits | `2ca28c6` (Fixtures, Modelo), `5974f30` (Projekcioj, Browser) |
 | Grüne Commits | `7375b18` (Modelo), `11fe640` (Projekcioj); Doku rot `50a7d56`, grün im Commit dieser Zeile |
+| F-8 Figma (gemessen 2026-10-14 in f10b-5; nur Plugin, nicht Teil des `sxaltilo`) | rot `08286ad`, grün `4fe0f89` (Frame `Eroj` mit Auto-Layout, F-7-Reserve entfernt); `layoutWrap` abgesichert (Ablehnung → Warnung mit Figmas Wortlaut, `section.frame.wrap: "refused"`, eine Reihe) im Commit dieser Zeile – Plan [`../008-ligilo/plan.md`](../008-ligilo/plan.md) → „Nachlese 2026-10-13“ |
 | Tests (`pnpm turbo run test --concurrency=1`) | modelo 2 632, projekcioj 381, mcp 159, cli 66, eroj 1 Vitest + 151 Playwright in drei Engines (2 übersprungen wie bisher: forced-colors, quickstart nur Chromium); davon neu für den Schalter: data/sxaltilo 24, spec010-rules 6, spec010-schema 3, vier Fixtures, Projekcioj 15, Browser `sxaltilo.spec` 6 und Internacia 3 je Engine, Alirebleco 8 Kombinationen, Vitrino 1, MCP 5 |
 
 ## ② `markobutono`
