@@ -1,0 +1,9 @@
+{
+  "description": "Spec 010 ① (plan D-13, G5): in PR ① the alternative needs-confirmation names markobutono, which does not exist before PR ②. An alternative that cannot be found is no alternative; until the checkbox is an Ero the entry says ero null (ask-human) and names the coming Ero in its kialo.",
+  "issues": [
+    {
+      "rule": "uzo-ero-unknown",
+      "path": "data/eroj/sxaltilo/uzo.json#/uzo/instead/0/ero"
+    }
+  ]
+}
