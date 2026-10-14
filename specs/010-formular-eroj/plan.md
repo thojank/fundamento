@@ -84,7 +84,7 @@ Neu `border-strong-on-background-sunken` (ui, Knopf auf ungeschalteter Schiene).
 
 #### D-17 Rot zuerst
 
-Fixtures (je `expected-issues.json`, `git check-ignore` leer): `sxaltilo-label-slot-optional` (`uzo-slot-required-missing`), `sxaltilo-web-term` (Prop `aria-checked`, `skemo-web-term`), `sxaltilo-instead-kialo-missing` (`uzo-kialo-missing` + `schema-violation`), `sxaltilo-instead-ero-unknown` (`uzo-ero-unknown`). Sie sind schalterförmig (`checked` schlüsselt, `position`, `beside`) und waren rot, bis Schema und Regeln standen. Der Text-Fall „Benachrichtigungen einschalten“ ist wie beim `kampo` ein `check_usage`-Test (`data/sxaltilo.test.ts`, rot in `f64023a`), dazu der MCP-Test des Beispiel-Dialogs.
+Fixtures (je `expected-issues.json`, `git check-ignore` leer): `sxaltilo-label-slot-optional` (`uzo-slot-required-missing`), `sxaltilo-web-term` (Prop `aria-checked`, `skemo-web-term`), `sxaltilo-instead-kialo-missing` (`uzo-kialo-missing` + `schema-violation`), `sxaltilo-instead-ero-unknown` (`uzo-ero-unknown`). Sie sind schalterförmig (`checked` schlüsselt, `position`, `beside`) und waren rot, bis Schema und Regeln standen. Der Text-Fall „Benachrichtigungen einschalten“ ist wie beim `kampo` ein `check_usage`-Test (`data/sxaltilo.test.ts`, rot in `2ca28c6`), dazu der MCP-Test des Beispiel-Dialogs.
 
 ### Abweichungen von der Spec
 
