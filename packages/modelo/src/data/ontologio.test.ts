@@ -147,9 +147,10 @@ describe("the scheme eroj (Spec 008 T009)", () => {
   const eroj = concepts.filter((concept) => concept.inScheme === "eroj");
 
   it("holds one concept per Ero of the Modelo, under #Ero, related to each other", () => {
-    expect(eroNames).toEqual(["butono", "kampo", "ligilo", "markobutono", "sxaltilo"]);
+    expect(eroNames).toEqual(["butono", "elekto", "kampo", "ligilo", "markobutono", "sxaltilo"]);
     expect(eroj.map((concept) => concept.term).sort()).toEqual([
       "Butono",
+      "Elekto",
       "Kampo",
       "Ligilo",
       "Markobutono",
@@ -165,14 +166,17 @@ describe("the scheme eroj (Spec 008 T009)", () => {
         target: string;
       }[];
     expect(relations("Ligilo")).toEqual([{ predicate: "references", target: "#Butono" }]);
+    // Spec 010 ③: the butono and the kampo send choose-few to the radio group.
     expect(relations("Butono")).toEqual([
       { predicate: "references", target: "#Ligilo" },
       { predicate: "references", target: "#Kampo" },
       { predicate: "references", target: "#Sxaltilo" },
+      { predicate: "references", target: "#Elekto" },
     ]);
     expect(relations("Kampo")).toEqual([
       { predicate: "references", target: "#Butono" },
       { predicate: "references", target: "#Sxaltilo" },
+      { predicate: "references", target: "#Elekto" },
     ]);
     // Spec 010 ①: the switch, with its German and English names (Schalter, switch); since ② it
     // sends a setting that applies only with the form to the checkbox.
@@ -190,6 +194,7 @@ describe("the scheme eroj (Spec 008 T009)", () => {
       { predicate: "references", target: "#Sxaltilo" },
       { predicate: "references", target: "#Kampo" },
       { predicate: "references", target: "#Butono" },
+      { predicate: "references", target: "#Elekto" },
     ]);
     const markobutono = eroj.find((concept) => concept.term === "Markobutono");
     expect(markobutono?.prefLabel).toEqual({
@@ -198,6 +203,16 @@ describe("the scheme eroj (Spec 008 T009)", () => {
       de: "Kontrollkästchen",
     });
     expect((markobutono?.altLabel as { de: string[] } | undefined)?.de).toContain("Checkbox");
+    // Spec 010 ③: the radio group (Auswahl, radio group), with the Eroj that send one of a few
+    // options to it.
+    expect(relations("Elekto")).toEqual([
+      { predicate: "references", target: "#Butono" },
+      { predicate: "references", target: "#Kampo" },
+      { predicate: "references", target: "#Markobutono" },
+    ]);
+    const elekto = eroj.find((concept) => concept.term === "Elekto");
+    expect(elekto?.prefLabel).toEqual({ eo: "Elekto", en: "radio group", de: "Auswahl" });
+    expect((elekto?.altLabel as { de: string[] } | undefined)?.de).toContain("Radio-Gruppe");
   });
 
   it("reports an Ero without a concept and a concept without an Ero", () => {

@@ -23,10 +23,11 @@ const uzoOf = (name: string) => modelo.eroj.find((entry) => entry.ero.name === n
 const kampo = modelo.eroj.find((entry) => entry.ero.name === "kampo");
 
 describe("markobutono in the repo Modelo (G1, G2, section 2)", () => {
-  it("lives in data/eroj/markobutono/skemo.json, between ligilo and sxaltilo, and the repo Modelo stays valid", () => {
+  it("lives in data/eroj/markobutono/skemo.json, after ligilo and before sxaltilo, and the repo Modelo stays valid", () => {
     expect(markobutono?.file).toBe("modelo/data/eroj/markobutono/skemo.json");
     expect(modelo.eroj.map((entry) => entry.ero.name)).toEqual([
       "butono",
+      "elekto",
       "kampo",
       "ligilo",
       "markobutono",
@@ -257,24 +258,26 @@ describe("the Uzo of the markobutono (section 2, G5)", () => {
 
 describe("the Reguloj of the markobutono (G6, E5)", () => {
   it.each([
-    ["field-label-visible", ["kampo", "sxaltilo", "markobutono"]],
-    ["field-label-names-the-datum", ["kampo", "sxaltilo", "markobutono"]],
-    ["error-says-what-to-do", ["kampo", "markobutono"]],
-    ["required-marked", ["kampo", "markobutono"]],
-    ["error-not-color-only", ["kampo", "markobutono"]],
+    // Spec 010 ③: the elekto follows the markobutono in each list (E5).
+    ["field-label-visible", ["kampo", "sxaltilo", "markobutono", "elekto"]],
+    ["field-label-names-the-datum", ["kampo", "sxaltilo", "markobutono", "elekto"]],
+    ["error-says-what-to-do", ["kampo", "markobutono", "elekto"]],
+    ["required-marked", ["kampo", "markobutono", "elekto"]],
+    ["error-not-color-only", ["kampo", "markobutono", "elekto"]],
   ])("%s is widened to the markobutono, not duplicated (E5)", (name, eroj) => {
     expect(named(name)?.appliesTo).toEqual({ eroj });
     expect(named(name)?.statement).toMatch(/markobutono/);
     expect(modelo.reguloj.filter((regulo) => regulo.name === name)).toHaveLength(1);
   });
 
-  it("spacing-owned-by-container applies to all five Eroj", () => {
+  it("spacing-owned-by-container applies to the markobutono and every other Ero", () => {
     expect(named("spacing-owned-by-container")?.appliesTo?.eroj).toEqual([
       "butono",
       "ligilo",
       "kampo",
       "sxaltilo",
       "markobutono",
+      "elekto",
     ]);
   });
 

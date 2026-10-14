@@ -82,12 +82,36 @@ export const PART_PROPERTY_TYPES: Readonly<Partial<Record<SkemoPartProperty, Dtc
 /** A combination of key values, e.g. `{ variant: "primary", state: "rest" }`. */
 export type Combination = Readonly<Record<string, string>>;
 
-/** The values a binding key may take: enum values, `true`/`false` for booleans, or the states. */
+/**
+ * The key of an entry of a slot (Spec 010 ③, E7, plan ③ D-02): the state of one option of a radio
+ * group, `selected`, true for the entry whose value is the value of the prop `equals`. A key the
+ * parts may be keyed by, like a boolean prop, but no prop: it belongs to the option, not to the
+ * Ero, and it is no axis of the variants (`variantKeys` takes props and the state only).
+ */
+export function entryKeysOf(skemo: Skemo): { slot: string; key: string; equals: string }[] {
+  return skemo.slots.flatMap((slot) =>
+    slot.entry === undefined ? [] : [{ slot: slot.name, ...slot.entry }],
+  );
+}
+
+/** Whether `key` is the key of an entry of a slot (E7) and no prop of the Skemo. */
+export function isEntryKey(skemo: Skemo, key: string): boolean {
+  return (
+    !skemo.props.some((prop) => prop.name === key) &&
+    entryKeysOf(skemo).some((entry) => entry.key === key)
+  );
+}
+
+/**
+ * The values a binding key may take: enum values, `true`/`false` for booleans and for the key of
+ * an entry (Spec 010 ③, E7), or the states.
+ */
 export function keyValues(skemo: Skemo, key: string): readonly string[] | undefined {
   if (key === STATE_KEY) return skemo.states;
   const prop = skemo.props.find((candidate) => candidate.name === key);
   if (prop?.kind === "enum") return prop.values ?? [];
   if (prop?.kind === "boolean") return ["true", "false"];
+  if (prop === undefined && isEntryKey(skemo, key)) return ["true", "false"];
   return undefined;
 }
 
@@ -301,9 +325,38 @@ function keyIssues(entry: LoadedEro, at: At): boolean {
       pointer,
       "skemo-binding-invalid",
       `Skemo of ${ero.name} keys a binding by ${key}, which is neither an enum or boolean prop nor state.`,
-      `Key bindings by ${[...skemo.props.filter((p) => p.kind === "enum" || p.kind === "boolean").map((p) => p.name), STATE_KEY].join(", ")}.`,
+      `Key bindings by ${[...skemo.props.filter((p) => p.kind === "enum" || p.kind === "boolean").map((p) => p.name), ...entryKeysOf(skemo).map((entry) => entry.key), STATE_KEY].join(", ")}.`,
     );
   };
+  // The state of one entry (Spec 010 ③, E7): its own name, no prop and not the state, and its
+  // value is compared with a string prop of the Ero.
+  skemo.slots.forEach((slot, index) => {
+    const entry = slot.entry;
+    if (entry === undefined) return;
+    const base = `/skemo/slots/${index}/entry`;
+    if (entry.key === STATE_KEY || skemo.props.some((prop) => prop.name === entry.key)) {
+      at(
+        `${base}/key`,
+        "skemo-binding-invalid",
+        `Skemo of ${ero.name} names the state of one entry of the slot ${slot.name} ${entry.key}, which is also ${entry.key === STATE_KEY ? "the state" : "a prop"} of ${ero.name}; the state of one option is no state of the group.`,
+        "Give the state of one entry a name of its own (selected); it belongs to the option, not to the Ero (E7).",
+      );
+    }
+    const equals = skemo.props.find((prop) => prop.name === entry.equals);
+    if (equals?.kind !== "string") {
+      at(
+        `${base}/equals`,
+        "skemo-binding-invalid",
+        `Skemo of ${ero.name} marks the entry of the slot ${slot.name} whose value is the value of ${entry.equals}, which is no string prop of ${ero.name}.`,
+        `Compare the value of an entry with a string prop (${
+          skemo.props
+            .filter((prop) => prop.kind === "string")
+            .map((prop) => prop.name)
+            .join(", ") || "none"
+        }): the value of the chosen option.`,
+      );
+    }
+  });
   for (const [part, properties] of Object.entries(skemo.parts)) {
     for (const [property, source] of Object.entries(properties)) {
       if (source === undefined) continue;
@@ -460,7 +513,8 @@ function constraintIssues(entry: LoadedEro, at: At): void {
         return;
       }
       const allowed = keyValues(skemo, key);
-      if (allowed === undefined || key === STATE_KEY) {
+      // The state of one entry (E7) is no prop: a constraint on it would judge one option.
+      if (allowed === undefined || key === STATE_KEY || isEntryKey(skemo, key)) {
         at(
           pointer,
           "skemo-constraint-invalid",
@@ -542,6 +596,12 @@ function nameIssues(entry: LoadedEro, at: At): void {
   });
   skemo.slots.forEach((slot, index) => {
     if (isSkemoWebTerm(slot.name)) report(`/skemo/slots/${index}/name`, "slot", slot.name);
+    // The state of one entry (Spec 010 ③, E7) is a name of the Skemo too: selected, not
+    // aria-checked, which is how the Web Celo speaks it.
+    const key = slot.entry?.key;
+    if (key !== undefined && isSkemoWebTerm(key)) {
+      report(`/skemo/slots/${index}/entry/key`, "state of an entry", key);
+    }
   });
   skemo.states.forEach((state, index) => {
     if (isSkemoWebTerm(state)) report(`/skemo/states/${index}`, "state", state);

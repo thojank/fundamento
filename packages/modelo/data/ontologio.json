@@ -967,6 +967,52 @@
         {
           "predicate": "references",
           "target": "#Sxaltilo"
+        },
+        {
+          "predicate": "references",
+          "target": "#Elekto"
+        }
+      ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Elekto",
+      "term": "Elekto",
+      "inScheme": "eroj",
+      "prefLabel": {
+        "eo": "Elekto",
+        "en": "radio group",
+        "de": "Auswahl"
+      },
+      "altLabel": {
+        "en": [
+          "elekto",
+          "radio buttons"
+        ],
+        "de": [
+          "Radio-Gruppe",
+          "Optionsfelder",
+          "elekto"
+        ]
+      },
+      "definition": {
+        "en": "A radio group: chooses one of a few options that all stay visible. Its label names the question and always shows; every option is a circle with its own label, the chosen one filled. It can be required and show help and an error. The butono and the kampo send choose-few to it (use-instead), the markobutono one of a few; a yes or no is the markobutono, six options or more belong in a list (elektilo, not yet covered).",
+        "de": "Eine Auswahl (Radio-Gruppe): wählt eine von wenigen Optionen, die alle sichtbar bleiben. Ihre Beschriftung nennt die Frage und ist immer sichtbar; jede Option ist ein Kreis mit eigener Beschriftung, die gewählte gefüllt. Sie kann Pflicht sein und Hilfe und einen Fehler zeigen. butono und kampo verweisen für choose-few auf sie (use-instead), der markobutono für eine von wenigen; ein Ja/Nein ist der markobutono, ab sechs Optionen gehört die Wahl in eine Liste (elektilo, noch nicht abgedeckt)."
+      },
+      "broader": [
+        "#Ero"
+      ],
+      "relations": [
+        {
+          "predicate": "references",
+          "target": "#Butono"
+        },
+        {
+          "predicate": "references",
+          "target": "#Kampo"
+        },
+        {
+          "predicate": "references",
+          "target": "#Markobutono"
         }
       ]
     },
@@ -1039,6 +1085,10 @@
         {
           "predicate": "references",
           "target": "#Sxaltilo"
+        },
+        {
+          "predicate": "references",
+          "target": "#Elekto"
         }
       ]
     },
@@ -1063,8 +1113,8 @@
         ]
       },
       "definition": {
-        "en": "A checkbox: marks one option as yes or no inside a form; it applies when the form is sent. Its label names the option and always shows; it can show an error and be required (terms accepted). A setting that applies at once is the sxaltilo (use-instead); the sxaltilo sends a setting that applies only with the form to it.",
-        "de": "Ein Kontrollkästchen: markiert eine Option in einem Formular mit Ja oder Nein; es gilt, wenn das Formular gesendet wird. Seine Beschriftung nennt die Option und ist immer sichtbar; es kann einen Fehler zeigen und Pflicht sein (AGB akzeptiert). Eine Einstellung, die sofort wirkt, ist der sxaltilo (use-instead); der sxaltilo verweist für Einstellungen, die erst mit dem Formular gelten, auf ihn."
+        "en": "A checkbox: marks one option as yes or no inside a form; it applies when the form is sent. Its label names the option and always shows; it can show an error and be required (terms accepted). A setting that applies at once is the sxaltilo (use-instead); the sxaltilo sends a setting that applies only with the form to it. One of a few options is the elekto (use-instead).",
+        "de": "Ein Kontrollkästchen: markiert eine Option in einem Formular mit Ja oder Nein; es gilt, wenn das Formular gesendet wird. Seine Beschriftung nennt die Option und ist immer sichtbar; es kann einen Fehler zeigen und Pflicht sein (AGB akzeptiert). Eine Einstellung, die sofort wirkt, ist der sxaltilo (use-instead); der sxaltilo verweist für Einstellungen, die erst mit dem Formular gelten, auf ihn. Eine von wenigen Optionen ist der elekto (use-instead)."
       },
       "broader": [
         "#Ero"
@@ -1081,6 +1131,10 @@
         {
           "predicate": "references",
           "target": "#Butono"
+        },
+        {
+          "predicate": "references",
+          "target": "#Elekto"
         }
       ]
     },

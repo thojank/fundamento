@@ -2153,6 +2153,20 @@
         "beside": {
           "description": "The text of the slot stands beside the control, on the ground of the container, not on a part of the Ero (Spec 010 ①, plan D-07): the label of a switch next to its track. skemo-kontrastparo-missing does not pair it with the Ero's fills.",
           "type": "boolean"
+        },
+        "entry": {
+          "description": "Every entry of the slot is one option of its own, a text with a value (Spec 010 ③, E7, plan ③ D-02): the options of a radio group. key names the state of one entry, a boolean the parts may be keyed by (by, when) — true for the entry whose value is the value of the string prop equals, false for every other. A state of the entry, not of the Ero: no prop, no axis of the variants.",
+          "type": "object",
+          "properties": {
+            "key": {
+              "$ref": "#/$defs/Name"
+            },
+            "equals": {
+              "$ref": "#/$defs/Name"
+            }
+          },
+          "required": ["key", "equals"],
+          "additionalProperties": false
         }
       },
       "required": ["name"],
@@ -2703,6 +2717,11 @@
           "type": "integer",
           "minimum": 1
         },
+        "min": {
+          "description": "The fewest entries the slot takes when it is used (Spec 010 ③, plan ③ D-10): a radio group of one option is no choice. Judged like max (uzo-slot-min).",
+          "type": "integer",
+          "minimum": 1
+        },
         "required": {
           "type": "boolean"
         },
@@ -2862,6 +2881,32 @@
               "additionalProperties": false
             },
             {
+              "description": "No two entries of the slot share a text, compared without case and surrounding space (Spec 010 ③, plan ③ D-09): a list check, its of names a slot with entries.",
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "const": "distinct"
+                }
+              },
+              "required": ["kind"],
+              "additionalProperties": false
+            },
+            {
+              "description": "The slot holds at most count entries (Spec 010 ③, plan ③ D-09): a list check, its of names a slot with entries.",
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "const": "max-entries"
+                },
+                "count": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              },
+              "required": ["kind", "count"],
+              "additionalProperties": false
+            },
+            {
               "type": "object",
               "properties": {
                 "kind": {
@@ -2951,13 +2996,23 @@
           "pattern": "^[a-z]{2}$"
         },
         "texts": {
-          "description": "The texts of the other text slots of the instance, by slot name (Spec 009, plan D-06): help, error. The label stays label.",
+          "description": "The texts of the other text slots of the instance, by slot name (Spec 009, plan D-06): help, error. The label stays label. A slot that takes several entries gives one text per entry, as a list (Spec 010 ③, plan ③ D-09): the labels of the options.",
           "type": "object",
           "propertyNames": {
             "$ref": "#/$defs/Name"
           },
           "additionalProperties": {
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            ]
           }
         },
         "aspekto": {

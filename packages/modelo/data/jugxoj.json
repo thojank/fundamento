@@ -1912,6 +1912,352 @@
           }
         ]
       }
+    },
+    {
+      "id": "jug_01M4WT0SRT3ZHF508WCEJ59WA3",
+      "ref": {
+        "ero": "ero_01M4WT0RA8VHA64P4RFHAEBK1Q"
+      },
+      "decision": "approved",
+      "kialo": "The label names the question the options answer, as a noun.",
+      "date": "2026-10-14",
+      "context": "Example CORRECT for the Regulo named in ekzemplo.regulo (Spec 010 ③ G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4S1ZR7GEPZSTB9ES3REK3V1",
+        "instances": [
+          {
+            "ero": "elekto",
+            "props": {},
+            "label": "Versandart",
+            "texts": {
+              "options": [
+                "Standard",
+                "Express",
+                "Abholung"
+              ]
+            },
+            "lingvo": "de"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4WT0SRVJYMQAS9EMNFRG17V",
+      "ref": {
+        "ero": "ero_01M4WT0RA8VHA64P4RFHAEBK1Q"
+      },
+      "decision": "approved",
+      "kialo": "The label names the question the options answer.",
+      "date": "2026-10-14",
+      "context": "Example CORRECT for the Regulo named in ekzemplo.regulo (Spec 010 ③ G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4S1ZR7GEPZSTB9ES3REK3V1",
+        "instances": [
+          {
+            "ero": "elekto",
+            "props": {},
+            "label": "Shipping method",
+            "texts": {
+              "options": [
+                "Standard",
+                "Express",
+                "Pickup"
+              ]
+            },
+            "lingvo": "en"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4WT0SRVJYMQAS9EMNFRG17W",
+      "ref": {
+        "ero": "ero_01M4WT0RA8VHA64P4RFHAEBK1Q"
+      },
+      "decision": "rejected",
+      "kialo": "A verb of choosing in the label reads as an instruction; the circles already say that one is chosen.",
+      "date": "2026-10-14",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 010 ③ G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4S1ZR7GEPZSTB9ES3REK3V1",
+        "instances": [
+          {
+            "ero": "elekto",
+            "props": {},
+            "label": "Versandart wählen",
+            "texts": {
+              "options": [
+                "Standard",
+                "Express",
+                "Abholung"
+              ]
+            },
+            "lingvo": "de"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4WT0SRVJYMQAS9EMNFRG17X",
+      "ref": {
+        "ero": "ero_01M4WT0RA8VHA64P4RFHAEBK1Q"
+      },
+      "decision": "rejected",
+      "kialo": "A verb of choosing in the label reads as an instruction, not as the name of the question.",
+      "date": "2026-10-14",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 010 ③ G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4S1ZR7GEPZSTB9ES3REK3V1",
+        "instances": [
+          {
+            "ero": "elekto",
+            "props": {},
+            "label": "Choose a shipping method",
+            "texts": {
+              "options": [
+                "Standard",
+                "Express",
+                "Pickup"
+              ]
+            },
+            "lingvo": "en"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4WT0SRVJYMQAS9EMNFRG17Y",
+      "ref": {
+        "ero": "ero_01M4WT0RA8VHA64P4RFHAEBK1Q"
+      },
+      "decision": "approved",
+      "kialo": "Every option has a label of its own; the person can tell them apart.",
+      "date": "2026-10-14",
+      "context": "Example CORRECT for the Regulo named in ekzemplo.regulo (Spec 010 ③ G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4WT0SD6MYJETNVJ4ASJX910",
+        "instances": [
+          {
+            "ero": "elekto",
+            "props": {},
+            "label": "Versandart",
+            "texts": {
+              "options": [
+                "Standard",
+                "Express",
+                "Abholung"
+              ]
+            },
+            "lingvo": "de"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4WT0SRVJYMQAS9EMNFRG17Z",
+      "ref": {
+        "ero": "ero_01M4WT0RA8VHA64P4RFHAEBK1Q"
+      },
+      "decision": "approved",
+      "kialo": "Every option has a label of its own.",
+      "date": "2026-10-14",
+      "context": "Example CORRECT for the Regulo named in ekzemplo.regulo (Spec 010 ③ G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4WT0SD6MYJETNVJ4ASJX910",
+        "instances": [
+          {
+            "ero": "elekto",
+            "props": {},
+            "label": "Shipping method",
+            "texts": {
+              "options": [
+                "Standard",
+                "Express",
+                "Pickup"
+              ]
+            },
+            "lingvo": "en"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4WT0SRVJYMQAS9EMNFRG180",
+      "ref": {
+        "ero": "ero_01M4WT0RA8VHA64P4RFHAEBK1Q"
+      },
+      "decision": "rejected",
+      "kialo": "Two options called Standard: the person cannot tell which one counts, a screen reader says the same name twice.",
+      "date": "2026-10-14",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 010 ③ G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4WT0SD6MYJETNVJ4ASJX910",
+        "instances": [
+          {
+            "ero": "elekto",
+            "props": {},
+            "label": "Versandart",
+            "texts": {
+              "options": [
+                "Standard",
+                "Express",
+                "Standard"
+              ]
+            },
+            "lingvo": "de"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4WT0SRVJYMQAS9EMNFRG181",
+      "ref": {
+        "ero": "ero_01M4WT0RA8VHA64P4RFHAEBK1Q"
+      },
+      "decision": "rejected",
+      "kialo": "Two options called Express, one in lower case: the same label for the eye and the ear.",
+      "date": "2026-10-14",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 010 ③ G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4WT0SD6MYJETNVJ4ASJX910",
+        "instances": [
+          {
+            "ero": "elekto",
+            "props": {},
+            "label": "Shipping method",
+            "texts": {
+              "options": [
+                "Express",
+                "Standard",
+                "express"
+              ]
+            },
+            "lingvo": "en"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4WT0SRVJYMQAS9EMNFRG182",
+      "ref": {
+        "ero": "ero_01M4WT0RA8VHA64P4RFHAEBK1Q"
+      },
+      "decision": "approved",
+      "kialo": "Four options stay visible and are read at a glance.",
+      "date": "2026-10-14",
+      "context": "Example CORRECT for the Regulo named in ekzemplo.regulo (Spec 010 ③ G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4WT0SD77GYN9VMJA9ST7VRM",
+        "instances": [
+          {
+            "ero": "elekto",
+            "props": {},
+            "label": "Zahlungsart",
+            "texts": {
+              "options": [
+                "Rechnung",
+                "Lastschrift",
+                "Kreditkarte",
+                "PayPal"
+              ]
+            },
+            "lingvo": "de"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4WT0SRVJYMQAS9EMNFRG183",
+      "ref": {
+        "ero": "ero_01M4WT0RA8VHA64P4RFHAEBK1Q"
+      },
+      "decision": "approved",
+      "kialo": "Four options stay visible and are read at a glance.",
+      "date": "2026-10-14",
+      "context": "Example CORRECT for the Regulo named in ekzemplo.regulo (Spec 010 ③ G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4WT0SD77GYN9VMJA9ST7VRM",
+        "instances": [
+          {
+            "ero": "elekto",
+            "props": {},
+            "label": "Payment method",
+            "texts": {
+              "options": [
+                "Invoice",
+                "Direct debit",
+                "Credit card",
+                "PayPal"
+              ]
+            },
+            "lingvo": "en"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4WT0SRVJYMQAS9EMNFRG184",
+      "ref": {
+        "ero": "ero_01M4WT0RA8VHA64P4RFHAEBK1Q"
+      },
+      "decision": "rejected",
+      "kialo": "Seven countries are a list: nobody reads seven visible options; a list that opens on demand folds them away.",
+      "date": "2026-10-14",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 010 ③ G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4WT0SD77GYN9VMJA9ST7VRM",
+        "instances": [
+          {
+            "ero": "elekto",
+            "props": {},
+            "label": "Land",
+            "texts": {
+              "options": [
+                "Deutschland",
+                "Österreich",
+                "Schweiz",
+                "Frankreich",
+                "Italien",
+                "Spanien",
+                "Polen"
+              ]
+            },
+            "lingvo": "de"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4WT0SRVJYMQAS9EMNFRG185",
+      "ref": {
+        "ero": "ero_01M4WT0RA8VHA64P4RFHAEBK1Q"
+      },
+      "decision": "rejected",
+      "kialo": "Seven countries are a list, not a group of visible options.",
+      "date": "2026-10-14",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 010 ③ G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4WT0SD77GYN9VMJA9ST7VRM",
+        "instances": [
+          {
+            "ero": "elekto",
+            "props": {},
+            "label": "Country",
+            "texts": {
+              "options": [
+                "Germany",
+                "Austria",
+                "Switzerland",
+                "France",
+                "Italy",
+                "Spain",
+                "Poland"
+              ]
+            },
+            "lingvo": "en"
+          }
+        ]
+      }
     }
   ]
 }

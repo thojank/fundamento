@@ -19,7 +19,13 @@ import type {
 import type { ColorValue } from "../generated/modelo-schema.js";
 import { allAssignments } from "../resolve/assignment.js";
 import { resolveCombination } from "../resolve/resolve.js";
-import { boundToken, combinationsOf, PART_PROPERTY_TYPES, STATE_KEY } from "./skemo-rules.js";
+import {
+  boundToken,
+  combinationsOf,
+  isEntryKey,
+  PART_PROPERTY_TYPES,
+  STATE_KEY,
+} from "./skemo-rules.js";
 
 /**
  * What a side of the comparison restates; a side that has no states compares props only. `values`
@@ -253,15 +259,21 @@ export function skemoPartValues(
   const values: Record<string, string> = {};
   for (const combination of combinationsOf(skemo, variantKeys(skemo))) {
     for (const [part, partProperties] of Object.entries(skemo.parts)) {
-      for (const property of Object.keys(partProperties)) {
+      for (const [property, source] of Object.entries(partProperties)) {
         const type = PART_PROPERTY_TYPES[property as SkemoPartProperty];
         if (type !== "color" && type !== "dimension") continue;
-        const bound = boundToken(skemo, part, property, combination);
-        if (bound === undefined) continue;
-        const key = `${part}.${property}@${parityVariantKey(combination)}`;
-        const value = resolved[bound.token]?.value;
-        const text = type === "color" ? colorText(value) : parityDimensionText(value);
-        if (text !== undefined) values[key] = text;
+        // A part keyed by the state of one entry (Spec 010 ③, E7: the circle of a chosen option)
+        // has a value per variant and per value of that key; the key stands in the variant name.
+        const entryKeys = keysOf(skemo, source).filter((key) => isEntryKey(skemo, key));
+        for (const entry of combinationsOf(skemo, entryKeys)) {
+          const full = { ...combination, ...entry };
+          const bound = boundToken(skemo, part, property, full);
+          if (bound === undefined) continue;
+          const key = `${part}.${property}@${parityVariantKey(full)}`;
+          const value = resolved[bound.token]?.value;
+          const text = type === "color" ? colorText(value) : parityDimensionText(value);
+          if (text !== undefined) values[key] = text;
+        }
       }
     }
   }

@@ -156,7 +156,11 @@ type RadioSkemoFile = {
   skemo: {
     props: { name: string; kind: string }[];
     slots: { name: string; entry?: { key: string; equals: string } }[];
-    constraints?: { when: Record<string, string>; allowed: Record<string, string[]> }[];
+    constraints?: {
+      when: Record<string, string>;
+      allowed: Record<string, string[]>;
+      kialo: string;
+    }[];
   };
 };
 type RadioUzoFile = { uzo: { content: unknown[] } };
@@ -207,6 +211,7 @@ describe("a radio group Skemo: selected is the state of one option (③ D-02, E7
         value.skemo.constraints?.push({
           when: { selected: "true" },
           allowed: { invalid: ["false"] },
+          kialo: "A chosen option is never wrong.",
         });
       }),
     );

@@ -811,10 +811,10 @@ export interface EroInstance {
    */
   lingvo?: string;
   /**
-   * The texts of the other text slots of the instance, by slot name (Spec 009, plan D-06): help, error. The label stays label.
+   * The texts of the other text slots of the instance, by slot name (Spec 009, plan D-06): help, error. The label stays label. A slot that takes several entries gives one text per entry, as a list (Spec 010 ③, plan ③ D-09): the labels of the options.
    */
   texts?: {
-    [k: string]: string;
+    [k: string]: string | string[];
   };
   /**
    * The Aspekto the instance is shown in; its overrides of adjustable text rules apply (Spec 007, A10).
@@ -1008,6 +1008,10 @@ export interface UzoSlot {
    */
   accepts?: Name[];
   max?: number;
+  /**
+   * The fewest entries the slot takes when it is used (Spec 010 ③, plan ③ D-10): a radio group of one option is no choice. Judged like max (uzo-slot-min).
+   */
+  min?: number;
   required?: boolean;
   nesting?: number;
 }
@@ -1078,6 +1082,13 @@ export interface UzoContent {
       }
     | {
         kind: "not-instead";
+      }
+    | {
+        kind: "distinct";
+      }
+    | {
+        kind: "max-entries";
+        count: number;
       }
     | {
         kind: "verb-and-object";
@@ -1157,6 +1168,13 @@ export interface SkemoSlot {
    * The text of the slot stands beside the control, on the ground of the container, not on a part of the Ero (Spec 010 ①, plan D-07): the label of a switch next to its track. skemo-kontrastparo-missing does not pair it with the Ero's fills.
    */
   beside?: boolean;
+  /**
+   * Every entry of the slot is one option of its own, a text with a value (Spec 010 ③, E7, plan ③ D-02): the options of a radio group. key names the state of one entry, a boolean the parts may be keyed by (by, when) — true for the entry whose value is the value of the string prop equals, false for every other. A state of the entry, not of the Ero: no prop, no axis of the variants.
+   */
+  entry?: {
+    key: Name;
+    equals: Name;
+  };
 }
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema

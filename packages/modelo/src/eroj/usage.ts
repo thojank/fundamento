@@ -167,6 +167,32 @@ export function textOfSource(instance: EroInstance, of: string = LABEL_SOURCE): 
 }
 
 /**
+ * The texts of the entries of a slot that takes several (Spec 010 ③, plan ③ D-09): the labels of
+ * the options, given as a list in `texts` (one text alone counts as one entry). Undefined when the
+ * instance gives no texts for the slot.
+ */
+export function entryTextsOf(instance: EroInstance, of: string): string[] | undefined {
+  const [kind = "", name = ""] = of.split(":");
+  if (kind !== "slot") return undefined;
+  const texts = instance.texts?.[name];
+  if (texts === undefined) return undefined;
+  return typeof texts === "string" ? [texts] : [...texts];
+}
+
+/**
+ * How many entries an instance gives a slot: its texts, or what stands in `slots` (Spec 007, A5),
+ * whichever says more. Undefined when the instance says nothing about the slot.
+ */
+export function entryCountOf(instance: EroInstance, of: string): number | undefined {
+  const [kind = "", name = ""] = of.split(":");
+  if (kind !== "slot") return undefined;
+  const texts = entryTextsOf(instance, of);
+  const entries = instance.slots?.[name];
+  if (texts === undefined && entries === undefined) return undefined;
+  return Math.max(texts?.length ?? 0, entries?.length ?? 0);
+}
+
+/**
  * Whether each slot of the Skemo is filled in an instance (Spec 009, D-04): the label by its text,
  * another slot by its entries or its text. Keyed `slot:<name>`, so a constraint can read it.
  */
@@ -176,7 +202,8 @@ export function slotStates(skemo: Skemo, instance: EroInstance): Record<string, 
     const filled =
       (slot.default === true && textOf(instance) !== undefined) ||
       (instance.slots?.[slot.name]?.length ?? 0) > 0 ||
-      textOfSource(instance, `slot:${slot.name}`) !== undefined;
+      textOfSource(instance, `slot:${slot.name}`) !== undefined ||
+      (entryTextsOf(instance, `slot:${slot.name}`) ?? []).some((text) => text.trim() !== "");
     states[`${SLOT_KEY_PREFIX}${slot.name}`] = filled ? SLOT_FILLED : SLOT_EMPTY;
   }
   return states;
@@ -289,6 +316,41 @@ export function textCheckFailure(
   }
 }
 
+/** Check kinds that judge the entries of a slot, not one text (Spec 010 ③, plan ③ D-09). */
+const LIST_CHECK_KINDS: ReadonlySet<string> = new Set(["distinct", "max-entries"]);
+
+/** A text compared as an option label: without case and surrounding space (NFC). */
+const sameText = (text: string) => text.normalize("NFC").trim().toLowerCase();
+
+/**
+ * Why the entries of a slot fail a list check of a Uzo text rule (Spec 010 ③, plan ③ D-09), or
+ * nothing: `distinct` finds two entries with the same text, `max-entries` more than `count`.
+ */
+export function listCheckFailure(
+  check: UzoContent["check"],
+  texts: readonly string[] | undefined,
+  count: number,
+  slot: string,
+): string | undefined {
+  switch (check.kind) {
+    case "distinct": {
+      const seen = new Map<string, string>();
+      for (const text of texts ?? []) {
+        const first = seen.get(sameText(text));
+        if (first !== undefined) {
+          return `two of its ${slot} share the label "${first}"${first === text ? "" : ` ("${text}")`}; a person cannot tell them apart`;
+        }
+        seen.set(sameText(text), text);
+      }
+      return undefined;
+    }
+    case "max-entries":
+      return count > check.count ? `it has ${count} ${slot}, more than ${check.count}` : undefined;
+    default:
+      return undefined;
+  }
+}
+
 /**
  * The language of a text that hits a generic word of a `not-words` check, when exactly one
  * language claims it ("OK" is generic in German and English alike, so it names no language).
@@ -327,7 +389,8 @@ export function approvedLabel(
   for (const jugxo of modelo.jugxoj) {
     if (jugxo.decision !== "approved" || jugxo.ekzemplo?.regulo !== regulo.id) continue;
     for (const instance of jugxo.ekzemplo.instances) {
-      const label = textOfSource(instance, of);
+      // The entries of a slot that takes several (Spec 010 ③): the options, joined.
+      const label = textOfSource(instance, of) ?? entryTextsOf(instance, of)?.join(", ");
       const skemo = eroOf(instance)?.skemo;
       if (label === undefined || skemo === undefined) continue;
       labels.push({ label, lingvo: instance.lingvo ?? lingvoOf(skemo, label) });
@@ -351,6 +414,11 @@ const textRule: UsageEnforcer = ({ modelo, regulo, instances, eroOf }) =>
     if (ero === undefined || !applies(regulo, ero)) return [];
     const rule = ero.uzo?.content.find((entry) => entry.regulo === regulo.name);
     if (rule === undefined) return [];
+    // A list check judges the entries of a slot (Spec 010 ③, plan ③ D-09): the options of a radio
+    // group, their labels or their number.
+    if (LIST_CHECK_KINDS.has(rule.check.kind)) {
+      return listRuleFinding(modelo, regulo, rule, instance, index, ero, eroOf);
+    }
     // Text rules judge a text; an instance without one violates label-required alone (§5). The
     // text is the label, or what `of` names (Spec 009, D-06).
     const text = textOfSource(instance, rule.of);
@@ -401,6 +469,62 @@ const textRule: UsageEnforcer = ({ modelo, regulo, instances, eroOf }) =>
       },
     ];
   });
+
+/**
+ * The finding of a list check (Spec 010 ③, plan ③ D-09) on one instance: two options with one
+ * label, or more options than the rule allows. The solution is the approved example of the Regulo;
+ * an adjustable rule overridden by the Aspekto of the instance is reported as info, as a text rule.
+ */
+function listRuleFinding(
+  modelo: Modelo,
+  regulo: Regulo,
+  rule: UzoContent,
+  instance: EroInstance,
+  index: number,
+  ero: LoadedEro,
+  eroOf: (instance: EroInstance) => LoadedEro | undefined,
+): UsageFinding[] {
+  const of = rule.of ?? LABEL_SOURCE;
+  const count = entryCountOf(instance, of);
+  if (count === undefined || count === 0) return [];
+  const texts = entryTextsOf(instance, of);
+  const slot = of.slice(of.indexOf(":") + 1);
+  const failure = listCheckFailure(rule.check, texts, count, slot);
+  if (failure === undefined) return [];
+  const label = textOf(instance);
+  const lingvo =
+    instance.lingvo ??
+    (label === undefined ? undefined : lingvoOf(ero.skemo, label)) ??
+    DEFAULT_LINGVO;
+  const example = approvedLabel(modelo, regulo, lingvo, eroOf, of);
+  const shown =
+    texts === undefined ? `${count} ${slot}` : texts.map((text) => `"${text}"`).join(", ");
+  const suggestion =
+    rule.check.kind === "max-entries"
+      ? `Show at most ${rule.check.count} ${slot}${example === undefined ? "" : `, as the approved example does: "${example}"`}. ${regulo.statement}`
+      : example === undefined
+        ? `Write the ${slot} so that the rule holds: ${regulo.statement}`
+        : `Name the ${slot} apart, as the approved example does: "${example}".`;
+  const jugxo = overrideOf(modelo, instance, rule);
+  if (jugxo !== undefined) {
+    return [
+      {
+        instance: [index],
+        severity: "info",
+        message: `Instance ${index} of ${ero.ero.name} shows ${shown} (${of}): ${failure}. The Aspekto ${instance.aspekto} overrides ${regulo.name} with the Jugxo ${jugxo}.`,
+        suggestion: `Keep the ${slot} if the Jugxo ${jugxo} covers them; otherwise ${suggestion.charAt(0).toLowerCase()}${suggestion.slice(1)}`,
+      },
+    ];
+  }
+  return [
+    {
+      instance: [index],
+      severity: rule.fixed ? "error" : (rule.severity ?? "error"),
+      message: `Instance ${index} of ${ero.ero.name} shows ${shown} (${of}): ${failure}.`,
+      suggestion,
+    },
+  ];
+}
 
 /** What a slot entry of an instance is, for a message: `text`, `icon` or the Ero's name. */
 function slotEntryName(entry: NonNullable<EroInstance["slots"]>[string][number]): string {
@@ -477,6 +601,19 @@ function uzoFindings(
         ),
       );
     }
+  }
+  // The fewest entries a slot takes (Spec 010 ③, plan ③ D-10): a radio group of one option is
+  // no choice. Only a slot the instance gives entries for is judged; what it leaves out is unknown.
+  for (const [slot, rule] of Object.entries(uzo.slots)) {
+    if (rule.min === undefined) continue;
+    const count = entryCountOf(instance, `slot:${slot}`);
+    if (count === undefined || count >= rule.min) continue;
+    findings.push({
+      rule: "uzo-slot-min",
+      instance: [index],
+      message: `Instance ${index} of ${ero.ero.name} holds ${count} ${count === 1 ? "entry" : "entries"} in the slot ${slot}, which takes at least ${rule.min}.`,
+      suggestion: `Give the slot ${slot} at least ${rule.min} entries; with fewer the Ero is not the one (get_ero names its boundaries).`,
+    });
   }
   for (const [slot, entries] of Object.entries(slots)) {
     const rule = uzo.slots[slot];
@@ -680,6 +817,10 @@ export const USAGE_ENFORCERS: Readonly<Record<string, UsageEnforcer>> = {
   // Spec 010 ① (G6, plan D-14): the switch names its setting, not the change; the switch says
   // whether it is on. field-label-visible and field-label-names-the-datum apply to it as well (E5).
   "switch-label-names-the-setting": textRule,
+  // Spec 010 ③ (G6, plan ③ D-09): the options of a radio group have distinct labels (fixed) and
+  // are few (adjustable, a warning from the sixth on); both are list checks of the Uzo.
+  "option-labels-distinct": textRule,
+  "elekto-options-few": textRule,
 };
 
 function applies(regulo: Regulo, ero: LoadedEro): boolean {

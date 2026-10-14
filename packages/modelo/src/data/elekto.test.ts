@@ -233,7 +233,7 @@ describe("elekto in the repo Modelo (G1, G2, section 3)", () => {
       ["choose-few", {}, "elekto-options-few"],
     ]);
     expect(skemo?.goals?.[0]?.keywords).toEqual({
-      en: ["choose", "pick", "option", "options", "variant", "which", "radio"],
+      en: ["choose", "pick", "option", "options", "which", "radio"],
       de: [
         "wähle",
         "wählen",
@@ -357,7 +357,7 @@ describe("the cross-links of G5 (one Ero per entry)", () => {
       expect(few?.kialo).toMatch(/elekto/);
       expect(many?.kialo).toMatch(/elektilo/);
       expect(few?.keywords).toEqual({
-        en: ["choose", "pick", "option", "variant", "two", "three"],
+        en: ["choose", "pick", "option", "two", "three"],
         de: ["wählen", "wähle", "option", "variante", "zwei", "drei"],
       });
       expect(many?.keywords).toEqual({

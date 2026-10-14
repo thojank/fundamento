@@ -521,6 +521,7 @@ function contentIssues(entry: LoadedEro, uzo: JsonObject, modelo: Modelo, at: At
       });
     }
     unknownGoal(`${base}/check/goal`, objectAt(item, "check").goal);
+    ofIssues(entry, item, base, at);
 
     const name = stringAt(item, "regulo");
     const regulo = name === undefined ? undefined : reguloFor(modelo, entry, name);
@@ -537,6 +538,53 @@ function contentIssues(entry: LoadedEro, uzo: JsonObject, modelo: Modelo, at: At
       );
     }
   }
+}
+
+/** Check kinds that judge the entries of a slot, not one text (Spec 010 ③, plan ③ D-09). */
+export const LIST_CHECKS: ReadonlySet<string> = new Set(["distinct", "max-entries"]);
+
+/**
+ * `uzo-content-of-invalid` (Spec 010 ③, plan ③ D-09): the text a rule judges is a slot or a prop
+ * of the Skemo, and a list check (distinct, max-entries) judges a slot whose entries are options
+ * (`SkemoSlot.entry`). Without `of` a rule judges the label; a list check needs its slot named.
+ */
+function ofIssues(entry: LoadedEro, item: JsonObject, base: string, at: At): void {
+  const kind = stringAt(objectAt(item, "check"), "kind");
+  const list = kind !== undefined && LIST_CHECKS.has(kind);
+  const of = stringAt(item, "of");
+  if (of === undefined) {
+    if (!list) return;
+    at(
+      base,
+      "uzo-content-of-invalid",
+      `content of the Uzo of ${entry.ero.name} checks a list (${kind}) without naming its slot; without of a rule judges the label, one text.`,
+      `Name the slot whose entries are judged in of (${listSlots(entry).join(", ") || "none"}).`,
+    );
+    return;
+  }
+  const [source = "", name = ""] = of.split(":");
+  const slot =
+    source === "slot" ? entry.skemo.slots.find((candidate) => candidate.name === name) : undefined;
+  const known =
+    source === "slot" ? slot !== undefined : entry.skemo.props.some((prop) => prop.name === name);
+  if (known && (!list || slot?.entry !== undefined)) return;
+  at(
+    `${base}/of`,
+    "uzo-content-of-invalid",
+    known
+      ? `content of the Uzo of ${entry.ero.name} checks the entries of ${of} (${kind}), but the slot takes one text, no entries; two equal options or too many can only be found among the entries of a slot with entry.`
+      : `content of the Uzo of ${entry.ero.name} judges ${of}, which is no ${source === "slot" ? "slot" : "prop"} of its Skemo.`,
+    list
+      ? `Check the list on a slot whose entries are options (${listSlots(entry).join(", ") || "none"}).`
+      : `Judge a slot or a prop of the Skemo (${[...entry.skemo.slots.map((candidate) => `slot:${candidate.name}`), ...entry.skemo.props.map((prop) => `prop:${prop.name}`)].join(", ")}).`,
+  );
+}
+
+/** The slots of the Skemo whose entries are options, as `slot:<name>`. */
+function listSlots(entry: LoadedEro): string[] {
+  return entry.skemo.slots
+    .filter((slot) => slot.entry !== undefined)
+    .map((slot) => `slot:${slot.name}`);
 }
 
 /** A Jugxo with that decision whose example is for the Regulo and labels every instance. */

@@ -92,7 +92,8 @@ describe("rule catalog (§2.6)", () => {
     // Spec 008 (T003, T004): skemo-web-term, skemo-a11y-invalid, uzo-boundary-covered and the two
     // Skemo-level Reguloj of the ligilo, link-not-color-only and external-link-marked.
     // Spec 009 (T003): uzo-slot-required-missing and the four kampo Reguloj enforced by name.
-    expect(RULE_IDS).toHaveLength(151);
+    // Spec 010 ③ (T203): uzo-content-of-invalid and uzo-slot-min.
+    expect(RULE_IDS).toHaveLength(153);
     for (const rule of [
       "uzo-skemo-missing",
       "uzo-ero-unknown",
