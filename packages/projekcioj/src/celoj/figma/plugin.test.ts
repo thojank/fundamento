@@ -250,6 +250,7 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
     expect(openButono.map((manko) => manko.part)).toEqual(["boundary", "slots", "content"]);
     expect(result.mankoj.open.map((manko) => manko.set)).toEqual([
       ...["boundary", "slots", "content"].map(() => "butono"),
+      ...["boundary", "slots", "content"].map(() => "elekto"),
       ...["boundary", "slots", "content"].map(() => "kampo"),
       ...["boundary", "slots", "content"].map(() => "ligilo"),
       ...["boundary", "slots", "content"].map(() => "markobutono"),
@@ -279,6 +280,7 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
     ).toEqual(["boundary", "slots", "content"]);
     expect(result.mankoj.closed.map((manko) => manko.set)).toEqual([
       ...["butono", "butono", "butono"],
+      ...["elekto", "elekto", "elekto"],
       ...["kampo", "kampo", "kampo"],
       ...["ligilo", "ligilo", "ligilo"],
       ...["markobutono", "markobutono", "markobutono"],
@@ -2437,6 +2439,8 @@ describe("every bound paint shows the plan's colour after the first and the seco
       // Spec 008: two sets; the ligilo has placement × size × state = 30 variants.
       components: [
         { set: "butono", created: 72, updated: 0 },
+        // Spec 010 ③: the elekto has size × state = 15 variants.
+        { set: "elekto", created: 15, updated: 0 },
         // Spec 009: the kampo has size × state = 18 variants.
         { set: "kampo", created: 18, updated: 0 },
         { set: "ligilo", created: 30, updated: 0 },
@@ -3676,6 +3680,7 @@ describe("the label default follows the role of the Ero (M-3)", () => {
     await run(double, source);
     const of = (name: string) => defaultsOf(pageNodes(double).find((child) => child.name === name));
     expect(of("butono")).toEqual(["Aktion"]);
+    expect(of("elekto")).toEqual(["Frage"]);
     expect(of("kampo")).toEqual(["Beschriftung"]);
     expect(of("ligilo")).toEqual(["Ziel"]);
     expect(of("markobutono")).toEqual(["Option"]);
@@ -3836,6 +3841,110 @@ describe("the markobutono is drawn as a toggle: box, check mark, label and error
     );
     expect(on?.children[0]?.children.map((child) => child.name)).toEqual(["focus-ring", "label"]);
     expect(descendant(on, "indicator")?.children).toEqual([]);
+  });
+
+  it("a second run writes nothing new", async () => {
+    const { double } = await drawn();
+    const before = double.snapshot();
+    await run(double, source);
+    expect(double.snapshot()).toBe(before);
+  });
+});
+
+// Spec 010 ③ (plan ③ D-07): the radio group is drawn in a structure of its own, choice — a field in a
+// column: the label (the question), a column of options, help and error. Each option is a row:
+// the focus ring around the circle (control) with the dot (indicator, the web's vector) in it, the
+// option's label beside it. The bindings that follow selected come from the entry of the plan for
+// that option (the first chosen, E7): the chosen circle filled, its dot drawn; the others filled
+// with the ground and their dot at opacity 0. The focus ring shows on the first option only.
+// Test-double assumptions until measured in f10b-5: as for the check mark (② D-09), and a
+// componentPropertyReference on one text of each variant only (the label).
+describe("the elekto is drawn as a choice: question, options with circle and dot, help and error (Spec 010 ③)", () => {
+  const source = repoFiles["figma/plugin/code.js"] ?? "";
+  const bound = (node: DoubleNode | undefined, field: string) => node?.boundVariables[field]?.name;
+  const fillOf = (node: DoubleNode | undefined) =>
+    ((node?.properties.fills ?? []) as { boundVariables?: { color?: { name: string } } }[])[0]
+      ?.boundVariables?.color?.name;
+  const strokeOf = (node: DoubleNode | undefined) =>
+    ((node?.properties.strokes ?? []) as { boundVariables?: { color?: { name: string } } }[])[0]
+      ?.boundVariables?.color?.name;
+  const drawn = async () => {
+    const double = modelDouble();
+    await run(double, source);
+    const set = pageNodes(double).find((child) => child.name === "elekto");
+    const variant = (name: string) => set?.children.find((child) => child.name === name);
+    return { double, set, variant };
+  };
+
+  it("draws every variant of size × state, named by the plan", async () => {
+    const { set } = await drawn();
+    expect(set?.children).toHaveLength(15);
+    expect(set?.children[0]?.name).toBe("size=small, state=rest");
+  });
+
+  it("stacks the question, the options, help and error; each option a row of ring and label", async () => {
+    const { variant } = await drawn();
+    const rest = variant("size=medium, state=rest");
+    const field = rest?.children.find((child) => child.name === "field");
+    expect(field?.properties.layoutMode).toBe("VERTICAL");
+    expect(field?.children.map((child) => child.name)).toEqual([
+      "label",
+      "options",
+      "help",
+      "error",
+    ]);
+    const options = field?.children.find((child) => child.name === "options");
+    expect(options?.properties.layoutMode).toBe("VERTICAL");
+    expect(options?.children.map((child) => child.name)).toEqual([
+      "option-1",
+      "option-2",
+      "option-3",
+    ]);
+    const first = options?.children[0];
+    expect(first?.properties.layoutMode).toBe("HORIZONTAL");
+    expect(first?.children.map((child) => child.name)).toEqual(["focus-ring", "option-label"]);
+    expect(descendant(first, "control")?.children.map((child) => child.name)).toEqual([
+      "indicator",
+    ]);
+    expect(descendant(first, "indicator")?.children.map((child) => child.name)).toEqual(["mark"]);
+    expect(descendant(rest, "label")?.properties.characters).toBe("Frage");
+    expect(
+      options?.children.map((option) => descendant(option, "option-label")?.properties.characters),
+    ).toEqual(["Eins", "Zwei", "Drei"]);
+    expect(descendant(rest, "help")?.properties.characters).toBe("Hinweis");
+    expect(descendant(rest, "error")?.properties.characters).toBe("Fehler");
+    expect(bound(field, "itemSpacing")).toBe("spacing/medium");
+    expect(bound(options, "itemSpacing")).toBe("spacing/medium");
+    expect(bound(first, "itemSpacing")).toBe("spacing/small");
+  });
+
+  it("fills the chosen circle and draws its dot; the other circles take the ground, their dot hidden", async () => {
+    const { variant } = await drawn();
+    const rest = variant("size=medium, state=rest");
+    const options = descendant(rest, "options")?.children ?? [];
+    const [chosen, other] = options;
+    expect(fillOf(descendant(chosen, "control"))).toBe("color/action/primary/rest");
+    expect(fillOf(descendant(other, "control"))).toBe("color/background/default");
+    expect(strokeOf(descendant(other, "control"))).toBe("color/border/strong");
+    expect(bound(descendant(chosen, "control"), "cornerRadius")).toBe("radius/role/pill");
+    expect(descendant(chosen, "indicator")?.properties.opacity).toBe(1);
+    expect(fillOf(descendant(chosen, "mark"))).toBe("color/action/primary/text");
+    expect(bound(descendant(chosen, "indicator"), "width")).toBe("size/icon/medium");
+    expect(descendant(other, "indicator")?.properties.opacity).toBe(0);
+    expect(descendant(other, "mark")?.properties.fills).toEqual([]);
+    expect(fillOf(descendant(other, "option-label"))).toBe("color/text/default");
+    expect(bound(descendant(other, "option-label"), "fontSize")).toBe(
+      "typography/body/1/font-size",
+    );
+  });
+
+  it("shows the focus ring on the first option only, in the focus variant only", async () => {
+    const { variant } = await drawn();
+    const focus = descendant(variant("size=medium, state=focus"), "options")?.children ?? [];
+    expect(strokeOf(descendant(focus[0], "focus-ring"))).toBeDefined();
+    expect(strokeOf(descendant(focus[1], "focus-ring"))).toBeUndefined();
+    const rest = descendant(variant("size=medium, state=rest"), "options")?.children ?? [];
+    expect(strokeOf(descendant(rest[0], "focus-ring"))).toBeUndefined();
   });
 
   it("a second run writes nothing new", async () => {

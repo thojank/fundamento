@@ -7,7 +7,7 @@ import { join } from "node:path";
 import { defaultModeloSource, evaluateAlirebleco, getEro, loadModelo } from "@fundamento/modelo";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { buildProjekcioj } from "../../build.js";
-import { roundTo, type VitrinoDatumoj } from "./datumoj.js";
+import { roundTo, VITRINO_OPTIONS, type VitrinoDatumoj } from "./datumoj.js";
 import { VITRINO_FILE } from "./vitrino.js";
 
 const dirs: string[] = [];
@@ -251,6 +251,7 @@ describe("the Vitrino after the acceptances (Nachlese 2026-10-13)", () => {
   it("the layout sentence names the subject and the placement (C8)", () => {
     expect(datumoj.a11yRoloj).toEqual({
       butono: "button",
+      elekto: "radiogroup",
       kampo: "textbox",
       ligilo: "link",
       markobutono: "checkbox",
@@ -353,5 +354,36 @@ describe("the Vitrino shows the markobutono ticked, required, invalid and disabl
 
   it("says that the label of the checkbox may break", () => {
     expect(html).toContain("Größe aus dem Inhalt, Label darf umbrechen.");
+  });
+});
+
+// Spec 010 ③ (plan ③ D-13): the radio group in the Vitrino, from the same grid: a column for
+// required (it carries an a11y text), invalid and disabled (states); every cell three options, the
+// first chosen (value of the Ero = value of the option, E7), the help everywhere and the error
+// only under invalid (constraint). The words of the options are the Figma set's (one source).
+describe("the Vitrino shows the elekto with three options, required, invalid and disabled (Spec 010 ③)", () => {
+  const OPTIONS =
+    '<data slot="options" value="1">Eins</data><data slot="options" value="2">Zwei</data><data slot="options" value="3">Drei</data>';
+
+  it("has the columns rest, required, invalid, disabled and a row per size, three options in every cell", () => {
+    const grid = datumoj.eroj.elekto ?? "";
+    expect(grid).toContain(
+      '<th scope="col">rest</th><th scope="col">required</th><th scope="col">invalid</th><th scope="col">disabled</th>',
+    );
+    for (const size of ["small", "medium", "large"]) {
+      expect(grid).toContain(
+        `<fm-elekto size="${size}" value="1">${size}${OPTIONS}<span slot="help">Hinweis</span></fm-elekto>`,
+      );
+      expect(grid).toContain(
+        `<fm-elekto size="${size}" value="1" invalid>${size}${OPTIONS}<span slot="help">Hinweis</span><span slot="error">Fehler</span></fm-elekto>`,
+      );
+    }
+    expect(grid.match(/<data slot="options"/g)).toHaveLength(3 * 4 * 3);
+    expect(grid.match(/slot="error"/g)).toHaveLength(3);
+    expect(VITRINO_OPTIONS).toEqual(["Eins", "Zwei", "Drei"]);
+  });
+
+  it("says that no option of the radio group breaks", () => {
+    expect(html).toContain("Größe aus dem Inhalt, keine Option bricht um.");
   });
 });

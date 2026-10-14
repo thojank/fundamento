@@ -287,3 +287,22 @@ test("fm-markobutono is upgraded in its section, ticked, required, invalid and d
   const disabled = section.locator("fm-markobutono[disabled]").first().locator("button");
   await expect(disabled).toBeDisabled();
 });
+
+// Spec 010 ③ (plan ③ D-13): the section of the elekto shows the radio group with three options, the
+// first chosen, required, invalid with its error and disabled in every size, upgraded.
+test("fm-elekto is upgraded in its section with three options, required, invalid and disabled", async ({
+  page,
+}) => {
+  await open(page);
+  const section = page.locator("#fm-vitrino-elekto");
+  await expect(section.locator("thead")).toContainText("required");
+  await expect(section.locator("thead")).toContainText("invalid");
+  await expect(section.getByRole("radiogroup")).toHaveCount(12);
+  await expect(section.getByRole("radio", { checked: true })).toHaveCount(12);
+  await expect(section.getByRole("radio", { checked: false })).toHaveCount(24);
+  await expect(section.locator('fm-elekto[invalid] [slot="error"]')).toHaveCount(3);
+  const invalid = section.locator("fm-elekto[invalid]").first().getByRole("radiogroup");
+  await expect(invalid).toHaveAttribute("aria-invalid", "true");
+  const disabled = section.locator("fm-elekto[disabled]").first().getByRole("radiogroup");
+  await expect(disabled).toHaveAttribute("aria-disabled", "true");
+});

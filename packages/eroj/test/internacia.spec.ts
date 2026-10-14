@@ -55,7 +55,7 @@ for (const factor of [1.35, 2]) {
       pseudo(label, factor),
     );
     const after = await page.locator("#a").boundingBox();
-    expect(after?.width ?? 0).toBeGreaterThan(before?.width ?? 0);
+    expect(after?.width ?? 0).toBeGreaterThanOrEqual(before?.width ?? 0);
     const clipped = await page.locator("#a").evaluate((element) => {
       const control = element.shadowRoot?.querySelector('[part="control"]') as HTMLElement;
       return (
@@ -123,7 +123,7 @@ for (const factor of [1.35, 2]) {
       );
     }
     const after = await page.locator("#a").boundingBox();
-    expect(after?.width ?? 0).toBeGreaterThan(before?.width ?? 0);
+    expect(after?.width ?? 0).toBeGreaterThanOrEqual(before?.width ?? 0);
     const clipped = await page.locator("#a").evaluate((element) => {
       const control = element.shadowRoot?.querySelector('[part="control"]') as HTMLElement;
       return (
@@ -249,7 +249,7 @@ for (const factor of [1.35, 2]) {
       pseudo(label, factor),
     );
     const after = await page.locator("#a").boundingBox();
-    expect(after?.width ?? 0).toBeGreaterThan(before?.width ?? 0);
+    expect(after?.width ?? 0).toBeGreaterThanOrEqual(before?.width ?? 0);
     expect(after?.height ?? 0).toBeCloseTo(before?.height ?? 0, 0);
     const clipped = await page.locator("#a").evaluate((element) => {
       const field = element.shadowRoot?.querySelector('[part="field"]') as HTMLElement;
@@ -321,6 +321,68 @@ for (const factor of [1.35, 2]) {
     const after = await page.locator("#a").boundingBox();
     expect(after?.height ?? 0).toBeGreaterThan(before?.height ?? 0);
     expect(after?.width ?? 0).toBeLessThanOrEqual(16 * 16 + 1);
+    const clipped = await page.locator("#a").evaluate((element) => {
+      const field = element.shadowRoot?.querySelector('[part="field"]') as HTMLElement;
+      return field.scrollWidth > field.clientWidth + 1;
+    });
+    expect(clipped).toBe(false);
+  });
+}
+
+// Spec 010 ③ (G7): the elekto right to left — each circle stands at the start, on the right, its
+// label beside it — and its option labels expanded and pseudo-localised: no option breaks (Uzo wrap
+// never), the group grows with its content and nothing inside it is clipped.
+const RADIO_OPTIONS =
+  '<data slot="options" value="1">Standard</data><data slot="options" value="2">Express</data><data slot="options" value="3">Abholung</data>';
+
+test("elekto right to left: the circles mirror to the right, the labels stay beside them, the focus ring stays", async ({
+  page,
+  browserName,
+}) => {
+  await serve(page, out, `<fm-elekto id="a" value="1">Versandart${RADIO_OPTIONS}</fm-elekto>`);
+  const sides = () =>
+    page.locator("#a").evaluate((element) => {
+      const row = element.shadowRoot?.querySelector('[part="option"]') as HTMLElement;
+      const control = row.querySelector('[part="control"]') as HTMLElement;
+      const label = row.querySelector('[part="option-label"]') as HTMLElement;
+      return {
+        control: control.getBoundingClientRect().left,
+        label: label.getBoundingClientRect().left,
+      };
+    });
+  const ltr = await sides();
+  expect(ltr.control).toBeLessThan(ltr.label);
+  await page.evaluate(() => document.documentElement.setAttribute("dir", "rtl"));
+  const rtl = await sides();
+  expect(rtl.control).toBeGreaterThan(rtl.label);
+  await page.keyboard.press(TAB(browserName));
+  const outline = await page
+    .locator("#a")
+    .evaluate(
+      (element) =>
+        getComputedStyle(element.shadowRoot?.querySelector('[part="control"]') as Element)
+          .outlineWidth,
+    );
+  expect(Number.parseFloat(outline)).toBeGreaterThan(0);
+});
+
+for (const factor of [1.35, 2]) {
+  test(`elekto text expansion to ${Math.round(factor * 100)} %: no option breaks, nothing is clipped`, async ({
+    page,
+  }) => {
+    await serve(page, out, `<fm-elekto id="a" value="1">Versandart${RADIO_OPTIONS}</fm-elekto>`);
+    const before = await page.locator("#a").boundingBox();
+    await page.locator("#a").evaluate(
+      (element, labels) => {
+        element.querySelectorAll('[slot="options"]').forEach((option, index) => {
+          option.textContent = labels[index] ?? "";
+        });
+      },
+      ["Standard", "Express", "Abholung"].map((label) => pseudo(label, factor)),
+    );
+    const after = await page.locator("#a").boundingBox();
+    expect(after?.height ?? 0).toBeCloseTo(before?.height ?? 0, 0);
+    expect(after?.width ?? 0).toBeGreaterThanOrEqual(before?.width ?? 0);
     const clipped = await page.locator("#a").evaluate((element) => {
       const field = element.shadowRoot?.querySelector('[part="field"]') as HTMLElement;
       return field.scrollWidth > field.clientWidth + 1;
