@@ -677,6 +677,9 @@ export const USAGE_ENFORCERS: Readonly<Record<string, UsageEnforcer>> = {
   "error-says-what-to-do": textRule,
   "help-is-one-sentence": textRule,
   "placeholder-is-example": textRule,
+  // Spec 010 ① (G6, plan D-14): the switch names its setting, not the change; the switch says
+  // whether it is on. field-label-visible and field-label-names-the-datum apply to it as well (E5).
+  "switch-label-names-the-setting": textRule,
 };
 
 function applies(regulo: Regulo, ero: LoadedEro): boolean {

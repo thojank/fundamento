@@ -397,7 +397,8 @@
         "eroj": [
           "butono",
           "ligilo",
-          "kampo"
+          "kampo",
+          "sxaltilo"
         ]
       }
     },
@@ -521,13 +522,14 @@
     {
       "id": "reg_01M4S1ZR7F1KE1AV1C7X5W8GD5",
       "name": "field-label-visible",
-      "statement": "A kampo always has a visible label; an empty label slot is a violation.",
+      "statement": "A kampo or a sxaltilo always has a visible label; an empty label slot is a violation.",
       "kialo": "WCAG 3.3.2 (Labels or Instructions): a placeholder disappears while typing, and a label only a screen reader hears does not help the sighted person who finds the field half filled.",
-      "scope": "eroj: kampo instances; the label slot has text",
+      "scope": "eroj: kampo and sxaltilo instances; the label slot has text",
       "checkability": "automatic",
       "appliesTo": {
         "eroj": [
-          "kampo"
+          "kampo",
+          "sxaltilo"
         ]
       }
     },
@@ -586,13 +588,14 @@
     {
       "id": "reg_01M4S1ZR7GEPZSTB9ES3REK3V1",
       "name": "field-label-names-the-datum",
-      "statement": "The label of a kampo names what is entered, as a noun: 'E-Mail', not 'E-Mail eingeben'.",
+      "statement": "The label of a kampo names what is entered, as a noun: 'E-Mail', not 'E-Mail eingeben'; the label of a sxaltilo names its setting the same way.",
       "kialo": "The label is read as the name of the field, in a form and in a list of fields; a verb in it reads as an instruction, not a name. A brand may show voice here, with a Jugxo.",
-      "scope": "eroj: kampo instances with a label (check not-words: verbs of entering)",
+      "scope": "eroj: kampo and sxaltilo instances with a label (check not-words: verbs of entering)",
       "checkability": "automatic",
       "appliesTo": {
         "eroj": [
-          "kampo"
+          "kampo",
+          "sxaltilo"
         ]
       }
     },
@@ -619,6 +622,19 @@
       "appliesTo": {
         "eroj": [
           "kampo"
+        ]
+      }
+    },
+    {
+      "id": "reg_01M4WMD1WXQY3DF8GRA0Y848WM",
+      "name": "switch-label-names-the-setting",
+      "statement": "The label of a sxaltilo names the setting as a state, 'Benachrichtigungen', not the action that changes it: 'Benachrichtigungen einschalten'.",
+      "kialo": "WAI-ARIA APG Switch pattern and WCAG 4.1.2 (Name, Role, Value): the switch announces its state itself (on, off); a verb in its label announces it a second time and reads as a button, so a screen reader says 'Benachrichtigungen einschalten, Schalter, an' — the person cannot tell what is on.",
+      "scope": "eroj: sxaltilo instances with a label (check not-words: verbs of switching), an approximation without a model: 'Dark Mode an' (state word in the label) is not found",
+      "checkability": "automatic",
+      "appliesTo": {
+        "eroj": [
+          "sxaltilo"
         ]
       }
     }

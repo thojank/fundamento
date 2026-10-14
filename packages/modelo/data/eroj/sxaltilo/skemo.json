@@ -1,0 +1,398 @@
+{
+  "ero": {
+    "id": "ero_01M4WMD0RAJYZY7QT5VNS47T8M",
+    "name": "sxaltilo",
+    "skemo": "ske_01M4WMD145A64P8KV15HEH3TQ9",
+    "description": "A switch: turns a setting on or off and applies it at once. Its label names the setting and always shows; the switch shows its state itself."
+  },
+  "skemo": {
+    "id": "ske_01M4WMD145A64P8KV15HEH3TQ9",
+    "ero": "ero_01M4WMD0RAJYZY7QT5VNS47T8M",
+    "props": [
+      {
+        "name": "checked",
+        "kind": "boolean",
+        "default": false,
+        "description": "The setting is on: the track is filled and the knob stands at its end. A prop, not a state (E2): it holds the value, the states say how the switch is touched."
+      },
+      {
+        "name": "size",
+        "kind": "enum",
+        "values": [
+          "small",
+          "medium",
+          "large"
+        ],
+        "default": "medium",
+        "description": "Knob, track and label on the scale of the kampo: the knob takes size.icon.*, the track the width of size.control.*."
+      },
+      {
+        "name": "disabled",
+        "kind": "boolean",
+        "default": false,
+        "description": "Not available; skipped by the keyboard, the setting cannot be changed."
+      },
+      {
+        "name": "name",
+        "kind": "string",
+        "description": "The name in the form; without effect in a design tool, like type on the butono."
+      }
+    ],
+    "states": [
+      "rest",
+      "hover",
+      "focus",
+      "disabled"
+    ],
+    "slots": [
+      {
+        "name": "label",
+        "default": true,
+        "text": true,
+        "beside": true
+      }
+    ],
+    "parts": {
+      "label": {
+        "color": {
+          "by": [
+            "state"
+          ]
+        },
+        "typography": {
+          "by": [
+            "size"
+          ]
+        }
+      },
+      "surface": {
+        "fill": {
+          "by": [
+            "checked",
+            "state"
+          ]
+        }
+      },
+      "border": {
+        "color": {
+          "by": [
+            "checked",
+            "state"
+          ]
+        },
+        "width": {
+          "fixed": "border.width.default"
+        }
+      },
+      "box": {
+        "width": {
+          "by": [
+            "size"
+          ]
+        },
+        "gap": {
+          "fixed": "spacing.small"
+        },
+        "radius": {
+          "fixed": "radius.role.pill"
+        }
+      },
+      "indicator": {
+        "fill": {
+          "by": [
+            "checked",
+            "state"
+          ]
+        },
+        "size": {
+          "by": [
+            "size"
+          ]
+        },
+        "radius": {
+          "fixed": "radius.role.pill"
+        },
+        "position": {
+          "by": [
+            "checked"
+          ]
+        }
+      },
+      "focus-ring": {
+        "ring": {
+          "fixed": "focus.ring"
+        },
+        "offset": {
+          "fixed": "focus.offset"
+        },
+        "color": {
+          "fixed": "color.focus.inner"
+        }
+      },
+      "motion": {
+        "duration": {
+          "fixed": "motion.duration.fast"
+        },
+        "easing": {
+          "fixed": "motion.easing.standard"
+        }
+      }
+    },
+    "bindings": [
+      {
+        "part": "label",
+        "property": "color",
+        "when": {
+          "state": "rest"
+        },
+        "token": "color.text.default"
+      },
+      {
+        "part": "label",
+        "property": "color",
+        "when": {
+          "state": "disabled"
+        },
+        "token": "color.text.disabled"
+      },
+      {
+        "part": "label",
+        "property": "typography",
+        "when": {
+          "size": "small"
+        },
+        "token": "typography.label.2"
+      },
+      {
+        "part": "label",
+        "property": "typography",
+        "when": {
+          "size": "medium"
+        },
+        "token": "typography.label.1"
+      },
+      {
+        "part": "label",
+        "property": "typography",
+        "when": {
+          "size": "large"
+        },
+        "token": "typography.label.1"
+      },
+      {
+        "part": "surface",
+        "property": "fill",
+        "when": {
+          "checked": "true",
+          "state": "rest"
+        },
+        "token": "color.action.primary.rest"
+      },
+      {
+        "part": "surface",
+        "property": "fill",
+        "when": {
+          "checked": "true",
+          "state": "hover"
+        },
+        "token": "color.action.primary.hover"
+      },
+      {
+        "part": "surface",
+        "property": "fill",
+        "when": {
+          "checked": "true",
+          "state": "disabled"
+        },
+        "token": "color.action.primary.disabled"
+      },
+      {
+        "part": "surface",
+        "property": "fill",
+        "when": {
+          "checked": "false",
+          "state": "rest"
+        },
+        "token": "color.background.sunken"
+      },
+      {
+        "part": "border",
+        "property": "color",
+        "when": {
+          "checked": "true",
+          "state": "rest"
+        },
+        "token": "color.action.primary.rest"
+      },
+      {
+        "part": "border",
+        "property": "color",
+        "when": {
+          "checked": "true",
+          "state": "hover"
+        },
+        "token": "color.action.primary.hover"
+      },
+      {
+        "part": "border",
+        "property": "color",
+        "when": {
+          "checked": "true",
+          "state": "disabled"
+        },
+        "token": "color.action.primary.disabled"
+      },
+      {
+        "part": "border",
+        "property": "color",
+        "when": {
+          "checked": "false",
+          "state": "rest"
+        },
+        "token": "color.border.strong"
+      },
+      {
+        "part": "border",
+        "property": "color",
+        "when": {
+          "checked": "false",
+          "state": "disabled"
+        },
+        "token": "color.border.disabled"
+      },
+      {
+        "part": "box",
+        "property": "width",
+        "when": {
+          "size": "small"
+        },
+        "token": "size.control.small"
+      },
+      {
+        "part": "box",
+        "property": "width",
+        "when": {
+          "size": "medium"
+        },
+        "token": "size.control.medium"
+      },
+      {
+        "part": "box",
+        "property": "width",
+        "when": {
+          "size": "large"
+        },
+        "token": "size.control.large"
+      },
+      {
+        "part": "indicator",
+        "property": "fill",
+        "when": {
+          "checked": "true",
+          "state": "rest"
+        },
+        "token": "color.action.primary.text"
+      },
+      {
+        "part": "indicator",
+        "property": "fill",
+        "when": {
+          "checked": "false",
+          "state": "rest"
+        },
+        "token": "color.border.strong"
+      },
+      {
+        "part": "indicator",
+        "property": "fill",
+        "when": {
+          "checked": "false",
+          "state": "disabled"
+        },
+        "token": "color.border.disabled"
+      },
+      {
+        "part": "indicator",
+        "property": "size",
+        "when": {
+          "size": "small"
+        },
+        "token": "size.icon.small"
+      },
+      {
+        "part": "indicator",
+        "property": "size",
+        "when": {
+          "size": "medium"
+        },
+        "token": "size.icon.medium"
+      },
+      {
+        "part": "indicator",
+        "property": "size",
+        "when": {
+          "size": "large"
+        },
+        "token": "size.icon.large"
+      },
+      {
+        "part": "indicator",
+        "property": "position",
+        "when": {
+          "checked": "false"
+        },
+        "token": "start"
+      },
+      {
+        "part": "indicator",
+        "property": "position",
+        "when": {
+          "checked": "true"
+        },
+        "token": "end"
+      }
+    ],
+    "a11y": {
+      "role": "switch",
+      "name": [
+        "slot:label"
+      ],
+      "states": {
+        "checked": [
+          "aria-checked"
+        ],
+        "disabled": [
+          "aria-disabled"
+        ]
+      },
+      "keys": [
+        "Space",
+        "Enter"
+      ]
+    },
+    "goals": [
+      {
+        "goal": "toggle",
+        "keywords": {
+          "en": [
+            "toggle",
+            "switch",
+            "enable",
+            "disable"
+          ],
+          "de": [
+            "umschalten",
+            "einschalten",
+            "ausschalten",
+            "aktivieren",
+            "deaktivieren",
+            "einschaltet",
+            "ausschaltet"
+          ]
+        },
+        "props": {},
+        "regulo": "switch-label-names-the-setting"
+      }
+    ]
+  }
+}

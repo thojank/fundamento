@@ -2149,13 +2149,17 @@
         },
         "decorative": {
           "type": "boolean"
+        },
+        "beside": {
+          "description": "The text of the slot stands beside the control, on the ground of the container, not on a part of the Ero (Spec 010 ①, plan D-07): the label of a switch next to its track. skemo-kontrastparo-missing does not pair it with the Ero's fills.",
+          "type": "boolean"
         }
       },
       "required": ["name"],
       "additionalProperties": false
     },
     "SkemoPartProperty": {
-      "description": "Platform-neutral part properties (Art. VIII); the mapping to CSS or another platform is Celo knowledge in the projections.",
+      "description": "Platform-neutral part properties (Art. VIII); the mapping to CSS or another platform is Celo knowledge in the projections. position takes a term, not a token: start or end along the control (Spec 010 ①, plan D-04, the knob of a switch).",
       "type": "string",
       "enum": [
         "fill",
@@ -2170,7 +2174,8 @@
         "offset",
         "size",
         "duration",
-        "easing"
+        "easing",
+        "position"
       ]
     },
     "SkemoPartSource": {
@@ -2244,7 +2249,7 @@
           }
         },
         "token": {
-          "description": "A role token of core, or the keyword inherit or none (Spec 008, plan D-03; see SkemoPartSource.fixed).",
+          "description": "A role token of core, or the keyword inherit or none (Spec 008, plan D-03; see SkemoPartSource.fixed); for the property position one of the terms start or end (Spec 010 ①, plan D-04).",
           "$ref": "#/$defs/TokenName"
         }
       },

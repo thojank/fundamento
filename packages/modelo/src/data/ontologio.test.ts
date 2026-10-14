@@ -147,8 +147,13 @@ describe("the scheme eroj (Spec 008 T009)", () => {
   const eroj = concepts.filter((concept) => concept.inScheme === "eroj");
 
   it("holds one concept per Ero of the Modelo, under #Ero, related to each other", () => {
-    expect(eroNames).toEqual(["butono", "kampo", "ligilo"]);
-    expect(eroj.map((concept) => concept.term).sort()).toEqual(["Butono", "Kampo", "Ligilo"]);
+    expect(eroNames).toEqual(["butono", "kampo", "ligilo", "sxaltilo"]);
+    expect(eroj.map((concept) => concept.term).sort()).toEqual([
+      "Butono",
+      "Kampo",
+      "Ligilo",
+      "Sxaltilo",
+    ]);
     for (const concept of eroj) {
       expect(concept.broader).toEqual(["#Ero"]);
       expect(concept.notation).toBeUndefined();
@@ -162,8 +167,19 @@ describe("the scheme eroj (Spec 008 T009)", () => {
     expect(relations("Butono")).toEqual([
       { predicate: "references", target: "#Ligilo" },
       { predicate: "references", target: "#Kampo" },
+      { predicate: "references", target: "#Sxaltilo" },
     ]);
-    expect(relations("Kampo")).toEqual([{ predicate: "references", target: "#Butono" }]);
+    expect(relations("Kampo")).toEqual([
+      { predicate: "references", target: "#Butono" },
+      { predicate: "references", target: "#Sxaltilo" },
+    ]);
+    // Spec 010 ①: the switch, with its German and English names (Schalter, switch).
+    expect(relations("Sxaltilo")).toEqual([
+      { predicate: "references", target: "#Butono" },
+      { predicate: "references", target: "#Kampo" },
+    ]);
+    const sxaltilo = eroj.find((concept) => concept.term === "Sxaltilo");
+    expect(sxaltilo?.prefLabel).toEqual({ eo: "Sxaltilo", en: "switch", de: "Schalter" });
   });
 
   it("reports an Ero without a concept and a concept without an Ero", () => {

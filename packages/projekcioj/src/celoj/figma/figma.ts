@@ -18,6 +18,7 @@ import {
   boundToken,
   combinationsOf,
   isBindingKeyword,
+  isPositionKeyword,
   type LoadedEro,
   type Modelo,
   nomRegulo,
@@ -32,6 +33,7 @@ import {
   readDtcgColor,
   STATE_KEY,
   type Uzo,
+  variantKeys,
 } from "@fundamento/modelo";
 import type { Celo, CeloInput, GeneratedFile } from "../../build.js";
 import { VITRINO_SLOT_TEXTS, VITRINO_SURFACE } from "../vitrino/datumoj.js";
@@ -136,12 +138,13 @@ export const FIELD_TEXTS: Readonly<Record<string, string>> = {
 /**
  * How the plugin draws a set (Spec 009, D-09): a control (variant → ring → gap → control → label)
  * for a button or a link, a field (label above, the control with its text, help and error below)
- * for a textbox. Celo knowledge from the a11y role (Art. VIII).
+ * for a textbox, a toggle (Spec 010 ①, D-10: a row — ring → gap → control with the knob in it,
+ * the label beside) for a switch. Celo knowledge from the a11y role (Art. VIII).
  */
-export type FigmaStructure = "control" | "field";
+export type FigmaStructure = "control" | "field" | "toggle";
 
 export const structureOf = (role: string): FigmaStructure =>
-  role === "textbox" ? "field" : "control";
+  role === "textbox" ? "field" : role === "switch" ? "toggle" : "control";
 
 /**
  * The neutral word every label template shows, per a11y role (M-3; Maintainer, F14, 2026-10-13,
@@ -152,6 +155,8 @@ const LABEL_DEFAULTS: Readonly<Record<string, string>> = {
   button: "Aktion",
   link: "Ziel",
   textbox: "Beschriftung",
+  // Spec 010 ① (plan D-10): a switch names a setting; for the maintainer to confirm (no Jugxo).
+  switch: "Einstellung",
 };
 
 /** The word a role without its own entry shows: the button's, as every set did before M-3. */
@@ -175,14 +180,14 @@ export const FIGMA_SECTION = "Fundamento";
 const SET_GAP = "spacing.xlarge";
 
 /**
- * The share of a set's own width the gap after it is at least (F-7, gemessen 2026-10-14 in
- * f10b-5): after the brand switch on the section (komuna → ekzemplo) the kampo set grew wider
- * (Archivo Black) and overlapped the ligilo, because the gap was read from the widths of the
- * default mode. The plugin sets no mode on the section to measure the other brands (F-2: the
- * section's mode is the maintainer's), so the room is a share of the width: half, more than the
- * widening measured. The smaller of the two ways that carry both brands (Regel 0).
+ * The frame in the section every set is a child of (F-8, gemessen 2026-10-14 in f10b-5): after
+ * the run with seven sets, elektilo lay on ligilo — F-7's gap of half the left neighbour's width
+ * came from the widths of the default mode, and the widths change per brand mode (Archivo Black is
+ * wider). The frame has auto-layout (horizontal, wrapping, spacing.xlarge both ways, hugging), so
+ * Figma places the sets from their sizes in the mode on screen; the plugin computes no place
+ * (Regel 0: das Werkzeug kann es).
  */
-export const SET_WIDTH_RESERVE = 0.5;
+export const FIGMA_SET_FRAME = "Eroj";
 
 /**
  * The typography a label that inherits from its text (binding keyword `inherit`, Spec 008 E6,
@@ -236,6 +241,12 @@ export interface FigmaComponentSet {
      * bound to a width, not to `none`. Written as the text decoration, not bound (B-1).
      */
     underline?: boolean;
+    /**
+     * Where the knob of a switch stands in this variant (Spec 010 ①, D-04): the term of
+     * `indicator.position`, start or end. A term binds no variable; the plugin writes it as the
+     * alignment of the track, as the underline is written.
+     */
+    position?: "start" | "end";
     /**
      * The cell of the variant in the grid, as the Vitrino orders it: the row is its combination of
      * the keyed props (emphasis × intent × size) in the order of the plan, the column its state.
@@ -326,14 +337,13 @@ export interface FigmaPlan {
   collections: FigmaCollection[];
   components: FigmaComponentSet[];
   /**
-   * Where the sets lie (F-1, F-2): in the section of this name on the current page, in a row —
-   * the first at the padding, every set the run creates or moves in to the right of the last set
-   * (right edge + gap). A set the run finds in the section keeps its place unless it stands closer
-   * to its left neighbour than that neighbour's gap (F-7). Gap and padding are px of
-   * spacing.xlarge, resolved in the base combination; the gap after a set is at least `reserve`
-   * of that set's own width, so a wider brand font does not run it into the next set.
+   * Where the sets lie (F-1, F-2, F-8): in the frame `frame` with auto-layout (horizontal,
+   * wrapping, `gap` between the sets and between the rows, hugging both ways, no fill), at the
+   * padding of the section of this name on the current page. Figma places the sets; the plugin
+   * computes no x or y of a set. Gap and padding are px of spacing.xlarge, resolved in the base
+   * combination.
    */
-  section?: { name: string; gap: number; padding: number; reserve: number };
+  section?: { name: string; gap: number; padding: number; frame: string };
 }
 
 /** The single-mode collection of everything no Dimensio changes, and its mode. */
@@ -642,18 +652,7 @@ function measureOf(value: unknown, field?: string): number {
  * is one geometry, and a set whose variants disagreed would need one variable per variant.
  */
 function radiusTokensOf(entry: LoadedEro): Record<string, string> | undefined {
-  const keyed = new Set<string>();
-  for (const partProperties of Object.values(entry.skemo.parts)) {
-    for (const source of Object.values(partProperties)) {
-      if (source !== undefined && "by" in source) for (const key of source.by) keyed.add(key);
-    }
-  }
-  const keys = [
-    ...entry.skemo.props
-      .filter((prop) => prop.kind === "enum" && keyed.has(prop.name))
-      .map((prop) => prop.name),
-    STATE_KEY,
-  ];
+  const keys = variantKeys(entry.skemo);
   let tokens: Record<string, string> | undefined;
   for (const combination of combinationsOf(entry.skemo, keys)) {
     const here: Record<string, string> = {};
@@ -906,19 +905,9 @@ function componentSetOf(
   }
   properties.state = [...skemo.states];
   // Variants exist for what changes the appearance: the props the parts are keyed by, and state.
-  // `type`, for example, is behaviour in a form and would only multiply the set.
-  const keyed = new Set<string>();
-  for (const partProperties of Object.values(skemo.parts)) {
-    for (const source of Object.values(partProperties)) {
-      if (source !== undefined && "by" in source) for (const key of source.by) keyed.add(key);
-    }
-  }
-  const keys = [
-    ...skemo.props
-      .filter((prop) => prop.kind === "enum" && keyed.has(prop.name))
-      .map((prop) => prop.name),
-    "state",
-  ];
+  // `type`, for example, is behaviour in a form and would only multiply the set. A keyed boolean
+  // prop is an axis too (Spec 010 ①, D-03: checked of the switch).
+  const keys = variantKeys(skemo);
   const drawn = new Set(DRAWN_PART_PROPERTIES);
   // The focus radii only for an Ero that has a radius to grow (F32); the ligilo has none.
   const radiiOf =
@@ -940,6 +929,8 @@ function componentSetOf(
         const bound = boundToken(skemo, part, property, combination);
         if (bound === undefined) continue;
         const key = `${part}.${property}`;
+        // A position is a term (Spec 010 ①, D-04): written per variant below, never bound.
+        if (isPositionKeyword(bound.token)) continue;
         // A keyword binds no variable (D-03): inherit takes the running text's role (D-11), none
         // leaves the field empty — nothing to bind, nothing to draw, nothing in the inventory.
         if (isBindingKeyword(bound.token)) {
@@ -982,6 +973,13 @@ function componentSetOf(
       skemo.parts.underline?.width === undefined
         ? undefined
         : boundToken(skemo, "underline", "width", combination);
+    const position = Object.entries(skemo.parts)
+      .map(([part, properties]) =>
+        properties.position === undefined
+          ? undefined
+          : boundToken(skemo, part, "position", combination)?.token,
+      )
+      .find((token) => token !== undefined && isPositionKeyword(token));
     // Die Schreibweise über alle Kombinationen entschieden, wie die Deckkraft (F8): Zwei Marken
     // dürfen sich unterscheiden, und dann nennt der Plan keinen Wert, sondern den Befund.
     const cases = new Set(
@@ -1007,6 +1005,7 @@ function componentSetOf(
       ...(underlineWidth === undefined
         ? {}
         : { underline: !isBindingKeyword(underlineWidth.token) }),
+      ...(position === undefined ? {} : { position: position as "start" | "end" }),
     };
   });
   // Every font the label can carry, over every combination (F30). The typography role follows the
@@ -1189,7 +1188,7 @@ export const FIGMA_CELO: Celo = {
           modelo.reguloj,
         ),
       ),
-      section: { name: FIGMA_SECTION, gap, padding: gap, reserve: SET_WIDTH_RESERVE },
+      section: { name: FIGMA_SECTION, gap, padding: gap, frame: FIGMA_SET_FRAME },
     };
     return [
       { path: "figma/plan.json", text: `${JSON.stringify(plan, null, 2)}\n` },

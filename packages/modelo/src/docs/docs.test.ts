@@ -1135,3 +1135,42 @@ describe("Nachlese Spec 008/009 and Spec 004 findings (2026-10-13)", () => {
     expect(kampo).toMatch(/Make-Test/);
   });
 });
+
+// Spec 010 ① (G7, acceptance 8): the Vojmapo names Spec 010 ① in Phase 4; the folder carries the
+// spec unchanged next to plan and tasks with four sections, ① filled.
+describe("Spec 010 ① documentation (Vojmapo Phase 4)", () => {
+  it("the vojmapo names Spec 010 ①, the switch and the Guidelines sentence", () => {
+    const row = read("docs/vojmapo.md")
+      .split("\n")
+      .find((line) => line.startsWith("| 4 |"));
+    expect(row).toContain("**Spec 010 ① (`sxaltilo`");
+    expect(row).toContain("hält an/aus und wirkt sofort");
+    expect(row).toContain("Make baut kein An/Aus mehr aus einem Button");
+    expect(row).toContain("Spec 010 ① umgesetzt");
+  });
+
+  it("specs/010-formular-eroj carries the spec unchanged, plan and tasks with ① to ④", () => {
+    const spec = read("specs/010-formular-eroj/spec.md");
+    expect(spec).toMatch(
+      /^# Spec 010 – Formular-Eroj, Runde 1: Sxaltilo, Markobutono, Elekto, Elektilo/,
+    );
+    const plan = read("specs/010-formular-eroj/plan.md");
+    const tasks = read("specs/010-formular-eroj/tasks.md");
+    for (const text of [plan, tasks]) {
+      for (const section of ["① `sxaltilo`", "② `markobutono`", "③ `elekto`", "④ `elektilo`"]) {
+        expect(text).toContain(`## ${section}`);
+      }
+    }
+    for (const heading of [
+      "### Entwurfsentscheidungen",
+      "### Abweichungen von der Spec",
+      "### Befunde / Mankoj",
+      "### Offen (für den Maintainer)",
+      "#### D-04 Die Lage des Knopfs ist ein Begriff",
+    ]) {
+      expect(plan).toContain(heading);
+    }
+    expect(tasks).toContain("### Messungen");
+    expect(tasks).toContain("0073212");
+  });
+});

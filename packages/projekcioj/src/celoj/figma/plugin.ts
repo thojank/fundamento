@@ -15,13 +15,24 @@
 // variables.getLocalVariableCollectionsAsync/getLocalVariablesAsync, createVariableCollection,
 // createVariable, createVariableAlias, setBoundVariableForPaint, collection.addMode/renameMode,
 // variable.setValueForMode/variableCollectionId, createComponent/createFrame/createText,
-// combineAsVariants, appendChild, setBoundVariable, set/getSharedPluginData, and createSection with
-// resizeWithoutConstraints for the section „Fundamento" that holds every set (F-2).
+// combineAsVariants, appendChild, setBoundVariable, set/getSharedPluginData, createSection with
+// resizeWithoutConstraints for the section „Fundamento" (F-2), and in it a frame „Eroj" with
+// auto-layout (layoutMode HORIZONTAL, layoutWrap WRAP, itemSpacing, counterAxisSpacing) that holds
+// every set (F-8).
 
 import { type FigmaPlan, TEXT_CASE_VARIES } from "./figma.js";
 
 /** The nodes of one variant the plugin draws, outside in (F11). */
-type PartNode = "focus-ring" | "focus-gap" | "control" | "label" | "text" | "help" | "error";
+type PartNode =
+  | "focus-ring"
+  | "focus-gap"
+  | "control"
+  | "label"
+  | "text"
+  | "help"
+  | "error"
+  | "indicator"
+  | "field";
 
 interface Binding {
   node: PartNode;
@@ -103,6 +114,20 @@ const BINDINGS: Readonly<Record<string, readonly Binding[]>> = {
     { node: "error", fields: ["fontStyle"], suffix: "/font-style", font: true },
     { node: "error", fields: ["letterSpacing"], suffix: "/letter-spacing" },
   ],
+  // A switch (Spec 010 ①, D-10): the knob is a frame of its own in the track, its fill, its size
+  // (width and height alike: a circle) and its radius bound like the control's.
+  "indicator.fill": [{ node: "indicator", fields: ["fills"], paint: true }],
+  "indicator.size": [{ node: "indicator", fields: ["width", "height"] }],
+  "indicator.radius": [{ node: "indicator", fields: ["cornerRadius"] }],
+};
+
+/**
+ * Where a structure binds a part property elsewhere than BINDINGS says (Spec 010 ①, D-10): in a
+ * toggle the gap stands between the track and the label beside it, so it is the field's spacing;
+ * the track holds only the knob.
+ */
+const STRUCTURE_BINDINGS: Readonly<Record<string, Readonly<Record<string, readonly Binding[]>>>> = {
+  toggle: { "box.gap": [{ node: "field", fields: ["itemSpacing"] }] },
 };
 
 /** A column of parts: the field of a textbox (Spec 009, D-09): label, control, help, error. */
@@ -118,6 +143,35 @@ const FIELD_LAYOUT = {
   paddingRight: 0,
   paddingTop: 0,
   paddingBottom: 0,
+};
+
+/**
+ * A row of parts: the field of a switch (Spec 010 ①, D-10): the ring around the track, then the
+ * label beside it, centred on one line; the gap between them is bound to box.gap.
+ */
+const TOGGLE_LAYOUT = {
+  layoutMode: "HORIZONTAL",
+  primaryAxisAlignItems: "MIN",
+  counterAxisAlignItems: "CENTER",
+  layoutSizingHorizontal: "HUG",
+  layoutSizingVertical: "HUG",
+  strokesIncludedInLayout: false,
+  itemSpacing: 0,
+  paddingLeft: 0,
+  paddingRight: 0,
+  paddingTop: 0,
+  paddingBottom: 0,
+};
+
+/**
+ * The knob of a switch (Spec 010 ①, D-10): its size is bound (indicator.size), so it is fixed in
+ * both axes; Figma honours a bound width only on a frame that is not hugging or filling.
+ */
+const INDICATOR_LAYOUT: Readonly<Record<string, string>> = {
+  // The knob holds nothing; it is a filled frame, no layout of its own.
+  layoutMode: "NONE",
+  layoutSizingHorizontal: "FIXED",
+  layoutSizingVertical: "FIXED",
 };
 
 /**
@@ -230,6 +284,9 @@ const BINDINGS = ${JSON.stringify(BINDINGS)};
 const CONTROL_LAYOUT = ${JSON.stringify(CONTROL_LAYOUT)};
 const HUG_LAYOUT = ${JSON.stringify(HUG_LAYOUT)};
 const FIELD_LAYOUT = ${JSON.stringify(FIELD_LAYOUT)};
+const TOGGLE_LAYOUT = ${JSON.stringify(TOGGLE_LAYOUT)};
+const INDICATOR_LAYOUT = ${JSON.stringify(INDICATOR_LAYOUT)};
+const STRUCTURE_BINDINGS = ${JSON.stringify(STRUCTURE_BINDINGS)};
 const IN_FLOW = ${JSON.stringify(IN_FLOW)};
 const TEXT_SIZING = ${JSON.stringify(TEXT_SIZING)};
 const NEUTRAL = ${JSON.stringify(NEUTRAL)};
@@ -388,21 +445,43 @@ function findSection() {
   return ours(figma.currentPage, "section", PLAN.section.name);
 }
 
+/** The frame „Eroj" in the section (F-8), found by its mark \`frame\`, or undefined. */
+function findFrame(section) {
+  if (section === undefined) return undefined;
+  return ours(section, "frame", PLAN.section.frame);
+}
+
 /**
- * The set of an Ero: in the section, or still directly on the page, where every run before F-2
+ * The set of an Ero: in the frame, directly in the section, where the runs of F-1 to F-7 left it
+ * (gemessen 2026-10-14 in f10b-5), or still directly on the page, where every run before F-2
  * left it (gemessen 2026-10-13 in f10b-5: butono und ligilo lagen beide auf der Seite).
  */
 function findSet(name) {
   const section = findSection();
-  const inSection = section === undefined ? undefined : ours(section, "ero", name);
-  return inSection !== undefined ? inSection : ours(figma.currentPage, "ero", name);
+  const frame = findFrame(section);
+  for (const parent of [frame, section, figma.currentPage]) {
+    if (parent === undefined) continue;
+    const set = ours(parent, "ero", name);
+    if (set !== undefined) return set;
+  }
+  return undefined;
 }
 
-/** What the run did with the section; the headline of the report carries it (F-2). */
+/**
+ * What the run did with section and frame; the headline of the report carries it (F-2, F-8).
+ * \`moved\` names every set the run found outside the frame — on the page or directly in the
+ * section — and put into it.
+ */
 const sectionReport =
   PLAN.section === undefined
     ? undefined
-    : { name: PLAN.section.name, found: false, created: false, moved: [] };
+    : {
+        name: PLAN.section.name,
+        found: false,
+        created: false,
+        moved: [],
+        frame: { name: PLAN.section.frame, found: false, created: false, wrap: "WRAP" },
+      };
 
 /**
  * The section of this run: found, or created on the current page and stamped (F-2). A new section
@@ -431,85 +510,78 @@ function openSection() {
 }
 
 /**
- * Puts a set into the section (F-1, F-2). A set the run finds in the section keeps its place —
- * a second run moves nothing. A set the run created, or found still lying on the page, goes to
- * the right of the last set in the section: its right edge plus the gap, top-aligned with it;
- * the first set of a section lies at the padding. Gemessen 2026-10-13 in f10b-5: ein neues Set
- * lag bei 0/0 auf dem vorhandenen und musste von Hand verschoben werden (F-1). Figma keeps x and y
- * of a re-parented node as numbers, now relative to the new parent, so they are written after
- * appendChild. Returns where the set lies, and after which set, for the report.
+ * The frame „Eroj" in the section (F-8, gemessen 2026-10-14 in f10b-5): found, or created at the
+ * section's padding and stamped like the section. Nach dem Lauf mit sieben Sets lag elektilo auf
+ * ligilo: die Abstände von F-1/F-7 kamen aus den Breiten im Standardmodus, und die Breiten ändern
+ * sich je Markenmodus. Auto-layout places the sets from their sizes in whatever mode is on screen
+ * — horizontal, wrapping, spacing.xlarge between the sets and between the rows, hugging both
+ * ways, no fill — so the plugin computes no place of a set (Regel 0: das Werkzeug kann es). What
+ * the plugin owns on the frame is neutral or the plan's, like on every node it draws.
+ *
+ * WRAP on a frame that hugs its width is not measured yet: Figma may refuse it. Refused is no
+ * reason to stop, like a refused font binding (F30): the frame stays one row without wrap, the
+ * section report says \`wrap: "refused"\`, and a warning carries Figma's own words.
  */
-function placeSet(section, set, name, created) {
+function openFrame(section, warnings) {
   if (section === undefined) return undefined;
-  if (set.parent === section) {
-    // F-7: a found set keeps its place unless its left neighbour's gap runs into it — then it
-    // moves right, once; the next run finds enough room and keeps it.
-    const left = leftNeighbour(section, set);
-    const needed = left === undefined ? undefined : left.x + left.width + gapAfter(left);
-    if (needed === undefined || set.x >= needed) {
-      return { x: set.x, y: set.y, after: null, action: "kept" };
-    }
-    write(set, "x", needed);
-    return {
-      x: set.x,
-      y: set.y,
-      after: left.getSharedPluginData(NAMESPACE, "ero"),
-      action: "spaced",
-    };
+  let frame = findFrame(section);
+  sectionReport.frame.found = frame !== undefined;
+  if (frame === undefined) {
+    frame = create(() => figma.createFrame());
+    section.appendChild(frame);
+    stamp(frame, "frame", PLAN.section.frame);
+    write(frame, "x", PLAN.section.padding);
+    write(frame, "y", PLAN.section.padding);
+    sectionReport.frame.created = true;
   }
-  let last;
-  for (const child of ownedSets(section)) {
-    if (child === set) continue;
-    if (last === undefined || child.x + child.width > last.x + last.width) last = child;
+  write(frame, "name", PLAN.section.frame);
+  own(frame, NEUTRAL);
+  // The width is the maintainer's once the frame exists: a frame that hugs its width has no
+  // width to wrap at (one row), the rows of f10b-5 come from a fixed width given by hand, and a
+  // run must not take it back to HUG. Hugging is the start of a new frame only.
+  Object.assign(gather(frame), {
+    layoutMode: "HORIZONTAL",
+    itemSpacing: PLAN.section.gap,
+    counterAxisSpacing: PLAN.section.gap,
+    ...(sectionReport.frame.created ? { layoutSizingHorizontal: "HUG" } : {}),
+    layoutSizingVertical: "HUG",
+  });
+  flush(frame);
+  try {
+    write(frame, "layoutWrap", "WRAP");
+    sectionReport.frame.wrap = "WRAP";
+  } catch (error) {
+    sectionReport.frame.wrap = "refused";
+    warnings.push(
+      PLAN.section.name + "/" + PLAN.section.frame + ": Figma hat layoutWrap WRAP am Frame " +
+        "abgelehnt — die Sets liegen in einer Reihe ohne Umbruch, Figma legt sie weiter aus. " +
+        String(error && error.message ? error.message : error),
+    );
   }
-  const x = last === undefined ? PLAN.section.padding : last.x + last.width + gapAfter(last);
-  const y = last === undefined ? PLAN.section.padding : last.y;
-  section.appendChild(set);
-  write(set, "x", x);
-  write(set, "y", y);
-  if (!created) sectionReport.moved.push(name);
-  return {
-    x: set.x,
-    y: set.y,
-    after: last === undefined ? null : last.getSharedPluginData(NAMESPACE, "ero"),
-    action: created ? "created" : "moved",
-  };
-}
-
-/** The component sets the plugin owns inside the section. */
-function ownedSets(section) {
-  const sets = [];
-  for (const child of section.children) {
-    if (child.type !== "COMPONENT_SET") continue;
-    if (child.getSharedPluginData(NAMESPACE, "ero") === "") continue;
-    sets.push(child);
-  }
-  return sets;
+  return frame;
 }
 
 /**
- * The gap after a set (F-7): the plan's gap, or the plan's share of the set's own width in the
- * mode on screen, whichever is larger. Gemessen 2026-10-14 in f10b-5: ekzemplo (Archivo Black)
- * made the kampo set wider than the gap of komuna; the sets are not measured in every mode (F-2:
- * the plugin sets no mode on the section), so the set's width stands in for the brand's growth.
+ * Puts a set into the frame „Eroj" (F-8): a set the run finds in the frame stays where it is in
+ * the frame's order; a set the run created, or found on the page or directly in the section, is
+ * appended at the end. The set is in the frame's flow (layoutPositioning AUTO), and Figma places
+ * it — the plugin writes no x or y. Returns the frame and that the layout places the set.
  */
-function gapAfter(set) {
-  return Math.max(PLAN.section.gap, set.width * PLAN.section.reserve);
-}
-
-/** The owned set whose right edge lies furthest right while still left of this set's left edge. */
-function leftNeighbour(section, set) {
-  let left;
-  for (const child of ownedSets(section)) {
-    if (child === set || child.x >= set.x) continue;
-    if (left === undefined || child.x + child.width > left.x + left.width) left = child;
+function placeSet(frame, set, name, created) {
+  if (frame === undefined) return undefined;
+  if (set.parent !== frame) {
+    frame.appendChild(set);
+    if (!created) sectionReport.moved.push(name);
   }
-  return left;
+  write(set, "layoutPositioning", "AUTO");
+  return { frame: PLAN.section.frame, action: "in-layout" };
 }
 
 /**
  * The section as large as its content plus the padding on the right and at the bottom (F-2),
- * resized only when it differs, so a second run writes nothing.
+ * resized only when it differs, so a second run writes nothing. Its content is the frame „Eroj"
+ * (F-8), measured in the mode on screen when the run ends; a section does not hug, so after a
+ * brand switch the frame may outgrow it until the next run.
  */
 function fitSection(section) {
   if (section === undefined || section.children.length === 0) return;
@@ -633,10 +705,11 @@ function boundId(node, field) {
   return typeof bound === "object" ? bound.id : bound;
 }
 
-function bind(nodes, variant, variables) {
+function bind(nodes, variant, variables, structure) {
   const deferred = [];
+  const moved = STRUCTURE_BINDINGS[structure] || {};
   for (const [part, name] of Object.entries(variant.bindings)) {
-    for (const target of BINDINGS[part] || []) {
+    for (const target of moved[part] || BINDINGS[part] || []) {
       const variable = variables.get(name + (target.suffix || ""));
       if (variable === undefined) continue;
       const node = nodes[target.node];
@@ -1107,8 +1180,10 @@ async function applyComponents(variables, warnings) {
     });
   }
   const reports = [];
-  // The section every set lies in (F-2): found, or created before the first set is placed.
+  // The section and its frame every set lies in (F-2, F-8): found, or created before the first
+  // set is placed.
   const section = openSection();
+  const frame = openFrame(section, warnings);
   progress.section = sectionReport;
   for (const component of PLAN.components) {
     let set = findSet(component.set);
@@ -1170,8 +1245,11 @@ async function applyComponents(variables, warnings) {
       // A field (Spec 009, D-09) is a column: label, then ring → gap → control with the typed text,
       // then help and error; a control keeps the label inside.
       const isField = component.structure === "field";
-      const field = isField ? part(node, "field", () => figma.createFrame()) : undefined;
-      const labelParent = isField ? field : undefined;
+      // A switch (Spec 010 ①, D-10) is a row: the ring around the track with its knob, then the
+      // label beside it.
+      const isToggle = component.structure === "toggle";
+      const field = isField || isToggle ? part(node, "field", () => figma.createFrame()) : undefined;
+      const labelParent = field;
       const ring = part(field || node, "focus-ring", () => figma.createFrame());
       const gap = part(ring, "focus-gap", () => figma.createFrame());
       const control =
@@ -1182,6 +1260,8 @@ async function applyComponents(variables, warnings) {
       write(control, "name", "control");
       const label = part(labelParent || control, "label", () => figma.createText());
       if (isField && field.children.indexOf(label) !== 0) field.insertChild(0, label);
+      if (isToggle && field.children.indexOf(label) !== 1) field.insertChild(1, label);
+      const indicator = isToggle ? part(control, "indicator", () => figma.createFrame()) : undefined;
       const textNode = isField ? part(control, "text", () => figma.createText()) : undefined;
       const help = isField ? part(field, "help", () => figma.createText()) : undefined;
       const error = isField ? part(field, "error", () => figma.createText()) : undefined;
@@ -1225,21 +1305,36 @@ async function applyComponents(variables, warnings) {
       labels.push(label);
       // Only values from the plan (F13): every owned property neutral first — Figma's white fill,
       // its clipping and its line would otherwise cover what the plan draws.
-      for (const frame of [node, ring, gap, control].concat(field ? [field] : [])) own(frame, NEUTRAL);
+      const frames = [node, ring, gap, control]
+        .concat(field ? [field] : [])
+        .concat(indicator ? [indicator] : []);
+      for (const frame of frames) own(frame, NEUTRAL);
       for (const each of texts) own(each, NEUTRAL_TEXT);
       // Layout before any measure is bound: padding, gap and minimum sizes only take effect on
       // an auto-layout frame (F11). The variant, ring and gap wrap their content.
       for (const frame of [node, ring, gap]) own(frame, HUG_LAYOUT);
-      if (field) own(field, FIELD_LAYOUT);
+      if (field) own(field, isToggle ? TOGGLE_LAYOUT : FIELD_LAYOUT);
       own(control, CONTROL_LAYOUT);
+      if (isToggle) {
+        // The knob stands where the variant says (D-04), along the writing direction; the border
+        // of the track takes its room, as on the web (box-sizing border-box): the track is the
+        // knob plus its border, its width at least box.width.
+        own(control, {
+          primaryAxisAlignItems: variant.position === "end" ? "MAX" : "MIN",
+          strokesIncludedInLayout: true,
+        });
+        own(indicator, INDICATOR_LAYOUT);
+      }
       // The variant lies in the grid's flow, its parts in the variant's (F14).
-      for (const child of [node, ring, gap, control].concat(field ? [field] : []).concat(texts)) own(child, IN_FLOW);
+      for (const child of frames.concat(texts)) own(child, IN_FLOW);
       for (const each of texts) own(each, TEXT_SIZING);
       const nodes = { "focus-ring": ring, "focus-gap": gap, control, label };
+      if (field) nodes.field = field;
+      if (indicator) nodes.indicator = indicator;
       if (textNode) nodes.text = textNode;
       if (help) nodes.help = help;
       if (error) nodes.error = error;
-      const measures = bind(nodes, variant, variables);
+      const measures = bind(nodes, variant, variables, component.structure);
       // Der Radius des Rings und seines Abstands wird gebunden, nicht eingetragen (F32): als Zahl
       // stand er in jedem Modus gleich und umschloss in einer Marke mit Radius 0 einen eckigen
       // Knopf rund. Er geht denselben Weg wie die übrigen Maße, also nach dem Layout.
@@ -1252,7 +1347,7 @@ async function applyComponents(variables, warnings) {
       }
       // Everything gathered is written once, layout before the parts inside it; the measures
       // are bound after that, when every frame has its layout.
-      for (const each of [node, ring, gap, control].concat(field ? [field] : []).concat(texts)) flush(each);
+      for (const each of frames.concat(texts)) flush(each);
       for (const { node: target, field, variable, font } of measures) {
         if (boundId(target, field) === variable.id) continue;
         if (font !== true) {
@@ -1425,8 +1520,8 @@ async function applyComponents(variables, warnings) {
         }
       }
     }
-    // Where the set lies (F-1, F-2): kept, or put to the right of the last set in the section.
-    report.placement = placeSet(section, set, component.set, madeThisRun.get(component.set) === set);
+    // Where the set lies (F-8): in the frame Eroj, placed by Figma's auto-layout.
+    report.placement = placeSet(frame, set, component.set, madeThisRun.get(component.set) === set);
     report.layout = measureLayout(set, component);
     report.layout.refused = refused;
     // Symmetric (F10): the plan against the file, in both directions, with names. The finding
@@ -1979,7 +2074,13 @@ function reportParts(result) {
         modes: report.modes,
         placement: report.placement,
       })),
-      mankoj: result.mankoj,
+      // The Mankoj by set, part and field; their evidence, the tool's words, stands in the part
+      // state of each set (uzo.evidence). Spec 010 ①: with four sets the evidence of twelve
+      // parts no longer fit the headline of 4 000 characters (F22).
+      mankoj: {
+        open: result.mankoj.open.map(({ set, part, field }) => ({ set, part, field })),
+        closed: result.mankoj.closed.map(({ set, part, field }) => ({ set, part, field })),
+      },
     }),
   ];
   for (const report of result.components) {

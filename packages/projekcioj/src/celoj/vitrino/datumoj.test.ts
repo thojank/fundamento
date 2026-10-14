@@ -249,7 +249,12 @@ describe("the Vitrino after the acceptances (Nachlese 2026-10-13)", () => {
   // C8 (Spec 008 and 009): "Label darf umbrechen" holds for the ligilo only inline, and the kampo's
   // line that never breaks is the input line, not the label. The subject comes from the a11y role.
   it("the layout sentence names the subject and the placement (C8)", () => {
-    expect(datumoj.a11yRoloj).toEqual({ butono: "button", kampo: "textbox", ligilo: "link" });
+    expect(datumoj.a11yRoloj).toEqual({
+      butono: "button",
+      kampo: "textbox",
+      ligilo: "link",
+      sxaltilo: "switch",
+    });
     expect(html).toContain("Größe aus dem Inhalt, Label bricht nie um.");
     expect(html).toContain("Größe aus dem Inhalt, Label darf umbrechen (inline), standalone nie.");
     expect(html).toContain("Größe aus dem Container, Eingabezeile bricht nie um.");
@@ -306,5 +311,22 @@ describe("the Vitrino after the acceptances (Nachlese 2026-10-13)", () => {
     expect(html).toContain('<section id="fm-vitrino-komparo" tabindex="-1">');
     expect(html).toMatch(/komparoSection\.scrollIntoView\(/);
     expect(html).toMatch(/komparoSection\.focus\(/);
+  });
+});
+
+// Spec 010 ① (plan D-11): checked is a prop, not a state (E2), and still the first thing to see
+// of a switch. A boolean prop that keys the parts gets its column like a boolean state does: the
+// grid of the sxaltilo has the columns rest, checked and disabled, one row per size.
+describe("the Vitrino shows the sxaltilo checked and unchecked (Spec 010 ①)", () => {
+  it("has a column checked between rest and disabled, and a row per size", () => {
+    const grid = datumoj.eroj.sxaltilo ?? "";
+    expect(grid).toContain(
+      '<th scope="col">rest</th><th scope="col">checked</th><th scope="col">disabled</th>',
+    );
+    for (const size of ["small", "medium", "large"]) {
+      expect(grid).toContain(`<fm-sxaltilo size="${size}">${size}</fm-sxaltilo>`);
+      expect(grid).toContain(`<fm-sxaltilo size="${size}" checked>${size}</fm-sxaltilo>`);
+      expect(grid).toContain(`<fm-sxaltilo size="${size}" disabled>${size}</fm-sxaltilo>`);
+    }
   });
 });

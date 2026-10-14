@@ -1,0 +1,115 @@
+{
+  "$schema": "../../../../../../../schema/modelo.schema.json#/$defs/EroFile",
+  "ero": {
+    "id": "ero_01M2XM2NGN3KJSKJ4JTXQWMF72",
+    "name": "sxaltilo",
+    "skemo": "ske_01M2XM2NWJ39A7BEZ9A2S8GANE",
+    "description": "Fixture Ero: a switch with its label beside the track, on or off."
+  },
+  "skemo": {
+    "id": "ske_01M2XM2NWJ39A7BEZ9A2S8GANE",
+    "ero": "ero_01M2XM2NGN3KJSKJ4JTXQWMF72",
+    "props": [
+      {
+        "name": "aria-checked",
+        "kind": "boolean",
+        "default": false
+      }
+    ],
+    "states": [
+      "rest"
+    ],
+    "slots": [
+      {
+        "name": "label",
+        "default": true,
+        "text": true,
+        "beside": true
+      }
+    ],
+    "parts": {
+      "label": {
+        "color": {
+          "fixed": "color.text.default"
+        }
+      },
+      "surface": {
+        "fill": {
+          "by": [
+            "aria-checked",
+            "state"
+          ]
+        }
+      },
+      "indicator": {
+        "fill": {
+          "fixed": "color.text.default"
+        },
+        "size": {
+          "fixed": "spacing.medium"
+        },
+        "position": {
+          "by": [
+            "aria-checked"
+          ]
+        }
+      },
+      "box": {
+        "gap": {
+          "fixed": "spacing.small"
+        }
+      }
+    },
+    "bindings": [
+      {
+        "part": "surface",
+        "property": "fill",
+        "when": {
+          "aria-checked": "false",
+          "state": "rest"
+        },
+        "token": "color.background.default"
+      },
+      {
+        "part": "surface",
+        "property": "fill",
+        "when": {
+          "aria-checked": "true",
+          "state": "rest"
+        },
+        "token": "color.background.default"
+      },
+      {
+        "part": "indicator",
+        "property": "position",
+        "when": {
+          "aria-checked": "false"
+        },
+        "token": "start"
+      },
+      {
+        "part": "indicator",
+        "property": "position",
+        "when": {
+          "aria-checked": "true"
+        },
+        "token": "end"
+      }
+    ],
+    "a11y": {
+      "role": "switch",
+      "name": [
+        "slot:label"
+      ],
+      "states": {
+        "aria-checked": [
+          "aria-checked"
+        ]
+      },
+      "keys": [
+        "Space",
+        "Enter"
+      ]
+    }
+  }
+}

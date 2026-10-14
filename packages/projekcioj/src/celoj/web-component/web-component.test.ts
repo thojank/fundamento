@@ -37,11 +37,13 @@ describe("Web Component Celo (T011)", () => {
       "eroj/src/generated/fm-butono.ts",
       "eroj/src/generated/fm-kampo.ts",
       "eroj/src/generated/fm-ligilo.ts",
+      "eroj/src/generated/fm-sxaltilo.ts",
       "eroj/src/generated/index.ts",
       "eroj/src/generated/kampo.styles.ts",
       "eroj/src/generated/ligilo.styles.ts",
       "eroj/src/generated/react.ts",
       "eroj/src/generated/skemo.ts",
+      "eroj/src/generated/sxaltilo.styles.ts",
     ]);
   });
 
@@ -196,5 +198,59 @@ describe("Web Component Celo for the ligilo (Spec 008 T015)", () => {
       "rest",
       "visited",
     ]);
+  });
+});
+
+// Spec 010 ① (plan D-09): the switch from the same template — a native button with role switch
+// and aria-checked as the track, the knob inside it, the label beside it; checked keys the parts
+// (data-checked on the field) and the knob stands at the start or the end of the track.
+describe("Web Component Celo for the sxaltilo (Spec 010 ①)", () => {
+  const sxaltiloStyles = files["eroj/src/generated/sxaltilo.styles.ts"] ?? "";
+  const sxaltiloElement = files["eroj/src/generated/fm-sxaltilo.ts"] ?? "";
+  const sxaltiloCss = JSON.parse(
+    /export const SXALTILO_CSS = (".*");/s.exec(sxaltiloStyles)?.[1] ?? '""',
+  ) as string;
+
+  it("renders a button with role switch as the track, the knob in it and the label beside it", () => {
+    const templates = [...sxaltiloElement.matchAll(/`(<[^`]*)`/g)].map((m) => m[1] ?? "");
+    expect(templates.flatMap((t) => [...t.matchAll(/part="([a-z-]+)"/g)].map((m) => m[1]))).toEqual(
+      ["field", "control", "indicator", "label"],
+    );
+    expect(sxaltiloElement).toContain('role="switch"');
+    expect(sxaltiloElement).toContain('aria-labelledby="label"');
+    expect(sxaltiloElement).toContain('<label part="label" id="label" for="control">');
+    expect(sxaltiloElement).toContain("static formAssociated = true;");
+    expect(sxaltiloElement).toContain('control.setAttribute("aria-checked"');
+    expect(sxaltiloElement).toContain('customElements.define("fm-sxaltilo", FmSxaltilo)');
+    for (const template of templates) expect(template).not.toMatch(/>[^<\s$][^<]*</);
+  });
+
+  it("keys the parts by checked on the field and places the knob by a logical alignment (D-03, D-04)", () => {
+    expect(sxaltiloCss).toContain('[part="field"][data-checked="true"]');
+    expect(sxaltiloCss).toContain('[part="field"][data-checked="false"]');
+    expect(sxaltiloCss).toMatch(
+      /\[data-checked="true"\]\) \[part="control"\] \{\n(\s+[a-z-]+: [^;]+;\n)*\s+justify-content: flex-end;/,
+    );
+    expect(sxaltiloCss).toMatch(
+      /\[data-checked="false"\]\) \[part="control"\] \{\n(\s+[a-z-]+: [^;]+;\n)*\s+justify-content: flex-start;/,
+    );
+    expect(sxaltiloCss).toContain("background-color: var(--fm-color-action-primary-rest);");
+    expect(sxaltiloCss).toContain("background-color: var(--fm-color-background-sunken);");
+    expect(sxaltiloCss).toContain("inline-size: var(--fm-size-icon-medium);");
+    expect(sxaltiloCss).toContain("min-inline-size: var(--fm-size-control-medium);");
+  });
+
+  it("keeps every design property a token and logical (Art. X gate 1)", () => {
+    expect(componentCssIssues("sxaltilo.css", sxaltiloCss)).toEqual([]);
+    expect(cssPhysicalPropertyIssues("sxaltilo.css", sxaltiloCss)).toEqual([]);
+  });
+
+  it("states checked as a boolean prop in the stylesheet inventory, like React and Figma (parity)", () => {
+    const inventory = stylesheetInventory(sxaltiloStyles);
+    expect(inventory.props).toEqual({
+      checked: ["boolean"],
+      size: ["small", "medium", "large"],
+    });
+    expect([...inventory.states].sort()).toEqual(["disabled", "focus", "hover", "rest"]);
   });
 });

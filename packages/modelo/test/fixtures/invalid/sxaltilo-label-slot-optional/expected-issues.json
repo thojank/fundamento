@@ -1,0 +1,9 @@
+{
+  "description": "Spec 010 ① G7 (G1, E5, Spec 009 D-05): the switch takes its accessible name from the slot label alone (no label prop), but its Uzo does not mark the slot required. A switch without its visible label could be built; the label slot is a duty.",
+  "issues": [
+    {
+      "rule": "uzo-slot-required-missing",
+      "path": "data/eroj/sxaltilo/uzo.json#/uzo/slots/label"
+    }
+  ]
+}

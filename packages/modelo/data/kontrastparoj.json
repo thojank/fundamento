@@ -502,6 +502,13 @@
       "foreground": "color.border.default",
       "background": "color.background.sunken",
       "kategorio": "ui"
+    },
+    {
+      "id": "kpa_01M4WMD2MSC7KGT0BT5D63V654",
+      "name": "border-strong-on-background-sunken",
+      "foreground": "color.border.strong",
+      "background": "color.background.sunken",
+      "kategorio": "ui"
     }
   ]
 }

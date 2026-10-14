@@ -201,3 +201,60 @@ for (const factor of [1.35, 2]) {
     expect(clipped).toBe(false);
   });
 }
+
+// Spec 010 ① (G7): the sxaltilo right to left — the knob starts on the right and ends on the
+// left, the label stands at the start — and its label expanded and pseudo-localised: the switch
+// grows with it, the label stays on one line (wrap never) and nothing is clipped.
+test("sxaltilo right to left: track and knob mirror, the label stays at the start, the focus ring stays", async ({
+  page,
+  browserName,
+}) => {
+  await serve(page, out, `<fm-sxaltilo id="a">Benachrichtigungen</fm-sxaltilo>`);
+  const sides = () =>
+    page.locator("#a").evaluate((element) => {
+      const track = element.shadowRoot?.querySelector('[part="control"]') as HTMLElement;
+      const label = element.shadowRoot?.querySelector('[part="label"]') as HTMLElement;
+      return {
+        track: track.getBoundingClientRect().left,
+        label: label.getBoundingClientRect().left,
+      };
+    });
+  const ltr = await sides();
+  expect(ltr.track).toBeLessThan(ltr.label);
+  await page.evaluate(() => document.documentElement.setAttribute("dir", "rtl"));
+  const rtl = await sides();
+  expect(rtl.track).toBeGreaterThan(rtl.label);
+  await page.keyboard.press(TAB(browserName));
+  const outline = await page
+    .locator("#a")
+    .evaluate(
+      (element) =>
+        getComputedStyle(element.shadowRoot?.querySelector('[part="control"]') as Element)
+          .outlineWidth,
+    );
+  expect(Number.parseFloat(outline)).toBeGreaterThan(0);
+});
+
+for (const factor of [1.35, 2]) {
+  test(`sxaltilo text expansion to ${Math.round(factor * 100)} %: the label grows on one line, nothing is clipped`, async ({
+    page,
+  }) => {
+    const label = "Benachrichtigungen";
+    await serve(page, out, `<fm-sxaltilo id="a">${label}</fm-sxaltilo>`);
+    const before = await page.locator("#a").boundingBox();
+    await page.locator("#a").evaluate(
+      (element, text) => {
+        element.textContent = text;
+      },
+      pseudo(label, factor),
+    );
+    const after = await page.locator("#a").boundingBox();
+    expect(after?.width ?? 0).toBeGreaterThan(before?.width ?? 0);
+    expect(after?.height ?? 0).toBeCloseTo(before?.height ?? 0, 0);
+    const clipped = await page.locator("#a").evaluate((element) => {
+      const field = element.shadowRoot?.querySelector('[part="field"]') as HTMLElement;
+      return field.scrollWidth > field.clientWidth + 1;
+    });
+    expect(clipped).toBe(false);
+  });
+}

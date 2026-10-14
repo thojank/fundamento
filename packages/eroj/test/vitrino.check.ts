@@ -255,3 +255,17 @@ for (const [scheme, contrast] of [
     expect(await axeViolations(page)).toEqual([]);
   });
 }
+
+// Spec 010 ① (plan D-11): the section of the sxaltilo shows the switch unchecked, checked and
+// disabled in every size, upgraded, with the knob at the end where it is checked.
+test("fm-sxaltilo is upgraded in its section, unchecked, checked and disabled", async ({
+  page,
+}) => {
+  await open(page);
+  const section = page.locator("#fm-vitrino-sxaltilo");
+  await expect(section.locator("thead")).toContainText("checked");
+  await expect(section.getByRole("switch", { checked: true })).toHaveCount(3);
+  await expect(section.getByRole("switch", { checked: false })).toHaveCount(6);
+  const disabled = section.locator("fm-sxaltilo[disabled]").first().locator("button");
+  await expect(disabled).toBeDisabled();
+});

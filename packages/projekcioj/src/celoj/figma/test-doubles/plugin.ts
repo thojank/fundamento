@@ -599,6 +599,14 @@ function node(
  *   double never counted strokes; nobody had measured that. `strokesIncludedInLayout = false` is
  *   documented to make strokes overlap the content instead; the double follows the documentation
  *   there, and the next run has to confirm it.
+ * - a horizontal frame with `layoutWrap: "WRAP"` (F-8, 2026-10-14) — a **belief**, not a
+ *   measurement, until the maintainer has measured it in f10b-5: the children go into rows in
+ *   their order; a child starts a new row when it would end beyond the frame's inner width (its
+ *   width minus paddings), a row as high as its highest child, `counterAxisSpacing` between the
+ *   rows, `itemSpacing` between the children of a row, every child at the top of its row. A frame
+ *   that hugs its width has no width to wrap at: it lays every child in one row and grows (what
+ *   Figma does with HUG and WRAP together is the measurement). Every read lays the children out
+ *   anew from their current sizes, so a child that grows pushes its neighbours.
  * Numbers bound to a variable take its value in the first mode of its collection.
  */
 function layoutOf(
@@ -623,6 +631,49 @@ function layoutOf(
   };
   const inFlow = (current: DoubleNode) =>
     current.children.filter((child) => prop(child, "layoutPositioning") !== "ABSOLUTE");
+  /** A visible stroke takes space, unless strokesIncludedInLayout says no (run #21). */
+  const strokeOf = (current: DoubleNode): number => {
+    const strokes = prop(current, "strokes");
+    const visible = Array.isArray(strokes) && strokes.length > 0;
+    return visible && prop(current, "strokesIncludedInLayout") !== false
+      ? 2 * num(current, "strokeWeight")
+      : 0;
+  };
+  /**
+   * The rows of a horizontal frame that wraps (F-8, a belief until measured in f10b-5): a child
+   * starts a new row when it would end beyond the inner width; a hugging frame is one row.
+   */
+  const wraps = (current: DoubleNode): boolean =>
+    prop(current, "layoutMode") === "HORIZONTAL" && prop(current, "layoutWrap") === "WRAP";
+  const rowsOf = (current: DoubleNode): DoubleNode[][] => {
+    const children = inFlow(current);
+    if (!wraps(current) || hugs(current, "H")) return [children];
+    const inner =
+      num(current, "width") -
+      num(current, "paddingLeft") -
+      num(current, "paddingRight") -
+      strokeOf(current);
+    const rows: DoubleNode[][] = [];
+    let row: DoubleNode[] = [];
+    let used = 0;
+    for (const child of children) {
+      const width = measure(child).width;
+      if (row.length > 0 && used + num(current, "itemSpacing") + width > inner) {
+        rows.push(row);
+        row = [];
+        used = 0;
+      }
+      used += (row.length > 0 ? num(current, "itemSpacing") : 0) + width;
+      row.push(child);
+    }
+    rows.push(row);
+    return rows;
+  };
+  const rowWidth = (current: DoubleNode, row: DoubleNode[]): number =>
+    row.reduce((sum, child) => sum + measure(child).width, 0) +
+    num(current, "itemSpacing") * Math.max(0, row.length - 1);
+  const rowHeight = (row: DoubleNode[]): number =>
+    Math.max(0, ...row.map((child) => measure(child).height));
 
   const measure = (current: DoubleNode): { width: number; height: number } => {
     const known = sizes.get(current);
@@ -633,6 +684,25 @@ function layoutOf(
       const fontSize = num(current, "fontSize") || 12;
       const characters = String(prop(current, "characters") ?? "");
       size = { width: characters.length * fontSize * 0.6, height: fontSize * 1.25 };
+    } else if (wraps(current)) {
+      const rows = rowsOf(current);
+      const padX = num(current, "paddingLeft") + num(current, "paddingRight") + strokeOf(current);
+      const padY = num(current, "paddingTop") + num(current, "paddingBottom") + strokeOf(current);
+      const contentW = Math.max(0, ...rows.map((row) => rowWidth(current, row))) + padX;
+      const contentH =
+        rows.reduce((sum, row) => sum + rowHeight(row), 0) +
+        num(current, "counterAxisSpacing") * Math.max(0, rows.length - 1) +
+        padY;
+      size = {
+        width: Math.max(
+          hugs(current, "H") ? contentW : num(current, "width"),
+          num(current, "minWidth"),
+        ),
+        height: Math.max(
+          hugs(current, "V") ? contentH : num(current, "height"),
+          num(current, "minHeight"),
+        ),
+      };
     } else if (mode === "HORIZONTAL" || mode === "VERTICAL") {
       const children = inFlow(current).map(measure);
       const along = (child: { width: number; height: number }) =>
@@ -722,6 +792,19 @@ function layoutOf(
             : 0,
           ...measure(child),
         });
+      }
+      return;
+    }
+    if (wraps(current)) {
+      let top = num(current, "paddingTop");
+      for (const row of rowsOf(current)) {
+        let left = num(current, "paddingLeft");
+        for (const child of row) {
+          const size = measure(child);
+          place(child, { x: left, y: top, ...size });
+          left += size.width + num(current, "itemSpacing");
+        }
+        top += rowHeight(row) + num(current, "counterAxisSpacing");
       }
       return;
     }

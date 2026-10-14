@@ -1,0 +1,55 @@
+{
+  "$schema": "../../../../../../../schema/modelo.schema.json#/$defs/UzoFile",
+  "uzo": {
+    "id": "uzo_01M4H39SZBPN8VKA70309EJ35G",
+    "ero": "ero_01M2XM2NGN3KJSKJ4JTXQWMF72",
+    "skemo": "ske_01M2XM2NWJ39A7BEZ9A2S8GANE",
+    "purpose": "Fixture Uzo: turns a setting on or off and applies it at once.",
+    "instead": [
+      {
+        "goal": "needs-confirmation",
+        "keywords": {
+          "en": [
+            "checkbox"
+          ],
+          "de": [
+            "checkbox"
+          ]
+        },
+        "ero": "markobutono",
+        "kialo": "A setting that applies only when the form is sent is a checkbox, because a switch promises that the change is already done."
+      }
+    ],
+    "boundary": [
+      {
+        "case": "three-states",
+        "action": "not-supported",
+        "kialo": "A switch holds on or off, because a third state has no place on a track with two ends."
+      }
+    ],
+    "composes": {
+      "containers": [],
+      "with": [],
+      "never": [],
+      "spacing": {
+        "owner": "container",
+        "regulo": "spacing-owned-by-container"
+      }
+    },
+    "slots": {
+      "label": {
+        "accepts": [
+          "text"
+        ],
+        "required": true,
+        "max": 1,
+        "nesting": 0
+      }
+    },
+    "layout": {
+      "size": "content",
+      "wrap": "never"
+    },
+    "content": []
+  }
+}
