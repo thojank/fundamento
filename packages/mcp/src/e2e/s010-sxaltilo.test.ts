@@ -73,7 +73,7 @@ describe("the example dialog: a button that switches the dark mode on", () => {
     expect(answer.action).toBeUndefined();
   });
 
-  it("the butono itself says why not: toggle is the sxaltilo's, a form setting the coming checkbox", async () => {
+  it("the butono itself says why not: toggle is the sxaltilo's, a form setting the checkbox", async () => {
     const answer = await output<{
       uzo?: { instead: { goal: string; ero: string | null; kialo: string }[] };
     }>(client, "get_ero", { name: "butono" });
@@ -81,7 +81,7 @@ describe("the example dialog: a button that switches the dark mode on", () => {
     expect(toggle?.ero).toBe("sxaltilo");
     expect(toggle?.kialo).toBe(butono.instead.find((entry) => entry.goal === "toggle")?.kialo);
     expect(toggle?.kialo).toMatch(/because a button acts once and forgets/);
-    expect(toggle?.kialo).toMatch(/markobutono \(PR ②\)/);
+    expect(toggle?.kialo).toMatch(/in a form, applied with it: markobutono\)\.$/);
   });
 
   it("the label 'Dark Mode' passes; 'Dark Mode einschalten' violates the fixed rule, with the clean way", async () => {
@@ -103,12 +103,13 @@ describe("the example dialog: a button that switches the dark mode on", () => {
 });
 
 describe("list_eroj and the brief (acceptance 1)", () => {
-  it("lists four Eroj; the brief of the sxaltilo names the purpose, the axes and the label as a duty", async () => {
+  it("lists the Eroj; the brief of the sxaltilo names the purpose, the axes and the label as a duty", async () => {
     const listed = await output<{ eroj: { name: string }[] }>(client, "list_eroj", {});
     expect(listed.eroj.map((entry) => entry.name)).toEqual([
       "butono",
       "kampo",
       "ligilo",
+      "markobutono",
       "sxaltilo",
     ]);
     const brief = await output<Brief>(client, "get_ero", { name: "sxaltilo", brief: true });
@@ -117,13 +118,14 @@ describe("list_eroj and the brief (acceptance 1)", () => {
     expect(brief.axes.map((axis) => axis.name)).toContain("size");
   });
 
-  it("'Checkbox' is the alternative needs-confirmation: not covered until PR ②, ask-human", async () => {
+  // Spec 010 ②: the checkbox is an Ero; the alternative needs-confirmation says use-instead.
+  it("'Checkbox' is the alternative needs-confirmation: the markobutono since PR ②", async () => {
     const answer = await output<Suggested>(client, "suggest_ero", { goal: "Checkbox" });
-    expect(answer.suggestion).toBeNull();
+    expect(answer.suggestion).toEqual({ ero: "markobutono", props: {} });
     expect(answer.boundary).toEqual({
       ero: "sxaltilo",
       case: "needs-confirmation",
-      action: "ask-human",
+      action: "use-instead",
       kialo: sxaltilo.instead[0]?.kialo,
     });
   });

@@ -12,6 +12,7 @@ import {
   ALPHA_VARIES,
   compositeFields,
   FIGMA_CELO,
+  FIGMA_NOT_DRAWN,
   FIGMA_SECTION,
   type FigmaPlan,
   type FigmaValue,
@@ -721,6 +722,7 @@ describe("Figma plan for the ligilo (Spec 008 T017)", () => {
       "butono",
       "kampo",
       "ligilo",
+      "markobutono",
       "sxaltilo",
     ]);
     expect(set?.properties).toEqual({
@@ -883,6 +885,8 @@ describe("the label default of a set follows its a11y role (M-3)", () => {
       butono: "Aktion",
       kampo: "Beschriftung",
       ligilo: "Ziel",
+      // Spec 010 ②: a checkbox names an option (plan ② D-11, for the maintainer to confirm, O-x).
+      markobutono: "Option",
       sxaltilo: "Einstellung",
     });
   });
@@ -892,6 +896,7 @@ describe("the label default of a set follows its a11y role (M-3)", () => {
     expect(labelDefaultOf("link")).toBe("Ziel");
     expect(labelDefaultOf("textbox")).toBe("Beschriftung");
     expect(labelDefaultOf("switch")).toBe("Einstellung");
+    expect(labelDefaultOf("checkbox")).toBe("Option");
     expect(labelDefaultOf("slider")).toBe("Aktion");
   });
 });
@@ -993,5 +998,87 @@ describe("Figma plan for the sxaltilo (Spec 010 ①)", () => {
     expect(items.sxaltilo?.values["indicator.fill@checked=true,size=medium,state=rest"]).toMatch(
       /^#[0-9a-f]{6}$/,
     );
+  });
+});
+
+// Spec 010 ② (plan ② D-09, D-10): the fifth set, a checkbox, drawn in the toggle structure of the
+// switch — G1 gives all four Wahl-Eroj the build "control + label". checked × size × state is
+// 2 × 3 × 5; the indicator is a sign (the check mark, the same vector the web draws), its colour
+// bound where checked and not drawn where the Skemo says none; the error text stands under the
+// label with the word of the kampo's field, and the required mark is not drawn (Jugxo of the kampo).
+describe("Figma plan for the markobutono (Spec 010 ②)", () => {
+  const set = plan.components.find((component) => component.set === "markobutono");
+  const markobutono = prepared.input.modelo.eroj.find((entry) => entry.ero.name === "markobutono");
+  const variant = (checked: string, size: string, state: string) =>
+    set?.variants.find(
+      (entry) =>
+        entry.props.checked === checked && entry.props.size === size && entry.props.state === state,
+    );
+
+  it("plans a toggle of checked × size × state with the purpose, the word Option and the error text", () => {
+    expect(set?.structure).toBe("toggle");
+    expect(set?.properties).toEqual({
+      checked: "BOOLEAN",
+      required: "BOOLEAN",
+      invalid: "BOOLEAN",
+      size: ["small", "medium", "large"],
+      disabled: "BOOLEAN",
+      name: "TEXT",
+      state: ["rest", "hover", "focus", "disabled", "invalid"],
+    });
+    expect(set?.variants).toHaveLength(2 * 3 * 5);
+    expect(Object.keys(set?.variants[0]?.props ?? {})).toEqual(["checked", "size", "state"]);
+    expect(set?.grid).toMatchObject({ rows: 6, columns: 5 });
+    expect(set?.description).toBe(markobutono?.uzo?.purpose);
+    expect(set?.label?.defaultValue).toBe("Option");
+    expect(set?.texts).toEqual({ error: "Fehler" });
+    expect(set?.sign).toMatch(/^<svg [^>]*viewBox="0 0 16 16"/);
+    // The switch keeps its knob: no sign, no texts.
+    const sxaltilo = plan.components.find((component) => component.set === "sxaltilo");
+    expect(sxaltilo?.sign).toBeUndefined();
+    expect(sxaltilo?.texts).toBeUndefined();
+  });
+
+  it("binds the box by checked and state, its border by state, the check mark where checked (G3)", () => {
+    const on = variant("true", "medium", "rest");
+    const off = variant("false", "medium", "rest");
+    expect(on?.bindings["surface.fill"]).toBe("color/action/primary/rest");
+    expect(off?.bindings["surface.fill"]).toBe("color/background/default");
+    expect(on?.bindings["border.color"]).toBe("color/border/strong");
+    expect(variant("false", "medium", "invalid")?.bindings["border.color"]).toBe(
+      "color/status/danger/border",
+    );
+    expect(on?.bindings["indicator.color"]).toBe("color/action/primary/text");
+    expect(on?.paints?.["indicator.color"]).toMatchObject({ hex: expect.stringMatching(/^#/) });
+    expect(on?.bindings["indicator.size"]).toBe("size/icon/medium");
+    expect(on?.geometry?.["indicator.size"]).toBe("20px");
+    expect(on?.bindings["box.radius"]).toBe("radius/role/control");
+    expect(on?.bindings["error.color"]).toBe("color/status/danger/text");
+    expect(on?.hidden).toBeUndefined();
+  });
+
+  it("does not draw the check mark where indicator.color is none (unchecked)", () => {
+    const off = variant("false", "small", "hover");
+    expect(off?.bindings["indicator.color"]).toBeUndefined();
+    expect(off?.paints?.["indicator.color"]).toBeUndefined();
+    expect(off?.hidden).toEqual(["indicator"]);
+  });
+
+  it("names the required mark as not drawn with the kampo's Jugxo, nothing else", () => {
+    expect(variant("true", "medium", "rest")?.notDrawn).toEqual({
+      "required-mark.color": FIGMA_NOT_DRAWN["required-mark"],
+    });
+  });
+
+  it("states the markobutono in the parity inventory: checked a boolean, the mark's paint only where checked", () => {
+    const items = figmaPlanInventory(plan);
+    expect(items.markobutono?.props.checked).toEqual(["boolean"]);
+    expect(items.markobutono?.states).toEqual(["rest", "hover", "focus", "disabled", "invalid"]);
+    expect(
+      items.markobutono?.values["indicator.color@checked=true,size=medium,state=rest"],
+    ).toMatch(/^#[0-9a-f]{6}$/);
+    expect(
+      items.markobutono?.values["indicator.color@checked=false,size=medium,state=rest"],
+    ).toBeUndefined();
   });
 });

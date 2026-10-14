@@ -253,6 +253,7 @@ describe("the Vitrino after the acceptances (Nachlese 2026-10-13)", () => {
       butono: "button",
       kampo: "textbox",
       ligilo: "link",
+      markobutono: "checkbox",
       sxaltilo: "switch",
     });
     expect(html).toContain("Größe aus dem Inhalt, Label bricht nie um.");
@@ -328,5 +329,29 @@ describe("the Vitrino shows the sxaltilo checked and unchecked (Spec 010 ①)", 
       expect(grid).toContain(`<fm-sxaltilo size="${size}" checked>${size}</fm-sxaltilo>`);
       expect(grid).toContain(`<fm-sxaltilo size="${size}" disabled>${size}</fm-sxaltilo>`);
     }
+  });
+});
+
+// Spec 010 ② (plan ② D-13): the checkbox in the Vitrino, from the same grid as the switch and the
+// field: a column for checked (it keys the parts), required (it carries an a11y text), invalid and
+// disabled (states); the error text only under invalid, from the constraint of the Skemo.
+describe("the Vitrino shows the markobutono ticked, required, invalid and disabled (Spec 010 ②)", () => {
+  it("has the columns rest, checked, required, invalid, disabled and a row per size", () => {
+    const grid = datumoj.eroj.markobutono ?? "";
+    expect(grid).toContain(
+      '<th scope="col">rest</th><th scope="col">checked</th><th scope="col">required</th><th scope="col">invalid</th><th scope="col">disabled</th>',
+    );
+    for (const size of ["small", "medium", "large"]) {
+      expect(grid).toContain(`<fm-markobutono size="${size}">${size}</fm-markobutono>`);
+      expect(grid).toContain(`<fm-markobutono size="${size}" checked>${size}</fm-markobutono>`);
+      expect(grid).toContain(
+        `<fm-markobutono size="${size}" invalid>${size}<span slot="error">Fehler</span></fm-markobutono>`,
+      );
+    }
+    expect(grid.match(/slot="error"/g)).toHaveLength(3);
+  });
+
+  it("says that the label of the checkbox may break", () => {
+    expect(html).toContain("Größe aus dem Inhalt, Label darf umbrechen.");
   });
 });

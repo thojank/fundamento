@@ -48,6 +48,7 @@ describe("Make Kit sources (T018)", () => {
       "guidelines/components/butono.md",
       "guidelines/components/kampo.md",
       "guidelines/components/ligilo.md",
+      "guidelines/components/markobutono.md",
       "guidelines/components/sxaltilo.md",
       "guidelines/foundations/color.md",
       "guidelines/foundations/dimensioj.md",
@@ -392,6 +393,25 @@ describe("Make Kit and the sxaltilo (Spec 010 ①)", () => {
       expect(kit(aspekto, "guidelines/components/butono.md")).toContain(
         "set `label` as its accessible name",
       );
+    },
+  );
+});
+
+// Spec 010 ② (G7, plan ② D-12): Make builds every yes/no that applies with the form from the
+// checkbox and sends what applies at once to the switch — one sentence in the guidelines,
+// generated from every Ero with role checkbox; the page of the checkbox names its props.
+describe("Make Kit and the markobutono (Spec 010 ②)", () => {
+  it.each(ASPEKTOJ)(
+    "%s: the guidelines say that every yes/no of a form is a <Markobutono>",
+    (aspekto) => {
+      expect(kit(aspekto, "guidelines/Guidelines.md")).toContain(
+        "- Every yes/no that applies with the form is a `<Markobutono>`; a setting that applies at once is a `<Sxaltilo>`.",
+      );
+      const page = kit(aspekto, "guidelines/components/markobutono.md");
+      expect(page).toContain("# Markobutono");
+      expect(page).toContain("`checked`");
+      expect(page).toContain("`required`");
+      expect(page).not.toContain("set `label` as its accessible name");
     },
   );
 });

@@ -252,6 +252,7 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
       ...["boundary", "slots", "content"].map(() => "butono"),
       ...["boundary", "slots", "content"].map(() => "kampo"),
       ...["boundary", "slots", "content"].map(() => "ligilo"),
+      ...["boundary", "slots", "content"].map(() => "markobutono"),
       ...["boundary", "slots", "content"].map(() => "sxaltilo"),
     ]);
     for (const manko of openButono) {
@@ -280,6 +281,7 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
       ...["butono", "butono", "butono"],
       ...["kampo", "kampo", "kampo"],
       ...["ligilo", "ligilo", "ligilo"],
+      ...["markobutono", "markobutono", "markobutono"],
       ...["sxaltilo", "sxaltilo", "sxaltilo"],
     ]);
   });
@@ -2438,6 +2440,8 @@ describe("every bound paint shows the plan's colour after the first and the seco
         // Spec 009: the kampo has size × state = 18 variants.
         { set: "kampo", created: 18, updated: 0 },
         { set: "ligilo", created: 30, updated: 0 },
+        // Spec 010 ②: the markobutono has checked × size × state = 30 variants.
+        { set: "markobutono", created: 30, updated: 0 },
         // Spec 010 ①: the sxaltilo has checked × size × state = 24 variants.
         { set: "sxaltilo", created: 24, updated: 0 },
       ],
@@ -3674,6 +3678,7 @@ describe("the label default follows the role of the Ero (M-3)", () => {
     expect(of("butono")).toEqual(["Aktion"]);
     expect(of("kampo")).toEqual(["Beschriftung"]);
     expect(of("ligilo")).toEqual(["Ziel"]);
+    expect(of("markobutono")).toEqual(["Option"]);
     expect(of("sxaltilo")).toEqual(["Einstellung"]);
   });
 
@@ -3752,5 +3757,91 @@ describe("the sxaltilo is drawn as a toggle: track, knob, label beside (Spec 010
     )[0];
     expect(fill?.boundVariables?.color).toBeDefined();
     expect(bound(descendant(on, "control"), "minWidth")).toBe("size/control/medium");
+  });
+});
+
+// Spec 010 ② (plan ② D-09, D-10): the checkbox is drawn in the toggle structure — a field in a
+// row: the focus ring around the box (control) with the check mark (indicator) in it, then a
+// column with the label and the error under it. The check mark is the web's vector, imported
+// with createNodeFromSvg: its frame takes the bound size, the vector its bound colour and scales
+// with the frame; where the variant hides it (indicator.color none), the frame has opacity 0.
+// Test-double assumptions until measured in f10b-5: createNodeFromSvg gives a FRAME of the SVG's
+// width and height holding one VECTOR; a vector with constraints SCALE follows its frame's size.
+describe("the markobutono is drawn as a toggle: box, check mark, label and error beside (Spec 010 ②)", () => {
+  const source = repoFiles["figma/plugin/code.js"] ?? "";
+  const bound = (node: DoubleNode | undefined, field: string) => node?.boundVariables[field]?.name;
+  const drawn = async () => {
+    const double = modelDouble();
+    await run(double, source);
+    const set = pageNodes(double).find((child) => child.name === "markobutono");
+    const variant = (name: string) => set?.children.find((child) => child.name === name);
+    return { double, set, variant };
+  };
+
+  it("draws every variant of checked × size × state, named by the plan", async () => {
+    const { set } = await drawn();
+    expect(set?.children).toHaveLength(30);
+    expect(set?.children[0]?.name).toBe("checked=true, size=small, state=rest");
+  });
+
+  it("puts label and error in a column beside the ring, the check mark in the box", async () => {
+    const { variant } = await drawn();
+    const on = variant("checked=true, size=medium, state=rest");
+    const field = on?.children.find((child) => child.name === "field");
+    expect(field?.children.map((child) => child.name)).toEqual(["focus-ring", "texts"]);
+    expect(field?.properties.layoutMode).toBe("HORIZONTAL");
+    expect(field?.properties.counterAxisAlignItems).toBe("MIN");
+    const texts = field?.children.find((child) => child.name === "texts");
+    expect(texts?.properties.layoutMode).toBe("VERTICAL");
+    expect(texts?.children.map((child) => child.name)).toEqual(["label", "error"]);
+    expect(descendant(on, "label")?.properties.characters).toBe("Option");
+    expect(descendant(on, "error")?.properties.characters).toBe("Fehler");
+    const control = descendant(on, "control");
+    expect(control?.children.map((child) => child.name)).toEqual(["indicator"]);
+    expect(descendant(on, "indicator")?.children.map((child) => child.name)).toEqual(["mark"]);
+    expect(bound(field, "itemSpacing")).toBe("spacing/small");
+  });
+
+  it("binds the size of the check mark's frame, the colour of its vector, and the box's radius", async () => {
+    const { variant } = await drawn();
+    const on = variant("checked=true, size=medium, state=rest");
+    const indicator = descendant(on, "indicator");
+    expect(bound(indicator, "width")).toBe("size/icon/medium");
+    expect(bound(indicator, "height")).toBe("size/icon/medium");
+    const mark = descendant(on, "mark");
+    expect(mark?.type).toBe("VECTOR");
+    expect(mark?.properties.constraints).toEqual({ horizontal: "SCALE", vertical: "SCALE" });
+    const fill = (
+      (mark?.properties.fills ?? []) as { boundVariables?: { color?: { name: string } } }[]
+    )[0];
+    expect(fill?.boundVariables?.color?.name).toBe("color/action/primary/text");
+    expect(bound(descendant(on, "control"), "cornerRadius")).toBe("radius/role/control");
+    expect(indicator?.properties.opacity).toBe(1);
+  });
+
+  it("hides the check mark where the box is not ticked, and binds no colour to it", async () => {
+    const { variant } = await drawn();
+    const off = variant("checked=false, size=medium, state=rest");
+    expect(descendant(off, "indicator")?.properties.opacity).toBe(0);
+    const fills = (descendant(off, "mark")?.properties.fills ?? []) as unknown[];
+    expect(fills).toEqual([]);
+  });
+
+  it("keeps the switch's knob a filled frame without a sign or a column (Spec 010 ①)", async () => {
+    const double = modelDouble();
+    await run(double, source);
+    const set = pageNodes(double).find((child) => child.name === "sxaltilo");
+    const on = set?.children.find(
+      (child) => child.name === "checked=true, size=medium, state=rest",
+    );
+    expect(on?.children[0]?.children.map((child) => child.name)).toEqual(["focus-ring", "label"]);
+    expect(descendant(on, "indicator")?.children).toEqual([]);
+  });
+
+  it("a second run writes nothing new", async () => {
+    const { double } = await drawn();
+    const before = double.snapshot();
+    await run(double, source);
+    expect(double.snapshot()).toBe(before);
   });
 });
