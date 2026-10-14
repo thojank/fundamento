@@ -46,11 +46,10 @@
         "goal": "multi",
         "keywords": {
           "en": [
-            "multiple",
-            "several"
+            "multiselect"
           ],
           "de": [
-            "mehrere",
+            "mehrfachauswahl",
             "mehrfach"
           ]
         },
