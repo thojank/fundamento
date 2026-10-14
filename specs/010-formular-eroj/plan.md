@@ -348,7 +348,7 @@ In [`tasks.md`](tasks.md) ③.
 
 ## ④ `elektilo` – Auswahlliste (Select) (PR ④)
 
-**Branch:** `261014-spec-010-elektilo-010092` (gestapelt auf PR ③ `261014-spec-010-elekto-010092` @ `6ddc3a1`) · **Datum:** 2026-10-14 · **Aufgaben, Commits und rote Hashes:** [`tasks.md`](tasks.md) ④ (alle Hashes in einer Zeile der Messungen)
+**Branch:** `261014-spec-010-elektilo-010092` (gestapelt auf PR ③ `261014-spec-010-elekto-010092` @ `f1e824b`) · **Datum:** 2026-10-14 · **Aufgaben, Commits und rote Hashes:** [`tasks.md`](tasks.md) ④ (alle Hashes in einer Zeile der Messungen)
 
 Der vierte und letzte Wahl-Ero dieser Runde: hält eine von vielen Optionen, die Liste klappt auf Anforderung auf. Er ist das Feld des `kampo` mit einem Chevron und einer Liste, die der Plattform gehört (E3); die Optionen sind Einträge wie beim `elekto` (③ D-02, O-13). Fast alles trägt der Weg von ③ und von Spec 009 (Regel 0.1); neu sind nur das native `select` in der Web-Celo, der Chevron im Feld und die Regulo für den Platzhalter einer Liste. Jede Entscheidung unten nennt ihre Stufe. Mit ④ ist die Familie der Wahl-Eroj vollständig: `butono`, `kampo` und `elekto` schicken jede Wahl an ein Ero, keine an eine Person.
 
