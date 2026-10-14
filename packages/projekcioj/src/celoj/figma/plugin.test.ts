@@ -3406,7 +3406,12 @@ describe("every set lies in the frame Eroj in the section Fundamento (F-1, F-2, 
     expect(box(frame).width).toBe(width);
     expect(box(named(frame, third)).y).toBeGreaterThan(box(named(frame, first)).y);
     expect(overlapping(double)).toEqual([]);
-    expect(report.section.frame).toEqual({ name: FRAME, found: true, created: false, wrap: "WRAP" });
+    expect(report.section.frame).toEqual({
+      name: FRAME,
+      found: true,
+      created: false,
+      wrap: "WRAP",
+    });
   });
 
   it("finds section and frame again on a second run, moves nothing and makes no second one", async () => {
