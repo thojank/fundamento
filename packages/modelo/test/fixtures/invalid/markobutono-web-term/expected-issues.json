@@ -1,0 +1,9 @@
+{
+  "description": "Spec 010 ② G7 (Art. VIII, Spec 008 D-13): the Skemo of the checkbox names its prop aria-checked, the attribute of one platform. The prop is checked; the Web Celo speaks it as aria-checked.",
+  "issues": [
+    {
+      "rule": "skemo-web-term",
+      "path": "data/eroj/markobutono/skemo.json#/skemo/props/0/name"
+    }
+  ]
+}

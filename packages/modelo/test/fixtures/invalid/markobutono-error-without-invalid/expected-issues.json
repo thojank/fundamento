@@ -1,0 +1,9 @@
+{
+  "description": "Spec 010 ② G7 (Spec 009 D-04): the checkbox carries an error slot and the constraint that a filled error slot makes it invalid, but no prop invalid the constraint could hold to — only the state of that name. An error text without the error state could be built: a screen reader would read a fault on a checkbox that says it is fine.",
+  "issues": [
+    {
+      "rule": "skemo-constraint-invalid",
+      "path": "data/eroj/markobutono/skemo.json#/skemo/constraints/0/allowed/invalid"
+    }
+  ]
+}
