@@ -43,8 +43,8 @@
             "vielen"
           ]
         },
-        "ero": null,
-        "kialo": "Many options are a list, because a field takes any text; no such Ero yet (elektilo)."
+        "ero": "elektilo",
+        "kialo": "Many options are a list, because a field takes any text; elektilo covers it."
       },
       {
         "goal": "choose-few",

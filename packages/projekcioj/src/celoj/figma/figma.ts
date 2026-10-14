@@ -37,7 +37,12 @@ import {
   variantKeys,
 } from "@fundamento/modelo";
 import type { Celo, CeloInput, GeneratedFile } from "../../build.js";
-import { VITRINO_OPTIONS, VITRINO_SLOT_TEXTS, VITRINO_SURFACE } from "../vitrino/datumoj.js";
+import {
+  VITRINO_OPTIONS,
+  VITRINO_PROMPT,
+  VITRINO_SLOT_TEXTS,
+  VITRINO_SURFACE,
+} from "../vitrino/datumoj.js";
 import { signOf } from "../web-component/element-template.js";
 import { DRAWN_PART_PROPERTIES, pluginManifest, pluginSource } from "./plugin.js";
 
@@ -121,7 +126,8 @@ export const FIGMA_NOT_DRAWN: Readonly<Record<string, string>> = {
   // Spec 009 (plan D-09, Befund B-2; Abnahme F-4): the control of a field in the set is empty and
   // shows the placeholder, so the colour of the typed text has no node; the sign of the required
   // mark is the projection's — of the kampo and, since Spec 010 ② and ③, of the markobutono and the
-  // elekto (the Jugxo's wording names all three).
+  // elekto; since ④ both for the elektilo, whose closed field shows its prompt (the Jugxo's wording
+  // names all four).
   text: "jug_01M4S2R85WRAC5SV7CARH8RE7S",
   "required-mark": "jug_01M4S2R85WRAC5SV7CARH8RE7S",
 };
@@ -139,6 +145,17 @@ export const FIELD_TEXTS: Readonly<Record<string, string>> = {
 };
 
 /**
+ * The texts the field of a select shows in the set (Spec 010 ④, plan ④ D-07): the closed field
+ * with its prompt where the kampo shows its example — "Bitte wählen", the Vitrino's prompt (one
+ * source for both pictures); an example of one option there would read as chosen, which the
+ * Regulo select-placeholder-is-prompt forbids. Help and error as in the kampo's field.
+ */
+export const SELECT_TEXTS: Readonly<Record<string, string>> = {
+  ...FIELD_TEXTS,
+  text: VITRINO_PROMPT,
+};
+
+/**
  * How the plugin draws a set (Spec 009, D-09): a control (variant → ring → gap → control → label)
  * for a button or a link, a field (label above, the control with its text, help and error below)
  * for a textbox, a toggle (Spec 010 ①, D-10: a row — ring → gap → control with the knob in it,
@@ -152,10 +169,12 @@ export type FigmaStructure = "control" | "field" | "toggle" | "choice";
  * A radio group (Spec 010 ③, D-07) is a choice: the label (the question) above a column of
  * options, each a row — ring → gap → circle with the dot, the option's label beside it — and help
  * and error below. Its options are entries of a slot, not variants: selected is the state of one
- * option (E7).
+ * option (E7). A select (Spec 010 ④, D-07) is a field: the closed field of the kampo with the
+ * chevron at the end of its control; its list is the platform's and not drawn (E3, Manko of the
+ * plan).
  */
 export const structureOf = (role: string): FigmaStructure =>
-  role === "textbox"
+  role === "textbox" || role === "combobox"
     ? "field"
     : role === "switch" || role === "checkbox"
       ? "toggle"
@@ -178,6 +197,8 @@ const LABEL_DEFAULTS: Readonly<Record<string, string>> = {
   checkbox: "Option",
   // Spec 010 ③ (plan ③ D-07): a radio group names its question; for the maintainer to confirm.
   radiogroup: "Frage",
+  // Spec 010 ④ (plan ④ D-07): a select names what is chosen; for the maintainer to confirm (O-15).
+  combobox: "Auswahl",
 };
 
 /** The word a role without its own entry shows: the button's, as every set did before M-3. */
@@ -1187,8 +1208,9 @@ function componentSetOf(
         return text === undefined ? [] : [[slot.name, text]];
       }),
   );
-  const sign =
-    structure === "toggle" || structure === "choice" ? signOf(skemo.a11y.role, "16") : undefined;
+  // The sign of the indicator: the check mark, the dot, and the chevron of a select's field
+  // (Spec 010 ④, D-07); a text field has none.
+  const sign = signOf(skemo.a11y.role, "16");
   // The options of a choice (Spec 010 ③, D-07): the Vitrino's words, the first chosen.
   const [entryKey] = entryKeys;
   const options =
@@ -1198,7 +1220,9 @@ function componentSetOf(
   return {
     set: entry.ero.name,
     structure,
-    ...(structure === "field" ? { texts: { ...FIELD_TEXTS } } : {}),
+    ...(structure === "field"
+      ? { texts: { ...(skemo.a11y.role === "combobox" ? SELECT_TEXTS : FIELD_TEXTS) } }
+      : {}),
     ...((structure === "toggle" || structure === "choice") && Object.keys(toggleTexts).length > 0
       ? { texts: toggleTexts }
       : {}),

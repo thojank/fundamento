@@ -66,7 +66,8 @@ describe("get_ero brief (Spec 007 A8)", () => {
   });
 
   // Spec 008 T014 (A5, E of Spec 009): every Ero's brief, measured; the ceiling stays 750.
-  it.each(["butono", "elekto", "kampo", "ligilo", "markobutono", "sxaltilo"])(
+  // Spec 010 ④: seven Eroj, the elektilo among them.
+  it.each(["butono", "elektilo", "elekto", "kampo", "ligilo", "markobutono", "sxaltilo"])(
     `%s stays under the ceiling of ${BRIEF_LIMIT} (ceil(bytes / 3) of the compact JSON)`,
     async (name) => {
       const { client } = await connect({ config: EKZEMPLO_CONFIG });
@@ -96,6 +97,7 @@ describe("suggest_ero (FR-13)", () => {
       "destructive",
       "confirm",
       "dismiss",
+      "choose-many",
       "choose-few",
       "enter-text",
       "email",

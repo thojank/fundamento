@@ -44,8 +44,8 @@
             "vielen"
           ]
         },
-        "ero": null,
-        "kialo": "Choosing one of many values is a selection from a list, not an action, because a row of buttons hides which value is chosen; Fundamento has no such Ero yet (elektilo, PR ④ of Spec 010)."
+        "ero": "elektilo",
+        "kialo": "Choosing one of many values is a selection from a list, not an action, because a row of buttons hides which value is chosen; Fundamento covers it with elektilo."
       },
       {
         "goal": "choose-few",

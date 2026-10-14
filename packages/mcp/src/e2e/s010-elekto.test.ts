@@ -102,11 +102,12 @@ describe("the dialog of the spec: a dropdown with three shipping methods", () =>
     expect(answer.kialo).toBe(kialoOf("elekto-options-few"));
   });
 
-  it("'Land aus einer Liste' is choose-many: not covered until PR ④ (elektilo), a person decides", async () => {
+  // Spec 010 ④: the list is the elektilo now; its goal choose-many answers (plan ④ D-14).
+  it("'Land aus einer Liste' is choose-many: the elektilo since PR ④, no person needed", async () => {
     const answer = await output<Suggested>(client, "suggest_ero", { goal: "Land aus einer Liste" });
-    expect(answer.suggestion).toBeNull();
-    expect(answer.boundary).toMatchObject({ case: "choose-many", action: "ask-human" });
-    expect(answer.boundary?.kialo).toMatch(/elektilo/);
+    expect(answer.suggestion).toEqual({ ero: "elektilo", props: {} });
+    expect(answer.matched?.goal).toBe("choose-many");
+    expect(answer.action).toBeUndefined();
   });
 });
 
@@ -159,10 +160,11 @@ describe("check_usage of the radio group", () => {
 });
 
 describe("list_eroj and the brief (acceptance 1)", () => {
-  it("lists six Eroj; the brief of the elekto names the purpose, the axes, label and options as duties, its alternatives", async () => {
+  it("lists the Eroj; the brief of the elekto names the purpose, the axes, label and options as duties, its alternatives", async () => {
     const listed = await output<{ eroj: { name: string }[] }>(client, "list_eroj", {});
     expect(listed.eroj.map((entry) => entry.name)).toEqual([
       "butono",
+      "elektilo",
       "elekto",
       "kampo",
       "ligilo",
@@ -174,7 +176,7 @@ describe("list_eroj and the brief (acceptance 1)", () => {
     expect(brief.required).toEqual({ props: [], slots: ["label", "options"] });
     expect(brief.axes.map((axis) => axis.name)).toEqual(["size", "orientation"]);
     expect(brief.instead?.map((entry) => [entry.goal, entry.ero])).toEqual([
-      ["choose-many", null],
+      ["choose-many", "elektilo"],
       ["yes-no", "markobutono"],
       ["multi", null],
     ]);
@@ -184,7 +186,7 @@ describe("list_eroj and the brief (acceptance 1)", () => {
     ]);
   });
 
-  it("the butono and the kampo answer choose-few with the elekto and leave choose-many open (G5, acceptance 7)", async () => {
+  it("the butono and the kampo answer choose-few with the elekto and choose-many with the elektilo (G5, acceptance 7)", async () => {
     for (const [name, uzo] of [
       ["butono", butono],
       ["kampo", kampo],
@@ -192,7 +194,7 @@ describe("list_eroj and the brief (acceptance 1)", () => {
       const brief = await output<Brief>(client, "get_ero", { name, brief: true });
       const goals = brief.instead?.map((entry) => [entry.goal, entry.ero]);
       expect(goals, name).toContainEqual(["choose-few", "elekto"]);
-      expect(goals, name).toContainEqual(["choose-many", null]);
+      expect(goals, name).toContainEqual(["choose-many", "elektilo"]);
       expect(
         goals?.map(([goal]) => goal),
         name,

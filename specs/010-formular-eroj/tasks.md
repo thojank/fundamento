@@ -127,6 +127,44 @@
 | Tests (je Paket `vitest run`, Playwright) | modelo 2 765, projekcioj 420, mcp 180, cli 66, eroj 1 Vitest + 220 Playwright in drei Engines (2 übersprungen wie bisher: forced-colors, quickstart nur Chromium); davon neu für die Auswahl: data/elekto 46, spec010-rules 6, spec010-schema 5, fünf Fixtures (je validate und e2e), docs 2, Projekcioj 19 (Web Component 6, Figma-Plan 4, Plugin 5, Make Kit 2, Vitrino 2), Browser `elekto.spec` 9 und Internacia 3 je Engine, Alirebleco 8 Kombinationen je Engine, Vitrino 1, MCP 9 (s010-elekto) |
 | Checks | `check:vortaro-lint`, `check:regularo` (uzoj=6, kein `skemo-uzo-missing`), `check:mankoj`, `check:alirebleco`, `check:clean-room`, `check:make-kit` 5, `check:quickstart` 1, `check:vitrino` 15, `check:release` – grün; `pnpm lint` grün |
 
-## ④ `elektilo`
+## ④ `elektilo` (PR ④)
 
-Folgt in PR ④.
+**Plan:** [`plan.md`](plan.md) ④ (D-01–D-16) · **Branch:** `261014-spec-010-elektilo-010092` (gestapelt auf ③) · Die Hashes aller Commits stehen in **einer** Zeile der Messungen (nach einem Rebase dort und in der einen Schleife von `docs.test.ts` ersetzen).
+
+### A – Rot zuerst
+- [x] **T301 Fixtures** `invalid/elektilo-label-slot-optional`, `invalid/elektilo-web-term`, `invalid/elektilo-instead-kialo-missing`, `invalid/elektilo-prompt-on-unknown-slot` (G7, D-16). Die Regeln gab es seit ①–③; rot beobachtet durch Mutation (vier Regel-Ids umbenannt: 4 von 4 rot, zurückgesetzt); erster roter Commit.
+- [x] **T302 Modelo-Tests** `data/elektilo.test.ts` (Skemo wie der `kampo` plus Chevron, kein `open`, Optionen als Einträge, Uzo, Reguloj, zwölf Jugxoj, check_usage: acht Länder mit „Bitte wählen“, leeres Label, zwei gleiche Optionen, eine Option, Platzhalter gleich Label, eine Option als Platzhalter, „Land auswählen“, Fehler ohne invalid; suggest_ero: „Land auswählen“, „Select a country“, „Dropdown mit drei Versandarten“, „Combobox mit Suche“, „Dropdown mit eigenem Popup“; describe_term „Dropdown“; brief von elektilo, kampo, butono, elekto); butono-, kampo-, elekto-, sxaltilo-, markobutono-, ligilo-, ontologio-Tests und die Folgetests (sieben Eroj, uzoj=7, Goal choose-many) erwarten die Verflechtung. Erster roter Commit (98 von 2 834).
+
+### B – Modelo
+- [x] **T303 Daten** `elektilo/skemo.json`, `uzo.json` (IDs aus `pnpm id:new`); keine Schema-Änderung.
+- [x] **T304 Reguloj und Jugxoj** `select-placeholder-is-prompt` neu (Enforcer `textRule`), acht Reguloj und `spacing-owned-by-container` ausgeweitet; zwölf Jugxoj.
+- [x] **T305 Verflechtung** `butono`/`kampo`/`elekto` `choose-many` → `use-instead: elektilo`; `brief` des `kampo` 746.
+- [x] **T306 Ontologio und Gvidanto** `#Elektilo` (altLabel Dropdown); Goal `choose-many`.
+
+### C – Projekcioj (zweiter roter Commit)
+- [x] **T307 Web Component** `fm-elektilo` (D-06): Feld des `kampo` um ein natives `select`, Optionen aus dem Light DOM, Platzhalter als gesperrte erste Option, Formular, Chevron aus Token-Arithmetik.
+- [x] **T308 React** `Elektilo`, Typtest `test/types/elektilo.tsx` (grün bei Ankunft: der Wrapper ist generisch).
+- [x] **T309 Figma** Bauform `field` mit Chevron (`sign`), 15 Varianten, „Bitte wählen“, „Auswahl“; Modi je Set im Teil `state` des Berichts (D-07).
+- [x] **T310 Make Kit** `components/elektilo.md`, Satz in `Guidelines.md`, Satz des `elekto` nennt `<Elektilo>` (D-11).
+- [x] **T311 Vitrino** Aufforderung statt erster Option, Satz „Feld bricht nie um“ (D-13).
+- [x] **T312 Eroj im Browser** `elektilo.spec.ts`, `alirebleco.check.ts`, `internacia.spec.ts`, `vitrino.check.ts`.
+- [x] **T313 MCP** `e2e/s010-elektilo.test.ts` (Dialoge), `eroj-tools.test.ts` (brief sieben Eroj), Folgetests; Ausgabeschema `describe_term` (D-15, rot im zweiten roten Commit).
+
+### D – Abschluss
+- [x] **T314 Vojmapo** Zeile 4 (Spec 010 ④, Familie vollständig) und `docs.test.ts` (Doku rot, dritter roter Commit).
+- [x] **T315 Messungen** unten; Bericht.
+
+### Messungen
+
+| Was | Wert |
+|---|---|
+| `get_ero elektilo brief:true`, Bytes / `ceil(Bytes/3)` (Spec-007-Maß, Server `core + aspekto-ekzemplo`) | 1 472 Bytes / **491** – unter 750. Zum Vergleich jetzt: kampo 2 237 / **746** (vorher 747: `"elektilo"` statt `null` +6 Bytes, Kialo −8, D-12), butono 2 014 / 672 (vorher 679), elekto 1 366 / 456 (vorher 463), markobutono 1 323 / 441, sxaltilo 865 / 289, ligilo 1 477 / 493 |
+| Parität (`pnpm check:parity`) | 7 Eroj, 4 Seiten, 0 Differenzen; 369 benannte Freigaben (339 wie vorher + 30: `text.color` und `required-mark.color` des elektilo je Variante, Jugxo `jug_01M4S2R85WRAC5SV7CARH8RE7S`) |
+| Alirebleco (Eroj, `check:alirebleco-eroj`) | elektilo: 8 Kombinationen (komuna, ekzemplo × light, dark × default, high) × 3 Engines, je drei Pflicht-Auswahllisten mit Aufforderung und Hilfe (3 Größen) und eine mit gewählter Option in rest, hover, invalid (mit Fehlertext), disabled: axe ohne Befund (Rolle combobox des nativen `select`); Chevron auf Feld ≥ 3:1 auch invalid, Fokusring ≥ 3:1 auf Abstand und Seite – 177 grün (vorher 153) |
+| Alirebleco (Modelo, `check:alirebleco`) | 70 KontrastParoj × 72 Kombinationen wie vorher (kein neues Paar): Chevron `text-muted-on-background-default` min. 6,71, auf `sunken` (disabled) 5,58; Platzhalter `text-subtle-on-background-default` 9,38 |
+| Maße (Basis-Kombination, im Browser) | Feld 32/40/48 px hoch wie der `kampo`, Breite aus dem Container; Chevron 16/20/24 px, quadratisch, mittig, Abstand zum Ende = Innenabstand + Rand, der Text endet `box.gap` davor |
+| Figma-Bericht (Double) | Kopfzeile mit sieben Sets 2 722 Zeichen (ohne die Modi je Set 4 094 → Grenze 4 000, D-07), längste Zeile 3 883 |
+| Dialoge (MCP) | „Land auswählen“ → `elektilo` (Goal `choose-many`, Schlüsselwort „auswählen“, Kialo von `elekto-options-few`); „Dropdown mit drei Versandarten“ → `elekto` (Alternative `choose-few` des `butono`, „drei“); `describe_term` „Dropdown“ → `Elektilo`; „Combobox mit Suche“ → `search-in-list` ask-human |
+| **Commits** (rot / grün; nach einem Rebase hier ersetzen) | rot `61260c2` (Fixtures, Modelo), `d95a7e5` (Projekcioj, Browser, MCP), `7c540f7` (Doku) · grün `2e48734` (Modelo), `1005043` (Projekcioj), Doku im Commit dieser Zeile |
+| Tests (je Paket `vitest run`, Playwright) | modelo 2 836, projekcioj 439, mcp 195, cli 66, eroj 1 Vitest + 262 Playwright in drei Engines (2 übersprungen wie bisher: forced-colors, quickstart nur Chromium); davon neu für die Auswahlliste: data/elektilo 53, vier Fixtures (je validate und e2e), docs 2, Projekcioj 19 (Web Component 7, Figma-Plan 3, Plugin 5, Make Kit 2, Vitrino 2), Browser `elektilo.spec` 11 und Internacia 3 je Engine, Alirebleco 8 Kombinationen je Engine, Vitrino 1, MCP 14 (s010-elektilo) plus der siebte Eintrag in eroj-tools |
+| Checks | `check:vortaro-lint`, `check:regularo` (uzoj=7, kein `skemo-uzo-missing`), `check:mankoj` (8, unverändert), `check:alirebleco`, `check:clean-room`, `check:make-kit` 5, `check:quickstart` 1, `check:vitrino` 16, `check:release` – grün; `pnpm lint` grün |

@@ -40,10 +40,11 @@ const rulesOf = (result: ReturnType<typeof evaluateUsage>) =>
   result.violations.map((violation) => [violation.issue.rule, violation.issue.severity]);
 
 describe("elekto in the repo Modelo (G1, G2, section 3)", () => {
-  it("lives in data/eroj/elekto/skemo.json, between butono and kampo, and the repo Modelo stays valid", () => {
+  it("lives in data/eroj/elekto/skemo.json, between elektilo and kampo, and the repo Modelo stays valid", () => {
     expect(elekto?.file).toBe("modelo/data/eroj/elekto/skemo.json");
     expect(modelo.eroj.map((entry) => entry.ero.name)).toEqual([
       "butono",
+      "elektilo",
       "elekto",
       "kampo",
       "ligilo",
@@ -267,13 +268,15 @@ describe("the Uzo of the elekto (section 3, G5)", () => {
     expect(uzo?.layout).toEqual({ size: "content", wrap: "never" });
   });
 
-  it("names choose-many as not covered until PR ④ (elektilo), sends yes-no to the markobutono, multi not covered", () => {
+  // Spec 010 ④ (G5, plan ④ D-12): choose-many is the elektilo's now — use-instead, no PR in the kialo.
+  it("sends choose-many to the elektilo, yes-no to the markobutono, multi not covered", () => {
     expect(uzo?.instead.map((entry) => [entry.goal, entry.ero])).toEqual([
-      ["choose-many", null],
+      ["choose-many", "elektilo"],
       ["yes-no", "markobutono"],
       ["multi", null],
     ]);
-    expect(uzo?.instead[0]?.kialo).toMatch(/elektilo, PR ④/);
+    expect(uzo?.instead[0]?.kialo).toMatch(/Fundamento covers it with elektilo\.$/);
+    expect(uzo?.instead[0]?.kialo).not.toMatch(/PR ④/);
     expect(uzo?.instead[1]?.kialo).toMatch(/A yes or no is a check mark/);
     expect(uzo?.instead[2]?.kialo).toMatch(/group of checkboxes/);
   });
@@ -346,14 +349,14 @@ describe("the cross-links of G5 (one Ero per entry)", () => {
   });
 
   it.each(["butono", "kampo"])(
-    "the %s splits choose into choose-few (use-instead elekto) and choose-many (not yet, elektilo), keywords apart",
+    "the %s splits choose into choose-few (use-instead elekto) and choose-many (use-instead elektilo since ④), keywords apart",
     (name) => {
       const instead = uzoOf(name)?.instead ?? [];
       expect(instead.map((entry) => entry.goal)).not.toContain("choose");
       const few = instead.find((entry) => entry.goal === "choose-few");
       const many = instead.find((entry) => entry.goal === "choose-many");
       expect(few?.ero).toBe("elekto");
-      expect(many?.ero).toBeNull();
+      expect(many?.ero).toBe("elektilo");
       expect(few?.kialo).toMatch(/elekto/);
       expect(many?.kialo).toMatch(/elektilo/);
       expect(few?.keywords).toEqual({
@@ -383,7 +386,8 @@ describe("the Reguloj of the elekto (G6, E5)", () => {
   it("option-labels-distinct is new and fixed; elekto-options-few is new and adjustable; both judge instances", () => {
     expect(named("option-labels-distinct")).toMatchObject({
       checkability: "automatic",
-      appliesTo: { eroj: ["elekto"] },
+      // Spec 010 ④: widened to the elektilo, whose options are entries of the same kind (E5).
+      appliesTo: { eroj: ["elekto", "elektilo"] },
     });
     expect(named("option-labels-distinct")?.kialo).toMatch(/tell apart/);
     expect(named("elekto-options-few")).toMatchObject({
@@ -394,19 +398,20 @@ describe("the Reguloj of the elekto (G6, E5)", () => {
   });
 
   it.each([
-    ["field-label-visible", ["kampo", "sxaltilo", "markobutono", "elekto"]],
-    ["field-label-names-the-datum", ["kampo", "sxaltilo", "markobutono", "elekto"]],
-    ["error-says-what-to-do", ["kampo", "markobutono", "elekto"]],
-    ["required-marked", ["kampo", "markobutono", "elekto"]],
-    ["error-not-color-only", ["kampo", "markobutono", "elekto"]],
-    ["help-is-one-sentence", ["kampo", "elekto"]],
+    // Spec 010 ④: the elektilo follows the elekto in each list (E5).
+    ["field-label-visible", ["kampo", "sxaltilo", "markobutono", "elekto", "elektilo"]],
+    ["field-label-names-the-datum", ["kampo", "sxaltilo", "markobutono", "elekto", "elektilo"]],
+    ["error-says-what-to-do", ["kampo", "markobutono", "elekto", "elektilo"]],
+    ["required-marked", ["kampo", "markobutono", "elekto", "elektilo"]],
+    ["error-not-color-only", ["kampo", "markobutono", "elekto", "elektilo"]],
+    ["help-is-one-sentence", ["kampo", "elekto", "elektilo"]],
   ])("%s is widened to the elekto, not duplicated (E5)", (name, eroj) => {
     expect(named(name)?.appliesTo).toEqual({ eroj });
     expect(named(name)?.statement).toMatch(/elekto/);
     expect(modelo.reguloj.filter((regulo) => regulo.name === name)).toHaveLength(1);
   });
 
-  it("spacing-owned-by-container applies to all six Eroj", () => {
+  it("spacing-owned-by-container applies to all seven Eroj", () => {
     expect(named("spacing-owned-by-container")?.appliesTo?.eroj).toEqual([
       "butono",
       "ligilo",
@@ -414,6 +419,7 @@ describe("the Reguloj of the elekto (G6, E5)", () => {
       "sxaltilo",
       "markobutono",
       "elekto",
+      "elektilo",
     ]);
   });
 
@@ -544,18 +550,16 @@ describe("suggest_ero and the radio group (Gvidanto, section 3)", () => {
 
   // Many before few: "auswählen" ends with the few's "wählen" (a Uzo keyword of six letters hits
   // the end of a word, N-1), so the entry of many stands first in the Uzo of butono and kampo.
-  it.each(["Land auswählen", "Sprache aus vielen auswählen"])(
-    "'%s' is choose-many, not choose-few: the list wins over the few",
+  // Spec 010 ④: the list is the elektilo; its goal choose-many answers, the butono's alternative
+  // says the same (use-instead elektilo) and confirms it (Spec 008 D-08).
+  it.each(["Land auswählen", "Sprache aus vielen auswählen", "Land aus einer Liste"])(
+    "'%s' is choose-many, not choose-few: the elektilo since ④, no person needed",
     (text) => {
       const answer = suggest(text);
-      expect(answer.suggestion).toBeNull();
-      expect(answer.boundary).toMatchObject({ case: "choose-many", action: "ask-human" });
+      expect(answer.suggestion).toEqual({ ero: "elektilo", props: {} });
+      expect(answer.matched?.goal).toBe("choose-many");
+      expect(answer.action).toBeUndefined();
+      expect(answer.candidates).toBeUndefined();
     },
   );
-
-  it("'Land aus einer Liste' is choose-many: not covered until PR ④, a person decides", () => {
-    const answer = suggest("Land aus einer Liste");
-    expect(answer.suggestion).toBeNull();
-    expect(answer.boundary).toMatchObject({ case: "choose-many", action: "ask-human" });
-  });
 });

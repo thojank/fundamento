@@ -1247,3 +1247,43 @@ describe("Spec 010 ③ documentation (Vojmapo Phase 4)", () => {
     }
   });
 });
+
+// Spec 010 ④ (G7, acceptance 8): the Vojmapo names Spec 010 ④ in Phase 4 and the family of the four
+// Wahl-Eroj as complete; plan and tasks carry section ④ with its decisions, its deviations and the
+// red hashes. After a rebase the hashes change: they stand in one row of tasks.md ④ and in the one
+// loop below.
+describe("Spec 010 ④ documentation (Vojmapo Phase 4)", () => {
+  it("the vojmapo names Spec 010 ④, the select, the Guidelines sentence and the family as complete", () => {
+    const row = read("docs/vojmapo.md")
+      .split("\n")
+      .find((line) => line.startsWith("| 4 |"));
+    expect(row).toContain("**Spec 010 ④ (`elektilo`");
+    expect(row).toContain("hält eine von vielen Optionen");
+    expect(row).toContain("Make baut jede Wahl einer von vielen Optionen aus der Auswahlliste");
+    expect(row).toContain("Die Familie der Wahl-Eroj ist vollständig");
+    expect(row).not.toContain("④ `elektilo` folgt gestapelt.");
+    expect(row).toContain("Spec 010 ④ umgesetzt");
+  });
+
+  it("plan and tasks carry section ④ with decisions, deviations, findings and red hashes", () => {
+    const plan = read("specs/010-formular-eroj/plan.md");
+    const tasks = read("specs/010-formular-eroj/tasks.md");
+    const section = (text: string) => text.slice(text.indexOf("## ④ `elektilo`"));
+    for (const heading of [
+      "### Zusammenfassung",
+      "### Entwurfsentscheidungen",
+      "### Abweichungen von der Spec",
+      "### Befunde / Mankoj",
+      "### Offen (für den Maintainer)",
+      "#### D-02 Die Optionen sind Einträge des Slots `options` wie beim `elekto`",
+      "#### D-09 Text-Regeln: `select-placeholder-is-prompt` statt `placeholder-is-example`",
+    ]) {
+      expect(section(plan)).toContain(heading);
+    }
+    expect(section(plan)).not.toContain("Folgt in PR ④.");
+    expect(section(tasks)).toContain("### Messungen");
+    for (const hash of ["61260c2", "d95a7e5", "7c540f7"]) {
+      expect(section(tasks)).toContain(hash);
+    }
+  });
+});

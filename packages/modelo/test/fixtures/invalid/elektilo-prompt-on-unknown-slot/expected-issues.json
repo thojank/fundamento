@@ -1,0 +1,9 @@
+{
+  "description": "Spec 010 ④ G6, G7: the prompt rule of the select judges its placeholder, a prop. Here it names a slot placeholder the Skemo does not have, so the rule would never see the text it is about; the placeholder is prop:placeholder.",
+  "issues": [
+    {
+      "rule": "uzo-content-of-invalid",
+      "path": "data/eroj/elektilo/uzo.json#/uzo/content/0/of"
+    }
+  ]
+}

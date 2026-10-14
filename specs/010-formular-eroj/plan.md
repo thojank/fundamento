@@ -346,6 +346,118 @@ Fixtures (je `expected-issues.json`, `git check-ignore` leer): `elekto-label-slo
 
 In [`tasks.md`](tasks.md) ③.
 
-## ④ `elektilo` – Auswahlliste (Select)
+## ④ `elektilo` – Auswahlliste (Select) (PR ④)
 
-Folgt in PR ④.
+**Branch:** `261014-spec-010-elektilo-010092` (gestapelt auf PR ③ `261014-spec-010-elekto-010092` @ `84c50a0`) · **Datum:** 2026-10-14 · **Aufgaben, Commits und rote Hashes:** [`tasks.md`](tasks.md) ④ (alle Hashes in einer Zeile der Messungen)
+
+Der vierte und letzte Wahl-Ero dieser Runde: hält eine von vielen Optionen, die Liste klappt auf Anforderung auf. Er ist das Feld des `kampo` mit einem Chevron und einer Liste, die der Plattform gehört (E3); die Optionen sind Einträge wie beim `elekto` (③ D-02, O-13). Fast alles trägt der Weg von ③ und von Spec 009 (Regel 0.1); neu sind nur das native `select` in der Web-Celo, der Chevron im Feld und die Regulo für den Platzhalter einer Liste. Jede Entscheidung unten nennt ihre Stufe. Mit ④ ist die Familie der Wahl-Eroj vollständig: `butono`, `kampo` und `elekto` schicken jede Wahl an ein Ero, keine an eine Person.
+
+### Zusammenfassung
+
+1. **Modelo:** `data/eroj/elektilo/{skemo,uzo}.json`; neue Regulo `select-placeholder-is-prompt` (anpassbar); `field-label-visible`, `field-label-names-the-datum`, `error-says-what-to-do`, `required-marked`, `error-not-color-only`, `help-is-one-sentence`, `placeholder-not-label`, `option-labels-distinct` und `spacing-owned-by-container` per `appliesTo` ausgeweitet (E5); `placeholder-is-example` bleibt beim `kampo`; zwölf Jugxoj (drei Text-Regeln × approved/rejected × de/en); Ontologio `#Elektilo` (Auswahlliste/select, altLabel Dropdown). Keine Schema-Änderung, kein neues Token, kein neuer KontrastParo.
+2. **Verflechtung (G5):** `butono`, `kampo` und `elekto` `choose-many` → `use-instead: elektilo` (schließt ③ D-08/D-12); der `elektilo` schickt `choose-few` an den `elekto`. `brief` des `kampo` 746 (vorher 747).
+3. **Projekcioj:** Web Component `fm-elektilo` (das Feld des `kampo` um ein natives `select`, Optionen aus dem Light DOM, Platzhalter als gesperrte erste Option, Formular-Wert und -Gültigkeit, Chevron am Ende), React `Elektilo`, Figma-Set in der Bauform `field` mit Chevron (15 Varianten, nur geschlossen), Make-Kit `components/elektilo.md` und Guidelines-Satz (der Satz des `elekto` nennt jetzt `<Elektilo>`), Vitrino-Abschnitt (Aufforderung „Bitte wählen“, drei Optionen), MCP (sieben Eroj, Dialoge als Test). Parität für sieben Eroj.
+
+### Entwurfsentscheidungen
+
+#### D-01 Props, Zustände, Slots wie Abschnitt 4 der Spec (G1, G2, G4, E3)
+
+Props `value` (string, ohne Standard: leer heißt „keine gewählt“), `placeholder` (string; die Aufforderung im leeren Feld, nie die Beschriftung), `required`, `invalid`, `size` (small/medium/large, medium), `disabled`, `name`; Zustände `rest`, `hover`, `focus`, `disabled`, `invalid` – **`open` ist weder Zustand noch Prop** (E3: die Liste ist die der Plattform; der Typtest weist `open` ab). Slots `label` (Standard-Slot), `options` (die Optionen, D-02), `help`, `error`. Kein `beside`: der `elektilo` ist das Feld des `kampo`, dessen Slots auch ohne `beside` stehen und dessen Paare deklariert sind (① D-07, Kandidat bleibt). Kein `readonly` (die Spec nennt ihn nicht; ein Select, das man nicht ändern kann, ist `disabled`). `a11y.texts.required` wörtlich wie beim `kampo`; `a11y.description` aus `slot:help`, `slot:error`; Constraint `slot:error` belegt ⇒ `invalid` mit der Kialo des `kampo`.
+
+#### D-02 Die Optionen sind Einträge des Slots `options` wie beim `elekto` (③ D-02, O-13; Regel 0.1)
+
+`SkemoSlot.entry: { key: selected, equals: value }` – dieselbe Form wie in ③, O-13 sagte, ④ nimmt sie. Anders als beim `elekto` schlüsselt kein Teil nach `selected`: die Optionen zeichnet die Liste der Plattform, Figma zeichnet die Liste nicht (E3). Der Schlüssel trägt hier die Listen-Prüfung `distinct` (`option-labels-distinct` verlangt einen Slot mit `entry`, ③ D-09) und `a11y.states.selected = [aria-selected]` (so spricht die Plattform die gewählte Option). Kein Unter-Ero, kein `option` als Begriff der Skemo (`skemo-web-term`, Fixture).
+
+#### D-03 Teile und Bindungen vom `kampo` kopiert, dazu `indicator` (Regel 0.1; Spec Abschnitt 4)
+
+Die Teile `label`, `required-mark`, `surface`, `border`, `text`, `placeholder`, `help`, `error`, `focus-ring`, `box`, `motion` sind die des `kampo`, jede feste Quelle und jede Bindung wörtlich kopiert (ohne die Bindungen des Zustands `readonly`); der Datentest vergleicht beide. Neu ist `indicator` (der Chevron): `color` fest `color.text.muted`, `size` by [size] → `size.icon.small|medium|large` (16/20/24 px). **Kopie, keine gemeinsame Tabelle** (Regel 0, Spec: „Deduplizierung ist Kandidat“): eine gemeinsame Bindungstabelle „Feld-Bauform“ wäre ein zweiter Mechanismus im Schema; Kandidat B-8.
+
+#### D-04 Der Chevron ist ein Zeichen der Projektion (wie Haken und Punkt, ② D-08, ③ D-05)
+
+`signOf("combobox")`: ein gefüllter Umriss nach unten in einem Kasten von 16 × 16 (`M1.9 5.7 3.3 4.3 8 9l4.7-4.7 1.4 1.4L8 11.8z`), in `currentColor` – die Farbe des Teils `indicator`; als Pfad, damit Figma einen Vektor importiert (② D-09). Im Web `aria-hidden`, kein Text.
+
+#### D-05 Maße aus Rollen-Tokens (E1)
+
+Höhe des Feldes `size.control.*` wie der `kampo` (gleiche Höhe in einer Zeile, Uzo `with: kampo`), Chevron `size.icon.*`, Abstand Text–Chevron `box.gap` (`spacing.small`), Rand `border.width.default`. Gemessen im Browser (`elektilo.spec.ts`): der Chevron liegt im Feld, quadratisch, mittig, sein Abstand zum Ende ist Innenabstand + Rand, der Text endet davor.
+
+#### D-06 Web Component: das Feld des `kampo` um ein natives `select` (Regel 0.2; Art. VIII)
+
+`HostControl` `select` für die Rolle `combobox` – die kleinste Änderung: das Markup des Feldes (`fieldMarkup` des `kampo`) mit `<select part="control">` statt `<input>` und dem Chevron daneben (`<span part="indicator" aria-hidden="true">`), beide in einer Zeile. Die Rolle `combobox` gibt der Browser dem `select`, das Element setzt keine eigene. **Die Optionen kommen aus dem Light DOM** wie beim `elekto` (`<data slot="options" value="de">Deutschland</data>`, ③ D-06): das Element schreibt sie beim Rendern als `<option>` der Plattform in das `select` (der Begriff `option` steht nur in der Web-Celo, Art. VIII, wie `href`); ein `MutationObserver` folgt neuen Optionen und Werten. **Platzhalter:** solange keine Option gewählt ist (`value` leer oder unbekannt), steht vor den Optionen eine gesperrte Option ohne Wert mit dem Text von `placeholder` – gewählt, aber nicht zurückwählbar; ist eine Option gewählt, fällt sie weg. Formular über `ElementInternals` wie der `markobutono`: Wert der gewählten Option, Pflicht ohne Wahl ist `valueMissing` (Meldung aus `a11y.texts.required`); `aria-required`, `aria-invalid` (auch aus belegtem Fehler-Slot), `name`, `disabled` am `select`. Eine Wahl in der Liste setzt `value`; `input` kommt vom `select` selbst (composed), `change` sagt das Element noch einmal, weil das `change` des `select` die Shadow-Grenze nicht verlässt. **Tasten:** die der Plattform (ArrowUp/Down, Enter, Escape, `a11y.keys`); das Element nimmt keine für sich (gemessen: keine Taste `defaultPrevented`). Stylesheet: Bauform des Feldes (`fieldStructure`), Zeile aus `select` (füllt) und Chevron (schrumpft nicht, `pointer-events: none`, liegt über dem Ende des `select`); **wo der Chevron steht**, ist Celo-Wissen in Token-Arithmetik je Größe: `padding-inline-end: calc(Innenabstand + Chevron + Abstand)` am `select`, `margin-inline-start: calc(-1 * (Chevron + Innenabstand + Rand))` und `margin-inline-end: calc(Innenabstand + Rand)` am Chevron – nur `var(--fm-*)`, kein Literal (`componentCssIssues` leer, logische Eigenschaften, rtl spiegelt sich). Die Farbe des Platzhalters gilt, solange die gesperrte Option gewählt ist (`[part="control"]:has(> option[value=""]:checked)`, außerhalb von `:where()`: höhere Spezifität als die Textfarbe jedes Zustands). Inventar: `size` und fünf Zustände wie der `kampo` ohne `readonly`.
+
+#### D-07 Figma: Bauform `field` mit Chevron, nur geschlossen (E3; Regel 0.1)
+
+`structureOf("combobox")` = `field` – die Bauform des `kampo`: Label, Ring → Abstand → Kontrolle, Hilfe, Fehler. Was der `kampo` nicht hat, kommt aus dem Plan wie beim Kontrollkästchen (② D-09): `sign` (der Chevron, dasselbe SVG wie im Web), das Plugin importiert ihn einmal in die Kontrolle **nach** dem Text (`createNodeFromSvg`), bindet die Größe seines Rahmens an `indicator.size` und die Füllung seines Vektors an `indicator.color`; der Abstand ist `box.gap` (Abstand der Kontrolle). Achsen `size × state` = 3 × 5 = 15 Varianten. **Texte:** `texts { text: "Bitte wählen", help: "Hinweis", error: "Fehler" }` (`SELECT_TEXTS`) – das Muster des `kampo` (F-4: Standardtext je Knoten), aber die Kontrolle zeigt die Aufforderung, nicht „Beispiel“: ein Wort im leeren Feld läse sich als gewählte Option, das verbietet `select-placeholder-is-prompt` (D-09); dasselbe Wort zeigt die Vitrino (`VITRINO_PROMPT`, F-5: eine Quelle für beide Bilder). Vorgabewort der Beschriftung `combobox` → **„Auswahl“** (was gewählt wird; zur Bestätigung, O-15). `text.color` und `required-mark.color` sind nicht gezeichnet – derselbe Jugxo wie beim `kampo` (`jug_01M4S2R85WRAC5SV7CARH8RE7S`), sein Wortlaut nennt jetzt den `elektilo` (O-19). Die Liste zeichnet Figma nicht (Manko M-1). **Bericht:** mit sieben Sets war die Kopfzeile 4 094 Zeichen lang (Grenze 4 000, F22) – der Kandidat aus ③ B-5: die Modi, in denen jedes Set vorgefunden und hinterlassen wurde (`modes`), stehen jetzt im Teil `state` des Sets statt in der Kopfzeile, unter demselben Namen; Kopfzeile 2 722 Zeichen. **Annahmen des Doubles bis zur Messung in f10b-5:** wie ② D-09 (`createNodeFromSvg` legt einen FRAME 16 × 16 mit einem VECTOR je Pfad an, SCALE folgt dem gebundenen Rahmen); ein Kind mit fester Größe in einer HUG-Kontrolle steht nach dem Text.
+
+#### D-08 Uzo (Abschnitt 4, G5)
+
+`instead`: `choose-few` → `use-instead: elekto` (few, two, three / wenige, wenigen, zwei, drei; „Up to five options read faster when they all stay visible, because a list hides them behind a click; Fundamento covers it with elekto.“), `search-in-list` → `null` (autocomplete, combobox, typeahead, searchable / autovervollständigung, combobox, durchsuchbar, suchliste), `multiple` → `null` (multiselect / mehrfachauswahl, mehrfach – die Wörter des `multi` des `elekto`, nicht „mehrere“/„multiple“, ③ B-3). Grenzen `custom-popup` (not-supported, Kialo der Spec; popup, overlay), `grouped-options` (ask-human; optgroup, grouped / gruppiert, optionsgruppen), `no-visible-label` (via `field-label-visible`). `composes`: Container `form`, `dialog`, `filter-bar`; `with`: `kampo` (gleiche Höhe, Breite aus dem Container), `butono`; `never`: `butono`. Slots: `label` (Pflicht), `options` (Pflicht, `min: 2`, kein `max`), `help`, `error`. Layout `size: container`, `wrap: never` – wie der `kampo`.
+
+#### D-09 Text-Regeln: `select-placeholder-is-prompt` statt `placeholder-is-example` (G6; Regel 0.2/0.3)
+
+Die Spec bietet zwei Wege: `placeholder-is-example` für den `elektilo` per Jugxo überstimmen oder eine eigene Regulo – Regel 0 und die Spec: **eigene Regulo, keine Überstimmung im Kern.** `placeholder-is-example` bleibt beim `kampo` (sein `not-words` nennt „bitte“ – „Bitte wählen“ fiele). `select-placeholder-is-prompt` (anpassbar): „The placeholder of an elektilo is a prompt to choose, 'Bitte wählen', 'Land wählen': at least two words, never one of the options.“ Kleinste Prüfung, die sie trägt: die vorhandene Prüfart `min-words` (`count: 2`) auf `prop:placeholder` – eine Option im leeren Feld ist meist ein Wort („Deutschland“), eine Aufforderung mindestens zwei. Näherung ohne Modell wie `error-says-what-to-do` (R-2), im `scope` genannt: eine Option aus zwei Wörtern („Vereinigte Staaten“) besteht. „Nie eine der Optionen“ genau zu prüfen hieße eine Prüfart über Prop und Einträge – neue Regulo-Semantik (Regel 0.3), Kandidat O-17. Ausgeweitet (E5): `placeholder-not-label` (die Spec: „gleiche Regeln wie kampo: nie die Beschriftung“), `option-labels-distinct` (fest), `field-label-names-the-datum` (Wörter des Wählens wie beim `elekto`), `error-says-what-to-do` (fest), `help-is-one-sentence`, dazu die Skemo-Reguloj `required-marked`, `error-not-color-only` und `field-label-visible` (E5). Zwölf Jugxoj mit Referenz `elektilo`: Aufforderung („Bitte wählen“/„Please choose“ ✓, „Deutschland“/„Germany“ ✗), Optionen (sieben Länder ✓, zweimal „Deutschland“/„Germany“ ✗), Datum („Land“/„Country“ ✓, „Land auswählen“/„Select a country“ ✗).
+
+#### D-10 Goal `choose-many` und die Dialoge (Gvidanto)
+
+Goal `choose-many` → Props `{}`, Regulo `elekto-options-few` (deren Kialo ist die Antwort: ab sechs sichtbaren Optionen liest niemand mehr, eine Liste, die zuklappt, ist schneller). Schlüsselwörter einzeln, wie der Auftrag sie nennt: en list, select, country, language, many; de liste, auswählen, land, sprache, vielen. **`select`/`auswählen` sind keine Allzweck-Verben** im Sinn des Datentests (`suggest-ero.test`, OP-12: Präpositionen und go/open, gehen/öffnen; `kampo.test`: eingeben/enter/type): sie benennen genau das Wählen aus einer Liste und stehen seit ③ in `choose-many` von `butono`/`kampo`. **„Land auswählen“** → `elektilo` (Goal; die Alternative `choose-many` des `butono` sagt dasselbe und bestätigt es, Spec 008 D-08). **„Dropdown mit drei Versandarten“** bleibt `elekto` (③ D-14): „drei“ trifft `choose-few` des `butono` zuerst. Darum ist **„dropdown“ kein Schlüsselwort**: als Goal-Wort des `elektilo` träfen „dropdown“ (elektilo) und „drei“ (elekto) zwei verschiedene Eroj, die Antwort wäre ask-human. „Wie heißt das Dropdown in Fundamento?“ beantwortet `describe_term` („Dropdown“ ist altLabel des `#Elektilo`, D-14); `suggest_ero("Dropdown")` allein kennt kein Goal (B-4). Beide Dialoge als MCP-Test (`s010-elektilo`).
+
+#### D-11 Make Kit
+
+`components/elektilo.md` generiert (die Seite nennt `placeholder`, wie eine Option geschrieben wird – derselbe Satz wie beim `elekto` – und zeigt die Aufforderung ihrer Beispiele). `Guidelines.md`: „A choice of one among many options is an `<Elektilo>` list; up to five visible options are an `<Elekto>`.“ (generiert aus jedem Ero mit Rolle `combobox`, der `elekto` genannt, wo das Modelo ihn hat). Der Satz des `elekto` (③ D-11) heißt jetzt „… six or more go into an `<Elektilo>` list.“ – „which this kit does not have yet: ask a person“ steht nirgends mehr.
+
+#### D-12 Verflechtung und `brief` (G5)
+
+`butono`, `kampo` und `elekto` `choose-many` → `use-instead: elektilo`, Schlüsselwörter unverändert. Kialo: `butono` „… Fundamento covers it with elektilo.“, `elekto` „… Fundamento covers it with elektilo.“, **`kampo` „Many options are a list, because a field takes any text; elektilo covers it.“** – vorher „… no such Ero yet (elektilo).“; `"elektilo"` statt `null` kostet 6 Bytes, die kürzere Kialo spart 8: `brief` des `kampo` 2 237 Bytes / **746** (vorher 747), gemessen vor der Änderung; keine Grenze angehoben, keine andere Kialo geändert. `uzo-boundary-covered` grün: kein `instead` mit `null`, keine Grenze mit ask-human nennt ein Wort des Goals `choose-many` (Datentest). `markobutono` und `sxaltilo` nennen keine Liste (geprüft: ihre `instead`/Grenzen tragen kein Wort des Goals).
+
+#### D-13 Vitrino
+
+Spalten aus der bestehenden Regel: `rest`, `required` (a11y-Text), `invalid`, `disabled`; Zeilen `size`. Jede Zelle trägt die drei Optionen (`VITRINO_OPTIONS`, wie ③) und **`placeholder="Bitte wählen"` statt `value="1"`**: ein Ero, dessen Optionen Einträge sind und das einen Platzhalter hat, zeigt das geschlossene Feld mit der Aufforderung – wie das Figma-Set (D-07); der `elekto` behält die erste Option gewählt. Hilfe überall, Fehler nur unter `invalid`. Layout-Satz „Größe aus dem Container, Feld bricht nie um.“
+
+#### D-14 Ontologio
+
+`#Elektilo` (eo Elektilo, en select, de Auswahlliste; altLabel en elektilo, dropdown, select list; de Dropdown, Auswahlfeld, elektilo) mit Beziehungen zu `#Butono`, `#Kampo`, `#Elekto`; `#Butono`, `#Kampo` und `#Elekto` verweisen auf ihn; die Definition des `#Elekto` sagt „elektilo (use-instead)“ statt „noch nicht abgedeckt“.
+
+#### D-15 `describe_term` kennt die Schemata `eroj` und `principoj` (Befund, Regel 0.2)
+
+Das Ausgabeschema von `describe_term` (`packages/mcp/schema/tools/describe_term.output.json`) ließ für `inScheme` nur `terminologio` und `modelo` zu; das Schema der Ontologio kennt seit Spec 008 auch `eroj` (und `principoj`). Jede Antwort auf einen Ero-Begriff („Butono“, „Dropdown“) verletzte damit das Ausgabeschema des Servers – gefunden mit dem Dialog „Wie heißt das Dropdown in Fundamento?“ (MCP-Test rot). Kleinste Änderung: die Aufzählung folgt dem Schema der Ontologio (`terminologio`, `modelo`, `principoj`, `eroj`); keine Prüfung entfällt, das Schema nennt jetzt, was die Daten tragen (O-20).
+
+#### D-16 Rot zuerst
+
+Fixtures (je `expected-issues.json`, `git check-ignore` leer): `elektilo-label-slot-optional` (`uzo-slot-required-missing`), `elektilo-web-term` (der Slot der Einträge heißt `option` → `skemo-web-term` an `slots/1/name`), `elektilo-instead-kialo-missing` (`uzo-kialo-missing` + `schema-violation`), `elektilo-prompt-on-unknown-slot` (`select-placeholder-is-prompt` auf `slot:placeholder` → `uzo-content-of-invalid`). Alle Regeln gab es seit ①–③; die Fixtures waren sofort grün und sind **durch Mutation** rot beobachtet (vier Regel-Ids umbenannt: 4 von 4 rot, zurückgesetzt). Die Instanz-Fälle (eine Option → `uzo-slot-min`, zwei gleiche Optionen, leeres Label, Platzhalter gleich Label, eine Option als Platzhalter, die Aufforderung erlaubt) sind `check_usage`-Tests (`data/elektilo.test.ts`, rot im ersten roten Commit) und im MCP-Test. Grün bei Ankunft im Projekcioj-Rot: der Typtest (der React-Wrapper ist generisch) und Teile des MCP-Tests (die Antworten trägt der Modelo-Commit; ihr Rot steht in `data/elektilo.test.ts`); rot dort: `describe_term` (D-15).
+
+### Abweichungen von der Spec
+
+1. **Teile `surface`/`border`/`box` statt eines Teils `control`** (D-03, wie ①–③ und der `kampo`); in den Projekcioj heißt das `select` `control`.
+2. **Figma-Texte „Bitte wählen“ statt „Beispiel“** (D-07): das Muster des `kampo`, aber die Aufforderung, die die Regel verlangt.
+3. **„dropdown“ ist kein Goal-Wort** (D-10): es machte „Dropdown mit drei Versandarten“ zu ask-human; `describe_term` beantwortet die Frage nach dem Namen.
+4. **`select-placeholder-is-prompt` prüft `min-words 2`**, nicht „nie eine der Optionen“ (D-09): Näherung, die genaue Prüfung wäre neue Regulo-Semantik (O-17).
+5. **Das Figma-Manko „nur geschlossen“ steht nicht in `mankoj.json`** (M-1).
+6. **`a11y.keys` ohne Space** (G4 nennt Pfeiltasten, Enter, Escape); welche Taste die Liste öffnet, entscheidet die Plattform (B-2).
+7. **Zusätzlich:** Grenze `no-visible-label`, `never: butono`, Text-Regeln `help-is-one-sentence` und `placeholder-not-label` (wie `kampo`), `instead`-Schlüsselwörter und Grenz-Schlüsselwörter frei gewählt; der Chevron ist auch `disabled` `color.text.muted` (die Spec bindet ihn fest, Kandidat B-8).
+8. **`describe_term`-Schema ausgeweitet** (D-15): außerhalb von Abschnitt 4, aber Voraussetzung des Gvidanto-Dialogs.
+
+### Befunde / Mankoj
+
+- **M-1 Figma zeigt nur das geschlossene Feld** (E3). Nicht in `mankoj.json`: ein Manko dort ist eine gemessene Lücke eines Werkzeugs – Celo, Evidenz in dessen Worten, Datum der Messung, Schließbedingung aus `binding-accepted | import-kept | theme-conjunction | library-sync` (① M-1). Figma kann eine offene Liste zeichnen; dass das Set sie nicht zeigt, ist die Entscheidung E3 (die Liste ist die der Plattform, das Modelo kennt keinen Zustand `open`), keine gemessene Grenze von Figma, und keine Schließbedingung beschreibt sie. Hier geführt; die Beschreibung des Sets (Markdown der Uzo) nennt die Grenze `custom-popup`. Ob `mankoj.json` eine Art „Entscheidung, nicht Werkzeug“ bekommen soll, ist Schema-Semantik (O-18).
+- **B-1 `brief`:** elektilo 1 472 Bytes / 491; `kampo` 2 237 / **746** (vorher 747, D-12), `butono` 2 014 / 672 (vorher 679), `elekto` 1 366 / 456 (vorher 463), `markobutono` 441, `sxaltilo` 289, `ligilo` 493.
+- **B-2 Tasten der Liste:** auf macOS öffnen ArrowUp/Down in WebKit und Chromium die native Liste, statt die Wahl im geschlossenen Feld zu ändern; die Liste ist die der Plattform (E3), ihre Tasten auch. Der Test prüft, dass das Element keine Taste nimmt; was eine Taste tut, misst die Abnahme.
+- **B-3 Farbe der Aufforderung in der offenen Liste:** solange die Aufforderung gewählt ist, trägt das `select` die Farbe des Platzhalters; ob eine Engine die Optionen der offenen Liste darin zeigt, ist Sache der Plattform und nicht gemessen.
+- **B-4 `suggest_ero("Dropdown")`** antwortet `goal-unknown` (D-10); `describe_term("Dropdown")` → `Elektilo`.
+- **B-5 Ero-Reihenfolge:** `elektilo` steht alphabetisch vor `elekto`; „Mehrfachauswahl“ trifft jetzt `multiple` des `elektilo` vor `multi` des `elekto` (beide ask-human, Kialo des `elektilo`), und „Welche Sprache?“ ist `elektilo` (das Goal des ersten Ero gewinnt: „sprache“ vor „welche“ des `elekto`) – gemessen, beide Antworten sagen, was die Wörter sagen.
+- **B-6 Kopfzeile des Plugin-Berichts:** 2 722 Zeichen mit sieben Sets (D-07); die längste Zeile 3 883 (Grenze der Teile 3 900).
+- **B-7 Formular-Gültigkeit des `kampo`** fehlt weiter (② B-1, O-7); `elektilo`, `elekto` und `markobutono` haben sie.
+- **B-8 Kandidaten:** gemeinsame Bindungstabelle „Feld-Bauform“ für `kampo` und `elektilo` (D-03); Farbe des Chevrons im Zustand `disabled`; `composes.with` von `butono`/`kampo` nennt die Wahl-Eroj nicht (wie ②, ③).
+- **Mankoj:** keine Rolle fehlt (G3 trägt vollständig: `color.text.muted`, `size.icon.*`).
+
+### Offen (für den Maintainer)
+
+- **O-15** Vorgabewort der Figma-Beschriftung für `combobox`: „Auswahl“ (D-07) – bestätigen oder ersetzen; ein Jugxo erst nach der Entscheidung.
+- **O-16** Aufforderung „Bitte wählen“ als Text des Feldes in Figma und Vitrino statt „Beispiel“ (D-07, D-13) – bestätigen.
+- **O-17** Kandidat „der Platzhalter ist keine der Optionen“ als genaue Prüfung (Abweichung 4): eine Prüfart über Prop und Einträge – neue Regulo-Semantik, nicht entschieden.
+- **O-18** Ob `mankoj.json` Lücken aus Entscheidungen (E3) führen soll (M-1) – Schema-Semantik, nicht entschieden.
+- **O-19** Wortlaut von `jug_01M4S2R85WRAC5SV7CARH8RE7S` um den `elektilo` ergänzt (`text.color` und `required-mark.color` in Figma nicht gezeichnet) – bestätigen (wie O-6, O-14).
+- **O-20** Ausgabeschema von `describe_term` an die Schemata der Ontologio angeglichen (D-15) – bestätigen.
+- **O-3** aus ① gilt weiter: `brief.axes` nennt Enum-Props; beim `elektilo` nur `size`.
+
+### Messungen
+
+In [`tasks.md`](tasks.md) ④.

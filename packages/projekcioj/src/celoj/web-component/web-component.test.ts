@@ -34,8 +34,10 @@ describe("Web Component Celo (T011)", () => {
     // Spec 008: the ligilo on the same path as the butono (Art. IX, Art. XI).
     expect(Object.keys(files).sort()).toEqual([
       "eroj/src/generated/butono.styles.ts",
+      "eroj/src/generated/elektilo.styles.ts",
       "eroj/src/generated/elekto.styles.ts",
       "eroj/src/generated/fm-butono.ts",
+      "eroj/src/generated/fm-elektilo.ts",
       "eroj/src/generated/fm-elekto.ts",
       "eroj/src/generated/fm-kampo.ts",
       "eroj/src/generated/fm-ligilo.ts",
@@ -455,6 +457,131 @@ describe("Web Component Celo for the elekto (Spec 010 ③)", () => {
 
   it("states size as its only styled prop and the five states in the stylesheet inventory (parity)", () => {
     const inventory = stylesheetInventory(elektoStyles);
+    expect(inventory.props).toEqual({ size: ["small", "medium", "large"] });
+    expect([...inventory.states].sort()).toEqual(["disabled", "focus", "hover", "invalid", "rest"]);
+  });
+});
+
+// Spec 010 ④ (plan ④ D-06, E3): the select. The field of the kampo — label with the mark of a
+// required field, help and error — around the platform's own select (role combobox from the
+// browser, Art. VIII: the platform element is Celo knowledge, like href) and the chevron beside
+// it, lying over its end. The options come from the light DOM (<data slot="options" value>, like
+// the elekto's) and are written into the select as the platform's options; while none is chosen,
+// the placeholder is the first option, disabled. The list that opens is the platform's: no popup,
+// no state open, no key handling of the element's own.
+describe("Web Component Celo for the elektilo (Spec 010 ④)", () => {
+  const elektiloStyles = files["eroj/src/generated/elektilo.styles.ts"] ?? "";
+  const elektiloElement = files["eroj/src/generated/fm-elektilo.ts"] ?? "";
+  const kampoElement = files["eroj/src/generated/fm-kampo.ts"] ?? "";
+  const kampoStyles = files["eroj/src/generated/kampo.styles.ts"] ?? "";
+  const elektiloCss = JSON.parse(
+    /export const ELEKTILO_CSS = (".*");/s.exec(elektiloStyles)?.[1] ?? '""',
+  ) as string;
+  const kampoCss = JSON.parse(
+    /export const KAMPO_CSS = (".*");/s.exec(kampoStyles)?.[1] ?? '""',
+  ) as string;
+  const templates = (source: string) =>
+    [...source.matchAll(/`(<[^`]*)`/g)].map((match) => match[1] ?? "");
+  const parts = (source: string) =>
+    templates(source).flatMap((t) => [...t.matchAll(/part="([a-z-]+)"/g)].map((m) => m[1]));
+
+  it("renders the field of the kampo around a native select, with the chevron beside it", () => {
+    expect(parts(elektiloElement)).toEqual([
+      "field",
+      "label",
+      "required-mark",
+      "control",
+      "indicator",
+      "help",
+      "error",
+    ]);
+    expect(elektiloElement).toContain('<select part="control" id="control"></select>');
+    expect(elektiloElement).toContain('<label part="label" for="control">');
+    expect(elektiloElement).toContain('<span part="indicator" aria-hidden="true"><svg');
+    expect(elektiloElement).toContain('<span part="error" id="error" hidden aria-live="polite">');
+    expect(elektiloElement).toContain("static formAssociated = true;");
+    expect(elektiloElement).toContain('customElements.define("fm-elektilo", FmElektilo)');
+    // No role of its own: the browser gives the select role combobox; no popup, no open (E3).
+    expect(elektiloElement).not.toContain('role="combobox"');
+    expect(elektiloElement).not.toContain("aria-expanded");
+    expect(elektiloElement).not.toContain("listbox");
+    expect(elektiloElement).not.toContain("slotAssignment");
+    for (const template of templates(elektiloElement)) {
+      expect(template).not.toMatch(/>[^<\s$][^<]*</);
+    }
+    // The kampo is unchanged: an input, no chevron.
+    expect(parts(kampoElement)).toEqual([
+      "field",
+      "label",
+      "required-mark",
+      "control",
+      "help",
+      "error",
+    ]);
+    expect(kampoElement).not.toContain("<select");
+  });
+
+  it("mirrors the options of the light DOM, the placeholder first and disabled while none is chosen", () => {
+    expect(elektiloElement).toContain('child.getAttribute("slot") === "options"');
+    expect(elektiloElement).toContain('document.createElement("option")');
+    expect(elektiloElement).toContain("element.disabled = option.prompt;");
+    expect(elektiloElement).toContain("select.selectedIndex = chosen === -1 ? 0 : chosen;");
+    expect(elektiloElement).toContain("new MutationObserver(");
+  });
+
+  it("is the form's value and validity; required, invalid and the change of the select", () => {
+    expect(elektiloElement).toContain("this.#internals.setFormValue(chosen === -1 ? null");
+    expect(elektiloElement).toContain("setValidity({ valueMissing: true }, missing, select)");
+    expect(elektiloElement).toContain('select.setAttribute("aria-required", "true")');
+    expect(elektiloElement).toContain('select.setAttribute("aria-invalid", "true")');
+    expect(elektiloElement).toContain('control.addEventListener("change"');
+    expect(elektiloElement).toContain('new Event("change", { bubbles: true })');
+    // The keys are the platform's: the element handles none of its own (a11y.keys of the Skemo).
+    expect(elektiloElement).not.toContain('addEventListener("keydown"');
+  });
+
+  it("keys the field like the kampo, the chevron in color.text.muted and size.icon.*, the prompt in the placeholder colour", () => {
+    expect(elektiloCss).toContain(
+      ':where([part="field"]) [part="indicator"] {\n  color: var(--fm-color-text-muted);\n}',
+    );
+    expect(elektiloCss).toContain(
+      ':where([part="field"][data-size="small"]) [part="indicator"] {\n  inline-size: var(--fm-size-icon-small);',
+    );
+    expect(elektiloCss).toContain(
+      ':where([part="field"]) [part="control"]:has(> option[value=""]:checked) {\n  color: var(--fm-color-text-subtle);\n}',
+    );
+    expect(elektiloCss).not.toContain("::placeholder");
+    expect(elektiloCss).toContain("border-color: var(--fm-color-status-danger-border);");
+    expect(elektiloCss).toContain("min-block-size: var(--fm-size-control-medium);");
+    expect(elektiloCss).not.toContain("[readonly]");
+    // The kampo keeps its own placeholder rule and has no chevron.
+    expect(kampoCss).toContain('[part="control"]::placeholder');
+    expect(kampoCss).not.toContain("indicator");
+  });
+
+  it("lays the chevron over the end of the select from tokens only: the text ends a gap before it (D-06)", () => {
+    expect(elektiloCss).toContain(
+      ':where([part="field"]) > div { display: flex; align-items: center; }',
+    );
+    expect(elektiloCss).toContain("pointer-events: none;");
+    expect(elektiloCss).toContain(
+      "padding-inline-end: calc(var(--fm-spacing-medium) + var(--fm-size-icon-medium) + var(--fm-spacing-small));",
+    );
+    expect(elektiloCss).toContain(
+      "margin-inline-start: calc(-1 * (var(--fm-size-icon-small) + var(--fm-spacing-small) + var(--fm-border-width-default)));",
+    );
+    expect(elektiloCss).toContain(
+      "margin-inline-end: calc(var(--fm-spacing-medium) + var(--fm-border-width-default));",
+    );
+  });
+
+  it("keeps every design property a token and logical (Art. X gate 1)", () => {
+    expect(componentCssIssues("elektilo.css", elektiloCss)).toEqual([]);
+    expect(cssPhysicalPropertyIssues("elektilo.css", elektiloCss)).toEqual([]);
+  });
+
+  it("states size as its only styled prop and the five states in the stylesheet inventory (parity)", () => {
+    const inventory = stylesheetInventory(elektiloStyles);
     expect(inventory.props).toEqual({ size: ["small", "medium", "large"] });
     expect([...inventory.states].sort()).toEqual(["disabled", "focus", "hover", "invalid", "rest"]);
   });

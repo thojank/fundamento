@@ -23,6 +23,7 @@ describe("list_eroj", () => {
     );
     expect(listEroj(modelo).eroj.map((entry) => entry.name)).toEqual([
       "butono",
+      "elektilo",
       "elekto",
       "kampo",
       "ligilo",
@@ -36,7 +37,7 @@ describe("list_eroj", () => {
       variants: ["high", "medium", "low"],
       props: ["emphasis", "intent", "size", "type", "disabled", "loading", "full-width", "label"],
     });
-    expect(listEroj(modelo).eroj[3]).toMatchObject({
+    expect(listEroj(modelo).eroj[4]).toMatchObject({
       name: "ligilo",
       variants: ["inline", "standalone"],
       props: ["to", "placement", "external", "size", "label"],

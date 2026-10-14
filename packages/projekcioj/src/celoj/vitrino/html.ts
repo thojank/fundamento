@@ -141,7 +141,8 @@ function uzo(datumoj: VitrinoDatumoj): string {
 function wrapSentence(role: string | undefined, wrap: string): string {
   // A radio group (Spec 010 ③): what never breaks is each option and the row of options.
   if (role === "radiogroup" && wrap === "never") return "keine Option bricht um";
-  const subject = role === "textbox" ? "Eingabezeile" : "Label";
+  // A select (Spec 010 ④): what never breaks is the closed field with the chosen option.
+  const subject = role === "textbox" ? "Eingabezeile" : role === "combobox" ? "Feld" : "Label";
   if (wrap === "never") return `${subject} bricht nie um`;
   if (wrap === "with-text") return `${subject} darf umbrechen (inline), standalone nie`;
   return `${subject} darf umbrechen`;

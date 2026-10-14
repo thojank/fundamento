@@ -1,0 +1,9 @@
+{
+  "description": "Spec 010 ④ G7 (Art. VIII, Spec 008 D-13): the Skemo of the select names the slot of its entries option, the element of one platform. The slot is options; the Web Celo renders each entry as the platform's option inside its select.",
+  "issues": [
+    {
+      "rule": "skemo-web-term",
+      "path": "data/eroj/elektilo/skemo.json#/skemo/slots/1/name"
+    }
+  ]
+}

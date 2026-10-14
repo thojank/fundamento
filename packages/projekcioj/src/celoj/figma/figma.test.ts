@@ -720,6 +720,7 @@ describe("Figma plan for the ligilo (Spec 008 T017)", () => {
   it("plans the sets in Ero order, butono first, and gives the ligilo placement × size × state", () => {
     expect(plan.components.map((component) => component.set)).toEqual([
       "butono",
+      "elektilo",
       "elekto",
       "kampo",
       "ligilo",
@@ -884,6 +885,8 @@ describe("the label default of a set follows its a11y role (M-3)", () => {
     // Spec 010 ①: a switch names a setting (plan D-10, for the maintainer to confirm).
     expect(defaults).toEqual({
       butono: "Aktion",
+      // Spec 010 ④: a select names what is chosen (plan ④ D-07, for the maintainer to confirm).
+      elektilo: "Auswahl",
       // Spec 010 ③: a radio group names its question (plan ③ D-07, for the maintainer to confirm).
       elekto: "Frage",
       kampo: "Beschriftung",
@@ -901,6 +904,7 @@ describe("the label default of a set follows its a11y role (M-3)", () => {
     expect(labelDefaultOf("switch")).toBe("Einstellung");
     expect(labelDefaultOf("checkbox")).toBe("Option");
     expect(labelDefaultOf("radiogroup")).toBe("Frage");
+    expect(labelDefaultOf("combobox")).toBe("Auswahl");
     expect(labelDefaultOf("slider")).toBe("Aktion");
   });
 });
@@ -1177,5 +1181,84 @@ describe("Figma plan for the elekto (Spec 010 ③)", () => {
       items.elekto?.values["indicator.color@selected=false,size=small,state=focus"],
     ).toBeUndefined();
     expect(items.elekto?.values["options.gap@size=large,state=rest"]).toBe("8px");
+  });
+});
+
+// Spec 010 ④ (plan ④ D-07, E3): the select is drawn as the field of the kampo — label above, the
+// control with its text, help and error below — with the chevron at the end of the control; the
+// field is closed and shows the prompt "Bitte wählen", the Vitrino's word. Its list is the
+// platform's and not drawn (E3): no options in the set, no state open; the Manko stands in the plan.
+describe("Figma plan for the elektilo (Spec 010 ④)", () => {
+  const set = plan.components.find((component) => component.set === "elektilo");
+  const kampoSet = plan.components.find((component) => component.set === "kampo");
+  const elektilo = prepared.input.modelo.eroj.find((entry) => entry.ero.name === "elektilo");
+  const variant = (size: string, state: string) =>
+    set?.variants.find((entry) => entry.props.size === size && entry.props.state === state);
+
+  it("plans a closed field of size × state with the purpose, the word Auswahl, the prompt, help and error", () => {
+    expect(set?.structure).toBe("field");
+    expect(set?.properties).toEqual({
+      value: "TEXT",
+      placeholder: "TEXT",
+      required: "BOOLEAN",
+      invalid: "BOOLEAN",
+      size: ["small", "medium", "large"],
+      disabled: "BOOLEAN",
+      name: "TEXT",
+      state: ["rest", "hover", "focus", "disabled", "invalid"],
+    });
+    expect(set?.variants).toHaveLength(3 * 5);
+    expect(Object.keys(set?.variants[0]?.props ?? {})).toEqual(["size", "state"]);
+    expect(set?.grid).toMatchObject({ rows: 3, columns: 5 });
+    expect(set?.description).toBe(elektilo?.uzo?.purpose);
+    expect(set?.label?.defaultValue).toBe("Auswahl");
+    expect(set?.texts).toEqual({ text: "Bitte wählen", help: "Hinweis", error: "Fehler" });
+    // The kampo keeps its example; only the select shows a prompt.
+    expect(kampoSet?.texts).toEqual({ text: "Beispiel", help: "Hinweis", error: "Fehler" });
+    // No options are drawn: the list is the platform's (E3).
+    expect(set?.entry).toBeUndefined();
+    expect(set?.sign).toMatch(/^<svg [^>]*viewBox="0 0 16 16"/);
+    // The chevron as one filled path: Figma imports one vector, as for the check mark (② D-09).
+    expect(set?.sign).toContain('<path d="M1.9 5.7 3.3 4.3 8 9l4.7-4.7 1.4 1.4L8 11.8z"/>');
+    expect(kampoSet?.sign).toBeUndefined();
+  });
+
+  it("binds the field like the kampo's and the chevron in color.text.muted, sized from size.icon.*", () => {
+    const rest = variant("medium", "rest");
+    expect(rest?.bindings["text.typography"]).toBe("typography/body/1");
+    expect(rest?.bindings["border.color"]).toBe("color/border/default");
+    expect(variant("medium", "invalid")?.bindings["border.color"]).toBe(
+      "color/status/danger/border",
+    );
+    expect(variant("medium", "disabled")?.bindings["surface.fill"]).toBe("color/background/sunken");
+    expect(rest?.bindings["indicator.color"]).toBe("color/text/muted");
+    expect(rest?.paints?.["indicator.color"]).toMatchObject({ hex: expect.stringMatching(/^#/) });
+    expect(rest?.bindings["indicator.size"]).toBe("size/icon/medium");
+    expect(rest?.geometry?.["indicator.size"]).toBe("20px");
+    expect(variant("large", "rest")?.bindings["indicator.size"]).toBe("size/icon/large");
+    expect(rest?.bindings["box.gap"]).toBe("spacing/small");
+    expect(rest?.bindings["placeholder.color"]).toBe("color/text/subtle");
+    expect(rest?.geometry?.["box.height"]).toBe("40px");
+    // The closed field shows the prompt (placeholder), so the colour of a chosen option's text has
+    // no node; the mark of a required select is the projection's — the kampo's Jugxo.
+    expect(rest?.notDrawn).toEqual({
+      "text.color": "jug_01M4S2R85WRAC5SV7CARH8RE7S",
+      "required-mark.color": "jug_01M4S2R85WRAC5SV7CARH8RE7S",
+    });
+    expect(rest?.hidden).toBeUndefined();
+  });
+
+  it("states the elektilo in the parity inventory: size, five states, the chevron per variant", () => {
+    const items = figmaPlanInventory(plan);
+    expect(items.elektilo?.props.size).toEqual(["small", "medium", "large"]);
+    expect(items.elektilo?.props.selected).toBeUndefined();
+    expect(items.elektilo?.states).toEqual(["rest", "hover", "focus", "disabled", "invalid"]);
+    expect(items.elektilo?.values["indicator.color@size=medium,state=rest"]).toMatch(
+      /^#[0-9a-f]{6}$/,
+    );
+    expect(items.elektilo?.values["indicator.size@size=small,state=hover"]).toBe("16px");
+    expect(items.elektilo?.values["placeholder.color@size=large,state=invalid"]).toMatch(
+      /^#[0-9a-f]{6}$/,
+    );
   });
 });

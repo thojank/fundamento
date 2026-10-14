@@ -147,9 +147,18 @@ describe("the scheme eroj (Spec 008 T009)", () => {
   const eroj = concepts.filter((concept) => concept.inScheme === "eroj");
 
   it("holds one concept per Ero of the Modelo, under #Ero, related to each other", () => {
-    expect(eroNames).toEqual(["butono", "elekto", "kampo", "ligilo", "markobutono", "sxaltilo"]);
+    expect(eroNames).toEqual([
+      "butono",
+      "elektilo",
+      "elekto",
+      "kampo",
+      "ligilo",
+      "markobutono",
+      "sxaltilo",
+    ]);
     expect(eroj.map((concept) => concept.term).sort()).toEqual([
       "Butono",
+      "Elektilo",
       "Elekto",
       "Kampo",
       "Ligilo",
@@ -166,17 +175,20 @@ describe("the scheme eroj (Spec 008 T009)", () => {
         target: string;
       }[];
     expect(relations("Ligilo")).toEqual([{ predicate: "references", target: "#Butono" }]);
-    // Spec 010 ③: the butono and the kampo send choose-few to the radio group.
+    // Spec 010 ③: the butono and the kampo send choose-few to the radio group; ④ choose-many to
+    // the select.
     expect(relations("Butono")).toEqual([
       { predicate: "references", target: "#Ligilo" },
       { predicate: "references", target: "#Kampo" },
       { predicate: "references", target: "#Sxaltilo" },
       { predicate: "references", target: "#Elekto" },
+      { predicate: "references", target: "#Elektilo" },
     ]);
     expect(relations("Kampo")).toEqual([
       { predicate: "references", target: "#Butono" },
       { predicate: "references", target: "#Sxaltilo" },
       { predicate: "references", target: "#Elekto" },
+      { predicate: "references", target: "#Elektilo" },
     ]);
     // Spec 010 ①: the switch, with its German and English names (Schalter, switch); since ② it
     // sends a setting that applies only with the form to the checkbox.
@@ -205,14 +217,28 @@ describe("the scheme eroj (Spec 008 T009)", () => {
     expect((markobutono?.altLabel as { de: string[] } | undefined)?.de).toContain("Checkbox");
     // Spec 010 ③: the radio group (Auswahl, radio group), with the Eroj that send one of a few
     // options to it.
+    // Spec 010 ④: the radio group sends six options or more to the select.
     expect(relations("Elekto")).toEqual([
       { predicate: "references", target: "#Butono" },
       { predicate: "references", target: "#Kampo" },
       { predicate: "references", target: "#Markobutono" },
+      { predicate: "references", target: "#Elektilo" },
     ]);
     const elekto = eroj.find((concept) => concept.term === "Elekto");
     expect(elekto?.prefLabel).toEqual({ eo: "Elekto", en: "radio group", de: "Auswahl" });
     expect((elekto?.altLabel as { de: string[] } | undefined)?.de).toContain("Radio-Gruppe");
+    expect((elekto?.definition as { en: string } | undefined)?.en).not.toMatch(/not yet covered/);
+    // Spec 010 ④: the select (Auswahlliste, select), with the Eroj that send many options to it;
+    // "Dropdown" finds it (describe_term), the word an agent asks for (Gvidanto question).
+    expect(relations("Elektilo")).toEqual([
+      { predicate: "references", target: "#Butono" },
+      { predicate: "references", target: "#Kampo" },
+      { predicate: "references", target: "#Elekto" },
+    ]);
+    const elektilo = eroj.find((concept) => concept.term === "Elektilo");
+    expect(elektilo?.prefLabel).toEqual({ eo: "Elektilo", en: "select", de: "Auswahlliste" });
+    expect((elektilo?.altLabel as { de: string[] } | undefined)?.de).toContain("Dropdown");
+    expect((elektilo?.altLabel as { en: string[] } | undefined)?.en).toContain("dropdown");
   });
 
   it("reports an Ero without a concept and a concept without an Ero", () => {

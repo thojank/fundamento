@@ -821,6 +821,9 @@ export const USAGE_ENFORCERS: Readonly<Record<string, UsageEnforcer>> = {
   // are few (adjustable, a warning from the sixth on); both are list checks of the Uzo.
   "option-labels-distinct": textRule,
   "elekto-options-few": textRule,
+  // Spec 010 ④ (G6, plan ④ D-09): the placeholder of a select is a prompt, not an example of a
+  // value (that is placeholder-is-example of the kampo): at least two words, a text rule of the Uzo.
+  "select-placeholder-is-prompt": textRule,
 };
 
 function applies(regulo: Regulo, ero: LoadedEro): boolean {

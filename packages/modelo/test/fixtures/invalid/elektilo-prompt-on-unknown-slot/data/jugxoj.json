@@ -1,0 +1,64 @@
+{
+  "jugxoj": [
+    {
+      "id": "jug_01M4WYZNK0J2W3HBTNT5GZ30G7",
+      "ref": {
+        "ero": "ero_01M2XM2NGN3KJSKJ4JTXQWMF72"
+      },
+      "decision": "approved",
+      "kialo": "Fixture example: the placeholder as the rule wants it.",
+      "date": "2026-10-14",
+      "context": "Fixture example (Spec 010 ④ G6).",
+      "ekzemplo": {
+        "regulo": "reg_01M4WYZNDZCQSSJ4BAG35XJFTB",
+        "instances": [
+          {
+            "ero": "elektilo",
+            "props": {
+              "placeholder": "Bitte wählen"
+            },
+            "label": "Land",
+            "texts": {
+              "options": [
+                "Deutschland",
+                "Österreich",
+                "Schweiz"
+              ]
+            },
+            "lingvo": "de"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4WYZNK18530PH84FCZDFDFA",
+      "ref": {
+        "ero": "ero_01M2XM2NGN3KJSKJ4JTXQWMF72"
+      },
+      "decision": "rejected",
+      "kialo": "Fixture example: the placeholder as the rule forbids it.",
+      "date": "2026-10-14",
+      "context": "Fixture example (Spec 010 ④ G6).",
+      "ekzemplo": {
+        "regulo": "reg_01M4WYZNDZCQSSJ4BAG35XJFTB",
+        "instances": [
+          {
+            "ero": "elektilo",
+            "props": {
+              "placeholder": "Deutschland"
+            },
+            "label": "Land",
+            "texts": {
+              "options": [
+                "Deutschland",
+                "Österreich",
+                "Schweiz"
+              ]
+            },
+            "lingvo": "de"
+          }
+        ]
+      }
+    }
+  ]
+}
