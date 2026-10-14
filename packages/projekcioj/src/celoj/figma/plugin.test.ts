@@ -3387,6 +3387,28 @@ describe("every set lies in the frame Eroj in the section Fundamento (F-1, F-2, 
     expect(overlapping(double)).toEqual([]);
   });
 
+  // A frame that hugs its width has no width to wrap at (one row). The rows in f10b-5 come from a
+  // width the maintainer gives the frame by hand; the next run must not take it back to HUG.
+  it("keeps a fixed width the maintainer gave the frame, and the sets wrap into rows", async () => {
+    const double = modelDouble();
+    await apply(double);
+    const frame = frameOf(double);
+    const [first, second, third] = names;
+    if (first === undefined || second === undefined || third === undefined) throw new Error("3");
+    const gap = layout?.gap ?? Number.NaN;
+    const width = box(named(frame, first)).width + gap + box(named(frame, second)).width;
+    Object.assign(frame, { layoutSizingHorizontal: "FIXED", width });
+    expect(box(named(frame, third)).y).toBeGreaterThan(box(named(frame, first)).y);
+    const report = await apply(double);
+    expect((frame as unknown as { layoutSizingHorizontal: string }).layoutSizingHorizontal).toBe(
+      "FIXED",
+    );
+    expect(box(frame).width).toBe(width);
+    expect(box(named(frame, third)).y).toBeGreaterThan(box(named(frame, first)).y);
+    expect(overlapping(double)).toEqual([]);
+    expect(report.section.frame).toEqual({ name: FRAME, found: true, created: false, wrap: "WRAP" });
+  });
+
   it("finds section and frame again on a second run, moves nothing and makes no second one", async () => {
     const double = modelDouble();
     await apply(double);
