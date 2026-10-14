@@ -1171,6 +1171,6 @@ describe("Spec 010 ① documentation (Vojmapo Phase 4)", () => {
       expect(plan).toContain(heading);
     }
     expect(tasks).toContain("### Messungen");
-    expect(tasks).toContain("f64023a");
+    expect(tasks).toContain("2ca28c6");
   });
 });
