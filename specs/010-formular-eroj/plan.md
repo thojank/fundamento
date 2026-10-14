@@ -192,7 +192,7 @@ Die Spalten kommen aus ① D-11 und Spec 009: `rest`, `checked` (schlüsselt Tei
 
 #### D-16 Rot zuerst
 
-Fixtures (je `expected-issues.json`, `git check-ignore` leer): `markobutono-label-slot-optional` (`uzo-slot-required-missing`), `markobutono-web-term` (Prop `aria-checked`, `skemo-web-term`), `markobutono-instead-kialo-missing` (`uzo-kialo-missing` + `schema-violation`), `markobutono-error-without-invalid` (Fehler-Slot mit Constraint `slot:error ⇒ invalid`, aber ohne Prop `invalid` → `skemo-constraint-invalid`). Alle Regeln gab es schon; die Fixtures waren auf dem Stand von ① sofort grün und sind **durch Mutation** rot beobachtet (wie `skemo-web-term-part` in Spec 009). Die Instanz-Fälle (leeres Label, Fehler ohne `invalid`, „Pflichtfeld“) sind `check_usage`-Tests (`data/markobutono.test.ts`, rot in `84c95a9`), dazu die MCP-Szenarien.
+Fixtures (je `expected-issues.json`, `git check-ignore` leer): `markobutono-label-slot-optional` (`uzo-slot-required-missing`), `markobutono-web-term` (Prop `aria-checked`, `skemo-web-term`), `markobutono-instead-kialo-missing` (`uzo-kialo-missing` + `schema-violation`), `markobutono-error-without-invalid` (Fehler-Slot mit Constraint `slot:error ⇒ invalid`, aber ohne Prop `invalid` → `skemo-constraint-invalid`). Alle Regeln gab es schon; die Fixtures waren auf dem Stand von ① sofort grün und sind **durch Mutation** rot beobachtet (wie `skemo-web-term-part` in Spec 009). Die Instanz-Fälle (leeres Label, Fehler ohne `invalid`, „Pflichtfeld“) sind `check_usage`-Tests (`data/markobutono.test.ts`, rot in `052e78a`), dazu die MCP-Szenarien.
 
 ### Abweichungen von der Spec
 
