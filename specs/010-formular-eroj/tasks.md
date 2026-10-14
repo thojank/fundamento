@@ -86,9 +86,46 @@
 | Tests (`pnpm turbo run test --concurrency=1`) | modelo 2 686, projekcioj 401, mcp 170, cli 66, eroj 1 Vitest + 184 Playwright in drei Engines (2 übersprungen wie bisher: forced-colors, quickstart nur Chromium); davon neu für das Kontrollkästchen: data/markobutono 34, vier Fixtures, docs 2, Projekcioj 20 (Web Component 5, Figma-Plan 5, Plugin 6, Make Kit 2, Vitrino 2), Browser `markobutono.spec` 8 und Internacia 3 je Engine, Alirebleco 8 Kombinationen je Engine, Vitrino 1, MCP 10 (s010-markobutono) plus der fünfte Eintrag in eroj-tools |
 | Checks | `check:vortaro-lint`, `check:regularo` (uzoj=5, kein `skemo-uzo-missing`), `check:mankoj`, `check:alirebleco`, `check:clean-room`, `check:make-kit` 5, `check:quickstart` 1, `check:vitrino` 14, `check:release` – grün; `pnpm lint` grün |
 
-## ③ `elekto`
+## ③ `elekto` (PR ③)
 
-Folgt in PR ③.
+**Plan:** [`plan.md`](plan.md) ③ (D-01–D-16) · **Branch:** `261014-spec-010-elekto-010092` (gestapelt auf ②) · Die Hashes aller Commits stehen in **einer** Zeile der Messungen (nach einem Rebase dort und in der einen Schleife von `docs.test.ts` ersetzen).
+
+### A – Rot zuerst
+- [x] **T201 Fixtures** `invalid/elekto-label-slot-optional`, `invalid/elekto-web-term`, `invalid/elekto-instead-kialo-missing`, `invalid/elekto-option-labels-distinct-on-label`, `invalid/elekto-options-few-on-unknown-slot` (G7, D-16). Rot ohne Mutation (Schema und Regeln fehlten); erster roter Commit.
+- [x] **T202 Modelo-Tests** `data/elekto.test.ts` (Skemo, E7, Uzo, Reguloj, zwölf Jugxoj, check_usage: drei Versandarten, leeres Label, zwei gleiche Optionen, sieben Optionen, eine Option, „Versandart wählen“, Fehler ohne invalid; suggest_ero: „Dropdown mit drei Versandarten“, „Welche Versandart?“, „Radiobutton“, „Land aus einer Liste“; brief des kampo), `contracts/spec010-schema.test.ts`, `eroj/spec010-rules.test.ts`; markobutono-, butono-, kampo-, sxaltilo.test erwarten die Verflechtung. Erster roter Commit (69 von 2 761).
+
+### B – Modelo
+- [x] **T203 Schema** `SkemoSlot.entry`, `UzoSlot.min`, Prüfarten `distinct`/`max-entries`, `EroInstance.texts` als Liste; `generate:types`; Regeln in `skemo-rules.ts`, `uzo-rules.ts` (`uzo-content-of-invalid`), `usage.ts` (Listen-Prüfungen, `uzo-slot-min`), `inventories.ts` (Werte je Wert des Schlüssels).
+- [x] **T204 Daten** `elekto/skemo.json`, `uzo.json` (IDs aus `pnpm id:new`); zwei neue Reguloj, sieben ausgeweitet; zwölf Jugxoj.
+- [x] **T205 Verflechtung** `butono`/`kampo` `choose-many` + `choose-few`, `markobutono` `choose-one-of-few` → `elekto`; `brief` des `kampo` 747.
+- [x] **T206 Ontologio und Gvidanto** `#Elekto`; Goal `choose-few`. Nachträge: `multi` ohne „mehrere“ (s009-kampo S4 fiel), `choose-many` vor `choose-few` („Land auswählen“, rot und grün).
+
+### C – Projekcioj (zweiter roter Commit)
+- [x] **T207 Web Component** `fm-elekto` (D-06): Gruppe, Zeilen role radio, manuelle Slot-Zuweisung, Tasten, Formular.
+- [x] **T208 React** `Elekto`, Typtest `test/types/elekto.tsx` (grün bei Ankunft: der Wrapper ist generisch).
+- [x] **T209 Figma** Bauform `choice`, 15 Varianten, `entry`/`entries`, „Frage“; Plugin `drawChoice`; Bericht unter 4 000 Zeichen (D-07).
+- [x] **T210 Make Kit** `components/elekto.md`, Satz in `Guidelines.md` (D-11).
+- [x] **T211 Vitrino** drei Optionen je Zelle, Satz „keine Option bricht um“ (D-13).
+- [x] **T212 Eroj im Browser** `elekto.spec.ts`, `alirebleco.check.ts`, `internacia.spec.ts`, `vitrino.check.ts`.
+- [x] **T213 MCP** `e2e/s010-elekto.test.ts` (Dialog der Spec), `eroj-tools.test.ts` (brief sechs Eroj), Folgetests (grün bei Ankunft: die Antworten trägt der Modelo-Commit; ihr Rot steht im ersten roten Commit, `data/elekto.test.ts`).
+
+### D – Abschluss
+- [x] **T214 Vojmapo** Zeile 4 und `docs.test.ts` (Doku rot, dritter roter Commit).
+- [x] **T215 Messungen** unten; Bericht.
+
+### Messungen
+
+| Was | Wert |
+|---|---|
+| `get_ero elekto brief:true`, Bytes / `ceil(Bytes/3)` (Spec-007-Maß, Server `core + aspekto-ekzemplo`) | 1 387 Bytes / **463** – unter 750. Zum Vergleich jetzt: kampo 2 239 / **747** (vorher 727; mit dem Wortlaut des `butono` wären es 758, D-12), butono 2 035 / 679 (vorher 596), markobutono 1 323 / 441 (vorher 449), sxaltilo 865 / 289, ligilo 1 477 / 493 |
+| Parität (`pnpm check:parity`) | 6 Eroj, 4 Seiten, 0 Differenzen; 339 benannte Freigaben (324 wie vorher + 15: `required-mark.color` des elekto je Variante, Jugxo `jug_01M4S2R85WRAC5SV7CARH8RE7S`); Kreis und Punkt je Wert von `selected` verglichen |
+| Alirebleco (Eroj, `check:alirebleco-eroj`) | elekto: 8 Kombinationen (komuna, ekzemplo × light, dark × default, high) × 3 Engines, je drei Gruppen (3 Größen, die erste Option gewählt) in rest, hover, invalid (mit Fehlertext), disabled: axe ohne Befund (radiogroup/radio); Punkt auf Kreis ≥ 3:1, Rand jedes Kreises auf Seite ≥ 3:1 auch invalid, Fokusring ≥ 3:1 auf Abstand und Seite – 153 grün (vorher 129) |
+| Alirebleco (Modelo, `check:alirebleco`) | 70 KontrastParoj × 72 Kombinationen wie vorher (kein neues Paar): `action-primary-text-on-fill` min. 7,76, `border-strong-on-background-default` 6,71, `status-danger-border-on-background-default` 7,33 |
+| Maße (Basis-Kombination, im Browser) | Box des Punktes 16/20/24 px, Punkt 8/10/12 px, Kreis 18/22/26 px (Box + 2 × 1 px), rund; Abstand Kreis–Label 4 px, zwischen den Optionen und den Teilen 8 px |
+| Dialog der Spec (MCP) | „Dropdown mit drei Versandarten“ → `elekto` (Schlüsselwort „drei“, Alternative `choose-few` des `butono`, dessen Kialo); „Welche Versandart?“ → Goal `choose-few`, Kialo von `elekto-options-few` |
+| **Commits** (rot / grün; nach einem Rebase hier ersetzen) | rot `9207c2e` (Fixtures, Modelo), `c57d02d` (Projekcioj, Browser, MCP), `9ad11a6` (Doku), `384c10c` (Nachtrag Gvidanto) · grün `088d8ec` (Modelo), `a42a73f` (Nachtrag multi), `353c4dd` (Projekcioj), `5522df3` (Nachtrag Gvidanto), Doku im Commit dieser Zeile |
+| Tests (je Paket `vitest run`, Playwright) | modelo 2 765, projekcioj 420, mcp 180, cli 66, eroj 1 Vitest + 220 Playwright in drei Engines (2 übersprungen wie bisher: forced-colors, quickstart nur Chromium); davon neu für die Auswahl: data/elekto 46, spec010-rules 6, spec010-schema 5, fünf Fixtures (je validate und e2e), docs 2, Projekcioj 19 (Web Component 6, Figma-Plan 4, Plugin 5, Make Kit 2, Vitrino 2), Browser `elekto.spec` 9 und Internacia 3 je Engine, Alirebleco 8 Kombinationen je Engine, Vitrino 1, MCP 9 (s010-elekto) |
+| Checks | `check:vortaro-lint`, `check:regularo` (uzoj=6, kein `skemo-uzo-missing`), `check:mankoj`, `check:alirebleco`, `check:clean-room`, `check:make-kit` 5, `check:quickstart` 1, `check:vitrino` 15, `check:release` – grün; `pnpm lint` grün |
 
 ## ④ `elektilo`
 

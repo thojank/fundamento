@@ -228,9 +228,123 @@ Fixtures (je `expected-issues.json`, `git check-ignore` leer): `markobutono-labe
 
 In [`tasks.md`](tasks.md) ②.
 
-## ③ `elekto` – Auswahl (Radio-Gruppe)
+## ③ `elekto` – Auswahl (Radio-Gruppe) (PR ③)
 
-Folgt in PR ③.
+**Branch:** `261014-spec-010-elekto-010092` (gestapelt auf PR ② `261014-spec-010-markobutono-010092` @ `bf38865`) · **Datum:** 2026-10-14 · **Aufgaben, Commits und rote Hashes:** [`tasks.md`](tasks.md) ③ (alle Hashes in einer Zeile der Messungen)
+
+Der dritte Wahl-Ero: hält eine von wenigen sichtbaren Optionen. Neu gegenüber Schalter und Kontrollkästchen ist, dass ein Ero mehrere Kontrollen trägt – je Option einen Kreis – und dass „gewählt“ ein Zustand der Option ist, nicht der Gruppe (E7). Alles andere trägt der Weg von ① und ② (Regel 0.1); jede Entscheidung unten nennt ihre Stufe.
+
+### Zusammenfassung
+
+1. **Modelo:** `data/eroj/elekto/{skemo,uzo}.json`; zwei neue Reguloj `option-labels-distinct` (fest) und `elekto-options-few` (anpassbar, Warnung ab der sechsten Option); `field-label-visible`, `field-label-names-the-datum`, `error-says-what-to-do`, `required-marked`, `error-not-color-only`, `help-is-one-sentence` und `spacing-owned-by-container` per `appliesTo` ausgeweitet (E5); zwölf Jugxoj (drei Text-Regeln × approved/rejected × de/en); Ontologio `#Elekto` (Auswahl/radio group). Kein neues Token, kein neuer KontrastParo.
+2. **Schema (additiv):** `SkemoSlot.entry` (`key`, `equals`) – der Zustand einer Option (D-02); `UzoSlot.min` (D-10); Prüfarten `distinct` und `max-entries` auf den Einträgen eines Slots, `EroInstance.texts` als Liste (D-09); Regeln `uzo-content-of-invalid` und `uzo-slot-min`.
+3. **Verflechtung (G5):** `butono` und `kampo` teilen `choose` in `choose-many` (`null`, Kialo nennt `elektilo`) und `choose-few` (`use-instead: elekto`); `markobutono` `choose-one-of-few` → `use-instead: elekto` (schließt ② D-10). `brief` des `kampo` 747 (Grenze 750).
+4. **Projekcioj:** Web Component `fm-elekto` (Gruppe mit `role="radiogroup"`, je Option eine Zeile `role="radio"` aus dem Light DOM, Formular-Wert und -Gültigkeit), React `Elekto`, Figma-Set in der neuen Bauform `choice` (15 Varianten, drei Optionen, die erste gewählt), Make-Kit `components/elekto.md` und Guidelines-Satz, Vitrino-Abschnitt (drei Optionen je Zelle), MCP (sechs Eroj, Dialog der Spec als Test). Parität für sechs Eroj.
+
+### Entwurfsentscheidungen
+
+#### D-01 Props, Zustände, Slots wie Abschnitt 3 der Spec (G1, G2, G4)
+
+Props `value` (string, ohne Standard: leer heißt „keine gewählt“), `required`, `invalid`, `size` (small/medium/large, medium), `disabled`, `name`, `orientation` (vertical/horizontal, vertical); Zustände `rest`, `hover`, `focus`, `disabled`, `invalid`; Slots `label` (Standard-Slot, die Frage), `options` (die Optionen, D-02), `help`, `error` – alle `beside` (① D-07): sie stehen auf dem Grund des Containers, nie auf einem Kreis. `orientation` schlüsselt keinen Teil: Layout, kein Token, keine Achse der Varianten (wie `kind` des `kampo`). `a11y.texts.required` wörtlich wie beim `kampo`; `a11y.description` aus `slot:help`, `slot:error`; Constraint `slot:error` belegt ⇒ `invalid` mit der Kialo des `kampo`.
+
+#### D-02 selected ist der Zustand einer Option, nicht der Gruppe (E7; Regel 0.2)
+
+Die Skemo kannte als Schlüssel einer Bindung nur Props und `state`. Eine Prop `selected` wäre eine Aussage über die Gruppe und daher falsch (E7); ein Unter-Ero `opcio` verbietet E7. Kleinste Erweiterung, die das Schema trägt: **`SkemoSlot.entry: { key, equals }`** – jeder Eintrag des Slots ist eine Option mit Text und Wert; `key` (`selected`) ist ihr Zustand, wahr für die Option, deren Wert der Wert der String-Prop `equals` (`value`) ist. Teile dürfen nach dem Schlüssel schlüsseln (`keyValues`: true/false; Bindungen, Abdeckung, Paare wie bei einer booleschen Prop), er ist aber keine Prop und keine Achse der Varianten (`variantKeys`, `styledProps` unverändert). Regeln: `skemo-binding-invalid`, wenn der Schlüssel auch Prop oder `state` heißt oder `equals` keine String-Prop ist; `skemo-web-term` prüft den Schlüssel (`aria-checked` ist das Wort der Web-Celo, Fixture); ein Constraint auf ihm ist `skemo-constraint-invalid`. Parität: `skemoPartValues` nennt einen Teil, der nach dem Schlüssel schlüsselt, je Variante und Wert (`surface.fill@selected=true,size=…,state=…`), die Figma-Seite ebenso (D-07) – gewählte und nicht gewählte Kreise werden verglichen. `a11y.states.selected = [aria-checked]` sagt der Web-Celo, wie sie den Zustand der Zeile spricht.
+
+#### D-03 Teile wie ② D-02, dazu `option-label` und `options` (Regel 0.1/0.2)
+
+Der Kreis heißt in der Skemo `surface` (Füllung), `border` (Rand), `box` (Radius `radius.role.pill`, Abstand Kreis–Options-Label `spacing.small`), in den Projekcioj `control` (je Option eines). `indicator` ist der Punkt. `label` (die Frage, `typography.label.*` wie der `markobutono`), `option-label` (`typography.body.2` small, `body.1` sonst – „typography body“ der Spec), `help`/`error`/`required-mark` wie der `kampo`. **Neu `options.gap`** (`spacing.medium`, fest): der Abstand zwischen den Optionen und zwischen Label, Optionen, Hilfe und Fehler. Mit nur `box.gap` (4 px) stünden zwei Optionen so nah wie Kreis und Label – nebeneinander (horizontal) wäre nicht mehr zu sehen, welches Label zu welchem Kreis gehört.
+
+#### D-04 Farben wie der markobutono (G3, ② D-04, D-06)
+
+Kreis gefüllt by [selected, state]: gewählt `color.action.primary.rest|hover|disabled` (focus und invalid wie rest), nicht gewählt `color.background.default`. Rand by [state]: `color.border.strong`, disabled `color.border.disabled`, invalid `color.status.danger.border`. Punkt `indicator.color` by [selected]: `color.action.primary.text` gewählt, `none` sonst (das Schlüsselwort aus Spec 008, wie der Haken). Option-Label `color.text.default`/`.disabled`. Paare wie beim Kontrollkästchen, alle deklariert: Punkt auf Kreis `action-primary-text-on-fill` (≥ 7,76:1), Rand auf Seite `border-strong-on-background-default` (≥ 6,71:1), `status-danger-border-on-background-default` (≥ 7,33:1). `color.action.primary.pressed` bleibt ungenutzt (kein Zustand pressed).
+
+#### D-05 Maße aus Rollen-Tokens (E1, wie ② D-05)
+
+Die Box des Punktes `indicator.size` = `size.icon.*` (16/20/24 px); der Punkt ist ein Kreis vom halben Durchmesser in ihrer Mitte (8/10/12 px), ein Zeichen der Projektion wie der Haken (`signOf`), als Pfad gezeichnet, damit Figma einen Vektor importiert. Der Kreis ist die Box plus Rand (18/22/26 px), rund. Gemessen im Browser (`elekto.spec.ts`: Box = Token, Kreis = Box + 2 × Rand, Breite = Höhe, Radius ≥ halbe Höhe, Punkt nur gewählt sichtbar).
+
+#### D-06 Web Component: Gruppe mit role radiogroup, je Option eine Zeile role radio (Regel 0.2)
+
+Die Bauform `toggle` (ein Knopf mit Rolle) trägt eine Gruppe mit N Kontrollen nicht. Kleinste Änderung: `HostControl` `group` für `role: radiogroup`. Das Shadow DOM: `[part=field]` mit `role="radiogroup"` und `aria-labelledby="label"`, darin Label (mit Pflichtmarke), `[part=options]`, Hilfe, Fehler. **Die Optionen kommen aus dem Light DOM:** jedes Kind mit `slot="options"`, sein Wert das Attribut `value`, sein Text das Options-Label – geschrieben als `<data slot="options" value="express">Express</data>`. Warum `<data>`: `option` ist ein Web-Begriff der Skemo (`skemo-web-term`) und ein natives `<option>` außerhalb von `<select>` trägt die Rolle `option` in die Radio-Gruppe (axe: falsche Eltern); ein eigenes Element `fm-opcio` wäre ein Unter-Ero (E7); `<data>` ist das Element der Plattform für „Text mit maschinenlesbarem Wert“, hat keine Rolle und ist in React getypt (`value`). Ohne `value` gilt der Text. Das Element weist die Kinder selbst den Slots zu (`attachShadow({ slotAssignment: "manual" })`, Chrome 86+, Firefox 92+, Safari 16.4+) und baut je Option eine Zeile `[part=option]` mit `role="radio"` und `aria-checked`, darin Kreis (`control`) mit Punkt und `option-label` mit dem Slot; ein `MutationObserver` folgt neuen Optionen und Werten. Verhalten (APG Radio Group): ein Tab-Halt (die gewählte Zeile, sonst die erste; `focus()` der Gruppe geht dorthin), ArrowDown/ArrowRight und ArrowUp/ArrowLeft bewegen **und wählen** mit Umlauf, Space wählt, Klick auf eine Zeile wählt; `input`/`change`; `aria-required`, `aria-invalid` (auch aus belegtem Fehler-Slot), `aria-disabled` an Gruppe und Zeilen, `aria-orientation` aus `orientation`; Formular-Wert ist der Wert der gewählten Option, eine Pflicht-Gruppe ohne Wahl ist `valueMissing` (Meldung aus `a11y.texts.required`). Stylesheet: Kombination und Gruppen-Zustände (invalid, disabled) an der Feldwurzel, `selected` (`aria-checked`), hover und focus an der Zeile – alles in `:where()`, die Reihenfolge der Zustände entscheidet; horizontal eine Reihe ohne Umbruch, jede Option ohne Umbruch (Uzo `wrap: never`). Inventar: `size` und fünf Zustände (`[aria-disabled="true"]` zählt als disabled), kein `data-selected`.
+
+#### D-07 Figma: neue Bauform `choice` (Regel 0.2)
+
+`toggle` (② D-09) ist eine Zeile mit einer Kontrolle; eine Gruppe mit drei Kontrollen, Frage, Hilfe und Fehler trägt sie nicht ohne einen zweiten Mechanismus in ihr. Kleinste neue Bauform: `structureOf("radiogroup")` = `choice` – Variante → `field` (Spalte, Abstand `options.gap`) → `label`, `options` (Spalte, Abstand `options.gap`) mit `option-1…3` (Zeile, Abstand `box.gap`: Ring → Abstand → Kreis mit importiertem Punkt, `option-label`), `help`, `error`. Achsen nur mit sichtbarer Wirkung: `size × state` = 3 × 5 = 15; `orientation` zeichnet Figma nicht (Abweichung 8). Der Plan trägt `entry` (`selected`, die Wörter der Vitrino „Eins, Zwei, Drei“, die erste gewählt) und je Variante `entries.true/false` mit den Bindungen, Farben und Maßen der Teile, die nach `selected` schlüsseln (Kreis gefüllt und Punkt gezeichnet nur gewählt, sonst Deckkraft 0). Das Plugin bindet Gruppe und jede Option in eigenen Durchgängen (`bind` überspringt Teile ohne Knoten im Durchgang); der Fokusring zeigt sich an der ersten Option der Fokus-Variante. Vorgabewort der Beschriftung „Frage“ – die Frage, die die Optionen beantworten; zur Bestätigung (O-9). Bericht: die Mankoj der Kopfzeile nach Feld und Set gruppiert (mit sechs Sets 4 550 Zeichen, Grenze 4 000, F22 – dieselben Namen, kürzer), ein zu langer Teil der Layout-Messung einmal mehr geteilt. **Annahmen des Doubles bis zur Messung in f10b-5:** wie ② D-09 (`createNodeFromSvg` legt einen FRAME mit einem VECTOR je Pfad an, SCALE folgt dem Rahmen); ein Set, dessen Variante drei gleich gebaute Zeilen trägt, wird in Figma so angelegt wie im Double.
+
+#### D-08 Uzo (Abschnitt 3, G5)
+
+`instead`: `choose-many` → `ero: null`, Kialo „Six or more options, or an unknown number, belong in a list that opens on demand … (elektilo, PR ④ of Spec 010)“ – **PR ④ macht daraus `use-instead: elektilo`**; `yes-no` → `use-instead: markobutono` („A yes or no is a check mark, because …“); `multi` → `null` („Several options at once are a group of checkboxes …“). Grenzen `single-option` (not-supported: „A choice of one is no choice …“; erkannt über `UzoSlot.min`, D-10) und `no-visible-label` (via `field-label-visible`). `composes`: Container `form`, `dialog`, `filter-bar`; `with`: `kampo`, `butono`; `never`: `butono`. Slots: `label` (Pflicht), `options` (Pflicht, `min: 2`), `help`, `error`. Layout `size: content`, `wrap: never`. Text-Regeln D-09.
+
+#### D-09 Text-Regeln und Listen-Prüfungen (G6; Regel 0.2)
+
+`option-labels-distinct` (fest) und `elekto-options-few` (anpassbar, `severity: warning`) prüfen keinen Text, sondern die Einträge eines Slots. Die vorhandenen Prüfarten nehmen einen Text; kleinste Erweiterung: zwei **Listen-Prüfarten** `distinct` (kein Text zweimal, ohne Groß/Klein und Rand-Leerraum) und `max-entries` (`count: 5`, die Spec sagt „max-options: 5“) mit `of: slot:options`; die Instanz nennt die Texte als Liste (`EroInstance.texts.options: ["Standard", "Express", …]`). Der Enforcer bleibt `textRule` (Überstimmung durch die Aspekto, Beispiel aus dem approved-Jugxo). `uzo-content-of-invalid` meldet ein `of`, das keinen Slot/keine Prop der Skemo nennt, und eine Listen-Prüfung auf einem Slot ohne `entry` (vorher war `of` ungeprüft). Ausgeweitet: `field-label-names-the-datum` mit Wörtern des Wählens (`auswählen`, `wählen`, `wähle` / `choose`, `select`, `pick`: „Versandart“, nicht „Versandart wählen“), `error-says-what-to-do` (fest), `help-is-one-sentence` (anpassbar) wie beim `kampo`. Zwölf Jugxoj mit Referenz `elekto`: Datum („Versandart“/„Shipping method“ ✓, „Versandart wählen“/„Choose a shipping method“ ✗), Optionen („Standard, Express, Abholung“ ✓, zweimal „Standard“ / „Express, Standard, express“ ✗), Anzahl (vier Zahlungsarten ✓, sieben Länder ✗ – Warnung).
+
+#### D-10 `UzoSlot.min` (Regel 0.2)
+
+„min 2“ der Spec: `UzoSlot.min` neben `max`, in `check_usage` als `uzo-slot-min` – nur für einen Slot, den die Instanz nennt (was sie weglässt, ist unbekannt). Eine Option ist die Grenze `single-option`.
+
+#### D-11 Make Kit
+
+`components/elekto.md` generiert; die Seite sagt, wie eine Option geschrieben wird (`<data slot="options" value="express">Express</data>`; gewählt ist die Option, deren Wert `value` ist), ihre Beispiele zeigen die Optionen, die Text-Regeln auf Optionen zeigen Optionen statt des Labels. `Guidelines.md`: „A choice of one among a few visible options is an `<Elekto>`; six or more go into a list, which this kit does not have yet: ask a person.“ – mit einem Ero der Rolle `combobox` (PR ④) wird daraus „… go into an `<Elektilo>` list.“ Ein Komponentenname, den das Kit nicht hat, stünde sonst in den Guidelines.
+
+#### D-12 Verflechtung und `brief` des `kampo` (G5)
+
+`butono` und `kampo`: `choose` wird `choose-many` (`null`; select, list, country, language, many / auswählen, liste, land, sprache, vielen) und `choose-few` (`use-instead: elekto`; choose, pick, option, two, three / wählen, wähle, option, variante, zwei, drei) – ein Eintrag nennt ein Ero. **choose-many steht vor choose-few:** ein Uzo-Schlüsselwort von sechs Buchstaben trifft das Ende eines Wortes (N-1), „auswählen“ endete sonst bei „wählen“ (Nachtrag, die Commits in tasks ③). Kialo des `butono` aus der alten abgeleitet („Choosing one of a few visible values is a selection, not an action, because a row of buttons hides which value is chosen; Fundamento covers it with elekto.“). **Kialo des `kampo` gekürzt** (B-2 von ①/②): mit dem Wortlaut des `butono` wären es 758; jetzt „A few options are chosen, not typed, because a field takes any text; elekto covers it.“ und „Many options are a list, because a field takes any text; no such Ero yet (elektilo).“ – `brief` 2 239 Bytes / **747**. Die Grenze 750 ist nicht angehoben, keine andere Kialo geändert. `markobutono` `choose-one-of-few` → `use-instead: elekto` (Kialo endet „Fundamento covers it with elekto.“). `uzo-boundary-covered` grün.
+
+#### D-13 Vitrino
+
+Spalten aus der bestehenden Regel: `rest`, `required` (a11y-Text), `invalid`, `disabled` (Zustände), Zeilen `size`. Jede Zelle trägt drei Optionen `<data slot="options" value="1|2|3">Eins/Zwei/Drei</data>` (`VITRINO_OPTIONS`, dieselben Wörter wie im Figma-Set) und `value="1"` (die erste gewählt; generisch: die Prop `equals` des Slots mit `entry`), Hilfe überall, Fehler nur unter `invalid` (Constraint). Layout-Satz „Größe aus dem Inhalt, keine Option bricht um.“
+
+#### D-14 Goal `choose-few` und der Dialog der Spec
+
+Goal `choose-few` → Props `{}`, Regulo `elekto-options-few`; Schlüsselwörter als ganze Wörter (Datentest): en choose, pick, option, options, which, radio; de wähle, wählen, option, optionen, variante, welche, radiobutton, optionsfeld (die Wörter der Alternative des `markobutono`, ② D-10). **„Dropdown mit drei Versandarten“:** kein Wort trifft ein Goal (`dropdown` steht nirgends – „Wie heißt das Dropdown in Fundamento?“ ist die Frage von PR ④); „drei“ trifft die Alternative `choose-few` des `butono` (erstes Ero) → `use-instead: elekto`; Antwort `elekto` mit `boundary` `butono`/`choose-few` und dessen Kialo („… a row of buttons hides which value is chosen; Fundamento covers it with elekto.“). „Welche Versandart?“ trifft das Goal und antwortet mit der Kialo von `elekto-options-few` („… Three visible options read faster than any list.“). Beides MCP-Test (`s010-elekto`).
+
+#### D-15 Ontologio
+
+`#Elekto` (eo Elekto, en radio group, de Auswahl; altLabel Radio-Gruppe, Optionsfelder, radio buttons) mit Beziehungen zu `#Butono`, `#Kampo`, `#Markobutono`; `#Butono`, `#Kampo` (choose-few) und `#Markobutono` (eine von wenigen) verweisen auf ihn.
+
+#### D-16 Rot zuerst
+
+Fixtures (je `expected-issues.json`, `git check-ignore` leer): `elekto-label-slot-optional` (`uzo-slot-required-missing`), `elekto-web-term` (Zustand der Option `aria-checked` → `skemo-web-term` an `slots/1/entry/key`), `elekto-instead-kialo-missing` (`uzo-kialo-missing` + `schema-violation`), `elekto-option-labels-distinct-on-label` (`distinct` auf dem Label → `uzo-content-of-invalid`), `elekto-options-few-on-unknown-slot` (`max-entries` 5 auf einem Slot, den die Skemo nicht hat; das abgelehnte Beispiel trägt sieben Optionen → `uzo-content-of-invalid`). Rot ohne Mutation: Schema und Regeln für `entry`, `min`, die Listen-Prüfungen und `uzo-content-of-invalid` gab es nicht. Die Instanz-Fälle (zwei gleiche Optionen, sieben Optionen, leeres Label, eine Option) sind `check_usage`-Tests in `data/elekto.test.ts` (rot im ersten roten Commit) und im MCP-Test.
+
+### Abweichungen von der Spec
+
+1. **Teile `surface`/`border`/`box` statt `control`** (D-03, wie ①/②); in den Projekcioj heißt der Kreis `control`.
+2. **Zusätzlicher Teil `options` (gap)** (D-03): Abstand zwischen den Optionen.
+3. **Kein englisches Schlüsselwort „variant“** (D-12, D-14): der Datentest F1 (`butono.test`, „no word variant or tone is left in data/“) verbietet das Wort in `data/` seit der Umbenennung der Achsen; „Variante“ (de) steht.
+4. **Goal-Wörter einzeln:** „choose one“, „pick one“, „which of“, „wähle eine“, „welche von“ als ganze Wörter (choose, pick, which; wähle, welche) – Goals treffen nur Wörter; „one“/„eine“, „of“/„von“ wären Allzweckwörter.
+5. **Zwei der fünf Fixtures prüfen die Daten der neuen Prüfungen** (D-16): „zwei gleiche Optionen“ und „sieben Optionen“ sind Instanzen, keine Modelo-Daten; der Validator prüft Instanzen nicht (wie ② Abweichung 2). Die Instanz-Fälle sind `check_usage`-Tests (Modelo und MCP), die Fixtures zeigen die Prüfung am falschen Ort.
+6. **„horizontal nur bei ≤ 3 kurzen Optionen“ wird nicht geprüft:** eine Warnung „ab 4 Optionen vertical“ verlangt eine Prüfung, die eine Prop und die Zahl der Einträge zusammen liest – eine neue Regulo-Semantik (Regel 0.3). Kandidat (O-11); im `scope` von `elekto-options-few` genannt.
+7. **`choose-many` → `null` statt `elektilo`** in PR ③ (D-08, D-12); PR ④ macht daraus `use-instead`.
+8. **Figma zeichnet `orientation` nicht** (D-07): `orientation` schlüsselt keinen Teil und ist keine Achse; das Set zeigt vertikal.
+9. **Prüfart `max-entries` statt „max-options“** (D-09): eine Listen-Prüfung für jeden Slot mit Einträgen.
+10. **Zusätzlich:** Grenze `no-visible-label`, `never: butono`, Text-Regeln `error-says-what-to-do` und `help-is-one-sentence` (wie `kampo`/`markobutono`); `color.action.primary.pressed` ungenutzt (kein Zustand pressed).
+
+### Befunde / Mankoj
+
+- **B-1 `brief`:** elekto 1 387 Bytes / 463; `kampo` 2 239 / **747** (Grenze 750, D-12), `butono` 2 035 / 679 (vorher 596), `markobutono` 1 323 / 441 (vorher 449), `sxaltilo` 289, `ligilo` 493. Der `kampo` hat drei Einheiten Luft; PR ④ ersetzt „no such Ero yet (elektilo)“ durch einen gleich langen Satz – ein weiteres `instead` des `kampo` reißt die Grenze.
+- **B-2 Zahlen als Schlüsselwörter:** „zwei“, „drei“ (G5) treffen auch „Formular mit drei Feldern“ → `elekto` (gemessen). Näherung ohne Modell, wie Spec 008 R-1.
+- **B-3 `which`/`welche` und `ja`/`nein`/`yes`/`no` sind breit:** „Ja/Nein/Vielleicht“ (drei Optionen) trifft `yes-no` → `markobutono`; „Which file to upload“ trifft `which` und die Grenze `file` des `kampo` → ask-human mit beiden Kandidaten. Die Alternative `multi` trug zuerst „mehrere“ und fing „Kommentar, mehrere Absätze“ vor der `multi-line` des `kampo` ab (Ero-Reihenfolge, `elekto` vor `kampo`) – jetzt multiselect / mehrfachauswahl, mehrfach (Nachtrag, die Commits in tasks ③).
+- **B-4 Pfeiltasten und Schreibrichtung:** ArrowRight wählt die nächste Option auch rechts-nach-links (APG nennt „Right Arrow: next“); ob rtl gespiegelt werden soll, ist nicht entschieden.
+- **B-5 Kopfzeile des Plugin-Berichts:** mit sechs Sets ~3,6 k Zeichen (Grenze 4 000) nach dem Gruppieren der Mankoj; ein siebtes Set braucht wieder Platz (Kandidat: `modes` je Set in den Teil `state`).
+- **B-6 Zielgröße:** der Kreis `small` ist 18 × 18 px; Ziel ist die ganze Zeile (Kreis + Label), wie ①/② B-3 – misst die Abnahme.
+- **B-7 Manuelle Slot-Zuweisung:** setzt Chrome 86, Firefox 92, Safari 16.4 voraus (in allen drei Playwright-Engines grün); ältere Browser zeigen keine Optionen.
+- **B-8 Kandidaten:** Hover-Farbe des nicht gewählten Kreises (wie ①/② B-4); `options.gap` je `orientation` (horizontal mehr Abstand); `composes.with` von `butono`/`kampo` nennt die Wahl-Eroj nicht (wie ②).
+- **Mankoj:** keine Rolle fehlt (G3 trägt vollständig); keine neue Lücke einer Celo (die Pflichtmarke in Figma deckt der bestehende Jugxo, D-07).
+
+### Offen (für den Maintainer)
+
+- **O-9** Vorgabewort der Figma-Beschriftung für `radiogroup`: „Frage“ (D-07) – bestätigen oder ersetzen; ein Jugxo erst nach der Entscheidung.
+- **O-10** Optionen als `<data slot="options" value="…">` im Light DOM (D-06) – bestätigen; die Alternative wäre ein eigenes Element (ein Unter-Ero, E7).
+- **O-11** Kandidat „horizontal ab 4 Optionen warnt“ (Abweichung 6): eine Prüfung über Prop und Einträge – neue Regulo-Semantik, nicht entschieden.
+- **O-12** Kürzere Kialo der beiden neuen `kampo`-Einträge (D-12) – bestätigen; oder ein anderer Weg für die Grenze 750.
+- **O-13** `SkemoSlot.entry` als Form von E7 (D-02) – bestätigen; PR ④ (`elektilo`) nimmt dieselbe Form für seine Optionen.
+- **O-14** Wortlaut von `jug_01M4S2R85WRAC5SV7CARH8RE7S` um den `elekto` ergänzt (Pflichtmarke in Figma nicht gezeichnet) – bestätigen (wie O-6).
+- **O-3** aus ① gilt weiter: `brief.axes` nennt Enum-Props; `orientation` steht dort, `selected` als Zustand einer Option nicht.
+
+### Messungen
+
+In [`tasks.md`](tasks.md) ③.
 
 ## ④ `elektilo` – Auswahlliste (Select)
 
