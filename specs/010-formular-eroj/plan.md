@@ -118,7 +118,7 @@ In [`tasks.md`](tasks.md) ①.
 
 ## ② `markobutono` – Kontrollkästchen (PR ②)
 
-**Branch:** `261014-spec-010-markobutono-010092` (gestapelt auf PR ① `261014-spec-010-sxaltilo-010092` @ `a31224e`) · **Datum:** 2026-10-14 · **Aufgaben und rote Hashes:** [`tasks.md`](tasks.md) ②
+**Branch:** `261014-spec-010-markobutono-010092` (gestapelt auf PR ① `261014-spec-010-sxaltilo-010092` @ `ecdfa01`) · **Datum:** 2026-10-14 · **Aufgaben und rote Hashes:** [`tasks.md`](tasks.md) ②
 
 Der zweite Wahl-Ero: hält ja/nein und gilt mit dem Formular. Fast alles trägt der Weg, den ① für den Schalter gebaut hat (Regel 0.1); neu ist nur, was das Kontrollkästchen mehr hat als der Schalter – Pflicht, Fehler, ein Haken als Zeichen. Jede Entscheidung unten nennt ihre Stufe.
 
@@ -192,7 +192,7 @@ Die Spalten kommen aus ① D-11 und Spec 009: `rest`, `checked` (schlüsselt Tei
 
 #### D-16 Rot zuerst
 
-Fixtures (je `expected-issues.json`, `git check-ignore` leer): `markobutono-label-slot-optional` (`uzo-slot-required-missing`), `markobutono-web-term` (Prop `aria-checked`, `skemo-web-term`), `markobutono-instead-kialo-missing` (`uzo-kialo-missing` + `schema-violation`), `markobutono-error-without-invalid` (Fehler-Slot mit Constraint `slot:error ⇒ invalid`, aber ohne Prop `invalid` → `skemo-constraint-invalid`). Alle Regeln gab es schon; die Fixtures waren auf dem Stand von ① sofort grün und sind **durch Mutation** rot beobachtet (wie `skemo-web-term-part` in Spec 009). Die Instanz-Fälle (leeres Label, Fehler ohne `invalid`, „Pflichtfeld“) sind `check_usage`-Tests (`data/markobutono.test.ts`, rot in `1bf7a4a`), dazu die MCP-Szenarien.
+Fixtures (je `expected-issues.json`, `git check-ignore` leer): `markobutono-label-slot-optional` (`uzo-slot-required-missing`), `markobutono-web-term` (Prop `aria-checked`, `skemo-web-term`), `markobutono-instead-kialo-missing` (`uzo-kialo-missing` + `schema-violation`), `markobutono-error-without-invalid` (Fehler-Slot mit Constraint `slot:error ⇒ invalid`, aber ohne Prop `invalid` → `skemo-constraint-invalid`). Alle Regeln gab es schon; die Fixtures waren auf dem Stand von ① sofort grün und sind **durch Mutation** rot beobachtet (wie `skemo-web-term-part` in Spec 009). Die Instanz-Fälle (leeres Label, Fehler ohne `invalid`, „Pflichtfeld“) sind `check_usage`-Tests (`data/markobutono.test.ts`, rot in `50354ce`), dazu die MCP-Szenarien.
 
 ### Abweichungen von der Spec
 

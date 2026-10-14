@@ -50,16 +50,16 @@
 **Plan:** [`plan.md`](plan.md) ② (D-01–D-16) · **Branch:** `261014-spec-010-markobutono-010092` (gestapelt auf ①) · Aufgaben ② zählen ab T101 (③ ab T201, ④ ab T301), damit die Abschnitte ihre Nummern behalten.
 
 ### A – Rot zuerst
-- [x] **T101 Fixtures** `invalid/markobutono-label-slot-optional`, `invalid/markobutono-web-term`, `invalid/markobutono-instead-kialo-missing`, `invalid/markobutono-error-without-invalid` (G7, D-16). Committet in `1bf7a4a`; die Regeln gab es schon, rot beobachtet durch Mutation (Regel-Ids in `uzo-rules.ts`/`skemo-rules.ts` umbenannt: 4 von 4 rot, zurückgesetzt).
-- [x] **T102 Modelo-Tests** `data/markobutono.test.ts` (Skemo, Uzo, Reguloj, Jugxoj, check_usage leeres Label / Fehler ohne invalid / „Pflichtfeld“, suggest_ero „AGB akzeptieren“, „Newsletter abonnieren“, „Checkbox“, Dark Mode, „sofort“, „Radiobutton“), `data/sxaltilo.test.ts` (needs-confirmation → markobutono). Rot in `1bf7a4a` (37 von 2 684).
+- [x] **T101 Fixtures** `invalid/markobutono-label-slot-optional`, `invalid/markobutono-web-term`, `invalid/markobutono-instead-kialo-missing`, `invalid/markobutono-error-without-invalid` (G7, D-16). Committet in `50354ce`; die Regeln gab es schon, rot beobachtet durch Mutation (Regel-Ids in `uzo-rules.ts`/`skemo-rules.ts` umbenannt: 4 von 4 rot, zurückgesetzt).
+- [x] **T102 Modelo-Tests** `data/markobutono.test.ts` (Skemo, Uzo, Reguloj, Jugxoj, check_usage leeres Label / Fehler ohne invalid / „Pflichtfeld“, suggest_ero „AGB akzeptieren“, „Newsletter abonnieren“, „Checkbox“, Dark Mode, „sofort“, „Radiobutton“), `data/sxaltilo.test.ts` (needs-confirmation → markobutono). Rot in `50354ce` (37 von 2 684).
 
 ### B – Modelo
-- [x] **T103 Daten** `markobutono/skemo.json`, `uzo.json` (IDs aus `pnpm id:new`). Grün in `1574b9a`.
-- [x] **T104 Reguloj und Jugxoj** fünf Reguloj des `kampo` und `spacing-owned-by-container` ausgeweitet; acht Jugxoj. Grün in `1574b9a`.
-- [x] **T105 Verflechtung** `sxaltilo` needs-confirmation → `markobutono`; Kialo von `butono`/`kampo` `toggle` ohne „(PR ②)“. Grün in `1574b9a`.
-- [x] **T106 Ontologio** `#Markobutono` (Kontrollkästchen/checkbox), `#Sxaltilo` verweist auf ihn. Grün in `1574b9a`.
+- [x] **T103 Daten** `markobutono/skemo.json`, `uzo.json` (IDs aus `pnpm id:new`). Grün in `9142d29`.
+- [x] **T104 Reguloj und Jugxoj** fünf Reguloj des `kampo` und `spacing-owned-by-container` ausgeweitet; acht Jugxoj. Grün in `9142d29`.
+- [x] **T105 Verflechtung** `sxaltilo` needs-confirmation → `markobutono`; Kialo von `butono`/`kampo` `toggle` ohne „(PR ②)“. Grün in `9142d29`.
+- [x] **T106 Ontologio** `#Markobutono` (Kontrollkästchen/checkbox), `#Sxaltilo` verweist auf ihn. Grün in `9142d29`.
 
-### C – Projekcioj (rot in `681554a`, grün in `105d99b`)
+### C – Projekcioj (rot in `1e2ab78`, grün in `4c59863`)
 - [x] **T107 Web Component** `fm-markobutono` aus der Bauform `toggle` (D-08), Formular-Gültigkeit, Inventar liest die Feldwurzel.
 - [x] **T108 React** `Markobutono`, Typtest `test/types/markobutono.tsx`.
 - [x] **T109 Figma** Bauform `toggle` mit `sign`, `texts`, `hidden`; 30 Varianten; „Option“; Double `createNodeFromSvg`/VECTOR (D-09, D-11).
@@ -69,7 +69,7 @@
 - [x] **T113 MCP** `e2e/s010-markobutono.test.ts`, `eroj-tools.test.ts` (brief fünf Eroj), Folgetests.
 
 ### D – Abschluss
-- [x] **T114 Vojmapo** Zeile 4 und `docs.test.ts` (rot in `2113c18`).
+- [x] **T114 Vojmapo** Zeile 4 und `docs.test.ts` (rot in `b9ff3a3`).
 - [x] **T115 Messungen** unten; Bericht.
 
 ### Messungen
@@ -81,8 +81,8 @@
 | Alirebleco (Eroj, `check:alirebleco-eroj`) | markobutono: 8 Kombinationen (komuna, ekzemplo × light, dark × default, high) × 3 Engines, je 6 Kästchen (3 Größen × angehakt/nicht) in rest, hover, invalid (mit Fehlertext), disabled: axe ohne Befund (Rolle checkbox); Haken auf Kästchen ≥ 3:1, Rand auf Seite ≥ 3:1 auch invalid, Fokusring ≥ 3:1 auf Abstand und Seite – 129 grün (vorher 105) |
 | Alirebleco (Modelo, `check:alirebleco`) | 70 KontrastParoj × 72 Kombinationen wie vorher (kein neues Paar): `action-primary-text-on-fill` min. 7,76, `border-strong-on-background-default` 6,71, `status-danger-border-on-background-default` 7,33 |
 | Maße (Basis-Kombination) | Haken 16/20/24 px, Kästchen 18/22/26 px (Haken + 2 × 1 px), Radius 4 px, Abstand 4 px; Label-Zeile 15/17,5/17,5 px (B-5) |
-| Rote Commits | `1bf7a4a` (Fixtures, Modelo), `681554a` (Projekcioj, Browser, MCP), `2113c18` (Doku) |
-| Grüne Commits | `1574b9a` (Modelo), `105d99b` (Projekcioj); Doku grün im Commit dieser Zeile |
+| Rote Commits | `50354ce` (Fixtures, Modelo), `1e2ab78` (Projekcioj, Browser, MCP), `b9ff3a3` (Doku) |
+| Grüne Commits | `9142d29` (Modelo), `4c59863` (Projekcioj); Doku grün im Commit dieser Zeile |
 | Tests (`pnpm turbo run test --concurrency=1`) | modelo 2 686, projekcioj 401, mcp 170, cli 66, eroj 1 Vitest + 184 Playwright in drei Engines (2 übersprungen wie bisher: forced-colors, quickstart nur Chromium); davon neu für das Kontrollkästchen: data/markobutono 34, vier Fixtures, docs 2, Projekcioj 20 (Web Component 5, Figma-Plan 5, Plugin 6, Make Kit 2, Vitrino 2), Browser `markobutono.spec` 8 und Internacia 3 je Engine, Alirebleco 8 Kombinationen je Engine, Vitrino 1, MCP 10 (s010-markobutono) plus der fünfte Eintrag in eroj-tools |
 | Checks | `check:vortaro-lint`, `check:regularo` (uzoj=5, kein `skemo-uzo-missing`), `check:mankoj`, `check:alirebleco`, `check:clean-room`, `check:make-kit` 5, `check:quickstart` 1, `check:vitrino` 14, `check:release` – grün; `pnpm lint` grün |
 
