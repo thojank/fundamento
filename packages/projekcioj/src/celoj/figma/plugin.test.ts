@@ -58,12 +58,16 @@ async function run(
 
 /**
  * The nodes on the page, and those of every section on it in place of the section's children
- * (F-2): the sets lie in the section „Fundamento", a node a test looks for is found either way.
+ * (F-2), and those of the plugin's frame in the section (F-8: the sets lie in the frame „Eroj" in
+ * the section „Fundamento"): a node a test looks for is found either way.
  */
 function pageNodes(double: ReturnType<typeof figmaDouble>): DoubleNode[] {
-  return (double.root.children[0]?.children ?? []).flatMap((child) =>
-    child.type === "SECTION" ? [child, ...child.children] : [child],
-  );
+  const open = (child: DoubleNode): DoubleNode[] =>
+    child.type === "SECTION" ||
+    (child.type === "FRAME" && child.getSharedPluginData("fundamento", "frame") !== "")
+      ? [child, ...child.children.flatMap(open)]
+      : [child];
+  return (double.root.children[0]?.children ?? []).flatMap(open);
 }
 
 describe("Figma development plugin (T016)", () => {
@@ -1355,14 +1359,9 @@ describe("every property the plugin owns is from the plan or neutral", () => {
   it("leaves no tool default on any node it drew, the component set included", async () => {
     const double = modelDouble();
     await run(double, repoFiles["figma/plugin/code.js"] ?? "");
-    // The set lies in the section Fundamento (F-2), in no flow: its position among siblings is
-    // not the plugin's.
-    const onPage = [
-      "Document/Page 1/Fundamento/butono: layoutPositioning",
-      "Document/Page 1/Fundamento/kampo: layoutPositioning",
-      "Document/Page 1/Fundamento/ligilo: layoutPositioning",
-      "Document/Page 1/Fundamento/sxaltilo: layoutPositioning",
-    ];
+    // The frame Eroj lies in the section Fundamento (F-8), in no flow: its position among
+    // siblings is not the plugin's. The sets lie in the frame's flow, and that is the plugin's.
+    const onPage = ["Document/Page 1/Fundamento/Eroj: layoutPositioning"];
     expect(double.untouchedDefaults(OWNED).filter((entry) => !onPage.includes(entry))).toEqual([]);
     const set = pageNodes(double).find((child) => child.name === "butono");
     expect(set?.properties.strokes).toEqual([]);
@@ -3191,18 +3190,26 @@ describe("the field of the kampo has room and shows its texts (F-4)", () => {
 
 // F-1 / F-2 (Nachlese Spec 008/009, gemessen 2026-10-13 in f10b-5): Das neue Set ligilo lag auf
 // dem Set butono bei 0/0 und musste von Hand verschoben werden. Jetzt liegen alle Sets in einer
-// Section „Fundamento": ein neues Set rechts neben dem letzten, mit dem Abstand spacing.xlarge;
-// vorgefundene Sets behalten ihren Platz. Ein Modus auf der Section schaltet die Marke der ganzen
-// Bibliothek; das Plugin setzt und löscht dort nie einen (F35 gilt für Sets).
-// F-7 (gemessen 2026-10-14 in f10b-5): Nach dem Markenwechsel an der Section (komuna → ekzemplo)
-// wurde das Set kampo breiter (Archivo Black) und überlappte ligilo — der Abstand kam aus den
-// Breiten im Standardmodus. Jetzt ist der Abstand nach einem Set mindestens die halbe Breite
-// dieses Sets (Plan: section.reserve), und ein vorgefundenes Set, das seinem linken Nachbarn
-// näher steht, rückt nach rechts (action spaced). Kein Modus wird dafür an der Section gesetzt.
-describe("every set lies in the section Fundamento, in a row (F-1, F-2, F-7)", () => {
+// Section „Fundamento". Ein Modus auf der Section schaltet die Marke der ganzen Bibliothek; das
+// Plugin setzt und löscht dort nie einen (F35 gilt für Sets).
+// F-8 (gemessen 2026-10-14 in f10b-5): Nach dem Lauf mit sieben Sets lag elektilo auf ligilo —
+// der Abstand von F-7 (halbe Breite des linken Nachbarn) kam aus den Breiten im Standardmodus,
+// und die Breiten ändern sich je Markenmodus (Archivo Black ist breiter). Jetzt rechnet das Plugin
+// keine Lage mehr: In der Section liegt ein Frame „Eroj" mit Auto-Layout (horizontal, Umbruch,
+// Abstände spacing.xlarge, Hug), alle Sets sind seine Kinder, Figma legt sie aus. Was das Double
+// dabei über layoutWrap annimmt, steht an layoutOf in test-doubles/plugin.ts (Messung in f10b-5).
+describe("every set lies in the frame Eroj in the section Fundamento (F-1, F-2, F-8)", () => {
   const source = repoFiles["figma/plugin/code.js"] ?? "";
-  type Placement = { x: number; y: number; after: string | null; action: string };
-  type SectionReport = { name: string; found: boolean; created: boolean; moved: string[] };
+  const FRAME = "Eroj";
+  type Placement = { frame: string; action: string };
+  type FrameReport = { name: string; found: boolean; created: boolean };
+  type SectionReport = {
+    name: string;
+    found: boolean;
+    created: boolean;
+    moved: string[];
+    frame: FrameReport;
+  };
   type Report = {
     section: SectionReport;
     components: { set: string; placement: Placement }[];
@@ -3224,6 +3231,13 @@ describe("every set lies in the section Fundamento, in a row (F-1, F-2, F-7)", (
     if (section === undefined) throw new Error("no section");
     return section;
   };
+  const framesOf = (double: ReturnType<typeof figmaDouble>) =>
+    sectionOf(double).children.filter((child) => child.type === "FRAME");
+  const frameOf = (double: ReturnType<typeof figmaDouble>) => {
+    const [frame] = framesOf(double);
+    if (frame === undefined) throw new Error(`no frame ${FRAME} in the section`);
+    return frame;
+  };
   const named = (parent: DoubleNode, name: string) => {
     const found = parent.children.find((child) => child.name === name);
     if (found === undefined) throw new Error(`no ${name} in ${parent.name}`);
@@ -3235,211 +3249,243 @@ describe("every set lies in the section Fundamento, in a row (F-1, F-2, F-7)", (
     const { x, y, width, height } = node as unknown as DoubleBoxLike;
     return { x, y, width, height };
   };
+  /** Place on the page: x and y of every ancestor up to the page added (F-8). */
+  const onPage = (node: DoubleNode): DoubleBoxLike => {
+    const own = box(node);
+    let x = 0;
+    let y = 0;
+    for (let current: DoubleNode | undefined = node; current !== undefined; ) {
+      if (current.type === "PAGE") break;
+      const at = box(current);
+      x += at.x;
+      y += at.y;
+      current = current.parent;
+    }
+    return { x, y, width: own.width, height: own.height };
+  };
+  const overlap = (a: DoubleBoxLike, b: DoubleBoxLike) =>
+    a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height;
+  /** Every pair of sets whose boxes on the page intersect, as "a × b". */
+  const overlapping = (double: ReturnType<typeof figmaDouble>): string[] => {
+    const sets = pageNodes(double).filter((node) => node.type === "COMPONENT_SET");
+    const found: string[] = [];
+    for (let i = 0; i < sets.length; i++) {
+      for (let j = i + 1; j < sets.length; j++) {
+        const a = sets[i] as DoubleNode;
+        const b = sets[j] as DoubleNode;
+        if (overlap(onPage(a), onPage(b))) found.push(`${a.name} × ${b.name}`);
+      }
+    }
+    return found;
+  };
+  const setNamed = (double: ReturnType<typeof figmaDouble>, name: string) => {
+    const set = pageNodes(double).find(
+      (node) => node.type === "COMPONENT_SET" && node.name === name,
+    );
+    if (set === undefined) throw new Error(`no set ${name}`);
+    return set;
+  };
+  /** Every text named `label` under a node. */
+  const labelsOf = (node: DoubleNode): DoubleNode[] =>
+    node.children.flatMap((child) => [
+      ...(child.type === "TEXT" && child.name === "label" ? [child] : []),
+      ...labelsOf(child),
+    ]);
   const names = repoPlan.components.map((component) => component.set);
   const layout = repoPlan.section;
-  /** The gap after a set (F-7): the plan's gap, or half the set's width, whichever is larger. */
-  const gapAfter = (node: DoubleBoxLike): number =>
-    Math.max(layout?.gap ?? Number.NaN, node.width * (layout?.reserve ?? Number.NaN));
+  const inLayout = names.map(() => ({ frame: FRAME, action: "in-layout" }));
 
-  it("creates one section Fundamento, stamped, and puts every set into it", async () => {
+  it("creates one section Fundamento with one frame Eroj, both stamped, every set in the frame", async () => {
     const double = modelDouble();
     const report = await apply(double);
     expect(sectionsOf(double)).toHaveLength(1);
     const section = sectionOf(double);
     expect(section.name).toBe("Fundamento");
     expect(section.getSharedPluginData("fundamento", "section")).toBe("Fundamento");
-    expect(section.children.map((child) => child.name)).toEqual(names);
+    expect(section.children.map((child) => child.name)).toEqual([FRAME]);
+    const frame = frameOf(double);
+    expect(frame.getSharedPluginData("fundamento", "frame")).toBe(FRAME);
+    expect(frame.children.map((child) => child.name)).toEqual(names);
     expect(pageOf(double).children.filter((child) => child.type === "COMPONENT_SET")).toEqual([]);
-    expect(report.section).toEqual({ name: "Fundamento", found: false, created: true, moved: [] });
+    expect(report.section).toEqual({
+      name: "Fundamento",
+      found: false,
+      created: true,
+      moved: [],
+      frame: { name: FRAME, found: false, created: true },
+    });
   });
 
-  it("lays the sets out in a row: padding first, then right edge plus gap, and says so", async () => {
+  it("lets Figma lay the sets out: horizontal, wrapping, spacing.xlarge, hugging, no fill", async () => {
     const double = modelDouble();
     const report = await apply(double);
-    const section = sectionOf(double);
-    const sets = names.map((name) => box(named(section, name)));
-    expect(sets[0]).toMatchObject({ x: layout?.padding, y: layout?.padding });
-    for (let index = 1; index < sets.length; index++) {
-      const before = sets[index - 1] as DoubleBoxLike;
-      expect(sets[index]?.x, names[index]).toBe(before.x + before.width + gapAfter(before));
-      expect(sets[index]?.y, names[index]).toBe(before.y);
+    const frame = frameOf(double);
+    expect(frame.properties).toMatchObject({
+      layoutMode: "HORIZONTAL",
+      layoutWrap: "WRAP",
+      itemSpacing: layout?.gap,
+      counterAxisSpacing: layout?.gap,
+      layoutSizingHorizontal: "HUG",
+      layoutSizingVertical: "HUG",
+      fills: [],
+    });
+    expect(box(frame)).toMatchObject({ x: layout?.padding, y: layout?.padding });
+    // The plugin computes no place of a set: x and y are Figma's (the double's layout).
+    for (const name of names) {
+      const set = named(frame, name);
+      expect(set.properties.x, name).toBeUndefined();
+      expect(set.properties.y, name).toBeUndefined();
+      expect(set.properties.layoutPositioning, name).toBe("AUTO");
     }
-    expect(report.components.map((component) => component.placement)).toEqual(
-      names.map((_, index) => ({
-        x: sets[index]?.x,
-        y: sets[index]?.y,
-        after: index === 0 ? null : names[index - 1],
-        action: "created",
-      })),
-    );
+    expect(report.components.map((component) => component.placement)).toEqual(inLayout);
   });
 
-  it("sizes the section to its sets plus its padding", async () => {
+  it("sizes the section to the frame plus its padding", async () => {
     const double = modelDouble();
     await apply(double);
     const section = box(sectionOf(double));
-    const sets = names.map((name) => box(named(sectionOf(double), name)));
+    const frame = box(frameOf(double));
     const padding = layout?.padding ?? NaN;
-    expect(section.width).toBe(Math.max(...sets.map((set) => set.x + set.width)) + padding);
-    expect(section.height).toBe(Math.max(...sets.map((set) => set.y + set.height)) + padding);
+    expect(section.width).toBe(frame.x + frame.width + padding);
+    expect(section.height).toBe(frame.y + frame.height + padding);
   });
 
-  it("finds the section again on a second run, moves nothing and makes no second one", async () => {
+  // The finding of 2026-10-14: in the brand mode a set grows (Archivo Black) and ran into its
+  // right neighbour. The double cannot switch the mode of a size (it resolves the first mode), so
+  // the wider brand is drawn as longer labels — the set grows by what it measures, not by a width
+  // the test assigns.
+  it("keeps two sets whose widths differ per mode apart, in either mode (F-8)", async () => {
+    const double = modelDouble();
+    await apply(double);
+    expect(overlapping(double)).toEqual([]);
+    const [left, right] = names;
+    if (left === undefined || right === undefined) throw new Error("2");
+    const labels = labelsOf(setNamed(double, left));
+    expect(labels.length).toBeGreaterThan(0);
+    const narrow = labels.map((label) => String(label.properties.characters ?? ""));
+    const narrowWidth = box(setNamed(double, left)).width;
+    // The brand switch: every label of the left set eight times as long.
+    for (const label of labels) {
+      Object.assign(label, { characters: String(label.properties.characters ?? "").repeat(8) });
+    }
+    const wideWidth = box(setNamed(double, left)).width;
+    // More than any reserve of half the width plus the gap (F-7) could carry.
+    expect(wideWidth).toBeGreaterThan(narrowWidth * 1.5 + (layout?.gap ?? NaN));
+    expect(overlapping(double)).toEqual([]);
+    // The right neighbour keeps the gap of spacing.xlarge in the wide mode too, or lies below.
+    const wideLeft = onPage(setNamed(double, left));
+    const wideRight = onPage(setNamed(double, right));
+    expect(
+      wideRight.x >= wideLeft.x + wideLeft.width + (layout?.gap ?? NaN) ||
+        wideRight.y >= wideLeft.y + wideLeft.height + (layout?.gap ?? NaN),
+    ).toBe(true);
+    // And back to the narrow brand: still apart, nobody ran the plugin in between.
+    labels.forEach((label, index) => {
+      Object.assign(label, { characters: narrow[index] ?? "" });
+    });
+    expect(box(setNamed(double, left)).width).toBe(narrowWidth);
+    expect(overlapping(double)).toEqual([]);
+  });
+
+  it("finds section and frame again on a second run, moves nothing and makes no second one", async () => {
     const double = modelDouble();
     await apply(double);
     const first = double.snapshot();
-    const places = names.map((name) => box(named(sectionOf(double), name)));
     const report = await apply(double);
     expect(sectionsOf(double)).toHaveLength(1);
+    expect(framesOf(double)).toHaveLength(1);
     expect(double.snapshot()).toBe(first);
-    expect(names.map((name) => box(named(sectionOf(double), name)))).toEqual(places);
-    expect(report.section).toEqual({ name: "Fundamento", found: true, created: false, moved: [] });
-    expect(report.components.map((component) => component.placement.action)).toEqual(
-      names.map(() => "kept"),
-    );
+    expect(report.section).toEqual({
+      name: "Fundamento",
+      found: true,
+      created: false,
+      moved: [],
+      frame: { name: FRAME, found: true, created: false },
+    });
+    expect(report.components.map((component) => component.placement)).toEqual(inLayout);
     expect(report.warnings).toEqual([]);
   });
 
-  it("keeps a set where the maintainer put it, and places a new one right of the last", async () => {
+  // The file f10b-5 after the run of 2026-10-14: section Fundamento, the sets directly in it, at
+  // the places F-1/F-7 computed. The run moves them into a new frame Eroj, in the plan's order.
+  it("moves the sets that lie directly in the section into a new frame Eroj (f10b-5)", async () => {
     const double = modelDouble();
     await apply(double);
     const section = sectionOf(double);
-    const [first, middle, last] = names;
-    if (first === undefined || middle === undefined || last === undefined) throw new Error("3");
-    // The maintainer drags the last set further right and down, and deletes the middle one.
-    Object.assign(named(section, last), { x: 4000, y: 300 });
-    named(section, middle).remove();
-    const kept = box(named(section, first));
+    let x = layout?.padding ?? NaN;
+    for (const name of names) {
+      const set = named(frameOf(double), name);
+      section.appendChild(set);
+      Object.assign(set, { x, y: layout?.padding });
+      x += box(set).width + (layout?.gap ?? NaN);
+    }
+    frameOf(double).remove();
     const report = await apply(double);
-    expect(box(named(section, first))).toEqual(kept);
-    expect(box(named(section, last))).toMatchObject({ x: 4000, y: 300 });
-    const lastBox = box(named(section, last));
-    expect(box(named(section, middle))).toMatchObject({
-      x: lastBox.x + lastBox.width + gapAfter(lastBox),
-      y: 300,
+    expect(report.section).toEqual({
+      name: "Fundamento",
+      found: true,
+      created: false,
+      moved: names,
+      frame: { name: FRAME, found: false, created: true },
     });
-    const placement = report.components.find((component) => component.set === middle)?.placement;
-    expect(placement).toEqual({
-      x: lastBox.x + lastBox.width + gapAfter(lastBox),
-      y: 300,
-      after: last,
-      action: "created",
-    });
+    expect(section.children.map((child) => child.name)).toEqual([FRAME]);
+    expect(frameOf(double).children.map((child) => child.name)).toEqual(names);
+    expect(report.components.map((component) => component.placement)).toEqual(inLayout);
+    expect(overlapping(double)).toEqual([]);
+    expect(report.warnings).toEqual([]);
+    // The next run finds everything in place.
+    const snapshot = double.snapshot();
+    const again = await apply(double);
+    expect(double.snapshot()).toBe(snapshot);
+    expect(again.section.moved).toEqual([]);
   });
 
-  // The file f10b-5 as measured: the sets lie on the page, ligilo on top of butono at 0/0.
-  it("moves the sets that lie on the page into a new section, in a row, the first kept in place", async () => {
+  // The file f10b-5 as measured on 2026-10-13: the sets lie on the page, ligilo on butono at 0/0.
+  it("moves the sets that lie on the page into a new section and frame, the first kept in place", async () => {
     const double = modelDouble();
     await apply(double);
     const page = pageOf(double);
-    const section = sectionOf(double);
     for (const name of names) {
-      const set = named(section, name);
+      const set = named(frameOf(double), name);
       page.appendChild(set);
       Object.assign(set, { x: 0, y: 0 });
     }
-    section.remove();
+    sectionOf(double).remove();
     const report = await apply(double);
     expect(report.section).toEqual({
       name: "Fundamento",
       found: false,
       created: true,
       moved: names,
+      frame: { name: FRAME, found: false, created: true },
     });
-    const fresh = sectionOf(double);
-    expect(fresh.children.map((child) => child.name)).toEqual(names);
+    expect(frameOf(double).children.map((child) => child.name)).toEqual(names);
     expect(page.children.filter((child) => child.type === "COMPONENT_SET")).toEqual([]);
-    const sets = names.map((name) => box(named(fresh, name)));
-    expect(sets[0]).toMatchObject({ x: layout?.padding, y: layout?.padding });
-    for (let index = 1; index < sets.length; index++) {
-      const before = sets[index - 1] as DoubleBoxLike;
-      expect(sets[index]?.x, names[index]).toBe(before.x + before.width + gapAfter(before));
-    }
-    // The first set stays where the maintainer saw it: the section opens around it.
-    expect(box(fresh).x + (sets[0]?.x ?? NaN)).toBe(0);
-    expect(box(fresh).y + (sets[0]?.y ?? NaN)).toBe(0);
-    expect(report.components.map((component) => component.placement.action)).toEqual(
-      names.map(() => "moved"),
-    );
+    // The first set stays where the maintainer saw it: section and frame open around it.
+    const first = onPage(setNamed(double, names[0] ?? ""));
+    expect({ x: first.x, y: first.y }).toEqual({ x: 0, y: 0 });
+    expect(overlapping(double)).toEqual([]);
+    expect(report.components.map((component) => component.placement)).toEqual(inLayout);
     // Nothing was created: every variant was found in its set.
     expect(report.warnings).toEqual([]);
   });
 
-  it("moves a set from the page into a section it finds, behind the last set", async () => {
+  it("moves a set from the page into the frame it finds, at its end", async () => {
     const double = modelDouble();
     await apply(double);
-    const section = sectionOf(double);
-    // Spec 010 ①: four sets; the first goes behind the last of the plan, whatever their number.
     const first = names[0];
-    const last = names.at(-1);
-    if (first === undefined || last === undefined) throw new Error("3");
-    pageOf(double).appendChild(named(section, first));
+    if (first === undefined) throw new Error("1");
+    pageOf(double).appendChild(named(frameOf(double), first));
     const report = await apply(double);
     expect(report.section).toEqual({
       name: "Fundamento",
       found: true,
       created: false,
       moved: [first],
+      frame: { name: FRAME, found: true, created: false },
     });
-    const lastBox = box(named(section, last));
-    expect(box(named(section, first))).toMatchObject({
-      x: lastBox.x + lastBox.width + gapAfter(lastBox),
-      y: lastBox.y,
-    });
-  });
-
-  // The file f10b-5 on 2026-10-14: three sets in the section with the gap of the default mode
-  // (24 px); the brand font widens kampo over ligilo. The run spaces them, the next run keeps them.
-  it("spaces a found set that stands closer to its left neighbour than its gap, once (F-7)", async () => {
-    const double = modelDouble();
-    await apply(double);
-    const section = sectionOf(double);
-    // Spec 010 ①: the sets after the third keep their place — their left neighbour is spaced
-    // back to where the first run put it.
-    const [first, middle, last, ...rest] = names;
-    if (first === undefined || middle === undefined || last === undefined) throw new Error("3");
-    const restBoxes = rest.map((name) => ({ name, ...box(named(sectionOf(double), name)) }));
-    const gap = layout?.gap ?? Number.NaN;
-    const firstBox = box(named(section, first));
-    Object.assign(named(section, middle), { x: firstBox.x + firstBox.width + gap });
-    const middleBox = box(named(section, middle));
-    Object.assign(named(section, last), { x: middleBox.x + middleBox.width + gap });
-    expect(gapAfter(firstBox)).toBeGreaterThan(gap);
-    const report = await apply(double);
-    const spacedMiddle = box(named(section, middle));
-    expect(spacedMiddle).toMatchObject({
-      x: firstBox.x + firstBox.width + gapAfter(firstBox),
-      y: firstBox.y,
-    });
-    expect(box(named(section, last))).toMatchObject({
-      x: spacedMiddle.x + spacedMiddle.width + gapAfter(spacedMiddle),
-    });
-    expect(report.components.map((component) => component.placement)).toEqual([
-      { x: firstBox.x, y: firstBox.y, after: null, action: "kept" },
-      { x: spacedMiddle.x, y: spacedMiddle.y, after: first, action: "spaced" },
-      {
-        x: spacedMiddle.x + spacedMiddle.width + gapAfter(spacedMiddle),
-        y: spacedMiddle.y,
-        after: middle,
-        action: "spaced",
-      },
-      ...restBoxes.map((entry) => ({ x: entry.x, y: entry.y, after: null, action: "kept" })),
-    ]);
-    expect(report.section.moved).toEqual([]);
-    // Enough room is kept: a third run moves nothing.
-    const snapshot = double.snapshot();
-    const again = await apply(double);
-    expect(double.snapshot()).toBe(snapshot);
-    expect(again.components.map((component) => component.placement.action)).toEqual(
-      names.map(() => "kept"),
-    );
-    // A set the maintainer dragged far to the right keeps its place: only too little room moves.
-    Object.assign(named(section, last), { x: 9000 });
-    const far = await apply(double);
-    expect(box(named(section, last)).x).toBe(9000);
-    expect(far.components.find((component) => component.set === last)?.placement.action).toBe(
-      "kept",
-    );
+    expect(frameOf(double).children.map((child) => child.name)).toEqual([...names.slice(1), first]);
+    expect(overlapping(double)).toEqual([]);
   });
 
   it("never sets and never clears a mode on the section; the sets stay on none (F35)", async () => {
@@ -3461,15 +3507,16 @@ describe("every set lies in the section Fundamento, in a row (F-1, F-2, F-7)", (
     });
     await apply(double);
     expect(section.explicitVariableModes).toEqual({ [aspekto.id]: mode.modeId });
+    for (const frame of framesOf(double)) expect(frame.explicitVariableModes).toEqual({});
     for (const name of names) {
-      const set = named(section, name);
+      const set = setNamed(double, name);
       expect(set.explicitVariableModes, name).toEqual({});
       // The set follows the section: one mode there switches the brand of the whole library.
       expect(set.resolvedVariableModes[aspekto.id], name).toBe(mode.modeId);
     }
   });
 
-  it("names section and placement in the headline of the report", async () => {
+  it("names section, frame and placement in the headline of the report", async () => {
     const double = modelDouble();
     const lines: string[] = [];
     const module = new Function("figma", "console", source);
@@ -3486,11 +3533,69 @@ describe("every set lies in the section Fundamento, in a row (F-1, F-2, F-7)", (
       found: false,
       created: true,
       moved: [],
+      frame: { name: FRAME, found: false, created: true },
     });
-    expect(headline.components.map((component) => component.placement.after)).toEqual([
-      null,
-      ...names.slice(0, -1),
+    expect(headline.components.map((component) => component.placement)).toEqual(inLayout);
+  });
+});
+
+// What the double assumes about a wrapping auto-layout frame (F-8) — a belief until the
+// maintainer has measured it in f10b-5: rows at the inner width of a fixed frame, counterAxisSpacing
+// between the rows; a frame that hugs its width is one row; every read follows the current sizes.
+describe("the double lays out a horizontal frame that wraps (F-8, Annahme bis zur Messung)", () => {
+  const frameOf = (double: ReturnType<typeof figmaDouble>) =>
+    (double.figma as { createFrame: () => DoubleNode }).createFrame();
+  type DoubleBoxLike = { x: number; y: number; width: number; height: number };
+  const box = (node: DoubleNode): DoubleBoxLike => {
+    const { x, y, width, height } = node as unknown as DoubleBoxLike;
+    return { x, y, width, height };
+  };
+  const wrapping = () => {
+    const double = modelDouble();
+    const frame = frameOf(double);
+    Object.assign(frame, {
+      layoutMode: "HORIZONTAL",
+      layoutWrap: "WRAP",
+      itemSpacing: 10,
+      counterAxisSpacing: 20,
+      width: 250,
+      layoutSizingVertical: "HUG",
+    });
+    const children = [0, 1, 2].map(() => {
+      const child = frameOf(double);
+      Object.assign(child, { width: 100, height: 50 });
+      frame.appendChild(child);
+      return child;
+    });
+    return { frame, children };
+  };
+
+  it("wraps a child that would end beyond the inner width into the next row", () => {
+    const { frame, children } = wrapping();
+    expect(children.map((child) => [box(child).x, box(child).y])).toEqual([
+      [0, 0],
+      [110, 0],
+      [0, 70],
     ]);
+    expect(box(frame)).toMatchObject({ width: 250, height: 120 });
+  });
+
+  it("lays a frame that hugs its width out in one row", () => {
+    const { frame, children } = wrapping();
+    Object.assign(frame, { layoutSizingHorizontal: "HUG" });
+    expect(children.map((child) => [box(child).x, box(child).y])).toEqual([
+      [0, 0],
+      [110, 0],
+      [220, 0],
+    ]);
+    expect(box(frame)).toMatchObject({ width: 320, height: 50 });
+  });
+
+  it("follows a child that grows: its neighbours move on the next read", () => {
+    const { frame, children } = wrapping();
+    Object.assign(frame, { layoutSizingHorizontal: "HUG" });
+    Object.assign(children[0] as DoubleNode, { width: 300 });
+    expect(children.map((child) => box(child).x)).toEqual([0, 310, 420]);
   });
 });
 

@@ -19,7 +19,6 @@ import {
   figmaValues,
   labelDefaultOf,
   resolveFigmaPlan,
-  SET_WIDTH_RESERVE,
   styleOfWeight,
   TEXT_CASE_VARIES,
 } from "./figma.js";
@@ -897,10 +896,12 @@ describe("the label default of a set follows its a11y role (M-3)", () => {
   });
 });
 
-// F-1 / F-2 (Nachlese Spec 008/009): Die Sets liegen in der Section „Fundamento", in einer Reihe.
+// F-1 / F-2 (Nachlese Spec 008/009): Die Sets liegen in der Section „Fundamento".
 // Abstand und Innenabstand sind ein Token, keine Zahl: spacing.xlarge, aufgelöst in der
 // Basiskombination wie der Zellabstand der Vitrino.
-describe("the plan places the sets in the section Fundamento (F-1, F-2)", () => {
+// F-8 (gemessen 2026-10-14 in f10b-5): In der Section liegt der Frame „Eroj" mit Auto-Layout;
+// Figma legt die Sets aus, der Plan trägt keine Reserve mehr (F-7 ersetzt).
+describe("the plan places the sets in the frame Eroj of the section Fundamento (F-1, F-2, F-8)", () => {
   const repo = celoInputOf(defaultModeloSource());
   if (!repo.ok) throw new Error("the repo Modelo must be valid");
   const repoPlan = JSON.parse(
@@ -916,19 +917,18 @@ describe("the plan places the sets in the section Fundamento (F-1, F-2)", () => 
       name: FIGMA_SECTION,
       gap: xlarge?.value,
       padding: xlarge?.value,
-      reserve: SET_WIDTH_RESERVE,
+      frame: "Eroj",
     });
     // Resolved today: 24 px (spacing.scale.600).
     expect(repoPlan.section?.gap).toBe(24);
     expect(FIGMA_SECTION).toBe("Fundamento");
   });
 
-  // F-7 (gemessen 2026-10-14 in f10b-5): the brand font (Archivo Black) widened the kampo set
-  // over the ligilo; the gap of the default mode is not enough. The plan carries the share of a
-  // set's own width the gap after it is at least — half, measured as more than the widening.
-  it("carries the reserve of a set's width for the gap after it (F-7)", () => {
-    expect(SET_WIDTH_RESERVE).toBe(0.5);
-    expect(repoPlan.section?.reserve).toBe(SET_WIDTH_RESERVE);
+  // F-8 (gemessen 2026-10-14 in f10b-5): F-7's reserve of half a set's width did not carry the
+  // widths of every brand mode. Figma's auto-layout places the sets; the plan carries no reserve.
+  it("carries the frame the sets lie in, and no reserve (F-8)", () => {
+    expect(repoPlan.section?.frame).toBe("Eroj");
+    expect(repoPlan.section).not.toHaveProperty("reserve");
   });
 });
 
