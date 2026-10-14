@@ -849,9 +849,44 @@ describe("Spec 007 documentation (Constitution v2.1, Uzo)", () => {
     const row = read("docs/vojmapo.md")
       .split("\n")
       .find((line) => line.startsWith("| 5 |"));
+    // Projection B (Research-Notiz 2026-10-14) stands next to A; A stays preserved.
     expect(row).toBe(
-      "| 5 | – | Generatoren in voller Breite: eine generische Figma-Library, Marken als Modi der Sammlung aspekto (F27, gemessen in M1); Penpot mit demselben Anspruch – Umschalten, nicht Kopieren (heute Manko man_01M4AZ8C2AXY2TJ2W9NQWYBKM1: eine Datei je Marke; Schließbedingung ist der Markenschalter in einer Datei); Icons, Fonts, JSON-LD-Projekcio der Ontologio, Laufzeit-Umschaltung aller Dimensioj | geplant |",
+      "| 5 | – | Generatoren in voller Breite: eine generische Figma-Library, Marken als Modi der Sammlung aspekto (F27, gemessen in M1); Penpot mit demselben Anspruch – Umschalten, nicht Kopieren (heute Manko man_01M4AZ8C2AXY2TJ2W9NQWYBKM1: eine Datei je Marke; Schließbedingung ist der Markenschalter in einer Datei); Icons, Fonts, JSON-LD-Projekcio der Ontologio, Laufzeit-Umschaltung aller Dimensioj. Figma-Projektion B „Achsen als Modi“ als Spec mit Vergleichsdatei A gegen B ([Research-Notiz 2026-10-14](../research/projekcio-b-achsen-als-modi-2026-10-14.md)); Projektion A bleibt konserviert | geplant |",
     );
+  });
+
+  // Maintainer, 2026-10-14 (Research-Notiz „Projektion B"): the target picture gets a second
+  // sentence next to the Chamäleon — Figma is the shop window, the prompt the control plane — and
+  // the rule „nichts wegschmeißen" becomes a Constitution candidate, not an amendment.
+  it("the vojmapo states Figma as the shop window and the prompt as the control plane (2026-10-14)", () => {
+    const vojmapo = read("docs/vojmapo.md");
+    const target = section(vojmapo, "Zielbild in einem Satz");
+    expect(target).toContain(
+      "Figma ist Schaufenster, der Prompt ist die Bedienebene. Ein Entwurf entsteht per Prompt („Login-Screen für Marke XY, nach diesem Vorbild“), Änderungen ebenso; Figma zeigt ihn und lässt ihn nachträglich anfassen – sekundär. (Maintainer, 2026-10-14)",
+    );
+    // The Chamäleon sentence stays as it was; the new one stands next to it.
+    expect(target).toContain("(Maintainer, 2026-10-09)");
+  });
+
+  it("the vojmapo carries the Constitution candidate 'ein Konzeptwechsel stellt daneben' as a candidate, not an amendment", () => {
+    const vojmapo = read("docs/vojmapo.md");
+    const row = vojmapo.split("\n").find((line) => line.startsWith("| **Konservierung** |")) ?? "";
+    expect(row).toContain(
+      "Ein Konzeptwechsel stellt daneben, er ersetzt nicht; der alte Stand bleibt baubar, gemessen und zurückholbar.",
+    );
+    expect(row).toContain("Art. XI");
+    expect(row).toMatch(/\| Kandidat[^|]*\|$/);
+    expect(row).not.toContain("Amendment beschlossen");
+    const constitution = read(".specify/memory/constitution.md");
+    expect(constitution).not.toContain("stellt daneben, er ersetzt nicht");
+  });
+
+  it("the research note on Projektion B lies with the research and is listed in the benchmarks", () => {
+    const note = read("research/projekcio-b-achsen-als-modi-2026-10-14.md");
+    expect(note).toMatch(/^# Research-Notiz: Figma-Projektion B „Achsen als Modi" – 2026-10-14/);
+    expect(note).toContain('Regel „Nichts wegschmeißen"');
+    const benchmarks = read("research/benchmarks.md");
+    expect(benchmarks).toContain("projekcio-b-achsen-als-modi-2026-10-14.md");
   });
 
   it("the vojmapo names one switchable Make Kit as the goal and the kit per Aspekto as the bridge", () => {
