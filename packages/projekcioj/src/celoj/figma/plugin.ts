@@ -536,11 +536,14 @@ function openFrame(section, warnings) {
   }
   write(frame, "name", PLAN.section.frame);
   own(frame, NEUTRAL);
+  // The width is the maintainer's once the frame exists: a frame that hugs its width has no
+  // width to wrap at (one row), the rows of f10b-5 come from a fixed width given by hand, and a
+  // run must not take it back to HUG. Hugging is the start of a new frame only.
   Object.assign(gather(frame), {
     layoutMode: "HORIZONTAL",
     itemSpacing: PLAN.section.gap,
     counterAxisSpacing: PLAN.section.gap,
-    layoutSizingHorizontal: "HUG",
+    ...(sectionReport.frame.created ? { layoutSizingHorizontal: "HUG" } : {}),
     layoutSizingVertical: "HUG",
   });
   flush(frame);
