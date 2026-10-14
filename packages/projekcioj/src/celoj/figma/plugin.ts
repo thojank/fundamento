@@ -15,8 +15,10 @@
 // variables.getLocalVariableCollectionsAsync/getLocalVariablesAsync, createVariableCollection,
 // createVariable, createVariableAlias, setBoundVariableForPaint, collection.addMode/renameMode,
 // variable.setValueForMode/variableCollectionId, createComponent/createFrame/createText,
-// combineAsVariants, appendChild, setBoundVariable, set/getSharedPluginData, and createSection with
-// resizeWithoutConstraints for the section „Fundamento" that holds every set (F-2).
+// combineAsVariants, appendChild, setBoundVariable, set/getSharedPluginData, createSection with
+// resizeWithoutConstraints for the section „Fundamento" (F-2), and in it a frame „Eroj" with
+// auto-layout (layoutMode HORIZONTAL, layoutWrap WRAP, itemSpacing, counterAxisSpacing) that holds
+// every set (F-8).
 
 import { type FigmaPlan, TEXT_CASE_VARIES } from "./figma.js";
 
@@ -443,21 +445,43 @@ function findSection() {
   return ours(figma.currentPage, "section", PLAN.section.name);
 }
 
+/** The frame „Eroj" in the section (F-8), found by its mark \`frame\`, or undefined. */
+function findFrame(section) {
+  if (section === undefined) return undefined;
+  return ours(section, "frame", PLAN.section.frame);
+}
+
 /**
- * The set of an Ero: in the section, or still directly on the page, where every run before F-2
+ * The set of an Ero: in the frame, directly in the section, where the runs of F-1 to F-7 left it
+ * (gemessen 2026-10-14 in f10b-5), or still directly on the page, where every run before F-2
  * left it (gemessen 2026-10-13 in f10b-5: butono und ligilo lagen beide auf der Seite).
  */
 function findSet(name) {
   const section = findSection();
-  const inSection = section === undefined ? undefined : ours(section, "ero", name);
-  return inSection !== undefined ? inSection : ours(figma.currentPage, "ero", name);
+  const frame = findFrame(section);
+  for (const parent of [frame, section, figma.currentPage]) {
+    if (parent === undefined) continue;
+    const set = ours(parent, "ero", name);
+    if (set !== undefined) return set;
+  }
+  return undefined;
 }
 
-/** What the run did with the section; the headline of the report carries it (F-2). */
+/**
+ * What the run did with section and frame; the headline of the report carries it (F-2, F-8).
+ * \`moved\` names every set the run found outside the frame — on the page or directly in the
+ * section — and put into it.
+ */
 const sectionReport =
   PLAN.section === undefined
     ? undefined
-    : { name: PLAN.section.name, found: false, created: false, moved: [] };
+    : {
+        name: PLAN.section.name,
+        found: false,
+        created: false,
+        moved: [],
+        frame: { name: PLAN.section.frame, found: false, created: false },
+      };
 
 /**
  * The section of this run: found, or created on the current page and stamped (F-2). A new section
@@ -486,85 +510,61 @@ function openSection() {
 }
 
 /**
- * Puts a set into the section (F-1, F-2). A set the run finds in the section keeps its place —
- * a second run moves nothing. A set the run created, or found still lying on the page, goes to
- * the right of the last set in the section: its right edge plus the gap, top-aligned with it;
- * the first set of a section lies at the padding. Gemessen 2026-10-13 in f10b-5: ein neues Set
- * lag bei 0/0 auf dem vorhandenen und musste von Hand verschoben werden (F-1). Figma keeps x and y
- * of a re-parented node as numbers, now relative to the new parent, so they are written after
- * appendChild. Returns where the set lies, and after which set, for the report.
+ * The frame „Eroj" in the section (F-8, gemessen 2026-10-14 in f10b-5): found, or created at the
+ * section's padding and stamped like the section. Nach dem Lauf mit sieben Sets lag elektilo auf
+ * ligilo: die Abstände von F-1/F-7 kamen aus den Breiten im Standardmodus, und die Breiten ändern
+ * sich je Markenmodus. Auto-layout places the sets from their sizes in whatever mode is on screen
+ * — horizontal, wrapping, spacing.xlarge between the sets and between the rows, hugging both
+ * ways, no fill — so the plugin computes no place of a set (Regel 0: das Werkzeug kann es). What
+ * the plugin owns on the frame is neutral or the plan's, like on every node it draws.
  */
-function placeSet(section, set, name, created) {
+function openFrame(section) {
   if (section === undefined) return undefined;
-  if (set.parent === section) {
-    // F-7: a found set keeps its place unless its left neighbour's gap runs into it — then it
-    // moves right, once; the next run finds enough room and keeps it.
-    const left = leftNeighbour(section, set);
-    const needed = left === undefined ? undefined : left.x + left.width + gapAfter(left);
-    if (needed === undefined || set.x >= needed) {
-      return { x: set.x, y: set.y, after: null, action: "kept" };
-    }
-    write(set, "x", needed);
-    return {
-      x: set.x,
-      y: set.y,
-      after: left.getSharedPluginData(NAMESPACE, "ero"),
-      action: "spaced",
-    };
+  let frame = findFrame(section);
+  sectionReport.frame.found = frame !== undefined;
+  if (frame === undefined) {
+    frame = create(() => figma.createFrame());
+    section.appendChild(frame);
+    stamp(frame, "frame", PLAN.section.frame);
+    write(frame, "x", PLAN.section.padding);
+    write(frame, "y", PLAN.section.padding);
+    sectionReport.frame.created = true;
   }
-  let last;
-  for (const child of ownedSets(section)) {
-    if (child === set) continue;
-    if (last === undefined || child.x + child.width > last.x + last.width) last = child;
-  }
-  const x = last === undefined ? PLAN.section.padding : last.x + last.width + gapAfter(last);
-  const y = last === undefined ? PLAN.section.padding : last.y;
-  section.appendChild(set);
-  write(set, "x", x);
-  write(set, "y", y);
-  if (!created) sectionReport.moved.push(name);
-  return {
-    x: set.x,
-    y: set.y,
-    after: last === undefined ? null : last.getSharedPluginData(NAMESPACE, "ero"),
-    action: created ? "created" : "moved",
-  };
-}
-
-/** The component sets the plugin owns inside the section. */
-function ownedSets(section) {
-  const sets = [];
-  for (const child of section.children) {
-    if (child.type !== "COMPONENT_SET") continue;
-    if (child.getSharedPluginData(NAMESPACE, "ero") === "") continue;
-    sets.push(child);
-  }
-  return sets;
+  write(frame, "name", PLAN.section.frame);
+  own(frame, NEUTRAL);
+  Object.assign(gather(frame), {
+    layoutMode: "HORIZONTAL",
+    layoutWrap: "WRAP",
+    itemSpacing: PLAN.section.gap,
+    counterAxisSpacing: PLAN.section.gap,
+    layoutSizingHorizontal: "HUG",
+    layoutSizingVertical: "HUG",
+  });
+  flush(frame);
+  return frame;
 }
 
 /**
- * The gap after a set (F-7): the plan's gap, or the plan's share of the set's own width in the
- * mode on screen, whichever is larger. Gemessen 2026-10-14 in f10b-5: ekzemplo (Archivo Black)
- * made the kampo set wider than the gap of komuna; the sets are not measured in every mode (F-2:
- * the plugin sets no mode on the section), so the set's width stands in for the brand's growth.
+ * Puts a set into the frame „Eroj" (F-8): a set the run finds in the frame stays where it is in
+ * the frame's order; a set the run created, or found on the page or directly in the section, is
+ * appended at the end. The set is in the frame's flow (layoutPositioning AUTO), and Figma places
+ * it — the plugin writes no x or y. Returns the frame and that the layout places the set.
  */
-function gapAfter(set) {
-  return Math.max(PLAN.section.gap, set.width * PLAN.section.reserve);
-}
-
-/** The owned set whose right edge lies furthest right while still left of this set's left edge. */
-function leftNeighbour(section, set) {
-  let left;
-  for (const child of ownedSets(section)) {
-    if (child === set || child.x >= set.x) continue;
-    if (left === undefined || child.x + child.width > left.x + left.width) left = child;
+function placeSet(frame, set, name, created) {
+  if (frame === undefined) return undefined;
+  if (set.parent !== frame) {
+    frame.appendChild(set);
+    if (!created) sectionReport.moved.push(name);
   }
-  return left;
+  write(set, "layoutPositioning", "AUTO");
+  return { frame: PLAN.section.frame, action: "in-layout" };
 }
 
 /**
  * The section as large as its content plus the padding on the right and at the bottom (F-2),
- * resized only when it differs, so a second run writes nothing.
+ * resized only when it differs, so a second run writes nothing. Its content is the frame „Eroj"
+ * (F-8), measured in the mode on screen when the run ends; a section does not hug, so after a
+ * brand switch the frame may outgrow it until the next run.
  */
 function fitSection(section) {
   if (section === undefined || section.children.length === 0) return;
@@ -1163,8 +1163,10 @@ async function applyComponents(variables, warnings) {
     });
   }
   const reports = [];
-  // The section every set lies in (F-2): found, or created before the first set is placed.
+  // The section and its frame every set lies in (F-2, F-8): found, or created before the first
+  // set is placed.
   const section = openSection();
+  const frame = openFrame(section);
   progress.section = sectionReport;
   for (const component of PLAN.components) {
     let set = findSet(component.set);
@@ -1501,8 +1503,8 @@ async function applyComponents(variables, warnings) {
         }
       }
     }
-    // Where the set lies (F-1, F-2): kept, or put to the right of the last set in the section.
-    report.placement = placeSet(section, set, component.set, madeThisRun.get(component.set) === set);
+    // Where the set lies (F-8): in the frame Eroj, placed by Figma's auto-layout.
+    report.placement = placeSet(frame, set, component.set, madeThisRun.get(component.set) === set);
     report.layout = measureLayout(set, component);
     report.layout.refused = refused;
     // Symmetric (F10): the plan against the file, in both directions, with names. The finding

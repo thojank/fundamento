@@ -104,6 +104,7 @@ Fixtures (je `expected-issues.json`, `git check-ignore` leer): `sxaltilo-label-s
 - **B-2 `brief` des `kampo` wächst:** 708 → 730 (Grenze 750) durch die längere Kialo von `toggle`; PR ③/④ teilen `choose` in zwei Einträge – der `kampo` reißt die Grenze dann voraussichtlich. Nicht gekürzt, gemessen.
 - **B-3 Zielgröße:** Die Schiene `small` ist 18 px hoch; Ziel ist Schiene + Label (das Label schaltet mit). Ob das 24 × 24 (WCAG 2.5.8) in jedem Fall trägt, misst die Abnahme.
 - **B-4 Kandidaten:** `beside` am `kampo`; eigene Hover-Farbe der ungeschalteten Schiene; gemeinsame Bindungstabelle für Feld-Bauformen (Spec ④).
+- **F-8 Figma (gemessen 2026-10-14 in f10b-5)** liegt auf diesem Branch als eigene Commits (rot `08286ad`, dann grün), nur Plugin, nicht Teil des `sxaltilo`: die Sets liegen im Frame `Eroj` mit Auto-Layout in der Section „Fundamento“, F-7s Reserve ist entfernt. Eintrag in [`../008-ligilo/plan.md`](../008-ligilo/plan.md) → „Nachlese 2026-10-13“.
 
 ### Offen (für den Maintainer)
 
