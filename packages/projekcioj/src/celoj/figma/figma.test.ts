@@ -1119,7 +1119,8 @@ describe("Figma plan for the elekto (Spec 010 ③)", () => {
     expect(set?.texts).toEqual({ help: "Hinweis", error: "Fehler" });
     expect(set?.entry).toEqual({ key: "selected", texts: ["Eins", "Zwei", "Drei"], selected: 0 });
     expect(set?.sign).toMatch(/^<svg [^>]*viewBox="0 0 16 16"/);
-    expect(set?.sign).toContain("<circle");
+    // The dot as a path: Figma imports one vector, as for the check mark (② D-09).
+    expect(set?.sign).toContain('<path d="M8 4a4 4 0 1 1 0 8a4 4 0 1 1 0-8z"/>');
   });
 
   it("binds what follows selected per value of the key: the chosen circle filled, its dot drawn (G3, E7)", () => {

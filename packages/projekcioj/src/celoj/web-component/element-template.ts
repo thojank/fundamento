@@ -10,9 +10,10 @@
  * The native control an a11y role is rendered as (Celo knowledge, Art. VIII). `toggle` is a
  * native button with the role of the Skemo, a control with its label beside it: the track of a
  * switch with the knob in it (Spec 010 ①, D-09), the box of a checkbox with the check mark in it
- * (Spec 010 ②, D-08).
+ * (Spec 010 ②, D-08). `group` is a radio group (Spec 010 ③, D-06): an element with role
+ * radiogroup named by its label, one row with role radio per option of the light DOM.
  */
-export type HostControl = "button" | "a" | "input" | "toggle";
+export type HostControl = "button" | "a" | "input" | "toggle" | "group";
 
 export interface ElementNames {
   /** `fm-butono` */
@@ -29,8 +30,11 @@ export interface ElementNames {
   role?: string;
   /** Whether the Skemo has the part required-mark: a toggle shows it in its label (D-08). */
   marked?: boolean;
-  /** Slot names in the order the Skemo declares them; the default slot is the label. */
-  slots?: { name: string; default?: boolean; decorative?: boolean }[];
+  /**
+   * Slot names in the order the Skemo declares them; the default slot is the label. A slot whose
+   * entries are options (Spec 010 ③, SkemoSlot.entry) is a `list`: one row per entry.
+   */
+  slots?: { name: string; default?: boolean; decorative?: boolean; list?: boolean }[];
   /**
    * The Make Kit builds one file per Aspekto: the descriptor and the stylesheet are then constants
    * above the element instead of imports (D-14).
@@ -43,6 +47,7 @@ export function hostOf(role: string): HostControl {
   if (role === "link") return "a";
   if (role === "textbox") return "input";
   if (role === "switch" || role === "checkbox") return "toggle";
+  if (role === "radiogroup") return "group";
   return "button";
 }
 
@@ -61,6 +66,12 @@ const MARK =
 const REQUIRED_MARK =
   '<svg aria-hidden="true" viewBox="0 0 16 16" width="8" height="8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 2v12M2.8 5l10.4 6M13.2 5 2.8 11"/></svg>';
 
+/**
+ * The dot of a chosen option in a box of 16 × 16 (Spec 010 ③, D-05): a circle of radius 4 in the
+ * middle, drawn as a path so that Figma imports one vector, as for the check mark (② D-09).
+ */
+const DOT_PATH = "M8 4a4 4 0 1 1 0 8a4 4 0 1 1 0-8z";
+
 /** The outline of the check mark in a box of 16 × 16 (Spec 010 ②, D-08). */
 const CHECK_PATH = "M6.4 12.6 2.2 8.4l1.4-1.4 2.8 2.8 6-6 1.4 1.4z";
 
@@ -72,6 +83,10 @@ const CHECK_PATH = "M6.4 12.6 2.2 8.4l1.4-1.4 2.8 2.8 6-6 1.4 1.4z";
  * box of 16 (one shape for both pictures).
  */
 export function signOf(role: string, size = "100%"): string | undefined {
+  // The dot of a chosen option (Spec 010 ③, D-05): half the box of the indicator, in its middle.
+  if (role === "radiogroup") {
+    return `<svg aria-hidden="true" viewBox="0 0 16 16" width="${size}" height="${size}" fill="currentColor"><path d="${DOT_PATH}"/></svg>`;
+  }
   if (role !== "checkbox") return undefined;
   return `<svg aria-hidden="true" viewBox="0 0 16 16" width="${size}" height="${size}" fill="currentColor"><path d="${CHECK_PATH}"/></svg>`;
 }
@@ -82,7 +97,7 @@ export function signOf(role: string, size = "100%"): string | undefined {
  */
 function textsMarkup(slots: NonNullable<ElementNames["slots"]>): string {
   return slots
-    .filter((slot) => slot.default !== true && slot.decorative !== true)
+    .filter((slot) => slot.default !== true && slot.decorative !== true && slot.list !== true)
     .map(
       (slot) =>
         `<span part="${slot.name}" id="${slot.name}" hidden${slot.name === "error" ? ' aria-live="polite"' : ""}><slot name="${slot.name}"></slot></span>`,
@@ -121,6 +136,28 @@ function toggleMarkup(
   return `<div part="field"><button part="control" id="control" type="button" role="${role}" aria-labelledby="label"><span part="indicator">${signOf(role) ?? ""}</span></button>${beside}<span id="fm-texts" hidden></span></div>`;
 }
 
+/**
+ * The shadow markup of a radio group (Spec 010 ③, D-06): the group with role radiogroup, named by
+ * its label (with the mark of a required group), the column of options — its rows are made by the
+ * element, one per option — and help and error below. The element assigns the children to the
+ * slots itself (manual slot assignment), so that every option gets a row of its own.
+ */
+function groupMarkup(slots: NonNullable<ElementNames["slots"]>, marked: boolean): string {
+  const mark = marked
+    ? `<span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span>`
+    : "";
+  return `<div part="field" id="control" role="radiogroup" aria-labelledby="label"><span part="label" id="label"><slot></slot>${mark}</span><div part="options"></div>${textsMarkup(slots)}<span id="fm-texts" hidden></span></div>`;
+}
+
+/**
+ * One row of a radio group (Spec 010 ③, D-06): role radio, its state aria-checked, the circle
+ * (control) with the dot (indicator) in it and the label of the option beside it; the option itself
+ * is assigned to the row's slot. The element adds one row per option.
+ */
+function rowMarkup(role: string): string {
+  return `<div part="option" role="radio" aria-checked="false" tabindex="-1"><span part="control"><span part="indicator">${signOf(role) ?? ""}</span></span><span part="option-label"><slot></slot></span></div>`;
+}
+
 /** The shadow markup of the control: slots before the label (icon-start), the label, the rest. */
 function markup(
   host: HostControl,
@@ -130,6 +167,7 @@ function markup(
 ): string {
   if (host === "input") return fieldMarkup(slots);
   if (host === "toggle") return toggleMarkup(role, slots, marked);
+  if (host === "group") return groupMarkup(slots, marked);
   const before = slots.filter((slot) => slot.default !== true && slot.name.endsWith("-start"));
   const after = slots.filter((slot) => slot.default !== true && !slot.name.endsWith("-start"));
   const last = after.at(-1)?.name;
@@ -161,8 +199,17 @@ export function elementSource({
     inline === true
       ? `const SKEMO = ${constant}_SKEMO;\nconst CSS = ${constant}_CSS;`
       : `import { ${constant}_SKEMO as SKEMO } from "./skemo.js";\nimport { ${constant}_CSS as CSS } from "./${ero}.styles.js";`;
-  const control = host === "a" ? "a" : host === "input" ? "input" : "button";
+  const control =
+    host === "a"
+      ? "a"
+      : host === "input"
+        ? "input"
+        : host === "group"
+          ? "[role=radiogroup]"
+          : "button";
   const isToggle = host === "toggle";
+  const isGroup = host === "group";
+  const listSlot = slots.find((slot) => slot.list === true)?.name ?? "";
   // Only the element of a toggle carries these lines (Spec 010 ①, D-09; ②, D-08).
   const toggleRender = isToggle
     ? `    // A toggle (Spec 010 ①, D-09): checked is spoken as aria-checked; in a form it sends "on"
@@ -188,6 +235,152 @@ export function elementSource({
       if (invalid) control.setAttribute("aria-invalid", "true");
       else control.removeAttribute("aria-invalid");
     }
+`
+    : "";
+  // A radio group (Spec 010 ③, D-06): the chosen row is the option whose value is the prop value —
+  // selected is the state of the row (aria-checked), never of the group; one tab stop, the chosen
+  // row or else the first; the chosen value is the form's, and a required group without a choice
+  // keeps the form from being sent.
+  const groupRender = isGroup
+    ? `    const group = control;
+    const rows = this.#rows();
+    const values = this.#values();
+    const value = this.propValue("value");
+    const chosen = typeof value === "string" && value !== "" ? values.indexOf(value) : -1;
+    const off = this.propValue("disabled") === true;
+    rows.forEach((row, index) => {
+      row.setAttribute("aria-checked", String(index === chosen));
+      row.tabIndex = !off && index === (chosen === -1 ? 0 : chosen) ? 0 : -1;
+      if (off) row.setAttribute("aria-disabled", "true");
+      else row.removeAttribute("aria-disabled");
+    });
+    if (off) group.setAttribute("aria-disabled", "true");
+    else group.removeAttribute("aria-disabled");
+    const orientation = this.propValue("orientation");
+    group.setAttribute("aria-orientation", typeof orientation === "string" ? orientation : "vertical");
+    this.#internals.setFormValue(chosen === -1 ? null : (values[chosen] ?? null));
+    const required = this.propValue("required") === true;
+    if (required) group.setAttribute("aria-required", "true");
+    else group.removeAttribute("aria-required");
+    const missing = TEXTS.required?.[this.#lingvo()] ?? TEXTS.required?.en ?? "";
+    const first = rows[0];
+    if (required && chosen === -1 && missing !== "" && first !== undefined) {
+      this.#internals.setValidity({ valueMissing: true }, missing, first);
+    } else {
+      this.#internals.setValidity({});
+    }
+    const invalid = this.propValue("invalid") === true || this.#filled("error");
+    if (invalid) group.setAttribute("aria-invalid", "true");
+    else group.removeAttribute("aria-invalid");
+`
+    : "";
+  // The constructor of a radio group: it assigns the children to the slots and follows them, and
+  // the arrow keys move and choose (Spec 010 ③, D-06).
+  const groupInit = isGroup
+    ? `    new MutationObserver(() => {
+      this.#assign();
+      this.#render();
+    }).observe(this, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+      attributes: true,
+      attributeFilter: ["slot", "value"],
+    });
+    control.addEventListener("keydown", (event) => this.#key(event));
+`
+    : "";
+  // The methods of a radio group (Spec 010 ③, D-06): its rows and their values, the assignment of
+  // the children, the keys of the Skemo, the choice.
+  const groupMethods = isGroup
+    ? `
+  /** Focus goes to the one tab stop of the group: the chosen row, else the first. */
+  override focus(options?: FocusOptions): void {
+    const rows = this.#rows();
+    (rows.find((row) => row.tabIndex === 0) ?? rows[0])?.focus(options);
+  }
+
+  /** The rows of the group, one per option. */
+  #rows(): HTMLElement[] {
+    return [...(this.shadowRoot?.querySelectorAll('[part="option"]') ?? [])] as HTMLElement[];
+  }
+
+  /** The value of each option: its attribute value, else its text. */
+  #values(): string[] {
+    return this.#rows().map((row) => {
+      const option = row.querySelector("slot")?.assignedNodes()[0];
+      return option instanceof Element
+        ? (option.getAttribute("value") ?? option.textContent?.trim() ?? "")
+        : "";
+    });
+  }
+
+  /**
+   * Assigns the children to the slots (manual slot assignment): every child in the slot of the
+   * options to a row of its own, made here; the others by their slot name, the rest to the label.
+   */
+  #assign(): void {
+    const shadow = this.shadowRoot;
+    if (shadow === null) return;
+    const label: (Element | Text)[] = [];
+    const options: Element[] = [];
+    const named = new Map<string, (Element | Text)[]>();
+    for (const node of this.childNodes) {
+      if (!(node instanceof Element) && !(node instanceof Text)) continue;
+      const slot = node instanceof Element ? node.getAttribute("slot") : null;
+      if (slot === null) label.push(node);
+      else if (slot === "${listSlot}" && node instanceof Element) options.push(node);
+      else named.set(slot, [...(named.get(slot) ?? []), node]);
+    }
+    this.#label.assign(...label);
+    for (const holder of shadow.querySelectorAll("slot[name]")) {
+      (holder as HTMLSlotElement).assign(...(named.get(holder.getAttribute("name") ?? "") ?? []));
+    }
+    const list = shadow.querySelector('[part="options"]');
+    if (!(list instanceof HTMLElement)) return;
+    while (list.children.length > options.length) list.lastElementChild?.remove();
+    while (list.children.length < options.length) {
+      list.insertAdjacentHTML("beforeend", \`${rowMarkup(role)}\`);
+    }
+    options.forEach((option, index) => {
+      list.children[index]?.querySelector("slot")?.assign(option);
+    });
+  }
+
+  /** The keys of the Skemo: the arrows move and choose, wrapping around; Space chooses. */
+  #key(event: KeyboardEvent): void {
+    const key = event.key === " " ? "Space" : event.key;
+    if (!KEYS.includes(key) || this.propValue("disabled") === true) return;
+    const rows = this.#rows();
+    if (rows.length === 0) return;
+    const row = event.composedPath().find(
+      (node) => node instanceof HTMLElement && node.getAttribute("part") === "option",
+    );
+    const at = Math.max(0, rows.indexOf(row as HTMLElement));
+    const next =
+      key === "ArrowDown" || key === "ArrowRight"
+        ? (at + 1) % rows.length
+        : key === "ArrowUp" || key === "ArrowLeft"
+          ? (at - 1 + rows.length) % rows.length
+          : key === "Space"
+            ? at
+            : undefined;
+    if (next === undefined) return;
+    event.preventDefault();
+    this.#choose(next);
+  }
+
+  /** Chooses the option of a row: its value is the prop value; input and change, as a radio. */
+  #choose(index: number): void {
+    const row = this.#rows()[index];
+    const value = this.#values()[index];
+    if (row === undefined || value === undefined) return;
+    row.focus();
+    if (this.getAttribute("value") === value) return;
+    this.setAttribute("value", value);
+    this.dispatchEvent(new Event("input", { bubbles: true, composed: true }));
+    this.dispatchEvent(new Event("change", { bubbles: true }));
+  }
 `
     : "";
   // A checkbox turns with Space alone (Spec 010 ②, D-08): the Skemo names its keys, and Enter on a
@@ -285,7 +478,7 @@ export class ${className} extends Base {
   constructor() {
     super();
     this.#internals = this.attachInternals();
-    const root = this.attachShadow({ mode: "open", delegatesFocus: true });
+    const root = this.attachShadow({ mode: "open", delegatesFocus: true${isGroup ? ', slotAssignment: "manual"' : ""} });
     if (sheet === undefined) {
       sheet = new CSSStyleSheet();
       sheet.replaceSync(CSS);
@@ -307,7 +500,7 @@ export class ${className} extends Base {
     this.#label = label;
     this.#texts = texts;
     control.addEventListener("click", (event) => this.#activate(event));
-${toggleKeys}    label.addEventListener("slotchange", () => this.#render());
+${toggleKeys}${groupInit}    label.addEventListener("slotchange", () => this.#render());
     for (const named of root.querySelectorAll("slot[name]")) {
       named.addEventListener("slotchange", () => this.#render());
     }
@@ -322,7 +515,7 @@ ${toggleKeys}    label.addEventListener("slotchange", () => this.#render());
   }
 
   connectedCallback(): void {
-    this.#render();
+${isGroup ? "    this.#assign();\n" : ""}    this.#render();
   }
 
   attributeChangedCallback(): void {
@@ -444,7 +637,7 @@ ${toggleKeys}    label.addEventListener("slotchange", () => this.#render());
       if (invalid) control.setAttribute("aria-invalid", "true");
       else control.removeAttribute("aria-invalid");
     }
-${toggleRender}    // The texts of the slots that describe the control (Spec 009, D-02; a checkbox, Spec 010 ②):
+${toggleRender}${groupRender}    // The texts of the slots that describe the control (Spec 009, D-02; a checkbox, Spec 010 ②):
     // shown while they have text, and its description in that order.
     for (const source of DESCRIPTION) {
       const [kind, name = ""] = source.split(":");
@@ -488,8 +681,18 @@ ${toggleRender}    // The texts of the slots that describe the control (Spec 009
       event.stopImmediatePropagation();
       return;
     }
-    if (!(this.#control instanceof HTMLButtonElement)) return;
-${toggleActivate}  }
+${
+  isGroup
+    ? `    // A radio group (Spec 010 ③, D-06): a click on a row chooses its option.
+    const row = event.composedPath().find(
+      (node) => node instanceof HTMLElement && node.getAttribute("part") === "option",
+    );
+    if (row instanceof HTMLElement) this.#choose(this.#rows().indexOf(row));
+`
+    : `    if (!(this.#control instanceof HTMLButtonElement)) return;
+${toggleActivate}`
+}  }
+${groupMethods}
 }
 
 /**

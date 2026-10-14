@@ -100,7 +100,15 @@ function exampleBlock(jugxo: Jugxo, tag: string): string {
       const attributes = Object.entries(instance.props)
         .map(([key, value]) => (value === true ? ` ${key}` : ` ${key}="${String(value)}"`))
         .join("");
-      return `<${tag}${attributes}>${instance.label ?? ""}</${tag}>`;
+      // The options of a radio group (Spec 010 ③): one element per entry, its value its position.
+      const entries = Object.entries(instance.texts ?? {})
+        .flatMap(([slot, texts]) =>
+          Array.isArray(texts)
+            ? texts.map((text, index) => `<data slot="${slot}" value="${index + 1}">${text}</data>`)
+            : [],
+        )
+        .join("");
+      return `<${tag}${attributes}>${instance.label ?? ""}${entries}</${tag}>`;
     })
     .join("\n");
   const verdict = jugxo.decision === "approved" ? "CORRECT" : "WRONG";
@@ -112,10 +120,17 @@ function exampleLabel(
   input: CeloInput,
   reguloId: string | undefined,
   decision: Jugxo["decision"],
+  of?: string,
 ): string | undefined {
   if (reguloId === undefined) return undefined;
   for (const jugxo of input.modelo.jugxoj) {
     if (jugxo.decision !== decision || jugxo.ekzemplo?.regulo !== reguloId) continue;
+    // A rule on the entries of a slot (Spec 010 ③: the options) shows them, not the label.
+    const slot = of?.startsWith("slot:") === true ? of.slice("slot:".length) : undefined;
+    const entries = jugxo.ekzemplo.instances
+      .map((instance) => (slot === undefined ? undefined : instance.texts?.[slot]))
+      .find((texts) => Array.isArray(texts));
+    if (Array.isArray(entries)) return entries.join(", ");
     const label = jugxo.ekzemplo.instances.find((instance) => instance.label !== undefined)?.label;
     if (label !== undefined) return label;
   }
@@ -184,8 +199,8 @@ function uzoSections(input: CeloInput, uzo: Uzo, reguloj: readonly Regulo[]): st
       const kind = rule.fixed
         ? "fixed: no brand overrides it"
         : `adjustable: a brand may override it with a Jugxo${rule.severity === "warning" ? "; reports a warning" : ""}`;
-      const correct = exampleLabel(input, regulo?.id, "approved");
-      const wrong = exampleLabel(input, regulo?.id, "rejected");
+      const correct = exampleLabel(input, regulo?.id, "approved", rule.of);
+      const wrong = exampleLabel(input, regulo?.id, "rejected", rule.of);
       return `- **${rule.regulo}** (${kind}) — ${regulo?.statement ?? ""}\n  Why: ${regulo?.kialo ?? ""}\n  CORRECT: "${correct ?? ""}" · WRONG: "${wrong ?? ""}"`;
     })
     .join("\n");
@@ -275,12 +290,23 @@ function componentGuideline(
   const iconOnly = skemo.props.some((prop) => prop.name === "label")
     ? ` for an icon-only ${entry.ero.name} set \`label\` as its accessible name.`
     : "";
+  // A slot whose entries are options (Spec 010 ③, E7): how an option is written, and which is
+  // chosen — the one whose value is the prop the Skemo names.
+  const options = skemo.slots
+    .flatMap((slot) =>
+      slot.entry === undefined
+        ? []
+        : [
+            ` Each option is an element in the slot \`${slot.name}\` with its value: \`<data slot="${slot.name}" value="express">Express</data>\`; the option whose value is \`${slot.entry.equals}\` is chosen.`,
+          ],
+    )
+    .join("");
   return `# ${name}
 
 ${entry.ero.description}
 
 Use \`<${name}>\` in React, or the element \`<${tag}>\` in plain HTML. The label is the children of
-the component${iconOnly === "" ? "; it always shows." : `;${iconOnly}`}${target}
+the component${iconOnly === "" ? "; it always shows." : `;${iconOnly}`}${target}${options}
 
 ## Props
 
@@ -346,6 +372,17 @@ function guidelines(input: CeloInput, aspekto: string): GeneratedFile[] {
         `- Every yes/no that applies with the form is a \`<${componentName(entry.ero)}>\`${switchName === undefined ? "" : `; a setting that applies at once is a \`<${componentName(switchName.ero)}>\``}.`,
     )
     .join("\n");
+  // Spec 010 ③ (G7, plan ③ D-11): a choice of one among a few visible options comes from the radio
+  // group; six or more go into a list — named once the Modelo has one (elektilo, PR ④), until then
+  // the kit says that it has none.
+  const listName = eroj.find((entry) => entry.skemo.a11y.role === "combobox");
+  const radioLines = eroj
+    .filter((entry) => entry.skemo.a11y.role === "radiogroup" && entry.uzo !== undefined)
+    .map(
+      (entry) =>
+        `- A choice of one among a few visible options is an \`<${componentName(entry.ero)}>\`; six or more go into ${listName === undefined ? "a list, which this kit does not have yet: ask a person" : `an \`<${componentName(listName.ero)}>\` list`}.`,
+    )
+    .join("\n");
   return [
     {
       path: `${base}/Guidelines.md`,
@@ -362,6 +399,7 @@ ${ruleLines}
 ${fieldLines}
 ${switchLines}
 ${checkboxLines}
+${radioLines}
 
 Where to look: \`setup.md\` for the imports, \`foundations/\` for the tokens, \`components/\` for
 each component.
