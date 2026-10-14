@@ -147,11 +147,12 @@ describe("the scheme eroj (Spec 008 T009)", () => {
   const eroj = concepts.filter((concept) => concept.inScheme === "eroj");
 
   it("holds one concept per Ero of the Modelo, under #Ero, related to each other", () => {
-    expect(eroNames).toEqual(["butono", "kampo", "ligilo", "sxaltilo"]);
+    expect(eroNames).toEqual(["butono", "kampo", "ligilo", "markobutono", "sxaltilo"]);
     expect(eroj.map((concept) => concept.term).sort()).toEqual([
       "Butono",
       "Kampo",
       "Ligilo",
+      "Markobutono",
       "Sxaltilo",
     ]);
     for (const concept of eroj) {
@@ -173,13 +174,30 @@ describe("the scheme eroj (Spec 008 T009)", () => {
       { predicate: "references", target: "#Butono" },
       { predicate: "references", target: "#Sxaltilo" },
     ]);
-    // Spec 010 ①: the switch, with its German and English names (Schalter, switch).
+    // Spec 010 ①: the switch, with its German and English names (Schalter, switch); since ② it
+    // sends a setting that applies only with the form to the checkbox.
     expect(relations("Sxaltilo")).toEqual([
       { predicate: "references", target: "#Butono" },
       { predicate: "references", target: "#Kampo" },
+      { predicate: "references", target: "#Markobutono" },
     ]);
     const sxaltilo = eroj.find((concept) => concept.term === "Sxaltilo");
     expect(sxaltilo?.prefLabel).toEqual({ eo: "Sxaltilo", en: "switch", de: "Schalter" });
+    expect((sxaltilo?.definition as { en: string } | undefined)?.en).not.toMatch(/coming/);
+    // Spec 010 ②: the checkbox (Kontrollkästchen, checkbox), with the switch it answers to and
+    // the Eroj it stands with in a form.
+    expect(relations("Markobutono")).toEqual([
+      { predicate: "references", target: "#Sxaltilo" },
+      { predicate: "references", target: "#Kampo" },
+      { predicate: "references", target: "#Butono" },
+    ]);
+    const markobutono = eroj.find((concept) => concept.term === "Markobutono");
+    expect(markobutono?.prefLabel).toEqual({
+      eo: "Markobutono",
+      en: "checkbox",
+      de: "Kontrollkästchen",
+    });
+    expect((markobutono?.altLabel as { de: string[] } | undefined)?.de).toContain("Checkbox");
   });
 
   it("reports an Ero without a concept and a concept without an Ero", () => {

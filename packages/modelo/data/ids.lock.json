@@ -88,6 +88,10 @@
       "status": "active",
       "type": "ero"
     },
+    "ero_01M4WPZVP7R6HPEMAQ4EJKH3MT": {
+      "status": "active",
+      "type": "ero"
+    },
     "jug_01M2VRT7KQ77W91MVXB4GXSRZ4": {
       "status": "active",
       "type": "jugxo"
@@ -449,6 +453,38 @@
       "type": "jugxo"
     },
     "jug_01M4WMD28XK5G77EBVFKGDXA10": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M4WPZWSQ9QBQ9E3NFY410XHM": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M4WPZWSR006Y8WCECWAQKS8A": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M4WPZWSR006Y8WCECWAQKS8B": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M4WPZWSR006Y8WCECWAQKS8C": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M4WPZWSR006Y8WCECWAQKS8D": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M4WPZWSR006Y8WCECWAQKS8E": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M4WPZWSR006Y8WCECWAQKS8F": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M4WPZWSR006Y8WCECWAQKS8G": {
       "status": "active",
       "type": "jugxo"
     },
@@ -1001,6 +1037,10 @@
       "type": "skemo"
     },
     "ske_01M4WMD145A64P8KV15HEH3TQ9": {
+      "status": "active",
+      "type": "skemo"
+    },
+    "ske_01M4WPZW25ZEQ8AEGHGBKVC4KB": {
       "status": "active",
       "type": "skemo"
     },
@@ -2449,6 +2489,10 @@
       "type": "uzo"
     },
     "uzo_01M4WMD1GEGR6YWD8Q1WW9D0T3": {
+      "status": "active",
+      "type": "uzo"
+    },
+    "uzo_01M4WPZWDY0CFECQVVJV3TSQJN": {
       "status": "active",
       "type": "uzo"
     }

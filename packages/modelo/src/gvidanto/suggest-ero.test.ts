@@ -73,6 +73,8 @@ describe("suggest_ero", () => {
       "email",
       "navigate",
       "external",
+      "agree",
+      "opt-in",
       "toggle",
     ]);
     // Spec 007 (OP-6, D-06): the system says it does not cover the goal; a person decides.

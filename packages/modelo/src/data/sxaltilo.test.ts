@@ -22,12 +22,13 @@ const named = (name: string) => modelo.reguloj.find((regulo) => regulo.name === 
 const uzoOf = (name: string) => modelo.eroj.find((entry) => entry.ero.name === name)?.uzo;
 
 describe("sxaltilo in the repo Modelo (G1, G2, section 1)", () => {
-  it("lives in data/eroj/sxaltilo/skemo.json, after the three Eroj, and the repo Modelo stays valid", () => {
+  it("lives in data/eroj/sxaltilo/skemo.json, after the other Eroj, and the repo Modelo stays valid", () => {
     expect(sxaltilo.file).toBe("modelo/data/eroj/sxaltilo/skemo.json");
     expect(modelo.eroj.map((entry) => entry.ero.name)).toEqual([
       "butono",
       "kampo",
       "ligilo",
+      "markobutono",
       "sxaltilo",
     ]);
     expect(validateModelo(defaultModeloSource()).errors).toEqual([]);
@@ -208,17 +209,19 @@ describe("the Reguloj of the sxaltilo (G6, E5, D-14)", () => {
   it.each(["field-label-visible", "field-label-names-the-datum"])(
     "%s is widened to the sxaltilo, not duplicated (E5)",
     (name) => {
-      expect(named(name)?.appliesTo).toEqual({ eroj: ["kampo", "sxaltilo"] });
+      // Spec 010 ②: widened once more, to the markobutono (E5).
+      expect(named(name)?.appliesTo).toEqual({ eroj: ["kampo", "sxaltilo", "markobutono"] });
       expect(modelo.reguloj.filter((regulo) => regulo.name === name)).toHaveLength(1);
     },
   );
 
-  it("spacing-owned-by-container applies to all four Eroj", () => {
+  it("spacing-owned-by-container applies to every Ero", () => {
     expect(named("spacing-owned-by-container")?.appliesTo?.eroj).toEqual([
       "butono",
       "ligilo",
       "kampo",
       "sxaltilo",
+      "markobutono",
     ]);
   });
 

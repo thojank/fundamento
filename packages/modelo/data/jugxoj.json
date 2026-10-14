@@ -1720,6 +1720,198 @@
           }
         ]
       }
+    },
+    {
+      "id": "jug_01M4WPZWSQ9QBQ9E3NFY410XHM",
+      "ref": {
+        "ero": "ero_01M4WPZVP7R6HPEMAQ4EJKH3MT"
+      },
+      "decision": "approved",
+      "kialo": "The label names the option the tick answers, as a noun.",
+      "date": "2026-10-14",
+      "context": "Example CORRECT for the Regulo named in ekzemplo.regulo (Spec 010 ② G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4S1ZR7GEPZSTB9ES3REK3V1",
+        "instances": [
+          {
+            "ero": "markobutono",
+            "props": {},
+            "label": "Newsletter",
+            "lingvo": "de"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4WPZWSR006Y8WCECWAQKS8A",
+      "ref": {
+        "ero": "ero_01M4WPZVP7R6HPEMAQ4EJKH3MT"
+      },
+      "decision": "approved",
+      "kialo": "The label names the option the tick answers.",
+      "date": "2026-10-14",
+      "context": "Example CORRECT for the Regulo named in ekzemplo.regulo (Spec 010 ② G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4S1ZR7GEPZSTB9ES3REK3V1",
+        "instances": [
+          {
+            "ero": "markobutono",
+            "props": {},
+            "label": "Remember me",
+            "lingvo": "en"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4WPZWSR006Y8WCECWAQKS8B",
+      "ref": {
+        "ero": "ero_01M4WPZVP7R6HPEMAQ4EJKH3MT"
+      },
+      "decision": "rejected",
+      "kialo": "A verb of entering names a field, not an option that is ticked.",
+      "date": "2026-10-14",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 010 ② G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4S1ZR7GEPZSTB9ES3REK3V1",
+        "instances": [
+          {
+            "ero": "markobutono",
+            "props": {},
+            "label": "Newsletter eintragen",
+            "lingvo": "de"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4WPZWSR006Y8WCECWAQKS8C",
+      "ref": {
+        "ero": "ero_01M4WPZVP7R6HPEMAQ4EJKH3MT"
+      },
+      "decision": "rejected",
+      "kialo": "A verb of entering names a field, not an option that is ticked.",
+      "date": "2026-10-14",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 010 ② G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4S1ZR7GEPZSTB9ES3REK3V1",
+        "instances": [
+          {
+            "ero": "markobutono",
+            "props": {},
+            "label": "Complete the terms",
+            "lingvo": "en"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4WPZWSR006Y8WCECWAQKS8D",
+      "ref": {
+        "ero": "ero_01M4WPZVP7R6HPEMAQ4EJKH3MT"
+      },
+      "decision": "approved",
+      "kialo": "The error says what to do: tick the box, and why.",
+      "date": "2026-10-14",
+      "context": "Example CORRECT for the Regulo named in ekzemplo.regulo (Spec 010 ② G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4S1ZR7GEPZSTB9ES3REK3TY",
+        "instances": [
+          {
+            "ero": "markobutono",
+            "props": {
+              "required": true,
+              "invalid": true
+            },
+            "label": "Ich akzeptiere die AGB",
+            "texts": {
+              "error": "Akzeptiere die AGB, um fortzufahren"
+            },
+            "lingvo": "de"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4WPZWSR006Y8WCECWAQKS8E",
+      "ref": {
+        "ero": "ero_01M4WPZVP7R6HPEMAQ4EJKH3MT"
+      },
+      "decision": "approved",
+      "kialo": "The error names the way out, not only the fault.",
+      "date": "2026-10-14",
+      "context": "Example CORRECT for the Regulo named in ekzemplo.regulo (Spec 010 ② G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4S1ZR7GEPZSTB9ES3REK3TY",
+        "instances": [
+          {
+            "ero": "markobutono",
+            "props": {
+              "required": true,
+              "invalid": true
+            },
+            "label": "I accept the terms",
+            "texts": {
+              "error": "Accept the terms to continue"
+            },
+            "lingvo": "en"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4WPZWSR006Y8WCECWAQKS8F",
+      "ref": {
+        "ero": "ero_01M4WPZVP7R6HPEMAQ4EJKH3MT"
+      },
+      "decision": "rejected",
+      "kialo": "One word says that something is missing and nothing about what to do; the person guesses which box.",
+      "date": "2026-10-14",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 010 ② G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4S1ZR7GEPZSTB9ES3REK3TY",
+        "instances": [
+          {
+            "ero": "markobutono",
+            "props": {
+              "required": true,
+              "invalid": true
+            },
+            "label": "Ich akzeptiere die AGB",
+            "texts": {
+              "error": "Pflichtfeld"
+            },
+            "lingvo": "de"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4WPZWSR006Y8WCECWAQKS8G",
+      "ref": {
+        "ero": "ero_01M4WPZVP7R6HPEMAQ4EJKH3MT"
+      },
+      "decision": "rejected",
+      "kialo": "The fault without the way out leaves the person guessing.",
+      "date": "2026-10-14",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 010 ② G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4S1ZR7GEPZSTB9ES3REK3TY",
+        "instances": [
+          {
+            "ero": "markobutono",
+            "props": {
+              "required": true,
+              "invalid": true
+            },
+            "label": "I accept the terms",
+            "texts": {
+              "error": "Required"
+            },
+            "lingvo": "en"
+          }
+        ]
+      }
     }
   ]
 }

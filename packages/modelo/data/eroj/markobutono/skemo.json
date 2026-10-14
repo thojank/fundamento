@@ -1,0 +1,385 @@
+{
+  "ero": {
+    "id": "ero_01M4WPZVP7R6HPEMAQ4EJKH3MT",
+    "name": "markobutono",
+    "skemo": "ske_01M4WPZW25ZEQ8AEGHGBKVC4KB",
+    "description": "A checkbox: marks one option as yes or no inside a form; it applies when the form is sent. Its label names the option and always shows; it can show an error."
+  },
+  "skemo": {
+    "id": "ske_01M4WPZW25ZEQ8AEGHGBKVC4KB",
+    "ero": "ero_01M4WPZVP7R6HPEMAQ4EJKH3MT",
+    "props": [
+      {
+        "name": "checked",
+        "kind": "boolean",
+        "default": false,
+        "description": "The option is ticked: the box is filled and shows the check mark. A prop, not a state (E2): it holds the answer, the states say how the checkbox is touched."
+      },
+      {
+        "name": "required",
+        "kind": "boolean",
+        "default": false,
+        "description": "Must be ticked before the form is sent (terms accepted); marked visibly and audibly (Regulo required-marked)."
+      },
+      {
+        "name": "invalid",
+        "kind": "boolean",
+        "default": false,
+        "description": "The answer is wrong, a required box left empty; true whenever the slot error is filled (constraint)."
+      },
+      {
+        "name": "size",
+        "kind": "enum",
+        "values": [
+          "small",
+          "medium",
+          "large"
+        ],
+        "default": "medium",
+        "description": "Box, check mark and label on the scale of the kampo: the check mark takes size.icon.*, the box is the mark plus its border."
+      },
+      {
+        "name": "disabled",
+        "kind": "boolean",
+        "default": false,
+        "description": "Not available; skipped by the keyboard, the answer cannot be changed."
+      },
+      {
+        "name": "name",
+        "kind": "string",
+        "description": "The name in the form; without effect in a design tool, like type on the butono."
+      }
+    ],
+    "states": [
+      "rest",
+      "hover",
+      "focus",
+      "disabled",
+      "invalid"
+    ],
+    "slots": [
+      {
+        "name": "label",
+        "default": true,
+        "text": true,
+        "beside": true
+      },
+      {
+        "name": "error",
+        "text": true,
+        "beside": true
+      }
+    ],
+    "parts": {
+      "label": {
+        "color": {
+          "by": [
+            "state"
+          ]
+        },
+        "typography": {
+          "by": [
+            "size"
+          ]
+        }
+      },
+      "required-mark": {
+        "color": {
+          "fixed": "color.status.danger.text"
+        }
+      },
+      "error": {
+        "color": {
+          "fixed": "color.status.danger.text"
+        },
+        "typography": {
+          "fixed": "typography.caption"
+        }
+      },
+      "surface": {
+        "fill": {
+          "by": [
+            "checked",
+            "state"
+          ]
+        }
+      },
+      "border": {
+        "color": {
+          "by": [
+            "state"
+          ]
+        },
+        "width": {
+          "fixed": "border.width.default"
+        }
+      },
+      "box": {
+        "gap": {
+          "fixed": "spacing.small"
+        },
+        "radius": {
+          "fixed": "radius.role.control"
+        }
+      },
+      "indicator": {
+        "color": {
+          "by": [
+            "checked"
+          ]
+        },
+        "size": {
+          "by": [
+            "size"
+          ]
+        }
+      },
+      "focus-ring": {
+        "ring": {
+          "fixed": "focus.ring"
+        },
+        "offset": {
+          "fixed": "focus.offset"
+        },
+        "color": {
+          "fixed": "color.focus.inner"
+        }
+      },
+      "motion": {
+        "duration": {
+          "fixed": "motion.duration.fast"
+        },
+        "easing": {
+          "fixed": "motion.easing.standard"
+        }
+      }
+    },
+    "bindings": [
+      {
+        "part": "label",
+        "property": "color",
+        "when": {
+          "state": "rest"
+        },
+        "token": "color.text.default"
+      },
+      {
+        "part": "label",
+        "property": "color",
+        "when": {
+          "state": "disabled"
+        },
+        "token": "color.text.disabled"
+      },
+      {
+        "part": "label",
+        "property": "typography",
+        "when": {
+          "size": "small"
+        },
+        "token": "typography.label.2"
+      },
+      {
+        "part": "label",
+        "property": "typography",
+        "when": {
+          "size": "medium"
+        },
+        "token": "typography.label.1"
+      },
+      {
+        "part": "label",
+        "property": "typography",
+        "when": {
+          "size": "large"
+        },
+        "token": "typography.label.1"
+      },
+      {
+        "part": "surface",
+        "property": "fill",
+        "when": {
+          "checked": "true",
+          "state": "rest"
+        },
+        "token": "color.action.primary.rest"
+      },
+      {
+        "part": "surface",
+        "property": "fill",
+        "when": {
+          "checked": "true",
+          "state": "hover"
+        },
+        "token": "color.action.primary.hover"
+      },
+      {
+        "part": "surface",
+        "property": "fill",
+        "when": {
+          "checked": "true",
+          "state": "disabled"
+        },
+        "token": "color.action.primary.disabled"
+      },
+      {
+        "part": "surface",
+        "property": "fill",
+        "when": {
+          "checked": "false",
+          "state": "rest"
+        },
+        "token": "color.background.default"
+      },
+      {
+        "part": "border",
+        "property": "color",
+        "when": {
+          "state": "rest"
+        },
+        "token": "color.border.strong"
+      },
+      {
+        "part": "border",
+        "property": "color",
+        "when": {
+          "state": "disabled"
+        },
+        "token": "color.border.disabled"
+      },
+      {
+        "part": "border",
+        "property": "color",
+        "when": {
+          "state": "invalid"
+        },
+        "token": "color.status.danger.border"
+      },
+      {
+        "part": "indicator",
+        "property": "color",
+        "when": {
+          "checked": "true"
+        },
+        "token": "color.action.primary.text"
+      },
+      {
+        "part": "indicator",
+        "property": "color",
+        "when": {
+          "checked": "false"
+        },
+        "token": "none"
+      },
+      {
+        "part": "indicator",
+        "property": "size",
+        "when": {
+          "size": "small"
+        },
+        "token": "size.icon.small"
+      },
+      {
+        "part": "indicator",
+        "property": "size",
+        "when": {
+          "size": "medium"
+        },
+        "token": "size.icon.medium"
+      },
+      {
+        "part": "indicator",
+        "property": "size",
+        "when": {
+          "size": "large"
+        },
+        "token": "size.icon.large"
+      }
+    ],
+    "a11y": {
+      "role": "checkbox",
+      "name": [
+        "slot:label"
+      ],
+      "description": [
+        "slot:error"
+      ],
+      "states": {
+        "checked": [
+          "aria-checked"
+        ],
+        "required": [
+          "aria-required"
+        ],
+        "invalid": [
+          "aria-invalid"
+        ],
+        "disabled": [
+          "aria-disabled"
+        ]
+      },
+      "keys": [
+        "Space"
+      ],
+      "texts": {
+        "required": {
+          "de": "erforderlich",
+          "en": "required"
+        }
+      }
+    },
+    "constraints": [
+      {
+        "when": {
+          "slot:error": "filled"
+        },
+        "allowed": {
+          "invalid": [
+            "true"
+          ]
+        },
+        "kialo": "An error text without the error state is a contradiction a screen reader cannot resolve: it reads a fault on a field that says it is fine."
+      }
+    ],
+    "goals": [
+      {
+        "goal": "agree",
+        "keywords": {
+          "en": [
+            "accept",
+            "agree",
+            "terms",
+            "consent"
+          ],
+          "de": [
+            "akzeptieren",
+            "zustimmen",
+            "agb",
+            "einwilligen"
+          ]
+        },
+        "props": {
+          "required": true
+        },
+        "regulo": "required-marked"
+      },
+      {
+        "goal": "opt-in",
+        "keywords": {
+          "en": [
+            "newsletter",
+            "remember",
+            "subscribe"
+          ],
+          "de": [
+            "newsletter",
+            "merken",
+            "abonnieren"
+          ]
+        },
+        "props": {},
+        "regulo": "field-label-visible"
+      }
+    ]
+  }
+}

@@ -1043,6 +1043,48 @@
       ]
     },
     {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Markobutono",
+      "term": "Markobutono",
+      "inScheme": "eroj",
+      "prefLabel": {
+        "eo": "Markobutono",
+        "en": "checkbox",
+        "de": "Kontrollkästchen"
+      },
+      "altLabel": {
+        "en": [
+          "markobutono",
+          "check box"
+        ],
+        "de": [
+          "Checkbox",
+          "Häkchen",
+          "markobutono"
+        ]
+      },
+      "definition": {
+        "en": "A checkbox: marks one option as yes or no inside a form; it applies when the form is sent. Its label names the option and always shows; it can show an error and be required (terms accepted). A setting that applies at once is the sxaltilo (use-instead); the sxaltilo sends a setting that applies only with the form to it.",
+        "de": "Ein Kontrollkästchen: markiert eine Option in einem Formular mit Ja oder Nein; es gilt, wenn das Formular gesendet wird. Seine Beschriftung nennt die Option und ist immer sichtbar; es kann einen Fehler zeigen und Pflicht sein (AGB akzeptiert). Eine Einstellung, die sofort wirkt, ist der sxaltilo (use-instead); der sxaltilo verweist für Einstellungen, die erst mit dem Formular gelten, auf ihn."
+      },
+      "broader": [
+        "#Ero"
+      ],
+      "relations": [
+        {
+          "predicate": "references",
+          "target": "#Sxaltilo"
+        },
+        {
+          "predicate": "references",
+          "target": "#Kampo"
+        },
+        {
+          "predicate": "references",
+          "target": "#Butono"
+        }
+      ]
+    },
+    {
       "uri": "https://fundamento.ciferecigo.com/ontologio#Sxaltilo",
       "term": "Sxaltilo",
       "inScheme": "eroj",
@@ -1062,8 +1104,8 @@
         ]
       },
       "definition": {
-        "en": "A switch: turns a setting on or off and applies it at once. Its label names the setting and always shows; the switch shows its state itself. The butono and the kampo send toggle to it (use-instead); a setting that applies only with the form is the coming markobutono.",
-        "de": "Ein Schalter: schaltet eine Einstellung ein oder aus und wendet sie sofort an. Seine Beschriftung nennt die Einstellung und ist immer sichtbar; den Zustand zeigt der Schalter selbst. butono und kampo verweisen für Ein-/Ausschalten auf ihn (use-instead); eine Einstellung, die erst mit dem Formular gilt, ist der kommende markobutono."
+        "en": "A switch: turns a setting on or off and applies it at once. Its label names the setting and always shows; the switch shows its state itself. The butono and the kampo send toggle to it (use-instead); a setting that applies only with the form is the markobutono.",
+        "de": "Ein Schalter: schaltet eine Einstellung ein oder aus und wendet sie sofort an. Seine Beschriftung nennt die Einstellung und ist immer sichtbar; den Zustand zeigt der Schalter selbst. butono und kampo verweisen für Ein-/Ausschalten auf ihn (use-instead); eine Einstellung, die erst mit dem Formular gilt, ist der markobutono."
       },
       "broader": [
         "#Ero"
@@ -1076,6 +1118,10 @@
         {
           "predicate": "references",
           "target": "#Kampo"
+        },
+        {
+          "predicate": "references",
+          "target": "#Markobutono"
         }
       ]
     }
