@@ -971,6 +971,10 @@
         {
           "predicate": "references",
           "target": "#Elekto"
+        },
+        {
+          "predicate": "references",
+          "target": "#Elektilo"
         }
       ]
     },
@@ -995,8 +999,8 @@
         ]
       },
       "definition": {
-        "en": "A radio group: chooses one of a few options that all stay visible. Its label names the question and always shows; every option is a circle with its own label, the chosen one filled. It can be required and show help and an error. The butono and the kampo send choose-few to it (use-instead), the markobutono one of a few; a yes or no is the markobutono, six options or more belong in a list (elektilo, not yet covered).",
-        "de": "Eine Auswahl (Radio-Gruppe): wählt eine von wenigen Optionen, die alle sichtbar bleiben. Ihre Beschriftung nennt die Frage und ist immer sichtbar; jede Option ist ein Kreis mit eigener Beschriftung, die gewählte gefüllt. Sie kann Pflicht sein und Hilfe und einen Fehler zeigen. butono und kampo verweisen für choose-few auf sie (use-instead), der markobutono für eine von wenigen; ein Ja/Nein ist der markobutono, ab sechs Optionen gehört die Wahl in eine Liste (elektilo, noch nicht abgedeckt)."
+        "en": "A radio group: chooses one of a few options that all stay visible. Its label names the question and always shows; every option is a circle with its own label, the chosen one filled. It can be required and show help and an error. The butono and the kampo send choose-few to it (use-instead), the markobutono one of a few; a yes or no is the markobutono, six options or more belong in the elektilo (use-instead).",
+        "de": "Eine Auswahl (Radio-Gruppe): wählt eine von wenigen Optionen, die alle sichtbar bleiben. Ihre Beschriftung nennt die Frage und ist immer sichtbar; jede Option ist ein Kreis mit eigener Beschriftung, die gewählte gefüllt. Sie kann Pflicht sein und Hilfe und einen Fehler zeigen. butono und kampo verweisen für choose-few auf sie (use-instead), der markobutono für eine von wenigen; ein Ja/Nein ist der markobutono, ab sechs Optionen gehört die Wahl in den elektilo (use-instead)."
       },
       "broader": [
         "#Ero"
@@ -1013,6 +1017,53 @@
         {
           "predicate": "references",
           "target": "#Markobutono"
+        },
+        {
+          "predicate": "references",
+          "target": "#Elektilo"
+        }
+      ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Elektilo",
+      "term": "Elektilo",
+      "inScheme": "eroj",
+      "prefLabel": {
+        "eo": "Elektilo",
+        "en": "select",
+        "de": "Auswahlliste"
+      },
+      "altLabel": {
+        "en": [
+          "elektilo",
+          "dropdown",
+          "select list"
+        ],
+        "de": [
+          "Dropdown",
+          "Auswahlfeld",
+          "elektilo"
+        ]
+      },
+      "definition": {
+        "en": "A select: chooses one of many options from a list that opens on demand (country, language, year). Its label always shows; the closed field shows the chosen option or a prompt ('Bitte wählen') with a chevron, and can show help and an error. The list is the platform's own (no popup of its own). The butono, the kampo and the elekto send choose-many to it (use-instead); up to five visible options are the elekto (use-instead).",
+        "de": "Eine Auswahlliste (Select): wählt eine von vielen Optionen aus einer Liste, die sich auf Anforderung öffnet (Land, Sprache, Jahr). Ihre Beschriftung ist immer sichtbar; das geschlossene Feld zeigt die gewählte Option oder eine Aufforderung („Bitte wählen“) mit einem Chevron und kann Hilfe und einen Fehler zeigen. Die Liste ist die der Plattform (kein eigenes Popup). butono, kampo und elekto verweisen für choose-many auf sie (use-instead); bis zu fünf sichtbare Optionen sind der elekto (use-instead)."
+      },
+      "broader": [
+        "#Ero"
+      ],
+      "relations": [
+        {
+          "predicate": "references",
+          "target": "#Butono"
+        },
+        {
+          "predicate": "references",
+          "target": "#Kampo"
+        },
+        {
+          "predicate": "references",
+          "target": "#Elekto"
         }
       ]
     },
@@ -1089,6 +1140,10 @@
         {
           "predicate": "references",
           "target": "#Elekto"
+        },
+        {
+          "predicate": "references",
+          "target": "#Elektilo"
         }
       ]
     },

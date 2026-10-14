@@ -1,0 +1,486 @@
+{
+  "ero": {
+    "id": "ero_01M4WYFKBHR43AQNZH9SSKKQTB",
+    "name": "elektilo",
+    "skemo": "ske_01M4WYFKQC9XZQ48YDQN9VBD12",
+    "description": "A select: chooses one of many options from a list that opens on demand. It always shows its label; the closed field shows the chosen option or a prompt, with a chevron at its end, and can show help and an error."
+  },
+  "skemo": {
+    "id": "ske_01M4WYFKQC9XZQ48YDQN9VBD12",
+    "ero": "ero_01M4WYFKBHR43AQNZH9SSKKQTB",
+    "props": [
+      {
+        "name": "value",
+        "kind": "string",
+        "description": "The value of the chosen option, or empty while none is chosen. A prop, not a state (E2): it holds the answer; which option the closed field shows follows from it (the entry key selected of the slot options, E7)."
+      },
+      {
+        "name": "placeholder",
+        "kind": "string",
+        "description": "A prompt in the empty field, 'Bitte wählen'; never the label (Regulo placeholder-not-label) and never an option (Regulo select-placeholder-is-prompt)."
+      },
+      {
+        "name": "required",
+        "kind": "boolean",
+        "default": false,
+        "description": "An option must be chosen before the form is sent; marked visibly and audibly (Regulo required-marked)."
+      },
+      {
+        "name": "invalid",
+        "kind": "boolean",
+        "default": false,
+        "description": "The choice is wrong, a required choice left open; true whenever the slot error is filled (constraint)."
+      },
+      {
+        "name": "size",
+        "kind": "enum",
+        "values": [
+          "small",
+          "medium",
+          "large"
+        ],
+        "default": "medium",
+        "description": "Height of the field on the scale of the kampo (size.control.*), so a select and a field stand level in one form; the chevron takes size.icon.*."
+      },
+      {
+        "name": "disabled",
+        "kind": "boolean",
+        "default": false,
+        "description": "Not available; skipped by the keyboard, the list does not open."
+      },
+      {
+        "name": "name",
+        "kind": "string",
+        "description": "The name in the form; without effect in a design tool, like type on the butono."
+      }
+    ],
+    "states": [
+      "rest",
+      "hover",
+      "focus",
+      "disabled",
+      "invalid"
+    ],
+    "slots": [
+      {
+        "name": "label",
+        "default": true,
+        "text": true
+      },
+      {
+        "name": "options",
+        "text": true,
+        "entry": {
+          "key": "selected",
+          "equals": "value"
+        }
+      },
+      {
+        "name": "help",
+        "text": true
+      },
+      {
+        "name": "error",
+        "text": true
+      }
+    ],
+    "parts": {
+      "label": {
+        "color": {
+          "by": [
+            "state"
+          ]
+        },
+        "typography": {
+          "by": [
+            "size"
+          ]
+        }
+      },
+      "required-mark": {
+        "color": {
+          "fixed": "color.status.danger.text"
+        }
+      },
+      "surface": {
+        "fill": {
+          "by": [
+            "state"
+          ]
+        }
+      },
+      "border": {
+        "color": {
+          "by": [
+            "state"
+          ]
+        },
+        "width": {
+          "fixed": "border.width.default"
+        }
+      },
+      "text": {
+        "color": {
+          "by": [
+            "state"
+          ]
+        },
+        "typography": {
+          "by": [
+            "size"
+          ]
+        }
+      },
+      "placeholder": {
+        "color": {
+          "fixed": "color.text.subtle"
+        }
+      },
+      "indicator": {
+        "color": {
+          "fixed": "color.text.muted"
+        },
+        "size": {
+          "by": [
+            "size"
+          ]
+        }
+      },
+      "help": {
+        "color": {
+          "fixed": "color.text.muted"
+        },
+        "typography": {
+          "fixed": "typography.caption"
+        }
+      },
+      "error": {
+        "color": {
+          "fixed": "color.status.danger.text"
+        },
+        "typography": {
+          "fixed": "typography.caption"
+        }
+      },
+      "focus-ring": {
+        "ring": {
+          "fixed": "focus.ring"
+        },
+        "offset": {
+          "fixed": "focus.offset"
+        },
+        "color": {
+          "fixed": "color.focus.inner"
+        }
+      },
+      "box": {
+        "height": {
+          "by": [
+            "size"
+          ]
+        },
+        "inline-padding": {
+          "by": [
+            "size"
+          ]
+        },
+        "gap": {
+          "fixed": "spacing.small"
+        },
+        "radius": {
+          "fixed": "radius.role.control"
+        }
+      },
+      "motion": {
+        "duration": {
+          "fixed": "motion.duration.fast"
+        },
+        "easing": {
+          "fixed": "motion.easing.standard"
+        }
+      }
+    },
+    "bindings": [
+      {
+        "part": "label",
+        "property": "color",
+        "when": {
+          "state": "rest"
+        },
+        "token": "color.text.default"
+      },
+      {
+        "part": "label",
+        "property": "color",
+        "when": {
+          "state": "disabled"
+        },
+        "token": "color.text.disabled"
+      },
+      {
+        "part": "label",
+        "property": "typography",
+        "when": {
+          "size": "small"
+        },
+        "token": "typography.label.2"
+      },
+      {
+        "part": "label",
+        "property": "typography",
+        "when": {
+          "size": "medium"
+        },
+        "token": "typography.label.1"
+      },
+      {
+        "part": "label",
+        "property": "typography",
+        "when": {
+          "size": "large"
+        },
+        "token": "typography.label.1"
+      },
+      {
+        "part": "surface",
+        "property": "fill",
+        "when": {
+          "state": "rest"
+        },
+        "token": "color.background.default"
+      },
+      {
+        "part": "surface",
+        "property": "fill",
+        "when": {
+          "state": "disabled"
+        },
+        "token": "color.background.sunken"
+      },
+      {
+        "part": "border",
+        "property": "color",
+        "when": {
+          "state": "rest"
+        },
+        "token": "color.border.default"
+      },
+      {
+        "part": "border",
+        "property": "color",
+        "when": {
+          "state": "hover"
+        },
+        "token": "color.border.strong"
+      },
+      {
+        "part": "border",
+        "property": "color",
+        "when": {
+          "state": "focus"
+        },
+        "token": "color.border.strong"
+      },
+      {
+        "part": "border",
+        "property": "color",
+        "when": {
+          "state": "disabled"
+        },
+        "token": "color.border.disabled"
+      },
+      {
+        "part": "border",
+        "property": "color",
+        "when": {
+          "state": "invalid"
+        },
+        "token": "color.status.danger.border"
+      },
+      {
+        "part": "text",
+        "property": "color",
+        "when": {
+          "state": "rest"
+        },
+        "token": "color.text.default"
+      },
+      {
+        "part": "text",
+        "property": "color",
+        "when": {
+          "state": "disabled"
+        },
+        "token": "color.text.disabled"
+      },
+      {
+        "part": "text",
+        "property": "typography",
+        "when": {
+          "size": "small"
+        },
+        "token": "typography.body.2"
+      },
+      {
+        "part": "text",
+        "property": "typography",
+        "when": {
+          "size": "medium"
+        },
+        "token": "typography.body.1"
+      },
+      {
+        "part": "text",
+        "property": "typography",
+        "when": {
+          "size": "large"
+        },
+        "token": "typography.body.1"
+      },
+      {
+        "part": "box",
+        "property": "height",
+        "when": {
+          "size": "small"
+        },
+        "token": "size.control.small"
+      },
+      {
+        "part": "box",
+        "property": "height",
+        "when": {
+          "size": "medium"
+        },
+        "token": "size.control.medium"
+      },
+      {
+        "part": "box",
+        "property": "height",
+        "when": {
+          "size": "large"
+        },
+        "token": "size.control.large"
+      },
+      {
+        "part": "box",
+        "property": "inline-padding",
+        "when": {
+          "size": "small"
+        },
+        "token": "spacing.small"
+      },
+      {
+        "part": "box",
+        "property": "inline-padding",
+        "when": {
+          "size": "medium"
+        },
+        "token": "spacing.medium"
+      },
+      {
+        "part": "box",
+        "property": "inline-padding",
+        "when": {
+          "size": "large"
+        },
+        "token": "spacing.medium"
+      },
+      {
+        "part": "indicator",
+        "property": "size",
+        "when": {
+          "size": "small"
+        },
+        "token": "size.icon.small"
+      },
+      {
+        "part": "indicator",
+        "property": "size",
+        "when": {
+          "size": "medium"
+        },
+        "token": "size.icon.medium"
+      },
+      {
+        "part": "indicator",
+        "property": "size",
+        "when": {
+          "size": "large"
+        },
+        "token": "size.icon.large"
+      }
+    ],
+    "a11y": {
+      "role": "combobox",
+      "name": [
+        "slot:label"
+      ],
+      "description": [
+        "slot:help",
+        "slot:error"
+      ],
+      "states": {
+        "selected": [
+          "aria-selected"
+        ],
+        "required": [
+          "aria-required"
+        ],
+        "invalid": [
+          "aria-invalid"
+        ],
+        "disabled": [
+          "aria-disabled"
+        ]
+      },
+      "keys": [
+        "ArrowUp",
+        "ArrowDown",
+        "Enter",
+        "Escape"
+      ],
+      "texts": {
+        "required": {
+          "de": "erforderlich",
+          "en": "required"
+        }
+      }
+    },
+    "constraints": [
+      {
+        "when": {
+          "slot:error": "filled"
+        },
+        "allowed": {
+          "invalid": [
+            "true"
+          ]
+        },
+        "kialo": "An error text without the error state is a contradiction a screen reader cannot resolve: it reads a fault on a field that says it is fine."
+      }
+    ],
+    "goals": [
+      {
+        "goal": "choose-many",
+        "keywords": {
+          "en": [
+            "list",
+            "select",
+            "country",
+            "language",
+            "many"
+          ],
+          "de": [
+            "liste",
+            "auswählen",
+            "land",
+            "sprache",
+            "vielen"
+          ]
+        },
+        "props": {},
+        "regulo": "elekto-options-few"
+      }
+    ]
+  }
+}

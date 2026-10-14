@@ -391,7 +391,7 @@
       "name": "spacing-owned-by-container",
       "statement": "The space between sibling Eroj belongs to their container; an Ero carries no outer spacing.",
       "kialo": "An Ero does not know its neighbours. If each one brought its own distance, two Eroj side by side would add up their distances, and the rhythm of a view would depend on which Ero stands where.",
-      "scope": "eroj: butono, ligilo, kampo, sxaltilo, markobutono and elekto instances in a design or in code",
+      "scope": "eroj: butono, ligilo, kampo, sxaltilo, markobutono, elekto and elektilo instances in a design or in code",
       "checkability": "manual",
       "appliesTo": {
         "eroj": [
@@ -400,7 +400,8 @@
           "kampo",
           "sxaltilo",
           "markobutono",
-          "elekto"
+          "elekto",
+          "elektilo"
         ]
       }
     },
@@ -524,51 +525,54 @@
     {
       "id": "reg_01M4S1ZR7F1KE1AV1C7X5W8GD5",
       "name": "field-label-visible",
-      "statement": "A kampo, a sxaltilo, a markobutono or an elekto always has a visible label; an empty label slot is a violation.",
+      "statement": "A kampo, a sxaltilo, a markobutono, an elekto or an elektilo always has a visible label; an empty label slot is a violation.",
       "kialo": "WCAG 3.3.2 (Labels or Instructions): a placeholder disappears while typing, and a label only a screen reader hears does not help the sighted person who finds the field half filled.",
-      "scope": "eroj: kampo, sxaltilo, markobutono and elekto instances; the label slot has text",
+      "scope": "eroj: kampo, sxaltilo, markobutono, elekto and elektilo instances; the label slot has text",
       "checkability": "automatic",
       "appliesTo": {
         "eroj": [
           "kampo",
           "sxaltilo",
           "markobutono",
-          "elekto"
+          "elekto",
+          "elektilo"
         ]
       }
     },
     {
       "id": "reg_01M4S1ZR7GEPZSTB9ES3REK3TX",
       "name": "placeholder-not-label",
-      "statement": "The placeholder of a kampo is an example, not the label: a placeholder without a label is a violation, a placeholder equal to the label a warning.",
+      "statement": "The placeholder of a kampo or an elektilo is not the label: a placeholder without a label is a violation, a placeholder equal to the label a warning.",
       "kialo": "A placeholder disappears while typing (WCAG 3.3.2), and an example that repeats the label says nothing.",
-      "scope": "eroj: kampo instances with a placeholder",
+      "scope": "eroj: kampo and elektilo instances with a placeholder",
       "checkability": "automatic",
       "appliesTo": {
         "eroj": [
-          "kampo"
+          "kampo",
+          "elektilo"
         ]
       }
     },
     {
       "id": "reg_01M4S1ZR7GEPZSTB9ES3REK3TY",
       "name": "error-says-what-to-do",
-      "statement": "The error text of a kampo, a markobutono or an elekto says what to do, not only that something is wrong.",
+      "statement": "The error text of a kampo, a markobutono, an elekto or an elektilo says what to do, not only that something is wrong.",
       "kialo": "WCAG 3.3.3 (Error Suggestion): 'Invalid' leaves the person guessing; a sentence with a verb and an object names the way out.",
-      "scope": "eroj: kampo, markobutono and elekto instances with an error text; checked as at least three words (check min-words), an approximation without a model: min-words only counts the words, so a three-word text without a way out ('Das ist ungültig') passes (Abnahme Spec 009 A6, R-2; candidate for a better check in the Vojmapo, Phase 6)",
+      "scope": "eroj: kampo, markobutono, elekto and elektilo instances with an error text; checked as at least three words (check min-words), an approximation without a model: min-words only counts the words, so a three-word text without a way out ('Das ist ungültig') passes (Abnahme Spec 009 A6, R-2; candidate for a better check in the Vojmapo, Phase 6)",
       "checkability": "automatic",
       "appliesTo": {
         "eroj": [
           "kampo",
           "markobutono",
-          "elekto"
+          "elekto",
+          "elektilo"
         ]
       }
     },
     {
       "id": "reg_01M4S1ZR7GEPZSTB9ES3REK3TZ",
       "name": "error-not-color-only",
-      "statement": "An error of a kampo, a markobutono or an elekto is not a red border alone: the Skemo carries a text slot error and speaks the state with aria-invalid.",
+      "statement": "An error of a kampo, a markobutono, an elekto or an elektilo is not a red border alone: the Skemo carries a text slot error and speaks the state with aria-invalid.",
       "kialo": "WCAG 1.4.1 (Use of Color) and 3.3.1 (Error Identification): a person who does not see the hue must read and hear that the field is wrong.",
       "scope": "eroj: the Skemo of every Ero with the state invalid",
       "checkability": "automatic",
@@ -576,14 +580,15 @@
         "eroj": [
           "kampo",
           "markobutono",
-          "elekto"
+          "elekto",
+          "elektilo"
         ]
       }
     },
     {
       "id": "reg_01M4S1ZR7GEPZSTB9ES3REK3V0",
       "name": "required-marked",
-      "statement": "A kampo, a markobutono or an elekto with required true is marked visibly (part required-mark) and audibly (a11y text required in de and en).",
+      "statement": "A kampo, a markobutono, an elekto or an elektilo with required true is marked visibly (part required-mark) and audibly (a11y text required in de and en).",
       "kialo": "The person should know before sending what may stay empty. The sign of the mark is the Aspekto's; the duty to mark is not.",
       "scope": "eroj: the Skemo of every Ero with a boolean prop required",
       "checkability": "automatic",
@@ -591,37 +596,40 @@
         "eroj": [
           "kampo",
           "markobutono",
-          "elekto"
+          "elekto",
+          "elektilo"
         ]
       }
     },
     {
       "id": "reg_01M4S1ZR7GEPZSTB9ES3REK3V1",
       "name": "field-label-names-the-datum",
-      "statement": "The label of a kampo names what is entered, as a noun: 'E-Mail', not 'E-Mail eingeben'; the label of a sxaltilo names its setting the same way, the label of a markobutono its option, the label of an elekto its question: 'Versandart', not 'Versandart wählen'.",
+      "statement": "The label of a kampo names what is entered, as a noun: 'E-Mail', not 'E-Mail eingeben'; the label of a sxaltilo names its setting the same way, the label of a markobutono its option, the label of an elekto or an elektilo its question: 'Versandart', not 'Versandart wählen'.",
       "kialo": "The label is read as the name of the field, in a form and in a list of fields; a verb in it reads as an instruction, not a name. A brand may show voice here, with a Jugxo.",
-      "scope": "eroj: kampo, sxaltilo, markobutono and elekto instances with a label (check not-words: verbs of entering, of choosing for the elekto)",
+      "scope": "eroj: kampo, sxaltilo, markobutono, elekto and elektilo instances with a label (check not-words: verbs of entering, of choosing for the elekto and the elektilo)",
       "checkability": "automatic",
       "appliesTo": {
         "eroj": [
           "kampo",
           "sxaltilo",
           "markobutono",
-          "elekto"
+          "elekto",
+          "elektilo"
         ]
       }
     },
     {
       "id": "reg_01M4S1ZR7GEPZSTB9ES3REK3V2",
       "name": "help-is-one-sentence",
-      "statement": "The help text of a kampo or an elekto is one sentence.",
+      "statement": "The help text of a kampo, an elekto or an elektilo is one sentence.",
       "kialo": "Help that is a paragraph is skipped; one sentence next to the field is read.",
-      "scope": "eroj: kampo and elekto instances with a help text (check max-sentences 1)",
+      "scope": "eroj: kampo, elekto and elektilo instances with a help text (check max-sentences 1)",
       "checkability": "automatic",
       "appliesTo": {
         "eroj": [
           "kampo",
-          "elekto"
+          "elekto",
+          "elektilo"
         ]
       }
     },
@@ -654,13 +662,14 @@
     {
       "id": "reg_01M4WT0SD6MYJETNVJ4ASJX910",
       "name": "option-labels-distinct",
-      "statement": "The options of an elekto have distinct labels: two options never share a label.",
+      "statement": "The options of an elekto or an elektilo have distinct labels: two options never share a label.",
       "kialo": "A choice is only possible between names a person can tell apart: two options called the same make the person guess which one counts, and a screen reader announces the same name twice in one group.",
-      "scope": "eroj: elekto instances with option labels (slot options, check distinct); compared without case and surrounding space, so 'Express' and 'express ' are one label; fixed, no Aspekto overrides it (Uzo content)",
+      "scope": "eroj: elekto and elektilo instances with option labels (slot options, check distinct); compared without case and surrounding space, so 'Express' and 'express ' are one label; fixed, no Aspekto overrides it (Uzo content)",
       "checkability": "automatic",
       "appliesTo": {
         "eroj": [
-          "elekto"
+          "elekto",
+          "elektilo"
         ]
       }
     },
@@ -674,6 +683,19 @@
       "appliesTo": {
         "eroj": [
           "elekto"
+        ]
+      }
+    },
+    {
+      "id": "reg_01M4WYFMFFG2H5A04DJ6Y90WMK",
+      "name": "select-placeholder-is-prompt",
+      "statement": "The placeholder of an elektilo is a prompt to choose, 'Bitte wählen', 'Land wählen': at least two words, never one of the options.",
+      "kialo": "The empty field of a select shows its placeholder where a chosen option will stand; a single word there reads as an option already chosen, and a person sends the form without choosing. A prompt says that nothing is chosen yet. Unlike the placeholder of a kampo it is no example of a value: the values are the options.",
+      "scope": "eroj: elektilo instances with a placeholder (check min-words 2), an approximation without a model: min-words only counts the words, so an option of two words ('Vereinigte Staaten') passes; adjustable: a brand may write its prompt otherwise with a Jugxo. The placeholder of the kampo stays an example (placeholder-is-example does not apply to the elektilo)",
+      "checkability": "automatic",
+      "appliesTo": {
+        "eroj": [
+          "elektilo"
         ]
       }
     }

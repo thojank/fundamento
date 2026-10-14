@@ -2258,6 +2258,392 @@
           }
         ]
       }
+    },
+    {
+      "id": "jug_01M4WYFMVPNNK00NJ682W7WPN3",
+      "ref": {
+        "ero": "ero_01M4WYFKBHR43AQNZH9SSKKQTB"
+      },
+      "decision": "approved",
+      "kialo": "The empty field asks to choose: nothing is chosen yet, and the label still says what.",
+      "date": "2026-10-14",
+      "context": "Example CORRECT for the Regulo named in ekzemplo.regulo (Spec 010 ④ G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4WYFMFFG2H5A04DJ6Y90WMK",
+        "instances": [
+          {
+            "ero": "elektilo",
+            "props": {
+              "placeholder": "Bitte wählen"
+            },
+            "label": "Land",
+            "texts": {
+              "options": [
+                "Deutschland",
+                "Österreich",
+                "Schweiz",
+                "Frankreich",
+                "Italien",
+                "Spanien",
+                "Polen"
+              ]
+            },
+            "lingvo": "de"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4WYFMVQ1AXQ3TZE2XPNTRFQ",
+      "ref": {
+        "ero": "ero_01M4WYFKBHR43AQNZH9SSKKQTB"
+      },
+      "decision": "approved",
+      "kialo": "The empty field asks to choose; the prompt is no option.",
+      "date": "2026-10-14",
+      "context": "Example CORRECT for the Regulo named in ekzemplo.regulo (Spec 010 ④ G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4WYFMFFG2H5A04DJ6Y90WMK",
+        "instances": [
+          {
+            "ero": "elektilo",
+            "props": {
+              "placeholder": "Please choose"
+            },
+            "label": "Country",
+            "texts": {
+              "options": [
+                "Germany",
+                "Austria",
+                "Switzerland",
+                "France",
+                "Italy",
+                "Spain",
+                "Poland"
+              ]
+            },
+            "lingvo": "en"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4WYFMVQ1AXQ3TZE2XPNTRFR",
+      "ref": {
+        "ero": "ero_01M4WYFKBHR43AQNZH9SSKKQTB"
+      },
+      "decision": "rejected",
+      "kialo": "One country in the empty field reads as chosen: a person sends the form without choosing.",
+      "date": "2026-10-14",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 010 ④ G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4WYFMFFG2H5A04DJ6Y90WMK",
+        "instances": [
+          {
+            "ero": "elektilo",
+            "props": {
+              "placeholder": "Deutschland"
+            },
+            "label": "Land",
+            "texts": {
+              "options": [
+                "Deutschland",
+                "Österreich",
+                "Schweiz",
+                "Frankreich",
+                "Italien",
+                "Spanien",
+                "Polen"
+              ]
+            },
+            "lingvo": "de"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4WYFMVQ1AXQ3TZE2XPNTRFS",
+      "ref": {
+        "ero": "ero_01M4WYFKBHR43AQNZH9SSKKQTB"
+      },
+      "decision": "rejected",
+      "kialo": "One country in the empty field reads as an option already chosen.",
+      "date": "2026-10-14",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 010 ④ G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4WYFMFFG2H5A04DJ6Y90WMK",
+        "instances": [
+          {
+            "ero": "elektilo",
+            "props": {
+              "placeholder": "Germany"
+            },
+            "label": "Country",
+            "texts": {
+              "options": [
+                "Germany",
+                "Austria",
+                "Switzerland",
+                "France",
+                "Italy",
+                "Spain",
+                "Poland"
+              ]
+            },
+            "lingvo": "en"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4WYFMVQ1AXQ3TZE2XPNTRFT",
+      "ref": {
+        "ero": "ero_01M4WYFKBHR43AQNZH9SSKKQTB"
+      },
+      "decision": "approved",
+      "kialo": "Every country has its own name in the list.",
+      "date": "2026-10-14",
+      "context": "Example CORRECT for the Regulo named in ekzemplo.regulo (Spec 010 ④ G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4WT0SD6MYJETNVJ4ASJX910",
+        "instances": [
+          {
+            "ero": "elektilo",
+            "props": {},
+            "label": "Land",
+            "texts": {
+              "options": [
+                "Deutschland",
+                "Österreich",
+                "Schweiz",
+                "Frankreich",
+                "Italien",
+                "Spanien",
+                "Polen"
+              ]
+            },
+            "lingvo": "de"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4WYFMVQ1AXQ3TZE2XPNTRFV",
+      "ref": {
+        "ero": "ero_01M4WYFKBHR43AQNZH9SSKKQTB"
+      },
+      "decision": "approved",
+      "kialo": "Every country has its own name in the list.",
+      "date": "2026-10-14",
+      "context": "Example CORRECT for the Regulo named in ekzemplo.regulo (Spec 010 ④ G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4WT0SD6MYJETNVJ4ASJX910",
+        "instances": [
+          {
+            "ero": "elektilo",
+            "props": {},
+            "label": "Country",
+            "texts": {
+              "options": [
+                "Germany",
+                "Austria",
+                "Switzerland",
+                "France",
+                "Italy",
+                "Spain",
+                "Poland"
+              ]
+            },
+            "lingvo": "en"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4WYFMVQ1AXQ3TZE2XPNTRFW",
+      "ref": {
+        "ero": "ero_01M4WYFKBHR43AQNZH9SSKKQTB"
+      },
+      "decision": "rejected",
+      "kialo": "Two entries called Deutschland: the list offers one country twice, and a person guesses which one counts.",
+      "date": "2026-10-14",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 010 ④ G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4WT0SD6MYJETNVJ4ASJX910",
+        "instances": [
+          {
+            "ero": "elektilo",
+            "props": {},
+            "label": "Land",
+            "texts": {
+              "options": [
+                "Deutschland",
+                "Österreich",
+                "Schweiz",
+                "deutschland"
+              ]
+            },
+            "lingvo": "de"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4WYFMVQ1AXQ3TZE2XPNTRFX",
+      "ref": {
+        "ero": "ero_01M4WYFKBHR43AQNZH9SSKKQTB"
+      },
+      "decision": "rejected",
+      "kialo": "Two entries called Germany: the list offers one country twice.",
+      "date": "2026-10-14",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 010 ④ G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4WT0SD6MYJETNVJ4ASJX910",
+        "instances": [
+          {
+            "ero": "elektilo",
+            "props": {},
+            "label": "Country",
+            "texts": {
+              "options": [
+                "Germany",
+                "Austria",
+                "Switzerland",
+                "Germany "
+              ]
+            },
+            "lingvo": "en"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4WYFMVQ1AXQ3TZE2XPNTRFY",
+      "ref": {
+        "ero": "ero_01M4WYFKBHR43AQNZH9SSKKQTB"
+      },
+      "decision": "approved",
+      "kialo": "The label names what is chosen, as a noun.",
+      "date": "2026-10-14",
+      "context": "Example CORRECT for the Regulo named in ekzemplo.regulo (Spec 010 ④ G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4S1ZR7GEPZSTB9ES3REK3V1",
+        "instances": [
+          {
+            "ero": "elektilo",
+            "props": {},
+            "label": "Land",
+            "texts": {
+              "options": [
+                "Deutschland",
+                "Österreich",
+                "Schweiz",
+                "Frankreich",
+                "Italien",
+                "Spanien",
+                "Polen"
+              ]
+            },
+            "lingvo": "de"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4WYFMVQ1AXQ3TZE2XPNTRFZ",
+      "ref": {
+        "ero": "ero_01M4WYFKBHR43AQNZH9SSKKQTB"
+      },
+      "decision": "approved",
+      "kialo": "The label names what is chosen.",
+      "date": "2026-10-14",
+      "context": "Example CORRECT for the Regulo named in ekzemplo.regulo (Spec 010 ④ G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4S1ZR7GEPZSTB9ES3REK3V1",
+        "instances": [
+          {
+            "ero": "elektilo",
+            "props": {},
+            "label": "Country",
+            "texts": {
+              "options": [
+                "Germany",
+                "Austria",
+                "Switzerland",
+                "France",
+                "Italy",
+                "Spain",
+                "Poland"
+              ]
+            },
+            "lingvo": "en"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4WYFMVQ1AXQ3TZE2XPNTRG0",
+      "ref": {
+        "ero": "ero_01M4WYFKBHR43AQNZH9SSKKQTB"
+      },
+      "decision": "rejected",
+      "kialo": "A verb of choosing in the label is an instruction, not the name of the field; the list says that one chooses.",
+      "date": "2026-10-14",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 010 ④ G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4S1ZR7GEPZSTB9ES3REK3V1",
+        "instances": [
+          {
+            "ero": "elektilo",
+            "props": {},
+            "label": "Land auswählen",
+            "texts": {
+              "options": [
+                "Deutschland",
+                "Österreich",
+                "Schweiz",
+                "Frankreich",
+                "Italien",
+                "Spanien",
+                "Polen"
+              ]
+            },
+            "lingvo": "de"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M4WYFMVQ1AXQ3TZE2XPNTRG1",
+      "ref": {
+        "ero": "ero_01M4WYFKBHR43AQNZH9SSKKQTB"
+      },
+      "decision": "rejected",
+      "kialo": "A verb of choosing in the label is an instruction, not a name.",
+      "date": "2026-10-14",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 010 ④ G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4S1ZR7GEPZSTB9ES3REK3V1",
+        "instances": [
+          {
+            "ero": "elektilo",
+            "props": {},
+            "label": "Select a country",
+            "texts": {
+              "options": [
+                "Germany",
+                "Austria",
+                "Switzerland",
+                "France",
+                "Italy",
+                "Spain",
+                "Poland"
+              ]
+            },
+            "lingvo": "en"
+          }
+        ]
+      }
     }
   ]
 }
