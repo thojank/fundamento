@@ -13,6 +13,7 @@ import {
   compositeFields,
   FIGMA_CELO,
   FIGMA_SECTION,
+  SET_WIDTH_RESERVE,
   type FigmaPlan,
   type FigmaValue,
   figmaPlanInventory,
@@ -907,9 +908,18 @@ describe("the plan places the sets in the section Fundamento (F-1, F-2)", () => 
       name: FIGMA_SECTION,
       gap: xlarge?.value,
       padding: xlarge?.value,
+      reserve: SET_WIDTH_RESERVE,
     });
     // Resolved today: 24 px (spacing.scale.600).
     expect(repoPlan.section?.gap).toBe(24);
     expect(FIGMA_SECTION).toBe("Fundamento");
+  });
+
+  // F-7 (gemessen 2026-10-14 in f10b-5): the brand font (Archivo Black) widened the kampo set
+  // over the ligilo; the gap of the default mode is not enough. The plan carries the share of a
+  // set's own width the gap after it is at least — half, measured as more than the widening.
+  it("carries the reserve of a set's width for the gap after it (F-7)", () => {
+    expect(SET_WIDTH_RESERVE).toBe(0.5);
+    expect(repoPlan.section?.reserve).toBe(SET_WIDTH_RESERVE);
   });
 });
