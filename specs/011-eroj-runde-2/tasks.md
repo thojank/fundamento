@@ -47,8 +47,8 @@
 | G8 | 101 Variablen, beide Kits (komuna, ekzemplo) deklarieren jede |
 | Rote Commits | `039d0f0` (O-21), `763504c` (G8), `713593d` (Nachlese 2), `7f87c22` (kampo), `3b1a34f` (elektilo, zusammen mit kampo grün), `d55569d` (Doku) |
 | Grüne Commits | `ee46910` (O-21), `bfbf806` (G8), `59ca32f` (Nachlese 2), `3b1a34f` (kampo), `c990ea1` (elektilo), Doku im Commit dieser Zeile |
-| Tests (je Paket `vitest run`, Playwright in Chromium) | siehe Bericht (nach dem letzten Lauf eingetragen) |
-| Checks | `check:vortaro-lint`, `check:regularo` (uzoj=7), `check:mankoj` (8, unverändert), `check:alirebleco` (76 Paare), `check:clean-room`, `check:parity` – grün |
+| Tests (je Paket `vitest run`, Playwright in Chromium) | modelo 2 879 (vorher 2 836), projekcioj 453 (vorher 439), mcp 199 (vorher 195), cli 66, eroj 1 Vitest + 94 Playwright in Chromium (die drei Engines prüft der Merge-Lauf auf `main`); davon neu: ci/workflow 4, make-kit 3, data/spec011-nachlese 10, contracts/spec011-schema 3, data/kampo 5 (+ geänderte), data/elektilo 3, Fixture `elektilo-constraint-prop-unknown` (validate und e2e), docs 5, Projekcioj (Web Component 6, Figma 2 geändert), Browser `kampo.spec` 4 und Internacia 1, MCP 4 (s009-kampo 2, s010-elektilo 2) |
+| Checks | `check:vortaro-lint`, `check:regularo` (uzoj=7), `check:mankoj` (8, unverändert), `check:alirebleco` (76 Paare), `check:clean-room`, `check:parity` (7 Eroj, 0 Differenzen, 369 Freigaben), `check:alirebleco-eroj` 59 (Chromium, 41,9 s), `check:make-kit` 5, `check:quickstart` 1, `check:vitrino` 16 (APCA-Zeile 1962 → 2178 durch die sechs Link-Paare), `check:release` (beide Kits gepackt) – grün; `pnpm lint` grün (9 Warnungen in modelo, 1 in projekcioj, 1 Info in cli: alle älter als der Branch, nicht angefasst – Aufräumzeile für später) |
 
 ## ② Eingabe und Overlay
 

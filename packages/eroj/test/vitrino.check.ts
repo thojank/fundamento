@@ -196,8 +196,9 @@ test("the contrast table shows WCAG, APCA and the change against the comparison 
   await expect(page.locator("#fm-vitrino-kontrasto p").first()).toContainText(
     // Spec 008 added three KontrastParoj color.link.* on color.background.canvas (1764 → 1890),
     // Spec 009 three more for the field (error text on sunken, error border, border on sunken:
-    // 1890 → 1962); the snapshot of the comparison state stays at 1296.
-    "In den 72 Kombinationen des Vergleichsstands: 1962 gegen 1296 (Veränderung +666)",
+    // 1890 → 1962); Spec 011 ① six more for the link colours on raised and sunken (1962 → 2178);
+    // the snapshot of the comparison state stays at 1296.
+    "In den 72 Kombinationen des Vergleichsstands: 2178 gegen 1296 (Veränderung +882)",
   );
 });
 
