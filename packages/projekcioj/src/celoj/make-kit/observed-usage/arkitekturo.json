@@ -28,7 +28,7 @@
     "--fm-color-link-rest",
     "--fm-color-navigation-hover",
     "--fm-color-navigation-rest",
-    "--fm-color-navigation-selectd",
+    "--fm-color-navigation-selected",
     "--fm-color-navigation-text-rest",
     "--fm-color-navigation-text-selected",
     "--fm-color-status-danger-border",
