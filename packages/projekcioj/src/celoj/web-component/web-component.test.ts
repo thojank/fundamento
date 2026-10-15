@@ -535,12 +535,17 @@ describe("Web Component Celo for the elektilo (Spec 010 ④)", () => {
     expect(elektiloElement).toContain('child.getAttribute("slot") === "options"');
     expect(elektiloElement).toContain('document.createElement("option")');
     expect(elektiloElement).toContain("element.disabled = option.prompt;");
-    expect(elektiloElement).toContain("select.selectedIndex = chosen === -1 ? 0 : chosen;");
+    // Spec 011 ①: the empty option, when set, stands before the chosen one.
+    expect(elektiloElement).toContain(
+      "select.selectedIndex = chosen === -1 ? 0 : chosen + (empty ? 1 : 0);",
+    );
     expect(elektiloElement).toContain("new MutationObserver(");
   });
 
   it("is the form's value and validity; required, invalid and the change of the select", () => {
-    expect(elektiloElement).toContain("this.#internals.setFormValue(chosen === -1 ? null");
+    expect(elektiloElement).toContain(
+      'this.#internals.setFormValue(chosen === -1 ? (empty ? "" : null)',
+    );
     expect(elektiloElement).toContain("setValidity({ valueMissing: true }, missing, select)");
     expect(elektiloElement).toContain('select.setAttribute("aria-required", "true")');
     expect(elektiloElement).toContain('select.setAttribute("aria-invalid", "true")');

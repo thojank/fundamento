@@ -361,6 +361,17 @@ function keyIssues(entry: LoadedEro, at: At): boolean {
         }): the value of the chosen option.`,
       );
     }
+    // The empty entry (Spec 011 ①, D-09): its text is a string prop of the Skemo.
+    const empty =
+      entry.empty === undefined ? undefined : skemo.props.find((prop) => prop.name === entry.empty);
+    if (entry.empty !== undefined && empty?.kind !== "string") {
+      at(
+        `${base}/empty`,
+        "skemo-binding-invalid",
+        `Skemo of ${ero.name} gives the slot ${slot.name} an empty entry with the text of ${entry.empty}, which is no string prop of ${ero.name}.`,
+        "Name a string prop whose text is the empty first entry (the empty option of a select).",
+      );
+    }
   });
   for (const [part, properties] of Object.entries(skemo.parts)) {
     for (const [property, source] of Object.entries(properties)) {

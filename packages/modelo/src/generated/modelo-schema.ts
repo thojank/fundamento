@@ -1169,11 +1169,12 @@ export interface SkemoSlot {
    */
   beside?: boolean;
   /**
-   * Every entry of the slot is one option of its own, a text with a value (Spec 010 ③, E7, plan ③ D-02): the options of a radio group. key names the state of one entry, a boolean the parts may be keyed by (by, when) — true for the entry whose value is the value of the string prop equals, false for every other. A state of the entry, not of the Ero: no prop, no axis of the variants.
+   * Every entry of the slot is one option of its own, a text with a value (Spec 010 ③, E7, plan ③ D-02): the options of a radio group. key names the state of one entry, a boolean the parts may be keyed by (by, when) — true for the entry whose value is the value of the string prop equals, false for every other. A state of the entry, not of the Ero: no prop, no axis of the variants. empty names a string prop whose text is a first entry with the value "" (Spec 011 ①, plan ① D-09): the empty option of a select, 'Alle'; it counts among the entries for the rules on them.
    */
   entry?: {
     key: Name;
     equals: Name;
+    empty?: Name;
   };
 }
 /**

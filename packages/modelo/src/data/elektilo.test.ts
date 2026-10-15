@@ -173,7 +173,10 @@ describe("elektilo in the repo Modelo (G1, G2, section 4)", () => {
     if (skemo === undefined) throw new Error("elektilo missing");
     expect(forbiddenBy(skemo, { "slot:error": "filled", invalid: "false" })).toBeDefined();
     expect(forbiddenBy(skemo, { "slot:error": "filled", invalid: "true" })).toBeUndefined();
-    expect(skemo.constraints).toEqual([kampo?.skemo.constraints?.[0]]);
+    // The first constraint is the kampo's; the second is the elektilo's own (Spec 011 ①: no
+    // empty-label beside a placeholder).
+    expect(skemo.constraints?.[0]).toEqual(kampo?.skemo.constraints?.[0]);
+    expect(skemo.constraints).toHaveLength(2);
     expect(
       slotStates(skemo, {
         ero: "elektilo",

@@ -17,7 +17,7 @@
       {
         "name": "placeholder",
         "kind": "string",
-        "description": "A prompt in the empty field, 'Bitte wählen'; never the label (Regulo placeholder-not-label) and never an option (Regulo select-placeholder-is-prompt)."
+        "description": "A prompt in the empty field, 'Bitte wählen'; never the label (Regulo placeholder-not-label), never an option (Regulo select-placeholder-is-prompt) and never beside empty-label (constraint)."
       },
       {
         "name": "required",
@@ -52,6 +52,11 @@
         "name": "name",
         "kind": "string",
         "description": "The name in the form; without effect in a design tool, like type on the butono."
+      },
+      {
+        "name": "empty-label",
+        "kind": "string",
+        "description": "The text of a chosen empty option, 'Alle', 'keine Auswahl': the first option, with the value \"\", selectable; it replaces the placeholder (constraint) and counts as an option (Regulo option-labels-distinct)."
       }
     ],
     "states": [
@@ -72,7 +77,8 @@
         "text": true,
         "entry": {
           "key": "selected",
-          "equals": "value"
+          "equals": "value",
+          "empty": "empty-label"
         }
       },
       {
@@ -457,6 +463,17 @@
           ]
         },
         "kialo": "An error text without the error state is a contradiction a screen reader cannot resolve: it reads a fault on a field that says it is fine."
+      },
+      {
+        "when": {
+          "prop:empty-label": "filled"
+        },
+        "allowed": {
+          "prop:placeholder": [
+            "empty"
+          ]
+        },
+        "kialo": "An empty option beside a prompt is the same first line twice, because both stand in the closed field for 'nothing chosen'; the empty option replaces the prompt."
       }
     ],
     "goals": [

@@ -314,10 +314,17 @@ export function elementSource({
     const wanted = typeof value === "string" ? value : "";
     const chosen = wanted === "" ? -1 : entries.findIndex((entry) => entry.value === wanted);
     const placeholder = this.propValue("placeholder");
+    // The empty option (Spec 011 ①, plan ① D-09): with empty-label the first option is a real one
+    // — the value "", the text of empty-label, chosen while nothing else is, never disabled — and
+    // there is no prompt beside it (the Skemo forbids both, the empty option wins).
+    const emptyLabel = this.propValue("empty-label");
+    const empty = typeof emptyLabel === "string" && emptyLabel !== "";
     const options = [
-      ...(chosen === -1
-        ? [{ value: "", text: typeof placeholder === "string" ? placeholder : "", prompt: true }]
-        : []),
+      ...(empty
+        ? [{ value: "", text: emptyLabel, prompt: false }]
+        : chosen === -1
+          ? [{ value: "", text: typeof placeholder === "string" ? placeholder : "", prompt: true }]
+          : []),
       ...entries.map((entry) => ({ ...entry, prompt: false })),
     ];
     const same =
@@ -342,8 +349,8 @@ export function elementSource({
         }),
       );
     }
-    select.selectedIndex = chosen === -1 ? 0 : chosen;
-    this.#internals.setFormValue(chosen === -1 ? null : (entries[chosen]?.value ?? null));
+    select.selectedIndex = chosen === -1 ? 0 : chosen + (empty ? 1 : 0);
+    this.#internals.setFormValue(chosen === -1 ? (empty ? "" : null) : (entries[chosen]?.value ?? null));
     const formName = this.propValue("name");
     if (typeof formName === "string" && formName !== "") select.setAttribute("name", formName);
     else select.removeAttribute("name");
