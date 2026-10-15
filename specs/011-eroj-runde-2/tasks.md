@@ -39,7 +39,7 @@
 |---|---|
 | O-21, Hook-Arbeit von `e2e/checks.test.ts` (24 Spawns), lokal 10 Kerne | isoliert 3,42 / 3,42 / 3,46 s; neben der modelo-Suite 19,08 / 12,18 s ungegated → 9,82 s mit Gate 4 (plan ① D-01) |
 | O-21, `check:alirebleco-eroj` Chromium | 148,6 s (1 Worker, wie ein PR-Lauf) → 44,3 s (5 Worker, `fullyParallel`); drei Engines vorher 5 min 7 s |
-| O-21, CI vorher (`main`, 38588087905 / 38591248711 / 38671739185) | Test 442 / 401 / 433 s, Alirebleco (Eroj) 397 / 396 / 423 s; nachher: der PR-Lauf (Bericht) |
+| O-21, CI vorher (`main`, 38588087905 / 38591248711 / 38671739185) | Test 442 / 401 / 433 s, Alirebleco (Eroj) 397 / 396 / 423 s; nachher PR-Lauf 38805790774: Test **262 s**, Alirebleco (Eroj) **90 s**, Job 8 min 38 s, grün ohne CI-Faktor |
 | `get_ero … brief:true`, Bytes / `ceil(Bytes/3)` | kampo 2 233 / **745** (vorher 2 237 / 746), elektilo 1 535 / 512 (vorher 491: +`selected`), elekto 1 429 / 477 (vorher 456), markobutono 1 386 / 462 (vorher 441: +`checked`), sxaltilo 928 / 310 (vorher 289), butono 2 014 / 672, ligilo 1 477 / 493 – alle unter 750 |
 | Parität (`pnpm check:parity`) | 7 Eroj, 4 Seiten, 0 Differenzen; 369 benannte Freigaben wie vorher |
 | Alirebleco (Modelo, `check:alirebleco`) | **76** KontrastParoj (vorher 70) × 72 Kombinationen, 0 Fehler; Link-Minima rest 5,58 / hover 7,11 / visited 8,58 (plan ① D-06) |

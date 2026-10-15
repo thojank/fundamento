@@ -35,7 +35,7 @@ Kein neues Ero. ① räumt die offenen Punkte von Spec 010 auf (Nachlese 2), bin
 3. `e2e/test-doubles/harness.ts`: `runNode` geht durch ein Gate von `availableParallelism()` Kindprozessen; die Aufrufer behalten ihr `Promise.all`, die Arbeit ändert sich nicht, nur die Reihenfolge.
 4. `e2e/checks.test.ts`: der Hook ist wieder `60_000` ohne CI-Faktor. Der ältere Faktor 3 in `packages/mcp/vitest.config.ts` und im CLI-Export-Test (`6bd4532`, Spec 008/009-Kette, Jugxo `jug_01M2W3K1YPP05F4XF86J71RGTK`) ist nicht aus der Spec-010-Kette und bleibt (Offen O-1).
 
-**Messungen (lokal, zehn Kerne; CI-Zahlen nach dem PR-Lauf im Bericht).**
+**Messungen (lokal zehn Kerne; CI der PR-Lauf 38805790774 auf 4 vCPU, Chromium).**
 
 | Was | vorher | nachher |
 |---|---|---|
@@ -44,6 +44,9 @@ Kein neues Ero. ① räumt die offenen Punkte von Spec 010 auf (Nachlese 2), bin
 | `check:alirebleco-eroj`, Chromium (wie ein PR-Lauf) | 148,6 s (59 Tests, 1 Worker) | 44,3 s (59 Tests, 5 Worker) |
 | `check:alirebleco-eroj`, drei Engines | 5 min 7 s (177 Tests, 3 Worker) | nicht erneut gemessen (Chromium ist der PR-Fall) |
 | `pnpm --filter @fundamento/modelo test`, ganze Suite | 27,7 s | 39–41 s (die e2e-Dateien laufen nacheinander; der Abtausch gegen die Last auf dem Runner, siehe Befund B-1) |
+| CI „Test“ (alle Pakete, `turbo run test`) | 401 / 433 / 442 s (38591248711, 38671739185, 38588087905) | **262 s** (38805790774) |
+| CI „Check: Alirebleco (Eroj)“ | 396 / 423 / 397 s | **90 s** |
+| CI Job gesamt | 13–14 min | 8 min 38 s; der Hook von `checks.test.ts` blieb unter 60 s ohne Faktor |
 
 **Was nicht geändert ist.** Die Prüfungen selbst (axe je Element und Zustand, jede Fixture durch den gebauten Runner), die Timeouts der Tests, `turbo run test` (alle Pakete parallel) und `ci.yml`. Ein höheres Timeout steht nirgends.
 
