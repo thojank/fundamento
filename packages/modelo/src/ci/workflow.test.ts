@@ -308,6 +308,6 @@ describe("the e2e runtime is bounded by structure, not by a timeout (Spec 011 â‘
   it("the hook of checks.test.ts carries no CI factor any more", () => {
     const checks = readFileSync(`${repoRoot}packages/modelo/src/e2e/checks.test.ts`, "utf8");
     expect(checks).not.toContain('process.env.CI === "true" ? 3 : 1');
-    expect(checks).toContain("60_000,");
+    expect(checks).toContain("}, 60_000);");
   });
 });
