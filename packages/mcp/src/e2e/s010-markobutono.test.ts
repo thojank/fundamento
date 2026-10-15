@@ -181,7 +181,8 @@ describe("list_eroj and the brief (acceptance 1)", () => {
     const brief = await output<Brief>(client, "get_ero", { name: "markobutono", brief: true });
     expect(brief.purpose).toBe(markobutono.purpose);
     expect(brief.required).toEqual({ props: [], slots: ["label"] });
-    expect(brief.axes.map((axis) => axis.name)).toEqual(["size"]);
+    // Spec 011 ① (O-3): checked keys the parts, so it is an axis of the brief too.
+    expect(brief.axes.map((axis) => axis.name)).toEqual(["checked", "size"]);
     expect(brief.instead?.map((entry) => [entry.goal, entry.ero])).toEqual([
       ["immediate", "sxaltilo"],
       ["choose-one-of-few", "elekto"],

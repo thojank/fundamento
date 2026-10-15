@@ -483,6 +483,10 @@
               },
               "default": {
                 "type": "string"
+              },
+              "slot": {
+                "description": "The slot whose entries carry this state (Spec 011 ① O-3): selected is the state of one option of the slot options, no prop of the Ero.",
+                "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
               }
             },
             "required": ["name", "values"],

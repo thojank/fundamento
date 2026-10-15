@@ -40,6 +40,9 @@ export const STRUCTURAL_PROPERTIES: readonly string[] = [
   "transition-property",
   "border-style",
   "margin",
+  // Spec 011 ① (O-8, Spec 010 ② B-4): whether a word longer than the line breaks inside the word
+  // is structure (anywhere, normal); the label of an Ero that may wrap carries it.
+  "overflow-wrap",
 ];
 
 /** Design properties: their value must come from a token (prefix match on the property name). */

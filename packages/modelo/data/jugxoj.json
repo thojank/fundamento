@@ -2644,6 +2644,50 @@
           }
         ]
       }
+    },
+    {
+      "id": "jug_01M50KAWKV5A1PYBARPMX4YKJE",
+      "ref": {
+        "artikolo": "VIII",
+        "celo": "figma"
+      },
+      "decision": "approved",
+      "kialo": "Der Vorgabewert der Text-Eigenschaft label des Figma-Sets für die Rolle switch (sxaltilo) ist „Einstellung“ (LABEL_DEFAULTS der Figma-Celo, wie jug_01M4VCG06S4MWFPVPNWMBN9EWF für button, link und textbox). Ein Schalter nennt eine Einstellung (purpose: holds a setting on or off). Jede Instanz überschreibt das Wort; ein vorgefundenes Set bekommt es beim nächsten Lauf.",
+      "date": "2026-10-15",
+      "context": "Spec 010 ① (plan D-10), offener Punkt O-1: Vorgabewort vom Maintainer am 2026-10-14 abgenommen (Briefing P0 vom 2026-10-15, Nachlese 2); Jugxo in Spec 011 ① nachgetragen."
+    },
+    {
+      "id": "jug_01M50KAWKW4N2AG37AJZY1P96V",
+      "ref": {
+        "artikolo": "VIII",
+        "celo": "figma"
+      },
+      "decision": "approved",
+      "kialo": "Der Vorgabewert der Text-Eigenschaft label des Figma-Sets für die Rolle checkbox (markobutono) ist „Option“ (LABEL_DEFAULTS der Figma-Celo, wie jug_01M4VCG06S4MWFPVPNWMBN9EWF für button, link und textbox). Ein Kontrollkästchen nennt eine Option (purpose: marks one option). Jede Instanz überschreibt das Wort; ein vorgefundenes Set bekommt es beim nächsten Lauf.",
+      "date": "2026-10-15",
+      "context": "Spec 010 ② (plan ② D-11), offener Punkt O-5: Vorgabewort vom Maintainer am 2026-10-14 abgenommen (Briefing P0 vom 2026-10-15, Nachlese 2); Jugxo in Spec 011 ① nachgetragen."
+    },
+    {
+      "id": "jug_01M50KAWKW4N2AG37AJZY1P96W",
+      "ref": {
+        "artikolo": "VIII",
+        "celo": "figma"
+      },
+      "decision": "approved",
+      "kialo": "Der Vorgabewert der Text-Eigenschaft label des Figma-Sets für die Rolle radiogroup (elekto) ist „Frage“ (LABEL_DEFAULTS der Figma-Celo, wie jug_01M4VCG06S4MWFPVPNWMBN9EWF für button, link und textbox). Eine Auswahl nennt die Frage, die ihre Optionen beantworten. Jede Instanz überschreibt das Wort; ein vorgefundenes Set bekommt es beim nächsten Lauf.",
+      "date": "2026-10-15",
+      "context": "Spec 010 ③ (plan ③ D-07), offener Punkt O-9: Vorgabewort vom Maintainer am 2026-10-14 abgenommen (Briefing P0 vom 2026-10-15, Nachlese 2); Jugxo in Spec 011 ① nachgetragen."
+    },
+    {
+      "id": "jug_01M50KAWKW4N2AG37AJZY1P96X",
+      "ref": {
+        "artikolo": "VIII",
+        "celo": "figma"
+      },
+      "decision": "approved",
+      "kialo": "Der Vorgabewert der Text-Eigenschaft label des Figma-Sets für die Rolle combobox (elektilo) ist „Auswahl“ (LABEL_DEFAULTS der Figma-Celo, wie jug_01M4VCG06S4MWFPVPNWMBN9EWF für button, link und textbox). Eine Auswahlliste nennt, was gewählt wird. Jede Instanz überschreibt das Wort; ein vorgefundenes Set bekommt es beim nächsten Lauf.",
+      "date": "2026-10-15",
+      "context": "Spec 010 ④ (plan ④ D-07), offener Punkt O-15: Vorgabewort vom Maintainer am 2026-10-14 abgenommen (Briefing P0 vom 2026-10-15, Nachlese 2); Jugxo in Spec 011 ① nachgetragen."
     }
   ]
 }

@@ -20,10 +20,11 @@ describe("O-3: the brief names boolean axes and the state of an entry", () => {
   it("checked is an axis of the sxaltilo and the markobutono: a boolean that keys their parts", () => {
     for (const name of ["sxaltilo", "markobutono"]) {
       const axes = briefOf(ero(name)).axes;
+      // In the order of the props of the Skemo: checked stands before size there.
       expect(
         axes.map((axis) => axis.name),
         name,
-      ).toEqual(["size", "checked"]);
+      ).toEqual(["checked", "size"]);
       expect(axes.find((axis) => axis.name === "checked")).toEqual({
         name: "checked",
         values: ["true", "false"],
@@ -57,6 +58,7 @@ describe("O-3: the brief names boolean axes and the state of an entry", () => {
       "emphasis",
       "intent",
       "size",
+      "type",
     ]);
     expect(briefOf(ero("ligilo")).axes.map((axis) => axis.name)).toEqual(["placement", "size"]);
   });
