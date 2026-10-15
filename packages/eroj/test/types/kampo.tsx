@@ -16,9 +16,24 @@ export const valid = (
   </Kampo>
 );
 
+// Spec 011 ① (E8): password, number and date are kinds; min, max and autocomplete are props.
+export const kinds = (
+  <>
+    <Kampo kind="password" autocomplete="current-password">
+      Passwort
+    </Kampo>
+    <Kampo kind="number" min="1" max="99">
+      Vorrang
+    </Kampo>
+    <Kampo kind="date" min="2026-10-16">
+      Ablaufdatum
+    </Kampo>
+  </>
+);
+
 export const wrong = (
-  // @ts-expect-error kind allows text, email, tel, url and search only
-  <Kampo kind="password">Passwort</Kampo>
+  // @ts-expect-error kind allows text, email, tel, url, search, password, number and date only
+  <Kampo kind="color">Farbe</Kampo>
 );
 
 export const noLabelProp = (

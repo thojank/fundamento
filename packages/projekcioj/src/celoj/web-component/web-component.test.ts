@@ -596,3 +596,44 @@ describe("Web Component Celo for the elektilo (Spec 010 ④)", () => {
     expect([...inventory.states].sort()).toEqual(["disabled", "focus", "hover", "invalid", "rest"]);
   });
 });
+
+// Spec 011 ① (E8, O-7, plan ① D-07): the kampo takes a password, a whole number and a date, is
+// the form's validity and sends the form with Enter. A number is a text input with a numeric
+// keyboard and a pattern (GOV.UK: no type=number, whose wheel and arrows change the value); a date
+// is the platform's own dialog; a password hides what is typed and names what the platform fills
+// in. A required field left empty, a number that is no whole number or out of its bounds, and a
+// date the platform refuses keep the form from being sent; the error slot's text is the message.
+describe("Web Component Celo for the kampo of Spec 011 ① (password, number, date, form)", () => {
+  const kampoElement = files["eroj/src/generated/fm-kampo.ts"] ?? "";
+  const kampoStyles = files["eroj/src/generated/kampo.styles.ts"] ?? "";
+
+  it("renders a number as type text with inputmode numeric and a whole-number pattern, a date as type date, a password as type password", () => {
+    expect(kampoElement).toContain('control.type = kind === "number" ? "text" : kind;');
+    expect(kampoElement).toContain('control.setAttribute("inputmode", "numeric")');
+    expect(kampoElement).toContain('control.setAttribute("pattern", "-?[0-9]+")');
+    expect(kampoElement).not.toContain('"number"\n');
+    for (const attribute of ["autocomplete", "min", "max"]) {
+      expect(kampoElement).toContain(`control.setAttribute("${attribute}"`);
+      expect(kampoElement).toContain(`control.removeAttribute("${attribute}")`);
+    }
+  });
+
+  it("is the form's validity: required, the whole number and its bounds, the platform's date; the error slot's text is the message", () => {
+    expect(kampoElement).toContain("setValidity({ valueMissing: true }");
+    expect(kampoElement).toContain("rangeUnderflow");
+    expect(kampoElement).toContain("rangeOverflow");
+    expect(kampoElement).toContain("patternMismatch");
+    expect(kampoElement).toContain("#errorText()");
+    expect(kampoElement).toContain("formResetCallback()");
+  });
+
+  it("sends the form with Enter, once, like a native input (O-7)", () => {
+    expect(kampoElement).toContain('if (event.key === "Enter"');
+    expect(kampoElement).toContain("form.requestSubmit()");
+  });
+
+  it("changes nothing in the stylesheet: no kind keys a part", () => {
+    expect(kampoStyles).not.toContain("data-kind");
+    expect(kampoStyles).not.toContain("password");
+  });
+});
