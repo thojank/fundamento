@@ -278,3 +278,36 @@ describe("Node 24 is enforced (Spec 001 review A)", () => {
     expect(task.timeout).toBeGreaterThanOrEqual(30_000);
   });
 });
+
+// Spec 011 ① (O-21, plan ① D-01): the e2e runtime is solved in its structure, not with a timeout.
+// The spawning e2e files of this package run one after the other, after the unit files, and every
+// spawn goes through a gate of the machine's cores; the Playwright files of @fundamento/eroj run
+// their tests in parallel across workers, not one file per worker. The CI factor 3 of the hook in
+// checks.test.ts (Spec 010 ④, 98aea27) is gone with it.
+describe("the e2e runtime is bounded by structure, not by a timeout (Spec 011 ① O-21)", () => {
+  it("@fundamento/eroj runs the tests of one Playwright file in parallel (fullyParallel)", () => {
+    const config = readFileSync(`${repoRoot}packages/eroj/playwright.config.ts`, "utf8");
+    expect(config).toContain("fullyParallel: true");
+  });
+
+  it("this package runs its spawning e2e files in a group of their own, after the unit files, one at a time", () => {
+    const config = readFileSync(`${repoRoot}packages/modelo/vitest.config.ts`, "utf8");
+    expect(config).toContain('include: ["src/e2e/**/*.test.ts"]');
+    expect(config).toContain("fileParallelism: false");
+    expect(config).toContain("groupOrder: 1");
+  });
+
+  it("every spawn of the e2e harness passes a gate sized by the machine's cores", () => {
+    const harness = readFileSync(
+      `${repoRoot}packages/modelo/src/e2e/test-doubles/harness.ts`,
+      "utf8",
+    );
+    expect(harness).toContain("availableParallelism()");
+  });
+
+  it("the hook of checks.test.ts carries no CI factor any more", () => {
+    const checks = readFileSync(`${repoRoot}packages/modelo/src/e2e/checks.test.ts`, "utf8");
+    expect(checks).not.toContain('process.env.CI === "true" ? 3 : 1');
+    expect(checks).toContain("60_000,");
+  });
+});
