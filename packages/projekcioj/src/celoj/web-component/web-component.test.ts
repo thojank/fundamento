@@ -269,6 +269,11 @@ describe("Web Component Celo for the markobutono (Spec 010 ②)", () => {
   const markobutonoStyles = files["eroj/src/generated/markobutono.styles.ts"] ?? "";
   const markobutonoElement = files["eroj/src/generated/fm-markobutono.ts"] ?? "";
   const sxaltiloElement = files["eroj/src/generated/fm-sxaltilo.ts"] ?? "";
+  const sxaltiloCss = JSON.parse(
+    /export const SXALTILO_CSS = (".*");/s.exec(
+      files["eroj/src/generated/sxaltilo.styles.ts"] ?? "",
+    )?.[1] ?? '""',
+  ) as string;
   const markobutonoCss = JSON.parse(
     /export const MARKOBUTONO_CSS = (".*");/s.exec(markobutonoStyles)?.[1] ?? '""',
   ) as string;
@@ -327,7 +332,12 @@ describe("Web Component Celo for the markobutono (Spec 010 ②)", () => {
     expect(markobutonoCss).toContain("border-radius: var(--fm-radius-role-control);");
     expect(markobutonoCss).toContain("inline-size: var(--fm-size-icon-medium);");
     // The label may break (Uzo wrap allowed), the switch's never; the mark shows only marked.
+    // Spec 011 ① (O-8, plan ② B-4 of Spec 010): a single word longer than the line breaks too.
     expect(markobutonoCss).not.toContain("white-space: nowrap");
+    expect(markobutonoCss).toContain(
+      ':where([part="label"]) { cursor: pointer; white-space: normal; overflow-wrap: anywhere; }',
+    );
+    expect(sxaltiloCss).not.toContain("overflow-wrap");
     expect(markobutonoCss).toContain(
       ':where([part="field"]:not([data-marked="true"])) [part="required-mark"] { display: none; }',
     );

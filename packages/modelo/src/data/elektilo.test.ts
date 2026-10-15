@@ -287,7 +287,8 @@ describe("the Uzo of the elektilo (section 4, G5)", () => {
   it("the brief names the purpose, size, the label and the options as duties, and stays under 750", () => {
     if (elektilo === undefined) throw new Error("elektilo missing");
     const brief = briefOf(elektilo);
-    expect(brief.axes.map((axis) => axis.name)).toEqual(["size"]);
+    // Spec 011 ① (O-3): selected, the state of one entry, is an axis of the brief too.
+    expect(brief.axes.map((axis) => axis.name)).toEqual(["size", "selected"]);
     expect(brief.required).toEqual({ props: [], slots: ["label", "options"] });
     const { bytes, units } = briefUnits("elektilo");
     expect(units, `${bytes} bytes`).toBeLessThanOrEqual(750);
