@@ -22,6 +22,11 @@ export const REST_STATE = "rest";
 
 /** The prefix of a constraint key that reads a slot: `slot:error` is filled or empty (Spec 009). */
 export const SLOT_KEY_PREFIX = "slot:";
+/**
+ * A string prop read as filled or empty in a constraint (Spec 011 ①, plan ① D-08), like a slot:
+ * a bound (min) on a kind without a scale, an empty option beside a prompt.
+ */
+export const PROP_KEY_PREFIX = "prop:";
 
 export const SLOT_FILLED = "filled";
 export const SLOT_EMPTY = "empty";
@@ -509,6 +514,34 @@ function constraintIssues(entry: LoadedEro, at: At): void {
               : `Skemo of ${ero.name} constrains the slot ${slot}, which the Skemo does not have.`,
             `Read a slot of the Skemo (${skemo.slots.map((candidate) => candidate.name).join(", ")}) in when, with filled or empty.`,
           );
+        }
+        return;
+      }
+      // A string prop (Spec 011 ①, D-08): read as filled or empty in when and in allowed.
+      if (key.startsWith(PROP_KEY_PREFIX)) {
+        const name = key.slice(PROP_KEY_PREFIX.length);
+        const prop = skemo.props.find((candidate) => candidate.name === name);
+        if (prop === undefined || prop.kind !== "string") {
+          at(
+            pointer,
+            "skemo-constraint-invalid",
+            `Skemo of ${ero.name} reads ${key} as filled or empty, but ${name} is ${prop === undefined ? "not a prop" : `a ${prop.kind} prop`} of ${ero.name}.`,
+            `Read a string prop of the Skemo (${skemo.props
+              .filter((candidate) => candidate.kind === "string")
+              .map((candidate) => candidate.name)
+              .join(", ")}) as prop:<name>, with filled or empty.`,
+          );
+          return;
+        }
+        for (const value of values) {
+          if (value !== SLOT_FILLED && value !== SLOT_EMPTY) {
+            at(
+              pointer,
+              "skemo-constraint-invalid",
+              `Skemo of ${ero.name} reads ${key}=${value}; a string prop is read as filled or empty.`,
+              "Use filled or empty.",
+            );
+          }
         }
         return;
       }

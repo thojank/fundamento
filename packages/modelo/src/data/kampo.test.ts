@@ -445,7 +445,8 @@ describe("the kampo of Spec 011 ①: password, number and date", () => {
         candidate.kind === "boundary" ? candidate.case : candidate.goal,
       ),
     ).toEqual(["reveal-password", "password"]);
-    expect(suggest("Dezimalzahl mit zwei Nachkommastellen").boundary).toMatchObject({
+    // Not "mit zwei Nachkommastellen": zwei is a word of choose-few (Spec 010 ③ B-2).
+    expect(suggest("Dezimalzahl mit Nachkommastellen").boundary).toMatchObject({
       ero: "kampo",
       case: "decimal",
       action: "not-supported",
@@ -455,7 +456,7 @@ describe("the kampo of Spec 011 ①: password, number and date", () => {
       case: "date-range",
       action: "ask-human",
     });
-    expect(suggest("Zahl mit Pfeilen").boundary).toMatchObject({
+    expect(suggest("Zähler mit Plus und Minus").boundary).toMatchObject({
       ero: "kampo",
       case: "number-stepper",
       action: "not-supported",

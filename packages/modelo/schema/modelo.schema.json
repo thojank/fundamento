@@ -2349,11 +2349,15 @@
       "type": "object",
       "properties": {
         "when": {
-          "description": "Prop values the constraint applies to; a key slot:<name> with filled or empty reads a slot (Spec 009, plan D-04).",
+          "description": "Prop values the constraint applies to; a key slot:<name> with filled or empty reads a slot (Spec 009, plan D-04); a key prop:<name> with filled or empty reads a string prop (Spec 011 ①, plan ① D-08).",
           "type": "object",
           "minProperties": 1,
           "patternProperties": {
             "^slot:[a-z0-9]+(-[a-z0-9]+)*$": {
+              "type": "string",
+              "enum": ["filled", "empty"]
+            },
+            "^prop:[a-z0-9]+(-[a-z0-9]+)*$": {
               "type": "string",
               "enum": ["filled", "empty"]
             },
@@ -2364,10 +2368,12 @@
           "additionalProperties": false
         },
         "allowed": {
+          "description": "The values each named prop may take while the constraint applies; a key prop:<name> allows filled or empty of a string prop (Spec 011 ①, plan ① D-08).",
           "type": "object",
           "minProperties": 1,
           "propertyNames": {
-            "$ref": "#/$defs/Name"
+            "type": "string",
+            "pattern": "^(prop:)?[a-z0-9]+(-[a-z0-9]+)*$"
           },
           "additionalProperties": {
             "type": "array",

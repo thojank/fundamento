@@ -1235,15 +1235,21 @@ export interface SkemoA11Y {
  */
 export interface SkemoConstraint {
   /**
-   * Prop values the constraint applies to; a key slot:<name> with filled or empty reads a slot (Spec 009, plan D-04).
+   * Prop values the constraint applies to; a key slot:<name> with filled or empty reads a slot (Spec 009, plan D-04); a key prop:<name> with filled or empty reads a string prop (Spec 011 ①, plan ① D-08).
    */
   when: {
     /**
      * This interface was referenced by `undefined`'s JSON-Schema definition
      * via the `patternProperty` "^slot:[a-z0-9]+(-[a-z0-9]+)*$".
+     *
+     * This interface was referenced by `undefined`'s JSON-Schema definition
+     * via the `patternProperty` "^prop:[a-z0-9]+(-[a-z0-9]+)*$".
      */
     [k: string]: "filled" | "empty" | Name;
   };
+  /**
+   * The values each named prop may take while the constraint applies; a key prop:<name> allows filled or empty of a string prop (Spec 011 ①, plan ① D-08).
+   */
   allowed: {
     /**
      * @minItems 1

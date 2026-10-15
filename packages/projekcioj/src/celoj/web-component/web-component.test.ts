@@ -611,15 +611,13 @@ describe("Web Component Celo for the kampo of Spec 011 ① (password, number, da
     expect(kampoElement).toContain('control.type = kind === "number" ? "text" : kind;');
     expect(kampoElement).toContain('control.setAttribute("inputmode", "numeric")');
     expect(kampoElement).toContain('control.setAttribute("pattern", "-?[0-9]+")');
-    expect(kampoElement).not.toContain('"number"\n');
-    for (const attribute of ["autocomplete", "min", "max"]) {
-      expect(kampoElement).toContain(`control.setAttribute("${attribute}"`);
-      expect(kampoElement).toContain(`control.removeAttribute("${attribute}")`);
-    }
+    expect(kampoElement).not.toContain('control.type = "number"');
+    expect(kampoElement).toContain('for (const attribute of ["autocomplete", "min", "max"])');
+    expect(kampoElement).toContain("control.setAttribute(attribute, given)");
   });
 
   it("is the form's validity: required, the whole number and its bounds, the platform's date; the error slot's text is the message", () => {
-    expect(kampoElement).toContain("setValidity({ valueMissing: true }");
+    expect(kampoElement).toContain("flags = { valueMissing: true }");
     expect(kampoElement).toContain("rangeUnderflow");
     expect(kampoElement).toContain("rangeOverflow");
     expect(kampoElement).toContain("patternMismatch");
@@ -628,12 +626,34 @@ describe("Web Component Celo for the kampo of Spec 011 ① (password, number, da
   });
 
   it("sends the form with Enter, once, like a native input (O-7)", () => {
-    expect(kampoElement).toContain('if (event.key === "Enter"');
+    expect(kampoElement).toContain('if (event.key !== "Enter" || !KEYS.includes("Enter")) return;');
     expect(kampoElement).toContain("form.requestSubmit()");
+    // Only the field listens for Enter: the select keeps the platform's keys (Spec 010 ④).
+    expect(files["eroj/src/generated/fm-elektilo.ts"] ?? "").not.toContain('event.key !== "Enter"');
   });
 
   it("changes nothing in the stylesheet: no kind keys a part", () => {
     expect(kampoStyles).not.toContain("data-kind");
     expect(kampoStyles).not.toContain("password");
+  });
+});
+
+// Spec 011 ① (plan ① D-09): the empty option of the select. With empty-label the first option is
+// a real one — the value "", the text of empty-label, chosen while nothing else is, never disabled
+// — and there is no prompt beside it: 'Alle' appears once (QA L6 of Arkitekturo, point 4).
+describe("Web Component Celo for the elektilo of Spec 011 ① (empty-label)", () => {
+  const elektiloElement = files["eroj/src/generated/fm-elektilo.ts"] ?? "";
+
+  it("writes the empty option first, selectable, and leaves the prompt out while empty-label is set", () => {
+    expect(elektiloElement).toContain('const emptyLabel = this.propValue("empty-label")');
+    expect(elektiloElement).toContain("prompt: false");
+    expect(elektiloElement).toContain("element.disabled = option.prompt;");
+    expect(elektiloElement).toContain('typeof emptyLabel === "string" && emptyLabel !== ""');
+  });
+
+  it('the chosen empty option is the form value "", not nothing', () => {
+    expect(elektiloElement).toContain(
+      'this.#internals.setFormValue(chosen === -1 ? (empty ? "" : null)',
+    );
   });
 });

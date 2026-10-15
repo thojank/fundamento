@@ -370,3 +370,44 @@ test("every size of the select is at least size.target.min high in every density
     for (const height of heights) expect(height, density).toBeGreaterThanOrEqual(24);
   }
 });
+
+// Spec 011 ① (plan ① D-09): the empty option — 'Alle' as a real first option with the value "",
+// chosen while nothing else is, never disabled, and no prompt beside it; it is the form value "".
+test('empty-label: the first option is selectable with the value "", no prompt beside it, and the form value is empty, not missing', async ({
+  page,
+}) => {
+  await serve(
+    page,
+    out,
+    `<form id="f">${select('name="land" empty-label="Alle" placeholder="Bitte wählen"')}</form>`,
+  );
+  const options = () =>
+    page
+      .locator("#a")
+      .evaluate((element) =>
+        [...(element.shadowRoot?.querySelectorAll("option") ?? [])].map((option) => [
+          option.value,
+          option.textContent,
+          option.disabled,
+          option.selected,
+        ]),
+      );
+  // The placeholder stands beside empty-label (the Skemo forbids it): the empty option wins.
+  expect(await options()).toEqual([
+    ["", "Alle", false, true],
+    ["de", "Deutschland", false, false],
+    ["at", "Österreich", false, false],
+    ["ch", "Schweiz", false, false],
+  ]);
+  const formValue = () =>
+    page.evaluate(() => new FormData(document.getElementById("f") as HTMLFormElement).get("land"));
+  expect(await formValue()).toBe("");
+  await page.getByRole("combobox", { name: "Land" }).selectOption("at");
+  await expect(page.locator("#a")).toHaveAttribute("value", "at");
+  expect(await formValue()).toBe("at");
+  // Back to the empty option: still there, still selectable (unlike a prompt).
+  await page.getByRole("combobox", { name: "Land" }).selectOption("");
+  await expect(page.locator("#a")).toHaveAttribute("value", "");
+  expect((await options())[0]).toEqual(["", "Alle", false, true]);
+  expect(await formValue()).toBe("");
+});

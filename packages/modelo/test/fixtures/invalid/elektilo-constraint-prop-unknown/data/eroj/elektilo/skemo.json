@@ -1,0 +1,157 @@
+{
+  "ero": {
+    "id": "ero_01M2XM2NGN3KJSKJ4JTXQWMF72",
+    "name": "elektilo",
+    "skemo": "ske_01M2XM2NWJ39A7BEZ9A2S8GANE",
+    "description": "Fixture Ero: a select, one of many options from a list that opens on demand."
+  },
+  "skemo": {
+    "id": "ske_01M2XM2NWJ39A7BEZ9A2S8GANE",
+    "ero": "ero_01M2XM2NGN3KJSKJ4JTXQWMF72",
+    "props": [
+      {
+        "name": "value",
+        "kind": "string"
+      },
+      {
+        "name": "placeholder",
+        "kind": "string"
+      },
+      {
+        "name": "invalid",
+        "kind": "boolean",
+        "default": false
+      }
+    ],
+    "states": [
+      "rest",
+      "invalid"
+    ],
+    "slots": [
+      {
+        "name": "label",
+        "default": true,
+        "text": true
+      },
+      {
+        "name": "options",
+        "text": true,
+        "entry": {
+          "key": "selected",
+          "equals": "value"
+        }
+      },
+      {
+        "name": "error",
+        "text": true
+      }
+    ],
+    "parts": {
+      "label": {
+        "color": {
+          "fixed": "color.text.default"
+        }
+      },
+      "surface": {
+        "fill": {
+          "by": [
+            "state"
+          ]
+        }
+      },
+      "text": {
+        "color": {
+          "fixed": "color.text.default"
+        }
+      },
+      "placeholder": {
+        "color": {
+          "fixed": "color.text.default"
+        }
+      },
+      "indicator": {
+        "color": {
+          "fixed": "color.text.default"
+        },
+        "size": {
+          "fixed": "spacing.medium"
+        }
+      },
+      "error": {
+        "color": {
+          "fixed": "color.text.default"
+        }
+      },
+      "box": {
+        "gap": {
+          "fixed": "spacing.small"
+        }
+      }
+    },
+    "bindings": [
+      {
+        "part": "surface",
+        "property": "fill",
+        "when": {
+          "state": "rest"
+        },
+        "token": "color.background.default"
+      },
+      {
+        "part": "surface",
+        "property": "fill",
+        "when": {
+          "state": "invalid"
+        },
+        "token": "color.background.default"
+      }
+    ],
+    "a11y": {
+      "role": "combobox",
+      "name": [
+        "slot:label"
+      ],
+      "description": [
+        "slot:error"
+      ],
+      "states": {
+        "selected": [
+          "aria-selected"
+        ],
+        "invalid": [
+          "aria-invalid"
+        ]
+      },
+      "keys": [
+        "ArrowUp",
+        "ArrowDown",
+        "Enter",
+        "Escape"
+      ]
+    },
+    "constraints": [
+      {
+        "when": {
+          "slot:error": "filled"
+        },
+        "allowed": {
+          "invalid": [
+            "true"
+          ]
+        },
+        "kialo": "An error text without the error state is a contradiction a screen reader cannot resolve: it reads a fault on a field that says it is fine."
+      },
+      {
+        "when": {
+          "prop:prompt": "filled"
+        },
+        "allowed": {
+          "prop:placeholder": [
+            "empty"
+          ]
+        },
+        "kialo": "An empty option beside a prompt shows two first lines; the prop is misspelt here on purpose."
+      }
+    ]
+  }
+}

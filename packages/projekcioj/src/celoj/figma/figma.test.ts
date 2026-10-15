@@ -873,7 +873,16 @@ describe("Figma plan for the kampo (Spec 009 T010)", () => {
       "readonly",
       "invalid",
     ]);
-    expect(items.kampo?.props.kind).toEqual(["text", "email", "tel", "url", "search"]);
+    expect(items.kampo?.props.kind).toEqual([
+      "text",
+      "email",
+      "tel",
+      "url",
+      "search",
+      "password",
+      "number",
+      "date",
+    ]);
     expect(items.kampo?.values["placeholder.color@size=medium,state=rest"]).toMatch(
       /^#[0-9a-f]{6}$/,
     );
@@ -1210,6 +1219,8 @@ describe("Figma plan for the elektilo (Spec 010 ④)", () => {
       size: ["small", "medium", "large"],
       disabled: "BOOLEAN",
       name: "TEXT",
+      // Spec 011 ① (D-09): the empty option is a property of the plan; the set shows the prompt.
+      "empty-label": "TEXT",
       state: ["rest", "hover", "focus", "disabled", "invalid"],
     });
     expect(set?.variants).toHaveLength(3 * 5);

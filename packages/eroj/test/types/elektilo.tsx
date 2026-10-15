@@ -29,6 +29,19 @@ export const valid = (
 
 export const nothingChosen = <Elektilo placeholder="Bitte wählen">Land</Elektilo>;
 
+// Spec 011 ① (D-09): the empty option, a real first option with the value "".
+export const allOfThem = (
+  <Elektilo emptyLabel="Alle" value="">
+    Status
+    <data slot="options" value="draft">
+      Entwurf
+    </data>
+    <data slot="options" value="valid">
+      Gültig
+    </data>
+  </Elektilo>
+);
+
 export const wrongSize = (
   // @ts-expect-error size allows small, medium and large only
   <Elektilo size="huge">Land</Elektilo>

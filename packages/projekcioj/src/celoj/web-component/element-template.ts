@@ -528,6 +528,155 @@ export function elementSource({
     if (type === "submit") form.requestSubmit();
     else if (type === "reset") form.reset();
 `;
+  // Enter sends the form (Spec 011 ①, O-7), as it does in a native one-line input: the input lies
+  // in the shadow tree, so the platform's implicit submission does not reach the form around the
+  // element; the form checks its validity first and sends once. Only the element of a textbox.
+  const inputEnter =
+    host === "input"
+      ? `    control.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" || !KEYS.includes("Enter")) return;
+      const form = this.#internals.form;
+      if (form === null) return;
+      event.preventDefault();
+      form.requestSubmit();
+    });
+`
+      : "";
+  // The render of a field (Spec 009, D-08; Spec 011 ①, E8, O-7): only the element of a textbox
+  // carries these lines — the kinds, the attributes and the validity need the field's methods.
+  const inputRender =
+    host === "input"
+      ? `    if (control instanceof HTMLInputElement) {
+      const kind = String(this.propValue("kind") ?? "text");
+      // A number is a text input with a numeric keyboard and a whole-number pattern (Spec 011 ①,
+      // E8; GOV.UK: type=number changes its value with the wheel and the arrows); a date is the
+      // platform's own dialog; a password hides what is typed. Every other kind is its type.
+      control.type = kind === "number" ? "text" : kind;
+      if (kind === "number") {
+        control.setAttribute("inputmode", "numeric");
+        control.setAttribute("pattern", "-?[0-9]+");
+      } else {
+        control.removeAttribute("inputmode");
+        control.removeAttribute("pattern");
+      }
+      // What the platform fills in, and the bounds of a number or a date (the platform checks
+      // them on a date; the element on a number, below).
+      for (const attribute of ["autocomplete", "min", "max"]) {
+        const given = this.propValue(attribute);
+        if (typeof given === "string" && given !== "") control.setAttribute(attribute, given);
+        else control.removeAttribute(attribute);
+      }
+      const value = this.propValue("value");
+      const text = typeof value === "string" ? value : "";
+      if (control.value !== text) control.value = text;
+      this.#internals.setFormValue(text);
+      const placeholder = this.propValue("placeholder");
+      if (typeof placeholder === "string" && placeholder !== "") control.setAttribute("placeholder", placeholder);
+      else control.removeAttribute("placeholder");
+      const formName = this.propValue("name");
+      if (typeof formName === "string" && formName !== "") control.setAttribute("name", formName);
+      else control.removeAttribute("name");
+      const required = this.propValue("required") === true;
+      control.required = required;
+      if (required) control.setAttribute("aria-required", "true");
+      else control.removeAttribute("aria-required");
+      const disabled = this.propValue("disabled") === true;
+      control.readOnly = !disabled && this.propValue("readonly") === true;
+      const invalid = this.propValue("invalid") === true || this.#filled("error");
+      this.#validate(control, kind, text, required, invalid);
+    }
+`
+      : "";
+  // The methods of a field (Spec 011 ①, O-7): its validity in the form, the message of the error
+  // slot, the platform's own message for a number out of its bounds, and the reset of the form.
+  const inputMethods =
+    host === "input"
+      ? `
+  /** The text of the error slot: the message of the form while the field is invalid. */
+  #errorText(): string {
+    const slot = this.shadowRoot?.querySelector('slot[name="error"]');
+    return slot instanceof HTMLSlotElement
+      ? slot
+          .assignedNodes({ flatten: true })
+          .map((node) => node.textContent ?? "")
+          .join("")
+          .trim()
+      : "";
+  }
+
+  /**
+   * The validity of the field in its form (Spec 011 ①, O-7, E8): a required field left empty, a
+   * number that is no whole number or lies outside min and max, and a date the platform refuses
+   * keep the form from being sent. The message is the error slot's text (error-says-what-to-do),
+   * else the text of a11y.texts.required or the platform's own; the control says aria-invalid.
+   */
+  #validate(control: HTMLInputElement, kind: string, text: string, required: boolean, invalid: boolean): void {
+    const own = this.#errorText();
+    let flags: ValidityStateFlags = {};
+    let message = own;
+    if (required && text === "") {
+      flags = { valueMissing: true };
+      if (own === "") message = TEXTS.required?.[this.#lingvo()] ?? TEXTS.required?.en ?? "";
+    } else if (kind === "number" && text !== "" && !/^-?[0-9]+$/.test(text)) {
+      flags = { patternMismatch: true };
+      if (own === "") message = control.validationMessage;
+    } else if (kind === "number" && text !== "") {
+      const number = Number(text);
+      const min = this.propValue("min");
+      const max = this.propValue("max");
+      if (typeof min === "string" && min !== "" && number < Number(min)) flags = { rangeUnderflow: true };
+      else if (typeof max === "string" && max !== "" && number > Number(max)) flags = { rangeOverflow: true };
+      if (own === "") message = this.#platformMessage(text, min, max);
+    } else if (kind === "date" && !control.validity.valid) {
+      flags = {
+        badInput: control.validity.badInput,
+        rangeUnderflow: control.validity.rangeUnderflow,
+        rangeOverflow: control.validity.rangeOverflow,
+      };
+      if (own === "") message = control.validationMessage;
+    }
+    const wrong = Object.values(flags).some((flag) => flag === true);
+    if (wrong && message !== "") this.#internals.setValidity(flags, message, control);
+    else this.#internals.setValidity({});
+    if (invalid || wrong) control.setAttribute("aria-invalid", "true");
+    else control.removeAttribute("aria-invalid");
+  }
+
+  /**
+   * The platform's own words for a whole number outside its bounds, asked of a number input that
+   * is never shown (the shown one is a text input, E8): no text of the element's own (Art. VIII).
+   */
+  #platformMessage(text: string, min: Value | undefined, max: Value | undefined): string {
+    const probe = document.createElement("input");
+    probe.type = "number";
+    probe.step = "1";
+    if (typeof min === "string" && min !== "") probe.min = min;
+    if (typeof max === "string" && max !== "") probe.max = max;
+    probe.value = text;
+    return probe.validationMessage;
+  }
+
+  /** A reset of the form empties the field, as it empties a native input. */
+  formResetCallback(): void {
+    this.removeAttribute("value");
+  }
+
+  /** The validity of the field, as a native input exposes it (ElementInternals). */
+  get validity(): ValidityState {
+    return this.#internals.validity;
+  }
+
+  /** The message of the validity, as a native input exposes it. */
+  get validationMessage(): string {
+    return this.#internals.validationMessage;
+  }
+
+  /** Whether the field is valid; fires invalid when it is not, as a native input does. */
+  checkValidity(): boolean {
+    return this.#internals.checkValidity();
+  }
+`
+      : "";
   const body = `
 type Value = string | boolean;
 
@@ -632,7 +781,7 @@ ${toggleKeys}${groupInit}${selectInit}    label.addEventListener("slotchange", (
         if (this.getAttribute("value") !== control.value) this.setAttribute("value", control.value);
       });
     }
-  }
+${inputEnter}  }
 
   connectedCallback(): void {
 ${isGroup ? "    this.#assign();\n" : ""}    this.#render();
@@ -667,10 +816,19 @@ ${isGroup ? "    this.#assign();\n" : ""}    this.#render();
     for (const prop of PROPS) {
       if (prop.kind === "enum") values[prop.name] = String(this.propValue(prop.name));
     }
+    // A string prop reads as filled or empty in a constraint (Spec 011 ①, plan ① D-08), like a
+    // slot: a bound on a kind without a scale, an empty option beside a prompt. Read here, never
+    // written on the root as a data attribute.
+    const read: Record<string, string> = { ...values };
+    for (const prop of PROPS) {
+      if (prop.kind !== "string") continue;
+      const given = this.propValue(prop.name);
+      read[\`prop:\${prop.name}\`] = typeof given === "string" && given !== "" ? "filled" : "empty";
+    }
     for (const constraint of CONSTRAINTS) {
-      const applies = Object.entries(constraint.when).every(([key, value]) => values[key] === value);
+      const applies = Object.entries(constraint.when).every(([key, value]) => read[key] === value);
       const violated = Object.entries(constraint.allowed).some(
-        ([key, allowed]) => values[key] !== undefined && !allowed.includes(values[key] ?? ""),
+        ([key, allowed]) => read[key] !== undefined && !allowed.includes(read[key] ?? ""),
       );
       if (!applies || !violated) continue;
       const given = Object.entries(constraint.when).map(([key, value]) => \`\${key}="\${value}"\`).join(" ");
@@ -734,30 +892,7 @@ ${isGroup ? "    this.#assign();\n" : ""}    this.#render();
     // \`invalid\` spoken as aria-invalid and set by a filled error slot (constraint of the Skemo);
     // disabled wins over readonly; help and error show only while they have text.
     const described: string[] = [];
-    if (control instanceof HTMLInputElement) {
-      const kind = this.propValue("kind");
-      control.type = typeof kind === "string" && kind !== "" ? kind : "text";
-      const value = this.propValue("value");
-      const text = typeof value === "string" ? value : "";
-      if (control.value !== text) control.value = text;
-      this.#internals.setFormValue(text);
-      const placeholder = this.propValue("placeholder");
-      if (typeof placeholder === "string" && placeholder !== "") control.setAttribute("placeholder", placeholder);
-      else control.removeAttribute("placeholder");
-      const formName = this.propValue("name");
-      if (typeof formName === "string" && formName !== "") control.setAttribute("name", formName);
-      else control.removeAttribute("name");
-      const required = this.propValue("required") === true;
-      control.required = required;
-      if (required) control.setAttribute("aria-required", "true");
-      else control.removeAttribute("aria-required");
-      const disabled = this.propValue("disabled") === true;
-      control.readOnly = !disabled && this.propValue("readonly") === true;
-      const invalid = this.propValue("invalid") === true || this.#filled("error");
-      if (invalid) control.setAttribute("aria-invalid", "true");
-      else control.removeAttribute("aria-invalid");
-    }
-${toggleRender}${groupRender}${selectRender}    // The texts of the slots that describe the control (Spec 009, D-02; a checkbox, Spec 010 ②):
+${inputRender}${toggleRender}${groupRender}${selectRender}    // The texts of the slots that describe the control (Spec 009, D-02; a checkbox, Spec 010 ②):
     // shown while they have text, and its description in that order.
     for (const source of DESCRIPTION) {
       const [kind, name = ""] = source.split(":");
@@ -812,7 +947,7 @@ ${
     : `    if (!(this.#control instanceof HTMLButtonElement)) return;
 ${toggleActivate}`
 }  }
-${groupMethods}${selectMethods}
+${groupMethods}${selectMethods}${inputMethods}
 }
 
 /**
