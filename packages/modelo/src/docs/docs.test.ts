@@ -1287,3 +1287,106 @@ describe("Spec 010 ④ documentation (Vojmapo Phase 4)", () => {
     }
   });
 });
+
+// Spec 011 ① (G9, acceptance 8–10): the Vojmapo names Spec 011 ① in Phase 4, the Arkitekturo
+// contract (G8) among the cross-cutting themes and the two Regulo candidates of Spec 010 (O-11,
+// O-17) in Phase 6; the folder carries the spec unchanged next to plan and tasks with five sections,
+// ① filled; the plan of Spec 010 carries the Nachlese 2 with the confirmed points.
+describe("Spec 011 ① documentation (Vojmapo Phase 4, Querschnitt, Phase 6)", () => {
+  const vojmapo = read("docs/vojmapo.md");
+  const row = (start: string) => vojmapo.split("\n").find((line) => line.startsWith(start)) ?? "";
+
+  it("the vojmapo names Spec 011 ①: the e2e runtime, the kampo kinds, the empty option, the contract", () => {
+    const phase4 = row("| 4 |");
+    expect(phase4).toContain("**Spec 011 ① (Grundlage");
+    expect(phase4).toContain("O-21");
+    expect(phase4).toContain("`password`");
+    expect(phase4).toContain("`empty-label`");
+    expect(phase4).toContain("Spec 011 ① umgesetzt");
+  });
+
+  it("the vojmapo carries the Arkitekturo contract as a cross-cutting theme (G8)", () => {
+    const contract = row("| **Arkitekturo-Vertrag**");
+    expect(contract).toContain("observed-usage/arkitekturo.json");
+    expect(contract).toContain("101");
+    expect(contract).toContain("Jugxo");
+    expect(contract).toMatch(/Constitution/);
+  });
+
+  it("the vojmapo carries the Regulo candidates of Spec 010 (O-11, O-17) in Phase 6, not as work done", () => {
+    const phase6 = row("| 6 |");
+    expect(phase6).toContain("Prüfart über Prop und Einträge");
+    expect(phase6).toContain("elekto-options-few");
+    expect(phase6).toContain("select-placeholder-is-prompt");
+    expect(phase6).toMatch(/\| geplant \|$/);
+  });
+
+  it("specs/011-eroj-runde-2 carries the spec unchanged, the candidate list, plan and tasks with ① to ⑤", () => {
+    expect(read("specs/011-eroj-runde-2/spec.md")).toMatch(
+      /^# Spec 011 – Eroj in der Breite, Runde 2: Eingabe, Overlay, Rückmeldung, Daten, Navigation/,
+    );
+    expect(read("specs/011-eroj-runde-2/arkitekturo-kandidaten.md")).toMatch(
+      /^# Kandidaten für Fundamento/,
+    );
+    const plan = read("specs/011-eroj-runde-2/plan.md");
+    const tasks = read("specs/011-eroj-runde-2/tasks.md");
+    for (const text of [plan, tasks]) {
+      for (const heading of [
+        "## ① Grundlage",
+        "## ② Eingabe",
+        "## ③ Rückmeldung",
+        "## ④ Daten",
+        "## ⑤ Navigation",
+      ]) {
+        expect(text).toContain(heading);
+      }
+    }
+    for (const heading of [
+      "### Zusammenfassung",
+      "### Entwurfsentscheidungen",
+      "### Abweichungen von der Spec",
+      "### Befunde / Mankoj",
+      "### Offen (für den Maintainer)",
+      "#### D-01 O-21",
+      "#### D-02 G8",
+    ]) {
+      expect(plan).toContain(heading);
+    }
+    // The e2e runtime, measured before and after (O-21), and the brief of the kampo.
+    expect(plan).toMatch(/vorher/);
+    expect(plan).toMatch(/nachher/);
+    expect(tasks).toContain("### Messungen");
+    for (const hash of ["039d0f0", "763504c", "713593d", "7f87c22"]) {
+      expect(tasks).toContain(hash);
+    }
+  });
+
+  it("the plan of Spec 010 carries the Nachlese 2 with every confirmed point", () => {
+    const nachlese = section(read("specs/010-formular-eroj/plan.md"), "Nachlese 2026-10-15");
+    for (const point of [
+      "O-1",
+      "O-3",
+      "O-4",
+      "O-5",
+      "O-6",
+      "O-7",
+      "O-8",
+      "O-9",
+      "O-10",
+      "O-11",
+      "O-12",
+      "O-13",
+      "O-14",
+      "O-15",
+      "O-16",
+      "O-17",
+      "O-18",
+      "O-19",
+      "O-20",
+      "O-21",
+    ]) {
+      expect(nachlese, point).toContain(`**${point}`);
+    }
+    expect(nachlese).toContain("jug_01M50KAWKV5A1PYBARPMX4YKJE");
+  });
+});
