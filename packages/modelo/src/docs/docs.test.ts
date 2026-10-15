@@ -1385,7 +1385,8 @@ describe("Spec 011 ① documentation (Vojmapo Phase 4, Querschnitt, Phase 6)", (
       "O-20",
       "O-21",
     ]) {
-      expect(nachlese, point).toContain(`**${point}`);
+      // Every point stands in the bold head of a bullet, alone or with its siblings (O-1, O-5, …).
+      expect(nachlese, point).toMatch(new RegExp(`\\*\\*[^*\\n]*\\b${point}\\b`));
     }
     expect(nachlese).toContain("jug_01M50KAWKV5A1PYBARPMX4YKJE");
   });
