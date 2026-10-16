@@ -36,7 +36,12 @@ describe("langetaro in the repo Modelo (section ⑤, G1, G2, E7)", () => {
 
   it("has label (a duty) and selected (the id of the chosen tab) as props; the states of a tab", () => {
     expect(
-      skemo?.props.map((prop) => [prop.name, prop.values ?? prop.kind, prop.default, prop.required]),
+      skemo?.props.map((prop) => [
+        prop.name,
+        prop.values ?? prop.kind,
+        prop.default,
+        prop.required,
+      ]),
     ).toEqual([
       ["label", "string", undefined, true],
       ["selected", "string", undefined, undefined],
@@ -73,8 +78,12 @@ describe("langetaro in the repo Modelo (section ⑤, G1, G2, E7)", () => {
       "color.action.tertiary.disabled",
     );
     expect(skemo.parts.tabs?.color).toEqual({ by: ["active"] });
-    expect(boundToken(skemo, "tabs", "color", { active: "true" })?.token).toBe("color.text.default");
-    expect(boundToken(skemo, "tabs", "color", { active: "false" })?.token).toBe("color.text.subtle");
+    expect(boundToken(skemo, "tabs", "color", { active: "true" })?.token).toBe(
+      "color.text.default",
+    );
+    expect(boundToken(skemo, "tabs", "color", { active: "false" })?.token).toBe(
+      "color.text.subtle",
+    );
     expect(skemo.parts.tabs?.typography).toEqual({ fixed: "typography.label.1" });
     expect(skemo.parts.tab?.height).toEqual({ fixed: "size.target.min" });
     expect(skemo.parts["selected-indicator"]?.width).toEqual({ by: ["active"] });
@@ -84,10 +93,14 @@ describe("langetaro in the repo Modelo (section ⑤, G1, G2, E7)", () => {
     expect(boundToken(skemo, "selected-indicator", "width", { active: "false" })?.token).toBe(
       "none",
     );
-    expect(skemo.parts["selected-indicator"]?.color).toEqual({ fixed: "color.navigation.selected" });
+    expect(skemo.parts["selected-indicator"]?.color).toEqual({
+      fixed: "color.navigation.selected",
+    });
     expect(skemo.parts.list?.color).toEqual({ fixed: "color.border.default" });
     expect(skemo.parts.list?.width).toEqual({ fixed: "border.width.default" });
     expect(skemo.parts.panel?.["inline-padding"]).toEqual({ fixed: "spacing.medium" });
+    // The panel is text of the Ero (axe measured black on the dark page without it, as ④ B-8).
+    expect(skemo.parts.panel?.color).toEqual({ fixed: "color.text.default" });
     expect(styledProps(skemo)).toEqual([]);
     // The state of one entry (active) is no variant of the Ero (E7): the variants are the state alone.
     expect(variantKeys(skemo)).toEqual(["state"]);
@@ -146,7 +159,12 @@ describe("the Uzo of the langetaro (section ⑤, G5)", () => {
   it("composes in a page section; carries option-labels-distinct, fixed, as distinct on the tabs", () => {
     expect(uzo?.composes.containers.map((container) => container.name)).toEqual(["page-section"]);
     expect(uzo?.content).toEqual([
-      { regulo: "option-labels-distinct", fixed: true, of: "slot:tabs", check: { kind: "distinct" } },
+      {
+        regulo: "option-labels-distinct",
+        fixed: true,
+        of: "slot:tabs",
+        check: { kind: "distinct" },
+      },
     ]);
   });
 

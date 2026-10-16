@@ -91,7 +91,11 @@ describe("the navigation dialogs of the spec: 'Reiter oder Navigation?'", () => 
       goal: "Tabs, um zum Formular zu wechseln",
     });
     expect(form.suggestion).toEqual({ ero: "elekto", props: {} });
-    expect(form.boundary).toMatchObject({ ero: "langetaro", case: "form-choice", kialo: formChoice.kialo });
+    expect(form.boundary).toMatchObject({
+      ero: "langetaro",
+      case: "form-choice",
+      kialo: formChoice.kialo,
+    });
   });
 
   it("'Reiter für die Hauptseiten' → the navigado, with the tabs' reason (pages are the navigado's)", async () => {
@@ -121,7 +125,11 @@ describe("check_usage of the navigation and the tabs", () => {
   it("an item 'hier' violates link-label-names-destination (widened); 'Standards' passes", async () => {
     const wrong = await output<Judged>(client, "check_usage", {
       instances: [
-        { ero: "navigado", props: { label: "Hauptnavigation" }, texts: { items: ["hier", "Versionen"] } },
+        {
+          ero: "navigado",
+          props: { label: "Hauptnavigation" },
+          texts: { items: ["hier", "Versionen"] },
+        },
       ],
     });
     expect(wrong.violations.map((entry) => entry.issue.rule)).toEqual([

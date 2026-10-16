@@ -1170,10 +1170,10 @@ describe("Web Component Celo for the navigado (Spec 011 ⑤)", () => {
   const styles = files["eroj/src/generated/navigado.styles.ts"] ?? "";
   const element = files["eroj/src/generated/fm-navigado.ts"] ?? "";
   const css = JSON.parse(
-    /export const NAVIGADO_CSS = (".*");/s.exec(styles)?.[1] ?? '""',
+    /export const NAVIGADO_CSS = ("(?:[^"\\]|\\.)*");/.exec(styles)?.[1] ?? '""',
   ) as string;
   const light = JSON.parse(
-    /export const NAVIGADO_LIGHT_CSS = (".*");/s.exec(styles)?.[1] ?? '""',
+    /export const NAVIGADO_LIGHT_CSS = ("(?:[^"\\]|\\.)*");/.exec(styles)?.[1] ?? '""',
   ) as string;
 
   it("renders a nav landmark around the slotted links, adopts the light stylesheet, marks the current page and composes the count", () => {
@@ -1235,7 +1235,7 @@ describe("Web Component Celo for the langetaro (Spec 011 ⑤)", () => {
   const styles = files["eroj/src/generated/langetaro.styles.ts"] ?? "";
   const element = files["eroj/src/generated/fm-langetaro.ts"] ?? "";
   const css = JSON.parse(
-    /export const LANGETARO_CSS = (".*");/s.exec(styles)?.[1] ?? '""',
+    /export const LANGETARO_CSS = ("(?:[^"\\]|\\.)*");/.exec(styles)?.[1] ?? '""',
   ) as string;
 
   it("renders the tablist, the rows with role tab, the panel; selection follows focus and says select", () => {

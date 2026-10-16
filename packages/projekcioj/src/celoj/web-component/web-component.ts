@@ -99,6 +99,47 @@ export const isLight = (skemo: Skemo): boolean => hostOf(skemo.a11y.role) === "l
 /** The parts of a light-DOM host the shadow tree holds: the scroll region and its edge. */
 const LIGHT_SHADOW_PARTS: ReadonlySet<string> = new Set(["region", "border", "focus-ring"]);
 
+/** A navigation (Spec 011 ⑤, D-07): the platform's own links in the light DOM, the nav in the shadow. */
+const isNav = (skemo: Skemo): boolean => skemo.a11y.role === "navigation";
+
+/**
+ * Whether a part property of a light-DOM host stands in the shadow sheet: the region of a table
+ * and its edge; the gap of a navigation (between the items, on the nav itself). Everything else
+ * stands in the document's stylesheet (`lightStylesheetOf`).
+ */
+function lightShadowProperty(skemo: Skemo, part: string, property: string): boolean {
+  if (isNav(skemo)) return part === "box" && property === "gap";
+  return LIGHT_SHADOW_PARTS.has(part);
+}
+
+/** Tabs (Spec 011 ⑤, D-08): rows with role tab in a tablist, the panel beside. */
+const isTabs = (skemo: Skemo): boolean => hostOf(skemo.a11y.role) === "tabs";
+
+/**
+ * The states of a tab (Spec 011 ⑤, D-08): hover and focus are the row's, disabled the row's too
+ * (a tab the markup disables, spoken as aria-disabled); the list itself has no state.
+ */
+const TAB_STATES: Readonly<Record<string, string | undefined>> = {
+  hover: ":hover",
+  focus: ":focus-visible",
+  disabled: '[aria-disabled="true"]',
+};
+
+/**
+ * The selector of a part of the tabs (Spec 011 ⑤, D-08): the tablist is the control and carries
+ * the part list (its line and the gap); tab (the row), tabs (its text) and the selected indicator
+ * (its block-end edge) are the row, with the state of one tab (active, E7: aria-selected) and its
+ * hover, focus and disabled; the panel is its own element.
+ */
+function tabsPartSelector(part: string, data: string, entry: string, state: string): string {
+  const root = `[part="control"]${data}`;
+  const row = `[part="tab"]${entry}${TAB_STATES[state] ?? ""}`;
+  if (part === "list") return `:where(${root})`;
+  if (part === "panel") return `:where([part="panel"])`;
+  if (part === "focus-ring") return `:where(${root} [part="tab"]:focus-visible)`;
+  return `:where(${root} ${row})`;
+}
+
 /**
  * The selector of a part of a meter (Spec 011 ④, D-08): the combination stands on the control;
  * the box is the control, the unknown part is the track while the value is unknown, every other
@@ -291,6 +332,16 @@ function declarations(skemo: Skemo, part: string, property: string, token: strin
   if (isMeter(skemo) && part === "unknown") {
     if (property === "color") return [`border-color: ${variable(token)};`];
     if (property === "width") return [`border-width: ${variable(token)};`];
+  }
+  // The line of a tablist and the indicator of the selected tab (Spec 011 ⑤, D-08) are block-end
+  // edges: their colour and width are the border's; an indicator of width none is not drawn.
+  if (isTabs(skemo) && (part === "list" || part === "selected-indicator")) {
+    if (property === "color") return [`border-block-end-color: ${variable(token)};`];
+    if (property === "width") {
+      return token === "none"
+        ? ["border-block-end-style: none;"]
+        : ["border-block-end-style: solid;", `border-block-end-width: ${variable(token)};`];
+    }
   }
   if (isBindingKeyword(token)) return keywordDeclarations(part, property, token);
   // The underline of a link (Spec 008): a text decoration of the width and colour bound.
@@ -522,11 +573,37 @@ const meterStructure: string = [
  * is a block; a table lies in a focusable region that scrolls along the inline axis; a list in a
  * plain frame. Everything else stands in the document's stylesheet (`lightStylesheetOf`).
  */
-const lightStructure: string = [
+const lightStructure = (skemo: Skemo): string =>
+  isNav(skemo)
+    ? [
+        // A navigation (Spec 011 ⑤, D-07): the nav is a row of items that wraps (the order stays);
+        // vertical stacks them along the inline size of the host.
+        ":host { display: block; }",
+        ':where([part="list"]) { display: flex; flex-wrap: wrap; align-items: center; }',
+        ':where([part="list"][data-orientation="vertical"]) { flex-direction: column; align-items: stretch; }',
+      ].join("\n")
+    : [
+        ":host { display: block; }",
+        ':where([part="region"]) { display: block; overflow-x: auto; box-sizing: border-box; border-style: solid; }',
+        ':where([part="region"]:focus:not(:focus-visible)) { outline-width: 0; }',
+        ':where([part="list"]) { display: block; }',
+      ].join("\n");
+
+/**
+ * Layout of tabs (Spec 011 ⑤, D-08), keywords only: the host is a block that takes the width of
+ * its container; the tablist a row that never wraps (the Uzo says never) and scrolls along the
+ * inline axis when the tabs are more than the line holds, with its line along the block-end edge;
+ * every tab a button without the platform's border, its block-end edge the indicator; the panel a
+ * block.
+ */
+const tabsStructure: string = [
   ":host { display: block; }",
-  ':where([part="region"]) { display: block; overflow-x: auto; box-sizing: border-box; border-style: solid; }',
-  ':where([part="region"]:focus:not(:focus-visible)) { outline-width: 0; }',
-  ':where([part="list"]) { display: block; }',
+  ':where([part="control"]) { display: flex; flex-wrap: nowrap; align-items: stretch; overflow-x: auto; box-sizing: border-box; border-block-end-style: solid; }',
+  ':where([part="tab"]) { display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; margin: 0; border-style: none; appearance: none; cursor: pointer; white-space: nowrap; transition-property: background-color, color, border-color; }',
+  ':where([part="tab"]:focus:not(:focus-visible)) { outline-width: 0; }',
+  ':where([part="tab"][aria-disabled="true"]) { cursor: not-allowed; }',
+  ':where([part="panel"]) { display: block; }',
+  ':where([part="panel"]:focus:not(:focus-visible)) { outline-width: 0; }',
 ].join("\n");
 
 /**
@@ -543,9 +620,33 @@ export function lightStylesheetOf(skemo: Skemo, tag: string): string {
     else found[1].push(...lines);
   };
   const table = skemo.a11y.role === "table";
+  const nav = isNav(skemo);
   // Where a part of the table lies (Spec 011 ④, D-09): the head row, every cell, the row headers,
-  // the sort button in a header and its sign.
-  const where = (part: string, data: string, state: string): string | undefined => {
+  // the sort button in a header and its sign. Where a part of a navigation lies (Spec 011 ⑤,
+  // D-07): every part is the link — item (its fill), items (its text), the underline, the box —
+  // with the state of one item (current, E7) as aria-current on the link.
+  const where = (
+    part: string,
+    data: string,
+    state: string,
+    entry = "",
+    property = "",
+  ): string | undefined => {
+    if (nav) {
+      const a = `${tag}${data} > a${entry}`;
+      switch (part) {
+        case "item":
+        case "items":
+        case "underline":
+          return `${a}${state}`;
+        case "box":
+          return property === "gap" ? undefined : a;
+        case "focus-ring":
+          return `${a}:focus-visible`;
+        default:
+          return undefined;
+      }
+    }
     if (table) {
       const t = `${tag}${data} > table`;
       switch (part) {
@@ -597,7 +698,7 @@ export function lightStylesheetOf(skemo: Skemo, tag: string): string {
     for (const [property, source] of Object.entries(properties)) {
       const token = fixedToken(source);
       if (token === undefined) continue;
-      const selector = where(part, "", "");
+      const selector = where(part, "", "", "", property);
       if (selector !== undefined) add(selector, lines(part, property, token));
     }
   }
@@ -612,13 +713,24 @@ export function lightStylesheetOf(skemo: Skemo, tag: string): string {
           const bound = boundToken(skemo, part, property, combination);
           if (bound === undefined) continue;
           const data = keys
-            .filter((key) => key !== STATE_KEY)
+            .filter((key) => key !== STATE_KEY && !isEntryKey(skemo, key))
             .map((key) => `[data-${key}="${combination[key] ?? ""}"]`)
+            .join("");
+          // The state of one entry (E7) stands on the link as the attribute the Skemo names
+          // (aria-current): present while true, absent while false.
+          const entry = keys
+            .filter((key) => isEntryKey(skemo, key))
+            .map((key) => {
+              const attribute = skemo.a11y.states[key]?.[0] ?? `data-${key}`;
+              return combination[key] === "true" ? `[${attribute}]` : `:not([${attribute}])`;
+            })
             .join("");
           const selector = where(
             part,
             data,
             STATE_SELECTORS[combination[STATE_KEY] ?? "rest"] ?? "",
+            entry,
+            property,
           );
           if (selector !== undefined) add(selector, lines(part, property, bound.token));
         }
@@ -648,24 +760,29 @@ export function lightStylesheetOf(skemo: Skemo, tag: string): string {
       }
     }
   }
-  const structure = table
+  const structure = nav
     ? [
-        `${tag} > table { border-collapse: collapse; caption-side: top; }`,
-        `${tag} > table :is(td, th) { text-align: start; box-sizing: border-box; border-block-end-style: solid; }`,
-        `${tag} > table :is(td, th)[numeric] { text-align: end; font-variant-numeric: tabular-nums; }`,
-        `${tag} > table > thead th > button { display: inline-flex; align-items: center; appearance: none; border-style: none; cursor: pointer; font: inherit; color: inherit; text-align: inherit; }`,
-        `${tag} > table > thead th > button > svg { flex: none; }`,
-        `${tag} > table > thead th[aria-sort="descending"] > button > svg { transform: rotate(180deg); }`,
-        `${tag} > table > tbody > tr[data-fm-empty] > td { text-align: center; }`,
-        `${tag} ${HIDDEN_TEXT}`,
+        `${tag} > a { display: inline-flex; align-items: center; box-sizing: border-box; white-space: nowrap; transition-property: background-color, color, text-decoration-color; }`,
+        `${tag} > a:focus:not(:focus-visible) { outline-width: 0; }`,
       ]
-    : [
-        `${tag} > dl { display: grid; margin: 0; }`,
-        `${tag} > dl > :is(dt, dd) { margin: 0; }`,
-        `${tag}[data-layout="columns"] > dl { grid-template-columns: max-content auto; }`,
-        `${tag}[data-layout="stacked"] > dl { grid-template-columns: auto; }`,
-        `${tag} ${HIDDEN_TEXT}`,
-      ];
+    : table
+      ? [
+          `${tag} > table { border-collapse: collapse; caption-side: top; }`,
+          `${tag} > table :is(td, th) { text-align: start; box-sizing: border-box; border-block-end-style: solid; }`,
+          `${tag} > table :is(td, th)[numeric] { text-align: end; font-variant-numeric: tabular-nums; }`,
+          `${tag} > table > thead th > button { display: inline-flex; align-items: center; appearance: none; border-style: none; cursor: pointer; font: inherit; color: inherit; text-align: inherit; }`,
+          `${tag} > table > thead th > button > svg { flex: none; }`,
+          `${tag} > table > thead th[aria-sort="descending"] > button > svg { transform: rotate(180deg); }`,
+          `${tag} > table > tbody > tr[data-fm-empty] > td { text-align: center; }`,
+          `${tag} ${HIDDEN_TEXT}`,
+        ]
+      : [
+          `${tag} > dl { display: grid; margin: 0; }`,
+          `${tag} > dl > :is(dt, dd) { margin: 0; }`,
+          `${tag}[data-layout="columns"] > dl { grid-template-columns: max-content auto; }`,
+          `${tag}[data-layout="stacked"] > dl { grid-template-columns: auto; }`,
+          `${tag} ${HIDDEN_TEXT}`,
+        ];
   return `${structure.join("\n")}\n${rules
     .map(([selector, body]) => `${selector} {\n${body.map((line) => `  ${line}`).join("\n")}\n}`)
     .join("\n")}\n`;
@@ -813,8 +930,15 @@ export function stylesheetOf(skemo: Skemo, uzo?: Uzo): string {
   };
   // A light-DOM host (Spec 011 ④, E10) keeps only the region and its edge in the shadow sheet;
   // every other part stands in the document's stylesheet (lightStylesheetOf).
-  const shadowParts = Object.entries(skemo.parts).filter(
-    ([part]) => !isLight(skemo) || LIGHT_SHADOW_PARTS.has(part),
+  const shadowParts = Object.entries(skemo.parts).map(
+    ([part, properties]): [string, Record<string, SkemoPartSource | undefined>] => [
+      part,
+      Object.fromEntries(
+        Object.entries(properties).filter(
+          ([property]) => !isLight(skemo) || lightShadowProperty(skemo, part, property),
+        ),
+      ),
+    ],
   );
   // Fixed properties first: they do not depend on props or state.
   for (const [part, properties] of shadowParts) {
@@ -869,19 +993,21 @@ export function stylesheetOf(skemo: Skemo, uzo?: Uzo): string {
         : isMeter(skemo)
           ? meterStructure
           : isLight(skemo)
-            ? lightStructure
-            : isField(skemo)
-              ? fieldStructure(disables, isSelect(skemo), isTextarea(skemo))
-              : isGroup(skemo)
-                ? groupStructure(disables, skemo.parts["required-mark"] !== undefined)
-                : isToggle(skemo)
-                  ? toggleStructure(
-                      disables,
-                      uzo?.layout.wrap !== undefined && uzo.layout.wrap !== "never",
-                      skemo.slots.some((slot) => slot.default !== true && slot.text === true),
-                      skemo.parts["required-mark"] !== undefined,
-                    )
-                  : structure(uzo?.layout.wrap === "with-text", disables, bordered);
+            ? lightStructure(skemo)
+            : isTabs(skemo)
+              ? tabsStructure
+              : isField(skemo)
+                ? fieldStructure(disables, isSelect(skemo), isTextarea(skemo))
+                : isGroup(skemo)
+                  ? groupStructure(disables, skemo.parts["required-mark"] !== undefined)
+                  : isToggle(skemo)
+                    ? toggleStructure(
+                        disables,
+                        uzo?.layout.wrap !== undefined && uzo.layout.wrap !== "never",
+                        skemo.slots.some((slot) => slot.default !== true && slot.text === true),
+                        skemo.parts["required-mark"] !== undefined,
+                      )
+                    : structure(uzo?.layout.wrap === "with-text", disables, bordered);
   return `${base}\n${[...tokenRules, ...undrawn].join("\n")}\n`;
 }
 
@@ -919,8 +1045,11 @@ function selectorOf(
   if (isDialog(skemo)) return dialogPartSelector(part, data);
   if (isStatus(skemo)) return statusPartSelector(part, data);
   if (isMeter(skemo)) return meterPartSelector(part, data);
-  // The shadow of a light-DOM host (Spec 011 ④, E10): the region and its edge, the ring on focus.
+  if (isTabs(skemo)) return tabsPartSelector(part, data, entry, combination[STATE_KEY] ?? "rest");
+  // The shadow of a light-DOM host (Spec 011 ④, E10): the region and its edge, the ring on focus;
+  // of a navigation (Spec 011 ⑤) the nav with the gap of its items.
   if (isLight(skemo)) {
+    if (isNav(skemo)) return ':where([part="list"])';
     return part === "focus-ring"
       ? ':where([part="region"]:focus-visible)'
       : ':where([part="region"])';

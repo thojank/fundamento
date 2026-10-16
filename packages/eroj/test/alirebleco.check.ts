@@ -1217,26 +1217,24 @@ for (const aspekto of ["komuna", "ekzemplo"]) {
         await expect(page.getByRole("tablist")).toHaveCount(1);
         await expect(page.getByRole("tab")).toHaveCount(3);
         for (const orientation of ["horizontal", "vertical"]) {
-          const colours = await page.locator(`#n-${orientation}`).evaluate(
-            (element) => {
-              // The colour behind an element: its own fill, or the page's where it is see-through.
-              const read = (node: Element): string => {
-                const own = getComputedStyle(node).backgroundColor;
-                const alpha = /rgba\([^)]*,\s*([\d.]+)\)/.exec(own)?.[1];
-                return alpha !== undefined && Number.parseFloat(alpha) === 0
-                  ? getComputedStyle(document.body).backgroundColor
-                  : own;
-              };
-              const current = element.querySelector("a[aria-current]") as HTMLElement;
-              const other = element.querySelector("a:not([aria-current])") as HTMLElement;
-              return {
-                currentText: getComputedStyle(current).color,
-                currentFill: read(current),
-                otherText: getComputedStyle(other).color,
-                otherFill: read(other),
-              };
-            },
-          );
+          const colours = await page.locator(`#n-${orientation}`).evaluate((element) => {
+            // The colour behind an element: its own fill, or the page's where it is see-through.
+            const read = (node: Element): string => {
+              const own = getComputedStyle(node).backgroundColor;
+              const alpha = /rgba\([^)]*,\s*([\d.]+)\)/.exec(own)?.[1];
+              return alpha !== undefined && Number.parseFloat(alpha) === 0
+                ? getComputedStyle(document.body).backgroundColor
+                : own;
+            };
+            const current = element.querySelector("a[aria-current]") as HTMLElement;
+            const other = element.querySelector("a:not([aria-current])") as HTMLElement;
+            return {
+              currentText: getComputedStyle(current).color,
+              currentFill: read(current),
+              otherText: getComputedStyle(other).color,
+              otherFill: read(other),
+            };
+          });
           expect(
             contrastOf(colours.currentText, colours.currentFill),
             `${orientation} current`,
@@ -1289,22 +1287,43 @@ for (const aspekto of ["komuna", "ekzemplo"]) {
           if (!(active instanceof HTMLAnchorElement)) return null;
           const style = getComputedStyle(active);
           const gap = /rgba?\([^)]*\)/.exec(style.boxShadow)?.[0] ?? "";
-          return { ring: style.outlineColor, gap, page: getComputedStyle(document.body).backgroundColor };
+          return {
+            ring: style.outlineColor,
+            gap,
+            page: getComputedStyle(document.body).backgroundColor,
+          };
         });
         expect(linkRing).not.toBeNull();
-        expect(contrastOf(linkRing?.ring ?? "", linkRing?.gap ?? ""), "link ring on gap").toBeGreaterThanOrEqual(3);
-        expect(contrastOf(linkRing?.ring ?? "", linkRing?.page ?? ""), "link ring on page").toBeGreaterThanOrEqual(3);
+        expect(
+          contrastOf(linkRing?.ring ?? "", linkRing?.gap ?? ""),
+          "link ring on gap",
+        ).toBeGreaterThanOrEqual(3);
+        expect(
+          contrastOf(linkRing?.ring ?? "", linkRing?.page ?? ""),
+          "link ring on page",
+        ).toBeGreaterThanOrEqual(3);
         await page.evaluate(() => (document.querySelector("#tl") as HTMLElement).focus());
         const tabRing = await page.locator("#tl").evaluate((element) => {
           const active = element.shadowRoot?.activeElement;
-          if (!(active instanceof HTMLElement) || active.getAttribute("role") !== "tab") return null;
+          if (!(active instanceof HTMLElement) || active.getAttribute("role") !== "tab")
+            return null;
           const style = getComputedStyle(active);
           const gap = /rgba?\([^)]*\)/.exec(style.boxShadow)?.[0] ?? "";
-          return { ring: style.outlineColor, gap, page: getComputedStyle(document.body).backgroundColor };
+          return {
+            ring: style.outlineColor,
+            gap,
+            page: getComputedStyle(document.body).backgroundColor,
+          };
         });
         expect(tabRing).not.toBeNull();
-        expect(contrastOf(tabRing?.ring ?? "", tabRing?.gap ?? ""), "tab ring on gap").toBeGreaterThanOrEqual(3);
-        expect(contrastOf(tabRing?.ring ?? "", tabRing?.page ?? ""), "tab ring on page").toBeGreaterThanOrEqual(3);
+        expect(
+          contrastOf(tabRing?.ring ?? "", tabRing?.gap ?? ""),
+          "tab ring on gap",
+        ).toBeGreaterThanOrEqual(3);
+        expect(
+          contrastOf(tabRing?.ring ?? "", tabRing?.page ?? ""),
+          "tab ring on page",
+        ).toBeGreaterThanOrEqual(3);
       });
     }
   }

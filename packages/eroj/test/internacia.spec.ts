@@ -880,7 +880,9 @@ test("navigado and langetaro text expansion: the items wrap, the tabs keep their
     nav: document.getElementById("n")?.getBoundingClientRect().height ?? 0,
     navWidth: document.getElementById("n")?.getBoundingClientRect().width ?? 0,
     list:
-      document.getElementById("t")?.shadowRoot?.querySelector('[part="control"]')
+      document
+        .getElementById("t")
+        ?.shadowRoot?.querySelector('[part="control"]')
         ?.getBoundingClientRect().height ?? 0,
   }));
   await page.evaluate(
@@ -891,7 +893,9 @@ test("navigado and langetaro text expansion: the items wrap, the tabs keep their
     [pseudo("Standards der Organisation", 1), pseudo("Versionen des Standards", 1)],
   );
   const after = await page.evaluate(() => {
-    const list = document.getElementById("t")?.shadowRoot?.querySelector('[part="control"]') as HTMLElement;
+    const list = document
+      .getElementById("t")
+      ?.shadowRoot?.querySelector('[part="control"]') as HTMLElement;
     return {
       nav: document.getElementById("n")?.getBoundingClientRect().height ?? 0,
       navWidth: document.getElementById("n")?.getBoundingClientRect().width ?? 0,

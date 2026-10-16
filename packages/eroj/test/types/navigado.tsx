@@ -8,7 +8,12 @@ export const valid = (
     <a href="/standards" data-page="standards">
       Standards
     </a>
-    <a href="/versions" data-page="versions" data-count="1" data-count-description="1 Version in Prüfung">
+    <a
+      href="/versions"
+      data-page="versions"
+      data-count="1"
+      data-count-description="1 Version in Prüfung"
+    >
       Versionen
     </a>
   </Navigado>

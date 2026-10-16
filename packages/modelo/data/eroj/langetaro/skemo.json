@@ -87,6 +87,9 @@
         }
       },
       "panel": {
+        "color": {
+          "fixed": "color.text.default"
+        },
         "inline-padding": {
           "fixed": "spacing.medium"
         }

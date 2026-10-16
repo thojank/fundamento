@@ -23,9 +23,10 @@ const focused = (page: import("@playwright/test").Page) =>
     const host = document.activeElement;
     if (host?.id === "after") return "after";
     const inner = host?.shadowRoot?.activeElement;
-    return inner === null || inner === undefined
-      ? "none"
-      : `${inner.getAttribute("role")}:${inner.textContent?.trim()}`;
+    if (inner === null || inner === undefined) return "none";
+    // The text of a row lies in the light DOM (slotted): read the assigned node, not the shadow.
+    const slotted = inner.querySelector("slot")?.assignedNodes()[0]?.textContent?.trim() ?? "";
+    return `${inner.getAttribute("role")}:${slotted}`;
   });
 
 test.describe("fm-langetaro behaviour", () => {
@@ -40,7 +41,10 @@ test.describe("fm-langetaro behaviour", () => {
       "aria-selected",
       "true",
     );
-    await expect(page.getByRole("tab", { name: "Inhalt" })).toHaveAttribute("aria-selected", "false");
+    await expect(page.getByRole("tab", { name: "Inhalt" })).toHaveAttribute(
+      "aria-selected",
+      "false",
+    );
     // One tab stop: the selected tab.
     const stops = await items.evaluateAll((elements) =>
       elements.map((element) => (element as HTMLElement).tabIndex),
@@ -49,10 +53,22 @@ test.describe("fm-langetaro behaviour", () => {
     const panel = page.getByRole("tabpanel");
     await expect(panel).toHaveCount(1);
     await expect(panel).toHaveAccessibleName("Versionen");
-    await expect(panel).toHaveText("Der Inhalt");
+    // The panel's content lies in the light DOM (slotted): the host shows it.
+    await expect(page.locator("#t")).toContainText("Der Inhalt");
+    expect(
+      await panel.evaluate((element) =>
+        element
+          .querySelector("slot")
+          ?.assignedNodes()
+          .map((node) => node.textContent),
+      ),
+    ).toEqual(["Der Inhalt"]);
     // Without the prop the first tab is selected.
     await page.locator("#t").evaluate((element) => element.removeAttribute("selected"));
-    await expect(page.getByRole("tab", { name: "Inhalt" })).toHaveAttribute("aria-selected", "true");
+    await expect(page.getByRole("tab", { name: "Inhalt" })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
     await expect(panel).toHaveAccessibleName("Inhalt");
   });
 
@@ -117,7 +133,8 @@ test.describe("fm-langetaro behaviour", () => {
     );
     await page.getByRole("tab", { name: "Regeln" }).click();
     expect(await selected(page)).toBe("regeln");
-    await page.getByRole("tab", { name: "Versionen" }).click();
+    // A disabled tab: the pointer reaches it (force: Playwright itself waits for an enabled target).
+    await page.getByRole("tab", { name: "Versionen" }).click({ force: true });
     expect(await selected(page)).toBe("regeln");
     await page.evaluate(() => (document.querySelector("#t") as HTMLElement).focus());
     expect(await focused(page)).toBe("tab:Regeln");

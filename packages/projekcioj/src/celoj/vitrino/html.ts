@@ -164,7 +164,12 @@ function wrapSentence(role: string | undefined, wrap: string, multiline = false)
                 ? "Wert"
                 : role === "meter"
                   ? "Wertetext"
-                  : "Label";
+                  : // Spec 011 ⑤: a navigation wraps its row of items, the tabs never wrap.
+                    role === "navigation"
+                    ? "Leiste"
+                    : role === "tablist"
+                      ? "Reiter"
+                      : "Label";
   if (wrap === "never") return `${subject} bricht nie um`;
   if (wrap === "with-text") return `${subject} darf umbrechen (inline), standalone nie`;
   return `${subject} darf umbrechen`;

@@ -27,7 +27,8 @@ export type HostControl =
   | "text"
   | "status"
   | "meter"
-  | "light";
+  | "light"
+  | "tabs";
 
 export interface ElementNames {
   /** `fm-butono` */
@@ -86,6 +87,11 @@ export function hostOf(role: string, multiline = false): HostControl {
   // holds only a region or a frame around the slot.
   if (role === "meter") return "meter";
   if (role === "table" || role === "list") return "light";
+  // A navigation (Spec 011 ⑤, D-07) keeps the platform's own links in the light DOM too: the
+  // shadow holds the nav landmark around them. Tabs (D-08) are rows with role tab, as a radio
+  // group's are rows with role radio.
+  if (role === "navigation") return "light";
+  if (role === "tablist") return "tabs";
   if (role === "textbox") return multiline ? "textarea" : "input";
   if (role === "dialog") return "dialog";
   if (role === "switch" || role === "checkbox") return "toggle";
@@ -303,7 +309,12 @@ function meterMarkup(): string {
  * content slot (the table), or a plain frame around the default slot (the list); a default text
  * slot (the caption of a table) is not rendered here — the element writes it into the table.
  */
-function lightMarkup(slots: NonNullable<ElementNames["slots"]>): string {
+function lightMarkup(slots: NonNullable<ElementNames["slots"]>, role = ""): string {
+  // A navigation (Spec 011 ⑤, D-07): the nav landmark, named by the label prop in the render,
+  // around the links of the default slot; the gap between the items is its own.
+  if (role === "navigation") {
+    return '<nav part="list"><slot></slot></nav><span id="fm-texts" hidden></span>';
+  }
   const content = slots.find((slot) => slot.default !== true && slot.text !== true);
   const defaultSlot = slots.find((slot) => slot.default === true);
   const frame =
@@ -329,6 +340,19 @@ const DASH_SIGN =
 /** The chevron of a sort button (Spec 011 ④, D-09): the select's sign, turned by the direction. */
 const SORT_SIGN = `<svg aria-hidden="true" viewBox="0 0 16 16" width="100%" height="100%" fill="currentColor"><path d="${CHEVRON_PATH}"/></svg>`;
 
+/**
+ * The shadow markup of tabs (Spec 011 ⑤, D-08): the tablist (named by the label prop in the
+ * render) whose rows the element makes, one per child of the default slot (manual slot
+ * assignment, as the radio group); the panel, a tabpanel labelled by the selected tab, around the
+ * panel slot; the default slot stays empty and hidden (the children lie in the rows).
+ */
+function tabsMarkup(): string {
+  return '<div part="control" role="tablist"></div><div part="panel" role="tabpanel" tabindex="0"><slot name="panel"></slot></div><slot hidden></slot><span id="fm-texts" hidden></span>';
+}
+
+/** One row of the tabs (Spec 011 ⑤, D-08): a button with role tab; its edge is the indicator. */
+const TAB_ROW = '<button part="tab" role="tab" type="button"><slot></slot></button>';
+
 /** The shadow markup of the control: slots before the label (icon-start), the label, the rest. */
 function markup(
   host: HostControl,
@@ -341,7 +365,8 @@ function markup(
   if (host === "text") return textMarkup(slots);
   if (host === "status") return statusMarkup(slots, indicator, dismiss);
   if (host === "meter") return meterMarkup();
-  if (host === "light") return lightMarkup(slots);
+  if (host === "light") return lightMarkup(slots, role);
+  if (host === "tabs") return tabsMarkup();
   if (host === "input") return fieldMarkup(slots);
   if (host === "textarea") return fieldMarkup(slots, true);
   if (host === "dialog") return dialogMarkup();
@@ -403,7 +428,9 @@ export function elementSource({
                       ? "div"
                       : host === "light"
                         ? "[part='region'], [part='list']"
-                        : "button";
+                        : host === "tabs"
+                          ? "[role=tablist]"
+                          : "button";
   const isToggle = host === "toggle";
   const isGroup = host === "group";
   const isSelect = host === "select";
@@ -413,7 +440,9 @@ export function elementSource({
   const isDialog = host === "dialog";
   const isStatus = host === "status";
   const isMeter = host === "meter";
-  const isStatic = isStatus || host === "text" || isMeter || isLight;
+  const isTabs = host === "tabs";
+  const isNav = isLight && role === "navigation";
+  const isStatic = isStatus || host === "text" || isMeter || isLight || isTabs;
   const listSlot = slots.find((slot) => slot.list === true)?.name ?? "";
   const namedSlots = slots
     .filter((slot) => slot.default !== true && slot.decorative !== true)
@@ -1183,9 +1212,12 @@ ${
       subtree: true,
       characterData: true,
       attributes: true,
-      attributeFilter: ["slot", "data-sort", "numeric"],
+      attributeFilter: ${isNav ? '["slot", "href", "data-page", "data-count", "data-count-description"]' : '["slot", "data-sort", "numeric"]'},
     });
-    this.addEventListener("click", (event) => {
+${
+  isNav
+    ? ""
+    : `    this.addEventListener("click", (event) => {
       const button = event
         .composedPath()
         .find(
@@ -1200,9 +1232,54 @@ ${
       this.dispatchEvent(new CustomEvent("sort-change", { bubbles: true, detail: { column, direction } }));
     });
 `
+}`
     : "";
-  const lightMethods = isLight
+  const lightMethods = isNav
     ? `
+  /** Writes what the Ero adds to the links (Spec 011 ⑤, D-07); every write first compares. */
+  #decorate(): void {
+    // The landmark is named by the label prop (a11y.name prop:label).
+    const label = this.propValue("label");
+    const name = typeof label === "string" && label !== "" ? label : null;
+    if (this.#control.getAttribute("aria-label") !== name) {
+      if (name === null) this.#control.removeAttribute("aria-label");
+      else this.#control.setAttribute("aria-label", name);
+    }
+    // The current page (G4, E7): the item whose key — its data-page, else its href — is the page
+    // prop carries aria-current="page"; no other does. Colour alone never says it: the stylesheet
+    // binds the underline to [aria-current].
+    const page = this.propValue("page");
+    const wanted = typeof page === "string" && page !== "" ? page : null;
+    for (const item of this.querySelectorAll(":scope > a")) {
+      const key = item.getAttribute("data-page") ?? item.getAttribute("href") ?? item.textContent?.trim() ?? "";
+      const current = wanted !== null && key === wanted;
+      if (current && item.getAttribute("aria-current") !== "page") item.setAttribute("aria-current", "page");
+      if (!current && item.hasAttribute("aria-current")) item.removeAttribute("aria-current");
+      // A count next to an item (the spec: 1 Version in Prüfung) is a composed insigno with intent
+      // info: the digit is not heard (aria-hidden), the description is (the badge's hidden slot).
+      const count = item.getAttribute("data-count");
+      const description = item.getAttribute("data-count-description") ?? "";
+      let badge = item.querySelector(":scope > fm-insigno");
+      if (count === null || count === "") {
+        badge?.remove();
+        continue;
+      }
+      if (badge === null) {
+        badge = document.createElement("fm-insigno");
+        badge.setAttribute("intent", "info");
+        badge.setAttribute("size", "small");
+        badge.innerHTML = '<span aria-hidden="true"></span><span slot="description"></span>';
+        item.append(badge);
+      }
+      const digit = badge.querySelector('[aria-hidden="true"]');
+      if (digit !== null && digit.textContent !== count) digit.textContent = count;
+      const heard = badge.querySelector('[slot="description"]');
+      if (heard !== null && heard.textContent !== description) heard.textContent = description;
+    }
+  }
+`
+    : isLight
+      ? `
   /** The platform's own table or list in the light DOM, the first child of its kind. */
   #native(kind: "table" | "dl"): HTMLElement | undefined {
     const node = [...this.children].find((child) => child.tagName.toLowerCase() === kind);
@@ -1317,7 +1394,7 @@ ${
     }
   }
 `
-    : "";
+      : "";
   // The text of a slot of the light DOM, read for a meter's value text and a table's caption or
   // empty state (the default slot is named "").
   const slotTextMethod =
@@ -1336,6 +1413,161 @@ ${
   }
 `
       : "";
+  // Tabs (Spec 011 ⑤, D-08): the constructor follows the children and the keys; a click on a row
+  // selects its tab.
+  const tabsInit = isTabs
+    ? `    new MutationObserver(() => {
+      this.#assign();
+      this.#render();
+    }).observe(this, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+      attributes: true,
+      attributeFilter: ["slot", "value", "disabled", "aria-disabled"],
+    });
+    control.addEventListener("keydown", (event) => this.#key(event));
+    control.addEventListener("click", (event) => {
+      const row = event.composedPath().find(
+        (node) => node instanceof HTMLElement && node.getAttribute("part") === "tab",
+      );
+      if (row instanceof HTMLElement) this.#choose(this.#rows().indexOf(row));
+    });
+`
+    : "";
+  // The render of tabs (Spec 011 ⑤, D-08, E7, G4): active is the state of one row (aria-selected),
+  // never of the list; the selected tab is the prop's, else the first that is not disabled; one tab
+  // stop (the selected tab); a disabled tab says so and is no stop; the panel is labelled by the
+  // selected tab.
+  const tabsRender = isTabs
+    ? `    const rows = this.#rows();
+    const values = this.#values();
+    const disabledRows = this.#disabled();
+    const selected = this.propValue("selected");
+    const wanted = typeof selected === "string" && selected !== "" ? values.indexOf(selected) : -1;
+    const active = wanted === -1 ? disabledRows.findIndex((off) => !off) : wanted;
+    rows.forEach((row, index) => {
+      const on = index === active;
+      row.setAttribute("aria-selected", String(on));
+      row.id = \`tab-\${index}\`;
+      row.setAttribute("aria-controls", "panel");
+      row.tabIndex = on && !disabledRows[index] ? 0 : -1;
+      if (disabledRows[index]) row.setAttribute("aria-disabled", "true");
+      else row.removeAttribute("aria-disabled");
+    });
+    const panel = this.shadowRoot?.querySelector('[part="panel"]');
+    if (panel instanceof HTMLElement) {
+      panel.id = "panel";
+      if (active === -1) panel.removeAttribute("aria-labelledby");
+      else panel.setAttribute("aria-labelledby", \`tab-\${active}\`);
+    }
+`
+    : "";
+  const tabsMethods = isTabs
+    ? `
+  /** Focus goes to the one tab stop: the selected tab, else the first. */
+  override focus(options?: FocusOptions): void {
+    const rows = this.#rows();
+    (rows.find((row) => row.tabIndex === 0) ?? rows[0])?.focus(options);
+  }
+
+  /** The rows of the list, one per tab. */
+  #rows(): HTMLElement[] {
+    return [...(this.shadowRoot?.querySelectorAll('[part="tab"]') ?? [])] as HTMLElement[];
+  }
+
+  /** The child a row holds: the tab of the light DOM. */
+  #tabOf(row: HTMLElement): Element | undefined {
+    const node = row.querySelector("slot")?.assignedNodes()[0];
+    return node instanceof Element ? node : undefined;
+  }
+
+  /** The id of each tab: its attribute value, else its text. */
+  #values(): string[] {
+    return this.#rows().map((row) => {
+      const tab = this.#tabOf(row);
+      return tab === undefined ? "" : (tab.getAttribute("value") ?? tab.textContent?.trim() ?? "");
+    });
+  }
+
+  /** Whether each tab is disabled (its attribute disabled, or aria-disabled where the markup has none). */
+  #disabled(): boolean[] {
+    return this.#rows().map((row) => {
+      const tab = this.#tabOf(row);
+      return tab !== undefined && (tab.hasAttribute("disabled") || tab.getAttribute("aria-disabled") === "true");
+    });
+  }
+
+  /**
+   * Assigns the children to the slots (manual slot assignment): every element without a slot to a
+   * row of its own, made here; the panel to its slot.
+   */
+  #assign(): void {
+    const shadow = this.shadowRoot;
+    if (shadow === null) return;
+    const tabs: Element[] = [];
+    const named = new Map<string, Element[]>();
+    for (const node of this.children) {
+      const slot = node.getAttribute("slot");
+      if (slot === null) tabs.push(node);
+      else named.set(slot, [...(named.get(slot) ?? []), node]);
+    }
+    for (const holder of shadow.querySelectorAll("slot[name]")) {
+      (holder as HTMLSlotElement).assign(...(named.get(holder.getAttribute("name") ?? "") ?? []));
+    }
+    const list = this.#control;
+    while (list.children.length > tabs.length) list.lastElementChild?.remove();
+    while (list.children.length < tabs.length) {
+      list.insertAdjacentHTML("beforeend", \`${TAB_ROW}\`);
+    }
+    tabs.forEach((tab, index) => {
+      list.children[index]?.querySelector("slot")?.assign(tab);
+    });
+  }
+
+  /** The keys of the Skemo: the arrows move and select, wrapping around; Home and End go to the ends. */
+  #key(event: KeyboardEvent): void {
+    if (!KEYS.includes(event.key)) return;
+    const rows = this.#rows();
+    const disabledRows = this.#disabled();
+    const enabled = rows.map((_row, index) => index).filter((index) => !disabledRows[index]);
+    if (enabled.length === 0) return;
+    const row = event.composedPath().find(
+      (node) => node instanceof HTMLElement && node.getAttribute("part") === "tab",
+    );
+    const at = Math.max(0, enabled.indexOf(rows.indexOf(row as HTMLElement)));
+    const next =
+      event.key === "ArrowRight"
+        ? enabled[(at + 1) % enabled.length]
+        : event.key === "ArrowLeft"
+          ? enabled[(at - 1 + enabled.length) % enabled.length]
+          : event.key === "Home"
+            ? enabled[0]
+            : event.key === "End"
+              ? enabled[enabled.length - 1]
+              : undefined;
+    if (next === undefined) return;
+    event.preventDefault();
+    this.#choose(next);
+  }
+
+  /**
+   * Selects the tab of a row (selection follows the focus, automatic activation): the event may
+   * be prevented, then the selection stays; otherwise its id is the prop selected.
+   */
+  #choose(index: number): void {
+    const row = this.#rows()[index];
+    const value = this.#values()[index];
+    if (row === undefined || value === undefined || this.#disabled()[index]) return;
+    row.focus();
+    if (this.getAttribute("selected") === value) return;
+    const go = this.dispatchEvent(
+      new CustomEvent("select", { bubbles: true, cancelable: true, detail: { value } }),
+    );
+    if (go) this.setAttribute("selected", value);
+  }
+`
+    : "";
   const body = `
 type Value = string | boolean;
 
@@ -1419,7 +1651,7 @@ ${isFieldHost ? "  /** Whether a person touched the field or the form reported i
   constructor() {
     super();
     this.#internals = this.attachInternals();
-    const root = this.attachShadow({ mode: "open", delegatesFocus: true${isGroup ? ', slotAssignment: "manual"' : ""} });
+    const root = this.attachShadow({ mode: "open", delegatesFocus: true${isGroup || isTabs ? ', slotAssignment: "manual"' : ""} });
     if (sheet === undefined) {
       sheet = new CSSStyleSheet();
       sheet.replaceSync(CSS);
@@ -1443,7 +1675,7 @@ ${isFieldHost ? "  /** Whether a person touched the field or the form reported i
     this.#label = label;
     this.#texts = texts;
     control.addEventListener("click", (event) => this.#activate(event));
-${toggleKeys}${groupInit}${selectInit}${dialogInit}${statusInit}${lightInit}    label.addEventListener("slotchange", () => this.#render());
+${toggleKeys}${groupInit}${selectInit}${dialogInit}${statusInit}${lightInit}${tabsInit}    label.addEventListener("slotchange", () => this.#render());
     for (const named of root.querySelectorAll("slot[name]")) {
       named.addEventListener("slotchange", () => this.#render());
     }
@@ -1458,7 +1690,7 @@ ${toggleKeys}${groupInit}${selectInit}${dialogInit}${statusInit}${lightInit}    
 ${invalidReport}${inputEnter}  }
 
   connectedCallback(): void {
-${isGroup ? "    this.#assign();\n" : ""}    this.#render();
+${isGroup || isTabs ? "    this.#assign();\n" : ""}    this.#render();
   }
 
   attributeChangedCallback(): void {
@@ -1577,7 +1809,7 @@ ${isGroup ? "    this.#assign();\n" : ""}    this.#render();
     // \`invalid\` spoken as aria-invalid and set by a filled error slot (constraint of the Skemo);
     // disabled wins over readonly; help and error show only while they have text.
     const described: string[] = [];
-${inputRender}${toggleRender}${groupRender}${selectRender}${dialogRender}${statusRender}${meterRender}${lightRender}    // The texts of the slots that describe the control (Spec 009, D-02; a checkbox, Spec 010 ②):
+${inputRender}${toggleRender}${groupRender}${selectRender}${dialogRender}${statusRender}${meterRender}${lightRender}${tabsRender}    // The texts of the slots that describe the control (Spec 009, D-02; a checkbox, Spec 010 ②):
     // shown while they have text, and its description in that order.
     for (const source of DESCRIPTION) {
       const [kind, name = ""] = source.split(":");
@@ -1653,7 +1885,7 @@ ${
     : `    if (!(this.#control instanceof HTMLButtonElement)) return;
 ${toggleActivate}`
 }  }
-${groupMethods}${selectMethods}${inputMethods}${dialogMethods}${statusMethods}${slotTextMethod}${lightMethods}
+${groupMethods}${selectMethods}${inputMethods}${dialogMethods}${statusMethods}${slotTextMethod}${lightMethods}${tabsMethods}
 }
 
 /**

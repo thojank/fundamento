@@ -84,9 +84,7 @@ test.describe("fm-navigado behaviour", () => {
       description: element.querySelector('[slot="description"]')?.textContent,
     }));
     expect(heard).toEqual({ digit: "1", description: "1 Version in Prüfung" });
-    await expect(page.getByRole("link", { name: "Versionen 1 Version in Prüfung" })).toHaveCount(
-      1,
-    );
+    await expect(page.getByRole("link", { name: "Versionen 1 Version in Prüfung" })).toHaveCount(1);
     await page.locator("#n a[data-count]").evaluate((element) => {
       element.setAttribute("data-count", "2");
       element.setAttribute("data-count-description", "2 Versionen in Prüfung");
@@ -108,13 +106,17 @@ test.describe("fm-navigado behaviour", () => {
       `<div id="w" style="inline-size: 40rem">${nav('label="Hauptnavigation"')}</div>`,
     );
     const tops = () =>
-      page.locator("#n a").evaluateAll((elements) =>
-        elements.map((element) => Math.round(element.getBoundingClientRect().top)),
-      );
+      page
+        .locator("#n a")
+        .evaluateAll((elements) =>
+          elements.map((element) => Math.round(element.getBoundingClientRect().top)),
+        );
     const lefts = () =>
-      page.locator("#n a").evaluateAll((elements) =>
-        elements.map((element) => Math.round(element.getBoundingClientRect().left)),
-      );
+      page
+        .locator("#n a")
+        .evaluateAll((elements) =>
+          elements.map((element) => Math.round(element.getBoundingClientRect().left)),
+        );
     const row = await tops();
     expect(new Set(row).size).toBe(1);
     const order = await lefts();

@@ -54,7 +54,12 @@ describe("navigado in the repo Modelo (section ⑤, G1, G2, E7)", () => {
 
   it("has orientation, label (a duty) and page (the key of the current page) as props; the states of an item", () => {
     expect(
-      skemo?.props.map((prop) => [prop.name, prop.values ?? prop.kind, prop.default, prop.required]),
+      skemo?.props.map((prop) => [
+        prop.name,
+        prop.values ?? prop.kind,
+        prop.default,
+        prop.required,
+      ]),
     ).toEqual([
       ["orientation", ["horizontal", "vertical"], "horizontal", undefined],
       ["label", "string", undefined, true],
@@ -141,7 +146,9 @@ describe("the Uzo of the navigado (section ⑤, G5)", () => {
     expect(uzo?.purpose).toBe(
       "Leads between the main pages of an application and shows where the person is.",
     );
-    expect(uzo?.slots).toEqual({ items: { accepts: ["text"], required: true, min: 2, nesting: 0 } });
+    expect(uzo?.slots).toEqual({
+      items: { accepts: ["text"], required: true, min: 2, nesting: 0 },
+    });
     expect(uzo?.layout).toEqual({ size: "container", wrap: "allowed" });
   });
 
