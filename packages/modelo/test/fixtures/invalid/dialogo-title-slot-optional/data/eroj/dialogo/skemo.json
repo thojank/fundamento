@@ -1,0 +1,205 @@
+{
+  "ero": {
+    "id": "ero_01M2XM2NGN3KJSKJ4JTXQWMF72",
+    "name": "dialogo",
+    "skemo": "ske_01M2XM2NWJ39A7BEZ9A2S8GANE",
+    "description": "Fixture Ero: the dialogo of Spec 011 ②, trimmed to what the fixture needs."
+  },
+  "skemo": {
+    "id": "ske_01M2XM2NWJ39A7BEZ9A2S8GANE",
+    "ero": "ero_01M2XM2NGN3KJSKJ4JTXQWMF72",
+    "props": [
+      {
+        "name": "open",
+        "kind": "boolean",
+        "default": false,
+        "description": "Whether the dialog is shown; the application opens it and closes it after confirm or cancel."
+      },
+      {
+        "name": "size",
+        "kind": "enum",
+        "values": [
+          "small",
+          "medium"
+        ],
+        "default": "small",
+        "description": "The width of the surface on the scale of the containers (size.container.*): small for a question, medium for a form."
+      },
+      {
+        "name": "reason",
+        "kind": "enum",
+        "values": [
+          "none",
+          "optional",
+          "required"
+        ],
+        "default": "none",
+        "description": "Whether the dialog asks for a reason: none, an optional text, or a required one that locks the confirmation until text is entered. The reason is a tekstareo the dialog shows itself."
+      }
+    ],
+    "states": [
+      "rest"
+    ],
+    "slots": [
+      {
+        "name": "title",
+        "default": true,
+        "text": true
+      },
+      {
+        "name": "message",
+        "text": true
+      },
+      {
+        "name": "reason",
+        "text": true
+      },
+      {
+        "name": "content"
+      },
+      {
+        "name": "actions"
+      }
+    ],
+    "parts": {
+      "backdrop": {
+        "fill": {
+          "fixed": "color.backdrop"
+        }
+      },
+      "surface": {
+        "fill": {
+          "fixed": "color.background.raised"
+        },
+        "radius": {
+          "fixed": "radius.role.surface"
+        },
+        "width": {
+          "by": [
+            "size"
+          ]
+        },
+        "shadow": {
+          "fixed": "elevation.shadow.modal"
+        }
+      },
+      "border": {
+        "color": {
+          "fixed": "color.border.default"
+        },
+        "width": {
+          "fixed": "border.width.default"
+        }
+      },
+      "title": {
+        "color": {
+          "fixed": "color.text.default"
+        },
+        "typography": {
+          "fixed": "typography.headline.4"
+        }
+      },
+      "message": {
+        "color": {
+          "fixed": "color.text.default"
+        },
+        "typography": {
+          "fixed": "typography.body.1"
+        }
+      },
+      "reason": {
+        "color": {
+          "by": [
+            "reason"
+          ]
+        }
+      },
+      "content": {
+        "gap": {
+          "fixed": "spacing.medium"
+        }
+      },
+      "actions": {
+        "gap": {
+          "fixed": "spacing.small"
+        }
+      },
+      "box": {
+        "inline-padding": {
+          "fixed": "spacing.large"
+        },
+        "gap": {
+          "fixed": "spacing.medium"
+        }
+      }
+    },
+    "bindings": [
+      {
+        "part": "surface",
+        "property": "width",
+        "when": {
+          "size": "small"
+        },
+        "token": "size.container.small"
+      },
+      {
+        "part": "surface",
+        "property": "width",
+        "when": {
+          "size": "medium"
+        },
+        "token": "size.container.medium"
+      },
+      {
+        "part": "reason",
+        "property": "color",
+        "when": {
+          "reason": "none"
+        },
+        "token": "none"
+      },
+      {
+        "part": "reason",
+        "property": "color",
+        "when": {
+          "reason": "optional"
+        },
+        "token": "color.text.default"
+      },
+      {
+        "part": "reason",
+        "property": "color",
+        "when": {
+          "reason": "required"
+        },
+        "token": "color.text.default"
+      }
+    ],
+    "a11y": {
+      "role": "dialog",
+      "name": [
+        "slot:title"
+      ],
+      "description": [
+        "slot:message"
+      ],
+      "states": {},
+      "keys": [
+        "Escape"
+      ]
+    },
+    "constraints": [
+      {
+        "when": {
+          "slot:reason": "empty"
+        },
+        "allowed": {
+          "reason": [
+            "none"
+          ]
+        },
+        "kialo": "A reason field without a visible label is a field a person cannot name, because the dialog asks for words and must say which."
+      }
+    ]
+  }
+}

@@ -68,6 +68,7 @@ describe("suggest_ero", () => {
     expect(result.allowed).toEqual([
       "destructive",
       "confirm",
+      "ask-reason",
       "dismiss",
       "choose-many",
       "choose-few",
@@ -81,6 +82,7 @@ describe("suggest_ero", () => {
       "agree",
       "opt-in",
       "toggle",
+      "multi-line",
     ]);
     // Spec 007 (OP-6, D-06): the system says it does not cover the goal; a person decides.
     expect(result.issues[0]?.suggestion).toBe(

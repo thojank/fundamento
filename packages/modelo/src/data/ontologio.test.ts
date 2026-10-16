@@ -149,21 +149,25 @@ describe("the scheme eroj (Spec 008 T009)", () => {
   it("holds one concept per Ero of the Modelo, under #Ero, related to each other", () => {
     expect(eroNames).toEqual([
       "butono",
+      "dialogo",
       "elektilo",
       "elekto",
       "kampo",
       "ligilo",
       "markobutono",
       "sxaltilo",
+      "tekstareo",
     ]);
     expect(eroj.map((concept) => concept.term).sort()).toEqual([
       "Butono",
+      "Dialogo",
       "Elektilo",
       "Elekto",
       "Kampo",
       "Ligilo",
       "Markobutono",
       "Sxaltilo",
+      "Tekstareo",
     ]);
     for (const concept of eroj) {
       expect(concept.broader).toEqual(["#Ero"]);

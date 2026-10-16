@@ -132,18 +132,17 @@ describe("S3: the error says what to do", () => {
 });
 
 describe("S4: the agent does not take the field for several lines", () => {
-  it("'Kommentar, mehrere Absätze' is the alternative multi-line: ask-human, not covered yet", async () => {
+  // Spec 011 ② (G5): several lines are the tekstareo's now — the goal multi-line of the tekstareo
+  // answers, the kampo's alternative agrees (use-instead, Spec 008 D-08) and stays out of the
+  // answer as an instead entry of another Ero.
+  it("'Kommentar, mehrere Absätze' is the tekstareo: the kampo's multi-line is use-instead", async () => {
     const answer = await output<Suggested>(client, "suggest_ero", {
       goal: "Kommentar, mehrere Absätze",
     });
-    expect(answer.suggestion).toBeNull();
-    expect(answer.boundary).toEqual({
-      ero: "kampo",
-      case: "multi-line",
-      action: "ask-human",
-      kialo: multiLine.kialo,
-    });
-    expect(multiLine.kialo).toMatch(/Fundamento has no such Ero yet/);
+    expect(answer.suggestion).toEqual({ ero: "tekstareo", props: {} });
+    expect(answer.matched?.goal).toBe("multi-line");
+    expect(multiLine.ero).toBe("tekstareo");
+    expect(multiLine.kialo).not.toMatch(/Fundamento has no such Ero yet/);
   });
 
   it("'E-Mail' is the kampo with kind email; 'Name' the kampo", async () => {

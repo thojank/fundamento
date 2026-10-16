@@ -1,0 +1,98 @@
+{
+  "$schema": "../../../schema/modelo.schema.json#/$defs/UzoFile",
+  "uzo": {
+    "id": "uzo_01M4H39SZBPN8VKA70309EJ35G",
+    "ero": "ero_01M2XM2NGN3KJSKJ4JTXQWMF72",
+    "skemo": "ske_01M2XM2NWJ39A7BEZ9A2S8GANE",
+    "purpose": "Takes text that runs over several lines from a person: a comment, a description, a reason.",
+    "instead": [],
+    "boundary": [
+      {
+        "case": "auto-grow",
+        "action": "ask-human",
+        "keywords": {
+          "en": [
+            "autogrow",
+            "grows"
+          ],
+          "de": [
+            "mitwachsen",
+            "wächst"
+          ]
+        },
+        "kialo": "An area that grows with every line moves what stands below it while a person types, because the page reflows; whether a product wants that is a decision of a person."
+      },
+      {
+        "case": "character-count",
+        "action": "ask-human",
+        "keywords": {
+          "en": [
+            "characters",
+            "limit",
+            "maxlength"
+          ],
+          "de": [
+            "zeichen",
+            "zeichenzähler",
+            "zeichenlimit"
+          ]
+        },
+        "kialo": "A count of the characters left is a live text under the area, because the limit must be heard as well as seen; Fundamento has no such part yet, so a person decides."
+      },
+      {
+        "case": "rich-text",
+        "action": "not-supported",
+        "keywords": {
+          "en": [
+            "formatting",
+            "bold",
+            "rich"
+          ],
+          "de": [
+            "formatierung",
+            "fett",
+            "editor"
+          ]
+        },
+        "kialo": "Formatting is an editor, not a field, because bold and lists need their own controls and keys; the area takes plain text."
+      }
+    ],
+    "composes": {
+      "containers": [],
+      "with": [],
+      "never": [],
+      "spacing": {
+        "owner": "container",
+        "regulo": "spacing-owned-by-container"
+      }
+    },
+    "slots": {
+      "label": {
+        "accepts": [
+          "text"
+        ],
+        "max": 1,
+        "nesting": 0
+      },
+      "help": {
+        "accepts": [
+          "text"
+        ],
+        "max": 1,
+        "nesting": 0
+      },
+      "error": {
+        "accepts": [
+          "text"
+        ],
+        "max": 1,
+        "nesting": 0
+      }
+    },
+    "layout": {
+      "size": "container",
+      "wrap": "never"
+    },
+    "content": []
+  }
+}

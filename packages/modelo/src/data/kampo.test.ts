@@ -204,9 +204,10 @@ describe("the Uzo of the kampo (T004, A3)", () => {
   // Spec 010 ① (G5): toggle is the sxaltilo's since PR ①; multi-line stays open. Spec 010 ③ (G5,
   // plan ③ D-12): choose is two entries — choose-few the elekto's, choose-many the elektilo's since
   // PR ④ (plan ④ D-12).
-  it("names multi-line as not covered, choose-many as the elektilo's, choose-few as the elekto's, toggle as the sxaltilo's, and the six boundaries of A3", () => {
+  it("names multi-line as the tekstareo's, choose-many as the elektilo's, choose-few as the elekto's, toggle as the sxaltilo's, and the six boundaries of A3", () => {
     expect(uzo?.instead.map((entry) => [entry.goal, entry.ero])).toEqual([
-      ["multi-line", null],
+      // Spec 011 ② (G5): several lines are the tekstareo's now (use-instead).
+      ["multi-line", "tekstareo"],
       ["choose-many", "elektilo"],
       ["choose-few", "elekto"],
       ["toggle", "sxaltilo"],

@@ -1,0 +1,9 @@
+{
+  "description": "Spec 011 ② G7 (Art. VIII, Spec 008 D-13): the Skemo of the text area names the part of the typed text textarea, the element of one platform. The part is text; the Web Celo renders it as the platform's textarea.",
+  "issues": [
+    {
+      "rule": "skemo-web-term",
+      "path": "data/eroj/tekstareo/skemo.json#/skemo/parts/textarea"
+    }
+  ]
+}

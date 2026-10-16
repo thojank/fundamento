@@ -164,12 +164,14 @@ describe("list_eroj and the brief (acceptance 1)", () => {
     const listed = await output<{ eroj: { name: string }[] }>(client, "list_eroj", {});
     expect(listed.eroj.map((entry) => entry.name)).toEqual([
       "butono",
+      "dialogo",
       "elektilo",
       "elekto",
       "kampo",
       "ligilo",
       "markobutono",
       "sxaltilo",
+      "tekstareo",
     ]);
     const brief = await output<Brief>(client, "get_ero", { name: "elekto", brief: true });
     expect(brief.purpose).toBe(elekto.purpose);

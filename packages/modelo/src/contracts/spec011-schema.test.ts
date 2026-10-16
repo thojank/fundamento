@@ -64,3 +64,13 @@ describe("SkemoSlot.entry.empty (Spec 011 ① D-09)", () => {
     ).toBe(false);
   });
 });
+
+// Spec 011 ② (plan ② D-07): a part may carry a shadow — the elevation of a dialog's surface — a
+// part property like radius, bound to an elevation.shadow.* token. Additive.
+describe("SkemoPartProperty shadow (Spec 011 ② D-07)", () => {
+  it("is a part property keyed or fixed like any other", () => {
+    expect(v("SkemoPartProperty")("shadow")).toBe(true);
+    expect(v("SkemoPart")({ shadow: { fixed: "elevation.shadow.modal" } })).toBe(true);
+    expect(v("SkemoPart")({ elevation: { fixed: "elevation.shadow.modal" } })).toBe(false);
+  });
+});

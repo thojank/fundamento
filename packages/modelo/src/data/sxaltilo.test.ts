@@ -167,7 +167,8 @@ describe("the Uzo of the sxaltilo (section 1, G5, D-13)", () => {
       "settings-list",
       "dialog",
     ]);
-    expect(uzo?.composes.with.map((entry) => entry.ero)).toEqual(["kampo"]);
+    // Spec 011 ② (G5): the switch names the dialogo among its companions.
+    expect(uzo?.composes.with.map((entry) => entry.ero)).toEqual(["kampo", "dialogo"]);
     expect(uzo?.composes.never.map((entry) => entry.ero)).toEqual(["butono"]);
   });
 

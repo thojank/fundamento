@@ -1,0 +1,9 @@
+{
+  "description": "Spec 011 ② G7 (G4): the dialog takes its accessible name from the slot title alone, but its Uzo does not mark the slot required. A dialog without a title interrupts without saying what for; the title slot is a duty (dialog-title-names-the-decision).",
+  "issues": [
+    {
+      "rule": "uzo-slot-required-missing",
+      "path": "data/eroj/dialogo/uzo.json#/uzo/slots/title"
+    }
+  ]
+}
