@@ -410,7 +410,7 @@ In [`tasks.md`](tasks.md) ③.
 
 ## ④ Daten
 
-**Branch:** `261015-spec-011-daten-e137d7` (gestapelt auf ③ @ `0816199`, PR #65) · **Datum:** 2026-10-16 · **Aufgaben, Commits und rote Hashes:** [`tasks.md`](tasks.md) ④ · **Namen (E4) am 16.10. bestätigt:** `tabelo`, `atributlisto`, `mezurilo`.
+**Branch:** `261015-spec-011-daten-e137d7` (gestapelt auf ③ @ `fe7f3ec`, PR #65) · **Datum:** 2026-10-16 · **Aufgaben, Commits und rote Hashes:** [`tasks.md`](tasks.md) ④ · **Namen (E4) am 16.10. bestätigt:** `tabelo`, `atributlisto`, `mezurilo`.
 
 Die drei Eroj der Daten: die Datentabelle, die Schlüssel-Wert-Liste und der Messbalken. Zwei davon sind die ersten Eroj, die die **Plattform-Semantik im Light DOM** lassen (E10): die native Tabelle und die native Beschreibungsliste bleiben, wo sie sind, das Ero gestaltet und erweitert sie über ein Stylesheet, das das Dokument übernimmt (Host `light`, D-07). Der Messbalken ist eine Rolle `meter` im Shadow DOM. Jede Entscheidung unten nennt ihre Stufe.
 
@@ -484,7 +484,7 @@ Alirebleco (Eroj, Chromium, beide Aspektoj × Schema × Kontrast): `mezurilo` ax
 
 #### D-16 Rot zuerst
 
-Fixtures (getrimmt wie ③): `tabelo-caption-slot-optional`, `tabelo-web-term` (`tabindex`), `tabelo-instead-kialo-missing`, **`atributlisto-a11y-text-unknown`** (Schlüssel `entries-missing`: die Regel aus D-05 lehnt ihn ab — statt `slot-optional`, denn der Name der Liste kommt aus einer Prop, `uzo-slot-required-missing` greift nicht), `atributlisto-web-term` (`class`), `atributlisto-instead-kialo-missing`, `mezurilo-label-slot-optional`, `mezurilo-web-term` (`onclick`), `mezurilo-instead-kialo-missing`. Rot ohne Mutation: Modelo (`9b5e6d3`: 53 von 252 in sieben Dateien), Projekcioj (`da5f21f`: 12 von 182), Doku (`3264edb`: 2 von 161).
+Fixtures (getrimmt wie ③): `tabelo-caption-slot-optional`, `tabelo-web-term` (`tabindex`), `tabelo-instead-kialo-missing`, **`atributlisto-a11y-text-unknown`** (Schlüssel `entries-missing`: die Regel aus D-05 lehnt ihn ab — statt `slot-optional`, denn der Name der Liste kommt aus einer Prop, `uzo-slot-required-missing` greift nicht), `atributlisto-web-term` (`class`), `atributlisto-instead-kialo-missing`, `mezurilo-label-slot-optional`, `mezurilo-web-term` (`onclick`), `mezurilo-instead-kialo-missing`. Rot ohne Mutation: Modelo (`461acb0`: 53 von 252 in sieben Dateien), Projekcioj (`0c08f8f`: 12 von 182), Doku (`79adf22`: 2 von 161).
 
 ### Arkitekturo-Abdeckung (E11)
 
