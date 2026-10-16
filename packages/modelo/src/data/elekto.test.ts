@@ -51,9 +51,11 @@ describe("elekto in the repo Modelo (G1, G2, section 3)", () => {
       "elekto",
       "insigno",
       "kampo",
+      "langetaro",
       "ligilo",
       "markobutono",
       "mezurilo",
+      "navigado",
       "plenstato",
       "sxaltilo",
       "tabelo",
@@ -443,6 +445,8 @@ describe("the Reguloj of the elekto (G6, E5)", () => {
       "tabelo",
       "atributlisto",
       "mezurilo",
+      "navigado",
+      "langetaro",
     ]);
   });
 

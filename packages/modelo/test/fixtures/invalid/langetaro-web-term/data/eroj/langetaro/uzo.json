@@ -1,0 +1,70 @@
+{
+  "uzo": {
+    "id": "uzo_01M4H39SZBPN8VKA70309EJ35G",
+    "ero": "ero_01M2XM2NGN3KJSKJ4JTXQWMF72",
+    "skemo": "ske_01M2XM2NWJ39A7BEZ9A2S8GANE",
+    "purpose": "Switches between views of one thing.",
+    "instead": [
+      {
+        "goal": "form-choice",
+        "keywords": {
+          "en": [
+            "form"
+          ],
+          "de": [
+            "formular"
+          ]
+        },
+        "ero": null,
+        "kialo": "A choice in a form is a value, because the fixture says so."
+      }
+    ],
+    "boundary": [
+      {
+        "case": "closable-tabs",
+        "action": "not-supported",
+        "keywords": {
+          "en": [
+            "closable"
+          ],
+          "de": [
+            "schließbar"
+          ]
+        },
+        "kialo": "A closable tab is a document, because the fixture says so."
+      }
+    ],
+    "composes": {
+      "containers": [],
+      "with": [],
+      "never": [],
+      "spacing": {
+        "owner": "container",
+        "regulo": "spacing-owned-by-container"
+      }
+    },
+    "slots": {
+      "tabs": {
+        "accepts": [
+          "text"
+        ],
+        "required": true,
+        "min": 2,
+        "nesting": 0
+      },
+      "panel": {
+        "accepts": [
+          "text"
+        ],
+        "required": true,
+        "max": 1,
+        "nesting": 1
+      }
+    },
+    "layout": {
+      "size": "container",
+      "wrap": "never"
+    },
+    "content": []
+  }
+}

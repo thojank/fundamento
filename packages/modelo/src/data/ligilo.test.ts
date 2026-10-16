@@ -40,9 +40,11 @@ describe("ligilo in the repo Modelo (T006)", () => {
       "elekto",
       "insigno",
       "kampo",
+      "langetaro",
       "ligilo",
       "markobutono",
       "mezurilo",
+      "navigado",
       "plenstato",
       "sxaltilo",
       "tabelo",
@@ -271,6 +273,8 @@ describe("the Reguloj of the ligilo (T005, A2, D-13)", () => {
       "tabelo",
       "atributlisto",
       "mezurilo",
+      "navigado",
+      "langetaro",
     ]);
   });
 

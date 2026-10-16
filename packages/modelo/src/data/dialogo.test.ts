@@ -32,7 +32,7 @@ const suggest = (goal: string) => {
 };
 
 describe("dialogo in the repo Modelo (section ②, E9)", () => {
-  it("lives in data/eroj/dialogo/skemo.json, fourth of fifteen Eroj", () => {
+  it("lives in data/eroj/dialogo/skemo.json, fourth of seventeen Eroj", () => {
     expect(dialogo?.file).toBe("modelo/data/eroj/dialogo/skemo.json");
     expect(modelo.eroj[3]?.ero.name).toBe("dialogo");
   });

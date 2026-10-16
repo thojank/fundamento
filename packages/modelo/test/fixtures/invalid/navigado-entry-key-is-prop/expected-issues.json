@@ -1,0 +1,9 @@
+{
+  "description": "Spec 011 ⑤ G7 (E7, Spec 010 ③): the Skemo of the navigado names the state of one item page, which is also its prop (the key of the current page); the state of one entry is no state of the Ero and needs a name of its own (current).",
+  "issues": [
+    {
+      "rule": "skemo-binding-invalid",
+      "path": "data/eroj/navigado/skemo.json#/skemo/slots/0/entry/key"
+    }
+  ]
+}

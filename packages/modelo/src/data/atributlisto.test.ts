@@ -26,7 +26,7 @@ const suggest = (goal: string) => {
 };
 
 describe("atributlisto in the repo Modelo (section ④, G1, G2, E10)", () => {
-  it("lives in data/eroj/atributlisto/skemo.json, first of fifteen Eroj", () => {
+  it("lives in data/eroj/atributlisto/skemo.json, first of seventeen Eroj", () => {
     expect(atributlisto?.file).toBe("modelo/data/eroj/atributlisto/skemo.json");
     expect(modelo.eroj[0]?.ero.name).toBe("atributlisto");
   });
