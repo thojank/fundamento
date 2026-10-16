@@ -56,6 +56,8 @@ export interface DoubleNode {
   pluginData: Record<string, string>;
   appendChild(child: DoubleNode): void;
   insertChild(index: number, child: DoubleNode): void;
+  /** Sets the size of the node, as the Plugin API's resize does (F-4, a belief until measured). */
+  resize(width: number, height: number): void;
   setSharedPluginData(namespace: string, key: string, value: string): void;
   getSharedPluginData(namespace: string, key: string): string;
   setBoundVariable(field: string, variable: DoubleVariable | null): void;
@@ -442,6 +444,33 @@ function node(
       self.children.splice(index, 0, child);
       context.version++;
     },
+    // resize(width, height) (F-4, Spec 011 ③ acceptance) — a **belief** about the Plugin API until
+    // the maintainer measures it in f10b-5: the node takes the size, never below Figma's smallest
+    // size of 0.01 (the tool throws below it, naming the field), and an auto-layout frame that
+    // hugged an axis is fixed in it afterwards, as a frame resized by hand is in the editor; a
+    // layout written after the resize lets it hug again.
+    resize(width, height) {
+      for (const [field, value] of [
+        ["width", width],
+        ["height", height],
+      ] as const) {
+        if (!(value >= 0.01)) {
+          throw new Error(`in resize: Expected "${field}" to have value >= 0.01, got ${value}`);
+        }
+      }
+      const mode = self.properties.layoutMode;
+      if (mode === "HORIZONTAL" || mode === "VERTICAL") {
+        for (const field of ["layoutSizingHorizontal", "layoutSizingVertical"]) {
+          if (self.properties[field] === "HUG") self.properties[field] = "FIXED";
+        }
+      }
+      self.properties.width = width;
+      self.properties.height = height;
+      self.defaults.delete("width");
+      self.defaults.delete("height");
+      counts.writes++;
+      context.version++;
+    },
     setExplicitVariableModeForCollection(collection, modeId) {
       self.explicitVariableModes[collection.id] = modeId;
       counts.writes++;
@@ -595,6 +624,11 @@ function node(
  * - an auto-layout frame hugs an axis when it says so (layoutSizing HUG, or the older AUTO sizing
  *   modes), adds its paddings and the spacing between its children in the flow, and grows to its
  *   minimum sizes; otherwise it keeps its width and height (Figma's default 100 × 100);
+ * - an auto-layout frame **without children keeps its size, hug or not** (F-4 of the acceptance
+ *   of Spec 011 ③, measured 2026-10-16: the notice stood with a lot of empty space below its
+ *   texts; the number that fits is the 100 × 100 createFrame gave the empty actions placeholder,
+ *   which the hugging column took in). An earlier version of this double collapsed an empty
+ *   hugging frame to its paddings — nobody had measured that, and it hid the finding;
  * - a grid as it was **measured** (run 3 in file wSYaaAsB2EujMxGra84PoM, 2026-09-21): set and
  *   variants were correct — GRID, 12 × 6, every track HUG, the variants AUTO and HUG in their own
  *   size — but every anchor read −1: no child lay in a cell. A child without a cell sizes no track
@@ -695,6 +729,12 @@ function layoutOf(
       const fontSize = num(current, "fontSize") || 12;
       const characters = String(prop(current, "characters") ?? "");
       size = { width: characters.length * fontSize * 0.6, height: fontSize * 1.25 };
+    } else if ((mode === "HORIZONTAL" || mode === "VERTICAL") && inFlow(current).length === 0) {
+      // An empty auto-layout frame keeps its size, hug or not (F-4, measured; see above).
+      size = {
+        width: Math.max(num(current, "width"), num(current, "minWidth")),
+        height: Math.max(num(current, "height"), num(current, "minHeight")),
+      };
     } else if (wraps(current)) {
       const rows = rowsOf(current);
       const padX = num(current, "paddingLeft") + num(current, "paddingRight") + strokeOf(current);

@@ -4697,6 +4697,60 @@ describe("the avizo is drawn as a notice: surface with accent, heading, message,
     await run(double, source);
     expect(double.snapshot()).toBe(before);
   });
+
+  // F-4 of the acceptance of Spec 011 ③ (measured in Figma, 2026-10-16): the notice stood with a
+  // lot of empty space below its texts — a fixed height, where every frame of it says HUG. The
+  // cause is the empty actions placeholder: an auto-layout frame without children keeps its size,
+  // hug or not, so the 100 × 100 createFrame gives a frame stayed, and the column took it in. The
+  // plugin makes an empty placeholder as small as the tool allows (0.01) before it writes its
+  // layout, so the height of every variant follows its texts and padding — with the dismiss frame
+  // shown or hidden — and the placeholder still hugs what a designer drops into it.
+  it("hugs its height in every variant (F-4): the empty actions placeholder keeps no default size, the variant is as high as its texts and padding", async () => {
+    const { double, set } = await drawn();
+    const box = (node: DoubleNode | undefined) =>
+      node as unknown as { width: number; height: number };
+    const value = (node: DoubleNode | undefined, name: string) =>
+      Number(
+        double.variables
+          .find((variable) => variable.name === name)
+          ?.resolveForConsumer(node as DoubleNode).value,
+      );
+    expect(set?.children).toHaveLength(4);
+    for (const variant of set?.children ?? []) {
+      const control = descendant(variant, "control");
+      const texts = descendant(variant, "texts");
+      const actions = descendant(variant, "actions");
+      const dismiss = descendant(variant, "dismiss");
+      for (const frame of [variant, control, texts, actions]) {
+        expect(frame?.properties.layoutSizingVertical, `${variant.name} ${frame?.name}`).toBe(
+          "HUG",
+        );
+      }
+      expect(actions?.properties.visible, variant.name).not.toBe(false);
+      for (const shown of [false, true]) {
+        if (dismiss !== undefined) (dismiss as unknown as { visible: boolean }).visible = shown;
+        const where = `${variant.name}, dismiss ${shown ? "shown" : "hidden"}`;
+        // The empty placeholder is no larger than the tool's smallest size.
+        expect(box(actions).width, where).toBeLessThanOrEqual(0.01);
+        expect(box(actions).height, where).toBeLessThanOrEqual(0.01);
+        // The column is its three texts, the gaps between its four children and the placeholder.
+        const words = ["heading", "message", "details"].map(
+          (name) => box(descendant(variant, name)).height,
+        );
+        const gap = value(texts, "spacing/small");
+        expect(gap).toBeGreaterThan(0);
+        expect(box(texts).height, where).toBeCloseTo(
+          words.reduce((sum, each) => sum + each, 0) + 3 * gap + box(actions).height,
+          5,
+        );
+        // The control is the column and its padding; the variant is the control.
+        const padding = value(control, "spacing/medium");
+        expect(padding).toBeGreaterThan(0);
+        expect(box(control).height, where).toBeCloseTo(box(texts).height + 2 * padding, 5);
+        expect(box(variant).height, where).toBe(box(control).height);
+      }
+    }
+  });
 });
 
 // Spec 011 ③ (spec „plenstato", G2, G4; plan ③ D-14): the state is a structure of its own —

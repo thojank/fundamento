@@ -502,6 +502,7 @@ export interface FigmaComponentSet {
       paints?: Record<string, FigmaPaint>;
     }
   >;
+  /**
    * The boolean props that show or hide a part (Spec 011 ③, plan ③ D-14: dismissible shows the
    * dismiss frame of a notice): each a BOOLEAN property of the set, declared like the label, with
    * the part's visibility connected to it and the Skemo's default; an instance switches it. A

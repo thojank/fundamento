@@ -440,7 +440,9 @@ const STATE_LAYOUT = {
 /**
  * The placeholder of a slot of elements (Spec 011 ③: the actions of a notice and of a state): an
  * empty row that hugs what a designer drops into it, its gap bound (actions.gap). It stands in
- * for instances of the butono, like the stand-ins of a dialog (candidate B-6).
+ * for instances of the butono, like the stand-ins of a dialog (candidate B-6). While it is empty
+ * it is as small as the tool allows (`shrinkEmpty`, F-4): an auto-layout frame without children
+ * keeps its size, hug or not, and the 100 × 100 of createFrame made the notice as high as that.
  */
 const PLACEHOLDER_LAYOUT = {
   layoutMode: "HORIZONTAL",
@@ -1210,6 +1212,27 @@ function part(parent, name, make) {
   return found;
 }
 
+/**
+ * The smallest size the tool gives a node: resize refuses less (F-4, Spec 011 ③ acceptance).
+ */
+const SMALLEST_SIZE = 0.01;
+
+/**
+ * An empty placeholder made as small as the tool allows (F-4 of the acceptance of Spec 011 ③,
+ * measured 2026-10-16): an auto-layout frame without children keeps its size, hug or not — the
+ * actions placeholder of the notice stood at the 100 × 100 createFrame gave it, and the hugging
+ * column took the empty space in below the texts. Called before the frame's layout is written:
+ * resizing a frame that hugs fixes its axes, and the layout that follows lets it hug again, so the
+ * placeholder adds nothing until a designer drops a butono into it, and then hugs the butono.
+ * A frame that holds something, or is this small already, is left alone (a second run writes
+ * nothing).
+ */
+function shrinkEmpty(frame) {
+  if (frame.children.length > 0) return;
+  if (frame.width <= SMALLEST_SIZE && frame.height <= SMALLEST_SIZE) return;
+  frame.resize(SMALLEST_SIZE, SMALLEST_SIZE);
+}
+
 function variantName(props) {
   return Object.entries(props)
     .map(([key, value]) => key + "=" + value)
@@ -1927,6 +1950,8 @@ async function applyComponents(variables, warnings) {
     if (heading !== undefined) nodes.heading = heading;
     if (details !== undefined) nodes.details = details;
     const measures = bind(nodes, variant, variables, component.structure);
+    // The empty placeholder keeps no default size (F-4): shrunk before its layout is written.
+    shrinkEmpty(actions);
     for (const each of frames.concat(all)) flush(each);
     bindMeasures(measures, report, component, variant);
   }
@@ -1982,6 +2007,8 @@ async function applyComponents(variables, warnings) {
     if (variant.stroke !== undefined && variant.stroke.style === "none") {
       for (const paint of gather(control).strokes || []) paint.visible = false;
     }
+    // The empty placeholder keeps no default size (F-4, as in a notice).
+    shrinkEmpty(actions);
     for (const each of frames.concat([text]).concat(mark ? [mark] : [])) flush(each);
     bindMeasures(measures, report, component, variant);
   }
