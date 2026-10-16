@@ -49,6 +49,38 @@ test.describe("fm-tekstareo behaviour", () => {
     ).toEqual(["field", "label", "required-mark", "control", "help", "error"]);
   });
 
+  // Nachbesserung F-8 (Abnahme 16.10.): as the kampo — an empty, untouched required area shows no
+  // error until the form is sent.
+  test("an empty, untouched required area shows no error until the form is sent", async ({
+    page,
+  }) => {
+    await serve(
+      page,
+      out,
+      `<form id="f">${area('required name="a"')}<fm-tekstareo id="b" name="b">Notiz</fm-tekstareo><button type="submit">Senden</button></form>`,
+    );
+    const box = page.getByRole("textbox", { name: "Begründung" });
+    await expect(box).not.toHaveAttribute("aria-invalid");
+    const borders = () =>
+      page.evaluate(() =>
+        ["a", "b"].map((id) =>
+          getComputedStyle(
+            document.getElementById(id)?.shadowRoot?.querySelector('[part="control"]') as Element,
+          ).borderColor,
+        ),
+      );
+    const before = await borders();
+    expect(before[0]).toBe(before[1]);
+    await page.evaluate(() => {
+      const form = document.getElementById("f") as HTMLFormElement;
+      form.addEventListener("submit", (event) => event.preventDefault());
+      form.requestSubmit();
+    });
+    await expect(box).toHaveAttribute("aria-invalid", "true");
+    const after = await borders();
+    expect(after[0]).not.toBe(after[1]);
+  });
+
   test("four rows by default; the area is taller than one line and resizes vertically only", async ({
     page,
   }) => {

@@ -185,7 +185,9 @@ describe("the Uzo of the dialogo (section ②, G5)", () => {
       uzo?.content.map((entry) => [
         entry.regulo,
         entry.fixed,
-        entry.of ?? "slot:heading",
+        // Nachbesserung F-1 (Abnahme 16.10.): the rule names its source — the heading, which is
+        // the default slot; `texts.heading` was never judged while `of` was missing.
+        entry.of,
         entry.check.kind,
       ]),
     ).toEqual([["dialog-title-names-the-decision", false, "slot:heading", "not-words"]]);
@@ -306,6 +308,12 @@ describe("check_usage and suggest_ero of the dialog (G6, G7, Gvidanto)", () => {
     expect(rulesOf(judge({ label: "Achtung" }))).toEqual([
       ["dialog-title-names-the-decision", "error"],
     ]);
+    // F-1: the heading given as the text of its slot is the same title (the default slot is the
+    // label); measured 16.10.: texts.heading "Bestätigung" passed.
+    expect(rulesOf(judge({ texts: { heading: "Bestätigung" } }))).toEqual([
+      ["dialog-title-names-the-decision", "error"],
+    ]);
+    expect(rulesOf(judge({ texts: { heading: "Version freigeben?" } }))).toEqual([]);
   });
 
   it("a required reason without its label is a contradiction the Skemo forbids; with the label it passes", () => {

@@ -102,6 +102,13 @@ describe("check_usage of the dialog and the text area", () => {
       instances: [{ ero: "dialogo", props: {}, label: "Version freigeben?" }],
     });
     expect(right.valid).toBe(true);
+    // F-1 (Abnahme 16.10.): the heading as the text of its slot is judged too.
+    const slotted = await output<Judged>(client, "check_usage", {
+      instances: [{ ero: "dialogo", props: {}, texts: { heading: "Bestätigung" } }],
+    });
+    expect(slotted.violations.map((entry) => entry.issue.rule)).toEqual([
+      "dialog-title-names-the-decision",
+    ]);
   });
 
   it("a required reason without its label is a contradiction the Skemo forbids", async () => {
