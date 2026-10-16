@@ -94,7 +94,7 @@
 
 ## ③ Rückmeldung
 
-**Plan:** [`plan.md`](plan.md) ③ (D-01–D-16) · **Branch:** `261015-spec-011-rueckmeldung-e137d7` (gestapelt auf ② @ `d7ec115`, PR #64) · Aufgaben ③ zählen ab T201. Die Hashes aller Commits stehen in **einer** Zeile der Messungen (nach einem Rebase dort und in der einen Schleife von `src/docs/docs.test.ts` ersetzen).
+**Plan:** [`plan.md`](plan.md) ③ (D-01–D-16) · **Branch:** `261015-spec-011-rueckmeldung-e137d7` (gestapelt auf ② @ `d43a057`, PR #64) · Aufgaben ③ zählen ab T201. Die Hashes aller Commits stehen in **einer** Zeile der Messungen (nach einem Rebase dort und in der einen Schleife von `src/docs/docs.test.ts` ersetzen).
 
 ### A – Rot zuerst
 - [x] **T201 Fixtures und Modelo-Tests** neun Fixtures (D-16), `data/insigno.test.ts`, `data/avizo.test.ts`, `data/plenstato.test.ts` (Skemo, Uzo, Reguloj, Jugxoj, check_usage, suggest_ero, die Rückmeldungen der Spec), Schema-Tests `stroke`/`hidden`/`max-words`/`when.props`, Listen auf zwölf Eroj, Verflechtung in dialogo-/butono-Tests, MCP `s011-rueckmeldung.test.ts`. Rot in `8efa1a6` (69 von 178 in neun Dateien).
@@ -129,7 +129,7 @@
 | Alirebleco (Eroj, `check:alirebleco-eroj`, Chromium) | insigno 8 Kombinationen × 10 Varianten (axe, Text ≥ 4,5:1 auf dem Etikett, Rand ≥ 3:1), avizo 8 × 4 (axe status/alert, Überschrift und Nachricht ≥ 4,5:1, Akzent ≥ 3:1, Fokusring des Schließen-Knopfs ≥ 3:1), plenstato 8 × 2 (axe, Text ≥ 4,5:1, Indikator ≥ 3:1) – 24 grün |
 | Vitrino-Check (Chromium) | 19 grün, davon neu insigno/avizo/plenstato (ein Test: 10 Etiketten, 8 Hinweise mit 2 alert und 4 Schließen, 2 Zustände, axe) |
 | Internacia (Chromium) | 32 grün, davon neu avizo rtl + 135/200 %, insigno Expansion, plenstato rtl |
-| **Commits** (rot / grün; nach einem Rebase hier ersetzen) | rot `8efa1a6` (Fixtures, Modelo, MCP), `494cb1f` (Projekcioj, Browser), `28d3e90` (Doku) · grün `b0ec6f0` (Modelo), `d20fa1a` (Projekcioj außer Figma), `cb4c725` (Figma), Doku im Commit der Messungen |
+| **Commits** (rot / grün; nach einem Rebase hier ersetzen) | rot `8efa1a6` (Fixtures, Modelo, MCP), `494cb1f` (Projekcioj, Browser), `28d3e90` (Doku) · grün `b0ec6f0` (Modelo), `d20fa1a` (Projekcioj außer Figma), `cb4c725` (Figma), Doku `1366c57` · Rebase auf ② `69cbcf0` · Nachbesserung 16.10.: Figma F-4 `e3fd096`, Doku im Folge-Commit |
 | Tests (je Paket `vitest run`, Playwright in Chromium) | modelo 3 064 (vorher 2 958), projekcioj 521 (vorher 486), mcp 221 (vorher 209), cli 66, eroj 1 Vitest + 136 Playwright in Chromium (vorher 114; die drei Engines prüft der Merge-Lauf auf `main`); davon neu: data/insigno 20, data/avizo 22, data/plenstato 18, contracts/spec011-schema 5, neun Fixtures (validate und e2e), docs 2, MCP s011-rueckmeldung 9, Projekcioj (Web Component 12, Make-Kit 2, Datumoj 3, Figma 18 neu, 27 rot beobachtet), Browser `insigno.spec` 5, `avizo.spec` 7, `plenstato.spec` 5, Alirebleco 24, Internacia 5, Vitrino-Check 1 |
 | Checks | `check:vortaro-lint`, `check:regularo` (uzoj=12), `check:mankoj` (8, unverändert), `check:alirebleco` (80 Paare, min. 3,96:1 wie vorher), `check:clean-room`, `check:parity` (12 Eroj, 0 Differenzen, 429 Freigaben), `check:alirebleco-eroj` 99 (Chromium, 52 s), `check:make-kit` 5, `check:quickstart` 1, `check:vitrino` 19 (APCA-Zeile 2178 → 2196 durch die vier Paare), `check:release` (beide Kits gepackt, je 29 Dateien: + `guidelines/components/insigno.md`, `avizo.md`, `plenstato.md`) – grün; `pnpm lint` grün (9 Warnungen in modelo, 1 in projekcioj, 1 Info in cli: alle älter als der Branch, nicht angefasst) |
 

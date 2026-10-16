@@ -398,6 +398,10 @@ Fixtures (je `expected-issues.json`), auf das Vortaro der Fixture getrimmt wie d
 - **O-16** Zwei Goals am `avizo` (Abweichung 6) und das Stichwort „button“ (Abweichung 7) — bestätigen.
 - **O-17** Indikator in `color.status.info.basic` statt `color.brand.fill` (Abweichung 12, B-9) — bestätigen; Alternative: eine Rolle `color.brand.accent` in Spec 012, dann bindet der Indikator sie.
 
+### Nachbesserung (Abnahme 16.10., Messung auf HEAD `2b24cf5`)
+
+- **F-4 Figma `avizo`: feste Höhe, Leerraum unter dem Inhalt** (D-14): alle Rahmen des Hinweises waren HUG; der Leerraum kam vom leeren Platzhalter `actions` am Ende der Textspalte — ein Auto-Layout-Rahmen ohne Kinder behält in Figma seine Anlagegröße (100 × 100 von `createFrame`), auch mit HUG; die Spalte nahm die 100 px auf. Das Double modellierte einen leeren Hug-Rahmen als 0 × 0 und verdeckte den Befund. Fix: `shrinkEmpty` bringt einen leeren Platzhalter vor dem Layout auf die kleinste Größe (0,01, Figmas Minimum), in `drawNotice` und `drawState` (derselbe Platzhalter beim `plenstato`); das Double behält die Größe leerer Rahmen und modelliert `resize`. Nicht ausgeblendet, weil `visible` beim `plenstato` den Constraint „keine Aktionen beim Laden“ trägt. Rest: ein `spacing.small`-Abstand vor dem Platzhalter bleibt, bis jemand ihn füllt oder ausblendet. Annahmen bis f10b-5 (B-6): Figma behält die Größe leerer Hug-Rahmen; `resize` fixiert die Achsen, das danach geschriebene `layoutSizing* HUG` stellt Hug wieder her. Rot zuerst (1 von 4), 524 grün, `check:parity` 0 Differenzen.
+
 ### Messungen
 
 In [`tasks.md`](tasks.md) ③.
