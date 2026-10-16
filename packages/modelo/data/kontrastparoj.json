@@ -628,6 +628,13 @@
       "foreground": "color.text.subtle",
       "background": "color.action.tertiary.hover",
       "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M537Y6XVAPSGKXF42FB8MW38",
+      "name": "navigation-text-selected-on-background-default",
+      "foreground": "color.navigation.text.selected",
+      "background": "color.background.default",
+      "kategorio": "ui"
     }
   ]
 }

@@ -72,7 +72,7 @@
           ]
         },
         "color": {
-          "fixed": "color.navigation.selected"
+          "fixed": "color.navigation.text.selected"
         }
       },
       "list": {

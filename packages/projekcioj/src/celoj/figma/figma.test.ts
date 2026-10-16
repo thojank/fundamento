@@ -2523,7 +2523,7 @@ describe("Figma plan for the langetaro (Spec 011 ⑤)", () => {
       "tab.height": "size/target/min",
       "tab.inline-padding": "spacing/medium",
       "tabs.typography": "typography/label/1",
-      "selected-indicator.color": "color/navigation/selected",
+      "selected-indicator.color": "color/navigation/text/selected",
       "list.color": "color/border/default",
       "list.width": "border/width/default",
       "list.gap": "spacing/xsmall",

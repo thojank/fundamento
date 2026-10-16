@@ -94,9 +94,13 @@ describe("langetaro in the repo Modelo (section ⑤, G1, G2, E7)", () => {
       "none",
     );
     // Nachbesserung F-7 (Abnahme 16.10.): color.navigation.selected is a background role — on the
-    // light ground of komuna the indicator was invisible (a Spec error). The indicator binds the
-    // brand fill, declared against the default ground as a ui pair (3:1, WCAG 1.4.11).
-    expect(skemo.parts["selected-indicator"]?.color).toEqual({ fixed: "color.brand.fill" });
+    // light ground of komuna the indicator was invisible (a Spec error). The brand fill was the
+    // first choice, but in ekzemplo light it measures 1,4:1 on the ground (yellow on white), so the
+    // indicator binds the selected text colour of the navigation, declared against the default
+    // ground as a ui pair (3:1, WCAG 1.4.11).
+    expect(skemo.parts["selected-indicator"]?.color).toEqual({
+      fixed: "color.navigation.text.selected",
+    });
     expect(skemo.parts.list?.color).toEqual({ fixed: "color.border.default" });
     expect(skemo.parts.list?.width).toEqual({ fixed: "border.width.default" });
     expect(skemo.parts.panel?.["inline-padding"]).toEqual({ fixed: "spacing.medium" });
@@ -129,10 +133,10 @@ describe("langetaro in the repo Modelo (section ⑤, G1, G2, E7)", () => {
 });
 
 describe("the KontrastParo of the indicator (F-7, G3)", () => {
-  it("declares the brand fill on the default ground as a ui pair (3:1): the indicator is a graphic", () => {
+  it("declares the selected text colour on the default ground as a ui pair (3:1): the indicator is a graphic", () => {
     const pair = modelo.kontrastParoj.find(
       (candidate) =>
-        candidate.foreground === "color.brand.fill" &&
+        candidate.foreground === "color.navigation.text.selected" &&
         candidate.background === "color.background.default",
     );
     expect(pair?.kategorio).toBe("ui");

@@ -5874,7 +5874,7 @@ describe("the langetaro is drawn as tabs: the list with three tabs, the first ac
       expect(bound(tab, "paddingRight"), `tab-${index}`).toBe("spacing/medium");
       expect(tab?.properties.strokesIncludedInLayout, `tab-${index}`).toBe(true);
       expect(paints(tab, "strokes")[0]?.boundVariables?.color?.name, `tab-${index}`).toBe(
-        "color/navigation/selected",
+        "color/navigation/text/selected",
       );
       const text = descendant(tab, `tabs-${index}`);
       expect(bound(text, "fontSize"), `tabs-${index}`).toBe("typography/label/1/font-size");

@@ -1265,8 +1265,8 @@ describe("Web Component Celo for the langetaro (Spec 011 ⑤)", () => {
       ':where([part="control"] [part="tab"][aria-disabled="true"]) {\n  background-color: var(--fm-color-action-tertiary-disabled);',
     );
     expect(css).toContain("border-block-end-width: var(--fm-border-width-strong);");
-    // F-7: the indicator is the brand fill, not the navigation background.
-    expect(css).toContain("border-block-end-color: var(--fm-color-brand-fill);");
+    // F-7: the indicator is the selected text colour, not the navigation background.
+    expect(css).toContain("border-block-end-color: var(--fm-color-navigation-text-selected);");
     expect(css).toContain("border-block-end-style: none;");
     expect(css).toContain("border-block-end-color: var(--fm-color-border-default);");
     // The panel is text of the Ero (its colour first, as the Skemo orders the properties).
