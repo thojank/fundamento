@@ -35,8 +35,10 @@ describe("componentCssIssues (F2)", () => {
   it("keeps the allowlist small and explicit", () => {
     // Spec 008 added text-decoration-line (the underline of a link is structure: on or off);
     // Spec 011 ① (O-8) overflow-wrap (whether a word longer than the line breaks: on or off).
-    expect(STRUCTURAL_PROPERTIES.length).toBeLessThanOrEqual(22);
+    // Spec 011 ② (plan ② D-11): resize (whether a person may drag an area taller: vertical, none).
+    expect(STRUCTURAL_PROPERTIES.length).toBeLessThanOrEqual(23);
     expect(STRUCTURAL_PROPERTIES).toContain("overflow-wrap");
+    expect(STRUCTURAL_PROPERTIES).toContain("resize");
     for (const property of ["color", "background-color", "padding", "font-size", "gap"]) {
       expect(STRUCTURAL_PROPERTIES, property).not.toContain(property);
     }

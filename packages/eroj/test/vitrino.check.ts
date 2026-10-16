@@ -328,3 +328,44 @@ test("fm-elektilo is upgraded in its section with the prompt and three options, 
   const disabled = section.locator("fm-elektilo[disabled]").first().getByRole("combobox");
   await expect(disabled).toBeDisabled();
 });
+
+// Spec 011 ② (plan ② D-15): the section of the tekstareo shows the area in every kind × size,
+// required, invalid with its error and disabled, upgraded; the section of the dialogo shows a button
+// per size × reason that opens the closed dialog — modal, upgraded, axe-clean — and Escape closes it.
+test("fm-tekstareo is upgraded in its section in every kind × size, required, invalid and disabled", async ({
+  page,
+}) => {
+  await open(page);
+  const section = page.locator("#fm-vitrino-tekstareo");
+  await expect(section.locator("thead")).toContainText("required");
+  await expect(section.locator("thead")).toContainText("invalid");
+  await expect(section.getByRole("textbox")).toHaveCount(24);
+  expect(
+    await section
+      .getByRole("textbox")
+      .first()
+      .evaluate((element) => element.tagName),
+  ).toBe("TEXTAREA");
+  await expect(section.locator('fm-tekstareo[invalid] [slot="error"]')).toHaveCount(6);
+  const invalid = section.locator("fm-tekstareo[invalid]").first().getByRole("textbox");
+  await expect(invalid).toHaveAttribute("aria-invalid", "true");
+  const disabled = section.locator("fm-tekstareo[disabled]").first().getByRole("textbox");
+  await expect(disabled).toBeDisabled();
+});
+
+test("fm-dialogo opens from its section, modal and axe-clean, and Escape closes it", async ({
+  page,
+}) => {
+  await open(page);
+  const section = page.locator("#fm-vitrino-dialogo");
+  await expect(section.locator("fm-dialogo")).toHaveCount(6);
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await section.locator('[data-fm-opens="fm-vitrino-dialogo-medium-required"]').click();
+  const dialog = page.getByRole("dialog", { name: "medium · required" });
+  await expect(dialog).toBeVisible();
+  await expect(dialog).toHaveAttribute("aria-modal", "true");
+  await expect(dialog.getByRole("textbox", { name: "Begründung" })).toBeVisible();
+  expect(await axeViolations(page)).toEqual([]);
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+});

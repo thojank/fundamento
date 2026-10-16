@@ -515,3 +515,125 @@ test("markobutono: a single word longer than the line breaks inside the word, no
   expect(lines.height).toBeGreaterThan(lines.lineHeight * 1.5);
   expect(lines.clipped).toBe(false);
 });
+
+// Spec 011 ② (G7): the tekstareo right to left — label, text and help align to the right — and its
+// label, help and error expanded and pseudo-localised: everything grows, nothing is clipped; the
+// area keeps the width of its container.
+test("tekstareo right to left: the text aligns to the right and the focus ring stays", async ({
+  page,
+  browserName,
+}) => {
+  await serve(page, out, `<fm-tekstareo id="a">Begründung</fm-tekstareo>`);
+  await page.evaluate(() => document.documentElement.setAttribute("dir", "rtl"));
+  const direction = await page
+    .locator("#a")
+    .evaluate(
+      (element) =>
+        getComputedStyle(element.shadowRoot?.querySelector('[part="control"]') as Element)
+          .direction,
+    );
+  expect(direction).toBe("rtl");
+  await page.keyboard.press(TAB(browserName));
+  const outline = await page
+    .locator("#a")
+    .evaluate(
+      (element) =>
+        getComputedStyle(element.shadowRoot?.querySelector('[part="control"]') as Element)
+          .outlineWidth,
+    );
+  expect(Number.parseFloat(outline)).toBeGreaterThan(0);
+});
+
+for (const factor of [1.35, 2]) {
+  test(`tekstareo text expansion to ${Math.round(factor * 100)} %: label, help and error grow, nothing is clipped`, async ({
+    page,
+  }) => {
+    const label = "Begründung";
+    const help = "Die Prüfer lesen die Begründung.";
+    await serve(
+      page,
+      out,
+      `<div style="inline-size: 20rem"><fm-tekstareo id="a" invalid>${label}<span slot="help">${help}</span><span slot="error">Gib eine Begründung mit mindestens zehn Zeichen ein</span></fm-tekstareo></div>`,
+    );
+    const before = await page.locator("#a").boundingBox();
+    await page.locator("#a").evaluate(
+      (element, [l, h]) => {
+        element.childNodes[0].textContent = l ?? "";
+        (element.querySelector('[slot="help"]') as HTMLElement).textContent = h ?? "";
+      },
+      [pseudo(label, factor), pseudo(help, factor)],
+    );
+    const after = await page.locator("#a").boundingBox();
+    expect(after?.height ?? 0).toBeGreaterThanOrEqual(before?.height ?? 0);
+    expect(Math.round(after?.width ?? 0)).toBe(Math.round(before?.width ?? 0));
+    const clipped = await page.locator("#a").evaluate((element) => {
+      const field = element.shadowRoot?.querySelector('[part="field"]') as HTMLElement;
+      return field.scrollWidth > field.clientWidth + 1;
+    });
+    expect(clipped).toBe(false);
+  });
+}
+
+// Spec 011 ② (G7): the dialogo right to left — the actions stand at the end, which is the left;
+// the heading aligns to the right — and its heading expanded: the surface keeps the width of its
+// size, the heading wraps, nothing is clipped.
+test("dialogo right to left: the actions mirror to the left, the heading aligns right", async ({
+  page,
+}) => {
+  await serve(
+    page,
+    out,
+    `<fm-dialogo id="d" open>Version freigeben?<span slot="message">Nachricht</span><fm-butono slot="actions" emphasis="low">Abbrechen</fm-butono><fm-butono id="ok" slot="actions" emphasis="high">Freigeben</fm-butono></fm-dialogo>`,
+  );
+  const sides = () =>
+    page.locator("#d").evaluate((element) => {
+      const control = element.shadowRoot?.querySelector('[part="control"]') as HTMLElement;
+      const actions = element.shadowRoot?.querySelector('[part="actions"]') as HTMLElement;
+      const ok = document.getElementById("ok") as HTMLElement;
+      const box = control.getBoundingClientRect();
+      const button = ok.getBoundingClientRect();
+      return {
+        okFromLeft: button.left - box.left,
+        okFromRight: box.right - button.right,
+        direction: getComputedStyle(actions).direction,
+      };
+    });
+  const ltr = await sides();
+  expect(ltr.okFromRight).toBeLessThan(ltr.okFromLeft);
+  await page.evaluate(() => document.documentElement.setAttribute("dir", "rtl"));
+  const rtl = await sides();
+  expect(rtl.direction).toBe("rtl");
+  expect(rtl.okFromLeft).toBeLessThan(rtl.okFromRight);
+});
+
+test("dialogo heading expansion to 200 %: the surface keeps its width, the heading wraps, nothing is clipped", async ({
+  page,
+}) => {
+  const heading = "Version freigeben?";
+  await serve(
+    page,
+    out,
+    `<fm-dialogo id="d" open>${heading}<fm-butono slot="actions" emphasis="high">Freigeben</fm-butono></fm-dialogo>`,
+  );
+  const measure = () =>
+    page.locator("#d").evaluate((element) => {
+      const control = element.shadowRoot?.querySelector('[part="control"]') as HTMLElement;
+      const head = element.shadowRoot?.querySelector('[part="heading"]') as HTMLElement;
+      return {
+        width: control.getBoundingClientRect().width,
+        headingHeight: head.getBoundingClientRect().height,
+        clipped: control.scrollWidth > control.clientWidth + 1,
+      };
+    });
+  const before = await measure();
+  await page.locator("#d").evaluate(
+    (element, text) => {
+      element.childNodes[0].textContent = text;
+    },
+    pseudo(heading, 2),
+  );
+  const after = await measure();
+  expect(Math.round(after.width)).toBe(Math.round(before.width));
+  expect(after.headingHeight).toBeGreaterThan(before.headingHeight);
+  expect(after.clipped).toBe(false);
+});
