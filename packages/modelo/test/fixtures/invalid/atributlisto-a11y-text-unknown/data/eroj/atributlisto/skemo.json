@@ -60,7 +60,7 @@
       "states": {},
       "keys": [],
       "texts": {
-        "entries-empty": {
+        "entries-missing": {
           "de": "keine Angabe",
           "en": "not specified"
         }

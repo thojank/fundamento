@@ -1386,6 +1386,10 @@
         {
           "predicate": "references",
           "target": "#Butono"
+        },
+        {
+          "predicate": "references",
+          "target": "#Mezurilo"
         }
       ]
     },
@@ -1473,6 +1477,145 @@
         {
           "predicate": "references",
           "target": "#Butono"
+        }
+      ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Tabelo",
+      "term": "Tabelo",
+      "inScheme": "eroj",
+      "prefLabel": {
+        "eo": "Tabelo",
+        "en": "data table",
+        "de": "Datentabelle"
+      },
+      "altLabel": {
+        "en": [
+          "tabelo",
+          "table",
+          "data table"
+        ],
+        "de": [
+          "Tabelle",
+          "tabelo"
+        ]
+      },
+      "definition": {
+        "en": "A data table: shows many records with the same fields as rows and columns; it styles and extends the platform's own table (caption, column and row headers, sort buttons with aria-sort, a scroll region, the empty state as a plenstato). One record is the atributlisto's; a status in a cell an insigno, a value in a range a mezurilo.",
+        "de": "Eine Datentabelle: zeigt viele Datensätze mit denselben Feldern als Zeilen und Spalten; sie gestaltet und erweitert die native Tabelle der Plattform (Beschriftung, Spalten- und Zeilenköpfe, Sortier-Schaltflächen mit aria-sort, eine Scroll-Region, der Leerzustand als plenstato). Ein Datensatz gehört dem atributlisto, ein Status in einer Zelle dem insigno, ein Wert in einem Bereich dem mezurilo."
+      },
+      "broader": [
+        "#Ero"
+      ],
+      "relations": [
+        {
+          "predicate": "references",
+          "target": "#Atributlisto"
+        },
+        {
+          "predicate": "references",
+          "target": "#Insigno"
+        },
+        {
+          "predicate": "references",
+          "target": "#Ligilo"
+        },
+        {
+          "predicate": "references",
+          "target": "#Butono"
+        },
+        {
+          "predicate": "references",
+          "target": "#Mezurilo"
+        },
+        {
+          "predicate": "references",
+          "target": "#Plenstato"
+        }
+      ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Atributlisto",
+      "term": "Atributlisto",
+      "inScheme": "eroj",
+      "prefLabel": {
+        "eo": "Atributlisto",
+        "en": "key-value list",
+        "de": "Schlüssel-Wert-Liste"
+      },
+      "altLabel": {
+        "en": [
+          "atributlisto",
+          "key-value list",
+          "description list"
+        ],
+        "de": [
+          "Attributliste",
+          "atributlisto"
+        ]
+      },
+      "definition": {
+        "en": "A key-value list: shows the fields of one record as name and value (version, owner, valid since) in the platform's own description list; an empty value shows a dash and is heard as 'not specified'. Many records are the tabelo's; editing is a form (kampo).",
+        "de": "Eine Schlüssel-Wert-Liste: zeigt die Felder eines Datensatzes als Name und Wert (Version, Verantwortlich, gültig seit) in der nativen Beschreibungsliste der Plattform; ein leerer Wert zeigt einen Strich und wird als „keine Angabe“ gesprochen. Viele Datensätze gehören dem tabelo, Bearbeiten ist ein Formular (kampo)."
+      },
+      "broader": [
+        "#Ero"
+      ],
+      "relations": [
+        {
+          "predicate": "references",
+          "target": "#Tabelo"
+        },
+        {
+          "predicate": "references",
+          "target": "#Kampo"
+        },
+        {
+          "predicate": "references",
+          "target": "#Insigno"
+        },
+        {
+          "predicate": "references",
+          "target": "#Ligilo"
+        },
+        {
+          "predicate": "references",
+          "target": "#Mezurilo"
+        }
+      ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Mezurilo",
+      "term": "Mezurilo",
+      "inScheme": "eroj",
+      "prefLabel": {
+        "eo": "Mezurilo",
+        "en": "meter",
+        "de": "Messbalken"
+      },
+      "altLabel": {
+        "en": [
+          "mezurilo",
+          "meter",
+          "gauge"
+        ],
+        "de": [
+          "Messbalken",
+          "Anteilsanzeige",
+          "mezurilo"
+        ]
+      },
+      "definition": {
+        "en": "A meter: shows a known value within a known range with its number (66 % conform, 3 of 5 checked), role meter with aria-valuetext from its text; an unknown value is not 0 — the track stays empty with a dashed edge. A status in a word is the insigno's; the insigno sends a value in a range here (use-instead).",
+        "de": "Ein Messbalken: zeigt einen bekannten Wert in einem bekannten Bereich mit seiner Zahl (66 % konform, 3 von 5 geprüft), Rolle meter mit aria-valuetext aus seinem Text; ein unbekannter Wert ist nicht 0 – die Spur bleibt leer mit gestricheltem Rand. Ein Status in einem Wort gehört dem insigno; der insigno verweist für einen Wert in einem Bereich auf ihn (use-instead)."
+      },
+      "broader": [
+        "#Ero"
+      ],
+      "relations": [
+        {
+          "predicate": "references",
+          "target": "#Insigno"
         }
       ]
     }

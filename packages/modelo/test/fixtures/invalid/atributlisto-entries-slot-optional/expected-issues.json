@@ -1,9 +1,0 @@
-{
-  "description": "Spec 011 ④ G7: the atributlisto takes its accessible name from the slot entries, but its Uzo does not mark the slot required; the slot is a duty.",
-  "issues": [
-    {
-      "rule": "uzo-slot-required-missing",
-      "path": "data/eroj/atributlisto/uzo.json#/uzo/slots/entries"
-    }
-  ]
-}

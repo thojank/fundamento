@@ -183,11 +183,11 @@ describe("the cross-links of G5: a value in a range is the meter's, a status wor
     expect(entry?.kialo).not.toContain("no such Ero yet");
   });
 
-  it("'Anteil in Prozent' is the mezurilo; 'Konformität als Prozent-Badge' is the mezurilo too (the badge's own instead wins)", () => {
+  it("'Anteil in Prozent' and 'Konformität in Prozent' are the mezurilo (the badge's instead and the meter's goal agree)", () => {
     expect(suggest("Anteil in Prozent").suggestion).toEqual({ ero: "mezurilo", props: {} });
-    const badge = suggest("Konformität als Prozent-Badge");
-    expect(badge.suggestion).toEqual({ ero: "mezurilo", props: {} });
-    expect(badge.boundary).toMatchObject({ ero: "insigno", case: "value-in-range" });
+    const ratio = suggest("Konformität in Prozent");
+    expect(ratio.suggestion).toEqual({ ero: "mezurilo", props: {} });
+    expect(ratio.matched?.goal).toBe("meter");
   });
 
   it("'ein Statuswort statt einer Zahl' is the insigno; a chart and a segmented bar stop", () => {

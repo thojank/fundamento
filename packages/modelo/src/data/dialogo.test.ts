@@ -347,7 +347,7 @@ describe("check_usage and suggest_ero of the dialog (G6, G7, Gvidanto)", () => {
       ero: "dialogo",
       props: { reason: "required" },
     });
-    expect(suggest("Seitenpaneel mit Details").boundary).toMatchObject({
+    expect(suggest("Seitenpaneel mit dem Inhalt").boundary).toMatchObject({
       ero: "dialogo",
       case: "drawer",
       action: "not-supported",

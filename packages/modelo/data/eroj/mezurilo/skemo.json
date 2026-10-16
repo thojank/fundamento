@@ -1,0 +1,180 @@
+{
+  "ero": {
+    "id": "ero_01M523F9Z0MAVKZC8ZVN9RBWS5",
+    "name": "mezurilo",
+    "skemo": "ske_01M523FAAXJ1AADZWZ6NQRX83N",
+    "description": "A meter: shows a known value within a known range, with its number — 66 % conform, 3 of 5 checked. An unknown value is not 0: the track stays empty with a dashed edge and the text says so."
+  },
+  "skemo": {
+    "id": "ske_01M523FAAXJ1AADZWZ6NQRX83N",
+    "ero": "ero_01M523F9Z0MAVKZC8ZVN9RBWS5",
+    "props": [
+      {
+        "name": "value",
+        "kind": "number",
+        "description": "The value in the range; empty means unknown (no aria-valuenow, the dashed track)."
+      },
+      {
+        "name": "min",
+        "kind": "number",
+        "default": 0,
+        "description": "The start of the range."
+      },
+      {
+        "name": "max",
+        "kind": "number",
+        "default": 100,
+        "description": "The end of the range."
+      },
+      {
+        "name": "intent",
+        "kind": "enum",
+        "values": [
+          "neutral",
+          "success",
+          "warning",
+          "danger"
+        ],
+        "default": "neutral",
+        "description": "The colour of the fill; the application chooses it, the meter computes no thresholds."
+      }
+    ],
+    "states": [
+      "rest"
+    ],
+    "slots": [
+      {
+        "name": "label",
+        "default": true,
+        "text": true
+      },
+      {
+        "name": "value-text",
+        "text": true
+      }
+    ],
+    "parts": {
+      "track": {
+        "fill": {
+          "fixed": "color.background.sunken"
+        },
+        "radius": {
+          "fixed": "radius.role.pill"
+        },
+        "height": {
+          "fixed": "spacing.medium"
+        }
+      },
+      "fill": {
+        "color": {
+          "by": [
+            "intent"
+          ]
+        },
+        "radius": {
+          "fixed": "radius.role.pill"
+        }
+      },
+      "unknown": {
+        "stroke": {
+          "fixed": "stroke.dashed"
+        },
+        "color": {
+          "fixed": "color.border.default"
+        },
+        "width": {
+          "fixed": "border.width.default"
+        }
+      },
+      "label": {
+        "color": {
+          "fixed": "color.text.default"
+        },
+        "typography": {
+          "fixed": "typography.label.1"
+        }
+      },
+      "value-text": {
+        "color": {
+          "fixed": "color.text.subtle"
+        },
+        "typography": {
+          "fixed": "typography.label.2"
+        }
+      },
+      "box": {
+        "gap": {
+          "fixed": "spacing.small"
+        }
+      }
+    },
+    "bindings": [
+      {
+        "part": "fill",
+        "property": "color",
+        "when": {
+          "intent": "neutral"
+        },
+        "token": "color.brand.fill"
+      },
+      {
+        "part": "fill",
+        "property": "color",
+        "when": {
+          "intent": "success"
+        },
+        "token": "color.status.success.basic"
+      },
+      {
+        "part": "fill",
+        "property": "color",
+        "when": {
+          "intent": "warning"
+        },
+        "token": "color.status.warning.basic"
+      },
+      {
+        "part": "fill",
+        "property": "color",
+        "when": {
+          "intent": "danger"
+        },
+        "token": "color.status.danger.basic"
+      }
+    ],
+    "a11y": {
+      "role": "meter",
+      "name": [
+        "slot:label"
+      ],
+      "description": [
+        "slot:value-text"
+      ],
+      "states": {},
+      "keys": []
+    },
+    "goals": [
+      {
+        "goal": "meter",
+        "keywords": {
+          "en": [
+            "meter",
+            "gauge",
+            "percentage",
+            "score",
+            "level"
+          ],
+          "de": [
+            "messbalken",
+            "anteil",
+            "prozent",
+            "quote",
+            "stand"
+          ]
+        },
+        "props": {},
+        "regulo": "meter-text-states-value"
+      }
+    ]
+  }
+}

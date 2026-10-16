@@ -1,0 +1,123 @@
+{
+  "ero": {
+    "id": "ero_01M523F9Z0MAVKZC8ZVN9RBWS4",
+    "name": "atributlisto",
+    "skemo": "ske_01M523FAAXJ1AADZWZ6NQRX83M",
+    "description": "A key-value list: shows the fields of one record as name and value — version, owner, valid since. It styles the platform's own description list; an empty value shows a dash and is heard as 'not specified'."
+  },
+  "skemo": {
+    "id": "ske_01M523FAAXJ1AADZWZ6NQRX83M",
+    "ero": "ero_01M523F9Z0MAVKZC8ZVN9RBWS4",
+    "props": [
+      {
+        "name": "layout",
+        "kind": "enum",
+        "values": [
+          "columns",
+          "stacked"
+        ],
+        "default": "columns",
+        "description": "Name and value side by side (columns) or one above the other (stacked); the application chooses for a narrow container."
+      },
+      {
+        "name": "label",
+        "kind": "string",
+        "description": "The accessible name of the list when the page has more than one."
+      }
+    ],
+    "states": [
+      "rest"
+    ],
+    "slots": [
+      {
+        "name": "entries",
+        "default": true
+      }
+    ],
+    "parts": {
+      "term": {
+        "color": {
+          "fixed": "color.text.muted"
+        },
+        "typography": {
+          "fixed": "typography.label.2"
+        }
+      },
+      "value": {
+        "color": {
+          "fixed": "color.text.default"
+        },
+        "typography": {
+          "fixed": "typography.body.2"
+        }
+      },
+      "list": {
+        "gap": {
+          "fixed": "spacing.large"
+        }
+      },
+      "box": {
+        "gap": {
+          "fixed": "spacing.small"
+        },
+        "inline-padding": {
+          "by": [
+            "layout"
+          ]
+        }
+      }
+    },
+    "bindings": [
+      {
+        "part": "box",
+        "property": "inline-padding",
+        "when": {
+          "layout": "columns"
+        },
+        "token": "spacing.large"
+      },
+      {
+        "part": "box",
+        "property": "inline-padding",
+        "when": {
+          "layout": "stacked"
+        },
+        "token": "spacing.xsmall"
+      }
+    ],
+    "a11y": {
+      "role": "list",
+      "name": [
+        "prop:label"
+      ],
+      "states": {},
+      "keys": [],
+      "texts": {
+        "entries-empty": {
+          "de": "keine Angabe",
+          "en": "not specified"
+        }
+      }
+    },
+    "goals": [
+      {
+        "goal": "details",
+        "keywords": {
+          "en": [
+            "details",
+            "metadata",
+            "properties",
+            "attributes"
+          ],
+          "de": [
+            "details",
+            "metadaten",
+            "eigenschaften",
+            "angaben"
+          ]
+        },
+        "props": {}
+      }
+    ]
+  }
+}

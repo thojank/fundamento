@@ -96,9 +96,9 @@ describe("the data dialogs of the spec: a table, one record, a meter", () => {
 });
 
 describe("check_usage of the table and the meter", () => {
-  it("a table without words in its caption violates table-caption-names-the-content; 'Standards' passes", async () => {
+  it("a caption 'Tabelle' violates table-caption-names-the-content; 'Standards' passes", async () => {
     const wrong = await output<Judged>(client, "check_usage", {
-      instances: [{ ero: "tabelo", props: {}, texts: { caption: " " } }],
+      instances: [{ ero: "tabelo", props: {}, label: "Tabelle" }],
     });
     expect(wrong.violations.map((entry) => entry.issue.rule)).toEqual([
       "table-caption-names-the-content",
@@ -154,8 +154,8 @@ describe("list_eroj and the briefs", () => {
       "tekstareo",
     ]);
     const table = await output<Brief>(client, "get_ero", { name: "tabelo", brief: true });
-    expect(table.axes.map((axis) => axis.name)).toEqual(["density"]);
-    expect(table.required).toEqual({ props: [], slots: ["content", "caption"] });
+    expect(table.axes.map((axis) => axis.name)).toEqual(["density", "direction"]);
+    expect(table.required).toEqual({ props: [], slots: ["caption", "content"] });
     const list = await output<Brief>(client, "get_ero", { name: "atributlisto", brief: true });
     expect(list.axes.map((axis) => axis.name)).toEqual(["layout"]);
     expect(list.required).toEqual({ props: [], slots: ["entries"] });

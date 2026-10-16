@@ -64,8 +64,8 @@
             "anteil"
           ]
         },
-        "ero": null,
-        "kialo": "A value in a range is a measure, not a status, because it has a scale; Fundamento has no such Ero yet (mezurilo, ④)."
+        "ero": "mezurilo",
+        "kialo": "A value in a range is a measure, not a status, because it has a scale; that is the mezurilo."
       }
     ],
     "boundary": [

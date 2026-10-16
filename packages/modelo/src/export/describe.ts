@@ -17,6 +17,12 @@ const WORDS = [
   "ten",
   "eleven",
   "twelve",
+  // Spec 011 ④, ⑤: fifteen and seventeen Eroj.
+  "thirteen",
+  "fourteen",
+  "fifteen",
+  "sixteen",
+  "seventeen",
 ] as const;
 
 /** A count as an English word for 0 to 12 (`no` for zero), otherwise as digits. */

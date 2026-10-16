@@ -47,10 +47,10 @@ describe("tabelo in the repo Modelo (section ④, G1, G2, E10)", () => {
     expect(skemo?.states).toEqual(["rest", "hover", "focus"]);
   });
 
-  it("has the slots content (default: the table), caption (required) and empty (the text of the plenstato)", () => {
+  it("has the slots caption (default, required: the table's name), content (the table) and empty (the text of the plenstato)", () => {
     expect(skemo?.slots).toEqual([
-      { name: "content", default: true },
-      { name: "caption", text: true },
+      { name: "caption", default: true, text: true },
+      { name: "content" },
       { name: "empty", text: true },
     ]);
   });
@@ -121,8 +121,8 @@ describe("the Uzo of the tabelo (section ④, G5)", () => {
       "Shows many records with the same fields as rows and columns, so a person can compare and find: standards, versions, findings.",
     );
     expect(uzo?.slots).toEqual({
-      content: { accepts: ["text"], required: true, max: 1, nesting: 1 },
       caption: { accepts: ["text"], required: true, max: 1, nesting: 0 },
+      content: { accepts: ["text"], required: true, max: 1, nesting: 1 },
       empty: { accepts: ["text"], max: 1, nesting: 0 },
     });
     expect(uzo?.layout).toEqual({ size: "container", wrap: "never" });
@@ -160,13 +160,18 @@ describe("the Uzo of the tabelo (section ④, G5)", () => {
     ]);
   });
 
-  it("carries table-caption-names-the-content, fixed, as min-words 1 on the caption", () => {
+  it("carries table-caption-names-the-content, fixed, as not-words against captions that name no content", () => {
     expect(uzo?.content).toEqual([
       {
         regulo: "table-caption-names-the-content",
         fixed: true,
-        of: "slot:caption",
-        check: { kind: "min-words", count: 1 },
+        check: {
+          kind: "not-words",
+          words: {
+            de: ["tabelle", "daten", "übersicht", "liste"],
+            en: ["table", "data", "overview", "list"],
+          },
+        },
       },
     ]);
   });
@@ -174,8 +179,9 @@ describe("the Uzo of the tabelo (section ④, G5)", () => {
   it("the brief names density as the axis, caption and content as duties, and stays under 750", () => {
     if (tabelo === undefined) throw new Error("missing");
     const brief = briefOf(tabelo);
-    expect(brief.axes.map((axis) => axis.name)).toEqual(["density"]);
-    expect(brief.required).toEqual({ props: [], slots: ["content", "caption"] });
+    // direction is an enum prop too: the brief names every enum prop as an axis.
+    expect(brief.axes.map((axis) => axis.name)).toEqual(["density", "direction"]);
+    expect(brief.required).toEqual({ props: [], slots: ["caption", "content"] });
     expect(Math.ceil(JSON.stringify(brief).length / 3)).toBeLessThanOrEqual(750);
   });
 });
@@ -211,14 +217,12 @@ describe("the Reguloj of the tabelo (G6)", () => {
 });
 
 describe("check_usage and suggest_ero of the table (G6, G7, Gvidanto)", () => {
-  it("a caption 'Standards' passes; an empty caption violates the caption rule", () => {
+  it("a caption 'Standards' passes; 'Tabelle' violates the caption rule", () => {
     expect(
-      rulesOf(
-        evaluateUsage(modelo, [{ ero: "tabelo", props: {}, texts: { caption: "Standards" } }]),
-      ),
+      rulesOf(evaluateUsage(modelo, [{ ero: "tabelo", props: {}, label: "Standards" }])),
     ).toEqual([]);
     expect(
-      rulesOf(evaluateUsage(modelo, [{ ero: "tabelo", props: {}, texts: { caption: "   " } }])),
+      rulesOf(evaluateUsage(modelo, [{ ero: "tabelo", props: {}, label: "Tabelle" }])),
     ).toEqual([["table-caption-names-the-content", "error"]]);
   });
 
@@ -231,8 +235,8 @@ describe("check_usage and suggest_ero of the table (G6, G7, Gvidanto)", () => {
   });
 
   it("row selection and pagination ask a person; a sticky header stops", () => {
-    expect(suggest("Zeilen auswählen in der Tabelle").action).toBe("ask-human");
-    expect(suggest("Tabelle mit Seitennummerierung").action).toBe("ask-human");
+    expect(suggest("Zeilenauswahl der Zeilen").action).toBe("ask-human");
+    expect(suggest("Zeilen mit Seitennummerierung").action).toBe("ask-human");
     expect(suggest("eine feste Kopfzeile").boundary).toMatchObject({
       ero: "tabelo",
       case: "sticky-header",

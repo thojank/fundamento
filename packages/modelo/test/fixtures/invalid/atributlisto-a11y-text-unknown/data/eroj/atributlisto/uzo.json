@@ -48,7 +48,8 @@
         "accepts": [
           "text"
         ],
-        "nesting": 0
+        "nesting": 0,
+        "required": true
       }
     },
     "layout": {

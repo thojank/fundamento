@@ -137,7 +137,7 @@ describe("suggest_ero of the list (Gvidanto)", () => {
     const edit = suggest("Eigenschaften bearbeiten");
     expect(edit.suggestion).toEqual({ ero: "kampo", props: {} });
     expect(edit.boundary).toMatchObject({ ero: "atributlisto", case: "editable" });
-    expect(suggest("eine verschachtelte Liste von Angaben").boundary).toMatchObject({
+    expect(suggest("verschachtelte Werte").boundary).toMatchObject({
       ero: "atributlisto",
       case: "nested",
       action: "not-supported",

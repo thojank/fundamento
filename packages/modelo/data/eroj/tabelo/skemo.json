@@ -1,0 +1,235 @@
+{
+  "ero": {
+    "id": "ero_01M523F9YZX0X2QDED1XRNM1G4",
+    "name": "tabelo",
+    "skemo": "ske_01M523FAAXJ1AADZWZ6NQRX83K",
+    "description": "A data table: shows many records with the same fields as rows and columns, so a person can compare and find — standards, versions, findings. It styles and extends the platform's own table: the scroll region, the empty state, the sort buttons."
+  },
+  "skemo": {
+    "id": "ske_01M523FAAXJ1AADZWZ6NQRX83K",
+    "ero": "ero_01M523F9YZX0X2QDED1XRNM1G4",
+    "props": [
+      {
+        "name": "density",
+        "kind": "enum",
+        "values": [
+          "comfortable",
+          "compact"
+        ],
+        "default": "comfortable",
+        "description": "The room in every cell (padding and minimum height from spacing and size roles)."
+      },
+      {
+        "name": "caption-hidden",
+        "kind": "boolean",
+        "default": false,
+        "description": "Hides the caption from sight; it stays for assistive technology (never without a caption)."
+      },
+      {
+        "name": "sort",
+        "kind": "string",
+        "description": "The key of the sorted column (the th's data-sort), shown as aria-sort; sorting itself is the application's, the table says sort-change."
+      },
+      {
+        "name": "direction",
+        "kind": "enum",
+        "values": [
+          "ascending",
+          "descending"
+        ],
+        "default": "ascending",
+        "description": "The direction of the sorted column."
+      }
+    ],
+    "states": [
+      "rest",
+      "hover",
+      "focus"
+    ],
+    "slots": [
+      {
+        "name": "caption",
+        "default": true,
+        "text": true
+      },
+      {
+        "name": "content"
+      },
+      {
+        "name": "empty",
+        "text": true
+      }
+    ],
+    "parts": {
+      "head": {
+        "fill": {
+          "fixed": "color.background.sunken"
+        },
+        "color": {
+          "fixed": "color.text.default"
+        },
+        "typography": {
+          "fixed": "typography.label.1"
+        }
+      },
+      "cell": {
+        "color": {
+          "fixed": "color.text.default"
+        },
+        "typography": {
+          "fixed": "typography.body.2"
+        },
+        "inline-padding": {
+          "by": [
+            "density"
+          ]
+        },
+        "height": {
+          "by": [
+            "density"
+          ]
+        }
+      },
+      "row-header": {
+        "typography": {
+          "fixed": "typography.label.1"
+        }
+      },
+      "border": {
+        "color": {
+          "fixed": "color.border.subtle"
+        },
+        "width": {
+          "fixed": "border.width.default"
+        }
+      },
+      "region": {
+        "radius": {
+          "fixed": "radius.role.surface"
+        }
+      },
+      "sort": {
+        "fill": {
+          "by": [
+            "state"
+          ]
+        },
+        "color": {
+          "fixed": "color.text.default"
+        },
+        "radius": {
+          "fixed": "radius.role.control"
+        }
+      },
+      "sort-indicator": {
+        "size": {
+          "fixed": "size.icon.small"
+        },
+        "color": {
+          "fixed": "color.text.subtle"
+        }
+      },
+      "focus-ring": {
+        "ring": {
+          "fixed": "focus.ring"
+        },
+        "offset": {
+          "fixed": "focus.offset"
+        },
+        "color": {
+          "fixed": "color.focus.inner"
+        }
+      }
+    },
+    "bindings": [
+      {
+        "part": "cell",
+        "property": "inline-padding",
+        "when": {
+          "density": "comfortable"
+        },
+        "token": "spacing.medium"
+      },
+      {
+        "part": "cell",
+        "property": "inline-padding",
+        "when": {
+          "density": "compact"
+        },
+        "token": "spacing.small"
+      },
+      {
+        "part": "cell",
+        "property": "height",
+        "when": {
+          "density": "comfortable"
+        },
+        "token": "size.control.large"
+      },
+      {
+        "part": "cell",
+        "property": "height",
+        "when": {
+          "density": "compact"
+        },
+        "token": "size.control.small"
+      },
+      {
+        "part": "sort",
+        "property": "fill",
+        "when": {
+          "state": "rest"
+        },
+        "token": "color.action.tertiary.rest"
+      },
+      {
+        "part": "sort",
+        "property": "fill",
+        "when": {
+          "state": "hover"
+        },
+        "token": "color.action.tertiary.hover"
+      },
+      {
+        "part": "sort",
+        "property": "fill",
+        "when": {
+          "state": "focus"
+        },
+        "token": "color.action.tertiary.rest"
+      }
+    ],
+    "a11y": {
+      "role": "table",
+      "name": [
+        "slot:caption"
+      ],
+      "states": {},
+      "keys": [
+        "Enter",
+        "Space"
+      ]
+    },
+    "goals": [
+      {
+        "goal": "table",
+        "keywords": {
+          "en": [
+            "table",
+            "records",
+            "grid",
+            "datatable"
+          ],
+          "de": [
+            "tabelle",
+            "datensätze",
+            "einträge",
+            "zeilen"
+          ]
+        },
+        "props": {},
+        "regulo": "table-caption-names-the-content"
+      }
+    ]
+  }
+}
