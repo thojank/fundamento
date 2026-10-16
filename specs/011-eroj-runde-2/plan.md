@@ -350,7 +350,7 @@ Alirebleco (Eroj, Chromium, beide Aspektoj × Schema × Kontrast): `insigno` axe
 
 #### D-16 Rot zuerst
 
-Fixtures (je `expected-issues.json`), auf das Vortaro der Fixture getrimmt wie der `dialogo` (② D-17): `insigno-label-slot-optional`, `insigno-web-term` (Prop `tabindex`), `insigno-instead-kialo-missing`, `avizo-message-slot-optional`, `avizo-web-term` (Prop `onclick`), `avizo-instead-kialo-missing`, `plenstato-text-slot-optional`, `plenstato-web-term` (Prop `class`), `plenstato-instead-kialo-missing`. Rot ohne Mutation: `data/insigno.test.ts`, `data/avizo.test.ts`, `data/plenstato.test.ts`, Schema-Tests, die Listen auf zwölf Eroj, MCP (`ef600ae`: 69 von 178 in neun Dateien); Projekcioj-Tests (`17a5990`: 11 von 166); Doku (`878712a`: 2 von 159).
+Fixtures (je `expected-issues.json`), auf das Vortaro der Fixture getrimmt wie der `dialogo` (② D-17): `insigno-label-slot-optional`, `insigno-web-term` (Prop `tabindex`), `insigno-instead-kialo-missing`, `avizo-message-slot-optional`, `avizo-web-term` (Prop `onclick`), `avizo-instead-kialo-missing`, `plenstato-text-slot-optional`, `plenstato-web-term` (Prop `class`), `plenstato-instead-kialo-missing`. Rot ohne Mutation: `data/insigno.test.ts`, `data/avizo.test.ts`, `data/plenstato.test.ts`, Schema-Tests, die Listen auf zwölf Eroj, MCP (`8efa1a6`: 69 von 178 in neun Dateien); Projekcioj-Tests (`494cb1f`: 11 von 166); Doku (`28d3e90`: 2 von 159).
 
 ### Arkitekturo-Abdeckung (E11)
 
