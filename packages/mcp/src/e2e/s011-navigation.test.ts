@@ -74,17 +74,24 @@ describe("the navigation dialogs of the spec: 'Reiter oder Navigation?'", () => 
     expect(answer.kialo).toBe(kialoOf("option-labels-distinct"));
   });
 
-  it("'Tabs, um zwischen Liste und Formular zu wechseln' (the spec's dialog): a person decides — the tabs' form-choice stands beside the other reading", async () => {
+  it("'Tabs, um zwischen Liste und Formular zu wechseln' (the spec's dialog) is answered with the elektilo today: 'Liste' is its word (plan ⑤ B-3)", async () => {
     // The spec answers conditionally (langetaro only when both views belong to the same thing,
-    // else navigado): Fundamento picks no reading; the tabs' own alternative form-choice names
-    // why a choice in a form is no switch of views (OP-12).
+    // else navigado). The words of the sentence belong to other Eroj: "Liste" to the elektilo
+    // (goal choose-many, and the elekto's alternative that sends there), "Formular" to the tabs'
+    // own alternative form-choice. The first Ero in name order answers (Spec 008 D-08): the
+    // elektilo. Pinned as it is, so that a change of the answer is seen; the finding stands in
+    // plan ⑤ (B-3), the condition of the spec is a person's call (OP-6).
     const answer = await output<Suggested>(client, "suggest_ero", {
       goal: "Tabs, um zwischen Liste und Formular zu wechseln",
     });
-    expect(answer.action).toBe("ask-human");
-    expect(answer.candidates).toContainEqual(
-      expect.objectContaining({ ero: "langetaro", case: "form-choice", kialo: formChoice.kialo }),
-    );
+    expect(answer.suggestion).toEqual({ ero: "elektilo", props: {} });
+    expect(answer.matched?.keyword).toBe("liste");
+    // The tabs' own reading of the sentence, asked without the list: a form is the elekto's.
+    const form = await output<Suggested>(client, "suggest_ero", {
+      goal: "Tabs, um zum Formular zu wechseln",
+    });
+    expect(form.suggestion).toEqual({ ero: "elekto", props: {} });
+    expect(form.boundary).toMatchObject({ ero: "langetaro", case: "form-choice", kialo: formChoice.kialo });
   });
 
   it("'Reiter für die Hauptseiten' → the navigado, with the tabs' reason (pages are the navigado's)", async () => {
@@ -113,7 +120,9 @@ describe("the navigation dialogs of the spec: 'Reiter oder Navigation?'", () => 
 describe("check_usage of the navigation and the tabs", () => {
   it("an item 'hier' violates link-label-names-destination (widened); 'Standards' passes", async () => {
     const wrong = await output<Judged>(client, "check_usage", {
-      instances: [{ ero: "navigado", props: { label: "Hauptnavigation" }, texts: { items: "hier" } }],
+      instances: [
+        { ero: "navigado", props: { label: "Hauptnavigation" }, texts: { items: ["hier", "Versionen"] } },
+      ],
     });
     expect(wrong.violations.map((entry) => entry.issue.rule)).toEqual([
       "link-label-names-destination",
@@ -121,7 +130,11 @@ describe("check_usage of the navigation and the tabs", () => {
     expect(wrong.violations[0]?.issue.regulo?.kialo).toBe(kialoOf("link-label-names-destination"));
     const right = await output<Judged>(client, "check_usage", {
       instances: [
-        { ero: "navigado", props: { label: "Hauptnavigation" }, texts: { items: "Standards" } },
+        {
+          ero: "navigado",
+          props: { label: "Hauptnavigation" },
+          texts: { items: ["Standards", "Versionen"] },
+        },
       ],
     });
     expect(right.valid).toBe(true);
@@ -174,7 +187,8 @@ describe("list_eroj and the briefs", () => {
     expect(navigation.required).toEqual({ props: ["label"], slots: ["items"] });
     const tabs = await output<Brief>(client, "get_ero", { name: "langetaro", brief: true });
     expect(tabs.axes.map((axis) => axis.name)).toEqual(["active"]);
-    expect(tabs.required).toEqual({ props: ["label"], slots: ["tabs", "panel"] });
+    expect(tabs.required.props).toEqual(["label"]);
+    expect([...tabs.required.slots].sort()).toEqual(["panel", "tabs"]);
     for (const brief of [navigation, tabs]) {
       expect(Math.ceil(JSON.stringify(brief).length / 3)).toBeLessThanOrEqual(750);
     }

@@ -281,8 +281,8 @@ describe("the scheme eroj (Spec 008 T009)", () => {
         mutate((copy) => {
           copy.concepts.push({
             ...(copy.concepts.find((concept) => concept.term === "Ligilo") as Concept),
-            term: "Navigado",
-            uri: "https://fundamento.ciferecigo.com/ontologio#Navigado",
+            term: "Panelo",
+            uri: "https://fundamento.ciferecigo.com/ontologio#Panelo",
             relations: [],
           });
         }),

@@ -1,0 +1,167 @@
+{
+  "$schema": "../../../schema/modelo.schema.json#/$defs/UzoFile",
+  "uzo": {
+    "id": "uzo_01M52BHAQAJEEW2E6NPDNPQNKZ",
+    "ero": "ero_01M52BH9YT0BYYTE0ZAH272Q7D",
+    "skemo": "ske_01M52BHAB2CMDHZDZKT2GVAXD7",
+    "purpose": "Leads between the main pages of an application and shows where the person is.",
+    "instead": [
+      {
+        "goal": "single-link",
+        "keywords": {
+          "en": [
+            "link",
+            "hyperlink"
+          ],
+          "de": [
+            "verweis",
+            "textlink"
+          ]
+        },
+        "ero": "ligilo",
+        "kialo": "One link is a ligilo, because a navigation is a list of places with one marked as the current; a single destination has no list and no current."
+      },
+      {
+        "goal": "switch-view",
+        "keywords": {
+          "en": [
+            "tabs",
+            "tab"
+          ],
+          "de": [
+            "reiter",
+            "registerkarte"
+          ]
+        },
+        "ero": "langetaro",
+        "kialo": "Views of the same thing on one page are tabs, because the person stays where they are; a navigation leaves the page."
+      },
+      {
+        "goal": "steps",
+        "keywords": {
+          "en": [
+            "steps",
+            "multistep"
+          ],
+          "de": [
+            "schritte",
+            "schrittfolge"
+          ]
+        },
+        "ero": null,
+        "kialo": "The steps of a process are no menu, because their order is the process and a person may not skip ahead; Fundamento has no step indicator yet, a person decides."
+      }
+    ],
+    "boundary": [
+      {
+        "case": "submenu",
+        "action": "ask-human",
+        "keywords": {
+          "en": [
+            "submenu",
+            "flyout"
+          ],
+          "de": [
+            "untermenü",
+            "aufklappmenü"
+          ]
+        },
+        "kialo": "A second level that opens under an item is a menu with its own keyboard, because the person moves in two directions; a person decides whether a second navigation on the page does it."
+      },
+      {
+        "case": "collapsed-mobile",
+        "action": "not-supported",
+        "keywords": {
+          "en": [
+            "hamburger",
+            "collapsed",
+            "offcanvas"
+          ],
+          "de": [
+            "hamburger",
+            "eingeklappt",
+            "einklappen"
+          ]
+        },
+        "kialo": "A collapsed navigation needs an overlay with a keyboard of its own (open, close, trap the focus), because the items are hidden until asked for; a navigation that wraps stays visible and needs none of it."
+      },
+      {
+        "case": "breadcrumb",
+        "action": "ask-human",
+        "keywords": {
+          "en": [
+            "breadcrumb",
+            "breadcrumbs"
+          ],
+          "de": [
+            "brotkrumen",
+            "brotkrümel",
+            "pfadnavigation"
+          ]
+        },
+        "kialo": "A breadcrumb shows the path to the page, not the pages beside it, because its items are the ancestors in order; whether the application needs one is a decision of a person."
+      }
+    ],
+    "composes": {
+      "containers": [
+        {
+          "name": "shell",
+          "kialo": "A navigation stands in the shell of the application (its head or its side), because it belongs to every page and to none."
+        }
+      ],
+      "with": [
+        {
+          "ero": "ligilo",
+          "kialo": "Its items are links, because each one moves to a page and none acts here."
+        },
+        {
+          "ero": "insigno",
+          "kialo": "A count next to an item is an insigno with intent info and a description, because the digit alone says nothing (1 Version in Prüfung)."
+        }
+      ],
+      "never": [],
+      "spacing": {
+        "owner": "container",
+        "regulo": "spacing-owned-by-container"
+      }
+    },
+    "slots": {
+      "items": {
+        "accepts": [
+          "text"
+        ],
+        "required": true,
+        "min": 2,
+        "nesting": 0
+      }
+    },
+    "layout": {
+      "size": "container",
+      "wrap": "allowed"
+    },
+    "content": [
+      {
+        "regulo": "link-label-names-destination",
+        "fixed": true,
+        "of": "slot:items",
+        "check": {
+          "kind": "not-words",
+          "words": {
+            "de": [
+              "hier",
+              "klicken",
+              "mehr",
+              "link"
+            ],
+            "en": [
+              "here",
+              "click",
+              "more",
+              "link"
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

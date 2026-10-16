@@ -132,6 +132,14 @@
       "status": "active",
       "type": "ero"
     },
+    "ero_01M52BH9YT0BYYTE0ZAH272Q7D": {
+      "status": "active",
+      "type": "ero"
+    },
+    "ero_01M52BH9YVR2C1P3X0C32NCFJE": {
+      "status": "active",
+      "type": "ero"
+    },
     "jug_01M2VRT7KQ77W91MVXB4GXSRZ4": {
       "status": "active",
       "type": "jugxo"
@@ -1120,6 +1128,22 @@
       "status": "active",
       "type": "kontrastParo"
     },
+    "kpa_01M52BPACWP978A94W3CH3CSV9": {
+      "status": "active",
+      "type": "kontrastParo"
+    },
+    "kpa_01M52BPACWP978A94W3CH3CSVA": {
+      "status": "active",
+      "type": "kontrastParo"
+    },
+    "kpa_01M52BPACWP978A94W3CH3CSVB": {
+      "status": "active",
+      "type": "kontrastParo"
+    },
+    "kpa_01M52BPACWP978A94W3CH3CSVC": {
+      "status": "active",
+      "type": "kontrastParo"
+    },
     "man_01M37TQHM886J48FX84PZZTY4X": {
       "status": "active",
       "type": "manko"
@@ -1461,6 +1485,14 @@
       "type": "skemo"
     },
     "ske_01M523FAAXJ1AADZWZ6NQRX83N": {
+      "status": "active",
+      "type": "skemo"
+    },
+    "ske_01M52BHAB2CMDHZDZKT2GVAXD7": {
+      "status": "active",
+      "type": "skemo"
+    },
+    "ske_01M52BHAB2CMDHZDZKT2GVAXD8": {
       "status": "active",
       "type": "skemo"
     },
@@ -2953,6 +2985,14 @@
       "type": "uzo"
     },
     "uzo_01M523FAR4K5YR54RGTY79QK3Z": {
+      "status": "active",
+      "type": "uzo"
+    },
+    "uzo_01M52BHAQAJEEW2E6NPDNPQNKZ": {
+      "status": "active",
+      "type": "uzo"
+    },
+    "uzo_01M52BHAQAJEEW2E6NPDNPQNM0": {
       "status": "active",
       "type": "uzo"
     }

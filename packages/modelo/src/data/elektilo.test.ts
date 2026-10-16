@@ -403,7 +403,8 @@ describe("the Reguloj of the elektilo (G6, E5)", () => {
     ["error-not-color-only", ["kampo", "markobutono", "elekto", "elektilo", "tekstareo"]],
     ["help-is-one-sentence", ["kampo", "elekto", "elektilo", "tekstareo"]],
     ["placeholder-not-label", ["kampo", "elektilo", "tekstareo"]],
-    ["option-labels-distinct", ["elekto", "elektilo"]],
+    // Spec 011 ⑤: widened once more, to the tabs of the langetaro.
+    ["option-labels-distinct", ["elekto", "elektilo", "langetaro"]],
   ])("%s is widened to the elektilo, not duplicated (E5)", (name, eroj) => {
     expect(named(name)?.appliesTo).toEqual({ eroj });
     expect(named(name)?.statement).toMatch(/elektilo/);

@@ -5,8 +5,8 @@
 // cross-links of G5: a choice in a form is the elekto's, pages are the navigado's.
 
 import { describe, expect, it } from "vitest";
-import { entryKeysOf, styledProps, variantKeys } from "../eroj/inventories.js";
-import { boundToken, combinationsOf } from "../eroj/skemo-rules.js";
+import { styledProps, variantKeys } from "../eroj/inventories.js";
+import { boundToken, combinationsOf, entryKeysOf } from "../eroj/skemo-rules.js";
 import { evaluateUsage } from "../eroj/usage.js";
 import { briefOf } from "../gvidanto/eroj.js";
 import { suggestEro } from "../gvidanto/suggest-ero.js";
@@ -53,14 +53,17 @@ describe("langetaro in the repo Modelo (section ⑤, G1, G2, E7)", () => {
     expect(entryKeysOf(skemo)).toEqual([{ slot: "tabs", key: "active", equals: "selected" }]);
   });
 
-  it("names its parts: tab keyed by state and active, the selected indicator, the list's line, the panel, focus-ring", () => {
+  it("names its parts: tab keyed by state, tabs (the text) by active, the selected indicator, the list's line, the panel, focus-ring", () => {
     if (skemo === undefined) throw new Error("missing");
+    // The text of the tabs is the part named after the slot (tabs): so the pair rule pairs its
+    // colour with the tab's fill in every combination (skemo-kontrastparo-missing).
     expect(Object.keys(skemo.parts).sort()).toEqual([
       "focus-ring",
       "list",
       "panel",
       "selected-indicator",
       "tab",
+      "tabs",
     ]);
     expect(skemo.parts.tab?.fill).toEqual({ by: ["state"] });
     expect(boundToken(skemo, "tab", "fill", { state: "hover" })?.token).toBe(
@@ -69,10 +72,10 @@ describe("langetaro in the repo Modelo (section ⑤, G1, G2, E7)", () => {
     expect(boundToken(skemo, "tab", "fill", { state: "disabled" })?.token).toBe(
       "color.action.tertiary.disabled",
     );
-    expect(skemo.parts.tab?.color).toEqual({ by: ["active"] });
-    expect(boundToken(skemo, "tab", "color", { active: "true" })?.token).toBe("color.text.default");
-    expect(boundToken(skemo, "tab", "color", { active: "false" })?.token).toBe("color.text.subtle");
-    expect(skemo.parts.tab?.typography).toEqual({ fixed: "typography.label.1" });
+    expect(skemo.parts.tabs?.color).toEqual({ by: ["active"] });
+    expect(boundToken(skemo, "tabs", "color", { active: "true" })?.token).toBe("color.text.default");
+    expect(boundToken(skemo, "tabs", "color", { active: "false" })?.token).toBe("color.text.subtle");
+    expect(skemo.parts.tabs?.typography).toEqual({ fixed: "typography.label.1" });
     expect(skemo.parts.tab?.height).toEqual({ fixed: "size.target.min" });
     expect(skemo.parts["selected-indicator"]?.width).toEqual({ by: ["active"] });
     expect(boundToken(skemo, "selected-indicator", "width", { active: "true" })?.token).toBe(
@@ -86,8 +89,9 @@ describe("langetaro in the repo Modelo (section ⑤, G1, G2, E7)", () => {
     expect(skemo.parts.list?.width).toEqual({ fixed: "border.width.default" });
     expect(skemo.parts.panel?.["inline-padding"]).toEqual({ fixed: "spacing.medium" });
     expect(styledProps(skemo)).toEqual([]);
-    expect(variantKeys(skemo)).toEqual(["active", "state"]);
-    expect(combinationsOf(skemo, variantKeys(skemo))).toHaveLength(8);
+    // The state of one entry (active) is no variant of the Ero (E7): the variants are the state alone.
+    expect(variantKeys(skemo)).toEqual(["state"]);
+    expect(combinationsOf(skemo, ["active", "state"])).toHaveLength(8);
   });
 
   it("speaks role tablist, named by its label; active is the state of a tab (aria-selected), disabled too; the arrows, Home and End (G4)", () => {
@@ -128,7 +132,8 @@ describe("the Uzo of the langetaro (section ⑤, G5)", () => {
       ["pages", "navigado"],
     ]);
     expect(uzo?.boundary.map((entry) => [entry.case, entry.action])).toEqual([
-      ["overflow", "ask-human"],
+      // "overflow" is a web term of the Uzo (uzo-web-term): the case is named by what it is.
+      ["many-tabs", "ask-human"],
       ["closable-tabs", "not-supported"],
       ["manual-activation", "ask-human"],
       ["vertical-tabs", "ask-human"],
@@ -145,11 +150,12 @@ describe("the Uzo of the langetaro (section ⑤, G5)", () => {
     ]);
   });
 
-  it("the brief names active as the axis of the tabs, label as a duty, tabs and panel as duties, and stays under 750", () => {
+  it("the brief names active as the axis of the tabs, label as a duty, panel and tabs as duties, and stays under 750", () => {
     if (langetaro === undefined) throw new Error("missing");
     const brief = briefOf(langetaro);
     expect(brief.axes.map((axis) => axis.name)).toEqual(["active"]);
-    expect(brief.required).toEqual({ props: ["label"], slots: ["tabs", "panel"] });
+    expect(brief.required.props).toEqual(["label"]);
+    expect([...brief.required.slots].sort()).toEqual(["panel", "tabs"]);
     expect(Math.ceil(JSON.stringify(brief).length / 3)).toBeLessThanOrEqual(750);
   });
 });

@@ -1618,6 +1618,97 @@
           "target": "#Insigno"
         }
       ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Navigado",
+      "term": "Navigado",
+      "inScheme": "eroj",
+      "prefLabel": {
+        "eo": "Navigado",
+        "en": "navigation",
+        "de": "Navigation"
+      },
+      "altLabel": {
+        "en": [
+          "navigado",
+          "navigation",
+          "menu",
+          "nav bar",
+          "main menu",
+          "sidebar"
+        ],
+        "de": [
+          "Navigation",
+          "Menü",
+          "Hauptmenü",
+          "Hauptnavigation",
+          "Seitenleiste",
+          "navigado"
+        ]
+      },
+      "definition": {
+        "en": "A navigation: leads between the main pages of an application and shows where the person is. Its items are the platform's own links (ligilo) in a named landmark; the item of the current page carries aria-current and is marked by more than colour; a count next to an item is an insigno. Views of one thing on one page are the langetaro's.",
+        "de": "Eine Navigation: führt zwischen den Hauptseiten einer Anwendung und zeigt, wo die Person ist. Ihre Einträge sind die nativen Links der Plattform (ligilo) in einer benannten Landmarke; der Eintrag der aktuellen Seite trägt aria-current und ist mehr als durch Farbe markiert; ein Zähler neben einem Eintrag ist ein insigno. Ansichten einer Sache auf einer Seite gehören dem langetaro."
+      },
+      "broader": [
+        "#Ero"
+      ],
+      "relations": [
+        {
+          "predicate": "references",
+          "target": "#Ligilo"
+        },
+        {
+          "predicate": "references",
+          "target": "#Insigno"
+        },
+        {
+          "predicate": "references",
+          "target": "#Langetaro"
+        }
+      ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Langetaro",
+      "term": "Langetaro",
+      "inScheme": "eroj",
+      "prefLabel": {
+        "eo": "Langetaro",
+        "en": "tabs",
+        "de": "Reiter"
+      },
+      "altLabel": {
+        "en": [
+          "langetaro",
+          "tabs",
+          "tab bar",
+          "tab list"
+        ],
+        "de": [
+          "Reiter",
+          "Tabs",
+          "Registerkarten",
+          "Reiterleiste",
+          "langetaro"
+        ]
+      },
+      "definition": {
+        "en": "Tabs: switch between views of the same thing on one page (content, versions, rules, audit). A tab list named by its label, one tab active at a time (aria-selected, marked by more than colour), the arrows move and select, the panel shows the view. A choice in a form is the elekto's, the pages of an application the navigado's.",
+        "de": "Reiter: wechseln zwischen Ansichten derselben Sache auf einer Seite (Inhalt, Versionen, Regeln, Audit). Eine benannte Reiterleiste, ein Reiter zur Zeit aktiv (aria-selected, mehr als durch Farbe markiert), die Pfeiltasten bewegen und wählen, das Panel zeigt die Ansicht. Eine Wahl in einem Formular gehört dem elekto, die Seiten einer Anwendung dem navigado."
+      },
+      "broader": [
+        "#Ero"
+      ],
+      "relations": [
+        {
+          "predicate": "references",
+          "target": "#Elekto"
+        },
+        {
+          "predicate": "references",
+          "target": "#Navigado"
+        }
+      ]
     }
   ]
 }

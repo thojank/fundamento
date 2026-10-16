@@ -5,8 +5,8 @@
 // a single link is the ligilo's, a switch of views the langetaro's.
 
 import { describe, expect, it } from "vitest";
-import { entryKeysOf, styledProps, variantKeys } from "../eroj/inventories.js";
-import { boundToken, combinationsOf } from "../eroj/skemo-rules.js";
+import { styledProps, variantKeys } from "../eroj/inventories.js";
+import { boundToken, combinationsOf, entryKeysOf } from "../eroj/skemo-rules.js";
 import { evaluateUsage } from "../eroj/usage.js";
 import { briefOf } from "../gvidanto/eroj.js";
 import { suggestEro } from "../gvidanto/suggest-ero.js";
@@ -71,13 +71,15 @@ describe("navigado in the repo Modelo (section ⑤, G1, G2, E7)", () => {
     expect(entryKeysOf(skemo)).toEqual([{ slot: "items", key: "current", equals: "page" }]);
   });
 
-  it("names its parts: item keyed by current and state, item-text by current, the underline of the current page, box, focus-ring", () => {
+  it("names its parts: item keyed by current and state, items (the text) by current, the underline of the current page, box, focus-ring", () => {
     if (skemo === undefined) throw new Error("missing");
+    // The text of the items is the part named after the slot (items): so the pair rule pairs
+    // its colour with the item's fill in every combination (skemo-kontrastparo-missing).
     expect(Object.keys(skemo.parts).sort()).toEqual([
       "box",
       "focus-ring",
       "item",
-      "item-text",
+      "items",
       "underline",
     ]);
     expect(skemo.parts.item?.fill).toEqual({ by: ["current", "state"] });
@@ -90,14 +92,14 @@ describe("navigado in the repo Modelo (section ⑤, G1, G2, E7)", () => {
     expect(boundToken(skemo, "item", "fill", { current: "true", state: "rest" })?.token).toBe(
       "color.navigation.selected",
     );
-    expect(skemo.parts["item-text"]?.color).toEqual({ by: ["current"] });
-    expect(boundToken(skemo, "item-text", "color", { current: "true" })?.token).toBe(
+    expect(skemo.parts.items?.color).toEqual({ by: ["current"] });
+    expect(boundToken(skemo, "items", "color", { current: "true" })?.token).toBe(
       "color.navigation.text.selected",
     );
-    expect(boundToken(skemo, "item-text", "color", { current: "false" })?.token).toBe(
+    expect(boundToken(skemo, "items", "color", { current: "false" })?.token).toBe(
       "color.navigation.text.rest",
     );
-    expect(skemo.parts["item-text"]?.typography).toEqual({ fixed: "typography.label.1" });
+    expect(skemo.parts.items?.typography).toEqual({ fixed: "typography.label.1" });
     // The current page is never colour alone (G4): the underline of border.width.strong.
     expect(skemo.parts.underline?.width).toEqual({ by: ["current"] });
     expect(boundToken(skemo, "underline", "width", { current: "true" })?.token).toBe(
@@ -107,8 +109,9 @@ describe("navigado in the repo Modelo (section ⑤, G1, G2, E7)", () => {
     expect(skemo.parts.box?.height).toEqual({ fixed: "size.target.min" });
     expect(skemo.parts.box?.radius).toEqual({ fixed: "radius.role.control" });
     expect(styledProps(skemo)).toEqual([]);
-    expect(variantKeys(skemo)).toEqual(["current", "state"]);
-    expect(combinationsOf(skemo, variantKeys(skemo))).toHaveLength(6);
+    // The state of one entry (current) is no variant of the Ero (E7): the variants are the state alone.
+    expect(variantKeys(skemo)).toEqual(["state"]);
+    expect(combinationsOf(skemo, ["current", "state"])).toHaveLength(6);
   });
 
   it("speaks role navigation, named by its label; current is the state of an item (aria-current)", () => {
@@ -194,14 +197,16 @@ describe("the Reguloj of the navigado (G6, E5)", () => {
   });
 
   it("an item 'hier' violates the destination rule; 'Standards' passes", () => {
-    const judge = (items: string) =>
+    // At least two items (uzo-slot-min): a navigation with one place is a ligilo.
+    const judge = (items: string[]) =>
       rulesOf(
         evaluateUsage(modelo, [
           { ero: "navigado", props: { label: "Hauptnavigation" }, texts: { items } },
         ]),
       );
-    expect(judge("Standards")).toEqual([]);
-    expect(judge("hier")).toEqual([["link-label-names-destination", "error"]]);
+    expect(judge(["Standards", "Versionen"])).toEqual([]);
+    expect(judge(["hier", "Versionen"])).toEqual([["link-label-names-destination", "error"]]);
+    expect(judge(["Standards"])).toEqual([["uzo-slot-min", "error"]]);
   });
 });
 

@@ -462,65 +462,79 @@ const textRule: UsageEnforcer = ({ modelo, regulo, instances, eroOf }) =>
     }
     // Text rules judge a text; an instance without one violates label-required alone (§5). The
     // text is the label, or what `of` names (Spec 009, D-06).
-    const text = textOfSource(instance, rule.of, ero.skemo);
-    if (text === undefined) return [];
-    if (rule.when?.goal !== undefined) {
-      const goal = goalOfInstance(ero.skemo, instance);
-      if (goal === undefined || !rule.when.goal.includes(goal)) return [];
-    }
-    // Spec 011 ③ (plan ③ D-06): a rule for instances with one of the listed values of a prop —
-    // the error rule of the avizo judges the message of intent danger only. The value is the
-    // instance's, else the default of the Skemo.
-    if (rule.when?.props !== undefined) {
-      const applies = Object.entries(rule.when.props).every(([prop, values]) => {
-        const given =
-          instance.props[prop] ??
-          ero.skemo.props.find((candidate) => candidate.name === prop)?.default;
-        return typeof given === "string" && values.includes(given);
-      });
-      if (!applies) return [];
-    }
-    const failure = textCheckFailure(ero.skemo, rule.check, text, ero.uzo);
-    if (failure === undefined) return [];
-    // The language of the instance when it says it (Spec 008, D-06), else read from the text.
-    const lingvo =
-      instance.lingvo ??
-      lingvoOf(ero.skemo, text) ??
-      genericLingvo(rule.check, text) ??
-      insteadHit(ero.uzo, text)?.lingvo ??
-      DEFAULT_LINGVO;
-    const example = approvedLabel(modelo, regulo, lingvo, eroOf, rule.of);
-    // A text that names another Ero's goal is that Ero's job (not-instead, D-07): the solution is
-    // the other Ero with the kialo of the instead entry, not a better label.
-    const instead = rule.check.kind === "not-instead" ? insteadHit(ero.uzo, text) : undefined;
-    const suggestion =
-      instead !== undefined
-        ? instead.entry.ero === null
-          ? `Ask a person; Fundamento does not cover ${instead.entry.goal} yet. ${instead.entry.kialo}`
-          : `Use ${instead.entry.ero} instead (use-instead, case ${instead.entry.goal}). ${instead.entry.kialo}`
-        : example === undefined
-          ? `Write a text that follows the rule: ${regulo.statement}`
-          : `Write the text as the approved example does, e.g. "${example}".`;
-    // Overridden by the Aspekto of the instance: visible as info, not as a violation (Art. VI).
-    const jugxo = overrideOf(modelo, instance, rule);
-    if (jugxo !== undefined) {
+    // Spec 011 ⑤ (plan ⑤ D-05): a text rule on a slot whose entries are options (the items of a
+    // navigation, link-label-names-destination) judges every entry, one finding per failing text;
+    // every other rule judges the one text of its source.
+    const of = rule.of ?? LABEL_SOURCE;
+    const entrySlot = ero.skemo.slots.find(
+      (slot) => slot.entry !== undefined && of === `slot:${slot.name}`,
+    );
+    const texts =
+      entrySlot === undefined
+        ? [textOfSource(instance, rule.of, ero.skemo)].filter(
+            (text): text is string => text !== undefined,
+          )
+        : (entryTextsOf(instance, of, ero.skemo) ?? []);
+    const judge = (text: string): UsageFinding[] => {
+      if (rule.when?.goal !== undefined) {
+        const goal = goalOfInstance(ero.skemo, instance);
+        if (goal === undefined || !rule.when.goal.includes(goal)) return [];
+      }
+      // Spec 011 ③ (plan ③ D-06): a rule for instances with one of the listed values of a prop —
+      // the error rule of the avizo judges the message of intent danger only. The value is the
+      // instance's, else the default of the Skemo.
+      if (rule.when?.props !== undefined) {
+        const applies = Object.entries(rule.when.props).every(([prop, values]) => {
+          const given =
+            instance.props[prop] ??
+            ero.skemo.props.find((candidate) => candidate.name === prop)?.default;
+          return typeof given === "string" && values.includes(given);
+        });
+        if (!applies) return [];
+      }
+      const failure = textCheckFailure(ero.skemo, rule.check, text, ero.uzo);
+      if (failure === undefined) return [];
+      // The language of the instance when it says it (Spec 008, D-06), else read from the text.
+      const lingvo =
+        instance.lingvo ??
+        lingvoOf(ero.skemo, text) ??
+        genericLingvo(rule.check, text) ??
+        insteadHit(ero.uzo, text)?.lingvo ??
+        DEFAULT_LINGVO;
+      const example = approvedLabel(modelo, regulo, lingvo, eroOf, rule.of);
+      // A text that names another Ero's goal is that Ero's job (not-instead, D-07): the solution is
+      // the other Ero with the kialo of the instead entry, not a better label.
+      const instead = rule.check.kind === "not-instead" ? insteadHit(ero.uzo, text) : undefined;
+      const suggestion =
+        instead !== undefined
+          ? instead.entry.ero === null
+            ? `Ask a person; Fundamento does not cover ${instead.entry.goal} yet. ${instead.entry.kialo}`
+            : `Use ${instead.entry.ero} instead (use-instead, case ${instead.entry.goal}). ${instead.entry.kialo}`
+          : example === undefined
+            ? `Write a text that follows the rule: ${regulo.statement}`
+            : `Write the text as the approved example does, e.g. "${example}".`;
+      // Overridden by the Aspekto of the instance: visible as info, not as a violation (Art. VI).
+      const jugxo = overrideOf(modelo, instance, rule);
+      if (jugxo !== undefined) {
+        return [
+          {
+            instance: [index],
+            severity: "info",
+            message: `Instance ${index} of ${ero.ero.name} says "${text}" (${rule.of ?? LABEL_SOURCE}): ${failure}. The Aspekto ${instance.aspekto} overrides ${regulo.name} with the Jugxo ${jugxo}.`,
+            suggestion: `Keep the label if the Jugxo ${jugxo} covers it; otherwise ${suggestion.charAt(0).toLowerCase()}${suggestion.slice(1)}`,
+          },
+        ];
+      }
       return [
         {
           instance: [index],
-          severity: "info",
-          message: `Instance ${index} of ${ero.ero.name} says "${text}" (${rule.of ?? LABEL_SOURCE}): ${failure}. The Aspekto ${instance.aspekto} overrides ${regulo.name} with the Jugxo ${jugxo}.`,
-          suggestion: `Keep the label if the Jugxo ${jugxo} covers it; otherwise ${suggestion.charAt(0).toLowerCase()}${suggestion.slice(1)}`,
+          severity: rule.fixed ? "error" : (rule.severity ?? "error"),
+          message: `Instance ${index} of ${ero.ero.name} says "${text}" (${rule.of ?? LABEL_SOURCE}): ${failure}.`,
+          suggestion,
         },
       ];
-    }
-    return [
-      {
-        instance: [index],
-        severity: rule.fixed ? "error" : (rule.severity ?? "error"),
-        message: `Instance ${index} of ${ero.ero.name} says "${text}" (${rule.of ?? LABEL_SOURCE}): ${failure}.`,
-        suggestion,
-      },
-    ];
+    };
+    return texts.flatMap(judge);
   });
 
 /**

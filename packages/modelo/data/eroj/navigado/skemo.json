@@ -1,0 +1,226 @@
+{
+  "ero": {
+    "id": "ero_01M52BH9YT0BYYTE0ZAH272Q7D",
+    "name": "navigado",
+    "skemo": "ske_01M52BHAB2CMDHZDZKT2GVAXD7",
+    "description": "A navigation: leads between the main pages of an application and shows where the person is. Its items are the platform's own links; the item of the current page is marked by more than colour."
+  },
+  "skemo": {
+    "id": "ske_01M52BHAB2CMDHZDZKT2GVAXD7",
+    "ero": "ero_01M52BH9YT0BYYTE0ZAH272Q7D",
+    "props": [
+      {
+        "name": "orientation",
+        "kind": "enum",
+        "values": [
+          "horizontal",
+          "vertical"
+        ],
+        "default": "horizontal",
+        "description": "horizontal lays the items in a row that wraps when the container is narrow (the order stays); vertical stacks them (a sidebar)."
+      },
+      {
+        "name": "label",
+        "kind": "string",
+        "required": true,
+        "description": "The name of the navigation, heard as the name of the landmark (Hauptnavigation); a page with two navigations needs two names."
+      },
+      {
+        "name": "page",
+        "kind": "string",
+        "description": "The key of the current page: the item whose key (its own page key, else its destination) is this value is the current one (SkemoSlot.entry current)."
+      }
+    ],
+    "states": [
+      "rest",
+      "hover",
+      "focus"
+    ],
+    "slots": [
+      {
+        "name": "items",
+        "default": true,
+        "text": true,
+        "entry": {
+          "key": "current",
+          "equals": "page"
+        }
+      }
+    ],
+    "parts": {
+      "item": {
+        "fill": {
+          "by": [
+            "current",
+            "state"
+          ]
+        }
+      },
+      "items": {
+        "color": {
+          "by": [
+            "current"
+          ]
+        },
+        "typography": {
+          "fixed": "typography.label.1"
+        }
+      },
+      "underline": {
+        "width": {
+          "by": [
+            "current"
+          ]
+        },
+        "color": {
+          "fixed": "color.navigation.text.selected"
+        }
+      },
+      "box": {
+        "height": {
+          "fixed": "size.target.min"
+        },
+        "radius": {
+          "fixed": "radius.role.control"
+        },
+        "inline-padding": {
+          "fixed": "spacing.small"
+        },
+        "gap": {
+          "fixed": "spacing.xsmall"
+        }
+      },
+      "focus-ring": {
+        "ring": {
+          "fixed": "focus.ring"
+        },
+        "offset": {
+          "fixed": "focus.offset"
+        },
+        "color": {
+          "fixed": "color.focus.inner"
+        }
+      }
+    },
+    "bindings": [
+      {
+        "part": "item",
+        "property": "fill",
+        "when": {
+          "current": "false",
+          "state": "rest"
+        },
+        "token": "color.navigation.rest"
+      },
+      {
+        "part": "item",
+        "property": "fill",
+        "when": {
+          "current": "false",
+          "state": "hover"
+        },
+        "token": "color.navigation.hover"
+      },
+      {
+        "part": "item",
+        "property": "fill",
+        "when": {
+          "current": "false",
+          "state": "focus"
+        },
+        "token": "color.navigation.rest"
+      },
+      {
+        "part": "item",
+        "property": "fill",
+        "when": {
+          "current": "true",
+          "state": "rest"
+        },
+        "token": "color.navigation.selected"
+      },
+      {
+        "part": "item",
+        "property": "fill",
+        "when": {
+          "current": "true",
+          "state": "hover"
+        },
+        "token": "color.navigation.selected"
+      },
+      {
+        "part": "item",
+        "property": "fill",
+        "when": {
+          "current": "true",
+          "state": "focus"
+        },
+        "token": "color.navigation.selected"
+      },
+      {
+        "part": "items",
+        "property": "color",
+        "when": {
+          "current": "true"
+        },
+        "token": "color.navigation.text.selected"
+      },
+      {
+        "part": "items",
+        "property": "color",
+        "when": {
+          "current": "false"
+        },
+        "token": "color.navigation.text.rest"
+      },
+      {
+        "part": "underline",
+        "property": "width",
+        "when": {
+          "current": "true"
+        },
+        "token": "border.width.strong"
+      },
+      {
+        "part": "underline",
+        "property": "width",
+        "when": {
+          "current": "false"
+        },
+        "token": "none"
+      }
+    ],
+    "a11y": {
+      "role": "navigation",
+      "name": [
+        "prop:label"
+      ],
+      "states": {
+        "current": [
+          "aria-current"
+        ]
+      },
+      "keys": []
+    },
+    "goals": [
+      {
+        "goal": "navigate-app",
+        "keywords": {
+          "en": [
+            "navbar",
+            "sidebar",
+            "nav"
+          ],
+          "de": [
+            "hauptnavigation",
+            "hauptmenü",
+            "seitenleiste",
+            "navigationsleiste"
+          ]
+        },
+        "props": {},
+        "regulo": "link-label-names-destination"
+      }
+    ]
+  }
+}
