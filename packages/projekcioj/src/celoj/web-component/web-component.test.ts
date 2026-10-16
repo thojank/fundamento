@@ -1268,7 +1268,10 @@ describe("Web Component Celo for the langetaro (Spec 011 ⑤)", () => {
     expect(css).toContain("border-block-end-color: var(--fm-color-navigation-selected);");
     expect(css).toContain("border-block-end-style: none;");
     expect(css).toContain("border-block-end-color: var(--fm-color-border-default);");
-    expect(css).toContain(':where([part="panel"]) {\n  padding-inline: var(--fm-spacing-medium);');
+    // The panel is text of the Ero (its colour first, as the Skemo orders the properties).
+    expect(css).toContain(
+      ':where([part="panel"]) {\n  color: var(--fm-color-text-default);\n  padding-inline: var(--fm-spacing-medium);',
+    );
     expect(css).toContain(
       ':where([part="control"] [part="tab"]:focus-visible) {\n  outline-width: var(--fm-focus-ring-width);',
     );

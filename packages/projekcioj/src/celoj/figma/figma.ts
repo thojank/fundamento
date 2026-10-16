@@ -48,7 +48,12 @@ import {
   VITRINO_TABLE,
 } from "../vitrino/datumoj.js";
 import { signOf } from "../web-component/element-template.js";
-import { drawnPartPropertiesOf, pluginManifest, pluginSource } from "./plugin.js";
+import {
+  drawnPartPropertiesOf,
+  pluginManifest,
+  pluginSource,
+  structureBoundPartPropertiesOf,
+} from "./plugin.js";
 
 /** A variable value: a literal, or an alias to another variable of the plan. */
 export type FigmaValue = { alias: string } | string | number | FigmaColor | boolean;
@@ -125,7 +130,10 @@ const FOCUS_STATE = "focus";
 export const FIGMA_NOT_DRAWN: Readonly<Record<string, string>> = {
   icon: "jug_01M31TV1V4S3RNBPWSRB2CGEDK",
   // Spec 008 (plan D-11, Befund B-1): the underline is written as the label's text decoration,
-  // on or off per variant; its thickness and colour bind to no variable in Figma.
+  // on or off per variant; its thickness and colour bind to no variable in Figma. The underline
+  // of a navigation's item (Spec 011 ⑤) is no text decoration but the item's block-end edge, and
+  // the nav structure binds it as a stroke of its own (STRUCTURE_BINDINGS.nav): a part property
+  // a structure binds on a node of its own is drawn, whatever release its name has here.
   underline: "jug_01M4RYCY61NK92JM6XYD00M012",
   // Spec 009 (plan D-09, Befund B-2; Abnahme F-4): the control of a field in the set is empty and
   // shows the placeholder, so the colour of the typed text has no node; the sign of the required
@@ -301,6 +309,23 @@ export const UNKNOWN_EXAMPLE = "unbekannt";
 export const METER_UNKNOWN_TEXT = "nicht geprüft";
 
 /**
+ * The name of the example frame beside a navigation's set (Spec 011 ⑤): the default variant laid
+ * out as a column, as `<set> – vertikal`. orientation keys no part (the Web stylesheet inventory
+ * says props {}), so it is no variant axis of the set — a prop variant here would break parity;
+ * the vertical picture is an example frame, as the unknown value of a meter is (Spec 011 ④).
+ */
+export const VERTICAL_EXAMPLE = "vertikal";
+
+/**
+ * The texts of a tab list's set besides the tabs (Spec 011 ⑤): the word of the panel — the
+ * Vitrino's panel shows the word of the first tab ("Eins"), one source for both pictures (F-5).
+ * The panel's content is the application's: the set shows the word in the panel's colour
+ * (panel.color) and, since the Skemo gives the panel no role, in the font of the tabs, bound to
+ * nothing (a Befund for plan ⑤).
+ */
+export const TABS_TEXTS: Readonly<Record<string, string>> = { panel: VITRINO_OPTIONS[0] ?? "" };
+
+/**
  * The share of the track the fill of a meter takes in the set (Spec 011 ④, plan ④ D-14): the
  * Vitrino's value example (66) in the Skemo's range (min 0, max 100 by default) — one source for
  * both pictures. A number of the drawing, no token: Figma binds no share, the plugin writes the
@@ -316,6 +341,18 @@ export function meterShareOf(skemo: LoadedEro["skemo"]): number {
   const example = Number(VITRINO_NUMBER_EXAMPLES.value ?? 0);
   const range = bound("max") - bound("min");
   return range > 0 ? (example - bound("min")) / range : 0;
+}
+
+/**
+ * The value of the orientation prop that stacks a navigation (Spec 011 ⑤): `vertical`, where
+ * the Skemo's enum has it; undefined for an Ero without it. Read, never assumed: a prop that keys
+ * no part stands in no variant, and the example frame shows the one value the set does not.
+ */
+export function verticalOf(skemo: LoadedEro["skemo"]): string | undefined {
+  const prop = skemo.props.find(
+    (candidate) => candidate.name === "orientation" && candidate.kind === "enum",
+  );
+  return prop?.values?.includes("vertical") === true ? "vertical" : undefined;
 }
 
 /**
@@ -410,7 +447,9 @@ export type FigmaStructure =
   | "state"
   | "meter"
   | "table"
-  | "list";
+  | "list"
+  | "nav"
+  | "tabs";
 
 /**
  * A radio group (Spec 010 ③, D-07) is a choice: the label (the question) above a column of
@@ -428,7 +467,12 @@ export type FigmaStructure =
  * a meter (role meter) is a column — label, the track with the fill in it, value text; a table
  * (role table) is the caption above the region with the head and three rows, the sort button in
  * the first head cell; a list (role list) is a column of entries, each a row or a column by
- * layout.
+ * layout. Spec 011 ⑤: a navigation (role navigation) is a nav — a row of three items, each ring
+ * → gap → item (its fill, its underline as the block-end stroke) with the item's text, the
+ * first the current one (the state of one entry, E7); a tab list (role tablist) is tabs — the
+ * list (a row with its line as the block-end stroke) of three tabs, each ring → gap → tab (fill
+ * by state, the selected indicator as the block-end stroke) with the tab's text, the first the
+ * active one, and the panel with its word below.
  */
 export const structureOf = (role: string, parts: readonly string[] = []): FigmaStructure =>
   role === "textbox" || role === "combobox"
@@ -451,7 +495,11 @@ export const structureOf = (role: string, parts: readonly string[] = []): FigmaS
                   ? "table"
                   : role === "list"
                     ? "list"
-                    : "control";
+                    : role === "navigation"
+                      ? "nav"
+                      : role === "tablist"
+                        ? "tabs"
+                        : "control";
 
 /**
  * The neutral word every label template shows, per a11y role (M-3; Maintainer, F14, 2026-10-13,
@@ -491,6 +539,13 @@ const LABEL_DEFAULTS: Readonly<Record<string, string>> = {
   // Spec 011 ④ (plan ④ D-14): a key-value list's label is its accessible name, the record's
   // details (Goal details: Angaben). For the maintainer to confirm; no Jugxo created here.
   list: "Angaben",
+  // Spec 011 ⑤: a navigation's label is the name of the landmark (Hauptnavigation), heard, never
+  // seen; the set's word is the name of the Ero itself. Proposal for the maintainer to confirm;
+  // no Jugxo created here.
+  navigation: "Navigation",
+  // Spec 011 ⑤: a tab list's label is the name of the group, never shown; the set's word is the
+  // name of the Ero itself. Proposal for the maintainer to confirm; no Jugxo created here.
+  tablist: "Reiter",
 };
 
 /**
@@ -577,6 +632,8 @@ export interface FigmaComponentSet {
    * The options a choice shows in every variant (Spec 010 ③, D-07): the entry key of its slot
    * (selected), the words of the options — the Vitrino's — and which of them is chosen. The plugin
    * draws one row per word and binds each with the entry of the variant for its value of the key.
+   * Spec 011 ⑤: the items of a navigation (current) and the tabs of a tab list (active) the same
+   * way — the Vitrino's words, the first the current or active one.
    */
   entry?: { key: string; texts: string[]; selected: number };
   /**
@@ -597,6 +654,11 @@ export interface FigmaComponentSet {
      * stroke of the part unknown with the plan's dash pattern and holds no fill frame.
      */
     texts?: Record<string, string>;
+    /**
+     * The values of props that key no part the example shows (Spec 011 ⑤: orientation vertical
+     * of a navigation): written as the direction of the list, no variant and nothing bound.
+     */
+    props?: Record<string, string>;
   };
   /**
    * Stand-ins that look like a composed Ero (Abnahme Spec 011 ②, F-5), per node of the set: the
@@ -1436,8 +1498,11 @@ function componentSetOf(
   const keys = variantKeys(skemo);
   const structure = structureOf(skemo.a11y.role, Object.keys(skemo.parts));
   // What the plugin draws for this structure (Spec 011 ③): the bindings every structure shares and
-  // the ones this structure binds elsewhere — the text's colour on the label of a badge.
+  // the ones this structure binds elsewhere — the text's colour on the label of a badge. What the
+  // structure binds on a node of its own (Spec 011 ⑤: the underline of a navigation's item as its
+  // block-end stroke) is drawn whatever release the part's name has in FIGMA_NOT_DRAWN.
   const drawn = new Set(drawnPartPropertiesOf(structure));
+  const ownBindings = new Set(structureBoundPartPropertiesOf(structure));
   // The focus radii only for an Ero that has a radius to grow (F32); the ligilo has none.
   const radiiOf =
     radiusTokensOf(entry) === undefined
@@ -1605,7 +1670,8 @@ function componentSetOf(
         // check:parity says so. The part the label property writes is drawn whatever its name
         // (Spec 011 ③: the text of a badge or a state is its label, not the typed text B-2
         // releases).
-        const release = part === labelPart ? undefined : FIGMA_NOT_DRAWN[part];
+        const release =
+          part === labelPart || ownBindings.has(key) ? undefined : FIGMA_NOT_DRAWN[part];
         if (release !== undefined) {
           notDrawn[key] = release;
           continue;
@@ -1797,7 +1863,16 @@ function componentSetOf(
             padding: parityPx(base[SET_GAP]?.value),
             texts: { "value-text": METER_UNKNOWN_TEXT },
           }
-        : undefined;
+        : // The example of a navigation (Spec 011 ⑤): the default variant as a column, where the
+          // Skemo knows the orientation vertical — a prop that keys no part and is no axis.
+          structure === "nav" && verticalOf(skemo) !== undefined
+          ? {
+              name: `${entry.ero.name} – ${VERTICAL_EXAMPLE}`,
+              variant: defaults,
+              padding: parityPx(base[SET_GAP]?.value),
+              props: { orientation: verticalOf(skemo) ?? "" },
+            }
+          : undefined;
   // The sign of the indicator: the check mark, the dot, and the chevron of a select's field
   // (Spec 010 ④, D-07); a text field has none. A state (Spec 011 ③) has the arc. A table (Spec
   // 011 ④) has the select's chevron as its sort indicator — the web turns the same sign by the
@@ -1838,10 +1913,13 @@ function componentSetOf(
         }
       : undefined;
   const entries = structure === "list" ? [...LIST_ENTRIES] : undefined;
-  // The options of a choice (Spec 010 ③, D-07): the Vitrino's words, the first chosen.
+  // The options of a choice (Spec 010 ③, D-07): the Vitrino's words, the first chosen. The items
+  // of a navigation and the tabs of a tab list (Spec 011 ⑤): the same words, the first current
+  // or active.
   const [entryKey] = entryKeys;
   const options =
-    structure === "choice" && entryKey !== undefined
+    (structure === "choice" || structure === "nav" || structure === "tabs") &&
+    entryKey !== undefined
       ? { key: entryKey, texts: [...VITRINO_OPTIONS], selected: 0 }
       : undefined;
   // The confirming action of a dialog looks like the butono it composes (Abnahme Spec 011 ②,
@@ -1859,6 +1937,7 @@ function componentSetOf(
       ? { texts: toggleTexts }
       : {}),
     ...(structure === "dialog" ? { texts: dialogTexts } : {}),
+    ...(structure === "tabs" ? { texts: { ...TABS_TEXTS } } : {}),
     ...(sign === undefined ? {} : { sign }),
     ...(options === undefined ? {} : { entry: options }),
     ...(example === undefined ? {} : { example }),

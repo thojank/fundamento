@@ -29,7 +29,9 @@
 // since Figma binds no share; the track fills the column, layoutSizingHorizontal FILL),
 // clipsContent on the region and the track, textAlignHorizontal RIGHT for a numeric column, and
 // a text that carries two property references (characters and visible: the caption) — beliefs
-// alike until measured.
+// alike until measured. Spec 011 ⑤ adds nothing new to the slice: the underline of a navigation's
+// item, the line of a tab list and the indicator of a tab are bottom weights (strokeBottomWeight)
+// on a frame with the three other sides at 0, as the rows of a table are.
 
 import { type FigmaPlan, TEXT_CASE_VARIES } from "./figma.js";
 
@@ -93,7 +95,19 @@ type PartNode =
   | "list"
   | `entry-${string}`
   | `term-${string}`
-  | `value-${string}`;
+  | `value-${string}`
+  // A navigation (Spec 011 ⑤): the control is the nav (its gap); every item lies in an entry
+  // frame (`entry-1` …) that holds ring → gap → `item-1` … (the link: its fill, its underline as
+  // the bottom stroke) with the text `items-1` …. A tab list (Spec 011 ⑤): the control is the
+  // list (its line as the bottom stroke, its gap); every tab in an entry frame — ring → gap →
+  // `tab-1` … (fill by state, the selected indicator as the bottom stroke) with the text
+  // `tabs-1` …; the panel below with its text.
+  | `item-${string}`
+  | `items-${string}`
+  | `tab-${string}`
+  | `tabs-${string}`
+  | "panel"
+  | "panel-text";
 
 interface Binding {
   node: PartNode;
@@ -376,6 +390,40 @@ const STRUCTURE_BINDINGS: Readonly<Record<string, Readonly<Record<string, readon
   list: {
     "box.inline-padding": [{ node: "entry-row-*", fields: ["itemSpacing"] }],
     "box.gap": [{ node: "entry-column-*", fields: ["itemSpacing"] }],
+  },
+  // A navigation (Spec 011 ⑤): the box is every item — its minimum height, radius and inline
+  // padding (the web's link), the gap stays on the control (the nav, BINDINGS); the item's fill
+  // and the text of the item in its colour and role; the underline as the item's bottom stroke
+  // — its width by current (none where not current: the weight stays 0), its colour the stroke's
+  // paint. No text decoration: the web draws a block-end edge here, not a line under the word.
+  nav: {
+    "box.height": [{ node: "item-*", fields: ["minHeight"] }],
+    "box.radius": [{ node: "item-*", fields: ["cornerRadius"] }],
+    "box.inline-padding": [{ node: "item-*", fields: ["paddingLeft", "paddingRight"] }],
+    "item.fill": [{ node: "item-*", fields: ["fills"], paint: true }],
+    "items.color": [{ node: "items-*", fields: ["fills"], paint: true }],
+    "items.typography": typographyOf("items-*"),
+    "underline.width": [{ node: "item-*", fields: ["strokeBottomWeight"] }],
+    "underline.color": [{ node: "item-*", fields: ["strokes"], paint: true }],
+  },
+  // A tab list (Spec 011 ⑤): the list is the control — its line the bottom stroke (colour and
+  // width), its gap between the tabs; every tab its fill by state, minimum height and inline
+  // padding, the selected indicator its bottom stroke (width by active, none where not active);
+  // the tab's text in its colour by active and its role; the panel its inline padding, its text
+  // in the panel's colour.
+  tabs: {
+    "list.color": [{ node: "control", fields: ["strokes"], paint: true }],
+    "list.width": [{ node: "control", fields: ["strokeBottomWeight"] }],
+    "list.gap": [{ node: "control", fields: ["itemSpacing"] }],
+    "tab.fill": [{ node: "tab-*", fields: ["fills"], paint: true }],
+    "tab.height": [{ node: "tab-*", fields: ["minHeight"] }],
+    "tab.inline-padding": [{ node: "tab-*", fields: ["paddingLeft", "paddingRight"] }],
+    "tabs.color": [{ node: "tabs-*", fields: ["fills"], paint: true }],
+    "tabs.typography": typographyOf("tabs-*"),
+    "selected-indicator.width": [{ node: "tab-*", fields: ["strokeBottomWeight"] }],
+    "selected-indicator.color": [{ node: "tab-*", fields: ["strokes"], paint: true }],
+    "panel.inline-padding": [{ node: "panel", fields: ["paddingLeft", "paddingRight"] }],
+    "panel.color": [{ node: "panel-text", fields: ["fills"], paint: true }],
   },
 };
 
@@ -689,6 +737,62 @@ const ENTRY_ROW_LAYOUT = {
 };
 
 /**
+ * The nav of a navigation (Spec 011 ⑤): a row of its items at the start, centred on one line, the
+ * gap bound to box.gap; the example „vertikal" turns it into a column (layoutMode VERTICAL, the
+ * items at the start). The web wraps the row when the container is narrow; a set has no container.
+ */
+const NAV_LAYOUT = {
+  layoutMode: "HORIZONTAL",
+  primaryAxisAlignItems: "MIN",
+  counterAxisAlignItems: "CENTER",
+  layoutSizingHorizontal: "HUG",
+  layoutSizingVertical: "HUG",
+  strokesIncludedInLayout: false,
+  itemSpacing: 0,
+  paddingLeft: 0,
+  paddingRight: 0,
+  paddingTop: 0,
+  paddingBottom: 0,
+};
+
+/**
+ * The list of a tab list (Spec 011 ⑤): a row of its tabs that never wraps, the tabs at its end
+ * across (their indicators on the line), its line the bottom stroke and in the size (border-box),
+ * the gap bound to list.gap.
+ */
+const TABLIST_LAYOUT = {
+  layoutMode: "HORIZONTAL",
+  primaryAxisAlignItems: "MIN",
+  counterAxisAlignItems: "MAX",
+  layoutSizingHorizontal: "HUG",
+  layoutSizingVertical: "HUG",
+  strokesIncludedInLayout: true,
+  itemSpacing: 0,
+  paddingLeft: 0,
+  paddingRight: 0,
+  paddingTop: 0,
+  paddingBottom: 0,
+};
+
+/**
+ * The panel of a tab list (Spec 011 ⑤): a row holding its word, the inline padding bound
+ * (panel.inline-padding), hugging what an instance puts into it.
+ */
+const PANEL_LAYOUT = {
+  layoutMode: "HORIZONTAL",
+  primaryAxisAlignItems: "MIN",
+  counterAxisAlignItems: "MIN",
+  layoutSizingHorizontal: "HUG",
+  layoutSizingVertical: "HUG",
+  strokesIncludedInLayout: false,
+  itemSpacing: 0,
+  paddingLeft: 0,
+  paddingRight: 0,
+  paddingTop: 0,
+  paddingBottom: 0,
+};
+
+/**
  * The vector of a check mark (Spec 010 ②, D-09): no line, no effect, its fill bound to the
  * indicator's colour; it scales with its frame, whose size is bound — the frame is the sign's box
  * of 16 the SVG was drawn in.
@@ -808,6 +912,14 @@ export const drawnPartPropertiesOf = (structure: string): readonly string[] => [
 ];
 
 /**
+ * The part properties a structure binds on nodes of its own (Spec 011 ⑤): what it draws whatever
+ * release the part's name has in FIGMA_NOT_DRAWN — the underline of a navigation's item is its
+ * block-end stroke, not the text decoration the ligilo's Jugxo releases.
+ */
+export const structureBoundPartPropertiesOf = (structure: string): readonly string[] =>
+  Object.keys(STRUCTURE_BINDINGS[structure] ?? {});
+
+/**
  * The menu command that lifts the abort of F10c: a run that would create a variant in a set it
  * found goes on. Its own entry, so the default command can never do it by accident.
  */
@@ -848,6 +960,9 @@ const FILL_LAYOUT = ${JSON.stringify(FILL_LAYOUT)};
 const ROW_LAYOUT = ${JSON.stringify(ROW_LAYOUT)};
 const CELL_LAYOUT = ${JSON.stringify(CELL_LAYOUT)};
 const ENTRY_ROW_LAYOUT = ${JSON.stringify(ENTRY_ROW_LAYOUT)};
+const NAV_LAYOUT = ${JSON.stringify(NAV_LAYOUT)};
+const TABLIST_LAYOUT = ${JSON.stringify(TABLIST_LAYOUT)};
+const PANEL_LAYOUT = ${JSON.stringify(PANEL_LAYOUT)};
 const MARK_NEUTRAL = ${JSON.stringify(MARK_NEUTRAL)};
 const INDICATOR_LAYOUT = ${JSON.stringify(INDICATOR_LAYOUT)};
 const STRUCTURE_BINDINGS = ${JSON.stringify(STRUCTURE_BINDINGS)};
@@ -2584,11 +2699,173 @@ async function applyComponents(variables, warnings) {
     bindMeasures(measures, report, component, variant);
   }
   /**
+   * The entries of a navigation or a tab list (Spec 011 ⑤), one per word of the plan's entry:
+   * an entry frame holding ring → gap → the keyed frame (\`item-N\` or \`tab-N\`) with its text
+   * (\`items-N\` or \`tabs-N\`), found by their marks or created, in the order of the words. The
+   * texts are written in the variant's font, the case of the role, the word of the entry.
+   */
+  async function drawEntries(control, component, variant, keyed, textOf) {
+    const words = component.entry !== undefined ? component.entry.texts : [];
+    const rows = words.map((word, index) => {
+      const n = index + 1;
+      const entry = part(control, "entry-" + n, () => figma.createFrame());
+      const ring = part(entry, "focus-ring", () => figma.createFrame());
+      const gap = part(ring, "focus-gap", () => figma.createFrame());
+      const frame = part(gap, keyed + "-" + n, () => figma.createFrame());
+      const text = part(frame, textOf + "-" + n, () => figma.createText());
+      return { word, entry, ring, gap, frame, text, n };
+    });
+    rows.forEach((row, index) => {
+      if (control.children.indexOf(row.entry) !== index) control.insertChild(index, row.entry);
+    });
+    for (const row of rows) await loadCurrentFont(row.text);
+    for (const row of rows) {
+      writeCase(component, variant, row.text);
+      if (variant.font !== undefined) {
+        write(row.text, "fontName", fonts.get(variant.font.family + " " + variant.font.style));
+      }
+      write(row.text, "characters", row.word);
+    }
+    return rows;
+  }
+  /**
+   * Binds the entries of a navigation or a tab list (Spec 011 ⑤), each in a pass of its own (as
+   * the options of a choice, Spec 010 ③): the variant's bindings and paints merged with the entry
+   * of its value of the key — the first word is the current or active one — the ring shown on
+   * the first entry in the focus variant only, the radii of ring and gap bound where the plan has
+   * them (F32).
+   */
+  function bindEntries(rows, component, variant, variables, keyed, textOf, measures) {
+    const chosen = component.entry !== undefined ? component.entry.selected : 0;
+    rows.forEach((row, index) => {
+      const values = (variant.entries || {})[index === chosen ? "true" : "false"] || { bindings: {} };
+      const merged = {
+        bindings: Object.assign({}, variant.bindings, values.bindings),
+        paints: Object.assign({}, variant.paints, values.paints),
+        focusVisible: variant.focusVisible === true && index === 0,
+      };
+      const nodes = { "focus-ring": row.ring, "focus-gap": row.gap };
+      nodes[keyed + "-" + row.n] = row.frame;
+      nodes[textOf + "-" + row.n] = row.text;
+      for (const measure of bind(nodes, merged, variables, component.structure)) measures.push(measure);
+      for (const name of ["focus-ring", "focus-gap"]) {
+        const variable = variables.get((variant.radii || {})[name]);
+        const target = name === "focus-ring" ? row.ring : row.gap;
+        if (variable !== undefined) measures.push({ node: target, field: "cornerRadius", variable: variable });
+      }
+    });
+  }
+  /**
+   * A navigation (Spec 011 ⑤): the variant holds the control — the nav, a row of its items, the
+   * gap bound to box.gap — with one entry per word of the plan (the Vitrino's: Eins, Zwei, Drei),
+   * each ring → gap → item (fill by current and state, the box's height, radius and inline
+   * padding, the underline as its bottom stroke: strong where current, none elsewhere) with the
+   * item's text (colour by current, the label role). The first item is the current one (E7). The
+   * label prop is the name of the landmark, heard, never seen: no text carries the label
+   * property. The same drawing on the example frame „vertikal" (\`example\` with props): then the
+   * nav is a column. A count beside an item (the Uzo composes an insigno) is not drawn: it would
+   * be an instance of another set, which the plugin does not compose yet (candidate B-6).
+   */
+  async function drawNav(node, component, variant, report, labels, example) {
+    const vertical = example !== undefined && (example.props || {}).orientation === "vertical";
+    const control = part(node, "control", () => figma.createFrame());
+    const rows = await drawEntries(control, component, variant, "item", "items");
+    const texts = rows.map((row) => row.text);
+    const frames = [node, control].concat(...rows.map((row) => [row.entry, row.ring, row.gap, row.frame]));
+    for (const frame of frames) own(frame, NEUTRAL);
+    for (const each of texts) own(each, NEUTRAL_TEXT);
+    own(node, HUG_LAYOUT);
+    if (example !== undefined) {
+      own(node, {
+        paddingLeft: example.padding,
+        paddingRight: example.padding,
+        paddingTop: example.padding,
+        paddingBottom: example.padding,
+      });
+    }
+    own(control, NAV_LAYOUT);
+    if (vertical) own(control, { layoutMode: "VERTICAL", counterAxisAlignItems: "MIN" });
+    for (const row of rows) {
+      for (const frame of [row.entry, row.ring, row.gap]) own(frame, HUG_LAYOUT);
+      own(row.frame, CONTROL_LAYOUT);
+      // The underline lies in the item's size, as on the web (border-box); only the bottom
+      // carries it — the other sides stay 0, the bottom is bound (underline.width) where current.
+      own(row.frame, {
+        strokesIncludedInLayout: true,
+        strokeTopWeight: 0,
+        strokeLeftWeight: 0,
+        strokeRightWeight: 0,
+        strokeBottomWeight: 0,
+      });
+    }
+    for (const child of frames.concat(texts)) own(child, IN_FLOW);
+    for (const each of texts) own(each, TEXT_SIZING);
+    const measures = bind({ control }, variant, variables, component.structure);
+    bindEntries(rows, component, variant, variables, "item", "items", measures);
+    for (const each of frames.concat(texts)) flush(each);
+    bindMeasures(measures, report, component, variant);
+  }
+  /**
+   * A tab list (Spec 011 ⑤): the variant is a column — the control (the list: a row of its tabs,
+   * its line the bottom stroke in list.color and list.width, the gap bound to list.gap) above the
+   * panel (its inline padding bound, the Vitrino's word of the first tab in panel.color). Every
+   * tab is ring → gap → tab (fill by state — every tab shows the variant's state, as the web's
+   * stylesheet keys it —, minimum height and inline padding, the selected indicator as its bottom
+   * stroke: strong where active, none elsewhere) with the tab's text (colour by active, the label
+   * role); the first tab is the active one (E7). The label prop is the name of the group, never
+   * shown: no text carries the label property. The panel's text has no role in the Skemo (its
+   * content is the application's): it is written in the tabs' font, bound to nothing.
+   */
+  async function drawTabs(node, component, variant, report) {
+    const texts = component.texts || {};
+    const control = part(node, "control", () => figma.createFrame());
+    const panel = part(node, "panel", () => figma.createFrame());
+    [control, panel].forEach((child, index) => {
+      if (node.children.indexOf(child) !== index) node.insertChild(index, child);
+    });
+    const panelText = part(panel, "panel-text", () => figma.createText());
+    const rows = await drawEntries(control, component, variant, "tab", "tabs");
+    await loadCurrentFont(panelText);
+    if (variant.font !== undefined) {
+      write(panelText, "fontName", fonts.get(variant.font.family + " " + variant.font.style));
+    }
+    if (typeof texts.panel === "string") write(panelText, "characters", texts.panel);
+    const all = rows.map((row) => row.text).concat([panelText]);
+    const frames = [node, control, panel].concat(...rows.map((row) => [row.entry, row.ring, row.gap, row.frame]));
+    for (const frame of frames) own(frame, NEUTRAL);
+    for (const each of all) own(each, NEUTRAL_TEXT);
+    own(node, FIELD_LAYOUT);
+    own(control, TABLIST_LAYOUT);
+    // Only the bottom of the list carries its line; the other sides stay 0.
+    own(control, { strokeTopWeight: 0, strokeLeftWeight: 0, strokeRightWeight: 0, strokeBottomWeight: 0 });
+    own(panel, PANEL_LAYOUT);
+    for (const row of rows) {
+      for (const frame of [row.entry, row.ring, row.gap]) own(frame, HUG_LAYOUT);
+      own(row.frame, CONTROL_LAYOUT);
+      // The indicator lies in the tab's size, as on the web (border-box); the bottom alone
+      // carries it, bound (selected-indicator.width) where active.
+      own(row.frame, {
+        strokesIncludedInLayout: true,
+        strokeTopWeight: 0,
+        strokeLeftWeight: 0,
+        strokeRightWeight: 0,
+        strokeBottomWeight: 0,
+      });
+    }
+    for (const child of frames.concat(all)) own(child, IN_FLOW);
+    for (const each of all) own(each, TEXT_SIZING);
+    const measures = bind({ control, panel, "panel-text": panelText }, variant, variables, component.structure);
+    bindEntries(rows, component, variant, variables, "tab", "tabs", measures);
+    for (const each of frames.concat(all)) flush(each);
+    bindMeasures(measures, report, component, variant);
+  }
+  /**
    * The example frame beside a set (Spec 011 ②, spec „dialogo – Figma": „mit Hintergrund", the
    * default variant drawn once more on a frame whose fill is bound to the backdrop; Spec 011 ④,
-   * spec „mezurilo – Figma": „unbekannt", the default variant with the unknown value), found by
-   * its mark \`example\` or created, placed in the frame „Eroj" right after the set (F-8) — Figma
-   * lays it out like a set. It is no set: no variants, no grid, no label property.
+   * spec „mezurilo – Figma": „unbekannt", the default variant with the unknown value; Spec 011 ⑤:
+   * „vertikal", the default variant of a navigation as a column), found by its mark \`example\`
+   * or created, placed in the frame „Eroj" right after the set (F-8) — Figma lays it out like a
+   * set. It is no set: no variants, no grid, no label property.
    */
   async function placeExample(frame, set, component, report) {
     const spec = component.example;
@@ -2604,6 +2881,7 @@ async function applyComponents(variables, warnings) {
     }
     write(example, "name", spec.name);
     if (component.structure === "meter") await drawMeter(example, component, variant, report, [], spec);
+    else if (component.structure === "nav") await drawNav(example, component, variant, report, [], spec);
     else await drawDialog(example, component, variant, report, [], spec);
     if (example.parent !== frame) frame.appendChild(example);
     const at = frame.children.indexOf(set) + 1;
@@ -2775,6 +3053,18 @@ async function applyComponents(variables, warnings) {
       }
       if (component.structure === "list") {
         await drawList(node, component, variant, report);
+        if (existing === undefined) made.push(node);
+        continue;
+      }
+      // A navigation and a tab list (Spec 011 ⑤) are drawn in functions of their own: every
+      // entry keeps its focus ring, the control lies directly under the variant.
+      if (component.structure === "nav") {
+        await drawNav(node, component, variant, report, labels, undefined);
+        if (existing === undefined) made.push(node);
+        continue;
+      }
+      if (component.structure === "tabs") {
+        await drawTabs(node, component, variant, report);
         if (existing === undefined) made.push(node);
         continue;
       }
@@ -3390,6 +3680,27 @@ function measureLayout(set, component) {
       }
       const fill = found.track === undefined ? undefined : ours(found.track, "part", "fill");
       if (fill !== undefined) found.fill = fill;
+      // Spec 011 ⑤: the first entry of a navigation or a tab list with its ring, its keyed
+      // frame (item-1, tab-1) and its text; the panel of a tab list beside the control.
+      const entry = ours(direct, "part", "entry-1");
+      if (entry !== undefined) {
+        found.entry = entry;
+        const entryRing = ours(entry, "part", "focus-ring");
+        if (entryRing !== undefined) found["focus-ring"] = entryRing;
+        const entryGap = entryRing === undefined ? undefined : ours(entryRing, "part", "focus-gap");
+        if (entryGap !== undefined) {
+          found["focus-gap"] = entryGap;
+          for (const name of ["item-1", "tab-1"]) {
+            const keyed = ours(entryGap, "part", name);
+            if (keyed === undefined) continue;
+            found[name] = keyed;
+            const word = ours(keyed, "part", name === "item-1" ? "items-1" : "tabs-1");
+            if (word !== undefined) found[name === "item-1" ? "items-1" : "tabs-1"] = word;
+          }
+        }
+      }
+      const panel = ours(node, "part", "panel");
+      if (panel !== undefined) found.panel = panel;
     }
     // A table (Spec 011 ④): the caption and the region with its head; the sort button with its
     // ring in the head cell that holds one.
@@ -3734,7 +4045,6 @@ function reportParts(result) {
         extra: report.extra.length,
         duplicates: report.duplicates.length,
         lost: report.lost.length,
-        diagnosis: report.diagnosis,
         placement: report.placement,
       })),
     }),
@@ -3745,7 +4055,9 @@ function reportParts(result) {
     // (plan ④ D-07, ③ B-5): with seven sets the headline grew to 4 094 characters; the modes each
     // set was found and left in moved to its part state, under the same name. Spec 011 ④ (plan
     // ④ D-14): with fifteen sets the headline grew to 4 398 characters; the Mankoj are a part of
-    // their own right after it, under the same name.
+    // their own right after it, under the same name. Spec 011 ⑤: with seventeen sets it grew to
+    // 4 080 characters; the diagnosis of each set moved to its part state, under the same name
+    // (the returned report keeps it where it was).
     JSON.stringify({
       part: "mankoj",
       value: {
@@ -3766,6 +4078,7 @@ function reportParts(result) {
           before: report.before,
           after: report.after,
           left: report.left,
+          diagnosis: report.diagnosis,
           modes: report.modes,
           fonts: report.fonts,
           uzo: report.uzo,
