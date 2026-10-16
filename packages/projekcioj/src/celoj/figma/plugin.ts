@@ -23,8 +23,10 @@
 // (componentPropertyReferences.visible: dismissible), a dash pattern and an invisible paint (the
 // stroke of a state) — each a belief about the API until the maintainer has measured it in
 // f10b-5. Spec 011 ④ adds the bottom weight (strokeBottomWeight: the border under a table's
-// rows), a minimum width written from the measured width (minWidth: the columns of a table, the
-// track and the fill of a meter — Figma binds no share and a set has no container to fill),
+// rows), a minimum width written from the measured width (minWidth: the columns of a table),
+// a width written from the measured width (resize: the column of a meter takes the wider of its
+// texts — a set has no container to fill — and the fill frame the plan's share of the track,
+// since Figma binds no share; the track fills the column, layoutSizingHorizontal FILL),
 // clipsContent on the region and the track, textAlignHorizontal RIGHT for a numeric column, and
 // a text that carries two property references (characters and visible: the caption) — beliefs
 // alike until measured.
@@ -238,7 +240,8 @@ const BINDINGS: Readonly<Record<string, readonly Binding[]>> = {
   "details.typography": typographyOf("details"),
   "dismiss.size": [{ node: "dismiss", fields: ["width", "height"] }],
   // A meter (Spec 011 ④, plan ④ D-14): the track's fill and radius; its height is a minimum, as
-  // on the web (min-block-size), and the fill is as high as the track (align-self: stretch); the
+  // on the web (min-block-size), and the fill is as high as the track (align-self: stretch) — the
+  // same minimum on the fill, which is resized to it (F-3: an empty frame keeps its size); the
   // fill's colour and radius; the unknown stroke on the track of the example frame only (the
   // node `unknown` is registered there alone, like the backdrop of a dialog); the value text.
   "track.fill": [{ node: "track", fields: ["fills"], paint: true }],
@@ -564,16 +567,40 @@ const PLACEHOLDER_LAYOUT = {
 };
 
 /**
+ * The column of a meter (Spec 011 ④, plan ④ D-14; acceptance F-3): label, track, value text.
+ * The meter takes the width of its container (Uzo size container), so the track fills the
+ * column's inline axis — and a set has no container to fill: the column is fixed in that axis
+ * and takes the width of the wider of its texts, measured and written (resize), the one number
+ * the track can fill. Figma gives a FILL child nothing in a parent that hugs the same axis (the
+ * editor turns such a parent fixed) — a belief until measured in f10b-5. It hugs its height.
+ */
+const METER_LAYOUT = {
+  layoutMode: "VERTICAL",
+  primaryAxisAlignItems: "MIN",
+  counterAxisAlignItems: "MIN",
+  layoutSizingHorizontal: "FIXED",
+  layoutSizingVertical: "HUG",
+  strokesIncludedInLayout: false,
+  itemSpacing: 0,
+  paddingLeft: 0,
+  paddingRight: 0,
+  paddingTop: 0,
+  paddingBottom: 0,
+};
+
+/**
  * The track of a meter (Spec 011 ④, plan ④ D-14): a row that clips its fill to its radius, as on
  * the web (overflow hidden, border-box: the unknown stroke of the example lies in the size); it
- * hugs the fill and is at least as high as track.height (bound) and as wide as the wider of the
- * two texts (written from the measurement — a set has no container to fill).
+ * fills the column's width (F-3: FILL along the inline axis, as the web's track is as wide as
+ * the meter) and hugs its height, at least track.height (bound) — the fill frame in it is as
+ * high as that, and the empty track of the example is brought to it (an empty auto-layout frame
+ * keeps its size, ③ F-4).
  */
 const TRACK_LAYOUT = {
   layoutMode: "HORIZONTAL",
   primaryAxisAlignItems: "MIN",
   counterAxisAlignItems: "MIN",
-  layoutSizingHorizontal: "HUG",
+  layoutSizingHorizontal: "FILL",
   layoutSizingVertical: "HUG",
   strokesIncludedInLayout: true,
   clipsContent: true,
@@ -585,15 +612,18 @@ const TRACK_LAYOUT = {
 };
 
 /**
- * The fill of a meter (Spec 011 ④): an empty frame whose size is its minimums — the height bound
- * to track.height like the track's, the width the plan's share of the track, written.
+ * The fill of a meter (Spec 011 ④; acceptance F-3): an empty frame, fixed in both axes and
+ * resized by the plugin — the width the plan's share of the track's measured width, the height
+ * the track's height (track.height, bound to it as a minimum too, so a mode with a higher track
+ * lifts it). Hugging, an empty auto-layout frame keeps the 100 × 100 of createFrame (③ F-4): the
+ * fill stood as a circle and the track hugged it.
  */
 const FILL_LAYOUT = {
   layoutMode: "HORIZONTAL",
   primaryAxisAlignItems: "MIN",
   counterAxisAlignItems: "MIN",
-  layoutSizingHorizontal: "HUG",
-  layoutSizingVertical: "HUG",
+  layoutSizingHorizontal: "FIXED",
+  layoutSizingVertical: "FIXED",
   strokesIncludedInLayout: false,
   itemSpacing: 0,
   paddingLeft: 0,
@@ -812,6 +842,7 @@ const ACTIONS_LAYOUT = ${JSON.stringify(ACTIONS_LAYOUT)};
 const NOTICE_LAYOUT = ${JSON.stringify(NOTICE_LAYOUT)};
 const STATE_LAYOUT = ${JSON.stringify(STATE_LAYOUT)};
 const PLACEHOLDER_LAYOUT = ${JSON.stringify(PLACEHOLDER_LAYOUT)};
+const METER_LAYOUT = ${JSON.stringify(METER_LAYOUT)};
 const TRACK_LAYOUT = ${JSON.stringify(TRACK_LAYOUT)};
 const FILL_LAYOUT = ${JSON.stringify(FILL_LAYOUT)};
 const ROW_LAYOUT = ${JSON.stringify(ROW_LAYOUT)};
@@ -1448,6 +1479,38 @@ function shrinkEmpty(frame) {
   if (frame.children.length > 0) return;
   if (frame.width <= SMALLEST_SIZE && frame.height <= SMALLEST_SIZE) return;
   frame.resize(SMALLEST_SIZE, SMALLEST_SIZE);
+}
+
+/**
+ * A frame brought to a measured size (Spec 011 ④ acceptance, F-3): resized only where it does
+ * not hold the size yet (F21: a second run writes nothing), never below the tool's smallest.
+ * resize fixes an axis that hugged (③ F-4), so the sizing the frame owns is written again after
+ * it — hug stays hug, fill stays fill, only the fixed axis keeps the number.
+ */
+function fit(frame, width, height, layout) {
+  const w = Math.max(width, SMALLEST_SIZE);
+  const h = Math.max(height, SMALLEST_SIZE);
+  if (frame.width === w && frame.height === h) return false;
+  frame.resize(w, h);
+  write(frame, "layoutSizingHorizontal", layout.layoutSizingHorizontal);
+  write(frame, "layoutSizingVertical", layout.layoutSizingVertical);
+  return true;
+}
+
+/**
+ * The number a variable shows for a node — the mode the node stands in decides, aliases followed
+ * (resolveForConsumer, as the report reads a paint's colour) — or undefined where the tool has no
+ * such method or the value is no number.
+ */
+function resolvedNumber(variable, node) {
+  if (variable === undefined || typeof variable.resolveForConsumer !== "function") return undefined;
+  let resolved;
+  try {
+    resolved = variable.resolveForConsumer(node);
+  } catch (error) {
+    return undefined;
+  }
+  return resolved !== undefined && typeof resolved.value === "number" ? resolved.value : undefined;
 }
 
 function variantName(props) {
@@ -2233,13 +2296,18 @@ async function applyComponents(variables, warnings) {
    * A meter (Spec 011 ④, plan ④ D-14): the variant holds the control — a column, the gap bound to
    * box.gap — with the label (the label property), the track (its fill, radius and height as a
    * minimum, clipping) holding the fill frame (its colour by intent, its radius, as high as the
-   * track) and the value text (the Vitrino's word). The track is at least as wide as the wider of
-   * the two texts and the fill the plan's share of the track — both written from what the tool
-   * measured (Regel 0: Figma binds no share, and a set has no container to fill). The same
-   * drawing on the example frame „unbekannt" (\`example\` with texts): then the track is the node
-   * \`unknown\` — its stroke bound to unknown.color and unknown.width with the plan's dash pattern —
-   * no fill frame is made, the value text says „nicht geprüft", and the label carries the word
-   * itself (a text outside a component has no property).
+   * track) and the value text (the Vitrino's word). The column is as wide as the wider of the
+   * two texts, written from what the tool measured (Regel 0: a set has no container to fill —
+   * the meter takes its container's width), the track fills it, and the fill frame is resized
+   * to the plan's share of the track's width and the track's height (Figma binds no share; an
+   * empty auto-layout frame keeps its size, so it is fixed, not hugging — acceptance F-3). The
+   * same drawing on the example frame „unbekannt" (\`example\` with texts): then the track is the
+   * node \`unknown\` — its stroke bound to unknown.color and unknown.width with the plan's dash
+   * pattern — no fill frame is made and the empty track is brought to its minimum height, the
+   * value text says „nicht geprüft" in the role of the set's value text (F-6), the label carries
+   * the word itself (a text outside a component has no property), and the frame stands on the
+   * Vitrino's ground like the set (component.surface), so its texts lie on the canvas their roles
+   * are paired with in every mode — not on whatever the section shows.
    */
   async function drawMeter(node, component, variant, report, labels, example) {
     const texts = Object.assign({}, component.texts || {}, example === undefined ? {} : example.texts || {});
@@ -2273,7 +2341,20 @@ async function applyComponents(variables, warnings) {
         paddingBottom: example.padding,
       });
     }
-    own(control, FIELD_LAYOUT);
+    // The ground of the example (F-6): the set's surface, bound like the set's (F16).
+    if (example !== undefined && component.surface !== undefined) {
+      const ground = variables.get(component.surface.variable);
+      if (ground !== undefined) {
+        const bound = figma.variables.setBoundVariableForPaint(
+          { type: "SOLID", color: { r: 0, g: 0, b: 0 } },
+          "color",
+          ground,
+        );
+        bound.opacity = component.surface.opacity;
+        gather(node).fills = [bound];
+      }
+    }
+    own(control, METER_LAYOUT);
     own(track, TRACK_LAYOUT);
     if (fill) own(fill, FILL_LAYOUT);
     // The dash pattern of the unknown stroke (own() would empty a list): the plan's numbers, on
@@ -2289,9 +2370,20 @@ async function applyComponents(variables, warnings) {
     const measures = bind(nodes, variant, variables, component.structure);
     for (const each of frames.concat(all)) flush(each);
     bindMeasures(measures, report, component, variant);
-    // Measured, then written (F14): the track as wide as the wider text, the fill its share.
-    write(track, "minWidth", Math.max(label.width, valueText.width));
-    if (fill && component.meter !== undefined) write(fill, "minWidth", component.meter.share * track.width);
+    // Measured, then written (F14, F-3): the column as wide as the wider text — the track fills
+    // it — and the fill frame the plan's share of the track, as high as the track: track.height
+    // as the mode resolves it (the track's minimum; where the tool cannot say, the smallest size,
+    // and the fill's bound minimum lifts it). The empty track of the example is brought to that
+    // height the same way (an empty auto-layout frame keeps its size, ③ F-4).
+    const trackHeight = resolvedNumber(variables.get(variant.bindings["track.height"]), track);
+    fit(control, Math.max(label.width, valueText.width), control.height, METER_LAYOUT);
+    if (unknown) {
+      fit(track, track.width, trackHeight === undefined ? SMALLEST_SIZE : trackHeight, TRACK_LAYOUT);
+    }
+    if (fill && component.meter !== undefined) {
+      const height = trackHeight === undefined ? SMALLEST_SIZE : trackHeight;
+      fit(fill, component.meter.share * track.width, height, FILL_LAYOUT);
+    }
   }
   /**
    * A table (Spec 011 ④, plan ④ D-14): the variant is a column — the caption (the label

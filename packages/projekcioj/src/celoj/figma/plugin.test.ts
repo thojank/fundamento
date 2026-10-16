@@ -4940,13 +4940,19 @@ describe("the plenstato is drawn as a state: the column with the arc, the text a
 });
 
 // Spec 011 ④ (spec „mezurilo", G2, G4; plan ④ D-14): the meter is a structure of its own —
-// variant → control (a column, the gap bound to box.gap) → label (the label property), track (its
-// fill, radius and height as a minimum; its width at least the wider of the two texts, written —
-// a set has no container to fill) holding the fill frame (its colour by intent, its radius, as
-// high as the track, its width the share of the track: 66 of 0 … 100, the Vitrino's value
-// example, written as a number since Figma binds no share), and the value text. The unknown value
-// is the example frame beside the set: the track's stroke bound to unknown.color and
-// unknown.width with the dash pattern of the plan, no fill frame, the text „nicht geprüft".
+// variant → control (a column, the gap bound to box.gap; its width written from the wider of the
+// two texts, measured — a set has no container to fill, and the meter takes the width of its
+// container, Uzo size container) → label (the label property), track (its fill, radius and height
+// as a minimum; it fills the column's width: FILL along the inline axis) holding the fill frame
+// (its colour by intent, its radius, as high as the track, its width the share of the track: 66
+// of 0 … 100, the Vitrino's value example, resized to the number since Figma binds no share), and
+// the value text. The unknown value is the example frame beside the set, on the Vitrino's ground
+// like the set: the track's stroke bound to unknown.color and unknown.width with the dash pattern
+// of the plan, no fill frame, the text „nicht geprüft" in the value text's role (F-6).
+// Acceptance of Spec 011 ④ (F-3): an empty auto-layout frame keeps its size, hug or not (③ F-4) —
+// the fill frame stood at the 100 × 100 of createFrame and the track hugged it, a circle; the
+// example's empty track stood at 100 × 100 too, a square. Measured against the double, which
+// models that size, FILL, and resize.
 describe("the mezurilo is drawn as a meter: label, track with the fill at 66 %, value text; the unknown example dashed (Spec 011 ④)", () => {
   const source = repoFiles["figma/plugin/code.js"] ?? "";
   const bound = (node: DoubleNode | undefined, field: string) => node?.boundVariables[field]?.name;
@@ -5037,22 +5043,41 @@ describe("the mezurilo is drawn as a meter: label, track with the fill at 66 %, 
     }
   });
 
-  it("gives the track the width of its wider text and the fill 66 % of the track, as high as the track", async () => {
+  it("gives the column the width of its wider text, the track fills it, and the fill is 66 % of the track, as high as the track (F-3)", async () => {
     const { variant } = await drawn();
-    for (const intent of ["neutral", "danger"]) {
+    const trackHeight = Number.parseFloat(planned?.variants[0]?.geometry?.["track.height"] ?? "");
+    expect(trackHeight).toBeGreaterThan(0);
+    for (const intent of ["neutral", "success", "warning", "danger"]) {
       const node = variant(`intent=${intent}, state=rest`);
+      const control = descendant(node, "control");
       const label = descendant(node, "label");
       const valueText = descendant(node, "value-text");
       const track = descendant(node, "track");
       const fill = descendant(node, "fill");
       const widest = Math.max(box(label).width, box(valueText).width);
       expect(widest, intent).toBeGreaterThan(0);
-      expect(track?.properties.minWidth, intent).toBe(widest);
+      // The column carries the written width (a set has no container to fill); the variant hugs.
+      expect(control?.properties.layoutSizingHorizontal, intent).toBe("FIXED");
+      expect(control?.properties.layoutSizingVertical, intent).toBe("HUG");
+      expect(box(control).width, intent).toBe(widest);
+      expect(node?.properties.layoutSizingHorizontal, intent).toBe("HUG");
+      expect(box(node).width, intent).toBe(widest);
+      // The track fills the column's inline axis and is as high as track.height, no 100 × 100.
+      expect(track?.properties.layoutSizingHorizontal, intent).toBe("FILL");
+      expect(track?.properties.layoutSizingVertical, intent).toBe("HUG");
+      expect(track?.properties.minWidth, intent).toBeUndefined();
       expect(box(track).width, intent).toBe(widest);
+      expect(box(track).height, intent).toBe(trackHeight);
+      // The fill is the share of the track, measured from the track, and as high as the track:
+      // an empty auto-layout frame keeps its size, so it is fixed and resized, not hugging.
       expect(planned?.meter?.share).toBe(0.66);
-      expect(fill?.properties.minWidth, intent).toBe(0.66 * widest);
+      expect(fill?.properties.layoutSizingHorizontal, intent).toBe("FIXED");
+      expect(fill?.properties.layoutSizingVertical, intent).toBe("FIXED");
+      expect(fill?.properties.minWidth, intent).toBeUndefined();
       expect(box(fill).width, intent).toBe(0.66 * widest);
+      expect(box(fill).height, intent).toBe(trackHeight);
       expect(box(fill).height, intent).toBe(box(track).height);
+      expect(bound(fill, "minHeight"), intent).toBe("spacing/medium");
     }
   });
 
@@ -5074,8 +5099,15 @@ describe("the mezurilo is drawn as a meter: label, track with the fill at 66 %, 
     );
     expect(example?.properties.layoutPositioning).toBe("AUTO");
     expect(example?.properties.paddingLeft).toBe(repoPlan.section?.gap);
-    // No backdrop: the example of a meter stands on the page.
-    expect(example?.properties.fills).toEqual([]);
+    // No backdrop, but the ground of the set (F-6): the example is a picture of the Ero like a
+    // variant, so its texts stand on the Vitrino's canvas they are paired with — not on whatever
+    // the section shows in the mode it is in (in a dark scheme: light text on a white section).
+    expect(mezurilo).toBeDefined();
+    const ground = paints(example, "fills");
+    expect(ground).toHaveLength(1);
+    expect(ground[0]?.boundVariables?.color?.name).toBe("color/background/canvas");
+    expect((ground[0] as { opacity?: number }).opacity).toBe(1);
+    expect(ground[0]?.visible).toBe(true);
     const track = descendant(example, "track");
     expect(paints(track, "strokes")[0]?.boundVariables?.color?.name).toBe("color/border/default");
     expect(paints(track, "strokes")[0]?.visible).toBe(true);
@@ -5086,13 +5118,37 @@ describe("the mezurilo is drawn as a meter: label, track with the fill at 66 %, 
     expect(track?.children).toEqual([]);
     expect(descendant(example, "fill")).toBeUndefined();
     expect(descendant(example, "label")?.properties.characters).toBe("Messwert");
-    expect(descendant(example, "value-text")?.properties.characters).toBe("nicht geprüft");
-    // The track is as wide as in the set: the wider text, here the label.
-    const widest = Math.max(
-      box(descendant(example, "label")).width,
-      box(descendant(example, "value-text")).width,
+    const valueText = descendant(example, "value-text");
+    expect(valueText?.properties.characters).toBe("nicht geprüft");
+    // F-6: the value text of the example binds the role of the set's value text, color.text.subtle
+    // from the Skemo's part value-text, with the paint's alpha as the token resolves (1) and no
+    // opacity of its own — no disabled look, not the border colour of the unknown part.
+    const setValueText = descendant(set?.children[0], "value-text");
+    const role = paints(valueText, "fills");
+    expect(role).toHaveLength(1);
+    expect(role[0]?.boundVariables?.color?.name).toBe("color/text/subtle");
+    expect(role[0]?.boundVariables?.color?.name).toBe(
+      paints(setValueText, "fills")[0]?.boundVariables?.color?.name,
     );
-    expect(track?.properties.minWidth).toBe(widest);
+    expect((role[0] as { opacity?: number }).opacity).toBe(1);
+    expect(role[0]?.visible).toBe(true);
+    expect(valueText?.properties.opacity).toBe(1);
+    expect(valueText?.properties.effects).toEqual([]);
+    expect(bound(valueText, "fontSize")).toBe("typography/label/2/font-size");
+    expect(valueText?.properties.fontName).toEqual(setValueText?.properties.fontName);
+    // The column and the track are as wide as in the set: the wider text, here the label; the
+    // empty track keeps the height of track.height, not the 100 × 100 of createFrame (F-3).
+    const widest = Math.max(box(descendant(example, "label")).width, box(valueText).width);
+    const control = descendant(example, "control");
+    expect(control?.properties.layoutSizingHorizontal).toBe("FIXED");
+    expect(box(control).width).toBe(widest);
+    expect(track?.properties.layoutSizingHorizontal).toBe("FILL");
+    expect(track?.properties.layoutSizingVertical).toBe("HUG");
+    expect(track?.properties.minWidth).toBeUndefined();
+    expect(box(track).width).toBe(widest);
+    expect(box(track).height).toBe(
+      Number.parseFloat(planned?.variants[0]?.geometry?.["track.height"] ?? ""),
+    );
   });
 
   it("measures every variant with a size and a cell, warns of nothing, and writes nothing new on a second run", async () => {

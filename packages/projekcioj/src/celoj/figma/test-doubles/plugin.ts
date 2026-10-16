@@ -448,7 +448,8 @@ function node(
     // the maintainer measures it in f10b-5: the node takes the size, never below Figma's smallest
     // size of 0.01 (the tool throws below it, naming the field), and an auto-layout frame that
     // hugged an axis is fixed in it afterwards, as a frame resized by hand is in the editor; a
-    // layout written after the resize lets it hug again.
+    // layout written after the resize lets it hug again. A child that filled an axis is fixed in
+    // it the same way (Spec 011 ④ acceptance, F-3: the track of a meter) — a belief alike.
     resize(width, height) {
       for (const [field, value] of [
         ["width", width],
@@ -458,11 +459,11 @@ function node(
           throw new Error(`in resize: Expected "${field}" to have value >= 0.01, got ${value}`);
         }
       }
-      const mode = self.properties.layoutMode;
-      if (mode === "HORIZONTAL" || mode === "VERTICAL") {
-        for (const field of ["layoutSizingHorizontal", "layoutSizingVertical"]) {
-          if (self.properties[field] === "HUG") self.properties[field] = "FIXED";
-        }
+      for (const field of ["layoutSizingHorizontal", "layoutSizingVertical"]) {
+        const mode = self.properties.layoutMode;
+        const sizing = self.properties[field];
+        const hugging = sizing === "HUG" && (mode === "HORIZONTAL" || mode === "VERTICAL");
+        if (hugging || sizing === "FILL") self.properties[field] = "FIXED";
       }
       self.properties.width = width;
       self.properties.height = height;
@@ -652,6 +653,14 @@ function node(
  *   that hugs its width has no width to wrap at: it lays every child in one row and grows (what
  *   Figma does with HUG and WRAP together is the measurement). Every read lays the children out
  *   anew from their current sizes, so a child that grows pushes its neighbours.
+ * - a child of an auto-layout frame that **fills** an axis (`layoutSizing* FILL`; Spec 011 ④
+ *   acceptance, F-3: the track of a meter) — a **belief** until measured in f10b-5, following the
+ *   documentation: across the parent's flow it is as large as the parent's inner size (the size
+ *   minus paddings and a stroke in the layout); along the flow the filling children share what the
+ *   other children and the spacing leave. A parent that hugs the same axis counts a filling child
+ *   as nothing there (what Figma does with a hugging parent and a filling child is the
+ *   measurement; the editor turns such a parent fixed) — so the plugin writes the parent's width.
+ *   Minimum sizes hold for a filling child like for every other.
  * Numbers bound to a variable take its value in the first mode of its collection.
  */
 function layoutOf(
@@ -676,6 +685,24 @@ function layoutOf(
   };
   const inFlow = (current: DoubleNode) =>
     current.children.filter((child) => prop(child, "layoutPositioning") !== "ABSOLUTE");
+  const isFlow = (current: DoubleNode | undefined): boolean => {
+    const mode = current === undefined ? undefined : prop(current, "layoutMode");
+    return mode === "HORIZONTAL" || mode === "VERTICAL";
+  };
+  /** Whether a child fills an axis of its auto-layout parent (F-3). */
+  const fills = (current: DoubleNode, axis: "H" | "V"): boolean =>
+    prop(current, axis === "H" ? "layoutSizingHorizontal" : "layoutSizingVertical") === "FILL" &&
+    current.parent !== undefined &&
+    isFlow(current.parent) &&
+    prop(current, "layoutPositioning") !== "ABSOLUTE";
+  /** What a child adds to the size of a parent that hugs: nothing along an axis it fills. */
+  const contribution = (child: DoubleNode): { width: number; height: number } => {
+    const own = intrinsic(child);
+    return {
+      width: fills(child, "H") ? 0 : own.width,
+      height: fills(child, "V") ? 0 : own.height,
+    };
+  };
   /** A visible stroke takes space, unless strokesIncludedInLayout says no (run #21). */
   const strokeOf = (current: DoubleNode): number => {
     const strokes = prop(current, "strokes");
@@ -702,7 +729,7 @@ function layoutOf(
     let row: DoubleNode[] = [];
     let used = 0;
     for (const child of children) {
-      const width = measure(child).width;
+      const width = contribution(child).width;
       if (row.length > 0 && used + num(current, "itemSpacing") + width > inner) {
         rows.push(row);
         row = [];
@@ -715,13 +742,18 @@ function layoutOf(
     return rows;
   };
   const rowWidth = (current: DoubleNode, row: DoubleNode[]): number =>
-    row.reduce((sum, child) => sum + measure(child).width, 0) +
+    row.reduce((sum, child) => sum + contribution(child).width, 0) +
     num(current, "itemSpacing") * Math.max(0, row.length - 1);
   const rowHeight = (row: DoubleNode[]): number =>
-    Math.max(0, ...row.map((child) => measure(child).height));
+    Math.max(0, ...row.map((child) => contribution(child).height));
 
-  const measure = (current: DoubleNode): { width: number; height: number } => {
-    const known = sizes.get(current);
+  /**
+   * The size a node has of its own — from its properties, minimums and children; an axis it
+   * fills is settled by `measure`, from the parent.
+   */
+  const intrinsics = new Map<DoubleNode, { width: number; height: number }>();
+  const intrinsic = (current: DoubleNode): { width: number; height: number } => {
+    const known = intrinsics.get(current);
     if (known !== undefined) return known;
     let size: { width: number; height: number };
     const mode = prop(current, "layoutMode");
@@ -755,7 +787,7 @@ function layoutOf(
         ),
       };
     } else if (mode === "HORIZONTAL" || mode === "VERTICAL") {
-      const children = inFlow(current).map(measure);
+      const children = inFlow(current).map(contribution);
       const along = (child: { width: number; height: number }) =>
         mode === "HORIZONTAL" ? child.width : child.height;
       const across = (child: { width: number; height: number }) =>
@@ -801,6 +833,52 @@ function layoutOf(
       };
     } else {
       size = { width: num(current, "width"), height: num(current, "height") };
+    }
+    intrinsics.set(current, size);
+    return size;
+  };
+
+  /** The size a node ends up with: its own, and along an axis it fills the parent's share (F-3). */
+  const measure = (current: DoubleNode): { width: number; height: number } => {
+    const known = sizes.get(current);
+    if (known !== undefined) return known;
+    const own = intrinsic(current);
+    const size = { ...own };
+    const parent = current.parent;
+    if (parent !== undefined && (fills(current, "H") || fills(current, "V"))) {
+      const outer = measure(parent);
+      const mode = prop(parent, "layoutMode");
+      const siblings = inFlow(parent);
+      for (const axis of ["H", "V"] as const) {
+        if (!fills(current, axis)) continue;
+        const inner =
+          axis === "H"
+            ? outer.width -
+              num(parent, "paddingLeft") -
+              num(parent, "paddingRight") -
+              strokeOf(parent)
+            : outer.height -
+              num(parent, "paddingTop") -
+              num(parent, "paddingBottom") -
+              strokeOf(parent);
+        const primary = (axis === "H") === (mode === "HORIZONTAL");
+        let share = inner;
+        if (primary && !wraps(parent)) {
+          const others = siblings
+            .filter((child) => child !== current && !fills(child, axis))
+            .reduce(
+              (sum, child) =>
+                sum + (axis === "H" ? contribution(child).width : contribution(child).height),
+              0,
+            );
+          const spacing = num(parent, "itemSpacing") * Math.max(0, siblings.length - 1);
+          const filling = siblings.filter((child) => fills(child, axis)).length;
+          share = (inner - others - spacing) / Math.max(1, filling);
+        }
+        const minimum = num(current, axis === "H" ? "minWidth" : "minHeight");
+        if (axis === "H") size.width = Math.max(0, share, minimum);
+        else size.height = Math.max(0, share, minimum);
+      }
     }
     sizes.set(current, size);
     return size;
