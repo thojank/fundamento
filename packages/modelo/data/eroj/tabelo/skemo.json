@@ -50,7 +50,8 @@
       {
         "name": "caption",
         "default": true,
-        "text": true
+        "text": true,
+        "beside": true
       },
       {
         "name": "content"
@@ -61,6 +62,14 @@
       }
     ],
     "parts": {
+      "caption": {
+        "color": {
+          "fixed": "color.text.default"
+        },
+        "typography": {
+          "fixed": "typography.label.1"
+        }
+      },
       "head": {
         "fill": {
           "fixed": "color.background.sunken"

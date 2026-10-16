@@ -84,12 +84,16 @@ describe("mezurilo in the repo Modelo (section ④, G1, G2)", () => {
     expect(skemo.parts.track?.radius).toEqual({ fixed: "radius.role.pill" });
     expect(skemo.parts.track?.height).toEqual({ fixed: "spacing.medium" });
     expect(skemo.parts.fill?.color).toEqual({ by: ["intent"] });
+    // Not the brand fill of the spec: on the sunken track it measures 1,3:1 in ekzemplo light
+    // (yellow on grey); the strong border colour is a declared foreground on sunken (≥ 5,58:1).
     expect(boundToken(skemo, "fill", "color", { intent: "neutral" })?.token).toBe(
-      "color.brand.fill",
+      "color.border.strong",
     );
+    // The strong status colour (border), not basic: warning.basic measured 1,23:1 on the sunken
+    // track in ekzemplo light; the border colours are declared on sunken (ui, ≥ 3:1).
     for (const intent of ["success", "warning", "danger"]) {
       expect(boundToken(skemo, "fill", "color", { intent })?.token).toBe(
-        `color.status.${intent}.basic`,
+        `color.status.${intent}.border`,
       );
     }
     expect(skemo.parts.unknown?.stroke).toEqual({ fixed: "stroke.dashed" });
@@ -119,6 +123,21 @@ describe("mezurilo in the repo Modelo (section ④, G1, G2)", () => {
       en: ["meter", "gauge", "percentage", "score", "level"],
       de: ["messbalken", "anteil", "prozent", "quote", "stand"],
     });
+  });
+});
+
+describe("the KontrastParoj of the meter (G3)", () => {
+  it("declares the strong status colours and the strong border on the sunken track as ui pairs", () => {
+    const pairs = modelo.kontrastParoj.filter(
+      (pair) => pair.background === "color.background.sunken",
+    );
+    for (const intent of ["success", "warning", "danger"]) {
+      const pair = pairs.find(
+        (candidate) => candidate.foreground === `color.status.${intent}.border`,
+      );
+      expect(pair?.kategorio, intent).toBe("ui");
+    }
+    expect(pairs.some((pair) => pair.foreground === "color.border.strong")).toBe(true);
   });
 });
 

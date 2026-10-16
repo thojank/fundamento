@@ -549,6 +549,8 @@ export function lightStylesheetOf(skemo: Skemo, tag: string): string {
     if (table) {
       const t = `${tag}${data} > table`;
       switch (part) {
+        case "caption":
+          return `${t} > caption`;
         case "head":
           return `${t} > thead th`;
         case "cell":

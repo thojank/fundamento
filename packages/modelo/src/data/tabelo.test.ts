@@ -49,16 +49,19 @@ describe("tabelo in the repo Modelo (section ④, G1, G2, E10)", () => {
 
   it("has the slots caption (default, required: the table's name), content (the table) and empty (the text of the plenstato)", () => {
     expect(skemo?.slots).toEqual([
-      { name: "caption", default: true, text: true },
+      // The caption stands above the table on the ground of the page (beside): it is never
+      // paired with the head's fill or the sort button's (skemo-kontrastparo-missing).
+      { name: "caption", default: true, text: true, beside: true },
       { name: "content" },
       { name: "empty", text: true },
     ]);
   });
 
-  it("names its parts: head, cell keyed by density, row-header, border, region, sort keyed by state, sort-indicator, focus-ring", () => {
+  it("names its parts: caption, head, cell keyed by density, row-header, border, region, sort keyed by state, sort-indicator, focus-ring", () => {
     if (skemo === undefined) throw new Error("missing");
     expect(Object.keys(skemo.parts).sort()).toEqual([
       "border",
+      "caption",
       "cell",
       "focus-ring",
       "head",
@@ -67,6 +70,8 @@ describe("tabelo in the repo Modelo (section ④, G1, G2, E10)", () => {
       "sort",
       "sort-indicator",
     ]);
+    // The caption is text of the Ero too (axe measured black on the dark page without it).
+    expect(skemo.parts.caption?.color).toEqual({ fixed: "color.text.default" });
     expect(skemo.parts.head?.fill).toEqual({ fixed: "color.background.sunken" });
     expect(skemo.parts.head?.typography).toEqual({ fixed: "typography.label.1" });
     expect(skemo.parts.cell?.["inline-padding"]).toEqual({ by: ["density"] });

@@ -115,7 +115,7 @@
         "when": {
           "intent": "neutral"
         },
-        "token": "color.brand.fill"
+        "token": "color.border.strong"
       },
       {
         "part": "fill",
@@ -123,7 +123,7 @@
         "when": {
           "intent": "success"
         },
-        "token": "color.status.success.basic"
+        "token": "color.status.success.border"
       },
       {
         "part": "fill",
@@ -131,7 +131,7 @@
         "when": {
           "intent": "warning"
         },
-        "token": "color.status.warning.basic"
+        "token": "color.status.warning.border"
       },
       {
         "part": "fill",
@@ -139,7 +139,7 @@
         "when": {
           "intent": "danger"
         },
-        "token": "color.status.danger.basic"
+        "token": "color.status.danger.border"
       }
     ],
     "a11y": {
