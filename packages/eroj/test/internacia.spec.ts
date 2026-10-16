@@ -556,12 +556,21 @@ for (const factor of [1.35, 2]) {
       `<div style="inline-size: 20rem"><fm-tekstareo id="a" invalid>${label}<span slot="help">${help}</span><span slot="error">Gib eine Begründung mit mindestens zehn Zeichen ein</span></fm-tekstareo></div>`,
     );
     const before = await page.locator("#a").boundingBox();
+    // Expanded by words, as the kampo's test does (a translation adds words, not one unbreakable
+    // run of characters): the label is one word and is marked; help grows by words. A run of
+    // tildes as long as the sentence overflowed the container on the Linux runner, whose fallback
+    // font is wider than the macOS one (Spec 011 ② B-8).
+    const sentence = "Die Prüfer lesen die Begründung und schreiben ihre Antwort darunter.";
+    const words = sentence.split(" ");
+    const expanded = [...words, ...words.slice(0, Math.ceil(words.length * (factor - 1)))].join(
+      " ",
+    );
     await page.locator("#a").evaluate(
       (element, [l, h]) => {
         element.childNodes[0].textContent = l ?? "";
         (element.querySelector('[slot="help"]') as HTMLElement).textContent = h ?? "";
       },
-      [pseudo(label, factor), pseudo(help, factor)],
+      [pseudo(label, 1), pseudo(expanded, 1)],
     );
     const after = await page.locator("#a").boundingBox();
     expect(after?.height ?? 0).toBeGreaterThanOrEqual(before?.height ?? 0);
