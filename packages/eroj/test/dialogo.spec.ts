@@ -110,11 +110,10 @@ test.describe("fm-dialogo behaviour", () => {
     await expect(page.locator("#d")).toHaveAttribute("open", "");
     await expect(page.locator("#ok")).toBeVisible();
     expect(
-      await page
-        .locator("#d")
-        .evaluate(
-          (element) => (element.shadowRoot?.querySelector("dialog") as HTMLDialogElement).open,
-        ),
+      await page.locator("#d").evaluate((element) => {
+        const native = element.shadowRoot?.querySelector("dialog");
+        return native instanceof HTMLDialogElement && native.open;
+      }),
     ).toBe(true);
   });
 
