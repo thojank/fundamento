@@ -191,9 +191,10 @@ describe("a flipped prop value in one artefact fails the check (AK-04)", () => {
     const dir = flipped((root) => {
       const file = join(root, "figma/plan.json");
       const plan = JSON.parse(readFileSync(file, "utf8")) as {
-        components: { properties: Record<string, string[] | string> }[];
+        components: { set: string; properties: Record<string, string[] | string> }[];
       };
-      const component = plan.components[0];
+      // Spec 011 ③: the avizo stands first in Ero order; the butono is found by its name.
+      const component = plan.components.find((candidate) => candidate.set === "butono");
       if (component !== undefined) component.properties.type = ["button", "submit", "resett"];
       writeFileSync(file, `${JSON.stringify(plan, null, 2)}\n`);
     });

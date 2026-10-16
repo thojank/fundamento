@@ -36,9 +36,12 @@ describe("componentCssIssues (F2)", () => {
     // Spec 008 added text-decoration-line (the underline of a link is structure: on or off);
     // Spec 011 ① (O-8) overflow-wrap (whether a word longer than the line breaks: on or off).
     // Spec 011 ② (plan ② D-11): resize (whether a person may drag an area taller: vertical, none).
-    expect(STRUCTURAL_PROPERTIES.length).toBeLessThanOrEqual(23);
+    // Spec 011 ③ (plan ③ D-05, D-09, D-10): clip-path (a text for assistive technology alone),
+    // text-align (a state centres itself), border-inline-start-style (the accent of a notice).
+    expect(STRUCTURAL_PROPERTIES.length).toBeLessThanOrEqual(26);
     expect(STRUCTURAL_PROPERTIES).toContain("overflow-wrap");
     expect(STRUCTURAL_PROPERTIES).toContain("resize");
+    expect(STRUCTURAL_PROPERTIES).toContain("clip-path");
     for (const property of ["color", "background-color", "padding", "font-size", "gap"]) {
       expect(STRUCTURAL_PROPERTIES, property).not.toContain(property);
     }

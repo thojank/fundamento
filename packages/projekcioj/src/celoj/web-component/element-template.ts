@@ -1059,7 +1059,7 @@ ${
     const duration = Number.parseFloat(raw) * (raw.endsWith("ms") ? 1 : 1000);
     // The first easing of the list, a keyword or a function with its arguments (never split at
     // the commas inside cubic-bezier()).
-    const easing = /^[a-z-]+(?:\([^)]*\))?/.exec(style.transitionTimingFunction)?.[0] ?? "linear";
+    const easing = /^[a-z-]+(?:\\([^)]*\\))?/.exec(style.transitionTimingFunction)?.[0] ?? "linear";
     const turning = this.isConnected && this.propValue("kind") === "loading" && duration > 0;
     if (!turning) {
       for (const animation of running) animation.cancel();

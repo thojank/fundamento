@@ -74,7 +74,6 @@
     "a11y": {
       "role": "status",
       "name": [
-        "slot:heading",
         "slot:message"
       ],
       "states": {},
