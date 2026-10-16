@@ -53,12 +53,14 @@ describe("elektilo in the repo Modelo (G1, G2, section 4)", () => {
     expect(elektilo?.file).toBe("modelo/data/eroj/elektilo/skemo.json");
     expect(modelo.eroj.map((entry) => entry.ero.name)).toEqual([
       "butono",
+      "dialogo",
       "elektilo",
       "elekto",
       "kampo",
       "ligilo",
       "markobutono",
       "sxaltilo",
+      "tekstareo",
     ]);
     // uzo-boundary-covered among them: no Uzo says null or ask-human for the words of its goal.
     expect(validateModelo(defaultModeloSource()).errors).toEqual([]);
@@ -380,13 +382,19 @@ describe("the Reguloj of the elektilo (G6, E5)", () => {
   });
 
   it.each([
-    ["field-label-visible", ["kampo", "sxaltilo", "markobutono", "elekto", "elektilo"]],
-    ["field-label-names-the-datum", ["kampo", "sxaltilo", "markobutono", "elekto", "elektilo"]],
-    ["error-says-what-to-do", ["kampo", "markobutono", "elekto", "elektilo"]],
-    ["required-marked", ["kampo", "markobutono", "elekto", "elektilo"]],
-    ["error-not-color-only", ["kampo", "markobutono", "elekto", "elektilo"]],
-    ["help-is-one-sentence", ["kampo", "elekto", "elektilo"]],
-    ["placeholder-not-label", ["kampo", "elektilo"]],
+    [
+      "field-label-visible",
+      ["kampo", "sxaltilo", "markobutono", "elekto", "elektilo", "tekstareo"],
+    ],
+    [
+      "field-label-names-the-datum",
+      ["kampo", "sxaltilo", "markobutono", "elekto", "elektilo", "tekstareo"],
+    ],
+    ["error-says-what-to-do", ["kampo", "markobutono", "elekto", "elektilo", "tekstareo"]],
+    ["required-marked", ["kampo", "markobutono", "elekto", "elektilo", "tekstareo"]],
+    ["error-not-color-only", ["kampo", "markobutono", "elekto", "elektilo", "tekstareo"]],
+    ["help-is-one-sentence", ["kampo", "elekto", "elektilo", "tekstareo"]],
+    ["placeholder-not-label", ["kampo", "elektilo", "tekstareo"]],
     ["option-labels-distinct", ["elekto", "elektilo"]],
   ])("%s is widened to the elektilo, not duplicated (E5)", (name, eroj) => {
     expect(named(name)?.appliesTo).toEqual({ eroj });
@@ -403,6 +411,8 @@ describe("the Reguloj of the elektilo (G6, E5)", () => {
       "markobutono",
       "elekto",
       "elektilo",
+      "tekstareo",
+      "dialogo",
     ]);
   });
 

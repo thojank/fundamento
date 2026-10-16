@@ -251,12 +251,14 @@ describe("the Vitrino after the acceptances (Nachlese 2026-10-13)", () => {
   it("the layout sentence names the subject and the placement (C8)", () => {
     expect(datumoj.a11yRoloj).toEqual({
       butono: "button",
+      dialogo: "dialog",
       elektilo: "combobox",
       elekto: "radiogroup",
       kampo: "textbox",
       ligilo: "link",
       markobutono: "checkbox",
       sxaltilo: "switch",
+      tekstareo: "textbox",
     });
     expect(html).toContain("Größe aus dem Inhalt, Label bricht nie um.");
     expect(html).toContain("Größe aus dem Inhalt, Label darf umbrechen (inline), standalone nie.");
@@ -420,5 +422,45 @@ describe("the Vitrino shows the elektilo closed with the prompt, required, inval
 
   it("says that the field of the select never breaks and takes its size from the container", () => {
     expect(html).toContain("Größe aus dem Container, Feld bricht nie um.");
+  });
+});
+
+// Spec 011 ② (plan ② D-15): the grid of the tekstareo has one row per kind × size, the columns
+// rest, required, invalid and disabled, help in every cell and the error under invalid, like the
+// kampo; the grid of the dialogo shows every size × reason as a closed dialog behind a button that
+// opens it (the dialog is modal: six open at once would cover the page), with heading, message,
+// the reason's label and two actions, at most one with emphasis high.
+describe("the Vitrino shows the tekstareo and the dialogo (Spec 011 ②)", () => {
+  it("tekstareo: a row per kind × size, the columns rest, required, invalid, disabled; help everywhere, the error under invalid", () => {
+    const grid = datumoj.eroj.tekstareo ?? "";
+    expect(grid).toContain('<th scope="col">required</th>');
+    expect(grid).toContain('<th scope="col">invalid</th>');
+    expect(grid).toContain('<th scope="col">disabled</th>');
+    expect(grid).toContain(
+      '<fm-tekstareo kind="code" size="medium">code · medium<span slot="help">Hinweis</span></fm-tekstareo>',
+    );
+    expect(grid).toContain(
+      '<fm-tekstareo kind="text" size="small" invalid>text · small<span slot="help">Hinweis</span><span slot="error">Fehler</span></fm-tekstareo>',
+    );
+    expect((grid.match(/<tr>/g) ?? []).length).toBe(7);
+  });
+
+  it("dialogo: a row per size × reason, each cell a button that opens the closed dialog with heading, message, reason label and two actions", () => {
+    const grid = datumoj.eroj.dialogo ?? "";
+    expect((grid.match(/<fm-dialogo /g) ?? []).length).toBe(6);
+    expect(grid).toContain(
+      '<fm-butono emphasis="medium" data-fm-opens="fm-vitrino-dialogo-small-none">Öffnen</fm-butono>',
+    );
+    expect(grid).toContain(
+      '<fm-dialogo id="fm-vitrino-dialogo-small-required" size="small" reason="required">small · required',
+    );
+    expect(grid).toContain('<span slot="message">Nachricht</span>');
+    expect(grid).toContain('<span slot="reason">Begründung</span>');
+    expect(grid).toContain(
+      '<fm-butono slot="actions" emphasis="low">Abbrechen</fm-butono><fm-butono slot="actions" emphasis="high">Bestätigen</fm-butono>',
+    );
+    // No cell opens the dialog on its own: open is no column.
+    expect(grid).not.toContain(" open>");
+    expect(grid).not.toContain('<th scope="col">open</th>');
   });
 });

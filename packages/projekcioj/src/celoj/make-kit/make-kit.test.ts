@@ -46,12 +46,14 @@ describe("Make Kit sources (T018)", () => {
       "README.md",
       "guidelines/Guidelines.md",
       "guidelines/components/butono.md",
+      "guidelines/components/dialogo.md",
       "guidelines/components/elektilo.md",
       "guidelines/components/elekto.md",
       "guidelines/components/kampo.md",
       "guidelines/components/ligilo.md",
       "guidelines/components/markobutono.md",
       "guidelines/components/sxaltilo.md",
+      "guidelines/components/tekstareo.md",
       "guidelines/foundations/color.md",
       "guidelines/foundations/dimensioj.md",
       "guidelines/foundations/spacing.md",
@@ -504,4 +506,37 @@ describe("the observed usage of the Make Kit by Arkitekturo (Spec 011 ① G8)", 
       [],
     );
   });
+});
+
+// Spec 011 ② (G7, plan ② D-14): Make builds every text of several lines from the text area and
+// every confirmation before an irreversible action from the dialog — one sentence each in the
+// guidelines, generated from the Eroj (a textbox with rows, an Ero with role dialog); the pages
+// of both exist and name their props and slots.
+describe("Make Kit and the tekstareo and dialogo (Spec 011 ②)", () => {
+  it.each(ASPEKTOJ)(
+    "%s: the guidelines send several lines to the Tekstareo and a question to the Dialogo",
+    (aspekto) => {
+      const guidelines = kit(aspekto, "guidelines/Guidelines.md");
+      expect(guidelines).toContain(
+        "- Every text that runs over several lines (a comment, a description, a reason) is a `<Tekstareo>`; one line is a `<Kampo>`.",
+      );
+      expect(guidelines).toContain(
+        "- Every confirmation before an action that cannot be undone is a `<Dialogo>` whose heading names the decision; never a second button that asks.",
+      );
+      // The kampo's sentence names the field, not the area: one sentence per Ero.
+      expect(guidelines).toContain("- Every entry of text is a `<Kampo>`");
+      expect(guidelines).not.toContain("- Every entry of text is a `<Tekstareo>`");
+      const area = kit(aspekto, "guidelines/components/tekstareo.md");
+      expect(area).toContain("# Tekstareo");
+      expect(area).toContain("`rows`");
+      expect(area).toContain("`kind`");
+      expect(area).toContain("**rich-text**");
+      const dialog = kit(aspekto, "guidelines/components/dialogo.md");
+      expect(dialog).toContain("# Dialogo");
+      expect(dialog).toContain("`reason`");
+      expect(dialog).toContain("`actions`");
+      expect(dialog).toContain("**dialog-title-names-the-decision**");
+      expect(dialog).toContain("Version freigeben?");
+    },
+  );
 });

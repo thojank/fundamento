@@ -168,12 +168,14 @@ describe("list_eroj and the brief (A5, acceptance 1)", () => {
     const listed = await output<{ eroj: { name: string }[] }>(client, "list_eroj", {});
     expect(listed.eroj.map((entry) => entry.name)).toEqual([
       "butono",
+      "dialogo",
       "elektilo",
       "elekto",
       "kampo",
       "ligilo",
       "markobutono",
       "sxaltilo",
+      "tekstareo",
     ]);
     const full = await output<{ skemo: { a11y: { role: string } }; uzo?: { purpose: string } }>(
       client,

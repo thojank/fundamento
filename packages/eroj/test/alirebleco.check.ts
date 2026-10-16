@@ -676,3 +676,129 @@ for (const aspekto of ["komuna", "ekzemplo"]) {
     }
   }
 }
+
+// Spec 011 ② (G7, plan ② D-11): the rendered fm-tekstareo in every colour class of komuna and
+// ekzemplo: axe (role textbox) on every kind × size in rest, hover, disabled and invalid (with the
+// error text), required with help; the focus ring of the textarea contrasts at least 3:1 with the
+// gap colour and with the page background.
+const tekstareo = input.modelo.eroj.find((entry) => entry.ero.name === "tekstareo");
+if (tekstareo === undefined) throw new Error("tekstareo missing");
+const areaCombos = combinationsOf(tekstareo.skemo, ["kind", "size"]);
+const areas = areaCombos
+  .map(
+    (c, i) =>
+      `<fm-tekstareo id="t${i}" kind="${c.kind}" size="${c.size}" required>Begründung ${i}<span slot="help">Die Prüfer lesen die Begründung.</span></fm-tekstareo>`,
+  )
+  .join(" ")
+  .concat(
+    `<fm-tekstareo id="terr" invalid>Kommentar<span slot="error">Gib eine Begründung mit mindestens zehn Zeichen ein</span></fm-tekstareo>`,
+  );
+
+for (const aspekto of ["komuna", "ekzemplo"]) {
+  for (const scheme of ["light", "dark"]) {
+    for (const contrast of ["default", "high"]) {
+      test(`${aspekto} ${scheme}/${contrast}: axe on every kind × size and state of the tekstareo, focus ring ≥ 3:1`, async ({
+        page,
+        browserName,
+      }) => {
+        await serve(
+          page,
+          out,
+          areas,
+          "<style>body { color: var(--fm-color-text-default); }</style>",
+        );
+        await page.evaluate(
+          ([a, s, c]) => {
+            const root = document.documentElement;
+            root.setAttribute("data-fm-aspekto", a ?? "");
+            root.setAttribute("data-fm-color-scheme", s ?? "");
+            root.setAttribute("data-fm-contrast", c ?? "");
+          },
+          [aspekto, scheme, contrast],
+        );
+        expect(await axeViolations(page), "rest").toEqual([]);
+        for (const [i] of areaCombos.entries()) {
+          await page.locator(`#t${i}`).locator('[part="control"]').hover();
+          expect(await axeViolations(page, `#t${i}`), `#t${i} hover`).toEqual([]);
+        }
+        await page.mouse.move(0, 0);
+        await page.locator("fm-tekstareo").evaluateAll((elements) => {
+          for (const element of elements) element.toggleAttribute("disabled", true);
+        });
+        expect(await axeViolations(page), "disabled").toEqual([]);
+        await page.locator("fm-tekstareo").evaluateAll((elements) => {
+          for (const element of elements) element.toggleAttribute("disabled", false);
+        });
+        const rings = await focusRingContrasts(
+          page,
+          [...areaCombos.map((_c, i) => `#t${i}`), "#terr"],
+          browserName,
+        );
+        expect(rings).toHaveLength(areaCombos.length + 1);
+        for (const ring of rings) {
+          expect(ring.gap, `${ring.selector} ring on gap`).toBeGreaterThanOrEqual(3);
+          expect(ring.page, `${ring.selector} ring on page`).toBeGreaterThanOrEqual(3);
+        }
+      });
+    }
+  }
+}
+
+// Spec 011 ② (G7, plan ② D-12): the rendered fm-dialogo in every colour class of komuna and
+// ekzemplo: axe (role dialog, modal) with an open dialog of every size × reason — heading, message,
+// the reason area, two actions — on the page behind it; heading and message contrast at least 4.5:1
+// with the surface, the surface's border 3:1 with the backdrop-covered page; the focus ring of the
+// confirmation (a butono inside the dialog) at least 3:1 with its gap and with the surface.
+const dialogo = input.modelo.eroj.find((entry) => entry.ero.name === "dialogo");
+if (dialogo === undefined) throw new Error("dialogo missing");
+const dialogCombos = combinationsOf(dialogo.skemo, ["size", "reason"]);
+const dialogMarkup = (c: Record<string, string>) =>
+  `<fm-dialogo id="d" open size="${c.size}" reason="${c.reason}">Version freigeben?<span slot="message">Die Version gilt danach für alle Projekte.</span><span slot="reason">Begründung</span><fm-butono slot="actions" emphasis="low">Abbrechen</fm-butono><fm-butono id="ok" slot="actions" emphasis="high">Freigeben</fm-butono></fm-dialogo><p>Seite dahinter.</p>`;
+
+for (const aspekto of ["komuna", "ekzemplo"]) {
+  for (const scheme of ["light", "dark"]) {
+    for (const contrast of ["default", "high"]) {
+      test(`${aspekto} ${scheme}/${contrast}: axe on the open dialogo of every size × reason, texts ≥ 4.5:1 on the surface`, async ({
+        page,
+      }) => {
+        for (const c of dialogCombos) {
+          await serve(
+            page,
+            out,
+            dialogMarkup(c),
+            "<style>body { color: var(--fm-color-text-default); }</style>",
+          );
+          await page.evaluate(
+            ([a, s, k]) => {
+              const root = document.documentElement;
+              root.setAttribute("data-fm-aspekto", a ?? "");
+              root.setAttribute("data-fm-color-scheme", s ?? "");
+              root.setAttribute("data-fm-contrast", k ?? "");
+            },
+            [aspekto, scheme, contrast],
+          );
+          await expect(page.getByRole("dialog")).toBeVisible();
+          expect(await axeViolations(page), JSON.stringify(c)).toEqual([]);
+          const colours = await page.locator("#d").evaluate((element) => {
+            const control = element.shadowRoot?.querySelector('[part="control"]') as HTMLElement;
+            const heading = element.shadowRoot?.querySelector('[part="heading"]') as HTMLElement;
+            const message = element.shadowRoot?.querySelector('[part="message"]') as HTMLElement;
+            return {
+              surface: getComputedStyle(control).backgroundColor,
+              heading: getComputedStyle(heading).color,
+              message: getComputedStyle(message).color,
+            };
+          });
+          expect(
+            contrastOf(colours.heading, colours.surface),
+            `${JSON.stringify(c)} heading`,
+          ).toBeGreaterThanOrEqual(4.5);
+          expect(
+            contrastOf(colours.message, colours.surface),
+            `${JSON.stringify(c)} message`,
+          ).toBeGreaterThanOrEqual(4.5);
+        }
+      });
+    }
+  }
+}

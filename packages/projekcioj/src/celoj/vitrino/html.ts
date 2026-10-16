@@ -127,7 +127,7 @@ function uzo(datumoj: VitrinoDatumoj): string {
             `<li><strong>${escapeHtml(rule.regulo.name)}</strong> (${rule.fixed ? "fest" : "anpassbar"}): ${escapeHtml(rule.regulo.statement)} <em>${escapeHtml(rule.regulo.kialo)}</em></li>`,
         )
         .join("");
-      return `<article><h3>${escapeHtml(ero)}</h3><p>${escapeHtml(use.purpose)}</p><h4>Wann nehme ich den ${escapeHtml(capitalised(ero))} nicht?</h4><ul>${boundaries}</ul><h4>Zusammen mit</h4><ul>${together}</ul>${table("Slots", ["Slot", "nimmt auf", "max", "Verschachtelung", "Pflicht"], slots)}<h4>Layout</h4><p>Größe aus dem ${use.layout.size === "content" ? "Inhalt" : "Container"}, ${wrapSentence(datumoj.a11yRoloj[ero], use.layout.wrap)}.</p><ul>${allowances}</ul><h4>Text</h4><ul>${text}</ul></article>`;
+      return `<article><h3>${escapeHtml(ero)}</h3><p>${escapeHtml(use.purpose)}</p><h4>Wann nehme ich den ${escapeHtml(capitalised(ero))} nicht?</h4><ul>${boundaries}</ul><h4>Zusammen mit</h4><ul>${together}</ul>${table("Slots", ["Slot", "nimmt auf", "max", "Verschachtelung", "Pflicht"], slots)}<h4>Layout</h4><p>Größe aus dem ${use.layout.size === "content" ? "Inhalt" : "Container"}, ${wrapSentence(datumoj.a11yRoloj[ero], use.layout.wrap, datumoj.plurliniaj.includes(ero))}.</p><ul>${allowances}</ul><h4>Text</h4><ul>${text}</ul></article>`;
     })
     .join("");
 }
@@ -138,11 +138,22 @@ function uzo(datumoj: VitrinoDatumoj): string {
  * where the label may break (inline) and where never (standalone), instead of "darf umbrechen"
  * for both.
  */
-function wrapSentence(role: string | undefined, wrap: string): string {
+function wrapSentence(role: string | undefined, wrap: string, multiline = false): string {
   // A radio group (Spec 010 ③): what never breaks is each option and the row of options.
   if (role === "radiogroup" && wrap === "never") return "keine Option bricht um";
-  // A select (Spec 010 ④): what never breaks is the closed field with the chosen option.
-  const subject = role === "textbox" ? "Eingabezeile" : role === "combobox" ? "Feld" : "Label";
+  // A select (Spec 010 ④): what never breaks is the closed field with the chosen option. A text
+  // area (Spec 011 ②): its text wraps by nature, what never breaks is its label; a dialog: what
+  // may break is its heading.
+  const subject =
+    role === "textbox"
+      ? multiline
+        ? "Beschriftung"
+        : "Eingabezeile"
+      : role === "combobox"
+        ? "Feld"
+        : role === "dialog"
+          ? "Überschrift"
+          : "Label";
   if (wrap === "never") return `${subject} bricht nie um`;
   if (wrap === "with-text") return `${subject} darf umbrechen (inline), standalone nie`;
   return `${subject} darf umbrechen`;

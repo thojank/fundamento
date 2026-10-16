@@ -2688,6 +2688,386 @@
       "kialo": "Der Vorgabewert der Text-Eigenschaft label des Figma-Sets für die Rolle combobox (elektilo) ist „Auswahl“ (LABEL_DEFAULTS der Figma-Celo, wie jug_01M4VCG06S4MWFPVPNWMBN9EWF für button, link und textbox). Eine Auswahlliste nennt, was gewählt wird. Jede Instanz überschreibt das Wort; ein vorgefundenes Set bekommt es beim nächsten Lauf.",
       "date": "2026-10-15",
       "context": "Spec 010 ④ (plan ④ D-07), offener Punkt O-15: Vorgabewort vom Maintainer am 2026-10-14 abgenommen (Briefing P0 vom 2026-10-15, Nachlese 2); Jugxo in Spec 011 ① nachgetragen."
+    },
+    {
+      "id": "jug_01M51T75T0JEP94HAE1JPB7SSK",
+      "ref": {
+        "ero": "ero_01M51T74A6C97AHDY36TV0SXBY"
+      },
+      "decision": "approved",
+      "kialo": "The label names what is written: the reason.",
+      "date": "2026-10-16",
+      "context": "Example CORRECT for the Regulo named in ekzemplo.regulo (Spec 011 ② G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4S1ZR7GEPZSTB9ES3REK3V1",
+        "instances": [
+          {
+            "ero": "tekstareo",
+            "props": {},
+            "label": "Begründung",
+            "lingvo": "de"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M51T75T0JEP94HAE1JPB7SSM",
+      "ref": {
+        "ero": "ero_01M51T74A6C97AHDY36TV0SXBY"
+      },
+      "decision": "approved",
+      "kialo": "The label names what is written.",
+      "date": "2026-10-16",
+      "context": "Example CORRECT for the Regulo named in ekzemplo.regulo (Spec 011 ② G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4S1ZR7GEPZSTB9ES3REK3V1",
+        "instances": [
+          {
+            "ero": "tekstareo",
+            "props": {},
+            "label": "Reason",
+            "lingvo": "en"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M51T75T0JEP94HAE1JPB7SSN",
+      "ref": {
+        "ero": "ero_01M51T74A6C97AHDY36TV0SXBY"
+      },
+      "decision": "rejected",
+      "kialo": "A verb in the label is an instruction, not the name of the datum; the area says that one writes.",
+      "date": "2026-10-16",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 011 ② G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4S1ZR7GEPZSTB9ES3REK3V1",
+        "instances": [
+          {
+            "ero": "tekstareo",
+            "props": {},
+            "label": "Begründung eingeben",
+            "lingvo": "de"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M51T75T1Y3J67460S0K66KCY",
+      "ref": {
+        "ero": "ero_01M51T74A6C97AHDY36TV0SXBY"
+      },
+      "decision": "rejected",
+      "kialo": "A verb in the label is an instruction, not a name.",
+      "date": "2026-10-16",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 011 ② G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4S1ZR7GEPZSTB9ES3REK3V1",
+        "instances": [
+          {
+            "ero": "tekstareo",
+            "props": {},
+            "label": "Enter a reason",
+            "lingvo": "en"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M51T75T1Y3J67460S0K66KCZ",
+      "ref": {
+        "ero": "ero_01M51T74A6C97AHDY36TV0SXBY"
+      },
+      "decision": "approved",
+      "kialo": "The error says what to do: write at least ten characters.",
+      "date": "2026-10-16",
+      "context": "Example CORRECT for the Regulo named in ekzemplo.regulo (Spec 011 ② G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4S1ZR7GEPZSTB9ES3REK3TY",
+        "instances": [
+          {
+            "ero": "tekstareo",
+            "props": {
+              "invalid": true
+            },
+            "label": "Begründung",
+            "texts": {
+              "error": "Gib eine Begründung mit mindestens zehn Zeichen ein"
+            },
+            "lingvo": "de"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M51T75T1Y3J67460S0K66KD0",
+      "ref": {
+        "ero": "ero_01M51T74A6C97AHDY36TV0SXBY"
+      },
+      "decision": "approved",
+      "kialo": "The error says what to do.",
+      "date": "2026-10-16",
+      "context": "Example CORRECT for the Regulo named in ekzemplo.regulo (Spec 011 ② G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4S1ZR7GEPZSTB9ES3REK3TY",
+        "instances": [
+          {
+            "ero": "tekstareo",
+            "props": {
+              "invalid": true
+            },
+            "label": "Reason",
+            "texts": {
+              "error": "Enter a reason of at least ten characters"
+            },
+            "lingvo": "en"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M51T75T1Y3J67460S0K66KD1",
+      "ref": {
+        "ero": "ero_01M51T74A6C97AHDY36TV0SXBY"
+      },
+      "decision": "rejected",
+      "kialo": "'Zu kurz' names the fault, not the way out.",
+      "date": "2026-10-16",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 011 ② G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4S1ZR7GEPZSTB9ES3REK3TY",
+        "instances": [
+          {
+            "ero": "tekstareo",
+            "props": {
+              "invalid": true
+            },
+            "label": "Begründung",
+            "texts": {
+              "error": "Zu kurz"
+            },
+            "lingvo": "de"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M51T75T1Y3J67460S0K66KD2",
+      "ref": {
+        "ero": "ero_01M51T74A6C97AHDY36TV0SXBY"
+      },
+      "decision": "rejected",
+      "kialo": "'Too short' names the fault, not the way out.",
+      "date": "2026-10-16",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 011 ② G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4S1ZR7GEPZSTB9ES3REK3TY",
+        "instances": [
+          {
+            "ero": "tekstareo",
+            "props": {
+              "invalid": true
+            },
+            "label": "Reason",
+            "texts": {
+              "error": "Too short"
+            },
+            "lingvo": "en"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M51T75T1Y3J67460S0K66KD3",
+      "ref": {
+        "ero": "ero_01M51T74A6C97AHDY36TV0SXBY"
+      },
+      "decision": "approved",
+      "kialo": "One sentence of help: who reads the reason.",
+      "date": "2026-10-16",
+      "context": "Example CORRECT for the Regulo named in ekzemplo.regulo (Spec 011 ② G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4S1ZR7GEPZSTB9ES3REK3V2",
+        "instances": [
+          {
+            "ero": "tekstareo",
+            "props": {},
+            "label": "Begründung",
+            "texts": {
+              "help": "Die Prüfer lesen die Begründung."
+            },
+            "lingvo": "de"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M51T75T1Y3J67460S0K66KD4",
+      "ref": {
+        "ero": "ero_01M51T74A6C97AHDY36TV0SXBY"
+      },
+      "decision": "approved",
+      "kialo": "One sentence of help.",
+      "date": "2026-10-16",
+      "context": "Example CORRECT for the Regulo named in ekzemplo.regulo (Spec 011 ② G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4S1ZR7GEPZSTB9ES3REK3V2",
+        "instances": [
+          {
+            "ero": "tekstareo",
+            "props": {},
+            "label": "Reason",
+            "texts": {
+              "help": "The reviewers read the reason."
+            },
+            "lingvo": "en"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M51T75T1Y3J67460S0K66KD5",
+      "ref": {
+        "ero": "ero_01M51T74A6C97AHDY36TV0SXBY"
+      },
+      "decision": "rejected",
+      "kialo": "Two sentences are a paragraph, not help; the second belongs on the page.",
+      "date": "2026-10-16",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 011 ② G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4S1ZR7GEPZSTB9ES3REK3V2",
+        "instances": [
+          {
+            "ero": "tekstareo",
+            "props": {},
+            "label": "Begründung",
+            "texts": {
+              "help": "Die Prüfer lesen die Begründung. Sie steht danach im Protokoll der Version."
+            },
+            "lingvo": "de"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M51T75T1Y3J67460S0K66KD6",
+      "ref": {
+        "ero": "ero_01M51T74A6C97AHDY36TV0SXBY"
+      },
+      "decision": "rejected",
+      "kialo": "Two sentences are a paragraph, not help.",
+      "date": "2026-10-16",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 011 ② G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4S1ZR7GEPZSTB9ES3REK3V2",
+        "instances": [
+          {
+            "ero": "tekstareo",
+            "props": {},
+            "label": "Reason",
+            "texts": {
+              "help": "The reviewers read the reason. It stays in the record of the version afterwards."
+            },
+            "lingvo": "en"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M51T75T1Y3J67460S0K66KD7",
+      "ref": {
+        "ero": "ero_01M51T74A5H5FGY35BQ90VQEGH"
+      },
+      "decision": "approved",
+      "kialo": "The title names the decision: whether to release the version.",
+      "date": "2026-10-16",
+      "context": "Example CORRECT for the Regulo named in ekzemplo.regulo (Spec 011 ② G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M51T75E2BJ990J424KTWZ7KB",
+        "instances": [
+          {
+            "ero": "dialogo",
+            "props": {},
+            "label": "Version freigeben?",
+            "texts": {
+              "message": "Die Version gilt danach für alle Projekte."
+            },
+            "lingvo": "de"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M51T75T1Y3J67460S0K66KD8",
+      "ref": {
+        "ero": "ero_01M51T74A5H5FGY35BQ90VQEGH"
+      },
+      "decision": "approved",
+      "kialo": "The title names the decision.",
+      "date": "2026-10-16",
+      "context": "Example CORRECT for the Regulo named in ekzemplo.regulo (Spec 011 ② G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M51T75E2BJ990J424KTWZ7KB",
+        "instances": [
+          {
+            "ero": "dialogo",
+            "props": {},
+            "label": "Release this version?",
+            "texts": {
+              "message": "The version applies to every project afterwards."
+            },
+            "lingvo": "en"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M51T75T1Y3J67460S0K66KD9",
+      "ref": {
+        "ero": "ero_01M51T74A5H5FGY35BQ90VQEGH"
+      },
+      "decision": "rejected",
+      "kialo": "'Bestätigung' says that something is asked, not what; the screen reader names the dialog by it.",
+      "date": "2026-10-16",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 011 ② G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M51T75E2BJ990J424KTWZ7KB",
+        "instances": [
+          {
+            "ero": "dialogo",
+            "props": {},
+            "label": "Bestätigung",
+            "texts": {
+              "message": "Die Version gilt danach für alle Projekte."
+            },
+            "lingvo": "de"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M51T75T1Y3J67460S0K66KDA",
+      "ref": {
+        "ero": "ero_01M51T74A5H5FGY35BQ90VQEGH"
+      },
+      "decision": "rejected",
+      "kialo": "'Confirmation' says that something is asked, not what.",
+      "date": "2026-10-16",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 011 ② G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M51T75E2BJ990J424KTWZ7KB",
+        "instances": [
+          {
+            "ero": "dialogo",
+            "props": {},
+            "label": "Confirmation",
+            "texts": {
+              "message": "The version applies to every project afterwards."
+            },
+            "lingvo": "en"
+          }
+        ]
+      }
     }
   ]
 }

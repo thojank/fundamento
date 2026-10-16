@@ -213,6 +213,39 @@ export function suggestEro(modelo: Modelo, input: SuggestEroInput): SuggestEroRe
     return { ok: true, output };
   }
 
+  // Spec 011 ② (plan ② D-10): an Ero's own use-instead outranks its own goal. "Ein zweiter Button
+  // ‚Wirklich löschen?'" hits the butono's goal destructive (löschen) and the butono's alternative
+  // confirm (wirklich, zweiten), which sends to the dialogo: the Uzo of the butono says "not me,
+  // there" for this case, and that is the answer — the alternative's Ero, with the butono's kialo.
+  // Only an instead entry redirects a whole goal; an own boundary (a case, "Übersicht speichern":
+  // navigation beside save) and two different Eroj stay a conflict (below), as does an own entry
+  // that asks a person.
+  if (
+    boundary !== undefined &&
+    goal !== undefined &&
+    boundary.ero === goal.ero &&
+    boundary.kind === "instead" &&
+    boundary.action === "use-instead"
+  ) {
+    const instead = insteadEro(modelo, boundary);
+    if (instead !== undefined) {
+      return {
+        ok: true,
+        output: {
+          goal: input.goal,
+          matched: { goal: boundary.case, keyword: boundary.keyword, lingvo: boundary.lingvo },
+          suggestion: { ero: instead, props: {} },
+          boundary: {
+            ero: boundary.ero,
+            case: boundary.case,
+            action: boundary.action,
+            kialo: boundary.kialo,
+          },
+        },
+      };
+    }
+  }
+
   if (boundary !== undefined && goal !== undefined) {
     // Both readings hold; Fundamento does not choose (OP-12). Prompt rule 12 passes both on.
     const goalCandidate: SuggestCandidate = {

@@ -28,12 +28,15 @@ if (process.env.TURBO_HASH === undefined) {
 // like the other e2e files. On the CI runner the `beforeAll` of src/resources-http.test.ts —
 // one `connect()` on a preloaded Modelo, 1 s locally — then ran into Vitest's 10 s hook limit
 // twice in a row (PR #52, 5874134: "Hook timed out in 10000ms"), the contest Spec 006 B6 had
-// already measured at 9–12 s for a hook. The hooks follow the same ruling as the tests: factor
-// 3 under CI, for the load, not for the work.
+// already measured at 9–12 s for a hook. The hooks followed the same ruling as the tests: factor
+// 3 under CI, for the load, not for the work. Spec 011 ② (O-1 of plan ①, maintainer 2026-10-16)
+// takes the factor of the hooks back: since O-21 (Spec 011 ①) the spawning e2e files of modelo
+// run one after the other and the Playwright files share the workers, so the runner has room. If
+// a run turns red on a hook, the factor stays off and the report says so.
 const shared = {
   exclude: [...configDefaults.exclude, "src/e2e/perf.test.ts"],
   testTimeout: 30_000 * (process.env.CI === "true" ? 3 : 1),
-  hookTimeout: 10_000 * (process.env.CI === "true" ? 3 : 1),
+  hookTimeout: 10_000,
 };
 
 // Spec 006 (B6): src/http.test.ts starts a child process that loads the Modelo. In CI it ran

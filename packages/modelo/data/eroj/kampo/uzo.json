@@ -22,8 +22,8 @@
             "mehrzeilig"
           ]
         },
-        "ero": null,
-        "kialo": "Several lines need a field that grows with them, because one line hides what was written; Fundamento has no such Ero yet."
+        "ero": "tekstareo",
+        "kialo": "Several lines need a field that grows with them, because one line hides what was written; tekstareo covers it."
       },
       {
         "goal": "choose-many",

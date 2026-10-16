@@ -68,6 +68,24 @@
         },
         "ero": "elekto",
         "kialo": "Choosing one of a few visible values is a selection, not an action, because a row of buttons hides which value is chosen; Fundamento covers it with elekto."
+      },
+      {
+        "goal": "confirm",
+        "keywords": {
+          "en": [
+            "sure",
+            "really",
+            "confirmation"
+          ],
+          "de": [
+            "sicher",
+            "wirklich",
+            "zweiten",
+            "rückfrage"
+          ]
+        },
+        "ero": "dialogo",
+        "kialo": "An action that cannot be undone asks first, because the question needs a title, a reason and a way out; the question is a dialog, not a second button. Fundamento covers it with dialogo."
       }
     ],
     "boundary": [

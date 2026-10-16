@@ -29,7 +29,12 @@ import { aspektoStylesheet } from "../css/css.js";
 import { componentName, reactSource } from "../react/react.js";
 import { themeBlock } from "../tailwind/tailwind.js";
 import { elementSource } from "../web-component/element-template.js";
-import { elementNamesOf, namesOf, stylesheetOf } from "../web-component/web-component.js";
+import {
+  elementNamesOf,
+  isMultiline,
+  namesOf,
+  stylesheetOf,
+} from "../web-component/web-component.js";
 
 /** `@fundamento/make-kit-komuna` (Q2: published under the dist-tag `next`). */
 export function makeKitName(aspekto: string): string {
@@ -346,10 +351,37 @@ function guidelines(input: CeloInput, aspekto: string): GeneratedFile[] {
   // Spec 009 (D-10, Art. VII): an entry of text comes from the field Ero, never from a raw input;
   // generated from the Uzo of every Ero that is a textbox.
   const fieldLines = eroj
-    .filter((entry) => entry.skemo.a11y.role === "textbox" && entry.uzo !== undefined)
+    .filter(
+      (entry) =>
+        entry.skemo.a11y.role === "textbox" && !isMultiline(entry.skemo) && entry.uzo !== undefined,
+    )
     .map(
       (entry) =>
         `- Every entry of text is a \`<${componentName(entry.ero)}>\` (${entry.uzo?.purpose ?? ""}); never a raw input element, and never a field without its visible label.`,
+    )
+    .join("\n");
+  // Spec 011 ② (G7, plan ② D-14): every text of several lines comes from the text area (a textbox
+  // with rows), one line from the field; generated from both where the Modelo has them.
+  const fieldName = eroj.find(
+    (entry) => entry.skemo.a11y.role === "textbox" && !isMultiline(entry.skemo),
+  );
+  const areaLines = eroj
+    .filter(
+      (entry) =>
+        entry.skemo.a11y.role === "textbox" && isMultiline(entry.skemo) && entry.uzo !== undefined,
+    )
+    .map(
+      (entry) =>
+        `- Every text that runs over several lines (a comment, a description, a reason) is a \`<${componentName(entry.ero)}>\`${fieldName === undefined ? "" : `; one line is a \`<${componentName(fieldName.ero)}>\``}.`,
+    )
+    .join("\n");
+  // Spec 011 ② (G7, plan ② D-14): every confirmation before an action that cannot be undone comes
+  // from the dialog, whose heading names the decision; never a second button that asks.
+  const dialogLines = eroj
+    .filter((entry) => entry.skemo.a11y.role === "dialog" && entry.uzo !== undefined)
+    .map(
+      (entry) =>
+        `- Every confirmation before an action that cannot be undone is a \`<${componentName(entry.ero)}>\` whose heading names the decision; never a second button that asks.`,
     )
     .join("\n");
   // Spec 010 ① (G7, plan D-12): every on/off setting that applies at once comes from the switch,
@@ -408,6 +440,8 @@ components and its tokens; never write a colour, a size or a font value yourself
   attributes on \`<html>\`; never with a second stylesheet.
 ${ruleLines}
 ${fieldLines}
+${areaLines}
+${dialogLines}
 ${switchLines}
 ${checkboxLines}
 ${radioLines}

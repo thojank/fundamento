@@ -1,0 +1,9 @@
+{
+  "description": "Spec 011 ② G7 (Art. VIII, Spec 008 D-13): the Skemo of the dialog names a prop tabindex, the attribute of one platform. Where the focus goes is Celo knowledge (G4: the first field, else the confirmation), not a prop.",
+  "issues": [
+    {
+      "rule": "skemo-web-term",
+      "path": "data/eroj/dialogo/skemo.json#/skemo/props/3/name"
+    }
+  ]
+}

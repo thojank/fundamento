@@ -26,12 +26,14 @@ describe("sxaltilo in the repo Modelo (G1, G2, section 1)", () => {
     expect(sxaltilo.file).toBe("modelo/data/eroj/sxaltilo/skemo.json");
     expect(modelo.eroj.map((entry) => entry.ero.name)).toEqual([
       "butono",
+      "dialogo",
       "elektilo",
       "elekto",
       "kampo",
       "ligilo",
       "markobutono",
       "sxaltilo",
+      "tekstareo",
     ]);
     expect(validateModelo(defaultModeloSource()).errors).toEqual([]);
   });
@@ -167,7 +169,8 @@ describe("the Uzo of the sxaltilo (section 1, G5, D-13)", () => {
       "settings-list",
       "dialog",
     ]);
-    expect(uzo?.composes.with.map((entry) => entry.ero)).toEqual(["kampo"]);
+    // Spec 011 ② (G5): the switch names the dialogo among its companions.
+    expect(uzo?.composes.with.map((entry) => entry.ero)).toEqual(["kampo", "dialogo"]);
     expect(uzo?.composes.never.map((entry) => entry.ero)).toEqual(["butono"]);
   });
 
@@ -196,7 +199,9 @@ describe("the Uzo of the sxaltilo (section 1, G5, D-13)", () => {
         "elektilo",
       );
     }
-    expect(uzoOf("kampo")?.instead.find((entry) => entry.goal === "multi-line")?.ero).toBeNull();
+    expect(uzoOf("kampo")?.instead.find((entry) => entry.goal === "multi-line")?.ero).toBe(
+      "tekstareo",
+    );
   });
 });
 
@@ -214,9 +219,10 @@ describe("the Reguloj of the sxaltilo (G6, E5, D-14)", () => {
   it.each(["field-label-visible", "field-label-names-the-datum"])(
     "%s is widened to the sxaltilo, not duplicated (E5)",
     (name) => {
-      // Spec 010 ②: widened once more, to the markobutono (E5); ③ to the elekto, ④ the elektilo.
+      // Spec 010 ②: widened once more, to the markobutono (E5); ③ to the elekto, ④ the elektilo;
+      // Spec 011 ② to the tekstareo.
       expect(named(name)?.appliesTo).toEqual({
-        eroj: ["kampo", "sxaltilo", "markobutono", "elekto", "elektilo"],
+        eroj: ["kampo", "sxaltilo", "markobutono", "elekto", "elektilo", "tekstareo"],
       });
       expect(modelo.reguloj.filter((regulo) => regulo.name === name)).toHaveLength(1);
     },
@@ -231,6 +237,8 @@ describe("the Reguloj of the sxaltilo (G6, E5, D-14)", () => {
       "markobutono",
       "elekto",
       "elektilo",
+      "tekstareo",
+      "dialogo",
     ]);
   });
 

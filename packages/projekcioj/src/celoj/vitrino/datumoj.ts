@@ -115,6 +115,8 @@ export interface VitrinoDatumoj {
    * the label (Abnahme Spec 009, C8).
    */
   a11yRoloj: Record<string, string>;
+  /** The Eroj whose textbox runs over several lines (Spec 011 ②: the tekstareo, by its rows). */
+  plurliniaj: string[];
   /**
    * The Uzo of every Ero that has one, as get_ero states it (Spec 007 T027, S5): the Vitrino
    * answers "Wann nehme ich den Butono nicht?" from the same data as the Gvidanto.
@@ -286,7 +288,20 @@ export function uzojOf(modelo: Modelo): Record<string, UzoOutput> {
 export const VITRINO_SLOT_TEXTS: Readonly<Record<string, string>> = {
   help: "Hinweis",
   error: "Fehler",
+  // Spec 011 ② (plan ② D-15): the message and the reason's label of a dialog.
+  message: "Nachricht",
+  reason: "Begründung",
 };
+
+/**
+ * The actions of a dialog in the Vitrino (Spec 011 ②, plan ② D-15): two butono, one with emphasis
+ * high (one-primary-per-container), the words of the butono's own examples.
+ */
+export const VITRINO_DIALOG_ACTIONS =
+  '<fm-butono slot="actions" emphasis="low">Abbrechen</fm-butono><fm-butono slot="actions" emphasis="high">Bestätigen</fm-butono>';
+
+/** The word on the button that opens a dialog of the Vitrino. */
+export const VITRINO_OPEN = "Öffnen";
 
 /**
  * The options of a slot whose entries are options (Spec 010 ③, D-13, E7): three neutral words, the
@@ -379,6 +394,10 @@ export function eroMarkup(entry: LoadedEro): string {
         : [prompts ? ` placeholder="${VITRINO_PROMPT}"` : ` ${slot.entry.equals}="1"`],
     )
     .join("");
+  // A dialog (Spec 011 ②, plan ② D-15) is modal: six open at once would cover the page. Every cell
+  // holds the closed dialog behind a button that opens it (data-fm-opens, read by the Vitrino's
+  // script), with the two actions of the Vitrino in its slot.
+  const dialog = entry.skemo.a11y.role === "dialog";
   const rows = combinationsOf(entry.skemo, keys)
     .filter((combination) => combination[STATE_KEY] === undefined)
     .map((combination) => {
@@ -386,10 +405,16 @@ export function eroMarkup(entry: LoadedEro): string {
         .map(([key, value]) => ` ${key}="${value}"`)
         .join("");
       const label = vitrinoLabelOf(combination);
+      const id = `fm-vitrino-${entry.ero.name}-${Object.values(combination).join("-")}`;
+      const opener = dialog
+        ? `<fm-butono emphasis="medium" data-fm-opens="${id}">${VITRINO_OPEN}</fm-butono>`
+        : "";
+      const identity = dialog ? ` id="${id}"` : "";
+      const actions = dialog ? VITRINO_DIALOG_ACTIONS : "";
       const cells = [undefined, ...columns]
         .map(
           (column) =>
-            `<td><${tag}${attributes}${required}${chosen}${column === undefined ? "" : ` ${column}`}>${label}${optionTexts(entry)}${slotTexts(entry, column)}</${tag}></td>`,
+            `<td>${opener}<${tag}${identity}${attributes}${required}${chosen}${column === undefined ? "" : ` ${column}`}>${label}${optionTexts(entry)}${slotTexts(entry, column)}${actions}</${tag}></td>`,
         )
         .join("");
       return `<tr><th scope="row">${label}</th>${cells}</tr>`;
@@ -718,6 +743,9 @@ export function vitrinoDatumoj({ input, bazo }: VitrinoDatumojInput): VitrinoDat
     a11yRoloj: Object.fromEntries(
       modelo.eroj.map((entry) => [entry.ero.name, entry.skemo.a11y.role]),
     ),
+    plurliniaj: modelo.eroj
+      .filter((entry) => entry.skemo.props.some((prop) => prop.name === "rows"))
+      .map((entry) => entry.ero.name),
     uzo: uzojOf(modelo),
     apcaHintoj: {
       nun: apcaNun,

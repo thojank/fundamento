@@ -34,15 +34,18 @@ describe("Web Component Celo (T011)", () => {
     // Spec 008: the ligilo on the same path as the butono (Art. IX, Art. XI).
     expect(Object.keys(files).sort()).toEqual([
       "eroj/src/generated/butono.styles.ts",
+      "eroj/src/generated/dialogo.styles.ts",
       "eroj/src/generated/elektilo.styles.ts",
       "eroj/src/generated/elekto.styles.ts",
       "eroj/src/generated/fm-butono.ts",
+      "eroj/src/generated/fm-dialogo.ts",
       "eroj/src/generated/fm-elektilo.ts",
       "eroj/src/generated/fm-elekto.ts",
       "eroj/src/generated/fm-kampo.ts",
       "eroj/src/generated/fm-ligilo.ts",
       "eroj/src/generated/fm-markobutono.ts",
       "eroj/src/generated/fm-sxaltilo.ts",
+      "eroj/src/generated/fm-tekstareo.ts",
       "eroj/src/generated/index.ts",
       "eroj/src/generated/kampo.styles.ts",
       "eroj/src/generated/ligilo.styles.ts",
@@ -50,6 +53,7 @@ describe("Web Component Celo (T011)", () => {
       "eroj/src/generated/react.ts",
       "eroj/src/generated/skemo.ts",
       "eroj/src/generated/sxaltilo.styles.ts",
+      "eroj/src/generated/tekstareo.styles.ts",
     ]);
   });
 
@@ -660,5 +664,145 @@ describe("Web Component Celo for the elektilo of Spec 011 ① (empty-label)", ()
     expect(elektiloElement).toContain(
       'this.#internals.setFormValue(chosen === -1 ? (empty ? "" : null)',
     );
+  });
+});
+
+// Spec 011 ② (plan ② D-11): the text area. The field of the kampo — label with the mark of a
+// required area, help and error below — around the platform's own textarea: rows as its height,
+// vertical resizing only (structure), kind code in the code typography without the platform's
+// spelling check; form-associated like the kampo (required keeps the form from being sent); Enter
+// writes a line and sends nothing (the Skemo names no key).
+describe("Web Component Celo for the tekstareo (Spec 011 ②)", () => {
+  const styles = files["eroj/src/generated/tekstareo.styles.ts"] ?? "";
+  const element = files["eroj/src/generated/fm-tekstareo.ts"] ?? "";
+  const css = JSON.parse(
+    /export const TEKSTAREO_CSS = (".*");/s.exec(styles)?.[1] ?? '""',
+  ) as string;
+  const templates = (source: string) =>
+    [...source.matchAll(/`(<[^`]*)`/g)].map((match) => match[1] ?? "");
+  const parts = (source: string) =>
+    templates(source).flatMap((t) => [...t.matchAll(/part="([a-z-]+)"/g)].map((m) => m[1]));
+
+  it("renders the field of the kampo around a native textarea", () => {
+    expect(parts(element)).toEqual(["field", "label", "required-mark", "control", "help", "error"]);
+    expect(element).toContain('<textarea part="control" id="control"></textarea>');
+    expect(element).toContain('<label part="label" for="control">');
+    expect(element).toContain("static formAssociated = true;");
+    expect(element).toContain('customElements.define("fm-tekstareo", FmTekstareo)');
+    expect(element).not.toContain("<input");
+  });
+
+  it("writes rows, spells code without the spelling check, is the form's value and validity", () => {
+    expect(element).toContain('control.setAttribute("rows"');
+    expect(element).toContain('control.setAttribute("spellcheck", "false")');
+    expect(element).toContain("flags = { valueMissing: true }");
+    expect(element).toContain("formResetCallback()");
+    // No Enter of its own: a line break is the textarea's; the Skemo names no key.
+    expect(element).not.toContain('event.key !== "Enter"');
+  });
+
+  it("keys the typography of the text by kind and size, resizes vertically only, has no height of its own", () => {
+    expect(css).toContain(
+      ':where([part="field"][data-kind="code"][data-size="medium"]) [part="control"] {\n  font-family: var(--fm-typography-code-font-family);',
+    );
+    expect(css).toContain(
+      ':where([part="field"][data-kind="text"][data-size="small"]) [part="control"] {\n  font-family: var(--fm-typography-body-2-font-family);',
+    );
+    expect(css).toContain("resize: vertical;");
+    expect(css).not.toContain("min-block-size");
+    expect(css).not.toContain("[readonly]");
+  });
+
+  it("keeps every design property a token and logical (Art. X gate 1)", () => {
+    expect(componentCssIssues("tekstareo.css", css)).toEqual([]);
+    expect(cssPhysicalPropertyIssues("tekstareo.css", css)).toEqual([]);
+  });
+
+  it("states kind and size and the five states in the stylesheet inventory (parity)", () => {
+    const inventory = stylesheetInventory(styles);
+    expect(inventory.props).toEqual({ kind: ["text", "code"], size: ["small", "medium", "large"] });
+    expect([...inventory.states].sort()).toEqual(["disabled", "focus", "hover", "invalid", "rest"]);
+  });
+});
+
+// Spec 011 ② (plan ② D-12, E9, G4): the dialog. The platform's own <dialog>, opened with showModal
+// (focus trap and Escape are the platform's), named by its heading and described by its message;
+// the reason is a tekstareo the dialog shows itself; the actions are slotted butono — the one with
+// emphasis high confirms, every other cancels; confirm is cancelable and keeps the dialog open
+// when prevented; a required reason or an invalid field in the content locks the confirmation.
+describe("Web Component Celo for the dialogo (Spec 011 ②)", () => {
+  const styles = files["eroj/src/generated/dialogo.styles.ts"] ?? "";
+  const element = files["eroj/src/generated/fm-dialogo.ts"] ?? "";
+  const css = JSON.parse(/export const DIALOGO_CSS = (".*");/s.exec(styles)?.[1] ?? '""') as string;
+  const templates = (source: string) =>
+    [...source.matchAll(/`(<[^`]*)`/g)].map((match) => match[1] ?? "");
+  const parts = (source: string) =>
+    templates(source).flatMap((t) => [...t.matchAll(/part="([a-z-]+)"/g)].map((m) => m[1]));
+
+  it("renders the platform's dialog as the control, with heading, message, content, the reason area and the actions", () => {
+    expect(parts(element)).toEqual([
+      "control",
+      "heading",
+      "message",
+      "content",
+      "reason",
+      "actions",
+    ]);
+    expect(element).toContain(
+      '<dialog part="control" aria-modal="true" aria-labelledby="heading" aria-describedby="message">',
+    );
+    expect(element).toContain('<h2 part="heading" id="heading"><slot></slot></h2>');
+    expect(element).toContain(
+      '<fm-tekstareo part="reason" rows="3"><slot name="reason"></slot></fm-tekstareo>',
+    );
+    expect(element).toContain('<slot name="actions"></slot>');
+    expect(element).toContain("static formAssociated = false;");
+    expect(element).toContain('customElements.define("fm-dialogo", FmDialogo)');
+  });
+
+  it("opens with showModal, closes on cancel, says confirm with the reason and keeps open when prevented", () => {
+    expect(element).toContain("dialog.showModal()");
+    expect(element).toContain(
+      'new CustomEvent("confirm", { bubbles: true, cancelable: true, detail: { reason',
+    );
+    expect(element).toContain('new Event("cancel", { bubbles: true })');
+    expect(element).toContain('action.getAttribute("emphasis") === "high"');
+    expect(element).toContain(":invalid");
+  });
+
+  it("styles the surface from tokens: width by size, backdrop, shadow, radius and border; the reason only with a reason", () => {
+    expect(css).toContain(
+      ':where([part="control"][data-size="small"]) {\n  inline-size: var(--fm-size-container-small);',
+    );
+    expect(css).toContain(
+      ':where([part="control"])::backdrop {\n  background-color: var(--fm-color-backdrop);\n}',
+    );
+    expect(css).toContain("box-shadow: var(--fm-elevation-shadow-modal);");
+    expect(css).toContain("border-radius: var(--fm-radius-role-surface);");
+    expect(css).toContain("border-color: var(--fm-color-border-default);");
+    expect(css).toContain(
+      ':where([part="control"]) [part="heading"] {\n  color: var(--fm-color-text-default);\n  font-family: var(--fm-typography-headline-4-font-family);',
+    );
+    expect(css).toContain(
+      ':where([part="control"][data-reason="none"]) [part="reason"] { display: none; }',
+    );
+    expect(css).toContain(
+      ':where([part="control"][data-reason="required"]) [part="reason"] {\n  min-block-size: var(--fm-size-control-large);\n}',
+    );
+    expect(css).toContain("justify-content: flex-end");
+  });
+
+  it("keeps every design property a token and logical (Art. X gate 1)", () => {
+    expect(componentCssIssues("dialogo.css", css)).toEqual([]);
+    expect(cssPhysicalPropertyIssues("dialogo.css", css)).toEqual([]);
+  });
+
+  it("states size and reason and the one state rest in the stylesheet inventory (parity)", () => {
+    const inventory = stylesheetInventory(styles);
+    expect(inventory.props).toEqual({
+      size: ["small", "medium"],
+      reason: ["none", "optional", "required"],
+    });
+    expect([...inventory.states]).toEqual(["rest"]);
   });
 });

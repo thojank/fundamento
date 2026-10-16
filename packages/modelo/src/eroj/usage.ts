@@ -160,11 +160,19 @@ const LABEL_SOURCE = "slot:label";
  * The text a rule judges (Spec 009, D-06): the label, the text of another slot (`texts`) or a
  * string prop (`props`). Empty when the instance has none there.
  */
-export function textOfSource(instance: EroInstance, of: string = LABEL_SOURCE): string | undefined {
+export function textOfSource(
+  instance: EroInstance,
+  of: string = LABEL_SOURCE,
+  skemo?: Skemo,
+): string | undefined {
   if (of === LABEL_SOURCE) return textOf(instance);
   const [kind = "", name = ""] = of.split(":");
   const text = kind === "slot" ? instance.texts?.[name] : instance.props[name];
-  return typeof text === "string" && text.trim() !== "" ? text : undefined;
+  if (typeof text === "string" && text.trim() !== "") return text;
+  // The default slot is the label (Spec 011 ② F-1): a rule on the heading of a dialog reads the
+  // text given as `texts.heading` or as the label — both name the same slot.
+  const isDefault = skemo?.slots.some((slot) => slot.name === name && slot.default === true);
+  return kind === "slot" && isDefault === true ? textOf(instance) : undefined;
 }
 
 /**
@@ -415,8 +423,8 @@ export function approvedLabel(
     if (jugxo.decision !== "approved" || jugxo.ekzemplo?.regulo !== regulo.id) continue;
     for (const instance of jugxo.ekzemplo.instances) {
       // The entries of a slot that takes several (Spec 010 ③): the options, joined.
-      const label = textOfSource(instance, of) ?? entryTextsOf(instance, of)?.join(", ");
       const skemo = eroOf(instance)?.skemo;
+      const label = textOfSource(instance, of, skemo) ?? entryTextsOf(instance, of)?.join(", ");
       if (label === undefined || skemo === undefined) continue;
       labels.push({ label, lingvo: instance.lingvo ?? lingvoOf(skemo, label) });
     }
@@ -446,7 +454,7 @@ const textRule: UsageEnforcer = ({ modelo, regulo, instances, eroOf }) =>
     }
     // Text rules judge a text; an instance without one violates label-required alone (§5). The
     // text is the label, or what `of` names (Spec 009, D-06).
-    const text = textOfSource(instance, rule.of);
+    const text = textOfSource(instance, rule.of, ero.skemo);
     if (text === undefined) return [];
     if (rule.when !== undefined) {
       const goal = goalOfInstance(ero.skemo, instance);
@@ -846,6 +854,9 @@ export const USAGE_ENFORCERS: Readonly<Record<string, UsageEnforcer>> = {
   // are few (adjustable, a warning from the sixth on); both are list checks of the Uzo.
   "option-labels-distinct": textRule,
   "elekto-options-few": textRule,
+  // Spec 011 ② (G6, plan ② D-08): the heading of a dialog names the decision, never only that
+  // something is asked (not-words against the usual empty titles); a text rule of the Uzo.
+  "dialog-title-names-the-decision": textRule,
   // Spec 010 ④ (G6, plan ④ D-09): the placeholder of a select is a prompt, not an example of a
   // value (that is placeholder-is-example of the kampo): at least two words, a text rule of the Uzo.
   "select-placeholder-is-prompt": textRule,

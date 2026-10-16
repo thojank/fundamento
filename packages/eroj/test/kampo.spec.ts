@@ -70,6 +70,50 @@ test.describe("fm-kampo behaviour", () => {
     await expect(page.locator("#a").locator('[part="required-mark"]')).toBeHidden();
   });
 
+  // Nachbesserung F-8 (Abnahme 16.10.): an empty required field a person has not touched shows no
+  // error — no aria-invalid, the border of rest — as elektilo, elekto and markobutono do; the form
+  // still does not send. Once the form was sent (the platform says invalid) or the person typed,
+  // the field says it.
+  test("an empty, untouched required field shows no error until the form is sent", async ({
+    page,
+  }) => {
+    await serve(
+      page,
+      out,
+      `<form id="f">${field('required name="a"')}<fm-kampo id="b" name="b">Name</fm-kampo><button id="s" type="submit">Senden</button></form>`,
+    );
+    const box = page.getByRole("textbox", { name: "E-Mail" });
+    await expect(box).not.toHaveAttribute("aria-invalid");
+    const borders = () =>
+      page.evaluate(() =>
+        ["a", "b"].map(
+          (id) =>
+            getComputedStyle(
+              document.getElementById(id)?.shadowRoot?.querySelector('[part="control"]') as Element,
+            ).borderColor,
+        ),
+      );
+    const before = await borders();
+    expect(before[0]).toBe(before[1]);
+    const sent = await page.evaluate(() => {
+      let submitted = false;
+      const form = document.getElementById("f") as HTMLFormElement;
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        submitted = true;
+      });
+      form.requestSubmit();
+      return submitted;
+    });
+    expect(sent).toBe(false);
+    await expect(box).toHaveAttribute("aria-invalid", "true");
+    const after = await borders();
+    expect(after[0]).not.toBe(after[1]);
+    // Typing takes the error away; a reset of the form takes the report away.
+    await box.fill("a@b.example");
+    await expect(box).not.toHaveAttribute("aria-invalid");
+  });
+
   test("help and error stay hidden without text; the description follows", async ({ page }) => {
     await serve(page, out, field('kind="text"'));
     const box = page.getByRole("textbox", { name: "E-Mail" });

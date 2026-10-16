@@ -161,10 +161,12 @@ describe("the Uzo of the butono (T020)", () => {
   // Spec 010 ① (G5): toggle is the sxaltilo's since PR ①. Spec 010 ③ (G5, plan ③ D-12): choose is
   // two entries, one Ero each — choose-few is the elekto's, choose-many the elektilo's since PR ④.
   it("answers toggle with the sxaltilo, choose-few with the elekto and choose-many with the elektilo, each with a kialo", () => {
+    // Spec 011 ② (G5): a confirmation question is a dialogo, not a second button.
     expect(uzo?.instead.map((entry) => [entry.goal, entry.ero])).toEqual([
       ["toggle", "sxaltilo"],
       ["choose-many", "elektilo"],
       ["choose-few", "elekto"],
+      ["confirm", "dialogo"],
     ]);
     for (const entry of uzo?.instead ?? []) expect(entry.kialo).toMatch(/\bbecause\b/);
   });

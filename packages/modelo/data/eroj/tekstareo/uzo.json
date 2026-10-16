@@ -1,0 +1,188 @@
+{
+  "$schema": "../../../schema/modelo.schema.json#/$defs/UzoFile",
+  "uzo": {
+    "id": "uzo_01M51T7522SKY4S5HFGV2PPNZG",
+    "ero": "ero_01M51T74A6C97AHDY36TV0SXBY",
+    "skemo": "ske_01M51T74P5M264XDJJ2XWMJQZT",
+    "purpose": "Takes text that runs over several lines from a person: a comment, a description, a reason.",
+    "instead": [
+      {
+        "goal": "one-line",
+        "keywords": {
+          "en": [
+            "name",
+            "email",
+            "search",
+            "one-line"
+          ],
+          "de": [
+            "name",
+            "mail",
+            "suche",
+            "einzeilig"
+          ]
+        },
+        "ero": "kampo",
+        "kialo": "One line of text is a field, because a text area invites more than a name or an address takes; kampo covers it."
+      }
+    ],
+    "boundary": [
+      {
+        "case": "auto-grow",
+        "action": "ask-human",
+        "keywords": {
+          "en": [
+            "autogrow",
+            "grows"
+          ],
+          "de": [
+            "mitwachsen",
+            "wächst"
+          ]
+        },
+        "kialo": "An area that grows with every line moves what stands below it while a person types, because the page reflows; whether a product wants that is a decision of a person."
+      },
+      {
+        "case": "character-count",
+        "action": "ask-human",
+        "keywords": {
+          "en": [
+            "characters",
+            "limit",
+            "maxlength"
+          ],
+          "de": [
+            "zeichen",
+            "zeichenzähler",
+            "zeichenlimit"
+          ]
+        },
+        "kialo": "A count of the characters left is a live text under the area, because the limit must be heard as well as seen; Fundamento has no such part yet, so a person decides."
+      },
+      {
+        "case": "rich-text",
+        "action": "not-supported",
+        "keywords": {
+          "en": [
+            "formatting",
+            "bold",
+            "rich"
+          ],
+          "de": [
+            "formatierung",
+            "fett",
+            "editor"
+          ]
+        },
+        "kialo": "Formatting is an editor, not a field, because bold and lists need their own controls and keys; the area takes plain text."
+      },
+      {
+        "case": "no-visible-label",
+        "action": "not-supported",
+        "via": {
+          "regulo": "field-label-visible"
+        },
+        "kialo": "An area without a visible label is lost once typing starts, because the placeholder disappears then."
+      }
+    ],
+    "composes": {
+      "containers": [
+        {
+          "name": "form",
+          "kialo": "An area without a form has no sender, because the entry is only sent with the form."
+        },
+        {
+          "name": "dialog",
+          "kialo": "A dialog may ask for a reason before it ends, because the decision it ends in may need words."
+        }
+      ],
+      "with": [
+        {
+          "ero": "kampo",
+          "kialo": "Fields and areas of one form stand stacked, because a person reads a form top down."
+        },
+        {
+          "ero": "butono",
+          "kialo": "The form ends with the button that sends it, because filling it in does nothing by itself."
+        }
+      ],
+      "never": [
+        {
+          "ero": "butono",
+          "kialo": "An area stands in no slot of a button, because a button is one target with one name."
+        }
+      ],
+      "spacing": {
+        "owner": "container",
+        "regulo": "spacing-owned-by-container"
+      }
+    },
+    "slots": {
+      "label": {
+        "accepts": [
+          "text"
+        ],
+        "required": true,
+        "max": 1,
+        "nesting": 0
+      },
+      "help": {
+        "accepts": [
+          "text"
+        ],
+        "max": 1,
+        "nesting": 0
+      },
+      "error": {
+        "accepts": [
+          "text"
+        ],
+        "max": 1,
+        "nesting": 0
+      }
+    },
+    "layout": {
+      "size": "container",
+      "wrap": "never"
+    },
+    "content": [
+      {
+        "regulo": "field-label-names-the-datum",
+        "fixed": false,
+        "check": {
+          "kind": "not-words",
+          "words": {
+            "de": [
+              "eingeben",
+              "eintragen",
+              "ausfüllen"
+            ],
+            "en": [
+              "enter",
+              "type",
+              "complete"
+            ]
+          }
+        }
+      },
+      {
+        "regulo": "error-says-what-to-do",
+        "fixed": true,
+        "of": "slot:error",
+        "check": {
+          "kind": "min-words",
+          "count": 3
+        }
+      },
+      {
+        "regulo": "help-is-one-sentence",
+        "fixed": false,
+        "of": "slot:help",
+        "check": {
+          "kind": "max-sentences",
+          "count": 1
+        }
+      }
+    ]
+  }
+}

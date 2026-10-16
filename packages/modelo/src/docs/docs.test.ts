@@ -1391,3 +1391,40 @@ describe("Spec 011 ① documentation (Vojmapo Phase 4, Querschnitt, Phase 6)", (
     expect(nachlese).toContain("jug_01M50KAWKV5A1PYBARPMX4YKJE");
   });
 });
+
+// Spec 011 ② (G9, acceptance 8): the Vojmapo names Spec 011 ② in Phase 4; plan and tasks carry
+// section ② with its decisions, deviations, findings, the Arkitekturo coverage and the red hashes.
+// After a rebase the hashes change: they stand in one row of tasks.md ② and in the one loop below.
+describe("Spec 011 ② documentation (Vojmapo Phase 4)", () => {
+  it("the vojmapo names Spec 011 ②, the text area, the dialog and the Guidelines sentences", () => {
+    const row = read("docs/vojmapo.md")
+      .split("\n")
+      .find((line) => line.startsWith("| 4 |"));
+    expect(row).toContain("**Spec 011 ② (`tekstareo`, `dialogo`");
+    expect(row).toContain("Make baut jeden Text über mehrere Zeilen aus dem Textbereich");
+    expect(row).toContain("jede Rückfrage vor einer unumkehrbaren Aktion aus dem Dialog");
+    expect(row).toContain("Spec 011 ② umgesetzt");
+  });
+
+  it("plan and tasks carry section ② with decisions, deviations, findings, coverage and red hashes", () => {
+    const plan = read("specs/011-eroj-runde-2/plan.md");
+    const tasks = read("specs/011-eroj-runde-2/tasks.md");
+    const section = (text: string) =>
+      text.slice(text.indexOf("## ② Eingabe"), text.indexOf("## ③ Rückmeldung"));
+    for (const heading of [
+      "### Zusammenfassung",
+      "### Entwurfsentscheidungen",
+      "### Arkitekturo-Abdeckung (E11)",
+      "### Abweichungen von der Spec",
+      "### Befunde / Mankoj",
+      "### Offen (für den Maintainer)",
+      "#### D-11 Web Component `fm-tekstareo`",
+      "#### D-12 Web Component `fm-dialogo`",
+    ]) {
+      expect(section(plan)).toContain(heading);
+    }
+    expect(section(plan)).not.toContain("Folgt in PR ②.");
+    expect(section(tasks)).toContain("### Messungen");
+    for (const hash of ["1f386e5", "2a2a2f2"]) expect(section(tasks)).toContain(hash);
+  });
+});

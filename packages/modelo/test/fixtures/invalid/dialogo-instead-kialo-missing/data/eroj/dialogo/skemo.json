@@ -1,0 +1,146 @@
+{
+  "ero": {
+    "id": "ero_01M2XM2NGN3KJSKJ4JTXQWMF72",
+    "name": "dialogo",
+    "skemo": "ske_01M2XM2NWJ39A7BEZ9A2S8GANE",
+    "description": "Fixture Ero: the dialogo of Spec 011 ②, trimmed to what the fixture needs."
+  },
+  "skemo": {
+    "id": "ske_01M2XM2NWJ39A7BEZ9A2S8GANE",
+    "ero": "ero_01M2XM2NGN3KJSKJ4JTXQWMF72",
+    "props": [
+      {
+        "name": "open",
+        "kind": "boolean",
+        "default": false,
+        "description": "Whether the dialog is shown; the application opens it and closes it after confirm or cancel."
+      },
+      {
+        "name": "size",
+        "kind": "enum",
+        "values": [
+          "small",
+          "medium"
+        ],
+        "default": "small",
+        "description": "The width of the surface on the scale of the containers (size.container.*): small for a question, medium for a form."
+      },
+      {
+        "name": "reason",
+        "kind": "enum",
+        "values": [
+          "none",
+          "optional",
+          "required"
+        ],
+        "default": "none",
+        "description": "Whether the dialog asks for a reason: none, an optional text, or a required one that locks the confirmation until text is entered. The reason is a tekstareo the dialog shows itself."
+      }
+    ],
+    "states": [
+      "rest"
+    ],
+    "slots": [
+      {
+        "name": "heading",
+        "default": true,
+        "text": true
+      },
+      {
+        "name": "message",
+        "text": true
+      },
+      {
+        "name": "reason",
+        "text": true
+      },
+      {
+        "name": "content"
+      },
+      {
+        "name": "actions"
+      }
+    ],
+    "parts": {
+      "surface": {
+        "fill": {
+          "fixed": "color.background.default"
+        }
+      },
+      "heading": {
+        "color": {
+          "fixed": "color.text.default"
+        }
+      },
+      "message": {
+        "color": {
+          "fixed": "color.text.default"
+        }
+      },
+      "reason": {
+        "height": {
+          "by": [
+            "reason"
+          ]
+        }
+      },
+      "box": {
+        "gap": {
+          "fixed": "spacing.small"
+        }
+      }
+    },
+    "bindings": [
+      {
+        "part": "reason",
+        "property": "height",
+        "when": {
+          "reason": "none"
+        },
+        "token": "none"
+      },
+      {
+        "part": "reason",
+        "property": "height",
+        "when": {
+          "reason": "optional"
+        },
+        "token": "spacing.medium"
+      },
+      {
+        "part": "reason",
+        "property": "height",
+        "when": {
+          "reason": "required"
+        },
+        "token": "spacing.medium"
+      }
+    ],
+    "a11y": {
+      "role": "dialog",
+      "name": [
+        "slot:heading"
+      ],
+      "description": [
+        "slot:message"
+      ],
+      "states": {},
+      "keys": [
+        "Escape"
+      ]
+    },
+    "constraints": [
+      {
+        "when": {
+          "slot:reason": "empty"
+        },
+        "allowed": {
+          "reason": [
+            "none"
+          ]
+        },
+        "kialo": "A reason field without a visible label is a field a person cannot name, because the dialog asks for words and must say which."
+      }
+    ]
+  }
+}

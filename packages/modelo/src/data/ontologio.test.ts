@@ -149,21 +149,25 @@ describe("the scheme eroj (Spec 008 T009)", () => {
   it("holds one concept per Ero of the Modelo, under #Ero, related to each other", () => {
     expect(eroNames).toEqual([
       "butono",
+      "dialogo",
       "elektilo",
       "elekto",
       "kampo",
       "ligilo",
       "markobutono",
       "sxaltilo",
+      "tekstareo",
     ]);
     expect(eroj.map((concept) => concept.term).sort()).toEqual([
       "Butono",
+      "Dialogo",
       "Elektilo",
       "Elekto",
       "Kampo",
       "Ligilo",
       "Markobutono",
       "Sxaltilo",
+      "Tekstareo",
     ]);
     for (const concept of eroj) {
       expect(concept.broader).toEqual(["#Ero"]);
@@ -177,18 +181,22 @@ describe("the scheme eroj (Spec 008 T009)", () => {
     expect(relations("Ligilo")).toEqual([{ predicate: "references", target: "#Butono" }]);
     // Spec 010 ③: the butono and the kampo send choose-few to the radio group; ④ choose-many to
     // the select.
+    // Spec 011 ②: the butono sends a confirmation question to the dialogo, the kampo several
+    // lines to the tekstareo.
     expect(relations("Butono")).toEqual([
       { predicate: "references", target: "#Ligilo" },
       { predicate: "references", target: "#Kampo" },
       { predicate: "references", target: "#Sxaltilo" },
       { predicate: "references", target: "#Elekto" },
       { predicate: "references", target: "#Elektilo" },
+      { predicate: "references", target: "#Dialogo" },
     ]);
     expect(relations("Kampo")).toEqual([
       { predicate: "references", target: "#Butono" },
       { predicate: "references", target: "#Sxaltilo" },
       { predicate: "references", target: "#Elekto" },
       { predicate: "references", target: "#Elektilo" },
+      { predicate: "references", target: "#Tekstareo" },
     ]);
     // Spec 010 ①: the switch, with its German and English names (Schalter, switch); since ② it
     // sends a setting that applies only with the form to the checkbox.
@@ -196,6 +204,7 @@ describe("the scheme eroj (Spec 008 T009)", () => {
       { predicate: "references", target: "#Butono" },
       { predicate: "references", target: "#Kampo" },
       { predicate: "references", target: "#Markobutono" },
+      { predicate: "references", target: "#Dialogo" },
     ]);
     const sxaltilo = eroj.find((concept) => concept.term === "Sxaltilo");
     expect(sxaltilo?.prefLabel).toEqual({ eo: "Sxaltilo", en: "switch", de: "Schalter" });
@@ -207,6 +216,7 @@ describe("the scheme eroj (Spec 008 T009)", () => {
       { predicate: "references", target: "#Kampo" },
       { predicate: "references", target: "#Butono" },
       { predicate: "references", target: "#Elekto" },
+      { predicate: "references", target: "#Dialogo" },
     ]);
     const markobutono = eroj.find((concept) => concept.term === "Markobutono");
     expect(markobutono?.prefLabel).toEqual({
@@ -254,8 +264,8 @@ describe("the scheme eroj (Spec 008 T009)", () => {
         mutate((copy) => {
           copy.concepts.push({
             ...(copy.concepts.find((concept) => concept.term === "Ligilo") as Concept),
-            term: "Tekstareo",
-            uri: "https://fundamento.ciferecigo.com/ontologio#Tekstareo",
+            term: "Avizo",
+            uri: "https://fundamento.ciferecigo.com/ontologio#Avizo",
             relations: [],
           });
         }),

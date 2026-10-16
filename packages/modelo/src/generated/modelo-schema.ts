@@ -240,7 +240,7 @@ export type SkemoPartSource =
       sameAs: string;
     };
 /**
- * Platform-neutral part properties (Art. VIII); the mapping to CSS or another platform is Celo knowledge in the projections. position takes a term, not a token: start or end along the control (Spec 010 ①, plan D-04, the knob of a switch).
+ * Platform-neutral part properties (Art. VIII); the mapping to CSS or another platform is Celo knowledge in the projections. position takes a term, not a token: start or end along the control (Spec 010 ①, plan D-04, the knob of a switch). shadow binds an elevation.shadow.* token: the lift of a surface (Spec 011 ②, plan ② D-07, the dialog).
  *
  * This interface was referenced by `ModeloJson`'s JSON-Schema
  * via the `definition` "SkemoPartProperty".
@@ -259,7 +259,8 @@ export type SkemoPartProperty =
   | "size"
   | "duration"
   | "easing"
-  | "position";
+  | "position"
+  | "shadow";
 /**
  * Text transformation of a typography role (Spec 001, D-11). DTCG has no field for it; the values are platform-neutral.
  *

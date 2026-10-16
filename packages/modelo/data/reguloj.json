@@ -192,13 +192,14 @@
     {
       "id": "reg_01M2XMV80DG7JCJDTZGE66MGHW",
       "name": "one-primary-per-container",
-      "statement": "A container holds at most one butono with emphasis=high; instances without a named container count as one container.",
+      "statement": "A container holds at most one butono with emphasis=high; instances without a named container count as one container. The actions of a dialogo are such a container (Spec 011 ②).",
       "kialo": "Two equal calls to action move the decision onto the user; one primary action makes the next step obvious, and every other action steps back as secondary or tertiary.",
-      "scope": "eroj: butono instances in a design or in code (check_usage)",
+      "scope": "eroj: butono instances in a design or in code (check_usage), the actions of a dialogo among them",
       "checkability": "automatic",
       "appliesTo": {
         "eroj": [
-          "butono"
+          "butono",
+          "dialogo"
         ]
       }
     },
@@ -401,7 +402,9 @@
           "sxaltilo",
           "markobutono",
           "elekto",
-          "elektilo"
+          "elektilo",
+          "tekstareo",
+          "dialogo"
         ]
       }
     },
@@ -525,9 +528,9 @@
     {
       "id": "reg_01M4S1ZR7F1KE1AV1C7X5W8GD5",
       "name": "field-label-visible",
-      "statement": "A kampo, a sxaltilo, a markobutono, an elekto or an elektilo always has a visible label; an empty label slot is a violation.",
+      "statement": "A kampo, a sxaltilo, a markobutono, an elekto, an elektilo or a tekstareo always has a visible label; an empty label slot is a violation.",
       "kialo": "WCAG 3.3.2 (Labels or Instructions): a placeholder disappears while typing, and a label only a screen reader hears does not help the sighted person who finds the field half filled.",
-      "scope": "eroj: kampo, sxaltilo, markobutono, elekto and elektilo instances; the label slot has text",
+      "scope": "eroj: kampo, sxaltilo, markobutono, elekto, elektilo and tekstareo instances; the label slot has text",
       "checkability": "automatic",
       "appliesTo": {
         "eroj": [
@@ -535,44 +538,47 @@
           "sxaltilo",
           "markobutono",
           "elekto",
-          "elektilo"
+          "elektilo",
+          "tekstareo"
         ]
       }
     },
     {
       "id": "reg_01M4S1ZR7GEPZSTB9ES3REK3TX",
       "name": "placeholder-not-label",
-      "statement": "The placeholder of a kampo or an elektilo is not the label: a placeholder without a label is a violation, a placeholder equal to the label a warning.",
+      "statement": "The placeholder of a kampo, an elektilo or a tekstareo is not the label: a placeholder without a label is a violation, a placeholder equal to the label a warning.",
       "kialo": "A placeholder disappears while typing (WCAG 3.3.2), and an example that repeats the label says nothing.",
       "scope": "eroj: kampo and elektilo instances with a placeholder",
       "checkability": "automatic",
       "appliesTo": {
         "eroj": [
           "kampo",
-          "elektilo"
+          "elektilo",
+          "tekstareo"
         ]
       }
     },
     {
       "id": "reg_01M4S1ZR7GEPZSTB9ES3REK3TY",
       "name": "error-says-what-to-do",
-      "statement": "The error text of a kampo, a markobutono, an elekto or an elektilo says what to do, not only that something is wrong.",
+      "statement": "The error text of a kampo, a markobutono, an elekto, an elektilo or a tekstareo says what to do, not only that something is wrong.",
       "kialo": "WCAG 3.3.3 (Error Suggestion): 'Invalid' leaves the person guessing; a sentence with a verb and an object names the way out.",
-      "scope": "eroj: kampo, markobutono, elekto and elektilo instances with an error text; checked as at least three words (check min-words), an approximation without a model: min-words only counts the words, so a three-word text without a way out ('Das ist ungültig') passes (Abnahme Spec 009 A6, R-2; candidate for a better check in the Vojmapo, Phase 6)",
+      "scope": "eroj: kampo, markobutono, elekto, elektilo and tekstareo instances with an error text; checked as at least three words (check min-words), an approximation without a model: min-words only counts the words, so a three-word text without a way out ('Das ist ungültig') passes (Abnahme Spec 009 A6, R-2; candidate for a better check in the Vojmapo, Phase 6)",
       "checkability": "automatic",
       "appliesTo": {
         "eroj": [
           "kampo",
           "markobutono",
           "elekto",
-          "elektilo"
+          "elektilo",
+          "tekstareo"
         ]
       }
     },
     {
       "id": "reg_01M4S1ZR7GEPZSTB9ES3REK3TZ",
       "name": "error-not-color-only",
-      "statement": "An error of a kampo, a markobutono, an elekto or an elektilo is not a red border alone: the Skemo carries a text slot error and speaks the state with aria-invalid.",
+      "statement": "An error of a kampo, a markobutono, an elekto, an elektilo or a tekstareo is not a red border alone: the Skemo carries a text slot error and speaks the state with aria-invalid.",
       "kialo": "WCAG 1.4.1 (Use of Color) and 3.3.1 (Error Identification): a person who does not see the hue must read and hear that the field is wrong.",
       "scope": "eroj: the Skemo of every Ero with the state invalid",
       "checkability": "automatic",
@@ -581,14 +587,15 @@
           "kampo",
           "markobutono",
           "elekto",
-          "elektilo"
+          "elektilo",
+          "tekstareo"
         ]
       }
     },
     {
       "id": "reg_01M4S1ZR7GEPZSTB9ES3REK3V0",
       "name": "required-marked",
-      "statement": "A kampo, a markobutono, an elekto or an elektilo with required true is marked visibly (part required-mark) and audibly (a11y text required in de and en).",
+      "statement": "A kampo, a markobutono, an elekto, an elektilo or a tekstareo with required true is marked visibly (part required-mark) and audibly (a11y text required in de and en).",
       "kialo": "The person should know before sending what may stay empty. The sign of the mark is the Aspekto's; the duty to mark is not.",
       "scope": "eroj: the Skemo of every Ero with a boolean prop required",
       "checkability": "automatic",
@@ -597,16 +604,17 @@
           "kampo",
           "markobutono",
           "elekto",
-          "elektilo"
+          "elektilo",
+          "tekstareo"
         ]
       }
     },
     {
       "id": "reg_01M4S1ZR7GEPZSTB9ES3REK3V1",
       "name": "field-label-names-the-datum",
-      "statement": "The label of a kampo names what is entered, as a noun: 'E-Mail', not 'E-Mail eingeben'; the label of a sxaltilo names its setting the same way, the label of a markobutono its option, the label of an elekto or an elektilo its question: 'Versandart', not 'Versandart wählen'.",
+      "statement": "The label of a kampo names what is entered, as a noun: 'E-Mail', not 'E-Mail eingeben'; the label of a sxaltilo names its setting the same way, the label of a markobutono its option, the label of an elekto, an elektilo or a tekstareo its question: 'Versandart', not 'Versandart wählen'.",
       "kialo": "The label is read as the name of the field, in a form and in a list of fields; a verb in it reads as an instruction, not a name. A brand may show voice here, with a Jugxo.",
-      "scope": "eroj: kampo, sxaltilo, markobutono, elekto and elektilo instances with a label (check not-words: verbs of entering, of choosing for the elekto and the elektilo)",
+      "scope": "eroj: kampo, sxaltilo, markobutono, elekto, elektilo and tekstareo instances with a label (check not-words: verbs of entering, of choosing for the elekto and the elektilo)",
       "checkability": "automatic",
       "appliesTo": {
         "eroj": [
@@ -614,22 +622,24 @@
           "sxaltilo",
           "markobutono",
           "elekto",
-          "elektilo"
+          "elektilo",
+          "tekstareo"
         ]
       }
     },
     {
       "id": "reg_01M4S1ZR7GEPZSTB9ES3REK3V2",
       "name": "help-is-one-sentence",
-      "statement": "The help text of a kampo, an elekto or an elektilo is one sentence.",
+      "statement": "The help text of a kampo, an elekto, an elektilo or a tekstareo is one sentence.",
       "kialo": "Help that is a paragraph is skipped; one sentence next to the field is read.",
-      "scope": "eroj: kampo, elekto and elektilo instances with a help text (check max-sentences 1)",
+      "scope": "eroj: kampo, elekto, elektilo and tekstareo instances with a help text (check max-sentences 1)",
       "checkability": "automatic",
       "appliesTo": {
         "eroj": [
           "kampo",
           "elekto",
-          "elektilo"
+          "elektilo",
+          "tekstareo"
         ]
       }
     },
@@ -696,6 +706,19 @@
       "appliesTo": {
         "eroj": [
           "elektilo"
+        ]
+      }
+    },
+    {
+      "id": "reg_01M51T75E2BJ990J424KTWZ7KB",
+      "name": "dialog-title-names-the-decision",
+      "statement": "The title of a dialogo names the decision it asks for, 'Version freigeben?', 'Standard löschen?', never a word that only says that something is asked: 'Bestätigung', 'Achtung', 'Hinweis'.",
+      "kialo": "A dialog interrupts, and its title must say on its own what it is about: a screen reader names the dialog by its title when it opens, and a person who reads only the title decides from it.",
+      "scope": "eroj: dialogo instances (check not-words against a list of empty titles), an approximation without a model: the list names the usual empty words, a title like 'Wichtig' passes; adjustable: a brand may write its titles otherwise with a Jugxo",
+      "checkability": "automatic",
+      "appliesTo": {
+        "eroj": [
+          "dialogo"
         ]
       }
     }

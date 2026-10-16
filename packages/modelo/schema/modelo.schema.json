@@ -2176,7 +2176,7 @@
       "additionalProperties": false
     },
     "SkemoPartProperty": {
-      "description": "Platform-neutral part properties (Art. VIII); the mapping to CSS or another platform is Celo knowledge in the projections. position takes a term, not a token: start or end along the control (Spec 010 ①, plan D-04, the knob of a switch).",
+      "description": "Platform-neutral part properties (Art. VIII); the mapping to CSS or another platform is Celo knowledge in the projections. position takes a term, not a token: start or end along the control (Spec 010 ①, plan D-04, the knob of a switch). shadow binds an elevation.shadow.* token: the lift of a surface (Spec 011 ②, plan ② D-07, the dialog).",
       "type": "string",
       "enum": [
         "fill",
@@ -2192,7 +2192,8 @@
         "size",
         "duration",
         "easing",
-        "position"
+        "position",
+        "shadow"
       ]
     },
     "SkemoPartSource": {

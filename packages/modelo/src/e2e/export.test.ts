@@ -48,18 +48,20 @@ describe("AK-06: the S6 dialog is answered from dist/modelo.json alone", () => {
     expect(modeloJson.reguloj.every((regulo) => regulo.kialo.trim() !== "")).toBe(true);
     expect(modeloJson.eroj.map((ero) => ero.name)).toEqual([
       "butono",
+      "dialogo",
       "elektilo",
       "elekto",
       "kampo",
       "ligilo",
       "markobutono",
       "sxaltilo",
+      "tekstareo",
     ]);
   });
 
   it("AK-06: states the S6 sentence", () => {
     expect(describeModelo(modeloJson).sentence).toMatch(
-      /^Fundamento v0\.1\.0: six Dimensioj \(aspekto, viewport, density, color-scheme, contrast, motion\), one Aspekto \(`komuna`: reference, MIT, Geist\), \d+ tokens in \w+ types \(.+\), \w+ rules with reasons \(\w+ automatic\), \w+ Jugxoj, seven Eroj \(`butono`, `elektilo`, `elekto`, `kampo`, `ligilo`, `markobutono`, `sxaltilo`\)\. Ask explain why a value is what it is\.$/,
+      /^Fundamento v0\.1\.0: six Dimensioj \(aspekto, viewport, density, color-scheme, contrast, motion\), one Aspekto \(`komuna`: reference, MIT, Geist\), \d+ tokens in \w+ types \(.+\), \w+ rules with reasons \(\w+ automatic\), \w+ Jugxoj, nine Eroj \(`butono`, `dialogo`, `elektilo`, `elekto`, `kampo`, `ligilo`, `markobutono`, `sxaltilo`, `tekstareo`\)\. Ask explain why a value is what it is\.$/,
     );
   });
 });
