@@ -250,13 +250,16 @@ describe("the Vitrino after the acceptances (Nachlese 2026-10-13)", () => {
   // line that never breaks is the input line, not the label. The subject comes from the a11y role.
   it("the layout sentence names the subject and the placement (C8)", () => {
     expect(datumoj.a11yRoloj).toEqual({
+      avizo: "status",
       butono: "button",
       dialogo: "dialog",
       elektilo: "combobox",
       elekto: "radiogroup",
+      insigno: "generic",
       kampo: "textbox",
       ligilo: "link",
       markobutono: "checkbox",
+      plenstato: "status",
       sxaltilo: "switch",
       tekstareo: "textbox",
     });
@@ -462,5 +465,36 @@ describe("the Vitrino shows the tekstareo and the dialogo (Spec 011 ②)", () =>
     // No cell opens the dialog on its own: open is no column.
     expect(grid).not.toContain(" open>");
     expect(grid).not.toContain('<th scope="col">open</th>');
+  });
+});
+
+// Spec 011 ③ (plan ③ D-13): the grid of the insigno has one row per intent × size with the label
+// and the hidden description; the grid of the avizo one row per intent, the columns rest and
+// dismissible, heading and details slotted with their words; the grid of the plenstato one row
+// per kind, no actions (the Skemo forbids them while loading).
+describe("the Vitrino shows the insigno, the avizo and the plenstato (Spec 011 ③)", () => {
+  it("insigno: a row per intent × size, the label and the hidden description", () => {
+    const grid = datumoj.eroj.insigno ?? "";
+    expect((grid.match(/<fm-insigno /g) ?? []).length).toBe(10);
+    expect(grid).toContain(
+      '<fm-insigno intent="success" size="small">success · small<span slot="description">Beschreibung</span></fm-insigno>',
+    );
+    expect(grid).not.toContain('<th scope="col">disabled</th>');
+  });
+
+  it("avizo: a row per intent, the columns rest and dismissible, heading and details with their words", () => {
+    const grid = datumoj.eroj.avizo ?? "";
+    expect((grid.match(/<tr>/g) ?? []).length).toBe(5);
+    expect(grid).toContain('<th scope="col">dismissible</th>');
+    expect(grid).toContain(
+      '<fm-avizo intent="danger" dismissible>danger<span slot="heading">Überschrift</span><span slot="details">Einzelheit</span></fm-avizo>',
+    );
+  });
+
+  it("plenstato: a row per kind, the text alone", () => {
+    const grid = datumoj.eroj.plenstato ?? "";
+    expect(grid).toContain('<fm-plenstato kind="loading">loading</fm-plenstato>');
+    expect(grid).toContain('<fm-plenstato kind="empty">empty</fm-plenstato>');
+    expect(grid).not.toContain('slot="actions"');
   });
 });

@@ -802,3 +802,186 @@ for (const aspekto of ["komuna", "ekzemplo"]) {
     }
   }
 }
+
+// Spec 011 ③ (G7, plan ③ D-08): the rendered fm-insigno in every colour class of komuna and
+// ekzemplo: axe on every intent × size (static text, no role), the text at least 4.5:1 with the
+// surface of the badge, the border at least 3:1 with the page.
+const insigno = input.modelo.eroj.find((entry) => entry.ero.name === "insigno");
+if (insigno === undefined) throw new Error("insigno missing");
+const badgeCombos = combinationsOf(insigno.skemo, ["intent", "size"]);
+const badges = badgeCombos
+  .map(
+    (c, i) =>
+      `<fm-insigno id="i${i}" intent="${c.intent}" size="${c.size}">In Prüfung<span slot="description">Zwei Prüfer lesen die Version.</span></fm-insigno>`,
+  )
+  .join(" ");
+
+for (const aspekto of ["komuna", "ekzemplo"]) {
+  for (const scheme of ["light", "dark"]) {
+    for (const contrast of ["default", "high"]) {
+      test(`${aspekto} ${scheme}/${contrast}: axe on every insigno intent × size, text ≥ 4.5:1 on the badge, border ≥ 3:1 on the page`, async ({
+        page,
+      }) => {
+        await serve(page, out, badges);
+        await page.evaluate(
+          ([a, s, k]) => {
+            const root = document.documentElement;
+            root.setAttribute("data-fm-aspekto", a ?? "");
+            root.setAttribute("data-fm-color-scheme", s ?? "");
+            root.setAttribute("data-fm-contrast", k ?? "");
+          },
+          [aspekto, scheme, contrast],
+        );
+        expect(await axeViolations(page)).toEqual([]);
+        const pageColour = await page.evaluate(
+          () => getComputedStyle(document.body).backgroundColor,
+        );
+        for (const [i, c] of badgeCombos.entries()) {
+          const colours = await page.locator(`#i${i}`).evaluate((element) => {
+            const control = element.shadowRoot?.querySelector('[part="control"]') as HTMLElement;
+            const style = getComputedStyle(control);
+            return {
+              surface: style.backgroundColor,
+              text: style.color,
+              border: style.borderTopColor,
+            };
+          });
+          expect(
+            contrastOf(colours.text, colours.surface),
+            `${JSON.stringify(c)} text`,
+          ).toBeGreaterThanOrEqual(4.5);
+          expect(
+            contrastOf(colours.border, pageColour),
+            `${JSON.stringify(c)} border`,
+          ).toBeGreaterThanOrEqual(3);
+        }
+      });
+    }
+  }
+}
+
+// Spec 011 ③ (G7, plan ③ D-09): the rendered fm-avizo in every colour class: axe (role status,
+// alert for danger) on every intent with heading, message, details, an action and the dismiss
+// butono; heading and message at least 4.5:1 with the surface, the accent at least 3:1 with it;
+// the focus ring of the dismiss butono at least 3:1 with its gap and with the surface.
+const avizo = input.modelo.eroj.find((entry) => entry.ero.name === "avizo");
+if (avizo === undefined) throw new Error("avizo missing");
+const noticeCombos = combinationsOf(avizo.skemo, ["intent"]);
+const notices = noticeCombos
+  .map(
+    (c, i) =>
+      `<fm-avizo id="n${i}" intent="${c.intent}" dismissible>Der Import wurde nicht gespeichert. Prüfe die Datei und lade sie erneut hoch.<span slot="heading">Import</span><ul slot="details"><li>Zeile 3: Titel fehlt</li></ul><fm-butono slot="actions" emphasis="medium">Datei erneut wählen</fm-butono></fm-avizo>`,
+  )
+  .join(" ");
+
+for (const aspekto of ["komuna", "ekzemplo"]) {
+  for (const scheme of ["light", "dark"]) {
+    for (const contrast of ["default", "high"]) {
+      test(`${aspekto} ${scheme}/${contrast}: axe on every avizo intent, texts ≥ 4.5:1 and the accent ≥ 3:1 on the surface`, async ({
+        page,
+        browserName,
+      }) => {
+        await serve(page, out, notices);
+        await page.evaluate(
+          ([a, s, k]) => {
+            const root = document.documentElement;
+            root.setAttribute("data-fm-aspekto", a ?? "");
+            root.setAttribute("data-fm-color-scheme", s ?? "");
+            root.setAttribute("data-fm-contrast", k ?? "");
+          },
+          [aspekto, scheme, contrast],
+        );
+        expect(await axeViolations(page)).toEqual([]);
+        await expect(page.getByRole("alert")).toHaveCount(1);
+        await expect(page.getByRole("status")).toHaveCount(noticeCombos.length - 1);
+        for (const [i, c] of noticeCombos.entries()) {
+          const colours = await page.locator(`#n${i}`).evaluate((element) => {
+            const control = element.shadowRoot?.querySelector('[part="control"]') as HTMLElement;
+            const heading = element.shadowRoot?.querySelector('[part="heading"]') as HTMLElement;
+            const message = element.shadowRoot?.querySelector('[part="message"]') as HTMLElement;
+            const style = getComputedStyle(control);
+            return {
+              surface: style.backgroundColor,
+              accent: style.borderInlineStartColor,
+              heading: getComputedStyle(heading).color,
+              message: getComputedStyle(message).color,
+            };
+          });
+          expect(
+            contrastOf(colours.heading, colours.surface),
+            `${JSON.stringify(c)} heading`,
+          ).toBeGreaterThanOrEqual(4.5);
+          expect(
+            contrastOf(colours.message, colours.surface),
+            `${JSON.stringify(c)} message`,
+          ).toBeGreaterThanOrEqual(4.5);
+          expect(
+            contrastOf(colours.accent, colours.surface),
+            `${JSON.stringify(c)} accent`,
+          ).toBeGreaterThanOrEqual(3);
+        }
+        const rings = await focusRingContrasts(
+          page,
+          noticeCombos.map((_c, i) => `#n${i} >>> [part="dismiss"]`),
+          browserName,
+        );
+        expect(rings).toHaveLength(noticeCombos.length);
+        for (const ring of rings) {
+          expect(ring.gap, `${ring.selector} ring on gap`).toBeGreaterThanOrEqual(3);
+          expect(ring.page, `${ring.selector} ring on surface`).toBeGreaterThanOrEqual(3);
+        }
+      });
+    }
+  }
+}
+
+// Spec 011 ③ (G7, plan ③ D-10): the rendered fm-plenstato in every colour class: axe (role
+// status, busy while loading) on both kinds, the text at least 4.5:1 with the page it stands on,
+// the indicator at least 3:1 with the page while loading.
+const plenstato = input.modelo.eroj.find((entry) => entry.ero.name === "plenstato");
+if (plenstato === undefined) throw new Error("plenstato missing");
+const states = `<fm-plenstato id="p0" kind="loading">Standards werden geladen</fm-plenstato><fm-plenstato id="p1" kind="empty">Noch keine Standards. Lege den ersten an.<fm-butono slot="actions" emphasis="high">Standard anlegen</fm-butono></fm-plenstato>`;
+
+for (const aspekto of ["komuna", "ekzemplo"]) {
+  for (const scheme of ["light", "dark"]) {
+    for (const contrast of ["default", "high"]) {
+      test(`${aspekto} ${scheme}/${contrast}: axe on the loading and the empty plenstato, text ≥ 4.5:1 and indicator ≥ 3:1 on the page`, async ({
+        page,
+      }) => {
+        await serve(page, out, states);
+        await page.evaluate(
+          ([a, s, k]) => {
+            const root = document.documentElement;
+            root.setAttribute("data-fm-aspekto", a ?? "");
+            root.setAttribute("data-fm-color-scheme", s ?? "");
+            root.setAttribute("data-fm-contrast", k ?? "");
+          },
+          [aspekto, scheme, contrast],
+        );
+        expect(await axeViolations(page)).toEqual([]);
+        await expect(page.getByRole("status")).toHaveCount(2);
+        const pageColour = await page.evaluate(
+          () => getComputedStyle(document.body).backgroundColor,
+        );
+        for (const id of ["p0", "p1"]) {
+          const colours = await page.locator(`#${id}`).evaluate((element) => {
+            const text = element.shadowRoot?.querySelector('[part="text"]') as HTMLElement;
+            const indicator = element.shadowRoot?.querySelector(
+              '[part="indicator"]',
+            ) as HTMLElement;
+            return {
+              text: getComputedStyle(text).color,
+              indicator: getComputedStyle(indicator).color,
+            };
+          });
+          expect(contrastOf(colours.text, pageColour), `${id} text`).toBeGreaterThanOrEqual(4.5);
+          if (id === "p0") {
+            expect(contrastOf(colours.indicator, pageColour), "indicator").toBeGreaterThanOrEqual(
+              3,
+            );
+          }
+        }
+      });
+    }
+  }
+}

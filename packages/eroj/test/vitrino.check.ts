@@ -369,3 +369,32 @@ test("fm-dialogo opens from its section, modal and axe-clean, and Escape closes 
   await page.keyboard.press("Escape");
   await expect(page.getByRole("dialog")).toHaveCount(0);
 });
+
+// Spec 011 ③ (plan ③ D-13): the sections of the insigno, the avizo and the plenstato in the
+// Vitrino: every badge upgraded with its label, every notice a live region with heading and
+// details (the danger one an alert), the dismissible column with a close button, both states of
+// the plenstato, axe without a finding.
+test("fm-insigno, fm-avizo and fm-plenstato are upgraded in their sections, axe-clean", async ({
+  page,
+}) => {
+  await open(page);
+  const badges = page.locator("#fm-vitrino-insigno fm-insigno");
+  await expect(badges).toHaveCount(10);
+  await expect(badges.first()).toHaveText(/neutral · small/);
+  const notices = page.locator("#fm-vitrino-avizo fm-avizo");
+  await expect(notices).toHaveCount(8);
+  await expect(page.locator("#fm-vitrino-avizo").getByRole("alert")).toHaveCount(2);
+  await expect(page.locator("#fm-vitrino-avizo").getByRole("status")).toHaveCount(6);
+  await expect(
+    page.locator("#fm-vitrino-avizo").getByRole("button", { name: "Schließen" }),
+  ).toHaveCount(4);
+  const states = page.locator("#fm-vitrino-plenstato fm-plenstato");
+  await expect(states).toHaveCount(2);
+  await expect(page.locator("#fm-vitrino-plenstato").getByRole("status").first()).toHaveAttribute(
+    "aria-busy",
+    "true",
+  );
+  expect(await axeViolations(page, "#fm-vitrino-insigno")).toEqual([]);
+  expect(await axeViolations(page, "#fm-vitrino-avizo")).toEqual([]);
+  expect(await axeViolations(page, "#fm-vitrino-plenstato")).toEqual([]);
+});
