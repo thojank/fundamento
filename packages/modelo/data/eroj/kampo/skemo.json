@@ -17,10 +17,13 @@
           "email",
           "tel",
           "url",
-          "search"
+          "search",
+          "password",
+          "number",
+          "date"
         ],
         "default": "text",
-        "description": "What kind of text is expected; changes the keyboard on touch and the input aids, never the look."
+        "description": "What kind of text is expected; changes the keyboard on touch and the input aids, never the look. password hides what is typed; number takes a whole number (a text input with a numeric keyboard, no wheel or arrows); date opens the platform's own date dialog."
       },
       {
         "name": "value",
@@ -71,6 +74,21 @@
         "name": "name",
         "kind": "string",
         "description": "The name in the form; without effect in a design tool, like type on the butono."
+      },
+      {
+        "name": "min",
+        "kind": "string",
+        "description": "The lowest whole number or earliest date allowed (constraint: only with kind number or date)."
+      },
+      {
+        "name": "max",
+        "kind": "string",
+        "description": "The highest whole number or latest date allowed (constraint: only with kind number or date)."
+      },
+      {
+        "name": "autocomplete",
+        "kind": "string",
+        "description": "What the platform may fill in, in the platform's words: current-password or new-password for a password, email for an e-mail."
       }
     ],
     "states": [
@@ -427,7 +445,9 @@
           "aria-readonly"
         ]
       },
-      "keys": [],
+      "keys": [
+        "Enter"
+      ],
       "texts": {
         "required": {
           "de": "erforderlich",
@@ -457,6 +477,30 @@
           ]
         },
         "kialo": "Two reasons why one cannot type are one too many; disabled wins."
+      },
+      {
+        "when": {
+          "prop:min": "filled"
+        },
+        "allowed": {
+          "kind": [
+            "number",
+            "date"
+          ]
+        },
+        "kialo": "A bound needs a scale; text, an address or a password has none, so min says nothing there."
+      },
+      {
+        "when": {
+          "prop:max": "filled"
+        },
+        "allowed": {
+          "kind": [
+            "number",
+            "date"
+          ]
+        },
+        "kialo": "A bound needs a scale; text, an address or a password has none, so max says nothing there."
       }
     ],
     "goals": [
@@ -493,6 +537,63 @@
         },
         "props": {
           "kind": "email"
+        },
+        "regulo": "field-label-visible"
+      },
+      {
+        "goal": "password",
+        "keywords": {
+          "en": [
+            "password",
+            "passphrase"
+          ],
+          "de": [
+            "passwort",
+            "passwortfeld",
+            "kennwort"
+          ]
+        },
+        "props": {
+          "kind": "password"
+        },
+        "regulo": "field-label-visible"
+      },
+      {
+        "goal": "number",
+        "keywords": {
+          "en": [
+            "number",
+            "integer",
+            "whole"
+          ],
+          "de": [
+            "zahl",
+            "ganzzahl",
+            "ganze",
+            "anzahl"
+          ]
+        },
+        "props": {
+          "kind": "number"
+        },
+        "regulo": "field-label-visible"
+      },
+      {
+        "goal": "date",
+        "keywords": {
+          "en": [
+            "date",
+            "expiry",
+            "deadline"
+          ],
+          "de": [
+            "datum",
+            "ablaufdatum",
+            "frist"
+          ]
+        },
+        "props": {
+          "kind": "date"
         },
         "regulo": "field-label-visible"
       }

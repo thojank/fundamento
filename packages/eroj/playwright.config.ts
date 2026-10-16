@@ -30,5 +30,10 @@ export default defineConfig({
   testIgnore: "**/quickstart.spec.ts",
   timeout: 120_000,
   reporter: [["list"]],
+  // Spec 011 ① (O-21): the tests of one file run in parallel across the workers. Without this a
+  // file is one worker's, and a PR run (one engine) drove the whole rendered accessibility check
+  // through one worker: 396 to 423 s on the runner with seven Eroj (runs 38588087905,
+  // 38591248711, 38671739185; Chromium only). Every test builds its own page; no two share state.
+  fullyParallel: true,
   projects: selectedEngines(),
 });

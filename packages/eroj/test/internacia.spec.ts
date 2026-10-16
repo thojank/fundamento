@@ -488,3 +488,30 @@ for (const factor of [1.35, 2]) {
     expect(after.clipped).toBe(false);
   });
 }
+
+// Spec 011 ① (O-8, plan ② B-4 of Spec 010): a single word longer than the line — a long compound,
+// a pseudo-localised chain of tildes — breaks inside the word now (overflow-wrap on the label of a
+// label that may wrap), so the box stays in its container and nothing is clipped.
+test("markobutono: a single word longer than the line breaks inside the word, nothing is clipped", async ({
+  page,
+}) => {
+  await serve(
+    page,
+    out,
+    `<div id="w" style="inline-size: 12rem"><fm-markobutono id="a">Datenschutzgrundverordnungseinwilligungserklärung~~~~~~~~~~~~~~~~~~~~</fm-markobutono></div>`,
+  );
+  const outer = await page.locator("#w").boundingBox();
+  const host = await page.locator("#a").boundingBox();
+  expect(host?.width ?? 0).toBeLessThanOrEqual((outer?.width ?? 0) + 1);
+  const lines = await page.locator("#a").evaluate((element) => {
+    const label = element.shadowRoot?.querySelector('[part="label"]') as HTMLElement;
+    const field = element.shadowRoot?.querySelector('[part="field"]') as HTMLElement;
+    return {
+      height: label.getBoundingClientRect().height,
+      lineHeight: Number.parseFloat(getComputedStyle(label).lineHeight),
+      clipped: field.scrollWidth > field.clientWidth + 1,
+    };
+  });
+  expect(lines.height).toBeGreaterThan(lines.lineHeight * 1.5);
+  expect(lines.clipped).toBe(false);
+});

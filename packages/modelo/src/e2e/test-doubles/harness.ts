@@ -14,7 +14,7 @@ import {
   rmSync,
   writeFileSync,
 } from "node:fs";
-import { tmpdir } from "node:os";
+import { availableParallelism, tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { expect } from "vitest";
@@ -52,19 +52,54 @@ export function childEnv(): NodeJS.ProcessEnv {
   return env;
 }
 
-/** Runs `node <script> …args` asynchronously (so callers can spawn in parallel). */
-export function runNode(script: string, args: readonly string[], cwd = REPO_ROOT): Promise<Run> {
-  return new Promise((resolvePromise) => {
-    execFile(
-      process.execPath,
-      [script, ...args],
-      { cwd, env: childEnv(), encoding: "utf8", maxBuffer: 64 * 1024 * 1024 },
-      (error, stdout, stderr) => {
-        const code = error === null ? 0 : typeof error.code === "number" ? error.code : Number.NaN;
-        resolvePromise({ code, stdout, stderr });
-      },
-    );
-  });
+/**
+ * The gate of the spawns (Spec 011 ① O-21, plan ① D-01): at most one child process per core at a
+ * time. A `beforeAll` that spawns every fixture at once (checks: 24, validate: ~90) made the
+ * processes thrash on a four-core runner — the hook of checks.test.ts ran past 60 s with seven
+ * Eroj — while the same work takes seconds when it queues. The work does not change, the order
+ * does: callers still `Promise.all` their spawns.
+ */
+const GATE = Math.max(1, availableParallelism());
+let running = 0;
+const waiting: (() => void)[] = [];
+
+function enter(): Promise<void> {
+  if (running < GATE) {
+    running++;
+    return Promise.resolve();
+  }
+  return new Promise((resolvePromise) => waiting.push(resolvePromise));
+}
+
+function leave(): void {
+  const next = waiting.shift();
+  if (next === undefined) running--;
+  else next();
+}
+
+/** Runs `node <script> …args` asynchronously (so callers can spawn in parallel), through the gate. */
+export async function runNode(
+  script: string,
+  args: readonly string[],
+  cwd = REPO_ROOT,
+): Promise<Run> {
+  await enter();
+  try {
+    return await new Promise((resolvePromise) => {
+      execFile(
+        process.execPath,
+        [script, ...args],
+        { cwd, env: childEnv(), encoding: "utf8", maxBuffer: 64 * 1024 * 1024 },
+        (error, stdout, stderr) => {
+          const code =
+            error === null ? 0 : typeof error.code === "number" ? error.code : Number.NaN;
+          resolvePromise({ code, stdout, stderr });
+        },
+      );
+    });
+  } finally {
+    leave();
+  }
 }
 
 /** `fm …args` (the root `pnpm fm` script without pnpm's exit-code masking). */

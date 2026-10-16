@@ -20,9 +20,10 @@ const has = (foreground: string, background: string) =>
   );
 
 describe("KontrastParoj of the repo (D-12, data-model §4)", () => {
-  it("declares about sixty pairs", () => {
+  // Spec 011 ① declared the link colours on raised and sunken (six pairs): 76 now.
+  it("declares about sixty to eighty pairs", () => {
     expect(modelo.kontrastParoj.length).toBeGreaterThanOrEqual(55);
-    expect(modelo.kontrastParoj.length).toBeLessThanOrEqual(70);
+    expect(modelo.kontrastParoj.length).toBeLessThanOrEqual(80);
   });
 
   it("covers status text on the weak and subtle status surfaces (K5)", () => {

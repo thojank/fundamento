@@ -191,13 +191,13 @@ const LABEL_DEFAULTS: Readonly<Record<string, string>> = {
   button: "Aktion",
   link: "Ziel",
   textbox: "Beschriftung",
-  // Spec 010 ① (plan D-10): a switch names a setting; for the maintainer to confirm (no Jugxo).
+  // Spec 010 ① (plan D-10): a switch names a setting (Jugxo jug_01M50KAWKV5A1PYBARPMX4YKJE, O-1).
   switch: "Einstellung",
-  // Spec 010 ② (plan ② D-11): a checkbox names an option; for the maintainer to confirm (O-5).
+  // Spec 010 ② (plan ② D-11): a checkbox names an option (Jugxo jug_01M50KAWKW4N2AG37AJZY1P96V, O-5).
   checkbox: "Option",
-  // Spec 010 ③ (plan ③ D-07): a radio group names its question; for the maintainer to confirm.
+  // Spec 010 ③ (plan ③ D-07): a radio group names its question (Jugxo jug_01M50KAWKW4N2AG37AJZY1P96W, O-9).
   radiogroup: "Frage",
-  // Spec 010 ④ (plan ④ D-07): a select names what is chosen; for the maintainer to confirm (O-15).
+  // Spec 010 ④ (plan ④ D-07): a select names what is chosen (Jugxo jug_01M50KAWKW4N2AG37AJZY1P96X, O-15).
   combobox: "Auswahl",
 };
 

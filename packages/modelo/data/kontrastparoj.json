@@ -509,6 +509,48 @@
       "foreground": "color.border.strong",
       "background": "color.background.sunken",
       "kategorio": "ui"
+    },
+    {
+      "id": "kpa_01M50KAX0420EWQ3Q0Q16SREZF",
+      "name": "link-rest-on-background-raised",
+      "foreground": "color.link.rest",
+      "background": "color.background.raised",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M50KAX05QWG0CTX6643H1ND0",
+      "name": "link-hover-on-background-raised",
+      "foreground": "color.link.hover",
+      "background": "color.background.raised",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M50KAX05QWG0CTX6643H1ND1",
+      "name": "link-visited-on-background-raised",
+      "foreground": "color.link.visited",
+      "background": "color.background.raised",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M50KAX05QWG0CTX6643H1ND2",
+      "name": "link-rest-on-background-sunken",
+      "foreground": "color.link.rest",
+      "background": "color.background.sunken",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M50KAX05QWG0CTX6643H1ND3",
+      "name": "link-hover-on-background-sunken",
+      "foreground": "color.link.hover",
+      "background": "color.background.sunken",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M50KAX05QWG0CTX6643H1ND4",
+      "name": "link-visited-on-background-sunken",
+      "foreground": "color.link.visited",
+      "background": "color.background.sunken",
+      "kategorio": "text-normal"
     }
   ]
 }

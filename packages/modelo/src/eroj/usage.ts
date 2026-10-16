@@ -17,6 +17,7 @@ import type {
 import {
   describeCombination,
   forbiddenBy,
+  PROP_KEY_PREFIX,
   SLOT_EMPTY,
   SLOT_FILLED,
   SLOT_KEY_PREFIX,
@@ -171,12 +172,21 @@ export function textOfSource(instance: EroInstance, of: string = LABEL_SOURCE): 
  * the options, given as a list in `texts` (one text alone counts as one entry). Undefined when the
  * instance gives no texts for the slot.
  */
-export function entryTextsOf(instance: EroInstance, of: string): string[] | undefined {
+export function entryTextsOf(
+  instance: EroInstance,
+  of: string,
+  skemo?: Skemo,
+): string[] | undefined {
   const [kind = "", name = ""] = of.split(":");
   if (kind !== "slot") return undefined;
   const texts = instance.texts?.[name];
   if (texts === undefined) return undefined;
-  return typeof texts === "string" ? [texts] : [...texts];
+  const given = typeof texts === "string" ? [texts] : [...texts];
+  // The empty entry (Spec 011 ①, plan ① D-09): the text of the prop the slot's entry names stands
+  // first among the entries — 'Alle' is an option for the rules on the options.
+  const empty = skemo?.slots.find((slot) => slot.name === name)?.entry?.empty;
+  const label = empty === undefined ? undefined : instance.props[empty];
+  return typeof label === "string" && label.trim() !== "" ? [label, ...given] : given;
 }
 
 /**
@@ -205,6 +215,21 @@ export function slotStates(skemo: Skemo, instance: EroInstance): Record<string, 
       textOfSource(instance, `slot:${slot.name}`) !== undefined ||
       (entryTextsOf(instance, `slot:${slot.name}`) ?? []).some((text) => text.trim() !== "");
     states[`${SLOT_KEY_PREFIX}${slot.name}`] = filled ? SLOT_FILLED : SLOT_EMPTY;
+  }
+  return states;
+}
+
+/**
+ * Whether each string prop of the Skemo is filled in an instance (Spec 011 ①, plan ① D-08): a
+ * non-empty text, or a number. Keyed `prop:<name>`, so a constraint can read it like a slot.
+ */
+export function propStates(skemo: Skemo, instance: EroInstance): Record<string, string> {
+  const states: Record<string, string> = {};
+  for (const prop of skemo.props) {
+    if (prop.kind !== "string") continue;
+    const given = instance.props[prop.name];
+    const filled = (typeof given === "string" && given.trim() !== "") || typeof given === "number";
+    states[`${PROP_KEY_PREFIX}${prop.name}`] = filled ? SLOT_FILLED : SLOT_EMPTY;
   }
   return states;
 }
@@ -487,7 +512,7 @@ function listRuleFinding(
   const of = rule.of ?? LABEL_SOURCE;
   const count = entryCountOf(instance, of);
   if (count === undefined || count === 0) return [];
-  const texts = entryTextsOf(instance, of);
+  const texts = entryTextsOf(instance, of, ero.skemo);
   const slot = of.slice(of.indexOf(":") + 1);
   const failure = listCheckFailure(rule.check, texts, count, slot);
   if (failure === undefined) return [];
@@ -867,8 +892,13 @@ export function evaluateUsage(modelo: Modelo, instances: readonly EroInstance[])
       return;
     }
     const props = effectiveProps(ero.skemo, instance.props);
-    // A constraint may read a slot (Spec 009, D-04): filled or empty stands next to the props.
-    const combination = { ...props, ...slotStates(ero.skemo, instance) };
+    // A constraint may read a slot (Spec 009, D-04) or a string prop (Spec 011 ①, D-08): filled
+    // or empty stands next to the props.
+    const combination = {
+      ...props,
+      ...slotStates(ero.skemo, instance),
+      ...propStates(ero.skemo, instance),
+    };
     const forbidden = forbiddenBy(ero.skemo, combination);
     if (forbidden !== undefined) {
       at(

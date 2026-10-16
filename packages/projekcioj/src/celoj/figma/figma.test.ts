@@ -820,8 +820,10 @@ describe("Figma plan for the kampo (Spec 009 T010)", () => {
   it("plans a field of size × state with the properties of the Skemo", () => {
     expect(set?.structure).toBe("field");
     expect(plan.components[0]?.structure).toBe("control");
+    // Spec 011 ① (E8): the three new kinds and min, max, autocomplete are properties of the plan,
+    // nothing is drawn differently (a date shows the closed field, like the elektilo; E3).
     expect(set?.properties).toEqual({
-      kind: ["text", "email", "tel", "url", "search"],
+      kind: ["text", "email", "tel", "url", "search", "password", "number", "date"],
       value: "TEXT",
       placeholder: "TEXT",
       required: "BOOLEAN",
@@ -830,6 +832,9 @@ describe("Figma plan for the kampo (Spec 009 T010)", () => {
       invalid: "BOOLEAN",
       size: ["small", "medium", "large"],
       name: "TEXT",
+      min: "TEXT",
+      max: "TEXT",
+      autocomplete: "TEXT",
       state: ["rest", "hover", "focus", "disabled", "readonly", "invalid"],
     });
     expect(set?.variants).toHaveLength(3 * 6);
@@ -868,7 +873,16 @@ describe("Figma plan for the kampo (Spec 009 T010)", () => {
       "readonly",
       "invalid",
     ]);
-    expect(items.kampo?.props.kind).toEqual(["text", "email", "tel", "url", "search"]);
+    expect(items.kampo?.props.kind).toEqual([
+      "text",
+      "email",
+      "tel",
+      "url",
+      "search",
+      "password",
+      "number",
+      "date",
+    ]);
     expect(items.kampo?.values["placeholder.color@size=medium,state=rest"]).toMatch(
       /^#[0-9a-f]{6}$/,
     );
@@ -1205,6 +1219,8 @@ describe("Figma plan for the elektilo (Spec 010 ④)", () => {
       size: ["small", "medium", "large"],
       disabled: "BOOLEAN",
       name: "TEXT",
+      // Spec 011 ① (D-09): the empty option is a property of the plan; the set shows the prompt.
+      "empty-label": "TEXT",
       state: ["rest", "hover", "focus", "disabled", "invalid"],
     });
     expect(set?.variants).toHaveLength(3 * 5);

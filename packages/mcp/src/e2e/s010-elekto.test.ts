@@ -174,7 +174,8 @@ describe("list_eroj and the brief (acceptance 1)", () => {
     const brief = await output<Brief>(client, "get_ero", { name: "elekto", brief: true });
     expect(brief.purpose).toBe(elekto.purpose);
     expect(brief.required).toEqual({ props: [], slots: ["label", "options"] });
-    expect(brief.axes.map((axis) => axis.name)).toEqual(["size", "orientation"]);
+    // Spec 011 ① (O-3): selected, the state of one option, is an axis of the brief too.
+    expect(brief.axes.map((axis) => axis.name)).toEqual(["size", "orientation", "selected"]);
     expect(brief.instead?.map((entry) => [entry.goal, entry.ero])).toEqual([
       ["choose-many", "elektilo"],
       ["yes-no", "markobutono"],

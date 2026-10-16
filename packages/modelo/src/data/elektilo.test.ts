@@ -74,6 +74,8 @@ describe("elektilo in the repo Modelo (G1, G2, section 4)", () => {
         ["size", ["small", "medium", "large"], "medium"],
         ["disabled", "boolean", false],
         ["name", "string", undefined],
+        // Spec 011 ① (plan ① D-09): a chosen empty option, 'Alle', 'keine Auswahl', value "".
+        ["empty-label", "string", undefined],
       ],
     );
     expect(skemo?.props.find((prop) => prop.name === "placeholder")?.description).toMatch(
@@ -91,9 +93,15 @@ describe("elektilo in the repo Modelo (G1, G2, section 4)", () => {
   });
 
   it("has the slots of the kampo plus options; every option is an entry with the key selected (③ D-02, O-13)", () => {
+    // Spec 011 ① (D-09): the empty option is an entry of the slot too — the first, with the value
+    // "" and the text of empty-label; option-labels-distinct counts it among the options.
     expect(skemo?.slots).toEqual([
       { name: "label", default: true, text: true },
-      { name: "options", text: true, entry: { key: "selected", equals: "value" } },
+      {
+        name: "options",
+        text: true,
+        entry: { key: "selected", equals: "value", empty: "empty-label" },
+      },
       { name: "help", text: true },
       { name: "error", text: true },
     ]);
@@ -165,7 +173,10 @@ describe("elektilo in the repo Modelo (G1, G2, section 4)", () => {
     if (skemo === undefined) throw new Error("elektilo missing");
     expect(forbiddenBy(skemo, { "slot:error": "filled", invalid: "false" })).toBeDefined();
     expect(forbiddenBy(skemo, { "slot:error": "filled", invalid: "true" })).toBeUndefined();
-    expect(skemo.constraints).toEqual([kampo?.skemo.constraints?.[0]]);
+    // The first constraint is the kampo's; the second is the elektilo's own (Spec 011 ①: no
+    // empty-label beside a placeholder).
+    expect(skemo.constraints?.[0]).toEqual(kampo?.skemo.constraints?.[0]);
+    expect(skemo.constraints).toHaveLength(2);
     expect(
       slotStates(skemo, {
         ero: "elektilo",
@@ -287,7 +298,8 @@ describe("the Uzo of the elektilo (section 4, G5)", () => {
   it("the brief names the purpose, size, the label and the options as duties, and stays under 750", () => {
     if (elektilo === undefined) throw new Error("elektilo missing");
     const brief = briefOf(elektilo);
-    expect(brief.axes.map((axis) => axis.name)).toEqual(["size"]);
+    // Spec 011 ① (O-3): selected, the state of one entry, is an axis of the brief too.
+    expect(brief.axes.map((axis) => axis.name)).toEqual(["size", "selected"]);
     expect(brief.required).toEqual({ props: [], slots: ["label", "options"] });
     const { bytes, units } = briefUnits("elektilo");
     expect(units, `${bytes} bytes`).toBeLessThanOrEqual(750);
@@ -577,5 +589,60 @@ describe("suggest_ero and the select (Gvidanto, section 4)", () => {
     expect(result.output.term).toBe("Elektilo");
     expect(result.output.matchedBy).toBe("altLabel");
     expect(result.output.prefLabel).toEqual({ eo: "Elektilo", en: "select", de: "Auswahlliste" });
+  });
+});
+
+// Spec 011 ① (plan ① D-09): the empty option. Arkitekturo needed 'Alle' and 'keine Auswahl' as a
+// choice with the value "" and got it twice, beside the prompt (QA L6, point 4). empty-label makes
+// the first option a real one; it excludes the placeholder, and it is an option for the rule that
+// keeps option labels apart.
+describe("the empty option of the elektilo (Spec 011 ①)", () => {
+  const judge = (instance: Record<string, unknown>) =>
+    evaluateUsage(modelo, [{ ero: "elektilo", props: {}, ...instance }]);
+
+  it("forbids empty-label beside a placeholder (constraint on two string props)", () => {
+    if (skemo === undefined) throw new Error("elektilo missing");
+    expect(
+      forbiddenBy(skemo, { "prop:empty-label": "filled", "prop:placeholder": "filled" }),
+    ).toBeDefined();
+    expect(
+      forbiddenBy(skemo, { "prop:empty-label": "filled", "prop:placeholder": "empty" }),
+    ).toBeUndefined();
+    expect(
+      forbiddenBy(skemo, { "prop:empty-label": "empty", "prop:placeholder": "filled" }),
+    ).toBeUndefined();
+    const both = judge({
+      label: "Status",
+      props: { "empty-label": "Alle", placeholder: "Bitte wählen" },
+      texts: { options: ["Entwurf", "Gültig"] },
+    });
+    expect(both.violations.map((violation) => violation.issue.rule)).toEqual([
+      "ero-prop-constraint",
+    ]);
+    expect(both.violations[0]?.issue.message).toContain("prop:empty-label=filled");
+  });
+
+  it("'Alle' before 'Entwurf' and 'Gültig' passes; 'Alle' twice is option-labels-distinct", () => {
+    const right = judge({
+      label: "Status",
+      props: { "empty-label": "Alle" },
+      texts: { options: ["Entwurf", "Gültig"] },
+    });
+    expect(right.valid).toBe(true);
+    expect(right.violations).toEqual([]);
+    const twice = judge({
+      label: "Status",
+      props: { "empty-label": "Alle" },
+      texts: { options: ["alle", "Entwurf"] },
+    });
+    expect(twice.violations.map((violation) => violation.issue.rule)).toEqual([
+      "option-labels-distinct",
+    ]);
+    expect(twice.violations[0]?.issue.message).toMatch(/"Alle"/);
+  });
+
+  it("the brief of the elektilo stays under 750 with the empty option", () => {
+    const { bytes, units } = briefUnits("elektilo");
+    expect(units, `${bytes} bytes`).toBeLessThanOrEqual(750);
   });
 });

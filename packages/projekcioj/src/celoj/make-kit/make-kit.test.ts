@@ -474,3 +474,34 @@ describe("Make Kit and the elektilo (Spec 010 ④)", () => {
     },
   );
 });
+
+// Spec 011 ① (G8, plan ① D-02): the Arkitekturo contract. The --fm-* variables the first consumer
+// of the kit reads are recorded as observed usage, with source and date; every one of them must be
+// declared in the styles.css of every kit. A renamed or removed variable turns this red, and is
+// then allowed only with a Jugxo that names the replacement and the consumer.
+describe("the observed usage of the Make Kit by Arkitekturo (Spec 011 ① G8)", () => {
+  const observed = JSON.parse(
+    readFileSync(new URL("./observed-usage/arkitekturo.json", import.meta.url), "utf8"),
+  ) as { consumer: string; kit: string; source: string; date: string; variables: string[] };
+
+  it("names the consumer, the kit, the source and the date of the observation", () => {
+    expect(observed.consumer).toBe("arkitekturo");
+    expect(observed.kit).toMatch(/^@fundamento\/make-kit-komuna@/);
+    expect(observed.source).toContain("arkitekturo-kandidaten.md");
+    expect(observed.date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(observed.variables.length).toBeGreaterThan(50);
+    expect(observed.variables).toEqual([...new Set(observed.variables)].sort());
+    for (const name of observed.variables) expect(name).toMatch(/^--fm-[a-z0-9-]+$/);
+  });
+
+  it.each(ASPEKTOJ)("%s: every observed variable is declared in styles.css", (aspekto) => {
+    const styles = kit(aspekto, "styles.css");
+    const declared = new Set(
+      [...styles.matchAll(/(--fm-[a-z0-9-]+)\s*:/g)].map((match) => match[1] ?? ""),
+    );
+    const missing = observed.variables.filter((name) => !declared.has(name));
+    expect(missing, "renamed or removed without a Jugxo naming replacement and consumer").toEqual(
+      [],
+    );
+  });
+});

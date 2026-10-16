@@ -225,7 +225,8 @@ describe("list_eroj and the brief (acceptance 1, 7)", () => {
     const brief = await output<Brief>(client, "get_ero", { name: "elektilo", brief: true });
     expect(brief.purpose).toBe(elektilo.purpose);
     expect(brief.required).toEqual({ props: [], slots: ["label", "options"] });
-    expect(brief.axes.map((axis) => axis.name)).toEqual(["size"]);
+    // Spec 011 ① (O-3): selected, the state of one option, is an axis of the brief too.
+    expect(brief.axes.map((axis) => axis.name)).toEqual(["size", "selected"]);
     expect(brief.instead?.map((entry) => [entry.goal, entry.ero])).toEqual([
       ["choose-few", "elekto"],
       ["search-in-list", null],
@@ -251,4 +252,48 @@ describe("list_eroj and the brief (acceptance 1, 7)", () => {
       expect(Math.ceil(bytes / 3), `${name}: ${bytes} bytes`).toBeLessThanOrEqual(750);
     },
   );
+});
+
+// Spec 011 ① (plan ① D-09): the empty option 'Alle' — once, as a real option, never beside a
+// prompt; and it counts as an option for option-labels-distinct.
+describe("Spec 011 ①: the empty option of the select", () => {
+  it("'Alle' as empty-label with two options passes; beside a placeholder it is a contradiction the Skemo forbids", async () => {
+    const right = await output<Judged>(client, "check_usage", {
+      instances: [
+        {
+          ero: "elektilo",
+          props: { "empty-label": "Alle" },
+          label: "Status",
+          texts: { options: ["Entwurf", "Gültig"] },
+        },
+      ],
+    });
+    expect(right.valid).toBe(true);
+    expect(right.violations).toEqual([]);
+    const both = await output<Judged>(client, "check_usage", {
+      instances: [
+        {
+          ero: "elektilo",
+          props: { "empty-label": "Alle", placeholder: "Bitte wählen" },
+          label: "Status",
+          texts: { options: ["Entwurf", "Gültig"] },
+        },
+      ],
+    });
+    expect(both.violations.map((entry) => entry.issue.rule)).toEqual(["ero-prop-constraint"]);
+  });
+
+  it("'Alle' twice — as empty-label and as an option — violates option-labels-distinct", async () => {
+    const twice = await output<Judged>(client, "check_usage", {
+      instances: [
+        {
+          ero: "elektilo",
+          props: { "empty-label": "Alle" },
+          label: "Status",
+          texts: { options: ["Alle", "Entwurf"] },
+        },
+      ],
+    });
+    expect(twice.violations.map((entry) => entry.issue.rule)).toEqual(["option-labels-distinct"]);
+  });
 });

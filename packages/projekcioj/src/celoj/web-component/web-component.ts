@@ -393,7 +393,9 @@ const toggleStructure = (
     ':where([part="control"]) { display: inline-flex; align-items: center; box-sizing: border-box; margin: 0; padding: 0; border-style: solid; cursor: pointer; appearance: none; transition-property: background-color, border-color; }',
     ':where([part="indicator"]) { display: block; flex: none; transition-property: background-color; }',
     ':where([part="indicator"]) > svg { display: block; }',
-    `:where([part="label"]) { cursor: pointer; white-space: ${wraps ? "normal" : "nowrap"}; }`,
+    // A label that may wrap breaks inside a word longer than the line too (Spec 011 ① O-8): a long
+    // compound or a pseudo-localised chain would otherwise push the Ero out of its container.
+    `:where([part="label"]) { cursor: pointer; white-space: ${wraps ? "normal; overflow-wrap: anywhere" : "nowrap"}; }`,
     ':where([part="control"]:focus:not(:focus-visible)) { outline-width: 0; }',
     ...(disables
       ? [

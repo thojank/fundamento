@@ -25,6 +25,7 @@ import type {
   UzoLayout,
   UzoSlot,
 } from "../contracts/modelo.js";
+import { variantKeys } from "../eroj/inventories.js";
 import { ASPEKTO_DIMENSIO } from "../load/build.js";
 import { nomRegulo } from "../nomreguloj/index.js";
 import { isNoTarget } from "../nomreguloj/types.js";
@@ -113,8 +114,12 @@ export interface UzoOutput {
 export interface GetEroBrief {
   ero: string;
   purpose?: string;
-  /** Every enum prop of the Skemo with its values and default. */
-  axes: { name: string; values: string[]; default?: string }[];
+  /**
+   * Every enum prop of the Skemo with its values and default; a boolean prop that keys a part
+   * (checked, Spec 010 ① D-03) with true and false; and the state of one entry of a slot
+   * (selected, Spec 010 ③ E7) with the slot it belongs to and no default (Spec 011 ① O-3).
+   */
+  axes: { name: string; values: string[]; default?: string; slot?: string }[];
   /** Props without a default (the caller has to decide them) and slots the Uzo requires. */
   required: { props: string[]; slots: string[] };
   instead?: { goal: string; ero: string | null; kialo: string }[];
@@ -370,15 +375,26 @@ export function uzoOf(modelo: Modelo, uzo: Uzo | undefined): UzoOutput | undefin
 /** The brief answer of an Ero (A8), generated from its Skemo and Uzo. */
 export function briefOf(entry: LoadedEro): GetEroBrief {
   const { skemo, uzo } = entry;
+  // The axes of the variants (Spec 010 ① D-03): every prop a part is keyed by, state aside.
+  const keyedProps = new Set(variantKeys(skemo));
   const brief: GetEroBrief = {
     ero: entry.ero.name,
-    axes: skemo.props
-      .filter((prop) => prop.kind === "enum")
-      .map((prop) => ({
-        name: prop.name,
-        values: [...(prop.values ?? [])],
-        ...(prop.default === undefined ? {} : { default: String(prop.default) }),
-      })),
+    axes: [
+      ...skemo.props
+        .filter(
+          (prop) => prop.kind === "enum" || (prop.kind === "boolean" && keyedProps.has(prop.name)),
+        )
+        .map((prop) => ({
+          name: prop.name,
+          values: prop.kind === "enum" ? [...(prop.values ?? [])] : ["true", "false"],
+          ...(prop.default === undefined ? {} : { default: String(prop.default) }),
+        })),
+      ...skemo.slots.flatMap((slot) =>
+        slot.entry === undefined
+          ? []
+          : [{ name: slot.entry.key, values: ["true", "false"], slot: slot.name }],
+      ),
+    ],
     required: {
       // R-10 (Abnahme 2026-10-13): a duty is what the Skemo marks as required. "No default" is
       // not a duty: label is the fallback name of an empty slot, value the text of an empty field.

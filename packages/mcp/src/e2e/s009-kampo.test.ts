@@ -163,3 +163,26 @@ describe("S4: the agent does not take the field for several lines", () => {
     expect(answer.matched?.goal).toBe("email");
   });
 });
+
+// Spec 011 ① (Gvidanto: „Passwortfeld?“): the question Arkitekturo bridged with a token in plain
+// text has an answer now — the kampo with kind password; a date and a whole number likewise.
+describe("Spec 011 ①: „Passwortfeld?“", () => {
+  it("'Passwortfeld' is the kampo with kind password; 'Ablaufdatum' with kind date; 'ganze Zahl' with kind number", async () => {
+    const password = await output<Suggested>(client, "suggest_ero", { goal: "Passwortfeld" });
+    expect(password.suggestion).toEqual({ ero: "kampo", props: { kind: "password" } });
+    expect(password.matched?.goal).toBe("password");
+    const date = await output<Suggested>(client, "suggest_ero", { goal: "Ablaufdatum des Pins" });
+    expect(date.suggestion).toEqual({ ero: "kampo", props: { kind: "date" } });
+    const number = await output<Suggested>(client, "suggest_ero", {
+      goal: "Vorrang als ganze Zahl",
+    });
+    expect(number.suggestion).toEqual({ ero: "kampo", props: { kind: "number" } });
+  });
+
+  it("min on an e-mail field is a contradiction the Skemo forbids (a bound needs a scale)", async () => {
+    const answer = await output<Judged>(client, "check_usage", {
+      instances: [{ ero: "kampo", props: { kind: "email", min: "3" }, label: "E-Mail" }],
+    });
+    expect(answer.violations.map((entry) => entry.issue.rule)).toEqual(["ero-prop-constraint"]);
+  });
+});

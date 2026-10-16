@@ -5,6 +5,8 @@
 import { describe, expect, it } from "vitest";
 import { boundToken, combinationsOf, forbiddenBy } from "../eroj/skemo-rules.js";
 import { evaluateUsage, slotStates, USAGE_ENFORCERS } from "../eroj/usage.js";
+import { briefOf } from "../gvidanto/eroj.js";
+import { suggestEro } from "../gvidanto/suggest-ero.js";
 import { loadModelo } from "../load/load-modelo.js";
 import { defaultModeloSource } from "../load/source.js";
 import { REGULO_ENFORCERS } from "../validate/regularo-enforcement.js";
@@ -41,8 +43,10 @@ describe("kampo in the repo Modelo (T004)", () => {
   });
 
   it("has the props, states and slots of A1: kind not type, no label prop, three text slots (E2, E7)", () => {
+    // Spec 011 ① (E8): kind takes password, number (whole numbers) and date (the platform's
+    // dialog); min and max bound a number or a date; autocomplete names what the platform fills in.
     expect(skemo.props.map((prop) => [prop.name, prop.values ?? prop.kind, prop.default])).toEqual([
-      ["kind", ["text", "email", "tel", "url", "search"], "text"],
+      ["kind", ["text", "email", "tel", "url", "search", "password", "number", "date"], "text"],
       ["value", "string", undefined],
       ["placeholder", "string", undefined],
       ["required", "boolean", false],
@@ -51,6 +55,9 @@ describe("kampo in the repo Modelo (T004)", () => {
       ["invalid", "boolean", false],
       ["size", ["small", "medium", "large"], "medium"],
       ["name", "string", undefined],
+      ["min", "string", undefined],
+      ["max", "string", undefined],
+      ["autocomplete", "string", undefined],
     ]);
     expect(skemo.props.map((prop) => prop.name)).not.toContain("label");
     expect(skemo.props.map((prop) => prop.name)).not.toContain("type");
@@ -121,6 +128,32 @@ describe("kampo in the repo Modelo (T004)", () => {
       readonly: ["aria-readonly"],
     });
     expect(skemo.a11y.texts).toEqual({ required: { de: "erforderlich", en: "required" } });
+    // Spec 011 ① (O-7): Enter in the one-line field sends the form, so the Skemo names the key.
+    expect(skemo.a11y.keys).toEqual(["Enter"]);
+  });
+
+  // Spec 011 ① (E8): a bound needs a scale — min and max belong to a number or a date; the
+  // constraint reads the string props as filled or empty, like a slot (plan ① D-08).
+  it("forbids min and max on a kind without a scale: text, email, tel, url, search, password", () => {
+    for (const prop of ["min", "max"]) {
+      expect(forbiddenBy(skemo, { [`prop:${prop}`]: "filled", kind: "text" })).toBeDefined();
+      expect(forbiddenBy(skemo, { [`prop:${prop}`]: "filled", kind: "password" })).toBeDefined();
+      expect(forbiddenBy(skemo, { [`prop:${prop}`]: "filled", kind: "number" })).toBeUndefined();
+      expect(forbiddenBy(skemo, { [`prop:${prop}`]: "filled", kind: "date" })).toBeUndefined();
+      expect(forbiddenBy(skemo, { [`prop:${prop}`]: "empty", kind: "text" })).toBeUndefined();
+    }
+    const result = evaluateUsage(modelo, [
+      { ero: "kampo", props: { kind: "email", min: "3" }, label: "E-Mail" },
+    ]);
+    expect(result.violations.map((violation) => violation.issue.rule)).toEqual([
+      "ero-prop-constraint",
+    ]);
+    expect(result.violations[0]?.issue.message).toContain("prop:min=filled");
+    expect(
+      evaluateUsage(modelo, [
+        { ero: "kampo", props: { kind: "number", min: "1", max: "99" }, label: "Vorrang" },
+      ]).violations,
+    ).toEqual([]);
   });
 
   it("forbids an error text without invalid and disabled with readonly (D-04)", () => {
@@ -140,10 +173,14 @@ describe("kampo in the repo Modelo (T004)", () => {
     ]);
   });
 
-  it("knows the goals enter-text and email (kind email) without all-purpose verbs (OP-12)", () => {
+  it("knows the goals enter-text, email, password, number and date without all-purpose verbs (OP-12)", () => {
+    // Spec 011 ① (E8, Gvidanto „Passwortfeld?“): a password, a whole number and a date are kinds.
     expect(skemo.goals?.map((goal) => [goal.goal, goal.props])).toEqual([
       ["enter-text", {}],
       ["email", { kind: "email" }],
+      ["password", { kind: "password" }],
+      ["number", { kind: "number" }],
+      ["date", { kind: "date" }],
     ]);
     const words = (skemo.goals ?? []).flatMap((goal) => Object.values(goal.keywords).flat());
     for (const word of ["eingeben", "enter", "type", "zur", "to"])
@@ -174,10 +211,13 @@ describe("the Uzo of the kampo (T004, A3)", () => {
       ["choose-few", "elekto"],
       ["toggle", "sxaltilo"],
     ]);
+    // Spec 011 ① (G5, E8): password and date are kinds now, their boundaries are gone; what stays
+    // outside is showing a password, a decimal and a range of dates.
     expect(uzo?.boundary.map((entry) => [entry.case, entry.action])).toEqual([
-      ["password", "not-supported"],
+      ["reveal-password", "ask-human"],
       ["number-stepper", "not-supported"],
-      ["date", "ask-human"],
+      ["decimal", "not-supported"],
+      ["date-range", "ask-human"],
       ["file", "ask-human"],
       ["no-visible-label", "not-supported"],
       ["icon-in-field", "not-supported"],
@@ -359,5 +399,75 @@ describe("the Reguloj of the kampo (T003, T004, A2, D-07)", () => {
     ]) {
       expect(names).toContain(name);
     }
+  });
+});
+
+// Spec 011 ① (E8, G5, Gvidanto): the three new kinds answer the questions Arkitekturo bridged by
+// hand — a token typed in plain text, a precedence checked in the view, an expiry as a text field.
+describe("the kampo of Spec 011 ①: password, number and date", () => {
+  const suggest = (goal: string) => {
+    const result = suggestEro(modelo, { goal });
+    if (!result.ok) throw new Error(`suggest_ero ${goal} failed`);
+    return result.output;
+  };
+
+  it("'Passwortfeld' and 'password' are the kampo with kind password", () => {
+    expect(suggest("Passwortfeld").suggestion).toEqual({
+      ero: "kampo",
+      props: { kind: "password" },
+    });
+    expect(suggest("Feld für das Kennwort").suggestion).toEqual({
+      ero: "kampo",
+      props: { kind: "password" },
+    });
+    expect(suggest("A password for the login").suggestion).toEqual({
+      ero: "kampo",
+      props: { kind: "password" },
+    });
+  });
+
+  it("'Ablaufdatum' is the kampo with kind date; 'Vorrang als ganze Zahl' with kind number", () => {
+    expect(suggest("Ablaufdatum des Pins").suggestion).toEqual({
+      ero: "kampo",
+      props: { kind: "date" },
+    });
+    expect(suggest("Vorrang als ganze Zahl").suggestion).toEqual({
+      ero: "kampo",
+      props: { kind: "number" },
+    });
+  });
+
+  it("showing the password, a decimal and a range of dates stop at the boundaries", () => {
+    const reveal = suggest("Passwort einblenden");
+    expect(reveal.action).toBe("ask-human");
+    expect(
+      reveal.candidates?.map((candidate) =>
+        candidate.kind === "boundary" ? candidate.case : candidate.goal,
+      ),
+    ).toEqual(["reveal-password", "password"]);
+    // Not "mit zwei Nachkommastellen": zwei is a word of choose-few (Spec 010 ③ B-2).
+    expect(suggest("Dezimalzahl mit Nachkommastellen").boundary).toMatchObject({
+      ero: "kampo",
+      case: "decimal",
+      action: "not-supported",
+    });
+    expect(suggest("Zeitraum von bis").boundary).toMatchObject({
+      ero: "kampo",
+      case: "date-range",
+      action: "ask-human",
+    });
+    expect(suggest("Zähler mit Plus und Minus").boundary).toMatchObject({
+      ero: "kampo",
+      case: "number-stepper",
+      action: "not-supported",
+    });
+  });
+
+  it("the brief of the kampo stays under 750 with the three kinds and the three boundaries", () => {
+    const brief = briefOf(kampo);
+    expect(brief.axes.map((axis) => axis.name)).toEqual(["kind", "size"]);
+    expect(brief.boundary?.map((entry) => entry.case)).toContain("reveal-password");
+    const bytes = Buffer.byteLength(JSON.stringify(brief), "utf8");
+    expect(Math.ceil(bytes / 3), `${bytes} bytes`).toBeLessThanOrEqual(750);
   });
 });

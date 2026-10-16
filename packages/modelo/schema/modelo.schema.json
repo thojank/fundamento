@@ -2155,13 +2155,16 @@
           "type": "boolean"
         },
         "entry": {
-          "description": "Every entry of the slot is one option of its own, a text with a value (Spec 010 ③, E7, plan ③ D-02): the options of a radio group. key names the state of one entry, a boolean the parts may be keyed by (by, when) — true for the entry whose value is the value of the string prop equals, false for every other. A state of the entry, not of the Ero: no prop, no axis of the variants.",
+          "description": "Every entry of the slot is one option of its own, a text with a value (Spec 010 ③, E7, plan ③ D-02): the options of a radio group. key names the state of one entry, a boolean the parts may be keyed by (by, when) — true for the entry whose value is the value of the string prop equals, false for every other. A state of the entry, not of the Ero: no prop, no axis of the variants. empty names a string prop whose text is a first entry with the value \"\" (Spec 011 ①, plan ① D-09): the empty option of a select, 'Alle'; it counts among the entries for the rules on them.",
           "type": "object",
           "properties": {
             "key": {
               "$ref": "#/$defs/Name"
             },
             "equals": {
+              "$ref": "#/$defs/Name"
+            },
+            "empty": {
               "$ref": "#/$defs/Name"
             }
           },
@@ -2349,11 +2352,15 @@
       "type": "object",
       "properties": {
         "when": {
-          "description": "Prop values the constraint applies to; a key slot:<name> with filled or empty reads a slot (Spec 009, plan D-04).",
+          "description": "Prop values the constraint applies to; a key slot:<name> with filled or empty reads a slot (Spec 009, plan D-04); a key prop:<name> with filled or empty reads a string prop (Spec 011 ①, plan ① D-08).",
           "type": "object",
           "minProperties": 1,
           "patternProperties": {
             "^slot:[a-z0-9]+(-[a-z0-9]+)*$": {
+              "type": "string",
+              "enum": ["filled", "empty"]
+            },
+            "^prop:[a-z0-9]+(-[a-z0-9]+)*$": {
               "type": "string",
               "enum": ["filled", "empty"]
             },
@@ -2364,10 +2371,12 @@
           "additionalProperties": false
         },
         "allowed": {
+          "description": "The values each named prop may take while the constraint applies; a key prop:<name> allows filled or empty of a string prop (Spec 011 ①, plan ① D-08).",
           "type": "object",
           "minProperties": 1,
           "propertyNames": {
-            "$ref": "#/$defs/Name"
+            "type": "string",
+            "pattern": "^(prop:)?[a-z0-9]+(-[a-z0-9]+)*$"
           },
           "additionalProperties": {
             "type": "array",

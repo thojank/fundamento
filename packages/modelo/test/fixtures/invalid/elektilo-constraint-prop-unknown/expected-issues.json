@@ -1,0 +1,9 @@
+{
+  "description": "Spec 011 ① (plan ① D-09, D-08): a constraint reads a string prop as filled or empty — but the prop it names, prompt, is not a prop of the elektilo (the prop is empty-label). skemo-constraint-invalid names the key; the Skemo is otherwise the one of the repo.",
+  "issues": [
+    {
+      "rule": "skemo-constraint-invalid",
+      "path": "data/eroj/elektilo/skemo.json#/skemo/constraints/1/when/prop:prompt"
+    }
+  ]
+}

@@ -224,3 +224,148 @@ test("every size of the input line is at least size.target.min high in every den
     for (const height of heights) expect(height, density).toBeGreaterThanOrEqual(24);
   }
 });
+
+// Spec 011 ① (E8, O-7, plan ① D-07): password, number and date; the form's validity; Enter sends.
+test.describe("fm-kampo of Spec 011 ①: password, number, date, form", () => {
+  test("password hides what is typed and names what the platform fills in", async ({ page }) => {
+    await serve(
+      page,
+      out,
+      `<fm-kampo id="a" kind="password" autocomplete="current-password">Passwort</fm-kampo>`,
+    );
+    const control = page.locator("#a").locator('[part="control"]');
+    await expect(control).toHaveAttribute("type", "password");
+    await expect(control).toHaveAttribute("autocomplete", "current-password");
+    await control.fill("geheim");
+    await expect(page.locator("#a")).toHaveAttribute("value", "geheim");
+    await page.locator("#a").evaluate((e) => e.removeAttribute("autocomplete"));
+    await expect(control).not.toHaveAttribute("autocomplete");
+  });
+
+  test("number: a text input with a numeric keyboard; a whole number passes, 1.5 and abc are invalid, bounds hold; the error slot is the message", async ({
+    page,
+  }) => {
+    await serve(
+      page,
+      out,
+      `<form id="f"><fm-kampo id="a" kind="number" name="n" min="1" max="99">Vorrang</fm-kampo></form>`,
+    );
+    const host = page.locator("#a");
+    const control = host.locator('[part="control"]');
+    await expect(control).toHaveAttribute("type", "text");
+    await expect(control).toHaveAttribute("inputmode", "numeric");
+    const validity = () =>
+      host.evaluate((e) => {
+        const v = e as HTMLElement & { validity: ValidityState; validationMessage: string };
+        return {
+          valid: v.validity.valid,
+          pattern: v.validity.patternMismatch,
+          under: v.validity.rangeUnderflow,
+          over: v.validity.rangeOverflow,
+          message: v.validationMessage,
+          aria: e.shadowRoot?.querySelector('[part="control"]')?.getAttribute("aria-invalid"),
+          form: (document.getElementById("f") as HTMLFormElement).checkValidity(),
+        };
+      });
+    await control.fill("42");
+    expect(await validity()).toMatchObject({ valid: true, aria: null, form: true });
+    await control.fill("1.5");
+    expect(await validity()).toMatchObject({
+      valid: false,
+      pattern: true,
+      aria: "true",
+      form: false,
+    });
+    await control.fill("abc");
+    expect(await validity()).toMatchObject({ valid: false, pattern: true, aria: "true" });
+    await control.fill("0");
+    const under = await validity();
+    expect(under).toMatchObject({
+      valid: false,
+      under: true,
+      over: false,
+      aria: "true",
+      form: false,
+    });
+    expect(under.message.length).toBeGreaterThan(0);
+    await control.fill("100");
+    expect(await validity()).toMatchObject({ valid: false, under: false, over: true });
+    // The error slot's text is the message of the form (error-says-what-to-do).
+    await host.evaluate((e) => {
+      e.insertAdjacentHTML(
+        "beforeend",
+        '<span slot="error">Gib eine Zahl zwischen 1 und 99 ein</span>',
+      );
+    });
+    await expect
+      .poll(async () => (await validity()).message)
+      .toBe("Gib eine Zahl zwischen 1 und 99 ein");
+    await control.fill("7");
+    expect(await validity()).toMatchObject({ valid: true });
+  });
+
+  test("date: the platform's own dialog with its bounds; required keeps the form from being sent", async ({
+    page,
+  }) => {
+    await serve(
+      page,
+      out,
+      `<form id="f"><fm-kampo id="a" kind="date" name="d" min="2026-10-16" required>Ablaufdatum</fm-kampo></form>`,
+    );
+    const host = page.locator("#a");
+    const control = host.locator('[part="control"]');
+    await expect(control).toHaveAttribute("type", "date");
+    await expect(control).toHaveAttribute("min", "2026-10-16");
+    const state = () =>
+      host.evaluate((e) => {
+        const v = e as HTMLElement & { validity: ValidityState; validationMessage: string };
+        return {
+          valid: v.validity.valid,
+          missing: v.validity.valueMissing,
+          under: v.validity.rangeUnderflow,
+          message: v.validationMessage,
+          form: (document.getElementById("f") as HTMLFormElement).checkValidity(),
+        };
+      });
+    const empty = await state();
+    expect(empty).toMatchObject({ valid: false, missing: true, form: false });
+    expect(empty.message).toBe(texts.de);
+    await control.fill("2026-10-01");
+    expect(await state()).toMatchObject({ valid: false, under: true, form: false });
+    await control.fill("2026-12-24");
+    expect(await state()).toMatchObject({ valid: true, form: true });
+    expect(
+      await page.evaluate(() =>
+        new FormData(document.getElementById("f") as HTMLFormElement).get("d"),
+      ),
+    ).toBe("2026-12-24");
+  });
+
+  test("Enter in a one-line field sends the form exactly once; a required empty field does not; reset clears the value", async ({
+    page,
+  }) => {
+    await serve(
+      page,
+      out,
+      `<form id="f"><fm-kampo id="a" name="a" required>Name</fm-kampo><fm-butono type="submit">Senden</fm-butono></form>`,
+    );
+    await page.evaluate(() => {
+      const form = document.getElementById("f") as HTMLFormElement;
+      (window as unknown as { sent: number }).sent = 0;
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        (window as unknown as { sent: number }).sent++;
+      });
+    });
+    const control = page.locator("#a").locator('[part="control"]');
+    await control.focus();
+    await page.keyboard.press("Enter");
+    expect(await page.evaluate(() => (window as unknown as { sent: number }).sent)).toBe(0);
+    await control.fill("Erika");
+    await page.keyboard.press("Enter");
+    expect(await page.evaluate(() => (window as unknown as { sent: number }).sent)).toBe(1);
+    await page.evaluate(() => (document.getElementById("f") as HTMLFormElement).reset());
+    await expect(page.locator("#a")).not.toHaveAttribute("value");
+    await expect(control).toHaveValue("");
+  });
+});

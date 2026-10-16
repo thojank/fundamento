@@ -333,7 +333,8 @@ describe("the Uzo of the elekto (section 3, G5)", () => {
   it("the brief names the purpose, size and orientation, the label and the options as duties, and stays short", () => {
     if (elekto === undefined) throw new Error("elekto missing");
     const brief = briefOf(elekto);
-    expect(brief.axes.map((axis) => axis.name)).toEqual(["size", "orientation"]);
+    // Spec 011 ① (O-3): selected, the state of one entry, is an axis of the brief too.
+    expect(brief.axes.map((axis) => axis.name)).toEqual(["size", "orientation", "selected"]);
     expect(brief.required).toEqual({ props: [], slots: ["label", "options"] });
     const bytes = Buffer.byteLength(JSON.stringify(brief), "utf8");
     expect(Math.ceil(bytes / 3), `${bytes} bytes`).toBeLessThanOrEqual(750);

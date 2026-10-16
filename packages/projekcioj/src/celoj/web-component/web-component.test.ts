@@ -269,6 +269,11 @@ describe("Web Component Celo for the markobutono (Spec 010 ②)", () => {
   const markobutonoStyles = files["eroj/src/generated/markobutono.styles.ts"] ?? "";
   const markobutonoElement = files["eroj/src/generated/fm-markobutono.ts"] ?? "";
   const sxaltiloElement = files["eroj/src/generated/fm-sxaltilo.ts"] ?? "";
+  const sxaltiloCss = JSON.parse(
+    /export const SXALTILO_CSS = (".*");/s.exec(
+      files["eroj/src/generated/sxaltilo.styles.ts"] ?? "",
+    )?.[1] ?? '""',
+  ) as string;
   const markobutonoCss = JSON.parse(
     /export const MARKOBUTONO_CSS = (".*");/s.exec(markobutonoStyles)?.[1] ?? '""',
   ) as string;
@@ -327,7 +332,12 @@ describe("Web Component Celo for the markobutono (Spec 010 ②)", () => {
     expect(markobutonoCss).toContain("border-radius: var(--fm-radius-role-control);");
     expect(markobutonoCss).toContain("inline-size: var(--fm-size-icon-medium);");
     // The label may break (Uzo wrap allowed), the switch's never; the mark shows only marked.
+    // Spec 011 ① (O-8, plan ② B-4 of Spec 010): a single word longer than the line breaks too.
     expect(markobutonoCss).not.toContain("white-space: nowrap");
+    expect(markobutonoCss).toContain(
+      ':where([part="label"]) { cursor: pointer; white-space: normal; overflow-wrap: anywhere; }',
+    );
+    expect(sxaltiloCss).not.toContain("overflow-wrap");
     expect(markobutonoCss).toContain(
       ':where([part="field"]:not([data-marked="true"])) [part="required-mark"] { display: none; }',
     );
@@ -525,12 +535,17 @@ describe("Web Component Celo for the elektilo (Spec 010 ④)", () => {
     expect(elektiloElement).toContain('child.getAttribute("slot") === "options"');
     expect(elektiloElement).toContain('document.createElement("option")');
     expect(elektiloElement).toContain("element.disabled = option.prompt;");
-    expect(elektiloElement).toContain("select.selectedIndex = chosen === -1 ? 0 : chosen;");
+    // Spec 011 ①: the empty option, when set, stands before the chosen one.
+    expect(elektiloElement).toContain(
+      "select.selectedIndex = chosen === -1 ? 0 : chosen + (empty ? 1 : 0);",
+    );
     expect(elektiloElement).toContain("new MutationObserver(");
   });
 
   it("is the form's value and validity; required, invalid and the change of the select", () => {
-    expect(elektiloElement).toContain("this.#internals.setFormValue(chosen === -1 ? null");
+    expect(elektiloElement).toContain(
+      'this.#internals.setFormValue(chosen === -1 ? (empty ? "" : null)',
+    );
     expect(elektiloElement).toContain("setValidity({ valueMissing: true }, missing, select)");
     expect(elektiloElement).toContain('select.setAttribute("aria-required", "true")');
     expect(elektiloElement).toContain('select.setAttribute("aria-invalid", "true")');
@@ -584,5 +599,66 @@ describe("Web Component Celo for the elektilo (Spec 010 ④)", () => {
     const inventory = stylesheetInventory(elektiloStyles);
     expect(inventory.props).toEqual({ size: ["small", "medium", "large"] });
     expect([...inventory.states].sort()).toEqual(["disabled", "focus", "hover", "invalid", "rest"]);
+  });
+});
+
+// Spec 011 ① (E8, O-7, plan ① D-07): the kampo takes a password, a whole number and a date, is
+// the form's validity and sends the form with Enter. A number is a text input with a numeric
+// keyboard and a pattern (GOV.UK: no type=number, whose wheel and arrows change the value); a date
+// is the platform's own dialog; a password hides what is typed and names what the platform fills
+// in. A required field left empty, a number that is no whole number or out of its bounds, and a
+// date the platform refuses keep the form from being sent; the error slot's text is the message.
+describe("Web Component Celo for the kampo of Spec 011 ① (password, number, date, form)", () => {
+  const kampoElement = files["eroj/src/generated/fm-kampo.ts"] ?? "";
+  const kampoStyles = files["eroj/src/generated/kampo.styles.ts"] ?? "";
+
+  it("renders a number as type text with inputmode numeric and a whole-number pattern, a date as type date, a password as type password", () => {
+    expect(kampoElement).toContain('control.type = kind === "number" ? "text" : kind;');
+    expect(kampoElement).toContain('control.setAttribute("inputmode", "numeric")');
+    expect(kampoElement).toContain('control.setAttribute("pattern", "-?[0-9]+")');
+    expect(kampoElement).not.toContain('control.type = "number"');
+    expect(kampoElement).toContain('for (const attribute of ["autocomplete", "min", "max"])');
+    expect(kampoElement).toContain("control.setAttribute(attribute, given)");
+  });
+
+  it("is the form's validity: required, the whole number and its bounds, the platform's date; the error slot's text is the message", () => {
+    expect(kampoElement).toContain("flags = { valueMissing: true }");
+    expect(kampoElement).toContain("rangeUnderflow");
+    expect(kampoElement).toContain("rangeOverflow");
+    expect(kampoElement).toContain("patternMismatch");
+    expect(kampoElement).toContain("#errorText()");
+    expect(kampoElement).toContain("formResetCallback()");
+  });
+
+  it("sends the form with Enter, once, like a native input (O-7)", () => {
+    expect(kampoElement).toContain('if (event.key !== "Enter" || !KEYS.includes("Enter")) return;');
+    expect(kampoElement).toContain("form.requestSubmit()");
+    // Only the field listens for Enter: the select keeps the platform's keys (Spec 010 ④).
+    expect(files["eroj/src/generated/fm-elektilo.ts"] ?? "").not.toContain('event.key !== "Enter"');
+  });
+
+  it("changes nothing in the stylesheet: no kind keys a part", () => {
+    expect(kampoStyles).not.toContain("data-kind");
+    expect(kampoStyles).not.toContain("password");
+  });
+});
+
+// Spec 011 ① (plan ① D-09): the empty option of the select. With empty-label the first option is
+// a real one — the value "", the text of empty-label, chosen while nothing else is, never disabled
+// — and there is no prompt beside it: 'Alle' appears once (QA L6 of Arkitekturo, point 4).
+describe("Web Component Celo for the elektilo of Spec 011 ① (empty-label)", () => {
+  const elektiloElement = files["eroj/src/generated/fm-elektilo.ts"] ?? "";
+
+  it("writes the empty option first, selectable, and leaves the prompt out while empty-label is set", () => {
+    expect(elektiloElement).toContain('const emptyLabel = this.propValue("empty-label")');
+    expect(elektiloElement).toContain("prompt: false");
+    expect(elektiloElement).toContain("element.disabled = option.prompt;");
+    expect(elektiloElement).toContain('typeof emptyLabel === "string" && emptyLabel !== ""');
+  });
+
+  it('the chosen empty option is the form value "", not nothing', () => {
+    expect(elektiloElement).toContain(
+      'this.#internals.setFormValue(chosen === -1 ? (empty ? "" : null)',
+    );
   });
 });

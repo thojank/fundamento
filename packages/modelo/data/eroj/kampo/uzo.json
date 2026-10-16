@@ -23,7 +23,7 @@
           ]
         },
         "ero": null,
-        "kialo": "A text that runs over several lines needs a field that grows with it, because one line hides what was written; Fundamento has no such Ero yet."
+        "kialo": "Several lines need a field that grows with them, because one line hides what was written; Fundamento has no such Ero yet."
       },
       {
         "goal": "choose-many",
@@ -82,23 +82,26 @@
           ]
         },
         "ero": "sxaltilo",
-        "kialo": "A setting that stays on or off needs a control that shows its state, because a text would have to be read to know it; Fundamento covers it with sxaltilo when the setting applies at once (in a form, applied with it: markobutono)."
+        "kialo": "A setting on or off needs a control that shows its state, because a text would have to be read to know it; sxaltilo when it applies at once (in a form, applied with it: markobutono)."
       }
     ],
     "boundary": [
       {
-        "case": "password",
-        "action": "not-supported",
+        "case": "reveal-password",
+        "action": "ask-human",
         "keywords": {
           "en": [
-            "password"
+            "reveal",
+            "unmask",
+            "show-password"
           ],
           "de": [
-            "passwort",
-            "kennwort"
+            "einblenden",
+            "verbergen",
+            "anzeigen"
           ]
         },
-        "kialo": "A password field hides what one types and needs a switch to show it, because a hidden text is an own behaviour, not a kind."
+        "kialo": "A switch that shows the password is a control of its own, because the field only hides; a person decides whether a product wants it."
       },
       {
         "case": "number-stepper",
@@ -112,20 +115,40 @@
             "zähler"
           ]
         },
-        "kialo": "A number with step buttons is a control of its own, because the buttons change the value and the field only shows it."
+        "kialo": "Step buttons are a control of their own, because they change the value and the field only shows it."
       },
       {
-        "case": "date",
+        "case": "decimal",
+        "action": "not-supported",
+        "keywords": {
+          "en": [
+            "decimal",
+            "float",
+            "fraction"
+          ],
+          "de": [
+            "dezimalzahl",
+            "dezimal",
+            "kommazahl",
+            "nachkommastellen"
+          ]
+        },
+        "kialo": "A fraction is written with a comma or a point, because the separator is a locale; number takes whole numbers only."
+      },
+      {
+        "case": "date-range",
         "action": "ask-human",
         "keywords": {
           "en": [
-            "date"
+            "period",
+            "range"
           ],
           "de": [
-            "datum"
+            "zeitraum",
+            "datumsbereich"
           ]
         },
-        "kialo": "A date is typed in a format or picked from a calendar, because people write dates differently; which way a product takes is a decision of a person, and Fundamento has no such Ero yet."
+        "kialo": "Two dates that depend on each other are an Ero of their own, because the end lies after the start; Fundamento has none yet."
       },
       {
         "case": "file",
@@ -140,7 +163,7 @@
             "hochladen"
           ]
         },
-        "kialo": "A file is chosen, not typed, because the value is not text; Fundamento has no such Ero yet, so a person decides."
+        "kialo": "A file is chosen, not typed, because the value is not text; no such Ero yet, so a person decides."
       },
       {
         "case": "no-visible-label",
@@ -148,12 +171,12 @@
         "via": {
           "regulo": "field-label-visible"
         },
-        "kialo": "A field without a visible label cannot be found again once the placeholder is gone, because the placeholder disappears while typing."
+        "kialo": "A field without a visible label is lost once typing starts, because the placeholder disappears then."
       },
       {
         "case": "icon-in-field",
         "action": "not-supported",
-        "kialo": "A prefix or a suffix (currency, unit, icon) comes in a later round, because it changes the inline room of the field; until then an icon stands next to the field, not in it."
+        "kialo": "A prefix or suffix (currency, unit, icon) comes in a later round, because it changes the inline room; until then an icon stands next to the field."
       }
     ],
     "composes": {

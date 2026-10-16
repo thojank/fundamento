@@ -461,3 +461,22 @@ Fixtures (je `expected-issues.json`, `git check-ignore` leer): `elektilo-label-s
 ### Messungen
 
 In [`tasks.md`](tasks.md) ④.
+
+## Nachlese 2026-10-15
+
+Spec 011 ① (Briefing P0 vom 2026-10-15, [`../011-eroj-runde-2/plan.md`](../011-eroj-runde-2/plan.md) ①) räumt die offenen Punkte dieser Spec auf. Die als bestätigt gemeldeten Punkte sind hier nur nachgetragen, nichts ist umgebaut:
+
+- **O-1, O-5, O-9, O-15 bestätigt (14.10.):** die Figma-Vorgabewörter „Einstellung“ (`switch`), „Option“ (`checkbox`), „Frage“ (`radiogroup`), „Auswahl“ (`combobox`) tragen je einen Jugxo: `jug_01M50KAWKV5A1PYBARPMX4YKJE`, `jug_01M50KAWKW4N2AG37AJZY1P96V`, `jug_01M50KAWKW4N2AG37AJZY1P96W`, `jug_01M50KAWKW4N2AG37AJZY1P96X` (Art. VIII, Celo figma, wie `jug_01M4VCG06S4MWFPVPNWMBN9EWF`); `LABEL_DEFAULTS` in `figma.ts` nennt sie.
+- **O-3 umgesetzt:** `brief.axes` nennt jede Prop, nach der ein Teil schlüsselt – `checked` mit `true`/`false` und Standard – und den Zustand eines Eintrags (`selected`, mit `slot`, ohne Standard). `brief` je Ero neu gemessen (Spec 011 ① tasks), keines über 750.
+- **O-4 bestätigt:** `wrap: allowed` beim `markobutono` (② Abweichung 1); `with-text` behält seine eine Bedeutung.
+- **O-6, O-14, O-19 bestätigt:** der Wortlaut von `jug_01M4S2R85WRAC5SV7CARH8RE7S` (Pflichtmarke und Textfarbe in Figma nicht gezeichnet; `markobutono`, `elekto`, `elektilo` mitgenannt) gilt.
+- **O-7 umgesetzt:** `fm-kampo` ist form-associated (Spec 011 ① D-07): Pflicht, ganze Zahl, Grenzen und ein Datum der Plattform halten das Formular an; Enter sendet ab.
+- **O-8 umgesetzt:** `overflow-wrap` steht auf der Strukturliste des Stylesheet-Lints (21 → 22), das umbrechende Label eines Toggles trägt `overflow-wrap: anywhere`; Internacia-Test mit einem Wort, das länger ist als die Zeile (② B-4).
+- **O-10 bestätigt:** Optionen als `<data slot="options" value="…">` im Light DOM (③ D-06).
+- **O-11, O-17 nicht umgesetzt, Kandidaten:** eine Prüfart über Prop und Einträge (horizontal ab vier Optionen; der Platzhalter ist keine der Optionen) steht in der Vojmapo unter Phase 6 bei den Regulo-Kandidaten.
+- **O-12 bestätigt:** kürzere Kialo (③ D-12); Spec 011 ① kürzt nach demselben Muster weiter (`brief` des `kampo` 745).
+- **O-13 bestätigt:** `SkemoSlot.entry` als Form von E7 (③ D-02); Spec 011 ① ergänzt `entry.empty` für die leere Option des `elektilo`.
+- **O-16 bestätigt:** „Bitte wählen“ als Text des Feldes in Figma und Vitrino (④ D-07, D-13).
+- **O-18 bestätigt, kein Schemawechsel:** `mankoj.json` führt nur gemessene Werkzeuglücken (Celo, Evidenz, Schließbedingung). Lücken aus einer Entscheidung (E3: die Liste ist die der Plattform, Figma zeigt das geschlossene Feld) stehen als Grenze in der Uzo (`custom-popup`) und in plan.md (④ M-1).
+- **O-20 bestätigt:** das Ausgabeschema von `describe_term` nennt die Schemata der Ontologio (④ D-15).
+- **O-21 umgesetzt (Spec 011 ① D-01):** die e2e-Laufzeit ist strukturell gebunden, der CI-Faktor 3 des Hooks von `e2e/checks.test.ts` (④, `98aea27`) ist wieder entfernt; Laufzeit vorher und nachher dort.
