@@ -74,3 +74,67 @@ describe("SkemoPartProperty shadow (Spec 011 ② D-07)", () => {
     expect(v("SkemoPart")({ elevation: { fixed: "elevation.shadow.modal" } })).toBe(false);
   });
 });
+
+// Spec 011 ③ (plan ③ D-04): a part may carry a stroke — the dashed border of an empty state — a
+// part property bound to a stroke.* token or to none. Additive.
+describe("SkemoPartProperty stroke (Spec 011 ③ D-04)", () => {
+  it("is a part property keyed or fixed like any other", () => {
+    expect(v("SkemoPartProperty")("stroke")).toBe(true);
+    expect(v("SkemoPart")({ stroke: { by: ["kind"] } })).toBe(true);
+    expect(v("SkemoPart")({ dash: { fixed: "stroke.dashed" } })).toBe(false);
+  });
+});
+
+// Spec 011 ③ (plan ③ D-05): a text slot may be hidden — present for assistive technology, never
+// shown: the long form of a badge. Additive.
+describe("SkemoSlot.hidden (Spec 011 ③ D-05)", () => {
+  it("marks a text slot as visually hidden", () => {
+    expect(v("SkemoSlot")({ name: "description", text: true, hidden: true })).toBe(true);
+    expect(v("SkemoSlot")({ name: "description", hidden: "yes" })).toBe(false);
+  });
+});
+
+// Spec 011 ③ (G6, plan ③ D-06): a text rule may count words upwards (max-words: a badge has at
+// most three) and may apply to instances with a prop value (when.props: the error rule of the
+// avizo for intent danger). Additive; when.goal stays.
+describe("UzoContent max-words and when.props (Spec 011 ③ D-06)", () => {
+  it("accepts max-words with a count", () => {
+    expect(
+      v("UzoContent")({
+        regulo: "badge-text-short",
+        fixed: false,
+        check: { kind: "max-words", count: 3 },
+      }),
+    ).toBe(true);
+    expect(v("UzoContent")({ regulo: "x", fixed: false, check: { kind: "max-words" } })).toBe(
+      false,
+    );
+  });
+
+  it("accepts when.props beside when.goal, and refuses an empty when", () => {
+    expect(
+      v("UzoContent")({
+        regulo: "error-says-what-to-do",
+        fixed: false,
+        when: { props: { intent: ["danger"] } },
+        check: { kind: "min-words", count: 3 },
+      }),
+    ).toBe(true);
+    expect(
+      v("UzoContent")({
+        regulo: "x",
+        fixed: true,
+        when: { goal: ["destructive"] },
+        check: { kind: "min-words", count: 3 },
+      }),
+    ).toBe(true);
+    expect(
+      v("UzoContent")({
+        regulo: "x",
+        fixed: true,
+        when: {},
+        check: { kind: "min-words", count: 3 },
+      }),
+    ).toBe(false);
+  });
+});

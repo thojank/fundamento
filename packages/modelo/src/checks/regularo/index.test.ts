@@ -57,7 +57,7 @@ describe("regularo on the repo", () => {
     expect(result.stats).toEqual({
       reguloj: count("reguloj.json", "reguloj"),
       jugxoj: count("jugxoj.json", "jugxoj"),
-      uzoj: 9,
+      uzoj: 12,
     });
   });
 });

@@ -148,7 +148,7 @@ describe("the S6 dialog from dist/modelo.json alone (AK-06)", () => {
     );
     // Counts change while Spec 001 fills the Vortaro; the shape of the sentence does not.
     expect(description.sentence).toMatch(
-      /^Fundamento v0\.1\.0: six Dimensioj \(aspekto, viewport, density, color-scheme, contrast, motion\), one Aspekto \(`komuna`: reference, MIT, Geist\), \d+ tokens in \w+ types \(.+\), \w+ rules with reasons \(\w+ automatic\), \w+ Jugxoj, nine Eroj \(`butono`, `dialogo`, `elektilo`, `elekto`, `kampo`, `ligilo`, `markobutono`, `sxaltilo`, `tekstareo`\)\. Ask explain why a value is what it is\.$/,
+      /^Fundamento v0\.1\.0: six Dimensioj \(aspekto, viewport, density, color-scheme, contrast, motion\), one Aspekto \(`komuna`: reference, MIT, Geist\), \d+ tokens in \w+ types \(.+\), \w+ rules with reasons \(\w+ automatic\), \w+ Jugxoj, twelve Eroj \(`avizo`, `butono`, `dialogo`, `elektilo`, `elekto`, `insigno`, `kampo`, `ligilo`, `markobutono`, `plenstato`, `sxaltilo`, `tekstareo`\)\. Ask explain why a value is what it is\.$/,
     );
   });
 });

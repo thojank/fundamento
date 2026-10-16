@@ -1,0 +1,117 @@
+{
+  "ero": {
+    "id": "ero_01M2XM2NGN3KJSKJ4JTXQWMF72",
+    "name": "plenstato",
+    "skemo": "ske_01M2XM2NWJ39A7BEZ9A2S8GANE",
+    "description": "Fixture Ero: the plenstato of Spec 011 ③, trimmed to what the fixture needs."
+  },
+  "skemo": {
+    "id": "ske_01M2XM2NWJ39A7BEZ9A2S8GANE",
+    "ero": "ero_01M2XM2NGN3KJSKJ4JTXQWMF72",
+    "props": [
+      {
+        "name": "kind",
+        "kind": "enum",
+        "values": [
+          "loading",
+          "empty"
+        ],
+        "required": true,
+        "description": "Loads or is empty."
+      },
+      {
+        "name": "class",
+        "kind": "string",
+        "description": "a web term, on purpose"
+      }
+    ],
+    "states": [
+      "rest"
+    ],
+    "slots": [
+      {
+        "name": "text",
+        "default": true,
+        "text": true
+      },
+      {
+        "name": "actions"
+      }
+    ],
+    "parts": {
+      "surface": {
+        "fill": {
+          "fixed": "color.background.default"
+        }
+      },
+      "text": {
+        "color": {
+          "fixed": "color.text.default"
+        }
+      },
+      "box": {
+        "gap": {
+          "fixed": "spacing.small"
+        }
+      }
+    },
+    "bindings": [],
+    "a11y": {
+      "role": "status",
+      "name": [
+        "slot:text"
+      ],
+      "states": {},
+      "keys": [],
+      "texts": {
+        "kind-loading": {
+          "de": "lädt",
+          "en": "loading"
+        }
+      }
+    },
+    "goals": [
+      {
+        "goal": "loading",
+        "keywords": {
+          "en": [
+            "loading"
+          ],
+          "de": [
+            "lädt"
+          ]
+        },
+        "props": {
+          "kind": "loading"
+        }
+      },
+      {
+        "goal": "empty",
+        "keywords": {
+          "en": [
+            "empty"
+          ],
+          "de": [
+            "leer"
+          ]
+        },
+        "props": {
+          "kind": "empty"
+        }
+      }
+    ],
+    "constraints": [
+      {
+        "when": {
+          "slot:actions": "filled"
+        },
+        "allowed": {
+          "kind": [
+            "empty"
+          ]
+        },
+        "kialo": "An action while loading acts on nothing, because the fixture says so."
+      }
+    ]
+  }
+}

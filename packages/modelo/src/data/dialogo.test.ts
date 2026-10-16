@@ -153,9 +153,9 @@ describe("the Uzo of the dialogo (section ②, G5)", () => {
     expect(uzo?.layout).toEqual({ size: "container", wrap: "allowed" });
   });
 
-  it("names a mere notice as not covered yet (avizo, ③) and a long form as a person's decision; stops at non-modal, drawer and nested", () => {
+  it("sends a mere notice to the avizo (③) and names a long form as a person's decision; stops at non-modal, drawer and nested", () => {
     expect(uzo?.instead.map((entry) => [entry.goal, entry.ero])).toEqual([
-      ["inform-only", null],
+      ["inform-only", "avizo"],
       ["long-form", null],
     ]);
     expect(uzo?.instead[0]?.kialo).toMatch(/avizo/);
@@ -358,13 +358,9 @@ describe("check_usage and suggest_ero of the dialog (G6, G7, Gvidanto)", () => {
     });
   });
 
-  it("'Gespeichert' as a notice is not covered yet: the dialogo says avizo (③)", () => {
+  it("'Gespeichert' as a notice is the avizo (③): the dialogo's inform-only is use-instead", () => {
     const answer = suggest("Hinweis: gespeichert");
-    expect(answer.suggestion).toBeNull();
-    expect(answer.boundary).toMatchObject({
-      ero: "dialogo",
-      case: "inform-only",
-      action: "ask-human",
-    });
+    expect(answer.suggestion).toEqual({ ero: "avizo", props: {} });
+    expect(answer.matched?.goal).toBe("notify");
   });
 });

@@ -1,0 +1,76 @@
+{
+  "$schema": "../../../schema/modelo.schema.json#/$defs/UzoFile",
+  "uzo": {
+    "id": "uzo_01M4H39SZBPN8VKA70309EJ35G",
+    "ero": "ero_01M2XM2NGN3KJSKJ4JTXQWMF72",
+    "skemo": "ske_01M2XM2NWJ39A7BEZ9A2S8GANE",
+    "purpose": "Tells the person in the flow of the page what happened.",
+    "instead": [
+      {
+        "goal": "needs-decision",
+        "keywords": {
+          "en": [
+            "decision"
+          ],
+          "de": [
+            "entscheidung"
+          ]
+        },
+        "ero": null
+      }
+    ],
+    "boundary": [
+      {
+        "case": "toast",
+        "action": "not-supported",
+        "keywords": {
+          "en": [
+            "toast"
+          ],
+          "de": [
+            "toast"
+          ]
+        },
+        "kialo": "A notice that goes away by itself is not readable for everyone, because the fixture says so."
+      }
+    ],
+    "composes": {
+      "containers": [],
+      "with": [],
+      "never": [],
+      "spacing": {
+        "owner": "container",
+        "regulo": "spacing-owned-by-container"
+      }
+    },
+    "slots": {
+      "heading": {
+        "accepts": [
+          "text"
+        ],
+        "max": 1,
+        "nesting": 0
+      },
+      "message": {
+        "accepts": [
+          "text"
+        ],
+        "required": true,
+        "max": 1,
+        "nesting": 0
+      },
+      "actions": {
+        "accepts": [
+          "text"
+        ],
+        "max": 2,
+        "nesting": 0
+      }
+    },
+    "layout": {
+      "size": "container",
+      "wrap": "allowed"
+    },
+    "content": []
+  }
+}

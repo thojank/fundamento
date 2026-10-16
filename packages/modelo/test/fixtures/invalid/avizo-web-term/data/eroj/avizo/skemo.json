@@ -1,0 +1,108 @@
+{
+  "ero": {
+    "id": "ero_01M2XM2NGN3KJSKJ4JTXQWMF72",
+    "name": "avizo",
+    "skemo": "ske_01M2XM2NWJ39A7BEZ9A2S8GANE",
+    "description": "Fixture Ero: the avizo of Spec 011 ③, trimmed to what the fixture needs."
+  },
+  "skemo": {
+    "id": "ske_01M2XM2NWJ39A7BEZ9A2S8GANE",
+    "ero": "ero_01M2XM2NGN3KJSKJ4JTXQWMF72",
+    "props": [
+      {
+        "name": "intent",
+        "kind": "enum",
+        "values": [
+          "info",
+          "danger"
+        ],
+        "default": "info",
+        "description": "Intent."
+      },
+      {
+        "name": "dismissible",
+        "kind": "boolean",
+        "default": false,
+        "description": "Can be closed."
+      },
+      {
+        "name": "onclick",
+        "kind": "string",
+        "description": "a web term, on purpose"
+      }
+    ],
+    "states": [
+      "rest"
+    ],
+    "slots": [
+      {
+        "name": "heading",
+        "text": true
+      },
+      {
+        "name": "message",
+        "default": true,
+        "text": true
+      },
+      {
+        "name": "actions"
+      }
+    ],
+    "parts": {
+      "surface": {
+        "fill": {
+          "fixed": "color.background.default"
+        }
+      },
+      "heading": {
+        "color": {
+          "fixed": "color.text.default"
+        }
+      },
+      "message": {
+        "color": {
+          "fixed": "color.text.default"
+        }
+      },
+      "box": {
+        "gap": {
+          "fixed": "spacing.small"
+        }
+      }
+    },
+    "bindings": [],
+    "a11y": {
+      "role": "status",
+      "name": [
+        "slot:heading",
+        "slot:message"
+      ],
+      "states": {},
+      "keys": [],
+      "texts": {
+        "dismissible": {
+          "de": "Schließen",
+          "en": "Close"
+        },
+        "intent-danger": {
+          "de": "Fehler:",
+          "en": "Error:"
+        }
+      }
+    },
+    "goals": [
+      {
+        "goal": "notify",
+        "keywords": {
+          "en": [
+            "notice"
+          ],
+          "de": [
+            "hinweis"
+          ]
+        },
+        "props": {}
+      }
+    ]
+  }
+}

@@ -22,13 +22,16 @@ describe("list_eroj", () => {
       modelo.eroj.map((entry) => entry.ero.name),
     );
     expect(listEroj(modelo).eroj.map((entry) => entry.name)).toEqual([
+      "avizo",
       "butono",
       "dialogo",
       "elektilo",
       "elekto",
+      "insigno",
       "kampo",
       "ligilo",
       "markobutono",
+      "plenstato",
       "sxaltilo",
       "tekstareo",
     ]);

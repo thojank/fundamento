@@ -1,0 +1,9 @@
+{
+  "description": "Spec 011 ③ G7: the avizo takes its accessible name from the slot message, but its Uzo does not mark the slot required; the slot is a duty (G4: text, never colour alone).",
+  "issues": [
+    {
+      "rule": "uzo-slot-required-missing",
+      "path": "data/eroj/avizo/uzo.json#/uzo/slots/message"
+    }
+  ]
+}

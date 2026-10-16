@@ -69,13 +69,16 @@ describe("get_ero brief (Spec 007 A8)", () => {
   // Spec 008 T014 (A5, E of Spec 009): every Ero's brief, measured; the ceiling stays 750.
   // Spec 010 ④: seven Eroj, the elektilo among them; Spec 011 ②: nine, dialogo and tekstareo.
   it.each([
+    "avizo",
     "butono",
     "dialogo",
     "elektilo",
     "elekto",
+    "insigno",
     "kampo",
     "ligilo",
     "markobutono",
+    "plenstato",
     "sxaltilo",
     "tekstareo",
   ])(
@@ -105,12 +108,15 @@ describe("suggest_ero (FR-13)", () => {
       expect.objectContaining({ rule: "goal-unknown", path: "suggest_ero/goal" }),
     ]);
     expect(result.structuredContent?.allowed).toEqual([
+      "notify",
+      "report-error",
       "destructive",
       "confirm",
       "dismiss",
       "ask-reason",
       "choose-many",
       "choose-few",
+      "status-label",
       "enter-text",
       "email",
       "password",
@@ -120,6 +126,8 @@ describe("suggest_ero (FR-13)", () => {
       "external",
       "agree",
       "opt-in",
+      "loading",
+      "empty",
       "toggle",
       "multi-line",
     ]);
