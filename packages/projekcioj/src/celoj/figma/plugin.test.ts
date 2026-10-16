@@ -4251,6 +4251,47 @@ describe("the dialogo is drawn as a dialog: surface with heading, message, reaso
     );
   });
 
+  // Abnahme Spec 011 ② (F-5, O-8): „Bestätigen" is a butono of emphasis high, „Abbrechen" of
+  // emphasis low. The last stand-in binds its fill and its word's colour to the butono's roles
+  // for emphasis=high, intent=neutral, state=rest, and its radius to the butono's box radius —
+  // the plan's `composed` entry, read from the butono Skemo; the first keeps the dialog's look
+  // (no fill, the message's colour, the surface's border). Both in every variant and on the
+  // example frame.
+  it("fills the confirming action with the butono's primary roles and leaves the cancelling one as it was (F-5)", async () => {
+    const { double, variant } = await drawn();
+    const frame = pageNodes(double).find(
+      (node) => node.type === "FRAME" && node.getSharedPluginData("fundamento", "frame") === "Eroj",
+    );
+    const example = frame?.children.find((child) => child.name === `dialogo – ${BACKDROP_EXAMPLE}`);
+    const roots = [
+      variant("size=small, reason=none, state=rest"),
+      variant("size=medium, reason=required, state=rest"),
+      example,
+    ];
+    for (const root of roots) {
+      const actions = descendant(root, "actions");
+      const [cancel, confirm] = actions?.children ?? [];
+      expect(confirm?.name, root?.name).toBe("action-2");
+      expect(paintOf(confirm, "fills"), root?.name).toBe("color/action/primary/rest");
+      expect(paintOf(descendant(confirm, "action-label"), "fills"), root?.name).toBe(
+        "color/action/primary/text",
+      );
+      expect(bound(confirm, "cornerRadius"), root?.name).toBe("radius/role/control");
+      // The confirming stand-in keeps the dialog's border, padding and the message's role.
+      expect(paintOf(confirm, "strokes"), root?.name).toBe("color/border/default");
+      expect(bound(confirm, "paddingLeft"), root?.name).toBe("spacing/large");
+      expect(bound(descendant(confirm, "action-label"), "fontSize"), root?.name).toBe(
+        "typography/body/1/font-size",
+      );
+      expect(cancel?.name, root?.name).toBe("action-1");
+      expect(cancel?.properties.fills, root?.name).toEqual([]);
+      expect(paintOf(descendant(cancel, "action-label"), "fills"), root?.name).toBe(
+        "color/text/default",
+      );
+      expect(bound(cancel, "cornerRadius"), root?.name).toBeUndefined();
+    }
+  });
+
   it("shows the reason field with its label where a reason is asked, its height bound; hides the content where none", async () => {
     const { variant } = await drawn();
     for (const reason of ["optional", "required"]) {

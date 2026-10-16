@@ -1545,4 +1545,49 @@ describe("Figma plan for the dialogo (Spec 011 ②)", () => {
     expect(items.dialogo?.values["backdrop.color@reason=none,size=small,state=rest"]).toBeDefined();
     expect(items.dialogo?.values["border.width@reason=none,size=small,state=rest"]).toBe("1px");
   });
+
+  // Abnahme Spec 011 ② (F-5, O-8): the confirming action is a butono of emphasis high, the
+  // cancelling one of emphasis low (VITRINO_DIALOG_ACTIONS). The dialogo Skemo gives its actions
+  // no roles — they are composed butono — so the plan reads the butono's own roles for
+  // emphasis=high, intent=neutral, state=rest from the butono Skemo of the Modelo and hands them
+  // to the plugin for the last stand-in: surface fill, label colour and the radius of the box.
+  // The other stand-in keeps the dialog's look. Composed roles are no part of the dialogo and
+  // stay out of its parity inventory.
+  it("binds the confirming action (the last stand-in) to the butono's roles for emphasis high at rest; the cancelling one keeps the dialog's look", () => {
+    expect(set?.composed).toEqual({
+      "action-2": {
+        ero: "butono",
+        props: { emphasis: "high", intent: "neutral", state: "rest" },
+        bindings: {
+          "surface.fill": "color/action/primary/rest",
+          "label.color": "color/action/primary/text",
+          "box.radius": "radius/role/control",
+        },
+        paints: {
+          "surface.fill": expect.objectContaining({ hex: expect.stringMatching(/^#/) }),
+          "label.color": expect.objectContaining({ hex: expect.stringMatching(/^#/) }),
+        },
+      },
+    });
+    // Every binding names a variable of the plan (the butono binds them already).
+    const names = new Set(
+      plan.collections.flatMap((collection) =>
+        collection.variables.map((variableOfPlan) => variableOfPlan.name),
+      ),
+    );
+    for (const name of Object.values(set?.composed?.["action-2"]?.bindings ?? {})) {
+      expect(names.has(name), name).toBe(true);
+    }
+    // The dialogo's own variants bind nothing of the butono (actions.gap is the dialog's own);
+    // no other set composes.
+    for (const entry of set?.variants ?? []) {
+      expect(Object.keys(entry.bindings).some((key) => key.startsWith("action-"))).toBe(false);
+      expect(Object.keys(entry.paints ?? {}).some((key) => key.startsWith("action-"))).toBe(false);
+    }
+    expect(plan.components.filter((component) => component.composed !== undefined)).toHaveLength(1);
+    const items = figmaPlanInventory(plan);
+    expect(
+      Object.keys(items.dialogo?.values ?? {}).filter((key) => key.startsWith("action-")),
+    ).toEqual([]);
+  });
 });

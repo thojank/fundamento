@@ -187,6 +187,57 @@ const DIALOG_ACTION_TEXTS: Readonly<Record<string, string>> = Object.fromEntries
 );
 
 /**
+ * Which stand-in of a dialog looks like which butono (Abnahme Spec 011 ②, F-5; O-8): the last
+ * action — „Bestätigen" — confirms and is a butono of emphasis high; „Abbrechen" before it is of
+ * emphasis low and keeps the dialog's look (VITRINO_DIALOG_ACTIONS, one source for both
+ * pictures). The parts a stand-in can show: its fill, the colour of its word and the radius of
+ * its box — one frame with a text in it, as a control is. The roles are read from the butono's
+ * Skemo at rest; nothing here names a token.
+ */
+export const DIALOG_CONFIRM_ACTION = {
+  node: `action-${Object.keys(DIALOG_ACTION_TEXTS).length}`,
+  ero: "butono",
+  props: { emphasis: "high", intent: "neutral", [STATE_KEY]: "rest" } as Record<string, string>,
+  parts: ["surface.fill", "label.color", "box.radius"] as readonly string[],
+};
+
+/**
+ * The composed look of a dialog's confirming stand-in (F-5): the butono's bindings for the props
+ * of DIALOG_CONFIRM_ACTION, by token name like every binding, with the paints' deckkraft decided
+ * over every mode (F8). `undefined` where the Modelo has no butono or binds none of the parts —
+ * then the stand-in keeps the dialog's look, and the test says so.
+ */
+function composedOf(
+  eroj: readonly LoadedEro[],
+  resolutions: ReturnType<typeof allResolutions>,
+  base: Readonly<Record<string, { value: unknown }>>,
+): FigmaComponentSet["composed"] {
+  const { node, ero, props, parts } = DIALOG_CONFIRM_ACTION;
+  const entry = eroj.find((candidate) => candidate.ero.name === ero);
+  if (entry === undefined) return undefined;
+  const bindings: Record<string, string> = {};
+  const paints: Record<string, FigmaPaint> = {};
+  for (const key of parts) {
+    const [part = "", property = ""] = key.split(".");
+    const bound = boundToken(entry.skemo, part, property, props);
+    if (bound === undefined || isBindingKeyword(bound.token)) continue;
+    bindings[key] = variableName(bound.token);
+    if (PART_PROPERTY_TYPES[property as keyof typeof PART_PROPERTY_TYPES] !== "color") continue;
+    const paint = paintOf(bound.token, resolutions, base);
+    if (paint !== undefined) paints[key] = paint;
+  }
+  if (Object.keys(bindings).length === 0) return undefined;
+  return {
+    [node]: {
+      ero,
+      props: { ...props },
+      bindings,
+      ...(Object.keys(paints).length === 0 ? {} : { paints }),
+    },
+  };
+}
+
+/**
  * The texts of a dialog's set (Spec 011 ②): the message and the label of the reason field from
  * the Vitrino's slot words, the two action words; the heading is the label property.
  */
@@ -332,6 +383,23 @@ export interface FigmaComponentSet {
     backdrop: { binding: string; paint: FigmaPaint };
     padding: number;
   };
+  /**
+   * Stand-ins that look like a composed Ero (Abnahme Spec 011 ②, F-5), per node of the set: the
+   * confirming action of a dialog is a butono of emphasis high (O-8), which the dialogo Skemo
+   * gives no roles of its own. The plan reads the roles from the composed Ero's Skemo for the
+   * named props — the butono's surface fill, label colour and box radius at rest — as bindings
+   * the plugin applies to the stand-in like a control's, with the paints' deckkraft (F8). Not a
+   * part of the set's Skemo, so not in its parity inventory.
+   */
+  composed?: Record<
+    string,
+    {
+      ero: string;
+      props: Record<string, string>;
+      bindings: Record<string, string>;
+      paints?: Record<string, FigmaPaint>;
+    }
+  >;
   /** The purpose of the Uzo, one line, as the description of the set (Spec 007 T028, A12). */
   description?: string;
   /**
@@ -1066,6 +1134,7 @@ function componentSetOf(
   resolutions: ReturnType<typeof allResolutions>,
   base: Readonly<Record<string, { value: unknown }>>,
   reguloj: readonly Regulo[],
+  eroj: readonly LoadedEro[] = [],
 ): FigmaComponentSet {
   const skemo = entry.skemo;
   const description = entry.uzo?.purpose.replace(/\s*\n\s*/g, " ").trim();
@@ -1399,6 +1468,9 @@ function componentSetOf(
     structure === "choice" && entryKey !== undefined
       ? { key: entryKey, texts: [...VITRINO_OPTIONS], selected: 0 }
       : undefined;
+  // The confirming action of a dialog looks like the butono it composes (Abnahme Spec 011 ②,
+  // F-5): its roles read from the butono's Skemo in the same Modelo.
+  const composed = structure === "dialog" ? composedOf(eroj, resolutions, base) : undefined;
   return {
     set: entry.ero.name,
     structure,
@@ -1410,6 +1482,7 @@ function componentSetOf(
     ...(sign === undefined ? {} : { sign }),
     ...(options === undefined ? {} : { entry: options }),
     ...(example === undefined ? {} : { example }),
+    ...(composed === undefined ? {} : { composed }),
     ...(description === undefined ? {} : { description }),
     ...(uzo === undefined ? {} : { uzo }),
     properties,
@@ -1531,6 +1604,7 @@ export const FIGMA_CELO: Celo = {
           allResolutions(modelo),
           base,
           modelo.reguloj,
+          modelo.eroj,
         ),
       ),
       section: { name: FIGMA_SECTION, gap, padding: gap, frame: FIGMA_SET_FRAME },

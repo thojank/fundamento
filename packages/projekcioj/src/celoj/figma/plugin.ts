@@ -1680,6 +1680,18 @@ async function applyComponents(variables, warnings) {
     });
     if (example !== undefined) nodes.backdrop = node;
     const measures = bind(nodes, variant, variables, component.structure);
+    // A stand-in that looks like the Ero it composes (Abnahme Spec 011 ②, F-5): the confirming
+    // action is a butono of emphasis high, so its frame and its word take the butono's bindings
+    // the plan read from that Skemo — the fill, the colour of the label and the radius of the box
+    // — bound as a control's are, after the dialog's own (fill and word colour replace the
+    // dialog's; border, padding and the word's role stay). The other stand-in keeps its look.
+    const composed = component.composed || {};
+    for (const each of stands) {
+      const look = composed[each.key];
+      if (look === undefined) continue;
+      const bound = bind({ control: each.frame, label: each.text }, look, variables, "control");
+      for (const measure of bound) measures.push(measure);
+    }
     // The shadow of the surface (Spec 011 ②): bound where the API binds effects, written where not.
     if (variant.shadow !== undefined) {
       const shadow = shadowEffects(variant.shadow, variables);
