@@ -22,7 +22,12 @@
 // of a notice), a BOOLEAN component property connected to a layer's visible
 // (componentPropertyReferences.visible: dismissible), a dash pattern and an invisible paint (the
 // stroke of a state) — each a belief about the API until the maintainer has measured it in
-// f10b-5.
+// f10b-5. Spec 011 ④ adds the bottom weight (strokeBottomWeight: the border under a table's
+// rows), a minimum width written from the measured width (minWidth: the columns of a table, the
+// track and the fill of a meter — Figma binds no share and a set has no container to fill),
+// clipsContent on the region and the track, textAlignHorizontal RIGHT for a numeric column, and
+// a text that carries two property references (characters and visible: the caption) — beliefs
+// alike until measured.
 
 import { type FigmaPlan, TEXT_CASE_VARIES } from "./figma.js";
 
@@ -60,7 +65,33 @@ type PartNode =
   // A notice (Spec 011 ③): the details text and the dismiss frame; a badge and a state (Spec 011
   // ③) reuse control, text, indicator, mark, texts and actions.
   | "details"
-  | "dismiss";
+  | "dismiss"
+  // A meter (Spec 011 ④, plan ④ D-14): the track with the fill frame in it and the value text;
+  // `unknown` is the track of the example frame, the one node that carries the unknown stroke.
+  | "track"
+  | "fill"
+  | "unknown"
+  | "value-text"
+  // A table (Spec 011 ④): the caption, the region, the head row and the body rows (`row-1` …),
+  // the cells (`head-1` …, `cell-1-1` …) and their texts (`head-text-2` …, `row-header-text-1` …,
+  // `cell-text-1-2` …), the sort button with its text and indicator in the sorted head cell. A
+  // `*` in a binding's node stands for a number: every node of the set whose name matches.
+  | "caption"
+  | "region"
+  | "head"
+  | "sort"
+  | "sort-text"
+  | "sort-indicator"
+  | `head-${string}`
+  | `row-${string}`
+  | `cell-${string}`
+  // A list (Spec 011 ④): the list, its entries — registered as `entry-row-1` … where the entry is
+  // a row (layout columns) and `entry-column-1` … where it is a column (stacked), so the gap binds
+  // to the box's inline padding in the one and to its gap in the other — and their texts.
+  | "list"
+  | `entry-${string}`
+  | `term-${string}`
+  | `value-${string}`;
 
 interface Binding {
   node: PartNode;
@@ -206,6 +237,58 @@ const BINDINGS: Readonly<Record<string, readonly Binding[]>> = {
   "details.color": [{ node: "details", fields: ["fills"], paint: true }],
   "details.typography": typographyOf("details"),
   "dismiss.size": [{ node: "dismiss", fields: ["width", "height"] }],
+  // A meter (Spec 011 ④, plan ④ D-14): the track's fill and radius; its height is a minimum, as
+  // on the web (min-block-size), and the fill is as high as the track (align-self: stretch); the
+  // fill's colour and radius; the unknown stroke on the track of the example frame only (the
+  // node `unknown` is registered there alone, like the backdrop of a dialog); the value text.
+  "track.fill": [{ node: "track", fields: ["fills"], paint: true }],
+  "track.radius": [{ node: "track", fields: ["cornerRadius"] }],
+  "track.height": [
+    { node: "track", fields: ["minHeight"] },
+    { node: "fill", fields: ["minHeight"] },
+  ],
+  "fill.color": [{ node: "fill", fields: ["fills"], paint: true }],
+  "fill.radius": [{ node: "fill", fields: ["cornerRadius"] }],
+  "unknown.color": [{ node: "unknown", fields: ["strokes"], paint: true }],
+  "unknown.width": [{ node: "unknown", fields: ["strokeWeight"] }],
+  "value-text.color": [{ node: "value-text", fields: ["fills"], paint: true }],
+  "value-text.typography": typographyOf("value-text"),
+  // A table (Spec 011 ④, plan ④ D-14): the caption is the label; the head row's fill, the head
+  // texts (the sort button's text takes the sort's colour and the head's role); every cell's
+  // inline padding and minimum height (the web's min-block-size); the row headers' role; the
+  // region's radius; the sort button's fill, colour and radius; the chevron's frame and vector.
+  "caption.color": [{ node: "caption", fields: ["fills"], paint: true }],
+  "caption.typography": typographyOf("caption"),
+  "head.fill": [{ node: "head", fields: ["fills"], paint: true }],
+  "head.color": [{ node: "head-text-*", fields: ["fills"], paint: true }],
+  "head.typography": [...typographyOf("head-text-*"), ...typographyOf("sort-text")],
+  "cell.color": [
+    { node: "cell-text-*-*", fields: ["fills"], paint: true },
+    { node: "row-header-text-*", fields: ["fills"], paint: true },
+  ],
+  "cell.typography": typographyOf("cell-text-*-*"),
+  "cell.inline-padding": [
+    { node: "head-*", fields: ["paddingLeft", "paddingRight"] },
+    { node: "cell-*-*", fields: ["paddingLeft", "paddingRight"] },
+  ],
+  "cell.height": [
+    { node: "head-*", fields: ["minHeight"] },
+    { node: "cell-*-*", fields: ["minHeight"] },
+  ],
+  "row-header.typography": typographyOf("row-header-text-*"),
+  "region.radius": [{ node: "region", fields: ["cornerRadius"] }],
+  "sort.fill": [{ node: "sort", fields: ["fills"], paint: true }],
+  "sort.color": [{ node: "sort-text", fields: ["fills"], paint: true }],
+  "sort.radius": [{ node: "sort", fields: ["cornerRadius"] }],
+  "sort-indicator.size": [{ node: "sort-indicator", fields: ["width", "height"] }],
+  "sort-indicator.color": [{ node: "mark", fields: ["fills"], paint: true }],
+  // A list (Spec 011 ④, plan ④ D-14): the terms and the values as texts, the gap of the list
+  // between its entries.
+  "term.color": [{ node: "term-*", fields: ["fills"], paint: true }],
+  "term.typography": typographyOf("term-*"),
+  "value.color": [{ node: "value-*", fields: ["fills"], paint: true }],
+  "value.typography": typographyOf("value-*"),
+  "list.gap": [{ node: "list", fields: ["itemSpacing"] }],
 };
 
 /**
@@ -268,6 +351,28 @@ const STRUCTURE_BINDINGS: Readonly<Record<string, Readonly<Record<string, readon
     "box.inline-padding": [{ node: "control", fields: [...PADDINGS] }],
     "text.color": [{ node: "text", fields: ["fills"], paint: true }],
     "indicator.color": [{ node: "mark", fields: ["strokes"], paint: true }],
+  },
+  // A table (Spec 011 ④, plan ④ D-14): the border outlines the region on every side and runs
+  // under the head and under every row (the web's border-block-end of every cell — one line per
+  // row here, the bottom side alone, the other three 0).
+  table: {
+    "border.color": [
+      { node: "region", fields: ["strokes"], paint: true },
+      { node: "head", fields: ["strokes"], paint: true },
+      { node: "row-*", fields: ["strokes"], paint: true },
+    ],
+    "border.width": [
+      { node: "region", fields: ["strokeWeight"] },
+      { node: "head", fields: ["strokeBottomWeight"] },
+      { node: "row-*", fields: ["strokeBottomWeight"] },
+    ],
+  },
+  // A list (Spec 011 ④): the gap between term and value is the box's inline padding where the
+  // entry is a row (columns: the web's column-gap) and the box's gap where it is a column
+  // (stacked: the web's row-gap); an entry is registered under the one name or the other.
+  list: {
+    "box.inline-padding": [{ node: "entry-row-*", fields: ["itemSpacing"] }],
+    "box.gap": [{ node: "entry-column-*", fields: ["itemSpacing"] }],
   },
 };
 
@@ -459,6 +564,101 @@ const PLACEHOLDER_LAYOUT = {
 };
 
 /**
+ * The track of a meter (Spec 011 ④, plan ④ D-14): a row that clips its fill to its radius, as on
+ * the web (overflow hidden, border-box: the unknown stroke of the example lies in the size); it
+ * hugs the fill and is at least as high as track.height (bound) and as wide as the wider of the
+ * two texts (written from the measurement — a set has no container to fill).
+ */
+const TRACK_LAYOUT = {
+  layoutMode: "HORIZONTAL",
+  primaryAxisAlignItems: "MIN",
+  counterAxisAlignItems: "MIN",
+  layoutSizingHorizontal: "HUG",
+  layoutSizingVertical: "HUG",
+  strokesIncludedInLayout: true,
+  clipsContent: true,
+  itemSpacing: 0,
+  paddingLeft: 0,
+  paddingRight: 0,
+  paddingTop: 0,
+  paddingBottom: 0,
+};
+
+/**
+ * The fill of a meter (Spec 011 ④): an empty frame whose size is its minimums — the height bound
+ * to track.height like the track's, the width the plan's share of the track, written.
+ */
+const FILL_LAYOUT = {
+  layoutMode: "HORIZONTAL",
+  primaryAxisAlignItems: "MIN",
+  counterAxisAlignItems: "MIN",
+  layoutSizingHorizontal: "HUG",
+  layoutSizingVertical: "HUG",
+  strokesIncludedInLayout: false,
+  itemSpacing: 0,
+  paddingLeft: 0,
+  paddingRight: 0,
+  paddingTop: 0,
+  paddingBottom: 0,
+};
+
+/**
+ * A row of a table (Spec 011 ④, plan ④ D-14): the head and every body row, hugging its cells,
+ * the border under it in the size (border-box).
+ */
+const ROW_LAYOUT = {
+  layoutMode: "HORIZONTAL",
+  primaryAxisAlignItems: "MIN",
+  counterAxisAlignItems: "CENTER",
+  layoutSizingHorizontal: "HUG",
+  layoutSizingVertical: "HUG",
+  strokesIncludedInLayout: true,
+  itemSpacing: 0,
+  paddingLeft: 0,
+  paddingRight: 0,
+  paddingTop: 0,
+  paddingBottom: 0,
+};
+
+/**
+ * A cell of a table (Spec 011 ④): a row holding its text (or the sort button), its inline
+ * padding and minimum height bound (cell.inline-padding, cell.height), hugging — and at least as
+ * wide as the widest cell of its column (minWidth, written from the measurement, so the columns
+ * align). A numeric cell aligns at the end (primaryAxisAlignItems MAX).
+ */
+const CELL_LAYOUT = {
+  layoutMode: "HORIZONTAL",
+  primaryAxisAlignItems: "MIN",
+  counterAxisAlignItems: "CENTER",
+  layoutSizingHorizontal: "HUG",
+  layoutSizingVertical: "HUG",
+  strokesIncludedInLayout: false,
+  itemSpacing: 0,
+  paddingLeft: 0,
+  paddingRight: 0,
+  paddingTop: 0,
+  paddingBottom: 0,
+};
+
+/**
+ * An entry of a list in columns (Spec 011 ④): term then value in a row, the gap bound to the
+ * box's inline padding; stacked, the entry is a column (TEXTS_LAYOUT) with the box's gap.
+ */
+const ENTRY_ROW_LAYOUT = {
+  layoutMode: "HORIZONTAL",
+  primaryAxisAlignItems: "MIN",
+  counterAxisAlignItems: "MIN",
+  layoutSizingHorizontal: "HUG",
+  layoutSizingVertical: "HUG",
+  strokesIncludedInLayout: false,
+  itemSpacing: 0,
+  paddingLeft: 0,
+  paddingRight: 0,
+  paddingTop: 0,
+  paddingBottom: 0,
+};
+
+/**
  * The vector of a check mark (Spec 010 ②, D-09): no line, no effect, its fill bound to the
  * indicator's colour; it scales with its frame, whose size is bound — the frame is the sign's box
  * of 16 the SVG was drawn in.
@@ -612,6 +812,11 @@ const ACTIONS_LAYOUT = ${JSON.stringify(ACTIONS_LAYOUT)};
 const NOTICE_LAYOUT = ${JSON.stringify(NOTICE_LAYOUT)};
 const STATE_LAYOUT = ${JSON.stringify(STATE_LAYOUT)};
 const PLACEHOLDER_LAYOUT = ${JSON.stringify(PLACEHOLDER_LAYOUT)};
+const TRACK_LAYOUT = ${JSON.stringify(TRACK_LAYOUT)};
+const FILL_LAYOUT = ${JSON.stringify(FILL_LAYOUT)};
+const ROW_LAYOUT = ${JSON.stringify(ROW_LAYOUT)};
+const CELL_LAYOUT = ${JSON.stringify(CELL_LAYOUT)};
+const ENTRY_ROW_LAYOUT = ${JSON.stringify(ENTRY_ROW_LAYOUT)};
 const MARK_NEUTRAL = ${JSON.stringify(MARK_NEUTRAL)};
 const INDICATOR_LAYOUT = ${JSON.stringify(INDICATOR_LAYOUT)};
 const STRUCTURE_BINDINGS = ${JSON.stringify(STRUCTURE_BINDINGS)};
@@ -1067,6 +1272,16 @@ function boundId(node, field) {
   return typeof bound === "object" ? bound.id : bound;
 }
 
+/**
+ * The nodes a binding names (Spec 011 ④): one, or — where the name holds a \`*\`, a number — every
+ * node of the pass whose name matches: the cells of a table (\`cell-*-*\`), the terms of a list.
+ */
+function namedBy(nodes, name) {
+  if (name.indexOf("*") === -1) return [name];
+  const pattern = new RegExp("^" + name.split("*").join("[0-9]+") + "$");
+  return Object.keys(nodes).filter((candidate) => pattern.test(candidate));
+}
+
 function bind(nodes, variant, variables, structure) {
   const deferred = [];
   const moved = STRUCTURE_BINDINGS[structure] || {};
@@ -1074,28 +1289,30 @@ function bind(nodes, variant, variables, structure) {
     for (const target of moved[part] || BINDINGS[part] || []) {
       const variable = variables.get(name + (target.suffix || ""));
       if (variable === undefined) continue;
-      const node = nodes[target.node];
-      // A choice binds a variant in passes, the group and each option (Spec 010 ③, D-07): a part
-      // whose node is not in this pass is bound in another.
-      if (node === undefined) continue;
-      if (target.paint === true) {
-        // The focus ring shows only in the focus state; in every other its fill stays neutral.
-        if (target.focusOnly === true && variant.focusVisible !== true) continue;
-        // Figma binds only the RGB of a variable to a paint; the deckkraft comes from the plan
-        // and is set here, in every case — also at 0, so the binding stays visible (F8).
-        const paint = (variant.paints || {})[part];
-        const bound = figma.variables.setBoundVariableForPaint(
-          { type: "SOLID", color: { r: 0, g: 0, b: 0 } },
-          "color",
-          variable,
-        );
-        if (paint !== undefined && typeof paint.opacity === "number") bound.opacity = paint.opacity;
-        for (const field of target.fields) gather(node)[field] = [bound];
-      } else {
-        // A measure is bound after the frame's layout is written: padding, gap and minimum sizes
-        // only take effect on an auto-layout frame, and the tool refuses them before (F11).
-        for (const field of target.fields) {
-          deferred.push({ node, field, variable, font: target.font === true });
+      for (const key of namedBy(nodes, target.node)) {
+        const node = nodes[key];
+        // A choice binds a variant in passes, the group and each option (Spec 010 ③, D-07): a
+        // part whose node is not in this pass is bound in another.
+        if (node === undefined) continue;
+        if (target.paint === true) {
+          // The focus ring shows only in the focus state; in every other its fill stays neutral.
+          if (target.focusOnly === true && variant.focusVisible !== true) continue;
+          // Figma binds only the RGB of a variable to a paint; the deckkraft comes from the plan
+          // and is set here, in every case — also at 0, so the binding stays visible (F8).
+          const paint = (variant.paints || {})[part];
+          const bound = figma.variables.setBoundVariableForPaint(
+            { type: "SOLID", color: { r: 0, g: 0, b: 0 } },
+            "color",
+            variable,
+          );
+          if (paint !== undefined && typeof paint.opacity === "number") bound.opacity = paint.opacity;
+          for (const field of target.fields) gather(node)[field] = [bound];
+        } else {
+          // A measure is bound after the frame's layout is written: padding, gap and minimum
+          // sizes only take effect on an auto-layout frame, and the tool refuses them before (F11).
+          for (const field of target.fields) {
+            deferred.push({ node, field, variable, font: target.font === true });
+          }
         }
       }
     }
@@ -2013,10 +2230,273 @@ async function applyComponents(variables, warnings) {
     bindMeasures(measures, report, component, variant);
   }
   /**
-   * The example frame „mit Hintergrund" of a dialog (Spec 011 ②, spec „dialogo – Figma"): the
-   * default variant drawn once more on a frame whose fill is bound to the backdrop, found by its
-   * mark \`example\` or created, placed in the frame „Eroj" right after the set (F-8) — Figma lays
-   * it out like a set. It is no set: no variants, no grid, no label property.
+   * A meter (Spec 011 ④, plan ④ D-14): the variant holds the control — a column, the gap bound to
+   * box.gap — with the label (the label property), the track (its fill, radius and height as a
+   * minimum, clipping) holding the fill frame (its colour by intent, its radius, as high as the
+   * track) and the value text (the Vitrino's word). The track is at least as wide as the wider of
+   * the two texts and the fill the plan's share of the track — both written from what the tool
+   * measured (Regel 0: Figma binds no share, and a set has no container to fill). The same
+   * drawing on the example frame „unbekannt" (\`example\` with texts): then the track is the node
+   * \`unknown\` — its stroke bound to unknown.color and unknown.width with the plan's dash pattern —
+   * no fill frame is made, the value text says „nicht geprüft", and the label carries the word
+   * itself (a text outside a component has no property).
+   */
+  async function drawMeter(node, component, variant, report, labels, example) {
+    const texts = Object.assign({}, component.texts || {}, example === undefined ? {} : example.texts || {});
+    const unknown = example !== undefined && example.texts !== undefined;
+    const control = part(node, "control", () => figma.createFrame());
+    const label = part(control, "label", () => figma.createText());
+    const track = part(control, "track", () => figma.createFrame());
+    const valueText = part(control, "value-text", () => figma.createText());
+    [label, track, valueText].forEach((child, index) => {
+      if (control.children.indexOf(child) !== index) control.insertChild(index, child);
+    });
+    const fill = unknown ? undefined : part(track, "fill", () => figma.createFrame());
+    const all = [label, valueText];
+    for (const each of all) await loadCurrentFont(each);
+    writeCase(component, variant, label);
+    if (variant.font !== undefined) {
+      for (const each of all) write(each, "fontName", fonts.get(variant.font.family + " " + variant.font.style));
+    }
+    if (typeof texts["value-text"] === "string") write(valueText, "characters", texts["value-text"]);
+    if (example === undefined) labels.push(label);
+    else if (component.label !== undefined) write(label, "characters", component.label.defaultValue);
+    const frames = [node, control, track].concat(fill ? [fill] : []);
+    for (const frame of frames) own(frame, NEUTRAL);
+    for (const each of all) own(each, NEUTRAL_TEXT);
+    own(node, HUG_LAYOUT);
+    if (example !== undefined) {
+      own(node, {
+        paddingLeft: example.padding,
+        paddingRight: example.padding,
+        paddingTop: example.padding,
+        paddingBottom: example.padding,
+      });
+    }
+    own(control, FIELD_LAYOUT);
+    own(track, TRACK_LAYOUT);
+    if (fill) own(fill, FILL_LAYOUT);
+    // The dash pattern of the unknown stroke (own() would empty a list): the plan's numbers, on
+    // the example alone; in the set the track has no stroke.
+    if (unknown && variant.stroke !== undefined && variant.stroke.part === "unknown") {
+      gather(track).dashPattern = variant.stroke.dashPattern.slice();
+    }
+    for (const child of frames.concat(all)) own(child, IN_FLOW);
+    for (const each of all) own(each, TEXT_SIZING);
+    const nodes = { control, label, track, "value-text": valueText };
+    if (fill) nodes.fill = fill;
+    if (unknown) nodes.unknown = track;
+    const measures = bind(nodes, variant, variables, component.structure);
+    for (const each of frames.concat(all)) flush(each);
+    bindMeasures(measures, report, component, variant);
+    // Measured, then written (F14): the track as wide as the wider text, the fill its share.
+    write(track, "minWidth", Math.max(label.width, valueText.width));
+    if (fill && component.meter !== undefined) write(fill, "minWidth", component.meter.share * track.width);
+  }
+  /**
+   * A table (Spec 011 ④, plan ④ D-14): the variant is a column — the caption (the label
+   * property; shown by the BOOLEAN property of caption-hidden, \`toggled\`) above the region (the
+   * border on every side, the radius, clipping) holding the head row (its fill, the border under
+   * it) and one row per row of the plan's table (the border under each), every row a row of cells
+   * (inline padding and minimum height bound). The sorted head cell holds the sort button:
+   * focus-ring → focus-gap → sort (fill by state, radius) with the head's text (sort.color, the
+   * head's role) and the chevron (sort-indicator: its size bound, the vector's fill bound to
+   * sort-indicator.color); the other head cells and the body cells hold their text — a row
+   * header in the row-header role, a cell in the cell's. A numeric column aligns at the end; the
+   * tabular figures of the web are no property of a Figma text. Every cell of a column is at
+   * least as wide as the widest (written from the measurement), so the columns align.
+   */
+  async function drawTable(node, component, variant, report, labels, toggled) {
+    const table = component.table || { head: [], rows: [], numeric: [], sorted: 0 };
+    const caption = part(node, "caption", () => figma.createText());
+    const region = part(node, "region", () => figma.createFrame());
+    [caption, region].forEach((child, index) => {
+      if (node.children.indexOf(child) !== index) node.insertChild(index, child);
+    });
+    const head = part(region, "head", () => figma.createFrame());
+    const rows = table.rows.map((_, index) => part(region, "row-" + (index + 1), () => figma.createFrame()));
+    [head].concat(rows).forEach((child, index) => {
+      if (region.children.indexOf(child) !== index) region.insertChild(index, child);
+    });
+    const columns = table.head.map((_, index) => index);
+    const headCells = columns.map((column) => part(head, "head-" + (column + 1), () => figma.createFrame()));
+    headCells.forEach((child, index) => {
+      if (head.children.indexOf(child) !== index) head.insertChild(index, child);
+    });
+    const sortCell = headCells[table.sorted];
+    const ring = part(sortCell, "focus-ring", () => figma.createFrame());
+    const gap = part(ring, "focus-gap", () => figma.createFrame());
+    const sort = part(gap, "sort", () => figma.createFrame());
+    const sortText = part(sort, "sort-text", () => figma.createText());
+    const indicator = part(sort, "sort-indicator", () =>
+      typeof component.sign === "string" ? figma.createNodeFromSvg(component.sign) : figma.createFrame(),
+    );
+    const mark = typeof component.sign === "string" ? markOf(indicator) : undefined;
+    [sortText, indicator].forEach((child, index) => {
+      if (sort.children.indexOf(child) !== index) sort.insertChild(index, child);
+    });
+    const headTexts = columns.map((column) =>
+      column === table.sorted
+        ? undefined
+        : part(headCells[column], "head-text-" + (column + 1), () => figma.createText()),
+    );
+    const cells = rows.map((row, r) => {
+      const made = columns.map((column) => part(row, "cell-" + (r + 1) + "-" + (column + 1), () => figma.createFrame()));
+      made.forEach((child, index) => {
+        if (row.children.indexOf(child) !== index) row.insertChild(index, child);
+      });
+      return made;
+    });
+    const cellTexts = cells.map((row, r) =>
+      row.map((cell, column) =>
+        part(
+          cell,
+          column === 0 ? "row-header-text-" + (r + 1) : "cell-text-" + (r + 1) + "-" + (column + 1),
+          () => figma.createText(),
+        ),
+      ),
+    );
+    const all = [caption, sortText]
+      .concat(headTexts.filter((each) => each !== undefined))
+      .concat(cellTexts.flat());
+    for (const each of all) await loadCurrentFont(each);
+    writeCase(component, variant, caption);
+    if (variant.font !== undefined) {
+      for (const each of all) write(each, "fontName", fonts.get(variant.font.family + " " + variant.font.style));
+    }
+    columns.forEach((column) => {
+      const text = column === table.sorted ? sortText : headTexts[column];
+      if (text !== undefined) write(text, "characters", table.head[column]);
+    });
+    cellTexts.forEach((row, r) =>
+      row.forEach((text, column) => write(text, "characters", (table.rows[r] || [])[column] || "")),
+    );
+    labels.push(caption);
+    toggled.push({ part: "caption", node: caption });
+    const frames = [node, region, head, ring, gap, sort, indicator].concat(rows, headCells, cells.flat());
+    for (const frame of frames) own(frame, NEUTRAL);
+    for (const each of all) own(each, NEUTRAL_TEXT);
+    own(node, FIELD_LAYOUT);
+    own(region, FIELD_LAYOUT);
+    // The region clips its rows to its radius, as on the web (overflow-x auto, border-box).
+    own(region, { clipsContent: true, strokesIncludedInLayout: true });
+    for (const row of [head].concat(rows)) {
+      own(row, ROW_LAYOUT);
+      // Only the bottom carries the border: the weight of every other side is 0, the bottom one
+      // is bound (border.width) after the layout, like every measure.
+      own(row, { strokeTopWeight: 0, strokeLeftWeight: 0, strokeRightWeight: 0 });
+    }
+    const numeric = (column) => table.numeric.indexOf(column) !== -1;
+    for (const cell of headCells.concat(cells.flat())) own(cell, CELL_LAYOUT);
+    columns.forEach((column) => {
+      for (const cell of [headCells[column]].concat(cells.map((row) => row[column]))) {
+        own(cell, { primaryAxisAlignItems: numeric(column) ? "MAX" : "MIN" });
+      }
+      for (const text of [column === table.sorted ? sortText : headTexts[column]].concat(cellTexts.map((row) => row[column]))) {
+        if (text !== undefined) own(text, { textAlignHorizontal: numeric(column) ? "RIGHT" : "LEFT" });
+      }
+    });
+    for (const frame of [ring, gap]) own(frame, HUG_LAYOUT);
+    own(sort, CONTROL_LAYOUT);
+    own(indicator, INDICATOR_LAYOUT);
+    if (mark) own(mark, MARK_NEUTRAL);
+    for (const child of frames.concat(all)) own(child, IN_FLOW);
+    for (const each of all) own(each, TEXT_SIZING);
+    const nodes = {
+      caption, region, head, sort,
+      "focus-ring": ring,
+      "focus-gap": gap,
+      "sort-text": sortText,
+      "sort-indicator": indicator,
+    };
+    if (mark) nodes.mark = mark;
+    rows.forEach((row, r) => {
+      nodes["row-" + (r + 1)] = row;
+    });
+    columns.forEach((column) => {
+      nodes["head-" + (column + 1)] = headCells[column];
+      if (headTexts[column] !== undefined) nodes["head-text-" + (column + 1)] = headTexts[column];
+    });
+    cells.forEach((row, r) =>
+      row.forEach((cell, column) => {
+        nodes["cell-" + (r + 1) + "-" + (column + 1)] = cell;
+        nodes[column === 0 ? "row-header-text-" + (r + 1) : "cell-text-" + (r + 1) + "-" + (column + 1)] = cellTexts[r][column];
+      }),
+    );
+    const measures = bind(nodes, variant, variables, component.structure);
+    // The ring's radii, bound like the butono's (F32): they grow from the sort button's radius.
+    for (const name of ["focus-ring", "focus-gap"]) {
+      const variable = variables.get((variant.radii || {})[name]);
+      const target = name === "focus-ring" ? ring : gap;
+      if (variable !== undefined) measures.push({ node: target, field: "cornerRadius", variable: variable });
+    }
+    for (const each of frames.concat(all).concat(mark ? [mark] : [])) flush(each);
+    bindMeasures(measures, report, component, variant);
+    // Measured, then written (F14): every cell of a column at least as wide as its widest, so
+    // the columns align; the same on every run, so nothing is rewritten.
+    columns.forEach((column) => {
+      const stack = [headCells[column]].concat(cells.map((row) => row[column]));
+      const widest = Math.max.apply(null, stack.map((cell) => cell.width));
+      for (const cell of stack) write(cell, "minWidth", widest);
+    });
+  }
+  /**
+   * A key-value list (Spec 011 ④, plan ④ D-14): the variant holds the list — a column, the gap
+   * bound to list.gap — with one entry per pair of the plan: a row (layout columns: term then
+   * value, the gap the box's inline padding) or a column (stacked: the box's gap), the term and
+   * the value texts in their roles. The label prop is the accessible name, never seen: no text
+   * carries the label property.
+   */
+  async function drawList(node, component, variant, report) {
+    const entries = component.entries || [];
+    // The layout is a term of the variant, written like the knob's position: columns lays an
+    // entry out as a row, stacked as a column (the web's grid-template-columns by layout).
+    const columns = variant.props.layout !== "stacked";
+    const list = part(node, "list", () => figma.createFrame());
+    const rows = entries.map((_, index) => part(list, "entry-" + (index + 1), () => figma.createFrame()));
+    rows.forEach((child, index) => {
+      if (list.children.indexOf(child) !== index) list.insertChild(index, child);
+    });
+    const terms = rows.map((row, index) => part(row, "term-" + (index + 1), () => figma.createText()));
+    const values = rows.map((row, index) => part(row, "value-" + (index + 1), () => figma.createText()));
+    rows.forEach((row, index) => {
+      [terms[index], values[index]].forEach((child, at) => {
+        if (row.children.indexOf(child) !== at) row.insertChild(at, child);
+      });
+    });
+    const all = terms.concat(values);
+    for (const each of all) await loadCurrentFont(each);
+    if (variant.font !== undefined) {
+      for (const each of all) write(each, "fontName", fonts.get(variant.font.family + " " + variant.font.style));
+    }
+    entries.forEach((entry, index) => {
+      write(terms[index], "characters", entry.term);
+      write(values[index], "characters", entry.value);
+    });
+    const frames = [node, list].concat(rows);
+    for (const frame of frames) own(frame, NEUTRAL);
+    for (const each of all) own(each, NEUTRAL_TEXT);
+    own(node, HUG_LAYOUT);
+    own(list, FIELD_LAYOUT);
+    for (const row of rows) own(row, columns ? ENTRY_ROW_LAYOUT : TEXTS_LAYOUT);
+    for (const child of frames.concat(all)) own(child, IN_FLOW);
+    for (const each of all) own(each, TEXT_SIZING);
+    const nodes = { list };
+    rows.forEach((row, index) => {
+      nodes[(columns ? "entry-row-" : "entry-column-") + (index + 1)] = row;
+      nodes["term-" + (index + 1)] = terms[index];
+      nodes["value-" + (index + 1)] = values[index];
+    });
+    const measures = bind(nodes, variant, variables, component.structure);
+    for (const each of frames.concat(all)) flush(each);
+    bindMeasures(measures, report, component, variant);
+  }
+  /**
+   * The example frame beside a set (Spec 011 ②, spec „dialogo – Figma": „mit Hintergrund", the
+   * default variant drawn once more on a frame whose fill is bound to the backdrop; Spec 011 ④,
+   * spec „mezurilo – Figma": „unbekannt", the default variant with the unknown value), found by
+   * its mark \`example\` or created, placed in the frame „Eroj" right after the set (F-8) — Figma
+   * lays it out like a set. It is no set: no variants, no grid, no label property.
    */
   async function placeExample(frame, set, component, report) {
     const spec = component.example;
@@ -2031,7 +2511,8 @@ async function applyComponents(variables, warnings) {
       stamp(example, "example", component.set);
     }
     write(example, "name", spec.name);
-    await drawDialog(example, component, variant, report, [], spec);
+    if (component.structure === "meter") await drawMeter(example, component, variant, report, [], spec);
+    else await drawDialog(example, component, variant, report, [], spec);
     if (example.parent !== frame) frame.appendChild(example);
     const at = frame.children.indexOf(set) + 1;
     if (frame.children.indexOf(example) !== at) frame.insertChild(at, example);
@@ -2185,6 +2666,23 @@ async function applyComponents(variables, warnings) {
       }
       if (component.structure === "state") {
         await drawState(node, component, variant, report, labels);
+        if (existing === undefined) made.push(node);
+        continue;
+      }
+      // A meter, a table and a list (Spec 011 ④) are drawn in functions of their own; the table
+      // keeps its focus ring around the sort button.
+      if (component.structure === "meter") {
+        await drawMeter(node, component, variant, report, labels, undefined);
+        if (existing === undefined) made.push(node);
+        continue;
+      }
+      if (component.structure === "table") {
+        await drawTable(node, component, variant, report, labels, toggled);
+        if (existing === undefined) made.push(node);
+        continue;
+      }
+      if (component.structure === "list") {
+        await drawList(node, component, variant, report);
         if (existing === undefined) made.push(node);
         continue;
       }
@@ -2456,26 +2954,33 @@ async function applyComponents(variables, warnings) {
       }
       for (const label of labels) {
         write(label, "characters", spec.defaultValue);
-        write(label, "componentPropertyReferences", { characters: key });
+        // Merged: a text may carry a visibility reference too (Spec 011 ④: the caption).
+        write(label, "componentPropertyReferences", Object.assign({}, label.componentPropertyReferences || {}, { characters: key }));
       }
     }
     // A boolean prop that shows a part (Spec 011 ③, plan ③ D-14: dismissible) is a BOOLEAN
     // property of the set, declared once like the label, its default the Skemo's; the part's
-    // visibility is connected to it, so an instance switches the part on and off.
+    // visibility is connected to it, so an instance switches the part on and off. A prop that
+    // hides the part (Spec 011 ④, plan ④ D-14: caption-hidden) is declared the other way round —
+    // Figma shows a layer when its property is true, and the connection cannot be inverted — as
+    // the part's name (\`caption\`), true where the prop's default is false.
     for (const toggle of component.toggles || []) {
+      const hides = toggle.hides === true;
+      const name = hides ? toggle.part : toggle.property;
+      const shown = hides ? !toggle.defaultValue : toggle.defaultValue;
       const definitions = set.componentPropertyDefinitions || {};
       let key = Object.keys(definitions).find(
         (candidate) =>
-          candidate.split("#")[0] === toggle.property && definitions[candidate].type === "BOOLEAN",
+          candidate.split("#")[0] === name && definitions[candidate].type === "BOOLEAN",
       );
-      if (key === undefined) key = set.addComponentProperty(toggle.property, "BOOLEAN", toggle.defaultValue);
-      else if (definitions[key].defaultValue !== toggle.defaultValue) {
-        set.editComponentProperty(key, { defaultValue: toggle.defaultValue });
+      if (key === undefined) key = set.addComponentProperty(name, "BOOLEAN", shown);
+      else if (definitions[key].defaultValue !== shown) {
+        set.editComponentProperty(key, { defaultValue: shown });
       }
       for (const each of toggled) {
         if (each.part !== toggle.part) continue;
-        write(each.node, "visible", toggle.defaultValue);
-        write(each.node, "componentPropertyReferences", { visible: key });
+        write(each.node, "visible", shown);
+        write(each.node, "componentPropertyReferences", Object.assign({}, each.node.componentPropertyReferences || {}, { visible: key }));
       }
     }
     component.variants.forEach((variant, index) => {
@@ -2636,10 +3141,12 @@ function measureLayout(set, component) {
     .map((variant) => ours(set, "variant", variantName(variant.props)))
     .filter((node) => node !== undefined);
   const boxes = nodes.map((node) => {
-    // The content of a variant: its ring, the surface of a dialog (Spec 011 ②), or the control
-    // directly under it (Spec 011 ③: badge, notice, state).
+    // The content of a variant: its ring, the surface of a dialog (Spec 011 ②), the control
+    // directly under it (Spec 011 ③: badge, notice, state; Spec 011 ④: meter), the region of a
+    // table or the list of a list (Spec 011 ④).
     const content =
-      ours(node, "part", "focus-ring") || ours(node, "part", "surface") || ours(node, "part", "control");
+      ours(node, "part", "focus-ring") || ours(node, "part", "surface") || ours(node, "part", "control") ||
+      ours(node, "part", "region") || ours(node, "part", "list");
     return {
       name: node.name,
       x: node.x,
@@ -2780,7 +3287,8 @@ function measureLayout(set, component) {
     const direct = ours(node, "part", "control");
     if (direct !== undefined && found.control === undefined) {
       found.control = direct;
-      for (const name of ["text", "indicator", "texts", "actions", "dismiss"]) {
+      // Spec 011 ④: the label, track and value text of a meter, the fill in its track.
+      for (const name of ["text", "indicator", "texts", "actions", "dismiss", "label", "track", "value-text"]) {
         const each = ours(direct, "part", name);
         if (each !== undefined) found[name] = each;
       }
@@ -2788,6 +3296,38 @@ function measureLayout(set, component) {
         const each = found.texts === undefined ? undefined : ours(found.texts, "part", name);
         if (each !== undefined) found[name] = each;
       }
+      const fill = found.track === undefined ? undefined : ours(found.track, "part", "fill");
+      if (fill !== undefined) found.fill = fill;
+    }
+    // A table (Spec 011 ④): the caption and the region with its head; the sort button with its
+    // ring in the head cell that holds one.
+    const region = ours(node, "part", "region");
+    if (region !== undefined) {
+      found.region = region;
+      const caption = ours(node, "part", "caption");
+      if (caption !== undefined) found.caption = caption;
+      const tableHead = ours(region, "part", "head");
+      if (tableHead !== undefined) {
+        found.head = tableHead;
+        for (const cell of tableHead.children) {
+          const sortRing = ours(cell, "part", "focus-ring");
+          if (sortRing === undefined) continue;
+          found["focus-ring"] = sortRing;
+          const sortGap = ours(sortRing, "part", "focus-gap");
+          if (sortGap !== undefined) found["focus-gap"] = sortGap;
+          const sort = sortGap === undefined ? undefined : ours(sortGap, "part", "sort");
+          if (sort !== undefined) found.sort = sort;
+          const sortIndicator = sort === undefined ? undefined : ours(sort, "part", "sort-indicator");
+          if (sortIndicator !== undefined) found["sort-indicator"] = sortIndicator;
+        }
+      }
+    }
+    // A list (Spec 011 ④): the list and its first entry.
+    const listNode = ours(node, "part", "list");
+    if (listNode !== undefined) {
+      found.list = listNode;
+      const entry = ours(listNode, "part", "entry-1");
+      if (entry !== undefined) found.entry = entry;
     }
     return found;
   };
@@ -3105,13 +3645,18 @@ function reportParts(result) {
         diagnosis: report.diagnosis,
         placement: report.placement,
       })),
-      // The Mankoj by set, part and field; their evidence, the tool's words, stands in the part
-      // state of each set (uzo.evidence). Spec 010 ①: with four sets the evidence of twelve
-      // parts no longer fit the headline of 4 000 characters (F22). Spec 010 ③: with six sets
-      // the list of eighteen objects did not either; grouped by field and set, the same names.
-      // Spec 010 ④ (plan ④ D-07, ③ B-5): with seven sets the headline grew to 4 094 characters;
-      // the modes each set was found and left in moved to its part state, under the same name.
-      mankoj: {
+    }),
+    // The Mankoj by set, part and field; their evidence, the tool's words, stands in the part
+    // state of each set (uzo.evidence). Spec 010 ①: with four sets the evidence of twelve parts
+    // no longer fit the headline of 4 000 characters (F22). Spec 010 ③: with six sets the list
+    // of eighteen objects did not either; grouped by field and set, the same names. Spec 010 ④
+    // (plan ④ D-07, ③ B-5): with seven sets the headline grew to 4 094 characters; the modes each
+    // set was found and left in moved to its part state, under the same name. Spec 011 ④ (plan
+    // ④ D-14): with fifteen sets the headline grew to 4 398 characters; the Mankoj are a part of
+    // their own right after it, under the same name.
+    JSON.stringify({
+      part: "mankoj",
+      value: {
         open: groupedMankoj(result.mankoj.open),
         closed: groupedMankoj(result.mankoj.closed),
       },

@@ -4,7 +4,13 @@
 import { defaultModeloSource, projectModeloSource } from "@fundamento/modelo";
 import { describe, expect, it } from "vitest";
 import { celoInputOf } from "../../build.js";
-import { BACKDROP_EXAMPLE, FIGMA_CELO, type FigmaPlan, resolveFigmaPlan } from "./figma.js";
+import {
+  BACKDROP_EXAMPLE,
+  FIGMA_CELO,
+  type FigmaPlan,
+  resolveFigmaPlan,
+  UNKNOWN_EXAMPLE,
+} from "./figma.js";
 import {
   type DoubleCollection,
   type DoubleNode,
@@ -272,6 +278,8 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
     const openButono = result.mankoj.open.filter((manko) => manko.set === "butono");
     expect(openButono.map((manko) => manko.part)).toEqual(["boundary", "slots", "content"]);
     expect(result.mankoj.open.map((manko) => manko.set)).toEqual([
+      // Spec 011 ④: the atributlisto, the mezurilo and the tabelo carry a Uzo like every set.
+      ...["boundary", "slots", "content"].map(() => "atributlisto"),
       // Spec 011 ③: the avizo, the insigno and the plenstato carry a Uzo like every set.
       ...["boundary", "slots", "content"].map(() => "avizo"),
       ...["boundary", "slots", "content"].map(() => "butono"),
@@ -283,8 +291,10 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
       ...["boundary", "slots", "content"].map(() => "kampo"),
       ...["boundary", "slots", "content"].map(() => "ligilo"),
       ...["boundary", "slots", "content"].map(() => "markobutono"),
+      ...["boundary", "slots", "content"].map(() => "mezurilo"),
       ...["boundary", "slots", "content"].map(() => "plenstato"),
       ...["boundary", "slots", "content"].map(() => "sxaltilo"),
+      ...["boundary", "slots", "content"].map(() => "tabelo"),
       ...["boundary", "slots", "content"].map(() => "tekstareo"),
     ]);
     for (const manko of openButono) {
@@ -310,6 +320,8 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
       result.mankoj.closed.filter((manko) => manko.set === "butono").map((manko) => manko.part),
     ).toEqual(["boundary", "slots", "content"]);
     expect(result.mankoj.closed.map((manko) => manko.set)).toEqual([
+      // Spec 011 ④: the atributlisto, the mezurilo and the tabelo close their three parts too.
+      ...["atributlisto", "atributlisto", "atributlisto"],
       // Spec 011 ③: the avizo, the insigno and the plenstato close their three parts too.
       ...["avizo", "avizo", "avizo"],
       ...["butono", "butono", "butono"],
@@ -321,8 +333,10 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
       ...["kampo", "kampo", "kampo"],
       ...["ligilo", "ligilo", "ligilo"],
       ...["markobutono", "markobutono", "markobutono"],
+      ...["mezurilo", "mezurilo", "mezurilo"],
       ...["plenstato", "plenstato", "plenstato"],
       ...["sxaltilo", "sxaltilo", "sxaltilo"],
+      ...["tabelo", "tabelo", "tabelo"],
       ...["tekstareo", "tekstareo", "tekstareo"],
     ]);
   });
@@ -1027,9 +1041,9 @@ describe("a text is written only after its current font is loaded (F-A)", () => 
 // Schreiben sucht der Lauf deshalb auch markierte Komponenten außerhalb des Sets und bricht ab,
 // wenn er welche findet — ohne sie still zu übernehmen und ohne sie still zu löschen.
 describe("a marked component outside the set stops the run before it writes (F-B)", () => {
-  // The first component a run makes: since Spec 011 ③ the avizo's, which sorts before the butono.
-  const FIRST = "intent=info, state=rest";
-  const FIRST_SET = "avizo";
+  // The first component a run makes: since Spec 011 ④ the atributlisto's, which sorts first.
+  const FIRST = "layout=columns, state=rest";
+  const FIRST_SET = "atributlisto";
   type Orphan = { id: string; name: string; set: string; parent: { id: string; type: string } };
 
   /** A run that crashes once its first component stands, as Figma's run did (F-A). */
@@ -2240,8 +2254,9 @@ describe("a failed run leaves everything readable in the console (F21)", () => {
         ...double.figma,
         command: "run",
         createComponent: () => {
-          // Spec 011 ③: the avizo's four variants are made first; the run fails in the butono.
-          if (++made === 4 + 40)
+          // Spec 011 ④: the atributlisto's two and the avizo's four variants are made first; the
+          // run fails in the butono.
+          if (++made === 2 + 4 + 40)
             throw new Error("in set_layoutMode: Cannot delete occupied row/column.");
           return create();
         },
@@ -2485,6 +2500,8 @@ describe("every bound paint shows the plan's colour after the first and the seco
       warnings: [],
       // Spec 008: two sets; the ligilo has placement × size × state = 30 variants.
       components: [
+        // Spec 011 ④: the atributlisto has layout = 2 variants in one state.
+        { set: "atributlisto", created: 2, updated: 0 },
         // Spec 011 ③: the avizo has intent = 4 variants in one state (dismissible is no axis).
         { set: "avizo", created: 4, updated: 0 },
         { set: "butono", created: 72, updated: 0 },
@@ -2501,10 +2518,15 @@ describe("every bound paint shows the plan's colour after the first and the seco
         { set: "ligilo", created: 30, updated: 0 },
         // Spec 010 ②: the markobutono has checked × size × state = 30 variants.
         { set: "markobutono", created: 30, updated: 0 },
+        // Spec 011 ④: the mezurilo has intent = 4 variants in one state (value, min, max are
+        // numbers, no axis).
+        { set: "mezurilo", created: 4, updated: 0 },
         // Spec 011 ③: the plenstato has kind = 2 variants in one state.
         { set: "plenstato", created: 2, updated: 0 },
         // Spec 010 ①: the sxaltilo has checked × size × state = 24 variants.
         { set: "sxaltilo", created: 24, updated: 0 },
+        // Spec 011 ④: the tabelo has density × state = 6 variants (the states of the sort button).
+        { set: "tabelo", created: 6, updated: 0 },
         // Spec 011 ②: the tekstareo has kind × size × state = 30 variants.
         { set: "tekstareo", created: 30, updated: 0 },
       ],
@@ -3373,9 +3395,14 @@ describe("every set lies in the frame Eroj in the section Fundamento (F-1, F-2, 
     ]);
   const names = repoPlan.components.map((component) => component.set);
   // Spec 011 ②: the example frame „mit Hintergrund" of the dialogo lies in the frame beside its
-  // set; it is no set, so it is moved by no test and overlaps with none.
+  // set; it is no set, so it is moved by no test and overlaps with none. Spec 011 ④: so does the
+  // example frame „unbekannt" of the mezurilo.
   const inFrame = names.flatMap((name) =>
-    name === "dialogo" ? [name, `dialogo – ${BACKDROP_EXAMPLE}`] : [name],
+    name === "dialogo"
+      ? [name, `dialogo – ${BACKDROP_EXAMPLE}`]
+      : name === "mezurilo"
+        ? [name, `mezurilo – ${UNKNOWN_EXAMPLE}`]
+        : [name],
   );
   const layout = repoPlan.section;
   const inLayout = names.map(() => ({ frame: FRAME, action: "in-layout" }));
@@ -3443,7 +3470,9 @@ describe("every set lies in the frame Eroj in the section Fundamento (F-1, F-2, 
     const double = modelDouble();
     await apply(double);
     expect(overlapping(double)).toEqual([]);
-    const [left, right] = names;
+    // The first two sets with a label to lengthen: since Spec 011 ④ the atributlisto sorts first
+    // and connects no text to its label (its label is the accessible name, never seen).
+    const [left, right] = names.filter((name) => labelsOf(setNamed(double, name)).length > 0);
     if (left === undefined || right === undefined) throw new Error("2");
     const labels = labelsOf(setNamed(double, left));
     expect(labels.length).toBeGreaterThan(0);
@@ -3770,6 +3799,12 @@ describe("the label default follows the role of the Ero (M-3)", () => {
     expect(of("insigno")).toEqual(["Status"]);
     expect(of("avizo")).toEqual(["Meldung", false]);
     expect(of("plenstato")).toEqual(["Zustand"]);
+    // Spec 011 ④ (plan ④ D-14): the meter, the list (its label is the accessible name, no text
+    // node) and the table, whose BOOLEAN caption-hidden is declared as the caption's visibility —
+    // Figma shows a layer when its property is true, so the property is „caption", default true.
+    expect(of("mezurilo")).toEqual(["Messwert"]);
+    expect(of("atributlisto")).toEqual(["Angaben"]);
+    expect(of("tabelo")).toEqual(["Beschriftung", true]);
   });
 
   it("updates a found ligilo that still says Aktion to Ziel, property and every label", async () => {
@@ -4901,5 +4936,574 @@ describe("the plenstato is drawn as a state: the column with the arc, the text a
     const before = double.snapshot();
     await run(double, source);
     expect(double.snapshot()).toBe(before);
+  });
+});
+
+// Spec 011 ④ (spec „mezurilo", G2, G4; plan ④ D-14): the meter is a structure of its own —
+// variant → control (a column, the gap bound to box.gap) → label (the label property), track (its
+// fill, radius and height as a minimum; its width at least the wider of the two texts, written —
+// a set has no container to fill) holding the fill frame (its colour by intent, its radius, as
+// high as the track, its width the share of the track: 66 of 0 … 100, the Vitrino's value
+// example, written as a number since Figma binds no share), and the value text. The unknown value
+// is the example frame beside the set: the track's stroke bound to unknown.color and
+// unknown.width with the dash pattern of the plan, no fill frame, the text „nicht geprüft".
+describe("the mezurilo is drawn as a meter: label, track with the fill at 66 %, value text; the unknown example dashed (Spec 011 ④)", () => {
+  const source = repoFiles["figma/plugin/code.js"] ?? "";
+  const bound = (node: DoubleNode | undefined, field: string) => node?.boundVariables[field]?.name;
+  type Paint = { visible: boolean; boundVariables?: { color?: { name: string } } };
+  const paints = (node: DoubleNode | undefined, field: "fills" | "strokes") =>
+    (node?.properties[field] ?? []) as Paint[];
+  type Box = { width: number; height: number };
+  const box = (node: DoubleNode | undefined): Box => {
+    const { width, height } = (node ?? {}) as unknown as Box;
+    return { width, height };
+  };
+  type Report = {
+    warnings: string[];
+    components: {
+      set: string;
+      example?: { name: string; found: boolean; created: boolean };
+      layout: {
+        zero: string[];
+        smaller: string[];
+        unplaced: string[];
+        uneven: unknown[];
+        columns: number;
+        rows: number;
+        held: { rest: Record<string, Record<string, unknown>> };
+      };
+    }[];
+  };
+  const drawn = async () => {
+    const double = modelDouble();
+    const report = (await new Function("figma", `${source}\nreturn applyPlan();`)(
+      double.figma,
+    )) as Report;
+    const set = pageNodes(double).find((child) => child.name === "mezurilo");
+    const variant = (name: string) => set?.children.find((child) => child.name === name);
+    const mezurilo = report.components.find((component) => component.set === "mezurilo");
+    return { double, set, variant, report, mezurilo };
+  };
+  const planned = repoPlan.components.find((component) => component.set === "mezurilo");
+
+  it("draws four variants by intent: the column with label, track and value text, the fill's colour by intent", async () => {
+    const { set, variant, mezurilo } = await drawn();
+    expect(set?.children.map((child) => child.name)).toEqual([
+      "intent=neutral, state=rest",
+      "intent=success, state=rest",
+      "intent=warning, state=rest",
+      "intent=danger, state=rest",
+    ]);
+    expect(mezurilo?.layout.columns).toBe(1);
+    expect(mezurilo?.layout.rows).toBe(4);
+    const neutral = variant("intent=neutral, state=rest");
+    const control = descendant(neutral, "control");
+    expect(control?.properties.layoutMode).toBe("VERTICAL");
+    expect(control?.properties.fills).toEqual([]);
+    expect(bound(control, "itemSpacing")).toBe("spacing/small");
+    expect(control?.children.map((child) => child.name)).toEqual(["label", "track", "value-text"]);
+    const label = descendant(neutral, "label");
+    expect(label?.properties.characters).toBe("Messwert");
+    expect(label?.properties.componentPropertyReferences).toMatchObject({
+      characters: expect.stringMatching(/^label/),
+    });
+    expect(paints(label, "fills")[0]?.boundVariables?.color?.name).toBe("color/text/default");
+    expect(bound(label, "fontSize")).toBe("typography/label/1/font-size");
+    const track = descendant(neutral, "track");
+    expect(track?.properties.layoutMode).toBe("HORIZONTAL");
+    expect(track?.properties.clipsContent).toBe(true);
+    expect(paints(track, "fills")[0]?.boundVariables?.color?.name).toBe("color/background/sunken");
+    // In the set the track has no stroke: the unknown value is the example's.
+    expect(track?.properties.strokes).toEqual([]);
+    expect(track?.properties.dashPattern).toEqual([]);
+    expect(bound(track, "cornerRadius")).toBe("radius/role/pill");
+    expect(bound(track, "minHeight")).toBe("spacing/medium");
+    expect(track?.children.map((child) => child.name)).toEqual(["fill"]);
+    const fill = descendant(neutral, "fill");
+    expect(paints(fill, "fills")[0]?.boundVariables?.color?.name).toBe("color/border/strong");
+    expect(bound(fill, "cornerRadius")).toBe("radius/role/pill");
+    expect(bound(fill, "minHeight")).toBe("spacing/medium");
+    const valueText = descendant(neutral, "value-text");
+    expect(valueText?.properties.characters).toBe("66 % von 3 prüfbaren");
+    expect(paints(valueText, "fills")[0]?.boundVariables?.color?.name).toBe("color/text/subtle");
+    expect(bound(valueText, "fontSize")).toBe("typography/label/2/font-size");
+    for (const [intent, token] of [
+      ["success", "color/status/success/border"],
+      ["warning", "color/status/warning/border"],
+      ["danger", "color/status/danger/border"],
+    ] as const) {
+      const colour = descendant(variant(`intent=${intent}, state=rest`), "fill");
+      expect(paints(colour, "fills")[0]?.boundVariables?.color?.name, intent).toBe(token);
+    }
+  });
+
+  it("gives the track the width of its wider text and the fill 66 % of the track, as high as the track", async () => {
+    const { variant } = await drawn();
+    for (const intent of ["neutral", "danger"]) {
+      const node = variant(`intent=${intent}, state=rest`);
+      const label = descendant(node, "label");
+      const valueText = descendant(node, "value-text");
+      const track = descendant(node, "track");
+      const fill = descendant(node, "fill");
+      const widest = Math.max(box(label).width, box(valueText).width);
+      expect(widest, intent).toBeGreaterThan(0);
+      expect(track?.properties.minWidth, intent).toBe(widest);
+      expect(box(track).width, intent).toBe(widest);
+      expect(planned?.meter?.share).toBe(0.66);
+      expect(fill?.properties.minWidth, intent).toBe(0.66 * widest);
+      expect(box(fill).width, intent).toBe(0.66 * widest);
+      expect(box(fill).height, intent).toBe(box(track).height);
+    }
+  });
+
+  it('places the example „unbekannt" beside the set: the track dashed in the unknown stroke, no fill, the text nicht geprüft', async () => {
+    const { double, mezurilo, set } = await drawn();
+    const example = pageNodes(double).find((child) => child.name === "mezurilo – unbekannt");
+    expect(example).toBeDefined();
+    expect(example?.getSharedPluginData("fundamento", "example")).toBe("mezurilo");
+    expect(mezurilo?.example).toEqual({
+      name: "mezurilo – unbekannt",
+      found: false,
+      created: true,
+    });
+    // Right after the set in the frame Eroj (F-8), in its flow.
+    const frame = set?.parent;
+    expect(frame?.getSharedPluginData("fundamento", "frame")).toBe("Eroj");
+    expect(frame?.children.indexOf(example as DoubleNode)).toBe(
+      (frame?.children.indexOf(set as DoubleNode) ?? -2) + 1,
+    );
+    expect(example?.properties.layoutPositioning).toBe("AUTO");
+    expect(example?.properties.paddingLeft).toBe(repoPlan.section?.gap);
+    // No backdrop: the example of a meter stands on the page.
+    expect(example?.properties.fills).toEqual([]);
+    const track = descendant(example, "track");
+    expect(paints(track, "strokes")[0]?.boundVariables?.color?.name).toBe("color/border/default");
+    expect(paints(track, "strokes")[0]?.visible).toBe(true);
+    expect(bound(track, "strokeWeight")).toBe("border/width/default");
+    expect(track?.properties.dashPattern).toEqual(planned?.variants[0]?.stroke?.dashPattern);
+    expect(track?.properties.dashPattern).toHaveLength(2);
+    expect(paints(track, "fills")[0]?.boundVariables?.color?.name).toBe("color/background/sunken");
+    expect(track?.children).toEqual([]);
+    expect(descendant(example, "fill")).toBeUndefined();
+    expect(descendant(example, "label")?.properties.characters).toBe("Messwert");
+    expect(descendant(example, "value-text")?.properties.characters).toBe("nicht geprüft");
+    // The track is as wide as in the set: the wider text, here the label.
+    const widest = Math.max(
+      box(descendant(example, "label")).width,
+      box(descendant(example, "value-text")).width,
+    );
+    expect(track?.properties.minWidth).toBe(widest);
+  });
+
+  it("measures every variant with a size and a cell, warns of nothing, and writes nothing new on a second run", async () => {
+    const { double, mezurilo, report } = await drawn();
+    expect(mezurilo?.layout.zero).toEqual([]);
+    expect(mezurilo?.layout.smaller).toEqual([]);
+    expect(mezurilo?.layout.unplaced).toEqual([]);
+    expect(mezurilo?.layout.uneven).toEqual([]);
+    expect(report.warnings.filter((warning) => warning.startsWith("mezurilo"))).toEqual([]);
+    expect(mezurilo?.layout.held.rest.control).toBeDefined();
+    expect(mezurilo?.layout.held.rest.track).toBeDefined();
+    expect(mezurilo?.layout.held.rest.fill).toBeDefined();
+    const before = double.snapshot();
+    const written = double.counts.writes;
+    await run(double, source);
+    expect(double.snapshot()).toBe(before);
+    expect(double.counts.writes - written).toBe(0);
+  });
+});
+
+// Spec 011 ④ (spec „tabelo", G2, G4; plan ④ D-14): the table is a structure of its own — variant
+// (a column) → caption (the label property, shown by the BOOLEAN property „caption": Figma shows
+// a layer when its property is true, so the Skemo's caption-hidden false is the caption's true),
+// region (border, radius, clipping) → head (its fill, the bottom border) and three rows (the
+// bottom border), each a row of three cells (inline padding and minimum height by density); every
+// cell of a column at least as wide as the widest of the column, written from what the tool
+// measured (Regel 0: the tool computes the layout, the plugin binds no width). The first head
+// cell holds the sort button: focus-ring → focus-gap → sort (fill by state, radius) with the head
+// text and the chevron of the select (sort-indicator, its size bound, the vector's fill bound to
+// sort-indicator.color). The numeric column aligns its texts at the end; tabular figures are no
+// property of a Figma text (noted, not drawn). The words are the Vitrino's table.
+describe("the tabelo is drawn as a table: caption, region with head and three rows, the sort button in the first head cell (Spec 011 ④)", () => {
+  const source = repoFiles["figma/plugin/code.js"] ?? "";
+  const bound = (node: DoubleNode | undefined, field: string) => node?.boundVariables[field]?.name;
+  type Paint = { visible: boolean; boundVariables?: { color?: { name: string } } };
+  const paints = (node: DoubleNode | undefined, field: "fills" | "strokes") =>
+    (node?.properties[field] ?? []) as Paint[];
+  type Definitions = Record<string, { type: string; defaultValue: string | boolean }>;
+  type Box = { width: number; height: number };
+  const box = (node: DoubleNode | undefined): Box => {
+    const { width, height } = (node ?? {}) as unknown as Box;
+    return { width, height };
+  };
+  type Report = {
+    warnings: string[];
+    components: {
+      set: string;
+      layout: {
+        zero: string[];
+        smaller: string[];
+        unplaced: string[];
+        uneven: unknown[];
+        columns: number;
+        rows: number;
+        held: { rest: Record<string, Record<string, unknown>> };
+      };
+    }[];
+  };
+  const drawn = async () => {
+    const double = modelDouble();
+    const report = (await new Function("figma", `${source}\nreturn applyPlan();`)(
+      double.figma,
+    )) as Report;
+    const set = pageNodes(double).find((child) => child.name === "tabelo");
+    const variant = (name: string) => set?.children.find((child) => child.name === name);
+    const tabelo = report.components.find((component) => component.set === "tabelo");
+    return { double, set, variant, report, tabelo };
+  };
+  const REST = "density=comfortable, state=rest";
+  const FOCUS = "density=comfortable, state=focus";
+
+  it("draws six variants of density × state: the caption above the region with head and three rows of three cells", async () => {
+    const { set, variant, tabelo } = await drawn();
+    expect(set?.children.map((child) => child.name)).toEqual([
+      "density=comfortable, state=rest",
+      "density=comfortable, state=hover",
+      "density=comfortable, state=focus",
+      "density=compact, state=rest",
+      "density=compact, state=hover",
+      "density=compact, state=focus",
+    ]);
+    expect(tabelo?.layout.columns).toBe(3);
+    expect(tabelo?.layout.rows).toBe(2);
+    const rest = variant(REST);
+    expect(rest?.properties.layoutMode).toBe("VERTICAL");
+    expect(rest?.children.map((child) => child.name)).toEqual(["caption", "region"]);
+    const caption = descendant(rest, "caption");
+    expect(caption?.properties.characters).toBe("Beschriftung");
+    expect(caption?.properties.componentPropertyReferences).toMatchObject({
+      characters: expect.stringMatching(/^label/),
+      visible: expect.stringMatching(/^caption#/),
+    });
+    expect(caption?.properties.visible).toBe(true);
+    expect(paints(caption, "fills")[0]?.boundVariables?.color?.name).toBe("color/text/default");
+    expect(bound(caption, "fontSize")).toBe("typography/label/1/font-size");
+    const region = descendant(rest, "region");
+    expect(region?.properties.layoutMode).toBe("VERTICAL");
+    expect(region?.properties.clipsContent).toBe(true);
+    expect(region?.properties.fills).toEqual([]);
+    expect(paints(region, "strokes")[0]?.boundVariables?.color?.name).toBe("color/border/subtle");
+    expect(bound(region, "strokeWeight")).toBe("border/width/default");
+    expect(bound(region, "cornerRadius")).toBe("radius/role/surface");
+    expect(region?.children.map((child) => child.name)).toEqual([
+      "head",
+      "row-1",
+      "row-2",
+      "row-3",
+    ]);
+    const head = descendant(rest, "head");
+    expect(head?.properties.layoutMode).toBe("HORIZONTAL");
+    expect(paints(head, "fills")[0]?.boundVariables?.color?.name).toBe("color/background/sunken");
+    expect(paints(head, "strokes")[0]?.boundVariables?.color?.name).toBe("color/border/subtle");
+    expect(bound(head, "strokeBottomWeight")).toBe("border/width/default");
+    expect(head?.properties.strokeTopWeight).toBe(0);
+    expect(head?.children.map((child) => child.name)).toEqual(["head-1", "head-2", "head-3"]);
+    for (const row of [1, 2, 3]) {
+      const node = descendant(rest, `row-${row}`);
+      expect(node?.properties.layoutMode, `row-${row}`).toBe("HORIZONTAL");
+      expect(node?.properties.fills, `row-${row}`).toEqual([]);
+      expect(paints(node, "strokes")[0]?.boundVariables?.color?.name, `row-${row}`).toBe(
+        "color/border/subtle",
+      );
+      expect(bound(node, "strokeBottomWeight"), `row-${row}`).toBe("border/width/default");
+      expect(
+        node?.children.map((child) => child.name),
+        `row-${row}`,
+      ).toEqual([`cell-${row}-1`, `cell-${row}-2`, `cell-${row}-3`]);
+    }
+    // The words of the Vitrino's table: head, row headers, text and numeric cells.
+    expect(descendant(rest, "sort-text")?.properties.characters).toBe("Name");
+    expect(descendant(rest, "head-text-2")?.properties.characters).toBe("Status");
+    expect(descendant(rest, "head-text-3")?.properties.characters).toBe("Anzahl");
+    expect(descendant(rest, "row-header-text-1")?.properties.characters).toBe("Barrierefreiheit");
+    expect(descendant(rest, "cell-text-2-2")?.properties.characters).toBe("Entwurf");
+    expect(descendant(rest, "cell-text-3-3")?.properties.characters).toBe("1");
+    // Head texts in head.color and head.typography; row headers in row-header.typography; cells
+    // in cell.color and cell.typography.
+    const headText = descendant(rest, "head-text-2");
+    expect(paints(headText, "fills")[0]?.boundVariables?.color?.name).toBe("color/text/default");
+    expect(bound(headText, "fontSize")).toBe("typography/label/1/font-size");
+    const rowHeader = descendant(rest, "row-header-text-2");
+    expect(paints(rowHeader, "fills")[0]?.boundVariables?.color?.name).toBe("color/text/default");
+    expect(bound(rowHeader, "fontSize")).toBe("typography/label/1/font-size");
+    const cellText = descendant(rest, "cell-text-2-2");
+    expect(bound(cellText, "fontSize")).toBe("typography/body/2/font-size");
+    // The numeric column at the end: the cell aligns at the end, the text to the right.
+    for (const name of ["head-text-3", "cell-text-1-3", "cell-text-3-3"]) {
+      expect(descendant(rest, name)?.properties.textAlignHorizontal, name).toBe("RIGHT");
+    }
+    expect(descendant(rest, "cell-text-1-2")?.properties.textAlignHorizontal).not.toBe("RIGHT");
+    expect(descendant(rest, "cell-1-3")?.properties.primaryAxisAlignItems).toBe("MAX");
+    expect(descendant(rest, "cell-1-2")?.properties.primaryAxisAlignItems).toBe("MIN");
+  });
+
+  it("binds padding and minimum height of every cell by density, and gives every cell of a column the width of its widest", async () => {
+    const { variant } = await drawn();
+    const cells = (node: DoubleNode | undefined, column: number) =>
+      [`head-${column}`, `cell-1-${column}`, `cell-2-${column}`, `cell-3-${column}`].map((name) =>
+        descendant(node, name),
+      );
+    for (const [name, padding, height] of [
+      [REST, "spacing/medium", "size/control/large"],
+      ["density=compact, state=rest", "spacing/small", "size/control/small"],
+    ] as const) {
+      const node = variant(name);
+      for (const column of [1, 2, 3]) {
+        for (const cell of cells(node, column)) {
+          expect(cell?.properties.layoutMode, `${name} ${cell?.name}`).toBe("HORIZONTAL");
+          expect(cell?.properties.fills, `${name} ${cell?.name}`).toEqual([]);
+          expect(bound(cell, "paddingLeft"), `${name} ${cell?.name}`).toBe(padding);
+          expect(bound(cell, "paddingRight"), `${name} ${cell?.name}`).toBe(padding);
+          expect(bound(cell, "minHeight"), `${name} ${cell?.name}`).toBe(height);
+        }
+        // One width per column (the widest cell's), written as the minimum of every cell.
+        const widths = cells(node, column).map((cell) => box(cell).width);
+        expect(new Set(widths).size, `${name} column ${column}`).toBe(1);
+        expect(widths[0], `${name} column ${column}`).toBeGreaterThan(0);
+        for (const cell of cells(node, column)) {
+          expect(cell?.properties.minWidth, `${name} ${cell?.name}`).toBe(widths[0]);
+        }
+      }
+      // The rows are as wide as the head: columns align.
+      const widths = ["head", "row-1", "row-2", "row-3"].map(
+        (row) => box(descendant(node, row)).width,
+      );
+      expect(new Set(widths).size, name).toBe(1);
+    }
+  });
+
+  it("draws the sort button in the first head cell: fill by state, radius, the chevron bound, the ring in the focus variant only", async () => {
+    const { variant } = await drawn();
+    const rest = variant(REST);
+    const hover = variant("density=comfortable, state=hover");
+    const focus = variant(FOCUS);
+    for (const [node, state] of [
+      [rest, "rest"],
+      [hover, "hover"],
+      [focus, "focus"],
+    ] as const) {
+      const cell = descendant(node, "head-1");
+      expect(
+        cell?.children.map((child) => child.name),
+        state,
+      ).toEqual(["focus-ring"]);
+      const ring = descendant(cell, "focus-ring");
+      const gap = descendant(ring, "focus-gap");
+      const sort = descendant(gap, "sort");
+      expect(sort?.properties.layoutMode, state).toBe("HORIZONTAL");
+      expect(bound(sort, "cornerRadius"), state).toBe("radius/role/control");
+      expect(
+        sort?.children.map((child) => child.name),
+        state,
+      ).toEqual(["sort-text", "sort-indicator"]);
+      const text = descendant(sort, "sort-text");
+      expect(paints(text, "fills")[0]?.boundVariables?.color?.name, state).toBe(
+        "color/text/default",
+      );
+      expect(bound(text, "fontSize"), state).toBe("typography/label/1/font-size");
+      const indicator = descendant(sort, "sort-indicator");
+      expect(indicator?.properties.layoutMode, state).toBe("NONE");
+      expect(bound(indicator, "width"), state).toBe("size/icon/small");
+      expect(bound(indicator, "height"), state).toBe("size/icon/small");
+      expect(indicator?.properties.fills, state).toEqual([]);
+      const mark = descendant(indicator, "mark");
+      expect(mark?.type, state).toBe("VECTOR");
+      expect(paints(mark, "fills")[0]?.boundVariables?.color?.name, state).toBe(
+        "color/text/subtle",
+      );
+      expect(mark?.properties.strokes, state).toEqual([]);
+      // The ring and its gap reserve their room in every state (F11).
+      expect(bound(ring, "paddingLeft"), state).toBe("focus/ring/width");
+      expect(bound(gap, "paddingLeft"), state).toBe("focus/offset");
+      expect(bound(ring, "cornerRadius"), state).toBe("radius/focus/ring");
+      expect(bound(gap, "cornerRadius"), state).toBe("radius/focus/gap");
+    }
+    expect(paints(descendant(rest, "sort"), "fills")[0]?.boundVariables?.color?.name).toBe(
+      "color/action/tertiary/rest",
+    );
+    expect(paints(descendant(hover, "sort"), "fills")[0]?.boundVariables?.color?.name).toBe(
+      "color/action/tertiary/hover",
+    );
+    expect(paints(descendant(focus, "sort"), "fills")[0]?.boundVariables?.color?.name).toBe(
+      "color/action/tertiary/rest",
+    );
+    // The ring shows its colours in the focus state only.
+    expect(paints(descendant(rest, "focus-ring"), "strokes")).toEqual([]);
+    expect(paints(descendant(hover, "focus-ring"), "strokes")).toEqual([]);
+    expect(paints(descendant(focus, "focus-ring"), "strokes")[0]?.boundVariables?.color?.name).toBe(
+      "focus/ring/color",
+    );
+    expect(paints(descendant(focus, "focus-gap"), "strokes")[0]?.boundVariables?.color?.name).toBe(
+      "color/focus/inner",
+    );
+    // The other head cells hold their text alone.
+    expect(descendant(rest, "head-2")?.children.map((child) => child.name)).toEqual([
+      "head-text-2",
+    ]);
+  });
+
+  it("declares caption-hidden as the BOOLEAN property caption (shown), default true, connected to the caption's visibility, once over two runs", async () => {
+    const { double, set, variant } = await drawn();
+    const definitions = () => (set?.properties.componentPropertyDefinitions ?? {}) as Definitions;
+    const key = () =>
+      Object.keys(definitions()).find((candidate) => candidate.startsWith("caption#"));
+    expect(key()).toBeDefined();
+    expect(definitions()[key() ?? ""]).toEqual({ type: "BOOLEAN", defaultValue: true });
+    expect(Object.keys(definitions())).toHaveLength(2);
+    for (const node of set?.children ?? []) {
+      const caption = descendant(node, "caption");
+      expect(caption?.properties.visible, node.name).toBe(true);
+      expect(caption?.properties.componentPropertyReferences, node.name).toMatchObject({
+        visible: key(),
+      });
+    }
+    expect(variant(REST)).toBeDefined();
+    await run(double, source);
+    expect(Object.keys(definitions())).toHaveLength(2);
+    expect(definitions()[key() ?? ""]).toEqual({ type: "BOOLEAN", defaultValue: true });
+  });
+
+  it("measures every variant with a size and a cell, the three states of a density alike, warns of nothing, and writes nothing new on a second run", async () => {
+    const { double, tabelo, report } = await drawn();
+    expect(tabelo?.layout.zero).toEqual([]);
+    expect(tabelo?.layout.smaller).toEqual([]);
+    expect(tabelo?.layout.unplaced).toEqual([]);
+    expect(tabelo?.layout.uneven).toEqual([]);
+    expect(report.warnings.filter((warning) => warning.startsWith("tabelo"))).toEqual([]);
+    expect(tabelo?.layout.held.rest.caption).toBeDefined();
+    expect(tabelo?.layout.held.rest.region).toBeDefined();
+    expect(tabelo?.layout.held.rest.head).toBeDefined();
+    expect(tabelo?.layout.held.rest.sort).toBeDefined();
+    const before = double.snapshot();
+    const written = double.counts.writes;
+    await run(double, source);
+    expect(double.snapshot()).toBe(before);
+    expect(double.counts.writes - written).toBe(0);
+  });
+});
+
+// Spec 011 ④ (spec „atributlisto", G2; plan ④ D-14): the list is a structure of its own —
+// variant → list (a column, the gap bound to list.gap) → three entries, the Vitrino's: in columns
+// a row, term then value, the gap bound to box.inline-padding; stacked a column, the gap bound to
+// box.gap. The term in term.color and term.typography, the value in value.color and
+// value.typography; an empty value shows the dash. The label prop is the accessible name: the set
+// declares the label property and connects no text to it (nothing seen, nothing drawn).
+describe("the atributlisto is drawn as a list: three entries, rows in columns and columns stacked (Spec 011 ④)", () => {
+  const source = repoFiles["figma/plugin/code.js"] ?? "";
+  const bound = (node: DoubleNode | undefined, field: string) => node?.boundVariables[field]?.name;
+  type Paint = { visible: boolean; boundVariables?: { color?: { name: string } } };
+  const paints = (node: DoubleNode | undefined, field: "fills" | "strokes") =>
+    (node?.properties[field] ?? []) as Paint[];
+  type Definitions = Record<string, { type: string; defaultValue: string | boolean }>;
+  type Report = {
+    warnings: string[];
+    components: {
+      set: string;
+      layout: {
+        zero: string[];
+        smaller: string[];
+        unplaced: string[];
+        uneven: unknown[];
+        columns: number;
+        rows: number;
+        held: { rest: Record<string, Record<string, unknown>> };
+      };
+    }[];
+  };
+  const drawn = async () => {
+    const double = modelDouble();
+    const report = (await new Function("figma", `${source}\nreturn applyPlan();`)(
+      double.figma,
+    )) as Report;
+    const set = pageNodes(double).find((child) => child.name === "atributlisto");
+    const variant = (name: string) => set?.children.find((child) => child.name === name);
+    const atributlisto = report.components.find((component) => component.set === "atributlisto");
+    return { double, set, variant, report, atributlisto };
+  };
+
+  it("draws two variants by layout: the list column with three entries, each term and value in their roles", async () => {
+    const { set, variant, atributlisto } = await drawn();
+    expect(set?.children.map((child) => child.name)).toEqual([
+      "layout=columns, state=rest",
+      "layout=stacked, state=rest",
+    ]);
+    expect(atributlisto?.layout.columns).toBe(1);
+    expect(atributlisto?.layout.rows).toBe(2);
+    for (const [name, mode, gap] of [
+      ["layout=columns, state=rest", "HORIZONTAL", "spacing/large"],
+      ["layout=stacked, state=rest", "VERTICAL", "spacing/small"],
+    ] as const) {
+      const node = variant(name);
+      const list = descendant(node, "list");
+      expect(list?.properties.layoutMode, name).toBe("VERTICAL");
+      expect(list?.properties.fills, name).toEqual([]);
+      expect(bound(list, "itemSpacing"), name).toBe("spacing/large");
+      expect(
+        list?.children.map((child) => child.name),
+        name,
+      ).toEqual(["entry-1", "entry-2", "entry-3"]);
+      for (const index of [1, 2, 3]) {
+        const entry = descendant(node, `entry-${index}`);
+        expect(entry?.properties.layoutMode, `${name} entry-${index}`).toBe(mode);
+        expect(bound(entry, "itemSpacing"), `${name} entry-${index}`).toBe(gap);
+        expect(
+          entry?.children.map((child) => child.name),
+          `${name} entry-${index}`,
+        ).toEqual([`term-${index}`, `value-${index}`]);
+        const term = descendant(entry, `term-${index}`);
+        expect(paints(term, "fills")[0]?.boundVariables?.color?.name, name).toBe(
+          "color/text/muted",
+        );
+        expect(bound(term, "fontSize"), name).toBe("typography/label/2/font-size");
+        const value = descendant(entry, `value-${index}`);
+        expect(paints(value, "fills")[0]?.boundVariables?.color?.name, name).toBe(
+          "color/text/default",
+        );
+        expect(bound(value, "fontSize"), name).toBe("typography/body/2/font-size");
+      }
+      expect(descendant(node, "term-1")?.properties.characters, name).toBe("Version");
+      expect(descendant(node, "value-1")?.properties.characters, name).toBe("3");
+      expect(descendant(node, "term-2")?.properties.characters, name).toBe("Verantwortlich");
+      expect(descendant(node, "value-2")?.properties.characters, name).toBe("Team Fundamento");
+      expect(descendant(node, "term-3")?.properties.characters, name).toBe("Gültig seit");
+      expect(descendant(node, "value-3")?.properties.characters, name).toBe("–");
+      // No text carries the label property: the label is the accessible name, never seen.
+      const connected = (child: DoubleNode): boolean =>
+        child.properties.componentPropertyReferences !== undefined ||
+        child.children.some(connected);
+      expect(connected(node as DoubleNode), name).toBe(false);
+    }
+  });
+
+  it("declares the label property with the word Angaben and nothing else", async () => {
+    const { set } = await drawn();
+    const definitions = (set?.properties.componentPropertyDefinitions ?? {}) as Definitions;
+    expect(Object.values(definitions)).toEqual([{ type: "TEXT", defaultValue: "Angaben" }]);
+  });
+
+  it("measures every variant with a size and a cell, warns of nothing, and writes nothing new on a second run", async () => {
+    const { double, atributlisto, report } = await drawn();
+    expect(atributlisto?.layout.zero).toEqual([]);
+    expect(atributlisto?.layout.smaller).toEqual([]);
+    expect(atributlisto?.layout.unplaced).toEqual([]);
+    expect(atributlisto?.layout.uneven).toEqual([]);
+    expect(report.warnings.filter((warning) => warning.startsWith("atributlisto"))).toEqual([]);
+    expect(atributlisto?.layout.held.rest.list).toBeDefined();
+    expect(atributlisto?.layout.held.rest.entry).toBeDefined();
+    const before = double.snapshot();
+    const written = double.counts.writes;
+    await run(double, source);
+    expect(double.snapshot()).toBe(before);
+    expect(double.counts.writes - written).toBe(0);
   });
 });

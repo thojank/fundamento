@@ -39,10 +39,13 @@ import {
 import type { Celo, CeloInput, GeneratedFile } from "../../build.js";
 import {
   VITRINO_DIALOG_ACTIONS,
+  VITRINO_LIST_ENTRIES,
+  VITRINO_NUMBER_EXAMPLES,
   VITRINO_OPTIONS,
   VITRINO_PROMPT,
   VITRINO_SLOT_TEXTS,
   VITRINO_SURFACE,
+  VITRINO_TABLE,
 } from "../vitrino/datumoj.js";
 import { signOf } from "../web-component/element-template.js";
 import { drawnPartPropertiesOf, pluginManifest, pluginSource } from "./plugin.js";
@@ -282,6 +285,80 @@ export const DIALOG_TEXTS: Readonly<Record<string, string>> = {
 export const BACKDROP_EXAMPLE = "mit Hintergrund";
 
 /**
+ * The name of the example frame beside a meter's set (Spec 011 ④, spec „mezurilo – Figma": the
+ * value examples 0, 66 and unknown; plan ④ D-14): the default variant with the unknown value, as
+ * `<set> – unbekannt`. The variants show the known value (the Vitrino's example, `meterShareOf`);
+ * an unknown value is not 0 (G4): the track keeps its fill, carries the dashed stroke of the part
+ * unknown and holds no fill frame, and the value text says so.
+ */
+export const UNKNOWN_EXAMPLE = "unbekannt";
+
+/**
+ * The value text of an unknown value (Spec 011 ④, G4, Regulo meter-text-states-value: an unknown
+ * value heißt „nicht geprüft", nie „0 %"): the word of the Regulo, which the Skemo's a11y texts
+ * do not carry (the application writes the text; the set shows the Regulo's example).
+ */
+export const METER_UNKNOWN_TEXT = "nicht geprüft";
+
+/**
+ * The share of the track the fill of a meter takes in the set (Spec 011 ④, plan ④ D-14): the
+ * Vitrino's value example (66) in the Skemo's range (min 0, max 100 by default) — one source for
+ * both pictures. A number of the drawing, no token: Figma binds no share, the plugin writes the
+ * fill's width from the track's measured width.
+ */
+export function meterShareOf(skemo: LoadedEro["skemo"]): number {
+  const bound = (name: string): number => {
+    const prop = skemo.props.find(
+      (candidate) => candidate.name === name && candidate.kind === "number",
+    );
+    return typeof prop?.default === "number" ? prop.default : Number(prop?.default ?? 0);
+  };
+  const example = Number(VITRINO_NUMBER_EXAMPLES.value ?? 0);
+  const range = bound("max") - bound("min");
+  return range > 0 ? (example - bound("min")) / range : 0;
+}
+
+/**
+ * The dash of an empty value in a key-value list (Spec 011 ④, plan ④ D-14): the web draws a
+ * short line as a sign of the projection and speaks „keine Angabe" (a11y.texts entries-empty);
+ * the set shows the dash as the value's text, where the Vitrino's entry has none. One character,
+ * named here once.
+ */
+export const LIST_EMPTY_VALUE = "–";
+
+/**
+ * The entries of a key-value list in the set (Spec 011 ④, F-5): the Vitrino's pairs, an empty
+ * value as the dash.
+ */
+export const LIST_ENTRIES: readonly { term: string; value: string }[] = VITRINO_LIST_ENTRIES.map(
+  ([term, value]) => ({ term, value: value === "" ? LIST_EMPTY_VALUE : value }),
+);
+
+/**
+ * The table of the set (Spec 011 ④, spec „tabelo – Figma": ein Set mit Kopf + 3 Zeilen × 3
+ * Spalten, eine numerisch, die Sortierung am ersten Kopf aufsteigend; F-5): read from the
+ * Vitrino's table markup, one source for both pictures — the head words, the rows (a row header
+ * and its cells), which columns are numeric (`numeric`) and which the sort button stands on
+ * (`data-sort`). The direction is the Skemo's default of the prop direction.
+ */
+export const TABLE_TEXTS: { head: string[]; rows: string[][]; numeric: number[]; sorted: number } =
+  (() => {
+    const heads = [...VITRINO_TABLE.matchAll(/<th scope="col"([^>]*)>([^<]*)<\/th>/g)];
+    const rows = [
+      ...VITRINO_TABLE.matchAll(/<tr>(<th scope="row">(?:[^<]*<\/th>)(?:<td>[^<]*<\/td>)+)<\/tr>/g),
+    ].map((row) => [...(row[1] ?? "").matchAll(/>([^<]+)</g)].map((cell) => cell[1] ?? ""));
+    return {
+      head: heads.map((head) => head[2] ?? ""),
+      rows,
+      numeric: heads.flatMap((head, index) => (/\bnumeric\b/.test(head[1] ?? "") ? [index] : [])),
+      sorted: Math.max(
+        0,
+        heads.findIndex((head) => /\bdata-sort=/.test(head[1] ?? "")),
+      ),
+    };
+  })();
+
+/**
  * The sign of a loading state (Spec 011 ③, plan ③ D-14): the arc the web draws in its indicator
  * (element-template.ts, D-10: three quarters of a circle in a box of 16, a stroke in the current
  * colour), here in its own box of 16 like the signs of `signOf`. The plugin imports it once and
@@ -296,9 +373,14 @@ export const STATE_SIGN =
  * butono of a notice. Celo knowledge (Art. VIII): the Skemo keys no part by the prop — the butono
  * is there or not, it does not change its look — so the plan declares it as a BOOLEAN property of
  * the set connected to the part's visibility, with the Skemo's default. Only where the Skemo has
- * both the prop and the part.
+ * both the prop and the part — or the slot (Spec 011 ④, plan ④ D-14: caption-hidden hides the
+ * caption of a table, the text of its default slot, which the set draws as the label; `hides`
+ * says the prop takes the part away where dismissible brings it).
  */
-const BOOLEAN_TOGGLES: Readonly<Record<string, string>> = { dismissible: "dismiss" };
+const BOOLEAN_TOGGLES: Readonly<Record<string, { part: string; hides?: boolean }>> = {
+  dismissible: { part: "dismiss" },
+  "caption-hidden": { part: "caption", hides: true },
+};
 
 /**
  * The dash pattern of a dashed stroke (Spec 011 ③, plan ③ D-14), in widths of the stroke: the
@@ -325,7 +407,10 @@ export type FigmaStructure =
   | "dialog"
   | "badge"
   | "notice"
-  | "state";
+  | "state"
+  | "meter"
+  | "table"
+  | "list";
 
 /**
  * A radio group (Spec 010 ③, D-07) is a choice: the label (the question) above a column of
@@ -339,7 +424,11 @@ export type FigmaStructure =
  * — the pill with its text, no ring (G2); a live region (role status) is a notice — a row with the
  * accent at its start, the texts in a column, the dismiss frame at the end — or, where its Skemo
  * has an indicator (the area is busy or empty), a state — a column with the arc, the text and the
- * actions. The parts tell the two apart: the role alone is the same.
+ * actions. The parts tell the two apart: the role alone is the same. Spec 011 ④ (plan ④ D-14):
+ * a meter (role meter) is a column — label, the track with the fill in it, value text; a table
+ * (role table) is the caption above the region with the head and three rows, the sort button in
+ * the first head cell; a list (role list) is a column of entries, each a row or a column by
+ * layout.
  */
 export const structureOf = (role: string, parts: readonly string[] = []): FigmaStructure =>
   role === "textbox" || role === "combobox"
@@ -356,7 +445,13 @@ export const structureOf = (role: string, parts: readonly string[] = []): FigmaS
               ? parts.includes("indicator")
                 ? "state"
                 : "notice"
-              : "control";
+              : role === "meter"
+                ? "meter"
+                : role === "table"
+                  ? "table"
+                  : role === "list"
+                    ? "list"
+                    : "control";
 
 /**
  * The neutral word every label template shows, per a11y role (M-3; Maintainer, F14, 2026-10-13,
@@ -385,6 +480,17 @@ const LABEL_DEFAULTS: Readonly<Record<string, string>> = {
   // Spec 011 ③ (plan ③ D-14): a live region (role status) is a notice whose message tells what
   // happened — the default text of the message property. For the maintainer to confirm; no Jugxo.
   status: "Meldung",
+  // Spec 011 ④ (plan ④ D-14): a meter's label names the measure it shows (Regulo
+  // meter-text-states-value gives the number to the value text). For the maintainer to confirm;
+  // no Jugxo created here.
+  meter: "Messwert",
+  // Spec 011 ④ (plan ④ D-14): a table's caption names what stands in the rows (Regulo
+  // table-caption-names-the-content); the set's word is a caption's, like a field's label. For
+  // the maintainer to confirm; no Jugxo created here.
+  table: "Beschriftung",
+  // Spec 011 ④ (plan ④ D-14): a key-value list's label is its accessible name, the record's
+  // details (Goal details: Angaben). For the maintainer to confirm; no Jugxo created here.
+  list: "Angaben",
 };
 
 /**
@@ -482,8 +588,15 @@ export interface FigmaComponentSet {
   example?: {
     name: string;
     variant: Record<string, string>;
-    backdrop: { binding: string; paint: FigmaPaint };
+    /** The backdrop of a dialog's example; a meter's example (Spec 011 ④) stands on the page. */
+    backdrop?: { binding: string; paint: FigmaPaint };
     padding: number;
+    /**
+     * The words the example shows instead of the set's (Spec 011 ④): the value text of the
+     * unknown value. Where the example has them, it is the unknown value: the track carries the
+     * stroke of the part unknown with the plan's dash pattern and holds no fill frame.
+     */
+    texts?: Record<string, string>;
   };
   /**
    * Stand-ins that look like a composed Ero (Abnahme Spec 011 ②, F-5), per node of the set: the
@@ -506,9 +619,31 @@ export interface FigmaComponentSet {
    * The boolean props that show or hide a part (Spec 011 ③, plan ③ D-14: dismissible shows the
    * dismiss frame of a notice): each a BOOLEAN property of the set, declared like the label, with
    * the part's visibility connected to it and the Skemo's default; an instance switches it. A
-   * boolean that keys a part is an axis instead (Spec 010 ①) and stands in no list here.
+   * boolean that keys a part is an axis instead (Spec 010 ①) and stands in no list here. A prop
+   * that `hides` (Spec 011 ④: caption-hidden) takes the part away where it is true; Figma shows a
+   * layer when its property is true, so the plugin declares the inverse — the part's name as the
+   * property, shown by default where the prop's default is false.
    */
-  toggles?: { property: string; part: string; defaultValue: boolean }[];
+  toggles?: { property: string; part: string; defaultValue: boolean; hides?: boolean }[];
+  /**
+   * The share of the track the fill of a meter takes (Spec 011 ④, plan ④ D-14): the Vitrino's
+   * value example in the Skemo's range, written as the fill's width from the measured track.
+   */
+  meter?: { share: number };
+  /**
+   * The table of the set (Spec 011 ④, plan ④ D-14): the head words, the rows (row header first),
+   * the numeric columns, the sorted column and the direction of its sort button — the Vitrino's
+   * table, one source for both pictures.
+   */
+  table?: {
+    head: string[];
+    rows: string[][];
+    numeric: number[];
+    sorted: number;
+    direction: string;
+  };
+  /** The entries of a key-value list (Spec 011 ④): the Vitrino's pairs, an empty value the dash. */
+  entries?: { term: string; value: string }[];
   /** The purpose of the Uzo, one line, as the description of the set (Spec 007 T028, A12). */
   description?: string;
   /**
@@ -1006,6 +1141,23 @@ const DERIVED_RADII = [
 /** The parts a derived radius is computed from, as `<part>.<property>` of the Skemo. */
 const RADIUS_PARTS = ["box.radius", "focus-ring.offset", "focus-ring.ring"] as const;
 
+/**
+ * The part the focus ring encloses (F32): the box, or — where the Skemo has no box with a radius
+ * — the part whose fill the state keys (Spec 011 ④, plan ④ D-14: the sort button of a table; the
+ * states are the button's, E3), so the ring grows from that part's radius.
+ */
+function ringedPartOf(skemo: LoadedEro["skemo"]): string {
+  if (skemo.parts.box?.radius !== undefined) return "box";
+  const keyed = Object.entries(skemo.parts).find(
+    ([, properties]) =>
+      properties.radius !== undefined &&
+      properties.fill !== undefined &&
+      "by" in properties.fill &&
+      properties.fill.by.includes(STATE_KEY),
+  );
+  return keyed?.[0] ?? "box";
+}
+
 /** The px of a resolved dimension, optionally inside a field of a composite. */
 function measureOf(value: unknown, field?: string): number {
   const measure =
@@ -1022,11 +1174,15 @@ function measureOf(value: unknown, field?: string): number {
 function radiusTokensOf(entry: LoadedEro): Record<string, string> | undefined {
   const keys = variantKeys(entry.skemo);
   let tokens: Record<string, string> | undefined;
+  const ringed = ringedPartOf(entry.skemo);
   for (const combination of combinationsOf(entry.skemo, keys)) {
     const here: Record<string, string> = {};
     for (const part of RADIUS_PARTS) {
       const [name, property] = part.split(".");
-      const bound = boundToken(entry.skemo, name ?? "", property ?? "", combination);
+      // The ring encloses the part that takes the state (Spec 011 ④: the sort button of a table,
+      // whose radius is the one to grow); elsewhere the box, as before.
+      const of = name === "box" ? ringed : (name ?? "");
+      const bound = boundToken(entry.skemo, of, property ?? "", combination);
       if (bound !== undefined) here[part] = bound.token;
     }
     if (Object.keys(here).length !== RADIUS_PARTS.length) return undefined;
@@ -1604,6 +1760,8 @@ function componentSetOf(
   // the checkbox its error; the switch has none. A dialog (Spec 011 ②) its message, the label
   // of its reason, and the words of its two actions. A notice (Spec 011 ③) its heading and its
   // details; a badge and a state have no text beside the label (the badge's description is hidden).
+  // A meter (Spec 011 ④) its value text; a table's empty slot has no word in the Vitrino and its
+  // caption is the label; a list's entries are no text slot.
   const toggleTexts = slotWordsOf(skemo);
   const dialogTexts = { ...toggleTexts, ...DIALOG_ACTION_TEXTS };
   // The example frame of a dialog (Spec 011 ②): the default variant — every keyed prop at its
@@ -1629,20 +1787,57 @@ function componentSetOf(
           backdrop: { binding: variableName(backdrop.token), paint: backdropPaint },
           padding: parityPx(base[SET_GAP]?.value),
         }
-      : undefined;
+      : // The example of a meter (Spec 011 ④): the default variant with the unknown value — no
+        // backdrop, the Regulo's word as its value text; the plugin leaves out the fill frame
+        // and draws the stroke of the part unknown, whose term every variant carries.
+        structure === "meter" && skemo.parts.unknown !== undefined
+        ? {
+            name: `${entry.ero.name} – ${UNKNOWN_EXAMPLE}`,
+            variant: defaults,
+            padding: parityPx(base[SET_GAP]?.value),
+            texts: { "value-text": METER_UNKNOWN_TEXT },
+          }
+        : undefined;
   // The sign of the indicator: the check mark, the dot, and the chevron of a select's field
-  // (Spec 010 ④, D-07); a text field has none. A state (Spec 011 ③) has the arc.
-  const sign = structure === "state" ? STATE_SIGN : signOf(skemo.a11y.role, "16");
-  // The boolean props that show a part (Spec 011 ③): BOOLEAN properties of the set, no axis.
+  // (Spec 010 ④, D-07); a text field has none. A state (Spec 011 ③) has the arc. A table (Spec
+  // 011 ④) has the select's chevron as its sort indicator — the web turns the same sign by the
+  // direction; one shape for both pictures.
+  const sign =
+    structure === "state"
+      ? STATE_SIGN
+      : structure === "table"
+        ? signOf("combobox", "16")
+        : signOf(skemo.a11y.role, "16");
+  // The boolean props that show a part (Spec 011 ③): BOOLEAN properties of the set, no axis. The
+  // part may be the text of a slot (Spec 011 ④: the caption of a table is its default slot).
   const toggles = skemo.props.flatMap((prop) => {
-    const part = BOOLEAN_TOGGLES[prop.name];
+    const toggle = BOOLEAN_TOGGLES[prop.name];
     return prop.kind === "boolean" &&
-      part !== undefined &&
-      skemo.parts[part] !== undefined &&
+      toggle !== undefined &&
+      (skemo.parts[toggle.part] !== undefined ||
+        skemo.slots.some((slot) => slot.name === toggle.part)) &&
       !keys.includes(prop.name)
-      ? [{ property: prop.name, part, defaultValue: prop.default === true }]
+      ? [
+          {
+            property: prop.name,
+            part: toggle.part,
+            defaultValue: prop.default === true,
+            ...(toggle.hides === true ? { hides: true } : {}),
+          },
+        ]
       : [];
   });
+  // The table of a table's set and the entries of a list's (Spec 011 ④): the Vitrino's words.
+  const table =
+    structure === "table"
+      ? {
+          ...TABLE_TEXTS,
+          direction: String(
+            skemo.props.find((prop) => prop.name === "direction")?.default ?? "ascending",
+          ),
+        }
+      : undefined;
+  const entries = structure === "list" ? [...LIST_ENTRIES] : undefined;
   // The options of a choice (Spec 010 ③, D-07): the Vitrino's words, the first chosen.
   const [entryKey] = entryKeys;
   const options =
@@ -1656,7 +1851,10 @@ function componentSetOf(
     set: entry.ero.name,
     structure,
     ...(structure === "field" ? { texts: fieldTextsOf(skemo) } : {}),
-    ...((structure === "toggle" || structure === "choice" || structure === "notice") &&
+    ...((structure === "toggle" ||
+      structure === "choice" ||
+      structure === "notice" ||
+      structure === "meter") &&
     Object.keys(toggleTexts).length > 0
       ? { texts: toggleTexts }
       : {}),
@@ -1666,6 +1864,9 @@ function componentSetOf(
     ...(example === undefined ? {} : { example }),
     ...(composed === undefined ? {} : { composed }),
     ...(toggles.length === 0 ? {} : { toggles }),
+    ...(structure === "meter" ? { meter: { share: meterShareOf(skemo) } } : {}),
+    ...(table === undefined ? {} : { table }),
+    ...(entries === undefined ? {} : { entries }),
     ...(description === undefined ? {} : { description }),
     ...(uzo === undefined ? {} : { uzo }),
     properties,

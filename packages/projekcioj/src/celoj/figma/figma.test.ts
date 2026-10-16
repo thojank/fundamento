@@ -8,6 +8,8 @@ import { join } from "node:path";
 import { baseResolution, defaultModeloSource, projectModeloSource } from "@fundamento/modelo";
 import { describe, expect, it } from "vitest";
 import { celoInputOf } from "../../build.js";
+import { VITRINO_LIST_ENTRIES, VITRINO_SLOT_TEXTS } from "../vitrino/datumoj.js";
+import { signOf } from "../web-component/element-template.js";
 import {
   ALPHA_VARIES,
   BACKDROP_EXAMPLE,
@@ -20,12 +22,15 @@ import {
   type FigmaValue,
   figmaPlanInventory,
   figmaValues,
+  LIST_EMPTY_VALUE,
   labelDefaultOf,
+  METER_UNKNOWN_TEXT,
   resolveFigmaPlan,
   STATE_SIGN,
   structureOf,
   styleOfWeight,
   TEXT_CASE_VARIES,
+  UNKNOWN_EXAMPLE,
 } from "./figma.js";
 import { FIGMA_MODE_LIMIT } from "./plugin.js";
 
@@ -730,6 +735,8 @@ describe("Figma plan for the ligilo (Spec 008 T017)", () => {
 
   it("plans the sets in Ero order, butono first, and gives the ligilo placement × size × state", () => {
     expect(plan.components.map((component) => component.set)).toEqual([
+      // Spec 011 ④: the atributlisto, the mezurilo and the tabelo, in the Ero order like every set.
+      "atributlisto",
       // Spec 011 ③: the avizo, the insigno and the plenstato, in the Ero order like every set.
       "avizo",
       "butono",
@@ -741,8 +748,10 @@ describe("Figma plan for the ligilo (Spec 008 T017)", () => {
       "kampo",
       "ligilo",
       "markobutono",
+      "mezurilo",
       "plenstato",
       "sxaltilo",
+      "tabelo",
       "tekstareo",
     ]);
     expect(set?.properties).toEqual({
@@ -916,6 +925,9 @@ describe("the label default of a set follows its a11y role (M-3)", () => {
     );
     // Spec 010 ①: a switch names a setting (plan D-10, for the maintainer to confirm).
     expect(defaults).toEqual({
+      // Spec 011 ④ (plan ④ D-14): a key-value list (role list) names what it states (for the
+      // maintainer to confirm).
+      atributlisto: "Angaben",
       // Spec 011 ③ (plan ③ D-14): a notice (role status) names its message (for the maintainer
       // to confirm).
       avizo: "Meldung",
@@ -932,13 +944,28 @@ describe("the label default of a set follows its a11y role (M-3)", () => {
       ligilo: "Ziel",
       // Spec 010 ②: a checkbox names an option (plan ② D-11, for the maintainer to confirm, O-x).
       markobutono: "Option",
+      // Spec 011 ④ (plan ④ D-14): a meter (role meter) names the measure its label stands for
+      // (for the maintainer to confirm).
+      mezurilo: "Messwert",
       // Spec 011 ③: a loading or empty state shares the role status with the notice; its word is
       // the structure's, not the role's (for the maintainer to confirm).
       plenstato: "Zustand",
       sxaltilo: "Einstellung",
+      // Spec 011 ④ (plan ④ D-14): a table's caption is a caption like a field's label (for the
+      // maintainer to confirm).
+      tabelo: "Beschriftung",
       // Spec 011 ②: a text area is a textbox, so the kampo's word applies.
       tekstareo: "Beschriftung",
     });
+  });
+
+  it("knows the words of the Daten roles: meter, table, list (Spec 011 ④)", () => {
+    expect(labelDefaultOf("meter")).toBe("Messwert");
+    expect(labelDefaultOf("table")).toBe("Beschriftung");
+    expect(labelDefaultOf("list")).toBe("Angaben");
+    expect(labelDefaultOf("meter", "meter")).toBe("Messwert");
+    expect(labelDefaultOf("table", "table")).toBe("Beschriftung");
+    expect(labelDefaultOf("list", "list")).toBe("Angaben");
   });
 
   it("falls back to Aktion for a role the Celo does not know", () => {
@@ -1921,5 +1948,380 @@ describe("Figma plan for the plenstato (Spec 011 ③)", () => {
         (key) => key.startsWith("motion.") || key.startsWith("border.stroke"),
       ),
     ).toBe(false);
+  });
+});
+
+// Spec 011 ④ (spec „mezurilo", G2, G4, G7; plan ④ D-14): a meter has the role meter and one state
+// (G2), so it is drawn as a structure of its own — a column with the label (the label property),
+// the track (its fill, radius and height) holding the fill frame whose colour follows intent and
+// whose width is the share of the Vitrino's value example (66 of 0 … 100), and the value text
+// (the Vitrino's slot word). The unknown value is the example frame beside the set: the track with
+// the dashed stroke of the part unknown, no fill, the text „nicht geprüft" (G4, Regulo
+// meter-text-states-value). value, min and max are numbers: NUMBER properties, no axis.
+describe("Figma plan for the mezurilo (Spec 011 ④)", () => {
+  const set = plan.components.find((component) => component.set === "mezurilo");
+  const mezurilo = prepared.input.modelo.eroj.find((entry) => entry.ero.name === "mezurilo");
+  const variant = (intent: string) => set?.variants.find((entry) => entry.props.intent === intent);
+
+  it("plans a meter of intent in one state, with the purpose, the word Messwert, the value text, the share and the unknown example", () => {
+    expect(structureOf("meter")).toBe("meter");
+    expect(set?.structure).toBe("meter");
+    expect(set?.properties).toEqual({
+      value: "NUMBER",
+      min: "NUMBER",
+      max: "NUMBER",
+      intent: ["neutral", "success", "warning", "danger"],
+      state: ["rest"],
+    });
+    expect(set?.variants).toHaveLength(4);
+    expect(Object.keys(set?.variants[0]?.props ?? {})).toEqual(["intent", "state"]);
+    expect(set?.grid).toMatchObject({ rows: 4, columns: 1 });
+    expect(set?.description).toBe(mezurilo?.uzo?.purpose);
+    expect(set?.label?.defaultValue).toBe("Messwert");
+    // The value text is the Vitrino's slot word (one source for both pictures, F-5).
+    expect(set?.texts).toEqual({ "value-text": VITRINO_SLOT_TEXTS["value-text"] });
+    expect(set?.texts?.["value-text"]).toBe("66 % von 3 prüfbaren");
+    // The share of the track the fill takes: the Vitrino's value example in the Skemo's range.
+    expect(set?.meter).toEqual({ share: 0.66 });
+    // The example beside the set: the default variant with the unknown value.
+    expect(set?.example).toEqual({
+      name: `mezurilo – ${UNKNOWN_EXAMPLE}`,
+      variant: { intent: "neutral", state: "rest" },
+      padding: plan.section?.gap,
+      texts: { "value-text": METER_UNKNOWN_TEXT },
+    });
+    expect(UNKNOWN_EXAMPLE).toBe("unbekannt");
+    expect(METER_UNKNOWN_TEXT).toBe("nicht geprüft");
+    expect(set?.sign).toBeUndefined();
+    expect(set?.toggles).toBeUndefined();
+    expect(set?.variants.every((entry) => entry.focusVisible === false)).toBe(true);
+  });
+
+  it("binds track, fill by intent, the unknown stroke, label and value text, and the gap; the stroke dashed for the unknown value", () => {
+    const neutral = variant("neutral");
+    expect(neutral?.bindings).toEqual({
+      "track.fill": "color/background/sunken",
+      "track.radius": "radius/role/pill",
+      "track.height": "spacing/medium",
+      // Neutral is color.border.strong, not color.brand.fill: the brand fill measured 1,3:1 on
+      // the track in ekzemplo (Modelo of ④).
+      "fill.color": "color/border/strong",
+      "fill.radius": "radius/role/pill",
+      "unknown.stroke": "stroke/dashed",
+      "unknown.color": "color/border/default",
+      "unknown.width": "border/width/default",
+      "label.color": "color/text/default",
+      "label.typography": "typography/label/1",
+      "value-text.color": "color/text/subtle",
+      "value-text.typography": "typography/label/2",
+      "box.gap": "spacing/small",
+    });
+    expect(variant("success")?.bindings["fill.color"]).toBe("color/status/success/border");
+    expect(variant("warning")?.bindings["fill.color"]).toBe("color/status/warning/border");
+    expect(variant("danger")?.bindings["fill.color"]).toBe("color/status/danger/border");
+    // The stroke of the unknown value as a term per variant, with the pattern the plugin writes
+    // on the example only (a number, not bound, like the plenstato's).
+    expect(neutral?.stroke).toMatchObject({ part: "unknown", style: "dashed" });
+    expect(neutral?.stroke?.dashPattern).toHaveLength(2);
+    expect(neutral?.stroke?.dashPattern.every((length) => length > 0)).toBe(true);
+    expect(Object.keys(neutral?.paints ?? {}).sort()).toEqual([
+      "fill.color",
+      "label.color",
+      "track.fill",
+      "unknown.color",
+      "value-text.color",
+    ]);
+    expect(Object.keys(neutral?.geometry ?? {}).sort()).toEqual([
+      "box.gap",
+      "fill.radius",
+      "track.height",
+      "track.radius",
+      "unknown.width",
+    ]);
+    expect(neutral?.notDrawn).toEqual({});
+    expect(neutral?.hidden).toBeUndefined();
+    // The label is the label part: its role (label.1) gives the font and the case of the set.
+    expect(neutral?.font).toBeDefined();
+    expect(set?.fonts?.length ?? 0).toBeGreaterThan(0);
+  });
+
+  it("states the mezurilo in the parity inventory: value, min and max numbers, intent, the state rest, the fill's colour per intent", () => {
+    const items = figmaPlanInventory(plan);
+    expect(items.mezurilo?.props).toEqual({
+      value: ["number"],
+      min: ["number"],
+      max: ["number"],
+      intent: ["neutral", "success", "warning", "danger"],
+    });
+    expect(items.mezurilo?.states).toEqual(["rest"]);
+    expect(items.mezurilo?.values["fill.color@intent=neutral,state=rest"]).toMatch(/^#[0-9a-f]{6}/);
+    expect(items.mezurilo?.values["fill.color@intent=danger,state=rest"]).toMatch(/^#[0-9a-f]{6}/);
+    expect(items.mezurilo?.values["track.fill@intent=success,state=rest"]).toMatch(/^#[0-9a-f]{6}/);
+    expect(items.mezurilo?.values["unknown.color@intent=neutral,state=rest"]).toMatch(
+      /^#[0-9a-f]{6}/,
+    );
+    expect(items.mezurilo?.values["value-text.color@intent=warning,state=rest"]).toMatch(
+      /^#[0-9a-f]{6}/,
+    );
+    expect(items.mezurilo?.values["track.height@intent=neutral,state=rest"]).toMatch(/px$/);
+    expect(items.mezurilo?.values["unknown.width@intent=neutral,state=rest"]).toBe("1px");
+    expect(
+      Object.keys(items.mezurilo?.values ?? {}).some((key) => key.startsWith("unknown.stroke")),
+    ).toBe(false);
+  });
+});
+
+// Spec 011 ④ (spec „tabelo", G2, G4, G7; plan ④ D-14): a table has the role table; its states
+// belong to the sort button in the head (E3). It is drawn as a structure of its own — the caption
+// (the label property) above the region (border, radius) holding the head row (its fill) and
+// three body rows, three columns each: a row header, a text and a numeric cell; the first head
+// cell holds the sort button (fill by state, radius, the focus ring in the focus variant) with
+// the head text and the chevron of the select (sort-indicator). Axes density × state. The words
+// are the Vitrino's table (one source for both pictures). caption-hidden keys no part and is no
+// axis: a BOOLEAN property of the set that hides the caption — connected to its visibility, which
+// Figma shows when true, so the plan says the prop hides.
+describe("Figma plan for the tabelo (Spec 011 ④)", () => {
+  const set = plan.components.find((component) => component.set === "tabelo");
+  const tabelo = prepared.input.modelo.eroj.find((entry) => entry.ero.name === "tabelo");
+  const variant = (density: string, state: string) =>
+    set?.variants.find((entry) => entry.props.density === density && entry.props.state === state);
+
+  it("plans a table of density × state with the purpose, the word Beschriftung, the Vitrino's table, the chevron and caption-hidden as a BOOLEAN that hides the caption", () => {
+    expect(structureOf("table")).toBe("table");
+    expect(set?.structure).toBe("table");
+    expect(set?.properties).toEqual({
+      density: ["comfortable", "compact"],
+      "caption-hidden": "BOOLEAN",
+      sort: "TEXT",
+      direction: ["ascending", "descending"],
+      state: ["rest", "hover", "focus"],
+    });
+    expect(set?.variants).toHaveLength(6);
+    expect(Object.keys(set?.variants[0]?.props ?? {})).toEqual(["density", "state"]);
+    expect(set?.grid).toMatchObject({ rows: 2, columns: 3 });
+    expect(set?.description).toBe(tabelo?.uzo?.purpose);
+    expect(set?.label?.defaultValue).toBe("Beschriftung");
+    // Head + 3 rows × 3 columns, the last numeric, the first sorted ascending (the spec's set).
+    expect(set?.table).toEqual({
+      head: ["Name", "Status", "Anzahl"],
+      rows: [
+        ["Barrierefreiheit", "gültig", "0"],
+        ["Datenschutz", "Entwurf", "3"],
+        ["Sicherheit", "in Prüfung", "1"],
+      ],
+      numeric: [2],
+      sorted: 0,
+      direction: "ascending",
+    });
+    // The chevron of the select is the sort indicator (one shape for both pictures).
+    expect(set?.sign).toBe(signOf("combobox", "16"));
+    expect(set?.sign).toContain('d="M1.9 5.7');
+    expect(set?.toggles).toEqual([
+      { property: "caption-hidden", part: "caption", defaultValue: false, hides: true },
+    ]);
+    expect(set?.texts).toBeUndefined();
+    expect(set?.example).toBeUndefined();
+    expect(set?.variants.map((entry) => entry.focusVisible)).toEqual([
+      false,
+      false,
+      true,
+      false,
+      false,
+      true,
+    ]);
+  });
+
+  it("binds head, cells by density, row header, border, region, the sort button by state, its indicator and the focus ring; draws them all", () => {
+    const rest = variant("comfortable", "rest");
+    expect(rest?.bindings).toEqual({
+      // The caption is the label part (the default slot caption has a part of its name).
+      "caption.color": "color/text/default",
+      "caption.typography": "typography/label/1",
+      "head.fill": "color/background/sunken",
+      "head.color": "color/text/default",
+      "head.typography": "typography/label/1",
+      "cell.color": "color/text/default",
+      "cell.typography": "typography/body/2",
+      "cell.inline-padding": "spacing/medium",
+      "cell.height": "size/control/large",
+      "row-header.typography": "typography/label/1",
+      "border.color": "color/border/subtle",
+      "border.width": "border/width/default",
+      "region.radius": "radius/role/surface",
+      "sort.fill": "color/action/tertiary/rest",
+      "sort.color": "color/text/default",
+      "sort.radius": "radius/role/control",
+      "sort-indicator.size": "size/icon/small",
+      "sort-indicator.color": "color/text/subtle",
+      "focus-ring.ring": "focus/ring",
+      "focus-ring.offset": "focus/offset",
+      "focus-ring.color": "color/focus/inner",
+    });
+    expect(variant("compact", "rest")?.bindings).toMatchObject({
+      "cell.inline-padding": "spacing/small",
+      "cell.height": "size/control/small",
+    });
+    expect(variant("comfortable", "hover")?.bindings["sort.fill"]).toBe(
+      "color/action/tertiary/hover",
+    );
+    expect(variant("comfortable", "focus")?.bindings["sort.fill"]).toBe(
+      "color/action/tertiary/rest",
+    );
+    expect(Object.keys(rest?.paints ?? {}).sort()).toEqual([
+      "border.color",
+      "caption.color",
+      "cell.color",
+      "focus-ring.color",
+      "focus-ring.ring",
+      "head.color",
+      "head.fill",
+      "sort-indicator.color",
+      "sort.color",
+      "sort.fill",
+    ]);
+    expect(Object.keys(rest?.geometry ?? {}).sort()).toEqual([
+      "border.width",
+      "cell.height",
+      "cell.inline-padding",
+      "focus-ring.offset",
+      "region.radius",
+      "sort-indicator.size",
+      "sort.radius",
+    ]);
+    expect(rest?.notDrawn).toEqual({});
+    expect(rest?.hidden).toBeUndefined();
+    expect(rest?.stroke).toBeUndefined();
+    // The ring around the sort button grows from the button's radius (F32), like the butono's.
+    expect(rest?.radii).toEqual({
+      "focus-gap": "radius/focus/gap",
+      "focus-ring": "radius/focus/ring",
+    });
+    // The caption is the label part: its role (label.1) gives the font and the case of the set.
+    expect(rest?.font).toBeDefined();
+    expect(set?.fonts?.length ?? 0).toBeGreaterThan(0);
+  });
+
+  it("states the tabelo in the parity inventory: density, caption-hidden a boolean, sort a string, direction, three states, the sort fill per state", () => {
+    const items = figmaPlanInventory(plan);
+    expect(items.tabelo?.props).toEqual({
+      density: ["comfortable", "compact"],
+      "caption-hidden": ["boolean"],
+      sort: ["string"],
+      direction: ["ascending", "descending"],
+    });
+    expect(items.tabelo?.states).toEqual(["rest", "hover", "focus"]);
+    expect(items.tabelo?.values["sort.fill@density=comfortable,state=rest"]).toBeDefined();
+    expect(items.tabelo?.values["sort.fill@density=compact,state=hover"]).toBeDefined();
+    expect(items.tabelo?.values["head.fill@density=comfortable,state=rest"]).toMatch(
+      /^#[0-9a-f]{6}/,
+    );
+    expect(items.tabelo?.values["caption.color@density=comfortable,state=rest"]).toMatch(
+      /^#[0-9a-f]{6}/,
+    );
+    expect(items.tabelo?.values["cell.inline-padding@density=comfortable,state=rest"]).toMatch(
+      /px$/,
+    );
+    expect(items.tabelo?.values["cell.inline-padding@density=compact,state=rest"]).toMatch(/px$/);
+    expect(items.tabelo?.values["cell.height@density=compact,state=focus"]).toMatch(/px$/);
+    expect(items.tabelo?.values["border.width@density=comfortable,state=rest"]).toBe("1px");
+    expect(items.tabelo?.values["sort-indicator.size@density=comfortable,state=rest"]).toMatch(
+      /px$/,
+    );
+  });
+});
+
+// Spec 011 ④ (spec „atributlisto", G2, G7; plan ④ D-14): a key-value list has the role list and
+// one state (G2). It is drawn as a structure of its own — the list (its gap) with three entries,
+// the Vitrino's words (F-5): in columns each entry a row, term then value, the gap the box's
+// inline padding; stacked each entry a column, the gap the box's gap. An empty value shows the
+// dash. The label prop is the accessible name, never seen: the set declares the label property
+// with the word of the role and draws no text node for it.
+describe("Figma plan for the atributlisto (Spec 011 ④)", () => {
+  const set = plan.components.find((component) => component.set === "atributlisto");
+  const atributlisto = prepared.input.modelo.eroj.find(
+    (entry) => entry.ero.name === "atributlisto",
+  );
+  const variant = (layout: string) => set?.variants.find((entry) => entry.props.layout === layout);
+
+  it("plans a list of layout in one state, with the purpose, the word Angaben and the Vitrino's entries", () => {
+    expect(structureOf("list")).toBe("list");
+    expect(set?.structure).toBe("list");
+    expect(set?.properties).toEqual({
+      layout: ["columns", "stacked"],
+      label: "TEXT",
+      state: ["rest"],
+    });
+    expect(set?.variants).toHaveLength(2);
+    expect(Object.keys(set?.variants[0]?.props ?? {})).toEqual(["layout", "state"]);
+    expect(set?.grid).toMatchObject({ rows: 2, columns: 1 });
+    expect(set?.description).toBe(atributlisto?.uzo?.purpose);
+    expect(set?.label?.defaultValue).toBe("Angaben");
+    expect(set?.entries).toEqual([
+      { term: "Version", value: "3" },
+      { term: "Verantwortlich", value: "Team Fundamento" },
+      { term: "Gültig seit", value: LIST_EMPTY_VALUE },
+    ]);
+    expect(set?.entries).toEqual(
+      VITRINO_LIST_ENTRIES.map(([term, value]) => ({
+        term,
+        value: value === "" ? LIST_EMPTY_VALUE : value,
+      })),
+    );
+    expect(LIST_EMPTY_VALUE).toBe("–");
+    expect(set?.texts).toBeUndefined();
+    expect(set?.sign).toBeUndefined();
+    expect(set?.toggles).toBeUndefined();
+    expect(set?.example).toBeUndefined();
+    expect(set?.variants.every((entry) => entry.focusVisible === false)).toBe(true);
+  });
+
+  it("binds term and value, the list's gap, the box's gap and its inline padding by layout; draws them all", () => {
+    const columns = variant("columns");
+    expect(columns?.bindings).toEqual({
+      "term.color": "color/text/muted",
+      "term.typography": "typography/label/2",
+      "value.color": "color/text/default",
+      "value.typography": "typography/body/2",
+      "list.gap": "spacing/large",
+      "box.gap": "spacing/small",
+      "box.inline-padding": "spacing/large",
+    });
+    expect(variant("stacked")?.bindings["box.inline-padding"]).toBe("spacing/xsmall");
+    expect(Object.keys(columns?.paints ?? {}).sort()).toEqual(["term.color", "value.color"]);
+    expect(Object.keys(columns?.geometry ?? {}).sort()).toEqual([
+      "box.gap",
+      "box.inline-padding",
+      "list.gap",
+    ]);
+    expect(columns?.notDrawn).toEqual({});
+    expect(columns?.hidden).toBeUndefined();
+    expect(columns?.stroke).toBeUndefined();
+    expect(columns?.font).toBeUndefined();
+    expect(set?.fonts?.length ?? 0).toBeGreaterThan(0);
+  });
+
+  it("states the atributlisto in the parity inventory: layout, label a string, the state rest, term and value colours, the gaps", () => {
+    const items = figmaPlanInventory(plan);
+    expect(items.atributlisto?.props).toEqual({
+      layout: ["columns", "stacked"],
+      label: ["string"],
+    });
+    expect(items.atributlisto?.states).toEqual(["rest"]);
+    expect(items.atributlisto?.values["term.color@layout=columns,state=rest"]).toMatch(
+      /^#[0-9a-f]{6}/,
+    );
+    expect(items.atributlisto?.values["value.color@layout=stacked,state=rest"]).toMatch(
+      /^#[0-9a-f]{6}/,
+    );
+    expect(items.atributlisto?.values["list.gap@layout=columns,state=rest"]).toMatch(/px$/);
+    expect(items.atributlisto?.values["box.inline-padding@layout=columns,state=rest"]).toMatch(
+      /px$/,
+    );
+    expect(items.atributlisto?.values["box.inline-padding@layout=stacked,state=rest"]).toMatch(
+      /px$/,
+    );
+    expect(items.atributlisto?.values["box.inline-padding@layout=columns,state=rest"]).not.toBe(
+      items.atributlisto?.values["box.inline-padding@layout=stacked,state=rest"],
+    );
   });
 });
