@@ -10,7 +10,9 @@ import { describe, expect, it } from "vitest";
 import { celoInputOf } from "../../build.js";
 import {
   ALPHA_VARIES,
+  BACKDROP_EXAMPLE,
   compositeFields,
+  DIALOG_TEXTS,
   FIGMA_CELO,
   FIGMA_NOT_DRAWN,
   FIGMA_SECTION,
@@ -20,6 +22,7 @@ import {
   figmaValues,
   labelDefaultOf,
   resolveFigmaPlan,
+  structureOf,
   styleOfWeight,
   TEXT_CASE_VARIES,
 } from "./figma.js";
@@ -720,12 +723,15 @@ describe("Figma plan for the ligilo (Spec 008 T017)", () => {
   it("plans the sets in Ero order, butono first, and gives the ligilo placement × size × state", () => {
     expect(plan.components.map((component) => component.set)).toEqual([
       "butono",
+      // Spec 011 ②: the dialogo and the tekstareo, in the Ero order like every set.
+      "dialogo",
       "elektilo",
       "elekto",
       "kampo",
       "ligilo",
       "markobutono",
       "sxaltilo",
+      "tekstareo",
     ]);
     expect(set?.properties).toEqual({
       to: "TEXT",
@@ -899,6 +905,8 @@ describe("the label default of a set follows its a11y role (M-3)", () => {
     // Spec 010 ①: a switch names a setting (plan D-10, for the maintainer to confirm).
     expect(defaults).toEqual({
       butono: "Aktion",
+      // Spec 011 ②: a dialog's heading names the decision (for the maintainer to confirm).
+      dialogo: "Entscheidung",
       // Spec 010 ④: a select names what is chosen (plan ④ D-07, for the maintainer to confirm).
       elektilo: "Auswahl",
       // Spec 010 ③: a radio group names its question (plan ③ D-07, for the maintainer to confirm).
@@ -908,6 +916,8 @@ describe("the label default of a set follows its a11y role (M-3)", () => {
       // Spec 010 ②: a checkbox names an option (plan ② D-11, for the maintainer to confirm, O-x).
       markobutono: "Option",
       sxaltilo: "Einstellung",
+      // Spec 011 ②: a text area is a textbox, so the kampo's word applies.
+      tekstareo: "Beschriftung",
     });
   });
 
@@ -919,6 +929,7 @@ describe("the label default of a set follows its a11y role (M-3)", () => {
     expect(labelDefaultOf("checkbox")).toBe("Option");
     expect(labelDefaultOf("radiogroup")).toBe("Frage");
     expect(labelDefaultOf("combobox")).toBe("Auswahl");
+    expect(labelDefaultOf("dialog")).toBe("Entscheidung");
     expect(labelDefaultOf("slider")).toBe("Aktion");
   });
 });
@@ -1276,5 +1287,262 @@ describe("Figma plan for the elektilo (Spec 010 ④)", () => {
     expect(items.elektilo?.values["placeholder.color@size=large,state=invalid"]).toMatch(
       /^#[0-9a-f]{6}$/,
     );
+  });
+});
+
+// Spec 011 ② (G7, spec „tekstareo – Figma"): the text area is a textbox, so it is drawn as the
+// field of the kampo — label above, ring → gap → control with its text, help and error below —
+// with the axes kind × size × state: kind keys the text's typography (code → typography.code), so
+// it is an axis of the variants like size. The control has no box.height (the kampo's has): it
+// hugs its text, and the text shows the example followed by the empty lines of the default rows,
+// so the area reads as one of four rows (the `rows` prop is a number, nothing to bind).
+describe("Figma plan for the tekstareo (Spec 011 ②)", () => {
+  const set = plan.components.find((component) => component.set === "tekstareo");
+  const kampoSet = plan.components.find((component) => component.set === "kampo");
+  const tekstareo = prepared.input.modelo.eroj.find((entry) => entry.ero.name === "tekstareo");
+  const variant = (kind: string, size: string, state: string) =>
+    set?.variants.find(
+      (entry) =>
+        entry.props.kind === kind && entry.props.size === size && entry.props.state === state,
+    );
+
+  it("plans a field of kind × size × state with the purpose, the word Beschriftung and the field's texts", () => {
+    expect(set?.structure).toBe("field");
+    expect(set?.properties).toEqual({
+      kind: ["text", "code"],
+      value: "TEXT",
+      // A number prop: Figma has no number property; the plan states the Skemo's kind.
+      rows: "NUMBER",
+      placeholder: "TEXT",
+      required: "BOOLEAN",
+      disabled: "BOOLEAN",
+      readonly: "BOOLEAN",
+      invalid: "BOOLEAN",
+      size: ["small", "medium", "large"],
+      name: "TEXT",
+      state: ["rest", "hover", "focus", "disabled", "invalid"],
+    });
+    expect(set?.variants).toHaveLength(2 * 3 * 5);
+    expect(Object.keys(set?.variants[0]?.props ?? {})).toEqual(["kind", "size", "state"]);
+    expect(set?.grid).toMatchObject({ rows: 6, columns: 5 });
+    expect(set?.description).toBe(tekstareo?.uzo?.purpose);
+    expect(set?.label?.defaultValue).toBe("Beschriftung");
+    // The example, then three empty lines: four rows, the Skemo's default of `rows`.
+    expect(set?.texts).toEqual({ text: "Beispiel\n\n\n", help: "Hinweis", error: "Fehler" });
+    expect(kampoSet?.texts?.text).toBe("Beispiel");
+    expect(set?.sign).toBeUndefined();
+    expect(set?.entry).toBeUndefined();
+  });
+
+  it("binds the text's typography by kind and size: the code role for code, the body roles for text; no height", () => {
+    for (const size of ["small", "medium", "large"]) {
+      expect(variant("code", size, "rest")?.bindings["text.typography"], size).toBe(
+        "typography/code",
+      );
+    }
+    expect(variant("text", "small", "rest")?.bindings["text.typography"]).toBe("typography/body/2");
+    expect(variant("text", "medium", "rest")?.bindings["text.typography"]).toBe(
+      "typography/body/1",
+    );
+    const rest = variant("text", "medium", "rest");
+    expect(rest?.bindings["label.typography"]).toBe("typography/label/1");
+    expect(rest?.bindings["border.color"]).toBe("color/border/default");
+    expect(variant("code", "medium", "invalid")?.bindings["border.color"]).toBe(
+      "color/status/danger/border",
+    );
+    expect(variant("text", "medium", "disabled")?.bindings["surface.fill"]).toBe(
+      "color/background/sunken",
+    );
+    expect(rest?.bindings["box.height"]).toBeUndefined();
+    expect(rest?.geometry?.["box.height"]).toBeUndefined();
+    expect(rest?.geometry?.["box.inline-padding"]).toMatch(/px$/);
+    expect(rest?.notDrawn).toEqual({
+      "text.color": "jug_01M4S2R85WRAC5SV7CARH8RE7S",
+      "required-mark.color": "jug_01M4S2R85WRAC5SV7CARH8RE7S",
+    });
+    expect(rest?.hidden).toBeUndefined();
+    // The code role asks for the mono family in every brand (F30).
+    expect(set?.fonts?.some((font) => /Mono/.test(font.family))).toBe(true);
+  });
+
+  it("states the tekstareo in the parity inventory: kind and size, five states, no height", () => {
+    const items = figmaPlanInventory(plan);
+    expect(items.tekstareo?.props.kind).toEqual(["text", "code"]);
+    expect(items.tekstareo?.props.rows).toEqual(["number"]);
+    expect(items.tekstareo?.props.size).toEqual(["small", "medium", "large"]);
+    expect(items.tekstareo?.states).toEqual(["rest", "hover", "focus", "disabled", "invalid"]);
+    expect(items.tekstareo?.values["placeholder.color@kind=code,size=medium,state=rest"]).toMatch(
+      /^#[0-9a-f]{6}$/,
+    );
+    expect(items.tekstareo?.values["box.inline-padding@kind=text,size=small,state=rest"]).toMatch(
+      /px$/,
+    );
+    expect(
+      Object.keys(items.tekstareo?.values ?? {}).some((key) => key.startsWith("box.height@")),
+    ).toBe(false);
+  });
+});
+
+// Spec 011 ② (spec „dialogo – Figma", G7): a new structure `dialog` — the surface with heading,
+// message and two actions, axes size × reason, one state. `open` keys no part and is a property
+// of the plan; `size` binds the surface's width, `reason` the height of the reason field, and the
+// keyword none at that height hides the field (hidden, like a colour that is none). The backdrop
+// is not part of the variants: an example frame „mit Hintergrund" beside the set shows the default
+// variant on it. The shadow of the surface is a composite token; the plan carries its fields per
+// layer, resolved in the base combination, so the plugin can bind them to a drop shadow or write
+// them where the API cannot bind.
+describe("Figma plan for the dialogo (Spec 011 ②)", () => {
+  const set = plan.components.find((component) => component.set === "dialogo");
+  const dialogo = prepared.input.modelo.eroj.find((entry) => entry.ero.name === "dialogo");
+  const variant = (size: string, reason: string) =>
+    set?.variants.find((entry) => entry.props.size === size && entry.props.reason === reason);
+
+  it("plans a dialog of size × reason in one state, with the purpose, the word Entscheidung and the words of its slots", () => {
+    expect(structureOf("dialog")).toBe("dialog");
+    expect(set?.structure).toBe("dialog");
+    expect(set?.properties).toEqual({
+      open: "BOOLEAN",
+      size: ["small", "medium"],
+      reason: ["none", "optional", "required"],
+      state: ["rest"],
+    });
+    expect(set?.variants).toHaveLength(2 * 3);
+    expect(Object.keys(set?.variants[0]?.props ?? {})).toEqual(["size", "reason", "state"]);
+    expect(set?.grid).toMatchObject({ rows: 6, columns: 1 });
+    expect(set?.description).toBe(dialogo?.uzo?.purpose);
+    expect(set?.label?.defaultValue).toBe("Entscheidung");
+    expect(set?.texts).toEqual(DIALOG_TEXTS);
+    expect(DIALOG_TEXTS).toEqual({
+      message: "Nachricht",
+      reason: "Begründung",
+      "action-1": "Abbrechen",
+      "action-2": "Bestätigen",
+    });
+    expect(set?.sign).toBeUndefined();
+    expect(set?.entry).toBeUndefined();
+    expect(set?.variants.every((entry) => entry.focusVisible === false)).toBe(true);
+    expect(set?.variants.every((entry) => entry.radii === undefined)).toBe(true);
+  });
+
+  it("binds surface, border, heading, message, gaps and padding; the width by size, the reason's height by reason", () => {
+    const rest = variant("small", "none");
+    expect(rest?.bindings).toMatchObject({
+      "backdrop.color": "color/backdrop",
+      "surface.fill": "color/background/raised",
+      "surface.radius": "radius/role/surface",
+      "surface.width": "size/container/small",
+      "surface.shadow": "elevation/shadow/modal",
+      "border.color": "color/border/default",
+      "border.width": "border/width/default",
+      "heading.color": "color/text/default",
+      "heading.typography": "typography/headline/4",
+      "message.color": "color/text/default",
+      "message.typography": "typography/body/1",
+      "content.gap": "spacing/medium",
+      "actions.gap": "spacing/small",
+      "box.inline-padding": "spacing/large",
+      "box.gap": "spacing/medium",
+    });
+    expect(variant("medium", "none")?.bindings["surface.width"]).toBe("size/container/medium");
+    expect(rest?.geometry?.["surface.width"]).toBe("640px");
+    expect(variant("medium", "none")?.geometry?.["surface.width"]).toBe("960px");
+    expect(rest?.geometry?.["content.gap"]).toMatch(/px$/);
+    expect(rest?.geometry?.["actions.gap"]).toMatch(/px$/);
+    expect(rest?.geometry?.["box.inline-padding"]).toMatch(/px$/);
+    expect(rest?.paints?.["surface.fill"]).toMatchObject({ hex: expect.stringMatching(/^#/) });
+    expect(rest?.paints?.["heading.color"]).toMatchObject({ hex: expect.stringMatching(/^#/) });
+    expect(rest?.paints?.["backdrop.color"]).toBeDefined();
+    // none: no height, the reason field is hidden; optional and required: the large control.
+    expect(rest?.bindings["reason.height"]).toBeUndefined();
+    expect(rest?.geometry?.["reason.height"]).toBeUndefined();
+    expect(rest?.hidden).toEqual(["reason"]);
+    for (const reason of ["optional", "required"]) {
+      const asked = variant("small", reason);
+      expect(asked?.bindings["reason.height"], reason).toBe("size/control/large");
+      expect(asked?.geometry?.["reason.height"], reason).toMatch(/px$/);
+      expect(asked?.hidden, reason).toBeUndefined();
+    }
+    expect(rest?.notDrawn).toEqual({});
+  });
+
+  it("carries the modal shadow of the surface as fields per layer, resolved in the base combination", () => {
+    const rest = variant("small", "none");
+    expect(rest?.shadow?.part).toBe("surface");
+    expect(rest?.shadow?.variable).toBe("elevation/shadow/modal");
+    // komuna has two layers, ekzemplo one: the fields are numbered (F9).
+    expect(rest?.shadow?.layers).toHaveLength(2);
+    const [key, ambient] = rest?.shadow?.layers ?? [];
+    expect(key?.fields).toEqual({
+      color: "elevation/shadow/modal/1/color",
+      offsetX: "elevation/shadow/modal/1/offset-x",
+      offsetY: "elevation/shadow/modal/1/offset-y",
+      blur: "elevation/shadow/modal/1/blur",
+      spread: "elevation/shadow/modal/1/spread",
+    });
+    expect(key).toMatchObject({ offsetX: 0, offsetY: 12, blur: 32, spread: 0 });
+    expect(key?.color).toMatchObject({ hex: expect.stringMatching(/^#[0-9a-f]{6}$/) });
+    expect(ambient).toMatchObject({ offsetX: 0, offsetY: 0, blur: 8, spread: 0 });
+    expect(ambient?.fields.color).toBe("elevation/shadow/modal/2/color");
+    // Every field names a variable of the plan.
+    const names = new Set(
+      plan.collections.flatMap((collection) =>
+        collection.variables.map((variableOfPlan) => variableOfPlan.name),
+      ),
+    );
+    for (const layer of rest?.shadow?.layers ?? []) {
+      for (const name of Object.values(layer.fields)) expect(names.has(name), name).toBe(true);
+    }
+    // Every variant carries it; no other set does.
+    expect(set?.variants.every((entry) => entry.shadow !== undefined)).toBe(true);
+    expect(plan.components[0]?.variants[0]?.shadow).toBeUndefined();
+  });
+
+  it("takes the heading's role for the font and the text case of a set without a label part", () => {
+    const rest = variant("small", "none");
+    expect(rest?.font).toEqual({ family: "Geist", style: "SemiBold" });
+    expect(typeof rest?.textCase).toBe("string");
+    expect(set?.fonts?.some((font) => font.style === "SemiBold")).toBe(true);
+    expect(set?.fonts?.some((font) => font.style === "Regular")).toBe(true);
+  });
+
+  it('plans the example frame „mit Hintergrund" beside the set: the default variant on the backdrop', () => {
+    expect(set?.example).toEqual({
+      name: `dialogo – ${BACKDROP_EXAMPLE}`,
+      variant: { size: "small", reason: "none", state: "rest" },
+      backdrop: {
+        binding: "color/backdrop",
+        paint: expect.objectContaining({ hex: expect.any(String) }),
+      },
+      padding: plan.section?.gap,
+    });
+    expect(plan.components[0]?.example).toBeUndefined();
+  });
+
+  it("states the dialogo in the parity inventory: size and reason, the state rest, the measures and colours per variant", () => {
+    const items = figmaPlanInventory(plan);
+    expect(items.dialogo?.props).toEqual({
+      open: ["boolean"],
+      size: ["small", "medium"],
+      reason: ["none", "optional", "required"],
+    });
+    expect(items.dialogo?.states).toEqual(["rest"]);
+    expect(items.dialogo?.values["surface.width@reason=none,size=small,state=rest"]).toBe("640px");
+    expect(items.dialogo?.values["surface.width@reason=required,size=medium,state=rest"]).toBe(
+      "960px",
+    );
+    expect(items.dialogo?.values["reason.height@reason=required,size=small,state=rest"]).toMatch(
+      /px$/,
+    );
+    expect(
+      items.dialogo?.values["reason.height@reason=none,size=small,state=rest"],
+    ).toBeUndefined();
+    expect(items.dialogo?.values["surface.fill@reason=none,size=small,state=rest"]).toMatch(
+      /^#[0-9a-f]{6}$/,
+    );
+    expect(items.dialogo?.values["heading.color@reason=optional,size=medium,state=rest"]).toMatch(
+      /^#[0-9a-f]{6}$/,
+    );
+    expect(items.dialogo?.values["backdrop.color@reason=none,size=small,state=rest"]).toBeDefined();
+    expect(items.dialogo?.values["border.width@reason=none,size=small,state=rest"]).toBe("1px");
   });
 });

@@ -4,7 +4,7 @@
 import { defaultModeloSource, projectModeloSource } from "@fundamento/modelo";
 import { describe, expect, it } from "vitest";
 import { celoInputOf } from "../../build.js";
-import { FIGMA_CELO, type FigmaPlan, resolveFigmaPlan } from "./figma.js";
+import { BACKDROP_EXAMPLE, FIGMA_CELO, type FigmaPlan, resolveFigmaPlan } from "./figma.js";
 import {
   type DoubleCollection,
   type DoubleNode,
@@ -37,6 +37,19 @@ const MODEL_FONTS = [
   { family: "Archivo", style: "Regular" },
   { family: "Archivo", style: "Medium" },
   { family: "Archivo", style: "Black" },
+  // Spec 011 ②: the heading of the dialogo is typography.headline.4, SemiBold in komuna and Black
+  // in ekzemplo (above), with the crossing Archivo SemiBold a field-by-field binding passes
+  // through (a real Archivo ships it). The code text of the tekstareo is typography.code: Geist
+  // Mono in komuna, in the Regular cut and the Medium crossing. The fixture's ekzemplo names the
+  // generic `ui-monospace` first in its code stack, and the plan takes the first family of a
+  // stack (F30) — a prepared file cannot have a font of that name; it stands here so the two-brand
+  // tests measure the binding, not the fixture's stack (Befund for the fixture, Spec 011 ②).
+  { family: "Geist", style: "SemiBold" },
+  { family: "Archivo", style: "SemiBold" },
+  { family: "Geist Mono", style: "Regular" },
+  { family: "Geist Mono", style: "Medium" },
+  { family: "ui-monospace", style: "Regular" },
+  { family: "ui-monospace", style: "Medium" },
 ] as const;
 const modelDouble = () => figmaDouble({ fonts: MODEL_FONTS });
 
@@ -250,12 +263,15 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
     expect(openButono.map((manko) => manko.part)).toEqual(["boundary", "slots", "content"]);
     expect(result.mankoj.open.map((manko) => manko.set)).toEqual([
       ...["boundary", "slots", "content"].map(() => "butono"),
+      // Spec 011 ②: the dialogo and the tekstareo carry a Uzo like every set.
+      ...["boundary", "slots", "content"].map(() => "dialogo"),
       ...["boundary", "slots", "content"].map(() => "elektilo"),
       ...["boundary", "slots", "content"].map(() => "elekto"),
       ...["boundary", "slots", "content"].map(() => "kampo"),
       ...["boundary", "slots", "content"].map(() => "ligilo"),
       ...["boundary", "slots", "content"].map(() => "markobutono"),
       ...["boundary", "slots", "content"].map(() => "sxaltilo"),
+      ...["boundary", "slots", "content"].map(() => "tekstareo"),
     ]);
     for (const manko of openButono) {
       expect(manko.set).toBe("butono");
@@ -281,12 +297,15 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
     ).toEqual(["boundary", "slots", "content"]);
     expect(result.mankoj.closed.map((manko) => manko.set)).toEqual([
       ...["butono", "butono", "butono"],
+      // Spec 011 ②: the dialogo and the tekstareo close their three parts too.
+      ...["dialogo", "dialogo", "dialogo"],
       ...["elektilo", "elektilo", "elektilo"],
       ...["elekto", "elekto", "elekto"],
       ...["kampo", "kampo", "kampo"],
       ...["ligilo", "ligilo", "ligilo"],
       ...["markobutono", "markobutono", "markobutono"],
       ...["sxaltilo", "sxaltilo", "sxaltilo"],
+      ...["tekstareo", "tekstareo", "tekstareo"],
     ]);
   });
 });
@@ -1452,6 +1471,11 @@ describe("the label is set in the model's font (F11)", () => {
         { family: "Geist", style: "Medium" },
         // Spec 008: the inline ligilo shows the running text's role (Regular).
         { family: "Geist", style: "Regular" },
+        // Spec 011 ②: the heading of the dialogo (SemiBold) and the code text of the tekstareo
+        // (Geist Mono Regular, and the Medium crossing the field-by-field binding passes through).
+        { family: "Geist", style: "SemiBold" },
+        { family: "Geist Mono", style: "Regular" },
+        { family: "Geist Mono", style: "Medium" },
       ],
     });
     const report = (await new Function(
@@ -2441,6 +2465,8 @@ describe("every bound paint shows the plan's colour after the first and the seco
       // Spec 008: two sets; the ligilo has placement × size × state = 30 variants.
       components: [
         { set: "butono", created: 72, updated: 0 },
+        // Spec 011 ②: the dialogo has size × reason = 6 variants in one state.
+        { set: "dialogo", created: 6, updated: 0 },
         // Spec 010 ④: the elektilo has size × state = 15 variants.
         { set: "elektilo", created: 15, updated: 0 },
         // Spec 010 ③: the elekto has size × state = 15 variants.
@@ -2452,6 +2478,8 @@ describe("every bound paint shows the plan's colour after the first and the seco
         { set: "markobutono", created: 30, updated: 0 },
         // Spec 010 ①: the sxaltilo has checked × size × state = 24 variants.
         { set: "sxaltilo", created: 24, updated: 0 },
+        // Spec 011 ②: the tekstareo has kind × size × state = 30 variants.
+        { set: "tekstareo", created: 30, updated: 0 },
       ],
     });
     const json = lines
@@ -3304,6 +3332,11 @@ describe("every set lies in the frame Eroj in the section Fundamento (F-1, F-2, 
       ...labelsOf(child),
     ]);
   const names = repoPlan.components.map((component) => component.set);
+  // Spec 011 ②: the example frame „mit Hintergrund" of the dialogo lies in the frame beside its
+  // set; it is no set, so it is moved by no test and overlaps with none.
+  const inFrame = names.flatMap((name) =>
+    name === "dialogo" ? [name, `dialogo – ${BACKDROP_EXAMPLE}`] : [name],
+  );
   const layout = repoPlan.section;
   const inLayout = names.map(() => ({ frame: FRAME, action: "in-layout" }));
 
@@ -3317,7 +3350,7 @@ describe("every set lies in the frame Eroj in the section Fundamento (F-1, F-2, 
     expect(section.children.map((child) => child.name)).toEqual([FRAME]);
     const frame = frameOf(double);
     expect(frame.getSharedPluginData("fundamento", "frame")).toBe(FRAME);
-    expect(frame.children.map((child) => child.name)).toEqual(names);
+    expect(frame.children.map((child) => child.name)).toEqual(inFrame);
     expect(pageOf(double).children.filter((child) => child.type === "COMPONENT_SET")).toEqual([]);
     expect(report.section).toEqual({
       name: "Fundamento",
@@ -3468,7 +3501,7 @@ describe("every set lies in the frame Eroj in the section Fundamento (F-1, F-2, 
       frame: { name: FRAME, found: false, created: true, wrap: "WRAP" },
     });
     expect(section.children.map((child) => child.name)).toEqual([FRAME]);
-    expect(frameOf(double).children.map((child) => child.name)).toEqual(names);
+    expect(frameOf(double).children.map((child) => child.name)).toEqual(inFrame);
     expect(report.components.map((component) => component.placement)).toEqual(inLayout);
     expect(overlapping(double)).toEqual([]);
     expect(report.warnings).toEqual([]);
@@ -3498,7 +3531,7 @@ describe("every set lies in the frame Eroj in the section Fundamento (F-1, F-2, 
       moved: names,
       frame: { name: FRAME, found: false, created: true, wrap: "WRAP" },
     });
-    expect(frameOf(double).children.map((child) => child.name)).toEqual(names);
+    expect(frameOf(double).children.map((child) => child.name)).toEqual(inFrame);
     expect(page.children.filter((child) => child.type === "COMPONENT_SET")).toEqual([]);
     // The first set stays where the maintainer saw it: section and frame open around it.
     const first = onPage(setNamed(double, names[0] ?? ""));
@@ -3523,7 +3556,10 @@ describe("every set lies in the frame Eroj in the section Fundamento (F-1, F-2, 
       moved: [first],
       frame: { name: FRAME, found: true, created: false, wrap: "WRAP" },
     });
-    expect(frameOf(double).children.map((child) => child.name)).toEqual([...names.slice(1), first]);
+    expect(frameOf(double).children.map((child) => child.name)).toEqual([
+      ...inFrame.slice(1),
+      first,
+    ]);
     expect(overlapping(double)).toEqual([]);
   });
 
@@ -3542,7 +3578,7 @@ describe("every set lies in the frame Eroj in the section Fundamento (F-1, F-2, 
     const frame = frameOf(double);
     expect(frame.properties.layoutWrap).toBeUndefined();
     expect(frame.properties.layoutMode).toBe("HORIZONTAL");
-    expect(frame.children.map((child) => child.name)).toEqual(names);
+    expect(frame.children.map((child) => child.name)).toEqual(inFrame);
     expect(report.components.map((component) => component.placement)).toEqual(inLayout);
     expect(overlapping(double)).toEqual([]);
     const refusals = report.warnings.filter((warning) => warning.includes("layoutWrap"));
@@ -4039,6 +4075,285 @@ describe("the elektilo is drawn as the field of the kampo with the chevron in it
     const kampo = pageNodes(double).find((child) => child.name === "kampo");
     const control = descendant(kampo?.children[0], "control");
     expect(control?.children.map((child) => child.name)).toEqual(["text"]);
+  });
+
+  it("a second run writes nothing new", async () => {
+    const { double } = await drawn();
+    const before = double.snapshot();
+    await run(double, source);
+    expect(double.snapshot()).toBe(before);
+  });
+});
+
+// Spec 011 ② (spec „tekstareo", G7): the text area is drawn as the field of the kampo (Spec 009,
+// D-09) with the axes kind × size × state. The text in the control binds the code role for
+// kind=code and the body role for kind=text; the control has no box.height and hugs its text,
+// which shows the example and the empty lines of the default rows (four), so the area is as high
+// as four lines of its typography — `rows` is a number, nothing to bind.
+describe("the tekstareo is drawn as the field of the kampo: kind × size × state, the code role bound (Spec 011 ②)", () => {
+  const source = repoFiles["figma/plugin/code.js"] ?? "";
+  const bound = (node: DoubleNode | undefined, field: string) => node?.boundVariables[field]?.name;
+  const drawn = async () => {
+    const double = modelDouble();
+    await run(double, source);
+    const set = pageNodes(double).find((child) => child.name === "tekstareo");
+    const variant = (name: string) => set?.children.find((child) => child.name === name);
+    return { double, set, variant };
+  };
+
+  it("draws every variant of kind × size × state, named by the plan", async () => {
+    const { set } = await drawn();
+    expect(set?.children).toHaveLength(30);
+    expect(set?.children[0]?.name).toBe("kind=text, size=small, state=rest");
+    expect(
+      set?.children.some((child) => child.name === "kind=code, size=large, state=invalid"),
+    ).toBe(true);
+  });
+
+  it("binds the code role to the text of a code variant and the body role to a text variant; the control hugs", async () => {
+    const { variant } = await drawn();
+    const code = variant("kind=code, size=medium, state=rest");
+    const text = variant("kind=text, size=medium, state=rest");
+    expect(bound(descendant(code, "text"), "fontSize")).toBe("typography/code/font-size");
+    expect(bound(descendant(code, "text"), "fontFamily")).toBe("typography/code/font-family");
+    expect(bound(descendant(text, "text"), "fontSize")).toBe("typography/body/1/font-size");
+    const control = descendant(text, "control");
+    expect(control?.children.map((child) => child.name)).toEqual(["text"]);
+    expect(control?.boundVariables.minHeight).toBeUndefined();
+    expect(control?.properties.layoutSizingVertical).toBe("HUG");
+    expect(descendant(text, "text")?.properties.characters).toBe("Beispiel\n\n\n");
+    expect(descendant(text, "label")?.properties.characters).toBe("Beschriftung");
+    expect(descendant(text, "help")?.properties.characters).toBe("Hinweis");
+    expect(descendant(text, "error")?.properties.characters).toBe("Fehler");
+    expect(bound(descendant(text, "label"), "fontSize")).toBe("typography/label/1/font-size");
+  });
+
+  it("a second run writes nothing new", async () => {
+    const { double } = await drawn();
+    const before = double.snapshot();
+    await run(double, source);
+    expect(double.snapshot()).toBe(before);
+  });
+});
+
+// Spec 011 ② (spec „dialogo – Figma", G7): the dialog is a structure of its own — variant →
+// surface (a column of fixed width, bound to size.container.*) → heading, message, content
+// (the reason's label and a field frame standing in for the composed tekstareo, its height bound
+// to size.control.large), actions (a row at the end, two frames with a word each standing in for
+// the butono). Where the reason is none, the content is hidden (visible false): a hidden child of
+// an auto-layout frame takes no space in Figma, so no gap remains. The shadow of the surface is
+// written as a drop shadow from the plan's fields; the double does not model
+// setBoundVariableForEffect, so the run reports the shadow as written, not bound. The example
+// frame „mit Hintergrund" lies in the frame Eroj beside the set and shows the default variant on
+// the backdrop (color.backdrop). Test-double assumptions until measured in f10b-5: a hidden child
+// takes no space in auto-layout (the double measures no visibility); width and height bound on a
+// FIXED frame take the variable's value (the double resolves bound numbers).
+describe("the dialogo is drawn as a dialog: surface with heading, message, reason and two actions (Spec 011 ②)", () => {
+  const source = repoFiles["figma/plugin/code.js"] ?? "";
+  const bound = (node: DoubleNode | undefined, field: string) => node?.boundVariables[field]?.name;
+  const paintOf = (node: DoubleNode | undefined, field: "fills" | "strokes") =>
+    ((node?.properties[field] ?? []) as { boundVariables?: { color?: { name: string } } }[])[0]
+      ?.boundVariables?.color?.name;
+  type Report = {
+    warnings: string[];
+    components: {
+      set: string;
+      shadow?: { part: string; variable: string; layers: number; status: string; evidence: string };
+      example?: { name: string; found: boolean; created: boolean };
+      layout: {
+        zero: string[];
+        smaller: string[];
+        unplaced: string[];
+        uneven: unknown[];
+        columns: number;
+        rows: number;
+        held: { rest: Record<string, Record<string, unknown>> };
+      };
+    }[];
+  };
+  const drawn = async () => {
+    const double = modelDouble();
+    const report = (await new Function("figma", `${source}\nreturn applyPlan();`)(
+      double.figma,
+    )) as Report;
+    const set = pageNodes(double).find((child) => child.name === "dialogo");
+    const variant = (name: string) => set?.children.find((child) => child.name === name);
+    const dialogo = report.components.find((component) => component.set === "dialogo");
+    return { double, set, variant, report, dialogo };
+  };
+
+  it("draws the six variants of size × reason, named by the plan, in one column", async () => {
+    const { set, dialogo } = await drawn();
+    expect(set?.children.map((child) => child.name)).toEqual([
+      "size=small, reason=none, state=rest",
+      "size=small, reason=optional, state=rest",
+      "size=small, reason=required, state=rest",
+      "size=medium, reason=none, state=rest",
+      "size=medium, reason=optional, state=rest",
+      "size=medium, reason=required, state=rest",
+    ]);
+    expect(dialogo?.layout.columns).toBe(1);
+    expect(dialogo?.layout.rows).toBe(6);
+  });
+
+  it("stacks heading, message, content and actions in the surface, its width bound by size", async () => {
+    const { variant } = await drawn();
+    const small = variant("size=small, reason=none, state=rest");
+    expect(small?.children.map((child) => child.name)).toEqual(["surface"]);
+    const surface = descendant(small, "surface");
+    expect(surface?.properties.layoutMode).toBe("VERTICAL");
+    expect(surface?.properties.layoutSizingHorizontal).toBe("FIXED");
+    expect(surface?.properties.layoutSizingVertical).toBe("HUG");
+    expect(surface?.children.map((child) => child.name)).toEqual([
+      "heading",
+      "message",
+      "content",
+      "actions",
+    ]);
+    expect(bound(surface, "width")).toBe("size/container/small");
+    expect(
+      bound(descendant(variant("size=medium, reason=none, state=rest"), "surface"), "width"),
+    ).toBe("size/container/medium");
+    expect(paintOf(surface, "fills")).toBe("color/background/raised");
+    expect(paintOf(surface, "strokes")).toBe("color/border/default");
+    expect(bound(surface, "strokeWeight")).toBe("border/width/default");
+    expect(bound(surface, "cornerRadius")).toBe("radius/role/surface");
+    expect(bound(surface, "itemSpacing")).toBe("spacing/medium");
+    for (const side of ["paddingLeft", "paddingRight", "paddingTop", "paddingBottom"]) {
+      expect(bound(surface, side), side).toBe("spacing/large");
+    }
+    const heading = descendant(small, "heading");
+    expect(heading?.properties.characters).toBe("Entscheidung");
+    expect(bound(heading, "fontSize")).toBe("typography/headline/4/font-size");
+    expect(paintOf(heading, "fills")).toBe("color/text/default");
+    expect(heading?.properties.componentPropertyReferences).toMatchObject({
+      characters: expect.stringMatching(/^label/),
+    });
+    const message = descendant(small, "message");
+    expect(message?.properties.characters).toBe("Nachricht");
+    expect(bound(message, "fontSize")).toBe("typography/body/1/font-size");
+    const actions = descendant(small, "actions");
+    expect(actions?.properties.layoutMode).toBe("HORIZONTAL");
+    expect(actions?.properties.primaryAxisAlignItems).toBe("MAX");
+    expect(bound(actions, "itemSpacing")).toBe("spacing/small");
+    expect(actions?.children.map((child) => child.name)).toEqual(["action-1", "action-2"]);
+    expect(actions?.children.map((action) => action.children.map((child) => child.name))).toEqual([
+      ["action-label"],
+      ["action-label"],
+    ]);
+    expect(
+      actions?.children.map((action) => descendant(action, "action-label")?.properties.characters),
+    ).toEqual(["Abbrechen", "Bestätigen"]);
+    // The stand-ins take the border of the surface and the message's role, bound.
+    expect(paintOf(actions?.children[0], "strokes")).toBe("color/border/default");
+    expect(bound(descendant(actions?.children[0], "action-label"), "fontSize")).toBe(
+      "typography/body/1/font-size",
+    );
+  });
+
+  it("shows the reason field with its label where a reason is asked, its height bound; hides the content where none", async () => {
+    const { variant } = await drawn();
+    for (const reason of ["optional", "required"]) {
+      const asked = variant(`size=small, reason=${reason}, state=rest`);
+      const content = descendant(asked, "content");
+      expect(content?.properties.visible, reason).not.toBe(false);
+      expect(content?.properties.layoutMode, reason).toBe("VERTICAL");
+      expect(bound(content, "itemSpacing"), reason).toBe("spacing/medium");
+      expect(
+        content?.children.map((child) => child.name),
+        reason,
+      ).toEqual(["reason-label", "reason-field"]);
+      expect(descendant(asked, "reason-label")?.properties.characters, reason).toBe("Begründung");
+      const field = descendant(asked, "reason-field");
+      expect(bound(field, "height"), reason).toBe("size/control/large");
+      expect(field?.properties.layoutSizingVertical, reason).toBe("FIXED");
+      expect(paintOf(field, "strokes"), reason).toBe("color/border/default");
+      expect(bound(field, "strokeWeight"), reason).toBe("border/width/default");
+    }
+    const none = descendant(variant("size=medium, reason=none, state=rest"), "content");
+    expect(none?.properties.visible).toBe(false);
+    expect(none?.children.map((child) => child.name)).toEqual(["reason-label", "reason-field"]);
+    expect(bound(descendant(none, "reason-field"), "height")).toBeUndefined();
+  });
+
+  it("writes the modal shadow as a drop shadow of the surface from the plan's layers, and reports that the double cannot bind it", async () => {
+    const { variant, dialogo } = await drawn();
+    const surface = descendant(variant("size=small, reason=none, state=rest"), "surface");
+    const effects = surface?.properties.effects as Record<string, unknown>[];
+    expect(effects).toHaveLength(2);
+    expect(effects[0]).toMatchObject({
+      type: "DROP_SHADOW",
+      offset: { x: 0, y: 12 },
+      radius: 32,
+      spread: 0,
+      visible: true,
+    });
+    expect(effects[0]?.color).toMatchObject({ r: expect.any(Number), a: expect.any(Number) });
+    expect(effects[1]).toMatchObject({ type: "DROP_SHADOW", radius: 8 });
+    expect(dialogo?.shadow).toMatchObject({
+      part: "surface",
+      variable: "elevation/shadow/modal",
+      layers: 2,
+      status: "written",
+    });
+    expect(dialogo?.shadow?.evidence).toContain("setBoundVariableForEffect");
+  });
+
+  it('draws the example frame „mit Hintergrund" beside the set in the frame Eroj: the default variant on the backdrop', async () => {
+    const { double, report, dialogo } = await drawn();
+    const frame = pageNodes(double).find(
+      (node) => node.type === "FRAME" && node.getSharedPluginData("fundamento", "frame") === "Eroj",
+    );
+    const names = frame?.children.map((child) => child.name) ?? [];
+    const example = frame?.children.find((child) => child.name === `dialogo – ${BACKDROP_EXAMPLE}`);
+    expect(example?.type).toBe("FRAME");
+    expect(names.indexOf(`dialogo – ${BACKDROP_EXAMPLE}`)).toBe(names.indexOf("dialogo") + 1);
+    expect(example?.getSharedPluginData("fundamento", "example")).toBe("dialogo");
+    expect(paintOf(example, "fills")).toBe("color/backdrop");
+    expect(example?.properties.layoutMode).toBe("HORIZONTAL");
+    expect(example?.properties.paddingLeft).toBe(repoPlan.section?.gap);
+    expect(example?.properties.layoutPositioning).toBe("AUTO");
+    expect(example?.children.map((child) => child.name)).toEqual(["surface"]);
+    const surface = descendant(example, "surface");
+    expect(bound(surface, "width")).toBe("size/container/small");
+    expect(descendant(example, "heading")?.properties.characters).toBe("Entscheidung");
+    // A text outside a component can be connected to no property.
+    expect(descendant(example, "heading")?.properties.componentPropertyReferences).toBeUndefined();
+    expect(descendant(example, "content")?.properties.visible).toBe(false);
+    expect(dialogo?.example).toEqual({
+      name: `dialogo – ${BACKDROP_EXAMPLE}`,
+      found: false,
+      created: true,
+    });
+    expect(
+      report.components.find((component) => component.set === "butono")?.example,
+    ).toBeUndefined();
+    // The second run finds it and makes no second one.
+    const again = (await new Function("figma", `${source}\nreturn applyPlan();`)(
+      double.figma,
+    )) as Report;
+    expect(again.components.find((component) => component.set === "dialogo")?.example).toEqual({
+      name: `dialogo – ${BACKDROP_EXAMPLE}`,
+      found: true,
+      created: false,
+    });
+    expect(
+      frame?.children.filter((child) => child.name === `dialogo – ${BACKDROP_EXAMPLE}`),
+    ).toHaveLength(1);
+  });
+
+  it("measures every variant with a size and a cell, and warns of nothing for the dialogo", async () => {
+    const { dialogo, report } = await drawn();
+    expect(dialogo?.layout.zero).toEqual([]);
+    expect(dialogo?.layout.smaller).toEqual([]);
+    expect(dialogo?.layout.unplaced).toEqual([]);
+    expect(dialogo?.layout.uneven).toEqual([]);
+    expect(report.warnings.filter((warning) => warning.startsWith("dialogo"))).toEqual([]);
+    expect(report.warnings.filter((warning) => warning.startsWith("tekstareo"))).toEqual([]);
+    // The parts of the first variant in the report: the surface at size.container.small.
+    expect(dialogo?.layout.held.rest.surface).toMatchObject({ width: 640 });
+    expect(dialogo?.layout.held.rest.heading).toBeDefined();
+    expect(dialogo?.layout.held.rest.actions).toBeDefined();
   });
 
   it("a second run writes nothing new", async () => {

@@ -38,6 +38,7 @@ import {
 } from "@fundamento/modelo";
 import type { Celo, CeloInput, GeneratedFile } from "../../build.js";
 import {
+  VITRINO_DIALOG_ACTIONS,
   VITRINO_OPTIONS,
   VITRINO_PROMPT,
   VITRINO_SLOT_TEXTS,
@@ -133,27 +134,79 @@ export const FIGMA_NOT_DRAWN: Readonly<Record<string, string>> = {
 };
 
 /**
- * The texts a field shows in the set (Abnahme Spec 009, F-4): the control an example in place of
- * the typed text (the placeholder), help and error a word each. One neutral word per node, like
- * the label's default (F14, M-3); an instance overrides them. Without content a HUG frame shrinks to
- * its paddings and a text node is invisible.
+ * The text the control of a field shows in the set (Abnahme Spec 009, F-4): an example in place
+ * of the typed text (the placeholder). One neutral word per node, like the label's default (F14,
+ * M-3); an instance overrides it. Without content a HUG frame shrinks to its paddings and a text
+ * node is invisible. The field of a select (Spec 010 ④, plan ④ D-07) shows its prompt instead —
+ * "Bitte wählen", the Vitrino's (one source for both pictures); an example of one option there
+ * would read as chosen, which the Regulo select-placeholder-is-prompt forbids.
  */
-export const FIELD_TEXTS: Readonly<Record<string, string>> = {
-  text: "Beispiel",
-  // The same words the Vitrino slots into the field (F-5): one source for both pictures.
-  ...VITRINO_SLOT_TEXTS,
+export const FIELD_EXAMPLE = "Beispiel";
+
+/**
+ * The words of the text slots of a Skemo besides its default slot (F-5: the same words the
+ * Vitrino slots in, one source for both pictures): help and error of a field (F-4), the error of
+ * a checkbox (Spec 010 ②), message and reason of a dialog (Spec 011 ②). A slot the Vitrino has no
+ * word for, or whose entries are options (Spec 010 ③), is left out.
+ */
+function slotWordsOf(skemo: LoadedEro["skemo"]): Record<string, string> {
+  return Object.fromEntries(
+    skemo.slots
+      .filter((slot) => slot.default !== true && slot.text === true && slot.entry === undefined)
+      .flatMap((slot) => {
+        const text = VITRINO_SLOT_TEXTS[slot.name];
+        return text === undefined ? [] : [[slot.name, text]];
+      }),
+  );
+}
+
+/**
+ * The texts of a field (F-4): the example (or the prompt of a select) in the control, the words
+ * of its slots below. A text area (Spec 011 ②) shows the example followed by the empty lines of
+ * its default rows, so the control — which has no box.height and hugs its text — is as high as
+ * the rows the web shows; `rows` is a number, nothing to bind.
+ */
+function fieldTextsOf(skemo: LoadedEro["skemo"]): Record<string, string> {
+  const rows = skemo.props.find((prop) => prop.name === "rows" && prop.kind === "number")?.default;
+  const lines = typeof rows === "number" && rows > 1 ? rows : 1;
+  const example = skemo.a11y.role === "combobox" ? VITRINO_PROMPT : FIELD_EXAMPLE;
+  return { text: example + "\n".repeat(lines - 1), ...slotWordsOf(skemo) };
+}
+
+/**
+ * The words of the two actions a dialog shows (Spec 011 ②): the Vitrino's — "Abbrechen" and
+ * "Bestätigen", read from the markup of its actions, one source for both pictures (F-5). In the
+ * set they stand in two simple frames, not in instances of the butono (candidate: instances once
+ * the plugin composes sets).
+ */
+const DIALOG_ACTION_TEXTS: Readonly<Record<string, string>> = Object.fromEntries(
+  [...VITRINO_DIALOG_ACTIONS.matchAll(/>([^<]+)</g)].map((match, index) => [
+    `action-${index + 1}`,
+    match[1] ?? "",
+  ]),
+);
+
+/**
+ * The texts of a dialog's set (Spec 011 ②): the message and the label of the reason field from
+ * the Vitrino's slot words, the two action words; the heading is the label property.
+ */
+export const DIALOG_TEXTS: Readonly<Record<string, string>> = {
+  ...Object.fromEntries(
+    ["message", "reason"].flatMap((slot) => {
+      const text = VITRINO_SLOT_TEXTS[slot];
+      return text === undefined ? [] : [[slot, text]];
+    }),
+  ),
+  ...DIALOG_ACTION_TEXTS,
 };
 
 /**
- * The texts the field of a select shows in the set (Spec 010 ④, plan ④ D-07): the closed field
- * with its prompt where the kampo shows its example — "Bitte wählen", the Vitrino's prompt (one
- * source for both pictures); an example of one option there would read as chosen, which the
- * Regulo select-placeholder-is-prompt forbids. Help and error as in the kampo's field.
+ * The name of the example frame beside a dialog's set (Spec 011 ②, spec „dialogo – Figma"): the
+ * default variant on the backdrop (color.backdrop), as `<set> – mit Hintergrund`. The variants
+ * themselves show the surface only: an instance of a dialog is its surface, the backdrop is the
+ * page's.
  */
-export const SELECT_TEXTS: Readonly<Record<string, string>> = {
-  ...FIELD_TEXTS,
-  text: VITRINO_PROMPT,
-};
+export const BACKDROP_EXAMPLE = "mit Hintergrund";
 
 /**
  * How the plugin draws a set (Spec 009, D-09): a control (variant → ring → gap → control → label)
@@ -163,7 +216,7 @@ export const SELECT_TEXTS: Readonly<Record<string, string>> = {
  * it, label and error in a column beside it; G1 gives the Wahl-Eroj one build, "control + label").
  * Celo knowledge from the a11y role (Art. VIII).
  */
-export type FigmaStructure = "control" | "field" | "toggle" | "choice";
+export type FigmaStructure = "control" | "field" | "toggle" | "choice" | "dialog";
 
 /**
  * A radio group (Spec 010 ③, D-07) is a choice: the label (the question) above a column of
@@ -171,7 +224,9 @@ export type FigmaStructure = "control" | "field" | "toggle" | "choice";
  * and error below. Its options are entries of a slot, not variants: selected is the state of one
  * option (E7). A select (Spec 010 ④, D-07) is a field: the closed field of the kampo with the
  * chevron at the end of its control; its list is the platform's and not drawn (E3, Manko of the
- * plan).
+ * plan). A dialog (Spec 011 ②) is a structure of its own: the surface — a column of a width
+ * bound by size — with heading, message, the reason field and two actions; a text area is a
+ * textbox and therefore a field.
  */
 export const structureOf = (role: string): FigmaStructure =>
   role === "textbox" || role === "combobox"
@@ -180,7 +235,9 @@ export const structureOf = (role: string): FigmaStructure =>
       ? "toggle"
       : role === "radiogroup"
         ? "choice"
-        : "control";
+        : role === "dialog"
+          ? "dialog"
+          : "control";
 
 /**
  * The neutral word every label template shows, per a11y role (M-3; Maintainer, F14, 2026-10-13,
@@ -199,6 +256,10 @@ const LABEL_DEFAULTS: Readonly<Record<string, string>> = {
   radiogroup: "Frage",
   // Spec 010 ④ (plan ④ D-07): a select names what is chosen (Jugxo jug_01M50KAWKW4N2AG37AJZY1P96X, O-15).
   combobox: "Auswahl",
+  // Spec 011 ②: a dialog's heading names the decision it asks for (Regulo
+  // dialog-title-names-the-decision) — the default text of the heading property. For the
+  // maintainer to confirm; no Jugxo created here.
+  dialog: "Entscheidung",
 };
 
 /** The word a role without its own entry shows: the button's, as every set did before M-3. */
@@ -259,6 +320,18 @@ export interface FigmaComponentSet {
    * draws one row per word and binds each with the entry of the variant for its value of the key.
    */
   entry?: { key: string; texts: string[]; selected: number };
+  /**
+   * The example frame beside the set of a dialog (Spec 011 ②): the named variant drawn once more
+   * on a frame whose fill is bound to the backdrop, at the padding of the section's gap, placed
+   * in the frame „Eroj" right after the set (F-8). The backdrop is drawn here only — the
+   * variants are the surface — and this is where the plan's `backdrop.color` is applied.
+   */
+  example?: {
+    name: string;
+    variant: Record<string, string>;
+    backdrop: { binding: string; paint: FigmaPaint };
+    padding: number;
+  };
   /** The purpose of the Uzo, one line, as the description of the set (Spec 007 T028, A12). */
   description?: string;
   /**
@@ -267,7 +340,14 @@ export interface FigmaComponentSet {
    * is measured by the run (Art. VI); a part the tool refuses is reported as an open Manko.
    */
   uzo?: { field: "descriptionMarkdown"; parts: UzoPart[]; markdown: string };
-  properties: Record<string, string[] | "BOOLEAN" | "TEXT">;
+  /**
+   * The properties of the set, as Figma names them: an enum prop its values (a VARIANT axis
+   * where it keys a part), a boolean BOOLEAN, a string TEXT. A number prop (Spec 011 ②: the
+   * rows of a text area) is NUMBER — Figma's component properties know no number, an instance
+   * would write it as text; the plan states the Skemo's kind so parity compares kinds, and the
+   * plugin declares none of these properties (only the label, F11).
+   */
+  properties: Record<string, string[] | "BOOLEAN" | "TEXT" | "NUMBER">;
   variants: {
     props: Record<string, string>;
     bindings: Record<string, string>;
@@ -307,9 +387,32 @@ export interface FigmaComponentSet {
     /**
      * The parts not drawn in this variant (Spec 010 ②, D-09): a colour bound to the keyword
      * none — the check mark of an unticked box. The plugin gives the part opacity 0; its place
-     * stays, as on the web.
+     * stays, as on the web. A height bound to none (Spec 011 ②: the reason field of a dialog
+     * without a reason) hides the part with its place: the plugin sets it invisible.
      */
     hidden?: string[];
+    /**
+     * The shadow of a part (Spec 011 ②: elevation.shadow.modal of the dialog's surface), a
+     * composite the plan holds field by field (F9): per layer the variables of its five fields
+     * and their values in the base combination. The plugin binds them to a DROP_SHADOW effect
+     * where the API binds effects (setBoundVariableForEffect), and writes the resolved layer
+     * where it does not — and says which (Vojmapo: the shadow variables bound to no effect).
+     */
+    shadow?: {
+      part: string;
+      variable: string;
+      layers: {
+        fields: Record<"color" | "offsetX" | "offsetY" | "blur" | "spread", string>;
+        /** The colour's deckkraft decided over every mode, like a paint's (F8). */
+        color: FigmaPaint;
+        /** The alpha of the base combination: what a written, unbound layer shows. */
+        alpha: number;
+        offsetX: number;
+        offsetY: number;
+        blur: number;
+        spread: number;
+      }[];
+    };
     /**
      * What follows the state of one option (Spec 010 ③, E7), per value of the entry key: the
      * bindings, paints and measures of the parts keyed by selected, and the parts not drawn in it
@@ -978,6 +1081,7 @@ function componentSetOf(
   for (const prop of skemo.props) {
     if (prop.kind === "enum") properties[prop.name] = [...(prop.values ?? [])];
     else if (prop.kind === "boolean") properties[prop.name] = "BOOLEAN";
+    else if (prop.kind === "number") properties[prop.name] = "NUMBER";
     else properties[prop.name] = "TEXT";
   }
   properties.state = [...skemo.states];
@@ -991,10 +1095,63 @@ function componentSetOf(
     radiusTokensOf(entry) === undefined
       ? undefined
       : { "focus-gap": "radius/focus/gap", "focus-ring": "radius/focus/ring" };
+  // The part the label property writes: the label, or the heading of a dialog (Spec 011 ②),
+  // whose role decides the font the texts are written in and the case of the heading.
+  const labelPart =
+    skemo.parts.label !== undefined || skemo.parts.heading === undefined ? "label" : "heading";
   const typographyToken = (combination: Readonly<Record<string, string>>): string | undefined => {
-    const bound = boundToken(skemo, "label", "typography", combination);
+    const bound = boundToken(skemo, labelPart, "typography", combination);
     if (bound === undefined) return undefined;
     return bound.token === "inherit" ? INHERIT_TYPOGRAPHY : bound.token;
+  };
+  // The shadow of a part, field by field (Spec 011 ②, F9): the layers are counted over every
+  // combination, like the variables, so the field names are the plan's; the values are the base
+  // combination's, the deckkraft of the colour decided over every mode (F8).
+  const shadowOf = (
+    combination: Readonly<Record<string, string>>,
+  ): FigmaComponentSet["variants"][number]["shadow"] => {
+    for (const [part, partProperties] of Object.entries(skemo.parts)) {
+      if (partProperties.shadow === undefined) continue;
+      const bound = boundToken(skemo, part, "shadow", combination);
+      if (bound === undefined || isBindingKeyword(bound.token)) continue;
+      const token = bound.token;
+      const fields = compositeFields("shadow", valuesOf(resolutions, token));
+      const prefixes = [...new Set(fields.map((field) => field.slice(0, field.indexOf("/") + 1)))];
+      const layers = prefixes.map((prefix) => {
+        const field = (kind: string) => `${prefix}${kind}`;
+        const alphas = new Set<number>();
+        for (const { tokens } of resolutions) {
+          const color = readDtcgColor(fieldValue(tokens[token]?.value, field("color")));
+          if (color !== undefined) alphas.add(alphaOf(color));
+        }
+        const baseColor = readDtcgColor(fieldValue(base[token]?.value, field("color")));
+        const hex = baseColor === undefined ? "#000000" : hexOf(baseColor);
+        const alpha = baseColor === undefined ? 0 : alphaOf(baseColor);
+        const [only] = [...alphas];
+        const color: FigmaPaint =
+          alphas.size === 1 && only !== undefined
+            ? { hex, opacity: only }
+            : { hex, alphaVariesByMode: true };
+        const px = (kind: string) => measureOf(fieldValue(base[token]?.value, field(kind)));
+        return {
+          fields: {
+            color: variableName(token, field("color")),
+            offsetX: variableName(token, field("offsetX")),
+            offsetY: variableName(token, field("offsetY")),
+            blur: variableName(token, field("blur")),
+            spread: variableName(token, field("spread")),
+          },
+          color,
+          alpha,
+          offsetX: px("offsetX"),
+          offsetY: px("offsetY"),
+          blur: px("blur"),
+          spread: px("spread"),
+        };
+      });
+      return { part, variable: variableName(token), layers };
+    }
+    return undefined;
   };
   // The keys of one entry (Spec 010 ③, E7: selected) are no axis: the parts they key are bound
   // per value of the key, in the entries of each variant.
@@ -1041,8 +1198,12 @@ function componentSetOf(
           if (bound.token === "inherit" && property === "typography") {
             bindings[key] = variableName(INHERIT_TYPOGRAPHY);
           }
-          // A colour that is none is a part not drawn in this variant (Spec 010 ②, D-09).
-          if (bound.token === "none" && (property === "color" || property === "fill")) {
+          // A colour that is none is a part not drawn in this variant (Spec 010 ②, D-09); a
+          // height that is none (Spec 011 ②: the reason field of a dialog without a reason) too.
+          if (
+            bound.token === "none" &&
+            (property === "color" || property === "fill" || property === "height")
+          ) {
             hidden.push(part);
           }
           continue;
@@ -1126,6 +1287,7 @@ function componentSetOf(
     );
     const [onlyCase] = [...cases];
     const textCase = cases.size <= 1 ? (onlyCase ?? "ORIGINAL") : TEXT_CASE_VARIES;
+    const shadow = shadowOf(combination);
     return {
       props: { ...combination },
       bindings,
@@ -1142,6 +1304,7 @@ function componentSetOf(
       ...(position === undefined ? {} : { position: position as "start" | "end" }),
       ...(hidden.length === 0 ? {} : { hidden }),
       ...(Object.keys(entries).length === 0 ? {} : { entries }),
+      ...(shadow === undefined ? {} : { shadow }),
     };
   });
   // Every font the label can carry, over every combination (F30). The typography role follows the
@@ -1199,15 +1362,34 @@ function componentSetOf(
   const cell = parityPx(base[VITRINO_CELL_PADDING]?.value);
   const structure = structureOf(skemo.a11y.role);
   // A toggle shows the words of its text slots besides the label, as the field does (Spec 010 ②):
-  // the checkbox its error; the switch has none.
-  const toggleTexts = Object.fromEntries(
-    skemo.slots
-      .filter((slot) => slot.default !== true && slot.text === true && slot.entry === undefined)
-      .flatMap((slot) => {
-        const text = VITRINO_SLOT_TEXTS[slot.name];
-        return text === undefined ? [] : [[slot.name, text]];
-      }),
+  // the checkbox its error; the switch has none. A dialog (Spec 011 ②) its message, the label
+  // of its reason, and the words of its two actions.
+  const toggleTexts = slotWordsOf(skemo);
+  const dialogTexts = { ...toggleTexts, ...DIALOG_ACTION_TEXTS };
+  // The example frame of a dialog (Spec 011 ②): the default variant — every keyed prop at its
+  // default, the first state — on the backdrop, at the padding of the section's gap.
+  const defaults = Object.fromEntries(
+    keys.map((key) => [
+      key,
+      key === STATE_KEY
+        ? (skemo.states[0] ?? "")
+        : String(skemo.props.find((prop) => prop.name === key)?.default ?? ""),
+    ]),
   );
+  const backdrop = boundToken(skemo, "backdrop", "color", defaults);
+  const backdropPaint =
+    backdrop === undefined || isBindingKeyword(backdrop.token)
+      ? undefined
+      : paintOf(backdrop.token, resolutions, base);
+  const example =
+    structure === "dialog" && backdrop !== undefined && backdropPaint !== undefined
+      ? {
+          name: `${entry.ero.name} – ${BACKDROP_EXAMPLE}`,
+          variant: defaults,
+          backdrop: { binding: variableName(backdrop.token), paint: backdropPaint },
+          padding: parityPx(base[SET_GAP]?.value),
+        }
+      : undefined;
   // The sign of the indicator: the check mark, the dot, and the chevron of a select's field
   // (Spec 010 ④, D-07); a text field has none.
   const sign = signOf(skemo.a11y.role, "16");
@@ -1220,14 +1402,14 @@ function componentSetOf(
   return {
     set: entry.ero.name,
     structure,
-    ...(structure === "field"
-      ? { texts: { ...(skemo.a11y.role === "combobox" ? SELECT_TEXTS : FIELD_TEXTS) } }
-      : {}),
+    ...(structure === "field" ? { texts: fieldTextsOf(skemo) } : {}),
     ...((structure === "toggle" || structure === "choice") && Object.keys(toggleTexts).length > 0
       ? { texts: toggleTexts }
       : {}),
+    ...(structure === "dialog" ? { texts: dialogTexts } : {}),
     ...(sign === undefined ? {} : { sign }),
     ...(options === undefined ? {} : { entry: options }),
+    ...(example === undefined ? {} : { example }),
     ...(description === undefined ? {} : { description }),
     ...(uzo === undefined ? {} : { uzo }),
     properties,
@@ -1367,8 +1549,8 @@ function sortVariables(variables: readonly FigmaVariable[]): FigmaVariable[] {
 
 /**
  * What the Figma plan states about the components (Spec 003 T021, FR-12): every component
- * property with its values (`BOOLEAN` and `TEXT` as the kinds they stand for) and the state
- * property as the states. Read from `plan.json`, the file the plugin applies.
+ * property with its values (`BOOLEAN`, `TEXT` and `NUMBER` as the kinds they stand for) and the
+ * state property as the states. Read from `plan.json`, the file the plugin applies.
  */
 export function figmaPlanInventory(plan: unknown): Record<string, ParityItem> {
   const components =
@@ -1384,7 +1566,10 @@ export function figmaPlanInventory(plan: unknown): Record<string, ParityItem> {
     for (const [name, values] of Object.entries(component.properties)) {
       if (name === STATE_KEY) continue;
       if (Array.isArray(values)) props[name] = [...values];
-      else props[name] = [values === "BOOLEAN" ? "boolean" : "string"];
+      else
+        props[name] = [
+          values === "BOOLEAN" ? "boolean" : values === "NUMBER" ? "number" : "string",
+        ];
     }
     const states = component.properties[STATE_KEY];
     // F8: the side states what the plugin applies — the paint with its deckkraft, or the marker

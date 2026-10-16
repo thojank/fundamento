@@ -38,7 +38,21 @@ type PartNode =
   // A radio group (Spec 010 ③, D-07): the column of options, one row per option, its label.
   | "options"
   | "option"
-  | "option-label";
+  | "option-label"
+  // A dialog (Spec 011 ②): the surface with heading, message, the content holding the reason's
+  // label and field, the row of actions with two stand-ins; the backdrop is the example frame.
+  | "surface"
+  | "heading"
+  | "message"
+  | "content"
+  | "reason-label"
+  | "reason-field"
+  | "actions"
+  | "action-1"
+  | "action-2"
+  | "action-label-1"
+  | "action-label-2"
+  | "backdrop";
 
 interface Binding {
   node: PartNode;
@@ -54,6 +68,14 @@ interface Binding {
 }
 
 const PADDINGS = ["paddingLeft", "paddingRight", "paddingTop", "paddingBottom"] as const;
+
+/** The four bindings of a typography role on a text node (F9, F30), as the label's. */
+const typographyOf = (node: PartNode): Binding[] => [
+  { node, fields: ["fontSize"], suffix: "/font-size" },
+  { node, fields: ["fontFamily"], suffix: "/font-family", font: true },
+  { node, fields: ["fontStyle"], suffix: "/font-style", font: true },
+  { node, fields: ["letterSpacing"], suffix: "/letter-spacing" },
+];
 
 /** Part property -> where the plugin binds it (Celo knowledge, Art. VIII). */
 const BINDINGS: Readonly<Record<string, readonly Binding[]>> = {
@@ -141,6 +163,32 @@ const BINDINGS: Readonly<Record<string, readonly Binding[]>> = {
     { node: "field", fields: ["itemSpacing"] },
     { node: "options", fields: ["itemSpacing"] },
   ],
+  // A dialog (Spec 011 ②): the surface's radius and width (bound by size: a frame of fixed width
+  // takes a bound width), the heading and the message as texts of their own; the message's role
+  // and colour also stand on the stand-ins — the label of the reason field and the words of the
+  // two actions — which the Skemo gives no role of their own. The reason field's height is bound
+  // by reason, the gaps of content and actions to their frames. The backdrop is the fill of the
+  // example frame beside the set, the only node that draws it.
+  "surface.radius": [{ node: "control", fields: ["cornerRadius"] }],
+  "surface.width": [{ node: "control", fields: ["width"] }],
+  "heading.color": [{ node: "heading", fields: ["fills"], paint: true }],
+  "heading.typography": typographyOf("heading"),
+  "message.color": [
+    { node: "message", fields: ["fills"], paint: true },
+    { node: "reason-label", fields: ["fills"], paint: true },
+    { node: "action-label-1", fields: ["fills"], paint: true },
+    { node: "action-label-2", fields: ["fills"], paint: true },
+  ],
+  "message.typography": [
+    ...typographyOf("message"),
+    ...typographyOf("reason-label"),
+    ...typographyOf("action-label-1"),
+    ...typographyOf("action-label-2"),
+  ],
+  "reason.height": [{ node: "reason-field", fields: ["height"] }],
+  "content.gap": [{ node: "content", fields: ["itemSpacing"] }],
+  "actions.gap": [{ node: "actions", fields: ["itemSpacing"] }],
+  "backdrop.color": [{ node: "backdrop", fields: ["fills"], paint: true }],
 };
 
 /**
@@ -153,6 +201,38 @@ const STRUCTURE_BINDINGS: Readonly<Record<string, Readonly<Record<string, readon
   // A radio group (Spec 010 ③, D-07): the gap of the box stands between a circle and its label,
   // in the row of the option.
   choice: { "box.gap": [{ node: "option", fields: ["itemSpacing"] }] },
+  // A dialog (Spec 011 ②) has no control: its surface takes what the control takes elsewhere —
+  // fill, border, radius, width, the gap between its parts and its padding, which the Skemo names
+  // once and the surface takes on every side. The border also outlines the stand-ins: the reason
+  // field (the composed tekstareo's border is the same role) and the two actions, which take the
+  // surface's padding across and its gap along as their room around the word.
+  dialog: {
+    "surface.fill": [{ node: "surface", fields: ["fills"], paint: true }],
+    "surface.radius": [{ node: "surface", fields: ["cornerRadius"] }],
+    "surface.width": [{ node: "surface", fields: ["width"] }],
+    "border.color": [
+      { node: "surface", fields: ["strokes"], paint: true },
+      { node: "reason-field", fields: ["strokes"], paint: true },
+      { node: "action-1", fields: ["strokes"], paint: true },
+      { node: "action-2", fields: ["strokes"], paint: true },
+    ],
+    "border.width": [
+      { node: "surface", fields: ["strokeWeight"] },
+      { node: "reason-field", fields: ["strokeWeight"] },
+      { node: "action-1", fields: ["strokeWeight"] },
+      { node: "action-2", fields: ["strokeWeight"] },
+    ],
+    "box.inline-padding": [
+      { node: "surface", fields: [...PADDINGS] },
+      { node: "action-1", fields: ["paddingLeft", "paddingRight"] },
+      { node: "action-2", fields: ["paddingLeft", "paddingRight"] },
+    ],
+    "box.gap": [
+      { node: "surface", fields: ["itemSpacing"] },
+      { node: "action-1", fields: ["paddingTop", "paddingBottom"] },
+      { node: "action-2", fields: ["paddingTop", "paddingBottom"] },
+    ],
+  },
 };
 
 /** A column of parts: the field of a textbox (Spec 009, D-09): label, control, help, error. */
@@ -198,6 +278,82 @@ const TEXTS_LAYOUT = {
   primaryAxisAlignItems: "MIN",
   counterAxisAlignItems: "MIN",
   layoutSizingHorizontal: "HUG",
+  layoutSizingVertical: "HUG",
+  strokesIncludedInLayout: false,
+  itemSpacing: 0,
+  paddingLeft: 0,
+  paddingRight: 0,
+  paddingTop: 0,
+  paddingBottom: 0,
+};
+
+/**
+ * The surface of a dialog (Spec 011 ②): a column of fixed width — the width is bound to
+ * size.container.* and a bound width only takes effect on a frame that is not hugging — that
+ * hugs its height; heading, message, content and actions at the start. Its padding and gap are
+ * bound (box.inline-padding, box.gap).
+ */
+const SURFACE_LAYOUT = {
+  layoutMode: "VERTICAL",
+  primaryAxisAlignItems: "MIN",
+  counterAxisAlignItems: "MIN",
+  layoutSizingHorizontal: "FIXED",
+  layoutSizingVertical: "HUG",
+  strokesIncludedInLayout: false,
+  itemSpacing: 0,
+  paddingLeft: 0,
+  paddingRight: 0,
+  paddingTop: 0,
+  paddingBottom: 0,
+};
+
+/**
+ * The content of a dialog (Spec 011 ②): a column across the whole surface, the reason's label
+ * above its field, the gap bound to content.gap. Where the variant asks no reason it is hidden
+ * (visible false): a hidden child of an auto-layout frame takes no space, so no gap remains.
+ */
+const CONTENT_LAYOUT = {
+  layoutMode: "VERTICAL",
+  primaryAxisAlignItems: "MIN",
+  counterAxisAlignItems: "MIN",
+  layoutSizingHorizontal: "FILL",
+  layoutSizingVertical: "HUG",
+  strokesIncludedInLayout: false,
+  itemSpacing: 0,
+  paddingLeft: 0,
+  paddingRight: 0,
+  paddingTop: 0,
+  paddingBottom: 0,
+};
+
+/**
+ * The field of the reason (Spec 011 ②), a frame standing in for the composed tekstareo: across
+ * the content, its height bound to reason.height (size.control.large) — fixed, so the binding
+ * takes effect — with the border of the surface and no fill of its own.
+ */
+const REASON_FIELD_LAYOUT = {
+  layoutMode: "HORIZONTAL",
+  primaryAxisAlignItems: "MIN",
+  counterAxisAlignItems: "MIN",
+  layoutSizingHorizontal: "FILL",
+  layoutSizingVertical: "FIXED",
+  strokesIncludedInLayout: false,
+  itemSpacing: 0,
+  paddingLeft: 0,
+  paddingRight: 0,
+  paddingTop: 0,
+  paddingBottom: 0,
+};
+
+/**
+ * The actions of a dialog (Spec 011 ②): a row across the surface, its two stand-ins at the end
+ * (the web's row, end), the gap bound to actions.gap.
+ */
+const ACTIONS_LAYOUT = {
+  layoutMode: "HORIZONTAL",
+  primaryAxisAlignItems: "MAX",
+  counterAxisAlignItems: "CENTER",
+  layoutSizingHorizontal: "FILL",
   layoutSizingVertical: "HUG",
   strokesIncludedInLayout: false,
   itemSpacing: 0,
@@ -345,6 +501,10 @@ const HUG_LAYOUT = ${JSON.stringify(HUG_LAYOUT)};
 const FIELD_LAYOUT = ${JSON.stringify(FIELD_LAYOUT)};
 const TOGGLE_LAYOUT = ${JSON.stringify(TOGGLE_LAYOUT)};
 const TEXTS_LAYOUT = ${JSON.stringify(TEXTS_LAYOUT)};
+const SURFACE_LAYOUT = ${JSON.stringify(SURFACE_LAYOUT)};
+const CONTENT_LAYOUT = ${JSON.stringify(CONTENT_LAYOUT)};
+const REASON_FIELD_LAYOUT = ${JSON.stringify(REASON_FIELD_LAYOUT)};
+const ACTIONS_LAYOUT = ${JSON.stringify(ACTIONS_LAYOUT)};
 const MARK_NEUTRAL = ${JSON.stringify(MARK_NEUTRAL)};
 const INDICATOR_LAYOUT = ${JSON.stringify(INDICATOR_LAYOUT)};
 const STRUCTURE_BINDINGS = ${JSON.stringify(STRUCTURE_BINDINGS)};
@@ -675,7 +835,8 @@ function write(node, field, value) {
     } catch (error) {
       current = undefined;
     }
-    if (samePaints(field, current, value) || sameJson(current, value)) return false;
+    if (samePaints(field, current, value) || sameEffects(field, current, value) ||
+      sameJson(current, value)) return false;
   }
   node[field] = value;
   return true;
@@ -710,6 +871,39 @@ function samePaints(field, current, value) {
       opacityOf(held) === opacityOf(paint) &&
       visibleOf(held) === visibleOf(paint)
     );
+  });
+}
+
+/**
+ * Two effect lists hold the same when every effect has the same type, the same variable per
+ * bound field — or the same value where none is bound — and the same visibility (Spec 011 ②, the
+ * shadow of a dialog's surface). Read back, an effect carries what Figma filled in, like a paint
+ * (F22), so a comparison by JSON would rewrite it on every run. An assumption until measured.
+ */
+function sameEffects(field, current, value) {
+  if (field !== "effects") return false;
+  if (!Array.isArray(current) || !Array.isArray(value) || current.length !== value.length) {
+    return false;
+  }
+  const boundOf = (entry, name) =>
+    entry && entry.boundVariables && entry.boundVariables[name]
+      ? entry.boundVariables[name].id
+      : undefined;
+  return value.every((effect, index) => {
+    const held = current[index];
+    if (held === undefined || held.type !== effect.type) return false;
+    if ((held.visible !== false) !== (effect.visible !== false)) return false;
+    for (const name of ["color", "offsetX", "offsetY", "radius", "spread"]) {
+      const bound = boundOf(effect, name);
+      if (bound !== boundOf(held, name)) return false;
+      if (bound !== undefined) continue;
+      const read = (entry) =>
+        name === "offsetX" ? (entry.offset || {}).x
+          : name === "offsetY" ? (entry.offset || {}).y
+            : entry[name];
+      if (!sameJson(read(held), read(effect))) return false;
+    }
+    return true;
   });
 }
 
@@ -800,6 +994,68 @@ function bind(nodes, variant, variables, structure) {
     }
   }
   return deferred;
+}
+
+/** The channels of a six-digit hex colour, as Figma holds them (0 to 1). */
+function rgbOf(hex) {
+  const number = parseInt(hex.slice(1), 16);
+  return { r: ((number >> 16) & 255) / 255, g: ((number >> 8) & 255) / 255, b: (number & 255) / 255 };
+}
+
+/**
+ * The drop shadows of a part from the plan's layers (Spec 011 ②, F9): one DROP_SHADOW effect per
+ * layer, each field bound to its variable where the API binds effects (setBoundVariableForEffect;
+ * Vojmapo: the shadow variables bound to no effect until an Ero asks for elevation), and written
+ * with the values of the base combination where it does not — then the shadow does not follow
+ * the mode, and the report says so. The effect is written whole, so a read-back compares (F22).
+ */
+function shadowEffects(shadow, variables) {
+  const bindable = "setBoundVariableForEffect" in figma.variables;
+  const effects = shadow.layers.map((layer) => {
+    const rgb = rgbOf(layer.color.hex);
+    let effect = {
+      type: "DROP_SHADOW",
+      color: { r: rgb.r, g: rgb.g, b: rgb.b, a: layer.alpha },
+      offset: { x: layer.offsetX, y: layer.offsetY },
+      radius: layer.blur,
+      spread: layer.spread,
+      visible: true,
+      blendMode: "NORMAL",
+      showShadowBehindNode: false,
+    };
+    if (!bindable) return effect;
+    const fields = [
+      ["color", layer.fields.color],
+      ["offsetX", layer.fields.offsetX],
+      ["offsetY", layer.fields.offsetY],
+      ["radius", layer.fields.blur],
+      ["spread", layer.fields.spread],
+    ];
+    for (const [field, name] of fields) {
+      const variable = variables.get(name);
+      if (variable !== undefined) {
+        effect = figma.variables.setBoundVariableForEffect(effect, field, variable);
+      }
+    }
+    return effect;
+  });
+  return {
+    effects: effects,
+    report: {
+      part: shadow.part,
+      variable: shadow.variable,
+      layers: shadow.layers.length,
+      status: bindable ? "bound" : "written",
+      evidence: bindable
+        ? "setBoundVariableForEffect bound colour, offset, blur and spread of every layer of " +
+          shadow.variable + " to a DROP_SHADOW effect of the " + shadow.part + "; the shadow " +
+          "follows the mode."
+        : "figma.variables.setBoundVariableForEffect is not available in this API: the " +
+          shadow.layers.length + " layer(s) of " + shadow.variable + " are written as DROP_SHADOW " +
+          "effects of the " + shadow.part + " with the values of the base combination, bound to " +
+          "no variable — the shadow does not follow the mode.",
+    },
+  };
 }
 
 /**
@@ -1334,6 +1590,134 @@ async function applyComponents(variables, warnings) {
     for (const each of owned.concat(rows.map((row) => row.mark).filter((mark) => mark !== undefined))) flush(each);
     bindMeasures(measures, report, component, variant);
   }
+  /**
+   * A dialog (Spec 011 ②): the variant holds the surface — a column of a width bound by size —
+   * with the heading (the label property), the message, the content (the reason's label and a
+   * field frame standing in for the composed tekstareo, its height bound by reason; hidden where
+   * the variant asks no reason) and the row of actions with two stand-ins, a word each. No focus
+   * ring: the dialog has one state, its states lie with the composed butono and tekstareo. The
+   * same drawing on the example frame „mit Hintergrund" (\`example\` given): then the node is the
+   * backdrop, its fill bound to color.backdrop, the surface at the padding of the section's gap,
+   * and the heading carries the word itself — a text outside a component has no property.
+   */
+  async function drawDialog(node, component, variant, report, labels, example) {
+    const texts = component.texts || {};
+    const surface = part(node, "surface", () => figma.createFrame());
+    const heading = part(surface, "heading", () => figma.createText());
+    const message = part(surface, "message", () => figma.createText());
+    const content = part(surface, "content", () => figma.createFrame());
+    const reasonLabel = part(content, "reason-label", () => figma.createText());
+    const reasonField = part(content, "reason-field", () => figma.createFrame());
+    const actions = part(surface, "actions", () => figma.createFrame());
+    const actionKeys = Object.keys(texts).filter((key) => /^action-[0-9]+$/.test(key)).sort();
+    const stands = actionKeys.map((key) => {
+      const frame = part(actions, key, () => figma.createFrame());
+      const text = part(frame, "action-label", () => figma.createText());
+      return { key, frame, text };
+    });
+    [heading, message, content, actions].forEach((child, index) => {
+      if (surface.children.indexOf(child) !== index) surface.insertChild(index, child);
+    });
+    [reasonLabel, reasonField].forEach((child, index) => {
+      if (content.children.indexOf(child) !== index) content.insertChild(index, child);
+    });
+    stands.forEach((each, index) => {
+      if (actions.children.indexOf(each.frame) !== index) actions.insertChild(index, each.frame);
+    });
+    const all = [heading, message, reasonLabel].concat(stands.map((each) => each.text));
+    for (const each of all) await loadCurrentFont(each);
+    if (variant.textCase === TEXT_CASE_VARIES) {
+      if (casesVarying.indexOf(component.set) === -1) {
+        casesVarying.push(component.set);
+        warnings.push(
+          component.set + ": Die Schreibweise der Beschriftung ist nicht in allen Modi " +
+            "dieselbe. textCase ist in Figma kein bindbares Feld, also bleibt sie ungesetzt — " +
+            "eine Marke auszuwählen wäre keine Projektion.",
+        );
+      }
+    } else if (typeof variant.textCase === "string") {
+      write(heading, "textCase", variant.textCase);
+    }
+    if (variant.font !== undefined) {
+      for (const each of all) write(each, "fontName", fonts.get(variant.font.family + " " + variant.font.style));
+    }
+    if (typeof texts.message === "string") write(message, "characters", texts.message);
+    if (typeof texts.reason === "string") write(reasonLabel, "characters", texts.reason);
+    for (const each of stands) write(each.text, "characters", texts[each.key]);
+    if (example === undefined) labels.push(heading);
+    else if (component.label !== undefined) write(heading, "characters", component.label.defaultValue);
+    const frames = [node, surface, content, reasonField, actions].concat(stands.map((each) => each.frame));
+    for (const frame of frames) own(frame, NEUTRAL);
+    for (const each of all) own(each, NEUTRAL_TEXT);
+    own(node, HUG_LAYOUT);
+    if (example !== undefined) {
+      own(node, {
+        paddingLeft: example.padding,
+        paddingRight: example.padding,
+        paddingTop: example.padding,
+        paddingBottom: example.padding,
+      });
+    }
+    own(surface, SURFACE_LAYOUT);
+    own(content, CONTENT_LAYOUT);
+    // The reason field is hidden where the variant asks no reason (reason.height none): a hidden
+    // child of an auto-layout frame takes no space, so no gap remains (an assumption of the
+    // double until measured in f10b-5; Figma documents it so).
+    own(content, { visible: (variant.hidden || []).indexOf("reason") === -1 });
+    own(reasonField, REASON_FIELD_LAYOUT);
+    own(actions, ACTIONS_LAYOUT);
+    for (const each of stands) own(each.frame, CONTROL_LAYOUT);
+    for (const child of frames.concat(all)) own(child, IN_FLOW);
+    for (const each of all) own(each, TEXT_SIZING);
+    const nodes = {
+      surface, heading, message, content, actions,
+      "reason-label": reasonLabel,
+      "reason-field": reasonField,
+    };
+    stands.forEach((each, index) => {
+      nodes["action-" + (index + 1)] = each.frame;
+      nodes["action-label-" + (index + 1)] = each.text;
+    });
+    if (example !== undefined) nodes.backdrop = node;
+    const measures = bind(nodes, variant, variables, component.structure);
+    // The shadow of the surface (Spec 011 ②): bound where the API binds effects, written where not.
+    if (variant.shadow !== undefined) {
+      const shadow = shadowEffects(variant.shadow, variables);
+      const target = nodes[variant.shadow.part];
+      if (target !== undefined) {
+        gather(target).effects = shadow.effects;
+        report.shadow = shadow.report;
+      }
+    }
+    for (const each of frames.concat(all)) flush(each);
+    bindMeasures(measures, report, component, variant);
+  }
+  /**
+   * The example frame „mit Hintergrund" of a dialog (Spec 011 ②, spec „dialogo – Figma"): the
+   * default variant drawn once more on a frame whose fill is bound to the backdrop, found by its
+   * mark \`example\` or created, placed in the frame „Eroj" right after the set (F-8) — Figma lays
+   * it out like a set. It is no set: no variants, no grid, no label property.
+   */
+  async function placeExample(frame, set, component, report) {
+    const spec = component.example;
+    if (frame === undefined || spec === undefined) return undefined;
+    const wanted = variantName(spec.variant);
+    const variant = component.variants.find((candidate) => variantName(candidate.props) === wanted);
+    if (variant === undefined) return undefined;
+    let example = ours(frame, "example", component.set);
+    const found = example !== undefined;
+    if (example === undefined) {
+      example = create(() => figma.createFrame());
+      stamp(example, "example", component.set);
+    }
+    write(example, "name", spec.name);
+    await drawDialog(example, component, variant, report, [], spec);
+    if (example.parent !== frame) frame.appendChild(example);
+    const at = frame.children.indexOf(set) + 1;
+    if (frame.children.indexOf(example) !== at) frame.insertChild(at, example);
+    write(example, "layoutPositioning", "AUTO");
+    return { name: spec.name, found: found, created: !found };
+  }
   // Every font of every mode, not only the one of the base combination (F30): a binding to a font
   // variable only holds once Figma has loaded every font that variable can show. What did not
   // arrive is named here, with the Aspektoj that ask for it, and the run falls back for it.
@@ -1456,6 +1840,12 @@ async function applyComponents(variables, warnings) {
       // A radio group (Spec 010 ③, D-07) is drawn as a choice, in a function of its own.
       if (component.structure === "choice") {
         await drawChoice(node, component, variant, report, labels);
+        if (existing === undefined) made.push(node);
+        continue;
+      }
+      // A dialog (Spec 011 ②) is drawn as a surface with its parts, in a function of its own.
+      if (component.structure === "dialog") {
+        await drawDialog(node, component, variant, report, labels, undefined);
         if (existing === undefined) made.push(node);
         continue;
       }
@@ -1754,6 +2144,10 @@ async function applyComponents(variables, warnings) {
     }
     // Where the set lies (F-8): in the frame Eroj, placed by Figma's auto-layout.
     report.placement = placeSet(frame, set, component.set, madeThisRun.get(component.set) === set);
+    // The example frame of a dialog beside its set (Spec 011 ②).
+    if (component.example !== undefined) {
+      report.example = await placeExample(frame, set, component, report);
+    }
     report.layout = measureLayout(set, component);
     report.layout.refused = refused;
     // Symmetric (F10): the plan against the file, in both directions, with names. The finding
@@ -1884,7 +2278,8 @@ function measureLayout(set, component) {
     .map((variant) => ours(set, "variant", variantName(variant.props)))
     .filter((node) => node !== undefined);
   const boxes = nodes.map((node) => {
-    const content = ours(node, "part", "focus-ring");
+    // The content of a variant: its ring, or the surface of a dialog (Spec 011 ②).
+    const content = ours(node, "part", "focus-ring") || ours(node, "part", "surface");
     return {
       name: node.name,
       x: node.x,
@@ -2008,6 +2403,17 @@ function measureLayout(set, component) {
         const each = holder === undefined ? undefined : ours(holder, "part", name);
         if (each !== undefined) found[name] = each;
       }
+    }
+    // A dialog (Spec 011 ②): the surface and its parts; the reason field inside the content.
+    const surface = ours(node, "part", "surface");
+    if (surface !== undefined) {
+      found.surface = surface;
+      for (const name of ["heading", "message", "content", "actions"]) {
+        const each = ours(surface, "part", name);
+        if (each !== undefined) found[name] = each;
+      }
+      const reasonField = found.content === undefined ? undefined : ours(found.content, "part", "reason-field");
+      if (reasonField !== undefined) found["reason-field"] = reasonField;
     }
     return found;
   };
@@ -2352,6 +2758,9 @@ function reportParts(result) {
           modes: report.modes,
           fonts: report.fonts,
           uzo: report.uzo,
+          // Spec 011 ②: the shadow of a dialog's surface (bound or written) and its example frame.
+          shadow: report.shadow,
+          example: report.example,
         },
       }),
     );
