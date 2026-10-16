@@ -1273,6 +1273,23 @@ for (const aspekto of ["komuna", "ekzemplo"]) {
           contrastOf(tabColours.otherText, tabColours.otherFill),
           "tab",
         ).toBeGreaterThanOrEqual(4.5);
+        // F-7 (Abnahme 16.10.): the indicator of the selected tab is a graphic — at least 3:1 on the
+        // ground it lies on (WCAG 1.4.11); color.navigation.selected was invisible on komuna light.
+        const indicator = await page.locator("#tl").evaluate((element) => {
+          const selected = element.shadowRoot?.querySelector(
+            '[part="tab"][aria-selected="true"]',
+          ) as HTMLElement;
+          const own = getComputedStyle(selected).backgroundColor;
+          const alpha = /rgba\([^)]*,\s*([\d.]+)\)/.exec(own)?.[1];
+          return {
+            edge: getComputedStyle(selected).borderBlockEndColor,
+            ground:
+              alpha !== undefined && Number.parseFloat(alpha) === 0
+                ? getComputedStyle(document.body).backgroundColor
+                : own,
+          };
+        });
+        expect(contrastOf(indicator.edge, indicator.ground), "indicator").toBeGreaterThanOrEqual(3);
         // The rings: Tab reaches the first link of the first navigation, later the selected tab.
         await page.evaluate(() => {
           const start = document.createElement("span");
