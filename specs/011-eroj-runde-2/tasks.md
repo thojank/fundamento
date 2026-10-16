@@ -67,7 +67,7 @@
 ### C – Projekcioj
 - [x] **T107 Web Component** `fm-tekstareo` (D-11), `fm-dialogo` (D-12); Strukturliste `resize`. Grün in `71f9fdc`; Überschrift/Nachricht `overflow-wrap` in `23e9bb5`.
 - [x] **T108 React** `Tekstareo`, `Dialogo`, Typtests.
-- [ ] **T109 Figma** Bauform `dialog`, `tekstareo` als `field` (D-13) — Agent im Double; Hash nach dem Durchgang.
+- [x] **T109 Figma** Bauform `dialog`, `tekstareo` als `field` (D-13), 275 grün, rot zuerst im Durchgang (27): `079f874`.
 - [x] **T110 Make Kit** zwei Komponentenseiten, zwei Sätze in `Guidelines.md` (D-14).
 - [x] **T111 Vitrino** Grid des Dialogs mit Öffnen-Knopf, `plurliniaj`, Layout-Sätze (D-15).
 - [x] **T112 Eroj im Browser** `tekstareo.spec` 8, `dialogo.spec` 7, Alirebleco 16 Kombinationen, Internacia 5, Vitrino-Check 2 (Chromium).
@@ -83,12 +83,12 @@
 | Was | Wert |
 |---|---|
 | `get_ero … brief:true`, Bytes / `ceil(Bytes/3)` | tekstareo 1 266 / **422**, dialogo 1 230 / **410**; butono 2 245 / **749** (vorher 672: Eintrag `confirm`, B-1), kampo 2 229 / 743 (vorher 745), elektilo 512, elekto 477, markobutono 462, sxaltilo 310, ligilo 493 – alle unter 750 |
-| Parität (`pnpm check:parity`) | nach dem Figma-Durchgang (T109) |
+| Parität (`pnpm check:parity`) | 9 Eroj, 4 Seiten, 0 Differenzen; 429 benannte Freigaben (369 wie ① + 60: `text.color` und `required-mark.color` des tekstareo je Variante, Jugxo `jug_01M4S2R85WRAC5SV7CARH8RE7S`) |
 | Alirebleco (Modelo, `check:alirebleco`) | 76 Paare × 72 Kombinationen wie ① (kein neues Paar: Überschrift und Nachricht auf `raised` sind `text-default-on-background-raised`, min. 7,x:1 nach Spec 009) |
 | Alirebleco (Eroj, `check:alirebleco-eroj`, Chromium) | tekstareo 8 Kombinationen (6 Felder kind × size + Fehlerfeld, rest/hover/disabled, Fokusring ≥ 3:1), dialogo 8 Kombinationen × 6 offene Varianten (axe dialog/aria-modal, Überschrift und Nachricht ≥ 4,5:1) – 16 grün |
 | Vitrino-Check (Chromium) | 18 grün, davon neu tekstareo (24 Textbereiche) und dialogo (Öffnen, modal, axe, Escape) |
 | Internacia (Chromium) | 27 grün, davon neu tekstareo rtl + 135/200 %, dialogo rtl + Überschrift 400 % |
-| **Commits** (rot / grün; nach einem Rebase hier ersetzen) | rot `1f386e5` (Fixtures, Modelo, MCP), `2a2a2f2` (Projekcioj, Browser), `29cf274` (Doku) · grün `bf960ac` (Modelo), `71f9fdc` (Projekcioj außer Figma), `23e9bb5` (overflow-wrap, O-1), Figma und Doku: siehe Bericht |
+| **Commits** (rot / grün; nach einem Rebase hier ersetzen) | rot `1f386e5` (Fixtures, Modelo, MCP), `2a2a2f2` (Projekcioj, Browser), `29cf274` (Doku) · grün `bf960ac` (Modelo), `71f9fdc` (Projekcioj außer Figma), `23e9bb5` (overflow-wrap, O-1), `079f874` (Figma), Doku `ba9bd7f` |
 | Tests (je Paket `vitest run`, Playwright in Chromium) | nach dem letzten Lauf im Bericht |
 | Checks | `check:regularo` (uzoj=9), `check:mankoj` (8), `check:alirebleco` (76), `check:vortaro-lint`, `check:clean-room` – grün; `check:parity`, `check:make-kit`, `check:quickstart`, `check:vitrino`, `check:release` nach dem Figma-Durchgang |
 
