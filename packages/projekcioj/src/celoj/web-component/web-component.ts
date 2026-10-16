@@ -364,8 +364,10 @@ const dialogStructure: string = [
   ":host { display: contents; }",
   ':where([part="control"]) { display: flex; flex-direction: column; box-sizing: border-box; border-style: solid; transition-property: background-color, border-color; }',
   ':where([part="control"]:not([open])) { display: none; }',
-  ':where([part="heading"]) { margin: 0; }',
-  ':where([part="message"]) { margin: 0; }',
+  // A heading or a message that is a long word breaks inside the word (O-8 of Spec 011 ①): the
+  // surface keeps the width of its size.
+  ':where([part="heading"]) { margin: 0; overflow-wrap: anywhere; }',
+  ':where([part="message"]) { margin: 0; overflow-wrap: anywhere; }',
   ':where([part="message"]:not(:has(slot:not(:empty)))) { display: none; }',
   ':where([part="content"]) { display: flex; flex-direction: column; }',
   ':where([part="actions"]) { display: flex; justify-content: flex-end; flex-wrap: wrap; }',
