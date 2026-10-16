@@ -93,6 +93,29 @@ test.describe("fm-dialogo behaviour", () => {
     ]);
   });
 
+  // Nachbesserung (CI-Lauf 38976295942 auf ③): closing and reopening in one go — the platform's
+  // close event arrives after the dialog was shown again and must not take the new open back.
+  // The test of the actions set open right after cancel; on the runner the close event landed
+  // after it and the dialog vanished (the confirm never became visible).
+  test("a dialog closed and reopened in one task stays open: the late close event takes nothing back", async ({
+    page,
+  }) => {
+    await serve(page, out, dialog("open"));
+    await page.locator("#d").evaluate((element) => {
+      element.removeAttribute("open");
+      element.setAttribute("open", "");
+    });
+    // Give the platform's close event time to land, then the dialog must still be open.
+    await page.waitForTimeout(200);
+    await expect(page.locator("#d")).toHaveAttribute("open", "");
+    await expect(page.locator("#ok")).toBeVisible();
+    expect(
+      await page.locator("#d").evaluate(
+        (element) => (element.shadowRoot?.querySelector("dialog") as HTMLDialogElement).open,
+      ),
+    ).toBe(true);
+  });
+
   test("reason required: the area takes the focus, the confirmation is locked until text is entered, and the text is the detail", async ({
     page,
   }) => {
