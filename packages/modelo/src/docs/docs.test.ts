@@ -1418,8 +1418,8 @@ describe("Spec 011 ② documentation (Vojmapo Phase 4)", () => {
       "### Abweichungen von der Spec",
       "### Befunde / Mankoj",
       "### Offen (für den Maintainer)",
-      "#### D-11 `tekstareo`",
-      "#### D-12 `dialogo`",
+      "#### D-11 Web Component `fm-tekstareo`",
+      "#### D-12 Web Component `fm-dialogo`",
     ]) {
       expect(section(plan)).toContain(heading);
     }
