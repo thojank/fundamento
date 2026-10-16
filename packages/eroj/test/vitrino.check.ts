@@ -409,7 +409,8 @@ test("fm-tabelo, fm-atributlisto and fm-mezurilo are upgraded in their sections,
   await open(page);
   const tables = page.locator("#fm-vitrino-tabelo fm-tabelo");
   await expect(tables).toHaveCount(2);
-  await expect(page.locator("#fm-vitrino-tabelo").getByRole("table")).toHaveCount(2);
+  // The section's own grid is a table too: count the tables inside the Eroj.
+  await expect(page.locator("#fm-vitrino-tabelo fm-tabelo").getByRole("table")).toHaveCount(2);
   await expect(page.locator("#fm-vitrino-tabelo th[data-sort] > button")).toHaveCount(2);
   const lists = page.locator("#fm-vitrino-atributlisto fm-atributlisto");
   await expect(lists).toHaveCount(2);
