@@ -176,29 +176,29 @@
 
 ## ⑤ Navigation
 
-**Plan:** [`plan.md`](plan.md) ⑤ (D-01–D-14) · **Branch:** `261015-spec-011-navigation-e137d7` (gestapelt auf ④ @ `a0da510`, PR #66) · Aufgaben ⑤ zählen ab T401. Die Hashes aller Commits stehen in **einer** Zeile der Messungen (nach einem Rebase dort und in der einen Schleife von `src/docs/docs.test.ts` ersetzen).
+**Plan:** [`plan.md`](plan.md) ⑤ (D-01–D-14) · **Branch:** `261015-spec-011-navigation-e137d7` (gestapelt auf ④ @ `3b49c06`, PR #66) · Aufgaben ⑤ zählen ab T401. Die Hashes aller Commits stehen in **einer** Zeile der Messungen (nach einem Rebase dort und in der einen Schleife von `src/docs/docs.test.ts` ersetzen).
 
 ### A – Rot zuerst
-- [x] **T401 Fixtures und Modelo-Tests** sechs Fixtures (D-14), `data/navigado.test.ts`, `data/langetaro.test.ts` (Skemo, Uzo, ausgeweitete Reguloj, check_usage, suggest_ero, die Navigations-Dialoge der Spec), Listen auf siebzehn Eroj, `knownGoals` mit `switch-view`/`navigate-app`, MCP `s011-navigation.test.ts`. Rot in `4d6bc2c` (56 von 2 943 in 21 Dateien; MCP 3 Dateien).
-- [x] **T402 Projekcioj-Tests** `web-component.test.ts` (navigado, langetaro), `make-kit.test.ts`, `publish.test.ts`, `datumoj.test.ts`, Typtests `types/{navigado,langetaro}.tsx`, Browser `navigado.spec.ts`, `langetaro.spec.ts`, `alirebleco.check.ts`, `internacia.spec.ts`, `vitrino.check.ts`. Rot in `057c672` (17 von 571 in 5 Dateien).
+- [x] **T401 Fixtures und Modelo-Tests** sechs Fixtures (D-14), `data/navigado.test.ts`, `data/langetaro.test.ts` (Skemo, Uzo, ausgeweitete Reguloj, check_usage, suggest_ero, die Navigations-Dialoge der Spec), Listen auf siebzehn Eroj, `knownGoals` mit `switch-view`/`navigate-app`, MCP `s011-navigation.test.ts`. Rot in `f71d5dd` (56 von 2 943 in 21 Dateien; MCP 3 Dateien).
+- [x] **T402 Projekcioj-Tests** `web-component.test.ts` (navigado, langetaro), `make-kit.test.ts`, `publish.test.ts`, `datumoj.test.ts`, Typtests `types/{navigado,langetaro}.tsx`, Browser `navigado.spec.ts`, `langetaro.spec.ts`, `alirebleco.check.ts`, `internacia.spec.ts`, `vitrino.check.ts`. Rot in `d870af3` (17 von 571 in 5 Dateien).
 
-### B – Modelo (grün in `d437635`)
+### B – Modelo (grün in `d466543`)
 - [x] **T403 Daten** `navigado/{skemo,uzo}.json`, `langetaro/{skemo,uzo}.json` (IDs aus `pnpm id:new`); vier KontrastParoj (D-02).
 - [x] **T404 Reguloj** `link-label-names-destination`, `link-not-color-only` → `navigado`, `option-labels-distinct` → `langetaro`, `spacing-owned-by-container` → beide (D-03); keine neue Regulo, keine neuen Jugxoj.
 - [x] **T405 Verflechtung** `navigado.single-link` → `ligilo`, `navigado.switch-view` → `langetaro`, `langetaro.form-choice` → `elekto`, `langetaro.pages` → `navigado`; Grenze `many-tabs` (D-04).
 - [x] **T406 Gvidanto und Ontologio** Text-Regeln auf den Einträgen eines Slots (D-05); `#Navigado`, `#Langetaro`.
 
 ### C – Projekcioj
-- [x] **T407 Web Component** Host `light` für die Navigation mit Eintragszustand im Dokument-Blatt (D-06), `fm-navigado` (D-07), Host `tabs` und `fm-langetaro` (D-08). Grün in `66b48a7` (mit `panel.color`).
+- [x] **T407 Web Component** Host `light` für die Navigation mit Eintragszustand im Dokument-Blatt (D-06), `fm-navigado` (D-07), Host `tabs` und `fm-langetaro` (D-08). Grün in `0993348` (mit `panel.color`).
 - [x] **T408 React** `Navigado`, `Langetaro`, Typtests (D-09).
-- [x] **T409 Figma** Bauformen `nav`, `tabs` (D-12), rot zuerst im Durchgang (11 von 571), 589 grün: `58a7ff1`.
+- [x] **T409 Figma** Bauformen `nav`, `tabs` (D-12), rot zuerst im Durchgang (11 von 571), 589 grün: `a35be8d`.
 - [x] **T410 Make Kit** zwei Komponentenseiten, zwei Sätze in `Guidelines.md` (D-10).
 - [x] **T411 Vitrino** Links und Reiter als Einträge des Standard-Slots, Namen Navigation/Reiter, Panel, Layout-Sätze (D-11).
 - [x] **T412 Eroj im Browser** `navigado.spec` 4, `langetaro.spec` 4, Alirebleco 8 Kombinationen, Internacia 2, Vitrino-Check 1 (Chromium).
 - [x] **T413 MCP** `s011-navigation.test.ts`, `eroj-tools.test.ts` (siebzehn Eroj), Folgetests.
 
 ### D – Abschluss
-- [x] **T414 Doku** Vojmapo Zeile 4, plan ⑤, tasks ⑤; `docs.test.ts` rot in `739a28c`, grün im Commit der Messungen (Doku).
+- [x] **T414 Doku** Vojmapo Zeile 4, plan ⑤, tasks ⑤; `docs.test.ts` rot in `834a2f5`, grün im Commit der Messungen (Doku).
 - [x] **T415 Messungen** unten; Bericht.
 
 ### Messungen
@@ -211,7 +211,7 @@
 | Alirebleco (Eroj, `check:alirebleco-eroj`, Chromium) | navigado beide Orientierungen (axe navigation, aktueller und anderer Eintrag ≥ 4,5:1 auf ihrer Füllung, Fokusring des Links ≥ 3:1 auf Spalt und Seite) und langetaro (axe tablist/tab/tabpanel, gewählter und anderer Reiter ≥ 4,5:1 auf ihrer Fläche über der Seite, Fokusring des Reiters ≥ 3:1) in 8 Kombinationen – 8 neu, 123 gesamt, 57 s |
 | Vitrino-Check (Chromium) | 21 grün, davon neu navigado/langetaro (ein Test: eine Landmarke mit drei Links und einer aktuellen Seite, eine Reiterleiste mit drei Reitern und Panel, axe); die APCA-Zeile 2 196 → 2 394 |
 | Internacia (Chromium) | 36 grün, davon neu rtl (erster Eintrag und erster Reiter rechts) und Expansion (die Einträge brechen um, die Reiter bleiben in der Zeile und die Liste rollt) |
-| **Commits** (rot / grün; nach einem Rebase hier ersetzen) | rot `4d6bc2c` (Fixtures, Modelo, MCP), `057c672` (Projekcioj, Browser), `739a28c` (Doku) · grün `d437635` (Modelo), `66b48a7` (Projekcioj außer Figma), `58a7ff1` (Figma), `5ea16ec` (Vitrino-Zeile, Doku), Typtest `be764aa`, `2407356` · Rebase auf ④ `5900655` · Nachbesserung 16.10.: rot `001aac6` (F-7), grün `a41f861`, Doku im Folge-Commit |
+| **Commits** (rot / grün; nach einem Rebase hier ersetzen) | rot `f71d5dd` (Fixtures, Modelo, MCP), `d870af3` (Projekcioj, Browser), `834a2f5` (Doku) · grün `d466543` (Modelo), `0993348` (Projekcioj außer Figma), `a35be8d` (Figma), `b96c076` (Vitrino-Zeile, Doku), Typtest `4ba85cf`, `6ba3a25` · Rebase auf ④ `712ce07` · Nachbesserung 16.10.: rot `b860cc1` (F-7), grün `60c134c`, Doku im Folge-Commit |
 | Tests (je Paket `vitest run`, Playwright in Chromium) | modelo 3 214 (vorher 3 155), projekcioj 589 (vorher 559), mcp 241 (vorher 231), cli 66, eroj 1 Vitest + 161 Playwright in Chromium (vorher 151; die drei Engines prüft der Merge-Lauf auf `main`); davon neu: data/navigado 15, data/langetaro 14, sechs Fixtures, docs 2, MCP s011-navigation 8, Projekcioj (Web Component 8, Make-Kit 2, Datumoj 2, Figma 18 neu, 11 rot beobachtet), Browser `navigado.spec` 4, `langetaro.spec` 4, Alirebleco 8, Internacia 2, Vitrino-Check 1 |
 | Checks | `check:vortaro-lint`, `check:regularo` (uzoj=17), `check:mankoj` (8, unverändert), `check:alirebleco` (87 Paare), `check:clean-room`, `check:parity` (17 Eroj, 0 Differenzen, 429 Freigaben), `check:alirebleco-eroj` 123 (Chromium, 57 s), `check:make-kit` 5, `check:quickstart` 1, `check:vitrino` 21, `check:release` (beide Kits gepackt, je 34 Dateien: + `guidelines/components/navigado.md`, `langetaro.md`) – grün; `pnpm lint` grün (9 Warnungen in modelo, 1 in projekcioj, 1 Info in cli: alle älter als der Branch, nicht angefasst) |
 
