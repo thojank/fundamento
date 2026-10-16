@@ -30,9 +30,9 @@ const suggest = (goal: string) => {
 };
 
 describe("plenstato in the repo Modelo (section ③, G1, G2)", () => {
-  it("lives in data/eroj/plenstato/skemo.json, tenth of twelve Eroj", () => {
+  it("lives in data/eroj/plenstato/skemo.json, twelfth of fifteen Eroj", () => {
     expect(plenstato?.file).toBe("modelo/data/eroj/plenstato/skemo.json");
-    expect(modelo.eroj[9]?.ero.name).toBe("plenstato");
+    expect(modelo.eroj[11]?.ero.name).toBe("plenstato");
   });
 
   it("has kind (loading, empty) as its one prop, a duty without a default; one state, rest", () => {

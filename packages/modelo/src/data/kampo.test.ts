@@ -31,6 +31,7 @@ describe("kampo in the repo Modelo (T004)", () => {
   it("lives in data/eroj/kampo/skemo.json, between elekto and ligilo, and the repo Modelo stays valid", () => {
     expect(kampo.file).toBe("modelo/data/eroj/kampo/skemo.json");
     expect(modelo.eroj.map((entry) => entry.ero.name)).toEqual([
+      "atributlisto",
       "avizo",
       "butono",
       "dialogo",
@@ -40,8 +41,10 @@ describe("kampo in the repo Modelo (T004)", () => {
       "kampo",
       "ligilo",
       "markobutono",
+      "mezurilo",
       "plenstato",
       "sxaltilo",
+      "tabelo",
       "tekstareo",
     ]);
     expect(validateModelo(defaultModeloSource()).errors).toEqual([]);
@@ -334,6 +337,9 @@ describe("the Reguloj of the kampo (T003, T004, A2, D-07)", () => {
       "insigno",
       "avizo",
       "plenstato",
+      "tabelo",
+      "atributlisto",
+      "mezurilo",
     ]);
   });
 

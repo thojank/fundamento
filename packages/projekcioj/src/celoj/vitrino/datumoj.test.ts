@@ -250,6 +250,7 @@ describe("the Vitrino after the acceptances (Nachlese 2026-10-13)", () => {
   // line that never breaks is the input line, not the label. The subject comes from the a11y role.
   it("the layout sentence names the subject and the placement (C8)", () => {
     expect(datumoj.a11yRoloj).toEqual({
+      atributlisto: "list",
       avizo: "status",
       butono: "button",
       dialogo: "dialog",
@@ -259,8 +260,10 @@ describe("the Vitrino after the acceptances (Nachlese 2026-10-13)", () => {
       kampo: "textbox",
       ligilo: "link",
       markobutono: "checkbox",
+      mezurilo: "meter",
       plenstato: "status",
       sxaltilo: "switch",
+      tabelo: "table",
       tekstareo: "textbox",
     });
     expect(html).toContain("Größe aus dem Inhalt, Label bricht nie um.");

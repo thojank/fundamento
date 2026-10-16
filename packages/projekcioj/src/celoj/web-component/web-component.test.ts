@@ -33,11 +33,13 @@ describe("Web Component Celo (T011)", () => {
   it("generates the descriptor, the stylesheet, the element and an index", () => {
     // Spec 008: the ligilo on the same path as the butono (Art. IX, Art. XI).
     expect(Object.keys(files).sort()).toEqual([
+      "eroj/src/generated/atributlisto.styles.ts",
       "eroj/src/generated/avizo.styles.ts",
       "eroj/src/generated/butono.styles.ts",
       "eroj/src/generated/dialogo.styles.ts",
       "eroj/src/generated/elektilo.styles.ts",
       "eroj/src/generated/elekto.styles.ts",
+      "eroj/src/generated/fm-atributlisto.ts",
       "eroj/src/generated/fm-avizo.ts",
       "eroj/src/generated/fm-butono.ts",
       "eroj/src/generated/fm-dialogo.ts",
@@ -47,18 +49,22 @@ describe("Web Component Celo (T011)", () => {
       "eroj/src/generated/fm-kampo.ts",
       "eroj/src/generated/fm-ligilo.ts",
       "eroj/src/generated/fm-markobutono.ts",
+      "eroj/src/generated/fm-mezurilo.ts",
       "eroj/src/generated/fm-plenstato.ts",
       "eroj/src/generated/fm-sxaltilo.ts",
+      "eroj/src/generated/fm-tabelo.ts",
       "eroj/src/generated/fm-tekstareo.ts",
       "eroj/src/generated/index.ts",
       "eroj/src/generated/insigno.styles.ts",
       "eroj/src/generated/kampo.styles.ts",
       "eroj/src/generated/ligilo.styles.ts",
       "eroj/src/generated/markobutono.styles.ts",
+      "eroj/src/generated/mezurilo.styles.ts",
       "eroj/src/generated/plenstato.styles.ts",
       "eroj/src/generated/react.ts",
       "eroj/src/generated/skemo.ts",
       "eroj/src/generated/sxaltilo.styles.ts",
+      "eroj/src/generated/tabelo.styles.ts",
       "eroj/src/generated/tekstareo.styles.ts",
     ]);
   });

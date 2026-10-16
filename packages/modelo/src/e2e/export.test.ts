@@ -47,6 +47,7 @@ describe("AK-06: the S6 dialog is answered from dist/modelo.json alone", () => {
     expect(new Set(modeloJson.tokens.map((token) => token.type)).size).toBe(description.typeCount);
     expect(modeloJson.reguloj.every((regulo) => regulo.kialo.trim() !== "")).toBe(true);
     expect(modeloJson.eroj.map((ero) => ero.name)).toEqual([
+      "atributlisto",
       "avizo",
       "butono",
       "dialogo",
@@ -56,15 +57,17 @@ describe("AK-06: the S6 dialog is answered from dist/modelo.json alone", () => {
       "kampo",
       "ligilo",
       "markobutono",
+      "mezurilo",
       "plenstato",
       "sxaltilo",
+      "tabelo",
       "tekstareo",
     ]);
   });
 
   it("AK-06: states the S6 sentence", () => {
     expect(describeModelo(modeloJson).sentence).toMatch(
-      /^Fundamento v0\.1\.0: six Dimensioj \(aspekto, viewport, density, color-scheme, contrast, motion\), one Aspekto \(`komuna`: reference, MIT, Geist\), \d+ tokens in \w+ types \(.+\), \w+ rules with reasons \(\w+ automatic\), \w+ Jugxoj, twelve Eroj \(`avizo`, `butono`, `dialogo`, `elektilo`, `elekto`, `insigno`, `kampo`, `ligilo`, `markobutono`, `plenstato`, `sxaltilo`, `tekstareo`\)\. Ask explain why a value is what it is\.$/,
+      /^Fundamento v0\.1\.0: six Dimensioj \(aspekto, viewport, density, color-scheme, contrast, motion\), one Aspekto \(`komuna`: reference, MIT, Geist\), \d+ tokens in \w+ types \(.+\), \w+ rules with reasons \(\w+ automatic\), \w+ Jugxoj, fifteen Eroj \(`atributlisto`, `avizo`, `butono`, `dialogo`, `elektilo`, `elekto`, `insigno`, `kampo`, `ligilo`, `markobutono`, `mezurilo`, `plenstato`, `sxaltilo`, `tabelo`, `tekstareo`\)\. Ask explain why a value is what it is\.$/,
     );
   });
 });

@@ -52,6 +52,7 @@ describe("elektilo in the repo Modelo (G1, G2, section 4)", () => {
   it("lives in data/eroj/elektilo/skemo.json, between butono and elekto, and the repo Modelo stays valid", () => {
     expect(elektilo?.file).toBe("modelo/data/eroj/elektilo/skemo.json");
     expect(modelo.eroj.map((entry) => entry.ero.name)).toEqual([
+      "atributlisto",
       "avizo",
       "butono",
       "dialogo",
@@ -61,8 +62,10 @@ describe("elektilo in the repo Modelo (G1, G2, section 4)", () => {
       "kampo",
       "ligilo",
       "markobutono",
+      "mezurilo",
       "plenstato",
       "sxaltilo",
+      "tabelo",
       "tekstareo",
     ]);
     // uzo-boundary-covered among them: no Uzo says null or ask-human for the words of its goal.
@@ -419,6 +422,9 @@ describe("the Reguloj of the elektilo (G6, E5)", () => {
       "insigno",
       "avizo",
       "plenstato",
+      "tabelo",
+      "atributlisto",
+      "mezurilo",
     ]);
   });
 
