@@ -185,8 +185,8 @@ describe("the cross-links of G5: an area loads here, an action loads in the buto
     expect(Math.ceil(JSON.stringify(briefOf(butono)).length / 3)).toBeLessThanOrEqual(750);
   });
 
-  it("'Ladeanzeige für die Liste' is the plenstato with kind loading; 'der Knopf sendet gerade' is the butono", () => {
-    expect(suggest("Ladeanzeige für die Liste").suggestion).toEqual({
+  it("'Ladeanzeige für die Standards' is the plenstato with kind loading; 'der Knopf sendet gerade' is the butono", () => {
+    expect(suggest("Ladeanzeige für die Standards").suggestion).toEqual({
       ero: "plenstato",
       props: { kind: "loading" },
     });
@@ -230,7 +230,7 @@ describe("the Reguloj of the plenstato (G6)", () => {
     for (const jugxo of examples) {
       const instances = jugxo.ekzemplo?.instances ?? [];
       expect(instances[0]?.props).toEqual({ kind: "empty" });
-      const rules = rulesOf(evaluateUsage(modelo, { instances })).map(([rule]) => rule);
+      const rules = rulesOf(evaluateUsage(modelo, instances)).map(([rule]) => rule);
       if (jugxo.decision === "approved") expect(rules, jugxo.id).toEqual([]);
       else expect(rules, jugxo.id).toEqual(["empty-state-says-what-next"]);
       expect(jugxo.ref).toEqual({ ero: plenstato?.ero.id });
@@ -241,9 +241,9 @@ describe("the Reguloj of the plenstato (G6)", () => {
 describe("check_usage of the state (G6, G7)", () => {
   const judge = (label: string, props: Record<string, string>, texts?: Record<string, string>) =>
     rulesOf(
-      evaluateUsage(modelo, {
-        instances: [{ ero: "plenstato", props, label, ...(texts === undefined ? {} : { texts }) }],
-      }),
+      evaluateUsage(modelo, [
+        { ero: "plenstato", props, label, ...(texts === undefined ? {} : { texts }) },
+      ]),
     );
 
   it("'Noch keine Standards. Lege den ersten an.' passes; 'Keine Treffer' violates the rule; while loading two words pass", () => {

@@ -1,0 +1,253 @@
+{
+  "ero": {
+    "id": "ero_01M51ZRFPHM8B0ED97V23SDRRJ",
+    "name": "avizo",
+    "skemo": "ske_01M51ZRG2K24R0RFTV8RPJMHBG",
+    "description": "A notice: tells the person in the flow of the page what happened or what to watch for — saved, could not save, import not confirmed. Its kind is a word, never colour alone."
+  },
+  "skemo": {
+    "id": "ske_01M51ZRG2K24R0RFTV8RPJMHBG",
+    "ero": "ero_01M51ZRFPHM8B0ED97V23SDRRJ",
+    "props": [
+      {
+        "name": "intent",
+        "kind": "enum",
+        "values": [
+          "info",
+          "success",
+          "warning",
+          "danger"
+        ],
+        "default": "info",
+        "description": "What kind of notice: info, success, warning or danger (an error). No neutral: a notice without a kind is text. danger is spoken as an alert, the others as status (G4)."
+      },
+      {
+        "name": "dismissible",
+        "kind": "boolean",
+        "default": false,
+        "description": "Shows a close button (a butono with emphasis low) named by a11y.texts.dismissible; closing hides the notice and says dismiss."
+      }
+    ],
+    "states": [
+      "rest"
+    ],
+    "slots": [
+      {
+        "name": "heading",
+        "text": true
+      },
+      {
+        "name": "message",
+        "default": true,
+        "text": true
+      },
+      {
+        "name": "details",
+        "text": true
+      },
+      {
+        "name": "actions"
+      }
+    ],
+    "parts": {
+      "surface": {
+        "fill": {
+          "by": [
+            "intent"
+          ]
+        }
+      },
+      "accent": {
+        "color": {
+          "by": [
+            "intent"
+          ]
+        },
+        "width": {
+          "fixed": "border.width.strong"
+        }
+      },
+      "heading": {
+        "color": {
+          "fixed": "color.text.default"
+        },
+        "typography": {
+          "fixed": "typography.label.1"
+        }
+      },
+      "message": {
+        "color": {
+          "fixed": "color.text.default"
+        },
+        "typography": {
+          "fixed": "typography.body.1"
+        }
+      },
+      "details": {
+        "color": {
+          "fixed": "color.text.default"
+        },
+        "typography": {
+          "fixed": "typography.caption"
+        }
+      },
+      "actions": {
+        "gap": {
+          "fixed": "spacing.small"
+        }
+      },
+      "dismiss": {
+        "size": {
+          "fixed": "size.control.small"
+        }
+      },
+      "box": {
+        "inline-padding": {
+          "fixed": "spacing.medium"
+        },
+        "gap": {
+          "fixed": "spacing.small"
+        },
+        "radius": {
+          "fixed": "radius.role.surface"
+        }
+      }
+    },
+    "bindings": [
+      {
+        "part": "surface",
+        "property": "fill",
+        "when": {
+          "intent": "info"
+        },
+        "token": "color.status.info.weak"
+      },
+      {
+        "part": "surface",
+        "property": "fill",
+        "when": {
+          "intent": "success"
+        },
+        "token": "color.status.success.weak"
+      },
+      {
+        "part": "surface",
+        "property": "fill",
+        "when": {
+          "intent": "warning"
+        },
+        "token": "color.status.warning.weak"
+      },
+      {
+        "part": "surface",
+        "property": "fill",
+        "when": {
+          "intent": "danger"
+        },
+        "token": "color.status.danger.weak"
+      },
+      {
+        "part": "accent",
+        "property": "color",
+        "when": {
+          "intent": "info"
+        },
+        "token": "color.status.info.border"
+      },
+      {
+        "part": "accent",
+        "property": "color",
+        "when": {
+          "intent": "success"
+        },
+        "token": "color.status.success.border"
+      },
+      {
+        "part": "accent",
+        "property": "color",
+        "when": {
+          "intent": "warning"
+        },
+        "token": "color.status.warning.border"
+      },
+      {
+        "part": "accent",
+        "property": "color",
+        "when": {
+          "intent": "danger"
+        },
+        "token": "color.status.danger.border"
+      }
+    ],
+    "a11y": {
+      "role": "status",
+      "name": [
+        "slot:message"
+      ],
+      "states": {},
+      "keys": [],
+      "texts": {
+        "dismissible": {
+          "de": "Schließen",
+          "en": "Close"
+        },
+        "intent-info": {
+          "de": "Hinweis:",
+          "en": "Note:"
+        },
+        "intent-success": {
+          "de": "Erfolg:",
+          "en": "Success:"
+        },
+        "intent-warning": {
+          "de": "Warnung:",
+          "en": "Warning:"
+        },
+        "intent-danger": {
+          "de": "Fehler:",
+          "en": "Error:"
+        }
+      }
+    },
+    "goals": [
+      {
+        "goal": "notify",
+        "keywords": {
+          "en": [
+            "notice",
+            "alert",
+            "message",
+            "warning",
+            "banner"
+          ],
+          "de": [
+            "hinweis",
+            "meldung",
+            "warnung",
+            "erfolgsmeldung"
+          ]
+        },
+        "props": {}
+      },
+      {
+        "goal": "report-error",
+        "keywords": {
+          "en": [
+            "error",
+            "failed",
+            "failure"
+          ],
+          "de": [
+            "fehler",
+            "fehlgeschlagen",
+            "fehlermeldung"
+          ]
+        },
+        "props": {
+          "intent": "danger"
+        },
+        "regulo": "error-says-what-to-do"
+      }
+    ]
+  }
+}

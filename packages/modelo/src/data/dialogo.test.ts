@@ -32,9 +32,9 @@ const suggest = (goal: string) => {
 };
 
 describe("dialogo in the repo Modelo (section ②, E9)", () => {
-  it("lives in data/eroj/dialogo/skemo.json, second of nine Eroj", () => {
+  it("lives in data/eroj/dialogo/skemo.json, third of twelve Eroj", () => {
     expect(dialogo?.file).toBe("modelo/data/eroj/dialogo/skemo.json");
-    expect(modelo.eroj[1]?.ero.name).toBe("dialogo");
+    expect(modelo.eroj[2]?.ero.name).toBe("dialogo");
   });
 
   it("has open, size (small, medium) and reason (none, optional, required) as props; one state, rest (G2)", () => {
@@ -244,7 +244,7 @@ describe("the Reguloj of the dialogo (G6, E5)", () => {
 
   it("one-primary-per-container is widened to the dialogo: at most one butono with emphasis high in its actions", () => {
     const regulo = named("one-primary-per-container");
-    expect(regulo?.appliesTo?.eroj).toEqual(["butono", "dialogo"]);
+    expect(regulo?.appliesTo?.eroj).toEqual(["butono", "dialogo", "avizo"]);
     expect(regulo?.statement).toMatch(/dialogo/);
     const two = evaluateUsage(modelo, [
       {

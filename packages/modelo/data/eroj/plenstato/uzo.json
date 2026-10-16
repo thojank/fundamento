@@ -1,0 +1,118 @@
+{
+  "$schema": "../../../schema/modelo.schema.json#/$defs/UzoFile",
+  "uzo": {
+    "id": "uzo_01M51ZRGEPTH2CEY385GE1PB0M",
+    "ero": "ero_01M51ZRFPJXJRYE15FEKX72M2K",
+    "skemo": "ske_01M51ZRG2K24R0RFTV8RPJMHBH",
+    "purpose": "Fills an area while its content loads, or when there is none: loading standards, no standards yet.",
+    "instead": [
+      {
+        "goal": "button-busy",
+        "keywords": {
+          "en": [
+            "submitting"
+          ],
+          "de": [
+            "knopf",
+            "sendet"
+          ]
+        },
+        "ero": "butono",
+        "kialo": "An action that is working is the butono's own loading, because the person waits at the button they pressed; an area loads when its content is not there yet."
+      },
+      {
+        "goal": "progress-known",
+        "keywords": {
+          "en": [
+            "progress",
+            "percentage"
+          ],
+          "de": [
+            "fortschritt",
+            "fortschrittsanzeige"
+          ]
+        },
+        "ero": null,
+        "kialo": "Progress of a task in percent is neither a measure like the mezurilo's nor a wait, because it moves by itself; that is an Ero of its own, a person decides."
+      }
+    ],
+    "boundary": [
+      {
+        "case": "skeleton",
+        "action": "not-supported",
+        "keywords": {
+          "en": [
+            "skeleton",
+            "shimmer"
+          ],
+          "de": [
+            "skelett",
+            "platzhalterfläche"
+          ]
+        },
+        "kialo": "A grey shape of the content to come promises a layout the data may not have, because it is drawn before the data; the text says what loads."
+      }
+    ],
+    "composes": {
+      "containers": [
+        {
+          "name": "tabelo",
+          "kialo": "A table without rows shows its empty state in place of the rows, because the person looks there for them (tabelo, ④)."
+        },
+        {
+          "name": "page-section",
+          "kialo": "A section whose content loads or is empty fills itself with the state, because an empty section says nothing."
+        }
+      ],
+      "with": [
+        {
+          "ero": "butono",
+          "kialo": "An empty state may offer the next step, because 'none yet' asks what to do; a working action is the butono's own loading."
+        }
+      ],
+      "never": [],
+      "spacing": {
+        "owner": "container",
+        "regulo": "spacing-owned-by-container"
+      }
+    },
+    "slots": {
+      "text": {
+        "accepts": [
+          "text"
+        ],
+        "required": true,
+        "max": 1,
+        "nesting": 0
+      },
+      "actions": {
+        "accepts": [
+          "butono"
+        ],
+        "max": 2,
+        "nesting": 0
+      }
+    },
+    "layout": {
+      "size": "container",
+      "wrap": "allowed"
+    },
+    "content": [
+      {
+        "regulo": "empty-state-says-what-next",
+        "fixed": false,
+        "when": {
+          "props": {
+            "kind": [
+              "empty"
+            ]
+          }
+        },
+        "check": {
+          "kind": "min-words",
+          "count": 3
+        }
+      }
+    ]
+  }
+}

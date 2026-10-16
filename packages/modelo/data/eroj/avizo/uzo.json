@@ -1,0 +1,171 @@
+{
+  "$schema": "../../../schema/modelo.schema.json#/$defs/UzoFile",
+  "uzo": {
+    "id": "uzo_01M51ZRGEPTH2CEY385GE1PB0K",
+    "ero": "ero_01M51ZRFPHM8B0ED97V23SDRRJ",
+    "skemo": "ske_01M51ZRG2K24R0RFTV8RPJMHBG",
+    "purpose": "Tells the person in the flow of the page what happened or what to watch for: saved, could not save, import not confirmed.",
+    "instead": [
+      {
+        "goal": "needs-decision",
+        "keywords": {
+          "en": [
+            "decide",
+            "decision",
+            "confirmation"
+          ],
+          "de": [
+            "entscheiden",
+            "entscheidung",
+            "rückfrage"
+          ]
+        },
+        "ero": "dialogo",
+        "kialo": "A notice asks nothing, because it reads in the flow of the page; what needs a decision interrupts, and that is a dialogo."
+      },
+      {
+        "goal": "one-word-status",
+        "keywords": {
+          "en": [
+            "badge",
+            "status",
+            "tag"
+          ],
+          "de": [
+            "badge",
+            "status",
+            "etikett"
+          ]
+        },
+        "ero": "insigno",
+        "kialo": "One to three words next to a title are a badge, because a status is read at a glance; a notice is a sentence."
+      },
+      {
+        "goal": "field-error",
+        "keywords": {
+          "en": [
+            "invalid"
+          ],
+          "de": [
+            "feldfehler",
+            "eingabefehler"
+          ]
+        },
+        "ero": "kampo",
+        "kialo": "An error of one field stands at the field, because the person corrects it there (slot error of the kampo); a notice names what no field owns."
+      }
+    ],
+    "boundary": [
+      {
+        "case": "toast",
+        "action": "not-supported",
+        "keywords": {
+          "en": [
+            "toast",
+            "snackbar"
+          ],
+          "de": [
+            "toast",
+            "snackbar",
+            "einblendung"
+          ]
+        },
+        "kialo": "A notice that goes away by itself is not readable for everyone, because some read slowly or look later; an Ero with a time rule is its own."
+      },
+      {
+        "case": "stacked-notices",
+        "action": "ask-human",
+        "keywords": {
+          "en": [
+            "stacked",
+            "queue"
+          ],
+          "de": [
+            "gestapelt",
+            "warteschlange"
+          ]
+        },
+        "kialo": "Several notices at once compete for the same attention, because each claims the flow of the page; a person decides which stay and in which order."
+      }
+    ],
+    "composes": {
+      "containers": [
+        {
+          "name": "page",
+          "kialo": "A notice belongs to the page whose state it tells, because that is where the person reads on."
+        },
+        {
+          "name": "dialog",
+          "kialo": "A notice stands at the top of a dialog's content when a confirmation failed, because the person decides there what to do next."
+        }
+      ],
+      "with": [
+        {
+          "ero": "butono",
+          "kialo": "A notice may offer the next step as an action, because what to do about it is one button: at most one with emphasis high."
+        },
+        {
+          "ero": "ligilo",
+          "kialo": "A notice may lead to where the matter is, because a destination is a link, not an action."
+        }
+      ],
+      "never": [],
+      "spacing": {
+        "owner": "container",
+        "regulo": "spacing-owned-by-container"
+      }
+    },
+    "slots": {
+      "heading": {
+        "accepts": [
+          "text"
+        ],
+        "max": 1,
+        "nesting": 0
+      },
+      "message": {
+        "accepts": [
+          "text"
+        ],
+        "required": true,
+        "max": 1,
+        "nesting": 0
+      },
+      "details": {
+        "accepts": [
+          "text"
+        ],
+        "nesting": 0
+      },
+      "actions": {
+        "accepts": [
+          "butono",
+          "ligilo"
+        ],
+        "max": 2,
+        "nesting": 0
+      }
+    },
+    "layout": {
+      "size": "container",
+      "wrap": "allowed"
+    },
+    "content": [
+      {
+        "regulo": "error-says-what-to-do",
+        "fixed": false,
+        "when": {
+          "props": {
+            "intent": [
+              "danger"
+            ]
+          }
+        },
+        "check": {
+          "kind": "min-words",
+          "count": 3
+        }
+      }
+    ]
+  }
+}

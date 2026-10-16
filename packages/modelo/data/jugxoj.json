@@ -3068,6 +3068,282 @@
           }
         ]
       }
+    },
+    {
+      "id": "jug_01M51ZRH6K7YKVD1DEBJFF3C2N",
+      "ref": {
+        "ero": "ero_01M51ZRFPHM8B0ED97V23SDRRH"
+      },
+      "decision": "approved",
+      "kialo": "'In Prüfung' names the status in two words.",
+      "date": "2026-10-16",
+      "context": "Example RIGHT for the Regulo named in ekzemplo.regulo (Spec 011 ③ G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M51ZRGTGH154NAVAYYGMTRVF",
+        "instances": [
+          {
+            "ero": "insigno",
+            "props": {
+              "intent": "info"
+            },
+            "label": "In Prüfung",
+            "lingvo": "de"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M51ZRH6MVE84HJJ54484ZQEM",
+      "ref": {
+        "ero": "ero_01M51ZRFPHM8B0ED97V23SDRRH"
+      },
+      "decision": "approved",
+      "kialo": "'In review' names the status in two words.",
+      "date": "2026-10-16",
+      "context": "Example RIGHT for the Regulo named in ekzemplo.regulo (Spec 011 ③ G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M51ZRGTGH154NAVAYYGMTRVF",
+        "instances": [
+          {
+            "ero": "insigno",
+            "props": {
+              "intent": "info"
+            },
+            "label": "In review",
+            "lingvo": "en"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M51ZRH6MVE84HJJ54484ZQEN",
+      "ref": {
+        "ero": "ero_01M51ZRFPHM8B0ED97V23SDRRH"
+      },
+      "decision": "rejected",
+      "kialo": "Five words are a sentence; it belongs in a notice.",
+      "date": "2026-10-16",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 011 ③ G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M51ZRGTGH154NAVAYYGMTRVF",
+        "instances": [
+          {
+            "ero": "insigno",
+            "props": {
+              "intent": "info"
+            },
+            "label": "Diese Version wird gerade geprüft",
+            "lingvo": "de"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M51ZRH6MVE84HJJ54484ZQEP",
+      "ref": {
+        "ero": "ero_01M51ZRFPHM8B0ED97V23SDRRH"
+      },
+      "decision": "rejected",
+      "kialo": "Seven words are a sentence; it belongs in a notice.",
+      "date": "2026-10-16",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 011 ③ G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M51ZRGTGH154NAVAYYGMTRVF",
+        "instances": [
+          {
+            "ero": "insigno",
+            "props": {
+              "intent": "info"
+            },
+            "label": "This version is being reviewed right now",
+            "lingvo": "en"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M51ZRH6MVE84HJJ54484ZQEQ",
+      "ref": {
+        "ero": "ero_01M51ZRFPHM8B0ED97V23SDRRJ"
+      },
+      "decision": "approved",
+      "kialo": "Says what went wrong and what to do next.",
+      "date": "2026-10-16",
+      "context": "Example RIGHT for the Regulo named in ekzemplo.regulo (Spec 011 ③ G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4S1ZR7GEPZSTB9ES3REK3TY",
+        "instances": [
+          {
+            "ero": "avizo",
+            "props": {
+              "intent": "danger"
+            },
+            "label": "Der Import wurde nicht gespeichert. Prüfe die Datei und lade sie erneut hoch.",
+            "lingvo": "de"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M51ZRH6MVE84HJJ54484ZQER",
+      "ref": {
+        "ero": "ero_01M51ZRFPHM8B0ED97V23SDRRJ"
+      },
+      "decision": "approved",
+      "kialo": "Says what went wrong and what to do next.",
+      "date": "2026-10-16",
+      "context": "Example RIGHT for the Regulo named in ekzemplo.regulo (Spec 011 ③ G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4S1ZR7GEPZSTB9ES3REK3TY",
+        "instances": [
+          {
+            "ero": "avizo",
+            "props": {
+              "intent": "danger"
+            },
+            "label": "The import was not saved. Check the file and upload it again.",
+            "lingvo": "en"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M51ZRH6MVE84HJJ54484ZQES",
+      "ref": {
+        "ero": "ero_01M51ZRFPHM8B0ED97V23SDRRJ"
+      },
+      "decision": "rejected",
+      "kialo": "'Fehler' says that something is wrong, not what to do.",
+      "date": "2026-10-16",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 011 ③ G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4S1ZR7GEPZSTB9ES3REK3TY",
+        "instances": [
+          {
+            "ero": "avizo",
+            "props": {
+              "intent": "danger"
+            },
+            "label": "Fehler",
+            "lingvo": "de"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M51ZRH6MVE84HJJ54484ZQET",
+      "ref": {
+        "ero": "ero_01M51ZRFPHM8B0ED97V23SDRRJ"
+      },
+      "decision": "rejected",
+      "kialo": "'Error' says that something is wrong, not what to do.",
+      "date": "2026-10-16",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 011 ③ G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4S1ZR7GEPZSTB9ES3REK3TY",
+        "instances": [
+          {
+            "ero": "avizo",
+            "props": {
+              "intent": "danger"
+            },
+            "label": "Error",
+            "lingvo": "en"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M51ZRH6MVE84HJJ54484ZQEV",
+      "ref": {
+        "ero": "ero_01M51ZRFPJXJRYE15FEKX72M2K"
+      },
+      "decision": "approved",
+      "kialo": "Names what is missing and the next step.",
+      "date": "2026-10-16",
+      "context": "Example RIGHT for the Regulo named in ekzemplo.regulo (Spec 011 ③ G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M51ZRGTGH154NAVAYYGMTRVG",
+        "instances": [
+          {
+            "ero": "plenstato",
+            "props": {
+              "kind": "empty"
+            },
+            "label": "Noch keine Standards. Lege den ersten an.",
+            "lingvo": "de"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M51ZRH6MVE84HJJ54484ZQEW",
+      "ref": {
+        "ero": "ero_01M51ZRFPJXJRYE15FEKX72M2K"
+      },
+      "decision": "approved",
+      "kialo": "Names what is missing and the next step.",
+      "date": "2026-10-16",
+      "context": "Example RIGHT for the Regulo named in ekzemplo.regulo (Spec 011 ③ G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M51ZRGTGH154NAVAYYGMTRVG",
+        "instances": [
+          {
+            "ero": "plenstato",
+            "props": {
+              "kind": "empty"
+            },
+            "label": "No standards yet. Create the first one.",
+            "lingvo": "en"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M51ZRH6MVE84HJJ54484ZQEX",
+      "ref": {
+        "ero": "ero_01M51ZRFPJXJRYE15FEKX72M2K"
+      },
+      "decision": "rejected",
+      "kialo": "'Keine Treffer' leaves open what is missing and what to do.",
+      "date": "2026-10-16",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 011 ③ G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M51ZRGTGH154NAVAYYGMTRVG",
+        "instances": [
+          {
+            "ero": "plenstato",
+            "props": {
+              "kind": "empty"
+            },
+            "label": "Keine Treffer",
+            "lingvo": "de"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M51ZRH6MVE84HJJ54484ZQEY",
+      "ref": {
+        "ero": "ero_01M51ZRFPJXJRYE15FEKX72M2K"
+      },
+      "decision": "rejected",
+      "kialo": "'No results' leaves open what is missing and what to do.",
+      "date": "2026-10-16",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 011 ③ G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M51ZRGTGH154NAVAYYGMTRVG",
+        "instances": [
+          {
+            "ero": "plenstato",
+            "props": {
+              "kind": "empty"
+            },
+            "label": "No results",
+            "lingvo": "en"
+          }
+        ]
+      }
     }
   ]
 }

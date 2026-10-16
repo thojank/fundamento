@@ -338,6 +338,14 @@ export function textCheckFailure(
         ? `it has ${count} word${count === 1 ? "" : "s"}, fewer than the ${check.count} a sentence that says what to do needs`
         : undefined;
     }
+    // Spec 011 ③ (plan ③ D-06): a badge is skimmed, so its label has at most a few words; a
+    // count of words, like min-words, an approximation without a model.
+    case "max-words": {
+      const count = wordsOf(text).length;
+      return count > check.count
+        ? `it has ${count} words, more than the ${check.count} a label that is read at a glance may have`
+        : undefined;
+    }
     case "max-sentences": {
       const sentences = text.split(/[.!?]+(?:\s+|$)/).filter((part) => part.trim() !== "").length;
       return sentences > check.count
@@ -456,9 +464,21 @@ const textRule: UsageEnforcer = ({ modelo, regulo, instances, eroOf }) =>
     // text is the label, or what `of` names (Spec 009, D-06).
     const text = textOfSource(instance, rule.of, ero.skemo);
     if (text === undefined) return [];
-    if (rule.when !== undefined) {
+    if (rule.when?.goal !== undefined) {
       const goal = goalOfInstance(ero.skemo, instance);
       if (goal === undefined || !rule.when.goal.includes(goal)) return [];
+    }
+    // Spec 011 ③ (plan ③ D-06): a rule for instances with one of the listed values of a prop —
+    // the error rule of the avizo judges the message of intent danger only. The value is the
+    // instance's, else the default of the Skemo.
+    if (rule.when?.props !== undefined) {
+      const applies = Object.entries(rule.when.props).every(([prop, values]) => {
+        const given =
+          instance.props[prop] ??
+          ero.skemo.props.find((candidate) => candidate.name === prop)?.default;
+        return typeof given === "string" && values.includes(given);
+      });
+      if (!applies) return [];
     }
     const failure = textCheckFailure(ero.skemo, rule.check, text, ero.uzo);
     if (failure === undefined) return [];
@@ -857,6 +877,10 @@ export const USAGE_ENFORCERS: Readonly<Record<string, UsageEnforcer>> = {
   // Spec 011 ② (G6, plan ② D-08): the heading of a dialog names the decision, never only that
   // something is asked (not-words against the usual empty titles); a text rule of the Uzo.
   "dialog-title-names-the-decision": textRule,
+  // Spec 011 ③ (G6, plan ③ D-06): a badge has at most three words (max-words on the label); an
+  // empty state names what is missing and the next step (min-words on the text, kind empty only).
+  "badge-text-short": textRule,
+  "empty-state-says-what-next": textRule,
   // Spec 010 ④ (G6, plan ④ D-09): the placeholder of a select is a prompt, not an example of a
   // value (that is placeholder-is-example of the kampo): at least two words, a text rule of the Uzo.
   "select-placeholder-is-prompt": textRule,

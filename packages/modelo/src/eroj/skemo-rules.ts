@@ -657,20 +657,43 @@ function nameIssues(entry: LoadedEro, at: At): void {
 
 /**
  * `skemo-a11y-invalid` (Spec 008 A1, plan D-02): every key of `a11y.texts` is a boolean prop of
- * the Skemo — the text is heard when that prop is true, and a text without its prop is never heard.
+ * the Skemo — the text is heard when that prop is true, and a text without its prop is never heard
+ * — or, since Spec 011 ③ (plan ③ D-07), `<prop>-<value>` of an enum prop: the text is heard while
+ * the prop has that value (the kind of a notice: "Fehler:"; "lädt" while loading).
  */
 function a11yIssues(entry: LoadedEro, at: At): void {
   const { ero, skemo } = entry;
   const booleans = skemo.props.filter((prop) => prop.kind === "boolean").map((prop) => prop.name);
+  const valued = skemo.props
+    .filter((prop) => prop.kind === "enum")
+    .flatMap((prop) => (prop.values ?? []).map((value) => `${prop.name}-${value}`));
   for (const key of Object.keys(skemo.a11y.texts ?? {})) {
-    if (booleans.includes(key)) continue;
+    if (booleans.includes(key) || valued.includes(key)) continue;
     at(
       appendPointer("/skemo/a11y/texts", key),
       "skemo-a11y-invalid",
-      `Skemo of ${ero.name} carries an a11y text for ${key}, which is no boolean prop of ${ero.name}; the text would never be heard.`,
-      `Key a11y.texts by a boolean prop (${booleans.join(", ") || "none"}), or add the prop first.`,
+      `Skemo of ${ero.name} carries an a11y text for ${key}, which is no boolean prop of ${ero.name} and no <prop>-<value> of an enum prop; the text would never be heard.`,
+      `Key a11y.texts by a boolean prop (${booleans.join(", ") || "none"}) or by <prop>-<value> of an enum prop, or add the prop first.`,
     );
   }
+}
+
+/**
+ * The a11y texts keyed by `<prop>-<value>` of an enum prop (Spec 011 ③, plan ③ D-07), as the
+ * Celoj read them: per enum prop, the value and the texts heard while the prop has it.
+ */
+export function valuedTexts(
+  skemo: Skemo,
+): { prop: string; value: string; texts: Readonly<Record<string, string>> }[] {
+  const texts = skemo.a11y.texts ?? {};
+  return skemo.props
+    .filter((prop) => prop.kind === "enum")
+    .flatMap((prop) =>
+      (prop.values ?? []).flatMap((value) => {
+        const heard = texts[`${prop.name}-${value}`];
+        return heard === undefined ? [] : [{ prop: prop.name, value, texts: heard }];
+      }),
+    );
 }
 
 /** Why `value` is not allowed for prop `key`, or `undefined` when it is. */

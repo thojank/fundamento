@@ -979,6 +979,10 @@
         {
           "predicate": "references",
           "target": "#Dialogo"
+        },
+        {
+          "predicate": "references",
+          "target": "#Plenstato"
         }
       ]
     },
@@ -1338,6 +1342,137 @@
         {
           "predicate": "references",
           "target": "#Markobutono"
+        },
+        {
+          "predicate": "references",
+          "target": "#Avizo"
+        }
+      ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Insigno",
+      "term": "Insigno",
+      "inScheme": "eroj",
+      "prefLabel": {
+        "eo": "Insigno",
+        "en": "badge",
+        "de": "Statusetikett"
+      },
+      "altLabel": {
+        "en": [
+          "insigno",
+          "badge",
+          "tag",
+          "status label"
+        ],
+        "de": [
+          "Badge",
+          "Etikett",
+          "insigno"
+        ]
+      },
+      "definition": {
+        "en": "A badge: names a status in one to three words next to what it describes (draft, in review, 3 violations); the text carries the status, never colour alone, and a long form is a visually hidden description. A sentence is the avizo's, a value in a range the mezurilo's.",
+        "de": "Ein Statusetikett: nennt einen Status in ein bis drei Wörtern neben dem, was es beschreibt (Entwurf, in Prüfung, 3 Verstöße); der Text trägt den Status, nie die Farbe allein, eine lange Fassung ist eine visuell verborgene Beschreibung. Ein Satz gehört dem avizo, ein Wert in einem Bereich dem mezurilo."
+      },
+      "broader": [
+        "#Ero"
+      ],
+      "relations": [
+        {
+          "predicate": "references",
+          "target": "#Avizo"
+        },
+        {
+          "predicate": "references",
+          "target": "#Butono"
+        }
+      ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Avizo",
+      "term": "Avizo",
+      "inScheme": "eroj",
+      "prefLabel": {
+        "eo": "Avizo",
+        "en": "notice",
+        "de": "Hinweis"
+      },
+      "altLabel": {
+        "en": [
+          "avizo",
+          "notice",
+          "alert",
+          "message"
+        ],
+        "de": [
+          "Meldung",
+          "Benachrichtigung",
+          "avizo"
+        ]
+      },
+      "definition": {
+        "en": "A notice: tells the person in the flow of the page what happened or what to watch for (saved, could not save, import not confirmed); its kind (info, success, warning, danger) is spoken as a word, danger as an alert; it may be closed and may carry details and up to two actions. The dialogo sends a mere notice to it (use-instead); a decision is the dialogo's, a one-word status the insigno's, a field's error the kampo's.",
+        "de": "Ein Hinweis: sagt der Person im Fluss der Seite, was geschehen ist oder worauf sie achten soll (gespeichert, nicht gespeichert, Import unbestätigt); seine Art (Info, Erfolg, Warnung, Fehler) wird als Wort gesprochen, Fehler als Alert; er kann geschlossen werden und Einzelheiten und bis zu zwei Aktionen tragen. Der dialogo verweist für eine bloße Meldung auf ihn (use-instead); eine Entscheidung gehört dem dialogo, ein Status in einem Wort dem insigno, der Fehler eines Felds dem kampo."
+      },
+      "broader": [
+        "#Ero"
+      ],
+      "relations": [
+        {
+          "predicate": "references",
+          "target": "#Dialogo"
+        },
+        {
+          "predicate": "references",
+          "target": "#Insigno"
+        },
+        {
+          "predicate": "references",
+          "target": "#Kampo"
+        },
+        {
+          "predicate": "references",
+          "target": "#Butono"
+        },
+        {
+          "predicate": "references",
+          "target": "#Ligilo"
+        }
+      ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Plenstato",
+      "term": "Plenstato",
+      "inScheme": "eroj",
+      "prefLabel": {
+        "eo": "Plenstato",
+        "en": "loading and empty state",
+        "de": "Lade- und Leerzustand"
+      },
+      "altLabel": {
+        "en": [
+          "plenstato",
+          "loading state",
+          "empty state"
+        ],
+        "de": [
+          "Ladezustand",
+          "Leerzustand",
+          "plenstato"
+        ]
+      },
+      "definition": {
+        "en": "A loading or empty state: fills an area while its content loads (an indicator that moves with the motion roles, spoken as busy) or when there is none (a dashed surface with a text that says what is missing and the next step). A working action is the butono's own loading; the butono sends a loading area to it (use-instead).",
+        "de": "Ein Lade- und Leerzustand: füllt eine Fläche, während ihr Inhalt lädt (ein Indikator, der sich mit den Bewegungsrollen bewegt, als beschäftigt gesprochen) oder wenn keiner da ist (eine gestrichelte Fläche mit einem Text, der sagt, was fehlt und was als Nächstes kommt). Eine arbeitende Aktion ist das loading des butono; der butono verweist für eine ladende Fläche auf ihn (use-instead)."
+      },
+      "broader": [
+        "#Ero"
+      ],
+      "relations": [
+        {
+          "predicate": "references",
+          "target": "#Butono"
         }
       ]
     }

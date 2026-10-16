@@ -31,13 +31,16 @@ describe("kampo in the repo Modelo (T004)", () => {
   it("lives in data/eroj/kampo/skemo.json, between elekto and ligilo, and the repo Modelo stays valid", () => {
     expect(kampo.file).toBe("modelo/data/eroj/kampo/skemo.json");
     expect(modelo.eroj.map((entry) => entry.ero.name)).toEqual([
+      "avizo",
       "butono",
       "dialogo",
       "elektilo",
       "elekto",
+      "insigno",
       "kampo",
       "ligilo",
       "markobutono",
+      "plenstato",
       "sxaltilo",
       "tekstareo",
     ]);
@@ -298,6 +301,8 @@ describe("the Reguloj of the kampo (T003, T004, A2, D-07)", () => {
           // Spec 011 ②: the tekstareo is a field of several lines; the seven field Reguloj are
           // widened to it (E5), placeholder-is-example stays the kampo's.
           ...(name === "placeholder-is-example" ? [] : ["tekstareo"]),
+          // Spec 011 ③: the message of an avizo with intent danger says what to do (E5).
+          ...(name === "error-says-what-to-do" ? ["avizo"] : []),
         ],
       });
       expect(regulo?.checkability).toBe("automatic");
@@ -326,6 +331,9 @@ describe("the Reguloj of the kampo (T003, T004, A2, D-07)", () => {
       "elektilo",
       "tekstareo",
       "dialogo",
+      "insigno",
+      "avizo",
+      "plenstato",
     ]);
   });
 

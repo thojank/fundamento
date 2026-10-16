@@ -52,13 +52,16 @@ describe("elektilo in the repo Modelo (G1, G2, section 4)", () => {
   it("lives in data/eroj/elektilo/skemo.json, between butono and elekto, and the repo Modelo stays valid", () => {
     expect(elektilo?.file).toBe("modelo/data/eroj/elektilo/skemo.json");
     expect(modelo.eroj.map((entry) => entry.ero.name)).toEqual([
+      "avizo",
       "butono",
       "dialogo",
       "elektilo",
       "elekto",
+      "insigno",
       "kampo",
       "ligilo",
       "markobutono",
+      "plenstato",
       "sxaltilo",
       "tekstareo",
     ]);
@@ -390,7 +393,7 @@ describe("the Reguloj of the elektilo (G6, E5)", () => {
       "field-label-names-the-datum",
       ["kampo", "sxaltilo", "markobutono", "elekto", "elektilo", "tekstareo"],
     ],
-    ["error-says-what-to-do", ["kampo", "markobutono", "elekto", "elektilo", "tekstareo"]],
+    ["error-says-what-to-do", ["kampo", "markobutono", "elekto", "elektilo", "tekstareo", "avizo"]],
     ["required-marked", ["kampo", "markobutono", "elekto", "elektilo", "tekstareo"]],
     ["error-not-color-only", ["kampo", "markobutono", "elekto", "elektilo", "tekstareo"]],
     ["help-is-one-sentence", ["kampo", "elekto", "elektilo", "tekstareo"]],
@@ -413,6 +416,9 @@ describe("the Reguloj of the elektilo (G6, E5)", () => {
       "elektilo",
       "tekstareo",
       "dialogo",
+      "insigno",
+      "avizo",
+      "plenstato",
     ]);
   });
 

@@ -90,9 +90,9 @@ describe("the feedback of the spec: a status word, a notice, a loading area", ()
     });
   });
 
-  it("'Ladeanzeige für die Liste' → a plenstato with kind loading; 'der Knopf sendet gerade' → the butono", async () => {
+  it("'Ladeanzeige für die Standards' → a plenstato with kind loading; 'der Knopf sendet gerade' → the butono", async () => {
     const area = await output<Suggested>(client, "suggest_ero", {
-      goal: "Ladeanzeige für die Liste",
+      goal: "Ladeanzeige für die Standards",
     });
     expect(area.suggestion).toEqual({ ero: "plenstato", props: { kind: "loading" } });
     const busy = await output<Suggested>(client, "suggest_ero", {

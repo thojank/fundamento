@@ -246,7 +246,7 @@ describe("the Reguloj of the insigno (G6)", () => {
     ]);
     for (const jugxo of examples) {
       const instances = jugxo.ekzemplo?.instances ?? [];
-      const result = evaluateUsage(modelo, { instances });
+      const result = evaluateUsage(modelo, instances);
       const rules = rulesOf(result).map(([rule]) => rule);
       if (jugxo.decision === "approved") expect(rules, jugxo.id).toEqual([]);
       else expect(rules, jugxo.id).toEqual(["badge-text-short"]);
@@ -257,7 +257,7 @@ describe("the Reguloj of the insigno (G6)", () => {
 
 describe("check_usage and suggest_ero of the badge (G6, G7, Gvidanto)", () => {
   const judge = (label: string, props: Record<string, string> = {}) =>
-    rulesOf(evaluateUsage(modelo, { instances: [{ ero: "insigno", props, label }] }));
+    rulesOf(evaluateUsage(modelo, [{ ero: "insigno", props, label }]));
 
   it("'In Prüfung' and '3 Verstöße' pass; a sentence violates badge-text-short", () => {
     expect(judge("In Prüfung")).toEqual([]);
@@ -280,7 +280,11 @@ describe("check_usage and suggest_ero of the badge (G6, G7, Gvidanto)", () => {
       case: "dot-only",
       action: "not-supported",
     });
-    expect(suggest("a badge in the brand colour").action).toBe("ask-human");
+    expect(suggest("in the brand colour").boundary).toMatchObject({
+      ero: "insigno",
+      case: "brand-badge",
+      action: "ask-human",
+    });
     const ratio = suggest("Anteil in Prozent");
     expect(ratio.suggestion).toBeNull();
     expect(ratio.boundary).toMatchObject({ ero: "insigno", case: "value-in-range" });

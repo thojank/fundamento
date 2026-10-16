@@ -34,10 +34,10 @@ describe("get_ero (FR-13)", () => {
     // (Spec 011 ②) dialogo is nearer to "butonno" than markobutono.
     expect(result.structuredContent?.allowed).toEqual([
       "butono",
+      "insigno",
+      "avizo",
       "dialogo",
       "elekto",
-      "kampo",
-      "ligilo",
     ]);
   });
 });

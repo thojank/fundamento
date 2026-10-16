@@ -1,0 +1,174 @@
+{
+  "$schema": "../../../schema/modelo.schema.json#/$defs/UzoFile",
+  "uzo": {
+    "id": "uzo_01M51ZRGEN3VWEQ13FZS69DQ11",
+    "ero": "ero_01M51ZRFPHM8B0ED97V23SDRRH",
+    "skemo": "ske_01M51ZRG2J1CVQCTEDNBQPZK6D",
+    "purpose": "Names a status in one to three words next to what it describes: draft, in review, valid, 3 violations.",
+    "instead": [
+      {
+        "goal": "sentence",
+        "keywords": {
+          "en": [
+            "sentence",
+            "explanation",
+            "notice"
+          ],
+          "de": [
+            "satz",
+            "erklärung",
+            "hinweis"
+          ]
+        },
+        "ero": "avizo",
+        "kialo": "A badge is read in passing, because a status is one glance; a sentence that explains is a notice (avizo)."
+      },
+      {
+        "goal": "clickable",
+        "keywords": {
+          "en": [
+            "clickable",
+            "click"
+          ],
+          "de": [
+            "klickbar",
+            "anklicken"
+          ]
+        },
+        "ero": "butono",
+        "kialo": "A badge is no control, because a label that reacts to a click hides an action; an action is a butono, a destination a ligilo."
+      },
+      {
+        "goal": "count-only",
+        "keywords": {
+          "en": [
+            "count"
+          ],
+          "de": [
+            "zahlenwert",
+            "trefferzahl"
+          ]
+        },
+        "ero": null,
+        "kialo": "A bare number says nothing, because '3' without 'violations' is no status; a person decides what the number is."
+      },
+      {
+        "goal": "value-in-range",
+        "keywords": {
+          "en": [
+            "percent",
+            "ratio"
+          ],
+          "de": [
+            "prozent",
+            "anteil"
+          ]
+        },
+        "ero": null,
+        "kialo": "A value in a range is a measure, not a status, because it has a scale; Fundamento has no such Ero yet (mezurilo, ④)."
+      }
+    ],
+    "boundary": [
+      {
+        "case": "brand-badge",
+        "action": "ask-human",
+        "keywords": {
+          "en": [
+            "brand",
+            "branded"
+          ],
+          "de": [
+            "marke",
+            "markenfarbe"
+          ]
+        },
+        "kialo": "A badge in the brand colour says no status, because the brand colour is no state; a person decides what it marks."
+      },
+      {
+        "case": "dot-only",
+        "action": "not-supported",
+        "keywords": {
+          "en": [
+            "dot"
+          ],
+          "de": [
+            "punkt"
+          ]
+        },
+        "kialo": "A dot without text is colour alone, because a person who does not see the hue reads nothing (WCAG 1.4.1); the text is required."
+      },
+      {
+        "case": "removable-chip",
+        "action": "not-supported",
+        "keywords": {
+          "en": [
+            "removable",
+            "filterchip"
+          ],
+          "de": [
+            "entfernbar",
+            "filterchip"
+          ]
+        },
+        "kialo": "A chip that can be removed is a filter, because removing acts; that is an Ero of its own."
+      }
+    ],
+    "composes": {
+      "containers": [
+        {
+          "name": "tabelo",
+          "kialo": "A status stands in the cell of its row, because the row is what it describes (tabelo, ④)."
+        },
+        {
+          "name": "atributlisto",
+          "kialo": "A status is the value of an attribute, because the key names what it says (atributlisto, ④)."
+        },
+        {
+          "name": "page-title",
+          "kialo": "A status stands next to the title of what it describes, because that is where a person looks first."
+        },
+        {
+          "name": "navigado",
+          "kialo": "A count next to a navigation entry says how much waits there, because the entry is what it counts (navigado, ⑤)."
+        }
+      ],
+      "with": [],
+      "never": [],
+      "spacing": {
+        "owner": "container",
+        "regulo": "spacing-owned-by-container"
+      }
+    },
+    "slots": {
+      "label": {
+        "accepts": [
+          "text"
+        ],
+        "required": true,
+        "max": 1,
+        "nesting": 0
+      },
+      "description": {
+        "accepts": [
+          "text"
+        ],
+        "max": 1,
+        "nesting": 0
+      }
+    },
+    "layout": {
+      "size": "content",
+      "wrap": "never"
+    },
+    "content": [
+      {
+        "regulo": "badge-text-short",
+        "fixed": false,
+        "check": {
+          "kind": "max-words",
+          "count": 3
+        }
+      }
+    ]
+  }
+}

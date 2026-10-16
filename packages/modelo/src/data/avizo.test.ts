@@ -104,9 +104,9 @@ describe("avizo in the repo Modelo (section ③, G1, G2)", () => {
     }
   });
 
-  it("speaks role status (danger: alert, Celo knowledge), named by heading or message; the kind and 'Schließen' are a11y texts (G4)", () => {
+  it("speaks role status (danger: alert, Celo knowledge), named by its message (the one required slot); the kind and 'Schließen' are a11y texts (G4)", () => {
     expect(skemo?.a11y.role).toBe("status");
-    expect(skemo?.a11y.name).toEqual(["slot:heading", "slot:message"]);
+    expect(skemo?.a11y.name).toEqual(["slot:message"]);
     expect(skemo?.a11y.states).toEqual({});
     expect(skemo?.a11y.keys).toEqual([]);
     expect(skemo?.a11y.texts).toEqual({
@@ -221,7 +221,7 @@ describe("the cross-links of G5: the dialogo informs through the avizo, the aviz
       case: "toast",
       action: "not-supported",
     });
-    expect(suggest("gestapelte Hinweise").boundary).toMatchObject({
+    expect(suggest("Hinweise gestapelt übereinander").boundary).toMatchObject({
       ero: "avizo",
       case: "stacked-notices",
       action: "ask-human",
@@ -253,7 +253,7 @@ describe("the Reguloj of the avizo (G6, E5)", () => {
     for (const jugxo of examples) {
       const instances = jugxo.ekzemplo?.instances ?? [];
       expect(instances[0]?.props).toEqual({ intent: "danger" });
-      const rules = rulesOf(evaluateUsage(modelo, { instances })).map(([rule]) => rule);
+      const rules = rulesOf(evaluateUsage(modelo, instances)).map(([rule]) => rule);
       if (jugxo.decision === "approved") expect(rules, jugxo.id).toEqual([]);
       else expect(rules, jugxo.id).toEqual(["error-says-what-to-do"]);
       expect(jugxo.ref).toEqual({ ero: avizo?.ero.id });
@@ -263,7 +263,7 @@ describe("the Reguloj of the avizo (G6, E5)", () => {
 
 describe("check_usage of the notice (G6, G7)", () => {
   const judge = (label: string, props: Record<string, string> = {}) =>
-    rulesOf(evaluateUsage(modelo, { instances: [{ ero: "avizo", props, label }] }));
+    rulesOf(evaluateUsage(modelo, [{ ero: "avizo", props, label }]));
 
   it("'Gespeichert.' passes as info; 'Fehler' alone violates error-says-what-to-do as danger, and passes as warning", () => {
     expect(judge("Gespeichert.")).toEqual([]);
@@ -277,23 +277,21 @@ describe("check_usage of the notice (G6, G7)", () => {
   });
 
   it("two primary actions in one notice violate one-primary-per-container", () => {
-    const result = evaluateUsage(modelo, {
-      instances: [
-        { ero: "avizo", props: { intent: "warning" }, label: "Import unbestätigt." },
-        {
-          ero: "butono",
-          props: { emphasis: "high" },
-          label: "Metadaten bearbeiten",
-          container: "notice-1",
-        },
-        {
-          ero: "butono",
-          props: { emphasis: "high" },
-          label: "Import verwerfen",
-          container: "notice-1",
-        },
-      ],
-    });
+    const result = evaluateUsage(modelo, [
+      { ero: "avizo", props: { intent: "warning" }, label: "Import unbestätigt." },
+      {
+        ero: "butono",
+        props: { emphasis: "high", intent: "danger" },
+        label: "Projekt löschen",
+        container: "notice-1",
+      },
+      {
+        ero: "butono",
+        props: { emphasis: "high", intent: "danger" },
+        label: "Entwurf verwerfen",
+        container: "notice-1",
+      },
+    ]);
     expect(rulesOf(result).map(([rule]) => rule)).toEqual(["one-primary-per-container"]);
   });
 });

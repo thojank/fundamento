@@ -240,7 +240,7 @@ export type SkemoPartSource =
       sameAs: string;
     };
 /**
- * Platform-neutral part properties (Art. VIII); the mapping to CSS or another platform is Celo knowledge in the projections. position takes a term, not a token: start or end along the control (Spec 010 ①, plan D-04, the knob of a switch). shadow binds an elevation.shadow.* token: the lift of a surface (Spec 011 ②, plan ② D-07, the dialog).
+ * Platform-neutral part properties (Art. VIII); the mapping to CSS or another platform is Celo knowledge in the projections. position takes a term, not a token: start or end along the control (Spec 010 ①, plan D-04, the knob of a switch). shadow binds an elevation.shadow.* token: the lift of a surface (Spec 011 ②, plan ② D-07, the dialog). stroke binds a stroke.* token or none: the line style of a border (Spec 011 ③, plan ③ D-04, the dashed surface of an empty state).
  *
  * This interface was referenced by `ModeloJson`'s JSON-Schema
  * via the `definition` "SkemoPartProperty".
@@ -260,7 +260,8 @@ export type SkemoPartProperty =
   | "duration"
   | "easing"
   | "position"
-  | "shadow";
+  | "shadow"
+  | "stroke";
 /**
  * Text transformation of a typography role (Spec 001, D-11). DTCG has no field for it; the values are platform-neutral.
  *
@@ -1063,11 +1064,20 @@ export interface UzoContent {
    */
   of?: string;
   severity?: "error" | "warning";
+  /**
+   * When the rule applies (Spec 009 D-06: instances of a goal; Spec 011 ③ D-06: instances with one of the listed values of a prop — the error rule of the avizo for intent danger). At least one of goal and props.
+   */
   when?: {
     /**
      * @minItems 1
      */
-    goal: Name[];
+    goal?: Name[];
+    props?: {
+      /**
+       * @minItems 1
+       */
+      [k: string]: Name[];
+    };
   };
   check:
     | {
@@ -1075,6 +1085,10 @@ export interface UzoContent {
       }
     | {
         kind: "min-words";
+        count: number;
+      }
+    | {
+        kind: "max-words";
         count: number;
       }
     | {
@@ -1177,6 +1191,10 @@ export interface SkemoSlot {
     equals: Name;
     empty?: Name;
   };
+  /**
+   * The text of the slot is for assistive technology alone (Spec 011 ③, plan ③ D-05): present in the accessible content, never shown — the long form of a badge; a projection keeps it out of sight, a drawn set leaves it out.
+   */
+  hidden?: boolean;
 }
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema
