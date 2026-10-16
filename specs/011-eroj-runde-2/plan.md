@@ -264,7 +264,7 @@ Fixtures (je `expected-issues.json`, `git check-ignore` leer), auf das Vortaro d
 
 O-6 bis O-10 am 16.10. bestätigt.
 
-### Nachbesserung (Abnahme 16.10., Messung auf HEAD `2b24cf5`)
+### Nachbesserung (Abnahme 16.10., Messung auf HEAD `a572416`)
 
 - **F-1 `dialog-title-names-the-decision` las nur das Label** (D-09): die Regel stand ohne `of`, die Prüfung las `slot:label`; `texts.heading: "Bestätigung"` galt als gültig. Fix: `of: "slot:heading"` im `content`-Eintrag, und `textOfSource` liest für einen Slot, der der Standard-Slot ist, den Text des Slots oder das Label — beide nennen denselben Slot; so bleiben die vier Jugxoj-Beispiele (mit `label`) gültig und der Standard-Slot ist überall das Label (Regel 0.2: eine Zeile, kein zweiter Weg). Rot zuerst in `data/dialogo.test.ts` und MCP `s011-eingabe`.
 - **F-8 Leeres, unberührtes Pflichtfeld zeigte den Fehlerrand** (D-11, ① O-7): `#validate` schrieb `aria-invalid` sobald die Gültigkeit des Formulars `valueMissing` sagte — also sofort bei `required`, anders als `elektilo`, `elekto`, `markobutono`. Fix: die Gültigkeit des Formulars bleibt (`setValidity`, das Formular sendet nicht); `aria-invalid` und damit der Rand des Zustands `invalid` kommen erst mit der Prop `invalid`, dem gefüllten Slot `error`, nachdem die Person getippt hat (`input`) oder nachdem das Formular das Feld als ungültig gemeldet hat (`invalid`-Ereignis der Plattform am Host beim Absenden); ein Reset des Formulars nimmt die Meldung zurück. Ein getippter falscher Wert (Zahl 1,5) zeigt den Fehler weiterhin sofort (abgenommenes ①-Verhalten). Rot zuerst in `kampo.spec.ts` und `tekstareo.spec.ts` (leer/unberührt: kein `aria-invalid`, Rand wie ein Feld ohne `required`; nach `requestSubmit` beides).
@@ -398,7 +398,7 @@ Fixtures (je `expected-issues.json`), auf das Vortaro der Fixture getrimmt wie d
 - **O-16** Zwei Goals am `avizo` (Abweichung 6) und das Stichwort „button“ (Abweichung 7) — bestätigen.
 - **O-17** Indikator in `color.status.info.basic` statt `color.brand.fill` (Abweichung 12, B-9) — bestätigen; Alternative: eine Rolle `color.brand.accent` in Spec 012, dann bindet der Indikator sie.
 
-### Nachbesserung (Abnahme 16.10., Messung auf HEAD `2b24cf5`)
+### Nachbesserung (Abnahme 16.10., Messung auf HEAD `a572416`)
 
 - **F-4 Figma `avizo`: feste Höhe, Leerraum unter dem Inhalt** (D-14): alle Rahmen des Hinweises waren HUG; der Leerraum kam vom leeren Platzhalter `actions` am Ende der Textspalte — ein Auto-Layout-Rahmen ohne Kinder behält in Figma seine Anlagegröße (100 × 100 von `createFrame`), auch mit HUG; die Spalte nahm die 100 px auf. Das Double modellierte einen leeren Hug-Rahmen als 0 × 0 und verdeckte den Befund. Fix: `shrinkEmpty` bringt einen leeren Platzhalter vor dem Layout auf die kleinste Größe (0,01, Figmas Minimum), in `drawNotice` und `drawState` (derselbe Platzhalter beim `plenstato`); das Double behält die Größe leerer Rahmen und modelliert `resize`. Nicht ausgeblendet, weil `visible` beim `plenstato` den Constraint „keine Aktionen beim Laden“ trägt. Rest: ein `spacing.small`-Abstand vor dem Platzhalter bleibt, bis jemand ihn füllt oder ausblendet. Annahmen bis f10b-5 (B-6): Figma behält die Größe leerer Hug-Rahmen; `resize` fixiert die Achsen, das danach geschriebene `layoutSizing* HUG` stellt Hug wieder her. Rot zuerst (1 von 4), 524 grün, `check:parity` 0 Differenzen.
 
@@ -534,7 +534,7 @@ Fixtures (getrimmt wie ③): `tabelo-caption-slot-optional`, `tabelo-web-term` (
 
 O-18 bis O-22 am 16.10. bestätigt.
 
-### Nachbesserung (Abnahme 16.10., Messung auf HEAD `2b24cf5`)
+### Nachbesserung (Abnahme 16.10., Messung auf HEAD `a572416`)
 
 - **F-3 Figma `mezurilo`: Spur und Füllung ohne Breite** (D-14): der Füll-Rahmen war ein leerer Hug-Rahmen und behielt in Figma die Anlagegröße 100 × 100; die hug-gende Spur nahm sie auf (144 × 100 mit Pillenradius: der Kreis in `komuna`; im Beispiel die leere Spur selbst 100 × 100: das Quadrat); das geschriebene `minWidth` war ein Minimum unter einer Anlagegröße und griff nie nach unten; nichts gab der Spur eine Breite von außen (Variante und Spalte HUG). Fix: die Spalte des Messbalkens ist so breit wie ihr breiterer Text (gemessen, geschrieben: Figma gibt einem FILL-Kind in einem hug-genden Rahmen keine Breite), die Spur füllt sie (`layoutSizingHorizontal: FILL`, Höhe `spacing.medium` als Minimum, kein `minWidth`), die Füllung ist fest 66 % der Spurbreite × Spurhöhe (`fit`, resized nur, wenn die Größe nicht hält; `minHeight` bleibt gebunden). Das Double modelliert FILL (Innenmaß des Elternrahmens; in einem hug-genden Rahmen zählt ein füllendes Kind als 0) und `resize` auf FILL-Achsen. Im Code (Web) war alles richtig. Rot zuerst (2 von 4), 562 grün, `check:parity` 0 Differenzen.
 - **F-6 Figma „mezurilo – unbekannt“: „nicht geprüft“ kaum lesbar** (D-14): die Bindung des Wertetexts war die des Sets (`color.text.subtle`, Paint- und Knoten-Deckkraft 1, `typography.label.2`) — Knoten für Knoten im Double gleich. Unterschied: der Beispielrahmen hatte keinen Grund (`fills: []`) und lag auf dem Abschnitt; steht der Abschnitt in einem anderen Modus (f10b-5 setzt den Abschnittsmodus), ist `text.subtle` eines Modus auf dem Grund des anderen kaum lesbar — der Text ist für `color.background.canvas` deklariert, nicht für den Abschnitt. Fix: der Beispielrahmen trägt den Grund des Sets (`color.background.canvas`, gebunden, Deckkraft 1) wie der Rahmen „mit Hintergrund“ des `dialogo` (F16); der Wertetext bindet unverändert `color.text.subtle` mit voller Deckkraft (keine Opazität, keine Effekte; ein Test prüft Paint- und Knoten-Deckkraft 1 und dieselbe Bindung wie im Set). Hypothese, nicht gemessen (A14): bleibt der Text im Figma-Lauf blass, ist die aufgelöste Variable (Alpha des Modus, F37) die Ursache — dann Nachlese 3 mit `color.text.default` für den Wertetext in der Skemo (eine Quelle für alle Celoj). Annahmen bis f10b-5 (B-6): `resize` fixiert FILL-Achsen, das danach geschriebene Sizing stellt FILL wieder her; ein gebundenes `minHeight` hebt einen fest dimensionierten Rahmen; Figma rundet 95,04.
@@ -545,7 +545,7 @@ In [`tasks.md`](tasks.md) ④.
 
 ## ⑤ Navigation
 
-**Branch:** `261015-spec-011-navigation-e137d7` (gestapelt auf ④ @ `e9b302e`, PR #66) · **Datum:** 2026-10-16 · **Aufgaben, Commits und rote Hashes:** [`tasks.md`](tasks.md) ⑤ · **Namen (E4) am 16.10. bestätigt:** `navigado`, `langetaro`.
+**Branch:** `261015-spec-011-navigation-e137d7` (gestapelt auf ④ @ `aab58ad`, PR #66) · **Datum:** 2026-10-16 · **Aufgaben, Commits und rote Hashes:** [`tasks.md`](tasks.md) ⑤ · **Namen (E4) am 16.10. bestätigt:** `navigado`, `langetaro`.
 
 Die zwei Eroj der Navigation: die Navigation zwischen den Hauptseiten und die Reiter innerhalb einer Seite. Die Navigation geht den Weg von ④ (E10, Host `light`): die nativen Links bleiben im Light DOM, das Ero legt die Landmarke darum und gestaltet sie über das Dokument-Stylesheet. Die Reiter sind eine Bauform `tabs` im Shadow DOM, Reihen `role=tab` wie die Zeilen `role=radio` der Auswahl. Beide tragen den Zustand eines Eintrags (E7): `current` am Eintrag der aktuellen Seite, `active` am gewählten Reiter — nie Farbe allein. Kein neues Token, keine neue Regulo: drei Reguloj ausgeweitet (E5). Mit ⑤ ist Runde 2 vollständig: zehn Eroj in fünf PRs. Jede Entscheidung unten nennt ihre Stufe.
 
@@ -611,7 +611,7 @@ Alirebleco (Eroj, Chromium, beide Aspektoj × Schema × Kontrast): axe auf beide
 
 #### D-14 Rot zuerst
 
-Fixtures (getrimmt wie ④): `navigado-web-term` (`href`), `navigado-instead-kialo-missing`, **`navigado-entry-key-is-prop`** (Schlüssel `page` = Prop: `skemo-binding-invalid`, E7), `langetaro-web-term` (`tabindex`), `langetaro-instead-kialo-missing`, **`langetaro-entry-equals-unknown`** (`equals: chosen`, keine String-Prop: `skemo-binding-invalid`). Kein `slot-optional`: beide Namen kommen aus einer Prop (`uzo-slot-required-missing` greift nicht, wie ④ `atributlisto`). Rot ohne Mutation: Modelo (`a0aad10`: 56 von 2 943 in 21 Dateien), Projekcioj (`1aa6100`: 17 von 571 in 5 Dateien), Doku (`4ccbdd4`: 2 von 163).
+Fixtures (getrimmt wie ④): `navigado-web-term` (`href`), `navigado-instead-kialo-missing`, **`navigado-entry-key-is-prop`** (Schlüssel `page` = Prop: `skemo-binding-invalid`, E7), `langetaro-web-term` (`tabindex`), `langetaro-instead-kialo-missing`, **`langetaro-entry-equals-unknown`** (`equals: chosen`, keine String-Prop: `skemo-binding-invalid`). Kein `slot-optional`: beide Namen kommen aus einer Prop (`uzo-slot-required-missing` greift nicht, wie ④ `atributlisto`). Rot ohne Mutation: Modelo (`5e09c80`: 56 von 2 943 in 21 Dateien), Projekcioj (`5c9f7b8`: 17 von 571 in 5 Dateien), Doku (`6f77c6f`: 2 von 163).
 
 ### Arkitekturo-Abdeckung (E11)
 
