@@ -177,6 +177,7 @@
       {
         "regulo": "dialog-title-names-the-decision",
         "fixed": false,
+        "of": "slot:heading",
         "check": {
           "kind": "not-words",
           "words": {

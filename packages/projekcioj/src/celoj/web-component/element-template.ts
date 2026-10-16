@@ -575,6 +575,21 @@ export function elementSource({
   // Enter sends the form (Spec 011 ①, O-7), as it does in a native one-line input: the input lies
   // in the shadow tree, so the platform's implicit submission does not reach the form around the
   // element; the form checks its validity first and sends once. Only the element of a textbox.
+  // A field shows its error once a person has touched it — typed into it — or once the form was
+  // sent and the platform said invalid on the host (Spec 011 ② F-8); an empty, untouched required
+  // field shows none, as the other fields of a form.
+  const invalidReport = isFieldHost
+    ? `    this.addEventListener("invalid", () => {
+      this.#reported = true;
+      this.#render();
+    });
+    control.addEventListener("input", () => {
+      if (this.#reported) return;
+      this.#reported = true;
+      this.#render();
+    });
+`
+    : "";
   const inputEnter =
     host === "input"
       ? `    control.addEventListener("keydown", (event) => {
@@ -690,7 +705,11 @@ ${
     const wrong = Object.values(flags).some((flag) => flag === true);
     if (wrong && message !== "") this.#internals.setValidity(flags, message, control);
     else this.#internals.setValidity({});
-    if (invalid || wrong) control.setAttribute("aria-invalid", "true");
+    // Spec 011 ② F-8: an empty required field a person has not touched shows no error — the
+    // form's validity holds it back, but aria-invalid (and the error border) comes only with the
+    // prop invalid, a filled error slot, or once the field was touched or the form reported it
+    // (the platform's invalid event on sending), as the other fields of a form do.
+    if (invalid || (wrong && this.#reported)) control.setAttribute("aria-invalid", "true");
     else control.removeAttribute("aria-invalid");
   }
 
@@ -710,6 +729,7 @@ ${
 
   /** A reset of the form empties the field, as it empties a native input. */
   formResetCallback(): void {
+    this.#reported = false;
     this.removeAttribute("value");
   }
 
@@ -923,7 +943,7 @@ export class ${className} extends Base {
   readonly #root: HTMLElement;
   readonly #label: HTMLSlotElement;
   readonly #texts: HTMLElement;
-
+${isFieldHost ? "  /** Whether a person touched the field or the form reported it invalid (Spec 011 ② F-8): the error shows from then on. */\n  #reported = false;\n" : ""}
   constructor() {
     super();
     this.#internals = this.attachInternals();
@@ -961,7 +981,7 @@ ${toggleKeys}${groupInit}${selectInit}${dialogInit}    label.addEventListener("s
         if (this.getAttribute("value") !== control.value) this.setAttribute("value", control.value);
       });
     }
-${inputEnter}  }
+${invalidReport}${inputEnter}  }
 
   connectedCallback(): void {
 ${isGroup ? "    this.#assign();\n" : ""}    this.#render();

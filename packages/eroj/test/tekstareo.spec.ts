@@ -63,10 +63,11 @@ test.describe("fm-tekstareo behaviour", () => {
     await expect(box).not.toHaveAttribute("aria-invalid");
     const borders = () =>
       page.evaluate(() =>
-        ["a", "b"].map((id) =>
-          getComputedStyle(
-            document.getElementById(id)?.shadowRoot?.querySelector('[part="control"]') as Element,
-          ).borderColor,
+        ["a", "b"].map(
+          (id) =>
+            getComputedStyle(
+              document.getElementById(id)?.shadowRoot?.querySelector('[part="control"]') as Element,
+            ).borderColor,
         ),
       );
     const before = await borders();

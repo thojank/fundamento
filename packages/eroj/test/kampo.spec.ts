@@ -72,7 +72,8 @@ test.describe("fm-kampo behaviour", () => {
 
   // Nachbesserung F-8 (Abnahme 16.10.): an empty required field a person has not touched shows no
   // error — no aria-invalid, the border of rest — as elektilo, elekto and markobutono do; the form
-  // still does not send. Once the form was sent (the platform says invalid), the field says it.
+  // still does not send. Once the form was sent (the platform says invalid) or the person typed,
+  // the field says it.
   test("an empty, untouched required field shows no error until the form is sent", async ({
     page,
   }) => {
@@ -85,10 +86,11 @@ test.describe("fm-kampo behaviour", () => {
     await expect(box).not.toHaveAttribute("aria-invalid");
     const borders = () =>
       page.evaluate(() =>
-        ["a", "b"].map((id) =>
-          getComputedStyle(
-            document.getElementById(id)?.shadowRoot?.querySelector('[part="control"]') as Element,
-          ).borderColor,
+        ["a", "b"].map(
+          (id) =>
+            getComputedStyle(
+              document.getElementById(id)?.shadowRoot?.querySelector('[part="control"]') as Element,
+            ).borderColor,
         ),
       );
     const before = await borders();
