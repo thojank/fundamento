@@ -31,7 +31,9 @@ import { themeBlock } from "../tailwind/tailwind.js";
 import { elementSource } from "../web-component/element-template.js";
 import {
   elementNamesOf,
+  isLight,
   isMultiline,
+  lightStylesheetOf,
   namesOf,
   stylesheetOf,
 } from "../web-component/web-component.js";
@@ -613,9 +615,13 @@ function sources(input: CeloInput, aspekto: string): GeneratedFile[] {
   const elements = input.modelo.eroj
     .map((entry) => {
       const { constant } = namesOf(entry.ero);
+      // A light-DOM host (Spec 011 ④, E10) carries the document's stylesheet too.
+      const light = isLight(entry.skemo)
+        ? `const ${constant}_LIGHT_CSS = ${JSON.stringify(lightStylesheetOf(entry.skemo, namesOf(entry.ero).tag))};\n`
+        : "";
       return `const ${constant}_SKEMO = ${JSON.stringify(entry.skemo)} as const;
 const ${constant}_CSS = ${JSON.stringify(stylesheetOf(entry.skemo, entry.uzo))};
-${elementSource(elementNamesOf(entry, true))}`;
+${light}${elementSource(elementNamesOf(entry, true))}`;
     })
     .join("\n");
   const defines = input.modelo.eroj

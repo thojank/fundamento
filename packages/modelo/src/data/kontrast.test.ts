@@ -21,9 +21,11 @@ const has = (foreground: string, background: string) =>
 
 describe("KontrastParoj of the repo (D-12, data-model §4)", () => {
   // Spec 011 ① declared the link colours on raised and sunken (six pairs): 76 now.
-  it("declares about sixty to eighty pairs", () => {
+  it("declares about sixty to ninety pairs", () => {
+    // Spec 011 ③ added four text pairs on the weak status surfaces, ④ three ui pairs of the
+    // strong status colours on the sunken track of the meter (83).
     expect(modelo.kontrastParoj.length).toBeGreaterThanOrEqual(55);
-    expect(modelo.kontrastParoj.length).toBeLessThanOrEqual(80);
+    expect(modelo.kontrastParoj.length).toBeLessThanOrEqual(90);
   });
 
   it("covers status text on the weak and subtle status surfaces (K5)", () => {
