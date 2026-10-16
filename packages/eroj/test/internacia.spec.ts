@@ -757,3 +757,78 @@ test("plenstato right to left: the indicator stands to the right of the text", a
   await page.evaluate(() => document.documentElement.setAttribute("dir", "rtl"));
   expect(await order()).toBe(false);
 });
+
+// Spec 011 ④ (G7): the tabelo right to left — a numeric column aligns to the end, which is the
+// left; the sort indicator stands after the header text — and the atributlisto right to left: the
+// term stands to the right of the value in columns; the mezurilo fills from the right.
+test("tabelo, atributlisto and mezurilo right to left: numbers align left, terms stand right, the bar fills from the right", async ({
+  page,
+}) => {
+  await serve(
+    page,
+    out,
+    `<fm-tabelo id="t">Standards<table slot="content"><thead><tr><th scope="col">Name</th><th scope="col" numeric>Verstöße</th></tr></thead><tbody><tr><th scope="row">A</th><td>3</td></tr></tbody></table></fm-tabelo><fm-atributlisto id="a"><dl><dt>Version</dt><dd>3</dd></dl></fm-atributlisto><fm-mezurilo id="m" value="30">Anteil<span slot="value-text">30 von 100</span></fm-mezurilo>`,
+  );
+  const measure = () =>
+    page.evaluate(() => {
+      const td = document.querySelector("#t tbody td") as HTMLElement;
+      const dt = document.querySelector("#a dt") as HTMLElement;
+      const dd = document.querySelector("#a dd") as HTMLElement;
+      const m = document.getElementById("m") as HTMLElement;
+      const track = m.shadowRoot?.querySelector('[part="track"]') as HTMLElement;
+      const fill = m.shadowRoot?.querySelector('[part="fill"]') as HTMLElement;
+      return {
+        numeric: getComputedStyle(td).textAlign,
+        termLeftOfValue: dt.getBoundingClientRect().left < dd.getBoundingClientRect().left,
+        fillAtStart:
+          Math.abs(fill.getBoundingClientRect().left - track.getBoundingClientRect().left) < 2,
+        fillAtEnd:
+          Math.abs(fill.getBoundingClientRect().right - track.getBoundingClientRect().right) < 2,
+      };
+    });
+  const ltr = await measure();
+  expect(ltr.numeric).toBe("end");
+  expect(ltr.termLeftOfValue).toBe(true);
+  expect(ltr.fillAtStart).toBe(true);
+  await page.evaluate(() => document.documentElement.setAttribute("dir", "rtl"));
+  const rtl = await measure();
+  expect(rtl.termLeftOfValue).toBe(false);
+  expect(rtl.fillAtEnd).toBe(true);
+});
+
+// The caption of a table and the terms of a list expanded by words: the table keeps the width of
+// its container (the region scrolls), the list grows in height, nothing is clipped.
+test("tabelo and atributlisto text expansion: the caption wraps, the terms grow, nothing is clipped", async ({
+  page,
+}) => {
+  await serve(
+    page,
+    out,
+    `<div style="inline-size: 20rem"><fm-tabelo id="t">Standards<table slot="content"><thead><tr><th scope="col">Name</th></tr></thead><tbody><tr><td>A</td></tr></tbody></table></fm-tabelo><fm-atributlisto id="a"><dl><dt id="term">Version</dt><dd>3</dd></dl></fm-atributlisto></div>`,
+  );
+  const before = await page.locator("#a").boundingBox();
+  const caption = "Standards";
+  const words = "Standards der Organisation und ihrer Partner im laufenden Jahr".split(" ");
+  await page.evaluate(
+    ([c, t]) => {
+      const table = document.getElementById("t") as HTMLElement;
+      table.childNodes[0].textContent = c ?? "";
+      (document.getElementById("term") as HTMLElement).textContent = t ?? "";
+    },
+    [pseudo([...words, ...words].join(" "), 1), pseudo("Version der Veröffentlichung", 1)],
+  );
+  const after = await page.locator("#a").boundingBox();
+  expect(after?.height ?? 0).toBeGreaterThanOrEqual(before?.height ?? 0);
+  expect(Math.round(after?.width ?? 0)).toBe(Math.round(before?.width ?? 0));
+  const clipped = await page.evaluate(() => {
+    const table = document.getElementById("t") as HTMLElement;
+    const region = table.shadowRoot?.querySelector('[part="region"]') as HTMLElement;
+    const list = document.querySelector("#a dl") as HTMLElement;
+    return {
+      table: region.getBoundingClientRect().width > table.getBoundingClientRect().width + 1,
+      list: list.scrollWidth > list.clientWidth + 1,
+    };
+  });
+  expect(clipped).toEqual({ table: false, list: false });
+  void caption;
+});

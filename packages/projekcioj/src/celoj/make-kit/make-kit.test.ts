@@ -584,3 +584,37 @@ describe("Make Kit and the insigno, avizo and plenstato (Spec 011 ③)", () => {
     },
   );
 });
+
+// Spec 011 ④ (G7, plan ④ D-12): one sentence per Ero in the Guidelines — many records are the
+// Tabelo, one record the Atributlisto, a value in a range the Mezurilo — and a component page each.
+describe("Make Kit and the tabelo, atributlisto and mezurilo (Spec 011 ④)", () => {
+  it.each(ASPEKTOJ)(
+    "%s: the guidelines send many records to the Tabelo, one record to the Atributlisto, a value in a range to the Mezurilo",
+    (aspekto) => {
+      const guidelines = kit(aspekto, "guidelines/Guidelines.md");
+      expect(guidelines).toContain(
+        "- Every list of records with the same fields is a `<Tabelo>` around the platform's own table with a caption; one record is an `<Atributlisto>`.",
+      );
+      expect(guidelines).toContain(
+        "- Every record shown as names and values is an `<Atributlisto>` around the platform's own description list; never a table for one record, and editing is a form of `<Kampo>`.",
+      );
+      expect(guidelines).toContain(
+        "- Every known value within a known range is a `<Mezurilo>` with its number as text; an unknown value is never 0, and a status in a word is an `<Insigno>`.",
+      );
+      const table = kit(aspekto, "guidelines/components/tabelo.md");
+      expect(table).toContain("# Tabelo");
+      expect(table).toContain("`density`");
+      expect(table).toContain("**table-caption-names-the-content**");
+      expect(table).toContain("**sticky-header**");
+      const list = kit(aspekto, "guidelines/components/atributlisto.md");
+      expect(list).toContain("# Atributlisto");
+      expect(list).toContain("`layout`");
+      expect(list).toContain("**nested**");
+      const meter = kit(aspekto, "guidelines/components/mezurilo.md");
+      expect(meter).toContain("# Mezurilo");
+      expect(meter).toContain("`intent`");
+      expect(meter).toContain("**meter-text-states-value**");
+      expect(meter).toContain("66 % von 3 prüfbaren");
+    },
+  );
+});

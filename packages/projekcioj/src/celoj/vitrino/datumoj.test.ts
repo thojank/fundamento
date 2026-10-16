@@ -501,3 +501,34 @@ describe("the Vitrino shows the insigno, the avizo and the plenstato (Spec 011 �
     expect(grid).not.toContain('slot="actions"');
   });
 });
+
+// Spec 011 ④ (plan ④ D-13): the grid of the tabelo has one row per density with a table of
+// three rows and three columns (one numeric, the first head sortable); the grid of the
+// atributlisto one row per layout with three entries, one empty; the grid of the mezurilo one row
+// per intent with the value example 66 and its text.
+describe("the Vitrino shows the tabelo, the atributlisto and the mezurilo (Spec 011 ④)", () => {
+  it("tabelo: a row per density, each a captioned table with a sortable head, a numeric column and three rows", () => {
+    const grid = datumoj.eroj.tabelo ?? "";
+    expect((grid.match(/<fm-tabelo /g) ?? []).length).toBe(2);
+    expect(grid).toContain(
+      '<fm-tabelo density="compact">compact<table slot="content"><thead><tr><th scope="col" data-sort="name">Name</th>',
+    );
+    expect(grid).toContain('<th scope="col" numeric>Anzahl</th>');
+    expect((grid.match(/<th scope="row">/g) ?? []).length).toBe(6);
+  });
+
+  it("atributlisto: a row per layout, each a dl with three entries, the last value empty", () => {
+    const grid = datumoj.eroj.atributlisto ?? "";
+    expect((grid.match(/<fm-atributlisto /g) ?? []).length).toBe(2);
+    expect(grid).toContain('<fm-atributlisto layout="stacked"><dl><dt>Version</dt><dd>3</dd>');
+    expect(grid).toContain("<dt>Gültig seit</dt><dd></dd></dl></fm-atributlisto>");
+  });
+
+  it("mezurilo: a row per intent, the value example 66 with its text", () => {
+    const grid = datumoj.eroj.mezurilo ?? "";
+    expect((grid.match(/<fm-mezurilo /g) ?? []).length).toBe(4);
+    expect(grid).toContain(
+      '<fm-mezurilo intent="warning" value="66">warning<span slot="value-text">66 % von 3 prüfbaren</span></fm-mezurilo>',
+    );
+  });
+});

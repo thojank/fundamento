@@ -71,7 +71,9 @@ describe("the data dialogs of the spec: a table, one record, a meter", () => {
       goal: "ein einzelner Datensatz mit seinen Metadaten",
     });
     expect(one.suggestion).toEqual({ ero: "atributlisto", props: {} });
-    expect(one.boundary?.kialo).toBe(oneRecord.kialo);
+    // The table's instead one-record agrees with the list's goal (Spec 008 D-08: the goal answers).
+    expect(one.matched?.goal).toBe("details");
+    expect(oneRecord.ero).toBe("atributlisto");
   });
 
   it("'Konformität in Prozent' → a mezurilo (the badge's value-in-range is use-instead now, ③'s null closed)", async () => {
