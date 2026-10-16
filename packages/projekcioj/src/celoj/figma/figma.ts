@@ -45,7 +45,7 @@ import {
   VITRINO_SURFACE,
 } from "../vitrino/datumoj.js";
 import { signOf } from "../web-component/element-template.js";
-import { DRAWN_PART_PROPERTIES, pluginManifest, pluginSource } from "./plugin.js";
+import { drawnPartPropertiesOf, pluginManifest, pluginSource } from "./plugin.js";
 
 /** A variable value: a literal, or an alias to another variable of the plan. */
 export type FigmaValue = { alias: string } | string | number | FigmaColor | boolean;
@@ -144,17 +144,39 @@ export const FIGMA_NOT_DRAWN: Readonly<Record<string, string>> = {
 export const FIELD_EXAMPLE = "Beispiel";
 
 /**
+ * The words of the heading and the details of a notice (Spec 011 ③, plan ③ D-14) where the
+ * Vitrino does not export them yet (plan ③ D-15 adds `heading`, `details` and `description` to
+ * its slot words): the same words, so both pictures stay one once the export is there —
+ * `slotWord` takes the Vitrino's first and falls back to these.
+ */
+const SLOT_WORDS_FALLBACK: Readonly<Record<string, string>> = {
+  heading: "Überschrift",
+  details: "Einzelheit",
+};
+
+const slotWord = (slot: string): string | undefined =>
+  VITRINO_SLOT_TEXTS[slot] ?? SLOT_WORDS_FALLBACK[slot];
+
+/**
  * The words of the text slots of a Skemo besides its default slot (F-5: the same words the
  * Vitrino slots in, one source for both pictures): help and error of a field (F-4), the error of
- * a checkbox (Spec 010 ②), message and reason of a dialog (Spec 011 ②). A slot the Vitrino has no
- * word for, or whose entries are options (Spec 010 ③), is left out.
+ * a checkbox (Spec 010 ②), message and reason of a dialog (Spec 011 ②), heading and details of a
+ * notice (Spec 011 ③). A slot the Vitrino has no word for, or whose entries are options (Spec 010
+ * ③), is left out — and so is a hidden slot (Spec 011 ③: the description of a badge is spoken,
+ * never seen; a set draws what is seen).
  */
 function slotWordsOf(skemo: LoadedEro["skemo"]): Record<string, string> {
   return Object.fromEntries(
     skemo.slots
-      .filter((slot) => slot.default !== true && slot.text === true && slot.entry === undefined)
+      .filter(
+        (slot) =>
+          slot.default !== true &&
+          slot.text === true &&
+          slot.entry === undefined &&
+          slot.hidden !== true,
+      )
       .flatMap((slot) => {
-        const text = VITRINO_SLOT_TEXTS[slot.name];
+        const text = slotWord(slot.name);
         return text === undefined ? [] : [[slot.name, text]];
       }),
   );
@@ -260,6 +282,34 @@ export const DIALOG_TEXTS: Readonly<Record<string, string>> = {
 export const BACKDROP_EXAMPLE = "mit Hintergrund";
 
 /**
+ * The sign of a loading state (Spec 011 ③, plan ③ D-14): the arc the web draws in its indicator
+ * (element-template.ts, D-10: three quarters of a circle in a box of 16, a stroke in the current
+ * colour), here in its own box of 16 like the signs of `signOf`. The plugin imports it once and
+ * binds the vector's stroke to indicator.color. The path is the web's; a shared export of it is a
+ * candidate (one source for both pictures), the other Celo's path is not exported today.
+ */
+export const STATE_SIGN =
+  '<svg aria-hidden="true" viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 2a6 6 0 1 1-6 6"/></svg>';
+
+/**
+ * The part a boolean prop shows or hides (Spec 011 ③, plan ③ D-14): dismissible shows the dismiss
+ * butono of a notice. Celo knowledge (Art. VIII): the Skemo keys no part by the prop — the butono
+ * is there or not, it does not change its look — so the plan declares it as a BOOLEAN property of
+ * the set connected to the part's visibility, with the Skemo's default. Only where the Skemo has
+ * both the prop and the part.
+ */
+const BOOLEAN_TOGGLES: Readonly<Record<string, string>> = { dismissible: "dismiss" };
+
+/**
+ * The dash pattern of a dashed stroke (Spec 011 ③, plan ③ D-14), in widths of the stroke: the
+ * web says `border-style: dashed` and leaves the lengths to the browser (Chromium draws a thin
+ * dashed border three widths on, three off); Figma knows no dashed style, only a pattern of
+ * numbers, bound to no variable. The plan writes the pattern from the border's width in the base
+ * combination, as it writes the underline (B-1) — a number, not a token, named here once.
+ */
+const DASH_IN_WIDTHS = 3;
+
+/**
  * How the plugin draws a set (Spec 009, D-09): a control (variant → ring → gap → control → label)
  * for a button or a link, a field (label above, the control with its text, help and error below)
  * for a textbox, a toggle (Spec 010 ①, D-10: a row — ring → gap → control with the knob in it,
@@ -267,7 +317,15 @@ export const BACKDROP_EXAMPLE = "mit Hintergrund";
  * it, label and error in a column beside it; G1 gives the Wahl-Eroj one build, "control + label").
  * Celo knowledge from the a11y role (Art. VIII).
  */
-export type FigmaStructure = "control" | "field" | "toggle" | "choice" | "dialog";
+export type FigmaStructure =
+  | "control"
+  | "field"
+  | "toggle"
+  | "choice"
+  | "dialog"
+  | "badge"
+  | "notice"
+  | "state";
 
 /**
  * A radio group (Spec 010 ③, D-07) is a choice: the label (the question) above a column of
@@ -277,9 +335,13 @@ export type FigmaStructure = "control" | "field" | "toggle" | "choice" | "dialog
  * chevron at the end of its control; its list is the platform's and not drawn (E3, Manko of the
  * plan). A dialog (Spec 011 ②) is a structure of its own: the surface — a column of a width
  * bound by size — with heading, message, the reason field and two actions; a text area is a
- * textbox and therefore a field.
+ * textbox and therefore a field. Spec 011 ③ (plan ③ D-14): static text (role generic) is a badge
+ * — the pill with its text, no ring (G2); a live region (role status) is a notice — a row with the
+ * accent at its start, the texts in a column, the dismiss frame at the end — or, where its Skemo
+ * has an indicator (the area is busy or empty), a state — a column with the arc, the text and the
+ * actions. The parts tell the two apart: the role alone is the same.
  */
-export const structureOf = (role: string): FigmaStructure =>
+export const structureOf = (role: string, parts: readonly string[] = []): FigmaStructure =>
   role === "textbox" || role === "combobox"
     ? "field"
     : role === "switch" || role === "checkbox"
@@ -288,7 +350,13 @@ export const structureOf = (role: string): FigmaStructure =>
         ? "choice"
         : role === "dialog"
           ? "dialog"
-          : "control";
+          : role === "generic"
+            ? "badge"
+            : role === "status"
+              ? parts.includes("indicator")
+                ? "state"
+                : "notice"
+              : "control";
 
 /**
  * The neutral word every label template shows, per a11y role (M-3; Maintainer, F14, 2026-10-13,
@@ -311,12 +379,46 @@ const LABEL_DEFAULTS: Readonly<Record<string, string>> = {
   // dialog-title-names-the-decision) — the default text of the heading property. For the
   // maintainer to confirm; no Jugxo created here.
   dialog: "Entscheidung",
+  // Spec 011 ③ (plan ③ D-14): a badge (static text, role generic) names a status in one to three
+  // words (Regulo badge-text-short). For the maintainer to confirm; no Jugxo created here.
+  generic: "Status",
+  // Spec 011 ③ (plan ③ D-14): a live region (role status) is a notice whose message tells what
+  // happened — the default text of the message property. For the maintainer to confirm; no Jugxo.
+  status: "Meldung",
+};
+
+/**
+ * The word of a structure where two Eroj share one role (Spec 011 ③, plan ③ D-14): the notice and
+ * the loading or empty state are both a status, and a state's text says which of the two the
+ * area is in — before the role's word. For the maintainer to confirm; no Jugxo created here.
+ */
+const STRUCTURE_LABEL_DEFAULTS: Readonly<Partial<Record<FigmaStructure, string>>> = {
+  state: "Zustand",
 };
 
 /** The word a role without its own entry shows: the button's, as every set did before M-3. */
 const LABEL_DEFAULT = "Aktion";
 
-export const labelDefaultOf = (role: string): string => LABEL_DEFAULTS[role] ?? LABEL_DEFAULT;
+export const labelDefaultOf = (role: string, structure?: FigmaStructure): string =>
+  (structure === undefined ? undefined : STRUCTURE_LABEL_DEFAULTS[structure]) ??
+  LABEL_DEFAULTS[role] ??
+  LABEL_DEFAULT;
+
+/**
+ * The part the label property writes (F11): the part named like the default text slot of the
+ * Skemo — the label of a control or a field, the heading of a dialog (Spec 011 ②), the message of
+ * a notice and the text of a state (Spec 011 ③) — or, where the slot has no part of its name, the
+ * part `text` (the badge: its slot is `label`, its part `text`), else `label`. Its typography
+ * decides the font the texts are written in and the case; its colour is drawn, whatever release
+ * the part's name has elsewhere (the typed text of a field, B-2).
+ */
+export function labelPartOf(skemo: LoadedEro["skemo"]): string {
+  const slot = skemo.slots.find(
+    (candidate) => candidate.default === true && candidate.text === true,
+  );
+  if (slot !== undefined && skemo.parts[slot.name] !== undefined) return slot.name;
+  return skemo.parts.label === undefined && skemo.parts.text !== undefined ? "text" : "label";
+}
 
 /**
  * The section every component set of the library lies in (F-2, Nachlese Spec 008/009): one mode
@@ -400,6 +502,12 @@ export interface FigmaComponentSet {
       paints?: Record<string, FigmaPaint>;
     }
   >;
+   * The boolean props that show or hide a part (Spec 011 ③, plan ③ D-14: dismissible shows the
+   * dismiss frame of a notice): each a BOOLEAN property of the set, declared like the label, with
+   * the part's visibility connected to it and the Skemo's default; an instance switches it. A
+   * boolean that keys a part is an axis instead (Spec 010 ①) and stands in no list here.
+   */
+  toggles?: { property: string; part: string; defaultValue: boolean }[];
   /** The purpose of the Uzo, one line, as the description of the set (Spec 007 T028, A12). */
   description?: string;
   /**
@@ -456,9 +564,20 @@ export interface FigmaComponentSet {
      * The parts not drawn in this variant (Spec 010 ②, D-09): a colour bound to the keyword
      * none — the check mark of an unticked box. The plugin gives the part opacity 0; its place
      * stays, as on the web. A height bound to none (Spec 011 ②: the reason field of a dialog
-     * without a reason) hides the part with its place: the plugin sets it invisible.
+     * without a reason) hides the part with its place: the plugin sets it invisible. So does a
+     * part whose slot the Skemo's constraints forbid in this variant (Spec 011 ③: the actions of
+     * a state while loading) — for a slot of elements; a text slot keeps its word in every
+     * variant (F-4).
      */
     hidden?: string[];
+    /**
+     * The line style of a part's stroke (Spec 011 ③, plan ③ D-14): the term of the stroke.* token
+     * the part binds — solid or dashed — or none, where the binding is the keyword. The variable
+     * stands in the bindings; the style is written, since Figma binds no dash pattern: the
+     * pattern in px of the base combination for dashed (`DASH_IN_WIDTHS` of the stroke's width),
+     * empty otherwise. For none the plugin keeps the bound paint and shows it not.
+     */
+    stroke?: { part: string; style: string; dashPattern: number[] };
     /**
      * The shadow of a part (Spec 011 ②: elevation.shadow.modal of the dialog's surface), a
      * composite the plan holds field by field (F9): per layer the variables of its five fields
@@ -1158,16 +1277,19 @@ function componentSetOf(
   // `type`, for example, is behaviour in a form and would only multiply the set. A keyed boolean
   // prop is an axis too (Spec 010 ①, D-03: checked of the switch).
   const keys = variantKeys(skemo);
-  const drawn = new Set(DRAWN_PART_PROPERTIES);
+  const structure = structureOf(skemo.a11y.role, Object.keys(skemo.parts));
+  // What the plugin draws for this structure (Spec 011 ③): the bindings every structure shares and
+  // the ones this structure binds elsewhere — the text's colour on the label of a badge.
+  const drawn = new Set(drawnPartPropertiesOf(structure));
   // The focus radii only for an Ero that has a radius to grow (F32); the ligilo has none.
   const radiiOf =
     radiusTokensOf(entry) === undefined
       ? undefined
       : { "focus-gap": "radius/focus/gap", "focus-ring": "radius/focus/ring" };
-  // The part the label property writes: the label, or the heading of a dialog (Spec 011 ②),
-  // whose role decides the font the texts are written in and the case of the heading.
-  const labelPart =
-    skemo.parts.label !== undefined || skemo.parts.heading === undefined ? "label" : "heading";
+  // The part the label property writes: the label, the heading of a dialog (Spec 011 ②), the
+  // message of a notice or the text of a badge or a state (Spec 011 ③), whose role decides the
+  // font the texts are written in and the case.
+  const labelPart = labelPartOf(skemo);
   const typographyToken = (combination: Readonly<Record<string, string>>): string | undefined => {
     const bound = boundToken(skemo, labelPart, "typography", combination);
     if (bound === undefined) return undefined;
@@ -1222,6 +1344,47 @@ function componentSetOf(
     }
     return undefined;
   };
+  // The stroke of a part as a term (Spec 011 ③): the value of the stroke.* token in the base
+  // combination (solid, dashed) or none; the dash pattern from the part's width there.
+  const strokeOf = (
+    combination: Readonly<Record<string, string>>,
+  ): FigmaComponentSet["variants"][number]["stroke"] => {
+    for (const [part, partProperties] of Object.entries(skemo.parts)) {
+      if (partProperties.stroke === undefined) continue;
+      const bound = boundToken(skemo, part, "stroke", combination);
+      if (bound === undefined) continue;
+      const style = isBindingKeyword(bound.token)
+        ? "none"
+        : String(base[bound.token]?.value ?? "solid");
+      const width = boundToken(skemo, part, "width", combination);
+      const px = width === undefined ? 0 : measureOf(base[width.token]?.value);
+      const dash = DASH_IN_WIDTHS * px;
+      return { part, style, dashPattern: style === "dashed" && dash > 0 ? [dash, dash] : [] };
+    }
+    return undefined;
+  };
+  // The parts whose slot the constraints forbid in a combination (Spec 011 ③): a constraint
+  // `slot:<name>: filled ⇒ <prop>: [values]` whose values do not include the combination's hides
+  // the part of the slot's name — for a slot of elements (the actions of a state while loading);
+  // a text slot keeps its word in every variant (F-4: the error of a field stands in every state).
+  const forbiddenPartsOf = (combination: Readonly<Record<string, string>>): string[] =>
+    (skemo.constraints ?? []).flatMap((constraint) => {
+      const slots = Object.entries(constraint.when)
+        .filter(([key, value]) => key.startsWith("slot:") && value === "filled")
+        .map(([key]) => key.slice("slot:".length))
+        .filter((slot) => {
+          const declared = skemo.slots.find((candidate) => candidate.name === slot);
+          return (
+            declared !== undefined && declared.text !== true && skemo.parts[slot] !== undefined
+          );
+        });
+      if (slots.length === 0) return [];
+      const allowed = Object.entries(constraint.allowed).every(([prop, values]) => {
+        const value = combination[prop];
+        return value === undefined || values.includes(value);
+      });
+      return allowed ? [] : slots;
+    });
   // The keys of one entry (Spec 010 ③, E7: selected) are no axis: the parts they key are bound
   // per value of the key, in the entries of each variant.
   const entryKeys = [
@@ -1282,8 +1445,10 @@ function componentSetOf(
         if (type !== "color" && type !== "dimension") continue;
         // What the plugin does not draw is named with its Jugxo, never claimed (Paket „Figma
         // zeigt das Ero"). What it does not draw and no Jugxo releases is simply absent, and
-        // check:parity says so.
-        const release = FIGMA_NOT_DRAWN[part];
+        // check:parity says so. The part the label property writes is drawn whatever its name
+        // (Spec 011 ③: the text of a badge or a state is its label, not the typed text B-2
+        // releases).
+        const release = part === labelPart ? undefined : FIGMA_NOT_DRAWN[part];
         if (release !== undefined) {
           notDrawn[key] = release;
           continue;
@@ -1331,6 +1496,10 @@ function componentSetOf(
       const paint = paintOf(ring.token, resolutions, base, "color");
       if (paint !== undefined) paints["focus-ring.ring"] = paint;
     }
+    for (const part of forbiddenPartsOf(combination)) {
+      if (!hidden.includes(part)) hidden.push(part);
+    }
+    const stroke = strokeOf(combination);
     const typography = typographyToken(combination);
     const font = fontOf(typography === undefined ? undefined : base[typography]?.value);
     const underlineWidth =
@@ -1374,6 +1543,7 @@ function componentSetOf(
       ...(hidden.length === 0 ? {} : { hidden }),
       ...(Object.keys(entries).length === 0 ? {} : { entries }),
       ...(shadow === undefined ? {} : { shadow }),
+      ...(stroke === undefined ? {} : { stroke }),
     };
   });
   // Every font the label can carry, over every combination (F30). The typography role follows the
@@ -1429,10 +1599,10 @@ function componentSetOf(
     });
   }
   const cell = parityPx(base[VITRINO_CELL_PADDING]?.value);
-  const structure = structureOf(skemo.a11y.role);
   // A toggle shows the words of its text slots besides the label, as the field does (Spec 010 ②):
   // the checkbox its error; the switch has none. A dialog (Spec 011 ②) its message, the label
-  // of its reason, and the words of its two actions.
+  // of its reason, and the words of its two actions. A notice (Spec 011 ③) its heading and its
+  // details; a badge and a state have no text beside the label (the badge's description is hidden).
   const toggleTexts = slotWordsOf(skemo);
   const dialogTexts = { ...toggleTexts, ...DIALOG_ACTION_TEXTS };
   // The example frame of a dialog (Spec 011 ②): the default variant — every keyed prop at its
@@ -1460,8 +1630,18 @@ function componentSetOf(
         }
       : undefined;
   // The sign of the indicator: the check mark, the dot, and the chevron of a select's field
-  // (Spec 010 ④, D-07); a text field has none.
-  const sign = signOf(skemo.a11y.role, "16");
+  // (Spec 010 ④, D-07); a text field has none. A state (Spec 011 ③) has the arc.
+  const sign = structure === "state" ? STATE_SIGN : signOf(skemo.a11y.role, "16");
+  // The boolean props that show a part (Spec 011 ③): BOOLEAN properties of the set, no axis.
+  const toggles = skemo.props.flatMap((prop) => {
+    const part = BOOLEAN_TOGGLES[prop.name];
+    return prop.kind === "boolean" &&
+      part !== undefined &&
+      skemo.parts[part] !== undefined &&
+      !keys.includes(prop.name)
+      ? [{ property: prop.name, part, defaultValue: prop.default === true }]
+      : [];
+  });
   // The options of a choice (Spec 010 ③, D-07): the Vitrino's words, the first chosen.
   const [entryKey] = entryKeys;
   const options =
@@ -1475,7 +1655,8 @@ function componentSetOf(
     set: entry.ero.name,
     structure,
     ...(structure === "field" ? { texts: fieldTextsOf(skemo) } : {}),
-    ...((structure === "toggle" || structure === "choice") && Object.keys(toggleTexts).length > 0
+    ...((structure === "toggle" || structure === "choice" || structure === "notice") &&
+    Object.keys(toggleTexts).length > 0
       ? { texts: toggleTexts }
       : {}),
     ...(structure === "dialog" ? { texts: dialogTexts } : {}),
@@ -1483,6 +1664,7 @@ function componentSetOf(
     ...(options === undefined ? {} : { entry: options }),
     ...(example === undefined ? {} : { example }),
     ...(composed === undefined ? {} : { composed }),
+    ...(toggles.length === 0 ? {} : { toggles }),
     ...(description === undefined ? {} : { description }),
     ...(uzo === undefined ? {} : { uzo }),
     properties,
@@ -1494,7 +1676,7 @@ function componentSetOf(
       gap: 2 * cell,
       padding: cell,
     },
-    label: { property: "label", defaultValue: labelDefaultOf(skemo.a11y.role) },
+    label: { property: "label", defaultValue: labelDefaultOf(skemo.a11y.role, structure) },
     fonts,
     ...(surface === undefined ? {} : { surface }),
   };

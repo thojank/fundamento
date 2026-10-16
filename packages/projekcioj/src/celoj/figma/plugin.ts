@@ -18,7 +18,11 @@
 // combineAsVariants, appendChild, setBoundVariable, set/getSharedPluginData, createSection with
 // resizeWithoutConstraints for the section „Fundamento" (F-2), and in it a frame „Eroj" with
 // auto-layout (layoutMode HORIZONTAL, layoutWrap WRAP, itemSpacing, counterAxisSpacing) that holds
-// every set (F-8).
+// every set (F-8). Spec 011 ③ adds a stroke weight per side (strokeLeftWeight, bound: the accent
+// of a notice), a BOOLEAN component property connected to a layer's visible
+// (componentPropertyReferences.visible: dismissible), a dash pattern and an invisible paint (the
+// stroke of a state) — each a belief about the API until the maintainer has measured it in
+// f10b-5.
 
 import { type FigmaPlan, TEXT_CASE_VARIES } from "./figma.js";
 
@@ -52,7 +56,11 @@ type PartNode =
   | "action-2"
   | "action-label-1"
   | "action-label-2"
-  | "backdrop";
+  | "backdrop"
+  // A notice (Spec 011 ③): the details text and the dismiss frame; a badge and a state (Spec 011
+  // ③) reuse control, text, indicator, mark, texts and actions.
+  | "details"
+  | "dismiss";
 
 interface Binding {
   node: PartNode;
@@ -189,6 +197,15 @@ const BINDINGS: Readonly<Record<string, readonly Binding[]>> = {
   "content.gap": [{ node: "content", fields: ["itemSpacing"] }],
   "actions.gap": [{ node: "actions", fields: ["itemSpacing"] }],
   "backdrop.color": [{ node: "backdrop", fields: ["fills"], paint: true }],
+  // A notice (Spec 011 ③, plan ③ D-14): the accent is the stroke of the control at its start —
+  // the left side, the inline start of a file that knows no writing direction — its colour the
+  // paint of the strokes, its width the weight of that side alone (the other three stay 0); the
+  // details a text of their own; the dismiss frame a square of dismiss.size, like the knob.
+  "accent.color": [{ node: "control", fields: ["strokes"], paint: true }],
+  "accent.width": [{ node: "control", fields: ["strokeLeftWeight"] }],
+  "details.color": [{ node: "details", fields: ["fills"], paint: true }],
+  "details.typography": typographyOf("details"),
+  "dismiss.size": [{ node: "dismiss", fields: ["width", "height"] }],
 };
 
 /**
@@ -232,6 +249,25 @@ const STRUCTURE_BINDINGS: Readonly<Record<string, Readonly<Record<string, readon
       { node: "action-1", fields: ["paddingTop", "paddingBottom"] },
       { node: "action-2", fields: ["paddingTop", "paddingBottom"] },
     ],
+  },
+  // A badge (Spec 011 ③, plan ③ D-14): its text is the label — the colour of the text part goes
+  // on the text node (in a field the text node shows the placeholder, B-2).
+  badge: { "text.color": [{ node: "text", fields: ["fills"], paint: true }] },
+  // A notice (Spec 011 ③): the padding of the box on every side of the control (the Skemo names
+  // it once); the gap of the box between the parts of the row and between the texts of the column.
+  notice: {
+    "box.inline-padding": [{ node: "control", fields: [...PADDINGS] }],
+    "box.gap": [
+      { node: "control", fields: ["itemSpacing"] },
+      { node: "texts", fields: ["itemSpacing"] },
+    ],
+  },
+  // A state (Spec 011 ③): the padding on every side; the text is the label; the arc is a stroked
+  // path, so the indicator's colour is the stroke of the vector, not its fill.
+  state: {
+    "box.inline-padding": [{ node: "control", fields: [...PADDINGS] }],
+    "text.color": [{ node: "text", fields: ["fills"], paint: true }],
+    "indicator.color": [{ node: "mark", fields: ["strokes"], paint: true }],
   },
 };
 
@@ -364,6 +400,63 @@ const ACTIONS_LAYOUT = {
 };
 
 /**
+ * The control of a notice (Spec 011 ③, plan ③ D-14): a row — the texts column, then the dismiss
+ * frame — at the start; the accent is its left stroke, and the stroke lies in the size, as on the
+ * web (box-sizing border-box: the border-inline-start adds to the padding). Padding and gap are
+ * bound (box.inline-padding on every side, box.gap).
+ */
+const NOTICE_LAYOUT = {
+  layoutMode: "HORIZONTAL",
+  primaryAxisAlignItems: "MIN",
+  counterAxisAlignItems: "MIN",
+  layoutSizingHorizontal: "HUG",
+  layoutSizingVertical: "HUG",
+  strokesIncludedInLayout: true,
+  itemSpacing: 0,
+  paddingLeft: 0,
+  paddingRight: 0,
+  paddingTop: 0,
+  paddingBottom: 0,
+};
+
+/**
+ * The control of a state (Spec 011 ③, plan ③ D-14): a column, centred — the arc, the text, the
+ * actions — whose border lies in the size (border-box), dashed or not shown as the variant says.
+ */
+const STATE_LAYOUT = {
+  layoutMode: "VERTICAL",
+  primaryAxisAlignItems: "CENTER",
+  counterAxisAlignItems: "CENTER",
+  layoutSizingHorizontal: "HUG",
+  layoutSizingVertical: "HUG",
+  strokesIncludedInLayout: true,
+  itemSpacing: 0,
+  paddingLeft: 0,
+  paddingRight: 0,
+  paddingTop: 0,
+  paddingBottom: 0,
+};
+
+/**
+ * The placeholder of a slot of elements (Spec 011 ③: the actions of a notice and of a state): an
+ * empty row that hugs what a designer drops into it, its gap bound (actions.gap). It stands in
+ * for instances of the butono, like the stand-ins of a dialog (candidate B-6).
+ */
+const PLACEHOLDER_LAYOUT = {
+  layoutMode: "HORIZONTAL",
+  primaryAxisAlignItems: "MIN",
+  counterAxisAlignItems: "CENTER",
+  layoutSizingHorizontal: "HUG",
+  layoutSizingVertical: "HUG",
+  strokesIncludedInLayout: false,
+  itemSpacing: 0,
+  paddingLeft: 0,
+  paddingRight: 0,
+  paddingTop: 0,
+  paddingBottom: 0,
+};
+
+/**
  * The vector of a check mark (Spec 010 ②, D-09): no line, no effect, its fill bound to the
  * indicator's colour; it scales with its frame, whose size is bound — the frame is the sign's box
  * of 16 the SVG was drawn in.
@@ -474,6 +567,15 @@ export const FIGMA_MODE_LIMIT = 10;
 export const DRAWN_PART_PROPERTIES: readonly string[] = Object.keys(BINDINGS);
 
 /**
+ * Every part property the plugin applies for a set of one structure (Spec 011 ③): what every
+ * structure shares and what this structure binds elsewhere (the text's colour of a badge, the
+ * stroke of a state's arc). The plan of a set claims exactly these.
+ */
+export const drawnPartPropertiesOf = (structure: string): readonly string[] => [
+  ...new Set([...Object.keys(BINDINGS), ...Object.keys(STRUCTURE_BINDINGS[structure] ?? {})]),
+];
+
+/**
  * The menu command that lifts the abort of F10c: a run that would create a variant in a set it
  * found goes on. Its own entry, so the default command can never do it by accident.
  */
@@ -505,6 +607,9 @@ const SURFACE_LAYOUT = ${JSON.stringify(SURFACE_LAYOUT)};
 const CONTENT_LAYOUT = ${JSON.stringify(CONTENT_LAYOUT)};
 const REASON_FIELD_LAYOUT = ${JSON.stringify(REASON_FIELD_LAYOUT)};
 const ACTIONS_LAYOUT = ${JSON.stringify(ACTIONS_LAYOUT)};
+const NOTICE_LAYOUT = ${JSON.stringify(NOTICE_LAYOUT)};
+const STATE_LAYOUT = ${JSON.stringify(STATE_LAYOUT)};
+const PLACEHOLDER_LAYOUT = ${JSON.stringify(PLACEHOLDER_LAYOUT)};
 const MARK_NEUTRAL = ${JSON.stringify(MARK_NEUTRAL)};
 const INDICATOR_LAYOUT = ${JSON.stringify(INDICATOR_LAYOUT)};
 const STRUCTURE_BINDINGS = ${JSON.stringify(STRUCTURE_BINDINGS)};
@@ -1073,6 +1178,24 @@ function markOf(indicator) {
   }
   write(found, "name", "mark");
   return found;
+}
+
+/**
+ * The neutral of a stroked sign (Spec 011 ③: the arc of a state): no fill, no effect, scaling
+ * with its frame like the check mark; its stroke is bound to the indicator's colour, and its
+ * weight is the sign's own — read from the SVG the plan carries (stroke-width), the one shape of
+ * both pictures — so that nothing the import gave the vector stays unowned (F13).
+ */
+function arcNeutral(sign) {
+  const width = /stroke-width="([0-9.]+)"/.exec(sign || "");
+  return {
+    fills: [],
+    strokes: [],
+    strokeWeight: width === null ? 0 : Number(width[1]),
+    effects: [],
+    opacity: 1,
+    constraints: { horizontal: "SCALE", vertical: "SCALE" },
+  };
 }
 
 /** The child of parent marked as the part, created when missing. */
@@ -1705,6 +1828,164 @@ async function applyComponents(variables, warnings) {
     bindMeasures(measures, report, component, variant);
   }
   /**
+   * The writing case of the label's role (F31): written where the plan states one value, left
+   * unset with a warning where the modes disagree — a brand would be no projection.
+   */
+  function writeCase(component, variant, text) {
+    if (variant.textCase === TEXT_CASE_VARIES) {
+      if (casesVarying.indexOf(component.set) === -1) {
+        casesVarying.push(component.set);
+        warnings.push(
+          component.set + ": Die Schreibweise der Beschriftung ist nicht in allen Modi " +
+            "dieselbe. textCase ist in Figma kein bindbares Feld, also bleibt sie ungesetzt — " +
+            "eine Marke auszuwählen wäre keine Projektion.",
+        );
+      }
+    } else if (typeof variant.textCase === "string") {
+      write(text, "textCase", variant.textCase);
+    }
+  }
+  /**
+   * A badge (Spec 011 ③, plan ③ D-14): the variant holds the pill — the control, a row with its
+   * fill, border, radius, minimum height and inline padding bound — and in it the text, the label
+   * property, in the role of the text part. No focus ring: static text has no state but rest
+   * (G2); nothing of the hidden slot description is drawn.
+   */
+  async function drawBadge(node, component, variant, report, labels) {
+    const control = part(node, "control", () => figma.createFrame());
+    const text = part(control, "text", () => figma.createText());
+    await loadCurrentFont(text);
+    writeCase(component, variant, text);
+    if (variant.font !== undefined) {
+      write(text, "fontName", fonts.get(variant.font.family + " " + variant.font.style));
+    }
+    labels.push(text);
+    for (const frame of [node, control]) own(frame, NEUTRAL);
+    own(text, NEUTRAL_TEXT);
+    own(node, HUG_LAYOUT);
+    own(control, CONTROL_LAYOUT);
+    // The border lies in the size, as on the web (box-sizing border-box).
+    own(control, { strokesIncludedInLayout: true });
+    for (const child of [node, control, text]) own(child, IN_FLOW);
+    own(text, TEXT_SIZING);
+    const measures = bind({ control, text }, variant, variables, component.structure);
+    for (const each of [node, control, text]) flush(each);
+    bindMeasures(measures, report, component, variant);
+  }
+  /**
+   * A notice (Spec 011 ③, plan ③ D-14): the variant holds the control — a row with the surface's
+   * fill, the radius and the padding of the box, and the accent as its stroke at the start: the
+   * colour bound to the strokes, the left weight bound to accent.width, the other sides 0 — with
+   * the texts in a column (the heading, the message as the label property, the details, the
+   * actions placeholder) and the dismiss frame at the end, a square of dismiss.size. The dismiss
+   * frame is shown by the BOOLEAN property dismissible (\`toggled\`, connected below); no focus
+   * ring: the states lie with the composed dismiss butono (G2).
+   */
+  async function drawNotice(node, component, variant, report, labels, toggled) {
+    const texts = component.texts || {};
+    const control = part(node, "control", () => figma.createFrame());
+    const column = part(control, "texts", () => figma.createFrame());
+    const heading = typeof texts.heading === "string" ? part(column, "heading", () => figma.createText()) : undefined;
+    const message = part(column, "message", () => figma.createText());
+    const details = typeof texts.details === "string" ? part(column, "details", () => figma.createText()) : undefined;
+    const actions = part(column, "actions", () => figma.createFrame());
+    const dismiss = part(control, "dismiss", () => figma.createFrame());
+    [heading, message, details, actions]
+      .filter((child) => child !== undefined)
+      .forEach((child, index) => {
+        if (column.children.indexOf(child) !== index) column.insertChild(index, child);
+      });
+    [column, dismiss].forEach((child, index) => {
+      if (control.children.indexOf(child) !== index) control.insertChild(index, child);
+    });
+    const all = [heading, message, details].filter((each) => each !== undefined);
+    for (const each of all) await loadCurrentFont(each);
+    writeCase(component, variant, message);
+    if (variant.font !== undefined) {
+      for (const each of all) write(each, "fontName", fonts.get(variant.font.family + " " + variant.font.style));
+    }
+    if (heading !== undefined) write(heading, "characters", texts.heading);
+    if (details !== undefined) write(details, "characters", texts.details);
+    labels.push(message);
+    toggled.push({ part: "dismiss", node: dismiss });
+    const frames = [node, control, column, actions, dismiss];
+    for (const frame of frames) own(frame, NEUTRAL);
+    for (const each of all) own(each, NEUTRAL_TEXT);
+    own(node, HUG_LAYOUT);
+    own(control, NOTICE_LAYOUT);
+    // Only the start carries the accent: the weight of every other side is 0, the left one is
+    // bound (accent.width) after the layout, like every measure.
+    own(control, { strokeTopWeight: 0, strokeRightWeight: 0, strokeBottomWeight: 0 });
+    own(column, TEXTS_LAYOUT);
+    own(actions, PLACEHOLDER_LAYOUT);
+    own(dismiss, INDICATOR_LAYOUT);
+    // A part the constraints forbid in this variant is not shown (none for a notice today).
+    own(actions, { visible: (variant.hidden || []).indexOf("actions") === -1 });
+    for (const child of frames.concat(all)) own(child, IN_FLOW);
+    for (const each of all) own(each, TEXT_SIZING);
+    const nodes = { control, texts: column, message, actions, dismiss };
+    if (heading !== undefined) nodes.heading = heading;
+    if (details !== undefined) nodes.details = details;
+    const measures = bind(nodes, variant, variables, component.structure);
+    for (const each of frames.concat(all)) flush(each);
+    bindMeasures(measures, report, component, variant);
+  }
+  /**
+   * A state (Spec 011 ③, plan ③ D-14): the variant holds the control — a column, centred, with
+   * the border's colour and width bound and its line as the variant says: a dash pattern where
+   * the stroke is dashed (written, Figma binds none), the bound paint not shown where it is none
+   * — with the indicator (the arc of the web, imported once; its size bound, the vector's stroke
+   * bound to indicator.color; invisible where that colour is none), the text as the label
+   * property, and the actions placeholder, invisible where the constraint forbids actions (while
+   * loading). The motion part binds nothing here: Figma has no duration to bind, as for the
+   * butono.
+   */
+  async function drawState(node, component, variant, report, labels) {
+    const control = part(node, "control", () => figma.createFrame());
+    const indicator = part(control, "indicator", () =>
+      typeof component.sign === "string" ? figma.createNodeFromSvg(component.sign) : figma.createFrame(),
+    );
+    const mark = typeof component.sign === "string" ? markOf(indicator) : undefined;
+    const text = part(control, "text", () => figma.createText());
+    const actions = part(control, "actions", () => figma.createFrame());
+    [indicator, text, actions].forEach((child, index) => {
+      if (control.children.indexOf(child) !== index) control.insertChild(index, child);
+    });
+    await loadCurrentFont(text);
+    writeCase(component, variant, text);
+    if (variant.font !== undefined) {
+      write(text, "fontName", fonts.get(variant.font.family + " " + variant.font.style));
+    }
+    labels.push(text);
+    const frames = [node, control, indicator, actions];
+    for (const frame of frames) own(frame, NEUTRAL);
+    own(text, NEUTRAL_TEXT);
+    own(node, HUG_LAYOUT);
+    own(control, STATE_LAYOUT);
+    own(indicator, INDICATOR_LAYOUT);
+    own(actions, PLACEHOLDER_LAYOUT);
+    const hidden = variant.hidden || [];
+    // A part not drawn in this variant is not shown and takes no place (Spec 011 ③): the arc
+    // when the area is empty, the actions while it loads.
+    own(indicator, { visible: hidden.indexOf("indicator") === -1 });
+    own(actions, { visible: hidden.indexOf("actions") === -1 });
+    if (mark) own(mark, arcNeutral(component.sign));
+    // The dash pattern of the border (own() would empty a list): the plan's numbers, or none.
+    if (variant.stroke !== undefined) gather(control).dashPattern = variant.stroke.dashPattern.slice();
+    for (const child of frames.concat([text])) own(child, IN_FLOW);
+    own(text, TEXT_SIZING);
+    const nodes = { control, indicator, text, actions };
+    if (mark) nodes.mark = mark;
+    const measures = bind(nodes, variant, variables, component.structure);
+    // A stroke that is none keeps its binding and shows nothing: the paint is there, invisible —
+    // as on the web, where the colour is bound and the style is none.
+    if (variant.stroke !== undefined && variant.stroke.style === "none") {
+      for (const paint of gather(control).strokes || []) paint.visible = false;
+    }
+    for (const each of frames.concat([text]).concat(mark ? [mark] : [])) flush(each);
+    bindMeasures(measures, report, component, variant);
+  }
+  /**
    * The example frame „mit Hintergrund" of a dialog (Spec 011 ②, spec „dialogo – Figma"): the
    * default variant drawn once more on a frame whose fill is bound to the backdrop, found by its
    * mark \`example\` or created, placed in the frame „Eroj" right after the set (F-8) — Figma lays
@@ -1840,6 +2121,8 @@ async function applyComponents(variables, warnings) {
     progress.components.push(report);
     const made = [];
     const labels = [];
+    // The nodes a BOOLEAN property shows or hides (Spec 011 ③), connected once the set exists.
+    const toggled = [];
     for (const variant of component.variants) {
       const name = variantName(variant.props);
       const existing = set === undefined ? undefined : ours(set, "variant", name);
@@ -1858,6 +2141,23 @@ async function applyComponents(variables, warnings) {
       // A dialog (Spec 011 ②) is drawn as a surface with its parts, in a function of its own.
       if (component.structure === "dialog") {
         await drawDialog(node, component, variant, report, labels, undefined);
+        if (existing === undefined) made.push(node);
+        continue;
+      }
+      // A badge, a notice and a state (Spec 011 ③) are drawn in functions of their own: no focus
+      // ring, the control directly under the variant.
+      if (component.structure === "badge") {
+        await drawBadge(node, component, variant, report, labels);
+        if (existing === undefined) made.push(node);
+        continue;
+      }
+      if (component.structure === "notice") {
+        await drawNotice(node, component, variant, report, labels, toggled);
+        if (existing === undefined) made.push(node);
+        continue;
+      }
+      if (component.structure === "state") {
+        await drawState(node, component, variant, report, labels);
         if (existing === undefined) made.push(node);
         continue;
       }
@@ -2132,6 +2432,25 @@ async function applyComponents(variables, warnings) {
         write(label, "componentPropertyReferences", { characters: key });
       }
     }
+    // A boolean prop that shows a part (Spec 011 ③, plan ③ D-14: dismissible) is a BOOLEAN
+    // property of the set, declared once like the label, its default the Skemo's; the part's
+    // visibility is connected to it, so an instance switches the part on and off.
+    for (const toggle of component.toggles || []) {
+      const definitions = set.componentPropertyDefinitions || {};
+      let key = Object.keys(definitions).find(
+        (candidate) =>
+          candidate.split("#")[0] === toggle.property && definitions[candidate].type === "BOOLEAN",
+      );
+      if (key === undefined) key = set.addComponentProperty(toggle.property, "BOOLEAN", toggle.defaultValue);
+      else if (definitions[key].defaultValue !== toggle.defaultValue) {
+        set.editComponentProperty(key, { defaultValue: toggle.defaultValue });
+      }
+      for (const each of toggled) {
+        if (each.part !== toggle.part) continue;
+        write(each.node, "visible", toggle.defaultValue);
+        write(each.node, "componentPropertyReferences", { visible: key });
+      }
+    }
     component.variants.forEach((variant, index) => {
       const node = ours(set, "variant", variantName(variant.props));
       if (node !== undefined && set.children.indexOf(node) !== index) set.insertChild(index, node);
@@ -2290,8 +2609,10 @@ function measureLayout(set, component) {
     .map((variant) => ours(set, "variant", variantName(variant.props)))
     .filter((node) => node !== undefined);
   const boxes = nodes.map((node) => {
-    // The content of a variant: its ring, or the surface of a dialog (Spec 011 ②).
-    const content = ours(node, "part", "focus-ring") || ours(node, "part", "surface");
+    // The content of a variant: its ring, the surface of a dialog (Spec 011 ②), or the control
+    // directly under it (Spec 011 ③: badge, notice, state).
+    const content =
+      ours(node, "part", "focus-ring") || ours(node, "part", "surface") || ours(node, "part", "control");
     return {
       name: node.name,
       x: node.x,
@@ -2426,6 +2747,20 @@ function measureLayout(set, component) {
       }
       const reasonField = found.content === undefined ? undefined : ours(found.content, "part", "reason-field");
       if (reasonField !== undefined) found["reason-field"] = reasonField;
+    }
+    // A badge, a notice and a state (Spec 011 ③): the control directly under the variant with its
+    // parts; the texts of a notice in their column.
+    const direct = ours(node, "part", "control");
+    if (direct !== undefined && found.control === undefined) {
+      found.control = direct;
+      for (const name of ["text", "indicator", "texts", "actions", "dismiss"]) {
+        const each = ours(direct, "part", name);
+        if (each !== undefined) found[name] = each;
+      }
+      for (const name of ["heading", "message", "details", "actions"]) {
+        const each = found.texts === undefined ? undefined : ours(found.texts, "part", name);
+        if (each !== undefined) found[name] = each;
+      }
     }
     return found;
   };

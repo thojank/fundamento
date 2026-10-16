@@ -22,6 +22,7 @@ import {
   figmaValues,
   labelDefaultOf,
   resolveFigmaPlan,
+  STATE_SIGN,
   structureOf,
   styleOfWeight,
   TEXT_CASE_VARIES,
@@ -38,6 +39,13 @@ const files = FIGMA_CELO.generate(prepared.input);
 const plan = JSON.parse(
   files.find((file) => file.path === "figma/plan.json")?.text ?? "{}",
 ) as FigmaPlan;
+
+/**
+ * The set of the butono in a list of components: the Ero order sorts the avizo before it since
+ * Spec 011 ③, so the butono is no longer the first set of the plan.
+ */
+const butonoOf = <T>(components: readonly T[] | undefined): T | undefined =>
+  components?.find((component) => (component as { set?: unknown }).set === "butono");
 
 describe("Figma plan (T015)", () => {
   it("has one collection per Dimensio plus the single-mode collection fundamento", () => {
@@ -199,7 +207,7 @@ describe("resolved paint values of the Figma side (F8)", () => {
     expect(values["surface.fill@emphasis=low,intent=neutral,size=medium,state=hover"]).toBe(
       "#000000/0.08",
     );
-    const variant = plan.components[0]?.variants.find(
+    const variant = butonoOf(plan.components)?.variants.find(
       (entry) => entry.props.emphasis === "low" && entry.props.state === "hover",
     );
     expect(variant?.paints?.["surface.fill"]).toEqual({ hex: "#000000", opacity: 0.08 });
@@ -230,7 +238,7 @@ describe("resolved paint values of the Figma side (F8)", () => {
       FIGMA_CELO.generate(opaque.input).find((file) => file.path === "figma/plan.json")?.text ??
         "{}",
     ) as FigmaPlan;
-    const variant = opaquePlan.components[0]?.variants.find(
+    const variant = butonoOf(opaquePlan.components)?.variants.find(
       (entry) => entry.props.emphasis === "low" && entry.props.state === "hover",
     );
     expect(variant?.paints?.["surface.fill"]).toEqual({ hex: "#000000", alphaVariesByMode: true });
@@ -698,7 +706,7 @@ describe("capitals and tracking reach the Figma plan (F31)", () => {
       FIGMA_CELO.generate(mixed.input).find((file) => file.path === "figma/plan.json")?.text ??
         "{}",
     ) as FigmaPlan;
-    const medium = mixedPlan.components[0]?.variants.find(
+    const medium = butonoOf(mixedPlan.components)?.variants.find(
       (entry) => entry.props.size === "medium" && entry.props.state === "rest",
     );
     expect(medium?.textCase).toBe(TEXT_CASE_VARIES);
@@ -722,14 +730,18 @@ describe("Figma plan for the ligilo (Spec 008 T017)", () => {
 
   it("plans the sets in Ero order, butono first, and gives the ligilo placement × size × state", () => {
     expect(plan.components.map((component) => component.set)).toEqual([
+      // Spec 011 ③: the avizo, the insigno and the plenstato, in the Ero order like every set.
+      "avizo",
       "butono",
       // Spec 011 ②: the dialogo and the tekstareo, in the Ero order like every set.
       "dialogo",
       "elektilo",
       "elekto",
+      "insigno",
       "kampo",
       "ligilo",
       "markobutono",
+      "plenstato",
       "sxaltilo",
       "tekstareo",
     ]);
@@ -764,7 +776,7 @@ describe("Figma plan for the ligilo (Spec 008 T017)", () => {
     );
     expect(variant("standalone", "medium", "rest")?.bindings["underline.width"]).toBeUndefined();
     // The butono knows no underline.
-    expect(plan.components[0]?.variants[0]?.underline).toBeUndefined();
+    expect(butonoOf(plan.components)?.variants[0]?.underline).toBeUndefined();
   });
 
   it("takes the running text's role for the inherited typography and binds it (E6, D-11)", () => {
@@ -795,7 +807,7 @@ describe("Figma plan for the ligilo (Spec 008 T017)", () => {
   it("grows no focus radius for an Ero without a radius; the butono keeps its radii (F32)", () => {
     expect(variant("standalone", "medium", "focus")?.radii).toBeUndefined();
     expect(variant("standalone", "medium", "focus")?.focusVisible).toBe(true);
-    expect(plan.components[0]?.variants[0]?.radii).toEqual({
+    expect(butonoOf(plan.components)?.variants[0]?.radii).toEqual({
       "focus-gap": "radius/focus/gap",
       "focus-ring": "radius/focus/ring",
     });
@@ -825,7 +837,7 @@ describe("Figma plan for the kampo (Spec 009 T010)", () => {
 
   it("plans a field of size × state with the properties of the Skemo", () => {
     expect(set?.structure).toBe("field");
-    expect(plan.components[0]?.structure).toBe("control");
+    expect(butonoOf(plan.components)?.structure).toBe("control");
     // Spec 011 ① (E8): the three new kinds and min, max, autocomplete are properties of the plan,
     // nothing is drawn differently (a date shows the closed field, like the elektilo; E3).
     expect(set?.properties).toEqual({
@@ -863,10 +875,10 @@ describe("Figma plan for the kampo (Spec 009 T010)", () => {
     expect(rest?.notDrawn?.["placeholder.color"]).toBeUndefined();
     expect(rest?.paints?.["placeholder.color"]).toMatchObject({ hex: expect.stringMatching(/^#/) });
     expect(set?.texts).toEqual({ text: "Beispiel", help: "Hinweis", error: "Fehler" });
-    expect(plan.components[0]?.texts).toBeUndefined();
+    expect(butonoOf(plan.components)?.texts).toBeUndefined();
     expect(rest?.geometry?.["box.height"]).toBe("40px");
     // Fonts of every text part, over every mode: the caption and the body roles too.
-    expect((set?.fonts?.length ?? 0) >= (plan.components[0]?.fonts?.length ?? 0)).toBe(true);
+    expect((set?.fonts?.length ?? 0) >= (butonoOf(plan.components)?.fonts?.length ?? 0)).toBe(true);
   });
 
   it("states the kampo in the parity inventory with its six states", () => {
@@ -904,6 +916,9 @@ describe("the label default of a set follows its a11y role (M-3)", () => {
     );
     // Spec 010 ①: a switch names a setting (plan D-10, for the maintainer to confirm).
     expect(defaults).toEqual({
+      // Spec 011 ③ (plan ③ D-14): a notice (role status) names its message (for the maintainer
+      // to confirm).
+      avizo: "Meldung",
       butono: "Aktion",
       // Spec 011 ②: a dialog's heading names the decision (for the maintainer to confirm).
       dialogo: "Entscheidung",
@@ -911,10 +926,15 @@ describe("the label default of a set follows its a11y role (M-3)", () => {
       elektilo: "Auswahl",
       // Spec 010 ③: a radio group names its question (plan ③ D-07, for the maintainer to confirm).
       elekto: "Frage",
+      // Spec 011 ③: a badge (role generic) names a status (for the maintainer to confirm).
+      insigno: "Status",
       kampo: "Beschriftung",
       ligilo: "Ziel",
       // Spec 010 ②: a checkbox names an option (plan ② D-11, for the maintainer to confirm, O-x).
       markobutono: "Option",
+      // Spec 011 ③: a loading or empty state shares the role status with the notice; its word is
+      // the structure's, not the role's (for the maintainer to confirm).
+      plenstato: "Zustand",
       sxaltilo: "Einstellung",
       // Spec 011 ②: a text area is a textbox, so the kampo's word applies.
       tekstareo: "Beschriftung",
@@ -931,6 +951,14 @@ describe("the label default of a set follows its a11y role (M-3)", () => {
     expect(labelDefaultOf("combobox")).toBe("Auswahl");
     expect(labelDefaultOf("dialog")).toBe("Entscheidung");
     expect(labelDefaultOf("slider")).toBe("Aktion");
+  });
+
+  it("takes the word of the structure before the word of the role (Spec 011 ③)", () => {
+    expect(labelDefaultOf("generic")).toBe("Status");
+    expect(labelDefaultOf("status")).toBe("Meldung");
+    expect(labelDefaultOf("status", "notice")).toBe("Meldung");
+    expect(labelDefaultOf("status", "state")).toBe("Zustand");
+    expect(labelDefaultOf("button", "control")).toBe("Aktion");
   });
 });
 
@@ -1005,7 +1033,7 @@ describe("Figma plan for the sxaltilo (Spec 010 ①)", () => {
     expect(variant("true", "medium", "rest")?.position).toBe("end");
     expect(variant("true", "small", "disabled")?.position).toBe("end");
     expect(variant("true", "medium", "rest")?.bindings["indicator.position"]).toBeUndefined();
-    expect(plan.components[0]?.variants[0]?.position).toBeUndefined();
+    expect(butonoOf(plan.components)?.variants[0]?.position).toBeUndefined();
   });
 
   it("binds track, border and knob by checked and state, and draws them (D-06)", () => {
@@ -1494,7 +1522,7 @@ describe("Figma plan for the dialogo (Spec 011 ②)", () => {
     }
     // Every variant carries it; no other set does.
     expect(set?.variants.every((entry) => entry.shadow !== undefined)).toBe(true);
-    expect(plan.components[0]?.variants[0]?.shadow).toBeUndefined();
+    expect(butonoOf(plan.components)?.variants[0]?.shadow).toBeUndefined();
   });
 
   it("takes the heading's role for the font and the text case of a set without a label part", () => {
@@ -1515,7 +1543,7 @@ describe("Figma plan for the dialogo (Spec 011 ②)", () => {
       },
       padding: plan.section?.gap,
     });
-    expect(plan.components[0]?.example).toBeUndefined();
+    expect(butonoOf(plan.components)?.example).toBeUndefined();
   });
 
   it("states the dialogo in the parity inventory: size and reason, the state rest, the measures and colours per variant", () => {
@@ -1589,5 +1617,309 @@ describe("Figma plan for the dialogo (Spec 011 ②)", () => {
     expect(
       Object.keys(items.dialogo?.values ?? {}).filter((key) => key.startsWith("action-")),
     ).toEqual([]);
+  });
+});
+
+// Spec 011 ③ (spec „insigno", G2, G7; plan ③ D-14): a badge is static text with the role generic,
+// drawn as a structure of its own — the pill (surface fill, border, the radius of the box, the
+// minimum height and the inline padding by size) with one text, the label property, in the role
+// of the text part. Axes intent × size, one state (G2). The slot description is hidden
+// (hidden: true): spoken, never drawn — no word of it in the set. The text part is the label here,
+// so the kampo's release of the typed text (B-2) does not apply: its colour is drawn.
+describe("Figma plan for the insigno (Spec 011 ③)", () => {
+  const set = plan.components.find((component) => component.set === "insigno");
+  const insigno = prepared.input.modelo.eroj.find((entry) => entry.ero.name === "insigno");
+  const variant = (intent: string, size: string) =>
+    set?.variants.find((entry) => entry.props.intent === intent && entry.props.size === size);
+
+  it("plans a badge of intent × size in one state, with the purpose and the word Status; nothing of the hidden slot", () => {
+    expect(structureOf("generic")).toBe("badge");
+    expect(set?.structure).toBe("badge");
+    expect(set?.properties).toEqual({
+      intent: ["neutral", "info", "success", "warning", "danger"],
+      size: ["small", "medium"],
+      state: ["rest"],
+    });
+    expect(set?.variants).toHaveLength(5 * 2);
+    expect(Object.keys(set?.variants[0]?.props ?? {})).toEqual(["intent", "size", "state"]);
+    expect(set?.grid).toMatchObject({ rows: 10, columns: 1 });
+    expect(set?.description).toBe(insigno?.uzo?.purpose);
+    expect(set?.label?.defaultValue).toBe("Status");
+    expect(set?.texts).toBeUndefined();
+    expect(set?.sign).toBeUndefined();
+    expect(set?.toggles).toBeUndefined();
+    expect(set?.example).toBeUndefined();
+    expect(
+      set?.variants.every((entry) => entry.focusVisible === false && entry.radii === undefined),
+    ).toBe(true);
+  });
+
+  it("binds the pill by intent and size and draws the text's colour: the text is the label, not a typed text", () => {
+    const rest = variant("neutral", "medium");
+    expect(rest?.bindings).toEqual({
+      "surface.fill": "color/background/sunken",
+      "border.color": "color/border/default",
+      "border.width": "border/width/default",
+      "text.color": "color/text/subtle",
+      "text.typography": "typography/label/2",
+      "box.height": "size/icon/large",
+      "box.inline-padding": "spacing/small",
+      "box.radius": "radius/role/pill",
+    });
+    expect(variant("danger", "small")?.bindings).toMatchObject({
+      "surface.fill": "color/status/danger/subtle",
+      "border.color": "color/status/danger/border",
+      "text.color": "color/status/danger/text",
+      "box.height": "size/icon/medium",
+      "box.inline-padding": "spacing/xsmall",
+    });
+    expect(Object.keys(rest?.paints ?? {}).sort()).toEqual([
+      "border.color",
+      "surface.fill",
+      "text.color",
+    ]);
+    expect(Object.keys(rest?.geometry ?? {}).sort()).toEqual([
+      "border.width",
+      "box.height",
+      "box.inline-padding",
+      "box.radius",
+    ]);
+    expect(rest?.notDrawn).toEqual({});
+    expect(rest?.hidden).toBeUndefined();
+    expect(rest?.stroke).toBeUndefined();
+    expect(rest?.font).toEqual({ family: "Geist", style: "Medium" });
+    expect(typeof rest?.textCase).toBe("string");
+  });
+
+  it("states the insigno in the parity inventory: intent and size, the state rest, colours and measures per variant", () => {
+    const items = figmaPlanInventory(plan);
+    expect(items.insigno?.props).toEqual({
+      intent: ["neutral", "info", "success", "warning", "danger"],
+      size: ["small", "medium"],
+    });
+    expect(items.insigno?.states).toEqual(["rest"]);
+    expect(items.insigno?.values["text.color@intent=neutral,size=medium,state=rest"]).toMatch(
+      /^#[0-9a-f]{6}/,
+    );
+    expect(items.insigno?.values["surface.fill@intent=info,size=small,state=rest"]).toMatch(
+      /^#[0-9a-f]{6}/,
+    );
+    expect(items.insigno?.values["border.color@intent=danger,size=small,state=rest"]).toMatch(
+      /^#[0-9a-f]{6}/,
+    );
+    expect(items.insigno?.values["box.height@intent=neutral,size=small,state=rest"]).toMatch(/px$/);
+    expect(items.insigno?.values["box.radius@intent=neutral,size=small,state=rest"]).toMatch(/px$/);
+    expect(items.insigno?.values["border.width@intent=neutral,size=small,state=rest"]).toBe("1px");
+  });
+});
+
+// Spec 011 ③ (spec „avizo", G2, G4, G7; plan ③ D-14): a notice has the role status and no
+// indicator, so it is drawn as a notice — the surface (a row) whose stroke at the inline start is
+// the accent, the texts in a column (heading, the message as the label property, details, the
+// actions as a placeholder) and the dismiss frame at the end. Axis intent, one state: hover and
+// focus belong to the composed dismiss butono (G2). dismissible keys no part and is no axis; it
+// is a BOOLEAN property of the set that shows the dismiss part. The words of heading and details
+// are the Vitrino's slot words (F-5).
+describe("Figma plan for the avizo (Spec 011 ③)", () => {
+  const set = plan.components.find((component) => component.set === "avizo");
+  const avizo = prepared.input.modelo.eroj.find((entry) => entry.ero.name === "avizo");
+  const variant = (intent: string) => set?.variants.find((entry) => entry.props.intent === intent);
+
+  it("plans a notice of intent in one state; dismissible a BOOLEAN that shows the dismiss part; the word Meldung and the words of heading and details", () => {
+    expect(structureOf("status")).toBe("notice");
+    expect(structureOf("status", ["surface", "accent", "heading", "message", "dismiss"])).toBe(
+      "notice",
+    );
+    expect(set?.structure).toBe("notice");
+    expect(set?.properties).toEqual({
+      intent: ["info", "success", "warning", "danger"],
+      dismissible: "BOOLEAN",
+      state: ["rest"],
+    });
+    expect(set?.variants).toHaveLength(4);
+    expect(Object.keys(set?.variants[0]?.props ?? {})).toEqual(["intent", "state"]);
+    expect(set?.grid).toMatchObject({ rows: 4, columns: 1 });
+    expect(set?.description).toBe(avizo?.uzo?.purpose);
+    expect(set?.label?.defaultValue).toBe("Meldung");
+    expect(set?.texts).toEqual({ heading: "Überschrift", details: "Einzelheit" });
+    expect(set?.toggles).toEqual([
+      { property: "dismissible", part: "dismiss", defaultValue: false },
+    ]);
+    expect(set?.sign).toBeUndefined();
+    expect(set?.example).toBeUndefined();
+    expect(set?.variants.every((entry) => entry.focusVisible === false)).toBe(true);
+  });
+
+  it("binds surface and accent by intent, the three texts, the gaps, the dismiss size and the padding; draws them all", () => {
+    const info = variant("info");
+    expect(info?.bindings).toEqual({
+      "surface.fill": "color/status/info/weak",
+      "accent.color": "color/status/info/border",
+      "accent.width": "border/width/strong",
+      "heading.color": "color/text/default",
+      "heading.typography": "typography/label/1",
+      "message.color": "color/text/default",
+      "message.typography": "typography/body/1",
+      "details.color": "color/text/default",
+      "details.typography": "typography/caption",
+      "actions.gap": "spacing/small",
+      "dismiss.size": "size/control/small",
+      "box.inline-padding": "spacing/medium",
+      "box.gap": "spacing/small",
+      "box.radius": "radius/role/surface",
+    });
+    expect(variant("danger")?.bindings).toMatchObject({
+      "surface.fill": "color/status/danger/weak",
+      "accent.color": "color/status/danger/border",
+    });
+    expect(Object.keys(info?.paints ?? {}).sort()).toEqual([
+      "accent.color",
+      "details.color",
+      "heading.color",
+      "message.color",
+      "surface.fill",
+    ]);
+    expect(Object.keys(info?.geometry ?? {}).sort()).toEqual([
+      "accent.width",
+      "actions.gap",
+      "box.gap",
+      "box.inline-padding",
+      "box.radius",
+      "dismiss.size",
+    ]);
+    expect(info?.notDrawn).toEqual({});
+    expect(info?.hidden).toBeUndefined();
+    expect(info?.stroke).toBeUndefined();
+    // The message is the label: its role (body.1) gives the font and the case of the set.
+    expect(info?.font).toEqual({ family: "Geist", style: "Regular" });
+    expect(set?.fonts?.some((font) => font.family === "Geist" && font.style === "Medium")).toBe(
+      true,
+    );
+    expect(set?.fonts?.some((font) => font.family === "Archivo" && font.style === "Black")).toBe(
+      true,
+    );
+  });
+
+  it("states the avizo in the parity inventory: intent, dismissible a boolean, the state rest, surface and accent per intent", () => {
+    const items = figmaPlanInventory(plan);
+    expect(items.avizo?.props).toEqual({
+      intent: ["info", "success", "warning", "danger"],
+      dismissible: ["boolean"],
+    });
+    expect(items.avizo?.states).toEqual(["rest"]);
+    expect(items.avizo?.values["surface.fill@intent=info,state=rest"]).toMatch(/^#[0-9a-f]{6}/);
+    expect(items.avizo?.values["accent.color@intent=danger,state=rest"]).toMatch(/^#[0-9a-f]{6}/);
+    expect(items.avizo?.values["message.color@intent=success,state=rest"]).toMatch(/^#[0-9a-f]{6}/);
+    expect(items.avizo?.values["accent.width@intent=info,state=rest"]).toMatch(/px$/);
+    expect(items.avizo?.values["dismiss.size@intent=info,state=rest"]).toMatch(/px$/);
+    expect(items.avizo?.values["box.inline-padding@intent=warning,state=rest"]).toMatch(/px$/);
+  });
+});
+
+// Spec 011 ③ (spec „plenstato", G2, G4, G7; plan ③ D-14): a loading or empty state shares the
+// role status with the notice; its indicator tells them apart, so it is drawn as a state — a
+// column with the border as a stroke (dashed where the binding is stroke.dashed, none where it is
+// none: a term the plan states per variant, written like the underline, since Figma binds no dash
+// pattern), the arc of the web as its sign (hidden where its colour is none), the text as the
+// label property, and the actions as a placeholder hidden where the Skemo's constraint forbids
+// them (an action while loading). kind is a duty without a default. The motion part binds its two
+// variables and draws nothing, like the butono's: no inventory compares a duration.
+describe("Figma plan for the plenstato (Spec 011 ③)", () => {
+  const set = plan.components.find((component) => component.set === "plenstato");
+  const plenstato = prepared.input.modelo.eroj.find((entry) => entry.ero.name === "plenstato");
+  const variant = (kind: string) => set?.variants.find((entry) => entry.props.kind === kind);
+
+  it("plans a state of kind in one state, with the purpose, the word Zustand (the structure's, not the role's) and the arc as its sign", () => {
+    expect(structureOf("status", ["surface", "border", "indicator", "text", "motion"])).toBe(
+      "state",
+    );
+    expect(set?.structure).toBe("state");
+    expect(set?.properties).toEqual({ kind: ["loading", "empty"], state: ["rest"] });
+    expect(set?.variants).toHaveLength(2);
+    expect(Object.keys(set?.variants[0]?.props ?? {})).toEqual(["kind", "state"]);
+    expect(set?.grid).toMatchObject({ rows: 2, columns: 1 });
+    expect(set?.description).toBe(plenstato?.uzo?.purpose);
+    expect(set?.label?.defaultValue).toBe("Zustand");
+    expect(set?.sign).toBe(STATE_SIGN);
+    expect(STATE_SIGN).toContain('d="M8 2a6 6 0 1 1-6 6"');
+    expect(STATE_SIGN).toContain('stroke="currentColor"');
+    expect(STATE_SIGN).toContain('width="16" height="16"');
+    expect(set?.texts).toBeUndefined();
+    expect(set?.toggles).toBeUndefined();
+    expect(set?.example).toBeUndefined();
+    expect(set?.variants.every((entry) => entry.focusVisible === false)).toBe(true);
+  });
+
+  it("binds border, indicator, text and motion; the stroke dashed for empty and none for loading; the indicator's colour none for empty", () => {
+    const loading = variant("loading");
+    const empty = variant("empty");
+    expect(loading?.bindings).toEqual({
+      "surface.radius": "radius/role/surface",
+      "border.color": "color/border/subtle",
+      "border.width": "border/width/default",
+      "indicator.size": "size/icon/small",
+      "indicator.color": "color/status/info/basic",
+      "text.color": "color/text/muted",
+      "text.typography": "typography/body/1",
+      "actions.gap": "spacing/small",
+      "motion.duration": "motion/duration/slow",
+      "motion.easing": "motion/easing/standard",
+      "box.inline-padding": "spacing/large",
+      "box.gap": "spacing/small",
+    });
+    expect(empty?.bindings).toMatchObject({ "border.stroke": "stroke/dashed" });
+    expect(empty?.bindings["indicator.color"]).toBeUndefined();
+    expect(loading?.bindings["border.stroke"]).toBeUndefined();
+    // The stroke as a term per variant, with the pattern the plugin writes (a number, not bound).
+    expect(loading?.stroke).toEqual({ part: "border", style: "none", dashPattern: [] });
+    expect(empty?.stroke).toMatchObject({ part: "border", style: "dashed" });
+    expect(empty?.stroke?.dashPattern).toHaveLength(2);
+    expect(empty?.stroke?.dashPattern.every((length) => length > 0)).toBe(true);
+    // Hidden: the indicator where its colour is none; the actions where the constraint forbids
+    // them (slot:actions filled ⇒ kind empty).
+    expect(empty?.hidden).toEqual(["indicator"]);
+    expect(loading?.hidden).toEqual(["actions"]);
+    expect(Object.keys(loading?.paints ?? {}).sort()).toEqual([
+      "border.color",
+      "indicator.color",
+      "text.color",
+    ]);
+    expect(Object.keys(empty?.paints ?? {}).sort()).toEqual(["border.color", "text.color"]);
+    expect(Object.keys(loading?.geometry ?? {}).sort()).toEqual([
+      "actions.gap",
+      "border.width",
+      "box.gap",
+      "box.inline-padding",
+      "indicator.size",
+      "surface.radius",
+    ]);
+    expect(loading?.notDrawn).toEqual({});
+    expect(loading?.font).toEqual({ family: "Geist", style: "Regular" });
+    // The stroke token reaches the plan as a STRING variable; its value is the term.
+    const dashed = plan.collections
+      .flatMap((collection) => collection.variables)
+      .find((variableOfPlan) => variableOfPlan.name === "stroke/dashed");
+    expect(dashed?.type).toBe("STRING");
+    expect(Object.values(dashed?.values ?? {}).length).toBeGreaterThan(0);
+    expect(Object.values(dashed?.values ?? {}).every((value) => value === "dashed")).toBe(true);
+  });
+
+  it("states the plenstato in the parity inventory: kind, the state rest, the indicator's colour while loading only, no motion", () => {
+    const items = figmaPlanInventory(plan);
+    expect(items.plenstato?.props).toEqual({ kind: ["loading", "empty"] });
+    expect(items.plenstato?.states).toEqual(["rest"]);
+    expect(items.plenstato?.values["indicator.color@kind=loading,state=rest"]).toMatch(
+      /^#[0-9a-f]{6}/,
+    );
+    expect(items.plenstato?.values["indicator.color@kind=empty,state=rest"]).toBeUndefined();
+    expect(items.plenstato?.values["border.color@kind=empty,state=rest"]).toMatch(/^#[0-9a-f]{6}/);
+    expect(items.plenstato?.values["text.color@kind=loading,state=rest"]).toMatch(/^#[0-9a-f]{6}/);
+    expect(items.plenstato?.values["indicator.size@kind=loading,state=rest"]).toMatch(/px$/);
+    expect(items.plenstato?.values["border.width@kind=empty,state=rest"]).toBe("1px");
+    expect(
+      Object.keys(items.plenstato?.values ?? {}).some(
+        (key) => key.startsWith("motion.") || key.startsWith("border.stroke"),
+      ),
+    ).toBe(false);
   });
 });

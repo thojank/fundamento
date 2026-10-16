@@ -1020,17 +1020,27 @@ export function figmaDouble(
     // - createNodeFromSvg puts a FRAME of the SVG's width and height on the current page, with a
     //   white fill like any new frame, holding one VECTOR per path of the SVG;
     // - a vector with constraints SCALE follows the size of its frame, also a size bound to a
-    //   variable (the double keeps the vector's numbers: it computes no constraints).
+    //   variable (the double keeps the vector's numbers: it computes no constraints);
+    // - Spec 011 ③ (the arc of the plenstato): a path drawn with `stroke` on the svg element
+    //   arrives as a vector with that stroke (currentColor reads black) at the SVG's stroke-width,
+    //   and `fill="none"` as a vector without fill — a belief until measured in f10b-5.
     createNodeFromSvg: (svg: string) => {
       const size = (name: string) =>
         Number(new RegExp(`${name}="([0-9.]+)"`).exec(svg)?.[1] ?? "100");
+      const attribute = (name: string) => new RegExp(`\\s${name}="([^"]*)"`).exec(svg)?.[1];
       const frame = onPage(node("FRAME", "Frame", counts, context));
       frame.properties.width = size("width");
       frame.properties.height = size("height");
+      const stroked = attribute("stroke") !== undefined && attribute("stroke") !== "none";
       for (const _path of svg.match(/<path /g) ?? []) {
         const vector = node("VECTOR", "Vector", counts, context);
         vector.properties.width = size("width");
         vector.properties.height = size("height");
+        if (attribute("fill") === "none") vector.properties.fills = [];
+        if (stroked) {
+          vector.properties.strokes = [{ type: "SOLID", color: { r: 0, g: 0, b: 0 } }];
+          vector.properties.strokeWeight = Number(attribute("stroke-width") ?? "1");
+        }
         frame.appendChild(vector);
       }
       return frame;
@@ -1060,16 +1070,17 @@ export function figmaDouble(
     },
     combineAsVariants: (components: DoubleNode[], parent: DoubleNode) => {
       const set = node("COMPONENT_SET", "Component Set", counts, context);
-      // Component properties live on the set (F11): a TEXT property the labels are connected to.
-      const definitions: Record<string, { type: string; defaultValue: string }> = {};
+      // Component properties live on the set (F11): a TEXT property the labels are connected to;
+      // a BOOLEAN property a layer's visibility is connected to (Spec 011 ③, dismissible).
+      const definitions: Record<string, { type: string; defaultValue: string | boolean }> = {};
       set.properties.componentPropertyDefinitions = definitions;
       Object.assign(set, {
-        addComponentProperty(name: string, type: string, defaultValue: string) {
+        addComponentProperty(name: string, type: string, defaultValue: string | boolean) {
           const key = `${name}#${id("property")}`;
           definitions[key] = { type, defaultValue };
           return key;
         },
-        editComponentProperty(key: string, change: { defaultValue?: string }) {
+        editComponentProperty(key: string, change: { defaultValue?: string | boolean }) {
           const definition = definitions[key];
           if (definition === undefined) throw new Error(`No component property ${key}.`);
           if (change.defaultValue !== undefined) definition.defaultValue = change.defaultValue;
