@@ -43,6 +43,9 @@ export const STRUCTURAL_PROPERTIES: readonly string[] = [
   // Spec 011 ① (O-8, Spec 010 ② B-4): whether a word longer than the line breaks inside the word
   // is structure (anywhere, normal); the label of an Ero that may wrap carries it.
   "overflow-wrap",
+  // Spec 011 ② (plan ② D-11): whether a person may drag an area taller (vertical, none) is
+  // structure; the text area resizes vertically only.
+  "resize",
 ];
 
 /** Design properties: their value must come from a token (prefix match on the property name). */

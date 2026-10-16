@@ -15,7 +15,15 @@
  * a select (Spec 010 ④, D-06): the platform's own select, role combobox from the browser, its
  * options mirrored from the light DOM, the list the platform's (E3).
  */
-export type HostControl = "button" | "a" | "input" | "toggle" | "group" | "select";
+export type HostControl =
+  | "button"
+  | "a"
+  | "input"
+  | "textarea"
+  | "toggle"
+  | "group"
+  | "select"
+  | "dialog";
 
 export interface ElementNames {
   /** `fm-butono` */
@@ -44,10 +52,15 @@ export interface ElementNames {
   inline?: boolean;
 }
 
-/** The native control of an a11y role; everything that is not a link is a button. */
-export function hostOf(role: string): HostControl {
+/**
+ * The native control of an a11y role; everything that is not a link is a button. A textbox over
+ * several lines (Spec 011 ②, D-11: the Skemo has rows) is the platform's textarea; a dialog
+ * (Spec 011 ②, D-12) the platform's dialog, opened modal.
+ */
+export function hostOf(role: string, multiline = false): HostControl {
   if (role === "link") return "a";
-  if (role === "textbox") return "input";
+  if (role === "textbox") return multiline ? "textarea" : "input";
+  if (role === "dialog") return "dialog";
   if (role === "switch" || role === "checkbox") return "toggle";
   if (role === "radiogroup") return "group";
   if (role === "combobox") return "select";
@@ -124,8 +137,22 @@ function textsMarkup(slots: NonNullable<ElementNames["slots"]>): string {
  * native input, help and error below, each in its own part. The texts of the slots are the
  * description of the input (a11y.description), the error announced live.
  */
-function fieldMarkup(slots: NonNullable<ElementNames["slots"]>): string {
-  return `<div part="field"><label part="label" for="control"><slot></slot><span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span></label><input part="control" id="control">${textsMarkup(slots)}<span id="fm-texts" hidden></span></div>`;
+function fieldMarkup(slots: NonNullable<ElementNames["slots"]>, textarea = false): string {
+  // A text area (Spec 011 ②, D-11): the platform's textarea in place of the input.
+  const native = textarea
+    ? '<textarea part="control" id="control"></textarea>'
+    : '<input part="control" id="control">';
+  return `<div part="field"><label part="label" for="control"><slot></slot><span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span></label>${native}${textsMarkup(slots)}<span id="fm-texts" hidden></span></div>`;
+}
+
+/**
+ * The shadow markup of a dialog (Spec 011 ②, plan ② D-12, G4): the platform's own dialog as the
+ * control, named by its heading and described by its message; content for the fields of a form
+ * dialog (E9), the reason as a tekstareo the dialog shows itself (its label from the slot reason),
+ * the actions slotted butono at the end. aria-modal says what showModal does.
+ */
+function dialogMarkup(): string {
+  return `<dialog part="control" aria-modal="true" aria-labelledby="heading" aria-describedby="message"><h2 part="heading" id="heading"><slot></slot></h2><p part="message" id="message"><slot name="message"></slot></p><div part="content"><slot name="content"></slot></div><fm-tekstareo part="reason" rows="3"><slot name="reason"></slot></fm-tekstareo><div part="actions"><slot name="actions"></slot></div><span id="fm-texts" hidden></span></dialog>`;
 }
 
 /**
@@ -191,6 +218,8 @@ function markup(
   marked: boolean,
 ): string {
   if (host === "input") return fieldMarkup(slots);
+  if (host === "textarea") return fieldMarkup(slots, true);
+  if (host === "dialog") return dialogMarkup();
   if (host === "toggle") return toggleMarkup(role, slots, marked);
   if (host === "group") return groupMarkup(slots, marked);
   if (host === "select") return selectMarkup(slots, role);
@@ -230,14 +259,22 @@ export function elementSource({
       ? "a"
       : host === "input"
         ? "input"
-        : host === "group"
-          ? "[role=radiogroup]"
-          : host === "select"
-            ? "select"
-            : "button";
+        : host === "textarea"
+          ? "textarea"
+          : host === "dialog"
+            ? "dialog"
+            : host === "group"
+              ? "[role=radiogroup]"
+              : host === "select"
+                ? "select"
+                : "button";
   const isToggle = host === "toggle";
   const isGroup = host === "group";
   const isSelect = host === "select";
+  const isFieldHost = host === "input" || host === "textarea";
+  // The platform element of a field: the generated code names it, so the types narrow (TS).
+  const nativeField = host === "textarea" ? "HTMLTextAreaElement" : "HTMLInputElement";
+  const isDialog = host === "dialog";
   const listSlot = slots.find((slot) => slot.list === true)?.name ?? "";
   // Only the element of a toggle carries these lines (Spec 010 ①, D-09; ②, D-08).
   const toggleRender = isToggle
@@ -551,11 +588,12 @@ export function elementSource({
       : "";
   // The render of a field (Spec 009, D-08; Spec 011 ①, E8, O-7): only the element of a textbox
   // carries these lines — the kinds, the attributes and the validity need the field's methods.
-  const inputRender =
-    host === "input"
-      ? `    if (control instanceof HTMLInputElement) {
+  const inputRender = isFieldHost
+    ? `    if (control instanceof ${nativeField}) {
       const kind = String(this.propValue("kind") ?? "text");
-      // A number is a text input with a numeric keyboard and a whole-number pattern (Spec 011 ①,
+${
+  host === "input"
+    ? `      // A number is a text input with a numeric keyboard and a whole-number pattern (Spec 011 ①,
       // E8; GOV.UK: type=number changes its value with the wheel and the arrows); a date is the
       // platform's own dialog; a password hides what is typed. Every other kind is its type.
       control.type = kind === "number" ? "text" : kind;
@@ -573,7 +611,15 @@ export function elementSource({
         if (typeof given === "string" && given !== "") control.setAttribute(attribute, given);
         else control.removeAttribute(attribute);
       }
-      const value = this.propValue("value");
+`
+    : `      // A text area (Spec 011 ②, D-11): rows is its height; code is written without the
+      // platform's spelling check, in the code typography the stylesheet binds.
+      const rows = this.propValue("rows");
+      control.setAttribute("rows", String(rows ?? ""));
+      if (kind === "code") control.setAttribute("spellcheck", "false");
+      else control.removeAttribute("spellcheck");
+`
+}      const value = this.propValue("value");
       const text = typeof value === "string" ? value : "";
       if (control.value !== text) control.value = text;
       this.#internals.setFormValue(text);
@@ -593,12 +639,11 @@ export function elementSource({
       this.#validate(control, kind, text, required, invalid);
     }
 `
-      : "";
+    : "";
   // The methods of a field (Spec 011 ①, O-7): its validity in the form, the message of the error
   // slot, the platform's own message for a number out of its bounds, and the reset of the form.
-  const inputMethods =
-    host === "input"
-      ? `
+  const inputMethods = isFieldHost
+    ? `
   /** The text of the error slot: the message of the form while the field is invalid. */
   #errorText(): string {
     const slot = this.shadowRoot?.querySelector('slot[name="error"]');
@@ -617,7 +662,7 @@ export function elementSource({
    * keep the form from being sent. The message is the error slot's text (error-says-what-to-do),
    * else the text of a11y.texts.required or the platform's own; the control says aria-invalid.
    */
-  #validate(control: HTMLInputElement, kind: string, text: string, required: boolean, invalid: boolean): void {
+  #validate(control: HTMLInputElement | HTMLTextAreaElement, kind: string, text: string, required: boolean, invalid: boolean): void {
     const own = this.#errorText();
     let flags: ValidityStateFlags = {};
     let message = own;
@@ -683,7 +728,135 @@ export function elementSource({
     return this.#internals.checkValidity();
   }
 `
-      : "";
+    : "";
+  // The constructor of a dialog (Spec 011 ②, D-12): the platform's cancel (Escape) and close say
+  // cancel and take open back; a click on a slotted action confirms (emphasis high) or cancels;
+  // every input in the content or the reason area re-judges the lock of the confirmation.
+  const dialogInit = isDialog
+    ? `    control.addEventListener("cancel", (event) => {
+      event.preventDefault();
+      this.#cancel();
+    });
+    control.addEventListener("close", () => {
+      if (this.hasAttribute("open")) this.removeAttribute("open");
+    });
+    root.querySelector('[part="actions"]')?.addEventListener("click", (event) => {
+      const action = event
+        .composedPath()
+        .find((node) => node instanceof HTMLElement && node.tagName.toLowerCase() === "fm-butono");
+      if (!(action instanceof HTMLElement) || action.hasAttribute("disabled")) return;
+      if (action.getAttribute("emphasis") === "high") this.#confirm();
+      else this.#cancel();
+    });
+    root.addEventListener("input", () => this.#lock());
+    this.addEventListener("input", () => this.#lock());
+`
+    : "";
+  // The render of a dialog (Spec 011 ②, D-12, E9): open shows it modal (the focus trap and the
+  // top layer are the platform's), the first field of the content takes the focus, else the reason
+  // area, else the confirmation; the reason area is shown only with a reason, required when the
+  // reason is; the confirmation is locked while a required reason is empty or a field in the
+  // content is invalid.
+  const dialogRender = isDialog
+    ? `    const dialog = control as HTMLDialogElement;
+    const reason = String(this.propValue("reason") ?? "none");
+    const area = this.#reasonArea();
+    if (area !== undefined) {
+      area.toggleAttribute("required", reason === "required");
+      area.toggleAttribute("hidden", reason === "none");
+    }
+    const open = this.propValue("open") === true;
+    if (open && !dialog.open) {
+      dialog.showModal();
+    } else if (!open && dialog.open) {
+      dialog.close();
+    }
+    // The children of a parsed element arrive after it connects: the render runs again on every
+    // slotchange, and the focus is set while nothing inside the dialog has it (the dialog itself
+    // takes it from showModal when it has no focusable child yet).
+    if (dialog.open) {
+      const active = this.shadowRoot?.activeElement;
+      if (active === null || active === undefined || active === dialog) this.#focusFirst();
+    }
+    this.#lock();
+`
+    : "";
+  const dialogMethods = isDialog
+    ? `
+  /** The reason area the dialog shows itself: a tekstareo in its shadow tree. */
+  #reasonArea(): HTMLElement | undefined {
+    const area = this.shadowRoot?.querySelector('[part="reason"]');
+    return area instanceof HTMLElement ? area : undefined;
+  }
+
+  /** The text of the reason, read from the area; empty without a reason. */
+  #reasonText(): string {
+    const area = this.#reasonArea();
+    const value = area === undefined ? undefined : (area as HTMLElement & { value?: unknown }).value;
+    return typeof value === "string" ? value.trim() : "";
+  }
+
+  /** The slotted actions: every fm-butono in the slot actions; the one with emphasis high confirms. */
+  #actions(): HTMLElement[] {
+    return [...this.children].filter(
+      (child): child is HTMLElement =>
+        child instanceof HTMLElement &&
+        child.getAttribute("slot") === "actions" &&
+        child.tagName.toLowerCase() === "fm-butono",
+    );
+  }
+
+  /** Whether the confirmation is locked: a required reason without text, an invalid field in the content. */
+  #locked(): boolean {
+    if (this.propValue("reason") === "required" && this.#reasonText() === "") return true;
+    return [...this.children].some(
+      (child) => child.getAttribute("slot") === "content" && child.matches(":invalid"),
+    );
+  }
+
+  /** Writes the lock on the confirming action (disabled), and takes it back. */
+  #lock(): void {
+    const locked = this.#locked();
+    for (const action of this.#actions()) {
+      if (action.getAttribute("emphasis") !== "high") continue;
+      if (locked) {
+        if (!action.hasAttribute("disabled")) {
+          action.setAttribute("disabled", "");
+          action.setAttribute("data-fm-locked", "");
+        }
+      } else if (action.hasAttribute("data-fm-locked")) {
+        action.removeAttribute("disabled");
+        action.removeAttribute("data-fm-locked");
+      }
+    }
+  }
+
+  /** The focus on opening (G4): the first field of the content, else the reason area, else the confirmation. */
+  #focusFirst(): void {
+    const field = [...this.children].find(
+      (child): child is HTMLElement =>
+        child instanceof HTMLElement && child.getAttribute("slot") === "content",
+    );
+    const reason = this.propValue("reason") === "none" ? undefined : this.#reasonArea();
+    const confirm = this.#actions().find((action) => action.getAttribute("emphasis") === "high");
+    (field ?? reason ?? confirm ?? this.#actions()[0])?.focus();
+  }
+
+  /** Confirms: the event carries the reason and may be prevented, then the dialog stays open. */
+  #confirm(): void {
+    if (this.#locked()) return;
+    const event = new CustomEvent("confirm", { bubbles: true, cancelable: true, detail: { reason: this.#reasonText() } });
+    const go = this.dispatchEvent(event);
+    if (go) this.removeAttribute("open");
+  }
+
+  /** Cancels: the dialog closes, the application hears cancel. */
+  #cancel(): void {
+    this.removeAttribute("open");
+    this.dispatchEvent(new Event("cancel", { bubbles: true }));
+  }
+`
+    : "";
   const body = `
 type Value = string | boolean;
 
@@ -741,7 +914,7 @@ const Base = (typeof HTMLElement === "undefined" ? class {} : HTMLElement) as ty
 
 /** Generated from the Skemo of ${ero}; behaviour from the template in @fundamento/projekcioj. */
 export class ${className} extends Base {
-  static formAssociated = ${host === "a" ? "false" : "true"};
+  static formAssociated = ${host === "a" || host === "dialog" ? "false" : "true"};
   static observedAttributes = PROPS.map((prop) => prop.name);
 
   readonly #internals: ElementInternals;
@@ -776,11 +949,11 @@ export class ${className} extends Base {
     this.#label = label;
     this.#texts = texts;
     control.addEventListener("click", (event) => this.#activate(event));
-${toggleKeys}${groupInit}${selectInit}    label.addEventListener("slotchange", () => this.#render());
+${toggleKeys}${groupInit}${selectInit}${dialogInit}    label.addEventListener("slotchange", () => this.#render());
     for (const named of root.querySelectorAll("slot[name]")) {
       named.addEventListener("slotchange", () => this.#render());
     }
-    if (control instanceof HTMLInputElement) {
+    if (control instanceof ${nativeField}) {
       // The value a person types is the form value (ElementInternals, as fm-butono submits), and
       // the prop reflects it, so a wrapper reads what stands in the field.
       control.addEventListener("input", () => {
@@ -814,6 +987,8 @@ ${isGroup ? "    this.#assign();\n" : ""}    this.#render();
       }
       return raw !== null && allowed.includes(raw) ? raw : String(prop.default ?? allowed[0] ?? "");
     }
+    // A number (Spec 011 ②: rows) falls back to its default like an enum; a string has none.
+    if (prop.kind === "number") return raw ?? (prop.default === undefined ? undefined : String(prop.default));
     return raw ?? undefined;
   }
 
@@ -899,7 +1074,7 @@ ${isGroup ? "    this.#assign();\n" : ""}    this.#render();
     // \`invalid\` spoken as aria-invalid and set by a filled error slot (constraint of the Skemo);
     // disabled wins over readonly; help and error show only while they have text.
     const described: string[] = [];
-${inputRender}${toggleRender}${groupRender}${selectRender}    // The texts of the slots that describe the control (Spec 009, D-02; a checkbox, Spec 010 ②):
+${inputRender}${toggleRender}${groupRender}${selectRender}${dialogRender}    // The texts of the slots that describe the control (Spec 009, D-02; a checkbox, Spec 010 ②):
     // shown while they have text, and its description in that order.
     for (const source of DESCRIPTION) {
       const [kind, name = ""] = source.split(":");
@@ -954,7 +1129,7 @@ ${
     : `    if (!(this.#control instanceof HTMLButtonElement)) return;
 ${toggleActivate}`
 }  }
-${groupMethods}${selectMethods}${inputMethods}
+${groupMethods}${selectMethods}${inputMethods}${dialogMethods}
 }
 
 /**

@@ -70,7 +70,31 @@ function fieldPartSelector(
  * Whether the Ero is a field (a composite of label, input, help and error): a text field, or a
  * select (Spec 010 ④, D-06) — the same field around the platform's select.
  */
-const isField = (skemo: Skemo): boolean => hostOf(skemo.a11y.role) === "input" || isSelect(skemo);
+const isField = (skemo: Skemo): boolean =>
+  hostOf(skemo.a11y.role) === "input" || isSelect(skemo) || isTextarea(skemo);
+
+/** Whether the Ero is a text area (Spec 011 ②, D-11): a textbox over several lines, with rows. */
+export const isMultiline = (skemo: Skemo): boolean =>
+  skemo.props.some((prop) => prop.name === "rows");
+const isTextarea = (skemo: Skemo): boolean => skemo.a11y.role === "textbox" && isMultiline(skemo);
+
+/** Whether the Ero is a dialog (Spec 011 ②, D-12): the platform's dialog, opened modal. */
+const isDialog = (skemo: Skemo): boolean => hostOf(skemo.a11y.role) === "dialog";
+
+/**
+ * The selector of a part of a dialog (Spec 011 ②, D-12): the dialog itself is the control and
+ * carries the combination (data-size, data-reason) and the parts surface, border and box; the
+ * backdrop is its ::backdrop; heading, message, content, reason and actions are elements of their
+ * own inside it. One state, rest.
+ */
+function dialogPartSelector(part: string, data: string): string {
+  const root = `[part="control"]${data}`;
+  if (part === "backdrop") return `:where(${root})::backdrop`;
+  if (["heading", "message", "content", "reason", "actions"].includes(part)) {
+    return `:where(${root}) [part="${part}"]`;
+  }
+  return `:where(${root})`;
+}
 
 /** Whether the Ero is a select (Spec 010 ④, D-06): the field of the kampo around a select. */
 const isSelect = (skemo: Skemo): boolean => hostOf(skemo.a11y.role) === "select";
@@ -211,6 +235,19 @@ function declarations(skemo: Skemo, part: string, property: string, token: strin
     }
     if (property === "color") return [`text-decoration-color: ${variable(token)};`];
   }
+  // The lift of a surface (Spec 011 ②, D-07): a shadow token as the box shadow.
+  if (property === "shadow") return [`box-shadow: ${variable(token)};`];
+  // The veil of a dialog (Spec 011 ②, D-12): the backdrop's colour is its fill.
+  if (part === "backdrop" && property === "color") return [`background-color: ${variable(token)};`];
+  // The surface of a dialog (Spec 011 ②, D-12) takes the width of its size; that it never takes
+  // more than the viewport gives is the platform's own rule for a dialog (its max-width). Its
+  // inline padding is its padding on every side.
+  if (isDialog(skemo) && part === "surface" && property === "width") {
+    return [`inline-size: ${variable(token)};`];
+  }
+  if (isDialog(skemo) && part === "box" && property === "inline-padding") {
+    return [`padding: ${variable(token)};`];
+  }
   switch (property as SkemoPartProperty) {
     case "fill":
       return [`background-color: ${variable(token)};`];
@@ -303,17 +340,37 @@ const structure = (inlineHost: boolean, disables: boolean, bordered: boolean): s
  * column; the mark of a required field (an asterisk drawn as a small vector, no text) shows only
  * while the field is marked (data-marked).
  */
-const fieldStructure = (disables: boolean, select = false): string =>
+const fieldStructure = (disables: boolean, select = false, textarea = false): string =>
   [
     ":host { display: block; }",
     ':where([part="field"]) { display: flex; flex-direction: column; align-items: stretch; }',
     ':where([part="label"]) { display: inline-flex; align-items: baseline; }',
-    ':where([part="control"]) { display: block; box-sizing: border-box; margin: 0; border-style: solid; appearance: none; transition-property: background-color, color, border-color; }',
+    // A text area (Spec 011 ②, D-11) may be dragged taller, never wider: its width is the container's.
+    `:where([part="control"]) { display: block; box-sizing: border-box; margin: 0; border-style: solid; appearance: none; ${textarea ? "resize: vertical; " : ""}transition-property: background-color, color, border-color; }`,
     ':where([part="control"]:focus:not(:focus-visible)) { outline-width: 0; }',
     ...(disables ? [':where([part="control"]:disabled) { cursor: not-allowed; }'] : []),
     ':where([part="field"]:not([data-marked="true"])) [part="required-mark"] { display: none; }',
     ...(select ? selectStructure : []),
   ].join("\n");
+
+/**
+ * Layout of a dialog (Spec 011 ②, D-12), keywords only: the host holds nothing of its own (the
+ * dialog lies in the top layer); the dialog is a column of heading, message, content, the reason
+ * area and the actions; heading and message carry no margin of the user agent's; the content is a
+ * column; the actions a row at the end (the writing direction mirrors it); the reason area stands
+ * only with a reason. The cursor and the border style are the dialog's own.
+ */
+const dialogStructure: string = [
+  ":host { display: contents; }",
+  ':where([part="control"]) { display: flex; flex-direction: column; box-sizing: border-box; border-style: solid; transition-property: background-color, border-color; }',
+  ':where([part="control"]:not([open])) { display: none; }',
+  ':where([part="heading"]) { margin: 0; }',
+  ':where([part="message"]) { margin: 0; }',
+  ':where([part="message"]:not(:has(slot:not(:empty)))) { display: none; }',
+  ':where([part="content"]) { display: flex; flex-direction: column; }',
+  ':where([part="actions"]) { display: flex; justify-content: flex-end; flex-wrap: wrap; }',
+  ':where([part="control"][data-reason="none"]) [part="reason"] { display: none; }',
+].join("\n");
 
 /**
  * Layout of a select (Spec 010 ④, D-06), keywords only: the select and its chevron stand in one
@@ -494,18 +551,20 @@ export function stylesheetOf(skemo: Skemo, uzo?: Uzo): string {
   );
   const disables = skemo.states.includes("disabled") || skemo.states.includes("loading");
   const bordered = skemo.parts.border !== undefined;
-  const base = isField(skemo)
-    ? fieldStructure(disables, isSelect(skemo))
-    : isGroup(skemo)
-      ? groupStructure(disables, skemo.parts["required-mark"] !== undefined)
-      : isToggle(skemo)
-        ? toggleStructure(
-            disables,
-            uzo?.layout.wrap !== undefined && uzo.layout.wrap !== "never",
-            skemo.slots.some((slot) => slot.default !== true && slot.text === true),
-            skemo.parts["required-mark"] !== undefined,
-          )
-        : structure(uzo?.layout.wrap === "with-text", disables, bordered);
+  const base = isDialog(skemo)
+    ? dialogStructure
+    : isField(skemo)
+      ? fieldStructure(disables, isSelect(skemo), isTextarea(skemo))
+      : isGroup(skemo)
+        ? groupStructure(disables, skemo.parts["required-mark"] !== undefined)
+        : isToggle(skemo)
+          ? toggleStructure(
+              disables,
+              uzo?.layout.wrap !== undefined && uzo.layout.wrap !== "never",
+              skemo.slots.some((slot) => slot.default !== true && slot.text === true),
+              skemo.parts["required-mark"] !== undefined,
+            )
+          : structure(uzo?.layout.wrap === "with-text", disables, bordered);
   return `${base}\n${tokenRules.join("\n")}\n`;
 }
 
@@ -540,6 +599,7 @@ function selectorOf(
   if (isGroup(skemo)) {
     return groupPartSelector(part, property, data, entry, combination[STATE_KEY] ?? "rest");
   }
+  if (isDialog(skemo)) return dialogPartSelector(part, data);
   const state = STATE_SELECTORS[combination[STATE_KEY] ?? "rest"] ?? "";
   if (isField(skemo)) return fieldPartSelector(part, property, data, state, isSelect(skemo));
   if (isToggle(skemo)) return togglePartSelector(part, property, data, state);
@@ -567,7 +627,7 @@ export function elementNamesOf(entry: LoadedEro, inline = false) {
   return {
     ...namesOf(entry.ero),
     ero: entry.ero.name,
-    host: hostOf(entry.skemo.a11y.role),
+    host: hostOf(entry.skemo.a11y.role, isMultiline(entry.skemo)),
     role: entry.skemo.a11y.role,
     marked: entry.skemo.parts["required-mark"] !== undefined,
     slots: entry.skemo.slots.map((slot) => ({

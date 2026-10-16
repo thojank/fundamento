@@ -159,6 +159,15 @@ for (const button of document.querySelectorAll("[data-fm-switch]")) {
   });
 }
 
+// A dialog of the Vitrino opens from its button (Spec 011 ②, plan ② D-15): the dialog is modal,
+// so the grid shows it closed; the Ero itself takes open back when it closes.
+for (const opener of document.querySelectorAll("[data-fm-opens]")) {
+  opener.addEventListener("click", () => {
+    const dialog = document.getElementById(opener.getAttribute("data-fm-opens"));
+    if (dialog) dialog.setAttribute("open", "");
+  });
+}
+
 // The button in the header leads to the comparison (Spec 004 M1, Befund 2, 2026-10-12): it used
 // to toggle a two-column class on the last section, and nothing changed where the button stands.
 const komparoSwitch = document.getElementById("fm-vitrino-komparo-switch");

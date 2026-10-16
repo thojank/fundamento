@@ -148,7 +148,9 @@ describe("the Uzo of the dialogo (section ②, G5)", () => {
       },
       actions: { accepts: ["butono"], required: true, min: 1, max: 2, nesting: 0 },
     });
-    expect(uzo?.layout).toEqual({ size: "container", wrap: "never" });
+    // The heading is a sentence ("Standard „Datenschutz-Grundverordnung" löschen?") and wraps;
+    // the width is the size's (Abweichung 3 of plan ②).
+    expect(uzo?.layout).toEqual({ size: "container", wrap: "allowed" });
   });
 
   it("names a mere notice as not covered yet (avizo, ③) and a long form as a person's decision; stops at non-modal, drawer and nested", () => {

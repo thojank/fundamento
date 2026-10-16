@@ -34,15 +34,18 @@ describe("Web Component Celo (T011)", () => {
     // Spec 008: the ligilo on the same path as the butono (Art. IX, Art. XI).
     expect(Object.keys(files).sort()).toEqual([
       "eroj/src/generated/butono.styles.ts",
+      "eroj/src/generated/dialogo.styles.ts",
       "eroj/src/generated/elektilo.styles.ts",
       "eroj/src/generated/elekto.styles.ts",
       "eroj/src/generated/fm-butono.ts",
+      "eroj/src/generated/fm-dialogo.ts",
       "eroj/src/generated/fm-elektilo.ts",
       "eroj/src/generated/fm-elekto.ts",
       "eroj/src/generated/fm-kampo.ts",
       "eroj/src/generated/fm-ligilo.ts",
       "eroj/src/generated/fm-markobutono.ts",
       "eroj/src/generated/fm-sxaltilo.ts",
+      "eroj/src/generated/fm-tekstareo.ts",
       "eroj/src/generated/index.ts",
       "eroj/src/generated/kampo.styles.ts",
       "eroj/src/generated/ligilo.styles.ts",
@@ -50,6 +53,7 @@ describe("Web Component Celo (T011)", () => {
       "eroj/src/generated/react.ts",
       "eroj/src/generated/skemo.ts",
       "eroj/src/generated/sxaltilo.styles.ts",
+      "eroj/src/generated/tekstareo.styles.ts",
     ]);
   });
 
@@ -694,7 +698,7 @@ describe("Web Component Celo for the tekstareo (Spec 011 ②)", () => {
     expect(element).toContain("flags = { valueMissing: true }");
     expect(element).toContain("formResetCallback()");
     // No Enter of its own: a line break is the textarea's; the Skemo names no key.
-    expect(element).not.toContain("form.requestSubmit()");
+    expect(element).not.toContain('event.key !== "Enter"');
   });
 
   it("keys the typography of the text by kind and size, resizes vertically only, has no height of its own", () => {
@@ -745,7 +749,7 @@ describe("Web Component Celo for the dialogo (Spec 011 ②)", () => {
       "actions",
     ]);
     expect(element).toContain(
-      '<dialog part="control" aria-labelledby="heading" aria-describedby="message">',
+      '<dialog part="control" aria-modal="true" aria-labelledby="heading" aria-describedby="message">',
     );
     expect(element).toContain('<h2 part="heading" id="heading"><slot></slot></h2>');
     expect(element).toContain(
@@ -757,18 +761,18 @@ describe("Web Component Celo for the dialogo (Spec 011 ②)", () => {
   });
 
   it("opens with showModal, closes on cancel, says confirm with the reason and keeps open when prevented", () => {
-    expect(element).toContain("control.showModal()");
+    expect(element).toContain("dialog.showModal()");
     expect(element).toContain(
       'new CustomEvent("confirm", { bubbles: true, cancelable: true, detail: { reason',
     );
     expect(element).toContain('new Event("cancel", { bubbles: true })');
-    expect(element).toContain('propValue("emphasis") === "high"');
+    expect(element).toContain('action.getAttribute("emphasis") === "high"');
     expect(element).toContain(":invalid");
   });
 
   it("styles the surface from tokens: width by size, backdrop, shadow, radius and border; the reason only with a reason", () => {
     expect(css).toContain(
-      ':where([part="control"][data-size="small"]) {\n  inline-size: min(var(--fm-size-container-small), 100%);',
+      ':where([part="control"][data-size="small"]) {\n  inline-size: var(--fm-size-container-small);',
     );
     expect(css).toContain(
       ':where([part="control"])::backdrop {\n  background-color: var(--fm-color-backdrop);\n}',

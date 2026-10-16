@@ -32,7 +32,7 @@ export const wrongReason = (
   <Dialogo reason="always">Frage</Dialogo>
 );
 
-export const noTitleProp = (
+export const noHeadingProp = (
   // @ts-expect-error the heading is the children, never a prop
-  <Dialogo title="Frage">Frage</Dialogo>
+  <Dialogo heading="Frage">Frage</Dialogo>
 );

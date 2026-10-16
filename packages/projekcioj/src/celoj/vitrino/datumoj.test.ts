@@ -251,12 +251,14 @@ describe("the Vitrino after the acceptances (Nachlese 2026-10-13)", () => {
   it("the layout sentence names the subject and the placement (C8)", () => {
     expect(datumoj.a11yRoloj).toEqual({
       butono: "button",
+      dialogo: "dialog",
       elektilo: "combobox",
       elekto: "radiogroup",
       kampo: "textbox",
       ligilo: "link",
       markobutono: "checkbox",
       sxaltilo: "switch",
+      tekstareo: "textbox",
     });
     expect(html).toContain("Größe aus dem Inhalt, Label bricht nie um.");
     expect(html).toContain("Größe aus dem Inhalt, Label darf umbrechen (inline), standalone nie.");
