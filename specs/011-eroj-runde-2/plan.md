@@ -659,6 +659,12 @@ Fixtures (getrimmt wie ④): `navigado-web-term` (`href`), `navigado-instead-kia
 - **O-27** Eintragszustand `active` statt `selected` (Abweichung 3) — bestätigen.
 - **O-28** „navigation“ bleibt beim `ligilo` (Abweichung 1, B-1) — bestätigen; oder zur `navigado` bewegen (OP-12: eine Antwort, die stand, ändert sich).
 
+O-23 bis O-27 am 16.10. bestätigt; O-28 für Nachlese 3 („navigation“ und „menü“ zur `navigado`; Gleichstand zweier Goals → ask-human).
+
+### Nachbesserung (Abnahme 16.10., Messung auf HEAD `2b24cf5`)
+
+- **F-7 Der Indikator des `langetaro` band `color.navigation.selected`** (D-02, D-08): eine Hintergrundrolle — in `komuna` auf hellem Grund unsichtbar (gemessen 1,09:1 gegen den Grund des Reiters), im Code wie in Figma; ein Fehler der Spec, die Umsetzung folgte ihr. Erste Wahl laut Abnahme: `color.brand.fill` — `check:alirebleco` (die Aspekto `komuna`, 72 Kombinationen) maß das Paar `brand-fill-on-background-default` mit mindestens 7,82:1, der Alirebleco-Check der Eroj aber in **`ekzemplo light` 1,42:1 und `ekzemplo light/high` 1,18:1** (die gelbe Marke auf hellem Grund, wie ③ B-9 und ④ B-7: die Marke ist eine Fläche, keine Linie). Also die Rückfalloption: `selected-indicator.color` → **`color.navigation.text.selected`**, dazu der KontrastParo `navigation-text-selected-on-background-default` (ui, 3:1, WCAG 1.4.11: der Indikator ist eine Grafik auf dem Grund des Reiters, dessen Fläche durchscheinend ist), in `komuna` mindestens 11,52:1; der Alirebleco-Check der Eroj misst die Kante des gewählten Reiters ≥ 3:1 auf ihrem Grund in allen acht Farbklassen beider Aspektoj. Figma bindet die Kante aus der Skemo (die Tests der Bauform `tabs` nennen die Rolle). 88 Paare, APCA-Warnungen unverändert (ein ui-Paar). Befund daran: `check:alirebleco` prüft nur `komuna` — eine externe Aspekto wird erst im zusammengesetzten Browser-Check gemessen (Kandidat: der Modelo-Check über jede installierte Aspekto). Rot zuerst (`cd40066`: Modelo 2 von 15, Web Component 1 von 89, Alirebleco 1 von 8), grün im Folge-Commit.
+
 ### Messungen
 
 In [`tasks.md`](tasks.md) ⑤.
