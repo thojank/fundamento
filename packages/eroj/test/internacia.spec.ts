@@ -606,7 +606,9 @@ test("dialogo right to left: the actions mirror to the left, the heading aligns 
   expect(rtl.okFromLeft).toBeLessThan(rtl.okFromRight);
 });
 
-test("dialogo heading expansion to 200 %: the surface keeps its width, the heading wraps, nothing is clipped", async ({
+// Four times the heading: the small surface is size.container.small wide (640 px in komuna), and a
+// doubled heading still fits one line of headline.4 there.
+test("dialogo heading expansion to 400 %: the surface keeps its width, the heading wraps, nothing is clipped", async ({
   page,
 }) => {
   const heading = "Version freigeben?";
@@ -630,7 +632,7 @@ test("dialogo heading expansion to 200 %: the surface keeps its width, the headi
     (element, text) => {
       element.childNodes[0].textContent = text;
     },
-    pseudo(heading, 2),
+    pseudo(heading, 4),
   );
   const after = await measure();
   expect(Math.round(after.width)).toBe(Math.round(before.width));
