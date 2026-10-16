@@ -1009,7 +1009,7 @@ describe("Web Component Celo for the mezurilo (Spec 011 ④)", () => {
     expect(element).toContain('control.setAttribute("aria-valuetext"');
     expect(element).toContain('control.setAttribute("aria-valuenow"');
     expect(element).toContain('control.setAttribute("aria-valuemin"');
-    expect(element).toContain('control.setAttribute("data-unknown"');
+    expect(element).toContain('control.toggleAttribute("data-unknown"');
     expect(element).toContain("static formAssociated = false;");
     expect(element).toContain('customElements.define("fm-mezurilo", FmMezurilo)');
   });
@@ -1023,10 +1023,10 @@ describe("Web Component Celo for the mezurilo (Spec 011 ④)", () => {
     );
     expect(css).toContain("min-block-size: var(--fm-spacing-medium);");
     expect(css).toContain(
-      ':where([part="control"][data-unknown="true"]) [part="track"] {\n  border-style: var(--fm-stroke-dashed);',
+      ':where([part="control"][data-unknown]) [part="track"] {\n  border-style: var(--fm-stroke-dashed);',
     );
     expect(css).toContain(
-      ':where([part="control"][data-unknown="true"]) [part="fill"] { display: none; }',
+      ':where([part="control"][data-unknown]) [part="fill"] { display: none; }',
     );
   });
 
@@ -1051,9 +1051,11 @@ describe("Web Component Celo for the mezurilo (Spec 011 ④)", () => {
 describe("Web Component Celo for the tabelo (Spec 011 ④)", () => {
   const styles = files["eroj/src/generated/tabelo.styles.ts"] ?? "";
   const element = files["eroj/src/generated/fm-tabelo.ts"] ?? "";
-  const css = JSON.parse(/export const TABELO_CSS = (".*");/s.exec(styles)?.[1] ?? '""') as string;
+  const css = JSON.parse(
+    /export const TABELO_CSS = ("(?:[^"\\]|\\.)*");/.exec(styles)?.[1] ?? '""',
+  ) as string;
   const light = JSON.parse(
-    /export const TABELO_LIGHT_CSS = (".*");/s.exec(styles)?.[1] ?? '""',
+    /export const TABELO_LIGHT_CSS = ("(?:[^"\\]|\\.)*");/.exec(styles)?.[1] ?? '""',
   ) as string;
 
   it("renders the region around the slotted table, adopts the light stylesheet on the document, sorts and shows the empty state", () => {
@@ -1115,16 +1117,17 @@ describe("Web Component Celo for the atributlisto (Spec 011 ④)", () => {
   const styles = files["eroj/src/generated/atributlisto.styles.ts"] ?? "";
   const element = files["eroj/src/generated/fm-atributlisto.ts"] ?? "";
   const css = JSON.parse(
-    /export const ATRIBUTLISTO_CSS = (".*");/s.exec(styles)?.[1] ?? '""',
+    /export const ATRIBUTLISTO_CSS = ("(?:[^"\\]|\\.)*");/.exec(styles)?.[1] ?? '""',
   ) as string;
   const light = JSON.parse(
-    /export const ATRIBUTLISTO_LIGHT_CSS = (".*");/s.exec(styles)?.[1] ?? '""',
+    /export const ATRIBUTLISTO_LIGHT_CSS = ("(?:[^"\\]|\\.)*");/.exec(styles)?.[1] ?? '""',
   ) as string;
 
   it("renders the list around the slotted dl, adopts the light stylesheet, names itself and fills empty values", () => {
     expect(element).toContain('<div part="list"><slot></slot></div>');
     expect(element).toContain("document.adoptedStyleSheets");
-    expect(element).toContain('"entries-empty"');
+    // The key is built from the default slot's name: <slot>-empty (plan ④ D-05).
+    expect(element).toContain("-empty");
     expect(element).toContain('setAttribute("aria-label"');
     expect(element).toContain("static formAssociated = false;");
     expect(element).toContain('customElements.define("fm-atributlisto", FmAtributlisto)');

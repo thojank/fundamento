@@ -22,13 +22,13 @@ test.describe("fm-atributlisto behaviour", () => {
     await serve(page, out, list('label="Angaben zum Standard"'));
     await expect(page.locator("#a dt")).toHaveCount(3);
     const last = page.locator("#a dd").last();
-    await expect(last).toHaveText(/–/);
+    // The dash is a sign of the projection (a vector, no text node), the word is heard.
     const heard = await last.evaluate((element) => ({
       hidden: element.querySelector(".fm-hidden")?.textContent,
       clip: getComputedStyle(element.querySelector(".fm-hidden") as Element).clipPath,
-      dash: element.querySelector('[aria-hidden="true"]')?.textContent,
+      dash: element.querySelector('svg[aria-hidden="true"] path')?.getAttribute("d"),
     }));
-    expect(heard).toEqual({ hidden: texts["entries-empty"]?.de, clip: "inset(50%)", dash: "–" });
+    expect(heard).toEqual({ hidden: texts["entries-empty"]?.de, clip: "inset(50%)", dash: "M3 8h10" });
     const label = await page.locator("#a dl").getAttribute("aria-label");
     expect(label).toBe("Angaben zum Standard");
     // A value filled in later takes the dash away.

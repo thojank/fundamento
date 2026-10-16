@@ -471,6 +471,33 @@ function guidelines(input: CeloInput, aspekto: string): GeneratedFile[] {
         `- Every area whose content loads or is empty shows a \`<${componentName(entry.ero)}>\` with a text; never a bare spinner${buttonName === undefined ? "" : `, and a working button is the \`<${componentName(buttonName.ero)}>\`'s own loading`}.`,
     )
     .join("\n");
+  // Spec 011 ④ (G7, plan ④ D-12): many records are the table around the platform's own table
+  // with a caption, one record the list around the platform's own description list, a known value
+  // in a known range the meter with its number as text; generated from the roles table, list and
+  // meter, the companions named where the Modelo has them.
+  const recordName = eroj.find((entry) => entry.skemo.a11y.role === "list");
+  const badgeName = eroj.find((entry) => entry.skemo.a11y.role === "generic");
+  const tableLines = eroj
+    .filter((entry) => entry.skemo.a11y.role === "table" && entry.uzo !== undefined)
+    .map(
+      (entry) =>
+        `- Every list of records with the same fields is a \`<${componentName(entry.ero)}>\` around the platform's own table with a caption${recordName === undefined ? "" : `; one record is an \`<${componentName(recordName.ero)}>\``}.`,
+    )
+    .join("\n");
+  const recordLines = eroj
+    .filter((entry) => entry.skemo.a11y.role === "list" && entry.uzo !== undefined)
+    .map(
+      (entry) =>
+        `- Every record shown as names and values is an \`<${componentName(entry.ero)}>\` around the platform's own description list; never a table for one record${fieldName === undefined ? "" : `, and editing is a form of \`<${componentName(fieldName.ero)}>\``}.`,
+    )
+    .join("\n");
+  const meterLines = eroj
+    .filter((entry) => entry.skemo.a11y.role === "meter" && entry.uzo !== undefined)
+    .map(
+      (entry) =>
+        `- Every known value within a known range is a \`<${componentName(entry.ero)}>\` with its number as text; an unknown value is never 0${badgeName === undefined ? "" : `, and a status in a word is an \`<${componentName(badgeName.ero)}>\``}.`,
+    )
+    .join("\n");
   return [
     {
       path: `${base}/Guidelines.md`,
@@ -494,6 +521,9 @@ ${selectLines}
 ${badgeLines}
 ${noticeLines}
 ${stateLines}
+${tableLines}
+${recordLines}
+${meterLines}
 
 Where to look: \`setup.md\` for the imports, \`foundations/\` for the tokens, \`components/\` for
 each component.

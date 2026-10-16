@@ -95,17 +95,17 @@
           "fixed": "typography.label.1"
         }
       },
+      "region": {
+        "radius": {
+          "fixed": "radius.role.surface"
+        }
+      },
       "border": {
         "color": {
           "fixed": "color.border.subtle"
         },
         "width": {
           "fixed": "border.width.default"
-        }
-      },
-      "region": {
-        "radius": {
-          "fixed": "radius.role.surface"
         }
       },
       "sort": {

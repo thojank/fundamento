@@ -514,7 +514,8 @@ describe("the Vitrino shows the tabelo, the atributlisto and the mezurilo (Spec 
       '<fm-tabelo density="compact">compact<table slot="content"><thead><tr><th scope="col" data-sort="name">Name</th>',
     );
     expect(grid).toContain('<th scope="col" numeric>Anzahl</th>');
-    expect((grid.match(/<th scope="row">/g) ?? []).length).toBe(6);
+    // Three row headers per table, plus the Vitrino's own row header per combination.
+    expect((grid.match(/<th scope="row">/g) ?? []).length).toBe(8);
   });
 
   it("atributlisto: a row per layout, each a dl with three entries, the last value empty", () => {

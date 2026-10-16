@@ -79,6 +79,8 @@ test.describe("fm-tabelo behaviour", () => {
         `<table slot="content"><thead><tr>${'<th scope="col">Eine sehr lange Spaltenüberschrift</th>'.repeat(4)}</tr></thead><tbody><tr>${"<td>Zelle</td>".repeat(4)}</tr></tbody></table>`,
       )}</div>`,
     );
+    // The caption is written once the children are parsed: wait for the named table first.
+    await expect(page.getByRole("table", { name: "Standards" })).toBeVisible();
     await page.keyboard.press(TAB(browserName));
     const region = await page.locator("#t").evaluate((element) => {
       const node = element.shadowRoot?.querySelector('[part="region"]') as HTMLElement;

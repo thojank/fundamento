@@ -413,7 +413,7 @@ test("fm-tabelo, fm-atributlisto and fm-mezurilo are upgraded in their sections,
   await expect(page.locator("#fm-vitrino-tabelo th[data-sort] > button")).toHaveCount(2);
   const lists = page.locator("#fm-vitrino-atributlisto fm-atributlisto");
   await expect(lists).toHaveCount(2);
-  await expect(page.locator("#fm-vitrino-atributlisto dd").last()).toHaveText(/–/);
+  await expect(page.locator("#fm-vitrino-atributlisto dd").last().locator("svg")).toHaveCount(1);
   const meters = page.locator("#fm-vitrino-mezurilo fm-mezurilo");
   await expect(meters).toHaveCount(4);
   await expect(page.locator("#fm-vitrino-mezurilo").getByRole("meter").first()).toHaveAttribute(

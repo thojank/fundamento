@@ -50,7 +50,7 @@ test.describe("fm-mezurilo behaviour", () => {
     expect(share).toBeCloseTo(0.6, 1);
   });
 
-  test("an unknown value: no aria-valuenow, the text says so, no fill, a dashed track edge (not 0)", async ({
+  test("an unknown value: the text says so, no fill, a dashed track edge (not 0)", async ({
     page,
   }) => {
     await serve(
@@ -59,7 +59,9 @@ test.describe("fm-mezurilo behaviour", () => {
       `${meter("", "nicht geprüft")}<fm-mezurilo id="z" value="0">Null<span slot="value-text">0 von 3 geprüft</span></fm-mezurilo>`,
     );
     const region = page.getByRole("meter", { name: "Konformität" });
-    await expect(region).not.toHaveAttribute("aria-valuenow");
+    // ARIA requires aria-valuenow on a meter: the start of the range stands there, the text says
+    // what is heard — never 0 % (plan ④ D-08, Abweichung 13).
+    await expect(region).toHaveAttribute("aria-valuenow", "0");
     await expect(region).toHaveAttribute("aria-valuetext", "nicht geprüft");
     const look = (id: string) =>
       page.locator(`#${id}`).evaluate((element) => {
@@ -67,18 +69,18 @@ test.describe("fm-mezurilo behaviour", () => {
         const track = element.shadowRoot?.querySelector('[part="track"]') as HTMLElement;
         const fill = element.shadowRoot?.querySelector('[part="fill"]') as HTMLElement;
         return {
-          unknown: control.getAttribute("data-unknown"),
+          unknown: control.hasAttribute("data-unknown"),
           border: getComputedStyle(track).borderTopStyle,
           fill: getComputedStyle(fill).display,
           fillWidth: fill.getBoundingClientRect().width,
         };
       });
     const unknown = await look("m");
-    expect(unknown.unknown).toBe("true");
+    expect(unknown.unknown).toBe(true);
     expect(unknown.border).toBe("dashed");
     expect(unknown.fill).toBe("none");
     const zero = await look("z");
-    expect(zero.unknown).toBe("false");
+    expect(zero.unknown).toBe(false);
     expect(zero.border).not.toBe("dashed");
     expect(zero.fillWidth).toBe(0);
     await expect(page.getByRole("meter", { name: "Null" })).toHaveAttribute("aria-valuenow", "0");
