@@ -844,6 +844,10 @@ ${
       this.#cancel();
     });
     control.addEventListener("close", () => {
+      // The platform fires close after the dialog closed (a task later). A dialog shown again in
+      // between is open now: the late event takes nothing back (Spec 011 ③ Nachbesserung, CI-Lauf
+      // 38976295942: cancel, then open again in one go, and the confirmation vanished).
+      if ((control as HTMLDialogElement).open) return;
       if (this.hasAttribute("open")) this.removeAttribute("open");
     });
     root.querySelector('[part="actions"]')?.addEventListener("click", (event) => {
