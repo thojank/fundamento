@@ -76,7 +76,7 @@
 ### D – Abschluss
 - [x] **T114 O-1 von ①** CI-Faktor 3 des CLI-Export-Tests und der MCP-Hooks zurückgenommen (`23e9bb5`).
 - [x] **T115 Doku** Vojmapo Zeile 4, plan ②, tasks ②; `docs.test.ts` rot in `29cf274`, grün im Commit dieser Zeile.
-- [ ] **T116 Messungen** unten; Bericht.
+- [x] **T116 Messungen** unten; Bericht.
 
 ### Messungen
 
@@ -89,8 +89,8 @@
 | Vitrino-Check (Chromium) | 18 grün, davon neu tekstareo (24 Textbereiche) und dialogo (Öffnen, modal, axe, Escape) |
 | Internacia (Chromium) | 27 grün, davon neu tekstareo rtl + 135/200 %, dialogo rtl + Überschrift 400 % |
 | **Commits** (rot / grün; nach einem Rebase hier ersetzen) | rot `1f386e5` (Fixtures, Modelo, MCP), `2a2a2f2` (Projekcioj, Browser), `29cf274` (Doku) · grün `bf960ac` (Modelo), `71f9fdc` (Projekcioj außer Figma), `23e9bb5` (overflow-wrap, O-1), `079f874` (Figma), Doku `ba9bd7f` |
-| Tests (je Paket `vitest run`, Playwright in Chromium) | nach dem letzten Lauf im Bericht |
-| Checks | `check:regularo` (uzoj=9), `check:mankoj` (8), `check:alirebleco` (76), `check:vortaro-lint`, `check:clean-room` – grün; `check:parity`, `check:make-kit`, `check:quickstart`, `check:vitrino`, `check:release` nach dem Figma-Durchgang |
+| Tests (je Paket `vitest run`, Playwright in Chromium) | modelo 2 958 (vorher 2 879), projekcioj 486 (vorher 453), mcp 209 (vorher 199), cli 66, eroj 1 Vitest + 114 Playwright in Chromium (vorher 94; die drei Engines prüft der Merge-Lauf auf `main`); davon neu: data/tekstareo 29, data/dialogo (Skemo, Uzo, Reguloj, Jugxoj, check_usage, die Dialoge der Spec), contracts/spec011-schema `shadow`, sechs Fixtures (validate und e2e), docs 2, MCP s011-eingabe, Projekcioj (Web Component, Make-Kit, Datumoj, Figma 27 beobachtet rot), Browser `tekstareo.spec` 8 und `dialogo.spec` 7, Alirebleco 16, Internacia 4, Vitrino 2. Ein Playwright-Lauf zeigte 1 von 114 rot, der Wiederholungslauf 114 grün (nicht reproduziert; steht im Bericht) |
+| Checks | `check:vortaro-lint`, `check:regularo` (uzoj=9), `check:mankoj` (8, unverändert), `check:alirebleco` (76 Paare), `check:clean-room`, `check:parity` (9 Eroj, 0 Differenzen, 429 Freigaben), `check:alirebleco-eroj` 75 (Chromium), `check:make-kit` 5, `check:quickstart` 1, `check:vitrino` 18, `check:release` (beide Kits gepackt, je 26 Dateien: + `guidelines/components/tekstareo.md`, `dialogo.md`) – grün; `pnpm lint` grün (9 Warnungen in modelo, 1 in projekcioj, 1 Info in cli: alle älter als der Branch, nicht angefasst) |
 
 ## ③ Rückmeldung
 

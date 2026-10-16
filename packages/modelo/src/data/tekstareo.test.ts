@@ -87,18 +87,14 @@ describe("tekstareo in the repo Modelo (section ②)", () => {
 
   it("names the parts of the kampo without a height of its own, and copies the kampo's bindings (Regel 0.1)", () => {
     if (skemo === undefined || kampo === undefined) throw new Error("missing");
-    expect(Object.keys(skemo.parts).sort()).toEqual(
-      Object.keys(kampo.skemo.parts)
-        .filter((part) => true)
-        .sort(),
-    );
+    expect(Object.keys(skemo.parts).sort()).toEqual(Object.keys(kampo.skemo.parts).sort());
     expect(skemo.parts.box?.height).toBeUndefined();
     expect(kampo.skemo.parts.box?.height).toBeDefined();
     // Every binding of the kampo that is not the readonly state's, not the height and not the
     // typography of the text stands in the tekstareo word for word.
     const copied = kampo.skemo.bindings.filter(
       (binding) =>
-        binding.when.state !== "readonly" &&
+        binding.when?.state !== "readonly" &&
         !(binding.part === "box" && binding.property === "height") &&
         !(binding.part === "text" && binding.property === "typography"),
     );
