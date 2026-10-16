@@ -7,7 +7,7 @@ export const valid = (
   <Langetaro label="Standard" selected="inhalt">
     <data value="inhalt">Inhalt</data>
     <data value="versionen">Versionen</data>
-    <data value="regeln" disabled>
+    <data value="regeln" aria-disabled="true">
       Regeln
     </data>
     <div slot="panel">Der Inhalt des Standards.</div>
