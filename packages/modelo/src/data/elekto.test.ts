@@ -44,12 +44,14 @@ describe("elekto in the repo Modelo (G1, G2, section 3)", () => {
     expect(elekto?.file).toBe("modelo/data/eroj/elekto/skemo.json");
     expect(modelo.eroj.map((entry) => entry.ero.name)).toEqual([
       "butono",
+      "dialogo",
       "elektilo",
       "elekto",
       "kampo",
       "ligilo",
       "markobutono",
       "sxaltilo",
+      "tekstareo",
     ]);
     expect(validateModelo(defaultModeloSource()).errors).toEqual([]);
   });
@@ -400,12 +402,18 @@ describe("the Reguloj of the elekto (G6, E5)", () => {
 
   it.each([
     // Spec 010 ④: the elektilo follows the elekto in each list (E5).
-    ["field-label-visible", ["kampo", "sxaltilo", "markobutono", "elekto", "elektilo"]],
-    ["field-label-names-the-datum", ["kampo", "sxaltilo", "markobutono", "elekto", "elektilo"]],
-    ["error-says-what-to-do", ["kampo", "markobutono", "elekto", "elektilo"]],
-    ["required-marked", ["kampo", "markobutono", "elekto", "elektilo"]],
-    ["error-not-color-only", ["kampo", "markobutono", "elekto", "elektilo"]],
-    ["help-is-one-sentence", ["kampo", "elekto", "elektilo"]],
+    [
+      "field-label-visible",
+      ["kampo", "sxaltilo", "markobutono", "elekto", "elektilo", "tekstareo"],
+    ],
+    [
+      "field-label-names-the-datum",
+      ["kampo", "sxaltilo", "markobutono", "elekto", "elektilo", "tekstareo"],
+    ],
+    ["error-says-what-to-do", ["kampo", "markobutono", "elekto", "elektilo", "tekstareo"]],
+    ["required-marked", ["kampo", "markobutono", "elekto", "elektilo", "tekstareo"]],
+    ["error-not-color-only", ["kampo", "markobutono", "elekto", "elektilo", "tekstareo"]],
+    ["help-is-one-sentence", ["kampo", "elekto", "elektilo", "tekstareo"]],
   ])("%s is widened to the elekto, not duplicated (E5)", (name, eroj) => {
     expect(named(name)?.appliesTo).toEqual({ eroj });
     expect(named(name)?.statement).toMatch(/elekto/);
@@ -421,6 +429,8 @@ describe("the Reguloj of the elekto (G6, E5)", () => {
       "markobutono",
       "elekto",
       "elektilo",
+      "tekstareo",
+      "dialogo",
     ]);
   });
 

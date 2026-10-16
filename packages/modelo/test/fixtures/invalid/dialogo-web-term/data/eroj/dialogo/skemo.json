@@ -47,7 +47,7 @@
     ],
     "slots": [
       {
-        "name": "title",
+        "name": "heading",
         "default": true,
         "text": true
       },
@@ -67,97 +67,38 @@
       }
     ],
     "parts": {
-      "backdrop": {
-        "fill": {
-          "fixed": "color.backdrop"
-        }
-      },
       "surface": {
         "fill": {
-          "fixed": "color.background.raised"
-        },
-        "radius": {
-          "fixed": "radius.role.surface"
-        },
-        "width": {
-          "by": [
-            "size"
-          ]
-        },
-        "shadow": {
-          "fixed": "elevation.shadow.modal"
+          "fixed": "color.background.default"
         }
       },
-      "border": {
-        "color": {
-          "fixed": "color.border.default"
-        },
-        "width": {
-          "fixed": "border.width.default"
-        }
-      },
-      "title": {
+      "heading": {
         "color": {
           "fixed": "color.text.default"
-        },
-        "typography": {
-          "fixed": "typography.headline.4"
         }
       },
       "message": {
         "color": {
           "fixed": "color.text.default"
-        },
-        "typography": {
-          "fixed": "typography.body.1"
         }
       },
       "reason": {
-        "color": {
+        "height": {
           "by": [
             "reason"
           ]
         }
       },
-      "content": {
-        "gap": {
-          "fixed": "spacing.medium"
-        }
-      },
-      "actions": {
+      "box": {
         "gap": {
           "fixed": "spacing.small"
-        }
-      },
-      "box": {
-        "inline-padding": {
-          "fixed": "spacing.large"
-        },
-        "gap": {
-          "fixed": "spacing.medium"
         }
       }
     },
     "bindings": [
       {
-        "part": "surface",
-        "property": "width",
-        "when": {
-          "size": "small"
-        },
-        "token": "size.container.small"
-      },
-      {
-        "part": "surface",
-        "property": "width",
-        "when": {
-          "size": "medium"
-        },
-        "token": "size.container.medium"
-      },
-      {
         "part": "reason",
-        "property": "color",
+        "property": "height",
         "when": {
           "reason": "none"
         },
@@ -165,25 +106,25 @@
       },
       {
         "part": "reason",
-        "property": "color",
+        "property": "height",
         "when": {
           "reason": "optional"
         },
-        "token": "color.text.default"
+        "token": "spacing.medium"
       },
       {
         "part": "reason",
-        "property": "color",
+        "property": "height",
         "when": {
           "reason": "required"
         },
-        "token": "color.text.default"
+        "token": "spacing.medium"
       }
     ],
     "a11y": {
       "role": "dialog",
       "name": [
-        "slot:title"
+        "slot:heading"
       ],
       "description": [
         "slot:message"

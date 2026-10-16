@@ -63,6 +63,10 @@
         {
           "ero": "kampo",
           "kialo": "A settings form holds fields and switches together, because some settings take a value and some are only on or off; the switch applies at once, the field with the form."
+        },
+        {
+          "ero": "dialogo",
+          "kialo": "A switch inside a dialog applies at once like everywhere, because the dialog only frames the setting."
         }
       ],
       "never": [

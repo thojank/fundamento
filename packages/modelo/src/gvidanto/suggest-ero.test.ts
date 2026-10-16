@@ -68,8 +68,8 @@ describe("suggest_ero", () => {
     expect(result.allowed).toEqual([
       "destructive",
       "confirm",
-      "ask-reason",
       "dismiss",
+      "ask-reason",
       "choose-many",
       "choose-few",
       "enter-text",

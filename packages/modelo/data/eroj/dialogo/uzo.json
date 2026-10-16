@@ -1,0 +1,202 @@
+{
+  "$schema": "../../../schema/modelo.schema.json#/$defs/UzoFile",
+  "uzo": {
+    "id": "uzo_01M51T7521N2GGY8VZC4HTP8Y4",
+    "ero": "ero_01M51T74A5H5FGY35BQ90VQEGH",
+    "skemo": "ske_01M51T74P4HRGNV86W639ZYNPG",
+    "purpose": "Interrupts the page to ask for a decision before it happens: confirm, approve, reject with a reason. The page behind stays where it was.",
+    "instead": [
+      {
+        "goal": "inform-only",
+        "keywords": {
+          "en": [
+            "inform",
+            "notice",
+            "saved"
+          ],
+          "de": [
+            "informieren",
+            "hinweis",
+            "meldung",
+            "gespeichert"
+          ]
+        },
+        "ero": null,
+        "kialo": "Who only informs does not interrupt, because a notice reads in the flow of the page; Fundamento has no such Ero yet (avizo)."
+      },
+      {
+        "goal": "long-form",
+        "keywords": {
+          "en": [
+            "wizard",
+            "multi-step"
+          ],
+          "de": [
+            "assistent",
+            "mehrseitig",
+            "formularseite"
+          ]
+        },
+        "ero": null,
+        "kialo": "A form of more than one screen height is a page, because a dialog that scrolls hides its own actions; a person decides where it goes."
+      }
+    ],
+    "boundary": [
+      {
+        "case": "non-modal",
+        "action": "not-supported",
+        "keywords": {
+          "en": [
+            "modeless",
+            "popover",
+            "tooltip"
+          ],
+          "de": [
+            "nichtmodal",
+            "popover",
+            "tooltip"
+          ]
+        },
+        "kialo": "A surface that lets the page stay usable is no interruption, because a decision cannot be put off; that is another Ero."
+      },
+      {
+        "case": "drawer",
+        "action": "not-supported",
+        "keywords": {
+          "en": [
+            "drawer",
+            "side-panel"
+          ],
+          "de": [
+            "seitenpaneel",
+            "drawer"
+          ]
+        },
+        "kialo": "A panel that slides in from the side shows a second view, not a question, because it holds more than a decision."
+      },
+      {
+        "case": "nested-dialog",
+        "action": "not-supported",
+        "keywords": {
+          "en": [
+            "nested",
+            "stacked"
+          ],
+          "de": [
+            "verschachtelt",
+            "gestapelt"
+          ]
+        },
+        "kialo": "A dialog opens no second one, because two interruptions at once leave no page to return to."
+      }
+    ],
+    "composes": {
+      "containers": [
+        {
+          "name": "page",
+          "kialo": "A dialog belongs to the page it interrupts, because its decision returns the person there."
+        }
+      ],
+      "with": [
+        {
+          "ero": "butono",
+          "kialo": "The actions of a dialog are its buttons, because a decision is taken by one of them: at most one with emphasis high."
+        },
+        {
+          "ero": "tekstareo",
+          "kialo": "A reason is text over several lines, because a reason is a sentence or two; the dialog shows the area itself."
+        },
+        {
+          "ero": "kampo",
+          "kialo": "A short entry the decision needs stands in the content, because a field is one line."
+        },
+        {
+          "ero": "elektilo",
+          "kialo": "A choice of one among many the decision needs stands in the content, because a list closes again."
+        },
+        {
+          "ero": "markobutono",
+          "kialo": "A yes or no the decision needs stands in the content, because a check mark applies with the confirmation."
+        }
+      ],
+      "never": [],
+      "spacing": {
+        "owner": "container",
+        "regulo": "spacing-owned-by-container"
+      }
+    },
+    "slots": {
+      "heading": {
+        "accepts": [
+          "text"
+        ],
+        "required": true,
+        "max": 1,
+        "nesting": 0
+      },
+      "message": {
+        "accepts": [
+          "text"
+        ],
+        "max": 1,
+        "nesting": 0
+      },
+      "reason": {
+        "accepts": [
+          "text"
+        ],
+        "max": 1,
+        "nesting": 0
+      },
+      "content": {
+        "accepts": [
+          "kampo",
+          "tekstareo",
+          "elektilo",
+          "elekto",
+          "markobutono",
+          "sxaltilo"
+        ],
+        "nesting": 1
+      },
+      "actions": {
+        "accepts": [
+          "butono"
+        ],
+        "required": true,
+        "min": 1,
+        "max": 2,
+        "nesting": 0
+      }
+    },
+    "layout": {
+      "size": "container",
+      "wrap": "never"
+    },
+    "content": [
+      {
+        "regulo": "dialog-title-names-the-decision",
+        "fixed": false,
+        "check": {
+          "kind": "not-words",
+          "words": {
+            "de": [
+              "bestätigung",
+              "achtung",
+              "hinweis",
+              "warnung",
+              "frage"
+            ],
+            "en": [
+              "confirmation",
+              "attention",
+              "warning",
+              "notice",
+              "question"
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

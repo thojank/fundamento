@@ -328,12 +328,12 @@ describe("check_usage and suggest_ero of the text area (G6, G7, Gvidanto)", () =
       ero: "tekstareo",
       props: {},
     });
-    expect(suggest("Textfeld mit fetter Formatierung").boundary).toMatchObject({
+    expect(suggest("Fließtext mit fetter Formatierung").boundary).toMatchObject({
       ero: "tekstareo",
       case: "rich-text",
       action: "not-supported",
     });
-    expect(suggest("Zeichenzähler unter dem Feld").boundary).toMatchObject({
+    expect(suggest("Feld mit Zeichenlimit").boundary).toMatchObject({
       ero: "tekstareo",
       case: "character-count",
       action: "ask-human",

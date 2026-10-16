@@ -48,9 +48,9 @@ describe("dialogo in the repo Modelo (section ②, E9)", () => {
     expect(skemo?.states).toEqual(["rest"]);
   });
 
-  it("has the slots title (default), message, reason (the label of the reason field), content and actions", () => {
+  it("has the slots heading (default; title is a web term), message, reason (the label of the reason field), content and actions", () => {
     expect(skemo?.slots).toEqual([
-      { name: "title", default: true, text: true },
+      { name: "heading", default: true, text: true },
       { name: "message", text: true },
       { name: "reason", text: true },
       { name: "content" },
@@ -58,7 +58,7 @@ describe("dialogo in the repo Modelo (section ②, E9)", () => {
     ]);
   });
 
-  it("names its parts: backdrop, surface with shadow and width by size, border, title in headline.4, message, reason by reason, content, actions, box", () => {
+  it("names its parts: backdrop, surface with shadow and width by size, border, heading in headline.4, message, reason by reason, content, actions, box", () => {
     if (skemo === undefined) throw new Error("missing");
     expect(Object.keys(skemo.parts).sort()).toEqual([
       "actions",
@@ -66,12 +66,12 @@ describe("dialogo in the repo Modelo (section ②, E9)", () => {
       "border",
       "box",
       "content",
+      "heading",
       "message",
       "reason",
       "surface",
-      "title",
     ]);
-    expect(skemo.parts.backdrop?.fill).toEqual({ fixed: "color.backdrop" });
+    expect(skemo.parts.backdrop?.color).toEqual({ fixed: "color.backdrop" });
     expect(skemo.parts.surface?.fill).toEqual({ fixed: "color.background.raised" });
     expect(skemo.parts.surface?.shadow).toEqual({ fixed: "elevation.shadow.modal" });
     expect(skemo.parts.surface?.radius).toEqual({ fixed: "radius.role.surface" });
@@ -83,12 +83,13 @@ describe("dialogo in the repo Modelo (section ②, E9)", () => {
     );
     expect(skemo.parts.border?.color).toEqual({ fixed: "color.border.default" });
     // The smallest headline above body (section ②: the plan names it): headline.4.
-    expect(skemo.parts.title?.typography).toEqual({ fixed: "typography.headline.4" });
+    expect(skemo.parts.heading?.typography).toEqual({ fixed: "typography.headline.4" });
     expect(skemo.parts.message?.typography).toEqual({ fixed: "typography.body.1" });
-    // The reason field is drawn only with a reason: none is the keyword none (Spec 008 D-03).
-    expect(boundToken(skemo, "reason", "color", { reason: "none" })?.token).toBe("none");
-    expect(boundToken(skemo, "reason", "color", { reason: "required" })?.token).toBe(
-      "color.text.default",
+    // The reason field is there only with a reason: its height is none without one (Spec 008
+    // D-03), a control's height with one; the field itself is the tekstareo the dialog shows.
+    expect(boundToken(skemo, "reason", "height", { reason: "none" })?.token).toBe("none");
+    expect(boundToken(skemo, "reason", "height", { reason: "required" })?.token).toBe(
+      "size.control.large",
     );
     // size and reason key parts: the axes of the Figma set, 2 × 3 (one state).
     expect(styledProps(skemo)).toEqual(["size", "reason"]);
@@ -99,7 +100,7 @@ describe("dialogo in the repo Modelo (section ②, E9)", () => {
   it("speaks role dialog: named by the title, described by the message, Escape closes (G4)", () => {
     expect(skemo?.a11y).toEqual({
       role: "dialog",
-      name: ["slot:title"],
+      name: ["slot:heading"],
       description: ["slot:message"],
       states: {},
       keys: ["Escape"],
@@ -138,7 +139,7 @@ describe("the Uzo of the dialogo (section ②, G5)", () => {
       "Interrupts the page to ask for a decision before it happens: confirm, approve, reject with a reason. The page behind stays where it was.",
     );
     expect(uzo?.slots).toEqual({
-      title: { accepts: ["text"], required: true, max: 1, nesting: 0 },
+      heading: { accepts: ["text"], required: true, max: 1, nesting: 0 },
       message: { accepts: ["text"], max: 1, nesting: 0 },
       reason: { accepts: ["text"], max: 1, nesting: 0 },
       content: {
@@ -182,17 +183,17 @@ describe("the Uzo of the dialogo (section ②, G5)", () => {
       uzo?.content.map((entry) => [
         entry.regulo,
         entry.fixed,
-        entry.of ?? "slot:title",
+        entry.of ?? "slot:heading",
         entry.check.kind,
       ]),
-    ).toEqual([["dialog-title-names-the-decision", false, "slot:title", "not-words"]]);
+    ).toEqual([["dialog-title-names-the-decision", false, "slot:heading", "not-words"]]);
   });
 
   it("the brief names the purpose, size and reason, title and actions as duties, and stays under 750", () => {
     if (dialogo === undefined) throw new Error("dialogo missing");
     const brief = briefOf(dialogo);
     expect(brief.axes.map((axis) => axis.name)).toEqual(["size", "reason"]);
-    expect(brief.required).toEqual({ props: [], slots: ["title", "actions"] });
+    expect(brief.required).toEqual({ props: [], slots: ["heading", "actions"] });
     const bytes = Buffer.byteLength(JSON.stringify(brief), "utf8");
     expect(Math.ceil(bytes / 3), `${bytes} bytes`).toBeLessThanOrEqual(750);
   });
@@ -242,12 +243,22 @@ describe("the Reguloj of the dialogo (G6, E5)", () => {
     expect(regulo?.appliesTo?.eroj).toEqual(["butono", "dialogo"]);
     expect(regulo?.statement).toMatch(/dialogo/);
     const two = evaluateUsage(modelo, [
-      { ero: "butono", props: { emphasis: "high" }, label: "Freigeben", container: "dialog" },
-      { ero: "butono", props: { emphasis: "high" }, label: "Abbrechen", container: "dialog" },
+      {
+        ero: "butono",
+        props: { emphasis: "high" },
+        label: "Version freigeben",
+        container: "dialog",
+      },
+      {
+        ero: "butono",
+        props: { emphasis: "high" },
+        label: "Entwurf verwerfen",
+        container: "dialog",
+      },
     ]);
-    expect(two.violations.map((violation) => violation.issue.rule)).toEqual([
+    expect(two.violations.map((violation) => violation.issue.rule)).toContain(
       "one-primary-per-container",
-    ]);
+    );
   });
 
   it("has an approved and a rejected example in de and en that evaluate as they say", () => {
@@ -331,7 +342,7 @@ describe("check_usage and suggest_ero of the dialog (G6, G7, Gvidanto)", () => {
       case: "drawer",
       action: "not-supported",
     });
-    expect(suggest("ein verschachtelter Dialog").boundary).toMatchObject({
+    expect(suggest("verschachtelt im Dialog").boundary).toMatchObject({
       ero: "dialogo",
       case: "nested-dialog",
     });

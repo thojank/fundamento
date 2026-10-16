@@ -95,6 +95,10 @@
         {
           "ero": "butono",
           "kialo": "The form ends with the button that sends it, because ticking a box does nothing by itself; the button stands after the last checkbox."
+        },
+        {
+          "ero": "dialogo",
+          "kialo": "A check mark inside a dialog applies with the confirmation, because the dialog is the form it belongs to."
         }
       ],
       "never": [

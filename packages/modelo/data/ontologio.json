@@ -975,6 +975,10 @@
         {
           "predicate": "references",
           "target": "#Elektilo"
+        },
+        {
+          "predicate": "references",
+          "target": "#Dialogo"
         }
       ]
     },
@@ -1122,8 +1126,8 @@
         ]
       },
       "definition": {
-        "en": "A text field: takes one line of text from a person. It always shows its label, and can show help and an error. Its neighbour tekstareo (several lines) is a candidate, not yet an Ero.",
-        "de": "Ein Textfeld: nimmt eine Zeile Text von einer Person. Es zeigt seine Beschriftung immer und kann Hilfe und Fehler zeigen. Der Nachbar tekstareo (mehrere Zeilen) ist Kandidat, noch kein Ero."
+        "en": "A text field: takes one line of text from a person — text, an e-mail, a password, a whole number or a date. It always shows its label, and can show help and an error. Several lines are the tekstareo (use-instead).",
+        "de": "Ein Textfeld: nimmt eine Zeile Text von einer Person – Text, E-Mail, Passwort, ganze Zahl oder Datum. Es zeigt seine Beschriftung immer und kann Hilfe und Fehler zeigen. Mehrere Zeilen sind der tekstareo (use-instead)."
       },
       "broader": [
         "#Ero"
@@ -1144,6 +1148,10 @@
         {
           "predicate": "references",
           "target": "#Elektilo"
+        },
+        {
+          "predicate": "references",
+          "target": "#Tekstareo"
         }
       ]
     },
@@ -1190,6 +1198,10 @@
         {
           "predicate": "references",
           "target": "#Elekto"
+        },
+        {
+          "predicate": "references",
+          "target": "#Dialogo"
         }
       ]
     },
@@ -1227,6 +1239,101 @@
         {
           "predicate": "references",
           "target": "#Kampo"
+        },
+        {
+          "predicate": "references",
+          "target": "#Markobutono"
+        },
+        {
+          "predicate": "references",
+          "target": "#Dialogo"
+        }
+      ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Tekstareo",
+      "term": "Tekstareo",
+      "inScheme": "eroj",
+      "prefLabel": {
+        "eo": "Tekstareo",
+        "en": "text area",
+        "de": "Textbereich"
+      },
+      "altLabel": {
+        "en": [
+          "tekstareo",
+          "textarea",
+          "multi-line field"
+        ],
+        "de": [
+          "Textarea",
+          "mehrzeiliges Textfeld",
+          "tekstareo"
+        ]
+      },
+      "definition": {
+        "en": "A text area: takes text that runs over several lines from a person (a comment, a description, a reason). It always shows its label, grows with its rows, and can show help and an error; kind code sets the code typography. The kampo sends several lines to it (use-instead); one line is the kampo.",
+        "de": "Ein Textbereich: nimmt Text über mehrere Zeilen von einer Person (Kommentar, Beschreibung, Begründung). Er zeigt seine Beschriftung immer, wächst mit seinen Zeilen und kann Hilfe und Fehler zeigen; kind code setzt die Code-Typografie. Der kampo verweist für mehrere Zeilen auf ihn (use-instead); eine Zeile ist der kampo."
+      },
+      "broader": [
+        "#Ero"
+      ],
+      "relations": [
+        {
+          "predicate": "references",
+          "target": "#Kampo"
+        },
+        {
+          "predicate": "references",
+          "target": "#Dialogo"
+        }
+      ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Dialogo",
+      "term": "Dialogo",
+      "inScheme": "eroj",
+      "prefLabel": {
+        "eo": "Dialogo",
+        "en": "dialog",
+        "de": "Dialog"
+      },
+      "altLabel": {
+        "en": [
+          "dialogo",
+          "modal",
+          "modal dialog",
+          "confirmation dialog"
+        ],
+        "de": [
+          "Modal",
+          "Bestätigungsdialog",
+          "dialogo"
+        ]
+      },
+      "definition": {
+        "en": "A dialog: interrupts the page to ask for a decision before it happens — confirm, approve, reject with a reason; the page behind stays where it was. Its heading names the decision, its actions are one or two butono (at most one primary), a reason is a tekstareo it shows itself; form fields go into its content (one Ero for confirmation and form). The butono sends a confirmation question to it (use-instead).",
+        "de": "Ein Dialog: unterbricht die Seite, um vor einer Entscheidung zu fragen – bestätigen, freigeben, mit Begründung ablehnen; die Seite dahinter bleibt, wo sie war. Seine Überschrift nennt die Entscheidung, seine Aktionen sind ein oder zwei butono (höchstens einer primär), eine Begründung ist ein tekstareo, den er selbst zeigt; Formularfelder stehen in seinem Inhalt (ein Ero für Bestätigung und Formular). Der butono verweist für eine Rückfrage auf ihn (use-instead)."
+      },
+      "broader": [
+        "#Ero"
+      ],
+      "relations": [
+        {
+          "predicate": "references",
+          "target": "#Butono"
+        },
+        {
+          "predicate": "references",
+          "target": "#Tekstareo"
+        },
+        {
+          "predicate": "references",
+          "target": "#Kampo"
+        },
+        {
+          "predicate": "references",
+          "target": "#Elektilo"
         },
         {
           "predicate": "references",

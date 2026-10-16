@@ -101,297 +101,41 @@
     "parts": {
       "label": {
         "color": {
-          "by": [
-            "state"
-          ]
-        },
-        "typography": {
-          "by": [
-            "size"
-          ]
-        }
-      },
-      "required-mark": {
-        "color": {
-          "fixed": "color.status.danger.text"
+          "fixed": "color.text.default"
         }
       },
       "surface": {
         "fill": {
-          "by": [
-            "state"
-          ]
-        }
-      },
-      "border": {
-        "color": {
-          "by": [
-            "state"
-          ]
-        },
-        "width": {
-          "fixed": "border.width.default"
+          "fixed": "color.background.default"
         }
       },
       "text": {
         "color": {
-          "by": [
-            "state"
-          ]
-        },
-        "typography": {
-          "by": [
-            "kind",
-            "size"
-          ]
+          "fixed": "color.text.default"
         }
       },
       "placeholder": {
         "color": {
-          "fixed": "color.text.subtle"
+          "fixed": "color.text.default"
         }
       },
       "help": {
         "color": {
-          "fixed": "color.text.muted"
-        },
-        "typography": {
-          "fixed": "typography.caption"
+          "fixed": "color.text.default"
         }
       },
       "error": {
         "color": {
-          "fixed": "color.status.danger.text"
-        },
-        "typography": {
-          "fixed": "typography.caption"
-        }
-      },
-      "focus-ring": {
-        "ring": {
-          "fixed": "focus.ring"
-        },
-        "offset": {
-          "fixed": "focus.offset"
-        },
-        "color": {
-          "fixed": "color.focus.inner"
+          "fixed": "color.text.default"
         }
       },
       "box": {
-        "inline-padding": {
-          "by": [
-            "size"
-          ]
-        },
         "gap": {
           "fixed": "spacing.small"
-        },
-        "radius": {
-          "fixed": "radius.role.control"
-        }
-      },
-      "motion": {
-        "duration": {
-          "fixed": "motion.duration.fast"
-        },
-        "easing": {
-          "fixed": "motion.easing.standard"
         }
       }
     },
-    "bindings": [
-      {
-        "part": "label",
-        "property": "color",
-        "when": {
-          "state": "rest"
-        },
-        "token": "color.text.default"
-      },
-      {
-        "part": "label",
-        "property": "color",
-        "when": {
-          "state": "disabled"
-        },
-        "token": "color.text.disabled"
-      },
-      {
-        "part": "label",
-        "property": "typography",
-        "when": {
-          "size": "small"
-        },
-        "token": "typography.label.2"
-      },
-      {
-        "part": "label",
-        "property": "typography",
-        "when": {
-          "size": "medium"
-        },
-        "token": "typography.label.1"
-      },
-      {
-        "part": "label",
-        "property": "typography",
-        "when": {
-          "size": "large"
-        },
-        "token": "typography.label.1"
-      },
-      {
-        "part": "surface",
-        "property": "fill",
-        "when": {
-          "state": "rest"
-        },
-        "token": "color.background.default"
-      },
-      {
-        "part": "surface",
-        "property": "fill",
-        "when": {
-          "state": "disabled"
-        },
-        "token": "color.background.sunken"
-      },
-      {
-        "part": "border",
-        "property": "color",
-        "when": {
-          "state": "rest"
-        },
-        "token": "color.border.default"
-      },
-      {
-        "part": "border",
-        "property": "color",
-        "when": {
-          "state": "hover"
-        },
-        "token": "color.border.strong"
-      },
-      {
-        "part": "border",
-        "property": "color",
-        "when": {
-          "state": "focus"
-        },
-        "token": "color.border.strong"
-      },
-      {
-        "part": "border",
-        "property": "color",
-        "when": {
-          "state": "disabled"
-        },
-        "token": "color.border.disabled"
-      },
-      {
-        "part": "border",
-        "property": "color",
-        "when": {
-          "state": "invalid"
-        },
-        "token": "color.status.danger.border"
-      },
-      {
-        "part": "text",
-        "property": "color",
-        "when": {
-          "state": "rest"
-        },
-        "token": "color.text.default"
-      },
-      {
-        "part": "text",
-        "property": "color",
-        "when": {
-          "state": "disabled"
-        },
-        "token": "color.text.disabled"
-      },
-      {
-        "part": "box",
-        "property": "inline-padding",
-        "when": {
-          "size": "small"
-        },
-        "token": "spacing.small"
-      },
-      {
-        "part": "box",
-        "property": "inline-padding",
-        "when": {
-          "size": "medium"
-        },
-        "token": "spacing.medium"
-      },
-      {
-        "part": "box",
-        "property": "inline-padding",
-        "when": {
-          "size": "large"
-        },
-        "token": "spacing.medium"
-      },
-      {
-        "part": "text",
-        "property": "typography",
-        "when": {
-          "kind": "text",
-          "size": "small"
-        },
-        "token": "typography.body.2"
-      },
-      {
-        "part": "text",
-        "property": "typography",
-        "when": {
-          "kind": "text",
-          "size": "medium"
-        },
-        "token": "typography.body.1"
-      },
-      {
-        "part": "text",
-        "property": "typography",
-        "when": {
-          "kind": "text",
-          "size": "large"
-        },
-        "token": "typography.body.1"
-      },
-      {
-        "part": "text",
-        "property": "typography",
-        "when": {
-          "kind": "code",
-          "size": "small"
-        },
-        "token": "typography.code"
-      },
-      {
-        "part": "text",
-        "property": "typography",
-        "when": {
-          "kind": "code",
-          "size": "medium"
-        },
-        "token": "typography.code"
-      },
-      {
-        "part": "text",
-        "property": "typography",
-        "when": {
-          "kind": "code",
-          "size": "large"
-        },
-        "token": "typography.code"
-      }
-    ],
+    "bindings": [],
     "a11y": {
       "role": "textbox",
       "name": [

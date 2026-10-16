@@ -204,7 +204,8 @@ describe("get_ero", () => {
     expect(missing.issues.map((issue) => issue.rule)).toEqual(["ero-unknown"]);
     expect(missing.issues[0]?.path).toBe("get_ero/name");
     // The five nearest names (nearestNames): with six Eroj (Spec 010 ③) the farthest drops out.
-    expect(missing.allowed).toEqual(["butono", "elekto", "kampo", "ligilo", "markobutono"]);
+    // Spec 011 ②: with nine Eroj dialogo is nearer to "butonno" than markobutono.
+    expect(missing.allowed).toEqual(["butono", "dialogo", "elekto", "kampo", "ligilo"]);
   });
 });
 
@@ -238,6 +239,7 @@ describe("get_ero with the Uzo and brief (T022)", () => {
       "toggle",
       "choose-many",
       "choose-few",
+      "confirm",
     ]);
     expect(uzo?.slots).toEqual(butono.uzo?.slots);
     isReguloRef(uzo?.composes.spacing.regulo);

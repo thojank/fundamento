@@ -3,7 +3,7 @@
   "issues": [
     {
       "rule": "uzo-slot-required-missing",
-      "path": "data/eroj/dialogo/uzo.json#/uzo/slots/title"
+      "path": "data/eroj/dialogo/uzo.json#/uzo/slots/heading"
     }
   ]
 }

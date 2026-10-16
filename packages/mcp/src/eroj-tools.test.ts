@@ -30,13 +30,14 @@ describe("get_ero (FR-13)", () => {
     const { client } = await connect();
     const result = await call(client, "get_ero", { name: "butonno" });
     expect(result.isError).toBe(true);
-    // The five nearest names: with six Eroj (Spec 010 ③) the farthest drops out.
+    // The five nearest names: with six Eroj (Spec 010 ③) the farthest drops out; with nine
+    // (Spec 011 ②) dialogo is nearer to "butonno" than markobutono.
     expect(result.structuredContent?.allowed).toEqual([
       "butono",
+      "dialogo",
       "elekto",
       "kampo",
       "ligilo",
-      "markobutono",
     ]);
   });
 });
@@ -107,6 +108,7 @@ describe("suggest_ero (FR-13)", () => {
       "destructive",
       "confirm",
       "dismiss",
+      "ask-reason",
       "choose-many",
       "choose-few",
       "enter-text",
@@ -119,6 +121,7 @@ describe("suggest_ero (FR-13)", () => {
       "agree",
       "opt-in",
       "toggle",
+      "multi-line",
     ]);
   });
 });

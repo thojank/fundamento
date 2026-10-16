@@ -32,12 +32,14 @@ describe("kampo in the repo Modelo (T004)", () => {
     expect(kampo.file).toBe("modelo/data/eroj/kampo/skemo.json");
     expect(modelo.eroj.map((entry) => entry.ero.name)).toEqual([
       "butono",
+      "dialogo",
       "elektilo",
       "elekto",
       "kampo",
       "ligilo",
       "markobutono",
       "sxaltilo",
+      "tekstareo",
     ]);
     expect(validateModelo(defaultModeloSource()).errors).toEqual([]);
   });
@@ -293,6 +295,9 @@ describe("the Reguloj of the kampo (T003, T004, A2, D-07)", () => {
           ...(CHECKBOX.includes(name) ? ["markobutono"] : []),
           ...(RADIO.includes(name) ? ["elekto"] : []),
           ...(SELECT.includes(name) ? ["elektilo"] : []),
+          // Spec 011 ②: the tekstareo is a field of several lines; the seven field Reguloj are
+          // widened to it (E5), placeholder-is-example stays the kampo's.
+          ...(name === "placeholder-is-example" ? [] : ["tekstareo"]),
         ],
       });
       expect(regulo?.checkability).toBe("automatic");
@@ -319,6 +324,8 @@ describe("the Reguloj of the kampo (T003, T004, A2, D-07)", () => {
       "markobutono",
       "elekto",
       "elektilo",
+      "tekstareo",
+      "dialogo",
     ]);
   });
 

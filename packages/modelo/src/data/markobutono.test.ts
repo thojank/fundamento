@@ -27,12 +27,14 @@ describe("markobutono in the repo Modelo (G1, G2, section 2)", () => {
     expect(markobutono?.file).toBe("modelo/data/eroj/markobutono/skemo.json");
     expect(modelo.eroj.map((entry) => entry.ero.name)).toEqual([
       "butono",
+      "dialogo",
       "elektilo",
       "elekto",
       "kampo",
       "ligilo",
       "markobutono",
       "sxaltilo",
+      "tekstareo",
     ]);
     expect(validateModelo(defaultModeloSource()).errors).toEqual([]);
   });
@@ -261,11 +263,17 @@ describe("the Uzo of the markobutono (section 2, G5)", () => {
 describe("the Reguloj of the markobutono (G6, E5)", () => {
   it.each([
     // Spec 010 ③: the elekto follows the markobutono in each list (E5); ④ the elektilo.
-    ["field-label-visible", ["kampo", "sxaltilo", "markobutono", "elekto", "elektilo"]],
-    ["field-label-names-the-datum", ["kampo", "sxaltilo", "markobutono", "elekto", "elektilo"]],
-    ["error-says-what-to-do", ["kampo", "markobutono", "elekto", "elektilo"]],
-    ["required-marked", ["kampo", "markobutono", "elekto", "elektilo"]],
-    ["error-not-color-only", ["kampo", "markobutono", "elekto", "elektilo"]],
+    [
+      "field-label-visible",
+      ["kampo", "sxaltilo", "markobutono", "elekto", "elektilo", "tekstareo"],
+    ],
+    [
+      "field-label-names-the-datum",
+      ["kampo", "sxaltilo", "markobutono", "elekto", "elektilo", "tekstareo"],
+    ],
+    ["error-says-what-to-do", ["kampo", "markobutono", "elekto", "elektilo", "tekstareo"]],
+    ["required-marked", ["kampo", "markobutono", "elekto", "elektilo", "tekstareo"]],
+    ["error-not-color-only", ["kampo", "markobutono", "elekto", "elektilo", "tekstareo"]],
   ])("%s is widened to the markobutono, not duplicated (E5)", (name, eroj) => {
     expect(named(name)?.appliesTo).toEqual({ eroj });
     expect(named(name)?.statement).toMatch(/markobutono/);
@@ -281,6 +289,8 @@ describe("the Reguloj of the markobutono (G6, E5)", () => {
       "markobutono",
       "elekto",
       "elektilo",
+      "tekstareo",
+      "dialogo",
     ]);
   });
 

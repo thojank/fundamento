@@ -1,0 +1,244 @@
+{
+  "ero": {
+    "id": "ero_01M51T74A5H5FGY35BQ90VQEGH",
+    "name": "dialogo",
+    "skemo": "ske_01M51T74P4HRGNV86W639ZYNPG",
+    "description": "A dialog: interrupts the page to ask for a decision before it happens — confirm, approve, reject with a reason. The page behind stays where it was."
+  },
+  "skemo": {
+    "id": "ske_01M51T74P4HRGNV86W639ZYNPG",
+    "ero": "ero_01M51T74A5H5FGY35BQ90VQEGH",
+    "props": [
+      {
+        "name": "open",
+        "kind": "boolean",
+        "default": false,
+        "description": "Whether the dialog is shown; the application opens it and closes it after confirm or cancel."
+      },
+      {
+        "name": "size",
+        "kind": "enum",
+        "values": [
+          "small",
+          "medium"
+        ],
+        "default": "small",
+        "description": "The width of the surface on the scale of the containers (size.container.*): small for a question, medium for a form."
+      },
+      {
+        "name": "reason",
+        "kind": "enum",
+        "values": [
+          "none",
+          "optional",
+          "required"
+        ],
+        "default": "none",
+        "description": "Whether the dialog asks for a reason: none, an optional text, or a required one that locks the confirmation until text is entered. The reason is a tekstareo the dialog shows itself."
+      }
+    ],
+    "states": [
+      "rest"
+    ],
+    "slots": [
+      {
+        "name": "heading",
+        "default": true,
+        "text": true
+      },
+      {
+        "name": "message",
+        "text": true
+      },
+      {
+        "name": "reason",
+        "text": true
+      },
+      {
+        "name": "content"
+      },
+      {
+        "name": "actions"
+      }
+    ],
+    "parts": {
+      "backdrop": {
+        "color": {
+          "fixed": "color.backdrop"
+        }
+      },
+      "surface": {
+        "fill": {
+          "fixed": "color.background.raised"
+        },
+        "radius": {
+          "fixed": "radius.role.surface"
+        },
+        "width": {
+          "by": [
+            "size"
+          ]
+        },
+        "shadow": {
+          "fixed": "elevation.shadow.modal"
+        }
+      },
+      "border": {
+        "color": {
+          "fixed": "color.border.default"
+        },
+        "width": {
+          "fixed": "border.width.default"
+        }
+      },
+      "heading": {
+        "color": {
+          "fixed": "color.text.default"
+        },
+        "typography": {
+          "fixed": "typography.headline.4"
+        }
+      },
+      "message": {
+        "color": {
+          "fixed": "color.text.default"
+        },
+        "typography": {
+          "fixed": "typography.body.1"
+        }
+      },
+      "reason": {
+        "height": {
+          "by": [
+            "reason"
+          ]
+        }
+      },
+      "content": {
+        "gap": {
+          "fixed": "spacing.medium"
+        }
+      },
+      "actions": {
+        "gap": {
+          "fixed": "spacing.small"
+        }
+      },
+      "box": {
+        "inline-padding": {
+          "fixed": "spacing.large"
+        },
+        "gap": {
+          "fixed": "spacing.medium"
+        }
+      }
+    },
+    "bindings": [
+      {
+        "part": "surface",
+        "property": "width",
+        "when": {
+          "size": "small"
+        },
+        "token": "size.container.small"
+      },
+      {
+        "part": "surface",
+        "property": "width",
+        "when": {
+          "size": "medium"
+        },
+        "token": "size.container.medium"
+      },
+      {
+        "part": "reason",
+        "property": "height",
+        "when": {
+          "reason": "none"
+        },
+        "token": "none"
+      },
+      {
+        "part": "reason",
+        "property": "height",
+        "when": {
+          "reason": "optional"
+        },
+        "token": "size.control.large"
+      },
+      {
+        "part": "reason",
+        "property": "height",
+        "when": {
+          "reason": "required"
+        },
+        "token": "size.control.large"
+      }
+    ],
+    "a11y": {
+      "role": "dialog",
+      "name": [
+        "slot:heading"
+      ],
+      "description": [
+        "slot:message"
+      ],
+      "states": {},
+      "keys": [
+        "Escape"
+      ]
+    },
+    "constraints": [
+      {
+        "when": {
+          "slot:reason": "empty"
+        },
+        "allowed": {
+          "reason": [
+            "none"
+          ]
+        },
+        "kialo": "A reason field without a visible label is a field a person cannot name, because the dialog asks for words and must say which."
+      }
+    ],
+    "goals": [
+      {
+        "goal": "confirm",
+        "keywords": {
+          "en": [
+            "sure",
+            "approve",
+            "reject",
+            "confirmation"
+          ],
+          "de": [
+            "sicher",
+            "wirklich",
+            "freigeben",
+            "ablehnen",
+            "bestätigung"
+          ]
+        },
+        "props": {},
+        "regulo": "dialog-title-names-the-decision"
+      },
+      {
+        "goal": "ask-reason",
+        "keywords": {
+          "en": [
+            "justify",
+            "justification"
+          ],
+          "de": [
+            "begründen",
+            "begründungspflicht"
+          ]
+        },
+        "props": {
+          "reason": "required"
+        },
+        "regulo": "dialog-title-names-the-decision"
+      }
+    ]
+  }
+}

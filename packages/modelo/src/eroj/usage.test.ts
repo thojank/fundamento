@@ -79,8 +79,9 @@ describe("the four Ero Reguloj in the repo (data-model §3)", () => {
   });
 
   it.each(ERO_REGULOJ)("%s applies to butono and has a usage enforcer", (name) => {
+    // Spec 011 ② (E5): one-primary-per-container is widened to the actions of a dialogo.
     expect(repoReguloj.find((candidate) => candidate.name === name)?.appliesTo).toEqual({
-      eroj: ["butono"],
+      eroj: name === "one-primary-per-container" ? ["butono", "dialogo"] : ["butono"],
     });
     expect(USAGE_ENFORCERS[name]).toBeDefined();
   });
