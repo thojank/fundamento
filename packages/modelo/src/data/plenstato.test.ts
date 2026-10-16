@@ -84,8 +84,11 @@ describe("plenstato in the repo Modelo (section ③, G1, G2)", () => {
     expect(boundToken(skemo, "border", "stroke", { kind: "loading" })?.token).toBe("none");
     expect(skemo.parts.indicator?.size).toEqual({ fixed: "size.icon.small" });
     expect(skemo.parts.indicator?.color).toEqual({ by: ["kind"] });
+    // Not the brand fill of the spec: a fill role vanishes on the page where a brand's fill is
+    // light (ekzemplo light 1,2:1); the info colour is a declared foreground on the page (plan ③
+    // D-03, Abweichung 12, B-9).
     expect(boundToken(skemo, "indicator", "color", { kind: "loading" })?.token).toBe(
-      "color.brand.fill",
+      "color.status.info.basic",
     );
     expect(boundToken(skemo, "indicator", "color", { kind: "empty" })?.token).toBe("none");
     expect(skemo.parts.text?.color).toEqual({ fixed: "color.text.muted" });

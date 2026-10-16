@@ -839,7 +839,7 @@ describe("Web Component Celo for the insigno (Spec 011 ③)", () => {
 
   it("keys surface, border and text by intent, the box by size, with the pill radius and no cursor", () => {
     expect(css).toContain(
-      ':where([part="control"][data-intent="danger"][data-size="medium"]) {\n  background-color: var(--fm-color-status-danger-subtle);',
+      ':where([part="control"][data-intent="danger"]) {\n  background-color: var(--fm-color-status-danger-subtle);',
     );
     expect(css).toContain("border-radius: var(--fm-radius-role-pill);");
     expect(css).toContain("min-block-size: var(--fm-size-icon-medium);");

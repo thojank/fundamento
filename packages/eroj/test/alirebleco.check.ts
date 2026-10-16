@@ -920,15 +920,50 @@ for (const aspekto of ["komuna", "ekzemplo"]) {
             `${JSON.stringify(c)} accent`,
           ).toBeGreaterThanOrEqual(3);
         }
-        const rings = await focusRingContrasts(
-          page,
-          noticeCombos.map((_c, i) => `#n${i} >>> [part="dismiss"]`),
-          browserName,
-        );
-        expect(rings).toHaveLength(noticeCombos.length);
+        // The dismiss butono lies in the notice's shadow tree: Tab reaches it after the slotted
+        // action; its ring is measured against its gap and against the surface of the notice.
+        await page.evaluate(() => {
+          const start = document.createElement("span");
+          start.id = "fm-focus-start";
+          start.tabIndex = -1;
+          document.body.prepend(start);
+          start.focus();
+        });
+        const rings: { id: string; gap: number; surface: number }[] = [];
+        for (
+          let step = 0;
+          step < noticeCombos.length * 3 + 2 && rings.length < noticeCombos.length;
+          step++
+        ) {
+          await page.keyboard.press(TAB(browserName));
+          const measured = await page.evaluate(() => {
+            const host = document.activeElement;
+            const inner = host?.shadowRoot?.activeElement;
+            if (!(host instanceof HTMLElement) || !(inner instanceof HTMLElement)) return null;
+            if (inner.getAttribute("part") !== "dismiss") return null;
+            const control = inner.shadowRoot?.querySelector('[part="control"]');
+            const surface = host.shadowRoot?.querySelector('[part="control"]');
+            if (!(control instanceof HTMLElement) || !(surface instanceof HTMLElement)) return null;
+            const style = getComputedStyle(control);
+            return {
+              id: host.id,
+              ring: style.outlineColor,
+              gap: /rgba?\([^)]*\)/.exec(style.boxShadow)?.[0] ?? "",
+              surface: getComputedStyle(surface).backgroundColor,
+            };
+          });
+          if (measured !== null && !rings.some((ring) => ring.id === measured.id)) {
+            rings.push({
+              id: measured.id,
+              gap: contrastOf(measured.ring, measured.gap),
+              surface: contrastOf(measured.ring, measured.surface),
+            });
+          }
+        }
+        expect(rings.map((ring) => ring.id).sort()).toEqual(noticeCombos.map((_c, i) => `n${i}`));
         for (const ring of rings) {
-          expect(ring.gap, `${ring.selector} ring on gap`).toBeGreaterThanOrEqual(3);
-          expect(ring.page, `${ring.selector} ring on surface`).toBeGreaterThanOrEqual(3);
+          expect(ring.gap, `${ring.id} ring on gap`).toBeGreaterThanOrEqual(3);
+          expect(ring.surface, `${ring.id} ring on surface`).toBeGreaterThanOrEqual(3);
         }
       });
     }

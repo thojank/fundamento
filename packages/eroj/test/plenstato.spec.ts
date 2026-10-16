@@ -25,7 +25,8 @@ test.describe("fm-plenstato behaviour", () => {
     const region = page.getByRole("status");
     await expect(region).toBeVisible();
     await expect(region).toHaveAttribute("aria-busy", "true");
-    await expect(region).toHaveText(/lädt\s*Standards werden geladen/);
+    await expect(region).toHaveText(/^lädt/);
+    await expect(page.locator("#a")).toHaveText(/Standards werden geladen/);
     const inner = await page.locator("#a").evaluate((element) => {
       const control = element.shadowRoot?.querySelector('[part="control"]') as HTMLElement;
       const indicator = element.shadowRoot?.querySelector('[part="indicator"]') as HTMLElement;
@@ -50,7 +51,8 @@ test.describe("fm-plenstato behaviour", () => {
     );
     const region = page.getByRole("status");
     await expect(region).toHaveAttribute("aria-busy", "false");
-    await expect(region).toHaveText(/^\s*Noch keine Standards/);
+    await expect(region).toHaveText(/^\s*$/);
+    await expect(page.locator("#a")).toHaveText(/^\s*Noch keine Standards/);
     const inner = await page.locator("#a").evaluate((element) => {
       const control = element.shadowRoot?.querySelector('[part="control"]') as HTMLElement;
       const indicator = element.shadowRoot?.querySelector('[part="indicator"]') as HTMLElement;
@@ -89,7 +91,7 @@ test.describe("fm-plenstato behaviour", () => {
       });
     // The test page is served with data-fm-motion="reduced": the duration role is instant.
     expect(await animations()).toEqual([]);
-    await page.evaluate(() => document.documentElement.setAttribute("data-fm-motion", "full"));
+    await page.evaluate(() => document.documentElement.setAttribute("data-fm-motion", "default"));
     await page.locator("#a").evaluate((element) => element.setAttribute("kind", "loading"));
     const running = await animations();
     expect(running).toHaveLength(1);

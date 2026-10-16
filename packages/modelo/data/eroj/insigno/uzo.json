@@ -36,7 +36,7 @@
           ]
         },
         "ero": "butono",
-        "kialo": "A badge is no control, because a label that reacts to a click hides an action; an action is a butono, a destination a ligilo."
+        "kialo": "A badge is no control, because a label that answers a click hides an action; an action is a butono, a destination a ligilo."
       },
       {
         "goal": "count-only",

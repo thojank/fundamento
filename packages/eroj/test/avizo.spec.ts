@@ -26,7 +26,9 @@ test.describe("fm-avizo behaviour", () => {
     await serve(page, out, notice('intent="success"'));
     const region = page.getByRole("status");
     await expect(region).toBeVisible();
-    await expect(region).toHaveText(/Erfolg: Der Import ist gespeichert\./);
+    // The message is slotted light DOM: the host reads it; the word stands in the shadow tree.
+    await expect(page.locator("#a")).toHaveText(/Der Import ist gespeichert\./);
+    await expect(region).toHaveText(/^Erfolg:/);
     const hiddenWord = await page.locator("#a").evaluate((element) => {
       const word = element.shadowRoot?.getElementById("fm-texts") as HTMLElement;
       return { text: word.textContent, clip: getComputedStyle(word).clipPath, hidden: word.hidden };
@@ -38,11 +40,11 @@ test.describe("fm-avizo behaviour", () => {
     });
     await page.locator("#a").evaluate((element) => element.setAttribute("intent", "danger"));
     await expect(page.getByRole("status")).toHaveCount(0);
-    await expect(page.getByRole("alert")).toHaveText(/Fehler: Der Import ist gespeichert\./);
+    await expect(page.getByRole("alert")).toHaveText(/^Fehler:/);
     // In an English document the English word is heard.
     await page.evaluate(() => document.documentElement.setAttribute("lang", "en"));
     await page.locator("#a").evaluate((element) => element.setAttribute("intent", "warning"));
-    await expect(page.getByRole("status")).toHaveText(/Warning: Der Import/);
+    await expect(page.getByRole("status")).toHaveText(/^Warning:/);
   });
 
   test("heading, details and actions show only while they have content; the parts of the notice", async ({
@@ -147,8 +149,13 @@ test.describe("fm-avizo behaviour", () => {
 
 /** The rgb() string a browser computes for a resolved colour token. */
 function rgb(value: unknown): string {
-  const color = value as { components: number[]; alpha?: number };
-  const [r, g, b] = color.components.map((c) => Math.round(c * 255));
+  const color = value as { components: number[]; alpha?: number; hex?: string };
+  // The browser derives its rgb() from the hex the token resolves to; a component rounded on its
+  // own may land one step off (warning.weak: 0.9471 × 255 = 241.5).
+  const [r, g, b] =
+    typeof color.hex === "string"
+      ? [1, 3, 5].map((at) => Number.parseInt(color.hex?.slice(at, at + 2) ?? "0", 16))
+      : color.components.map((c) => Math.round(c * 255));
   return color.alpha === undefined || color.alpha >= 1
     ? `rgb(${r}, ${g}, ${b})`
     : `rgba(${r}, ${g}, ${b}, ${color.alpha})`;

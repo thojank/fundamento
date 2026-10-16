@@ -106,8 +106,13 @@ test.describe("fm-insigno behaviour", () => {
 
 /** The rgb() string a browser computes for a resolved colour token. */
 function rgb(value: unknown): string {
-  const color = value as { components: number[]; alpha?: number };
-  const [r, g, b] = color.components.map((c) => Math.round(c * 255));
+  const color = value as { components: number[]; alpha?: number; hex?: string };
+  // The browser derives its rgb() from the hex the token resolves to; a component rounded on its
+  // own may land one step off (warning.weak: 0.9471 × 255 = 241.5).
+  const [r, g, b] =
+    typeof color.hex === "string"
+      ? [1, 3, 5].map((at) => Number.parseInt(color.hex?.slice(at, at + 2) ?? "0", 16))
+      : color.components.map((c) => Math.round(c * 255));
   return color.alpha === undefined || color.alpha >= 1
     ? `rgb(${r}, ${g}, ${b})`
     : `rgba(${r}, ${g}, ${b}, ${color.alpha})`;

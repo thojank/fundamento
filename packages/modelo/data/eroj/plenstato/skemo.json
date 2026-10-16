@@ -115,7 +115,7 @@
         "when": {
           "kind": "loading"
         },
-        "token": "color.brand.fill"
+        "token": "color.status.info.basic"
       },
       {
         "part": "indicator",

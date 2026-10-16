@@ -46,6 +46,13 @@ export const STRUCTURAL_PROPERTIES: readonly string[] = [
   // Spec 011 ② (plan ② D-11): whether a person may drag an area taller (vertical, none) is
   // structure; the text area resizes vertically only.
   "resize",
+  // Spec 011 ③ (plan ③ D-08): a text for assistive technology alone is clipped from sight
+  // (clip-path: inset(50%)), a structure without a size literal; the alignment of the text of a
+  // state (center) is structure; whether only the start edge of a notice draws a line (its
+  // accent) is structure, the line's width and colour are design values below.
+  "clip-path",
+  "text-align",
+  "border-inline-start-style",
 ];
 
 /** Design properties: their value must come from a token (prefix match on the property name). */

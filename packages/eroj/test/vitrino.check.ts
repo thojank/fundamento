@@ -197,8 +197,9 @@ test("the contrast table shows WCAG, APCA and the change against the comparison 
     // Spec 008 added three KontrastParoj color.link.* on color.background.canvas (1764 → 1890),
     // Spec 009 three more for the field (error text on sunken, error border, border on sunken:
     // 1890 → 1962); Spec 011 ① six more for the link colours on raised and sunken (1962 → 2178);
+    // Spec 011 ③ four more for the default text on the weak status surfaces (2178 → 2196);
     // the snapshot of the comparison state stays at 1296.
-    "In den 72 Kombinationen des Vergleichsstands: 2178 gegen 1296 (Veränderung +882)",
+    "In den 72 Kombinationen des Vergleichsstands: 2196 gegen 1296 (Veränderung +900)",
   );
 });
 

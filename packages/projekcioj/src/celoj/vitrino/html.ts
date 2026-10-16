@@ -153,7 +153,10 @@ function wrapSentence(role: string | undefined, wrap: string, multiline = false)
         ? "Feld"
         : role === "dialog"
           ? "Überschrift"
-          : "Label";
+          : // Spec 011 ③: a live region (notice, state) wraps its text; a badge its label (never).
+            role === "status"
+            ? "Text"
+            : "Label";
   if (wrap === "never") return `${subject} bricht nie um`;
   if (wrap === "with-text") return `${subject} darf umbrechen (inline), standalone nie`;
   return `${subject} darf umbrechen`;
