@@ -1160,3 +1160,129 @@ describe("Web Component Celo for the atributlisto (Spec 011 ④)", () => {
     expect(inventory.states).toEqual(["rest"]);
   });
 });
+
+// Spec 011 ⑤ (plan ⑤ D-07, E10): the navigation. The platform's own links stay in the light DOM;
+// the shadow holds a nav landmark named by the label prop around the default slot, and the
+// document adopts a host-scoped stylesheet (the light host of ④). The element marks the item of
+// the current page with aria-current and shows a count as a composed insigno; the current item
+// differs by more than colour (its underline, link-not-color-only).
+describe("Web Component Celo for the navigado (Spec 011 ⑤)", () => {
+  const styles = files["eroj/src/generated/navigado.styles.ts"] ?? "";
+  const element = files["eroj/src/generated/fm-navigado.ts"] ?? "";
+  const css = JSON.parse(
+    /export const NAVIGADO_CSS = (".*");/s.exec(styles)?.[1] ?? '""',
+  ) as string;
+  const light = JSON.parse(
+    /export const NAVIGADO_LIGHT_CSS = (".*");/s.exec(styles)?.[1] ?? '""',
+  ) as string;
+
+  it("renders a nav landmark around the slotted links, adopts the light stylesheet, marks the current page and composes the count", () => {
+    expect(element).toContain('<nav part="list"><slot></slot></nav>');
+    expect(element).toContain("document.adoptedStyleSheets");
+    expect(element).toContain('setAttribute("aria-current", "page")');
+    expect(element).toContain('setAttribute("aria-label"');
+    expect(element).toContain("fm-insigno");
+    expect(element).toContain('"data-count"');
+    expect(element).toContain("static formAssociated = false;");
+    expect(element).toContain('customElements.define("fm-navigado", FmNavigado)');
+  });
+
+  it("writes the items scoped to the host in the light stylesheet: fill by current and state, text by current, the underline of the current page, the box", () => {
+    expect(light).toContain(
+      "fm-navigado > a:not([aria-current]) {\n  background-color: var(--fm-color-navigation-rest);",
+    );
+    expect(light).toContain(
+      "fm-navigado > a:not([aria-current]):hover {\n  background-color: var(--fm-color-navigation-hover);",
+    );
+    expect(light).toContain(
+      "fm-navigado > a[aria-current] {\n  background-color: var(--fm-color-navigation-selected);",
+    );
+    expect(light).toContain("color: var(--fm-color-navigation-text-selected);");
+    expect(light).toContain("color: var(--fm-color-navigation-text-rest);");
+    expect(light).toContain("text-decoration-thickness: var(--fm-border-width-strong);");
+    expect(light).toContain("text-decoration-line: none;");
+    expect(light).toContain("min-block-size: var(--fm-size-target-min);");
+    expect(light).toContain("border-radius: var(--fm-radius-role-control);");
+    expect(light).toContain(
+      "fm-navigado > a:focus-visible {\n  outline-width: var(--fm-focus-ring-width);",
+    );
+    // The gap between the items is the nav's, in the shadow; vertical stacks them.
+    expect(css).toContain(':where([part="list"]) {\n  gap: var(--fm-spacing-xsmall);');
+    expect(css).toContain(
+      ':where([part="list"][data-orientation="vertical"]) { flex-direction: column;',
+    );
+  });
+
+  it("keeps every design property a token and logical in both sheets (Art. X gate 1)", () => {
+    expect(componentCssIssues("navigado.css", css)).toEqual([]);
+    expect(componentCssIssues("navigado.light.css", light)).toEqual([]);
+    expect(cssPhysicalPropertyIssues("navigado.light.css", light)).toEqual([]);
+  });
+
+  it("states no styled prop and the states rest, hover and focus in the stylesheet inventory (parity)", () => {
+    const inventory = stylesheetInventory(styles);
+    expect(inventory.props).toEqual({});
+    expect([...inventory.states].sort()).toEqual(["focus", "hover", "rest"]);
+  });
+});
+
+// Spec 011 ⑤ (plan ⑤ D-08): the tabs. A tablist named by its label, one row with role tab per
+// child of the default slot (manual slot assignment, as the radio group), the selected tab's state
+// aria-selected (E7), one tab stop that the arrows, Home and End move; selection follows focus and
+// says select; the panel is a tabpanel labelled by the selected tab. The indicator of the selected
+// tab is its block-end edge (never colour alone).
+describe("Web Component Celo for the langetaro (Spec 011 ⑤)", () => {
+  const styles = files["eroj/src/generated/langetaro.styles.ts"] ?? "";
+  const element = files["eroj/src/generated/fm-langetaro.ts"] ?? "";
+  const css = JSON.parse(
+    /export const LANGETARO_CSS = (".*");/s.exec(styles)?.[1] ?? '""',
+  ) as string;
+
+  it("renders the tablist, the rows with role tab, the panel; selection follows focus and says select", () => {
+    expect(element).toContain('<div part="control" role="tablist"></div>');
+    expect(element).toContain(
+      '<div part="panel" role="tabpanel" tabindex="0"><slot name="panel"></slot></div>',
+    );
+    expect(element).toContain('role="tab"');
+    expect(element).toContain('setAttribute("aria-selected"');
+    expect(element).toContain('new CustomEvent("select"');
+    expect(element).toContain('slotAssignment: "manual"');
+    expect(element).toContain("static formAssociated = false;");
+    expect(element).toContain('customElements.define("fm-langetaro", FmLangetaro)');
+  });
+
+  it("styles the tab by state and active, the indicator as the selected tab's edge, the list's line, the panel", () => {
+    expect(css).toContain(
+      ':where([part="control"] [part="tab"][aria-selected="true"]) {\n  color: var(--fm-color-text-default);',
+    );
+    expect(css).toContain(
+      ':where([part="control"] [part="tab"][aria-selected="false"]) {\n  color: var(--fm-color-text-subtle);',
+    );
+    expect(css).toContain(
+      ':where([part="control"] [part="tab"]:hover) {\n  background-color: var(--fm-color-action-tertiary-hover);',
+    );
+    expect(css).toContain(
+      ':where([part="control"] [part="tab"][aria-disabled="true"]) {\n  background-color: var(--fm-color-action-tertiary-disabled);',
+    );
+    expect(css).toContain("border-block-end-width: var(--fm-border-width-strong);");
+    expect(css).toContain("border-block-end-color: var(--fm-color-navigation-selected);");
+    expect(css).toContain("border-block-end-style: none;");
+    expect(css).toContain("border-block-end-color: var(--fm-color-border-default);");
+    expect(css).toContain(':where([part="panel"]) {\n  padding-inline: var(--fm-spacing-medium);');
+    expect(css).toContain(
+      ':where([part="control"] [part="tab"]:focus-visible) {\n  outline-width: var(--fm-focus-ring-width);',
+    );
+    expect(css).toContain("min-block-size: var(--fm-size-target-min);");
+  });
+
+  it("keeps every design property a token and logical (Art. X gate 1)", () => {
+    expect(componentCssIssues("langetaro.css", css)).toEqual([]);
+    expect(cssPhysicalPropertyIssues("langetaro.css", css)).toEqual([]);
+  });
+
+  it("states no styled prop and the states rest, hover, focus and disabled in the stylesheet inventory (parity)", () => {
+    const inventory = stylesheetInventory(styles);
+    expect(inventory.props).toEqual({});
+    expect([...inventory.states].sort()).toEqual(["disabled", "focus", "hover", "rest"]);
+  });
+});

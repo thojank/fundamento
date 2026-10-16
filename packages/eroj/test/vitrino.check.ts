@@ -425,3 +425,21 @@ test("fm-tabelo, fm-atributlisto and fm-mezurilo are upgraded in their sections,
   expect(await axeViolations(page, "#fm-vitrino-atributlisto")).toEqual([]);
   expect(await axeViolations(page, "#fm-vitrino-mezurilo")).toEqual([]);
 });
+
+// Spec 011 ⑤ (plan ⑤ D-11): the sections of the navigado and the langetaro in the Vitrino: one
+// navigation landmark with three links and one current page, one tablist with three tabs and its
+// panel, axe without a finding.
+test("fm-navigado and fm-langetaro are upgraded in their sections, axe-clean", async ({ page }) => {
+  await open(page);
+  const navigation = page.locator("#fm-vitrino-navigado fm-navigado");
+  await expect(navigation).toHaveCount(1);
+  await expect(page.locator("#fm-vitrino-navigado").getByRole("navigation")).toHaveCount(1);
+  await expect(page.locator("#fm-vitrino-navigado").getByRole("link")).toHaveCount(3);
+  await expect(page.locator('#fm-vitrino-navigado a[aria-current="page"]')).toHaveCount(1);
+  const tabs = page.locator("#fm-vitrino-langetaro fm-langetaro");
+  await expect(tabs).toHaveCount(1);
+  await expect(page.locator("#fm-vitrino-langetaro").getByRole("tab")).toHaveCount(3);
+  await expect(page.locator("#fm-vitrino-langetaro").getByRole("tabpanel")).toHaveCount(1);
+  expect(await axeViolations(page, "#fm-vitrino-navigado")).toEqual([]);
+  expect(await axeViolations(page, "#fm-vitrino-langetaro")).toEqual([]);
+});

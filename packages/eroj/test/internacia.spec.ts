@@ -832,3 +832,77 @@ test("tabelo and atributlisto text expansion: the caption wraps, the terms grow,
   expect(clipped).toEqual({ table: false, list: false });
   void caption;
 });
+
+// Spec 011 ⑤ (G7): the navigado right to left — the first item stands at the right, the order
+// stays — and the langetaro right to left: the first tab at the right, the indicator with it.
+test("navigado and langetaro right to left: the first item and the first tab stand at the right", async ({
+  page,
+}) => {
+  await serve(
+    page,
+    out,
+    `<fm-navigado id="n" label="Hauptnavigation" page="a"><a href="#a" data-page="a">Eins</a><a href="#b" data-page="b">Zwei</a></fm-navigado><fm-langetaro id="t" label="Reiter" selected="a"><data value="a">Eins</data><data value="b">Zwei</data><div slot="panel">Inhalt</div></fm-langetaro>`,
+  );
+  const measure = () =>
+    page.evaluate(() => {
+      const items = [...document.querySelectorAll("#n a")] as HTMLElement[];
+      const tabs = [
+        ...(document.getElementById("t")?.shadowRoot?.querySelectorAll('[part="tab"]') ?? []),
+      ] as HTMLElement[];
+      return {
+        firstItemLeftOfSecond:
+          (items[0]?.getBoundingClientRect().left ?? 0) <
+          (items[1]?.getBoundingClientRect().left ?? 0),
+        firstTabLeftOfSecond:
+          (tabs[0]?.getBoundingClientRect().left ?? 0) <
+          (tabs[1]?.getBoundingClientRect().left ?? 0),
+      };
+    });
+  const ltr = await measure();
+  expect(ltr).toEqual({ firstItemLeftOfSecond: true, firstTabLeftOfSecond: true });
+  await page.evaluate(() => document.documentElement.setAttribute("dir", "rtl"));
+  const rtl = await measure();
+  expect(rtl).toEqual({ firstItemLeftOfSecond: false, firstTabLeftOfSecond: false });
+});
+
+// The items of a navigation and the tabs expanded by words: the navigation wraps into more rows
+// and keeps the width of its container; the tabs never wrap — the list keeps one line and scrolls
+// along the inline axis, nothing is clipped from sight.
+test("navigado and langetaro text expansion: the items wrap, the tabs keep their line and the list scrolls", async ({
+  page,
+}) => {
+  await serve(
+    page,
+    out,
+    `<div style="inline-size: 20rem"><fm-navigado id="n" label="Hauptnavigation" page="a"><a href="#a" data-page="a">Standards</a><a href="#b" data-page="b">Versionen</a><a href="#c" data-page="c">Regeln</a></fm-navigado><fm-langetaro id="t" label="Reiter" selected="a"><data value="a">Inhalt</data><data value="b">Versionen</data><data value="c">Regeln</data><div slot="panel">Inhalt</div></fm-langetaro></div>`,
+  );
+  const before = await page.evaluate(() => ({
+    nav: document.getElementById("n")?.getBoundingClientRect().height ?? 0,
+    navWidth: document.getElementById("n")?.getBoundingClientRect().width ?? 0,
+    list:
+      document.getElementById("t")?.shadowRoot?.querySelector('[part="control"]')
+        ?.getBoundingClientRect().height ?? 0,
+  }));
+  await page.evaluate(
+    ([items, tabs]) => {
+      for (const item of document.querySelectorAll("#n a")) item.textContent = items ?? "";
+      for (const tab of document.querySelectorAll("#t data")) tab.textContent = tabs ?? "";
+    },
+    [pseudo("Standards der Organisation", 1), pseudo("Versionen des Standards", 1)],
+  );
+  const after = await page.evaluate(() => {
+    const list = document.getElementById("t")?.shadowRoot?.querySelector('[part="control"]') as HTMLElement;
+    return {
+      nav: document.getElementById("n")?.getBoundingClientRect().height ?? 0,
+      navWidth: document.getElementById("n")?.getBoundingClientRect().width ?? 0,
+      list: list.getBoundingClientRect().height,
+      scrolls: list.scrollWidth > list.clientWidth + 1,
+      clipped: list.scrollHeight > list.clientHeight + 1,
+    };
+  });
+  expect(after.nav).toBeGreaterThan(before.nav);
+  expect(Math.round(after.navWidth)).toBe(Math.round(before.navWidth));
+  expect(Math.round(after.list)).toBe(Math.round(before.list));
+  expect(after.scrolls).toBe(true);
+  expect(after.clipped).toBe(false);
+});

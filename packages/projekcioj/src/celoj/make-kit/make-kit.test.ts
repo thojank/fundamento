@@ -620,3 +620,31 @@ describe("Make Kit and the tabelo, atributlisto and mezurilo (Spec 011 ④)", ()
     },
   );
 });
+
+// Spec 011 ⑤ (G7, plan ⑤ D-10): one sentence per Ero in the Guidelines — the navigation between
+// the main pages is the Navigado around the platform's own links, a switch of views the Langetaro
+// — and a component page each.
+describe("Make Kit and the navigado and langetaro (Spec 011 ⑤)", () => {
+  it.each(ASPEKTOJ)(
+    "%s: the guidelines send the navigation to the Navigado, a switch of views to the Langetaro",
+    (aspekto) => {
+      const guidelines = kit(aspekto, "guidelines/Guidelines.md");
+      expect(guidelines).toContain(
+        "- Every navigation between the main pages of an application is a `<Navigado>` around the platform's own links, named and with the current page marked; a single link is a `<Ligilo>`.",
+      );
+      expect(guidelines).toContain(
+        "- Every switch between views of the same thing on one page is a `<Langetaro>` with distinct tab labels; a choice in a form is an `<Elekto>`, and the pages of an application are a `<Navigado>`.",
+      );
+      const navigation = kit(aspekto, "guidelines/components/navigado.md");
+      expect(navigation).toContain("# Navigado");
+      expect(navigation).toContain("`orientation`");
+      expect(navigation).toContain("**link-label-names-destination**");
+      expect(navigation).toContain("**breadcrumb**");
+      const tabs = kit(aspekto, "guidelines/components/langetaro.md");
+      expect(tabs).toContain("# Langetaro");
+      expect(tabs).toContain("`selected`");
+      expect(tabs).toContain("**option-labels-distinct**");
+      expect(tabs).toContain("**closable-tabs**");
+    },
+  );
+});
