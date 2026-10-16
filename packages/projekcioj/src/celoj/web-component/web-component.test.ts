@@ -1016,7 +1016,7 @@ describe("Web Component Celo for the mezurilo (Spec 011 ④)", () => {
 
   it("fills the track with the colour of intent, keeps the track's height and pill, draws the dashed edge only when unknown", () => {
     expect(css).toContain(
-      ':where([part="control"][data-intent="success"]) [part="fill"] {\n  background-color: var(--fm-color-status-success-basic);',
+      ':where([part="control"][data-intent="success"]) [part="fill"] {\n  background-color: var(--fm-color-status-success-border);',
     );
     expect(css).toContain(
       ':where([part="control"]) [part="track"] {\n  background-color: var(--fm-color-background-sunken);',

@@ -28,7 +28,11 @@ test.describe("fm-atributlisto behaviour", () => {
       clip: getComputedStyle(element.querySelector(".fm-hidden") as Element).clipPath,
       dash: element.querySelector('svg[aria-hidden="true"] path')?.getAttribute("d"),
     }));
-    expect(heard).toEqual({ hidden: texts["entries-empty"]?.de, clip: "inset(50%)", dash: "M3 8h10" });
+    expect(heard).toEqual({
+      hidden: texts["entries-empty"]?.de,
+      clip: "inset(50%)",
+      dash: "M3 8h10",
+    });
     const label = await page.locator("#a dl").getAttribute("aria-label");
     expect(label).toBe("Angaben zum Standard");
     // A value filled in later takes the dash away.
