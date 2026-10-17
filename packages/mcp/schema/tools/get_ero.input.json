@@ -12,7 +12,7 @@
       "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/EroId"
     },
     "brief": {
-      "description": "Only the brief answer (Spec 007 A8): ero, purpose, axes, required, instead, boundary. Default false.",
+      "description": "Only the brief answer (Spec 007 A8): ero, purpose, axes, required, instead, boundary. The boundaries carry case, action and the Ero to use, no kialo (Nachlese 3 G4): ask without brief for the kialo. Default false.",
       "type": "boolean"
     }
   },

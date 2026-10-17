@@ -93,7 +93,8 @@ describe("rule catalog (§2.6)", () => {
     // Skemo-level Reguloj of the ligilo, link-not-color-only and external-link-marked.
     // Spec 009 (T003): uzo-slot-required-missing and the four kampo Reguloj enforced by name.
     // Spec 010 ③ (T203): uzo-content-of-invalid and uzo-slot-min.
-    expect(RULE_IDS).toHaveLength(153);
+    // Nachlese 3 (G3): goal-keyword-shared, the warning about a keyword two Eroj' goals share.
+    expect(RULE_IDS).toHaveLength(154);
     for (const rule of [
       "uzo-skemo-missing",
       "uzo-ero-unknown",

@@ -3,12 +3,13 @@
 // the boundary or alternative of a Uzo, with its kialo and action. Deterministic and without a
 // model: the first Skemo goal (declaration order) one of whose keywords is a word of the input
 // wins (D-16); the first instead or boundary entry of a Uzo whose keyword hits wins likewise. When
-// both hit, Fundamento picks no reading: it answers ask-human with both candidates (OP-12). Pure.
+// both hit, Fundamento picks no reading: it answers ask-human with both candidates (OP-12); so
+// does it when the goals of two Eroj hit alike (Nachlese 3 G2). Pure.
 // The goal is called goal since F1-T00 (Spec 007, OP-4): `intent` is the name of a prop.
 
 import type { ValidationIssue } from "../contracts/issues.js";
 import type { Keywords, Modelo, UzoBoundary } from "../contracts/modelo.js";
-import { goalOf, wordsOf } from "../eroj/usage.js";
+import { compoundsOf, goalOf, wordsOf } from "../eroj/usage.js";
 import { type ReguloRef, reguloRef } from "./eroj.js";
 
 /** The props a goal asks for, typed as an EroInstance takes them (R-9): never "true" as a text. */
@@ -184,9 +185,121 @@ function goalHit(modelo: Modelo, text: string, lingvo?: string): GoalHit | undef
   return undefined;
 }
 
+/**
+ * How many keywords of an Ero's goals the text hits (Nachlese 3 G2): the strength of a goal hit.
+ * Counted per keyword over every goal and language the input allows, with the same measure as
+ * `goalOf` (whole words, hyphenated compounds by their ending).
+ */
+function goalStrength(modelo: Modelo, ero: string, text: string, lingvo?: string): number {
+  const skemo = modelo.eroj.find((entry) => entry.ero.name === ero)?.skemo;
+  if (skemo === undefined) return 0;
+  const words = new Set(wordsOf(text));
+  const compounds = compoundsOf(text);
+  // Distinct words: "tabs" in both languages of one goal is one hit, not two.
+  const hit = new Set<string>();
+  for (const goal of skemo.goals ?? []) {
+    for (const [language, keywords] of Object.entries(goal.keywords)) {
+      if (lingvo !== undefined && language !== lingvo) continue;
+      for (const keyword of keywords) {
+        const needle = keyword.normalize("NFC").toLowerCase();
+        if (
+          words.has(needle) ||
+          (needle.length >= COMPOUND_SUFFIX_MIN &&
+            compounds.some((compound) => compound.endsWith(needle)))
+        ) {
+          hit.add(needle);
+        }
+      }
+    }
+  }
+  return hit.size;
+}
+
+/**
+ * The goals of other Eroj the text hits as strongly as the first (Nachlese 3 G2): a tie. The
+ * first Ero in name order keeps the answer where the strengths differ (every answer that stood
+ * stays); where another Ero is hit with the same number of keywords, nobody decides for a
+ * person. In Ero order, without the first.
+ */
+function tiedGoals(modelo: Modelo, first: GoalHit, text: string, lingvo?: string): GoalHit[] {
+  const strength = goalStrength(modelo, first.ero, text, lingvo);
+  const tied: GoalHit[] = [];
+  for (const entry of modelo.eroj) {
+    if (entry.ero.name === first.ero) continue;
+    const match = goalOf(entry.skemo, text, lingvo === undefined ? {} : { lingvo });
+    if (match === undefined) continue;
+    if (goalStrength(modelo, entry.ero.name, text, lingvo) !== strength) continue;
+    const regulo =
+      match.goal.regulo === undefined
+        ? undefined
+        : modelo.reguloj.find((candidate) => candidate.name === match.goal.regulo);
+    tied.push({
+      ero: entry.ero.name,
+      goal: match.goal.goal,
+      props: { ...match.goal.props },
+      keyword: match.keyword,
+      lingvo: match.lingvo,
+      ...(regulo === undefined ? {} : { kialo: regulo.kialo, regulo: reguloRef(regulo) }),
+    });
+  }
+  return tied;
+}
+
+function goalCandidateOf(hit: GoalHit): SuggestCandidate {
+  const candidate: SuggestCandidate = {
+    kind: "goal",
+    ero: hit.ero,
+    goal: hit.goal,
+    props: hit.props,
+    keyword: hit.keyword,
+  };
+  if (hit.kialo !== undefined) candidate.kialo = hit.kialo;
+  if (hit.regulo !== undefined) candidate.regulo = hit.regulo;
+  return candidate;
+}
+
 export function suggestEro(modelo: Modelo, input: SuggestEroInput): SuggestEroResult {
   const boundary = boundaryHit(modelo, input.goal, input.lingvo);
   const goal = goalHit(modelo, input.goal, input.lingvo);
+
+  // Nachlese 3 G2: the goals of two Eroj hit alike (the same number of keywords) — Fundamento
+  // picks no reading: ask-human with every tied candidate and its kialo. An own instead entry
+  // that redirects the first Ero's goal (Spec 011 ② D-10) is no tie and keeps its way below.
+  const ownRedirect =
+    boundary !== undefined &&
+    goal !== undefined &&
+    boundary.ero === goal.ero &&
+    boundary.kind === "instead" &&
+    boundary.action === "use-instead";
+  const tied =
+    goal === undefined || ownRedirect ? [] : tiedGoals(modelo, goal, input.goal, input.lingvo);
+  if (goal !== undefined && tied.length > 0) {
+    // A boundary that hit stands first among the candidates, as it does below (OP-12): its kialo
+    // says why one Ero is not the one.
+    const boundaryCandidate: SuggestCandidate[] =
+      boundary === undefined
+        ? []
+        : [
+            {
+              kind: "boundary",
+              ero: boundary.ero,
+              case: boundary.case,
+              action: boundary.action,
+              kialo: boundary.kialo,
+              keyword: boundary.keyword,
+            },
+          ];
+    return {
+      ok: true,
+      output: {
+        goal: input.goal,
+        matched: null,
+        suggestion: null,
+        action: "ask-human",
+        candidates: [...boundaryCandidate, ...[goal, ...tied].map(goalCandidateOf)],
+      },
+    };
+  }
 
   // Spec 008 D-08: a boundary that says use-instead X and a goal of X say the same thing. The
   // goal answers (Ero, props, Regulo) and the boundary stands next to it with its kialo, so the

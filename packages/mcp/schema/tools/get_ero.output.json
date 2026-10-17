@@ -540,6 +540,7 @@
           }
         },
         "boundary": {
+          "description": "The boundaries without their kialo (Nachlese 3 G4): case, action and the Ero to use; get_ero without brief carries the kialo.",
           "type": "array",
           "items": {
             "type": "object",
@@ -552,13 +553,9 @@
               },
               "ero": {
                 "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
-              },
-              "kialo": {
-                "type": "string",
-                "minLength": 1
               }
             },
-            "required": ["case", "action", "kialo"],
+            "required": ["case", "action"],
             "additionalProperties": false
           }
         },

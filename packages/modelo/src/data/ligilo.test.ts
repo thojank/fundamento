@@ -156,6 +156,12 @@ describe("ligilo in the repo Modelo (T006)", () => {
     const words = (skemo.goals ?? []).flatMap((goal) => Object.values(goal.keywords).flat());
     for (const word of ["zur", "zum", "go", "open", "öffnen", "to"])
       expect(words).not.toContain(word);
+    // Nachlese 3 G1 (O-28): "navigation" is the navigado's word now; the ligilo keeps the verb
+    // and the overview (one destination).
+    expect(skemo.goals?.[0]?.keywords).toEqual({
+      en: ["navigate", "overview"],
+      de: ["navigieren", "übersicht"],
+    });
     for (const word of words) expect(word).not.toMatch(/\s/);
   });
 

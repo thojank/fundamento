@@ -64,6 +64,10 @@ describe("get_ero brief (Spec 007 A8)", () => {
       "purpose",
       "required",
     ]);
+    // Nachlese 3 G4: the boundaries of the brief carry no kialo (get_ero without brief does).
+    for (const entry of (answer as { boundary: Record<string, unknown>[] }).boundary) {
+      expect(entry).not.toHaveProperty("kialo");
+    }
   });
 
   // Spec 008 T014 (A5, E of Spec 009): every Ero's brief, measured; the ceiling stays 750.

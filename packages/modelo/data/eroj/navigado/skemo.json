@@ -209,13 +209,17 @@
           "en": [
             "navbar",
             "sidebar",
-            "nav"
+            "nav",
+            "navigation",
+            "menu"
           ],
           "de": [
             "hauptnavigation",
             "hauptmenü",
             "seitenleiste",
-            "navigationsleiste"
+            "navigationsleiste",
+            "navigation",
+            "menü"
           ]
         },
         "props": {},
