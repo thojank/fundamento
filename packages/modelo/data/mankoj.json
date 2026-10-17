@@ -111,6 +111,20 @@
         "measure": "library-sync",
         "statement": "Eine zweite Penpot-Datei, die die Bibliothek der Celo-Datei verbindet, zeigt deren Sets und Themes ohne eigenen Import, und eine Änderung am Vortaro erreicht sie."
       }
+    },
+    {
+      "id": "man_01M54N90NZ8Z993BGKHE46KBQX",
+      "celo": "figma",
+      "property": "font.family.code",
+      "modelo": "Der Token font.family.code nennt eine Liste von Familien (Geist Mono, ui-monospace, monospace); ein Browser nimmt die erste, die er hat. Der Celo nimmt die erste, die die Datei lädt, und überspringt die generischen CSS-Namen, die keine Figma-Datei führt.",
+      "instead": "Eine Figma-Datei führt nur die Schriften, die installiert oder in ihr geladen sind. Eine Code-Familie, die der Datei fehlt, fällt auf die Rückfall-Familie des Plans (Inter) zurück, mit Warnung; die Variable typography/code/font-family trägt weiter die erste Familie des Tokens, und Figma lehnt die Bindung an eine Familie ab, die nicht geladen ist — der Code-Text steht dann in der Schrift der Beschriftung.",
+      "evidence": "Messung F-2 des Maintainers am 2026-10-16 (Nachlese 3): Code-Schrift fehlte im Plugin-Lauf — „Schrift Geist Mono Regular ist in dieser Datei nicht verfügbar; die Beschriftung steht ersatzweise in Inter Regular.“ Die Datei kennt Geist Mono nicht; die übrigen Namen des Tokens (ui-monospace, monospace) sind generische CSS-Namen, die loadFontAsync in keiner Datei annimmt.",
+      "date": "2026-10-17",
+      "external": "https://www.figma.com/plugin-docs/api/properties/figma-loadfontasync/ · https://help.figma.com/hc/en-us/articles/360039956774-Upload-custom-fonts-to-an-organization-or-team",
+      "closing": {
+        "measure": "binding-accepted",
+        "statement": "Ein Plugin-Lauf lädt eine Familie aus font.family.code ohne Warnung und Figma nimmt die Bindung von fontFamily an typography/code/font-family an — die Datei kennt Geist Mono, oder die Aspekto nennt eine Code-Schrift, die die Datei kennt."
+      }
     }
   ]
 }

@@ -2845,6 +2845,70 @@ describe("the report names the font that was applied, not the one that was plann
   });
 });
 
+// W3 (Nachlese 3, F-2; gemessen vom Maintainer am 2026-10-16): Die Code-Schrift fiel im Plugin-Lauf
+// auf Inter zurück, weil die Datei Geist Mono nicht kennt. Der Token font.family.code nennt eine
+// Liste; der Plan trägt sie als `families`, und das Plugin geht sie durch — jeder Kandidat im Schnitt
+// des Modells, dann Regular — bevor es auf die benannte Schrift zurückfällt. Die Warnung bleibt, wo
+// kein Kandidat lädt, und nennt, was versucht wurde. Kein Token ändert sich dafür.
+describe("the code font is the first loadable family of its stack (W3, F-2)", () => {
+  const CODE_FAMILIES = ["Geist Mono", "Menlo"];
+  /** The fixture's plan with a second candidate for the code family of the tekstareo. */
+  const withCandidates = () => {
+    const changed = JSON.parse(JSON.stringify(plan)) as FigmaPlan;
+    const set = changed.components.find((component) => component.set === "tekstareo");
+    for (const font of set?.fonts ?? []) {
+      if (font.family === "Geist Mono") font.families = [...CODE_FAMILIES];
+    }
+    for (const variant of set?.variants ?? []) {
+      if (variant.font?.family === "Geist Mono") variant.font.families = [...CODE_FAMILIES];
+    }
+    return (files["figma/plugin/code.js"] ?? "").replace(
+      /^const PLAN = .*$/m,
+      `const PLAN = ${JSON.stringify(changed)};`,
+    );
+  };
+  const withoutGeistMono = MODEL_FONTS.filter((font) => font.family !== "Geist Mono");
+  const report = async (double: ReturnType<typeof figmaDouble>, source: string) =>
+    (await new Function("figma", `${source}\nreturn applyPlan();`)(double.figma)) as {
+      warnings: string[];
+    };
+
+  it("loads the second family when the file refuses the first, without the fallback warning", async () => {
+    const double = figmaDouble({
+      fonts: [
+        ...withoutGeistMono,
+        { family: "Menlo", style: "Regular" },
+        { family: "Menlo", style: "Medium" },
+      ],
+    });
+    const result = await report(double, withCandidates());
+    expect(double.loadedFonts).toContain("Menlo Regular");
+    expect(result.warnings.filter((warning) => warning.includes("ersatzweise"))).toEqual([]);
+    // Befund (W3): what the code text shows is decided by its binding to the role's variable,
+    // whose value is the token's first family — Geist Mono, which this file cannot load. Figma
+    // refuses such a binding (F30), so the candidate is loaded, and the text keeps the label's
+    // font. The variable, not the ladder, would have to resolve the stack.
+    expect(
+      result.warnings.some(
+        (warning) =>
+          warning.startsWith("tekstareo") &&
+          warning.includes("abgelehnt") &&
+          warning.includes("typography/code/font-family"),
+      ),
+    ).toBe(true);
+  });
+
+  it("falls back to the named font when no candidate loads, and names every candidate it tried", async () => {
+    const double = figmaDouble({ fonts: withoutGeistMono });
+    const result = await report(double, withCandidates());
+    expect(double.loadedFonts).not.toContain("Menlo Regular");
+    const warning = result.warnings.find((entry) => entry.includes("Geist Mono Regular"));
+    expect(warning).toContain("Inter Regular");
+    expect(warning).toContain("ersatzweise");
+    expect(warning).toContain("Geist Mono, Menlo");
+  });
+});
+
 // F31: Der Lauf bindet den Sperrsatz und schreibt die Schreibweise. Gebunden, wo Figma es zulässt
 // — `letterSpacing` ist ein bindbares Feld des Textknotens, `textCase` ist es nicht.
 describe("the label carries its tracking and its case (F31)", () => {

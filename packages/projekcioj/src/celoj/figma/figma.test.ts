@@ -20,6 +20,7 @@ import {
   FIGMA_SECTION,
   type FigmaPlan,
   type FigmaValue,
+  figmaFontCandidates,
   figmaPlanInventory,
   figmaValues,
   LIST_EMPTY_VALUE,
@@ -498,9 +499,31 @@ describe("the label's font is a variable, not a fixed name (F30)", () => {
   it("lists every font the set can need, with the brand that asks for it", () => {
     const set = plan.components.find((component) => component.set === "butono");
     expect(set?.fonts).toEqual([
-      { family: "Archivo", style: "Black", aspektoj: ["ekzemplo"] },
-      { family: "Geist", style: "Medium", aspektoj: ["komuna"] },
+      { family: "Archivo", style: "Black", families: ["Archivo"], aspektoj: ["ekzemplo"] },
+      { family: "Geist", style: "Medium", families: ["Geist"], aspektoj: ["komuna"] },
     ]);
+  });
+});
+
+// W3 (Nachlese 3, F-2): a font stack of the Vortaro is written for browsers — real families first,
+// generic CSS keywords last. Figma knows only real families, so the plan lists the candidates a
+// run may try and leaves the keywords out; SFMono-Regular is Apple's PostScript name, which no
+// Figma file lists either. Menlo and Consolas are real families and stay.
+describe("the families a Figma run may try for a font stack (W3, F-2)", () => {
+  it("skips the generic CSS names and keeps the real families in their order", () => {
+    expect(figmaFontCandidates(["Geist Mono", "ui-monospace", "monospace"])).toEqual([
+      "Geist Mono",
+    ]);
+    expect(figmaFontCandidates(["SFMono-Regular", "Menlo", "Consolas", "monospace"])).toEqual([
+      "Menlo",
+      "Consolas",
+    ]);
+    expect(figmaFontCandidates(["Geist", "system-ui", "sans-serif"])).toEqual(["Geist"]);
+    expect(figmaFontCandidates("Geist")).toEqual(["Geist"]);
+  });
+
+  it("keeps the first name of a stack that is generic throughout, so the plan still names a family", () => {
+    expect(figmaFontCandidates(["ui-monospace", "monospace"])).toEqual(["ui-monospace"]);
   });
 });
 
@@ -581,8 +604,8 @@ describe("ekzemplo carries its weight (F32)", () => {
   it("asks the run for Archivo Black, not Archivo SemiBold", () => {
     const set = plan.components.find((component) => component.set === "butono");
     expect(set?.fonts).toEqual([
-      { family: "Archivo", style: "Black", aspektoj: ["ekzemplo"] },
-      { family: "Geist", style: "Medium", aspektoj: ["komuna"] },
+      { family: "Archivo", style: "Black", families: ["Archivo"], aspektoj: ["ekzemplo"] },
+      { family: "Geist", style: "Medium", families: ["Geist"], aspektoj: ["komuna"] },
     ]);
   });
 });
@@ -1438,6 +1461,33 @@ describe("Figma plan for the tekstareo (Spec 011 ②)", () => {
     expect(set?.fonts?.some((font) => /Mono/.test(font.family))).toBe(true);
   });
 
+  // W3 (Nachlese 3, F-2; gemessen vom Maintainer am 2026-10-16): Die Code-Schrift fiel im
+  // Plugin-Lauf auf Inter zurück, weil die Datei Geist Mono nicht kennt. Der Token font.family.code
+  // nennt einen Stapel — Geist Mono, dann die generischen ui-monospace und monospace des Browsers.
+  // Der Plan trägt jede Familie, die ein Lauf laden könnte, ohne die generischen CSS-Namen: keine
+  // Figma-Datei führt eine Schrift dieses Namens. `family` bleibt die erste davon.
+  it("carries the family list of the code typography, the generic CSS names left out (W3, F-2)", () => {
+    // The variant's own font is the label's (Geist, one candidate); the code text's font stands
+    // in the list the run loads before it binds (F30).
+    const rest = variant("code", "medium", "rest");
+    expect(rest?.font?.families).toEqual(["Geist"]);
+    const mono = set?.fonts?.find((font) => font.family === "Geist Mono");
+    expect(mono).toEqual({
+      family: "Geist Mono",
+      style: "Regular",
+      families: ["Geist Mono"],
+      aspektoj: ["komuna"],
+    });
+    for (const font of set?.fonts ?? []) expect(font.families[0]).toBe(font.family);
+    // Befund for the fixture: ekzemplo's code stack is generic throughout (ui-monospace,
+    // monospace), so no family of it is one a Figma file could list; the plan keeps the first
+    // name, and the run reports the fallback.
+    const generic = set?.fonts?.find(
+      (font) => font.aspektoj.includes("ekzemplo") && font.family === "ui-monospace",
+    );
+    expect(generic?.families).toEqual(["ui-monospace"]);
+  });
+
   it("states the tekstareo in the parity inventory: kind and size, five states, no height", () => {
     const items = figmaPlanInventory(plan);
     expect(items.tekstareo?.props.kind).toEqual(["text", "code"]);
@@ -1572,7 +1622,7 @@ describe("Figma plan for the dialogo (Spec 011 ②)", () => {
 
   it("takes the heading's role for the font and the text case of a set without a label part", () => {
     const rest = variant("small", "none");
-    expect(rest?.font).toEqual({ family: "Geist", style: "SemiBold" });
+    expect(rest?.font).toEqual({ family: "Geist", style: "SemiBold", families: ["Geist"] });
     expect(typeof rest?.textCase).toBe("string");
     expect(set?.fonts?.some((font) => font.style === "SemiBold")).toBe(true);
     expect(set?.fonts?.some((font) => font.style === "Regular")).toBe(true);
@@ -1732,7 +1782,7 @@ describe("Figma plan for the insigno (Spec 011 ③)", () => {
     expect(rest?.notDrawn).toEqual({});
     expect(rest?.hidden).toBeUndefined();
     expect(rest?.stroke).toBeUndefined();
-    expect(rest?.font).toEqual({ family: "Geist", style: "Medium" });
+    expect(rest?.font).toEqual({ family: "Geist", style: "Medium", families: ["Geist"] });
     expect(typeof rest?.textCase).toBe("string");
   });
 
@@ -1836,7 +1886,7 @@ describe("Figma plan for the avizo (Spec 011 ③)", () => {
     expect(info?.hidden).toBeUndefined();
     expect(info?.stroke).toBeUndefined();
     // The message is the label: its role (body.1) gives the font and the case of the set.
-    expect(info?.font).toEqual({ family: "Geist", style: "Regular" });
+    expect(info?.font).toEqual({ family: "Geist", style: "Regular", families: ["Geist"] });
     expect(set?.fonts?.some((font) => font.family === "Geist" && font.style === "Medium")).toBe(
       true,
     );
@@ -1939,7 +1989,7 @@ describe("Figma plan for the plenstato (Spec 011 ③)", () => {
       "surface.radius",
     ]);
     expect(loading?.notDrawn).toEqual({});
-    expect(loading?.font).toEqual({ family: "Geist", style: "Regular" });
+    expect(loading?.font).toEqual({ family: "Geist", style: "Regular", families: ["Geist"] });
     // The stroke token reaches the plan as a STRING variable; its value is the term.
     const dashed = plan.collections
       .flatMap((collection) => collection.variables)
