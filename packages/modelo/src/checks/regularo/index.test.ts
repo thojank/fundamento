@@ -39,6 +39,35 @@ function minimalCopy(): string {
   return root;
 }
 
+// Nachlese 3 G3 (Spec 011 ⑤ B-1): a goal keyword that two Eroj share in one language is a
+// warning `goal-keyword-shared` with both places — a decision for the maintainer, never removed
+// by the check; a Jugxo whose context names `goal-keyword-shared <lingvo>:<word>` is the exception.
+describe("goal-keyword-shared (Nachlese 3 G3)", () => {
+  it("the repo Modelo shares no goal keyword between two Eroj", async () => {
+    const result = await check({ json: true, repoRoot });
+    expect(result.warnings.filter((issue) => issue.rule === "goal-keyword-shared")).toEqual([]);
+  });
+
+  it("a keyword in the goals of two Eroj is warned with both places", async () => {
+    const root = mkdtempSync(join(tmpdir(), "fm-regularo-shared-"));
+    tempDirs.push(root);
+    cpSync(join(repoRoot, "packages/modelo/data"), join(root, "data"), { recursive: true });
+    const file = join(root, "data/eroj/navigado/skemo.json");
+    const skemo = JSON.parse(readFileSync(file, "utf8")) as {
+      skemo: { goals: { keywords: { de: string[] } }[] };
+    };
+    skemo.skemo.goals[0]?.keywords.de.push("übersicht");
+    writeFileSync(file, JSON.stringify(skemo, null, 2));
+    const result = await check({ json: true, fixture: root });
+    const shared = result.warnings.filter((issue) => issue.rule === "goal-keyword-shared");
+    expect(shared).toHaveLength(1);
+    expect(shared[0]?.message).toContain("übersicht");
+    expect(shared[0]?.message).toContain("ligilo");
+    expect(shared[0]?.message).toContain("navigado");
+    expect(result.ok).toBe(true);
+  });
+});
+
 describe("regularo on the repo", () => {
   // Until Stufe B of Spec 007 brings butono/uzo.json, the repo's only Ero has no Uzo: a warning,
   // not an error (A1).

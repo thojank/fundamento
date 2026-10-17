@@ -135,8 +135,11 @@ describe("navigado in the repo Modelo (section ⑤, G1, G2, E7)", () => {
     expect(skemo?.goals?.[0]?.keywords).toEqual({
       // Not "navigation" (the ligilo's goal navigate) and not "menu"/"menü" (the tabelo's boundary
       // row-actions-menu): the words of the spec that another Ero holds stay with it (④ B-4).
-      en: ["navbar", "sidebar", "nav"],
-      de: ["hauptnavigation", "hauptmenü", "seitenleiste", "navigationsleiste"],
+      // Nachlese 3 G1 (O-28): "navigation" and "menu"/"menü" come to the navigado; the ligilo
+      // keeps navigate/navigieren and overview/übersicht (one destination). "main menu" is two
+      // words and no keyword can hit it (wordsOf splits): hauptmenü stands for it.
+      en: ["navbar", "sidebar", "nav", "navigation", "menu"],
+      de: ["hauptnavigation", "hauptmenü", "seitenleiste", "navigationsleiste", "navigation", "menü"],
     });
   });
 });
@@ -214,6 +217,50 @@ describe("the Reguloj of the navigado (G6, E5)", () => {
     expect(judge(["Standards", "Versionen"])).toEqual([]);
     expect(judge(["hier", "Versionen"])).toEqual([["link-label-names-destination", "error"]]);
     expect(judge(["Standards"])).toEqual([["uzo-slot-min", "error"]]);
+  });
+});
+
+describe("Nachlese 3 G1: 'Navigation' leads to the navigado (O-28, OP-12)", () => {
+  it("'Navigation' is the navigado; 'Link zur Datenschutzerklärung' stays the ligilo", () => {
+    expect(suggest("Navigation").suggestion).toEqual({ ero: "navigado", props: {} });
+    expect(suggest("Navigation").matched?.goal).toBe("navigate-app");
+    expect(suggest("Link zur Datenschutzerklärung").suggestion).toEqual({
+      ero: "ligilo",
+      props: {},
+    });
+  });
+
+  it("carries a Jugxo for the answer that changed: 'Navigation' → navigado instead of ligilo", () => {
+    const jugxo = modelo.jugxoj.find(
+      (candidate) =>
+        candidate.ref.ero === navigado?.ero.id &&
+        candidate.kialo.includes("Wer Navigation sagt, meint die Menge mit aktueller Seite"),
+    );
+    expect(jugxo?.decision).toBe("approved");
+    expect(jugxo?.context).toMatch(/OP-12/);
+  });
+});
+
+describe("Nachlese 3 G2: a tie of two goals asks a person", () => {
+  it("'Tabs, um zwischen Liste und Formular zu wechseln' hits the elektilo (liste) and the langetaro (tabs) alike: ask-human with both", () => {
+    const answer = suggest("Tabs, um zwischen Liste und Formular zu wechseln");
+    expect(answer.action).toBe("ask-human");
+    expect(answer.suggestion).toBeNull();
+    expect(answer.candidates?.map((candidate) => [candidate.kind, candidate.ero])).toEqual([
+      ["goal", "elektilo"],
+      ["goal", "langetaro"],
+    ]);
+    for (const candidate of answer.candidates ?? []) {
+      expect(candidate.keyword.length).toBeGreaterThan(0);
+      expect(candidate.kialo?.length ?? 0).toBeGreaterThan(0);
+    }
+  });
+
+  it("a hit on one Ero only is no tie: 'Registerkarten einer Akte' stays the langetaro", () => {
+    expect(suggest("Registerkarten einer Akte").suggestion).toEqual({
+      ero: "langetaro",
+      props: {},
+    });
   });
 });
 

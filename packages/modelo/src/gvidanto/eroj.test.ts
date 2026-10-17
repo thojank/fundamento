@@ -292,10 +292,16 @@ describe("get_ero with the Uzo and brief (T022)", () => {
     for (const entry of brief.output.instead ?? []) {
       expect(Object.keys(entry).sort()).toEqual(["ero", "goal", "kialo"]);
     }
+    // Nachlese 3 G4: a boundary of the brief carries case and action (and the Ero to use), no
+    // kialo — the full kialo comes from get_ero without brief; so the brief stays under 750
+    // without shortening more kialos.
     for (const entry of brief.output.boundary ?? []) {
       expect(entry).not.toHaveProperty("keywords");
       expect(entry).not.toHaveProperty("via");
-      expect(entry.kialo.length).toBeGreaterThan(0);
+      expect(entry).not.toHaveProperty("kialo");
+      expect(Object.keys(entry).sort()).toEqual(
+        entry.ero === undefined ? ["action", "case"] : ["action", "case", "ero"],
+      );
     }
     // Spec 008 A4: navigation is use-instead ligilo; the brief names the Ero to use.
     expect(brief.output.boundary?.map((entry) => [entry.action, entry.ero])).toEqual([

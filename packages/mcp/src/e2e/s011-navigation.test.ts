@@ -74,28 +74,28 @@ describe("the navigation dialogs of the spec: 'Reiter oder Navigation?'", () => 
     expect(answer.kialo).toBe(kialoOf("option-labels-distinct"));
   });
 
-  it("'Tabs, um zwischen Liste und Formular zu wechseln' (the spec's dialog) is answered with the elektilo today: 'Liste' is its word (plan ⑤ B-3)", async () => {
-    // The spec answers conditionally (langetaro only when both views belong to the same thing,
-    // else navigado). The words of the sentence belong to other Eroj: "Liste" to the elektilo
-    // (goal choose-many, and the elekto's alternative that sends there), "Formular" to the tabs'
-    // own alternative form-choice. The first Ero in name order answers (Spec 008 D-08): the
-    // elektilo. Pinned as it is, so that a change of the answer is seen; the finding stands in
-    // plan ⑤ (B-3), the condition of the spec is a person's call (OP-6).
+  it("'Tabs, um zwischen Liste und Formular zu wechseln' (the spec's dialog): a tie of two goals, a person decides (Nachlese 3 G2)", async () => {
+    // "Liste" is the elektilo's word, "Tabs" the langetaro's — one hit each, equal strength:
+    // Fundamento picks no reading and names both candidates with their kialo (OP-12). The
+    // spec's condition (the same thing or not) is a person's call.
     const answer = await output<Suggested>(client, "suggest_ero", {
       goal: "Tabs, um zwischen Liste und Formular zu wechseln",
     });
-    expect(answer.suggestion).toEqual({ ero: "elektilo", props: {} });
-    expect(answer.matched?.keyword).toBe("liste");
-    // The tabs' own reading of the sentence, asked without the list: a form is the elekto's.
-    const form = await output<Suggested>(client, "suggest_ero", {
-      goal: "Tabs, um zum Formular zu wechseln",
+    expect(answer.action).toBe("ask-human");
+    expect(answer.suggestion).toBeNull();
+    expect(answer.candidates?.map((candidate) => [candidate.kind, candidate.ero])).toEqual([
+      ["goal", "elektilo"],
+      ["goal", "langetaro"],
+    ]);
+  });
+
+  it("'Navigation' is the navigado (Nachlese 3 G1, O-28); 'Link zur Datenschutzerklärung' stays the ligilo", async () => {
+    const navigation = await output<Suggested>(client, "suggest_ero", { goal: "Navigation" });
+    expect(navigation.suggestion).toEqual({ ero: "navigado", props: {} });
+    const link = await output<Suggested>(client, "suggest_ero", {
+      goal: "Link zur Datenschutzerklärung",
     });
-    expect(form.suggestion).toEqual({ ero: "elekto", props: {} });
-    expect(form.boundary).toMatchObject({
-      ero: "langetaro",
-      case: "form-choice",
-      kialo: formChoice.kialo,
-    });
+    expect(link.suggestion).toEqual({ ero: "ligilo", props: {} });
   });
 
   it("'Reiter für die Hauptseiten' → the navigado, with the tabs' reason (pages are the navigado's)", async () => {
