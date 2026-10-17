@@ -30,7 +30,9 @@ export type HostControl =
   | "light"
   | "tabs"
   | "icon"
-  | "separator";
+  | "separator"
+  | "heading"
+  | "paragraph";
 
 export interface ElementNames {
   /** `fm-butono` */
@@ -113,6 +115,10 @@ export function hostOf(role: string, multiline = false): HostControl {
   // separator (D-06) a div with that role, or none where it only decorates.
   if (role === "img") return "icon";
   if (role === "separator") return "separator";
+  // A heading (Spec 014 ③, plan ③ D-04) is a div with role heading and its level spoken as
+  // aria-level — its text is the control; a paragraph is the platform's p, inline where it is code.
+  if (role === "heading") return "heading";
+  if (role === "paragraph") return "paragraph";
   if (role === "textbox") return multiline ? "textarea" : "input";
   if (role === "dialog") return "dialog";
   if (role === "switch" || role === "checkbox") return "toggle";
@@ -207,7 +213,7 @@ function fieldMarkup(slots: NonNullable<ElementNames["slots"]>, textarea = false
  * Spec 014 ① plan ① D-02), the actions slotted butono at the end. aria-modal says what showModal does.
  */
 function dialogMarkup(): string {
-  return `<dialog part="control" aria-modal="true" aria-labelledby="heading" aria-describedby="message"><h2 part="heading" id="heading"><slot></slot></h2><p part="message" id="message"><slot name="message"></slot></p><div part="content"><slot name="content"></slot></div><fm-tekstareo part="reason" rows="3"><slot name="reason"></slot><slot name="reason-help" slot="help"></slot></fm-tekstareo><div part="actions"><slot name="actions"></slot></div><span id="fm-texts" hidden></span></dialog>`;
+  return `<dialog part="control" aria-modal="true" aria-labelledby="heading" aria-describedby="message"><fm-titolo part="heading" id="heading" level="2" size="headline-4"><slot></slot></fm-titolo><p part="message" id="message"><slot name="message"></slot></p><div part="content"><slot name="content"></slot></div><fm-tekstareo part="reason" rows="3"><slot name="reason"></slot><slot name="reason-help" slot="help"></slot></fm-tekstareo><div part="actions"><slot name="actions"></slot></div><span id="fm-texts" hidden></span></dialog>`;
 }
 
 /**
@@ -387,6 +393,23 @@ function iconMarkup(): string {
   return '<span part="glyph"></span><slot hidden></slot><span id="fm-texts" hidden></span>';
 }
 
+/**
+ * The shadow markup of a heading (Spec 014 ③, plan ③ D-04): the text is the control — one part,
+ * named text, so an Ero that composes a heading (the dialogo) keeps one [part="control"] of its own.
+ * The level is written as aria-level in the render; the size derives from it where none is given.
+ */
+function headingMarkup(): string {
+  return '<div part="text" role="heading"><slot></slot><span id="fm-texts" hidden></span></div>';
+}
+
+/**
+ * The shadow markup of a paragraph (Spec 014 ③, plan ③ D-04): the platform's p is the control;
+ * a kind of code takes the role code in the render, so it is spoken as code.
+ */
+function paragraphMarkup(): string {
+  return '<p part="control"><slot></slot><span id="fm-texts" hidden></span></p>';
+}
+
 /** The shadow markup of a separator (Spec 014 ②, plan ② D-06): the line, nothing else. */
 function separatorMarkup(): string {
   return '<div part="control"></div><slot hidden></slot><span id="fm-texts" hidden></span>';
@@ -419,6 +442,8 @@ function markup(
   if (host === "status") return statusMarkup(slots, indicator, dismiss, icon);
   if (host === "icon") return iconMarkup();
   if (host === "separator") return separatorMarkup();
+  if (host === "heading") return headingMarkup();
+  if (host === "paragraph") return paragraphMarkup();
   if (host === "meter") return meterMarkup();
   if (host === "light") return lightMarkup(slots, role);
   if (host === "tabs") return tabsMarkup();
@@ -493,7 +518,11 @@ export function elementSource({
                             ? "span"
                             : host === "separator"
                               ? "div"
-                              : "button";
+                              : host === "heading"
+                                ? "[part='text']"
+                                : host === "paragraph"
+                                  ? "p"
+                                  : "button";
   const isToggle = host === "toggle";
   const isGroup = host === "group";
   const isSelect = host === "select";
@@ -507,9 +536,19 @@ export function elementSource({
   const isNav = isLight && role === "navigation";
   const isIcon = host === "icon";
   const isSeparator = host === "separator";
+  const isHeading = host === "heading";
+  const isParagraph = host === "paragraph";
   const isSkip = host === "a" && skip;
   const isStatic =
-    isStatus || host === "text" || isMeter || isLight || isTabs || isIcon || isSeparator;
+    isStatus ||
+    host === "text" ||
+    isMeter ||
+    isLight ||
+    isTabs ||
+    isIcon ||
+    isSeparator ||
+    isHeading ||
+    isParagraph;
   const listSlot = slots.find((slot) => slot.list === true)?.name ?? "";
   const namedSlots = slots
     .filter((slot) => slot.default !== true && slot.decorative !== true)
@@ -1723,6 +1762,26 @@ ${
     }
 `
     : "";
+  // A heading (Spec 014 ③, plan ③ D-04): the level is spoken as aria-level (a11y.states); the size
+  // follows the level where the attribute is absent — the enum has no default on purpose, so a
+  // heading is never picked by its size: SIZE_OF_LEVEL is the Celo's reading of the Skemo's rule.
+  const headingRender = isHeading
+    ? `    const level = String(this.propValue("level") ?? "1");
+    control.setAttribute("aria-level", level);
+    if (this.getAttribute("size") === null) {
+      const derived = SIZE_OF_LEVEL[level] ?? "headline-4";
+      root.setAttribute("data-size", derived);
+      if (root !== control) control.setAttribute("data-size", derived);
+    }
+`
+    : "";
+  // A paragraph (Spec 014 ③, plan ③ D-04): inline code is spoken as code; every other kind is
+  // the platform's paragraph without a role attribute.
+  const paragraphRender = isParagraph
+    ? `    if (String(this.propValue("kind")) === "code") control.setAttribute("role", "code");
+    else control.removeAttribute("role");
+`
+    : "";
   // A skip link (Spec 014 ②, plan ② D-07): an empty label shows the Modelo's words for it, in the
   // language of the document (a11y.texts label-empty), as the fallback content of the slot.
   const skipRender = isSkip
@@ -1816,6 +1875,13 @@ ${
   isIcon
     ? `/** The names of the Ikonaro and whether each mirrors in right-to-left writing (Spec 014 ②). */
 const IKONARO: Readonly<Record<string, boolean>> = ${JSON.stringify(Object.fromEntries(ikonaro.map((entry) => [entry.name, entry.mirror === true])))};
+`
+    : ""
+}${
+  isHeading
+    ? `// The size a level implies where none is given (Spec 014 ③, plan ③ D-04): the first three
+// levels take the headline of their number, the deeper ones the smallest headline.
+const SIZE_OF_LEVEL: Readonly<Record<string, string>> = { "1": "headline-1", "2": "headline-2", "3": "headline-3", "4": "headline-4", "5": "headline-4", "6": "headline-4" };
 `
     : ""
 }
@@ -2024,7 +2090,7 @@ ${autoDisconnect}
     // \`invalid\` spoken as aria-invalid and set by a filled error slot (constraint of the Skemo);
     // disabled wins over readonly; help and error show only while they have text.
     const described: string[] = [];
-${inputRender}${toggleRender}${groupRender}${selectRender}${dialogRender}${statusRender}${meterRender}${lightRender}${tabsRender}${iconRender}${separatorRender}${skipRender}${composedIconRender}    // The texts of the slots that describe the control (Spec 009, D-02; a checkbox, Spec 010 ②):
+${inputRender}${toggleRender}${groupRender}${selectRender}${dialogRender}${statusRender}${meterRender}${lightRender}${tabsRender}${iconRender}${separatorRender}${headingRender}${paragraphRender}${skipRender}${composedIconRender}    // The texts of the slots that describe the control (Spec 009, D-02; a checkbox, Spec 010 ②):
     // shown while they have text, and its description in that order.
     for (const source of DESCRIPTION) {
       const [kind, name = ""] = source.split(":");

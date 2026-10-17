@@ -163,6 +163,7 @@ describe("the Uzo of the tabelo (section ④, G5)", () => {
       "mezurilo",
       "plenstato",
       "ikono",
+      "titolo",
     ]);
   });
 

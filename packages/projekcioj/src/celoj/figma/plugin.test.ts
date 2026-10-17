@@ -90,6 +90,14 @@ function pageNodes(double: ReturnType<typeof figmaDouble>): DoubleNode[] {
   return (double.root.children[0]?.children ?? []).flatMap(open);
 }
 
+/**
+ * Spec 014 ③ (F31): the ekzemplo fixture writes its display roles in capitals, komuna does not —
+ * the titolo's display variants carry TEXT_CASE_VARIES, and the run says so once per set. The one
+ * warning every run over both Aspektoj reports.
+ */
+const TITOLO_CASE_WARNING =
+  "titolo: Die Schreibweise der Beschriftung ist nicht in allen Modi dieselbe. textCase ist in Figma kein bindbares Feld, also bleibt sie ungesetzt — eine Marke auszuwählen wäre keine Projektion.";
+
 describe("Figma development plugin (T016)", () => {
   it("ships a manifest that Figma can import from disk", () => {
     const manifest = JSON.parse(files["figma/plugin/manifest.json"] ?? "{}") as Record<
@@ -506,11 +514,11 @@ describe("the plugin reports what it did (F10)", () => {
     expect(butonoOf(first.components)?.set).toBe("butono");
     expect(butonoOf(first.components)?.created).toHaveLength(variants);
     expect(butonoOf(first.components)?.updated).toEqual([]);
-    expect(first.warnings).toEqual([]);
+    expect(first.warnings).toEqual([TITOLO_CASE_WARNING]);
     const second = await report(double);
     expect(butonoOf(second.components)?.created).toEqual([]);
     expect(butonoOf(second.components)?.updated).toHaveLength(variants);
-    expect(second.warnings).toEqual([]);
+    expect(second.warnings).toEqual([TITOLO_CASE_WARNING]);
   });
 
   // The finding that made this necessary: a document of mixed history held 71 of 72 variants, and
@@ -547,7 +555,9 @@ describe("the plugin reports what it did (F10)", () => {
       console.log = log;
     }
     expect(lines.join("\n")).toContain('"set":"butono"');
-    expect(double.notifications.map((entry) => entry.message).join(" ")).toContain("butono");
+    // Spec 014 ③: with the ekzemplo Aspekto the headline carries the one warning (the titolo's
+    // display roles differ in case between the brands, F31) — the toast says so, not the sets.
+    expect(double.notifications.map((entry) => entry.message).join(" ")).toContain("titolo");
     expect(double.notifications[0]?.message).toContain("Konsole");
   });
 
@@ -2759,7 +2769,7 @@ describe("the run says it when a collection has more modes than Figma allows (F2
       "figma",
       `${sourceOf(planWithAspektoj(10))}\nreturn applyPlan();`,
     )(double.figma)) as { warnings: string[] };
-    expect(report.warnings).toEqual([]);
+    expect(report.warnings).toEqual([TITOLO_CASE_WARNING]);
   });
 });
 
@@ -2865,7 +2875,7 @@ describe("the label's font is bound, not written (F30)", () => {
   it("binds the family and the cut to the role's variables", async () => {
     const double = figmaDouble({ fonts: BOTH });
     const result = await report(double);
-    expect(result.warnings).toEqual([]);
+    expect(result.warnings).toEqual([TITOLO_CASE_WARNING]);
     const label = labelOf(double);
     // The label's typography role follows the size, so which of them a given variant carries
     // depends on the variant; both fields must name the same role, and it must be a label role.

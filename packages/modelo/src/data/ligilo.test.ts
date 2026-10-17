@@ -286,8 +286,6 @@ describe("the Reguloj of the ligilo (T005, A2, D-13)", () => {
       "elekto",
       "elektilo",
       "tekstareo",
-      "teksto",
-      "titolo",
       "dialogo",
       "insigno",
       "avizo",

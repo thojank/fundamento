@@ -70,7 +70,35 @@
 
 ## ③ Typografie
 
-*(folgt)*
+**Branch:** `261017-spec-014-typografie-e3bf97` (gestapelt auf ② @ `48f3c6e`) · Aufgaben ③ zählen ab T901.
+
+### A – Rot zuerst
+- [x] **T901 Tests** Daten-Pins `data/titolo.test.ts`, `data/teksto.test.ts` (Skemo, Uzo, Regulo, Jugxoj, Gvidanto-Dialoge, Listenprüfung), Schema (`contracts/spec014-schema.test.ts`: Prüfart `levels-in-order`), Eroj 20 → 22 in allen Pins (Export-Satz „twenty-two“, Listen, Ontologio, Kit-Dateien 39, Headline-Sets), Projekcioj (`web-component.test.ts`, `figma.test.ts`, `datumoj.test.ts`, `make-kit.test.ts`), Browser-Specs (`titolo.spec.ts`, `teksto.spec.ts`, `alirebleco.check.ts`, `vitrino.check.ts`), React-Typen, MCP-Dialoge `e2e/s014-typografie.test.ts`, Doku-Test ③, zwei Fehlerfixtures (`teksto-web-term`, `titolo-slot-required-missing`). Rot in `6190e31` (Modelo 39 Tests in 14 Dateien, Projekcioj 18 in 5 Dateien, MCP-Suite s014-typografie; Browser-Specs im Lauf beobachtet).
+
+### B – Grün
+- [x] **T902 `titolo`** Skemo (`level` Pflicht, `size` aus sieben Rollen), Uzo, Regulo `heading-levels-in-order` (`reg_01M5616GSFTAVNSEZTHHEZ8700`), vier Jugxoj `jug_01M5616H5XBEN3V2PK5S1QBKMP`, `…5YYRY0SWWR0VY53ZXJ`, `…ZXK`, `…ZXM`, Ontologio `Titolo` (D-01, D-03).
+- [x] **T903 `teksto`** Skemo (`kind`, `size`, `emphasis`, eine Constraint), Uzo, Ontologio `Teksto` (D-02).
+- [x] **T904 Nachbarn** `dialogo` (composes teksto, titolo), `avizo`, `plenstato`, `tabelo` (composes titolo), `spacing-owned-by-container` (Abweichung 2).
+- [x] **T905 Modelo-Code** Schema `UzoContent.check` `levels-in-order`, Prüfer `heading-levels-in-order` in `usage.ts`, Zahlwörter bis zweiundzwanzig (D-03).
+- [x] **T906 Web** Hosts `heading` und `paragraph` (Element-Template, Stylesheet-Struktur, `selectorOf`, `stylesheetInventory` liest `[part="text"]`), `SIZE_OF_LEVEL`, `role="code"`, Dialog komponiert `fm-titolo` (D-04).
+- [x] **T907 Figma** `structureOf` → badge, `LABEL_DEFAULTS` Überschrift/Text; Plugin-Tests der Fixture erwarten die `textCase`-Warnung des `titolo` (D-05, B-1).
+- [x] **T908 Vitrino, Make-Kit, React** `vitrinoDutyValue` (Ebene aus der Größe), `wrapSentence`, zwei Guideline-Sätze, React-Typen (D-06, D-07).
+- [x] **T909 Gvidanto** Stichwörter ohne „text“/„paragraph“/„absatz“, vier ②-Dialogsätze neu formuliert (D-08, B-2).
+
+### C – Abschluss
+- [x] **T910 Doku** plan ③, tasks ③, Vojmapo Zeile 4, README.
+- [ ] **T911 Messungen** unten; Bericht im PR.
+
+### Messungen
+
+| Was | Wert |
+|---|---|
+| Commits ③ | rot `6190e31`, grün: Hash in der Zeile nach dem Commit |
+| `brief` | titolo, teksto ≤ 750 (Daten-Tests und MCP e2e) |
+| Parität | `check:parity` 22 Eroj, 0 Differenzen, 225 Freigaben |
+| `check:regularo` | 56 Reguloj, 176 Jugxoj, 22 Uzoj, 0 Warnungen (keine neue `goal-keyword-shared`) |
+| Tests lokal | Modelo 3362, Projekcioj 633, MCP 270; Browser-Specs titolo, teksto, dialogo, Alirebleco-Block, Vitrino in Chromium grün |
+| CI | Lauf: Nummer und Dauer in der Zeile nach dem Lauf |
 
 ## ④ Overlays
 

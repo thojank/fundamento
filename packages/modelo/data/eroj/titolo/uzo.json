@@ -1,0 +1,102 @@
+{
+  "$schema": "../../../schema/modelo.schema.json#/$defs/UzoFile",
+  "uzo": {
+    "id": "uzo_01M5616GCXEGSSSK367B2XWJV8",
+    "ero": "ero_01M5616FMN3GPB1J421PMMKBZ3",
+    "skemo": "ske_01M5616G0WKZNS96ANV6PG3A7S",
+    "purpose": "Names a page or section; its level is structure, its size is design.",
+    "instead": [
+      {
+        "goal": "bold-paragraph-as-heading",
+        "keywords": {
+          "en": [
+            "boldface",
+            "bold-paragraph",
+            "emphasised"
+          ],
+          "de": [
+            "fettschrift",
+            "fettgedruckt",
+            "hervorgehoben"
+          ]
+        },
+        "ero": "titolo",
+        "kialo": "A bold paragraph that heads a section is a heading, because a screen reader reads the levels as the table of contents and a bold word is not in it; the titolo with its level says what the weight only shows."
+      }
+    ],
+    "boundary": [
+      {
+        "case": "heading-with-actions",
+        "action": "ask-human",
+        "keywords": {
+          "en": [
+            "toolbar",
+            "header-actions",
+            "header-row"
+          ],
+          "de": [
+            "kopfzeile",
+            "werkzeugleiste",
+            "titelzeile"
+          ]
+        },
+        "kialo": "A heading row with actions beside it is a pattern of the page (a Sxablono), because the heading names the section and the actions act on it; a person decides what stands in that row until the Sxablonoj come."
+      }
+    ],
+    "composes": {
+      "containers": [
+        {
+          "name": "page-section",
+          "kialo": "A section of a page starts with its heading, because the heading is what a person skims and what a screen reader lists."
+        }
+      ],
+      "with": [
+        {
+          "ero": "dialogo",
+          "kialo": "A dialog is named by its heading, because the heading says the decision it asks for; the dialog composes the titolo at level 2, its own document."
+        },
+        {
+          "ero": "avizo",
+          "kialo": "A notice may carry a heading over its message, because a heading lets a person skim what the notice is about; its heading is a text of the notice, no level of the page."
+        },
+        {
+          "ero": "plenstato",
+          "kialo": "An empty state names what is missing in its text, because that sentence is what a person reads first; it is a text of the state, no level of the page."
+        },
+        {
+          "ero": "tabelo",
+          "kialo": "A table is named by its caption, which stands visible above it, because the caption says what the rows are; the caption is the table's, no level of the page."
+        }
+      ],
+      "never": [],
+      "spacing": {
+        "owner": "container",
+        "regulo": "spacing-owned-by-container"
+      }
+    },
+    "slots": {
+      "label": {
+        "accepts": [
+          "text"
+        ],
+        "max": 1,
+        "required": true,
+        "nesting": 0
+      }
+    },
+    "layout": {
+      "size": "container",
+      "wrap": "allowed"
+    },
+    "content": [
+      {
+        "regulo": "heading-levels-in-order",
+        "fixed": true,
+        "of": "prop:level",
+        "check": {
+          "kind": "levels-in-order"
+        }
+      }
+    ]
+  }
+}

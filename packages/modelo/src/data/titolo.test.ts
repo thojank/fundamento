@@ -35,17 +35,25 @@ describe("titolo in the repo Modelo (section ③, G1, G2)", () => {
   });
 
   it("has level (a duty, 1–6, no default) and size (seven roles, no default: derived from the level) as props; one state; the label slot", () => {
-    expect(skemo?.props.map((prop) => [prop.name, prop.values, prop.default, prop.required])).toEqual(
+    expect(
+      skemo?.props.map((prop) => [prop.name, prop.values, prop.default, prop.required]),
+    ).toEqual([
+      ["level", ["1", "2", "3", "4", "5", "6"], undefined, true],
       [
-        ["level", ["1", "2", "3", "4", "5", "6"], undefined, true],
+        "size",
         [
-          "size",
-          ["display-1", "display-2", "display-3", "headline-1", "headline-2", "headline-3", "headline-4"],
-          undefined,
-          undefined,
+          "display-1",
+          "display-2",
+          "display-3",
+          "headline-1",
+          "headline-2",
+          "headline-3",
+          "headline-4",
         ],
+        undefined,
+        undefined,
       ],
-    );
+    ]);
     expect(skemo?.states).toEqual(["rest"]);
     expect(skemo?.slots).toEqual([{ name: "label", default: true, text: true }]);
   });
@@ -91,7 +99,9 @@ describe("titolo in the repo Modelo (section ③, G1, G2)", () => {
 
 describe("the Uzo of the titolo (section ③, G6)", () => {
   it("states the purpose; a bold paragraph as heading is the titolo itself; a heading with actions asks a person", () => {
-    expect(uzo?.purpose).toBe("Names a page or section; its level is structure, its size is design.");
+    expect(uzo?.purpose).toBe(
+      "Names a page or section; its level is structure, its size is design.",
+    );
     expect(uzo?.instead.map((entry) => [entry.goal, entry.ero])).toEqual([
       ["bold-paragraph-as-heading", "titolo"],
     ]);
@@ -111,10 +121,15 @@ describe("the Uzo of the titolo (section ③, G6)", () => {
       "plenstato",
       "tabelo",
     ]);
-    expect(uzo?.slots).toEqual({ label: { accepts: ["text"], max: 1, required: true, nesting: 0 } });
+    expect(uzo?.slots).toEqual({
+      label: { accepts: ["text"], max: 1, required: true, nesting: 0 },
+    });
     expect(uzo?.layout).toEqual({ size: "container", wrap: "allowed" });
     for (const name of ["dialogo", "avizo", "plenstato", "tabelo"]) {
-      expect(eroNamed(name)?.uzo?.composes.with.map((entry) => entry.ero), name).toContain("titolo");
+      expect(
+        eroNamed(name)?.uzo?.composes.with.map((entry) => entry.ero),
+        name,
+      ).toContain("titolo");
     }
   });
 
@@ -182,14 +197,14 @@ describe("the Reguloj of the titolo (G8, E5)", () => {
 });
 
 describe("suggest_ero of the heading (Gvidanto)", () => {
-  it("'Mach diesen Text fett, das ist die Überschrift des Abschnitts' is a titolo with level 2, no bold teksto", () => {
-    const answer = suggest("Mach diesen Text fett, das ist die Überschrift des Abschnitts");
+  it("'Zwischenüberschrift in Fettschrift' is a titolo with level 2 (the bold-paragraph alternative of its own Uzo), no bold teksto", () => {
+    const answer = suggest("Zwischenüberschrift in Fettschrift");
     expect(answer.suggestion).toEqual({ ero: "titolo", props: { level: "2" } });
   });
 
-  it("'Titel der Seite' is a titolo with level 1; 'a heading row with buttons' asks a person", () => {
+  it("'Titel der Seite' is a titolo with level 1; 'a toolbar beside the section' asks a person", () => {
     expect(suggest("Titel der Seite").suggestion).toEqual({ ero: "titolo", props: { level: "1" } });
-    expect(suggest("heading row with a toolbar").boundary).toMatchObject({
+    expect(suggest("toolbar beside the section").boundary).toMatchObject({
       ero: "titolo",
       case: "heading-with-actions",
       action: "ask-human",

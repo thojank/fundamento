@@ -36,8 +36,14 @@ test.describe("fm-titolo behaviour", () => {
     await expect(page.getByRole("heading", { level: 3, name: "Groß" })).toHaveCount(1);
     const tokens = await page.evaluate(() => {
       const root = getComputedStyle(document.documentElement);
-      const size = (role: string) => root.getPropertyValue(`--fm-typography-${role}-font-size`).trim();
-      return { h1: size("headline-1"), h2: size("headline-2"), h4: size("headline-4"), d1: size("display-1") };
+      const size = (role: string) =>
+        root.getPropertyValue(`--fm-typography-${role}-font-size`).trim();
+      return {
+        h1: size("headline-1"),
+        h2: size("headline-2"),
+        h4: size("headline-4"),
+        d1: size("display-1"),
+      };
     });
     expect((await headingOf(page, "a")).size).toBe("headline-1");
     expect((await headingOf(page, "a")).fontSize).toBe(tokens.h1);
@@ -62,7 +68,9 @@ test.describe("fm-titolo behaviour", () => {
     const box = await page.locator("#a").evaluate((element) => {
       const text = element.shadowRoot?.querySelector('[part="text"]') as HTMLElement;
       return {
-        lines: text.getBoundingClientRect().height / Number.parseFloat(getComputedStyle(text).lineHeight),
+        lines:
+          text.getBoundingClientRect().height /
+          Number.parseFloat(getComputedStyle(text).lineHeight),
         clipped: text.scrollWidth > text.clientWidth + 1,
         width: text.getBoundingClientRect().width,
       };

@@ -1502,7 +1502,9 @@ describe("Web Component Celo for the titolo and the teksto (Spec 014 ③)", () =
     expect(element).not.toContain('part="control"');
     expect(element).toContain("static formAssociated = false;");
     const css = cssOf("titolo");
-    expect(css).toContain(':where([part="text"][data-size="display-1"]) {\n  font-family: var(--fm-typography-display-1-font-family);');
+    expect(css).toContain(
+      ':where([part="text"][data-size="display-1"]) {\n  font-family: var(--fm-typography-display-1-font-family);',
+    );
     expect(css).toContain("color: var(--fm-color-text-default);");
     expect(css).toContain(":host { display: block; }");
     expect(css).toContain("overflow-wrap: anywhere;");
@@ -1515,9 +1517,15 @@ describe("Web Component Celo for the titolo and the teksto (Spec 014 ③)", () =
     expect(element).toContain('"code"');
     expect(element).toContain('customElements.define("fm-teksto", FmTeksto)');
     const css = cssOf("teksto");
-    expect(css).toContain(':where([part="control"][data-kind="body"][data-size="2"]) {\n  font-family: var(--fm-typography-body-2-font-family);');
-    expect(css).toContain(':where([part="control"][data-kind="code"][data-size="1"]) {\n  font-family: var(--fm-typography-code-font-family);');
-    expect(css).toContain(':where([part="control"][data-emphasis="low"]) {\n  color: var(--fm-color-text-muted);');
+    expect(css).toContain(
+      ':where([part="control"][data-kind="body"][data-size="2"]) {\n  font-family: var(--fm-typography-body-2-font-family);',
+    );
+    expect(css).toContain(
+      ':where([part="control"][data-kind="code"][data-size="1"]) {\n  font-family: var(--fm-typography-code-font-family);',
+    );
+    expect(css).toContain(
+      ':where([part="control"][data-emphasis="low"]) {\n  color: var(--fm-color-text-muted);',
+    );
     expect(css).toContain(':where([part="control"][data-kind="code"]) { display: inline;');
     expect(css).toContain("overflow-wrap: anywhere;");
     expect(componentCssIssues("teksto.css", css)).toEqual([]);
@@ -1525,6 +1533,8 @@ describe("Web Component Celo for the titolo and the teksto (Spec 014 ③)", () =
 
   it("the dialogo composes the titolo as its heading (level 2, headline-4)", () => {
     const element = files["eroj/src/generated/fm-dialogo.ts"] ?? "";
-    expect(element).toContain('<fm-titolo part="heading" id="heading" level="2" size="headline-4"><slot></slot></fm-titolo>');
+    expect(element).toContain(
+      '<fm-titolo part="heading" id="heading" level="2" size="headline-4"><slot></slot></fm-titolo>',
+    );
   });
 });

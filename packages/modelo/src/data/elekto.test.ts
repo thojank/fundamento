@@ -445,8 +445,6 @@ describe("the Reguloj of the elekto (G6, E5)", () => {
       "elekto",
       "elektilo",
       "tekstareo",
-      "teksto",
-      "titolo",
       "dialogo",
       "insigno",
       "avizo",

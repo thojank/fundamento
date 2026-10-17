@@ -27,9 +27,12 @@ const WORDS = [
   "eighteen",
   "nineteen",
   "twenty",
+  // Spec 014 ③: twenty-two Eroj (the two Typografie-Eroj).
+  "twenty-one",
+  "twenty-two",
 ] as const;
 
-/** A count as an English word for 0 to 20 (`no` for zero), otherwise as digits. */
+/** A count as an English word for 0 to 22 (`no` for zero), otherwise as digits. */
 export function countWord(count: number): string {
   return WORDS[count] ?? String(count);
 }

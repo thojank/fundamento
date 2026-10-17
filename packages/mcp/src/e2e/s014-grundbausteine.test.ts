@@ -54,9 +54,9 @@ beforeAll(async () => {
 });
 
 describe("the dialogs of the Grundbausteine", () => {
-  it("'Piktogramm neben der Überschrift' → an ikono; 'Statussymbol allein' → the insigno with the icon's reason", async () => {
+  it("'Piktogramm vor dem Wort' → an ikono; 'Statussymbol allein' → the insigno with the icon's reason", async () => {
     const icon = await output<Suggested>(client, "suggest_ero", {
-      goal: "Piktogramm neben der Überschrift",
+      goal: "Piktogramm vor dem Wort",
     });
     expect(icon.suggestion).toEqual({ ero: "ikono", props: {} });
     const status = await output<Suggested>(client, "suggest_ero", {

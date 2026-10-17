@@ -220,8 +220,8 @@ describe("get_ero", () => {
     expect(missing.issues[0]?.path).toBe("get_ero/name");
     // The five nearest names (nearestNames): with six Eroj (Spec 010 ③) the farthest drops out.
     // Spec 011 ②: with nine Eroj dialogo is nearer to "butonno" than markobutono.
-    // Spec 014 ②: ikono is nearer to "butonno" than insigno.
-    expect(missing.allowed).toEqual(["butono", "ikono", "insigno", "avizo", "dialogo"]);
+    // Spec 014 ②: ikono is nearer to "butonno" than insigno. Spec 014 ③: titolo too; dialogo drops.
+    expect(missing.allowed).toEqual(["butono", "ikono", "titolo", "insigno", "avizo"]);
   });
 });
 

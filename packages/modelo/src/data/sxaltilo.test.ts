@@ -214,8 +214,6 @@ describe("the Uzo of the sxaltilo (section 1, G5, D-13)", () => {
     }
     expect(uzoOf("kampo")?.instead.find((entry) => entry.goal === "multi-line")?.ero).toBe(
       "tekstareo",
-      "teksto",
-      "titolo",
     );
   });
 });
@@ -253,8 +251,6 @@ describe("the Reguloj of the sxaltilo (G6, E5, D-14)", () => {
       "elekto",
       "elektilo",
       "tekstareo",
-      "teksto",
-      "titolo",
       "dialogo",
       "insigno",
       "avizo",

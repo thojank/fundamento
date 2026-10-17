@@ -107,6 +107,14 @@
           "kialo": "A reason is text over several lines, because a reason is a sentence or two; the dialog shows the area itself."
         },
         {
+          "ero": "teksto",
+          "kialo": "The content of a dialog is running text where it explains the decision, because a person reads the reason before the buttons; the teksto sets it in the body role."
+        },
+        {
+          "ero": "titolo",
+          "kialo": "The heading of a dialog is a titolo at level 2, because the dialog is a document of its own and its heading names the decision (dialog-title-names-the-decision)."
+        },
+        {
           "ero": "kampo",
           "kialo": "A short entry the decision needs stands in the content, because a field is one line."
         },

@@ -175,7 +175,12 @@ function wrapSentence(role: string | undefined, wrap: string, multiline = false)
                         ? "Glyphe"
                         : role === "separator"
                           ? "Linie"
-                          : "Label";
+                          : // Spec 014 ③: a heading wraps its words, a paragraph its text.
+                            role === "heading"
+                            ? "Überschrift"
+                            : role === "paragraph"
+                              ? "Text"
+                              : "Label";
   if (wrap === "never") return `${subject} bricht nie um`;
   if (wrap === "with-text") return `${subject} darf umbrechen (inline), standalone nie`;
   return `${subject} darf umbrechen`;

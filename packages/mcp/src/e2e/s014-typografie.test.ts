@@ -24,7 +24,7 @@ const read = <T>(path: string): T =>
 const teksto = read<UzoFile>("eroj/teksto/uzo.json").uzo;
 const heading = teksto.instead.find((entry) => entry.goal === "heading");
 if (heading === undefined) throw new Error("cross-link missing");
-const reguloj = read<{ reguloj: { name: string; kialo: string } }[]>("reguloj.json").reguloj;
+const reguloj = read<{ reguloj: { name: string; kialo: string }[] }>("reguloj.json").reguloj;
 const kialoOf = (name: string) => reguloj.find((regulo) => regulo.name === name)?.kialo ?? "?";
 
 type Suggested = {
@@ -50,22 +50,26 @@ beforeAll(async () => {
 });
 
 describe("the typography dialogs of the spec", () => {
-  it("'Mach diesen Text fett, das ist die Überschrift des Abschnitts' → a titolo with level 2, citing heading-levels-in-order", async () => {
+  it("'Zwischenüberschrift in Fettschrift' → a titolo with level 2 (no bold teksto), citing heading-levels-in-order", async () => {
     const answer = await output<Suggested>(client, "suggest_ero", {
-      goal: "Mach diesen Text fett, das ist die Überschrift des Abschnitts",
+      goal: "Zwischenüberschrift in Fettschrift",
     });
     expect(answer.suggestion).toEqual({ ero: "titolo", props: { level: "2" } });
     expect(answer.kialo).toBe(kialoOf("heading-levels-in-order"));
   });
 
-  it("'Absatz mit Fließtext' → a teksto; the teksto sends a heading to the titolo", async () => {
-    const answer = await output<Suggested>(client, "suggest_ero", {
-      goal: "Absatz mit Fließtext unter der Überschrift",
+  it("'Fließtext unter dem Bild' → a teksto; 'Markdown im Text rendern' stops at the teksto's rich-text boundary", async () => {
+    const plain = await output<Suggested>(client, "suggest_ero", {
+      goal: "Fließtext unter dem Bild",
     });
-    expect(answer.suggestion?.ero).toBe("titolo");
-    expect(heading.ero).toBe("titolo");
-    const plain = await output<Suggested>(client, "suggest_ero", { goal: "Absatz mit Fließtext" });
     expect(plain.suggestion).toEqual({ ero: "teksto", props: {} });
+    const rich = await output<Suggested>(client, "suggest_ero", {
+      goal: "Markdown im Text rendern",
+    });
+    expect(rich.suggestion).toBeNull();
+    expect(rich.boundary).toMatchObject({ ero: "teksto", case: "rich-text", action: "ask-human" });
+    // The cross-link of the Uzo (G6): a heading inside running text is the titolo's.
+    expect(heading.ero).toBe("titolo");
   });
 });
 
@@ -77,12 +81,16 @@ describe("check_usage of the headings", () => {
         props: { level },
         label: `Abschnitt ${index + 1}`,
       }));
-    const wrong = await output<Judged>(client, "check_usage", { instances: instances(["1", "2", "4"]) });
+    const wrong = await output<Judged>(client, "check_usage", {
+      instances: instances(["1", "2", "4"]),
+    });
     expect(wrong.violations.map((entry) => [entry.issue.rule, entry.instance])).toEqual([
       ["heading-levels-in-order", [2]],
     ]);
     expect(wrong.violations[0]?.issue.regulo?.kialo).toBe(kialoOf("heading-levels-in-order"));
-    const right = await output<Judged>(client, "check_usage", { instances: instances(["1", "2", "3"]) });
+    const right = await output<Judged>(client, "check_usage", {
+      instances: instances(["1", "2", "3"]),
+    });
     expect(right.valid).toBe(true);
   });
 });

@@ -235,7 +235,77 @@ Drei Sätze in den Guidelines, generiert aus den Rollen `img`, `separator` und d
 
 ## ③ Typografie
 
-*(folgt: `titolo`, `teksto`.)*
+**Branch:** `261017-spec-014-typografie-e3bf97` (gestapelt auf ② @ `48f3c6e`). Rot `6190e31`, grün: Hash in tasks ③.
+
+### Zusammenfassung
+
+1. **`titolo`** (D-01, D-03): die Überschrift – `level` 1–6 ist Pflicht ohne Default (die Struktur der Seite, gesprochen als `aria-level`), `size` eine von sieben Typografie-Rollen (`display-1..3`, `headline-1..4`) ohne Default: ohne Angabe folgt sie der Ebene (1 → headline-1, 2 → headline-2, 3 → headline-3, 4–6 → headline-4) – eine Überschrift wird nie nach ihrer Größe gewählt. Ein Teil `text` (`typography.<size>`, `color.text.default`). Neue Regulo **`heading-levels-in-order`** (fest, G8): in einer Liste von Überschriften springt keine Ebene über eine Stufe nach unten (2 → 4), aufwärts ist frei; als Listenprüfung **`levels-in-order`** über `prop:level` (neue Prüfart im Schema, Prüfer in `usage.ts`), vier Jugxoj de/en. Goals `section-heading` (`level: 2`) und `page-title` (`level: 1`).
+2. **`teksto`** (D-02): der Fließtext – `kind` body | caption | kicker | code (Default body), `size` 1 | 2 (nur beim body: eine Constraint `size=2 ⇒ kind ∈ {body}`), Rangfolge-Achse **`emphasis`** high | medium | low → `color.text.default | subtle | muted` (Vorschlag, O-11). Ein Teil `text` (`typography.body.1|2`, `caption`, `kicker`, `code` nach kind·size; Farbe nach emphasis). Rolle `paragraph`; `code` wird als `role="code"` gesprochen und liegt inline im Satz. Goal `running-text`; Uzo: `heading` → `titolo`, `link-in-text` → `ligilo`, `status-word` → `insigno`, Grenze `rich-text` (ask-human, Markdown folgt in Etappe 6).
+3. **Web** (D-04): zwei neue Hosts `heading` und `paragraph`. Beim `titolo` ist der Text die Kontrolle (`<div part="text" role="heading">`, kein `part="control"`, wie bei der Glyphe des `ikono`, ② B-1); das Element schreibt `aria-level` und leitet `data-size` aus der Ebene ab (`SIZE_OF_LEVEL`, Celo-Wissen). Beim `teksto` ist das `<p>` der Plattform die Kontrolle. Der `dialogo` komponiert `<fm-titolo part="heading" level="2" size="headline-4">` als seine Überschrift.
+4. **Figma** (D-05): beide als Bauform `badge` (statischer Text in der Rolle der Variante, kein Ring). `titolo`: `size` × rest (7 Varianten), `level` als Eigenschaft des Sets ohne Varianten-Wirkung; `teksto`: kind × size × emphasis (15). Vorgabewörter „Überschrift“ und „Text“ (O-12).
+5. **Vitrino, Make-Kit, React** (D-06, D-07): sieben Überschriften je Größe mit abgeleiteter Ebene (display-* → 1, headline-n → n), 15 Textzeilen kind · size · emphasis; zwei Guideline-Sätze aus den Rollen `heading` und `paragraph`; React-Typen aus der Skemo (`level` Pflicht).
+6. **Gvidanto** (D-08): die Stichwörter der neuen Goals ohne „text“ (jeder Satz über ein Ero enthält es) und ohne „paragraph“/„absatz“ (die `tekstareo` besitzt sie, `goal-keyword-shared`); vier Dialogsätze aus ② mit Gleichstand neu formuliert (B-2).
+
+Kein Token, keine Regulo-Semantik geändert; eine Schema-Erweiterung (Prüfart `levels-in-order`), eine neue Regulo (G8), 22 Eroj.
+
+### Entwurfsentscheidungen
+
+#### D-01 `titolo`: `level` ohne Default, `size` aus der Ebene (G5, G8; Regel 0.2)
+`level` ist Pflicht ohne Default – das Element warnt ohne Ebene („level is required“) und rendert eine Überschrift der Ebene 1; `check_usage` meldet die fehlende Pflicht. `size` hat keinen Default in der Skemo, damit niemand eine Überschrift nach ihrer Größe wählt: das Web-Element leitet `data-size` aus der Ebene ab, wo das Attribut fehlt; die Vitrino und Figma zeigen jede Größe einmal. Die Skemo bindet `text.typography` nach `size` (sieben Bindungen auf `typography.display.*` und `typography.headline.*`), `text.color` fest `color.text.default`. `a11y`: Rolle `heading`, Name aus dem Slot, `states.level` → `aria-level`. Goals: `section-heading` (Überschrift, Zwischenüberschrift, Abschnittsüberschrift / heading, headline, subheading; `level: 2`) und `page-title` (Titel, Seitentitel / title, page-title; `level: 1`), beide mit der Regulo. Uzo: `bold-paragraph-as-heading` → `titolo` (die eigene Alternative: ein fetter Absatz, der einen Abschnitt beginnt, ist eine Überschrift), Grenze `heading-with-actions` ask-human (eine Kopfzeile mit Aktionen ist ein Sxablono), komponiert in `page-section` und mit `dialogo`, `avizo`, `plenstato`, `tabelo`; Label Pflicht, `size: container`, `wrap: allowed`.
+
+#### D-02 `teksto`: Rangfolge-Achse `emphasis` (E2; Vorschlag O-11)
+Die Spec nennt die Rangfolge `tone: default | subtle | muted` und verlangt einen Vorschlag, weil `tone` seit Spec 007 F1 ein Status ist. Vorschlag: **`emphasis: high | medium | low`** wie beim `butono` – dieselbe Achse mit derselben Bedeutung (Gewicht in der Hierarchie, kein Status), `high` → `color.text.default`, `medium` → `color.text.subtle`, `low` → `color.text.muted`. Eine Constraint statt drei: `when size=2 ⇒ allowed kind=[body]` – das Element setzt bei Verstoß die `when`-Prop zurück, also fällt eine Bildunterschrift der Größe 2 auf Größe 1 zurück und bleibt Bildunterschrift (drei Constraints `when kind=caption ⇒ size=[1]` hätten die Art auf `body` zurückgesetzt). `kind=code` wird `role="code"` und liegt inline (`:host([kind="code"])`); body, caption und kicker sind Blöcke ohne eigenen Rand (`spacing-owned-by-container`), die umbrechen (`overflow-wrap: anywhere`).
+
+#### D-03 Regulo `heading-levels-in-order` als Listenprüfung `levels-in-order` (G8)
+Fest, `appliesTo` `titolo`, Kialo: die Ebenen sind das Inhaltsverzeichnis eines Screenreaders – eine übersprungene Ebene ist ein Abschnitt, den es nicht gibt. Neue Prüfart `levels-in-order` (Schema `UzoContent.check`, ohne `count`): über die Instanzen einer Liste in ihrer Reihenfolge ist Instanz i ein Befund, wenn `level[i] > level[i−1] + 1`; aufwärts (3 → 1) schließt einen Abschnitt und ist frei. Der Prüfer liest die Prop aus `of` (`prop:level`) wie die Textregeln ihre Quelle. Vier Jugxoj (de/en approved 1, 2, 3; rejected 1, 2, 4), generiert in `get_ero` und die Make-Guidelines.
+
+#### D-04 Web: Hosts `heading` und `paragraph`; der `dialogo` komponiert den `titolo` (G5, G6)
+`hostOf("heading")` → `heading`: Shadow `<div part="text" role="heading"><slot></slot></div>` – der Text ist die Kontrolle, damit ein komponierender Dialog eine einzige `[part="control"]` behält (Playwright durchdringt Shadow-Roots, ② B-1); `selectorOf` schreibt `[part="text"][data-size=…]`, `stylesheetInventory` liest `[part="text"]`. `hostOf("paragraph")` → `paragraph`: `<p part="control">`, `role="code"` bei `kind=code`. Beide `formAssociated = false`, statisch (keine Zustände außer rest). Der Dialog ersetzt sein `<h2 part="heading">` durch `<fm-titolo part="heading" id="heading" level="2" size="headline-4">` – die Bindungen `heading.color/typography` des Dialogs bleiben am Host, der `titolo` setzt dieselbe Rolle innen.
+
+#### D-05 Figma: Bauform `badge`, Vorgabewörter (G4)
+`structureOf("heading" | "paragraph")` → `badge`: der Text in der Rolle der Variante, keine Fläche, kein Ring (die Bindungen `text.color` und `text.typography` zeichnet `drawBadge`). `titolo`: `size` ist Achse (7 Varianten), `level` schlüsselt keinen Teil und ist darum keine Achse – es steht als Eigenschaft des Sets (Enum-Liste), wie die Spec will („Eigenschaft der Instanz, nicht Variante“). `teksto`: 15 Varianten. `LABEL_DEFAULTS`: `heading` „Überschrift“, `paragraph` „Text“ – Vorschläge, kein Jugxo (O-12). Die `ekzemplo`-Fixture schreibt ihre Display-Rollen in Versalien, komuna nicht: die Display-Varianten des `titolo` tragen `TEXT_CASE_VARIES`, der Lauf warnt einmal je Set (F31, B-1).
+
+#### D-06 Vitrino (G6)
+Eine Pflicht-Enum, die keinen Teil schlüsselt (`level`), nimmt in jeder Zeile den Wert, den die Größe der Zeile nahelegt (`display-*` → 1, `headline-n` → n): sieben Überschriften, die Seite behält ihre Ordnung. Der `teksto` zeigt alle 15 Kombinationen (die Constraint lässt `caption size=2` aus). `wrapSentence`: „Überschrift darf umbrechen“, „Text darf umbrechen“.
+
+#### D-07 Make Kit (G7)
+Zwei Sätze aus den Rollen: „Every heading is a `<Titolo>` with its `level` (the structure of the page); its `size` is design, never a level chosen for its size.“ und „Every running text, caption, kicker or inline code is a `<Teksto>` in a type role; never a styled span.“ Die Komponentenseiten nennen `level` und `emphasis` aus der Props-Tabelle.
+
+#### D-08 Gvidanto: Stichwörter ohne „text“, „paragraph“, „absatz“ (Nachlese 3 G2/G3)
+`suggest_ero` zählt ganze Wörter; „Text“ steht in fast jedem Satz über ein Ero („Mach diesen Text fett …“) und hätte jeden Dialog zum Gleichstand gemacht – kein Stichwort. „paragraph“/„absatz“ stehen im Goal `multi-line` der `tekstareo` (`goal-keyword-shared`); der Erste in Namensordnung antwortet, ein Doppel hätte dem `teksto` nichts gebracht – die `tekstareo` behält die Wörter (O-15). Stichwörter des `teksto`: running-text, body-text, caption, kicker, inline-code / fließtext, lauftext, bildunterschrift, kicker. `check:regularo` 0 Warnungen.
+
+### Arkitekturo-Abdeckung
+
+| Ero | Stand |
+|---|---|
+| `titolo` | trägt (Skemo mit `level`/`size`, Uzo, Regulo `heading-levels-in-order` mit Prüfart `levels-in-order`, vier Jugxoj, Web Component `fm-titolo` mit `aria-level` und abgeleiteter Größe, React, Figma-Bauform badge, Make-Kit, Vitrino, MCP; komponiert im `dialogo`) |
+| `teksto` | trägt (Skemo mit `kind`/`size`/`emphasis`, Uzo, Web Component `fm-teksto` mit `role="code"`, React, Figma-Bauform badge, Make-Kit, Vitrino, MCP) |
+| `dialogo` | Überschrift ist ein komponierter `fm-titolo` (Browser-Specs des Dialogs grün) |
+| `avizo`, `plenstato`, `tabelo` | komponieren `titolo` in der Uzo (composes.with); ihre Überschriften bleiben eigene Textteile (Abweichung 2, O-14) |
+
+### Abweichungen von der Spec
+
+1. **`emphasis` statt `tone`** (D-02): die Spec verlangt den Vorschlag; `tone` ist seit Spec 007 F1 ein Status. Zur Bestätigung bei der Abnahme (O-11).
+2. **`avizo`, `plenstato`, `tabelo` komponieren den `titolo` nur in der Uzo**, nicht im Shadow-Markup: ihre Überschrift ist ein Text des Hinweises, der Zustandsfläche, der Tabelle (die `<caption>` der Plattform) und keine Ebene der Seite; nur der `dialogo` – ein eigenes Dokument – setzt eine Ebene (2). Ein `fm-titolo` im `avizo` hieße, dem Hinweis eine Ebene zu geben (O-14).
+3. **Eine Constraint statt „size nur bei body“ als drei** (D-02): `size=2 ⇒ kind=body`; derselbe Raum (15 Kombinationen), aber der Rückfall des Elements trifft die Größe und nicht die Art.
+4. **Figma: `level` als Enum-Eigenschaft des Sets** (Spec: „Text-Property“): eine Liste der sechs Ebenen, keine Varianten-Achse; ein freier Text könnte „7“ sagen.
+5. **Stichwörter ohne „Text“ und „Absatz“** (D-08): die Spec nennt die Goals, nicht die Wörter; Gleichstand und `goal-keyword-shared` entscheiden.
+
+### Befunde / Mankoj
+
+- **B-1** Figma-Lauf über `core + ekzemplo` warnt „titolo: Die Schreibweise der Beschriftung ist nicht in allen Modi dieselbe“ – die Display-Rollen der ekzemplo-Fixture sind Versalien, komunas nicht; `textCase` ist nicht bindbar (F31). Richtig so; die Plugin-Tests der Fixture erwarten die Warnung. Kein Manko.
+- **B-2** Gleichstände im Gvidanto durch die neuen Stichwörter: „Piktogramm neben der Überschrift“ (ikono ↔ titolo), „a tag next to the title“ (insigno ↔ titolo), „Fließtext mit fetter Formatierung“ (tekstareo ↔ teksto) – die Dialogsätze der ②-Tests (`ikono.test`, `insigno.test`, `tekstareo.test`, MCP `s014-grundbausteine`) sind neu formuliert („Piktogramm vor dem Wort“, „a tag beside the row“, „Eingabe mit fetter Formatierung“); die Antworten der Eroj sind dieselben. Kein Manko.
+- **B-3** Playwright: `getByRole("code", { name })` findet nichts – die Rolle `code` nimmt keinen Namen aus dem Inhalt (ARIA: name prohibited); der Spec zählt die Rolle. Kein Manko.
+- **B-4** CI von PR ② fiel in Shard 2 (`saltligilo.spec`: `browserName` im zweiten Test entfernt, aber genutzt – lokal nur Chromium gelaufen); Fix `48f3c6e` auf ②, ③ darauf gestapelt.
+- **B-5** Die `uzo-web-term`-Prüfung hält „reference“ und „title“ für Web-Begriffe: die Stichwörter des `teksto` heißen `link-text` und `subheading`. Kein Manko.
+
+### Offen (für den Maintainer)
+
+- **O-11 Name der Rangfolge-Achse.** `emphasis: high | medium | low` (D-02). Bestätigen oder benennen.
+- **O-12 Vorgabewörter Figma.** `heading` „Überschrift“, `paragraph` „Text“ (D-05). Zur Bestätigung; dann je ein Jugxo.
+- **O-13 Reichweite von `heading-levels-in-order`.** Die Prüfung sieht eine Liste von `titolo`-Instanzen in `check_usage`; die Ebene 2 des Dialogs und Überschriften in Sxablonoj liegen außerhalb, bis eine Seiten-Prüfung die Instanzen sammelt.
+- **O-14 `fm-titolo` in `avizo`, `plenstato`, `tabelo`.** Abweichung 2: ob die Überschrift des Hinweises eine Ebene der Seite werden soll (dann `fm-titolo` mit welcher Ebene?) oder Text bleibt.
+- **O-15 „Absatz“ und „paragraph“.** Bleiben bei der `tekstareo`; „Absatz“ allein fragt eine Person (Gleichstand kampo/tekstareo/teksto über die Alternativen). Ob der `teksto` das Wort bekommen soll, entscheidet der Maintainer – dann verliert es die `tekstareo` (D-08).
 
 ## ④ Overlays
 

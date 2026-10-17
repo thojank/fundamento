@@ -36,9 +36,9 @@ describe("get_ero (FR-13)", () => {
     expect(result.structuredContent?.allowed).toEqual([
       "butono",
       "ikono",
+      "titolo",
       "insigno",
       "avizo",
-      "dialogo",
     ]);
   });
 });
@@ -154,9 +154,6 @@ describe("suggest_ero (FR-13)", () => {
       "toggle",
       "table",
       "multi-line",
-    "running-text",
-    "section-heading",
-    "page-title",
       "running-text",
       "section-heading",
       "page-title",

@@ -2990,6 +2990,13 @@
               "additionalProperties": false
             },
             {
+              "description": "Over a list of instances the prop named in of never jumps up by more than one step from the instance before (Spec 014 ③, plan ③ D-03): the levels of headings; a check over the list, no count.",
+              "type": "object",
+              "properties": { "kind": { "const": "levels-in-order" } },
+              "required": ["kind"],
+              "additionalProperties": false
+            },
+            {
               "description": "The slot holds at most count entries (Spec 010 ③, plan ③ D-09): a list check, its of names a slot with entries.",
               "type": "object",
               "properties": {

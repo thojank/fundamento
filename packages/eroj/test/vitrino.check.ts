@@ -544,8 +544,12 @@ test("the Ikonaro grid, the apartigilo and the saltligilo are upgraded in their 
 // headings with their levels, fifteen paragraphs; axe without a finding.
 test("fm-titolo and fm-teksto are upgraded in their sections, axe-clean", async ({ page }) => {
   await open(page);
-  await expect(page.locator("#fm-vitrino-titolo").getByRole("heading", { level: 1 })).toHaveCount(3);
-  await expect(page.locator("#fm-vitrino-titolo").getByRole("heading", { level: 4 })).toHaveCount(1);
+  await expect(page.locator("#fm-vitrino-titolo").getByRole("heading", { level: 1 })).toHaveCount(
+    3,
+  );
+  await expect(page.locator("#fm-vitrino-titolo").getByRole("heading", { level: 4 })).toHaveCount(
+    1,
+  );
   await expect(page.locator("#fm-vitrino-teksto fm-teksto")).toHaveCount(15);
   await expect(page.locator("#fm-vitrino-teksto").getByRole("code")).toHaveCount(3);
   for (const id of ["titolo", "teksto"]) {

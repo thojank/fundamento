@@ -37,10 +37,10 @@ describe("teksto in the repo Modelo (section ③, G1, G2)", () => {
     ]);
     expect(skemo?.states).toEqual(["rest"]);
     expect(skemo?.slots).toEqual([{ name: "label", default: true, text: true }]);
+    // One constraint keyed by the size (plan ③ D-02): the element resets the when-prop on a
+    // violation, so a caption of size 2 becomes a caption of size 1 — never a body of size 2.
     expect(skemo?.constraints).toEqual([
-      { when: { kind: "caption" }, allowed: { size: ["1"] }, kialo: expect.stringMatching(/size/) },
-      { when: { kind: "kicker" }, allowed: { size: ["1"] }, kialo: expect.stringMatching(/size/) },
-      { when: { kind: "code" }, allowed: { size: ["1"] }, kialo: expect.stringMatching(/size/) },
+      { when: { size: "2" }, allowed: { kind: ["body"] }, kialo: expect.stringMatching(/size/) },
     ]);
   });
 
@@ -70,9 +70,7 @@ describe("teksto in the repo Modelo (section ③, G1, G2)", () => {
     expect(boundToken(skemo, "text", "color", { emphasis: "medium" })?.token).toBe(
       "color.text.subtle",
     );
-    expect(boundToken(skemo, "text", "color", { emphasis: "low" })?.token).toBe(
-      "color.text.muted",
-    );
+    expect(boundToken(skemo, "text", "color", { emphasis: "low" })?.token).toBe("color.text.muted");
     expect(variantKeys(skemo)).toEqual(["kind", "size", "emphasis", "state"]);
     expect(combinationsOf(skemo, ["kind", "size", "emphasis"])).toHaveLength(15);
   });
@@ -89,8 +87,10 @@ describe("teksto in the repo Modelo (section ③, G1, G2)", () => {
   it("knows the goal running-text with the words of G7", () => {
     expect(skemo?.goals?.map((goal) => goal.goal)).toEqual(["running-text"]);
     expect(skemo?.goals?.[0]?.keywords).toEqual({
-      en: ["text", "paragraph", "caption", "kicker", "inline-code"],
-      de: ["text", "absatz", "fließtext", "bildunterschrift", "kicker"],
+      // Not "text" (every sentence about an Ero says it) and not "paragraph"/"absatz" (the
+      // tekstareo's multi-line owns them, goal-keyword-shared): plan ③ D-08.
+      en: ["running-text", "body-text", "caption", "kicker", "inline-code"],
+      de: ["fließtext", "lauftext", "bildunterschrift", "kicker"],
     });
   });
 });
@@ -116,7 +116,9 @@ describe("the Uzo of the teksto (section ③, G6)", () => {
   it("composes in a page section with the ligilo; requires the label; size container, wraps; no text rule", () => {
     expect(uzo?.composes.containers.map((container) => container.name)).toEqual(["page-section"]);
     expect(uzo?.composes.with.map((entry) => entry.ero)).toEqual(["ligilo"]);
-    expect(uzo?.slots).toEqual({ label: { accepts: ["text"], max: 1, required: true, nesting: 0 } });
+    expect(uzo?.slots).toEqual({
+      label: { accepts: ["text"], max: 1, required: true, nesting: 0 },
+    });
     expect(uzo?.layout).toEqual({ size: "container", wrap: "allowed" });
     expect(uzo?.content).toEqual([]);
     expect(named("spacing-owned-by-container")?.appliesTo?.eroj).toContain("teksto");
@@ -145,8 +147,8 @@ describe("the Uzo of the teksto (section ③, G6)", () => {
 });
 
 describe("suggest_ero of the text (Gvidanto)", () => {
-  it("'Absatz mit Fließtext' is the teksto; 'a caption under the picture' too", () => {
-    expect(suggest("Absatz mit Fließtext").suggestion).toEqual({ ero: "teksto", props: {} });
+  it("'Fließtext unter dem Bild' is the teksto; 'a caption under the picture' too", () => {
+    expect(suggest("Fließtext unter dem Bild").suggestion).toEqual({ ero: "teksto", props: {} });
     expect(suggest("a caption under the picture").suggestion).toEqual({
       ero: "teksto",
       props: {},

@@ -111,6 +111,10 @@
         {
           "ero": "ikono",
           "kialo": "The icon of the intent stands before the words as an ikono, because a sign is read faster than a word; never alone — the intent word is heard, the colour is the status text's (G6)."
+        },
+        {
+          "ero": "titolo",
+          "kialo": "A heading over the message is a text of the notice, no level of the page; where a page section needs a heading, that is a titolo."
         }
       ],
       "never": [],

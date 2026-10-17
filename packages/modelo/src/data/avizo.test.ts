@@ -168,7 +168,12 @@ describe("the Uzo of the avizo (section ③, G5)", () => {
 
   it("composes in a page and at the top of a dialog's content, with butono and ligilo", () => {
     expect(uzo?.composes.containers.map((container) => container.name)).toEqual(["page", "dialog"]);
-    expect(uzo?.composes.with.map((entry) => entry.ero)).toEqual(["butono", "ligilo", "ikono"]);
+    expect(uzo?.composes.with.map((entry) => entry.ero)).toEqual([
+      "butono",
+      "ligilo",
+      "ikono",
+      "titolo",
+    ]);
   });
 
   it("carries error-says-what-to-do, adjustable, as min-words 3 on the message when intent is danger", () => {

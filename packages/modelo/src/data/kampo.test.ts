@@ -346,8 +346,6 @@ describe("the Reguloj of the kampo (T003, T004, A2, D-07)", () => {
       "elekto",
       "elektilo",
       "tekstareo",
-      "teksto",
-      "titolo",
       "dialogo",
       "insigno",
       "avizo",

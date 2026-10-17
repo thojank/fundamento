@@ -3746,6 +3746,162 @@
           }
         ]
       }
+    },
+    {
+      "id": "jug_01M5616H5XBEN3V2PK5S1QBKMP",
+      "ref": {
+        "ero": "ero_01M5616FMN3GPB1J421PMMKBZ3"
+      },
+      "decision": "approved",
+      "kialo": "Jede Ebene folgt der vorigen um höchstens eine Stufe: ein Screenreader hört das Inhaltsverzeichnis vollständig.",
+      "date": "2026-10-18",
+      "context": "Example RIGHT for the Regulo named in ekzemplo.regulo (Spec 014 ③, heading-levels-in-order, G8); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M5616GSFTAVNSEZTHHEZ8700",
+        "instances": [
+          {
+            "ero": "titolo",
+            "props": {
+              "level": "1"
+            },
+            "label": "Standards",
+            "lingvo": "de"
+          },
+          {
+            "ero": "titolo",
+            "props": {
+              "level": "2"
+            },
+            "label": "Barrierefreiheit",
+            "lingvo": "de"
+          },
+          {
+            "ero": "titolo",
+            "props": {
+              "level": "3"
+            },
+            "label": "Kontrast",
+            "lingvo": "de"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M5616H5YYRY0SWWR0VY53ZXJ",
+      "ref": {
+        "ero": "ero_01M5616FMN3GPB1J421PMMKBZ3"
+      },
+      "decision": "approved",
+      "kialo": "Every level follows the one before by at most one step: a screen reader hears the whole table of contents.",
+      "date": "2026-10-18",
+      "context": "Example RIGHT for the Regulo named in ekzemplo.regulo (Spec 014 ③, heading-levels-in-order, G8); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M5616GSFTAVNSEZTHHEZ8700",
+        "instances": [
+          {
+            "ero": "titolo",
+            "props": {
+              "level": "1"
+            },
+            "label": "Standards",
+            "lingvo": "en"
+          },
+          {
+            "ero": "titolo",
+            "props": {
+              "level": "2"
+            },
+            "label": "Accessibility",
+            "lingvo": "en"
+          },
+          {
+            "ero": "titolo",
+            "props": {
+              "level": "3"
+            },
+            "label": "Contrast",
+            "lingvo": "en"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M5616H5YYRY0SWWR0VY53ZXK",
+      "ref": {
+        "ero": "ero_01M5616FMN3GPB1J421PMMKBZ3"
+      },
+      "decision": "rejected",
+      "kialo": "Von 2 auf 4 fehlt eine Stufe: Wer von Überschrift zu Überschrift springt, hört einen Abschnitt, den es nicht gibt.",
+      "date": "2026-10-18",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 014 ③, heading-levels-in-order, G8); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M5616GSFTAVNSEZTHHEZ8700",
+        "instances": [
+          {
+            "ero": "titolo",
+            "props": {
+              "level": "1"
+            },
+            "label": "Standards",
+            "lingvo": "de"
+          },
+          {
+            "ero": "titolo",
+            "props": {
+              "level": "2"
+            },
+            "label": "Barrierefreiheit",
+            "lingvo": "de"
+          },
+          {
+            "ero": "titolo",
+            "props": {
+              "level": "4"
+            },
+            "label": "Kontrast",
+            "lingvo": "de"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M5616H5YYRY0SWWR0VY53ZXM",
+      "ref": {
+        "ero": "ero_01M5616FMN3GPB1J421PMMKBZ3"
+      },
+      "decision": "rejected",
+      "kialo": "From 2 to 4 a step is missing: whoever jumps from heading to heading hears a section that is not there.",
+      "date": "2026-10-18",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 014 ③, heading-levels-in-order, G8); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M5616GSFTAVNSEZTHHEZ8700",
+        "instances": [
+          {
+            "ero": "titolo",
+            "props": {
+              "level": "1"
+            },
+            "label": "Standards",
+            "lingvo": "en"
+          },
+          {
+            "ero": "titolo",
+            "props": {
+              "level": "2"
+            },
+            "label": "Accessibility",
+            "lingvo": "en"
+          },
+          {
+            "ero": "titolo",
+            "props": {
+              "level": "4"
+            },
+            "label": "Contrast",
+            "lingvo": "en"
+          }
+        ]
+      }
     }
   ]
 }

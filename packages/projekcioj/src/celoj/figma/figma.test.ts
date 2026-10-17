@@ -2846,8 +2846,15 @@ describe("the Figma plan draws the titolo and the teksto as text (Spec 014 ③)"
     expect(titolo?.structure).toBe("badge");
     expect(titolo?.properties).toEqual({
       level: ["1", "2", "3", "4", "5", "6"],
-      size: ["display-1", "display-2", "display-3", "headline-1", "headline-2", "headline-3", "headline-4"],
-      label: "TEXT",
+      size: [
+        "display-1",
+        "display-2",
+        "display-3",
+        "headline-1",
+        "headline-2",
+        "headline-3",
+        "headline-4",
+      ],
       state: ["rest"],
     });
     expect(titolo?.variants).toHaveLength(7);

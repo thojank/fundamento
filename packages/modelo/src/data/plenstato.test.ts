@@ -155,7 +155,7 @@ describe("the Uzo of the plenstato (section ③, G5)", () => {
       "tabelo",
       "page-section",
     ]);
-    expect(uzo?.composes.with.map((entry) => entry.ero)).toEqual(["butono"]);
+    expect(uzo?.composes.with.map((entry) => entry.ero)).toEqual(["butono", "titolo"]);
   });
 
   it("carries empty-state-says-what-next, adjustable, as min-words 3 on the text for kind empty", () => {

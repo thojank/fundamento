@@ -303,8 +303,6 @@ describe("the Reguloj of the markobutono (G6, E5)", () => {
       "elekto",
       "elektilo",
       "tekstareo",
-      "teksto",
-      "titolo",
       "dialogo",
       "insigno",
       "avizo",

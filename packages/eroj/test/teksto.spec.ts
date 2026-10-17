@@ -44,7 +44,8 @@ test.describe("fm-teksto behaviour", () => {
     );
     const tokens = await page.evaluate(() => {
       const root = getComputedStyle(document.documentElement);
-      const size = (role: string) => root.getPropertyValue(`--fm-typography-${role}-font-size`).trim();
+      const size = (role: string) =>
+        root.getPropertyValue(`--fm-typography-${role}-font-size`).trim();
       return {
         body1: size("body-1"),
         body2: size("body-2"),
@@ -67,7 +68,8 @@ test.describe("fm-teksto behaviour", () => {
     expect(code.display).toBe("inline");
     expect(code.role).toBe("code");
     expect(code.family.replaceAll('"', "")).toBe(tokens.codeFamily.replaceAll('"', ""));
-    await expect(page.getByRole("code", { name: "fm build" })).toHaveCount(1);
+    // A code role takes no name from its content (ARIA: name prohibited): the role is what counts.
+    await expect(page.getByRole("code")).toHaveCount(1);
   });
 
   test("the colour follows the emphasis: default, subtle, muted", async ({ page }) => {
@@ -97,7 +99,10 @@ test.describe("fm-teksto behaviour", () => {
     await expect.poll(() => warnings.some((text) => text.includes("fm-teksto"))).toBe(true);
     const lines = await page.locator("#w").evaluate((element) => {
       const control = element.shadowRoot?.querySelector('[part="control"]') as HTMLElement;
-      return control.getBoundingClientRect().height / Number.parseFloat(getComputedStyle(control).lineHeight);
+      return (
+        control.getBoundingClientRect().height /
+        Number.parseFloat(getComputedStyle(control).lineHeight)
+      );
     });
     expect(lines).toBeGreaterThan(1);
   });

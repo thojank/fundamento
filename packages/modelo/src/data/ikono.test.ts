@@ -236,8 +236,8 @@ describe("the Ikonaro and the Eroj that compose the ikono (G6)", () => {
 });
 
 describe("suggest_ero of the icon (Gvidanto)", () => {
-  it("'Piktogramm neben der Überschrift' is the ikono; 'ein Symbol' too", () => {
-    expect(suggest("Piktogramm neben der Überschrift").suggestion).toEqual({
+  it("'Piktogramm vor dem Wort' is the ikono; 'ein Symbol' too", () => {
+    expect(suggest("Piktogramm vor dem Wort").suggestion).toEqual({
       ero: "ikono",
       props: {},
     });

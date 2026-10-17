@@ -548,7 +548,11 @@ export const structureOf = (role: string, parts: readonly string[] = []): FigmaS
                           ? "icon"
                           : role === "separator"
                             ? "separator"
-                            : "control";
+                            : // Spec 014 ③ (plan ③ D-05): a heading and a paragraph are static
+                              // text, drawn as a badge is — the text in the role of the variant.
+                              role === "heading" || role === "paragraph"
+                              ? "badge"
+                              : "control";
 
 /**
  * The neutral word every label template shows, per a11y role (M-3; Maintainer, F14, 2026-10-13,
@@ -595,6 +599,10 @@ const LABEL_DEFAULTS: Readonly<Record<string, string>> = {
   // Spec 011 ⑤: a tab list's label is the name of the group, never shown; the set's word is the
   // name of the Ero itself. Proposal for the maintainer to confirm; no Jugxo created here.
   tablist: "Reiter",
+  // Spec 014 ③ (plan ③ D-05): a heading names its section, running text names itself. Proposal
+  // for the maintainer to confirm; no Jugxo created here.
+  heading: "Überschrift",
+  paragraph: "Text",
 };
 
 /**

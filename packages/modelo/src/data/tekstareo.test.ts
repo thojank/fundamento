@@ -251,8 +251,6 @@ describe("the Reguloj of the tekstareo (G6, E5)", () => {
       "elekto",
       "elektilo",
       "tekstareo",
-      "teksto",
-      "titolo",
       "dialogo",
       "insigno",
       "avizo",
@@ -347,12 +345,12 @@ describe("check_usage and suggest_ero of the text area (G6, G7, Gvidanto)", () =
     expect(multiLine?.kialo).not.toMatch(/no such Ero yet/);
   });
 
-  it("'Kommentar, mehrere Absätze' is the tekstareo too; 'Markdown-Editor mit Formatierung' stops at rich-text", () => {
+  it("'Kommentar, mehrere Absätze' is the tekstareo too; 'Eingabe mit fetter Formatierung' stops at rich-text", () => {
     expect(suggest("Kommentar, mehrere Absätze").suggestion).toEqual({
       ero: "tekstareo",
       props: {},
     });
-    expect(suggest("Fließtext mit fetter Formatierung").boundary).toMatchObject({
+    expect(suggest("Eingabe mit fetter Formatierung").boundary).toMatchObject({
       ero: "tekstareo",
       case: "rich-text",
       action: "not-supported",

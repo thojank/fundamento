@@ -640,7 +640,9 @@ describe("the Vitrino shows the titolo and the teksto (Spec 014 ③)", () => {
   it("the teksto has fifteen rows of kind · size · emphasis", () => {
     const section = datumoj.eroj.teksto ?? "";
     expect((section.match(/<fm-teksto /g) ?? []).length).toBe(15);
-    expect(section).toContain('<fm-teksto kind="code" size="1" emphasis="high">code · 1 · high</fm-teksto>');
+    expect(section).toContain(
+      '<fm-teksto kind="code" size="1" emphasis="high">code · 1 · high</fm-teksto>',
+    );
     expect(section).not.toContain('kind="caption" size="2"');
   });
 });
