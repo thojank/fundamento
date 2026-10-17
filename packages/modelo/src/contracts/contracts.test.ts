@@ -68,6 +68,7 @@ describe("entity ID prefixes (§2.3)", () => {
       sxablono: "sxa",
       projekcio: "prj",
       celo: "cel",
+      ikono: "iko",
     });
     expect(Object.keys(ENTITY_ID_PREFIXES)).toEqual([...ENTITY_TYPES]);
   });
@@ -95,7 +96,8 @@ describe("rule catalog (§2.6)", () => {
     // Spec 010 ③ (T203): uzo-content-of-invalid and uzo-slot-min.
     // Nachlese 3 (G3): goal-keyword-shared, the warning about a keyword two Eroj' goals share;
     // (W2): contrast-external-aspekto, a failing pair of an Aspekto beyond the reference.
-    expect(RULE_IDS).toHaveLength(155);
+    // Spec 014 ① (G3): the five glyph rules of check:ikonaro.
+    expect(RULE_IDS).toHaveLength(160);
     for (const rule of [
       "uzo-skemo-missing",
       "uzo-ero-unknown",
@@ -201,6 +203,7 @@ describe("shared constants", () => {
       "mankoj",
       "alirebleco",
       "clean-room",
+      "ikonaro",
     ]);
   });
 

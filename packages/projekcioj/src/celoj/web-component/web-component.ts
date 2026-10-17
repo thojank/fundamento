@@ -416,6 +416,10 @@ function declarations(skemo: Skemo, part: string, property: string, token: strin
       return [`transition-duration: ${variable(token)};`];
     case "easing":
       return [`transition-timing-function: ${variable(token)};`];
+    // The weight of a text where it departs from its role (Spec 014 ①, D-01): the current item of
+    // a navigation, the active tab; none (the role's weight stands) writes nothing.
+    case "weight":
+      return [`font-weight: ${variable(token)};`];
     default:
       return [];
   }
@@ -781,6 +785,9 @@ export function lightStylesheetOf(skemo: Skemo, tag: string): string {
           `${tag} > dl > :is(dt, dd) { margin: 0; }`,
           `${tag}[data-layout="columns"] > dl { grid-template-columns: max-content auto; }`,
           `${tag}[data-layout="stacked"] > dl { grid-template-columns: auto; }`,
+          // Spec 014 ① (plan ① D-03): auto is drawn as the wide case until the element has
+          // measured its container and written columns or stacked.
+          `${tag}[data-layout="auto"] > dl { grid-template-columns: max-content auto; }`,
           `${tag} ${HIDDEN_TEXT}`,
         ];
   return `${structure.join("\n")}\n${rules
@@ -1080,6 +1087,7 @@ export function namesOf(ero: LoadedEro["ero"]): {
 
 /** Everything the element template needs of one Ero: names, the native control, the slots. */
 export function elementNamesOf(entry: LoadedEro, inline = false) {
+  const columnsFrom = entry.uzo?.layout["columns-from"];
   return {
     ...namesOf(entry.ero),
     ero: entry.ero.name,
@@ -1090,6 +1098,9 @@ export function elementNamesOf(entry: LoadedEro, inline = false) {
     // has the parts.
     indicator: entry.skemo.parts.indicator !== undefined,
     dismiss: entry.skemo.parts.dismiss !== undefined,
+    // Spec 014 ① (plan ① D-03): the width from which layout auto lays name and value side by side,
+    // the Uzo's columns-from as the custom property its token is projected to.
+    ...(columnsFrom === undefined ? {} : { columnsFrom: nomRegulo("css").derive(columnsFrom) }),
     slots: entry.skemo.slots.map((slot) => ({
       name: slot.name,
       ...(slot.default === undefined ? {} : { default: slot.default }),

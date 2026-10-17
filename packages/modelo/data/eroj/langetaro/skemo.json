@@ -63,6 +63,11 @@
         },
         "typography": {
           "fixed": "typography.label.1"
+        },
+        "weight": {
+          "by": [
+            "active"
+          ]
         }
       },
       "selected-indicator": {
@@ -154,6 +159,22 @@
           "active": "false"
         },
         "token": "color.text.subtle"
+      },
+      {
+        "part": "tabs",
+        "property": "weight",
+        "when": {
+          "active": "true"
+        },
+        "token": "font.weight.semibold"
+      },
+      {
+        "part": "tabs",
+        "property": "weight",
+        "when": {
+          "active": "false"
+        },
+        "token": "none"
       },
       {
         "part": "selected-indicator",

@@ -18,7 +18,7 @@ import {
 
 /**
  * ID occurrences of: core token definitions (overrides in other sets carry no ID), set roots,
- * Dimensioj, DimensioValoroj, Reguloj, Jugxoj, Mankoj, KontrastParoj, Eroj, Skemoj and Uzoj. `$themes.json` is skipped: its
+ * Dimensioj, DimensioValoroj, Reguloj, Jugxoj, Mankoj, KontrastParoj, Ikonoj, Eroj, Skemoj and Uzoj. `$themes.json` is skipped: its
  * theme IDs repeat the DimensioValoro IDs by design.
  *
  * A present string ID points at the `id` value itself (e.g.
@@ -96,6 +96,14 @@ export function collectIdOccurrences(files: ModeloFiles): IdOccurrence[] {
     for (const { entry, index } of rawEntries(document.value, key)) {
       const pointer = `/${key}/${index}`;
       add(entityType, document.file, pointer, entry, pointer);
+    }
+  }
+  // Spec 014 ① (G3): every Ikono carries an iko_ ID; the file is optional.
+  const ikonaro = files.data["ikonaro.json"];
+  if (ikonaro !== undefined) {
+    for (const { entry, index } of rawEntries(ikonaro.value, "ikonaro")) {
+      const pointer = `/ikonaro/${index}`;
+      add("ikono", ikonaro.file, pointer, entry, pointer);
     }
   }
 

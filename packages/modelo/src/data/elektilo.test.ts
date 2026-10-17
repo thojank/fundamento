@@ -401,7 +401,8 @@ describe("the Reguloj of the elektilo (G6, E5)", () => {
     ["error-says-what-to-do", ["kampo", "markobutono", "elekto", "elektilo", "tekstareo", "avizo"]],
     ["required-marked", ["kampo", "markobutono", "elekto", "elektilo", "tekstareo"]],
     ["error-not-color-only", ["kampo", "markobutono", "elekto", "elektilo", "tekstareo"]],
-    ["help-is-one-sentence", ["kampo", "elekto", "elektilo", "tekstareo"]],
+    // Spec 014 ①: widened once more, to the reason-help of the dialogo.
+    ["help-is-one-sentence", ["kampo", "elekto", "elektilo", "tekstareo", "dialogo"]],
     ["placeholder-not-label", ["kampo", "elektilo", "tekstareo"]],
     // Spec 011 ⑤: widened once more, to the tabs of the langetaro.
     ["option-labels-distinct", ["elekto", "elektilo", "langetaro"]],

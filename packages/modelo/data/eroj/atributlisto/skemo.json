@@ -14,10 +14,11 @@
         "kind": "enum",
         "values": [
           "columns",
-          "stacked"
+          "stacked",
+          "auto"
         ],
         "default": "columns",
-        "description": "Name and value side by side (columns) or one above the other (stacked); the application chooses for a narrow container."
+        "description": "Name and value side by side (columns) or one above the other (stacked); auto lays them side by side while the container is at least as wide as the Uzo's columns-from, else stacks them."
       },
       {
         "name": "label",
@@ -83,6 +84,14 @@
           "layout": "stacked"
         },
         "token": "spacing.xsmall"
+      },
+      {
+        "part": "box",
+        "property": "inline-padding",
+        "when": {
+          "layout": "auto"
+        },
+        "token": "spacing.large"
       }
     ],
     "a11y": {

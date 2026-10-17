@@ -1,0 +1,17 @@
+{
+  "$schema": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/IkonaroFile",
+  "ikonaro": [
+    {
+      "id": "iko_01M55000000000000000000CS1",
+      "name": "close",
+      "meaning": { "de": "Schließen", "en": "Close" },
+      "kialo": "Every layer that opens needs a sign that closes it."
+    },
+    {
+      "id": "iko_01M55000000000000000000CK1",
+      "name": "check",
+      "meaning": { "de": "Haken", "en": "Check" },
+      "kialo": "A tick is the one sign every culture of the system reads as done."
+    }
+  ]
+}

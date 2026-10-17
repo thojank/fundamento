@@ -85,6 +85,13 @@ describe("langetaro in the repo Modelo (section ⑤, G1, G2, E7)", () => {
       "color.text.subtle",
     );
     expect(skemo.parts.tabs?.typography).toEqual({ fixed: "typography.label.1" });
+    // Spec 014 ① (Gewicht): the active tab is heavier too — weight by active, semibold where
+    // active, none (the role's own weight stands) elsewhere; the indicator stays (G4).
+    expect(skemo.parts.tabs?.weight).toEqual({ by: ["active"] });
+    expect(boundToken(skemo, "tabs", "weight", { active: "true" })?.token).toBe(
+      "font.weight.semibold",
+    );
+    expect(boundToken(skemo, "tabs", "weight", { active: "false" })?.token).toBe("none");
     expect(skemo.parts.tab?.height).toEqual({ fixed: "size.target.min" });
     expect(skemo.parts["selected-indicator"]?.width).toEqual({ by: ["active"] });
     expect(boundToken(skemo, "selected-indicator", "width", { active: "true" })?.token).toBe(

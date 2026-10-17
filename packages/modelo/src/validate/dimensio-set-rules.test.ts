@@ -53,6 +53,7 @@ function modelo(setoj: LoadedSet[]): Modelo {
     jugxoj: [],
     mankoj: [],
     kontrastParoj: [],
+    ikonaro: [],
     eroj: [],
     idsLock: { ids: {} },
     aspektoPackages: [],

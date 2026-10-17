@@ -49,6 +49,7 @@ const CHECK_SUMMARIES: Readonly<Record<CheckName, string>> = {
   alirebleco:
     "Contrast of every KontrastParo in every combination (WCAG 2.x binding, APCA advisory).",
   "clean-room": "No benchmark files or references; identifiers match the Fundamento allowlist.",
+  ikonaro: "Every Aspekto draws every Ikonaro name: square, in currentColor, with provenance.",
 };
 
 export const HELP = [

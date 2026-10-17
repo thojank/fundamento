@@ -199,6 +199,12 @@ export const RULE_IDS = [
   // a list check on a slot without entries; and the fewest entries a slot takes in check_usage.
   "uzo-content-of-invalid",
   "uzo-slot-min",
+  // Spec 014 ① (G3): the Ikonaro, drawn by every installed Aspekto (check:ikonaro).
+  "ikonaro-glyph-missing",
+  "ikonaro-glyph-fixed-color",
+  "ikonaro-glyph-provenance-missing",
+  "ikonaro-glyph-viewbox",
+  "ikonaro-glyph-unknown",
   // Projekcio lints (Spec 003, D-17)
   "css-physical-property",
   "ero-hardcoded-string",

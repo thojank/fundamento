@@ -105,6 +105,13 @@ describe("navigado in the repo Modelo (section ⑤, G1, G2, E7)", () => {
       "color.navigation.text.rest",
     );
     expect(skemo.parts.items?.typography).toEqual({ fixed: "typography.label.1" });
+    // Spec 014 ① (Gewicht): the current item is heavier too — weight by current, semibold where
+    // current, none (the role's own weight stands) elsewhere; the underline stays (G4).
+    expect(skemo.parts.items?.weight).toEqual({ by: ["current"] });
+    expect(boundToken(skemo, "items", "weight", { current: "true" })?.token).toBe(
+      "font.weight.semibold",
+    );
+    expect(boundToken(skemo, "items", "weight", { current: "false" })?.token).toBe("none");
     // The current page is never colour alone (G4): the underline of border.width.strong.
     expect(skemo.parts.underline?.width).toEqual({ by: ["current"] });
     expect(boundToken(skemo, "underline", "width", { current: "true" })?.token).toBe(

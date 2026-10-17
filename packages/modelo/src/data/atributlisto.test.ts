@@ -6,7 +6,7 @@
 
 import { describe, expect, it } from "vitest";
 import { styledProps, variantKeys } from "../eroj/inventories.js";
-import { combinationsOf } from "../eroj/skemo-rules.js";
+import { boundToken, combinationsOf } from "../eroj/skemo-rules.js";
 import { briefOf } from "../gvidanto/eroj.js";
 import { suggestEro } from "../gvidanto/suggest-ero.js";
 import { loadModelo } from "../load/load-modelo.js";
@@ -31,14 +31,16 @@ describe("atributlisto in the repo Modelo (section ④, G1, G2, E10)", () => {
     expect(modelo.eroj[0]?.ero.name).toBe("atributlisto");
   });
 
-  it("has layout (columns, stacked) and label (the optional name) as props; one state, rest", () => {
+  it("has layout (columns, stacked, auto since Spec 014 ①) and label (the optional name) as props; one state, rest", () => {
     expect(skemo?.props.map((prop) => [prop.name, prop.values ?? prop.kind, prop.default])).toEqual(
       [
-        ["layout", ["columns", "stacked"], "columns"],
+        ["layout", ["columns", "stacked", "auto"], "columns"],
         ["label", "string", undefined],
       ],
     );
     expect(skemo?.states).toEqual(["rest"]);
+    // auto: columns while the container is wide enough, else stacked; the default stays columns.
+    expect(skemo?.props[0]?.description).toMatch(/auto/);
   });
 
   it("has one slot entries (default): the dl with its dt/dd pairs in the light DOM (E10)", () => {
@@ -56,9 +58,22 @@ describe("atributlisto in the repo Modelo (section ④, G1, G2, E10)", () => {
     expect(skemo.parts.box?.gap).toEqual({ fixed: "spacing.small" });
     // layout keys the gap of the box: the term stands beside the value or above it.
     expect(skemo.parts.box?.["inline-padding"]).toEqual({ by: ["layout"] });
+    // Spec 014 ① (layout auto): the wide case is the columns case; the stacked case below the
+    // threshold is the stacked binding — the projection decides by the container, not the Skemo.
+    expect(boundToken(skemo, "box", "inline-padding", { layout: "auto" })?.token).toBe(
+      "spacing.large",
+    );
     expect(styledProps(skemo)).toEqual(["layout"]);
     expect(variantKeys(skemo)).toEqual(["layout", "state"]);
-    expect(combinationsOf(skemo, variantKeys(skemo))).toHaveLength(2);
+    expect(combinationsOf(skemo, variantKeys(skemo))).toHaveLength(3);
+  });
+
+  it("Spec 014 ①: the Uzo names the width from which auto lays name and value side by side — a container size, no new number", () => {
+    expect(uzo?.layout).toEqual({
+      size: "container",
+      wrap: "allowed",
+      "columns-from": "size.container.small",
+    });
   });
 
   it("speaks role list, named by its label prop; an empty value is heard as 'keine Angabe' (G4, D-05)", () => {
@@ -84,7 +99,7 @@ describe("the Uzo of the atributlisto (section ④, G5)", () => {
       "Shows the fields of one record as name and value: version, owner, valid since.",
     );
     expect(uzo?.slots).toEqual({ entries: { accepts: ["text"], required: true, nesting: 0 } });
-    expect(uzo?.layout).toEqual({ size: "container", wrap: "allowed" });
+    expect(uzo?.layout).toMatchObject({ size: "container", wrap: "allowed" });
   });
 
   it("sends many records to the tabelo and editing to the kampo (a form); stops at nesting", () => {

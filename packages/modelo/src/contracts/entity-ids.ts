@@ -21,6 +21,8 @@ export const ENTITY_ID_PREFIXES = {
   sxablono: "sxa",
   projekcio: "prj",
   celo: "cel",
+  // Spec 014 ① (G3): one name of the Ikonaro.
+  ikono: "iko",
 } as const satisfies Record<EntityType, string>;
 
 export type IdPrefix = (typeof ENTITY_ID_PREFIXES)[EntityType];
@@ -40,6 +42,7 @@ export const ENTITY_TYPES = [
   "sxablono",
   "projekcio",
   "celo",
+  "ikono",
 ] as const satisfies readonly EntityType[];
 
 /**

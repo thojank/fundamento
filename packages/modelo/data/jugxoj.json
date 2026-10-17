@@ -3538,6 +3538,114 @@
       "kialo": "Wer Navigation sagt, meint die Menge mit aktueller Seite; ein einzelner Link heißt Link.",
       "date": "2026-10-17",
       "context": "Nachlese 3 G1 (Spec 011 ⑤ O-28, Briefing 2026-10-17): eine Antwort, die stand, ändert sich (OP-12) — suggest_ero „Navigation“ → navigado statt ligilo. „navigation“ (en/de) geht vom Goal navigate des ligilo zum Goal navigate-app der navigado, dazu menu/menü (hauptmenü stand schon); navigate/navigieren und overview/übersicht bleiben beim ligilo (ein Ziel ansteuern). Die Grenze row-actions-menu des tabelo gibt menu/menü ab (uzo-boundary-covered: ein ask-human-Fall nennt kein Goal eines Ero), sie behält dropdown/aktionsmenü."
+    },
+    {
+      "id": "jug_01M55NWNH7K2SQJNZV10P42QS3",
+      "ref": {
+        "ero": "ero_01M51T74A5H5FGY35BQ90VQEGH"
+      },
+      "decision": "approved",
+      "kialo": "One sentence under the reason field is read; it says what the reason is for.",
+      "date": "2026-10-17",
+      "context": "Example CORRECT for the Regulo named in ekzemplo.regulo (Spec 014 ①, help-is-one-sentence widened to the dialogo's reason-help, E5); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4S1ZR7GEPZSTB9ES3REK3V2",
+        "instances": [
+          {
+            "ero": "dialogo",
+            "props": {
+              "reason": "required"
+            },
+            "texts": {
+              "heading": "Version ablehnen?",
+              "reason": "Begründung",
+              "reason-help": "Die Autorin liest den Grund vor der nächsten Fassung."
+            },
+            "lingvo": "de"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M55NWNH7K2SQJNZV10P42QS4",
+      "ref": {
+        "ero": "ero_01M51T74A5H5FGY35BQ90VQEGH"
+      },
+      "decision": "approved",
+      "kialo": "One sentence under the reason field is read; it says what the reason is for.",
+      "date": "2026-10-17",
+      "context": "Example CORRECT for the Regulo named in ekzemplo.regulo (Spec 014 ①, help-is-one-sentence widened to the dialogo's reason-help, E5); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4S1ZR7GEPZSTB9ES3REK3V2",
+        "instances": [
+          {
+            "ero": "dialogo",
+            "props": {
+              "reason": "required"
+            },
+            "texts": {
+              "heading": "Reject the version?",
+              "reason": "Reason",
+              "reason-help": "The author reads the reason before the next version."
+            },
+            "lingvo": "en"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M55NWNH7K2SQJNZV10P42QS5",
+      "ref": {
+        "ero": "ero_01M51T74A5H5FGY35BQ90VQEGH"
+      },
+      "decision": "rejected",
+      "kialo": "Two sentences are a paragraph; the second is skipped, so the first has to carry it alone.",
+      "date": "2026-10-17",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 014 ①, help-is-one-sentence widened to the dialogo's reason-help, E5); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4S1ZR7GEPZSTB9ES3REK3V2",
+        "instances": [
+          {
+            "ero": "dialogo",
+            "props": {
+              "reason": "required"
+            },
+            "texts": {
+              "heading": "Version ablehnen?",
+              "reason": "Begründung",
+              "reason-help": "Nennen Sie den Grund. Die Autorin liest ihn vor der nächsten Fassung."
+            },
+            "lingvo": "de"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M55NWNH7K2SQJNZV10P42QS6",
+      "ref": {
+        "ero": "ero_01M51T74A5H5FGY35BQ90VQEGH"
+      },
+      "decision": "rejected",
+      "kialo": "Two sentences are a paragraph; the second is skipped, so the first has to carry it alone.",
+      "date": "2026-10-17",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 014 ①, help-is-one-sentence widened to the dialogo's reason-help, E5); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M4S1ZR7GEPZSTB9ES3REK3V2",
+        "instances": [
+          {
+            "ero": "dialogo",
+            "props": {
+              "reason": "required"
+            },
+            "texts": {
+              "heading": "Reject the version?",
+              "reason": "Reason",
+              "reason-help": "Name the reason. The author reads it before the next version."
+            },
+            "lingvo": "en"
+          }
+        ]
+      }
     }
   ]
 }

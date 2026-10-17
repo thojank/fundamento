@@ -48,11 +48,12 @@ describe("dialogo in the repo Modelo (section ②, E9)", () => {
     expect(skemo?.states).toEqual(["rest"]);
   });
 
-  it("has the slots heading (default; title is a web term), message, reason (the label of the reason field), content and actions", () => {
+  it("has the slots heading (default; title is a web term), message, reason (the label of the reason field), reason-help (Spec 014 ①), content and actions", () => {
     expect(skemo?.slots).toEqual([
       { name: "heading", default: true, text: true },
       { name: "message", text: true },
       { name: "reason", text: true },
+      { name: "reason-help", text: true },
       { name: "content" },
       { name: "actions" },
     ]);
@@ -113,6 +114,14 @@ describe("dialogo in the repo Modelo (section ②, E9)", () => {
     expect(forbiddenBy(skemo, { "slot:reason": "empty", reason: "optional" })).toBeDefined();
     expect(forbiddenBy(skemo, { "slot:reason": "empty", reason: "none" })).toBeUndefined();
     expect(forbiddenBy(skemo, { "slot:reason": "filled", reason: "required" })).toBeUndefined();
+    // Spec 014 ① (reason-help): help under a reason field that is not there helps no one.
+    expect(forbiddenBy(skemo, { "slot:reason-help": "filled", reason: "none" })).toBeDefined();
+    expect(
+      forbiddenBy(skemo, { "slot:reason-help": "filled", reason: "optional" }),
+    ).toBeUndefined();
+    expect(
+      forbiddenBy(skemo, { "slot:reason-help": "filled", reason: "required" }),
+    ).toBeUndefined();
   });
 
   it("knows the goals confirm and ask-reason (reason=required), both citing the title rule; no word of the butono's goals", () => {
@@ -142,6 +151,7 @@ describe("the Uzo of the dialogo (section ②, G5)", () => {
       heading: { accepts: ["text"], required: true, max: 1, nesting: 0 },
       message: { accepts: ["text"], max: 1, nesting: 0 },
       reason: { accepts: ["text"], max: 1, nesting: 0 },
+      "reason-help": { accepts: ["text"], max: 1, nesting: 0 },
       content: {
         accepts: ["kampo", "tekstareo", "elektilo", "elekto", "markobutono", "sxaltilo"],
         nesting: 1,
@@ -190,7 +200,52 @@ describe("the Uzo of the dialogo (section ②, G5)", () => {
         entry.of,
         entry.check.kind,
       ]),
-    ).toEqual([["dialog-title-names-the-decision", false, "slot:heading", "not-words"]]);
+    ).toEqual([
+      ["dialog-title-names-the-decision", false, "slot:heading", "not-words"],
+      // Spec 014 ① (reason-help): the help of the reason field is one sentence, as every help
+      // (help-is-one-sentence widened, E5).
+      ["help-is-one-sentence", false, "slot:reason-help", "max-sentences"],
+    ]);
+  });
+
+  it("Spec 014 ①: help-is-one-sentence is widened to the dialogo's reason-help, with four examples that evaluate as they say", () => {
+    const regulo = named("help-is-one-sentence");
+    expect(regulo?.appliesTo?.eroj).toContain("dialogo");
+    expect(regulo?.statement).toMatch(/dialogo/);
+    expect(regulo?.scope).toMatch(/reason-help/);
+    const examples = modelo.jugxoj.filter(
+      (jugxo) =>
+        jugxo.ekzemplo?.regulo === regulo?.id &&
+        "ero" in jugxo.ref &&
+        jugxo.ref.ero === dialogo?.ero.id,
+    );
+    expect(examples.map((jugxo) => [jugxo.decision, jugxo.ekzemplo?.instances[0]?.lingvo])).toEqual(
+      [
+        ["approved", "de"],
+        ["approved", "en"],
+        ["rejected", "de"],
+        ["rejected", "en"],
+      ],
+    );
+    for (const jugxo of examples) {
+      const result = evaluateUsage(modelo, jugxo.ekzemplo?.instances ?? []);
+      const rules = result.violations.map((violation) => violation.issue.rule);
+      expect(rules, jugxo.id).toEqual(
+        jugxo.decision === "rejected" ? ["help-is-one-sentence"] : [],
+      );
+    }
+    const judged = evaluateUsage(modelo, [
+      {
+        ero: "dialogo",
+        props: { reason: "required" },
+        texts: {
+          heading: "Version ablehnen?",
+          reason: "Begründung",
+          "reason-help": "Nennen Sie den Grund. Die Autorin liest ihn.",
+        },
+      },
+    ]);
+    expect(rulesOf(judged)).toEqual([["help-is-one-sentence", "warning"]]);
   });
 
   it("the brief names the purpose, size and reason, title and actions as duties, and stays under 750", () => {

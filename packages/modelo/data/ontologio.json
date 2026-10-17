@@ -911,6 +911,72 @@
       ]
     },
     {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Ikonaro",
+      "term": "Ikonaro",
+      "inScheme": "modelo",
+      "prefLabel": {
+        "eo": "Ikonaro",
+        "en": "icon vocabulary",
+        "de": "Icon-Vokabular"
+      },
+      "altLabel": {
+        "en": [
+          "icon vocabulary",
+          "icon names",
+          "icon set of the core"
+        ],
+        "de": [
+          "Icon-Vokabular",
+          "Icon-Namen",
+          "Iconsatz des Kerns"
+        ]
+      },
+      "definition": {
+        "en": "The list of semantic icon names of the core (data/ikonaro.json): each a name with its meaning and kialo; the picture belongs to the Aspekto, which draws every name as an SVG (Spec 014, G3).",
+        "de": "Die Liste semantischer Icon-Namen des Kerns (data/ikonaro.json): je Name mit Bedeutung und Kialo; das Bild gehört der Aspekto, die jeden Namen als SVG zeichnet (Spec 014, G3)."
+      },
+      "broader": [
+        "#Modelo"
+      ],
+      "relations": [
+        {
+          "predicate": "references",
+          "target": "#Aspekto"
+        }
+      ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Ikono",
+      "term": "Ikono",
+      "inScheme": "modelo",
+      "notation": "ikono",
+      "prefLabel": {
+        "eo": "Ikono",
+        "en": "icon",
+        "de": "Icon"
+      },
+      "altLabel": {
+        "en": [
+          "icon",
+          "icon name",
+          "glyph"
+        ],
+        "de": [
+          "Icon",
+          "Icon-Name",
+          "Glyphe",
+          "Symbol"
+        ]
+      },
+      "definition": {
+        "en": "One name of the Ikonaro: an entity with an iko_ ID, a kebab-case name, its meaning in de and en and a kialo; mirror marks a glyph whose direction carries meaning and is mirrored in right-to-left writing.",
+        "de": "Ein Name des Ikonaro: eine Entität mit iko_-ID, Kebab-Namen, Bedeutung de/en und Kialo; mirror kennzeichnet eine Glyphe, deren Richtung Bedeutung trägt und in Rechts-nach-links-Schrift gespiegelt wird."
+      },
+      "broader": [
+        "#Ikonaro"
+      ]
+    },
+    {
       "uri": "https://fundamento.ciferecigo.com/ontologio#FluidaMarko",
       "term": "FluidaMarko",
       "inScheme": "principoj",

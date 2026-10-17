@@ -102,7 +102,9 @@ describe("runCheck", () => {
     expect(out.code).toBe(EXIT_USAGE);
     expect(out.stdout).toBe("");
     expect(out.stderr).toContain("frobnicate");
-    expect(out.stderr).toContain("vortaro-lint, parity, regularo, mankoj, alirebleco, clean-room");
+    expect(out.stderr).toContain(
+      "vortaro-lint, parity, regularo, mankoj, alirebleco, clean-room, ikonaro",
+    );
   });
 
   it("exits 2 when no check is given", async () => {

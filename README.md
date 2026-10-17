@@ -153,6 +153,7 @@ Each check is its own command and its own named CI step. Exit 0 = pass, 1 = chec
 | `pnpm check:regularo` | Every Regulo has a `kialo`; every Jugxo references something that exists (Art. X gate 3). Automatic Reguloj are enforced by `fm modelo validate`, and every issue they raise cites the Regulo with its ID and kialo. |
 | `pnpm check:alirebleco` | Every KontrastParo meets its thresholds in all 72 combinations: WCAG 2.x binding, APCA advisory (Art. X gate 4). A non-text pair may name an alternative pair `aux` (e.g. a status border); `--json` lists the pair × combination results the alternative carries under `branches`. |
 | `pnpm check:clean-room` | Nothing from a benchmark directory is in or referenced by the repo; every identifier is in the Fundamento namespace (Art. V). |
+| `pnpm check:ikonaro` | Every installed Aspekto draws every name of the Ikonaro (`packages/modelo/data/ikonaro.json`) as `ikonoj/<name>.svg`: a square viewBox, no fixed colour (`currentColor`) and its provenance — source, version, licence — in `<metadata>` (Spec 014 ①, Art. IV, Art. VII). A glyph whose name is not in the Ikonaro is a warning; nothing is deleted. |
 | `pnpm check:alirebleco-eroj` | axe-core and the focus ring on the rendered `fm-butono` in Chromium, Firefox and WebKit, in every colour class of both Aspektoj. |
 | `pnpm check:make-kit` | Each Make Kit installs from its packed tarball into a fresh Vite project and builds and renders there, with React 18.3 and with React 19.3 + Tailwind 4.3, in plain HTML without React, and on a server without a DOM. |
 | `pnpm check:quickstart` | The quickstart of this README, run as a user would and timed: pack `@fundamento/eroj`, install it in a fresh Vite project, render both projections, switch Aspekto and colour scheme without a reload — under five minutes (AK-07). |
@@ -203,7 +204,7 @@ The export's `packages/modelo/dist/vortaro/<aspekto>/` (and `packages/vortaro` w
 
 Fundamento contains no token names, values, code, text, icons, fonts or identifiers from any other design system. Other systems serve only as benchmarks from which abstract requirements are derived (`research/`). `.gitignore` excludes the local benchmark folders (`_benchmark/`, `**/ds-benchmark-*/`), and `pnpm check:clean-room` proves the rule positively: an allowlist of the Fundamento namespace, never a blocklist of foreign names.
 
-No font files and no icons are shipped (Spec 000 FR-18): Aspektoj reference font families, and each package declares their license and scripts. A brand owner's own values live in their private Aspekto package; the core repository keeps none of them (`pnpm check:clean-room` compares fingerprints, Spec 001 AK-08).
+No font files are shipped (Spec 000 FR-18): Aspektoj reference font families, and each package declares their license and scripts. Icons are vocabulary in the core (`data/ikonaro.json`, Spec 014 G3) and pictures in the Aspekto package: `aspekto-komuna/ikonoj/` carries the glyphs of komuna (Phosphor Icons, MIT, with the provenance in every file; `pnpm check:ikonaro`). A brand owner's own values live in their private Aspekto package; the core repository keeps none of them (`pnpm check:clean-room` compares fingerprints, Spec 001 AK-08).
 
 ## License
 

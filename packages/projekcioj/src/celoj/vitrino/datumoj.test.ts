@@ -464,6 +464,15 @@ describe("the Vitrino shows the tekstareo and the dialogo (Spec 011 ②)", () =>
     );
     expect(grid).toContain('<span slot="message">Nachricht</span>');
     expect(grid).toContain('<span slot="reason">Begründung</span>');
+    // Spec 014 ① (plan ① D-02), Abnahme ① F-2: the help of the reason field, one sentence, in every
+    // cell that has a reason field (optional, required) and in none without (the Skemo's constraint).
+    expect(grid).toContain(
+      'reason="required">medium · required<span slot="message">Nachricht</span><span slot="reason">Begründung</span><span slot="reason-help">Nenne den Grund in einem Satz.</span>',
+    );
+    expect(grid).toContain(
+      'reason="none">small · none<span slot="message">Nachricht</span><span slot="reason">Begründung</span><fm-butono',
+    );
+    expect((grid.match(/<span slot="reason-help">/g) ?? []).length).toBe(4);
     expect(grid).toContain(
       '<fm-butono slot="actions" emphasis="low">Abbrechen</fm-butono><fm-butono slot="actions" emphasis="high">Bestätigen</fm-butono>',
     );
@@ -520,9 +529,13 @@ describe("the Vitrino shows the tabelo, the atributlisto and the mezurilo (Spec 
     expect((grid.match(/<th scope="row">/g) ?? []).length).toBe(8);
   });
 
-  it("atributlisto: a row per layout, each a dl with three entries, the last value empty", () => {
+  it("atributlisto: a row per layout (columns, stacked, auto since Spec 014 ①), each a dl with three entries, the last value empty", () => {
     const grid = datumoj.eroj.atributlisto ?? "";
-    expect((grid.match(/<fm-atributlisto /g) ?? []).length).toBe(2);
+    expect((grid.match(/<fm-atributlisto /g) ?? []).length).toBe(3);
+    // Abnahme ① F-1: the prop value is the row's heading, never text of the list itself — a word
+    // in the default slot would stand above the dl as content.
+    expect(grid).toContain('<fm-atributlisto layout="auto"><dl><dt>Version</dt><dd>3</dd>');
+    expect(grid).not.toMatch(/<fm-atributlisto[^>]*>[^<]/);
     expect(grid).toContain('<fm-atributlisto layout="stacked"><dl><dt>Version</dt><dd>3</dd>');
     expect(grid).toContain("<dt>Gültig seit</dt><dd></dd></dl></fm-atributlisto>");
   });

@@ -1,0 +1,7 @@
+{
+  "description": "Spec 014 ① (G3, Art. VII): the glyph check of the Aspekto prova carries no provenance. What is imported travels with where it comes from: source, version and licence stand in the file itself (metadata), not in a footnote; without them the import is incomplete and no ground for a publication.",
+  "check": "ikonaro",
+  "issues": [
+    { "rule": "ikonaro-glyph-provenance-missing", "path": "aspekto-prova/ikonoj/check.svg#" }
+  ]
+}

@@ -148,6 +148,13 @@
         "max": 1,
         "nesting": 0
       },
+      "reason-help": {
+        "accepts": [
+          "text"
+        ],
+        "max": 1,
+        "nesting": 0
+      },
       "content": {
         "accepts": [
           "kampo",
@@ -196,6 +203,16 @@
               "question"
             ]
           }
+        }
+      },
+      {
+        "regulo": "help-is-one-sentence",
+        "fixed": false,
+        "severity": "warning",
+        "of": "slot:reason-help",
+        "check": {
+          "kind": "max-sentences",
+          "count": 1
         }
       }
     ]

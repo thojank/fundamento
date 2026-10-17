@@ -1,7 +1,7 @@
 {
   "name": "@fundamento/aspekto-komuna",
   "version": "0.1.0",
-  "description": "Fundamento reference Aspekto komuna in the Aspekto package format (calm, neutral, no signature colour; Geist). Its values live in the core; this package holds its metadata, empty set and conjunction sets. Contains no code.",
+  "description": "Fundamento reference Aspekto komuna in the Aspekto package format (calm, neutral, no signature colour; Geist). Its values live in the core; this package holds its metadata, empty set and conjunction sets. Draws the Ikonaro from Phosphor Icons (regular, MIT) in ikonoj/. Contains no code.",
   "license": "MIT",
   "type": "module",
   "fundamento": {
@@ -11,13 +11,15 @@
     "aspekto.json",
     "ids.lock.json",
     "$themes.json",
-    "sets"
+    "sets",
+    "ikonoj"
   ],
   "exports": {
     "./package.json": "./package.json",
     "./aspekto.json": "./aspekto.json",
     "./ids.lock.json": "./ids.lock.json",
-    "./sets/*": "./sets/*"
+    "./sets/*": "./sets/*",
+    "./ikonoj/*": "./ikonoj/*"
   },
   "scripts": {
     "lint": "biome check ."

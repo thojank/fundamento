@@ -1428,12 +1428,48 @@ function namedBy(nodes, name) {
   return Object.keys(nodes).filter((candidate) => pattern.test(candidate));
 }
 
+/** The prefixes a weight variable and its STRING twin of cuts are named with (F30). */
+const WEIGHT_PREFIX = "font/weight/";
+const STYLE_PREFIX = "font/style/";
+
+/** The part a binding key names: \`items\` of \`items.weight\`. */
+const partOfKey = (key) => key.slice(0, key.indexOf("."));
+
+/**
+ * Where a part property binds. A weight of a text (Spec 014 ①, plan ① D-01) has no place of its
+ * own: it binds the cut of the nodes the part's role binds — the fontStyle targets of its
+ * typography —, and there the role's own cut gives way to it (see bind).
+ */
+function targetsOf(part, moved) {
+  if (part.endsWith(".weight")) {
+    const role = partOfKey(part) + ".typography";
+    return (moved[role] || BINDINGS[role] || []).filter((target) => target.fields.indexOf("fontStyle") !== -1);
+  }
+  return moved[part] || BINDINGS[part] || [];
+}
+
+/**
+ * The variable a binding takes: the token's, with the field of a composite. A weight binds the
+ * cut, so it takes the STRING twin of its weight variable — font/weight/semibold binds
+ * font/style/semibold, whose cut follows the mode as the weight does (Spec 014 ①, F30).
+ */
+function variableOfBinding(variables, part, name, target) {
+  if (!part.endsWith(".weight")) return variables.get(name + (target.suffix || ""));
+  if (name.indexOf(WEIGHT_PREFIX) !== 0) return undefined;
+  return variables.get(STYLE_PREFIX + name.slice(WEIGHT_PREFIX.length));
+}
+
 function bind(nodes, variant, variables, structure) {
   const deferred = [];
   const moved = STRUCTURE_BINDINGS[structure] || {};
   for (const [part, name] of Object.entries(variant.bindings)) {
-    for (const target of moved[part] || BINDINGS[part] || []) {
-      const variable = variables.get(name + (target.suffix || ""));
+    // A part whose weight is bound takes its cut from the weight, not from its role (Spec 014 ①):
+    // the current item of a navigation in the semibold cut, in the family of its role.
+    const weighted =
+      !part.endsWith(".weight") && variant.bindings[partOfKey(part) + ".weight"] !== undefined;
+    for (const target of targetsOf(part, moved)) {
+      if (weighted && target.fields.indexOf("fontStyle") !== -1) continue;
+      const variable = variableOfBinding(variables, part, name, target);
       if (variable === undefined) continue;
       for (const key of namedBy(nodes, target.node)) {
         const node = nodes[key];
@@ -2726,10 +2762,15 @@ async function applyComponents(variables, warnings) {
       if (control.children.indexOf(row.entry) !== index) control.insertChild(index, row.entry);
     });
     for (const row of rows) await loadCurrentFont(row.text);
+    // An entry whose weight departs from the role carries its own font (Spec 014 ①, plan ①
+    // D-01): the current item, the active tab in the cut of the weight; the others the variant's.
+    const chosen = component.entry !== undefined ? component.entry.selected : 0;
     for (const row of rows) {
       writeCase(component, variant, row.text);
-      if (variant.font !== undefined) {
-        write(row.text, "fontName", fonts.get(variant.font.family + " " + variant.font.style));
+      const values = (variant.entries || {})[row.n - 1 === chosen ? "true" : "false"] || {};
+      const font = values.font !== undefined ? values.font : variant.font;
+      if (font !== undefined) {
+        write(row.text, "fontName", fonts.get(font.family + " " + font.style));
       }
       write(row.text, "characters", row.word);
     }
@@ -2944,9 +2985,12 @@ async function applyComponents(variables, warnings) {
     // A plan from before F30 names no fonts; then the base font of every variant is loaded, as
     // it always was, and nothing is bound.
     for (const variant of component.variants) {
-      if (variant.font === undefined) continue;
-      const key = variant.font.family + " " + variant.font.style;
-      if (!fonts.has(key)) fonts.set(key, await loadFont(variant.font, warnings));
+      const own = Object.values(variant.entries || {}).map((entry) => entry.font);
+      for (const font of [variant.font].concat(own)) {
+        if (font === undefined) continue;
+        const key = font.family + " " + font.style;
+        if (!fonts.has(key)) fonts.set(key, await loadFont(font, warnings));
+      }
     }
     fontReports.set(component.set, {
       bound: {},

@@ -218,6 +218,11 @@ export type KontrastParoId = string;
  */
 export type KontrastKategorio = "text-normal" | "text-large" | "ui";
 /**
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "IkonoId".
+ */
+export type IkonoId = string;
+/**
  * Where a part property gets its token: bindings keyed by props and state (by), one token (fixed), or the token of another part property (sameAs, 'part.property').
  *
  * This interface was referenced by `ModeloJson`'s JSON-Schema
@@ -240,7 +245,7 @@ export type SkemoPartSource =
       sameAs: string;
     };
 /**
- * Platform-neutral part properties (Art. VIII); the mapping to CSS or another platform is Celo knowledge in the projections. position takes a term, not a token: start or end along the control (Spec 010 ①, plan D-04, the knob of a switch). shadow binds an elevation.shadow.* token: the lift of a surface (Spec 011 ②, plan ② D-07, the dialog). stroke binds a stroke.* token or none: the line style of a border (Spec 011 ③, plan ③ D-04, the dashed surface of an empty state).
+ * Platform-neutral part properties (Art. VIII); the mapping to CSS or another platform is Celo knowledge in the projections. position takes a term, not a token: start or end along the control (Spec 010 ①, plan D-04, the knob of a switch). shadow binds an elevation.shadow.* token: the lift of a surface (Spec 011 ②, plan ② D-07, the dialog). stroke binds a stroke.* token or none: the line style of a border (Spec 011 ③, plan ③ D-04, the dashed surface of an empty state). weight binds a font.weight.* token or none: the weight of a text where it departs from its role (Spec 014 ①, plan ① D-01, the current item of a navigation, the active tab); none keeps the weight of the typography role.
  *
  * This interface was referenced by `ModeloJson`'s JSON-Schema
  * via the `definition` "SkemoPartProperty".
@@ -261,7 +266,8 @@ export type SkemoPartProperty =
   | "easing"
   | "position"
   | "shadow"
-  | "stroke";
+  | "stroke"
+  | "weight";
 /**
  * Text transformation of a typography role (Spec 001, D-11). DTCG has no field for it; the values are platform-neutral.
  *
@@ -292,7 +298,8 @@ export type EntityType =
   | "uzo"
   | "sxablono"
   | "projekcio"
-  | "celo";
+  | "celo"
+  | "ikono";
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema
  * via the `definition` "AnyId".
@@ -478,6 +485,10 @@ export interface ModeloJson {
    */
   uzoj?: Uzo[];
   kontrastParoj: KontrastParo[];
+  /**
+   * The Ikonaro (Spec 014 ①): the icon names of the core with meaning and kialo; absent while the Modelo has none.
+   */
+  ikonaro?: Ikono[];
   eroj: Ero[];
   skemoj: Skemo[];
   rezolvo: Rezolvo;
@@ -1029,7 +1040,19 @@ export interface UzoLayout {
    * never: the label stays on one line; allowed: it may break; with-text: it breaks only with the running text it stands in (a container of kind text), standing alone it never breaks (Spec 008, plan D-04).
    */
   wrap: "never" | "allowed" | "with-text";
-  [k: string]: UzoLayoutAllowance | "content" | "container" | "never" | "allowed" | "with-text";
+  /**
+   * The container width from which the Ero lays itself out side by side (its layout auto: name beside value), a size.container.* token of core; below it the Ero stacks (Spec 014 ①, plan ① D-03). Layout behaviour, so it stands in the Uzo (Constitution: Uzo); the Skemo binds the two looks, the projection measures the container.
+   */
+  "columns-from"?: string;
+  [k: string]:
+    | UzoLayoutAllowance
+    | "content"
+    | "container"
+    | "never"
+    | "allowed"
+    | "with-text"
+    | string
+    | undefined;
 }
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema
@@ -1113,6 +1136,23 @@ export interface UzoContent {
         kind: "not-words";
         words: Keywords;
       };
+}
+/**
+ * One name of the Ikonaro (Spec 014 ①, G3, E9): an icon is vocabulary in the core — a name, its meaning in de and en and a kialo — and a picture in every Aspekto package (ikonoj/<name>.svg, checked by check:ikonaro). mirror says that the direction carries meaning and the glyph is mirrored in right-to-left writing (chevron-right; a check is not).
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "Ikono".
+ */
+export interface Ikono {
+  id: IkonoId;
+  name: Name;
+  meaning: {
+    de: NonEmptyText;
+    en: NonEmptyText;
+    [k: string]: NonEmptyText;
+  };
+  kialo: NonEmptyText;
+  mirror?: boolean;
 }
 /**
  * A component (Spec 003). Lives with its Skemo in data/eroj/<name>/skemo.json.
@@ -1511,6 +1551,23 @@ export interface AspektoFile {
   fonts: Fonto[];
   tavoloj?: Tavoloj;
   aspiroj?: AspektoAspiro[];
+  /**
+   * The icon set the package draws the Ikonaro from (Spec 014 ①, G3, E10; Art. V: open source with a permissive licence in the core repository, Art. VII: the import carries its provenance): the set's name, the style drawn (a set with several styles: komuna Phosphor regular, ekzemplo Phosphor fill), the version read, its licence, the source and the day it was read, and the map from each Ikonaro name to the name of the set it is drawn from (plan ① D-04). Every glyph repeats source, version and licence in its own metadata. A package that draws its own glyphs names neither style nor map.
+   */
+  ikonoj?: {
+    set: NonEmptyText;
+    style?: NonEmptyText;
+    version: NonEmptyText;
+    license: License;
+    source: NonEmptyText;
+    read: string;
+    /**
+     * Ikonaro name → name of the icon in the set (both kebab-case).
+     */
+    names?: {
+      [k: string]: Name;
+    };
+  };
 }
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema
@@ -1622,4 +1679,14 @@ export interface Celo {
   id: CeloId;
   name: Name;
   description?: string;
+}
+/**
+ * data/ikonaro.json: the Ikonaro of the core (Spec 014 ① aims at 25 names at most); absent while no Ero draws an icon.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "IkonaroFile".
+ */
+export interface IkonaroFile {
+  $schema?: string;
+  ikonaro: Ikono[];
 }

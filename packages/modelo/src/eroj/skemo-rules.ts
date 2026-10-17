@@ -82,6 +82,8 @@ export const PART_PROPERTY_TYPES: Readonly<Partial<Record<SkemoPartProperty, Dtc
   size: "dimension",
   duration: "duration",
   easing: "cubicBezier",
+  // Spec 014 ① (plan ① D-01): the weight of a text where it departs from its role, or none.
+  weight: "fontWeight",
 };
 
 /** A combination of key values, e.g. `{ variant: "primary", state: "rest" }`. */

@@ -5,7 +5,12 @@ import { type Dirent, existsSync, readdirSync, readFileSync } from "node:fs";
 import { basename, join } from "node:path";
 import { formatIssuePath, type ValidationIssue } from "../contracts/issues.js";
 import type { ModeloSource } from "../contracts/modelo.js";
-import { DATA_FILE_SCHEMA_DEFS, type DataFileName } from "../contracts/schema.js";
+import {
+  DATA_FILE_SCHEMA_DEFS,
+  type DataFileName,
+  OPTIONAL_DATA_FILE_SCHEMA_DEFS,
+  type OptionalDataFileName,
+} from "../contracts/schema.js";
 import { parseStrictJson } from "../json/strict-json.js";
 import { modeloRootOf, relativeModeloPath } from "./source.js";
 
@@ -45,7 +50,8 @@ export interface ModeloFiles {
   sets: ModeloSetDocument[];
   /** Composed Aspekto packages in source order (D-08). */
   packages: AspektoPackageFiles[];
-  data: Record<DataFileName, ModeloDocument>;
+  data: Record<DataFileName, ModeloDocument> &
+    Partial<Record<OptionalDataFileName, ModeloDocument>>;
   /** `data/eroj/<name>/skemo.json`, sorted by path; empty when the directory does not exist. */
   eroj: ModeloDocument[];
   /**
@@ -64,6 +70,10 @@ export interface ReadModeloFilesResult {
 }
 
 export const DATA_FILE_NAMES = Object.keys(DATA_FILE_SCHEMA_DEFS) as DataFileName[];
+/** Data files that may be absent (Spec 014 ①: `ikonaro.json`). */
+export const OPTIONAL_DATA_FILE_NAMES = Object.keys(
+  OPTIONAL_DATA_FILE_SCHEMA_DEFS,
+) as OptionalDataFileName[];
 export const THEMES_FILE_NAME = "$themes.json";
 export const METADATA_FILE_NAME = "$metadata.json";
 export const SETS_DIR_NAME = "sets";
@@ -148,9 +158,18 @@ export function readModeloFiles(source: ModeloSource): ReadModeloFilesResult {
 
   const themes = read(join(source.vortaroDir, THEMES_FILE_NAME));
   const metadata = read(join(source.vortaroDir, METADATA_FILE_NAME));
-  const data: Partial<Record<DataFileName, ModeloDocument>> = {};
+  const data: Partial<Record<DataFileName | OptionalDataFileName, ModeloDocument>> = {};
   for (const name of DATA_FILE_NAMES) {
     const document = read(join(source.dataDir, name));
+    if (document !== undefined) {
+      data[name] = document;
+    }
+  }
+  // An optional data file is read only when it exists; its absence is no issue.
+  for (const name of OPTIONAL_DATA_FILE_NAMES) {
+    const path = join(source.dataDir, name);
+    if (!existsSync(path)) continue;
+    const document = read(path);
     if (document !== undefined) {
       data[name] = document;
     }
@@ -222,8 +241,9 @@ function packageLabel(dir: string): string {
 }
 
 function isComplete(
-  data: Partial<Record<DataFileName, ModeloDocument>>,
-): data is Record<DataFileName, ModeloDocument> {
+  data: Partial<Record<DataFileName | OptionalDataFileName, ModeloDocument>>,
+): data is Record<DataFileName, ModeloDocument> &
+  Partial<Record<OptionalDataFileName, ModeloDocument>> {
   return DATA_FILE_NAMES.every((name) => data[name] !== undefined);
 }
 

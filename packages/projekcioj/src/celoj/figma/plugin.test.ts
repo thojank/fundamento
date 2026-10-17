@@ -2261,9 +2261,9 @@ describe("a failed run leaves everything readable in the console (F21)", () => {
         ...double.figma,
         command: "run",
         createComponent: () => {
-          // Spec 011 ④: the atributlisto's two and the avizo's four variants are made first; the
-          // run fails in the butono.
-          if (++made === 2 + 4 + 40)
+          // Spec 011 ④: the atributlisto's three (layout auto since Spec 014 ①) and the avizo's
+          // four variants are made first; the run fails in the butono.
+          if (++made === 3 + 4 + 40)
             throw new Error("in set_layoutMode: Cannot delete occupied row/column.");
           return create();
         },
@@ -2507,8 +2507,8 @@ describe("every bound paint shows the plan's colour after the first and the seco
       warnings: [],
       // Spec 008: two sets; the ligilo has placement × size × state = 30 variants.
       components: [
-        // Spec 011 ④: the atributlisto has layout = 2 variants in one state.
-        { set: "atributlisto", created: 2, updated: 0 },
+        // Spec 011 ④: the atributlisto has layout = 3 variants in one state (auto since Spec 014 ①).
+        { set: "atributlisto", created: 3, updated: 0 },
         // Spec 011 ③: the avizo has intent = 4 variants in one state (dismissible is no axis).
         { set: "avizo", created: 4, updated: 0 },
         { set: "butono", created: 72, updated: 0 },
@@ -5570,17 +5570,20 @@ describe("the atributlisto is drawn as a list: three entries, rows in columns an
     return { double, set, variant, report, atributlisto };
   };
 
-  it("draws two variants by layout: the list column with three entries, each term and value in their roles", async () => {
+  it("draws three variants by layout: the list column with three entries, each term and value in their roles", async () => {
     const { set, variant, atributlisto } = await drawn();
     expect(set?.children.map((child) => child.name)).toEqual([
       "layout=columns, state=rest",
       "layout=stacked, state=rest",
+      "layout=auto, state=rest",
     ]);
     expect(atributlisto?.layout.columns).toBe(1);
-    expect(atributlisto?.layout.rows).toBe(2);
+    expect(atributlisto?.layout.rows).toBe(3);
+    // Spec 014 ① (layout auto, plan ① D-03): the set draws auto as the wide case, the columns.
     for (const [name, mode, gap] of [
       ["layout=columns, state=rest", "HORIZONTAL", "spacing/large"],
       ["layout=stacked, state=rest", "VERTICAL", "spacing/small"],
+      ["layout=auto, state=rest", "HORIZONTAL", "spacing/large"],
     ] as const) {
       const node = variant(name);
       const list = descendant(node, "list");
@@ -5761,6 +5764,20 @@ describe("the navigado is drawn as a nav: three items in a row, the first curren
         paints(descendant(node, "items-1"), "fills")[0]?.boundVariables?.color?.name,
         name,
       ).toBe("color/navigation/text/selected");
+      // Spec 014 ① (Gewicht, plan ① D-01): the current item's text in the semibold cut, its style
+      // bound to the STRING twin of the weight (F30), the others in the cut of their role.
+      expect(descendant(node, "items-1")?.properties.fontName, name).toEqual({
+        family: "Geist",
+        style: "SemiBold",
+      });
+      expect(bound(descendant(node, "items-1"), "fontStyle"), name).toBe("font/style/semibold");
+      expect(descendant(node, "items-2")?.properties.fontName, name).toEqual({
+        family: "Geist",
+        style: "Medium",
+      });
+      expect(bound(descendant(node, "items-2"), "fontStyle"), name).toBe(
+        "typography/label/1/font-style",
+      );
       for (const index of [2, 3]) {
         const other = descendant(node, `item-${index}`);
         expect(paints(other, "fills")[0]?.boundVariables?.color?.name, `${name} ${index}`).toBe(

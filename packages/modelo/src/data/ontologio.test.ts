@@ -42,7 +42,33 @@ describe("ontologio.json (FR-15, FR-16, AK-07)", () => {
         .filter((concept) => concept.inScheme === "modelo")
         .map((concept) => concept.term)
         .sort(),
-    ).toEqual(["DimensioValoro", "KontrastParo", "Regulo", "Token", "TokenSet"]);
+    ).toEqual([
+      "DimensioValoro",
+      "Ikonaro",
+      "Ikono",
+      "KontrastParo",
+      "Regulo",
+      "Token",
+      "TokenSet",
+    ]);
+  });
+
+  // Spec 014 ① (G3, plan ① D-04): the Ikonaro — icons as vocabulary of the core — and its entries.
+  it("knows the Ikonaro (de: Icon-Vokabular) and the Ikono as the entity type ikono", () => {
+    const concepts = (ontologio as unknown as { concepts: Concept[] }).concepts;
+    const ikonaro = concepts.find((concept) => concept.term === "Ikonaro");
+    expect(ikonaro).toMatchObject({
+      inScheme: "modelo",
+      prefLabel: { eo: "Ikonaro", de: "Icon-Vokabular" },
+      broader: ["#Modelo"],
+    });
+    expect((ikonaro?.altLabel as { de?: string[] })?.de).toContain("Icon-Vokabular");
+    expect((ikonaro?.altLabel as { en?: string[] })?.en).toContain("icon vocabulary");
+    expect((ikonaro?.definition as { de?: string })?.de).toMatch(/Aspekto/);
+    const ikono = concepts.find((concept) => concept.term === "Ikono");
+    expect(ikono).toMatchObject({ inScheme: "modelo", notation: "ikono", broader: ["#Ikonaro"] });
+    expect((ikono?.altLabel as { de?: string[] })?.de).toContain("Icon");
+    expect((ikono?.altLabel as { en?: string[] })?.en).toContain("icon");
   });
 
   it.each([

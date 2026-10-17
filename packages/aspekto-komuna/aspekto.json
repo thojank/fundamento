@@ -19,6 +19,31 @@
       "scripts": ["Latn"]
     }
   ],
+  "ikonoj": {
+    "set": "Phosphor Icons",
+    "style": "regular",
+    "version": "2.1.1",
+    "license": "MIT",
+    "source": "https://github.com/phosphor-icons/core (npm @phosphor-icons/core 2.1.1, assets/regular)",
+    "read": "2026-10-17",
+    "names": {
+      "check": "check",
+      "chevron-down": "caret-down",
+      "chevron-right": "caret-right",
+      "close": "x",
+      "collapse": "arrows-in-simple",
+      "danger": "warning-octagon",
+      "expand": "arrows-out-simple",
+      "external": "arrow-square-out",
+      "info": "info",
+      "more": "dots-three",
+      "search": "magnifying-glass",
+      "sort-ascending": "sort-ascending",
+      "sort-descending": "sort-descending",
+      "success": "check-circle",
+      "warning": "warning"
+    }
+  },
   "aspiroj": [
     {
       "metriko": "wcag2-reserve",

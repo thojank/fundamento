@@ -1,0 +1,96 @@
+{
+  "$schema": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/IkonaroFile",
+  "ikonaro": [
+    {
+      "id": "iko_01M55EFZMTVJR4FGV32KYEG54W",
+      "name": "check",
+      "meaning": { "de": "Haken: gewählt, erledigt", "en": "Check: selected, done" },
+      "kialo": "The one sign every culture of the system reads as done or chosen: the selected entry of an elekto, the checked markobutono, the chosen item of a menuo."
+    },
+    {
+      "id": "iko_01M55EFZMVS7WDTJ3D55SPVHQK",
+      "name": "chevron-down",
+      "meaning": { "de": "Winkel nach unten: öffnet nach unten, aufklappbar", "en": "Chevron down: opens downwards, expandable" },
+      "kialo": "A list that opens below its control (elektilo, kompletigilo, the trigger of a menuo) and a faldilo that is closed announce it with the same sign; its direction is down in every writing direction, so it never mirrors."
+    },
+    {
+      "id": "iko_01M55EFZMVS7WDTJ3D55SPVHQM",
+      "name": "chevron-right",
+      "meaning": { "de": "Winkel in Leserichtung: führt weiter", "en": "Chevron forwards: leads on" },
+      "kialo": "Leads on in the direction of reading — a closed faldilo, a group of the navigado. The direction carries the meaning, so the glyph mirrors in right-to-left writing (Internacia).",
+      "mirror": true
+    },
+    {
+      "id": "iko_01M55EFZMVS7WDTJ3D55SPVHQN",
+      "name": "close",
+      "meaning": { "de": "Schließen, Verwerfen, Leeren", "en": "Close, dismiss, clear" },
+      "kialo": "Every layer that opens needs a sign that closes it (dialogo, sxvebilo), every avizo that can be dismissed and every kampo or kompletigilo that can be cleared uses the same one."
+    },
+    {
+      "id": "iko_01M55EFZMVS7WDTJ3D55SPVHQP",
+      "name": "collapse",
+      "meaning": { "de": "Zusammenklappen, verkleinern", "en": "Collapse, shrink" },
+      "kialo": "The counterpart of expand: a faldilo or a surface that takes its room back. The spec names the pair (G3); one sign for both directions would need a label to tell them apart."
+    },
+    {
+      "id": "iko_01M55EFZMVS7WDTJ3D55SPVHQQ",
+      "name": "danger",
+      "meaning": { "de": "Gefahr, Fehler", "en": "Danger, error" },
+      "kialo": "The status danger of an avizo and the invalid kampo need a sign beside the colour: colour alone is no information (WCAG 1.4.1). An octagon reads as stop and is told apart from warning (triangle) and close (cross) at small sizes."
+    },
+    {
+      "id": "iko_01M55EFZMVS7WDTJ3D55SPVHQR",
+      "name": "expand",
+      "meaning": { "de": "Aufklappen, vergrößern", "en": "Expand, enlarge" },
+      "kialo": "A faldilo or a surface that takes more room; the counterpart of collapse (G3)."
+    },
+    {
+      "id": "iko_01M55EFZMVS7WDTJ3D55SPVHQS",
+      "name": "external",
+      "meaning": { "de": "Führt aus der Anwendung heraus", "en": "Leads out of the application" },
+      "kialo": "The ligilo marks an external destination visibly and audibly (Regulo external-link-marked); the sign is the visible half. It does not mirror: the box with the arrow is read as a symbol, not as a direction."
+    },
+    {
+      "id": "iko_01M55EFZMVS7WDTJ3D55SPVHQT",
+      "name": "info",
+      "meaning": { "de": "Hinweis", "en": "Information" },
+      "kialo": "The status info of an avizo needs a sign beside the colour (WCAG 1.4.1); the i in a circle is read across cultures."
+    },
+    {
+      "id": "iko_01M55EFZMVS7WDTJ3D55SPVHQW",
+      "name": "more",
+      "meaning": { "de": "Weitere Aktionen", "en": "More actions" },
+      "kialo": "The row actions of a tabelo and every place that hides further actions behind a menuo use the same three dots (G3 names it)."
+    },
+    {
+      "id": "iko_01M55EFZMVS7WDTJ3D55SPVHQX",
+      "name": "search",
+      "meaning": { "de": "Suchen", "en": "Search" },
+      "kialo": "A kampo for searching and the kompletigilo announce what they do with the magnifier (G3 names it); the sign stands beside the field until a prefix inside the field exists (kampo icon-in-field, not supported)."
+    },
+    {
+      "id": "iko_01M55EFZMVS7WDTJ3D55SPVHQY",
+      "name": "sort-ascending",
+      "meaning": { "de": "Aufsteigend sortiert", "en": "Sorted ascending" },
+      "kialo": "The sort part of a tabelo column shows its direction; an arrow alone would not say which way the data runs. Does not mirror: the order is read top-down in every writing direction."
+    },
+    {
+      "id": "iko_01M55EFZMVS7WDTJ3D55SPVHQZ",
+      "name": "sort-descending",
+      "meaning": { "de": "Absteigend sortiert", "en": "Sorted descending" },
+      "kialo": "The counterpart of sort-ascending on the sort part of a tabelo column."
+    },
+    {
+      "id": "iko_01M55EFZMVS7WDTJ3D55SPVHR0",
+      "name": "success",
+      "meaning": { "de": "Erfolg, gültig", "en": "Success, valid" },
+      "kialo": "The status success of an avizo and the valid kampo need a sign beside the colour (WCAG 1.4.1); the check in a circle is told apart from the bare check that means chosen."
+    },
+    {
+      "id": "iko_01M55EFZMVS7WDTJ3D55SPVHR1",
+      "name": "warning",
+      "meaning": { "de": "Warnung", "en": "Warning" },
+      "kialo": "The status warning of an avizo needs a sign beside the colour (WCAG 1.4.1); the triangle is told apart from danger (octagon) and info (circle)."
+    }
+  ]
+}

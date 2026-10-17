@@ -14,8 +14,19 @@ export const valid = (
   </Atributlisto>
 );
 
+// Spec 014 ① (plan ① D-03): auto lays name and value side by side while the container is wide
+// enough, else stacks them.
+export const auto = (
+  <Atributlisto layout="auto">
+    <dl>
+      <dt>Version</dt>
+      <dd>3</dd>
+    </dl>
+  </Atributlisto>
+);
+
 export const wrongLayout = (
-  // @ts-expect-error layout allows columns and stacked only
+  // @ts-expect-error layout allows columns, stacked and auto only
   <Atributlisto layout="grid">
     <dl />
   </Atributlisto>

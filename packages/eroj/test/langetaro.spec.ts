@@ -180,4 +180,28 @@ test.describe("fm-langetaro behaviour", () => {
     const body = await page.evaluate(() => document.body.clientWidth);
     expect(Math.round(host?.width ?? 0)).toBeGreaterThan(body / 2);
   });
+
+  // Spec 014 ① (Gewicht, plan ① D-01): the active tab is heavier than the others — the role's
+  // weight (label.1, medium) for every tab, semibold where active; the indicator stays (G4).
+  test("the active tab is set in the semibold weight, the others in the weight of their role", async ({
+    page,
+  }) => {
+    await serve(page, out, tabs('label="Standard" selected="versionen"'));
+    const weight = (name: string) =>
+      page.getByRole("tab", { name }).evaluate((element) => getComputedStyle(element).fontWeight);
+    const tokens = await page.evaluate(() => {
+      const root = getComputedStyle(document.documentElement);
+      return {
+        semibold: root.getPropertyValue("--fm-font-weight-semibold").trim(),
+        role: root.getPropertyValue("--fm-typography-label-1-font-weight").trim(),
+      };
+    });
+    expect(tokens.semibold).toBe("600");
+    expect(await weight("Versionen")).toBe(tokens.semibold);
+    expect(await weight("Inhalt")).toBe(tokens.role);
+    expect(await weight("Inhalt")).not.toBe(tokens.semibold);
+    await page.locator("#t").evaluate((element) => element.setAttribute("selected", "inhalt"));
+    expect(await weight("Inhalt")).toBe(tokens.semibold);
+    expect(await weight("Versionen")).toBe(tokens.role);
+  });
 });

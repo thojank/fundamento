@@ -95,7 +95,8 @@
     },
     "layout": {
       "size": "container",
-      "wrap": "allowed"
+      "wrap": "allowed",
+      "columns-from": "size.container.small"
     },
     "content": []
   }
