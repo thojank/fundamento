@@ -1573,4 +1573,28 @@ describe("Nachlese 3 documentation (specs/012-nachlese-3)", () => {
     for (const hash of ["e3aeda4"]) expect(section(tasks)).toContain(hash);
     expect(read("docs/vojmapo.md")).toContain("Nachlese 3");
   });
+
+  it("plan and tasks carry section ② with the six tools, the CI measurement and red hashes", () => {
+    const plan = read("specs/012-nachlese-3/plan.md");
+    const tasks = read("specs/012-nachlese-3/tasks.md");
+    const section = (text: string) => text.slice(text.indexOf("## ② Werkzeuge"));
+    for (const heading of [
+      "### Zusammenfassung",
+      "#### D-01 W1",
+      "#### D-02 W2",
+      "#### D-03 W3",
+      "#### D-04 W4",
+      "#### D-05 W5",
+      "#### D-06 W6",
+      "### Abweichungen vom Briefing",
+      "### Befunde / Mankoj",
+      "### Offen (für den Maintainer)",
+    ]) {
+      expect(section(plan)).toContain(heading);
+    }
+    expect(section(plan)).not.toContain("Folgt in PR ②.");
+    expect(section(plan)).toMatch(/Run-Nummern|Run \d{11}/);
+    expect(section(tasks)).toContain("### Messungen");
+    for (const hash of ["ba6a705"]) expect(section(tasks)).toContain(hash);
+  });
 });
