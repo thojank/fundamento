@@ -38,7 +38,10 @@ describe("componentCssIssues (F2)", () => {
     // Spec 011 ② (plan ② D-11): resize (whether a person may drag an area taller: vertical, none).
     // Spec 011 ③ (plan ③ D-05, D-09, D-10): clip-path (a text for assistive technology alone),
     // text-align (a state centres itself), border-inline-start-style (the accent of a notice).
-    expect(STRUCTURAL_PROPERTIES.length).toBeLessThanOrEqual(34);
+    // Spec 014 ② (plan ② D-05, D-07): the mask of a glyph (image, size, repeat, position) and the
+    // place of a part above the page (inset-block-start, inset-inline-start); D-06: the edge of a
+    // separator's line (border-block-start-style).
+    expect(STRUCTURAL_PROPERTIES.length).toBeLessThanOrEqual(42);
     expect(STRUCTURAL_PROPERTIES).toContain("overflow-wrap");
     expect(STRUCTURAL_PROPERTIES).toContain("resize");
     expect(STRUCTURAL_PROPERTIES).toContain("clip-path");

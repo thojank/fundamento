@@ -131,7 +131,12 @@
           "kialo": "A count next to a navigation entry says how much waits there, because the entry is what it counts (navigado, ⑤)."
         }
       ],
-      "with": [],
+      "with": [
+        {
+          "ero": "ikono",
+          "kialo": "An icon per intent may stand beside the word as an ikono, never alone, because the word is the status and the sign only strengthens it (G6)."
+        }
+      ],
       "never": [],
       "spacing": {
         "owner": "container",

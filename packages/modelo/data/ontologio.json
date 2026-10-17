@@ -914,6 +914,7 @@
       "uri": "https://fundamento.ciferecigo.com/ontologio#Ikonaro",
       "term": "Ikonaro",
       "inScheme": "modelo",
+      "notation": "ikono",
       "prefLabel": {
         "eo": "Ikonaro",
         "en": "icon vocabulary",
@@ -923,17 +924,19 @@
         "en": [
           "icon vocabulary",
           "icon names",
-          "icon set of the core"
+          "icon set of the core",
+          "icon names of the core"
         ],
         "de": [
           "Icon-Vokabular",
           "Icon-Namen",
-          "Iconsatz des Kerns"
+          "Iconsatz des Kerns",
+          "Icon-Einträge"
         ]
       },
       "definition": {
-        "en": "The list of semantic icon names of the core (data/ikonaro.json): each a name with its meaning and kialo; the picture belongs to the Aspekto, which draws every name as an SVG (Spec 014, G3).",
-        "de": "Die Liste semantischer Icon-Namen des Kerns (data/ikonaro.json): je Name mit Bedeutung und Kialo; das Bild gehört der Aspekto, die jeden Namen als SVG zeichnet (Spec 014, G3)."
+        "en": "The list of semantic icon names of the core (data/ikonaro.json): each a name with its meaning and kialo; the picture belongs to the Aspekto, which draws every name as an SVG (Spec 014, G3). Each entry is an Ikono with an iko_ ID; the Ero ikono shows it.",
+        "de": "Die Liste semantischer Icon-Namen des Kerns (data/ikonaro.json): je Name mit Bedeutung und Kialo; das Bild gehört der Aspekto, die jeden Namen als SVG zeichnet (Spec 014, G3). Jeder Eintrag ist ein Ikono mit iko_-ID; das Ero ikono zeigt ihn."
       },
       "broader": [
         "#Modelo"
@@ -948,8 +951,7 @@
     {
       "uri": "https://fundamento.ciferecigo.com/ontologio#Ikono",
       "term": "Ikono",
-      "inScheme": "modelo",
-      "notation": "ikono",
+      "inScheme": "eroj",
       "prefLabel": {
         "eo": "Ikono",
         "en": "icon",
@@ -957,23 +959,46 @@
       },
       "altLabel": {
         "en": [
+          "ikono",
           "icon",
-          "icon name",
-          "glyph"
+          "symbol",
+          "pictogram",
+          "glyph",
+          "icon name"
         ],
         "de": [
           "Icon",
-          "Icon-Name",
+          "Symbol",
+          "Piktogramm",
           "Glyphe",
-          "Symbol"
+          "Icon-Name",
+          "ikono"
         ]
       },
       "definition": {
-        "en": "One name of the Ikonaro: an entity with an iko_ ID, a kebab-case name, its meaning in de and en and a kialo; mirror marks a glyph whose direction carries meaning and is mirrored in right-to-left writing.",
-        "de": "Ein Name des Ikonaro: eine Entität mit iko_-ID, Kebab-Namen, Bedeutung de/en und Kialo; mirror kennzeichnet eine Glyphe, deren Richtung Bedeutung trägt und in Rechts-nach-links-Schrift gespiegelt wird."
+        "en": "An icon: shows one name of the Ikonaro as the picture of the Aspekto on screen — decorative by default, an image with its label where it carries meaning; its size is a token, its colour the text's, a status icon takes the status text colour and is named (icon-meaning-named). The name itself is an entity of the Ikonaro (iko_ ID, meaning de/en, kialo, mirror).",
+        "de": "Ein Icon: zeigt einen Namen des Ikonaro als Bild der Aspekto – dekorativ, solange es nur ziert, ein Bild mit seinem label, wo es etwas bedeutet; seine Größe ist ein Token, seine Farbe die des Textes, ein Status-Icon nimmt die Status-Textfarbe und trägt einen Namen (icon-meaning-named). Der Name selbst ist ein Eintrag des Ikonaro (iko_-ID, Bedeutung de/en, Kialo, mirror)."
       },
       "broader": [
-        "#Ikonaro"
+        "#Ero"
+      ],
+      "relations": [
+        {
+          "predicate": "references",
+          "target": "#Ikonaro"
+        },
+        {
+          "predicate": "references",
+          "target": "#Butono"
+        },
+        {
+          "predicate": "references",
+          "target": "#Insigno"
+        },
+        {
+          "predicate": "references",
+          "target": "#Avizo"
+        }
       ]
     },
     {
@@ -1779,6 +1804,86 @@
         {
           "predicate": "references",
           "target": "#Elekto"
+        },
+        {
+          "predicate": "references",
+          "target": "#Navigado"
+        }
+      ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Apartigilo",
+      "term": "Apartigilo",
+      "inScheme": "eroj",
+      "prefLabel": {
+        "eo": "Apartigilo",
+        "en": "divider",
+        "de": "Trenner"
+      },
+      "altLabel": {
+        "en": [
+          "apartigilo",
+          "divider",
+          "separator",
+          "dividing line",
+          "rule"
+        ],
+        "de": [
+          "Trenner",
+          "Trennlinie",
+          "Trennstrich",
+          "Separator",
+          "apartigilo"
+        ]
+      },
+      "definition": {
+        "en": "A divider: a line that separates groups of content where space alone does not; horizontal across its container or vertical between neighbours, a separator for assistive technology or nothing at all (decorative); its line is a border role. A line with a word in it is a heading or a choice, which a person decides.",
+        "de": "Ein Trenner: eine Linie, die Gruppen von Inhalt trennt, wo Abstand allein es nicht tut; waagerecht über den Container oder senkrecht zwischen Nachbarn, ein Separator für Hilfstechnik oder gar nichts (dekorativ); seine Linie ist eine Rand-Rolle. Eine Linie mit einem Wort darin ist eine Überschrift oder eine Wahl, das entscheidet eine Person."
+      },
+      "broader": [
+        "#Ero"
+      ],
+      "relations": [
+        {
+          "predicate": "references",
+          "target": "#Ikono"
+        }
+      ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Saltligilo",
+      "term": "Saltligilo",
+      "inScheme": "eroj",
+      "prefLabel": {
+        "eo": "Saltligilo",
+        "en": "skip link",
+        "de": "Sprunglink"
+      },
+      "altLabel": {
+        "en": [
+          "saltligilo",
+          "skip link",
+          "skip to content",
+          "skip navigation"
+        ],
+        "de": [
+          "Sprunglink",
+          "zum Inhalt springen",
+          "Navigation überspringen",
+          "saltligilo"
+        ]
+      },
+      "definition": {
+        "en": "A skip link: the first focusable element of a page, hidden until it has the focus, then shown above everything with its focus ring; it jumps to the main content past the repeated parts (WCAG 2.4.1) and moves the focus there. Its label names the destination (link-label-names-destination); a reference inside the text is the ligilo's.",
+        "de": "Ein Sprunglink: das erste fokussierbare Element einer Seite, verborgen bis zum Fokus, dann über allem sichtbar mit seinem Fokusring; er springt am Wiederholten vorbei zum Inhalt (WCAG 2.4.1) und setzt den Fokus dorthin. Seine Beschriftung nennt das Ziel (link-label-names-destination); ein Verweis im Text gehört dem ligilo."
+      },
+      "broader": [
+        "#Ero"
+      ],
+      "relations": [
+        {
+          "predicate": "references",
+          "target": "#Ligilo"
         },
         {
           "predicate": "references",

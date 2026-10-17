@@ -115,7 +115,9 @@ describe("the Uzo of the saltligilo (section ②, G6)", () => {
 
   it("composes in the shell; requires the label; size content, never wraps", () => {
     expect(uzo?.composes.containers.map((container) => container.name)).toEqual(["shell"]);
-    expect(uzo?.slots).toEqual({ label: { accepts: ["text"], max: 1, required: true, nesting: 0 } });
+    expect(uzo?.slots).toEqual({
+      label: { accepts: ["text"], max: 1, required: true, nesting: 0 },
+    });
     expect(uzo?.layout).toEqual({ size: "content", wrap: "never" });
   });
 

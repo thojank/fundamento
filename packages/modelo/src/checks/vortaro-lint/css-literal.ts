@@ -19,6 +19,9 @@ const CSS_WIDE_KEYWORDS: ReadonlySet<string> = new Set([
   "unset",
   "revert",
   "revert-layer",
+  // Spec 014 ② (plan ② D-05): the colour of the text around, no value of its own — the fill of a
+  // masked glyph takes it, so an icon inherits like a word.
+  "currentcolor",
 ]);
 const MATH_FUNCTIONS: ReadonlySet<string> = new Set(["calc", "min", "max", "clamp"]);
 const ZERO_PATTERN = /^[+-]?(0+(\.0*)?|\.0+)$/;

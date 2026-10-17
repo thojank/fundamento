@@ -32,12 +32,13 @@ describe("get_ero (FR-13)", () => {
     expect(result.isError).toBe(true);
     // The five nearest names: with six Eroj (Spec 010 ③) the farthest drops out; with nine
     // (Spec 011 ②) dialogo is nearer to "butonno" than markobutono.
+    // Spec 014 ②: ikono is nearer to "butonno" than insigno.
     expect(result.structuredContent?.allowed).toEqual([
       "butono",
+      "ikono",
       "insigno",
       "avizo",
       "dialogo",
-      "elekto",
     ]);
   });
 });
@@ -73,6 +74,7 @@ describe("get_ero brief (Spec 007 A8)", () => {
   // Spec 008 T014 (A5, E of Spec 009): every Ero's brief, measured; the ceiling stays 750.
   // Spec 010 ④: seven Eroj, the elektilo among them; Spec 011 ②: nine, dialogo and tekstareo.
   it.each([
+    "apartigilo",
     "apartigilo",
     "atributlisto",
     "avizo",
@@ -120,6 +122,7 @@ describe("suggest_ero (FR-13)", () => {
       expect.objectContaining({ rule: "goal-unknown", path: "suggest_ero/goal" }),
     ]);
     expect(result.structuredContent?.allowed).toEqual([
+      "separate",
       "details",
       "notify",
       "report-error",
@@ -129,6 +132,7 @@ describe("suggest_ero (FR-13)", () => {
       "ask-reason",
       "choose-many",
       "choose-few",
+      "show-icon",
       "status-label",
       "enter-text",
       "email",
@@ -144,6 +148,7 @@ describe("suggest_ero (FR-13)", () => {
       "navigate-app",
       "loading",
       "empty",
+      "skip-to-content",
       "toggle",
       "table",
       "multi-line",

@@ -156,6 +156,10 @@
         {
           "ero": "plenstato",
           "kialo": "A table without rows shows the empty state over all columns, because the person looks there for the rows."
+        },
+        {
+          "ero": "ikono",
+          "kialo": "The sort arrow in a sortable head cell is an ikono (sort-ascending, sort-descending), because the direction is a sign of the Ikonaro the Aspekto draws; aria-sort says it aloud."
         }
       ],
       "never": [],

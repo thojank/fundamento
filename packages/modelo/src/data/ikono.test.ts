@@ -157,10 +157,12 @@ describe("the Uzo of the ikono (section ②, G6)", () => {
     ]);
   });
 
-  it("the brief names size and intent as axes, name as a duty, and stays under 750", () => {
+  it("the brief names name, size and intent as axes, name as a duty, and stays under 750", () => {
     if (ikono === undefined) throw new Error("missing");
     const brief = briefOf(ikono);
-    expect(brief.axes.map((axis) => axis.name)).toEqual(["size", "intent"]);
+    // The name is a choice an agent makes (every enum prop is an axis of the brief): fifteen values.
+    expect(brief.axes.map((axis) => axis.name)).toEqual(["name", "size", "intent"]);
+    expect(brief.axes[0]?.values).toEqual(modelo.ikonaro.map((entry) => entry.name));
     expect(brief.required).toEqual({ props: ["name"], slots: [] });
     expect(Math.ceil(JSON.stringify(brief).length / 3)).toBeLessThanOrEqual(750);
   });
@@ -220,12 +222,16 @@ describe("the Ikonaro and the Eroj that compose the ikono (G6)", () => {
     }
   });
 
-  it("the avizo shows a status icon beside its words: the part icon in the accent's colour, size.icon.medium", () => {
+  it("the avizo shows a status icon beside its words: the part icon in the status text colour by intent, size.icon.medium", () => {
     const avizo = eroNamed("avizo")?.skemo;
     expect(avizo?.parts.icon).toEqual({
-      color: { sameAs: "accent.color" },
+      color: { by: ["intent"] },
       size: { fixed: "size.icon.medium" },
     });
+    if (avizo === undefined) throw new Error("missing");
+    expect(boundToken(avizo, "icon", "color", { intent: "danger" })?.token).toBe(
+      "color.status.danger.text",
+    );
   });
 });
 
@@ -243,6 +249,6 @@ describe("suggest_ero of the icon (Gvidanto)", () => {
     expect(status.suggestion).toEqual({ ero: "insigno", props: {} });
     const logo = suggest("das Logo der Marke");
     expect(logo.suggestion).toBeNull();
-    expect(logo.action).toBe("ask-human");
+    expect(logo.boundary).toMatchObject({ ero: "ikono", case: "logo", action: "ask-human" });
   });
 });

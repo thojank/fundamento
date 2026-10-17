@@ -327,7 +327,7 @@
       "decision": "approved",
       "kialo": "Figma zeichnet die Icons der Schaltfläche nicht. Die Vitrino entscheidet, was Figma zeigt (Maintainer, 2026-09-21), und sie zeigt keine: Die Skemo kennt die Slots icon-start und icon-end, beide dekorativ und in der Referenzdarstellung leer. Ein Icon in Figma, das die Vitrino nicht zeigt, wäre eine Erfindung der Projektion. Die Farbe (icon.color, gleich label.color) und die Größe (icon.size) bleiben im Modelo; die Figma-Seite von check:parity meldet sie als „not drawn (dieser Jugxo)“ — eine benannte, freigegebene Differenz, die der Bericht als Warnung zeigt, keine stille Gleichheit. Zeigt die Vitrino eines Tages Icons, entfällt dieser Eintrag und Figma zeichnet sie; der Eintrag in der Vojmapo hält das fest.",
       "date": "2026-09-21",
-      "context": "Spec 003, Paket „Figma zeigt das Ero“ (F11/F13), Entscheidung 1 des Maintainers vom 2026-09-21: Parity meldet nur, was das Plugin anwendet; Fokusring wird gezeichnet, das Icon entscheidet die Vitrino. Umgesetzt in figma.ts (FIGMA_NOT_DRAWN) und in der Regel parity-part-not-drawn."
+      "context": "Spec 003, Paket „Figma zeigt das Ero“ (F11/F13), Entscheidung 1 des Maintainers vom 2026-09-21: Parity meldet nur, was das Plugin anwendet; Fokusring wird gezeichnet, das Icon entscheidet die Vitrino. Umgesetzt in figma.ts (FIGMA_NOT_DRAWN) und in der Regel parity-part-not-drawn. Nachtrag (Spec 014 ②, 2026-10-17, plan ② D-08): aufgehoben — die Vitrino zeigt Icons (das Ikonaro als Raster, der butono mit icon-start), also zeichnet Figma sie: jede Glyphe je Aspekto als Vektor mit gebundener Sichtbarkeit (ikonoj/<aspekto>), die Farbe an die Rolle gebunden. Der Eintrag `icon` in FIGMA_NOT_DRAWN entfällt; dieser Jugxo bleibt als Geschichte stehen und wird nicht gelöscht."
     },
     {
       "id": "jug_01M327FC8MRXSEF63AHQHFQJ28",
@@ -3642,6 +3642,106 @@
               "reason": "Reason",
               "reason-help": "Name the reason. The author reads it before the next version."
             },
+            "lingvo": "en"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M55X2XQXVH4CN9PHB5ZNPNEH",
+      "ref": {
+        "ero": "ero_01M55X2W7FMR4C5F279M85EAC1"
+      },
+      "decision": "approved",
+      "kialo": "Das Wort nennt, was das Zeichen bedeutet: Wer es nicht sieht, hört „Fehler“.",
+      "date": "2026-10-17",
+      "context": "Example RIGHT for the Regulo named in ekzemplo.regulo (Spec 014 ②, icon-meaning-named, G8); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M55X2XBTVBQC8HSYFM3SBYM2",
+        "instances": [
+          {
+            "ero": "ikono",
+            "props": {
+              "name": "danger",
+              "intent": "danger",
+              "label": "Fehler"
+            },
+            "label": "Fehler",
+            "lingvo": "de"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M55X2XQXVH4CN9PHB5ZNPNEJ",
+      "ref": {
+        "ero": "ero_01M55X2W7FMR4C5F279M85EAC1"
+      },
+      "decision": "approved",
+      "kialo": "The word names what the sign means: whoever cannot see it hears 'Error'.",
+      "date": "2026-10-17",
+      "context": "Example RIGHT for the Regulo named in ekzemplo.regulo (Spec 014 ②, icon-meaning-named, G8); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M55X2XBTVBQC8HSYFM3SBYM2",
+        "instances": [
+          {
+            "ero": "ikono",
+            "props": {
+              "name": "danger",
+              "intent": "danger",
+              "label": "Error"
+            },
+            "label": "Error",
+            "lingvo": "en"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M55X2XQYKEVP9XGC6ATSNQ23",
+      "ref": {
+        "ero": "ero_01M55X2W7FMR4C5F279M85EAC1"
+      },
+      "decision": "rejected",
+      "kialo": "„Symbol“ nennt das Bild, nicht seine Bedeutung: Wer es nicht sieht, hört nichts, was ihm hilft.",
+      "date": "2026-10-17",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 014 ②, icon-meaning-named, G8); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M55X2XBTVBQC8HSYFM3SBYM2",
+        "instances": [
+          {
+            "ero": "ikono",
+            "props": {
+              "name": "danger",
+              "intent": "danger",
+              "label": "Symbol"
+            },
+            "label": "Symbol",
+            "lingvo": "de"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M55X2XQYKEVP9XGC6ATSNQ24",
+      "ref": {
+        "ero": "ero_01M55X2W7FMR4C5F279M85EAC1"
+      },
+      "decision": "rejected",
+      "kialo": "'Icon' names the picture, not its meaning: whoever cannot see it hears nothing that helps.",
+      "date": "2026-10-17",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 014 ②, icon-meaning-named, G8); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M55X2XBTVBQC8HSYFM3SBYM2",
+        "instances": [
+          {
+            "ero": "ikono",
+            "props": {
+              "name": "danger",
+              "intent": "danger",
+              "label": "Icon"
+            },
+            "label": "Icon",
             "lingvo": "en"
           }
         ]

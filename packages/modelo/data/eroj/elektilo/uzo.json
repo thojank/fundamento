@@ -121,6 +121,10 @@
         {
           "ero": "butono",
           "kialo": "The form ends with the button that sends it, because choosing an option does nothing by itself; the button stands after the last field."
+        },
+        {
+          "ero": "ikono",
+          "kialo": "The chevron at the end of the field is an ikono chevron-down, because the sign that a list opens below is vocabulary of the Ikonaro, drawn by the Aspekto in the size of the field."
         }
       ],
       "never": [

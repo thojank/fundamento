@@ -12,10 +12,14 @@ const names = input.modelo.ikonaro.map((entry) => entry.name);
 
 const glyphStyle = (page: Parameters<typeof serve>[0], id: string) =>
   page.locator(`#${id}`).evaluate((element) => {
+    // The glyph is the control of an icon (one part, no second control inside a composing Ero).
     const glyph = element.shadowRoot?.querySelector('[part="glyph"]') as HTMLElement;
-    const control = element.shadowRoot?.querySelector('[part="control"]') as HTMLElement;
+    const control = glyph;
     const style = getComputedStyle(glyph);
-    const mask = style.maskImage !== "" && style.maskImage !== "none" ? style.maskImage : style.webkitMaskImage;
+    const mask =
+      style.maskImage !== "" && style.maskImage !== "none"
+        ? style.maskImage
+        : style.webkitMaskImage;
     return {
       mask,
       fill: style.backgroundColor,

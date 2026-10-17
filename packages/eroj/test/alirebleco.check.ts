@@ -1384,11 +1384,15 @@ for (const aspekto of ["komuna", "ekzemplo"]) {
           const icon = document.querySelector('fm-ikono[intent="danger"]');
           const glyph = icon?.shadowRoot?.querySelector('[part="glyph"]');
           return {
-            fill: glyph === null || glyph === undefined ? "" : getComputedStyle(glyph).backgroundColor,
+            fill:
+              glyph === null || glyph === undefined ? "" : getComputedStyle(glyph).backgroundColor,
             page: getComputedStyle(document.body).backgroundColor,
           };
         });
-        expect(contrastOf(graphic.fill, graphic.page), "status icon vs page").toBeGreaterThanOrEqual(3);
+        expect(
+          contrastOf(graphic.fill, graphic.page),
+          "status icon vs page",
+        ).toBeGreaterThanOrEqual(3);
       });
     }
   }

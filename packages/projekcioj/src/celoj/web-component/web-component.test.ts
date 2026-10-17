@@ -40,7 +40,6 @@ describe("Web Component Celo (T011)", () => {
       "eroj/src/generated/dialogo.styles.ts",
       "eroj/src/generated/elektilo.styles.ts",
       "eroj/src/generated/elekto.styles.ts",
-      "eroj/src/generated/ikono.styles.ts",
       "eroj/src/generated/fm-apartigilo.ts",
       "eroj/src/generated/fm-atributlisto.ts",
       "eroj/src/generated/fm-avizo.ts",
@@ -61,6 +60,7 @@ describe("Web Component Celo (T011)", () => {
       "eroj/src/generated/fm-sxaltilo.ts",
       "eroj/src/generated/fm-tabelo.ts",
       "eroj/src/generated/fm-tekstareo.ts",
+      "eroj/src/generated/ikono.styles.ts",
       "eroj/src/generated/index.ts",
       "eroj/src/generated/insigno.styles.ts",
       "eroj/src/generated/kampo.styles.ts",
@@ -70,8 +70,8 @@ describe("Web Component Celo (T011)", () => {
       "eroj/src/generated/mezurilo.styles.ts",
       "eroj/src/generated/navigado.styles.ts",
       "eroj/src/generated/plenstato.styles.ts",
-      "eroj/src/generated/saltligilo.styles.ts",
       "eroj/src/generated/react.ts",
+      "eroj/src/generated/saltligilo.styles.ts",
       "eroj/src/generated/skemo.ts",
       "eroj/src/generated/sxaltilo.styles.ts",
       "eroj/src/generated/tabelo.styles.ts",
@@ -533,7 +533,10 @@ describe("Web Component Celo for the elektilo (Spec 010 ④)", () => {
     ]);
     expect(elektiloElement).toContain('<select part="control" id="control"></select>');
     expect(elektiloElement).toContain('<label part="label" for="control">');
-    expect(elektiloElement).toContain('<span part="indicator" aria-hidden="true"><svg');
+    // Spec 014 ②: the chevron is an ikono chevron-down, the Aspekto's glyph in the size of the field.
+    expect(elektiloElement).toContain(
+      '<span part="indicator" aria-hidden="true"><fm-ikono name="chevron-down"></fm-ikono></span>',
+    );
     expect(elektiloElement).toContain('<span part="error" id="error" hidden aria-live="polite">');
     expect(elektiloElement).toContain("static formAssociated = true;");
     expect(elektiloElement).toContain('customElements.define("fm-elektilo", FmElektilo)');
@@ -902,6 +905,7 @@ describe("Web Component Celo for the avizo (Spec 011 ③)", () => {
   it("renders a status region with the kind word, heading, message, details, actions and the dismiss butono", () => {
     expect(parts(element)).toEqual([
       "control",
+      "icon",
       "heading",
       "message",
       "details",
@@ -1344,7 +1348,8 @@ describe("Web Component Celo for the ikono (Spec 014 ②)", () => {
   ) as string;
 
   it("renders the glyph in a span, names it by the label as an image, hides it decorative, knows which names mirror", () => {
-    expect(element).toContain('<span part="control"><span part="glyph"></span>');
+    expect(element).toContain('<span part="glyph"></span>');
+    expect(element).not.toContain('part="control"');
     expect(element).toContain('"img"');
     expect(element).toContain('"aria-hidden"');
     expect(element).toContain("--fm-ikono-");
@@ -1360,10 +1365,10 @@ describe("Web Component Celo for the ikono (Spec 014 ②)", () => {
     expect(css).toContain("inline-size: var(--fm-size-icon-medium);");
     expect(css).toContain("block-size: var(--fm-size-icon-small);");
     expect(css).toContain(
-      ':where([part="control"][data-intent="danger"]) {\n  color: var(--fm-color-status-danger-text);',
+      ':where([part="glyph"][data-intent="danger"]) {\n  color: var(--fm-color-status-danger-text);',
     );
-    // inherit writes nothing: the neutral icon takes the colour of the text around it.
-    expect(css).not.toContain('[data-intent="neutral"]) {\n  color');
+    // inherit is said: the neutral icon takes the colour of the text around it.
+    expect(css).toContain(':where([part="glyph"][data-intent="neutral"]) {\n  color: inherit;');
     expect(css).toContain("scaleX(-1)");
     expect(componentCssIssues("ikono.css", css)).toEqual([]);
     expect(cssPhysicalPropertyIssues("ikono.css", css)).toEqual([]);
@@ -1391,7 +1396,9 @@ describe("Web Component Celo for the apartigilo (Spec 014 ②)", () => {
   it("draws the line as a border of one edge in the bound colour and width; vertical takes a control's height", () => {
     expect(css).toContain("border-color: var(--fm-color-border-subtle);");
     expect(css).toContain("border-width: var(--fm-border-width-default);");
-    expect(css).toContain("border-block-start-style: solid;");
+    expect(css).toContain(
+      ':where([part="control"][data-orientation="horizontal"]) { border-block-start-style: solid; }',
+    );
     expect(css).toContain("border-inline-start-style: solid;");
     expect(css).toContain(
       ':where([part="control"][data-orientation="vertical"]) {\n  min-block-size: var(--fm-size-control-medium);',
@@ -1456,7 +1463,13 @@ describe("the Eroj draw their signs as ikono (Spec 014 ②)", () => {
     expect(element).toContain('<span part="icon" aria-hidden="true"><fm-ikono');
     expect(element).toContain('<fm-ikono slot="icon-start" name="close"');
     expect(element).not.toContain("M4 4l8 8M12 4l-8 8");
-    expect(styles).toContain('[part="icon"]');
-    expect(styles).toContain("inline-size: var(--fm-size-icon-medium);");
+    const css = JSON.parse(
+      /export const AVIZO_CSS = ("(?:[^"\\]|\\.)*");/.exec(styles)?.[1] ?? '""',
+    ) as string;
+    expect(css).toContain('[part="icon"]');
+    expect(css).toContain("inline-size: var(--fm-size-icon-medium);");
+    expect(css).toContain(
+      ':where([part="control"][data-intent="danger"]) [part="icon"] {\n  color: var(--fm-color-status-danger-text);',
+    );
   });
 });

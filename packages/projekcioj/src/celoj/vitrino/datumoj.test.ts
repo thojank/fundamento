@@ -250,12 +250,14 @@ describe("the Vitrino after the acceptances (Nachlese 2026-10-13)", () => {
   // line that never breaks is the input line, not the label. The subject comes from the a11y role.
   it("the layout sentence names the subject and the placement (C8)", () => {
     expect(datumoj.a11yRoloj).toEqual({
+      apartigilo: "separator",
       atributlisto: "list",
       avizo: "status",
       butono: "button",
       dialogo: "dialog",
       elektilo: "combobox",
       elekto: "radiogroup",
+      ikono: "img",
       insigno: "generic",
       kampo: "textbox",
       langetaro: "tablist",
@@ -264,6 +266,7 @@ describe("the Vitrino after the acceptances (Nachlese 2026-10-13)", () => {
       mezurilo: "meter",
       navigado: "navigation",
       plenstato: "status",
+      saltligilo: "link",
       sxaltilo: "switch",
       tabelo: "table",
       tekstareo: "textbox",
@@ -591,7 +594,9 @@ describe("the Vitrino shows the Ikonaro and the Grundbausteine (Spec 014 ②)", 
       expect(section, name).toContain(`<fm-ikono name="${name}" size="large"`);
     }
     for (const intent of ["info", "success", "warning", "danger"]) {
-      expect(section, intent).toContain(`<fm-ikono name="${intent}" size="medium" intent="${intent}" label="`);
+      expect(section, intent).toContain(
+        `<fm-ikono name="${intent}" size="medium" intent="${intent}" label="`,
+      );
     }
     expect(section).not.toContain('intent="neutral"');
     expect(section).toContain('<th scope="row">small</th>');
@@ -608,12 +613,13 @@ describe("the Vitrino shows the Ikonaro and the Grundbausteine (Spec 014 ②)", 
     expect(datumoj.eroj.ligilo ?? "").not.toContain("<fm-ikono");
   });
 
-  it("the apartigilo stands in both orientations, the saltligilo in one row with its target", () => {
+  it("the apartigilo stands in both orientations, the saltligilo in one row pointing at its section", () => {
     const apartigilo = datumoj.eroj.apartigilo ?? "";
     expect(apartigilo).toContain('<fm-apartigilo orientation="horizontal"');
     expect(apartigilo).toContain('<fm-apartigilo orientation="vertical"');
     const saltligilo = datumoj.eroj.saltligilo ?? "";
+    // The target is the section itself: its id without the fragment sign (the link spells it).
     expect(saltligilo).toContain('<fm-saltligilo to="fm-vitrino-saltligilo">');
-    expect(saltligilo).toContain('id="fm-vitrino-saltligilo-target"');
+    expect(saltligilo).not.toContain('to="#fm-vitrino-saltligilo"');
   });
 });

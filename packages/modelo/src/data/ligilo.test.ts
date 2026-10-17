@@ -32,12 +32,14 @@ describe("ligilo in the repo Modelo (T006)", () => {
   it("lives in data/eroj/ligilo/skemo.json, after the butono, and the repo Modelo stays valid", () => {
     expect(ligilo.file).toBe("modelo/data/eroj/ligilo/skemo.json");
     expect(modelo.eroj.map((entry) => entry.ero.name)).toEqual([
+      "apartigilo",
       "atributlisto",
       "avizo",
       "butono",
       "dialogo",
       "elektilo",
       "elekto",
+      "ikono",
       "insigno",
       "kampo",
       "langetaro",
@@ -46,6 +48,7 @@ describe("ligilo in the repo Modelo (T006)", () => {
       "mezurilo",
       "navigado",
       "plenstato",
+      "saltligilo",
       "sxaltilo",
       "tabelo",
       "tekstareo",
@@ -242,8 +245,15 @@ describe("the Reguloj of the ligilo (T005, A2, D-13)", () => {
   it.each([...TEXT_REGULOJ, ...SKEMO_REGULOJ])("%s applies to ligilo with a kialo", (name) => {
     const regulo = named(name);
     // Spec 011 ⑤ (E5): the destination rule and the colour rule are widened to the navigado.
-    const widened = ["link-label-names-destination", "link-not-color-only"].includes(name);
-    expect(regulo?.appliesTo).toEqual({ eroj: widened ? ["ligilo", "navigado"] : ["ligilo"] });
+    // Spec 011 ⑤ widened two rules to the navigado; Spec 014 ② widens the destination rule to the
+    // saltligilo too (E5).
+    const widened =
+      name === "link-label-names-destination"
+        ? ["ligilo", "navigado", "saltligilo"]
+        : name === "link-not-color-only"
+          ? ["ligilo", "navigado"]
+          : ["ligilo"];
+    expect(regulo?.appliesTo).toEqual({ eroj: widened });
     expect(regulo?.checkability).toBe("automatic");
     expect(regulo?.kialo.length ?? 0).toBeGreaterThan(40);
   });
@@ -283,6 +293,9 @@ describe("the Reguloj of the ligilo (T005, A2, D-13)", () => {
       "mezurilo",
       "navigado",
       "langetaro",
+      "ikono",
+      "apartigilo",
+      "saltligilo",
     ]);
   });
 

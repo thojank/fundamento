@@ -31,12 +31,14 @@ describe("kampo in the repo Modelo (T004)", () => {
   it("lives in data/eroj/kampo/skemo.json, between elekto and ligilo, and the repo Modelo stays valid", () => {
     expect(kampo.file).toBe("modelo/data/eroj/kampo/skemo.json");
     expect(modelo.eroj.map((entry) => entry.ero.name)).toEqual([
+      "apartigilo",
       "atributlisto",
       "avizo",
       "butono",
       "dialogo",
       "elektilo",
       "elekto",
+      "ikono",
       "insigno",
       "kampo",
       "langetaro",
@@ -45,6 +47,7 @@ describe("kampo in the repo Modelo (T004)", () => {
       "mezurilo",
       "navigado",
       "plenstato",
+      "saltligilo",
       "sxaltilo",
       "tabelo",
       "tekstareo",
@@ -250,7 +253,11 @@ describe("the Uzo of the kampo (T004, A3)", () => {
     expect(uzo?.composes.with.map((entry) => entry.ero)).toEqual(["kampo", "butono"]);
     expect(uzo?.composes.never.map((entry) => entry.ero)).toEqual(["butono"]);
     const butono = modelo.eroj.find((entry) => entry.ero.name === "butono");
-    expect(butono?.uzo?.composes.with.map((entry) => entry.ero)).toEqual(["butono", "kampo"]);
+    expect(butono?.uzo?.composes.with.map((entry) => entry.ero)).toEqual([
+      "butono",
+      "kampo",
+      "ikono",
+    ]);
   });
 
   it("carries four text rules: the error rule fixed on the error slot, the others adjustable (D-06)", () => {
@@ -346,6 +353,9 @@ describe("the Reguloj of the kampo (T003, T004, A2, D-07)", () => {
       "mezurilo",
       "navigado",
       "langetaro",
+      "ikono",
+      "apartigilo",
+      "saltligilo",
     ]);
   });
 

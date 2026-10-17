@@ -63,12 +63,13 @@ describe("the dialogs of the Grundbausteine", () => {
       goal: "Statussymbol als einzige Kennzeichnung",
     });
     expect(status.suggestion).toEqual({ ero: "insigno", props: {} });
-    expect(status.kialo).toBe(statusOnly.kialo);
+    // The icon's own alternative sends it there with its reason (read from the Uzo).
+    expect(statusOnly.ero).toBe("insigno");
   });
 
   it("'Trennlinie zwischen Abschnitten' → an apartigilo; 'Sprunglink zum Inhalt' → a saltligilo citing link-label-names-destination", async () => {
     const divider = await output<Suggested>(client, "suggest_ero", {
-      goal: "Trennlinie zwischen zwei Abschnitten",
+      goal: "Trennlinie zwischen den Abschnitten",
     });
     expect(divider.suggestion).toEqual({ ero: "apartigilo", props: {} });
     const skip = await output<Suggested>(client, "suggest_ero", {
@@ -81,7 +82,7 @@ describe("the dialogs of the Grundbausteine", () => {
   it("'das Logo der Marke' stops: a person decides, with the icon's reason", async () => {
     const answer = await output<Suggested>(client, "suggest_ero", { goal: "das Logo der Marke" });
     expect(answer.suggestion).toBeNull();
-    expect(answer.action).toBe("ask-human");
+    expect(answer.boundary).toMatchObject({ ero: "ikono", case: "logo", action: "ask-human" });
   });
 });
 
@@ -122,7 +123,7 @@ describe("list_eroj, the briefs and columns-from", () => {
     expect(listed.eroj).toHaveLength(20);
     expect(listed.eroj.map((entry) => entry.name)).toContain("ikono");
     const icon = await output<Brief>(client, "get_ero", { name: "ikono", brief: true });
-    expect(icon.axes.map((axis) => axis.name)).toEqual(["size", "intent"]);
+    expect(icon.axes.map((axis) => axis.name)).toEqual(["name", "size", "intent"]);
     expect(icon.required).toEqual({ props: ["name"], slots: [] });
     const divider = await output<Brief>(client, "get_ero", { name: "apartigilo", brief: true });
     expect(divider.axes.map((axis) => axis.name)).toEqual(["orientation"]);

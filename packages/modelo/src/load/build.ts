@@ -178,6 +178,8 @@ function composeAspektoValues(
     // Typed after schema validation (AspektoFile); the loader only guarantees objects.
     if (Array.isArray(raw.fonts))
       entry.fonts = raw.fonts.filter(isJsonObject) as unknown as Fonto[];
+    // Spec 014 ② (G3): the glyphs the package draws, by Ikonaro name, for every Celo.
+    if (pkg.ikonoj !== undefined) entry.ikonoj = pkg.ikonoj;
     if (Array.isArray(raw.aspiroj))
       entry.aspiroj = raw.aspiroj.filter(isJsonObject) as unknown as AspektoAspiro[];
     // Spec 007 (D-03): the overrides of adjustable text rules, for check_usage.

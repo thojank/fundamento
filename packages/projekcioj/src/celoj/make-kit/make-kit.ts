@@ -33,6 +33,7 @@ import {
   elementNamesOf,
   isLight,
   isMultiline,
+  isSkip,
   lightStylesheetOf,
   namesOf,
   stylesheetOf,
@@ -520,6 +521,30 @@ function guidelines(input: CeloInput, aspekto: string): GeneratedFile[] {
         `- Every switch between views of the same thing on one page is a \`<${componentName(entry.ero)}>\` with distinct tab labels${radioName === undefined ? "" : `; a choice in a form is an \`<${componentName(radioName.ero)}>\``}${navigationName === undefined ? "" : `, and the pages of an application are a \`<${componentName(navigationName.ero)}>\``}.`,
     )
     .join("\n");
+  // Spec 014 ② (G10, plan ② D-10): every icon is the ikono with a name of the Ikonaro, never a
+  // pasted SVG; every dividing line the apartigilo; the first focusable element of a page the
+  // saltligilo (the link that floats); generated from the roles img, separator and link.
+  const iconLines = eroj
+    .filter((entry) => entry.skemo.a11y.role === "img" && entry.uzo !== undefined)
+    .map(
+      (entry) =>
+        `- Every icon is an \`<${componentName(entry.ero)}>\` with a name from the Ikonaro, decorative unless it carries meaning (then with a \`label\`); never paste an SVG.`,
+    )
+    .join("\n");
+  const separatorLines = eroj
+    .filter((entry) => entry.skemo.a11y.role === "separator" && entry.uzo !== undefined)
+    .map(
+      (entry) =>
+        `- Every line that separates groups of content is an \`<${componentName(entry.ero)}>\`; where space alone separates, use spacing and no line.`,
+    )
+    .join("\n");
+  const skipLines = eroj
+    .filter((entry) => isSkip(entry.skemo) && entry.uzo !== undefined)
+    .map(
+      (entry) =>
+        `- The first focusable element of a page is a \`<${componentName(entry.ero)}>\` to the main content${linkName === undefined ? "" : `; a reference inside the text is a \`<${componentName(linkName.ero)}>\``}.`,
+    )
+    .join("\n");
   return [
     {
       path: `${base}/Guidelines.md`,
@@ -548,6 +573,9 @@ ${recordLines}
 ${meterLines}
 ${navigationLines}
 ${tabsLines}
+${iconLines}
+${separatorLines}
+${skipLines}
 
 Where to look: \`setup.md\` for the imports, \`foundations/\` for the tokens, \`components/\` for
 each component.
@@ -643,7 +671,7 @@ function sources(input: CeloInput, aspekto: string): GeneratedFile[] {
         : "";
       return `const ${constant}_SKEMO = ${JSON.stringify(entry.skemo)} as const;
 const ${constant}_CSS = ${JSON.stringify(stylesheetOf(entry.skemo, entry.uzo))};
-${light}${elementSource(elementNamesOf(entry, true))}`;
+${light}${elementSource(elementNamesOf(entry, true, input.modelo.ikonaro))}`;
     })
     .join("\n");
   const defines = input.modelo.eroj

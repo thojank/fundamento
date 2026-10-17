@@ -902,6 +902,10 @@ export const USAGE_ENFORCERS: Readonly<Record<string, UsageEnforcer>> = {
   // Spec 010 ④ (G6, plan ④ D-09): the placeholder of a select is a prompt, not an example of a
   // value (that is placeholder-is-example of the kampo): at least two words, a text rule of the Uzo.
   "select-placeholder-is-prompt": textRule,
+  // Spec 014 ② (G8, plan ② D-02): a name that only says icon is no name (not-words on prop:label);
+  // a status icon without a name breaks the constraint of the Skemo (prop:label filled), a button
+  // with only an icon and no label breaks label-required.
+  "icon-meaning-named": textRule,
 };
 
 function applies(regulo: Regulo, ero: LoadedEro): boolean {

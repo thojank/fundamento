@@ -47,12 +47,14 @@ describe("AK-06: the S6 dialog is answered from dist/modelo.json alone", () => {
     expect(new Set(modeloJson.tokens.map((token) => token.type)).size).toBe(description.typeCount);
     expect(modeloJson.reguloj.every((regulo) => regulo.kialo.trim() !== "")).toBe(true);
     expect(modeloJson.eroj.map((ero) => ero.name)).toEqual([
+      "apartigilo",
       "atributlisto",
       "avizo",
       "butono",
       "dialogo",
       "elektilo",
       "elekto",
+      "ikono",
       "insigno",
       "kampo",
       "langetaro",
@@ -61,6 +63,7 @@ describe("AK-06: the S6 dialog is answered from dist/modelo.json alone", () => {
       "mezurilo",
       "navigado",
       "plenstato",
+      "saltligilo",
       "sxaltilo",
       "tabelo",
       "tekstareo",

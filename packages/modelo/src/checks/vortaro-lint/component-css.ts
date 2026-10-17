@@ -61,6 +61,17 @@ export const STRUCTURAL_PROPERTIES: readonly string[] = [
   "font-variant-numeric",
   "grid-template-columns",
   "overflow-x",
+  // Spec 014 ② (plan ② D-05, D-07): a glyph is a mask of the Aspekto's picture (the image a
+  // token reference, size, repeat and position keywords); a part above the page is fixed at the
+  // start of the viewport (0 and keywords).
+  "mask-image",
+  "mask-size",
+  "mask-repeat",
+  "mask-position",
+  "inset-block-start",
+  "inset-inline-start",
+  // Spec 014 ② (plan ② D-06): which edge of a separator draws its line is structure.
+  "border-block-start-style",
   "border-block-end-style",
   "transform",
   "align-self",
@@ -110,6 +121,8 @@ export const DESIGN_PREFIXES: readonly string[] = [
   "animation-delay",
   "fill",
   "stroke",
+  // Spec 014 ② (plan ② D-04): the layer of a part above the page, an elevation.layer.* token.
+  "z-index",
 ];
 
 const isDesign = (property: string) =>

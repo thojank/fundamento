@@ -34,7 +34,7 @@ describe("ontologio.json (FR-15, FR-16, AK-07)", () => {
     expect(checkOntologio(ontologio, constitution, eroNames)).toEqual([]);
   });
 
-  it("holds the 20 terms of the Constitution table and the 5 entity-type concepts", () => {
+  it("holds the 20 terms of the Constitution table and the entity-type concepts", () => {
     const concepts = (ontologio as unknown as { concepts: Concept[] }).concepts;
     expect(concepts.filter((concept) => concept.inScheme === "terminologio")).toHaveLength(20);
     expect(
@@ -42,19 +42,11 @@ describe("ontologio.json (FR-15, FR-16, AK-07)", () => {
         .filter((concept) => concept.inScheme === "modelo")
         .map((concept) => concept.term)
         .sort(),
-    ).toEqual([
-      "DimensioValoro",
-      "Ikonaro",
-      "Ikono",
-      "KontrastParo",
-      "Regulo",
-      "Token",
-      "TokenSet",
-    ]);
+    ).toEqual(["DimensioValoro", "Ikonaro", "KontrastParo", "Regulo", "Token", "TokenSet"]);
   });
 
   // Spec 014 ① (G3, plan ① D-04): the Ikonaro — icons as vocabulary of the core — and its entries.
-  it("knows the Ikonaro (de: Icon-Vokabular) and the Ikono as the entity type ikono", () => {
+  it("knows the Ikonaro (de: Icon-Vokabular) with the entity type ikono, and the Ikono as the Ero", () => {
     const concepts = (ontologio as unknown as { concepts: Concept[] }).concepts;
     const ikonaro = concepts.find((concept) => concept.term === "Ikonaro");
     expect(ikonaro).toMatchObject({
@@ -65,8 +57,12 @@ describe("ontologio.json (FR-15, FR-16, AK-07)", () => {
     expect((ikonaro?.altLabel as { de?: string[] })?.de).toContain("Icon-Vokabular");
     expect((ikonaro?.altLabel as { en?: string[] })?.en).toContain("icon vocabulary");
     expect((ikonaro?.definition as { de?: string })?.de).toMatch(/Aspekto/);
+    // Spec 014 ② (plan ② D-03): the Ikono is the Ero (scheme eroj, below); the entity type ikono
+    // (iko_) is noted at the Ikonaro, whose entries it names.
+    expect(ikonaro?.notation).toBe("ikono");
     const ikono = concepts.find((concept) => concept.term === "Ikono");
-    expect(ikono).toMatchObject({ inScheme: "modelo", notation: "ikono", broader: ["#Ikonaro"] });
+    expect(ikono).toMatchObject({ inScheme: "eroj", broader: ["#Ero"] });
+    expect(ikono?.notation).toBeUndefined();
     expect((ikono?.altLabel as { de?: string[] })?.de).toContain("Icon");
     expect((ikono?.altLabel as { en?: string[] })?.en).toContain("icon");
   });
@@ -215,12 +211,14 @@ describe("the scheme eroj (Spec 008 T009)", () => {
 
   it("holds one concept per Ero of the Modelo, under #Ero, related to each other", () => {
     expect(eroNames).toEqual([
+      "apartigilo",
       "atributlisto",
       "avizo",
       "butono",
       "dialogo",
       "elektilo",
       "elekto",
+      "ikono",
       "insigno",
       "kampo",
       "langetaro",
@@ -229,17 +227,20 @@ describe("the scheme eroj (Spec 008 T009)", () => {
       "mezurilo",
       "navigado",
       "plenstato",
+      "saltligilo",
       "sxaltilo",
       "tabelo",
       "tekstareo",
     ]);
     expect(eroj.map((concept) => concept.term).sort()).toEqual([
+      "Apartigilo",
       "Atributlisto",
       "Avizo",
       "Butono",
       "Dialogo",
       "Elektilo",
       "Elekto",
+      "Ikono",
       "Insigno",
       "Kampo",
       "Langetaro",
@@ -248,6 +249,7 @@ describe("the scheme eroj (Spec 008 T009)", () => {
       "Mezurilo",
       "Navigado",
       "Plenstato",
+      "Saltligilo",
       "Sxaltilo",
       "Tabelo",
       "Tekstareo",

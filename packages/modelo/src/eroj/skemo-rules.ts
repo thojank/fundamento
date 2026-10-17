@@ -84,6 +84,8 @@ export const PART_PROPERTY_TYPES: Readonly<Partial<Record<SkemoPartProperty, Dtc
   easing: "cubicBezier",
   // Spec 014 ① (plan ① D-01): the weight of a text where it departs from its role, or none.
   weight: "fontWeight",
+  // Spec 014 ② (plan ② D-04): where a part lies above the page, an elevation.layer.* token.
+  layer: "number",
 };
 
 /** A combination of key values, e.g. `{ variant: "primary", state: "rest" }`. */

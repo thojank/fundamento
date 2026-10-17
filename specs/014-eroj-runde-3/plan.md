@@ -2,7 +2,7 @@
 
 **Spec:** [`spec.md`](spec.md) (Fassung vom 2026-10-17, 19:54, unverändert kopiert; die Korrektur des Maintainers nennt Phosphor in G3, E10 und Benchmark und „quadratische viewBox“) · **Briefing:** `briefing-p0-2026-10-17.md` (Maintainer-Ordner, nicht kopiert) · **Basis:** `main` @ `f6f38f5` (Nachlese 3 #68, #69) · **Regel 0** (12.10.) gilt: Weg des `butono` zuerst, sonst kleinste Änderung mit Eintrag hier; Tokens, Regulo-Semantik und Constitution unverändert; nie eine Grenze schwächen, um grün zu werden. **Aufgaben, Commits und rote Hashes:** [`tasks.md`](tasks.md).
 
-Fünf PRs, gestapelt (E6): ① Grundlage von `main`, ② Grundbausteine von ①, ③ Typografie von ②, ④ Overlays von ③, ⑤ Aufklappen von ④.
+Fünf PRs, gestapelt (E6): ① Grundlage von `main` (gemergt als #70), ② Grundbausteine von `main` nach dem Merge von ①, ③ Typografie von ②, ④ Overlays von ③, ⑤ Aufklappen von ④.
 
 ## ① Grundlage
 
@@ -137,13 +137,98 @@ Gemessen 2026-10-17 mit `node scripts/measure-overlay.mjs` (Playwright-Engines d
 - **O-1 Spec-Text zu E10/G3/Benchmark** – *erledigt 17.10.*: Die Spec-Datei (Stand 16:45) war byteidentisch mit der Kopie aus `9a3194f` und nannte Lucide; der Maintainer hat sie korrigiert (19:54: Phosphor in G3, E10, Benchmark; quadratische `viewBox`), die Kopie ist erneut unverändert übernommen. Das Briefing (Abschnitt Ikonaro) ist seit 17:54 ebenfalls korrigiert (Phosphor, Raster laut plan.md) – erledigt.
 - **O-2 Icon-Namen** – *entschieden 17.10.*: `menu` aus der Startmenge genommen (die `navigado` hat keinen eingeklappten Zustand; kommt mit der Grenze zurück, wenn sie fällt), `danger` als Achteck bestätigt (eine andere Form als das Dreieck von `warning`, damit die Unterscheidung nicht nur an der Farbe hängt). Startmenge jetzt 15 Namen. Die übrigen Namen bleiben bis zum Merge von ① änderbar (E4 sinngemäß).
 - **Biome ohne `ikonoj`** – *bestätigt 17.10.* (D-04).
-- **O-3 `get_ero` und `columns-from`.** `uzoOf` in `gvidanto/eroj.ts` und das MCP-Ausgabeschema `get_ero.output.json` geben `layout.columns-from` noch nicht aus; ein Agent sieht die Schwelle also nicht. Kleine Folgeaufgabe (Schema + Test), nicht Teil von ①; Vorschlag: mit ② (`ikono`), wenn `get_ero` ohnehin die Icon-Namen aufnimmt.
-- **O-5 Figma-Dialog ohne Hilfesatz.** `DIALOG_TEXTS` trägt `reason-help`, das Plugin zeichnet unter dem Begründungsfeld aber noch keinen Hilfetext-Knoten (es zeichnet feste Knoten: `reason-label`, Feld, Aktionen). Kandidat für ② mit den Icons, wenn der Dialog ohnehin neu gezeichnet wird.
+- **O-3 `get_ero` und `columns-from`** – *erledigt in ② (D-07)*. `uzoOf` in `gvidanto/eroj.ts` und das MCP-Ausgabeschema `get_ero.output.json` geben `layout.columns-from` noch nicht aus; ein Agent sieht die Schwelle also nicht. Kleine Folgeaufgabe (Schema + Test), nicht Teil von ①; Vorschlag: mit ② (`ikono`), wenn `get_ero` ohnehin die Icon-Namen aufnimmt.
+- **O-5 Figma-Dialog ohne Hilfesatz** – *erledigt in ② (D-07)*. `DIALOG_TEXTS` trägt `reason-help`, das Plugin zeichnet unter dem Begründungsfeld aber noch keinen Hilfetext-Knoten (es zeichnet feste Knoten: `reason-label`, Feld, Aktionen). Kandidat für ② mit den Icons, wenn der Dialog ohnehin neu gezeichnet wird.
 - **O-4 Gewicht in Figma für Optionen.** Die Schrift je Eintrag wird in `drawEntries` (navigado, langetaro) geschrieben; `drawChoice` (Optionen des `elekto`) wendet noch keine Eintrags-Schrift an – heute bindet kein Ero dort ein Gewicht. Kommt mit dem ersten Bedarf.
 
 ## ② Grundbausteine
 
-*(folgt nach dem Merge von ①: `ikono`, `apartigilo`, `saltligilo`; vorhandene Icons umstellen; Figma zeichnet Icons.)*
+**Branch:** `261017-spec-014-grundbausteine-e3bf97` (von `main` @ `498b238`, nach dem Merge von ① #70) · **Datum:** 2026-10-17/18.
+
+### Zusammenfassung
+
+1. **`ikono`** (D-01, D-02): das Icon – `name` ist ein Enum der 15 Ikonaro-Namen (ein Pflicht-Prop, eine Liste mit `data/ikonaro.json`), `size` bindet `size.icon.*` an den Teil `box`, `intent` bindet die Farbe des Teils `glyph` (`neutral` → `inherit`, Status → `color.status.<intent>.text`), `label` macht aus dem dekorativen Zeichen ein Bild mit Namen (`role="img"`). Ein Status-Icon trägt Bedeutung und darum einen Namen: Constraint `intent ≠ neutral ⇒ prop:label filled`. Neue Regulo **`icon-meaning-named`** (fest, Prüfart `not-words` auf `prop:label`: „Icon“, „Symbol“, „Bild“ sind keine Namen), vier Jugxoj de/en. Im Web ist die Glyphe eine Maske der Aspekto-Datei (`--fm-ikono-<name>`, vom CSS-Celo je Aspekto projiziert) in `currentcolor`; `chevron-right` spiegelt in RTL.
+2. **`apartigilo`** (D-03): der Trenner – `orientation` schlüsselt die Höhe des Teils `box` (`none` waagerecht, `size.control.medium` senkrecht) und ist damit Achse der Figma-Varianten; die Linie ist der Rand einer Kante (`color.border.subtle`, `border.width.default`); `decorative` macht ihn zu `role="none"`. Ein Separator hat keinen Namen: `a11y.name` darf leer sein (Schema).
+3. **`saltligilo`** (D-04): der Sprunglink – `to` (Id des Ziels; `target` ist ein Web-Begriff, Abweichung 1), verborgen bis `:focus-visible`, dann fest am Anfang des Viewports über allem (neue Teil-Eigenschaft **`layer`** → `elevation.layer.overlay`, Schema), mit Fläche, Rand, Schatten und Fokusring; Enter setzt den Fokus auf das Ziel (ein `tabindex="-1"`, wo das Ziel keins hat); der Text eines leeren Slots ist „Zum Inhalt springen“ aus `a11y.texts` (`label-empty`); `link-label-names-destination` ausgeweitet (E5).
+4. **Icons in vorhandenen Eroj** (D-05): der Chevron des `elektilo`, der Sortierpfeil der `tabelo` (`sort-ascending`/`sort-descending` nach Richtung, nichts dreht mehr), das Status-Icon des `avizo` (neuer Teil `icon`, Farbe `color.status.<intent>.text`, `size.icon.medium`) und das Schließen-Kreuz seines `butono` sind `ikono`; die Slots des `butono` nehmen `ikono` an; die Vitrino zeigt den `butono` mit `icon-start` (`check`), das Ikonaro als Raster je Größe und die Status-Icons benannt.
+5. **Figma zeichnet Icons** (D-06): der Plan trägt die Glyphen jeder Aspekto (`ikonoj`) und je Aspekto eine BOOLEAN-Variable `ikonoj/<aspekto>` in der Sammlung `aspekto`; jedes Icon ist je Aspekto ein aus der Glyphe importierter Rahmen, dessen Sichtbarkeit an diese Variable gebunden ist – der Markenmodus wechselt das Bild. Set `ikono` als Bauform `icon` (name × size × intent, Raster Namen × Größe·Intent), Bauform `separator`, `saltligilo` als Kontrolle; `icon` entfällt in `FIGMA_NOT_DRAWN`, der Jugxo `jug_01M31TV1V4S3RNBPWSRB2CGEDK` trägt den Nachtrag.
+6. **O-3 und O-5 aus ①** (D-07): `get_ero` gibt `layout.columns-from` aus (MCP-Ausgabeschema); der Figma-Dialog zeichnet den Hilfesatz unter dem Begründungsfeld in den Rollen der `tekstareo`-Hilfe (`composed["reason-help"]`).
+
+Kein Token, keine Regulo-Semantik geändert; zwei Schema-Erweiterungen (`layer`, leeres `a11y.name`), eine neue Regulo (G8), 20 Eroj.
+
+### Entwurfsentscheidungen
+
+#### D-01 `ikono`: Name als Enum des Ikonaro, Status-Icon mit Namen (G3, G5, G8)
+
+`name` ist ein Enum mit den Namen aus `data/ikonaro.json` in deren Reihenfolge (ein Daten-Test hält beide Listen gleich): so kennt der React-Typ die Namen, der `brief` nennt sie als Achse, und Figma hat je Name eine Variante – ein String-Prop könnte Figma nicht in ein Bild übersetzen. `size` schlüsselt `box.size` (`size.icon.*`), `intent` schlüsselt `glyph.color`: `neutral` → `inherit` (das Icon erbt die Textfarbe wie ein Wort), sonst `color.status.<intent>.text`. Ein Status-Icon sagt etwas, also trägt es einen Namen: vier Constraints `when intent=<status>` ⇒ `prop:label` `filled` (Prüfart über Prop, Spec ②); das Element fällt ohne Namen mit Warnung auf `neutral` zurück, `check_usage` meldet `ero-prop-constraint`. Die Regulo `icon-meaning-named` (fest; `appliesTo` `ikono`, `butono` – die Schaltfläche nur mit Icon prüft `label-required`) urteilt über den Namen selbst: `not-words` (icon, image, symbol, glyph, picture / icon, symbol, bild, grafik, zeichen) auf `prop:label`; Jugxoj de/en approved („Fehler“/„Error“) und rejected („Symbol“/„Icon“). Goal `show-icon` (Icon, Symbol, Piktogramm, Glyphe; keine neue `goal-keyword-shared`-Warnung, `check:regularo` 0 Warnungen). Uzo: `status-only-icon` → `insigno`, `logo` → null (ask-human), Grenzen `custom-svg` (ask-human), `animated-icon` (not-supported); komponiert mit `butono`, `avizo`, `insigno`, `tabelo`, `elektilo` (`menuo`, `faldilo`, `kompletigilo` folgen in ④/⑤).
+
+#### D-02 Web: die Glyphe als Maske der Aspekto-Datei (G3, E9)
+
+Der CSS-Celo schreibt je Aspekto einen Block `/* ikonoj <aspekto> */` mit `--fm-ikono-<name>: url("data:image/svg+xml,…")` (Metadaten und Kommentare entfernt, der Rest unverändert), am Root-Selektor der Aspekto wie jeder Wert (`fundamento.css` schaltet mit `data-fm-aspekto`, die Datei je Aspekto bei `:root`). Das Element schreibt `--fm-ikono: var(--fm-ikono-<name>)` auf die Glyphe; die Glyphe ist `mask-image: var(--fm-ikono)` in `background-color: currentcolor` – das Icon erbt wie ein Wort, ein Status-Icon setzt `color` aus der Bindung. Die Glyphe **ist** die Kontrolle (`part="glyph"`, keine zweite Kontrolle: Befund B-1). Spiegelung in RTL über die Klasse `fm-mirror` (`:host(:dir(rtl))`), gesteuert vom `IKONARO`-Wissen des Elements (`mirror` aus `data/ikonaro.json`; Befund B-3). Dekorativ: `aria-hidden="true"`; benannt: `role="img"` + `aria-label`. Vortaro-Lint: `currentcolor` ist ein Schlüsselwort (kein Wert), `mask-image/size/repeat/position` sind Struktur; kein Literal. Ein komponierendes Ero setzt `size` am inneren `fm-ikono` auf seine eigene Größe (`butono` an geslotteten Icons, `elektilo` am Chevron), damit Host und Glyphe eine Größe haben.
+
+#### D-03 `apartigilo`: Richtung als Achse, kein Name (G5; Regel 0.2)
+
+`box.height by orientation` (`none` | `size.control.medium`) macht die Richtung zur Achse der Figma-Varianten (Spec: „Figma: `orientation`“) und gibt der senkrechten Linie eine Mindesthöhe; die Linie ist der Rand einer Kante (`line.color` → `border-color`, `line.width` → `border-width`, die Kante ist Struktur: `border-block-start-style` waagerecht, `border-inline-start-style` senkrecht). `a11y.name` ist leer: ein Separator hat keinen Namen; das Schema verlangte `minItems: 1` – gelockert (kleinste Änderung, Regel 0.2). `decorative` → `role="none"` ohne `aria-orientation`. Grenze `labelled-line` (ask-human: ein Wort in der Linie ist eine Überschrift oder eine Wahl); `spacing-only` → null (ask-human, Kialo: der Container besitzt den Abstand). Ontologio `Apartigilo`.
+
+#### D-04 `saltligilo`: `to`, `layer`, verborgen bis Fokus (G5, E5; Regel 0.2)
+
+`target` ist ein Web-Begriff (`skemo-web-term`, Art. VIII), das Prop heißt `to` wie beim `ligilo` (Abweichung 1); der Web-Celo schreibt `href="#<to>"`. Neue Teil-Eigenschaft **`layer`** (Typ `number`, bindet `elevation.layer.*`; Web: `z-index`; Figma: gebunden, aber ohne Tiefe) – der Weg des `butono`: eine Teil-Eigenschaft neben `shadow`, `stroke`, `weight`; ④ nutzt sie für die Overlays. Ein Link mit `surface.layer` ist Celo-Wissen „schwebt“: `position: fixed` am Anfang des Viewports (logisch, RTL spiegelt), `clip-path: inset(50%)` bis `:focus-visible`. Der Text eines leeren Slots kommt aus `a11y.texts["label-empty"]` („Zum Inhalt springen“/„Skip to content“, Sprache des Dokuments) als Fallback-Inhalt des Slots; die Uzo verlangt den Slot trotzdem (`uzo-slot-required-missing`: ein Name mit nur einer Quelle). Enter: `click` → `tabindex="-1"` am Ziel, wo keins steht, dann `focus()` (G5). `link-label-names-destination` ausgeweitet statt vervielfacht (E5, `not-words` wie beim `ligilo`). Container `shell`; Grenze `always-visible` (not-supported); `in-page-link` → `ligilo`. Figma zeichnet beide Zustände (Abweichung 2); der Schatten steht im Plan und wird mit ④ gebunden (O-8).
+
+#### D-05 Icons in vorhandenen Eroj (G3, G6)
+
+`elektilo`: der Indikator hält `<fm-ikono name="chevron-down">` in der Feldgröße; `tabelo`: der Sortierknopf hält `<fm-ikono name="sort-ascending" size="small">`, bei absteigender Sortierung `sort-descending` (die `rotate`-Regel entfällt); `avizo`: neuer Teil `icon` (`color by intent` → `color.status.<intent>.text`, `size` `size.icon.medium`) als `<span part="icon" aria-hidden>` vor den Texten mit `<fm-ikono name="<intent>">` (die Ikonaro-Namen sind die Intents), das Schließen-Kreuz ist `<fm-ikono slot="icon-start" name="close">`; `butono`/`ligilo`: geslottete `fm-ikono` bekommen `size` des Hosts. Nicht umgestellt (O-7): Haken des `markobutono`, Punkt des `elekto`, Bogen des `plenstato`, Pflichtstern, die Außen-Markierung des `ligilo` – Zeichen der Projektion ohne Ikonaro-Namen bzw. außerhalb der vier Eroj aus G9 ②.
+
+#### D-06 Figma: Glyphen je Aspekto, Sichtbarkeit als BOOLEAN-Variable (G3, G4, E9)
+
+Der Plan trägt `ikonoj` (`names`, `mirror`, `glyphs[aspekto][name]` = SVG-Text aus dem Aspekto-Paket; der Loader liest `ikonoj/*.svg` als `LoadedAspektoPackage.ikonoj`) und je Aspekto eine Variable `ikonoj/<aspekto>` vom Typ BOOLEAN in der Sammlung `aspekto` (wahr nur im eigenen Modus). Das Plugin zeichnet ein Icon als Rahmen mit je Aspekto einem importierten Glyphen-Rahmen (`createNodeFromSvg`, `glyph-<aspekto>`), dessen `visible` an die Variable gebunden ist, und dem Vektor darin, dessen Füllung an die Farbe gebunden ist (`glyph-*`/`mark-*`-Knoten, `drawGlyphs`). Set `ikono`: Bauform `icon`, 225 Varianten (name × size × intent); der Name ist keine Achse der Skemo-Teile (`extraAxes`), das Paritäts-Inventar lässt ihn aus dem Variantenschlüssel – jede Namensvariante nennt dieselben Werte; Raster: Zeile je Größe·Intent, Spalte je Name. `inherit` an einer Farbe bindet `color.text.default` (`INHERIT_COLOR`, wie `INHERIT_TYPOGRAPHY`), nennt aber keine Farbe (die Skemo nennt keine; Befund B-4). `butono`-Varianten zeichnen `icon-start` (`check`) vor dem Label mit `icon.color`/`icon.size`; `elektilo`, `tabelo`, `avizo` ihre Icons je Variante (`variant.icons`). Bauform `separator`: die Linie als Rahmen mit gebundenem Strich einer Kante (`line-h`/`line-v`), waagerecht mit der Länge `size.container.small` (geschrieben, nicht gebunden). Kein `sign` mehr für `combobox` und `table`. Die Report-Headline überschritt mit 20 Sets 4 000 Zeichen: `placement` je Set in den Teil `state` verschoben (Befund B-2). `FIGMA_NOT_DRAWN.icon` entfällt; `check:parity` 20 Eroj, 0 Differenzen.
+
+#### D-07 O-3 und O-5 aus ① geschlossen
+
+`uzoOf` gibt `layout["columns-from"]` aus, das MCP-Ausgabeschema `get_ero.output.json` kennt den Schlüssel (O-3). Der Dialog zeichnet `reason-help` nach dem Begründungsfeld mit dem Wort der Vitrino; `composedOf` liest dafür `help.color`/`help.typography` der `tekstareo` bei `size=medium, state=rest` (`DIALOG_REASON_HELP`), gebunden wie die Hilfe eines Feldes (O-5).
+
+#### D-08 Ontologio: `Ikono` ist das Ero (Regel 0.2)
+
+Die Ontologio hatte `#Ikono` als Entitätsbegriff (Schema `modelo`, Notation `ikono`). Das Ero ist die erste Bedeutung des Worts: `#Ikono` steht jetzt im Schema `eroj` (unter `#Ero`, ohne Notation, wie jedes Ero), der Entitätstyp `ikono` (`iko_`) ist am `#Ikonaro` notiert, dessen Einträge er sind (die Prüfung verlangt genau einen Begriff je Entitätstyp). `Apartigilo` und `Saltligilo` neu, mit de/en-Synonymen; `describe_term("Ikono")` findet das Ero.
+
+#### D-09 Vitrino
+
+Abschnitt `ikono`: eine Zeile je Größe mit allen 15 Namen (dekorativ), eine Zeile je Status-Intent mit dem benannten Status-Icon (Name aus `meaning.de`, O-6); die Bilder wechseln mit der Aspekto. `apartigilo`: beide Richtungen (senkrecht zwischen zwei Wörtern, Klasse `fm-row`); `saltligilo`: eine Zeile, `to` zeigt auf die eigene Sektion (Id ohne `#`). `butono`: `<fm-ikono slot="icon-start" name="check">` in jeder Zelle.
+
+#### D-10 Make Kit
+
+Drei Sätze in den Guidelines, generiert aus den Rollen `img`, `separator` und dem schwebenden Link: „Every icon is an `<Ikono>` with a name from the Ikonaro …; never paste an SVG.“, „Every line that separates groups of content is an `<Apartigilo>` …“, „The first focusable element of a page is a `<Saltligilo>` …“. Je Ero eine Komponentenseite.
+
+### Arkitekturo-Abdeckung
+
+| Ero | Stand |
+|---|---|
+| `ikono` | trägt (Skemo, Uzo, Regulo, Jugxoj, Web Component als Maske, CSS-Glyphen je Aspekto, React, Figma-Set mit Markenwechsel, Make-Kit, Vitrino-Raster, MCP; Icons in butono, tabelo, avizo, elektilo) |
+| `apartigilo` | trägt (Skemo, Uzo, Web, React, Figma-Bauform separator, Make-Kit, Vitrino, MCP) |
+| `saltligilo` | trägt (Skemo mit `layer`, Uzo, Web mit Fokusziel, React, Figma-Kontrolle, Make-Kit, Vitrino, MCP); Schatten in Figma mit ④ |
+
+### Abweichungen von der Spec
+
+1. **`to` statt `target`** (D-04): `target` ist ein Web-Begriff (`skemo-web-term`, Art. VIII, Spec 008 D-13); die Skemo nennt das Ziel wie der `ligilo`, der Web-Celo buchstabiert es.
+2. **Figma zeichnet den `saltligilo` in beiden Zuständen** (Spec: „nur der sichtbare Fokuszustand“): die Paritätsprüfung vergleicht jede Variante der Skemo; der Ruhezustand ist die Variante ohne Ring (auf der Seite unsichtbar). Eine Variante wegzulassen hieße, eine Grenze zu schwächen (Regel 0.4).
+3. **Figma-Set `ikono` name × size × intent** (Spec: „name × size; Farbe an `color.text.default` gebunden“): `intent` schlüsselt die Glyphenfarbe in der Skemo und ist damit Achse; die neutrale Variante bindet `color.text.default` wie die Spec will, die Status-Varianten ihre Status-Textfarbe. Raster wie die Spec: Namen × Größe.
+4. **`avizo.icon` bindet die Status-Textfarbe** (`color.status.<intent>.text`) statt der Akzentfarbe: das Icon steht neben den Wörtern, nicht am Rand.
+
+### Befunde / Mankoj
+
+- **B-1** Playwright-Locators durchdringen Shadow-Roots: ein komponiertes `fm-ikono` mit eigener `[part="control"]` brach drei `elektilo`-Specs („resolved to 2 elements“). Die Glyphe ist darum die Kontrolle des Icons (`part="glyph"`, D-02); `stylesheetInventory` kennt sie. Kein Manko.
+- **B-2** Die Report-Headline des Plugins überschritt mit 20 Sets 4 000 Zeichen (4 325): `placement` je Set in den Teil `state` verschoben, der Report selbst unverändert (D-06). Kein Manko.
+- **B-3** `stylesheetInventory` liest `data-*`-Attribute als Props: ein `data-mirror` an der Glyphe wurde zur Prop `mirror` (`parity-prop-mismatch`). Spiegelung als Klasse `fm-mirror`. Kein Manko.
+- **B-4** Eine Farbe `inherit` schrieb keine Regel, das Web-Inventar kannte `intent=neutral` nicht; `inherit` schreibt jetzt `color: inherit` (ein CSS-Schlüsselwort). Figma nennt für `inherit` keine Farbe (die Skemo nennt keine). Kein Manko.
+- **B-5** Figma kann eine Vektorform nicht per Modus wechseln; die BOOLEAN-Variable an `visible` je Aspekto ist der Weg (D-06) – eine Annahme des Doubles, bis f10b-5 misst, dass `setBoundVariable("visible", …)` an einem Rahmen hält und `createNodeFromSvg` Phosphors 256er-Pfade skaliert.
+- **B-6** Der Sprunglink-Spec „Enter setzt den Fokus“ fiel im Chromium-Lauf aller neuen Specs einmal (Tab unter Last nicht angekommen), allein grün; der Spec fokussiert den Link jetzt direkt und prüft Enter (der Tab-Weg steht im ersten Spec).
+
+### Offen (für den Maintainer)
+
+- **O-6 Vorgabewörter.** Vitrino: Status-Icons mit `meaning.de` als Namen („Gefahr, Fehler“ …); Figma: kein Label-Wort für `ikono` und `apartigilo` (keine Beschriftung), `saltligilo` „Ziel“ wie der `ligilo`. Zur Bestätigung.
+- **O-7 Restliche Zeichen der Projektion.** Haken (`markobutono`), Punkt (`elekto`), Bogen (`plenstato`), Pflichtstern und die Außen-Markierung des `ligilo` bleiben gezeichnete Zeichen; Kandidaten fürs Ikonaro: `external` am `ligilo` (`icon-end`), `check` am `markobutono`. Nicht Teil von G9 ②.
+- **O-8 Schatten des `saltligilo` in Figma.** Der Plan trägt ihn (`variant.shadow`), die Kontrolle bindet ihn erst mit ④ (`setBoundVariableForEffect`, wie `dialogo`).
+- **O-9 `brief` des `ikono`.** Die Achse `name` mit 15 Werten steht im `brief` (jedes Enum ist eine Achse); gemessen ≤ 750. Mit +4 Namen (Spec 015) wächst er; Grenze beobachten.
+- **O-10 `intent` am `ikono`.** Wo ein Status-Icon neben einem Status-Wort steht, erbt es dessen Farbe; `intent` braucht es nur allein stehend – und dann mit Namen (D-01). Ob die Achse bleibt oder der `avizo`-Weg (Farbe vom Kontext) reicht: Maintainer.
 
 ## ③ Typografie
 

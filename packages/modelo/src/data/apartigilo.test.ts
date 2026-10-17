@@ -98,8 +98,8 @@ describe("the Uzo of the apartigilo (section ②)", () => {
 });
 
 describe("suggest_ero of the divider (Gvidanto)", () => {
-  it("'Trennlinie zwischen zwei Abschnitten' is the apartigilo; 'a divider' too", () => {
-    expect(suggest("Trennlinie zwischen zwei Abschnitten").suggestion).toEqual({
+  it("'Trennlinie zwischen den Abschnitten' is the apartigilo; 'a divider' too", () => {
+    expect(suggest("Trennlinie zwischen den Abschnitten").suggestion).toEqual({
       ero: "apartigilo",
       props: {},
     });

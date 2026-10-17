@@ -1,0 +1,51 @@
+{
+  "$schema": "../../../schema/modelo.schema.json#/$defs/UzoFile",
+  "uzo": {
+    "id": "uzo_01M55X2WZS3W6YXNGRCB91BWG5",
+    "ero": "ero_01M55X2W7FMR4C5F279M85EAC2",
+    "skemo": "ske_01M55X2WKJTJVMKK7CPB0ZKHFP",
+    "purpose": "Separates groups of content where space alone does not.",
+    "instead": [
+      {
+        "goal": "spacing-only",
+        "keywords": {
+          "en": ["spacing", "whitespace", "breathing"],
+          "de": ["abstand", "zwischenraum", "luft"]
+        },
+        "ero": null,
+        "kialo": "Where space alone tells the groups apart, a line adds noise, because every line asks to be read as a boundary; the container owns the space (spacing-owned-by-container), and a person decides whether the groups need more than it."
+      }
+    ],
+    "boundary": [
+      {
+        "case": "labelled-line",
+        "action": "ask-human",
+        "keywords": {
+          "en": ["labelled", "inscribed", "captioned"],
+          "de": ["beschriftete", "beschriftet", "beschriftung"]
+        },
+        "kialo": "A line with a word in it is a heading of the group below or a choice between two ways, because the word carries the meaning and the line only frames it; a person decides whether it is a titolo or two paths."
+      }
+    ],
+    "composes": {
+      "containers": [
+        {
+          "name": "page-section",
+          "kialo": "A section of a page separates its groups with a line where the space between them is already taken, because the eye needs one edge to stop at."
+        }
+      ],
+      "with": [],
+      "never": [],
+      "spacing": {
+        "owner": "container",
+        "regulo": "spacing-owned-by-container"
+      }
+    },
+    "slots": {},
+    "layout": {
+      "size": "container",
+      "wrap": "never"
+    },
+    "content": []
+  }
+}

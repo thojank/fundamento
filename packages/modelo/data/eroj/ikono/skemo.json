@@ -1,0 +1,131 @@
+{
+  "ero": {
+    "id": "ero_01M55X2W7FMR4C5F279M85EAC1",
+    "name": "ikono",
+    "skemo": "ske_01M55X2WKHZ7MB8QMYK3C5RWFZ",
+    "description": "An icon: shows a symbol from the brand's icon set (the Ikonaro), decorative by default, named when it carries meaning. Its size is a token, its colour the text's around it; a status icon takes its status text colour and is named."
+  },
+  "skemo": {
+    "id": "ske_01M55X2WKHZ7MB8QMYK3C5RWFZ",
+    "ero": "ero_01M55X2W7FMR4C5F279M85EAC1",
+    "props": [
+      {
+        "name": "name",
+        "kind": "enum",
+        "values": [
+          "check",
+          "chevron-down",
+          "chevron-right",
+          "close",
+          "collapse",
+          "danger",
+          "expand",
+          "external",
+          "info",
+          "more",
+          "search",
+          "sort-ascending",
+          "sort-descending",
+          "success",
+          "warning"
+        ],
+        "required": true,
+        "description": "The name of the icon in the Ikonaro (data/ikonaro.json): a word of the core, drawn by every Aspekto in its own set."
+      },
+      {
+        "name": "size",
+        "kind": "enum",
+        "values": ["small", "medium", "large"],
+        "default": "medium",
+        "description": "The size of the box, size.icon.*; an Ero that composes the icon sets it to its own."
+      },
+      {
+        "name": "intent",
+        "kind": "enum",
+        "values": ["neutral", "info", "success", "warning", "danger"],
+        "default": "neutral",
+        "description": "neutral inherits the colour of the text around it; a status intent takes the status text colour (never alone: a status needs a word, Regulo error-not-color-only) and names the icon."
+      },
+      {
+        "name": "label",
+        "kind": "string",
+        "description": "The name of the icon where it carries meaning: then it is an image with that name; without it the icon is decorative and not heard (Regulo icon-meaning-named)."
+      }
+    ],
+    "states": ["rest"],
+    "slots": [],
+    "parts": {
+      "glyph": { "color": { "by": ["intent"] } },
+      "box": { "size": { "by": ["size"] } }
+    },
+    "bindings": [
+      { "part": "glyph", "property": "color", "when": { "intent": "neutral" }, "token": "inherit" },
+      {
+        "part": "glyph",
+        "property": "color",
+        "when": { "intent": "info" },
+        "token": "color.status.info.text"
+      },
+      {
+        "part": "glyph",
+        "property": "color",
+        "when": { "intent": "success" },
+        "token": "color.status.success.text"
+      },
+      {
+        "part": "glyph",
+        "property": "color",
+        "when": { "intent": "warning" },
+        "token": "color.status.warning.text"
+      },
+      {
+        "part": "glyph",
+        "property": "color",
+        "when": { "intent": "danger" },
+        "token": "color.status.danger.text"
+      },
+      { "part": "box", "property": "size", "when": { "size": "small" }, "token": "size.icon.small" },
+      { "part": "box", "property": "size", "when": { "size": "medium" }, "token": "size.icon.medium" },
+      { "part": "box", "property": "size", "when": { "size": "large" }, "token": "size.icon.large" }
+    ],
+    "a11y": {
+      "role": "img",
+      "name": ["prop:label"],
+      "states": {},
+      "keys": []
+    },
+    "constraints": [
+      {
+        "when": { "intent": "info" },
+        "allowed": { "prop:label": ["filled"] },
+        "kialo": "A status icon says something, so it carries a name: a picture without a name is silent for a screen reader (icon-meaning-named)."
+      },
+      {
+        "when": { "intent": "success" },
+        "allowed": { "prop:label": ["filled"] },
+        "kialo": "A status icon says something, so it carries a name: a picture without a name is silent for a screen reader (icon-meaning-named)."
+      },
+      {
+        "when": { "intent": "warning" },
+        "allowed": { "prop:label": ["filled"] },
+        "kialo": "A status icon says something, so it carries a name: a picture without a name is silent for a screen reader (icon-meaning-named)."
+      },
+      {
+        "when": { "intent": "danger" },
+        "allowed": { "prop:label": ["filled"] },
+        "kialo": "A status icon says something, so it carries a name: a picture without a name is silent for a screen reader (icon-meaning-named)."
+      }
+    ],
+    "goals": [
+      {
+        "goal": "show-icon",
+        "keywords": {
+          "en": ["icon", "symbol", "pictogram", "glyph"],
+          "de": ["icon", "symbol", "piktogramm", "glyphe"]
+        },
+        "props": {},
+        "regulo": "icon-meaning-named"
+      }
+    ]
+  }
+}

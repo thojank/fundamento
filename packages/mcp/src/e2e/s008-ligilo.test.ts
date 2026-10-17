@@ -167,12 +167,14 @@ describe("list_eroj and the brief (A5, acceptance 1)", () => {
   it("lists two Eroj and answers get_ero ligilo with Skemo and Uzo", async () => {
     const listed = await output<{ eroj: { name: string }[] }>(client, "list_eroj", {});
     expect(listed.eroj.map((entry) => entry.name)).toEqual([
+      "apartigilo",
       "atributlisto",
       "avizo",
       "butono",
       "dialogo",
       "elektilo",
       "elekto",
+      "ikono",
       "insigno",
       "kampo",
       "langetaro",
@@ -181,6 +183,7 @@ describe("list_eroj and the brief (A5, acceptance 1)", () => {
       "mezurilo",
       "navigado",
       "plenstato",
+      "saltligilo",
       "sxaltilo",
       "tabelo",
       "tekstareo",

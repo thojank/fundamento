@@ -50,7 +50,9 @@ test.describe("fm-saltligilo behaviour", () => {
     expect(shown.position).toBe("fixed");
     expect(shown.outline).toBeGreaterThan(0);
     const layer = await page.evaluate(() =>
-      getComputedStyle(document.documentElement).getPropertyValue("--fm-elevation-layer-overlay").trim(),
+      getComputedStyle(document.documentElement)
+        .getPropertyValue("--fm-elevation-layer-overlay")
+        .trim(),
     );
     expect(shown.z).toBe(layer);
     expect(shown.top).toBeLessThan(40);
@@ -59,21 +61,22 @@ test.describe("fm-saltligilo behaviour", () => {
 
   test("Enter moves the focus to the target: a landmark without tabindex takes it (the link makes it focusable)", async ({
     page,
-    browserName,
   }) => {
     await serve(
       page,
       out,
       `<fm-saltligilo id="s" to="main"></fm-saltligilo><fm-butono id="b">Davor</fm-butono><main id="main"><h1>Inhalt</h1><fm-butono id="c">Danach</fm-butono></main>`,
     );
-    await page.keyboard.press(TAB(browserName));
+    // The link is focused directly (the Tab path is proved above): Enter follows it.
+    await page.locator("#s").evaluate((element) => {
+      const link = element.shadowRoot?.querySelector('[part="control"]');
+      if (link instanceof HTMLElement) link.focus();
+    });
     await page.keyboard.press("Enter");
-    await expect
-      .poll(() => page.evaluate(() => document.activeElement?.id ?? ""))
-      .toBe("main");
-    expect(await page.evaluate(() => document.getElementById("main")?.getAttribute("tabindex"))).toBe(
-      "-1",
-    );
+    await expect.poll(() => page.evaluate(() => document.activeElement?.id ?? "")).toBe("main");
+    expect(
+      await page.evaluate(() => document.getElementById("main")?.getAttribute("tabindex")),
+    ).toBe("-1");
     expect(await page.evaluate(() => location.hash)).toBe("#main");
     await page.keyboard.press(TAB(browserName));
     await expect.poll(() => page.evaluate(() => document.activeElement?.id ?? "")).toBe("c");

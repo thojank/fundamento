@@ -1,0 +1,68 @@
+{
+  "ero": {
+    "id": "ero_01M55X2W7FMR4C5F279M85EAC3",
+    "name": "saltligilo",
+    "skemo": "ske_01M55X2WKJTJVMKK7CPB0ZKHFQ",
+    "description": "A skip link: the first focusable element of a page, hidden until it has the focus, then shown above everything; it jumps to the main content past the repeated parts (WCAG 2.4.1)."
+  },
+  "skemo": {
+    "id": "ske_01M55X2WKJTJVMKK7CPB0ZKHFQ",
+    "ero": "ero_01M55X2W7FMR4C5F279M85EAC3",
+    "props": [
+      {
+        "name": "to",
+        "kind": "string",
+        "required": true,
+        "description": "The id of the target on the same page: a landmark (main) or an element that can take the focus; the Web Celo spells it as the fragment of the link and gives the target the focus."
+      }
+    ],
+    "states": ["rest", "focus"],
+    "slots": [{ "name": "label", "default": true, "text": true }],
+    "parts": {
+      "label": {
+        "color": { "fixed": "color.text.default" },
+        "typography": { "fixed": "typography.label.1" }
+      },
+      "surface": {
+        "fill": { "fixed": "color.background.raised" },
+        "layer": { "fixed": "elevation.layer.overlay" },
+        "shadow": { "fixed": "elevation.shadow.floating" }
+      },
+      "border": {
+        "color": { "fixed": "color.border.strong" },
+        "width": { "fixed": "border.width.default" }
+      },
+      "box": {
+        "height": { "fixed": "size.target.min" },
+        "inline-padding": { "fixed": "spacing.medium" },
+        "radius": { "fixed": "radius.role.control" }
+      },
+      "focus-ring": {
+        "ring": { "fixed": "focus.ring" },
+        "offset": { "fixed": "focus.offset" },
+        "color": { "fixed": "color.focus.inner" }
+      }
+    },
+    "bindings": [],
+    "a11y": {
+      "role": "link",
+      "name": ["slot:label"],
+      "states": {},
+      "keys": ["Enter"],
+      "texts": {
+        "label-empty": { "de": "Zum Inhalt springen", "en": "Skip to content" }
+      }
+    },
+    "goals": [
+      {
+        "goal": "skip-to-content",
+        "keywords": {
+          "en": ["skip", "skiplink", "jump"],
+          "de": ["sprunglink", "überspringen", "springen"]
+        },
+        "props": {},
+        "regulo": "link-label-names-destination"
+      }
+    ]
+  }
+}

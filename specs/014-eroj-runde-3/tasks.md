@@ -38,7 +38,35 @@
 
 ## ② Grundbausteine
 
-*(folgt nach dem Merge von ①)*
+**Branch:** `261017-spec-014-grundbausteine-e3bf97` (von `main` @ `498b238`) · Aufgaben ② zählen ab T801.
+
+### A – Rot zuerst
+- [x] **T801 Tests** Daten-Pins `data/ikono.test.ts`, `data/apartigilo.test.ts`, `data/saltligilo.test.ts` (Skemo, Uzo, Reguloj, Jugxoj, Gvidanto-Dialoge), Schema (`contracts/spec014-schema.test.ts`: `layer`, leeres `a11y.name`), Eroj 17 → 20 in allen Pins (Export-Satz „twenty“, Listen, Ontologio), Projekcioj (`web-component.test.ts`, `css.test.ts`, `figma.test.ts`, `plugin.test.ts`, `datumoj.test.ts`, `make-kit.test.ts`, `gvidanto/eroj.test.ts` für `columns-from`), Browser-Specs (`ikono.spec.ts`, `apartigilo.spec.ts`, `saltligilo.spec.ts`, `avizo.spec.ts`, `elektilo.spec.ts`, `tabelo.spec.ts`, `alirebleco.check.ts`, `internacia.spec.ts`, `vitrino.check.ts`), React-Typen, MCP-Dialoge `e2e/s014-grundbausteine.test.ts`, Doku-Test ②, drei Fehlerfixtures (`ikono-web-term`, `apartigilo-instead-kialo-missing`, `saltligilo-slot-required-missing`). Rot in `8258240` (Modelo 49 Tests in 11 Dateien, Projekcioj 23 in 5 Dateien, MCP-Suite s014; Browser-Specs und `plugin.test` im Lauf beobachtet).
+
+### B – Grün
+- [x] **T802 `ikono`** Skemo (name-Enum des Ikonaro, size, intent mit `inherit`, label, vier Constraints), Uzo, Regulo `icon-meaning-named` (`reg_01M55X2XBTVBQC8HSYFM3SBYM2`), vier Jugxoj `jug_01M55X2XQXVH4CN9PHB5ZNPNEH`–`QXVH…EJ`, `QYKE…23`, `QYKE…24`, Nachtrag am Jugxo `jug_01M31TV1V4S3RNBPWSRB2CGEDK`, Ontologio `Ikono` als Ero (D-01, D-08).
+- [x] **T803 `apartigilo`** Skemo (orientation schlüsselt `box.height`), Uzo, Schema `a11y.name` ohne `minItems`, Ontologio `Apartigilo` (D-03).
+- [x] **T804 `saltligilo`** Skemo (`to`, `layer` als Teil-Eigenschaft, `a11y.texts.label-empty`), Uzo, `link-label-names-destination` ausgeweitet, Ontologio `Saltligilo` (D-04).
+- [x] **T805 Nachbarn** `butono` (Slots nehmen `ikono`, composes), `avizo` (Teil `icon`, composes), `insigno`, `tabelo`, `elektilo` (composes), `spacing-owned-by-container` (D-05).
+- [x] **T806 Modelo-Code** `PART_PROPERTY_TYPES.layer`, Loader liest `ikonoj/*.svg` (`LoadedAspektoPackage.ikonoj`), `icon-meaning-named` als Textregel, `uzoOf` mit `columns-from` (O-3) und MCP-Ausgabeschema, Zahlwörter bis zwanzig, Vortaro-Lint (`currentcolor`, `mask-*`, `inset-*`, `border-block-start-style`, `z-index`).
+- [x] **T807 Web** Element-Template (Hosts `icon`, `separator`; Sprunglink `href="#"`, Fokusziel, Standardtext; Icons in `elektilo`, `tabelo`, `avizo`; `size` an geslotteten Icons), Stylesheet (Maske, Linie, `layer` → `z-index`, Sprunglink verborgen bis Fokus), CSS-Celo `--fm-ikono-<name>` je Aspekto (D-02, D-05).
+- [x] **T808 Figma** Plan (`ikonoj`, BOOLEAN-Variablen, Bauformen `icon`/`separator`, `extraAxes`, Icons je Variante, `INHERIT_COLOR`, `composed["reason-help"]`), Plugin (`drawGlyphs`, `drawIcon`, `drawSeparator`, Icons in Kontrolle/Select/Tabelle/Hinweis, Dialog-Hilfesatz O-5, `placement` im Teil `state`), `FIGMA_NOT_DRAWN` ohne `icon` (D-06, D-07).
+- [x] **T809 Vitrino, Make-Kit, React** Ikonaro-Raster, beide Richtungen des Trenners, Sprunglink, `butono` mit `icon-start`; drei Guideline-Sätze; React-Typen (D-09, D-10).
+
+### C – Abschluss
+- [x] **T810 Doku** plan ②, tasks ②, Vojmapo Zeile 4, README.
+- [ ] **T811 Messungen** unten; Bericht im PR.
+
+### Messungen
+
+| Was | Wert |
+|---|---|
+| Commits ② | rot `8258240`, grün: Hash in der Zeile nach dem Commit |
+| `brief` | ikono, apartigilo, saltligilo ≤ 750 (Daten-Tests und MCP e2e) |
+| Parität | `check:parity` 20 Eroj, 0 Differenzen, 225 Freigaben |
+| `check:regularo` | 55 Reguloj, 172 Jugxoj, 20 Uzoj, 0 Warnungen (keine neue `goal-keyword-shared`) |
+| Tests lokal | Modelo, Projekcioj (Figma-Plugin-Double: Icons je Aspekto, 225 Varianten), MCP 264; Browser-Specs der ② in Chromium grün |
+| CI | Lauf: Nummer und Dauer in der Zeile nach dem Lauf |
 
 ## ③ Typografie
 

@@ -518,11 +518,16 @@ test("the Ikonaro grid, the apartigilo and the saltligilo are upgraded in their 
   await expect(icons).toHaveCount(15 * 3 + 4);
   await expect(page.locator("#fm-vitrino-ikono").getByRole("img")).toHaveCount(4);
   const maskOf = () =>
-    page.locator('#fm-vitrino-ikono fm-ikono[name="close"]').first().evaluate((element) => {
-      const glyph = element.shadowRoot?.querySelector('[part="glyph"]') as HTMLElement;
-      const style = getComputedStyle(glyph);
-      return style.maskImage !== "" && style.maskImage !== "none" ? style.maskImage : style.webkitMaskImage;
-    });
+    page
+      .locator('#fm-vitrino-ikono fm-ikono[name="close"]')
+      .first()
+      .evaluate((element) => {
+        const glyph = element.shadowRoot?.querySelector('[part="glyph"]') as HTMLElement;
+        const style = getComputedStyle(glyph);
+        return style.maskImage !== "" && style.maskImage !== "none"
+          ? style.maskImage
+          : style.webkitMaskImage;
+      });
   const komuna = await maskOf();
   expect(komuna).toContain("data:image/svg+xml");
   await page.locator('[data-fm-switch="aspekto"][data-fm-valoro="ekzemplo"]').click();

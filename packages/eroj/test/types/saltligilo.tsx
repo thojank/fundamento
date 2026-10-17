@@ -8,8 +8,8 @@ export const valid = <Saltligilo to="main">Zum Inhalt springen</Saltligilo>;
 // @ts-expect-error to is the id of the target, a string
 export const wrongTarget = <Saltligilo to={3}>Zum Inhalt springen</Saltligilo>;
 
-// @ts-expect-error a skip link has no size
 export const noSize = (
+  // @ts-expect-error a skip link has no size
   <Saltligilo to="main" size="small">
     Zum Inhalt springen
   </Saltligilo>

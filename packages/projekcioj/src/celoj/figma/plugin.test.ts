@@ -279,6 +279,8 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
     const openButono = result.mankoj.open.filter((manko) => manko.set === "butono");
     expect(openButono.map((manko) => manko.part)).toEqual(["boundary", "slots", "content"]);
     expect(result.mankoj.open.map((manko) => manko.set)).toEqual([
+      // Spec 014 ②: the apartigilo, the ikono and the saltligilo carry a Uzo like every set.
+      ...["boundary", "slots", "content"].map(() => "apartigilo"),
       // Spec 011 ④: the atributlisto, the mezurilo and the tabelo carry a Uzo like every set.
       ...["boundary", "slots", "content"].map(() => "atributlisto"),
       // Spec 011 ③: the avizo, the insigno and the plenstato carry a Uzo like every set.
@@ -288,6 +290,7 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
       ...["boundary", "slots", "content"].map(() => "dialogo"),
       ...["boundary", "slots", "content"].map(() => "elektilo"),
       ...["boundary", "slots", "content"].map(() => "elekto"),
+      ...["boundary", "slots", "content"].map(() => "ikono"),
       ...["boundary", "slots", "content"].map(() => "insigno"),
       ...["boundary", "slots", "content"].map(() => "kampo"),
       // Spec 011 ⑤: the langetaro and the navigado carry a Uzo like every set.
@@ -297,6 +300,7 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
       ...["boundary", "slots", "content"].map(() => "mezurilo"),
       ...["boundary", "slots", "content"].map(() => "navigado"),
       ...["boundary", "slots", "content"].map(() => "plenstato"),
+      ...["boundary", "slots", "content"].map(() => "saltligilo"),
       ...["boundary", "slots", "content"].map(() => "sxaltilo"),
       ...["boundary", "slots", "content"].map(() => "tabelo"),
       ...["boundary", "slots", "content"].map(() => "tekstareo"),
@@ -324,6 +328,8 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
       result.mankoj.closed.filter((manko) => manko.set === "butono").map((manko) => manko.part),
     ).toEqual(["boundary", "slots", "content"]);
     expect(result.mankoj.closed.map((manko) => manko.set)).toEqual([
+      // Spec 014 ②: the apartigilo, the ikono and the saltligilo close their three parts too.
+      ...["apartigilo", "apartigilo", "apartigilo"],
       // Spec 011 ④: the atributlisto, the mezurilo and the tabelo close their three parts too.
       ...["atributlisto", "atributlisto", "atributlisto"],
       // Spec 011 ③: the avizo, the insigno and the plenstato close their three parts too.
@@ -333,6 +339,7 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
       ...["dialogo", "dialogo", "dialogo"],
       ...["elektilo", "elektilo", "elektilo"],
       ...["elekto", "elekto", "elekto"],
+      ...["ikono", "ikono", "ikono"],
       ...["insigno", "insigno", "insigno"],
       ...["kampo", "kampo", "kampo"],
       // Spec 011 ⑤: the langetaro and the navigado close their three parts too.
@@ -342,6 +349,7 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
       ...["mezurilo", "mezurilo", "mezurilo"],
       ...["navigado", "navigado", "navigado"],
       ...["plenstato", "plenstato", "plenstato"],
+      ...["saltligilo", "saltligilo", "saltligilo"],
       ...["sxaltilo", "sxaltilo", "sxaltilo"],
       ...["tabelo", "tabelo", "tabelo"],
       ...["tekstareo", "tekstareo", "tekstareo"],
@@ -932,8 +940,12 @@ describe("a run reports every node of the set that was there at its start and is
     return found;
   };
   const LAST = "emphasis=low, intent=neutral, size=large, state=loading";
-  /** Variant, focus ring, focus gap, control, label: five nodes per variant, plus the set. */
-  const NODES = 72 * 5 + 1;
+  /**
+   * Variant, focus ring, focus gap, control, label: five nodes per variant, plus the set; since
+   * Spec 014 ② the icon-start of every variant with its glyph frame and vector (the repo plan:
+   * komuna alone): eight nodes per variant.
+   */
+  const NODES = 72 * 8 + 1;
 
   it("counts the same nodes at start and end of a clean run, and loses none", async () => {
     const double = modelDouble();
@@ -2289,7 +2301,9 @@ describe("a failed run leaves everything readable in the console (F21)", () => {
     expect(partial.phase).toBe("components");
     expect(partial.variables).toBeGreaterThan(0);
     expect(butonoOf(partial.components)?.set).toBe("butono");
-    expect(butonoOf(partial.components)?.created).toHaveLength(39);
+    // Spec 014 ②: the icon-start of every variant takes two creations more per variant, so the
+    // abort comes two variants earlier.
+    expect(butonoOf(partial.components)?.created).toHaveLength(37);
   });
 
   it("prints the report of a good run as one JSON string too", async () => {
@@ -2507,6 +2521,8 @@ describe("every bound paint shows the plan's colour after the first and the seco
       warnings: [],
       // Spec 008: two sets; the ligilo has placement × size × state = 30 variants.
       components: [
+        // Spec 014 ②: the apartigilo has orientation = 2 variants in one state.
+        { set: "apartigilo", created: 2, updated: 0 },
         // Spec 011 ④: the atributlisto has layout = 3 variants in one state (auto since Spec 014 ①).
         { set: "atributlisto", created: 3, updated: 0 },
         // Spec 011 ③: the avizo has intent = 4 variants in one state (dismissible is no axis).
@@ -2518,6 +2534,8 @@ describe("every bound paint shows the plan's colour after the first and the seco
         { set: "elektilo", created: 15, updated: 0 },
         // Spec 010 ③: the elekto has size × state = 15 variants.
         { set: "elekto", created: 15, updated: 0 },
+        // Spec 014 ②: the ikono has name × size × intent = 225 variants in one state.
+        { set: "ikono", created: 225, updated: 0 },
         // Spec 011 ③: the insigno has intent × size = 10 variants in one state.
         { set: "insigno", created: 10, updated: 0 },
         // Spec 009: the kampo has size × state = 18 variants.
@@ -2536,6 +2554,8 @@ describe("every bound paint shows the plan's colour after the first and the seco
         { set: "navigado", created: 3, updated: 0 },
         // Spec 011 ③: the plenstato has kind = 2 variants in one state.
         { set: "plenstato", created: 2, updated: 0 },
+        // Spec 014 ②: the saltligilo has state = 2 variants (rest and focus).
+        { set: "saltligilo", created: 2, updated: 0 },
         // Spec 010 ①: the sxaltilo has checked × size × state = 24 variants.
         { set: "sxaltilo", created: 24, updated: 0 },
         // Spec 011 ④: the tabelo has density × state = 6 variants (the states of the sort button).
@@ -3787,7 +3807,13 @@ describe("every set lies in the frame Eroj in the section Fundamento (F-1, F-2, 
       moved: [],
       frame: { name: FRAME, found: false, created: true, wrap: "WRAP" },
     });
-    expect(headline.components.map((component) => component.placement)).toEqual(inLayout);
+    // Spec 014 ②: with twenty sets the placement stands in the part state of every set.
+    const placements = lines
+      .filter((line) => line.startsWith("{"))
+      .map((line) => JSON.parse(line) as { part?: string; value?: { placement?: unknown } })
+      .filter((part) => part.part === "state")
+      .map((part) => part.value?.placement);
+    expect(placements).toEqual(inLayout);
   });
 });
 
@@ -4213,7 +4239,10 @@ describe("the elektilo is drawn as the field of the kampo with the chevron in it
     expect(bound(indicator, "height")).toBe("size/icon/medium");
     expect(indicator?.properties.layoutSizingHorizontal).toBe("FIXED");
     expect(indicator?.properties.opacity).toBe(1);
-    expect(descendant(rest, "indicator")?.children.map((child) => child.name)).toEqual(["mark"]);
+    // Spec 014 ②: the chevron is a glyph frame per Aspekto of the plan (the repo plan: komuna).
+    expect(descendant(rest, "indicator")?.children.map((child) => child.name)).toEqual([
+      "glyph-komuna",
+    ]);
     const mark = descendant(rest, "mark");
     expect(mark?.type).toBe("VECTOR");
     expect(mark?.properties.constraints).toEqual({ horizontal: "SCALE", vertical: "SCALE" });
@@ -4466,7 +4495,7 @@ describe("the dialogo is drawn as a dialog: surface with heading, message, reaso
       expect(
         content?.children.map((child) => child.name),
         reason,
-      ).toEqual(["reason-label", "reason-field"]);
+      ).toEqual(["reason-label", "reason-field", "reason-help"]);
       expect(descendant(asked, "reason-label")?.properties.characters, reason).toBe("Begründung");
       const field = descendant(asked, "reason-field");
       expect(bound(field, "height"), reason).toBe("size/control/large");
@@ -4476,7 +4505,11 @@ describe("the dialogo is drawn as a dialog: surface with heading, message, reaso
     }
     const none = descendant(variant("size=medium, reason=none, state=rest"), "content");
     expect(none?.properties.visible).toBe(false);
-    expect(none?.children.map((child) => child.name)).toEqual(["reason-label", "reason-field"]);
+    expect(none?.children.map((child) => child.name)).toEqual([
+      "reason-label",
+      "reason-field",
+      "reason-help",
+    ]);
     expect(bound(descendant(none, "reason-field"), "height")).toBeUndefined();
   });
 
@@ -4736,7 +4769,8 @@ describe("the avizo is drawn as a notice: surface with accent, heading, message,
       expect(bound(control, side), side).toBe("spacing/medium");
     }
     expect(bound(control, "itemSpacing")).toBe("spacing/small");
-    expect(control?.children.map((child) => child.name)).toEqual(["texts", "dismiss"]);
+    // Spec 014 ②: the icon of the intent stands first.
+    expect(control?.children.map((child) => child.name)).toEqual(["icon", "texts", "dismiss"]);
     const texts = descendant(info, "texts");
     expect(texts?.properties.layoutMode).toBe("VERTICAL");
     expect(bound(texts, "itemSpacing")).toBe("spacing/small");
@@ -6062,7 +6096,8 @@ describe("the langetaro is drawn as tabs: the list with three tabs, the first ac
 // the butono draws its icon-start, the elektilo its chevron, the tabelo its sort arrow and the
 // avizo its status icon the same way; the dialog shows the help of its reason (O-5 of ①).
 describe("icons are drawn from the glyphs of every Aspekto and switch with the brand (Spec 014 ②)", () => {
-  const source = repoFiles["figma/plugin/code.js"] ?? "";
+  // The plan of core + ekzemplo: two Aspektoj, two glyph frames per icon.
+  const source = files["figma/plugin/code.js"] ?? "";
   const bound = (node: DoubleNode | undefined, field: string) => node?.boundVariables[field]?.name;
   const paintOf = (node: DoubleNode | undefined, field: "fills" | "strokes") =>
     ((node?.properties[field] ?? []) as { boundVariables?: { color?: { name: string } } }[])[0]
@@ -6087,7 +6122,10 @@ describe("icons are drawn from the glyphs of every Aspekto and switch with the b
     );
     expect(variant?.children.map((child) => child.name)).toEqual(["control"]);
     const control = descendant(variant, "control");
-    expect(control?.children.map((child) => child.name)).toEqual(["glyph-komuna", "glyph-ekzemplo"]);
+    expect(control?.children.map((child) => child.name)).toEqual([
+      "glyph-komuna",
+      "glyph-ekzemplo",
+    ]);
     expect(bound(control, "width")).toBe("size/icon/medium");
     expect(bound(control, "height")).toBe("size/icon/medium");
     const komuna = descendant(variant, "glyph-komuna");
@@ -6127,8 +6165,12 @@ describe("icons are drawn from the glyphs of every Aspekto and switch with the b
     );
     const elektilo = setOf("elektilo");
     const indicator = descendant(elektilo?.children[0], "indicator");
-    expect(indicator?.children.map((child) => child.name)).toEqual(["glyph-komuna", "glyph-ekzemplo"]);
-    expect(descendant(elektilo?.children[0], "mark")).toBeUndefined();
+    expect(indicator?.children.map((child) => child.name)).toEqual([
+      "glyph-komuna",
+      "glyph-ekzemplo",
+    ]);
+    // No hand-drawn sign: the only vectors are the imports of the glyphs.
+    expect(descendant(elektilo?.children[0], "mark")?.parent?.name).toBe("glyph-komuna");
     expect(paintOf(vectorOf(descendant(indicator, "glyph-komuna")), "fills")).toBe(
       "color/text/muted",
     );
@@ -6141,7 +6183,7 @@ describe("icons are drawn from the glyphs of every Aspekto and switch with the b
     expect(bound(sortIndicator, "width")).toBe("size/icon/small");
   });
 
-  it("the avizo draws the icon of its intent before its texts, in the accent's colour; the dialog shows the help of its reason (O-5)", async () => {
+  it("the avizo draws the icon of its intent before its texts, in the status text colour; the dialog shows the help of its reason (O-5)", async () => {
     const { setOf } = await drawn();
     const avizo = setOf("avizo");
     const danger = avizo?.children.find((child) => child.name === "intent=danger, state=rest");
@@ -6178,7 +6220,7 @@ describe("icons are drawn from the glyphs of every Aspekto and switch with the b
     expect(bound(horizontal, "strokeTopWeight")).toBe("border/width/default");
     const vertical = descendant(apartigilo?.children[1], "control");
     expect(bound(vertical, "strokeLeftWeight")).toBe("border/width/default");
-    expect(bound(vertical, "minHeight")).toBe("size/control/medium");
+    expect(bound(vertical, "height")).toBe("size/control/medium");
     const saltligilo = setOf("saltligilo");
     expect(saltligilo?.children.map((child) => child.name)).toEqual(["state=rest", "state=focus"]);
     expect(paintOf(descendant(saltligilo?.children[0], "control"), "fills")).toBe(

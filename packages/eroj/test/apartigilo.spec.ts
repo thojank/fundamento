@@ -27,11 +27,17 @@ test.describe("fm-apartigilo behaviour", () => {
   test("a horizontal separator: role separator, aria-orientation horizontal, the line along the start edge, the width of its container", async ({
     page,
   }) => {
-    await serve(page, out, `<div style="inline-size: 20rem"><fm-apartigilo id="h"></fm-apartigilo></div>`);
+    await serve(
+      page,
+      out,
+      `<div style="inline-size: 20rem"><fm-apartigilo id="h"></fm-apartigilo></div>`,
+    );
     await expect(page.getByRole("separator")).toHaveCount(1);
     const line = await lineOf(page, "h");
     const token = await page.evaluate(() =>
-      getComputedStyle(document.documentElement).getPropertyValue("--fm-border-width-default").trim(),
+      getComputedStyle(document.documentElement)
+        .getPropertyValue("--fm-border-width-default")
+        .trim(),
     );
     expect(line.role).toBe("separator");
     expect(line.orientation).toBe("horizontal");
@@ -61,7 +67,9 @@ test.describe("fm-apartigilo behaviour", () => {
     expect(line.height).toBeGreaterThanOrEqual(control);
   });
 
-  test("decorative: role none, nothing for assistive technology; the line stays", async ({ page }) => {
+  test("decorative: role none, nothing for assistive technology; the line stays", async ({
+    page,
+  }) => {
     await serve(page, out, `<fm-apartigilo id="d" decorative></fm-apartigilo>`);
     await expect(page.getByRole("separator")).toHaveCount(0);
     const line = await lineOf(page, "d");
