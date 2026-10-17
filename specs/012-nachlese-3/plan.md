@@ -86,4 +86,71 @@ In [`tasks.md`](tasks.md) ①.
 
 ## ② Werkzeuge
 
-Folgt in PR ②.
+**Branch:** `261017-nachlese-3-werkzeuge-e137d7` (gestapelt auf ① @ `90d31bc`, PR #68) · **Datum:** 2026-10-17.
+
+### Zusammenfassung
+
+1. **W1:** `ci.yml` in drei Jobs nebeneinander — `unit` (Build, Tests ohne die Eroj, Perf, Lint, die sechs Modelo-Checks, Release), `eroj` (Playwright in zwei Shards), `rendered-checks` (Alirebleco der Eroj, Make Kit, Quickstart, Vitrino); kein Timeout erhöht (D-01). Messung vorher/nachher unten.
+2. **W2:** `check:alirebleco` misst jede bekannte Aspekto: `komuna` bindend wie bisher, `ekzemplo` als Warnung `contrast-external-aspekto` (D-02). Bestand: ekzemplo 0 fehlgeschlagene Paar-Auswertungen.
+3. **W3:** Figma löst `font.family.code` als Liste von Kandidaten auf (D-03), Manko mit Schließbedingung.
+4. **W4:** die Vitrino zeigt den `mezurilo` ohne Wert (Zeile „unbekannt“, D-04).
+5. **W5:** die Vitrino verdrahtet Reiter-Panel und Sortierung (D-05); die Eroj bleiben (E10).
+6. **W6:** Ontologio-Schema `laboro` mit neun Arbeitsbegriffen, `Kampo` mit drei altLabels, `describe_term` findet jeden (D-06).
+
+Kein neues Ero, kein Token, keine Regulo-Semantik. Schema-Erweiterungen additiv: `ontologio.schema.json` (Schema `laboro`), MCP `describe_term.output.json` (dasselbe Enum).
+
+### Entwurfsentscheidungen
+
+#### D-01 W1: drei CI-Jobs statt einer Reihe (Spec 011 ⑤ B-9, O-21)
+
+Der eine Job fuhr alles nacheinander, und `turbo run test` ließ die Playwright-Suite der Eroj neben den spawnenden e2e-Dateien von `modelo` laufen: dort traf der Hook-Timeout (60 s, Run 38966614433), die Wanduhr stand bei 12 bis 19 Minuten. Jetzt: **`unit`** — Install, Build, `pnpm turbo run test --filter=!@fundamento/eroj`, Perf, Lint, `check:vortaro-lint|parity|regularo|mankoj|alirebleco|clean-room`, `check:release`; **`eroj`** — Playwright-Browser, Build, Vitest der Eroj (React-Typen) und `playwright test --shard=N/2` als Matrix (2 Shards, `fail-fast: false`); **`rendered-checks`** — Playwright-Browser, Build, `check:alirebleco-eroj`, `check:make-kit`, `check:quickstart`, `check:vitrino`. `PLAYWRIGHT_ENGINES` steht an den zwei gerenderten Jobs (auf `main` drei Engines, im PR Chromium), `timeout-minutes: 15` je Job; kein Vitest- oder Playwright-Timeout angehoben. `workflow.test.ts` pinnt die drei Jobs mit ihren Schritten, die Matrix, die Engines und das Budget; der Skript `check` der Wurzel (eine Reihe für lokal) ist unverändert. Die Eroj-Tests laufen im Job `eroj` ohne die Modelo-e2e-Last, die Modelo-e2e-Gruppe ohne Playwright daneben — die Ursache des Hook-Timeouts ist weg, nicht sein Budget.
+
+**Messung vorher** (ein Job, Wanduhr des Laufs): Spec 011 ③ Run 38979497232 **16m15s**; ④ Run 38979562730 **12m03s**; ⑤ Run 38979619902 **15m50s**, Run 38966614433 rot (Hook-Timeout), Neustart 15m50s; Nachlese 3 ① Run 39022824766 **12m04s** (Test-Schritt 7m09s). **Nachher** (drei Jobs, Wanduhr = längster Job): Run-Nummern der drei Läufe in Folge folgen mit dem PR-Lauf (W1_AFTER_RUNS).
+
+#### D-02 W2: `check:alirebleco` über jede bekannte Aspekto (Spec 011 ⑤ B-8)
+
+Der Check lud bisher die Standardquelle (Kern + `komuna`). Jetzt wertet er zusätzlich jede Aspekto aus, die das Modelo kennt: `KNOWN_ASPEKTO_FIXTURES = ["ekzemplo"]` — die Test-Aspekto, die Tests, Vitrino und Figma-Sets über den Kern legen (`test/fixtures/valid/aspekto-ekzemplo/fundamento.config.json`, als Projektquelle komponiert). Ihre fehlgeschlagenen Paar-Auswertungen werden **Warnungen** `contrast-external-aspekto` (Pfad des Paars, Nachricht mit `[ekzemplo]`, Hinweis Regel 0.3), ihre Statistik steht mit Präfix (`ekzemplo:evaluations`, `ekzemplo:errors`, …) im Ergebnis, die Zusammenfassung nennt sie. `komuna` bleibt bindend. Nicht jede Fixture mit Konfiguration zählt (Abweichung 1): `aspekto-font-declared` komponiert ekzemplo mit geänderten Schriften und meldete 18 fehlende Paare — eine Prüf-Fixture, keine Aspekto des Systems. **Bestand:** ekzemplo 0 fehlgeschlagene Paar-Auswertungen über 144 Kombinationen (die gelbe Marke aus ③ B-9/④ B-7/⑤ F-7 liegt auf keinem deklarierten Paar — die Eroj binden sie nicht mehr). `RULE_IDS` += `contrast-external-aspekto` (155).
+
+#### D-03 W3: Figma löst `font.family.code` als Liste auf (F-2)
+
+`fontOf` nahm die erste Familie des Stapels (`stack[0]`); `font.family.code` = `["Geist Mono", "ui-monospace", "monospace"]` fiel in der Datei des Maintainers mit Warnung auf Inter zurück (F-2). Jetzt: der Plan trägt an jedem Schriftpaar **`families`** (die Kandidaten; `family` = `families[0]` bleibt für die Kompatibilität), `figmaFontCandidates(stack)` überspringt die generischen CSS-Namen (`ui-monospace`, `monospace`, `system-ui`, `ui-sans-serif`, `ui-serif`, `ui-rounded`, `sans-serif`, `serif`, `cursive`, `fantasy`, `math`, `emoji`, `fangsong`, `SFMono-Regular`, `-apple-system`, `BlinkMacSystemFont`; echte Familien wie Menlo bleiben), ein durchgehend generischer Stapel behält seinen ersten Namen. `loadFont` im Plugin geht die Leiter über **jeden Kandidaten** im Schnitt des Modells, dann in Regular, dann Inter im Schnitt, dann Inter Regular (`figma.loadFontAsync` je Kandidat); ein späterer Kandidat im richtigen Schnitt ist keine Warnung (der Token nennt ihn, wie ein Browser); die Warnung bei Schnittwechsel oder Rückfall nennt die versuchten Kandidaten. `applyComponents` reicht `families` durch (vorher baute es das Paar neu). Manko `man_01M54N90NZ8Z993BGKHE46KBQX` (Celo figma, `font.family.code`, Beleg: Messung F-2 vom 16.10.), Schließbedingung: ein Plugin-Lauf lädt eine Familie aus `font.family.code` ohne Warnung und Figma nimmt die Bindung von `fontFamily` an `typography/code/font-family` an. Kein Token geändert. Rot zuerst (5), 597 grün, `check:parity` 0 Differenzen, `check:mankoj` 9.
+
+#### D-04 W4: Vitrino zeigt den `mezurilo` ohne Wert (F-9)
+
+`eroMarkup`: ein Ero mit einer Zahl-Prop ohne Default (der Wert des Messbalkens) bekommt eine Zeile **„unbekannt“** nach den Kombinationen — einmal, nicht je `intent` (die Spur ist in jedem `intent` dieselbe gestrichelte Spur ohne Füllung): `<fm-mezurilo>unbekannt<span slot="value-text">nicht geprüft</span>`. `VITRINO_UNKNOWN_LABEL`/`VITRINO_UNKNOWN_TEXT` als eine Quelle (die Figma-Celo nennt denselben Text `METER_UNKNOWN_TEXT`; Kandidat: ein Import). Der Vitrino-Check prüft `aria-valuetext` und `data-unknown` am fünften Messbalken.
+
+#### D-05 W5: Vitrino verdrahtet die Vorführung (F-10)
+
+`skripto.ts` (das Skript der Vitrino-Seite, nicht der Eroj): `fm-langetaro` `select` → das Panel zeigt das Wort des gewählten Reiters (das Kind ohne `slot`, dessen `value` oder Text der `detail.value` ist); `fm-tabelo` `sort-change` → `sort` und `direction` werden gesetzt (der Pfeil dreht sich über `aria-sort`), die Zeilen des Light DOM nach der Spalte sortiert (`th[data-sort]`-Index; eine `numeric`-Spalte als Zahl, sonst `localeCompare("de")`), `tr[data-fm-empty]` bleibt außen vor. Nur die Vitrino; die Eroj bleiben, wie sie sind (E10). Der Vitrino-Check klickt den zweiten Reiter (Panel „Zwei“, `selected="2"`) und die Sortier-Schaltfläche dreimal (ascending → descending mit umgekehrten Zeilen → ascending).
+
+#### D-06 W6: Ontologio – Schema `laboro`, neun Begriffe, Kampo-altLabels
+
+Die Begriffe passen in kein bestehendes Schema (`terminologio` spiegelt die Tabelle der Constitution und ist durch den Drift-Check gebunden, `modelo` die Entitätsarten des Schemas, `principoj` die Grundsätze, `eroj` die Eroj): neues Schema **`laboro`** („die Arbeitsbegriffe des Systems“), additiv in `ontologio.schema.json` und im MCP-Schema von `describe_term`. Begriffe: `Vitrino` (showcase/Schaufenster), `Vojmapo` (roadmap/Fahrplan), `Kialo` (reason/Begründung), `Alirebleco` (accessibility/Barrierefreiheit), `Internacia` (internationalisation/Internationalisierung), `Komparo` (comparison/Vergleich), `Etoso` (ambience/Stimmung, als Kandidat gekennzeichnet), `Komuna` und `Ekzemplo` (die zwei Aspektoj; der Begriff muss groß beginnen, das eo-Label ist `komuna`/`ekzemplo`), je mit `prefLabel` eo/en/de, `altLabel` en/de, Definition en/de und `related`. `Kampo.altLabel.de` += Passwortfeld, Zahlenfeld, Datumsfeld (① B-4). MCP `s012-nachlese-3.test.ts`: `describe_term` je Begriff über Term, deutsches und englisches Label, die drei Feldnamen über `altLabel`.
+
+### Abweichungen vom Briefing
+
+1. **W2 misst `ekzemplo`, nicht jede Fixture mit Konfiguration** (D-02): `KNOWN_ASPEKTO_FIXTURES` ist eine Liste; `aspekto-font-declared` ist eine Prüf-Fixture.
+2. **W6 braucht ein neues Schema `laboro`** (D-06): die Begriffe sind weder Constitution-Terminologie noch Entitätsarten; zwei Schemadateien additiv erweitert.
+3. **W6 `Komuna`/`Ekzemplo` als Begriffe** (D-06): das Muster der Begriffe verlangt einen Großbuchstaben, die Labels tragen die Kleinschreibung.
+4. **W4 eine Zeile „unbekannt“, nicht je intent** (D-04).
+5. **W1 der Release-Check im Job `unit`** (D-01): er braucht keinen Browser; das Briefing nennt ihn nicht.
+6. **W3 Messart des Mankos `binding-accepted`** (D-03): statt `code-font-loads` (geschlossene Liste).
+
+### Befunde / Mankoj
+
+- **B-3 ekzemplo besteht alle deklarierten Paare** (D-02): die in ③/④/⑤ gemessenen Marken-Kontraste (1,2–1,5:1) liegen auf Paaren, die nie deklariert wurden, weil die Eroj die Marke als Linie nicht mehr binden; der Check meldet 0. Die Lücke bleibt: eine Marke als Fläche ohne Grund-Paar wird nicht gemessen. Kandidat: ein Paar `brand-fill-on-background-default` (ui) deklarieren, sobald ein Ero die Marke bindet — es wäre in ekzemplo rot (Warnung).
+- **B-4 `aspekto-font-declared` als Projektquelle** (D-02): 18 fehlende Paare `border-default-on-background-sunken` in ekzemplo light, wenn die Fixture ekzemplo mit eigener Schrift komponiert — ein Nebeneffekt der Fixture, nicht gemessen weiter; Hinweis für den Maintainer, falls Fixtures je als Aspektoj gelten sollen.
+- **B-5 Der Token-Wert liefert genau eine Figma-taugliche Familie** (D-03): `font.family.code` → Kandidaten `[Geist Mono]`; die Leiter ändert für die Datei des Maintainers nichts, die Warnung bleibt, bis die Datei Geist Mono kennt. **Kandidat: die Aspekto nennt eine Code-Schrift** (oder Geist Mono wird in Figma hochgeladen). Tiefer: selbst wenn ein zweiter Kandidat lädt, entscheidet die Bindung an `typography/code/font-family` (Wert: die erste Familie des Tokens), was der Code-Text zeigt — Figma lehnt die Bindung ab, wenn die Familie nicht geladen ist (F30), der Text bleibt in der Schrift der Beschriftung. Soll ein Kandidat wirken, müsste der Variablenwert je Modus den Stapel wie ein Browser auflösen (erste ladbare Familie): ein dateiabhängiger Wert, Entscheidung des Maintainers (O-35). ekzemplos Code-Stapel ist durchgehend generisch (`ui-monospace`, `monospace`): keine Figma-ladbare Familie (② B-7 bleibt).
+- **Mankoj:** +1 (`man_01M54N90NZ8Z993BGKHE46KBQX`, 9 gesamt). Abweichung 6: die Messart heißt `binding-accepted`, nicht `code-font-loads` — die Messarten sind eine geschlossene Liste (`MANKO_MEASURES`, Schema-Enum); eine neue Art wäre eine Schema-Änderung; `binding-accepted` trifft die Lücke (Figma nimmt die Bindung erst mit geladener Familie an).
+
+### Offen (für den Maintainer)
+
+- **O-32** Ob `ekzemplo` im Kontrast-Check bindet (W2): heute Warnung; Entscheidung des Maintainers.
+- **O-33** Der Name des Ontologio-Schemas `laboro` und die Zuordnung der neun Begriffe (W6) — bestätigen.
+- **O-34** Die Zeile „unbekannt“ einmal statt je intent (W4) — bestätigen.
+- **O-35** Code-Schrift in Figma (W3, B-5): die Aspekto nennt eine Code-Schrift, die die Datei kennt, oder Geist Mono wird hochgeladen; ein Variablenwert, der den Stapel je Datei auflöst, ist eine Entscheidung des Maintainers.
+
+### Messungen
+
+In [`tasks.md`](tasks.md) ②.
+
