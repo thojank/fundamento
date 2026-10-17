@@ -35,4 +35,33 @@
 
 ## ② Werkzeuge
 
-Folgt in PR ②.
+**Branch:** `261017-nachlese-3-werkzeuge-e137d7` (gestapelt auf ① @ `90d31bc`, PR #68) · Aufgaben ② zählen ab T601.
+
+### A – Rot zuerst
+- [x] **T601 Tests** `ci/workflow.test.ts` (W1), `checks/alirebleco/index.test.ts` (W2), `vitrino/datumoj.test.ts` und `vitrino.check.ts` (W4, W5), `data/ontologio.test.ts` und MCP `s012-nachlese-3.test.ts` (W6). Rot in `ba6a705` (Modelo 12 von 75 in drei Dateien, projekcioj 1 von 38, Browser und MCP rot im Lauf beobachtet).
+- [x] **T602 Doku-Test** `docs.test.ts` ② rot in `3975384` (1 von 165).
+- [x] **T603 Figma-Tests** W3 (rot zuerst im Durchgang, 5 rot, dann 597 grün): in `d21d9a3`.
+
+### B – Grün
+- [x] **T604 W1** `ci.yml` drei Jobs (D-01), Pins in `workflow.test.ts`: `dc715c2`.
+- [x] **T605 W2** `checks/alirebleco/index.ts` (D-02), `RULE_IDS` 155: `dc715c2`.
+- [x] **T606 W3** Figma Kandidaten-Liste, Manko (D-03): `d21d9a3`.
+- [x] **T607 W4, W5** `datumoj.ts`, `skripto.ts` (D-04, D-05): `dc715c2`.
+- [x] **T608 W6** `ontologio.json`, `ontologio.schema.json`, MCP-Schema (D-06): `dc715c2`.
+
+### C – Abschluss
+- [x] **T609 Doku** plan ②, tasks ②, Vojmapo (grün im Commit der Messungen).
+- [x] **T610 CI** drei Läufe in Folge ≤ 12 min ohne Hook-Timeout: 39024362329 8m04s, 39024959792 8m11s, 39025517138 8m35s (plan ② D-01).
+- [x] **T611 Messungen** unten; Bericht.
+
+### Messungen
+
+| Was | Wert |
+|---|---|
+| `check:alirebleco` | komuna 88 Paare × 72 Kombinationen, 0 Fehler, 2 394 APCA-Warnungen; ekzemplo 144 Kombinationen, 0 fehlgeschlagene Paar-Auswertungen (`aspektoj=2`) |
+| `check:vitrino` | 22 (vorher 21): + Verdrahtung (Reiter-Panel, Sortierung); der mezurilo-Test prüft den fünften Messbalken |
+| `describe_term` | neun Begriffe × 3 Anfragen (Term, de, en) und drei Kampo-altLabels: 12 MCP-Tests |
+| CI (W1) | vorher 12m03s–16m15s (ein Job), nachher 8m04s / 8m11s / 8m35s (drei Läufe in Folge, längster Job `unit`); Details in plan ② D-01 |
+| **Commits** (rot / grün; nach einem Rebase hier ersetzen) | rot `ba6a705` (Tests), `3975384` (Doku-Test) · grün `dc715c2` (W1, W2, W4, W5, W6), Figma W3 `d21d9a3`, Doku `9472957`, W1-Messung im Folgecommit |
+| Tests (je Paket `vitest run`) | modelo 3 229 (vorher 2 957 + 265 = 3 222; +7), mcp 254 (vorher 242), projekcioj 597 (vorher 592), cli 66, eroj Vitest 1 + Playwright 164 (Chromium); `pnpm lint` grün |
+

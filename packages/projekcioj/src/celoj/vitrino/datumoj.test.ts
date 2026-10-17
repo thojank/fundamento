@@ -527,9 +527,14 @@ describe("the Vitrino shows the tabelo, the atributlisto and the mezurilo (Spec 
     expect(grid).toContain("<dt>Gültig seit</dt><dd></dd></dl></fm-atributlisto>");
   });
 
-  it("mezurilo: a row per intent, the value example 66 with its text", () => {
+  it("mezurilo: a row per intent, the value example 66 with its text, and one row without a value (Nachlese 3 W4)", () => {
     const grid = datumoj.eroj.mezurilo ?? "";
-    expect((grid.match(/<fm-mezurilo /g) ?? []).length).toBe(4);
+    // Four intents with the value, and the row "unbekannt": the meter without a value, its text
+    // "nicht geprüft" — the picture of F-9.
+    expect((grid.match(/<fm-mezurilo[ >]/g) ?? []).length).toBe(5);
+    expect(grid).toContain(
+      '<tr><th scope="row">unbekannt</th><td><fm-mezurilo>unbekannt<span slot="value-text">nicht geprüft</span></fm-mezurilo></td></tr>',
+    );
     expect(grid).toContain(
       '<fm-mezurilo intent="warning" value="66">warning<span slot="value-text">66 % von 3 prüfbaren</span></fm-mezurilo>',
     );

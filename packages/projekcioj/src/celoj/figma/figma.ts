@@ -745,8 +745,12 @@ export interface FigmaComponentSet {
      * every mode and enclosed a square button with a round ring (F32).
      */
     radii?: { "focus-ring": string; "focus-gap": string };
-    /** The font of the label, from its typography token: family and the style of its weight. */
-    font?: { family: string; style: string };
+    /**
+     * The font of the label, from its typography token: family and the style of its weight, and
+     * every family of the token's stack a run may try (W3, F-2) — the generic CSS names left out,
+     * `family` the first of them. The run loads the first that the file has.
+     */
+    font?: { family: string; style: string; families: string[] };
     /**
      * Whether the label is underlined in this variant (Spec 008, D-11): the part `underline`
      * bound to a width, not to `none`. Written as the text decoration, not bound (B-1).
@@ -837,7 +841,7 @@ export interface FigmaComponentSet {
    * (F30). A binding to a font variable only holds once every value the variable takes is loaded,
    * so the run loads this list before it binds — the base combination's font alone is not enough.
    */
-  fonts?: { family: string; style: string; aspektoj: string[] }[];
+  fonts?: { family: string; style: string; families: string[]; aspektoj: string[] }[];
   /**
    * The ground the set stands on: the Vitrino's surface, as a variable, so it follows color-scheme
    * and contrast (F16). The deckkraft is decided over every combination, like every paint (F8).
@@ -1772,7 +1776,10 @@ function componentSetOf(
   // Every font the label can carry, over every combination (F30). The typography role follows the
   // variant (size), and its family and weight follow the Dimensioj, so the pairs are collected over
   // both — each with the Aspektoj that ask for it, which is what the report names per mode.
-  const fontsNeeded = new Map<string, { family: string; style: string; aspektoj: Set<string> }>();
+  const fontsNeeded = new Map<
+    string,
+    { family: string; style: string; families: string[]; aspektoj: Set<string> }
+  >();
   // Every part with a typography (Spec 009: a field has label, text, help and error).
   const typographyParts = Object.entries(skemo.parts)
     .filter(([, properties]) => properties.typography !== undefined)
@@ -1801,6 +1808,7 @@ function componentSetOf(
     .map((entry) => ({
       family: entry.family,
       style: entry.style,
+      families: entry.families,
       aspektoj: [...entry.aspektoj].sort(),
     }))
     .sort((a, b) => (`${a.family} ${a.style}` < `${b.family} ${b.style}` ? -1 : 1));
@@ -1980,16 +1988,54 @@ const FONT_STYLES: Readonly<Record<number, string>> = {
 export const FIGMA_FONT_FALLBACK = "Inter";
 
 /**
- * The Figma font of a typography value: the first family of its stack — the others (system-ui,
- * sans-serif) are fallbacks of the browser — and the style of its weight.
+ * The names in a font stack that are no family: the generic keywords of CSS, which a browser
+ * resolves to whatever it has, and Apple's PostScript alias SFMono-Regular. No Figma file lists a
+ * font of these names, so a run that tried them would only be refused (W3, F-2). Menlo, Consolas
+ * and the like are real families and stay candidates.
  */
-function fontOf(value: unknown): { family: string; style: string } | undefined {
+const GENERIC_FONT_FAMILIES: ReadonlySet<string> = new Set([
+  "ui-monospace",
+  "monospace",
+  "system-ui",
+  "ui-sans-serif",
+  "ui-serif",
+  "ui-rounded",
+  "sans-serif",
+  "serif",
+  "cursive",
+  "fantasy",
+  "math",
+  "emoji",
+  "fangsong",
+  "SFMono-Regular",
+  "-apple-system",
+  "BlinkMacSystemFont",
+]);
+
+/**
+ * The families of a font stack a Figma run may try, in the stack's order, without the generic
+ * names (W3, F-2). A stack that is generic throughout keeps its first name, so the plan still
+ * names a family and the run reports what it could not load.
+ */
+export function figmaFontCandidates(stack: unknown): string[] {
+  const names = (Array.isArray(stack) ? stack : [stack]).filter(
+    (name): name is string => typeof name === "string",
+  );
+  const candidates = names.filter((name) => !GENERIC_FONT_FAMILIES.has(name));
+  return candidates.length > 0 ? candidates : names.slice(0, 1);
+}
+
+/**
+ * The Figma font of a typography value: the first family of its stack that is no generic CSS
+ * name, every such family as the candidates a run may try (W3, F-2), and the style of its weight.
+ */
+function fontOf(value: unknown): { family: string; style: string; families: string[] } | undefined {
   const typography = value as { fontFamily?: unknown; fontWeight?: unknown } | undefined;
-  const stack = typography?.fontFamily;
-  const family = Array.isArray(stack) ? stack[0] : stack;
+  const families = figmaFontCandidates(typography?.fontFamily);
+  const family = families[0];
   const weight = typeof typography?.fontWeight === "number" ? typography.fontWeight : 400;
-  if (typeof family !== "string") return undefined;
-  return { family, style: FONT_STYLES[Math.round(weight / 100) * 100] ?? "Regular" };
+  if (family === undefined) return undefined;
+  return { family, style: FONT_STYLES[Math.round(weight / 100) * 100] ?? "Regular", families };
 }
 
 /** The padding of a table cell in the Vitrino; the grid in Figma keeps the same distances. */

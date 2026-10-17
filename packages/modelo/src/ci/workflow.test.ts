@@ -32,20 +32,49 @@ const ERO_CHECK_STEPS: ReadonlyArray<readonly [name: string, script: string]> = 
   ["Check: Release", "check:release"],
 ];
 
-const GATE_STEPS: ReadonlyArray<readonly [name: string, run: string]> = [
-  // The rendered checks of @fundamento/eroj run in Chromium, Firefox and WebKit (Spec 003).
-  [
-    "Playwright browsers",
-    "pnpm --filter @fundamento/eroj exec playwright install --with-deps chromium firefox webkit",
-  ],
+// Nachlese 3 W1 (Spec 011 ⑤ B-9, O-21): the one job of before ran everything in a row — the
+// Playwright suite beside the spawning e2e files of this package made the hook time out, and the
+// wall clock stood at 16 to 19 minutes. Three jobs run side by side now: the unit tests with lint
+// and the Modelo checks; the rendered Eroj in two Playwright shards; the rendered checks. No
+// timeout was raised.
+const PLAYWRIGHT_BROWSERS =
+  "pnpm --filter @fundamento/eroj exec playwright install --with-deps chromium firefox webkit";
+
+/** The job of the unit tests: build, every package but the Eroj, perf, lint, the checks, release. */
+const UNIT_STEPS: ReadonlyArray<readonly [name: string, run: string]> = [
   ["Build", "pnpm build"],
-  ["Test", "pnpm test"],
+  ["Test", "pnpm turbo run test --filter=!@fundamento/eroj"],
   // AK-07 timings run alone, outside the parallel Turborepo test run (Spec 001 D-17).
   ["Perf", "pnpm perf"],
   ["Lint", "pnpm lint"],
   ...CHECK_STEPS.map(([name, script]) => [name, `pnpm ${script}`] as const),
-  ...ERO_CHECK_STEPS.map(([name, script]) => [name, `pnpm ${script}`] as const),
+  ["Check: Release", "pnpm check:release"],
 ];
+
+/** The job of the rendered Eroj: the Playwright suite in two shards (fullyParallel inside). */
+const EROJ_STEPS: ReadonlyArray<readonly [name: string, run: string]> = [
+  ["Playwright browsers", PLAYWRIGHT_BROWSERS],
+  ["Build", "pnpm build"],
+  [
+    "Test",
+    "pnpm --filter @fundamento/eroj exec vitest run --passWithNoTests && pnpm --filter @fundamento/eroj exec playwright test --shard=${{ matrix.shard }}/2",
+  ],
+];
+
+/** The job of the rendered checks: axe over the Eroj, the Make Kit, the quickstart, the Vitrino. */
+const RENDERED_CHECK_STEPS: ReadonlyArray<readonly [name: string, run: string]> = [
+  ["Playwright browsers", PLAYWRIGHT_BROWSERS],
+  ["Build", "pnpm build"],
+  ...ERO_CHECK_STEPS.filter(([name]) => name !== "Check: Release").map(
+    ([name, script]) => [name, `pnpm ${script}`] as const,
+  ),
+];
+
+const JOBS: Readonly<Record<string, ReadonlyArray<readonly [name: string, run: string]>>> = {
+  unit: UNIT_STEPS,
+  eroj: EROJ_STEPS,
+  "rendered-checks": RENDERED_CHECK_STEPS,
+};
 
 interface Step {
   name?: unknown;
@@ -64,18 +93,26 @@ function loadWorkflow(): Record<string, unknown> {
   return parsed;
 }
 
-function loadJob(): Record<string, unknown> {
+function loadJobs(): Record<string, Record<string, unknown>> {
   const jobs = loadWorkflow().jobs;
   if (!isRecord(jobs)) throw new Error("ci.yml has no jobs mapping");
-  const values = Object.values(jobs);
-  expect(values).toHaveLength(1);
-  const job = values[0];
-  if (!isRecord(job)) throw new Error("ci.yml job is not a mapping");
+  const result: Record<string, Record<string, unknown>> = {};
+  for (const [name, job] of Object.entries(jobs)) {
+    if (!isRecord(job)) throw new Error(`ci.yml job ${name} is not a mapping`);
+    result[name] = job;
+  }
+  return result;
+}
+
+/** The first job, for the pins every job shares (they are checked for each job below). */
+function loadJob(name = "unit"): Record<string, unknown> {
+  const job = loadJobs()[name];
+  if (job === undefined) throw new Error(`ci.yml has no job ${name}`);
   return job;
 }
 
-function loadSteps(): Step[] {
-  const steps = loadJob().steps;
+function loadSteps(job = "unit"): Step[] {
+  const steps = loadJob(job).steps;
   if (!Array.isArray(steps)) throw new Error("ci.yml job has no steps list");
   return steps.map((step: unknown) => {
     if (!isRecord(step)) throw new Error("ci.yml step is not a mapping");
@@ -154,11 +191,46 @@ describe("CI workflow (.github/workflows/ci.yml)", () => {
     expect(installIndex).toBeGreaterThan(indexOfAction(steps, "actions/setup-node"));
   });
 
-  it("runs Build, Test, Lint and the five checks as separate named steps, in order", () => {
-    const steps = loadSteps();
-    const installIndex = steps.findIndex((step) => step.run === "pnpm install --frozen-lockfile");
-    const gates = steps.slice(installIndex + 1).map((step) => [step.name, step.run]);
-    expect(gates).toEqual(GATE_STEPS.map(([name, run]) => [name, run]));
+  it("has the three jobs unit, eroj and rendered-checks, each with its named steps in order after the install", () => {
+    expect(Object.keys(loadJobs())).toEqual(Object.keys(JOBS));
+    for (const [job, expected] of Object.entries(JOBS)) {
+      const steps = loadSteps(job);
+      const installIndex = steps.findIndex((step) => step.run === "pnpm install --frozen-lockfile");
+      expect(installIndex, job).toBeGreaterThan(0);
+      const gates = steps.slice(installIndex + 1).map((step) => [step.name, step.run]);
+      expect(gates, job).toEqual(expected.map(([name, run]) => [name, run]));
+    }
+  });
+
+  it("every job runs on ubuntu-latest, checks out first, installs pnpm before Node and a frozen lockfile after", () => {
+    for (const [name, job] of Object.entries(loadJobs())) {
+      expect(job["runs-on"], name).toBe("ubuntu-latest");
+      const steps = loadSteps(name);
+      expect(indexOfAction(steps, "actions/checkout"), name).toBe(0);
+      expect(indexOfAction(steps, "pnpm/action-setup"), name).toBeLessThan(
+        indexOfAction(steps, "actions/setup-node"),
+      );
+      expect(
+        steps.findIndex((step) => step.run === "pnpm install --frozen-lockfile"),
+        name,
+      ).toBeGreaterThan(indexOfAction(steps, "actions/setup-node"));
+    }
+  });
+
+  it("shards the Playwright suite of the Eroj in two, without fail-fast, and gives the two rendered jobs the engines", () => {
+    const eroj = loadJob("eroj");
+    expect(eroj.strategy).toEqual({ "fail-fast": false, matrix: { shard: [1, 2] } });
+    for (const name of ["eroj", "rendered-checks"]) {
+      const env = loadJob(name).env;
+      expect(isRecord(env) && typeof env.PLAYWRIGHT_ENGINES === "string", name).toBe(true);
+    }
+    expect(loadJob("unit").env).toBeUndefined();
+  });
+
+  it("keeps every job under a 15-minute budget (the wall clock stays under 12)", () => {
+    for (const [name, job] of Object.entries(loadJobs())) {
+      expect(job["timeout-minutes"], name).toBeLessThanOrEqual(15);
+    }
   });
 
   it("has one check step for every registered check", () => {

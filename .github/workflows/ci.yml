@@ -28,16 +28,16 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  check:
-    name: Build, test, lint and conformance checks
+  # Nachlese 3 W1 (Spec 011 ⑤ B-9, O-21 fortgesetzt): three jobs side by side instead of one row.
+  # The one job ran the Playwright suite of the Eroj beside the spawning e2e files of modelo
+  # (turbo runs the packages' tests in parallel): the hook of validate.test.ts timed out under
+  # that load (run 38966614433), and the wall clock stood at 16 to 19 minutes. Now the unit tests
+  # run without the Eroj, the Eroj in two Playwright shards, the rendered checks on their own;
+  # no timeout was raised. Measured before/after in specs/012-nachlese-3/plan.md ②.
+  unit:
+    name: Build, test, lint and Modelo checks
     runs-on: ubuntu-latest
-    timeout-minutes: 20
-    # A run on main (the merge run, the nightly run) proves the rendering of the Eroj in Chromium,
-    # Firefox and WebKit (Spec 003); a PR run in Chromium only. "Check: Alirebleco (Eroj)" took 201 to 205 s of
-    # 734 to 805 s in three engines (Vojmapo). An engine-specific defect therefore shows on main,
-    # not in the PR. Read by packages/eroj/playwright.config.ts.
-    env:
-      PLAYWRIGHT_ENGINES: ${{ (github.ref == 'refs/heads/main' && github.event_name != 'pull_request') && 'chromium firefox webkit' || 'chromium' }}
+    timeout-minutes: 15
     steps:
       # Default fetch depth (1) is enough: the checks only need `git ls-files`.
       - name: Checkout
@@ -59,17 +59,12 @@ jobs:
       - name: Install
         run: pnpm install --frozen-lockfile
 
-      # All three engines are installed in every run, also where PLAYWRIGHT_ENGINES runs only one:
-      # workflow.test.ts pins this line. The time of this step is apt (`--with-deps`), not the
-      # browser download (Vojmapo); a cache of ~/.cache/ms-playwright was measured and taken back.
-      - name: Playwright browsers
-        run: pnpm --filter @fundamento/eroj exec playwright install --with-deps chromium firefox webkit
-
       - name: Build
         run: pnpm build
 
+      # Every package but the Eroj: their Playwright suite has the job eroj (W1).
       - name: Test
-        run: pnpm test
+        run: pnpm turbo run test --filter=!@fundamento/eroj
 
       # AK-07 timings alone, after the parallel test run (Spec 001 D-17).
       - name: Perf
@@ -97,6 +92,85 @@ jobs:
       - name: "Check: Clean-Room"
         run: pnpm check:clean-room
 
+      # F23: the release path itself, on every PR — both kits built as release.yml builds them,
+      # packed as a dry run. A broken release path turns red here, not in the maintainer's run.
+      - name: "Check: Release"
+        run: pnpm check:release
+
+  eroj:
+    name: Rendered Eroj (Playwright, shard ${{ matrix.shard }} of 2)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2]
+    # A run on main (the merge run, the nightly run) proves the rendering of the Eroj in Chromium,
+    # Firefox and WebKit (Spec 003); a PR run in Chromium only. An engine-specific defect therefore
+    # shows on main, not in the PR. Read by packages/eroj/playwright.config.ts.
+    env:
+      PLAYWRIGHT_ENGINES: ${{ (github.ref == 'refs/heads/main' && github.event_name != 'pull_request') && 'chromium firefox webkit' || 'chromium' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      # All three engines are installed in every run, also where PLAYWRIGHT_ENGINES runs only one:
+      # workflow.test.ts pins this line. The time of this step is apt (`--with-deps`), not the
+      # browser download (Vojmapo); a cache of ~/.cache/ms-playwright was measured and taken back.
+      - name: Playwright browsers
+        run: pnpm --filter @fundamento/eroj exec playwright install --with-deps chromium firefox webkit
+
+      - name: Build
+        run: pnpm build
+
+      # The unit test of the package (the React types), then this shard of the Playwright suite.
+      - name: Test
+        run: pnpm --filter @fundamento/eroj exec vitest run --passWithNoTests && pnpm --filter @fundamento/eroj exec playwright test --shard=${{ matrix.shard }}/2
+
+  rendered-checks:
+    name: Rendered checks (Alirebleco, Make Kit, Quickstart, Vitrino)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      PLAYWRIGHT_ENGINES: ${{ (github.ref == 'refs/heads/main' && github.event_name != 'pull_request') && 'chromium firefox webkit' || 'chromium' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Playwright browsers
+        run: pnpm --filter @fundamento/eroj exec playwright install --with-deps chromium firefox webkit
+
+      - name: Build
+        run: pnpm build
+
       # Rendered accessibility of the Eroj: axe-core, keyboard, focus ring (Spec 003 T013, D-09).
       - name: "Check: Alirebleco (Eroj)"
         run: pnpm check:alirebleco-eroj
@@ -105,7 +179,6 @@ jobs:
       - name: "Check: Make Kit"
         run: pnpm check:make-kit
 
-
       # AK-07: the quickstart of the README, run as a user would and timed (T027).
       - name: "Check: Quickstart"
         run: pnpm check:quickstart
@@ -113,8 +186,3 @@ jobs:
       # Spec 004 AK-02: the Vitrino in a browser — switching, comparison, axe (T011, T012).
       - name: "Check: Vitrino"
         run: pnpm check:vitrino
-
-      # F23: the release path itself, on every PR — both kits built as release.yml builds them,
-      # packed as a dry run. A broken release path turns red here, not in the maintainer's run.
-      - name: "Check: Release"
-        run: pnpm check:release

@@ -1930,19 +1930,25 @@ function diagnose(report) {
 
 /**
  * Loads the model's font, and when the file does not have it, the nearest thing it does have —
- * in this order: the same family in its Regular cut, then the named fallback family in the model's
- * cut, then that family's Regular. The family goes last on purpose (F32): a brand is recognised by
- * its typeface long before its weight, so Archivo Regular says more about the model than Inter
- * Black does. Whatever is returned is what the label really carries; the caller reports that, not
- * what was asked for.
+ * in this order: every family of the token's stack the plan names (W3, F-2: families, the
+ * generic CSS names already left out), each in the model's cut and then in Regular, then the
+ * named fallback family in the model's cut, then that family's Regular. The family goes before
+ * the cut on purpose (F32): a brand is recognised by its typeface long before its weight, so
+ * Archivo Regular says more about the model than Inter Black does. Whatever is returned is what
+ * the label really carries; the caller reports that, not what was asked for. A later family of
+ * the stack is no fallback — the token itself names it, as a browser would take it — so only the
+ * cut or the fallback family is worth a warning, and the warning names what was tried.
  */
 async function loadFont(font, warnings) {
-  const ladder = [
-    font,
-    { family: font.family, style: "Regular" },
-    { family: PLAN.fontFallback, style: font.style },
-    { family: PLAN.fontFallback, style: "Regular" },
-  ];
+  const families =
+    Array.isArray(font.families) && font.families.length > 0 ? font.families : [font.family];
+  const ladder = [];
+  for (const family of families) {
+    ladder.push({ family: family, style: font.style });
+    if (font.style !== "Regular") ladder.push({ family: family, style: "Regular" });
+  }
+  ladder.push({ family: PLAN.fontFallback, style: font.style });
+  ladder.push({ family: PLAN.fontFallback, style: "Regular" });
   let applied;
   let last;
   for (const candidate of ladder) {
@@ -1958,10 +1964,11 @@ async function loadFont(font, warnings) {
   // Not even Inter Regular: this file cannot draw a label at all, and a run that carried on would
   // fail later at a place that says nothing about the cause.
   if (applied === undefined) throw last;
-  if (applied.family !== font.family || applied.style !== font.style) {
+  if (families.indexOf(applied.family) === -1 || applied.style !== font.style) {
+    const tried = families.length > 1 ? " (versucht: " + families.join(", ") + ")" : "";
     warnings.push(
-      "Schrift " + font.family + " " + font.style + " ist in dieser Datei nicht verfügbar; " +
-        "die Beschriftung steht ersatzweise in " + applied.family + " " + applied.style + ".",
+      "Schrift " + font.family + " " + font.style + " ist in dieser Datei nicht verfügbar" + tried +
+        "; die Beschriftung steht ersatzweise in " + applied.family + " " + applied.style + ".",
     );
   }
   return applied;
@@ -2901,7 +2908,8 @@ async function applyComponents(variables, warnings) {
     // What a mode really shows: missing here is a finding, with the name and the fallback.
     for (const font of component.fonts || []) {
       const key = font.family + " " + font.style;
-      const pair = { family: font.family, style: font.style };
+      // The candidates travel with the pair (W3, F-2): the ladder tries every family of the stack.
+      const pair = { family: font.family, style: font.style, families: font.families };
       if (!fonts.has(key)) fonts.set(key, await loadFont(pair, warnings));
       const arrived = fonts.get(key);
       const applied = arrived.family + " " + arrived.style;

@@ -168,6 +168,47 @@ for (const opener of document.querySelectorAll("[data-fm-opens]")) {
   });
 }
 
+// Nachlese 3 W5 (F-10): the Vitrino wires its own show, the Eroj stay what they are (E10). A tab
+// chosen shows its word in the panel; a sort button sets sort and direction on the table and
+// sorts the rows of the light DOM by the column (numeric columns by number).
+for (const tabs of document.querySelectorAll("fm-langetaro")) {
+  tabs.addEventListener("select", (event) => {
+    const value = event.detail && event.detail.value;
+    const panel = tabs.querySelector('[slot="panel"]');
+    const tab = Array.from(tabs.children).find(
+      (child) =>
+        !child.hasAttribute("slot") &&
+        (child.getAttribute("value") || (child.textContent || "").trim()) === value,
+    );
+    if (panel && tab) panel.textContent = (tab.textContent || "").trim();
+  });
+}
+for (const table of document.querySelectorAll("fm-tabelo")) {
+  table.addEventListener("sort-change", (event) => {
+    const column = event.detail && event.detail.column;
+    const direction = event.detail && event.detail.direction;
+    if (!column || !direction) return;
+    table.setAttribute("sort", column);
+    table.setAttribute("direction", direction);
+    const native = table.querySelector("table");
+    if (!native) return;
+    const headers = Array.from(native.querySelectorAll("thead th"));
+    const index = headers.findIndex((header) => header.getAttribute("data-sort") === column);
+    const body = native.querySelector("tbody");
+    if (index === -1 || !body) return;
+    const numeric = headers[index].hasAttribute("numeric");
+    const rows = Array.from(body.children).filter((row) => !row.hasAttribute("data-fm-empty"));
+    const cellText = (row) => ((row.children[index] && row.children[index].textContent) || "").trim();
+    rows.sort((a, b) => {
+      const left = cellText(a);
+      const right = cellText(b);
+      const order = numeric ? Number(left) - Number(right) : left.localeCompare(right, "de");
+      return direction === "descending" ? -order : order;
+    });
+    for (const row of rows) body.appendChild(row);
+  });
+}
+
 // The button in the header leads to the comparison (Spec 004 M1, Befund 2, 2026-10-12): it used
 // to toggle a two-column class on the last section, and nothing changed where the button stands.
 const komparoSwitch = document.getElementById("fm-vitrino-komparo-switch");
