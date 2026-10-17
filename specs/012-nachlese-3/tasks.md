@@ -51,7 +51,7 @@
 
 ### C – Abschluss
 - [x] **T609 Doku** plan ②, tasks ②, Vojmapo (grün im Commit der Messungen).
-- [ ] **T610 CI** drei Läufe in Folge ≤ 12 min ohne Hook-Timeout (Run-Nummern in plan ② D-01).
+- [x] **T610 CI** drei Läufe in Folge ≤ 12 min ohne Hook-Timeout: 39024362329 8m04s, 39024959792 8m11s, 39025517138 8m35s (plan ② D-01).
 - [x] **T611 Messungen** unten; Bericht.
 
 ### Messungen
@@ -61,7 +61,7 @@
 | `check:alirebleco` | komuna 88 Paare × 72 Kombinationen, 0 Fehler, 2 394 APCA-Warnungen; ekzemplo 144 Kombinationen, 0 fehlgeschlagene Paar-Auswertungen (`aspektoj=2`) |
 | `check:vitrino` | 22 (vorher 21): + Verdrahtung (Reiter-Panel, Sortierung); der mezurilo-Test prüft den fünften Messbalken |
 | `describe_term` | neun Begriffe × 3 Anfragen (Term, de, en) und drei Kampo-altLabels: 12 MCP-Tests |
-| CI (W1) | vorher/nachher in plan ② D-01 |
-| **Commits** (rot / grün; nach einem Rebase hier ersetzen) | rot `ba6a705` (Tests), `3975384` (Doku-Test) · grün `dc715c2` (W1, W2, W4, W5, W6), Figma W3 `d21d9a3`, Doku im Commit der Messungen |
+| CI (W1) | vorher 12m03s–16m15s (ein Job), nachher 8m04s / 8m11s / 8m35s (drei Läufe in Folge, längster Job `unit`); Details in plan ② D-01 |
+| **Commits** (rot / grün; nach einem Rebase hier ersetzen) | rot `ba6a705` (Tests), `3975384` (Doku-Test) · grün `dc715c2` (W1, W2, W4, W5, W6), Figma W3 `d21d9a3`, Doku `9472957`, W1-Messung im Folgecommit |
 | Tests (je Paket `vitest run`) | modelo 3 229 (vorher 2 957 + 265 = 3 222; +7), mcp 254 (vorher 242), projekcioj 597 (vorher 592), cli 66, eroj Vitest 1 + Playwright 164 (Chromium); `pnpm lint` grün |
 
