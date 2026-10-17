@@ -164,14 +164,14 @@ describe("the scheme laboro (Nachlese 3 W6)", () => {
     for (const concept of laboro) {
       const labels = concept.prefLabel as Record<string, string>;
       expect(Object.keys(labels).sort(), concept.term).toEqual(["de", "en", "eo"]);
-      const definition = concept.definition as Record<string, string>;
-      expect(definition.de.length, concept.term).toBeGreaterThan(20);
-      expect(definition.en.length, concept.term).toBeGreaterThan(20);
+      const definition = concept.definition as Record<string, string | undefined>;
+      expect(definition.de?.length ?? 0, concept.term).toBeGreaterThan(20);
+      expect(definition.en?.length ?? 0, concept.term).toBeGreaterThan(20);
     }
     const etoso = laboro.find((concept) => concept.term === "Etoso");
     expect(JSON.stringify(etoso)).toMatch(/Kandidat|candidate/);
     const komuna = laboro.find((concept) => concept.term === "Komuna");
-    expect((komuna?.prefLabel as Record<string, string>).eo).toBe("komuna");
+    expect(komuna?.prefLabel).toMatchObject({ eo: "komuna" });
   });
 
   it("the kampo names Passwortfeld, Zahlenfeld and Datumsfeld as alternative labels (Spec 011 ① B-4)", () => {
