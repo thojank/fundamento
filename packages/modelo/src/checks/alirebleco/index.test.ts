@@ -50,7 +50,8 @@ describe("alirebleco over every known Aspekto (Nachlese 3 W2)", () => {
     const result = await check({ json: true, repoRoot });
     expect(result.stats.aspektoj).toBe(2);
     expect(result.stats["ekzemplo:evaluations"]).toBeGreaterThan(0);
-    expect(result.stats["ekzemplo:combinations"]).toBe(72);
+    // The composed source carries both Aspektoj: komuna's 72 combinations and ekzemplo's.
+    expect(result.stats["ekzemplo:combinations"]).toBe(144);
     const external = result.warnings.filter((issue) => issue.rule === "contrast-external-aspekto");
     for (const issue of external) expect(issue.message).toContain("ekzemplo");
     expect(result.stats["ekzemplo:errors"]).toBe(external.length);

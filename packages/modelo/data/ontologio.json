@@ -30,6 +30,13 @@
         "en": "The Eroj of the Modelo and how they relate: what one does that another does not (Spec 008, A8).",
         "de": "Die Eroj des Modelo und ihre Beziehungen zueinander: was das eine tut und das andere nicht (Spec 008, A8)."
       }
+    },
+    {
+      "id": "laboro",
+      "definition": {
+        "en": "The working terms of the system: its showcase, its roadmap, the reason of a rule, its checks, its two Aspektoj — words the specs and the agents use that the Constitution table does not define (Nachlese 3 W6).",
+        "de": "Die Arbeitsbegriffe des Systems: sein Schaufenster, sein Fahrplan, die Begründung einer Regel, seine Prüfungen, seine zwei Aspektoj — Wörter der Specs und der Agenten, die die Terminologie-Tabelle nicht definiert (Nachlese 3 W6)."
+      }
     }
   ],
   "predicates": [
@@ -1126,7 +1133,10 @@
         "de": [
           "Eingabefeld",
           "Feld",
-          "kampo"
+          "kampo",
+          "Passwortfeld",
+          "Zahlenfeld",
+          "Datumsfeld"
         ]
       },
       "definition": {
@@ -1708,6 +1718,273 @@
           "predicate": "references",
           "target": "#Navigado"
         }
+      ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Vitrino",
+      "term": "Vitrino",
+      "inScheme": "laboro",
+      "prefLabel": {
+        "eo": "Vitrino",
+        "en": "showcase",
+        "de": "Schaufenster"
+      },
+      "altLabel": {
+        "en": [
+          "vitrino",
+          "showcase",
+          "gallery"
+        ],
+        "de": [
+          "Vitrino",
+          "Schaufenster",
+          "Galerie"
+        ]
+      },
+      "definition": {
+        "en": "The showcase of the Eroj: one page, generated from the Modelo, that shows every Ero in every combination of its Skemo in the Aspekto, colour scheme, contrast, density and motion a person switches, with the roles, the contrast pairs, the Regularo coverage and the comparison with the benchmark. A check (check:vitrino) drives it in a browser.",
+        "de": "Das Schaufenster der Eroj: eine Seite, aus dem Modelo erzeugt, die jedes Ero in jeder Kombination seiner Skemo zeigt, in Aspekto, Farbschema, Kontrast, Dichte und Bewegung, die eine Person umschaltet, mit den Rollen, den Kontrastpaaren, der Regularo-Abdeckung und dem Vergleich mit dem Benchmark. Eine Prüfung (check:vitrino) fährt sie im Browser."
+      },
+      "related": [
+        "#Ero",
+        "#Aspekto",
+        "#Komparo"
+      ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Vojmapo",
+      "term": "Vojmapo",
+      "inScheme": "laboro",
+      "prefLabel": {
+        "eo": "Vojmapo",
+        "en": "roadmap",
+        "de": "Fahrplan"
+      },
+      "altLabel": {
+        "en": [
+          "vojmapo",
+          "roadmap"
+        ],
+        "de": [
+          "Vojmapo",
+          "Fahrplan",
+          "Roadmap"
+        ]
+      },
+      "definition": {
+        "en": "The roadmap of the system (docs/vojmapo.md): its phases, what each spec brought, the candidates and the open findings, one row per phase, kept in step by the documentation tests.",
+        "de": "Der Fahrplan des Systems (docs/vojmapo.md): seine Phasen, was jede Spec gebracht hat, die Kandidaten und die offenen Befunde, eine Zeile je Phase, von den Dokumentationstests im Tritt gehalten."
+      }
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Kialo",
+      "term": "Kialo",
+      "inScheme": "laboro",
+      "prefLabel": {
+        "eo": "Kialo",
+        "en": "reason",
+        "de": "Begründung"
+      },
+      "altLabel": {
+        "en": [
+          "kialo",
+          "reason",
+          "rationale"
+        ],
+        "de": [
+          "Kialo",
+          "Begründung",
+          "Grund"
+        ]
+      },
+      "definition": {
+        "en": "The reason of a rule, a boundary, an alternative or a judgement: the sentence that says why, which an agent quotes instead of inventing one. Every Regulo, every Uzo entry and every Jugxo carries one; a reason that is missing is a validation error.",
+        "de": "Die Begründung einer Regel, einer Grenze, einer Alternative oder eines Urteils: der Satz, der sagt, warum — den ein Agent zitiert, statt einen zu erfinden. Jede Regulo, jeder Uzo-Eintrag und jeder Jugxo trägt eine; eine fehlende Begründung ist ein Validierungsfehler."
+      },
+      "related": [
+        "#Regulo",
+        "#Uzo",
+        "#Jugxo"
+      ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Alirebleco",
+      "term": "Alirebleco",
+      "inScheme": "laboro",
+      "prefLabel": {
+        "eo": "Alirebleco",
+        "en": "accessibility",
+        "de": "Barrierefreiheit"
+      },
+      "altLabel": {
+        "en": [
+          "alirebleco",
+          "accessibility",
+          "a11y"
+        ],
+        "de": [
+          "Alirebleco",
+          "Barrierefreiheit",
+          "Zugänglichkeit"
+        ]
+      },
+      "definition": {
+        "en": "Accessibility as the system checks it: the contrast of every declared pair in every combination (check:alirebleco, WCAG 2.x binding, APCA advisory), and the rendered Eroj in a browser (check:alirebleco-eroj: axe, keyboard, focus ring, names and states).",
+        "de": "Barrierefreiheit, wie das System sie prüft: der Kontrast jedes deklarierten Paars in jeder Kombination (check:alirebleco, WCAG 2.x bindend, APCA beratend) und die gerenderten Eroj im Browser (check:alirebleco-eroj: axe, Tastatur, Fokusring, Namen und Zustände)."
+      },
+      "related": [
+        "#KontrastParo",
+        "#Ero"
+      ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Internacia",
+      "term": "Internacia",
+      "inScheme": "laboro",
+      "prefLabel": {
+        "eo": "Internacia",
+        "en": "internationalisation",
+        "de": "Internationalisierung"
+      },
+      "altLabel": {
+        "en": [
+          "internacia",
+          "internationalisation",
+          "i18n",
+          "rtl"
+        ],
+        "de": [
+          "Internacia",
+          "Internationalisierung",
+          "Schreibrichtung"
+        ]
+      },
+      "definition": {
+        "en": "Internationalisation as the Eroj prove it in a browser: right-to-left writing mirrors what has a direction, texts expanded by words wrap or grow without clipping, and what assistive technology hears follows the language of the document.",
+        "de": "Internationalisierung, wie die Eroj sie im Browser beweisen: Schreibrichtung von rechts nach links spiegelt, was eine Richtung hat, nach Wörtern erweiterte Texte brechen um oder wachsen ohne Beschnitt, und was assistive Technik hört, folgt der Sprache des Dokuments."
+      },
+      "related": [
+        "#Ero"
+      ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Komparo",
+      "term": "Komparo",
+      "inScheme": "laboro",
+      "prefLabel": {
+        "eo": "Komparo",
+        "en": "comparison",
+        "de": "Vergleich"
+      },
+      "altLabel": {
+        "en": [
+          "komparo",
+          "comparison",
+          "benchmark comparison"
+        ],
+        "de": [
+          "Komparo",
+          "Vergleich",
+          "Benchmark-Vergleich"
+        ]
+      },
+      "definition": {
+        "en": "The comparison with a benchmark system in the showcase: the Vitrino sets the system's values beside the benchmark's for the same role and names the side in words, so a difference is read, not guessed; the clean-room check keeps the benchmark's own values out of the Modelo.",
+        "de": "Der Vergleich mit einem Benchmark-System im Schaufenster: die Vitrino stellt die Werte des Systems neben die des Benchmarks für dieselbe Rolle und nennt die Seite in Worten, damit ein Unterschied gelesen und nicht geraten wird; die Clean-Room-Prüfung hält die Werte des Benchmarks aus dem Modelo heraus."
+      },
+      "related": [
+        "#Vitrino"
+      ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Etoso",
+      "term": "Etoso",
+      "inScheme": "laboro",
+      "prefLabel": {
+        "eo": "Etoso",
+        "en": "ambience",
+        "de": "Stimmung"
+      },
+      "altLabel": {
+        "en": [
+          "etoso",
+          "ambience",
+          "mood",
+          "context"
+        ],
+        "de": [
+          "Etoso",
+          "Stimmung",
+          "Kontext"
+        ]
+      },
+      "definition": {
+        "en": "Context and mood of a view (candidate): a Dimensio that would let an Aspekto shift its roles with the situation — a calm reading view, an urgent task — without new tokens. Measured as a fixture (dimensio-etoso) and not decided; a candidate until a spec takes it up.",
+        "de": "Kontext und Stimmung einer Ansicht (Kandidat): eine Dimensio, mit der eine Aspekto ihre Rollen mit der Situation verschöbe — eine ruhige Leseansicht, eine dringende Aufgabe — ohne neue Tokens. Als Fixture gemessen (dimensio-etoso), nicht entschieden; ein Kandidat, bis eine Spec ihn aufnimmt."
+      },
+      "related": [
+        "#Dimensio",
+        "#Aspekto"
+      ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Komuna",
+      "term": "Komuna",
+      "inScheme": "laboro",
+      "prefLabel": {
+        "eo": "komuna",
+        "en": "komuna (reference brand)",
+        "de": "komuna (Referenzmarke)"
+      },
+      "altLabel": {
+        "en": [
+          "komuna",
+          "reference brand",
+          "reference Aspekto"
+        ],
+        "de": [
+          "komuna",
+          "Referenzmarke",
+          "Referenz-Aspekto"
+        ]
+      },
+      "definition": {
+        "en": "The reference Aspekto of the system (packages/aspekto-komuna): the brand every check measures first and every projection builds first — MIT-licensed, the Geist typeface, the values the specs take as given; a brand of its own lies beside it, never over it.",
+        "de": "Die Referenz-Aspekto des Systems (packages/aspekto-komuna): die Marke, die jede Prüfung zuerst misst und jede Projektion zuerst baut — MIT-lizenziert, die Schrift Geist, die Werte, die die Specs als gegeben nehmen; eine eigene Marke liegt daneben, nie darüber."
+      },
+      "related": [
+        "#Aspekto",
+        "#Ekzemplo"
+      ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Ekzemplo",
+      "term": "Ekzemplo",
+      "inScheme": "laboro",
+      "prefLabel": {
+        "eo": "ekzemplo",
+        "en": "ekzemplo (test brand)",
+        "de": "ekzemplo (Testmarke)"
+      },
+      "altLabel": {
+        "en": [
+          "ekzemplo",
+          "test brand",
+          "example Aspekto"
+        ],
+        "de": [
+          "ekzemplo",
+          "Testmarke",
+          "Beispiel-Aspekto"
+        ]
+      },
+      "definition": {
+        "en": "The test Aspekto of the system (test/fixtures/valid/aspekto-ekzemplo): an external brand with its own palette, typeface (Archivo) and code of conduct, composed over the core in the tests, the showcase and the Figma sets to prove that a second brand switches without new tokens; what fails only there is a finding, not a token change.",
+        "de": "Die Test-Aspekto des Systems (test/fixtures/valid/aspekto-ekzemplo): eine externe Marke mit eigener Palette, Schrift (Archivo) und Haltung, in den Tests, dem Schaufenster und den Figma-Sets über den Kern gelegt, um zu beweisen, dass eine zweite Marke ohne neue Tokens umschaltet; was nur dort scheitert, ist ein Befund, keine Token-Änderung."
+      },
+      "related": [
+        "#Aspekto",
+        "#Komuna"
       ]
     }
   ]

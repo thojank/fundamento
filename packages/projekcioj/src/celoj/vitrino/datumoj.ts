@@ -306,6 +306,12 @@ export const VITRINO_SLOT_TEXTS: Readonly<Record<string, string>> = {
  */
 export const VITRINO_NUMBER_EXAMPLES: Readonly<Record<string, string>> = { value: "66" };
 
+/** The row and label of the meter without a value in the Vitrino (Nachlese 3 W4, F-9). */
+export const VITRINO_UNKNOWN_LABEL = "unbekannt";
+
+/** The value text of a meter whose value is unknown (Spec 011 ④ G4); the Figma example says it too. */
+export const VITRINO_UNKNOWN_TEXT = "nicht geprüft";
+
 /**
  * The entries of a key-value list in the Vitrino (Spec 011 ④, plan ④ D-13): three pairs, the last
  * value empty (the dash and "keine Angabe"). The Figma set shows the same words.
@@ -503,8 +509,14 @@ export function eroMarkup(entry: LoadedEro): string {
       return `<tr><th scope="row">${label}</th>${cells}</tr>`;
     })
     .join("");
+  // Nachlese 3 W4 (F-9): an Ero with a number prop without a default (the meter's value) shows one
+  // more row without it — the unknown value, its text "nicht geprüft", once for every intent.
+  const unknown =
+    examples === ""
+      ? ""
+      : `<tr><th scope="row">${VITRINO_UNKNOWN_LABEL}</th><td><${tag}>${VITRINO_UNKNOWN_LABEL}<span slot="value-text">${VITRINO_UNKNOWN_TEXT}</span></${tag}></td></tr>`;
   const heads = ["rest", ...columns].map((column) => `<th scope="col">${column}</th>`).join("");
-  return `<table><caption>${tag}, jede Kombination der Skemo</caption><thead><tr><th scope="col">Kombination</th>${heads}</tr></thead><tbody>${rows}</tbody></table>`;
+  return `<table><caption>${tag}, jede Kombination der Skemo</caption><thead><tr><th scope="col">Kombination</th>${heads}</tr></thead><tbody>${rows}${unknown}</tbody></table>`;
 }
 
 /** The grid of every Ero of the Modelo, by name (Spec 008, D-12). */

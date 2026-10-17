@@ -421,9 +421,11 @@ test("fm-tabelo, fm-atributlisto and fm-mezurilo are upgraded in their sections,
   await expect(meters).toHaveCount(5);
   await expect(meters.last().getByRole("meter")).toHaveAttribute("aria-valuetext", "nicht geprüft");
   expect(
-    await meters.last().evaluate(
-      (element) => element.shadowRoot?.querySelector('[part="control"]')?.hasAttribute("data-unknown"),
-    ),
+    await meters
+      .last()
+      .evaluate((element) =>
+        element.shadowRoot?.querySelector('[part="control"]')?.hasAttribute("data-unknown"),
+      ),
   ).toBe(true);
   await expect(page.locator("#fm-vitrino-mezurilo").getByRole("meter").first()).toHaveAttribute(
     "aria-valuenow",

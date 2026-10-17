@@ -531,7 +531,7 @@ describe("the Vitrino shows the tabelo, the atributlisto and the mezurilo (Spec 
     const grid = datumoj.eroj.mezurilo ?? "";
     // Four intents with the value, and the row "unbekannt": the meter without a value, its text
     // "nicht geprüft" — the picture of F-9.
-    expect((grid.match(/<fm-mezurilo /g) ?? []).length).toBe(5);
+    expect((grid.match(/<fm-mezurilo[ >]/g) ?? []).length).toBe(5);
     expect(grid).toContain(
       '<tr><th scope="row">unbekannt</th><td><fm-mezurilo>unbekannt<span slot="value-text">nicht geprüft</span></fm-mezurilo></td></tr>',
     );

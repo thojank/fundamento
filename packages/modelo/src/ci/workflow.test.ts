@@ -195,9 +195,7 @@ describe("CI workflow (.github/workflows/ci.yml)", () => {
     expect(Object.keys(loadJobs())).toEqual(Object.keys(JOBS));
     for (const [job, expected] of Object.entries(JOBS)) {
       const steps = loadSteps(job);
-      const installIndex = steps.findIndex(
-        (step) => step.run === "pnpm install --frozen-lockfile",
-      );
+      const installIndex = steps.findIndex((step) => step.run === "pnpm install --frozen-lockfile");
       expect(installIndex, job).toBeGreaterThan(0);
       const gates = steps.slice(installIndex + 1).map((step) => [step.name, step.run]);
       expect(gates, job).toEqual(expected.map(([name, run]) => [name, run]));
