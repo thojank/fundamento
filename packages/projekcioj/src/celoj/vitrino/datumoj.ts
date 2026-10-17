@@ -296,7 +296,38 @@ export const VITRINO_SLOT_TEXTS: Readonly<Record<string, string>> = {
   heading: "Überschrift",
   details: "Einzelheit",
   description: "Beschreibung",
+  // Spec 011 ④ (plan ④ D-13): the value text of a meter (the spec's example).
+  "value-text": "66 % von 3 prüfbaren",
 };
+
+/**
+ * The value example of a meter in the Vitrino (Spec 011 ④, plan ④ D-13): a number prop without
+ * a default is set to it, so the bar shows a fill; the Figma set shows the same share.
+ */
+export const VITRINO_NUMBER_EXAMPLES: Readonly<Record<string, string>> = { value: "66" };
+
+/**
+ * The entries of a key-value list in the Vitrino (Spec 011 ④, plan ④ D-13): three pairs, the last
+ * value empty (the dash and "keine Angabe"). The Figma set shows the same words.
+ */
+export const VITRINO_LIST_ENTRIES: readonly (readonly [string, string])[] = [
+  ["Version", "3"],
+  ["Verantwortlich", "Team Fundamento"],
+  ["Gültig seit", ""],
+];
+
+/** The caption of the Vitrino's table (Spec 011 ④, plan ④ D-13); the Figma set's label word. */
+export const VITRINO_TABLE_CAPTION = "Standards";
+
+/**
+ * The table of the Vitrino (Spec 011 ④, plan ④ D-13): a head with a sortable first column and a
+ * numeric last column, three rows with row headers — the picture the Figma set draws too.
+ */
+export const VITRINO_TABLE =
+  '<table slot="content"><thead><tr><th scope="col" data-sort="name">Name</th><th scope="col">Status</th><th scope="col" numeric>Anzahl</th></tr></thead><tbody><tr><th scope="row">Barrierefreiheit</th><td>gültig</td><td>0</td></tr><tr><th scope="row">Datenschutz</th><td>Entwurf</td><td>3</td></tr><tr><th scope="row">Sicherheit</th><td>in Prüfung</td><td>1</td></tr></tbody></table>';
+
+/** The dl of the Vitrino's key-value list (Spec 011 ④). */
+export const VITRINO_LIST = `<dl>${VITRINO_LIST_ENTRIES.map(([term, value]) => `<dt>${term}</dt><dd>${value}</dd>`).join("")}</dl>`;
 
 /**
  * The actions of a dialog in the Vitrino (Spec 011 ②, plan ② D-15): two butono, one with emphasis
@@ -403,6 +434,19 @@ export function eroMarkup(entry: LoadedEro): string {
   // holds the closed dialog behind a button that opens it (data-fm-opens, read by the Vitrino's
   // script), with the two actions of the Vitrino in its slot.
   const dialog = entry.skemo.a11y.role === "dialog";
+  // A light-DOM host (Spec 011 ④, plan ④ D-13, E10): the table or the list of the Vitrino in the
+  // light DOM of every cell; a meter shows the value example.
+  const role = entry.skemo.a11y.role;
+  const light = role === "table" ? VITRINO_TABLE : role === "list" ? VITRINO_LIST : "";
+  const examples = entry.skemo.props
+    .filter(
+      (prop) =>
+        prop.kind === "number" &&
+        prop.default === undefined &&
+        prop.name in VITRINO_NUMBER_EXAMPLES,
+    )
+    .map((prop) => ` ${prop.name}="${VITRINO_NUMBER_EXAMPLES[prop.name] ?? ""}"`)
+    .join("");
   const rows = combinationsOf(entry.skemo, keys)
     .filter((combination) => combination[STATE_KEY] === undefined)
     .map((combination) => {
@@ -419,7 +463,7 @@ export function eroMarkup(entry: LoadedEro): string {
       const cells = [undefined, ...columns]
         .map(
           (column) =>
-            `<td>${opener}<${tag}${identity}${attributes}${required}${chosen}${column === undefined ? "" : ` ${column}`}>${label}${optionTexts(entry)}${slotTexts(entry, column)}${actions}</${tag}></td>`,
+            `<td>${opener}<${tag}${identity}${attributes}${examples}${required}${chosen}${column === undefined ? "" : ` ${column}`}>${role === "list" ? "" : label}${optionTexts(entry)}${slotTexts(entry, column)}${actions}${light}</${tag}></td>`,
         )
         .join("");
       return `<tr><th scope="row">${label}</th>${cells}</tr>`;

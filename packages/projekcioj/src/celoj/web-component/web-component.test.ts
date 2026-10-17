@@ -33,11 +33,13 @@ describe("Web Component Celo (T011)", () => {
   it("generates the descriptor, the stylesheet, the element and an index", () => {
     // Spec 008: the ligilo on the same path as the butono (Art. IX, Art. XI).
     expect(Object.keys(files).sort()).toEqual([
+      "eroj/src/generated/atributlisto.styles.ts",
       "eroj/src/generated/avizo.styles.ts",
       "eroj/src/generated/butono.styles.ts",
       "eroj/src/generated/dialogo.styles.ts",
       "eroj/src/generated/elektilo.styles.ts",
       "eroj/src/generated/elekto.styles.ts",
+      "eroj/src/generated/fm-atributlisto.ts",
       "eroj/src/generated/fm-avizo.ts",
       "eroj/src/generated/fm-butono.ts",
       "eroj/src/generated/fm-dialogo.ts",
@@ -47,18 +49,22 @@ describe("Web Component Celo (T011)", () => {
       "eroj/src/generated/fm-kampo.ts",
       "eroj/src/generated/fm-ligilo.ts",
       "eroj/src/generated/fm-markobutono.ts",
+      "eroj/src/generated/fm-mezurilo.ts",
       "eroj/src/generated/fm-plenstato.ts",
       "eroj/src/generated/fm-sxaltilo.ts",
+      "eroj/src/generated/fm-tabelo.ts",
       "eroj/src/generated/fm-tekstareo.ts",
       "eroj/src/generated/index.ts",
       "eroj/src/generated/insigno.styles.ts",
       "eroj/src/generated/kampo.styles.ts",
       "eroj/src/generated/ligilo.styles.ts",
       "eroj/src/generated/markobutono.styles.ts",
+      "eroj/src/generated/mezurilo.styles.ts",
       "eroj/src/generated/plenstato.styles.ts",
       "eroj/src/generated/react.ts",
       "eroj/src/generated/skemo.ts",
       "eroj/src/generated/sxaltilo.styles.ts",
+      "eroj/src/generated/tabelo.styles.ts",
       "eroj/src/generated/tekstareo.styles.ts",
     ]);
   });
@@ -975,6 +981,178 @@ describe("Web Component Celo for the plenstato (Spec 011 ③)", () => {
   it("states kind and the one state rest in the stylesheet inventory (parity)", () => {
     const inventory = stylesheetInventory(styles);
     expect(inventory.props).toEqual({ kind: ["loading", "empty"] });
+    expect(inventory.states).toEqual(["rest"]);
+  });
+});
+
+// Spec 011 ④ (plan ④ D-08): the meter. A div with role meter as the control, named by its label
+// and described by its value text (aria-valuetext too); aria-valuenow only while the value is
+// known; the fill a child of the track whose inline size is the share (set by the element, a
+// ratio, no design value); an unknown value shows no fill and gives the track the dashed edge of
+// the part unknown.
+describe("Web Component Celo for the mezurilo (Spec 011 ④)", () => {
+  const styles = files["eroj/src/generated/mezurilo.styles.ts"] ?? "";
+  const element = files["eroj/src/generated/fm-mezurilo.ts"] ?? "";
+  const css = JSON.parse(
+    /export const MEZURILO_CSS = (".*");/s.exec(styles)?.[1] ?? '""',
+  ) as string;
+  const templates = (source: string) =>
+    [...source.matchAll(/`(<[^`]*)`/g)].map((match) => match[1] ?? "");
+  const parts = (source: string) =>
+    templates(source).flatMap((t) => [...t.matchAll(/part="([a-z-]+)"/g)].map((m) => m[1]));
+
+  it("renders a meter region with label, track, fill and value text", () => {
+    expect(parts(element)).toEqual(["control", "label", "track", "fill", "value-text"]);
+    expect(element).toContain(
+      '<div part="control" role="meter" aria-labelledby="label" aria-describedby="value-text">',
+    );
+    expect(element).toContain('control.setAttribute("aria-valuetext"');
+    expect(element).toContain('control.setAttribute("aria-valuenow"');
+    expect(element).toContain('control.setAttribute("aria-valuemin"');
+    expect(element).toContain('control.toggleAttribute("data-unknown"');
+    expect(element).toContain("static formAssociated = false;");
+    expect(element).toContain('customElements.define("fm-mezurilo", FmMezurilo)');
+  });
+
+  it("fills the track with the colour of intent, keeps the track's height and pill, draws the dashed edge only when unknown", () => {
+    expect(css).toContain(
+      ':where([part="control"][data-intent="success"]) [part="fill"] {\n  background-color: var(--fm-color-status-success-border);',
+    );
+    expect(css).toContain(
+      ':where([part="control"]) [part="track"] {\n  background-color: var(--fm-color-background-sunken);',
+    );
+    expect(css).toContain("min-block-size: var(--fm-spacing-medium);");
+    expect(css).toContain(
+      ':where([part="control"][data-unknown]) [part="track"] {\n  border-style: var(--fm-stroke-dashed);',
+    );
+    expect(css).toContain(
+      ':where([part="control"][data-unknown]) [part="fill"] { display: none; }',
+    );
+  });
+
+  it("keeps every design property a token and logical (Art. X gate 1)", () => {
+    expect(componentCssIssues("mezurilo.css", css)).toEqual([]);
+    expect(cssPhysicalPropertyIssues("mezurilo.css", css)).toEqual([]);
+  });
+
+  it("states intent and the one state rest in the stylesheet inventory (parity)", () => {
+    const inventory = stylesheetInventory(styles);
+    expect(inventory.props).toEqual({ intent: ["neutral", "success", "warning", "danger"] });
+    expect(inventory.states).toEqual(["rest"]);
+  });
+});
+
+// Spec 011 ④ (plan ④ D-09, E10): the table. The Ero styles and extends the platform's own table
+// in the light DOM: a second stylesheet, scoped to the host, is adopted by the document; the
+// combination stands on the host (data-density); the shadow holds the scroll region (role region,
+// focusable, named by the caption) around the slot of the table. The element writes the caption
+// from its default slot, wraps sortable headers (data-sort) in buttons with aria-sort, says
+// sort-change, and shows the empty slot as a plenstato over all columns when there are no rows.
+describe("Web Component Celo for the tabelo (Spec 011 ④)", () => {
+  const styles = files["eroj/src/generated/tabelo.styles.ts"] ?? "";
+  const element = files["eroj/src/generated/fm-tabelo.ts"] ?? "";
+  const css = JSON.parse(
+    /export const TABELO_CSS = ("(?:[^"\\]|\\.)*");/.exec(styles)?.[1] ?? '""',
+  ) as string;
+  const light = JSON.parse(
+    /export const TABELO_LIGHT_CSS = ("(?:[^"\\]|\\.)*");/.exec(styles)?.[1] ?? '""',
+  ) as string;
+
+  it("renders the region around the slotted table, adopts the light stylesheet on the document, sorts and shows the empty state", () => {
+    expect(element).toContain(
+      '<div part="region" role="region" tabindex="0"><slot name="content"></slot></div>',
+    );
+    expect(element).toContain("document.adoptedStyleSheets");
+    expect(element).toContain('new CustomEvent("sort-change"');
+    expect(element).toContain('setAttribute("aria-sort"');
+    expect(element).toContain('"caption"');
+    expect(element).toContain("fm-plenstato");
+    expect(element).toContain("static formAssociated = false;");
+    expect(element).toContain('customElements.define("fm-tabelo", FmTabelo)');
+  });
+
+  it("writes the table's parts scoped to the host in the light stylesheet: head, cells by density, row headers, sort buttons by state", () => {
+    expect(light).toContain(
+      "fm-tabelo > table > thead th {\n  background-color: var(--fm-color-background-sunken);",
+    );
+    expect(light).toContain(
+      'fm-tabelo[data-density="compact"] > table :is(td, th) {\n  padding-inline: var(--fm-spacing-small);',
+    );
+    expect(light).toContain("min-block-size: var(--fm-size-control-large);");
+    expect(light).toContain(
+      "fm-tabelo > table > tbody th {\n  font-family: var(--fm-typography-label-1-font-family);",
+    );
+    expect(light).toContain(
+      "fm-tabelo > table > thead th > button:hover {\n  background-color: var(--fm-color-action-tertiary-hover);",
+    );
+    expect(light).toContain(
+      "fm-tabelo > table > thead th > button:focus-visible {\n  outline-width: var(--fm-focus-ring-width);",
+    );
+    expect(light).toContain("border-block-end-color: var(--fm-color-border-subtle);");
+    expect(light).toContain("fm-tabelo .fm-hidden {");
+    expect(light).toContain("font-variant-numeric: tabular-nums;");
+    // The region keeps its border and radius in the shadow sheet.
+    expect(css).toContain(
+      ':where([part="region"]) {\n  border-radius: var(--fm-radius-role-surface);',
+    );
+  });
+
+  it("keeps every design property a token and logical in both sheets (Art. X gate 1)", () => {
+    expect(componentCssIssues("tabelo.css", css)).toEqual([]);
+    expect(componentCssIssues("tabelo.light.css", light)).toEqual([]);
+    expect(cssPhysicalPropertyIssues("tabelo.light.css", light)).toEqual([]);
+  });
+
+  it("states density and the states rest, hover and focus in the stylesheet inventory (parity)", () => {
+    const inventory = stylesheetInventory(styles);
+    expect(inventory.props).toEqual({ density: ["comfortable", "compact"] });
+    expect([...inventory.states].sort()).toEqual(["focus", "hover", "rest"]);
+  });
+});
+
+// Spec 011 ④ (plan ④ D-10, E10): the key-value list. The platform's own dl in the light DOM,
+// styled by a host-scoped stylesheet the document adopts: terms and values, the grid of columns or
+// the stack; an empty dd shows a dash and carries the a11y text entries-empty clipped from sight.
+describe("Web Component Celo for the atributlisto (Spec 011 ④)", () => {
+  const styles = files["eroj/src/generated/atributlisto.styles.ts"] ?? "";
+  const element = files["eroj/src/generated/fm-atributlisto.ts"] ?? "";
+  const css = JSON.parse(
+    /export const ATRIBUTLISTO_CSS = ("(?:[^"\\]|\\.)*");/.exec(styles)?.[1] ?? '""',
+  ) as string;
+  const light = JSON.parse(
+    /export const ATRIBUTLISTO_LIGHT_CSS = ("(?:[^"\\]|\\.)*");/.exec(styles)?.[1] ?? '""',
+  ) as string;
+
+  it("renders the list around the slotted dl, adopts the light stylesheet, names itself and fills empty values", () => {
+    expect(element).toContain('<div part="list"><slot></slot></div>');
+    expect(element).toContain("document.adoptedStyleSheets");
+    // The key is built from the default slot's name: <slot>-empty (plan ④ D-05).
+    expect(element).toContain("-empty");
+    expect(element).toContain('setAttribute("aria-label"');
+    expect(element).toContain("static formAssociated = false;");
+    expect(element).toContain('customElements.define("fm-atributlisto", FmAtributlisto)');
+  });
+
+  it("writes terms, values and the grid scoped to the host; layout keys the column gap", () => {
+    expect(light).toContain("fm-atributlisto > dl > dt {\n  color: var(--fm-color-text-muted);");
+    expect(light).toContain("fm-atributlisto > dl > dd {\n  color: var(--fm-color-text-default);");
+    expect(light).toContain(
+      'fm-atributlisto[data-layout="columns"] > dl {\n  column-gap: var(--fm-spacing-large);',
+    );
+    expect(light).toContain(
+      'fm-atributlisto[data-layout="columns"] > dl { grid-template-columns: max-content auto; }',
+    );
+    expect(light).toContain(
+      'fm-atributlisto[data-layout="stacked"] > dl { grid-template-columns: auto; }',
+    );
+    expect(light).toContain("fm-atributlisto .fm-hidden {");
+    expect(componentCssIssues("atributlisto.css", css)).toEqual([]);
+    expect(componentCssIssues("atributlisto.light.css", light)).toEqual([]);
+  });
+
+  it("states layout and the one state rest in the stylesheet inventory (parity)", () => {
+    const inventory = stylesheetInventory(styles);
+    expect(inventory.props).toEqual({ layout: ["columns", "stacked"] });
     expect(inventory.states).toEqual(["rest"]);
   });
 });

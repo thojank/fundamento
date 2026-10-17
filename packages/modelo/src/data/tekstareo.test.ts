@@ -45,6 +45,7 @@ describe("tekstareo in the repo Modelo (section ②)", () => {
   it("lives in data/eroj/tekstareo/skemo.json, last of nine Eroj, and the repo Modelo stays valid", () => {
     expect(tekstareo?.file).toBe("modelo/data/eroj/tekstareo/skemo.json");
     expect(modelo.eroj.map((entry) => entry.ero.name)).toEqual([
+      "atributlisto",
       "avizo",
       "butono",
       "dialogo",
@@ -54,8 +55,10 @@ describe("tekstareo in the repo Modelo (section ②)", () => {
       "kampo",
       "ligilo",
       "markobutono",
+      "mezurilo",
       "plenstato",
       "sxaltilo",
+      "tabelo",
       "tekstareo",
     ]);
     expect(validateModelo(defaultModeloSource()).errors).toEqual([]);
@@ -245,6 +248,9 @@ describe("the Reguloj of the tekstareo (G6, E5)", () => {
       "insigno",
       "avizo",
       "plenstato",
+      "tabelo",
+      "atributlisto",
+      "mezurilo",
     ]);
   });
 

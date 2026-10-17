@@ -399,3 +399,29 @@ test("fm-insigno, fm-avizo and fm-plenstato are upgraded in their sections, axe-
   expect(await axeViolations(page, "#fm-vitrino-avizo")).toEqual([]);
   expect(await axeViolations(page, "#fm-vitrino-plenstato")).toEqual([]);
 });
+
+// Spec 011 ④ (plan ④ D-13): the sections of the tabelo, the atributlisto and the mezurilo in the
+// Vitrino: two captioned tables with a sortable head, two lists with a dash for the empty value,
+// four meters with the value example, axe without a finding.
+test("fm-tabelo, fm-atributlisto and fm-mezurilo are upgraded in their sections, axe-clean", async ({
+  page,
+}) => {
+  await open(page);
+  const tables = page.locator("#fm-vitrino-tabelo fm-tabelo");
+  await expect(tables).toHaveCount(2);
+  // The section's own grid is a table too: count the tables inside the Eroj.
+  await expect(page.locator("#fm-vitrino-tabelo fm-tabelo").getByRole("table")).toHaveCount(2);
+  await expect(page.locator("#fm-vitrino-tabelo th[data-sort] > button")).toHaveCount(2);
+  const lists = page.locator("#fm-vitrino-atributlisto fm-atributlisto");
+  await expect(lists).toHaveCount(2);
+  await expect(page.locator("#fm-vitrino-atributlisto dd").last().locator("svg")).toHaveCount(1);
+  const meters = page.locator("#fm-vitrino-mezurilo fm-mezurilo");
+  await expect(meters).toHaveCount(4);
+  await expect(page.locator("#fm-vitrino-mezurilo").getByRole("meter").first()).toHaveAttribute(
+    "aria-valuenow",
+    "66",
+  );
+  expect(await axeViolations(page, "#fm-vitrino-tabelo")).toEqual([]);
+  expect(await axeViolations(page, "#fm-vitrino-atributlisto")).toEqual([]);
+  expect(await axeViolations(page, "#fm-vitrino-mezurilo")).toEqual([]);
+});

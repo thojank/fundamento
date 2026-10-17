@@ -1,0 +1,9 @@
+{
+  "description": "Spec 011 ④ G7: the tabelo takes its accessible name from the slot caption, but its Uzo does not mark the slot required; the slot is a duty.",
+  "issues": [
+    {
+      "rule": "uzo-slot-required-missing",
+      "path": "data/eroj/tabelo/uzo.json#/uzo/slots/caption"
+    }
+  ]
+}

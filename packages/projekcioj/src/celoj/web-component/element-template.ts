@@ -25,7 +25,9 @@ export type HostControl =
   | "select"
   | "dialog"
   | "text"
-  | "status";
+  | "status"
+  | "meter"
+  | "light";
 
 export interface ElementNames {
   /** `fm-butono` */
@@ -79,6 +81,11 @@ export function hostOf(role: string, multiline = false): HostControl {
   // role status, alert where the Skemo's intent is danger.
   if (role === "generic") return "text";
   if (role === "status") return "status";
+  // A meter (Spec 011 ④, D-08) is a div with role meter; a table or a list (D-09, D-10, E10) is
+  // the platform's own element in the light DOM, which the Ero styles and extends: the shadow
+  // holds only a region or a frame around the slot.
+  if (role === "meter") return "meter";
+  if (role === "table" || role === "list") return "light";
   if (role === "textbox") return multiline ? "textarea" : "input";
   if (role === "dialog") return "dialog";
   if (role === "switch" || role === "checkbox") return "toggle";
@@ -281,6 +288,47 @@ function statusMarkup(
   return `<div part="control" role="status"><span id="fm-texts" class="fm-hidden"></span>${indicator ? `<span part="indicator" aria-hidden="true">${arc}</span>` : ""}<div>${holders}</div>${dismiss ? `<fm-butono part="dismiss" emphasis="low" size="small" hidden>${CROSS}</fm-butono>` : ""}</div>`;
 }
 
+/**
+ * The shadow markup of a meter (Spec 011 ④, D-08, G4): a div with role meter as the control,
+ * named by its label and described by its value text (the aria-valuetext too); the track with the
+ * fill in it, whose inline size the element sets to the share of the range.
+ */
+function meterMarkup(): string {
+  return `<div part="control" role="meter" aria-labelledby="label" aria-describedby="value-text"><span part="label" id="label"><slot></slot></span><span part="track"><span part="fill"></span></span><span part="value-text" id="value-text"><slot name="value-text"></slot></span><span id="fm-texts" hidden></span></div>`;
+}
+
+/**
+ * The shadow markup of a light-DOM host (Spec 011 ④, D-09, D-10, E10): the platform's own table
+ * or list stays in the light DOM; the shadow holds a focusable, named scroll region around a named
+ * content slot (the table), or a plain frame around the default slot (the list); a default text
+ * slot (the caption of a table) is not rendered here — the element writes it into the table.
+ */
+function lightMarkup(slots: NonNullable<ElementNames["slots"]>): string {
+  const content = slots.find((slot) => slot.default !== true && slot.text !== true);
+  const defaultSlot = slots.find((slot) => slot.default === true);
+  const frame =
+    content !== undefined
+      ? `<div part="region" role="region" tabindex="0"><slot name="${content.name}"></slot></div>`
+      : `<div part="list"><slot></slot></div>`;
+  const hiddenDefault =
+    content !== undefined && defaultSlot?.text === true ? "<slot hidden></slot>" : "";
+  const hiddenNamed = slots
+    .filter((slot) => slot.default !== true && slot.text === true)
+    .map((slot) => `<slot name="${slot.name}" hidden></slot>`)
+    .join("");
+  return `${frame}${hiddenDefault}${hiddenNamed}<span id="fm-texts" hidden></span>`;
+}
+
+/**
+ * The dash of an empty value (Spec 011 ④, D-10): a short line in the current colour, a sign of
+ * the projection like the check mark — no text node (Art. VIII, ero-hardcoded-string).
+ */
+const DASH_SIGN =
+  '<svg aria-hidden="true" viewBox="0 0 16 16" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 8h10"/></svg>';
+
+/** The chevron of a sort button (Spec 011 ④, D-09): the select's sign, turned by the direction. */
+const SORT_SIGN = `<svg aria-hidden="true" viewBox="0 0 16 16" width="100%" height="100%" fill="currentColor"><path d="${CHEVRON_PATH}"/></svg>`;
+
 /** The shadow markup of the control: slots before the label (icon-start), the label, the rest. */
 function markup(
   host: HostControl,
@@ -292,6 +340,8 @@ function markup(
 ): string {
   if (host === "text") return textMarkup(slots);
   if (host === "status") return statusMarkup(slots, indicator, dismiss);
+  if (host === "meter") return meterMarkup();
+  if (host === "light") return lightMarkup(slots);
   if (host === "input") return fieldMarkup(slots);
   if (host === "textarea") return fieldMarkup(slots, true);
   if (host === "dialog") return dialogMarkup();
@@ -327,10 +377,11 @@ export function elementSource({
     { name: "icon-end", decorative: true },
   ],
 }: ElementNames): string {
+  const isLight = host === "light";
   const head =
     inline === true
-      ? `const SKEMO = ${constant}_SKEMO;\nconst CSS = ${constant}_CSS;`
-      : `import { ${constant}_SKEMO as SKEMO } from "./skemo.js";\nimport { ${constant}_CSS as CSS } from "./${ero}.styles.js";`;
+      ? `const SKEMO = ${constant}_SKEMO;\nconst CSS = ${constant}_CSS;${isLight ? `\nconst LIGHT_CSS = ${constant}_LIGHT_CSS;` : ""}`
+      : `import { ${constant}_SKEMO as SKEMO } from "./skemo.js";\nimport { ${constant}_CSS as CSS${isLight ? `, ${constant}_LIGHT_CSS as LIGHT_CSS` : ""} } from "./${ero}.styles.js";`;
   const control =
     host === "a"
       ? "a"
@@ -348,7 +399,11 @@ export function elementSource({
                   ? "span"
                   : host === "status"
                     ? "div"
-                    : "button";
+                    : host === "meter"
+                      ? "div"
+                      : host === "light"
+                        ? "[part='region'], [part='list']"
+                        : "button";
   const isToggle = host === "toggle";
   const isGroup = host === "group";
   const isSelect = host === "select";
@@ -357,7 +412,8 @@ export function elementSource({
   const nativeField = host === "textarea" ? "HTMLTextAreaElement" : "HTMLInputElement";
   const isDialog = host === "dialog";
   const isStatus = host === "status";
-  const isStatic = isStatus || host === "text";
+  const isMeter = host === "meter";
+  const isStatic = isStatus || host === "text" || isMeter || isLight;
   const listSlot = slots.find((slot) => slot.list === true)?.name ?? "";
   const namedSlots = slots
     .filter((slot) => slot.default !== true && slot.decorative !== true)
@@ -1080,6 +1136,206 @@ ${
           : ""
       }`
     : "";
+  // The render of a meter (Spec 011 ④, D-08, G4): the range and the value spoken as the platform
+  // speaks a meter; an unknown value has no aria-valuenow and marks the control, so the track shows
+  // the dashed edge of the part unknown and no fill; the fill's inline size is the share of the
+  // range (a ratio the element computes, no design value); the value text is the aria-valuetext.
+  const meterRender = isMeter
+    ? `    const min = Number(this.propValue("min") ?? 0);
+    const max = Number(this.propValue("max") ?? 100);
+    const rawValue = this.propValue("value");
+    const known = typeof rawValue === "string" && rawValue.trim() !== "" && Number.isFinite(Number(rawValue));
+    control.setAttribute("aria-valuemin", String(min));
+    control.setAttribute("aria-valuemax", String(max));
+    // ARIA requires aria-valuenow on a meter (axe aria-required-attr): an unknown value says the
+    // start of the range as its number and its text as what is heard ("nicht geprüft"), so no one
+    // hears 0 (plan ④ D-08, Abweichung 13).
+    control.setAttribute("aria-valuenow", String(known ? Number(rawValue) : min));
+    // A presence attribute, not a value: the parity inventory reads data-<prop>="…" as props.
+    control.toggleAttribute("data-unknown", !known);
+    const share = known && max > min ? Math.min(1, Math.max(0, (Number(rawValue) - min) / (max - min))) : 0;
+    const fill = this.shadowRoot?.querySelector('[part="fill"]');
+    if (fill instanceof HTMLElement) fill.style.inlineSize = \`\${share * 100}%\`;
+    control.setAttribute("aria-valuetext", this.#slotText("value-text"));
+`
+    : "";
+  // The render of a light-DOM host (Spec 011 ④, D-09, D-10, E10): the platform's own table or
+  // list in the light DOM gets what the Ero adds — the caption from the default slot (hidden from
+  // sight with caption-hidden, never missing) and the region's name, the sort buttons in the
+  // headers that carry data-sort with aria-sort on the sorted column, the numeric mark on the
+  // cells of a numeric column, the empty state as a plenstato over all columns while there are no
+  // rows; the dash and the a11y text of an empty value, the name of the list. Every write checks
+  // what stands there, so the observer of the light DOM does not loop.
+  const lightRender = isLight
+    ? `    this.#decorate();
+`
+    : "";
+  const lightInit = isLight
+    ? `    if (lightSheet === undefined) {
+      lightSheet = new CSSStyleSheet();
+      lightSheet.replaceSync(LIGHT_CSS);
+    }
+    if (!document.adoptedStyleSheets.includes(lightSheet)) {
+      document.adoptedStyleSheets = [...document.adoptedStyleSheets, lightSheet];
+    }
+    new MutationObserver(() => this.#render()).observe(this, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+      attributes: true,
+      attributeFilter: ["slot", "data-sort", "numeric"],
+    });
+    this.addEventListener("click", (event) => {
+      const button = event
+        .composedPath()
+        .find(
+          (node) =>
+            node instanceof HTMLButtonElement && node.parentElement?.hasAttribute("data-sort") === true,
+        );
+      if (!(button instanceof HTMLButtonElement) || !this.contains(button)) return;
+      const column = button.parentElement?.getAttribute("data-sort") ?? "";
+      const current = this.propValue("sort");
+      const direction =
+        current === column && this.propValue("direction") === "ascending" ? "descending" : "ascending";
+      this.dispatchEvent(new CustomEvent("sort-change", { bubbles: true, detail: { column, direction } }));
+    });
+`
+    : "";
+  const lightMethods = isLight
+    ? `
+  /** The platform's own table or list in the light DOM, the first child of its kind. */
+  #native(kind: "table" | "dl"): HTMLElement | undefined {
+    const node = [...this.children].find((child) => child.tagName.toLowerCase() === kind);
+    return node instanceof HTMLElement ? node : undefined;
+  }
+
+  /** Writes what the Ero adds to the native element; every write first compares. */
+  #decorate(): void {
+    const table = this.#native("table");
+    if (table !== undefined) this.#decorateTable(table);
+    const list = this.#native("dl");
+    if (list !== undefined) this.#decorateList(list);
+  }
+
+  #decorateTable(table: HTMLElement): void {
+    // The caption from the default slot (Spec 011 ④, D-09): written into the table, where the
+    // platform names it; hidden from sight with caption-hidden, never removed (G4).
+    const captionText = this.#slotText("");
+    let caption = table.querySelector(":scope > caption");
+    if (caption === null && captionText !== "") {
+      caption = document.createElement("caption");
+      table.prepend(caption);
+    }
+    if (caption instanceof HTMLElement) {
+      if (caption.textContent !== captionText) caption.textContent = captionText;
+      const hidden = HAS_PROP.has("caption-hidden") && this.propValue("caption-hidden") === true;
+      if (caption.classList.contains("fm-hidden") !== hidden) caption.classList.toggle("fm-hidden", hidden);
+    }
+    const region = this.shadowRoot?.querySelector('[part="region"]');
+    if (region instanceof HTMLElement && region.getAttribute("aria-label") !== (captionText || null)) {
+      if (captionText === "") region.removeAttribute("aria-label");
+      else region.setAttribute("aria-label", captionText);
+    }
+    // The sort buttons (Spec 011 ④, D-09, G4): every header that carries data-sort holds a button
+    // with its text and the indicator; aria-sort stands on the sorted column alone.
+    const sorted = this.propValue("sort");
+    const direction = String(this.propValue("direction") ?? "ascending");
+    for (const header of table.querySelectorAll(":scope > thead th")) {
+      const key = header.getAttribute("data-sort");
+      if (key === null) continue;
+      let button = header.querySelector(":scope > button");
+      if (button === null) {
+        button = document.createElement("button");
+        button.setAttribute("type", "button");
+        button.append(...header.childNodes);
+        button.insertAdjacentHTML("beforeend", \`${SORT_SIGN}\`);
+        header.append(button);
+      }
+      const wanted = typeof sorted === "string" && sorted === key ? direction : null;
+      if (header.getAttribute("aria-sort") !== wanted) {
+        if (wanted === null) header.removeAttribute("aria-sort");
+        else header.setAttribute("aria-sort", wanted);
+      }
+    }
+    // A numeric column (Spec 011 ④, D-09): the header carries numeric, its cells get the mark.
+    const headers = [...table.querySelectorAll(":scope > thead th")];
+    const numeric = headers.map((header) => header.hasAttribute("numeric"));
+    for (const row of table.querySelectorAll(":scope > tbody > tr:not([data-fm-empty])")) {
+      [...row.children].forEach((cell, index) => {
+        if (numeric[index] === true && !cell.hasAttribute("numeric")) cell.setAttribute("numeric", "");
+      });
+    }
+    // The empty state (Spec 011 ④, D-09): without rows, the empty slot's text as a plenstato over
+    // all columns; rows take it away.
+    const body = table.querySelector(":scope > tbody");
+    if (body !== null && NAMED_SLOTS.includes("empty")) {
+      const rows = [...body.children].filter((row) => !row.hasAttribute("data-fm-empty"));
+      const placeholder = body.querySelector(":scope > tr[data-fm-empty]");
+      const emptyText = this.#slotText("empty");
+      if (rows.length === 0 && emptyText !== "") {
+        if (placeholder === null) {
+          body.insertAdjacentHTML(
+            "beforeend",
+            \`<tr data-fm-empty><td colspan="\${Math.max(1, headers.length)}"><fm-plenstato kind="empty"></fm-plenstato></td></tr>\`,
+          );
+        }
+        const state = body.querySelector(":scope > tr[data-fm-empty] fm-plenstato");
+        if (state instanceof HTMLElement && state.textContent !== emptyText) state.textContent = emptyText;
+      } else if (placeholder !== null) {
+        placeholder.remove();
+      }
+    }
+  }
+
+  #decorateList(list: HTMLElement): void {
+    // The name of the list (Spec 011 ④, D-10): the label prop, as the platform names a list.
+    const label = this.propValue("label");
+    const name = typeof label === "string" && label !== "" ? label : null;
+    if (list.getAttribute("aria-label") !== name) {
+      if (name === null) list.removeAttribute("aria-label");
+      else list.setAttribute("aria-label", name);
+    }
+    // An empty value (Spec 011 ④, D-10, G4): a dash to see, the a11y text of the default slot's
+    // empty entry to hear (a11y.texts <slot>-empty), clipped from sight; a value filled in later
+    // takes both away.
+    const slot = (SKEMO.slots as readonly { name: string; default?: boolean }[]).find((candidate) => candidate.default === true);
+    const heard = slot === undefined ? undefined : TEXTS[\`\${slot.name}-empty\`];
+    if (heard === undefined) return;
+    const lingvo = this.#lingvo();
+    const word = heard[lingvo] ?? heard.en ?? Object.values(heard)[0] ?? "";
+    for (const value of list.querySelectorAll(":scope > dd")) {
+      const marked = value.hasAttribute("data-fm-empty");
+      const ours = value.querySelector(":scope > .fm-hidden") !== null;
+      if (marked && !ours) {
+        value.removeAttribute("data-fm-empty");
+        continue;
+      }
+      if (marked) continue;
+      if ((value.textContent ?? "").trim() !== "" || value.children.length > 0) continue;
+      value.setAttribute("data-fm-empty", "");
+      value.innerHTML = \`<span class="fm-hidden">\${word}</span>${DASH_SIGN}\`;
+    }
+  }
+`
+    : "";
+  // The text of a slot of the light DOM, read for a meter's value text and a table's caption or
+  // empty state (the default slot is named "").
+  const slotTextMethod =
+    isMeter || isLight
+      ? `
+  /** The text a slot holds (the default slot as ""), trimmed; empty without content. */
+  #slotText(name: string): string {
+    const slot = this.shadowRoot?.querySelector(name === "" ? "slot:not([name])" : \`slot[name="\${name}"]\`);
+    return slot instanceof HTMLSlotElement
+      ? slot
+          .assignedNodes({ flatten: true })
+          .map((node) => node.textContent ?? "")
+          .join("")
+          .trim()
+      : "";
+  }
+`
+      : "";
   const body = `
 type Value = string | boolean;
 
@@ -1129,7 +1385,7 @@ const KEYED_BOOLEANS = PROPS.filter(
 ).map((prop) => prop.name);
 
 let sheet: CSSStyleSheet | undefined;
-const warned = new Set<string>();
+${isLight ? "/** The stylesheet of the light DOM (Spec 011 ④, E10): adopted by the document once, scoped to the host. */\nlet lightSheet: CSSStyleSheet | undefined;\n" : ""}const warned = new Set<string>();
 
 function warn(message: string): void {
   if (warned.has(message)) return;
@@ -1181,11 +1437,13 @@ ${isFieldHost ? "  /** Whether a person touched the field or the form reported i
       throw new Error("${tag}: shadow template is incomplete");
     }
     this.#control = control;
-    this.#root = root.querySelector('[part="field"]') ?? control;
+    // A light-DOM host carries the combination itself (Spec 011 ④, E10): the document's stylesheet
+    // selects fm-tabelo[data-density="compact"] > table …
+    this.#root = ${isLight ? "this" : `root.querySelector('[part="field"]') ?? control`};
     this.#label = label;
     this.#texts = texts;
     control.addEventListener("click", (event) => this.#activate(event));
-${toggleKeys}${groupInit}${selectInit}${dialogInit}${statusInit}    label.addEventListener("slotchange", () => this.#render());
+${toggleKeys}${groupInit}${selectInit}${dialogInit}${statusInit}${lightInit}    label.addEventListener("slotchange", () => this.#render());
     for (const named of root.querySelectorAll("slot[name]")) {
       named.addEventListener("slotchange", () => this.#render());
     }
@@ -1319,7 +1577,7 @@ ${isGroup ? "    this.#assign();\n" : ""}    this.#render();
     // \`invalid\` spoken as aria-invalid and set by a filled error slot (constraint of the Skemo);
     // disabled wins over readonly; help and error show only while they have text.
     const described: string[] = [];
-${inputRender}${toggleRender}${groupRender}${selectRender}${dialogRender}${statusRender}    // The texts of the slots that describe the control (Spec 009, D-02; a checkbox, Spec 010 ②):
+${inputRender}${toggleRender}${groupRender}${selectRender}${dialogRender}${statusRender}${meterRender}${lightRender}    // The texts of the slots that describe the control (Spec 009, D-02; a checkbox, Spec 010 ②):
     // shown while they have text, and its description in that order.
     for (const source of DESCRIPTION) {
       const [kind, name = ""] = source.split(":");
@@ -1366,9 +1624,17 @@ ${
       .join("")
       .trim();
     const name = this.propValue("label");
-    if (text === "" && typeof name === "string" && name !== "") control.setAttribute("aria-label", name);
+${
+  isLight
+    ? `    // A light-DOM host names its region by the caption (Spec 011 ④, D-09) and its list by the
+    // label prop on the dl itself (D-10); nothing is written here.
+    void text;
+    void name;
+`
+    : `    if (text === "" && typeof name === "string" && name !== "") control.setAttribute("aria-label", name);
     else control.removeAttribute("aria-label");
-  }
+`
+}  }
 
   #activate(event: Event): void {
     if (this.propValue("loading") === true || this.propValue("disabled") === true) {
@@ -1387,7 +1653,7 @@ ${
     : `    if (!(this.#control instanceof HTMLButtonElement)) return;
 ${toggleActivate}`
 }  }
-${groupMethods}${selectMethods}${inputMethods}${dialogMethods}${statusMethods}
+${groupMethods}${selectMethods}${inputMethods}${dialogMethods}${statusMethods}${slotTextMethod}${lightMethods}
 }
 
 /**

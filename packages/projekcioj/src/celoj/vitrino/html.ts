@@ -156,7 +156,15 @@ function wrapSentence(role: string | undefined, wrap: string, multiline = false)
           : // Spec 011 ③: a live region (notice, state) wraps its text; a badge its label (never).
             role === "status"
             ? "Text"
-            : "Label";
+            : // Spec 011 ④: a table scrolls its region (never wraps), a list wraps its values, a
+              // meter never wraps its text.
+              role === "table"
+              ? "Region"
+              : role === "list"
+                ? "Wert"
+                : role === "meter"
+                  ? "Wertetext"
+                  : "Label";
   if (wrap === "never") return `${subject} bricht nie um`;
   if (wrap === "with-text") return `${subject} darf umbrechen (inline), standalone nie`;
   return `${subject} darf umbrechen`;

@@ -69,6 +69,7 @@ describe("get_ero brief (Spec 007 A8)", () => {
   // Spec 008 T014 (A5, E of Spec 009): every Ero's brief, measured; the ceiling stays 750.
   // Spec 010 ④: seven Eroj, the elektilo among them; Spec 011 ②: nine, dialogo and tekstareo.
   it.each([
+    "atributlisto",
     "avizo",
     "butono",
     "dialogo",
@@ -78,8 +79,10 @@ describe("get_ero brief (Spec 007 A8)", () => {
     "kampo",
     "ligilo",
     "markobutono",
+    "mezurilo",
     "plenstato",
     "sxaltilo",
+    "tabelo",
     "tekstareo",
   ])(
     `%s stays under the ceiling of ${BRIEF_LIMIT} (ceil(bytes / 3) of the compact JSON)`,
@@ -108,6 +111,7 @@ describe("suggest_ero (FR-13)", () => {
       expect.objectContaining({ rule: "goal-unknown", path: "suggest_ero/goal" }),
     ]);
     expect(result.structuredContent?.allowed).toEqual([
+      "details",
       "notify",
       "report-error",
       "destructive",
@@ -126,9 +130,11 @@ describe("suggest_ero (FR-13)", () => {
       "external",
       "agree",
       "opt-in",
+      "meter",
       "loading",
       "empty",
       "toggle",
+      "table",
       "multi-line",
     ]);
   });

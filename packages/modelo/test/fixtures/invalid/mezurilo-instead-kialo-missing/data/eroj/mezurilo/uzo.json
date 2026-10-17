@@ -1,0 +1,69 @@
+{
+  "uzo": {
+    "id": "uzo_01M4H39SZBPN8VKA70309EJ35G",
+    "ero": "ero_01M2XM2NGN3KJSKJ4JTXQWMF72",
+    "skemo": "ske_01M2XM2NWJ39A7BEZ9A2S8GANE",
+    "purpose": "Shows a known value within a known range, with its number.",
+    "instead": [
+      {
+        "goal": "status-word",
+        "keywords": {
+          "en": [
+            "statusword"
+          ],
+          "de": [
+            "statuswort"
+          ]
+        },
+        "ero": null
+      }
+    ],
+    "boundary": [
+      {
+        "case": "chart",
+        "action": "not-supported",
+        "keywords": {
+          "en": [
+            "chart"
+          ],
+          "de": [
+            "diagramm"
+          ]
+        },
+        "kialo": "A chart compares many values, because the fixture says so."
+      }
+    ],
+    "composes": {
+      "containers": [],
+      "with": [],
+      "never": [],
+      "spacing": {
+        "owner": "container",
+        "regulo": "spacing-owned-by-container"
+      }
+    },
+    "slots": {
+      "label": {
+        "accepts": [
+          "text"
+        ],
+        "required": true,
+        "max": 1,
+        "nesting": 0
+      },
+      "value-text": {
+        "accepts": [
+          "text"
+        ],
+        "required": true,
+        "max": 1,
+        "nesting": 0
+      }
+    },
+    "layout": {
+      "size": "container",
+      "wrap": "never"
+    },
+    "content": []
+  }
+}

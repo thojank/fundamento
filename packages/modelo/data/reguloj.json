@@ -393,7 +393,7 @@
       "name": "spacing-owned-by-container",
       "statement": "The space between sibling Eroj belongs to their container; an Ero carries no outer spacing.",
       "kialo": "An Ero does not know its neighbours. If each one brought its own distance, two Eroj side by side would add up their distances, and the rhythm of a view would depend on which Ero stands where.",
-      "scope": "eroj: every Ero's instances in a design or in code (butono, ligilo, kampo, sxaltilo, markobutono, elekto, elektilo, tekstareo, dialogo, insigno, avizo, plenstato)",
+      "scope": "eroj: every Ero's instances in a design or in code (butono, ligilo, kampo, sxaltilo, markobutono, elekto, elektilo, tekstareo, dialogo, insigno, avizo, plenstato, tabelo, atributlisto, mezurilo)",
       "checkability": "manual",
       "appliesTo": {
         "eroj": [
@@ -408,7 +408,10 @@
           "dialogo",
           "insigno",
           "avizo",
-          "plenstato"
+          "plenstato",
+          "tabelo",
+          "atributlisto",
+          "mezurilo"
         ]
       }
     },
@@ -750,6 +753,32 @@
       "appliesTo": {
         "eroj": [
           "plenstato"
+        ]
+      }
+    },
+    {
+      "id": "reg_01M523FB4399X7M2YAH505F626",
+      "name": "table-caption-names-the-content",
+      "statement": "Every tabelo has a caption that says what stands in its rows, 'Standards', 'Prüfläufe der Version 3'; it may be hidden from sight, never missing.",
+      "kialo": "A screen reader names the table by its caption when the person enters it; without it the rows are numbers and words without a subject.",
+      "scope": "eroj: tabelo instances (check not-words against captions that name no content: 'Tabelle', 'Daten', 'Übersicht', 'Liste'; the Uzo makes the slot a duty), an approximation: the list names the usual empty captions, 'Dinge' passes; fixed: no brand writes tables without a caption that names its rows",
+      "checkability": "automatic",
+      "appliesTo": {
+        "eroj": [
+          "tabelo"
+        ]
+      }
+    },
+    {
+      "id": "reg_01M523FB44ZQQK93DNE33G8BTN",
+      "name": "meter-text-states-value",
+      "statement": "The value text of a mezurilo names the value and what it refers to, '66 % von 3 prüfbaren', '3 von 5 geprüft'; an unknown value says so, 'nicht geprüft', never '0 %'.",
+      "kialo": "A bar without a number is colour alone, and 0 is a statement: a person who cannot see the fill, or who sees an empty bar, must read what it means.",
+      "scope": "eroj: mezurilo instances (check min-words 2 on the value text), an approximation without a model: '66 %' alone and '0 %' alone fail, 'nicht geprüft' passes; fixed",
+      "checkability": "automatic",
+      "appliesTo": {
+        "eroj": [
+          "mezurilo"
         ]
       }
     }

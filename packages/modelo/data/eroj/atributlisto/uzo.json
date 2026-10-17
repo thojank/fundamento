@@ -1,0 +1,102 @@
+{
+  "$schema": "../../../schema/modelo.schema.json#/$defs/UzoFile",
+  "uzo": {
+    "id": "uzo_01M523FAR4K5YR54RGTY79QK3Y",
+    "ero": "ero_01M523F9Z0MAVKZC8ZVN9RBWS4",
+    "skemo": "ske_01M523FAAXJ1AADZWZ6NQRX83M",
+    "purpose": "Shows the fields of one record as name and value: version, owner, valid since.",
+    "instead": [
+      {
+        "goal": "many-records",
+        "keywords": {
+          "en": [
+            "records",
+            "table"
+          ],
+          "de": [
+            "datensätze",
+            "tabelle"
+          ]
+        },
+        "ero": "tabelo",
+        "kialo": "Many records with the same fields are rows and columns, because a person compares them; that is the tabelo."
+      },
+      {
+        "goal": "editable",
+        "keywords": {
+          "en": [
+            "edit",
+            "editable"
+          ],
+          "de": [
+            "bearbeiten",
+            "ändern"
+          ]
+        },
+        "ero": "kampo",
+        "kialo": "Editing is a form, not a list, because every value becomes a field with a label; the kampo in a form."
+      }
+    ],
+    "boundary": [
+      {
+        "case": "nested",
+        "action": "not-supported",
+        "keywords": {
+          "en": [
+            "sublist"
+          ],
+          "de": [
+            "unterliste",
+            "verschachtelte"
+          ]
+        },
+        "kialo": "A list inside a value loses its pairs, because assistive technology reads one list of names and values; flatten the record or use a second list."
+      }
+    ],
+    "composes": {
+      "containers": [
+        {
+          "name": "page-section",
+          "kialo": "The fields of a record stand in a section of its page, because the person reads them next to the content."
+        },
+        {
+          "name": "dialog",
+          "kialo": "A dialog may show the fields of what it asks about, because the decision needs them in sight."
+        }
+      ],
+      "with": [
+        {
+          "ero": "insigno",
+          "kialo": "A status as a value is a badge, because a state is one or two words."
+        },
+        {
+          "ero": "ligilo",
+          "kialo": "A value may lead somewhere, because an owner or a source is a destination."
+        },
+        {
+          "ero": "mezurilo",
+          "kialo": "A value in a range is a meter, because a number alone has no scale."
+        }
+      ],
+      "never": [],
+      "spacing": {
+        "owner": "container",
+        "regulo": "spacing-owned-by-container"
+      }
+    },
+    "slots": {
+      "entries": {
+        "accepts": [
+          "text"
+        ],
+        "required": true,
+        "nesting": 0
+      }
+    },
+    "layout": {
+      "size": "container",
+      "wrap": "allowed"
+    },
+    "content": []
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "description": "Spec 011 ④ G7 (Art. VIII, Spec 008 D-13): the Skemo of the atributlisto names a prop class, the attribute of one platform; the Celoj translate.",
+  "issues": [
+    {
+      "rule": "skemo-web-term",
+      "path": "data/eroj/atributlisto/skemo.json#/skemo/props/2/name"
+    }
+  ]
+}

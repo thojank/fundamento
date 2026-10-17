@@ -53,6 +53,17 @@ export const STRUCTURAL_PROPERTIES: readonly string[] = [
   "clip-path",
   "text-align",
   "border-inline-start-style",
+  // Spec 011 ④ (plan ④ D-09, D-10): the platform's own table and list in the light DOM — whether
+  // borders collapse, where the caption stands, tabular figures in a numeric column, the columns of
+  // the grid (max-content, auto) and the scroll axis of the region are structure.
+  "border-collapse",
+  "caption-side",
+  "font-variant-numeric",
+  "grid-template-columns",
+  "overflow-x",
+  "border-block-end-style",
+  "transform",
+  "align-self",
 ];
 
 /** Design properties: their value must come from a token (prefix match on the property name). */

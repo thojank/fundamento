@@ -66,6 +66,7 @@ describe("suggest_ero", () => {
     expect(result.issues[0]?.path).toBe("suggest_ero/goal");
     // Every goal of every Ero, in Ero order (Spec 008: navigate and external of the ligilo).
     expect(result.allowed).toEqual([
+      "details",
       "notify",
       "report-error",
       "destructive",
@@ -84,9 +85,11 @@ describe("suggest_ero", () => {
       "external",
       "agree",
       "opt-in",
+      "meter",
       "loading",
       "empty",
       "toggle",
+      "table",
       "multi-line",
     ]);
     // Spec 007 (OP-6, D-06): the system says it does not cover the goal; a person decides.

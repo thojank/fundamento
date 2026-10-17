@@ -148,6 +148,7 @@ describe("the scheme eroj (Spec 008 T009)", () => {
 
   it("holds one concept per Ero of the Modelo, under #Ero, related to each other", () => {
     expect(eroNames).toEqual([
+      "atributlisto",
       "avizo",
       "butono",
       "dialogo",
@@ -157,11 +158,14 @@ describe("the scheme eroj (Spec 008 T009)", () => {
       "kampo",
       "ligilo",
       "markobutono",
+      "mezurilo",
       "plenstato",
       "sxaltilo",
+      "tabelo",
       "tekstareo",
     ]);
     expect(eroj.map((concept) => concept.term).sort()).toEqual([
+      "Atributlisto",
       "Avizo",
       "Butono",
       "Dialogo",
@@ -171,8 +175,10 @@ describe("the scheme eroj (Spec 008 T009)", () => {
       "Kampo",
       "Ligilo",
       "Markobutono",
+      "Mezurilo",
       "Plenstato",
       "Sxaltilo",
+      "Tabelo",
       "Tekstareo",
     ]);
     for (const concept of eroj) {
@@ -271,8 +277,8 @@ describe("the scheme eroj (Spec 008 T009)", () => {
         mutate((copy) => {
           copy.concepts.push({
             ...(copy.concepts.find((concept) => concept.term === "Ligilo") as Concept),
-            term: "Tabelo",
-            uri: "https://fundamento.ciferecigo.com/ontologio#Tabelo",
+            term: "Navigado",
+            uri: "https://fundamento.ciferecigo.com/ontologio#Navigado",
             relations: [],
           });
         }),

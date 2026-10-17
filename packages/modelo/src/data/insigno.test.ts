@@ -34,6 +34,7 @@ describe("insigno in the repo Modelo (section ③, G1, G2)", () => {
   it("lives in data/eroj/insigno/skemo.json, among twelve Eroj", () => {
     expect(insigno?.file).toBe("modelo/data/eroj/insigno/skemo.json");
     expect(modelo.eroj.map((entry) => entry.ero.name)).toEqual([
+      "atributlisto",
       "avizo",
       "butono",
       "dialogo",
@@ -43,8 +44,10 @@ describe("insigno in the repo Modelo (section ③, G1, G2)", () => {
       "kampo",
       "ligilo",
       "markobutono",
+      "mezurilo",
       "plenstato",
       "sxaltilo",
+      "tabelo",
       "tekstareo",
     ]);
   });
@@ -162,16 +165,16 @@ describe("the Uzo of the insigno (section ③, G5)", () => {
     expect(uzo?.layout).toEqual({ size: "content", wrap: "never" });
   });
 
-  it("sends a sentence to the avizo and a click to the butono; a bare count and a value in a range are a person's decision until ④", () => {
+  it("sends a sentence to the avizo, a click to the butono and a value in a range to the mezurilo (④); a bare count is a person's decision", () => {
     expect(uzo?.instead.map((entry) => [entry.goal, entry.ero])).toEqual([
       ["sentence", "avizo"],
       ["clickable", "butono"],
       ["count-only", null],
-      ["value-in-range", null],
+      ["value-in-range", "mezurilo"],
     ]);
     for (const entry of uzo?.instead ?? []) expect(entry.kialo).toMatch(/because/);
-    expect(uzo?.instead.find((entry) => entry.goal === "value-in-range")?.kialo).toContain(
-      "mezurilo",
+    expect(uzo?.instead.find((entry) => entry.goal === "value-in-range")?.kialo).not.toContain(
+      "no such Ero yet",
     );
   });
 
@@ -285,8 +288,8 @@ describe("check_usage and suggest_ero of the badge (G6, G7, Gvidanto)", () => {
       case: "brand-badge",
       action: "ask-human",
     });
+    // ④: a value in a range is the mezurilo's now; the badge's instead says so.
     const ratio = suggest("Anteil in Prozent");
-    expect(ratio.suggestion).toBeNull();
-    expect(ratio.boundary).toMatchObject({ ero: "insigno", case: "value-in-range" });
+    expect(ratio.suggestion).toEqual({ ero: "mezurilo", props: {} });
   });
 });

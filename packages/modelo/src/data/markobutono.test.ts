@@ -26,6 +26,7 @@ describe("markobutono in the repo Modelo (G1, G2, section 2)", () => {
   it("lives in data/eroj/markobutono/skemo.json, after ligilo and before sxaltilo, and the repo Modelo stays valid", () => {
     expect(markobutono?.file).toBe("modelo/data/eroj/markobutono/skemo.json");
     expect(modelo.eroj.map((entry) => entry.ero.name)).toEqual([
+      "atributlisto",
       "avizo",
       "butono",
       "dialogo",
@@ -35,8 +36,10 @@ describe("markobutono in the repo Modelo (G1, G2, section 2)", () => {
       "kampo",
       "ligilo",
       "markobutono",
+      "mezurilo",
       "plenstato",
       "sxaltilo",
+      "tabelo",
       "tekstareo",
     ]);
     expect(validateModelo(defaultModeloSource()).errors).toEqual([]);
@@ -297,6 +300,9 @@ describe("the Reguloj of the markobutono (G6, E5)", () => {
       "insigno",
       "avizo",
       "plenstato",
+      "tabelo",
+      "atributlisto",
+      "mezurilo",
     ]);
   });
 

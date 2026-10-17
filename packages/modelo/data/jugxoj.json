@@ -3344,6 +3344,190 @@
           }
         ]
       }
+    },
+    {
+      "id": "jug_01M523FBG53606V478Y4XMT20X",
+      "ref": {
+        "ero": "ero_01M523F9YZX0X2QDED1XRNM1G4"
+      },
+      "decision": "approved",
+      "kialo": "The caption names what the rows are.",
+      "date": "2026-10-16",
+      "context": "Example RIGHT for the Regulo named in ekzemplo.regulo (Spec 011 ④ G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M523FB4399X7M2YAH505F626",
+        "instances": [
+          {
+            "ero": "tabelo",
+            "props": {},
+            "lingvo": "de",
+            "label": "Standards"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M523FBG64GAMZEPGMN7B85S5",
+      "ref": {
+        "ero": "ero_01M523F9YZX0X2QDED1XRNM1G4"
+      },
+      "decision": "approved",
+      "kialo": "The caption names what the rows are.",
+      "date": "2026-10-16",
+      "context": "Example RIGHT for the Regulo named in ekzemplo.regulo (Spec 011 ④ G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M523FB4399X7M2YAH505F626",
+        "instances": [
+          {
+            "ero": "tabelo",
+            "props": {},
+            "lingvo": "en",
+            "label": "Standards"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M523FBG64GAMZEPGMN7B85S6",
+      "ref": {
+        "ero": "ero_01M523F9YZX0X2QDED1XRNM1G4"
+      },
+      "decision": "rejected",
+      "kialo": "'Tabelle' says that it is a table, not what stands in its rows.",
+      "date": "2026-10-16",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 011 ④ G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M523FB4399X7M2YAH505F626",
+        "instances": [
+          {
+            "ero": "tabelo",
+            "props": {},
+            "lingvo": "de",
+            "label": "Tabelle"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M523FBG64GAMZEPGMN7B85S7",
+      "ref": {
+        "ero": "ero_01M523F9YZX0X2QDED1XRNM1G4"
+      },
+      "decision": "rejected",
+      "kialo": "'Table' says that it is a table, not what stands in its rows.",
+      "date": "2026-10-16",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 011 ④ G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M523FB4399X7M2YAH505F626",
+        "instances": [
+          {
+            "ero": "tabelo",
+            "props": {},
+            "lingvo": "en",
+            "label": "Table"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M523FBG64GAMZEPGMN7B85S8",
+      "ref": {
+        "ero": "ero_01M523F9Z0MAVKZC8ZVN9RBWS5"
+      },
+      "decision": "approved",
+      "kialo": "Names the value and what it refers to.",
+      "date": "2026-10-16",
+      "context": "Example RIGHT for the Regulo named in ekzemplo.regulo (Spec 011 ④ G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M523FB44ZQQK93DNE33G8BTN",
+        "instances": [
+          {
+            "ero": "mezurilo",
+            "props": {
+              "value": 66
+            },
+            "label": "Konformität",
+            "texts": {
+              "value-text": "66 % von 3 prüfbaren"
+            },
+            "lingvo": "de"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M523FBG64GAMZEPGMN7B85S9",
+      "ref": {
+        "ero": "ero_01M523F9Z0MAVKZC8ZVN9RBWS5"
+      },
+      "decision": "approved",
+      "kialo": "Names the value and what it refers to.",
+      "date": "2026-10-16",
+      "context": "Example RIGHT for the Regulo named in ekzemplo.regulo (Spec 011 ④ G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M523FB44ZQQK93DNE33G8BTN",
+        "instances": [
+          {
+            "ero": "mezurilo",
+            "props": {
+              "value": 66
+            },
+            "label": "Conformance",
+            "texts": {
+              "value-text": "66 % of 3 checkable"
+            },
+            "lingvo": "en"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M523FBG64GAMZEPGMN7B85SA",
+      "ref": {
+        "ero": "ero_01M523F9Z0MAVKZC8ZVN9RBWS5"
+      },
+      "decision": "rejected",
+      "kialo": "'0 %' alone says a value that is not known as if it were measured.",
+      "date": "2026-10-16",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 011 ④ G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M523FB44ZQQK93DNE33G8BTN",
+        "instances": [
+          {
+            "ero": "mezurilo",
+            "props": {},
+            "label": "Konformität",
+            "texts": {
+              "value-text": "0 %"
+            },
+            "lingvo": "de"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M523FBG64GAMZEPGMN7B85SB",
+      "ref": {
+        "ero": "ero_01M523F9Z0MAVKZC8ZVN9RBWS5"
+      },
+      "decision": "rejected",
+      "kialo": "'0 %' alone says a value that is not known as if it were measured.",
+      "date": "2026-10-16",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 011 ④ G6); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M523FB44ZQQK93DNE33G8BTN",
+        "instances": [
+          {
+            "ero": "mezurilo",
+            "props": {},
+            "label": "Conformance",
+            "texts": {
+              "value-text": "0 %"
+            },
+            "lingvo": "en"
+          }
+        ]
+      }
     }
   ]
 }

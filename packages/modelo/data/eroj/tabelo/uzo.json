@@ -1,0 +1,220 @@
+{
+  "$schema": "../../../schema/modelo.schema.json#/$defs/UzoFile",
+  "uzo": {
+    "id": "uzo_01M523FAR3SN5JRQRQTM841HAB",
+    "ero": "ero_01M523F9YZX0X2QDED1XRNM1G4",
+    "skemo": "ske_01M523FAAXJ1AADZWZ6NQRX83K",
+    "purpose": "Shows many records with the same fields as rows and columns, so a person can compare and find: standards, versions, findings.",
+    "instead": [
+      {
+        "goal": "one-record",
+        "keywords": {
+          "en": [
+            "record",
+            "metadata"
+          ],
+          "de": [
+            "datensatz",
+            "metadaten"
+          ]
+        },
+        "ero": "atributlisto",
+        "kialo": "One record has no rows to compare, because its fields are names and values; that is the atributlisto."
+      },
+      {
+        "goal": "layout-grid",
+        "keywords": {
+          "en": [
+            "layout"
+          ],
+          "de": [
+            "layout",
+            "anordnung"
+          ]
+        },
+        "ero": null,
+        "kialo": "A table for the layout of a page destroys the reading order, because assistive technology reads it as data; a person decides how the page is built."
+      }
+    ],
+    "boundary": [
+      {
+        "case": "row-selection",
+        "action": "ask-human",
+        "keywords": {
+          "en": [
+            "selection",
+            "checkboxes"
+          ],
+          "de": [
+            "zeilenauswahl",
+            "markieren"
+          ]
+        },
+        "kialo": "Selecting rows adds a column of boxes and actions on the selection, because a selection without actions says nothing; a person decides the pattern."
+      },
+      {
+        "case": "pagination",
+        "action": "ask-human",
+        "keywords": {
+          "en": [
+            "pagination",
+            "pages"
+          ],
+          "de": [
+            "seitennummerierung",
+            "blättern"
+          ]
+        },
+        "kialo": "Pages of a table are navigation between parts of the data, because the table shows one part at a time; a person decides where the control stands."
+      },
+      {
+        "case": "inline-edit",
+        "action": "ask-human",
+        "keywords": {
+          "en": [
+            "inline",
+            "editable"
+          ],
+          "de": [
+            "inline",
+            "zellenbearbeitung"
+          ]
+        },
+        "kialo": "Editing in a cell is a form in a table, because each cell becomes a field; a person decides whether a form fits better."
+      },
+      {
+        "case": "row-actions-menu",
+        "action": "ask-human",
+        "keywords": {
+          "en": [
+            "menu",
+            "dropdown"
+          ],
+          "de": [
+            "menü",
+            "aktionsmenü"
+          ]
+        },
+        "kialo": "Several small butono in a cell are allowed, because each action keeps its name; a menu that folds them is an Ero Fundamento does not have, a person decides."
+      },
+      {
+        "case": "sticky-header",
+        "action": "not-supported",
+        "keywords": {
+          "en": [
+            "sticky",
+            "fixed"
+          ],
+          "de": [
+            "fixiert",
+            "feste",
+            "kopfzeile"
+          ]
+        },
+        "kialo": "A header that stays while the rows scroll needs a scroll rule of the region, because the table itself does not scroll; that comes with the region's second round."
+      },
+      {
+        "case": "row-tint",
+        "action": "ask-human",
+        "keywords": {
+          "en": [
+            "tint",
+            "highlight"
+          ],
+          "de": [
+            "einfärben",
+            "hervorheben"
+          ]
+        },
+        "kialo": "A coloured row says something only with a word, because colour alone carries no meaning (WCAG 1.4.1); a person decides what the row says and where."
+      }
+    ],
+    "composes": {
+      "containers": [
+        {
+          "name": "page-section",
+          "kialo": "A table fills a section of the page, because it takes the width of its container and scrolls in its own region."
+        }
+      ],
+      "with": [
+        {
+          "ero": "insigno",
+          "kialo": "A status in a cell is a badge, because a row's state is one or two words."
+        },
+        {
+          "ero": "ligilo",
+          "kialo": "A cell or a row header may lead to the record, because the record's page is a destination."
+        },
+        {
+          "ero": "butono",
+          "kialo": "An action on a row is a small butono in its cell, because the action keeps its name next to the row (size small)."
+        },
+        {
+          "ero": "mezurilo",
+          "kialo": "A value in a range in a cell is a meter, because a number alone has no scale."
+        },
+        {
+          "ero": "plenstato",
+          "kialo": "A table without rows shows the empty state over all columns, because the person looks there for the rows."
+        }
+      ],
+      "never": [],
+      "spacing": {
+        "owner": "container",
+        "regulo": "spacing-owned-by-container"
+      }
+    },
+    "slots": {
+      "caption": {
+        "accepts": [
+          "text"
+        ],
+        "required": true,
+        "max": 1,
+        "nesting": 0
+      },
+      "content": {
+        "accepts": [
+          "text"
+        ],
+        "required": true,
+        "max": 1,
+        "nesting": 1
+      },
+      "empty": {
+        "accepts": [
+          "text"
+        ],
+        "max": 1,
+        "nesting": 0
+      }
+    },
+    "layout": {
+      "size": "container",
+      "wrap": "never"
+    },
+    "content": [
+      {
+        "regulo": "table-caption-names-the-content",
+        "fixed": true,
+        "check": {
+          "kind": "not-words",
+          "words": {
+            "de": [
+              "tabelle",
+              "daten",
+              "übersicht",
+              "liste"
+            ],
+            "en": [
+              "table",
+              "data",
+              "overview",
+              "list"
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,96 @@
+{
+  "ero": {
+    "id": "ero_01M2XM2NGN3KJSKJ4JTXQWMF72",
+    "name": "mezurilo",
+    "skemo": "ske_01M2XM2NWJ39A7BEZ9A2S8GANE",
+    "description": "Fixture Ero: the mezurilo of Spec 011 ④, trimmed to what the fixture needs."
+  },
+  "skemo": {
+    "id": "ske_01M2XM2NWJ39A7BEZ9A2S8GANE",
+    "ero": "ero_01M2XM2NGN3KJSKJ4JTXQWMF72",
+    "props": [
+      {
+        "name": "value",
+        "kind": "number",
+        "description": "Value."
+      },
+      {
+        "name": "intent",
+        "kind": "enum",
+        "values": [
+          "neutral",
+          "danger"
+        ],
+        "default": "neutral",
+        "description": "Intent."
+      },
+      {
+        "name": "onclick",
+        "kind": "string",
+        "description": "a web term, on purpose"
+      }
+    ],
+    "states": [
+      "rest"
+    ],
+    "slots": [
+      {
+        "name": "label",
+        "default": true,
+        "text": true
+      },
+      {
+        "name": "value-text",
+        "text": true
+      }
+    ],
+    "parts": {
+      "track": {
+        "fill": {
+          "fixed": "color.background.default"
+        }
+      },
+      "label": {
+        "color": {
+          "fixed": "color.text.default"
+        }
+      },
+      "value-text": {
+        "color": {
+          "fixed": "color.text.default"
+        }
+      },
+      "box": {
+        "gap": {
+          "fixed": "spacing.small"
+        }
+      }
+    },
+    "bindings": [],
+    "a11y": {
+      "role": "meter",
+      "name": [
+        "slot:label"
+      ],
+      "description": [
+        "slot:value-text"
+      ],
+      "states": {},
+      "keys": []
+    },
+    "goals": [
+      {
+        "goal": "meter",
+        "keywords": {
+          "en": [
+            "gauge"
+          ],
+          "de": [
+            "messbalken"
+          ]
+        },
+        "props": {}
+      }
+    ]
+  }
+}

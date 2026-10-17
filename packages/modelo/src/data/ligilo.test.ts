@@ -32,6 +32,7 @@ describe("ligilo in the repo Modelo (T006)", () => {
   it("lives in data/eroj/ligilo/skemo.json, after the butono, and the repo Modelo stays valid", () => {
     expect(ligilo.file).toBe("modelo/data/eroj/ligilo/skemo.json");
     expect(modelo.eroj.map((entry) => entry.ero.name)).toEqual([
+      "atributlisto",
       "avizo",
       "butono",
       "dialogo",
@@ -41,8 +42,10 @@ describe("ligilo in the repo Modelo (T006)", () => {
       "kampo",
       "ligilo",
       "markobutono",
+      "mezurilo",
       "plenstato",
       "sxaltilo",
+      "tabelo",
       "tekstareo",
     ]);
     expect(validateModelo(defaultModeloSource()).errors).toEqual([]);
@@ -265,6 +268,9 @@ describe("the Reguloj of the ligilo (T005, A2, D-13)", () => {
       "insigno",
       "avizo",
       "plenstato",
+      "tabelo",
+      "atributlisto",
+      "mezurilo",
     ]);
   });
 

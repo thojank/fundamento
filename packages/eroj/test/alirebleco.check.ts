@@ -1020,3 +1020,168 @@ for (const aspekto of ["komuna", "ekzemplo"]) {
     }
   }
 }
+
+// Spec 011 ④ (G7, plan ④ D-08): the rendered fm-mezurilo in every colour class: axe (role meter)
+// on every intent with a known and an unknown value; the label at least 4.5:1 on the page, the fill
+// at least 3:1 with the track (WCAG 1.4.11: the bar is a graphic that carries the value).
+const mezurilo = input.modelo.eroj.find((entry) => entry.ero.name === "mezurilo");
+if (mezurilo === undefined) throw new Error("mezurilo missing");
+const meterCombos = combinationsOf(mezurilo.skemo, ["intent"]);
+const meters = `${meterCombos
+  .map(
+    (c, i) =>
+      `<fm-mezurilo id="g${i}" intent="${c.intent}" value="66">Konformität ${i}<span slot="value-text">66 % von 3 prüfbaren</span></fm-mezurilo>`,
+  )
+  .join(
+    " ",
+  )}<fm-mezurilo id="gu">Unbekannt<span slot="value-text">nicht geprüft</span></fm-mezurilo>`;
+
+for (const aspekto of ["komuna", "ekzemplo"]) {
+  for (const scheme of ["light", "dark"]) {
+    for (const contrast of ["default", "high"]) {
+      test(`${aspekto} ${scheme}/${contrast}: axe on every mezurilo intent and the unknown value, label ≥ 4.5:1, fill ≥ 3:1 on the track`, async ({
+        page,
+      }) => {
+        await serve(page, out, meters);
+        await page.evaluate(
+          ([a, s, k]) => {
+            const root = document.documentElement;
+            root.setAttribute("data-fm-aspekto", a ?? "");
+            root.setAttribute("data-fm-color-scheme", s ?? "");
+            root.setAttribute("data-fm-contrast", k ?? "");
+          },
+          [aspekto, scheme, contrast],
+        );
+        expect(await axeViolations(page)).toEqual([]);
+        await expect(page.getByRole("meter")).toHaveCount(meterCombos.length + 1);
+        const pageColour = await page.evaluate(
+          () => getComputedStyle(document.body).backgroundColor,
+        );
+        for (const [i, c] of meterCombos.entries()) {
+          const colours = await page.locator(`#g${i}`).evaluate((element) => {
+            const track = element.shadowRoot?.querySelector('[part="track"]') as HTMLElement;
+            const fill = element.shadowRoot?.querySelector('[part="fill"]') as HTMLElement;
+            const label = element.shadowRoot?.querySelector('[part="label"]') as HTMLElement;
+            return {
+              track: getComputedStyle(track).backgroundColor,
+              fill: getComputedStyle(fill).backgroundColor,
+              label: getComputedStyle(label).color,
+            };
+          });
+          expect(
+            contrastOf(colours.label, pageColour),
+            `${JSON.stringify(c)} label`,
+          ).toBeGreaterThanOrEqual(4.5);
+          expect(
+            contrastOf(colours.fill, colours.track),
+            `${JSON.stringify(c)} fill`,
+          ).toBeGreaterThanOrEqual(3);
+        }
+      });
+    }
+  }
+}
+
+// Spec 011 ④ (G7, plan ④ D-09, D-10, E10): the rendered fm-tabelo and fm-atributlisto in every
+// colour class: axe (table with caption, column and row headers, sort buttons; a description list
+// with a name) on both densities and both layouts; head text and cells at least 4.5:1, the sort
+// button's focus ring at least 3:1 with its gap and with the head.
+const tableMarkup = (density: string) =>
+  `<fm-tabelo id="t-${density}" density="${density}" sort="name">Standards<table slot="content"><thead><tr><th scope="col" data-sort="name">Name</th><th scope="col">Status</th><th scope="col" numeric>Verstöße</th></tr></thead><tbody><tr><th scope="row">Barrierefreiheit</th><td><fm-insigno intent="success">gültig</fm-insigno></td><td>0</td></tr><tr><th scope="row">Datenschutz</th><td>Entwurf</td><td>3</td></tr></tbody></table></fm-tabelo>`;
+const listMarkup = (layout: string) =>
+  `<fm-atributlisto id="l-${layout}" layout="${layout}" label="Angaben ${layout}"><dl><dt>Version</dt><dd>3</dd><dt>Gültig seit</dt><dd></dd></dl></fm-atributlisto>`;
+
+for (const aspekto of ["komuna", "ekzemplo"]) {
+  for (const scheme of ["light", "dark"]) {
+    for (const contrast of ["default", "high"]) {
+      test(`${aspekto} ${scheme}/${contrast}: axe on the tabelo (both densities) and the atributlisto (both layouts), texts ≥ 4.5:1, sort ring ≥ 3:1`, async ({
+        page,
+        browserName,
+      }) => {
+        await serve(
+          page,
+          out,
+          `${tableMarkup("comfortable")}${tableMarkup("compact")}${listMarkup("columns")}${listMarkup("stacked")}`,
+        );
+        await page.evaluate(
+          ([a, s, k]) => {
+            const root = document.documentElement;
+            root.setAttribute("data-fm-aspekto", a ?? "");
+            root.setAttribute("data-fm-color-scheme", s ?? "");
+            root.setAttribute("data-fm-contrast", k ?? "");
+          },
+          [aspekto, scheme, contrast],
+        );
+        expect(await axeViolations(page)).toEqual([]);
+        await expect(page.getByRole("table")).toHaveCount(2);
+        for (const density of ["comfortable", "compact"]) {
+          const colours = await page.locator(`#t-${density}`).evaluate((element) => {
+            const th = element.querySelector("thead th") as HTMLElement;
+            const button = th.querySelector("button") as HTMLElement;
+            const td = element.querySelector("tbody td:last-child") as HTMLElement;
+            return {
+              headFill: getComputedStyle(th).backgroundColor,
+              headText: getComputedStyle(button).color,
+              cellText: getComputedStyle(td).color,
+              page: getComputedStyle(document.body).backgroundColor,
+            };
+          });
+          expect(
+            contrastOf(colours.headText, colours.headFill),
+            `${density} head`,
+          ).toBeGreaterThanOrEqual(4.5);
+          expect(
+            contrastOf(colours.cellText, colours.page),
+            `${density} cell`,
+          ).toBeGreaterThanOrEqual(4.5);
+        }
+        for (const layout of ["columns", "stacked"]) {
+          const colours = await page.locator(`#l-${layout}`).evaluate((element) => ({
+            term: getComputedStyle(element.querySelector("dt") as Element).color,
+            value: getComputedStyle(element.querySelector("dd") as Element).color,
+            page: getComputedStyle(document.body).backgroundColor,
+          }));
+          expect(contrastOf(colours.term, colours.page), `${layout} term`).toBeGreaterThanOrEqual(
+            4.5,
+          );
+          expect(contrastOf(colours.value, colours.page), `${layout} value`).toBeGreaterThanOrEqual(
+            4.5,
+          );
+        }
+        // The sort button's ring: Tab reaches the region, then the button.
+        await page.evaluate(() => {
+          const start = document.createElement("span");
+          start.id = "fm-focus-start";
+          start.tabIndex = -1;
+          document.body.prepend(start);
+          start.focus();
+        });
+        let ring: { gap: number; head: number } | null = null;
+        for (let step = 0; step < 6 && ring === null; step++) {
+          await page.keyboard.press(TAB(browserName));
+          ring = await page
+            .evaluate(() => {
+              const active = document.activeElement;
+              if (!(active instanceof HTMLButtonElement) || active.closest("fm-tabelo") === null)
+                return null;
+              const style = getComputedStyle(active);
+              const th = active.closest("th") as HTMLElement;
+              const gap = /rgba?\([^)]*\)/.exec(style.boxShadow)?.[0] ?? "";
+              return { ring: style.outlineColor, gap, head: getComputedStyle(th).backgroundColor };
+            })
+            .then((measured) =>
+              measured === null
+                ? null
+                : {
+                    gap: contrastOf(measured.ring, measured.gap),
+                    head: contrastOf(measured.ring, measured.head),
+                  },
+            );
+        }
+        expect(ring).not.toBeNull();
+        expect(ring?.gap ?? 0, "sort ring on gap").toBeGreaterThanOrEqual(3);
+        expect(ring?.head ?? 0, "sort ring on head").toBeGreaterThanOrEqual(3);
+      });
+    }
+  }
+}

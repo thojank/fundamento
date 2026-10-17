@@ -1,0 +1,9 @@
+{
+  "description": "Spec 011 ④ G7 (plan ④ D-05): the Skemo of the atributlisto carries an a11y text keyed entries-missing, which is no boolean prop, no <prop>-<value> of an enum prop and no <slot>-empty; the text would never be heard.",
+  "issues": [
+    {
+      "rule": "skemo-a11y-invalid",
+      "path": "data/eroj/atributlisto/skemo.json#/skemo/a11y/texts/entries-missing"
+    }
+  ]
+}

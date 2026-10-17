@@ -135,7 +135,44 @@
 
 ## ④ Daten
 
-Folgt in PR ④.
+**Plan:** [`plan.md`](plan.md) ④ (D-01–D-16) · **Branch:** `261015-spec-011-daten-e137d7` (gestapelt auf ③ @ `fe7f3ec`, PR #65) · Aufgaben ④ zählen ab T301. Die Hashes aller Commits stehen in **einer** Zeile der Messungen (nach einem Rebase dort und in der einen Schleife von `src/docs/docs.test.ts` ersetzen).
+
+### A – Rot zuerst
+- [x] **T301 Fixtures und Modelo-Tests** neun Fixtures (D-16), `data/tabelo.test.ts`, `data/atributlisto.test.ts`, `data/mezurilo.test.ts` (Skemo, Uzo, Reguloj, Jugxoj, check_usage, suggest_ero, die Daten-Dialoge der Spec), Listen auf fünfzehn Eroj, Verflechtung in insigno-/plenstato-Tests, MCP `s011-daten.test.ts`. Rot in `461acb0` (53 von 252 in sieben Dateien).
+- [x] **T302 Projekcioj-Tests** `web-component.test.ts` (mezurilo, tabelo, atributlisto), `make-kit.test.ts`, `publish.test.ts`, `datumoj.test.ts`, Typtests `types/{mezurilo,tabelo,atributlisto}.tsx`, Browser `mezurilo.spec.ts`, `tabelo.spec.ts`, `atributlisto.spec.ts`, `alirebleco.check.ts`, `internacia.spec.ts`, `vitrino.check.ts`. Rot in `0c08f8f` (12 von 182).
+
+### B – Modelo (grün in `9e1602e`)
+- [x] **T303 Daten** `tabelo/{skemo,uzo}.json`, `atributlisto/{skemo,uzo}.json`, `mezurilo/{skemo,uzo}.json` (IDs aus `pnpm id:new`); Regel `skemo-a11y-invalid` mit `<slot>-empty` (D-05); Zahlwörter bis seventeen.
+- [x] **T304 Reguloj und Jugxoj** `table-caption-names-the-content` und `meter-text-states-value` neu (fest), `spacing-owned-by-container` ausgeweitet; 8 Jugxoj (D-04).
+- [x] **T305 Verflechtung** `insigno.value-in-range` → `mezurilo`, `tabelo` ↔ `atributlisto`, `mezurilo.status-word` → `insigno`, `atributlisto.editable` → `kampo`, `plenstato.progress-known` ohne „percentage“ (D-06).
+- [x] **T306 Gvidanto und Ontologio** Enforcer der zwei Regeln; `#Tabelo`, `#Atributlisto`, `#Mezurilo`.
+
+### C – Projekcioj
+- [x] **T307 Web Component** Host `light` mit Dokument-Stylesheet (D-07), `fm-mezurilo` (D-08), `fm-tabelo` (D-09), `fm-atributlisto` (D-10); Strukturliste 26 → 34. Grün in `c3b8afd`; Teil `caption`, Füllfarben und `aria-valuenow` in `b311093`; Inline-Bausatz in `2a71d17`.
+- [x] **T308 React** `Mezurilo`, `Tabelo`, `Atributlisto`, Typtests.
+- [x] **T309 Figma** Bauformen `meter`, `table`, `list` (D-14), rot zuerst im Durchgang (27 von 315), 315 grün: `af45e8b`.
+- [x] **T310 Make Kit** drei Komponentenseiten, drei Sätze in `Guidelines.md` (D-12).
+- [x] **T311 Vitrino** Tabelle, Liste und Wertbeispiel als eine Quelle, drei Grids, Layout-Sätze (D-13).
+- [x] **T312 Eroj im Browser** `mezurilo.spec` 5, `tabelo.spec` 5, `atributlisto.spec` 3, Alirebleco 16 Kombinationen (2 × 8), Internacia 2, Vitrino-Check 1 (Chromium).
+- [x] **T313 MCP** `s011-daten.test.ts`, `eroj-tools.test.ts` (fünfzehn Eroj), Folgetests.
+
+### D – Abschluss
+- [x] **T314 Doku** Vojmapo Zeile 4, plan ④, tasks ④; `docs.test.ts` rot in `79adf22`, grün im Commit der Messungen (Doku).
+- [x] **T315 Messungen** unten; Bericht.
+
+### Messungen
+
+| Was | Wert |
+|---|---|
+| `get_ero … brief:true`, Bytes / `ceil(Bytes/3)` | tabelo **654**, atributlisto **254**, mezurilo **318**; insigno 497 (vorher 503: kürzere Kialo von `value-in-range`), butono 748, kampo 743, elektilo 512, elekto 477, markobutono 462, sxaltilo 310, ligilo 493, dialogo 404, tekstareo 422, avizo 411, plenstato 287 – alle unter 750 |
+| Parität (`pnpm check:parity`) | 15 Eroj, 4 Seiten, 0 Differenzen; 429 benannte Freigaben wie ③ (keine neue) |
+| Alirebleco (Modelo, `check:alirebleco`) | 83 Paare (80 + 3 `status-<intent>-border-on-background-sunken`, ui, min. 5,27:1) × 72 Kombinationen, 0 Fehler; APCA-Warnungen 2196 wie ③ |
+| Alirebleco (Eroj, `check:alirebleco-eroj`, Chromium) | mezurilo 8 Kombinationen × 4 intent + unbekannt (axe meter, Beschriftung ≥ 4,5:1, Füllung ≥ 3:1 auf der Spur — gemessen min. 3,73:1 in komuna light nach dem Wechsel auf die Randfarben), tabelo/atributlisto 8 × (2 Dichten + 2 Layouts) (axe table/list, Kopf und Zellen ≥ 4,5:1, Fokusring der Sortier-Schaltfläche ≥ 3:1) – 16 neu, 115 gesamt, 54 s |
+| Vitrino-Check (Chromium) | 20 grün, davon neu tabelo/atributlisto/mezurilo (ein Test: 2 Tabellen mit Sortier-Schaltflächen, 2 Listen mit Strich, 4 Messbalken mit `aria-valuenow` 66, axe) |
+| Internacia (Chromium) | 34 grün, davon neu rtl der drei Eroj (Zahlen links, Namen rechts, Füllung von rechts) und Expansion von Beschriftung und Namen nach Wörtern |
+| **Commits** (rot / grün; nach einem Rebase hier ersetzen) | rot `461acb0` (Fixtures, Modelo, MCP), `0c08f8f` (Projekcioj, Browser), `79adf22` (Doku) · grün `9e1602e` (Modelo), `c3b8afd` (Projekcioj außer Figma), `b311093`/`2a71d17`/`4e205aa` (Nachbesserungen), `af45e8b` (Figma), Doku `ae52297` · Rebase auf ③ `0ab1c60` · Nachbesserung 16.10.: Figma F-3/F-6 `cde51f9`, Doku im Folge-Commit |
+| Tests (je Paket `vitest run`, Playwright in Chromium) | modelo 3 155 (vorher 3 064), projekcioj 559 (vorher 521), mcp 231 (vorher 221), cli 66, eroj 1 Vitest + 151 Playwright in Chromium (vorher 136; die drei Engines prüft der Merge-Lauf auf `main`); davon neu: data/tabelo 22, data/atributlisto 15, data/mezurilo 19, neun Fixtures, docs 2, MCP s011-daten 8, Projekcioj (Web Component 13, Make-Kit 2, Datumoj 3, Figma 22 neu, 27 rot beobachtet), Browser `mezurilo.spec` 5, `tabelo.spec` 5, `atributlisto.spec` 3, Alirebleco 16, Internacia 2, Vitrino-Check 1 |
+| Checks | `check:vortaro-lint`, `check:regularo` (uzoj=15), `check:mankoj` (8, unverändert), `check:alirebleco` (83 Paare), `check:clean-room`, `check:parity` (15 Eroj, 0 Differenzen, 429 Freigaben), `check:alirebleco-eroj` 115 (Chromium, 54 s), `check:make-kit` 5, `check:quickstart` 1, `check:vitrino` 20 (APCA-Zeile 2196 unverändert), `check:release` (beide Kits gepackt, je 32 Dateien: + `guidelines/components/tabelo.md`, `atributlisto.md`, `mezurilo.md`) – grün; `pnpm lint` grün (9 Warnungen in modelo, 1 in projekcioj, 1 Info in cli: alle älter als der Branch, nicht angefasst) |
 
 ## ⑤ Navigation
 

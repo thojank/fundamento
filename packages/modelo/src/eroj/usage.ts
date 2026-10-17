@@ -881,6 +881,10 @@ export const USAGE_ENFORCERS: Readonly<Record<string, UsageEnforcer>> = {
   // empty state names what is missing and the next step (min-words on the text, kind empty only).
   "badge-text-short": textRule,
   "empty-state-says-what-next": textRule,
+  // Spec 011 ④ (G6, plan ④ D-04, D-06): a caption that names the rows (not-words against empty
+  // captions); a value text that names value and reference (min-words 2, so '0 %' alone fails).
+  "table-caption-names-the-content": textRule,
+  "meter-text-states-value": textRule,
   // Spec 010 ④ (G6, plan ④ D-09): the placeholder of a select is a prompt, not an example of a
   // value (that is placeholder-is-example of the kampo): at least two words, a text rule of the Uzo.
   "select-placeholder-is-prompt": textRule,

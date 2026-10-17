@@ -579,6 +579,27 @@
       "foreground": "color.text.default",
       "background": "color.status.danger.weak",
       "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M525BF4BRV085Q3KCWP1H0GC",
+      "name": "status-success-border-on-background-sunken",
+      "foreground": "color.status.success.border",
+      "background": "color.background.sunken",
+      "kategorio": "ui"
+    },
+    {
+      "id": "kpa_01M525BF4C21P7MKMZ3VA18ZS6",
+      "name": "status-warning-border-on-background-sunken",
+      "foreground": "color.status.warning.border",
+      "background": "color.background.sunken",
+      "kategorio": "ui"
+    },
+    {
+      "id": "kpa_01M525BF4DH2EJRC5J1V5DCN2K",
+      "name": "status-danger-border-on-background-sunken",
+      "foreground": "color.status.danger.border",
+      "background": "color.background.sunken",
+      "kategorio": "ui"
     }
   ]
 }
