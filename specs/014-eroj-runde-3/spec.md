@@ -72,8 +72,8 @@ Fehlt eine Rolle: die nächstliegende nehmen und ein Manko führen. Kandidat ist
   - `sort-ascending`, `sort-descending`, `info`, `success`, `warning`, `danger`
   - `more`, `search`, `external`, `expand`, `collapse`
 - Die Startmenge ist genau das, was die 17 vorhandenen und die 9 neuen Eroj brauchen, plus `more`, `search` und `external`. Ziel sind höchstens 25 Namen.
-- **Jede Aspekto liefert die Bilder** (SVG, 24er-Raster, `currentColor`). Der Satz aus Art. IV gilt: Ikonografie ist eine Dimension der Marke. Vollständigkeit wird geprüft: Jede Aspekto belegt jeden Namen (wie beim Vortaro).
-- **komuna (E10):** Die Glyphen stammen aus einem Open-Source-Icon-Set mit permissiver Lizenz (Art. V Abs. Schriften und Icon-Sets), nur die benötigten Namen, mit Herkunftsnachweis je Datei (Art. VII). Vorschlag: Lucide (ISC). ekzemplo bekommt als Fixture ein absichtlich anderes Set (z. B. gefüllt statt Linie), damit der Markenwechsel bei Icons sichtbar und testbar ist.
+- **Jede Aspekto liefert die Bilder** (SVG, quadratische `viewBox`, `currentColor`). Der Satz aus Art. IV gilt: Ikonografie ist eine Dimension der Marke. Vollständigkeit wird geprüft: Jede Aspekto belegt jeden Namen (wie beim Vortaro).
+- **komuna (E10):** Die Glyphen stammen aus einem Open-Source-Icon-Set mit permissiver Lizenz (Art. V Abs. Schriften und Icon-Sets), nur die benötigten Namen, mit Herkunftsnachweis je Datei (Art. VII). Quelle ist **Phosphor Icons (MIT)**, Entscheidung des Maintainers vom 17.10. ekzemplo nimmt als Fixture einen anderen Stil derselben Familie (komuna `regular`, ekzemplo `fill`), damit der Markenwechsel bei Icons sichtbar und testbar ist. Weitere Phosphor-Gewichte (thin, light, bold, duotone) sind ein Kandidat für einen Regler der Werkstatt (Etappe 8), aber nicht Teil dieser Spec.
 - Die Vitrino zeigt Icons. Damit entfällt `icon` in `FIGMA_NOT_DRAWN`, und Figma zeichnet sie (`createNodeFromSvg`, Farbe an die Variable gebunden). Der Jugxo `jug_01M31TV1V4S3RNBPWSRB2CGEDK` bekommt einen Nachtrag „aufgehoben durch Spec 014“. Er wird nicht gelöscht.
 
 **G4 – Overlays auf der Plattform (E11).**
@@ -157,7 +157,7 @@ Bleibt ⑤ nachts unfertig, bleibt er offen; ①–④ werden trotzdem gemessen.
 - **Gewicht:** Die Skemata von `navigado` (Eintrag `current`) und `langetaro` (Reiter `selected`) binden das Gewicht. Vorschlag `font.weight.semibold`, sonst die Rolle, die `typography.label.1` in fett trägt. Figma zeigt es. Arkitekturo-Abdeckung „offen“ → „trägt“.
 - **`dialogo.reason-help`:** Slot, sichtbar unter dem Begründungsfeld, wird als Hilfe an den `tekstareo` gegeben (`aria-describedby`). `help-is-one-sentence` ausgeweitet.
 - **`atributlisto.layout: auto`** (neuer Default bleibt `columns`, `auto` ist wählbar): Container-Query auf dem Host. Unter der Schwelle wird gestapelt. Die Schwelle ist eine vorhandene Größe (Vorschlag `size.container.small`), keine neue Zahl. Test: Breite schmal und breit, Internacia-Test mit langen Schlüsseln.
-- **Ikonaro:** Schema, `data/ikonaro.json` mit Namen, Bedeutung de/en und Kialo. Prüfung `check:ikonaro`: Jede installierte Aspekto belegt jeden Namen; jede Datei ist SVG, `viewBox 0 0 24 24`, ohne feste Farbe und mit Herkunftsnachweis. Ontologio-Begriff **Ikonaro** (de: Icon-Vokabular).
+- **Ikonaro:** Schema, `data/ikonaro.json` mit Namen, Bedeutung de/en und Kialo. Prüfung `check:ikonaro`: Jede installierte Aspekto belegt jeden Namen; jede Datei ist SVG mit quadratischer `viewBox` (Raster laut plan.md), ohne feste Farbe und mit Herkunftsnachweis. Ontologio-Begriff **Ikonaro** (de: Icon-Vokabular).
 - **Overlay-Messung:** Popover-API und Anchor Positioning in den drei Engines, Ergebnis als Tabelle in plan.md. Danach entscheidet ④ zwischen Anchor und Fallback, ohne Rückfrage, nach E11.
 
 ## ② Grundbausteine
@@ -304,7 +304,7 @@ Bleibt ⑤ nachts unfertig, bleibt er offen; ①–④ werden trotzdem gemessen.
 - **E7** Arkitekturo ist Anforderung, kein Code wird übernommen.
 - **E8** Bei „Menü“ gewinnt `navigado` (O-28); `menuo` bekommt nur zusammengesetzte Stichwörter.
 - **E9** Icons sind Vokabular im Kern und Bild in der Aspekto (G3). Kein Icon-Font, nur SVG.
-- **E10** komuna-Glyphen aus einem Open-Source-Set mit permissiver Lizenz, Vorschlag Lucide (ISC), nur benötigte Namen, mit Herkunftsnachweis. Alternative, falls der Maintainer widerspricht: eigene, einfache Glyphen im 24er-Raster.
+- **E10** Die komuna-Glyphen kommen aus **Phosphor Icons (MIT)**, Stil `regular` (Maintainer, 17.10.). ekzemplo nimmt den Stil `fill` derselben Familie. Verwendet werden nur die benötigten Namen, mit Herkunftsnachweis je Datei. Die Phosphor-Namen werden auf die semantischen Namen des Ikonaro abgebildet (z. B. `x` → `close`, `caret-down` → `chevron-down`). Die Abbildung steht im Aspekto-Paket, nicht im Kern.
 - **E11** Overlays nur mit Popover-API und Anchor Positioning der Plattform, einfacher eigener Fallback, kein Positionierungs-Framework (G4).
 - **E12** Toast, Drawer, Untermenüs und Mehrfachauswahl sind nicht in dieser Spec (Spec 015 oder Grenze).
 
@@ -313,6 +313,6 @@ Bleibt ⑤ nachts unfertig, bleibt er offen; ①–④ werden trotzdem gemessen.
 - WCAG 2.2: 1.1.1, 1.3.1, 1.4.1, 1.4.3, 1.4.11, 1.4.13, 2.1.1, 2.4.1, 2.4.3, 2.4.6, 2.4.7, 2.5.8, 4.1.2, 4.1.3.
 - HTML: Popover-API, `details` mit `name`, CSS Anchor Positioning (Stand der Browser misst P0).
 - GOV.UK: Skip link, Details, Accordion, Typography (Überschriftenebenen vs. Größen). USWDS: Tooltip, Combo box, Accordion, Icon.
-- Lucide (ISC) nur als Quelle der komuna-Glyphen mit Herkunftsnachweis, nicht als Benchmark für das Ero.
+- Phosphor Icons (MIT) nur als Quelle der Glyphen von komuna und ekzemplo, mit Herkunftsnachweis, nicht als Benchmark für das Ero.
 
 P0 ergänzt research.md nur bei Entscheidungen, die hier fehlen.

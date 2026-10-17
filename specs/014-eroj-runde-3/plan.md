@@ -1,6 +1,6 @@
 # Spec 014 – Eroj Runde 3 – Plan
 
-**Spec:** [`spec.md`](spec.md) (Fassung vom 2026-10-17, unverändert kopiert; Textstand siehe ① Offen O-1) · **Briefing:** `briefing-p0-2026-10-17.md` (Maintainer-Ordner, nicht kopiert) · **Basis:** `main` @ `f6f38f5` (Nachlese 3 #68, #69) · **Regel 0** (12.10.) gilt: Weg des `butono` zuerst, sonst kleinste Änderung mit Eintrag hier; Tokens, Regulo-Semantik und Constitution unverändert; nie eine Grenze schwächen, um grün zu werden. **Aufgaben, Commits und rote Hashes:** [`tasks.md`](tasks.md).
+**Spec:** [`spec.md`](spec.md) (Fassung vom 2026-10-17, 19:54, unverändert kopiert; die Korrektur des Maintainers nennt Phosphor in G3, E10 und Benchmark und „quadratische viewBox“) · **Briefing:** `briefing-p0-2026-10-17.md` (Maintainer-Ordner, nicht kopiert) · **Basis:** `main` @ `f6f38f5` (Nachlese 3 #68, #69) · **Regel 0** (12.10.) gilt: Weg des `butono` zuerst, sonst kleinste Änderung mit Eintrag hier; Tokens, Regulo-Semantik und Constitution unverändert; nie eine Grenze schwächen, um grün zu werden. **Aufgaben, Commits und rote Hashes:** [`tasks.md`](tasks.md).
 
 Fünf PRs, gestapelt (E6): ① Grundlage von `main`, ② Grundbausteine von ①, ③ Typografie von ②, ④ Overlays von ③, ⑤ Aufklappen von ④.
 
@@ -13,7 +13,7 @@ Fünf PRs, gestapelt (E6): ① Grundlage von `main`, ② Grundbausteine von ①,
 1. **Gewicht** (D-01): `navigado.items.weight` by `current`, `langetaro.tabs.weight` by `active`, gebunden an `font.weight.*` oder `none`. *(Grün folgt.)*
 2. **`dialogo.reason-help`** (D-02): Slot, Constraint, Uzo; `help-is-one-sentence` ausgeweitet; vier Jugxoj. *(Grün folgt.)*
 3. **`atributlisto layout: auto`** (D-03): `UzoLayout.columns-from` (Container-Query), ResizeObserver im Web Component. *(Grün folgt.)*
-4. **Ikonaro** (D-04, G3): `data/ikonaro.json` mit 16 Namen (Bedeutung de/en, Kialo, `mirror`), Entität `ikono` mit Präfix `iko_`, optionale Datendatei im Loader; `check:ikonaro`; Glyphen komuna aus **Phosphor Icons, Stil regular**, ekzemplo aus **Phosphor Icons, Stil fill** (Abweichung 1), mit Herkunftsnachweis je Datei und Abbildung Ikonaro-Name → Phosphor-Name im Aspekto-Paket.
+4. **Ikonaro** (D-04, G3): `data/ikonaro.json` mit 15 Namen (Bedeutung de/en, Kialo, `mirror`), Entität `ikono` mit Präfix `iko_`, optionale Datendatei im Loader; `check:ikonaro`; Glyphen komuna aus **Phosphor Icons, Stil regular**, ekzemplo aus **Phosphor Icons, Stil fill** (Abweichung 1), mit Herkunftsnachweis je Datei und Abbildung Ikonaro-Name → Phosphor-Name im Aspekto-Paket (seit der Spec-Korrektur vom 17.10., 19:54, Spec-konform).
 5. **Tooltip-Kontrast** (D-05, G2): KontrastParo `text-inverse-on-background-inverse`. *(Grün folgt.)*
 6. **Overlay-Messung** (D-06, G4): Popover-API und Anchor Positioning in drei Engines, Skript `packages/eroj/scripts/measure-overlay.mjs`. *(Messung folgt.)*
 
@@ -37,7 +37,7 @@ Kein neues Ero in ①, kein Token (E1), keine Regulo-Semantik geändert.
 
 **Daten.** `data/ikonaro.json` (`IkonaroFile`: `{ "ikonaro": [Ikono…] }`), je `Ikono`: `id` (`iko_` + ULID, Entitätstyp `ikono` im Lock), `name` (kebab), `meaning.de`/`meaning.en`, `kialo`, optional `mirror: true` (die Richtung trägt Bedeutung, die Glyphe wird in Rechts-nach-links-Schrift gespiegelt; Internacia). Die Datei ist im Loader **optional** (`OPTIONAL_DATA_FILE_SCHEMA_DEFS`): fehlt sie, ist das Ikonaro leer und kein Befund – jede Fixture ohne Icons bleibt gültig. Sie wird, wenn vorhanden, gegen `IkonaroFile` geprüft, ihre IDs zählt `checkIds`, der Export `modelo.json` trägt `ikonaro` nur, wenn es Einträge gibt (ein Export ohne Icons behält seine Bytes).
 
-**Startmenge (16 Namen, Grenze 25).** Abgeleitet aus dem, was die 17 Eroj heute zeichnen oder als Zeichen nachbilden, dem Bedarf der 9 neuen Eroj und den drei Namen der Spec (`more`, `search`, `external`). Nicht aufgenommen: `indeterminate` (der `markobutono` hat keinen Mischzustand), `chevron-left`/`chevron-up` (kein Ero braucht sie; `chevron-right` spiegelt in RTL), `loading` (kein Ero zeigt heute einen Spinner). Phosphor-Name = Name der Datei im Set (komuna liest `assets/regular/<name>.svg`, ekzemplo `assets/fill/<name>-fill.svg`).
+**Startmenge (15 Namen, Grenze 25).** Abgeleitet aus dem, was die 17 Eroj heute zeichnen oder als Zeichen nachbilden, dem Bedarf der 9 neuen Eroj und den drei Namen der Spec (`more`, `search`, `external`). Nicht aufgenommen: `indeterminate` (der `markobutono` hat keinen Mischzustand), `chevron-left`/`chevron-up` (kein Ero braucht sie; `chevron-right` spiegelt in RTL), `loading` (kein Ero zeigt heute einen Spinner), `menu` (Hamburger: die `navigado` hat keinen eingeklappten Zustand, `collapsed-mobile` ist `not-supported`; der Name kommt mit der Grenze zurück, wenn sie fällt – Maintainer 17.10., O-2; die zunächst vergebene ID `iko_01M55EFZMVS7WDTJ3D55SPVHQV` ist im Lock stillgelegt). Phosphor-Name = Name der Datei im Set (komuna liest `assets/regular/<name>.svg`, ekzemplo `assets/fill/<name>-fill.svg`).
 
 | Ikonaro | Bedeutung | Bedarf (Eroj) | Phosphor | mirror |
 |---|---|---|---|---|
@@ -50,7 +50,6 @@ Kein neues Ero in ①, kein Token (E1), keine Regulo-Semantik geändert.
 | `expand` | aufklappen | `faldilo` (⑤), Spec G3 | `arrows-out-simple` | – |
 | `external` | führt hinaus | `ligilo.icon-end` (`external-link-marked`) | `arrow-square-out` | – |
 | `info` | Hinweis | `avizo` (Status) | `info` | – |
-| `menu` | Hauptmenü öffnen | `navigado` `collapsed-mobile` (Hamburger; das Wort bleibt bei der `navigado`, E8) | `list` | – |
 | `more` | weitere Aktionen | `tabelo.row-actions` → `menuo` (④), Spec G3 | `dots-three` | – |
 | `search` | suchen | `kampo` (neben dem Feld, `icon-in-field` nicht unterstützt), `kompletigilo` (⑤) | `magnifying-glass` | – |
 | `sort-ascending` | aufsteigend | `tabelo.sort` | `sort-ascending` | – |
@@ -73,7 +72,7 @@ license: MIT, https://github.com/phosphor-icons/core/blob/main/LICENSE
 
 Gelesen am 2026-10-17 aus dem npm-Tarball `@phosphor-icons/core@2.1.1` (`assets/regular`, `assets/fill`); die Pfaddaten sind unverändert übernommen, der Wurzelknoten trägt `fill="currentColor"` (Phosphor liefert das so), eine feste Farbe kommt nicht vor. Die Dateien tragen keinen `<title>` und keine Rolle: Ob eine Glyphe dekorativ oder informativ ist, entscheidet das Ero am Ort der Verwendung (`ikono` in ②), und ein fester Text in der Datei wäre ein Verstoß gegen Internacia. Biome lintet SVG als HTML (`noSvgWithoutTitle`); der Ordner `ikonoj` steht deshalb außerhalb seines Scopes (`biome.json`, wie `test/fixtures` und `src/generated`).
 
-**Raster: `viewBox="0 0 256 256"`, nicht 24.** Phosphor zeichnet im 256er-Raster. Die Glyphen behalten es: Die Pfade bleiben bitgleich mit der Quelle (Herkunft nachprüfbar, kein Umrechnen mit Rundungsfehlern), und ein quadratischer `viewBox` skaliert ohne Verzerrung auf jede Größe – die Größe setzt das Ero (`ikono` in ② über `size`-Token), nicht die Datei. `check:ikonaro` prüft deshalb nur **quadratisch** (`0 0 n n`; `ikonaro-glyph-viewbox` bei fehlendem oder nicht quadratischem viewBox), keinen bestimmten Rasterwert. Die drei Fixtures des Checks zeichnen weiter im 24er-Raster und bleiben gültig. Spec G3 und Briefing sagen „24er-Raster“: Abweichung 2.
+**Raster: `viewBox="0 0 256 256"`, nicht 24.** Phosphor zeichnet im 256er-Raster. Die Glyphen behalten es: Die Pfade bleiben bitgleich mit der Quelle (Herkunft nachprüfbar, kein Umrechnen mit Rundungsfehlern), und ein quadratischer `viewBox` skaliert ohne Verzerrung auf jede Größe – die Größe setzt das Ero (`ikono` in ② über `size`-Token), nicht die Datei. `check:ikonaro` prüft deshalb nur **quadratisch** (`0 0 n n`; `ikonaro-glyph-viewbox` bei fehlendem oder nicht quadratischem viewBox), keinen bestimmten Rasterwert. Die drei Fixtures des Checks zeichnen weiter im 24er-Raster und bleiben gültig. Das Raster hat der Maintainer am 17.10. bestätigt; die Spec sagt seit ihrer Korrektur „quadratische viewBox (Raster laut plan.md)“ (Abweichung 2, erledigt).
 
 **`check:ikonaro`** (Regeln): `ikonaro-glyph-missing` (Aspekto ohne einen Namen; Fehler am Eintrag in `data/ikonaro.json`), `ikonaro-glyph-fixed-color` (feste Farbe an Wurzel oder Form, als Attribut oder `style`; `none` und `currentColor` sind keine Farbe), `ikonaro-glyph-provenance-missing` (ohne `source`, `version`, `license`), `ikonaro-glyph-viewbox` (fehlend oder nicht quadratisch), `ikonaro-glyph-unknown` (Warnung: Glyphe ohne Namen im Ikonaro; nichts wird gelöscht). Misst jede bekannte Aspekto (komuna, ekzemplo als `KNOWN_ASPEKTO_FIXTURES` wie `check:alirebleco`). *(Implementierung im Grün.)*
 
@@ -99,8 +98,8 @@ Skript `packages/eroj/scripts/measure-overlay.mjs` misst `showPopover`/`popover`
 
 ### Abweichungen von der Spec
 
-1. **Phosphor Icons (MIT) statt Lucide (ISC) als Quelle der komuna-Glyphen** (D-04; E10, G3, Benchmark). Entscheidung des Maintainers vom 17.10.2026, als Korrektur vor dem Grün übermittelt; P0 hat nicht von sich aus gewechselt (Briefing: „Du wechselst nicht von dir aus“). Die Spec nennt Lucide als *Vorschlag*; ihre Regel – Open-Source-Set mit permissiver Lizenz (Art. V Abs. Schriften und Icon-Sets), nur die benötigten Namen, Herkunftsnachweis je Datei (Art. VII) – erfüllt Phosphor ebenso. komuna zeichnet im Stil **regular**, ekzemplo im Stil **fill** desselben Sets: ein absichtlich anderer Stil als Fixture (G3), die Herkunft ist beidesmal dieselbe und nachgewiesen. **Ersetzt, nicht ergänzt:** Im Repo gibt es keine Lucide-Glyphe und keinen Lucide-Nachweis; die roten Tests von `27e472d` (Lucide, `viewBox 0 0 24 24`) sind korrigiert. Die Spec-Kopie bleibt unverändert (Briefing: „unverändert kopieren“), siehe O-1.
-2. **Raster 256 statt 24** (D-04; G3, Briefing „SVG mit viewBox 0 0 24 24“). Folge von 1: Phosphor zeichnet im 256er-Raster, die Pfade bleiben unverändert, `check:ikonaro` prüft nur „quadratisch“. Die Größe setzt das Ero, nicht die Datei.
+1. **Phosphor Icons (MIT) statt Lucide (ISC) als Quelle der komuna-Glyphen** (D-04; E10, G3, Benchmark) – **durch Spec-Korrektur erledigt** (Spec-Fassung 17.10., 19:54, nennt Phosphor, Stil regular/fill und die Abbildung im Aspekto-Paket; hier als Geschichte der Entscheidung belassen). Entscheidung des Maintainers vom 17.10.2026, als Korrektur vor dem Grün übermittelt; P0 hat nicht von sich aus gewechselt (Briefing: „Du wechselst nicht von dir aus“). Die Spec nannte Lucide als *Vorschlag*; ihre Regel – Open-Source-Set mit permissiver Lizenz (Art. V Abs. Schriften und Icon-Sets), nur die benötigten Namen, Herkunftsnachweis je Datei (Art. VII) – erfüllt Phosphor ebenso. komuna zeichnet im Stil **regular**, ekzemplo im Stil **fill** desselben Sets: ein absichtlich anderer Stil als Fixture (G3), die Herkunft ist beidesmal dieselbe und nachgewiesen. **Ersetzt, nicht ergänzt:** Im Repo gibt es keine Lucide-Glyphe und keinen Lucide-Nachweis; die roten Tests von `27e472d` (Lucide, `viewBox 0 0 24 24`) sind korrigiert. Die Spec-Kopie blieb bis zur Korrektur unverändert (Briefing: „unverändert kopieren“), siehe O-1.
+2. **Raster 256 statt 24** (D-04; G3, Briefing „SVG mit viewBox 0 0 24 24“) – **durch Spec-Korrektur erledigt** (die Spec verlangt eine quadratische `viewBox`, das Raster laut plan.md; Maintainer 17.10. bestätigt 256). Folge von 1: Phosphor zeichnet im 256er-Raster, die Pfade bleiben unverändert, `check:ikonaro` prüft nur „quadratisch“. Die Größe setzt das Ero, nicht die Datei.
 
 ### Befunde / Mankoj
 
@@ -108,8 +107,9 @@ Skript `packages/eroj/scripts/measure-overlay.mjs` misst `showPopover`/`popover`
 
 ### Offen (für den Maintainer)
 
-- **O-1 Spec-Text zu E10/G3/Benchmark.** Die Datei `…/.fundamento/spec014/spec.md` (Stand 16:45) ist byteidentisch mit der Kopie aus `9a3194f` und nennt weiterhin Lucide (ISC) als Vorschlag; auch das Briefing (Abschnitt Ikonaro) nennt Lucide und `viewBox 0 0 24 24`. Die Entscheidung Phosphor (MIT) steht hier als Abweichung 1 und 2. Soll die Spec den Wechsel selbst tragen, bitte den Text ändern; P0 kopiert dann erneut unverändert.
-- **O-2 Icon-Namen.** 16 Namen (Tabelle in D-04) als Vorschlag; `menu` (Hamburger der `navigado`) und `danger` (Achteck) sind die beiden, über die man streiten kann. Änderbar bis zum Merge von ① (E4 gilt sinngemäß für das Ikonaro).
+- **O-1 Spec-Text zu E10/G3/Benchmark** – *erledigt 17.10.*: Die Spec-Datei (Stand 16:45) war byteidentisch mit der Kopie aus `9a3194f` und nannte Lucide; der Maintainer hat sie korrigiert (19:54: Phosphor in G3, E10, Benchmark; quadratische `viewBox`), die Kopie ist erneut unverändert übernommen. Das Briefing (Abschnitt Ikonaro) nennt weiter Lucide und `viewBox 0 0 24 24`; es ist nicht Teil des Repos.
+- **O-2 Icon-Namen** – *entschieden 17.10.*: `menu` aus der Startmenge genommen (die `navigado` hat keinen eingeklappten Zustand; kommt mit der Grenze zurück, wenn sie fällt), `danger` als Achteck bestätigt (eine andere Form als das Dreieck von `warning`, damit die Unterscheidung nicht nur an der Farbe hängt). Startmenge jetzt 15 Namen. Die übrigen Namen bleiben bis zum Merge von ① änderbar (E4 sinngemäß).
+- **Biome ohne `ikonoj`** – *bestätigt 17.10.* (D-04).
 
 ## ② Grundbausteine
 
