@@ -366,7 +366,22 @@ test("fm-dialogo opens from its section, modal and axe-clean, and Escape closes 
   const dialog = page.getByRole("dialog", { name: "medium · required" });
   await expect(dialog).toBeVisible();
   await expect(dialog).toHaveAttribute("aria-modal", "true");
-  await expect(dialog.getByRole("textbox", { name: "Begründung" })).toBeVisible();
+  const textbox = dialog.getByRole("textbox", { name: "Begründung" });
+  await expect(textbox).toBeVisible();
+  // Spec 014 ① (plan ① D-02), Abnahme ① F-2: the help of the reason field stands visibly under the
+  // field and describes the textbox.
+  await expect(textbox).toHaveAccessibleDescription(/Nenne den Grund in einem Satz\./);
+  const help = section.locator('#fm-vitrino-dialogo-medium-required [slot="reason-help"]');
+  await expect(help).toBeVisible();
+  await expect(help).toHaveText("Nenne den Grund in einem Satz.");
+  const helpBelowField = await page.evaluate(() => {
+    const host = document.getElementById("fm-vitrino-dialogo-medium-required") as HTMLElement;
+    const area = host.shadowRoot?.querySelector('[part="reason"]') as HTMLElement;
+    const control = area.shadowRoot?.querySelector("textarea") as HTMLElement;
+    const help = host.querySelector('[slot="reason-help"]') as HTMLElement;
+    return help.getBoundingClientRect().top >= control.getBoundingClientRect().bottom - 1;
+  });
+  expect(helpBelowField).toBe(true);
   expect(await axeViolations(page)).toEqual([]);
   await page.keyboard.press("Escape");
   await expect(page.getByRole("dialog")).toHaveCount(0);
@@ -416,6 +431,18 @@ test("fm-tabelo, fm-atributlisto and fm-mezurilo are upgraded in their sections,
   const lists = page.locator("#fm-vitrino-atributlisto fm-atributlisto");
   // Spec 014 ① (plan ① D-03): a third row, layout auto, beside columns and stacked.
   await expect(lists).toHaveCount(3);
+  // Abnahme ① F-1: a list carries its dl and no text of its own — the prop value is the row's
+  // heading, not a word above the list.
+  for (const own of await lists.evaluateAll((elements) =>
+    elements.map((element) =>
+      [...element.childNodes]
+        .filter((node) => node.nodeType === Node.TEXT_NODE)
+        .map((node) => node.textContent?.trim() ?? "")
+        .join(""),
+    ),
+  )) {
+    expect(own).toBe("");
+  }
   await expect(page.locator("#fm-vitrino-atributlisto dd").last().locator("svg")).toHaveCount(1);
   const meters = page.locator("#fm-vitrino-mezurilo fm-mezurilo");
   // Nachlese 3 W4 (F-9): the fifth meter has no value — unknown, dashed, "nicht geprüft".
