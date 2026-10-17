@@ -199,4 +199,34 @@ test.describe("fm-dialogo behaviour", () => {
     expect(Math.round(medium.width)).toBe(Math.round(medium.medium));
     expect(medium.medium).toBeGreaterThan(small.small);
   });
+
+  // Spec 014 ① (reason-help, plan ① D-02): a help under the reason field, handed to the composed
+  // tekstareo as its help: visible under the field and the description of the textbox.
+  test("reason-help stands under the reason field and describes it; without a reason it is not shown", async ({
+    page,
+  }) => {
+    await serve(
+      page,
+      out,
+      dialog(
+        'open reason="required"',
+        '<span slot="reason">Begründung</span><span slot="reason-help">Ein Satz genügt.</span>',
+      ),
+    );
+    const area = page.locator("#d").locator('[part="reason"]');
+    const textbox = area.getByRole("textbox", { name: "Begründung" });
+    await expect(textbox).toHaveAccessibleDescription(/Ein Satz genügt\./);
+    const help = page.locator('#d [slot="reason-help"]');
+    await expect(help).toBeVisible();
+    const below = await page.evaluate(() => {
+      const dialog = document.getElementById("d") as HTMLElement;
+      const area = dialog.shadowRoot?.querySelector('[part="reason"]') as HTMLElement;
+      const control = area.shadowRoot?.querySelector("textarea") as HTMLElement;
+      const help = dialog.querySelector('[slot="reason-help"]') as HTMLElement;
+      return help.getBoundingClientRect().top >= control.getBoundingClientRect().bottom - 1;
+    });
+    expect(below).toBe(true);
+    await page.locator("#d").evaluate((element) => element.setAttribute("reason", "none"));
+    await expect(help).toBeHidden();
+  });
 });

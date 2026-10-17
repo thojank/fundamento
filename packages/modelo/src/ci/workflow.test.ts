@@ -17,6 +17,8 @@ const CHECK_STEPS: ReadonlyArray<readonly [name: string, script: string]> = [
   ["Check: Mankoj", "check:mankoj"],
   ["Check: Alirebleco", "check:alirebleco"],
   ["Check: Clean-Room", "check:clean-room"],
+  // Spec 014 ① (G3): every installed Aspekto draws every name of the Ikonaro.
+  ["Check: Ikonaro", "check:ikonaro"],
 ];
 
 /** Rendered checks of the Eroj (Spec 003 T013, plan D-09): axe-core, keyboard, focus, ARIA. */

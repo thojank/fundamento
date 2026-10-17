@@ -768,8 +768,10 @@ describe("Web Component Celo for the dialogo (Spec 011 ②)", () => {
       '<dialog part="control" aria-modal="true" aria-labelledby="heading" aria-describedby="message">',
     );
     expect(element).toContain('<h2 part="heading" id="heading"><slot></slot></h2>');
+    // Spec 014 ① (reason-help, plan ① D-02): the help of the reason stands under the field, handed
+    // to the composed tekstareo as its help (it describes the control, aria-describedby).
     expect(element).toContain(
-      '<fm-tekstareo part="reason" rows="3"><slot name="reason"></slot></fm-tekstareo>',
+      '<fm-tekstareo part="reason" rows="3"><slot name="reason"></slot><slot name="reason-help" slot="help"></slot></fm-tekstareo>',
     );
     expect(element).toContain('<slot name="actions"></slot>');
     expect(element).toContain("static formAssociated = false;");
@@ -1149,6 +1151,11 @@ describe("Web Component Celo for the atributlisto (Spec 011 ④)", () => {
     expect(light).toContain(
       'fm-atributlisto[data-layout="stacked"] > dl { grid-template-columns: auto; }',
     );
+    // Spec 014 ① (layout auto, plan ① D-03): the wide case is the columns case in the sheet; the
+    // element resolves auto to columns or stacked by the width of its container.
+    expect(light).toContain(
+      'fm-atributlisto[data-layout="auto"] > dl {\n  column-gap: var(--fm-spacing-large);',
+    );
     expect(light).toContain("fm-atributlisto .fm-hidden {");
     expect(componentCssIssues("atributlisto.css", css)).toEqual([]);
     expect(componentCssIssues("atributlisto.light.css", light)).toEqual([]);
@@ -1156,8 +1163,18 @@ describe("Web Component Celo for the atributlisto (Spec 011 ④)", () => {
 
   it("states layout and the one state rest in the stylesheet inventory (parity)", () => {
     const inventory = stylesheetInventory(styles);
-    expect(inventory.props).toEqual({ layout: ["columns", "stacked"] });
+    expect(inventory.props).toEqual({ layout: ["columns", "stacked", "auto"] });
     expect(inventory.states).toEqual(["rest"]);
+  });
+
+  it("Spec 014 ①: layout auto measures the container against the width the Uzo names (size.container.small) and writes columns or stacked", () => {
+    // The threshold is the token of the Uzo (columns-from), read as the custom property it is
+    // projected to; a container query takes no var(), so the element observes its own inline size.
+    expect(element).toContain('const COLUMNS_FROM = "--fm-size-container-small";');
+    expect(element).toContain("ResizeObserver");
+    expect(element).toContain('"auto"');
+    expect(element).toMatch(/data-layout/);
+    expect(element).toContain("#autoLayout(");
   });
 });
 
@@ -1201,6 +1218,15 @@ describe("Web Component Celo for the navigado (Spec 011 ⑤)", () => {
     expect(light).toContain("color: var(--fm-color-navigation-text-rest);");
     expect(light).toContain("text-decoration-thickness: var(--fm-border-width-strong);");
     expect(light).toContain("text-decoration-line: none;");
+    // Spec 014 ① (Gewicht, plan ① D-01): the current item is heavier — its weight bound to
+    // font.weight.semibold; the others keep the weight of their role (none writes nothing).
+    expect(light).toContain("font-weight: var(--fm-font-weight-semibold);");
+    expect(light).toMatch(
+      /fm-navigado > a\[aria-current\] \{\n(?:  [^\n]+\n)*  font-weight: var\(--fm-font-weight-semibold\);/,
+    );
+    expect(
+      /fm-navigado > a:not\(\[aria-current\]\) \{\n(?:  [^\n]+\n)*\}/.exec(light)?.[0] ?? "",
+    ).not.toContain("font-weight: var(--fm-font-weight-semibold)");
     expect(light).toContain("min-block-size: var(--fm-size-target-min);");
     expect(light).toContain("border-radius: var(--fm-radius-role-control);");
     expect(light).toContain(
@@ -1265,6 +1291,15 @@ describe("Web Component Celo for the langetaro (Spec 011 ⑤)", () => {
       ':where([part="control"] [part="tab"][aria-disabled="true"]) {\n  background-color: var(--fm-color-action-tertiary-disabled);',
     );
     expect(css).toContain("border-block-end-width: var(--fm-border-width-strong);");
+    // Spec 014 ① (Gewicht, plan ① D-01): the active tab is heavier — weight by active.
+    expect(css).toMatch(
+      /:where\(\[part="control"\] \[part="tab"\]\[aria-selected="true"\]\) \{\n(?:  [^\n]+\n)*  font-weight: var\(--fm-font-weight-semibold\);/,
+    );
+    expect(
+      /:where\(\[part="control"\] \[part="tab"\]\[aria-selected="false"\]\) \{\n(?:  [^\n]+\n)*\}/.exec(
+        css,
+      )?.[0] ?? "",
+    ).not.toContain("font-weight: var(--fm-font-weight-semibold)");
     // F-7: the indicator is the selected text colour, not the navigation background.
     expect(css).toContain("border-block-end-color: var(--fm-color-navigation-text-selected);");
     expect(css).toContain("border-block-end-style: none;");

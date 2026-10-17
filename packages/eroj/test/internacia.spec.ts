@@ -910,3 +910,41 @@ test("navigado and langetaro text expansion: the items wrap, the tabs keep their
   expect(after.scrolls).toBe(true);
   expect(after.clipped).toBe(false);
 });
+
+// Spec 014 ① (layout auto, plan ① D-03, Internacia): in a wide container the auto list puts the
+// term beside the value — right of it in right-to-left writing, with long keys as a translation
+// would bring them; in a narrow container it stacks, the term above the value, in both directions.
+test("atributlisto layout auto right to left: columns put the long term right of the value, stacked puts it above", async ({
+  page,
+}) => {
+  const term = pseudo("Verantwortliche Organisationseinheit", 1);
+  await serve(
+    page,
+    out,
+    `<div id="w" style="inline-size: 48rem"><fm-atributlisto id="a" layout="auto"><dl><dt id="term">${term}</dt><dd>3</dd></dl></fm-atributlisto></div>`,
+  );
+  await page.evaluate(() => document.documentElement.setAttribute("dir", "rtl"));
+  const measure = () =>
+    page.evaluate(() => {
+      const host = document.getElementById("a") as HTMLElement;
+      const dt = host.querySelector("dt") as HTMLElement;
+      const dd = host.querySelector("dd") as HTMLElement;
+      return {
+        resolved: host.getAttribute("data-layout"),
+        termRightOfValue: dt.getBoundingClientRect().left > dd.getBoundingClientRect().left,
+        termAboveValue: dt.getBoundingClientRect().bottom <= dd.getBoundingClientRect().top + 1,
+        clipped: dt.scrollWidth > dt.clientWidth + 1,
+      };
+    });
+  await expect.poll(async () => (await measure()).resolved).toBe("columns");
+  const wide = await measure();
+  expect(wide.termRightOfValue).toBe(true);
+  expect(wide.clipped).toBe(false);
+  await page.locator("#w").evaluate((element) => {
+    (element as HTMLElement).style.inlineSize = "16rem";
+  });
+  await expect.poll(async () => (await measure()).resolved).toBe("stacked");
+  const narrow = await measure();
+  expect(narrow.termAboveValue).toBe(true);
+  expect(narrow.clipped).toBe(false);
+});

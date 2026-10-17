@@ -5761,6 +5761,20 @@ describe("the navigado is drawn as a nav: three items in a row, the first curren
         paints(descendant(node, "items-1"), "fills")[0]?.boundVariables?.color?.name,
         name,
       ).toBe("color/navigation/text/selected");
+      // Spec 014 ① (Gewicht, plan ① D-01): the current item's text in the semibold cut, its style
+      // bound to the STRING twin of the weight (F30), the others in the cut of their role.
+      expect(descendant(node, "items-1")?.properties.fontName, name).toEqual({
+        family: "Geist",
+        style: "SemiBold",
+      });
+      expect(bound(descendant(node, "items-1"), "fontStyle"), name).toBe("font/style/semibold");
+      expect(descendant(node, "items-2")?.properties.fontName, name).toEqual({
+        family: "Geist",
+        style: "Medium",
+      });
+      expect(bound(descendant(node, "items-2"), "fontStyle"), name).toBe(
+        "typography/label/1/font-style",
+      );
       for (const index of [2, 3]) {
         const other = descendant(node, `item-${index}`);
         expect(paints(other, "fills")[0]?.boundVariables?.color?.name, `${name} ${index}`).toBe(

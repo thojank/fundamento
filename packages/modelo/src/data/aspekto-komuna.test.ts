@@ -18,7 +18,9 @@ describe("@fundamento/aspekto-komuna (D-05)", () => {
   it("points package.json at aspekto.json and ships the package files", () => {
     const manifest = json("package.json");
     expect(manifest.fundamento).toEqual({ aspekto: "./aspekto.json" });
-    expect(manifest.files).toEqual(["aspekto.json", "ids.lock.json", "$themes.json", "sets"]);
+    // Spec 014 ① (G3, E10): the glyphs of the Ikonaro travel with the package, with their licence.
+    expect(manifest.files).toEqual(["aspekto.json", "ids.lock.json", "$themes.json", "sets", "ikonoj"]);
+    expect((manifest.exports as Record<string, string>)["./ikonoj/*"]).toBe("./ikonoj/*");
   });
 
   it("has a schema-valid aspekto.json: MIT, Geist and Geist Mono, no idNamespace", () => {

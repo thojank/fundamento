@@ -84,4 +84,48 @@ test.describe("fm-atributlisto behaviour", () => {
     });
     expect(lines).toBeGreaterThan(1.5);
   });
+
+  // Spec 014 ① (layout auto, plan ① D-03): auto lays name and value side by side while the
+  // container is at least size.container.small wide, else stacks them; the element measures its
+  // container (a container query takes no token), and follows every change of its width.
+  test("layout auto: columns in a wide container, stacked in a narrow one, and it follows the container", async ({
+    page,
+  }) => {
+    await serve(
+      page,
+      out,
+      `<div id="w" style="inline-size: 48rem"><fm-atributlisto id="a" layout="auto"><dl><dt>Version</dt><dd>3</dd><dt>Verantwortlich</dt><dd>Team Fundamento</dd></dl></fm-atributlisto></div>`,
+    );
+    const threshold = await page.evaluate(() =>
+      getComputedStyle(document.documentElement).getPropertyValue("--fm-size-container-small").trim(),
+    );
+    expect(threshold).toBe("640px");
+    const measure = () =>
+      page.locator("#a").evaluate((element) => {
+        const dt = element.querySelector("dt") as HTMLElement;
+        const dd = element.querySelector("dd") as HTMLElement;
+        return {
+          layout: element.getAttribute("layout"),
+          resolved: element.getAttribute("data-layout"),
+          sameRow: Math.abs(dt.getBoundingClientRect().top - dd.getBoundingClientRect().top) < 2,
+        };
+      });
+    await expect.poll(async () => (await measure()).resolved).toBe("columns");
+    expect(await measure()).toEqual({ layout: "auto", resolved: "columns", sameRow: true });
+    await page.locator("#w").evaluate((element) => {
+      (element as HTMLElement).style.inlineSize = "16rem";
+    });
+    await expect.poll(async () => (await measure()).resolved).toBe("stacked");
+    expect(await measure()).toEqual({ layout: "auto", resolved: "stacked", sameRow: false });
+    await page.locator("#w").evaluate((element) => {
+      (element as HTMLElement).style.inlineSize = "48rem";
+    });
+    await expect.poll(async () => (await measure()).resolved).toBe("columns");
+    // The chosen layouts stay what they say, whatever the container.
+    await page.locator("#a").evaluate((element) => element.setAttribute("layout", "stacked"));
+    await page.locator("#w").evaluate((element) => {
+      (element as HTMLElement).style.inlineSize = "48rem";
+    });
+    await expect.poll(async () => (await measure()).resolved).toBe("stacked");
+  });
 });

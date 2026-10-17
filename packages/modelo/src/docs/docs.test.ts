@@ -204,6 +204,7 @@ describe("README.md (S1, FR-02, AK-11)", () => {
     "pnpm check:regularo",
     "pnpm check:alirebleco",
     "pnpm check:clean-room",
+    "pnpm check:ikonaro",
     "pnpm -s",
     "--fixture",
     "--json",
@@ -1596,5 +1597,67 @@ describe("Nachlese 3 documentation (specs/012-nachlese-3)", () => {
     expect(section(plan)).toMatch(/Run-Nummern|Run \d{11}/);
     expect(section(tasks)).toContain("### Messungen");
     for (const hash of ["ba6a705"]) expect(section(tasks)).toContain(hash);
+  });
+});
+
+// Spec 014 (Briefing 2026-10-17): specs/014-eroj-runde-3 carries the spec unchanged, a plan and
+// tasks with the five sections ① to ⑤; ① carries the overlay measurement as a table, the
+// Arkitekturo coverage of the three extensions and the red hashes; the Vojmapo names it in Phase 4.
+describe("Spec 014 documentation (specs/014-eroj-runde-3)", () => {
+  it("the spec is the one of 2026-10-17, unchanged; plan and tasks carry ① to ⑤", () => {
+    const spec = read("specs/014-eroj-runde-3/spec.md");
+    expect(spec).toMatch(
+      /^# Spec 014 – Eroj in der Breite, Runde 3: Grundbausteine, Typografie, Overlays, Aufklappen/,
+    );
+    expect(spec).toContain("**E4 Namen:** `ikono`, `apartigilo`, `saltligilo`, `titolo`, `teksto`, `konsileto`, `sxvebilo`, `menuo`, `faldilo`, `kompletigilo`");
+    const plan = read("specs/014-eroj-runde-3/plan.md");
+    const tasks = read("specs/014-eroj-runde-3/tasks.md");
+    for (const text of [plan, tasks]) {
+      for (const heading of [
+        "## ① Grundlage",
+        "## ② Grundbausteine",
+        "## ③ Typografie",
+        "## ④ Overlays",
+        "## ⑤ Aufklappen",
+      ]) {
+        expect(text).toContain(heading);
+      }
+    }
+  });
+
+  it("plan ① carries the decisions, the overlay measurement, the Ikonaro list, the Arkitekturo coverage, deviations, findings and open points; tasks ① the red hashes", () => {
+    const plan = read("specs/014-eroj-runde-3/plan.md");
+    const tasks = read("specs/014-eroj-runde-3/tasks.md");
+    const section = (text: string) =>
+      text.slice(text.indexOf("## ① Grundlage"), text.indexOf("## ② Grundbausteine"));
+    for (const heading of [
+      "### Zusammenfassung",
+      "### Entwurfsentscheidungen",
+      "#### D-01",
+      "#### D-02",
+      "#### D-03",
+      "#### D-04",
+      "#### D-05",
+      "#### D-06",
+      "### Overlay-Messung",
+      "### Arkitekturo-Abdeckung",
+      "### Abweichungen von der Spec",
+      "### Befunde / Mankoj",
+      "### Offen (für den Maintainer)",
+    ]) {
+      expect(section(plan), heading).toContain(heading);
+    }
+    // The measurement of G4: Popover API and anchor positioning in the three engines, as a table.
+    expect(section(plan)).toMatch(/\| Merkmal \| chromium [\d.]+ \| firefox [\d.]+ \| webkit [\d.]+ \|/);
+    expect(section(plan)).toContain("showPopover");
+    expect(section(plan)).toContain("anchor-name");
+    // The Ikonaro start set is listed in the plan (G3): every name with its need.
+    expect(section(plan)).toContain("`chevron-right`");
+    expect(section(plan)).toContain("`more`");
+    // The three extensions stand on „trägt" in the coverage.
+    for (const row of ["Gewicht", "reason-help", "layout"]) expect(section(plan)).toContain(row);
+    expect(section(tasks)).toContain("### Messungen");
+    expect(section(tasks)).toMatch(/rot `[0-9a-f]{7}`/);
+    expect(read("docs/vojmapo.md")).toContain("Spec 014 ①");
   });
 });

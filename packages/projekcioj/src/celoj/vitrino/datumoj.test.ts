@@ -520,9 +520,10 @@ describe("the Vitrino shows the tabelo, the atributlisto and the mezurilo (Spec 
     expect((grid.match(/<th scope="row">/g) ?? []).length).toBe(8);
   });
 
-  it("atributlisto: a row per layout, each a dl with three entries, the last value empty", () => {
+  it("atributlisto: a row per layout (columns, stacked, auto since Spec 014 ①), each a dl with three entries, the last value empty", () => {
     const grid = datumoj.eroj.atributlisto ?? "";
-    expect((grid.match(/<fm-atributlisto /g) ?? []).length).toBe(2);
+    expect((grid.match(/<fm-atributlisto /g) ?? []).length).toBe(3);
+    expect(grid).toContain('<fm-atributlisto layout="auto">auto<dl>');
     expect(grid).toContain('<fm-atributlisto layout="stacked"><dl><dt>Version</dt><dd>3</dd>');
     expect(grid).toContain("<dt>Gültig seit</dt><dd></dd></dl></fm-atributlisto>");
   });

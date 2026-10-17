@@ -137,4 +137,28 @@ test.describe("fm-navigado behaviour", () => {
     expect(stacked[0]).toBeLessThan(stacked[1] ?? 0);
     expect(stacked[1]).toBeLessThan(stacked[2] ?? 0);
   });
+
+  // Spec 014 ① (Gewicht, plan ① D-01): the current item is heavier than the others — the role's
+  // weight (label.1, medium) for every item, semibold where current; the underline stays (G4).
+  test("the current item is set in the semibold weight, the others in the weight of their role", async ({
+    page,
+  }) => {
+    await serve(page, out, nav('label="Hauptnavigation" page="standards"'));
+    const weight = (name: string) =>
+      page.getByRole("link", { name }).evaluate((element) => getComputedStyle(element).fontWeight);
+    const tokens = await page.evaluate(() => {
+      const root = getComputedStyle(document.documentElement);
+      return {
+        semibold: root.getPropertyValue("--fm-font-weight-semibold").trim(),
+        role: root.getPropertyValue("--fm-typography-label-1-font-weight").trim(),
+      };
+    });
+    expect(tokens.semibold).toBe("600");
+    expect(await weight("Standards")).toBe(tokens.semibold);
+    expect(await weight("Versionen")).toBe(tokens.role);
+    expect(await weight("Versionen")).not.toBe(tokens.semibold);
+    await page.locator("#n").evaluate((element) => element.setAttribute("page", "versions"));
+    expect(await weight("Versionen")).toBe(tokens.semibold);
+    expect(await weight("Standards")).toBe(tokens.role);
+  });
 });

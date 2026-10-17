@@ -1,0 +1,10 @@
+{
+  "description": "Spec 014 ① (G3): the Aspekto prova draws close but not check, so one name of the Ikonaro has no glyph — every installed Aspekto draws every name, as every Aspekto overrides every token (Art. IV). A glyph without a name (star) is a warning: nothing is deleted by a check.",
+  "check": "ikonaro",
+  "issues": [
+    { "rule": "ikonaro-glyph-missing", "path": "data/ikonaro.json#/ikonaro/1" }
+  ],
+  "warnings": [
+    { "rule": "ikonaro-glyph-unknown", "path": "aspekto-prova/ikonoj/star.svg#" }
+  ]
+}

@@ -2314,14 +2314,16 @@ describe("Figma plan for the atributlisto (Spec 011 ④)", () => {
   it("plans a list of layout in one state, with the purpose, the word Angaben and the Vitrino's entries", () => {
     expect(structureOf("list")).toBe("list");
     expect(set?.structure).toBe("list");
+    // Spec 014 ① (layout auto, plan ① D-03): auto is a value of the axis; the set draws it as the
+    // wide case (columns), the container query is the web's.
     expect(set?.properties).toEqual({
-      layout: ["columns", "stacked"],
+      layout: ["columns", "stacked", "auto"],
       label: "TEXT",
       state: ["rest"],
     });
-    expect(set?.variants).toHaveLength(2);
+    expect(set?.variants).toHaveLength(3);
     expect(Object.keys(set?.variants[0]?.props ?? {})).toEqual(["layout", "state"]);
-    expect(set?.grid).toMatchObject({ rows: 2, columns: 1 });
+    expect(set?.grid).toMatchObject({ rows: 3, columns: 1 });
     expect(set?.description).toBe(atributlisto?.uzo?.purpose);
     expect(set?.label?.defaultValue).toBe("Angaben");
     expect(set?.entries).toEqual([
@@ -2355,6 +2357,7 @@ describe("Figma plan for the atributlisto (Spec 011 ④)", () => {
       "box.inline-padding": "spacing/large",
     });
     expect(variant("stacked")?.bindings["box.inline-padding"]).toBe("spacing/xsmall");
+    expect(variant("auto")?.bindings["box.inline-padding"]).toBe("spacing/large");
     expect(Object.keys(columns?.paints ?? {}).sort()).toEqual(["term.color", "value.color"]);
     expect(Object.keys(columns?.geometry ?? {}).sort()).toEqual([
       "box.gap",
@@ -2371,7 +2374,7 @@ describe("Figma plan for the atributlisto (Spec 011 ④)", () => {
   it("states the atributlisto in the parity inventory: layout, label a string, the state rest, term and value colours, the gaps", () => {
     const items = figmaPlanInventory(plan);
     expect(items.atributlisto?.props).toEqual({
-      layout: ["columns", "stacked"],
+      layout: ["columns", "stacked", "auto"],
       label: ["string"],
     });
     expect(items.atributlisto?.states).toEqual(["rest"]);
@@ -2481,6 +2484,8 @@ describe("Figma plan for the navigado (Spec 011 ⑤)", () => {
         bindings: {
           "item.fill": "color/navigation/selected",
           "items.color": "color/navigation/text/selected",
+          // Spec 014 ① (Gewicht, plan ① D-01): the current item's text in the semibold cut.
+          "items.weight": "font/weight/semibold",
           "underline.width": "border/width/strong",
         },
         paints: {
@@ -2488,6 +2493,7 @@ describe("Figma plan for the navigado (Spec 011 ⑤)", () => {
           "items.color": expect.objectContaining({ opacity: 1 }),
         },
         geometry: { "underline.width": expect.stringMatching(/px$/) },
+        font: { family: "Geist", style: "SemiBold", families: ["Geist"] },
       },
       false: {
         bindings: {
@@ -2500,6 +2506,10 @@ describe("Figma plan for the navigado (Spec 011 ⑤)", () => {
         },
       },
     });
+    // The semibold cut is a font the set needs, per Aspekto, beside the role's own (F30).
+    expect(set?.fonts?.map((font) => `${font.family} ${font.style}`)).toEqual(
+      expect.arrayContaining(["Geist Medium", "Geist SemiBold", "Archivo SemiBold"]),
+    );
     expect(variant("hover")?.entries?.false?.bindings["item.fill"]).toBe("color/navigation/hover");
     expect(variant("hover")?.entries?.true?.bindings["item.fill"]).toBe(
       "color/navigation/selected",
@@ -2613,16 +2623,22 @@ describe("Figma plan for the langetaro (Spec 011 ⑤)", () => {
       true: {
         bindings: {
           "tabs.color": "color/text/default",
+          // Spec 014 ① (Gewicht, plan ① D-01): the active tab's text in the semibold cut.
+          "tabs.weight": "font/weight/semibold",
           "selected-indicator.width": "border/width/strong",
         },
         paints: { "tabs.color": expect.objectContaining({ opacity: 1 }) },
         geometry: { "selected-indicator.width": expect.stringMatching(/px$/) },
+        font: { family: "Geist", style: "SemiBold", families: ["Geist"] },
       },
       false: {
         bindings: { "tabs.color": "color/text/subtle" },
         paints: { "tabs.color": expect.objectContaining({ opacity: 1 }) },
       },
     });
+    expect(set?.fonts?.map((font) => `${font.family} ${font.style}`)).toEqual(
+      expect.arrayContaining(["Geist Medium", "Geist SemiBold", "Archivo SemiBold"]),
+    );
     expect(set?.fonts?.length ?? 0).toBeGreaterThan(0);
   });
 
