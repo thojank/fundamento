@@ -271,12 +271,13 @@ function composedOf(
 }
 
 /**
- * The texts of a dialog's set (Spec 011 ②): the message and the label of the reason field from
- * the Vitrino's slot words, the two action words; the heading is the label property.
+ * The texts of a dialog's set (Spec 011 ②): the message, the label of the reason field and its
+ * help (Spec 014 ①, plan ① D-02; the same sentence the Vitrino shows, F-5) from the Vitrino's
+ * slot words, the two action words; the heading is the label property.
  */
 export const DIALOG_TEXTS: Readonly<Record<string, string>> = {
   ...Object.fromEntries(
-    ["message", "reason"].flatMap((slot) => {
+    ["message", "reason", "reason-help"].flatMap((slot) => {
       const text = VITRINO_SLOT_TEXTS[slot];
       return text === undefined ? [] : [[slot, text]];
     }),

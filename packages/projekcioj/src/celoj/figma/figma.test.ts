@@ -1538,6 +1538,8 @@ describe("Figma plan for the dialogo (Spec 011 ②)", () => {
     expect(DIALOG_TEXTS).toEqual({
       message: "Nachricht",
       reason: "Begründung",
+      // Spec 014 ① (plan ① D-02): the help of the reason field, the Vitrino's sentence.
+      "reason-help": "Nenne den Grund in einem Satz.",
       "action-1": "Abbrechen",
       "action-2": "Bestätigen",
     });

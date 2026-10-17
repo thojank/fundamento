@@ -291,6 +291,8 @@ export const VITRINO_SLOT_TEXTS: Readonly<Record<string, string>> = {
   // Spec 011 ② (plan ② D-15): the message and the reason's label of a dialog.
   message: "Nachricht",
   reason: "Begründung",
+  // Spec 014 ① (plan ① D-02): the help of the reason field, one sentence (help-is-one-sentence).
+  "reason-help": "Nenne den Grund in einem Satz.",
   // Spec 011 ③ (plan ③ D-13): the heading and the details of a notice, the hidden description
   // of a badge.
   heading: "Überschrift",
@@ -393,7 +395,11 @@ function optionTexts(entry: LoadedEro): string {
  * <prop>: true` keeps the slot out of every column but that prop's (the error of the kampo stands
  * only under invalid; an error text without the state is a contradiction, Spec 009 D-04).
  */
-function slotTexts(entry: LoadedEro, column: string | undefined): string {
+function slotTexts(
+  entry: LoadedEro,
+  column: string | undefined,
+  combination: Readonly<Record<string, string>>,
+): string {
   return entry.skemo.slots
     .filter((slot) => slot.text === true && slot.default !== true)
     .flatMap((slot) => {
@@ -402,10 +408,15 @@ function slotTexts(entry: LoadedEro, column: string | undefined): string {
       const constraint = (entry.skemo.constraints ?? []).find(
         (candidate) => candidate.when[`slot:${slot.name}`] === "filled",
       );
+      // A filled slot is allowed where the constraint's props hold: the boolean column of the cell
+      // (the error under invalid) or the enum value of the row (Spec 014 ①, Abnahme ① F-2: the
+      // reason-help only where the dialog has a reason field).
       const allowed =
         constraint === undefined ||
         Object.entries(constraint.allowed).every(
-          ([prop, values]) => prop === column && values.includes("true"),
+          ([prop, values]) =>
+            (prop === column && values.includes("true")) ||
+            (combination[prop] !== undefined && values.includes(combination[prop])),
         );
       return allowed ? [`<span slot="${slot.name}">${text}</span>`] : [];
     })
@@ -500,13 +511,13 @@ export function eroMarkup(entry: LoadedEro): string {
         : "";
       const identity = dialog ? ` id="${id}"` : "";
       const actions = dialog ? VITRINO_DIALOG_ACTIONS : "";
-      // A list with layout auto (Spec 014 ①, plan ① D-03) chooses columns or stacked by the width
-      // of its cell: the cell says auto above the list, so the look is read as the element's choice.
-      const named = role === "list" ? combination.layout === "auto" : !entriesInDefault;
+      // A light-DOM list carries its dl and no word of its own (Abnahme ① F-1): the prop value is
+      // the row's heading, whatever layout the list chooses.
+      const named = role !== "list" && !entriesInDefault;
       const cells = [undefined, ...columns]
         .map(
           (column) =>
-            `<td>${opener}<${tag}${identity}${attributes}${examples}${required}${chosen}${column === undefined ? "" : ` ${column}`}>${named ? label : ""}${optionTexts(entry)}${slotTexts(entry, column)}${actions}${light}</${tag}></td>`,
+            `<td>${opener}<${tag}${identity}${attributes}${examples}${required}${chosen}${column === undefined ? "" : ` ${column}`}>${named ? label : ""}${optionTexts(entry)}${slotTexts(entry, column, combination)}${actions}${light}</${tag}></td>`,
         )
         .join("");
       return `<tr><th scope="row">${label}</th>${cells}</tr>`;

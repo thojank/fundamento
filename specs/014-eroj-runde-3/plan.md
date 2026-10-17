@@ -127,12 +127,18 @@ Gemessen 2026-10-17 mit `node scripts/measure-overlay.mjs` (Playwright-Engines d
 - **B-6** `check:vitrino` zählte die atributlisto-Zeilen fest (2); die dritte Zeile (`auto`) machte den ersten CI-Lauf rot (Rendered checks 5m37s). Zahl auf 3 gesetzt, kein Manko.
 - **B-4** Phosphor liefert im Set keine 24er-Fassung; die Pfade stehen im 256er-Raster (Abweichung 2, erledigt). Für `ikono` (②) heißt das: die Größe kommt aus `size`-Token, nie aus der Datei.
 
+### Abnahme ① (Maintainer, 2026-10-17; Vitrino f6f38f5 → acb6eae)
+
+- **F-1 „auto“ als sichtbarer Text über der Liste.** Ursache: Der rote Test aus `27e472d` verlangte wörtlich `<fm-atributlisto layout="auto">auto<dl>`, und der Vitrino-Generator schrieb das Prop-Wort in den Standard-Slot der Liste (`named`-Sonderfall für `layout=auto`). Eine Light-DOM-Liste trägt ihre `dl` und kein eigenes Wort; das Prop-Wort ist die Zeilenüberschrift. Roter Test zuerst (`fb0fa04`: Daten-Test „kein Text im Host“, Browser-Prüfung „kein eigener Textknoten“), dann der Sonderfall entfernt.
+- **F-2 keine Hilfe unter „Begründung“.** Ursache: `slotTexts` der Vitrino ließ einen belegten Slot nur zu, wenn die Constraint auf die boolesche Spalte der Zelle zeigt (Fehler unter `invalid`); die Constraint von `reason-help` zeigt auf den Enum-Wert der Zeile (`reason` optional|required) und fiel durch – dazu fehlte das Wort. Jetzt gilt die Constraint auch für den Zeilenwert, und `VITRINO_SLOT_TEXTS["reason-help"]` ist „Nenne den Grund in einem Satz.“ – in jeder Zelle mit Begründungsfeld (4), in keiner ohne. Browser-Prüfung: sichtbar unter dem Textfeld, `aria-describedby` des Textfelds trägt den Satz, axe ohne Befund. Dasselbe Wort steht in `DIALOG_TEXTS` des Figma-Sets (F-5: ein Wortschatz für beide Bilder); das Plugin zeichnet den Hilfesatz im Dialog noch nicht (O-5).
+
 ### Offen (für den Maintainer)
 
 - **O-1 Spec-Text zu E10/G3/Benchmark** – *erledigt 17.10.*: Die Spec-Datei (Stand 16:45) war byteidentisch mit der Kopie aus `9a3194f` und nannte Lucide; der Maintainer hat sie korrigiert (19:54: Phosphor in G3, E10, Benchmark; quadratische `viewBox`), die Kopie ist erneut unverändert übernommen. Das Briefing (Abschnitt Ikonaro) ist seit 17:54 ebenfalls korrigiert (Phosphor, Raster laut plan.md) – erledigt.
 - **O-2 Icon-Namen** – *entschieden 17.10.*: `menu` aus der Startmenge genommen (die `navigado` hat keinen eingeklappten Zustand; kommt mit der Grenze zurück, wenn sie fällt), `danger` als Achteck bestätigt (eine andere Form als das Dreieck von `warning`, damit die Unterscheidung nicht nur an der Farbe hängt). Startmenge jetzt 15 Namen. Die übrigen Namen bleiben bis zum Merge von ① änderbar (E4 sinngemäß).
 - **Biome ohne `ikonoj`** – *bestätigt 17.10.* (D-04).
 - **O-3 `get_ero` und `columns-from`.** `uzoOf` in `gvidanto/eroj.ts` und das MCP-Ausgabeschema `get_ero.output.json` geben `layout.columns-from` noch nicht aus; ein Agent sieht die Schwelle also nicht. Kleine Folgeaufgabe (Schema + Test), nicht Teil von ①; Vorschlag: mit ② (`ikono`), wenn `get_ero` ohnehin die Icon-Namen aufnimmt.
+- **O-5 Figma-Dialog ohne Hilfesatz.** `DIALOG_TEXTS` trägt `reason-help`, das Plugin zeichnet unter dem Begründungsfeld aber noch keinen Hilfetext-Knoten (es zeichnet feste Knoten: `reason-label`, Feld, Aktionen). Kandidat für ② mit den Icons, wenn der Dialog ohnehin neu gezeichnet wird.
 - **O-4 Gewicht in Figma für Optionen.** Die Schrift je Eintrag wird in `drawEntries` (navigado, langetaro) geschrieben; `drawChoice` (Optionen des `elekto`) wendet noch keine Eintrags-Schrift an – heute bindet kein Ero dort ein Gewicht. Kommt mit dem ersten Bedarf.
 
 ## ② Grundbausteine

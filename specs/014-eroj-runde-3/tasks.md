@@ -23,11 +23,15 @@
 - [x] **T710 Doku** plan ①, tasks ①, Vojmapo Zeile 4, README (Checks-Tabelle, Icon-Satz); Make-Guidelines unverändert (kein neues Ero in ①).
 - [x] **T711 Messungen** unten; Bericht im PR #70.
 
+### D – Abnahme ①
+- [x] **T712 F-1/F-2 rot** `datumoj.test.ts` (Liste ohne eigenen Text; `reason-help` in vier Zellen), `vitrino.check.ts` (kein Textknoten im Host; Hilfe sichtbar unter dem Feld, Beschreibung des Textfelds). Rot in `fb0fa04` (datumoj 2, vitrino.check 1).
+- [x] **T713 F-1/F-2 grün** `datumoj.ts` (`named` ohne Listen-Sonderfall; `slotTexts` prüft Constraints auch gegen den Zeilenwert; Wort `reason-help`), `DIALOG_TEXTS` mit `reason-help`; Hash in den Messungen.
+
 ### Messungen
 
 | Was | Wert |
 |---|---|
-| Commits ① | rot `27e472d`, Korrektur Ikonaro `49d4697`, Spec-Korrektur `2b3ba25`, grün `506f2a1`, CI `5740c53`, Messungen *(dieser Commit)* |
+| Commits ① | rot `27e472d`, Korrektur Ikonaro `49d4697`, Spec-Korrektur `2b3ba25`, grün `506f2a1`, CI `5740c53`, Messungen `acb6eae`, Abnahme rot `fb0fa04`, Abnahme grün *(dieser Commit)* |
 | Ikonaro | 15 Namen (Grenze 25), 2 Aspektoj × 15 Glyphen, Phosphor `@phosphor-icons/core` 2.1.1 (MIT), Raster 256 |
 | Overlay-Unterstützung | Popover-API und Anchor Positioning vollständig in allen drei Engines; nur `inset-area` (alter Name) fehlt überall |
 | CI | Lauf 1 `39065845169` (506f2a1): unit 6m21s grün, Eroj-Shards 5m42s/5m18s grün, Rendered checks 5m37s rot (B-6, Vitrino-Zahl); Lauf 2 `39066399062` (5740c53): alle Jobs grün – unit, Eroj-Shards 6m06s/5m11s, Rendered checks 6m56s; Wanduhr 7m48s, unter 12 min |
