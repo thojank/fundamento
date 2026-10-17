@@ -61,6 +61,7 @@ test.describe("fm-saltligilo behaviour", () => {
 
   test("Enter moves the focus to the target: a landmark without tabindex takes it (the link makes it focusable)", async ({
     page,
+    browserName,
   }) => {
     await serve(
       page,
