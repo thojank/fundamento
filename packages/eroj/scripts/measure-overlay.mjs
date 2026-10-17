@@ -81,12 +81,17 @@ async function measure(name, type) {
   });
   // Light dismiss: Escape closes an auto popover.
   await page.keyboard.press("Escape");
-  const escape = await page.evaluate(() => {
+  const escapeCloses = await page.evaluate(() => {
     const pop = document.getElementById("pop");
     return !pop.matches(":popover-open");
   });
   await browser.close();
-  return { name, version, supports, behaviour: { ...behaviour, "Escape closes it (light dismiss)": escape } };
+  return {
+    name,
+    version,
+    supports,
+    behaviour: { ...behaviour, "Escape closes it (light dismiss)": escapeCloses },
+  };
 }
 
 const results = [];
@@ -97,7 +102,10 @@ if (process.argv.includes("--json")) {
 } else {
   const rows = [
     ...Object.keys(results[0].supports).map((key) => [key, ...results.map((r) => r.supports[key])]),
-    ...Object.keys(results[0].behaviour).map((key) => [key, ...results.map((r) => r.behaviour[key])]),
+    ...Object.keys(results[0].behaviour).map((key) => [
+      key,
+      ...results.map((r) => r.behaviour[key]),
+    ]),
   ];
   const cell = (v) => (v === true ? "ja" : v === false ? "nein" : String(v));
   console.log(`| Merkmal | ${results.map((r) => `${r.name} ${r.version}`).join(" | ")} |`);

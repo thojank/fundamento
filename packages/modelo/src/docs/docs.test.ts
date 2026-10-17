@@ -1609,7 +1609,9 @@ describe("Spec 014 documentation (specs/014-eroj-runde-3)", () => {
     expect(spec).toMatch(
       /^# Spec 014 – Eroj in der Breite, Runde 3: Grundbausteine, Typografie, Overlays, Aufklappen/,
     );
-    expect(spec).toContain("**E4 Namen:** `ikono`, `apartigilo`, `saltligilo`, `titolo`, `teksto`, `konsileto`, `sxvebilo`, `menuo`, `faldilo`, `kompletigilo`");
+    expect(spec).toContain(
+      "**E4 Namen:** `ikono`, `apartigilo`, `saltligilo`, `titolo`, `teksto`, `konsileto`, `sxvebilo`, `menuo`, `faldilo`, `kompletigilo`",
+    );
     const plan = read("specs/014-eroj-runde-3/plan.md");
     const tasks = read("specs/014-eroj-runde-3/tasks.md");
     for (const text of [plan, tasks]) {
@@ -1648,7 +1650,9 @@ describe("Spec 014 documentation (specs/014-eroj-runde-3)", () => {
       expect(section(plan), heading).toContain(heading);
     }
     // The measurement of G4: Popover API and anchor positioning in the three engines, as a table.
-    expect(section(plan)).toMatch(/\| Merkmal \| chromium [\d.]+ \| firefox [\d.]+ \| webkit [\d.]+ \|/);
+    expect(section(plan)).toMatch(
+      /\| Merkmal \| chromium [\d.]+ \| firefox [\d.]+ \| webkit [\d.]+ \|/,
+    );
     expect(section(plan)).toContain("showPopover");
     expect(section(plan)).toContain("anchor-name");
     // The Ikonaro start set is listed in the plan (G3): every name with its need.

@@ -5,7 +5,13 @@
 import type { ErrorObject, ModeloAjv } from "../contracts/ajv.js";
 import { getModeloValidator } from "../contracts/ajv.js";
 import { formatIssuePath, type RuleId, type ValidationIssue } from "../contracts/issues.js";
-import { DATA_FILE_SCHEMA_DEFS, type DataFileName, SCHEMA_DEFS } from "../contracts/schema.js";
+import {
+  DATA_FILE_SCHEMA_DEFS,
+  type DataFileName,
+  OPTIONAL_DATA_FILE_SCHEMA_DEFS,
+  type OptionalDataFileName,
+  SCHEMA_DEFS,
+} from "../contracts/schema.js";
 import { appendPointer } from "../json/pointer.js";
 import type { ModeloDocument, ModeloFiles } from "../load/files.js";
 import { checkTokenName } from "../nomreguloj/token-name.js";
@@ -163,6 +169,23 @@ export function schemaIssues(files: ModeloFiles, ajv: ModeloAjv): ValidationIssu
         ...mapErrors(validate.errors ?? [], document, defName, {
           semantic: DATA_FILE_SEMANTIC[name],
           subtrees: DATA_FILE_SUBTREE_RULES[name],
+          isSetFile: false,
+        }),
+      );
+    }
+  }
+  // Optional data files (Spec 014 ①: the Ikonaro) are validated when present.
+  for (const name of Object.keys(OPTIONAL_DATA_FILE_SCHEMA_DEFS) as OptionalDataFileName[]) {
+    const document = files.data[name];
+    if (document === undefined) continue;
+    const defName = OPTIONAL_DATA_FILE_SCHEMA_DEFS[name];
+    const validate = getModeloValidator(ajv, defName);
+    if (!validate(document.value)) {
+      issues.push(
+        ...mapErrors(validate.errors ?? [], document, defName, {
+          // The Ikono's ID is checked by `checkIds` (id-missing, id-format).
+          semantic: [/^\/ikonaro\/\d+\/id(\/|$)/],
+          subtrees: [],
           isSetFile: false,
         }),
       );

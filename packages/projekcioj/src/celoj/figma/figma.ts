@@ -814,6 +814,12 @@ export interface FigmaComponentSet {
         paints?: Record<string, FigmaPaint>;
         geometry?: Record<string, string>;
         hidden?: string[];
+        /**
+         * The font of the entry's text where a weight keyed by the entry departs from its role
+         * (Spec 014 ①, plan ① D-01: the current item of a navigation in the semibold cut): the
+         * role's family, the cut of the bound font.weight.* token. Absent, the variant's font.
+         */
+        font?: { family: string; style: string; families: string[] };
       }
     >;
     /**
@@ -1521,6 +1527,25 @@ function componentSetOf(
     if (bound === undefined) return undefined;
     return bound.token === "inherit" ? INHERIT_TYPOGRAPHY : bound.token;
   };
+  // The font of a text part whose weight departs from its role (Spec 014 ①, plan ① D-01): the
+  // family of the role, the cut of the bound font.weight.* token in these tokens — per Aspekto, as
+  // every font (F30). A weight bound to none, or no weight, leaves the role's font: undefined.
+  const weightedFontOf = (
+    part: string,
+    combination: Readonly<Record<string, string>>,
+    tokens: Readonly<Record<string, { value?: unknown } | undefined>>,
+  ): { family: string; style: string; families: string[] } | undefined => {
+    if (skemo.parts[part]?.weight === undefined) return undefined;
+    const weight = boundToken(skemo, part, "weight", combination);
+    if (weight === undefined || isBindingKeyword(weight.token)) return undefined;
+    const role = boundToken(skemo, part, "typography", combination);
+    if (role === undefined) return undefined;
+    const typography = role.token === "inherit" ? INHERIT_TYPOGRAPHY : role.token;
+    const font = fontOf(tokens[typography]?.value);
+    const value = Number(tokens[weight.token]?.value);
+    if (font === undefined || !Number.isFinite(value)) return undefined;
+    return { ...font, style: styleOfWeight(value) };
+  };
   // The shadow of a part, field by field (Spec 011 ②, F9): the layers are counted over every
   // combination, like the variables, so the field names are the plan's; the values are the base
   // combination's, the deckkraft of the colour decided over every mode (F8).
@@ -1709,11 +1734,18 @@ function componentSetOf(
       if (entryKeys.length === 0) break;
       const sink = { bindings: {}, paints: {}, geometry: {}, notDrawn: {}, hidden: [] as string[] };
       bindParts({ ...combination, ...value }, keyedByEntry, sink);
+      // A weight keyed by the entry writes the entry's text in its own cut (Spec 014 ①, plan ①
+      // D-01): the current item of a navigation, the active tab.
+      const entryFont = Object.keys(skemo.parts)
+        .filter((part) => keyedByEntry(part, "weight"))
+        .map((part) => weightedFontOf(part, { ...combination, ...value }, base))
+        .find((font) => font !== undefined);
       entries[entryKeys.map((key) => value[key]).join(",")] = {
         bindings: sink.bindings,
         ...(Object.keys(sink.paints).length === 0 ? {} : { paints: sink.paints }),
         ...(Object.keys(sink.geometry).length === 0 ? {} : { geometry: sink.geometry }),
         ...(sink.hidden.length === 0 ? {} : { hidden: sink.hidden }),
+        ...(entryFont === undefined ? {} : { font: entryFont }),
       };
     }
     // The focus ring (F11). Its colour sits in a field of a composite token and is compared by
@@ -1728,7 +1760,13 @@ function componentSetOf(
     }
     const stroke = strokeOf(combination);
     const typography = typographyToken(combination);
-    const font = fontOf(typography === undefined ? undefined : base[typography]?.value);
+    // The label's own weight, where one departs from its role and follows the variant, not an
+    // entry (Spec 014 ①, plan ① D-01).
+    const font =
+      (keyedByEntry(labelPart, "weight")
+        ? undefined
+        : weightedFontOf(labelPart, combination, base)) ??
+      fontOf(typography === undefined ? undefined : base[typography]?.value);
     const underlineWidth =
       skemo.parts.underline?.width === undefined
         ? undefined
@@ -1780,10 +1818,25 @@ function componentSetOf(
     string,
     { family: string; style: string; families: string[]; aspektoj: Set<string> }
   >();
+  const need = (
+    font: { family: string; style: string; families: string[] } | undefined,
+    assignment: Readonly<Record<string, string>>,
+  ) => {
+    if (font === undefined) return;
+    const key = `${font.family}\u0000${font.style}`;
+    const seen = fontsNeeded.get(key) ?? { ...font, aspektoj: new Set<string>() };
+    const aspekto = assignment[ASPEKTO_DIMENSIO];
+    if (aspekto !== undefined) seen.aspektoj.add(aspekto);
+    fontsNeeded.set(key, seen);
+  };
   // Every part with a typography (Spec 009: a field has label, text, help and error).
   const typographyParts = Object.entries(skemo.parts)
     .filter(([, properties]) => properties.typography !== undefined)
     .map(([part]) => part);
+  const weightedParts = Object.entries(skemo.parts)
+    .filter(([, properties]) => properties.weight !== undefined)
+    .map(([part]) => part);
+  const entryValues = entryKeys.length === 0 ? [{}] : combinationsOf(skemo, entryKeys);
   for (const { assignment, tokens } of resolutions) {
     for (const variant of variants) {
       for (const part of typographyParts) {
@@ -1795,12 +1848,14 @@ function componentSetOf(
               ? INHERIT_TYPOGRAPHY
               : bound.token;
         const font = typography === undefined ? undefined : fontOf(tokens[typography]?.value);
-        if (font === undefined) continue;
-        const key = `${font.family}\u0000${font.style}`;
-        const seen = fontsNeeded.get(key) ?? { ...font, aspektoj: new Set<string>() };
-        const aspekto = assignment[ASPEKTO_DIMENSIO];
-        if (aspekto !== undefined) seen.aspektoj.add(aspekto);
-        fontsNeeded.set(key, seen);
+        need(font, assignment);
+      }
+      // A weight that departs from the role asks for the role's family in its own cut, per
+      // Aspekto, in every value of the entry it may follow (Spec 014 ①, plan ① D-01).
+      for (const part of weightedParts) {
+        for (const value of entryValues) {
+          need(weightedFontOf(part, { ...variant.props, ...value }, tokens), assignment);
+        }
       }
     }
   }

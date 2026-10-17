@@ -64,6 +64,12 @@ export interface ElementNames {
   /** Whether the Skemo has the part dismiss: a status host shows a close butono in it (D-09). */
   dismiss?: boolean;
   /**
+   * The custom property of the width from which a list with layout auto lays name and value side
+   * by side (Spec 014 ①, plan ① D-03): the Uzo's columns-from (size.container.small →
+   * --fm-size-container-small); absent, the element has no auto layout to resolve.
+   */
+  columnsFrom?: string;
+  /**
    * The Make Kit builds one file per Aspekto: the descriptor and the stylesheet are then constants
    * above the element instead of imports (D-14).
    */
@@ -181,11 +187,12 @@ function fieldMarkup(slots: NonNullable<ElementNames["slots"]>, textarea = false
 /**
  * The shadow markup of a dialog (Spec 011 ②, plan ② D-12, G4): the platform's own dialog as the
  * control, named by its heading and described by its message; content for the fields of a form
- * dialog (E9), the reason as a tekstareo the dialog shows itself (its label from the slot reason),
- * the actions slotted butono at the end. aria-modal says what showModal does.
+ * dialog (E9), the reason as a tekstareo the dialog shows itself (its label from the slot reason,
+ * its help from the slot reason-help: one sentence under the field that describes the textbox,
+ * Spec 014 ① plan ① D-02), the actions slotted butono at the end. aria-modal says what showModal does.
  */
 function dialogMarkup(): string {
-  return `<dialog part="control" aria-modal="true" aria-labelledby="heading" aria-describedby="message"><h2 part="heading" id="heading"><slot></slot></h2><p part="message" id="message"><slot name="message"></slot></p><div part="content"><slot name="content"></slot></div><fm-tekstareo part="reason" rows="3"><slot name="reason"></slot></fm-tekstareo><div part="actions"><slot name="actions"></slot></div><span id="fm-texts" hidden></span></dialog>`;
+  return `<dialog part="control" aria-modal="true" aria-labelledby="heading" aria-describedby="message"><h2 part="heading" id="heading"><slot></slot></h2><p part="message" id="message"><slot name="message"></slot></p><div part="content"><slot name="content"></slot></div><fm-tekstareo part="reason" rows="3"><slot name="reason"></slot><slot name="reason-help" slot="help"></slot></fm-tekstareo><div part="actions"><slot name="actions"></slot></div><span id="fm-texts" hidden></span></dialog>`;
 }
 
 /**
@@ -396,6 +403,7 @@ export function elementSource({
   marked = false,
   indicator = false,
   dismiss = false,
+  columnsFrom,
   slots = [
     { name: "label", default: true },
     { name: "icon-start", decorative: true },
@@ -1195,8 +1203,62 @@ ${
   // cells of a numeric column, the empty state as a plenstato over all columns while there are no
   // rows; the dash and the a11y text of an empty value, the name of the list. Every write checks
   // what stands there, so the observer of the light DOM does not loop.
+  // Layout auto (Spec 014 ①, plan ① D-03): a list whose Uzo names columns-from resolves auto to
+  // columns or stacked by its own inline size, after the enums are written on the host.
+  const isAuto = isLight && columnsFrom !== undefined;
   const lightRender = isLight
     ? `    this.#decorate();
+${isAuto ? "    this.#autoLayout();\n" : ""}`
+    : "";
+  const autoConstant = isAuto
+    ? `/** The width from which layout auto lays name and value side by side (Spec 014 ①, the Uzo's columns-from). */
+const COLUMNS_FROM = ${JSON.stringify(columnsFrom)};
+`
+    : "";
+  const autoField = isAuto
+    ? "  /** Observes the inline size of the element while its layout is auto (Spec 014 ①). */\n  #sizes: ResizeObserver | undefined;\n"
+    : "";
+  const autoDisconnect = isAuto
+    ? `
+  disconnectedCallback(): void {
+    this.#sizes?.disconnect();
+    this.#sizes = undefined;
+  }
+`
+    : "";
+  const autoMethods = isAuto
+    ? `
+  /**
+   * Layout auto (Spec 014 ①, plan ① D-03): columns while the element is at least as wide as the
+   * Uzo's columns-from, else stacked; columns and stacked stand as they are. A container query
+   * takes no var(), so the element observes its own inline size and reads the token's custom
+   * property. The observer resolves in the next frame: the switch changes the block size of the
+   * element, which an observer callback must not do to the element it observes.
+   */
+  #autoLayout(): void {
+    if (this.propValue("layout") !== "auto" || !this.isConnected) {
+      this.#sizes?.disconnect();
+      this.#sizes = undefined;
+      return;
+    }
+    if (this.#sizes === undefined) {
+      this.#sizes = new ResizeObserver(() => requestAnimationFrame(() => this.#autoLayout()));
+      this.#sizes.observe(this);
+    }
+    const style = getComputedStyle(this);
+    const box = this.getBoundingClientRect();
+    const inline = style.writingMode.startsWith("horizontal") ? box.width : box.height;
+    const raw = style.getPropertyValue(COLUMNS_FROM).trim();
+    const number = Number.parseFloat(raw);
+    const threshold = raw.endsWith("rem")
+      ? number * Number.parseFloat(getComputedStyle(document.documentElement).fontSize)
+      : raw.endsWith("em")
+        ? number * Number.parseFloat(style.fontSize)
+        : number;
+    // Without the token (no Aspekto loaded) the wide case stands, as the stylesheet draws auto.
+    const resolved = Number.isFinite(threshold) && inline < threshold ? "stacked" : "columns";
+    if (this.getAttribute("data-layout") !== resolved) this.setAttribute("data-layout", resolved);
+  }
 `
     : "";
   const lightInit = isLight
@@ -1617,7 +1679,7 @@ const KEYED_BOOLEANS = PROPS.filter(
 ).map((prop) => prop.name);
 
 let sheet: CSSStyleSheet | undefined;
-${isLight ? "/** The stylesheet of the light DOM (Spec 011 ④, E10): adopted by the document once, scoped to the host. */\nlet lightSheet: CSSStyleSheet | undefined;\n" : ""}const warned = new Set<string>();
+${isLight ? "/** The stylesheet of the light DOM (Spec 011 ④, E10): adopted by the document once, scoped to the host. */\nlet lightSheet: CSSStyleSheet | undefined;\n" : ""}${autoConstant}const warned = new Set<string>();
 
 function warn(message: string): void {
   if (warned.has(message)) return;
@@ -1647,7 +1709,7 @@ export class ${className} extends Base {
   readonly #root: HTMLElement;
   readonly #label: HTMLSlotElement;
   readonly #texts: HTMLElement;
-${isFieldHost ? "  /** Whether a person touched the field or the form reported it invalid (Spec 011 ② F-8): the error shows from then on. */\n  #reported = false;\n" : ""}
+${autoField}${isFieldHost ? "  /** Whether a person touched the field or the form reported it invalid (Spec 011 ② F-8): the error shows from then on. */\n  #reported = false;\n" : ""}
   constructor() {
     super();
     this.#internals = this.attachInternals();
@@ -1696,7 +1758,7 @@ ${isGroup || isTabs ? "    this.#assign();\n" : ""}    this.#render();
   attributeChangedCallback(): void {
     this.#render();
   }
-
+${autoDisconnect}
   /**
    * The value of a prop after validation: an invalid value falls back to the default. Named apart
    * from the props: a field has a prop \`value\` (Spec 009), whose accessor must not shadow this.
@@ -1885,7 +1947,7 @@ ${
     : `    if (!(this.#control instanceof HTMLButtonElement)) return;
 ${toggleActivate}`
 }  }
-${groupMethods}${selectMethods}${inputMethods}${dialogMethods}${statusMethods}${slotTextMethod}${lightMethods}${tabsMethods}
+${groupMethods}${selectMethods}${inputMethods}${dialogMethods}${statusMethods}${slotTextMethod}${lightMethods}${autoMethods}${tabsMethods}
 }
 
 /**

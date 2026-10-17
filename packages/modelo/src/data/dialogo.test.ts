@@ -116,8 +116,12 @@ describe("dialogo in the repo Modelo (section ②, E9)", () => {
     expect(forbiddenBy(skemo, { "slot:reason": "filled", reason: "required" })).toBeUndefined();
     // Spec 014 ① (reason-help): help under a reason field that is not there helps no one.
     expect(forbiddenBy(skemo, { "slot:reason-help": "filled", reason: "none" })).toBeDefined();
-    expect(forbiddenBy(skemo, { "slot:reason-help": "filled", reason: "optional" })).toBeUndefined();
-    expect(forbiddenBy(skemo, { "slot:reason-help": "filled", reason: "required" })).toBeUndefined();
+    expect(
+      forbiddenBy(skemo, { "slot:reason-help": "filled", reason: "optional" }),
+    ).toBeUndefined();
+    expect(
+      forbiddenBy(skemo, { "slot:reason-help": "filled", reason: "required" }),
+    ).toBeUndefined();
   });
 
   it("knows the goals confirm and ask-reason (reason=required), both citing the title rule; no word of the butono's goals", () => {
@@ -215,18 +219,20 @@ describe("the Uzo of the dialogo (section ②, G5)", () => {
         "ero" in jugxo.ref &&
         jugxo.ref.ero === dialogo?.ero.id,
     );
-    expect(
-      examples.map((jugxo) => [jugxo.decision, jugxo.ekzemplo?.instances[0]?.lingvo]),
-    ).toEqual([
-      ["approved", "de"],
-      ["approved", "en"],
-      ["rejected", "de"],
-      ["rejected", "en"],
-    ]);
+    expect(examples.map((jugxo) => [jugxo.decision, jugxo.ekzemplo?.instances[0]?.lingvo])).toEqual(
+      [
+        ["approved", "de"],
+        ["approved", "en"],
+        ["rejected", "de"],
+        ["rejected", "en"],
+      ],
+    );
     for (const jugxo of examples) {
       const result = evaluateUsage(modelo, jugxo.ekzemplo?.instances ?? []);
       const rules = result.violations.map((violation) => violation.issue.rule);
-      expect(rules, jugxo.id).toEqual(jugxo.decision === "rejected" ? ["help-is-one-sentence"] : []);
+      expect(rules, jugxo.id).toEqual(
+        jugxo.decision === "rejected" ? ["help-is-one-sentence"] : [],
+      );
     }
     const judged = evaluateUsage(modelo, [
       {

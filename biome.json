@@ -6,7 +6,7 @@
     "useIgnoreFile": true
   },
   "files": {
-    "includes": ["**", "!**/test/fixtures", "!**/src/generated"]
+    "includes": ["**", "!**/test/fixtures", "!**/src/generated", "!**/ikonoj"]
   },
   "formatter": {
     "enabled": true,

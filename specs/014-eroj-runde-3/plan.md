@@ -6,16 +6,16 @@ Fünf PRs, gestapelt (E6): ① Grundlage von `main`, ② Grundbausteine von ①,
 
 ## ① Grundlage
 
-**Branch:** `261017-spec-014-eroj-runde-3-d4f536` (von `main` @ `f6f38f5`) · **Datum:** 2026-10-17.
+**Branch:** `261017-spec-014-grundlage-d4f536` (von `main` @ `f6f38f5`) · **Datum:** 2026-10-17.
 
 ### Zusammenfassung
 
-1. **Gewicht** (D-01): `navigado.items.weight` by `current`, `langetaro.tabs.weight` by `active`, gebunden an `font.weight.*` oder `none`. *(Grün folgt.)*
-2. **`dialogo.reason-help`** (D-02): Slot, Constraint, Uzo; `help-is-one-sentence` ausgeweitet; vier Jugxoj. *(Grün folgt.)*
-3. **`atributlisto layout: auto`** (D-03): `UzoLayout.columns-from` (Container-Query), ResizeObserver im Web Component. *(Grün folgt.)*
+1. **Gewicht** (D-01): neue Teil-Eigenschaft `weight` (Typ `fontWeight`); `navigado.items.weight` by `current`, `langetaro.tabs.weight` by `active`: `font.weight.semibold` wo aktuell/aktiv, `none` sonst (das Gewicht der Rolle `label.1` bleibt). Web: `font-weight` nur im aktuellen Fall; Figma: der Schnitt `SemiBold` als Schrift des Eintrags, `fontStyle` an den STRING-Zwilling `font/style/semibold` gebunden (F30); Unterstrich und Indikator bleiben (G4).
+2. **`dialogo.reason-help`** (D-02): Text-Slot unter dem Begründungsfeld, an den komponierten `tekstareo` als dessen `help` gereicht (beschreibt das Textfeld, `aria-describedby`); Constraint „`reason-help` belegt ⇒ `reason` optional|required“; `help-is-one-sentence` ausgeweitet statt vervielfacht (E5), als Warnung am `dialogo`; vier Jugxoj (de/en, approved/rejected).
+3. **`atributlisto layout: auto`** (D-03): dritter Wert der Achse `layout`; die Uzo nennt mit `columns-from: size.container.small` die Containerbreite, ab der Name und Wert nebeneinander stehen; das Element misst seinen Container (ResizeObserver, Schwelle aus `--fm-size-container-small`) und schreibt `data-layout` columns|stacked; Figma zeichnet `auto` als den breiten Fall.
 4. **Ikonaro** (D-04, G3): `data/ikonaro.json` mit 15 Namen (Bedeutung de/en, Kialo, `mirror`), Entität `ikono` mit Präfix `iko_`, optionale Datendatei im Loader; `check:ikonaro`; Glyphen komuna aus **Phosphor Icons, Stil regular**, ekzemplo aus **Phosphor Icons, Stil fill** (Abweichung 1), mit Herkunftsnachweis je Datei und Abbildung Ikonaro-Name → Phosphor-Name im Aspekto-Paket (seit der Spec-Korrektur vom 17.10., 19:54, Spec-konform).
-5. **Tooltip-Kontrast** (D-05, G2): KontrastParo `text-inverse-on-background-inverse`. *(Grün folgt.)*
-6. **Overlay-Messung** (D-06, G4): Popover-API und Anchor Positioning in drei Engines, Skript `packages/eroj/scripts/measure-overlay.mjs`. *(Messung folgt.)*
+5. **Tooltip-Kontrast** (D-05, G2): das Paar `text-inverse-on-background-inverse` (`color.text.inverse` auf `color.background.inverse`, `text-normal`) ist bereits deklariert; kein neues Token, kein neues Paar.
+6. **Overlay-Messung** (D-06, G4): Popover-API und CSS Anchor Positioning sind in Chromium 153, Firefox 155 und WebKit 26.6 vollständig vorhanden und verhalten sich wie spezifiziert (Tabelle unten). ④ nutzt `position-area`/`position-anchor` der Plattform mit `position-try-fallbacks`, der eigene Fallback (unter dem Auslöser) bleibt klein (E11).
 
 Kein neues Ero in ①, kein Token (E1), keine Regulo-Semantik geändert.
 
@@ -23,15 +23,15 @@ Kein neues Ero in ①, kein Token (E1), keine Regulo-Semantik geändert.
 
 #### D-01 Gewicht als Part-Eigenschaft `weight` (navigado, langetaro)
 
-`SkemoPartProperty` erhält `weight` (Token `font.weight.*` oder `none`); `PART_PROPERTY_TYPES.weight = fontWeight`; der Web Component schreibt `font-weight`. `navigado/skemo.json` bindet `items.weight` bei `current`, `langetaro/skemo.json` `tabs.weight` bei `active`. *(Ausarbeitung im Grün.)*
+`SkemoPartProperty` erhält `weight` (bindet ein `font.weight.*`-Token oder `none`; `PART_PROPERTY_TYPES.weight = fontWeight`). `navigado/skemo.json` bindet `items.weight` by `current` (`true` → `font.weight.semibold`, `false` → `none`), `langetaro/skemo.json` `tabs.weight` by `active` ebenso. Weg des `butono`: eine weitere Teil-Eigenschaft neben `shadow` und `stroke`, keine neue Achse und kein neues Token (E1). `none` heißt: das Gewicht der Typografie-Rolle steht – der Web Component schreibt dann nichts, Figma behält den Schnitt der Rolle. Im Web wird `font-weight: var(--fm-font-weight-semibold)` nur in der Regel des aktuellen Eintrags (`a[aria-current]`) bzw. des aktiven Reiters (`[aria-selected="true"]`) geschrieben. In Figma löst der Plan das gebundene Gewicht je Aspekto zum Schnitt auf (600 → `SemiBold`) mit der Familie der Rolle, trägt es als `font` des Eintrags und als Kreuzung Familie × Schnitt in die Schriften des Sets (komuna Geist SemiBold, ekzemplo Archivo SemiBold); das Plugin lädt den Schnitt und bindet `fontStyle` an den STRING-Zwilling `font/style/semibold` (F30). Unterstrich und Indikator bleiben: das Gewicht ergänzt, es ersetzt kein zweites Merkmal (G4).
 
 #### D-02 `dialogo.reason-help`
 
-*(Ausarbeitung im Grün.)*
+Ein Text-Slot `reason-help` nach `reason` (Skemo und Uzo: `accepts: text`, `max: 1`). Der Dialog reicht ihn an den komponierten `tekstareo` weiter: `<slot name="reason-help" slot="help">` im Shadow-Markup, damit die Hilfe unter dem Feld steht und das Textfeld beschreibt (`aria-describedby` des `tekstareo`); mit `reason="none"` verschwindet sie mit dem Begründungsbereich. Constraint (Skemo): `slot:reason-help` belegt ⇒ `reason` ∈ {optional, required} – Hilfe unter einem Feld, das es nicht gibt, hilft niemandem. `help-is-one-sentence` ausgeweitet statt vervielfacht (E5): `appliesTo.eroj` um `dialogo`, Statement und Scope nennen das Begründungsfeld; die Uzo prüft `slot:reason-help` mit `max-sentences 1` als **Warnung** (wie beim Dialogtitel: eine Textregel am Dialog warnt, D-02 von Spec 011 ②). Vier Jugxoj als Beispiele (de/en approved: „Die Autorin liest den Grund vor der nächsten Fassung.“; de/en rejected: zwei Sätze), generiert in `get_ero` und die Make-Guidelines.
 
 #### D-03 `atributlisto layout: auto` mit `columns-from`
 
-`UzoLayout.columns-from` nennt ein `size.container.*`-Token des Kerns; darunter stapelt das Ero, darüber steht der Name neben dem Wert. Layout-Verhalten gehört in die Uzo; die Skemo bindet beide Erscheinungen, die Projektion misst den Container. *(Ausarbeitung im Grün.)*
+`UzoLayout.columns-from` nennt ein `size.container.*`-Token des Kerns (Schema-Muster, kein Pixelwert: „640px“ ist ungültig); darunter stapelt das Ero, darüber steht der Name neben dem Wert. Layout-Verhalten gehört in die Uzo; die Skemo bindet beide Erscheinungen (`auto` bindet wie der breite Fall `columns`, drei Kombinationen), die Projektion misst den Container. Web: Eine Container-Query nimmt kein `var()`, deshalb beobachtet das Element seine eigene Inline-Größe (`ResizeObserver`) gegen den Wert von `--fm-size-container-small` (komuna 640px) und schreibt `data-layout="columns"` oder `"stacked"`; gewählte Layouts bleiben, was sie sagen. Der ResizeObserver prüft im nächsten Frame nach (ein Layoutwechsel ändert die Höhe des Elements; direkt im Callback wäre das die „ResizeObserver loop“-Warnung der Plattform) – beim Verbinden entscheidet das Element sofort, bei einem Live-Resize mit bis zu einem Frame Verzug. Fehlt das Token, bleibt es bei `columns`. `uzo-prop-unknown` kennt `columns-from` als Layout-Schlüssel. Figma zeichnet `auto` als dritte Variante im breiten Fall (der Plan braucht keine Änderung: alles außer `stacked` ist der Spaltenfall). Die Vitrino zeigt drei Zeilen, die dritte mit dem Wort `auto` vor der Liste. Der React-Typ nimmt `auto` an.
 
 #### D-04 Ikonaro: Namen im Kern, Bilder in der Aspekto (G3, E9, E10)
 
@@ -78,23 +78,40 @@ Gelesen am 2026-10-17 aus dem npm-Tarball `@phosphor-icons/core@2.1.1` (`assets/
 
 #### D-05 Tooltip-Kontrast (G2)
 
-`color.text.inverse` auf `color.background.inverse`, Kategorie `text-normal`, als KontrastParo `text-inverse-on-background-inverse`; kein neues Token (E1). Werte unter 4.5:1 wären ein Befund. *(Grün folgt.)*
+`color.text.inverse` auf `color.background.inverse`, Kategorie `text-normal`, als KontrastParo `text-inverse-on-background-inverse` – war bereits deklariert (`kpa_01M2W9W6QK3YTCXM2XBRA41K63`, neben `border-inverse-on-background-inverse`); `check:alirebleco` misst es in allen Kombinationen grün. Kein neues Token (E1), kein neues Paar; der rote Test bestätigt nur, dass ④ den Tooltip darauf setzen kann.
 
 #### D-06 Overlay-Messung (G4, E11)
 
-Skript `packages/eroj/scripts/measure-overlay.mjs` misst `showPopover`/`popover`-Attribut, `anchor-name`/`position-anchor`/`position-area` in Chromium, Firefox und WebKit (Playwright). Ergebnis unten; daraus folgt für ④ Anchor oder Fallback ohne Rückfrage. *(Messung folgt.)*
+Skript `packages/eroj/scripts/measure-overlay.mjs` misst Feature-Queries und je ein Verhalten (ein Popover öffnet im Top Layer und schließt mit Escape; ein verankertes Element sitzt unter seinem Anker) in den drei Engines, die Playwright mitbringt (2026-10-17). Ergebnis: alles vorhanden, nur der alte Name `inset-area` fehlt überall – ④ schreibt `position-area`. **Entscheidung für ④ (E11):** `konsileto`, `sxvebilo`, `menuo` und die Vorschlagsliste des `kompletigilo` positionieren mit `position-anchor`/`position-area` und `position-try-fallbacks` der Plattform; der eigene Fallback bleibt die einfache Lage unter dem Auslöser für Umgebungen ohne `anchor-name` (`@supports not (anchor-name: --a)`), kein Positionierungs-Framework.
 
 ### Overlay-Messung
 
-*(Tabelle `| Merkmal | chromium x | firefox x | webkit x |` folgt im Grün: `showPopover`, `popover="auto"`, Light Dismiss, `anchor-name`, `position-anchor`, `position-area`, `position-try-fallbacks`.)*
+Gemessen 2026-10-17 mit `node scripts/measure-overlay.mjs` (Playwright-Engines des Repos):
+
+| Merkmal | chromium 153.0.8010.12 | firefox 155.0 | webkit 26.6 |
+|---|---|---|---|
+| popover-attribute | ja | ja | ja |
+| showPopover | ja | ja | ja |
+| popover-open-selector | ja | ja | ja |
+| anchor-name | ja | ja | ja |
+| position-anchor | ja | ja | ja |
+| position-area | ja | ja | ja |
+| inset-area (older name) | nein | nein | nein |
+| anchor() function | ja | ja | ja |
+| position-try-fallbacks | ja | ja | ja |
+| anchor-size() | ja | ja | ja |
+| showPopover opens (:popover-open) | ja | ja | ja |
+| position-area places it below the anchor | ja | ja | ja |
+| anchor() places it below the anchor | ja | ja | ja |
+| Escape closes it (light dismiss) | ja | ja | ja |
 
 ### Arkitekturo-Abdeckung
 
 | Erweiterung | Stand |
 |---|---|
-| Gewicht (`weight`) | offen → *(trägt im Grün)* |
-| `reason-help` | offen → *(trägt im Grün)* |
-| `layout: auto` (`columns-from`) | offen → *(trägt im Grün)* |
+| Gewicht (`weight`) | offen → trägt (`navigado`, `langetaro`; Web, React, Figma, Browser-Spec) |
+| `reason-help` | offen → trägt (`dialogo`; Skemo, Uzo, Regulo, Jugxoj, Web, Browser-Spec) |
+| `layout: auto` (`columns-from`) | offen → trägt (`atributlisto`; Skemo, Uzo, Web mit ResizeObserver, Figma, Vitrino, React, Browser-Specs inkl. RTL) |
 
 ### Abweichungen von der Spec
 
@@ -103,13 +120,19 @@ Skript `packages/eroj/scripts/measure-overlay.mjs` misst `showPopover`/`popover`
 
 ### Befunde / Mankoj
 
-*(folgt im Grün)*
+- **B-1** README sagte „No font files and no icons are shipped“ (Spec 000 FR-18); seit dem Ikonaro liefert das komuna-Paket Glyphen. Satz korrigiert: Icons sind Vokabular im Kern und Bild im Aspekto-Paket. Kein Manko.
+- **B-2** Biome lintet SVG als HTML (`noSvgWithoutTitle`); ein `<title>` in der Glyphe wäre fester Text (Internacia). `ikonoj` außerhalb des Biome-Scopes (D-04). Kein Manko.
+- **B-3** `help-is-one-sentence` meldet am `kampo` als Fehler, am `dialogo` als Warnung (Uzo-`severity`): eine Textregel am Dialog warnt (Spec 011 ② D-02), am Feld hält sie. Bewusst so; kein Manko.
+- **B-5** Der Browser-Spec `dialogo.spec.ts` „Escape cancels … the focus returns to the opener“ fällt lokal in WebKit 26.6 (macOS) auch auf `main` @ `f6f38f5` (Vergleichslauf in einem temporären Worktree, dreimal reproduziert): der Fokus kehrt nach Escape nicht zum Öffner zurück. Kein Befund von ①; CI (Linux) ist der Maßstab. Bleibt er dort grün, ist es eine Eigenheit des lokalen WebKit; sonst ein Manko des `dialogo` für die Nachlese.
+- **B-4** Phosphor liefert im Set keine 24er-Fassung; die Pfade stehen im 256er-Raster (Abweichung 2, erledigt). Für `ikono` (②) heißt das: die Größe kommt aus `size`-Token, nie aus der Datei.
 
 ### Offen (für den Maintainer)
 
-- **O-1 Spec-Text zu E10/G3/Benchmark** – *erledigt 17.10.*: Die Spec-Datei (Stand 16:45) war byteidentisch mit der Kopie aus `9a3194f` und nannte Lucide; der Maintainer hat sie korrigiert (19:54: Phosphor in G3, E10, Benchmark; quadratische `viewBox`), die Kopie ist erneut unverändert übernommen. Das Briefing (Abschnitt Ikonaro) nennt weiter Lucide und `viewBox 0 0 24 24`; es ist nicht Teil des Repos.
+- **O-1 Spec-Text zu E10/G3/Benchmark** – *erledigt 17.10.*: Die Spec-Datei (Stand 16:45) war byteidentisch mit der Kopie aus `9a3194f` und nannte Lucide; der Maintainer hat sie korrigiert (19:54: Phosphor in G3, E10, Benchmark; quadratische `viewBox`), die Kopie ist erneut unverändert übernommen. Das Briefing (Abschnitt Ikonaro) ist seit 17:54 ebenfalls korrigiert (Phosphor, Raster laut plan.md) – erledigt.
 - **O-2 Icon-Namen** – *entschieden 17.10.*: `menu` aus der Startmenge genommen (die `navigado` hat keinen eingeklappten Zustand; kommt mit der Grenze zurück, wenn sie fällt), `danger` als Achteck bestätigt (eine andere Form als das Dreieck von `warning`, damit die Unterscheidung nicht nur an der Farbe hängt). Startmenge jetzt 15 Namen. Die übrigen Namen bleiben bis zum Merge von ① änderbar (E4 sinngemäß).
 - **Biome ohne `ikonoj`** – *bestätigt 17.10.* (D-04).
+- **O-3 `get_ero` und `columns-from`.** `uzoOf` in `gvidanto/eroj.ts` und das MCP-Ausgabeschema `get_ero.output.json` geben `layout.columns-from` noch nicht aus; ein Agent sieht die Schwelle also nicht. Kleine Folgeaufgabe (Schema + Test), nicht Teil von ①; Vorschlag: mit ② (`ikono`), wenn `get_ero` ohnehin die Icon-Namen aufnimmt.
+- **O-4 Gewicht in Figma für Optionen.** Die Schrift je Eintrag wird in `drawEntries` (navigado, langetaro) geschrieben; `drawChoice` (Optionen des `elekto`) wendet noch keine Eintrags-Schrift an – heute bindet kein Ero dort ein Gewicht. Kommt mit dem ersten Bedarf.
 
 ## ② Grundbausteine
 

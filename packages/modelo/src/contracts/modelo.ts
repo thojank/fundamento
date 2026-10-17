@@ -10,6 +10,7 @@ import type {
   Ero,
   Fonto,
   IdsLock,
+  Ikono,
   Jugxo,
   KontrastParo,
   LingvoOverride,
@@ -33,6 +34,8 @@ export type {
   Ero,
   EroFile,
   EroInstance,
+  IkonaroFile,
+  Ikono,
   Jugxo,
   JugxoEkzemplo,
   JugxojFile,
@@ -173,6 +176,8 @@ export interface Modelo {
   /** The measured gaps of the tools, kept by the system itself (F41). */
   mankoj: Manko[];
   kontrastParoj: KontrastParo[];
+  /** The Ikonaro: the icon names of the core (Spec 014 ①, G3); empty while data/ikonaro.json is absent. */
+  ikonaro: Ikono[];
   /** Eroj with their Skemoj, sorted by Ero name (Spec 003). */
   eroj: LoadedEro[];
   /** Union of the core registry and every package registry. */

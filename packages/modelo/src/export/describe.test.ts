@@ -44,6 +44,7 @@ function modeloJson(overrides: Partial<ModeloJson> = {}): ModeloJson {
     jugxoj: [],
     mankoj: [],
     kontrastParoj: [],
+    ikonaro: [],
     eroj: [],
     skemoj: [],
     rezolvo: { assignment: { aspekto: "a" }, tokens: {} },

@@ -42,7 +42,15 @@ describe("ontologio.json (FR-15, FR-16, AK-07)", () => {
         .filter((concept) => concept.inScheme === "modelo")
         .map((concept) => concept.term)
         .sort(),
-    ).toEqual(["DimensioValoro", "Ikonaro", "Ikono", "KontrastParo", "Regulo", "Token", "TokenSet"]);
+    ).toEqual([
+      "DimensioValoro",
+      "Ikonaro",
+      "Ikono",
+      "KontrastParo",
+      "Regulo",
+      "Token",
+      "TokenSet",
+    ]);
   });
 
   // Spec 014 ① (G3, plan ① D-04): the Ikonaro — icons as vocabulary of the core — and its entries.

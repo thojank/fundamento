@@ -186,6 +186,11 @@ export function buildModeloJson(input: ModeloExportInput): ModeloJson {
   if (reference !== undefined) {
     modeloJson.core = { referenceAspekto: reference };
   }
+  // Spec 014 ① (G3): the Ikonaro travels with the export; absent while the Modelo has none, so an
+  // export without icons keeps its bytes.
+  if (modelo.ikonaro.length > 0) {
+    modeloJson.ikonaro = structuredClone(modelo.ikonaro);
+  }
   // Spec 007: in Ero order, like eroj. Absent while no Ero has a Uzo, so an export without Uzoj
   // keeps its bytes (AK-10).
   const uzoj = modelo.eroj.flatMap((entry) =>

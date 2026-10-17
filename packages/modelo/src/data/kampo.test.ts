@@ -308,6 +308,8 @@ describe("the Reguloj of the kampo (T003, T004, A2, D-07)", () => {
           ...(name === "placeholder-is-example" ? [] : ["tekstareo"]),
           // Spec 011 ③: the message of an avizo with intent danger says what to do (E5).
           ...(name === "error-says-what-to-do" ? ["avizo"] : []),
+          // Spec 014 ①: the help of the dialogo's reason field is one sentence too (E5).
+          ...(name === "help-is-one-sentence" ? ["dialogo"] : []),
         ],
       });
       expect(regulo?.checkability).toBe("automatic");

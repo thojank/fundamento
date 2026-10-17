@@ -642,16 +642,17 @@
     {
       "id": "reg_01M4S1ZR7GEPZSTB9ES3REK3V2",
       "name": "help-is-one-sentence",
-      "statement": "The help text of a kampo, an elekto, an elektilo or a tekstareo is one sentence.",
+      "statement": "The help text of a kampo, an elekto, an elektilo, a tekstareo or the reason field of a dialogo is one sentence.",
       "kialo": "Help that is a paragraph is skipped; one sentence next to the field is read.",
-      "scope": "eroj: kampo, elekto, elektilo and tekstareo instances with a help text (check max-sentences 1)",
+      "scope": "eroj: kampo, elekto, elektilo and tekstareo instances with a help text, and dialogo instances with a reason-help (check max-sentences 1)",
       "checkability": "automatic",
       "appliesTo": {
         "eroj": [
           "kampo",
           "elekto",
           "elektilo",
-          "tekstareo"
+          "tekstareo",
+          "dialogo"
         ]
       }
     },

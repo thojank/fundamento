@@ -97,7 +97,9 @@ test.describe("fm-atributlisto behaviour", () => {
       `<div id="w" style="inline-size: 48rem"><fm-atributlisto id="a" layout="auto"><dl><dt>Version</dt><dd>3</dd><dt>Verantwortlich</dt><dd>Team Fundamento</dd></dl></fm-atributlisto></div>`,
     );
     const threshold = await page.evaluate(() =>
-      getComputedStyle(document.documentElement).getPropertyValue("--fm-size-container-small").trim(),
+      getComputedStyle(document.documentElement)
+        .getPropertyValue("--fm-size-container-small")
+        .trim(),
     );
     expect(threshold).toBe("640px");
     const measure = () =>

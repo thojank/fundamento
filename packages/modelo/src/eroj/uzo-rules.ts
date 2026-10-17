@@ -16,8 +16,11 @@ import { isJsonObject, type JsonObject } from "../validate/raw.js";
 /** What a slot accepts besides an Ero name (data-model §2.1, UzoSlot). */
 const SLOT_CONTENT_KINDS: ReadonlySet<string> = new Set(["text", "icon"]);
 
-/** The keys of `layout` that are no boolean prop (data-model §2.1, UzoLayout). */
-const LAYOUT_KEYS: ReadonlySet<string> = new Set(["size", "wrap"]);
+/**
+ * The keys of `layout` that are no boolean prop (data-model §2.1, UzoLayout); columns-from names the
+ * container width of layout auto (Spec 014 ①, plan ① D-03).
+ */
+const LAYOUT_KEYS: ReadonlySet<string> = new Set(["size", "wrap", "columns-from"]);
 
 type At = (pointer: string, rule: RuleId, message: string, suggestion: string) => void;
 
@@ -408,7 +411,10 @@ function requiredSlotIssues(entry: LoadedEro, uzo: JsonObject, at: At): void {
   }
 }
 
-/** `uzo-prop-unknown`: every layout key besides size and wrap is a boolean prop of the Skemo. */
+/**
+ * `uzo-prop-unknown`: every layout key besides size, wrap and columns-from is a boolean prop of the
+ * Skemo.
+ */
 function layoutIssues(entry: LoadedEro, uzo: JsonObject, at: At): void {
   const booleans = entry.skemo.props
     .filter((prop) => prop.kind === "boolean")

@@ -422,7 +422,8 @@ describe("the Reguloj of the elekto (G6, E5)", () => {
     ["error-says-what-to-do", ["kampo", "markobutono", "elekto", "elektilo", "tekstareo", "avizo"]],
     ["required-marked", ["kampo", "markobutono", "elekto", "elektilo", "tekstareo"]],
     ["error-not-color-only", ["kampo", "markobutono", "elekto", "elektilo", "tekstareo"]],
-    ["help-is-one-sentence", ["kampo", "elekto", "elektilo", "tekstareo"]],
+    // Spec 014 ①: widened once more, to the reason-help of the dialogo.
+    ["help-is-one-sentence", ["kampo", "elekto", "elektilo", "tekstareo", "dialogo"]],
   ])("%s is widened to the elekto, not duplicated (E5)", (name, eroj) => {
     expect(named(name)?.appliesTo).toEqual({ eroj });
     expect(named(name)?.statement).toMatch(/elekto/);

@@ -55,6 +55,10 @@
         "text": true
       },
       {
+        "name": "reason-help",
+        "text": true
+      },
+      {
         "name": "content"
       },
       {
@@ -199,6 +203,18 @@
           ]
         },
         "kialo": "A reason field without a visible label is a field a person cannot name, because the dialog asks for words and must say which."
+      },
+      {
+        "when": {
+          "slot:reason-help": "filled"
+        },
+        "allowed": {
+          "reason": [
+            "optional",
+            "required"
+          ]
+        },
+        "kialo": "Help under a reason field that is not there helps no one, because the sentence would describe a control the dialog does not show (Spec 014 ①)."
       }
     ],
     "goals": [

@@ -24,6 +24,8 @@ export const SCHEMA_DEFS = {
   skemo: "Skemo",
   eroFile: "EroFile",
   uzoFile: "UzoFile",
+  ikono: "Ikono",
+  ikonaroFile: "IkonaroFile",
   sxablono: "Sxablono",
   projekcio: "Projekcio",
   celo: "Celo",
@@ -42,6 +44,16 @@ export const DATA_FILE_SCHEMA_DEFS = {
 } as const;
 
 export type DataFileName = keyof typeof DATA_FILE_SCHEMA_DEFS;
+
+/**
+ * Schema def per optional file in the Modelo `data/` directory: read when it exists, no issue when
+ * it does not. The Ikonaro is absent while no Ero draws an icon (Spec 014 ①, G3).
+ */
+export const OPTIONAL_DATA_FILE_SCHEMA_DEFS = {
+  "ikonaro.json": "IkonaroFile",
+} as const;
+
+export type OptionalDataFileName = keyof typeof OPTIONAL_DATA_FILE_SCHEMA_DEFS;
 
 /** Absolute schema reference of a def, e.g. `schemaRef("DimensiojFile")`. */
 export function schemaRef(defName: string): string {

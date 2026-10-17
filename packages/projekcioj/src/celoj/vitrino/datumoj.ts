@@ -500,10 +500,13 @@ export function eroMarkup(entry: LoadedEro): string {
         : "";
       const identity = dialog ? ` id="${id}"` : "";
       const actions = dialog ? VITRINO_DIALOG_ACTIONS : "";
+      // A list with layout auto (Spec 014 ①, plan ① D-03) chooses columns or stacked by the width
+      // of its cell: the cell says auto above the list, so the look is read as the element's choice.
+      const named = role === "list" ? combination.layout === "auto" : !entriesInDefault;
       const cells = [undefined, ...columns]
         .map(
           (column) =>
-            `<td>${opener}<${tag}${identity}${attributes}${examples}${required}${chosen}${column === undefined ? "" : ` ${column}`}>${role === "list" || entriesInDefault ? "" : label}${optionTexts(entry)}${slotTexts(entry, column)}${actions}${light}</${tag}></td>`,
+            `<td>${opener}<${tag}${identity}${attributes}${examples}${required}${chosen}${column === undefined ? "" : ` ${column}`}>${named ? label : ""}${optionTexts(entry)}${slotTexts(entry, column)}${actions}${light}</${tag}></td>`,
         )
         .join("");
       return `<tr><th scope="row">${label}</th>${cells}</tr>`;

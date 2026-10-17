@@ -52,6 +52,7 @@ export function modeloFromExport(modeloJson: ModeloJson): Modelo {
     jugxoj: structuredClone(modeloJson.jugxoj),
     mankoj: structuredClone(modeloJson.mankoj),
     kontrastParoj: structuredClone(modeloJson.kontrastParoj),
+    ikonaro: structuredClone(modeloJson.ikonaro ?? []),
     // eroj and skemoj are exported in the same order (Ero name); the files are not exported.
     // A Uzo finds its Ero by ID (Spec 007).
     eroj: modeloJson.eroj.flatMap((ero) => {

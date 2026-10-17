@@ -13,6 +13,7 @@ describe("@fundamento/modelo public entry", () => {
       "mankoj",
       "alirebleco",
       "clean-room",
+      "ikonaro",
     ]);
   });
 

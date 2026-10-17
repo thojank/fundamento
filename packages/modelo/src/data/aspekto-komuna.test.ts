@@ -19,7 +19,13 @@ describe("@fundamento/aspekto-komuna (D-05)", () => {
     const manifest = json("package.json");
     expect(manifest.fundamento).toEqual({ aspekto: "./aspekto.json" });
     // Spec 014 ① (G3, E10): the glyphs of the Ikonaro travel with the package, with their licence.
-    expect(manifest.files).toEqual(["aspekto.json", "ids.lock.json", "$themes.json", "sets", "ikonoj"]);
+    expect(manifest.files).toEqual([
+      "aspekto.json",
+      "ids.lock.json",
+      "$themes.json",
+      "sets",
+      "ikonoj",
+    ]);
     expect((manifest.exports as Record<string, string>)["./ikonoj/*"]).toBe("./ikonoj/*");
   });
 

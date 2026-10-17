@@ -92,6 +92,10 @@ jobs:
       - name: "Check: Clean-Room"
         run: pnpm check:clean-room
 
+      # Spec 014 ① (G3): every installed Aspekto draws every name of the Ikonaro.
+      - name: "Check: Ikonaro"
+        run: pnpm check:ikonaro
+
       # F23: the release path itself, on every PR — both kits built as release.yml builds them,
       # packed as a dry run. A broken release path turns red here, not in the maintainer's run.
       - name: "Check: Release"

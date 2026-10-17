@@ -5,6 +5,7 @@ import type { ValidationIssue } from "../contracts/issues.js";
 import type {
   Dimensio,
   DimensioValoro,
+  Ikono,
   Jugxo,
   KontrastParo,
   LoadedAspektoPackage,
@@ -75,6 +76,8 @@ export function buildModelo(files: ModeloFiles): BuildModeloResult {
     ],
     mankoj: entriesOf<Manko>(files.data["mankoj.json"].value, "mankoj"),
     kontrastParoj: entriesOf<KontrastParo>(files.data["kontrastparoj.json"].value, "kontrastParoj"),
+    // Spec 014 ① (G3): the Ikonaro, empty while data/ikonaro.json does not exist.
+    ikonaro: entriesOf<Ikono>(files.data["ikonaro.json"]?.value, "ikonaro"),
     eroj: loadedEroj(files.eroj, files.uzoj),
     idsLock,
     aspektoPackages,

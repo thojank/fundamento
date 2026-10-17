@@ -64,6 +64,11 @@
         },
         "typography": {
           "fixed": "typography.label.1"
+        },
+        "weight": {
+          "by": [
+            "current"
+          ]
         }
       },
       "underline": {
@@ -172,6 +177,22 @@
           "current": "false"
         },
         "token": "color.navigation.text.rest"
+      },
+      {
+        "part": "items",
+        "property": "weight",
+        "when": {
+          "current": "true"
+        },
+        "token": "font.weight.semibold"
+      },
+      {
+        "part": "items",
+        "property": "weight",
+        "when": {
+          "current": "false"
+        },
+        "token": "none"
       },
       {
         "part": "underline",
