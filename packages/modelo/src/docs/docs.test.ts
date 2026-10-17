@@ -1543,3 +1543,34 @@ describe("Spec 011 ⑤ documentation (Vojmapo Phase 4)", () => {
     for (const hash of ["f71d5dd", "d870af3"]) expect(section(tasks)).toContain(hash);
   });
 });
+
+// Nachlese 3 (Briefing 2026-10-17): specs/012-nachlese-3 carries the briefing unchanged, a plan
+// and tasks with the red hashes; the Vojmapo names the Nachlese in Phase 4.
+describe("Nachlese 3 documentation (specs/012-nachlese-3)", () => {
+  it("the briefing is the one of 2026-10-17, unchanged; plan and tasks carry section ① with decisions, findings and red hashes", () => {
+    const briefing = read("specs/012-nachlese-3/briefing.md");
+    expect(briefing).toContain("# Briefing P0 – Nachlese 3 (nach Spec 011) – 2026-10-17");
+    expect(briefing).toContain("**G1 – O-28: „Navigation“ führt zur navigado.**");
+    const plan = read("specs/012-nachlese-3/plan.md");
+    const tasks = read("specs/012-nachlese-3/tasks.md");
+    const section = (text: string) =>
+      text.slice(text.indexOf("## ① Gvidanto"), text.indexOf("## ② Werkzeuge"));
+    for (const heading of [
+      "### Zusammenfassung",
+      "### Entwurfsentscheidungen",
+      "#### D-01 G1",
+      "#### D-02 G2",
+      "#### D-03 G3",
+      "#### D-04 G4",
+      "### Abweichungen vom Briefing",
+      "### Befunde / Mankoj",
+      "### Offen (für den Maintainer)",
+    ]) {
+      expect(section(plan)).toContain(heading);
+    }
+    expect(section(plan)).toContain("brief");
+    expect(section(tasks)).toContain("### Messungen");
+    for (const hash of ["e3aeda4"]) expect(section(tasks)).toContain(hash);
+    expect(read("docs/vojmapo.md")).toContain("Nachlese 3");
+  });
+});
