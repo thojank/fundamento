@@ -33,18 +33,22 @@ describe("Web Component Celo (T011)", () => {
   it("generates the descriptor, the stylesheet, the element and an index", () => {
     // Spec 008: the ligilo on the same path as the butono (Art. IX, Art. XI).
     expect(Object.keys(files).sort()).toEqual([
+      "eroj/src/generated/apartigilo.styles.ts",
       "eroj/src/generated/atributlisto.styles.ts",
       "eroj/src/generated/avizo.styles.ts",
       "eroj/src/generated/butono.styles.ts",
       "eroj/src/generated/dialogo.styles.ts",
       "eroj/src/generated/elektilo.styles.ts",
       "eroj/src/generated/elekto.styles.ts",
+      "eroj/src/generated/ikono.styles.ts",
+      "eroj/src/generated/fm-apartigilo.ts",
       "eroj/src/generated/fm-atributlisto.ts",
       "eroj/src/generated/fm-avizo.ts",
       "eroj/src/generated/fm-butono.ts",
       "eroj/src/generated/fm-dialogo.ts",
       "eroj/src/generated/fm-elektilo.ts",
       "eroj/src/generated/fm-elekto.ts",
+      "eroj/src/generated/fm-ikono.ts",
       "eroj/src/generated/fm-insigno.ts",
       "eroj/src/generated/fm-kampo.ts",
       "eroj/src/generated/fm-langetaro.ts",
@@ -53,6 +57,7 @@ describe("Web Component Celo (T011)", () => {
       "eroj/src/generated/fm-mezurilo.ts",
       "eroj/src/generated/fm-navigado.ts",
       "eroj/src/generated/fm-plenstato.ts",
+      "eroj/src/generated/fm-saltligilo.ts",
       "eroj/src/generated/fm-sxaltilo.ts",
       "eroj/src/generated/fm-tabelo.ts",
       "eroj/src/generated/fm-tekstareo.ts",
@@ -65,6 +70,7 @@ describe("Web Component Celo (T011)", () => {
       "eroj/src/generated/mezurilo.styles.ts",
       "eroj/src/generated/navigado.styles.ts",
       "eroj/src/generated/plenstato.styles.ts",
+      "eroj/src/generated/saltligilo.styles.ts",
       "eroj/src/generated/react.ts",
       "eroj/src/generated/skemo.ts",
       "eroj/src/generated/sxaltilo.styles.ts",
@@ -1323,5 +1329,134 @@ describe("Web Component Celo for the langetaro (Spec 011 ⑤)", () => {
     const inventory = stylesheetInventory(styles);
     expect(inventory.props).toEqual({});
     expect([...inventory.states].sort()).toEqual(["disabled", "focus", "hover", "rest"]);
+  });
+});
+
+// Spec 014 ② (section ②, plan ② D-05): the ikono — a span with role img where it is named, hidden
+// from assistive technology where it is decorative; the glyph a mask of the Aspekto's SVG
+// (--fm-ikono-<name>, projected by the CSS Celo) in the current colour, sized by the box, mirrored
+// in right-to-left writing where the Ikonaro says the direction carries meaning.
+describe("Web Component Celo for the ikono (Spec 014 ②)", () => {
+  const styles = files["eroj/src/generated/ikono.styles.ts"] ?? "";
+  const element = files["eroj/src/generated/fm-ikono.ts"] ?? "";
+  const css = JSON.parse(
+    /export const IKONO_CSS = ("(?:[^"\\]|\\.)*");/.exec(styles)?.[1] ?? '""',
+  ) as string;
+
+  it("renders the glyph in a span, names it by the label as an image, hides it decorative, knows which names mirror", () => {
+    expect(element).toContain('<span part="control"><span part="glyph"></span>');
+    expect(element).toContain('"img"');
+    expect(element).toContain('"aria-hidden"');
+    expect(element).toContain("--fm-ikono-");
+    expect(element).toContain("IKONARO");
+    expect(element).toContain('"chevron-right"');
+    expect(element).toContain("static formAssociated = false;");
+    expect(element).toContain('customElements.define("fm-ikono", FmIkono)');
+  });
+
+  it("masks the glyph with the Aspekto's picture in the current colour, sizes the box by the token, colours a status icon, mirrors in RTL", () => {
+    expect(css).toContain("mask-image: var(--fm-ikono);");
+    expect(css).toContain("background-color: currentcolor;");
+    expect(css).toContain("inline-size: var(--fm-size-icon-medium);");
+    expect(css).toContain("block-size: var(--fm-size-icon-small);");
+    expect(css).toContain(
+      ':where([part="control"][data-intent="danger"]) {\n  color: var(--fm-color-status-danger-text);',
+    );
+    // inherit writes nothing: the neutral icon takes the colour of the text around it.
+    expect(css).not.toContain('[data-intent="neutral"]) {\n  color');
+    expect(css).toContain("scaleX(-1)");
+    expect(componentCssIssues("ikono.css", css)).toEqual([]);
+    expect(cssPhysicalPropertyIssues("ikono.css", css)).toEqual([]);
+  });
+});
+
+// Spec 014 ② (plan ② D-06): the apartigilo — a div with role separator and its orientation, role
+// none where decorative; its line the border of one edge, colour and width bound; a vertical
+// line at least a control's height.
+describe("Web Component Celo for the apartigilo (Spec 014 ②)", () => {
+  const styles = files["eroj/src/generated/apartigilo.styles.ts"] ?? "";
+  const element = files["eroj/src/generated/fm-apartigilo.ts"] ?? "";
+  const css = JSON.parse(
+    /export const APARTIGILO_CSS = ("(?:[^"\\]|\\.)*");/.exec(styles)?.[1] ?? '""',
+  ) as string;
+
+  it("renders a separator with its orientation, none where decorative", () => {
+    expect(element).toContain('<div part="control"></div>');
+    expect(element).toContain('"separator"');
+    expect(element).toContain('"none"');
+    expect(element).toContain('"aria-orientation"');
+    expect(element).toContain('customElements.define("fm-apartigilo", FmApartigilo)');
+  });
+
+  it("draws the line as a border of one edge in the bound colour and width; vertical takes a control's height", () => {
+    expect(css).toContain("border-color: var(--fm-color-border-subtle);");
+    expect(css).toContain("border-width: var(--fm-border-width-default);");
+    expect(css).toContain("border-block-start-style: solid;");
+    expect(css).toContain("border-inline-start-style: solid;");
+    expect(css).toContain(
+      ':where([part="control"][data-orientation="vertical"]) {\n  min-block-size: var(--fm-size-control-medium);',
+    );
+    expect(componentCssIssues("apartigilo.css", css)).toEqual([]);
+    expect(cssPhysicalPropertyIssues("apartigilo.css", css)).toEqual([]);
+  });
+});
+
+// Spec 014 ② (plan ② D-07): the saltligilo — the platform's link to a fragment of the page, hidden
+// until it has the focus, then above everything (layer: z-index of elevation.layer.overlay) at
+// the start of the page with its surface, shadow and ring; Enter moves the focus to the target.
+describe("Web Component Celo for the saltligilo (Spec 014 ②)", () => {
+  const styles = files["eroj/src/generated/saltligilo.styles.ts"] ?? "";
+  const element = files["eroj/src/generated/fm-saltligilo.ts"] ?? "";
+  const css = JSON.parse(
+    /export const SALTLIGILO_CSS = ("(?:[^"\\]|\\.)*");/.exec(styles)?.[1] ?? '""',
+  ) as string;
+
+  it("renders a link to the fragment of `to`, with the default text of an empty label and the focus of the target", () => {
+    expect(element).toContain('<a part="control"><slot></slot>');
+    expect(element).toContain('"#"');
+    expect(element).toContain("label-empty");
+    expect(element).toContain('"tabindex"');
+    expect(element).toContain("getElementById");
+    expect(element).toContain('customElements.define("fm-saltligilo", FmSaltligilo)');
+  });
+
+  it("lies above the page on its layer, hidden until focus-visible, with surface, shadow and ring", () => {
+    expect(css).toContain("z-index: var(--fm-elevation-layer-overlay);");
+    expect(css).toContain("box-shadow: var(--fm-elevation-shadow-floating);");
+    expect(css).toContain("background-color: var(--fm-color-background-raised);");
+    expect(css).toContain("position: fixed;");
+    expect(css).toContain(':where([part="control"]:not(:focus-visible)) { clip-path: inset(50%);');
+    expect(css).toContain("outline-width: var(--fm-focus-ring-width);");
+    expect(componentCssIssues("saltligilo.css", css)).toEqual([]);
+    expect(cssPhysicalPropertyIssues("saltligilo.css", css)).toEqual([]);
+  });
+});
+
+// Spec 014 ② (section ②, G3, G6): the signs the Eroj drew by hand become ikono: the chevron of the
+// elektilo, the sort arrow of the tabelo (its name by the direction, no rotation), the status
+// icon of the avizo (the part icon, one glyph per intent) and the cross of its dismiss butono.
+describe("the Eroj draw their signs as ikono (Spec 014 ②)", () => {
+  it("the elektilo's indicator holds an fm-ikono chevron-down in the size of the field", () => {
+    const element = files["eroj/src/generated/fm-elektilo.ts"] ?? "";
+    expect(element).toContain('<fm-ikono name="chevron-down"');
+    expect(element).not.toContain("M1.9 5.7");
+  });
+
+  it("the tabelo's sort button holds an fm-ikono sort-ascending, sort-descending by the direction; nothing rotates", () => {
+    const element = files["eroj/src/generated/fm-tabelo.ts"] ?? "";
+    const styles = files["eroj/src/generated/tabelo.styles.ts"] ?? "";
+    expect(element).toContain('<fm-ikono name="sort-ascending" size="small"');
+    expect(element).toContain('"sort-descending"');
+    expect(styles).not.toContain("rotate(180deg)");
+  });
+
+  it("the avizo shows the icon of its intent before the texts, decorative, in the accent's colour; its dismiss butono an ikono close", () => {
+    const element = files["eroj/src/generated/fm-avizo.ts"] ?? "";
+    const styles = files["eroj/src/generated/avizo.styles.ts"] ?? "";
+    expect(element).toContain('<span part="icon" aria-hidden="true"><fm-ikono');
+    expect(element).toContain('<fm-ikono slot="icon-start" name="close"');
+    expect(element).not.toContain("M4 4l8 8M12 4l-8 8");
+    expect(styles).toContain('[part="icon"]');
+    expect(styles).toContain("inline-size: var(--fm-size-icon-medium);");
   });
 });

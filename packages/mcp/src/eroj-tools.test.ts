@@ -73,12 +73,14 @@ describe("get_ero brief (Spec 007 A8)", () => {
   // Spec 008 T014 (A5, E of Spec 009): every Ero's brief, measured; the ceiling stays 750.
   // Spec 010 ④: seven Eroj, the elektilo among them; Spec 011 ②: nine, dialogo and tekstareo.
   it.each([
+    "apartigilo",
     "atributlisto",
     "avizo",
     "butono",
     "dialogo",
     "elektilo",
     "elekto",
+    "ikono",
     "insigno",
     "kampo",
     "langetaro",
@@ -87,6 +89,7 @@ describe("get_ero brief (Spec 007 A8)", () => {
     "mezurilo",
     "navigado",
     "plenstato",
+    "saltligilo",
     "sxaltilo",
     "tabelo",
     "tekstareo",

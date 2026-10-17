@@ -1,0 +1,9 @@
+{
+  "description": "Spec 014 ② G10 (Art. VIII, Spec 008 D-13): the Skemo of the ikono names a prop src, the attribute of one platform; the Skemo says name (a name of the Ikonaro), and the Celoj draw the picture.",
+  "issues": [
+    {
+      "rule": "skemo-web-term",
+      "path": "data/eroj/ikono/skemo.json#/skemo/props/2/name"
+    }
+  ]
+}

@@ -648,3 +648,28 @@ describe("Make Kit and the navigado and langetaro (Spec 011 ⑤)", () => {
     },
   );
 });
+
+// Spec 014 ② (G10, plan ② D-10): Make builds every icon from the ikono with a name of the Ikonaro
+// and never pastes an SVG, every dividing line from the apartigilo, and the first focusable
+// element of a page from the saltligilo — three sentences in the guidelines, generated from the
+// roles img, separator and the link that floats (the skip link).
+describe("Make Kit and the Grundbausteine (Spec 014 ②)", () => {
+  it.each(ASPEKTOJ)("%s: the guidelines name the ikono, the apartigilo and the saltligilo", (aspekto) => {
+    const guidelines = kit(aspekto, "guidelines/Guidelines.md");
+    expect(guidelines).toContain(
+      "- Every icon is an `<Ikono>` with a name from the Ikonaro, decorative unless it carries meaning (then with a `label`); never paste an SVG.",
+    );
+    expect(guidelines).toContain(
+      "- Every line that separates groups of content is an `<Apartigilo>`; where space alone separates, use spacing and no line.",
+    );
+    expect(guidelines).toContain(
+      "- The first focusable element of a page is a `<Saltligilo>` to the main content; a reference inside the text is a `<Ligilo>`.",
+    );
+    for (const ero of ["ikono", "apartigilo", "saltligilo"]) {
+      const page = kit(aspekto, `guidelines/components/${ero}.md`);
+      expect(page, ero).toContain(`# ${ero.charAt(0).toUpperCase()}${ero.slice(1)}`);
+    }
+    expect(kit(aspekto, "guidelines/components/ikono.md")).toContain("`name`");
+    expect(kit(aspekto, "guidelines/components/saltligilo.md")).toContain("`to`");
+  });
+});

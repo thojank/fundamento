@@ -2663,3 +2663,137 @@ describe("Figma plan for the langetaro (Spec 011 ⑤)", () => {
     expect(Object.values(values).some((value) => value.startsWith("not drawn"))).toBe(false);
   });
 });
+
+// Spec 014 ② (G3, G4, section ②, plan ② D-08): the Figma plan draws icons. The glyphs of every
+// Aspekto travel in the plan (`ikonoj`), a BOOLEAN variable per Aspekto in the collection aspekto
+// says which picture shows in which mode; the set ikono is a structure of its own (icon), its
+// variants name × size × intent in a grid of names; the butono, the elektilo, the tabelo and the
+// avizo name the icons they compose per variant; the release of the undrawn icon is lifted.
+describe("the Figma plan draws icons (Spec 014 ②)", () => {
+  const ikono = plan.components.find((component) => component.set === "ikono");
+  const names = prepared.input.modelo.ikonaro.map((entry) => entry.name);
+
+  it("carries the glyphs of every Aspekto and the names that mirror; a BOOLEAN variable per Aspekto switches them", () => {
+    expect(plan.ikonoj?.names).toEqual(names);
+    expect(plan.ikonoj?.mirror).toEqual(["chevron-right"]);
+    expect(Object.keys(plan.ikonoj?.glyphs ?? {})).toEqual(["komuna", "ekzemplo"]);
+    for (const aspekto of ["komuna", "ekzemplo"]) {
+      for (const name of names) {
+        expect(plan.ikonoj?.glyphs[aspekto]?.[name], `${aspekto} ${name}`).toMatch(/^<svg/);
+      }
+    }
+    const aspekto = plan.collections.find((collection) => collection.name === "aspekto");
+    expect(aspekto?.variables.filter((variable) => variable.type === "BOOLEAN")).toEqual([
+      { name: "ikonoj/komuna", type: "BOOLEAN", values: { komuna: true, ekzemplo: false } },
+      { name: "ikonoj/ekzemplo", type: "BOOLEAN", values: { komuna: false, ekzemplo: true } },
+    ]);
+  });
+
+  it("lifts the release of the undrawn icon: FIGMA_NOT_DRAWN names no icon, the butono binds and draws its icon", () => {
+    expect(FIGMA_NOT_DRAWN.icon).toBeUndefined();
+    const butono = butonoOf(plan.components);
+    const rest = butono?.variants.find(
+      (variant) =>
+        variant.props.emphasis === "high" &&
+        variant.props.intent === "neutral" &&
+        variant.props.size === "medium" &&
+        variant.props.state === "rest",
+    );
+    expect(rest?.notDrawn["icon.color"]).toBeUndefined();
+    expect(rest?.bindings["icon.color"]).toBe("color/action/primary/text");
+    expect(rest?.bindings["icon.size"]).toBe("size/icon/medium");
+    expect(rest?.paints["icon.color"]).toBeDefined();
+    expect(rest?.icons).toEqual({ "icon-start": "check" });
+  });
+
+  it("draws the set ikono as an icon: name × size × intent, the colour of a neutral icon bound to the text's, a status icon to its status text", () => {
+    expect(ikono?.structure).toBe("icon");
+    expect(ikono?.properties).toEqual({
+      name: names,
+      size: ["small", "medium", "large"],
+      intent: ["neutral", "info", "success", "warning", "danger"],
+      label: "TEXT",
+      state: ["rest"],
+    });
+    expect(ikono?.variants).toHaveLength(names.length * 3 * 5);
+    const neutral = ikono?.variants.find(
+      (variant) =>
+        variant.props.name === "close" &&
+        variant.props.size === "medium" &&
+        variant.props.intent === "neutral",
+    );
+    expect(neutral?.bindings).toEqual({
+      "glyph.color": "color/text/default",
+      "box.size": "size/icon/medium",
+    });
+    expect(neutral?.paints["glyph.color"]).toBeDefined();
+    const danger = ikono?.variants.find(
+      (variant) =>
+        variant.props.name === "danger" &&
+        variant.props.size === "large" &&
+        variant.props.intent === "danger",
+    );
+    expect(danger?.bindings).toEqual({
+      "glyph.color": "color/status/danger/text",
+      "box.size": "size/icon/large",
+    });
+    // The grid: a row per size × intent, a column per name (spec ②: name × size).
+    expect(ikono?.grid).toMatchObject({ rows: 15, columns: names.length });
+    expect(neutral?.cell).toEqual({ row: 1, column: names.indexOf("close") });
+    expect(ikono?.label).toBeUndefined();
+    expect(ikono?.description).toBe(
+      "Shows a symbol from the brand's icon set, decorative by default, named when it carries meaning.",
+    );
+  });
+
+  it("the elektilo, the tabelo and the avizo name the icons they compose", () => {
+    const elektilo = plan.components.find((component) => component.set === "elektilo");
+    expect(elektilo?.variants[0]?.icons).toEqual({ indicator: "chevron-down" });
+    expect(elektilo?.sign).toBeUndefined();
+    const tabelo = plan.components.find((component) => component.set === "tabelo");
+    expect(tabelo?.variants[0]?.icons).toEqual({ "sort-indicator": "sort-ascending" });
+    expect(tabelo?.sign).toBeUndefined();
+    const avizo = plan.components.find((component) => component.set === "avizo");
+    for (const variant of avizo?.variants ?? []) {
+      expect(variant.icons).toEqual({ icon: variant.props.intent });
+      expect(variant.bindings["icon.size"]).toBe("size/icon/medium");
+      expect(variant.bindings["icon.color"]).toBe(variant.bindings["accent.color"]);
+    }
+  });
+
+  it("draws the apartigilo as a separator with both orientations, and the saltligilo as a control in rest and focus", () => {
+    const apartigilo = plan.components.find((component) => component.set === "apartigilo");
+    expect(apartigilo?.structure).toBe("separator");
+    expect(apartigilo?.variants.map((variant) => variant.props)).toEqual([
+      { orientation: "horizontal", state: "rest" },
+      { orientation: "vertical", state: "rest" },
+    ]);
+    expect(apartigilo?.variants[0]?.bindings).toEqual({
+      "line.color": "color/border/subtle",
+      "line.width": "border/width/default",
+    });
+    expect(apartigilo?.variants[1]?.bindings["box.height"]).toBe("size/control/medium");
+    expect(apartigilo?.label).toBeUndefined();
+    const saltligilo = plan.components.find((component) => component.set === "saltligilo");
+    expect(saltligilo?.structure).toBe("control");
+    expect(saltligilo?.variants.map((variant) => variant.props.state)).toEqual(["rest", "focus"]);
+    expect(saltligilo?.variants[1]?.focusVisible).toBe(true);
+    expect(saltligilo?.variants[0]?.bindings["surface.fill"]).toBe("color/background/raised");
+    expect(saltligilo?.variants[0]?.bindings["surface.layer"]).toBeUndefined();
+    expect(saltligilo?.variants[0]?.shadow?.part).toBe("surface");
+    expect(labelDefaultOf("link")).toBe("Ziel");
+  });
+
+  it("the inventory of the plan compares the icon's and the separator's paints like every set", () => {
+    const inventory = figmaPlanInventory(plan);
+    expect(inventory.ikono?.props.name).toEqual(names);
+    expect(inventory.ikono?.values["glyph.color@intent=danger,name=danger,size=large"]).toBeDefined();
+    expect(inventory.apartigilo?.values["line.color@orientation=horizontal"]).toBeDefined();
+    expect(
+      Object.keys(inventory.butono?.values ?? {}).some((key) => key.startsWith("icon.color@")),
+    ).toBe(true);
+    expect(
+      Object.values(inventory.butono?.values ?? {}).some((value) => value.includes("not drawn")),
+    ).toBe(false);
+  });
+});

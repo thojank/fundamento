@@ -76,12 +76,14 @@ describe("describe_term (FR-12)", () => {
 
   it("names the instances of Ero", () => {
     expect(success("Ero").instances?.names).toEqual([
+      "apartigilo",
       "atributlisto",
       "avizo",
       "butono",
       "dialogo",
       "elektilo",
       "elekto",
+      "ikono",
       "insigno",
       "kampo",
       "langetaro",
@@ -90,6 +92,7 @@ describe("describe_term (FR-12)", () => {
       "mezurilo",
       "navigado",
       "plenstato",
+      "saltligilo",
       "sxaltilo",
       "tabelo",
       "tekstareo",

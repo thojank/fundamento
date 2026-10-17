@@ -948,3 +948,40 @@ test("atributlisto layout auto right to left: columns put the long term right of
   expect(narrow.termAboveValue).toBe(true);
   expect(narrow.clipped).toBe(false);
 });
+
+// Spec 014 ② (G10): the saltligilo right to left stands at the inline start — the right edge —
+// and its text expanded to 140 % fits without clipping; the ikono's mirroring is proved in
+// ikono.spec.ts (chevron-right mirrors, check does not).
+test("saltligilo right to left: shown at the right edge; expanded to 140 %, nothing is clipped", async ({
+  page,
+  browserName,
+}) => {
+  await serve(
+    page,
+    out,
+    `<fm-saltligilo id="s" to="main">Zum Inhalt springen</fm-saltligilo><main id="main">Inhalt</main>`,
+  );
+  await page.keyboard.press(TAB(browserName));
+  const ltr = await page.locator("#s").evaluate((element) => {
+    const control = element.shadowRoot?.querySelector('[part="control"]') as HTMLElement;
+    return control.getBoundingClientRect().left;
+  });
+  expect(ltr).toBeLessThan(40);
+  await page.evaluate(() => document.documentElement.setAttribute("dir", "rtl"));
+  const rtl = await page.locator("#s").evaluate((element) => {
+    const control = element.shadowRoot?.querySelector('[part="control"]') as HTMLElement;
+    return { right: control.getBoundingClientRect().right, width: window.innerWidth };
+  });
+  expect(rtl.right).toBeGreaterThan(rtl.width - 40);
+  await page.locator("#s").evaluate(
+    (element, text) => {
+      element.textContent = text;
+    },
+    pseudo("Zum Inhalt springen", 1.4),
+  );
+  const clipped = await page.locator("#s").evaluate((element) => {
+    const control = element.shadowRoot?.querySelector('[part="control"]') as HTMLElement;
+    return control.scrollWidth > control.clientWidth + 1;
+  });
+  expect(clipped).toBe(false);
+});

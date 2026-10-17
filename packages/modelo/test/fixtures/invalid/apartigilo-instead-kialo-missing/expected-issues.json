@@ -1,0 +1,13 @@
+{
+  "description": "Spec 014 ② G10 (G6, Art. VI): the apartigilo sends a goal elsewhere without saying why. An alternative without its reason is an order the agent cannot pass on; the schema rejects it too.",
+  "issues": [
+    {
+      "rule": "uzo-kialo-missing",
+      "path": "data/eroj/apartigilo/uzo.json#/uzo/instead/0"
+    },
+    {
+      "rule": "schema-violation",
+      "path": "data/eroj/apartigilo/uzo.json#/uzo/instead/0"
+    }
+  ]
+}

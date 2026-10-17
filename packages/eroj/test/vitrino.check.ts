@@ -506,3 +506,31 @@ test("the Vitrino wires the tabs' panel and the table's sorting", async ({ page 
   await nameHeader.getByRole("button").click();
   expect(await rows()).toEqual(["Barrierefreiheit", "Datenschutz", "Sicherheit"]);
 });
+
+// Spec 014 ② (G3, G10, plan ② D-09): the Vitrino shows the Ikonaro as a grid per size and the
+// status icons named; the glyphs switch with the Aspekto; the apartigilo in both orientations and
+// the saltligilo are upgraded in their sections; axe without a finding.
+test("the Ikonaro grid, the apartigilo and the saltligilo are upgraded in their sections; the glyphs switch with the brand; axe-clean", async ({
+  page,
+}) => {
+  await open(page);
+  const icons = page.locator("#fm-vitrino-ikono fm-ikono");
+  await expect(icons).toHaveCount(15 * 3 + 4);
+  await expect(page.locator("#fm-vitrino-ikono").getByRole("img")).toHaveCount(4);
+  const maskOf = () =>
+    page.locator('#fm-vitrino-ikono fm-ikono[name="close"]').first().evaluate((element) => {
+      const glyph = element.shadowRoot?.querySelector('[part="glyph"]') as HTMLElement;
+      const style = getComputedStyle(glyph);
+      return style.maskImage !== "" && style.maskImage !== "none" ? style.maskImage : style.webkitMaskImage;
+    });
+  const komuna = await maskOf();
+  expect(komuna).toContain("data:image/svg+xml");
+  await page.locator('[data-fm-switch="aspekto"][data-fm-valoro="ekzemplo"]').click();
+  await expect.poll(maskOf).not.toBe(komuna);
+  await page.locator('[data-fm-switch="aspekto"][data-fm-valoro="komuna"]').click();
+  await expect(page.locator("#fm-vitrino-apartigilo").getByRole("separator")).toHaveCount(2);
+  await expect(page.locator("#fm-vitrino-saltligilo").getByRole("link")).toHaveCount(1);
+  for (const id of ["ikono", "apartigilo", "saltligilo"]) {
+    expect(await axeViolations(page, `#fm-vitrino-${id}`), id).toEqual([]);
+  }
+});

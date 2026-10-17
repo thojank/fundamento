@@ -22,12 +22,14 @@ describe("list_eroj", () => {
       modelo.eroj.map((entry) => entry.ero.name),
     );
     expect(listEroj(modelo).eroj.map((entry) => entry.name)).toEqual([
+      "apartigilo",
       "atributlisto",
       "avizo",
       "butono",
       "dialogo",
       "elektilo",
       "elekto",
+      "ikono",
       "insigno",
       "kampo",
       "langetaro",
@@ -36,6 +38,7 @@ describe("list_eroj", () => {
       "mezurilo",
       "navigado",
       "plenstato",
+      "saltligilo",
       "sxaltilo",
       "tabelo",
       "tekstareo",
@@ -351,5 +354,18 @@ describe("brief: required.props comes from the Skemo, not from a missing default
         .map((prop) => `${entry.ero.name}.${prop.name}`),
     );
     expect(offending).toEqual([]);
+  });
+});
+
+// Spec 014 ② (O-3 of ①): get_ero states the container width from which a list lays itself out
+// side by side — the Uzo's columns-from — so an agent sees the threshold of layout auto.
+describe("get_ero and columns-from (Spec 014 ②, O-3)", () => {
+  it("the Uzo of the atributlisto names columns-from in its layout", () => {
+    const answer = getEro(modelo, { name: "atributlisto" });
+    if (!answer.ok) throw new Error("get_ero atributlisto failed");
+    expect(answer.output.uzo?.layout["columns-from"]).toBe("size.container.small");
+    const button = getEro(modelo, { name: "butono" });
+    if (!button.ok) throw new Error("get_ero butono failed");
+    expect(button.output.uzo?.layout["columns-from"]).toBeUndefined();
   });
 });

@@ -6054,3 +6054,139 @@ describe("the langetaro is drawn as tabs: the list with three tabs, the first ac
     expect(double.counts.writes - written).toBe(0);
   });
 });
+
+// Spec 014 ② (G3, plan ② D-08): the plugin draws icons. An icon is one frame per Aspekto, imported
+// from the glyph of that Aspekto (createNodeFromSvg), its visibility bound to the BOOLEAN
+// variable ikonoj/<aspekto> — so the brand mode switches the picture — and its vectors' fill
+// bound to the colour of the part. The set ikono draws one variant per name × size × intent;
+// the butono draws its icon-start, the elektilo its chevron, the tabelo its sort arrow and the
+// avizo its status icon the same way; the dialog shows the help of its reason (O-5 of ①).
+describe("icons are drawn from the glyphs of every Aspekto and switch with the brand (Spec 014 ②)", () => {
+  const source = repoFiles["figma/plugin/code.js"] ?? "";
+  const bound = (node: DoubleNode | undefined, field: string) => node?.boundVariables[field]?.name;
+  const paintOf = (node: DoubleNode | undefined, field: "fills" | "strokes") =>
+    ((node?.properties[field] ?? []) as { boundVariables?: { color?: { name: string } } }[])[0]
+      ?.boundVariables?.color?.name;
+  const vectorOf = (frame: DoubleNode | undefined) =>
+    frame?.children.find((child) => child.type === "VECTOR");
+  const drawn = async () => {
+    const double = modelDouble();
+    const report = (await new Function("figma", `${source}\nreturn applyPlan();`)(
+      double.figma,
+    )) as { warnings: string[]; components: { set: string; layout: { zero: string[] } }[] };
+    const setOf = (name: string) => pageNodes(double).find((child) => child.name === name);
+    return { double, report, setOf };
+  };
+
+  it("the set ikono: 225 variants, each the control with one glyph frame per Aspekto, visible by the brand variable, filled in the bound colour, sized by the token", async () => {
+    const { setOf, report } = await drawn();
+    const set = setOf("ikono");
+    expect(set?.children).toHaveLength(225);
+    const variant = set?.children.find(
+      (child) => child.name === "name=close, size=medium, intent=neutral, state=rest",
+    );
+    expect(variant?.children.map((child) => child.name)).toEqual(["control"]);
+    const control = descendant(variant, "control");
+    expect(control?.children.map((child) => child.name)).toEqual(["glyph-komuna", "glyph-ekzemplo"]);
+    expect(bound(control, "width")).toBe("size/icon/medium");
+    expect(bound(control, "height")).toBe("size/icon/medium");
+    const komuna = descendant(variant, "glyph-komuna");
+    const ekzemplo = descendant(variant, "glyph-ekzemplo");
+    expect(bound(komuna, "visible")).toBe("ikonoj/komuna");
+    expect(bound(ekzemplo, "visible")).toBe("ikonoj/ekzemplo");
+    expect(paintOf(vectorOf(komuna), "fills")).toBe("color/text/default");
+    expect(paintOf(vectorOf(ekzemplo), "fills")).toBe("color/text/default");
+    const danger = set?.children.find(
+      (child) => child.name === "name=danger, size=large, intent=danger, state=rest",
+    );
+    expect(paintOf(vectorOf(descendant(danger, "glyph-komuna")), "fills")).toBe(
+      "color/status/danger/text",
+    );
+    expect(bound(descendant(danger, "control"), "width")).toBe("size/icon/large");
+    expect(descendant(variant, "label")).toBeUndefined();
+    expect(descendant(variant, "focus-ring")).toBeUndefined();
+    expect(report.warnings.filter((warning) => warning.startsWith("ikono"))).toEqual([]);
+    expect(report.components.find((component) => component.set === "ikono")?.layout.zero).toEqual(
+      [],
+    );
+  });
+
+  it("the butono draws its icon-start before the label, in the label's colour and the icon's size; the elektilo its chevron, the tabelo its sort arrow", async () => {
+    const { setOf } = await drawn();
+    const butono = setOf("butono");
+    const rest = butono?.children.find(
+      (child) => child.name === "emphasis=high, intent=neutral, size=medium, state=rest",
+    );
+    const control = descendant(rest, "control");
+    expect(control?.children.map((child) => child.name)).toEqual(["icon-start", "label"]);
+    const icon = descendant(rest, "icon-start");
+    expect(icon?.children.map((child) => child.name)).toEqual(["glyph-komuna", "glyph-ekzemplo"]);
+    expect(bound(icon, "width")).toBe("size/icon/medium");
+    expect(paintOf(vectorOf(descendant(icon, "glyph-komuna")), "fills")).toBe(
+      "color/action/primary/text",
+    );
+    const elektilo = setOf("elektilo");
+    const indicator = descendant(elektilo?.children[0], "indicator");
+    expect(indicator?.children.map((child) => child.name)).toEqual(["glyph-komuna", "glyph-ekzemplo"]);
+    expect(descendant(elektilo?.children[0], "mark")).toBeUndefined();
+    expect(paintOf(vectorOf(descendant(indicator, "glyph-komuna")), "fills")).toBe(
+      "color/text/muted",
+    );
+    const tabelo = setOf("tabelo");
+    const sortIndicator = descendant(tabelo?.children[0], "sort-indicator");
+    expect(sortIndicator?.children.map((child) => child.name)).toEqual([
+      "glyph-komuna",
+      "glyph-ekzemplo",
+    ]);
+    expect(bound(sortIndicator, "width")).toBe("size/icon/small");
+  });
+
+  it("the avizo draws the icon of its intent before its texts, in the accent's colour; the dialog shows the help of its reason (O-5)", async () => {
+    const { setOf } = await drawn();
+    const avizo = setOf("avizo");
+    const danger = avizo?.children.find((child) => child.name === "intent=danger, state=rest");
+    const control = descendant(danger, "control");
+    expect(control?.children.map((child) => child.name)).toEqual(["icon", "texts", "dismiss"]);
+    const icon = descendant(danger, "icon");
+    expect(bound(icon, "width")).toBe("size/icon/medium");
+    expect(paintOf(vectorOf(descendant(icon, "glyph-komuna")), "fills")).toBe(
+      "color/status/danger/text",
+    );
+    const dialogo = setOf("dialogo");
+    const withReason = dialogo?.children.find((child) => child.name.includes("reason=optional"));
+    const content = descendant(withReason, "content");
+    expect(content?.children.map((child) => child.name)).toEqual([
+      "reason-label",
+      "reason-field",
+      "reason-help",
+    ]);
+    expect(descendant(withReason, "reason-help")?.properties.characters).toBe(
+      "Nenne den Grund in einem Satz.",
+    );
+    expect(paintOf(descendant(withReason, "reason-help"), "fills")).toBe("color/text/muted");
+  });
+
+  it("draws the apartigilo as a line and the saltligilo as a control; writes nothing new on a second run", async () => {
+    const { double, setOf } = await drawn();
+    const apartigilo = setOf("apartigilo");
+    expect(apartigilo?.children.map((child) => child.name)).toEqual([
+      "orientation=horizontal, state=rest",
+      "orientation=vertical, state=rest",
+    ]);
+    const horizontal = descendant(apartigilo?.children[0], "control");
+    expect(paintOf(horizontal, "strokes")).toBe("color/border/subtle");
+    expect(bound(horizontal, "strokeTopWeight")).toBe("border/width/default");
+    const vertical = descendant(apartigilo?.children[1], "control");
+    expect(bound(vertical, "strokeLeftWeight")).toBe("border/width/default");
+    expect(bound(vertical, "minHeight")).toBe("size/control/medium");
+    const saltligilo = setOf("saltligilo");
+    expect(saltligilo?.children.map((child) => child.name)).toEqual(["state=rest", "state=focus"]);
+    expect(paintOf(descendant(saltligilo?.children[0], "control"), "fills")).toBe(
+      "color/background/raised",
+    );
+    expect(descendant(saltligilo?.children[0], "label")?.properties.characters).toBe("Ziel");
+    const before = double.snapshot();
+    await run(double, source);
+    expect(double.snapshot()).toBe(before);
+  });
+});
