@@ -55,18 +55,18 @@
 
 ### C – Abschluss
 - [x] **T810 Doku** plan ②, tasks ②, Vojmapo Zeile 4, README.
-- [ ] **T811 Messungen** unten; Bericht im PR.
+- [x] **T811 Messungen** unten; Bericht im PR.
 
 ### Messungen
 
 | Was | Wert |
 |---|---|
-| Commits ② | rot `8258240`, grün: Hash in der Zeile nach dem Commit |
+| Commits ② | rot `8258240`, grün `f4cbb25`, Fix `48f3c6e` (saltligilo-Spec: `browserName` im zweiten Test, CI Shard 2) |
 | `brief` | ikono, apartigilo, saltligilo ≤ 750 (Daten-Tests und MCP e2e) |
 | Parität | `check:parity` 20 Eroj, 0 Differenzen, 225 Freigaben |
 | `check:regularo` | 55 Reguloj, 172 Jugxoj, 20 Uzoj, 0 Warnungen (keine neue `goal-keyword-shared`) |
 | Tests lokal | Modelo, Projekcioj (Figma-Plugin-Double: Icons je Aspekto, 225 Varianten), MCP 264; Browser-Specs der ② in Chromium grün |
-| CI | Lauf: Nummer und Dauer in der Zeile nach dem Lauf |
+| CI | Lauf 39076801771 rot (Shard 2, B-7: `browserName`), Lauf 39077749355 grün, 7 min 17 s (Jobs 7:15 / 4:30 / 7:07 / 7:04) |
 
 ## ③ Typografie
 

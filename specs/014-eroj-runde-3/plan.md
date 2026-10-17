@@ -221,6 +221,7 @@ Drei Sätze in den Guidelines, generiert aus den Rollen `img`, `separator` und d
 - **B-4** Eine Farbe `inherit` schrieb keine Regel, das Web-Inventar kannte `intent=neutral` nicht; `inherit` schreibt jetzt `color: inherit` (ein CSS-Schlüsselwort). Figma nennt für `inherit` keine Farbe (die Skemo nennt keine). Kein Manko.
 - **B-5** Figma kann eine Vektorform nicht per Modus wechseln; die BOOLEAN-Variable an `visible` je Aspekto ist der Weg (D-06) – eine Annahme des Doubles, bis f10b-5 misst, dass `setBoundVariable("visible", …)` an einem Rahmen hält und `createNodeFromSvg` Phosphors 256er-Pfade skaliert.
 - **B-6** Der Sprunglink-Spec „Enter setzt den Fokus“ fiel im Chromium-Lauf aller neuen Specs einmal (Tab unter Last nicht angekommen), allein grün; der Spec fokussiert den Link jetzt direkt und prüft Enter (der Tab-Weg steht im ersten Spec).
+- **B-7** CI-Lauf 39076801771 fiel in Shard 2: derselbe Spec nutzte `browserName` nach dem Umbau ohne das Fixture (lokal nur Chromium gelaufen, dort ohne Tab-Taste kein Aufruf); Fix `48f3c6e`, Lauf 39077749355 grün in 7 min 17 s.
 
 ### Offen (für den Maintainer)
 
