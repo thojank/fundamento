@@ -19,16 +19,29 @@ describe("SkemoPartProperty weight (Spec 014 ① D-01)", () => {
     expect(v("SkemoPart")({ weight: { fixed: "font.weight.semibold" } })).toBe(true);
     expect(v("SkemoPart")({ bold: { fixed: "font.weight.bold" } })).toBe(false);
     expect(
-      v("SkemoBinding")({ part: "items", property: "weight", when: { current: "true" }, token: "font.weight.semibold" }),
+      v("SkemoBinding")({
+        part: "items",
+        property: "weight",
+        when: { current: "true" },
+        token: "font.weight.semibold",
+      }),
     ).toBe(true);
   });
 });
 
 describe("UzoLayout columns-from (Spec 014 ① D-03)", () => {
   it("names the container width from which the Ero lays itself out side by side, a token", () => {
-    expect(v("UzoLayout")({ size: "container", wrap: "allowed", "columns-from": "size.container.small" })).toBe(true);
+    expect(
+      v("UzoLayout")({
+        size: "container",
+        wrap: "allowed",
+        "columns-from": "size.container.small",
+      }),
+    ).toBe(true);
     expect(v("UzoLayout")({ size: "container", wrap: "allowed" })).toBe(true);
-    expect(v("UzoLayout")({ size: "container", wrap: "allowed", "columns-from": "640px" })).toBe(false);
+    expect(v("UzoLayout")({ size: "container", wrap: "allowed", "columns-from": "640px" })).toBe(
+      false,
+    );
   });
 });
 
@@ -91,7 +104,7 @@ describe("Ikonaro (Spec 014 ① D-04)", () => {
     void without;
   });
 
-  it("an Aspekto package declares the icon set it draws: set, version, license, source, the day it was read", () => {
+  it("an Aspekto package declares the icon set it draws: set, style, version, license, source, the day it was read, and the map of names", () => {
     const aspekto = {
       id: `dva_${ULID}`,
       name: "komuna",
@@ -99,14 +112,31 @@ describe("Ikonaro (Spec 014 ① D-04)", () => {
       license: "MIT",
       fonts: [],
     };
+    const ikonoj = {
+      set: "Phosphor Icons",
+      style: "regular",
+      version: "2.1.1",
+      license: "MIT",
+      source: "https://github.com/phosphor-icons/core",
+      read: "2026-10-17",
+      names: { close: "x", "chevron-down": "caret-down" },
+    };
     expect(v("AspektoFile")(aspekto)).toBe(true);
-    expect(
-      v("AspektoFile")({
-        ...aspekto,
-        ikonoj: { set: "Lucide", version: "1.59.0", license: "ISC", source: "https://lucide.dev", read: "2026-10-17" },
-      }),
-    ).toBe(true);
-    expect(v("AspektoFile")({ ...aspekto, ikonoj: { set: "Lucide" } })).toBe(false);
-    expect(v("AspektoFile")({ ...aspekto, ikonoj: { set: "Lucide", version: "1", license: "ISC", source: "x", read: "gestern" } })).toBe(false);
+    expect(v("AspektoFile")({ ...aspekto, ikonoj }), JSON.stringify(v("AspektoFile").errors)).toBe(
+      true,
+    );
+    // The style and the map are the set's business: a package that draws its own glyphs has neither.
+    const { style: _style, names: _names, ...own } = ikonoj;
+    expect(v("AspektoFile")({ ...aspekto, ikonoj: own })).toBe(true);
+    expect(v("AspektoFile")({ ...aspekto, ikonoj: { set: "Phosphor Icons" } })).toBe(false);
+    expect(v("AspektoFile")({ ...aspekto, ikonoj: { ...ikonoj, read: "gestern" } })).toBe(false);
+    // The map is keyed by the Ikonaro name (kebab) and points at a name of the set (kebab).
+    expect(v("AspektoFile")({ ...aspekto, ikonoj: { ...ikonoj, names: { Close: "x" } } })).toBe(
+      false,
+    );
+    expect(v("AspektoFile")({ ...aspekto, ikonoj: { ...ikonoj, names: { close: "" } } })).toBe(
+      false,
+    );
+    expect(v("AspektoFile")({ ...aspekto, ikonoj: { ...ikonoj, style: "" } })).toBe(false);
   });
 });
