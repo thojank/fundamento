@@ -123,7 +123,8 @@ Gemessen 2026-10-17 mit `node scripts/measure-overlay.mjs` (Playwright-Engines d
 - **B-1** README sagte „No font files and no icons are shipped“ (Spec 000 FR-18); seit dem Ikonaro liefert das komuna-Paket Glyphen. Satz korrigiert: Icons sind Vokabular im Kern und Bild im Aspekto-Paket. Kein Manko.
 - **B-2** Biome lintet SVG als HTML (`noSvgWithoutTitle`); ein `<title>` in der Glyphe wäre fester Text (Internacia). `ikonoj` außerhalb des Biome-Scopes (D-04). Kein Manko.
 - **B-3** `help-is-one-sentence` meldet am `kampo` als Fehler, am `dialogo` als Warnung (Uzo-`severity`): eine Textregel am Dialog warnt (Spec 011 ② D-02), am Feld hält sie. Bewusst so; kein Manko.
-- **B-5** Der Browser-Spec `dialogo.spec.ts` „Escape cancels … the focus returns to the opener“ fällt lokal in WebKit 26.6 (macOS) auch auf `main` @ `f6f38f5` (Vergleichslauf in einem temporären Worktree, dreimal reproduziert): der Fokus kehrt nach Escape nicht zum Öffner zurück. Kein Befund von ①; CI (Linux) ist der Maßstab. Bleibt er dort grün, ist es eine Eigenheit des lokalen WebKit; sonst ein Manko des `dialogo` für die Nachlese.
+- **B-5** Der Browser-Spec `dialogo.spec.ts` „Escape cancels … the focus returns to the opener“ fällt lokal in WebKit 26.6 (macOS) auch auf `main` @ `f6f38f5` (Vergleichslauf in einem temporären Worktree, dreimal reproduziert): der Fokus kehrt nach Escape nicht zum Öffner zurück. Kein Befund von ①; CI (Linux) ist der Maßstab – dort sind beide Eroj-Shards grün (Lauf 39065845169), also eine Eigenheit des lokalen WebKit, kein Manko.
+- **B-6** `check:vitrino` zählte die atributlisto-Zeilen fest (2); die dritte Zeile (`auto`) machte den ersten CI-Lauf rot (Rendered checks 5m37s). Zahl auf 3 gesetzt, kein Manko.
 - **B-4** Phosphor liefert im Set keine 24er-Fassung; die Pfade stehen im 256er-Raster (Abweichung 2, erledigt). Für `ikono` (②) heißt das: die Größe kommt aus `size`-Token, nie aus der Datei.
 
 ### Offen (für den Maintainer)
