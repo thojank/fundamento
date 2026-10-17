@@ -1,0 +1,9 @@
+{
+  "description": "Spec 011 ⑤ G7 (Art. VIII, Spec 008 D-13): the Skemo of the navigado names a prop href, the attribute of one platform; the Celoj translate (the target of an item is the link's own).",
+  "issues": [
+    {
+      "rule": "skemo-web-term",
+      "path": "data/eroj/navigado/skemo.json#/skemo/props/1/name"
+    }
+  ]
+}

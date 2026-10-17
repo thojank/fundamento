@@ -10,6 +10,7 @@ import {
   type FigmaPlan,
   resolveFigmaPlan,
   UNKNOWN_EXAMPLE,
+  VERTICAL_EXAMPLE,
 } from "./figma.js";
 import {
   type DoubleCollection,
@@ -289,9 +290,12 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
       ...["boundary", "slots", "content"].map(() => "elekto"),
       ...["boundary", "slots", "content"].map(() => "insigno"),
       ...["boundary", "slots", "content"].map(() => "kampo"),
+      // Spec 011 ⑤: the langetaro and the navigado carry a Uzo like every set.
+      ...["boundary", "slots", "content"].map(() => "langetaro"),
       ...["boundary", "slots", "content"].map(() => "ligilo"),
       ...["boundary", "slots", "content"].map(() => "markobutono"),
       ...["boundary", "slots", "content"].map(() => "mezurilo"),
+      ...["boundary", "slots", "content"].map(() => "navigado"),
       ...["boundary", "slots", "content"].map(() => "plenstato"),
       ...["boundary", "slots", "content"].map(() => "sxaltilo"),
       ...["boundary", "slots", "content"].map(() => "tabelo"),
@@ -331,9 +335,12 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
       ...["elekto", "elekto", "elekto"],
       ...["insigno", "insigno", "insigno"],
       ...["kampo", "kampo", "kampo"],
+      // Spec 011 ⑤: the langetaro and the navigado close their three parts too.
+      ...["langetaro", "langetaro", "langetaro"],
       ...["ligilo", "ligilo", "ligilo"],
       ...["markobutono", "markobutono", "markobutono"],
       ...["mezurilo", "mezurilo", "mezurilo"],
+      ...["navigado", "navigado", "navigado"],
       ...["plenstato", "plenstato", "plenstato"],
       ...["sxaltilo", "sxaltilo", "sxaltilo"],
       ...["tabelo", "tabelo", "tabelo"],
@@ -2515,12 +2522,18 @@ describe("every bound paint shows the plan's colour after the first and the seco
         { set: "insigno", created: 10, updated: 0 },
         // Spec 009: the kampo has size × state = 18 variants.
         { set: "kampo", created: 18, updated: 0 },
+        // Spec 011 ⑤: the langetaro has state = 4 variants (active is the state of one tab, E7;
+        // label and selected are strings, no axis).
+        { set: "langetaro", created: 4, updated: 0 },
         { set: "ligilo", created: 30, updated: 0 },
         // Spec 010 ②: the markobutono has checked × size × state = 30 variants.
         { set: "markobutono", created: 30, updated: 0 },
         // Spec 011 ④: the mezurilo has intent = 4 variants in one state (value, min, max are
         // numbers, no axis).
         { set: "mezurilo", created: 4, updated: 0 },
+        // Spec 011 ⑤: the navigado has state = 3 variants (current is the state of one item, E7;
+        // orientation keys no part and is no axis).
+        { set: "navigado", created: 3, updated: 0 },
         // Spec 011 ③: the plenstato has kind = 2 variants in one state.
         { set: "plenstato", created: 2, updated: 0 },
         // Spec 010 ①: the sxaltilo has checked × size × state = 24 variants.
@@ -3396,13 +3409,15 @@ describe("every set lies in the frame Eroj in the section Fundamento (F-1, F-2, 
   const names = repoPlan.components.map((component) => component.set);
   // Spec 011 ②: the example frame „mit Hintergrund" of the dialogo lies in the frame beside its
   // set; it is no set, so it is moved by no test and overlaps with none. Spec 011 ④: so does the
-  // example frame „unbekannt" of the mezurilo.
+  // example frame „unbekannt" of the mezurilo; Spec 011 ⑤: and „vertikal" of the navigado.
   const inFrame = names.flatMap((name) =>
     name === "dialogo"
       ? [name, `dialogo – ${BACKDROP_EXAMPLE}`]
       : name === "mezurilo"
         ? [name, `mezurilo – ${UNKNOWN_EXAMPLE}`]
-        : [name],
+        : name === "navigado"
+          ? [name, `navigado – ${VERTICAL_EXAMPLE}`]
+          : [name],
   );
   const layout = repoPlan.section;
   const inLayout = names.map(() => ({ frame: FRAME, action: "in-layout" }));
@@ -3805,6 +3820,10 @@ describe("the label default follows the role of the Ero (M-3)", () => {
     expect(of("mezurilo")).toEqual(["Messwert"]);
     expect(of("atributlisto")).toEqual(["Angaben"]);
     expect(of("tabelo")).toEqual(["Beschriftung", true]);
+    // Spec 011 ⑤: the navigation and the tab list — their label is the accessible name, heard,
+    // never seen (no text node carries it); the words are proposals for the maintainer.
+    expect(of("navigado")).toEqual(["Navigation"]);
+    expect(of("langetaro")).toEqual(["Reiter"]);
   });
 
   it("updates a found ligilo that still says Aktion to Ziel, property and every label", async () => {
@@ -5556,6 +5575,397 @@ describe("the atributlisto is drawn as a list: three entries, rows in columns an
     expect(report.warnings.filter((warning) => warning.startsWith("atributlisto"))).toEqual([]);
     expect(atributlisto?.layout.held.rest.list).toBeDefined();
     expect(atributlisto?.layout.held.rest.entry).toBeDefined();
+    const before = double.snapshot();
+    const written = double.counts.writes;
+    await run(double, source);
+    expect(double.snapshot()).toBe(before);
+    expect(double.counts.writes - written).toBe(0);
+  });
+});
+
+// Spec 011 ⑤ (spec „navigado", E7, G2): the navigation is a structure of its own — variant →
+// control (the nav, a row with the gap bound to box.gap) → three entries, the Vitrino's words
+// (Eins, Zwei, Drei), each ring → gap → item (fill by current and state, the box's height, radius
+// and inline padding, the underline as the bottom stroke: bound where current, 0 elsewhere) with
+// its text (colour by current, the label role). The first item is the current one. The label prop
+// is the name of the landmark: the set declares the label property and connects no text to it.
+// The example frame „vertikal" beside the set stacks the same items in a column; orientation is
+// no variant axis (the Web stylesheet inventory says props {}).
+describe("the navigado is drawn as a nav: three items in a row, the first current with the underline; the example vertical (Spec 011 ⑤)", () => {
+  const source = repoFiles["figma/plugin/code.js"] ?? "";
+  const bound = (node: DoubleNode | undefined, field: string) => node?.boundVariables[field]?.name;
+  type Paint = { visible: boolean; boundVariables?: { color?: { name: string } } };
+  const paints = (node: DoubleNode | undefined, field: "fills" | "strokes") =>
+    (node?.properties[field] ?? []) as Paint[];
+  type Definitions = Record<string, { type: string; defaultValue: string | boolean }>;
+  type Report = {
+    warnings: string[];
+    components: {
+      set: string;
+      example?: { name: string; found: boolean; created: boolean };
+      layout: {
+        zero: string[];
+        smaller: string[];
+        unplaced: string[];
+        uneven: unknown[];
+        columns: number;
+        rows: number;
+        held: { rest: Record<string, Record<string, unknown>> };
+      };
+    }[];
+  };
+  const drawn = async () => {
+    const double = modelDouble();
+    const report = (await new Function("figma", `${source}\nreturn applyPlan();`)(
+      double.figma,
+    )) as Report;
+    const set = pageNodes(double).find((child) => child.name === "navigado");
+    const variant = (name: string) => set?.children.find((child) => child.name === name);
+    const navigado = report.components.find((component) => component.set === "navigado");
+    return { double, set, variant, report, navigado };
+  };
+
+  it("draws three variants by state: the nav row with three entries, each ring → gap → item with its text", async () => {
+    const { set, variant, navigado } = await drawn();
+    expect(set?.children.map((child) => child.name)).toEqual([
+      "state=rest",
+      "state=hover",
+      "state=focus",
+    ]);
+    expect(navigado?.layout.columns).toBe(3);
+    expect(navigado?.layout.rows).toBe(1);
+    const rest = variant("state=rest");
+    const control = descendant(rest, "control");
+    expect(rest?.children.map((child) => child.name)).toEqual(["control"]);
+    expect(control?.properties.layoutMode).toBe("HORIZONTAL");
+    expect(control?.properties.fills).toEqual([]);
+    expect(bound(control, "itemSpacing")).toBe("spacing/xsmall");
+    expect(control?.children.map((child) => child.name)).toEqual(["entry-1", "entry-2", "entry-3"]);
+    for (const index of [1, 2, 3]) {
+      const entry = descendant(control, `entry-${index}`);
+      expect(
+        entry?.children.map((child) => child.name),
+        `entry-${index}`,
+      ).toEqual(["focus-ring"]);
+      const ring = descendant(entry, "focus-ring");
+      const gap = descendant(ring, "focus-gap");
+      expect(
+        gap?.children.map((child) => child.name),
+        `entry-${index}`,
+      ).toEqual([`item-${index}`]);
+      const item = descendant(gap, `item-${index}`);
+      expect(
+        item?.children.map((child) => child.name),
+        `entry-${index}`,
+      ).toEqual([`items-${index}`]);
+      expect(item?.properties.layoutMode, `item-${index}`).toBe("HORIZONTAL");
+      expect(bound(item, "minHeight"), `item-${index}`).toBe("size/target/min");
+      expect(bound(item, "cornerRadius"), `item-${index}`).toBe("radius/role/control");
+      expect(bound(item, "paddingLeft"), `item-${index}`).toBe("spacing/small");
+      expect(bound(item, "paddingRight"), `item-${index}`).toBe("spacing/small");
+      expect(item?.properties.strokesIncludedInLayout, `item-${index}`).toBe(true);
+      expect(paints(item, "strokes")[0]?.boundVariables?.color?.name, `item-${index}`).toBe(
+        "color/navigation/text/selected",
+      );
+      const text = descendant(item, `items-${index}`);
+      expect(bound(text, "fontSize"), `items-${index}`).toBe("typography/label/1/font-size");
+      expect(bound(text, "fontFamily"), `items-${index}`).toBe("typography/label/1/font-family");
+    }
+    expect(descendant(rest, "items-1")?.properties.characters).toBe("Eins");
+    expect(descendant(rest, "items-2")?.properties.characters).toBe("Zwei");
+    expect(descendant(rest, "items-3")?.properties.characters).toBe("Drei");
+    // No text carries the label property: the label is the name of the landmark, never seen.
+    const connected = (child: DoubleNode): boolean =>
+      child.properties.componentPropertyReferences !== undefined || child.children.some(connected);
+    expect(connected(rest as DoubleNode)).toBe(false);
+  });
+
+  it("marks the first item as current: selected fill, selected text, the underline bound; the others rest and hover by state, no underline", async () => {
+    const { variant } = await drawn();
+    for (const [name, fill] of [
+      ["state=rest", "color/navigation/rest"],
+      ["state=hover", "color/navigation/hover"],
+      ["state=focus", "color/navigation/rest"],
+    ] as const) {
+      const node = variant(name);
+      const current = descendant(node, "item-1");
+      expect(paints(current, "fills")[0]?.boundVariables?.color?.name, name).toBe(
+        "color/navigation/selected",
+      );
+      expect(bound(current, "strokeBottomWeight"), name).toBe("border/width/strong");
+      expect(
+        paints(descendant(node, "items-1"), "fills")[0]?.boundVariables?.color?.name,
+        name,
+      ).toBe("color/navigation/text/selected");
+      for (const index of [2, 3]) {
+        const other = descendant(node, `item-${index}`);
+        expect(paints(other, "fills")[0]?.boundVariables?.color?.name, `${name} ${index}`).toBe(
+          fill,
+        );
+        expect(bound(other, "strokeBottomWeight"), `${name} ${index}`).toBeUndefined();
+        expect(other?.properties.strokeBottomWeight, `${name} ${index}`).toBe(0);
+        expect(
+          paints(descendant(node, `items-${index}`), "fills")[0]?.boundVariables?.color?.name,
+          `${name} ${index}`,
+        ).toBe("color/navigation/text/rest");
+      }
+    }
+  });
+
+  it("shows the focus ring on the first item in the focus variant only, its radii bound (F32)", async () => {
+    const { variant } = await drawn();
+    const focus = variant("state=focus");
+    const ring = descendant(descendant(focus, "entry-1"), "focus-ring");
+    const gap = descendant(ring, "focus-gap");
+    expect(paints(ring, "strokes")).toHaveLength(1);
+    expect(paints(ring, "strokes")[0]?.boundVariables?.color?.name).toBe("focus/ring/color");
+    expect(paints(gap, "strokes")[0]?.boundVariables?.color?.name).toBe("color/focus/inner");
+    expect(bound(ring, "cornerRadius")).toBe("radius/focus/ring");
+    expect(bound(gap, "cornerRadius")).toBe("radius/focus/gap");
+    expect(paints(descendant(descendant(focus, "entry-2"), "focus-ring"), "strokes")).toEqual([]);
+    const rest = variant("state=rest");
+    expect(paints(descendant(descendant(rest, "entry-1"), "focus-ring"), "strokes")).toEqual([]);
+  });
+
+  it("declares the label property with the word Navigation and nothing else", async () => {
+    const { set } = await drawn();
+    const definitions = (set?.properties.componentPropertyDefinitions ?? {}) as Definitions;
+    expect(Object.values(definitions)).toEqual([{ type: "TEXT", defaultValue: "Navigation" }]);
+  });
+
+  it('places the example „vertikal" right after the set: the same three items in a column, the first current', async () => {
+    const { double, set, navigado } = await drawn();
+    const frame = set?.parent as DoubleNode | undefined;
+    const names = frame?.children.map((child) => child.name) ?? [];
+    expect(names.indexOf(`navigado – ${VERTICAL_EXAMPLE}`)).toBe(names.indexOf("navigado") + 1);
+    const example = frame?.children.find(
+      (child) => child.name === `navigado – ${VERTICAL_EXAMPLE}`,
+    );
+    expect(example?.type).toBe("FRAME");
+    expect(navigado?.example).toEqual({
+      name: `navigado – ${VERTICAL_EXAMPLE}`,
+      found: false,
+      created: true,
+    });
+    const control = descendant(example, "control");
+    expect(control?.properties.layoutMode).toBe("VERTICAL");
+    expect(control?.children.map((child) => child.name)).toEqual(["entry-1", "entry-2", "entry-3"]);
+    expect(paints(descendant(example, "item-1"), "fills")[0]?.boundVariables?.color?.name).toBe(
+      "color/navigation/selected",
+    );
+    expect(bound(descendant(example, "item-1"), "strokeBottomWeight")).toBe("border/width/strong");
+    expect(descendant(example, "items-3")?.properties.characters).toBe("Drei");
+    expect(example?.properties.paddingLeft).toBe(repoPlan.section?.gap);
+    // The example is found on the second run: nothing is created twice.
+    const report = (await new Function("figma", `${source}\nreturn applyPlan();`)(
+      double.figma,
+    )) as Report;
+    expect(report.components.find((component) => component.set === "navigado")?.example).toEqual({
+      name: `navigado – ${VERTICAL_EXAMPLE}`,
+      found: true,
+      created: false,
+    });
+    expect(
+      frame?.children.filter((child) => child.name === `navigado – ${VERTICAL_EXAMPLE}`),
+    ).toHaveLength(1);
+  });
+
+  it("measures every variant with a size and a cell, the three states alike, warns of nothing, and writes nothing new on a second run", async () => {
+    const { double, navigado, report } = await drawn();
+    expect(navigado?.layout.zero).toEqual([]);
+    expect(navigado?.layout.smaller).toEqual([]);
+    expect(navigado?.layout.unplaced).toEqual([]);
+    expect(navigado?.layout.uneven).toEqual([]);
+    expect(report.warnings.filter((warning) => warning.startsWith("navigado"))).toEqual([]);
+    expect(navigado?.layout.held.rest.control).toBeDefined();
+    expect(navigado?.layout.held.rest.entry).toBeDefined();
+    expect(navigado?.layout.held.rest["item-1"]).toBeDefined();
+    const before = double.snapshot();
+    const written = double.counts.writes;
+    await run(double, source);
+    expect(double.snapshot()).toBe(before);
+    expect(double.counts.writes - written).toBe(0);
+  });
+});
+
+// Spec 011 ⑤ (spec „langetaro", E7, G2): the tab list is a structure of its own — variant → a
+// column of the control (the list: a row of three entries with its line as the bottom stroke in
+// list.color and list.width, the gap bound to list.gap) and the panel (its inline padding bound,
+// the Vitrino's word of the first tab in panel.color). Every entry is ring → gap → tab (fill by
+// state, height and inline padding, the selected indicator as the bottom stroke: bound where
+// active, 0 elsewhere) with its text (colour by active, the label role). The first tab is the
+// active one. The label prop is the name of the group: the set declares the label property and
+// connects no text to it.
+describe("the langetaro is drawn as tabs: the list with three tabs, the first active with the indicator, the line, the panel below (Spec 011 ⑤)", () => {
+  const source = repoFiles["figma/plugin/code.js"] ?? "";
+  const bound = (node: DoubleNode | undefined, field: string) => node?.boundVariables[field]?.name;
+  type Paint = {
+    visible: boolean;
+    opacity?: number;
+    boundVariables?: { color?: { name: string } };
+  };
+  const paints = (node: DoubleNode | undefined, field: "fills" | "strokes") =>
+    (node?.properties[field] ?? []) as Paint[];
+  type Definitions = Record<string, { type: string; defaultValue: string | boolean }>;
+  type Report = {
+    warnings: string[];
+    components: {
+      set: string;
+      example?: unknown;
+      layout: {
+        zero: string[];
+        smaller: string[];
+        unplaced: string[];
+        uneven: unknown[];
+        columns: number;
+        rows: number;
+        held: { rest: Record<string, Record<string, unknown>> };
+      };
+    }[];
+  };
+  const drawn = async () => {
+    const double = modelDouble();
+    const report = (await new Function("figma", `${source}\nreturn applyPlan();`)(
+      double.figma,
+    )) as Report;
+    const set = pageNodes(double).find((child) => child.name === "langetaro");
+    const variant = (name: string) => set?.children.find((child) => child.name === name);
+    const langetaro = report.components.find((component) => component.set === "langetaro");
+    return { double, set, variant, report, langetaro };
+  };
+
+  it("draws four variants by state: the list row with three entries and the panel below, each tab ring → gap → tab with its text", async () => {
+    const { set, variant, langetaro } = await drawn();
+    expect(set?.children.map((child) => child.name)).toEqual([
+      "state=rest",
+      "state=hover",
+      "state=focus",
+      "state=disabled",
+    ]);
+    expect(langetaro?.layout.columns).toBe(4);
+    expect(langetaro?.layout.rows).toBe(1);
+    const rest = variant("state=rest");
+    expect(rest?.properties.layoutMode).toBe("VERTICAL");
+    expect(rest?.children.map((child) => child.name)).toEqual(["control", "panel"]);
+    const control = descendant(rest, "control");
+    expect(control?.properties.layoutMode).toBe("HORIZONTAL");
+    expect(control?.properties.fills).toEqual([]);
+    expect(control?.properties.strokesIncludedInLayout).toBe(true);
+    expect(paints(control, "strokes")[0]?.boundVariables?.color?.name).toBe("color/border/default");
+    expect(bound(control, "strokeBottomWeight")).toBe("border/width/default");
+    expect(control?.properties.strokeTopWeight).toBe(0);
+    expect(bound(control, "itemSpacing")).toBe("spacing/xsmall");
+    expect(control?.children.map((child) => child.name)).toEqual(["entry-1", "entry-2", "entry-3"]);
+    for (const index of [1, 2, 3]) {
+      const entry = descendant(control, `entry-${index}`);
+      const ring = descendant(entry, "focus-ring");
+      const gap = descendant(ring, "focus-gap");
+      expect(
+        gap?.children.map((child) => child.name),
+        `entry-${index}`,
+      ).toEqual([`tab-${index}`]);
+      const tab = descendant(gap, `tab-${index}`);
+      expect(
+        tab?.children.map((child) => child.name),
+        `entry-${index}`,
+      ).toEqual([`tabs-${index}`]);
+      expect(bound(tab, "minHeight"), `tab-${index}`).toBe("size/target/min");
+      expect(bound(tab, "paddingLeft"), `tab-${index}`).toBe("spacing/medium");
+      expect(bound(tab, "paddingRight"), `tab-${index}`).toBe("spacing/medium");
+      expect(tab?.properties.strokesIncludedInLayout, `tab-${index}`).toBe(true);
+      expect(paints(tab, "strokes")[0]?.boundVariables?.color?.name, `tab-${index}`).toBe(
+        "color/navigation/text/selected",
+      );
+      const text = descendant(tab, `tabs-${index}`);
+      expect(bound(text, "fontSize"), `tabs-${index}`).toBe("typography/label/1/font-size");
+    }
+    expect(descendant(rest, "tabs-1")?.properties.characters).toBe("Eins");
+    expect(descendant(rest, "tabs-2")?.properties.characters).toBe("Zwei");
+    expect(descendant(rest, "tabs-3")?.properties.characters).toBe("Drei");
+    const panel = descendant(rest, "panel");
+    expect(panel?.properties.layoutMode).toBe("HORIZONTAL");
+    expect(bound(panel, "paddingLeft")).toBe("spacing/medium");
+    expect(bound(panel, "paddingRight")).toBe("spacing/medium");
+    expect(panel?.children.map((child) => child.name)).toEqual(["panel-text"]);
+    const panelText = descendant(panel, "panel-text");
+    expect(panelText?.properties.characters).toBe("Eins");
+    expect(paints(panelText, "fills")[0]?.boundVariables?.color?.name).toBe("color/text/default");
+    // The panel's text has no role in the Skemo: nothing of its typography is bound.
+    expect(bound(panelText, "fontSize")).toBeUndefined();
+    const connected = (child: DoubleNode): boolean =>
+      child.properties.componentPropertyReferences !== undefined || child.children.some(connected);
+    expect(connected(rest as DoubleNode)).toBe(false);
+  });
+
+  it("fills every tab by state and marks the first as active: default text and the indicator bound; the others subtle, no indicator", async () => {
+    const { variant } = await drawn();
+    for (const [name, fill, opacity] of [
+      ["state=rest", "color/action/tertiary/rest", 0],
+      ["state=hover", "color/action/tertiary/hover", 0.08],
+      ["state=focus", "color/action/tertiary/rest", 0],
+      ["state=disabled", "color/action/tertiary/disabled", 0],
+    ] as const) {
+      const node = variant(name);
+      for (const index of [1, 2, 3]) {
+        const tab = descendant(node, `tab-${index}`);
+        const fillPaint = paints(tab, "fills")[0];
+        expect(fillPaint?.boundVariables?.color?.name, `${name} ${index}`).toBe(fill);
+        expect(fillPaint?.opacity, `${name} ${index}`).toBe(opacity);
+      }
+      expect(bound(descendant(node, "tab-1"), "strokeBottomWeight"), name).toBe(
+        "border/width/strong",
+      );
+      expect(
+        paints(descendant(node, "tabs-1"), "fills")[0]?.boundVariables?.color?.name,
+        name,
+      ).toBe("color/text/default");
+      for (const index of [2, 3]) {
+        expect(
+          bound(descendant(node, `tab-${index}`), "strokeBottomWeight"),
+          `${name} ${index}`,
+        ).toBeUndefined();
+        expect(descendant(node, `tab-${index}`)?.properties.strokeBottomWeight).toBe(0);
+        expect(
+          paints(descendant(node, `tabs-${index}`), "fills")[0]?.boundVariables?.color?.name,
+          `${name} ${index}`,
+        ).toBe("color/text/subtle");
+      }
+    }
+  });
+
+  it("shows the focus ring on the first tab in the focus variant only", async () => {
+    const { variant } = await drawn();
+    const focus = variant("state=focus");
+    const ring = descendant(descendant(focus, "entry-1"), "focus-ring");
+    expect(paints(ring, "strokes")).toHaveLength(1);
+    expect(paints(ring, "strokes")[0]?.boundVariables?.color?.name).toBe("focus/ring/color");
+    expect(paints(descendant(descendant(focus, "entry-2"), "focus-ring"), "strokes")).toEqual([]);
+    for (const name of ["state=rest", "state=hover", "state=disabled"]) {
+      const other = variant(name);
+      expect(
+        paints(descendant(descendant(other, "entry-1"), "focus-ring"), "strokes"),
+        name,
+      ).toEqual([]);
+    }
+  });
+
+  it("declares the label property with the word Reiter and nothing else; no example frame", async () => {
+    const { set, langetaro } = await drawn();
+    const definitions = (set?.properties.componentPropertyDefinitions ?? {}) as Definitions;
+    expect(Object.values(definitions)).toEqual([{ type: "TEXT", defaultValue: "Reiter" }]);
+    expect(langetaro?.example).toBeUndefined();
+  });
+
+  it("measures every variant with a size and a cell, the four states alike, warns of nothing, and writes nothing new on a second run", async () => {
+    const { double, langetaro, report } = await drawn();
+    expect(langetaro?.layout.zero).toEqual([]);
+    expect(langetaro?.layout.smaller).toEqual([]);
+    expect(langetaro?.layout.unplaced).toEqual([]);
+    expect(langetaro?.layout.uneven).toEqual([]);
+    expect(report.warnings.filter((warning) => warning.startsWith("langetaro"))).toEqual([]);
+    expect(langetaro?.layout.held.rest.control).toBeDefined();
+    expect(langetaro?.layout.held.rest.panel).toBeDefined();
+    expect(langetaro?.layout.held.rest["tab-1"]).toBeDefined();
     const before = double.snapshot();
     const written = double.counts.writes;
     await run(double, source);

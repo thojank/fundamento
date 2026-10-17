@@ -1,0 +1,93 @@
+{
+  "ero": {
+    "id": "ero_01M2XM2NGN3KJSKJ4JTXQWMF72",
+    "name": "navigado",
+    "skemo": "ske_01M2XM2NWJ39A7BEZ9A2S8GANE",
+    "description": "Fixture Ero: the navigado of Spec 011 ⑤, trimmed to what the fixture needs."
+  },
+  "skemo": {
+    "id": "ske_01M2XM2NWJ39A7BEZ9A2S8GANE",
+    "ero": "ero_01M2XM2NGN3KJSKJ4JTXQWMF72",
+    "props": [
+      {
+        "name": "orientation",
+        "kind": "enum",
+        "values": [
+          "horizontal",
+          "vertical"
+        ],
+        "default": "horizontal",
+        "description": "Orientation."
+      },
+      {
+        "name": "label",
+        "kind": "string",
+        "required": true,
+        "description": "The name of the navigation."
+      },
+      {
+        "name": "page",
+        "kind": "string",
+        "description": "The key of the current page."
+      }
+    ],
+    "states": [
+      "rest"
+    ],
+    "slots": [
+      {
+        "name": "items",
+        "default": true,
+        "text": true,
+        "entry": {
+          "key": "current",
+          "equals": "page"
+        }
+      }
+    ],
+    "parts": {
+      "item": {
+        "fill": {
+          "fixed": "color.background.default"
+        }
+      },
+      "item-text": {
+        "color": {
+          "fixed": "color.text.default"
+        }
+      },
+      "box": {
+        "gap": {
+          "fixed": "spacing.small"
+        }
+      }
+    },
+    "bindings": [],
+    "a11y": {
+      "role": "navigation",
+      "name": [
+        "prop:label"
+      ],
+      "states": {
+        "current": [
+          "aria-current"
+        ]
+      },
+      "keys": []
+    },
+    "goals": [
+      {
+        "goal": "navigate-app",
+        "keywords": {
+          "en": [
+            "navbar"
+          ],
+          "de": [
+            "hauptnavigation"
+          ]
+        },
+        "props": {}
+      }
+    ]
+  }
+}

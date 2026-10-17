@@ -1,0 +1,9 @@
+{
+  "description": "Spec 011 ⑤ G7 (E7, Spec 010 ③): the Skemo of the langetaro marks the active tab as the one whose value is the value of chosen, which is no string prop of the langetaro; the chosen tab is named by selected.",
+  "issues": [
+    {
+      "rule": "skemo-binding-invalid",
+      "path": "data/eroj/langetaro/skemo.json#/skemo/slots/0/entry/equals"
+    }
+  ]
+}

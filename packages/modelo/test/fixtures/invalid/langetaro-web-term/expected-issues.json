@@ -1,0 +1,9 @@
+{
+  "description": "Spec 011 ⑤ G7 (Art. VIII, Spec 008 D-13): the Skemo of the langetaro names a prop tabindex, the attribute of one platform; the Celoj translate (the roving tab stop is the Web Celo's).",
+  "issues": [
+    {
+      "rule": "skemo-web-term",
+      "path": "data/eroj/langetaro/skemo.json#/skemo/props/2/name"
+    }
+  ]
+}

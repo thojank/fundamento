@@ -1,0 +1,151 @@
+{
+  "$schema": "../../../schema/modelo.schema.json#/$defs/UzoFile",
+  "uzo": {
+    "id": "uzo_01M52BHAQAJEEW2E6NPDNPQNM0",
+    "ero": "ero_01M52BH9YVR2C1P3X0C32NCFJE",
+    "skemo": "ske_01M52BHAB2CMDHZDZKT2GVAXD8",
+    "purpose": "Switches between views of the same thing on one page: content, versions, rules, audit.",
+    "instead": [
+      {
+        "goal": "form-choice",
+        "keywords": {
+          "en": [
+            "form",
+            "formfield"
+          ],
+          "de": [
+            "formular",
+            "formularwahl"
+          ]
+        },
+        "ero": "elekto",
+        "kialo": "A choice in a form is a value, not a switch of views, because it is sent with the form and read back as data; that is the elekto."
+      },
+      {
+        "goal": "pages",
+        "keywords": {
+          "en": [
+            "subpages",
+            "routes"
+          ],
+          "de": [
+            "seiten",
+            "unterseiten",
+            "hauptseiten"
+          ]
+        },
+        "ero": "navigado",
+        "kialo": "Pages of an application are a navigation, because the person leaves where they are; tabs switch views of one thing and stay on the page."
+      }
+    ],
+    "boundary": [
+      {
+        "case": "many-tabs",
+        "action": "ask-human",
+        "keywords": {
+          "en": [
+            "scrollable",
+            "crowded"
+          ],
+          "de": [
+            "überlauf",
+            "überlaufen"
+          ]
+        },
+        "kialo": "More tabs than the line holds need a rule for what happens to the rest (a second line, a scroll, a list), because every rule hides something; a person decides which."
+      },
+      {
+        "case": "closable-tabs",
+        "action": "not-supported",
+        "keywords": {
+          "en": [
+            "closable",
+            "closeable"
+          ],
+          "de": [
+            "schließbar",
+            "schließbare"
+          ]
+        },
+        "kialo": "A tab a person can close is a document, not a view of one thing, because closing it removes content; Fundamento has no such tab."
+      },
+      {
+        "case": "manual-activation",
+        "action": "ask-human",
+        "keywords": {
+          "en": [
+            "manual",
+            "manually"
+          ],
+          "de": [
+            "manuell",
+            "manuelle"
+          ]
+        },
+        "kialo": "Selection follows the focus here (automatic activation), because a panel that is cheap to show should show at once; a panel that is slow to load wants Enter to select, which a person decides."
+      },
+      {
+        "case": "vertical-tabs",
+        "action": "ask-human",
+        "keywords": {
+          "en": [
+            "vertical"
+          ],
+          "de": [
+            "vertikal",
+            "vertikale",
+            "senkrecht",
+            "senkrechte"
+          ]
+        },
+        "kialo": "Tabs along the side read like a navigation, because a column of places is what a sidebar is; a person decides whether these are views of one thing or pages."
+      }
+    ],
+    "composes": {
+      "containers": [
+        {
+          "name": "page-section",
+          "kialo": "Tabs head a section of the page, because the views they switch belong to that section's one thing."
+        }
+      ],
+      "with": [],
+      "never": [],
+      "spacing": {
+        "owner": "container",
+        "regulo": "spacing-owned-by-container"
+      }
+    },
+    "slots": {
+      "tabs": {
+        "accepts": [
+          "text"
+        ],
+        "required": true,
+        "min": 2,
+        "nesting": 0
+      },
+      "panel": {
+        "accepts": [
+          "text"
+        ],
+        "required": true,
+        "max": 1,
+        "nesting": 1
+      }
+    },
+    "layout": {
+      "size": "container",
+      "wrap": "never"
+    },
+    "content": [
+      {
+        "regulo": "option-labels-distinct",
+        "fixed": true,
+        "of": "slot:tabs",
+        "check": {
+          "kind": "distinct"
+        }
+      }
+    ]
+  }
+}

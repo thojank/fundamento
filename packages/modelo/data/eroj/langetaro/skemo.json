@@ -1,0 +1,217 @@
+{
+  "ero": {
+    "id": "ero_01M52BH9YVR2C1P3X0C32NCFJE",
+    "name": "langetaro",
+    "skemo": "ske_01M52BHAB2CMDHZDZKT2GVAXD8",
+    "description": "Tabs: switch between views of the same thing on one page. One tab is active at a time, marked by more than colour; its panel shows the view."
+  },
+  "skemo": {
+    "id": "ske_01M52BHAB2CMDHZDZKT2GVAXD8",
+    "ero": "ero_01M52BH9YVR2C1P3X0C32NCFJE",
+    "props": [
+      {
+        "name": "label",
+        "kind": "string",
+        "required": true,
+        "description": "The name of the tab list, heard as the name of the group (Standard); never shown."
+      },
+      {
+        "name": "selected",
+        "kind": "string",
+        "description": "The id of the chosen tab: the tab whose id is this value is the active one (SkemoSlot.entry active); without it the first tab. An application that keeps the tab in its route sets it itself."
+      }
+    ],
+    "states": [
+      "rest",
+      "hover",
+      "focus",
+      "disabled"
+    ],
+    "slots": [
+      {
+        "name": "tabs",
+        "default": true,
+        "text": true,
+        "entry": {
+          "key": "active",
+          "equals": "selected"
+        }
+      },
+      {
+        "name": "panel"
+      }
+    ],
+    "parts": {
+      "tab": {
+        "fill": {
+          "by": [
+            "state"
+          ]
+        },
+        "height": {
+          "fixed": "size.target.min"
+        },
+        "inline-padding": {
+          "fixed": "spacing.medium"
+        }
+      },
+      "tabs": {
+        "color": {
+          "by": [
+            "active"
+          ]
+        },
+        "typography": {
+          "fixed": "typography.label.1"
+        }
+      },
+      "selected-indicator": {
+        "width": {
+          "by": [
+            "active"
+          ]
+        },
+        "color": {
+          "fixed": "color.navigation.text.selected"
+        }
+      },
+      "list": {
+        "color": {
+          "fixed": "color.border.default"
+        },
+        "width": {
+          "fixed": "border.width.default"
+        },
+        "gap": {
+          "fixed": "spacing.xsmall"
+        }
+      },
+      "panel": {
+        "color": {
+          "fixed": "color.text.default"
+        },
+        "inline-padding": {
+          "fixed": "spacing.medium"
+        }
+      },
+      "focus-ring": {
+        "ring": {
+          "fixed": "focus.ring"
+        },
+        "offset": {
+          "fixed": "focus.offset"
+        },
+        "color": {
+          "fixed": "color.focus.inner"
+        }
+      }
+    },
+    "bindings": [
+      {
+        "part": "tab",
+        "property": "fill",
+        "when": {
+          "state": "rest"
+        },
+        "token": "color.action.tertiary.rest"
+      },
+      {
+        "part": "tab",
+        "property": "fill",
+        "when": {
+          "state": "hover"
+        },
+        "token": "color.action.tertiary.hover"
+      },
+      {
+        "part": "tab",
+        "property": "fill",
+        "when": {
+          "state": "focus"
+        },
+        "token": "color.action.tertiary.rest"
+      },
+      {
+        "part": "tab",
+        "property": "fill",
+        "when": {
+          "state": "disabled"
+        },
+        "token": "color.action.tertiary.disabled"
+      },
+      {
+        "part": "tabs",
+        "property": "color",
+        "when": {
+          "active": "true"
+        },
+        "token": "color.text.default"
+      },
+      {
+        "part": "tabs",
+        "property": "color",
+        "when": {
+          "active": "false"
+        },
+        "token": "color.text.subtle"
+      },
+      {
+        "part": "selected-indicator",
+        "property": "width",
+        "when": {
+          "active": "true"
+        },
+        "token": "border.width.strong"
+      },
+      {
+        "part": "selected-indicator",
+        "property": "width",
+        "when": {
+          "active": "false"
+        },
+        "token": "none"
+      }
+    ],
+    "a11y": {
+      "role": "tablist",
+      "name": [
+        "prop:label"
+      ],
+      "states": {
+        "active": [
+          "aria-selected"
+        ],
+        "disabled": [
+          "aria-disabled"
+        ]
+      },
+      "keys": [
+        "ArrowLeft",
+        "ArrowRight",
+        "Home",
+        "End"
+      ]
+    },
+    "goals": [
+      {
+        "goal": "switch-view",
+        "keywords": {
+          "en": [
+            "tabs",
+            "tabbar",
+            "views",
+            "sections"
+          ],
+          "de": [
+            "reiter",
+            "tabs",
+            "registerkarten",
+            "ansichten"
+          ]
+        },
+        "props": {},
+        "regulo": "option-labels-distinct"
+      }
+    ]
+  }
+}

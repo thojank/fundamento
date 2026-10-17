@@ -40,9 +40,11 @@ describe("ligilo in the repo Modelo (T006)", () => {
       "elekto",
       "insigno",
       "kampo",
+      "langetaro",
       "ligilo",
       "markobutono",
       "mezurilo",
+      "navigado",
       "plenstato",
       "sxaltilo",
       "tabelo",
@@ -233,7 +235,9 @@ describe("the Reguloj of the ligilo (T005, A2, D-13)", () => {
 
   it.each([...TEXT_REGULOJ, ...SKEMO_REGULOJ])("%s applies to ligilo with a kialo", (name) => {
     const regulo = named(name);
-    expect(regulo?.appliesTo).toEqual({ eroj: ["ligilo"] });
+    // Spec 011 ⑤ (E5): the destination rule and the colour rule are widened to the navigado.
+    const widened = ["link-label-names-destination", "link-not-color-only"].includes(name);
+    expect(regulo?.appliesTo).toEqual({ eroj: widened ? ["ligilo", "navigado"] : ["ligilo"] });
     expect(regulo?.checkability).toBe("automatic");
     expect(regulo?.kialo.length ?? 0).toBeGreaterThan(40);
   });
@@ -271,6 +275,8 @@ describe("the Reguloj of the ligilo (T005, A2, D-13)", () => {
       "tabelo",
       "atributlisto",
       "mezurilo",
+      "navigado",
+      "langetaro",
     ]);
   });
 

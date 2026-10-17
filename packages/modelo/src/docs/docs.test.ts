@@ -1506,3 +1506,40 @@ describe("Spec 011 ④ documentation (Vojmapo Phase 4)", () => {
     for (const hash of ["461acb0", "0c08f8f"]) expect(section(tasks)).toContain(hash);
   });
 });
+
+// Spec 011 ⑤ (G9, acceptance 8): the Vojmapo names Spec 011 ⑤ in Phase 4; plan and tasks carry
+// section ⑤ with its decisions, deviations, findings, the Arkitekturo coverage and the red hashes.
+// After a rebase the hashes change: they stand in one row of tasks.md ⑤ and in the one loop below.
+describe("Spec 011 ⑤ documentation (Vojmapo Phase 4)", () => {
+  it("the vojmapo names Spec 011 ⑤, the navigation, the tabs and the Guidelines sentences", () => {
+    const row = read("docs/vojmapo.md")
+      .split("\n")
+      .find((line) => line.startsWith("| 4 |"));
+    expect(row).toContain("**Spec 011 ⑤ (`navigado`, `langetaro`");
+    expect(row).toContain("Make baut jede Hauptnavigation aus der Navigation um die nativen Links");
+    expect(row).toContain("jeden Wechsel zwischen Ansichten derselben Sache aus den Reitern");
+    expect(row).toContain("Spec 011 ⑤ umgesetzt");
+    expect(row).toContain("Runde 2 der Eroj vollständig");
+  });
+
+  it("plan and tasks carry section ⑤ with decisions, deviations, findings, coverage and red hashes", () => {
+    const plan = read("specs/011-eroj-runde-2/plan.md");
+    const tasks = read("specs/011-eroj-runde-2/tasks.md");
+    const section = (text: string) => text.slice(text.indexOf("## ⑤ Navigation"));
+    for (const heading of [
+      "### Zusammenfassung",
+      "### Entwurfsentscheidungen",
+      "### Arkitekturo-Abdeckung (E11)",
+      "### Abweichungen von der Spec",
+      "### Befunde / Mankoj",
+      "### Offen (für den Maintainer)",
+      "#### D-07 Web Component `fm-navigado`",
+      "#### D-08 Web Component `fm-langetaro`",
+    ]) {
+      expect(section(plan)).toContain(heading);
+    }
+    expect(section(plan)).not.toContain("Folgt in PR ⑤.");
+    expect(section(tasks)).toContain("### Messungen");
+    for (const hash of ["f71d5dd", "d870af3"]) expect(section(tasks)).toContain(hash);
+  });
+});

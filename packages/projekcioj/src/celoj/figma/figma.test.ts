@@ -8,7 +8,7 @@ import { join } from "node:path";
 import { baseResolution, defaultModeloSource, projectModeloSource } from "@fundamento/modelo";
 import { describe, expect, it } from "vitest";
 import { celoInputOf } from "../../build.js";
-import { VITRINO_LIST_ENTRIES, VITRINO_SLOT_TEXTS } from "../vitrino/datumoj.js";
+import { VITRINO_LIST_ENTRIES, VITRINO_OPTIONS, VITRINO_SLOT_TEXTS } from "../vitrino/datumoj.js";
 import { signOf } from "../web-component/element-template.js";
 import {
   ALPHA_VARIES,
@@ -29,8 +29,11 @@ import {
   STATE_SIGN,
   structureOf,
   styleOfWeight,
+  TABS_TEXTS,
   TEXT_CASE_VARIES,
   UNKNOWN_EXAMPLE,
+  VERTICAL_EXAMPLE,
+  verticalOf,
 } from "./figma.js";
 import { FIGMA_MODE_LIMIT } from "./plugin.js";
 
@@ -746,9 +749,11 @@ describe("Figma plan for the ligilo (Spec 008 T017)", () => {
       "elekto",
       "insigno",
       "kampo",
+      "langetaro",
       "ligilo",
       "markobutono",
       "mezurilo",
+      "navigado",
       "plenstato",
       "sxaltilo",
       "tabelo",
@@ -941,12 +946,18 @@ describe("the label default of a set follows its a11y role (M-3)", () => {
       // Spec 011 ③: a badge (role generic) names a status (for the maintainer to confirm).
       insigno: "Status",
       kampo: "Beschriftung",
+      // Spec 011 ⑤: a tab list's label is the name of the group, never shown; the word is the
+      // Ero's (proposal for the maintainer to confirm).
+      langetaro: "Reiter",
       ligilo: "Ziel",
       // Spec 010 ②: a checkbox names an option (plan ② D-11, for the maintainer to confirm, O-x).
       markobutono: "Option",
       // Spec 011 ④ (plan ④ D-14): a meter (role meter) names the measure its label stands for
       // (for the maintainer to confirm).
       mezurilo: "Messwert",
+      // Spec 011 ⑤: a navigation's label is the name of the landmark, heard, never seen; the word
+      // is the Ero's (proposal for the maintainer to confirm).
+      navigado: "Navigation",
       // Spec 011 ③: a loading or empty state shares the role status with the notice; its word is
       // the structure's, not the role's (for the maintainer to confirm).
       plenstato: "Zustand",
@@ -966,6 +977,13 @@ describe("the label default of a set follows its a11y role (M-3)", () => {
     expect(labelDefaultOf("meter", "meter")).toBe("Messwert");
     expect(labelDefaultOf("table", "table")).toBe("Beschriftung");
     expect(labelDefaultOf("list", "list")).toBe("Angaben");
+  });
+
+  it("knows the words of the Navigation roles: navigation, tablist (Spec 011 ⑤)", () => {
+    expect(labelDefaultOf("navigation")).toBe("Navigation");
+    expect(labelDefaultOf("tablist")).toBe("Reiter");
+    expect(labelDefaultOf("navigation", "nav")).toBe("Navigation");
+    expect(labelDefaultOf("tablist", "tabs")).toBe("Reiter");
   });
 
   it("falls back to Aktion for a role the Celo does not know", () => {
@@ -2323,5 +2341,257 @@ describe("Figma plan for the atributlisto (Spec 011 ④)", () => {
     expect(items.atributlisto?.values["box.inline-padding@layout=columns,state=rest"]).not.toBe(
       items.atributlisto?.values["box.inline-padding@layout=stacked,state=rest"],
     );
+  });
+});
+
+// Spec 011 ⑤ (spec „navigado", E7, G2; plan ⑤ D-07): a navigation has the role navigation and
+// the states rest, hover, focus. It is drawn as a structure of its own — the nav (its gap) with
+// three items, the Vitrino's words (F-5), the first the current one: current is the state of one
+// entry (E7), no axis — its parts are bound per value of the key in the entries of each variant,
+// as the Web stylesheet keys them (props {} there). orientation keys no part and is no axis: the
+// vertical picture is the example frame „vertikal". The underline is the item's block-end edge,
+// drawn as a stroke of the nav structure — not the text decoration the ligilo's Jugxo releases.
+describe("Figma plan for the navigado (Spec 011 ⑤)", () => {
+  const set = plan.components.find((component) => component.set === "navigado");
+  const navigado = prepared.input.modelo.eroj.find((entry) => entry.ero.name === "navigado");
+  const variant = (state: string) => set?.variants.find((entry) => entry.props.state === state);
+
+  it("plans a nav of state only, with the purpose, the word Navigation, the Vitrino's words as items and the example vertikal", () => {
+    expect(structureOf("navigation")).toBe("nav");
+    expect(set?.structure).toBe("nav");
+    expect(set?.properties).toEqual({
+      orientation: ["horizontal", "vertical"],
+      label: "TEXT",
+      page: "TEXT",
+      state: ["rest", "hover", "focus"],
+    });
+    expect(set?.variants).toHaveLength(3);
+    expect(set?.variants.map((entry) => Object.keys(entry.props))).toEqual([
+      ["state"],
+      ["state"],
+      ["state"],
+    ]);
+    expect(set?.grid).toMatchObject({ rows: 1, columns: 3 });
+    expect(set?.description).toBe(navigado?.uzo?.purpose);
+    expect(set?.label?.defaultValue).toBe("Navigation");
+    expect(set?.entry).toEqual({ key: "current", texts: ["Eins", "Zwei", "Drei"], selected: 0 });
+    expect(set?.entry?.texts).toEqual([...VITRINO_OPTIONS]);
+    expect(set?.texts).toBeUndefined();
+    expect(set?.sign).toBeUndefined();
+    expect(set?.toggles).toBeUndefined();
+    expect(set?.table).toBeUndefined();
+    expect(set?.entries).toBeUndefined();
+    expect(verticalOf(navigado?.skemo as NonNullable<typeof navigado>["skemo"])).toBe("vertical");
+    expect(VERTICAL_EXAMPLE).toBe("vertikal");
+    expect(set?.example).toEqual({
+      name: `navigado – ${VERTICAL_EXAMPLE}`,
+      variant: { state: "rest" },
+      padding: plan.section?.gap,
+      props: { orientation: "vertical" },
+    });
+    expect(set?.variants.map((entry) => entry.focusVisible)).toEqual([false, false, true]);
+  });
+
+  it("binds the box, the underline's colour and the ring once per variant; fill, text colour and underline width per value of current (E7)", () => {
+    const rest = variant("rest");
+    expect(rest?.bindings).toEqual({
+      "items.typography": "typography/label/1",
+      "underline.color": "color/navigation/text/selected",
+      "box.height": "size/target/min",
+      "box.radius": "radius/role/control",
+      "box.inline-padding": "spacing/small",
+      "box.gap": "spacing/xsmall",
+      "focus-ring.ring": "focus/ring",
+      "focus-ring.offset": "focus/offset",
+      "focus-ring.color": "color/focus/inner",
+    });
+    // The underline is drawn, not released: its colour is a paint of the variant (B-1 releases
+    // the text decoration of a link, not the block-end edge of an item).
+    expect(rest?.notDrawn).toEqual({});
+    expect(Object.keys(rest?.paints ?? {}).sort()).toEqual([
+      "focus-ring.color",
+      "focus-ring.ring",
+      "underline.color",
+    ]);
+    expect(Object.keys(rest?.geometry ?? {}).sort()).toEqual([
+      "box.gap",
+      "box.height",
+      "box.inline-padding",
+      "box.radius",
+      "focus-ring.offset",
+    ]);
+    expect(rest?.underline).toBeUndefined();
+    expect(rest?.hidden).toBeUndefined();
+    expect(rest?.radii).toEqual({
+      "focus-gap": "radius/focus/gap",
+      "focus-ring": "radius/focus/ring",
+    });
+    expect(rest?.entries).toEqual({
+      true: {
+        bindings: {
+          "item.fill": "color/navigation/selected",
+          "items.color": "color/navigation/text/selected",
+          "underline.width": "border/width/strong",
+        },
+        paints: {
+          "item.fill": expect.objectContaining({ opacity: 1 }),
+          "items.color": expect.objectContaining({ opacity: 1 }),
+        },
+        geometry: { "underline.width": expect.stringMatching(/px$/) },
+      },
+      false: {
+        bindings: {
+          "item.fill": "color/navigation/rest",
+          "items.color": "color/navigation/text/rest",
+        },
+        paints: {
+          "item.fill": expect.objectContaining({ opacity: 1 }),
+          "items.color": expect.objectContaining({ opacity: 1 }),
+        },
+      },
+    });
+    expect(variant("hover")?.entries?.false?.bindings["item.fill"]).toBe("color/navigation/hover");
+    expect(variant("hover")?.entries?.true?.bindings["item.fill"]).toBe(
+      "color/navigation/selected",
+    );
+    expect(variant("focus")?.entries?.false?.bindings["item.fill"]).toBe("color/navigation/rest");
+    expect(set?.fonts?.length ?? 0).toBeGreaterThan(0);
+  });
+
+  it("states the navigado in the parity inventory: orientation, label and page, three states, item and text per value of current, the underline", () => {
+    const items = figmaPlanInventory(plan);
+    expect(items.navigado?.props).toEqual({
+      orientation: ["horizontal", "vertical"],
+      label: ["string"],
+      page: ["string"],
+    });
+    expect(items.navigado?.states).toEqual(["rest", "hover", "focus"]);
+    const values = items.navigado?.values ?? {};
+    expect(values["item.fill@current=true,state=rest"]).toMatch(/^#[0-9a-f]{6}$/);
+    expect(values["item.fill@current=false,state=hover"]).toMatch(/^#[0-9a-f]{6}$/);
+    expect(values["item.fill@current=false,state=hover"]).not.toBe(
+      values["item.fill@current=false,state=rest"],
+    );
+    expect(values["items.color@current=true,state=rest"]).toMatch(/^#[0-9a-f]{6}$/);
+    expect(values["items.color@current=false,state=rest"]).toMatch(/^#[0-9a-f]{6}$/);
+    expect(values["underline.width@current=true,state=rest"]).toMatch(/px$/);
+    expect(values["underline.width@current=false,state=rest"]).toBeUndefined();
+    expect(values["underline.color@state=rest"]).toMatch(/^#[0-9a-f]{6}$/);
+    expect(values["box.height@state=rest"]).toMatch(/px$/);
+    expect(values["box.gap@state=focus"]).toMatch(/px$/);
+    expect(Object.values(values).some((value) => value.startsWith("not drawn"))).toBe(false);
+  });
+});
+
+// Spec 011 ⑤ (spec „langetaro", E7, G2; plan ⑤ D-08): a tab list has the role tablist and the
+// states rest, hover, focus, disabled — the states of a tab, keyed on the whole set as the Web
+// stylesheet keys them (props {} there). It is drawn as a structure of its own — the list (its
+// line, its gap) with three tabs, the Vitrino's words (F-5), the first the active one: active is
+// the state of one entry (E7), no axis — and the panel below with the Vitrino's word of the first
+// tab in the panel's colour.
+describe("Figma plan for the langetaro (Spec 011 ⑤)", () => {
+  const set = plan.components.find((component) => component.set === "langetaro");
+  const langetaro = prepared.input.modelo.eroj.find((entry) => entry.ero.name === "langetaro");
+  const variant = (state: string) => set?.variants.find((entry) => entry.props.state === state);
+
+  it("plans tabs of state only, with the purpose, the word Reiter, the Vitrino's words as tabs and its first word in the panel", () => {
+    expect(structureOf("tablist")).toBe("tabs");
+    expect(set?.structure).toBe("tabs");
+    expect(set?.properties).toEqual({
+      label: "TEXT",
+      selected: "TEXT",
+      state: ["rest", "hover", "focus", "disabled"],
+    });
+    expect(set?.variants).toHaveLength(4);
+    expect(set?.variants.every((entry) => Object.keys(entry.props).join() === "state")).toBe(true);
+    expect(set?.grid).toMatchObject({ rows: 1, columns: 4 });
+    expect(set?.description).toBe(langetaro?.uzo?.purpose);
+    expect(set?.label?.defaultValue).toBe("Reiter");
+    expect(set?.entry).toEqual({ key: "active", texts: ["Eins", "Zwei", "Drei"], selected: 0 });
+    expect(set?.texts).toEqual({ panel: "Eins" });
+    expect(TABS_TEXTS).toEqual({ panel: VITRINO_OPTIONS[0] });
+    expect(set?.sign).toBeUndefined();
+    expect(set?.toggles).toBeUndefined();
+    expect(set?.example).toBeUndefined();
+    expect(set?.variants.map((entry) => entry.focusVisible)).toEqual([false, false, true, false]);
+  });
+
+  it("binds the tab's fill by state, its height and padding, the list's line and gap, the panel; text colour and indicator width per value of active (E7)", () => {
+    const rest = variant("rest");
+    expect(rest?.bindings).toEqual({
+      "tab.fill": "color/action/tertiary/rest",
+      "tab.height": "size/target/min",
+      "tab.inline-padding": "spacing/medium",
+      "tabs.typography": "typography/label/1",
+      "selected-indicator.color": "color/navigation/text/selected",
+      "list.color": "color/border/default",
+      "list.width": "border/width/default",
+      "list.gap": "spacing/xsmall",
+      "panel.color": "color/text/default",
+      "panel.inline-padding": "spacing/medium",
+      "focus-ring.ring": "focus/ring",
+      "focus-ring.offset": "focus/offset",
+      "focus-ring.color": "color/focus/inner",
+    });
+    expect(variant("hover")?.bindings["tab.fill"]).toBe("color/action/tertiary/hover");
+    expect(variant("focus")?.bindings["tab.fill"]).toBe("color/action/tertiary/rest");
+    expect(variant("disabled")?.bindings["tab.fill"]).toBe("color/action/tertiary/disabled");
+    expect(rest?.notDrawn).toEqual({});
+    expect(Object.keys(rest?.paints ?? {}).sort()).toEqual([
+      "focus-ring.color",
+      "focus-ring.ring",
+      "list.color",
+      "panel.color",
+      "selected-indicator.color",
+      "tab.fill",
+    ]);
+    expect(Object.keys(rest?.geometry ?? {}).sort()).toEqual([
+      "focus-ring.offset",
+      "list.gap",
+      "list.width",
+      "panel.inline-padding",
+      "tab.height",
+      "tab.inline-padding",
+    ]);
+    // The tertiary fill is transparent at rest and a shade on hover: the deckkraft is the plan's.
+    expect(rest?.paints?.["tab.fill"]).toEqual({ hex: expect.any(String), opacity: 0 });
+    expect(variant("hover")?.paints?.["tab.fill"]).toMatchObject({ opacity: 0.08 });
+    // No box with a radius: nothing to grow the ring from (F32).
+    expect(rest?.radii).toBeUndefined();
+    expect(rest?.hidden).toBeUndefined();
+    expect(rest?.entries).toEqual({
+      true: {
+        bindings: {
+          "tabs.color": "color/text/default",
+          "selected-indicator.width": "border/width/strong",
+        },
+        paints: { "tabs.color": expect.objectContaining({ opacity: 1 }) },
+        geometry: { "selected-indicator.width": expect.stringMatching(/px$/) },
+      },
+      false: {
+        bindings: { "tabs.color": "color/text/subtle" },
+        paints: { "tabs.color": expect.objectContaining({ opacity: 1 }) },
+      },
+    });
+    expect(set?.fonts?.length ?? 0).toBeGreaterThan(0);
+  });
+
+  it("states the langetaro in the parity inventory: label and selected strings, four states, the tab's fill per state, text and indicator per value of active", () => {
+    const items = figmaPlanInventory(plan);
+    expect(items.langetaro?.props).toEqual({ label: ["string"], selected: ["string"] });
+    expect(items.langetaro?.states).toEqual(["rest", "hover", "focus", "disabled"]);
+    const values = items.langetaro?.values ?? {};
+    expect(values["tab.fill@state=rest"]).toMatch(/^#[0-9a-f]{6}\/0$/);
+    expect(values["tab.fill@state=hover"]).toMatch(/^#[0-9a-f]{6}\/0\.08$/);
+    expect(values["tabs.color@active=true,state=rest"]).toMatch(/^#[0-9a-f]{6}$/);
+    expect(values["tabs.color@active=false,state=disabled"]).toMatch(/^#[0-9a-f]{6}$/);
+    expect(values["selected-indicator.width@active=true,state=rest"]).toMatch(/px$/);
+    expect(values["selected-indicator.width@active=false,state=rest"]).toBeUndefined();
+    expect(values["selected-indicator.color@state=rest"]).toMatch(/^#[0-9a-f]{6}$/);
+    expect(values["list.color@state=rest"]).toMatch(/^#[0-9a-f]{6}$/);
+    expect(values["list.width@state=rest"]).toMatch(/px$/);
+    expect(values["panel.color@state=rest"]).toMatch(/^#[0-9a-f]{6}$/);
+    expect(values["panel.inline-padding@state=focus"]).toMatch(/px$/);
+    expect(Object.values(values).some((value) => value.startsWith("not drawn"))).toBe(false);
   });
 });

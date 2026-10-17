@@ -1185,3 +1185,163 @@ for (const aspekto of ["komuna", "ekzemplo"]) {
     }
   }
 }
+
+// Spec 011 ⑤ (G7, plan ⑤ D-07, D-08): the rendered fm-navigado and fm-langetaro in every colour
+// class: axe (a navigation landmark with links, the current page marked, a count badge; a tablist
+// with tabs, one disabled, and its panel); the text of every item at least 4.5:1 on its fill
+// (rest and current, selected and not); the focus ring of an item and of a tab at least 3:1.
+const navMarkup = (orientation: string) =>
+  `<fm-navigado id="n-${orientation}" orientation="${orientation}" label="Hauptnavigation ${orientation}" page="standards"><a href="#standards" data-page="standards">Standards</a><a href="#versions" data-page="versions" data-count="1" data-count-description="1 Version in Prüfung">Versionen</a><a href="#rules" data-page="rules">Regeln</a></fm-navigado>`;
+const tabsMarkup =
+  '<fm-langetaro id="tl" label="Standard" selected="inhalt"><data value="inhalt">Inhalt</data><data value="versionen">Versionen</data><data value="regeln" disabled>Regeln</data><div slot="panel">Der Inhalt des Standards.</div></fm-langetaro>';
+
+for (const aspekto of ["komuna", "ekzemplo"]) {
+  for (const scheme of ["light", "dark"]) {
+    for (const contrast of ["default", "high"]) {
+      test(`${aspekto} ${scheme}/${contrast}: axe on the navigado (both orientations) and the langetaro, texts ≥ 4.5:1 on their fills, rings ≥ 3:1`, async ({
+        page,
+        browserName,
+      }) => {
+        await serve(page, out, `${navMarkup("horizontal")}${navMarkup("vertical")}${tabsMarkup}`);
+        await page.evaluate(
+          ([a, s, k]) => {
+            const root = document.documentElement;
+            root.setAttribute("data-fm-aspekto", a ?? "");
+            root.setAttribute("data-fm-color-scheme", s ?? "");
+            root.setAttribute("data-fm-contrast", k ?? "");
+          },
+          [aspekto, scheme, contrast],
+        );
+        expect(await axeViolations(page)).toEqual([]);
+        await expect(page.getByRole("navigation")).toHaveCount(2);
+        await expect(page.getByRole("tablist")).toHaveCount(1);
+        await expect(page.getByRole("tab")).toHaveCount(3);
+        for (const orientation of ["horizontal", "vertical"]) {
+          const colours = await page.locator(`#n-${orientation}`).evaluate((element) => {
+            // The colour behind an element: its own fill, or the page's where it is see-through.
+            const read = (node: Element): string => {
+              const own = getComputedStyle(node).backgroundColor;
+              const alpha = /rgba\([^)]*,\s*([\d.]+)\)/.exec(own)?.[1];
+              return alpha !== undefined && Number.parseFloat(alpha) === 0
+                ? getComputedStyle(document.body).backgroundColor
+                : own;
+            };
+            const current = element.querySelector("a[aria-current]") as HTMLElement;
+            const other = element.querySelector("a:not([aria-current])") as HTMLElement;
+            return {
+              currentText: getComputedStyle(current).color,
+              currentFill: read(current),
+              otherText: getComputedStyle(other).color,
+              otherFill: read(other),
+            };
+          });
+          expect(
+            contrastOf(colours.currentText, colours.currentFill),
+            `${orientation} current`,
+          ).toBeGreaterThanOrEqual(4.5);
+          expect(
+            contrastOf(colours.otherText, colours.otherFill),
+            `${orientation} item`,
+          ).toBeGreaterThanOrEqual(4.5);
+        }
+        const tabColours = await page.locator("#tl").evaluate((element) => {
+          const read = (node: Element): string => {
+            const own = getComputedStyle(node).backgroundColor;
+            const alpha = /rgba\([^)]*,\s*([\d.]+)\)/.exec(own)?.[1];
+            return alpha !== undefined && Number.parseFloat(alpha) === 0
+              ? getComputedStyle(document.body).backgroundColor
+              : own;
+          };
+          const selected = element.shadowRoot?.querySelector(
+            '[part="tab"][aria-selected="true"]',
+          ) as HTMLElement;
+          const other = element.shadowRoot?.querySelector(
+            '[part="tab"][aria-selected="false"]:not([aria-disabled="true"])',
+          ) as HTMLElement;
+          return {
+            selectedText: getComputedStyle(selected).color,
+            selectedFill: read(selected),
+            otherText: getComputedStyle(other).color,
+            otherFill: read(other),
+          };
+        });
+        expect(
+          contrastOf(tabColours.selectedText, tabColours.selectedFill),
+          "selected tab",
+        ).toBeGreaterThanOrEqual(4.5);
+        expect(
+          contrastOf(tabColours.otherText, tabColours.otherFill),
+          "tab",
+        ).toBeGreaterThanOrEqual(4.5);
+        // F-7 (Abnahme 16.10.): the indicator of the selected tab is a graphic — at least 3:1 on the
+        // ground it lies on (WCAG 1.4.11); color.navigation.selected was invisible on komuna light.
+        const indicator = await page.locator("#tl").evaluate((element) => {
+          const selected = element.shadowRoot?.querySelector(
+            '[part="tab"][aria-selected="true"]',
+          ) as HTMLElement;
+          const own = getComputedStyle(selected).backgroundColor;
+          const alpha = /rgba\([^)]*,\s*([\d.]+)\)/.exec(own)?.[1];
+          return {
+            edge: getComputedStyle(selected).borderBlockEndColor,
+            ground:
+              alpha !== undefined && Number.parseFloat(alpha) === 0
+                ? getComputedStyle(document.body).backgroundColor
+                : own,
+          };
+        });
+        expect(contrastOf(indicator.edge, indicator.ground), "indicator").toBeGreaterThanOrEqual(3);
+        // The rings: Tab reaches the first link of the first navigation, later the selected tab.
+        await page.evaluate(() => {
+          const start = document.createElement("span");
+          start.id = "fm-focus-start";
+          start.tabIndex = -1;
+          document.body.prepend(start);
+          start.focus();
+        });
+        await page.keyboard.press(TAB(browserName));
+        const linkRing = await page.evaluate(() => {
+          const active = document.activeElement;
+          if (!(active instanceof HTMLAnchorElement)) return null;
+          const style = getComputedStyle(active);
+          const gap = /rgba?\([^)]*\)/.exec(style.boxShadow)?.[0] ?? "";
+          return {
+            ring: style.outlineColor,
+            gap,
+            page: getComputedStyle(document.body).backgroundColor,
+          };
+        });
+        expect(linkRing).not.toBeNull();
+        expect(
+          contrastOf(linkRing?.ring ?? "", linkRing?.gap ?? ""),
+          "link ring on gap",
+        ).toBeGreaterThanOrEqual(3);
+        expect(
+          contrastOf(linkRing?.ring ?? "", linkRing?.page ?? ""),
+          "link ring on page",
+        ).toBeGreaterThanOrEqual(3);
+        await page.evaluate(() => (document.querySelector("#tl") as HTMLElement).focus());
+        const tabRing = await page.locator("#tl").evaluate((element) => {
+          const active = element.shadowRoot?.activeElement;
+          if (!(active instanceof HTMLElement) || active.getAttribute("role") !== "tab")
+            return null;
+          const style = getComputedStyle(active);
+          const gap = /rgba?\([^)]*\)/.exec(style.boxShadow)?.[0] ?? "";
+          return {
+            ring: style.outlineColor,
+            gap,
+            page: getComputedStyle(document.body).backgroundColor,
+          };
+        });
+        expect(tabRing).not.toBeNull();
+        expect(
+          contrastOf(tabRing?.ring ?? "", tabRing?.gap ?? ""),
+          "tab ring on gap",
+        ).toBeGreaterThanOrEqual(3);
+        expect(
+          contrastOf(tabRing?.ring ?? "", tabRing?.page ?? ""),
+          "tab ring on page",
+        ).toBeGreaterThanOrEqual(3);
+      });
+    }
+  }
+}

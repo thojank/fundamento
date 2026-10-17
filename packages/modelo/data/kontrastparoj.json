@@ -600,6 +600,41 @@
       "foreground": "color.status.danger.border",
       "background": "color.background.sunken",
       "kategorio": "ui"
+    },
+    {
+      "id": "kpa_01M52BPACWP978A94W3CH3CSV9",
+      "name": "text-default-on-action-tertiary-rest",
+      "foreground": "color.text.default",
+      "background": "color.action.tertiary.rest",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M52BPACWP978A94W3CH3CSVA",
+      "name": "text-default-on-action-tertiary-hover",
+      "foreground": "color.text.default",
+      "background": "color.action.tertiary.hover",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M52BPACWP978A94W3CH3CSVB",
+      "name": "text-subtle-on-action-tertiary-rest",
+      "foreground": "color.text.subtle",
+      "background": "color.action.tertiary.rest",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M52BPACWP978A94W3CH3CSVC",
+      "name": "text-subtle-on-action-tertiary-hover",
+      "foreground": "color.text.subtle",
+      "background": "color.action.tertiary.hover",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M537Y6XVAPSGKXF42FB8MW38",
+      "name": "navigation-text-selected-on-background-default",
+      "foreground": "color.navigation.text.selected",
+      "background": "color.background.default",
+      "kategorio": "ui"
     }
   ]
 }

@@ -258,9 +258,11 @@ describe("the Vitrino after the acceptances (Nachlese 2026-10-13)", () => {
       elekto: "radiogroup",
       insigno: "generic",
       kampo: "textbox",
+      langetaro: "tablist",
       ligilo: "link",
       markobutono: "checkbox",
       mezurilo: "meter",
+      navigado: "navigation",
       plenstato: "status",
       sxaltilo: "switch",
       tabelo: "table",
@@ -530,6 +532,28 @@ describe("the Vitrino shows the tabelo, the atributlisto and the mezurilo (Spec 
     expect((grid.match(/<fm-mezurilo /g) ?? []).length).toBe(4);
     expect(grid).toContain(
       '<fm-mezurilo intent="warning" value="66">warning<span slot="value-text">66 % von 3 prüfbaren</span></fm-mezurilo>',
+    );
+  });
+});
+
+// Spec 011 ⑤ (plan ⑤ D-11): the grid of the navigado has one row (no prop keys its parts) with
+// three links in the light DOM, the first the current page, named Navigation; the grid of the
+// langetaro one row with three tabs, the first selected, the panel with its text, named Reiter.
+describe("the Vitrino shows the navigado and the langetaro (Spec 011 ⑤)", () => {
+  it("navigado: one row, three links of the Vitrino's words, the first current, named", () => {
+    const grid = datumoj.eroj.navigado ?? "";
+    expect((grid.match(/<fm-navigado /g) ?? []).length).toBe(1);
+    expect(grid).toContain(
+      '<fm-navigado label="Navigation" page="1"><a href="#fm-vitrino-navigado" data-page="1">Eins</a><a href="#fm-vitrino-navigado" data-page="2">Zwei</a>',
+    );
+    expect(grid).toContain('<th scope="row">rest</th>');
+  });
+
+  it("langetaro: one row, three tabs, the first selected, the panel with the first word, named", () => {
+    const grid = datumoj.eroj.langetaro ?? "";
+    expect((grid.match(/<fm-langetaro /g) ?? []).length).toBe(1);
+    expect(grid).toContain(
+      '<fm-langetaro label="Reiter" selected="1"><data value="1">Eins</data><data value="2">Zwei</data><data value="3">Drei</data><div slot="panel">Eins</div></fm-langetaro>',
     );
   });
 });

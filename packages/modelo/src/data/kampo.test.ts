@@ -39,9 +39,11 @@ describe("kampo in the repo Modelo (T004)", () => {
       "elekto",
       "insigno",
       "kampo",
+      "langetaro",
       "ligilo",
       "markobutono",
       "mezurilo",
+      "navigado",
       "plenstato",
       "sxaltilo",
       "tabelo",
@@ -340,6 +342,8 @@ describe("the Reguloj of the kampo (T003, T004, A2, D-07)", () => {
       "tabelo",
       "atributlisto",
       "mezurilo",
+      "navigado",
+      "langetaro",
     ]);
   });
 

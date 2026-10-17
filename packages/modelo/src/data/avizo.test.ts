@@ -32,7 +32,7 @@ const suggest = (goal: string) => {
 const INTENTS = ["info", "success", "warning", "danger"];
 
 describe("avizo in the repo Modelo (section ③, G1, G2)", () => {
-  it("lives in data/eroj/avizo/skemo.json, second of fifteen Eroj", () => {
+  it("lives in data/eroj/avizo/skemo.json, second of seventeen Eroj", () => {
     expect(avizo?.file).toBe("modelo/data/eroj/avizo/skemo.json");
     expect(modelo.eroj[1]?.ero.name).toBe("avizo");
   });

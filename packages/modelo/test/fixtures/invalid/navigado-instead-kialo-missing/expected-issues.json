@@ -1,0 +1,13 @@
+{
+  "description": "Spec 011 ⑤ G7 (G5, Art. VI): the navigado sends a goal elsewhere without saying why. An alternative without its reason is an order the agent cannot pass on; the schema rejects it too.",
+  "issues": [
+    {
+      "rule": "uzo-kialo-missing",
+      "path": "data/eroj/navigado/uzo.json#/uzo/instead/0"
+    },
+    {
+      "rule": "schema-violation",
+      "path": "data/eroj/navigado/uzo.json#/uzo/instead/0"
+    }
+  ]
+}

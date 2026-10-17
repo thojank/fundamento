@@ -500,6 +500,26 @@ function guidelines(input: CeloInput, aspekto: string): GeneratedFile[] {
         `- Every known value within a known range is a \`<${componentName(entry.ero)}>\` with its number as text; an unknown value is never 0${badgeName === undefined ? "" : `, and a status in a word is an \`<${componentName(badgeName.ero)}>\``}.`,
     )
     .join("\n");
+  // Spec 011 ⑤ (G7, plan ⑤ D-10): the navigation between the main pages is the navigado around
+  // the platform's own links (named, the current page marked), a switch of views on one page the
+  // langetaro with distinct tabs; generated from the roles navigation and tablist, the companions
+  // named where the Modelo has them.
+  const linkName = eroj.find((entry) => entry.skemo.a11y.role === "link");
+  const navigationName = eroj.find((entry) => entry.skemo.a11y.role === "navigation");
+  const navigationLines = eroj
+    .filter((entry) => entry.skemo.a11y.role === "navigation" && entry.uzo !== undefined)
+    .map(
+      (entry) =>
+        `- Every navigation between the main pages of an application is a \`<${componentName(entry.ero)}>\` around the platform's own links, named and with the current page marked${linkName === undefined ? "" : `; a single link is a \`<${componentName(linkName.ero)}>\``}.`,
+    )
+    .join("\n");
+  const tabsLines = eroj
+    .filter((entry) => entry.skemo.a11y.role === "tablist" && entry.uzo !== undefined)
+    .map(
+      (entry) =>
+        `- Every switch between views of the same thing on one page is a \`<${componentName(entry.ero)}>\` with distinct tab labels${radioName === undefined ? "" : `; a choice in a form is an \`<${componentName(radioName.ero)}>\``}${navigationName === undefined ? "" : `, and the pages of an application are a \`<${componentName(navigationName.ero)}>\``}.`,
+    )
+    .join("\n");
   return [
     {
       path: `${base}/Guidelines.md`,
@@ -526,6 +546,8 @@ ${stateLines}
 ${tableLines}
 ${recordLines}
 ${meterLines}
+${navigationLines}
+${tabsLines}
 
 Where to look: \`setup.md\` for the imports, \`foundations/\` for the tokens, \`components/\` for
 each component.

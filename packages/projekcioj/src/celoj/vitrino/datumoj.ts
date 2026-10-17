@@ -326,6 +326,15 @@ export const VITRINO_TABLE_CAPTION = "Standards";
 export const VITRINO_TABLE =
   '<table slot="content"><thead><tr><th scope="col" data-sort="name">Name</th><th scope="col">Status</th><th scope="col" numeric>Anzahl</th></tr></thead><tbody><tr><th scope="row">Barrierefreiheit</th><td>gültig</td><td>0</td></tr><tr><th scope="row">Datenschutz</th><td>Entwurf</td><td>3</td></tr><tr><th scope="row">Sicherheit</th><td>in Prüfung</td><td>1</td></tr></tbody></table>';
 
+/**
+ * The names of the Eroj whose name is a required prop label (Spec 011 ⑤, plan ⑤ D-11): the
+ * navigation and the tabs are heard by it; a link's `to` points at the section itself instead.
+ */
+export const VITRINO_LABELS: Readonly<Record<string, string>> = {
+  navigation: "Navigation",
+  tablist: "Reiter",
+};
+
 /** The dl of the Vitrino's key-value list (Spec 011 ④). */
 export const VITRINO_LIST = `<dl>${VITRINO_LIST_ENTRIES.map(([term, value]) => `<dt>${term}</dt><dd>${value}</dd>`).join("")}</dl>`;
 
@@ -353,13 +362,20 @@ export const VITRINO_OPTIONS: readonly string[] = ["Eins", "Zwei", "Drei"];
  */
 export const VITRINO_PROMPT = "Bitte wählen";
 
-/** The options of one cell: an element per option in its slot, with its value (Web Celo). */
+/**
+ * The options of one cell: an element per option in its slot, with its value (Web Celo). The
+ * entries of a default slot carry no slot name (Spec 011 ⑤: the tabs); the items of a navigation
+ * are the platform's own links to the section, keyed by their position (D-11).
+ */
 function optionTexts(entry: LoadedEro): string {
+  const navigation = entry.skemo.a11y.role === "navigation";
   return entry.skemo.slots
     .filter((slot) => slot.entry !== undefined)
     .map((slot) =>
-      VITRINO_OPTIONS.map(
-        (text, index) => `<data slot="${slot.name}" value="${index + 1}">${text}</data>`,
+      VITRINO_OPTIONS.map((text, index) =>
+        navigation
+          ? `<a href="#fm-vitrino-${entry.ero.name}" data-page="${index + 1}">${text}</a>`
+          : `<data${slot.default === true ? "" : ` slot="${slot.name}"`} value="${index + 1}">${text}</data>`,
       ).join(""),
     )
     .join("");
@@ -414,10 +430,14 @@ export function eroMarkup(entry: LoadedEro): string {
           styled.includes(prop.name)),
     )
     .map((prop) => prop.name);
-  // A link needs a target: the section itself (Spec 008); every other string prop stays empty.
+  // A link needs a target: the section itself (Spec 008); a required label (Spec 011 ⑤: the name
+  // of a navigation or a tab list) takes the word of its role; every other string prop stays empty.
   const required = entry.skemo.props
     .filter((prop) => prop.required === true && prop.kind === "string")
-    .map((prop) => ` ${prop.name}="#fm-vitrino-${entry.ero.name}"`)
+    .map(
+      (prop) =>
+        ` ${prop.name}="${prop.name === "label" ? (VITRINO_LABELS[entry.skemo.a11y.role] ?? `#fm-vitrino-${entry.ero.name}`) : `#fm-vitrino-${entry.ero.name}`}"`,
+    )
     .join("");
   // The prop an option's value is compared with (Spec 010 ③, E7) holds the first option: one chosen.
   // An Ero with a placeholder besides (the select, Spec 010 ④, D-13) shows the closed field with
@@ -437,7 +457,20 @@ export function eroMarkup(entry: LoadedEro): string {
   // A light-DOM host (Spec 011 ④, plan ④ D-13, E10): the table or the list of the Vitrino in the
   // light DOM of every cell; a meter shows the value example.
   const role = entry.skemo.a11y.role;
-  const light = role === "table" ? VITRINO_TABLE : role === "list" ? VITRINO_LIST : "";
+  // Tabs (Spec 011 ⑤, plan ⑤ D-11) show the panel of the first tab beside their tabs.
+  const light =
+    role === "table"
+      ? VITRINO_TABLE
+      : role === "list"
+        ? VITRINO_LIST
+        : role === "tablist"
+          ? `<div slot="panel">${VITRINO_OPTIONS[0] ?? ""}</div>`
+          : "";
+  // The default slot holds the entries where the Skemo makes it one (the items, the tabs): no
+  // label text beside them; the list has no text slot at all.
+  const entriesInDefault = entry.skemo.slots.some(
+    (slot) => slot.default === true && slot.entry !== undefined,
+  );
   const examples = entry.skemo.props
     .filter(
       (prop) =>
@@ -453,7 +486,8 @@ export function eroMarkup(entry: LoadedEro): string {
       const attributes = Object.entries(combination)
         .map(([key, value]) => ` ${key}="${value}"`)
         .join("");
-      const label = vitrinoLabelOf(combination);
+      // An Ero whose parts no prop keys has one row (Spec 011 ⑤): its head says rest.
+      const label = vitrinoLabelOf(combination) || "rest";
       const id = `fm-vitrino-${entry.ero.name}-${Object.values(combination).join("-")}`;
       const opener = dialog
         ? `<fm-butono emphasis="medium" data-fm-opens="${id}">${VITRINO_OPEN}</fm-butono>`
@@ -463,7 +497,7 @@ export function eroMarkup(entry: LoadedEro): string {
       const cells = [undefined, ...columns]
         .map(
           (column) =>
-            `<td>${opener}<${tag}${identity}${attributes}${examples}${required}${chosen}${column === undefined ? "" : ` ${column}`}>${role === "list" ? "" : label}${optionTexts(entry)}${slotTexts(entry, column)}${actions}${light}</${tag}></td>`,
+            `<td>${opener}<${tag}${identity}${attributes}${examples}${required}${chosen}${column === undefined ? "" : ` ${column}`}>${role === "list" || entriesInDefault ? "" : label}${optionTexts(entry)}${slotTexts(entry, column)}${actions}${light}</${tag}></td>`,
         )
         .join("");
       return `<tr><th scope="row">${label}</th>${cells}</tr>`;

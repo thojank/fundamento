@@ -1,0 +1,62 @@
+{
+  "uzo": {
+    "id": "uzo_01M4H39SZBPN8VKA70309EJ35G",
+    "ero": "ero_01M2XM2NGN3KJSKJ4JTXQWMF72",
+    "skemo": "ske_01M2XM2NWJ39A7BEZ9A2S8GANE",
+    "purpose": "Leads between the main pages.",
+    "instead": [
+      {
+        "goal": "single-link",
+        "keywords": {
+          "en": [
+            "hyperlink"
+          ],
+          "de": [
+            "verweis"
+          ]
+        },
+        "ero": null,
+        "kialo": "One link is a ligilo, because the fixture says so."
+      }
+    ],
+    "boundary": [
+      {
+        "case": "breadcrumb",
+        "action": "ask-human",
+        "keywords": {
+          "en": [
+            "breadcrumb"
+          ],
+          "de": [
+            "brotkrumen"
+          ]
+        },
+        "kialo": "A breadcrumb is a path, because the fixture says so."
+      }
+    ],
+    "composes": {
+      "containers": [],
+      "with": [],
+      "never": [],
+      "spacing": {
+        "owner": "container",
+        "regulo": "spacing-owned-by-container"
+      }
+    },
+    "slots": {
+      "items": {
+        "accepts": [
+          "text"
+        ],
+        "required": true,
+        "min": 2,
+        "nesting": 0
+      }
+    },
+    "layout": {
+      "size": "container",
+      "wrap": "allowed"
+    },
+    "content": []
+  }
+}
