@@ -46,6 +46,8 @@ describe("markobutono in the repo Modelo (G1, G2, section 2)", () => {
       "sxaltilo",
       "tabelo",
       "tekstareo",
+      "teksto",
+      "titolo",
     ]);
     expect(validateModelo(defaultModeloSource()).errors).toEqual([]);
   });
@@ -301,6 +303,8 @@ describe("the Reguloj of the markobutono (G6, E5)", () => {
       "elekto",
       "elektilo",
       "tekstareo",
+      "teksto",
+      "titolo",
       "dialogo",
       "insigno",
       "avizo",
@@ -313,6 +317,8 @@ describe("the Reguloj of the markobutono (G6, E5)", () => {
       "ikono",
       "apartigilo",
       "saltligilo",
+      "titolo",
+      "teksto",
     ]);
   });
 

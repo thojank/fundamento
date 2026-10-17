@@ -65,6 +65,8 @@ describe("Make Kit sources (T018)", () => {
       "guidelines/components/sxaltilo.md",
       "guidelines/components/tabelo.md",
       "guidelines/components/tekstareo.md",
+      "guidelines/components/teksto.md",
+      "guidelines/components/titolo.md",
       "guidelines/foundations/color.md",
       "guidelines/foundations/dimensioj.md",
       "guidelines/foundations/spacing.md",
@@ -678,4 +680,20 @@ describe("Make Kit and the Grundbausteine (Spec 014 ②)", () => {
       expect(kit(aspekto, "guidelines/components/saltligilo.md")).toContain("`to`");
     },
   );
+});
+
+// Spec 014 ③ (plan ③ D-07): Make builds every heading from the titolo with its level and every
+// running text from the teksto — two sentences, generated from the roles heading and paragraph.
+describe("Make Kit and the Typografie (Spec 014 ③)", () => {
+  it.each(ASPEKTOJ)("%s: the guidelines name the titolo and the teksto", (aspekto) => {
+    const guidelines = kit(aspekto, "guidelines/Guidelines.md");
+    expect(guidelines).toContain(
+      "- Every heading is a `<Titolo>` with its `level` (the structure of the page); its `size` is design, never a level chosen for its size.",
+    );
+    expect(guidelines).toContain(
+      "- Every running text, caption, kicker or inline code is a `<Teksto>` in a type role; never a styled span.",
+    );
+    expect(kit(aspekto, "guidelines/components/titolo.md")).toContain("`level`");
+    expect(kit(aspekto, "guidelines/components/teksto.md")).toContain("`emphasis`");
+  });
 });

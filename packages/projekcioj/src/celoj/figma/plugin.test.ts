@@ -335,6 +335,8 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
       ...["boundary", "slots", "content"].map(() => "sxaltilo"),
       ...["boundary", "slots", "content"].map(() => "tabelo"),
       ...["boundary", "slots", "content"].map(() => "tekstareo"),
+      ...["boundary", "slots", "content"].map(() => "teksto"),
+      ...["boundary", "slots", "content"].map(() => "titolo"),
     ]);
     for (const manko of openButono) {
       expect(manko.set).toBe("butono");
@@ -384,6 +386,8 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
       ...["sxaltilo", "sxaltilo", "sxaltilo"],
       ...["tabelo", "tabelo", "tabelo"],
       ...["tekstareo", "tekstareo", "tekstareo"],
+      ...["teksto", "teksto", "teksto"],
+      ...["titolo", "titolo", "titolo"],
     ]);
   });
 });
@@ -2678,6 +2682,9 @@ describe("every bound paint shows the plan's colour after the first and the seco
         { set: "tabelo", created: 6, updated: 0 },
         // Spec 011 ②: the tekstareo has kind × size × state = 30 variants.
         { set: "tekstareo", created: 30, updated: 0 },
+        // Spec 014 ③: the teksto has kind × size × emphasis = 15 variants, the titolo size = 7.
+        { set: "teksto", created: 15, updated: 0 },
+        { set: "titolo", created: 7, updated: 0 },
       ],
     });
     const json = lines

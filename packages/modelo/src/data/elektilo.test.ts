@@ -72,6 +72,8 @@ describe("elektilo in the repo Modelo (G1, G2, section 4)", () => {
       "sxaltilo",
       "tabelo",
       "tekstareo",
+      "teksto",
+      "titolo",
     ]);
     // uzo-boundary-covered among them: no Uzo says null or ask-human for the words of its goal.
     expect(validateModelo(defaultModeloSource()).errors).toEqual([]);
@@ -425,6 +427,8 @@ describe("the Reguloj of the elektilo (G6, E5)", () => {
       "elekto",
       "elektilo",
       "tekstareo",
+      "teksto",
+      "titolo",
       "dialogo",
       "insigno",
       "avizo",
@@ -437,6 +441,8 @@ describe("the Reguloj of the elektilo (G6, E5)", () => {
       "ikono",
       "apartigilo",
       "saltligilo",
+      "titolo",
+      "teksto",
     ]);
   });
 

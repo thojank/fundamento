@@ -784,6 +784,8 @@ describe("Figma plan for the ligilo (Spec 008 T017)", () => {
       "sxaltilo",
       "tabelo",
       "tekstareo",
+      "teksto",
+      "titolo",
     ]);
     expect(set?.properties).toEqual({
       to: "TEXT",
@@ -998,6 +1000,9 @@ describe("the label default of a set follows its a11y role (M-3)", () => {
       tabelo: "Beschriftung",
       // Spec 011 ②: a text area is a textbox, so the kampo's word applies.
       tekstareo: "Beschriftung",
+      // Spec 014 ③: running text names itself, a heading names its section (to confirm).
+      teksto: "Text",
+      titolo: "Überschrift",
     });
   });
 
@@ -2829,5 +2834,41 @@ describe("the Figma plan draws icons (Spec 014 ②)", () => {
     expect(
       Object.values(inventory.butono?.values ?? {}).some((value) => value.includes("not drawn")),
     ).toBe(false);
+  });
+});
+
+// Spec 014 ③ (plan ③ D-05): the titolo and the teksto are static text, drawn as a badge is — the
+// text in the role of the variant, no ring; size the axis of the titolo (level is no axis: it
+// keys no part), kind × size × emphasis the axes of the teksto.
+describe("the Figma plan draws the titolo and the teksto as text (Spec 014 ③)", () => {
+  it("the titolo: size × rest, the text in the role of the size, the word Überschrift", () => {
+    const titolo = plan.components.find((component) => component.set === "titolo");
+    expect(titolo?.structure).toBe("badge");
+    expect(titolo?.properties).toEqual({
+      level: ["1", "2", "3", "4", "5", "6"],
+      size: ["display-1", "display-2", "display-3", "headline-1", "headline-2", "headline-3", "headline-4"],
+      label: "TEXT",
+      state: ["rest"],
+    });
+    expect(titolo?.variants).toHaveLength(7);
+    expect(titolo?.variants[0]?.bindings).toEqual({
+      "text.color": "color/text/default",
+      "text.typography": "typography/display/1",
+    });
+    expect(titolo?.label).toEqual({ property: "label", defaultValue: "Überschrift" });
+  });
+
+  it("the teksto: kind × size × emphasis (fifteen), the text in the role and the colour, the word Text", () => {
+    const teksto = plan.components.find((component) => component.set === "teksto");
+    expect(teksto?.structure).toBe("badge");
+    expect(teksto?.variants).toHaveLength(15);
+    const code = teksto?.variants.find(
+      (variant) => variant.props.kind === "code" && variant.props.emphasis === "low",
+    );
+    expect(code?.bindings).toEqual({
+      "text.typography": "typography/code",
+      "text.color": "color/text/muted",
+    });
+    expect(teksto?.label).toEqual({ property: "label", defaultValue: "Text" });
   });
 });

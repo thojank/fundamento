@@ -30,7 +30,7 @@ const suggest = (goal: string) => {
 };
 
 describe("plenstato in the repo Modelo (section ③, G1, G2)", () => {
-  it("lives in data/eroj/plenstato/skemo.json, fourteenth of twenty Eroj", () => {
+  it("lives in data/eroj/plenstato/skemo.json, fourteenth of twenty-two Eroj", () => {
     expect(plenstato?.file).toBe("modelo/data/eroj/plenstato/skemo.json");
     expect(modelo.eroj[15]?.ero.name).toBe("plenstato");
   });

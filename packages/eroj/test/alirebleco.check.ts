@@ -1397,3 +1397,46 @@ for (const aspekto of ["komuna", "ekzemplo"]) {
     }
   }
 }
+
+// Spec 014 ③ (G5, G10, plan ③ D-04): the rendered fm-titolo and fm-teksto in every colour class:
+// axe (headings with their levels in order, paragraphs, inline code), the text of every emphasis
+// at least 4.5:1 on the page.
+const typografio =
+  '<fm-titolo level="1">Seite</fm-titolo><fm-teksto>Ein Absatz in der Grundrolle.</fm-teksto><fm-titolo level="2" size="headline-3">Abschnitt</fm-titolo><fm-teksto emphasis="medium">Ein Absatz in der zweiten Rolle.</fm-teksto><fm-teksto emphasis="low" kind="caption">Abbildung 1</fm-teksto><fm-teksto kind="kicker">Kategorie</fm-teksto><p>Ruf <fm-teksto kind="code">fm build</fm-teksto> auf.</p>';
+
+for (const aspekto of ["komuna", "ekzemplo"]) {
+  for (const scheme of ["light", "dark"]) {
+    for (const contrast of ["default", "high"]) {
+      test(`${aspekto} ${scheme}/${contrast}: axe on the titolo and the teksto; every emphasis ≥ 4.5:1 on the page`, async ({
+        page,
+      }) => {
+        await serve(page, out, typografio);
+        await page.evaluate(
+          ([a, s, k]) => {
+            const root = document.documentElement;
+            root.setAttribute("data-fm-aspekto", a ?? "");
+            root.setAttribute("data-fm-color-scheme", s ?? "");
+            root.setAttribute("data-fm-contrast", k ?? "");
+          },
+          [aspekto, scheme, contrast],
+        );
+        await expect(page.getByRole("heading")).toHaveCount(2);
+        await expect(page.getByRole("code")).toHaveCount(1);
+        expect(await axeViolations(page)).toEqual([]);
+        const measured = await page.evaluate(() =>
+          [...document.querySelectorAll("fm-teksto")].map((element) => {
+            const control = element.shadowRoot?.querySelector('[part="control"]') as HTMLElement;
+            return {
+              emphasis: element.getAttribute("emphasis") ?? "high",
+              colour: getComputedStyle(control).color,
+              page: getComputedStyle(document.body).backgroundColor,
+            };
+          }),
+        );
+        for (const text of measured) {
+          expect(contrastOf(text.colour, text.page), text.emphasis).toBeGreaterThanOrEqual(4.5);
+        }
+      });
+    }
+  }
+}

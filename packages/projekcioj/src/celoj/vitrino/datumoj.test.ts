@@ -270,6 +270,8 @@ describe("the Vitrino after the acceptances (Nachlese 2026-10-13)", () => {
       sxaltilo: "switch",
       tabelo: "table",
       tekstareo: "textbox",
+      teksto: "paragraph",
+      titolo: "heading",
     });
     expect(html).toContain("Größe aus dem Inhalt, Label bricht nie um.");
     expect(html).toContain("Größe aus dem Inhalt, Label darf umbrechen (inline), standalone nie.");
@@ -621,5 +623,24 @@ describe("the Vitrino shows the Ikonaro and the Grundbausteine (Spec 014 ②)", 
     // The target is the section itself: its id without the fragment sign (the link spells it).
     expect(saltligilo).toContain('<fm-saltligilo to="fm-vitrino-saltligilo">');
     expect(saltligilo).not.toContain('to="#fm-vitrino-saltligilo"');
+  });
+});
+
+// Spec 014 ③ (plan ③ D-06): the Vitrino shows the titolo in every size with its level derived,
+// and the teksto in every kind × size × emphasis.
+describe("the Vitrino shows the titolo and the teksto (Spec 014 ③)", () => {
+  it("the titolo has one row per size, each a heading whose level follows the size", () => {
+    const section = datumoj.eroj.titolo ?? "";
+    expect(section).toContain('<fm-titolo size="display-1" level="1">display-1</fm-titolo>');
+    expect(section).toContain('<fm-titolo size="headline-2" level="2">headline-2</fm-titolo>');
+    expect(section).toContain('<fm-titolo size="headline-4" level="4">headline-4</fm-titolo>');
+    expect((section.match(/<fm-titolo /g) ?? []).length).toBe(7);
+  });
+
+  it("the teksto has fifteen rows of kind · size · emphasis", () => {
+    const section = datumoj.eroj.teksto ?? "";
+    expect((section.match(/<fm-teksto /g) ?? []).length).toBe(15);
+    expect(section).toContain('<fm-teksto kind="code" size="1" emphasis="high">code · 1 · high</fm-teksto>');
+    expect(section).not.toContain('kind="caption" size="2"');
   });
 });

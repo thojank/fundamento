@@ -1,0 +1,9 @@
+{
+  "description": "Spec 014 ③ G10 (Art. VIII, Spec 008 D-13): the Skemo of the teksto names a prop class, the attribute of one platform; the Skemo says kind and emphasis, and the Celoj spell the markup.",
+  "issues": [
+    {
+      "rule": "skemo-web-term",
+      "path": "data/eroj/teksto/skemo.json#/skemo/props/2/name"
+    }
+  ]
+}

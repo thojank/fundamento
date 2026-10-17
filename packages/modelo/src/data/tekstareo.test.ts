@@ -65,6 +65,8 @@ describe("tekstareo in the repo Modelo (section ②)", () => {
       "sxaltilo",
       "tabelo",
       "tekstareo",
+      "teksto",
+      "titolo",
     ]);
     expect(validateModelo(defaultModeloSource()).errors).toEqual([]);
   });
@@ -249,6 +251,8 @@ describe("the Reguloj of the tekstareo (G6, E5)", () => {
       "elekto",
       "elektilo",
       "tekstareo",
+      "teksto",
+      "titolo",
       "dialogo",
       "insigno",
       "avizo",
@@ -261,6 +265,8 @@ describe("the Reguloj of the tekstareo (G6, E5)", () => {
       "ikono",
       "apartigilo",
       "saltligilo",
+      "titolo",
+      "teksto",
     ]);
   });
 

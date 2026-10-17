@@ -51,6 +51,8 @@ describe("kampo in the repo Modelo (T004)", () => {
       "sxaltilo",
       "tabelo",
       "tekstareo",
+      "teksto",
+      "titolo",
     ]);
     expect(validateModelo(defaultModeloSource()).errors).toEqual([]);
   });
@@ -344,6 +346,8 @@ describe("the Reguloj of the kampo (T003, T004, A2, D-07)", () => {
       "elekto",
       "elektilo",
       "tekstareo",
+      "teksto",
+      "titolo",
       "dialogo",
       "insigno",
       "avizo",
@@ -356,6 +360,8 @@ describe("the Reguloj of the kampo (T003, T004, A2, D-07)", () => {
       "ikono",
       "apartigilo",
       "saltligilo",
+      "titolo",
+      "teksto",
     ]);
   });
 

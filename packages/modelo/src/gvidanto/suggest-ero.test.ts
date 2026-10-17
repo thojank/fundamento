@@ -96,6 +96,12 @@ describe("suggest_ero", () => {
       "toggle",
       "table",
       "multi-line",
+    "running-text",
+    "section-heading",
+    "page-title",
+      "running-text",
+      "section-heading",
+      "page-title",
     ]);
     // Spec 007 (OP-6, D-06): the system says it does not cover the goal; a person decides.
     expect(result.issues[0]?.suggestion).toBe(

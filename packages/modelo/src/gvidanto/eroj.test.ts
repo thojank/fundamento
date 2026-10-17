@@ -42,6 +42,8 @@ describe("list_eroj", () => {
       "sxaltilo",
       "tabelo",
       "tekstareo",
+      "teksto",
+      "titolo",
     ]);
     expect(listEroj(modelo).eroj[3]).toEqual({
       id: butono.ero.id,
