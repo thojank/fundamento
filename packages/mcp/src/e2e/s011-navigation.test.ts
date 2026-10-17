@@ -83,9 +83,13 @@ describe("the navigation dialogs of the spec: 'Reiter oder Navigation?'", () => 
     });
     expect(answer.action).toBe("ask-human");
     expect(answer.suggestion).toBeNull();
-    expect(answer.candidates?.map((candidate) => [candidate.kind, candidate.ero])).toEqual([
-      ["goal", "elektilo"],
-      ["goal", "langetaro"],
+    expect(
+      answer.candidates
+        ?.filter((candidate) => candidate.kind === "goal")
+        .map((candidate) => [candidate.ero, candidate.goal]),
+    ).toEqual([
+      ["elektilo", "choose-many"],
+      ["langetaro", "switch-view"],
     ]);
   });
 
@@ -108,9 +112,9 @@ describe("the navigation dialogs of the spec: 'Reiter oder Navigation?'", () => 
     expect(switchView.ero).toBe("langetaro");
   });
 
-  it("'ein Hamburger-Menü für schmale Bildschirme' stops: not supported, with the navigado's reason", async () => {
+  it("'ein Hamburger für schmale Bildschirme' stops: not supported, with the navigado's reason", async () => {
     const answer = await output<Suggested>(client, "suggest_ero", {
-      goal: "ein Hamburger-Menü für schmale Bildschirme",
+      goal: "ein Hamburger für schmale Bildschirme",
     });
     expect(answer.suggestion).toBeNull();
     expect(answer.boundary).toMatchObject({

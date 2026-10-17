@@ -58,7 +58,7 @@ describe("goal-keyword-shared (Nachlese 3 G3)", () => {
     };
     skemo.skemo.goals[0]?.keywords.de.push("übersicht");
     writeFileSync(file, JSON.stringify(skemo, null, 2));
-    const result = await check({ json: true, fixture: root });
+    const result = await check({ json: true, repoRoot, fixture: root });
     const shared = result.warnings.filter((issue) => issue.rule === "goal-keyword-shared");
     expect(shared).toHaveLength(1);
     expect(shared[0]?.message).toContain("übersicht");

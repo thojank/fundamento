@@ -87,12 +87,12 @@
         "action": "ask-human",
         "keywords": {
           "en": [
-            "menu",
-            "dropdown"
+            "dropdown",
+            "rowmenu"
           ],
           "de": [
-            "menü",
-            "aktionsmenü"
+            "aktionsmenü",
+            "zeilenmenü"
           ]
         },
         "kialo": "Several small butono in a cell are allowed, because each action keeps its name; a menu that folds them is an Ero Fundamento does not have, a person decides."

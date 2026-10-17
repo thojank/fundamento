@@ -3528,6 +3528,16 @@
           }
         ]
       }
+    },
+    {
+      "id": "jug_01M54KXNGAVJ490FY86B10XTT6",
+      "ref": {
+        "ero": "ero_01M52BH9YT0BYYTE0ZAH272Q7D"
+      },
+      "decision": "approved",
+      "kialo": "Wer Navigation sagt, meint die Menge mit aktueller Seite; ein einzelner Link heißt Link.",
+      "date": "2026-10-17",
+      "context": "Nachlese 3 G1 (Spec 011 ⑤ O-28, Briefing 2026-10-17): eine Antwort, die stand, ändert sich (OP-12) — suggest_ero „Navigation“ → navigado statt ligilo. „navigation“ (en/de) geht vom Goal navigate des ligilo zum Goal navigate-app der navigado, dazu menu/menü (hauptmenü stand schon); navigate/navigieren und overview/übersicht bleiben beim ligilo (ein Ziel ansteuern). Die Grenze row-actions-menu des tabelo gibt menu/menü ab (uzo-boundary-covered: ein ask-human-Fall nennt kein Goal eines Ero), sie behält dropdown/aktionsmenü."
     }
   ]
 }

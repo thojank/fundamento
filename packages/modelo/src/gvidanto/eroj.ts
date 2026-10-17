@@ -123,7 +123,8 @@ export interface GetEroBrief {
   /** Props without a default (the caller has to decide them) and slots the Uzo requires. */
   required: { props: string[]; slots: string[] };
   instead?: { goal: string; ero: string | null; kialo: string }[];
-  boundary?: { case: string; action: UzoBoundary["action"]; ero?: string; kialo: string }[];
+  /** The boundaries without their kialo (Nachlese 3 G4): get_ero without brief has it. */
+  boundary?: { case: string; action: UzoBoundary["action"]; ero?: string }[];
   issues?: ValidationIssue[];
 }
 
@@ -418,11 +419,13 @@ export function briefOf(entry: LoadedEro): GetEroBrief {
   }
   brief.purpose = uzo.purpose;
   brief.instead = uzo.instead.map(({ goal, ero, kialo }) => ({ goal, ero, kialo }));
-  brief.boundary = uzo.boundary.map(({ case: name, action, ero, kialo }) => ({
+  // Nachlese 3 G4: a boundary of the brief names its case and action (and the Ero to use), no
+  // kialo — the full kialo comes from get_ero without brief; so the brief stays under its ceiling
+  // without shortening kialos.
+  brief.boundary = uzo.boundary.map(({ case: name, action, ero }) => ({
     case: name,
     action,
     ...(ero === undefined ? {} : { ero }),
-    kialo,
   }));
   return brief;
 }

@@ -172,6 +172,7 @@ export const RULE_IDS = [
   "uzo-override-fixed",
   "uzo-override-jugxo-missing",
   "skemo-uzo-missing",
+  "goal-keyword-shared",
   // Uzo in check_usage (Spec 007, A10, D-07): a boundary recognised via a slot, the wrap or a
   // Regulo, and the slot rules of the Uzo.
   "uzo-boundary",

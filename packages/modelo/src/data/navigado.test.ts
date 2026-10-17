@@ -139,7 +139,14 @@ describe("navigado in the repo Modelo (section ⑤, G1, G2, E7)", () => {
       // keeps navigate/navigieren and overview/übersicht (one destination). "main menu" is two
       // words and no keyword can hit it (wordsOf splits): hauptmenü stands for it.
       en: ["navbar", "sidebar", "nav", "navigation", "menu"],
-      de: ["hauptnavigation", "hauptmenü", "seitenleiste", "navigationsleiste", "navigation", "menü"],
+      de: [
+        "hauptnavigation",
+        "hauptmenü",
+        "seitenleiste",
+        "navigationsleiste",
+        "navigation",
+        "menü",
+      ],
     });
   });
 });
@@ -233,6 +240,7 @@ describe("Nachlese 3 G1: 'Navigation' leads to the navigado (O-28, OP-12)", () =
   it("carries a Jugxo for the answer that changed: 'Navigation' → navigado instead of ligilo", () => {
     const jugxo = modelo.jugxoj.find(
       (candidate) =>
+        "ero" in candidate.ref &&
         candidate.ref.ero === navigado?.ero.id &&
         candidate.kialo.includes("Wer Navigation sagt, meint die Menge mit aktueller Seite"),
     );
@@ -246,9 +254,14 @@ describe("Nachlese 3 G2: a tie of two goals asks a person", () => {
     const answer = suggest("Tabs, um zwischen Liste und Formular zu wechseln");
     expect(answer.action).toBe("ask-human");
     expect(answer.suggestion).toBeNull();
-    expect(answer.candidates?.map((candidate) => [candidate.kind, candidate.ero])).toEqual([
-      ["goal", "elektilo"],
-      ["goal", "langetaro"],
+    // The goals of both Eroj, in Ero order; a boundary that hit stands first with its kialo.
+    expect(
+      answer.candidates
+        ?.filter((candidate) => candidate.kind === "goal")
+        .map((candidate) => [candidate.ero, candidate.goal]),
+    ).toEqual([
+      ["elektilo", "choose-many"],
+      ["langetaro", "switch-view"],
     ]);
     for (const candidate of answer.candidates ?? []) {
       expect(candidate.keyword.length).toBeGreaterThan(0);
@@ -275,7 +288,9 @@ describe("suggest_ero of the navigation (Gvidanto)", () => {
 
   it("'ein einzelner Verweis' is the ligilo; a hamburger menu stops; a breadcrumb asks a person", () => {
     expect(suggest("ein einzelner Verweis").suggestion).toEqual({ ero: "ligilo", props: {} });
-    expect(suggest("ein Hamburger-Menü für schmale Bildschirme").boundary).toMatchObject({
+    // "Menü" is the navigado's own goal word since Nachlese 3 G1: beside the own boundary it is
+    // a conflict a person decides (Spec 011 ② D-10); the boundary alone answers "Hamburger".
+    expect(suggest("ein Hamburger für schmale Bildschirme").boundary).toMatchObject({
       ero: "navigado",
       case: "collapsed-mobile",
       action: "not-supported",

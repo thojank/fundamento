@@ -201,6 +201,17 @@ describe("suggest_ero with the Uzo (T023)", () => {
         kialo: expect.any(String),
         regulo: expect.objectContaining({ name: "one-primary-per-container" }),
       },
+      // Nachlese 3 G2: "Übersicht" is the ligilo's goal navigate too, hit as strongly as the
+      // butono's confirm — the tie names the ligilo among the candidates.
+      {
+        kind: "goal",
+        ero: "ligilo",
+        goal: "navigate",
+        props: {},
+        keyword: "übersicht",
+        kialo: expect.any(String),
+        regulo: expect.objectContaining({ name: "link-navigates-button-acts" }),
+      },
     ]);
   });
 
