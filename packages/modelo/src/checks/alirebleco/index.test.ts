@@ -41,6 +41,25 @@ function minimalModelo(): Modelo {
 
 const DATA = "data/kontrastparoj.json";
 
+// Nachlese 3 W2 (Spec 011 ⑤ B-8): the check measures every Aspekto the Modelo knows — the
+// reference komuna as before, and every Aspekto fixture of this package with a config
+// (aspekto-ekzemplo). A pair that fails in an external Aspekto is a warning
+// `contrast-external-aspekto`, a finding for the maintainer, not a red run (Regel 0.3).
+describe("alirebleco over every known Aspekto (Nachlese 3 W2)", () => {
+  it("measures komuna and ekzemplo; failures of ekzemplo are warnings that name the Aspekto", async () => {
+    const result = await check({ json: true, repoRoot });
+    expect(result.stats.aspektoj).toBe(2);
+    expect(result.stats["ekzemplo:evaluations"]).toBeGreaterThan(0);
+    expect(result.stats["ekzemplo:combinations"]).toBe(72);
+    const external = result.warnings.filter((issue) => issue.rule === "contrast-external-aspekto");
+    for (const issue of external) expect(issue.message).toContain("ekzemplo");
+    expect(result.stats["ekzemplo:errors"]).toBe(external.length);
+    expect(result.summary).toContain("ekzemplo");
+    // komuna stays binding: its errors are errors.
+    expect(result.ok).toBe(true);
+  });
+});
+
 describe("alirebleco on the repo", () => {
   it("passes every KontrastParo in all 72 combinations", async () => {
     const result = await check({ json: true, repoRoot });

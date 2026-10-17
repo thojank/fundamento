@@ -417,7 +417,14 @@ test("fm-tabelo, fm-atributlisto and fm-mezurilo are upgraded in their sections,
   await expect(lists).toHaveCount(2);
   await expect(page.locator("#fm-vitrino-atributlisto dd").last().locator("svg")).toHaveCount(1);
   const meters = page.locator("#fm-vitrino-mezurilo fm-mezurilo");
-  await expect(meters).toHaveCount(4);
+  // Nachlese 3 W4 (F-9): the fifth meter has no value — unknown, dashed, "nicht geprüft".
+  await expect(meters).toHaveCount(5);
+  await expect(meters.last().getByRole("meter")).toHaveAttribute("aria-valuetext", "nicht geprüft");
+  expect(
+    await meters.last().evaluate(
+      (element) => element.shadowRoot?.querySelector('[part="control"]')?.hasAttribute("data-unknown"),
+    ),
+  ).toBe(true);
   await expect(page.locator("#fm-vitrino-mezurilo").getByRole("meter").first()).toHaveAttribute(
     "aria-valuenow",
     "66",
@@ -443,4 +450,29 @@ test("fm-navigado and fm-langetaro are upgraded in their sections, axe-clean", a
   await expect(page.locator("#fm-vitrino-langetaro").getByRole("tabpanel")).toHaveCount(1);
   expect(await axeViolations(page, "#fm-vitrino-navigado")).toEqual([]);
   expect(await axeViolations(page, "#fm-vitrino-langetaro")).toEqual([]);
+});
+
+// Nachlese 3 W5 (F-10): the Vitrino wires its own show — a tab chosen shows its word in the
+// panel (select), a sort button sorts the rows of the table and turns the arrow (sort-change
+// sets sort and direction). Only in the Vitrino: the Eroj stay what they are (E10).
+test("the Vitrino wires the tabs' panel and the table's sorting", async ({ page }) => {
+  await open(page);
+  const tabs = page.locator("#fm-vitrino-langetaro fm-langetaro").first();
+  await expect(tabs.locator('[slot="panel"]')).toHaveText("Eins");
+  await tabs.getByRole("tab", { name: "Zwei" }).click();
+  await expect(tabs.locator('[slot="panel"]')).toHaveText("Zwei");
+  await expect(tabs).toHaveAttribute("selected", "2");
+  const table = page.locator("#fm-vitrino-tabelo fm-tabelo").first();
+  const rows = () =>
+    table.locator("tbody th").evaluateAll((cells) => cells.map((cell) => cell.textContent?.trim()));
+  expect(await rows()).toEqual(["Barrierefreiheit", "Datenschutz", "Sicherheit"]);
+  const nameHeader = table.locator('th[data-sort="name"]');
+  await nameHeader.getByRole("button").click();
+  await expect(nameHeader).toHaveAttribute("aria-sort", "ascending");
+  await expect(table).toHaveAttribute("sort", "name");
+  await nameHeader.getByRole("button").click();
+  await expect(nameHeader).toHaveAttribute("aria-sort", "descending");
+  expect(await rows()).toEqual(["Sicherheit", "Datenschutz", "Barrierefreiheit"]);
+  await nameHeader.getByRole("button").click();
+  expect(await rows()).toEqual(["Barrierefreiheit", "Datenschutz", "Sicherheit"]);
 });

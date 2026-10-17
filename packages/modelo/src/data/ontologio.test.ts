@@ -140,6 +140,47 @@ describe("ontologio: the principle Fluida Marko (Spec 004 T005)", () => {
   });
 });
 
+// Nachlese 3 W6: the working terms of the system — its showcase, roadmap, the reason of a rule,
+// its checks and its two Aspektoj — as concepts of a scheme of their own, with de/en labels, so
+// describe_term answers them; the kampo names its three kinds as alternative labels (① B-4).
+describe("the scheme laboro (Nachlese 3 W6)", () => {
+  const concepts = (ontologio as unknown as { concepts: Concept[] }).concepts;
+  const laboro = concepts.filter((concept) => concept.inScheme === "laboro");
+
+  it("carries the scheme laboro with the nine terms, each with eo/en/de labels and a definition", () => {
+    const schemes = (ontologio as unknown as { schemes: { id: string }[] }).schemes;
+    expect(schemes.map((scheme) => scheme.id)).toContain("laboro");
+    expect(laboro.map((concept) => concept.term).sort()).toEqual([
+      "Alirebleco",
+      "Ekzemplo",
+      "Etoso",
+      "Internacia",
+      "Kialo",
+      "Komparo",
+      "Komuna",
+      "Vitrino",
+      "Vojmapo",
+    ]);
+    for (const concept of laboro) {
+      const labels = concept.prefLabel as Record<string, string>;
+      expect(Object.keys(labels).sort(), concept.term).toEqual(["de", "en", "eo"]);
+      const definition = concept.definition as Record<string, string>;
+      expect(definition.de.length, concept.term).toBeGreaterThan(20);
+      expect(definition.en.length, concept.term).toBeGreaterThan(20);
+    }
+    const etoso = laboro.find((concept) => concept.term === "Etoso");
+    expect(JSON.stringify(etoso)).toMatch(/Kandidat|candidate/);
+    const komuna = laboro.find((concept) => concept.term === "Komuna");
+    expect((komuna?.prefLabel as Record<string, string>).eo).toBe("komuna");
+  });
+
+  it("the kampo names Passwortfeld, Zahlenfeld and Datumsfeld as alternative labels (Spec 011 ① B-4)", () => {
+    const kampo = concepts.find((concept) => concept.term === "Kampo");
+    const de = (kampo?.altLabel as Record<string, string[]> | undefined)?.de ?? [];
+    for (const label of ["Passwortfeld", "Zahlenfeld", "Datumsfeld"]) expect(de).toContain(label);
+  });
+});
+
 // Spec 008 T009 (A8, plan D-15): the Eroj of the Modelo as concepts of the scheme eroj, each with
 // its relation to the other, kept in step with data/eroj.
 describe("the scheme eroj (Spec 008 T009)", () => {
