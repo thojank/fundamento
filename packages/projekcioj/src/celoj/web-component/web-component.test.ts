@@ -33,23 +33,29 @@ describe("Web Component Celo (T011)", () => {
   it("generates the descriptor, the stylesheet, the element and an index", () => {
     // Spec 008: the ligilo on the same path as the butono (Art. IX, Art. XI).
     expect(Object.keys(files).sort()).toEqual([
+      "eroj/src/generated/avizo.styles.ts",
       "eroj/src/generated/butono.styles.ts",
       "eroj/src/generated/dialogo.styles.ts",
       "eroj/src/generated/elektilo.styles.ts",
       "eroj/src/generated/elekto.styles.ts",
+      "eroj/src/generated/fm-avizo.ts",
       "eroj/src/generated/fm-butono.ts",
       "eroj/src/generated/fm-dialogo.ts",
       "eroj/src/generated/fm-elektilo.ts",
       "eroj/src/generated/fm-elekto.ts",
+      "eroj/src/generated/fm-insigno.ts",
       "eroj/src/generated/fm-kampo.ts",
       "eroj/src/generated/fm-ligilo.ts",
       "eroj/src/generated/fm-markobutono.ts",
+      "eroj/src/generated/fm-plenstato.ts",
       "eroj/src/generated/fm-sxaltilo.ts",
       "eroj/src/generated/fm-tekstareo.ts",
       "eroj/src/generated/index.ts",
+      "eroj/src/generated/insigno.styles.ts",
       "eroj/src/generated/kampo.styles.ts",
       "eroj/src/generated/ligilo.styles.ts",
       "eroj/src/generated/markobutono.styles.ts",
+      "eroj/src/generated/plenstato.styles.ts",
       "eroj/src/generated/react.ts",
       "eroj/src/generated/skemo.ts",
       "eroj/src/generated/sxaltilo.styles.ts",
@@ -804,5 +810,171 @@ describe("Web Component Celo for the dialogo (Spec 011 ②)", () => {
       reason: ["none", "optional", "required"],
     });
     expect([...inventory.states]).toEqual(["rest"]);
+  });
+});
+
+// Spec 011 ③ (plan ③ D-08): the badge. Static text: a span as the control, no role attribute
+// (role generic is the span's own), the label in it and the long form in a visually hidden span
+// (clip-path, no size literal); every design value a token; intent and size key the parts; the
+// height is a minimum (min-block-size), so the text may grow the badge.
+describe("Web Component Celo for the insigno (Spec 011 ③)", () => {
+  const styles = files["eroj/src/generated/insigno.styles.ts"] ?? "";
+  const element = files["eroj/src/generated/fm-insigno.ts"] ?? "";
+  const css = JSON.parse(/export const INSIGNO_CSS = (".*");/s.exec(styles)?.[1] ?? '""') as string;
+  const templates = (source: string) =>
+    [...source.matchAll(/`(<[^`]*)`/g)].map((match) => match[1] ?? "");
+  const parts = (source: string) =>
+    templates(source).flatMap((t) => [...t.matchAll(/part="([a-z-]+)"/g)].map((m) => m[1]));
+
+  it("renders a span without a role as the control, the label and the hidden description in it", () => {
+    expect(parts(element)).toEqual(["control", "description"]);
+    expect(element).toContain('<span part="control"><slot></slot>');
+    expect(element).toContain(
+      '<span part="description" class="fm-hidden"><slot name="description"></slot></span>',
+    );
+    expect(element).not.toContain('role="generic"');
+    expect(element).toContain("static formAssociated = false;");
+    expect(element).toContain('customElements.define("fm-insigno", FmInsigno)');
+  });
+
+  it("keys surface, border and text by intent, the box by size, with the pill radius and no cursor", () => {
+    expect(css).toContain(
+      ':where([part="control"][data-intent="danger"]) {\n  background-color: var(--fm-color-status-danger-subtle);',
+    );
+    expect(css).toContain("border-radius: var(--fm-radius-role-pill);");
+    expect(css).toContain("min-block-size: var(--fm-size-icon-medium);");
+    expect(css).toContain("padding-inline: var(--fm-spacing-small);");
+    expect(css).toContain("white-space: nowrap;");
+    expect(css).not.toContain("cursor: pointer");
+    // The hidden text (G4): clipped, never sized with a literal.
+    expect(css).toContain(
+      ".fm-hidden { position: absolute; clip-path: inset(50%); overflow: hidden; white-space: nowrap; }",
+    );
+  });
+
+  it("keeps every design property a token and logical (Art. X gate 1)", () => {
+    expect(componentCssIssues("insigno.css", css)).toEqual([]);
+    expect(cssPhysicalPropertyIssues("insigno.css", css)).toEqual([]);
+  });
+
+  it("states intent and size and the one state rest in the stylesheet inventory (parity)", () => {
+    const inventory = stylesheetInventory(styles);
+    expect(inventory.props).toEqual({
+      intent: ["neutral", "info", "success", "warning", "danger"],
+      size: ["small", "medium"],
+    });
+    expect(inventory.states).toEqual(["rest"]);
+  });
+});
+
+// Spec 011 ③ (plan ③ D-09, G4): the notice. A live region as the control — role status, alert
+// for intent danger — with the kind as a visually hidden word before the heading (a11y.texts
+// keyed by intent-<value>), heading, message, details and actions, and a dismiss butono the
+// notice shows itself when dismissible, named by a11y.texts.dismissible; dismiss is cancelable,
+// then the notice hides itself and the focus goes to the next focusable element.
+describe("Web Component Celo for the avizo (Spec 011 ③)", () => {
+  const styles = files["eroj/src/generated/avizo.styles.ts"] ?? "";
+  const element = files["eroj/src/generated/fm-avizo.ts"] ?? "";
+  const css = JSON.parse(/export const AVIZO_CSS = (".*");/s.exec(styles)?.[1] ?? '""') as string;
+  const templates = (source: string) =>
+    [...source.matchAll(/`(<[^`]*)`/g)].map((match) => match[1] ?? "");
+  const parts = (source: string) =>
+    templates(source).flatMap((t) => [...t.matchAll(/part="([a-z-]+)"/g)].map((m) => m[1]));
+
+  it("renders a status region with the kind word, heading, message, details, actions and the dismiss butono", () => {
+    expect(parts(element)).toEqual([
+      "control",
+      "heading",
+      "message",
+      "details",
+      "actions",
+      "dismiss",
+    ]);
+    expect(element).toContain('<div part="control" role="status">');
+    expect(element).toContain('<span id="fm-texts" class="fm-hidden"></span>');
+    expect(element).toContain('<span part="message" id="message"><slot></slot></span>');
+    expect(element).toContain('<fm-butono part="dismiss" emphasis="low" size="small" hidden>');
+    expect(element).toContain(
+      'control.setAttribute("role", intent === "danger" ? "alert" : "status")',
+    );
+    expect(element).toContain('new CustomEvent("dismiss"');
+    expect(element).toContain("static formAssociated = false;");
+    expect(element).toContain('customElements.define("fm-avizo", FmAvizo)');
+  });
+
+  it("keys the surface and the accent by intent; the accent is the border at the start, the box padding on every side", () => {
+    expect(css).toContain(
+      ':where([part="control"][data-intent="warning"]) {\n  background-color: var(--fm-color-status-warning-weak);',
+    );
+    expect(css).toContain("border-inline-start-color: var(--fm-color-status-danger-border);");
+    expect(css).toContain("border-inline-start-width: var(--fm-border-width-strong);");
+    expect(css).toContain("padding: var(--fm-spacing-medium);");
+    expect(css).toContain(":host([hidden]) { display: none; }");
+    expect(css).toContain(':where([part="dismiss"][hidden]) { display: none; }');
+    expect(css).toContain("overflow-wrap: anywhere;");
+  });
+
+  it("keeps every design property a token and logical (Art. X gate 1)", () => {
+    expect(componentCssIssues("avizo.css", css)).toEqual([]);
+    expect(cssPhysicalPropertyIssues("avizo.css", css)).toEqual([]);
+  });
+
+  it("states intent and the one state rest in the stylesheet inventory (parity)", () => {
+    const inventory = stylesheetInventory(styles);
+    expect(inventory.props).toEqual({ intent: ["info", "success", "warning", "danger"] });
+    expect(inventory.states).toEqual(["rest"]);
+  });
+});
+
+// Spec 011 ③ (plan ③ D-10, G4): the loading and empty state. A status region, busy while
+// loading (aria-busy), with the indicator (a vector arc the element turns with the motion roles
+// of the part motion: the duration and easing it reads from its own transition properties, so
+// reduced motion stops it), the text and the actions of the empty state; the dashed border comes
+// from the part property stroke (border-style), none while loading.
+describe("Web Component Celo for the plenstato (Spec 011 ③)", () => {
+  const styles = files["eroj/src/generated/plenstato.styles.ts"] ?? "";
+  const element = files["eroj/src/generated/fm-plenstato.ts"] ?? "";
+  const css = JSON.parse(
+    /export const PLENSTATO_CSS = (".*");/s.exec(styles)?.[1] ?? '""',
+  ) as string;
+  const templates = (source: string) =>
+    [...source.matchAll(/`(<[^`]*)`/g)].map((match) => match[1] ?? "");
+  const parts = (source: string) =>
+    templates(source).flatMap((t) => [...t.matchAll(/part="([a-z-]+)"/g)].map((m) => m[1]));
+
+  it("renders a status region with the indicator, the text and the actions; busy while loading", () => {
+    expect(parts(element)).toEqual(["control", "indicator", "text", "actions"]);
+    expect(element).toContain('<div part="control" role="status">');
+    expect(element).toContain('<span part="indicator" aria-hidden="true">');
+    expect(element).toContain('control.setAttribute("aria-busy", String(kind === "loading"))');
+    expect(element).toContain("indicator.animate(");
+    expect(element).toContain("iterations: Number.POSITIVE_INFINITY");
+    expect(element).toContain("static formAssociated = false;");
+    expect(element).toContain('customElements.define("fm-plenstato", FmPlenstato)');
+  });
+
+  it("writes the stroke of the border by kind, hides the indicator when empty, binds the motion roles", () => {
+    expect(css).toContain(
+      ':where([part="control"][data-kind="empty"]) {\n  border-style: var(--fm-stroke-dashed);',
+    );
+    expect(css).toContain(':where([part="control"][data-kind="loading"]) {\n  border-style: none;');
+    expect(css).toContain(
+      ':where([part="control"][data-kind="empty"]) [part="indicator"] { display: none; }',
+    );
+    expect(css).toContain("transition-duration: var(--fm-motion-duration-slow);");
+    expect(css).toContain("transition-timing-function: var(--fm-motion-easing-standard);");
+    expect(css).toContain("border-radius: var(--fm-radius-role-surface);");
+    expect(css).not.toContain("background-color");
+  });
+
+  it("keeps every design property a token and logical (Art. X gate 1)", () => {
+    expect(componentCssIssues("plenstato.css", css)).toEqual([]);
+    expect(cssPhysicalPropertyIssues("plenstato.css", css)).toEqual([]);
+  });
+
+  it("states kind and the one state rest in the stylesheet inventory (parity)", () => {
+    const inventory = stylesheetInventory(styles);
+    expect(inventory.props).toEqual({ kind: ["loading", "empty"] });
+    expect(inventory.states).toEqual(["rest"]);
   });
 });

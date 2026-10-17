@@ -551,6 +551,34 @@
       "foreground": "color.link.visited",
       "background": "color.background.sunken",
       "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M51ZRHJR95B8SFPJP9WJRMSD",
+      "name": "text-default-on-status-info-weak",
+      "foreground": "color.text.default",
+      "background": "color.status.info.weak",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M51ZRHJR95B8SFPJP9WJRMSE",
+      "name": "text-default-on-status-success-weak",
+      "foreground": "color.text.default",
+      "background": "color.status.success.weak",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M51ZRHJS06A1C8ERHMDX9SYF",
+      "name": "text-default-on-status-warning-weak",
+      "foreground": "color.text.default",
+      "background": "color.status.warning.weak",
+      "kategorio": "text-normal"
+    },
+    {
+      "id": "kpa_01M51ZRHJS06A1C8ERHMDX9SYG",
+      "name": "text-default-on-status-danger-weak",
+      "foreground": "color.text.default",
+      "background": "color.status.danger.weak",
+      "kategorio": "text-normal"
     }
   ]
 }

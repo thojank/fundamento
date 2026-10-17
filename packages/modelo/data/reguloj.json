@@ -192,14 +192,15 @@
     {
       "id": "reg_01M2XMV80DG7JCJDTZGE66MGHW",
       "name": "one-primary-per-container",
-      "statement": "A container holds at most one butono with emphasis=high; instances without a named container count as one container. The actions of a dialogo are such a container (Spec 011 ②).",
+      "statement": "A container holds at most one butono with emphasis=high; instances without a named container count as one container. The actions of a dialogo and of an avizo are such containers (Spec 011 ②, ③).",
       "kialo": "Two equal calls to action move the decision onto the user; one primary action makes the next step obvious, and every other action steps back as secondary or tertiary.",
-      "scope": "eroj: butono instances in a design or in code (check_usage), the actions of a dialogo among them",
+      "scope": "eroj: butono instances in a design or in code (check_usage), the actions of a dialogo and of an avizo among them",
       "checkability": "automatic",
       "appliesTo": {
         "eroj": [
           "butono",
-          "dialogo"
+          "dialogo",
+          "avizo"
         ]
       }
     },
@@ -392,7 +393,7 @@
       "name": "spacing-owned-by-container",
       "statement": "The space between sibling Eroj belongs to their container; an Ero carries no outer spacing.",
       "kialo": "An Ero does not know its neighbours. If each one brought its own distance, two Eroj side by side would add up their distances, and the rhythm of a view would depend on which Ero stands where.",
-      "scope": "eroj: butono, ligilo, kampo, sxaltilo, markobutono, elekto and elektilo instances in a design or in code",
+      "scope": "eroj: every Ero's instances in a design or in code (butono, ligilo, kampo, sxaltilo, markobutono, elekto, elektilo, tekstareo, dialogo, insigno, avizo, plenstato)",
       "checkability": "manual",
       "appliesTo": {
         "eroj": [
@@ -404,7 +405,10 @@
           "elekto",
           "elektilo",
           "tekstareo",
-          "dialogo"
+          "dialogo",
+          "insigno",
+          "avizo",
+          "plenstato"
         ]
       }
     },
@@ -561,9 +565,9 @@
     {
       "id": "reg_01M4S1ZR7GEPZSTB9ES3REK3TY",
       "name": "error-says-what-to-do",
-      "statement": "The error text of a kampo, a markobutono, an elekto, an elektilo or a tekstareo says what to do, not only that something is wrong.",
+      "statement": "The error text of a kampo, a markobutono, an elekto, an elektilo or a tekstareo, and the message of an avizo with intent danger, says what to do, not only that something is wrong.",
       "kialo": "WCAG 3.3.3 (Error Suggestion): 'Invalid' leaves the person guessing; a sentence with a verb and an object names the way out.",
-      "scope": "eroj: kampo, markobutono, elekto, elektilo and tekstareo instances with an error text; checked as at least three words (check min-words), an approximation without a model: min-words only counts the words, so a three-word text without a way out ('Das ist ungültig') passes (Abnahme Spec 009 A6, R-2; candidate for a better check in the Vojmapo, Phase 6)",
+      "scope": "eroj: kampo, markobutono, elekto, elektilo and tekstareo instances with an error text and avizo instances with intent danger (their message, Spec 011 ③); checked as at least three words (check min-words), an approximation without a model: min-words only counts the words, so a three-word text without a way out ('Das ist ungültig') passes (Abnahme Spec 009 A6, R-2; candidate for a better check in the Vojmapo, Phase 6)",
       "checkability": "automatic",
       "appliesTo": {
         "eroj": [
@@ -571,7 +575,8 @@
           "markobutono",
           "elekto",
           "elektilo",
-          "tekstareo"
+          "tekstareo",
+          "avizo"
         ]
       }
     },
@@ -719,6 +724,32 @@
       "appliesTo": {
         "eroj": [
           "dialogo"
+        ]
+      }
+    },
+    {
+      "id": "reg_01M51ZRGTGH154NAVAYYGMTRVF",
+      "name": "badge-text-short",
+      "statement": "The label of an insigno has at most three words, 'In Prüfung', '3 Verstöße', never a sentence: 'Diese Version wird gerade geprüft'.",
+      "kialo": "A badge is skimmed next to what it describes, one glance; a sentence belongs in a notice (avizo), where it is read.",
+      "scope": "eroj: insigno instances (check max-words 3 on the label), an approximation without a model: it counts words, so three long words pass; adjustable: a brand may allow four with a Jugxo",
+      "checkability": "automatic",
+      "appliesTo": {
+        "eroj": [
+          "insigno"
+        ]
+      }
+    },
+    {
+      "id": "reg_01M51ZRGTGH154NAVAYYGMTRVG",
+      "name": "empty-state-says-what-next",
+      "statement": "The text of a plenstato with kind empty names what is missing and, where it can, the next step: 'Noch keine Standards. Lege den ersten an.', never 'Keine Treffer' alone.",
+      "kialo": "A person in front of an empty area asks what is missing and what to do; two words leave both open, a sentence answers at least the first.",
+      "scope": "eroj: plenstato instances with kind empty (check min-words 3 on the text), an approximation without a model: it counts words, so a long text without a next step passes; adjustable: a brand may write its empty states otherwise with a Jugxo",
+      "checkability": "automatic",
+      "appliesTo": {
+        "eroj": [
+          "plenstato"
         ]
       }
     }

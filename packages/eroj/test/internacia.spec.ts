@@ -648,3 +648,112 @@ test("dialogo heading expansion to 400 %: the surface keeps its width, the headi
   expect(after.headingHeight).toBeGreaterThan(before.headingHeight);
   expect(after.clipped).toBe(false);
 });
+
+// Spec 011 ③ (G7): the avizo right to left — the accent stands at the start, which is the right;
+// the dismiss butono at the end, which is the left — and its message expanded by words: the
+// notice grows in height, keeps the width of its container, nothing is clipped.
+test("avizo right to left: the accent mirrors to the right, the close button to the left", async ({
+  page,
+}) => {
+  await serve(
+    page,
+    out,
+    `<div style="inline-size: 24rem"><fm-avizo id="a" intent="warning" dismissible>Import unbestätigt.<span slot="heading">Import</span></fm-avizo></div>`,
+  );
+  const sides = () =>
+    page.locator("#a").evaluate((element) => {
+      const control = element.shadowRoot?.querySelector('[part="control"]') as HTMLElement;
+      const dismiss = element.shadowRoot?.querySelector('[part="dismiss"]') as HTMLElement;
+      const style = getComputedStyle(control);
+      const box = control.getBoundingClientRect();
+      const close = dismiss.getBoundingClientRect();
+      return {
+        left: Number.parseFloat(style.borderLeftWidth),
+        right: Number.parseFloat(style.borderRightWidth),
+        closeFromLeft: close.left - box.left,
+        closeFromRight: box.right - close.right,
+      };
+    });
+  const ltr = await sides();
+  expect(ltr.left).toBeGreaterThan(ltr.right);
+  expect(ltr.closeFromRight).toBeLessThan(ltr.closeFromLeft);
+  await page.evaluate(() => document.documentElement.setAttribute("dir", "rtl"));
+  const rtl = await sides();
+  expect(rtl.right).toBeGreaterThan(rtl.left);
+  expect(rtl.closeFromLeft).toBeLessThan(rtl.closeFromRight);
+});
+
+for (const factor of [1.35, 2]) {
+  test(`avizo text expansion to ${Math.round(factor * 100)} %: the message grows by words, the width stays, nothing is clipped`, async ({
+    page,
+  }) => {
+    await serve(
+      page,
+      out,
+      `<div style="inline-size: 20rem"><fm-avizo id="a" intent="danger" dismissible>Der Import wurde nicht gespeichert.<span slot="heading" id="h">Import</span></fm-avizo></div>`,
+    );
+    const before = await page.locator("#a").boundingBox();
+    const sentence = "Der Import wurde nicht gespeichert und die Datei liegt weiter im Postfach.";
+    const words = sentence.split(" ");
+    const expanded = [...words, ...words.slice(0, Math.ceil(words.length * (factor - 1)))].join(
+      " ",
+    );
+    await page.locator("#a").evaluate(
+      (element, [m, h]) => {
+        element.childNodes[0].textContent = m ?? "";
+        (element.querySelector("#h") as HTMLElement).textContent = h ?? "";
+      },
+      [pseudo(expanded, 1), pseudo("Import", 1)],
+    );
+    const after = await page.locator("#a").boundingBox();
+    expect(after?.height ?? 0).toBeGreaterThan(before?.height ?? 0);
+    expect(Math.round(after?.width ?? 0)).toBe(Math.round(before?.width ?? 0));
+    const clipped = await page.locator("#a").evaluate((element) => {
+      const control = element.shadowRoot?.querySelector('[part="control"]') as HTMLElement;
+      return control.scrollWidth > control.clientWidth + 1;
+    });
+    expect(clipped).toBe(false);
+  });
+}
+
+// Spec 011 ③ (G7): the insigno expanded — a badge of three words marked and widened by one word:
+// it grows in width, stays one line (the Uzo says never wrap) and clips nothing.
+test("insigno text expansion: the badge grows in width, stays one line, nothing is clipped", async ({
+  page,
+}) => {
+  await serve(page, out, `<fm-insigno id="a" intent="info">In Prüfung</fm-insigno>`);
+  const before = await page.locator("#a").boundingBox();
+  await page.locator("#a").evaluate(
+    (element, text) => {
+      element.childNodes[0].textContent = text;
+    },
+    pseudo("In Prüfung jetzt", 1),
+  );
+  const after = await page.locator("#a").boundingBox();
+  expect(after?.width ?? 0).toBeGreaterThan(before?.width ?? 0);
+  expect(Math.round(after?.height ?? 0)).toBe(Math.round(before?.height ?? 0));
+  const clipped = await page.locator("#a").evaluate((element) => {
+    const control = element.shadowRoot?.querySelector('[part="control"]') as HTMLElement;
+    return control.scrollWidth > control.clientWidth + 1;
+  });
+  expect(clipped).toBe(false);
+});
+
+// Spec 011 ③ (G7): the plenstato right to left — the indicator stands at the start of the text,
+// which is the right.
+test("plenstato right to left: the indicator stands to the right of the text", async ({ page }) => {
+  await serve(
+    page,
+    out,
+    `<fm-plenstato id="a" kind="loading">Standards werden geladen</fm-plenstato>`,
+  );
+  const order = () =>
+    page.locator("#a").evaluate((element) => {
+      const indicator = element.shadowRoot?.querySelector('[part="indicator"]') as HTMLElement;
+      const text = element.shadowRoot?.querySelector('[part="text"]') as HTMLElement;
+      return indicator.getBoundingClientRect().left < text.getBoundingClientRect().left;
+    });
+  expect(await order()).toBe(true);
+  await page.evaluate(() => document.documentElement.setAttribute("dir", "rtl"));
+  expect(await order()).toBe(false);
+});

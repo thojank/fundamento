@@ -1,0 +1,198 @@
+{
+  "ero": {
+    "id": "ero_01M51ZRFPJXJRYE15FEKX72M2K",
+    "name": "plenstato",
+    "skemo": "ske_01M51ZRG2K24R0RFTV8RPJMHBH",
+    "description": "A loading or empty state: fills an area while its content loads, or when there is none — loading standards, no standards yet. The text says which; the indicator moves only while loading."
+  },
+  "skemo": {
+    "id": "ske_01M51ZRG2K24R0RFTV8RPJMHBH",
+    "ero": "ero_01M51ZRFPJXJRYE15FEKX72M2K",
+    "props": [
+      {
+        "name": "kind",
+        "kind": "enum",
+        "values": [
+          "loading",
+          "empty"
+        ],
+        "required": true,
+        "description": "Whether the area loads (an indicator that moves, spoken as busy) or is empty (a dashed surface with the text and, if any, the next step). A duty: there is no state in between."
+      }
+    ],
+    "states": [
+      "rest"
+    ],
+    "slots": [
+      {
+        "name": "text",
+        "default": true,
+        "text": true
+      },
+      {
+        "name": "actions"
+      }
+    ],
+    "parts": {
+      "surface": {
+        "radius": {
+          "fixed": "radius.role.surface"
+        }
+      },
+      "border": {
+        "color": {
+          "fixed": "color.border.subtle"
+        },
+        "width": {
+          "fixed": "border.width.default"
+        },
+        "stroke": {
+          "by": [
+            "kind"
+          ]
+        }
+      },
+      "indicator": {
+        "size": {
+          "fixed": "size.icon.small"
+        },
+        "color": {
+          "by": [
+            "kind"
+          ]
+        }
+      },
+      "text": {
+        "color": {
+          "fixed": "color.text.muted"
+        },
+        "typography": {
+          "fixed": "typography.body.1"
+        }
+      },
+      "actions": {
+        "gap": {
+          "fixed": "spacing.small"
+        }
+      },
+      "motion": {
+        "duration": {
+          "fixed": "motion.duration.slow"
+        },
+        "easing": {
+          "fixed": "motion.easing.standard"
+        }
+      },
+      "box": {
+        "inline-padding": {
+          "fixed": "spacing.large"
+        },
+        "gap": {
+          "fixed": "spacing.small"
+        }
+      }
+    },
+    "bindings": [
+      {
+        "part": "border",
+        "property": "stroke",
+        "when": {
+          "kind": "loading"
+        },
+        "token": "none"
+      },
+      {
+        "part": "border",
+        "property": "stroke",
+        "when": {
+          "kind": "empty"
+        },
+        "token": "stroke.dashed"
+      },
+      {
+        "part": "indicator",
+        "property": "color",
+        "when": {
+          "kind": "loading"
+        },
+        "token": "color.status.info.basic"
+      },
+      {
+        "part": "indicator",
+        "property": "color",
+        "when": {
+          "kind": "empty"
+        },
+        "token": "none"
+      }
+    ],
+    "a11y": {
+      "role": "status",
+      "name": [
+        "slot:text"
+      ],
+      "states": {},
+      "keys": [],
+      "texts": {
+        "kind-loading": {
+          "de": "lädt",
+          "en": "loading"
+        }
+      }
+    },
+    "constraints": [
+      {
+        "when": {
+          "slot:actions": "filled"
+        },
+        "allowed": {
+          "kind": [
+            "empty"
+          ]
+        },
+        "kialo": "An action while loading would act on what is not there yet, because the content decides what can be done; actions belong to the empty state."
+      }
+    ],
+    "goals": [
+      {
+        "goal": "loading",
+        "keywords": {
+          "en": [
+            "loading",
+            "spinner",
+            "wait",
+            "busy"
+          ],
+          "de": [
+            "lädt",
+            "ladeanzeige",
+            "warten",
+            "laden"
+          ]
+        },
+        "props": {
+          "kind": "loading"
+        }
+      },
+      {
+        "goal": "empty",
+        "keywords": {
+          "en": [
+            "empty",
+            "nothing"
+          ],
+          "de": [
+            "leer",
+            "treffer",
+            "nichts",
+            "leerzustand"
+          ]
+        },
+        "props": {
+          "kind": "empty"
+        },
+        "regulo": "empty-state-says-what-next"
+      }
+    ]
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "$schema": "../../../schema/modelo.schema.json#/$defs/UzoFile",
+  "uzo": {
+    "id": "uzo_01M4H39SZBPN8VKA70309EJ35G",
+    "ero": "ero_01M2XM2NGN3KJSKJ4JTXQWMF72",
+    "skemo": "ske_01M2XM2NWJ39A7BEZ9A2S8GANE",
+    "purpose": "Fills an area while its content loads, or when there is none.",
+    "instead": [
+      {
+        "goal": "progress-known",
+        "keywords": {
+          "en": [
+            "progress"
+          ],
+          "de": [
+            "fortschritt"
+          ]
+        },
+        "ero": null,
+        "kialo": "Progress moves by itself, because the fixture says so."
+      }
+    ],
+    "boundary": [
+      {
+        "case": "skeleton",
+        "action": "not-supported",
+        "keywords": {
+          "en": [
+            "skeleton"
+          ],
+          "de": [
+            "skelett"
+          ]
+        },
+        "kialo": "A grey shape promises a layout, because the fixture says so."
+      }
+    ],
+    "composes": {
+      "containers": [],
+      "with": [],
+      "never": [],
+      "spacing": {
+        "owner": "container",
+        "regulo": "spacing-owned-by-container"
+      }
+    },
+    "slots": {
+      "text": {
+        "accepts": [
+          "text"
+        ],
+        "required": true,
+        "max": 1,
+        "nesting": 0
+      },
+      "actions": {
+        "accepts": [
+          "text"
+        ],
+        "max": 2,
+        "nesting": 0
+      }
+    },
+    "layout": {
+      "size": "container",
+      "wrap": "allowed"
+    },
+    "content": []
+  }
+}

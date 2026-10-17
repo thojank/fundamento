@@ -291,6 +291,11 @@ export const VITRINO_SLOT_TEXTS: Readonly<Record<string, string>> = {
   // Spec 011 ② (plan ② D-15): the message and the reason's label of a dialog.
   message: "Nachricht",
   reason: "Begründung",
+  // Spec 011 ③ (plan ③ D-13): the heading and the details of a notice, the hidden description
+  // of a badge.
+  heading: "Überschrift",
+  details: "Einzelheit",
+  description: "Beschreibung",
 };
 
 /**

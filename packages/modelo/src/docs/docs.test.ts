@@ -1428,3 +1428,42 @@ describe("Spec 011 ② documentation (Vojmapo Phase 4)", () => {
     for (const hash of ["1f386e5", "2a2a2f2"]) expect(section(tasks)).toContain(hash);
   });
 });
+
+// Spec 011 ③ (G9, acceptance 8): the Vojmapo names Spec 011 ③ in Phase 4; plan and tasks carry
+// section ③ with its decisions, deviations, findings, the Arkitekturo coverage and the red hashes.
+// After a rebase the hashes change: they stand in one row of tasks.md ③ and in the one loop below.
+describe("Spec 011 ③ documentation (Vojmapo Phase 4)", () => {
+  it("the vojmapo names Spec 011 ③, the badge, the notice, the state and the Guidelines sentences", () => {
+    const row = read("docs/vojmapo.md")
+      .split("\n")
+      .find((line) => line.startsWith("| 4 |"));
+    expect(row).toContain("**Spec 011 ③ (`insigno`, `avizo`, `plenstato`");
+    expect(row).toContain("Make baut jeden Status in ein bis drei Wörtern aus dem Statusetikett");
+    expect(row).toContain("jede Meldung im Fluss der Seite aus dem Hinweis");
+    expect(row).toContain("jede ladende oder leere Fläche aus dem Lade- und Leerzustand");
+    expect(row).toContain("Spec 011 ③ umgesetzt");
+  });
+
+  it("plan and tasks carry section ③ with decisions, deviations, findings, coverage and red hashes", () => {
+    const plan = read("specs/011-eroj-runde-2/plan.md");
+    const tasks = read("specs/011-eroj-runde-2/tasks.md");
+    const section = (text: string) =>
+      text.slice(text.indexOf("## ③ Rückmeldung"), text.indexOf("## ④ Daten"));
+    for (const heading of [
+      "### Zusammenfassung",
+      "### Entwurfsentscheidungen",
+      "### Arkitekturo-Abdeckung (E11)",
+      "### Abweichungen von der Spec",
+      "### Befunde / Mankoj",
+      "### Offen (für den Maintainer)",
+      "#### D-08 Web Component `fm-insigno`",
+      "#### D-09 Web Component `fm-avizo`",
+      "#### D-10 Web Component `fm-plenstato`",
+    ]) {
+      expect(section(plan)).toContain(heading);
+    }
+    expect(section(plan)).not.toContain("Folgt in PR ③.");
+    expect(section(tasks)).toContain("### Messungen");
+    for (const hash of ["e655fec", "29cbe9a"]) expect(section(tasks)).toContain(hash);
+  });
+});

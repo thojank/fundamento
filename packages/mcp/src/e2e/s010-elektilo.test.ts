@@ -214,13 +214,16 @@ describe("list_eroj and the brief (acceptance 1, 7)", () => {
   it("lists nine Eroj; the brief of the elektilo names the purpose, size, label and options as duties, its alternatives and boundaries", async () => {
     const listed = await output<{ eroj: { name: string }[] }>(client, "list_eroj", {});
     expect(listed.eroj.map((entry) => entry.name)).toEqual([
+      "avizo",
       "butono",
       "dialogo",
       "elektilo",
       "elekto",
+      "insigno",
       "kampo",
       "ligilo",
       "markobutono",
+      "plenstato",
       "sxaltilo",
       "tekstareo",
     ]);

@@ -45,13 +45,16 @@ describe("Make Kit sources (T018)", () => {
       "LICENSE",
       "README.md",
       "guidelines/Guidelines.md",
+      "guidelines/components/avizo.md",
       "guidelines/components/butono.md",
       "guidelines/components/dialogo.md",
       "guidelines/components/elektilo.md",
       "guidelines/components/elekto.md",
+      "guidelines/components/insigno.md",
       "guidelines/components/kampo.md",
       "guidelines/components/ligilo.md",
       "guidelines/components/markobutono.md",
+      "guidelines/components/plenstato.md",
       "guidelines/components/sxaltilo.md",
       "guidelines/components/tekstareo.md",
       "guidelines/foundations/color.md",
@@ -537,6 +540,44 @@ describe("Make Kit and the tekstareo and dialogo (Spec 011 ②)", () => {
       expect(dialog).toContain("`actions`");
       expect(dialog).toContain("**dialog-title-names-the-decision**");
       expect(dialog).toContain("Version freigeben?");
+    },
+  );
+});
+
+// Spec 011 ③ (G7, plan ③ D-12): one sentence per Ero in the Guidelines — a status word is the
+// Insigno, a message in the flow of the page the Avizo, a loading or empty area the Plenstato —
+// and a component page each, generated from Skemo, Uzo and Jugxoj like every other.
+describe("Make Kit and the insigno, avizo and plenstato (Spec 011 ③)", () => {
+  it.each(ASPEKTOJ)(
+    "%s: the guidelines send a status word to the Insigno, a message to the Avizo, a loading area to the Plenstato",
+    (aspekto) => {
+      const guidelines = kit(aspekto, "guidelines/Guidelines.md");
+      expect(guidelines).toContain(
+        "- Every status in one to three words next to what it describes (draft, in review, 3 violations) is an `<Insigno>`; a sentence is an `<Avizo>`.",
+      );
+      expect(guidelines).toContain(
+        "- Every message in the flow of the page about what happened or what to watch for (saved, could not save) is an `<Avizo>`; never a toast, and what needs a decision is a `<Dialogo>`.",
+      );
+      expect(guidelines).toContain(
+        "- Every area whose content loads or is empty shows a `<Plenstato>` with a text; never a bare spinner, and a working button is the `<Butono>`'s own loading.",
+      );
+      const badge = kit(aspekto, "guidelines/components/insigno.md");
+      expect(badge).toContain("# Insigno");
+      expect(badge).toContain("`intent`");
+      expect(badge).toContain("**badge-text-short**");
+      expect(badge).toContain("In Prüfung");
+      expect(badge).toContain("**dot-only**");
+      const notice = kit(aspekto, "guidelines/components/avizo.md");
+      expect(notice).toContain("# Avizo");
+      expect(notice).toContain("`dismissible`");
+      expect(notice).toContain("**toast**");
+      expect(notice).toContain("**error-says-what-to-do**");
+      const state = kit(aspekto, "guidelines/components/plenstato.md");
+      expect(state).toContain("# Plenstato");
+      expect(state).toContain("`kind`");
+      expect(state).toContain("**empty-state-says-what-next**");
+      expect(state).toContain("Noch keine Standards. Lege den ersten an.");
+      expect(state).toContain("**skeleton**");
     },
   );
 });

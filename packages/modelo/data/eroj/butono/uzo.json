@@ -24,7 +24,7 @@
           ]
         },
         "ero": "sxaltilo",
-        "kialo": "A setting that stays on or off needs a control that shows its state, because a button acts once and forgets; Fundamento covers it with sxaltilo when the setting applies at once (in a form, applied with it: markobutono)."
+        "kialo": "A setting that stays on or off needs a control that shows its state, because a button acts once and forgets; sxaltilo (in a form, applied with it: markobutono)."
       },
       {
         "goal": "choose-many",
@@ -45,7 +45,7 @@
           ]
         },
         "ero": "elektilo",
-        "kialo": "Choosing one of many values is a selection from a list, not an action, because a row of buttons hides which value is chosen; Fundamento covers it with elektilo."
+        "kialo": "One of many values is a selection, not an action, because a row of buttons hides which is chosen; Fundamento covers it with elektilo."
       },
       {
         "goal": "choose-few",
@@ -67,7 +67,7 @@
           ]
         },
         "ero": "elekto",
-        "kialo": "Choosing one of a few visible values is a selection, not an action, because a row of buttons hides which value is chosen; Fundamento covers it with elekto."
+        "kialo": "One of a few visible values is a selection, not an action, because a row of buttons hides which is chosen; Fundamento covers it with elekto."
       },
       {
         "goal": "confirm",
@@ -85,7 +85,21 @@
           ]
         },
         "ero": "dialogo",
-        "kialo": "An action that cannot be undone asks first, because the question needs a title, a reason and a way out; the question is a dialog, not a second button. Fundamento covers it with dialogo."
+        "kialo": "An action that cannot be undone asks first, because the question needs a title, a reason and a way out: a dialogo, not a second button."
+      },
+      {
+        "goal": "area-loading",
+        "keywords": {
+          "en": [
+            "spinner"
+          ],
+          "de": [
+            "ladeanzeige",
+            "ladezustand"
+          ]
+        },
+        "ero": "plenstato",
+        "kialo": "A button loads for its own action, because the person waits for what they pressed; an area without content yet is a plenstato."
       }
     ],
     "boundary": [
@@ -103,7 +117,7 @@
             "übersicht"
           ]
         },
-        "kialo": "A button starts an action on the current view; moving to another view is navigation, because it is announced differently and the way back works differently. Fundamento covers it with ligilo."
+        "kialo": "A button acts on the current view; moving to another view is navigation, because it is announced differently and the way back works differently. Fundamento covers it with ligilo."
       },
       {
         "case": "form-in-slot",
@@ -119,7 +133,7 @@
         "via": {
           "layout": "wrap"
         },
-        "kialo": "A label that breaks into lines no longer reads as one action, because the button grows in height next to its neighbours; shorten the label instead."
+        "kialo": "A label that breaks into lines no longer reads as one action, because the button grows beside its neighbours; shorten the label instead."
       },
       {
         "case": "no-accessible-label",
@@ -127,7 +141,7 @@
         "via": {
           "regulo": "label-required"
         },
-        "kialo": "An action without a name cannot be found, because assistive technology and voice control only know what is named."
+        "kialo": "An action without a name cannot be found, because assistive technology and voice control know only names."
       }
     ],
     "composes": {

@@ -426,6 +426,51 @@ function guidelines(input: CeloInput, aspekto: string): GeneratedFile[] {
         `- A choice of one among many options is an \`<${componentName(entry.ero)}>\` list${radioName === undefined ? "" : `; up to five visible options are an \`<${componentName(radioName.ero)}>\``}.`,
     )
     .join("\n");
+  // Spec 011 ③ (G7, plan ③ D-12): a status in one to three words is the badge (role generic),
+  // a sentence the notice; generated from every Ero with role generic, the notice named where the
+  // Modelo has one.
+  const noticeName = eroj.find(
+    (entry) =>
+      entry.skemo.a11y.role === "status" &&
+      entry.skemo.props.some((prop) => prop.name === "intent"),
+  );
+  const badgeLines = eroj
+    .filter((entry) => entry.skemo.a11y.role === "generic" && entry.uzo !== undefined)
+    .map(
+      (entry) =>
+        `- Every status in one to three words next to what it describes (draft, in review, 3 violations) is an \`<${componentName(entry.ero)}>\`${noticeName === undefined ? "" : `; a sentence is an \`<${componentName(noticeName.ero)}>\``}.`,
+    )
+    .join("\n");
+  // Spec 011 ③ (plan ③ D-12): a message in the flow of the page is the notice (a live region with
+  // an intent); never a toast; what needs a decision is the dialog, named where the Modelo has one.
+  const dialogName = eroj.find((entry) => entry.skemo.a11y.role === "dialog");
+  const noticeLines = eroj
+    .filter(
+      (entry) =>
+        entry.skemo.a11y.role === "status" &&
+        entry.skemo.props.some((prop) => prop.name === "intent") &&
+        entry.uzo !== undefined,
+    )
+    .map(
+      (entry) =>
+        `- Every message in the flow of the page about what happened or what to watch for (saved, could not save) is an \`<${componentName(entry.ero)}>\`; never a toast${dialogName === undefined ? "" : `, and what needs a decision is a \`<${componentName(dialogName.ero)}>\``}.`,
+    )
+    .join("\n");
+  // Spec 011 ③ (plan ③ D-12): an area that loads or is empty shows the state (a live region with
+  // a kind); never a bare spinner; a working button is the butono's own loading.
+  const buttonName = eroj.find((entry) => entry.skemo.a11y.role === "button");
+  const stateLines = eroj
+    .filter(
+      (entry) =>
+        entry.skemo.a11y.role === "status" &&
+        entry.skemo.props.some((prop) => prop.name === "kind") &&
+        entry.uzo !== undefined,
+    )
+    .map(
+      (entry) =>
+        `- Every area whose content loads or is empty shows a \`<${componentName(entry.ero)}>\` with a text; never a bare spinner${buttonName === undefined ? "" : `, and a working button is the \`<${componentName(buttonName.ero)}>\`'s own loading`}.`,
+    )
+    .join("\n");
   return [
     {
       path: `${base}/Guidelines.md`,
@@ -446,6 +491,9 @@ ${switchLines}
 ${checkboxLines}
 ${radioLines}
 ${selectLines}
+${badgeLines}
+${noticeLines}
+${stateLines}
 
 Where to look: \`setup.md\` for the imports, \`foundations/\` for the tokens, \`components/\` for
 each component.

@@ -167,6 +167,7 @@ describe("the Uzo of the butono (T020)", () => {
       ["choose-many", "elektilo"],
       ["choose-few", "elekto"],
       ["confirm", "dialogo"],
+      ["area-loading", "plenstato"],
     ]);
     for (const entry of uzo?.instead ?? []) expect(entry.kialo).toMatch(/\bbecause\b/);
   });

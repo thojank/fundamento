@@ -22,24 +22,27 @@ describe("list_eroj", () => {
       modelo.eroj.map((entry) => entry.ero.name),
     );
     expect(listEroj(modelo).eroj.map((entry) => entry.name)).toEqual([
+      "avizo",
       "butono",
       "dialogo",
       "elektilo",
       "elekto",
+      "insigno",
       "kampo",
       "ligilo",
       "markobutono",
+      "plenstato",
       "sxaltilo",
       "tekstareo",
     ]);
-    expect(listEroj(modelo).eroj[0]).toEqual({
+    expect(listEroj(modelo).eroj[1]).toEqual({
       id: butono.ero.id,
       name: "butono",
       description: butono.ero.description,
       variants: ["high", "medium", "low"],
       props: ["emphasis", "intent", "size", "type", "disabled", "loading", "full-width", "label"],
     });
-    expect(listEroj(modelo).eroj[5]).toMatchObject({
+    expect(listEroj(modelo).eroj[7]).toMatchObject({
       name: "ligilo",
       variants: ["inline", "standalone"],
       props: ["to", "placement", "external", "size", "label"],
@@ -205,7 +208,7 @@ describe("get_ero", () => {
     expect(missing.issues[0]?.path).toBe("get_ero/name");
     // The five nearest names (nearestNames): with six Eroj (Spec 010 ③) the farthest drops out.
     // Spec 011 ②: with nine Eroj dialogo is nearer to "butonno" than markobutono.
-    expect(missing.allowed).toEqual(["butono", "dialogo", "elekto", "kampo", "ligilo"]);
+    expect(missing.allowed).toEqual(["butono", "insigno", "avizo", "dialogo", "elekto"]);
   });
 });
 
@@ -240,6 +243,7 @@ describe("get_ero with the Uzo and brief (T022)", () => {
       "choose-many",
       "choose-few",
       "confirm",
+      "area-loading",
     ]);
     expect(uzo?.slots).toEqual(butono.uzo?.slots);
     isReguloRef(uzo?.composes.spacing.regulo);

@@ -1,0 +1,279 @@
+{
+  "ero": {
+    "id": "ero_01M51ZRFPHM8B0ED97V23SDRRH",
+    "name": "insigno",
+    "skemo": "ske_01M51ZRG2J1CVQCTEDNBQPZK6D",
+    "description": "A badge: names a status in one to three words next to what it describes — draft, in review, valid, 3 violations. Text carries the status, never colour alone."
+  },
+  "skemo": {
+    "id": "ske_01M51ZRG2J1CVQCTEDNBQPZK6D",
+    "ero": "ero_01M51ZRFPHM8B0ED97V23SDRRH",
+    "props": [
+      {
+        "name": "intent",
+        "kind": "enum",
+        "values": [
+          "neutral",
+          "info",
+          "success",
+          "warning",
+          "danger"
+        ],
+        "default": "neutral",
+        "description": "The kind of status the colours underline; neutral for a plain fact (draft, agent). No brand step: the brand colour says no status (boundary brand-badge)."
+      },
+      {
+        "name": "size",
+        "kind": "enum",
+        "values": [
+          "small",
+          "medium"
+        ],
+        "default": "medium",
+        "description": "The minimum height and the inline padding; the text may grow the badge, it has no fixed height."
+      }
+    ],
+    "states": [
+      "rest"
+    ],
+    "slots": [
+      {
+        "name": "label",
+        "default": true,
+        "text": true
+      },
+      {
+        "name": "description",
+        "text": true,
+        "hidden": true
+      }
+    ],
+    "parts": {
+      "surface": {
+        "fill": {
+          "by": [
+            "intent"
+          ]
+        }
+      },
+      "border": {
+        "color": {
+          "by": [
+            "intent"
+          ]
+        },
+        "width": {
+          "fixed": "border.width.default"
+        }
+      },
+      "text": {
+        "color": {
+          "by": [
+            "intent"
+          ]
+        },
+        "typography": {
+          "fixed": "typography.label.2"
+        }
+      },
+      "box": {
+        "height": {
+          "by": [
+            "size"
+          ]
+        },
+        "inline-padding": {
+          "by": [
+            "size"
+          ]
+        },
+        "radius": {
+          "fixed": "radius.role.pill"
+        }
+      }
+    },
+    "bindings": [
+      {
+        "part": "surface",
+        "property": "fill",
+        "when": {
+          "intent": "neutral"
+        },
+        "token": "color.background.sunken"
+      },
+      {
+        "part": "surface",
+        "property": "fill",
+        "when": {
+          "intent": "info"
+        },
+        "token": "color.status.info.subtle"
+      },
+      {
+        "part": "surface",
+        "property": "fill",
+        "when": {
+          "intent": "success"
+        },
+        "token": "color.status.success.subtle"
+      },
+      {
+        "part": "surface",
+        "property": "fill",
+        "when": {
+          "intent": "warning"
+        },
+        "token": "color.status.warning.subtle"
+      },
+      {
+        "part": "surface",
+        "property": "fill",
+        "when": {
+          "intent": "danger"
+        },
+        "token": "color.status.danger.subtle"
+      },
+      {
+        "part": "border",
+        "property": "color",
+        "when": {
+          "intent": "neutral"
+        },
+        "token": "color.border.default"
+      },
+      {
+        "part": "border",
+        "property": "color",
+        "when": {
+          "intent": "info"
+        },
+        "token": "color.status.info.border"
+      },
+      {
+        "part": "border",
+        "property": "color",
+        "when": {
+          "intent": "success"
+        },
+        "token": "color.status.success.border"
+      },
+      {
+        "part": "border",
+        "property": "color",
+        "when": {
+          "intent": "warning"
+        },
+        "token": "color.status.warning.border"
+      },
+      {
+        "part": "border",
+        "property": "color",
+        "when": {
+          "intent": "danger"
+        },
+        "token": "color.status.danger.border"
+      },
+      {
+        "part": "text",
+        "property": "color",
+        "when": {
+          "intent": "neutral"
+        },
+        "token": "color.text.subtle"
+      },
+      {
+        "part": "text",
+        "property": "color",
+        "when": {
+          "intent": "info"
+        },
+        "token": "color.status.info.text"
+      },
+      {
+        "part": "text",
+        "property": "color",
+        "when": {
+          "intent": "success"
+        },
+        "token": "color.status.success.text"
+      },
+      {
+        "part": "text",
+        "property": "color",
+        "when": {
+          "intent": "warning"
+        },
+        "token": "color.status.warning.text"
+      },
+      {
+        "part": "text",
+        "property": "color",
+        "when": {
+          "intent": "danger"
+        },
+        "token": "color.status.danger.text"
+      },
+      {
+        "part": "box",
+        "property": "height",
+        "when": {
+          "size": "small"
+        },
+        "token": "size.icon.medium"
+      },
+      {
+        "part": "box",
+        "property": "height",
+        "when": {
+          "size": "medium"
+        },
+        "token": "size.icon.large"
+      },
+      {
+        "part": "box",
+        "property": "inline-padding",
+        "when": {
+          "size": "small"
+        },
+        "token": "spacing.xsmall"
+      },
+      {
+        "part": "box",
+        "property": "inline-padding",
+        "when": {
+          "size": "medium"
+        },
+        "token": "spacing.small"
+      }
+    ],
+    "a11y": {
+      "role": "generic",
+      "name": [
+        "slot:label"
+      ],
+      "states": {},
+      "keys": []
+    },
+    "goals": [
+      {
+        "goal": "status-label",
+        "keywords": {
+          "en": [
+            "badge",
+            "tag",
+            "status",
+            "chip"
+          ],
+          "de": [
+            "badge",
+            "etikett",
+            "status",
+            "kennzeichnung"
+          ]
+        },
+        "props": {},
+        "regulo": "badge-text-short"
+      }
+    ]
+  }
+}

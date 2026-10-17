@@ -103,10 +103,13 @@ describe("Figma development plugin (T016)", () => {
     );
     const planned = plan.collections.flatMap((collection) => collection.variables);
     expect(double.variables).toHaveLength(planned.length);
-    const set = pageNodes(double).find((child) => child.type === "COMPONENT_SET");
+    // Spec 011 ③: the avizo sorts before the butono; the set of the butono is read by name.
+    const set = pageNodes(double).find(
+      (child) => child.type === "COMPONENT_SET" && child.name === "butono",
+    );
     expect(set?.name).toBe("butono");
     expect(set?.getSharedPluginData("fundamento", "ero")).toBe("butono");
-    expect(set?.children).toHaveLength(plan.components[0]?.variants.length ?? 0);
+    expect(set?.children).toHaveLength(butonoOf(plan.components)?.variants.length ?? 0);
   });
 
   it("changes nothing on a second run (idempotent)", async () => {
@@ -203,6 +206,13 @@ const repoFiles = Object.fromEntries(
 );
 const repoPlan = JSON.parse(repoFiles["figma/plan.json"] ?? "{}") as FigmaPlan;
 
+/**
+ * The set of the butono in a list of components or of their reports: the Ero order sorts the
+ * avizo before it since Spec 011 ③, so the butono is no longer the first set of the plan.
+ */
+const butonoOf = <T>(components: readonly T[] | undefined): T | undefined =>
+  components?.find((component) => (component as { set?: unknown }).set === "butono");
+
 /** The node of that name below `node`, at any depth: the control sits inside the focus ring. */
 function descendant(node: DoubleNode | undefined, name: string): DoubleNode | undefined {
   for (const child of node?.children ?? []) {
@@ -262,14 +272,18 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
     const openButono = result.mankoj.open.filter((manko) => manko.set === "butono");
     expect(openButono.map((manko) => manko.part)).toEqual(["boundary", "slots", "content"]);
     expect(result.mankoj.open.map((manko) => manko.set)).toEqual([
+      // Spec 011 ③: the avizo, the insigno and the plenstato carry a Uzo like every set.
+      ...["boundary", "slots", "content"].map(() => "avizo"),
       ...["boundary", "slots", "content"].map(() => "butono"),
       // Spec 011 ②: the dialogo and the tekstareo carry a Uzo like every set.
       ...["boundary", "slots", "content"].map(() => "dialogo"),
       ...["boundary", "slots", "content"].map(() => "elektilo"),
       ...["boundary", "slots", "content"].map(() => "elekto"),
+      ...["boundary", "slots", "content"].map(() => "insigno"),
       ...["boundary", "slots", "content"].map(() => "kampo"),
       ...["boundary", "slots", "content"].map(() => "ligilo"),
       ...["boundary", "slots", "content"].map(() => "markobutono"),
+      ...["boundary", "slots", "content"].map(() => "plenstato"),
       ...["boundary", "slots", "content"].map(() => "sxaltilo"),
       ...["boundary", "slots", "content"].map(() => "tekstareo"),
     ]);
@@ -296,14 +310,18 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
       result.mankoj.closed.filter((manko) => manko.set === "butono").map((manko) => manko.part),
     ).toEqual(["boundary", "slots", "content"]);
     expect(result.mankoj.closed.map((manko) => manko.set)).toEqual([
+      // Spec 011 ③: the avizo, the insigno and the plenstato close their three parts too.
+      ...["avizo", "avizo", "avizo"],
       ...["butono", "butono", "butono"],
       // Spec 011 ②: the dialogo and the tekstareo close their three parts too.
       ...["dialogo", "dialogo", "dialogo"],
       ...["elektilo", "elektilo", "elektilo"],
       ...["elekto", "elekto", "elekto"],
+      ...["insigno", "insigno", "insigno"],
       ...["kampo", "kampo", "kampo"],
       ...["ligilo", "ligilo", "ligilo"],
       ...["markobutono", "markobutono", "markobutono"],
+      ...["plenstato", "plenstato", "plenstato"],
       ...["sxaltilo", "sxaltilo", "sxaltilo"],
       ...["tekstareo", "tekstareo", "tekstareo"],
     ]);
@@ -315,7 +333,7 @@ describe("the paint carries the alpha of its token (F8)", () => {
   // is opaque the plan says `alphaVariesByMode`, and the guard refuses the binding — see the
   // Figma-side test.
   const variantOf = (props: Record<string, string>) =>
-    repoPlan.components[0]?.variants.find((entry) =>
+    butonoOf(repoPlan.components)?.variants.find((entry) =>
       Object.entries(props).every(([key, value]) => entry.props[key] === value),
     );
 
@@ -392,9 +410,9 @@ describe("the paint carries the alpha of its token (F8)", () => {
 // or fewer variants than the plan names, prints the whole report to the console and puts the
 // headline in the toast. A rejected run no longer disappears: it says so.
 describe("the plugin reports what it did (F10)", () => {
-  const variants = plan.components[0]?.variants.length ?? 0;
+  const variants = butonoOf(plan.components)?.variants.length ?? 0;
   const nameOf = (index: number) =>
-    Object.entries(plan.components[0]?.variants[index]?.props ?? {})
+    Object.entries(butonoOf(plan.components)?.variants[index]?.props ?? {})
       .map(([key, value]) => `${key}=${value}`)
       .join(", ");
 
@@ -421,13 +439,13 @@ describe("the plugin reports what it did (F10)", () => {
   it("counts every variant as created on the first run and as updated on the second", async () => {
     const double = modelDouble();
     const first = await report(double);
-    expect(first.components[0]?.set).toBe("butono");
-    expect(first.components[0]?.created).toHaveLength(variants);
-    expect(first.components[0]?.updated).toEqual([]);
+    expect(butonoOf(first.components)?.set).toBe("butono");
+    expect(butonoOf(first.components)?.created).toHaveLength(variants);
+    expect(butonoOf(first.components)?.updated).toEqual([]);
     expect(first.warnings).toEqual([]);
     const second = await report(double);
-    expect(second.components[0]?.created).toEqual([]);
-    expect(second.components[0]?.updated).toHaveLength(variants);
+    expect(butonoOf(second.components)?.created).toEqual([]);
+    expect(butonoOf(second.components)?.updated).toHaveLength(variants);
     expect(second.warnings).toEqual([]);
   });
 
@@ -446,8 +464,8 @@ describe("the plugin reports what it did (F10)", () => {
     extra.setSharedPluginData("fundamento", "variant", "variant=phantom");
     set.appendChild(extra);
     const again = await report(double, LIFT);
-    expect(again.components[0]?.created).toEqual([gone]);
-    expect(again.components[0]?.extra).toEqual(["variant=phantom"]);
+    expect(butonoOf(again.components)?.created).toEqual([gone]);
+    expect(butonoOf(again.components)?.extra).toEqual(["variant=phantom"]);
     expect(again.warnings.join(" ")).toContain("variant=phantom");
   });
 
@@ -514,14 +532,14 @@ describe("a second run creates nothing (F10b, the maintainer's case)", () => {
   it("finds all 72 variants again, creates none", async () => {
     const double = modelDouble();
     const first = await run2(double);
-    expect(first.components[0]?.created).toHaveLength(72);
+    expect(butonoOf(first.components)?.created).toHaveLength(72);
     const second = await run2(double);
-    expect(second.components[0]?.found).toBe(true);
-    expect(second.components[0]?.created).toEqual([]);
-    expect(second.components[0]?.updated).toHaveLength(72);
+    expect(butonoOf(second.components)?.found).toBe(true);
+    expect(butonoOf(second.components)?.created).toEqual([]);
+    expect(butonoOf(second.components)?.updated).toHaveLength(72);
     // The variant Figma re-created is the last one of the plan; name it, so a failure here is
     // immediately comparable with the measurement in Figma.
-    const last = repoPlan.components[0]?.variants.at(-1)?.props ?? {};
+    const last = butonoOf(repoPlan.components)?.variants.at(-1)?.props ?? {};
     expect(
       Object.entries(last)
         .map(([key, value]) => `${key}=${value}`)
@@ -572,7 +590,7 @@ describe("a run that creates in a set it found warns, and says what it found (F1
   it("reports how it left the set, marks included", async () => {
     const double = modelDouble();
     const first = await run2(double);
-    expect(first.components[0]?.after).toEqual({ children: 72, marked: 72 });
+    expect(butonoOf(first.components)?.after).toEqual({ children: 72, marked: 72 });
     expect(first.warnings).toEqual([]);
   });
 
@@ -584,16 +602,16 @@ describe("a run that creates in a set it found warns, and says what it found (F1
       ?.setSharedPluginData("fundamento", "variant", "");
     // Der Lauf legt die Variante neu an; der unmarkierte Knoten bleibt daneben stehen.
     const again = await run2(double, LIFT);
-    expect(again.components[0]?.after).toEqual({ children: 73, marked: 72 });
+    expect(butonoOf(again.components)?.after).toEqual({ children: 73, marked: 72 });
     expect(again.warnings.join(" ")).toContain("ohne Markierung");
   });
 
   it("reports how it found the set before it changed anything", async () => {
     const double = modelDouble();
     const first = await run2(double);
-    expect(first.components[0]?.before).toEqual({ children: 0, marked: 0, unmarked: [] });
+    expect(butonoOf(first.components)?.before).toEqual({ children: 0, marked: 0, unmarked: [] });
     const second = await run2(double);
-    expect(second.components[0]?.before).toEqual({ children: 72, marked: 72, unmarked: [] });
+    expect(butonoOf(second.components)?.before).toEqual({ children: 72, marked: 72, unmarked: [] });
   });
 
   // End state one: the node is gone. That is what the maintainer's numbers say — 71 children at
@@ -605,9 +623,9 @@ describe("a run that creates in a set it found warns, and says what it found (F1
       .children.find((child) => child.name === LAST)
       ?.remove();
     const again = await run2(double, LIFT);
-    expect(again.components[0]?.found).toBe(true);
-    expect(again.components[0]?.created).toEqual([LAST]);
-    expect(again.components[0]?.before?.children).toBe(71);
+    expect(butonoOf(again.components)?.found).toBe(true);
+    expect(butonoOf(again.components)?.created).toEqual([LAST]);
+    expect(butonoOf(again.components)?.before?.children).toBe(71);
     // Zwei Warnungen: die Regel („vorgefunden und trotzdem angelegt") und die Deutung des Paars
     // aus dem Endstand des vorigen Laufs und dem Anfangsstand dieses Laufs.
     const warnings = again.warnings;
@@ -626,10 +644,10 @@ describe("a run that creates in a set it found warns, and says what it found (F1
       .children.find((child) => child.name === LAST)
       ?.setSharedPluginData("fundamento", "variant", "");
     const again = await run2(double, LIFT);
-    expect(again.components[0]?.before?.unmarked).toEqual([LAST]);
-    expect(again.components[0]?.before?.marked).toBe(71);
-    expect(again.components[0]?.created).toEqual([LAST]);
-    expect(again.components[0]?.duplicates).toEqual([LAST]);
+    expect(butonoOf(again.components)?.before?.unmarked).toEqual([LAST]);
+    expect(butonoOf(again.components)?.before?.marked).toBe(71);
+    expect(butonoOf(again.components)?.created).toEqual([LAST]);
+    expect(butonoOf(again.components)?.duplicates).toEqual([LAST]);
     expect(setOf(double).children).toHaveLength(73);
     expect(again.warnings.join(" ")).toContain("doppelt");
   });
@@ -671,12 +689,12 @@ describe("the run reads its own last state and says what happened (F10b)", () =>
   it("leaves its state at the set and finds it again next time", async () => {
     const double = modelDouble();
     const first = await run2(double);
-    expect(first.components[0]?.planned).toBe(72);
-    expect(first.components[0]?.left).toBeNull();
-    expect(first.components[0]?.diagnosis).toBe("");
+    expect(butonoOf(first.components)?.planned).toBe(72);
+    expect(butonoOf(first.components)?.left).toBeNull();
+    expect(butonoOf(first.components)?.diagnosis).toBe("");
     const second = await run2(double);
-    expect(second.components[0]?.left).toEqual({ children: 72, marked: 72 });
-    expect(second.components[0]?.diagnosis).toBe("");
+    expect(butonoOf(second.components)?.left).toEqual({ children: 72, marked: 72 });
+    expect(butonoOf(second.components)?.diagnosis).toBe("");
     expect(second.warnings).toEqual([]);
   });
 
@@ -687,8 +705,8 @@ describe("the run reads its own last state and says what happened (F10b)", () =>
       .children.find((child) => child.name === LAST)
       ?.remove();
     const again = await run2(double, LIFT);
-    expect(again.components[0]?.left).toEqual({ children: 72, marked: 72 });
-    expect(again.components[0]?.diagnosis).toContain("zwischen den Läufen");
+    expect(butonoOf(again.components)?.left).toEqual({ children: 72, marked: 72 });
+    expect(butonoOf(again.components)?.diagnosis).toContain("zwischen den Läufen");
     expect(again.warnings.join(" ")).toContain("zwischen den Läufen");
   });
 
@@ -701,9 +719,9 @@ describe("the run reads its own last state and says what happened (F10b)", () =>
     set.children.find((child) => child.name === LAST)?.remove();
     set.setSharedPluginData("fundamento", "after", JSON.stringify({ children: 71, marked: 71 }));
     const again = await run2(double, LIFT);
-    expect(again.components[0]?.left).toEqual({ children: 71, marked: 71 });
-    expect(again.components[0]?.diagnosis).toContain("nie im Set angekommen");
-    expect(again.components[0]?.created).toEqual([LAST]);
+    expect(butonoOf(again.components)?.left).toEqual({ children: 71, marked: 71 });
+    expect(butonoOf(again.components)?.diagnosis).toContain("nie im Set angekommen");
+    expect(butonoOf(again.components)?.created).toEqual([LAST]);
   });
 
   it("says that the pair cannot be read yet when no earlier state is at the set", async () => {
@@ -713,8 +731,8 @@ describe("the run reads its own last state and says what happened (F10b)", () =>
     set.children.find((child) => child.name === LAST)?.remove();
     set.setSharedPluginData("fundamento", "after", "");
     const again = await run2(double, LIFT);
-    expect(again.components[0]?.left).toBeNull();
-    expect(again.components[0]?.diagnosis).toContain("früheren Laufs");
+    expect(butonoOf(again.components)?.left).toBeNull();
+    expect(butonoOf(again.components)?.diagnosis).toContain("früheren Laufs");
   });
 });
 
@@ -813,9 +831,9 @@ describe("a run that would create in a set it found aborts before it writes (F10
   it("does not abort a first run, nor a second run that finds every variant", async () => {
     const double = modelDouble();
     const first = await run2(double);
-    expect(first.components[0]?.created).toHaveLength(72);
+    expect(butonoOf(first.components)?.created).toHaveLength(72);
     const second = await run2(double);
-    expect(second.components[0]?.created).toEqual([]);
+    expect(butonoOf(second.components)?.created).toEqual([]);
   });
 
   it("goes on when the maintainer lifts the abort on purpose, and still warns", async () => {
@@ -825,7 +843,7 @@ describe("a run that would create in a set it found aborts before it writes (F10
       .children.find((child) => child.name === LAST)
       ?.remove();
     const again = await run2(double, { createInFoundSet: true });
-    expect(again.components[0]?.created).toEqual([LAST]);
+    expect(butonoOf(again.components)?.created).toEqual([LAST]);
     expect(again.warnings.join(" ")).toContain("vorgefunden");
   });
 
@@ -899,11 +917,11 @@ describe("a run reports every node of the set that was there at its start and is
   it("counts the same nodes at start and end of a clean run, and loses none", async () => {
     const double = modelDouble();
     const first = await runWith(double, {});
-    expect(first.components[0]?.nodes).toEqual({ start: 0, end: NODES });
-    expect(first.components[0]?.lost).toEqual([]);
+    expect(butonoOf(first.components)?.nodes).toEqual({ start: 0, end: NODES });
+    expect(butonoOf(first.components)?.lost).toEqual([]);
     const second = await runWith(double, {});
-    expect(second.components[0]?.nodes).toEqual({ start: NODES, end: NODES });
-    expect(second.components[0]?.lost).toEqual([]);
+    expect(butonoOf(second.components)?.nodes).toEqual({ start: NODES, end: NODES });
+    expect(butonoOf(second.components)?.lost).toEqual([]);
     expect(second.warnings).toEqual([]);
   });
 
@@ -925,9 +943,9 @@ describe("a run reports every node of the set that was there at its start and is
       },
       LIFT,
     );
-    expect(again.components[0]?.created).toEqual([LAST]);
-    expect(again.components[0]?.lost.map((entry) => entry.id)).toContain(old.id);
-    expect(again.components[0]?.lost.find((entry) => entry.id === old.id)).toMatchObject({
+    expect(butonoOf(again.components)?.created).toEqual([LAST]);
+    expect(butonoOf(again.components)?.lost.map((entry) => entry.id)).toContain(old.id);
+    expect(butonoOf(again.components)?.lost.find((entry) => entry.id === old.id)).toMatchObject({
       name: LAST,
       type: "COMPONENT",
       removed: true,
@@ -955,7 +973,7 @@ describe("a run reports every node of the set that was there at its start and is
       },
       LIFT,
     );
-    expect(again.components[0]?.lost.find((entry) => entry.id === old.id)).toMatchObject({
+    expect(butonoOf(again.components)?.lost.find((entry) => entry.id === old.id)).toMatchObject({
       removed: false,
       parent: { id: page.id, type: "PAGE" },
     });
@@ -980,9 +998,9 @@ describe("a run reports every node of the set that was there at its start and is
         return load(font);
       },
     });
-    expect(again.components[0]?.created).toEqual([]);
-    expect(again.components[0]?.nodes).toEqual({ start: NODES, end: NODES });
-    expect(again.components[0]?.lost.map((entry) => entry.id)).toEqual([label.id]);
+    expect(butonoOf(again.components)?.created).toEqual([]);
+    expect(butonoOf(again.components)?.nodes).toEqual({ start: NODES, end: NODES });
+    expect(butonoOf(again.components)?.lost.map((entry) => entry.id)).toEqual([label.id]);
     expect(again.warnings).toHaveLength(1);
     expect(again.warnings[0]).toContain(label.id);
   });
@@ -1009,7 +1027,9 @@ describe("a text is written only after its current font is loaded (F-A)", () => 
 // Schreiben sucht der Lauf deshalb auch markierte Komponenten außerhalb des Sets und bricht ab,
 // wenn er welche findet — ohne sie still zu übernehmen und ohne sie still zu löschen.
 describe("a marked component outside the set stops the run before it writes (F-B)", () => {
-  const FIRST = "emphasis=high, intent=neutral, size=small, state=rest";
+  // The first component a run makes: since Spec 011 ③ the avizo's, which sorts before the butono.
+  const FIRST = "intent=info, state=rest";
+  const FIRST_SET = "avizo";
   type Orphan = { id: string; name: string; set: string; parent: { id: string; type: string } };
 
   /** A run that crashes once its first component stands, as Figma's run did (F-A). */
@@ -1060,7 +1080,7 @@ describe("a marked component outside the set stops the run before it writes (F-B
     expect(componentsNamed(double, FIRST)).toHaveLength(1);
     expect(error?.message).toContain(orphans[0]?.id ?? "?");
     expect(error?.abort?.orphans).toEqual([
-      { id: orphans[0]?.id, name: FIRST, set: "butono", parent: { id: page?.id, type: "PAGE" } },
+      { id: orphans[0]?.id, name: FIRST, set: FIRST_SET, parent: { id: page?.id, type: "PAGE" } },
     ]);
     expect(double.counts).toEqual(counts);
   });
@@ -1399,7 +1419,7 @@ describe("every property the plugin owns is from the plan or neutral", () => {
 // Raster: 12 Zeilen × 6 Spalten, in der Reihenfolge des Plans — auch nachdem ein Lauf eine
 // Variante neu anlegen musste, die sonst am Ende stünde.
 describe("the variants stand in the grid of the Vitrino (F11)", () => {
-  const names = (repoPlan.components[0]?.variants ?? []).map((variant) =>
+  const names = (butonoOf(repoPlan.components)?.variants ?? []).map((variant) =>
     Object.entries(variant.props)
       .map(([key, value]) => `${key}=${value}`)
       .join(", "),
@@ -1703,7 +1723,7 @@ describe("every variant has its size and its own place in the grid (F14)", () =>
     // Rows in the order the Vitrino lists the combinations: the order of the plan.
     const planned = [
       ...new Set(
-        (repoPlan.components[0]?.variants ?? []).map(
+        (butonoOf(repoPlan.components)?.variants ?? []).map(
           (variant) =>
             `${variant.props.emphasis} · ${variant.props.intent} · ${variant.props.size}`,
         ),
@@ -1761,7 +1781,7 @@ describe("every variant has its size and its own place in the grid (F14)", () =>
       "figma",
       `${repoFiles["figma/plugin/code.js"] ?? ""}\nreturn applyPlan();`,
     )(figma)) as { warnings: string[]; components: { layout: { unplaced: string[] } }[] };
-    expect(report.components[0]?.layout.unplaced).toHaveLength(72);
+    expect(butonoOf(report.components)?.layout.unplaced).toHaveLength(72);
     const text = report.warnings.join(" ");
     expect(text).toContain("72 von 72 Varianten liegen in keiner Zelle");
     expect(text).toContain("in setGridChildPosition: refused");
@@ -1796,7 +1816,7 @@ describe("every variant has its size and its own place in the grid (F14)", () =>
         };
       }[];
     };
-    const held = report.components[0]?.layout.held;
+    const held = butonoOf(report.components)?.layout.held;
     expect(held?.set).toMatchObject({
       type: "COMPONENT_SET",
       layoutMode: "GRID",
@@ -1840,7 +1860,7 @@ describe("every variant has its size and its own place in the grid (F14)", () =>
       "figma",
       `${repoFiles["figma/plugin/code.js"] ?? ""}\nreturn applyPlan();`,
     )(figma)) as { components: { layout: { held: { set: Record<string, unknown> } } }[] };
-    expect(report.components[0]?.layout.held.set.gridRowSizes).toBe(
+    expect(butonoOf(report.components)?.layout.held.set.gridRowSizes).toBe(
       "wirft: in get_gridRowSizes: not supported",
     );
   });
@@ -1864,7 +1884,7 @@ describe("every variant has its size and its own place in the grid (F14)", () =>
 // mit color-scheme wechselt. Sie gehört zu den Eigenschaften, die das Plugin besitzt.
 describe("the set stands on the model's background, like the Vitrino (F16)", () => {
   it("names the Vitrino's surface in the plan", () => {
-    expect(repoPlan.components[0]?.surface).toEqual({
+    expect(butonoOf(repoPlan.components)?.surface).toEqual({
       variable: "color/background/canvas",
       opacity: 1,
     });
@@ -1988,7 +2008,7 @@ describe("every variant has the same outer size in all six states (F17)", () => 
       "figma",
       `${repoFiles["figma/plugin/code.js"] ?? ""}\nreturn applyPlan();`,
     )(figma)) as { warnings: string[]; components: { layout: { uneven: unknown[] } }[] };
-    expect(report.components[0]?.layout.uneven).toHaveLength(12);
+    expect(butonoOf(report.components)?.layout.uneven).toHaveLength(12);
     const text = report.warnings.join(" ");
     expect(text).toContain("12 von 12 Zeilen");
     expect(text).toContain("state=focus");
@@ -2003,7 +2023,7 @@ describe("every variant has the same outer size in all six states (F17)", () => 
     )(double.figma)) as {
       components: { layout: { held: { focus: Record<string, Record<string, unknown>> } } }[];
     };
-    const parts = report.components[0]?.layout.held.focus;
+    const parts = butonoOf(report.components)?.layout.held.focus;
     expect(parts?.variant?.name).toBe("emphasis=high, intent=neutral, size=small, state=focus");
     expect(parts?.["focus-ring"]).toMatchObject({
       strokesIncludedInLayout: false,
@@ -2109,7 +2129,7 @@ describe("the set encloses its grid (F20)", () => {
         };
       }[];
     };
-    const layout = report.components[0]?.layout;
+    const layout = butonoOf(report.components)?.layout;
     const set = setOf(double) as unknown as Box;
     expect(layout?.set).toEqual({ width: set.width, height: set.height });
     expect(layout?.bounds.minX).toBeGreaterThanOrEqual(0);
@@ -2139,7 +2159,7 @@ describe("the set encloses its grid (F20)", () => {
       "figma",
       `${repoFiles["figma/plugin/code.js"] ?? ""}\nreturn applyPlan();`,
     )(figma)) as { warnings: string[]; components: { layout: { outside: string[] } }[] };
-    expect(report.components[0]?.layout.outside.length).toBeGreaterThan(0);
+    expect(butonoOf(report.components)?.layout.outside.length).toBeGreaterThan(0);
     const text = report.warnings.join(" ");
     expect(text).toContain("liegen außerhalb des Sets");
     expect(text).toContain("300 × 200");
@@ -2199,8 +2219,8 @@ describe("the second run writes nothing that already holds (F21)", () => {
       components: { created: string[]; updated: string[] }[];
       warnings: string[];
     };
-    expect(report.components[0]?.created).toEqual([]);
-    expect(report.components[0]?.updated).toHaveLength(72);
+    expect(butonoOf(report.components)?.created).toEqual([]);
+    expect(butonoOf(report.components)?.updated).toHaveLength(72);
     expect(report.warnings).toEqual([]);
     expect(double.counts.writes - written).toBe(0);
   });
@@ -2220,7 +2240,8 @@ describe("a failed run leaves everything readable in the console (F21)", () => {
         ...double.figma,
         command: "run",
         createComponent: () => {
-          if (++made === 40)
+          // Spec 011 ③: the avizo's four variants are made first; the run fails in the butono.
+          if (++made === 4 + 40)
             throw new Error("in set_layoutMode: Cannot delete occupied row/column.");
           return create();
         },
@@ -2245,8 +2266,8 @@ describe("a failed run leaves everything readable in the console (F21)", () => {
     };
     expect(partial.phase).toBe("components");
     expect(partial.variables).toBeGreaterThan(0);
-    expect(partial.components[0]?.set).toBe("butono");
-    expect(partial.components[0]?.created).toHaveLength(39);
+    expect(butonoOf(partial.components)?.set).toBe("butono");
+    expect(butonoOf(partial.components)?.created).toHaveLength(39);
   });
 
   it("prints the report of a good run as one JSON string too", async () => {
@@ -2358,7 +2379,7 @@ describe("every bound paint shows the plan's colour after the first and the seco
 
   // The plan's paint per part and variant, in the default mode: hex and opacity (F8).
   const planned = (props: Record<string, string>) =>
-    repoPlan.components[0]?.variants.find((v) =>
+    butonoOf(repoPlan.components)?.variants.find((v) =>
       Object.entries(props).every(([k, val]) => v.props[k] === val),
     )?.paints ?? {};
 
@@ -2432,7 +2453,7 @@ describe("every bound paint shows the plan's colour after the first and the seco
         };
       }[];
     };
-    const paints = report.components[0]?.layout.paints;
+    const paints = butonoOf(report.components)?.layout.paints;
     expect(paints?.set.fills[0]).toMatchObject({ opacity: 1, variable: "color/background/canvas" });
     expect(paints?.set.fills[0]).toHaveProperty("color");
     expect(paints?.variant.control?.fills[0]).toMatchObject({
@@ -2464,6 +2485,8 @@ describe("every bound paint shows the plan's colour after the first and the seco
       warnings: [],
       // Spec 008: two sets; the ligilo has placement × size × state = 30 variants.
       components: [
+        // Spec 011 ③: the avizo has intent = 4 variants in one state (dismissible is no axis).
+        { set: "avizo", created: 4, updated: 0 },
         { set: "butono", created: 72, updated: 0 },
         // Spec 011 ②: the dialogo has size × reason = 6 variants in one state.
         { set: "dialogo", created: 6, updated: 0 },
@@ -2471,11 +2494,15 @@ describe("every bound paint shows the plan's colour after the first and the seco
         { set: "elektilo", created: 15, updated: 0 },
         // Spec 010 ③: the elekto has size × state = 15 variants.
         { set: "elekto", created: 15, updated: 0 },
+        // Spec 011 ③: the insigno has intent × size = 10 variants in one state.
+        { set: "insigno", created: 10, updated: 0 },
         // Spec 009: the kampo has size × state = 18 variants.
         { set: "kampo", created: 18, updated: 0 },
         { set: "ligilo", created: 30, updated: 0 },
         // Spec 010 ②: the markobutono has checked × size × state = 30 variants.
         { set: "markobutono", created: 30, updated: 0 },
+        // Spec 011 ③: the plenstato has kind = 2 variants in one state.
+        { set: "plenstato", created: 2, updated: 0 },
         // Spec 010 ①: the sxaltilo has checked × size × state = 24 variants.
         { set: "sxaltilo", created: 24, updated: 0 },
         // Spec 011 ②: the tekstareo has kind × size × state = 30 variants.
@@ -2533,7 +2560,7 @@ describe("the run says it when a collection has more modes than Figma allows (F2
     expect(warning).toContain("12");
     expect(warning).toContain("10");
     // The run does not stop at the limit: the component set is built either way.
-    expect(report.components[0]?.created).toHaveLength(72);
+    expect(butonoOf(report.components)?.created).toHaveLength(72);
   });
 
   it("names the Aspektoj that did not reach the file", async () => {
@@ -2649,7 +2676,9 @@ describe("the label's font is bound, not written (F30)", () => {
   }
 
   const labelOf = (double: ReturnType<typeof figmaDouble>) => {
-    const set = pageNodes(double).find((child) => child.type === "COMPONENT_SET");
+    const set = pageNodes(double).find(
+      (child) => child.type === "COMPONENT_SET" && child.name === "butono",
+    );
     const find = (node: DoubleNode): DoubleNode | undefined =>
       node.type === "TEXT" ? node : node.children.map(find).find((found) => found !== undefined);
     return find(set as DoubleNode);
@@ -2693,7 +2722,7 @@ describe("the label's font is bound, not written (F30)", () => {
   it("names the bound variables and the family per mode in the report", async () => {
     const double = figmaDouble({ fonts: BOTH });
     const result = await report(double);
-    expect(result.components[0]?.fonts).toEqual({
+    expect(butonoOf(result.components)?.fonts).toEqual({
       bound: {
         fontFamily: ["typography/label/2/font-family", "typography/label/1/font-family"],
         fontStyle: ["typography/label/2/font-style", "typography/label/1/font-style"],
@@ -2714,7 +2743,9 @@ describe("the focus ring's radius is bound, not written (F32)", () => {
   async function file() {
     const double = figmaDouble({ fonts: MODEL_FONTS });
     await run(double);
-    const set = pageNodes(double).find((child) => child.type === "COMPONENT_SET");
+    const set = pageNodes(double).find(
+      (child) => child.type === "COMPONENT_SET" && child.name === "butono",
+    );
     const variant = set?.children[0];
     const ring = variant?.children.find(
       (child) => child.getSharedPluginData("fundamento", "part") === "focus-ring",
@@ -2762,7 +2793,7 @@ describe("the report names the font that was applied, not the one that was plann
       ],
     });
     const result = await report(double);
-    const fonts = result.components[0]?.fonts;
+    const fonts = butonoOf(result.components)?.fonts;
     expect(fonts?.perAspekto.ekzemplo).toBe("Archivo Regular");
     expect(fonts?.perAspekto.komuna).toBe("Geist Medium");
     // What the plan asked for and did not get keeps its name, so both are readable.
@@ -2773,7 +2804,7 @@ describe("the report names the font that was applied, not the one that was plann
   it("leaves the family only when the family itself is missing", async () => {
     const double = figmaDouble({ fonts: [{ family: "Geist", style: "Medium" }] });
     const result = await report(double);
-    const fonts = result.components[0]?.fonts;
+    const fonts = butonoOf(result.components)?.fonts;
     expect(fonts?.perAspekto.ekzemplo).toBe("Inter Black");
     expect(fonts?.missing).toEqual(["Archivo Black"]);
   });
@@ -2783,7 +2814,9 @@ describe("the report names the font that was applied, not the one that was plann
 // — `letterSpacing` ist ein bindbares Feld des Textknotens, `textCase` ist es nicht.
 describe("the label carries its tracking and its case (F31)", () => {
   const labelOf = (double: ReturnType<typeof figmaDouble>) => {
-    const set = pageNodes(double).find((child) => child.type === "COMPONENT_SET");
+    const set = pageNodes(double).find(
+      (child) => child.type === "COMPONENT_SET" && child.name === "butono",
+    );
     const find = (node: DoubleNode): DoubleNode | undefined =>
       node.type === "TEXT" ? node : node.children.map(find).find((found) => found !== undefined);
     return find(set as DoubleNode);
@@ -2809,7 +2842,7 @@ describe("the label carries its tracking and its case (F31)", () => {
   it("warns instead of choosing a brand when the case varies by mode", async () => {
     const double = modelDouble();
     const changed = JSON.parse(JSON.stringify(plan)) as FigmaPlan;
-    for (const variant of changed.components[0]?.variants ?? []) {
+    for (const variant of butonoOf(changed.components)?.variants ?? []) {
       variant.textCase = "text case varies by mode";
     }
     const source = (files["figma/plugin/code.js"] ?? "").replace(
@@ -2942,7 +2975,7 @@ describe("the tertiary fill keeps its deckkraft over two runs (F43)", () => {
   type ReportedPaint = { opacity: number; resolved: boolean; stored: { opacity: number } };
 
   it("is the last variant of the plan, the one the report shows, and planned at deckkraft 0", () => {
-    const variants = plan.components[0]?.variants ?? [];
+    const variants = butonoOf(plan.components)?.variants ?? [];
     expect(variants.at(-1)?.props).toEqual(props);
     expect(variants.at(-1)?.paints?.["surface.fill"]).toEqual({ hex: "#000000", opacity: 0 });
     expect(variants.at(-1)?.paints?.["border.color"]).toEqual({ hex: "#000000", opacity: 0 });
@@ -2964,7 +2997,7 @@ describe("the tertiary fill keeps its deckkraft over two runs (F43)", () => {
         set?.children.find((child) => child.name === name),
         "control",
       );
-      const reported = report.components[0]?.layout.paints.last.control;
+      const reported = butonoOf(report.components)?.layout.paints.last.control;
       for (const field of ["fills", "strokes"] as const) {
         const where = `run ${index}, control ${field}`;
         const held = ((control?.properties[field] ?? []) as StoredPaint[])[0];
@@ -3325,10 +3358,17 @@ describe("every set lies in the frame Eroj in the section Fundamento (F-1, F-2, 
     if (set === undefined) throw new Error(`no set ${name}`);
     return set;
   };
-  /** Every text named `label` under a node. */
+  /**
+   * Every text under a node that carries the label property: the label of a control, the message
+   * of a notice (Spec 011 ③: the avizo is the first set in the frame).
+   */
   const labelsOf = (node: DoubleNode): DoubleNode[] =>
     node.children.flatMap((child) => [
-      ...(child.type === "TEXT" && child.name === "label" ? [child] : []),
+      ...(child.type === "TEXT" &&
+      (child.properties.componentPropertyReferences as { characters?: string } | undefined)
+        ?.characters !== undefined
+        ? [child]
+        : []),
       ...labelsOf(child),
     ]);
   const names = repoPlan.components.map((component) => component.set);
@@ -3725,6 +3765,11 @@ describe("the label default follows the role of the Ero (M-3)", () => {
     expect(of("ligilo")).toEqual(["Ziel"]);
     expect(of("markobutono")).toEqual(["Option"]);
     expect(of("sxaltilo")).toEqual(["Einstellung"]);
+    // Spec 011 ③ (plan ③ D-14): the badge, the notice (with its BOOLEAN dismissible beside the
+    // label) and the state, whose word is the structure's.
+    expect(of("insigno")).toEqual(["Status"]);
+    expect(of("avizo")).toEqual(["Meldung", false]);
+    expect(of("plenstato")).toEqual(["Zustand"]);
   });
 
   it("updates a found ligilo that still says Aktion to Ziel, property and every label", async () => {
@@ -4399,6 +4444,460 @@ describe("the dialogo is drawn as a dialog: surface with heading, message, reaso
 
   it("a second run writes nothing new", async () => {
     const { double } = await drawn();
+    const before = double.snapshot();
+    await run(double, source);
+    expect(double.snapshot()).toBe(before);
+  });
+});
+
+// Spec 011 ③ (spec „insigno", G2; plan ③ D-14): the badge is a structure of its own — variant →
+// control (the pill: a row with fill, border, radius, minimum height and inline padding bound) →
+// text (the label property, in the role of the text part). No focus ring: static text has no
+// state but rest, and no part of the hidden slot description is drawn.
+describe("the insigno is drawn as a badge: the pill with its text (Spec 011 ③)", () => {
+  const source = repoFiles["figma/plugin/code.js"] ?? "";
+  const bound = (node: DoubleNode | undefined, field: string) => node?.boundVariables[field]?.name;
+  const paintOf = (node: DoubleNode | undefined, field: "fills" | "strokes") =>
+    ((node?.properties[field] ?? []) as { boundVariables?: { color?: { name: string } } }[])[0]
+      ?.boundVariables?.color?.name;
+  type Report = {
+    warnings: string[];
+    components: {
+      set: string;
+      layout: {
+        zero: string[];
+        smaller: string[];
+        unplaced: string[];
+        uneven: unknown[];
+        columns: number;
+        rows: number;
+        held: { rest: Record<string, Record<string, unknown>> };
+      };
+    }[];
+  };
+  const drawn = async () => {
+    const double = modelDouble();
+    const report = (await new Function("figma", `${source}\nreturn applyPlan();`)(
+      double.figma,
+    )) as Report;
+    const set = pageNodes(double).find((child) => child.name === "insigno");
+    const variant = (name: string) => set?.children.find((child) => child.name === name);
+    const insigno = report.components.find((component) => component.set === "insigno");
+    return { double, set, variant, report, insigno };
+  };
+
+  it("draws ten variants of intent × size in one column, each the pill directly under the variant, the text as the label property", async () => {
+    const { set, variant, insigno } = await drawn();
+    expect(set?.children.map((child) => child.name)).toEqual([
+      "intent=neutral, size=small, state=rest",
+      "intent=neutral, size=medium, state=rest",
+      "intent=info, size=small, state=rest",
+      "intent=info, size=medium, state=rest",
+      "intent=success, size=small, state=rest",
+      "intent=success, size=medium, state=rest",
+      "intent=warning, size=small, state=rest",
+      "intent=warning, size=medium, state=rest",
+      "intent=danger, size=small, state=rest",
+      "intent=danger, size=medium, state=rest",
+    ]);
+    expect(insigno?.layout.columns).toBe(1);
+    expect(insigno?.layout.rows).toBe(10);
+    const small = variant("intent=neutral, size=small, state=rest");
+    expect(small?.children.map((child) => child.name)).toEqual(["control"]);
+    expect(descendant(small, "focus-ring")).toBeUndefined();
+    expect(descendant(small, "description")).toBeUndefined();
+    const control = descendant(small, "control");
+    expect(control?.properties.layoutMode).toBe("HORIZONTAL");
+    // The border lies in the size, as on the web (box-sizing border-box).
+    expect(control?.properties.strokesIncludedInLayout).toBe(true);
+    expect(paintOf(control, "fills")).toBe("color/background/sunken");
+    expect(paintOf(control, "strokes")).toBe("color/border/default");
+    expect(bound(control, "strokeWeight")).toBe("border/width/default");
+    expect(bound(control, "minHeight")).toBe("size/icon/medium");
+    expect(bound(control, "paddingLeft")).toBe("spacing/xsmall");
+    expect(bound(control, "paddingRight")).toBe("spacing/xsmall");
+    expect(bound(control, "cornerRadius")).toBe("radius/role/pill");
+    expect(control?.children.map((child) => child.name)).toEqual(["text"]);
+    const text = descendant(small, "text");
+    expect(text?.properties.characters).toBe("Status");
+    expect(text?.properties.componentPropertyReferences).toMatchObject({
+      characters: expect.stringMatching(/^label/),
+    });
+    expect(paintOf(text, "fills")).toBe("color/text/subtle");
+    expect(bound(text, "fontSize")).toBe("typography/label/2/font-size");
+    expect(bound(text, "fontFamily")).toBe("typography/label/2/font-family");
+    const danger = variant("intent=danger, size=medium, state=rest");
+    expect(paintOf(descendant(danger, "control"), "fills")).toBe("color/status/danger/subtle");
+    expect(paintOf(descendant(danger, "text"), "fills")).toBe("color/status/danger/text");
+    expect(bound(descendant(danger, "control"), "minHeight")).toBe("size/icon/large");
+    expect(bound(descendant(danger, "control"), "paddingLeft")).toBe("spacing/small");
+  });
+
+  it("measures every variant with a size and a cell, warns of nothing, and writes nothing new on a second run", async () => {
+    const { double, insigno, report } = await drawn();
+    expect(insigno?.layout.zero).toEqual([]);
+    expect(insigno?.layout.smaller).toEqual([]);
+    expect(insigno?.layout.unplaced).toEqual([]);
+    expect(insigno?.layout.uneven).toEqual([]);
+    expect(report.warnings.filter((warning) => warning.startsWith("insigno"))).toEqual([]);
+    expect(insigno?.layout.held.rest.control).toBeDefined();
+    expect(insigno?.layout.held.rest.text).toBeDefined();
+    const before = double.snapshot();
+    await run(double, source);
+    expect(double.snapshot()).toBe(before);
+  });
+});
+
+// Spec 011 ③ (spec „avizo", G2, G4; plan ③ D-14): the notice is a structure of its own — variant
+// → control (a row: surface fill, radius, the padding on every side; its stroke at the left — the
+// inline start of the Figma file, which knows no writing direction — is the accent: colour bound,
+// the left weight bound to accent.width, the other three sides 0) → texts (a column: heading,
+// the message as the label property, details, the actions placeholder with its gap) and the
+// dismiss frame (a square of dismiss.size) at the end. dismissible is a BOOLEAN property of the
+// set that shows the dismiss frame; off by default, as the Skemo says. Test-double assumptions
+// until measured in f10b-5: a stroke weight per side is bindable (strokeLeftWeight), and a
+// BOOLEAN property connected to visible shows and hides the layer in an instance.
+describe("the avizo is drawn as a notice: surface with accent, heading, message, details, actions and dismiss (Spec 011 ③)", () => {
+  const source = repoFiles["figma/plugin/code.js"] ?? "";
+  const bound = (node: DoubleNode | undefined, field: string) => node?.boundVariables[field]?.name;
+  const paintOf = (node: DoubleNode | undefined, field: "fills" | "strokes") =>
+    ((node?.properties[field] ?? []) as { boundVariables?: { color?: { name: string } } }[])[0]
+      ?.boundVariables?.color?.name;
+  type Definitions = Record<string, { type: string; defaultValue: string | boolean }>;
+  type Report = {
+    warnings: string[];
+    components: {
+      set: string;
+      layout: {
+        zero: string[];
+        smaller: string[];
+        unplaced: string[];
+        uneven: unknown[];
+        columns: number;
+        rows: number;
+        held: { rest: Record<string, Record<string, unknown>> };
+      };
+    }[];
+  };
+  const drawn = async () => {
+    const double = modelDouble();
+    const report = (await new Function("figma", `${source}\nreturn applyPlan();`)(
+      double.figma,
+    )) as Report;
+    const set = pageNodes(double).find((child) => child.name === "avizo");
+    const variant = (name: string) => set?.children.find((child) => child.name === name);
+    const avizo = report.components.find((component) => component.set === "avizo");
+    return { double, set, variant, report, avizo };
+  };
+
+  it("draws four variants by intent, the control a row with the accent at its start, the texts column and the dismiss frame", async () => {
+    const { set, variant, avizo } = await drawn();
+    expect(set?.children.map((child) => child.name)).toEqual([
+      "intent=info, state=rest",
+      "intent=success, state=rest",
+      "intent=warning, state=rest",
+      "intent=danger, state=rest",
+    ]);
+    expect(avizo?.layout.columns).toBe(1);
+    expect(avizo?.layout.rows).toBe(4);
+    const info = variant("intent=info, state=rest");
+    expect(info?.children.map((child) => child.name)).toEqual(["control"]);
+    const control = descendant(info, "control");
+    expect(control?.properties.layoutMode).toBe("HORIZONTAL");
+    expect(control?.properties.strokesIncludedInLayout).toBe(true);
+    expect(paintOf(control, "fills")).toBe("color/status/info/weak");
+    expect(paintOf(control, "strokes")).toBe("color/status/info/border");
+    expect(bound(control, "strokeLeftWeight")).toBe("border/width/strong");
+    expect(bound(control, "strokeWeight")).toBeUndefined();
+    expect(control?.properties.strokeWeight).toBe(0);
+    for (const side of ["strokeTopWeight", "strokeRightWeight", "strokeBottomWeight"]) {
+      expect(control?.properties[side], side).toBe(0);
+    }
+    expect(bound(control, "cornerRadius")).toBe("radius/role/surface");
+    for (const side of ["paddingLeft", "paddingRight", "paddingTop", "paddingBottom"]) {
+      expect(bound(control, side), side).toBe("spacing/medium");
+    }
+    expect(bound(control, "itemSpacing")).toBe("spacing/small");
+    expect(control?.children.map((child) => child.name)).toEqual(["texts", "dismiss"]);
+    const texts = descendant(info, "texts");
+    expect(texts?.properties.layoutMode).toBe("VERTICAL");
+    expect(bound(texts, "itemSpacing")).toBe("spacing/small");
+    expect(texts?.children.map((child) => child.name)).toEqual([
+      "heading",
+      "message",
+      "details",
+      "actions",
+    ]);
+    const heading = descendant(info, "heading");
+    expect(heading?.properties.characters).toBe("Überschrift");
+    expect(bound(heading, "fontSize")).toBe("typography/label/1/font-size");
+    expect(paintOf(heading, "fills")).toBe("color/text/default");
+    const message = descendant(info, "message");
+    expect(message?.properties.characters).toBe("Meldung");
+    expect(message?.properties.componentPropertyReferences).toMatchObject({
+      characters: expect.stringMatching(/^label/),
+    });
+    expect(bound(message, "fontSize")).toBe("typography/body/1/font-size");
+    expect(paintOf(message, "fills")).toBe("color/text/default");
+    const details = descendant(info, "details");
+    expect(details?.properties.characters).toBe("Einzelheit");
+    expect(bound(details, "fontSize")).toBe("typography/caption/font-size");
+    const actions = descendant(info, "actions");
+    expect(actions?.properties.layoutMode).toBe("HORIZONTAL");
+    expect(bound(actions, "itemSpacing")).toBe("spacing/small");
+    expect(actions?.properties.visible).not.toBe(false);
+    expect(actions?.children).toEqual([]);
+    const dismiss = descendant(info, "dismiss");
+    expect(dismiss?.properties.layoutMode).toBe("NONE");
+    expect(bound(dismiss, "width")).toBe("size/control/small");
+    expect(bound(dismiss, "height")).toBe("size/control/small");
+    expect(dismiss?.properties.fills).toEqual([]);
+    expect(dismiss?.properties.visible).toBe(false);
+    expect(dismiss?.properties.componentPropertyReferences).toEqual({
+      visible: expect.stringMatching(/^dismissible#/),
+    });
+    const danger = variant("intent=danger, state=rest");
+    expect(paintOf(descendant(danger, "control"), "fills")).toBe("color/status/danger/weak");
+    expect(paintOf(descendant(danger, "control"), "strokes")).toBe("color/status/danger/border");
+  });
+
+  it("declares dismissible as a BOOLEAN property of the set beside the label, default false, once over two runs", async () => {
+    const { double, set } = await drawn();
+    const definitions = () => (set?.properties.componentPropertyDefinitions ?? {}) as Definitions;
+    const keys = Object.keys(definitions()).filter((key) => key.startsWith("dismissible#"));
+    expect(keys).toHaveLength(1);
+    expect(definitions()[keys[0] ?? ""]).toEqual({ type: "BOOLEAN", defaultValue: false });
+    expect(Object.keys(definitions())).toHaveLength(2);
+    for (const variant of set?.children ?? []) {
+      expect(
+        descendant(variant, "dismiss")?.properties.componentPropertyReferences,
+        variant.name,
+      ).toEqual({ visible: keys[0] });
+    }
+    await run(double, source);
+    expect(Object.keys(definitions())).toHaveLength(2);
+    // No other set declares it.
+    const butono = pageNodes(double).find((child) => child.name === "butono");
+    expect(
+      Object.keys((butono?.properties.componentPropertyDefinitions ?? {}) as Definitions),
+    ).toHaveLength(1);
+  });
+
+  it("measures every variant with a size and a cell, warns of nothing, and writes nothing new on a second run", async () => {
+    const { double, avizo, report } = await drawn();
+    expect(avizo?.layout.zero).toEqual([]);
+    expect(avizo?.layout.smaller).toEqual([]);
+    expect(avizo?.layout.unplaced).toEqual([]);
+    expect(avizo?.layout.uneven).toEqual([]);
+    expect(report.warnings.filter((warning) => warning.startsWith("avizo"))).toEqual([]);
+    expect(avizo?.layout.held.rest.control).toBeDefined();
+    expect(avizo?.layout.held.rest.message).toBeDefined();
+    expect(avizo?.layout.held.rest.dismiss).toBeDefined();
+    const before = double.snapshot();
+    await run(double, source);
+    expect(double.snapshot()).toBe(before);
+  });
+
+  // F-4 of the acceptance of Spec 011 ③ (measured in Figma, 2026-10-16): the notice stood with a
+  // lot of empty space below its texts — a fixed height, where every frame of it says HUG. The
+  // cause is the empty actions placeholder: an auto-layout frame without children keeps its size,
+  // hug or not, so the 100 × 100 createFrame gives a frame stayed, and the column took it in. The
+  // plugin makes an empty placeholder as small as the tool allows (0.01) before it writes its
+  // layout, so the height of every variant follows its texts and padding — with the dismiss frame
+  // shown or hidden — and the placeholder still hugs what a designer drops into it.
+  it("hugs its height in every variant (F-4): the empty actions placeholder keeps no default size, the variant is as high as its texts and padding", async () => {
+    const { double, set } = await drawn();
+    const box = (node: DoubleNode | undefined) =>
+      node as unknown as { width: number; height: number };
+    const value = (node: DoubleNode | undefined, name: string) =>
+      Number(
+        double.variables
+          .find((variable) => variable.name === name)
+          ?.resolveForConsumer(node as DoubleNode).value,
+      );
+    expect(set?.children).toHaveLength(4);
+    for (const variant of set?.children ?? []) {
+      const control = descendant(variant, "control");
+      const texts = descendant(variant, "texts");
+      const actions = descendant(variant, "actions");
+      const dismiss = descendant(variant, "dismiss");
+      for (const frame of [variant, control, texts, actions]) {
+        expect(frame?.properties.layoutSizingVertical, `${variant.name} ${frame?.name}`).toBe(
+          "HUG",
+        );
+      }
+      expect(actions?.properties.visible, variant.name).not.toBe(false);
+      for (const shown of [false, true]) {
+        if (dismiss !== undefined) (dismiss as unknown as { visible: boolean }).visible = shown;
+        const where = `${variant.name}, dismiss ${shown ? "shown" : "hidden"}`;
+        // The empty placeholder is no larger than the tool's smallest size.
+        expect(box(actions).width, where).toBeLessThanOrEqual(0.01);
+        expect(box(actions).height, where).toBeLessThanOrEqual(0.01);
+        // The column is its three texts, the gaps between its four children and the placeholder.
+        const words = ["heading", "message", "details"].map(
+          (name) => box(descendant(variant, name)).height,
+        );
+        const gap = value(texts, "spacing/small");
+        expect(gap).toBeGreaterThan(0);
+        expect(box(texts).height, where).toBeCloseTo(
+          words.reduce((sum, each) => sum + each, 0) + 3 * gap + box(actions).height,
+          5,
+        );
+        // The control is the column and its padding; the variant is the control.
+        const padding = value(control, "spacing/medium");
+        expect(padding).toBeGreaterThan(0);
+        expect(box(control).height, where).toBeCloseTo(box(texts).height + 2 * padding, 5);
+        expect(box(variant).height, where).toBe(box(control).height);
+      }
+    }
+  });
+});
+
+// Spec 011 ③ (spec „plenstato", G2, G4; plan ③ D-14): the state is a structure of its own —
+// variant → control (a column, centred: the border's colour and width bound, the stroke dashed
+// where the plan says dashed — a dash pattern written as a number, since Figma binds none — and
+// the bound paint invisible where it says none) → indicator (the arc of the web, imported once;
+// its size bound, the vector's stroke bound to indicator.color, the frame invisible where the
+// colour is none), text (the label property) and the actions placeholder (invisible where the
+// constraint forbids actions: while loading). The motion part binds nothing in the file: Figma
+// has no duration to bind, as for the butono. Test-double assumptions until measured in f10b-5:
+// an imported SVG path with a stroke arrives as a vector with that stroke; a paint with
+// visible false shows nothing and keeps its binding.
+describe("the plenstato is drawn as a state: the column with the arc, the text and the actions; dashed when empty (Spec 011 ③)", () => {
+  const source = repoFiles["figma/plugin/code.js"] ?? "";
+  const bound = (node: DoubleNode | undefined, field: string) => node?.boundVariables[field]?.name;
+  type Paint = { visible: boolean; boundVariables?: { color?: { name: string } } };
+  const paints = (node: DoubleNode | undefined, field: "fills" | "strokes") =>
+    (node?.properties[field] ?? []) as Paint[];
+  type Report = {
+    warnings: string[];
+    components: {
+      set: string;
+      layout: {
+        zero: string[];
+        smaller: string[];
+        unplaced: string[];
+        uneven: unknown[];
+        columns: number;
+        rows: number;
+        held: { rest: Record<string, Record<string, unknown>> };
+      };
+    }[];
+  };
+  const drawn = async () => {
+    const double = modelDouble();
+    const report = (await new Function("figma", `${source}\nreturn applyPlan();`)(
+      double.figma,
+    )) as Report;
+    const set = pageNodes(double).find((child) => child.name === "plenstato");
+    const variant = (name: string) => set?.children.find((child) => child.name === name);
+    const plenstato = report.components.find((component) => component.set === "plenstato");
+    return { double, set, variant, report, plenstato };
+  };
+
+  it("draws two variants by kind: the border dashed where empty, its paint invisible where loading", async () => {
+    const { set, variant, plenstato } = await drawn();
+    expect(set?.children.map((child) => child.name)).toEqual([
+      "kind=loading, state=rest",
+      "kind=empty, state=rest",
+    ]);
+    expect(plenstato?.layout.columns).toBe(1);
+    expect(plenstato?.layout.rows).toBe(2);
+    const loading = descendant(variant("kind=loading, state=rest"), "control");
+    const empty = descendant(variant("kind=empty, state=rest"), "control");
+    for (const [control, kind] of [
+      [loading, "loading"],
+      [empty, "empty"],
+    ] as const) {
+      expect(control?.properties.layoutMode, kind).toBe("VERTICAL");
+      expect(control?.properties.primaryAxisAlignItems, kind).toBe("CENTER");
+      expect(control?.properties.counterAxisAlignItems, kind).toBe("CENTER");
+      expect(control?.properties.strokesIncludedInLayout, kind).toBe(true);
+      expect(control?.properties.fills, kind).toEqual([]);
+      expect(paints(control, "strokes")[0]?.boundVariables?.color?.name, kind).toBe(
+        "color/border/subtle",
+      );
+      expect(bound(control, "strokeWeight"), kind).toBe("border/width/default");
+      expect(bound(control, "cornerRadius"), kind).toBe("radius/role/surface");
+      for (const side of ["paddingLeft", "paddingRight", "paddingTop", "paddingBottom"]) {
+        expect(bound(control, side), `${kind} ${side}`).toBe("spacing/large");
+      }
+      expect(bound(control, "itemSpacing"), kind).toBe("spacing/small");
+      expect(
+        control?.children.map((child) => child.name),
+        kind,
+      ).toEqual(["indicator", "text", "actions"]);
+    }
+    // The stroke: none while loading — the paint stays bound and is not shown; dashed when empty.
+    expect(paints(loading, "strokes")[0]?.visible).toBe(false);
+    expect(loading?.properties.dashPattern).toEqual([]);
+    expect(paints(empty, "strokes")[0]?.visible).toBe(true);
+    const planned = repoPlan.components
+      .find((component) => component.set === "plenstato")
+      ?.variants.find((entry) => entry.props.kind === "empty")?.stroke;
+    expect(empty?.properties.dashPattern).toEqual(planned?.dashPattern);
+    expect(empty?.properties.dashPattern).toHaveLength(2);
+  });
+
+  it("shows the arc with its colour bound while loading and hides it when empty; hides the actions while loading", async () => {
+    const { variant } = await drawn();
+    const loading = variant("kind=loading, state=rest");
+    const empty = variant("kind=empty, state=rest");
+    for (const [node, kind] of [
+      [loading, "loading"],
+      [empty, "empty"],
+    ] as const) {
+      const indicator = descendant(node, "indicator");
+      expect(indicator?.properties.layoutMode, kind).toBe("NONE");
+      expect(bound(indicator, "width"), kind).toBe("size/icon/small");
+      expect(bound(indicator, "height"), kind).toBe("size/icon/small");
+      expect(indicator?.properties.fills, kind).toEqual([]);
+      const mark = descendant(node, "mark");
+      expect(mark?.type, kind).toBe("VECTOR");
+      expect(mark?.properties.fills, kind).toEqual([]);
+      // The arc's stroke width is the sign's own (the SVG's), carried with the sign.
+      expect(mark?.properties.strokeWeight, kind).toBe(2);
+      const text = descendant(node, "text");
+      expect(text?.properties.characters, kind).toBe("Zustand");
+      expect(text?.properties.componentPropertyReferences, kind).toMatchObject({
+        characters: expect.stringMatching(/^label/),
+      });
+      expect(paints(text, "fills")[0]?.boundVariables?.color?.name, kind).toBe("color/text/muted");
+      expect(bound(text, "fontSize"), kind).toBe("typography/body/1/font-size");
+      const actions = descendant(node, "actions");
+      expect(actions?.properties.layoutMode, kind).toBe("HORIZONTAL");
+      expect(bound(actions, "itemSpacing"), kind).toBe("spacing/small");
+      expect(actions?.children, kind).toEqual([]);
+    }
+    expect(descendant(loading, "indicator")?.properties.visible).toBe(true);
+    expect(paints(descendant(loading, "mark"), "strokes")[0]?.boundVariables?.color?.name).toBe(
+      "color/status/info/basic",
+    );
+    expect(descendant(loading, "actions")?.properties.visible).toBe(false);
+    expect(descendant(empty, "indicator")?.properties.visible).toBe(false);
+    expect(paints(descendant(empty, "mark"), "strokes")).toEqual([]);
+    expect(descendant(empty, "actions")?.properties.visible).toBe(true);
+    // Nothing of the motion part is bound anywhere in the variant.
+    const names = (node: DoubleNode | undefined): string[] =>
+      node === undefined
+        ? []
+        : [
+            ...Object.values(node.boundVariables).map((variable) => variable.name),
+            ...node.children.flatMap(names),
+          ];
+    expect(names(loading).some((name) => name.startsWith("motion/"))).toBe(false);
+  });
+
+  it("measures every variant with a size and a cell, warns of nothing, and writes nothing new on a second run", async () => {
+    const { double, plenstato, report } = await drawn();
+    expect(plenstato?.layout.zero).toEqual([]);
+    expect(plenstato?.layout.smaller).toEqual([]);
+    expect(plenstato?.layout.unplaced).toEqual([]);
+    expect(plenstato?.layout.uneven).toEqual([]);
+    expect(report.warnings.filter((warning) => warning.startsWith("plenstato"))).toEqual([]);
+    expect(plenstato?.layout.held.rest.control).toBeDefined();
+    expect(plenstato?.layout.held.rest.indicator).toBeDefined();
+    expect(plenstato?.layout.held.rest.text).toBeDefined();
     const before = double.snapshot();
     await run(double, source);
     expect(double.snapshot()).toBe(before);

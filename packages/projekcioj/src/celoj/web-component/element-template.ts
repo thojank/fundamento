@@ -23,7 +23,9 @@ export type HostControl =
   | "toggle"
   | "group"
   | "select"
-  | "dialog";
+  | "dialog"
+  | "text"
+  | "status";
 
 export interface ElementNames {
   /** `fm-butono` */
@@ -44,7 +46,20 @@ export interface ElementNames {
    * Slot names in the order the Skemo declares them; the default slot is the label. A slot whose
    * entries are options (Spec 010 ③, SkemoSlot.entry) is a `list`: one row per entry.
    */
-  slots?: { name: string; default?: boolean; decorative?: boolean; list?: boolean }[];
+  slots?: {
+    name: string;
+    default?: boolean;
+    decorative?: boolean;
+    list?: boolean;
+    /** A text slot (Spec 011 ③): a live region holds it in a span, every other slot in a div. */
+    text?: boolean;
+    /** The text is for assistive technology alone, clipped from sight (Spec 011 ③, D-08). */
+    hidden?: boolean;
+  }[];
+  /** Whether the Skemo has the part indicator: a status host turns it while loading (D-10). */
+  indicator?: boolean;
+  /** Whether the Skemo has the part dismiss: a status host shows a close butono in it (D-09). */
+  dismiss?: boolean;
   /**
    * The Make Kit builds one file per Aspekto: the descriptor and the stylesheet are then constants
    * above the element instead of imports (D-14).
@@ -59,6 +74,11 @@ export interface ElementNames {
  */
 export function hostOf(role: string, multiline = false): HostControl {
   if (role === "link") return "a";
+  // Static text (Spec 011 ③, D-08: the badge) is a span without a role attribute — generic is the
+  // span's own role; a live region (D-09, D-10: notice, loading and empty state) is a div with
+  // role status, alert where the Skemo's intent is danger.
+  if (role === "generic") return "text";
+  if (role === "status") return "status";
   if (role === "textbox") return multiline ? "textarea" : "input";
   if (role === "dialog") return "dialog";
   if (role === "switch" || role === "checkbox") return "toggle";
@@ -210,13 +230,68 @@ function rowMarkup(role: string): string {
   return `<div part="option" role="radio" aria-checked="false" tabindex="-1"><span part="control"><span part="indicator">${signOf(role) ?? ""}</span></span><span part="option-label"><slot></slot></span></div>`;
 }
 
+/**
+ * The arc of a loading indicator in a box of 16 × 16 (Spec 011 ③, D-10): three quarters of a
+ * circle in the current colour, a sign of the projection like the check mark; the element turns
+ * it with the motion roles of the Skemo.
+ */
+const ARC_PATH = "M8 2a6 6 0 1 1-6 6";
+
+/** The sign of a dismiss butono (Spec 011 ③, D-09): a cross in the current colour, decorative. */
+const CROSS =
+  '<svg slot="icon-start" aria-hidden="true" viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg>';
+
+/**
+ * The shadow markup of static text (Spec 011 ③, D-08, G4): a span without a role as the control,
+ * the label in it, and every hidden text slot (the long form of a badge) in a span clipped from
+ * sight but present for assistive technology — never a title attribute.
+ */
+function textMarkup(slots: NonNullable<ElementNames["slots"]>): string {
+  const hidden = slots
+    .filter((slot) => slot.hidden === true)
+    .map(
+      (slot) =>
+        `<span part="${slot.name}" class="fm-hidden"><slot name="${slot.name}"></slot></span>`,
+    )
+    .join("");
+  return `<span part="control"><slot></slot>${hidden}<span id="fm-texts" hidden></span></span>`;
+}
+
+/**
+ * The shadow markup of a live region (Spec 011 ③, D-09, D-10, G4): a div with role status as
+ * the control; first the words assistive technology hears with the content (the kind of a notice,
+ * "lädt"), clipped from sight; the indicator where the Skemo has one; then the text slots in the
+ * Skemo's order, the default slot as the message or text, every named slot in a holder hidden
+ * while empty; and the dismiss butono where the Skemo has the part, hidden until dismissible.
+ */
+function statusMarkup(
+  slots: NonNullable<ElementNames["slots"]>,
+  indicator: boolean,
+  dismiss: boolean,
+): string {
+  const arc = `<svg aria-hidden="true" viewBox="0 0 16 16" width="100%" height="100%" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="${ARC_PATH}"/></svg>`;
+  const holders = slots
+    .filter((slot) => slot.decorative !== true)
+    .map((slot) =>
+      slot.default === true
+        ? `<span part="${slot.name}" id="${slot.name}"><slot></slot></span>`
+        : `<${slot.text === true ? "span" : "div"} part="${slot.name}" id="${slot.name}" hidden><slot name="${slot.name}"></slot></${slot.text === true ? "span" : "div"}>`,
+    )
+    .join("");
+  return `<div part="control" role="status"><span id="fm-texts" class="fm-hidden"></span>${indicator ? `<span part="indicator" aria-hidden="true">${arc}</span>` : ""}<div>${holders}</div>${dismiss ? `<fm-butono part="dismiss" emphasis="low" size="small" hidden>${CROSS}</fm-butono>` : ""}</div>`;
+}
+
 /** The shadow markup of the control: slots before the label (icon-start), the label, the rest. */
 function markup(
   host: HostControl,
   slots: NonNullable<ElementNames["slots"]>,
   role: string,
   marked: boolean,
+  indicator = false,
+  dismiss = false,
 ): string {
+  if (host === "text") return textMarkup(slots);
+  if (host === "status") return statusMarkup(slots, indicator, dismiss);
   if (host === "input") return fieldMarkup(slots);
   if (host === "textarea") return fieldMarkup(slots, true);
   if (host === "dialog") return dialogMarkup();
@@ -244,6 +319,8 @@ export function elementSource({
   host = "button",
   role = "button",
   marked = false,
+  indicator = false,
+  dismiss = false,
   slots = [
     { name: "label", default: true },
     { name: "icon-start", decorative: true },
@@ -267,7 +344,11 @@ export function elementSource({
               ? "[role=radiogroup]"
               : host === "select"
                 ? "select"
-                : "button";
+                : host === "text"
+                  ? "span"
+                  : host === "status"
+                    ? "div"
+                    : "button";
   const isToggle = host === "toggle";
   const isGroup = host === "group";
   const isSelect = host === "select";
@@ -275,7 +356,12 @@ export function elementSource({
   // The platform element of a field: the generated code names it, so the types narrow (TS).
   const nativeField = host === "textarea" ? "HTMLTextAreaElement" : "HTMLInputElement";
   const isDialog = host === "dialog";
+  const isStatus = host === "status";
+  const isStatic = isStatus || host === "text";
   const listSlot = slots.find((slot) => slot.list === true)?.name ?? "";
+  const namedSlots = slots
+    .filter((slot) => slot.default !== true && slot.decorative !== true)
+    .map((slot) => slot.name);
   // Only the element of a toggle carries these lines (Spec 010 ①, D-09; ②, D-08).
   const toggleRender = isToggle
     ? `    // A toggle (Spec 010 ①, D-09): checked is spoken as aria-checked; in a form it sends "on"
@@ -758,6 +844,10 @@ ${
       this.#cancel();
     });
     control.addEventListener("close", () => {
+      // The platform fires close after the dialog closed (a task later). A dialog shown again in
+      // between is open now: the late event takes nothing back (Spec 011 ③ Nachbesserung, CI-Lauf
+      // 38976295942: cancel, then open again in one go, and the confirmation vanished).
+      if ((control as HTMLDialogElement).open) return;
       if (this.hasAttribute("open")) this.removeAttribute("open");
     });
     root.querySelector('[part="actions"]')?.addEventListener("click", (event) => {
@@ -877,6 +967,119 @@ ${
   }
 `
     : "";
+  // The constructor of a live region (Spec 011 ③, D-09): a click on the dismiss butono the notice
+  // shows itself says dismiss.
+  const statusInit =
+    isStatus && dismiss
+      ? `    root.querySelector('[part="dismiss"]')?.addEventListener("click", (event) => {
+      event.stopPropagation();
+      this.#dismiss();
+    });
+`
+      : "";
+  // The render of a live region (Spec 011 ③, D-09, D-10, G4): the role follows intent (danger is
+  // an alert), busy follows kind (loading); every named slot shows while it has content; the
+  // dismiss butono shows while dismissible and is named by a11y.texts.dismissible; the indicator
+  // turns while loading.
+  const statusRender = isStatus
+    ? `    if (HAS_PROP.has("intent")) {
+      const intent = this.propValue("intent");
+      control.setAttribute("role", intent === "danger" ? "alert" : "status");
+    }
+    if (HAS_PROP.has("kind")) {
+      const kind = this.propValue("kind");
+      control.setAttribute("aria-busy", String(kind === "loading"));
+    }
+    for (const name of NAMED_SLOTS) {
+      const holder = this.shadowRoot?.getElementById(name);
+      if (holder instanceof HTMLElement) holder.hidden = !this.#filled(name);
+    }
+${
+  dismiss
+    ? `    const closer = this.shadowRoot?.querySelector('[part="dismiss"]');
+    if (closer instanceof HTMLElement) {
+      const shown = HAS_PROP.has("dismissible") && this.propValue("dismissible") === true;
+      closer.hidden = !shown;
+      const word = TEXTS.dismissible;
+      const name = word?.[this.#lingvo()] ?? word?.en ?? "";
+      if (name !== "") closer.setAttribute("label", name);
+    }
+`
+    : ""
+}${indicator ? "    this.#spin();\n" : ""}`
+    : "";
+  const statusMethods = isStatus
+    ? `${
+        dismiss
+          ? `
+  /**
+   * Dismisses the notice (Spec 011 ③, D-09): the event may be prevented, then the notice stays;
+   * otherwise the notice hides itself and the focus goes to the next focusable element of the
+   * page after it, else to the one before it — the person is never left on nothing.
+   */
+  #dismiss(): void {
+    const go = this.dispatchEvent(new CustomEvent("dismiss", { bubbles: true, cancelable: true }));
+    if (!go) return;
+    const next = this.#neighbour();
+    this.setAttribute("hidden", "");
+    next?.focus();
+  }
+
+  /** The focusable element after the notice in document order, else the one before it. */
+  #neighbour(): HTMLElement | undefined {
+    const candidates = [...document.querySelectorAll<HTMLElement>("*")].filter(
+      (element) =>
+        !this.contains(element) &&
+        !element.hidden &&
+        !element.hasAttribute("disabled") &&
+        element.closest("[hidden]") === null &&
+        (element.tagName.includes("-") ||
+          element.matches('a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])')),
+    );
+    const after = candidates.find(
+      (element) => this.compareDocumentPosition(element) & Node.DOCUMENT_POSITION_FOLLOWING,
+    );
+    const before = candidates
+      .filter((element) => this.compareDocumentPosition(element) & Node.DOCUMENT_POSITION_PRECEDING)
+      .at(-1);
+    return after ?? before;
+  }
+`
+          : ""
+      }${
+        indicator
+          ? `
+  /**
+   * Turns the indicator while loading (Spec 011 ③, D-10): one turn per duration of the motion
+   * role the stylesheet binds (read from the transition of the control), with its easing, for ever;
+   * under reduced motion the duration role is instant and nothing turns (motion-reduced-instant).
+   */
+  #spin(): void {
+    const indicator = this.shadowRoot?.querySelector('[part="indicator"]');
+    if (!(indicator instanceof HTMLElement)) return;
+    const running = indicator.getAnimations();
+    const style = getComputedStyle(this.#control);
+    const raw = style.transitionDuration.split(",")[0]?.trim() ?? "0s";
+    const duration = Number.parseFloat(raw) * (raw.endsWith("ms") ? 1 : 1000);
+    // The first easing of the list, a keyword or a function with its arguments (never split at
+    // the commas inside cubic-bezier()).
+    const easing = /^[a-z-]+(?:\\([^)]*\\))?/.exec(style.transitionTimingFunction)?.[0] ?? "linear";
+    const turning = this.isConnected && this.propValue("kind") === "loading" && duration > 0;
+    if (!turning) {
+      for (const animation of running) animation.cancel();
+      return;
+    }
+    if (running.length > 0) return;
+    indicator.animate([{ transform: "rotate(0turn)" }, { transform: "rotate(1turn)" }], {
+      duration,
+      easing,
+      iterations: Number.POSITIVE_INFINITY,
+    });
+  }
+`
+          : ""
+      }`
+    : "";
   const body = `
 type Value = string | boolean;
 
@@ -885,6 +1088,7 @@ const PROPS = SKEMO.props as readonly {
   kind: "enum" | "boolean" | "string" | "number";
   values?: readonly string[];
   default?: string | boolean | number;
+  required?: boolean;
 }[];
 const CONSTRAINTS = (("constraints" in SKEMO ? SKEMO.constraints : []) ?? []) as readonly {
   when: Readonly<Record<string, string>>;
@@ -898,6 +1102,18 @@ const TEXTS = (("texts" in SKEMO.a11y ? SKEMO.a11y.texts : {}) ?? {}) as Readonl
 /** Where the description comes from, in order: slot:help, slot:error (Spec 009, D-02). */
 const DESCRIPTION = (("description" in SKEMO.a11y ? SKEMO.a11y.description : []) ?? []) as readonly string[];
 const HAS_PROP = new Set(PROPS.map((prop) => prop.name));
+/** The named slots of the Skemo, decorative ones aside: a live region shows each while it has content. */
+const NAMED_SLOTS: readonly string[] = ${JSON.stringify(namedSlots)};
+/**
+ * What assistive technology hears while an enum prop has a value (Spec 011 ③, D-07): the texts
+ * keyed <prop>-<value> — the kind of a notice ("Fehler:"), "lädt" while loading.
+ */
+const VALUED_TEXTS = PROPS.filter((prop) => prop.kind === "enum").flatMap((prop) =>
+  (prop.values ?? []).flatMap((value) => {
+    const heard = TEXTS[\`\${prop.name}-\${value}\`];
+    return heard === undefined ? [] : [{ prop: prop.name, value, heard }];
+  }),
+);
 /** The keys the Skemo names (Space, Enter): a toggle turns with these alone (Spec 010 ②). */
 const KEYS = SKEMO.a11y.keys as readonly string[];
 /**
@@ -934,7 +1150,7 @@ const Base = (typeof HTMLElement === "undefined" ? class {} : HTMLElement) as ty
 
 /** Generated from the Skemo of ${ero}; behaviour from the template in @fundamento/projekcioj. */
 export class ${className} extends Base {
-  static formAssociated = ${host === "a" || host === "dialog" ? "false" : "true"};
+  static formAssociated = ${host === "a" || host === "dialog" || isStatic ? "false" : "true"};
   static observedAttributes = PROPS.map((prop) => prop.name);
 
   readonly #internals: ElementInternals;
@@ -953,7 +1169,7 @@ ${isFieldHost ? "  /** Whether a person touched the field or the form reported i
       sheet.replaceSync(CSS);
     }
     root.adoptedStyleSheets = [sheet];
-    root.innerHTML = \`${markup(host, slots, role, marked)}\`;
+    root.innerHTML = \`${markup(host, slots, role, marked, indicator, dismiss)}\`;
     const control = root.querySelector("${control}");
     const label = root.querySelector("slot:not([name])");
     const texts = root.querySelector("#fm-texts");
@@ -969,7 +1185,7 @@ ${isFieldHost ? "  /** Whether a person touched the field or the form reported i
     this.#label = label;
     this.#texts = texts;
     control.addEventListener("click", (event) => this.#activate(event));
-${toggleKeys}${groupInit}${selectInit}${dialogInit}    label.addEventListener("slotchange", () => this.#render());
+${toggleKeys}${groupInit}${selectInit}${dialogInit}${statusInit}    label.addEventListener("slotchange", () => this.#render());
     for (const named of root.querySelectorAll("slot[name]")) {
       named.addEventListener("slotchange", () => this.#render());
     }
@@ -1002,10 +1218,16 @@ ${isGroup ? "    this.#assign();\n" : ""}    this.#render();
     const raw = this.getAttribute(name);
     if (prop.kind === "enum") {
       const allowed = prop.values ?? [];
+      const fallback = String(prop.default ?? allowed[0] ?? "");
       if (raw !== null && !allowed.includes(raw)) {
-        warn(\`${tag}: \${name}="\${raw}" is not allowed; using \${String(prop.default)} (allowed: \${allowed.join(", ")}).\`);
+        warn(\`${tag}: \${name}="\${raw}" is not allowed; using \${fallback} (allowed: \${allowed.join(", ")}).\`);
       }
-      return raw !== null && allowed.includes(raw) ? raw : String(prop.default ?? allowed[0] ?? "");
+      // A duty without a default (Spec 011 ③, R-10: kind of a state) falls back to the first
+      // value and says so: the element never renders nothing, the developer hears what is missing.
+      if (raw === null && prop.required === true) {
+        warn(\`${tag}: \${name} is required (allowed: \${allowed.join(", ")}); using \${fallback}.\`);
+      }
+      return raw !== null && allowed.includes(raw) ? raw : fallback;
     }
     // A number (Spec 011 ②: rows) falls back to its default like an enum; a string has none.
     if (prop.kind === "number") return raw ?? (prop.default === undefined ? undefined : String(prop.default));
@@ -1027,6 +1249,9 @@ ${isGroup ? "    this.#assign();\n" : ""}    this.#render();
       const given = this.propValue(prop.name);
       read[\`prop:\${prop.name}\`] = typeof given === "string" && given !== "" ? "filled" : "empty";
     }
+    // A named slot reads as filled or empty (Spec 009 D-04; Spec 011 ③: actions of a state only
+    // when empty), read here like a string prop.
+    for (const name of NAMED_SLOTS) read[\`slot:\${name}\`] = this.#filled(name) ? "filled" : "empty";
     for (const constraint of CONSTRAINTS) {
       const applies = Object.entries(constraint.when).every(([key, value]) => read[key] === value);
       const violated = Object.entries(constraint.allowed).some(
@@ -1037,7 +1262,7 @@ ${isGroup ? "    this.#assign();\n" : ""}    this.#render();
       warn(\`${tag}: \${given} is not allowed here; using the default. \${constraint.kialo}\`);
       for (const key of Object.keys(constraint.when)) {
         const prop = PROPS.find((candidate) => candidate.name === key);
-        values[key] = String(prop?.default ?? "");
+        if (prop !== undefined) values[key] = String(prop.default ?? prop.values?.[0] ?? "");
       }
     }
     return values;
@@ -1094,7 +1319,7 @@ ${isGroup ? "    this.#assign();\n" : ""}    this.#render();
     // \`invalid\` spoken as aria-invalid and set by a filled error slot (constraint of the Skemo);
     // disabled wins over readonly; help and error show only while they have text.
     const described: string[] = [];
-${inputRender}${toggleRender}${groupRender}${selectRender}${dialogRender}    // The texts of the slots that describe the control (Spec 009, D-02; a checkbox, Spec 010 ②):
+${inputRender}${toggleRender}${groupRender}${selectRender}${dialogRender}${statusRender}    // The texts of the slots that describe the control (Spec 009, D-02; a checkbox, Spec 010 ②):
     // shown while they have text, and its description in that order.
     for (const source of DESCRIPTION) {
       const [kind, name = ""] = source.split(":");
@@ -1106,11 +1331,24 @@ ${inputRender}${toggleRender}${groupRender}${selectRender}${dialogRender}    // 
     // What is heard in addition (Spec 008, D-02): the texts of every true boolean prop, in the
     // language of the document, as the description of the control; the mark shows with them.
     const lingvo = this.#lingvo();
-    const heard = Object.entries(TEXTS)
+${
+  isStatic
+    ? `    // A live region or static text (Spec 011 ③, D-07, D-09): what is heard stands in the content
+    // itself, clipped from sight — the texts of the enum values the props have now (the kind of a
+    // notice); a boolean's text names a part of the element (dismissible: the close butono), it
+    // is not spoken here, and the region carries no description.
+    const heard = VALUED_TEXTS.filter(({ prop, value }) => this.propValue(prop) === value).map(
+      ({ heard: byLingvo }) => byLingvo[lingvo] ?? byLingvo.en ?? Object.values(byLingvo)[0] ?? "",
+    );
+    this.#texts.textContent = heard.join(" ");
+`
+    : `    const heard = Object.entries(TEXTS)
       .filter(([prop]) => this.propValue(prop) === true)
       .map(([, byLingvo]) => byLingvo[lingvo] ?? byLingvo.en ?? Object.values(byLingvo)[0] ?? "");
     this.#texts.textContent = heard.join(" ");
     if (heard.length > 0) described.push("fm-texts");
+`
+}
     // Removed and set again on purpose: a changed text in a hidden target alone does not reach
     // the accessibility tree of every engine; the attribute change does.
     control.removeAttribute("aria-describedby");
@@ -1149,7 +1387,7 @@ ${
     : `    if (!(this.#control instanceof HTMLButtonElement)) return;
 ${toggleActivate}`
 }  }
-${groupMethods}${selectMethods}${inputMethods}${dialogMethods}
+${groupMethods}${selectMethods}${inputMethods}${dialogMethods}${statusMethods}
 }
 
 /**

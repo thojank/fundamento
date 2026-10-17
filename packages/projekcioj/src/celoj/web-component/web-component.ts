@@ -81,6 +81,23 @@ const isTextarea = (skemo: Skemo): boolean => skemo.a11y.role === "textbox" && i
 /** Whether the Ero is a dialog (Spec 011 ②, D-12): the platform's dialog, opened modal. */
 const isDialog = (skemo: Skemo): boolean => hostOf(skemo.a11y.role) === "dialog";
 
+/** Static text (Spec 011 ③, D-08): the badge, a span without a role. */
+const isText = (skemo: Skemo): boolean => hostOf(skemo.a11y.role) === "text";
+
+/** A live region (Spec 011 ③, D-09, D-10): the notice, the loading and empty state. */
+const isStatus = (skemo: Skemo): boolean => hostOf(skemo.a11y.role) === "status";
+
+/**
+ * The selector of a part of a live region (Spec 011 ③): the combination stands on the control
+ * (data-intent, data-kind); surface, accent, border, box and motion are the control itself, every
+ * other part — heading, message, details, text, actions, indicator, dismiss — its own element.
+ */
+function statusPartSelector(part: string, data: string): string {
+  const control = `[part="control"]${data}`;
+  if (["surface", "accent", "border", "box", "motion"].includes(part)) return `:where(${control})`;
+  return `:where(${control}) [part="${part}"]`;
+}
+
 /**
  * The selector of a part of a dialog (Spec 011 ②, D-12): the dialog itself is the control and
  * carries the combination (data-size, data-reason) and the parts surface, border and box; the
@@ -226,6 +243,21 @@ function declarations(skemo: Skemo, part: string, property: string, token: strin
   // direction, so right to left mirrors itself; structure, no design value.
   if (property === "position") {
     return [`justify-content: ${token === "end" ? "flex-end" : "flex-start"};`];
+  }
+  // The stroke of a border (Spec 011 ③, D-10): a stroke.* token is the border style (dashed for
+  // an empty state); none draws no border in that combination.
+  if (property === "stroke") {
+    return [token === "none" ? "border-style: none;" : `border-style: ${variable(token)};`];
+  }
+  // The accent of a notice (Spec 011 ③, D-09): a line along the start edge of the surface, its
+  // colour and width bound; the writing direction mirrors it.
+  if (isStatus(skemo) && part === "accent") {
+    if (property === "color") return [`border-inline-start-color: ${variable(token)};`];
+    if (property === "width") return [`border-inline-start-width: ${variable(token)};`];
+  }
+  // The inline padding of a live region is its padding on every side, as the dialog's (D-09).
+  if (isStatus(skemo) && part === "box" && property === "inline-padding") {
+    return [`padding: ${variable(token)};`];
   }
   if (isBindingKeyword(token)) return keywordDeclarations(part, property, token);
   // The underline of a link (Spec 008): a text decoration of the width and colour bound.
@@ -373,6 +405,71 @@ const dialogStructure: string = [
   ':where([part="actions"]) { display: flex; justify-content: flex-end; flex-wrap: wrap; }',
   ':where([part="control"][data-reason="none"]) [part="reason"] { display: none; }',
 ].join("\n");
+
+/**
+ * A text for assistive technology alone (Spec 011 ③, D-08, G4): clipped from sight, present in
+ * the accessible content; no size literal (clip-path instead of the 1px box), structure only.
+ */
+const HIDDEN_TEXT =
+  ".fm-hidden { position: absolute; clip-path: inset(50%); overflow: hidden; white-space: nowrap; }";
+
+/**
+ * Layout of static text (Spec 011 ③, D-08), keywords only: the badge is an inline block that
+ * hugs its label and never wraps (the Uzo says never); no cursor, no transition, nothing to press.
+ */
+const textStructure = (bordered: boolean): string =>
+  [
+    ":host { display: inline-block; vertical-align: middle; }",
+    `:where([part="control"]) { display: inline-flex; align-items: center; box-sizing: border-box; margin: 0; ${bordered ? "border-style: solid; " : ""}white-space: nowrap; }`,
+    HIDDEN_TEXT,
+  ].join("\n");
+
+/**
+ * Layout of a live region (Spec 011 ③, D-09, D-10), keywords only: the host is a block that takes
+ * the width of its container (Uzo size container) and hides itself once dismissed; the control a
+ * row — the indicator (where the Skemo has one), a column of the text slots, the dismiss butono at
+ * the end — with the accent as the line along the start edge where the Skemo has the part, and
+ * the border style from the stroke binding where it has one (so none is drawn where the Skemo
+ * says none). A state with an indicator centres itself; the indicator is not drawn where its
+ * colour is none (the Skemo keys it by kind), so no room stays empty.
+ */
+const statusStructure = (skemo: Skemo): string => {
+  const accent = skemo.parts.accent !== undefined;
+  const stroked = skemo.parts.border?.stroke !== undefined;
+  const bordered = skemo.parts.border !== undefined && !stroked;
+  const centred = skemo.parts.indicator !== undefined;
+  return [
+    ":host { display: block; }",
+    ":host([hidden]) { display: none; }",
+    `:where([part="control"]) { display: flex; align-items: ${centred ? "center" : "flex-start"}; ${centred ? "justify-content: center; text-align: center; " : ""}box-sizing: border-box; margin: 0; ${accent ? "border-inline-start-style: solid; " : ""}${bordered ? "border-style: solid; " : ""}}`,
+    `:where([part="control"]) > div { display: flex; flex-direction: column; ${centred ? "" : "flex: 1 1 auto; "}min-inline-size: 0; }`,
+    ':where([part="control"]) > div > [part] { margin: 0; overflow-wrap: anywhere; }',
+    ':where([part="actions"]) { display: flex; flex-wrap: wrap; }',
+    ':where([part="indicator"]) { display: block; flex: none; }',
+    ':where([part="indicator"]) > svg { display: block; }',
+    ':where([part="dismiss"][hidden]) { display: none; }',
+    HIDDEN_TEXT,
+  ].join("\n");
+};
+
+/**
+ * The indicator of a live region is not drawn where its colour is none (Spec 011 ③, D-10): the
+ * rule stands after the token rules, so the inventory reads the values of kind in the Skemo's
+ * order (loading, empty), as every other side states them.
+ */
+function statusUndrawn(skemo: Skemo): string[] {
+  return skemo.bindings
+    .filter(
+      (binding) =>
+        binding.part === "indicator" && binding.property === "color" && binding.token === "none",
+    )
+    .map(
+      (binding) =>
+        `:where([part="control"]${Object.entries(binding.when ?? {})
+          .map(([key, value]) => `[data-${key}="${value}"]`)
+          .join("")}) [part="indicator"] { display: none; }`,
+    );
+}
 
 /**
  * Layout of a select (Spec 010 ④, D-06), keywords only: the select and its chevron stand in one
@@ -551,23 +648,28 @@ export function stylesheetOf(skemo: Skemo, uzo?: Uzo): string {
   const tokenRules = [...fixedRules.entries(), ...keyedRules.entries(), ...placed].map(
     ([selector, lines]) => `${selector} {\n${lines.map((line) => `  ${line}`).join("\n")}\n}`,
   );
+  const undrawn = isStatus(skemo) ? statusUndrawn(skemo) : [];
   const disables = skemo.states.includes("disabled") || skemo.states.includes("loading");
   const bordered = skemo.parts.border !== undefined;
   const base = isDialog(skemo)
     ? dialogStructure
-    : isField(skemo)
-      ? fieldStructure(disables, isSelect(skemo), isTextarea(skemo))
-      : isGroup(skemo)
-        ? groupStructure(disables, skemo.parts["required-mark"] !== undefined)
-        : isToggle(skemo)
-          ? toggleStructure(
-              disables,
-              uzo?.layout.wrap !== undefined && uzo.layout.wrap !== "never",
-              skemo.slots.some((slot) => slot.default !== true && slot.text === true),
-              skemo.parts["required-mark"] !== undefined,
-            )
-          : structure(uzo?.layout.wrap === "with-text", disables, bordered);
-  return `${base}\n${tokenRules.join("\n")}\n`;
+    : isText(skemo)
+      ? textStructure(bordered)
+      : isStatus(skemo)
+        ? statusStructure(skemo)
+        : isField(skemo)
+          ? fieldStructure(disables, isSelect(skemo), isTextarea(skemo))
+          : isGroup(skemo)
+            ? groupStructure(disables, skemo.parts["required-mark"] !== undefined)
+            : isToggle(skemo)
+              ? toggleStructure(
+                  disables,
+                  uzo?.layout.wrap !== undefined && uzo.layout.wrap !== "never",
+                  skemo.slots.some((slot) => slot.default !== true && slot.text === true),
+                  skemo.parts["required-mark"] !== undefined,
+                )
+              : structure(uzo?.layout.wrap === "with-text", disables, bordered);
+  return `${base}\n${[...tokenRules, ...undrawn].join("\n")}\n`;
 }
 
 function keysOf(skemo: Skemo, source: SkemoPartSource | undefined, depth = 0): string[] {
@@ -602,6 +704,9 @@ function selectorOf(
     return groupPartSelector(part, property, data, entry, combination[STATE_KEY] ?? "rest");
   }
   if (isDialog(skemo)) return dialogPartSelector(part, data);
+  if (isStatus(skemo)) return statusPartSelector(part, data);
+  // Static text (Spec 011 ③, D-08): every part — surface, border, text, box — is the control.
+  if (isText(skemo)) return `:where([part="control"]${data})`;
   const state = STATE_SELECTORS[combination[STATE_KEY] ?? "rest"] ?? "";
   if (isField(skemo)) return fieldPartSelector(part, property, data, state, isSelect(skemo));
   if (isToggle(skemo)) return togglePartSelector(part, property, data, state);
@@ -632,11 +737,17 @@ export function elementNamesOf(entry: LoadedEro, inline = false) {
     host: hostOf(entry.skemo.a11y.role, isMultiline(entry.skemo)),
     role: entry.skemo.a11y.role,
     marked: entry.skemo.parts["required-mark"] !== undefined,
+    // Spec 011 ③: a live region turns its indicator and shows a dismiss butono where the Skemo
+    // has the parts.
+    indicator: entry.skemo.parts.indicator !== undefined,
+    dismiss: entry.skemo.parts.dismiss !== undefined,
     slots: entry.skemo.slots.map((slot) => ({
       name: slot.name,
       ...(slot.default === undefined ? {} : { default: slot.default }),
       ...(slot.decorative === undefined ? {} : { decorative: slot.decorative }),
       ...(slot.entry === undefined ? {} : { list: true }),
+      ...(slot.text === undefined ? {} : { text: slot.text }),
+      ...(slot.hidden === undefined ? {} : { hidden: slot.hidden }),
     })),
     inline,
   };
