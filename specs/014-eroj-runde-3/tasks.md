@@ -31,10 +31,10 @@
 
 | Was | Wert |
 |---|---|
-| Commits ① | rot `27e472d`, Korrektur Ikonaro `49d4697`, Spec-Korrektur `2b3ba25`, grün `506f2a1`, CI `5740c53`, Messungen `acb6eae`, Abnahme rot `fb0fa04`, Abnahme grün *(dieser Commit)* |
+| Commits ① | rot `27e472d`, Korrektur Ikonaro `49d4697`, Spec-Korrektur `2b3ba25`, grün `506f2a1`, CI `5740c53`, Messungen `acb6eae`, Abnahme rot `fb0fa04`, Abnahme grün `c40c523` |
 | Ikonaro | 15 Namen (Grenze 25), 2 Aspektoj × 15 Glyphen, Phosphor `@phosphor-icons/core` 2.1.1 (MIT), Raster 256 |
 | Overlay-Unterstützung | Popover-API und Anchor Positioning vollständig in allen drei Engines; nur `inset-area` (alter Name) fehlt überall |
-| CI | Lauf 1 `39065845169` (506f2a1): unit 6m21s grün, Eroj-Shards 5m42s/5m18s grün, Rendered checks 5m37s rot (B-6, Vitrino-Zahl); Lauf 2 `39066399062` (5740c53): alle Jobs grün – unit, Eroj-Shards 6m06s/5m11s, Rendered checks 6m56s; Wanduhr 7m48s, unter 12 min |
+| CI | Lauf 1 `39065845169` (506f2a1): unit 6m21s grün, Eroj-Shards 5m42s/5m18s grün, Rendered checks 5m37s rot (B-6, Vitrino-Zahl); Lauf 2 `39066399062` (5740c53): alle Jobs grün – unit, Eroj-Shards 6m06s/5m11s, Rendered checks 6m56s; Wanduhr 7m48s, unter 12 min; Lauf 3 `39066984214` (acb6eae) grün; Lauf 4 `39069914094` (c40c523, Abnahme) grün – Rendered checks mit Vitrino 7m03s, Wanduhr 7m07s |
 
 ## ② Grundbausteine
 
