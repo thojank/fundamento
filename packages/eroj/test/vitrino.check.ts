@@ -414,7 +414,8 @@ test("fm-tabelo, fm-atributlisto and fm-mezurilo are upgraded in their sections,
   await expect(page.locator("#fm-vitrino-tabelo fm-tabelo").getByRole("table")).toHaveCount(2);
   await expect(page.locator("#fm-vitrino-tabelo th[data-sort] > button")).toHaveCount(2);
   const lists = page.locator("#fm-vitrino-atributlisto fm-atributlisto");
-  await expect(lists).toHaveCount(2);
+  // Spec 014 ① (plan ① D-03): a third row, layout auto, beside columns and stacked.
+  await expect(lists).toHaveCount(3);
   await expect(page.locator("#fm-vitrino-atributlisto dd").last().locator("svg")).toHaveCount(1);
   const meters = page.locator("#fm-vitrino-mezurilo fm-mezurilo");
   // Nachlese 3 W4 (F-9): the fifth meter has no value — unknown, dashed, "nicht geprüft".
