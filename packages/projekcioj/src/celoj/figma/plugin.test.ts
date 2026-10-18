@@ -6875,7 +6875,7 @@ describe("the plugin draws the alsxutilo (Spec 015 ②)", () => {
 
 // Nachlese 4 N-8 (Spec 014 ⑤ O-23): the open kompletigilo shows both states of an entry — the
 // first suggestion chosen (its text in color.text.default), the second the active one under the
-// keyboard, its row filled with color.action.tertiary.hover; the others with the rest fill.
+// keyboard, its row filled with color.background.sunken; the others with the listbox's raised fill.
 describe("the kompletigilo fills the active suggestion (N-8)", () => {
   const fillOf = (node: DoubleNode | undefined) =>
     ((node?.properties.fills ?? []) as { boundVariables?: { color?: { name: string } } }[])[0]
@@ -6888,9 +6888,9 @@ describe("the kompletigilo fills the active suggestion (N-8)", () => {
     const open = set?.children.find(
       (child) => child.name === "size=medium, expanded=true, state=rest",
     );
-    expect(fillOf(descendant(open, "suggestion-1"))).toBe("color/action/tertiary/rest");
-    expect(fillOf(descendant(open, "suggestion-2"))).toBe("color/action/tertiary/hover");
-    expect(fillOf(descendant(open, "suggestion-3"))).toBe("color/action/tertiary/rest");
+    expect(fillOf(descendant(open, "suggestion-1"))).toBe("color/background/raised");
+    expect(fillOf(descendant(open, "suggestion-2"))).toBe("color/background/sunken");
+    expect(fillOf(descendant(open, "suggestion-3"))).toBe("color/background/raised");
     expect(fillOf(descendant(open, "suggestions-1"))).toBe("color/text/default");
     expect(fillOf(descendant(open, "suggestions-2"))).toBe("color/text/subtle");
     const before = double.snapshot();

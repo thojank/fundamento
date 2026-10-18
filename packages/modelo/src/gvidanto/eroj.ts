@@ -397,7 +397,13 @@ export function briefOf(entry: LoadedEro): GetEroBrief {
       ...skemo.slots.flatMap((slot) =>
         slot.entry === undefined
           ? []
-          : [{ name: slot.entry.key, values: ["true", "false"], slot: slot.name }],
+          : [
+              { name: slot.entry.key, values: ["true", "false"], slot: slot.name },
+              // The second state of an entry (Nachlese 4 N-8): the active suggestion.
+              ...(slot.entry.active === undefined
+                ? []
+                : [{ name: slot.entry.active, values: ["true", "false"], slot: slot.name }]),
+            ],
       ),
     ],
     required: {

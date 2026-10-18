@@ -3084,22 +3084,18 @@ describe("the Figma plan draws the faldilo and the kompletigilo (Spec 014 ⑤)",
       texts: ["Eins", "Zwei", "Drei"],
       selected: 0,
       active: 1,
+      activeKey: "active",
     });
     expect(kompletigilo?.texts?.text).toBe("Bitte wählen");
-    // The entries are keyed by selected and active, in this order.
-    expect(Object.keys(open?.entries ?? {}).sort()).toEqual([
-      "false,false",
-      "false,true",
-      "true,false",
-      "true,true",
-    ]);
-    expect(open?.entries?.["false,true"]?.bindings).toMatchObject({
-      "suggestion.fill": "color/action/tertiary/hover",
-      "suggestion.color": "color/text/subtle",
+    // What follows selected stands in the entries, what follows active in activeEntries — each
+    // part named with the key that keys it, as the parity names it.
+    expect(open?.entries?.false?.bindings).toEqual({ "suggestion.color": "color/text/subtle" });
+    expect(open?.entries?.true?.bindings).toEqual({ "suggestion.color": "color/text/default" });
+    expect(open?.activeEntries?.true?.bindings).toEqual({
+      "suggestion.fill": "color/background/sunken",
     });
-    expect(open?.entries?.["true,false"]?.bindings).toMatchObject({
-      "suggestion.fill": "color/action/tertiary/rest",
-      "suggestion.color": "color/text/default",
+    expect(open?.activeEntries?.false?.bindings).toEqual({
+      "suggestion.fill": "color/background/raised",
     });
     // N-9: loading is a property of the set, no axis and no part.
     expect(kompletigilo?.properties.loading).toBe("BOOLEAN");

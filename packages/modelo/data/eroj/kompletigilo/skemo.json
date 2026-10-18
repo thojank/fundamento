@@ -70,6 +70,12 @@
         "kind": "boolean",
         "default": false,
         "description": "The list of suggestions is shown. A prop the element writes while the person types and keys through the list; in a design tool the axis that shows the list open."
+      },
+      {
+        "name": "loading",
+        "kind": "boolean",
+        "default": false,
+        "description": "The application loads new suggestions for the typed text (a search on a server): the field says so (aria-busy and a live region with the text of a11y.texts loading) and stays operable; the list keeps what it has until the application sets the new options."
       }
     ],
     "states": [
@@ -90,7 +96,8 @@
         "text": true,
         "entry": {
           "key": "selected",
-          "equals": "value"
+          "equals": "value",
+          "active": "active"
         }
       },
       {
@@ -241,6 +248,11 @@
         "color": {
           "by": [
             "selected"
+          ]
+        },
+        "fill": {
+          "by": [
+            "active"
           ]
         },
         "typography": {
@@ -473,6 +485,22 @@
           "selected": "false"
         },
         "token": "color.text.subtle"
+      },
+      {
+        "part": "suggestion",
+        "property": "fill",
+        "when": {
+          "active": "true"
+        },
+        "token": "color.background.sunken"
+      },
+      {
+        "part": "suggestion",
+        "property": "fill",
+        "when": {
+          "active": "false"
+        },
+        "token": "color.background.raised"
       }
     ],
     "a11y": {
@@ -499,6 +527,9 @@
         ],
         "expanded": [
           "aria-expanded"
+        ],
+        "loading": [
+          "aria-busy"
         ]
       },
       "keys": [
@@ -519,6 +550,10 @@
         "options-count": {
           "de": "Vorschläge",
           "en": "suggestions"
+        },
+        "loading": {
+          "de": "lädt",
+          "en": "loading"
         }
       }
     },

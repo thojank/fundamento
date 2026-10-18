@@ -2456,7 +2456,15 @@ ${
     const lingvo = this.#lingvo();
     const none = TEXTS["options-empty"]?.[lingvo] ?? TEXTS["options-empty"]?.en ?? "";
     const word = TEXTS["options-count"]?.[lingvo] ?? TEXTS["options-count"]?.en ?? "";
-    const heard = matches.length === 0 ? none : \`\${matches.length} \${word}\`;
+    // While the application loads new suggestions (Nachlese 4 N-9, loading), the live region says
+    // so in the words of a11y.texts; the count comes back with the next render.
+    const loading = TEXTS["loading"]?.[lingvo] ?? TEXTS["loading"]?.en ?? "";
+    const heard =
+      this.propValue("loading") === true
+        ? loading
+        : matches.length === 0
+          ? none
+          : \`\${matches.length} \${word}\`;
     if (count instanceof HTMLElement && count.textContent !== heard) count.textContent = heard;
     let noResults = listbox.querySelector('[part="no-results"]');
     if (matches.length === 0 && this.#suggestTyped && noResults === null) {
@@ -2472,11 +2480,14 @@ ${
     return matches;
   }
 
-  /** The active option is heard through aria-activedescendant on the input. */
+  /**
+   * The active option is heard through aria-activedescendant on the input and seen through its
+   * fill (Nachlese 4 N-8): the row says data-active, the state of its entry the stylesheet keys.
+   */
   #suggestMark(): void {
     const rows = [...this.#listbox().querySelectorAll('[part="suggestion"]')] as HTMLElement[];
     const active = rows[this.#suggestActive];
-    rows.forEach((row) => row.classList.toggle("fm-active", row === active));
+    rows.forEach((row) => row.setAttribute("data-active", String(row === active)));
     if (active === undefined) this.#control.removeAttribute("aria-activedescendant");
     else this.#control.setAttribute("aria-activedescendant", active.id);
   }
@@ -3555,13 +3566,13 @@ ${autoDisconnect}
     }
     if (HAS_PROP.has("loading")) {
       const busy = this.propValue("loading") === true;
+      // A button that works ignores activation; a field that loads suggestions (Nachlese 4 N-9)
+      // stays operable — the person keeps typing — and is only busy.
       if (busy) {
         control.setAttribute("aria-busy", "true");
-        control.setAttribute("aria-disabled", "true");
-      } else {
+${isSuggest ? "" : '        control.setAttribute("aria-disabled", "true");\n'}      } else {
         control.removeAttribute("aria-busy");
-        control.removeAttribute("aria-disabled");
-      }
+${isSuggest ? "" : '        control.removeAttribute("aria-disabled");\n'}      }
     }
     // A link: \`to\` is its target (Art. VIII, the Web Celo spells it href); \`external\` marks
     // that the target lies outside the application (Spec 008, D-09).
@@ -3606,7 +3617,11 @@ ${
     this.#texts.textContent = heard.join(" ");
 `
     : `    const heard = Object.entries(TEXTS)
-      .filter(([prop]) => this.propValue(prop) === true)
+      .filter(([prop]) => this.propValue(prop) === true)${
+        // The loading of a field with suggestions is said in its live region (Nachlese 4 N-9),
+        // not described, and marks nothing (the mark is the required asterisk).
+        isSuggest ? '\n      .filter(([prop]) => prop !== "loading")' : ""
+      }
       .map(([, byLingvo]) => byLingvo[lingvo] ?? byLingvo.en ?? Object.values(byLingvo)[0] ?? "");
     this.#texts.textContent = heard.join(" ");
     if (heard.length > 0) described.push("fm-texts");

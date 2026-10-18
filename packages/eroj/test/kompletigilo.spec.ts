@@ -131,7 +131,7 @@ test.describe("fm-kompletigilo behaviour", () => {
 });
 
 // Nachlese 4 N-8 (Spec 014 ⑤ O-23): the active suggestion is seen, not only heard — its row is
-// written data-active and filled with color.action.tertiary.hover, the others with the rest fill.
+// written data-active and filled with color.background.sunken, the others with the raised fill of the listbox.
 // N-9 (O-24): while the application loads new suggestions (loading), the input is aria-busy and
 // the live region says "lädt"; the person keeps typing (no aria-disabled), and the count comes
 // back when loading ends.
@@ -146,8 +146,8 @@ test.describe("fm-kompletigilo: active suggestion and loading (Nachlese 4)", () 
         probe.style.backgroundColor = `var(${name})`;
         return getComputedStyle(probe).backgroundColor;
       };
-      const hover = resolve("--fm-color-action-tertiary-hover");
-      const rest = resolve("--fm-color-action-tertiary-rest");
+      const hover = resolve("--fm-color-background-sunken");
+      const rest = resolve("--fm-color-background-raised");
       probe.remove();
       return {
         hover,
@@ -159,7 +159,7 @@ test.describe("fm-kompletigilo: active suggestion and loading (Nachlese 4)", () 
       };
     });
 
-  test("the arrows fill the active suggestion with the tertiary hover colour; the others keep the rest fill", async ({
+  test("the arrows fill the active suggestion with the sunken ground; the others keep the raised fill", async ({
     page,
   }) => {
     await serve(page, out, MARKUP);

@@ -423,6 +423,8 @@ const STRUCTURE_BINDINGS: Readonly<Record<string, Readonly<Record<string, readon
     ],
     "suggestion.radius": [{ node: "suggestion-*", fields: ["cornerRadius"] }],
     "suggestion.color": [{ node: "suggestions-*", fields: ["fills"], paint: true }],
+    // Nachlese 4 N-8: the active suggestion's row is filled by active (the frame of the row).
+    "suggestion.fill": [{ node: "suggestion-*", fields: ["fills"], paint: true }],
     "suggestion.typography": typographyOf("suggestions-*"),
     "no-results.color": [{ node: "no-results", fields: ["fills"], paint: true }],
     "no-results.typography": typographyOf("no-results"),
@@ -3607,11 +3609,18 @@ async function applyComponents(variables, warnings) {
    */
   function bindEntries(rows, component, variant, variables, keyed, textOf, measures) {
     const chosen = component.entry !== undefined ? component.entry.selected : 0;
+    // The second state of an entry (Nachlese 4 N-8): the active row, bound with what follows
+    // active (activeEntries) besides what follows the first key.
+    const active = component.entry !== undefined ? component.entry.active : undefined;
     rows.forEach((row, index) => {
       const values = (variant.entries || {})[index === chosen ? "true" : "false"] || { bindings: {} };
+      const second =
+        typeof active === "number"
+          ? (variant.activeEntries || {})[index === active ? "true" : "false"] || { bindings: {} }
+          : { bindings: {} };
       const merged = {
-        bindings: Object.assign({}, variant.bindings, values.bindings),
-        paints: Object.assign({}, variant.paints, values.paints),
+        bindings: Object.assign({}, variant.bindings, values.bindings, second.bindings),
+        paints: Object.assign({}, variant.paints, values.paints, second.paints),
         focusVisible: variant.focusVisible === true && index === 0,
       };
       const nodes = { "focus-ring": row.ring, "focus-gap": row.gap };

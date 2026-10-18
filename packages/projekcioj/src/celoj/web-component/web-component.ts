@@ -1765,6 +1765,20 @@ function cssOf(moduleText: string): string {
   return sheets.length === 0 ? moduleText : sheets.join("\n");
 }
 
+/**
+ * The parts that carry the combination of an Ero in its stylesheet (the stylesheet inventory):
+ * the control, the field of a composite or a toggle, a list and its items, the glyph of an icon,
+ * the text of a heading. A data attribute on any other part belongs to that part.
+ */
+const COMBINATION_PARTS: ReadonlySet<string> = new Set([
+  "control",
+  "field",
+  "list",
+  "item",
+  "glyph",
+  "text",
+]);
+
 /** The state a selector addresses; the inverse of `STATE_SELECTORS` plus the focus ring (T021). */
 function stateOf(selector: string): string {
   // Spec 015 ② (plan ② D-05): the field of a file input while files are dragged over it.
@@ -1811,10 +1825,20 @@ export function stylesheetInventory(moduleText: string): ParityItem {
     )
       continue;
     states.add(stateOf(selector));
-    for (const [, name = "", value = ""] of selector.matchAll(/\[data-([a-z0-9-]+)="([^"]*)"\]/g)) {
-      const values = props.get(name) ?? [];
-      if (!values.includes(value)) values.push(value);
-      props.set(name, values);
+    // A data attribute on a part of its own is the state of one entry (Nachlese 4 N-8: the
+    // active suggestion, data-active on the row — no ARIA attribute says it), not a prop of the
+    // Ero: only what stands on the element that carries the combination counts.
+    const compounds = selector.split(/[\s>+~]+/).filter((compound) => compound !== "");
+    for (const compound of compounds) {
+      const part = /\[part="([a-z0-9-]+)"\]/.exec(compound)?.[1];
+      if (part !== undefined && !COMBINATION_PARTS.has(part)) continue;
+      for (const [, name = "", value = ""] of compound.matchAll(
+        /\[data-([a-z0-9-]+)="([^"]*)"\]/g,
+      )) {
+        const values = props.get(name) ?? [];
+        if (!values.includes(value)) values.push(value);
+        props.set(name, values);
+      }
     }
   }
   // A boolean prop that keys the parts (Spec 010 ①, D-03: checked) is written as

@@ -1741,10 +1741,10 @@ describe("Web Component Celo for the faldilo and the kompletigilo (Spec 014 ⑤)
     const element = files["eroj/src/generated/fm-kompletigilo.ts"] ?? "";
     const css = cssOf("kompletigilo");
     expect(css).toContain(
-      ':where([part="field"]) [part="suggestion"][data-active="true"] {\n  background-color: var(--fm-color-action-tertiary-hover);',
+      ':where([part="field"]) [part="suggestion"][data-active="true"] {\n  background-color: var(--fm-color-background-sunken);',
     );
     expect(css).toContain(
-      ':where([part="field"]) [part="suggestion"][data-active="false"] {\n  background-color: var(--fm-color-action-tertiary-rest);',
+      ':where([part="field"]) [part="suggestion"][data-active="false"] {\n  background-color: var(--fm-color-background-raised);',
     );
     expect(element).not.toContain("fm-active");
     expect(element).toContain('row.setAttribute("data-active", String(row === active))');

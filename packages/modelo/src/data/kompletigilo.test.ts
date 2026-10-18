@@ -127,6 +127,8 @@ describe("kompletigilo in the repo Modelo (section ⑤, G1, G2)", () => {
       invalid: ["aria-invalid"],
       disabled: ["aria-disabled"],
       expanded: ["aria-expanded"],
+      // Nachlese 4 N-9: busy while the application loads, still operable (no aria-disabled).
+      loading: ["aria-busy"],
     });
     expect(skemo?.a11y.keys).toEqual(["ArrowUp", "ArrowDown", "Enter", "Escape"]);
     expect(skemo?.a11y.texts).toEqual({
@@ -232,17 +234,18 @@ describe("the Reguloj of the kompletigilo (G8, E5)", () => {
 });
 
 // Nachlese 4 N-8 (Spec 014 ⑤ O-23, Abweichung 2): the suggestion the keyboard stands on
-// (aria-activedescendant) is a bound part — its fill by active, the menuo's way for the item under
-// the pointer (color.action.tertiary.hover, rest otherwise) — with the KontrastParoj every text of
-// the field needs on it. N-9 (O-24): while the application loads new suggestions, loading is true.
+// (aria-activedescendant) is a bound part — its fill by active: the sunken ground under the
+// active one, the listbox's own raised fill under the others — with the KontrastParoj every text
+// of the field needs on it (declared, measured, passed: plan D-08; the menuo's tertiary hover is
+// no pair the field's help and error pass). N-9 (O-24): while the application loads, loading.
 describe("the active suggestion and the loading field (Nachlese 4 N-8, N-9)", () => {
   it("active is a state of the entry, no prop: true for the one suggestion, false for the others", () => {
     expect(skemo?.props.some((prop) => prop.name === "active")).toBe(false);
     expect(boundToken(skemoOrThrow(), "suggestion", "fill", { active: "true" })?.token).toBe(
-      "color.action.tertiary.hover",
+      "color.background.sunken",
     );
     expect(boundToken(skemoOrThrow(), "suggestion", "fill", { active: "false" })?.token).toBe(
-      "color.action.tertiary.rest",
+      "color.background.raised",
     );
     // No axis of the variants: active, like selected, belongs to one entry.
     expect(variantKeys(skemoOrThrow())).toEqual(["size", "expanded", "state"]);
@@ -252,7 +255,7 @@ describe("the active suggestion and the loading field (Nachlese 4 N-8, N-9)", ()
     const pairs = new Set(
       modelo.kontrastParoj.map((pair) => `${pair.foreground} ${pair.background}`),
     );
-    for (const background of ["color.action.tertiary.hover", "color.action.tertiary.rest"]) {
+    for (const background of ["color.background.sunken", "color.background.raised"]) {
       for (const foreground of [
         "color.text.default",
         "color.text.subtle",

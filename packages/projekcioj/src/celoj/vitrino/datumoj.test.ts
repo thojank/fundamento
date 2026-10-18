@@ -703,12 +703,13 @@ describe("the Vitrino shows the faldilo and the kompletigilo (Spec 014 ⑤)", ()
 
   it("the kompletigilo has the columns of a field and expanded, three options and a prompt", () => {
     const section = datumoj.eroj.kompletigilo ?? "";
-    for (const column of ["required", "disabled", "invalid", "expanded"]) {
+    // Nachlese 4 N-9: loading is a column too — a boolean with a text that is heard (O-24).
+    for (const column of ["required", "disabled", "invalid", "expanded", "loading"]) {
       expect(section, column).toContain(`<th scope="col">${column}</th>`);
     }
     expect(section).toContain('<data slot="options" value="1">Eins</data>');
     expect(section).toContain('placeholder="Bitte wählen"');
-    expect((section.match(/<fm-kompletigilo /g) ?? []).length).toBe(3 * 5);
+    expect((section.match(/<fm-kompletigilo /g) ?? []).length).toBe(3 * 6);
   });
 });
 

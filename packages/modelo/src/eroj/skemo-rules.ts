@@ -97,10 +97,17 @@ export type Combination = Readonly<Record<string, string>>;
  * parts may be keyed by, like a boolean prop, but no prop: it belongs to the option, not to the
  * Ero, and it is no axis of the variants (`variantKeys` takes props and the state only).
  */
-export function entryKeysOf(skemo: Skemo): { slot: string; key: string; equals: string }[] {
-  return skemo.slots.flatMap((slot) =>
-    slot.entry === undefined ? [] : [{ slot: slot.name, ...slot.entry }],
-  );
+export function entryKeysOf(skemo: Skemo): { slot: string; key: string; equals?: string }[] {
+  return skemo.slots.flatMap((slot) => {
+    if (slot.entry === undefined) return [];
+    const { active, ...entry } = slot.entry;
+    // The second state of an entry (Nachlese 4 N-8): the one the keyboard stands on; no prop
+    // holds it, so it compares with nothing.
+    return [
+      { slot: slot.name, ...entry },
+      ...(active === undefined ? [] : [{ slot: slot.name, key: active }]),
+    ];
+  });
 }
 
 /** Whether `key` is the key of an entry of a slot (E7) and no prop of the Skemo. */
@@ -349,6 +356,21 @@ function keyIssues(entry: LoadedEro, at: At): boolean {
         "skemo-binding-invalid",
         `Skemo of ${ero.name} names the state of one entry of the slot ${slot.name} ${entry.key}, which is also ${entry.key === STATE_KEY ? "the state" : "a prop"} of ${ero.name}; the state of one option is no state of the group.`,
         "Give the state of one entry a name of its own (selected); it belongs to the option, not to the Ero (E7).",
+      );
+    }
+    // The second state of an entry (Nachlese 4 N-8): a name of its own too — no prop, not the
+    // state, not the first key.
+    if (
+      entry.active !== undefined &&
+      (entry.active === STATE_KEY ||
+        entry.active === entry.key ||
+        skemo.props.some((prop) => prop.name === entry.active))
+    ) {
+      at(
+        `${base}/active`,
+        "skemo-binding-invalid",
+        `Skemo of ${ero.name} names the active entry of the slot ${slot.name} ${entry.active}, which is also ${entry.active === STATE_KEY ? "the state" : entry.active === entry.key ? "the entry's key" : "a prop"} of ${ero.name}.`,
+        "Give the active entry a name of its own (active); it belongs to the option the keyboard stands on, not to the Ero.",
       );
     }
     const equals = skemo.props.find((prop) => prop.name === entry.equals);
