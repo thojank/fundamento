@@ -1,0 +1,136 @@
+{
+  "ero": {
+    "id": "ero_01M564NWTD0WC9QWBP0GGTQZYX",
+    "name": "sxvebilo",
+    "skemo": "ske_01M564NX6FGBH4NHKDSHCCM5W4",
+    "description": "A popover: opens a non-modal layer with content next to its trigger; the page stays usable. A layer of the platform (popover, light dismiss) anchored to the trigger, with a heading and content; the focus moves in on opening and back on closing."
+  },
+  "skemo": {
+    "id": "ske_01M564NX6FGBH4NHKDSHCCM5W4",
+    "ero": "ero_01M564NWTD0WC9QWBP0GGTQZYX",
+    "props": [
+      {
+        "name": "label",
+        "kind": "string",
+        "required": true,
+        "description": "The name of the layer, heard when the focus enters it (the accessible name of the dialog); never shown — a visible title is the heading slot."
+      },
+      {
+        "name": "placement",
+        "kind": "enum",
+        "values": [
+          "block-start",
+          "block-end",
+          "inline-start",
+          "inline-end"
+        ],
+        "default": "block-end",
+        "description": "Where the layer stands against its trigger, in logical directions (position-area); where that side has no room, the platform flips it. Layout, no token: it keys no part."
+      },
+      {
+        "name": "open",
+        "kind": "boolean",
+        "default": false,
+        "description": "Whether the layer is shown; the trigger toggles it, Escape and a click outside close it (light dismiss of the platform), and the attribute follows."
+      }
+    ],
+    "states": [
+      "rest"
+    ],
+    "slots": [
+      {
+        "name": "trigger"
+      },
+      {
+        "name": "content",
+        "default": true
+      },
+      {
+        "name": "heading",
+        "text": true
+      }
+    ],
+    "parts": {
+      "surface": {
+        "fill": {
+          "fixed": "color.background.raised"
+        },
+        "radius": {
+          "fixed": "radius.role.surface"
+        },
+        "shadow": {
+          "fixed": "elevation.shadow.overlay"
+        },
+        "layer": {
+          "fixed": "elevation.layer.overlay"
+        },
+        "width": {
+          "fixed": "size.container.small"
+        }
+      },
+      "border": {
+        "color": {
+          "fixed": "color.border.subtle"
+        },
+        "width": {
+          "fixed": "border.width.default"
+        }
+      },
+      "heading": {
+        "color": {
+          "fixed": "color.text.default"
+        },
+        "typography": {
+          "fixed": "typography.headline.4"
+        }
+      },
+      "content": {
+        "color": {
+          "fixed": "color.text.default"
+        },
+        "typography": {
+          "fixed": "typography.body.1"
+        },
+        "gap": {
+          "fixed": "spacing.medium"
+        }
+      },
+      "box": {
+        "inline-padding": {
+          "fixed": "spacing.medium"
+        },
+        "gap": {
+          "fixed": "spacing.small"
+        }
+      }
+    },
+    "bindings": [],
+    "a11y": {
+      "role": "dialog",
+      "name": [
+        "prop:label"
+      ],
+      "states": {},
+      "keys": [
+        "Escape"
+      ]
+    },
+    "goals": [
+      {
+        "goal": "popover",
+        "keywords": {
+          "en": [
+            "popover",
+            "flyout"
+          ],
+          "de": [
+            "popover",
+            "flyout",
+            "ausklappfenster"
+          ]
+        },
+        "props": {}
+      }
+    ]
+  }
+}

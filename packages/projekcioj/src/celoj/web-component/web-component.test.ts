@@ -50,14 +50,17 @@ describe("Web Component Celo (T011)", () => {
       "eroj/src/generated/fm-ikono.ts",
       "eroj/src/generated/fm-insigno.ts",
       "eroj/src/generated/fm-kampo.ts",
+      "eroj/src/generated/fm-konsileto.ts",
       "eroj/src/generated/fm-langetaro.ts",
       "eroj/src/generated/fm-ligilo.ts",
       "eroj/src/generated/fm-markobutono.ts",
+      "eroj/src/generated/fm-menuo.ts",
       "eroj/src/generated/fm-mezurilo.ts",
       "eroj/src/generated/fm-navigado.ts",
       "eroj/src/generated/fm-plenstato.ts",
       "eroj/src/generated/fm-saltligilo.ts",
       "eroj/src/generated/fm-sxaltilo.ts",
+      "eroj/src/generated/fm-sxvebilo.ts",
       "eroj/src/generated/fm-tabelo.ts",
       "eroj/src/generated/fm-tekstareo.ts",
       "eroj/src/generated/fm-teksto.ts",
@@ -66,9 +69,11 @@ describe("Web Component Celo (T011)", () => {
       "eroj/src/generated/index.ts",
       "eroj/src/generated/insigno.styles.ts",
       "eroj/src/generated/kampo.styles.ts",
+      "eroj/src/generated/konsileto.styles.ts",
       "eroj/src/generated/langetaro.styles.ts",
       "eroj/src/generated/ligilo.styles.ts",
       "eroj/src/generated/markobutono.styles.ts",
+      "eroj/src/generated/menuo.styles.ts",
       "eroj/src/generated/mezurilo.styles.ts",
       "eroj/src/generated/navigado.styles.ts",
       "eroj/src/generated/plenstato.styles.ts",
@@ -76,6 +81,7 @@ describe("Web Component Celo (T011)", () => {
       "eroj/src/generated/saltligilo.styles.ts",
       "eroj/src/generated/skemo.ts",
       "eroj/src/generated/sxaltilo.styles.ts",
+      "eroj/src/generated/sxvebilo.styles.ts",
       "eroj/src/generated/tabelo.styles.ts",
       "eroj/src/generated/tekstareo.styles.ts",
       "eroj/src/generated/teksto.styles.ts",
@@ -1536,5 +1542,89 @@ describe("Web Component Celo for the titolo and the teksto (Spec 014 ③)", () =
     expect(element).toContain(
       '<fm-titolo part="heading" id="heading" level="2" size="headline-4"><slot></slot></fm-titolo>',
     );
+  });
+});
+
+// Spec 014 ④ (section ④, plan ④ D-05): the overlays on the platform (E11, G4) — every layer is a
+// popover of the platform (top layer, light dismiss, Escape) anchored to its trigger with CSS
+// anchor positioning (position-anchor, position-area, position-try-fallbacks; the placement as a
+// host attribute, no data attribute, so the inventory reads no axis); the own fallback is the
+// plain place under the trigger (@supports not). The konsileto's control is the tooltip, the
+// sxvebilo's a non-modal dialog with a composed titolo as heading, the menuo's a menu of rows.
+describe("Web Component Celo for the overlays (Spec 014 ④)", () => {
+  const cssOf = (ero: string) =>
+    JSON.parse(
+      new RegExp(`export const ${ero.toUpperCase()}_CSS = ("(?:[^"\\\\]|\\\\.)*");`).exec(
+        files[`eroj/src/generated/${ero}.styles.ts`] ?? "",
+      )?.[1] ?? '""',
+    ) as string;
+
+  it("the konsileto is a tooltip of the platform: popover manual, anchored to its trigger, shown after the delay of the motion token", () => {
+    const element = files["eroj/src/generated/fm-konsileto.ts"] ?? "";
+    // The host is the layer (plan ④ B-7): it takes popover and the role itself, in the tree scope
+    // of its trigger; the control inside is the surface.
+    expect(element).toContain('<div part="control"><slot></slot>');
+    expect(element).toContain('this.setAttribute("popover", "manual")');
+    expect(element).toContain('this.setAttribute("role", "tooltip")');
+    expect(element).toContain('"aria-describedby"');
+    expect(element).toContain("anchor-name");
+    expect(element).toContain("position-anchor");
+    expect(element).toContain("showPopover");
+    expect(element).toContain("static formAssociated = false;");
+    const css = cssOf("konsileto");
+    expect(css).toContain("position-area: block-start;");
+    expect(css).toContain(':host([placement="block-end"]) { position-area: block-end; }');
+    expect(css).toContain("position-try-fallbacks: flip-block, flip-inline;");
+    expect(css).toContain("background-color: var(--fm-color-background-inverse);");
+    expect(css).toContain("color: var(--fm-color-text-inverse);");
+    expect(css).toContain("box-shadow: var(--fm-elevation-shadow-overlay);");
+    expect(css).toContain("z-index: var(--fm-elevation-layer-overlay);");
+    expect(css).toContain("transition-duration: var(--fm-motion-duration-slow);");
+    expect(css).not.toContain("data-placement");
+    expect(componentCssIssues("konsileto.css", css)).toEqual([]);
+    expect(cssPhysicalPropertyIssues("konsileto.css", css)).toEqual([]);
+  });
+
+  it("the sxvebilo is a non-modal dialog of the platform: popover auto, the trigger slotted with aria-expanded, the heading a composed titolo", () => {
+    const element = files["eroj/src/generated/fm-sxvebilo.ts"] ?? "";
+    expect(element).toContain('<slot name="trigger"></slot>');
+    expect(element).toContain('<div part="control" role="dialog" popover="auto"');
+    expect(element).toContain(
+      '<fm-titolo part="heading" id="heading" level="2" size="headline-4"><slot name="heading"></slot></fm-titolo>',
+    );
+    expect(element).toContain('"aria-expanded"');
+    expect(element).toContain("hidePopover");
+    const css = cssOf("sxvebilo");
+    expect(css).toContain("max-inline-size: var(--fm-size-container-small);");
+    expect(css).toContain("background-color: var(--fm-color-background-raised);");
+    expect(css).toContain("border-color: var(--fm-color-border-subtle);");
+    expect(css).toContain("box-shadow: var(--fm-elevation-shadow-overlay);");
+    expect(css).toContain("position-area: block-end;");
+    expect(componentCssIssues("sxvebilo.css", css)).toEqual([]);
+  });
+
+  it("the menuo is a menu of the platform's rows: popover auto, role menu with menuitem rows, an own trigger with the icon more", () => {
+    const element = files["eroj/src/generated/fm-menuo.ts"] ?? "";
+    expect(element).toContain('<div part="control" role="menu" popover="auto"></div>');
+    expect(element).toContain('role="menuitem"');
+    expect(element).toContain(
+      '<fm-butono part="trigger" emphasis="low"><fm-ikono name="more"></fm-ikono></fm-butono>',
+    );
+    expect(element).toContain('"aria-haspopup"');
+    expect(element).toContain('new CustomEvent("select"');
+    expect(element).toContain("fm-danger");
+    const css = cssOf("menuo");
+    expect(css).toContain(
+      ':where([part="control"] [part="item"]:hover) {\n  background-color: var(--fm-color-action-tertiary-hover);',
+    );
+    expect(css).toContain(
+      ':where([part="control"] [part="item"][aria-disabled="true"]) {\n  background-color: var(--fm-color-action-tertiary-disabled);',
+    );
+    expect(css).toContain(
+      '[part="control"] [part="item"].fm-danger {\n  color: var(--fm-color-status-danger-text);',
+    );
+    expect(css).toContain("min-block-size: var(--fm-size-target-min);");
+    expect(css).toContain(":focus-visible");
+    expect(componentCssIssues("menuo.css", css)).toEqual([]);
   });
 });

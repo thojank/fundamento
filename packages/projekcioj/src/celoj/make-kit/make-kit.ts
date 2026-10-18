@@ -33,6 +33,7 @@ import {
   elementNamesOf,
   isLight,
   isMultiline,
+  isPopover,
   isSkip,
   lightStylesheetOf,
   namesOf,
@@ -257,7 +258,10 @@ function componentGuideline(
           ? (prop.values ?? []).map((value) => `\`${value}\``).join(", ")
           : prop.kind;
       const fallback = prop.default === undefined ? "–" : `\`${String(prop.default)}\``;
-      return `| \`${prop.name}\` | ${values} | ${fallback} | ${prop.description ?? ""} |`;
+      // A prop whose name is a reserved word of JavaScript (Spec 014 ④: for) is htmlFor in React;
+      // the cell keeps the prop's own name (parity reads it), the meaning says React's.
+      const react = prop.name === "for" ? "In React `htmlFor`. " : "";
+      return `| \`${prop.name}\` | ${values} | ${fallback} | ${react}${prop.description ?? ""} |`;
     })
     .join("\n");
   const goals = (skemo.goals ?? [])
@@ -446,7 +450,10 @@ function guidelines(input: CeloInput, aspekto: string): GeneratedFile[] {
     .join("\n");
   // Spec 011 ③ (plan ③ D-12): a message in the flow of the page is the notice (a live region with
   // an intent); never a toast; what needs a decision is the dialog, named where the Modelo has one.
-  const dialogName = eroj.find((entry) => entry.skemo.a11y.role === "dialog");
+  // Spec 014 ④: the popover shares the role; the modal dialog is the one without a trigger slot.
+  const dialogName = eroj.find(
+    (entry) => entry.skemo.a11y.role === "dialog" && !isPopover(entry.skemo),
+  );
   const noticeLines = eroj
     .filter(
       (entry) =>
@@ -554,6 +561,30 @@ function guidelines(input: CeloInput, aspekto: string): GeneratedFile[] {
         `- Every running text, caption, kicker or inline code is a \`<${componentName(entry.ero)}>\` in a type role; never a styled span.`,
     )
     .join("\n");
+  // Spec 014 ④ (G7, plan ④ D-08): every hover hint is the konsileto bound to its control, every
+  // non-modal layer the sxvebilo, every set of actions on one object the menuo; generated from
+  // the roles tooltip, dialog with a trigger slot (the popover) and menu.
+  const tooltipLines = eroj
+    .filter((entry) => entry.skemo.a11y.role === "tooltip" && entry.uzo !== undefined)
+    .map(
+      (entry) =>
+        `- Every name or short hint of a control shown on hover or focus is a \`<${componentName(entry.ero)}>\` bound to it with \`htmlFor\`; what a person needs to act stands visibly as text.`,
+    )
+    .join("\n");
+  const popoverLines = eroj
+    .filter((entry) => isPopover(entry.skemo) && entry.uzo !== undefined)
+    .map(
+      (entry) =>
+        `- Every non-modal layer with content beside its trigger is a \`<${componentName(entry.ero)}>\`${dialogName === undefined ? "" : `; a layer that asks for a decision is a \`<${componentName(dialogName.ero)}>\``}.`,
+    )
+    .join("\n");
+  const menuLines = eroj
+    .filter((entry) => entry.skemo.a11y.role === "menu" && entry.uzo !== undefined)
+    .map(
+      (entry) =>
+        `- Every set of actions on one object behind a single button is a \`<${componentName(entry.ero)}>\` whose entries name their actions; never a button per action in a row.`,
+    )
+    .join("\n");
   const skipLines = eroj
     .filter((entry) => isSkip(entry.skemo) && entry.uzo !== undefined)
     .map(
@@ -594,6 +625,9 @@ ${separatorLines}
 ${skipLines}
 ${headingLines}
 ${paragraphLines}
+${tooltipLines}
+${popoverLines}
+${menuLines}
 
 Where to look: \`setup.md\` for the imports, \`foundations/\` for the tokens, \`components/\` for
 each component.

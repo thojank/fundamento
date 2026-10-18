@@ -62,14 +62,17 @@ describe("elektilo in the repo Modelo (G1, G2, section 4)", () => {
       "ikono",
       "insigno",
       "kampo",
+      "konsileto",
       "langetaro",
       "ligilo",
       "markobutono",
+      "menuo",
       "mezurilo",
       "navigado",
       "plenstato",
       "saltligilo",
       "sxaltilo",
+      "sxvebilo",
       "tabelo",
       "tekstareo",
       "teksto",
@@ -410,7 +413,8 @@ describe("the Reguloj of the elektilo (G6, E5)", () => {
     ["help-is-one-sentence", ["kampo", "elekto", "elektilo", "tekstareo", "dialogo"]],
     ["placeholder-not-label", ["kampo", "elektilo", "tekstareo"]],
     // Spec 011 ⑤: widened once more, to the tabs of the langetaro.
-    ["option-labels-distinct", ["elekto", "elektilo", "langetaro"]],
+    // Spec 014 ④: and to the entries of the menuo.
+    ["option-labels-distinct", ["elekto", "elektilo", "langetaro", "menuo"]],
   ])("%s is widened to the elektilo, not duplicated (E5)", (name, eroj) => {
     expect(named(name)?.appliesTo).toEqual({ eroj });
     expect(named(name)?.statement).toMatch(/elektilo/);
@@ -441,6 +445,9 @@ describe("the Reguloj of the elektilo (G6, E5)", () => {
       "saltligilo",
       "titolo",
       "teksto",
+      "konsileto",
+      "sxvebilo",
+      "menuo",
     ]);
   });
 

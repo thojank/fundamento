@@ -53,14 +53,17 @@ describe("elekto in the repo Modelo (G1, G2, section 3)", () => {
       "ikono",
       "insigno",
       "kampo",
+      "konsileto",
       "langetaro",
       "ligilo",
       "markobutono",
+      "menuo",
       "mezurilo",
       "navigado",
       "plenstato",
       "saltligilo",
       "sxaltilo",
+      "sxvebilo",
       "tabelo",
       "tekstareo",
       "teksto",
@@ -404,7 +407,7 @@ describe("the Reguloj of the elekto (G6, E5)", () => {
       checkability: "automatic",
       // Spec 010 ④: widened to the elektilo, whose options are entries of the same kind (E5);
       // Spec 011 ⑤: to the langetaro, whose tabs are entries too.
-      appliesTo: { eroj: ["elekto", "elektilo", "langetaro"] },
+      appliesTo: { eroj: ["elekto", "elektilo", "langetaro", "menuo"] },
     });
     expect(named("option-labels-distinct")?.kialo).toMatch(/tell apart/);
     expect(named("elekto-options-few")).toMatchObject({
@@ -459,6 +462,9 @@ describe("the Reguloj of the elekto (G6, E5)", () => {
       "saltligilo",
       "titolo",
       "teksto",
+      "konsileto",
+      "sxvebilo",
+      "menuo",
     ]);
   });
 

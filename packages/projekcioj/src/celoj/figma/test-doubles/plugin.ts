@@ -1167,6 +1167,19 @@ export function figmaDouble(
       // Measured on 2026-09-22 (F22, file hEWHvBz7uRNrpYSau52OUN): a paint shows the colour it
       // holds, binding or not — a raw paint with boundVariables and the placeholder {0,0,0}
       // rendered black. Only this call resolves the variable's colour into the copy it returns.
+      // Spec 014 ④ (G4): an effect binds a field to a variable and carries the alias, as the real
+      // API does (setBoundVariableForEffect returns a copy); the double keeps the written value.
+      setBoundVariableForEffect: (effect: unknown, field: string, variable: DoubleVariable) => {
+        const given = effect as Record<string, unknown>;
+        const bound = (given.boundVariables ?? {}) as Record<string, unknown>;
+        return {
+          ...given,
+          boundVariables: {
+            ...bound,
+            [field]: { type: "VARIABLE_ALIAS", id: variable.id, name: variable.name },
+          },
+        };
+      },
       setBoundVariableForPaint: (paint: unknown, _field: string, variable: DoubleVariable) => {
         const resolved = resolveColor(variable.name);
         return {

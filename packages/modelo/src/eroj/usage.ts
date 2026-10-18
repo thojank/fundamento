@@ -894,6 +894,8 @@ export const USAGE_ENFORCERS: Readonly<Record<string, UsageEnforcer>> = {
   // Spec 011 ③ (G6, plan ③ D-06): a badge has at most three words (max-words on the label); an
   // empty state names what is missing and the next step (min-words on the text, kind empty only).
   "badge-text-short": textRule,
+  // Spec 014 ④ (G8): the words of a tooltip, at most eight (max-words on the label).
+  "tooltip-text-short": textRule,
   "empty-state-says-what-next": textRule,
   // Spec 011 ④ (G6, plan ④ D-04, D-06): a caption that names the rows (not-words against empty
   // captions); a value text that names value and reference (min-words 2, so '0 %' alone fails).

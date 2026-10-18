@@ -160,6 +160,18 @@
       "status": "active",
       "type": "ero"
     },
+    "ero_01M564NWTCRSFC8QEB9TZKQB0C": {
+      "status": "active",
+      "type": "ero"
+    },
+    "ero_01M564NWTD0WC9QWBP0GGTQZYX": {
+      "status": "active",
+      "type": "ero"
+    },
+    "ero_01M564NWTE5K276E3M9RA00YKV": {
+      "status": "active",
+      "type": "ero"
+    },
     "iko_01M55EFZMTVJR4FGV32KYEG54W": {
       "status": "active",
       "type": "ikono"
@@ -928,6 +940,22 @@
       "status": "active",
       "type": "jugxo"
     },
+    "jug_01M564NYAMHPVDJCKZ422FR5X7": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M564NYAPDDV16E0FDCRMW3KM": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M564NYAPDDV16E0FDCRMW3KN": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M564NYAQTWQ5W2CQQDPNNMMZ": {
+      "status": "active",
+      "type": "jugxo"
+    },
     "kpa_01M2VEEE9HREQTY2499C9JS05Q": {
       "status": "active",
       "type": "kontrastParo"
@@ -1548,6 +1576,10 @@
       "status": "active",
       "type": "regulo"
     },
+    "reg_01M564NXYK5MC9C1SRGMW3CA7B": {
+      "status": "active",
+      "type": "regulo"
+    },
     "set_01M2VEEDW32MC4ZQPRN0GC9JRR": {
       "status": "active",
       "type": "tokenSet"
@@ -1669,6 +1701,18 @@
       "type": "skemo"
     },
     "ske_01M5616G0WKZNS96ANV6PG3A7S": {
+      "status": "active",
+      "type": "skemo"
+    },
+    "ske_01M564NX6FGBH4NHKDSHCCM5W3": {
+      "status": "active",
+      "type": "skemo"
+    },
+    "ske_01M564NX6FGBH4NHKDSHCCM5W4": {
+      "status": "active",
+      "type": "skemo"
+    },
+    "ske_01M564NX6FGBH4NHKDSHCCM5W5": {
       "status": "active",
       "type": "skemo"
     },
@@ -3189,6 +3233,18 @@
       "type": "uzo"
     },
     "uzo_01M5616GCXEGSSSK367B2XWJV8": {
+      "status": "active",
+      "type": "uzo"
+    },
+    "uzo_01M564NXJNCV7VW68BBE42BEA0": {
+      "status": "active",
+      "type": "uzo"
+    },
+    "uzo_01M564NXJNCV7VW68BBE42BEA1": {
+      "status": "active",
+      "type": "uzo"
+    },
+    "uzo_01M564NXJNCV7VW68BBE42BEA2": {
       "status": "active",
       "type": "uzo"
     }

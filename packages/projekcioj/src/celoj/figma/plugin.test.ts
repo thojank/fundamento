@@ -332,15 +332,19 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
       ...["boundary", "slots", "content"].map(() => "ikono"),
       ...["boundary", "slots", "content"].map(() => "insigno"),
       ...["boundary", "slots", "content"].map(() => "kampo"),
+      // Spec 014 ④: the konsileto, the menuo and the sxvebilo carry a Uzo like every set.
+      ...["boundary", "slots", "content"].map(() => "konsileto"),
       // Spec 011 ⑤: the langetaro and the navigado carry a Uzo like every set.
       ...["boundary", "slots", "content"].map(() => "langetaro"),
       ...["boundary", "slots", "content"].map(() => "ligilo"),
       ...["boundary", "slots", "content"].map(() => "markobutono"),
+      ...["boundary", "slots", "content"].map(() => "menuo"),
       ...["boundary", "slots", "content"].map(() => "mezurilo"),
       ...["boundary", "slots", "content"].map(() => "navigado"),
       ...["boundary", "slots", "content"].map(() => "plenstato"),
       ...["boundary", "slots", "content"].map(() => "saltligilo"),
       ...["boundary", "slots", "content"].map(() => "sxaltilo"),
+      ...["boundary", "slots", "content"].map(() => "sxvebilo"),
       ...["boundary", "slots", "content"].map(() => "tabelo"),
       ...["boundary", "slots", "content"].map(() => "tekstareo"),
       ...["boundary", "slots", "content"].map(() => "teksto"),
@@ -383,15 +387,19 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
       ...["ikono", "ikono", "ikono"],
       ...["insigno", "insigno", "insigno"],
       ...["kampo", "kampo", "kampo"],
+      // Spec 014 ④: the overlays close their three parts too.
+      ...["konsileto", "konsileto", "konsileto"],
       // Spec 011 ⑤: the langetaro and the navigado close their three parts too.
       ...["langetaro", "langetaro", "langetaro"],
       ...["ligilo", "ligilo", "ligilo"],
       ...["markobutono", "markobutono", "markobutono"],
+      ...["menuo", "menuo", "menuo"],
       ...["mezurilo", "mezurilo", "mezurilo"],
       ...["navigado", "navigado", "navigado"],
       ...["plenstato", "plenstato", "plenstato"],
       ...["saltligilo", "saltligilo", "saltligilo"],
       ...["sxaltilo", "sxaltilo", "sxaltilo"],
+      ...["sxvebilo", "sxvebilo", "sxvebilo"],
       ...["tabelo", "tabelo", "tabelo"],
       ...["tekstareo", "tekstareo", "tekstareo"],
       ...["teksto", "teksto", "teksto"],
@@ -2670,12 +2678,16 @@ describe("every bound paint shows the plan's colour after the first and the seco
         { set: "insigno", created: 10, updated: 0 },
         // Spec 009: the kampo has size × state = 18 variants.
         { set: "kampo", created: 18, updated: 0 },
+        // Spec 014 ④: the konsileto has placement = 4 variants in one state (an axis of its own).
+        { set: "konsileto", created: 4, updated: 0 },
         // Spec 011 ⑤: the langetaro has state = 4 variants (active is the state of one tab, E7;
         // label and selected are strings, no axis).
         { set: "langetaro", created: 4, updated: 0 },
         { set: "ligilo", created: 30, updated: 0 },
         // Spec 010 ②: the markobutono has checked × size × state = 30 variants.
         { set: "markobutono", created: 30, updated: 0 },
+        // Spec 014 ④: the menuo has state = 4 variants (the states of an entry).
+        { set: "menuo", created: 4, updated: 0 },
         // Spec 011 ④: the mezurilo has intent = 4 variants in one state (value, min, max are
         // numbers, no axis).
         { set: "mezurilo", created: 4, updated: 0 },
@@ -2688,6 +2700,8 @@ describe("every bound paint shows the plan's colour after the first and the seco
         { set: "saltligilo", created: 2, updated: 0 },
         // Spec 010 ①: the sxaltilo has checked × size × state = 24 variants.
         { set: "sxaltilo", created: 24, updated: 0 },
+        // Spec 014 ④: the sxvebilo has one variant (placement and open are no axes).
+        { set: "sxvebilo", created: 1, updated: 0 },
         // Spec 011 ④: the tabelo has density × state = 6 variants (the states of the sort button).
         { set: "tabelo", created: 6, updated: 0 },
         // Spec 011 ②: the tekstareo has kind × size × state = 30 variants.
@@ -4471,8 +4485,8 @@ describe("the tekstareo is drawn as the field of the kampo: kind × size × stat
 // to size.control.large), actions (a row at the end, two frames with a word each standing in for
 // the butono). Where the reason is none, the content is hidden (visible false): a hidden child of
 // an auto-layout frame takes no space in Figma, so no gap remains. The shadow of the surface is
-// written as a drop shadow from the plan's fields; the double does not model
-// setBoundVariableForEffect, so the run reports the shadow as written, not bound. The example
+// bound as a drop shadow field by field (Spec 014 ④: the double models setBoundVariableForEffect,
+// so the run reports the shadow as bound and the mode switches it). The example
 // frame „mit Hintergrund" lies in the frame Eroj beside the set and shows the default variant on
 // the backdrop (color.backdrop). Test-double assumptions until measured in f10b-5: a hidden child
 // takes no space in auto-layout (the double measures no visibility); width and height bound on a
@@ -4668,7 +4682,7 @@ describe("the dialogo is drawn as a dialog: surface with heading, message, reaso
       part: "surface",
       variable: "elevation/shadow/modal",
       layers: 2,
-      status: "written",
+      status: "bound",
     });
     expect(dialogo?.shadow?.evidence).toContain("setBoundVariableForEffect");
   });
@@ -6367,5 +6381,112 @@ describe("icons are drawn from the glyphs of every Aspekto and switch with the b
     const before = double.snapshot();
     await run(double, source);
     expect(double.snapshot()).toBe(before);
+  });
+});
+
+// Spec 014 ④ (plan ④ D-06): the plugin draws the overlays and binds every shadow (G4): the double
+// models setBoundVariableForEffect since ④, so the dialogo's shadow and the overlay shadows report
+// bound — the Vojmapo's finding „Schattenvariablen ungebunden" closes. A tooltip is a surface with
+// its text beside a stand-in of its trigger on the side of its placement; a popover a trigger
+// stand-in over the surface with heading and content; a menu a trigger stand-in over the surface
+// with three rows (the third in the danger colour).
+describe("the plugin draws the overlays and binds the shadows (Spec 014 ④)", () => {
+  const source = repoFiles["figma/plugin/code.js"] ?? "";
+  const bound = (node: DoubleNode | undefined, field: string) => node?.boundVariables[field]?.name;
+  const paintOf = (node: DoubleNode | undefined, field: "fills" | "strokes") =>
+    ((node?.properties[field] ?? []) as { boundVariables?: { color?: { name: string } } }[])[0]
+      ?.boundVariables?.color?.name;
+  type Report = {
+    warnings: string[];
+    components: {
+      set: string;
+      shadow?: { part: string; variable: string; layers: number; status: string; evidence: string };
+    }[];
+  };
+  const drawn = async () => {
+    const double = modelDouble();
+    const report = (await new Function("figma", `${source}\nreturn applyPlan();`)(
+      double.figma,
+    )) as Report;
+    const setOf = (name: string) => pageNodes(double).find((child) => child.name === name);
+    return { double, report, setOf };
+  };
+
+  it("binds the shadow of the dialogo, the konsileto, the sxvebilo and the menuo to DROP_SHADOW effects (status bound)", async () => {
+    const { report, setOf } = await drawn();
+    for (const name of ["dialogo", "konsileto", "sxvebilo", "menuo"]) {
+      const component = report.components.find((candidate) => candidate.set === name);
+      expect(component?.shadow, name).toMatchObject({ part: "surface", status: "bound" });
+      expect(component?.shadow?.evidence, name).toContain("follows the mode");
+    }
+    const konsileto = setOf("konsileto");
+    const surface = descendant(konsileto?.children[0], "control");
+    const effects = (surface?.properties.effects ?? []) as {
+      type: string;
+      boundVariables?: Record<string, { name: string }>;
+    }[];
+    expect(effects[0]?.type).toBe("DROP_SHADOW");
+    expect(effects[0]?.boundVariables?.color?.name).toMatch(/^elevation\/shadow\/overlay/);
+    expect(effects[0]?.boundVariables?.radius?.name).toMatch(/blur$/);
+  });
+
+  it("the konsileto: four variants by placement, the surface on the side of the placement beside a stand-in of the trigger", async () => {
+    const { setOf } = await drawn();
+    const set = setOf("konsileto");
+    expect(set?.children.map((child) => child.name)).toEqual([
+      "placement=block-start, state=rest",
+      "placement=block-end, state=rest",
+      "placement=inline-start, state=rest",
+      "placement=inline-end, state=rest",
+    ]);
+    const above = set?.children[0];
+    expect(above?.children.map((child) => child.name)).toEqual(["control", "anchor"]);
+    expect(above?.properties.layoutMode).toBe("VERTICAL");
+    const below = set?.children[1];
+    expect(below?.children.map((child) => child.name)).toEqual(["anchor", "control"]);
+    const before = set?.children[2];
+    expect(before?.properties.layoutMode).toBe("HORIZONTAL");
+    const control = descendant(above, "control");
+    expect(paintOf(control, "fills")).toBe("color/background/inverse");
+    expect(bound(control, "cornerRadius")).toBe("radius/role/control");
+    const text = descendant(above, "text");
+    expect(paintOf(text, "fills")).toBe("color/text/inverse");
+    expect(bound(text, "fontSize")).toBe("typography/caption/font-size");
+    expect(text?.properties.characters).toBe("Kurzhinweis");
+  });
+
+  it("the sxvebilo: a trigger stand-in over the surface with heading and content, the width bound", async () => {
+    const { setOf } = await drawn();
+    const variant = setOf("sxvebilo")?.children[0];
+    expect(variant?.children.map((child) => child.name)).toEqual(["trigger", "surface"]);
+    const surface = descendant(variant, "surface");
+    expect(surface?.children.map((child) => child.name)).toEqual(["heading", "content"]);
+    expect(bound(surface, "width")).toBe("size/container/small");
+    expect(paintOf(surface, "strokes")).toBe("color/border/subtle");
+    expect(descendant(variant, "heading")?.properties.characters).toBe("Überschrift");
+    expect(descendant(variant, "trigger-label")?.properties.characters).toBe("Auslöser");
+    expect(descendant(variant, "content-text")?.properties.characters).toBe("Inhalt");
+  });
+
+  it("the menuo: four variants by state, each a trigger stand-in over the surface with three rows, the third in the danger colour", async () => {
+    const { setOf } = await drawn();
+    const set = setOf("menuo");
+    expect(set?.children.map((child) => child.name)).toEqual([
+      "state=rest",
+      "state=hover",
+      "state=focus",
+      "state=disabled",
+    ]);
+    const rest = set?.children[0];
+    const surface = descendant(rest, "surface");
+    // The rows are entries like a tab list's: ring → gap → item, one per word of the plan.
+    expect(surface?.children.map((child) => child.name)).toEqual(["entry-1", "entry-2", "entry-3"]);
+    expect(paintOf(descendant(rest, "item-1"), "fills")).toBe("color/action/tertiary/rest");
+    expect(paintOf(descendant(rest, "items-1"), "fills")).toBe("color/text/default");
+    expect(paintOf(descendant(rest, "items-3"), "fills")).toBe("color/status/danger/text");
+    expect(descendant(rest, "items-1")?.properties.characters).toBe("Bearbeiten");
+    expect(descendant(rest, "items-3")?.properties.characters).toBe("Löschen");
+    expect(descendant(rest, "trigger-label")?.properties.characters).toBe("Weitere Aktionen");
+    expect(bound(descendant(rest, "item-1"), "minHeight")).toBe("size/target/min");
   });
 });

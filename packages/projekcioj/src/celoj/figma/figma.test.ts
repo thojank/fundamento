@@ -774,14 +774,17 @@ describe("Figma plan for the ligilo (Spec 008 T017)", () => {
       "ikono",
       "insigno",
       "kampo",
+      "konsileto",
       "langetaro",
       "ligilo",
       "markobutono",
+      "menuo",
       "mezurilo",
       "navigado",
       "plenstato",
       "saltligilo",
       "sxaltilo",
+      "sxvebilo",
       "tabelo",
       "tekstareo",
       "teksto",
@@ -977,12 +980,16 @@ describe("the label default of a set follows its a11y role (M-3)", () => {
       // Spec 011 ③: a badge (role generic) names a status (for the maintainer to confirm).
       insigno: "Status",
       kampo: "Beschriftung",
+      // Spec 014 ④: a tooltip is a short hint, the trigger of a menu offers more actions, a
+      // popover's label property is its heading (to confirm).
+      konsileto: "Kurzhinweis",
       // Spec 011 ⑤: a tab list's label is the name of the group, never shown; the word is the
       // Ero's (proposal for the maintainer to confirm).
       langetaro: "Reiter",
       ligilo: "Ziel",
       // Spec 010 ②: a checkbox names an option (plan ② D-11, for the maintainer to confirm, O-x).
       markobutono: "Option",
+      menuo: "Weitere Aktionen",
       // Spec 011 ④ (plan ④ D-14): a meter (role meter) names the measure its label stands for
       // (for the maintainer to confirm).
       mezurilo: "Messwert",
@@ -995,6 +1002,7 @@ describe("the label default of a set follows its a11y role (M-3)", () => {
       // Spec 014 ②: a skip link is a link; its word names its destination.
       saltligilo: "Ziel",
       sxaltilo: "Einstellung",
+      sxvebilo: "Überschrift",
       // Spec 011 ④ (plan ④ D-14): a table's caption is a caption like a field's label (for the
       // maintainer to confirm).
       tabelo: "Beschriftung",
@@ -2877,5 +2885,78 @@ describe("the Figma plan draws the titolo and the teksto as text (Spec 014 ③)"
       "text.color": "color/text/muted",
     });
     expect(teksto?.label).toEqual({ property: "label", defaultValue: "Text" });
+  });
+});
+
+// Spec 014 ④ (plan ④ D-06): the overlays in Figma — the konsileto as a tooltip (placement an axis
+// of its own, like the name of an icon: it keys no part), the sxvebilo as a popover (one variant:
+// trigger stand-in and surface with heading and content), the menuo as a menu (state × three
+// entries, one of them danger, one disabled); every surface carries its shadow field by field, so
+// the plugin binds it (setBoundVariableForEffect, also the dialogo's).
+describe("the Figma plan draws the overlays (Spec 014 ④)", () => {
+  const set = (name: string) => plan.components.find((component) => component.set === name);
+
+  it("the konsileto: placement × rest as a tooltip, its surface inverse with the overlay shadow, the word Kurzhinweis", () => {
+    const konsileto = set("konsileto");
+    expect(konsileto?.structure).toBe("tooltip");
+    expect(konsileto?.extraAxes).toEqual(["placement"]);
+    expect(konsileto?.variants).toHaveLength(4);
+    expect(konsileto?.variants.map((variant) => variant.props.placement)).toEqual([
+      "block-start",
+      "block-end",
+      "inline-start",
+      "inline-end",
+    ]);
+    expect(konsileto?.variants[0]?.bindings).toMatchObject({
+      "surface.fill": "color/background/inverse",
+      "surface.radius": "radius/role/control",
+      "text.color": "color/text/inverse",
+      "text.typography": "typography/caption",
+      "box.inline-padding": "spacing/small",
+    });
+    expect(konsileto?.variants[0]?.shadow).toMatchObject({
+      part: "surface",
+      variable: "elevation/shadow/overlay",
+    });
+    expect(konsileto?.label).toEqual({ property: "label", defaultValue: "Kurzhinweis" });
+  });
+
+  it("the sxvebilo: one variant as a popover with trigger, heading and content words; the surface's width is the small container", () => {
+    const sxvebilo = set("sxvebilo");
+    expect(sxvebilo?.structure).toBe("popover");
+    expect(sxvebilo?.variants).toHaveLength(1);
+    expect(sxvebilo?.variants[0]?.bindings).toMatchObject({
+      "surface.fill": "color/background/raised",
+      "surface.width": "size/container/small",
+      "border.color": "color/border/subtle",
+      "heading.typography": "typography/headline/4",
+      "content.typography": "typography/body/1",
+    });
+    expect(sxvebilo?.variants[0]?.shadow?.variable).toBe("elevation/shadow/overlay");
+    expect(sxvebilo?.texts).toEqual({ trigger: "Auslöser", content: "Inhalt" });
+    expect(sxvebilo?.label).toEqual({ property: "label", defaultValue: "Überschrift" });
+  });
+
+  it("the menuo: state × rest as a menu of three entries (edit, duplicate disabled, delete danger), the word of its trigger", () => {
+    const menuo = set("menuo");
+    expect(menuo?.structure).toBe("menu");
+    expect(menuo?.variants).toHaveLength(4);
+    expect(menuo?.menu).toEqual({
+      trigger: "Weitere Aktionen",
+      items: [
+        { text: "Bearbeiten" },
+        { text: "Duplizieren", disabled: true },
+        { text: "Löschen", danger: true },
+      ],
+    });
+    const hover = menuo?.variants.find((variant) => variant.props.state === "hover");
+    expect(hover?.bindings).toMatchObject({
+      "item.fill": "color/action/tertiary/hover",
+      "item.color": "color/text/default",
+      "item.typography": "typography/label/1",
+      "item.height": "size/target/min",
+      "danger-item.color": "color/status/danger/text",
+    });
+    expect(menuo?.label).toEqual({ property: "label", defaultValue: "Weitere Aktionen" });
   });
 });

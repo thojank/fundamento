@@ -1,0 +1,242 @@
+{
+  "ero": {
+    "id": "ero_01M564NWTE5K276E3M9RA00YKV",
+    "name": "menuo",
+    "skemo": "ske_01M564NX6FGBH4NHKDSHCCM5W5",
+    "description": "An action menu: offers actions for one object behind a single button — edit, duplicate, delete. A layer of the platform (popover) anchored to its trigger, walked with the arrow keys; an entry fires select with its id."
+  },
+  "skemo": {
+    "id": "ske_01M564NX6FGBH4NHKDSHCCM5W5",
+    "ero": "ero_01M564NWTE5K276E3M9RA00YKV",
+    "props": [
+      {
+        "name": "label",
+        "kind": "string",
+        "description": "The name of the menu and of its own trigger (a button with the icon more): heard as the button's name and the menu's; empty, the Modelo's words stand in (a11y.texts label-empty: Weitere Aktionen)."
+      },
+      {
+        "name": "placement",
+        "kind": "enum",
+        "values": [
+          "block-start",
+          "block-end",
+          "inline-start",
+          "inline-end"
+        ],
+        "default": "block-end",
+        "description": "Where the layer stands against its trigger, in logical directions (position-area); where that side has no room, the platform flips it. Layout, no token: it keys no part."
+      },
+      {
+        "name": "open",
+        "kind": "boolean",
+        "default": false,
+        "description": "Whether the menu is shown; the trigger toggles it, an entry, Escape and a click outside close it, and the attribute follows."
+      }
+    ],
+    "states": [
+      "rest",
+      "hover",
+      "focus",
+      "disabled"
+    ],
+    "slots": [
+      {
+        "name": "items",
+        "default": true,
+        "text": true
+      },
+      {
+        "name": "trigger"
+      }
+    ],
+    "parts": {
+      "surface": {
+        "fill": {
+          "fixed": "color.background.raised"
+        },
+        "radius": {
+          "fixed": "radius.role.surface"
+        },
+        "shadow": {
+          "fixed": "elevation.shadow.overlay"
+        },
+        "layer": {
+          "fixed": "elevation.layer.overlay"
+        },
+        "width": {
+          "fixed": "size.container.small"
+        }
+      },
+      "border": {
+        "color": {
+          "fixed": "color.border.subtle"
+        },
+        "width": {
+          "fixed": "border.width.default"
+        }
+      },
+      "item": {
+        "fill": {
+          "by": [
+            "state"
+          ]
+        },
+        "color": {
+          "by": [
+            "state"
+          ]
+        },
+        "typography": {
+          "fixed": "typography.label.1"
+        },
+        "height": {
+          "fixed": "size.target.min"
+        },
+        "inline-padding": {
+          "fixed": "spacing.medium"
+        },
+        "radius": {
+          "fixed": "radius.role.control"
+        }
+      },
+      "danger-item": {
+        "color": {
+          "fixed": "color.status.danger.text"
+        }
+      },
+      "box": {
+        "inline-padding": {
+          "fixed": "spacing.xsmall"
+        },
+        "gap": {
+          "fixed": "spacing.xsmall"
+        }
+      },
+      "focus-ring": {
+        "ring": {
+          "fixed": "focus.ring"
+        },
+        "offset": {
+          "fixed": "focus.offset"
+        },
+        "color": {
+          "fixed": "color.focus.inner"
+        }
+      }
+    },
+    "bindings": [
+      {
+        "part": "item",
+        "property": "fill",
+        "when": {
+          "state": "rest"
+        },
+        "token": "color.action.tertiary.rest"
+      },
+      {
+        "part": "item",
+        "property": "fill",
+        "when": {
+          "state": "hover"
+        },
+        "token": "color.action.tertiary.hover"
+      },
+      {
+        "part": "item",
+        "property": "fill",
+        "when": {
+          "state": "focus"
+        },
+        "token": "color.action.tertiary.rest"
+      },
+      {
+        "part": "item",
+        "property": "fill",
+        "when": {
+          "state": "disabled"
+        },
+        "token": "color.action.tertiary.disabled"
+      },
+      {
+        "part": "item",
+        "property": "color",
+        "when": {
+          "state": "rest"
+        },
+        "token": "color.text.default"
+      },
+      {
+        "part": "item",
+        "property": "color",
+        "when": {
+          "state": "hover"
+        },
+        "token": "color.text.default"
+      },
+      {
+        "part": "item",
+        "property": "color",
+        "when": {
+          "state": "focus"
+        },
+        "token": "color.text.default"
+      },
+      {
+        "part": "item",
+        "property": "color",
+        "when": {
+          "state": "disabled"
+        },
+        "token": "color.text.disabled"
+      }
+    ],
+    "a11y": {
+      "role": "menu",
+      "name": [
+        "prop:label"
+      ],
+      "states": {
+        "disabled": [
+          "aria-disabled"
+        ]
+      },
+      "keys": [
+        "ArrowDown",
+        "ArrowUp",
+        "Home",
+        "End",
+        "Escape",
+        "Enter",
+        "Space"
+      ],
+      "texts": {
+        "label-empty": {
+          "de": "Weitere Aktionen",
+          "en": "More actions"
+        }
+      }
+    },
+    "goals": [
+      {
+        "goal": "action-menu",
+        "keywords": {
+          "en": [
+            "actionmenu",
+            "contextmenu",
+            "overflowmenu",
+            "kebabmenu",
+            "rowactions"
+          ],
+          "de": [
+            "aktionsmenü",
+            "kontextmenü",
+            "zeilenaktionen",
+            "zeilenmenü"
+          ]
+        },
+        "props": {},
+        "regulo": "label-names-action"
+      }
+    ]
+  }
+}

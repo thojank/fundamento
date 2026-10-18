@@ -38,15 +38,18 @@ import {
 } from "@fundamento/modelo";
 import type { Celo, CeloInput, GeneratedFile } from "../../build.js";
 import {
+  VITRINO_CONTENT_TEXT,
   VITRINO_DIALOG_ACTIONS,
   VITRINO_ICON_EXAMPLE,
   VITRINO_LIST_ENTRIES,
+  VITRINO_MENU_ITEMS,
   VITRINO_NUMBER_EXAMPLES,
   VITRINO_OPTIONS,
   VITRINO_PROMPT,
   VITRINO_SLOT_TEXTS,
   VITRINO_SURFACE,
   VITRINO_TABLE,
+  VITRINO_TRIGGER_TEXT,
 } from "../vitrino/datumoj.js";
 import { signOf } from "../web-component/element-template.js";
 import {
@@ -492,7 +495,10 @@ export type FigmaStructure =
   | "nav"
   | "tabs"
   | "icon"
-  | "separator";
+  | "separator"
+  | "tooltip"
+  | "popover"
+  | "menu";
 
 /**
  * A radio group (Spec 010 ③, D-07) is a choice: the label (the question) above a column of
@@ -525,7 +531,9 @@ export const structureOf = (role: string, parts: readonly string[] = []): FigmaS
       : role === "radiogroup"
         ? "choice"
         : role === "dialog"
-          ? "dialog"
+          ? parts.length > 0 && !parts.includes("backdrop")
+            ? "popover"
+            : "dialog"
           : role === "generic"
             ? "badge"
             : role === "status"
@@ -552,7 +560,13 @@ export const structureOf = (role: string, parts: readonly string[] = []): FigmaS
                               // text, drawn as a badge is — the text in the role of the variant.
                               role === "heading" || role === "paragraph"
                               ? "badge"
-                              : "control";
+                              : // Spec 014 ④ (plan ④ D-06): the overlays — a tooltip, a menu, and
+                                // a popover (a dialog without a backdrop: non-modal, with a trigger).
+                                role === "tooltip"
+                                ? "tooltip"
+                                : role === "menu"
+                                  ? "menu"
+                                  : "control";
 
 /**
  * The neutral word every label template shows, per a11y role (M-3; Maintainer, F14, 2026-10-13,
@@ -603,6 +617,10 @@ const LABEL_DEFAULTS: Readonly<Record<string, string>> = {
   // for the maintainer to confirm; no Jugxo created here.
   heading: "Überschrift",
   paragraph: "Text",
+  // Spec 014 ④ (plan ④ D-06): a tooltip is a short hint; the label of a menu names its trigger,
+  // which offers more actions (the Modelo's own words, a11y.texts label-empty). Proposals.
+  tooltip: "Kurzhinweis",
+  menu: "Weitere Aktionen",
 };
 
 /**
@@ -612,6 +630,9 @@ const LABEL_DEFAULTS: Readonly<Record<string, string>> = {
  */
 const STRUCTURE_LABEL_DEFAULTS: Readonly<Partial<Record<FigmaStructure, string>>> = {
   state: "Zustand",
+  // Spec 014 ④ (plan ④ D-06): a popover shares the dialog's role; its label property writes its
+  // heading, so the word is the heading's. Proposal for the maintainer to confirm.
+  popover: "Überschrift",
 };
 
 /** The word a role without its own entry shows: the button's, as every set did before M-3. */
@@ -635,7 +656,12 @@ export function labelPartOf(skemo: LoadedEro["skemo"]): string {
     (candidate) => candidate.default === true && candidate.text === true,
   );
   if (slot !== undefined && skemo.parts[slot.name] !== undefined) return slot.name;
-  return skemo.parts.label === undefined && skemo.parts.text !== undefined ? "text" : "label";
+  if (skemo.parts.label === undefined && skemo.parts.text !== undefined) return "text";
+  // Spec 014 ④ (plan ④ D-06): a popover's label property writes its heading (the part of its
+  // heading slot); a menu's the word of its entries (the part item), whose role the rows take.
+  if (skemo.parts.label === undefined && skemo.parts.heading !== undefined) return "heading";
+  if (skemo.parts.label === undefined && skemo.parts.item !== undefined) return "item";
+  return "label";
 }
 
 /**
@@ -719,6 +745,11 @@ export interface FigmaComponentSet {
    * way — the Vitrino's words, the first the current or active one.
    */
   entry?: { key: string; texts: string[]; selected: number };
+  /**
+   * A menu (Spec 014 ④, plan ④ D-06): the word of its trigger stand-in and its entries — the
+   * Vitrino's three, one disabled, one danger — drawn as rows (entry carries the same words).
+   */
+  menu?: { trigger: string; items: { text: string; disabled?: boolean; danger?: boolean }[] };
   /**
    * The example frame beside the set of a dialog (Spec 011 ②): the named variant drawn once more
    * on a frame whose fill is bound to the backdrop, at the padding of the section's gap, placed
@@ -1642,7 +1673,9 @@ function componentSetOf(
   const structure = structureOf(skemo.a11y.role, Object.keys(skemo.parts));
   // An icon (Spec 014 ②): one variant per name of the Ikonaro besides the axes of its parts — the
   // name keys no part, the glyph does; the Figma side is told so (extraAxes).
-  const extraAxes = structure === "icon" ? ["name"] : [];
+  // A tooltip (Spec 014 ④): one variant per placement — the side keys no part, the layer takes
+  // it on the page; the set shows each side beside a stand-in of the trigger.
+  const extraAxes = structure === "icon" ? ["name"] : structure === "tooltip" ? ["placement"] : [];
   const keys = [...extraAxes, ...variantKeys(skemo)];
   // What the plugin draws for this structure (Spec 011 ③): the bindings every structure shares and
   // the ones this structure binds elsewhere — the text's colour on the label of a badge. What the
@@ -2142,6 +2175,21 @@ function componentSetOf(
   // The confirming action of a dialog looks like the butono it composes (Abnahme Spec 011 ②,
   // F-5): its roles read from the butono's Skemo in the same Modelo.
   const composed = structure === "dialog" ? composedOf(eroj, resolutions, base) : undefined;
+  // The overlays (Spec 014 ④, plan ④ D-06): a popover shows the words of its trigger stand-in and
+  // its content beside the heading (the label property); a menu its three entries (the
+  // Vitrino's: edit, duplicate disabled, delete danger) and the word of its trigger, the Modelo's
+  // own (a11y.texts label-empty). The entries are drawn as rows like a tab list's (entry).
+  const menu =
+    structure === "menu"
+      ? {
+          trigger: skemo.a11y.texts?.["label-empty"]?.de ?? labelDefaultOf(skemo.a11y.role),
+          items: VITRINO_MENU_ITEMS.map((item) => ({
+            text: item.text,
+            ...(item.disabled === true ? { disabled: true } : {}),
+            ...(item.danger === true ? { danger: true } : {}),
+          })),
+        }
+      : undefined;
   return {
     set: entry.ero.name,
     structure,
@@ -2155,6 +2203,15 @@ function componentSetOf(
       : {}),
     ...(structure === "dialog" ? { texts: dialogTexts } : {}),
     ...(structure === "tabs" ? { texts: { ...TABS_TEXTS } } : {}),
+    ...(structure === "popover"
+      ? { texts: { trigger: VITRINO_TRIGGER_TEXT, content: VITRINO_CONTENT_TEXT } }
+      : {}),
+    ...(menu === undefined
+      ? {}
+      : {
+          menu,
+          entry: { key: STATE_KEY, texts: menu.items.map((item) => item.text), selected: 0 },
+        }),
     ...(extraAxes.length === 0 ? {} : { extraAxes }),
     ...(structure === "separator"
       ? { separator: { length: parityPx(base[SEPARATOR_LENGTH]?.value) } }

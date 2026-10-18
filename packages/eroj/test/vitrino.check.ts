@@ -557,3 +557,22 @@ test("fm-titolo and fm-teksto are upgraded in their sections, axe-clean", async 
     expect(await axeViolations(page, `#fm-vitrino-${id}`), id).toEqual([]);
   }
 });
+
+// Spec 014 ④ (plan ④ D-07): the sections of the overlays in the Vitrino: the tooltip shows on
+// hover, the popover and the menu open behind their triggers; axe without a finding, opened.
+test("fm-konsileto, fm-sxvebilo and fm-menuo are upgraded and open in their sections, axe-clean", async ({
+  page,
+}) => {
+  await open(page);
+  await page.locator("#fm-vitrino-konsileto-trigger").hover();
+  await expect(page.locator("#fm-vitrino-konsileto").getByRole("tooltip")).toHaveCount(1);
+  await page.locator("#fm-vitrino-sxvebilo").getByRole("button", { name: "Öffnen" }).click();
+  await expect(page.locator("#fm-vitrino-sxvebilo").getByRole("dialog")).toHaveCount(1);
+  expect(await axeViolations(page, "#fm-vitrino-sxvebilo"), "sxvebilo").toEqual([]);
+  await page.keyboard.press("Escape");
+  await page.locator("#fm-vitrino-menuo").getByRole("button", { name: "Weitere Aktionen" }).click();
+  await expect(page.locator("#fm-vitrino-menuo").getByRole("menuitem")).toHaveCount(3);
+  expect(await axeViolations(page, "#fm-vitrino-menuo"), "menuo").toEqual([]);
+  await page.keyboard.press("Escape");
+  expect(await axeViolations(page, "#fm-vitrino-konsileto"), "konsileto").toEqual([]);
+});

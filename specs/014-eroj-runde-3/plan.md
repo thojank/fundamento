@@ -310,7 +310,79 @@ Zwei Sätze aus den Rollen: „Every heading is a `<Titolo>` with its `level` (t
 
 ## ④ Overlays
 
-*(folgt: `konsileto`, `sxvebilo`, `menuo`; Schatten in Figma gebunden.)*
+**Branch:** `261017-spec-014-overlays-e3bf97` (gestapelt auf ③). Rot `97098e1`, grün: Hash in tasks ④.
+
+### Zusammenfassung
+
+1. **Overlays auf der Plattform** (D-05, E11, G4): alle drei Ebenen sind Popover der Plattform (`popover="manual"` am Tooltip, `popover="auto"` an Popover und Menü: Top Layer, Light Dismiss, Escape) und sitzen mit CSS Anchor Positioning an ihrem Auslöser – das Element schreibt je Overlay einen gestrichelten Namen an den Auslöser (`anchor-name`) und an die Ebene (`position-anchor`), das Stylesheet setzt die Seite (`position-area` in logischen Richtungen, `placement` als Host-Attribut ohne Datenattribut) und kippt sie bei Platzmangel (`position-try-fallbacks: flip-block, flip-inline`); ohne Anchor Positioning schreibt das Element die schlichte Lage unter dem Auslöser als Inline-Insets (eigener Fallback, kein Framework). Gemessen in ① (alle drei Engines).
+2. **`konsileto`** (D-01): der Tooltip – `for` (Pflicht, Id des Auslösers), `placement` (Default `block-start`); Teile `surface` (inverse Fläche, `radius.role.control`, Schatten `elevation.shadow.overlay`, Ebene `elevation.layer.overlay`), `text` (`color.text.inverse`, `typography.caption`), `box`, `motion` (Verzögerung aus `motion.duration.slow`); Rolle `tooltip`, Escape. Erscheint nach der Verzögerung bei Hover und Fokus, bleibt beim Überfahren stehen, beschreibt den Auslöser (`aria-describedby` auf den Host) – außer sein Text ist der Name des Auslösers (Icon-Schaltfläche mit `label`), dann wird nichts doppelt gesprochen. Neue Regulo **`tooltip-text-short`** (fest, G8: höchstens acht Wörter, Prüfart `max-words`), vier Jugxoj de/en. Uzo: `essential-info` → `teksto` (Kialo nennt die Hilfe des `kampo`), `interactive-content` → `sxvebilo`, Grenze `tooltip-on-disabled` (ask-human).
+3. **`sxvebilo`** (D-02): das Popover – `label` (Pflicht, Name der Ebene), `placement` (Default `block-end`), `open`; Slots `trigger` (ein `butono`), Standard (Inhalt), `heading` (optional, komponiert `fm-titolo level=2`); Teile `surface` (erhaben, `radius.role.surface`, Schatten, Ebene, Breite höchstens `size.container.small`), `border`, `heading`, `content`, `box`; Rolle `dialog` nicht-modal (Bauform über den Slot `trigger` erkannt). Der Auslöser sagt `aria-expanded`, der Fokus geht in die Ebene und beim Schließen zurück, das Attribut `open` folgt dem `toggle`-Ereignis der Plattform. Uzo: `decision` → `dialogo`, `short-hint` → `konsileto`, `actions-list` → `menuo`, Grenzen `nested-popover` (not-supported), `drawer` (ask-human). Der `dialogo` schließt seine Grenze `non-modal` (use-instead `sxvebilo`).
+4. **`menuo`** (D-03): das Aktionsmenü – `label` (optional: ohne Angabe stehen die Wörter des Modelo „Weitere Aktionen“ ein, `a11y.texts label-empty`), `placement`, `open`; Slots `items` (Standard, Pflicht, `<data value>`-Einträge, `intent="danger"`, `disabled`, `fm-apartigilo` als Gruppenlinie) und `trigger` (optional; sonst der eigene `butono emphasis=low` mit `ikono more`); Zustände eines Eintrags rest/hover/focus/disabled; Teile `item` (Fläche und Farbe nach Zustand, `typography.label.1`, `size.target.min`, Padding, Radius), `danger-item` (`color.status.danger.text`), `surface`, `border`, `box`, `focus-ring`; Rolle `menu` mit `menuitem`-Zeilen (manuelle Slot-Zuweisung wie die Reiter), Tasten Pfeile (umlaufend, gesperrte übersprungen), Pos1/Ende, Buchstabensuche, Enter/Leertaste → `select` mit der Id, Escape schließt und fokussiert den Auslöser. Goal `action-menu` nur mit zusammengesetzten Wörtern (E8, O-28: „Menü“ bleibt bei der `navigado`). `label-names-action` und `option-labels-distinct` ausgeweitet (E5). Uzo: `navigate` → `navigado`, `choose-value` → `elektilo`, `single-action` → `butono`, Grenzen `submenu` (not-supported), `checkable-items` (ask-human); die `tabelo` schickt `row-actions` an den `menuo` (ihre Grenze `row-actions-menu` ist geschlossen), `apartigilo` und `ikono` komponieren mit ihm.
+5. **Figma** (D-06): Bauformen `tooltip` (placement als eigene Achse wie der Name des Icons, die Fläche neben einem Stellvertreter des Auslösers auf der Seite ihrer Lage), `popover` (Stellvertreter über der Fläche mit Überschrift und Inhalt) und `menu` (Stellvertreter über der Fläche mit drei Einträgen als Reihen wie die Reiter: Bearbeiten, Duplizieren, Löschen in der Gefahr-Farbe). **Schatten gebunden:** `setBoundVariableForEffect` je Feld und Lage an einen DROP_SHADOW-Effekt – für `konsileto`, `sxvebilo`, `menuo` und den `dialogo`; das Double modelliert den Aufruf, die Läufe melden `status: bound`; der Vojmapo-Befund „Schattenvariablen ungebunden“ ist gestrichen. Vorgabewörter „Kurzhinweis“, „Überschrift“ (Popover: das Label-Property schreibt die Überschrift), „Weitere Aktionen“ (O-16).
+6. **Modelo, Vitrino, Make-Kit, React** (D-03, D-07, D-08): `a11y.texts` kennt `<prop>-empty` einer String-Prop, eine Listenprüfung darf einen Text-Slot mit mehreren Texten beurteilen (`uzo-content-of-invalid`); Vitrino zeigt den Tooltip an einer Icon-Schaltfläche, das Popover hinter einem `butono`, das Menü mit eigenem Auslöser; drei Guideline-Sätze; React nennt `for` als `htmlFor` (Parität bildet es zurück).
+
+Kein Token, keine Regulo-Semantik geändert; keine Schema-Erweiterung (zwei Prüfregeln erweitert), eine neue Regulo (G8), 25 Eroj.
+
+### Entwurfsentscheidungen
+
+#### D-01 `konsileto`: `for`, `placement`, die Verzögerung als Teil `motion` (G5; Regel 0.2)
+`for` ist kein Web-Begriff der Liste (Art. VIII) und sagt, was es ist: die Id des Auslösers; React schreibt es als `htmlFor` wie am `label`. `placement` schlüsselt keinen Teil – die Seite ist Layout –, Figma macht sie zur Achse (`extraAxes`, wie `name` am `ikono`). Die Verzögerung ist ein Teil `motion` mit `duration` (`motion.duration.slow`, 300 ms in komuna) und `easing`: das Element liest sie aus der `transition-duration` der Kontrolle, kein Literal. Beim Verlassen des Auslösers wartet das Element 150 ms, bevor es schließt (der Zeiger darf auf die Ebene wandern, WCAG 1.4.13); die Zahl ist Verhalten, kein Token.
+
+#### D-02 `sxvebilo`: Rolle `dialog`, Bauform über den Slot `trigger` (G5)
+APG „Disclosure + Dialog nicht-modal“: die Ebene hat die Rolle `dialog` ohne `aria-modal`, benannt über `label`. Der Web-Celo und Figma erkennen das Popover am Slot `trigger` (`isPopover`) – derselbe `hostOf("dialog")` wäre der modale Dialog; Figma an den Teilen ohne `backdrop`. `aria-controls` vom Auslöser (Light DOM) auf die Ebene (Shadow) löst der Browser nicht auf; der Zustand steht in `aria-expanded`, der Fokus geht beim Öffnen hinein (erstes fokussierbares Kind, sonst die Ebene mit `tabindex=-1`), beim Schließen zum Auslöser (O-17).
+
+#### D-03 `menuo`: Einträge als Reihen, `label-empty`, Listenprüfung über Texte (G5, E5, E8)
+Die Einträge liegen als `<data value="…">` im Light DOM; je Eintrag eine Reihe `role="menuitem"` im Shadow (manuelle Slot-Zuweisung, wie die Reiter), ein `fm-apartigilo` wird zur Reihe `part="separator"`. Ein Eintrag mit `intent="danger"` trägt die Klasse `fm-danger` (kein Datenattribut: das Inventar liest `data-*` als Props), `disabled` wird `aria-disabled`. `label` ist optional: die Wörter des Modelo stehen ein (`a11y.texts label-empty`, de/en) – dafür darf `a11y.texts` seit ④ `<prop>-empty` einer String-Prop tragen (wie `<slot>-empty` seit Spec 011 ④). `option-labels-distinct` prüft die Einträge als Liste: ein Text-Slot, dessen Uzo-Slot nicht `max: 1` hat, gilt als Liste (`uzo-content-of-invalid` erweitert). Goal nur mit zusammengesetzten Wörtern; die englischen Mehrwortformen der Spec („action menu“) sind als `actionmenu` usw. notiert, weil der Gvidanto zusammengesetzte Wörter ohne Bindestrich vergleicht (B-2).
+
+#### D-04 Web: `aria-describedby` auf den Host, nichts doppelt gesprochen (G5)
+Eine Id-Referenz vom Auslöser in einen Shadow-Baum löst der Browser nicht auf; darum zeigt `aria-describedby` auf den Host `fm-konsileto` (eine Id bekommt er, wenn er keine hat), dessen Inhalt der Text ist. Ist der Text gleich dem Namen des Auslösers (`label`, `aria-label` oder Textinhalt), setzt das Element keine Beschreibung: der Name wird einmal gehört (Spec G5, WCAG 4.1.2).
+
+#### D-05 Web: Hosts `tooltip`, `popover`, `menu`; Anchor Positioning und der Fallback (E11)
+Drei Hosts im Element-Template; die Lage als geteilte Struktur-Regeln (`overlayPlace`): `position: fixed; inset: auto; position-area: <Default der Skemo>; position-try-fallbacks: flip-block, flip-inline`, je Seite `:host([placement=…]) [part="control"]`. Vier neue Struktur-Eigenschaften im Vortaro-Lint (`position-area`, `position-anchor`, `position-try-fallbacks`, `inset`). Der Fallback ohne `anchor-name` schreibt die Lage unter dem Auslöser als Inline-Styles (nicht im Stylesheet, kein Literal). `surface.width` wird bei Popover und Menü `max-inline-size` (die Ebene schmiegt sich darunter an den Inhalt), `box.inline-padding` das Padding aller Seiten wie beim Dialog.
+
+#### D-06 Figma: Bauformen, Stellvertreter, Schatten gebunden (G4)
+`drawTooltip`, `drawPopover`, `drawMenu` mit `STRUCTURE_BINDINGS` je Bauform; der Auslöser ist ein Stellvertreter (Rahmen mit Wort, `drawStandIn`), keine Instanz des `butono` (Kandidat B-6 aus Spec 011 ⑤). Die Reihen des Menüs nutzen `drawEntries`/`bindEntries` der Reiter (`component.entry` trägt die drei Wörter; `component.menu` die Einträge mit `disabled`/`danger`); der Gefahr-Eintrag ist als `danger-item` registriert, so bindet `danger-item.color` seine Farbe nach `item.color`. Schatten: `bindShadow` bindet `variant.shadow` (Felder je Lage) über `setBoundVariableForEffect`; das Test-Double kennt den Aufruf seit ④ – die Dialog-Tests erwarten `bound` statt `written`, der Vojmapo-Befund ist gestrichen. `level` der Reihen: die Variante `disabled` zeigt alle drei Einträge gesperrt (eine Variante hat einen Look; Abweichung 3).
+
+#### D-07 Vitrino
+Drei Sektionen, je eine Zeile: Tooltip an `fm-butono emphasis=low label="Suchen"` mit `ikono search`, Popover mit `butono` „Öffnen“, Überschrift und `teksto` „Inhalt“, Menü mit eigenem Auslöser und den drei Einträgen der Spec (Duplizieren gesperrt, Löschen `danger` hinter einem `fm-apartigilo`). Die Wörter sind je eine Quelle für Vitrino und Figma (`VITRINO_TOOLTIP_TEXT`, `VITRINO_CONTENT_TEXT`, `VITRINO_TRIGGER_TEXT`, `VITRINO_MENU_ITEMS`).
+
+#### D-08 Make Kit
+Drei Sätze aus den Rollen `tooltip`, `dialog` mit Slot `trigger`, `menu`; die Komponentenseite des `konsileto` nennt `htmlFor` (`for` am Element).
+
+### Arkitekturo-Abdeckung
+
+| Ero | Stand |
+|---|---|
+| `konsileto` | trägt (Skemo, Uzo, Regulo `tooltip-text-short` mit vier Jugxoj, Web Component als Popover der Plattform mit Anchor Positioning, React mit `htmlFor`, Figma-Bauform tooltip mit gebundenem Schatten, Make-Kit, Vitrino, MCP) |
+| `sxvebilo` | trägt (Skemo, Uzo, Web Component mit komponiertem `fm-titolo`, React, Figma-Bauform popover mit gebundenem Schatten, Make-Kit, Vitrino, MCP); der `dialogo` schließt `non-modal` |
+| `menuo` | trägt (Skemo, Uzo, zwei Reguloj ausgeweitet, Web Component mit `menuitem`-Reihen und `select`, React, Figma-Bauform menu mit gebundenem Schatten, Make-Kit, Vitrino, MCP); die `tabelo` schließt `row-actions-menu`, Arkitekturo-Kandidat „Zeilenaktionen“ trägt |
+| `dialogo` | Schatten in Figma gebunden (G4); Vojmapo-Befund gestrichen |
+
+### Abweichungen von der Spec
+
+1. **`menuo.label` optional statt Pflicht** (D-03): die Spec will Pflicht *und* einen Default aus `a11y.texts`; beides geht nicht – ohne Angabe stehen die Wörter des Modelo ein, `check_usage` verlangt nichts.
+2. **`placement` des `sxvebilo` und `menuo` Default `block-end`** (Spec: „wie oben“, der Tooltip steht `block-start`): eine Ebene mit Inhalt und ein Menü öffnen unter ihrem Auslöser; die Werte sind dieselben.
+3. **Figma: die Variante `disabled` des Menüs zeigt alle drei Einträge gesperrt** (Spec: „einer disabled“): der Zustand ist die Achse der Variante, nicht eines Eintrags; der gesperrte Eintrag der Spec steht in der Vitrino.
+4. **`essential-info` → `teksto`** (Spec: „kampo.help oder teksto“): ein `instead` nennt ein Ero; die Kialo nennt die Hilfe des `kampo`.
+5. **Englische Mehrwort-Stichwörter ohne Bindestrich** (`actionmenu`, `kebabmenu`, `hoverhint`): der Gvidanto vergleicht zusammengesetzte Wörter als ein Wort ohne Bindestrich (B-2); „action menu“ in zwei Wörtern trifft `menu` → `navigado` (O-28).
+6. **Stellvertreter statt `butono`-Instanz in Figma** (D-06): das Plugin komponiert noch keine Instanzen anderer Sets (Kandidat B-6 aus Spec 011 ⑤).
+
+### Befunde / Mankoj
+
+- **B-1** `dialogo.non-modal` trug „popover“ und „tooltip“ als Stichwörter und fing jeden Satz mit „Popover“ vor dem `sxvebilo` ab (der erste Treffer in Namensordnung entscheidet): die Grenze ist geschlossen (use-instead `sxvebilo`), ihre Wörter sind `modeless`/`nichtmodal`. Ebenso `navigado.submenu` ohne „flyout“ (das Wort des `sxvebilo`), `menuo.navigate` ohne „menu“ (das eigene Goal hätte sich selbst umgeleitet).
+- **B-2** Stichwörter mit Bindestrich treffen nie: `compoundsOf` entfernt die Bindestriche des Textes, `wordsOf` trennt an ihnen – ein Stichwort `kebab-menu` findet weder `kebab-menu` noch `kebab menu`. Die ④-Stichwörter sind darum ohne Bindestrich notiert; die ③-Stichwörter `running-text`, `body-text`, `inline-code`, `page-title` sind tot (O-18).
+- **B-3** Die Report-Headline des Plugins überschritt mit 25 Sets 4 000 Zeichen (4 027): die vier Zählwerte je Set (`missing`, `extra`, `duplicates`, `lost`) stehen im Teil `state`; die Headline behält `set`, `created`, `updated`.
+- **B-4** Der `tooltip-text-short`-Prüfer fehlte im Enforcer-Verzeichnis (jede automatische Regulo braucht einen, `regularo-repo.test`): `textRule` wie `badge-text-short`.
+- **B-5** Die Fixtures der ③ tragen nur das eigene Ero mit den Tokens des schmalen Vortaro: die ④-Fixtures sind die ③-Fixtures unter neuem Namen (`konsileto-slot-required-missing`, `menuo-web-term`), nur die geprüfte Regel zählt.
+- **B-6** Die Spec-Dialoge in Englisch („a kebab menu with a single action“) treffen `menu` → `navigado`; mit Bindestrich (`kebab-menu`) antwortet der `menuo` (Abweichung 5).
+
+### Offen (für den Maintainer)
+
+- **O-16 Vorgabewörter Figma.** `konsileto` „Kurzhinweis“, `sxvebilo` „Überschrift“ (das Label-Property schreibt die Überschrift), `menuo` „Weitere Aktionen“ (D-06). Zur Bestätigung; dann je ein Jugxo.
+- **O-17 `aria-controls` über die Shadow-Grenze.** Der Auslöser kann die Ebene im Shadow nicht referenzieren; `aria-expanded` und der Fokusweg tragen den Zustand (D-02). Ob der Host die Ebene stattdessen ins Light DOM legen soll: Maintainer.
+- **O-18 Tote Stichwörter mit Bindestrich** (B-2): `running-text`, `body-text`, `inline-code`, `page-title` aus ③ und `hover-hint`/`call-to-action`/`one-line`/`page-title` älterer Eroj treffen nie. Entweder der Gvidanto vergleicht Stichwörter ohne Bindestrich (eine Zeile in `goalOf`/`uzoKeywordHit`) oder die Wörter werden umgeschrieben – Entscheidung des Maintainers, weil es Antworten älterer Dialoge ändern kann.
+- **O-19 `menuo.label` Pflicht oder Default** (Abweichung 1).
+- **O-20 Eintrag mit `intent=danger` und `dialogo`.** Die Uzo sagt, ein unumkehrbarer Gefahr-Eintrag öffnet einen Dialog; das Ero erzwingt es nicht (Spec). Ob `check_usage` eine Warnung tragen soll: Maintainer.
 
 ## ⑤ Aufklappen
 

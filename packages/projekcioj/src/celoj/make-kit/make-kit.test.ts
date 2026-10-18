@@ -55,14 +55,17 @@ describe("Make Kit sources (T018)", () => {
       "guidelines/components/ikono.md",
       "guidelines/components/insigno.md",
       "guidelines/components/kampo.md",
+      "guidelines/components/konsileto.md",
       "guidelines/components/langetaro.md",
       "guidelines/components/ligilo.md",
       "guidelines/components/markobutono.md",
+      "guidelines/components/menuo.md",
       "guidelines/components/mezurilo.md",
       "guidelines/components/navigado.md",
       "guidelines/components/plenstato.md",
       "guidelines/components/saltligilo.md",
       "guidelines/components/sxaltilo.md",
+      "guidelines/components/sxvebilo.md",
       "guidelines/components/tabelo.md",
       "guidelines/components/tekstareo.md",
       "guidelines/components/teksto.md",
@@ -696,4 +699,28 @@ describe("Make Kit and the Typografie (Spec 014 ③)", () => {
     expect(kit(aspekto, "guidelines/components/titolo.md")).toContain("`level`");
     expect(kit(aspekto, "guidelines/components/teksto.md")).toContain("`emphasis`");
   });
+});
+
+// Spec 014 ④ (plan ④ D-08): Make builds every hover hint from the konsileto bound to its control,
+// every non-modal layer from the sxvebilo and every set of actions on one object from the menuo —
+// three sentences in the guidelines, generated from the roles tooltip, dialog with a trigger and
+// menu.
+describe("Make Kit and the Overlays (Spec 014 ④)", () => {
+  it.each(ASPEKTOJ)(
+    "%s: the guidelines name the konsileto, the sxvebilo and the menuo",
+    (aspekto) => {
+      const guidelines = kit(aspekto, "guidelines/Guidelines.md");
+      expect(guidelines).toContain(
+        "- Every name or short hint of a control shown on hover or focus is a `<Konsileto>` bound to it with `htmlFor`; what a person needs to act stands visibly as text.",
+      );
+      expect(guidelines).toContain(
+        "- Every non-modal layer with content beside its trigger is a `<Sxvebilo>`; a layer that asks for a decision is a `<Dialogo>`.",
+      );
+      expect(guidelines).toContain(
+        "- Every set of actions on one object behind a single button is a `<Menuo>` whose entries name their actions; never a button per action in a row.",
+      );
+      expect(kit(aspekto, "guidelines/components/konsileto.md")).toContain("`htmlFor`");
+      expect(kit(aspekto, "guidelines/components/menuo.md")).toContain("`placement`");
+    },
+  );
 });

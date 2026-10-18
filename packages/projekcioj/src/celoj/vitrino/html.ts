@@ -180,7 +180,12 @@ function wrapSentence(role: string | undefined, wrap: string, multiline = false)
                             ? "Überschrift"
                             : role === "paragraph"
                               ? "Text"
-                              : "Label";
+                              : // Spec 014 ④: a tooltip wraps its hint, a menu never wraps an entry.
+                                role === "tooltip"
+                                ? "Hinweis"
+                                : role === "menu"
+                                  ? "Eintrag"
+                                  : "Label";
   if (wrap === "never") return `${subject} bricht nie um`;
   if (wrap === "with-text") return `${subject} darf umbrechen (inline), standalone nie`;
   return `${subject} darf umbrechen`;

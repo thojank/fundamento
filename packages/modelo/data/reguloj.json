@@ -418,7 +418,10 @@
           "apartigilo",
           "saltligilo",
           "titolo",
-          "teksto"
+          "teksto",
+          "konsileto",
+          "sxvebilo",
+          "menuo"
         ]
       }
     },
@@ -438,13 +441,14 @@
     {
       "id": "reg_01M4RPB19HEMSFTRDZNPTHJV7P",
       "name": "label-names-action",
-      "statement": "The label of a butono names its action as a verb.",
+      "statement": "The label of a butono names its action as a verb; so does every entry of a menuo.",
       "kialo": "A person decides from the label alone what happens on activation. A verb says it; a noun or a mood makes them guess.",
-      "scope": "eroj: butono instances with a label; checked against the keywords of the Skemo's goals, so it only warns until a better check exists (plan D-02)",
+      "scope": "eroj: butono instances with a label; checked against the keywords of the Skemo's goals, so it only warns until a better check exists (plan D-02); menuo instances with their entries (slot items, Spec 014 ④)",
       "checkability": "automatic",
       "appliesTo": {
         "eroj": [
-          "butono"
+          "butono",
+          "menuo"
         ]
       }
     },
@@ -691,15 +695,16 @@
     {
       "id": "reg_01M4WT0SD6MYJETNVJ4ASJX910",
       "name": "option-labels-distinct",
-      "statement": "The options of an elekto or an elektilo and the tabs of a langetaro have distinct labels: two options never share a label.",
+      "statement": "The options of an elekto or an elektilo, the tabs of a langetaro and the entries of a menuo have distinct labels: two options never share a label.",
       "kialo": "A choice is only possible between names a person can tell apart: two options called the same make the person guess which one counts, and a screen reader announces the same name twice in one group.",
-      "scope": "eroj: elekto and elektilo instances with option labels (slot options) and langetaro instances with their tabs (slot tabs, Spec 011 ⑤) (check distinct); compared without case and surrounding space, so 'Express' and 'express ' are one label; fixed, no Aspekto overrides it (Uzo content)",
+      "scope": "eroj: elekto and elektilo instances with option labels (slot options) and langetaro instances with their tabs (slot tabs, Spec 011 ⑤) and menuo instances with their entries (slot items, Spec 014 ④) (check distinct); compared without case and surrounding space, so 'Express' and 'express ' are one label; fixed, no Aspekto overrides it (Uzo content)",
       "checkability": "automatic",
       "appliesTo": {
         "eroj": [
           "elekto",
           "elektilo",
-          "langetaro"
+          "langetaro",
+          "menuo"
         ]
       }
     },
@@ -818,6 +823,19 @@
       "appliesTo": {
         "eroj": [
           "titolo"
+        ]
+      }
+    },
+    {
+      "id": "reg_01M564NXYK5MC9C1SRGMW3CA7B",
+      "name": "tooltip-text-short",
+      "statement": "A konsileto names its control or gives one short hint in at most eight words: 'Suchen', 'Öffnet die Einstellungen'; never a sentence a person has to read twice.",
+      "kialo": "A tooltip vanishes when the pointer moves and is heard once as a description: a person gets one glance; what needs more words stands visibly on the page.",
+      "scope": "eroj: konsileto instances (check max-words 8 on the label), an approximation without a model: it counts words, so eight long words pass; fixed, no Aspekto overrides it (Uzo content)",
+      "checkability": "automatic",
+      "appliesTo": {
+        "eroj": [
+          "konsileto"
         ]
       }
     }

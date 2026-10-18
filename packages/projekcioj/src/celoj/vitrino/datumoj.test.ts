@@ -260,14 +260,17 @@ describe("the Vitrino after the acceptances (Nachlese 2026-10-13)", () => {
       ikono: "img",
       insigno: "generic",
       kampo: "textbox",
+      konsileto: "tooltip",
       langetaro: "tablist",
       ligilo: "link",
       markobutono: "checkbox",
+      menuo: "menu",
       mezurilo: "meter",
       navigado: "navigation",
       plenstato: "status",
       saltligilo: "link",
       sxaltilo: "switch",
+      sxvebilo: "dialog",
       tabelo: "table",
       tekstareo: "textbox",
       teksto: "paragraph",
@@ -644,5 +647,35 @@ describe("the Vitrino shows the titolo and the teksto (Spec 014 ③)", () => {
       '<fm-teksto kind="code" size="1" emphasis="high">code · 1 · high</fm-teksto>',
     );
     expect(section).not.toContain('kind="caption" size="2"');
+  });
+});
+
+// Spec 014 ④ (plan ④ D-07): the Vitrino shows the konsileto on an icon-only butono (hover or
+// focus shows it), the sxvebilo behind its trigger with a heading and a text, and the menuo with
+// its own trigger and three entries — one disabled, one danger behind a separator.
+describe("the Vitrino shows the overlays (Spec 014 ④)", () => {
+  it("the konsileto hangs on an icon-only butono of the Vitrino", () => {
+    const section = datumoj.eroj.konsileto ?? "";
+    expect(section).toContain(
+      '<fm-butono id="fm-vitrino-konsileto-trigger" emphasis="low" label="Suchen"><fm-ikono name="search"></fm-ikono></fm-butono>',
+    );
+    expect(section).toContain(
+      '<fm-konsileto for="fm-vitrino-konsileto-trigger">Suchen</fm-konsileto>',
+    );
+  });
+
+  it("the sxvebilo opens behind a butono with a heading and a text", () => {
+    const section = datumoj.eroj.sxvebilo ?? "";
+    expect(section).toContain('<fm-sxvebilo label="Überschrift">');
+    expect(section).toContain('<fm-butono slot="trigger" emphasis="medium">Öffnen</fm-butono>');
+    expect(section).toContain('<span slot="heading">Überschrift</span>');
+    expect(section).toContain("<fm-teksto>Inhalt</fm-teksto>");
+  });
+
+  it("the menuo shows its own trigger and three entries, one disabled, one danger behind a separator", () => {
+    const section = datumoj.eroj.menuo ?? "";
+    expect(section).toContain(
+      '<fm-menuo><data value="edit">Bearbeiten</data><data value="duplicate" disabled>Duplizieren</data><fm-apartigilo></fm-apartigilo><data value="delete" intent="danger">Löschen</data></fm-menuo>',
+    );
   });
 });

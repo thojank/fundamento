@@ -1,0 +1,147 @@
+{
+  "$schema": "../../../schema/modelo.schema.json#/$defs/UzoFile",
+  "uzo": {
+    "id": "uzo_01M564NXJNCV7VW68BBE42BEA1",
+    "ero": "ero_01M564NWTD0WC9QWBP0GGTQZYX",
+    "skemo": "ske_01M564NX6FGBH4NHKDSHCCM5W4",
+    "purpose": "Opens a non-modal layer with content next to its trigger; the page stays usable.",
+    "instead": [
+      {
+        "goal": "decision",
+        "keywords": {
+          "en": [
+            "irreversible",
+            "binding"
+          ],
+          "de": [
+            "verbindlich",
+            "unumkehrbar"
+          ]
+        },
+        "ero": "dialogo",
+        "kialo": "A layer that asks for a decision is a dialog, because a decision must be answered before the page goes on; a popover lets the page go on and closes on a click outside."
+      },
+      {
+        "goal": "short-hint",
+        "keywords": {
+          "en": [
+            "tooltip"
+          ],
+          "de": [
+            "tooltip"
+          ]
+        },
+        "ero": "konsileto",
+        "kialo": "A short hint without anything to operate is a tooltip, because it needs no focus and no close; a popover is for content a person reads or uses."
+      },
+      {
+        "goal": "actions-list",
+        "keywords": {
+          "en": [
+            "actionlist",
+            "actionslist",
+            "aktionsliste"
+          ],
+          "de": [
+            "aktionsliste",
+            "aktionsmenü"
+          ]
+        },
+        "ero": "menuo",
+        "kialo": "A list of actions for one object is a menu, because a menu is walked with the arrow keys and names each action; a popover holds content, no list of commands."
+      }
+    ],
+    "boundary": [
+      {
+        "case": "nested-popover",
+        "action": "not-supported",
+        "keywords": {
+          "en": [
+            "nested",
+            "stacked"
+          ],
+          "de": [
+            "geschachtelt",
+            "gestapelt"
+          ]
+        },
+        "kialo": "A popover inside a popover is not supported, because the light dismiss of the platform closes the outer layer with the inner and the focus path is lost; what needs a second layer is a dialog or a page."
+      },
+      {
+        "case": "drawer",
+        "action": "ask-human",
+        "keywords": {
+          "en": [
+            "sidepanel",
+            "slidein"
+          ],
+          "de": [
+            "seitenpanel",
+            "schublade"
+          ]
+        },
+        "kialo": "A panel that slides in from the edge and holds a whole form is a pattern of the page (a Sxablono), because it is a region with its own flow, not a layer beside a trigger; a person decides until the Sxablonoj come."
+      }
+    ],
+    "composes": {
+      "containers": [
+        {
+          "name": "page-section",
+          "kialo": "A popover stands where its trigger stands, because the layer belongs to the control that opens it."
+        }
+      ],
+      "with": [
+        {
+          "ero": "butono",
+          "kialo": "The trigger of a popover is a button, because a popover opens on a command and the button says it (aria-expanded tells the state)."
+        },
+        {
+          "ero": "titolo",
+          "kialo": "The heading of a popover is a titolo at level 2, because the layer is a small document of its own and its heading names what it holds."
+        }
+      ],
+      "never": [],
+      "spacing": {
+        "owner": "container",
+        "regulo": "spacing-owned-by-container"
+      }
+    },
+    "slots": {
+      "trigger": {
+        "accepts": [
+          "butono"
+        ],
+        "max": 1,
+        "required": true,
+        "nesting": 0
+      },
+      "content": {
+        "accepts": [
+          "teksto",
+          "kampo",
+          "tekstareo",
+          "elektilo",
+          "elekto",
+          "markobutono",
+          "sxaltilo",
+          "butono",
+          "ligilo"
+        ],
+        "required": true,
+        "nesting": 1
+      },
+      "heading": {
+        "accepts": [
+          "text"
+        ],
+        "max": 1,
+        "nesting": 0
+      }
+    },
+    "layout": {
+      "size": "content",
+      "wrap": "allowed"
+    },
+    "content": []
+  }
+}

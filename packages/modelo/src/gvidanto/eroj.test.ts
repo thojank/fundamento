@@ -32,14 +32,17 @@ describe("list_eroj", () => {
       "ikono",
       "insigno",
       "kampo",
+      "konsileto",
       "langetaro",
       "ligilo",
       "markobutono",
+      "menuo",
       "mezurilo",
       "navigado",
       "plenstato",
       "saltligilo",
       "sxaltilo",
+      "sxvebilo",
       "tabelo",
       "tekstareo",
       "teksto",
@@ -52,7 +55,7 @@ describe("list_eroj", () => {
       variants: ["high", "medium", "low"],
       props: ["emphasis", "intent", "size", "type", "disabled", "loading", "full-width", "label"],
     });
-    expect(listEroj(modelo).eroj[11]).toMatchObject({
+    expect(listEroj(modelo).eroj[12]).toMatchObject({
       name: "ligilo",
       variants: ["inline", "standalone"],
       props: ["to", "placement", "external", "size", "label"],
@@ -220,8 +223,9 @@ describe("get_ero", () => {
     expect(missing.issues[0]?.path).toBe("get_ero/name");
     // The five nearest names (nearestNames): with six Eroj (Spec 010 ③) the farthest drops out.
     // Spec 011 ②: with nine Eroj dialogo is nearer to "butonno" than markobutono.
-    // Spec 014 ②: ikono is nearer to "butonno" than insigno. Spec 014 ③: titolo too; dialogo drops.
-    expect(missing.allowed).toEqual(["butono", "ikono", "titolo", "insigno", "avizo"]);
+    // Spec 014 ②: ikono is nearer to "butonno" than insigno. Spec 014 ③: titolo too; dialogo
+    // drops. Spec 014 ④: menuo is nearer than avizo.
+    expect(missing.allowed).toEqual(["butono", "ikono", "titolo", "insigno", "menuo"]);
   });
 });
 

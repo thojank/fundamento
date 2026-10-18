@@ -66,7 +66,8 @@ describe("countWord", () => {
     [18, "eighteen"],
     [20, "twenty"],
     [22, "twenty-two"],
-    [23, "23"],
+    [25, "twenty-five"],
+    [26, "26"],
     [30, "30"],
   ])("%i -> %s", (count, word) => {
     expect(countWord(count)).toBe(word);

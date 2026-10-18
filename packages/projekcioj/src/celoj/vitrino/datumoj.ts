@@ -411,6 +411,30 @@ export const VITRINO_OPTIONS: readonly string[] = ["Eins", "Zwei", "Drei"];
  */
 export const VITRINO_PROMPT = "Bitte wählen";
 
+/** The hint of the Vitrino's tooltip (Spec 014 ④): the name of the icon-only butono it hangs on. */
+export const VITRINO_TOOLTIP_TEXT = "Suchen";
+
+/** The word in the content of the Vitrino's popover (Spec 014 ④); Figma shows the same. */
+export const VITRINO_CONTENT_TEXT = "Inhalt";
+
+/** The word of a popover's trigger stand-in in Figma (Spec 014 ④); the Vitrino's trigger says Öffnen. */
+export const VITRINO_TRIGGER_TEXT = "Auslöser";
+
+/**
+ * The entries of the Vitrino's menu (Spec 014 ④, the spec's example): edit, duplicate (disabled),
+ * delete (danger, behind a separator); Figma draws the same three.
+ */
+export const VITRINO_MENU_ITEMS: readonly {
+  value: string;
+  text: string;
+  disabled?: boolean;
+  danger?: boolean;
+}[] = [
+  { value: "edit", text: "Bearbeiten" },
+  { value: "duplicate", text: "Duplizieren", disabled: true },
+  { value: "delete", text: "Löschen", danger: true },
+];
+
 /**
  * The options of one cell: an element per option in its slot, with its value (Web Celo). The
  * entries of a default slot carry no slot name (Spec 011 ⑤: the tabs); the items of a navigation
@@ -479,6 +503,27 @@ export function eroMarkup(entry: LoadedEro, ikonaro: readonly VitrinoIkono[] = [
   // A separator (Spec 014 ②): both orientations, the vertical one between two words.
   if (entry.skemo.a11y.role === "separator") {
     return `<table><caption>${tag}, beide Richtungen</caption><thead><tr><th scope="col">orientation</th><th scope="col">rest</th></tr></thead><tbody><tr><th scope="row">horizontal</th><td><${tag} orientation="horizontal"></${tag}></td></tr><tr><th scope="row">vertical</th><td><div class="fm-row"><span>${VITRINO_OPTIONS[0] ?? ""}</span><${tag} orientation="vertical"></${tag}><span>${VITRINO_OPTIONS[1] ?? ""}</span></div></td></tr></tbody></table>`;
+  }
+  // The overlays (Spec 014 ④, plan ④ D-07): a tooltip on an icon-only butono of the Vitrino, a
+  // popover behind a butono with a heading and a text, a menu with its own trigger and three
+  // entries (one disabled, one danger behind a separator) — opened by a person, as on a page.
+  if (entry.skemo.a11y.role === "tooltip") {
+    return `<table><caption>${tag}, auf einer Icon-Schaltfläche</caption><thead><tr><th scope="col">Kombination</th><th scope="col">rest</th></tr></thead><tbody><tr><th scope="row">rest</th><td><div class="fm-row"><fm-butono id="fm-vitrino-konsileto-trigger" emphasis="low" label="${VITRINO_TOOLTIP_TEXT}"><fm-ikono name="search"></fm-ikono></fm-butono><${tag} for="fm-vitrino-konsileto-trigger">${VITRINO_TOOLTIP_TEXT}</${tag}></div></td></tr></tbody></table>`;
+  }
+  if (
+    entry.skemo.a11y.role === "dialog" &&
+    entry.skemo.slots.some((slot) => slot.name === "trigger")
+  ) {
+    return `<table><caption>${tag}, hinter seinem Auslöser</caption><thead><tr><th scope="col">Kombination</th><th scope="col">rest</th></tr></thead><tbody><tr><th scope="row">rest</th><td><${tag} label="${VITRINO_SLOT_TEXTS.heading ?? ""}"><fm-butono slot="trigger" emphasis="medium">${VITRINO_OPEN}</fm-butono><span slot="heading">${VITRINO_SLOT_TEXTS.heading ?? ""}</span><fm-teksto>${VITRINO_CONTENT_TEXT}</fm-teksto></${tag}></td></tr></tbody></table>`;
+  }
+  if (entry.skemo.a11y.role === "menu") {
+    const items = VITRINO_MENU_ITEMS.map((item, index) => {
+      const row = `<data value="${item.value}"${item.disabled === true ? " disabled" : ""}${item.danger === true ? ' intent="danger"' : ""}>${item.text}</data>`;
+      return index === VITRINO_MENU_ITEMS.length - 1
+        ? `<fm-apartigilo></fm-apartigilo>${row}`
+        : row;
+    });
+    return `<table><caption>${tag}, mit eigenem Auslöser</caption><thead><tr><th scope="col">Kombination</th><th scope="col">rest</th></tr></thead><tbody><tr><th scope="row">rest</th><td><${tag}>${items.join("")}</${tag}></td></tr></tbody></table>`;
   }
   const styled = styledProps(entry.skemo);
   const keys = styled.filter((key) =>

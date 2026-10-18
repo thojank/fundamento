@@ -1,0 +1,9 @@
+{
+  "description": "Spec 014 ④ G10 (Art. VIII, Spec 008 D-13): the Skemo of the menuo names a prop onopen, an event handler attribute of one platform; the Skemo says open, and the Celoj spell the markup.",
+  "issues": [
+    {
+      "rule": "skemo-web-term",
+      "path": "data/eroj/menuo/skemo.json#/skemo/props/2/name"
+    }
+  ]
+}

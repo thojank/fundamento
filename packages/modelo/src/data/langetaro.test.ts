@@ -29,9 +29,9 @@ const suggest = (goal: string) => {
 };
 
 describe("langetaro in the repo Modelo (section ⑤, G1, G2, E7)", () => {
-  it("lives in data/eroj/langetaro/skemo.json, ninth of twenty-two Eroj", () => {
+  it("lives in data/eroj/langetaro/skemo.json, ninth of twenty-five Eroj", () => {
     expect(langetaro?.file).toBe("modelo/data/eroj/langetaro/skemo.json");
-    expect(modelo.eroj[10]?.ero.name).toBe("langetaro");
+    expect(modelo.eroj[11]?.ero.name).toBe("langetaro");
   });
 
   it("has label (a duty) and selected (the id of the chosen tab) as props; the states of a tab", () => {
@@ -207,6 +207,8 @@ describe("the Reguloj of the langetaro (G6, E5)", () => {
       "elekto",
       "elektilo",
       "langetaro",
+      // Spec 014 ④: the entries of a menu too.
+      "menuo",
     ]);
     expect(named("option-labels-distinct")?.statement).toContain("langetaro");
     expect(named("spacing-owned-by-container")?.appliesTo?.eroj).toContain("langetaro");

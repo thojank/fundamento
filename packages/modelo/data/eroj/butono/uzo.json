@@ -171,6 +171,10 @@
         {
           "ero": "ikono",
           "kialo": "An icon before or after the label is an ikono with a name of the Ikonaro, because the sign shortens what the word says and switches with the brand; a button with the icon alone names itself with label (icon-meaning-named)."
+        },
+        {
+          "ero": "konsileto",
+          "kialo": "A button that shows only an icon composes a tooltip with its name, because whoever sees only a picture needs the word visibly too; the tooltip's text is the label, heard once."
         }
       ],
       "never": [],

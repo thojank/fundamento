@@ -78,8 +78,22 @@ export const isMultiline = (skemo: Skemo): boolean =>
   skemo.props.some((prop) => prop.name === "rows");
 const isTextarea = (skemo: Skemo): boolean => skemo.a11y.role === "textbox" && isMultiline(skemo);
 
+/**
+ * A popover (Spec 014 ④, D-05): a non-modal dialog with a trigger slot — a layer of the platform
+ * beside its trigger, told apart from the modal dialog by that slot.
+ */
+export const isPopover = (skemo: Skemo): boolean =>
+  skemo.a11y.role === "dialog" && skemo.slots.some((slot) => slot.name === "trigger");
+
 /** Whether the Ero is a dialog (Spec 011 ②, D-12): the platform's dialog, opened modal. */
-const isDialog = (skemo: Skemo): boolean => hostOf(skemo.a11y.role) === "dialog";
+const isDialog = (skemo: Skemo): boolean =>
+  hostOf(skemo.a11y.role) === "dialog" && !isPopover(skemo);
+
+/** A tooltip (Spec 014 ④, D-05): a layer of the platform with the role tooltip, anchored. */
+const isTooltip = (skemo: Skemo): boolean => hostOf(skemo.a11y.role) === "tooltip";
+
+/** A menu (Spec 014 ④, D-05): a layer of the platform with the role menu and rows of entries. */
+const isMenu = (skemo: Skemo): boolean => hostOf(skemo.a11y.role) === "menu";
 
 /** Static text (Spec 011 ③, D-08): the badge, a span without a role. */
 const isText = (skemo: Skemo): boolean => hostOf(skemo.a11y.role) === "text";
@@ -393,6 +407,19 @@ function declarations(skemo: Skemo, part: string, property: string, token: strin
   if (isDialog(skemo) && part === "box" && property === "inline-padding") {
     return [`padding: ${variable(token)};`];
   }
+  // An overlay (Spec 014 ④, D-05): the box's inline padding is the layer's padding on every side,
+  // as the dialog's; the surface's width is the most a popover or a menu takes (the layer hugs
+  // its content below it).
+  if (
+    (isTooltip(skemo) || isPopover(skemo) || isMenu(skemo)) &&
+    part === "box" &&
+    property === "inline-padding"
+  ) {
+    return [`padding: ${variable(token)};`];
+  }
+  if ((isPopover(skemo) || isMenu(skemo)) && part === "surface" && property === "width") {
+    return [`max-inline-size: ${variable(token)};`];
+  }
   switch (property as SkemoPartProperty) {
     case "fill":
       return [`background-color: ${variable(token)};`];
@@ -690,6 +717,97 @@ const paragraphStructure: string = [
   ':where([part="control"]) { display: block; box-sizing: border-box; margin: 0; overflow-wrap: anywhere; }',
   ':where([part="control"][data-kind="code"]) { display: inline; }',
 ].join("\n");
+
+/**
+ * The place of an overlay's control (Spec 014 ④, D-05, E11), keywords only: a popover of the
+ * platform lies in the top layer, fixed, and leaves its insets to the anchor; the side is the
+ * placement (position-area in logical directions, the Skemo's default first, the host attribute
+ * overrides it — no data attribute, so the inventory reads no axis), flipped where there is no
+ * room (position-try-fallbacks). Where the platform has no anchor positioning the element writes
+ * the plain place under the trigger as inline insets (the own fallback, E11).
+ */
+const overlayPlace = (fallback: string, layer = '[part="control"]'): string =>
+  [
+    `${layer === ":host" ? ":host" : `:where(${layer})`} { position: fixed; inset: auto; margin: 0; box-sizing: border-box; position-area: ${fallback}; position-try-fallbacks: flip-block, flip-inline; }`,
+    ...["block-start", "block-end", "inline-start", "inline-end"].map(
+      (side) =>
+        `:host([placement="${side}"])${layer === ":host" ? "" : ` ${layer}`} { position-area: ${side}; }`,
+    ),
+  ].join("\n");
+
+/**
+ * Layout of a tooltip (Spec 014 ④, D-05), keywords only: the host takes no place of its own (the
+ * layer lies in the top layer); the control wraps its words and breaks a long one.
+ */
+const tooltipStructure = (fallback: string): string =>
+  [
+    // The host is the layer (D-05, B-7): a popover of the platform in the tree scope of its
+    // trigger, so the anchor name reaches it; the control inside is the surface.
+    overlayPlace(fallback, ":host"),
+    ":host { border-style: none; }",
+    ':where([part="control"]) { border-style: none; overflow-wrap: anywhere; transition-property: opacity; }',
+  ].join("\n");
+
+/**
+ * Layout of a popover (Spec 014 ④, D-05), keywords only: the host stands inline where its trigger
+ * stands; the control is a column of heading and content with its border; the content a column.
+ */
+const popoverStructure = (fallback: string): string =>
+  [
+    ":host { display: inline-block; }",
+    // The slot's box wraps the slotted trigger in the shadow tree: it carries the anchor name.
+    ':where(slot[name="trigger"]) { display: inline-block; }',
+    overlayPlace(fallback),
+    ':where([part="control"]) { display: flex; flex-direction: column; border-style: solid; overflow-wrap: anywhere; }',
+    ':where([part="control"]:not(:popover-open)) { display: none; }',
+    ':where([part="heading"]) { margin: 0; }',
+    ':where([part="content"]) { display: flex; flex-direction: column; }',
+  ].join("\n");
+
+/**
+ * Layout of a menu (Spec 014 ④, D-05), keywords only: the host stands inline where its trigger
+ * stands; the control is a column of rows with its border; every row a button without the
+ * platform's border that stretches across the column and never wraps; a disabled row says so to
+ * the pointer; a separator row is a block.
+ */
+const menuStructure = (fallback: string): string =>
+  [
+    ":host { display: inline-block; }",
+    ':where(slot[name="trigger"]) { display: inline-block; }',
+    overlayPlace(fallback),
+    ':where([part="control"]) { display: flex; flex-direction: column; align-items: stretch; border-style: solid; }',
+    ':where([part="control"]:not(:popover-open)) { display: none; }',
+    ':where([part="item"]) { display: flex; align-items: center; box-sizing: border-box; margin: 0; border-style: none; appearance: none; cursor: pointer; white-space: nowrap; text-align: start; transition-property: background-color, color; }',
+    ':where([part="item"]:focus:not(:focus-visible)) { outline-width: 0; }',
+    ':where([part="item"][aria-disabled="true"]) { cursor: not-allowed; }',
+    ':where([part="separator"]) { display: block; }',
+  ].join("\n");
+
+/** The default side of an overlay's control: the Skemo's default of placement (D-05). */
+const placementOf = (skemo: Skemo): string =>
+  String(skemo.props.find((prop) => prop.name === "placement")?.default ?? "block-end");
+
+/** The states of a menu's rows (Spec 014 ④): hover, focus and disabled on the row itself. */
+const MENU_STATES: Readonly<Record<string, string | undefined>> = {
+  hover: ":hover",
+  focus: ":focus-visible",
+  disabled: '[aria-disabled="true"]',
+};
+
+/**
+ * The selector of a part of a menu (Spec 014 ④, D-05): the surface, border and box are the
+ * control; item is the row in its state, danger-item the row of a danger entry (a class, no data
+ * attribute: the inventory reads data-* as props), the focus ring the row with the focus.
+ */
+function menuPartSelector(part: string, data: string, state: string): string {
+  const root = `[part="control"]${data}`;
+  if (part === "item") return `:where(${root} [part="item"]${MENU_STATES[state] ?? ""})`;
+  // The danger entry's colour outranks the row's colour by state: a selector with specificity
+  // (:where has none), so the keyed rule written after it does not win.
+  if (part === "danger-item") return `${root} [part="item"].fm-danger`;
+  if (part === "focus-ring") return `:where(${root} [part="item"]:focus-visible)`;
+  return `:where(${root})`;
+}
 
 /**
  * Layout of a skip link (Spec 014 ②, D-07), keywords and 0 only, on top of a control's: the link
@@ -1084,38 +1202,47 @@ export function stylesheetOf(skemo: Skemo, uzo?: Uzo): string {
   const bordered = skemo.parts.border !== undefined;
   const base = isDialog(skemo)
     ? dialogStructure
-    : isIcon(skemo)
-      ? iconStructure
-      : isSeparator(skemo)
-        ? separatorStructure
-        : isHeading(skemo)
-          ? headingStructure
-          : isParagraph(skemo)
-            ? paragraphStructure
-            : isText(skemo)
-              ? textStructure(bordered)
-              : isStatus(skemo)
-                ? statusStructure(skemo)
-                : isMeter(skemo)
-                  ? meterStructure
-                  : isLight(skemo)
-                    ? lightStructure(skemo)
-                    : isTabs(skemo)
-                      ? tabsStructure
-                      : isField(skemo)
-                        ? fieldStructure(disables, isSelect(skemo), isTextarea(skemo))
-                        : isGroup(skemo)
-                          ? groupStructure(disables, skemo.parts["required-mark"] !== undefined)
-                          : isToggle(skemo)
-                            ? toggleStructure(
-                                disables,
-                                uzo?.layout.wrap !== undefined && uzo.layout.wrap !== "never",
-                                skemo.slots.some(
-                                  (slot) => slot.default !== true && slot.text === true,
-                                ),
-                                skemo.parts["required-mark"] !== undefined,
-                              )
-                            : structure(uzo?.layout.wrap === "with-text", disables, bordered);
+    : isTooltip(skemo)
+      ? tooltipStructure(placementOf(skemo))
+      : isPopover(skemo)
+        ? popoverStructure(placementOf(skemo))
+        : isMenu(skemo)
+          ? menuStructure(placementOf(skemo))
+          : isIcon(skemo)
+            ? iconStructure
+            : isSeparator(skemo)
+              ? separatorStructure
+              : isHeading(skemo)
+                ? headingStructure
+                : isParagraph(skemo)
+                  ? paragraphStructure
+                  : isText(skemo)
+                    ? textStructure(bordered)
+                    : isStatus(skemo)
+                      ? statusStructure(skemo)
+                      : isMeter(skemo)
+                        ? meterStructure
+                        : isLight(skemo)
+                          ? lightStructure(skemo)
+                          : isTabs(skemo)
+                            ? tabsStructure
+                            : isField(skemo)
+                              ? fieldStructure(disables, isSelect(skemo), isTextarea(skemo))
+                              : isGroup(skemo)
+                                ? groupStructure(
+                                    disables,
+                                    skemo.parts["required-mark"] !== undefined,
+                                  )
+                                : isToggle(skemo)
+                                  ? toggleStructure(
+                                      disables,
+                                      uzo?.layout.wrap !== undefined && uzo.layout.wrap !== "never",
+                                      skemo.slots.some(
+                                        (slot) => slot.default !== true && slot.text === true,
+                                      ),
+                                      skemo.parts["required-mark"] !== undefined,
+                                    )
+                                  : structure(uzo?.layout.wrap === "with-text", disables, bordered);
   // A skip link adds its place above the page to a control's structure (Spec 014 ②, D-07).
   const floating = isSkip(skemo) ? `\n${skipStructure}` : "";
   return `${base}${floating}\n${[...tokenRules, ...undrawn].join("\n")}\n`;
@@ -1153,6 +1280,15 @@ function selectorOf(
     return groupPartSelector(part, property, data, entry, combination[STATE_KEY] ?? "rest");
   }
   if (isDialog(skemo)) return dialogPartSelector(part, data);
+  // The overlays (Spec 014 ④): the tooltip's parts are all the control; the popover's heading and
+  // content are their own elements in it; the menu's rows carry the states.
+  if (isTooltip(skemo)) return `:where([part="control"]${data})`;
+  if (isPopover(skemo)) {
+    return part === "heading" || part === "content"
+      ? `:where([part="control"]${data}) [part="${part}"]`
+      : `:where([part="control"]${data})`;
+  }
+  if (isMenu(skemo)) return menuPartSelector(part, data, combination[STATE_KEY] ?? "rest");
   if (isStatus(skemo)) return statusPartSelector(part, data);
   if (isMeter(skemo)) return meterPartSelector(part, data);
   if (isTabs(skemo)) return tabsPartSelector(part, data, entry, combination[STATE_KEY] ?? "rest");
@@ -1208,7 +1344,7 @@ export function elementNamesOf(
   return {
     ...namesOf(entry.ero),
     ero: entry.ero.name,
-    host: hostOf(entry.skemo.a11y.role, isMultiline(entry.skemo)),
+    host: hostOf(entry.skemo.a11y.role, isMultiline(entry.skemo), isPopover(entry.skemo)),
     role: entry.skemo.a11y.role,
     marked: entry.skemo.parts["required-mark"] !== undefined,
     // Spec 011 ③: a live region turns its indicator and shows a dismiss butono where the Skemo

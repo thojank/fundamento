@@ -1727,3 +1727,37 @@ describe("Spec 014 ③ documentation (specs/014-eroj-runde-3)", () => {
     expect(read("docs/vojmapo.md")).toContain("Spec 014 ③");
   });
 });
+
+// Spec 014 ④ (Briefing 2026-10-17): plan ④ carries the decisions (the overlays on the platform,
+// the shadows bound in Figma), the Arkitekturo coverage, deviations, findings and open points;
+// tasks ④ the red hashes; the Vojmapo names ④ and closes the finding of the unbound shadows.
+describe("Spec 014 ④ documentation (specs/014-eroj-runde-3)", () => {
+  const section = (text: string) =>
+    text.slice(text.indexOf("## ④ Overlays"), text.indexOf("## ⑤ Aufklappen"));
+
+  it("plan ④ carries the decisions, the coverage, deviations, findings and open points; tasks ④ the red hashes", () => {
+    const plan = section(read("specs/014-eroj-runde-3/plan.md"));
+    for (const heading of [
+      "### Zusammenfassung",
+      "### Entwurfsentscheidungen",
+      "#### D-01",
+      "### Arkitekturo-Abdeckung",
+      "### Abweichungen von der Spec",
+      "### Befunde / Mankoj",
+      "### Offen (für den Maintainer)",
+    ]) {
+      expect(plan, heading).toContain(heading);
+    }
+    for (const ero of ["konsileto", "sxvebilo", "menuo"]) expect(plan).toContain(`\`${ero}\``);
+    expect(plan).toContain("position-area");
+    expect(plan).toContain("setBoundVariableForEffect");
+    const tasks = section(read("specs/014-eroj-runde-3/tasks.md"));
+    expect(tasks).toContain("### Messungen");
+    expect(tasks).toMatch(/rot `[0-9a-f]{7}`/);
+    const vojmapo = read("docs/vojmapo.md");
+    expect(vojmapo).toContain("Spec 014 ④");
+    expect(vojmapo).toContain(
+      "~~Schattenvariablen in Figma sind angelegt, aber an keinen Effekt gebunden~~",
+    );
+  });
+});
