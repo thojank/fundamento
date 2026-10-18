@@ -32,9 +32,9 @@ const suggest = (goal: string) => {
 const INTENTS = ["info", "success", "warning", "danger"];
 
 describe("avizo in the repo Modelo (section ③, G1, G2)", () => {
-  it("lives in data/eroj/avizo/skemo.json, second of twenty-nine Eroj", () => {
+  it("lives in data/eroj/avizo/skemo.json, fourth of thirty Eroj", () => {
     expect(avizo?.file).toBe("modelo/data/eroj/avizo/skemo.json");
-    expect(modelo.eroj[2]?.ero.name).toBe("avizo");
+    expect(modelo.eroj[3]?.ero.name).toBe("avizo");
   });
 
   it("has intent (info, success, warning, danger; no neutral) and dismissible as props; one state, rest", () => {

@@ -1646,3 +1646,77 @@ for (const aspekto of ["komuna", "ekzemplo"]) {
     }
   }
 }
+
+// Spec 015 ② (G5, plan ② D-05): the rendered alsxutilo — with a dropzone, a help, one chosen
+// file of a wrong kind (the error of the Modelo) — in every colour class: axe without a finding;
+// label, help, error, file name and the dropzone's hint at least 4.5:1 on their surfaces.
+const eingabo =
+  '<fm-alsxutilo id="an-u" name="lebenslauf" accept=".pdf" dropzone required>Lebenslauf<span slot="help">PDF, höchstens 5 MB</span></fm-alsxutilo>';
+
+for (const aspekto of ["komuna", "ekzemplo"]) {
+  for (const scheme of ["light", "dark"]) {
+    for (const contrast of ["default", "high"]) {
+      test(`${aspekto} ${scheme}/${contrast}: axe on the alsxutilo with a wrong file; its texts ≥ 4.5:1`, async ({
+        page,
+      }) => {
+        await serve(page, out, eingabo);
+        await page.evaluate(
+          ([a, s, k]) => {
+            const root = document.documentElement;
+            root.setAttribute("data-fm-aspekto", a ?? "");
+            root.setAttribute("data-fm-color-scheme", s ?? "");
+            root.setAttribute("data-fm-contrast", k ?? "");
+          },
+          [aspekto, scheme, contrast],
+        );
+        await page
+          .locator("#an-u")
+          .locator('input[type="file"]')
+          .setInputFiles([
+            { name: "Foto.png", mimeType: "image/png", buffer: Buffer.alloc(300, 1) },
+          ]);
+        await expect(page.locator("#an-u").locator('[part="file"]')).toHaveCount(1);
+        expect(await axeViolations(page), "alsxutilo").toEqual([]);
+        const measured = await page.evaluate(() => {
+          const luminance = (colour: string) => {
+            const [r = 0, g = 0, b = 0] = colour.match(/[\d.]+/g)?.map(Number) ?? [];
+            const channel = (value: number) => {
+              const c = value / 255;
+              return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+            };
+            return 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
+          };
+          const ratio = (front: string, back: string) => {
+            const [a, b] = [luminance(front), luminance(back)].sort((x, y) => y - x);
+            return ((a ?? 0) + 0.05) / ((b ?? 0) + 0.05);
+          };
+          const shadow = document.getElementById("an-u")?.shadowRoot;
+          const ground = (node: HTMLElement): string => {
+            let at: HTMLElement | null = node;
+            while (at !== null) {
+              const fill = getComputedStyle(at).backgroundColor;
+              if (fill !== "rgba(0, 0, 0, 0)" && fill !== "transparent") return fill;
+              at =
+                at.parentElement ?? ((at.getRootNode() as ShadowRoot).host as HTMLElement | null);
+            }
+            return getComputedStyle(document.body).backgroundColor;
+          };
+          const of = (part: string) => {
+            const node = shadow?.querySelector(`[part="${part}"]`) as HTMLElement;
+            return ratio(getComputedStyle(node).color, ground(node));
+          };
+          return {
+            label: of("label"),
+            help: of("help"),
+            error: of("error"),
+            name: of("file-name"),
+            hint: of("drop-hint"),
+          };
+        });
+        for (const [part, value] of Object.entries(measured)) {
+          expect(value, part).toBeGreaterThanOrEqual(4.5);
+        }
+      });
+    }
+  }
+}

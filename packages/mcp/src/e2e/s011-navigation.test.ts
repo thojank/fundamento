@@ -173,9 +173,10 @@ describe("check_usage of the navigation and the tabs", () => {
 });
 
 describe("list_eroj and the briefs", () => {
-  it("lists twenty-nine Eroj; the briefs of navigado and langetaro name their axes and duties", async () => {
+  it("lists thirty Eroj; the briefs of navigado and langetaro name their axes and duties", async () => {
     const listed = await output<Listed>(client, "list_eroj", {});
     expect(listed.eroj.map((entry) => entry.name)).toEqual([
+      "alsxutilo",
       "apartigilo",
       "atributlisto",
       "avizo",

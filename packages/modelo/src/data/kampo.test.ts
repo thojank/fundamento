@@ -31,6 +31,7 @@ describe("kampo in the repo Modelo (T004)", () => {
   it("lives in data/eroj/kampo/skemo.json, between elekto and ligilo, and the repo Modelo stays valid", () => {
     expect(kampo.file).toBe("modelo/data/eroj/kampo/skemo.json");
     expect(modelo.eroj.map((entry) => entry.ero.name)).toEqual([
+      "alsxutilo",
       "apartigilo",
       "atributlisto",
       "avizo",
@@ -243,7 +244,8 @@ describe("the Uzo of the kampo (T004, A3)", () => {
       ["number-stepper", "not-supported"],
       ["decimal", "not-supported"],
       ["date-range", "ask-human"],
-      ["file", "ask-human"],
+      // Spec 015 ②: a file is the alsxutilo's.
+      ["file", "use-instead"],
       ["no-visible-label", "not-supported"],
       ["icon-in-field", "not-supported"],
     ]);
@@ -332,6 +334,9 @@ describe("the Reguloj of the kampo (T003, T004, A2, D-07)", () => {
           // Spec 014 ⑤: the kompletigilo is a field with suggestions; every field Regulo but
           // placeholder-is-example is widened to it (its placeholder is a prompt, G8).
           ...(name === "placeholder-is-example" ? [] : ["kompletigilo"]),
+          // Spec 015 ②: the alsxutilo is a field of files; every field Regulo but the two of the
+          // placeholder is widened to it (it has none).
+          ...(name.startsWith("placeholder-") ? [] : ["alsxutilo"]),
         ],
       });
       expect(regulo?.checkability).toBe("automatic");
@@ -380,6 +385,7 @@ describe("the Reguloj of the kampo (T003, T004, A2, D-07)", () => {
       "kompletigilo",
       "pagxigilo",
       "spuro",
+      "alsxutilo",
     ]);
   });
 

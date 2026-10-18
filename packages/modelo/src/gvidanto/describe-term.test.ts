@@ -76,6 +76,7 @@ describe("describe_term (FR-12)", () => {
 
   it("names the instances of Ero", () => {
     expect(success("Ero").instances?.names).toEqual([
+      "alsxutilo",
       "apartigilo",
       "atributlisto",
       "avizo",

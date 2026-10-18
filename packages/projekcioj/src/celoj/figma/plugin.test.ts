@@ -319,6 +319,8 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
     expect(openButono.map((manko) => manko.part)).toEqual(["boundary", "slots", "content"]);
     expect(result.mankoj.open.map((manko) => manko.set)).toEqual([
       // Spec 014 ②: the apartigilo, the ikono and the saltligilo carry a Uzo like every set.
+      // Spec 015 ②: the alsxutilo carries a Uzo like every set.
+      ...["boundary", "slots", "content"].map(() => "alsxutilo"),
       ...["boundary", "slots", "content"].map(() => "apartigilo"),
       // Spec 011 ④: the atributlisto, the mezurilo and the tabelo carry a Uzo like every set.
       ...["boundary", "slots", "content"].map(() => "atributlisto"),
@@ -380,6 +382,7 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
     ).toEqual(["boundary", "slots", "content"]);
     expect(result.mankoj.closed.map((manko) => manko.set)).toEqual([
       // Spec 014 ②: the apartigilo, the ikono and the saltligilo close their three parts too.
+      ...["alsxutilo", "alsxutilo", "alsxutilo"],
       ...["apartigilo", "apartigilo", "apartigilo"],
       // Spec 011 ④: the atributlisto, the mezurilo and the tabelo close their three parts too.
       ...["atributlisto", "atributlisto", "atributlisto"],
@@ -628,6 +631,8 @@ describe("the full plan against the strict double: fresh and into the file of be
     // Spec 015 ①: the pagination and the breadcrumb are new to that file too.
     "pagxigilo",
     "spuro",
+    // Spec 015 ②: and the file input.
+    "alsxutilo",
   ]);
   const before2 = structuredClone(repo.input);
   before2.modelo.eroj = before2.modelo.eroj.filter((entry) => !BEFORE_2.has(entry.ero.name));
@@ -1214,8 +1219,9 @@ describe("a text is written only after its current font is loaded (F-A)", () => 
 // wenn er welche findet — ohne sie still zu übernehmen und ohne sie still zu löschen.
 describe("a marked component outside the set stops the run before it writes (F-B)", () => {
   // The first component a run makes: since Spec 011 ④ the atributlisto's, which sorts first.
-  const FIRST = "layout=columns, state=rest";
-  const FIRST_SET = "atributlisto";
+  // Spec 015 ②: the alsxutilo is the first set with a text; its first variant stands first.
+  const FIRST = "dropzone=true, state=rest";
+  const FIRST_SET = "alsxutilo";
   type Orphan = { id: string; name: string; set: string; parent: { id: string; type: string } };
 
   /** A run that crashes once its first component stands, as Figma's run did (F-A). */
@@ -2427,8 +2433,9 @@ describe("a failed run leaves everything readable in the console (F21)", () => {
         command: "run",
         createComponent: () => {
           // Spec 011 ④: the atributlisto's three (layout auto since Spec 014 ①) and the avizo's
-          // four variants are made first; the run fails in the butono.
-          if (++made === 3 + 4 + 40)
+          // four variants are made first; the run fails in the butono. Spec 015 ②: the
+          // alsxutilo's twelve before them.
+          if (++made === 12 + 3 + 4 + 40)
             throw new Error("in set_layoutMode: Cannot delete occupied row/column.");
           return create();
         },
@@ -2674,6 +2681,8 @@ describe("every bound paint shows the plan's colour after the first and the seco
       warnings: [],
       // Spec 008: two sets; the ligilo has placement × size × state = 30 variants.
       components: [
+        // Spec 015 ②: the alsxutilo has dropzone × state = 12 variants.
+        { set: "alsxutilo", created: 12, updated: 0 },
         // Spec 014 ②: the apartigilo has orientation = 2 variants in one state.
         { set: "apartigilo", created: 2, updated: 0 },
         // Spec 011 ④: the atributlisto has layout = 3 variants in one state (auto since Spec 014 ①).
@@ -2689,8 +2698,9 @@ describe("every bound paint shows the plan's colour after the first and the seco
         { set: "elekto", created: 15, updated: 0 },
         // Spec 014 ⑤: the faldilo has open × state = 6 variants.
         { set: "faldilo", created: 6, updated: 0 },
-        // Spec 014 ②: the ikono has name × size × intent = 240 variants in one state.
-        { set: "ikono", created: 240, updated: 0 },
+        // Spec 014 ②: the ikono has name × size × intent = 255 variants in one state (Spec 015
+        // ②: seventeen names with upload).
+        { set: "ikono", created: 255, updated: 0 },
         // Spec 011 ③: the insigno has intent × size = 10 variants in one state.
         { set: "insigno", created: 10, updated: 0 },
         // Spec 009: the kampo has size × state = 18 variants.
@@ -3673,7 +3683,10 @@ describe("every set lies in the frame Eroj in the section Fundamento (F-1, F-2, 
           : // Spec 015 ① (O-2): the pagination on page 1, 5 and 10 of 10 beside its set.
             name === "pagxigilo"
             ? [name, ...[1, 5, 10].map((page) => `pagxigilo – Seite ${page} von 10`)]
-            : [name],
+            : // Spec 015 ②: the upload with two files beside its set.
+              name === "alsxutilo"
+              ? [name, "alsxutilo – mit zwei Dateien"]
+              : [name],
   );
   const layout = repoPlan.section;
   const inLayout = names.map(() => ({ frame: FRAME, action: "in-layout" }));
@@ -3898,9 +3911,11 @@ describe("every set lies in the frame Eroj in the section Fundamento (F-1, F-2, 
       moved: [first],
       frame: { name: FRAME, found: true, created: false, wrap: "WRAP" },
     });
+    // The set moves to the end, its example frames with it (Spec 015 ②: the alsxutilo's).
+    const own = inFrame.filter((name) => name === first || name.startsWith(`${first} – `));
     expect(frameOf(double).children.map((child) => child.name)).toEqual([
-      ...inFrame.slice(1),
-      first,
+      ...inFrame.filter((name) => !own.includes(name)),
+      ...own,
     ]);
     expect(overlapping(double)).toEqual([]);
   });
@@ -6289,10 +6304,10 @@ describe("icons are drawn from the glyphs of every Aspekto and switch with the b
     return { double, report, setOf };
   };
 
-  it("the set ikono: 240 variants, each the control with one glyph frame per Aspekto, visible by the brand variable, filled in the bound colour, sized by the token", async () => {
+  it("the set ikono: 255 variants, each the control with one glyph frame per Aspekto, visible by the brand variable, filled in the bound colour, sized by the token", async () => {
     const { setOf, report } = await drawn();
     const set = setOf("ikono");
-    expect(set?.children).toHaveLength(240);
+    expect(set?.children).toHaveLength(255);
     const variant = set?.children.find(
       (child) => child.name === "name=close, size=medium, intent=neutral, state=rest",
     );
@@ -6600,6 +6615,75 @@ describe("the plugin draws the breadcrumb in one row with a chevron between two 
       "10",
     ]);
     expect(row("pagxigilo – Seite 10 von 10")).toEqual(["1", "\u2026", "9", "10"]);
+    const before = double.snapshot();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    expect(double.snapshot()).toBe(before);
+  });
+});
+
+// Spec 015 ② (plan ② D-06): the plugin draws the alsxutilo — every variant a column of label,
+// dropzone, help and error; the dropzone a row of the ring around the button (the butono's look,
+// its word and the glyphs of the icon upload) and the hint, shown only with a dropzone; the border
+// dashed with a dropzone, invisible without; the example „mit zwei Dateien" lists the two files,
+// each with its size and a remove of the butono's look with the glyphs of close. A second run
+// writes nothing.
+describe("the plugin draws the alsxutilo (Spec 015 ②)", () => {
+  const bound = (node: DoubleNode | undefined, field: string) => node?.boundVariables[field]?.name;
+  const paintOf = (node: DoubleNode | undefined) =>
+    (node?.properties.fills as { boundVariables?: { color?: { name: string } } }[] | undefined)?.[0]
+      ?.boundVariables?.color?.name;
+
+  it("every variant: label, dropzone, help, error; the button in the dropzone with its word and icon; the hint only with a dropzone", async () => {
+    const double = modelDouble();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    const set = pageNodes(double).find((node) => node.name === "alsxutilo");
+    expect(set?.children).toHaveLength(12);
+    for (const variant of set?.children ?? []) {
+      const field = descendant(variant, "field");
+      expect(field?.properties.layoutMode, variant.name).toBe("VERTICAL");
+      expect(field?.children.map((child) => child.name)).toEqual([
+        "label",
+        "dropzone",
+        "help",
+        "error",
+      ]);
+      const zone = descendant(variant, "dropzone");
+      expect(zone?.children.map((child) => child.name)).toEqual(["focus-ring", "drop-hint"]);
+      expect(descendant(variant, "choose-label")?.properties.characters).toBe("Datei auswählen");
+      expect(descendant(variant, "help")?.properties.characters).toBe(
+        "PDF oder PNG, höchstens 5 MB",
+      );
+      const withZone = variant.name.includes("dropzone=true");
+      expect(descendant(variant, "drop-hint")?.properties.visible, variant.name).toBe(withZone);
+      expect(bound(descendant(variant, "choose"), "minHeight")).toBe("size/control/medium");
+      expect(bound(zone, "strokeWeight")).toBe("border/width/default");
+      // The button holds one glyph frame per Aspekto of the icon upload.
+      expect(descendant(variant, "icon")?.children.length).toBeGreaterThan(0);
+    }
+    const dashed = set?.children.find((child) => child.name === "dropzone=true, state=rest");
+    const pattern = descendant(dashed, "dropzone")?.properties.dashPattern as number[] | undefined;
+    expect(pattern?.length).toBe(2);
+    const solid = set?.children.find((child) => child.name === "dropzone=true, state=dragover");
+    expect(descendant(solid, "dropzone")?.properties.dashPattern).toEqual([]);
+    expect(paintOf(descendant(solid, "dropzone"))).toBe("color/background/sunken");
+  });
+
+  it("the example „mit zwei Dateien“: two rows of name, size and a remove of the butono's look; a second run writes nothing", async () => {
+    const double = modelDouble();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    const frame = pageNodes(double).find(
+      (node) => node.type === "FRAME" && node.getSharedPluginData("fundamento", "frame") !== "",
+    );
+    const names = frame?.children.map((child) => child.name) ?? [];
+    const at = names.indexOf("alsxutilo");
+    expect(names.slice(at, at + 2)).toEqual(["alsxutilo", "alsxutilo – mit zwei Dateien"]);
+    const example = frame?.children.find((child) => child.name === "alsxutilo – mit zwei Dateien");
+    const list = descendant(example, "file-list");
+    expect(list?.children.map((child) => child.name)).toEqual(["file-row-1", "file-row-2"]);
+    expect(descendant(list, "file-name-1")?.properties.characters).toBe("Lebenslauf.pdf");
+    expect(descendant(list, "file-size-1")?.properties.characters).toBe("1,2 MB");
+    expect(descendant(list, "file-name-2")?.properties.characters).toBe("Zeugnis.png");
+    expect(bound(descendant(list, "remove-1"), "width")).toBe("size/control/small");
     const before = double.snapshot();
     await run(double, repoFiles["figma/plugin/code.js"] ?? "");
     expect(double.snapshot()).toBe(before);
