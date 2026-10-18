@@ -514,12 +514,47 @@ function guidelines(input: CeloInput, aspekto: string): GeneratedFile[] {
   // langetaro with distinct tabs; generated from the roles navigation and tablist, the companions
   // named where the Modelo has them.
   const linkName = eroj.find((entry) => entry.skemo.a11y.role === "link");
-  const navigationName = eroj.find((entry) => entry.skemo.a11y.role === "navigation");
+  // Spec 015 ①: the pagxigilo and the spuro share the role; the navigado is the one without an
+  // ellipsis or a separator part.
+  const plainNavigation = (entry: LoadedEro) =>
+    entry.skemo.a11y.role === "navigation" &&
+    entry.skemo.parts.ellipsis === undefined &&
+    entry.skemo.parts.separator === undefined;
+  const navigationName = eroj.find(plainNavigation);
   const navigationLines = eroj
-    .filter((entry) => entry.skemo.a11y.role === "navigation" && entry.uzo !== undefined)
+    .filter((entry) => plainNavigation(entry) && entry.uzo !== undefined)
     .map(
       (entry) =>
         `- Every navigation between the main pages of an application is a \`<${componentName(entry.ero)}>\` around the platform's own links, named and with the current page marked${linkName === undefined ? "" : `; a single link is a \`<${componentName(linkName.ero)}>\``}.`,
+    )
+    .join("\n");
+  // Spec 015 ① (G7, plan ① D-07): every long list in pages gets the pagxigilo, every page in a
+  // hierarchy shows its path in the spuro; generated from the role navigation with the parts
+  // ellipsis and separator, the companions named where the Modelo has them.
+  const pagerButton = eroj.find((entry) => entry.skemo.a11y.role === "button");
+  const tabsName = eroj.find((entry) => entry.skemo.a11y.role === "tablist");
+  const paginationLines = eroj
+    .filter(
+      (entry) =>
+        entry.skemo.a11y.role === "navigation" &&
+        entry.skemo.parts.ellipsis !== undefined &&
+        entry.uzo !== undefined,
+    )
+    .map(
+      (entry) =>
+        `- Every long list in pages gets a \`<${componentName(entry.ero)}>\` under it, the current page marked and an arrow back and forth${pagerButton === undefined ? "" : `; more on demand is a \`<${componentName(pagerButton.ero)}>\``}${tabsName === undefined ? "" : `, views of one thing are a \`<${componentName(tabsName.ero)}>\``}.`,
+    )
+    .join("\n");
+  const breadcrumbLines = eroj
+    .filter(
+      (entry) =>
+        entry.skemo.a11y.role === "navigation" &&
+        entry.skemo.parts.separator !== undefined &&
+        entry.uzo !== undefined,
+    )
+    .map(
+      (entry) =>
+        `- Every page inside a hierarchy shows its path in a \`<${componentName(entry.ero)}>\` at its head, each level a link and the current page text${navigationName === undefined ? "" : `; the places beside a page are the \`<${componentName(navigationName.ero)}>\``}.`,
     )
     .join("\n");
   const tabsLines = eroj
@@ -640,6 +675,8 @@ ${tableLines}
 ${recordLines}
 ${meterLines}
 ${navigationLines}
+${paginationLines}
+${breadcrumbLines}
 ${tabsLines}
 ${iconLines}
 ${separatorLines}

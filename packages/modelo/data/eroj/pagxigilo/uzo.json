@@ -1,0 +1,110 @@
+{
+  "$schema": "../../../schema/modelo.schema.json#/$defs/UzoFile",
+  "uzo": {
+    "id": "uzo_01M56F6FRPJ40E4HBAX500W489",
+    "ero": "ero_01M56F6F0ZVC9VKZS57S5K58CH",
+    "skemo": "ske_01M56F6FCXT3N0K796HNN80PD5",
+    "purpose": "Moves through the pages of a long list and shows which page is current.",
+    "instead": [
+      {
+        "goal": "load-more",
+        "keywords": {
+          "en": [
+            "loadmore",
+            "showmore"
+          ],
+          "de": [
+            "mehrladen",
+            "nachladen"
+          ]
+        },
+        "ero": "butono",
+        "kialo": "A list that grows by one more part on demand is a button, because the person stays on one page and the list gets longer; pages are places a person can return to."
+      },
+      {
+        "goal": "views",
+        "keywords": {
+          "en": [
+            "views",
+            "viewswitch"
+          ],
+          "de": [
+            "ansichten",
+            "ansichtswechsel"
+          ]
+        },
+        "ero": "langetaro",
+        "kialo": "Views of one thing on one page are tabs, because the person switches what is shown of the same thing; pages are parts of one list in order."
+      }
+    ],
+    "boundary": [
+      {
+        "case": "infinite-scroll",
+        "action": "ask-human",
+        "keywords": {
+          "en": [
+            "infinitescroll",
+            "endlessscroll"
+          ],
+          "de": [
+            "endlosscrollen",
+            "endlosliste"
+          ]
+        },
+        "kialo": "A list that loads as the person scrolls has no pages and no end a keyboard can reach, because the footer never comes; a person decides whether the list needs pages or a button for more."
+      },
+      {
+        "case": "page-size-select",
+        "action": "ask-human",
+        "keywords": {
+          "en": [
+            "pagesize",
+            "perpage"
+          ],
+          "de": [
+            "seitengröße",
+            "prosite"
+          ]
+        },
+        "kialo": "How many rows a page holds is a choice of its own, an elektilo beside the pagination, because the pagination moves between pages and does not resize them; a person decides where that choice stands."
+      }
+    ],
+    "composes": {
+      "containers": [
+        {
+          "name": "list-foot",
+          "kialo": "A pagination stands under the list it pages, because the person reaches it after the rows; the container owns the space between."
+        }
+      ],
+      "with": [
+        {
+          "ero": "tabelo",
+          "kialo": "A table with more rows than one page shows has a pagination under it, because the table shows one part at a time (the tabelo's boundary pagination)."
+        },
+        {
+          "ero": "ikono",
+          "kialo": "The arrows back and forth are the ikono chevron-left and chevron-right, because an arrow is a sign of the system and mirrors in right-to-left writing."
+        }
+      ],
+      "never": [],
+      "spacing": {
+        "owner": "container",
+        "regulo": "spacing-owned-by-container"
+      }
+    },
+    "slots": {
+      "items": {
+        "accepts": [
+          "text"
+        ],
+        "required": false,
+        "nesting": 0
+      }
+    },
+    "layout": {
+      "size": "container",
+      "wrap": "allowed"
+    },
+    "content": []
+  }
+}

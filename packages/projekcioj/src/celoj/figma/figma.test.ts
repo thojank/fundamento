@@ -1004,11 +1004,13 @@ describe("the label default of a set follows its a11y role (M-3)", () => {
       // Spec 011 ⑤: a navigation's label is the name of the landmark, heard, never seen; the word
       // is the Ero's (proposal for the maintainer to confirm).
       navigado: "Navigation",
+      pagxigilo: "Seitenblättern",
       // Spec 011 ③: a loading or empty state shares the role status with the notice; its word is
       // the structure's, not the role's (for the maintainer to confirm).
       plenstato: "Zustand",
       // Spec 014 ②: a skip link is a link; its word names its destination.
       saltligilo: "Ziel",
+      spuro: "Pfad",
       sxaltilo: "Einstellung",
       sxvebilo: "Überschrift",
       // Spec 011 ④ (plan ④ D-14): a table's caption is a caption like a field's label (for the
@@ -2717,7 +2719,7 @@ describe("the Figma plan draws icons (Spec 014 ②)", () => {
 
   it("carries the glyphs of every Aspekto and the names that mirror; a BOOLEAN variable per Aspekto switches them", () => {
     expect(plan.ikonoj?.names).toEqual(names);
-    expect(plan.ikonoj?.mirror).toEqual(["chevron-right"]);
+    expect(plan.ikonoj?.mirror).toEqual(["chevron-left", "chevron-right"]);
     expect(Object.keys(plan.ikonoj?.glyphs ?? {})).toEqual(["komuna", "ekzemplo"]);
     for (const aspekto of ["komuna", "ekzemplo"]) {
       for (const name of names) {
@@ -3047,11 +3049,11 @@ describe("the Figma plan draws the pagxigilo and the spuro (Spec 015 ①)", () =
     const rest = pagxigilo?.variants.find((variant) => variant.props.state === "rest");
     expect(rest?.icons).toEqual({ prev: "chevron-left", next: "chevron-right" });
     expect(rest?.bindings).toMatchObject({
-      "item.fill": "color/navigation/rest",
       "item.typography": "typography/label/1",
       "ellipsis.color": "color/navigation/text/rest",
       "prev.size": "size/icon/medium",
     });
+    expect(rest?.entries?.false?.bindings).toMatchObject({ "item.fill": "color/navigation/rest" });
     expect(rest?.entries?.true?.bindings).toMatchObject({
       "item.fill": "color/navigation/selected",
       "border.width": "border/width/strong",

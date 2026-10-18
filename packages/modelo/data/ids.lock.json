@@ -180,6 +180,14 @@
       "status": "active",
       "type": "ero"
     },
+    "ero_01M56F6F0ZVC9VKZS57S5K58CH": {
+      "status": "active",
+      "type": "ero"
+    },
+    "ero_01M56F6F10RCQDAAS9X5M8ZRW4": {
+      "status": "active",
+      "type": "ero"
+    },
     "iko_01M55EFZMTVJR4FGV32KYEG54W": {
       "status": "active",
       "type": "ikono"
@@ -241,6 +249,10 @@
       "type": "ikono"
     },
     "iko_01M55EFZMVS7WDTJ3D55SPVHR1": {
+      "status": "active",
+      "type": "ikono"
+    },
+    "iko_01M56F6G4PH5C6AAE0DNBM9KDD": {
       "status": "active",
       "type": "ikono"
     },
@@ -1753,6 +1765,14 @@
       "type": "skemo"
     },
     "ske_01M56AF004GZ2N13Y6C2K29HDY": {
+      "status": "active",
+      "type": "skemo"
+    },
+    "ske_01M56F6FCXT3N0K796HNN80PD5": {
+      "status": "active",
+      "type": "skemo"
+    },
+    "ske_01M56F6FCXT3N0K796HNN80PD6": {
       "status": "active",
       "type": "skemo"
     },
@@ -3293,6 +3313,14 @@
       "type": "uzo"
     },
     "uzo_01M56AF0CDZ5SFJYKYEF7VSNPT": {
+      "status": "active",
+      "type": "uzo"
+    },
+    "uzo_01M56F6FRPJ40E4HBAX500W489": {
+      "status": "active",
+      "type": "uzo"
+    },
+    "uzo_01M56F6FRPJ40E4HBAX500W48A": {
       "status": "active",
       "type": "uzo"
     }

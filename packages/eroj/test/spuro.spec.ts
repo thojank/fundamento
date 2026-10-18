@@ -27,10 +27,9 @@ test.describe("fm-spuro behaviour", () => {
     const separators = await page
       .locator("#s")
       .evaluate((element) =>
-        [...(element.shadowRoot?.querySelectorAll('[part="separator"]') ?? [])].map((node) => [
-          node.getAttribute("name"),
-          node.getAttribute("aria-hidden"),
-        ]),
+        [...(element.shadowRoot?.querySelectorAll('[part="separator"]:not([hidden])') ?? [])].map(
+          (node) => [node.getAttribute("name"), node.getAttribute("aria-hidden")],
+        ),
       );
     expect(separators).toEqual([
       ["chevron-right", "true"],

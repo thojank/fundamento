@@ -1,0 +1,119 @@
+{
+  "$schema": "../../../schema/modelo.schema.json#/$defs/UzoFile",
+  "uzo": {
+    "id": "uzo_01M56F6FRPJ40E4HBAX500W48A",
+    "ero": "ero_01M56F6F10RCQDAAS9X5M8ZRW4",
+    "skemo": "ske_01M56F6FCXT3N0K796HNN80PD6",
+    "purpose": "Shows where the current page sits in a hierarchy and links back up to each level.",
+    "instead": [
+      {
+        "goal": "main-navigation",
+        "keywords": {
+          "en": [
+            "mainnav",
+            "topnav"
+          ],
+          "de": [
+            "hauptnavigationsleiste",
+            "topnavigation"
+          ]
+        },
+        "ero": "navigado",
+        "kialo": "The places beside the page are a navigation, because a breadcrumb shows the ancestors above it, not the siblings; that is the navigado."
+      },
+      {
+        "goal": "steps",
+        "keywords": {
+          "en": [
+            "wizard",
+            "stepper"
+          ],
+          "de": [
+            "assistent",
+            "schrittanzeige"
+          ]
+        },
+        "ero": null,
+        "kialo": "The steps of a process are no path up a hierarchy, because their order is the process and the person may not jump back freely; Fundamento has no step indicator yet, a person decides."
+      }
+    ],
+    "boundary": [
+      {
+        "case": "collapsed-middle",
+        "action": "ask-human",
+        "keywords": {
+          "en": [
+            "truncated",
+            "collapsedpath"
+          ],
+          "de": [
+            "gekürzt",
+            "verkürzt"
+          ]
+        },
+        "kialo": "A long path shortened in the middle needs an overlay that opens the hidden levels, because what is cut away must stay reachable; a person decides whether the path wraps instead."
+      }
+    ],
+    "composes": {
+      "containers": [
+        {
+          "name": "page-header",
+          "kialo": "A breadcrumb stands at the head of the page above its heading, because the person reads where they are before what is there."
+        }
+      ],
+      "with": [
+        {
+          "ero": "ligilo",
+          "kialo": "Its items are links, because each one moves up to a level; the last one, the current page, is text."
+        },
+        {
+          "ero": "ikono",
+          "kialo": "The separator between two items is the ikono chevron-right, decorative, because it points down the path and mirrors in right-to-left writing."
+        }
+      ],
+      "never": [],
+      "spacing": {
+        "owner": "container",
+        "regulo": "spacing-owned-by-container"
+      }
+    },
+    "slots": {
+      "items": {
+        "accepts": [
+          "text"
+        ],
+        "required": true,
+        "min": 2,
+        "nesting": 0
+      }
+    },
+    "layout": {
+      "size": "container",
+      "wrap": "allowed"
+    },
+    "content": [
+      {
+        "regulo": "link-label-names-destination",
+        "fixed": true,
+        "of": "slot:items",
+        "check": {
+          "kind": "not-words",
+          "words": {
+            "de": [
+              "hier",
+              "klicken",
+              "mehr",
+              "link"
+            ],
+            "en": [
+              "here",
+              "click",
+              "more",
+              "link"
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

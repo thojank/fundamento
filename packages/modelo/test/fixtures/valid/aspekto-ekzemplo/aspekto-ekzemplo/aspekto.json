@@ -25,6 +25,7 @@
     "names": {
       "check": "check",
       "chevron-down": "caret-down",
+      "chevron-left": "caret-left",
       "chevron-right": "caret-right",
       "close": "x",
       "collapse": "arrows-in-simple",

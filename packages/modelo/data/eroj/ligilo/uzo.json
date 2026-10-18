@@ -104,6 +104,10 @@
         {
           "ero": "ligilo",
           "kialo": "Links of one list stand together, because a list of places is read as one choice."
+        },
+        {
+          "ero": "spuro",
+          "kialo": "The items of a breadcrumb are links up the hierarchy, because each one moves to a level above; the last is text."
         }
       ],
       "never": [

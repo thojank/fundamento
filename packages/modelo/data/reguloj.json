@@ -423,7 +423,9 @@
           "sxvebilo",
           "menuo",
           "faldilo",
-          "kompletigilo"
+          "kompletigilo",
+          "pagxigilo",
+          "spuro"
         ]
       }
     },
@@ -518,7 +520,8 @@
         "eroj": [
           "ligilo",
           "navigado",
-          "saltligilo"
+          "saltligilo",
+          "spuro"
         ]
       }
     },

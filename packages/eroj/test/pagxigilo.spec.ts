@@ -38,13 +38,13 @@ test.describe("fm-pagxigilo behaviour", () => {
       .locator("#p")
       .evaluate((element) =>
         [...(element.shadowRoot?.querySelectorAll('[part="ellipsis"]') ?? [])].map((node) => [
-          node.textContent,
+          node.querySelector("svg") !== null,
           node.getAttribute("aria-hidden"),
         ]),
       );
     expect(ellipses).toEqual([
-      ["…", "true"],
-      ["…", "true"],
+      [true, "true"],
+      [true, "true"],
     ]);
     // Without a label the Modelo's word names the landmark.
     await page.locator("#p").evaluate((element) => element.removeAttribute("label"));
@@ -77,7 +77,8 @@ test.describe("fm-pagxigilo behaviour", () => {
       "aria-disabled",
       "true",
     );
-    await page.getByRole("button", { name: "Nächste Seite" }).click();
+    // At the end the arrow is aria-disabled: a click (forced past the platform's check) does nothing.
+    await page.getByRole("button", { name: "Nächste Seite" }).click({ force: true });
     await expect(page.locator("#p")).toHaveAttribute("page", "3");
     await page.getByRole("button", { name: "Vorherige Seite" }).click();
     await expect(page.locator("#p")).toHaveAttribute("page", "2");

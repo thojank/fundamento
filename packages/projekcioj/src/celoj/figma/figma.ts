@@ -500,7 +500,9 @@ export type FigmaStructure =
   | "tooltip"
   | "popover"
   | "menu"
-  | "disclosure";
+  | "disclosure"
+  | "pagination"
+  | "breadcrumb";
 
 /**
  * A radio group (Spec 010 ③, D-07) is a choice: the label (the question) above a column of
@@ -549,7 +551,13 @@ export const structureOf = (role: string, parts: readonly string[] = []): FigmaS
                   : role === "list"
                     ? "list"
                     : role === "navigation"
-                      ? "nav"
+                      ? // Spec 015 ① (plan ① D-05): a navigation with an ellipsis part is a
+                        // pagination, with a separator part a breadcrumb.
+                        parts.includes("ellipsis")
+                        ? "pagination"
+                        : parts.includes("separator")
+                          ? "breadcrumb"
+                          : "nav"
                       : role === "tablist"
                         ? "tabs"
                         : // Spec 014 ② (plan ② D-08): an icon (role img) is the glyph of every
@@ -1647,6 +1655,9 @@ function iconsOf(
     const intent = combination.intent;
     return intent === undefined ? undefined : { icon: intent };
   }
+  // A pagination (Spec 015 ①): the arrows back and forth; a breadcrumb: the chevron between two.
+  if (structure === "pagination") return { prev: "chevron-left", next: "chevron-right" };
+  if (structure === "breadcrumb") return { separator: "chevron-right" };
   // A disclosure (Spec 014 ⑤): the chevron points down where open, right where closed.
   if (structure === "disclosure" && skemo.parts.indicator !== undefined) {
     return { indicator: combination.open === "true" ? "chevron-down" : "chevron-right" };
@@ -2182,13 +2193,21 @@ function componentSetOf(
   // or active.
   const [entryKey] = entryKeys;
   // The suggestions of a field with a listbox (Spec 014 ⑤): rows like a choice's options.
+  // Spec 015 ① (plan ① D-05): a pagination shows the pages 1, 2, 3 (the first current), a
+  // breadcrumb the Vitrino's three words with the last the current page.
   const options =
     (structure === "choice" ||
       structure === "nav" ||
       structure === "tabs" ||
+      structure === "pagination" ||
+      structure === "breadcrumb" ||
       (structure === "field" && skemo.parts.listbox !== undefined)) &&
     entryKey !== undefined
-      ? { key: entryKey, texts: [...VITRINO_OPTIONS], selected: 0 }
+      ? structure === "pagination"
+        ? { key: entryKey, texts: ["1", "2", "3"], selected: 0 }
+        : structure === "breadcrumb"
+          ? { key: entryKey, texts: [...VITRINO_OPTIONS], selected: VITRINO_OPTIONS.length - 1 }
+          : { key: entryKey, texts: [...VITRINO_OPTIONS], selected: 0 }
       : undefined;
   // The confirming action of a dialog looks like the butono it composes (Abnahme Spec 011 ②,
   // F-5): its roles read from the butono's Skemo in the same Modelo.
@@ -2259,7 +2278,17 @@ function componentSetOf(
     // An icon and a separator carry no text (Spec 014 ②): no label property.
     ...(structure === "icon" || structure === "separator"
       ? {}
-      : { label: { property: "label", defaultValue: labelDefaultOf(skemo.a11y.role, structure) } }),
+      : {
+          label: {
+            property: "label",
+            // The Modelo's own word where the label is empty (a11y.texts label-empty: the menu's
+            // trigger, Spec 014 ④; the landmarks of Spec 015 ①) names the set's label.
+            defaultValue:
+              (structure === "pagination" || structure === "breadcrumb"
+                ? skemo.a11y.texts?.["label-empty"]?.de
+                : undefined) ?? labelDefaultOf(skemo.a11y.role, structure),
+          },
+        }),
     fonts,
     ...(surface === undefined ? {} : { surface }),
   };

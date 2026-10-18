@@ -87,7 +87,7 @@
       },
       {
         "case": "breadcrumb",
-        "action": "ask-human",
+        "action": "use-instead",
         "keywords": {
           "en": [
             "breadcrumb",
@@ -99,7 +99,8 @@
             "pfadnavigation"
           ]
         },
-        "kialo": "A breadcrumb shows the path to the page, not the pages beside it, because its items are the ancestors in order; whether the application needs one is a decision of a person."
+        "kialo": "A breadcrumb shows the path to the page, not the pages beside it, because its items are the ancestors in order; that is the spuro (Spec 015 ① closes the boundary breadcrumb).",
+        "ero": "spuro"
       }
     ],
     "composes": {

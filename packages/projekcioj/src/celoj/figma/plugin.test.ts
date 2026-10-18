@@ -2686,8 +2686,8 @@ describe("every bound paint shows the plan's colour after the first and the seco
         { set: "elekto", created: 15, updated: 0 },
         // Spec 014 ⑤: the faldilo has open × state = 6 variants.
         { set: "faldilo", created: 6, updated: 0 },
-        // Spec 014 ②: the ikono has name × size × intent = 225 variants in one state.
-        { set: "ikono", created: 225, updated: 0 },
+        // Spec 014 ②: the ikono has name × size × intent = 240 variants in one state.
+        { set: "ikono", created: 240, updated: 0 },
         // Spec 011 ③: the insigno has intent × size = 10 variants in one state.
         { set: "insigno", created: 10, updated: 0 },
         // Spec 009: the kampo has size × state = 18 variants.
@@ -6283,10 +6283,10 @@ describe("icons are drawn from the glyphs of every Aspekto and switch with the b
     return { double, report, setOf };
   };
 
-  it("the set ikono: 225 variants, each the control with one glyph frame per Aspekto, visible by the brand variable, filled in the bound colour, sized by the token", async () => {
+  it("the set ikono: 240 variants, each the control with one glyph frame per Aspekto, visible by the brand variable, filled in the bound colour, sized by the token", async () => {
     const { setOf, report } = await drawn();
     const set = setOf("ikono");
-    expect(set?.children).toHaveLength(225);
+    expect(set?.children).toHaveLength(240);
     const variant = set?.children.find(
       (child) => child.name === "name=close, size=medium, intent=neutral, state=rest",
     );
