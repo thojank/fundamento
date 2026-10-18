@@ -10,8 +10,8 @@ export const valid = (
   </Sxvebilo>
 );
 
-// @ts-expect-error open is a boolean
 export const wrongOpen = (
+  // @ts-expect-error open is a boolean
   <Sxvebilo label="Filter" open="yes">
     x
   </Sxvebilo>

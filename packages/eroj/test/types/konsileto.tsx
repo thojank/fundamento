@@ -11,8 +11,8 @@ export const valid = (
 
 export const top = <Konsileto htmlFor="suchen">Suchen</Konsileto>;
 
-// @ts-expect-error placement is one of the four logical sides
 export const wrongPlacement = (
+  // @ts-expect-error placement is one of the four logical sides
   <Konsileto htmlFor="suchen" placement="top">
     x
   </Konsileto>
