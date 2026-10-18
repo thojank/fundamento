@@ -87,18 +87,18 @@
 
 ### C – Abschluss
 - [x] **T910 Doku** plan ③, tasks ③, Vojmapo Zeile 4, README.
-- [ ] **T911 Messungen** unten; Bericht im PR.
+- [x] **T911 Messungen** unten; Bericht im PR.
 
 ### Messungen
 
 | Was | Wert |
 |---|---|
-| Commits ③ | rot `6190e31`, grün: Hash in der Zeile nach dem Commit |
+| Commits ③ | rot `ecbb3bb` (vor dem Rebase `6190e31`), grün `ecc62e3` (nach Rebase auf ② `60fd64f`), Fix `453ae18` (Alirebleco-Block: `<p>` ohne Textfarbe im dunklen Aspekto → `fm-teksto`; Vitrino zählt vier Überschriften der Stufe 1; `@ts-expect-error` vor der JSX-Zeile in `titolo.tsx`) |
 | `brief` | titolo, teksto ≤ 750 (Daten-Tests und MCP e2e) |
 | Parität | `check:parity` 22 Eroj, 0 Differenzen, 225 Freigaben |
 | `check:regularo` | 56 Reguloj, 176 Jugxoj, 22 Uzoj, 0 Warnungen (keine neue `goal-keyword-shared`) |
 | Tests lokal | Modelo 3362, Projekcioj 633, MCP 270; Browser-Specs titolo, teksto, dialogo, Alirebleco-Block, Vitrino in Chromium grün |
-| CI | Lauf: Nummer und Dauer in der Zeile nach dem Lauf |
+| CI | Lauf 1 `39080409189` (ecc62e3) rot: Rendered checks (Alirebleco-Block ③ im dunklen Aspekto, Vitrino-Zahl) und Eroj-Shard (Typtest titolo), 9 min 16 s; Lauf 2 `39086698635` (453ae18) grün, 8 min 00 s (Jobs 7:06 / 4:43 / 7:57 / 7:19), unter 12 min |
 
 ## ④ Overlays
 
