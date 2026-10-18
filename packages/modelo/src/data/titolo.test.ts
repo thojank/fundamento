@@ -29,9 +29,9 @@ const suggest = (goal: string) => {
 };
 
 describe("titolo in the repo Modelo (section ③, G1, G2)", () => {
-  it("lives in data/eroj/titolo/skemo.json, one of twenty-five Eroj", () => {
+  it("lives in data/eroj/titolo/skemo.json, one of twenty-seven Eroj", () => {
     expect(titolo?.file).toBe("modelo/data/eroj/titolo/skemo.json");
-    expect(modelo.eroj).toHaveLength(25);
+    expect(modelo.eroj).toHaveLength(27);
   });
 
   it("has level (a duty, 1–6, no default) and size (seven roles, no default: derived from the level) as props; one state; the label slot", () => {

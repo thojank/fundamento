@@ -36,6 +36,21 @@
         },
         "ero": "navigado",
         "kialo": "Pages of an application are a navigation, because the person leaves where they are; tabs switch views of one thing and stay on the page."
+      },
+      {
+        "goal": "disclose",
+        "keywords": {
+          "en": [
+            "accordion",
+            "collapsible"
+          ],
+          "de": [
+            "akkordeon",
+            "aufklappbar"
+          ]
+        },
+        "ero": "faldilo",
+        "kialo": "Content that is hidden until opened is a disclosure, because tabs always show one view; the faldilo opens and closes, several in a group one at a time."
       }
     ],
     "boundary": [

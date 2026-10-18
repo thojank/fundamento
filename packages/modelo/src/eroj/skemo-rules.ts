@@ -675,8 +675,11 @@ function a11yIssues(entry: LoadedEro, at: At): void {
   // dash of a key-value list: "keine Angabe"). Spec 014 ④ (plan ④ D-03): `<prop>-empty` of a
   // string prop — the words that stand in while the prop is empty (the name of a menu's trigger:
   // "Weitere Aktionen"), as the empty label of a skip link stands in for its slot.
+  // Spec 014 ⑤ (plan ⑤ D-02): `<slot>-count` — the word heard with the number of entries of a
+  // slot (the suggestions of a kompletigilo: "3 Vorschläge").
   const emptied = [
     ...skemo.slots.map((slot) => `${slot.name}-empty`),
+    ...skemo.slots.map((slot) => `${slot.name}-count`),
     ...skemo.props.filter((prop) => prop.kind === "string").map((prop) => `${prop.name}-empty`),
   ];
   for (const key of Object.keys(skemo.a11y.texts ?? {})) {

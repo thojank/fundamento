@@ -29,9 +29,9 @@ const suggest = (goal: string) => {
 };
 
 describe("langetaro in the repo Modelo (section ⑤, G1, G2, E7)", () => {
-  it("lives in data/eroj/langetaro/skemo.json, ninth of twenty-five Eroj", () => {
+  it("lives in data/eroj/langetaro/skemo.json, ninth of twenty-seven Eroj", () => {
     expect(langetaro?.file).toBe("modelo/data/eroj/langetaro/skemo.json");
-    expect(modelo.eroj[11]?.ero.name).toBe("langetaro");
+    expect(modelo.eroj[13]?.ero.name).toBe("langetaro");
   });
 
   it("has label (a duty) and selected (the id of the chosen tab) as props; the states of a tab", () => {
@@ -166,6 +166,8 @@ describe("the Uzo of the langetaro (section ⑤, G5)", () => {
     expect(uzo?.instead.map((entry) => [entry.goal, entry.ero])).toEqual([
       ["form-choice", "elekto"],
       ["pages", "navigado"],
+      // Spec 014 ⑤: content that is hidden until opened is the faldilo's.
+      ["disclose", "faldilo"],
     ]);
     expect(uzo?.boundary.map((entry) => [entry.case, entry.action])).toEqual([
       // "overflow" is a web term of the Uzo (uzo-web-term): the case is named by what it is.
@@ -207,8 +209,9 @@ describe("the Reguloj of the langetaro (G6, E5)", () => {
       "elekto",
       "elektilo",
       "langetaro",
-      // Spec 014 ④: the entries of a menu too.
+      // Spec 014 ④: the entries of a menu too; ⑤: the suggestions of a combobox.
       "menuo",
+      "kompletigilo",
     ]);
     expect(named("option-labels-distinct")?.statement).toContain("langetaro");
     expect(named("spacing-owned-by-container")?.appliesTo?.eroj).toContain("langetaro");

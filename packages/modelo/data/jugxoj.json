@@ -3994,6 +3994,90 @@
           }
         ]
       }
+    },
+    {
+      "id": "jug_01M56AF14J0K06MYMCFKZ9SHVF",
+      "ref": {
+        "ero": "ero_01M56AEZKYD8K4R2SEZFS15QSM"
+      },
+      "decision": "approved",
+      "kialo": "Die Zusammenfassung nennt, was sich öffnet: Wer sie liest, weiß, ob es sich lohnt.",
+      "date": "2026-10-18",
+      "context": "Example RIGHT for the Regulo named in ekzemplo.regulo (Spec 014 ⑤, disclosure-label-names-content, G8); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M56AF0RKC0BBAYXNJTZDNSSQ",
+        "instances": [
+          {
+            "ero": "faldilo",
+            "props": {},
+            "label": "Lieferbedingungen",
+            "lingvo": "de"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M56AF14KZXWHBMX70X7NQVW6",
+      "ref": {
+        "ero": "ero_01M56AEZKYD8K4R2SEZFS15QSM"
+      },
+      "decision": "approved",
+      "kialo": "The summary names what opens: whoever reads it knows whether it is worth it.",
+      "date": "2026-10-18",
+      "context": "Example RIGHT for the Regulo named in ekzemplo.regulo (Spec 014 ⑤, disclosure-label-names-content, G8); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M56AF0RKC0BBAYXNJTZDNSSQ",
+        "instances": [
+          {
+            "ero": "faldilo",
+            "props": {},
+            "label": "Shipping terms",
+            "lingvo": "en"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M56AF14MHQPZA0KWA2GFF86Y",
+      "ref": {
+        "ero": "ero_01M56AEZKYD8K4R2SEZFS15QSM"
+      },
+      "decision": "rejected",
+      "kialo": "„Mehr“ sagt nur, dass es mehr gibt; eine Liste geschlossener Aufklapper mit diesem Wort ist eine Liste ohne Namen.",
+      "date": "2026-10-18",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 014 ⑤, disclosure-label-names-content, G8); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M56AF0RKC0BBAYXNJTZDNSSQ",
+        "instances": [
+          {
+            "ero": "faldilo",
+            "props": {},
+            "label": "Mehr",
+            "lingvo": "de"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M56AF14MHQPZA0KWA2GFF86Z",
+      "ref": {
+        "ero": "ero_01M56AEZKYD8K4R2SEZFS15QSM"
+      },
+      "decision": "rejected",
+      "kialo": "'More' only says that there is more; a list of closed disclosures with this word is a list without names.",
+      "date": "2026-10-18",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 014 ⑤, disclosure-label-names-content, G8); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M56AF0RKC0BBAYXNJTZDNSSQ",
+        "instances": [
+          {
+            "ero": "faldilo",
+            "props": {},
+            "label": "More",
+            "lingvo": "en"
+          }
+        ]
+      }
     }
   ]
 }

@@ -47,6 +47,7 @@ function fieldPartSelector(
   data: string,
   state: string,
   select = false,
+  entry = "",
 ): string {
   const root = `[part="field"]${data}${state === "" ? "" : `:has([part="control"]${state})`}`;
   if (part === "box" && property === "gap") return `:where(${root})`;
@@ -63,7 +64,23 @@ function fieldPartSelector(
   if (["label", "help", "error", "required-mark"].includes(part)) {
     return `:where(${root}) [part="${part}"]`;
   }
+  // The listbox of a field with suggestions (Spec 014 ⑤) and its rows: the suggestion by its
+  // entry (aria-selected), the no-results text.
+  if (part === "listbox" || part === "no-results") return `:where(${root}) [part="${part}"]`;
+  if (part === "suggestion") return `:where(${root}) [part="suggestion"]${entry}`;
   return `:where(${root}) [part="control"]`;
+}
+
+/**
+ * The selector of a part of a disclosure (Spec 014 ⑤, D-03): the combination (open) stands on
+ * the details, the state on the summary; the chevron and the content are their own elements.
+ */
+function disclosurePartSelector(part: string, data: string, state: string): string {
+  const root = `[part="control"]${data}`;
+  if (part === "summary") return `:where(${root}) [part="summary"]${STATE_SELECTORS[state] ?? ""}`;
+  if (part === "focus-ring") return `:where(${root}) [part="summary"]:focus-visible`;
+  if (part === "indicator" || part === "content") return `:where(${root}) [part="${part}"]`;
+  return `:where(${root})`;
 }
 
 /**
@@ -71,7 +88,7 @@ function fieldPartSelector(
  * select (Spec 010 ④, D-06) — the same field around the platform's select.
  */
 const isField = (skemo: Skemo): boolean =>
-  hostOf(skemo.a11y.role) === "input" || isSelect(skemo) || isTextarea(skemo);
+  hostOf(skemo.a11y.role) === "input" || isSelect(skemo) || isTextarea(skemo) || isSuggest(skemo);
 
 /** Whether the Ero is a text area (Spec 011 ②, D-11): a textbox over several lines, with rows. */
 export const isMultiline = (skemo: Skemo): boolean =>
@@ -212,8 +229,16 @@ function dialogPartSelector(part: string, data: string): string {
   return `:where(${root})`;
 }
 
+/** A field with suggestions (Spec 014 ⑤, D-03): a combobox with a listbox part of its own. */
+export const isSuggest = (skemo: Skemo): boolean =>
+  skemo.a11y.role === "combobox" && skemo.parts.listbox !== undefined;
+
+/** A disclosure (Spec 014 ⑤, D-03): the platform's details and summary. */
+const isDisclosure = (skemo: Skemo): boolean => hostOf(skemo.a11y.role) === "disclosure";
+
 /** Whether the Ero is a select (Spec 010 ④, D-06): the field of the kampo around a select. */
-const isSelect = (skemo: Skemo): boolean => hostOf(skemo.a11y.role) === "select";
+const isSelect = (skemo: Skemo): boolean =>
+  hostOf(skemo.a11y.role) === "select" && !isSuggest(skemo);
 
 /**
  * Whether the Ero is a toggle: a control with its label beside it — the track of a switch with
@@ -419,6 +444,14 @@ function declarations(skemo: Skemo, part: string, property: string, token: strin
   }
   if ((isPopover(skemo) || isMenu(skemo)) && part === "surface" && property === "width") {
     return [`max-inline-size: ${variable(token)};`];
+  }
+  // The listbox of a field with suggestions (Spec 014 ⑤): its width is the most it takes, its
+  // height the most it takes before it scrolls; a height of none is a listbox that is not shown.
+  if (isSuggest(skemo) && part === "listbox" && property === "width") {
+    return [`max-inline-size: ${variable(token)};`];
+  }
+  if (isSuggest(skemo) && part === "listbox" && property === "height") {
+    return token === "none" ? ["display: none;"] : [`max-block-size: ${variable(token)};`];
   }
   switch (property as SkemoPartProperty) {
     case "fill":
@@ -808,6 +841,36 @@ function menuPartSelector(part: string, data: string, state: string): string {
   if (part === "focus-ring") return `:where(${root} [part="item"]:focus-visible)`;
   return `:where(${root})`;
 }
+
+/**
+ * Layout of a disclosure (Spec 014 ⑤, D-03), keywords and 0 only: the host is a block; the
+ * details is a block; the summary a row with the chevron at its end, without the platform's
+ * marker, a pointer; the content a block, shown by the platform while open.
+ */
+const disclosureStructure: string = [
+  ":host { display: block; }",
+  ':where([part="control"]) { display: block; }',
+  ':where([part="summary"]) { display: flex; align-items: center; justify-content: space-between; box-sizing: border-box; margin: 0; list-style: none; cursor: pointer; transition-property: background-color, color; }',
+  ':where([part="summary"])::-webkit-details-marker { display: none; }',
+  ':where([part="summary"]:focus:not(:focus-visible)) { outline-width: 0; }',
+  ':where([part="content"]) { display: block; overflow-wrap: anywhere; }',
+].join("\n");
+
+/**
+ * Layout of the listbox of a field with suggestions (Spec 014 ⑤, D-03), keywords only: the
+ * field is the anchor, the listbox a popover of the platform under it (the writing direction
+ * mirrors it), a column of rows that scrolls when the suggestions are more than its height holds;
+ * every row a line that never wraps, a pointer; the no-results text a block; the count a text for
+ * assistive technology alone.
+ */
+const suggestStructure: string = [
+  ':where([part="field"]) { anchor-name: --fm-field; }',
+  ':where([part="listbox"]) { position: fixed; inset: auto; margin: 0; box-sizing: border-box; position-anchor: --fm-field; position-area: block-end; position-try-fallbacks: flip-block; display: flex; flex-direction: column; align-items: stretch; overflow: auto; border-style: none; }',
+  ':where([part="listbox"]:not(:popover-open)) { display: none; }',
+  ':where([part="suggestion"]) { display: flex; align-items: center; box-sizing: border-box; cursor: pointer; white-space: nowrap; }',
+  ':where([part="no-results"]) { display: block; }',
+  HIDDEN_TEXT,
+].join("\n");
 
 /**
  * Layout of a skip link (Spec 014 ②, D-07), keywords and 0 only, on top of a control's: the link
@@ -1226,23 +1289,30 @@ export function stylesheetOf(skemo: Skemo, uzo?: Uzo): string {
                           ? lightStructure(skemo)
                           : isTabs(skemo)
                             ? tabsStructure
-                            : isField(skemo)
-                              ? fieldStructure(disables, isSelect(skemo), isTextarea(skemo))
-                              : isGroup(skemo)
-                                ? groupStructure(
-                                    disables,
-                                    skemo.parts["required-mark"] !== undefined,
-                                  )
-                                : isToggle(skemo)
-                                  ? toggleStructure(
+                            : isDisclosure(skemo)
+                              ? disclosureStructure
+                              : isField(skemo)
+                                ? `${fieldStructure(disables, isSelect(skemo), isTextarea(skemo))}${isSuggest(skemo) ? `\n${suggestStructure}` : ""}`
+                                : isGroup(skemo)
+                                  ? groupStructure(
                                       disables,
-                                      uzo?.layout.wrap !== undefined && uzo.layout.wrap !== "never",
-                                      skemo.slots.some(
-                                        (slot) => slot.default !== true && slot.text === true,
-                                      ),
                                       skemo.parts["required-mark"] !== undefined,
                                     )
-                                  : structure(uzo?.layout.wrap === "with-text", disables, bordered);
+                                  : isToggle(skemo)
+                                    ? toggleStructure(
+                                        disables,
+                                        uzo?.layout.wrap !== undefined &&
+                                          uzo.layout.wrap !== "never",
+                                        skemo.slots.some(
+                                          (slot) => slot.default !== true && slot.text === true,
+                                        ),
+                                        skemo.parts["required-mark"] !== undefined,
+                                      )
+                                    : structure(
+                                        uzo?.layout.wrap === "with-text",
+                                        disables,
+                                        bordered,
+                                      );
   // A skip link adds its place above the page to a control's structure (Spec 014 ②, D-07).
   const floating = isSkip(skemo) ? `\n${skipStructure}` : "";
   return `${base}${floating}\n${[...tokenRules, ...undrawn].join("\n")}\n`;
@@ -1309,8 +1379,10 @@ function selectorOf(
   if (isText(skemo) || isSeparator(skemo) || isParagraph(skemo)) {
     return `:where([part="control"]${data})`;
   }
+  if (isDisclosure(skemo))
+    return disclosurePartSelector(part, data, combination[STATE_KEY] ?? "rest");
   const state = STATE_SELECTORS[combination[STATE_KEY] ?? "rest"] ?? "";
-  if (isField(skemo)) return fieldPartSelector(part, property, data, state, isSelect(skemo));
+  if (isField(skemo)) return fieldPartSelector(part, property, data, state, isSelect(skemo), entry);
   if (isToggle(skemo)) return togglePartSelector(part, property, data, state);
   return partSelector(part, `[part="control"]${data}${state}`);
 }
@@ -1344,7 +1416,12 @@ export function elementNamesOf(
   return {
     ...namesOf(entry.ero),
     ero: entry.ero.name,
-    host: hostOf(entry.skemo.a11y.role, isMultiline(entry.skemo), isPopover(entry.skemo)),
+    host: hostOf(
+      entry.skemo.a11y.role,
+      isMultiline(entry.skemo),
+      isPopover(entry.skemo),
+      isSuggest(entry.skemo),
+    ),
     role: entry.skemo.a11y.role,
     marked: entry.skemo.parts["required-mark"] !== undefined,
     // Spec 011 ③: a live region turns its indicator and shows a dismiss butono where the Skemo

@@ -96,9 +96,9 @@ describe("check_usage of the headings", () => {
 });
 
 describe("list_eroj and the briefs", () => {
-  it("lists twenty-five Eroj; the briefs of titolo and teksto name their axes and duties", async () => {
+  it("lists twenty-seven Eroj; the briefs of titolo and teksto name their axes and duties", async () => {
     const listed = await output<Listed>(client, "list_eroj", {});
-    expect(listed.eroj).toHaveLength(25);
+    expect(listed.eroj).toHaveLength(27);
     const titolo = await output<Brief>(client, "get_ero", { name: "titolo", brief: true });
     expect(titolo.axes.map((axis) => axis.name)).toEqual(["level", "size"]);
     expect(titolo.required).toEqual({ props: ["level"], slots: ["label"] });

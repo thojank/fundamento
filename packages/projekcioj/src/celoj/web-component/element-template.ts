@@ -35,7 +35,9 @@ export type HostControl =
   | "paragraph"
   | "tooltip"
   | "popover"
-  | "menu";
+  | "menu"
+  | "disclosure"
+  | "suggest";
 
 export interface ElementNames {
   /** `fm-butono` */
@@ -97,8 +99,17 @@ export interface ElementNames {
  * several lines (Spec 011 ②, D-11: the Skemo has rows) is the platform's textarea; a dialog
  * (Spec 011 ②, D-12) the platform's dialog, opened modal.
  */
-export function hostOf(role: string, multiline = false, popover = false): HostControl {
+export function hostOf(
+  role: string,
+  multiline = false,
+  popover = false,
+  suggest = false,
+): HostControl {
   if (role === "link") return "a";
+  // Spec 014 ⑤ (plan ⑤ D-03): a disclosure is the platform's details and summary (role group);
+  // a combobox with a listbox part is the field of the kampo with a list of suggestions.
+  if (role === "group") return "disclosure";
+  if (role === "combobox" && suggest) return "suggest";
   // The overlays (Spec 014 ④, plan ④ D-05): a tooltip, a menu, and a popover — a non-modal dialog
   // with a trigger slot (the Celo tells the host apart from the modal dialog by that slot).
   if (role === "tooltip") return "tooltip";
@@ -205,12 +216,23 @@ function textsMarkup(slots: NonNullable<ElementNames["slots"]>): string {
  * native input, help and error below, each in its own part. The texts of the slots are the
  * description of the input (a11y.description), the error announced live.
  */
-function fieldMarkup(slots: NonNullable<ElementNames["slots"]>, textarea = false): string {
-  // A text area (Spec 011 ②, D-11): the platform's textarea in place of the input.
+function fieldMarkup(
+  slots: NonNullable<ElementNames["slots"]>,
+  textarea = false,
+  suggest = false,
+): string {
+  // A text area (Spec 011 ②, D-11): the platform's textarea in place of the input. A field with
+  // suggestions (Spec 014 ⑤, D-03): the input as a combobox over a listbox — a popover of the
+  // platform anchored to the field — with the count of suggestions in a live region.
   const native = textarea
     ? '<textarea part="control" id="control"></textarea>'
-    : '<input part="control" id="control">';
-  return `<div part="field"><label part="label" for="control"><slot></slot><span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span></label>${native}${textsMarkup(slots)}<span id="fm-texts" hidden></span></div>`;
+    : suggest
+      ? '<input part="control" id="control" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="listbox" autocomplete="off">'
+      : '<input part="control" id="control">';
+  const listbox = suggest
+    ? '<div part="listbox" role="listbox" id="listbox" popover="manual"></div><span part="count" role="status" aria-live="polite" class="fm-hidden"></span>'
+    : "";
+  return `<div part="field"><label part="label" for="control"><slot></slot><span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span></label>${native}${listbox}${textsMarkup(slots)}<span id="fm-texts" hidden></span></div>`;
 }
 
 /**
@@ -457,6 +479,18 @@ const MENU_ROW =
 /** A group line of a menu (Spec 014 ④): the slotted apartigilo in a row of its own. */
 const MENU_SEPARATOR = '<div part="separator" role="none"><slot></slot></div>';
 
+/**
+ * The shadow markup of a disclosure (Spec 014 ⑤, plan ⑤ D-03): the platform's details as the
+ * control, its summary holding the summary slot and the chevron (an ikono that turns with the
+ * state), the content below; a group is the details' name, so the platform opens one at a time.
+ */
+function disclosureMarkup(): string {
+  return '<details part="control"><summary part="summary"><slot name="summary"></slot><fm-ikono part="indicator" name="chevron-right"></fm-ikono></summary><div part="content"><slot></slot></div><span id="fm-texts" hidden></span></details>';
+}
+
+/** One row of the suggestions (Spec 014 ⑤): an option of the listbox, chosen with the keys or a click. */
+const SUGGESTION_ROW = '<div part="suggestion" role="option" aria-selected="false"></div>';
+
 /** The shadow markup of a separator (Spec 014 ②, plan ② D-06): the line, nothing else. */
 function separatorMarkup(): string {
   return '<div part="control"></div><slot hidden></slot><span id="fm-texts" hidden></span>';
@@ -499,6 +533,8 @@ function markup(
   if (host === "tabs") return tabsMarkup();
   if (host === "input") return fieldMarkup(slots);
   if (host === "textarea") return fieldMarkup(slots, true);
+  if (host === "suggest") return fieldMarkup(slots, false, true);
+  if (host === "disclosure") return disclosureMarkup();
   if (host === "dialog") return dialogMarkup();
   if (host === "toggle") return toggleMarkup(role, slots, marked);
   if (host === "group") return groupMarkup(slots, marked);
@@ -574,15 +610,21 @@ export function elementSource({
                                   ? "p"
                                   : host === "tooltip"
                                     ? "[part='control']"
-                                    : host === "popover"
-                                      ? "[role=dialog]"
-                                      : host === "menu"
-                                        ? "[role=menu]"
-                                        : "button";
+                                    : host === "disclosure"
+                                      ? "details"
+                                      : host === "suggest"
+                                        ? "input"
+                                        : host === "popover"
+                                          ? "[role=dialog]"
+                                          : host === "menu"
+                                            ? "[role=menu]"
+                                            : "button";
   const isToggle = host === "toggle";
   const isGroup = host === "group";
   const isSelect = host === "select";
-  const isFieldHost = host === "input" || host === "textarea";
+  const isSuggest = host === "suggest";
+  const isDisclosure = host === "disclosure";
+  const isFieldHost = host === "input" || host === "textarea" || isSuggest;
   // The platform element of a field: the generated code names it, so the types narrow (TS).
   const nativeField = host === "textarea" ? "HTMLTextAreaElement" : "HTMLInputElement";
   const isDialog = host === "dialog";
@@ -609,7 +651,8 @@ export function elementSource({
     isSeparator ||
     isHeading ||
     isParagraph ||
-    isOverlay;
+    isOverlay ||
+    isDisclosure;
   const listSlot = slots.find((slot) => slot.list === true)?.name ?? "";
   const namedSlots = slots
     .filter((slot) => slot.default !== true && slot.decorative !== true)
@@ -945,7 +988,7 @@ export function elementSource({
     ? `    if (control instanceof ${nativeField}) {
       const kind = String(this.propValue("kind") ?? "text");
 ${
-  host === "input"
+  host === "input" || isSuggest
     ? `      // A number is a text input with a numeric keyboard and a whole-number pattern (Spec 011 ①,
       // E8; GOV.UK: type=number changes its value with the wheel and the arrows); a date is the
       // platform's own dialog; a password hides what is typed. Every other kind is its type.
@@ -974,7 +1017,13 @@ ${
 `
 }      const value = this.propValue("value");
       const text = typeof value === "string" ? value : "";
-      if (control.value !== text) control.value = text;
+${
+  isSuggest
+    ? `      // The field shows the words of the chosen suggestion; the form carries its value.
+      const shown = this.#entries().find((entry) => entry.value === text)?.text ?? text;
+      if (control.value !== shown) control.value = shown;`
+    : `      if (control.value !== text) control.value = text;`
+}
       this.#internals.setFormValue(text);
       const placeholder = this.propValue("placeholder");
       if (typeof placeholder === "string" && placeholder !== "") control.setAttribute("placeholder", placeholder);
@@ -1022,6 +1071,14 @@ ${
     if (required && text === "") {
       flags = { valueMissing: true };
       if (own === "") message = TEXTS.required?.[this.#lingvo()] ?? TEXTS.required?.en ?? "";
+    }${
+      isSuggest
+        ? ` else if (text !== "" && this.propValue("allow-free") !== true && !this.#entries().some((entry) => entry.value === text || entry.text === text)) {
+      // Spec 014 ⑤: without allow-free the value is one of the suggestions.
+      flags = { badInput: true };
+      if (own === "") message = TEXTS["options-empty"]?.[this.#lingvo()] ?? TEXTS["options-empty"]?.en ?? "";
+    }`
+        : ""
     } else if (kind === "number" && text !== "" && !/^-?[0-9]+$/.test(text)) {
       flags = { patternMismatch: true };
       if (own === "") message = control.validationMessage;
@@ -2052,6 +2109,151 @@ ${
   }
 `
     : "";
+  // The ways of a field with suggestions (Spec 014 ⑤): its options from the light DOM, the rows
+  // of the listbox, the keys of the Skemo, the choice, the validity of a free text.
+  const suggestMethods = isSuggest
+    ? `
+  #suggestTyped = false;
+  #suggestActive = -1;
+
+  /** The options of the field: every child in the slot of the options, its value and its text. */
+  #entries(): { value: string; text: string }[] {
+    return [...this.children]
+      .filter((child) => child.getAttribute("slot") === "options")
+      .map((child) => {
+        const text = child.textContent?.trim() ?? "";
+        return { value: child.getAttribute("value") ?? text, text };
+      });
+  }
+
+  #listbox(): HTMLElement {
+    return this.shadowRoot?.querySelector('[part="listbox"]') as HTMLElement;
+  }
+
+  /** The options that match the typed text (the text, not the value, case-insensitive). */
+  #suggestMatches(): { value: string; text: string }[] {
+    const typed = (this.#control as HTMLInputElement).value.trim().toLowerCase();
+    const minimum = Number(this.propValue("min-chars") ?? 1);
+    if (typed.length < minimum) return [];
+    const chosen = this.#entries().find((entry) => entry.value === this.getAttribute("value"));
+    // The text of a chosen option shows no list of its own.
+    if (chosen !== undefined && chosen.text.toLowerCase() === typed && !this.#suggestTyped) return [];
+    return this.#entries().filter((entry) => entry.text.toLowerCase().includes(typed));
+  }
+
+  /** Writes the rows of the listbox from the matches and tells how many there are. */
+  #suggestRows(): { value: string; text: string }[] {
+    const listbox = this.#listbox();
+    const matches = this.#suggestMatches();
+    const rows = [...listbox.querySelectorAll('[part="suggestion"]')] as HTMLElement[];
+    while (rows.length > matches.length) rows.pop()?.remove();
+    while (rows.length < matches.length) {
+      listbox.insertAdjacentHTML("beforeend", \`${SUGGESTION_ROW}\`);
+      const row = listbox.lastElementChild;
+      if (row instanceof HTMLElement) rows.push(row);
+    }
+    const value = this.getAttribute("value");
+    matches.forEach((entry, index) => {
+      const row = rows[index];
+      if (row === undefined) return;
+      row.id = \`suggestion-\${index}\`;
+      row.dataset.value = entry.value;
+      if (row.textContent !== entry.text) row.textContent = entry.text;
+      row.setAttribute("aria-selected", String(entry.value === value));
+    });
+    const count = this.shadowRoot?.querySelector('[part="count"]');
+    const lingvo = this.#lingvo();
+    const none = TEXTS["options-empty"]?.[lingvo] ?? TEXTS["options-empty"]?.en ?? "";
+    const word = TEXTS["options-count"]?.[lingvo] ?? TEXTS["options-count"]?.en ?? "";
+    const heard = matches.length === 0 ? none : \`\${matches.length} \${word}\`;
+    if (count instanceof HTMLElement && count.textContent !== heard) count.textContent = heard;
+    let noResults = listbox.querySelector('[part="no-results"]');
+    if (matches.length === 0 && this.#suggestTyped && noResults === null) {
+      listbox.insertAdjacentHTML("beforeend", '<div part="no-results"></div>');
+      noResults = listbox.querySelector('[part="no-results"]');
+    }
+    if (noResults instanceof HTMLElement) {
+      noResults.textContent = none;
+      noResults.hidden = matches.length > 0 || !this.#suggestTyped;
+    }
+    if (this.#suggestActive >= matches.length) this.#suggestActive = -1;
+    this.#suggestMark();
+    return matches;
+  }
+
+  /** The active option is heard through aria-activedescendant on the input. */
+  #suggestMark(): void {
+    const rows = [...this.#listbox().querySelectorAll('[part="suggestion"]')] as HTMLElement[];
+    const active = rows[this.#suggestActive];
+    rows.forEach((row) => row.classList.toggle("fm-active", row === active));
+    if (active === undefined) this.#control.removeAttribute("aria-activedescendant");
+    else this.#control.setAttribute("aria-activedescendant", active.id);
+  }
+
+  #suggestShow(): void {
+    const matches = this.#suggestRows();
+    const listbox = this.#listbox();
+    const typed = (this.#control as HTMLInputElement).value.trim();
+    const minimum = Number(this.propValue("min-chars") ?? 1);
+    const show = typed.length >= minimum && (matches.length > 0 || this.#suggestTyped);
+    if (show && !listbox.matches(":popover-open")) listbox.showPopover();
+    if (!show && listbox.matches(":popover-open")) listbox.hidePopover();
+    this.#control.setAttribute("aria-expanded", String(show));
+    if (this.hasAttribute("expanded") !== show) this.toggleAttribute("expanded", show);
+  }
+
+  #suggestClose(): void {
+    const listbox = this.#listbox();
+    if (listbox.matches(":popover-open")) listbox.hidePopover();
+    this.#control.setAttribute("aria-expanded", "false");
+    if (this.hasAttribute("expanded")) this.removeAttribute("expanded");
+    this.#suggestActive = -1;
+    this.#suggestMark();
+  }
+
+  /** Takes a row as the value: the option's value in the attribute, its text in the field. */
+  #suggestChoose(row: HTMLElement): void {
+    const value = row.dataset.value ?? "";
+    const entry = this.#entries().find((candidate) => candidate.value === value);
+    this.#suggestTyped = false;
+    (this.#control as HTMLInputElement).value = entry?.text ?? value;
+    this.setAttribute("value", value);
+    this.#suggestClose();
+    this.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+
+  /** The keys of the Skemo: the arrows move the active option, Enter takes it, Escape closes. */
+  #suggestKey(event: KeyboardEvent): void {
+    if (!KEYS.includes(event.key)) return;
+    const listbox = this.#listbox();
+    const rows = [...listbox.querySelectorAll('[part="suggestion"]')] as HTMLElement[];
+    if (event.key === "Escape") {
+      if (listbox.matches(":popover-open")) {
+        event.preventDefault();
+        this.#suggestClose();
+      }
+      return;
+    }
+    if (event.key === "Enter") {
+      const active = rows[this.#suggestActive];
+      if (active !== undefined && listbox.matches(":popover-open")) {
+        event.preventDefault();
+        this.#suggestChoose(active);
+      }
+      return;
+    }
+    event.preventDefault();
+    if (!listbox.matches(":popover-open")) {
+      this.#suggestTyped = true;
+      this.#suggestShow();
+    }
+    if (rows.length === 0) return;
+    const step = event.key === "ArrowDown" ? 1 : -1;
+    this.#suggestActive = (this.#suggestActive + step + rows.length) % rows.length;
+    this.#suggestMark();
+  }
+`
+    : "";
   const tabsMethods = isTabs
     ? `
   /** Focus goes to the one tab stop: the selected tab, else the first. */
@@ -2333,6 +2535,73 @@ ${
     this.#overlaySync();
 `
     : "";
+  // A disclosure (Spec 014 ⑤, plan ⑤ D-03, G5): the platform's details toggles on a click or a
+  // key on its summary; the open attribute follows the platform's toggle event (and a group's
+  // closing of the others), the chevron turns with it.
+  const disclosureInit = isDisclosure
+    ? `    control.addEventListener("toggle", () => {
+      const open = (control as HTMLDetailsElement).open;
+      if (this.hasAttribute("open") !== open) this.toggleAttribute("open", open);
+      // The platform groups details by name within one tree; every disclosure lies in its own
+      // shadow tree, so the group closes the others itself (B-4).
+      const group = this.propValue("group");
+      if (!open || typeof group !== "string" || group === "") return;
+      const root = this.getRootNode();
+      if (!(root instanceof Document || root instanceof ShadowRoot)) return;
+      for (const other of root.querySelectorAll(\`${tag}[group="\${group}"]\`)) {
+        if (other !== this && other.hasAttribute("open")) other.removeAttribute("open");
+      }
+    });
+`
+    : "";
+  const disclosureRender = isDisclosure
+    ? `    const details = control as HTMLDetailsElement;
+    const open = this.propValue("open") === true;
+    if (details.open !== open) details.open = open;
+    const group = this.propValue("group");
+    if (typeof group === "string" && group !== "") details.setAttribute("name", group);
+    else details.removeAttribute("name");
+    const chevron = this.shadowRoot?.querySelector('[part="indicator"]');
+    const sign = open ? "chevron-down" : "chevron-right";
+    if (chevron instanceof HTMLElement && chevron.getAttribute("name") !== sign) chevron.setAttribute("name", sign);
+`
+    : "";
+  // A field with suggestions (Spec 014 ⑤, plan ⑤ D-03, G5): typing from min-chars on shows the
+  // matching options in the listbox (a popover of the platform anchored to the field) and tells
+  // the application (query); the arrows move the active option (aria-activedescendant), Enter
+  // takes it as the value, Escape closes; without allow-free a text that is no option is invalid.
+  const suggestInit = isSuggest
+    ? `    new MutationObserver(() => this.#render()).observe(this, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+      attributes: true,
+      attributeFilter: ["slot", "value"],
+    });
+    const input = control as HTMLInputElement;
+    input.addEventListener("input", () => {
+      this.#suggestTyped = true;
+      if (this.getAttribute("value") !== input.value) this.setAttribute("value", input.value);
+      this.dispatchEvent(new CustomEvent("query", { bubbles: true, detail: { query: input.value } }));
+      this.#suggestShow();
+    });
+    input.addEventListener("keydown", (event) => this.#suggestKey(event));
+    input.addEventListener("blur", () => this.#suggestClose());
+    this.#listbox().addEventListener("mousedown", (event) => event.preventDefault());
+    this.#listbox().addEventListener("click", (event) => {
+      const row = event.composedPath().find(
+        (node) => node instanceof HTMLElement && node.getAttribute("part") === "suggestion",
+      );
+      if (row instanceof HTMLElement) this.#suggestChoose(row);
+    });
+`
+    : "";
+  const suggestRender = isSuggest
+    ? `    this.#suggestRows();
+    if (this.propValue("expanded") === true && !this.#listbox().matches(":popover-open")) this.#suggestShow();
+    if (this.propValue("expanded") !== true && this.#listbox().matches(":popover-open")) this.#suggestClose();
+`
+    : "";
   // The skip link moves the focus to its target (G5): a landmark takes it once it may (tabindex
   // -1, written where the markup has none); the fragment of the link is the platform's.
   const skipInit = isSkip
@@ -2497,7 +2766,7 @@ ${autoField}${isFieldHost ? "  /** Whether a person touched the field or the for
     this.#label = label;
     this.#texts = texts;
     control.addEventListener("click", (event) => this.#activate(event));
-${toggleKeys}${groupInit}${selectInit}${dialogInit}${statusInit}${lightInit}${tabsInit}${tooltipInit}${popoverInit}${menuInit}${skipInit}    label.addEventListener("slotchange", () => this.#render());
+${toggleKeys}${groupInit}${selectInit}${dialogInit}${statusInit}${lightInit}${tabsInit}${tooltipInit}${popoverInit}${menuInit}${disclosureInit}${suggestInit}${skipInit}    label.addEventListener("slotchange", () => this.#render());
     for (const named of root.querySelectorAll("slot[name]")) {
       named.addEventListener("slotchange", () => this.#render());
     }
@@ -2631,7 +2900,7 @@ ${autoDisconnect}
     // \`invalid\` spoken as aria-invalid and set by a filled error slot (constraint of the Skemo);
     // disabled wins over readonly; help and error show only while they have text.
     const described: string[] = [];
-${inputRender}${toggleRender}${groupRender}${selectRender}${dialogRender}${statusRender}${meterRender}${lightRender}${tabsRender}${iconRender}${separatorRender}${headingRender}${paragraphRender}${tooltipRender}${popoverRender}${menuRender}${skipRender}${composedIconRender}    // The texts of the slots that describe the control (Spec 009, D-02; a checkbox, Spec 010 ②):
+${inputRender}${toggleRender}${groupRender}${selectRender}${dialogRender}${statusRender}${meterRender}${lightRender}${tabsRender}${iconRender}${separatorRender}${headingRender}${paragraphRender}${tooltipRender}${popoverRender}${menuRender}${disclosureRender}${suggestRender}${skipRender}${composedIconRender}    // The texts of the slots that describe the control (Spec 009, D-02; a checkbox, Spec 010 ②):
     // shown while they have text, and its description in that order.
     for (const source of DESCRIPTION) {
       const [kind, name = ""] = source.split(":");
@@ -2708,7 +2977,7 @@ ${
     : `    if (!(this.#control instanceof HTMLButtonElement)) return;
 ${toggleActivate}`
 }  }
-${groupMethods}${selectMethods}${inputMethods}${dialogMethods}${statusMethods}${slotTextMethod}${lightMethods}${autoMethods}${tabsMethods}${overlayMethods}${tooltipMethods}${menuMethods}
+${groupMethods}${selectMethods}${inputMethods}${dialogMethods}${statusMethods}${slotTextMethod}${lightMethods}${autoMethods}${tabsMethods}${overlayMethods}${tooltipMethods}${menuMethods}${suggestMethods}
 }
 
 /**

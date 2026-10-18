@@ -34,9 +34,9 @@ const suggest = (goal: string) => {
 };
 
 describe("menuo in the repo Modelo (section ④, G1, G2, G4)", () => {
-  it("lives in data/eroj/menuo/skemo.json, one of twenty-five Eroj", () => {
+  it("lives in data/eroj/menuo/skemo.json, one of twenty-seven Eroj", () => {
     expect(menuo?.file).toBe("modelo/data/eroj/menuo/skemo.json");
-    expect(modelo.eroj).toHaveLength(25);
+    expect(modelo.eroj).toHaveLength(27);
   });
 
   it("has label (optional, the Modelo's words stand in), placement (block-end) and open as props; the states of an entry; items (default) and trigger slots", () => {
@@ -198,6 +198,7 @@ describe("the Reguloj of the menuo (G8, E5)", () => {
       "elektilo",
       "langetaro",
       "menuo",
+      "kompletigilo",
     ]);
     expect(named("option-labels-distinct")?.statement).toContain("menuo");
     expect(named("spacing-owned-by-container")?.appliesTo?.eroj).toContain("menuo");

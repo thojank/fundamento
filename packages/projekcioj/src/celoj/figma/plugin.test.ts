@@ -329,9 +329,12 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
       ...["boundary", "slots", "content"].map(() => "dialogo"),
       ...["boundary", "slots", "content"].map(() => "elektilo"),
       ...["boundary", "slots", "content"].map(() => "elekto"),
+      // Spec 014 ⑤: the faldilo and the kompletigilo carry a Uzo like every set.
+      ...["boundary", "slots", "content"].map(() => "faldilo"),
       ...["boundary", "slots", "content"].map(() => "ikono"),
       ...["boundary", "slots", "content"].map(() => "insigno"),
       ...["boundary", "slots", "content"].map(() => "kampo"),
+      ...["boundary", "slots", "content"].map(() => "kompletigilo"),
       // Spec 014 ④: the konsileto, the menuo and the sxvebilo carry a Uzo like every set.
       ...["boundary", "slots", "content"].map(() => "konsileto"),
       // Spec 011 ⑤: the langetaro and the navigado carry a Uzo like every set.
@@ -384,9 +387,12 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
       ...["dialogo", "dialogo", "dialogo"],
       ...["elektilo", "elektilo", "elektilo"],
       ...["elekto", "elekto", "elekto"],
+      // Spec 014 ⑤: the faldilo and the kompletigilo close their three parts too.
+      ...["faldilo", "faldilo", "faldilo"],
       ...["ikono", "ikono", "ikono"],
       ...["insigno", "insigno", "insigno"],
       ...["kampo", "kampo", "kampo"],
+      ...["kompletigilo", "kompletigilo", "kompletigilo"],
       // Spec 014 ④: the overlays close their three parts too.
       ...["konsileto", "konsileto", "konsileto"],
       // Spec 011 ⑤: the langetaro and the navigado close their three parts too.
@@ -2672,12 +2678,16 @@ describe("every bound paint shows the plan's colour after the first and the seco
         { set: "elektilo", created: 15, updated: 0 },
         // Spec 010 ③: the elekto has size × state = 15 variants.
         { set: "elekto", created: 15, updated: 0 },
+        // Spec 014 ⑤: the faldilo has open × state = 6 variants.
+        { set: "faldilo", created: 6, updated: 0 },
         // Spec 014 ②: the ikono has name × size × intent = 225 variants in one state.
         { set: "ikono", created: 225, updated: 0 },
         // Spec 011 ③: the insigno has intent × size = 10 variants in one state.
         { set: "insigno", created: 10, updated: 0 },
         // Spec 009: the kampo has size × state = 18 variants.
         { set: "kampo", created: 18, updated: 0 },
+        // Spec 014 ⑤: the kompletigilo has size × expanded × state = 30 variants.
+        { set: "kompletigilo", created: 30, updated: 0 },
         // Spec 014 ④: the konsileto has placement = 4 variants in one state (an axis of its own).
         { set: "konsileto", created: 4, updated: 0 },
         // Spec 011 ⑤: the langetaro has state = 4 variants (active is the state of one tab, E7;

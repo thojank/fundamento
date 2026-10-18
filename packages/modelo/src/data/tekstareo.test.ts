@@ -52,9 +52,11 @@ describe("tekstareo in the repo Modelo (section ②)", () => {
       "dialogo",
       "elektilo",
       "elekto",
+      "faldilo",
       "ikono",
       "insigno",
       "kampo",
+      "kompletigilo",
       "konsileto",
       "langetaro",
       "ligilo",
@@ -271,6 +273,8 @@ describe("the Reguloj of the tekstareo (G6, E5)", () => {
       "konsileto",
       "sxvebilo",
       "menuo",
+      "faldilo",
+      "kompletigilo",
     ]);
   });
 

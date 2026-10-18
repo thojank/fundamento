@@ -38,9 +38,11 @@ describe("kampo in the repo Modelo (T004)", () => {
       "dialogo",
       "elektilo",
       "elekto",
+      "faldilo",
       "ikono",
       "insigno",
       "kampo",
+      "kompletigilo",
       "konsileto",
       "langetaro",
       "ligilo",
@@ -229,6 +231,8 @@ describe("the Uzo of the kampo (T004, A3)", () => {
       ["choose-many", "elektilo"],
       ["choose-few", "elekto"],
       ["toggle", "sxaltilo"],
+      // Spec 014 ⑤: suggestions while typing are the kompletigilo's.
+      ["suggestions", "kompletigilo"],
     ]);
     // Spec 011 ① (G5, E8): password and date are kinds now, their boundaries are gone; what stays
     // outside is showing a password, a decimal and a range of dates.
@@ -323,6 +327,9 @@ describe("the Reguloj of the kampo (T003, T004, A2, D-07)", () => {
           ...(name === "error-says-what-to-do" ? ["avizo"] : []),
           // Spec 014 ①: the help of the dialogo's reason field is one sentence too (E5).
           ...(name === "help-is-one-sentence" ? ["dialogo"] : []),
+          // Spec 014 ⑤: the kompletigilo is a field with suggestions; every field Regulo but
+          // placeholder-is-example is widened to it (its placeholder is a prompt, G8).
+          ...(name === "placeholder-is-example" ? [] : ["kompletigilo"]),
         ],
       });
       expect(regulo?.checkability).toBe("automatic");
@@ -367,6 +374,8 @@ describe("the Reguloj of the kampo (T003, T004, A2, D-07)", () => {
       "konsileto",
       "sxvebilo",
       "menuo",
+      "faldilo",
+      "kompletigilo",
     ]);
   });
 

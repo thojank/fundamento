@@ -35,6 +35,7 @@ import {
   isMultiline,
   isPopover,
   isSkip,
+  isSuggest,
   lightStylesheetOf,
   namesOf,
   stylesheetOf,
@@ -585,6 +586,26 @@ function guidelines(input: CeloInput, aspekto: string): GeneratedFile[] {
         `- Every set of actions on one object behind a single button is a \`<${componentName(entry.ero)}>\` whose entries name their actions; never a button per action in a row.`,
     )
     .join("\n");
+  // Spec 014 ⑤ (G7, plan ⑤ D-06): every secondary content opened on demand is the faldilo, every
+  // field with suggestions the kompletigilo; generated from the roles group with a summary slot
+  // and combobox with a listbox part.
+  const selectName = eroj.find(
+    (entry) => entry.skemo.a11y.role === "combobox" && !isSuggest(entry.skemo),
+  );
+  const disclosureLines = eroj
+    .filter((entry) => entry.skemo.a11y.role === "group" && entry.uzo !== undefined)
+    .map(
+      (entry) =>
+        `- Every secondary content a person opens on demand is a \`<${componentName(entry.ero)}>\` whose summary names what it hides; several with one \`group\` open one at a time.`,
+    )
+    .join("\n");
+  const suggestLines = eroj
+    .filter((entry) => isSuggest(entry.skemo) && entry.uzo !== undefined)
+    .map(
+      (entry) =>
+        `- Every field whose values a person types and picks from suggestions is a \`<${componentName(entry.ero)}>\`${selectName === undefined ? "" : `; a fixed short list is an \`<${componentName(selectName.ero)}>\``}.`,
+    )
+    .join("\n");
   const skipLines = eroj
     .filter((entry) => isSkip(entry.skemo) && entry.uzo !== undefined)
     .map(
@@ -628,6 +649,8 @@ ${paragraphLines}
 ${tooltipLines}
 ${popoverLines}
 ${menuLines}
+${disclosureLines}
+${suggestLines}
 
 Where to look: \`setup.md\` for the imports, \`foundations/\` for the tokens, \`components/\` for
 each component.

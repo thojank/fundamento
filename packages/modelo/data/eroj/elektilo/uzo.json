@@ -31,17 +31,20 @@
             "autocomplete",
             "combobox",
             "typeahead",
-            "searchable"
+            "searchable",
+            "suggestions"
           ],
           "de": [
             "autovervollständigung",
             "combobox",
             "durchsuchbar",
-            "suchliste"
+            "suchliste",
+            "vorschläge",
+            "typeahead"
           ]
         },
-        "ero": null,
-        "kialo": "A list one types into to narrow it is a combobox with a search, because typing and choosing are two behaviours in one field; Fundamento has no such Ero yet."
+        "ero": "kompletigilo",
+        "kialo": "A combobox with a search in its list is the kompletigilo, because a person who knows a part of the word finds the value faster while typing; a fixed short list stays the select's (Spec 014 ⑤ closes the alternative search-in-list)."
       },
       {
         "goal": "multiple",

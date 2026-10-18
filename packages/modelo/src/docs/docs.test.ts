@@ -1761,3 +1761,30 @@ describe("Spec 014 ④ documentation (specs/014-eroj-runde-3)", () => {
     );
   });
 });
+
+// Spec 014 ⑤ (Briefing 2026-10-17): plan ⑤ carries the decisions, the Arkitekturo coverage,
+// deviations, findings and open points; tasks ⑤ the red hashes; the Vojmapo names ⑤.
+describe("Spec 014 ⑤ documentation (specs/014-eroj-runde-3)", () => {
+  const section = (text: string) => text.slice(text.indexOf("## ⑤ Aufklappen"));
+
+  it("plan ⑤ carries the decisions, the coverage, deviations, findings and open points; tasks ⑤ the red hashes", () => {
+    const plan = section(read("specs/014-eroj-runde-3/plan.md"));
+    for (const heading of [
+      "### Zusammenfassung",
+      "### Entwurfsentscheidungen",
+      "#### D-01",
+      "### Arkitekturo-Abdeckung",
+      "### Abweichungen von der Spec",
+      "### Befunde / Mankoj",
+      "### Offen (für den Maintainer)",
+    ]) {
+      expect(plan, heading).toContain(heading);
+    }
+    for (const ero of ["faldilo", "kompletigilo"]) expect(plan).toContain(`\`${ero}\``);
+    expect(plan).toContain("aria-activedescendant");
+    const tasks = section(read("specs/014-eroj-runde-3/tasks.md"));
+    expect(tasks).toContain("### Messungen");
+    expect(tasks).toMatch(/rot `[0-9a-f]{7}`/);
+    expect(read("docs/vojmapo.md")).toContain("Spec 014 ⑤");
+  });
+});

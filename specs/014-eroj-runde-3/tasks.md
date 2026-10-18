@@ -133,4 +133,31 @@
 
 ## ⑤ Aufklappen
 
-*(folgt)*
+**Branch:** `261017-spec-014-aufklappen-e3bf97` (gestapelt auf ④) · Aufgaben ⑤ zählen ab T1101.
+
+### A – Rot zuerst
+- [x] **T1101 Tests** Daten-Pins `data/faldilo.test.ts`, `data/kompletigilo.test.ts`, Eroj 25 → 27 in allen Pins (Export-Satz „twenty-seven“, Listen, Goals, Ontologio, Kit-Dateien 45, Headline-Sets, T029, E5-Tabellen der Feld-Reguloj), Projekcioj (`web-component.test.ts`, `figma.test.ts`, `plugin.test.ts`, `datumoj.test.ts`, `make-kit.test.ts`), Browser-Specs (`faldilo.spec.ts`, `kompletigilo.spec.ts`, `alirebleco.check.ts`, `vitrino.check.ts`), React-Typen, MCP-Dialoge `e2e/s014-aufklappen.test.ts`, Doku-Test ⑤, zwei Fehlerfixtures. Rot in `7ab25be` (Modelo 101 Tests in 31 Dateien, Projekcioj 18 in 6 Dateien, MCP 13 in 14 Dateien; Browser-Specs im Lauf beobachtet).
+
+### B – Grün
+- [x] **T1102 `faldilo`** Skemo, Uzo, Regulo `disclosure-label-names-content` (`reg_01M56AF0RKC0BBAYXNJTZDNSSQ`) mit vier Jugxoj `jug_01M56AF14J0K06MYMCFKZ9SHVF`, `…14KZXWHBMX70X7NQVW6`, `…14MHQPZA0KWA2GFF86Y`, `…86Z`, Ontologio `Faldilo`, Enforcer; `langetaro` schickt `disclose`, `apartigilo` und `ikono` komponieren (D-01).
+- [x] **T1103 `kompletigilo`** Skemo (Feld des `elektilo` ohne Chevron, `listbox`/`suggestion`/`no-results`, `a11y.texts options-empty`/`options-count`), Uzo, Ontologio `Kompletigilo`; neun Reguloj ausgeweitet; `kampo.suggestions`, `elektilo.search-in-list` geschlossen; KontrastParo `kpa_01M56ATH9Z3R049ABYP6RFAW5N` (D-02).
+- [x] **T1104 Modelo-Code** `skemo-a11y-invalid` nimmt `<slot>-count`, Zahlwörter bis siebenundzwanzig, Vortaro-Lint (`anchor-name`, `list-style`).
+- [x] **T1105 Web** Hosts `disclosure` und `suggest` (Element-Template, Strukturen, Selektoren, `max-block-size`/`max-inline-size` der Listbox) (D-03).
+- [x] **T1106 Figma** Bauform `disclosure` (`drawDisclosure`, `iconsOf` Chevron je `open`, `labelPartOf` summary, Vorgabewort), Listbox im Feld-Pfad (`component.entry` für Felder mit Listbox) (D-04).
+- [x] **T1107 Vitrino, Make-Kit, React** Slot-Wort `summary`, zwei Sätze, React-Typen (D-05, D-06).
+
+### C – Abschluss
+- [x] **T1108 Doku** plan ⑤, tasks ⑤, Vojmapo Zeile 4, README.
+- [x] **T1109 Messungen** unten; Bericht im PR.
+
+### Messungen
+
+| Was | Wert |
+|---|---|
+| Commits ⑤ | rot `a5dc6fe`, grün `f34af6a` (nach dem Rebase auf ④ `53447a8`; davor `47a82e9`/`f057270`, ursprünglich `7ab25be`/`c73161e`); nach dem Rebase auf ② `6fb4ab3` (F-4) am 2026-10-18; nach dem Rebase auf ② `e487388` (F-4) am 2026-10-18; nach dem Rebase auf `main` `45391a8` (#73 gemergt) am 2026-10-18 |
+| `brief` | faldilo, kompletigilo ≤ 750 (Daten-Tests und MCP e2e) |
+| Parität | `check:parity` 27 Eroj, 0 Differenzen, 285 Freigaben |
+| `check:regularo` | 58 Reguloj, 184 Jugxoj, 27 Uzoj, 0 Warnungen (keine neue `goal-keyword-shared`) |
+| Modelo-Checks | vortaro-lint, mankoj (9), alirebleco (0 Fehler), ikonaro, clean-room: 0 Fehler |
+| Tests lokal | Modelo 3450, Projekcioj 656, MCP 284; alle 210 Browser-Specs in Chromium grün (faldilo 6× wiederholt unter Last, B-4); Alirebleco-Check 465 (drei Browser, 6,3 min), Vitrino-Check 26 grün |
+| CI | Lauf: Nummer und Dauer in der Zeile nach dem Lauf |

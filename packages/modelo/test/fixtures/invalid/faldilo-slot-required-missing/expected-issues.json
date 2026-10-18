@@ -1,0 +1,9 @@
+{
+  "description": "Spec 014 ⑤ G10 (Spec 009 A7, E2): the accessible name of the faldilo comes from the slot label alone, but the Uzo does not mark the slot required. A disclosure without a summary hides without a name.",
+  "issues": [
+    {
+      "rule": "uzo-slot-required-missing",
+      "path": "data/eroj/faldilo/uzo.json#/uzo/slots/label"
+    }
+  ]
+}

@@ -52,9 +52,11 @@ describe("Make Kit sources (T018)", () => {
       "guidelines/components/dialogo.md",
       "guidelines/components/elektilo.md",
       "guidelines/components/elekto.md",
+      "guidelines/components/faldilo.md",
       "guidelines/components/ikono.md",
       "guidelines/components/insigno.md",
       "guidelines/components/kampo.md",
+      "guidelines/components/kompletigilo.md",
       "guidelines/components/konsileto.md",
       "guidelines/components/langetaro.md",
       "guidelines/components/ligilo.md",
@@ -723,4 +725,21 @@ describe("Make Kit and the Overlays (Spec 014 ④)", () => {
       expect(kit(aspekto, "guidelines/components/menuo.md")).toContain("`placement`");
     },
   );
+});
+
+// Spec 014 ⑤ (plan ⑤ D-06): Make hides secondary content behind the faldilo and builds every
+// field with suggestions from the kompletigilo — two sentences, from the roles group with a
+// summary slot and combobox with a listbox part.
+describe("Make Kit and the Aufklappen (Spec 014 ⑤)", () => {
+  it.each(ASPEKTOJ)("%s: the guidelines name the faldilo and the kompletigilo", (aspekto) => {
+    const guidelines = kit(aspekto, "guidelines/Guidelines.md");
+    expect(guidelines).toContain(
+      "- Every secondary content a person opens on demand is a `<Faldilo>` whose summary names what it hides; several with one `group` open one at a time.",
+    );
+    expect(guidelines).toContain(
+      "- Every field whose values a person types and picks from suggestions is a `<Kompletigilo>`; a fixed short list is an `<Elektilo>`.",
+    );
+    expect(kit(aspekto, "guidelines/components/faldilo.md")).toContain("`group`");
+    expect(kit(aspekto, "guidelines/components/kompletigilo.md")).toContain("`allow-free`");
+  });
 });

@@ -83,6 +83,10 @@ export const STRUCTURAL_PROPERTIES: readonly string[] = [
   "position-anchor",
   "position-try-fallbacks",
   "inset",
+  // Spec 014 ⑤ (plan ⑤ D-03): the field of a combobox names itself as the anchor of its listbox
+  // (anchor-name, a dashed name); whether the platform's marker of a summary shows is structure.
+  "anchor-name",
+  "list-style",
 ];
 
 /** Design properties: their value must come from a token (prefix match on the property name). */

@@ -1,0 +1,143 @@
+{
+  "$schema": "../../../schema/modelo.schema.json#/$defs/UzoFile",
+  "uzo": {
+    "id": "uzo_01M56AF0CC8T1K9SEC8ZDVYXC4",
+    "ero": "ero_01M56AEZKYD8K4R2SEZFS15QSM",
+    "skemo": "ske_01M56AF004GZ2N13Y6C2K29HDX",
+    "purpose": "Hides secondary content behind a label the person can open; several share a group when only one should be open.",
+    "instead": [
+      {
+        "goal": "switch-view",
+        "keywords": {
+          "en": [
+            "tabs",
+            "tabbar"
+          ],
+          "de": [
+            "reiterleiste",
+            "tableiste"
+          ]
+        },
+        "ero": "langetaro",
+        "kialo": "Views of the same thing that a person switches between are tabs, because one of them is always shown and the others wait beside it; a disclosure hides its content until it is opened."
+      },
+      {
+        "goal": "required-info",
+        "keywords": {
+          "en": [
+            "mandatory",
+            "mustread"
+          ],
+          "de": [
+            "pflichtlektüre",
+            "unverzichtbar"
+          ]
+        },
+        "ero": "teksto",
+        "kialo": "What everyone has to read is not hidden, because a closed disclosure is skipped; it stands as running text on the page."
+      }
+    ],
+    "boundary": [
+      {
+        "case": "nested-disclosure",
+        "action": "ask-human",
+        "keywords": {
+          "en": [
+            "subsection",
+            "nestedaccordion"
+          ],
+          "de": [
+            "unterabschnitt",
+            "akkordeonebene"
+          ]
+        },
+        "kialo": "A disclosure inside a disclosure hides content two levels deep, because a person has to open twice to find it; a person decides whether the inner level is a section of the page instead."
+      }
+    ],
+    "composes": {
+      "containers": [
+        {
+          "name": "page-section",
+          "kialo": "A disclosure stands in the flow of a section, because its content belongs there once it is opened."
+        }
+      ],
+      "with": [
+        {
+          "ero": "apartigilo",
+          "kialo": "Disclosures of one group are separated by a line, because a line says where one entry ends and the next begins."
+        },
+        {
+          "ero": "ikono",
+          "kialo": "The summary shows a chevron that turns with the state, because the sign says that there is more and whether it is shown."
+        },
+        {
+          "ero": "teksto",
+          "kialo": "The content of a disclosure is running text in its roles, because what it hides is read once opened."
+        }
+      ],
+      "never": [],
+      "spacing": {
+        "owner": "container",
+        "regulo": "spacing-owned-by-container"
+      }
+    },
+    "slots": {
+      "summary": {
+        "accepts": [
+          "text"
+        ],
+        "max": 1,
+        "required": true,
+        "nesting": 0
+      },
+      "content": {
+        "accepts": [
+          "teksto",
+          "titolo",
+          "kampo",
+          "tekstareo",
+          "elektilo",
+          "elekto",
+          "markobutono",
+          "sxaltilo",
+          "butono",
+          "ligilo",
+          "tabelo",
+          "atributlisto"
+        ],
+        "required": true,
+        "nesting": 1
+      }
+    },
+    "layout": {
+      "size": "container",
+      "wrap": "allowed"
+    },
+    "content": [
+      {
+        "regulo": "disclosure-label-names-content",
+        "fixed": true,
+        "of": "slot:summary",
+        "check": {
+          "kind": "not-words",
+          "words": {
+            "de": [
+              "mehr",
+              "details",
+              "weiteres",
+              "info",
+              "hier"
+            ],
+            "en": [
+              "more",
+              "details",
+              "info",
+              "expand",
+              "here"
+            ]
+          }
+        }
+      }
+    ]
+  }
+}
