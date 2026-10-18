@@ -55,6 +55,7 @@ describe("elektilo in the repo Modelo (G1, G2, section 4)", () => {
       "alsxutilo",
       "apartigilo",
       "atributlisto",
+      "avataro",
       "avizo",
       "butono",
       "dialogo",
@@ -500,6 +501,7 @@ describe("the Reguloj of the elektilo (G6, E5)", () => {
       "spuro",
       "alsxutilo",
       "karto",
+      "avataro",
     ]);
   });
 

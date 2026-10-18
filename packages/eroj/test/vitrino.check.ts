@@ -681,3 +681,26 @@ test("fm-karto is upgraded in its section, three articles named by their heading
   await expect(section.getByRole("button", { name: "Teilen" }).first()).toBeFocused();
   expect(await axeViolations(page, "#fm-vitrino-karto")).toEqual([]);
 });
+
+// Spec 015 ③ (plan ③ D-10): the section of the avataro — every size with the picture, the
+// initials without one and the initials where the picture does not load; the decorative one is
+// not heard; axe without a finding.
+test("fm-avataro is upgraded in its section, the picture loaded, the initials where it is missing or broken, axe-clean", async ({
+  page,
+}) => {
+  await open(page);
+  const section = page.locator("#fm-vitrino-avataro");
+  await expect(section.getByRole("img", { name: "Erika Mustermann" })).toHaveCount(9);
+  const shown = () =>
+    section.locator("fm-avataro").evaluateAll((elements) =>
+      elements.map((element) => {
+        const image = element.shadowRoot?.querySelector('[part="image"]') as HTMLElement;
+        const initials = element.shadowRoot?.querySelector('[part="initials"]') as HTMLElement;
+        return `${image.hidden ? "" : "image"}${initials.hidden ? "" : initials.textContent}`;
+      }),
+    );
+  await expect
+    .poll(shown)
+    .toEqual(["image", "EM", "EM", "EM", "image", "EM", "EM", "EM", "image", "EM", "EM", "EM"]);
+  expect(await axeViolations(page, "#fm-vitrino-avataro")).toEqual([]);
+});

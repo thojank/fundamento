@@ -28,6 +28,7 @@ describe("sxaltilo in the repo Modelo (G1, G2, section 1)", () => {
       "alsxutilo",
       "apartigilo",
       "atributlisto",
+      "avataro",
       "avizo",
       "butono",
       "dialogo",
@@ -293,6 +294,7 @@ describe("the Reguloj of the sxaltilo (G6, E5, D-14)", () => {
       "spuro",
       "alsxutilo",
       "karto",
+      "avataro",
     ]);
   });
 

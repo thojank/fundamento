@@ -160,11 +160,11 @@ describe("the Uzo of the karto (section ③, G2)", () => {
     expect(uzo?.boundary.find((entry) => entry.case === "card-grid")?.kialo).toContain("Sxablono");
   });
 
-  it("requires the heading; the content takes text and teksto, the meta a badge, the actions at most two", () => {
+  it("requires the heading; the content takes text and teksto, the meta a badge or an avatar (Spec 015 ③ avataro), the actions at most two", () => {
     expect(uzo?.slots).toEqual({
       heading: { accepts: ["text"], required: true, max: 1, nesting: 0 },
       content: { accepts: ["text", "teksto"], nesting: 0 },
-      meta: { accepts: ["insigno"], nesting: 0 },
+      meta: { accepts: ["insigno", "avataro"], nesting: 0 },
       actions: { accepts: ["butono", "ligilo"], max: 2, nesting: 0 },
     });
   });
@@ -178,7 +178,7 @@ describe("the Uzo of the karto (section ③, G2)", () => {
     expect(uzo?.layout["columns-from"]).toBe(eroNamed("atributlisto")?.uzo?.layout["columns-from"]);
   });
 
-  it("composes in a page section and a dialog, with titolo, teksto, insigno, butono and ligilo", () => {
+  it("composes in a page section and a dialog, with titolo, teksto, insigno, avataro, butono and ligilo", () => {
     expect(uzo?.composes.containers.map((container) => container.name)).toEqual([
       "page-section",
       "dialog",
@@ -187,6 +187,7 @@ describe("the Uzo of the karto (section ③, G2)", () => {
       "titolo",
       "teksto",
       "insigno",
+      "avataro",
       "butono",
       "ligilo",
     ]);

@@ -34,6 +34,7 @@ describe("kampo in the repo Modelo (T004)", () => {
       "alsxutilo",
       "apartigilo",
       "atributlisto",
+      "avataro",
       "avizo",
       "butono",
       "dialogo",
@@ -388,6 +389,7 @@ describe("the Reguloj of the kampo (T003, T004, A2, D-07)", () => {
       "spuro",
       "alsxutilo",
       "karto",
+      "avataro",
     ]);
   });
 

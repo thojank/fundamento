@@ -324,6 +324,8 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
       ...["boundary", "slots", "content"].map(() => "apartigilo"),
       // Spec 011 ④: the atributlisto, the mezurilo and the tabelo carry a Uzo like every set.
       ...["boundary", "slots", "content"].map(() => "atributlisto"),
+      // Spec 015 ③: the avataro carries a Uzo like every set.
+      ...["boundary", "slots", "content"].map(() => "avataro"),
       // Spec 011 ③: the avizo, the insigno and the plenstato carry a Uzo like every set.
       ...["boundary", "slots", "content"].map(() => "avizo"),
       ...["boundary", "slots", "content"].map(() => "butono"),
@@ -388,6 +390,8 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
       ...["apartigilo", "apartigilo", "apartigilo"],
       // Spec 011 ④: the atributlisto, the mezurilo and the tabelo close their three parts too.
       ...["atributlisto", "atributlisto", "atributlisto"],
+      // Spec 015 ③: the avataro closes its three parts too.
+      ...["avataro", "avataro", "avataro"],
       // Spec 011 ③: the avizo, the insigno and the plenstato close their three parts too.
       ...["avizo", "avizo", "avizo"],
       ...["butono", "butono", "butono"],
@@ -637,8 +641,9 @@ describe("the full plan against the strict double: fresh and into the file of be
     "spuro",
     // Spec 015 ②: and the file input.
     "alsxutilo",
-    // Spec 015 ③: and the card.
+    // Spec 015 ③: and the card and the avatar.
     "karto",
+    "avataro",
   ]);
   const before2 = structuredClone(repo.input);
   before2.modelo.eroj = before2.modelo.eroj.filter((entry) => !BEFORE_2.has(entry.ero.name));
@@ -2440,8 +2445,8 @@ describe("a failed run leaves everything readable in the console (F21)", () => {
         createComponent: () => {
           // Spec 011 ④: the atributlisto's three (layout auto since Spec 014 ①) and the avizo's
           // four variants are made first; the run fails in the butono. Spec 015 ②: the
-          // alsxutilo's twelve before them.
-          if (++made === 12 + 3 + 4 + 40)
+          // alsxutilo's twelve before them; Spec 015 ③: and the avataro's three.
+          if (++made === 12 + 3 + 3 + 4 + 40)
             throw new Error("in set_layoutMode: Cannot delete occupied row/column.");
           return create();
         },
@@ -2693,6 +2698,8 @@ describe("every bound paint shows the plan's colour after the first and the seco
         { set: "apartigilo", created: 2, updated: 0 },
         // Spec 011 ④: the atributlisto has layout = 3 variants in one state (auto since Spec 014 ①).
         { set: "atributlisto", created: 3, updated: 0 },
+        // Spec 015 ③: the avataro has size = 3 variants in one state.
+        { set: "avataro", created: 3, updated: 0 },
         // Spec 011 ③: the avizo has intent = 4 variants in one state (dismissible is no axis).
         { set: "avizo", created: 4, updated: 0 },
         { set: "butono", created: 72, updated: 0 },
@@ -3694,10 +3701,13 @@ describe("every set lies in the frame Eroj in the section Fundamento (F-1, F-2, 
             : // Spec 015 ②: the upload with two files beside its set.
               name === "alsxutilo"
               ? [name, "alsxutilo – mit zwei Dateien"]
-              : // Spec 015 ③: the card without its image beside its set.
+              : // Spec 015 ③: the card without its image beside its set, the avatar with its
+                // image beside its.
                 name === "karto"
                 ? [name, "karto – ohne Bild"]
-                : [name],
+                : name === "avataro"
+                  ? [name, "avataro – mit Bild"]
+                  : [name],
   );
   const layout = repoPlan.section;
   const inLayout = names.map(() => ({ frame: FRAME, action: "in-layout" }));
@@ -6808,5 +6818,76 @@ describe("the plugin draws the karto (Spec 015 ③)", () => {
     expect(descendant(example, "surface")?.properties.layoutMode).toBe("VERTICAL");
     expect(descendant(example, "media")?.properties.visible).toBe(false);
     expect(descendant(example, "heading")?.properties.characters).toBe("Überschrift");
+  });
+});
+
+// Spec 015 ③ (plan ③ D-11): the plugin draws the avataro — every variant the box (a square of
+// box.size) with the initials (a circle: fill, radius, the label property „EM" in its colour and
+// role) and the image over it (a circle: radius, clipping, the silhouette on the stand-in ground),
+// shown by the BOOLEAN property image, hidden by default; the example „mit Bild" after the set.
+describe("the plugin draws the avataro (Spec 015 ③)", () => {
+  const bound = (node: DoubleNode | undefined, field: string) => node?.boundVariables[field]?.name;
+  const paintOf = (node: DoubleNode | undefined) =>
+    (node?.properties.fills as { boundVariables?: { color?: { name: string } } }[] | undefined)?.[0]
+      ?.boundVariables?.color?.name;
+  type Definitions = Record<string, { type: string; defaultValue: string | boolean }>;
+
+  it("three sizes: the box, the initials circle with „EM“, the image circle with the silhouette; the image toggle; the example „mit Bild“ after the set", async () => {
+    const double = modelDouble();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    const set = pageNodes(double).find((node) => node.name === "avataro");
+    expect(set?.children.map((child) => child.name)).toEqual([
+      "size=small, state=rest",
+      "size=medium, state=rest",
+      "size=large, state=rest",
+    ]);
+    const definitions = (set?.properties.componentPropertyDefinitions ?? {}) as Definitions;
+    const image = Object.keys(definitions).find((key) => key.startsWith("image#"));
+    expect(definitions[image ?? ""]).toEqual({ type: "BOOLEAN", defaultValue: false });
+    const sizes: Record<string, string> = {
+      small: "size/icon/medium",
+      medium: "size/icon/large",
+      large: "size/control/large",
+    };
+    for (const variant of set?.children ?? []) {
+      const size = sizes[variant.name.slice("size=".length, variant.name.indexOf(","))];
+      const box = descendant(variant, "control");
+      expect(box?.children.map((child) => child.name)).toEqual(["initials", "image"]);
+      for (const node of [box, descendant(box, "initials"), descendant(box, "image")]) {
+        expect(bound(node, "width"), variant.name).toBe(size);
+        expect(bound(node, "height"), variant.name).toBe(size);
+      }
+      const initials = descendant(box, "initials");
+      expect(paintOf(initials)).toBe("color/background/sunken");
+      expect(bound(initials, "cornerRadius")).toBe("radius/full");
+      const text = descendant(initials, "initials-text");
+      expect(text?.properties.characters).toBe("EM");
+      expect(text?.properties.componentPropertyReferences).toEqual({
+        characters: expect.stringMatching(/^label#/),
+      });
+      expect(paintOf(text)).toBe("color/text/subtle");
+      expect(bound(text, "fontSize")).toBe(
+        variant.name.startsWith("size=large")
+          ? "typography/label/1/font-size"
+          : "typography/label/2/font-size",
+      );
+      const picture = descendant(box, "image");
+      expect(bound(picture, "cornerRadius")).toBe("radius/full");
+      expect(picture?.properties.clipsContent).toBe(true);
+      expect(paintOf(picture)).toBe("color/background/sunken");
+      expect(picture?.properties.visible).toBe(false);
+      expect(picture?.properties.componentPropertyReferences).toEqual({ visible: image });
+      expect(paintOf(descendant(descendant(picture, "picture"), "mark"))).toBe("color/text/subtle");
+    }
+    const frame = pageNodes(double).find(
+      (node) => node.type === "FRAME" && node.getSharedPluginData("fundamento", "frame") !== "",
+    );
+    const names = frame?.children.map((child) => child.name) ?? [];
+    const at = names.indexOf("avataro");
+    expect(names.slice(at, at + 2)).toEqual(["avataro", "avataro – mit Bild"]);
+    const example = frame?.children.find((child) => child.name === "avataro – mit Bild");
+    expect(bound(descendant(example, "control"), "width")).toBe("size/icon/large");
+    expect(descendant(example, "image")?.properties.visible).toBe(true);
+    expect(descendant(example, "initials-text")?.properties.characters).toBe("EM");
   });
 });

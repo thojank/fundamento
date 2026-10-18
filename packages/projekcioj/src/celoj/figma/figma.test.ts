@@ -9,6 +9,7 @@ import { baseResolution, defaultModeloSource, projectModeloSource } from "@funda
 import { describe, expect, it } from "vitest";
 import { celoInputOf } from "../../build.js";
 import {
+  VITRINO_AVATAR,
   VITRINO_CARD,
   VITRINO_LIST_ENTRIES,
   VITRINO_MEDIA_TEXT,
@@ -772,6 +773,8 @@ describe("Figma plan for the ligilo (Spec 008 T017)", () => {
       "apartigilo",
       // Spec 011 ④: the atributlisto, the mezurilo and the tabelo, in the Ero order like every set.
       "atributlisto",
+      // Spec 015 ③: the avataro, in the Ero order like every set.
+      "avataro",
       // Spec 011 ③: the avizo, the insigno and the plenstato, in the Ero order like every set.
       "avizo",
       "butono",
@@ -981,6 +984,8 @@ describe("the label default of a set follows its a11y role (M-3)", () => {
       // Spec 011 ④ (plan ④ D-14): a key-value list (role list) names what it states (for the
       // maintainer to confirm).
       atributlisto: "Angaben",
+      // Spec 015 ③: an avatar's label property writes its initials, the Vitrino's (to confirm).
+      avataro: "EM",
       // Spec 011 ③ (plan ③ D-14): a notice (role status) names its message (for the maintainer
       // to confirm).
       avizo: "Meldung",
@@ -3321,5 +3326,103 @@ describe("the Figma plan draws the karto (Spec 015 ③)", () => {
       "box.inline-padding@state=rest": "8px",
       "box.gap@state=rest": "4px",
     });
+  });
+});
+
+// Spec 015 ③ (plan ③ D-11): the avataro in Figma — an avatar: the role img of the ikono, told
+// apart by its initials; one variant per size (the Skemo's own axis), the initials the label
+// property with the Vitrino's word, the image a stand-in picture (the Vitrino's silhouette) the
+// BOOLEAN property image shows over the initials, and the example „mit Bild" beside the set. Every
+// colour and measure of the avataro is drawn; nothing of the stand-in is in its inventory.
+describe("the Figma plan draws the avataro (Spec 015 ③)", () => {
+  const set = plan.components.find((component) => component.set === "avataro");
+
+  it("an avatar of size in one state: the initials the label, the box by size, the image a toggle, the example „mit Bild“; the ikono stays an icon", () => {
+    expect(structureOf("img", ["box", "initials", "image"])).toBe("avatar");
+    expect(structureOf("img", ["box", "glyph"])).toBe("icon");
+    const ikono = plan.components.find((component) => component.set === "ikono");
+    expect(ikono?.structure).toBe("icon");
+    expect(ikono?.extraAxes).toEqual(["name"]);
+    expect(set?.structure).toBe("avatar");
+    expect(set?.extraAxes).toBeUndefined();
+    expect(set?.variants.map((variant) => variant.props)).toEqual([
+      { size: "small", state: "rest" },
+      { size: "medium", state: "rest" },
+      { size: "large", state: "rest" },
+    ]);
+    expect(set?.grid).toMatchObject({ rows: 3, columns: 1 });
+    expect(set?.properties).toEqual({
+      name: "TEXT",
+      picture: "TEXT",
+      size: ["small", "medium", "large"],
+      decorative: "BOOLEAN",
+      state: ["rest"],
+    });
+    expect(set?.label).toEqual({ property: "label", defaultValue: VITRINO_AVATAR.initials });
+    expect(set?.toggles).toEqual([{ property: "image", part: "image", defaultValue: false }]);
+    expect(set?.examples).toEqual([
+      {
+        name: "avataro – mit Bild",
+        variant: { size: "medium", state: "rest" },
+        padding: expect.any(Number),
+        toggled: { image: true },
+      },
+    ]);
+    // The stand-in picture: the Vitrino's silhouette as one path, on the sunken ground.
+    expect(set?.avatar?.picture).toMatch(/^<svg [^>]*viewBox="0 0 16 16"[^>]*><path d="M5 6a3 3/);
+    expect(set?.avatar).toMatchObject({
+      fill: { binding: "color/background/sunken" },
+      color: { binding: "color/text/subtle" },
+    });
+    const sizes = {
+      small: "size/icon/medium",
+      medium: "size/icon/large",
+      large: "size/control/large",
+    };
+    const roles = {
+      small: "typography/label/2",
+      medium: "typography/label/2",
+      large: "typography/label/1",
+    };
+    for (const variant of set?.variants ?? []) {
+      const size = variant.props.size as keyof typeof sizes;
+      expect(variant.bindings).toEqual({
+        "box.size": sizes[size],
+        "image.radius": "radius/full",
+        "initials.fill": "color/background/sunken",
+        "initials.color": "color/text/subtle",
+        "initials.typography": roles[size],
+        "initials.radius": "radius/full",
+      });
+      expect(variant.icons).toBeUndefined();
+      expect(variant.notDrawn).toEqual({});
+    }
+  });
+
+  it("states the avataro in the parity inventory: name, picture, size and decorative, the state rest, every colour and measure per size", () => {
+    const items = figmaPlanInventory(plan);
+    expect(items.avataro?.props).toEqual({
+      name: ["string"],
+      picture: ["string"],
+      size: ["small", "medium", "large"],
+      decorative: ["boolean"],
+    });
+    expect(items.avataro?.states).toEqual(["rest"]);
+    const hex = expect.stringMatching(/^#[0-9a-f]{6}$/);
+    expect(items.avataro?.values).toEqual(
+      Object.fromEntries(
+        [
+          ["small", "20px"],
+          ["medium", "24px"],
+          ["large", "48px"],
+        ].flatMap(([size, box]) => [
+          [`box.size@size=${size},state=rest`, box],
+          [`image.radius@size=${size},state=rest`, "9999px"],
+          [`initials.fill@size=${size},state=rest`, hex],
+          [`initials.color@size=${size},state=rest`, hex],
+          [`initials.radius@size=${size},state=rest`, "9999px"],
+        ]),
+      ),
+    );
   });
 });

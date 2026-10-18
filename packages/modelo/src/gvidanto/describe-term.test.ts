@@ -79,6 +79,7 @@ describe("describe_term (FR-12)", () => {
       "alsxutilo",
       "apartigilo",
       "atributlisto",
+      "avataro",
       "avizo",
       "butono",
       "dialogo",

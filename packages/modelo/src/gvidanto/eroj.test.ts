@@ -25,6 +25,7 @@ describe("list_eroj", () => {
       "alsxutilo",
       "apartigilo",
       "atributlisto",
+      "avataro",
       "avizo",
       "butono",
       "dialogo",
@@ -54,14 +55,14 @@ describe("list_eroj", () => {
       "teksto",
       "titolo",
     ]);
-    expect(listEroj(modelo).eroj[4]).toEqual({
+    expect(listEroj(modelo).eroj[5]).toEqual({
       id: butono.ero.id,
       name: "butono",
       description: butono.ero.description,
       variants: ["high", "medium", "low"],
       props: ["emphasis", "intent", "size", "type", "disabled", "loading", "full-width", "label"],
     });
-    expect(listEroj(modelo).eroj[16]).toMatchObject({
+    expect(listEroj(modelo).eroj[17]).toMatchObject({
       name: "ligilo",
       variants: ["inline", "standalone"],
       props: ["to", "placement", "external", "size", "label"],

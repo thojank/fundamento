@@ -69,6 +69,7 @@ describe("suggest_ero", () => {
       "upload",
       "separate",
       "details",
+      "avatar",
       "notify",
       "report-error",
       "destructive",

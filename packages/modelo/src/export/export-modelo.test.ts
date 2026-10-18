@@ -230,7 +230,7 @@ describe("exportModelo: uzoj (Spec 007)", () => {
     expect(exportOf("ero-minimal")).not.toHaveProperty("uzoj");
     // Spec 008: every Ero of the repo has a Uzo, in Ero order.
     expect(modeloJson.uzoj?.map((uzo) => uzo.ero)).toEqual(modeloJson.eroj.map((ero) => ero.id));
-    expect(modeloJson.uzoj).toHaveLength(31);
+    expect(modeloJson.uzoj).toHaveLength(32);
   });
 
   it("the export with uzoj validates against the exported schema", () => {

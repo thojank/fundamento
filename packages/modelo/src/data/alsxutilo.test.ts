@@ -40,9 +40,9 @@ const suggest = (goal: string) => {
 };
 
 describe("alsxutilo in the repo Modelo (section ②, G1, G2)", () => {
-  it("lives in data/eroj/alsxutilo/skemo.json, the first of thirty-one Eroj", () => {
+  it("lives in data/eroj/alsxutilo/skemo.json, the first of thirty-two Eroj", () => {
     expect(alsxutilo?.file).toBe("modelo/data/eroj/alsxutilo/skemo.json");
-    expect(modelo.eroj).toHaveLength(31);
+    expect(modelo.eroj).toHaveLength(32);
     expect(modelo.eroj[0]?.ero.name).toBe("alsxutilo");
   });
 

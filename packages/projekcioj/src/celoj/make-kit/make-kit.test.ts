@@ -48,6 +48,7 @@ describe("Make Kit sources (T018)", () => {
       "guidelines/components/alsxutilo.md",
       "guidelines/components/apartigilo.md",
       "guidelines/components/atributlisto.md",
+      "guidelines/components/avataro.md",
       "guidelines/components/avizo.md",
       "guidelines/components/butono.md",
       "guidelines/components/dialogo.md",
@@ -800,6 +801,27 @@ describe("Make Kit and the Inhalt of Spec 015 ③", () => {
       expect(component).toContain("# Karto");
       expect(component).toContain("`standalone`");
       expect(component).toContain("card-grid");
+    },
+  );
+});
+
+// Spec 015 ③ (plan ③ D-10): Make takes every person or thing as a picture or initials from the
+// avataro with its name — one sentence from the image with an initials part; the ikono keeps the
+// icon sentence alone.
+describe("Make Kit and the avataro of Spec 015 ③", () => {
+  it.each(ASPEKTOJ)(
+    "%s: the guidelines name the avataro beside the insigno; the icon sentence stays the ikono's",
+    (aspekto) => {
+      const guidelines = kit(aspekto, "guidelines/Guidelines.md");
+      expect(guidelines).toContain(
+        "- Every person or thing shown as a picture or as initials is an `<Avataro>` with its `name` (`decorative` where the name stands beside it); a status is an `<Insigno>`, never a dot or a colour worked out from the name.",
+      );
+      expect(guidelines).toContain("- Every icon is an `<Ikono>`");
+      expect(guidelines).not.toContain("- Every icon is an `<Avataro>`");
+      const component = kit(aspekto, "guidelines/components/avataro.md");
+      expect(component).toContain("# Avataro");
+      expect(component).toContain("`picture`");
+      expect(component).toContain("presence-dot");
     },
   );
 });

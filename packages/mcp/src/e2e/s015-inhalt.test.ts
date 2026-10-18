@@ -108,12 +108,32 @@ describe("the content dialogs of the spec (Spec 015 ③)", () => {
     expect(one.valid).toBe(true);
   });
 
-  it("lists thirty-one Eroj; the brief of the karto names level and orientation, level and heading as duties", async () => {
+  it("'Avatar mit Initialen' → the avataro, citing icon-meaning-named; a name that only says 'Profilbild' fails it", async () => {
+    const answer = await output<Suggested>(client, "suggest_ero", {
+      goal: "Avatar mit Initialen",
+    });
+    expect(answer.suggestion).toEqual({ ero: "avataro", props: {} });
+    expect(answer.kialo).toBe(kialoOf("icon-meaning-named"));
+    const judged = (name: string) =>
+      output<Judged>(client, "check_usage", {
+        instances: [{ ero: "avataro", props: { name }, label: name, lingvo: "de" }],
+      });
+    expect((await judged("Erika Mustermann")).valid).toBe(true);
+    const wrong = await judged("Profilbild");
+    expect(wrong.violations.map((violation) => violation.issue.rule)).toEqual([
+      "icon-meaning-named",
+    ]);
+  });
+
+  it("lists thirty-two Eroj; the briefs of the karto and the avataro name their axes and duties", async () => {
     const listed = await output<Listed>(client, "list_eroj", {});
-    expect(listed.eroj).toHaveLength(31);
+    expect(listed.eroj).toHaveLength(32);
     expect(listed.eroj.map((entry) => entry.name)).toContain("karto");
     const brief = await output<Brief>(client, "get_ero", { name: "karto", brief: true });
     expect(brief.axes.map((axis) => axis.name)).toEqual(["level", "orientation"]);
     expect(brief.required).toEqual({ props: ["level"], slots: ["heading"] });
+    const avatar = await output<Brief>(client, "get_ero", { name: "avataro", brief: true });
+    expect(avatar.axes.map((axis) => axis.name)).toEqual(["size"]);
+    expect(avatar.required).toEqual({ props: ["name"], slots: [] });
   });
 });

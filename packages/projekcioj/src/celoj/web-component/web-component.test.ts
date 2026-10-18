@@ -36,6 +36,7 @@ describe("Web Component Celo (T011)", () => {
       "eroj/src/generated/alsxutilo.styles.ts",
       "eroj/src/generated/apartigilo.styles.ts",
       "eroj/src/generated/atributlisto.styles.ts",
+      "eroj/src/generated/avataro.styles.ts",
       "eroj/src/generated/avizo.styles.ts",
       "eroj/src/generated/butono.styles.ts",
       "eroj/src/generated/dialogo.styles.ts",
@@ -45,6 +46,7 @@ describe("Web Component Celo (T011)", () => {
       "eroj/src/generated/fm-alsxutilo.ts",
       "eroj/src/generated/fm-apartigilo.ts",
       "eroj/src/generated/fm-atributlisto.ts",
+      "eroj/src/generated/fm-avataro.ts",
       "eroj/src/generated/fm-avizo.ts",
       "eroj/src/generated/fm-butono.ts",
       "eroj/src/generated/fm-dialogo.ts",
@@ -1944,6 +1946,59 @@ describe("Web Component Celo for the karto (Spec 015 ③)", () => {
   it("the parity inventory names no prop and the one state rest", () => {
     const inventory = stylesheetInventory(files["eroj/src/generated/karto.styles.ts"] ?? "");
     expect(inventory.props).toEqual({});
+    expect(inventory.states).toEqual(["rest"]);
+  });
+});
+
+// Spec 015 ③ (section ③, plan ③ D-08): the avataro is an image named by its name (or hidden where
+// decorative) with the platform's img and the initials inside — the picture once it has loaded,
+// else the initials: the first grapheme of the first and of the last word (Intl.Segmenter), at
+// most two. No colour is worked out from the name (E8): the initials take the fixed roles. It is
+// no icon: the ikono keeps its glyph.
+describe("Web Component Celo for the avataro (Spec 015 ③)", () => {
+  const cssOf = (ero: string) =>
+    JSON.parse(
+      new RegExp(`export const ${ero.toUpperCase()}_CSS = ("(?:[^"\\\\]|\\\\.)*");`).exec(
+        files[`eroj/src/generated/${ero}.styles.ts`] ?? "",
+      )?.[1] ?? '""',
+    ) as string;
+
+  it("renders the image named by the name with the picture and the initials inside; graphemes by Intl.Segmenter; no colour from the name", () => {
+    const element = files["eroj/src/generated/fm-avataro.ts"] ?? "";
+    expect(element).toContain(
+      '<span part="control"><img part="image" alt="" hidden><span part="initials" aria-hidden="true"></span></span>',
+    );
+    expect(element).toContain('control.setAttribute("role", "img");');
+    expect(element).toContain('control.setAttribute("aria-label", avatarName);');
+    expect(element).toContain('control.setAttribute("aria-hidden", "true");');
+    expect(element).toContain('new Intl.Segmenter(lingvo, { granularity: "grapheme" })');
+    expect(element).toContain("toLocaleUpperCase(lingvo)");
+    expect(element).toContain('picture.addEventListener("error"');
+    expect(element).toContain("static formAssociated = false;");
+    expect(element).not.toMatch(/charCodeAt|hsl\(|hue/);
+    // The ikono stays the glyph of the Ikonaro.
+    expect(files["eroj/src/generated/fm-ikono.ts"] ?? "").toContain('<span part="glyph"></span>');
+  });
+
+  it("the stylesheet: the box by size, the picture and the initials round, the initials on the sunken ground in the subtle text", () => {
+    const css = cssOf("avataro");
+    expect(css).toContain('[data-size="small"]');
+    expect(css).toContain("inline-size: var(--fm-size-icon-medium);");
+    expect(css).toContain("inline-size: var(--fm-size-icon-large);");
+    expect(css).toContain("inline-size: var(--fm-size-control-large);");
+    expect(css).toContain("border-radius: var(--fm-radius-full);");
+    expect(css).toContain("background-color: var(--fm-color-background-sunken);");
+    expect(css).toContain("color: var(--fm-color-text-subtle);");
+    expect(css).toContain("font-size: var(--fm-typography-label-1-font-size);");
+    expect(css).toContain(':where([part="image"]) { display: block; object-fit: cover; }');
+    expect(css).not.toContain("--fm-ikono");
+    expect(componentCssIssues("avataro.css", css)).toEqual([]);
+    expect(cssPhysicalPropertyIssues("avataro.css", css)).toEqual([]);
+  });
+
+  it("the parity inventory names size and the one state rest", () => {
+    const inventory = stylesheetInventory(files["eroj/src/generated/avataro.styles.ts"] ?? "");
+    expect(inventory.props).toEqual({ size: ["small", "medium", "large"] });
     expect(inventory.states).toEqual(["rest"]);
   });
 });
