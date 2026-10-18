@@ -60,6 +60,12 @@ const MODEL_FONTS = [
 ] as const;
 const modelDouble = () => figmaDouble({ fonts: MODEL_FONTS });
 
+/** The example frames beside the apartigilo's set (Nachlese 4 N-6, F-7), in their order. */
+const SEPARATOR_EXAMPLE_NAMES = [
+  "apartigilo – waagerecht zwischen zwei Texten",
+  "apartigilo – senkrecht zwischen zwei Texten",
+] as const;
+
 /**
  * The abort of F10c lifted: a test that takes a variant out of a set the plugin made and runs it
  * again measures what such a run reports — which is only there once the run goes on.
@@ -3689,25 +3695,28 @@ describe("every set lies in the frame Eroj in the section Fundamento (F-1, F-2, 
   // set; it is no set, so it is moved by no test and overlaps with none. Spec 011 ④: so does the
   // example frame „unbekannt" of the mezurilo; Spec 011 ⑤: and „vertikal" of the navigado.
   const inFrame = names.flatMap((name) =>
-    name === "dialogo"
-      ? [name, `dialogo – ${BACKDROP_EXAMPLE}`]
-      : name === "mezurilo"
-        ? [name, `mezurilo – ${UNKNOWN_EXAMPLE}`]
-        : name === "navigado"
-          ? [name, `navigado – ${VERTICAL_EXAMPLE}`]
-          : // Spec 015 ① (O-2): the pagination on page 1, 5 and 10 of 10 beside its set.
-            name === "pagxigilo"
-            ? [name, ...[1, 5, 10].map((page) => `pagxigilo – Seite ${page} von 10`)]
-            : // Spec 015 ②: the upload with two files beside its set.
-              name === "alsxutilo"
-              ? [name, "alsxutilo – mit zwei Dateien"]
-              : // Spec 015 ③: the card without its image beside its set, the avatar with its
-                // image beside its.
-                name === "karto"
-                ? [name, "karto – ohne Bild"]
-                : name === "avataro"
-                  ? [name, "avataro – mit Bild"]
-                  : [name],
+    // Nachlese 4 N-6 (F-7): the separator between two texts, once per orientation.
+    name === "apartigilo"
+      ? [name, ...SEPARATOR_EXAMPLE_NAMES]
+      : name === "dialogo"
+        ? [name, `dialogo – ${BACKDROP_EXAMPLE}`]
+        : name === "mezurilo"
+          ? [name, `mezurilo – ${UNKNOWN_EXAMPLE}`]
+          : name === "navigado"
+            ? [name, `navigado – ${VERTICAL_EXAMPLE}`]
+            : // Spec 015 ① (O-2): the pagination on page 1, 5 and 10 of 10 beside its set.
+              name === "pagxigilo"
+              ? [name, ...[1, 5, 10].map((page) => `pagxigilo – Seite ${page} von 10`)]
+              : // Spec 015 ②: the upload with two files beside its set.
+                name === "alsxutilo"
+                ? [name, "alsxutilo – mit zwei Dateien"]
+                : // Spec 015 ③: the card without its image beside its set, the avatar with its
+                  // image beside its.
+                  name === "karto"
+                  ? [name, "karto – ohne Bild"]
+                  : name === "avataro"
+                    ? [name, "avataro – mit Bild"]
+                    : [name],
   );
   const layout = repoPlan.section;
   const inLayout = names.map(() => ({ frame: FRAME, action: "in-layout" }));
@@ -6512,6 +6521,48 @@ describe("icons are drawn from the glyphs of every Aspekto and switch with the b
       "color/background/raised",
     );
     expect(descendant(saltligilo?.children[0], "label")?.properties.characters).toBe("Ziel");
+    const before = double.snapshot();
+    await run(double, source);
+    expect(double.snapshot()).toBe(before);
+  });
+
+  // Nachlese 4 N-6 (F-7, Figma-Lauf 09909f5): the line was hardly visible in the overview and the
+  // vertical one not recognisable — a 1 px line alone in a cell as wide as the horizontal one.
+  // The role is right (border.subtle on the Vitrino's ground, as on the web); an example frame
+  // shows each orientation where a line is seen: between two texts.
+  it("draws the apartigilo once more per orientation between two texts, beside the set (N-6)", async () => {
+    const { double } = await drawn();
+    const frame = pageNodes(double).find(
+      (node) => node.type === "FRAME" && node.getSharedPluginData("fundamento", "frame") !== "",
+    );
+    const names = frame?.children.map((child) => child.name) ?? [];
+    const at = names.indexOf("apartigilo");
+    expect(names.slice(at, at + 3)).toEqual(["apartigilo", ...SEPARATOR_EXAMPLE_NAMES]);
+    const [across, upright] = SEPARATOR_EXAMPLE_NAMES.map((name) =>
+      frame?.children.find((child) => child.name === name),
+    );
+    // A column for the horizontal line, a row for the vertical one: text, line, text.
+    expect(across?.properties.layoutMode).toBe("VERTICAL");
+    expect(upright?.properties.layoutMode).toBe("HORIZONTAL");
+    for (const example of [across, upright]) {
+      expect(example?.children.map((child) => child.name)).toEqual(["before", "line", "after"]);
+      expect(descendant(example, "before")?.properties.characters).toBe("Eins");
+      expect(descendant(example, "after")?.properties.characters).toBe("Zwei");
+      for (const text of ["before", "after"]) {
+        expect(paintOf(descendant(example, text), "fills")).toBe("color/text/default");
+        expect(bound(descendant(example, text), "fontSize")).toBe("typography/body/1/font-size");
+      }
+      // The frame stands on the Vitrino's ground, as the set does.
+      expect(paintOf(example, "fills")).toBe("color/background/canvas");
+    }
+    // The line is the set's: the same colour and weight, on the edge of its orientation.
+    const acrossLine = descendant(descendant(across, "line"), "control");
+    expect(paintOf(acrossLine, "strokes")).toBe("color/border/subtle");
+    expect(bound(acrossLine, "strokeTopWeight")).toBe("border/width/default");
+    const uprightLine = descendant(descendant(upright, "line"), "control");
+    expect(paintOf(uprightLine, "strokes")).toBe("color/border/subtle");
+    expect(bound(uprightLine, "strokeLeftWeight")).toBe("border/width/default");
+    expect(bound(uprightLine, "height")).toBe("size/control/medium");
     const before = double.snapshot();
     await run(double, source);
     expect(double.snapshot()).toBe(before);

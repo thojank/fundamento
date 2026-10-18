@@ -2846,6 +2846,32 @@ describe("the Figma plan draws icons (Spec 014 ②)", () => {
     });
     expect(apartigilo?.variants[1]?.bindings["box.height"]).toBe("size/control/medium");
     expect(apartigilo?.label).toBeUndefined();
+    // Nachlese 4 N-6 (F-7): each orientation once more between two words of the Vitrino, the
+    // texts bound to the role of running text — the line is seen where it divides.
+    expect(
+      apartigilo?.examples?.map((example) => [
+        example.name,
+        example.variant.orientation,
+        example.texts?.words,
+      ]),
+    ).toEqual([
+      ["apartigilo – waagerecht zwischen zwei Texten", "horizontal", ["Eins", "Zwei"]],
+      ["apartigilo – senkrecht zwischen zwei Texten", "vertical", ["Eins", "Zwei"]],
+    ]);
+    for (const example of apartigilo?.examples ?? []) {
+      expect(example.texts?.bindings).toEqual({
+        "label.color": "color/text/default",
+        "label.typography": "typography/body/1",
+      });
+      expect(example.texts?.paints["label.color"]).toBeDefined();
+      expect(example.texts?.font).toBeDefined();
+      expect(example.padding).toBeGreaterThan(0);
+    }
+    // The texts' font is one the run loads for the set.
+    const font = apartigilo?.examples?.[0]?.texts?.font;
+    expect(
+      apartigilo?.fonts?.some((each) => each.family === font?.family && each.style === font?.style),
+    ).toBe(true);
     const saltligilo = plan.components.find((component) => component.set === "saltligilo");
     expect(saltligilo?.structure).toBe("control");
     expect(saltligilo?.variants.map((variant) => variant.props.state)).toEqual(["rest", "focus"]);
