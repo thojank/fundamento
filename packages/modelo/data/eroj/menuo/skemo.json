@@ -231,7 +231,8 @@
             "aktionsmenü",
             "kontextmenü",
             "zeilenaktionen",
-            "zeilenmenü"
+            "zeilenmenü",
+            "tabellenzeile"
           ]
         },
         "props": {},
