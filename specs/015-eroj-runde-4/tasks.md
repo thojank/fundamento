@@ -57,7 +57,7 @@
 
 | Was | Wert |
 |---|---|
-| Commits ② | CI rot `f847be6`, grün `2aa1e87`; alsxutilo rot `4dbee64`, grün `04a2134`; B-1 rot `954f3eb`, grün (Hash im Commit danach) |
+| Commits ② | CI rot `f847be6`, grün `2aa1e87`; alsxutilo rot `4dbee64`, grün `04a2134`; B-1 rot `954f3eb`, grün `58b9858` |
 | Tests lokal (CI-Commit) | workflow.test 36 grün; Eroj-Playwright 217 in Chromium grün (40 s mit einem Bau je Worker) |
 | `brief` | alsxutilo 185 ≤ 750 (Daten-Test, MCP `get_ero` je Ero) |
 | `check:regularo` | 59 Reguloj, 188 Jugxoj, 30 Uzoj, 0 Warnungen (keine neue `goal-keyword-shared`) |
@@ -66,6 +66,7 @@
 | CI nachher | Lauf 39154145052 (`2aa1e87`, alle Jobs grün): Wanduhr 7:57 (vorher 11:20) — `checks` 1:18, `unit` 3:22, `projekcioj` 3:51 / 0:55 (Shard 1 ist `plugin.test.ts` allein, B-2), `eroj` 2:06 / 2:09 (vorher 5:53 / 10:21), `rendered-checks` 7:57 (vorher 8:25; jetzt die Wanduhr) |
 | CI (alsxutilo) | Lauf 39161380550 (`04a2134`, alle Jobs grün, 7:03 vom Start bis zum Ende): `checks` 0:58, `unit` 4:47, `projekcioj` 6:21 / 1:10 (Shard 1 ist weiter `plugin.test.ts` allein und wächst mit jedem Set: 3:51 → 6:21, B-2/O-5), `eroj` 1:46 / 2:07, `rendered-checks` 6:58 |
 | Tests lokal (B-1) | Modelo 3495, Projekcioj 688, MCP 296, CLI 66 grün (`--concurrency=2`, ohne Zeitüberschreitung); Lint, Modelo-Checks, release ohne Fehler, `check:parity` 30 Eroj, 0 Differenzen; Browser: alle 230 Specs in Chromium, `pflicht`, `kampo`, `tekstareo`, `elektilo`, `kompletigilo`, `markobutono`, `alsxutilo`, `elekto`, `sxaltilo`, `dialogo` in Firefox und WebKit 169 von 170 (der eine ist B-11, ohne D-11 ebenso rot), Alirebleco-Check 513, Vitrino 28, Make-Kit 5 |
+| CI (B-1) | Lauf 39164459838 (`58b9858`, alle Jobs grün): `checks` 0:58, `unit` 2:53, `projekcioj` 6:02 / 0:46, `eroj` 2:17 / 2:07, `rendered-checks` 7:19 |
 
 ## ③ Inhalt
 
