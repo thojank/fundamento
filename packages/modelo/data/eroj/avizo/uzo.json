@@ -85,7 +85,7 @@
             "einblendung"
           ]
         },
-        "kialo": "A notice that goes away by itself is not readable for everyone, because some read slowly or look later; an Ero with a time rule is its own."
+        "kialo": "A notice that goes away by itself is missed by whoever reads slowly, zooms in or has the focus elsewhere, because it is gone before they get there (WCAG 2.2.1, 4.1.3); a message stays in the flow of the page as an avizo until it is closed."
       },
       {
         "case": "stacked-notices",

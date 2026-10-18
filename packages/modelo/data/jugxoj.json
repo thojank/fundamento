@@ -4278,6 +4278,26 @@
           }
         ]
       }
+    },
+    {
+      "id": "jug_01M58JAE2ACR3TN55X9PTVPP1C",
+      "ref": {
+        "ero": "ero_01M51ZRFPHM8B0ED97V23SDRRJ"
+      },
+      "decision": "approved",
+      "kialo": "Kein Toast: Eine Meldung, die von selbst verschwindet, verpasst, wer langsam liest, vergrößert oder den Fokus woanders hat (WCAG 2.2.1, 4.1.3). Eine Rückmeldung steht als avizo im Fluss der Seite, bis die Person sie schließt.",
+      "date": "2026-10-18",
+      "context": "Entscheidung der Spec 015 ③ (E6, Briefing 2026-10-17): kein Toast-Ero; die Grenze toast des avizo bleibt not-supported, Toast und Snackbar sind Synonyme des Goals notify, suggest_ero antwortet mit dem avizo und der Kialo der Grenze. Benchmark als Anforderung (Art. V): GOV.UK verzichtet auf Toasts und zeigt Rückmeldungen als Banner im Fluss der Seite."
+    },
+    {
+      "id": "jug_01M58JAE2B490H9NDFFHAEJNQA",
+      "ref": {
+        "ero": "ero_01M51ZRFPHM8B0ED97V23SDRRJ"
+      },
+      "decision": "approved",
+      "kialo": "No toast: a message that goes away by itself is missed by whoever reads slowly, zooms in or has the focus elsewhere (WCAG 2.2.1, 4.1.3). Feedback stands as an avizo in the flow of the page until the person closes it.",
+      "date": "2026-10-18",
+      "context": "Entscheidung der Spec 015 ③ (E6, Briefing 2026-10-17): kein Toast-Ero; die Grenze toast des avizo bleibt not-supported, Toast und Snackbar sind Synonyme des Goals notify, suggest_ero antwortet mit dem avizo und der Kialo der Grenze. Benchmark als Anforderung (Art. V): GOV.UK verzichtet auf Toasts und zeigt Rückmeldungen als Banner im Fluss der Seite."
     }
   ]
 }

@@ -70,4 +70,33 @@
 
 ## ③ Inhalt
 
-Folgt in PR ③.
+**Branch:** `261018-spec-015-inhalt-f027c6` (gestapelt auf ②, #76) · Aufgaben ③ zählen ab T1401.
+
+### A – Rot zuerst
+- [x] **T1401 Tests `karto`** Daten-Pin `data/karto.test.ts`, Eroj 30 → 31 in allen Pins (Listen, Goals, Ontologio, S6-Satz „thirty-one“, Reihenfolgen, `one-primary-per-container`, Kit-Dateien 48), G2-Pins (`atributlisto`, `avizo`), Projekcioj (`web-component.test.ts`, `figma.test.ts`, `plugin.test.ts`, `datumoj.test.ts`, `make-kit.test.ts`, `publish.test.ts`), Browser-Specs (`karto.spec.ts`, `react.spec.ts`, Blöcke in `alirebleco.check.ts`, `vitrino.check.ts`, `internacia.spec.ts`), React-Typen `types/karto.tsx`, MCP-Dialoge `e2e/s015-inhalt.test.ts`.
+- [x] **T1404 Tests `avataro`** Daten-Pin `data/avataro.test.ts`, Eroj 31 → 32 in allen Pins, G2-Pins (`insigno`, `karto`, `ikono`), Projekcioj, Browser-Specs (`avataro.spec.ts`, Internacia-Initialen, Alirebleco, Vitrino), React-Typen `types/avataro.tsx`, MCP-Dialog.
+- [x] **T1407 Tests Toast (E6)** `avizo.test.ts`, `suggest-ero.test.ts` (Synonym mit Grenze, Invariante), MCP `s011-rueckmeldung` und `s015-inhalt`, Doku-Test ③.
+
+### B – Grün
+- [x] **T1402 `karto` im Modelo** Skemo, Uzo, Ontologio, G2, Reguloj ausgeweitet, Zahlwort (D-01, D-02).
+- [x] **T1403 `karto` in den Projekcioj** Web-Host `card` und Boolesches mit Default `true` (D-03, D-04), Figma `card` mit `drawCard` (D-05), Vitrino, Make-Kit, React (D-06).
+- [x] **T1405 `avataro` im Modelo** Skemo (`picture`), Uzo, Ontologio, G2, `icon-meaning-named` mit vier Jugxoj (D-07).
+- [x] **T1406 `avataro` in den Projekcioj** Web-Host `avatar` (D-08), `object-fit` in der Strukturliste, Figma `avatar` mit `drawAvatar` (D-09), Vitrino, Make-Kit, React (D-10).
+- [x] **T1408 Toast** Kialo, Synonyme, zwei Jugxoj, `suggest_ero` (D-11, D-12).
+
+### C – Abschluss
+- [x] **T1409 Doku** plan ③, tasks ③, Vojmapo Zeile 4 (Runde 4 vollständig), README.
+- [x] **T1410 Messungen** unten; Bericht im PR.
+
+### Messungen
+
+| Was | Wert |
+|---|---|
+| Commits ③ | karto rot `8fe847d`, grün `eaa6d74`; avataro rot `e63f193`, grün `76bc595`; Toast rot `3c0ce8e`, grün in der Zeile „Toast grün“ |
+| Rot gemessen | karto: Modelo 64 Tests in 37 Dateien, Projekcioj 21 in 6, MCP 16 in 17 (Suite s015-inhalt lädt nicht ohne Daten); avataro: Modelo 60 in 36, Projekcioj 21 in 6, MCP 18 in 17; Toast: Modelo 8 in 3, MCP 2 in 2 |
+| `brief` | karto 306, avataro ≤ 750 (Daten-Tests, MCP `get_ero` je Ero) |
+| `check:regularo` | 59 Reguloj, 194 Jugxoj, 32 Uzoj, 0 Warnungen (keine neue `goal-keyword-shared`) |
+| Tests lokal (karto) | Modelo 3515, Projekcioj 697, MCP 301, CLI 66; `check:parity` 31 Eroj, 0 Differenzen; Lint, Modelo-Checks ohne Fehler; Browser: 234 Specs in Chromium, karto/React/Internacia in Firefox und WebKit, Alirebleco karto 8 × 3 Browser, Vitrino karto |
+| Tests lokal (avataro) | Modelo 3529, Projekcioj 706, MCP 303, CLI 66; `check:parity` 32 Eroj, 0 Differenzen; Lint, Modelo-Checks ohne Fehler; Browser: 240 Specs in Chromium, avataro und Internacia-Initialen in Firefox und WebKit (15), Alirebleco karto/avataro 32 in Firefox/WebKit, Vitrino karto/avataro |
+| Tests lokal (Toast, Endstand) | Modelo 3536, Projekcioj 706, MCP 304, CLI 66 grün; `check:parity` 32 Eroj, 0 Differenzen (297 freigegebene Werte); Lint, vortaro-lint, regularo (194 Jugxoj), mankoj, alirebleco, clean-room, ikonaro (17 Namen, keiner neu), release ohne Fehler; Browser: alle 240 Specs in Chromium, `karto`, `avataro`, `internacia`, `react` in Firefox und WebKit 100, Alirebleco-Check 561 in drei Browsern, Vitrino 30, Make-Kit 5 |
+| Toast grün | in der Zeile CI (Hash-Commit) |

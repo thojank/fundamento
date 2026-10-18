@@ -199,4 +199,94 @@ Die Slot-Constraint der Skemo liest Slots nur in `when` (`skemo-constraint-inval
 
 ## ③ Inhalt
 
-Folgt in PR ③.
+**Branch:** `261018-spec-015-inhalt-f027c6` (gestapelt auf ② `261018-spec-015-eingabe-f027c6`, #76) · **Datum:** 2026-10-18/19 · **Stand:** fertig gebaut; Abnahme offen.
+
+### Zusammenfassung
+
+1. **`karto`** (D-01, D-03–D-06): die Karte – `level` (Pflicht, die Ebenen 1–6 des `titolo`, an den komponierten `titolo` durchgereicht), `orientation` `vertical` | `horizontal` (Default `vertical`, schlüsselt keinen Teil), `standalone` (boolesch, Default `true`: `article`; `false`: `region`, benannt durch die Überschrift). Slots `heading` (Text, Pflicht), `media`, `content` (Standard), `meta`, `actions`. Teile `surface` (`color.background.raised`, `radius.role.surface`, `elevation.shadow.raised`), `border` (`color.border.subtle`, `border.width.default`), `heading` (`typography.headline.4`), `content` (`typography.body.1`), `meta`, `actions`, `box` (`spacing.medium`/`spacing.small`, mit `density`). Rolle `article`, Name aus `slot:heading`. Goal `card` (Karte, Karten, Kachel, Kacheln, card, cards, tile, tiles) mit `one-primary-per-container`. Uzo: `data-record` → `atributlisto`, `notice` → `avizo`, `layout-box` → Person (Kialo der Spec), Grenzen `clickable-card` und `card-grid` (ask-human), `columns-from` `size.container.small` wie `atributlisto layout=auto`. G2: `atributlisto.as-card` und `avizo.content` → `karto`. `one-primary-per-container` und `spacing-owned-by-container` ausgeweitet.
+2. **`avataro`** (D-07–D-10): der Avatar – `name` (Pflicht), `picture` (die Adresse des Bilds; `src` ist ein Web-Begriff, D-07), `size` `small` | `medium` | `large` (`size.icon.medium`, `size.icon.large`, `size.control.large`; Initialen `typography.label.2`/`.2`/`.1`), `decorative` (Default `false`). Keine Slots. Teile `image` (`radius.full`), `initials` (`color.background.sunken`, `color.text.subtle`, `radius.full`, Typografie nach `size`), `box`. **Keine Farbe aus dem Namen** (E8): die Initialen haben feste Rollen. Rolle `img`, Name aus `prop:name`, `aria-hidden` wenn dekorativ. Goal `avatar` (Avatar, Profilbild, Initialen) mit `icon-meaning-named`. Uzo: `status` → `insigno`, `logo` → Person, Grenzen `avatar-group` und `presence-dot` (ask-human). G2: `insigno.person` → `avataro`; die `karto` nimmt den `avataro` in `meta`. `icon-meaning-named` auf `name` ausgeweitet (vier Jugxoj de/en), `spacing-owned-by-container`.
+3. **Toast als Grenze** (D-11, D-12, E6): `avizo.boundary.toast` bleibt `not-supported` (O-15) mit der neuen Kialo der Spec; „toast“/„snackbar“ sind Synonyme am Goal `notify` (kein eigenes Goal); ein Jugxo in de und en hält die Entscheidung fest (GOV.UK als Anforderung, kein fremder Inhalt). `suggest_ero` liest ein Wort, das ein Ero in eigener Grenze und eigenem Goal nennt, als Synonym mit Grenze: „Toast nach dem Speichern“ → `avizo` im Fluss, die Kialo der Grenze daneben.
+4. **Projekcioj:** Web-Celo Hosts `card` und `avatar` (D-04, D-08), Figma-Bauformen `card` und `avatar` mit Plugin-Zeichnung (D-05, D-09), Vitrino (D-06, D-10), Make-Kit-Sätze, React-Typen; ein boolesches Prop mit Default `true` liest `"false"` in Element, Property und React-Wrapper (D-03).
+
+### Entwurfsentscheidungen
+
+#### D-01 `karto`: Inhalt als Einheit, die Überschrift ist ein `titolo` (Regel 0.1: Weg des `dialogo`)
+Die Überschrift ist ein Text-Slot, den das Ero in einen komponierten `fm-titolo` setzt (wie der `dialogo`); `level` geht an ihn, die Typo-Rolle `headline.4` steht fest am Teil `heading` und als `size` am `titolo` – beide Bilder gleich. `orientation` schlüsselt keinen Teil: sie ist Layout des Celo, keine Variante der Tokens. `standalone` entscheidet `article` oder `region` (Celo-Wissen wie `role=alert` des `avizo` bei `danger`). Der Standard-Slot ist der Inhalt (die Spec), darum schreibt das Label-Property in Figma die Überschrift (`labelPartOf` → `heading`).
+
+#### D-02 Gvidanto: Stichwörter ohne falsche Freunde (G3, Nachlese 3 D-03)
+`goal-keyword-shared` ohne Warnung (`check:regularo` 0 Warnungen). Die Uzo-Stichwörter treffen ab sechs Buchstaben auch das Ende eines Worts (Spec 007 D-06): „karten“ an einer Uzo stähle „Registerkarten“ (`langetaro`), „bild“ kippte „Fließtext unter dem Bild“ (`teksto`, Dialog 014 ③). Darum tragen die Querverweise eigene Wörter (`atributlisto.as-card`: cardview, kartenansicht; `avizo.content`: teaser, inhaltskarte; `insigno.person`: avatar, initialen), die Grenzen Wörter, die kein Goal kennt (`card-grid`: raster, kartenraster; `clickable-card`: klickbare; `presence-dot`: presence, online, anwesenheit), damit `uzo-boundary-covered` nicht anschlägt. „Projektkarten mit Bild“ trifft darum kein Goal (O-17, B-1).
+
+#### D-03 Boolesches Prop mit Default `true` (`standalone`, Regel 0.2)
+`standalone` ist das erste boolesche Prop mit Default `true`; ein HTML-Attribut kann nur da sein oder fehlen. Das Element liest es als `true`, solange das Attribut fehlt, und als `false` nur bei `standalone="false"`; der Property-Setter schreibt `"false"` (React 19 reicht den Wert an die Property, React 18 ans Attribut), der React-Wrapper schreibt `"false"` bei `false` und lässt es sonst weg. Alle anderen Booleschen bleiben bitgleich (nur Props mit `default: true` nehmen den Weg).
+
+#### D-04 Web-Celo Host `card`
+`<article part="control" aria-labelledby="heading">` mit `media` (bündig, die Fläche schneidet es auf ihren Radius), `body` (Polsterung `box.inline-padding` rundum, Abstand `box.gap`), darin `fm-titolo#heading`, `content`, `meta`, `actions`; Medien, Meta und Aktionen nur mit Inhalt. Horizontal: Medien ein Drittel, Körper zwei Drittel; unter `columns-from` misst das Element seine Breite wie `atributlisto layout=auto` (eine Container-Query nimmt kein `var()`) und setzt die Klasse `fm-stacked` – keine `data-`-Attribute, denn das Paritäts-Inventar liest sie als Props der Skemo; die Ausrichtung liest der Stylesheet am Attribut des Hosts. Ein Bild in `media` ohne `alt` ist eine Entwickler-Warnung.
+
+#### D-05 Figma: Bauform `card`
+`orientation` als Zusatzachse wie `placement` des `konsileto` (zwei Varianten, ein Zustand); Medien als Platzhalter („Bild“ auf `color.background.sunken`) mit einem BOOLEAN-Schalter `media` (kein Prop der Skemo, nicht in der Parität), daneben das Beispiel „karto – ohne Bild“; Aktionen und Badge im Bild von `butono` (high, low) und `insigno` (neutral) (`composed`). Breite der Karte: `size.container.small` aufgelöst (geschrieben wie die Länge des `apartigilo`), Medien ein Drittel. Plugin-Zeichnung `drawCard`, `STRUCTURE_BINDINGS.card`.
+
+#### D-06 Vitrino, Make-Kit, React (`karto`)
+Vitrino: vertikal mit und ohne Bild, horizontal über zwei Spalten, Ebene 3 unter der Abschnittsüberschrift; das Bild ist ein Inline-SVG in der Textfarbe (die Vitrino lädt nichts von außen). Make-Kit: „Every summary of one thing … is a `<Karto>` with the `level` of its heading; the fields of one record are an `<Atributlisto>`, what happened is an `<Avizo>`, and a whole card is never one link.“ React-Typen aus der Skemo.
+
+#### D-07 `avataro`: Initialen ohne Farbe, `picture` statt `src` (Art. VIII)
+`src` ist ein Wort der Web-Plattform (`skemo-web-term`); das Prop heißt `picture`, der Web-Celo schreibt es als `src` des Bilds (wie `to` des `ligilo` als `href`). Größen (O-18): `size.icon.small` (16 px) trägt keine zwei Initialen lesbar, darum `small` = `size.icon.medium`, `medium` = `size.icon.large`, `large` = `size.control.large` (mit `density`). Die Initialen stehen immer auf `color.background.sunken` in `color.text.subtle` (KontrastParo vorhanden) – keine Farbe aus dem Namen (E8).
+
+#### D-08 Web-Celo Host `avatar`
+`<span part="control" role="img" aria-label="…">` mit `img part="image" alt=""` und `span part="initials" aria-hidden`. Das Bild steht erst nach `load`, sonst – fehlend, ladend oder kaputt – die Initialen. Initialen: Wörter an Leerraum und Strich (B-2), je Wort das erste Graphem (`Intl.Segmenter`), das Buchstabe oder Ziffer ist, vom ersten und letzten Wort, `toLocaleUpperCase` in der Sprache des Dokuments. `decorative` nimmt Rolle und Namen weg und setzt `aria-hidden`. Ohne `name` warnt das Element. `object-fit: cover` steht jetzt in der Strukturliste der Komponenten-CSS (Schlüsselwort, Regel 0.2). Das `ikono` bleibt Glyphe: `isIcon` schließt Bilder mit `initials` aus.
+
+#### D-09 Figma: Bauform `avatar`
+Drei Varianten nach `size`; das Label-Property schreibt die Initialen („EM“ aus der Vitrino); ein BOOLEAN-Schalter `image` zeigt das Bild-Ersatzbild (die Silhouette der Vitrino, eine Quelle für beide Bilder) über den Initialen, daneben das Beispiel „avataro – mit Bild“. Plugin-Zeichnung `drawAvatar`, `STRUCTURE_BINDINGS.avatar`.
+
+#### D-10 Vitrino, Make-Kit, React (`avataro`)
+Vitrino: je Größe mit Bild (SVG als data-Adresse), mit Initialen, mit kaputtem Bild (`data:,`) und dekorativ neben dem Namen; das Ikonaro-Raster bleibt dem `ikono`. Make-Kit: „Every person or thing shown as a picture or as initials is an `<Avataro>` with its `name` (`decorative` where the name stands beside it); a status is an `<Insigno>`, never a dot or a colour worked out from the name.“; der Icon-Satz gilt nur dem `ikono`. React-Typen aus der Skemo.
+
+#### D-11 Toast: Grenze mit Kialo, Jugxo (E6)
+Die Kialo von `avizo.boundary.toast` ist die der Spec; „ein Ero mit Zeitregel ist ein eigenes“ (Spec 011 ③) fällt weg, denn E6 schließt das Ero aus. Die Aktion bleibt `not-supported` (O-15). Zwei Jugxoj (de, en, `approved`, Bezug `avizo`) halten die Entscheidung mit GOV.UK als Anforderung fest. Der Make-Kit-Satz des `avizo` sagt schon „never a toast“.
+
+#### D-12 `suggest_ero`: eigene Grenze als Synonym eines eigenen Goals (Regel 0.2)
+Spec 008 D-08 deckt „Grenze → use-instead X = Goal von X“; eine Grenze, die beim eigenen Ero bleibt (`not-supported`), war mit dem eigenen Goal bisher ein Konflikt, und „Toast nach dem Speichern“ ein Gleichstand mit `butono.confirm` („speichern“). Neu: trifft dasselbe Wort die eigene Grenze und ein eigenes Goal, antwortet das Goal (Ero, Props, Regulo) mit der Grenze daneben, ohne Gleichstand. `uzo-boundary-covered` prüft nur fremde Goals und bleibt still. Heute sind „toast“ und „snackbar“ des `avizo` die einzigen solchen Wörter (Test pinnt die Invariante); jede andere Antwort bleibt bitgleich.
+
+### Arkitekturo-Abdeckung
+
+| Artikel | Wie ③ ihn trägt |
+|---|---|
+| Art. V (Clean Room) | GOV.UK nur als Anforderung im Jugxo; die Bilder der Vitrino und der Ersatzbilder sind eigene Zeichnungen; `check:clean-room` ohne Befund |
+| Art. VIII (keine Web-Begriffe, keine Strings im Ero) | `picture` statt `src`; keine Texte im Markup; Initialen aus dem Namen, Warnungen nur für Entwickler |
+| E1 (keine neuen Tokens) | nur vorhandene Rollen und `radius.full`, `size.*`, `typography.label.*` |
+| E5 (ausweiten statt vervielfachen) | `one-primary-per-container`, `icon-meaning-named`, `spacing-owned-by-container` ausgeweitet; keine neue Regulo |
+| E6 (kein Toast-Ero) | Grenze `not-supported` mit Kialo, Jugxo, Synonyme am `avizo` |
+| E8 (keine errechneten Farben) | feste Rollen der Initialen, Browser-Spec vergleicht drei Namen |
+| G2 (Verflechtung) | `atributlisto` ↔ `karto`, `avizo` ↔ `karto`, `insigno` ↔ `avataro` (instead in beide Richtungen) |
+| G3 (Stichwörter) | `goal-keyword-shared` ohne Warnung (`check:regularo` 0 Warnungen) |
+| Internacia | Karte in RTL (Medien rechts, Aktionen von rechts), Überschrift auf 200 %; Initialen mit kombinierenden Zeichen (NFD), Devanagari, Arabisch in RTL, Türkisch (ı/İ) in drei Browsern |
+| Alirebleco | axe ohne Befund und Kontrast ≥ 4,5:1 für Überschrift, Text und Initialen in acht Farbklassen, drei Browser |
+
+### Abweichungen von der Spec
+
+1. `avataro.src` heißt `picture` (Art. VIII, `skemo-web-term`; D-07).
+2. `avizo.boundary.toast` bleibt `not-supported`, nicht `ask-human` (O-15).
+3. „Toast nach dem Speichern“ → `avizo` mit leeren Props: „Toast“ sagt keine Art, `intent=success` wählt der Agent aus dem Inhalt; `check_usage` bestätigt die Instanz (O-16). Der Dialog 011 „ein Toast unten rechts“ antwortet jetzt mit `avizo` und der Grenze daneben statt nur mit der Grenze (E6).
+4. „Projektkarten mit Bild“ ist im Test „Karten mit Bild für die Projekte“ / „Projekt-Karten mit Bild“ (O-17); „Projektkarten im Raster“ fragt (Grenze `card-grid`) wie gefordert.
+5. `karto.actions` nimmt `butono` und `ligilo` (höchstens zwei): der `ligilo` kennt den Container `card` seit Spec 008 (der Weg zum Detail ist ein Ziel). Neu gegenüber der Spec: der Teil `border` neben `surface` (wie beim `dialogo`).
+6. Figma: „vertical, horizontal“ sind Varianten, „mit und ohne Bild“ ein Schalter mit Beispiel; beim Avatar „Bild/Initialen“ ebenso (Schalter `image`, Beispiel „mit Bild“).
+7. Avatar-Größen: `small`/`medium` auf `size.icon.medium`/`.large`, nicht `size.icon.small` (O-18).
+
+### Befunde / Mankoj
+
+- **B-1** Goal-Stichwörter treffen ganze Wörter und Bindestrich-Komposita, nicht „Projektkarten“ (Nachlese 4 F-2); eine Uzo-Hilfe mit „karten“ oder „bild“ hätte bestehende Antworten gekippt (D-02).
+- **B-2** Die Wort-Segmenter der Engines trennen verschieden: Firefox liefert bei „सीता राम“ nur „राम“ als Wort. Die Wörter kommen darum aus Leerraum und Strich, die Grapheme aus `Intl.Segmenter` (in drei Browsern gemessen).
+- **B-3** `src` ist ein Web-Begriff (`skemo-web-term` schlug beim ersten Laden an) – D-07.
+- **B-4** Rolle `img` teilt der `avataro` mit dem `ikono`: Web-Host, Figma-Bauform, Vitrino (Ikonaro-Raster) und Make-Kit (Icon-Satz) unterscheiden am Teil `initials`.
+- **B-5** Die Vitrino lädt nichts von außen (`<img src` und `http://` sind verboten): die Karte zeigt ein Inline-SVG, der Avatar ein SVG als data-Adresse mit kodiertem `xmlns`, das kaputte Bild ist `data:,`.
+- **B-6** Figma: `radius.full` löst zu 9999 px auf, Figma kappt das sichtbar zum Kreis; die Kreise des Avatars binden ihre Größe auch an `box.size` (Überlagerung im Rahmen ohne Layout); im echten Figma ungemessen (O-19).
+- **B-7** Alirebleco-Block des Avatars: der Text der Seite neben dem dekorativen Avatar ist kein Teil des Ero (im dunklen Schema ohne eigene Farbe); der Block prüft die Avatare allein.
+
+### Offen (für den Maintainer)
+
+- **O-15 Aktion der Grenze `toast`:** die Spec sagt „bleibt `ask-human`“, der Bestand ist seit Spec 011 ③ `not-supported`; `ask-human` wäre schwächer (Regel 0.4). Vorschlag: `not-supported` bleibt.
+- **O-16 `intent=success` beim Toast:** der Gvidanto antwortet mit `avizo` ohne Props. Vorschlag: so lassen; ein Goal `report-success` (Spiegel von `report-error`) wäre ein eigenes Goal, das die Spec ausschließt.
+- **O-17 Komposita:** „Projektkarten“ trifft kein Goal. Vorschlag: in Nachlese 4 mit F-2 (Goal-Treffer am Wortende ab sechs Buchstaben, mit den falschen Freunden als Tests).
+- **O-18 Avatar-Größen:** 20 / 24 / 48 px (komfortabel 56). Vorschlag: so; `size.icon.small` nur mit einer Initiale.
+- **O-19 Figma-Ersatzbilder und Vorgabewörter:** Karte 640 px breit (`size.container.small`), Medien ein Drittel; Label-Vorgaben „Überschrift“ (Karte) und „EM“ (Avatar); Avatar-Silhouette aus der Vitrino. Vorschlag: so, im Figma-Lauf der Abnahme messen.
+- **O-20 `standalone` mit Default `true`:** gelesen als Attribut `"false"` (D-03). Vorschlag: so; die Alternative wäre ein umgekehrtes Prop (`section`), das die Spec nicht nennt.
+- **O-21 `karto.actions` mit `ligilo`:** Vorschlag: so (Abweichung 5).
