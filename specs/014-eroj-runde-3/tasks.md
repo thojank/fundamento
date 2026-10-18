@@ -93,7 +93,7 @@
 
 | Was | Wert |
 |---|---|
-| Commits ③ | rot `792dc39` (vor dem Rebase `6190e31`), grün `d5d176c` (nach Rebase auf ② `60fd64f`), Fix `a76e933` (Alirebleco-Block: `<p>` ohne Textfarbe im dunklen Aspekto → `fm-teksto`; Vitrino zählt vier Überschriften der Stufe 1; `@ts-expect-error` vor der JSX-Zeile in `titolo.tsx`); nach dem Rebase auf ② `6fb4ab3` (F-4) am 2026-10-18 |
+| Commits ③ | rot `d05d754` (vor dem Rebase `6190e31`), grün `1402a16` (nach Rebase auf ② `60fd64f`), Fix `181c6d8` (Alirebleco-Block: `<p>` ohne Textfarbe im dunklen Aspekto → `fm-teksto`; Vitrino zählt vier Überschriften der Stufe 1; `@ts-expect-error` vor der JSX-Zeile in `titolo.tsx`); nach dem Rebase auf ② `6fb4ab3` (F-4) am 2026-10-18; nach dem Rebase auf ② `e487388` (F-4) am 2026-10-18 |
 | `brief` | titolo, teksto ≤ 750 (Daten-Tests und MCP e2e) |
 | Parität | `check:parity` 22 Eroj, 0 Differenzen, 225 Freigaben |
 | `check:regularo` | 56 Reguloj, 176 Jugxoj, 22 Uzoj, 0 Warnungen (keine neue `goal-keyword-shared`) |
