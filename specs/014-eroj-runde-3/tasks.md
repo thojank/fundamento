@@ -118,18 +118,18 @@
 
 ### C – Abschluss
 - [x] **T1009 Doku** plan ④, tasks ④, Vojmapo Zeile 4 und Befund-Zeile, README.
-- [ ] **T1010 Messungen** unten; Bericht im PR.
+- [x] **T1010 Messungen** unten; Bericht im PR.
 
 ### Messungen
 
 | Was | Wert |
 |---|---|
-| Commits ④ | rot `97098e1`, grün: Hash in der Zeile nach dem Commit |
+| Commits ④ | rot `c9e8ffc`, grün `849898a`, Fix `595cac2` (nach dem Rebase auf ③ `ba37441`; die CI-Läufe unten liefen auf `94c4e2a`/`19e8e27`, davor `b08d1c1` rot) (Typtests `konsileto.tsx`/`sxvebilo.tsx`: `@ts-expect-error` vor der JSX-Zeile, beide Eroj-Shards) |
 | `brief` | konsileto, sxvebilo, menuo ≤ 750 (Daten-Tests und MCP e2e) |
 | Parität | `check:parity` 25 Eroj, 0 Differenzen, 225 Freigaben |
 | `check:regularo` | 57 Reguloj, 180 Jugxoj, 25 Uzoj, 0 Warnungen (keine neue `goal-keyword-shared`) |
-| Tests lokal | Modelo, Projekcioj, MCP: Zahlen in der Zeile nach dem Lauf; Browser-Specs konsileto, sxvebilo, menuo, dialogo, Alirebleco-Block, Vitrino in Chromium |
-| CI | Lauf: Nummer und Dauer in der Zeile nach dem Lauf |
+| Tests lokal | Modelo 3413, Projekcioj 648, MCP 278; alle 203 Browser-Specs in Chromium grün, Alirebleco-Block ④ (8) und Vitrino-Check (25) mit eigener Konfiguration grün |
+| CI | Lauf 1 `39086960436` (94c4e2a) rot: beide Eroj-Shards (Typtests), 9 min 53 s; Lauf 2 `39087974879` (19e8e27) grün, 11 min 06 s (Jobs 7:44 / 7:37 / Build-Job 11:04 / 9:11) – unter 12 min, aber der Build-Job wächst mit jedem Ero (Befund, siehe Bericht) |
 
 ## ⑤ Aufklappen
 
