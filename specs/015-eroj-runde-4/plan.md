@@ -70,12 +70,14 @@ Zwei Sätze aus der Rolle `navigation` mit den Teilen `ellipsis`/`separator`; di
 - **B-9 (behoben)** Die Links der `spuro` waren 17,5 px hoch (axe `target-size`, WCAG 2.5.8, im Vitrino-Check): `box.height` (`size.target.min`) stand auf der Liste im Shadow statt auf den Zielen. Die Höhe steht jetzt als Mindesthöhe der Einträge im Dokument-Stylesheet (wie bei der `navigado`); Abstand und Chevron bleiben im Shadow.
 - **B-10** Das Ikonaro-Raster der Vitrino hat mit `chevron-left` sechzehn Namen; der Vitrino-Check zählt 16 × 3 + 4 Icons.
 - **B-11 (behoben)** Die Vitrino gab der aktuellen Seite der `spuro` einen Link; nach der Spec ist sie Text ohne Ziel. Die letzte Ebene ist jetzt ein `span`.
+- **B-12 (Befund, CI-Dauer)** Lauf 39126240312 (`60eae86`): der Job „Build, test, lint and Modelo checks“ brauchte 12 min 07 s – über der 12-Minuten-Grenze des Auftrags. Er wächst mit jedem Ero (⑤ auf `main`: 10 min 44 s). Rot war der Lauf an einem Typtest (`pagxigilo.tsx` erwartete einen Fehler für fehlendes `total-pages`; der React-Celo hält alle Props optional, die Pflicht meldet das Element zur Laufzeit) – ersetzt durch einen echten Typfehler (Zeichenkette für die Zahl). Die Aufteilung des Build-Jobs entscheidet der Maintainer (O-4).
 
 ### Offen (für den Maintainer)
 
 - **O-1 Name der Landmarke `spuro`:** „Pfad“ (de) / „Breadcrumb“ (en). Zur Bestätigung.
 - **O-2 Figma-Varianten:** Seite 1, 5 und 10 von 10 (Spec) als drei Beispiele neben dem Set, oder eine Zeile wie jetzt.
 - **O-3 `aria-disabled` statt `disabled`** an den Pfeilen (beide Modi gleich, fokussierbar wie APG-Toolbar).
+- **O-4 CI-Dauer:** der Build-Job liegt bei rund 12 min (B-12); ein zweiter Job für die Vitest-Suiten oder ein Shard würde ihn halbieren.
 
 ## ② Eingabe
 
