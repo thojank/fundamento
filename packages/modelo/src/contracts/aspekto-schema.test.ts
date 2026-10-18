@@ -67,6 +67,33 @@ describe("AspektoFile schema (D-05)", () => {
   });
 });
 
+// Spec 016 ① (G1): an Aspekto derived by the Agordilo carries its origin — the Agordo, the
+// version of the Agordilo and the structure it was written from.
+describe("agordilo: the origin of a derived Aspekto (Spec 016 G1)", () => {
+  const AGORDILO = {
+    version: "0.1.0",
+    structure: { vortaro: "0.1.0", reference: "komuna", sha256: "0".repeat(64) },
+    agordo: { name: "ekzemplo", leitfarbe: "#1d4ed8" },
+  };
+
+  it("accepts the origin block", () => {
+    const value = { ...EXTERNAL, agordilo: AGORDILO };
+    expect(validate(value), JSON.stringify(validate.errors)).toBe(true);
+  });
+
+  it.each([
+    ["without the Agordo", { version: "0.1.0", structure: AGORDILO.structure }],
+    ["with an unknown field", { ...AGORDILO, built: "today" }],
+    ["with an Agordo without leitfarbe", { ...AGORDILO, agordo: { name: "ekzemplo" } }],
+    [
+      "with a short fingerprint",
+      { ...AGORDILO, structure: { ...AGORDILO.structure, sha256: "0" } },
+    ],
+  ])("rejects an origin %s", (_label, agordilo) => {
+    expect(validate({ ...EXTERNAL, agordilo })).toBe(false);
+  });
+});
+
 describe("fonts[].scripts and tavoloj (T018b, D-20)", () => {
   const withFont = (font: Record<string, unknown>) => ({
     ...KOMUNA,

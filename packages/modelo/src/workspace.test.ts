@@ -19,6 +19,7 @@ function manifest(dir: string): Manifest {
 }
 
 const PACKAGES = {
+  agordilo: "@fundamento/agordilo",
   "aspekto-komuna": "@fundamento/aspekto-komuna",
   cli: "@fundamento/cli",
   eroj: "@fundamento/eroj",
@@ -29,7 +30,7 @@ const PACKAGES = {
 } as const;
 
 describe("workspace packages (plan D-01)", () => {
-  it("has exactly the five Phase-1 packages and the two of Phase 3", () => {
+  it("has exactly the five Phase-1 packages, the two of Phase 3 and the Agordilo (Spec 016)", () => {
     const dirs = readdirSync(packagesDir, { withFileTypes: true })
       .filter((entry) => entry.isDirectory())
       .map((entry) => entry.name)

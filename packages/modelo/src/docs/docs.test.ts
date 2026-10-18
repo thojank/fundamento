@@ -1933,3 +1933,53 @@ describe("Nachlese 4 documentation (specs/017-nachlese-4)", () => {
     expect(read("docs/vojmapo.md")).toContain("Erledigt mit Nachlese 4");
   });
 });
+
+// Spec 016 ① (Briefing 2026-10-18): specs/016-agordilo-1 carries the spec unchanged, a plan and
+// tasks with the three sections ① to ③; plan ① carries the decisions, the coverage, deviations,
+// findings, open points (the names Agordo and Raporto among them) and the measurements M1 and M2;
+// tasks ① the red hash; the README names the two Agordilo commands.
+describe("Spec 016 ① documentation (specs/016-agordilo-1)", () => {
+  it("the spec is the one of 2026-10-17, unchanged; plan and tasks carry ① to ③", () => {
+    const spec = read("specs/016-agordilo-1/spec.md");
+    expect(spec).toMatch(
+      /^# Spec 016 – Agordilo Stufe 1 \(Werkstatt\): Marke aus Farbe und Kontrast/,
+    );
+    expect(spec).toContain("**E8** ciferecigo erscheint nirgends.");
+    const plan = read("specs/016-agordilo-1/plan.md");
+    const tasks = read("specs/016-agordilo-1/tasks.md");
+    for (const text of [plan, tasks]) {
+      for (const heading of ["## ① Bibliothek", "## ② Werkstatt", "## ③ Gvidanto und Doku"]) {
+        expect(text).toContain(heading);
+      }
+    }
+  });
+
+  it("plan ① carries decisions, coverage, deviations, findings, open points and M1/M2; tasks ① the red hash", () => {
+    const section = (text: string) =>
+      text.slice(text.indexOf("## ① Bibliothek"), text.indexOf("## ② Werkstatt"));
+    const plan = section(read("specs/016-agordilo-1/plan.md"));
+    for (const heading of [
+      "### Zusammenfassung",
+      "### Entwurfsentscheidungen",
+      "#### D-01",
+      "#### D-02",
+      "### Arkitekturo-Abdeckung",
+      "### Abweichungen von der Spec",
+      "### Befunde / Mankoj",
+      "### Offen (für den Maintainer)",
+      "### M1",
+      "### M2",
+    ]) {
+      expect(plan, heading).toContain(heading);
+    }
+    for (const term of ["Agordo", "Raporto", "`provo`", "kontrastSojloj"]) {
+      expect(plan, term).toContain(term);
+    }
+    const tasks = section(read("specs/016-agordilo-1/tasks.md"));
+    expect(tasks).toContain("### Messungen");
+    expect(tasks).toMatch(/rot `[0-9a-f]{7}`/);
+    const readme = read("README.md");
+    expect(readme).toContain("fm agordilo derive");
+    expect(readme).toContain("fm agordilo check");
+  });
+});
