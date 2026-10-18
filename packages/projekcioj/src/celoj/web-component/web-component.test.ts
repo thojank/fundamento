@@ -664,7 +664,9 @@ describe("Web Component Celo for the kampo of Spec 011 ① (password, number, da
   it("renders a number as type text with inputmode numeric and a whole-number pattern, a date as type date, a password as type password", () => {
     expect(kampoElement).toContain('control.type = kind === "number" ? "text" : kind;');
     expect(kampoElement).toContain('control.setAttribute("inputmode", "numeric")');
-    expect(kampoElement).toContain('control.setAttribute("pattern", "-?[0-9]+")');
+    // B-1 (Spec 015 ②, plan ② D-11): no pattern on the native input — the element checks the whole
+    // number itself, the platform's bubble would show its own message.
+    expect(kampoElement).not.toContain('control.setAttribute("pattern"');
     expect(kampoElement).not.toContain('control.type = "number"');
     expect(kampoElement).toContain('for (const attribute of ["autocomplete", "min", "max"])');
     expect(kampoElement).toContain("control.setAttribute(attribute, given)");
@@ -1858,4 +1860,21 @@ describe("Web Component Celo for the alsxutilo (Spec 015 ②)", () => {
       ["disabled", "dragover", "focus", "hover", "invalid", "rest"].sort(),
     );
   });
+});
+
+// B-1 of Abnahme 014 ① (Spec 015 ②, plan ② D-11): the native control of every field Ero carries
+// no constraint the platform judges — no required, no pattern —, so the browser shows no bubble
+// with its validationMessage; the validity is the Ero's (ElementInternals), required stays
+// aria-required and the mark.
+describe("Web Component Celo: no native constraint in a field (B-1, Spec 015 ②)", () => {
+  it.each(["kampo", "tekstareo", "elektilo", "kompletigilo", "markobutono", "alsxutilo"])(
+    "fm-%s sets no required and no pattern on its native control, but aria-required and the validity of the Ero",
+    (ero) => {
+      const element = files[`eroj/src/generated/fm-${ero}.ts`] ?? "";
+      expect(element).not.toMatch(/\.required = required;/);
+      expect(element).not.toContain('setAttribute("pattern"');
+      expect(element).toContain('setAttribute("aria-required", "true")');
+      expect(element).toContain("this.#internals.setValidity(");
+    },
+  );
 });
