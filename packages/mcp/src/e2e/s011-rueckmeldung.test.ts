@@ -162,7 +162,7 @@ describe("check_usage of the badge, the notice and the state", () => {
 });
 
 describe("list_eroj and the briefs", () => {
-  it("lists twenty-seven Eroj; the briefs of insigno, avizo and plenstato name their axes and duties", async () => {
+  it("lists twenty-nine Eroj; the briefs of insigno, avizo and plenstato name their axes and duties", async () => {
     const listed = await output<Listed>(client, "list_eroj", {});
     expect(listed.eroj.map((entry) => entry.name)).toEqual([
       "apartigilo",
@@ -184,8 +184,10 @@ describe("list_eroj and the briefs", () => {
       "menuo",
       "mezurilo",
       "navigado",
+      "pagxigilo",
       "plenstato",
       "saltligilo",
+      "spuro",
       "sxaltilo",
       "sxvebilo",
       "tabelo",

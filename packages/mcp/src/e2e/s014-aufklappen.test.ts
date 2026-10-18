@@ -97,9 +97,9 @@ describe("check_usage of the Aufklappen", () => {
 });
 
 describe("list_eroj and the briefs", () => {
-  it("lists twenty-seven Eroj; the briefs of faldilo and kompletigilo name their axes and duties", async () => {
+  it("lists twenty-nine Eroj; the briefs of faldilo and kompletigilo name their axes and duties", async () => {
     const listed = await output<Listed>(client, "list_eroj", {});
-    expect(listed.eroj).toHaveLength(27);
+    expect(listed.eroj).toHaveLength(29);
     const faldiloBrief = await output<Brief>(client, "get_ero", { name: "faldilo", brief: true });
     expect(faldiloBrief.axes.map((axis) => axis.name)).toEqual(["open"]);
     expect(faldiloBrief.required).toEqual({ props: [], slots: ["content", "summary"] });

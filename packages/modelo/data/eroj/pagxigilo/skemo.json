@@ -1,0 +1,384 @@
+{
+  "ero": {
+    "id": "ero_01M56F6F0ZVC9VKZS57S5K58CH",
+    "name": "pagxigilo",
+    "skemo": "ske_01M56F6FCXT3N0K796HNN80PD5",
+    "description": "A pagination: moves through the pages of a long list and shows which page is current. Its items are the pages as numbers, the current one marked by more than colour, with an arrow back and forth; a landmark of its own, named."
+  },
+  "skemo": {
+    "id": "ske_01M56F6FCXT3N0K796HNN80PD5",
+    "ero": "ero_01M56F6F0ZVC9VKZS57S5K58CH",
+    "props": [
+      {
+        "name": "page",
+        "kind": "string",
+        "required": true,
+        "description": "The current page, counted from 1: the item whose number is this value is the current one (SkemoSlot.entry current). A string like the navigado's page, read as a number by the element."
+      },
+      {
+        "name": "total-pages",
+        "kind": "number",
+        "required": true,
+        "description": "How many pages there are; the last page's number. The element draws the first, the last, the current and its siblings, an ellipsis for every gap."
+      },
+      {
+        "name": "label",
+        "kind": "string",
+        "description": "The name of the landmark (Seitenblättern), heard, never seen; empty, the words of the Modelo stand in (a11y.texts label-empty)."
+      },
+      {
+        "name": "mode",
+        "kind": "enum",
+        "values": [
+          "button",
+          "link"
+        ],
+        "default": "button",
+        "description": "button: every item is a button and a chosen page fires page-change (cancelable) with the number; link: every item is a link to href-template with {page} replaced, the platform moves."
+      },
+      {
+        "name": "href-template",
+        "kind": "string",
+        "default": "?page={page}",
+        "description": "The destination of an item in mode link, {page} replaced by its number."
+      },
+      {
+        "name": "siblings",
+        "kind": "number",
+        "default": 1,
+        "description": "How many pages stand on either side of the current one before an ellipsis; the first and the last page always stand."
+      }
+    ],
+    "states": [
+      "rest",
+      "hover",
+      "focus",
+      "disabled"
+    ],
+    "slots": [
+      {
+        "name": "items",
+        "default": true,
+        "text": true,
+        "entry": {
+          "key": "current",
+          "equals": "page"
+        }
+      }
+    ],
+    "parts": {
+      "item": {
+        "fill": {
+          "by": [
+            "current",
+            "state"
+          ]
+        },
+        "color": {
+          "by": [
+            "current",
+            "state"
+          ]
+        },
+        "typography": {
+          "fixed": "typography.label.1"
+        },
+        "weight": {
+          "by": [
+            "current"
+          ]
+        },
+        "height": {
+          "fixed": "size.target.min"
+        },
+        "width": {
+          "fixed": "size.target.min"
+        },
+        "radius": {
+          "fixed": "radius.role.control"
+        },
+        "inline-padding": {
+          "fixed": "spacing.small"
+        }
+      },
+      "border": {
+        "width": {
+          "by": [
+            "current"
+          ]
+        },
+        "color": {
+          "fixed": "color.border.strong"
+        }
+      },
+      "ellipsis": {
+        "color": {
+          "fixed": "color.navigation.text.rest"
+        },
+        "typography": {
+          "fixed": "typography.label.1"
+        },
+        "width": {
+          "fixed": "size.target.min"
+        }
+      },
+      "prev": {
+        "size": {
+          "fixed": "size.icon.medium"
+        }
+      },
+      "next": {
+        "size": {
+          "fixed": "size.icon.medium"
+        }
+      },
+      "box": {
+        "gap": {
+          "fixed": "spacing.xsmall"
+        }
+      },
+      "focus-ring": {
+        "ring": {
+          "fixed": "focus.ring"
+        },
+        "offset": {
+          "fixed": "focus.offset"
+        },
+        "color": {
+          "fixed": "color.focus.inner"
+        }
+      }
+    },
+    "bindings": [
+      {
+        "part": "item",
+        "property": "fill",
+        "when": {
+          "current": "false",
+          "state": "rest"
+        },
+        "token": "color.navigation.rest"
+      },
+      {
+        "part": "item",
+        "property": "fill",
+        "when": {
+          "current": "false",
+          "state": "hover"
+        },
+        "token": "color.navigation.hover"
+      },
+      {
+        "part": "item",
+        "property": "fill",
+        "when": {
+          "current": "false",
+          "state": "focus"
+        },
+        "token": "color.navigation.rest"
+      },
+      {
+        "part": "item",
+        "property": "fill",
+        "when": {
+          "current": "false",
+          "state": "disabled"
+        },
+        "token": "color.action.tertiary.disabled"
+      },
+      {
+        "part": "item",
+        "property": "fill",
+        "when": {
+          "current": "true",
+          "state": "rest"
+        },
+        "token": "color.navigation.selected"
+      },
+      {
+        "part": "item",
+        "property": "fill",
+        "when": {
+          "current": "true",
+          "state": "hover"
+        },
+        "token": "color.navigation.selected"
+      },
+      {
+        "part": "item",
+        "property": "fill",
+        "when": {
+          "current": "true",
+          "state": "focus"
+        },
+        "token": "color.navigation.selected"
+      },
+      {
+        "part": "item",
+        "property": "fill",
+        "when": {
+          "current": "true",
+          "state": "disabled"
+        },
+        "token": "color.navigation.selected"
+      },
+      {
+        "part": "item",
+        "property": "color",
+        "when": {
+          "current": "false",
+          "state": "rest"
+        },
+        "token": "color.navigation.text.rest"
+      },
+      {
+        "part": "item",
+        "property": "color",
+        "when": {
+          "current": "false",
+          "state": "hover"
+        },
+        "token": "color.navigation.text.rest"
+      },
+      {
+        "part": "item",
+        "property": "color",
+        "when": {
+          "current": "false",
+          "state": "focus"
+        },
+        "token": "color.navigation.text.rest"
+      },
+      {
+        "part": "item",
+        "property": "color",
+        "when": {
+          "current": "false",
+          "state": "disabled"
+        },
+        "token": "color.text.disabled"
+      },
+      {
+        "part": "item",
+        "property": "color",
+        "when": {
+          "current": "true",
+          "state": "rest"
+        },
+        "token": "color.navigation.text.selected"
+      },
+      {
+        "part": "item",
+        "property": "color",
+        "when": {
+          "current": "true",
+          "state": "hover"
+        },
+        "token": "color.navigation.text.selected"
+      },
+      {
+        "part": "item",
+        "property": "color",
+        "when": {
+          "current": "true",
+          "state": "focus"
+        },
+        "token": "color.navigation.text.selected"
+      },
+      {
+        "part": "item",
+        "property": "color",
+        "when": {
+          "current": "true",
+          "state": "disabled"
+        },
+        "token": "color.navigation.text.selected"
+      },
+      {
+        "part": "item",
+        "property": "weight",
+        "when": {
+          "current": "true"
+        },
+        "token": "font.weight.semibold"
+      },
+      {
+        "part": "item",
+        "property": "weight",
+        "when": {
+          "current": "false"
+        },
+        "token": "none"
+      },
+      {
+        "part": "border",
+        "property": "width",
+        "when": {
+          "current": "true"
+        },
+        "token": "border.width.strong"
+      },
+      {
+        "part": "border",
+        "property": "width",
+        "when": {
+          "current": "false"
+        },
+        "token": "none"
+      }
+    ],
+    "a11y": {
+      "role": "navigation",
+      "name": [
+        "prop:label"
+      ],
+      "states": {
+        "current": [
+          "aria-current"
+        ],
+        "disabled": [
+          "aria-disabled"
+        ]
+      },
+      "keys": [],
+      "texts": {
+        "label-empty": {
+          "de": "Seitenblättern",
+          "en": "Pagination"
+        },
+        "prev-name": {
+          "de": "Vorherige Seite",
+          "en": "Previous page"
+        },
+        "next-name": {
+          "de": "Nächste Seite",
+          "en": "Next page"
+        },
+        "items-name": {
+          "de": "Seite",
+          "en": "Page"
+        }
+      }
+    },
+    "goals": [
+      {
+        "goal": "paginate",
+        "keywords": {
+          "en": [
+            "pagination",
+            "pager",
+            "paging",
+            "pagenumbers"
+          ],
+          "de": [
+            "seitennummerierung",
+            "blättern",
+            "seitenzahlen",
+            "seitenwechsel"
+          ]
+        },
+        "props": {}
+      }
+    ]
+  }
+}

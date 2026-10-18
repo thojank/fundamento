@@ -37,6 +37,7 @@ export type HostControl =
   | "popover"
   | "menu"
   | "disclosure"
+  | "pagination"
   | "suggest";
 
 export interface ElementNames {
@@ -87,6 +88,8 @@ export interface ElementNames {
   skip?: boolean;
   /** Whether the Skemo has the part icon: a status host shows the icon of its intent (Spec 014 ②). */
   icon?: boolean;
+  /** Spec 015 ① (plan ① D-04): a navigation whose items are a path — the breadcrumb, a light host with a list in its shadow. */
+  breadcrumb?: boolean;
   /**
    * The Make Kit builds one file per Aspekto: the descriptor and the stylesheet are then constants
    * above the element instead of imports (D-14).
@@ -104,8 +107,12 @@ export function hostOf(
   multiline = false,
   popover = false,
   suggest = false,
+  pagination = false,
 ): HostControl {
   if (role === "link") return "a";
+  // Spec 015 ① (plan ① D-03): a navigation with an ellipsis part draws its pages itself — a
+  // shadow host; the breadcrumb stays a light host like the navigado (its links are the page's).
+  if (role === "navigation" && pagination) return "pagination";
   // Spec 014 ⑤ (plan ⑤ D-03): a disclosure is the platform's details and summary (role group);
   // a combobox with a listbox part is the field of the kampo with a list of suggestions.
   if (role === "group") return "disclosure";
@@ -380,7 +387,16 @@ function meterMarkup(): string {
  * content slot (the table), or a plain frame around the default slot (the list); a default text
  * slot (the caption of a table) is not rendered here — the element writes it into the table.
  */
-function lightMarkup(slots: NonNullable<ElementNames["slots"]>, role = ""): string {
+function lightMarkup(
+  slots: NonNullable<ElementNames["slots"]>,
+  role = "",
+  breadcrumb = false,
+): string {
+  // A breadcrumb (Spec 015 ①, plan ① D-04): the nav landmark around an ordered list whose items
+  // the element makes, one per link of the light DOM (manual slot assignment), a chevron between.
+  if (breadcrumb) {
+    return '<nav part="list"><ol part="items"></ol></nav><slot hidden></slot><span id="fm-texts" hidden></span>';
+  }
   // A navigation (Spec 011 ⑤, D-07): the nav landmark, named by the label prop in the render,
   // around the links of the default slot; the gap between the items is its own.
   if (role === "navigation") {
@@ -502,6 +518,29 @@ function separatorMarkup(): string {
  * assignment, as the radio group); the panel, a tabpanel labelled by the selected tab, around the
  * panel slot; the default slot stays empty and hidden (the children lie in the rows).
  */
+/**
+ * The shadow markup of a pagination (Spec 015 ①, plan ① D-03): the nav landmark around an ordered
+ * list the element fills from page and total-pages — the arrow back, the pages, the arrow forth —
+ * every item a button (mode button) or the platform's link (mode link).
+ */
+function paginationMarkup(): string {
+  return '<nav part="list"><ol part="pages"></ol></nav><slot hidden></slot><span id="fm-texts" hidden></span>';
+}
+
+/**
+ * The ellipsis of a pagination (Spec 015 ①, plan ① D-03): three dots in the current colour, a sign
+ * of the projection like the dash of an empty value — no text node (Art. VIII, ero-hardcoded-string).
+ */
+const ELLIPSIS_SIGN =
+  '<svg aria-hidden="true" viewBox="0 0 16 16" width="1em" height="1em" fill="currentColor"><circle cx="3" cy="8" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="13" cy="8" r="1.5"/></svg>';
+
+/** The chevron after a level of a breadcrumb (Spec 015 ①): decorative, mirrored in RTL. */
+const BREADCRUMB_SEPARATOR =
+  '<fm-ikono part="separator" name="chevron-right" aria-hidden="true"></fm-ikono>';
+
+/** One item of a breadcrumb (Spec 015 ①): the slotted link and the chevron after it. */
+const BREADCRUMB_ENTRY = `<li part="entry"><slot name="item-"></slot>${BREADCRUMB_SEPARATOR}</li>`;
+
 function tabsMarkup(): string {
   return '<div part="control" role="tablist"></div><div part="panel" role="tabpanel" tabindex="0"><slot name="panel"></slot></div><slot hidden></slot><span id="fm-texts" hidden></span>';
 }
@@ -518,6 +557,7 @@ function markup(
   indicator = false,
   dismiss = false,
   icon = false,
+  breadcrumb = false,
 ): string {
   if (host === "text") return textMarkup(slots);
   if (host === "status") return statusMarkup(slots, indicator, dismiss, icon);
@@ -529,7 +569,8 @@ function markup(
   if (host === "popover") return popoverMarkup();
   if (host === "menu") return menuMarkup();
   if (host === "meter") return meterMarkup();
-  if (host === "light") return lightMarkup(slots, role);
+  if (host === "light") return lightMarkup(slots, role, breadcrumb);
+  if (host === "pagination") return paginationMarkup();
   if (host === "tabs") return tabsMarkup();
   if (host === "input") return fieldMarkup(slots);
   if (host === "textarea") return fieldMarkup(slots, true);
@@ -566,6 +607,7 @@ export function elementSource({
   ikonaro = [],
   skip = false,
   icon = false,
+  breadcrumb = false,
   slots = [
     { name: "label", default: true },
     { name: "icon-start", decorative: true },
@@ -612,13 +654,15 @@ export function elementSource({
                                     ? "[part='control']"
                                     : host === "disclosure"
                                       ? "details"
-                                      : host === "suggest"
-                                        ? "input"
-                                        : host === "popover"
-                                          ? "[role=dialog]"
-                                          : host === "menu"
-                                            ? "[role=menu]"
-                                            : "button";
+                                      : host === "pagination"
+                                        ? "[part=\'list\']"
+                                        : host === "suggest"
+                                          ? "input"
+                                          : host === "popover"
+                                            ? "[role=dialog]"
+                                            : host === "menu"
+                                              ? "[role=menu]"
+                                              : "button";
   const isToggle = host === "toggle";
   const isGroup = host === "group";
   const isSelect = host === "select";
@@ -631,7 +675,9 @@ export function elementSource({
   const isStatus = host === "status";
   const isMeter = host === "meter";
   const isTabs = host === "tabs";
-  const isNav = isLight && role === "navigation";
+  const isPagination = host === "pagination";
+  const isBreadcrumb = isLight && breadcrumb;
+  const isNav = isLight && role === "navigation" && !breadcrumb;
   const isIcon = host === "icon";
   const isSeparator = host === "separator";
   const isHeading = host === "heading";
@@ -652,7 +698,8 @@ export function elementSource({
     isHeading ||
     isParagraph ||
     isOverlay ||
-    isDisclosure;
+    isDisclosure ||
+    isPagination;
   const listSlot = slots.find((slot) => slot.list === true)?.name ?? "";
   const namedSlots = slots
     .filter((slot) => slot.default !== true && slot.decorative !== true)
@@ -1490,10 +1537,10 @@ const COLUMNS_FROM = ${JSON.stringify(columnsFrom)};
       subtree: true,
       characterData: true,
       attributes: true,
-      attributeFilter: ${isNav ? '["slot", "href", "data-page", "data-count", "data-count-description"]' : '["slot", "data-sort", "numeric"]'},
+      attributeFilter: ${isNav ? '["slot", "href", "data-page", "data-count", "data-count-description"]' : isBreadcrumb ? '["slot", "href", "data-page"]' : '["slot", "data-sort", "numeric"]'},
     });
 ${
-  isNav
+  isNav || isBreadcrumb
     ? ""
     : `    this.addEventListener("click", (event) => {
       const button = event
@@ -1512,8 +1559,61 @@ ${
 `
 }`
     : "";
-  const lightMethods = isNav
+  const lightMethods = isBreadcrumb
     ? `
+  /**
+   * Assigns the items to the list (manual slot assignment, Spec 015 ①, plan ① D-04): every child
+   * without a slot to a list item of its own, made here, with the chevron after it; the last
+   * item carries none.
+   */
+  #assign(): void {
+    const list = this.shadowRoot?.querySelector('[part="items"]');
+    if (!(list instanceof HTMLElement)) return;
+    const items = [...this.children].filter((child) => child.getAttribute("slot") === null);
+    if (list.children.length !== items.length) {
+      list.replaceChildren();
+      items.forEach((_item, index) => {
+        list.insertAdjacentHTML("beforeend", ${JSON.stringify(BREADCRUMB_ENTRY)}.replace('name="item-"', 'name="item-' + index + '"'));
+      });
+    }
+    items.forEach((item, index) => {
+      const entry = list.children[index];
+      entry?.querySelector("slot")?.assign(item);
+      // A chevron stands between two levels only (Abnahme S-2): the last level, the current page,
+      // has none. Removed, not hidden — the icon's own display would win over [hidden].
+      const separator = entry?.querySelector('[part="separator"]');
+      const last = index === items.length - 1;
+      if (last && separator !== null && separator !== undefined) separator.remove();
+      if (!last && (separator === null || separator === undefined)) {
+        entry?.insertAdjacentHTML("beforeend", ${JSON.stringify(BREADCRUMB_SEPARATOR)});
+      }
+    });
+  }
+
+  /** Writes what the Ero adds to the links (Spec 015 ①, D-04); every write first compares. */
+  #decorate(): void {
+    this.#assign();
+    // The landmark is named by the label prop, else by the Modelo's word (a11y.texts label-empty).
+    const label = this.propValue("label");
+    const fallback = TEXTS["label-empty"];
+    const spoken = fallback === undefined ? "" : (fallback[this.#lingvo()] ?? fallback.en ?? "");
+    const name = typeof label === "string" && label !== "" ? label : spoken;
+    if (this.#control.getAttribute("aria-label") !== name) this.#control.setAttribute("aria-label", name);
+    // The current page (E7): the item whose key is the page prop, else the last item, carries
+    // aria-current="page"; no other does. The stylesheet binds weight and underline to it.
+    const page = this.propValue("page");
+    const wanted = typeof page === "string" && page !== "" ? page : null;
+    const items = [...this.children].filter((child) => child.getAttribute("slot") === null);
+    items.forEach((item, index) => {
+      const key = item.getAttribute("data-page") ?? item.getAttribute("href") ?? item.textContent?.trim() ?? "";
+      const current = wanted === null ? index === items.length - 1 : key === wanted;
+      if (current && item.getAttribute("aria-current") !== "page") item.setAttribute("aria-current", "page");
+      if (!current && item.hasAttribute("aria-current")) item.removeAttribute("aria-current");
+    });
+  }
+`
+    : isNav
+      ? `
   /** Writes what the Ero adds to the links (Spec 011 ⑤, D-07); every write first compares. */
   #decorate(): void {
     // The landmark is named by the label prop (a11y.name prop:label).
@@ -1556,8 +1656,8 @@ ${
     }
   }
 `
-    : isLight
-      ? `
+      : isLight
+        ? `
   /** The platform's own table or list in the light DOM, the first child of its kind. */
   #native(kind: "table" | "dl"): HTMLElement | undefined {
     const node = [...this.children].find((child) => child.tagName.toLowerCase() === kind);
@@ -1676,7 +1776,7 @@ ${
     }
   }
 `
-      : "";
+        : "";
   // The text of a slot of the light DOM, read for a meter's value text and a table's caption or
   // empty state (the default slot is named "").
   const slotTextMethod =
@@ -1697,6 +1797,79 @@ ${
       : "";
   // Tabs (Spec 011 ⑤, D-08): the constructor follows the children and the keys; a click on a row
   // selects its tab.
+  // A pagination (Spec 015 ①, plan ① D-03, G5): a click on an item in mode button fires
+  // page-change (cancelable) with the number; the page prop follows unless cancelled. In mode link
+  // the platform follows the link; an item at the end (aria-disabled) does nothing.
+  const paginationInit = isPagination
+    ? `    control.addEventListener("click", (event) => {
+      const item = event.composedPath().find(
+        (node) => node instanceof HTMLElement && node.getAttribute("part") === "item",
+      );
+      if (!(item instanceof HTMLElement)) return;
+      if (item.getAttribute("aria-disabled") === "true") {
+        event.preventDefault();
+        return;
+      }
+      if (item instanceof HTMLAnchorElement) return;
+      const page = Number(item.getAttribute("data-page"));
+      const accepted = this.dispatchEvent(
+        new CustomEvent("page-change", { bubbles: true, cancelable: true, detail: { page } }),
+      );
+      if (accepted) this.setAttribute("page", String(page));
+    });
+`
+    : "";
+  // The render of a pagination (Spec 015 ①, plan ① D-03): the first and the last page, the current
+  // one and its siblings, an ellipsis per gap (not heard); every page named by the Modelo's word
+  // and its number (items-name), the arrows by theirs (prev-name, next-name); the landmark by the
+  // label prop, else by the Modelo's word (label-empty); the current page says aria-current.
+  const paginationRender = isPagination
+    ? `    const list = this.shadowRoot?.querySelector('[part="pages"]');
+    if (list instanceof HTMLElement) {
+      const lingvo = this.#lingvo();
+      const word = (key: string) => TEXTS[key]?.[lingvo] ?? TEXTS[key]?.en ?? "";
+      const given = this.propValue("label");
+      const landmark = typeof given === "string" && given !== "" ? given : word("label-empty");
+      if (control.getAttribute("aria-label") !== landmark) control.setAttribute("aria-label", landmark);
+      const pageCount = Math.max(1, Math.floor(Number(this.propValue("total-pages") ?? 1)) || 1);
+      const current = Math.min(pageCount, Math.max(1, Math.floor(Number(this.propValue("page") ?? 1)) || 1));
+      const siblings = Math.max(0, Math.floor(Number(this.propValue("siblings") ?? 1)) || 0);
+      const link = this.propValue("mode") === "link";
+      const template = String(this.propValue("href-template") ?? "?page={page}");
+      const low = Math.max(2, current - siblings);
+      const high = Math.min(pageCount - 1, current + siblings);
+      const pages: (number | "gap")[] = [1];
+      if (low > 2) pages.push("gap");
+      for (let n = low; n <= high; n += 1) pages.push(n);
+      if (high < pageCount - 1) pages.push("gap");
+      if (pageCount > 1) pages.push(pageCount);
+      const items: { kind: "prev" | "next" | "page" | "gap"; page: number }[] = [
+        { kind: "prev", page: current - 1 },
+        ...pages.map((page) => (page === "gap" ? { kind: "gap" as const, page: 0 } : { kind: "page" as const, page })),
+        { kind: "next", page: current + 1 },
+      ];
+      const html = items
+        .map((item) => {
+          if (item.kind === "gap") return '<li part="ellipsis" aria-hidden="true">' + ${JSON.stringify(ELLIPSIS_SIGN)} + "</li>";
+          const off = item.page < 1 || item.page > pageCount;
+          const tag = link ? "a" : "button";
+          const href = link && !off ? ' href="' + template.replace("{page}", String(item.page)) + '"' : "";
+          const type = link ? "" : ' type="button"';
+          const arrow = item.kind === "page" ? "" : ' data-arrow="' + item.kind + '"';
+          const name = item.kind === "page" ? word("items-name") + " " + item.page : word(item.kind + "-name");
+          const marked = item.kind === "page" && item.page === current ? ' aria-current="page"' : "";
+          const disabled = off ? ' aria-disabled="true"' : "";
+          const inner =
+            item.kind === "page"
+              ? String(item.page)
+              : '<fm-ikono part="' + item.kind + '" name="' + (item.kind === "prev" ? "chevron-left" : "chevron-right") + '"></fm-ikono>';
+          return '<li><' + tag + ' part="item"' + type + href + arrow + marked + disabled + ' aria-label="' + name + '" data-page="' + item.page + '">' + inner + "</" + tag + ">";
+        })
+        .join("");
+      if (list.innerHTML !== html) list.innerHTML = html;
+    }
+`
+    : "";
   const tabsInit = isTabs
     ? `    new MutationObserver(() => {
       this.#assign();
@@ -2742,13 +2915,13 @@ ${autoField}${isFieldHost ? "  /** Whether a person touched the field or the for
   constructor() {
     super();
     this.#internals = this.attachInternals();
-    const root = this.attachShadow({ mode: "open", delegatesFocus: true${isGroup || isTabs || isMenu ? ', slotAssignment: "manual"' : ""} });
+    const root = this.attachShadow({ mode: "open", delegatesFocus: true${isGroup || isTabs || isMenu || isBreadcrumb ? ', slotAssignment: "manual"' : ""} });
     if (sheet === undefined) {
       sheet = new CSSStyleSheet();
       sheet.replaceSync(CSS);
     }
     root.adoptedStyleSheets = [sheet];
-    root.innerHTML = \`${markup(host, slots, role, marked, indicator, dismiss, icon)}\`;
+    root.innerHTML = \`${markup(host, slots, role, marked, indicator, dismiss, icon, breadcrumb)}\`;
     const control = root.querySelector("${control}");
     const label = root.querySelector("slot:not([name])");
     const texts = root.querySelector("#fm-texts");
@@ -2766,7 +2939,7 @@ ${autoField}${isFieldHost ? "  /** Whether a person touched the field or the for
     this.#label = label;
     this.#texts = texts;
     control.addEventListener("click", (event) => this.#activate(event));
-${toggleKeys}${groupInit}${selectInit}${dialogInit}${statusInit}${lightInit}${tabsInit}${tooltipInit}${popoverInit}${menuInit}${disclosureInit}${suggestInit}${skipInit}    label.addEventListener("slotchange", () => this.#render());
+${toggleKeys}${groupInit}${selectInit}${dialogInit}${statusInit}${lightInit}${paginationInit}${tabsInit}${tooltipInit}${popoverInit}${menuInit}${disclosureInit}${suggestInit}${skipInit}    label.addEventListener("slotchange", () => this.#render());
     for (const named of root.querySelectorAll("slot[name]")) {
       named.addEventListener("slotchange", () => this.#render());
     }
@@ -2900,7 +3073,7 @@ ${autoDisconnect}
     // \`invalid\` spoken as aria-invalid and set by a filled error slot (constraint of the Skemo);
     // disabled wins over readonly; help and error show only while they have text.
     const described: string[] = [];
-${inputRender}${toggleRender}${groupRender}${selectRender}${dialogRender}${statusRender}${meterRender}${lightRender}${tabsRender}${iconRender}${separatorRender}${headingRender}${paragraphRender}${tooltipRender}${popoverRender}${menuRender}${disclosureRender}${suggestRender}${skipRender}${composedIconRender}    // The texts of the slots that describe the control (Spec 009, D-02; a checkbox, Spec 010 ②):
+${inputRender}${toggleRender}${groupRender}${selectRender}${dialogRender}${statusRender}${meterRender}${lightRender}${paginationRender}${tabsRender}${iconRender}${separatorRender}${headingRender}${paragraphRender}${tooltipRender}${popoverRender}${menuRender}${disclosureRender}${suggestRender}${skipRender}${composedIconRender}    // The texts of the slots that describe the control (Spec 009, D-02; a checkbox, Spec 010 ②):
     // shown while they have text, and its description in that order.
     for (const source of DESCRIPTION) {
       const [kind, name = ""] = source.split(":");
@@ -2948,10 +3121,11 @@ ${
       .trim();
     const name = this.propValue("label");
 ${
-  isLight || isOverlay
+  isLight || isOverlay || isPagination
     ? `    // A light-DOM host names its region by the caption (Spec 011 ④, D-09) and its list by the
     // label prop on the dl itself (D-10); an overlay (Spec 014 ④) names its layer in its own
-    // render; nothing is written here.
+    // render, a pagination (Spec 015 ①, B-3) its landmark — the label, else the Modelo's word;
+    // nothing is written here.
     void text;
     void name;
 `

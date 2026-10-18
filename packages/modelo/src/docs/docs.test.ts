@@ -1788,3 +1788,49 @@ describe("Spec 014 ⑤ documentation (specs/014-eroj-runde-3)", () => {
     expect(read("docs/vojmapo.md")).toContain("Spec 014 ⑤");
   });
 });
+
+// Spec 015 ① (Briefing 2026-10-17): specs/015-eroj-runde-4 carries the spec unchanged, a plan and
+// tasks with the three sections ① to ③; plan ① carries the decisions, the Arkitekturo coverage,
+// deviations, findings and open points; tasks ① the red hashes; the Vojmapo names ①.
+describe("Spec 015 ① documentation (specs/015-eroj-runde-4)", () => {
+  it("the spec is the one of 2026-10-17, unchanged; plan and tasks carry ① to ③", () => {
+    const spec = read("specs/015-eroj-runde-4/spec.md");
+    expect(spec).toMatch(
+      /^# Spec 015 – Eroj in der Breite, Runde 4: Blättern, Pfad, Hochladen, Karte, Avatar/,
+    );
+    expect(spec).toContain("**E4 Namen:** `pagxigilo`, `spuro`, `alsxutilo`, `karto`, `avataro`.");
+    const plan = read("specs/015-eroj-runde-4/plan.md");
+    const tasks = read("specs/015-eroj-runde-4/tasks.md");
+    for (const text of [plan, tasks]) {
+      for (const heading of ["## ① Navigation", "## ② Eingabe", "## ③ Inhalt"]) {
+        expect(text).toContain(heading);
+      }
+    }
+  });
+
+  it("plan ① carries the decisions, the coverage, deviations, findings and open points; tasks ① the red hashes", () => {
+    const section = (text: string) =>
+      text.slice(text.indexOf("## ① Navigation"), text.indexOf("## ② Eingabe"));
+    const plan = section(read("specs/015-eroj-runde-4/plan.md"));
+    for (const heading of [
+      "### Zusammenfassung",
+      "### Entwurfsentscheidungen",
+      "#### D-01",
+      "#### D-02",
+      "### Arkitekturo-Abdeckung",
+      "### Abweichungen von der Spec",
+      "### Befunde / Mankoj",
+      "### Offen (für den Maintainer)",
+    ]) {
+      expect(plan, heading).toContain(heading);
+    }
+    for (const ero of ["pagxigilo", "spuro"]) expect(plan).toContain(`\`${ero}\``);
+    // The name of the landmark of the spuro is a proposal (the spec: P0 proposes, the maintainer confirms).
+    expect(plan).toContain("Pfad");
+    expect(plan).toContain("`chevron-left`");
+    const tasks = section(read("specs/015-eroj-runde-4/tasks.md"));
+    expect(tasks).toContain("### Messungen");
+    expect(tasks).toMatch(/rot `[0-9a-f]{7}`/);
+    expect(read("docs/vojmapo.md")).toContain("Spec 015 ①");
+  });
+});

@@ -44,8 +44,10 @@ describe("sxaltilo in the repo Modelo (G1, G2, section 1)", () => {
       "menuo",
       "mezurilo",
       "navigado",
+      "pagxigilo",
       "plenstato",
       "saltligilo",
+      "spuro",
       "sxaltilo",
       "sxvebilo",
       "tabelo",
@@ -283,6 +285,8 @@ describe("the Reguloj of the sxaltilo (G6, E5, D-14)", () => {
       "menuo",
       "faldilo",
       "kompletigilo",
+      "pagxigilo",
+      "spuro",
     ]);
   });
 

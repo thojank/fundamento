@@ -71,8 +71,10 @@ describe("elektilo in the repo Modelo (G1, G2, section 4)", () => {
       "menuo",
       "mezurilo",
       "navigado",
+      "pagxigilo",
       "plenstato",
       "saltligilo",
+      "spuro",
       "sxaltilo",
       "sxvebilo",
       "tabelo",
@@ -465,6 +467,8 @@ describe("the Reguloj of the elektilo (G6, E5)", () => {
       "menuo",
       "faldilo",
       "kompletigilo",
+      "pagxigilo",
+      "spuro",
     ]);
   });
 

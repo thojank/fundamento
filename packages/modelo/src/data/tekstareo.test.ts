@@ -64,8 +64,10 @@ describe("tekstareo in the repo Modelo (section ②)", () => {
       "menuo",
       "mezurilo",
       "navigado",
+      "pagxigilo",
       "plenstato",
       "saltligilo",
+      "spuro",
       "sxaltilo",
       "sxvebilo",
       "tabelo",
@@ -275,6 +277,8 @@ describe("the Reguloj of the tekstareo (G6, E5)", () => {
       "menuo",
       "faldilo",
       "kompletigilo",
+      "pagxigilo",
+      "spuro",
     ]);
   });
 

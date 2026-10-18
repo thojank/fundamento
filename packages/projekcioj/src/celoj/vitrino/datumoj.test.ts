@@ -269,8 +269,10 @@ describe("the Vitrino after the acceptances (Nachlese 2026-10-13)", () => {
       menuo: "menu",
       mezurilo: "meter",
       navigado: "navigation",
+      pagxigilo: "navigation",
       plenstato: "status",
       saltligilo: "link",
+      spuro: "navigation",
       sxaltilo: "switch",
       sxvebilo: "dialog",
       tabelo: "table",
@@ -701,5 +703,26 @@ describe("the Vitrino shows the faldilo and the kompletigilo (Spec 014 ⑤)", ()
     expect(section).toContain('<data slot="options" value="1">Eins</data>');
     expect(section).toContain('placeholder="Bitte wählen"');
     expect((section.match(/<fm-kompletigilo /g) ?? []).length).toBe(3 * 5);
+  });
+});
+
+// Spec 015 ① (plan ① D-06): the Vitrino shows the pagxigilo on page 5 of 10 (both ellipses) in one
+// row, named by the Modelo's word, and the spuro with three links of the Vitrino's words, the last
+// the current page.
+describe("the Vitrino shows the pagxigilo and the spuro (Spec 015 ①)", () => {
+  it("pagxigilo: one row, page 5 of 10, no children (the Modelo's word names the landmark)", () => {
+    const grid = datumoj.eroj.pagxigilo ?? "";
+    expect((grid.match(/<fm-pagxigilo /g) ?? []).length).toBe(1);
+    expect(grid).toContain('<fm-pagxigilo total-pages="10" page="5"></fm-pagxigilo>');
+    expect(grid).not.toContain("unbekannt");
+    expect(grid).toContain('<th scope="row">rest</th>');
+  });
+
+  it("spuro: one row, two links and the current page as text, the Vitrino's words (the Modelo's word names the landmark)", () => {
+    const grid = datumoj.eroj.spuro ?? "";
+    expect((grid.match(/<fm-spuro /g) ?? []).length).toBe(1);
+    expect(grid).toContain(
+      '<fm-spuro page="3"><a href="#fm-vitrino-spuro" data-page="1">Eins</a><a href="#fm-vitrino-spuro" data-page="2">Zwei</a><span data-page="3">Drei</span></fm-spuro>',
+    );
   });
 });

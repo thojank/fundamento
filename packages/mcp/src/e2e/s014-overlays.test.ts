@@ -117,9 +117,9 @@ describe("check_usage of the overlays", () => {
 });
 
 describe("list_eroj and the briefs", () => {
-  it("lists twenty-seven Eroj; the briefs of konsileto, sxvebilo and menuo name their axes and duties", async () => {
+  it("lists twenty-nine Eroj; the briefs of konsileto, sxvebilo and menuo name their axes and duties", async () => {
     const listed = await output<Listed>(client, "list_eroj", {});
-    expect(listed.eroj).toHaveLength(27);
+    expect(listed.eroj).toHaveLength(29);
     const konsiletoBrief = await output<Brief>(client, "get_ero", {
       name: "konsileto",
       brief: true,

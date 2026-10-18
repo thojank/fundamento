@@ -69,7 +69,7 @@
       },
       {
         "case": "pagination",
-        "action": "ask-human",
+        "action": "use-instead",
         "keywords": {
           "en": [
             "pagination",
@@ -80,7 +80,8 @@
             "blättern"
           ]
         },
-        "kialo": "Pages of a table are navigation between parts of the data, because the table shows one part at a time; a person decides where the control stands."
+        "kialo": "Pages of a table are navigation between parts of the data, because the table shows one part at a time; the pagxigilo under the table moves between them (Spec 015 ① closes the boundary pagination).",
+        "ero": "pagxigilo"
       },
       {
         "case": "inline-edit",
@@ -168,6 +169,10 @@
         {
           "ero": "menuo",
           "kialo": "The row actions of a table are a menuo in the last cell of the row, because one button per row keeps the row readable; the menu names edit, duplicate, delete."
+        },
+        {
+          "ero": "pagxigilo",
+          "kialo": "A table with more rows than one page shows gets a pagination under it, because the table shows one part at a time and the person moves between the parts there."
         }
       ],
       "never": [],

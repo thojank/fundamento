@@ -515,7 +515,8 @@ test("the Ikonaro grid, the apartigilo and the saltligilo are upgraded in their 
 }) => {
   await open(page);
   const icons = page.locator("#fm-vitrino-ikono fm-ikono");
-  await expect(icons).toHaveCount(15 * 3 + 4);
+  // Spec 015 ①: sixteen names (chevron-left), three sizes each, and the four status icons.
+  await expect(icons).toHaveCount(16 * 3 + 4);
   await expect(page.locator("#fm-vitrino-ikono").getByRole("img")).toHaveCount(4);
   const maskOf = () =>
     page
@@ -590,6 +591,33 @@ test("fm-faldilo and fm-kompletigilo are upgraded in their sections, axe-clean",
   await page.locator("#fm-vitrino-kompletigilo").getByRole("combobox").first().fill("Ein");
   await expect(page.locator("#fm-vitrino-kompletigilo").getByRole("option")).toHaveCount(1);
   for (const id of ["faldilo", "kompletigilo"]) {
+    expect(await axeViolations(page, `#fm-vitrino-${id}`), id).toEqual([]);
+  }
+});
+
+// Spec 015 ① (plan ① D-06): the sections of the pagxigilo (page 5 of 10, usable by keyboard) and
+// the spuro (three levels) in the Vitrino; axe without a finding.
+test("fm-pagxigilo and fm-spuro are upgraded in their sections, the pager usable by keyboard, axe-clean", async ({
+  page,
+}) => {
+  await open(page);
+  const pager = page.locator("#fm-vitrino-pagxigilo");
+  await expect(pager.getByRole("navigation", { name: "Seitenblättern" })).toHaveCount(1);
+  await expect(pager.getByRole("button", { name: "Seite 5", exact: true })).toHaveAttribute(
+    "aria-current",
+    "page",
+  );
+  await pager.getByRole("button", { name: "Seite 6", exact: true }).focus();
+  await page.keyboard.press("Enter");
+  await expect(pager.getByRole("button", { name: "Seite 6", exact: true })).toHaveAttribute(
+    "aria-current",
+    "page",
+  );
+  const trail = page.locator("#fm-vitrino-spuro");
+  await expect(trail.getByRole("navigation", { name: "Pfad" })).toHaveCount(1);
+  await expect(trail.getByRole("listitem")).toHaveCount(3);
+  await expect(trail.getByRole("link")).toHaveCount(2);
+  for (const id of ["pagxigilo", "spuro"]) {
     expect(await axeViolations(page, `#fm-vitrino-${id}`), id).toEqual([]);
   }
 });

@@ -311,7 +311,11 @@ export const VITRINO_SUMMARY_TEXT = "Lieferbedingungen";
  * The value example of a meter in the Vitrino (Spec 011 ④, plan ④ D-13): a number prop without
  * a default is set to it, so the bar shows a fill; the Figma set shows the same share.
  */
-export const VITRINO_NUMBER_EXAMPLES: Readonly<Record<string, string>> = { value: "66" };
+export const VITRINO_NUMBER_EXAMPLES: Readonly<Record<string, string>> = {
+  value: "66",
+  // Spec 015 ① (plan ① D-06): the pagxigilo shows page 5 of 10 — both ellipses.
+  "total-pages": "10",
+};
 
 /** The row and label of the meter without a value in the Vitrino (Nachlese 3 W4, F-9). */
 export const VITRINO_UNKNOWN_LABEL = "unbekannt";
@@ -447,13 +451,19 @@ export const VITRINO_MENU_ITEMS: readonly {
  */
 function optionTexts(entry: LoadedEro): string {
   const navigation = entry.skemo.a11y.role === "navigation";
+  // A pagination (Spec 015 ①) draws its pages itself from page and total-pages: no entries.
+  if (navigation && entry.skemo.parts.ellipsis !== undefined) return "";
+  const breadcrumb = navigation && entry.skemo.parts.separator !== undefined;
   return entry.skemo.slots
     .filter((slot) => slot.entry !== undefined)
     .map((slot) =>
       VITRINO_OPTIONS.map((text, index) =>
-        navigation
-          ? `<a href="#fm-vitrino-${entry.ero.name}" data-page="${index + 1}">${text}</a>`
-          : `<data${slot.default === true ? "" : ` slot="${slot.name}"`} value="${index + 1}">${text}</data>`,
+        // The current page of a breadcrumb (Spec 015 ①) is its last level: text, no destination.
+        navigation && breadcrumb && index === VITRINO_OPTIONS.length - 1
+          ? `<span data-page="${index + 1}">${text}</span>`
+          : navigation
+            ? `<a href="#fm-vitrino-${entry.ero.name}" data-page="${index + 1}">${text}</a>`
+            : `<data${slot.default === true ? "" : ` slot="${slot.name}"`} value="${index + 1}">${text}</data>`,
       ).join(""),
     )
     .join("");
@@ -548,8 +558,15 @@ export function eroMarkup(entry: LoadedEro, ikonaro: readonly VitrinoIkono[] = [
   // of a navigation or a tab list) takes the word of its role; a skip link (Spec 014 ②) the id of
   // the section without the fragment sign; every other string prop stays empty.
   const floats = entry.skemo.parts.surface?.layer !== undefined;
+  // The prop an entry's value is compared with (page of the pagxigilo, Spec 015 ①) is written by
+  // `chosen` below, not here.
+  const equals = entry.skemo.slots.flatMap((slot) =>
+    slot.entry === undefined ? [] : [slot.entry.equals],
+  );
   const required = entry.skemo.props
-    .filter((prop) => prop.required === true && prop.kind === "string")
+    .filter(
+      (prop) => prop.required === true && prop.kind === "string" && !equals.includes(prop.name),
+    )
     .map(
       (prop) =>
         ` ${prop.name}="${prop.name === "label" ? (VITRINO_LABELS[entry.skemo.a11y.role] ?? `#fm-vitrino-${entry.ero.name}`) : floats ? `fm-vitrino-${entry.ero.name}` : `#fm-vitrino-${entry.ero.name}`}"`,
@@ -566,11 +583,19 @@ export function eroMarkup(entry: LoadedEro, ikonaro: readonly VitrinoIkono[] = [
   // An Ero with a placeholder besides (the select, Spec 010 ④, D-13) shows the closed field with
   // its prompt instead: its options are in the list that opens, the field says that none is chosen.
   const prompts = entry.skemo.props.some((prop) => prop.name === "placeholder");
+  // Spec 015 ① (plan ① D-06): the pagxigilo stands on page 5 (of 10, both ellipses), the spuro's
+  // current page is its last item.
+  const chosenValue =
+    entry.skemo.parts.ellipsis !== undefined
+      ? "5"
+      : entry.skemo.parts.separator !== undefined && entry.skemo.a11y.role === "navigation"
+        ? String(VITRINO_OPTIONS.length)
+        : "1";
   const chosen = entry.skemo.slots
     .flatMap((slot) =>
       slot.entry === undefined
         ? []
-        : [prompts ? ` placeholder="${VITRINO_PROMPT}"` : ` ${slot.entry.equals}="1"`],
+        : [prompts ? ` placeholder="${VITRINO_PROMPT}"` : ` ${slot.entry.equals}="${chosenValue}"`],
     )
     .join("");
   // A dialog (Spec 011 ②, plan ② D-15) is modal: six open at once would cover the page. Every cell
@@ -640,8 +665,10 @@ export function eroMarkup(entry: LoadedEro, ikonaro: readonly VitrinoIkono[] = [
     .join("");
   // Nachlese 3 W4 (F-9): an Ero with a number prop without a default (the meter's value) shows one
   // more row without it — the unknown value, its text "nicht geprüft", once for every intent.
+  // Spec 015 ①: only an Ero with a value text (the meter) shows the unknown row; the pagxigilo's
+  // total-pages is an example number without an unknown.
   const unknown =
-    examples === ""
+    examples === "" || !entry.skemo.slots.some((slot) => slot.name === "value-text")
       ? ""
       : `<tr><th scope="row">${VITRINO_UNKNOWN_LABEL}</th><td><${tag}>${VITRINO_UNKNOWN_LABEL}<span slot="value-text">${VITRINO_UNKNOWN_TEXT}</span></${tag}></td></tr>`;
   const heads = ["rest", ...columns].map((column) => `<th scope="col">${column}</th>`).join("");

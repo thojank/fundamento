@@ -60,8 +60,10 @@ describe("Web Component Celo (T011)", () => {
       "eroj/src/generated/fm-menuo.ts",
       "eroj/src/generated/fm-mezurilo.ts",
       "eroj/src/generated/fm-navigado.ts",
+      "eroj/src/generated/fm-pagxigilo.ts",
       "eroj/src/generated/fm-plenstato.ts",
       "eroj/src/generated/fm-saltligilo.ts",
+      "eroj/src/generated/fm-spuro.ts",
       "eroj/src/generated/fm-sxaltilo.ts",
       "eroj/src/generated/fm-sxvebilo.ts",
       "eroj/src/generated/fm-tabelo.ts",
@@ -80,10 +82,12 @@ describe("Web Component Celo (T011)", () => {
       "eroj/src/generated/menuo.styles.ts",
       "eroj/src/generated/mezurilo.styles.ts",
       "eroj/src/generated/navigado.styles.ts",
+      "eroj/src/generated/pagxigilo.styles.ts",
       "eroj/src/generated/plenstato.styles.ts",
       "eroj/src/generated/react.ts",
       "eroj/src/generated/saltligilo.styles.ts",
       "eroj/src/generated/skemo.ts",
+      "eroj/src/generated/spuro.styles.ts",
       "eroj/src/generated/sxaltilo.styles.ts",
       "eroj/src/generated/sxvebilo.styles.ts",
       "eroj/src/generated/tabelo.styles.ts",
@@ -1698,5 +1702,79 @@ describe("Web Component Celo for the faldilo and the kompletigilo (Spec 014 ⑤)
       ':where([part="field"][data-expanded="true"]) [part="listbox"] {\n  max-block-size: var(--fm-size-container-small);',
     );
     expect(componentCssIssues("kompletigilo.css", css)).toEqual([]);
+  });
+});
+
+// Spec 015 ① (section ①, plan ① D-03, D-04): the pagxigilo draws its pages itself from page and
+// total-pages — a nav around an ordered list of buttons (or links in mode link), the current page
+// with aria-current, an ellipsis per gap, an arrow back and forth as composed icons, the words of
+// the Modelo as the names; the spuro keeps the platform's own links in the light DOM (E10) and
+// assigns each to a list item of its shadow (manual slot assignment), a decorative chevron between
+// two, the last item (or the page prop's) current.
+describe("Web Component Celo for the pagxigilo and the spuro (Spec 015 ①)", () => {
+  const cssOf = (ero: string) =>
+    JSON.parse(
+      new RegExp(`export const ${ero.toUpperCase()}_CSS = ("(?:[^"\\\\]|\\\\.)*");`).exec(
+        files[`eroj/src/generated/${ero}.styles.ts`] ?? "",
+      )?.[1] ?? '""',
+    ) as string;
+  const lightCssOf = (ero: string) =>
+    JSON.parse(
+      new RegExp(`export const ${ero.toUpperCase()}_LIGHT_CSS = ("(?:[^"\\\\]|\\\\.)*");`).exec(
+        files[`eroj/src/generated/${ero}.styles.ts`] ?? "",
+      )?.[1] ?? '""',
+    ) as string;
+
+  it("the pagxigilo renders a nav with the pages as a list, arrows as icons, an ellipsis per gap; page-change in mode button", () => {
+    const element = files["eroj/src/generated/fm-pagxigilo.ts"] ?? "";
+    expect(element).toContain('<nav part="list">');
+    expect(element).toContain('<ol part="pages">');
+    expect(element).toContain("data-arrow=");
+    expect(element).toContain("chevron-left");
+    expect(element).toContain("chevron-right");
+    expect(element).toContain('part="ellipsis"');
+    expect(element).toContain('new CustomEvent("page-change"');
+    expect(element).toContain('"items-name"');
+    expect(element).toContain('"-name"');
+    expect(element).toContain('"label-empty"');
+    expect(element).toContain('"href-template"');
+    expect(element).toContain("static formAssociated = false;");
+    const css = cssOf("pagxigilo");
+    expect(css).toContain("var(--fm-color-navigation-selected)");
+    expect(css).toContain("var(--fm-border-width-strong)");
+    expect(css).toContain("var(--fm-size-icon-medium)");
+    // The current page is the entry the Skemo names (aria-current), present or absent.
+    expect(css).toContain("[aria-current]");
+    expect(css).toContain('[aria-disabled="true"]');
+    expect(css).toContain("list-style: none;");
+    expect(componentCssIssues("pagxigilo.css", css)).toEqual([]);
+    expect(cssPhysicalPropertyIssues("pagxigilo.css", css)).toEqual([]);
+  });
+
+  it("the spuro keeps the links in the light DOM and lists them in its shadow with a chevron between two; the current one by weight, without underline", () => {
+    const element = files["eroj/src/generated/fm-spuro.ts"] ?? "";
+    expect(element).toContain('<ol part="items">');
+    expect(element).toContain('slotAssignment: "manual"');
+    expect(element).toContain("separator");
+    expect(element).toContain("chevron-right");
+    expect(element).toContain('"label-empty"');
+    expect(element).toContain('"aria-current"');
+    const light = lightCssOf("spuro");
+    expect(light).toContain("fm-spuro > ");
+    expect(light).toContain("var(--fm-color-link-rest)");
+    expect(light).toContain("var(--fm-font-weight-semibold)");
+    expect(light).toContain("[aria-current]");
+    const css = cssOf("spuro");
+    expect(css).toContain("var(--fm-size-icon-small)");
+    // Abnahme 015 ① S-1: the chevron's size and colour stand on the chevron, the gap on the list
+    // of the levels — never on the nav itself, which would squeeze the path into one icon's width.
+    expect(css).toContain(
+      ':where([part="separator"]) {\n  color: var(--fm-color-text-muted);\n  inline-size: var(--fm-size-icon-small);',
+    );
+    expect(css).toContain(':where([part="items"]) {\n  gap: var(--fm-spacing-xsmall);');
+    expect(css).not.toMatch(/:where\(\[part="list"\]\) \{\n[^}]*inline-size/);
+    expect(css).toContain("list-style: none;");
+    expect(componentCssIssues("spuro.css", css)).toEqual([]);
+    expect(cssPhysicalPropertyIssues("spuro.css", css)).toEqual([]);
   });
 });

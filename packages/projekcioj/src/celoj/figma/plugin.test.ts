@@ -344,8 +344,11 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
       ...["boundary", "slots", "content"].map(() => "menuo"),
       ...["boundary", "slots", "content"].map(() => "mezurilo"),
       ...["boundary", "slots", "content"].map(() => "navigado"),
+      // Spec 015 ①: the pagxigilo and the spuro carry a Uzo like every set.
+      ...["boundary", "slots", "content"].map(() => "pagxigilo"),
       ...["boundary", "slots", "content"].map(() => "plenstato"),
       ...["boundary", "slots", "content"].map(() => "saltligilo"),
+      ...["boundary", "slots", "content"].map(() => "spuro"),
       ...["boundary", "slots", "content"].map(() => "sxaltilo"),
       ...["boundary", "slots", "content"].map(() => "sxvebilo"),
       ...["boundary", "slots", "content"].map(() => "tabelo"),
@@ -402,8 +405,11 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
       ...["menuo", "menuo", "menuo"],
       ...["mezurilo", "mezurilo", "mezurilo"],
       ...["navigado", "navigado", "navigado"],
+      // Spec 015 ①: the pagxigilo and the spuro close their three parts too.
+      ...["pagxigilo", "pagxigilo", "pagxigilo"],
       ...["plenstato", "plenstato", "plenstato"],
       ...["saltligilo", "saltligilo", "saltligilo"],
+      ...["spuro", "spuro", "spuro"],
       ...["sxaltilo", "sxaltilo", "sxaltilo"],
       ...["sxvebilo", "sxvebilo", "sxvebilo"],
       ...["tabelo", "tabelo", "tabelo"],
@@ -619,6 +625,9 @@ describe("the full plan against the strict double: fresh and into the file of be
     "menuo",
     "faldilo",
     "kompletigilo",
+    // Spec 015 ①: the pagination and the breadcrumb are new to that file too.
+    "pagxigilo",
+    "spuro",
   ]);
   const before2 = structuredClone(repo.input);
   before2.modelo.eroj = before2.modelo.eroj.filter((entry) => !BEFORE_2.has(entry.ero.name));
@@ -656,7 +665,7 @@ describe("the full plan against the strict double: fresh and into the file of be
     expect(refused(report)).toEqual([]);
   });
 
-  it("the file of before ②: 17 sets, the atributlisto without auto; then the current plan into the found file creates the 10 sets and the auto variants, nothing refused", async () => {
+  it("the file of before ②: 17 sets, the atributlisto without auto; then the current plan into the found file creates the new sets and the auto variants, nothing refused", async () => {
     const double = modelDouble();
     const first = await runWith(double, files17["figma/plugin/code.js"] ?? "");
     expect(first.components).toHaveLength(17);
@@ -2680,8 +2689,8 @@ describe("every bound paint shows the plan's colour after the first and the seco
         { set: "elekto", created: 15, updated: 0 },
         // Spec 014 ⑤: the faldilo has open × state = 6 variants.
         { set: "faldilo", created: 6, updated: 0 },
-        // Spec 014 ②: the ikono has name × size × intent = 225 variants in one state.
-        { set: "ikono", created: 225, updated: 0 },
+        // Spec 014 ②: the ikono has name × size × intent = 240 variants in one state.
+        { set: "ikono", created: 240, updated: 0 },
         // Spec 011 ③: the insigno has intent × size = 10 variants in one state.
         { set: "insigno", created: 10, updated: 0 },
         // Spec 009: the kampo has size × state = 18 variants.
@@ -2704,10 +2713,13 @@ describe("every bound paint shows the plan's colour after the first and the seco
         // Spec 011 ⑤: the navigado has state = 3 variants (current is the state of one item, E7;
         // orientation keys no part and is no axis).
         { set: "navigado", created: 3, updated: 0 },
+        // Spec 015 ①: the pagxigilo has 4 states, the spuro 3.
+        { set: "pagxigilo", created: 4, updated: 0 },
         // Spec 011 ③: the plenstato has kind = 2 variants in one state.
         { set: "plenstato", created: 2, updated: 0 },
         // Spec 014 ②: the saltligilo has state = 2 variants (rest and focus).
         { set: "saltligilo", created: 2, updated: 0 },
+        { set: "spuro", created: 3, updated: 0 },
         // Spec 010 ①: the sxaltilo has checked × size × state = 24 variants.
         { set: "sxaltilo", created: 24, updated: 0 },
         // Spec 014 ④: the sxvebilo has one variant (placement and open are no axes).
@@ -3658,7 +3670,10 @@ describe("every set lies in the frame Eroj in the section Fundamento (F-1, F-2, 
         ? [name, `mezurilo – ${UNKNOWN_EXAMPLE}`]
         : name === "navigado"
           ? [name, `navigado – ${VERTICAL_EXAMPLE}`]
-          : [name],
+          : // Spec 015 ① (O-2): the pagination on page 1, 5 and 10 of 10 beside its set.
+            name === "pagxigilo"
+            ? [name, ...[1, 5, 10].map((page) => `pagxigilo – Seite ${page} von 10`)]
+            : [name],
   );
   const layout = repoPlan.section;
   const inLayout = names.map(() => ({ frame: FRAME, action: "in-layout" }));
@@ -6274,10 +6289,10 @@ describe("icons are drawn from the glyphs of every Aspekto and switch with the b
     return { double, report, setOf };
   };
 
-  it("the set ikono: 225 variants, each the control with one glyph frame per Aspekto, visible by the brand variable, filled in the bound colour, sized by the token", async () => {
+  it("the set ikono: 240 variants, each the control with one glyph frame per Aspekto, visible by the brand variable, filled in the bound colour, sized by the token", async () => {
     const { setOf, report } = await drawn();
     const set = setOf("ikono");
-    expect(set?.children).toHaveLength(225);
+    expect(set?.children).toHaveLength(240);
     const variant = set?.children.find(
       (child) => child.name === "name=close, size=medium, intent=neutral, state=rest",
     );
@@ -6498,5 +6513,95 @@ describe("the plugin draws the overlays and binds the shadows (Spec 014 ④)", (
     expect(descendant(rest, "items-3")?.properties.characters).toBe("Löschen");
     expect(descendant(rest, "trigger-label")?.properties.characters).toBe("Weitere Aktionen");
     expect(bound(descendant(rest, "item-1"), "minHeight")).toBe("size/target/min");
+  });
+});
+
+// Abnahme 015 ① (S-1, S-2), checked in Figma too: the breadcrumb is one row of its three levels,
+// a chevron after the first two and none after the current page; the pagination one row of the
+// arrow back, the pages, the ellipsis and the arrow forth.
+describe("the plugin draws the breadcrumb in one row with a chevron between two levels (Abnahme 015 ① S-1, S-2)", () => {
+  const named = (node: DoubleNode | undefined, prefix: string): DoubleNode[] =>
+    node === undefined
+      ? []
+      : [
+          ...(node.name.startsWith(prefix) ? [node] : []),
+          ...node.children.flatMap((child) => named(child, prefix)),
+        ];
+
+  it("spuro: the control is a horizontal row of three entries; two chevrons, the last entry has none", async () => {
+    const double = modelDouble();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    const set = pageNodes(double).find((node) => node.name === "spuro");
+    expect(set?.children).toHaveLength(3);
+    for (const variant of set?.children ?? []) {
+      const control = descendant(variant, "control");
+      expect(control?.properties.layoutMode, variant.name).toBe("HORIZONTAL");
+      const entries = control?.children.filter((child) => child.name.startsWith("entry-")) ?? [];
+      expect(entries.map((entry) => entry.name)).toEqual(["entry-1", "entry-2", "entry-3"]);
+      for (const entry of entries) expect(entry.properties.layoutMode).toBe("HORIZONTAL");
+      expect(
+        named(variant, "separator-").filter((node) => /^separator-\d+$/.test(node.name)),
+      ).toHaveLength(2);
+      expect(named(entries[2], "separator-")).toEqual([]);
+    }
+  });
+
+  it("pagxigilo: the control is a horizontal row — arrow back, the pages, the ellipsis, arrow forth", async () => {
+    const double = modelDouble();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    const set = pageNodes(double).find((node) => node.name === "pagxigilo");
+    const control = descendant(set?.children[0], "control");
+    expect(control?.properties.layoutMode).toBe("HORIZONTAL");
+    expect(control?.children.map((child) => child.name)).toEqual(["arrow-1", "pages", "arrow-2"]);
+    const pages = descendant(control, "pages");
+    expect(pages?.properties.layoutMode).toBe("HORIZONTAL");
+    // The set shows 1 2 3 and the gap after the third page, in the third page's entry.
+    expect(pages?.children.map((child) => child.name)).toEqual(["entry-1", "entry-2", "entry-3"]);
+    expect(descendant(pages?.children[2], "ellipsis-3")?.properties.characters).toBe("\u2026");
+    expect(descendant(pages?.children[0], "ellipsis-1")).toBeUndefined();
+  });
+
+  // Spec 015 ① (O-2): the examples Seite 1, 5 und 10 von 10 stand beside the set, each the row
+  // the web shows for that page, the current page marked by its stroke.
+  it("pagxigilo: three examples beside the set — page 1, 5 and 10 of 10 with their gaps", async () => {
+    const double = modelDouble();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    const frame = pageNodes(double).find(
+      (node) => node.type === "FRAME" && node.getSharedPluginData("fundamento", "frame") !== "",
+    );
+    const names = frame?.children.map((child) => child.name) ?? [];
+    const at = names.indexOf("pagxigilo");
+    expect(names.slice(at, at + 4)).toEqual([
+      "pagxigilo",
+      "pagxigilo – Seite 1 von 10",
+      "pagxigilo – Seite 5 von 10",
+      "pagxigilo – Seite 10 von 10",
+    ]);
+    const row = (name: string) => {
+      const pages = descendant(
+        frame?.children.find((child) => child.name === name),
+        "pages",
+      );
+      return (pages?.children ?? []).flatMap((entry) => {
+        const n = entry.name.slice("entry-".length);
+        const number = String(descendant(entry, `items-${n}`)?.properties.characters ?? "");
+        const gap = descendant(entry, `ellipsis-${n}`);
+        return gap === undefined ? [number] : [number, "\u2026"];
+      });
+    };
+    expect(row("pagxigilo – Seite 1 von 10")).toEqual(["1", "2", "\u2026", "10"]);
+    expect(row("pagxigilo – Seite 5 von 10")).toEqual([
+      "1",
+      "\u2026",
+      "4",
+      "5",
+      "6",
+      "\u2026",
+      "10",
+    ]);
+    expect(row("pagxigilo – Seite 10 von 10")).toEqual(["1", "\u2026", "9", "10"]);
+    const before = double.snapshot();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    expect(double.snapshot()).toBe(before);
   });
 });

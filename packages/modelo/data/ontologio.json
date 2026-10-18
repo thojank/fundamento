@@ -2472,6 +2472,89 @@
         "#Aspekto",
         "#Komuna"
       ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Pagxigilo",
+      "term": "Pagxigilo",
+      "inScheme": "eroj",
+      "prefLabel": {
+        "eo": "Pagxigilo",
+        "en": "pagination",
+        "de": "Seitenblättern"
+      },
+      "altLabel": {
+        "en": [
+          "pagxigilo",
+          "pagination",
+          "pager",
+          "paging"
+        ],
+        "de": [
+          "Seitenblättern",
+          "Seitennummerierung",
+          "Blättern",
+          "pagxigilo"
+        ]
+      },
+      "definition": {
+        "en": "A pagination: moves through the pages of a long list and shows which page is current. Its items are the pages as numbers in a named landmark, the current one carries aria-current and is marked by more than colour; an arrow back and forth (ikono), an ellipsis for every gap.",
+        "de": "Ein Seitenblättern: bewegt sich durch die Seiten einer langen Liste und zeigt, welche Seite aktuell ist. Seine Einträge sind die Seiten als Zahlen in einer benannten Landmarke, die aktuelle trägt aria-current und ist durch mehr als Farbe markiert; ein Pfeil zurück und vor (ikono), eine Auslassung je Lücke."
+      },
+      "broader": [
+        "#Ero"
+      ],
+      "relations": [
+        {
+          "predicate": "references",
+          "target": "#Ikono"
+        },
+        {
+          "predicate": "references",
+          "target": "#Tabelo"
+        }
+      ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Spuro",
+      "term": "Spuro",
+      "inScheme": "eroj",
+      "prefLabel": {
+        "eo": "Spuro",
+        "en": "breadcrumb",
+        "de": "Brotkrumen"
+      },
+      "altLabel": {
+        "en": [
+          "spuro",
+          "breadcrumb",
+          "breadcrumbs",
+          "trail"
+        ],
+        "de": [
+          "Brotkrumen",
+          "Brotkrümel",
+          "Pfad",
+          "Pfadnavigation",
+          "spuro"
+        ]
+      },
+      "definition": {
+        "en": "A breadcrumb: shows where the current page sits in a hierarchy and links back up to each level. Its items are the platform's own links (ligilo) in order in a named landmark; the last is the current page, text with aria-current; a decorative chevron (ikono) between two items.",
+        "de": "Brotkrumen: zeigen, wo die aktuelle Seite in einer Hierarchie sitzt, und verlinken zu jeder Ebene darüber. Die Einträge sind die nativen Links der Plattform (ligilo) in Reihenfolge in einer benannten Landmarke; der letzte ist die aktuelle Seite, Text mit aria-current; ein dekorativer Winkel (ikono) zwischen zwei Einträgen."
+      },
+      "broader": [
+        "#Ero"
+      ],
+      "relations": [
+        {
+          "predicate": "references",
+          "target": "#Ligilo"
+        },
+        {
+          "predicate": "references",
+          "target": "#Ikono"
+        }
+      ]
     }
   ]
 }

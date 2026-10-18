@@ -30,9 +30,9 @@ const suggest = (goal: string) => {
 };
 
 describe("tabelo in the repo Modelo (section ④, G1, G2, E10)", () => {
-  it("lives in data/eroj/tabelo/skemo.json, sixteenth of twenty-seven Eroj", () => {
+  it("lives in data/eroj/tabelo/skemo.json, twenty-sixth of twenty-nine Eroj", () => {
     expect(tabelo?.file).toBe("modelo/data/eroj/tabelo/skemo.json");
-    expect(modelo.eroj[23]?.ero.name).toBe("tabelo");
+    expect(modelo.eroj[25]?.ero.name).toBe("tabelo");
   });
 
   it("has density, caption-hidden, sort (the column) and direction as props; the states of the sort button", () => {
@@ -145,7 +145,8 @@ describe("the Uzo of the tabelo (section ④, G5)", () => {
   it("names its boundaries: selection, pagination, inline edit, row menu and row tint ask a person; a sticky header is not supported", () => {
     expect(uzo?.boundary.map((entry) => [entry.case, entry.action])).toEqual([
       ["row-selection", "ask-human"],
-      ["pagination", "ask-human"],
+      // Spec 015 ①: the pagination is the pagxigilo's.
+      ["pagination", "use-instead"],
       ["inline-edit", "ask-human"],
       ["sticky-header", "not-supported"],
       ["row-tint", "ask-human"],
@@ -166,6 +167,7 @@ describe("the Uzo of the tabelo (section ④, G5)", () => {
       "ikono",
       "titolo",
       "menuo",
+      "pagxigilo",
     ]);
   });
 

@@ -111,6 +111,14 @@
         {
           "ero": "faldilo",
           "kialo": "The summary of a disclosure shows a chevron that turns with the state, because the sign says that there is more and whether it is shown."
+        },
+        {
+          "ero": "pagxigilo",
+          "kialo": "The arrows of a pagination are the icons chevron-left and chevron-right, because an arrow is a sign of the system that mirrors in right-to-left writing."
+        },
+        {
+          "ero": "spuro",
+          "kialo": "The separator of a breadcrumb is the icon chevron-right, decorative, because it points down the path."
         }
       ],
       "never": [],

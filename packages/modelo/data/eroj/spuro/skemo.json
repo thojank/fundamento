@@ -1,0 +1,221 @@
+{
+  "ero": {
+    "id": "ero_01M56F6F10RCQDAAS9X5M8ZRW4",
+    "name": "spuro",
+    "skemo": "ske_01M56F6FCXT3N0K796HNN80PD6",
+    "description": "A breadcrumb: shows where the current page sits in a hierarchy and links back up to each level. Its items are the platform's own links in order, the last the current page without a destination; a landmark of its own, named."
+  },
+  "skemo": {
+    "id": "ske_01M56F6FCXT3N0K796HNN80PD6",
+    "ero": "ero_01M56F6F10RCQDAAS9X5M8ZRW4",
+    "props": [
+      {
+        "name": "label",
+        "kind": "string",
+        "description": "The name of the landmark (Pfad), heard, never seen; empty, the words of the Modelo stand in (a11y.texts label-empty)."
+      },
+      {
+        "name": "page",
+        "kind": "string",
+        "description": "The key of the current page: the item whose key (its data-page, else its destination) is this value is the current one (SkemoSlot.entry current); empty, the last item is."
+      }
+    ],
+    "states": [
+      "rest",
+      "hover",
+      "focus"
+    ],
+    "slots": [
+      {
+        "name": "items",
+        "default": true,
+        "text": true,
+        "entry": {
+          "key": "current",
+          "equals": "page"
+        }
+      }
+    ],
+    "parts": {
+      "item": {
+        "color": {
+          "by": [
+            "current",
+            "state"
+          ]
+        },
+        "typography": {
+          "fixed": "typography.label.1"
+        },
+        "weight": {
+          "by": [
+            "current"
+          ]
+        }
+      },
+      "underline": {
+        "width": {
+          "by": [
+            "current"
+          ]
+        },
+        "color": {
+          "sameAs": "item.color"
+        }
+      },
+      "separator": {
+        "color": {
+          "fixed": "color.text.muted"
+        },
+        "size": {
+          "fixed": "size.icon.small"
+        }
+      },
+      "box": {
+        "gap": {
+          "fixed": "spacing.xsmall"
+        },
+        "height": {
+          "fixed": "size.target.min"
+        }
+      },
+      "focus-ring": {
+        "ring": {
+          "fixed": "focus.ring"
+        },
+        "offset": {
+          "fixed": "focus.offset"
+        },
+        "color": {
+          "fixed": "color.focus.inner"
+        }
+      }
+    },
+    "bindings": [
+      {
+        "part": "item",
+        "property": "color",
+        "when": {
+          "current": "false",
+          "state": "rest"
+        },
+        "token": "color.link.rest"
+      },
+      {
+        "part": "item",
+        "property": "color",
+        "when": {
+          "current": "false",
+          "state": "hover"
+        },
+        "token": "color.link.hover"
+      },
+      {
+        "part": "item",
+        "property": "color",
+        "when": {
+          "current": "false",
+          "state": "focus"
+        },
+        "token": "color.link.rest"
+      },
+      {
+        "part": "item",
+        "property": "color",
+        "when": {
+          "current": "true",
+          "state": "rest"
+        },
+        "token": "color.text.default"
+      },
+      {
+        "part": "item",
+        "property": "color",
+        "when": {
+          "current": "true",
+          "state": "hover"
+        },
+        "token": "color.text.default"
+      },
+      {
+        "part": "item",
+        "property": "color",
+        "when": {
+          "current": "true",
+          "state": "focus"
+        },
+        "token": "color.text.default"
+      },
+      {
+        "part": "item",
+        "property": "weight",
+        "when": {
+          "current": "true"
+        },
+        "token": "font.weight.semibold"
+      },
+      {
+        "part": "item",
+        "property": "weight",
+        "when": {
+          "current": "false"
+        },
+        "token": "none"
+      },
+      {
+        "part": "underline",
+        "property": "width",
+        "when": {
+          "current": "true"
+        },
+        "token": "none"
+      },
+      {
+        "part": "underline",
+        "property": "width",
+        "when": {
+          "current": "false"
+        },
+        "token": "border.width.default"
+      }
+    ],
+    "a11y": {
+      "role": "navigation",
+      "name": [
+        "prop:label"
+      ],
+      "states": {
+        "current": [
+          "aria-current"
+        ]
+      },
+      "keys": [],
+      "texts": {
+        "label-empty": {
+          "de": "Pfad",
+          "en": "Breadcrumb"
+        }
+      }
+    },
+    "goals": [
+      {
+        "goal": "breadcrumb",
+        "keywords": {
+          "en": [
+            "breadcrumb",
+            "breadcrumbs",
+            "trail"
+          ],
+          "de": [
+            "brotkrumen",
+            "brotkrümel",
+            "pfad",
+            "pfadnavigation"
+          ]
+        },
+        "props": {},
+        "regulo": "link-label-names-destination"
+      }
+    ]
+  }
+}

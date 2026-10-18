@@ -361,6 +361,28 @@ export const METER_UNKNOWN_TEXT = "nicht geprüft";
  */
 export const VERTICAL_EXAMPLE = "vertikal";
 
+/** The number of pages of the pagination's examples (Spec 015 ①, O-2: „von 10"). */
+export const PAGINATION_EXAMPLE_TOTAL = 10;
+
+/** The gap of a pagination's row, written as the web's element writes it. */
+export const PAGINATION_GAP = "\u2026";
+
+/**
+ * The words of a pagination's row on `page` of `total` (Spec 015 ①): the first and the last page,
+ * the current one and `siblings` on either side, the gap sign for every gap — as the web's
+ * element draws them, so both pictures show the same row.
+ */
+export function paginationWords(page: number, total: number, siblings: number): string[] {
+  const low = Math.max(2, page - siblings);
+  const high = Math.min(total - 1, page + siblings);
+  const words = ["1"];
+  if (low > 2) words.push(PAGINATION_GAP);
+  for (let n = low; n <= high; n += 1) words.push(String(n));
+  if (high < total - 1) words.push(PAGINATION_GAP);
+  if (total > 1) words.push(String(total));
+  return words;
+}
+
 /**
  * The texts of a tab list's set besides the tabs (Spec 011 ⑤): the word of the panel — the
  * Vitrino's panel shows the word of the first tab ("Eins"), one source for both pictures (F-5).
@@ -500,7 +522,9 @@ export type FigmaStructure =
   | "tooltip"
   | "popover"
   | "menu"
-  | "disclosure";
+  | "disclosure"
+  | "pagination"
+  | "breadcrumb";
 
 /**
  * A radio group (Spec 010 ③, D-07) is a choice: the label (the question) above a column of
@@ -549,7 +573,13 @@ export const structureOf = (role: string, parts: readonly string[] = []): FigmaS
                   : role === "list"
                     ? "list"
                     : role === "navigation"
-                      ? "nav"
+                      ? // Spec 015 ① (plan ① D-05): a navigation with an ellipsis part is a
+                        // pagination, with a separator part a breadcrumb.
+                        parts.includes("ellipsis")
+                        ? "pagination"
+                        : parts.includes("separator")
+                          ? "breadcrumb"
+                          : "nav"
                       : role === "tablist"
                         ? "tabs"
                         : // Spec 014 ② (plan ② D-08): an icon (role img) is the glyph of every
@@ -766,6 +796,18 @@ export interface FigmaComponentSet {
    * in the frame „Eroj" right after the set (F-8). The backdrop is drawn here only — the
    * variants are the surface — and this is where the plan's `backdrop.color` is applied.
    */
+  /**
+   * The examples beside a pagination's set (Spec 015 ①, O-2, the spec's „Seite 1, 5 und 10 von
+   * 10"): the default variant drawn once more per example with the pages the web shows for that
+   * page — the first, the last, the current one and its siblings, „…" for every gap — the current
+   * one by its index among them.
+   */
+  examples?: {
+    name: string;
+    variant: Record<string, string>;
+    padding: number;
+    pages: { texts: string[]; selected: number };
+  }[];
   example?: {
     name: string;
     variant: Record<string, string>;
@@ -1647,6 +1689,9 @@ function iconsOf(
     const intent = combination.intent;
     return intent === undefined ? undefined : { icon: intent };
   }
+  // A pagination (Spec 015 ①): the arrows back and forth; a breadcrumb: the chevron between two.
+  if (structure === "pagination") return { prev: "chevron-left", next: "chevron-right" };
+  if (structure === "breadcrumb") return { separator: "chevron-right" };
   // A disclosure (Spec 014 ⑤): the chevron points down where open, right where closed.
   if (structure === "disclosure" && skemo.parts.indicator !== undefined) {
     return { indicator: combination.open === "true" ? "chevron-down" : "chevron-right" };
@@ -1834,7 +1879,15 @@ function componentSetOf(
     ),
   ];
   const keyedByEntry = (part: string, property: string): boolean => {
-    const source = skemo.parts[part]?.[property as keyof (typeof skemo.parts)[string]];
+    const own = skemo.parts[part]?.[property as keyof (typeof skemo.parts)[string]];
+    // A property that is the same as another (Spec 015 ①: the underline of a breadcrumb's item in
+    // the item's colour) follows that one's keys.
+    const [otherPart = "", otherProperty = ""] =
+      own !== undefined && "sameAs" in own ? own.sameAs.split(".") : [];
+    const source =
+      own !== undefined && "sameAs" in own
+        ? skemo.parts[otherPart]?.[otherProperty as keyof (typeof skemo.parts)[string]]
+        : own;
     return (
       source !== undefined && "by" in source && source.by.some((key) => entryKeys.includes(key))
     );
@@ -2107,6 +2160,24 @@ function componentSetOf(
     backdrop === undefined || isBindingKeyword(backdrop.token)
       ? undefined
       : paintOf(backdrop.token, resolutions, base);
+  // Spec 015 ① (O-2): the pagination on page 1, 5 and 10 of 10, with the web's own choice of
+  // pages (the Skemo's default siblings).
+  const examples =
+    structure === "pagination"
+      ? [1, 5, 10].map((page) => {
+          const texts = paginationWords(
+            page,
+            PAGINATION_EXAMPLE_TOTAL,
+            Number(skemo.props.find((prop) => prop.name === "siblings")?.default ?? 1),
+          );
+          return {
+            name: `${entry.ero.name} – Seite ${page} von ${PAGINATION_EXAMPLE_TOTAL}`,
+            variant: defaults,
+            padding: parityPx(base[SET_GAP]?.value),
+            pages: { texts, selected: texts.indexOf(String(page)) },
+          };
+        })
+      : undefined;
   const example =
     structure === "dialog" && backdrop !== undefined && backdropPaint !== undefined
       ? {
@@ -2182,13 +2253,21 @@ function componentSetOf(
   // or active.
   const [entryKey] = entryKeys;
   // The suggestions of a field with a listbox (Spec 014 ⑤): rows like a choice's options.
+  // Spec 015 ① (plan ① D-05): a pagination shows the pages 1, 2, 3 (the first current), a
+  // breadcrumb the Vitrino's three words with the last the current page.
   const options =
     (structure === "choice" ||
       structure === "nav" ||
       structure === "tabs" ||
+      structure === "pagination" ||
+      structure === "breadcrumb" ||
       (structure === "field" && skemo.parts.listbox !== undefined)) &&
     entryKey !== undefined
-      ? { key: entryKey, texts: [...VITRINO_OPTIONS], selected: 0 }
+      ? structure === "pagination"
+        ? { key: entryKey, texts: ["1", "2", "3"], selected: 0 }
+        : structure === "breadcrumb"
+          ? { key: entryKey, texts: [...VITRINO_OPTIONS], selected: VITRINO_OPTIONS.length - 1 }
+          : { key: entryKey, texts: [...VITRINO_OPTIONS], selected: 0 }
       : undefined;
   // The confirming action of a dialog looks like the butono it composes (Abnahme Spec 011 ②,
   // F-5): its roles read from the butono's Skemo in the same Modelo.
@@ -2240,6 +2319,7 @@ function componentSetOf(
     ...(sign === undefined ? {} : { sign }),
     ...(options === undefined ? {} : { entry: options }),
     ...(example === undefined ? {} : { example }),
+    ...(examples === undefined ? {} : { examples }),
     ...(composed === undefined ? {} : { composed }),
     ...(toggles.length === 0 ? {} : { toggles }),
     ...(structure === "meter" ? { meter: { share: meterShareOf(skemo) } } : {}),
@@ -2259,7 +2339,17 @@ function componentSetOf(
     // An icon and a separator carry no text (Spec 014 ②): no label property.
     ...(structure === "icon" || structure === "separator"
       ? {}
-      : { label: { property: "label", defaultValue: labelDefaultOf(skemo.a11y.role, structure) } }),
+      : {
+          label: {
+            property: "label",
+            // The Modelo's own word where the label is empty (a11y.texts label-empty: the menu's
+            // trigger, Spec 014 ④; the landmarks of Spec 015 ①) names the set's label.
+            defaultValue:
+              (structure === "pagination" || structure === "breadcrumb"
+                ? skemo.a11y.texts?.["label-empty"]?.de
+                : undefined) ?? labelDefaultOf(skemo.a11y.role, structure),
+          },
+        }),
     fonts,
     ...(surface === undefined ? {} : { surface }),
   };

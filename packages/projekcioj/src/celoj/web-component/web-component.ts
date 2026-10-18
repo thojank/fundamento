@@ -125,13 +125,22 @@ const isMeter = (skemo: Skemo): boolean => hostOf(skemo.a11y.role) === "meter";
  * A light-DOM host (Spec 011 ④, D-09, D-10, E10): the platform's own table or list stays in the
  * light DOM; the Ero styles it through a stylesheet the document adopts, scoped to the host.
  */
-export const isLight = (skemo: Skemo): boolean => hostOf(skemo.a11y.role) === "light";
+export const isLight = (skemo: Skemo): boolean =>
+  hostOf(skemo.a11y.role) === "light" && !isPagination(skemo);
 
 /** The parts of a light-DOM host the shadow tree holds: the scroll region and its edge. */
 const LIGHT_SHADOW_PARTS: ReadonlySet<string> = new Set(["region", "border", "focus-ring"]);
 
+/** A pagination (Spec 015 ①, plan ① D-03): a navigation that draws its pages itself (an ellipsis part). */
+export const isPagination = (skemo: Skemo): boolean =>
+  skemo.a11y.role === "navigation" && skemo.parts.ellipsis !== undefined;
+
+/** A breadcrumb (Spec 015 ①, plan ① D-04): a navigation with a separator part between its items. */
+export const isBreadcrumb = (skemo: Skemo): boolean =>
+  skemo.a11y.role === "navigation" && skemo.parts.separator !== undefined;
+
 /** A navigation (Spec 011 ⑤, D-07): the platform's own links in the light DOM, the nav in the shadow. */
-const isNav = (skemo: Skemo): boolean => skemo.a11y.role === "navigation";
+const isNav = (skemo: Skemo): boolean => skemo.a11y.role === "navigation" && !isPagination(skemo);
 
 /**
  * Whether a part property of a light-DOM host stands in the shadow sheet: the region of a table
@@ -139,6 +148,11 @@ const isNav = (skemo: Skemo): boolean => skemo.a11y.role === "navigation";
  * stands in the document's stylesheet (`lightStylesheetOf`).
  */
 function lightShadowProperty(skemo: Skemo, part: string, property: string): boolean {
+  // A breadcrumb (Spec 015 ①): the list's gap and the chevrons are the shadow's, the links the
+  // page's — the height of the box is the links' minimum height, the size of a target (2.5.8).
+  if (isBreadcrumb(skemo)) {
+    return (part === "box" && property !== "height") || part === "separator";
+  }
   if (isNav(skemo)) return part === "box" && property === "gap";
   return LIGHT_SHADOW_PARTS.has(part);
 }
@@ -182,6 +196,28 @@ const TAB_STATES: Readonly<Record<string, string | undefined>> = {
  * (its block-end edge) are the row, with the state of one tab (active, E7: aria-selected) and its
  * hover, focus and disabled; the panel is its own element.
  */
+/**
+ * The selector of a part of a pagination (Spec 015 ①, D-03): the combination stands on the nav;
+ * the item by its entry (aria-current) and state, its border on the item too; the ellipsis and
+ * the arrows (the icons) their own elements; the box the nav and the list.
+ */
+function paginationPartSelector(part: string, data: string, entry: string, state: string): string {
+  const root = `[part="list"]${data}`;
+  const item = `[part="item"]${entry}${PAGINATION_STATES[state] ?? ""}`;
+  if (part === "item" || part === "border") return `:where(${root} ${item})`;
+  if (part === "focus-ring") return `:where(${root} [part="item"]:focus-visible)`;
+  if (part === "box") return `:where(${root}, ${root} [part="pages"])`;
+  return `:where(${root}) [part="${part}"]`;
+}
+
+/** The states of a pagination's item: disabled is aria-disabled (a link has no :disabled). */
+const PAGINATION_STATES: Readonly<Record<string, string | undefined>> = {
+  rest: "",
+  hover: ":hover",
+  focus: ":focus-visible",
+  disabled: '[aria-disabled="true"]',
+};
+
 function tabsPartSelector(part: string, data: string, entry: string, state: string): string {
   const root = `[part="control"]${data}`;
   const row = `[part="tab"]${entry}${TAB_STATES[state] ?? ""}`;
@@ -358,6 +394,9 @@ function keywordDeclarations(part: string, property: string, token: string): str
   }
   // The underline is switched off; a minimum that is none is simply not written.
   if (part === "underline" && property === "width") return ["text-decoration-line: none;"];
+  // A border whose width is none draws no border (Spec 015 ①, B-6: a page of a pagination that
+  // is not current) — not writing the width would leave the platform's own border of a button.
+  if (part === "border" && property === "width" && token === "none") return ["border-style: none;"];
   // A colour that is none (Spec 010 ②, D-08): the part is not drawn in that combination — the
   // check mark of an unticked box — and keeps its place, so the box does not change its size.
   if (token === "none" && (property === "color" || property === "fill")) return ["opacity: 0;"];
@@ -670,20 +709,30 @@ const meterStructure: string = [
  * plain frame. Everything else stands in the document's stylesheet (`lightStylesheetOf`).
  */
 const lightStructure = (skemo: Skemo): string =>
-  isNav(skemo)
+  isBreadcrumb(skemo)
     ? [
-        // A navigation (Spec 011 ⑤, D-07): the nav is a row of items that wraps (the order stays);
-        // vertical stacks them along the inline size of the host.
+        // A breadcrumb (Spec 015 ①, plan ① D-04): the list is a row of its items that wraps; every
+        // item holds the slotted link and the chevron after it.
         ":host { display: block; }",
-        ':where([part="list"]) { display: flex; flex-wrap: wrap; align-items: center; }',
-        ':where([part="list"][data-orientation="vertical"]) { flex-direction: column; align-items: stretch; }',
-      ].join("\n")
-    : [
-        ":host { display: block; }",
-        ':where([part="region"]) { display: block; overflow-x: auto; box-sizing: border-box; border-style: solid; }',
-        ':where([part="region"]:focus:not(:focus-visible)) { outline-width: 0; }',
         ':where([part="list"]) { display: block; }',
-      ].join("\n");
+        ':where([part="items"]) { display: flex; flex-wrap: wrap; align-items: center; list-style: none; margin: 0; padding: 0; }',
+        ':where([part="entry"]) { display: inline-flex; align-items: center; }',
+        ':where([part="separator"]) { flex: none; }',
+      ].join("\n")
+    : isNav(skemo)
+      ? [
+          // A navigation (Spec 011 ⑤, D-07): the nav is a row of items that wraps (the order stays);
+          // vertical stacks them along the inline size of the host.
+          ":host { display: block; }",
+          ':where([part="list"]) { display: flex; flex-wrap: wrap; align-items: center; }',
+          ':where([part="list"][data-orientation="vertical"]) { flex-direction: column; align-items: stretch; }',
+        ].join("\n")
+      : [
+          ":host { display: block; }",
+          ':where([part="region"]) { display: block; overflow-x: auto; box-sizing: border-box; border-style: solid; }',
+          ':where([part="region"]:focus:not(:focus-visible)) { outline-width: 0; }',
+          ':where([part="list"]) { display: block; }',
+        ].join("\n");
 
 /**
  * Layout of tabs (Spec 011 ⑤, D-08), keywords only: the host is a block that takes the width of
@@ -692,6 +741,21 @@ const lightStructure = (skemo: Skemo): string =>
  * every tab a button without the platform's border, its block-end edge the indicator; the panel a
  * block.
  */
+/**
+ * Layout of a pagination (Spec 015 ①, plan ① D-03), keywords only: the host is a block; the nav a
+ * row that wraps; the pages a list without marks; every item a button or a link centred in its
+ * box, its border solid (the current page's is bound), no decoration; an ellipsis centred.
+ */
+const paginationStructure: string = [
+  ":host { display: block; }",
+  ':where([part="list"]) { display: flex; flex-wrap: wrap; align-items: center; }',
+  ':where([part="pages"]) { display: flex; flex-wrap: wrap; align-items: center; list-style: none; margin: 0; padding: 0; }',
+  ':where([part="item"]) { display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; margin: 0; border-style: solid; appearance: none; cursor: pointer; text-decoration: none; }',
+  ':where([part="item"]:focus:not(:focus-visible)) { outline-width: 0; }',
+  ':where([part="item"][aria-disabled="true"]) { cursor: not-allowed; }',
+  ':where([part="ellipsis"]) { display: inline-flex; align-items: center; justify-content: center; }',
+].join("\n");
+
 const tabsStructure: string = [
   ":host { display: block; }",
   ':where([part="control"]) { display: flex; flex-wrap: nowrap; align-items: stretch; overflow-x: auto; box-sizing: border-box; border-block-end-style: solid; }',
@@ -897,7 +961,8 @@ export function lightStylesheetOf(skemo: Skemo, tag: string): string {
     else found[1].push(...lines);
   };
   const table = skemo.a11y.role === "table";
-  const nav = isNav(skemo);
+  const breadcrumb = isBreadcrumb(skemo);
+  const nav = isNav(skemo) && !breadcrumb;
   // Where a part of the table lies (Spec 011 ④, D-09): the head row, every cell, the row headers,
   // the sort button in a header and its sign. Where a part of a navigation lies (Spec 011 ⑤,
   // D-07): every part is the link — item (its fill), items (its text), the underline, the box —
@@ -909,6 +974,22 @@ export function lightStylesheetOf(skemo: Skemo, tag: string): string {
     entry = "",
     property = "",
   ): string | undefined => {
+    // A breadcrumb (Spec 015 ①, D-04): every item of the light DOM — a link or, the current page,
+    // a text — carries the item and its underline; box and separator stand in the shadow.
+    if (breadcrumb) {
+      const item = `${tag}${data} > *${entry}`;
+      switch (part) {
+        case "item":
+        case "underline":
+          return `${item}${state}`;
+        case "box":
+          return property === "height" ? item : undefined;
+        case "focus-ring":
+          return `${item}:focus-visible`;
+        default:
+          return undefined;
+      }
+    }
     if (nav) {
       const a = `${tag}${data} > a${entry}`;
       switch (part) {
@@ -1037,31 +1118,32 @@ export function lightStylesheetOf(skemo: Skemo, tag: string): string {
       }
     }
   }
-  const structure = nav
-    ? [
-        `${tag} > a { display: inline-flex; align-items: center; box-sizing: border-box; white-space: nowrap; transition-property: background-color, color, text-decoration-color; }`,
-        `${tag} > a:focus:not(:focus-visible) { outline-width: 0; }`,
-      ]
-    : table
+  const structure =
+    nav || breadcrumb
       ? [
-          `${tag} > table { border-collapse: collapse; caption-side: top; }`,
-          `${tag} > table :is(td, th) { text-align: start; box-sizing: border-box; border-block-end-style: solid; }`,
-          `${tag} > table :is(td, th)[numeric] { text-align: end; font-variant-numeric: tabular-nums; }`,
-          `${tag} > table > thead th > button { display: inline-flex; align-items: center; appearance: none; border-style: none; cursor: pointer; font: inherit; color: inherit; text-align: inherit; }`,
-          `${tag} > table > thead th > button > fm-ikono { flex: none; }`,
-          `${tag} > table > tbody > tr[data-fm-empty] > td { text-align: center; }`,
-          `${tag} ${HIDDEN_TEXT}`,
+          `${tag} > ${breadcrumb ? "*" : "a"} { display: inline-flex; align-items: center; box-sizing: border-box; white-space: nowrap; transition-property: background-color, color, text-decoration-color; }`,
+          `${tag} > ${breadcrumb ? "*" : "a"}:focus:not(:focus-visible) { outline-width: 0; }`,
         ]
-      : [
-          `${tag} > dl { display: grid; margin: 0; }`,
-          `${tag} > dl > :is(dt, dd) { margin: 0; }`,
-          `${tag}[data-layout="columns"] > dl { grid-template-columns: max-content auto; }`,
-          `${tag}[data-layout="stacked"] > dl { grid-template-columns: auto; }`,
-          // Spec 014 ① (plan ① D-03): auto is drawn as the wide case until the element has
-          // measured its container and written columns or stacked.
-          `${tag}[data-layout="auto"] > dl { grid-template-columns: max-content auto; }`,
-          `${tag} ${HIDDEN_TEXT}`,
-        ];
+      : table
+        ? [
+            `${tag} > table { border-collapse: collapse; caption-side: top; }`,
+            `${tag} > table :is(td, th) { text-align: start; box-sizing: border-box; border-block-end-style: solid; }`,
+            `${tag} > table :is(td, th)[numeric] { text-align: end; font-variant-numeric: tabular-nums; }`,
+            `${tag} > table > thead th > button { display: inline-flex; align-items: center; appearance: none; border-style: none; cursor: pointer; font: inherit; color: inherit; text-align: inherit; }`,
+            `${tag} > table > thead th > button > fm-ikono { flex: none; }`,
+            `${tag} > table > tbody > tr[data-fm-empty] > td { text-align: center; }`,
+            `${tag} ${HIDDEN_TEXT}`,
+          ]
+        : [
+            `${tag} > dl { display: grid; margin: 0; }`,
+            `${tag} > dl > :is(dt, dd) { margin: 0; }`,
+            `${tag}[data-layout="columns"] > dl { grid-template-columns: max-content auto; }`,
+            `${tag}[data-layout="stacked"] > dl { grid-template-columns: auto; }`,
+            // Spec 014 ① (plan ① D-03): auto is drawn as the wide case until the element has
+            // measured its container and written columns or stacked.
+            `${tag}[data-layout="auto"] > dl { grid-template-columns: max-content auto; }`,
+            `${tag} ${HIDDEN_TEXT}`,
+          ];
   return `${structure.join("\n")}\n${rules
     .map(([selector, body]) => `${selector} {\n${body.map((line) => `  ${line}`).join("\n")}\n}`)
     .join("\n")}\n`;
@@ -1285,34 +1367,36 @@ export function stylesheetOf(skemo: Skemo, uzo?: Uzo): string {
                       ? statusStructure(skemo)
                       : isMeter(skemo)
                         ? meterStructure
-                        : isLight(skemo)
-                          ? lightStructure(skemo)
-                          : isTabs(skemo)
-                            ? tabsStructure
-                            : isDisclosure(skemo)
-                              ? disclosureStructure
-                              : isField(skemo)
-                                ? `${fieldStructure(disables, isSelect(skemo), isTextarea(skemo))}${isSuggest(skemo) ? `\n${suggestStructure}` : ""}`
-                                : isGroup(skemo)
-                                  ? groupStructure(
-                                      disables,
-                                      skemo.parts["required-mark"] !== undefined,
-                                    )
-                                  : isToggle(skemo)
-                                    ? toggleStructure(
+                        : isPagination(skemo)
+                          ? paginationStructure
+                          : isLight(skemo)
+                            ? lightStructure(skemo)
+                            : isTabs(skemo)
+                              ? tabsStructure
+                              : isDisclosure(skemo)
+                                ? disclosureStructure
+                                : isField(skemo)
+                                  ? `${fieldStructure(disables, isSelect(skemo), isTextarea(skemo))}${isSuggest(skemo) ? `\n${suggestStructure}` : ""}`
+                                  : isGroup(skemo)
+                                    ? groupStructure(
                                         disables,
-                                        uzo?.layout.wrap !== undefined &&
-                                          uzo.layout.wrap !== "never",
-                                        skemo.slots.some(
-                                          (slot) => slot.default !== true && slot.text === true,
-                                        ),
                                         skemo.parts["required-mark"] !== undefined,
                                       )
-                                    : structure(
-                                        uzo?.layout.wrap === "with-text",
-                                        disables,
-                                        bordered,
-                                      );
+                                    : isToggle(skemo)
+                                      ? toggleStructure(
+                                          disables,
+                                          uzo?.layout.wrap !== undefined &&
+                                            uzo.layout.wrap !== "never",
+                                          skemo.slots.some(
+                                            (slot) => slot.default !== true && slot.text === true,
+                                          ),
+                                          skemo.parts["required-mark"] !== undefined,
+                                        )
+                                      : structure(
+                                          uzo?.layout.wrap === "with-text",
+                                          disables,
+                                          bordered,
+                                        );
   // A skip link adds its place above the page to a control's structure (Spec 014 ②, D-07).
   const floating = isSkip(skemo) ? `\n${skipStructure}` : "";
   return `${base}${floating}\n${[...tokenRules, ...undrawn].join("\n")}\n`;
@@ -1342,9 +1426,18 @@ function selectorOf(
     .filter((key) => key !== STATE_KEY && !isEntryKey(skemo, key))
     .map((key) => `[data-${key}="${combination[key] ?? ""}"]`)
     .join("");
+  // The state of one entry (E7) as the attribute the Skemo names. aria-current is no boolean: it
+  // is present ("page") on the current entry and absent elsewhere (Spec 015 ①, the pagination),
+  // as the light hosts read it; aria-selected and aria-checked say true or false.
   const entry = keys
     .filter((key) => isEntryKey(skemo, key))
-    .map((key) => `[${skemo.a11y.states[key]?.[0] ?? `data-${key}`}="${combination[key] ?? ""}"]`)
+    .map((key) => {
+      const attribute = skemo.a11y.states[key]?.[0] ?? `data-${key}`;
+      if (attribute === "aria-current") {
+        return combination[key] === "true" ? `[${attribute}]` : `:not([${attribute}])`;
+      }
+      return `[${attribute}="${combination[key] ?? ""}"]`;
+    })
     .join("");
   if (isGroup(skemo)) {
     return groupPartSelector(part, property, data, entry, combination[STATE_KEY] ?? "rest");
@@ -1365,6 +1458,11 @@ function selectorOf(
   // The shadow of a light-DOM host (Spec 011 ④, E10): the region and its edge, the ring on focus;
   // of a navigation (Spec 011 ⑤) the nav with the gap of its items.
   if (isLight(skemo)) {
+    // A breadcrumb (Spec 015 ①, Abnahme S-1): the chevron's size and colour on the chevron, the
+    // gap on the list of the levels — the nav keeps its width, so the levels stand in one line.
+    if (isBreadcrumb(skemo)) {
+      return part === "separator" ? ':where([part="separator"])' : ':where([part="items"])';
+    }
     if (isNav(skemo)) return ':where([part="list"])';
     return part === "focus-ring"
       ? ':where([part="region"]:focus-visible)'
@@ -1381,6 +1479,8 @@ function selectorOf(
   }
   if (isDisclosure(skemo))
     return disclosurePartSelector(part, data, combination[STATE_KEY] ?? "rest");
+  if (isPagination(skemo))
+    return paginationPartSelector(part, data, entry, combination[STATE_KEY] ?? "rest");
   const state = STATE_SELECTORS[combination[STATE_KEY] ?? "rest"] ?? "";
   if (isField(skemo)) return fieldPartSelector(part, property, data, state, isSelect(skemo), entry);
   if (isToggle(skemo)) return togglePartSelector(part, property, data, state);
@@ -1421,8 +1521,11 @@ export function elementNamesOf(
       isMultiline(entry.skemo),
       isPopover(entry.skemo),
       isSuggest(entry.skemo),
+      isPagination(entry.skemo),
     ),
     role: entry.skemo.a11y.role,
+    // Spec 015 ① (plan ① D-04): the breadcrumb is a light host with a list in its shadow.
+    breadcrumb: isBreadcrumb(entry.skemo),
     marked: entry.skemo.parts["required-mark"] !== undefined,
     // Spec 011 ③: a live region turns its indicator and shows a dismiss butono where the Skemo
     // has the parts.
@@ -1543,9 +1646,12 @@ export function stylesheetInventory(moduleText: string): ParityItem {
     // the box itself — the box is the mark plus its border).
     // A light-DOM host (Spec 011 ④, E10) writes the combination on itself: fm-tabelo[data-…].
     // An icon (Spec 014 ②): its glyph is its control; a heading (Spec 014 ③): its text.
+    // A pagination (Spec 015 ①): the states stand on its items in the list (the navigado's own
+    // list carries only its orientation, no state and no prop of the Skemo's).
     if (
       !selector.includes('[part="control"]') &&
       !selector.includes('[part="field"]') &&
+      !selector.includes('[part="list"] [part="item"]') &&
       !selector.includes('[part="glyph"]') &&
       !selector.includes('[part="text"]') &&
       !selector.trim().startsWith("fm-")

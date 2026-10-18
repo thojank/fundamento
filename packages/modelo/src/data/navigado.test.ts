@@ -29,7 +29,7 @@ const suggest = (goal: string) => {
 };
 
 describe("navigado in the repo Modelo (section ⑤, G1, G2, E7)", () => {
-  it("lives in data/eroj/navigado/skemo.json, among twenty-seven Eroj", () => {
+  it("lives in data/eroj/navigado/skemo.json, among twenty-nine Eroj", () => {
     expect(navigado?.file).toBe("modelo/data/eroj/navigado/skemo.json");
     expect(modelo.eroj.map((entry) => entry.ero.name)).toEqual([
       "apartigilo",
@@ -51,8 +51,10 @@ describe("navigado in the repo Modelo (section ⑤, G1, G2, E7)", () => {
       "menuo",
       "mezurilo",
       "navigado",
+      "pagxigilo",
       "plenstato",
       "saltligilo",
+      "spuro",
       "sxaltilo",
       "sxvebilo",
       "tabelo",
@@ -188,7 +190,8 @@ describe("the Uzo of the navigado (section ⑤, G5)", () => {
     expect(uzo?.boundary.map((entry) => [entry.case, entry.action])).toEqual([
       ["submenu", "ask-human"],
       ["collapsed-mobile", "not-supported"],
-      ["breadcrumb", "ask-human"],
+      // Spec 015 ①: the breadcrumb is the spuro's.
+      ["breadcrumb", "use-instead"],
     ]);
     for (const entry of [...(uzo?.instead ?? []), ...(uzo?.boundary ?? [])]) {
       expect(entry.kialo).toMatch(/because/);
@@ -229,6 +232,7 @@ describe("the Reguloj of the navigado (G6, E5)", () => {
       "ligilo",
       "navigado",
       "saltligilo",
+      "spuro",
     ]);
     expect(named("link-not-color-only")?.appliesTo?.eroj).toEqual(["ligilo", "navigado"]);
     expect(named("spacing-owned-by-container")?.appliesTo?.eroj).toContain("navigado");
@@ -307,7 +311,7 @@ describe("suggest_ero of the navigation (Gvidanto)", () => {
     expect(suggest("eine Seitenleiste").suggestion).toEqual({ ero: "navigado", props: {} });
   });
 
-  it("'ein einzelner Verweis' is the ligilo; a hamburger menu stops; a breadcrumb asks a person", () => {
+  it("'ein einzelner Verweis' is the ligilo; a hamburger menu stops; a breadcrumb is the spuro's", () => {
     expect(suggest("ein einzelner Verweis").suggestion).toEqual({ ero: "ligilo", props: {} });
     // "Menü" is the navigado's own goal word since Nachlese 3 G1: beside the own boundary it is
     // a conflict a person decides (Spec 011 ② D-10); the boundary alone answers "Hamburger".
@@ -316,10 +320,12 @@ describe("suggest_ero of the navigation (Gvidanto)", () => {
       case: "collapsed-mobile",
       action: "not-supported",
     });
+    // Spec 015 ①: the breadcrumb is the spuro's, with the navigado's reason.
+    expect(suggest("Brotkrumen über der Seite").suggestion).toEqual({ ero: "spuro", props: {} });
     expect(suggest("Brotkrumen über der Seite").boundary).toMatchObject({
       ero: "navigado",
       case: "breadcrumb",
-      action: "ask-human",
+      action: "use-instead",
     });
   });
 });

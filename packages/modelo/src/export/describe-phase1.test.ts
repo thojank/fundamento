@@ -57,7 +57,7 @@ describe("describeModelo (D-14)", () => {
   it("names Dimensioj, Aspektoj and counts per group in the sentence", () => {
     const { sentence, tokensByGroup } = describeModelo(project);
     expect(sentence).toMatch(
-      /^Fundamento v0\.1\.0: six Dimensioj \(aspekto, viewport, density, color-scheme, contrast, motion\), two Aspektoj \(`komuna`: reference, MIT, Geist; `ekzemplo`: external, MIT, Archivo\), \d+ tokens in \w+ types \(.+\), \w+ rules with reasons \(\w+ automatic\), \w+ Jugxoj, twenty-seven Eroj \(`apartigilo`, `atributlisto`, `avizo`, `butono`, `dialogo`, `elektilo`, `elekto`, `faldilo`, `ikono`, `insigno`, `kampo`, `kompletigilo`, `konsileto`, `langetaro`, `ligilo`, `markobutono`, `menuo`, `mezurilo`, `navigado`, `plenstato`, `saltligilo`, `sxaltilo`, `sxvebilo`, `tabelo`, `tekstareo`, `teksto`, `titolo`\)\. Ask explain why a value is what it is\.$/,
+      /^Fundamento v0\.1\.0: six Dimensioj \(aspekto, viewport, density, color-scheme, contrast, motion\), two Aspektoj \(`komuna`: reference, MIT, Geist; `ekzemplo`: external, MIT, Archivo\), \d+ tokens in \w+ types \(.+\), \w+ rules with reasons \(\w+ automatic\), \w+ Jugxoj, twenty-nine Eroj \(`apartigilo`, `atributlisto`, `avizo`, `butono`, `dialogo`, `elektilo`, `elekto`, `faldilo`, `ikono`, `insigno`, `kampo`, `kompletigilo`, `konsileto`, `langetaro`, `ligilo`, `markobutono`, `menuo`, `mezurilo`, `navigado`, `pagxigilo`, `plenstato`, `saltligilo`, `spuro`, `sxaltilo`, `sxvebilo`, `tabelo`, `tekstareo`, `teksto`, `titolo`\)\. Ask explain why a value is what it is\.$/,
     );
     expect(sentence).toContain(`color ${tokensByGroup.color}`);
     expect(sentence).toContain(`typography ${tokensByGroup.typography}`);

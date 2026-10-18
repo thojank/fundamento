@@ -34,7 +34,7 @@
 // on a frame with the three other sides at 0, as the rows of a table are.
 
 import { VITRINO_TRIGGER_TEXT } from "../vitrino/datumoj.js";
-import { type FigmaPlan, TEXT_CASE_VARIES } from "./figma.js";
+import { type FigmaPlan, PAGINATION_GAP, TEXT_CASE_VARIES } from "./figma.js";
 
 /** The nodes of one variant the plugin draws, outside in (F11). */
 type PartNode =
@@ -75,6 +75,23 @@ type PartNode =
   // suggestions, its rows and the no-results text.
   | "summary"
   | "summary-label"
+  // A pagination (Spec 015 ①, plan ① D-05): the arrows as items of their own (`arrow-1` back,
+  // `arrow-2` forth) holding the glyph frames (`prev`, `next`), the pages in a row of their own,
+  // the ellipsis a text in a box; a breadcrumb: a chevron (`separator-1` …) after every level but
+  // the last.
+  | "pages"
+  | "ellipsis-*"
+  | "ellipsis-box-*"
+  | "prev"
+  | "next"
+  | "prev-glyph-*"
+  | "prev-mark-*"
+  | "next-glyph-*"
+  | "next-mark-*"
+  | "arrow-*"
+  | "separator-*"
+  | "separator-*-glyph-*"
+  | "separator-*-mark-*"
   | "listbox"
   | "suggestion-*"
   | "suggestions-*"
@@ -545,6 +562,72 @@ const STRUCTURE_BINDINGS: Readonly<Record<string, Readonly<Record<string, readon
   // and the text of the item in its colour and role; the underline as the item's bottom stroke
   // — its width by current (none where not current: the weight stays 0), its colour the stroke's
   // paint. No text decoration: the web draws a block-end edge here, not a line under the word.
+  // A pagination (Spec 015 ①, plan ① D-05): every page an item — fill and colour by current and
+  // state, minimum height and width, inline padding, radius, the current page's border its
+  // stroke —, the arrows items too (the colour is their glyph's), the ellipsis a text in its
+  // colour and role in a box of its minimum width; the gap between them on the control and the
+  // row of the pages.
+  pagination: {
+    "item.fill": [
+      { node: "item-*", fields: ["fills"], paint: true },
+      { node: "arrow-*", fields: ["fills"], paint: true },
+    ],
+    "item.color": [
+      { node: "items-*", fields: ["fills"], paint: true },
+      { node: "prev-mark-*", fields: ["fills"], paint: true },
+      { node: "next-mark-*", fields: ["fills"], paint: true },
+    ],
+    "item.typography": typographyOf("items-*"),
+    "item.height": [
+      { node: "item-*", fields: ["minHeight"] },
+      { node: "arrow-*", fields: ["minHeight"] },
+    ],
+    "item.width": [
+      { node: "item-*", fields: ["minWidth"] },
+      { node: "arrow-*", fields: ["minWidth"] },
+    ],
+    "item.inline-padding": [
+      { node: "item-*", fields: ["paddingLeft", "paddingRight"] },
+      { node: "arrow-*", fields: ["paddingLeft", "paddingRight"] },
+    ],
+    "item.radius": [
+      { node: "item-*", fields: ["cornerRadius"] },
+      { node: "arrow-*", fields: ["cornerRadius"] },
+    ],
+    "border.width": [{ node: "item-*", fields: ["strokeWeight"] }],
+    "border.color": [{ node: "item-*", fields: ["strokes"], paint: true }],
+    "ellipsis.color": [{ node: "ellipsis-*", fields: ["fills"], paint: true }],
+    "ellipsis.typography": typographyOf("ellipsis-*"),
+    "ellipsis.width": [{ node: "ellipsis-box-*", fields: ["minWidth"] }],
+    "prev.size": [
+      { node: "prev", fields: ["width", "height"] },
+      { node: "prev-glyph-*", fields: ["width", "height"] },
+    ],
+    "next.size": [
+      { node: "next", fields: ["width", "height"] },
+      { node: "next-glyph-*", fields: ["width", "height"] },
+    ],
+    "box.gap": [
+      { node: "control", fields: ["itemSpacing"] },
+      { node: "pages", fields: ["itemSpacing"] },
+      { node: "entry-*", fields: ["itemSpacing"] },
+    ],
+  },
+  // A breadcrumb (Spec 015 ①, plan ① D-05): every level an item — its text in the colour of its
+  // entry (a link's, the current page's) and the label role, the underline its bottom stroke
+  // (none on the current page) —, a chevron after every level but the last, its size bound to the
+  // holder and its glyphs, its colour the fill of the glyphs' vectors.
+  breadcrumb: {
+    "item.color": [{ node: "items-*", fields: ["fills"], paint: true }],
+    "item.typography": typographyOf("items-*"),
+    "underline.width": [{ node: "item-*", fields: ["strokeBottomWeight"] }],
+    "underline.color": [{ node: "item-*", fields: ["strokes"], paint: true }],
+    "separator.color": [{ node: "separator-*-mark-*", fields: ["fills"], paint: true }],
+    "separator.size": [
+      { node: "separator-*", fields: ["width", "height"] },
+      { node: "separator-*-glyph-*", fields: ["width", "height"] },
+    ],
+  },
   nav: {
     "box.height": [{ node: "item-*", fields: ["minHeight"] }],
     "box.radius": [{ node: "item-*", fields: ["cornerRadius"] }],
@@ -1111,6 +1194,7 @@ const ROW_LAYOUT = ${JSON.stringify(ROW_LAYOUT)};
 const CELL_LAYOUT = ${JSON.stringify(CELL_LAYOUT)};
 const ENTRY_ROW_LAYOUT = ${JSON.stringify(ENTRY_ROW_LAYOUT)};
 const NAV_LAYOUT = ${JSON.stringify(NAV_LAYOUT)};
+const GAP = ${JSON.stringify(PAGINATION_GAP)};
 const TABLIST_LAYOUT = ${JSON.stringify(TABLIST_LAYOUT)};
 const PANEL_LAYOUT = ${JSON.stringify(PANEL_LAYOUT)};
 const MARK_NEUTRAL = ${JSON.stringify(MARK_NEUTRAL)};
@@ -3360,6 +3444,197 @@ async function applyComponents(variables, warnings) {
     bindMeasures(measures, report, component, variant);
   }
   /**
+   * A pagination (Spec 015 ①, plan ① D-05): the variant holds the control — a row of the arrow
+   * back, the pages, the ellipsis and the arrow forth, its gap bound to box.gap. The pages are a
+   * row of their own with one entry per word of the plan (1, 2, 3; the first current), each
+   * ring → gap → item (fill and colour by current and state, its border the current page's
+   * stroke) with its number. An arrow is an item too, in the colour of a page that is not
+   * current, holding the glyph frames of every Aspekto (chevron-left, chevron-right) in a holder
+   * of the arrow's size. The ellipsis is a text in its colour and role, in a box of its minimum
+   * width. The label prop is the name of the landmark, heard, never seen.
+   */
+  async function drawPagination(node, component, variant, report, example) {
+    const icons = variant.icons || {};
+    // The words of the row: the set's entries with a gap after them, or an example's pages (O-2).
+    const entry = component.entry || { key: "", texts: [], selected: 0 };
+    const words = example !== undefined ? example.pages.texts : entry.texts.concat([GAP]);
+    const chosen = example !== undefined ? example.pages.selected : entry.selected;
+    const numbers = [];
+    const gapAfter = {};
+    let current = -1;
+    words.forEach((word, index) => {
+      if (word === GAP) {
+        gapAfter[numbers.length] = true;
+        return;
+      }
+      if (index === chosen) current = numbers.length;
+      numbers.push(word);
+    });
+    const shown = Object.assign({}, component, {
+      entry: { key: entry.key, texts: numbers, selected: current },
+    });
+    const control = part(node, "control", () => figma.createFrame());
+    const back = part(control, "arrow-1", () => figma.createFrame());
+    const pages = part(control, "pages", () => figma.createFrame());
+    const forth = part(control, "arrow-2", () => figma.createFrame());
+    [back, pages, forth].forEach((child, index) => {
+      if (control.children.indexOf(child) !== index) control.insertChild(index, child);
+    });
+    const prev = part(back, "prev", () => figma.createFrame());
+    const next = part(forth, "next", () => figma.createFrame());
+    const measures = [];
+    const glyphs = Object.assign(
+      {},
+      drawGlyphs(prev, icons.prev || "chevron-left", "prev-", measures),
+      drawGlyphs(next, icons.next || "chevron-right", "next-", measures),
+    );
+    const rows = await drawEntries(pages, shown, variant, "item", "items");
+    // A gap stands after its page, in the page's entry: the row keeps one entry per page.
+    const gaps = [];
+    for (const row of rows) {
+      if (gapAfter[row.n] !== true) continue;
+      const box = part(row.entry, "ellipsis-box-" + row.n, () => figma.createFrame());
+      if (row.entry.children.indexOf(box) !== 1) row.entry.insertChild(1, box);
+      const text = part(box, "ellipsis-" + row.n, () => figma.createText());
+      await loadCurrentFont(text);
+      if (variant.font !== undefined) {
+        write(text, "fontName", fonts.get(variant.font.family + " " + variant.font.style));
+      }
+      write(text, "characters", GAP);
+      gaps.push({ n: row.n, box, text });
+    }
+    const texts = rows.map((row) => row.text).concat(gaps.map((gap) => gap.text));
+    const frames = [node, control, back, pages, forth, prev, next]
+      .concat(...rows.map((row) => [row.entry, row.ring, row.gap, row.frame]))
+      .concat(gaps.map((gap) => gap.box));
+    for (const frame of frames) own(frame, NEUTRAL);
+    for (const each of texts) own(each, NEUTRAL_TEXT);
+    own(node, HUG_LAYOUT);
+    if (example !== undefined) {
+      own(node, {
+        paddingLeft: example.padding,
+        paddingRight: example.padding,
+        paddingTop: example.padding,
+        paddingBottom: example.padding,
+      });
+    }
+    own(control, NAV_LAYOUT);
+    own(pages, NAV_LAYOUT);
+    for (const frame of [back, forth].concat(gaps.map((gap) => gap.box))) own(frame, CONTROL_LAYOUT);
+    for (const holder of [prev, next]) own(holder, INDICATOR_LAYOUT);
+    for (const row of rows) {
+      for (const frame of [row.entry, row.ring, row.gap]) own(frame, HUG_LAYOUT);
+      own(row.frame, CONTROL_LAYOUT);
+      // The border lies in the item's size, as on the web (border-box).
+      own(row.frame, { strokesIncludedInLayout: true });
+    }
+    for (const child of frames.concat(texts)) own(child, IN_FLOW);
+    for (const each of texts) own(each, TEXT_SIZING);
+    const nodes = { control, pages };
+    for (const row of rows) nodes["entry-" + row.n] = row.entry;
+    for (const gap of gaps) {
+      nodes["ellipsis-" + gap.n] = gap.text;
+      nodes["ellipsis-box-" + gap.n] = gap.box;
+    }
+    for (const measure of bind(nodes, variant, variables, component.structure)) measures.push(measure);
+    bindEntries(rows, shown, variant, variables, "item", "items", measures);
+    // The arrows take what a page that is not current takes (its fill, colour and box).
+    const off = (variant.entries || {}).false || { bindings: {}, paints: {} };
+    const arrows = Object.assign({ "arrow-1": back, "arrow-2": forth, prev, next }, glyphs);
+    const merged = {
+      bindings: Object.assign({}, variant.bindings, off.bindings),
+      paints: Object.assign({}, variant.paints, off.paints),
+      focusVisible: false,
+    };
+    for (const measure of bind(arrows, merged, variables, component.structure)) measures.push(measure);
+    for (const each of frames.concat(texts).concat(Object.values(glyphs))) flush(each);
+    bindMeasures(measures, report, component, variant);
+  }
+  /**
+   * The examples beside a pagination's set (Spec 015 ①, O-2): one frame per example, each found
+   * by its own mark or created, placed in the frame „Eroj" after the set in their order.
+   */
+  async function placeExamples(frame, set, component, report) {
+    if (frame === undefined) return [];
+    const placed = [];
+    const specs = component.examples || [];
+    for (let index = 0; index < specs.length; index += 1) {
+      const spec = specs[index];
+      const wanted = variantName(spec.variant);
+      const variant = component.variants.find((candidate) => variantName(candidate.props) === wanted);
+      if (variant === undefined) continue;
+      const key = component.set + "/" + (index + 1);
+      let example = ours(frame, "example", key);
+      const found = example !== undefined;
+      if (example === undefined) {
+        example = create(() => figma.createFrame());
+        stamp(example, "example", key);
+      }
+      write(example, "name", spec.name);
+      await drawPagination(example, component, variant, report, spec);
+      if (example.parent !== frame) frame.appendChild(example);
+      const at = frame.children.indexOf(set) + 1 + index;
+      if (frame.children.indexOf(example) !== at) frame.insertChild(at, example);
+      write(example, "layoutPositioning", "AUTO");
+      placed.push({ name: spec.name, found: found, created: !found });
+    }
+    return placed;
+  }
+  /**
+   * A breadcrumb (Spec 015 ①, plan ① D-05): the variant holds the control — a row of the levels
+   * (the Vitrino's three words, the last the current page), its gap bound to box.gap and its
+   * height to box.height. Every level is an entry: ring → gap → item (the underline its bottom
+   * stroke where it is a link) with its text, and after it — but the last — a chevron holder of
+   * the separator's size with the glyph frames of every Aspekto. The label prop is the name of the
+   * landmark, heard, never seen.
+   */
+  async function drawBreadcrumb(node, component, variant, report) {
+    const icons = variant.icons || {};
+    const control = part(node, "control", () => figma.createFrame());
+    const rows = await drawEntries(control, component, variant, "item", "items");
+    const measures = [];
+    const glyphs = {};
+    const holders = [];
+    rows.forEach((row, index) => {
+      if (index === rows.length - 1) return;
+      const holder = part(row.entry, "separator-" + row.n, () => figma.createFrame());
+      if (row.entry.children.indexOf(holder) !== 1) row.entry.insertChild(1, holder);
+      holders.push(holder);
+      glyphs["separator-" + row.n] = holder;
+      Object.assign(
+        glyphs,
+        drawGlyphs(holder, icons.separator || "chevron-right", "separator-" + row.n + "-", measures),
+      );
+    });
+    const texts = rows.map((row) => row.text);
+    const frames = [node, control].concat(...rows.map((row) => [row.entry, row.ring, row.gap, row.frame]), holders);
+    for (const frame of frames) own(frame, NEUTRAL);
+    for (const each of texts) own(each, NEUTRAL_TEXT);
+    own(node, HUG_LAYOUT);
+    own(control, NAV_LAYOUT);
+    for (const holder of holders) own(holder, INDICATOR_LAYOUT);
+    for (const row of rows) {
+      for (const frame of [row.entry, row.ring, row.gap]) own(frame, HUG_LAYOUT);
+      own(row.frame, CONTROL_LAYOUT);
+      // The underline lies in the item's size; only the bottom carries it.
+      own(row.frame, {
+        strokesIncludedInLayout: true,
+        strokeTopWeight: 0,
+        strokeLeftWeight: 0,
+        strokeRightWeight: 0,
+        strokeBottomWeight: 0,
+      });
+    }
+    for (const child of frames.concat(texts)) own(child, IN_FLOW);
+    for (const each of texts) own(each, TEXT_SIZING);
+    for (const measure of bind(Object.assign({ control }, glyphs), variant, variables, component.structure)) {
+      measures.push(measure);
+    }
+    bindEntries(rows, component, variant, variables, "item", "items", measures);
+    for (const each of frames.concat(texts).concat(Object.values(glyphs))) flush(each);
+    bindMeasures(measures, report, component, variant);
+  }
+  /**
    * A tab list (Spec 011 ⑤): the variant is a column — the control (the list: a row of its tabs,
    * its line the bottom stroke in list.color and list.width, the gap bound to list.gap) above the
    * panel (its inline padding bound, the Vitrino's word of the first tab in panel.color). Every
@@ -3657,6 +3932,17 @@ async function applyComponents(variables, warnings) {
       }
       if (component.structure === "tabs") {
         await drawTabs(node, component, variant, report);
+        if (existing === undefined) made.push(node);
+        continue;
+      }
+      // A pagination and a breadcrumb (Spec 015 ①) are drawn in functions of their own.
+      if (component.structure === "pagination") {
+        await drawPagination(node, component, variant, report);
+        if (existing === undefined) made.push(node);
+        continue;
+      }
+      if (component.structure === "breadcrumb") {
+        await drawBreadcrumb(node, component, variant, report);
         if (existing === undefined) made.push(node);
         continue;
       }
@@ -4044,6 +4330,10 @@ async function applyComponents(variables, warnings) {
     // The example frame of a dialog beside its set (Spec 011 ②).
     if (component.example !== undefined) {
       report.example = await placeExample(frame, set, component, report);
+    }
+    // The examples of a pagination beside its set (Spec 015 ①, O-2).
+    if (component.examples !== undefined) {
+      report.examples = await placeExamples(frame, set, component, report);
     }
     report.layout = measureLayout(set, component);
     report.layout.refused = refused;

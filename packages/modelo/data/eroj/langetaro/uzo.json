@@ -51,6 +51,21 @@
         },
         "ero": "faldilo",
         "kialo": "Content that is hidden until opened is a disclosure, because tabs always show one view; the faldilo opens and closes, several in a group one at a time."
+      },
+      {
+        "goal": "list-pages",
+        "keywords": {
+          "en": [
+            "listpages",
+            "pagedlist"
+          ],
+          "de": [
+            "listenseiten",
+            "seitenweise"
+          ]
+        },
+        "ero": "pagxigilo",
+        "kialo": "The pages of one long list are a pagination, because the person moves through parts of the same list in order; tabs switch views of one thing."
       }
     ],
     "boundary": [

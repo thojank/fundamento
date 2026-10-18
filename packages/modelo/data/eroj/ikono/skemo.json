@@ -15,6 +15,7 @@
         "values": [
           "check",
           "chevron-down",
+          "chevron-left",
           "chevron-right",
           "close",
           "collapse",
@@ -35,14 +36,24 @@
       {
         "name": "size",
         "kind": "enum",
-        "values": ["small", "medium", "large"],
+        "values": [
+          "small",
+          "medium",
+          "large"
+        ],
         "default": "medium",
         "description": "The size of the box, size.icon.*; an Ero that composes the icon sets it to its own."
       },
       {
         "name": "intent",
         "kind": "enum",
-        "values": ["neutral", "info", "success", "warning", "danger"],
+        "values": [
+          "neutral",
+          "info",
+          "success",
+          "warning",
+          "danger"
+        ],
         "default": "neutral",
         "description": "neutral inherits the colour of the text around it; a status intent takes the status text colour (never alone: a status needs a word, Regulo error-not-color-only) and names the icon."
       },
@@ -52,67 +63,143 @@
         "description": "The name of the icon where it carries meaning: then it is an image with that name; without it the icon is decorative and not heard (Regulo icon-meaning-named)."
       }
     ],
-    "states": ["rest"],
+    "states": [
+      "rest"
+    ],
     "slots": [],
     "parts": {
-      "glyph": { "color": { "by": ["intent"] } },
-      "box": { "size": { "by": ["size"] } }
+      "glyph": {
+        "color": {
+          "by": [
+            "intent"
+          ]
+        }
+      },
+      "box": {
+        "size": {
+          "by": [
+            "size"
+          ]
+        }
+      }
     },
     "bindings": [
-      { "part": "glyph", "property": "color", "when": { "intent": "neutral" }, "token": "inherit" },
       {
         "part": "glyph",
         "property": "color",
-        "when": { "intent": "info" },
+        "when": {
+          "intent": "neutral"
+        },
+        "token": "inherit"
+      },
+      {
+        "part": "glyph",
+        "property": "color",
+        "when": {
+          "intent": "info"
+        },
         "token": "color.status.info.text"
       },
       {
         "part": "glyph",
         "property": "color",
-        "when": { "intent": "success" },
+        "when": {
+          "intent": "success"
+        },
         "token": "color.status.success.text"
       },
       {
         "part": "glyph",
         "property": "color",
-        "when": { "intent": "warning" },
+        "when": {
+          "intent": "warning"
+        },
         "token": "color.status.warning.text"
       },
       {
         "part": "glyph",
         "property": "color",
-        "when": { "intent": "danger" },
+        "when": {
+          "intent": "danger"
+        },
         "token": "color.status.danger.text"
       },
-      { "part": "box", "property": "size", "when": { "size": "small" }, "token": "size.icon.small" },
-      { "part": "box", "property": "size", "when": { "size": "medium" }, "token": "size.icon.medium" },
-      { "part": "box", "property": "size", "when": { "size": "large" }, "token": "size.icon.large" }
+      {
+        "part": "box",
+        "property": "size",
+        "when": {
+          "size": "small"
+        },
+        "token": "size.icon.small"
+      },
+      {
+        "part": "box",
+        "property": "size",
+        "when": {
+          "size": "medium"
+        },
+        "token": "size.icon.medium"
+      },
+      {
+        "part": "box",
+        "property": "size",
+        "when": {
+          "size": "large"
+        },
+        "token": "size.icon.large"
+      }
     ],
     "a11y": {
       "role": "img",
-      "name": ["prop:label"],
+      "name": [
+        "prop:label"
+      ],
       "states": {},
       "keys": []
     },
     "constraints": [
       {
-        "when": { "intent": "info" },
-        "allowed": { "prop:label": ["filled"] },
+        "when": {
+          "intent": "info"
+        },
+        "allowed": {
+          "prop:label": [
+            "filled"
+          ]
+        },
         "kialo": "A status icon says something, so it carries a name: a picture without a name is silent for a screen reader (icon-meaning-named)."
       },
       {
-        "when": { "intent": "success" },
-        "allowed": { "prop:label": ["filled"] },
+        "when": {
+          "intent": "success"
+        },
+        "allowed": {
+          "prop:label": [
+            "filled"
+          ]
+        },
         "kialo": "A status icon says something, so it carries a name: a picture without a name is silent for a screen reader (icon-meaning-named)."
       },
       {
-        "when": { "intent": "warning" },
-        "allowed": { "prop:label": ["filled"] },
+        "when": {
+          "intent": "warning"
+        },
+        "allowed": {
+          "prop:label": [
+            "filled"
+          ]
+        },
         "kialo": "A status icon says something, so it carries a name: a picture without a name is silent for a screen reader (icon-meaning-named)."
       },
       {
-        "when": { "intent": "danger" },
-        "allowed": { "prop:label": ["filled"] },
+        "when": {
+          "intent": "danger"
+        },
+        "allowed": {
+          "prop:label": [
+            "filled"
+          ]
+        },
         "kialo": "A status icon says something, so it carries a name: a picture without a name is silent for a screen reader (icon-meaning-named)."
       }
     ],
@@ -120,8 +207,18 @@
       {
         "goal": "show-icon",
         "keywords": {
-          "en": ["icon", "symbol", "pictogram", "glyph"],
-          "de": ["icon", "symbol", "piktogramm", "glyphe"]
+          "en": [
+            "icon",
+            "symbol",
+            "pictogram",
+            "glyph"
+          ],
+          "de": [
+            "icon",
+            "symbol",
+            "piktogramm",
+            "glyphe"
+          ]
         },
         "props": {},
         "regulo": "icon-meaning-named"
