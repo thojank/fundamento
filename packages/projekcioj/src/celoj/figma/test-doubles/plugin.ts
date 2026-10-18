@@ -323,6 +323,22 @@ interface NodeContext {
 const GEOMETRY_KEYS: ReadonlySet<string> = new Set(["x", "y", "width", "height"]);
 
 /**
+ * Fields the Plugin API declares read-only on every scene node (plugin-api.d.ts: `readonly width`,
+ * `readonly height`, the absolute boxes; `hasMissingFont` of a text): assigning one throws
+ * "no setter for property" in Figma. Measured 2026-10-18 (Abnahme 014 ②–⑤, F-4): the separator
+ * wrote `width` on its frame and the real tool aborted in write ← flush ← drawSeparator; the
+ * double had accepted it. A size is set with `resize`, or bound with `setBoundVariable`.
+ */
+const READ_ONLY_FIELDS: ReadonlySet<string> = new Set([
+  "width",
+  "height",
+  "absoluteTransform",
+  "absoluteBoundingBox",
+  "absoluteRenderBounds",
+  "hasMissingFont",
+]);
+
+/**
  * A paint as Figma stores and returns it (F22): `visible`, `opacity` and `blendMode` filled in,
  * the colour as given. Reading `fills` back therefore never equals the object that was written —
  * a comparison by JSON rewrites on every run; a comparison by variable, opacity and visibility
@@ -535,6 +551,9 @@ function node(
     set(target, key, value) {
       if (key === "gridRowAnchorIndex" || key === "gridColumnAnchorIndex") {
         throw new Error(`${String(key)} is read-only; use setGridChildPosition.`);
+      }
+      if (typeof key === "string" && READ_ONLY_FIELDS.has(key)) {
+        throw new Error(`in set_${key}: no setter for property`);
       }
       if (typeof key === "string" && context.refuses?.has(key)) {
         throw new Error(

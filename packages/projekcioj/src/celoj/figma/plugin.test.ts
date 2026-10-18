@@ -185,6 +185,37 @@ describe("Figma development plugin (T016)", () => {
     expect(api.command).toBeUndefined();
   });
 
+  // Abnahme 014 ②–⑤ (2026-10-18, F-4): the real tool aborted the run with "no setter for property"
+  // in write ← flush ← drawSeparator — the separator wrote `width` on its frame, which the Plugin
+  // API declares read-only (resize sets it). The double had accepted the write. From now on it
+  // refuses every read-only field on every node type the plugin creates, so a drawing that writes
+  // one fails here first: the full runs below cover the tooltip, popover, menu, disclosure, the
+  // listbox of the kompletigilo and the icons from createNodeFromSvg.
+  it("refuses a write to a read-only field (width, height) on a frame, a text and a node from an SVG, as Figma does", () => {
+    const double = modelDouble();
+    const api = double.figma as {
+      createFrame: () => DoubleNode;
+      createText: () => DoubleNode;
+      createNodeFromSvg: (svg: string) => DoubleNode;
+    };
+    const frame = api.createFrame();
+    const text = api.createText();
+    const glyph = api.createNodeFromSvg(
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path d="M0 0h16v16z"/></svg>',
+    );
+    for (const node of [frame, text, glyph, glyph.children[0]]) {
+      expect(() => {
+        (node as unknown as { width: number }).width = 24;
+      }, node?.type).toThrow(/no setter for property/);
+      expect(() => {
+        (node as unknown as { height: number }).height = 24;
+      }, node?.type).toThrow(/no setter for property/);
+    }
+    // What resize sets stays settable through resize.
+    expect(() => frame.resize(24, 24)).not.toThrow();
+    expect(frame.width).toBe(24);
+  });
+
   it("never touches a node without Fundamento plugin data", async () => {
     const double = modelDouble();
     const page = double.root.children[0];
