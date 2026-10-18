@@ -40,4 +40,4 @@
 | `check:mankoj`, `vortaro-lint`, `clean-room` | 9 Mankoj; 0 Fehler |
 | Tests (lokal, `turbo run test --filter=!@fundamento/eroj --force`, 6 min 03 s) | Modelo 3 490 (vorher 3 476; +14), MCP 294 (291; +3), Projekcioj 678 (670; +8), CLI 66; `pnpm lint` grün (9 Warnungen Modelo, 1 Projekcioj, älter); `check:release` beide Kits |
 | Browser | alle 219 Specs in Chromium (vorher 215 + 4 neue); `ligilo`, `markobutono`, `kompletigilo`, `plenstato`, `apartigilo` in Firefox und WebKit 66; `check:alirebleco-eroj` 163, `check:vitrino` 27 (Pin: 18 `kompletigilo`, 3 mit `loading`), `check:make-kit` 5, `check:quickstart` 1 — je Chromium |
-| CI | folgt (Zeile nach dem Push) |
+| CI | Lauf 39167331502 (Dispatch, `7a38445`) grün, Wanduhr 10 min 02 s: unit 7:12, Eroj Shard 1 8:58, Shard 2 10:02, rendered-checks 7:50 (unter 12 min); grüner Stand `7a38445` |
