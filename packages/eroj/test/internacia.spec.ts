@@ -985,3 +985,51 @@ test("saltligilo right to left: shown at the right edge; expanded to 140 %, noth
   });
   expect(clipped).toBe(false);
 });
+
+// Spec 015 ③ (plan ③ D-04): a horizontal karto in right-to-left writing puts its media at the
+// right and its actions run from the right; its heading expanded to 200 % wraps inside the card,
+// the card keeps its width and nothing is clipped.
+test("karto right to left and heading expansion to 200 %: the media at the right, the heading wraps, nothing is clipped", async ({
+  page,
+}) => {
+  const heading = "Barrierefreiheit";
+  await serve(
+    page,
+    out,
+    `<div dir="rtl" style="inline-size: 800px"><fm-karto id="k" level="2" orientation="horizontal"><svg slot="media" aria-hidden="true" viewBox="0 0 16 9"><rect width="16" height="9" fill="currentColor"></rect></svg><span slot="heading">${heading}</span>Kontrast, Fokus und Namen.<fm-butono slot="actions" emphasis="high">Öffnen</fm-butono><fm-butono slot="actions" emphasis="low">Teilen</fm-butono></fm-karto></div>`,
+  );
+  const geometry = () =>
+    page.locator("#k").evaluate((element) => {
+      const root = element.shadowRoot;
+      const box = (part: string) =>
+        root?.querySelector(`[part="${part}"]`)?.getBoundingClientRect() ?? new DOMRect();
+      const actions = [...element.querySelectorAll('[slot="actions"]')].map(
+        (action) => action.getBoundingClientRect().left,
+      );
+      const text = root
+        ?.querySelector('[part="heading"]')
+        ?.shadowRoot?.querySelector('[part="text"]') as HTMLElement;
+      return {
+        media: box("media").left,
+        body: box("body").left,
+        width: element.getBoundingClientRect().width,
+        actions,
+        clipped: text.scrollWidth > text.clientWidth + 1,
+        lines: Math.round(text.getBoundingClientRect().height),
+      };
+    });
+  await expect.poll(async () => (await geometry()).media).toBeGreaterThan(0);
+  const before = await geometry();
+  expect(before.media).toBeGreaterThan(before.body);
+  expect(before.actions[0] ?? 0).toBeGreaterThan(before.actions[1] ?? 0);
+  await page.locator("#k span[slot=heading]").evaluate(
+    (element, text) => {
+      element.textContent = text;
+    },
+    `${pseudo(heading, 2)} ${pseudo(heading, 2)} ${pseudo(heading, 2)}`,
+  );
+  const after = await geometry();
+  expect(after.width).toBe(before.width);
+  expect(after.lines).toBeGreaterThan(before.lines);
+  expect(after.clipped).toBe(false);
+});

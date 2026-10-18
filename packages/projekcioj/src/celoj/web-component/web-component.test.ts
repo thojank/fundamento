@@ -54,6 +54,7 @@ describe("Web Component Celo (T011)", () => {
       "eroj/src/generated/fm-ikono.ts",
       "eroj/src/generated/fm-insigno.ts",
       "eroj/src/generated/fm-kampo.ts",
+      "eroj/src/generated/fm-karto.ts",
       "eroj/src/generated/fm-kompletigilo.ts",
       "eroj/src/generated/fm-konsileto.ts",
       "eroj/src/generated/fm-langetaro.ts",
@@ -76,6 +77,7 @@ describe("Web Component Celo (T011)", () => {
       "eroj/src/generated/index.ts",
       "eroj/src/generated/insigno.styles.ts",
       "eroj/src/generated/kampo.styles.ts",
+      "eroj/src/generated/karto.styles.ts",
       "eroj/src/generated/kompletigilo.styles.ts",
       "eroj/src/generated/konsileto.styles.ts",
       "eroj/src/generated/langetaro.styles.ts",
@@ -1877,4 +1879,71 @@ describe("Web Component Celo: no native constraint in a field (B-1, Spec 015 ②
       expect(element).toContain("this.#internals.setValidity(");
     },
   );
+});
+
+// Spec 015 ③ (section ③, plan ③ D-03, D-04): the karto is the platform's article named by its
+// heading — a composed titolo at the card's level — with the media edge to edge above the body
+// (beside it, horizontal, until the container is narrower than the Uzo's columns-from: the element
+// measures itself as layout auto does and marks a stacked card with a class), content, meta and
+// actions; standalone false makes it a region. The stylesheet keys nothing by a prop: the
+// orientation is read from the host's own attribute, so the parity inventory names no prop.
+describe("Web Component Celo for the karto (Spec 015 ③)", () => {
+  const cssOf = (ero: string) =>
+    JSON.parse(
+      new RegExp(`export const ${ero.toUpperCase()}_CSS = ("(?:[^"\\\\]|\\\\.)*");`).exec(
+        files[`eroj/src/generated/${ero}.styles.ts`] ?? "",
+      )?.[1] ?? '""',
+    ) as string;
+
+  it("renders an article named by a composed titolo, media, body, meta and actions; a region where it does not stand alone", () => {
+    const element = files["eroj/src/generated/fm-karto.ts"] ?? "";
+    expect(element).toContain('<article part="control" aria-labelledby="heading">');
+    expect(element).toContain(
+      '<fm-titolo part="heading" id="heading" level="2" size="headline-4"><slot name="heading"></slot></fm-titolo>',
+    );
+    expect(element).toContain('<div part="media" hidden><slot name="media"></slot></div>');
+    expect(element).toContain('<div part="content"><slot></slot></div>');
+    expect(element).toContain('<div part="meta" hidden><slot name="meta"></slot></div>');
+    expect(element).toContain('<div part="actions" hidden><slot name="actions"></slot></div>');
+    expect(element).toContain('heading.setAttribute("level"');
+    expect(element).toContain('control.setAttribute("role", "region")');
+    expect(element).toContain('control.removeAttribute("role")');
+    expect(element).toContain("static formAssociated = false;");
+    // A horizontal card stacks below the Uzo's columns-from, measured like layout auto.
+    expect(element).toContain('const COLUMNS_FROM = "--fm-size-container-small";');
+    expect(element).toContain('control.classList.toggle("fm-stacked"');
+    expect(element).toContain("new ResizeObserver(");
+    // An image without alt is a developer warning.
+    expect(element).toContain("the image in media has no alt");
+    // standalone defaults to true: absent is true, "false" is false (D-03).
+    expect(element).toContain('this.getAttribute(name) !== "false"');
+    expect(element).toContain('this.setAttribute(prop.name, "false")');
+  });
+
+  it("the stylesheet: the raised surface with its subtle border and shadow, the body's padding on every side, a row while horizontal and not stacked", () => {
+    const css = cssOf("karto");
+    expect(css).toContain(
+      ':where([part="control"]) { display: flex; flex-direction: column; box-sizing: border-box; margin: 0; overflow: hidden; border-style: solid; }',
+    );
+    expect(css).toContain(
+      ':host([orientation="horizontal"]) :where([part="control"]:not(.fm-stacked)) { flex-direction: row; }',
+    );
+    expect(css).toContain("background-color: var(--fm-color-background-raised);");
+    expect(css).toContain("border-radius: var(--fm-radius-role-surface);");
+    expect(css).toContain("box-shadow: var(--fm-elevation-shadow-raised);");
+    expect(css).toContain("border-color: var(--fm-color-border-subtle);");
+    expect(css).toContain("border-width: var(--fm-border-width-default);");
+    expect(css).toContain(':where([part="control"]) [part="body"] {');
+    expect(css).toContain("padding: var(--fm-spacing-medium);");
+    expect(css).toContain("font-size: var(--fm-typography-headline-4-font-size);");
+    expect(css).not.toContain("[data-");
+    expect(componentCssIssues("karto.css", css)).toEqual([]);
+    expect(cssPhysicalPropertyIssues("karto.css", css)).toEqual([]);
+  });
+
+  it("the parity inventory names no prop and the one state rest", () => {
+    const inventory = stylesheetInventory(files["eroj/src/generated/karto.styles.ts"] ?? "");
+    expect(inventory.props).toEqual({});
+    expect(inventory.states).toEqual(["rest"]);
+  });
 });

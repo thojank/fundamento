@@ -37,6 +37,7 @@ describe("sxaltilo in the repo Modelo (G1, G2, section 1)", () => {
       "ikono",
       "insigno",
       "kampo",
+      "karto",
       "kompletigilo",
       "konsileto",
       "langetaro",
@@ -291,6 +292,7 @@ describe("the Reguloj of the sxaltilo (G6, E5, D-14)", () => {
       "pagxigilo",
       "spuro",
       "alsxutilo",
+      "karto",
     ]);
   });
 

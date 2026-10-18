@@ -57,6 +57,7 @@ describe("Make Kit sources (T018)", () => {
       "guidelines/components/ikono.md",
       "guidelines/components/insigno.md",
       "guidelines/components/kampo.md",
+      "guidelines/components/karto.md",
       "guidelines/components/kompletigilo.md",
       "guidelines/components/konsileto.md",
       "guidelines/components/langetaro.md",
@@ -781,6 +782,24 @@ describe("Make Kit and the Eingabe of Spec 015 ②", () => {
       expect(component).toContain("# Alsxutilo");
       expect(component).toContain("`max-size`");
       expect(component).toContain("**file-constraints-stated**");
+    },
+  );
+});
+
+// Spec 015 ③ (plan ③ D-06): Make takes every summary of one thing from the karto, at the level of
+// its heading — one sentence from the role article, the record list and the notice named beside.
+describe("Make Kit and the Inhalt of Spec 015 ③", () => {
+  it.each(ASPEKTOJ)(
+    "%s: the guidelines name the karto beside the atributlisto and the avizo",
+    (aspekto) => {
+      const guidelines = kit(aspekto, "guidelines/Guidelines.md");
+      expect(guidelines).toContain(
+        "- Every summary of one thing — a heading, an image, a sentence and at most two actions — is a `<Karto>` with the `level` of its heading; the fields of one record are an `<Atributlisto>`, what happened is an `<Avizo>`, and a whole card is never one link.",
+      );
+      const component = kit(aspekto, "guidelines/components/karto.md");
+      expect(component).toContain("# Karto");
+      expect(component).toContain("`standalone`");
+      expect(component).toContain("card-grid");
     },
   );
 });

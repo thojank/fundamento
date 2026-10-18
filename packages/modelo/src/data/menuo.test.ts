@@ -34,9 +34,9 @@ const suggest = (goal: string) => {
 };
 
 describe("menuo in the repo Modelo (section ④, G1, G2, G4)", () => {
-  it("lives in data/eroj/menuo/skemo.json, one of thirty Eroj", () => {
+  it("lives in data/eroj/menuo/skemo.json, one of thirty-one Eroj", () => {
     expect(menuo?.file).toBe("modelo/data/eroj/menuo/skemo.json");
-    expect(modelo.eroj).toHaveLength(30);
+    expect(modelo.eroj).toHaveLength(31);
   });
 
   it("has label (optional, the Modelo's words stand in), placement (block-end) and open as props; the states of an entry; items (default) and trigger slots", () => {

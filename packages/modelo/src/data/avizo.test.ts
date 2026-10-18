@@ -32,7 +32,7 @@ const suggest = (goal: string) => {
 const INTENTS = ["info", "success", "warning", "danger"];
 
 describe("avizo in the repo Modelo (section ③, G1, G2)", () => {
-  it("lives in data/eroj/avizo/skemo.json, fourth of thirty Eroj", () => {
+  it("lives in data/eroj/avizo/skemo.json, fourth of thirty-one Eroj", () => {
     expect(avizo?.file).toBe("modelo/data/eroj/avizo/skemo.json");
     expect(modelo.eroj[3]?.ero.name).toBe("avizo");
   });
@@ -149,11 +149,12 @@ describe("the Uzo of the avizo (section ③, G5)", () => {
     expect(uzo?.layout).toEqual({ size: "container", wrap: "allowed" });
   });
 
-  it("sends a decision to the dialogo, a one-word status to the insigno and a field's error to the kampo (all use-instead)", () => {
+  it("sends a decision to the dialogo, a one-word status to the insigno, a field's error to the kampo and content about one thing to the karto (all use-instead; Spec 015 ③, G2)", () => {
     expect(uzo?.instead.map((entry) => [entry.goal, entry.ero])).toEqual([
       ["needs-decision", "dialogo"],
       ["one-word-status", "insigno"],
       ["field-error", "kampo"],
+      ["content", "karto"],
     ]);
     for (const entry of uzo?.instead ?? []) expect(entry.kialo).toMatch(/because/);
   });

@@ -8,7 +8,13 @@ import { join } from "node:path";
 import { baseResolution, defaultModeloSource, projectModeloSource } from "@fundamento/modelo";
 import { describe, expect, it } from "vitest";
 import { celoInputOf } from "../../build.js";
-import { VITRINO_LIST_ENTRIES, VITRINO_OPTIONS, VITRINO_SLOT_TEXTS } from "../vitrino/datumoj.js";
+import {
+  VITRINO_CARD,
+  VITRINO_LIST_ENTRIES,
+  VITRINO_MEDIA_TEXT,
+  VITRINO_OPTIONS,
+  VITRINO_SLOT_TEXTS,
+} from "../vitrino/datumoj.js";
 import {
   ALPHA_VARIES,
   BACKDROP_EXAMPLE,
@@ -777,6 +783,7 @@ describe("Figma plan for the ligilo (Spec 008 T017)", () => {
       "ikono",
       "insigno",
       "kampo",
+      "karto",
       "kompletigilo",
       "konsileto",
       "langetaro",
@@ -990,6 +997,8 @@ describe("the label default of a set follows its a11y role (M-3)", () => {
       // Spec 011 ③: a badge (role generic) names a status (for the maintainer to confirm).
       insigno: "Status",
       kampo: "Beschriftung",
+      // Spec 015 ③: a card's label property writes its heading (proposal, to confirm).
+      karto: "Überschrift",
       // Spec 014 ⑤: the combobox shares the elektilo's role; its word applies (O-21).
       kompletigilo: "Auswahl",
       // Spec 014 ④: a tooltip is a short hint, the trigger of a menu offers more actions, a
@@ -1751,12 +1760,13 @@ describe("Figma plan for the dialogo (Spec 011 ②)", () => {
       expect(Object.keys(entry.bindings).some((key) => key.startsWith("action-"))).toBe(false);
       expect(Object.keys(entry.paints ?? {}).some((key) => key.startsWith("action-"))).toBe(false);
     }
-    // Spec 015 ②: the alsxutilo composes its button and its removes too.
+    // Spec 015 ②: the alsxutilo composes its button and its removes too; Spec 015 ③: the karto
+    // its actions and its badge.
     expect(
       plan.components
         .filter((component) => component.composed !== undefined)
         .map((component) => component.set),
-    ).toEqual(["alsxutilo", "dialogo"]);
+    ).toEqual(["alsxutilo", "dialogo", "karto"]);
     const items = figmaPlanInventory(plan);
     expect(
       Object.keys(items.dialogo?.values ?? {}).filter((key) => key.startsWith("action-")),
@@ -3187,5 +3197,129 @@ describe("the Figma plan draws the alsxutilo (Spec 015 ②)", () => {
         ],
       },
     ]);
+  });
+});
+
+// Spec 015 ③ (plan ③ D-05): the karto in Figma — a card (role article): one variant per
+// orientation (an axis of its own, like the tooltip's placement: it keys no part), the heading the
+// label property, the Vitrino's card words, the actions and the badge in the looks of the butono
+// and the insigno they compose, the media a stand-in image the BOOLEAN property media shows, and
+// the example „ohne Bild" beside the set. Every colour and measure of the karto is drawn: its
+// parity inventory states each of them, nothing released.
+describe("the Figma plan draws the karto (Spec 015 ③)", () => {
+  const set = plan.components.find((component) => component.set === "karto");
+
+  it("a card of orientation in one state: the heading the label, the Vitrino's words, the media a toggle, the example „ohne Bild“, every part bound", () => {
+    expect(structureOf("article")).toBe("card");
+    expect(set?.structure).toBe("card");
+    expect(set?.extraAxes).toEqual(["orientation"]);
+    expect(set?.variants.map((variant) => variant.props)).toEqual([
+      { orientation: "vertical", state: "rest" },
+      { orientation: "horizontal", state: "rest" },
+    ]);
+    expect(set?.grid).toMatchObject({ rows: 2, columns: 1 });
+    // The media is no prop of the Skemo: a toggle, not a property.
+    expect(set?.properties).toEqual({
+      level: ["1", "2", "3", "4", "5", "6"],
+      orientation: ["vertical", "horizontal"],
+      standalone: "BOOLEAN",
+      state: ["rest"],
+    });
+    expect(set?.toggles).toEqual([{ property: "media", part: "media", defaultValue: true }]);
+    expect(set?.label).toEqual({ property: "label", defaultValue: "Überschrift" });
+    expect(set?.texts).toEqual({
+      content: VITRINO_CARD.text,
+      badge: VITRINO_CARD.badge,
+      "action-1": "Öffnen",
+      "action-2": "Teilen",
+      media: VITRINO_MEDIA_TEXT,
+    });
+    expect(set?.examples).toEqual([
+      {
+        name: "karto – ohne Bild",
+        variant: { orientation: "vertical", state: "rest" },
+        padding: expect.any(Number),
+        toggled: { media: false },
+      },
+    ]);
+    expect(set?.card).toMatchObject({
+      width: 640,
+      media: {
+        extent: 213,
+        fill: { binding: "color/background/sunken" },
+        color: { binding: "color/text/subtle" },
+      },
+    });
+    for (const variant of set?.variants ?? []) {
+      expect(variant.bindings).toEqual({
+        "surface.fill": "color/background/raised",
+        "surface.radius": "radius/role/surface",
+        "surface.shadow": "elevation/shadow/raised",
+        "border.color": "color/border/subtle",
+        "border.width": "border/width/default",
+        "heading.color": "color/text/default",
+        "heading.typography": "typography/headline/4",
+        "content.color": "color/text/default",
+        "content.typography": "typography/body/1",
+        "meta.gap": "spacing/small",
+        "actions.gap": "spacing/small",
+        "box.inline-padding": "spacing/medium",
+        "box.gap": "spacing/small",
+      });
+      expect(variant.notDrawn).toEqual({});
+      expect(variant.shadow).toMatchObject({
+        part: "surface",
+        variable: "elevation/shadow/raised",
+      });
+    }
+    // The actions in the Vitrino's order look like a butono of emphasis high and low, the badge
+    // like an insigno of intent neutral — roles read from their Skemoj, not the karto's.
+    expect(set?.composed?.["action-1"]).toMatchObject({
+      ero: "butono",
+      props: { emphasis: "high", intent: "neutral", size: "medium", state: "rest" },
+      bindings: {
+        "surface.fill": "color/action/primary/rest",
+        "label.color": "color/action/primary/text",
+      },
+    });
+    expect(set?.composed?.["action-2"]).toMatchObject({
+      ero: "butono",
+      props: { emphasis: "low" },
+      bindings: { "label.color": "color/action/tertiary/text" },
+    });
+    expect(set?.composed?.badge).toMatchObject({
+      ero: "insigno",
+      props: { intent: "neutral", size: "medium", state: "rest" },
+      bindings: {
+        "surface.fill": "color/background/sunken",
+        "border.color": "color/border/default",
+        "border.width": "border/width/default",
+        "text.color": "color/text/subtle",
+        "box.radius": "radius/role/pill",
+      },
+    });
+  });
+
+  it("states the karto in the parity inventory: level, orientation and standalone, the state rest, every colour and measure keyed by the state alone", () => {
+    const items = figmaPlanInventory(plan);
+    expect(items.karto?.props).toEqual({
+      level: ["1", "2", "3", "4", "5", "6"],
+      orientation: ["vertical", "horizontal"],
+      standalone: ["boolean"],
+    });
+    expect(items.karto?.states).toEqual(["rest"]);
+    // The orientation is no key (extraAxes); the composed looks and the media are no part.
+    expect(items.karto?.values).toEqual({
+      "surface.fill@state=rest": expect.stringMatching(/^#[0-9a-f]{6}$/),
+      "surface.radius@state=rest": "8px",
+      "border.color@state=rest": expect.stringMatching(/^#[0-9a-f]{6}$/),
+      "border.width@state=rest": "1px",
+      "heading.color@state=rest": expect.stringMatching(/^#[0-9a-f]{6}$/),
+      "content.color@state=rest": expect.stringMatching(/^#[0-9a-f]{6}$/),
+      "meta.gap@state=rest": "4px",
+      "actions.gap@state=rest": "4px",
+      "box.inline-padding@state=rest": "8px",
+      "box.gap@state=rest": "4px",
+    });
   });
 });

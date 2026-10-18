@@ -85,6 +85,7 @@ describe("suggest_ero", () => {
       "password",
       "number",
       "date",
+      "card",
       "suggest",
       "tooltip",
       "switch-view",

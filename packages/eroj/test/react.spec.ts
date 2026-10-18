@@ -1,5 +1,7 @@
 // The React wrapper Butono with React 18.3 and 19.3 (Spec 003 T012, plan D-08): props arrive as
-// attributes or properties of fm-butono, onClick fires once, iconStart lands in its slot.
+// attributes or properties of fm-butono, onClick fires once, iconStart lands in its slot. Spec 015
+// ③ (plan ③ D-03): a boolean whose default is true (standalone of the Karto) is written "false"
+// when it is false, and left out otherwise.
 
 import { fileURLToPath } from "node:url";
 import { expect, test } from "@playwright/test";
@@ -12,13 +14,15 @@ const dist = fileURLToPath(new URL("../dist/", import.meta.url));
 const ENTRY = `
 import { createElement } from "react";
 import { createRoot } from "react-dom/client";
-import { Butono } from "@fundamento/eroj/react";
+import { Butono, Karto } from "@fundamento/eroj/react";
 window.clicks = 0;
 createRoot(document.getElementById("root")).render(
   createElement("div", null,
     createElement(Butono, { id: "a", emphasis: "high", size: "large", fullWidth: true, onClick: () => { window.clicks++; },
       iconStart: createElement("svg", { id: "icon", "aria-hidden": "true" }) }, "Speichern"),
     createElement(Butono, { id: "b", intent: "danger", emphasis: "high", loading: true }, "Löschen"),
+    createElement(Karto, { id: "c", level: "3", standalone: false }, createElement("span", { slot: "heading" }, "Barrierefreiheit")),
+    createElement(Karto, { id: "d", level: "3", standalone: true }, createElement("span", { slot: "heading" }, "Datenschutz")),
   ),
 );
 `;
@@ -87,6 +91,12 @@ for (const react of ["18", "19"] as const) {
     const b = page.getByRole("button", { name: "Löschen" });
     await expect(b).toHaveAttribute("aria-busy", "true");
     await expect(b).toHaveAttribute("data-intent", "danger");
+    await expect(page.locator("#c")).toHaveAttribute("standalone", "false");
+    await expect(page.getByRole("region", { name: "Barrierefreiheit" })).toBeVisible();
+    expect(await page.locator("#d").evaluate((element) => element.hasAttribute("standalone"))).toBe(
+      false,
+    );
+    await expect(page.getByRole("article", { name: "Datenschutz" })).toBeVisible();
     expect(
       await page.evaluate(() => (window as unknown as { React?: unknown }).React),
     ).toBeUndefined();

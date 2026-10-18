@@ -34,9 +34,9 @@ const suggest = (goal: string) => {
 };
 
 describe("kompletigilo in the repo Modelo (section ⑤, G1, G2)", () => {
-  it("lives in data/eroj/kompletigilo/skemo.json, one of thirty Eroj", () => {
+  it("lives in data/eroj/kompletigilo/skemo.json, one of thirty-one Eroj", () => {
     expect(kompletigilo?.file).toBe("modelo/data/eroj/kompletigilo/skemo.json");
-    expect(modelo.eroj).toHaveLength(30);
+    expect(modelo.eroj).toHaveLength(31);
   });
 
   it("has the props of the elektilo without empty-label, plus allow-free, min-chars and expanded; the states of a field; label, options, help and error", () => {

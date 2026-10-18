@@ -26,7 +26,7 @@ const suggest = (goal: string) => {
 };
 
 describe("atributlisto in the repo Modelo (section ④, G1, G2, E10)", () => {
-  it("lives in data/eroj/atributlisto/skemo.json, third of thirty Eroj", () => {
+  it("lives in data/eroj/atributlisto/skemo.json, third of thirty-one Eroj", () => {
     expect(atributlisto?.file).toBe("modelo/data/eroj/atributlisto/skemo.json");
     expect(modelo.eroj[2]?.ero.name).toBe("atributlisto");
   });
@@ -102,10 +102,11 @@ describe("the Uzo of the atributlisto (section ④, G5)", () => {
     expect(uzo?.layout).toMatchObject({ size: "container", wrap: "allowed" });
   });
 
-  it("sends many records to the tabelo and editing to the kampo (a form); stops at nesting", () => {
+  it("sends many records to the tabelo, editing to the kampo (a form) and a record shown as a card to the karto (Spec 015 ③, G2); stops at nesting", () => {
     expect(uzo?.instead.map((entry) => [entry.goal, entry.ero])).toEqual([
       ["many-records", "tabelo"],
       ["editable", "kampo"],
+      ["as-card", "karto"],
     ]);
     expect(uzo?.boundary.map((entry) => [entry.case, entry.action])).toEqual([
       ["nested", "not-supported"],

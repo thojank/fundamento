@@ -109,9 +109,9 @@ describe("the navigation dialogs of the spec (Spec 015 ①)", () => {
     expect(clean.valid).toBe(true);
   });
 
-  it("lists thirty Eroj; the briefs of pagxigilo and spuro name their axis and duties", async () => {
+  it("lists thirty-one Eroj; the briefs of pagxigilo and spuro name their axis and duties", async () => {
     const listed = await output<Listed>(client, "list_eroj", {});
-    expect(listed.eroj).toHaveLength(30);
+    expect(listed.eroj).toHaveLength(31);
     expect(listed.eroj.map((entry) => entry.name)).toContain("pagxigilo");
     expect(listed.eroj.map((entry) => entry.name)).toContain("spuro");
     const pager = await output<Brief>(client, "get_ero", { name: "pagxigilo", brief: true });

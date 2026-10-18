@@ -29,9 +29,9 @@ const suggest = (goal: string) => {
 };
 
 describe("langetaro in the repo Modelo (section ⑤, G1, G2, E7)", () => {
-  it("lives in data/eroj/langetaro/skemo.json, fifteenth of thirty Eroj", () => {
+  it("lives in data/eroj/langetaro/skemo.json, sixteenth of thirty-one Eroj", () => {
     expect(langetaro?.file).toBe("modelo/data/eroj/langetaro/skemo.json");
-    expect(modelo.eroj[14]?.ero.name).toBe("langetaro");
+    expect(modelo.eroj[15]?.ero.name).toBe("langetaro");
   });
 
   it("has label (a duty) and selected (the id of the chosen tab) as props; the states of a tab", () => {

@@ -336,6 +336,8 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
       ...["boundary", "slots", "content"].map(() => "ikono"),
       ...["boundary", "slots", "content"].map(() => "insigno"),
       ...["boundary", "slots", "content"].map(() => "kampo"),
+      // Spec 015 ③: the karto carries a Uzo like every set.
+      ...["boundary", "slots", "content"].map(() => "karto"),
       ...["boundary", "slots", "content"].map(() => "kompletigilo"),
       // Spec 014 ④: the konsileto, the menuo and the sxvebilo carry a Uzo like every set.
       ...["boundary", "slots", "content"].map(() => "konsileto"),
@@ -398,6 +400,8 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
       ...["ikono", "ikono", "ikono"],
       ...["insigno", "insigno", "insigno"],
       ...["kampo", "kampo", "kampo"],
+      // Spec 015 ③: the karto closes its three parts too.
+      ...["karto", "karto", "karto"],
       ...["kompletigilo", "kompletigilo", "kompletigilo"],
       // Spec 014 ④: the overlays close their three parts too.
       ...["konsileto", "konsileto", "konsileto"],
@@ -633,6 +637,8 @@ describe("the full plan against the strict double: fresh and into the file of be
     "spuro",
     // Spec 015 ②: and the file input.
     "alsxutilo",
+    // Spec 015 ③: and the card.
+    "karto",
   ]);
   const before2 = structuredClone(repo.input);
   before2.modelo.eroj = before2.modelo.eroj.filter((entry) => !BEFORE_2.has(entry.ero.name));
@@ -2705,6 +2711,8 @@ describe("every bound paint shows the plan's colour after the first and the seco
         { set: "insigno", created: 10, updated: 0 },
         // Spec 009: the kampo has size × state = 18 variants.
         { set: "kampo", created: 18, updated: 0 },
+        // Spec 015 ③: the karto has orientation = 2 variants in one state (an axis of its own).
+        { set: "karto", created: 2, updated: 0 },
         // Spec 014 ⑤: the kompletigilo has size × expanded × state = 30 variants.
         { set: "kompletigilo", created: 30, updated: 0 },
         // Spec 014 ④: the konsileto has placement = 4 variants in one state (an axis of its own).
@@ -3686,7 +3694,10 @@ describe("every set lies in the frame Eroj in the section Fundamento (F-1, F-2, 
             : // Spec 015 ②: the upload with two files beside its set.
               name === "alsxutilo"
               ? [name, "alsxutilo – mit zwei Dateien"]
-              : [name],
+              : // Spec 015 ③: the card without its image beside its set.
+                name === "karto"
+                ? [name, "karto – ohne Bild"]
+                : [name],
   );
   const layout = repoPlan.section;
   const inLayout = names.map(() => ({ frame: FRAME, action: "in-layout" }));
@@ -6687,5 +6698,115 @@ describe("the plugin draws the alsxutilo (Spec 015 ②)", () => {
     const before = double.snapshot();
     await run(double, repoFiles["figma/plugin/code.js"] ?? "");
     expect(double.snapshot()).toBe(before);
+  });
+});
+
+// Spec 015 ③ (plan ③ D-05): the plugin draws the karto — every variant the surface (fill, radius,
+// the border, the shadow as an effect, clipping) with the media and the body; the media a
+// stand-in image across the top where vertical, at the start beside the body where horizontal,
+// shown by the BOOLEAN property media; the body the heading (the label property), the content,
+// the meta row with the badge in the insigno's look and the actions row with the two actions in
+// the butono's looks; the example „ohne Bild" after the set, its media hidden.
+describe("the plugin draws the karto (Spec 015 ③)", () => {
+  const bound = (node: DoubleNode | undefined, field: string) => node?.boundVariables[field]?.name;
+  const paintOf = (node: DoubleNode | undefined, field = "fills") =>
+    (
+      node?.properties[field] as { boundVariables?: { color?: { name: string } } }[] | undefined
+    )?.[0]?.boundVariables?.color?.name;
+  const box = (node: DoubleNode | undefined) =>
+    node as unknown as { x: number; y: number; width: number; height: number };
+  type Definitions = Record<string, { type: string; defaultValue: string | boolean }>;
+
+  it("both orientations: surface, media and body with their bindings, the stand-ins' looks, the media toggle, the example „ohne Bild“ after the set", async () => {
+    const double = modelDouble();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    const set = pageNodes(double).find((node) => node.name === "karto");
+    expect(set?.children.map((child) => child.name)).toEqual([
+      "orientation=vertical, state=rest",
+      "orientation=horizontal, state=rest",
+    ]);
+    const definitions = (set?.properties.componentPropertyDefinitions ?? {}) as Definitions;
+    const media = Object.keys(definitions).find((key) => key.startsWith("media#"));
+    expect(definitions[media ?? ""]).toEqual({ type: "BOOLEAN", defaultValue: true });
+    for (const variant of set?.children ?? []) {
+      const horizontal = variant.name.includes("horizontal");
+      const surface = descendant(variant, "surface");
+      expect(surface?.properties.layoutMode, variant.name).toBe(
+        horizontal ? "HORIZONTAL" : "VERTICAL",
+      );
+      expect(surface?.children.map((child) => child.name)).toEqual(["media", "body"]);
+      expect(paintOf(surface)).toBe("color/background/raised");
+      expect(paintOf(surface, "strokes")).toBe("color/border/subtle");
+      expect(bound(surface, "strokeWeight")).toBe("border/width/default");
+      expect(bound(surface, "cornerRadius")).toBe("radius/role/surface");
+      expect(surface?.properties.clipsContent).toBe(true);
+      const effects = (surface?.properties.effects ?? []) as { type: string }[];
+      expect(effects[0]?.type).toBe("DROP_SHADOW");
+      expect(box(surface).width).toBe(640);
+      const body = descendant(variant, "body");
+      expect(body?.children.map((child) => child.name)).toEqual([
+        "heading",
+        "content",
+        "meta",
+        "actions",
+      ]);
+      expect(bound(body, "paddingTop")).toBe("spacing/medium");
+      expect(bound(body, "paddingLeft")).toBe("spacing/medium");
+      expect(bound(body, "itemSpacing")).toBe("spacing/small");
+      const heading = descendant(body, "heading");
+      expect(heading?.properties.characters).toBe("Überschrift");
+      expect(heading?.properties.componentPropertyReferences).toEqual({
+        characters: expect.stringMatching(/^label#/),
+      });
+      expect(paintOf(heading)).toBe("color/text/default");
+      expect(bound(heading, "fontSize")).toBe("typography/headline/4/font-size");
+      const content = descendant(body, "content");
+      expect(content?.properties.characters).toBe("Kontrast, Fokus und Namen in jeder Marke.");
+      expect(paintOf(content)).toBe("color/text/default");
+      expect(bound(content, "fontSize")).toBe("typography/body/1/font-size");
+      expect(bound(descendant(body, "meta"), "itemSpacing")).toBe("spacing/small");
+      const badge = descendant(body, "badge");
+      expect(paintOf(badge)).toBe("color/background/sunken");
+      expect(bound(badge, "cornerRadius")).toBe("radius/role/pill");
+      expect(descendant(badge, "badge-label")?.properties.characters).toBe("gültig");
+      expect(paintOf(descendant(badge, "badge-label"))).toBe("color/text/subtle");
+      const actions = descendant(body, "actions");
+      expect(bound(actions, "itemSpacing")).toBe("spacing/small");
+      expect(actions?.children.map((child) => child.name)).toEqual(["action-1", "action-2"]);
+      expect(paintOf(actions?.children[0])).toBe("color/action/primary/rest");
+      expect(descendant(actions?.children[0], "action-label")?.properties.characters).toBe(
+        "Öffnen",
+      );
+      expect(paintOf(descendant(actions?.children[1], "action-label"))).toBe(
+        "color/action/tertiary/text",
+      );
+      const image = descendant(variant, "media");
+      expect(paintOf(image)).toBe("color/background/sunken");
+      expect(descendant(image, "media-text")?.properties.characters).toBe("Bild");
+      expect(paintOf(descendant(image, "media-text"))).toBe("color/text/subtle");
+      expect(image?.properties.visible).toBe(true);
+      expect(image?.properties.componentPropertyReferences).toEqual({ visible: media });
+      // Vertical: the media across the top, edge to edge; horizontal: a third at the start, as
+      // high as the body beside it.
+      if (horizontal) {
+        expect(box(image).width).toBe(213);
+        expect(box(image).x).toBeLessThan(box(body).x);
+        expect(box(image).height).toBe(box(body).height);
+      } else {
+        expect(box(image).height).toBe(213);
+        expect(box(image).y).toBeLessThan(box(body).y);
+        expect(box(image).width).toBe(box(body).width);
+      }
+    }
+    const frame = pageNodes(double).find(
+      (node) => node.type === "FRAME" && node.getSharedPluginData("fundamento", "frame") !== "",
+    );
+    const names = frame?.children.map((child) => child.name) ?? [];
+    const at = names.indexOf("karto");
+    expect(names.slice(at, at + 2)).toEqual(["karto", "karto – ohne Bild"]);
+    const example = frame?.children.find((child) => child.name === "karto – ohne Bild");
+    expect(descendant(example, "surface")?.properties.layoutMode).toBe("VERTICAL");
+    expect(descendant(example, "media")?.properties.visible).toBe(false);
+    expect(descendant(example, "heading")?.properties.characters).toBe("Überschrift");
   });
 });

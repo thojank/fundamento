@@ -88,6 +88,7 @@ describe("describe_term (FR-12)", () => {
       "ikono",
       "insigno",
       "kampo",
+      "karto",
       "kompletigilo",
       "konsileto",
       "langetaro",

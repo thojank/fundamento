@@ -263,6 +263,8 @@ describe("the Vitrino after the acceptances (Nachlese 2026-10-13)", () => {
       ikono: "img",
       insigno: "generic",
       kampo: "textbox",
+      // Spec 015 ③: the card is the platform's article.
+      karto: "article",
       kompletigilo: "combobox",
       konsileto: "tooltip",
       langetaro: "tablist",
@@ -743,5 +745,25 @@ describe("the Vitrino shows the alsxutilo (Spec 015 ②)", () => {
       '<fm-alsxutilo max-size="5000000" accept=".pdf,.png" dropzone>rest<span slot="help">PDF oder PNG, höchstens 5 MB</span></fm-alsxutilo>',
     );
     expect((grid.match(/<span slot="error">/g) ?? []).length).toBe(1);
+  });
+});
+
+// Spec 015 ③ (plan ③ D-06): the Vitrino shows the karto vertical with and without its picture
+// (an inline SVG: the Vitrino loads nothing from outside) and horizontal across both columns —
+// each with the heading, the sentence, a badge and two actions (one with emphasis high).
+describe("the Vitrino shows the karto (Spec 015 ③)", () => {
+  it("vertical with and without the picture, horizontal across both columns; level 3 under the section", () => {
+    const grid = datumoj.eroj.karto ?? "";
+    expect((grid.match(/<fm-karto /g) ?? []).length).toBe(3);
+    expect(grid).toContain(
+      '<th scope="col">orientation</th><th scope="col">mit Bild</th><th scope="col">ohne Bild</th>',
+    );
+    expect((grid.match(/<svg slot="media" aria-hidden="true"/g) ?? []).length).toBe(2);
+    expect(grid).toContain('<td colspan="2"><fm-karto level="3" orientation="horizontal">');
+    expect(grid).toContain(
+      '<span slot="heading">Barrierefreiheit</span>Kontrast, Fokus und Namen in jeder Marke.<fm-insigno slot="meta">gültig</fm-insigno><fm-butono slot="actions" emphasis="high">Öffnen</fm-butono><fm-butono slot="actions" emphasis="low">Teilen</fm-butono>',
+    );
+    expect(grid).not.toMatch(/<img/);
+    expect(html).toContain("Größe aus dem Container, Inhalt darf umbrechen.");
   });
 });

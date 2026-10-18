@@ -34,6 +34,7 @@ describe("list_eroj", () => {
       "ikono",
       "insigno",
       "kampo",
+      "karto",
       "kompletigilo",
       "konsileto",
       "langetaro",
@@ -60,7 +61,7 @@ describe("list_eroj", () => {
       variants: ["high", "medium", "low"],
       props: ["emphasis", "intent", "size", "type", "disabled", "loading", "full-width", "label"],
     });
-    expect(listEroj(modelo).eroj[15]).toMatchObject({
+    expect(listEroj(modelo).eroj[16]).toMatchObject({
       name: "ligilo",
       variants: ["inline", "standalone"],
       props: ["to", "placement", "external", "size", "label"],
