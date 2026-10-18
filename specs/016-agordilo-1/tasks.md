@@ -20,18 +20,18 @@
 
 ### C – Abschluss
 - [x] **T1609 Doku** plan ①, tasks ①, README (CLI, Pakete, Aspekto-Pakete).
-- [ ] **T1610 CI** grün, Hash des grünen Stands.
+- [x] **T1610 CI** grün (Lauf 39159638652), Hash des grünen Stands `e98b5f9`.
 
 ### Messungen
 
 | Was | Wert |
 |---|---|
-| Commits ① | rot `f00db43`, grün `0b14851`, weniger Ableitungen in den Tests (B-10): Folgecommit; CI: Zeile unten |
+| Commits ① | rot `f00db43`, grün `0b14851`, Fix CI-Dauer `e98b5f9` (Hash des grünen Stands, CI grün); dieser Eintrag im Folgecommit |
 | Tests lokal | Agordilo 35 in 5 Dateien (≈ 10 s), CLI 72 (davon 6 Agordilo, ≈ 18 s allein), MCP 291, Projekcioj 670, Modelo 3 484 – alle grün; `pnpm turbo run test --filter=!@fundamento/eroj` 160 s. Im parallelen Lauf lief einmal `export/build.test.ts` („two runs of the export build“) über sein lokales Budget von 30 s (36,8 s; in der CI ×3) – ohne die Agordilo-Last grün; die Agordilo-Tests tragen ein eigenes Budget von 120 s für Test und Hook (ein `beforeAll` mit zwei Ableitungen lief unter Last über 10 s). `pnpm lint` grün (nur ältere Warnungen), `check:vortaro-lint`, `check:regularo`, `check:alirebleco` (3 Aspektoj, provo 0 Fehler), `check:clean-room`, `check:mankoj`, `check:ikonaro` (3 Aspektoj), `check:parity` (29 Eroj, 0 Differenzen), `pnpm perf` grün; `fm modelo validate --aspekto …/aspekto-provo` 0 Fehler, `fm agordilo check …/aspekto-provo` OK |
 | Ableitung | provo: Paletten 85–93 ms (mit Aufbau des Struktur-Modelo), Ableitung mit allen Prüfungen 1,7 s (Validierung 1,07 s, Alirebleco 0,36 s); M2: zehn Ableitungen mit Prüfung 16,5 s |
 | provo | 6 408 Paar-Auswertungen bestanden, 0 verletzt; 0 Verstöße; 108 Hinweise (APCA); `fm modelo validate --aspekto` 0 Fehler; `check:alirebleco` provo 0 fehlgeschlagene Auswertungen; `check:ikonaro` 3 Aspektoj |
 | Paket provo | 24 Dateien; `raporto.json` 209 KB, `raporto.md` 54 KB |
-| CI | Lauf 39158336356 (`0b14851`): Build/Test/Checks grün 12:39 (Test-Schritt 11:20; `main` 9:01, B-10), Eroj Shard 1 grün 8:36, Shard 2 rot 7:09 am Flake `sxvebilo.spec.ts:53` (auch auf `main`, B-11) – neu gestartet, Rendered checks grün 5:21; nächster Lauf in der Zeile nach dem Push |
+| CI | Lauf 39158336356 (`0b14851`): Build/Test/Checks grün 12:39 (Test-Schritt 11:20), Eroj Shard 1 grün 8:36, Shard 2 rot 7:09 am Flake `sxvebilo.spec.ts:53` (auch auf `main`, B-11), neu gestartet und vom nächsten Lauf abgelöst, Rendered checks grün 5:21. Lauf 39159638652 (`e98b5f9`): alle vier Jobs grün – Build/Test/Checks 12:58 (Test-Schritt 11:42, B-10), Eroj Shard 1 8:32, Shard 2 6:47, Rendered checks 7:49 |
 
 ## ② Werkstatt
 
