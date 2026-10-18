@@ -92,7 +92,7 @@
 
 | Was | Wert |
 |---|---|
-| Commits ③ | karto rot `8fe847d`, grün `eaa6d74`; avataro rot `e63f193`, grün `76bc595`; Toast rot `3c0ce8e`, grün `67895ad` |
+| Commits ③ | karto rot `8fe847d`, grün `eaa6d74`; avataro rot `e63f193`, grün `76bc595`; Toast rot `0024905`, grün `67895ad` |
 | Rot gemessen | karto: Modelo 64 Tests in 37 Dateien, Projekcioj 21 in 6, MCP 16 in 17 (Suite s015-inhalt lädt nicht ohne Daten); avataro: Modelo 60 in 36, Projekcioj 21 in 6, MCP 18 in 17; Toast: Modelo 8 in 3, MCP 2 in 2 |
 | `brief` | karto 306, avataro ≤ 750 (Daten-Tests, MCP `get_ero` je Ero) |
 | `check:regularo` | 59 Reguloj, 194 Jugxoj, 32 Uzoj, 0 Warnungen (keine neue `goal-keyword-shared`) |
