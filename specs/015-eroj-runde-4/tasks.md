@@ -25,7 +25,7 @@
 
 | Was | Wert |
 |---|---|
-| Commits ① | rot `61955bd` (nach dem Rebase auf `main` `93a0df3`, #74 gemergt; davor `146f5c2`, `7b450f1`), Arbeitsstand `279cb5a`, grün `52b5cc9`; Abnahme S-1/S-2: rot `3178747`, Fix in der Zeile nach dem Commit |
+| Commits ① | rot `61955bd` (nach dem Rebase auf `main` `93a0df3`, #74 gemergt; davor `146f5c2`, `7b450f1`), Arbeitsstand `279cb5a`, grün `52b5cc9`; Abnahme S-1/S-2: rot `3178747`, Fix `165c83d` |
 | `brief` | pagxigilo, spuro ≤ 750 (Daten-Tests) |
 | `check:regularo` | 58 Reguloj, 184 Jugxoj, 29 Uzoj, 0 Warnungen (keine neue `goal-keyword-shared`) |
 | Tests lokal | Modelo 3476, Projekcioj 670, MCP 291 grün; `check:parity` 29 Eroj, 0 Differenzen; Lint, `check:regularo` (29 Uzoj), vortaro-lint, mankoj, ikonaro, clean-room ohne Fehler; Browser: alle 216 Specs in Chromium (spuro/pagxigilo zusätzlich in Firefox und WebKit), Alirebleco-Check 489 in drei Browsern, Vitrino-Check 27 grün (nach S-1/S-2 und O-2) |
