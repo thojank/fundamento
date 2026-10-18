@@ -329,6 +329,25 @@ const GEOMETRY_KEYS: ReadonlySet<string> = new Set(["x", "y", "width", "height"]
  * wrote `width` on its frame and the real tool aborted in write ← flush ← drawSeparator; the
  * double had accepted it. A size is set with `resize`, or bound with `setBoundVariable`.
  */
+/**
+ * Fields of an auto-layout child (plugin-api.d.ts, AutoLayoutChildrenMixin) and the sizing of an
+ * auto-layout frame: Figma refuses them on a node that neither has auto layout itself nor lies in
+ * an auto-layout frame — "node must be an auto-layout frame or a child of an auto-layout frame".
+ * Measured 2026-10-18 (Abnahme 014 ②–⑤, F-5): a new variant of a found set got its sizing written
+ * before it lay in the set. The double had accepted it.
+ */
+const LAYOUT_CHILD_FIELDS: ReadonlySet<string> = new Set([
+  "layoutSizingHorizontal",
+  "layoutSizingVertical",
+  "layoutAlign",
+  "layoutGrow",
+  "layoutPositioning",
+]);
+
+const hasAutoLayout = (node: DoubleNode | undefined): boolean =>
+  node !== undefined &&
+  ["HORIZONTAL", "VERTICAL", "GRID"].includes(String(node.properties.layoutMode));
+
 const READ_ONLY_FIELDS: ReadonlySet<string> = new Set([
   "width",
   "height",
@@ -554,6 +573,19 @@ function node(
       }
       if (typeof key === "string" && READ_ONLY_FIELDS.has(key)) {
         throw new Error(`in set_${key}: no setter for property`);
+      }
+      if (
+        typeof key === "string" &&
+        LAYOUT_CHILD_FIELDS.has(key) &&
+        !hasAutoLayout(target as DoubleNode) &&
+        !hasAutoLayout(target.parent)
+      ) {
+        const parent = target.parent;
+        throw new Error(
+          `in set_${key}: node must be an auto-layout frame or a child of an auto-layout frame` +
+            ` (Double: ${target.type} "${target.name}" layoutMode ${String(target.properties.layoutMode)}, ` +
+            `parent ${parent === undefined ? "none" : `${parent.type} "${parent.name}" layoutMode ${String(parent.properties.layoutMode)}`})`,
+        );
       }
       if (typeof key === "string" && context.refuses?.has(key)) {
         throw new Error(

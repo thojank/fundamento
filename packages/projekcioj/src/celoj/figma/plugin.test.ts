@@ -572,6 +572,86 @@ describe("the plugin reports what it did (F10)", () => {
   });
 });
 
+// Abnahme 014 ②–⑤ (2026-10-18, F-5): the maintainer's file holds the 17 sets of before Spec 014 ②,
+// the atributlisto without layout=auto. Against the strict double — it refuses sizing outside auto
+// layout and read-only fields as Figma does — the whole plan must run twice without a refusal:
+// fresh, and into that file with „auch in vorgefundenem Set anlegen" (the 10 new sets and the auto
+// variants of the found atributlisto are created). Before this, the real tool found the errors one
+// by one (F-4 the separator, F-5 the first variant whose sizing was written before its parent had
+// auto layout).
+describe("the full plan against the strict double: fresh and into the file of before ② (Abnahme F-5)", () => {
+  const BEFORE_2 = new Set([
+    "ikono",
+    "apartigilo",
+    "saltligilo",
+    "titolo",
+    "teksto",
+    "konsileto",
+    "sxvebilo",
+    "menuo",
+    "faldilo",
+    "kompletigilo",
+  ]);
+  const before2 = structuredClone(repo.input);
+  before2.modelo.eroj = before2.modelo.eroj.filter((entry) => !BEFORE_2.has(entry.ero.name));
+  const list = before2.modelo.eroj.find((entry) => entry.ero.name === "atributlisto");
+  if (list === undefined) throw new Error("atributlisto missing");
+  const layout = list.skemo.props.find((prop) => prop.name === "layout");
+  if (layout?.values !== undefined)
+    layout.values = layout.values.filter((value) => value !== "auto");
+  list.skemo.bindings = list.skemo.bindings.filter((binding) => binding.when?.layout !== "auto");
+  const files17 = Object.fromEntries(
+    FIGMA_CELO.generate(before2).map((file) => [file.path, file.text]),
+  );
+  type Report = {
+    components: { set: string; found: boolean; created: string[]; updated: string[] }[];
+    warnings: string[];
+  };
+  async function runWith(
+    double: ReturnType<typeof figmaDouble>,
+    source: string,
+    options?: typeof LIFT,
+  ): Promise<Report> {
+    const module = new Function("figma", "options", `${source}\nreturn applyPlan(options);`);
+    return (await module(double.figma, options)) as Report;
+  }
+  const refused = (report: Report) =>
+    report.warnings.filter((warning) => /abgelehnt|no setter|auto-layout/.test(warning));
+
+  it("fresh: every one of the 27 sets is drawn, nothing refused", async () => {
+    const double = modelDouble();
+    const report = await runWith(double, repoFiles["figma/plugin/code.js"] ?? "");
+    expect(report.components).toHaveLength(27);
+    expect(report.components.map((set) => set.set)).toEqual(
+      repoPlan.components.map((component) => component.set),
+    );
+    expect(refused(report)).toEqual([]);
+  });
+
+  it("the file of before ②: 17 sets, the atributlisto without auto; then the current plan into the found file creates the 10 sets and the auto variants, nothing refused", async () => {
+    const double = modelDouble();
+    const first = await runWith(double, files17["figma/plugin/code.js"] ?? "");
+    expect(first.components).toHaveLength(17);
+    const listBefore = first.components.find((set) => set.set === "atributlisto");
+    expect(listBefore?.created.some((name) => name.includes("layout=auto"))).toBe(false);
+    const second = await runWith(double, repoFiles["figma/plugin/code.js"] ?? "", LIFT);
+    expect(second.components).toHaveLength(27);
+    const listAfter = second.components.find((set) => set.set === "atributlisto");
+    expect(listAfter?.found).toBe(true);
+    expect(listAfter?.created.length).toBeGreaterThan(0);
+    expect(listAfter?.created.every((name) => name.includes("layout=auto"))).toBe(true);
+    for (const name of BEFORE_2) {
+      const set = second.components.find((each) => each.set === name);
+      expect(set?.found, name).toBe(false);
+      expect(set?.created.length, name).toBeGreaterThan(0);
+    }
+    expect(refused(second)).toEqual([]);
+    // A third run finds everything and creates nothing.
+    const third = await runWith(double, repoFiles["figma/plugin/code.js"] ?? "");
+    expect(third.components.every((set) => set.found && set.created.length === 0)).toBe(true);
+  });
+});
+
 // F10b (Abnahme M1, frische Datei QtJRsTlm7NnIPC8wqNuAVm): Lauf 1 legte 72 Varianten an, Lauf 2
 // meldete `found: true`, `created: 1` — und zwar die **letzte** Variante des Plans
 // (emphasis=low, intent=neutral, size=large, state=loading), bei `updated: 71` und `warnings: []`.
