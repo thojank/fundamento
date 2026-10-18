@@ -301,6 +301,8 @@ export interface DoubleBox {
 /** What a node needs from the file around it: the loaded fonts and the computed layout. */
 interface NodeContext {
   loaded: ReadonlySet<string>;
+  /** Geometry read as 32-bit floats, as Figma keeps it (Nachlese 4 N-5); off by default. */
+  float32?: boolean;
   /**
    * Fields the double refuses to set, throwing as Figma does for a field it does not have
    * (Spec 007 T029): the measurement of a Manko needs a tool that says no, and one that says yes.
@@ -697,7 +699,9 @@ function node(
       // Size and place are computed by the layout of the file, never read from what was last
       // written: the double does not assume a size the tool would compute differently (F14).
       if (typeof key === "string" && GEOMETRY_KEYS.has(key) && context.box !== undefined) {
-        return context.box(recorded)[key as keyof DoubleBox];
+        const value = context.box(recorded)[key as keyof DoubleBox];
+        // Figma keeps geometry as 32-bit floats (Nachlese 4 N-5, F-6): 0.01 reads 0.0099999998.
+        return context.float32 === true ? Math.fround(value) : value;
       }
       if (typeof key === "string" && !(key in target) && key in target.properties) {
         return target.properties[key];
@@ -780,8 +784,13 @@ function layoutOf(
     const primary = (axis === "H") === (mode === "HORIZONTAL");
     return prop(current, primary ? "primaryAxisSizingMode" : "counterAxisSizingMode") === "AUTO";
   };
+  // A hidden child takes no space in auto layout (documented; Nachlese 4 N-5: the double counted
+  // the hidden arc and actions placeholder of the plenstato, the file did not).
   const inFlow = (current: DoubleNode) =>
-    current.children.filter((child) => prop(child, "layoutPositioning") !== "ABSOLUTE");
+    current.children.filter(
+      (child) =>
+        prop(child, "layoutPositioning") !== "ABSOLUTE" && prop(child, "visible") !== false,
+    );
   const isFlow = (current: DoubleNode | undefined): boolean => {
     const mode = current === undefined ? undefined : prop(current, "layoutMode");
     return mode === "HORIZONTAL" || mode === "VERTICAL";
@@ -1102,6 +1111,11 @@ export function figmaDouble(
     modeLimit?: number;
     /** Fields the double refuses to set (Spec 007 T029); by default it accepts every field. */
     refuse?: readonly string[];
+    /**
+     * Read x, y, width and height as 32-bit floats, as Figma keeps them (Nachlese 4 N-5, F-6: a
+     * 0.01 has no exact float, and a sum of them lands a few millionths beside the set it ends in).
+     */
+    float32?: boolean;
   } = {},
 ): FigmaDouble {
   const counts: DoubleCounts = {
@@ -1118,6 +1132,7 @@ export function figmaDouble(
   const context: NodeContext = {
     loaded,
     ...(options.refuse === undefined ? {} : { refuses: new Set(options.refuse) }),
+    ...(options.float32 === true ? { float32: true } : {}),
     version: 0,
     variableById: (id) => variables.find((variable) => variable.id === id),
     collectionOf: (variable) =>

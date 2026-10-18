@@ -4913,6 +4913,15 @@ const px = (value) => Math.round(value * 100) / 100;
 const dims = (box) => px(box.width) + " × " + px(box.height);
 
 /**
+ * How far two lengths may lie apart and still be the same (Nachlese 4 N-5, F-6): half of what the
+ * report prints (px rounds to hundredths). Figma keeps geometry as 32-bit floats; a 0.01 — the
+ * empty placeholder of the plenstato — has no exact float, and a child's y plus its height came
+ * out a few millionths above the set it ends in: "das Set misst 101 × 148, die Kinder reichen bis
+ * 97 × 144" with a padding of 4 was no overlap. A real one is a whole pixel or more.
+ */
+const LAYOUT_SLACK = 0.005;
+
+/**
  * Reads back what the layout did, instead of trusting the call (F14): the size of every variant
  * against its content, the places the variants took, and the size of the set. Figma accepted a
  * grid once and left every variant at 0 × 0 — only a measurement says so.
@@ -5029,7 +5038,7 @@ function measureLayout(set, component) {
   const zero = boxes.filter((box) => box.width === 0 || box.height === 0);
   const smaller = boxes.filter(
     (box) => box.width !== 0 && box.height !== 0 &&
-      (box.width < box.content.width || box.height < box.content.height),
+      (box.width < box.content.width - LAYOUT_SLACK || box.height < box.content.height - LAYOUT_SLACK),
   );
   const unplaced = nodes
     .filter((node) => !(node.gridRowAnchorIndex >= 0 && node.gridColumnAnchorIndex >= 0))
@@ -5248,8 +5257,9 @@ function measureLayout(set, component) {
   const padRight = typeof set.paddingRight === "number" ? set.paddingRight : 0;
   const padBottom = typeof set.paddingBottom === "number" ? set.paddingBottom : 0;
   const outside = all
-    .filter((box) => box.x < 0 || box.y < 0 ||
-      box.x + box.width + padRight > set.width || box.y + box.height + padBottom > set.height)
+    .filter((box) => box.x < -LAYOUT_SLACK || box.y < -LAYOUT_SLACK ||
+      box.x + box.width + padRight > set.width + LAYOUT_SLACK ||
+      box.y + box.height + padBottom > set.height + LAYOUT_SLACK)
     .map((box) => box.name);
   const first = nodes[0];
   const last = nodes[nodes.length - 1];

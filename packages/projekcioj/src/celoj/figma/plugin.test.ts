@@ -5273,32 +5273,21 @@ describe("the plenstato is drawn as a state: the column with the arc, the text a
   // 0.01 of its empty actions placeholder (the loading variant hides it), and 0.01 has no exact
   // float: the sum of a child's y and height came out a few millionths above the set's height.
   it("warns of nothing where a variant ends at the padding but for float noise below what the report prints (N-5, F-6)", async () => {
-    const double = modelDouble();
-    const api = double.figma as { combineAsVariants: (...args: unknown[]) => DoubleNode };
-    const combine = api.combineAsVariants;
-    const figma = {
-      ...double.figma,
-      combineAsVariants: (...args: unknown[]) => {
-        const made = combine(...args);
-        if (!made.children.some((child) => child.name.startsWith("kind="))) return made;
-        return new Proxy(made, {
-          get(target, key, receiver) {
-            const value = Reflect.get(target, key, receiver);
-            // A set a few millionths smaller than the sum Figma lays out: float noise.
-            if ((key === "width" || key === "height") && typeof value === "number") {
-              return value - 0.000004;
-            }
-            return value;
-          },
-        });
-      },
-    };
+    // Geometry as Figma keeps it: 32-bit floats.
+    const double = figmaDouble({ fonts: MODEL_FONTS, float32: true });
     const report = (await new Function("figma", `${source}\nreturn applyPlan();`)(
-      figma,
-    )) as Report & { components: { set: string; layout: { outside: string[] } }[] };
+      double.figma,
+    )) as Report & {
+      components: { set: string; layout: { outside: string[]; smaller: string[] } }[];
+    };
     const plenstato = report.components.find((component) => component.set === "plenstato");
     expect(plenstato?.layout.outside).toEqual([]);
     expect(report.warnings.filter((warning) => warning.startsWith("plenstato"))).toEqual([]);
+    // No set at all reads a float's last digits as an overlap.
+    for (const component of report.components) {
+      expect(component.layout.outside, component.set).toEqual([]);
+      expect(component.layout.smaller, component.set).toEqual([]);
+    }
   });
 });
 
@@ -5335,20 +5324,19 @@ describe("the double lays out no invisible child (N-5)", () => {
     expect(shown).toBeDefined();
   });
 
-  it("the plenstato while loading is as high as its arc, gap and text and its paddings – the hidden actions take nothing", async () => {
+  it("the plenstato while loading takes nothing from its hidden actions placeholder: no 0.01, no gap before it", async () => {
     const double = modelDouble();
     await run(double, repoFiles["figma/plugin/code.js"] ?? "");
     const set = pageNodes(double).find((child) => child.name === "plenstato");
-    const loading = set?.children.find((child) => child.name === "kind=loading, state=rest");
-    const control = descendant(loading, "control");
-    const parts = ["indicator", "text"].map((name) =>
-      size(descendant(loading, name) as DoubleNode),
-    );
-    const padding = (control as unknown as { paddingTop: number }).paddingTop;
-    const gap = (control as unknown as { itemSpacing: number }).itemSpacing;
-    expect(size(control as DoubleNode).height).toBe(
-      parts.reduce((sum, part) => sum + part.height, 0) + gap + 2 * padding,
-    );
+    const variant = (name: string) => set?.children.find((child) => child.name === name);
+    const loading = descendant(variant("kind=loading, state=rest"), "control") as DoubleNode;
+    expect(descendant(loading, "actions")?.properties.visible).toBe(false);
+    // Arc, gap, text and paddings are whole numbers; only the hidden 0.01 placeholder (and the
+    // spacing before it) made the column 78.01 high in the double — 74 in the file's terms.
+    expect(Number.isInteger(size(loading).height)).toBe(true);
+    // The empty variant shows its placeholder: there the 0.01 belongs to the column.
+    const empty = descendant(variant("kind=empty, state=rest"), "control") as DoubleNode;
+    expect(Number.isInteger(size(empty).height)).toBe(false);
   });
 });
 
