@@ -111,7 +111,7 @@ Everything lives in one workspace; the npm org for published packages is
 | `@fundamento/modelo` | Schema, loader, resolver, validation, checks, NomReguloj, Gvidanto |
 | `@fundamento/aspekto-komuna` | The reference Aspekto |
 | `@fundamento/projekcioj` | Every generator: CSS, Tailwind, Web Component, React, Figma, Code Connect, Make Kit |
-| `@fundamento/eroj` | The generated Eroj: thirty-one `fm-*` elements (since Spec 015 ① with `fm-pagxigilo` and `fm-spuro`, the pagination and the breadcrumb; since Spec 015 ② with `fm-alsxutilo`, the file input; since Spec 015 ③ with `fm-karto`, the card) and their React wrappers |
+| `@fundamento/eroj` | The generated Eroj: thirty-two `fm-*` elements (since Spec 015 ① with `fm-pagxigilo` and `fm-spuro`, the pagination and the breadcrumb; since Spec 015 ② with `fm-alsxutilo`, the file input; since Spec 015 ③ with `fm-karto` and `fm-avataro`, the card and the avatar) and their React wrappers |
 | `@fundamento/mcp` | The MCP server (Gvidanto) |
 | `@fundamento/cli` | `fm`: validate, export, build projections, run the server |
 | `@fundamento/make-kit-<aspekto>` | Build output of `projekcioj`: one Figma Make kit per Aspekto (published under the dist-tag `next` after the acceptance) |

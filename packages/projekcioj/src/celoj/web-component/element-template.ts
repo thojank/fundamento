@@ -40,7 +40,8 @@ export type HostControl =
   | "pagination"
   | "suggest"
   | "upload"
-  | "card";
+  | "card"
+  | "avatar";
 
 export interface ElementNames {
   /** `fm-butono` */
@@ -111,6 +112,7 @@ export function hostOf(
   suggest = false,
   pagination = false,
   upload = false,
+  avatar = false,
 ): HostControl {
   if (role === "link") return "a";
   // Spec 015 ② (plan ② D-05): the platform's file input is heard as a button; with a dropzone
@@ -145,6 +147,8 @@ export function hostOf(
   if (role === "tablist") return "tabs";
   // An icon (Spec 014 ②, plan ② D-05) is a span that shows the Aspekto's glyph as a mask; a
   // separator (D-06) a div with that role, or none where it only decorates.
+  // Spec 015 ③ (plan ③ D-08): an image with an initials part is an avatar, not an icon.
+  if (role === "img" && avatar) return "avatar";
   if (role === "img") return "icon";
   if (role === "separator") return "separator";
   // A heading (Spec 014 ③, plan ③ D-04) is a div with role heading and its level spoken as
@@ -574,6 +578,16 @@ function tabsMarkup(): string {
 const TAB_ROW = '<button part="tab" role="tab" type="button"><slot></slot></button>';
 
 /**
+ * The shadow markup of an avatar (Spec 015 ③, plan ③ D-08): the control is the image of the
+ * person, named by the name (or hidden where decorative); inside it the platform's img — empty
+ * alt, the control carries the name — and the initials, both decorative; the element shows the
+ * picture once it has loaded, else the initials.
+ */
+function avatarMarkup(): string {
+  return '<span part="control"><img part="image" alt="" hidden><span part="initials" aria-hidden="true"></span></span><slot hidden></slot><span id="fm-texts" hidden></span>';
+}
+
+/**
  * The shadow markup of a card (Spec 015 ③, plan ③ D-04): the platform's article named by its
  * heading — a composed titolo at the card's level in the type role of the part heading — the media
  * edge to edge above (beside, horizontal) a body of heading, content, meta and actions; media,
@@ -608,6 +622,7 @@ function markup(
   if (host === "pagination") return paginationMarkup();
   if (host === "upload") return uploadMarkup();
   if (host === "card") return cardMarkup();
+  if (host === "avatar") return avatarMarkup();
   if (host === "tabs") return tabsMarkup();
   if (host === "input") return fieldMarkup(slots);
   if (host === "textarea") return fieldMarkup(slots, true);
@@ -697,11 +712,13 @@ export function elementSource({
                                           ? "input"
                                           : host === "card"
                                             ? "article"
-                                            : host === "popover"
-                                              ? "[role=dialog]"
-                                              : host === "menu"
-                                                ? "[role=menu]"
-                                                : "button";
+                                            : host === "avatar"
+                                              ? "[part='control']"
+                                              : host === "popover"
+                                                ? "[role=dialog]"
+                                                : host === "menu"
+                                                  ? "[role=menu]"
+                                                  : "button";
   const isToggle = host === "toggle";
   const isGroup = host === "group";
   const isSelect = host === "select";
@@ -727,6 +744,7 @@ export function elementSource({
   const isMenu = host === "menu";
   const isOverlay = isTooltip || isPopover || isMenu;
   const isCard = host === "card";
+  const isAvatar = host === "avatar";
   const isSkip = host === "a" && skip;
   const isStatic =
     isStatus ||
@@ -741,7 +759,8 @@ export function elementSource({
     isOverlay ||
     isDisclosure ||
     isPagination ||
-    isCard;
+    isCard ||
+    isAvatar;
   const listSlot = slots.find((slot) => slot.list === true)?.name ?? "";
   const namedSlots = slots
     .filter((slot) => slot.default !== true && slot.decorative !== true)
@@ -2701,6 +2720,55 @@ ${
     }
 ${isStacking ? "    this.#autoLayout();\n" : ""}`
     : "";
+  // An avatar (Spec 015 ③, plan ③ D-08): an image named by the name, hidden where decorative; the
+  // picture shows once it has loaded, else — none, still loading, or broken — the initials: the
+  // first grapheme of the first and of the last word of the name (Intl.Segmenter, so a letter
+  // with a combining mark stays one), at most two, in the writing of the document. No colour is
+  // worked out from the name (E8): the initials take the fixed roles of the part.
+  const avatarRender = isAvatar
+    ? `    const avatarName = String(this.propValue("name") ?? "").trim();
+    if (avatarName === "") warn(\`${tag}: name is required; an avatar without a name is a picture nobody hears (icon-meaning-named).\`);
+    if (this.propValue("decorative") === true) {
+      control.removeAttribute("role");
+      control.removeAttribute("aria-label");
+      control.setAttribute("aria-hidden", "true");
+    } else {
+      control.setAttribute("role", "img");
+      control.setAttribute("aria-label", avatarName);
+      control.removeAttribute("aria-hidden");
+    }
+    const initials = this.shadowRoot?.querySelector('[part="initials"]');
+    const image = this.shadowRoot?.querySelector('[part="image"]');
+    if (initials instanceof HTMLElement && image instanceof HTMLImageElement) {
+      const lingvo = this.#lingvo();
+      // Words are what spaces and dashes part (the word segmenters of the engines differ on
+      // scripts such as Devanagari); a word's initial is its first grapheme that is a letter or a
+      // digit, so a quote or a bracket before it does not count.
+      const words = avatarName.split(/[\\s\\p{Pd}]+/u).filter((word) => word !== "");
+      const picked = words.length > 1 ? [words[0] ?? "", words[words.length - 1] ?? ""] : words;
+      const graphemes = new Intl.Segmenter(lingvo, { granularity: "grapheme" });
+      const letters = picked
+        .map(
+          (word) =>
+            [...graphemes.segment(word)].find((grapheme) => /[\\p{L}\\p{N}]/u.test(grapheme.segment))
+              ?.segment ?? "",
+        )
+        .join("")
+        .toLocaleUpperCase(lingvo);
+      if (initials.textContent !== letters) initials.textContent = letters;
+      const picture = String(this.propValue("picture") ?? "");
+      if (picture !== this.#picture) {
+        this.#picture = picture;
+        this.#loaded = false;
+        if (picture === "") image.removeAttribute("src");
+        else image.src = picture;
+      }
+      const shown = picture !== "" && this.#loaded;
+      image.hidden = !shown;
+      initials.hidden = shown;
+    }
+`
+    : "";
   const skipRender = isSkip
     ? `    const fallback = TEXTS["label-empty"];
     if (fallback !== undefined) {
@@ -2897,6 +2965,21 @@ ${isStacking ? "    this.#autoLayout();\n" : ""}`
   // dropzone too — and writes them back into the input, so the platform's own list and the form
   // value always say the same. The dropzone is an addition for the pointer: dragover marks the
   // field (its state), a drop takes the files. Every remove takes one file away.
+  // The picture of an avatar (Spec 015 ③): loaded, it replaces the initials; broken, they stay.
+  const avatarInit = isAvatar
+    ? `    const picture = root.querySelector('[part="image"]');
+    if (picture instanceof HTMLImageElement) {
+      picture.addEventListener("load", () => {
+        this.#loaded = picture.naturalWidth > 0;
+        this.#render();
+      });
+      picture.addEventListener("error", () => {
+        this.#loaded = false;
+        this.#render();
+      });
+    }
+`
+    : "";
   const uploadInit = isUpload
     ? `    const fileInput = control as HTMLInputElement;
     fileInput.addEventListener("change", () => {
@@ -3314,7 +3397,7 @@ export class ${className} extends Base {
   readonly #root: HTMLElement;
   readonly #label: HTMLSlotElement;
   readonly #texts: HTMLElement;
-${autoField}${isUpload ? '  /** The chosen files (Spec 015 ②): the value of the field, in the order they were chosen. */\n  #files: File[] = [];\n  /** The element\'s own error: a chosen file breaks accept or max-size (empty while none does). */\n  #fileError = "";\n' : ""}${isFieldHost || isUpload ? "  /** Whether a person touched the field or the form reported it invalid (Spec 011 ② F-8): the error shows from then on. */\n  #reported = false;\n" : ""}
+${autoField}${isAvatar ? '  /** The picture an avatar shows and whether it has loaded (Spec 015 ③): until then the initials stand. */\n  #picture = "";\n  #loaded = false;\n' : ""}${isUpload ? '  /** The chosen files (Spec 015 ②): the value of the field, in the order they were chosen. */\n  #files: File[] = [];\n  /** The element\'s own error: a chosen file breaks accept or max-size (empty while none does). */\n  #fileError = "";\n' : ""}${isFieldHost || isUpload ? "  /** Whether a person touched the field or the form reported it invalid (Spec 011 ② F-8): the error shows from then on. */\n  #reported = false;\n" : ""}
   constructor() {
     super();
     this.#internals = this.attachInternals();
@@ -3342,7 +3425,7 @@ ${autoField}${isUpload ? '  /** The chosen files (Spec 015 ②): the value of th
     this.#label = label;
     this.#texts = texts;
     control.addEventListener("click", (event) => this.#activate(event));
-${toggleKeys}${groupInit}${selectInit}${dialogInit}${statusInit}${lightInit}${paginationInit}${tabsInit}${tooltipInit}${popoverInit}${menuInit}${disclosureInit}${suggestInit}${uploadInit}${skipInit}    label.addEventListener("slotchange", () => this.#render());
+${toggleKeys}${groupInit}${selectInit}${dialogInit}${statusInit}${lightInit}${paginationInit}${tabsInit}${tooltipInit}${popoverInit}${menuInit}${disclosureInit}${suggestInit}${uploadInit}${avatarInit}${skipInit}    label.addEventListener("slotchange", () => this.#render());
     for (const named of root.querySelectorAll("slot[name]")) {
       named.addEventListener("slotchange", () => this.#render());
     }
@@ -3485,7 +3568,7 @@ ${autoDisconnect}
     // \`invalid\` spoken as aria-invalid and set by a filled error slot (constraint of the Skemo);
     // disabled wins over readonly; help and error show only while they have text.
     const described: string[] = [];
-${inputRender}${toggleRender}${groupRender}${selectRender}${dialogRender}${statusRender}${meterRender}${lightRender}${paginationRender}${tabsRender}${iconRender}${separatorRender}${headingRender}${paragraphRender}${tooltipRender}${popoverRender}${menuRender}${disclosureRender}${suggestRender}${uploadRender}${cardRender}${skipRender}${composedIconRender}    // The texts of the slots that describe the control (Spec 009, D-02; a checkbox, Spec 010 ②):
+${inputRender}${toggleRender}${groupRender}${selectRender}${dialogRender}${statusRender}${meterRender}${lightRender}${paginationRender}${tabsRender}${iconRender}${separatorRender}${headingRender}${paragraphRender}${tooltipRender}${popoverRender}${menuRender}${disclosureRender}${suggestRender}${uploadRender}${cardRender}${avatarRender}${skipRender}${composedIconRender}    // The texts of the slots that describe the control (Spec 009, D-02; a checkbox, Spec 010 ②):
     // shown while they have text, and its description in that order.
     for (const source of DESCRIPTION) {
       const [kind, name = ""] = source.split(":");
@@ -3536,11 +3619,12 @@ ${
       .trim();
     const name = this.propValue("label");
 ${
-  isLight || isOverlay || isPagination || isCard
+  isLight || isOverlay || isPagination || isCard || isAvatar
     ? `    // A light-DOM host names its region by the caption (Spec 011 ④, D-09) and its list by the
     // label prop on the dl itself (D-10); an overlay (Spec 014 ④) names its layer in its own
     // render, a pagination (Spec 015 ①, B-3) its landmark — the label, else the Modelo's word; a
-    // card (Spec 015 ③) is named by its heading (aria-labelledby); nothing is written here.
+    // card (Spec 015 ③) is named by its heading (aria-labelledby), an avatar by its name in its
+    // own render; nothing is written here.
     void text;
     void name;
 `

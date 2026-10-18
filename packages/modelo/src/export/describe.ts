@@ -40,11 +40,12 @@ const WORDS = [
   "twenty-nine",
   // Spec 015 ②: thirty Eroj (the file input).
   "thirty",
-  // Spec 015 ③: thirty-one Eroj (the card).
+  // Spec 015 ③: thirty-one Eroj (the card), thirty-two (the avatar).
   "thirty-one",
+  "thirty-two",
 ] as const;
 
-/** A count as an English word for 0 to 31 (`no` for zero), otherwise as digits. */
+/** A count as an English word for 0 to 32 (`no` for zero), otherwise as digits. */
 export function countWord(count: number): string {
   return WORDS[count] ?? String(count);
 }

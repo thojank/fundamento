@@ -87,6 +87,9 @@ export const STRUCTURAL_PROPERTIES: readonly string[] = [
   // (anchor-name, a dashed name); whether the platform's marker of a summary shows is structure.
   "anchor-name",
   "list-style",
+  // Spec 015 ③ (plan ③ D-08): that the picture of an avatar covers its circle and is cropped,
+  // never stretched, is structure (cover, a keyword).
+  "object-fit",
 ];
 
 /** Design properties: their value must come from a token (prefix match on the property name). */

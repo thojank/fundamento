@@ -1,0 +1,131 @@
+{
+  "$schema": "../../../schema/modelo.schema.json#/$defs/UzoFile",
+  "uzo": {
+    "id": "uzo_01M58G3DF0HATBVQF8VQ1S09F4",
+    "ero": "ero_01M58G3CNE0MHGRKAJ23VNJ6P9",
+    "skemo": "ske_01M58G3D1F5ABHWV5AGSE09QBV",
+    "purpose": "Represents a person or thing with a picture or initials.",
+    "instead": [
+      {
+        "goal": "status",
+        "keywords": {
+          "en": [
+            "badge",
+            "statusbadge"
+          ],
+          "de": [
+            "badge",
+            "statusbadge"
+          ]
+        },
+        "ero": "insigno",
+        "kialo": "A status is a word next to what it describes, because a picture says who and not how; that is the insigno."
+      },
+      {
+        "goal": "logo",
+        "keywords": {
+          "en": [
+            "companylogo",
+            "brandlogo"
+          ],
+          "de": [
+            "firmenlogo",
+            "markenlogo"
+          ]
+        },
+        "ero": null,
+        "kialo": "A logo keeps the colours and the shape of its brand, because it is the brand's own picture; a round crop with initials would change it, and Fundamento does not carry it yet."
+      }
+    ],
+    "boundary": [
+      {
+        "case": "avatar-group",
+        "action": "ask-human",
+        "keywords": {
+          "en": [
+            "facepile",
+            "avatargroup"
+          ],
+          "de": [
+            "avatargruppe",
+            "avatarstapel"
+          ]
+        },
+        "kialo": "Overlapping avatars hide each other and need a count of the rest, because a stack only says how many; a person decides how many show and what the rest is called."
+      },
+      {
+        "case": "presence-dot",
+        "action": "ask-human",
+        "keywords": {
+          "en": [
+            "presence",
+            "online"
+          ],
+          "de": [
+            "anwesenheit",
+            "online"
+          ]
+        },
+        "kialo": "A dot on the picture says a state by colour alone, because it has no word (WCAG 1.4.1); a person decides how the presence is said in words."
+      }
+    ],
+    "composes": {
+      "containers": [
+        {
+          "name": "karto",
+          "kialo": "An avatar stands in the meta row of a card, because it says who the thing belongs to."
+        },
+        {
+          "name": "tabelo",
+          "kialo": "An avatar stands in the cell before a name, because a face is found faster than a word; the name beside it makes it decorative."
+        },
+        {
+          "name": "page-header",
+          "kialo": "A large avatar stands in the header of a profile, because the page is about that person."
+        }
+      ],
+      "with": [
+        {
+          "ero": "insigno",
+          "kialo": "A status of the person stands beside the avatar as a badge, because the picture says who and the word says how; never as a dot on the picture."
+        }
+      ],
+      "never": [],
+      "spacing": {
+        "owner": "container",
+        "regulo": "spacing-owned-by-container"
+      }
+    },
+    "slots": {},
+    "layout": {
+      "size": "content",
+      "wrap": "never"
+    },
+    "content": [
+      {
+        "regulo": "icon-meaning-named",
+        "fixed": true,
+        "of": "prop:name",
+        "check": {
+          "kind": "not-words",
+          "words": {
+            "en": [
+              "avatar",
+              "image",
+              "picture",
+              "photo",
+              "icon"
+            ],
+            "de": [
+              "avatar",
+              "profilbild",
+              "bild",
+              "foto",
+              "icon"
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

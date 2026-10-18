@@ -1491,6 +1491,10 @@
         {
           "predicate": "references",
           "target": "#Mezurilo"
+        },
+        {
+          "predicate": "references",
+          "target": "#Avataro"
         }
       ]
     },
@@ -2669,6 +2673,55 @@
         {
           "predicate": "references",
           "target": "#Avizo"
+        },
+        {
+          "predicate": "references",
+          "target": "#Avataro"
+        }
+      ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Avataro",
+      "term": "Avataro",
+      "inScheme": "eroj",
+      "prefLabel": {
+        "eo": "Avataro",
+        "en": "avatar",
+        "de": "Avatar"
+      },
+      "altLabel": {
+        "en": [
+          "avataro",
+          "avatar",
+          "profile picture",
+          "initials"
+        ],
+        "de": [
+          "Avatar",
+          "Profilbild",
+          "Initialen",
+          "avataro"
+        ]
+      },
+      "definition": {
+        "en": "An avatar: represents a person or a thing with a picture or, where there is none or it does not load, with the initials of its name — at most two, grapheme by grapheme, on the sunken ground in the subtle text colour; never a colour worked out from the name. It is an image named by that name (icon-meaning-named), or hidden where the name stands beside it (decorative). A status is the insigno's; a group of avatars and a presence dot stop with a person.",
+        "de": "Ein Avatar: zeigt eine Person oder eine Sache als Bild oder, wo keins da ist oder es nicht lädt, mit den Initialen ihres Namens – höchstens zwei, Graphem für Graphem, auf dem abgesenkten Grund in der gedämpften Textfarbe; nie eine aus dem Namen errechnete Farbe. Es ist ein Bild mit diesem Namen (icon-meaning-named) oder verborgen, wo der Name daneben steht (decorative). Ein Status gehört dem insigno; eine Avatar-Gruppe und ein Anwesenheitspunkt entscheidet eine Person."
+      },
+      "broader": [
+        "#Ero"
+      ],
+      "relations": [
+        {
+          "predicate": "references",
+          "target": "#Insigno"
+        },
+        {
+          "predicate": "references",
+          "target": "#Karto"
+        },
+        {
+          "predicate": "references",
+          "target": "#Tabelo"
         }
       ]
     }

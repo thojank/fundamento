@@ -128,7 +128,7 @@ function uzo(datumoj: VitrinoDatumoj): string {
             `<li><strong>${escapeHtml(rule.regulo.name)}</strong> (${rule.fixed ? "fest" : "anpassbar"}): ${escapeHtml(rule.regulo.statement)} <em>${escapeHtml(rule.regulo.kialo)}</em></li>`,
         )
         .join("");
-      return `<article><h3>${escapeHtml(ero)}</h3><p>${escapeHtml(use.purpose)}</p><h4>Wann nehme ich den ${escapeHtml(capitalised(ero))} nicht?</h4><ul>${boundaries}</ul><h4>Zusammen mit</h4><ul>${together}</ul>${table("Slots", ["Slot", "nimmt auf", "max", "Verschachtelung", "Pflicht"], slots)}<h4>Layout</h4><p>Größe aus dem ${use.layout.size === "content" ? "Inhalt" : "Container"}, ${wrapSentence(datumoj.a11yRoloj[ero], use.layout.wrap, datumoj.plurliniaj.includes(ero))}.</p><ul>${allowances}</ul><h4>Text</h4><ul>${text}</ul></article>`;
+      return `<article><h3>${escapeHtml(ero)}</h3><p>${escapeHtml(use.purpose)}</p><h4>Wann nehme ich den ${escapeHtml(capitalised(ero))} nicht?</h4><ul>${boundaries}</ul><h4>Zusammen mit</h4><ul>${together}</ul>${table("Slots", ["Slot", "nimmt auf", "max", "Verschachtelung", "Pflicht"], slots)}<h4>Layout</h4><p>Größe aus dem ${use.layout.size === "content" ? "Inhalt" : "Container"}, ${wrapSentence(datumoj.avataroj.includes(ero) ? "avatar" : datumoj.a11yRoloj[ero], use.layout.wrap, datumoj.plurliniaj.includes(ero))}.</p><ul>${allowances}</ul><h4>Text</h4><ul>${text}</ul></article>`;
     })
     .join("");
 }
@@ -188,10 +188,13 @@ function wrapSentence(role: string | undefined, wrap: string, multiline = false)
                                   : // Spec 014 ⑤: a disclosure wraps its summary.
                                     role === "group"
                                     ? "Zusammenfassung"
-                                    : // Spec 015 ③: a card wraps its content.
+                                    : // Spec 015 ③: a card wraps its content; an avatar never
+                                      // wraps its initials.
                                       role === "article"
                                       ? "Inhalt"
-                                      : "Label";
+                                      : role === "avatar"
+                                        ? "Initialen"
+                                        : "Label";
   if (wrap === "never") return `${subject} bricht nie um`;
   if (wrap === "with-text") return `${subject} darf umbrechen (inline), standalone nie`;
   return `${subject} darf umbrechen`;

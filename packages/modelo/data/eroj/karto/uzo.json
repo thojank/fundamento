@@ -112,6 +112,10 @@
           "kialo": "A status of the thing stands in the meta row as a badge, because a state is read at a glance."
         },
         {
+          "ero": "avataro",
+          "kialo": "Whom the thing belongs to stands in the meta row as an avatar, because a face is found faster than a name."
+        },
+        {
           "ero": "butono",
           "kialo": "A card offers at most two actions as buttons, because more turn the summary into a toolbar: at most one with emphasis high (one-primary-per-container)."
         },
@@ -144,7 +148,8 @@
       },
       "meta": {
         "accepts": [
-          "insigno"
+          "insigno",
+          "avataro"
         ],
         "nesting": 0
       },

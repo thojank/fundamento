@@ -256,7 +256,35 @@ function lightShadowProperty(skemo: Skemo, part: string, property: string): bool
 const isTabs = (skemo: Skemo): boolean => hostOf(skemo.a11y.role) === "tabs";
 
 /** An icon (Spec 014 ②, D-05): the control sized by the box, the glyph a mask inside it. */
-const isIcon = (skemo: Skemo): boolean => hostOf(skemo.a11y.role) === "icon";
+const isIcon = (skemo: Skemo): boolean => hostOf(skemo.a11y.role) === "icon" && !isAvatar(skemo);
+
+/**
+ * An avatar (Spec 015 ③, plan ③ D-08): an image with an initials part — the control sized by the
+ * box, the picture and the initials inside it, both round.
+ */
+export const isAvatar = (skemo: Skemo): boolean =>
+  skemo.a11y.role === "img" && skemo.parts.initials !== undefined;
+
+function avatarPartSelector(part: string, data: string): string {
+  const root = `[part="control"]${data}`;
+  if (part === "image" || part === "initials") return `:where(${root}) [part="${part}"]`;
+  return `:where(${root})`;
+}
+
+/**
+ * Layout of an avatar (Spec 015 ③, D-08), keywords and 0 only: an inline block in the line; the
+ * control a box that clips; the picture and the initials fill it (a stretched flex item, the
+ * picture cropped to cover the circle), the initials centred on one line; whichever is not shown
+ * takes no room.
+ */
+const avatarStructure: string = [
+  ":host { display: inline-block; vertical-align: middle; }",
+  ':where([part="control"]) { display: inline-flex; box-sizing: border-box; overflow: hidden; }',
+  ':where([part="image"], [part="initials"]) { flex: 1 1 0; align-self: stretch; box-sizing: border-box; min-inline-size: 0; margin: 0; }',
+  ':where([part="image"]) { display: block; object-fit: cover; }',
+  ':where([part="initials"]) { display: flex; align-items: center; justify-content: center; white-space: nowrap; overflow: hidden; }',
+  ':where([part="image"][hidden], [part="initials"][hidden]) { display: none; }',
+].join("\n");
 
 /** A separator (Spec 014 ②, D-06): the control is the line. */
 const isSeparator = (skemo: Skemo): boolean => hostOf(skemo.a11y.role) === "separator";
@@ -1479,35 +1507,37 @@ export function stylesheetOf(skemo: Skemo, uzo?: Uzo): string {
                             ? uploadStructure(disables)
                             : isCard(skemo)
                               ? cardStructure
-                              : isLight(skemo)
-                                ? lightStructure(skemo)
-                                : isTabs(skemo)
-                                  ? tabsStructure
-                                  : isDisclosure(skemo)
-                                    ? disclosureStructure
-                                    : isField(skemo)
-                                      ? `${fieldStructure(disables, isSelect(skemo), isTextarea(skemo))}${isSuggest(skemo) ? `\n${suggestStructure}` : ""}`
-                                      : isGroup(skemo)
-                                        ? groupStructure(
-                                            disables,
-                                            skemo.parts["required-mark"] !== undefined,
-                                          )
-                                        : isToggle(skemo)
-                                          ? toggleStructure(
+                              : isAvatar(skemo)
+                                ? avatarStructure
+                                : isLight(skemo)
+                                  ? lightStructure(skemo)
+                                  : isTabs(skemo)
+                                    ? tabsStructure
+                                    : isDisclosure(skemo)
+                                      ? disclosureStructure
+                                      : isField(skemo)
+                                        ? `${fieldStructure(disables, isSelect(skemo), isTextarea(skemo))}${isSuggest(skemo) ? `\n${suggestStructure}` : ""}`
+                                        : isGroup(skemo)
+                                          ? groupStructure(
                                               disables,
-                                              uzo?.layout.wrap !== undefined &&
-                                                uzo.layout.wrap !== "never",
-                                              skemo.slots.some(
-                                                (slot) =>
-                                                  slot.default !== true && slot.text === true,
-                                              ),
                                               skemo.parts["required-mark"] !== undefined,
                                             )
-                                          : structure(
-                                              uzo?.layout.wrap === "with-text",
-                                              disables,
-                                              bordered,
-                                            );
+                                          : isToggle(skemo)
+                                            ? toggleStructure(
+                                                disables,
+                                                uzo?.layout.wrap !== undefined &&
+                                                  uzo.layout.wrap !== "never",
+                                                skemo.slots.some(
+                                                  (slot) =>
+                                                    slot.default !== true && slot.text === true,
+                                                ),
+                                                skemo.parts["required-mark"] !== undefined,
+                                              )
+                                            : structure(
+                                                uzo?.layout.wrap === "with-text",
+                                                disables,
+                                                bordered,
+                                              );
   // A skip link adds its place above the page to a control's structure (Spec 014 ②, D-07).
   const floating = isSkip(skemo) ? `\n${skipStructure}` : "";
   return `${base}${floating}\n${[...tokenRules, ...undrawn].join("\n")}\n`;
@@ -1596,6 +1626,7 @@ function selectorOf(
     return uploadPartSelector(part, property, data, combination[STATE_KEY] ?? "rest");
   }
   if (isCard(skemo)) return cardPartSelector(part, data);
+  if (isAvatar(skemo)) return avatarPartSelector(part, data);
   const state = STATE_SELECTORS[combination[STATE_KEY] ?? "rest"] ?? "";
   if (isField(skemo)) return fieldPartSelector(part, property, data, state, isSelect(skemo), entry);
   if (isToggle(skemo)) return togglePartSelector(part, property, data, state);
@@ -1638,6 +1669,7 @@ export function elementNamesOf(
       isSuggest(entry.skemo),
       isPagination(entry.skemo),
       isUpload(entry.skemo),
+      isAvatar(entry.skemo),
     ),
     role: entry.skemo.a11y.role,
     // Spec 015 ① (plan ① D-04): the breadcrumb is a light host with a list in its shadow.

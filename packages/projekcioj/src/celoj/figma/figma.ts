@@ -38,6 +38,7 @@ import {
 } from "@fundamento/modelo";
 import type { Celo, CeloInput, GeneratedFile } from "../../build.js";
 import {
+  VITRINO_AVATAR,
   VITRINO_CARD,
   VITRINO_CONTENT_TEXT,
   VITRINO_DIALOG_ACTIONS,
@@ -453,12 +454,38 @@ export const UPLOAD_EXAMPLE = "mit zwei Dateien";
 export const CARD_EXAMPLE = "ohne Bild";
 
 /**
- * The stand-in image of a card (Spec 015 ③, plan ③ D-05): a frame where the media slot takes a
- * picture, its fill the sunken ground, the Vitrino's word in it in the subtle text colour —
- * bound to their variables, no Skemo parts (the karto styles no picture), so no parity.
+ * The stand-in of a picture (Spec 015 ③): its ground the sunken background, what it shows in the
+ * subtle text colour — bound to their variables, no Skemo parts, so no parity. The media of a
+ * card (plan ③ D-05) shows the Vitrino's word on it; the image of an avatar (plan ③ D-11) the
+ * Vitrino's silhouette (avatarSilhouetteOf).
  */
-const CARD_MEDIA_FILL = "color.background.sunken";
-const CARD_MEDIA_COLOR = "color.text.subtle";
+const STAND_IN_FILL = "color.background.sunken";
+const STAND_IN_COLOR = "color.text.subtle";
+
+/**
+ * The name of the example frame beside an avatar's set (Spec 015 ③, plan ③ D-11): the default
+ * variant with its image shown over the initials, as `<set> – mit Bild`.
+ */
+export const AVATAR_EXAMPLE = "mit Bild";
+
+/**
+ * The silhouette an avatar's image shows in the set (Spec 015 ③, plan ③ D-11): the head and the
+ * shoulders of the Vitrino's example picture (VITRINO_AVATAR.picture, one source for both
+ * pictures), its circle written as two arcs so head and shoulders are one filled path, without
+ * the picture's ground — the image frame's fill is the ground. The plugin imports it once and
+ * binds the vector's fill; `undefined` where the picture holds no circle and path to read.
+ */
+export function avatarSilhouetteOf(picture: string): string | undefined {
+  const svg = decodeURIComponent(picture.slice(picture.indexOf(",") + 1));
+  const box = /viewBox=['"]([^'"]+)['"]/.exec(svg)?.[1];
+  const circle = /<circle cx=['"]([\d.]+)['"] cy=['"]([\d.]+)['"] r=['"]([\d.]+)['"]/.exec(svg);
+  const body = /<path d=['"]([^'"]+)['"]/.exec(svg)?.[1];
+  if (box === undefined || circle === null || body === undefined) return undefined;
+  const [cx = 0, cy = 0, r = 0] = circle.slice(1).map(Number);
+  const [, , width = "16", height = "16"] = box.split(/\s+/);
+  const head = `M${cx - r} ${cy}a${r} ${r} 0 1 0 ${2 * r} 0a${r} ${r} 0 1 0 ${-2 * r} 0z`;
+  return `<svg aria-hidden="true" viewBox="${box}" width="${width}" height="${height}" fill="currentColor"><path d="${head}${body}"/></svg>`;
+}
 
 /**
  * The width of a card in the set (Spec 015 ③, plan ③ D-05): the Uzo's columns-from — from this
@@ -697,7 +724,8 @@ export type FigmaStructure =
   | "pagination"
   | "breadcrumb"
   | "upload"
-  | "card";
+  | "card"
+  | "avatar";
 
 /**
  * A radio group (Spec 010 ③, D-07) is a choice: the label (the question) above a column of
@@ -761,8 +789,12 @@ export const structureOf = (role: string, parts: readonly string[] = []): FigmaS
                           ? "tabs"
                           : // Spec 014 ② (plan ② D-08): an icon (role img) is the glyph of every
                             // Aspekto in a box; a separator (role separator) a line.
+                            // Spec 015 ③ (plan ③ D-11): an avatar shares the role img; its
+                            // initials tell it apart — the box with the initials and the image.
                             role === "img"
-                            ? "icon"
+                            ? parts.includes("initials")
+                              ? "avatar"
+                              : "icon"
                             : role === "separator"
                               ? "separator"
                               : // Spec 014 ③ (plan ③ D-05): a heading and a paragraph are static
@@ -859,6 +891,10 @@ const STRUCTURE_LABEL_DEFAULTS: Readonly<Partial<Record<FigmaStructure, string>>
   popover: "Überschrift",
   // Spec 015 ② (plan ② D-06): an upload's label names what is asked for, like a field's.
   upload: "Beschriftung",
+  // Spec 015 ③ (plan ③ D-11): an avatar's label property writes its initials, the Vitrino's
+  // (the icon shares the role img and carries no label). Proposal for the maintainer to confirm;
+  // no Jugxo created here.
+  avatar: VITRINO_AVATAR.initials,
 };
 
 /** The word a role without its own entry shows: the button's, as every set did before M-3. */
@@ -889,6 +925,8 @@ export function labelPartOf(skemo: LoadedEro["skemo"]): string {
   if (skemo.parts.label === undefined && skemo.parts.item !== undefined) return "item";
   // Spec 014 ⑤: a disclosure's label property writes its summary.
   if (skemo.parts.label === undefined && skemo.parts.summary !== undefined) return "summary";
+  // Spec 015 ③ (plan ③ D-11): an avatar's label property writes its initials.
+  if (skemo.parts.label === undefined && skemo.parts.initials !== undefined) return "initials";
   return "label";
 }
 
@@ -1002,8 +1040,8 @@ export interface FigmaComponentSet {
     files?: { name: string; size: string }[];
     /**
      * The values of the set's toggles the example shows (Spec 015 ③, plan ③ D-05): `media`
-     * false, the card „ohne Bild" — written as the visibility of the part, a frame outside the
-     * set has no property to switch.
+     * false, the card „ohne Bild"; `image` true, the avatar „mit Bild" (plan ③ D-11) — written
+     * as the visibility of the part, a frame outside the set has no property to switch.
      */
     toggled?: Record<string, boolean>;
   }[];
@@ -1077,6 +1115,16 @@ export interface FigmaComponentSet {
    * vertical, its width where horizontal), written from CARD_MEDIA_SHARE of that width; the
    * stand-in image's fill and the colour of its word, each a variable with its paint (F8).
    */
+  /**
+   * An avatar (Spec 015 ③, plan ③ D-11): the silhouette its image shows (avatarSilhouetteOf, an
+   * SVG in a box of 16, imported once), the image's ground and the silhouette's colour, each a
+   * variable with its paint (F8) — a stand-in for the picture, no part of the Skemo.
+   */
+  avatar?: {
+    picture: string;
+    fill: { binding: string; paint: FigmaPaint };
+    color: { binding: string; paint: FigmaPaint };
+  };
   card?: {
     width: number;
     media: {
@@ -2424,7 +2472,17 @@ function componentSetOf(
                 toggled: { media: false },
               },
             ]
-          : undefined;
+          : // Spec 015 ③ (plan ③ D-11): the avatar with its image shown beside its set.
+            structure === "avatar"
+            ? [
+                {
+                  name: `${entry.ero.name} – ${AVATAR_EXAMPLE}`,
+                  variant: defaults,
+                  padding: parityPx(base[SET_GAP]?.value),
+                  toggled: { image: true },
+                },
+              ]
+            : undefined;
   const example =
     structure === "dialog" && backdrop !== undefined && backdropPaint !== undefined
       ? {
@@ -2486,10 +2544,15 @@ function componentSetOf(
   });
   // Spec 015 ③ (plan ③ D-05): the media of a card is optional — a BOOLEAN property `media` shows
   // or hides its stand-in, no prop of the Skemo (so not in `properties`, nor in parity).
+  // Spec 015 ③ (plan ③ D-11): an avatar shows its picture where it has one and loads it — a
+  // BOOLEAN property `image` shows the stand-in over the initials, false by default (the
+  // picture prop has no default); no prop of the Skemo either.
   const toggles =
     structure === "card" && skemo.slots.some((slot) => slot.name === "media")
       ? [...propToggles, { property: "media", part: "media", defaultValue: true }]
-      : propToggles;
+      : structure === "avatar" && skemo.parts.image !== undefined
+        ? [...propToggles, { property: "image", part: "image", defaultValue: false }]
+        : propToggles;
   // The table of a table's set and the entries of a list's (Spec 011 ④): the Vitrino's words.
   const table =
     structure === "table"
@@ -2550,9 +2613,9 @@ function componentSetOf(
       : undefined;
   // A card (Spec 015 ③, plan ③ D-05): its width and the media's extent, written from the base
   // combination; the stand-in image's fill and word colour bound to their variables.
-  const mediaFill = structure === "card" ? paintOf(CARD_MEDIA_FILL, resolutions, base) : undefined;
-  const mediaColor =
-    structure === "card" ? paintOf(CARD_MEDIA_COLOR, resolutions, base) : undefined;
+  const pictured = structure === "card" || structure === "avatar";
+  const mediaFill = pictured ? paintOf(STAND_IN_FILL, resolutions, base) : undefined;
+  const mediaColor = pictured ? paintOf(STAND_IN_COLOR, resolutions, base) : undefined;
   const cardWidth = parityPx(base[CARD_WIDTH]?.value);
   const card =
     structure === "card" && mediaFill !== undefined && mediaColor !== undefined
@@ -2560,9 +2623,20 @@ function componentSetOf(
           width: cardWidth,
           media: {
             extent: Math.round(cardWidth * CARD_MEDIA_SHARE),
-            fill: { binding: variableName(CARD_MEDIA_FILL), paint: mediaFill },
-            color: { binding: variableName(CARD_MEDIA_COLOR), paint: mediaColor },
+            fill: { binding: variableName(STAND_IN_FILL), paint: mediaFill },
+            color: { binding: variableName(STAND_IN_COLOR), paint: mediaColor },
           },
+        }
+      : undefined;
+  // An avatar (Spec 015 ③, plan ③ D-11): the Vitrino's silhouette on the stand-in's ground.
+  const silhouette =
+    structure === "avatar" ? avatarSilhouetteOf(VITRINO_AVATAR.picture) : undefined;
+  const avatar =
+    silhouette !== undefined && mediaFill !== undefined && mediaColor !== undefined
+      ? {
+          picture: silhouette,
+          fill: { binding: variableName(STAND_IN_FILL), paint: mediaFill },
+          color: { binding: variableName(STAND_IN_COLOR), paint: mediaColor },
         }
       : undefined;
   return {
@@ -2630,6 +2704,7 @@ function componentSetOf(
     ...(table === undefined ? {} : { table }),
     ...(entries === undefined ? {} : { entries }),
     ...(card === undefined ? {} : { card }),
+    ...(avatar === undefined ? {} : { avatar }),
     ...(description === undefined ? {} : { description }),
     ...(uzo === undefined ? {} : { uzo }),
     properties,

@@ -111,6 +111,12 @@ type PartNode =
   | "meta"
   | "media"
   | "media-text"
+  // An avatar (Spec 015 ③, plan ③ D-11): the box (control) holds the initials — a circle with its
+  // text — and the image, a circle with the stand-in picture in it.
+  | "initials"
+  | "initials-text"
+  | "image"
+  | "picture"
   | "listbox"
   | "suggestion-*"
   | "suggestions-*"
@@ -679,6 +685,23 @@ const STRUCTURE_BINDINGS: Readonly<Record<string, Readonly<Record<string, readon
     "meta.gap": [{ node: "meta", fields: ["itemSpacing"] }],
     "box.inline-padding": [{ node: "body", fields: [...PADDINGS] }],
     "box.gap": [{ node: "body", fields: ["itemSpacing"] }],
+  },
+  // An avatar (Spec 015 ③, plan ③ D-11): the box is the control — a square of box.size, and so
+  // are the circles in it (the initials, the image) and the stand-in picture in the image —; the
+  // initials carry their fill and radius, their text the colour and the role of the variant; the
+  // image its radius (the picture's ground and silhouette are the plan's stand-in, avatar).
+  avatar: {
+    "box.size": [
+      { node: "control", fields: ["width", "height"] },
+      { node: "initials", fields: ["width", "height"] },
+      { node: "image", fields: ["width", "height"] },
+      { node: "picture", fields: ["width", "height"] },
+    ],
+    "initials.fill": [{ node: "initials", fields: ["fills"], paint: true }],
+    "initials.radius": [{ node: "initials", fields: ["cornerRadius"] }],
+    "initials.color": [{ node: "initials-text", fields: ["fills"], paint: true }],
+    "initials.typography": typographyOf("initials-text"),
+    "image.radius": [{ node: "image", fields: ["cornerRadius"] }],
   },
   breadcrumb: {
     "item.color": [{ node: "items-*", fields: ["fills"], paint: true }],
@@ -3944,9 +3967,92 @@ async function applyComponents(variables, warnings) {
     }
   }
   /**
+   * An avatar (Spec 015 ③, plan ③ D-11): the variant holds the box — a square of box.size, no
+   * layout of its own — with the initials and the image on top of each other, each as large as
+   * the box: the initials a circle (fill and radius bound) with the label property centred in
+   * it, in the colour and the role of the variant; the image a circle (radius bound, clipping)
+   * standing in for the picture — the Vitrino's silhouette (avatar.picture, imported once, its
+   * vector's fill bound to the stand-in colour) on the stand-in ground. The image is shown by the
+   * BOOLEAN property image (toggled), hidden by default; the example „mit Bild" shows it.
+   */
+  async function drawAvatar(node, component, variant, report, labels, toggled, example) {
+    const spec = component.avatar;
+    const control = part(node, "control", () => figma.createFrame());
+    const initials = part(control, "initials", () => figma.createFrame());
+    const text = part(initials, "initials-text", () => figma.createText());
+    const image = part(control, "image", () => figma.createFrame());
+    const picture = spec === undefined ? undefined : part(image, "picture", () => figma.createNodeFromSvg(spec.picture));
+    const vector = picture === undefined ? undefined : markOf(picture);
+    // The image lies over the initials: the later child is drawn on top.
+    [initials, image].forEach((child, index) => {
+      if (control.children.indexOf(child) !== index) control.insertChild(index, child);
+    });
+    await loadCurrentFont(text);
+    writeCase(component, variant, text);
+    if (variant.font !== undefined) {
+      write(text, "fontName", fonts.get(variant.font.family + " " + variant.font.style));
+    }
+    if (example === undefined) labels.push(text);
+    else if (component.label !== undefined) write(text, "characters", component.label.defaultValue);
+    toggled.push({ part: "image", node: image });
+    const frames = [node, control, initials, image].concat(picture === undefined ? [] : [picture]);
+    for (const frame of frames) own(frame, NEUTRAL);
+    own(text, NEUTRAL_TEXT);
+    own(node, HUG_LAYOUT);
+    if (example !== undefined) {
+      own(node, {
+        paddingLeft: example.padding,
+        paddingRight: example.padding,
+        paddingTop: example.padding,
+        paddingBottom: example.padding,
+      });
+    }
+    own(control, INDICATOR_LAYOUT);
+    // The circles lie in no flow (the box has no layout); what they are as children is written
+    // only where a layout takes it (flush), as for the glyph frames of an icon.
+    for (const frame of [node, control, initials, image].concat(picture === undefined ? [] : [picture])) {
+      own(frame, IN_FLOW);
+    }
+    // The initials centre their word in a circle of the box's size; the box has no layout, so
+    // the circle has its own and lies at its start, as the image does.
+    own(initials, CONTROL_LAYOUT);
+    own(initials, { layoutSizingHorizontal: "FIXED", layoutSizingVertical: "FIXED" });
+    own(image, INDICATOR_LAYOUT);
+    own(image, { clipsContent: true });
+    // The example „mit Bild" shows the image (a frame outside the set has no property to
+    // switch); in the set the property image shows it (connected below).
+    own(image, { visible: example !== undefined && (example.toggled || {}).image === true });
+    if (picture !== undefined) own(picture, INDICATOR_LAYOUT);
+    if (vector !== undefined) own(vector, MARK_NEUTRAL);
+    own(text, IN_FLOW);
+    own(text, TEXT_SIZING);
+    // The stand-in picture (no Skemo part): its ground and the silhouette bound to the plan's
+    // variables, with the deckkraft of the plan (F8).
+    if (spec !== undefined) {
+      for (const [target, paintSpec] of [[image, spec.fill], [vector, spec.color]]) {
+        if (target === undefined) continue;
+        const variable = variables.get(paintSpec.binding);
+        if (variable === undefined) continue;
+        const bound = figma.variables.setBoundVariableForPaint(
+          { type: "SOLID", color: { r: 0, g: 0, b: 0 } },
+          "color",
+          variable,
+        );
+        if (typeof paintSpec.paint.opacity === "number") bound.opacity = paintSpec.paint.opacity;
+        gather(target).fills = [bound];
+      }
+    }
+    const nodes = { control, initials, "initials-text": text, image };
+    if (picture !== undefined) nodes.picture = picture;
+    const measures = bind(nodes, variant, variables, component.structure);
+    for (const each of frames.concat([text]).concat(vector === undefined ? [] : [vector])) flush(each);
+    bindMeasures(measures, report, component, variant);
+  }
+  /**
    * The examples beside a pagination's set (Spec 015 ①, O-2): one frame per example, each found
    * by its own mark or created, placed in the frame „Eroj" after the set in their order. An
-   * upload's (Spec 015 ②) and a card's (Spec 015 ③: „ohne Bild") the same way.
+   * upload's (Spec 015 ②), a card's (Spec 015 ③: „ohne Bild") and an avatar's („mit Bild") the
+   * same way.
    */
   async function placeExamples(frame, set, component, report) {
     if (frame === undefined) return [];
@@ -3967,6 +4073,7 @@ async function applyComponents(variables, warnings) {
       write(example, "name", spec.name);
       if (component.structure === "upload") await drawUpload(example, component, variant, report, [], spec);
       else if (component.structure === "card") await drawCard(example, component, variant, report, [], [], spec);
+      else if (component.structure === "avatar") await drawAvatar(example, component, variant, report, [], [], spec);
       else await drawPagination(example, component, variant, report, spec);
       if (example.parent !== frame) frame.appendChild(example);
       const at = frame.children.indexOf(set) + 1 + index;
@@ -4351,6 +4458,12 @@ async function applyComponents(variables, warnings) {
       // A card (Spec 015 ③): the surface with the media and the body, in a function of its own.
       if (component.structure === "card") {
         await drawCard(node, component, variant, report, labels, toggled, undefined);
+        if (existing === undefined) made.push(node);
+        continue;
+      }
+      // An avatar (Spec 015 ③): the box with the initials and the image, in a function of its own.
+      if (component.structure === "avatar") {
+        await drawAvatar(node, component, variant, report, labels, toggled, undefined);
         if (existing === undefined) made.push(node);
         continue;
       }

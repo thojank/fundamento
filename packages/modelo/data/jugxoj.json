@@ -4186,6 +4186,98 @@
           }
         ]
       }
+    },
+    {
+      "id": "jug_01M58G3DVKMJPTR9XYMYFQSGNM",
+      "ref": {
+        "ero": "ero_01M58G3CNE0MHGRKAJ23VNJ6P9"
+      },
+      "decision": "approved",
+      "kialo": "Der Name sagt, wen das Bild zeigt: Wer es nicht sieht, hört „Erika Mustermann“.",
+      "date": "2026-10-18",
+      "context": "Example RIGHT for the Regulo named in ekzemplo.regulo (Spec 015 ③, icon-meaning-named widened to the avataro, G4); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M55X2XBTVBQC8HSYFM3SBYM2",
+        "instances": [
+          {
+            "ero": "avataro",
+            "props": {
+              "name": "Erika Mustermann"
+            },
+            "label": "Erika Mustermann",
+            "lingvo": "de"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M58G3DVKMJPTR9XYMYFQSGNN",
+      "ref": {
+        "ero": "ero_01M58G3CNE0MHGRKAJ23VNJ6P9"
+      },
+      "decision": "approved",
+      "kialo": "The name says whom the picture shows: whoever cannot see it hears 'Jane Doe'.",
+      "date": "2026-10-18",
+      "context": "Example RIGHT for the Regulo named in ekzemplo.regulo (Spec 015 ③, icon-meaning-named widened to the avataro, G4); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M55X2XBTVBQC8HSYFM3SBYM2",
+        "instances": [
+          {
+            "ero": "avataro",
+            "props": {
+              "name": "Jane Doe"
+            },
+            "label": "Jane Doe",
+            "lingvo": "en"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M58G3DVKMJPTR9XYMYFQSGNP",
+      "ref": {
+        "ero": "ero_01M58G3CNE0MHGRKAJ23VNJ6P9"
+      },
+      "decision": "rejected",
+      "kialo": "„Profilbild“ nennt das Bild, nicht die Person: Wer es nicht sieht, erfährt nicht, wer gemeint ist.",
+      "date": "2026-10-18",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 015 ③, icon-meaning-named widened to the avataro, G4); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M55X2XBTVBQC8HSYFM3SBYM2",
+        "instances": [
+          {
+            "ero": "avataro",
+            "props": {
+              "name": "Profilbild"
+            },
+            "label": "Profilbild",
+            "lingvo": "de"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M58G3DVKMJPTR9XYMYFQSGNQ",
+      "ref": {
+        "ero": "ero_01M58G3CNE0MHGRKAJ23VNJ6P9"
+      },
+      "decision": "rejected",
+      "kialo": "'Avatar' names the picture, not the person: whoever cannot see it does not learn who is meant.",
+      "date": "2026-10-18",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 015 ③, icon-meaning-named widened to the avataro, G4); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M55X2XBTVBQC8HSYFM3SBYM2",
+        "instances": [
+          {
+            "ero": "avataro",
+            "props": {
+              "name": "Avatar"
+            },
+            "label": "Avatar",
+            "lingvo": "en"
+          }
+        ]
+      }
     }
   ]
 }
