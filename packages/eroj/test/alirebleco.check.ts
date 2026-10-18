@@ -1517,3 +1517,68 @@ for (const aspekto of ["komuna", "ekzemplo"]) {
     }
   }
 }
+
+// Spec 014 ⑤ (G5, G10, plan ⑤ D-03): the rendered faldilo (one open) and kompletigilo (its list
+// open with three suggestions) in every colour class: axe without a finding; the summary and the
+// suggestions at least 4.5:1 on their surfaces.
+const aufklappoj =
+  '<fm-faldilo id="af-a" group="faq" open><span slot="summary">Lieferbedingungen</span><fm-teksto>Innerhalb von drei Tagen.</fm-teksto></fm-faldilo><fm-faldilo id="af-b" group="faq"><span slot="summary">Rückgabe</span><fm-teksto>Vierzehn Tage.</fm-teksto></fm-faldilo><fm-kompletigilo id="af-k" placeholder="Land eingeben">Land<data slot="options" value="de">Deutschland</data><data slot="options" value="dk">Dänemark</data><data slot="options" value="fr">Frankreich</data></fm-kompletigilo>';
+
+for (const aspekto of ["komuna", "ekzemplo"]) {
+  for (const scheme of ["light", "dark"]) {
+    for (const contrast of ["default", "high"]) {
+      test(`${aspekto} ${scheme}/${contrast}: axe on the faldilo and the opened kompletigilo; summary and suggestions ≥ 4.5:1`, async ({
+        page,
+      }) => {
+        await serve(page, out, aufklappoj);
+        await page.evaluate(
+          ([a, s, k]) => {
+            const root = document.documentElement;
+            root.setAttribute("data-fm-aspekto", a ?? "");
+            root.setAttribute("data-fm-color-scheme", s ?? "");
+            root.setAttribute("data-fm-contrast", k ?? "");
+          },
+          [aspekto, scheme, contrast],
+        );
+        await expect(page.getByRole("group")).toHaveCount(2);
+        expect(await axeViolations(page), "disclosures").toEqual([]);
+        await page.getByRole("combobox", { name: "Land" }).fill("d");
+        await expect(page.getByRole("option")).toHaveCount(2);
+        expect(await axeViolations(page), "suggestions").toEqual([]);
+        const measured = await page.evaluate(() => {
+          const luminance = (colour: string) => {
+            const [r = 0, g = 0, b = 0] = colour.match(/[\d.]+/g)?.map(Number) ?? [];
+            const channel = (value: number) => {
+              const c = value / 255;
+              return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+            };
+            return 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
+          };
+          const ratio = (front: string, back: string) => {
+            const [a, b] = [luminance(front), luminance(back)].sort((x, y) => y - x);
+            return ((a ?? 0) + 0.05) / ((b ?? 0) + 0.05);
+          };
+          const behind = (node: HTMLElement, fallback: HTMLElement) => {
+            const fill = getComputedStyle(node).backgroundColor;
+            return fill === "rgba(0, 0, 0, 0)" || fill === "transparent"
+              ? getComputedStyle(fallback).backgroundColor
+              : fill;
+          };
+          const summary = document
+            .getElementById("af-a")
+            ?.shadowRoot?.querySelector('[part="summary"]') as HTMLElement;
+          const listbox = document
+            .getElementById("af-k")
+            ?.shadowRoot?.querySelector('[part="listbox"]') as HTMLElement;
+          const suggestion = listbox.querySelector('[part="suggestion"]') as HTMLElement;
+          return {
+            summary: ratio(getComputedStyle(summary).color, behind(summary, document.body)),
+            suggestion: ratio(getComputedStyle(suggestion).color, behind(suggestion, listbox)),
+          };
+        });
+        expect(measured.summary, "summary").toBeGreaterThanOrEqual(4.5);
+        expect(measured.suggestion, "suggestion").toBeGreaterThanOrEqual(4.5);
+      });
+    }
+  }
+}

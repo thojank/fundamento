@@ -328,10 +328,12 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
       // Spec 011 ②: the dialogo and the tekstareo carry a Uzo like every set.
       ...["boundary", "slots", "content"].map(() => "dialogo"),
       ...["boundary", "slots", "content"].map(() => "elektilo"),
+      ...["boundary", "slots", "content"].map(() => "faldilo"),
       ...["boundary", "slots", "content"].map(() => "elekto"),
       ...["boundary", "slots", "content"].map(() => "ikono"),
       ...["boundary", "slots", "content"].map(() => "insigno"),
       ...["boundary", "slots", "content"].map(() => "kampo"),
+      ...["boundary", "slots", "content"].map(() => "kompletigilo"),
       // Spec 014 ④: the konsileto, the menuo and the sxvebilo carry a Uzo like every set.
       ...["boundary", "slots", "content"].map(() => "konsileto"),
       // Spec 011 ⑤: the langetaro and the navigado carry a Uzo like every set.
@@ -2665,6 +2667,8 @@ describe("every bound paint shows the plan's colour after the first and the seco
         { set: "atributlisto", created: 3, updated: 0 },
         // Spec 011 ③: the avizo has intent = 4 variants in one state (dismissible is no axis).
         { set: "avizo", created: 4, updated: 0 },
+        // Spec 014 ⑤: the faldilo has open × state = 6 variants.
+        { set: "faldilo", created: 6, updated: 0 },
         { set: "butono", created: 72, updated: 0 },
         // Spec 011 ②: the dialogo has size × reason = 6 variants in one state.
         { set: "dialogo", created: 6, updated: 0 },
@@ -2678,6 +2682,8 @@ describe("every bound paint shows the plan's colour after the first and the seco
         { set: "insigno", created: 10, updated: 0 },
         // Spec 009: the kampo has size × state = 18 variants.
         { set: "kampo", created: 18, updated: 0 },
+        // Spec 014 ⑤: the kompletigilo has size × expanded × state = 30 variants.
+        { set: "kompletigilo", created: 30, updated: 0 },
         // Spec 014 ④: the konsileto has placement = 4 variants in one state (an axis of its own).
         { set: "konsileto", created: 4, updated: 0 },
         // Spec 011 ⑤: the langetaro has state = 4 variants (active is the state of one tab, E7;

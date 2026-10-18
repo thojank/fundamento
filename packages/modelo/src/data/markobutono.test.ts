@@ -33,9 +33,11 @@ describe("markobutono in the repo Modelo (G1, G2, section 2)", () => {
       "dialogo",
       "elektilo",
       "elekto",
+      "faldilo",
       "ikono",
       "insigno",
       "kampo",
+      "kompletigilo",
       "konsileto",
       "langetaro",
       "ligilo",
@@ -281,15 +283,15 @@ describe("the Reguloj of the markobutono (G6, E5)", () => {
     // Spec 010 ③: the elekto follows the markobutono in each list (E5); ④ the elektilo.
     [
       "field-label-visible",
-      ["kampo", "sxaltilo", "markobutono", "elekto", "elektilo", "tekstareo"],
+      ["kampo", "sxaltilo", "markobutono", "elekto", "elektilo", "tekstareo", "kompletigilo"],
     ],
     [
       "field-label-names-the-datum",
-      ["kampo", "sxaltilo", "markobutono", "elekto", "elektilo", "tekstareo"],
+      ["kampo", "sxaltilo", "markobutono", "elekto", "elektilo", "tekstareo", "kompletigilo"],
     ],
-    ["error-says-what-to-do", ["kampo", "markobutono", "elekto", "elektilo", "tekstareo", "avizo"]],
-    ["required-marked", ["kampo", "markobutono", "elekto", "elektilo", "tekstareo"]],
-    ["error-not-color-only", ["kampo", "markobutono", "elekto", "elektilo", "tekstareo"]],
+    ["error-says-what-to-do", ["kampo", "markobutono", "elekto", "elektilo", "tekstareo", "avizo", "kompletigilo"]],
+    ["required-marked", ["kampo", "markobutono", "elekto", "elektilo", "tekstareo", "kompletigilo"]],
+    ["error-not-color-only", ["kampo", "markobutono", "elekto", "elektilo", "tekstareo", "kompletigilo"]],
   ])("%s is widened to the markobutono, not duplicated (E5)", (name, eroj) => {
     expect(named(name)?.appliesTo).toEqual({ eroj });
     expect(named(name)?.statement).toMatch(/markobutono/);
@@ -323,6 +325,8 @@ describe("the Reguloj of the markobutono (G6, E5)", () => {
       "konsileto",
       "sxvebilo",
       "menuo",
+      "faldilo",
+      "kompletigilo",
     ]);
   });
 

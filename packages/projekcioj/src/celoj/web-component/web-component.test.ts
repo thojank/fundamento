@@ -40,6 +40,7 @@ describe("Web Component Celo (T011)", () => {
       "eroj/src/generated/dialogo.styles.ts",
       "eroj/src/generated/elektilo.styles.ts",
       "eroj/src/generated/elekto.styles.ts",
+      "eroj/src/generated/faldilo.styles.ts",
       "eroj/src/generated/fm-apartigilo.ts",
       "eroj/src/generated/fm-atributlisto.ts",
       "eroj/src/generated/fm-avizo.ts",
@@ -47,9 +48,11 @@ describe("Web Component Celo (T011)", () => {
       "eroj/src/generated/fm-dialogo.ts",
       "eroj/src/generated/fm-elektilo.ts",
       "eroj/src/generated/fm-elekto.ts",
+      "eroj/src/generated/fm-faldilo.ts",
       "eroj/src/generated/fm-ikono.ts",
       "eroj/src/generated/fm-insigno.ts",
       "eroj/src/generated/fm-kampo.ts",
+      "eroj/src/generated/fm-kompletigilo.ts",
       "eroj/src/generated/fm-konsileto.ts",
       "eroj/src/generated/fm-langetaro.ts",
       "eroj/src/generated/fm-ligilo.ts",
@@ -69,6 +72,7 @@ describe("Web Component Celo (T011)", () => {
       "eroj/src/generated/index.ts",
       "eroj/src/generated/insigno.styles.ts",
       "eroj/src/generated/kampo.styles.ts",
+      "eroj/src/generated/kompletigilo.styles.ts",
       "eroj/src/generated/konsileto.styles.ts",
       "eroj/src/generated/langetaro.styles.ts",
       "eroj/src/generated/ligilo.styles.ts",
@@ -1626,5 +1630,69 @@ describe("Web Component Celo for the overlays (Spec 014 ④)", () => {
     expect(css).toContain("min-block-size: var(--fm-size-target-min);");
     expect(css).toContain(":focus-visible");
     expect(componentCssIssues("menuo.css", css)).toEqual([]);
+  });
+});
+
+// Spec 014 ⑤ (section ⑤, plan ⑤ D-03): the faldilo is the platform's details and summary (the
+// group its name, so the platform opens one at a time), the chevron an ikono that turns with the
+// state; the kompletigilo is the field of the kampo (the input host) with a listbox of
+// suggestions — a popover of the platform anchored to the field, rows with the role option,
+// aria-activedescendant on the input, the count of suggestions in a live region.
+describe("Web Component Celo for the faldilo and the kompletigilo (Spec 014 ⑤)", () => {
+  const cssOf = (ero: string) =>
+    JSON.parse(
+      new RegExp(`export const ${ero.toUpperCase()}_CSS = ("(?:[^"\\\\]|\\\\.)*");`).exec(
+        files[`eroj/src/generated/${ero}.styles.ts`] ?? "",
+      )?.[1] ?? '""',
+    ) as string;
+
+  it("the faldilo renders details and summary; the group is the details' name; the chevron turns with open", () => {
+    const element = files["eroj/src/generated/fm-faldilo.ts"] ?? "";
+    expect(element).toContain(
+      '<details part="control"><summary part="summary"><slot name="summary"></slot><fm-ikono part="indicator" name="chevron-right"></fm-ikono></summary><div part="content"><slot></slot></div>',
+    );
+    expect(element).toContain('"chevron-down"');
+    expect(element).toContain('setAttribute("name"');
+    expect(element).toContain("static formAssociated = false;");
+    const css = cssOf("faldilo");
+    expect(css).toContain(
+      ':where([part="control"][data-open="false"]) [part="summary"]:hover {\n  background-color: var(--fm-color-action-tertiary-hover);',
+    );
+    expect(css).toContain(
+      ':where([part="control"][data-open="true"]) [part="indicator"] {\n  color: var(--fm-color-text-default);',
+    );
+    expect(css).toContain("min-block-size: var(--fm-size-target-min);");
+    expect(css).toContain(':where([part="summary"]) { display: flex;');
+    expect(css).toContain("list-style: none;");
+    expect(componentCssIssues("faldilo.css", css)).toEqual([]);
+    expect(cssPhysicalPropertyIssues("faldilo.css", css)).toEqual([]);
+  });
+
+  it("the kompletigilo is a field of the kampo with a listbox popover of suggestions, named by its options", () => {
+    const element = files["eroj/src/generated/fm-kompletigilo.ts"] ?? "";
+    expect(element).toContain('<input part="control" id="control"');
+    expect(element).toContain(
+      '<div part="listbox" role="listbox" id="listbox" popover="manual"></div>',
+    );
+    expect(element).toContain('role="option"');
+    expect(element).toContain('"aria-activedescendant"');
+    expect(element).toContain('"aria-autocomplete"');
+    expect(element).toContain('new CustomEvent("query"');
+    expect(element).toContain('"options-count"');
+    expect(element).toContain("static formAssociated = true;");
+    const css = cssOf("kompletigilo");
+    expect(css).toContain(
+      ':where([part="field"][data-size="medium"]:has([part="control"]:hover)) [part="control"] {\n  background-color:',
+    );
+    expect(css).toContain(
+      ':where([part="field"]) [part="listbox"] {\n  background-color: var(--fm-color-background-raised);',
+    );
+    expect(css).toContain("box-shadow: var(--fm-elevation-shadow-overlay);");
+    expect(css).toContain(
+      ':where([part="field"]) [part="suggestion"][aria-selected="true"] {\n  color: var(--fm-color-text-default);',
+    );
+    expect(css).toContain("position-area: block-end;");
+    expect(css).not.toContain("data-expanded");
+    expect(componentCssIssues("kompletigilo.css", css)).toEqual([]);
   });
 });

@@ -771,9 +771,11 @@ describe("Figma plan for the ligilo (Spec 008 T017)", () => {
       "dialogo",
       "elektilo",
       "elekto",
+      "faldilo",
       "ikono",
       "insigno",
       "kampo",
+      "kompletigilo",
       "konsileto",
       "langetaro",
       "ligilo",
@@ -976,10 +978,14 @@ describe("the label default of a set follows its a11y role (M-3)", () => {
       elektilo: "Auswahl",
       // Spec 010 ③: a radio group names its question (plan ③ D-07, for the maintainer to confirm).
       elekto: "Frage",
+      // Spec 014 ⑤: a disclosure's label property writes its summary (to confirm).
+      faldilo: "Lieferbedingungen",
       ikono: undefined,
       // Spec 011 ③: a badge (role generic) names a status (for the maintainer to confirm).
       insigno: "Status",
       kampo: "Beschriftung",
+      // Spec 014 ⑤: the combobox is a field; the kampo's word applies.
+      kompletigilo: "Beschriftung",
       // Spec 014 ④: a tooltip is a short hint, the trigger of a menu offers more actions, a
       // popover's label property is its heading (to confirm).
       konsileto: "Kurzhinweis",
@@ -2958,5 +2964,68 @@ describe("the Figma plan draws the overlays (Spec 014 ④)", () => {
       "danger-item.color": "color/status/danger/text",
     });
     expect(menuo?.label).toEqual({ property: "label", defaultValue: "Weitere Aktionen" });
+  });
+});
+
+// Spec 014 ⑤ (plan ⑤ D-04): the faldilo in Figma — open × state, a summary row with the chevron
+// (down where open, right where closed) over the content shown only where open; the kompletigilo
+// as a field (the elektilo's drawing without the chevron) with the listbox of three suggestions
+// below it where expanded, its shadow bound.
+describe("the Figma plan draws the faldilo and the kompletigilo (Spec 014 ⑤)", () => {
+  const set = (name: string) => plan.components.find((component) => component.set === name);
+
+  it("the faldilo: open × state as a disclosure, the chevron per open, the word of the summary", () => {
+    const faldilo = set("faldilo");
+    expect(faldilo?.structure).toBe("disclosure");
+    expect(faldilo?.variants).toHaveLength(6);
+    const open = faldilo?.variants.find(
+      (variant) => variant.props.open === "true" && variant.props.state === "rest",
+    );
+    const closed = faldilo?.variants.find(
+      (variant) => variant.props.open === "false" && variant.props.state === "rest",
+    );
+    expect(open?.icons).toEqual({ indicator: "chevron-down" });
+    expect(closed?.icons).toEqual({ indicator: "chevron-right" });
+    expect(open?.bindings).toMatchObject({
+      "summary.fill": "color/action/tertiary/rest",
+      "summary.typography": "typography/label/1",
+      "indicator.color": "color/text/default",
+      "content.typography": "typography/body/1",
+    });
+    expect(closed?.bindings["indicator.color"]).toBe("color/text/subtle");
+    expect(faldilo?.texts).toEqual({ summary: "Lieferbedingungen", content: "Inhalt" });
+    expect(faldilo?.label).toEqual({ property: "label", defaultValue: "Lieferbedingungen" });
+  });
+
+  it("the kompletigilo: a field of size × expanded × state with the listbox of three suggestions where expanded, the shadow bound", () => {
+    const kompletigilo = set("kompletigilo");
+    expect(kompletigilo?.structure).toBe("field");
+    expect(kompletigilo?.variants).toHaveLength(3 * 2 * 5);
+    const open = kompletigilo?.variants.find(
+      (variant) =>
+        variant.props.size === "medium" &&
+        variant.props.expanded === "true" &&
+        variant.props.state === "rest",
+    );
+    const closed = kompletigilo?.variants.find(
+      (variant) =>
+        variant.props.size === "medium" &&
+        variant.props.expanded === "false" &&
+        variant.props.state === "rest",
+    );
+    expect(open?.bindings).toMatchObject({
+      "listbox.fill": "color/background/raised",
+      "listbox.height": "size/container/small",
+      "suggestion.typography": "typography/label/1",
+      "no-results.typography": "typography/caption",
+    });
+    expect(open?.shadow?.variable).toBe("elevation/shadow/overlay");
+    expect(closed?.hidden).toContain("listbox");
+    expect(kompletigilo?.entry).toEqual({
+      key: "selected",
+      texts: ["Eins", "Zwei", "Drei"],
+      selected: 0,
+    });
+    expect(kompletigilo?.texts?.text).toBe("Bitte wählen");
   });
 });

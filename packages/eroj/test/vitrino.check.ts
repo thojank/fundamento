@@ -576,3 +576,19 @@ test("fm-konsileto, fm-sxvebilo and fm-menuo are upgraded and open in their sect
   await page.keyboard.press("Escape");
   expect(await axeViolations(page, "#fm-vitrino-konsileto"), "konsileto").toEqual([]);
 });
+
+// Spec 014 ⑤ (plan ⑤ D-05): the sections of the faldilo (closed and open) and the kompletigilo
+// (the list opens on typing) in the Vitrino; axe without a finding.
+test("fm-faldilo and fm-kompletigilo are upgraded in their sections, axe-clean", async ({
+  page,
+}) => {
+  await open(page);
+  await expect(page.locator("#fm-vitrino-faldilo").getByRole("group")).toHaveCount(2);
+  await expect(page.locator("#fm-vitrino-faldilo fm-faldilo[open]")).toHaveCount(1);
+  await expect(page.locator("#fm-vitrino-kompletigilo fm-kompletigilo")).toHaveCount(15);
+  await page.locator("#fm-vitrino-kompletigilo").getByRole("combobox").first().fill("E");
+  await expect(page.locator("#fm-vitrino-kompletigilo").getByRole("option")).toHaveCount(1);
+  for (const id of ["faldilo", "kompletigilo"]) {
+    expect(await axeViolations(page, `#fm-vitrino-${id}`), id).toEqual([]);
+  }
+});

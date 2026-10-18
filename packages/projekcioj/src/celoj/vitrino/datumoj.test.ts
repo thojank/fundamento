@@ -257,9 +257,11 @@ describe("the Vitrino after the acceptances (Nachlese 2026-10-13)", () => {
       dialogo: "dialog",
       elektilo: "combobox",
       elekto: "radiogroup",
+      faldilo: "group",
       ikono: "img",
       insigno: "generic",
       kampo: "textbox",
+      kompletigilo: "combobox",
       konsileto: "tooltip",
       langetaro: "tablist",
       ligilo: "link",
@@ -677,5 +679,27 @@ describe("the Vitrino shows the overlays (Spec 014 ④)", () => {
     expect(section).toContain(
       '<fm-menuo><data value="edit">Bearbeiten</data><data value="duplicate" disabled>Duplizieren</data><fm-apartigilo></fm-apartigilo><data value="delete" intent="danger">Löschen</data></fm-menuo>',
     );
+  });
+});
+
+// Spec 014 ⑤ (plan ⑤ D-05): the Vitrino shows the faldilo closed and open (open is a column, a
+// keyed boolean like checked) with the word of its summary, and the kompletigilo like the
+// elektilo — size per row, the booleans as columns, the three options — expanded among them.
+describe("the Vitrino shows the faldilo and the kompletigilo (Spec 014 ⑤)", () => {
+  it("the faldilo has the column open and the summary word", () => {
+    const section = datumoj.eroj.faldilo ?? "";
+    expect(section).toContain('<th scope="col">open</th>');
+    expect(section).toContain('<span slot="summary">Lieferbedingungen</span>');
+    expect(section).toContain("<fm-faldilo open>");
+  });
+
+  it("the kompletigilo has the columns of a field and expanded, three options and a prompt", () => {
+    const section = datumoj.eroj.kompletigilo ?? "";
+    for (const column of ["required", "disabled", "invalid", "expanded"]) {
+      expect(section, column).toContain(`<th scope="col">${column}</th>`);
+    }
+    expect(section).toContain('<data slot="options" value="1">Eins</data>');
+    expect(section).toContain('placeholder="Bitte wählen"');
+    expect((section.match(/<fm-kompletigilo /g) ?? []).length).toBe(3 * 5);
   });
 });

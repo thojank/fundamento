@@ -31,7 +31,7 @@ const suggest = (goal: string) => {
 const INTENTS = ["neutral", "info", "success", "warning", "danger"];
 
 describe("insigno in the repo Modelo (section ③, G1, G2)", () => {
-  it("lives in data/eroj/insigno/skemo.json, among twenty-five Eroj", () => {
+  it("lives in data/eroj/insigno/skemo.json, among twenty-seven Eroj", () => {
     expect(insigno?.file).toBe("modelo/data/eroj/insigno/skemo.json");
     expect(modelo.eroj.map((entry) => entry.ero.name)).toEqual([
       "apartigilo",
@@ -41,9 +41,11 @@ describe("insigno in the repo Modelo (section ③, G1, G2)", () => {
       "dialogo",
       "elektilo",
       "elekto",
+      "faldilo",
       "ikono",
       "insigno",
       "kampo",
+      "kompletigilo",
       "konsileto",
       "langetaro",
       "ligilo",

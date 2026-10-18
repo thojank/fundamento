@@ -32,9 +32,11 @@ describe("sxaltilo in the repo Modelo (G1, G2, section 1)", () => {
       "dialogo",
       "elektilo",
       "elekto",
+      "faldilo",
       "ikono",
       "insigno",
       "kampo",
+      "kompletigilo",
       "konsileto",
       "langetaro",
       "ligilo",
@@ -238,7 +240,7 @@ describe("the Reguloj of the sxaltilo (G6, E5, D-14)", () => {
       // Spec 010 ②: widened once more, to the markobutono (E5); ③ to the elekto, ④ the elektilo;
       // Spec 011 ② to the tekstareo.
       expect(named(name)?.appliesTo).toEqual({
-        eroj: ["kampo", "sxaltilo", "markobutono", "elekto", "elektilo", "tekstareo"],
+        eroj: ["kampo", "sxaltilo", "markobutono", "elekto", "elektilo", "tekstareo", "kompletigilo"],
       });
       expect(modelo.reguloj.filter((regulo) => regulo.name === name)).toHaveLength(1);
     },
@@ -271,6 +273,8 @@ describe("the Reguloj of the sxaltilo (G6, E5, D-14)", () => {
       "konsileto",
       "sxvebilo",
       "menuo",
+      "faldilo",
+      "kompletigilo",
     ]);
   });
 

@@ -1,0 +1,9 @@
+{
+  "description": "Spec 014 ⑤ G10 (Art. VIII, Spec 008 D-13): the Skemo of the kompletigilo names a prop option, an element of one platform; the Skemo says suggestion, and the Celoj spell the markup.",
+  "issues": [
+    {
+      "rule": "skemo-web-term",
+      "path": "data/eroj/kompletigilo/skemo.json#/skemo/props/2/name"
+    }
+  ]
+}

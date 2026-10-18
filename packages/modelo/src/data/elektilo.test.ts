@@ -59,9 +59,11 @@ describe("elektilo in the repo Modelo (G1, G2, section 4)", () => {
       "dialogo",
       "elektilo",
       "elekto",
+      "faldilo",
       "ikono",
       "insigno",
       "kampo",
+      "kompletigilo",
       "konsileto",
       "langetaro",
       "ligilo",
@@ -244,7 +246,8 @@ describe("the Uzo of the elektilo (section 4, G5)", () => {
   it("sends a few visible options to the elekto, names a search in the list and several at once as not covered", () => {
     expect(uzo?.instead.map((entry) => [entry.goal, entry.ero])).toEqual([
       ["choose-few", "elekto"],
-      ["search-in-list", null],
+      // Spec 014 ⑤: covered by the kompletigilo.
+      ["search-in-list", "kompletigilo"],
       ["multiple", null],
     ]);
     expect(uzo?.instead[0]?.kialo).toMatch(/Fundamento covers it with elekto\.$/);
@@ -382,10 +385,10 @@ describe("the cross-links of G5: choose-many is the elektilo's (closes ③ D-08,
 });
 
 describe("the Reguloj of the elektilo (G6, E5)", () => {
-  it("select-placeholder-is-prompt is new, adjustable and the elektilo's alone; it judges instances", () => {
+  it("select-placeholder-is-prompt is new, adjustable, the elektilo's and since Spec 014 ⑤ the kompletigilo's; it judges instances", () => {
     expect(named("select-placeholder-is-prompt")).toMatchObject({
       checkability: "automatic",
-      appliesTo: { eroj: ["elektilo"] },
+      appliesTo: { eroj: ["elektilo", "kompletigilo"] },
     });
     expect(named("select-placeholder-is-prompt")?.statement).toMatch(/Bitte wählen/);
     expect(named("select-placeholder-is-prompt")?.kialo).toMatch(/prompt/);
@@ -400,21 +403,33 @@ describe("the Reguloj of the elektilo (G6, E5)", () => {
   it.each([
     [
       "field-label-visible",
-      ["kampo", "sxaltilo", "markobutono", "elekto", "elektilo", "tekstareo"],
+      ["kampo", "sxaltilo", "markobutono", "elekto", "elektilo", "tekstareo", "kompletigilo"],
     ],
     [
       "field-label-names-the-datum",
-      ["kampo", "sxaltilo", "markobutono", "elekto", "elektilo", "tekstareo"],
+      ["kampo", "sxaltilo", "markobutono", "elekto", "elektilo", "tekstareo", "kompletigilo"],
     ],
-    ["error-says-what-to-do", ["kampo", "markobutono", "elekto", "elektilo", "tekstareo", "avizo"]],
-    ["required-marked", ["kampo", "markobutono", "elekto", "elektilo", "tekstareo"]],
-    ["error-not-color-only", ["kampo", "markobutono", "elekto", "elektilo", "tekstareo"]],
+    [
+      "error-says-what-to-do",
+      ["kampo", "markobutono", "elekto", "elektilo", "tekstareo", "avizo", "kompletigilo"],
+    ],
+    [
+      "required-marked",
+      ["kampo", "markobutono", "elekto", "elektilo", "tekstareo", "kompletigilo"],
+    ],
+    [
+      "error-not-color-only",
+      ["kampo", "markobutono", "elekto", "elektilo", "tekstareo", "kompletigilo"],
+    ],
     // Spec 014 ①: widened once more, to the reason-help of the dialogo.
-    ["help-is-one-sentence", ["kampo", "elekto", "elektilo", "tekstareo", "dialogo"]],
-    ["placeholder-not-label", ["kampo", "elektilo", "tekstareo"]],
+    [
+      "help-is-one-sentence",
+      ["kampo", "elekto", "elektilo", "tekstareo", "dialogo", "kompletigilo"],
+    ],
+    ["placeholder-not-label", ["kampo", "elektilo", "tekstareo", "kompletigilo"]],
     // Spec 011 ⑤: widened once more, to the tabs of the langetaro.
     // Spec 014 ④: and to the entries of the menuo.
-    ["option-labels-distinct", ["elekto", "elektilo", "langetaro", "menuo"]],
+    ["option-labels-distinct", ["elekto", "elektilo", "langetaro", "menuo", "kompletigilo"]],
   ])("%s is widened to the elektilo, not duplicated (E5)", (name, eroj) => {
     expect(named(name)?.appliesTo).toEqual({ eroj });
     expect(named(name)?.statement).toMatch(/elektilo/);
@@ -448,6 +463,8 @@ describe("the Reguloj of the elektilo (G6, E5)", () => {
       "konsileto",
       "sxvebilo",
       "menuo",
+      "faldilo",
+      "kompletigilo",
     ]);
   });
 
@@ -607,14 +624,13 @@ describe("suggest_ero and the select (Gvidanto, section 4)", () => {
     });
   });
 
-  it("'Combobox mit Suche' is a search in the list: not covered, a person decides", () => {
+  it("'Combobox mit Suche' is a search in the list: the kompletigilo's since Spec 014 ⑤, with the select's reason", () => {
     const answer = suggest("Combobox mit Suche");
-    expect(answer.suggestion).toBeNull();
-    expect(answer.boundary).toMatchObject({
-      ero: "elektilo",
-      case: "search-in-list",
-      action: "ask-human",
-    });
+    expect(answer.suggestion).toEqual({ ero: "kompletigilo", props: {} });
+    // The select's alternative and the combobox's goal say the same thing (Spec 008 D-08): the
+    // goal answers, the alternative of the other Ero stays out of the answer.
+    expect(answer.matched?.goal).toBe("suggest");
+    expect(answer.boundary).toBeUndefined();
   });
 
   it("'Dropdown mit eigenem Popup' is no Ero of Fundamento: the list is the platform's (custom-popup)", () => {
