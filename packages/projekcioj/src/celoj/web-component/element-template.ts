@@ -843,7 +843,8 @@ export function elementSource({
     if (typeof formName === "string" && formName !== "") select.setAttribute("name", formName);
     else select.removeAttribute("name");
     const required = this.propValue("required") === true;
-    select.required = required;
+    // B-1 (Abnahme 014 ①, Spec 015 ② D-11): no required on the native control — the platform would show its validationMessage as a bubble; the validity is the Ero's (ElementInternals).
+    select.required = false;
     if (required) select.setAttribute("aria-required", "true");
     else select.removeAttribute("aria-required");
     const missing = TEXTS.required?.[this.#lingvo()] ?? TEXTS.required?.en ?? "";
@@ -1064,13 +1065,11 @@ ${
       // E8; GOV.UK: type=number changes its value with the wheel and the arrows); a date is the
       // platform's own dialog; a password hides what is typed. Every other kind is its type.
       control.type = kind === "number" ? "text" : kind;
-      if (kind === "number") {
-        control.setAttribute("inputmode", "numeric");
-        control.setAttribute("pattern", "-?[0-9]+");
-      } else {
-        control.removeAttribute("inputmode");
-        control.removeAttribute("pattern");
-      }
+      // B-1 (Spec 015 ② D-11): no pattern on the native input; the element checks the whole number
+      // itself (#validate), so the platform has no message to show as a bubble.
+      control.removeAttribute("pattern");
+      if (kind === "number") control.setAttribute("inputmode", "numeric");
+      else control.removeAttribute("inputmode");
       // What the platform fills in, and the bounds of a number or a date (the platform checks
       // them on a date; the element on a number, below).
       for (const attribute of ["autocomplete", "min", "max"]) {
@@ -1103,7 +1102,8 @@ ${
       if (typeof formName === "string" && formName !== "") control.setAttribute("name", formName);
       else control.removeAttribute("name");
       const required = this.propValue("required") === true;
-      control.required = required;
+      // B-1 (Abnahme 014 ①, Spec 015 ② D-11): no required on the native control — the platform would show its validationMessage as a bubble; the validity is the Ero's (ElementInternals).
+      control.required = false;
       if (required) control.setAttribute("aria-required", "true");
       else control.removeAttribute("aria-required");
       const disabled = this.propValue("disabled") === true;
@@ -1152,7 +1152,7 @@ ${
         : ""
     } else if (kind === "number" && text !== "" && !/^-?[0-9]+$/.test(text)) {
       flags = { patternMismatch: true };
-      if (own === "") message = control.validationMessage;
+      if (own === "") message = this.#patternMessage(text);
     } else if (kind === "number" && text !== "") {
       const number = Number(text);
       const min = this.propValue("min");
@@ -1189,6 +1189,17 @@ ${
     probe.step = "1";
     if (typeof min === "string" && min !== "") probe.min = min;
     if (typeof max === "string" && max !== "") probe.max = max;
+    probe.value = text;
+    return probe.validationMessage;
+  }
+
+  /**
+   * The platform's own words for a text that is no whole number, asked of an input that is never
+   * shown (B-1, Spec 015 ② D-11: the shown one carries no pattern, so it shows no bubble).
+   */
+  #patternMessage(text: string): string {
+    const probe = document.createElement("input");
+    probe.pattern = "-?[0-9]+";
     probe.value = text;
     return probe.validationMessage;
   }
@@ -2892,7 +2903,8 @@ ${
         list.hidden = this.#files.length === 0;
       }
       const required = this.propValue("required") === true;
-      input.required = required;
+      // B-1 (Abnahme 014 ①, Spec 015 ② D-11): no required on the native control — the platform would show its validationMessage as a bubble; the validity is the Ero's (ElementInternals).
+      input.required = false;
       if (required) input.setAttribute("aria-required", "true");
       else input.removeAttribute("aria-required");
       const problem = this.#problem(language);
@@ -3062,6 +3074,28 @@ ${
   }
 `
     : "";
+  // B-1 (Abnahme 014 ①, Spec 015 ② D-11): the validity of a choice in a form as a native control
+  // exposes it — the select, the checkbox and switch, the radio group judge themselves through
+  // ElementInternals like the fields, and say so through the same three members.
+  const choiceValidityMethods =
+    isSelect || isToggle || isGroup
+      ? `
+  /** The validity of the choice, as a native control exposes it (ElementInternals). */
+  get validity(): ValidityState {
+    return this.#internals.validity;
+  }
+
+  /** The message of the validity, as a native control exposes it. */
+  get validationMessage(): string {
+    return this.#internals.validationMessage;
+  }
+
+  /** Whether the choice is valid; fires invalid when it is not, as a native control does. */
+  checkValidity(): boolean {
+    return this.#internals.checkValidity();
+  }
+`
+      : "";
   // The skip link moves the focus to its target (G5): a landmark takes it once it may (tabindex
   // -1, written where the markup has none); the fragment of the link is the platform's.
   const skipInit = isSkip
@@ -3445,7 +3479,7 @@ ${
     : `    if (!(this.#control instanceof HTMLButtonElement)) return;
 ${toggleActivate}`
 }  }
-${groupMethods}${selectMethods}${inputMethods}${dialogMethods}${statusMethods}${slotTextMethod}${lightMethods}${autoMethods}${tabsMethods}${overlayMethods}${tooltipMethods}${menuMethods}${suggestMethods}${uploadMethods}
+${groupMethods}${selectMethods}${inputMethods}${dialogMethods}${statusMethods}${slotTextMethod}${lightMethods}${autoMethods}${tabsMethods}${overlayMethods}${tooltipMethods}${menuMethods}${suggestMethods}${uploadMethods}${choiceValidityMethods}
 }
 
 /**

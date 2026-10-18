@@ -93,6 +93,7 @@ Zwei Sätze aus der Rolle `navigation` mit den Teilen `ellipsis`/`separator`; di
 3. **Regeln (E5, G4; D-10):** neue Regulo `file-constraints-stated` (anpassbar) – geprüft über die vorhandene Slot-Constraint der Skemo (`slot:help` leer ⇒ `prop:accept` leer, gleichbedeutend mit „`accept` belegt ⇒ Hilfe belegt“) und eine Textregel auf der Hilfe (`min-words` 2) mit vier Jugxoj; sechs Feld-Reguloj des `kampo` und `spacing-owned-by-container` ausgeweitet.
 4. **Modelo:** `a11y.texts` kennt `<prop>-invalid` (der Fehler, wenn ein Wert die Grenze eines Text- oder Zahl-Props bricht) und `<part>-count` (die Wörter zur Zahl der Einträge eines Teils) – kleinste Änderung an `skemo-a11y-invalid` (D-04); Ikonaro `upload` (Phosphor `upload-simple`, regular und fill, nicht gespiegelt); Zahlwörter bis `thirty`.
 5. **Projekcioj:** Web-Celo Host `upload` (D-05: das native Datei-Eingabefeld liegt über dem komponierten `butono`, die Dateien sind der Formularwert, Prüfung von `accept` und `max-size` mit den Fehlern des Modelo, Liste, Zählansage, Ablage), Figma-Bauform `upload` mit Zeichnung im Plugin und dem Beispiel „mit zwei Dateien“ (D-06), Vitrino (D-07), Make-Kit-Satz (D-08), React-Typen (D-09).
+6. **B-1 aus der Abnahme 014 ① (D-11):** kein Pflichtfeld zeigt mehr die Blase des Browsers („Fülle dieses Feld aus.“). Das native Steuerelement von `kampo`, `tekstareo`, `kompletigilo`, `elektilo` und `alsxutilo` trägt kein `required` und keine `pattern` mehr; die Gültigkeit ist allein die des Ero (ElementInternals), der Fehler steht am Feld. `required` bleibt sichtbar und hörbar (Pflichtmarke, `aria-required`), ein leeres Pflichtfeld hält das Formular weiter an. Einmal im Element-Template gelöst.
 
 ### Entwurfsentscheidungen
 
@@ -136,6 +137,14 @@ Ein Satz aus der Rolle `button` mit dem Teil `dropzone`: „Every file a form as
 
 Die Slot-Constraint der Skemo liest Slots nur in `when` (`skemo-constraint-invalid`), also steht die Regel umgekehrt da: `when: { "slot:help": "empty" }, allowed: { "prop:accept": ["empty"] }` – dieselbe Aussage. Verletzt meldet `check_usage` `ero-prop-constraint` mit der Kialo, das Web-Element warnt in der Konsole. Wie die Hilfe lautet, prüft eine Textregel der Uzo auf `slot:help` (`min-words` 2, anpassbar, `USAGE_ENFORCERS` als `textRule`) mit je einem richtigen und falschen Beispiel in de und en (vier Jugxoj). `max-size` allein liest die Constraint nicht: `prop:<name>` gilt nur für Text-Props (Abweichung 3, O-10).
 
+#### D-11 B-1: die Gültigkeit gehört dem Ero, nicht dem nativen Steuerelement (Regel 0.2, einmal im Template)
+
+**Ursache:** Chromium zeigt beim Überfahren eines nativen Formularelements dessen `validationMessage` als Tooltip (Blink: `DefaultToolTip` von `InputType`, `HTMLTextAreaElement`, `HTMLSelectElement`), Firefox ebenso. Das Element setzte `required` (und beim `kampo kind=number` ein `pattern`) am nativen Steuerelement im Shadow: es war `:invalid`, seine Meldung „Fülle dieses Feld aus.“ war die Blase. Für das Formular zählte dieses Steuerelement nie (es liegt im Shadow, ohne Formular); die Gültigkeit setzte das Element ohnehin über `ElementInternals`.
+
+**Lösung:** Das native Steuerelement trägt keine Einschränkung, die die Plattform beurteilt – kein `required` (`kampo`, `tekstareo`, `kompletigilo` im gemeinsamen Feld-Render, `elektilo` im Select-Render, `alsxutilo`), kein `pattern` (die ganze Zahl prüft `#validate` selbst; die Worte der Plattform für den Fehler liefert ein nie gezeigtes Probe-Feld, wie schon bei den Grenzen). Pflicht bleibt `aria-required` und Pflichtmarke; `valueMissing` mit „erforderlich“ (oder dem Text des Fehler-Slots) setzt das Element über `ElementInternals`, das Formular sendet nicht, der Fehler zeigt sich erst nach dem Senden oder einer Eingabe (F-8 unverändert). Der `markobutono` (eine Schaltfläche mit Rolle `checkbox`) und der `elekto` hatten nie eine native Einschränkung; Select, Kontrollkästchen/Schalter und Radiogruppe bieten jetzt wie die Felder `validity`, `validationMessage` und `checkValidity()` an (Abweichung 7).
+
+**Nachweis (rot zuerst):** Einen Tooltip der Plattform kann kein Browser-Spec lesen. `pflicht.spec.ts` prüft darum, woraus er gemacht ist: je leeres Pflichtfeld der sechs Eroj ist das native Steuerelement ohne `required`, nicht `:invalid`, mit leerer `validationMessage` – vor und nach dem Sendeversuch –, das Ero dagegen `valueMissing` mit Meldung, `aria-required`, Marke sichtbar, Formular nicht gesendet; ein `kampo kind=number` mit „abc“ hat am nativen Feld kein `pattern` und keine Meldung, am Ero `patternMismatch` mit den Worten der Plattform. `web-component.test` pinnt dasselbe im erzeugten Code.
+
 ### Arkitekturo-Abdeckung
 
 | Artikel | Wie ② ihn trägt |
@@ -149,6 +158,7 @@ Die Slot-Constraint der Skemo liest Slots nur in `when` (`skemo-constraint-inval
 | G2 (Verflechtung) | `kampo.file` → use-instead; `alsxutilo.text-input` → `kampo`; `ikono` komponiert |
 | G3 (Stichwörter) | `goal-keyword-shared` ohne Warnung (`check:regularo` 0 Warnungen) |
 | Internacia | die Liste spiegelt sich in RTL (Browser-Spec); `upload` spiegelt nicht |
+| Fehler am Feld, nie in einer Blase (B-1) | kein natives Steuerelement eines Felds trägt `required` oder `pattern`; die Gültigkeit setzt das Ero über `ElementInternals` (D-11) |
 
 ### Abweichungen von der Spec
 
@@ -158,6 +168,7 @@ Die Slot-Constraint der Skemo liest Slots nur in `when` (`skemo-constraint-inval
 4. „file input“ trifft das Goal des `kampo` („input“) und des `alsxutilo` („file“) gleich stark: der Gvidanto fragt mit beiden Kandidaten (OP-12, wie ① Abweichung 3); „Datei hochladen“, „Upload“, „Anhang“, „attachment“ sind der `alsxutilo`.
 5. Neu gegenüber der Spec: der Hinweis der Ablagezone („oder hierher ziehen“, `drop-hint`) – ohne ihn sagt eine gestrichelte Fläche nicht, wozu sie da ist.
 6. Figma: „leer“, „Fehler“ und „Ablagezone `dragover`“ sind Varianten, „mit zwei Dateien“ ist ein Beispiel neben dem Set (wie ① O-2).
+7. B-1 (D-11): neben der Lösung bekommen `elektilo`, `markobutono`/`sxaltilo` und `elekto` die drei Gültigkeits-Mitglieder (`validity`, `validationMessage`, `checkValidity()`), die die Felder schon hatten – sonst ließe sich ihre Gültigkeit von außen nicht prüfen (der Spec braucht sie). Die Briefing-Liste nennt den `kompletigilo` nicht; er teilt das Feld-Render des `kampo` und ist mit gelöst.
 
 ### Befunde / Mankoj
 
@@ -170,6 +181,8 @@ Die Slot-Constraint der Skemo liest Slots nur in `when` (`skemo-constraint-inval
 - **B-7** Die Pflichtmarke ist in Figma nicht gezeichnet; der Jugxo `jug_01M4S2R85WRAC5SV7CARH8RE7S` gibt den Teil `required-mark` frei (nach Teilname, nicht nach Ero) – zwölf freigegebene Werte mehr (`check:parity` 285 → 297 Warnungen, 0 Differenzen). Sein Wortlaut nennt vier Eroj (O-12).
 - **B-8 (behoben)** Das erste Stichwort von `text-input` („text“) zog „Verweis im Text auf einen Abschnitt“ (`saltligilo`) und „Markdown im Text“ (`teksto`) zum `kampo`: zwei Dialoge aus 014 wären gekippt. Die Stichwörter sind jetzt „typed/typing“, „getippt/eintippen“.
 - **B-9** Der komponierte `butono` zeigt unter dem durchsichtigen Eingabefeld immer sein Ruhe-Bild (inert, kein `:hover` darunter); Hover und Fokus sagt die Ablagezone (Randfarbe) und der Fokusring am Knopf. Kein Manko der Barrierefreiheit (Fokus sichtbar, axe ohne Befund); als O-11 notiert.
+- **B-10 (B-1, Rest)** Zwei Fälle bleiben native Prüfungen: das Datum des `kampo` (`min`/`max` am Datumsfeld, damit der Dialog der Plattform die Grenzen kennt; außerhalb der Grenzen oder halb getippt ist es `:invalid`) und `kind=email`/`url` (`typeMismatch` der Plattform, die das Element nicht selbst prüft). Dort kann die Blase beim Überfahren noch erscheinen; ein Pflichtfeld zeigt sie nicht mehr (O-14).
+- **B-11** Lokal scheitert `dialogo.spec` „Escape cancels … the focus returns to the opener“ in WebKit (3 von 3 Wiederholungen) – auch ohne die Änderung von D-11 (geprüft mit dem Template vor B-1). Die PR-Läufe der CI fahren nur Chromium; auf `main` laufen alle drei Engines. Nicht Teil dieses PR, gemeldet.
 
 ### Offen (für den Maintainer)
 
@@ -182,6 +195,7 @@ Die Slot-Constraint der Skemo liest Slots nur in `when` (`skemo-constraint-inval
 - **O-11 Hover des Knopfs:** der `butono` unter dem Eingabefeld zeigt kein Hover (B-9). Vorschlag: so lassen; ein eigenes Hover-Bild wäre ein Zustand am `butono`, den nur der `alsxutilo` setzt.
 - **O-12 Jugxo der Pflichtmarke:** `jug_01M4S2R85WRAC5SV7CARH8RE7S` gibt jetzt auch die Marke des `alsxutilo` frei (B-7). Vorschlag: Wortlaut um „und jedes weitere Feld mit `required-mark`“ ergänzen (Nachtrag, kein neuer Jugxo).
 - **O-13 „file input“:** Rückfrage zwischen `kampo` und `alsxutilo` (Abweichung 4). Vorschlag: so lassen (OP-12); ein Stichwort „input“ am `alsxutilo` wäre `goal-keyword-shared`.
+- **O-14 Native Prüfung am Datum und an E-Mail/URL (B-10):** Vorschlag: die Grenzen des Datums und die Form von E-Mail und URL prüft das Element selbst wie die ganze Zahl (Datum lexikalisch als `YYYY-MM-DD`, die Worte der Plattform über ein Probe-Feld) und setzt `min`/`max` dann nur noch für den Dialog – eigener kleiner PR, weil `kind` sonst seine Tastaturen verlöre.
 
 ## ③ Inhalt
 
