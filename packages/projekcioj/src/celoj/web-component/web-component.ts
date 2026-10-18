@@ -25,8 +25,11 @@ import { elementSource, hostOf } from "./element-template.js";
 /** Slotted icons: a pseudo-element, so it follows the :where() of the control. */
 const ICONS = 'slot[name^="icon-"]::slotted(*)';
 
-/** The mark an icon slot falls back to (Spec 008, D-05): styled like a slotted icon. */
-const MARK = 'slot[name^="icon-"] > svg';
+/**
+ * The mark an icon slot falls back to (Spec 008, D-05): styled like a slotted icon. Since
+ * Nachlese 4 N-7 the Ikonaro's external (an fm-ikono), no hand-drawn svg.
+ */
+const MARK = 'slot[name^="icon-"] > fm-ikono';
 
 /** The selector of a part in the shadow tree; `control` carries the combination and state. */
 function partSelector(part: string, control: string): string {

@@ -1977,6 +1977,14 @@ function iconsOf(
   if (skemo.a11y.role === "combobox" && skemo.parts.indicator !== undefined) {
     return { indicator: "chevron-down" };
   }
+  // Nachlese 4 N-7 (Spec 014 ② O-7): the check mark of a checkbox is the Ikonaro's check.
+  if (
+    structure === "toggle" &&
+    skemo.a11y.role === "checkbox" &&
+    skemo.parts.indicator !== undefined
+  ) {
+    return { indicator: "check" };
+  }
   if (structure === "table" && skemo.parts["sort-indicator"] !== undefined) {
     return { "sort-indicator": "sort-ascending" };
   }
@@ -2579,7 +2587,8 @@ function componentSetOf(
   // 011 ④) has the select's chevron as its sort indicator — the web turns the same sign by the
   // direction; one shape for both pictures.
   // Spec 014 ②: the chevron of a select and the sort arrow of a table are icons of the plan
-  // (iconsOf), no sign; the check mark, the dot and the arc stay signs.
+  // (iconsOf), no sign; the dot and the arc stay signs. Nachlese 4 N-7: the check mark is an icon
+  // too (signOf has no sign for a checkbox any more).
   const sign =
     structure === "state"
       ? STATE_SIGN

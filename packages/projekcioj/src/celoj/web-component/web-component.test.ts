@@ -373,7 +373,8 @@ describe("Web Component Celo for the markobutono (Spec 010 ②)", () => {
     expect(markobutonoElement).toContain(
       '<span part="indicator"><fm-ikono name="check"></fm-ikono></span>',
     );
-    expect(markobutonoElement).not.toContain("<svg");
+    // The asterisk of a required box stays a sign of the projection; the check mark's path is gone.
+    expect(markobutonoElement).not.toContain("M6.4 12.6");
     expect(markobutonoElement).toContain(`querySelector('[part="indicator"] fm-ikono')`);
     expect(sxaltiloElement).toContain('<span part="indicator"></span>');
   });

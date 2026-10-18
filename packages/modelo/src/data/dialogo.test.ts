@@ -278,6 +278,8 @@ describe("the cross-links of G5: the butono asks before an irreversible action, 
       "kampo",
       "butono",
       "dialogo",
+      // Nachlese 4 N-7: the check mark is an ikono check.
+      "ikono",
     ]);
   });
 

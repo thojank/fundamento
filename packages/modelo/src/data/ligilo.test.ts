@@ -225,7 +225,8 @@ describe("the Uzo of the ligilo (T006, A3)", () => {
       "footer",
       "card",
     ]);
-    expect(uzo?.composes.with.map((entry) => entry.ero)).toEqual(["ligilo", "spuro"]);
+    // Nachlese 4 N-7: the mark of an external destination is an ikono external.
+    expect(uzo?.composes.with.map((entry) => entry.ero)).toEqual(["ligilo", "spuro", "ikono"]);
     expect(uzo?.composes.never.map((entry) => entry.ero)).toEqual(["butono"]);
     expect(uzo?.composes.never[0]?.kialo).toContain("action-bar");
     expect(uzo?.composes.spacing).toEqual({

@@ -4709,6 +4709,11 @@ async function applyComponents(variables, warnings) {
         }
       }
       if (indicator !== undefined && typeof icons.indicator === "string") {
+        // A file drawn before Nachlese 4 N-7 holds the hand-drawn check mark directly in the
+        // indicator (the sign's vector, part mark): the Ikonaro's glyphs take its place.
+        for (const child of indicator.children.slice()) {
+          if (child.type === "VECTOR") child.remove();
+        }
         Object.assign(glyphNodes, drawGlyphs(indicator, icons.indicator, "indicator-", glyphMeasures));
       }
       if (iconFrame !== undefined) {

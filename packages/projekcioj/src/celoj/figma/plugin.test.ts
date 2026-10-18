@@ -4241,6 +4241,9 @@ describe("the markobutono is drawn as a toggle: box, check mark, label and error
     const variant = (name: string) => set?.children.find((child) => child.name === name);
     return { double, set, variant };
   };
+  // The Aspektoj of the repository's Modelo, whose glyphs the plan carries (Nachlese 4 N-7).
+  const aspektoj = Object.keys(repoPlan.ikonoj?.glyphs ?? {});
+  const glyphFrames = aspektoj.map((aspekto) => `glyph-${aspekto}`);
 
   it("draws every variant of checked × size × state, named by the plan", async () => {
     const { set } = await drawn();
@@ -4262,12 +4265,9 @@ describe("the markobutono is drawn as a toggle: box, check mark, label and error
     expect(descendant(on, "error")?.properties.characters).toBe("Fehler");
     const control = descendant(on, "control");
     expect(control?.children.map((child) => child.name)).toEqual(["indicator"]);
-    // Nachlese 4 N-7: the check mark is the Ikonaro's check — a glyph frame per Aspekto, its
-    // visibility bound to the Aspekto's switch; no hand-drawn sign.
-    expect(descendant(on, "indicator")?.children.map((child) => child.name)).toEqual([
-      "glyph-komuna",
-      "glyph-ekzemplo",
-    ]);
+    // Nachlese 4 N-7: the check mark is the Ikonaro's check — a glyph frame per Aspekto of the
+    // Modelo, its visibility bound to the Aspekto's switch; no hand-drawn sign.
+    expect(descendant(on, "indicator")?.children.map((child) => child.name)).toEqual(glyphFrames);
     expect(descendant(on, "mark")?.parent?.name).toBe("glyph-komuna");
     expect(bound(field, "itemSpacing")).toBe("spacing/small");
   });
@@ -4278,7 +4278,7 @@ describe("the markobutono is drawn as a toggle: box, check mark, label and error
     const indicator = descendant(on, "indicator");
     expect(bound(indicator, "width")).toBe("size/icon/medium");
     expect(bound(indicator, "height")).toBe("size/icon/medium");
-    for (const aspekto of ["komuna", "ekzemplo"]) {
+    for (const aspekto of aspektoj) {
       const glyph = descendant(indicator, `glyph-${aspekto}`);
       expect(bound(glyph, "width"), aspekto).toBe("size/icon/medium");
       expect(bound(glyph, "visible"), aspekto).toBe(`ikonoj/${aspekto}`);
@@ -4317,10 +4317,7 @@ describe("the markobutono is drawn as a toggle: box, check mark, label and error
     old.setSharedPluginData("fundamento", "part", "mark");
     expect(indicator.children.some((child) => child.type === "VECTOR")).toBe(true);
     await run(double, source);
-    expect(indicator.children.map((child) => child.name)).toEqual([
-      "glyph-komuna",
-      "glyph-ekzemplo",
-    ]);
+    expect(indicator.children.map((child) => child.name)).toEqual(glyphFrames);
   });
 
   it("keeps the switch's knob a filled frame without a sign or a column (Spec 010 ①)", async () => {
