@@ -124,7 +124,7 @@
 
 | Was | Wert |
 |---|---|
-| Commits ④ | rot `d766153`, grün `a9424fd`, Fix `10f6c99` (nach dem Rebase auf ③ `ba37441`; die CI-Läufe unten liefen auf `94c4e2a`/`19e8e27`, davor `b08d1c1` rot) (Typtests `konsileto.tsx`/`sxvebilo.tsx`: `@ts-expect-error` vor der JSX-Zeile, beide Eroj-Shards); nach dem Rebase auf ② `6fb4ab3` (F-4) am 2026-10-18, weitere Fixes `c70550e`; nach dem Rebase auf ② `e487388` (F-4) am 2026-10-18, weitere Fixes `88fcd48` |
+| Commits ④ | rot `53c875e`, grün `8c388fd`, Fix `c28eca9` (nach dem Rebase auf ③ `ba37441`; die CI-Läufe unten liefen auf `94c4e2a`/`19e8e27`, davor `b08d1c1` rot) (Typtests `konsileto.tsx`/`sxvebilo.tsx`: `@ts-expect-error` vor der JSX-Zeile, beide Eroj-Shards); nach dem Rebase auf ② `6fb4ab3` (F-4) am 2026-10-18, weitere Fixes `c70550e`; nach dem Rebase auf ② `e487388` (F-4) am 2026-10-18, weitere Fixes `88fcd48`; nach dem Rebase auf `main` `8a41cba` (#72 gemergt) am 2026-10-18, weitere Fixes `3d51465` |
 | `brief` | konsileto, sxvebilo, menuo ≤ 750 (Daten-Tests und MCP e2e) |
 | Parität | `check:parity` 25 Eroj, 0 Differenzen, 225 Freigaben |
 | `check:regularo` | 57 Reguloj, 180 Jugxoj, 25 Uzoj, 0 Warnungen (keine neue `goal-keyword-shared`) |
