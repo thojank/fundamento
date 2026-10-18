@@ -1,0 +1,20 @@
+[
+  {
+    "group": "aspekto",
+    "id": "dva_provo_01M564XR004GZ8VPRRGNZZP9YT",
+    "name": "provo",
+    "selectedTokenSets": {
+      "aspekto/provo": "enabled",
+      "aspekto/provo+color-scheme/dark": "enabled",
+      "core": "source"
+    }
+  },
+  {
+    "group": "color-scheme",
+    "id": "dva_01M2VEEDQFS0RGTE2M27JARKHA",
+    "name": "dark",
+    "selectedTokenSets": {
+      "aspekto/provo+color-scheme/dark": "enabled"
+    }
+  }
+]

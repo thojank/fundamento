@@ -31,8 +31,9 @@ export function systemUlidSource(): UlidSource {
 }
 
 /**
- * A reproducible source: fixed time and a seeded PRNG (mulberry32). For tests and fixtures only;
- * never use it to allocate real IDs.
+ * A reproducible source: fixed time and a seeded PRNG (mulberry32). For tests and fixtures, and
+ * for the Aspektoj the Agordilo derives (Spec 016), whose IDs are a function of the Aspekto's name
+ * in its own package namespace; never use it to allocate IDs of the core registry.
  */
 export function fixedUlidSource(time: number, seed: number): UlidSource {
   let state = seed >>> 0;

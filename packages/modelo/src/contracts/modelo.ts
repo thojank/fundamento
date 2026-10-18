@@ -25,15 +25,21 @@ import type {
 import type { IssueLocation, ValidationIssue } from "./issues.js";
 
 export type {
+  Agordo,
+  AgordoJugxo,
   AliasLink,
+  AspektoAgordilo,
   AspektoAspiro,
+  AspektoFile,
   AspektoMetadata,
+  ColorValue,
   Dimensio,
   DimensiojFile,
   DimensioValoro,
   Ero,
   EroFile,
   EroInstance,
+  Fonto,
   IkonaroFile,
   Ikono,
   Jugxo,

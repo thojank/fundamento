@@ -156,14 +156,15 @@ describe("data/ikonaro.json (Spec 014 ①, G3)", () => {
     }
   });
 
-  it("check:ikonaro passes on the repo: komuna and ekzemplo complete", async () => {
+  // Spec 016 ①: provo, the Aspekto the Agordilo derives, is the third known Aspekto.
+  it("check:ikonaro passes on the repo: komuna, ekzemplo and provo complete", async () => {
     const result = await check({ json: true, repoRoot });
     expect(result.errors).toEqual([]);
     expect(result.ok).toBe(true);
     expect(result.stats).toMatchObject({
       names: names.length,
-      aspektoj: 2,
-      glyphs: names.length * 2,
+      aspektoj: 3,
+      glyphs: names.length * 3,
     });
   });
 

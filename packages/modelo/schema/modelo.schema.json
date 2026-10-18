@@ -1387,6 +1387,9 @@
             "$ref": "#/$defs/AspektoAspiro"
           }
         },
+        "agordilo": {
+          "$ref": "#/$defs/AspektoAgordilo"
+        },
         "ikonoj": {
           "description": "The icon set the package draws the Ikonaro from (Spec 014 ①, G3, E10; Art. V: open source with a permissive licence in the core repository, Art. VII: the import carries its provenance): the set's name, the style drawn (a set with several styles: komuna Phosphor regular, ekzemplo Phosphor fill), the version read, its licence, the source and the day it was read, and the map from each Ikonaro name to the name of the set it is drawn from (plan ① D-04). Every glyph repeats source, version and licence in its own metadata. A package that draws its own glyphs names neither style nor map.",
           "type": "object",
@@ -3350,6 +3353,160 @@
         }
       },
       "required": ["id", "name", "kondicxoj", "tree"],
+      "additionalProperties": false
+    },
+    "AspektoAgordilo": {
+      "description": "The origin of an Aspekto derived by the Agordilo (Spec 016, G1): the Agordo it was derived from, the version of the Agordilo and the structure it was written from (the Vortaro version, the reference Aspekto whose roles and assignment it keeps, and a SHA-256 fingerprint over the structure files and the calibration). Deriving is a write at save time; nothing is inherited at run time (Art. IV).",
+      "type": "object",
+      "properties": {
+        "version": {
+          "$ref": "#/$defs/NonEmptyText"
+        },
+        "structure": {
+          "type": "object",
+          "properties": {
+            "vortaro": {
+              "$ref": "#/$defs/NonEmptyText"
+            },
+            "reference": {
+              "$ref": "#/$defs/Name"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": ["vortaro", "reference", "sha256"],
+          "additionalProperties": false
+        },
+        "agordo": {
+          "$ref": "#/$defs/Agordo"
+        }
+      },
+      "required": ["version", "structure", "agordo"],
+      "additionalProperties": false
+    },
+    "AgordoColor": {
+      "description": "A colour of an Agordo (Spec 016, G4): hex with three or six digits, or CSS oklch() with lightness as a number (0…1) or a percentage, chroma and hue as numbers.",
+      "type": "string",
+      "pattern": "^(#[0-9a-fA-F]{3}|#[0-9a-fA-F]{6}|oklch\\(\\s*[0-9]*\\.?[0-9]+%?\\s+[0-9]*\\.?[0-9]+\\s+[0-9]*\\.?[0-9]+\\s*\\))$"
+    },
+    "AgordoJugxo": {
+      "description": "A deviation an Agordo records for an adjustable rule (Spec 016, G6, D-5): the Regulo by name, the reason, the date and the name of the person deciding. The Agordilo writes it into the package as a Jugxo; a fixed rule cannot be deviated from.",
+      "type": "object",
+      "properties": {
+        "regulo": {
+          "$ref": "#/$defs/Name"
+        },
+        "kialo": {
+          "$ref": "#/$defs/NonEmptyText"
+        },
+        "date": {
+          "type": "string",
+          "format": "date"
+        },
+        "name": {
+          "$ref": "#/$defs/NonEmptyText"
+        }
+      },
+      "required": ["regulo", "kialo", "date", "name"],
+      "additionalProperties": false
+    },
+    "Agordo": {
+      "description": "The recipe of a brand for the Agordilo (Spec 016, G4): a lead colour, optional status colours, the tint of the neutrals, three sliders and font families. The same Agordo derives the same Aspekto, byte for byte. owner and license fill aspekto.json; aspiroj are the brand's own goals, checked only when named; jugxoj record deviations from adjustable rules.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/Name"
+        },
+        "owner": {
+          "$ref": "#/$defs/NonEmptyText"
+        },
+        "license": {
+          "$ref": "#/$defs/License"
+        },
+        "leitfarbe": {
+          "$ref": "#/$defs/AgordoColor"
+        },
+        "zusatzfarben": {
+          "type": "object",
+          "properties": {
+            "success": {
+              "$ref": "#/$defs/AgordoColor"
+            },
+            "warning": {
+              "$ref": "#/$defs/AgordoColor"
+            },
+            "danger": {
+              "$ref": "#/$defs/AgordoColor"
+            },
+            "info": {
+              "$ref": "#/$defs/AgordoColor"
+            }
+          },
+          "additionalProperties": false
+        },
+        "neutral": {
+          "type": "object",
+          "properties": {
+            "toenung": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          },
+          "additionalProperties": false
+        },
+        "regler": {
+          "type": "object",
+          "properties": {
+            "helligkeit": {
+              "type": "number",
+              "minimum": -1,
+              "maximum": 1
+            },
+            "kontrast": {
+              "type": "number",
+              "minimum": -1,
+              "maximum": 1
+            },
+            "saettigung": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 2
+            }
+          },
+          "additionalProperties": false
+        },
+        "schriften": {
+          "type": "object",
+          "properties": {
+            "display": {
+              "$ref": "#/$defs/Fonto"
+            },
+            "body": {
+              "$ref": "#/$defs/Fonto"
+            },
+            "code": {
+              "$ref": "#/$defs/Fonto"
+            }
+          },
+          "additionalProperties": false
+        },
+        "aspiroj": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/AspektoAspiro"
+          }
+        },
+        "jugxoj": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/AgordoJugxo"
+          }
+        }
+      },
+      "required": ["name", "leitfarbe"],
       "additionalProperties": false
     },
     "AspektoAspiro": {

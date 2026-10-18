@@ -40,6 +40,11 @@ function fm(args: readonly string[]): Run {
 }
 
 const scratch = mkdtempSync(join(tmpdir(), "fm-agordilo-"));
+
+// One derivation composes and checks the whole Modelo with the derived Aspekto (2–4 s on a quiet
+// machine, measured 45 s for four spawns inside the parallel run): the tests that derive carry a
+// budget sized for that work, not the 30 s of a single spawn.
+const DERIVE_BUDGET = 120_000;
 afterAll(() => rmSync(scratch, { recursive: true, force: true }));
 
 function filesOf(dir: string): Record<string, string> {
@@ -66,36 +71,44 @@ describe("fm agordilo", () => {
     }
   });
 
-  it("derives provo twice into the same bytes and checks it", () => {
-    const first = join(scratch, "first");
-    const second = join(scratch, "second");
-    expect(fm(["agordilo", "derive", PROVO, "--out", first]).code).toBe(0);
-    expect(fm(["agordilo", "derive", PROVO, "--out", second]).code).toBe(0);
-    for (const file of ["aspekto.json", "ids.lock.json", "raporto.json", "raporto.md"]) {
-      expect(existsSync(join(first, file)), file).toBe(true);
-    }
-    expect(filesOf(second)).toEqual(filesOf(first));
+  it(
+    "derives provo twice into the same bytes and checks it",
+    () => {
+      const first = join(scratch, "first");
+      const second = join(scratch, "second");
+      expect(fm(["agordilo", "derive", PROVO, "--out", first]).code).toBe(0);
+      expect(fm(["agordilo", "derive", PROVO, "--out", second]).code).toBe(0);
+      for (const file of ["aspekto.json", "ids.lock.json", "raporto.json", "raporto.md"]) {
+        expect(existsSync(join(first, file)), file).toBe(true);
+      }
+      expect(filesOf(second)).toEqual(filesOf(first));
 
-    const check = fm(["agordilo", "check", first, "--json"]);
-    expect(check.code, check.stderr).toBe(0);
-    expect(JSON.parse(check.stdout)).toMatchObject({ ok: true, issues: [] });
+      const check = fm(["agordilo", "check", first, "--json"]);
+      expect(check.code, check.stderr).toBe(0);
+      expect(JSON.parse(check.stdout)).toMatchObject({ ok: true, issues: [] });
 
-    // G8: the derived package validates with the core, as an external Aspekto.
-    const validate = fm(["modelo", "validate", "--aspekto", first]);
-    expect(validate.code, validate.stdout).toBe(0);
-  });
+      // G8: the derived package validates with the core, as an external Aspekto.
+      const validate = fm(["modelo", "validate", "--aspekto", first]);
+      expect(validate.code, validate.stdout).toBe(0);
+    },
+    DERIVE_BUDGET,
+  );
 
-  it("finds a shipped report that no longer matches the checks", () => {
-    const dir = join(scratch, "stale");
-    expect(fm(["agordilo", "derive", PROVO, "--out", dir]).code).toBe(0);
-    const raporto = JSON.parse(readFileSync(join(dir, "raporto.json"), "utf8"));
-    raporto.summary.pairs.passed += 1;
-    writeFileSync(join(dir, "raporto.json"), `${JSON.stringify(raporto, null, 2)}\n`);
-    const check = fm(["agordilo", "check", dir, "--json"]);
-    expect(check.code).toBe(1);
-    const result = JSON.parse(check.stdout) as { issues: { rule: string; path: string }[] };
-    expect(result.issues.map((issue) => issue.rule)).toContain("raporto-out-of-sync");
-  });
+  it(
+    "finds a shipped report that no longer matches the checks",
+    () => {
+      const dir = join(scratch, "stale");
+      expect(fm(["agordilo", "derive", PROVO, "--out", dir]).code).toBe(0);
+      const raporto = JSON.parse(readFileSync(join(dir, "raporto.json"), "utf8"));
+      raporto.summary.pairs.passed += 1;
+      writeFileSync(join(dir, "raporto.json"), `${JSON.stringify(raporto, null, 2)}\n`);
+      const check = fm(["agordilo", "check", dir, "--json"]);
+      expect(check.code).toBe(1);
+      const result = JSON.parse(check.stdout) as { issues: { rule: string; path: string }[] };
+      expect(result.issues.map((issue) => issue.rule)).toContain("raporto-out-of-sync");
+    },
+    DERIVE_BUDGET,
+  );
 
   it("refuses an Agordo without leitfarbe with a structured issue and exit 1", () => {
     const file = join(scratch, "sen-leitfarbe.json");
@@ -113,16 +126,20 @@ describe("fm agordilo", () => {
     expect(existsSync(join(scratch, "never"))).toBe(false);
   });
 
-  it("refuses to export a light yellow without a Jugxo and writes nothing (G6)", () => {
-    const file = join(scratch, "flava.json");
-    writeFileSync(file, JSON.stringify({ name: "flava", leitfarbe: "#F5C400" }));
-    const out = join(scratch, "flava");
-    const run = fm(["agordilo", "derive", file, "--out", out]);
-    expect(run.code).toBe(1);
-    expect(run.stdout).toMatch(/cause/i);
-    expect(run.stdout).toMatch(/suggestion/i);
-    expect(existsSync(out)).toBe(false);
-  });
+  it(
+    "refuses to export a light yellow without a Jugxo and writes nothing (G6)",
+    () => {
+      const file = join(scratch, "flava.json");
+      writeFileSync(file, JSON.stringify({ name: "flava", leitfarbe: "#F5C400" }));
+      const out = join(scratch, "flava");
+      const run = fm(["agordilo", "derive", file, "--out", out]);
+      expect(run.code).toBe(1);
+      expect(run.stdout).toMatch(/cause/i);
+      expect(run.stdout).toMatch(/suggestion/i);
+      expect(existsSync(out)).toBe(false);
+    },
+    DERIVE_BUDGET,
+  );
 
   it("answers a usage error with exit 2", () => {
     expect(fm(["agordilo", "derive"]).code).toBe(2);

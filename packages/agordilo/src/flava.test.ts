@@ -83,6 +83,20 @@ describe("a light yellow lead colour (G6)", () => {
     }
   });
 
+  it("names a darker lead colour as its value, and that colour is free of violations", () => {
+    const suggested = derivation.raporto.violations
+      .map((violation) => /lead colour (#[0-9a-f]{6})/.exec(violation.suggestion)?.[1])
+      .find((value) => value !== undefined);
+    expect(suggested).toBeDefined();
+    const followed = deriveAspekto(
+      agordoOf({ ...FLAVA, leitfarbe: suggested }),
+      readStructure(),
+      loadCalibration(),
+    );
+    expect(followed.raporto.violations).toEqual([]);
+    expect(followed.exportable).toBe(true);
+  });
+
   it("never lets a Jugxo open a fixed rule", () => {
     const withFixed = deriveAspekto(
       agordoOf({

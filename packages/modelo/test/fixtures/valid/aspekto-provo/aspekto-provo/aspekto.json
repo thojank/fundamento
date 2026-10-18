@@ -1,0 +1,98 @@
+{
+  "id": "dva_provo_01M564XR004GZ8VPRRGNZZP9YT",
+  "name": "provo",
+  "owner": "Provo (fictitious, test only)",
+  "license": "MIT",
+  "idNamespace": "provo",
+  "fonts": [
+    {
+      "family": "Archivo",
+      "license": "OFL-1.1",
+      "source": "https://github.com/Omnibus-Type/Archivo",
+      "redistributable": true,
+      "scripts": [
+        "Latn"
+      ]
+    },
+    {
+      "family": "Geist",
+      "license": "OFL-1.1",
+      "source": "https://github.com/vercel/geist-font",
+      "redistributable": true,
+      "scripts": [
+        "Latn"
+      ]
+    },
+    {
+      "family": "Geist Mono",
+      "license": "OFL-1.1",
+      "source": "https://github.com/vercel/geist-font",
+      "redistributable": true,
+      "scripts": [
+        "Latn"
+      ]
+    }
+  ],
+  "ikonoj": {
+    "set": "Phosphor Icons",
+    "style": "regular",
+    "version": "2.1.1",
+    "license": "MIT",
+    "source": "https://github.com/phosphor-icons/core (npm @phosphor-icons/core 2.1.1, assets/regular)",
+    "read": "2026-10-17",
+    "names": {
+      "check": "check",
+      "chevron-down": "caret-down",
+      "chevron-left": "caret-left",
+      "chevron-right": "caret-right",
+      "close": "x",
+      "collapse": "arrows-in-simple",
+      "danger": "warning-octagon",
+      "expand": "arrows-out-simple",
+      "external": "arrow-square-out",
+      "info": "info",
+      "more": "dots-three",
+      "search": "magnifying-glass",
+      "sort-ascending": "sort-ascending",
+      "sort-descending": "sort-descending",
+      "success": "check-circle",
+      "warning": "warning"
+    }
+  },
+  "agordilo": {
+    "version": "0.1.0",
+    "structure": {
+      "vortaro": "0.1.0",
+      "reference": "komuna",
+      "sha256": "c50b930eb96009730fa14fae24708f84af93241e73504ff545a613eba233dc1a"
+    },
+    "agordo": {
+      "name": "provo",
+      "owner": "Provo (fictitious, test only)",
+      "license": "MIT",
+      "leitfarbe": "#6b4fa0",
+      "zusatzfarben": {
+        "info": "oklch(0.55 0.12 225)"
+      },
+      "neutral": {
+        "toenung": 0.4
+      },
+      "regler": {
+        "helligkeit": 0.1,
+        "kontrast": 0.1,
+        "saettigung": 1.1
+      },
+      "schriften": {
+        "display": {
+          "family": "Archivo",
+          "license": "OFL-1.1",
+          "source": "https://github.com/Omnibus-Type/Archivo",
+          "redistributable": true,
+          "scripts": [
+            "Latn"
+          ]
+        }
+      }
+    }
+  }
+}

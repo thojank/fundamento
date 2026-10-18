@@ -460,6 +460,13 @@ export type AspektoAspiro1 =
       max: unknown;
     };
 /**
+ * A colour of an Agordo (Spec 016, G4): hex with three or six digits, or CSS oklch() with lightness as a number (0…1) or a percentage, chroma and hue as numbers.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "AgordoColor".
+ */
+export type AgordoColor = string;
+/**
  * This interface was referenced by `ModeloJson`'s JSON-Schema
  * via the `definition` "IdStatus".
  */
@@ -1559,6 +1566,7 @@ export interface AspektoFile {
   fonts: Fonto[];
   tavoloj?: Tavoloj;
   aspiroj?: AspektoAspiro[];
+  agordilo?: AspektoAgordilo;
   /**
    * The icon set the package draws the Ikonaro from (Spec 014 ①, G3, E10; Art. V: open source with a permissive licence in the core repository, Art. VII: the import carries its provenance): the set's name, the style drawn (a set with several styles: komuna Phosphor regular, ekzemplo Phosphor fill), the version read, its licence, the source and the day it was read, and the map from each Ikonaro name to the name of the set it is drawn from (plan ① D-04). Every glyph repeats source, version and licence in its own metadata. A package that draws its own glyphs names neither style nor map.
    */
@@ -1576,6 +1584,66 @@ export interface AspektoFile {
       [k: string]: Name;
     };
   };
+}
+/**
+ * The origin of an Aspekto derived by the Agordilo (Spec 016, G1): the Agordo it was derived from, the version of the Agordilo and the structure it was written from (the Vortaro version, the reference Aspekto whose roles and assignment it keeps, and a SHA-256 fingerprint over the structure files and the calibration). Deriving is a write at save time; nothing is inherited at run time (Art. IV).
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "AspektoAgordilo".
+ */
+export interface AspektoAgordilo {
+  version: NonEmptyText;
+  structure: {
+    vortaro: NonEmptyText;
+    reference: Name;
+    sha256: string;
+  };
+  agordo: Agordo;
+}
+/**
+ * The recipe of a brand for the Agordilo (Spec 016, G4): a lead colour, optional status colours, the tint of the neutrals, three sliders and font families. The same Agordo derives the same Aspekto, byte for byte. owner and license fill aspekto.json; aspiroj are the brand's own goals, checked only when named; jugxoj record deviations from adjustable rules.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "Agordo".
+ */
+export interface Agordo {
+  name: Name;
+  owner?: NonEmptyText;
+  license?: License;
+  leitfarbe: AgordoColor;
+  zusatzfarben?: {
+    success?: AgordoColor;
+    warning?: AgordoColor;
+    danger?: AgordoColor;
+    info?: AgordoColor;
+  };
+  neutral?: {
+    toenung?: number;
+  };
+  regler?: {
+    helligkeit?: number;
+    kontrast?: number;
+    saettigung?: number;
+  };
+  schriften?: {
+    display?: Fonto;
+    body?: Fonto;
+    code?: Fonto;
+  };
+  aspiroj?: AspektoAspiro[];
+  jugxoj?: AgordoJugxo[];
+}
+/**
+ * A deviation an Agordo records for an adjustable rule (Spec 016, G6, D-5): the Regulo by name, the reason, the date and the name of the person deciding. The Agordilo writes it into the package as a Jugxo; a fixed rule cannot be deviated from.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "AgordoJugxo".
+ */
+export interface AgordoJugxo {
+  regulo: Name;
+  kialo: NonEmptyText;
+  date: string;
+  name: NonEmptyText;
 }
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema

@@ -12,12 +12,14 @@ if (process.env.TURBO_HASH === undefined) {
   });
 }
 
-// Every derivation validates and resolves the whole Modelo with the derived Aspekto (about a
-// second), and the tests run in parallel with the other packages', so they get a budget sized for
-// a loaded CI runner.
+// Every derivation validates and resolves the whole Modelo with the derived Aspekto (1.7 s on a
+// quiet machine: validation 1.1 s, Alirebleco 0.4 s, the palettes 0.09 s), and the tests run in
+// parallel with the other packages' (measured: a beforeAll with two derivations passed 10 s under
+// that load). Tests and the hooks that derive get a budget sized for a loaded CI runner.
 // biome-ignore lint/style/noDefaultExport: Vitest loads its config from the default export.
 export default defineConfig({
   test: {
-    testTimeout: 60_000,
+    testTimeout: 120_000,
+    hookTimeout: 120_000,
   },
 });
