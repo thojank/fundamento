@@ -587,7 +587,9 @@ test("fm-faldilo and fm-kompletigilo are upgraded in their sections, axe-clean",
   await open(page);
   await expect(page.locator("#fm-vitrino-faldilo").getByRole("group")).toHaveCount(2);
   await expect(page.locator("#fm-vitrino-faldilo fm-faldilo[open]")).toHaveCount(1);
-  await expect(page.locator("#fm-vitrino-kompletigilo fm-kompletigilo")).toHaveCount(15);
+  // Nachlese 4 N-9: a column loading besides required, disabled, invalid and expanded (3 × 6).
+  await expect(page.locator("#fm-vitrino-kompletigilo fm-kompletigilo")).toHaveCount(18);
+  await expect(page.locator("#fm-vitrino-kompletigilo fm-kompletigilo[loading]")).toHaveCount(3);
   // "Ein" matches Eins alone ("E" is in all three words).
   await page.locator("#fm-vitrino-kompletigilo").getByRole("combobox").first().fill("Ein");
   await expect(page.locator("#fm-vitrino-kompletigilo").getByRole("option")).toHaveCount(1);
