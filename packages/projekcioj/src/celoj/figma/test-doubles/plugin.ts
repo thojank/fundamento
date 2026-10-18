@@ -1340,7 +1340,11 @@ export function figmaDouble(
   const untouchedDefaults = (keys: readonly string[]) => {
     const found: string[] = [];
     const walk = (current: DoubleNode, path: string) => {
+      // A field of an auto-layout child is no default a plugin could own on a node outside auto
+      // layout (F-5): Figma refuses the write; the tool's value stands and is not counted.
+      const laidOut = hasAutoLayout(current) || hasAutoLayout(current.parent);
       for (const key of keys) {
+        if (LAYOUT_CHILD_FIELDS.has(key) && !laidOut) continue;
         if (current.defaults.has(key)) found.push(`${path}: ${key}`);
       }
       for (const child of current.children) walk(child, `${path}/${child.name}`);

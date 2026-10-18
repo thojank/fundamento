@@ -1232,10 +1232,10 @@ describe("Web Component Celo for the navigado (Spec 011 ⑤)", () => {
     // font.weight.semibold; the others keep the weight of their role (none writes nothing).
     expect(light).toContain("font-weight: var(--fm-font-weight-semibold);");
     expect(light).toMatch(
-      /fm-navigado > a\[aria-current\] \{\n(?:  [^\n]+\n)*  font-weight: var\(--fm-font-weight-semibold\);/,
+      /fm-navigado > a\[aria-current\] \{\n(?: {2}[^\n]+\n)* {2}font-weight: var\(--fm-font-weight-semibold\);/,
     );
     expect(
-      /fm-navigado > a:not\(\[aria-current\]\) \{\n(?:  [^\n]+\n)*\}/.exec(light)?.[0] ?? "",
+      /fm-navigado > a:not\(\[aria-current\]\) \{\n(?: {2}[^\n]+\n)*\}/.exec(light)?.[0] ?? "",
     ).not.toContain("font-weight: var(--fm-font-weight-semibold)");
     expect(light).toContain("min-block-size: var(--fm-size-target-min);");
     expect(light).toContain("border-radius: var(--fm-radius-role-control);");
@@ -1303,10 +1303,10 @@ describe("Web Component Celo for the langetaro (Spec 011 ⑤)", () => {
     expect(css).toContain("border-block-end-width: var(--fm-border-width-strong);");
     // Spec 014 ① (Gewicht, plan ① D-01): the active tab is heavier — weight by active.
     expect(css).toMatch(
-      /:where\(\[part="control"\] \[part="tab"\]\[aria-selected="true"\]\) \{\n(?:  [^\n]+\n)*  font-weight: var\(--fm-font-weight-semibold\);/,
+      /:where\(\[part="control"\] \[part="tab"\]\[aria-selected="true"\]\) \{\n(?: {2}[^\n]+\n)* {2}font-weight: var\(--fm-font-weight-semibold\);/,
     );
     expect(
-      /:where\(\[part="control"\] \[part="tab"\]\[aria-selected="false"\]\) \{\n(?:  [^\n]+\n)*\}/.exec(
+      /:where\(\[part="control"\] \[part="tab"\]\[aria-selected="false"\]\) \{\n(?: {2}[^\n]+\n)*\}/.exec(
         css,
       )?.[0] ?? "",
     ).not.toContain("font-weight: var(--fm-font-weight-semibold)");

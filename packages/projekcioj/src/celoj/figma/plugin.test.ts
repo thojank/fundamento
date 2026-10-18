@@ -575,7 +575,7 @@ describe("the plugin reports what it did (F10)", () => {
 // Abnahme 014 ②–⑤ (2026-10-18, F-5): the maintainer's file holds the 17 sets of before Spec 014 ②,
 // the atributlisto without layout=auto. Against the strict double — it refuses sizing outside auto
 // layout and read-only fields as Figma does — the whole plan must run twice without a refusal:
-// fresh, and into that file with „auch in vorgefundenem Set anlegen" (the 10 new sets and the auto
+// fresh, and into that file with „auch in vorgefundenem Set anlegen" (the new sets and the auto
 // variants of the found atributlisto are created). Before this, the real tool found the errors one
 // by one (F-4 the separator, F-5 the first variant whose sizing was written before its parent had
 // auto layout).
@@ -621,7 +621,7 @@ describe("the full plan against the strict double: fresh and into the file of be
   it("fresh: every one of the 27 sets is drawn, nothing refused", async () => {
     const double = modelDouble();
     const report = await runWith(double, repoFiles["figma/plugin/code.js"] ?? "");
-    expect(report.components).toHaveLength(27);
+    expect(report.components).toHaveLength(repoPlan.components.length);
     expect(report.components.map((set) => set.set)).toEqual(
       repoPlan.components.map((component) => component.set),
     );
@@ -635,12 +635,17 @@ describe("the full plan against the strict double: fresh and into the file of be
     const listBefore = first.components.find((set) => set.set === "atributlisto");
     expect(listBefore?.created.some((name) => name.includes("layout=auto"))).toBe(false);
     const second = await runWith(double, repoFiles["figma/plugin/code.js"] ?? "", LIFT);
-    expect(second.components).toHaveLength(27);
+    expect(second.components).toHaveLength(repoPlan.components.length);
     const listAfter = second.components.find((set) => set.set === "atributlisto");
     expect(listAfter?.found).toBe(true);
     expect(listAfter?.created.length).toBeGreaterThan(0);
     expect(listAfter?.created.every((name) => name.includes("layout=auto"))).toBe(true);
-    for (const name of BEFORE_2) {
+    // The sets this branch adds beyond the 17 (on ② three, on ⑤ ten) are created, not found.
+    const added = repoPlan.components
+      .map((component) => component.set)
+      .filter((name) => BEFORE_2.has(name));
+    expect(added.length).toBeGreaterThan(0);
+    for (const name of added) {
       const set = second.components.find((each) => each.set === name);
       expect(set?.found, name).toBe(false);
       expect(set?.created.length, name).toBeGreaterThan(0);

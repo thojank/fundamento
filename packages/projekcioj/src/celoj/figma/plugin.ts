@@ -1462,12 +1462,53 @@ function own(node, values) {
   }
 }
 
-/** Writes what was gathered for a node, each property once, only where it does not hold yet. */
+/** The layout a node owns comes first, what it is as a child of a layout last (F-5). */
+const LAYOUT_FIRST = ["layoutMode", "layoutWrap"];
+const LAYOUT_LAST = [
+  "layoutSizingHorizontal", "layoutSizingVertical", "layoutAlign", "layoutGrow", "layoutPositioning",
+];
+function layoutRank(field) {
+  if (LAYOUT_FIRST.indexOf(field) !== -1) return 0;
+  if (LAYOUT_LAST.indexOf(field) !== -1) return 2;
+  return 1;
+}
+
+/**
+ * Writes what was gathered for a node, each property once, only where it does not hold yet.
+ * Abnahme 014 ②–⑤ (F-5): Figma refuses the sizing of a child, its alignment, growth and
+ * positioning on a node that neither has auto layout itself nor lies in an auto-layout frame
+ * ("node must be an auto-layout frame or a child of an auto-layout frame"). The drawings flush a
+ * child before its parent, so the parent's layout mode is written first where it is still pending,
+ * and on the node itself the layout mode before the sizing.
+ */
 function flush(node) {
   const values = pending.get(node.id);
   if (values === undefined) return;
+  const parent = node.parent;
+  if (parent !== null && parent !== undefined) {
+    const above = pending.get(parent.id);
+    if (above !== undefined && above.layoutMode !== undefined) {
+      write(parent, "layoutMode", above.layoutMode);
+      delete above.layoutMode;
+    }
+  }
   pending.delete(node.id);
-  for (const [field, value] of Object.entries(values)) write(node, field, value);
+  const fields = Object.keys(values).sort((a, b) => layoutRank(a) - layoutRank(b));
+  for (const field of fields) {
+    // What a node is as a child of a layout applies only inside one (F-5): the glyph frames in
+    // the plain frame of an icon, the knob in its track. Where neither the node nor its parent
+    // has auto layout once the layout modes are written, the field is not written — the size of
+    // such a frame is bound (width, height), not laid out.
+    if (layoutRank(field) === 2 && !hasAutoLayout(node) && !hasAutoLayout(parent)) continue;
+    write(node, field, values[field]);
+  }
+}
+
+/** Whether a node lays out its children itself (a frame with auto layout or a grid). */
+function hasAutoLayout(node) {
+  if (node === null || node === undefined) return false;
+  const mode = node.layoutMode;
+  return mode === "HORIZONTAL" || mode === "VERTICAL" || mode === "GRID";
 }
 
 /** The ID of the variable a field is bound to, in the form the tool holds it. */

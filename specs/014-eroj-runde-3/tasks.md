@@ -61,7 +61,7 @@
 
 | Was | Wert |
 |---|---|
-| Commits ② | rot `8258240`, grün `f4cbb25`, Fix `48f3c6e` (saltligilo-Spec: `browserName` im zweiten Test, CI Shard 2), Fix `60fd64f` (Fokus synchron); Abnahme F-4: rot `aa92ed4` (Double verweigert schreibgeschützte Felder), Fix `5a2f67b` |
+| Commits ② | rot `8258240`, grün `f4cbb25`, Fix `48f3c6e` (saltligilo-Spec: `browserName` im zweiten Test, CI Shard 2), Fix `60fd64f` (Fokus synchron); Abnahme F-4: rot `aa92ed4` (Double verweigert schreibgeschützte Felder), Fix `5a2f67b`; Abnahme F-5: rot `3e16242` (Double verweigert Layout-Kindfelder außerhalb von Auto Layout, zwei Läufe des ganzen Plans), Fix in der Zeile nach dem Commit |
 | `brief` | ikono, apartigilo, saltligilo ≤ 750 (Daten-Tests und MCP e2e) |
 | Parität | `check:parity` 20 Eroj, 0 Differenzen, 225 Freigaben |
 | `check:regularo` | 55 Reguloj, 172 Jugxoj, 20 Uzoj, 0 Warnungen (keine neue `goal-keyword-shared`) |
