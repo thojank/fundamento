@@ -328,8 +328,9 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
       // Spec 011 ②: the dialogo and the tekstareo carry a Uzo like every set.
       ...["boundary", "slots", "content"].map(() => "dialogo"),
       ...["boundary", "slots", "content"].map(() => "elektilo"),
-      ...["boundary", "slots", "content"].map(() => "faldilo"),
       ...["boundary", "slots", "content"].map(() => "elekto"),
+      // Spec 014 ⑤: the faldilo and the kompletigilo carry a Uzo like every set.
+      ...["boundary", "slots", "content"].map(() => "faldilo"),
       ...["boundary", "slots", "content"].map(() => "ikono"),
       ...["boundary", "slots", "content"].map(() => "insigno"),
       ...["boundary", "slots", "content"].map(() => "kampo"),
@@ -386,9 +387,12 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
       ...["dialogo", "dialogo", "dialogo"],
       ...["elektilo", "elektilo", "elektilo"],
       ...["elekto", "elekto", "elekto"],
+      // Spec 014 ⑤: the faldilo and the kompletigilo close their three parts too.
+      ...["faldilo", "faldilo", "faldilo"],
       ...["ikono", "ikono", "ikono"],
       ...["insigno", "insigno", "insigno"],
       ...["kampo", "kampo", "kampo"],
+      ...["kompletigilo", "kompletigilo", "kompletigilo"],
       // Spec 014 ④: the overlays close their three parts too.
       ...["konsileto", "konsileto", "konsileto"],
       // Spec 011 ⑤: the langetaro and the navigado close their three parts too.
@@ -2667,8 +2671,6 @@ describe("every bound paint shows the plan's colour after the first and the seco
         { set: "atributlisto", created: 3, updated: 0 },
         // Spec 011 ③: the avizo has intent = 4 variants in one state (dismissible is no axis).
         { set: "avizo", created: 4, updated: 0 },
-        // Spec 014 ⑤: the faldilo has open × state = 6 variants.
-        { set: "faldilo", created: 6, updated: 0 },
         { set: "butono", created: 72, updated: 0 },
         // Spec 011 ②: the dialogo has size × reason = 6 variants in one state.
         { set: "dialogo", created: 6, updated: 0 },
@@ -2676,6 +2678,8 @@ describe("every bound paint shows the plan's colour after the first and the seco
         { set: "elektilo", created: 15, updated: 0 },
         // Spec 010 ③: the elekto has size × state = 15 variants.
         { set: "elekto", created: 15, updated: 0 },
+        // Spec 014 ⑤: the faldilo has open × state = 6 variants.
+        { set: "faldilo", created: 6, updated: 0 },
         // Spec 014 ②: the ikono has name × size × intent = 225 variants in one state.
         { set: "ikono", created: 225, updated: 0 },
         // Spec 011 ③: the insigno has intent × size = 10 variants in one state.

@@ -1656,7 +1656,7 @@ describe("Web Component Celo for the faldilo and the kompletigilo (Spec 014 ⑤)
     expect(element).toContain("static formAssociated = false;");
     const css = cssOf("faldilo");
     expect(css).toContain(
-      ':where([part="control"][data-open="false"]) [part="summary"]:hover {\n  background-color: var(--fm-color-action-tertiary-hover);',
+      ':where([part="control"]) [part="summary"]:hover {\n  background-color: var(--fm-color-action-tertiary-hover);',
     );
     expect(css).toContain(
       ':where([part="control"][data-open="true"]) [part="indicator"] {\n  color: var(--fm-color-text-default);',
@@ -1676,13 +1676,13 @@ describe("Web Component Celo for the faldilo and the kompletigilo (Spec 014 ⑤)
     );
     expect(element).toContain('role="option"');
     expect(element).toContain('"aria-activedescendant"');
-    expect(element).toContain('"aria-autocomplete"');
+    expect(element).toContain('aria-autocomplete="list"');
     expect(element).toContain('new CustomEvent("query"');
     expect(element).toContain('"options-count"');
     expect(element).toContain("static formAssociated = true;");
     const css = cssOf("kompletigilo");
     expect(css).toContain(
-      ':where([part="field"][data-size="medium"]:has([part="control"]:hover)) [part="control"] {\n  background-color:',
+      ':where([part="field"]:has([part="control"]:hover)) [part="control"] {\n  background-color:',
     );
     expect(css).toContain(
       ':where([part="field"]) [part="listbox"] {\n  background-color: var(--fm-color-background-raised);',
@@ -1692,7 +1692,11 @@ describe("Web Component Celo for the faldilo and the kompletigilo (Spec 014 ⑤)
       ':where([part="field"]) [part="suggestion"][aria-selected="true"] {\n  color: var(--fm-color-text-default);',
     );
     expect(css).toContain("position-area: block-end;");
-    expect(css).not.toContain("data-expanded");
+    // expanded keys the listbox's height (a keyed boolean on the field, like checked): the
+    // maximum when open, hidden when not.
+    expect(css).toContain(
+      ':where([part="field"][data-expanded="true"]) [part="listbox"] {\n  max-block-size: var(--fm-size-container-small);',
+    );
     expect(componentCssIssues("kompletigilo.css", css)).toEqual([]);
   });
 });

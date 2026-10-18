@@ -83,6 +83,24 @@
         },
         "ero": "sxaltilo",
         "kialo": "A setting on or off needs a control that shows its state, because a text would have to be read to know it; sxaltilo when it applies at once (in a form, applied with it: markobutono)."
+      },
+      {
+        "goal": "suggestions",
+        "keywords": {
+          "en": [
+            "autocomplete",
+            "typeahead",
+            "suggestions"
+          ],
+          "de": [
+            "autocomplete",
+            "typeahead",
+            "vorschläge",
+            "autovervollständigung"
+          ]
+        },
+        "ero": "kompletigilo",
+        "kialo": "A field whose values a person types and picks from suggestions is the kompletigilo, because the list shortens while typing; a plain field knows no suggestions."
       }
     ],
     "boundary": [

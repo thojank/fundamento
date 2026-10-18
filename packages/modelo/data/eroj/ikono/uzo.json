@@ -107,6 +107,10 @@
         {
           "ero": "menuo",
           "kialo": "An entry of a menu may carry an icon before its word, because the sign is read faster than the word; the word names the action."
+        },
+        {
+          "ero": "faldilo",
+          "kialo": "The summary of a disclosure shows a chevron that turns with the state, because the sign says that there is more and whether it is shown."
         }
       ],
       "never": [],

@@ -71,6 +71,14 @@ type PartNode =
   // text node, registered once more under this name).
   | "content-text"
   | "danger-item"
+  // A disclosure (Spec 014 ⑤): the summary row with its text; the listbox of a field with
+  // suggestions, its rows and the no-results text.
+  | "summary"
+  | "summary-label"
+  | "listbox"
+  | "suggestion-*"
+  | "suggestions-*"
+  | "no-results"
   // A notice (Spec 011 ③): the details text and the dismiss frame; a badge and a state (Spec 011
   // ③) reuse control, text, indicator, mark, texts and actions.
   | "details"
@@ -358,6 +366,41 @@ const BINDINGS: Readonly<Record<string, readonly Binding[]>> = {
  */
 const STRUCTURE_BINDINGS: Readonly<Record<string, Readonly<Record<string, readonly Binding[]>>>> = {
   toggle: { "box.gap": [{ node: "field", fields: ["itemSpacing"] }] },
+  // A field with suggestions (Spec 014 ⑤, plan ⑤ D-04): the listbox under the field with its
+  // fill, radius and width; every suggestion a row (height, padding, radius) with its text in
+  // the colour of its entry and the label role; the no-results text in its colour and role. A
+  // plain field has none of these parts: the keys bind nothing there.
+  field: {
+    "listbox.fill": [{ node: "listbox", fields: ["fills"], paint: true }],
+    "listbox.radius": [{ node: "listbox", fields: ["cornerRadius"] }],
+    "listbox.width": [{ node: "listbox", fields: ["width"] }],
+    "listbox.height": [{ node: "listbox", fields: ["maxHeight"] }],
+    "suggestion.height": [{ node: "suggestion-*", fields: ["minHeight"] }],
+    "suggestion.inline-padding": [
+      { node: "suggestion-*", fields: ["paddingLeft", "paddingRight"] },
+    ],
+    "suggestion.radius": [{ node: "suggestion-*", fields: ["cornerRadius"] }],
+    "suggestion.color": [{ node: "suggestions-*", fields: ["fills"], paint: true }],
+    "suggestion.typography": typographyOf("suggestions-*"),
+    "no-results.color": [{ node: "no-results", fields: ["fills"], paint: true }],
+    "no-results.typography": typographyOf("no-results"),
+  },
+  // A disclosure (Spec 014 ⑤, plan ⑤ D-04): the summary row carries fill, height, padding and
+  // radius, its text the colour and role; the chevron's colour is the fill of every glyph's
+  // vector (indicator-mark-*, as a select's); the content's text its colour and role, the content
+  // its padding; the gap of the box between summary and content on the variant's control.
+  disclosure: {
+    "summary.fill": [{ node: "summary", fields: ["fills"], paint: true }],
+    "summary.height": [{ node: "summary", fields: ["minHeight"] }],
+    "summary.inline-padding": [{ node: "summary", fields: ["paddingLeft", "paddingRight"] }],
+    "summary.radius": [{ node: "summary", fields: ["cornerRadius"] }],
+    "summary.color": [{ node: "summary-label", fields: ["fills"], paint: true }],
+    "summary.typography": typographyOf("summary-label"),
+    "content.color": [{ node: "content-text", fields: ["fills"], paint: true }],
+    "content.typography": typographyOf("content-text"),
+    "content.inline-padding": [{ node: "content", fields: [...PADDINGS] }],
+    "box.gap": [{ node: "control", fields: ["itemSpacing"] }],
+  },
   // An icon (Spec 014 ②, plan ② D-08): the control is the box (its size bound, and the size of
   // every glyph frame with it); the glyph's colour is the fill of every glyph's vector.
   icon: {
@@ -2714,6 +2757,68 @@ async function applyComponents(variables, warnings) {
     bindMeasures(measures, report, component, variant);
   }
   /**
+   * A disclosure (Spec 014 ⑤, plan ⑤ D-04): the variant holds the control — a column with the
+   * summary row (ring → gap → summary with the summary text, the label property, and the chevron
+   * as glyph frames per Aspekto, down where open and right where closed) over the content, a
+   * frame with the content word, shown where the variant is open.
+   */
+  async function drawDisclosure(node, component, variant, report, labels) {
+    const texts = component.texts || {};
+    const control = part(node, "control", () => figma.createFrame());
+    const ring = part(control, "focus-ring", () => figma.createFrame());
+    const gap = part(ring, "focus-gap", () => figma.createFrame());
+    const summary = part(gap, "summary", () => figma.createFrame());
+    const summaryLabel = part(summary, "summary-label", () => figma.createText());
+    const indicator = part(summary, "indicator", () => figma.createFrame());
+    const content = part(control, "content", () => figma.createFrame());
+    const contentText = part(content, "content-text", () => figma.createText());
+    [ring, content].forEach((child, index) => {
+      if (control.children.indexOf(child) !== index) control.insertChild(index, child);
+    });
+    [summaryLabel, indicator].forEach((child, index) => {
+      if (summary.children.indexOf(child) !== index) summary.insertChild(index, child);
+    });
+    for (const each of [summaryLabel, contentText]) await loadCurrentFont(each);
+    writeCase(component, variant, summaryLabel);
+    if (variant.font !== undefined) {
+      for (const each of [summaryLabel, contentText]) write(each, "fontName", fonts.get(variant.font.family + " " + variant.font.style));
+    }
+    if (typeof texts.content === "string") write(contentText, "characters", texts.content);
+    labels.push(summaryLabel);
+    const frames = [node, control, ring, gap, summary, indicator, content];
+    for (const frame of frames) own(frame, NEUTRAL);
+    for (const each of [summaryLabel, contentText]) own(each, NEUTRAL_TEXT);
+    own(node, HUG_LAYOUT);
+    own(control, FIELD_LAYOUT);
+    for (const frame of [ring, gap]) own(frame, HUG_LAYOUT);
+    own(summary, CONTROL_LAYOUT);
+    own(summary, { primaryAxisAlignItems: "SPACE_BETWEEN", strokesIncludedInLayout: true });
+    own(indicator, INDICATOR_LAYOUT);
+    own(content, CONTENT_LAYOUT);
+    own(content, { visible: variant.props.open === "true" });
+    for (const child of frames.concat([summaryLabel, contentText])) own(child, IN_FLOW);
+    for (const each of [summaryLabel, contentText]) own(each, TEXT_SIZING);
+    const glyphMeasures = [];
+    const glyphNodes = {};
+    const icon = (variant.icons || {}).indicator;
+    if (typeof icon === "string") {
+      Object.assign(glyphNodes, drawGlyphs(indicator, icon, "indicator-", glyphMeasures));
+    }
+    const nodes = Object.assign(
+      { control, "focus-ring": ring, "focus-gap": gap, summary, "summary-label": summaryLabel, indicator, content, "content-text": contentText },
+      glyphNodes,
+    );
+    const measures = bind(nodes, variant, variables, component.structure).concat(glyphMeasures);
+    for (const name of ["focus-ring", "focus-gap"]) {
+      const variable = variables.get((variant.radii || {})[name]);
+      const target = name === "focus-ring" ? ring : gap;
+      if (variable !== undefined) measures.push({ node: target, field: "cornerRadius", variable: variable });
+    }
+    for (const each of frames.concat([summaryLabel, contentText])) flush(each);
+    for (const each of Object.values(glyphNodes)) flush(each);
+    bindMeasures(measures, report, component, variant);
+  }
+  /**
    * A notice (Spec 011 ③, plan ③ D-14): the variant holds the control — a row with the surface's
    * fill, the radius and the padding of the box, and the accent as its stroke at the start: the
    * colour bound to the strokes, the left weight bound to accent.width, the other sides 0 — with
@@ -3515,6 +3620,12 @@ async function applyComponents(variables, warnings) {
         if (existing === undefined) made.push(node);
         continue;
       }
+      // A disclosure (Spec 014 ⑤): the summary row over the content, in a function of its own.
+      if (component.structure === "disclosure") {
+        await drawDisclosure(node, component, variant, report, labels);
+        if (existing === undefined) made.push(node);
+        continue;
+      }
       if (component.structure === "state") {
         await drawState(node, component, variant, report, labels);
         if (existing === undefined) made.push(node);
@@ -3599,13 +3710,25 @@ async function applyComponents(variables, warnings) {
         control.appendChild(indicator);
       }
       const mark = indicator !== undefined && typeof component.sign === "string" ? markOf(indicator) : undefined;
+      // A field with suggestions (Spec 014 ⑤): the listbox under the field, its rows the entries
+      // of the plan, shown where the variant is expanded (hidden where its height is none).
+      const suggests = isField && component.entry !== undefined;
+      const listbox = suggests ? part(field, "listbox", () => figma.createFrame()) : undefined;
       const help = isField ? part(field, "help", () => figma.createText()) : undefined;
       const errorParent = isField ? field : column;
       const error =
         errorParent !== undefined && (isField || typeof (component.texts || {}).error === "string")
           ? part(errorParent, "error", () => figma.createText())
           : undefined;
-      const texts = [label, textNode, help, error].filter((each) => each !== undefined);
+      const noResults = listbox !== undefined ? part(listbox, "no-results", () => figma.createText()) : undefined;
+      const suggestionRows = listbox !== undefined ? await drawEntries(listbox, component, variant, "suggestion", "suggestions") : [];
+      if (listbox !== undefined && noResults !== undefined && listbox.children.indexOf(noResults) !== listbox.children.length - 1) {
+        listbox.appendChild(noResults);
+      }
+      if (listbox !== undefined && help !== undefined && field.children.indexOf(listbox) !== field.children.indexOf(help) - 1) {
+        field.insertChild(field.children.indexOf(help), listbox);
+      }
+      const texts = [label, textNode, help, error].concat(noResults !== undefined ? [noResults] : []).filter((each) => each !== undefined);
       // Erst die Schrift, die der Text jetzt trägt, dann jedes Schreiben (F-A): Figma lehnt
       // textCase auf einem Text ab, dessen aktuelle Schrift nicht geladen ist — ein neuer Text trägt
       // Inter Regular, nicht die Schrift des Plans.
@@ -3643,12 +3766,18 @@ async function applyComponents(variables, warnings) {
         write(label, "textDecoration", variant.underline ? "UNDERLINE" : "NONE");
       }
       labels.push(label);
+      if (noResults !== undefined) {
+        const none = (component.texts || {})["options-empty"];
+        write(noResults, "characters", typeof none === "string" ? none : "");
+      }
       // Only values from the plan (F13): every owned property neutral first — Figma's white fill,
       // its clipping and its line would otherwise cover what the plan draws.
       const frames = [node, ring, gap, control]
         .concat(field ? [field] : [])
         .concat(column ? [column] : [])
-        .concat(indicator ? [indicator] : []);
+        .concat(indicator ? [indicator] : [])
+        .concat(listbox ? [listbox] : [])
+        .concat(...suggestionRows.map((row) => [row.entry, row.ring, row.gap, row.frame]));
       for (const frame of frames) own(frame, NEUTRAL);
       for (const each of texts) own(each, NEUTRAL_TEXT);
       // Layout before any measure is bound: padding, gap and minimum sizes only take effect on
@@ -3671,6 +3800,16 @@ async function applyComponents(variables, warnings) {
       }
       // The chevron keeps its bound size beside the text (D-07), as the knob does in its track.
       if (fieldSign) own(indicator, INDICATOR_LAYOUT);
+      if (listbox !== undefined) {
+        own(listbox, SURFACE_LAYOUT);
+        own(listbox, { visible: (variant.hidden || []).indexOf("listbox") === -1 });
+        for (const row of suggestionRows) {
+          for (const frame of [row.entry, row.ring, row.gap]) own(frame, HUG_LAYOUT);
+          own(row.frame, CONTROL_LAYOUT);
+          own(row.text, NEUTRAL_TEXT);
+          own(row.text, TEXT_SIZING);
+        }
+      }
       if (indicator !== undefined && typeof icons.indicator === "string") {
         Object.assign(glyphNodes, drawGlyphs(indicator, icons.indicator, "indicator-", glyphMeasures));
       }
@@ -3697,9 +3836,21 @@ async function applyComponents(variables, warnings) {
       if (textNode) nodes.text = textNode;
       if (help) nodes.help = help;
       if (error) nodes.error = error;
+      if (listbox) nodes.listbox = listbox;
+      if (noResults) nodes["no-results"] = noResults;
       Object.assign(nodes, glyphNodes);
       const measures = bind(nodes, variant, variables, component.structure);
       for (const measure of glyphMeasures) measures.push(measure);
+      // The rows of the suggestions (Spec 014 ⑤) are bound like a tab list's entries; the
+      // listbox's shadow as an overlay's.
+      if (listbox !== undefined) {
+        bindEntries(suggestionRows, component, variant, variables, "suggestion", "suggestions", measures);
+        bindShadow(nodes, variant, report);
+        for (const row of suggestionRows) {
+          own(row.text, IN_FLOW);
+          flush(row.text);
+        }
+      }
       for (const each of Object.values(glyphNodes)) flush(each);
       // Der Radius des Rings und seines Abstands wird gebunden, nicht eingetragen (F32): als Zahl
       // stand er in jedem Modus gleich und umschloss in einer Marke mit Radius 0 einen eckigen

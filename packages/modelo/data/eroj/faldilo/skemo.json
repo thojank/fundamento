@@ -1,0 +1,189 @@
+{
+  "ero": {
+    "id": "ero_01M56AEZKYD8K4R2SEZFS15QSM",
+    "name": "faldilo",
+    "skemo": "ske_01M56AF004GZ2N13Y6C2K29HDX",
+    "description": "A disclosure: hides secondary content behind a label the person can open; several share a group when only one should be open — the platform's details and summary, the group its name."
+  },
+  "skemo": {
+    "id": "ske_01M56AF004GZ2N13Y6C2K29HDX",
+    "ero": "ero_01M56AEZKYD8K4R2SEZFS15QSM",
+    "props": [
+      {
+        "name": "open",
+        "kind": "boolean",
+        "default": false,
+        "description": "The content is shown. A prop, not a state (E2): it holds the answer, the states say how the summary is touched; the summary speaks it as aria-expanded."
+      },
+      {
+        "name": "group",
+        "kind": "string",
+        "description": "Disclosures with the same group open one at a time (an accordion): the platform's name of the details, so opening one closes the others."
+      }
+    ],
+    "states": [
+      "rest",
+      "hover",
+      "focus"
+    ],
+    "slots": [
+      {
+        "name": "summary",
+        "text": true
+      },
+      {
+        "name": "content",
+        "default": true
+      }
+    ],
+    "parts": {
+      "summary": {
+        "fill": {
+          "by": [
+            "state"
+          ]
+        },
+        "color": {
+          "fixed": "color.text.default"
+        },
+        "typography": {
+          "fixed": "typography.label.1"
+        },
+        "height": {
+          "fixed": "size.target.min"
+        },
+        "inline-padding": {
+          "fixed": "spacing.medium"
+        },
+        "radius": {
+          "fixed": "radius.role.control"
+        }
+      },
+      "indicator": {
+        "color": {
+          "by": [
+            "open"
+          ]
+        },
+        "size": {
+          "fixed": "size.icon.medium"
+        }
+      },
+      "content": {
+        "color": {
+          "fixed": "color.text.default"
+        },
+        "typography": {
+          "fixed": "typography.body.1"
+        },
+        "inline-padding": {
+          "fixed": "spacing.medium"
+        }
+      },
+      "box": {
+        "gap": {
+          "fixed": "spacing.small"
+        }
+      },
+      "motion": {
+        "duration": {
+          "fixed": "motion.duration.fast"
+        },
+        "easing": {
+          "fixed": "motion.easing.standard"
+        }
+      },
+      "focus-ring": {
+        "ring": {
+          "fixed": "focus.ring"
+        },
+        "offset": {
+          "fixed": "focus.offset"
+        },
+        "color": {
+          "fixed": "color.focus.inner"
+        }
+      }
+    },
+    "bindings": [
+      {
+        "part": "summary",
+        "property": "fill",
+        "when": {
+          "state": "rest"
+        },
+        "token": "color.action.tertiary.rest"
+      },
+      {
+        "part": "summary",
+        "property": "fill",
+        "when": {
+          "state": "hover"
+        },
+        "token": "color.action.tertiary.hover"
+      },
+      {
+        "part": "summary",
+        "property": "fill",
+        "when": {
+          "state": "focus"
+        },
+        "token": "color.action.tertiary.rest"
+      },
+      {
+        "part": "indicator",
+        "property": "color",
+        "when": {
+          "open": "true"
+        },
+        "token": "color.text.default"
+      },
+      {
+        "part": "indicator",
+        "property": "color",
+        "when": {
+          "open": "false"
+        },
+        "token": "color.text.subtle"
+      }
+    ],
+    "a11y": {
+      "role": "group",
+      "name": [
+        "slot:summary"
+      ],
+      "states": {
+        "open": [
+          "aria-expanded"
+        ]
+      },
+      "keys": [
+        "Enter",
+        "Space"
+      ]
+    },
+    "goals": [
+      {
+        "goal": "disclosure",
+        "keywords": {
+          "en": [
+            "accordion",
+            "disclosure",
+            "collapsible",
+            "expandable",
+            "faq"
+          ],
+          "de": [
+            "akkordeon",
+            "aufklappen",
+            "aufklapper",
+            "ausklappen",
+            "faq"
+          ]
+        },
+        "props": {},
+        "regulo": "disclosure-label-names-content"
+      }
+    ]
+  }
+}

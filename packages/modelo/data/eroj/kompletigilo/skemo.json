@@ -1,0 +1,561 @@
+{
+  "ero": {
+    "id": "ero_01M56AEZKZ3T15QT01E88Q0HF9",
+    "name": "kompletigilo",
+    "skemo": "ske_01M56AF004GZ2N13Y6C2K29HDY",
+    "description": "A field that suggests matching values while the person types; the value may be one of the suggestions or, if allowed, free text. The field of the kampo with a list of suggestions (a popover of the platform anchored to the field), walked with the arrow keys; the number of suggestions is announced."
+  },
+  "skemo": {
+    "id": "ske_01M56AF004GZ2N13Y6C2K29HDY",
+    "ero": "ero_01M56AEZKZ3T15QT01E88Q0HF9",
+    "props": [
+      {
+        "name": "value",
+        "kind": "string",
+        "description": "The text of the field: the value of a chosen suggestion or, with allow-free, what the person typed. A prop, not a state (E2); which suggestion shows as chosen follows from it (the entry key selected of the slot options, E7)."
+      },
+      {
+        "name": "placeholder",
+        "kind": "string",
+        "description": "A prompt to type, 'Land eingeben': at least two words (select-placeholder-is-prompt), never a value."
+      },
+      {
+        "name": "required",
+        "kind": "boolean",
+        "default": false,
+        "description": "An option must be chosen before the form is sent; marked visibly and audibly (Regulo required-marked)."
+      },
+      {
+        "name": "invalid",
+        "kind": "boolean",
+        "default": false,
+        "description": "The choice is wrong, a required choice left open; true whenever the slot error is filled (constraint)."
+      },
+      {
+        "name": "size",
+        "kind": "enum",
+        "values": [
+          "small",
+          "medium",
+          "large"
+        ],
+        "default": "medium",
+        "description": "Height of the field on the scale of the kampo (size.control.*), so a select and a field stand level in one form; the chevron takes size.icon.*."
+      },
+      {
+        "name": "disabled",
+        "kind": "boolean",
+        "default": false,
+        "description": "Not available; skipped by the keyboard, the list does not open."
+      },
+      {
+        "name": "name",
+        "kind": "string",
+        "description": "The name in the form; without effect in a design tool, like type on the butono."
+      },
+      {
+        "name": "allow-free",
+        "kind": "boolean",
+        "default": false,
+        "description": "The person may keep a text that matches no suggestion; without it the field is invalid until a suggestion is chosen."
+      },
+      {
+        "name": "min-chars",
+        "kind": "number",
+        "default": 1,
+        "description": "How many characters the person types before suggestions are shown."
+      },
+      {
+        "name": "expanded",
+        "kind": "boolean",
+        "default": false,
+        "description": "The list of suggestions is shown. A prop the element writes while the person types and keys through the list; in a design tool the axis that shows the list open."
+      }
+    ],
+    "states": [
+      "rest",
+      "hover",
+      "focus",
+      "disabled",
+      "invalid"
+    ],
+    "slots": [
+      {
+        "name": "label",
+        "default": true,
+        "text": true
+      },
+      {
+        "name": "options",
+        "text": true,
+        "entry": {
+          "key": "selected",
+          "equals": "value"
+        }
+      },
+      {
+        "name": "help",
+        "text": true
+      },
+      {
+        "name": "error",
+        "text": true
+      }
+    ],
+    "parts": {
+      "label": {
+        "color": {
+          "by": [
+            "state"
+          ]
+        },
+        "typography": {
+          "by": [
+            "size"
+          ]
+        }
+      },
+      "required-mark": {
+        "color": {
+          "fixed": "color.status.danger.text"
+        }
+      },
+      "surface": {
+        "fill": {
+          "by": [
+            "state"
+          ]
+        }
+      },
+      "border": {
+        "color": {
+          "by": [
+            "state"
+          ]
+        },
+        "width": {
+          "fixed": "border.width.default"
+        }
+      },
+      "text": {
+        "color": {
+          "by": [
+            "state"
+          ]
+        },
+        "typography": {
+          "by": [
+            "size"
+          ]
+        }
+      },
+      "placeholder": {
+        "color": {
+          "fixed": "color.text.subtle"
+        }
+      },
+      "help": {
+        "color": {
+          "fixed": "color.text.muted"
+        },
+        "typography": {
+          "fixed": "typography.caption"
+        }
+      },
+      "error": {
+        "color": {
+          "fixed": "color.status.danger.text"
+        },
+        "typography": {
+          "fixed": "typography.caption"
+        }
+      },
+      "focus-ring": {
+        "ring": {
+          "fixed": "focus.ring"
+        },
+        "offset": {
+          "fixed": "focus.offset"
+        },
+        "color": {
+          "fixed": "color.focus.inner"
+        }
+      },
+      "box": {
+        "height": {
+          "by": [
+            "size"
+          ]
+        },
+        "inline-padding": {
+          "by": [
+            "size"
+          ]
+        },
+        "gap": {
+          "fixed": "spacing.small"
+        },
+        "radius": {
+          "fixed": "radius.role.control"
+        }
+      },
+      "motion": {
+        "duration": {
+          "fixed": "motion.duration.fast"
+        },
+        "easing": {
+          "fixed": "motion.easing.standard"
+        }
+      },
+      "listbox": {
+        "fill": {
+          "fixed": "color.background.raised"
+        },
+        "radius": {
+          "fixed": "radius.role.surface"
+        },
+        "shadow": {
+          "fixed": "elevation.shadow.overlay"
+        },
+        "layer": {
+          "fixed": "elevation.layer.overlay"
+        },
+        "width": {
+          "fixed": "size.container.small"
+        },
+        "height": {
+          "by": [
+            "expanded"
+          ]
+        }
+      },
+      "no-results": {
+        "color": {
+          "fixed": "color.text.subtle"
+        },
+        "typography": {
+          "fixed": "typography.caption"
+        }
+      },
+      "suggestion": {
+        "color": {
+          "by": [
+            "selected"
+          ]
+        },
+        "typography": {
+          "fixed": "typography.label.1"
+        },
+        "height": {
+          "fixed": "size.target.min"
+        },
+        "inline-padding": {
+          "fixed": "spacing.medium"
+        },
+        "radius": {
+          "fixed": "radius.role.control"
+        }
+      }
+    },
+    "bindings": [
+      {
+        "part": "label",
+        "property": "color",
+        "when": {
+          "state": "rest"
+        },
+        "token": "color.text.default"
+      },
+      {
+        "part": "label",
+        "property": "color",
+        "when": {
+          "state": "disabled"
+        },
+        "token": "color.text.disabled"
+      },
+      {
+        "part": "label",
+        "property": "typography",
+        "when": {
+          "size": "small"
+        },
+        "token": "typography.label.2"
+      },
+      {
+        "part": "label",
+        "property": "typography",
+        "when": {
+          "size": "medium"
+        },
+        "token": "typography.label.1"
+      },
+      {
+        "part": "label",
+        "property": "typography",
+        "when": {
+          "size": "large"
+        },
+        "token": "typography.label.1"
+      },
+      {
+        "part": "surface",
+        "property": "fill",
+        "when": {
+          "state": "rest"
+        },
+        "token": "color.background.default"
+      },
+      {
+        "part": "surface",
+        "property": "fill",
+        "when": {
+          "state": "disabled"
+        },
+        "token": "color.background.sunken"
+      },
+      {
+        "part": "border",
+        "property": "color",
+        "when": {
+          "state": "rest"
+        },
+        "token": "color.border.default"
+      },
+      {
+        "part": "border",
+        "property": "color",
+        "when": {
+          "state": "hover"
+        },
+        "token": "color.border.strong"
+      },
+      {
+        "part": "border",
+        "property": "color",
+        "when": {
+          "state": "focus"
+        },
+        "token": "color.border.strong"
+      },
+      {
+        "part": "border",
+        "property": "color",
+        "when": {
+          "state": "disabled"
+        },
+        "token": "color.border.disabled"
+      },
+      {
+        "part": "border",
+        "property": "color",
+        "when": {
+          "state": "invalid"
+        },
+        "token": "color.status.danger.border"
+      },
+      {
+        "part": "text",
+        "property": "color",
+        "when": {
+          "state": "rest"
+        },
+        "token": "color.text.default"
+      },
+      {
+        "part": "text",
+        "property": "color",
+        "when": {
+          "state": "disabled"
+        },
+        "token": "color.text.disabled"
+      },
+      {
+        "part": "text",
+        "property": "typography",
+        "when": {
+          "size": "small"
+        },
+        "token": "typography.body.2"
+      },
+      {
+        "part": "text",
+        "property": "typography",
+        "when": {
+          "size": "medium"
+        },
+        "token": "typography.body.1"
+      },
+      {
+        "part": "text",
+        "property": "typography",
+        "when": {
+          "size": "large"
+        },
+        "token": "typography.body.1"
+      },
+      {
+        "part": "box",
+        "property": "height",
+        "when": {
+          "size": "small"
+        },
+        "token": "size.control.small"
+      },
+      {
+        "part": "box",
+        "property": "height",
+        "when": {
+          "size": "medium"
+        },
+        "token": "size.control.medium"
+      },
+      {
+        "part": "box",
+        "property": "height",
+        "when": {
+          "size": "large"
+        },
+        "token": "size.control.large"
+      },
+      {
+        "part": "box",
+        "property": "inline-padding",
+        "when": {
+          "size": "small"
+        },
+        "token": "spacing.small"
+      },
+      {
+        "part": "box",
+        "property": "inline-padding",
+        "when": {
+          "size": "medium"
+        },
+        "token": "spacing.medium"
+      },
+      {
+        "part": "box",
+        "property": "inline-padding",
+        "when": {
+          "size": "large"
+        },
+        "token": "spacing.medium"
+      },
+      {
+        "part": "listbox",
+        "property": "height",
+        "when": {
+          "expanded": "false"
+        },
+        "token": "none"
+      },
+      {
+        "part": "listbox",
+        "property": "height",
+        "when": {
+          "expanded": "true"
+        },
+        "token": "size.container.small"
+      },
+      {
+        "part": "suggestion",
+        "property": "color",
+        "when": {
+          "selected": "true"
+        },
+        "token": "color.text.default"
+      },
+      {
+        "part": "suggestion",
+        "property": "color",
+        "when": {
+          "selected": "false"
+        },
+        "token": "color.text.subtle"
+      }
+    ],
+    "a11y": {
+      "role": "combobox",
+      "name": [
+        "slot:label"
+      ],
+      "description": [
+        "slot:help",
+        "slot:error"
+      ],
+      "states": {
+        "selected": [
+          "aria-selected"
+        ],
+        "required": [
+          "aria-required"
+        ],
+        "invalid": [
+          "aria-invalid"
+        ],
+        "disabled": [
+          "aria-disabled"
+        ],
+        "expanded": [
+          "aria-expanded"
+        ]
+      },
+      "keys": [
+        "ArrowUp",
+        "ArrowDown",
+        "Enter",
+        "Escape"
+      ],
+      "texts": {
+        "required": {
+          "de": "erforderlich",
+          "en": "required"
+        },
+        "options-empty": {
+          "de": "Keine Vorschläge",
+          "en": "No suggestions"
+        },
+        "options-count": {
+          "de": "Vorschläge",
+          "en": "suggestions"
+        }
+      }
+    },
+    "constraints": [
+      {
+        "when": {
+          "slot:error": "filled"
+        },
+        "allowed": {
+          "invalid": [
+            "true"
+          ]
+        },
+        "kialo": "An error text without the error state is a contradiction a screen reader cannot resolve: it reads a fault on a field that says it is fine."
+      }
+    ],
+    "goals": [
+      {
+        "goal": "suggest",
+        "keywords": {
+          "en": [
+            "autocomplete",
+            "combobox",
+            "typeahead",
+            "suggestions"
+          ],
+          "de": [
+            "autocomplete",
+            "combobox",
+            "typeahead",
+            "vorschläge",
+            "autovervollständigung"
+          ]
+        },
+        "props": {},
+        "regulo": "option-labels-distinct"
+      }
+    ]
+  }
+}

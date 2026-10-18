@@ -586,7 +586,8 @@ test("fm-faldilo and fm-kompletigilo are upgraded in their sections, axe-clean",
   await expect(page.locator("#fm-vitrino-faldilo").getByRole("group")).toHaveCount(2);
   await expect(page.locator("#fm-vitrino-faldilo fm-faldilo[open]")).toHaveCount(1);
   await expect(page.locator("#fm-vitrino-kompletigilo fm-kompletigilo")).toHaveCount(15);
-  await page.locator("#fm-vitrino-kompletigilo").getByRole("combobox").first().fill("E");
+  // "Ein" matches Eins alone ("E" is in all three words).
+  await page.locator("#fm-vitrino-kompletigilo").getByRole("combobox").first().fill("Ein");
   await expect(page.locator("#fm-vitrino-kompletigilo").getByRole("option")).toHaveCount(1);
   for (const id of ["faldilo", "kompletigilo"]) {
     expect(await axeViolations(page, `#fm-vitrino-${id}`), id).toEqual([]);

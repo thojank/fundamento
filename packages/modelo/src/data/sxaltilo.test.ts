@@ -240,7 +240,15 @@ describe("the Reguloj of the sxaltilo (G6, E5, D-14)", () => {
       // Spec 010 ②: widened once more, to the markobutono (E5); ③ to the elekto, ④ the elektilo;
       // Spec 011 ② to the tekstareo.
       expect(named(name)?.appliesTo).toEqual({
-        eroj: ["kampo", "sxaltilo", "markobutono", "elekto", "elektilo", "tekstareo", "kompletigilo"],
+        eroj: [
+          "kampo",
+          "sxaltilo",
+          "markobutono",
+          "elekto",
+          "elektilo",
+          "tekstareo",
+          "kompletigilo",
+        ],
       });
       expect(modelo.reguloj.filter((regulo) => regulo.name === name)).toHaveLength(1);
     },

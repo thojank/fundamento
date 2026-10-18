@@ -18,7 +18,8 @@ const stateOf = (page: Parameters<typeof serve>[0], id: string) =>
       attribute: element.hasAttribute("open"),
       name: details.getAttribute("name"),
       chevron: indicator.getAttribute("name"),
-      shown: content.getBoundingClientRect().height > 0,
+      // A closed details keeps its content out of sight (checkVisibility reads the UA's rule).
+      shown: content.checkVisibility(),
     };
   });
 
@@ -36,9 +37,10 @@ test.describe("fm-faldilo behaviour", () => {
     expect(closed.shown).toBe(false);
     expect(closed.name).toBe("faq");
     await page.locator("#a").getByText("Lieferbedingungen").click();
-    await expect.poll(async () => (await stateOf(page, "a")).open).toBe(true);
+    // The platform's toggle event is a task later than the open property: wait for the mirror.
+    await expect.poll(async () => (await stateOf(page, "a")).attribute).toBe(true);
     const opened = await stateOf(page, "a");
-    expect(opened.attribute).toBe(true);
+    expect(opened.open).toBe(true);
     expect(opened.chevron).toBe("chevron-down");
     expect(opened.shown).toBe(true);
     await expect(page.locator("#a").getByText("Innerhalb von drei Tagen.")).toBeVisible();
@@ -53,7 +55,7 @@ test.describe("fm-faldilo behaviour", () => {
     await page.locator("#b").getByText("Rückgabe").click();
     await expect.poll(async () => (await stateOf(page, "b")).open).toBe(true);
     await expect.poll(async () => (await stateOf(page, "a")).open).toBe(false);
-    expect((await stateOf(page, "a")).attribute).toBe(false);
+    await expect.poll(async () => (await stateOf(page, "a")).attribute).toBe(false);
     await page.locator("#b").evaluate((element) => {
       const summary = element.shadowRoot?.querySelector('[part="summary"]');
       if (summary instanceof HTMLElement) summary.focus();

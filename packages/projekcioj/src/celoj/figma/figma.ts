@@ -47,6 +47,7 @@ import {
   VITRINO_OPTIONS,
   VITRINO_PROMPT,
   VITRINO_SLOT_TEXTS,
+  VITRINO_SUMMARY_TEXT,
   VITRINO_SURFACE,
   VITRINO_TABLE,
   VITRINO_TRIGGER_TEXT,
@@ -498,7 +499,8 @@ export type FigmaStructure =
   | "separator"
   | "tooltip"
   | "popover"
-  | "menu";
+  | "menu"
+  | "disclosure";
 
 /**
  * A radio group (Spec 010 ③, D-07) is a choice: the label (the question) above a column of
@@ -566,7 +568,10 @@ export const structureOf = (role: string, parts: readonly string[] = []): FigmaS
                                 ? "tooltip"
                                 : role === "menu"
                                   ? "menu"
-                                  : "control";
+                                  : // Spec 014 ⑤ (plan ⑤ D-04): a disclosure (role group).
+                                    role === "group"
+                                    ? "disclosure"
+                                    : "control";
 
 /**
  * The neutral word every label template shows, per a11y role (M-3; Maintainer, F14, 2026-10-13,
@@ -630,6 +635,9 @@ const LABEL_DEFAULTS: Readonly<Record<string, string>> = {
  */
 const STRUCTURE_LABEL_DEFAULTS: Readonly<Partial<Record<FigmaStructure, string>>> = {
   state: "Zustand",
+  // Spec 014 ⑤ (plan ⑤ D-04): a disclosure's label property writes its summary; the Vitrino's
+  // word, one source for both pictures. Proposal for the maintainer to confirm.
+  disclosure: VITRINO_SUMMARY_TEXT,
   // Spec 014 ④ (plan ④ D-06): a popover shares the dialog's role; its label property writes its
   // heading, so the word is the heading's. Proposal for the maintainer to confirm.
   popover: "Überschrift",
@@ -661,6 +669,8 @@ export function labelPartOf(skemo: LoadedEro["skemo"]): string {
   // heading slot); a menu's the word of its entries (the part item), whose role the rows take.
   if (skemo.parts.label === undefined && skemo.parts.heading !== undefined) return "heading";
   if (skemo.parts.label === undefined && skemo.parts.item !== undefined) return "item";
+  // Spec 014 ⑤: a disclosure's label property writes its summary.
+  if (skemo.parts.label === undefined && skemo.parts.summary !== undefined) return "summary";
   return "label";
 }
 
@@ -1637,6 +1647,10 @@ function iconsOf(
     const intent = combination.intent;
     return intent === undefined ? undefined : { icon: intent };
   }
+  // A disclosure (Spec 014 ⑤): the chevron points down where open, right where closed.
+  if (structure === "disclosure" && skemo.parts.indicator !== undefined) {
+    return { indicator: combination.open === "true" ? "chevron-down" : "chevron-right" };
+  }
   return undefined;
 }
 
@@ -2167,8 +2181,12 @@ function componentSetOf(
   // of a navigation and the tabs of a tab list (Spec 011 ⑤): the same words, the first current
   // or active.
   const [entryKey] = entryKeys;
+  // The suggestions of a field with a listbox (Spec 014 ⑤): rows like a choice's options.
   const options =
-    (structure === "choice" || structure === "nav" || structure === "tabs") &&
+    (structure === "choice" ||
+      structure === "nav" ||
+      structure === "tabs" ||
+      (structure === "field" && skemo.parts.listbox !== undefined)) &&
     entryKey !== undefined
       ? { key: entryKey, texts: [...VITRINO_OPTIONS], selected: 0 }
       : undefined;
@@ -2205,6 +2223,9 @@ function componentSetOf(
     ...(structure === "tabs" ? { texts: { ...TABS_TEXTS } } : {}),
     ...(structure === "popover"
       ? { texts: { trigger: VITRINO_TRIGGER_TEXT, content: VITRINO_CONTENT_TEXT } }
+      : {}),
+    ...(structure === "disclosure"
+      ? { texts: { summary: VITRINO_SUMMARY_TEXT, content: VITRINO_CONTENT_TEXT } }
       : {}),
     ...(menu === undefined
       ? {}

@@ -300,7 +300,12 @@ export const VITRINO_SLOT_TEXTS: Readonly<Record<string, string>> = {
   description: "Beschreibung",
   // Spec 011 ④ (plan ④ D-13): the value text of a meter (the spec's example).
   "value-text": "66 % von 3 prüfbaren",
+  // Spec 014 ⑤ (plan ⑤ D-05): the summary of a disclosure names what it hides.
+  summary: "Lieferbedingungen",
 };
+
+/** The summary of the Vitrino's disclosure (Spec 014 ⑤); Figma shows the same word. */
+export const VITRINO_SUMMARY_TEXT = "Lieferbedingungen";
 
 /**
  * The value example of a meter in the Vitrino (Spec 011 ④, plan ④ D-13): a number prop without

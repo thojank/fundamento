@@ -635,6 +635,13 @@
       "foreground": "color.navigation.text.selected",
       "background": "color.background.default",
       "kategorio": "ui"
+    },
+    {
+      "id": "kpa_01M56ATH9Z3R049ABYP6RFAW5N",
+      "name": "status-danger-text-on-background-raised",
+      "foreground": "color.status.danger.text",
+      "background": "color.background.raised",
+      "kategorio": "ui"
     }
   ]
 }

@@ -289,9 +289,18 @@ describe("the Reguloj of the markobutono (G6, E5)", () => {
       "field-label-names-the-datum",
       ["kampo", "sxaltilo", "markobutono", "elekto", "elektilo", "tekstareo", "kompletigilo"],
     ],
-    ["error-says-what-to-do", ["kampo", "markobutono", "elekto", "elektilo", "tekstareo", "avizo", "kompletigilo"]],
-    ["required-marked", ["kampo", "markobutono", "elekto", "elektilo", "tekstareo", "kompletigilo"]],
-    ["error-not-color-only", ["kampo", "markobutono", "elekto", "elektilo", "tekstareo", "kompletigilo"]],
+    [
+      "error-says-what-to-do",
+      ["kampo", "markobutono", "elekto", "elektilo", "tekstareo", "avizo", "kompletigilo"],
+    ],
+    [
+      "required-marked",
+      ["kampo", "markobutono", "elekto", "elektilo", "tekstareo", "kompletigilo"],
+    ],
+    [
+      "error-not-color-only",
+      ["kampo", "markobutono", "elekto", "elektilo", "tekstareo", "kompletigilo"],
+    ],
   ])("%s is widened to the markobutono, not duplicated (E5)", (name, eroj) => {
     expect(named(name)?.appliesTo).toEqual({ eroj });
     expect(named(name)?.statement).toMatch(/markobutono/);

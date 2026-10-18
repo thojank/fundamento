@@ -429,11 +429,23 @@ describe("the Reguloj of the elekto (G6, E5)", () => {
       "field-label-names-the-datum",
       ["kampo", "sxaltilo", "markobutono", "elekto", "elektilo", "tekstareo", "kompletigilo"],
     ],
-    ["error-says-what-to-do", ["kampo", "markobutono", "elekto", "elektilo", "tekstareo", "avizo", "kompletigilo"]],
-    ["required-marked", ["kampo", "markobutono", "elekto", "elektilo", "tekstareo", "kompletigilo"]],
-    ["error-not-color-only", ["kampo", "markobutono", "elekto", "elektilo", "tekstareo", "kompletigilo"]],
+    [
+      "error-says-what-to-do",
+      ["kampo", "markobutono", "elekto", "elektilo", "tekstareo", "avizo", "kompletigilo"],
+    ],
+    [
+      "required-marked",
+      ["kampo", "markobutono", "elekto", "elektilo", "tekstareo", "kompletigilo"],
+    ],
+    [
+      "error-not-color-only",
+      ["kampo", "markobutono", "elekto", "elektilo", "tekstareo", "kompletigilo"],
+    ],
     // Spec 014 ①: widened once more, to the reason-help of the dialogo.
-    ["help-is-one-sentence", ["kampo", "elekto", "elektilo", "tekstareo", "dialogo", "kompletigilo"]],
+    [
+      "help-is-one-sentence",
+      ["kampo", "elekto", "elektilo", "tekstareo", "dialogo", "kompletigilo"],
+    ],
   ])("%s is widened to the elekto, not duplicated (E5)", (name, eroj) => {
     expect(named(name)?.appliesTo).toEqual({ eroj });
     expect(named(name)?.statement).toMatch(/elekto/);

@@ -54,6 +54,10 @@
         {
           "ero": "menuo",
           "kialo": "A line between groups of a menu says that the entries above and below belong to different things, because a person reads a group before the next."
+        },
+        {
+          "ero": "faldilo",
+          "kialo": "A line between the disclosures of a group says where one entry ends and the next begins."
         }
       ],
       "never": [],

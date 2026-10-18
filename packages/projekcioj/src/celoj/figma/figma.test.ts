@@ -984,8 +984,8 @@ describe("the label default of a set follows its a11y role (M-3)", () => {
       // Spec 011 ③: a badge (role generic) names a status (for the maintainer to confirm).
       insigno: "Status",
       kampo: "Beschriftung",
-      // Spec 014 ⑤: the combobox is a field; the kampo's word applies.
-      kompletigilo: "Beschriftung",
+      // Spec 014 ⑤: the combobox shares the elektilo's role; its word applies (O-21).
+      kompletigilo: "Auswahl",
       // Spec 014 ④: a tooltip is a short hint, the trigger of a menu offers more actions, a
       // popover's label property is its heading (to confirm).
       konsileto: "Kurzhinweis",

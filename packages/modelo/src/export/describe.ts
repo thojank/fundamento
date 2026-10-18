@@ -33,9 +33,12 @@ const WORDS = [
   "twenty-three",
   "twenty-four",
   "twenty-five",
+  // Spec 014 ⑤: twenty-seven Eroj (the disclosure and the combobox).
+  "twenty-six",
+  "twenty-seven",
 ] as const;
 
-/** A count as an English word for 0 to 25 (`no` for zero), otherwise as digits. */
+/** A count as an English word for 0 to 27 (`no` for zero), otherwise as digits. */
 export function countWord(count: number): string {
   return WORDS[count] ?? String(count);
 }

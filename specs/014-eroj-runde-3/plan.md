@@ -386,4 +386,65 @@ Drei Sätze aus den Rollen `tooltip`, `dialog` mit Slot `trigger`, `menu`; die K
 
 ## ⑤ Aufklappen
 
-*(folgt: `faldilo`, `kompletigilo`.)*
+**Branch:** `261017-spec-014-aufklappen-e3bf97` (gestapelt auf ④). Rot `7ab25be`, grün: Hash in tasks ⑤.
+
+### Zusammenfassung
+
+1. **`faldilo`** (D-01, D-03): der Aufklapper – `details` und `summary` der Plattform (Spec: nativ), `open` als Prop und Achse (die Farbe des Chevrons folgt ihr: `color.text.default` offen, `color.text.subtle` zu), `group` als `name` der `details`, so öffnet die Plattform in einer Gruppe nur einen; die Zusammenfassung als Zeile (`fill` nach Zustand aus `color.action.tertiary.*`, `typography.label.1`, `size.target.min`), der Chevron ein `ikono` (`chevron-right` zu, `chevron-down` offen), der Inhalt in `typography.body.1`. Rolle `group`, `open` als `aria-expanded` (die Plattform spricht die `summary`). Neue Regulo **`disclosure-label-names-content`** (fest, G8: die Zusammenfassung nennt, was sie verbirgt; `not-words` mehr, details, weiteres, info, hier / more, details, info, expand, here), vier Jugxoj. Uzo: `switch-view` → `langetaro`, `required-info` → `teksto`, Grenze `nested-disclosure` (ask-human); die `langetaro` schickt `disclose` an den `faldilo`, `apartigilo` und `ikono` komponieren.
+2. **`kompletigilo`** (D-02, D-03): die Eingabe mit Vorschlägen – das Feld des `kampo` (Teile und Bindungen des `elektilo` kopiert, ohne Chevron) mit `listbox` (erhabene Fläche, Schatten `elevation.shadow.overlay`, Ebene, Breite `size.container.small`, Höhe nach `expanded`: `none` | `size.container.small` als Maximum), `suggestion` (Farbe nach `selected`, `typography.label.1`, `size.target.min`) und `no-results` (`typography.caption`); Props wie der `elektilo` ohne `empty-label`, dazu `allow-free`, `min-chars` (1), `expanded` (Achse). APG Combobox: `role="combobox"` am Input mit `aria-autocomplete="list"`, `aria-expanded`, `aria-controls`, `aria-activedescendant`; die Listbox ein Popover der Plattform, am Feld verankert (`anchor-name` im Shadow, kein JS); die Zahl der Treffer als Live-Region („2 Vorschläge“, `a11y.texts options-count`; „Keine Vorschläge“ `options-empty`); Pfeile, Enter, Escape, Klick; `query` beim Tippen; ohne `allow-free` ist freier Text ungültig (`badInput`). Neun Feld-Reguloj ausgeweitet (E5, G8), `select-placeholder-is-prompt` eingeschlossen; `kampo` schickt `suggestions`, der `elektilo` schließt `search-in-list` (bisher null).
+3. **Modelo** (D-02): `a11y.texts` kennt `<slot>-count` (das Wort zur Zahl der Einträge), ein neuer KontrastParo `status-danger-text-on-background-raised` (der Fehlertext über der Listbox), Zahlwörter bis siebenundzwanzig, Vortaro-Lint kennt `anchor-name` und `list-style`.
+4. **Figma** (D-04): Bauform `disclosure` (`open` × Zustand = 6 Varianten: Zusammenfassung als Zeile mit Glyphe je Aspekto, Inhalt nur offen sichtbar) und das Feld des `kompletigilo` als Bauform `field` mit der Listbox darunter (drei Vorschläge als Reihen wie die Reiter, Schatten gebunden, nur `expanded` sichtbar). Vorgabewort „Lieferbedingungen“ (O-21).
+5. **Vitrino, Make-Kit, React** (D-05, D-06): Spalte `open` am `faldilo` mit dem Wort der Zusammenfassung; der `kompletigilo` wie der `elektilo` (Größe je Zeile, boolesche Spalten, drei Optionen, Aufforderung); zwei Guideline-Sätze; React-Typen (`allowFree`, `minChars`).
+
+Kein Token, keine Regulo-Semantik geändert; keine Schema-Erweiterung (eine Prüfregel erweitert), eine neue Regulo (G8), ein KontrastParo, 27 Eroj.
+
+### Entwurfsentscheidungen
+
+#### D-01 `faldilo`: `open` als Achse über den Chevron, die Zustände an der Zusammenfassung (G5; Regel 0.2)
+`open` schlüsselt einen Teil, damit es Achse der Figma-Varianten ist (Spec: `open` × Gruppe): die Farbe des Chevrons – offen `color.text.default`, zu `color.text.subtle` –, ein echter Unterschied der Gestalt. Die Zustände rest/hover/focus liegen an der Zusammenfassung (`summary.fill` nach Zustand), der Inhalt hat keinen. Das Element setzt `details.open` aus der Prop und spiegelt das `toggle`-Ereignis der Plattform in das Attribut (auch wenn die Plattform einen Eintrag der Gruppe schließt); `name` der `details` ist die Gruppe.
+
+#### D-02 `kompletigilo`: Teil `suggestion` (nicht `option`), Farbe nach `selected`, `<slot>-count` (E2, G5)
+`option` ist ein Element der Plattform (`skemo-web-term`): der Teil heißt `suggestion`. Eine Fläche je Vorschlag hätte jede Textfarbe des Feldes mit jeder Fläche gepaart (`skemo-kontrastparo-missing`): der Vorschlag trägt darum keine eigene Fläche, seine Farbe folgt `selected` (gewählt `color.text.default`, sonst `color.text.subtle`); die Listbox trägt die erhabene Fläche, ein KontrastParo deckt den Fehlertext darauf. Die Ansage der Treffer braucht ein Wort zur Zahl: `a11y.texts` kennt seit ⑤ `<slot>-count` (wie `<slot>-empty` seit Spec 011 ④).
+
+#### D-03 Web: Host `disclosure` und Host `suggest` (G5)
+`disclosure`: `<details part="control"><summary part="summary">…<fm-ikono part="indicator"></summary><div part="content">`; Tastatur und `aria-expanded` sind die der Plattform. `suggest`: das Feld des `kampo` (der Input-Host mit Formularbindung, Pflicht und Fehlertext) um `role="combobox"` am Input, `<div part="listbox" role="listbox" popover="manual">` mit Reihen `role="option"` aus den `<data slot="options">` (Text im Shadow kopiert, wie die Optionen des `elektilo`), `aria-activedescendant` statt Fokuswechsel, die Zählansage als `role="status"`; die Listbox sitzt per `anchor-name: --fm-field` am Feld (beide im Shadow, kein JS, E11). `min-chars` begrenzt, `query` meldet das Getippte, `change` den gewählten Wert; `badInput` ohne `allow-free`. `listbox.height` wird `max-block-size` (die Liste rollt), `none` verbirgt sie; `listbox.width` `max-inline-size`.
+
+#### D-04 Figma: Bauform `disclosure`, Listbox im Feld (G4)
+`drawDisclosure`: Ring → Lücke → Zusammenfassung (Fläche, Höhe, Padding, Radius, Text im Label-Property, Glyphe je Aspekto mit gebundener Sichtbarkeit) über dem Inhalt (nur offen sichtbar). Der `kompletigilo` bleibt Bauform `field`: der Feld-Pfad zeichnet die Listbox unter dem Feld, wo der Plan Einträge trägt (`component.entry`, die drei Wörter der Vitrino), mit `drawEntries`/`bindEntries` wie die Reiter, `no-results` als Text, `visible` nur bei `expanded`; die Schatten über `bindShadow`.
+
+#### D-05 Vitrino
+`open` ist eine boolesche Spalte wie `checked` (zwei Zellen je Zeile), die Zusammenfassung ein Slot-Wort (`VITRINO_SLOT_TEXTS.summary`); der `kompletigilo` zeigt wie der `elektilo` drei Optionen und die Aufforderung, `expanded` als Spalte öffnet die Liste.
+
+#### D-06 Make Kit
+Zwei Sätze aus den Rollen `group` (mit Slot `summary`) und `combobox` mit Teil `listbox`.
+
+### Arkitekturo-Abdeckung
+
+| Ero | Stand |
+|---|---|
+| `faldilo` | trägt (Skemo mit `open`/`group`, Uzo, Regulo `disclosure-label-names-content` mit vier Jugxoj, Web Component als `details`/`summary`, React, Figma-Bauform disclosure, Make-Kit, Vitrino, MCP) |
+| `kompletigilo` | trägt (Skemo als Feld mit Listbox, Uzo, neun Reguloj ausgeweitet, Web Component als APG-Combobox mit Popover-Listbox, React, Figma-Feld mit Listbox, Make-Kit, Vitrino, MCP); `elektilo.search-in-list` geschlossen, `kampo.suggestions` neu |
+
+### Abweichungen von der Spec
+
+1. **Teil `suggestion` statt `option`** (D-02): `option` ist ein Web-Begriff (Art. VIII).
+2. **Kein eigener Zustand `active` am Vorschlag** (Spec: „`option` (Eintrag, `selected` und `active`)“): der aktive Vorschlag ist der, den `aria-activedescendant` nennt (eine Klasse `fm-active` im Web, keine Achse), gewählt ist der Eintrag mit dem Wert; eine zweite Entry-Achse hätte die Varianten vervielfacht.
+3. **`listbox.height` ist ein Maximum**, keine feste Höhe: `size.container.small` als `max-block-size`, die Liste rollt.
+4. **Figma: `faldilo` als `open` × Zustand**, nicht „open × Gruppe (ein Eintrag offen, zwei zu)“: die Gruppe ist Verhalten der Plattform, keine Achse; ein Beispielrahmen mit drei Einträgen folgt, wenn der Maintainer ihn will (O-22).
+5. **Spec-Dialog „Feld, in dem man ein Land tippt und Vorschläge bekommt“** trifft drei Eroj gleich stark („Land“ ist das Wort von `butono.choose-many`/`elektilo`); ohne „Land“ antwortet der `kompletigilo` (B-1).
+
+### Befunde / Mankoj
+
+- **B-1** Gleichstände durch „Land“ (ein Wort der Wahl-Eroj) und „Reiter“ (die `langetaro` hat eine eigene Grenze `vertical`): `faldilo.switch-view` nutzt `tabbar`/`reiterleiste`, der Spec-Dialog mit „Land“ fragt (Abweichung 5). Kein Manko.
+- **B-2** `option` als Teilname fiel der Web-Begriff-Prüfung zum Opfer, eine Fläche je Vorschlag der KontrastParo-Prüfung (jede Textfarbe des Feldes × jede Fläche): beides führte zu D-02. Kein Manko.
+- **B-3** Die Fixtures der ⑤ sind wieder die ③-Fixtures unter neuem Namen (vgl. ④ B-5).
+- **B-4** Das `toggle`-Ereignis der Plattform kommt eine Aufgabe nach `details.open`: ein Spec, der nach dem Klick erst `open` abwartet und dann sofort das Attribut `open` und den Chevron liest, ist unter Last rot (ein Lauf von 210 Specs; allein grün). Der Spec wartet jetzt auf den Spiegel (das Attribut). Kein Manko des Elements.
+- **B-5** „E“ steht in allen drei Vitrino-Wörtern (Eins, Zwei, Drei): der Vitrino-Check tippt „Ein“, um einen Vorschlag zu bekommen. Kein Manko.
+- **B-6** Der Feld-Pfad des Plugins band die Reihen der Listbox zunächst nicht (`bindEntries` fehlte, die Texte waren nicht im Fluss): F13 und „every property bound“ rot, bis die Reihen wie die Reiter gebunden und ihre Texte `own`/`flush` durchliefen; der Schatten der Listbox über `bindShadow` wie bei den Overlays. Kein Manko.
+
+### Offen (für den Maintainer)
+
+- **O-21 Vorgabewort Figma** `faldilo` „Lieferbedingungen“ (das Label-Property schreibt die Zusammenfassung). Zur Bestätigung; dann ein Jugxo.
+- **O-22 Beispielrahmen „Gruppe“ in Figma** (drei `faldilo`, einer offen) wie „mit Hintergrund“ beim `dialogo` – wenn gewünscht.
+- **O-23 `active` als Achse des Vorschlags** (Abweichung 2): ob die Hervorhebung des aktiven Vorschlags ein gebundener Teil werden soll (`suggestion.fill by active`), mit den nötigen KontrastParoj.
+- **O-24 Server-Suche:** `query` meldet das Getippte, die Anwendung setzt die `<data slot="options">` neu; ob das Element dabei „lädt“ sagen soll (eine Live-Region), entscheidet der Maintainer.

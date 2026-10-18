@@ -896,6 +896,8 @@ export const USAGE_ENFORCERS: Readonly<Record<string, UsageEnforcer>> = {
   "badge-text-short": textRule,
   // Spec 014 ④ (G8): the words of a tooltip, at most eight (max-words on the label).
   "tooltip-text-short": textRule,
+  // Spec 014 ⑤ (G8): the summary of a disclosure names what it hides (not-words on the slot).
+  "disclosure-label-names-content": textRule,
   "empty-state-says-what-next": textRule,
   // Spec 011 ④ (G6, plan ④ D-04, D-06): a caption that names the rows (not-words against empty
   // captions); a value text that names value and reference (min-words 2, so '0 %' alone fails).

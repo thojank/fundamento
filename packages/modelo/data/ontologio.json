@@ -2116,6 +2116,97 @@
       ]
     },
     {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Faldilo",
+      "term": "Faldilo",
+      "inScheme": "eroj",
+      "prefLabel": {
+        "eo": "Faldilo",
+        "en": "disclosure",
+        "de": "Aufklapper"
+      },
+      "altLabel": {
+        "en": [
+          "faldilo",
+          "disclosure",
+          "accordion",
+          "collapsible",
+          "details"
+        ],
+        "de": [
+          "Aufklapper",
+          "Akkordeon",
+          "Aufklappen",
+          "Details",
+          "faldilo"
+        ]
+      },
+      "definition": {
+        "en": "A disclosure: hides secondary content behind a summary the person can open — the platform's details and summary; several with the same group open one at a time (an accordion, the platform's name). The summary names what it hides (disclosure-label-names-content); what everyone has to read is not hidden, views that alternate are the langetaro's.",
+        "de": "Ein Aufklapper: verbirgt Nebeninhalt hinter einer Zusammenfassung, die eine Person öffnen kann – details und summary der Plattform; mehrere mit derselben Gruppe öffnen einer nach dem anderen (ein Akkordeon, das name der Plattform). Die Zusammenfassung nennt, was sie verbirgt (disclosure-label-names-content); was alle lesen müssen, wird nicht versteckt, wechselnde Ansichten gehören dem langetaro."
+      },
+      "broader": [
+        "#Ero"
+      ],
+      "relations": [
+        {
+          "predicate": "references",
+          "target": "#Langetaro"
+        },
+        {
+          "predicate": "references",
+          "target": "#Apartigilo"
+        }
+      ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Kompletigilo",
+      "term": "Kompletigilo",
+      "inScheme": "eroj",
+      "prefLabel": {
+        "eo": "Kompletigilo",
+        "en": "combobox",
+        "de": "Eingabe mit Vorschlägen"
+      },
+      "altLabel": {
+        "en": [
+          "kompletigilo",
+          "combobox",
+          "autocomplete",
+          "typeahead",
+          "suggestions"
+        ],
+        "de": [
+          "Eingabe mit Vorschlägen",
+          "Combobox",
+          "Autocomplete",
+          "Autovervollständigung",
+          "Vorschläge",
+          "kompletigilo"
+        ]
+      },
+      "definition": {
+        "en": "A field that suggests matching values while the person types (APG combobox with a listbox): the field of the kampo with a list of suggestions anchored to it, walked with the arrow keys, the number of suggestions announced; the value is a chosen suggestion or, with allow-free, the typed text. A handful of fixed options is the elekto's, a fixed list without typing the elektilo's; tags and a multi-select are boundaries.",
+        "de": "Ein Feld, das beim Tippen passende Werte vorschlägt (APG-Combobox mit Listbox): das Feld des kampo mit einer daran verankerten Vorschlagsliste, mit den Pfeiltasten begangen, die Zahl der Vorschläge angesagt; der Wert ist ein gewählter Vorschlag oder, mit allow-free, der getippte Text. Eine Handvoll fester Optionen gehört dem elekto, eine feste Liste ohne Tippen dem elektilo; Tags und Mehrfachauswahl sind Grenzen."
+      },
+      "broader": [
+        "#Ero"
+      ],
+      "relations": [
+        {
+          "predicate": "references",
+          "target": "#Kampo"
+        },
+        {
+          "predicate": "references",
+          "target": "#Elektilo"
+        },
+        {
+          "predicate": "references",
+          "target": "#Elekto"
+        }
+      ]
+    },
+    {
       "uri": "https://fundamento.ciferecigo.com/ontologio#Vitrino",
       "term": "Vitrino",
       "inScheme": "laboro",
