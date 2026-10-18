@@ -34,7 +34,7 @@
 // on a frame with the three other sides at 0, as the rows of a table are.
 
 import { VITRINO_TRIGGER_TEXT } from "../vitrino/datumoj.js";
-import { type FigmaPlan, TEXT_CASE_VARIES } from "./figma.js";
+import { type FigmaPlan, PAGINATION_GAP, TEXT_CASE_VARIES } from "./figma.js";
 
 /** The nodes of one variant the plugin draws, outside in (F11). */
 type PartNode =
@@ -80,8 +80,8 @@ type PartNode =
   // the ellipsis a text in a box; a breadcrumb: a chevron (`separator-1` …) after every level but
   // the last.
   | "pages"
-  | "ellipsis"
-  | "ellipsis-box"
+  | "ellipsis-*"
+  | "ellipsis-box-*"
   | "prev"
   | "next"
   | "prev-glyph-*"
@@ -596,9 +596,9 @@ const STRUCTURE_BINDINGS: Readonly<Record<string, Readonly<Record<string, readon
     ],
     "border.width": [{ node: "item-*", fields: ["strokeWeight"] }],
     "border.color": [{ node: "item-*", fields: ["strokes"], paint: true }],
-    "ellipsis.color": [{ node: "ellipsis", fields: ["fills"], paint: true }],
-    "ellipsis.typography": typographyOf("ellipsis"),
-    "ellipsis.width": [{ node: "ellipsis-box", fields: ["minWidth"] }],
+    "ellipsis.color": [{ node: "ellipsis-*", fields: ["fills"], paint: true }],
+    "ellipsis.typography": typographyOf("ellipsis-*"),
+    "ellipsis.width": [{ node: "ellipsis-box-*", fields: ["minWidth"] }],
     "prev.size": [
       { node: "prev", fields: ["width", "height"] },
       { node: "prev-glyph-*", fields: ["width", "height"] },
@@ -610,6 +610,7 @@ const STRUCTURE_BINDINGS: Readonly<Record<string, Readonly<Record<string, readon
     "box.gap": [
       { node: "control", fields: ["itemSpacing"] },
       { node: "pages", fields: ["itemSpacing"] },
+      { node: "entry-*", fields: ["itemSpacing"] },
     ],
   },
   // A breadcrumb (Spec 015 ①, plan ① D-05): every level an item — its text in the colour of its
@@ -1193,6 +1194,7 @@ const ROW_LAYOUT = ${JSON.stringify(ROW_LAYOUT)};
 const CELL_LAYOUT = ${JSON.stringify(CELL_LAYOUT)};
 const ENTRY_ROW_LAYOUT = ${JSON.stringify(ENTRY_ROW_LAYOUT)};
 const NAV_LAYOUT = ${JSON.stringify(NAV_LAYOUT)};
+const GAP = ${JSON.stringify(PAGINATION_GAP)};
 const TABLIST_LAYOUT = ${JSON.stringify(TABLIST_LAYOUT)};
 const PANEL_LAYOUT = ${JSON.stringify(PANEL_LAYOUT)};
 const MARK_NEUTRAL = ${JSON.stringify(MARK_NEUTRAL)};
@@ -3451,41 +3453,74 @@ async function applyComponents(variables, warnings) {
    * of the arrow's size. The ellipsis is a text in its colour and role, in a box of its minimum
    * width. The label prop is the name of the landmark, heard, never seen.
    */
-  async function drawPagination(node, component, variant, report) {
+  async function drawPagination(node, component, variant, report, example) {
     const icons = variant.icons || {};
+    // The words of the row: the set's entries with a gap after them, or an example's pages (O-2).
+    const entry = component.entry || { key: "", texts: [], selected: 0 };
+    const words = example !== undefined ? example.pages.texts : entry.texts.concat([GAP]);
+    const chosen = example !== undefined ? example.pages.selected : entry.selected;
+    const numbers = [];
+    const gapAfter = {};
+    let current = -1;
+    words.forEach((word, index) => {
+      if (word === GAP) {
+        gapAfter[numbers.length] = true;
+        return;
+      }
+      if (index === chosen) current = numbers.length;
+      numbers.push(word);
+    });
+    const shown = Object.assign({}, component, {
+      entry: { key: entry.key, texts: numbers, selected: current },
+    });
     const control = part(node, "control", () => figma.createFrame());
     const back = part(control, "arrow-1", () => figma.createFrame());
     const pages = part(control, "pages", () => figma.createFrame());
-    const box = part(control, "ellipsis-box", () => figma.createFrame());
     const forth = part(control, "arrow-2", () => figma.createFrame());
-    [back, pages, box, forth].forEach((child, index) => {
+    [back, pages, forth].forEach((child, index) => {
       if (control.children.indexOf(child) !== index) control.insertChild(index, child);
     });
     const prev = part(back, "prev", () => figma.createFrame());
     const next = part(forth, "next", () => figma.createFrame());
-    const ellipsis = part(box, "ellipsis", () => figma.createText());
     const measures = [];
     const glyphs = Object.assign(
       {},
       drawGlyphs(prev, icons.prev || "chevron-left", "prev-", measures),
       drawGlyphs(next, icons.next || "chevron-right", "next-", measures),
     );
-    const rows = await drawEntries(pages, component, variant, "item", "items");
-    await loadCurrentFont(ellipsis);
-    if (variant.font !== undefined) {
-      write(ellipsis, "fontName", fonts.get(variant.font.family + " " + variant.font.style));
+    const rows = await drawEntries(pages, shown, variant, "item", "items");
+    // A gap stands after its page, in the page's entry: the row keeps one entry per page.
+    const gaps = [];
+    for (const row of rows) {
+      if (gapAfter[row.n] !== true) continue;
+      const box = part(row.entry, "ellipsis-box-" + row.n, () => figma.createFrame());
+      if (row.entry.children.indexOf(box) !== 1) row.entry.insertChild(1, box);
+      const text = part(box, "ellipsis-" + row.n, () => figma.createText());
+      await loadCurrentFont(text);
+      if (variant.font !== undefined) {
+        write(text, "fontName", fonts.get(variant.font.family + " " + variant.font.style));
+      }
+      write(text, "characters", GAP);
+      gaps.push({ n: row.n, box, text });
     }
-    write(ellipsis, "characters", "\u2026");
-    const texts = rows.map((row) => row.text).concat([ellipsis]);
-    const frames = [node, control, back, pages, box, forth, prev, next].concat(
-      ...rows.map((row) => [row.entry, row.ring, row.gap, row.frame]),
-    );
+    const texts = rows.map((row) => row.text).concat(gaps.map((gap) => gap.text));
+    const frames = [node, control, back, pages, forth, prev, next]
+      .concat(...rows.map((row) => [row.entry, row.ring, row.gap, row.frame]))
+      .concat(gaps.map((gap) => gap.box));
     for (const frame of frames) own(frame, NEUTRAL);
     for (const each of texts) own(each, NEUTRAL_TEXT);
     own(node, HUG_LAYOUT);
+    if (example !== undefined) {
+      own(node, {
+        paddingLeft: example.padding,
+        paddingRight: example.padding,
+        paddingTop: example.padding,
+        paddingBottom: example.padding,
+      });
+    }
     own(control, NAV_LAYOUT);
     own(pages, NAV_LAYOUT);
-    for (const frame of [back, forth, box]) own(frame, CONTROL_LAYOUT);
+    for (const frame of [back, forth].concat(gaps.map((gap) => gap.box))) own(frame, CONTROL_LAYOUT);
     for (const holder of [prev, next]) own(holder, INDICATOR_LAYOUT);
     for (const row of rows) {
       for (const frame of [row.entry, row.ring, row.gap]) own(frame, HUG_LAYOUT);
@@ -3495,10 +3530,14 @@ async function applyComponents(variables, warnings) {
     }
     for (const child of frames.concat(texts)) own(child, IN_FLOW);
     for (const each of texts) own(each, TEXT_SIZING);
-    for (const measure of bind({ control, pages, ellipsis, "ellipsis-box": box }, variant, variables, component.structure)) {
-      measures.push(measure);
+    const nodes = { control, pages };
+    for (const row of rows) nodes["entry-" + row.n] = row.entry;
+    for (const gap of gaps) {
+      nodes["ellipsis-" + gap.n] = gap.text;
+      nodes["ellipsis-box-" + gap.n] = gap.box;
     }
-    bindEntries(rows, component, variant, variables, "item", "items", measures);
+    for (const measure of bind(nodes, variant, variables, component.structure)) measures.push(measure);
+    bindEntries(rows, shown, variant, variables, "item", "items", measures);
     // The arrows take what a page that is not current takes (its fill, colour and box).
     const off = (variant.entries || {}).false || { bindings: {}, paints: {} };
     const arrows = Object.assign({ "arrow-1": back, "arrow-2": forth, prev, next }, glyphs);
@@ -3510,6 +3549,36 @@ async function applyComponents(variables, warnings) {
     for (const measure of bind(arrows, merged, variables, component.structure)) measures.push(measure);
     for (const each of frames.concat(texts).concat(Object.values(glyphs))) flush(each);
     bindMeasures(measures, report, component, variant);
+  }
+  /**
+   * The examples beside a pagination's set (Spec 015 ①, O-2): one frame per example, each found
+   * by its own mark or created, placed in the frame „Eroj" after the set in their order.
+   */
+  async function placeExamples(frame, set, component, report) {
+    if (frame === undefined) return [];
+    const placed = [];
+    const specs = component.examples || [];
+    for (let index = 0; index < specs.length; index += 1) {
+      const spec = specs[index];
+      const wanted = variantName(spec.variant);
+      const variant = component.variants.find((candidate) => variantName(candidate.props) === wanted);
+      if (variant === undefined) continue;
+      const key = component.set + "/" + (index + 1);
+      let example = ours(frame, "example", key);
+      const found = example !== undefined;
+      if (example === undefined) {
+        example = create(() => figma.createFrame());
+        stamp(example, "example", key);
+      }
+      write(example, "name", spec.name);
+      await drawPagination(example, component, variant, report, spec);
+      if (example.parent !== frame) frame.appendChild(example);
+      const at = frame.children.indexOf(set) + 1 + index;
+      if (frame.children.indexOf(example) !== at) frame.insertChild(at, example);
+      write(example, "layoutPositioning", "AUTO");
+      placed.push({ name: spec.name, found: found, created: !found });
+    }
+    return placed;
   }
   /**
    * A breadcrumb (Spec 015 ①, plan ① D-05): the variant holds the control — a row of the levels
@@ -4261,6 +4330,10 @@ async function applyComponents(variables, warnings) {
     // The example frame of a dialog beside its set (Spec 011 ②).
     if (component.example !== undefined) {
       report.example = await placeExample(frame, set, component, report);
+    }
+    // The examples of a pagination beside its set (Spec 015 ①, O-2).
+    if (component.examples !== undefined) {
+      report.examples = await placeExamples(frame, set, component, report);
     }
     report.layout = measureLayout(set, component);
     report.layout.refused = refused;

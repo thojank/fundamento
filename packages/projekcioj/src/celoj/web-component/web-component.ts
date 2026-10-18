@@ -1458,6 +1458,11 @@ function selectorOf(
   // The shadow of a light-DOM host (Spec 011 ④, E10): the region and its edge, the ring on focus;
   // of a navigation (Spec 011 ⑤) the nav with the gap of its items.
   if (isLight(skemo)) {
+    // A breadcrumb (Spec 015 ①, Abnahme S-1): the chevron's size and colour on the chevron, the
+    // gap on the list of the levels — the nav keeps its width, so the levels stand in one line.
+    if (isBreadcrumb(skemo)) {
+      return part === "separator" ? ':where([part="separator"])' : ':where([part="items"])';
+    }
     if (isNav(skemo)) return ':where([part="list"])';
     return part === "focus-ring"
       ? ':where([part="region"]:focus-visible)'

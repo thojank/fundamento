@@ -25,11 +25,11 @@
 
 | Was | Wert |
 |---|---|
-| Commits ① | rot `61955bd` (nach dem Rebase auf `main` `93a0df3`, #74 gemergt; davor `146f5c2`, `7b450f1`), Arbeitsstand `279cb5a`, grün `52b5cc9` |
+| Commits ① | rot `61955bd` (nach dem Rebase auf `main` `93a0df3`, #74 gemergt; davor `146f5c2`, `7b450f1`), Arbeitsstand `279cb5a`, grün `52b5cc9`; Abnahme S-1/S-2: rot `3178747`, Fix in der Zeile nach dem Commit |
 | `brief` | pagxigilo, spuro ≤ 750 (Daten-Tests) |
 | `check:regularo` | 58 Reguloj, 184 Jugxoj, 29 Uzoj, 0 Warnungen (keine neue `goal-keyword-shared`) |
-| Tests lokal | Modelo 3476, Projekcioj 667, MCP 291 grün; `check:parity` 29 Eroj, 0 Differenzen; Lint, `check:regularo` (29 Uzoj), vortaro-lint, mankoj, ikonaro, clean-room ohne Fehler; Browser: alle 215 Specs in Chromium, Alirebleco-Check 489 in drei Browsern (8,5 min), Vitrino-Check 27, Make-Kit-Check 5, Quickstart 1 grün |
-| CI | offen |
+| Tests lokal | Modelo 3476, Projekcioj 670, MCP 291 grün; `check:parity` 29 Eroj, 0 Differenzen; Lint, `check:regularo` (29 Uzoj), vortaro-lint, mankoj, ikonaro, clean-room ohne Fehler; Browser: alle 216 Specs in Chromium (spuro/pagxigilo zusätzlich in Firefox und WebKit), Alirebleco-Check 489 in drei Browsern, Vitrino-Check 27 grün (nach S-1/S-2 und O-2) |
+| CI | Lauf 39126240312 (`60eae86`) rot: Typtest `pagxigilo.tsx` (B-12), Build-Job 12 min 07 s; Lauf 39127146926 (`1e9e5f2`) grün, Jobs 11:20 / 10:21 / 8:25 / 5:53; nach S-1/S-2 und O-2: Lauf in der Zeile nach dem Push |
 
 ## ② Eingabe
 

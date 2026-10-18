@@ -54,7 +54,7 @@ Zwei Sätze aus der Rolle `navigation` mit den Teilen `ellipsis`/`separator`; di
 1. `page` ist eine Zeichenkette (D-01), kein Zahl-Prop.
 2. `prev`/`next` sind die Glyphen (Teile mit `size`); der Teil `current` der Spec ist der Eintragszustand, `border` trägt den Rand.
 3. „Pagination unter der Tabelle“ trifft `tabelle` (Goal der `tabelo`) und `pagination` gleich stark: der Gvidanto fragt (OP-12); „Pagination“ und „Seitennummerierung“ allein sind der `pagxigilo` mit dem Kialo der `tabelo`.
-4. Figma zeigt eine Zeile 1 2 3 mit Pfeilen, nicht Seite 1/5/10 von 10 (O-2).
+4. Figma zeigt im Set eine Zeile 1 2 3 … mit Pfeilen; Seite 1, 5 und 10 von 10 stehen als Beispiele daneben (O-2).
 5. `label` ist bei beiden optional (die Wörter des Modelo stehen ein), nicht Pflicht wie bei der `navigado`.
 
 ### Befunde / Mankoj
@@ -71,13 +71,16 @@ Zwei Sätze aus der Rolle `navigation` mit den Teilen `ellipsis`/`separator`; di
 - **B-10** Das Ikonaro-Raster der Vitrino hat mit `chevron-left` sechzehn Namen; der Vitrino-Check zählt 16 × 3 + 4 Icons.
 - **B-11 (behoben)** Die Vitrino gab der aktuellen Seite der `spuro` einen Link; nach der Spec ist sie Text ohne Ziel. Die letzte Ebene ist jetzt ein `span`.
 - **B-12 (Befund, CI-Dauer)** Lauf 39126240312 (`60eae86`): der Job „Build, test, lint and Modelo checks“ brauchte 12 min 07 s – über der 12-Minuten-Grenze des Auftrags. Er wächst mit jedem Ero (⑤ auf `main`: 10 min 44 s). Rot war der Lauf an einem Typtest (`pagxigilo.tsx` erwartete einen Fehler für fehlendes `total-pages`; der React-Celo hält alle Props optional, die Pflicht meldet das Element zur Laufzeit) – ersetzt durch einen echten Typfehler (Zeichenkette für die Zahl). Die Aufteilung des Build-Jobs entscheidet der Maintainer (O-4).
+- **B-13 (Abnahme S-1, behoben)** Die Ebenen der `spuro` standen in der Vitrino untereinander: der Shadow-Selektor eines Light-Hosts schickte jeden Teil an `[part="list"]`, so trug das `nav` selbst die Größe des Chevrons (`size.icon.small`, 16 px) und seine Farbe – der Pfad war ein Icon breit. Größe und Farbe des Chevrons stehen jetzt am Chevron, der Abstand an der Liste der Ebenen. Browser-Spec: eine Zeile bei ausreichender Breite, Umbruch bei Platzmangel, in RTL von rechts nach links.
+- **B-14 (Abnahme S-2, behoben)** Nach der aktuellen Seite stand ein Chevron: das Attribut `hidden` verlor gegen das `display` des `fm-ikono`. Die letzte Ebene bekommt jetzt keinen Chevron (entfernt, nicht versteckt). Der alte Spec filterte `[hidden]` heraus und verdeckte den Fehler; der neue zählt sichtbare Trenner (Ebenen − 1).
+- **B-15** Figma geprüft: die Bauform `breadcrumb` ist eine waagerechte Reihe der drei Ebenen mit zwei Chevrons, keiner nach der letzten; die `pagination` eine Reihe aus Pfeil, Seiten, Pfeil. Zwei Plugin-Tests halten das fest. Die Auslassung steht seit O-2 nach ihrer Seite im Eintrag dieser Seite (eine Reihe kann jetzt mehrere Lücken haben).
 
 ### Offen (für den Maintainer)
 
-- **O-1 Name der Landmarke `spuro`:** „Pfad“ (de) / „Breadcrumb“ (en). Zur Bestätigung.
-- **O-2 Figma-Varianten:** Seite 1, 5 und 10 von 10 (Spec) als drei Beispiele neben dem Set, oder eine Zeile wie jetzt.
-- **O-3 `aria-disabled` statt `disabled`** an den Pfeilen (beide Modi gleich, fokussierbar wie APG-Toolbar).
-- **O-4 CI-Dauer:** der Build-Job liegt bei rund 12 min (B-12); ein zweiter Job für die Vitest-Suiten oder ein Shard würde ihn halbieren.
+- **O-1 Name der Landmarke `spuro`:** „Pfad“ (de) / „Breadcrumb“ (en). **Entschieden (Maintainer, Abnahme ①): „Pfad“.**
+- **O-2 Figma-Varianten:** Seite 1, 5 und 10 von 10 (Spec) als drei Beispiele neben dem Set. **Entschieden: ja – umgesetzt** (`examples` im Plan mit den Seiten, die das Web zeigt; `placeExamples` im Plugin).
+- **O-3 `aria-disabled` statt `disabled`** an den Pfeilen (beide Modi gleich, fokussierbar wie APG-Toolbar). **Entschieden: ja** (so gebaut).
+- **O-4 CI-Dauer:** der Build-Job liegt bei rund 12 min (B-12); ein zweiter Job für die Vitest-Suiten oder ein Shard würde ihn halbieren. **Entschieden: aufteilen – als erster Commit in 015 ②.**
 
 ## ② Eingabe
 

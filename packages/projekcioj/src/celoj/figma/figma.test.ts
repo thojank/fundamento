@@ -3060,6 +3060,15 @@ describe("the Figma plan draws the pagxigilo and the spuro (Spec 015 ①)", () =
     });
     expect(pagxigilo?.entry).toEqual({ key: "current", texts: ["1", "2", "3"], selected: 0 });
     expect(pagxigilo?.label).toEqual({ property: "label", defaultValue: "Seitenblättern" });
+    // Spec 015 ① (O-2): page 1, 5 and 10 of 10 as examples beside the set, with the web's pages.
+    expect(pagxigilo?.examples?.map((example) => [example.name, example.pages])).toEqual([
+      ["pagxigilo – Seite 1 von 10", { texts: ["1", "2", "\u2026", "10"], selected: 0 }],
+      [
+        "pagxigilo – Seite 5 von 10",
+        { texts: ["1", "\u2026", "4", "5", "6", "\u2026", "10"], selected: 3 },
+      ],
+      ["pagxigilo – Seite 10 von 10", { texts: ["1", "\u2026", "9", "10"], selected: 3 }],
+    ]);
   });
 
   it("the spuro: state as a breadcrumb with three levels, the last current, the chevron between two", () => {

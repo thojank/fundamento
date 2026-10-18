@@ -361,6 +361,28 @@ export const METER_UNKNOWN_TEXT = "nicht geprüft";
  */
 export const VERTICAL_EXAMPLE = "vertikal";
 
+/** The number of pages of the pagination's examples (Spec 015 ①, O-2: „von 10"). */
+export const PAGINATION_EXAMPLE_TOTAL = 10;
+
+/** The gap of a pagination's row, written as the web's element writes it. */
+export const PAGINATION_GAP = "\u2026";
+
+/**
+ * The words of a pagination's row on `page` of `total` (Spec 015 ①): the first and the last page,
+ * the current one and `siblings` on either side, the gap sign for every gap — as the web's
+ * element draws them, so both pictures show the same row.
+ */
+export function paginationWords(page: number, total: number, siblings: number): string[] {
+  const low = Math.max(2, page - siblings);
+  const high = Math.min(total - 1, page + siblings);
+  const words = ["1"];
+  if (low > 2) words.push(PAGINATION_GAP);
+  for (let n = low; n <= high; n += 1) words.push(String(n));
+  if (high < total - 1) words.push(PAGINATION_GAP);
+  if (total > 1) words.push(String(total));
+  return words;
+}
+
 /**
  * The texts of a tab list's set besides the tabs (Spec 011 ⑤): the word of the panel — the
  * Vitrino's panel shows the word of the first tab ("Eins"), one source for both pictures (F-5).
@@ -774,6 +796,18 @@ export interface FigmaComponentSet {
    * in the frame „Eroj" right after the set (F-8). The backdrop is drawn here only — the
    * variants are the surface — and this is where the plan's `backdrop.color` is applied.
    */
+  /**
+   * The examples beside a pagination's set (Spec 015 ①, O-2, the spec's „Seite 1, 5 und 10 von
+   * 10"): the default variant drawn once more per example with the pages the web shows for that
+   * page — the first, the last, the current one and its siblings, „…" for every gap — the current
+   * one by its index among them.
+   */
+  examples?: {
+    name: string;
+    variant: Record<string, string>;
+    padding: number;
+    pages: { texts: string[]; selected: number };
+  }[];
   example?: {
     name: string;
     variant: Record<string, string>;
@@ -2126,6 +2160,24 @@ function componentSetOf(
     backdrop === undefined || isBindingKeyword(backdrop.token)
       ? undefined
       : paintOf(backdrop.token, resolutions, base);
+  // Spec 015 ① (O-2): the pagination on page 1, 5 and 10 of 10, with the web's own choice of
+  // pages (the Skemo's default siblings).
+  const examples =
+    structure === "pagination"
+      ? [1, 5, 10].map((page) => {
+          const texts = paginationWords(
+            page,
+            PAGINATION_EXAMPLE_TOTAL,
+            Number(skemo.props.find((prop) => prop.name === "siblings")?.default ?? 1),
+          );
+          return {
+            name: `${entry.ero.name} – Seite ${page} von ${PAGINATION_EXAMPLE_TOTAL}`,
+            variant: defaults,
+            padding: parityPx(base[SET_GAP]?.value),
+            pages: { texts, selected: texts.indexOf(String(page)) },
+          };
+        })
+      : undefined;
   const example =
     structure === "dialog" && backdrop !== undefined && backdropPaint !== undefined
       ? {
@@ -2267,6 +2319,7 @@ function componentSetOf(
     ...(sign === undefined ? {} : { sign }),
     ...(options === undefined ? {} : { entry: options }),
     ...(example === undefined ? {} : { example }),
+    ...(examples === undefined ? {} : { examples }),
     ...(composed === undefined ? {} : { composed }),
     ...(toggles.length === 0 ? {} : { toggles }),
     ...(structure === "meter" ? { meter: { share: meterShareOf(skemo) } } : {}),

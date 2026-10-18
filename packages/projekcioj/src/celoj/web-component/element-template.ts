@@ -534,9 +534,12 @@ function paginationMarkup(): string {
 const ELLIPSIS_SIGN =
   '<svg aria-hidden="true" viewBox="0 0 16 16" width="1em" height="1em" fill="currentColor"><circle cx="3" cy="8" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="13" cy="8" r="1.5"/></svg>';
 
+/** The chevron after a level of a breadcrumb (Spec 015 ①): decorative, mirrored in RTL. */
+const BREADCRUMB_SEPARATOR =
+  '<fm-ikono part="separator" name="chevron-right" aria-hidden="true"></fm-ikono>';
+
 /** One item of a breadcrumb (Spec 015 ①): the slotted link and the chevron after it. */
-const BREADCRUMB_ENTRY =
-  '<li part="entry"><slot name="item-"></slot><fm-ikono part="separator" name="chevron-right" aria-hidden="true"></fm-ikono></li>';
+const BREADCRUMB_ENTRY = `<li part="entry"><slot name="item-"></slot>${BREADCRUMB_SEPARATOR}</li>`;
 
 function tabsMarkup(): string {
   return '<div part="control" role="tablist"></div><div part="panel" role="tabpanel" tabindex="0"><slot name="panel"></slot></div><slot hidden></slot><span id="fm-texts" hidden></span>';
@@ -1574,11 +1577,16 @@ ${
       });
     }
     items.forEach((item, index) => {
-      list.children[index]?.querySelector("slot")?.assign(item);
-    });
-    const separators = [...list.querySelectorAll('[part="separator"]')];
-    separators.forEach((separator, index) => {
-      (separator as HTMLElement).hidden = index === separators.length - 1;
+      const entry = list.children[index];
+      entry?.querySelector("slot")?.assign(item);
+      // A chevron stands between two levels only (Abnahme S-2): the last level, the current page,
+      // has none. Removed, not hidden — the icon's own display would win over [hidden].
+      const separator = entry?.querySelector('[part="separator"]');
+      const last = index === items.length - 1;
+      if (last && separator !== null && separator !== undefined) separator.remove();
+      if (!last && (separator === null || separator === undefined)) {
+        entry?.insertAdjacentHTML("beforeend", ${JSON.stringify(BREADCRUMB_SEPARATOR)});
+      }
     });
   }
 
