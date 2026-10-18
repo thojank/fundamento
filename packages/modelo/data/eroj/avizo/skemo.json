@@ -57,6 +57,16 @@
           ]
         }
       },
+      "icon": {
+        "color": {
+          "by": [
+            "intent"
+          ]
+        },
+        "size": {
+          "fixed": "size.icon.medium"
+        }
+      },
       "accent": {
         "color": {
           "by": [
@@ -177,6 +187,38 @@
           "intent": "danger"
         },
         "token": "color.status.danger.border"
+      },
+      {
+        "part": "icon",
+        "property": "color",
+        "when": {
+          "intent": "info"
+        },
+        "token": "color.status.info.text"
+      },
+      {
+        "part": "icon",
+        "property": "color",
+        "when": {
+          "intent": "success"
+        },
+        "token": "color.status.success.text"
+      },
+      {
+        "part": "icon",
+        "property": "color",
+        "when": {
+          "intent": "warning"
+        },
+        "token": "color.status.warning.text"
+      },
+      {
+        "part": "icon",
+        "property": "color",
+        "when": {
+          "intent": "danger"
+        },
+        "token": "color.status.danger.text"
       }
     ],
     "a11y": {

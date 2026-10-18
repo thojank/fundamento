@@ -164,3 +164,16 @@ test.describe("fm-tabelo behaviour", () => {
     await expect(page.locator("#t fm-plenstato")).toHaveCount(0);
   });
 });
+
+// Spec 014 ② (G3, G6): the sort arrow is an fm-ikono — sort-ascending or sort-descending by the
+// direction, no rotation of one sign.
+test("the sort button holds an fm-ikono whose name follows the direction", async ({ page }) => {
+  await serve(page, out, table('sort="name"'));
+  const ikono = page.locator('#t th[data-sort="name"] > button fm-ikono');
+  await expect(ikono).toHaveCount(1);
+  await expect(ikono).toHaveAttribute("name", "sort-ascending");
+  await expect(ikono).toHaveAttribute("size", "small");
+  await page.locator("#t").evaluate((element) => element.setAttribute("direction", "descending"));
+  await expect(ikono).toHaveAttribute("name", "sort-descending");
+  expect(await page.locator("#t th > button svg").count()).toBe(0);
+});

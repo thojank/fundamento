@@ -9,7 +9,6 @@ import { baseResolution, defaultModeloSource, projectModeloSource } from "@funda
 import { describe, expect, it } from "vitest";
 import { celoInputOf } from "../../build.js";
 import { VITRINO_LIST_ENTRIES, VITRINO_OPTIONS, VITRINO_SLOT_TEXTS } from "../vitrino/datumoj.js";
-import { signOf } from "../web-component/element-template.js";
 import {
   ALPHA_VARIES,
   BACKDROP_EXAMPLE,
@@ -761,6 +760,8 @@ describe("Figma plan for the ligilo (Spec 008 T017)", () => {
 
   it("plans the sets in Ero order, butono first, and gives the ligilo placement × size × state", () => {
     expect(plan.components.map((component) => component.set)).toEqual([
+      // Spec 014 ②: the apartigilo, the ikono and the saltligilo, in the Ero order like every set.
+      "apartigilo",
       // Spec 011 ④: the atributlisto, the mezurilo and the tabelo, in the Ero order like every set.
       "atributlisto",
       // Spec 011 ③: the avizo, the insigno and the plenstato, in the Ero order like every set.
@@ -770,6 +771,7 @@ describe("Figma plan for the ligilo (Spec 008 T017)", () => {
       "dialogo",
       "elektilo",
       "elekto",
+      "ikono",
       "insigno",
       "kampo",
       "langetaro",
@@ -778,6 +780,7 @@ describe("Figma plan for the ligilo (Spec 008 T017)", () => {
       "mezurilo",
       "navigado",
       "plenstato",
+      "saltligilo",
       "sxaltilo",
       "tabelo",
       "tekstareo",
@@ -953,6 +956,8 @@ describe("the label default of a set follows its a11y role (M-3)", () => {
     );
     // Spec 010 ①: a switch names a setting (plan D-10, for the maintainer to confirm).
     expect(defaults).toEqual({
+      // Spec 014 ②: a separator and an icon carry no text — no label property.
+      apartigilo: undefined,
       // Spec 011 ④ (plan ④ D-14): a key-value list (role list) names what it states (for the
       // maintainer to confirm).
       atributlisto: "Angaben",
@@ -966,6 +971,7 @@ describe("the label default of a set follows its a11y role (M-3)", () => {
       elektilo: "Auswahl",
       // Spec 010 ③: a radio group names its question (plan ③ D-07, for the maintainer to confirm).
       elekto: "Frage",
+      ikono: undefined,
       // Spec 011 ③: a badge (role generic) names a status (for the maintainer to confirm).
       insigno: "Status",
       kampo: "Beschriftung",
@@ -984,6 +990,8 @@ describe("the label default of a set follows its a11y role (M-3)", () => {
       // Spec 011 ③: a loading or empty state shares the role status with the notice; its word is
       // the structure's, not the role's (for the maintainer to confirm).
       plenstato: "Zustand",
+      // Spec 014 ②: a skip link is a link; its word names its destination.
+      saltligilo: "Ziel",
       sxaltilo: "Einstellung",
       // Spec 011 ④ (plan ④ D-14): a table's caption is a caption like a field's label (for the
       // maintainer to confirm).
@@ -1340,9 +1348,9 @@ describe("Figma plan for the elektilo (Spec 010 ④)", () => {
     expect(kampoSet?.texts).toEqual({ text: "Beispiel", help: "Hinweis", error: "Fehler" });
     // No options are drawn: the list is the platform's (E3).
     expect(set?.entry).toBeUndefined();
-    expect(set?.sign).toMatch(/^<svg [^>]*viewBox="0 0 16 16"/);
-    // The chevron as one filled path: Figma imports one vector, as for the check mark (② D-09).
-    expect(set?.sign).toContain('<path d="M1.9 5.7 3.3 4.3 8 9l4.7-4.7 1.4 1.4L8 11.8z"/>');
+    // Spec 014 ②: the chevron is an ikono of the plan (chevron-down per variant), no sign.
+    expect(set?.sign).toBeUndefined();
+    expect(set?.variants[0]?.icons).toEqual({ indicator: "chevron-down" });
     expect(kampoSet?.sign).toBeUndefined();
   });
 
@@ -1693,6 +1701,13 @@ describe("Figma plan for the dialogo (Spec 011 ②)", () => {
           "label.color": expect.objectContaining({ hex: expect.stringMatching(/^#/) }),
         },
       },
+      // Spec 014 ② (O-5 of ①): the help of the reason looks like the tekstareo's help.
+      "reason-help": {
+        ero: "tekstareo",
+        props: { size: "medium", state: "rest" },
+        bindings: { "help.color": "color/text/muted", "help.typography": "typography/caption" },
+        paints: { "help.color": expect.objectContaining({ hex: expect.stringMatching(/^#/) }) },
+      },
     });
     // Every binding names a variable of the plan (the butono binds them already).
     const names = new Set(
@@ -1851,6 +1866,9 @@ describe("Figma plan for the avizo (Spec 011 ③)", () => {
     const info = variant("info");
     expect(info?.bindings).toEqual({
       "surface.fill": "color/status/info/weak",
+      // Spec 014 ②: the icon of the intent, in the status text colour, size.icon.medium.
+      "icon.color": "color/status/info/text",
+      "icon.size": "size/icon/medium",
       "accent.color": "color/status/info/border",
       "accent.width": "border/width/strong",
       "heading.color": "color/text/default",
@@ -1873,6 +1891,7 @@ describe("Figma plan for the avizo (Spec 011 ③)", () => {
       "accent.color",
       "details.color",
       "heading.color",
+      "icon.color",
       "message.color",
       "surface.fill",
     ]);
@@ -1883,6 +1902,7 @@ describe("Figma plan for the avizo (Spec 011 ③)", () => {
       "box.inline-padding",
       "box.radius",
       "dismiss.size",
+      "icon.size",
     ]);
     expect(info?.notDrawn).toEqual({});
     expect(info?.hidden).toBeUndefined();
@@ -2184,8 +2204,9 @@ describe("Figma plan for the tabelo (Spec 011 ④)", () => {
       direction: "ascending",
     });
     // The chevron of the select is the sort indicator (one shape for both pictures).
-    expect(set?.sign).toBe(signOf("combobox", "16"));
-    expect(set?.sign).toContain('d="M1.9 5.7');
+    // Spec 014 ②: the sort arrow is an ikono of the plan (sort-ascending), no sign.
+    expect(set?.sign).toBeUndefined();
+    expect(set?.variants[0]?.icons).toEqual({ "sort-indicator": "sort-ascending" });
     expect(set?.toggles).toEqual([
       { property: "caption-hidden", part: "caption", defaultValue: false, hides: true },
     ]);
@@ -2661,5 +2682,152 @@ describe("Figma plan for the langetaro (Spec 011 ⑤)", () => {
     expect(values["panel.color@state=rest"]).toMatch(/^#[0-9a-f]{6}$/);
     expect(values["panel.inline-padding@state=focus"]).toMatch(/px$/);
     expect(Object.values(values).some((value) => value.startsWith("not drawn"))).toBe(false);
+  });
+});
+
+// Spec 014 ② (G3, G4, section ②, plan ② D-08): the Figma plan draws icons. The glyphs of every
+// Aspekto travel in the plan (`ikonoj`), a BOOLEAN variable per Aspekto in the collection aspekto
+// says which picture shows in which mode; the set ikono is a structure of its own (icon), its
+// variants name × size × intent in a grid of names; the butono, the elektilo, the tabelo and the
+// avizo name the icons they compose per variant; the release of the undrawn icon is lifted.
+describe("the Figma plan draws icons (Spec 014 ②)", () => {
+  const ikono = plan.components.find((component) => component.set === "ikono");
+  const names = prepared.input.modelo.ikonaro.map((entry) => entry.name);
+
+  it("carries the glyphs of every Aspekto and the names that mirror; a BOOLEAN variable per Aspekto switches them", () => {
+    expect(plan.ikonoj?.names).toEqual(names);
+    expect(plan.ikonoj?.mirror).toEqual(["chevron-right"]);
+    expect(Object.keys(plan.ikonoj?.glyphs ?? {})).toEqual(["komuna", "ekzemplo"]);
+    for (const aspekto of ["komuna", "ekzemplo"]) {
+      for (const name of names) {
+        expect(plan.ikonoj?.glyphs[aspekto]?.[name], `${aspekto} ${name}`).toMatch(/^<svg/);
+      }
+    }
+    const aspekto = plan.collections.find((collection) => collection.name === "aspekto");
+    expect(aspekto?.variables.filter((variable) => variable.type === "BOOLEAN")).toEqual([
+      { name: "ikonoj/komuna", type: "BOOLEAN", values: { komuna: true, ekzemplo: false } },
+      { name: "ikonoj/ekzemplo", type: "BOOLEAN", values: { komuna: false, ekzemplo: true } },
+    ]);
+  });
+
+  it("lifts the release of the undrawn icon: FIGMA_NOT_DRAWN names no icon, the butono binds and draws its icon", () => {
+    expect(FIGMA_NOT_DRAWN.icon).toBeUndefined();
+    const butono = butonoOf(plan.components);
+    const rest = butono?.variants.find(
+      (variant) =>
+        variant.props.emphasis === "high" &&
+        variant.props.intent === "neutral" &&
+        variant.props.size === "medium" &&
+        variant.props.state === "rest",
+    );
+    expect(rest?.notDrawn?.["icon.color"]).toBeUndefined();
+    expect(rest?.bindings["icon.color"]).toBe("color/action/primary/text");
+    expect(rest?.bindings["icon.size"]).toBe("size/icon/medium");
+    expect(rest?.paints?.["icon.color"]).toBeDefined();
+    expect(rest?.icons).toEqual({ "icon-start": "check" });
+  });
+
+  it("draws the set ikono as an icon: name × size × intent, the colour of a neutral icon bound to the text's, a status icon to its status text", () => {
+    expect(ikono?.structure).toBe("icon");
+    expect(ikono?.properties).toEqual({
+      name: names,
+      size: ["small", "medium", "large"],
+      intent: ["neutral", "info", "success", "warning", "danger"],
+      label: "TEXT",
+      state: ["rest"],
+    });
+    expect(ikono?.variants).toHaveLength(names.length * 3 * 5);
+    const neutral = ikono?.variants.find(
+      (variant) =>
+        variant.props.name === "close" &&
+        variant.props.size === "medium" &&
+        variant.props.intent === "neutral",
+    );
+    expect(neutral?.bindings).toEqual({
+      "glyph.color": "color/text/default",
+      "box.size": "size/icon/medium",
+    });
+    // The stand-in claims no paint: the Skemo says inherit, the web takes the text's colour.
+    expect(neutral?.paints?.["glyph.color"]).toBeUndefined();
+    const danger = ikono?.variants.find(
+      (variant) =>
+        variant.props.name === "danger" &&
+        variant.props.size === "large" &&
+        variant.props.intent === "danger",
+    );
+    expect(danger?.bindings).toEqual({
+      "glyph.color": "color/status/danger/text",
+      "box.size": "size/icon/large",
+    });
+    expect(danger?.paints?.["glyph.color"]).toBeDefined();
+    // The grid: a row per size × intent, a column per name (spec ②: name × size).
+    expect(ikono?.grid).toMatchObject({ rows: 15, columns: names.length });
+    // The rows follow the combinations of size × intent in the Skemo's order: medium/neutral is
+    // the sixth (small/neutral…danger first); the column is the name's place in the Ikonaro.
+    expect(neutral?.cell).toEqual({ row: 5, column: names.indexOf("close") });
+    expect(ikono?.label).toBeUndefined();
+    expect(ikono?.description).toBe(
+      "Shows a symbol from the brand's icon set, decorative by default, named when it carries meaning.",
+    );
+  });
+
+  it("the elektilo, the tabelo and the avizo name the icons they compose", () => {
+    const elektilo = plan.components.find((component) => component.set === "elektilo");
+    expect(elektilo?.variants[0]?.icons).toEqual({ indicator: "chevron-down" });
+    expect(elektilo?.sign).toBeUndefined();
+    const tabelo = plan.components.find((component) => component.set === "tabelo");
+    expect(tabelo?.variants[0]?.icons).toEqual({ "sort-indicator": "sort-ascending" });
+    expect(tabelo?.sign).toBeUndefined();
+    const avizo = plan.components.find((component) => component.set === "avizo");
+    for (const variant of avizo?.variants ?? []) {
+      expect(variant.icons).toEqual({ icon: variant.props.intent });
+      expect(variant.bindings["icon.size"]).toBe("size/icon/medium");
+      expect(variant.bindings["icon.color"]).toBe(`color/status/${variant.props.intent}/text`);
+    }
+  });
+
+  it("draws the apartigilo as a separator with both orientations, and the saltligilo as a control in rest and focus", () => {
+    const apartigilo = plan.components.find((component) => component.set === "apartigilo");
+    expect(apartigilo?.structure).toBe("separator");
+    expect(apartigilo?.variants.map((variant) => variant.props)).toEqual([
+      { orientation: "horizontal", state: "rest" },
+      { orientation: "vertical", state: "rest" },
+    ]);
+    expect(apartigilo?.variants[0]?.bindings).toEqual({
+      "line.color": "color/border/subtle",
+      "line.width": "border/width/default",
+    });
+    expect(apartigilo?.variants[1]?.bindings["box.height"]).toBe("size/control/medium");
+    expect(apartigilo?.label).toBeUndefined();
+    const saltligilo = plan.components.find((component) => component.set === "saltligilo");
+    expect(saltligilo?.structure).toBe("control");
+    expect(saltligilo?.variants.map((variant) => variant.props.state)).toEqual(["rest", "focus"]);
+    expect(saltligilo?.variants[1]?.focusVisible).toBe(true);
+    expect(saltligilo?.variants[0]?.bindings["surface.fill"]).toBe("color/background/raised");
+    // The layer is bound in the plan (a FLOAT variable); Figma has no depth to apply it to.
+    expect(saltligilo?.variants[0]?.bindings["surface.layer"]).toBe("elevation/layer/overlay");
+    expect(saltligilo?.variants[0]?.shadow?.part).toBe("surface");
+    expect(labelDefaultOf("link")).toBe("Ziel");
+  });
+
+  it("the inventory of the plan compares the icon's and the separator's paints like every set", () => {
+    const inventory = figmaPlanInventory(plan);
+    expect(inventory.ikono?.props.name).toEqual(names);
+    // The name is no key of the Skemo side: every name states the same values (extraAxes).
+    expect(
+      inventory.ikono?.values["glyph.color@intent=danger,size=large,state=rest"],
+    ).toBeDefined();
+    expect(Object.keys(inventory.ikono?.values ?? {}).some((key) => key.includes("name="))).toBe(
+      false,
+    );
+    expect(
+      inventory.apartigilo?.values["line.color@orientation=horizontal,state=rest"],
+    ).toBeDefined();
+    expect(
+      Object.keys(inventory.butono?.values ?? {}).some((key) => key.startsWith("icon.color@")),
+    ).toBe(true);
+    expect(
+      Object.values(inventory.butono?.values ?? {}).some((value) => value.includes("not drawn")),
+    ).toBe(false);
   });
 });

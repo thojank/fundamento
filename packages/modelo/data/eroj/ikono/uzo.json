@@ -1,0 +1,98 @@
+{
+  "$schema": "../../../schema/modelo.schema.json#/$defs/UzoFile",
+  "uzo": {
+    "id": "uzo_01M55X2WZRBS84VV6228GWFAFW",
+    "ero": "ero_01M55X2W7FMR4C5F279M85EAC1",
+    "skemo": "ske_01M55X2WKHZ7MB8QMYK3C5RWFZ",
+    "purpose": "Shows a symbol from the brand's icon set, decorative by default, named when it carries meaning.",
+    "instead": [
+      {
+        "goal": "status-only-icon",
+        "keywords": {
+          "en": ["statusicon", "status-icon", "kennzeichnung"],
+          "de": ["statussymbol", "statusicon", "kennzeichnung"]
+        },
+        "ero": "insigno",
+        "kialo": "A status needs a word, because colour and a shape alone are no information for everyone (WCAG 1.4.1) and a picture is not read aloud; the insigno says the status in one to three words, with an icon beside it if the Aspekto wants one."
+      },
+      {
+        "goal": "logo",
+        "keywords": {
+          "en": ["logo", "wordmark", "brandmark"],
+          "de": ["logo", "wortmarke", "bildmarke"]
+        },
+        "ero": null,
+        "kialo": "A logo is the picture of a brand, not a sign of the system, because it keeps its own colours and proportions and never takes the text's colour; it belongs to the Aspekto as an asset of its own, which Fundamento does not carry yet."
+      }
+    ],
+    "boundary": [
+      {
+        "case": "custom-svg",
+        "action": "ask-human",
+        "keywords": {
+          "en": ["custom", "own", "drawn"],
+          "de": ["eigenes", "eigene", "gezeichnet"]
+        },
+        "kialo": "A picture outside the Ikonaro has no name in the core, because every name is vocabulary every Aspekto draws (Art. IV); a person decides whether the Ikonaro grows by a name or the picture is content."
+      },
+      {
+        "case": "animated-icon",
+        "action": "not-supported",
+        "keywords": {
+          "en": ["animated", "animation", "turning"],
+          "de": ["animiert", "animation", "drehend"]
+        },
+        "kialo": "An icon is still, because motion is a state of an Ero (the loading plenstato turns its indicator) and not of a sign; a sign that moves would carry meaning the name does not."
+      }
+    ],
+    "composes": {
+      "containers": [],
+      "with": [
+        {
+          "ero": "butono",
+          "kialo": "A button shows an icon before or after its label, or alone with a label prop, because the sign shortens what the word says; the icon takes the button's colour and size."
+        },
+        {
+          "ero": "avizo",
+          "kialo": "A notice shows the icon of its intent beside its words, because a sign is read faster than a word — and never alone, the intent word is heard (G6)."
+        },
+        {
+          "ero": "insigno",
+          "kialo": "A badge may show an icon per intent beside its word, never alone, because the word is the status and the sign only strengthens it (G6)."
+        },
+        {
+          "ero": "tabelo",
+          "kialo": "The sort button of a table shows the direction as an icon, because an arrow says ascending or descending in one glance; aria-sort says it aloud."
+        },
+        {
+          "ero": "elektilo",
+          "kialo": "The field of a select shows a chevron, because the sign says that a list opens below; the icon takes the field's size."
+        }
+      ],
+      "never": [],
+      "spacing": {
+        "owner": "container",
+        "regulo": "spacing-owned-by-container"
+      }
+    },
+    "slots": {},
+    "layout": {
+      "size": "content",
+      "wrap": "never"
+    },
+    "content": [
+      {
+        "regulo": "icon-meaning-named",
+        "fixed": true,
+        "of": "prop:label",
+        "check": {
+          "kind": "not-words",
+          "words": {
+            "en": ["icon", "image", "symbol", "glyph", "picture"],
+            "de": ["icon", "symbol", "bild", "grafik", "zeichen"]
+          }
+        }
+      }
+    ]
+  }
+}

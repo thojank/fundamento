@@ -32,9 +32,9 @@ const suggest = (goal: string) => {
 const INTENTS = ["info", "success", "warning", "danger"];
 
 describe("avizo in the repo Modelo (section ③, G1, G2)", () => {
-  it("lives in data/eroj/avizo/skemo.json, second of seventeen Eroj", () => {
+  it("lives in data/eroj/avizo/skemo.json, second of twenty Eroj", () => {
     expect(avizo?.file).toBe("modelo/data/eroj/avizo/skemo.json");
-    expect(modelo.eroj[1]?.ero.name).toBe("avizo");
+    expect(modelo.eroj[2]?.ero.name).toBe("avizo");
   });
 
   it("has intent (info, success, warning, danger; no neutral) and dismissible as props; one state, rest", () => {
@@ -65,6 +65,7 @@ describe("avizo in the repo Modelo (section ③, G1, G2)", () => {
       "details",
       "dismiss",
       "heading",
+      "icon",
       "message",
       "surface",
     ]);
@@ -167,7 +168,7 @@ describe("the Uzo of the avizo (section ③, G5)", () => {
 
   it("composes in a page and at the top of a dialog's content, with butono and ligilo", () => {
     expect(uzo?.composes.containers.map((container) => container.name)).toEqual(["page", "dialog"]);
-    expect(uzo?.composes.with.map((entry) => entry.ero)).toEqual(["butono", "ligilo"]);
+    expect(uzo?.composes.with.map((entry) => entry.ero)).toEqual(["butono", "ligilo", "ikono"]);
   });
 
   it("carries error-says-what-to-do, adjustable, as min-words 3 on the message when intent is danger", () => {

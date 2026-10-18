@@ -1,0 +1,70 @@
+{
+  "$schema": "../../../schema/modelo.schema.json#/$defs/UzoFile",
+  "uzo": {
+    "id": "uzo_01M55X2WZS3W6YXNGRCB91BWG6",
+    "ero": "ero_01M55X2W7FMR4C5F279M85EAC3",
+    "skemo": "ske_01M55X2WKJTJVMKK7CPB0ZKHFQ",
+    "purpose": "Lets keyboard users skip repeated content and jump to the main content.",
+    "instead": [
+      {
+        "goal": "in-page-link",
+        "keywords": {
+          "en": ["reference", "anchor", "see"],
+          "de": ["verweis", "anker", "siehe"]
+        },
+        "ero": "ligilo",
+        "kialo": "A reference inside the text is a link, because a reader follows it from the sentence it stands in; the skip link stands before everything and only passes over what repeats on every page."
+      }
+    ],
+    "boundary": [
+      {
+        "case": "always-visible",
+        "action": "not-supported",
+        "keywords": {
+          "en": ["permanent", "always"],
+          "de": ["dauerhaft", "immer"]
+        },
+        "kialo": "A skip link shows itself only to the person who tabs to it, because for everyone else it is a word before the content that says nothing; a link that is always shown is a place of the navigation (navigado) or a ligilo."
+      }
+    ],
+    "composes": {
+      "containers": [
+        {
+          "name": "shell",
+          "kialo": "The shell of an application holds the skip link as its first element, because the repeated parts it passes over (the navigation, the header) are the shell's and come before the content of every page."
+        }
+      ],
+      "with": [],
+      "never": [],
+      "spacing": {
+        "owner": "container",
+        "regulo": "spacing-owned-by-container"
+      }
+    },
+    "slots": {
+      "label": {
+        "accepts": ["text"],
+        "max": 1,
+        "required": true,
+        "nesting": 0
+      }
+    },
+    "layout": {
+      "size": "content",
+      "wrap": "never"
+    },
+    "content": [
+      {
+        "regulo": "link-label-names-destination",
+        "fixed": true,
+        "check": {
+          "kind": "not-words",
+          "words": {
+            "de": ["hier", "klicken", "mehr", "link"],
+            "en": ["here", "click", "more", "link"]
+          }
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "ero": {
+    "id": "ero_01M55X2W7FMR4C5F279M85EAC2",
+    "name": "apartigilo",
+    "skemo": "ske_01M55X2WKJTJVMKK7CPB0ZKHFP",
+    "description": "A divider: a line that separates groups of content where space alone does not. Horizontal or vertical; a separator for assistive technology, or nothing at all where it only decorates."
+  },
+  "skemo": {
+    "id": "ske_01M55X2WKJTJVMKK7CPB0ZKHFP",
+    "ero": "ero_01M55X2W7FMR4C5F279M85EAC2",
+    "props": [
+      {
+        "name": "orientation",
+        "kind": "enum",
+        "values": ["horizontal", "vertical"],
+        "default": "horizontal",
+        "description": "horizontal draws the line across its container between groups that stand above each other; vertical draws it along the block axis between groups that stand side by side."
+      },
+      {
+        "name": "decorative",
+        "kind": "boolean",
+        "default": false,
+        "description": "The line only decorates: nothing for assistive technology (role none). Default false: a separator between groups of content."
+      }
+    ],
+    "states": ["rest"],
+    "slots": [],
+    "parts": {
+      "line": {
+        "color": { "fixed": "color.border.subtle" },
+        "width": { "fixed": "border.width.default" }
+      },
+      "box": { "height": { "by": ["orientation"] } }
+    },
+    "bindings": [
+      { "part": "box", "property": "height", "when": { "orientation": "horizontal" }, "token": "none" },
+      {
+        "part": "box",
+        "property": "height",
+        "when": { "orientation": "vertical" },
+        "token": "size.control.medium"
+      }
+    ],
+    "a11y": {
+      "role": "separator",
+      "name": [],
+      "states": {},
+      "keys": []
+    },
+    "goals": [
+      {
+        "goal": "separate",
+        "keywords": {
+          "en": ["divider", "separator", "rule"],
+          "de": ["trennlinie", "trenner", "trennstrich"]
+        },
+        "props": {}
+      }
+    ]
+  }
+}

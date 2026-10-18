@@ -39,6 +39,7 @@ import {
 import type { Celo, CeloInput, GeneratedFile } from "../../build.js";
 import {
   VITRINO_DIALOG_ACTIONS,
+  VITRINO_ICON_EXAMPLE,
   VITRINO_LIST_ENTRIES,
   VITRINO_NUMBER_EXAMPLES,
   VITRINO_OPTIONS,
@@ -67,7 +68,8 @@ export interface FigmaColor {
 
 export interface FigmaVariable {
   name: string;
-  type: "COLOR" | "FLOAT" | "STRING";
+  /** BOOLEAN: the switch of a glyph per Aspekto (Spec 014 ②, plan ② D-08). */
+  type: "COLOR" | "FLOAT" | "STRING" | "BOOLEAN";
   /** Helper variables of the cascade are hidden from publishing. */
   hidden?: boolean;
   /** One entry per mode of the collection. */
@@ -128,7 +130,9 @@ const FOCUS_STATE = "focus";
  * and the icon is drawn (Maintainer, 2026-09-21).
  */
 export const FIGMA_NOT_DRAWN: Readonly<Record<string, string>> = {
-  icon: "jug_01M31TV1V4S3RNBPWSRB2CGEDK",
+  // The icon was released by jug_01M31TV1V4S3RNBPWSRB2CGEDK until Spec 014 ② (plan ② D-08): the
+  // Vitrino shows icons now, so Figma draws them from the glyphs of every Aspekto; the Jugxo
+  // stays as history with its note.
   // Spec 008 (plan D-11, Befund B-1): the underline is written as the label's text decoration,
   // on or off per variant; its thickness and colour bind to no variable in Figma. The underline
   // of a navigation's item (Spec 011 ⑤) is no text decoration but the item's block-end edge, and
@@ -259,16 +263,52 @@ function composedOf(
     const paint = paintOf(bound.token, resolutions, base);
     if (paint !== undefined) paints[key] = paint;
   }
-  if (Object.keys(bindings).length === 0) return undefined;
-  return {
-    [node]: {
+  const composed: NonNullable<FigmaComponentSet["composed"]> = {};
+  if (Object.keys(bindings).length > 0) {
+    composed[node] = {
       ero,
       props: { ...props },
       bindings,
       ...(Object.keys(paints).length === 0 ? {} : { paints }),
-    },
-  };
+    };
+  }
+  // The help of the reason (Spec 014 ① D-02, ② O-5): the dialog hands it to its tekstareo, so
+  // the stand-in takes the tekstareo's help colour and role, read from that Skemo.
+  const area = eroj.find((candidate) => candidate.ero.name === DIALOG_REASON_HELP.ero);
+  if (area !== undefined) {
+    const helpBindings: Record<string, string> = {};
+    const helpPaints: Record<string, FigmaPaint> = {};
+    for (const key of DIALOG_REASON_HELP.parts) {
+      const [part = "", property = ""] = key.split(".");
+      const bound = boundToken(area.skemo, part, property, DIALOG_REASON_HELP.props);
+      if (bound === undefined || isBindingKeyword(bound.token)) continue;
+      helpBindings[key] = variableName(bound.token);
+      if (PART_PROPERTY_TYPES[property as keyof typeof PART_PROPERTY_TYPES] !== "color") continue;
+      const paint = paintOf(bound.token, resolutions, base);
+      if (paint !== undefined) helpPaints[key] = paint;
+    }
+    if (Object.keys(helpBindings).length > 0) {
+      composed[DIALOG_REASON_HELP.node] = {
+        ero: DIALOG_REASON_HELP.ero,
+        props: { ...DIALOG_REASON_HELP.props },
+        bindings: helpBindings,
+        ...(Object.keys(helpPaints).length === 0 ? {} : { paints: helpPaints }),
+      };
+    }
+  }
+  return Object.keys(composed).length === 0 ? undefined : composed;
 }
+
+/**
+ * The help under the reason field of a dialog (Spec 014 ② O-5): a stand-in for the help of the
+ * composed tekstareo — its colour and role at rest in the field's default size.
+ */
+export const DIALOG_REASON_HELP = {
+  node: "reason-help",
+  ero: "tekstareo",
+  props: { size: "medium", [STATE_KEY]: "rest" } as Record<string, string>,
+  parts: ["help.color", "help.typography"] as readonly string[],
+};
 
 /**
  * The texts of a dialog's set (Spec 011 ②): the message, the label of the reason field and its
@@ -450,7 +490,9 @@ export type FigmaStructure =
   | "table"
   | "list"
   | "nav"
-  | "tabs";
+  | "tabs"
+  | "icon"
+  | "separator";
 
 /**
  * A radio group (Spec 010 ③, D-07) is a choice: the label (the question) above a column of
@@ -500,7 +542,13 @@ export const structureOf = (role: string, parts: readonly string[] = []): FigmaS
                       ? "nav"
                       : role === "tablist"
                         ? "tabs"
-                        : "control";
+                        : // Spec 014 ② (plan ② D-08): an icon (role img) is the glyph of every
+                          // Aspekto in a box; a separator (role separator) a line.
+                          role === "img"
+                          ? "icon"
+                          : role === "separator"
+                            ? "separator"
+                            : "control";
 
 /**
  * The neutral word every label template shows, per a11y role (M-3; Maintainer, F14, 2026-10-13,
@@ -614,6 +662,20 @@ export const FIGMA_SET_FRAME = "Eroj";
  */
 export const INHERIT_TYPOGRAPHY = "typography.body.1";
 
+/**
+ * The colour a part that inherits from its text (binding keyword `inherit`, Spec 014 ②, plan ②
+ * D-08: the glyph of a neutral icon) shows in Figma: a set has no text around it to inherit from,
+ * so the default text colour stands in for it, bound like any role — an instance in a surface
+ * takes the colour the designer gives it, as the web takes the text's.
+ */
+export const INHERIT_COLOR = "color.text.default";
+
+/**
+ * The icon every button carries in the set (Spec 014 ②, plan ② D-08): the Vitrino's example in
+ * its icon-start slot (one source for both pictures, F-5).
+ */
+export const ICON_EXAMPLE = VITRINO_ICON_EXAMPLE;
+
 export interface FigmaComponentSet {
   set: string;
   /** How the plugin draws the variants (Spec 009, D-09); a plan without it is a control. */
@@ -629,6 +691,18 @@ export interface FigmaComponentSet {
    * the size of its frame and the colour of its vector; a knob has no sign.
    */
   sign?: string;
+  /**
+   * The axes of the variants that are no axes of the Skemo's parts (Spec 014 ②, plan ② D-08): the
+   * name of an icon — one variant per name of the Ikonaro, drawn in its own column, while the
+   * Skemo keys no part by it. The parity inventory leaves them out of the variant key.
+   */
+  extraAxes?: string[];
+  /**
+   * A separator (Spec 014 ②, plan ② D-06): the length of the horizontal line in the set, px of
+   * size.container.small in the base combination — written, not bound; the line's width and
+   * colour are bound, the vertical line's height too.
+   */
+  separator?: { length: number };
   /**
    * The options a choice shows in every variant (Spec 010 ③, D-07): the entry key of its slot
    * (selected), the words of the options — the Vitrino's — and which of them is chosen. The plugin
@@ -725,6 +799,12 @@ export interface FigmaComponentSet {
   properties: Record<string, string[] | "BOOLEAN" | "TEXT" | "NUMBER">;
   variants: {
     props: Record<string, string>;
+    /**
+     * The icons the variant composes (Spec 014 ②, G3, plan ② D-08), by the part that holds each:
+     * the icon-start of a butono (the Vitrino's example), the chevron of a select, the sort arrow
+     * of a table, the status icon of a notice (its intent). Drawn from the glyphs of the plan.
+     */
+    icons?: Record<string, string>;
     bindings: Record<string, string>;
     /** Per colour binding the plugin draws, the paint it applies. */
     paints?: Record<string, FigmaPaint>;
@@ -912,6 +992,13 @@ export interface FigmaPlan {
   fontFallback?: string;
   collections: FigmaCollection[];
   components: FigmaComponentSet[];
+  /**
+   * The glyphs of the Ikonaro (Spec 014 ②, G3, plan ② D-08): every name of the core, which of them
+   * mirror in right-to-left writing, and per Aspekto the SVG the package draws for each name. An
+   * icon in the file is one frame per Aspekto imported from its glyph, shown by the BOOLEAN
+   * variable `ikonoj/<aspekto>` of the collection aspekto — so the brand mode switches the picture.
+   */
+  ikonoj?: { names: string[]; mirror: string[]; glyphs: Record<string, Record<string, string>> };
   /**
    * Where the sets lie (F-1, F-2, F-8): in the frame `frame` with auto-layout (horizontal,
    * wrapping, `gap` between the sets and between the rows, hugging both ways, no fill), at the
@@ -1476,6 +1563,44 @@ function paintOf(
     : { hex, alphaVariesByMode: true };
 }
 
+/**
+ * The length of the horizontal line of a separator in the set (Spec 014 ②, plan ② D-06): the
+ * smallest container a divider spans, px of the base combination — written, not bound.
+ */
+const SEPARATOR_LENGTH = "size.container.small";
+
+/**
+ * The icons a variant composes (Spec 014 ②, G3, G6, plan ② D-08), by the part that holds each:
+ * a button with a decorative icon-start slot and the part icon shows the Vitrino's example; a
+ * select its chevron-down in the indicator; a table its sort-ascending in the sort indicator; a
+ * notice with the part icon the icon of its intent (the names of the Ikonaro are the intents).
+ */
+function iconsOf(
+  skemo: LoadedEro["skemo"],
+  structure: FigmaStructure,
+  combination: Readonly<Record<string, string>>,
+): Record<string, string> | undefined {
+  if (
+    structure === "control" &&
+    skemo.a11y.role === "button" &&
+    skemo.parts.icon !== undefined &&
+    skemo.slots.some((slot) => slot.name === "icon-start" && slot.decorative === true)
+  ) {
+    return { "icon-start": ICON_EXAMPLE };
+  }
+  if (skemo.a11y.role === "combobox" && skemo.parts.indicator !== undefined) {
+    return { indicator: "chevron-down" };
+  }
+  if (structure === "table" && skemo.parts["sort-indicator"] !== undefined) {
+    return { "sort-indicator": "sort-ascending" };
+  }
+  if (structure === "notice" && skemo.parts.icon !== undefined) {
+    const intent = combination.intent;
+    return intent === undefined ? undefined : { icon: intent };
+  }
+  return undefined;
+}
+
 /** The component set of one Ero: every variant with its variable bindings (D-12). */
 function componentSetOf(
   entry: LoadedEro,
@@ -1506,8 +1631,11 @@ function componentSetOf(
   // Variants exist for what changes the appearance: the props the parts are keyed by, and state.
   // `type`, for example, is behaviour in a form and would only multiply the set. A keyed boolean
   // prop is an axis too (Spec 010 ①, D-03: checked of the switch).
-  const keys = variantKeys(skemo);
   const structure = structureOf(skemo.a11y.role, Object.keys(skemo.parts));
+  // An icon (Spec 014 ②): one variant per name of the Ikonaro besides the axes of its parts — the
+  // name keys no part, the glyph does; the Figma side is told so (extraAxes).
+  const extraAxes = structure === "icon" ? ["name"] : [];
+  const keys = [...extraAxes, ...variantKeys(skemo)];
   // What the plugin draws for this structure (Spec 011 ③): the bindings every structure shares and
   // the ones this structure binds elsewhere — the text's colour on the label of a badge. What the
   // structure binds on a node of its own (Spec 011 ⑤: the underline of a navigation's item as its
@@ -1682,6 +1810,12 @@ function componentSetOf(
           if (bound.token === "inherit" && property === "typography") {
             bindings[key] = variableName(INHERIT_TYPOGRAPHY);
           }
+          // A colour that inherits (Spec 014 ②): the default text colour stands in, bound like
+          // the inherited role (INHERIT_TYPOGRAPHY); no paint is claimed — the Skemo states none,
+          // the web takes the text's colour around the icon.
+          if (bound.token === "inherit" && property === "color" && drawn.has(key)) {
+            bindings[key] = variableName(INHERIT_COLOR);
+          }
           // A colour that is none is a part not drawn in this variant (Spec 010 ②, D-09); a
           // height that is none (Spec 011 ②: the reason field of a dialog without a reason) too.
           if (
@@ -1792,8 +1926,10 @@ function componentSetOf(
     const [onlyCase] = [...cases];
     const textCase = cases.size <= 1 ? (onlyCase ?? "ORIGINAL") : TEXT_CASE_VARIES;
     const shadow = shadowOf(combination);
+    const icons = iconsOf(skemo, structure, combination);
     return {
       props: { ...combination },
+      ...(icons === undefined ? {} : { icons }),
       bindings,
       paints,
       geometry,
@@ -1875,14 +2011,21 @@ function componentSetOf(
     ground !== undefined && "opacity" in ground
       ? { variable: variableName(VITRINO_SURFACE), opacity: ground.opacity }
       : undefined;
-  const columns = skemo.states.length;
+  // The grid: a row per combination, a column per state — an icon (Spec 014 ②) a row per
+  // combination of its axes and a column per name, as the spec draws it (name × size).
+  const names = skemo.props.find((prop) => prop.name === "name")?.values ?? [];
+  const columns = structure === "icon" ? names.length : skemo.states.length;
   const rowOf = new Map<string, number>();
   for (const variant of variants) {
-    const { [STATE_KEY]: state, ...combination } = variant.props;
-    const key = JSON.stringify(combination);
+    const { [STATE_KEY]: state, name, ...combination } = variant.props;
+    const key = JSON.stringify(structure === "icon" ? combination : { ...combination, name });
     if (!rowOf.has(key)) rowOf.set(key, rowOf.size);
     Object.assign(variant, {
-      cell: { row: rowOf.get(key) ?? 0, column: skemo.states.indexOf(state ?? "") },
+      cell: {
+        row: rowOf.get(key) ?? 0,
+        column:
+          structure === "icon" ? names.indexOf(name ?? "") : skemo.states.indexOf(state ?? ""),
+      },
     });
   }
   const cell = parityPx(base[VITRINO_CELL_PADDING]?.value);
@@ -1941,11 +2084,13 @@ function componentSetOf(
   // (Spec 010 ④, D-07); a text field has none. A state (Spec 011 ③) has the arc. A table (Spec
   // 011 ④) has the select's chevron as its sort indicator — the web turns the same sign by the
   // direction; one shape for both pictures.
+  // Spec 014 ②: the chevron of a select and the sort arrow of a table are icons of the plan
+  // (iconsOf), no sign; the check mark, the dot and the arc stay signs.
   const sign =
     structure === "state"
       ? STATE_SIGN
-      : structure === "table"
-        ? signOf("combobox", "16")
+      : skemo.a11y.role === "combobox" || structure === "table"
+        ? undefined
         : signOf(skemo.a11y.role, "16");
   // The boolean props that show a part (Spec 011 ③): BOOLEAN properties of the set, no axis. The
   // part may be the text of a slot (Spec 011 ④: the caption of a table is its default slot).
@@ -2002,6 +2147,10 @@ function componentSetOf(
       : {}),
     ...(structure === "dialog" ? { texts: dialogTexts } : {}),
     ...(structure === "tabs" ? { texts: { ...TABS_TEXTS } } : {}),
+    ...(extraAxes.length === 0 ? {} : { extraAxes }),
+    ...(structure === "separator"
+      ? { separator: { length: parityPx(base[SEPARATOR_LENGTH]?.value) } }
+      : {}),
     ...(sign === undefined ? {} : { sign }),
     ...(options === undefined ? {} : { entry: options }),
     ...(example === undefined ? {} : { example }),
@@ -2021,7 +2170,10 @@ function componentSetOf(
       gap: 2 * cell,
       padding: cell,
     },
-    label: { property: "label", defaultValue: labelDefaultOf(skemo.a11y.role, structure) },
+    // An icon and a separator carry no text (Spec 014 ②): no label property.
+    ...(structure === "icon" || structure === "separator"
+      ? {}
+      : { label: { property: "label", defaultValue: labelDefaultOf(skemo.a11y.role, structure) } }),
     fonts,
     ...(surface === undefined ? {} : { surface }),
   };
@@ -2156,12 +2308,53 @@ export const FIGMA_CELO: Celo = {
         variables: sortVariables(variables.get(dimensio.name) ?? []),
       })),
     ];
+    // The glyphs of every Aspekto (Spec 014 ②, G3): the picture per name, and a BOOLEAN variable
+    // per Aspekto in the collection aspekto that is true in its own mode — the switch of the
+    // glyph frames (plan ② D-08).
+    const aspektoCollection = collections.find(
+      (collection) => collection.name === ASPEKTO_DIMENSIO,
+    );
+    const aspektoj = aspektoCollection?.modes ?? [];
+    const ikonoj =
+      modelo.ikonaro.length === 0
+        ? undefined
+        : {
+            names: modelo.ikonaro.map((ikono) => ikono.name),
+            mirror: modelo.ikonaro
+              .filter((ikono) => ikono.mirror === true)
+              .map((ikono) => ikono.name),
+            glyphs: Object.fromEntries(
+              aspektoj.map((aspekto) => {
+                const glyphs =
+                  modelo.aspektoPackages.find((pkg) => pkg.aspekto === aspekto)?.ikonoj ?? {};
+                return [
+                  aspekto,
+                  Object.fromEntries(
+                    modelo.ikonaro.flatMap((ikono): [string, string][] => {
+                      const svg = glyphs[ikono.name];
+                      return svg === undefined ? [] : [[ikono.name, svg]];
+                    }),
+                  ),
+                ];
+              }),
+            ),
+          };
+    if (ikonoj !== undefined && aspektoCollection !== undefined) {
+      for (const aspekto of aspektoj) {
+        aspektoCollection.variables.push({
+          name: `ikonoj/${aspekto}`,
+          type: "BOOLEAN",
+          values: Object.fromEntries(aspektoj.map((mode) => [mode, mode === aspekto])),
+        });
+      }
+    }
     const base = baseResolution(modelo);
     const gap = parityPx(base[SET_GAP]?.value);
     const plan: FigmaPlan = {
       fundamento: modeloJson.fundamento.version,
       fontFallback: FIGMA_FONT_FALLBACK,
       collections,
+      ...(ikonoj === undefined ? {} : { ikonoj }),
       components: modelo.eroj.map((entry) =>
         componentSetOf(
           entry,
@@ -2214,8 +2407,13 @@ export function figmaPlanInventory(plan: unknown): Record<string, ParityItem> {
     // F8: the side states what the plugin applies — the paint with its deckkraft, or the marker
     // for a binding whose alpha is not the same in every mode.
     const values: Record<string, string> = {};
+    // The axes the Skemo keys no part by (Spec 014 ②: the name of an icon) are no part of the key
+    // the Skemo side writes; every name states the same values.
+    const extra = new Set(component.extraAxes ?? []);
+    const keyed = (props: Readonly<Record<string, string>>) =>
+      Object.fromEntries(Object.entries(props).filter(([key]) => !extra.has(key)));
     for (const variant of component.variants ?? []) {
-      const at = `@${parityVariantKey(variant.props)}`;
+      const at = `@${parityVariantKey(keyed(variant.props))}`;
       for (const [key, jugxo] of Object.entries(variant.notDrawn ?? {})) {
         values[`${key}${at}`] = `${PARITY_NOT_DRAWN} (${jugxo})`;
       }
@@ -2229,7 +2427,7 @@ export function figmaPlanInventory(plan: unknown): Record<string, ParityItem> {
         })),
       ];
       for (const { props, part } of sides) {
-        const where = `@${parityVariantKey(props)}`;
+        const where = `@${parityVariantKey(keyed(props))}`;
         for (const [key, text] of Object.entries(part.geometry ?? {}))
           values[`${key}${where}`] = text;
         for (const [binding, paint] of Object.entries(part.paints ?? {})) {

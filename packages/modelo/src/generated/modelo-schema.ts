@@ -245,7 +245,7 @@ export type SkemoPartSource =
       sameAs: string;
     };
 /**
- * Platform-neutral part properties (Art. VIII); the mapping to CSS or another platform is Celo knowledge in the projections. position takes a term, not a token: start or end along the control (Spec 010 ①, plan D-04, the knob of a switch). shadow binds an elevation.shadow.* token: the lift of a surface (Spec 011 ②, plan ② D-07, the dialog). stroke binds a stroke.* token or none: the line style of a border (Spec 011 ③, plan ③ D-04, the dashed surface of an empty state). weight binds a font.weight.* token or none: the weight of a text where it departs from its role (Spec 014 ①, plan ① D-01, the current item of a navigation, the active tab); none keeps the weight of the typography role.
+ * Platform-neutral part properties (Art. VIII); the mapping to CSS or another platform is Celo knowledge in the projections. position takes a term, not a token: start or end along the control (Spec 010 ①, plan D-04, the knob of a switch). shadow binds an elevation.shadow.* token: the lift of a surface (Spec 011 ②, plan ② D-07, the dialog). stroke binds a stroke.* token or none: the line style of a border (Spec 011 ③, plan ③ D-04, the dashed surface of an empty state). weight binds a font.weight.* token or none: the weight of a text where it departs from its role (Spec 014 ①, plan ① D-01, the current item of a navigation, the active tab); none keeps the weight of the typography role. layer binds an elevation.layer.* token (a number): where a part lies above the page — the skip link, the overlays (Spec 014 ②, plan ② D-04).
  *
  * This interface was referenced by `ModeloJson`'s JSON-Schema
  * via the `definition` "SkemoPartProperty".
@@ -267,7 +267,8 @@ export type SkemoPartProperty =
   | "position"
   | "shadow"
   | "stroke"
-  | "weight";
+  | "weight"
+  | "layer";
 /**
  * Text transformation of a typography role (Spec 001, D-11). DTCG has no field for it; the values are platform-neutral.
  *
@@ -1265,7 +1266,7 @@ export interface SkemoBinding {
 export interface SkemoA11Y {
   role: Name;
   /**
-   * @minItems 1
+   * Where the accessible name comes from, in order: slots or props. Empty for an Ero that is never named — a separator (Spec 014 ②, plan ② D-03).
    */
   name: string[];
   states: {

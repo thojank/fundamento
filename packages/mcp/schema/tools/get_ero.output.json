@@ -371,6 +371,10 @@
                 },
                 "wrap": {
                   "enum": ["never", "allowed", "with-text"]
+                },
+                "columns-from": {
+                  "description": "The container width from which layout auto lays the Ero out side by side (Spec 014 ①, ② O-3): a size.container.* token.",
+                  "type": "string"
                 }
               },
               "required": ["size", "wrap"],

@@ -413,7 +413,10 @@
           "atributlisto",
           "mezurilo",
           "navigado",
-          "langetaro"
+          "langetaro",
+          "ikono",
+          "apartigilo",
+          "saltligilo"
         ]
       }
     },
@@ -499,14 +502,15 @@
     {
       "id": "reg_01M4RYCWPBKKHNBR908WP6Y6V0",
       "name": "link-label-names-destination",
-      "statement": "The label of a ligilo and every item of a navigado names the destination; here, click, more or link alone name none.",
+      "statement": "The label of a ligilo and every item of a navigado names the destination; here, click, more or link alone name none; the skip link (saltligilo) names where it jumps to: 'Zum Inhalt springen'.",
       "kialo": "WCAG 2.4.4 (Link Purpose in Context): a screen reader user reads the links of a page as a list, out of context; a list of here says nothing.",
-      "scope": "eroj: ligilo instances with a label and navigado instances with their items (slot items, Spec 011 ⑤) (check not-words), an approximation without a model: not-words hits every occurrence of a listed word, so a label that names the destination and carries the word as well ('Mehr zum Datenschutz') is reported too (Abnahme Spec 008 A10, R-1; candidate not-only-words in the Vojmapo, Phase 6)",
+      "scope": "eroj: ligilo instances with a label and navigado instances with their items (slot items, Spec 011 ⑤) (check not-words), an approximation without a model: not-words hits every occurrence of a listed word, so a label that names the destination and carries the word as well ('Mehr zum Datenschutz') is reported too (Abnahme Spec 008 A10, R-1; candidate not-only-words in the Vojmapo, Phase 6); saltligilo instances (Spec 014 ②, E5), the one text of the label",
       "checkability": "automatic",
       "appliesTo": {
         "eroj": [
           "ligilo",
-          "navigado"
+          "navigado",
+          "saltligilo"
         ]
       }
     },
@@ -785,6 +789,20 @@
       "appliesTo": {
         "eroj": [
           "mezurilo"
+        ]
+      }
+    },
+    {
+      "id": "reg_01M55X2XBTVBQC8HSYFM3SBYM2",
+      "name": "icon-meaning-named",
+      "statement": "An icon that carries meaning has a name (label), and a button that shows only an icon has a label: 'Fehler', 'Warnung', 'Schließen' — never 'Icon' or 'Symbol', which name the picture and not what it means.",
+      "kialo": "A picture without a name is silent for a screen reader, and a name that only says 'icon' tells nothing; whoever cannot see the sign hears its meaning or hears nothing.",
+      "scope": "eroj: ikono instances with a status intent (info, success, warning, danger) carry a label (constraint of the Skemo, prop:label filled) and the label is judged on prop:label (check not-words: icon, image, symbol, glyph, picture / icon, symbol, bild, grafik, zeichen); butono instances that show only an icon carry a label (label-required judges it); fixed, no Aspekto overrides it (Uzo content)",
+      "checkability": "automatic",
+      "appliesTo": {
+        "eroj": [
+          "ikono",
+          "butono"
         ]
       }
     }

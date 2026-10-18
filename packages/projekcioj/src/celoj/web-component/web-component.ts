@@ -115,6 +115,20 @@ function lightShadowProperty(skemo: Skemo, part: string, property: string): bool
 /** Tabs (Spec 011 ⑤, D-08): rows with role tab in a tablist, the panel beside. */
 const isTabs = (skemo: Skemo): boolean => hostOf(skemo.a11y.role) === "tabs";
 
+/** An icon (Spec 014 ②, D-05): the control sized by the box, the glyph a mask inside it. */
+const isIcon = (skemo: Skemo): boolean => hostOf(skemo.a11y.role) === "icon";
+
+/** A separator (Spec 014 ②, D-06): the control is the line. */
+const isSeparator = (skemo: Skemo): boolean => hostOf(skemo.a11y.role) === "separator";
+
+/**
+ * A link that floats above the page (Spec 014 ②, D-07): the skip link — a link whose surface has
+ * a layer. Celo knowledge: the layer says it lies over the page, so it is fixed at the start of
+ * the viewport and hidden until it has the focus.
+ */
+export const isSkip = (skemo: Skemo): boolean =>
+  skemo.a11y.role === "link" && skemo.parts.surface?.layer !== undefined;
+
 /**
  * The states of a tab (Spec 011 ⑤, D-08): hover and focus are the row's, disabled the row's too
  * (a tab the markup disables, spoken as aria-disabled); the list itself has no state.
@@ -292,6 +306,9 @@ const variable = (token: string, field?: string) =>
  */
 function keywordDeclarations(part: string, property: string, token: string): string[] {
   if (token === "inherit") {
+    // A colour that inherits (Spec 014 ②, D-05: the glyph of a neutral icon) says so, so the
+    // combination has its rule and the inventory reads the value of the axis.
+    if (property === "color") return ["color: inherit;"];
     return property === "typography" ? ["display: inline;", "white-space: normal;"] : [];
   }
   // The underline is switched off; a minimum that is none is simply not written.
@@ -344,6 +361,12 @@ function declarations(skemo: Skemo, part: string, property: string, token: strin
     }
   }
   if (isBindingKeyword(token)) return keywordDeclarations(part, property, token);
+  // The line of a separator (Spec 014 ②, D-06): the border of one edge of the control; which edge
+  // is structure (the orientation), its colour and width are the line's.
+  if (part === "line") {
+    if (property === "color") return [`border-color: ${variable(token)};`];
+    if (property === "width") return [`border-width: ${variable(token)};`];
+  }
   // The underline of a link (Spec 008): a text decoration of the width and colour bound.
   if (part === "underline") {
     if (property === "width") {
@@ -420,6 +443,9 @@ function declarations(skemo: Skemo, part: string, property: string, token: strin
     // a navigation, the active tab; none (the role's weight stands) writes nothing.
     case "weight":
       return [`font-weight: ${variable(token)};`];
+    // The layer of a part above the page (Spec 014 ②, D-04): the skip link, the overlays of ④.
+    case "layer":
+      return [`z-index: ${variable(token)};`];
     default:
       return [];
   }
@@ -611,6 +637,44 @@ const tabsStructure: string = [
 ].join("\n");
 
 /**
+ * Layout of an icon (Spec 014 ②, D-05), keywords only: the host hugs the control, the control is
+ * the box (its size bound), the glyph fills it as a mask of the Aspekto's picture — the custom
+ * property the element writes from the name — painted in the current colour, so the icon
+ * inherits the colour of the text around it like a word; a glyph whose direction carries meaning
+ * mirrors in right-to-left writing.
+ */
+const iconStructure: string = [
+  ":host { display: inline-block; vertical-align: middle; }",
+  ':where([part="glyph"]) { display: block; box-sizing: border-box; background-color: currentcolor; mask-image: var(--fm-ikono); mask-size: contain; mask-repeat: no-repeat; mask-position: center; }',
+  ':host(:dir(rtl)) :where([part="glyph"].fm-mirror) { transform: scaleX(-1); }',
+].join("\n");
+
+/**
+ * Layout of a separator (Spec 014 ②, D-06), keywords only: a horizontal line is a block across
+ * its container with the border along its block-start edge; a vertical line stands beside its
+ * neighbours (an inline flex item that stretches) with the border along its inline-start edge;
+ * the other edges draw nothing. Colour and width are the line's (bound).
+ */
+const separatorStructure: string = [
+  ":host { display: block; }",
+  ':host([orientation="vertical"]) { display: inline-flex; align-self: stretch; vertical-align: middle; }',
+  ':where([part="control"]) { display: block; box-sizing: border-box; border-style: none; }',
+  ':where([part="control"][data-orientation="horizontal"]) { border-block-start-style: solid; }',
+  ':where([part="control"][data-orientation="vertical"]) { border-inline-start-style: solid; align-self: stretch; }',
+].join("\n");
+
+/**
+ * Layout of a skip link (Spec 014 ②, D-07), keywords and 0 only, on top of a control's: the link
+ * is fixed at the start of the viewport (the writing direction mirrors it) on its layer, and
+ * clipped from sight until it has the focus — a keyboard user finds it first, nobody else sees
+ * a word before the content.
+ */
+const skipStructure: string = [
+  ':where([part="control"]) { position: fixed; inset-block-start: 0; inset-inline-start: 0; }',
+  ':where([part="control"]:not(:focus-visible)) { clip-path: inset(50%); }',
+].join("\n");
+
+/**
  * The stylesheet of the light DOM (Spec 011 ④, D-09, D-10, E10): the document adopts it once;
  * every selector starts with the host's tag, the combination stands on the host (data-density,
  * data-layout). Celo knowledge: which element of the platform's table or list a part is.
@@ -666,7 +730,7 @@ export function lightStylesheetOf(skemo: Skemo, tag: string): string {
         case "sort":
           return `${t} > thead th > button${state}`;
         case "sort-indicator":
-          return `${t} > thead th > button > svg`;
+          return `${t} > thead th > button > fm-ikono`;
         case "focus-ring":
           return `${t} > thead th > button:focus-visible`;
         default:
@@ -775,8 +839,7 @@ export function lightStylesheetOf(skemo: Skemo, tag: string): string {
           `${tag} > table :is(td, th) { text-align: start; box-sizing: border-box; border-block-end-style: solid; }`,
           `${tag} > table :is(td, th)[numeric] { text-align: end; font-variant-numeric: tabular-nums; }`,
           `${tag} > table > thead th > button { display: inline-flex; align-items: center; appearance: none; border-style: none; cursor: pointer; font: inherit; color: inherit; text-align: inherit; }`,
-          `${tag} > table > thead th > button > svg { flex: none; }`,
-          `${tag} > table > thead th[aria-sort="descending"] > button > svg { transform: rotate(180deg); }`,
+          `${tag} > table > thead th > button > fm-ikono { flex: none; }`,
           `${tag} > table > tbody > tr[data-fm-empty] > td { text-align: center; }`,
           `${tag} ${HIDDEN_TEXT}`,
         ]
@@ -993,29 +1056,35 @@ export function stylesheetOf(skemo: Skemo, uzo?: Uzo): string {
   const bordered = skemo.parts.border !== undefined;
   const base = isDialog(skemo)
     ? dialogStructure
-    : isText(skemo)
-      ? textStructure(bordered)
-      : isStatus(skemo)
-        ? statusStructure(skemo)
-        : isMeter(skemo)
-          ? meterStructure
-          : isLight(skemo)
-            ? lightStructure(skemo)
-            : isTabs(skemo)
-              ? tabsStructure
-              : isField(skemo)
-                ? fieldStructure(disables, isSelect(skemo), isTextarea(skemo))
-                : isGroup(skemo)
-                  ? groupStructure(disables, skemo.parts["required-mark"] !== undefined)
-                  : isToggle(skemo)
-                    ? toggleStructure(
-                        disables,
-                        uzo?.layout.wrap !== undefined && uzo.layout.wrap !== "never",
-                        skemo.slots.some((slot) => slot.default !== true && slot.text === true),
-                        skemo.parts["required-mark"] !== undefined,
-                      )
-                    : structure(uzo?.layout.wrap === "with-text", disables, bordered);
-  return `${base}\n${[...tokenRules, ...undrawn].join("\n")}\n`;
+    : isIcon(skemo)
+      ? iconStructure
+      : isSeparator(skemo)
+        ? separatorStructure
+        : isText(skemo)
+          ? textStructure(bordered)
+          : isStatus(skemo)
+            ? statusStructure(skemo)
+            : isMeter(skemo)
+              ? meterStructure
+              : isLight(skemo)
+                ? lightStructure(skemo)
+                : isTabs(skemo)
+                  ? tabsStructure
+                  : isField(skemo)
+                    ? fieldStructure(disables, isSelect(skemo), isTextarea(skemo))
+                    : isGroup(skemo)
+                      ? groupStructure(disables, skemo.parts["required-mark"] !== undefined)
+                      : isToggle(skemo)
+                        ? toggleStructure(
+                            disables,
+                            uzo?.layout.wrap !== undefined && uzo.layout.wrap !== "never",
+                            skemo.slots.some((slot) => slot.default !== true && slot.text === true),
+                            skemo.parts["required-mark"] !== undefined,
+                          )
+                        : structure(uzo?.layout.wrap === "with-text", disables, bordered);
+  // A skip link adds its place above the page to a control's structure (Spec 014 ②, D-07).
+  const floating = isSkip(skemo) ? `\n${skipStructure}` : "";
+  return `${base}${floating}\n${[...tokenRules, ...undrawn].join("\n")}\n`;
 }
 
 function keysOf(skemo: Skemo, source: SkemoPartSource | undefined, depth = 0): string[] {
@@ -1062,7 +1131,10 @@ function selectorOf(
       : ':where([part="region"])';
   }
   // Static text (Spec 011 ③, D-08): every part — surface, border, text, box — is the control.
-  if (isText(skemo)) return `:where([part="control"]${data})`;
+  // An icon (Spec 014 ②): the glyph is the control, it carries the box and the colour; a
+  // separator: the control is the line.
+  if (isIcon(skemo)) return `:where([part="glyph"]${data})`;
+  if (isText(skemo) || isSeparator(skemo)) return `:where([part="control"]${data})`;
   const state = STATE_SELECTORS[combination[STATE_KEY] ?? "rest"] ?? "";
   if (isField(skemo)) return fieldPartSelector(part, property, data, state, isSelect(skemo));
   if (isToggle(skemo)) return togglePartSelector(part, property, data, state);
@@ -1085,8 +1157,15 @@ export function namesOf(ero: LoadedEro["ero"]): {
   };
 }
 
-/** Everything the element template needs of one Ero: names, the native control, the slots. */
-export function elementNamesOf(entry: LoadedEro, inline = false) {
+/**
+ * Everything the element template needs of one Ero: names, the native control, the slots. The
+ * Ikonaro (Spec 014 ②) is what the icon element knows of the names and which of them mirror.
+ */
+export function elementNamesOf(
+  entry: LoadedEro,
+  inline = false,
+  ikonaro: readonly { name: string; mirror?: boolean }[] = [],
+) {
   const columnsFrom = entry.uzo?.layout["columns-from"];
   return {
     ...namesOf(entry.ero),
@@ -1098,6 +1177,14 @@ export function elementNamesOf(entry: LoadedEro, inline = false) {
     // has the parts.
     indicator: entry.skemo.parts.indicator !== undefined,
     dismiss: entry.skemo.parts.dismiss !== undefined,
+    // Spec 014 ②: a status host with the part icon shows the icon of its intent; a link with a
+    // layer floats (the skip link); the icon element knows the Ikonaro.
+    icon: entry.skemo.parts.icon !== undefined && hostOf(entry.skemo.a11y.role) === "status",
+    skip: isSkip(entry.skemo),
+    ikonaro: ikonaro.map((ikono) => ({
+      name: ikono.name,
+      ...(ikono.mirror === true ? { mirror: true } : {}),
+    })),
     // Spec 014 ① (plan ① D-03): the width from which layout auto lays name and value side by side,
     // the Uzo's columns-from as the custom property its token is projected to.
     ...(columnsFrom === undefined ? {} : { columnsFrom: nomRegulo("css").derive(columnsFrom) }),
@@ -1147,7 +1234,7 @@ export const WEB_COMPONENT_CELO: Celo = {
       });
       files.push({
         path: `${GENERATED_DIR}/${tag}.ts`,
-        text: header + elementSource(elementNamesOf(entry)),
+        text: header + elementSource(elementNamesOf(entry, false, modelo.ikonaro)),
       });
     }
     // Every element module registers itself on import and exports its registration (F6);
@@ -1204,9 +1291,11 @@ export function stylesheetInventory(moduleText: string): ParityItem {
     // toggle (Spec 010 ②: the size of a checkbox keys only its label and its check mark, never
     // the box itself — the box is the mark plus its border).
     // A light-DOM host (Spec 011 ④, E10) writes the combination on itself: fm-tabelo[data-…].
+    // An icon (Spec 014 ②): its glyph is its control.
     if (
       !selector.includes('[part="control"]') &&
       !selector.includes('[part="field"]') &&
+      !selector.includes('[part="glyph"]') &&
       !selector.trim().startsWith("fm-")
     )
       continue;

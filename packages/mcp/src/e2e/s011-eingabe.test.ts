@@ -155,15 +155,17 @@ describe("check_usage of the dialog and the text area", () => {
 });
 
 describe("list_eroj and the briefs (acceptance 1)", () => {
-  it("lists seventeen Eroj; the briefs of dialogo and tekstareo name their axes and duties", async () => {
+  it("lists twenty Eroj; the briefs of dialogo and tekstareo name their axes and duties", async () => {
     const listed = await output<Listed>(client, "list_eroj", {});
     expect(listed.eroj.map((entry) => entry.name)).toEqual([
+      "apartigilo",
       "atributlisto",
       "avizo",
       "butono",
       "dialogo",
       "elektilo",
       "elekto",
+      "ikono",
       "insigno",
       "kampo",
       "langetaro",
@@ -172,6 +174,7 @@ describe("list_eroj and the briefs (acceptance 1)", () => {
       "mezurilo",
       "navigado",
       "plenstato",
+      "saltligilo",
       "sxaltilo",
       "tabelo",
       "tekstareo",

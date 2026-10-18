@@ -250,12 +250,14 @@ describe("the Vitrino after the acceptances (Nachlese 2026-10-13)", () => {
   // line that never breaks is the input line, not the label. The subject comes from the a11y role.
   it("the layout sentence names the subject and the placement (C8)", () => {
     expect(datumoj.a11yRoloj).toEqual({
+      apartigilo: "separator",
       atributlisto: "list",
       avizo: "status",
       butono: "button",
       dialogo: "dialog",
       elektilo: "combobox",
       elekto: "radiogroup",
+      ikono: "img",
       insigno: "generic",
       kampo: "textbox",
       langetaro: "tablist",
@@ -264,6 +266,7 @@ describe("the Vitrino after the acceptances (Nachlese 2026-10-13)", () => {
       mezurilo: "meter",
       navigado: "navigation",
       plenstato: "status",
+      saltligilo: "link",
       sxaltilo: "switch",
       tabelo: "table",
       tekstareo: "textbox",
@@ -573,5 +576,50 @@ describe("the Vitrino shows the navigado and the langetaro (Spec 011 ⑤)", () =
     expect(grid).toContain(
       '<fm-langetaro label="Reiter" selected="1"><data value="1">Eins</data><data value="2">Zwei</data><data value="3">Drei</data><div slot="panel">Eins</div></fm-langetaro>',
     );
+  });
+});
+
+// Spec 014 ② (G3, G10, plan ② D-09): the Vitrino shows icons — the Ikonaro as a grid per size,
+// every name an fm-ikono (the picture switches with the Aspekto), the status icons named in a
+// row of their own; the butono carries an icon-start in every cell (the same example Figma
+// draws); the apartigilo in both orientations; the saltligilo as a row.
+describe("the Vitrino shows the Ikonaro and the Grundbausteine (Spec 014 ②)", () => {
+  it("the section ikono is a grid: one row per size with every name, one row per status intent, named", () => {
+    const { modelo } = loadModelo(defaultModeloSource());
+    if (modelo === undefined) throw new Error("the repository Modelo could not be loaded");
+    const section = datumoj.eroj.ikono ?? "";
+    for (const { name } of modelo.ikonaro) {
+      expect(section, name).toContain(`<fm-ikono name="${name}" size="small"`);
+      expect(section, name).toContain(`<fm-ikono name="${name}" size="medium"`);
+      expect(section, name).toContain(`<fm-ikono name="${name}" size="large"`);
+    }
+    for (const intent of ["info", "success", "warning", "danger"]) {
+      expect(section, intent).toContain(
+        `<fm-ikono name="${intent}" size="medium" intent="${intent}" label="`,
+      );
+    }
+    expect(section).not.toContain('intent="neutral"');
+    expect(section).toContain('<th scope="row">small</th>');
+    expect(section).toContain('<th scope="row">danger</th>');
+    expect(html).toContain('id="fm-vitrino-ikono"');
+  });
+
+  it("the butono carries the example icon in its icon-start slot in every cell; the ligilo none", () => {
+    const butono = datumoj.eroj.butono ?? "";
+    expect(butono).toContain('<fm-ikono slot="icon-start" name="check"></fm-ikono>');
+    expect((butono.match(/<fm-butono /g) ?? []).length).toBe(
+      (butono.match(/<fm-ikono slot="icon-start"/g) ?? []).length,
+    );
+    expect(datumoj.eroj.ligilo ?? "").not.toContain("<fm-ikono");
+  });
+
+  it("the apartigilo stands in both orientations, the saltligilo in one row pointing at its section", () => {
+    const apartigilo = datumoj.eroj.apartigilo ?? "";
+    expect(apartigilo).toContain('<fm-apartigilo orientation="horizontal"');
+    expect(apartigilo).toContain('<fm-apartigilo orientation="vertical"');
+    const saltligilo = datumoj.eroj.saltligilo ?? "";
+    // The target is the section itself: its id without the fragment sign (the link spells it).
+    expect(saltligilo).toContain('<fm-saltligilo to="fm-vitrino-saltligilo">');
+    expect(saltligilo).not.toContain('to="#fm-vitrino-saltligilo"');
   });
 });

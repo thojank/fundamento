@@ -117,6 +117,11 @@ export interface LoadedAspektoPackage {
    * overrides, each with the Jugxo that records the deviation (Spec 007, A7, D-03).
    */
   overrides?: LingvoOverride[];
+  /**
+   * The glyphs of the package by Ikonaro name, the SVG text (Spec 014 ②, G3): the picture every
+   * Celo draws for an ikono of this Aspekto.
+   */
+  ikonoj?: Record<string, string>;
   /** `aspekto.json` path relative to the Modelo root. */
   aspektoFile: string;
   /** `ids.lock.json` path relative to the Modelo root. */

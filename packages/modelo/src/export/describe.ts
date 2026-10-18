@@ -23,9 +23,13 @@ const WORDS = [
   "fifteen",
   "sixteen",
   "seventeen",
+  // Spec 014 ②: twenty Eroj (the three Grundbausteine).
+  "eighteen",
+  "nineteen",
+  "twenty",
 ] as const;
 
-/** A count as an English word for 0 to 12 (`no` for zero), otherwise as digits. */
+/** A count as an English word for 0 to 20 (`no` for zero), otherwise as digits. */
 export function countWord(count: number): string {
   return WORDS[count] ?? String(count);
 }

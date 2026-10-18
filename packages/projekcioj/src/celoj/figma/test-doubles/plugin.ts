@@ -323,6 +323,41 @@ interface NodeContext {
 const GEOMETRY_KEYS: ReadonlySet<string> = new Set(["x", "y", "width", "height"]);
 
 /**
+ * Fields the Plugin API declares read-only on every scene node (plugin-api.d.ts: `readonly width`,
+ * `readonly height`, the absolute boxes; `hasMissingFont` of a text): assigning one throws
+ * "no setter for property" in Figma. Measured 2026-10-18 (Abnahme 014 ②–⑤, F-4): the separator
+ * wrote `width` on its frame and the real tool aborted in write ← flush ← drawSeparator; the
+ * double had accepted it. A size is set with `resize`, or bound with `setBoundVariable`.
+ */
+/**
+ * Fields of an auto-layout child (plugin-api.d.ts, AutoLayoutChildrenMixin) and the sizing of an
+ * auto-layout frame: Figma refuses them on a node that neither has auto layout itself nor lies in
+ * an auto-layout frame — "node must be an auto-layout frame or a child of an auto-layout frame".
+ * Measured 2026-10-18 (Abnahme 014 ②–⑤, F-5): a new variant of a found set got its sizing written
+ * before it lay in the set. The double had accepted it.
+ */
+const LAYOUT_CHILD_FIELDS: ReadonlySet<string> = new Set([
+  "layoutSizingHorizontal",
+  "layoutSizingVertical",
+  "layoutAlign",
+  "layoutGrow",
+  "layoutPositioning",
+]);
+
+const hasAutoLayout = (node: DoubleNode | undefined): boolean =>
+  node !== undefined &&
+  ["HORIZONTAL", "VERTICAL", "GRID"].includes(String(node.properties.layoutMode));
+
+const READ_ONLY_FIELDS: ReadonlySet<string> = new Set([
+  "width",
+  "height",
+  "absoluteTransform",
+  "absoluteBoundingBox",
+  "absoluteRenderBounds",
+  "hasMissingFont",
+]);
+
+/**
  * A paint as Figma stores and returns it (F22): `visible`, `opacity` and `blendMode` filled in,
  * the colour as given. Reading `fills` back therefore never equals the object that was written —
  * a comparison by JSON rewrites on every run; a comparison by variable, opacity and visibility
@@ -535,6 +570,22 @@ function node(
     set(target, key, value) {
       if (key === "gridRowAnchorIndex" || key === "gridColumnAnchorIndex") {
         throw new Error(`${String(key)} is read-only; use setGridChildPosition.`);
+      }
+      if (typeof key === "string" && READ_ONLY_FIELDS.has(key)) {
+        throw new Error(`in set_${key}: no setter for property`);
+      }
+      if (
+        typeof key === "string" &&
+        LAYOUT_CHILD_FIELDS.has(key) &&
+        !hasAutoLayout(target as DoubleNode) &&
+        !hasAutoLayout(target.parent)
+      ) {
+        const parent = target.parent;
+        throw new Error(
+          `in set_${key}: node must be an auto-layout frame or a child of an auto-layout frame` +
+            ` (Double: ${target.type} "${target.name}" layoutMode ${String(target.properties.layoutMode)}, ` +
+            `parent ${parent === undefined ? "none" : `${parent.type} "${parent.name}" layoutMode ${String(parent.properties.layoutMode)}`})`,
+        );
       }
       if (typeof key === "string" && context.refuses?.has(key)) {
         throw new Error(
@@ -1289,7 +1340,11 @@ export function figmaDouble(
   const untouchedDefaults = (keys: readonly string[]) => {
     const found: string[] = [];
     const walk = (current: DoubleNode, path: string) => {
+      // A field of an auto-layout child is no default a plugin could own on a node outside auto
+      // layout (F-5): Figma refuses the write; the tool's value stands and is not counted.
+      const laidOut = hasAutoLayout(current) || hasAutoLayout(current.parent);
       for (const key of keys) {
+        if (LAYOUT_CHILD_FIELDS.has(key) && !laidOut) continue;
         if (current.defaults.has(key)) found.push(`${path}: ${key}`);
       }
       for (const child of current.children) walk(child, `${path}/${child.name}`);

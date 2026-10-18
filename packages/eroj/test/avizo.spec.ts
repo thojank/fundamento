@@ -77,7 +77,7 @@ test.describe("fm-avizo behaviour", () => {
             n.getAttribute("part"),
           ),
         ),
-    ).toEqual(["control", "heading", "message", "details", "actions", "dismiss"]);
+    ).toEqual(["control", "icon", "heading", "message", "details", "actions", "dismiss"]);
   });
 
   test("dismissible: a close butono named 'Schließen'; its click says dismiss, hides the notice and moves the focus on", async ({
@@ -220,3 +220,50 @@ for (const aspekto of ["komuna", "ekzemplo"]) {
     }
   });
 }
+
+// Spec 014 ② (G3, G6): the notice shows the icon of its intent before its texts — an fm-ikono of
+// the intent's name, decorative (the intent word is heard already), in the accent's colour — and
+// its dismiss butono carries the ikono close instead of a hand-drawn cross.
+test("the icon of the intent stands before the texts, decorative, in the status text colour; the dismiss butono carries ikono close", async ({
+  page,
+}) => {
+  await serve(
+    page,
+    out,
+    `<fm-avizo id="a" intent="danger" dismissible>Konnte nicht speichern.</fm-avizo>`,
+  );
+  const icon = await page.locator("#a").evaluate((element) => {
+    const holder = element.shadowRoot?.querySelector('[part="icon"]') as HTMLElement;
+    const ikono = holder.querySelector("fm-ikono");
+    const control = element.shadowRoot?.querySelector('[part="control"]') as HTMLElement;
+    return {
+      hidden: holder.getAttribute("aria-hidden"),
+      name: ikono?.getAttribute("name"),
+      colour: getComputedStyle(holder).color,
+      accent: getComputedStyle(document.documentElement)
+        .getPropertyValue("--fm-color-status-danger-text")
+        .trim(),
+      // The first thing seen: the icon stands before the texts (the spoken words are clipped).
+      first: [...control.children].filter((child) => child.id !== "fm-texts")[0] === holder,
+      dismiss: element.shadowRoot?.querySelector('[part="dismiss"] fm-ikono')?.getAttribute("name"),
+    };
+  });
+  expect(icon.hidden).toBe("true");
+  expect(icon.name).toBe("danger");
+  const expected = await page.evaluate((hex) => {
+    const probe = document.createElement("span");
+    probe.style.color = hex;
+    document.body.append(probe);
+    const colour = getComputedStyle(probe).color;
+    probe.remove();
+    return colour;
+  }, icon.accent);
+  expect(icon.colour).toBe(expected);
+  expect(icon.first).toBe(true);
+  expect(icon.dismiss).toBe("close");
+  await page.locator("#a").evaluate((element) => element.setAttribute("intent", "success"));
+  await expect(page.locator("#a").locator('[part="icon"] fm-ikono')).toHaveAttribute(
+    "name",
+    "success",
+  );
+});

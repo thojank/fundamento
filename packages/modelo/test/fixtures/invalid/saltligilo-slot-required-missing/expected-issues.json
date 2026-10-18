@@ -1,0 +1,9 @@
+{
+  "description": "Spec 014 ② G10 (Spec 009 A7, E2): the accessible name of the saltligilo comes from the slot label alone, but the Uzo does not mark the slot required (the default text of a11y.texts is a fallback, not a second source). An Ero whose name has one source must not be buildable without it.",
+  "issues": [
+    {
+      "rule": "uzo-slot-required-missing",
+      "path": "data/eroj/saltligilo/uzo.json#/uzo/slots/label"
+    }
+  ]
+}

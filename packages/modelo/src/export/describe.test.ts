@@ -62,7 +62,10 @@ describe("countWord", () => {
     // Spec 011 ④: the words reach seventeen (the Eroj of the round); beyond that the number stands.
     [13, "thirteen"],
     [17, "seventeen"],
-    [18, "18"],
+    // Spec 014 ②: twenty (the three Grundbausteine); beyond that the number stands.
+    [18, "eighteen"],
+    [20, "twenty"],
+    [21, "21"],
     [30, "30"],
   ])("%i -> %s", (count, word) => {
     expect(countWord(count)).toBe(word);

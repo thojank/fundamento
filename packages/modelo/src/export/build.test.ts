@@ -148,7 +148,7 @@ describe("the S6 dialog from dist/modelo.json alone (AK-06)", () => {
     );
     // Counts change while Spec 001 fills the Vortaro; the shape of the sentence does not.
     expect(description.sentence).toMatch(
-      /^Fundamento v0\.1\.0: six Dimensioj \(aspekto, viewport, density, color-scheme, contrast, motion\), one Aspekto \(`komuna`: reference, MIT, Geist\), \d+ tokens in \w+ types \(.+\), \w+ rules with reasons \(\w+ automatic\), \w+ Jugxoj, seventeen Eroj \(`atributlisto`, `avizo`, `butono`, `dialogo`, `elektilo`, `elekto`, `insigno`, `kampo`, `langetaro`, `ligilo`, `markobutono`, `mezurilo`, `navigado`, `plenstato`, `sxaltilo`, `tabelo`, `tekstareo`\)\. Ask explain why a value is what it is\.$/,
+      /^Fundamento v0\.1\.0: six Dimensioj \(aspekto, viewport, density, color-scheme, contrast, motion\), one Aspekto \(`komuna`: reference, MIT, Geist\), \d+ tokens in \w+ types \(.+\), \w+ rules with reasons \(\w+ automatic\), \w+ Jugxoj, twenty Eroj \(`apartigilo`, `atributlisto`, `avizo`, `butono`, `dialogo`, `elektilo`, `elekto`, `ikono`, `insigno`, `kampo`, `langetaro`, `ligilo`, `markobutono`, `mezurilo`, `navigado`, `plenstato`, `saltligilo`, `sxaltilo`, `tabelo`, `tekstareo`\)\. Ask explain why a value is what it is\.$/,
     );
   });
 });

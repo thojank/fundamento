@@ -66,6 +66,7 @@ describe("suggest_ero", () => {
     expect(result.issues[0]?.path).toBe("suggest_ero/goal");
     // Every goal of every Ero, in Ero order (Spec 008: navigate and external of the ligilo).
     expect(result.allowed).toEqual([
+      "separate",
       "details",
       "notify",
       "report-error",
@@ -75,6 +76,7 @@ describe("suggest_ero", () => {
       "ask-reason",
       "choose-many",
       "choose-few",
+      "show-icon",
       "status-label",
       "enter-text",
       "email",
@@ -90,6 +92,7 @@ describe("suggest_ero", () => {
       "navigate-app",
       "loading",
       "empty",
+      "skip-to-content",
       "toggle",
       "table",
       "multi-line",

@@ -167,6 +167,10 @@
         {
           "ero": "kampo",
           "kialo": "A form ends with the button that sends it, because filling it in does nothing by itself; the button stands after the last field, not beside it (a search excepted)."
+        },
+        {
+          "ero": "ikono",
+          "kialo": "An icon before or after the label is an ikono with a name of the Ikonaro, because the sign shortens what the word says and switches with the brand; a button with the icon alone names itself with label (icon-meaning-named)."
         }
       ],
       "never": [],
@@ -185,14 +189,16 @@
       },
       "icon-start": {
         "accepts": [
-          "icon"
+          "icon",
+          "ikono"
         ],
         "max": 1,
         "nesting": 0
       },
       "icon-end": {
         "accepts": [
-          "icon"
+          "icon",
+          "ikono"
         ],
         "max": 1,
         "nesting": 0

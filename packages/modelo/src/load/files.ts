@@ -42,6 +42,11 @@ export interface AspektoPackageFiles {
   /** Optional Aspekto-scoped Reguloj and Jugxoj (D-10). */
   reguloj?: ModeloDocument;
   jugxoj?: ModeloDocument;
+  /**
+   * The glyphs of the package (Spec 014 ②, G3): `ikonoj/<name>.svg`, the SVG text by name. Read
+   * here, the loader's I/O edge, so every Celo draws the Aspekto's picture from the Modelo alone.
+   */
+  ikonoj?: Record<string, string>;
 }
 
 /** Every file of a Modelo root, parsed but not interpreted. FUND-3.2 validates these raw values. */
@@ -144,6 +149,8 @@ export function readModeloFiles(source: ModeloSource): ReadModeloFilesResult {
       continue;
     }
     const entry: AspektoPackageFiles = { name, dir, aspekto, idsLock, themes: packageThemes };
+    const ikonoj = readGlyphs(join(dir, GLYPH_DIR_NAME));
+    if (ikonoj !== undefined) entry.ikonoj = ikonoj;
     for (const key of ["reguloj", "jugxoj"] as const) {
       const path = join(dir, `${key}.json`);
       if (existsSync(path)) {
@@ -218,6 +225,33 @@ function listEroFiles(erojDir: string, fileName: string): string[] {
 
 /** The file every Aspekto package has at its root. */
 const ASPEKTO_FILE = "aspekto.json";
+/** The folder of an Aspekto package that holds one glyph per Ikonaro name (Spec 014 ①, G3). */
+const GLYPH_DIR_NAME = "ikonoj";
+
+/**
+ * The glyphs of a package by name (Spec 014 ②): every `.svg` below `ikonoj/`, as text. Absent
+ * when the folder does not exist; what a glyph has to be is check:ikonaro's business.
+ */
+function readGlyphs(dir: string): Record<string, string> | undefined {
+  let entries: Dirent[];
+  try {
+    entries = readdirSync(dir, { withFileTypes: true });
+  } catch {
+    return undefined;
+  }
+  const glyphs: Record<string, string> = {};
+  for (const entry of entries
+    .filter((candidate) => candidate.isFile())
+    .sort((a, b) => (a.name < b.name ? -1 : 1))) {
+    if (!entry.name.endsWith(".svg")) continue;
+    try {
+      glyphs[entry.name.slice(0, -".svg".length)] = readFileSync(join(dir, entry.name), "utf8");
+    } catch {
+      // An unreadable glyph is reported by check:ikonaro; the Modelo loads without it.
+    }
+  }
+  return glyphs;
+}
 /** The package's own ID registry. */
 const PACKAGE_LOCK_FILE = "ids.lock.json";
 

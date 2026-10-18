@@ -170,12 +170,14 @@ describe("list_eroj and the brief (acceptance 1)", () => {
   it("lists the Eroj; the brief of the markobutono names the purpose, the axes, the label as a duty and its alternatives", async () => {
     const listed = await output<{ eroj: { name: string }[] }>(client, "list_eroj", {});
     expect(listed.eroj.map((entry) => entry.name)).toEqual([
+      "apartigilo",
       "atributlisto",
       "avizo",
       "butono",
       "dialogo",
       "elektilo",
       "elekto",
+      "ikono",
       "insigno",
       "kampo",
       "langetaro",
@@ -184,6 +186,7 @@ describe("list_eroj and the brief (acceptance 1)", () => {
       "mezurilo",
       "navigado",
       "plenstato",
+      "saltligilo",
       "sxaltilo",
       "tabelo",
       "tekstareo",

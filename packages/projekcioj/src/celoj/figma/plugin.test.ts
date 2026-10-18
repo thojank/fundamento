@@ -185,6 +185,37 @@ describe("Figma development plugin (T016)", () => {
     expect(api.command).toBeUndefined();
   });
 
+  // Abnahme 014 ②–⑤ (2026-10-18, F-4): the real tool aborted the run with "no setter for property"
+  // in write ← flush ← drawSeparator — the separator wrote `width` on its frame, which the Plugin
+  // API declares read-only (resize sets it). The double had accepted the write. From now on it
+  // refuses every read-only field on every node type the plugin creates, so a drawing that writes
+  // one fails here first: the full runs below cover the tooltip, popover, menu, disclosure, the
+  // listbox of the kompletigilo and the icons from createNodeFromSvg.
+  it("refuses a write to a read-only field (width, height) on a frame, a text and a node from an SVG, as Figma does", () => {
+    const double = modelDouble();
+    const api = double.figma as {
+      createFrame: () => DoubleNode;
+      createText: () => DoubleNode;
+      createNodeFromSvg: (svg: string) => DoubleNode;
+    };
+    const frame = api.createFrame();
+    const text = api.createText();
+    const glyph = api.createNodeFromSvg(
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path d="M0 0h16v16z"/></svg>',
+    );
+    for (const node of [frame, text, glyph, glyph.children[0]]) {
+      expect(() => {
+        (node as unknown as { width: number }).width = 24;
+      }, node?.type).toThrow(/no setter for property/);
+      expect(() => {
+        (node as unknown as { height: number }).height = 24;
+      }, node?.type).toThrow(/no setter for property/);
+    }
+    // What resize sets stays settable through resize.
+    expect(() => frame.resize(24, 24)).not.toThrow();
+    expect((frame as unknown as { width: number }).width).toBe(24);
+  });
+
   it("never touches a node without Fundamento plugin data", async () => {
     const double = modelDouble();
     const page = double.root.children[0];
@@ -279,6 +310,8 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
     const openButono = result.mankoj.open.filter((manko) => manko.set === "butono");
     expect(openButono.map((manko) => manko.part)).toEqual(["boundary", "slots", "content"]);
     expect(result.mankoj.open.map((manko) => manko.set)).toEqual([
+      // Spec 014 ②: the apartigilo, the ikono and the saltligilo carry a Uzo like every set.
+      ...["boundary", "slots", "content"].map(() => "apartigilo"),
       // Spec 011 ④: the atributlisto, the mezurilo and the tabelo carry a Uzo like every set.
       ...["boundary", "slots", "content"].map(() => "atributlisto"),
       // Spec 011 ③: the avizo, the insigno and the plenstato carry a Uzo like every set.
@@ -288,6 +321,7 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
       ...["boundary", "slots", "content"].map(() => "dialogo"),
       ...["boundary", "slots", "content"].map(() => "elektilo"),
       ...["boundary", "slots", "content"].map(() => "elekto"),
+      ...["boundary", "slots", "content"].map(() => "ikono"),
       ...["boundary", "slots", "content"].map(() => "insigno"),
       ...["boundary", "slots", "content"].map(() => "kampo"),
       // Spec 011 ⑤: the langetaro and the navigado carry a Uzo like every set.
@@ -297,6 +331,7 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
       ...["boundary", "slots", "content"].map(() => "mezurilo"),
       ...["boundary", "slots", "content"].map(() => "navigado"),
       ...["boundary", "slots", "content"].map(() => "plenstato"),
+      ...["boundary", "slots", "content"].map(() => "saltligilo"),
       ...["boundary", "slots", "content"].map(() => "sxaltilo"),
       ...["boundary", "slots", "content"].map(() => "tabelo"),
       ...["boundary", "slots", "content"].map(() => "tekstareo"),
@@ -324,6 +359,8 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
       result.mankoj.closed.filter((manko) => manko.set === "butono").map((manko) => manko.part),
     ).toEqual(["boundary", "slots", "content"]);
     expect(result.mankoj.closed.map((manko) => manko.set)).toEqual([
+      // Spec 014 ②: the apartigilo, the ikono and the saltligilo close their three parts too.
+      ...["apartigilo", "apartigilo", "apartigilo"],
       // Spec 011 ④: the atributlisto, the mezurilo and the tabelo close their three parts too.
       ...["atributlisto", "atributlisto", "atributlisto"],
       // Spec 011 ③: the avizo, the insigno and the plenstato close their three parts too.
@@ -333,6 +370,7 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
       ...["dialogo", "dialogo", "dialogo"],
       ...["elektilo", "elektilo", "elektilo"],
       ...["elekto", "elekto", "elekto"],
+      ...["ikono", "ikono", "ikono"],
       ...["insigno", "insigno", "insigno"],
       ...["kampo", "kampo", "kampo"],
       // Spec 011 ⑤: the langetaro and the navigado close their three parts too.
@@ -342,6 +380,7 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
       ...["mezurilo", "mezurilo", "mezurilo"],
       ...["navigado", "navigado", "navigado"],
       ...["plenstato", "plenstato", "plenstato"],
+      ...["saltligilo", "saltligilo", "saltligilo"],
       ...["sxaltilo", "sxaltilo", "sxaltilo"],
       ...["tabelo", "tabelo", "tabelo"],
       ...["tekstareo", "tekstareo", "tekstareo"],
@@ -530,6 +569,91 @@ describe("the plugin reports what it did (F10)", () => {
     expect(lines.join("\n")).toContain("Inter fehlt");
     expect(double.notifications[0]?.message).toContain("fehlgeschlagen");
     expect(double.notifications[0]?.options).toMatchObject({ error: true });
+  });
+});
+
+// Abnahme 014 ②–⑤ (2026-10-18, F-5): the maintainer's file holds the 17 sets of before Spec 014 ②,
+// the atributlisto without layout=auto. Against the strict double — it refuses sizing outside auto
+// layout and read-only fields as Figma does — the whole plan must run twice without a refusal:
+// fresh, and into that file with „auch in vorgefundenem Set anlegen" (the new sets and the auto
+// variants of the found atributlisto are created). Before this, the real tool found the errors one
+// by one (F-4 the separator, F-5 the first variant whose sizing was written before its parent had
+// auto layout).
+describe("the full plan against the strict double: fresh and into the file of before ② (Abnahme F-5)", () => {
+  const BEFORE_2 = new Set([
+    "ikono",
+    "apartigilo",
+    "saltligilo",
+    "titolo",
+    "teksto",
+    "konsileto",
+    "sxvebilo",
+    "menuo",
+    "faldilo",
+    "kompletigilo",
+  ]);
+  const before2 = structuredClone(repo.input);
+  before2.modelo.eroj = before2.modelo.eroj.filter((entry) => !BEFORE_2.has(entry.ero.name));
+  const list = before2.modelo.eroj.find((entry) => entry.ero.name === "atributlisto");
+  if (list === undefined) throw new Error("atributlisto missing");
+  const layout = list.skemo.props.find((prop) => prop.name === "layout");
+  if (layout?.values !== undefined)
+    layout.values = layout.values.filter((value) => value !== "auto");
+  list.skemo.bindings = list.skemo.bindings.filter((binding) => binding.when?.layout !== "auto");
+  const files17 = Object.fromEntries(
+    FIGMA_CELO.generate(before2).map((file) => [file.path, file.text]),
+  );
+  type Report = {
+    components: { set: string; found: boolean; created: string[]; updated: string[] }[];
+    warnings: string[];
+  };
+  async function runWith(
+    double: ReturnType<typeof figmaDouble>,
+    source: string,
+    options?: typeof LIFT,
+  ): Promise<Report> {
+    const module = new Function("figma", "options", `${source}\nreturn applyPlan(options);`);
+    return (await module(double.figma, options)) as Report;
+  }
+  const refused = (report: Report) =>
+    report.warnings.filter((warning) => /abgelehnt|no setter|auto-layout/.test(warning));
+
+  it("fresh: every one of the 27 sets is drawn, nothing refused", async () => {
+    const double = modelDouble();
+    const report = await runWith(double, repoFiles["figma/plugin/code.js"] ?? "");
+    expect(report.components).toHaveLength(repoPlan.components.length);
+    expect(report.components.map((set) => set.set)).toEqual(
+      repoPlan.components.map((component) => component.set),
+    );
+    expect(refused(report)).toEqual([]);
+  });
+
+  it("the file of before ②: 17 sets, the atributlisto without auto; then the current plan into the found file creates the 10 sets and the auto variants, nothing refused", async () => {
+    const double = modelDouble();
+    const first = await runWith(double, files17["figma/plugin/code.js"] ?? "");
+    expect(first.components).toHaveLength(17);
+    const listBefore = first.components.find((set) => set.set === "atributlisto");
+    expect(listBefore?.created.some((name) => name.includes("layout=auto"))).toBe(false);
+    const second = await runWith(double, repoFiles["figma/plugin/code.js"] ?? "", LIFT);
+    expect(second.components).toHaveLength(repoPlan.components.length);
+    const listAfter = second.components.find((set) => set.set === "atributlisto");
+    expect(listAfter?.found).toBe(true);
+    expect(listAfter?.created.length).toBeGreaterThan(0);
+    expect(listAfter?.created.every((name) => name.includes("layout=auto"))).toBe(true);
+    // The sets this branch adds beyond the 17 (on ② three, on ⑤ ten) are created, not found.
+    const added = repoPlan.components
+      .map((component) => component.set)
+      .filter((name) => BEFORE_2.has(name));
+    expect(added.length).toBeGreaterThan(0);
+    for (const name of added) {
+      const set = second.components.find((each) => each.set === name);
+      expect(set?.found, name).toBe(false);
+      expect(set?.created.length, name).toBeGreaterThan(0);
+    }
+    expect(refused(second)).toEqual([]);
+    // A third run finds everything and creates nothing.
+    const third = await runWith(double, repoFiles["figma/plugin/code.js"] ?? "");
+    expect(third.components.every((set) => set.found && set.created.length === 0)).toBe(true);
   });
 });
 
@@ -932,8 +1056,12 @@ describe("a run reports every node of the set that was there at its start and is
     return found;
   };
   const LAST = "emphasis=low, intent=neutral, size=large, state=loading";
-  /** Variant, focus ring, focus gap, control, label: five nodes per variant, plus the set. */
-  const NODES = 72 * 5 + 1;
+  /**
+   * Variant, focus ring, focus gap, control, label: five nodes per variant, plus the set; since
+   * Spec 014 ② the icon-start of every variant with its glyph frame and vector (the repo plan:
+   * komuna alone): eight nodes per variant.
+   */
+  const NODES = 72 * 8 + 1;
 
   it("counts the same nodes at start and end of a clean run, and loses none", async () => {
     const double = modelDouble();
@@ -2289,7 +2417,9 @@ describe("a failed run leaves everything readable in the console (F21)", () => {
     expect(partial.phase).toBe("components");
     expect(partial.variables).toBeGreaterThan(0);
     expect(butonoOf(partial.components)?.set).toBe("butono");
-    expect(butonoOf(partial.components)?.created).toHaveLength(39);
+    // Spec 014 ②: the icon-start of every variant takes two creations more per variant, so the
+    // abort comes two variants earlier.
+    expect(butonoOf(partial.components)?.created).toHaveLength(37);
   });
 
   it("prints the report of a good run as one JSON string too", async () => {
@@ -2507,6 +2637,8 @@ describe("every bound paint shows the plan's colour after the first and the seco
       warnings: [],
       // Spec 008: two sets; the ligilo has placement × size × state = 30 variants.
       components: [
+        // Spec 014 ②: the apartigilo has orientation = 2 variants in one state.
+        { set: "apartigilo", created: 2, updated: 0 },
         // Spec 011 ④: the atributlisto has layout = 3 variants in one state (auto since Spec 014 ①).
         { set: "atributlisto", created: 3, updated: 0 },
         // Spec 011 ③: the avizo has intent = 4 variants in one state (dismissible is no axis).
@@ -2518,6 +2650,8 @@ describe("every bound paint shows the plan's colour after the first and the seco
         { set: "elektilo", created: 15, updated: 0 },
         // Spec 010 ③: the elekto has size × state = 15 variants.
         { set: "elekto", created: 15, updated: 0 },
+        // Spec 014 ②: the ikono has name × size × intent = 225 variants in one state.
+        { set: "ikono", created: 225, updated: 0 },
         // Spec 011 ③: the insigno has intent × size = 10 variants in one state.
         { set: "insigno", created: 10, updated: 0 },
         // Spec 009: the kampo has size × state = 18 variants.
@@ -2536,6 +2670,8 @@ describe("every bound paint shows the plan's colour after the first and the seco
         { set: "navigado", created: 3, updated: 0 },
         // Spec 011 ③: the plenstato has kind = 2 variants in one state.
         { set: "plenstato", created: 2, updated: 0 },
+        // Spec 014 ②: the saltligilo has state = 2 variants (rest and focus).
+        { set: "saltligilo", created: 2, updated: 0 },
         // Spec 010 ①: the sxaltilo has checked × size × state = 24 variants.
         { set: "sxaltilo", created: 24, updated: 0 },
         // Spec 011 ④: the tabelo has density × state = 6 variants (the states of the sort button).
@@ -3590,7 +3726,9 @@ describe("every set lies in the frame Eroj in the section Fundamento (F-1, F-2, 
     if (first === undefined || second === undefined || third === undefined) throw new Error("3");
     const gap = layout?.gap ?? Number.NaN;
     const width = box(named(frame, first)).width + gap + box(named(frame, second)).width;
-    Object.assign(frame, { layoutSizingHorizontal: "FIXED", width });
+    // A size given by hand is a resize (width is read-only in the Plugin API, F-4).
+    frame.resize(width, (frame as unknown as { height: number }).height);
+    Object.assign(frame, { layoutSizingHorizontal: "FIXED" });
     expect(box(named(frame, third)).y).toBeGreaterThan(box(named(frame, first)).y);
     const report = await apply(double);
     expect((frame as unknown as { layoutSizingHorizontal: string }).layoutSizingHorizontal).toBe(
@@ -3787,7 +3925,13 @@ describe("every set lies in the frame Eroj in the section Fundamento (F-1, F-2, 
       moved: [],
       frame: { name: FRAME, found: false, created: true, wrap: "WRAP" },
     });
-    expect(headline.components.map((component) => component.placement)).toEqual(inLayout);
+    // Spec 014 ②: with twenty sets the placement stands in the part state of every set.
+    const placements = lines
+      .filter((line) => line.startsWith("{"))
+      .map((line) => JSON.parse(line) as { part?: string; value?: { placement?: unknown } })
+      .filter((part) => part.part === "state")
+      .map((part) => part.value?.placement);
+    expect(placements).toEqual(inLayout);
   });
 });
 
@@ -3805,17 +3949,19 @@ describe("the double lays out a horizontal frame that wraps (F-8, Annahme bis zu
   const wrapping = () => {
     const double = modelDouble();
     const frame = frameOf(double);
+    // The width by hand is a resize (width is read-only in the Plugin API, F-4); the layout after
+    // it, as in the editor: a frame resized by hand keeps hugging its height once told so again.
+    frame.resize(250, (frame as unknown as { height: number }).height);
     Object.assign(frame, {
       layoutMode: "HORIZONTAL",
       layoutWrap: "WRAP",
       itemSpacing: 10,
       counterAxisSpacing: 20,
-      width: 250,
       layoutSizingVertical: "HUG",
     });
     const children = [0, 1, 2].map(() => {
       const child = frameOf(double);
-      Object.assign(child, { width: 100, height: 50 });
+      child.resize(100, 50);
       frame.appendChild(child);
       return child;
     });
@@ -3846,7 +3992,7 @@ describe("the double lays out a horizontal frame that wraps (F-8, Annahme bis zu
   it("follows a child that grows: its neighbours move on the next read", () => {
     const { frame, children } = wrapping();
     Object.assign(frame, { layoutSizingHorizontal: "HUG" });
-    Object.assign(children[0] as DoubleNode, { width: 300 });
+    (children[0] as DoubleNode).resize(300, 50);
     expect(children.map((child) => box(child).x)).toEqual([0, 310, 420]);
   });
 });
@@ -4213,7 +4359,10 @@ describe("the elektilo is drawn as the field of the kampo with the chevron in it
     expect(bound(indicator, "height")).toBe("size/icon/medium");
     expect(indicator?.properties.layoutSizingHorizontal).toBe("FIXED");
     expect(indicator?.properties.opacity).toBe(1);
-    expect(descendant(rest, "indicator")?.children.map((child) => child.name)).toEqual(["mark"]);
+    // Spec 014 ②: the chevron is a glyph frame per Aspekto of the plan (the repo plan: komuna).
+    expect(descendant(rest, "indicator")?.children.map((child) => child.name)).toEqual([
+      "glyph-komuna",
+    ]);
     const mark = descendant(rest, "mark");
     expect(mark?.type).toBe("VECTOR");
     expect(mark?.properties.constraints).toEqual({ horizontal: "SCALE", vertical: "SCALE" });
@@ -4466,7 +4615,7 @@ describe("the dialogo is drawn as a dialog: surface with heading, message, reaso
       expect(
         content?.children.map((child) => child.name),
         reason,
-      ).toEqual(["reason-label", "reason-field"]);
+      ).toEqual(["reason-label", "reason-field", "reason-help"]);
       expect(descendant(asked, "reason-label")?.properties.characters, reason).toBe("Begründung");
       const field = descendant(asked, "reason-field");
       expect(bound(field, "height"), reason).toBe("size/control/large");
@@ -4476,7 +4625,11 @@ describe("the dialogo is drawn as a dialog: surface with heading, message, reaso
     }
     const none = descendant(variant("size=medium, reason=none, state=rest"), "content");
     expect(none?.properties.visible).toBe(false);
-    expect(none?.children.map((child) => child.name)).toEqual(["reason-label", "reason-field"]);
+    expect(none?.children.map((child) => child.name)).toEqual([
+      "reason-label",
+      "reason-field",
+      "reason-help",
+    ]);
     expect(bound(descendant(none, "reason-field"), "height")).toBeUndefined();
   });
 
@@ -4736,7 +4889,8 @@ describe("the avizo is drawn as a notice: surface with accent, heading, message,
       expect(bound(control, side), side).toBe("spacing/medium");
     }
     expect(bound(control, "itemSpacing")).toBe("spacing/small");
-    expect(control?.children.map((child) => child.name)).toEqual(["texts", "dismiss"]);
+    // Spec 014 ②: the icon of the intent stands first.
+    expect(control?.children.map((child) => child.name)).toEqual(["icon", "texts", "dismiss"]);
     const texts = descendant(info, "texts");
     expect(texts?.properties.layoutMode).toBe("VERTICAL");
     expect(bound(texts, "itemSpacing")).toBe("spacing/small");
@@ -6052,5 +6206,149 @@ describe("the langetaro is drawn as tabs: the list with three tabs, the first ac
     await run(double, source);
     expect(double.snapshot()).toBe(before);
     expect(double.counts.writes - written).toBe(0);
+  });
+});
+
+// Spec 014 ② (G3, plan ② D-08): the plugin draws icons. An icon is one frame per Aspekto, imported
+// from the glyph of that Aspekto (createNodeFromSvg), its visibility bound to the BOOLEAN
+// variable ikonoj/<aspekto> — so the brand mode switches the picture — and its vectors' fill
+// bound to the colour of the part. The set ikono draws one variant per name × size × intent;
+// the butono draws its icon-start, the elektilo its chevron, the tabelo its sort arrow and the
+// avizo its status icon the same way; the dialog shows the help of its reason (O-5 of ①).
+describe("icons are drawn from the glyphs of every Aspekto and switch with the brand (Spec 014 ②)", () => {
+  // The plan of core + ekzemplo: two Aspektoj, two glyph frames per icon.
+  const source = files["figma/plugin/code.js"] ?? "";
+  const bound = (node: DoubleNode | undefined, field: string) => node?.boundVariables[field]?.name;
+  const paintOf = (node: DoubleNode | undefined, field: "fills" | "strokes") =>
+    ((node?.properties[field] ?? []) as { boundVariables?: { color?: { name: string } } }[])[0]
+      ?.boundVariables?.color?.name;
+  const vectorOf = (frame: DoubleNode | undefined) =>
+    frame?.children.find((child) => child.type === "VECTOR");
+  const drawn = async () => {
+    const double = modelDouble();
+    const report = (await new Function("figma", `${source}\nreturn applyPlan();`)(
+      double.figma,
+    )) as { warnings: string[]; components: { set: string; layout: { zero: string[] } }[] };
+    const setOf = (name: string) => pageNodes(double).find((child) => child.name === name);
+    return { double, report, setOf };
+  };
+
+  it("the set ikono: 225 variants, each the control with one glyph frame per Aspekto, visible by the brand variable, filled in the bound colour, sized by the token", async () => {
+    const { setOf, report } = await drawn();
+    const set = setOf("ikono");
+    expect(set?.children).toHaveLength(225);
+    const variant = set?.children.find(
+      (child) => child.name === "name=close, size=medium, intent=neutral, state=rest",
+    );
+    expect(variant?.children.map((child) => child.name)).toEqual(["control"]);
+    const control = descendant(variant, "control");
+    expect(control?.children.map((child) => child.name)).toEqual([
+      "glyph-komuna",
+      "glyph-ekzemplo",
+    ]);
+    expect(bound(control, "width")).toBe("size/icon/medium");
+    expect(bound(control, "height")).toBe("size/icon/medium");
+    const komuna = descendant(variant, "glyph-komuna");
+    const ekzemplo = descendant(variant, "glyph-ekzemplo");
+    expect(bound(komuna, "visible")).toBe("ikonoj/komuna");
+    expect(bound(ekzemplo, "visible")).toBe("ikonoj/ekzemplo");
+    expect(paintOf(vectorOf(komuna), "fills")).toBe("color/text/default");
+    expect(paintOf(vectorOf(ekzemplo), "fills")).toBe("color/text/default");
+    const danger = set?.children.find(
+      (child) => child.name === "name=danger, size=large, intent=danger, state=rest",
+    );
+    expect(paintOf(vectorOf(descendant(danger, "glyph-komuna")), "fills")).toBe(
+      "color/status/danger/text",
+    );
+    expect(bound(descendant(danger, "control"), "width")).toBe("size/icon/large");
+    expect(descendant(variant, "label")).toBeUndefined();
+    expect(descendant(variant, "focus-ring")).toBeUndefined();
+    expect(report.warnings.filter((warning) => warning.startsWith("ikono"))).toEqual([]);
+    expect(report.components.find((component) => component.set === "ikono")?.layout.zero).toEqual(
+      [],
+    );
+  });
+
+  it("the butono draws its icon-start before the label, in the label's colour and the icon's size; the elektilo its chevron, the tabelo its sort arrow", async () => {
+    const { setOf } = await drawn();
+    const butono = setOf("butono");
+    const rest = butono?.children.find(
+      (child) => child.name === "emphasis=high, intent=neutral, size=medium, state=rest",
+    );
+    const control = descendant(rest, "control");
+    expect(control?.children.map((child) => child.name)).toEqual(["icon-start", "label"]);
+    const icon = descendant(rest, "icon-start");
+    expect(icon?.children.map((child) => child.name)).toEqual(["glyph-komuna", "glyph-ekzemplo"]);
+    expect(bound(icon, "width")).toBe("size/icon/medium");
+    expect(paintOf(vectorOf(descendant(icon, "glyph-komuna")), "fills")).toBe(
+      "color/action/primary/text",
+    );
+    const elektilo = setOf("elektilo");
+    const indicator = descendant(elektilo?.children[0], "indicator");
+    expect(indicator?.children.map((child) => child.name)).toEqual([
+      "glyph-komuna",
+      "glyph-ekzemplo",
+    ]);
+    // No hand-drawn sign: the only vectors are the imports of the glyphs.
+    expect(descendant(elektilo?.children[0], "mark")?.parent?.name).toBe("glyph-komuna");
+    expect(paintOf(vectorOf(descendant(indicator, "glyph-komuna")), "fills")).toBe(
+      "color/text/muted",
+    );
+    const tabelo = setOf("tabelo");
+    const sortIndicator = descendant(tabelo?.children[0], "sort-indicator");
+    expect(sortIndicator?.children.map((child) => child.name)).toEqual([
+      "glyph-komuna",
+      "glyph-ekzemplo",
+    ]);
+    expect(bound(sortIndicator, "width")).toBe("size/icon/small");
+  });
+
+  it("the avizo draws the icon of its intent before its texts, in the status text colour; the dialog shows the help of its reason (O-5)", async () => {
+    const { setOf } = await drawn();
+    const avizo = setOf("avizo");
+    const danger = avizo?.children.find((child) => child.name === "intent=danger, state=rest");
+    const control = descendant(danger, "control");
+    expect(control?.children.map((child) => child.name)).toEqual(["icon", "texts", "dismiss"]);
+    const icon = descendant(danger, "icon");
+    expect(bound(icon, "width")).toBe("size/icon/medium");
+    expect(paintOf(vectorOf(descendant(icon, "glyph-komuna")), "fills")).toBe(
+      "color/status/danger/text",
+    );
+    const dialogo = setOf("dialogo");
+    const withReason = dialogo?.children.find((child) => child.name.includes("reason=optional"));
+    const content = descendant(withReason, "content");
+    expect(content?.children.map((child) => child.name)).toEqual([
+      "reason-label",
+      "reason-field",
+      "reason-help",
+    ]);
+    expect(descendant(withReason, "reason-help")?.properties.characters).toBe(
+      "Nenne den Grund in einem Satz.",
+    );
+    expect(paintOf(descendant(withReason, "reason-help"), "fills")).toBe("color/text/muted");
+  });
+
+  it("draws the apartigilo as a line and the saltligilo as a control; writes nothing new on a second run", async () => {
+    const { double, setOf } = await drawn();
+    const apartigilo = setOf("apartigilo");
+    expect(apartigilo?.children.map((child) => child.name)).toEqual([
+      "orientation=horizontal, state=rest",
+      "orientation=vertical, state=rest",
+    ]);
+    const horizontal = descendant(apartigilo?.children[0], "control");
+    expect(paintOf(horizontal, "strokes")).toBe("color/border/subtle");
+    expect(bound(horizontal, "strokeTopWeight")).toBe("border/width/default");
+    const vertical = descendant(apartigilo?.children[1], "control");
+    expect(bound(vertical, "strokeLeftWeight")).toBe("border/width/default");
+    expect(bound(vertical, "height")).toBe("size/control/medium");
+    const saltligilo = setOf("saltligilo");
+    expect(saltligilo?.children.map((child) => child.name)).toEqual(["state=rest", "state=focus"]);
+    expect(paintOf(descendant(saltligilo?.children[0], "control"), "fills")).toBe(
+      "color/background/raised",
+    );
+    expect(descendant(saltligilo?.children[0], "label")?.properties.characters).toBe("Ziel");
+    const before = double.snapshot();
+    await run(double, source);
+    expect(double.snapshot()).toBe(before);
   });
 });

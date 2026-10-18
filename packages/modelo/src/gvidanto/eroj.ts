@@ -96,9 +96,11 @@ export interface UzoOutput {
   layout: {
     size: UzoLayout["size"];
     wrap: UzoLayout["wrap"];
+    /** The container width from which layout auto lays the Ero out side by side (Spec 014 ①, ② O-3). */
+    "columns-from"?: string;
     [prop: string]:
-      | UzoLayout["size"]
-      | UzoLayout["wrap"]
+      | string
+      | undefined
       | {
           allowedIn: { containers?: string[]; dimensioj?: Record<string, string[]> };
           regulo: ReguloRef;
@@ -344,6 +346,8 @@ function reguloRefNamed(modelo: Modelo, name: string): ReguloRef {
 export function uzoOf(modelo: Modelo, uzo: Uzo | undefined): UzoOutput | undefined {
   if (uzo === undefined) return undefined;
   const layout: UzoOutput["layout"] = { size: uzo.layout.size, wrap: uzo.layout.wrap };
+  // Spec 014 ② (O-3 of ①): the threshold of layout auto, so an agent sees it.
+  if (uzo.layout["columns-from"] !== undefined) layout["columns-from"] = uzo.layout["columns-from"];
   for (const [prop, allowance] of Object.entries(uzo.layout)) {
     if (typeof allowance !== "object") continue;
     layout[prop] = {

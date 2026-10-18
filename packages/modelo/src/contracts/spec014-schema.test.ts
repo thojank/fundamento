@@ -140,3 +140,20 @@ describe("Ikonaro (Spec 014 ① D-04)", () => {
     expect(v("AspektoFile")({ ...aspekto, ikonoj: { ...ikonoj, style: "" } })).toBe(false);
   });
 });
+
+// Spec 014 ② (plan ② D-04, D-03): a part may carry a layer (the skip link above the page, the
+// overlays of ④) bound to an elevation.layer.* token; an Ero that is never named (a separator)
+// has an empty a11y.name. Additive; every Skemo before stays valid.
+describe("SkemoPartProperty layer and an empty a11y.name (Spec 014 ②)", () => {
+  it("layer is a part property bound to a number token", () => {
+    expect(v("SkemoPartProperty")("layer")).toBe(true);
+    expect(v("SkemoPart")({ layer: { fixed: "elevation.layer.overlay" } })).toBe(true);
+    expect(v("SkemoPart")({ depth: { fixed: "elevation.layer.overlay" } })).toBe(false);
+  });
+
+  it("a11y.name may be empty: a separator has no name of its own", () => {
+    expect(v("SkemoA11y")({ role: "separator", name: [], states: {}, keys: [] })).toBe(true);
+    expect(v("SkemoA11y")({ role: "img", name: ["prop:label"], states: {}, keys: [] })).toBe(true);
+    expect(v("SkemoA11y")({ role: "img", states: {}, keys: [] })).toBe(false);
+  });
+});

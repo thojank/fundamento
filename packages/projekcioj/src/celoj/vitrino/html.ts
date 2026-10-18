@@ -37,6 +37,7 @@ th, td { text-align: start; padding: var(--fm-spacing-small); border-block-end: 
 .fm-group { display: flex; flex-wrap: wrap; gap: var(--fm-spacing-small); align-items: center; }
 .fm-group button { font: inherit; padding: var(--fm-spacing-small); background-color: var(--fm-color-action-secondary-rest); color: var(--fm-color-action-secondary-text); border: var(--fm-border-width-default) solid var(--fm-color-border-default); border-radius: var(--fm-radius-role-control); cursor: pointer; }
 .fm-group button[aria-pressed="true"] { background-color: var(--fm-color-action-primary-rest); color: var(--fm-color-action-primary-text); }
+.fm-row { display: flex; align-items: center; gap: var(--fm-spacing-small); }
 [hidden] { display: none !important; }`;
 
 function switcher(datumoj: VitrinoDatumoj): string {
@@ -169,7 +170,12 @@ function wrapSentence(role: string | undefined, wrap: string, multiline = false)
                     ? "Leiste"
                     : role === "tablist"
                       ? "Reiter"
-                      : "Label";
+                      : // Spec 014 ②: an icon never wraps its glyph, a separator its line.
+                        role === "img"
+                        ? "Glyphe"
+                        : role === "separator"
+                          ? "Linie"
+                          : "Label";
   if (wrap === "never") return `${subject} bricht nie um`;
   if (wrap === "with-text") return `${subject} darf umbrechen (inline), standalone nie`;
   return `${subject} darf umbrechen`;

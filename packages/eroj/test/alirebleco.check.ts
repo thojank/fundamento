@@ -1345,3 +1345,55 @@ for (const aspekto of ["komuna", "ekzemplo"]) {
     }
   }
 }
+
+// Spec 014 ② (G5, G10, plan ② D-05–D-07): the rendered fm-ikono, fm-apartigilo and fm-saltligilo
+// in every colour class: axe (a named icon is an image, a decorative one is nothing; a separator
+// with its orientation and a decorative line; the skip link, a link); the ring of the skip link
+// at least 3:1 against its gap and the page; a status icon on the page ≥ 3:1 (a graphic).
+const grundbausteinoj =
+  '<fm-saltligilo id="skip" to="main">Zum Inhalt springen</fm-saltligilo><main id="main"><fm-ikono id="named" name="warning" label="Warnung"></fm-ikono><fm-ikono name="close"></fm-ikono><fm-ikono name="danger" intent="danger" label="Fehler"></fm-ikono><fm-apartigilo></fm-apartigilo><div style="display: flex"><span>a</span><fm-apartigilo orientation="vertical"></fm-apartigilo><span>b</span></div><fm-apartigilo decorative></fm-apartigilo><fm-butono id="after">Danach</fm-butono></main>';
+
+for (const aspekto of ["komuna", "ekzemplo"]) {
+  for (const scheme of ["light", "dark"]) {
+    for (const contrast of ["default", "high"]) {
+      test(`${aspekto} ${scheme}/${contrast}: axe on the ikono, the apartigilo and the saltligilo; the skip link's ring ≥ 3:1`, async ({
+        page,
+        browserName,
+      }) => {
+        await serve(page, out, grundbausteinoj);
+        await page.evaluate(
+          ([a, s, k]) => {
+            const root = document.documentElement;
+            root.setAttribute("data-fm-aspekto", a ?? "");
+            root.setAttribute("data-fm-color-scheme", s ?? "");
+            root.setAttribute("data-fm-contrast", k ?? "");
+          },
+          [aspekto, scheme, contrast],
+        );
+        await expect(page.getByRole("img")).toHaveCount(2);
+        await expect(page.getByRole("separator")).toHaveCount(2);
+        await expect(page.getByRole("link", { name: "Zum Inhalt springen" })).toHaveCount(1);
+        expect(await axeViolations(page), "rest").toEqual([]);
+        const [ring] = await focusRingContrasts(page, ["#skip"], browserName);
+        expect(ring, "skip link reached by Tab").toBeDefined();
+        expect(ring?.gap ?? 0, "ring vs gap").toBeGreaterThanOrEqual(3);
+        expect(ring?.page ?? 0, "ring vs page").toBeGreaterThanOrEqual(3);
+        expect(await axeViolations(page), "focus").toEqual([]);
+        // A status icon is a graphic: its colour against the page at least 3:1 (WCAG 1.4.11).
+        const graphic = await page.evaluate(() => {
+          const icon = document.querySelector('fm-ikono[intent="danger"]');
+          const glyph = icon?.shadowRoot?.querySelector('[part="glyph"]');
+          return {
+            fill:
+              glyph === null || glyph === undefined ? "" : getComputedStyle(glyph).backgroundColor,
+            page: getComputedStyle(document.body).backgroundColor,
+          };
+        });
+        expect(
+          contrastOf(graphic.fill, graphic.page),
+          "status icon vs page",
+        ).toBeGreaterThanOrEqual(3);
+      });
+    }
+  }
+}

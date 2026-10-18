@@ -129,3 +129,37 @@ describe("capitals and tracking reach the web projection (F31)", () => {
     expect(component).toContain("letter-spacing: var(--fm-typography-label-1-letter-spacing)");
   });
 });
+
+// Spec 014 ② (G3, plan ② D-05): the glyphs of every Aspekto reach the web as custom properties
+// --fm-ikono-<name> (the SVG as a data URL), switched by data-fm-aspekto like every value — so an
+// ikono changes its picture with the brand without a reload, and a mask in currentcolor draws it.
+describe("the glyphs of the Ikonaro per Aspekto (Spec 014 ②)", () => {
+  it("writes one block per Aspekto with every name of the Ikonaro as --fm-ikono-<name>", () => {
+    const { modelo } = loadModelo(source);
+    if (modelo === undefined) throw new Error("unreachable");
+    expect(modelo.ikonaro.length).toBeGreaterThan(0);
+    const komuna = combined.split("/* ikonoj komuna */\n")[1]?.split("\n}")[0] ?? "";
+    const ekzemplo = combined.split("/* ikonoj ekzemplo */\n")[1]?.split("\n}")[0] ?? "";
+    expect(komuna.split("\n")[0]).toBe(
+      ':where(:root:is([data-fm-aspekto="komuna"], :not([data-fm-aspekto]))) {',
+    );
+    expect(ekzemplo.split("\n")[0]).toBe(':where(:root[data-fm-aspekto="ekzemplo"]) {');
+    for (const { name } of modelo.ikonaro) {
+      expect(komuna, name).toContain(`  --fm-ikono-${name}: url("data:image/svg+xml,`);
+      expect(ekzemplo, name).toContain(`  --fm-ikono-${name}: url("data:image/svg+xml,`);
+    }
+    // Two styles of the same set: the pictures differ, the names are the same.
+    const of = (block: string, name: string) =>
+      new RegExp(`--fm-ikono-${name}: (.*);`).exec(block)?.[1];
+    expect(of(komuna, "close")).not.toBe(of(ekzemplo, "close"));
+    expect(of(komuna, "close")).toContain("%3Csvg");
+    expect(of(komuna, "close")).not.toContain("<metadata>");
+  });
+
+  it("puts the glyphs of one Aspekto at :root in its own file", () => {
+    const ekzemplo = files["css/fundamento-ekzemplo.css"] ?? "";
+    expect(ekzemplo).toContain("/* ikonoj ekzemplo */\n:where(:root) {");
+    expect(ekzemplo).toContain("  --fm-ikono-close: url(");
+    expect(ekzemplo).not.toContain("/* ikonoj komuna */");
+  });
+});

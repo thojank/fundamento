@@ -1665,3 +1665,35 @@ describe("Spec 014 documentation (specs/014-eroj-runde-3)", () => {
     expect(read("docs/vojmapo.md")).toContain("Spec 014 ①");
   });
 });
+
+// Spec 014 ② (Briefing 2026-10-17): plan ② carries the decisions, the Arkitekturo coverage of the
+// three Eroj, deviations, findings and open points; tasks ② the red hashes; the Vojmapo names ②.
+describe("Spec 014 ② documentation (specs/014-eroj-runde-3)", () => {
+  const section = (text: string) =>
+    text.slice(text.indexOf("## ② Grundbausteine"), text.indexOf("## ③ Typografie"));
+
+  it("plan ② carries the decisions, the coverage, deviations, findings and open points; tasks ② the red hashes", () => {
+    const plan = section(read("specs/014-eroj-runde-3/plan.md"));
+    for (const heading of [
+      "### Zusammenfassung",
+      "### Entwurfsentscheidungen",
+      "#### D-01",
+      "### Arkitekturo-Abdeckung",
+      "### Abweichungen von der Spec",
+      "### Befunde / Mankoj",
+      "### Offen (für den Maintainer)",
+    ]) {
+      expect(plan, heading).toContain(heading);
+    }
+    for (const ero of ["ikono", "apartigilo", "saltligilo"]) expect(plan).toContain(`\`${ero}\``);
+    // The spec's `target` is a web term; the Skemo says `to` (Art. VIII) — a deviation on record.
+    expect(plan).toContain("`to`");
+    // O-3 and O-5 of ① are closed here.
+    expect(plan).toContain("O-3");
+    expect(plan).toContain("O-5");
+    const tasks = section(read("specs/014-eroj-runde-3/tasks.md"));
+    expect(tasks).toContain("### Messungen");
+    expect(tasks).toMatch(/rot `[0-9a-f]{7}`/);
+    expect(read("docs/vojmapo.md")).toContain("Spec 014 ②");
+  });
+});

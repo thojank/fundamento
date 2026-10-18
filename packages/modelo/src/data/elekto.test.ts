@@ -43,12 +43,14 @@ describe("elekto in the repo Modelo (G1, G2, section 3)", () => {
   it("lives in data/eroj/elekto/skemo.json, between elektilo and kampo, and the repo Modelo stays valid", () => {
     expect(elekto?.file).toBe("modelo/data/eroj/elekto/skemo.json");
     expect(modelo.eroj.map((entry) => entry.ero.name)).toEqual([
+      "apartigilo",
       "atributlisto",
       "avizo",
       "butono",
       "dialogo",
       "elektilo",
       "elekto",
+      "ikono",
       "insigno",
       "kampo",
       "langetaro",
@@ -57,6 +59,7 @@ describe("elekto in the repo Modelo (G1, G2, section 3)", () => {
       "mezurilo",
       "navigado",
       "plenstato",
+      "saltligilo",
       "sxaltilo",
       "tabelo",
       "tekstareo",
@@ -449,6 +452,9 @@ describe("the Reguloj of the elekto (G6, E5)", () => {
       "mezurilo",
       "navigado",
       "langetaro",
+      "ikono",
+      "apartigilo",
+      "saltligilo",
     ]);
   });
 

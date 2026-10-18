@@ -22,12 +22,14 @@ describe("list_eroj", () => {
       modelo.eroj.map((entry) => entry.ero.name),
     );
     expect(listEroj(modelo).eroj.map((entry) => entry.name)).toEqual([
+      "apartigilo",
       "atributlisto",
       "avizo",
       "butono",
       "dialogo",
       "elektilo",
       "elekto",
+      "ikono",
       "insigno",
       "kampo",
       "langetaro",
@@ -36,18 +38,19 @@ describe("list_eroj", () => {
       "mezurilo",
       "navigado",
       "plenstato",
+      "saltligilo",
       "sxaltilo",
       "tabelo",
       "tekstareo",
     ]);
-    expect(listEroj(modelo).eroj[2]).toEqual({
+    expect(listEroj(modelo).eroj[3]).toEqual({
       id: butono.ero.id,
       name: "butono",
       description: butono.ero.description,
       variants: ["high", "medium", "low"],
       props: ["emphasis", "intent", "size", "type", "disabled", "loading", "full-width", "label"],
     });
-    expect(listEroj(modelo).eroj[9]).toMatchObject({
+    expect(listEroj(modelo).eroj[11]).toMatchObject({
       name: "ligilo",
       variants: ["inline", "standalone"],
       props: ["to", "placement", "external", "size", "label"],
@@ -94,6 +97,8 @@ describe("get_ero", () => {
       "label-names-action",
       "destructive-label-names-object",
       "destructive-label-not-generic",
+      // Spec 014 ② (G8): a button that shows only an icon has a label.
+      "icon-meaning-named",
     ]);
     for (const regulo of output.reguloj) {
       expect(regulo.kialo.length).toBeGreaterThan(0);
@@ -213,7 +218,8 @@ describe("get_ero", () => {
     expect(missing.issues[0]?.path).toBe("get_ero/name");
     // The five nearest names (nearestNames): with six Eroj (Spec 010 ③) the farthest drops out.
     // Spec 011 ②: with nine Eroj dialogo is nearer to "butonno" than markobutono.
-    expect(missing.allowed).toEqual(["butono", "insigno", "avizo", "dialogo", "elekto"]);
+    // Spec 014 ②: ikono is nearer to "butonno" than insigno.
+    expect(missing.allowed).toEqual(["butono", "ikono", "insigno", "avizo", "dialogo"]);
   });
 });
 
@@ -351,5 +357,18 @@ describe("brief: required.props comes from the Skemo, not from a missing default
         .map((prop) => `${entry.ero.name}.${prop.name}`),
     );
     expect(offending).toEqual([]);
+  });
+});
+
+// Spec 014 ② (O-3 of ①): get_ero states the container width from which a list lays itself out
+// side by side — the Uzo's columns-from — so an agent sees the threshold of layout auto.
+describe("get_ero and columns-from (Spec 014 ②, O-3)", () => {
+  it("the Uzo of the atributlisto names columns-from in its layout", () => {
+    const answer = getEro(modelo, { name: "atributlisto" });
+    if (!answer.ok) throw new Error("get_ero atributlisto failed");
+    expect(answer.output.uzo?.layout["columns-from"]).toBe("size.container.small");
+    const button = getEro(modelo, { name: "butono" });
+    if (!button.ok) throw new Error("get_ero butono failed");
+    expect(button.output.uzo?.layout["columns-from"]).toBeUndefined();
   });
 });

@@ -175,8 +175,8 @@ describe("the Uzo of the butono (T020)", () => {
   it("rules the slots of A5: text in the label, one decorative icon at each end, no nesting", () => {
     expect(uzo?.slots).toEqual({
       label: { accepts: ["text"], max: 1, nesting: 0 },
-      "icon-start": { accepts: ["icon"], max: 1, nesting: 0 },
-      "icon-end": { accepts: ["icon"], max: 1, nesting: 0 },
+      "icon-start": { accepts: ["icon", "ikono"], max: 1, nesting: 0 },
+      "icon-end": { accepts: ["icon", "ikono"], max: 1, nesting: 0 },
     });
   });
 

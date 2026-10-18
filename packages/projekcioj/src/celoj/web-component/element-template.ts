@@ -28,7 +28,9 @@ export type HostControl =
   | "status"
   | "meter"
   | "light"
-  | "tabs";
+  | "tabs"
+  | "icon"
+  | "separator";
 
 export interface ElementNames {
   /** `fm-butono` */
@@ -70,6 +72,15 @@ export interface ElementNames {
    */
   columnsFrom?: string;
   /**
+   * The Ikonaro as the icon element knows it (Spec 014 ②, plan ② D-05): every name, and whether
+   * its direction carries meaning (mirrored in right-to-left writing). An unknown name warns.
+   */
+  ikonaro?: { name: string; mirror?: boolean }[];
+  /** A link that floats above the page (Spec 014 ②, plan ② D-07: the skip link, surface.layer). */
+  skip?: boolean;
+  /** Whether the Skemo has the part icon: a status host shows the icon of its intent (Spec 014 ②). */
+  icon?: boolean;
+  /**
    * The Make Kit builds one file per Aspekto: the descriptor and the stylesheet are then constants
    * above the element instead of imports (D-14).
    */
@@ -98,6 +109,10 @@ export function hostOf(role: string, multiline = false): HostControl {
   // group's are rows with role radio.
   if (role === "navigation") return "light";
   if (role === "tablist") return "tabs";
+  // An icon (Spec 014 ②, plan ② D-05) is a span that shows the Aspekto's glyph as a mask; a
+  // separator (D-06) a div with that role, or none where it only decorates.
+  if (role === "img") return "icon";
+  if (role === "separator") return "separator";
   if (role === "textbox") return multiline ? "textarea" : "input";
   if (role === "dialog") return "dialog";
   if (role === "switch" || role === "checkbox") return "toggle";
@@ -203,7 +218,8 @@ function dialogMarkup(): string {
  * list that opens is the platform's (E3).
  */
 function selectMarkup(slots: NonNullable<ElementNames["slots"]>, role: string): string {
-  return `<div part="field"><label part="label" for="control"><slot></slot><span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span></label><div><select part="control" id="control"></select><span part="indicator" aria-hidden="true">${signOf(role) ?? ""}</span></div>${textsMarkup(slots)}<span id="fm-texts" hidden></span></div>`;
+  void role;
+  return `<div part="field"><label part="label" for="control"><slot></slot><span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span></label><div><select part="control" id="control"></select><span part="indicator" aria-hidden="true">${IKONO_CHEVRON}</span></div>${textsMarkup(slots)}<span id="fm-texts" hidden></span></div>`;
 }
 
 /**
@@ -257,9 +273,17 @@ function rowMarkup(role: string): string {
  */
 const ARC_PATH = "M8 2a6 6 0 1 1-6 6";
 
-/** The sign of a dismiss butono (Spec 011 ③, D-09): a cross in the current colour, decorative. */
-const CROSS =
-  '<svg slot="icon-start" aria-hidden="true" viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg>';
+/**
+ * The sign of a dismiss butono (Spec 011 ③, D-09; Spec 014 ②, G3): the ikono close in its
+ * icon-start slot — the Aspekto's glyph, switching with the brand, decorative in the butono.
+ */
+const CROSS = '<fm-ikono slot="icon-start" name="close"></fm-ikono>';
+
+/**
+ * The chevron of a select (Spec 010 ④, D-05; Spec 014 ②, G3): the ikono chevron-down in the
+ * indicator, in the size of the field (the element writes it); the Aspekto draws the glyph.
+ */
+const IKONO_CHEVRON = '<fm-ikono name="chevron-down"></fm-ikono>';
 
 /**
  * The shadow markup of static text (Spec 011 ③, D-08, G4): a span without a role as the control,
@@ -288,6 +312,7 @@ function statusMarkup(
   slots: NonNullable<ElementNames["slots"]>,
   indicator: boolean,
   dismiss: boolean,
+  icon = false,
 ): string {
   const arc = `<svg aria-hidden="true" viewBox="0 0 16 16" width="100%" height="100%" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="${ARC_PATH}"/></svg>`;
   const holders = slots
@@ -298,7 +323,10 @@ function statusMarkup(
         : `<${slot.text === true ? "span" : "div"} part="${slot.name}" id="${slot.name}" hidden><slot name="${slot.name}"></slot></${slot.text === true ? "span" : "div"}>`,
     )
     .join("");
-  return `<div part="control" role="status"><span id="fm-texts" class="fm-hidden"></span>${indicator ? `<span part="indicator" aria-hidden="true">${arc}</span>` : ""}<div>${holders}</div>${dismiss ? `<fm-butono part="dismiss" emphasis="low" size="small" hidden>${CROSS}</fm-butono>` : ""}</div>`;
+  // The icon of the intent (Spec 014 ②, G3, G6): an ikono named like the intent, decorative — the
+  // intent word is heard already — in the colour of the part icon.
+  const sign = icon ? '<span part="icon" aria-hidden="true"><fm-ikono></fm-ikono></span>' : "";
+  return `<div part="control" role="status"><span id="fm-texts" class="fm-hidden"></span>${indicator ? `<span part="indicator" aria-hidden="true">${arc}</span>` : ""}${sign}<div>${holders}</div>${dismiss ? `<fm-butono part="dismiss" emphasis="low" size="small" hidden>${CROSS}</fm-butono>` : ""}</div>`;
 }
 
 /**
@@ -344,8 +372,25 @@ function lightMarkup(slots: NonNullable<ElementNames["slots"]>, role = ""): stri
 const DASH_SIGN =
   '<svg aria-hidden="true" viewBox="0 0 16 16" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 8h10"/></svg>';
 
-/** The chevron of a sort button (Spec 011 ④, D-09): the select's sign, turned by the direction. */
-const SORT_SIGN = `<svg aria-hidden="true" viewBox="0 0 16 16" width="100%" height="100%" fill="currentColor"><path d="${CHEVRON_PATH}"/></svg>`;
+/**
+ * The arrow of a sort button (Spec 011 ④, D-09; Spec 014 ②, G3): the ikono sort-ascending in the
+ * size of the sort indicator; the element names it sort-descending where the column is sorted so.
+ */
+const SORT_SIGN = '<fm-ikono name="sort-ascending" size="small"></fm-ikono>';
+
+/**
+ * The shadow markup of an icon (Spec 014 ②, plan ② D-05): the masked glyph is the control itself —
+ * one part, so an Ero that composes an icon keeps one [part="control"] of its own (a locator that
+ * pierces shadow roots finds the composing Ero's control alone).
+ */
+function iconMarkup(): string {
+  return '<span part="glyph"></span><slot hidden></slot><span id="fm-texts" hidden></span>';
+}
+
+/** The shadow markup of a separator (Spec 014 ②, plan ② D-06): the line, nothing else. */
+function separatorMarkup(): string {
+  return '<div part="control"></div><slot hidden></slot><span id="fm-texts" hidden></span>';
+}
 
 /**
  * The shadow markup of tabs (Spec 011 ⑤, D-08): the tablist (named by the label prop in the
@@ -368,9 +413,12 @@ function markup(
   marked: boolean,
   indicator = false,
   dismiss = false,
+  icon = false,
 ): string {
   if (host === "text") return textMarkup(slots);
-  if (host === "status") return statusMarkup(slots, indicator, dismiss);
+  if (host === "status") return statusMarkup(slots, indicator, dismiss, icon);
+  if (host === "icon") return iconMarkup();
+  if (host === "separator") return separatorMarkup();
   if (host === "meter") return meterMarkup();
   if (host === "light") return lightMarkup(slots, role);
   if (host === "tabs") return tabsMarkup();
@@ -404,6 +452,9 @@ export function elementSource({
   indicator = false,
   dismiss = false,
   columnsFrom,
+  ikonaro = [],
+  skip = false,
+  icon = false,
   slots = [
     { name: "label", default: true },
     { name: "icon-start", decorative: true },
@@ -438,7 +489,11 @@ export function elementSource({
                         ? "[part='region'], [part='list']"
                         : host === "tabs"
                           ? "[role=tablist]"
-                          : "button";
+                          : host === "icon"
+                            ? "span"
+                            : host === "separator"
+                              ? "div"
+                              : "button";
   const isToggle = host === "toggle";
   const isGroup = host === "group";
   const isSelect = host === "select";
@@ -450,7 +505,11 @@ export function elementSource({
   const isMeter = host === "meter";
   const isTabs = host === "tabs";
   const isNav = isLight && role === "navigation";
-  const isStatic = isStatus || host === "text" || isMeter || isLight || isTabs;
+  const isIcon = host === "icon";
+  const isSeparator = host === "separator";
+  const isSkip = host === "a" && skip;
+  const isStatic =
+    isStatus || host === "text" || isMeter || isLight || isTabs || isIcon || isSeparator;
   const listSlot = slots.find((slot) => slot.list === true)?.name ?? "";
   const namedSlots = slots
     .filter((slot) => slot.default !== true && slot.decorative !== true)
@@ -1395,6 +1454,10 @@ ${
         if (wanted === null) header.removeAttribute("aria-sort");
         else header.setAttribute("aria-sort", wanted);
       }
+      // The arrow is an ikono (Spec 014 ②, G3): named by the direction of the sorted column.
+      const arrow = button.querySelector("fm-ikono");
+      const arrowName = wanted === "descending" ? "sort-descending" : "sort-ascending";
+      if (arrow !== null && arrow.getAttribute("name") !== arrowName) arrow.setAttribute("name", arrowName);
     }
     // A numeric column (Spec 011 ④, D-09): the header carries numeric, its cells get the mark.
     const headers = [...table.querySelectorAll(":scope > thead th")];
@@ -1630,6 +1693,89 @@ ${
   }
 `
     : "";
+  // An icon (Spec 014 ②, plan ② D-05): the glyph is the Aspekto's picture of the name, a custom
+  // property the CSS Celo projects (--fm-ikono-<name>), masked in the current colour; a name whose
+  // direction carries meaning mirrors in right-to-left writing (data-mirror); named by its label
+  // it is an image, without one it is decorative and hidden from assistive technology.
+  const iconRender = isIcon
+    ? `    const glyphName = String(this.propValue("name") ?? "");
+    control.style.setProperty("--fm-ikono", \`var(--fm-ikono-\${glyphName})\`);
+    // A class, no data attribute: the parity inventory reads data-* as props of the Skemo.
+    control.classList.toggle("fm-mirror", IKONARO[glyphName] === true);
+    const meaning = this.propValue("label");
+    if (typeof meaning === "string" && meaning !== "") {
+      control.setAttribute("role", "img");
+      control.removeAttribute("aria-hidden");
+    } else {
+      control.removeAttribute("role");
+      control.setAttribute("aria-hidden", "true");
+    }
+`
+    : "";
+  // A separator (Spec 014 ②, plan ② D-06): its role and orientation, none where it decorates.
+  const separatorRender = isSeparator
+    ? `    if (this.propValue("decorative") === true) {
+      control.setAttribute("role", "none");
+      control.removeAttribute("aria-orientation");
+    } else {
+      control.setAttribute("role", "separator");
+      control.setAttribute("aria-orientation", String(this.propValue("orientation") ?? "horizontal"));
+    }
+`
+    : "";
+  // A skip link (Spec 014 ②, plan ② D-07): an empty label shows the Modelo's words for it, in the
+  // language of the document (a11y.texts label-empty), as the fallback content of the slot.
+  const skipRender = isSkip
+    ? `    const fallback = TEXTS["label-empty"];
+    if (fallback !== undefined) {
+      const spoken = fallback[this.#lingvo()] ?? fallback.en ?? "";
+      if (this.#label.textContent !== spoken) this.#label.textContent = spoken;
+    }
+`
+    : "";
+  // The skip link moves the focus to its target (G5): a landmark takes it once it may (tabindex
+  // -1, written where the markup has none); the fragment of the link is the platform's.
+  const skipInit = isSkip
+    ? `    control.addEventListener("click", () => {
+      const to = this.propValue("to");
+      const target = typeof to === "string" && to !== "" ? document.getElementById(to) : null;
+      if (target === null) return;
+      if (!target.hasAttribute("tabindex")) target.setAttribute("tabindex", "-1");
+      // At once, not a frame later: a Tab pressed right after Enter must find the target focused
+      // (CI-Lauf 39080368228: the late focus took the focus back from the next element).
+      target.focus();
+    });
+`
+    : "";
+  // The icons an Ero composes (Spec 014 ②, G3, G6): the status icon of a notice is named like
+  // its intent; the chevron of a select and a slotted icon of a button take the size of the Ero.
+  const composedIconRender = [
+    isStatus && icon
+      ? `    const statusIcon = this.shadowRoot?.querySelector('[part="icon"] fm-ikono');
+    if (statusIcon !== null && statusIcon !== undefined) {
+      const intentName = String(this.propValue("intent") ?? "");
+      if (statusIcon.getAttribute("name") !== intentName) statusIcon.setAttribute("name", intentName);
+    }
+`
+      : "",
+    isSelect
+      ? `    const chevron = this.shadowRoot?.querySelector('[part="indicator"] fm-ikono');
+    const fieldSize = String(this.propValue("size") ?? "medium");
+    if (chevron !== null && chevron !== undefined && chevron.getAttribute("size") !== fieldSize) {
+      chevron.setAttribute("size", fieldSize);
+    }
+`
+      : "",
+    (host === "button" || host === "a") && !isSkip
+      ? `    if (HAS_PROP.has("size")) {
+      const iconSize = String(this.propValue("size") ?? "medium");
+      for (const slotted of this.querySelectorAll(':scope > fm-ikono[slot^="icon-"]')) {
+        if (slotted.getAttribute("size") !== iconSize) slotted.setAttribute("size", iconSize);
+      }
+    }
+`
+      : "",
+  ].join("");
   const body = `
 type Value = string | boolean;
 
@@ -1666,6 +1812,13 @@ const VALUED_TEXTS = PROPS.filter((prop) => prop.kind === "enum").flatMap((prop)
 );
 /** The keys the Skemo names (Space, Enter): a toggle turns with these alone (Spec 010 ②). */
 const KEYS = SKEMO.a11y.keys as readonly string[];
+${
+  isIcon
+    ? `/** The names of the Ikonaro and whether each mirrors in right-to-left writing (Spec 014 ②). */
+const IKONARO: Readonly<Record<string, boolean>> = ${JSON.stringify(Object.fromEntries(ikonaro.map((entry) => [entry.name, entry.mirror === true])))};
+`
+    : ""
+}
 /**
  * Boolean props that key a part (Spec 010 ①, D-03: checked): written on the root as
  * data-<prop>="true|false", like an enum, because the stylesheet keys on them.
@@ -1719,7 +1872,7 @@ ${autoField}${isFieldHost ? "  /** Whether a person touched the field or the for
       sheet.replaceSync(CSS);
     }
     root.adoptedStyleSheets = [sheet];
-    root.innerHTML = \`${markup(host, slots, role, marked, indicator, dismiss)}\`;
+    root.innerHTML = \`${markup(host, slots, role, marked, indicator, dismiss, icon)}\`;
     const control = root.querySelector("${control}");
     const label = root.querySelector("slot:not([name])");
     const texts = root.querySelector("#fm-texts");
@@ -1737,7 +1890,7 @@ ${autoField}${isFieldHost ? "  /** Whether a person touched the field or the for
     this.#label = label;
     this.#texts = texts;
     control.addEventListener("click", (event) => this.#activate(event));
-${toggleKeys}${groupInit}${selectInit}${dialogInit}${statusInit}${lightInit}${tabsInit}    label.addEventListener("slotchange", () => this.#render());
+${toggleKeys}${groupInit}${selectInit}${dialogInit}${statusInit}${lightInit}${tabsInit}${skipInit}    label.addEventListener("slotchange", () => this.#render());
     for (const named of root.querySelectorAll("slot[name]")) {
       named.addEventListener("slotchange", () => this.#render());
     }
@@ -1859,7 +2012,7 @@ ${autoDisconnect}
     // that the target lies outside the application (Spec 008, D-09).
     if (control instanceof HTMLAnchorElement) {
       const to = this.propValue("to");
-      if (typeof to === "string" && to !== "") control.setAttribute("href", to);
+      if (typeof to === "string" && to !== "") control.setAttribute("href", ${isSkip ? '"#" + to' : "to"});
       else {
         control.removeAttribute("href");
         warn(\`${tag}: to is required; a link without a target is text (boundary disabled-link).\`);
@@ -1871,7 +2024,7 @@ ${autoDisconnect}
     // \`invalid\` spoken as aria-invalid and set by a filled error slot (constraint of the Skemo);
     // disabled wins over readonly; help and error show only while they have text.
     const described: string[] = [];
-${inputRender}${toggleRender}${groupRender}${selectRender}${dialogRender}${statusRender}${meterRender}${lightRender}${tabsRender}    // The texts of the slots that describe the control (Spec 009, D-02; a checkbox, Spec 010 ②):
+${inputRender}${toggleRender}${groupRender}${selectRender}${dialogRender}${statusRender}${meterRender}${lightRender}${tabsRender}${iconRender}${separatorRender}${skipRender}${composedIconRender}    // The texts of the slots that describe the control (Spec 009, D-02; a checkbox, Spec 010 ②):
     // shown while they have text, and its description in that order.
     for (const source of DESCRIPTION) {
       const [kind, name = ""] = source.split(":");

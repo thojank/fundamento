@@ -411,3 +411,22 @@ test('empty-label: the first option is selectable with the value "", no prompt b
   expect((await options())[0]).toEqual(["", "Alle", false, true]);
   expect(await formValue()).toBe("");
 });
+
+// Spec 014 ② (G3, G6): the chevron of the select is an fm-ikono chevron-down in the size of the
+// field, in the indicator's colour; no hand-drawn sign.
+test("the indicator holds an fm-ikono chevron-down that follows the size of the field", async ({
+  page,
+}) => {
+  await serve(
+    page,
+    out,
+    `<fm-elektilo id="a" size="small">Land<data slot="options" value="de">Deutschland</data></fm-elektilo>`,
+  );
+  const ikono = page.locator("#a").locator('[part="indicator"] fm-ikono');
+  await expect(ikono).toHaveCount(1);
+  await expect(ikono).toHaveAttribute("name", "chevron-down");
+  await expect(ikono).toHaveAttribute("size", "small");
+  await page.locator("#a").evaluate((element) => element.setAttribute("size", "large"));
+  await expect(ikono).toHaveAttribute("size", "large");
+  expect(await page.locator("#a").locator('[part="indicator"] svg').count()).toBe(0);
+});

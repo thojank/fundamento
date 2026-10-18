@@ -52,12 +52,14 @@ describe("elektilo in the repo Modelo (G1, G2, section 4)", () => {
   it("lives in data/eroj/elektilo/skemo.json, between butono and elekto, and the repo Modelo stays valid", () => {
     expect(elektilo?.file).toBe("modelo/data/eroj/elektilo/skemo.json");
     expect(modelo.eroj.map((entry) => entry.ero.name)).toEqual([
+      "apartigilo",
       "atributlisto",
       "avizo",
       "butono",
       "dialogo",
       "elektilo",
       "elekto",
+      "ikono",
       "insigno",
       "kampo",
       "langetaro",
@@ -66,6 +68,7 @@ describe("elektilo in the repo Modelo (G1, G2, section 4)", () => {
       "mezurilo",
       "navigado",
       "plenstato",
+      "saltligilo",
       "sxaltilo",
       "tabelo",
       "tekstareo",
@@ -265,7 +268,7 @@ describe("the Uzo of the elektilo (section 4, G5)", () => {
       "dialog",
       "filter-bar",
     ]);
-    expect(uzo?.composes.with.map((entry) => entry.ero)).toEqual(["kampo", "butono"]);
+    expect(uzo?.composes.with.map((entry) => entry.ero)).toEqual(["kampo", "butono", "ikono"]);
     expect(uzo?.composes.with[0]?.kialo).toMatch(/same height/);
     expect(uzo?.composes.never.map((entry) => entry.ero)).toEqual(["butono"]);
   });
@@ -431,6 +434,9 @@ describe("the Reguloj of the elektilo (G6, E5)", () => {
       "mezurilo",
       "navigado",
       "langetaro",
+      "ikono",
+      "apartigilo",
+      "saltligilo",
     ]);
   });
 

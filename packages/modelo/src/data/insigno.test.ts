@@ -31,15 +31,17 @@ const suggest = (goal: string) => {
 const INTENTS = ["neutral", "info", "success", "warning", "danger"];
 
 describe("insigno in the repo Modelo (section ③, G1, G2)", () => {
-  it("lives in data/eroj/insigno/skemo.json, among twelve Eroj", () => {
+  it("lives in data/eroj/insigno/skemo.json, among twenty Eroj", () => {
     expect(insigno?.file).toBe("modelo/data/eroj/insigno/skemo.json");
     expect(modelo.eroj.map((entry) => entry.ero.name)).toEqual([
+      "apartigilo",
       "atributlisto",
       "avizo",
       "butono",
       "dialogo",
       "elektilo",
       "elekto",
+      "ikono",
       "insigno",
       "kampo",
       "langetaro",
@@ -48,6 +50,7 @@ describe("insigno in the repo Modelo (section ③, G1, G2)", () => {
       "mezurilo",
       "navigado",
       "plenstato",
+      "saltligilo",
       "sxaltilo",
       "tabelo",
       "tekstareo",
@@ -196,7 +199,7 @@ describe("the Uzo of the insigno (section ③, G5)", () => {
       "page-title",
       "navigado",
     ]);
-    expect(uzo?.composes.with).toEqual([]);
+    expect(uzo?.composes.with.map((entry) => entry.ero)).toEqual(["ikono"]);
     expect(uzo?.composes.spacing).toEqual({
       owner: "container",
       regulo: "spacing-owned-by-container",

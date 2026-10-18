@@ -107,7 +107,22 @@ type PartNode =
   | `tab-${string}`
   | `tabs-${string}`
   | "panel"
-  | "panel-text";
+  | "panel-text"
+  // Spec 014 ② (plan ② D-08): an icon's control holds one glyph frame per Aspekto with the vector
+  // of the import in it; a composed icon (icon-start, indicator, sort-indicator, the notice's icon)
+  // holds the same under its own prefix; a separator registers its control as the line of its
+  // orientation.
+  | "glyph-*"
+  | "mark-*"
+  | "icon"
+  | "icon-glyph-*"
+  | "icon-mark-*"
+  | "indicator-glyph-*"
+  | "indicator-mark-*"
+  | "sort-glyph-*"
+  | "sort-mark-*"
+  | "line-h"
+  | "line-v";
 
 interface Binding {
   node: PartNode;
@@ -200,11 +215,27 @@ const BINDINGS: Readonly<Record<string, readonly Binding[]>> = {
   // A switch (Spec 010 ①, D-10): the knob is a frame of its own in the track, its fill, its size
   // (width and height alike: a circle) and its radius bound like the control's.
   "indicator.fill": [{ node: "indicator", fields: ["fills"], paint: true }],
-  "indicator.size": [{ node: "indicator", fields: ["width", "height"] }],
+  "indicator.size": [
+    { node: "indicator", fields: ["width", "height"] },
+    { node: "indicator-glyph-*", fields: ["width", "height"] },
+  ],
   "indicator.radius": [{ node: "indicator", fields: ["cornerRadius"] }],
   // A checkbox (Spec 010 ②, D-09): the indicator is the frame of the check mark (its size bound
-  // like the knob's), the mark a vector in it whose fill is the colour of the indicator.
-  "indicator.color": [{ node: "mark", fields: ["fills"], paint: true }],
+  // like the knob's), the mark a vector in it whose fill is the colour of the indicator. Spec 014
+  // ②: the chevron of a select is an icon — its glyph frames take the size, their vectors the
+  // colour (indicator-glyph-*, indicator-mark-*).
+  "indicator.color": [
+    { node: "mark", fields: ["fills"], paint: true },
+    { node: "indicator-mark-*", fields: ["fills"], paint: true },
+  ],
+  // Spec 014 ② (G3, plan ② D-08): the icon a control composes — the icon-start of a butono, the
+  // status icon of a notice: its size on the frame and on every glyph frame, its colour on every
+  // glyph's vector.
+  "icon.color": [{ node: "icon-mark-*", fields: ["fills"], paint: true }],
+  "icon.size": [
+    { node: "icon", fields: ["width", "height"] },
+    { node: "icon-glyph-*", fields: ["width", "height"] },
+  ],
   // A radio group (Spec 010 ③, D-07): the label of each option a text of its own, bound like the
   // label; the gap of the options stands between the parts of the field and between the rows.
   "option-label.color": [{ node: "option-label", fields: ["fills"], paint: true }],
@@ -297,8 +328,15 @@ const BINDINGS: Readonly<Record<string, readonly Binding[]>> = {
   "sort.fill": [{ node: "sort", fields: ["fills"], paint: true }],
   "sort.color": [{ node: "sort-text", fields: ["fills"], paint: true }],
   "sort.radius": [{ node: "sort", fields: ["cornerRadius"] }],
-  "sort-indicator.size": [{ node: "sort-indicator", fields: ["width", "height"] }],
-  "sort-indicator.color": [{ node: "mark", fields: ["fills"], paint: true }],
+  // Spec 014 ②: the sort arrow is an icon (sort-glyph-*, sort-mark-*).
+  "sort-indicator.size": [
+    { node: "sort-indicator", fields: ["width", "height"] },
+    { node: "sort-glyph-*", fields: ["width", "height"] },
+  ],
+  "sort-indicator.color": [
+    { node: "mark", fields: ["fills"], paint: true },
+    { node: "sort-mark-*", fields: ["fills"], paint: true },
+  ],
   // A list (Spec 011 ④, plan ④ D-14): the terms and the values as texts, the gap of the list
   // between its entries.
   "term.color": [{ node: "term-*", fields: ["fills"], paint: true }],
@@ -315,6 +353,26 @@ const BINDINGS: Readonly<Record<string, readonly Binding[]>> = {
  */
 const STRUCTURE_BINDINGS: Readonly<Record<string, Readonly<Record<string, readonly Binding[]>>>> = {
   toggle: { "box.gap": [{ node: "field", fields: ["itemSpacing"] }] },
+  // An icon (Spec 014 ②, plan ② D-08): the control is the box (its size bound, and the size of
+  // every glyph frame with it); the glyph's colour is the fill of every glyph's vector.
+  icon: {
+    "box.size": [
+      { node: "control", fields: ["width", "height"] },
+      { node: "glyph-*", fields: ["width", "height"] },
+    ],
+    "glyph.color": [{ node: "mark-*", fields: ["fills"], paint: true }],
+  },
+  // A separator (Spec 014 ②, plan ② D-06): the control is the line — its colour the stroke, its
+  // width the weight of the one edge that draws (top where horizontal, left where vertical) and
+  // the thickness of the frame across; a vertical line's height is the box's.
+  separator: {
+    "line.color": [{ node: "control", fields: ["strokes"], paint: true }],
+    "line.width": [
+      { node: "line-h", fields: ["strokeTopWeight", "height"] },
+      { node: "line-v", fields: ["strokeLeftWeight", "width"] },
+    ],
+    "box.height": [{ node: "line-v", fields: ["height"] }],
+  },
   // A radio group (Spec 010 ③, D-07): the gap of the box stands between a circle and its label,
   // in the row of the option.
   choice: { "box.gap": [{ node: "option", fields: ["itemSpacing"] }] },
@@ -966,6 +1024,7 @@ const PANEL_LAYOUT = ${JSON.stringify(PANEL_LAYOUT)};
 const MARK_NEUTRAL = ${JSON.stringify(MARK_NEUTRAL)};
 const INDICATOR_LAYOUT = ${JSON.stringify(INDICATOR_LAYOUT)};
 const STRUCTURE_BINDINGS = ${JSON.stringify(STRUCTURE_BINDINGS)};
+const IKONOJ = ${JSON.stringify(plan.ikonoj ?? { names: [], mirror: [], glyphs: {} })};
 const IN_FLOW = ${JSON.stringify(IN_FLOW)};
 const TEXT_SIZING = ${JSON.stringify(TEXT_SIZING)};
 const NEUTRAL = ${JSON.stringify(NEUTRAL)};
@@ -1403,12 +1462,53 @@ function own(node, values) {
   }
 }
 
-/** Writes what was gathered for a node, each property once, only where it does not hold yet. */
+/** The layout a node owns comes first, what it is as a child of a layout last (F-5). */
+const LAYOUT_FIRST = ["layoutMode", "layoutWrap"];
+const LAYOUT_LAST = [
+  "layoutSizingHorizontal", "layoutSizingVertical", "layoutAlign", "layoutGrow", "layoutPositioning",
+];
+function layoutRank(field) {
+  if (LAYOUT_FIRST.indexOf(field) !== -1) return 0;
+  if (LAYOUT_LAST.indexOf(field) !== -1) return 2;
+  return 1;
+}
+
+/**
+ * Writes what was gathered for a node, each property once, only where it does not hold yet.
+ * Abnahme 014 ②–⑤ (F-5): Figma refuses the sizing of a child, its alignment, growth and
+ * positioning on a node that neither has auto layout itself nor lies in an auto-layout frame
+ * ("node must be an auto-layout frame or a child of an auto-layout frame"). The drawings flush a
+ * child before its parent, so the parent's layout mode is written first where it is still pending,
+ * and on the node itself the layout mode before the sizing.
+ */
 function flush(node) {
   const values = pending.get(node.id);
   if (values === undefined) return;
+  const parent = node.parent;
+  if (parent !== null && parent !== undefined) {
+    const above = pending.get(parent.id);
+    if (above !== undefined && above.layoutMode !== undefined) {
+      write(parent, "layoutMode", above.layoutMode);
+      delete above.layoutMode;
+    }
+  }
   pending.delete(node.id);
-  for (const [field, value] of Object.entries(values)) write(node, field, value);
+  const fields = Object.keys(values).sort((a, b) => layoutRank(a) - layoutRank(b));
+  for (const field of fields) {
+    // What a node is as a child of a layout applies only inside one (F-5): the glyph frames in
+    // the plain frame of an icon, the knob in its track. Where neither the node nor its parent
+    // has auto layout once the layout modes are written, the field is not written — the size of
+    // such a frame is bound (width, height), not laid out.
+    if (layoutRank(field) === 2 && !hasAutoLayout(node) && !hasAutoLayout(parent)) continue;
+    write(node, field, values[field]);
+  }
+}
+
+/** Whether a node lays out its children itself (a frame with auto layout or a grid). */
+function hasAutoLayout(node) {
+  if (node === null || node === undefined) return false;
+  const mode = node.layoutMode;
+  return mode === "HORIZONTAL" || mode === "VERTICAL" || mode === "GRID";
 }
 
 /** The ID of the variable a field is bound to, in the form the tool holds it. */
@@ -2073,6 +2173,82 @@ async function applyComponents(variables, warnings) {
     }
   }
   /**
+   * An icon (Spec 014 ②, G3, plan ② D-08): in \`holder\` one frame per Aspekto of the plan,
+   * imported from that Aspekto's glyph of \`name\` (createNodeFromSvg, once; a frame where the
+   * Aspekto draws no glyph), its visibility bound to the BOOLEAN variable ikonoj/<aspekto> — the
+   * brand mode shows one picture and hides the others — and the vector of the import neutral,
+   * scaling with its frame; the caller binds the frames' size and the vectors' fill through the
+   * nodes this returns (<prefix>glyph-n, <prefix>mark-n).
+   */
+  function drawGlyphs(holder, name, prefix, measures) {
+    const nodes = {};
+    Object.keys(IKONOJ.glyphs).forEach((aspekto, index) => {
+      const svg = (IKONOJ.glyphs[aspekto] || {})[name];
+      const frame = part(holder, "glyph-" + aspekto, () =>
+        typeof svg === "string" ? figma.createNodeFromSvg(svg) : figma.createFrame(),
+      );
+      if (holder.children.indexOf(frame) !== index) holder.insertChild(index, frame);
+      const vector = markOf(frame);
+      own(frame, NEUTRAL);
+      own(frame, INDICATOR_LAYOUT);
+      own(frame, IN_FLOW);
+      if (vector !== undefined) own(vector, MARK_NEUTRAL);
+      const variable = variables.get("ikonoj/" + aspekto);
+      if (variable !== undefined) measures.push({ node: frame, field: "visible", variable: variable });
+      nodes[prefix + "glyph-" + (index + 1)] = frame;
+      if (vector !== undefined) nodes[prefix + "mark-" + (index + 1)] = vector;
+    });
+    return nodes;
+  }
+  /**
+   * The set ikono (Spec 014 ②, plan ② D-08): the variant holds the control — the box, its size
+   * bound — with the glyph frames of every Aspekto in it; no label, no focus ring.
+   */
+  async function drawIcon(node, component, variant, report) {
+    const control = part(node, "control", () => figma.createFrame());
+    const measures = [];
+    for (const frame of [node, control]) own(frame, NEUTRAL);
+    own(node, HUG_LAYOUT);
+    own(control, INDICATOR_LAYOUT);
+    for (const frame of [node, control]) own(frame, IN_FLOW);
+    const nodes = Object.assign({ control }, drawGlyphs(control, variant.props.name, "", measures));
+    for (const measure of bind(nodes, variant, variables, component.structure)) measures.push(measure);
+    for (const each of [node].concat(Object.values(nodes))) flush(each);
+    bindMeasures(measures, report, component, variant);
+  }
+  /**
+   * The set apartigilo (Spec 014 ②, plan ② D-06): the variant holds the control — the line, a
+   * frame with the stroke of one edge: the colour bound, the weight bound (line.width) on the top
+   * edge of a horizontal line (its height the same weight, its length the plan's) and on the left
+   * edge of a vertical one (its width the weight, its height bound to box.height); the other
+   * edges weigh 0.
+   */
+  async function drawSeparator(node, component, variant, report) {
+    const control = part(node, "control", () => figma.createFrame());
+    const vertical = variant.props.orientation === "vertical";
+    for (const frame of [node, control]) own(frame, NEUTRAL);
+    own(node, HUG_LAYOUT);
+    own(control, INDICATOR_LAYOUT);
+    for (const frame of [node, control]) own(frame, IN_FLOW);
+    own(control, { strokeTopWeight: 0, strokeRightWeight: 0, strokeBottomWeight: 0, strokeLeftWeight: 0 });
+    const nodes = { control };
+    nodes[vertical ? "line-v" : "line-h"] = control;
+    const measures = bind(nodes, variant, variables, component.structure);
+    for (const each of [node, control]) flush(each);
+    // The length of a horizontal line is the plan's number (Abnahme 014 ②–⑤, F-4): width is
+    // read-only in the Plugin API ("no setter for property"), so the frame is resized — only where
+    // it does not hold the length yet (F21), the sizing it owns written again after it (③ F-4).
+    if (!vertical) {
+      const length = Math.max((component.separator || {}).length || 0, SMALLEST_SIZE);
+      if (control.width !== length) {
+        control.resize(length, Math.max(control.height, SMALLEST_SIZE));
+        write(control, "layoutSizingHorizontal", INDICATOR_LAYOUT.layoutSizingHorizontal);
+        write(control, "layoutSizingVertical", INDICATOR_LAYOUT.layoutSizingVertical);
+      }
+    }
+    bindMeasures(measures, report, component, variant);
+  }
+  /**
    * A radio group (Spec 010 ③, D-07): the variant is a column — the label (the question), the
    * options, help, error — and every option a row: ring → gap → circle (control) with the dot
    * (indicator, the web's vector) in it, the option's label beside it. The group is bound once,
@@ -2192,6 +2368,9 @@ async function applyComponents(variables, warnings) {
     const content = part(surface, "content", () => figma.createFrame());
     const reasonLabel = part(content, "reason-label", () => figma.createText());
     const reasonField = part(content, "reason-field", () => figma.createFrame());
+    // The help under the reason field (Spec 014 ① D-02, ② O-5): the Vitrino's sentence, drawn
+    // like the help of the composed tekstareo (composed["reason-help"]).
+    const reasonHelp = typeof texts["reason-help"] === "string" ? part(content, "reason-help", () => figma.createText()) : undefined;
     const actions = part(surface, "actions", () => figma.createFrame());
     const actionKeys = Object.keys(texts).filter((key) => /^action-[0-9]+$/.test(key)).sort();
     const stands = actionKeys.map((key) => {
@@ -2202,13 +2381,15 @@ async function applyComponents(variables, warnings) {
     [heading, message, content, actions].forEach((child, index) => {
       if (surface.children.indexOf(child) !== index) surface.insertChild(index, child);
     });
-    [reasonLabel, reasonField].forEach((child, index) => {
-      if (content.children.indexOf(child) !== index) content.insertChild(index, child);
-    });
+    [reasonLabel, reasonField, reasonHelp]
+      .filter((child) => child !== undefined)
+      .forEach((child, index) => {
+        if (content.children.indexOf(child) !== index) content.insertChild(index, child);
+      });
     stands.forEach((each, index) => {
       if (actions.children.indexOf(each.frame) !== index) actions.insertChild(index, each.frame);
     });
-    const all = [heading, message, reasonLabel].concat(stands.map((each) => each.text));
+    const all = [heading, message, reasonLabel].concat(reasonHelp !== undefined ? [reasonHelp] : []).concat(stands.map((each) => each.text));
     for (const each of all) await loadCurrentFont(each);
     if (variant.textCase === TEXT_CASE_VARIES) {
       if (casesVarying.indexOf(component.set) === -1) {
@@ -2227,6 +2408,7 @@ async function applyComponents(variables, warnings) {
     }
     if (typeof texts.message === "string") write(message, "characters", texts.message);
     if (typeof texts.reason === "string") write(reasonLabel, "characters", texts.reason);
+    if (reasonHelp !== undefined) write(reasonHelp, "characters", texts["reason-help"]);
     for (const each of stands) write(each.text, "characters", texts[each.key]);
     if (example === undefined) labels.push(heading);
     else if (component.label !== undefined) write(heading, "characters", component.label.defaultValue);
@@ -2275,6 +2457,10 @@ async function applyComponents(variables, warnings) {
       if (look === undefined) continue;
       const bound = bind({ control: each.frame, label: each.text }, look, variables, "control");
       for (const measure of bound) measures.push(measure);
+    }
+    // The help of the reason looks like the tekstareo's help (O-5): its colour and role.
+    if (reasonHelp !== undefined && composed["reason-help"] !== undefined) {
+      for (const measure of bind({ help: reasonHelp }, composed["reason-help"], variables, "field")) measures.push(measure);
     }
     // The shadow of the surface (Spec 011 ②): bound where the API binds effects, written where not.
     if (variant.shadow !== undefined) {
@@ -2351,14 +2537,19 @@ async function applyComponents(variables, warnings) {
     const details = typeof texts.details === "string" ? part(column, "details", () => figma.createText()) : undefined;
     const actions = part(column, "actions", () => figma.createFrame());
     const dismiss = part(control, "dismiss", () => figma.createFrame());
+    // The icon of the intent (Spec 014 ②, G3): a glyph per Aspekto in a frame before the texts.
+    const iconName = (variant.icons || {}).icon;
+    const iconFrame = typeof iconName === "string" ? part(control, "icon", () => figma.createFrame()) : undefined;
     [heading, message, details, actions]
       .filter((child) => child !== undefined)
       .forEach((child, index) => {
         if (column.children.indexOf(child) !== index) column.insertChild(index, child);
       });
-    [column, dismiss].forEach((child, index) => {
-      if (control.children.indexOf(child) !== index) control.insertChild(index, child);
-    });
+    [iconFrame, column, dismiss]
+      .filter((child) => child !== undefined)
+      .forEach((child, index) => {
+        if (control.children.indexOf(child) !== index) control.insertChild(index, child);
+      });
     const all = [heading, message, details].filter((each) => each !== undefined);
     for (const each of all) await loadCurrentFont(each);
     writeCase(component, variant, message);
@@ -2387,7 +2578,17 @@ async function applyComponents(variables, warnings) {
     const nodes = { control, texts: column, message, actions, dismiss };
     if (heading !== undefined) nodes.heading = heading;
     if (details !== undefined) nodes.details = details;
+    const iconMeasures = [];
+    if (iconFrame !== undefined) {
+      own(iconFrame, NEUTRAL);
+      own(iconFrame, INDICATOR_LAYOUT);
+      own(iconFrame, IN_FLOW);
+      nodes.icon = iconFrame;
+      Object.assign(nodes, drawGlyphs(iconFrame, iconName, "icon-", iconMeasures));
+    }
     const measures = bind(nodes, variant, variables, component.structure);
+    for (const measure of iconMeasures) measures.push(measure);
+    for (const key of Object.keys(nodes)) if (key === "icon" || key.indexOf("icon-") === 0) flush(nodes[key]);
     // The empty placeholder keeps no default size (F-4): shrunk before its layout is written.
     shrinkEmpty(actions);
     for (const each of frames.concat(all)) flush(each);
@@ -2660,6 +2861,10 @@ async function applyComponents(variables, warnings) {
       "sort-indicator": indicator,
     };
     if (mark) nodes.mark = mark;
+    // The sort arrow is an icon (Spec 014 ②): the glyph frames per Aspekto in the indicator.
+    const sortMeasures = [];
+    const sortIcon = (variant.icons || {})["sort-indicator"];
+    if (typeof sortIcon === "string") Object.assign(nodes, drawGlyphs(indicator, sortIcon, "sort-", sortMeasures));
     rows.forEach((row, r) => {
       nodes["row-" + (r + 1)] = row;
     });
@@ -2674,6 +2879,8 @@ async function applyComponents(variables, warnings) {
       }),
     );
     const measures = bind(nodes, variant, variables, component.structure);
+    for (const measure of sortMeasures) measures.push(measure);
+    for (const key of Object.keys(nodes)) if (key.indexOf("sort-glyph-") === 0 || key.indexOf("sort-mark-") === 0) flush(nodes[key]);
     // The ring's radii, bound like the butono's (F32): they grow from the sort button's radius.
     for (const name of ["focus-ring", "focus-gap"]) {
       const variable = variables.get((variant.radii || {})[name]);
@@ -3062,6 +3269,17 @@ async function applyComponents(variables, warnings) {
       write(node, "name", name);
       stamp(node, "variant", name);
       stamp(node, "ero", component.set);
+      // An icon and a separator (Spec 014 ②) are drawn in functions of their own.
+      if (component.structure === "icon") {
+        await drawIcon(node, component, variant, report);
+        if (existing === undefined) made.push(node);
+        continue;
+      }
+      if (component.structure === "separator") {
+        await drawSeparator(node, component, variant, report);
+        if (existing === undefined) made.push(node);
+        continue;
+      }
       // A radio group (Spec 010 ③, D-07) is drawn as a choice, in a function of its own.
       if (component.structure === "choice") {
         await drawChoice(node, component, variant, report, labels);
@@ -3143,6 +3361,13 @@ async function applyComponents(variables, warnings) {
       if (control.parent !== gap) gap.appendChild(control);
       write(control, "name", "control");
       const label = part(labelParent || control, "label", () => figma.createText());
+      // The icons the variant composes (Spec 014 ②, G3): the icon-start of a button before its
+      // label, the chevron of a select in its indicator — glyph frames per Aspekto, bound below.
+      const icons = variant.icons || {};
+      const glyphNodes = {};
+      const glyphMeasures = [];
+      const iconFrame = typeof icons["icon-start"] === "string" ? part(control, "icon-start", () => figma.createFrame()) : undefined;
+      if (iconFrame !== undefined && control.children.indexOf(iconFrame) !== 0) control.insertChild(0, iconFrame);
       if (isField && field.children.indexOf(label) !== 0) field.insertChild(0, label);
       if (isToggle && column === undefined && field.children.indexOf(label) !== 1) field.insertChild(1, label);
       if (column !== undefined && field.children.indexOf(column) !== 1) field.insertChild(1, column);
@@ -3150,7 +3375,7 @@ async function applyComponents(variables, warnings) {
       const textNode = isField ? part(control, "text", () => figma.createText()) : undefined;
       // The chevron of a select (Spec 010 ④, D-07): its sign at the end of the field's control,
       // after the text, imported once like the check mark; a text field has no sign.
-      const fieldSign = isField && typeof component.sign === "string";
+      const fieldSign = isField && (typeof component.sign === "string" || typeof icons.indicator === "string");
       // The knob of a switch is a frame; the check mark of a checkbox is its sign, imported once.
       const indicator = isToggle || fieldSign
         ? part(control, "indicator", () =>
@@ -3235,6 +3460,16 @@ async function applyComponents(variables, warnings) {
       }
       // The chevron keeps its bound size beside the text (D-07), as the knob does in its track.
       if (fieldSign) own(indicator, INDICATOR_LAYOUT);
+      if (indicator !== undefined && typeof icons.indicator === "string") {
+        Object.assign(glyphNodes, drawGlyphs(indicator, icons.indicator, "indicator-", glyphMeasures));
+      }
+      if (iconFrame !== undefined) {
+        own(iconFrame, NEUTRAL);
+        own(iconFrame, INDICATOR_LAYOUT);
+        own(iconFrame, IN_FLOW);
+        glyphNodes.icon = iconFrame;
+        Object.assign(glyphNodes, drawGlyphs(iconFrame, icons["icon-start"], "icon-", glyphMeasures));
+      }
       if (column) {
         own(column, TEXTS_LAYOUT);
         // The box stands at the first line of its label (D-09), as on the web.
@@ -3251,7 +3486,10 @@ async function applyComponents(variables, warnings) {
       if (textNode) nodes.text = textNode;
       if (help) nodes.help = help;
       if (error) nodes.error = error;
+      Object.assign(nodes, glyphNodes);
       const measures = bind(nodes, variant, variables, component.structure);
+      for (const measure of glyphMeasures) measures.push(measure);
+      for (const each of Object.values(glyphNodes)) flush(each);
       // Der Radius des Rings und seines Abstands wird gebunden, nicht eingetragen (F32): als Zahl
       // stand er in jedem Modus gleich und umschloss in einer Marke mit Radius 0 einen eckigen
       // Knopf rund. Er geht denselben Weg wie die übrigen Maße, also nach dem Layout.
@@ -4097,7 +4335,6 @@ function reportParts(result) {
         extra: report.extra.length,
         duplicates: report.duplicates.length,
         lost: report.lost.length,
-        placement: report.placement,
       })),
     }),
     // The Mankoj by set, part and field; their evidence, the tool's words, stands in the part
@@ -4109,7 +4346,9 @@ function reportParts(result) {
     // ④ D-14): with fifteen sets the headline grew to 4 398 characters; the Mankoj are a part of
     // their own right after it, under the same name. Spec 011 ⑤: with seventeen sets it grew to
     // 4 080 characters; the diagnosis of each set moved to its part state, under the same name
-    // (the returned report keeps it where it was).
+    // (the returned report keeps it where it was). Spec 014 ② (plan ② D-08): with twenty sets it
+    // grew to 4 325 characters; the placement of each set moved to its part state, under the same
+    // name (the returned report keeps it where it was).
     JSON.stringify({
       part: "mankoj",
       value: {
@@ -4137,6 +4376,8 @@ function reportParts(result) {
           // Spec 011 ②: the shadow of a dialog's surface (bound or written) and its example frame.
           shadow: report.shadow,
           example: report.example,
+          // Spec 014 ②: where the set lies (F-8), out of the headline since twenty sets.
+          placement: report.placement,
         },
       }),
     );

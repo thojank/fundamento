@@ -343,6 +343,47 @@ export const VITRINO_LABELS: Readonly<Record<string, string>> = {
   tablist: "Reiter",
 };
 
+/**
+ * The icon a button carries in its icon-start slot in the Vitrino (Spec 014 ②, G3, plan ② D-09):
+ * one name of the Ikonaro, the same the Figma set draws (one source for both pictures). The
+ * Vitrino shows icons, so Figma draws them (the Jugxo of the undrawn icon is lifted).
+ */
+export const VITRINO_ICON_EXAMPLE = "check";
+
+/** The sizes the Ikonaro grid of the Vitrino shows, one row each (Spec 014 ②). */
+const ICON_SIZES = ["small", "medium", "large"] as const;
+
+/**
+ * The grid of the Ikonaro (Spec 014 ②, G10, plan ② D-09): one row per size with every name of the
+ * Ikonaro, decorative; one row per status intent with the status icon named by its meaning — a
+ * status icon carries meaning and is named (icon-meaning-named). The pictures switch with the
+ * Aspekto.
+ */
+function ikonaroMarkup(tag: string, ikonaro: readonly VitrinoIkono[]): string {
+  const sizes = ICON_SIZES.map(
+    (size) =>
+      `<tr><th scope="row">${size}</th><td>${ikonaro
+        .map((ikono) => `<${tag} name="${ikono.name}" size="${size}"></${tag}>`)
+        .join("")}</td></tr>`,
+  );
+  const intents = ikonaro
+    .filter((ikono) => STATUS_INTENTS.includes(ikono.name))
+    .map(
+      (ikono) =>
+        `<tr><th scope="row">${ikono.name}</th><td><${tag} name="${ikono.name}" size="medium" intent="${ikono.name}" label="${ikono.meaning.de}"></${tag}></td></tr>`,
+    );
+  return `<table><caption>${tag}, das Ikonaro je Größe und die Status-Icons</caption><thead><tr><th scope="col">Größe / Intent</th><th scope="col">Namen</th></tr></thead><tbody>${[...sizes, ...intents].join("")}</tbody></table>`;
+}
+
+/** The intents of a status icon: the names of the Ikonaro that are an intent of the avizo (G3). */
+const STATUS_INTENTS: readonly string[] = ["info", "success", "warning", "danger"];
+
+/** What the Vitrino needs of one name of the Ikonaro. */
+export interface VitrinoIkono {
+  name: string;
+  meaning: { de: string; en: string };
+}
+
 /** The dl of the Vitrino's key-value list (Spec 011 ④). */
 export const VITRINO_LIST = `<dl>${VITRINO_LIST_ENTRIES.map(([term, value]) => `<dt>${term}</dt><dd>${value}</dd>`).join("")}</dl>`;
 
@@ -431,8 +472,14 @@ function slotTexts(
  * string prop (the link's `to`, R-10) points at the section itself; the text slots carry their
  * example word where the Skemo allows it (F-5).
  */
-export function eroMarkup(entry: LoadedEro): string {
+export function eroMarkup(entry: LoadedEro, ikonaro: readonly VitrinoIkono[] = []): string {
   const tag = `fm-${entry.ero.name}`;
+  // The Ikonaro grid (Spec 014 ②): the icon shows every name, not every combination.
+  if (entry.skemo.a11y.role === "img") return ikonaroMarkup(tag, ikonaro);
+  // A separator (Spec 014 ②): both orientations, the vertical one between two words.
+  if (entry.skemo.a11y.role === "separator") {
+    return `<table><caption>${tag}, beide Richtungen</caption><thead><tr><th scope="col">orientation</th><th scope="col">rest</th></tr></thead><tbody><tr><th scope="row">horizontal</th><td><${tag} orientation="horizontal"></${tag}></td></tr><tr><th scope="row">vertical</th><td><div class="fm-row"><span>${VITRINO_OPTIONS[0] ?? ""}</span><${tag} orientation="vertical"></${tag}><span>${VITRINO_OPTIONS[1] ?? ""}</span></div></td></tr></tbody></table>`;
+  }
   const styled = styledProps(entry.skemo);
   const keys = styled.filter((key) =>
     entry.skemo.props.some((prop) => prop.name === key && prop.kind === "enum"),
@@ -448,14 +495,23 @@ export function eroMarkup(entry: LoadedEro): string {
     )
     .map((prop) => prop.name);
   // A link needs a target: the section itself (Spec 008); a required label (Spec 011 ⑤: the name
-  // of a navigation or a tab list) takes the word of its role; every other string prop stays empty.
+  // of a navigation or a tab list) takes the word of its role; a skip link (Spec 014 ②) the id of
+  // the section without the fragment sign; every other string prop stays empty.
+  const floats = entry.skemo.parts.surface?.layer !== undefined;
   const required = entry.skemo.props
     .filter((prop) => prop.required === true && prop.kind === "string")
     .map(
       (prop) =>
-        ` ${prop.name}="${prop.name === "label" ? (VITRINO_LABELS[entry.skemo.a11y.role] ?? `#fm-vitrino-${entry.ero.name}`) : `#fm-vitrino-${entry.ero.name}`}"`,
+        ` ${prop.name}="${prop.name === "label" ? (VITRINO_LABELS[entry.skemo.a11y.role] ?? `#fm-vitrino-${entry.ero.name}`) : floats ? `fm-vitrino-${entry.ero.name}` : `#fm-vitrino-${entry.ero.name}`}"`,
     )
     .join("");
+  // A button shows the example icon in its icon-start slot (Spec 014 ②): the same name Figma draws.
+  const icons =
+    entry.skemo.a11y.role === "button" &&
+    entry.skemo.parts.icon !== undefined &&
+    entry.skemo.slots.some((slot) => slot.name === "icon-start" && slot.decorative === true)
+      ? `<fm-ikono slot="icon-start" name="${VITRINO_ICON_EXAMPLE}"></fm-ikono>`
+      : "";
   // The prop an option's value is compared with (Spec 010 ③, E7) holds the first option: one chosen.
   // An Ero with a placeholder besides (the select, Spec 010 ④, D-13) shows the closed field with
   // its prompt instead: its options are in the list that opens, the field says that none is chosen.
@@ -517,7 +573,7 @@ export function eroMarkup(entry: LoadedEro): string {
       const cells = [undefined, ...columns]
         .map(
           (column) =>
-            `<td>${opener}<${tag}${identity}${attributes}${examples}${required}${chosen}${column === undefined ? "" : ` ${column}`}>${named ? label : ""}${optionTexts(entry)}${slotTexts(entry, column, combination)}${actions}${light}</${tag}></td>`,
+            `<td>${opener}<${tag}${identity}${attributes}${examples}${required}${chosen}${column === undefined ? "" : ` ${column}`}>${icons}${named ? label : ""}${optionTexts(entry)}${slotTexts(entry, column, combination)}${actions}${light}</${tag}></td>`,
         )
         .join("");
       return `<tr><th scope="row">${label}</th>${cells}</tr>`;
@@ -533,9 +589,12 @@ export function eroMarkup(entry: LoadedEro): string {
   return `<table><caption>${tag}, jede Kombination der Skemo</caption><thead><tr><th scope="col">Kombination</th>${heads}</tr></thead><tbody>${rows}${unknown}</tbody></table>`;
 }
 
-/** The grid of every Ero of the Modelo, by name (Spec 008, D-12). */
-export function erojMarkup(eroj: readonly LoadedEro[]): Record<string, string> {
-  return Object.fromEntries(eroj.map((entry) => [entry.ero.name, eroMarkup(entry)]));
+/** The grid of every Ero of the Modelo, by name (Spec 008, D-12); the icon shows the Ikonaro. */
+export function erojMarkup(
+  eroj: readonly LoadedEro[],
+  ikonaro: readonly VitrinoIkono[] = [],
+): Record<string, string> {
+  return Object.fromEntries(eroj.map((entry) => [entry.ero.name, eroMarkup(entry, ikonaro)]));
 }
 
 function regularoOf(
@@ -848,7 +907,7 @@ export function vitrinoDatumoj({ input, bazo }: VitrinoDatumojInput): VitrinoDat
       rampoj,
       ankroj,
     }),
-    eroj: erojMarkup(modelo.eroj),
+    eroj: erojMarkup(modelo.eroj, modelo.ikonaro),
     a11yRoloj: Object.fromEntries(
       modelo.eroj.map((entry) => [entry.ero.name, entry.skemo.a11y.role]),
     ),

@@ -29,15 +29,17 @@ const suggest = (goal: string) => {
 };
 
 describe("navigado in the repo Modelo (section ⑤, G1, G2, E7)", () => {
-  it("lives in data/eroj/navigado/skemo.json, among seventeen Eroj", () => {
+  it("lives in data/eroj/navigado/skemo.json, among twenty Eroj", () => {
     expect(navigado?.file).toBe("modelo/data/eroj/navigado/skemo.json");
     expect(modelo.eroj.map((entry) => entry.ero.name)).toEqual([
+      "apartigilo",
       "atributlisto",
       "avizo",
       "butono",
       "dialogo",
       "elektilo",
       "elekto",
+      "ikono",
       "insigno",
       "kampo",
       "langetaro",
@@ -46,6 +48,7 @@ describe("navigado in the repo Modelo (section ⑤, G1, G2, E7)", () => {
       "mezurilo",
       "navigado",
       "plenstato",
+      "saltligilo",
       "sxaltilo",
       "tabelo",
       "tekstareo",
@@ -215,7 +218,11 @@ describe("the Uzo of the navigado (section ⑤, G5)", () => {
 
 describe("the Reguloj of the navigado (G6, E5)", () => {
   it("link-label-names-destination and link-not-color-only are widened to the navigado; spacing too", () => {
-    expect(named("link-label-names-destination")?.appliesTo?.eroj).toEqual(["ligilo", "navigado"]);
+    expect(named("link-label-names-destination")?.appliesTo?.eroj).toEqual([
+      "ligilo",
+      "navigado",
+      "saltligilo",
+    ]);
     expect(named("link-not-color-only")?.appliesTo?.eroj).toEqual(["ligilo", "navigado"]);
     expect(named("spacing-owned-by-container")?.appliesTo?.eroj).toContain("navigado");
   });
