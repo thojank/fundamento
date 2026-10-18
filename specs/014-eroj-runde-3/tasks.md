@@ -154,7 +154,7 @@
 
 | Was | Wert |
 |---|---|
-| Commits ⑤ | rot `d96ceff`, grün `25c6122` (nach dem Rebase auf ④ `53447a8`; davor `47a82e9`/`f057270`, ursprünglich `7ab25be`/`c73161e`); nach dem Rebase auf ② `6fb4ab3` (F-4) am 2026-10-18; nach dem Rebase auf ② `e487388` (F-4) am 2026-10-18 |
+| Commits ⑤ | rot `a5dc6fe`, grün `f34af6a` (nach dem Rebase auf ④ `53447a8`; davor `47a82e9`/`f057270`, ursprünglich `7ab25be`/`c73161e`); nach dem Rebase auf ② `6fb4ab3` (F-4) am 2026-10-18; nach dem Rebase auf ② `e487388` (F-4) am 2026-10-18; nach dem Rebase auf `main` `45391a8` (#73 gemergt) am 2026-10-18 |
 | `brief` | faldilo, kompletigilo ≤ 750 (Daten-Tests und MCP e2e) |
 | Parität | `check:parity` 27 Eroj, 0 Differenzen, 285 Freigaben |
 | `check:regularo` | 58 Reguloj, 184 Jugxoj, 27 Uzoj, 0 Warnungen (keine neue `goal-keyword-shared`) |

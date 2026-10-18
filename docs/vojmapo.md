@@ -153,6 +153,8 @@ Stand der Idee: Konzept, keine Spec. Quelle: Gespräche mit dem Maintainer am 20
 | **Nachlese 4, O-7:** Restliche gezeichnete Zeichen der Projektion – `external` am `ligilo` (`icon-end`), `check` am `markobutono` als Kandidaten fürs Ikonaro | Spec 014 ② plan O-7 | Nachlese 4 |
 | **Nachlese 4, O-23:** Der aktive Vorschlag des `kompletigilo` als gebundener Teil (`suggestion.fill by active`) mit den nötigen KontrastParoj | Spec 014 ⑤ plan O-23, Abweichung 2 | Nachlese 4 |
 | **Nachlese 4, O-24:** Ladeansage bei Server-Suche – ob der `kompletigilo` nach `query` „lädt“ sagt (Live-Region) | Spec 014 ⑤ plan O-24 | Nachlese 4 |
+| **Nachlese 4, F-6:** `plenstato` – 4 px im Innenabstand (Figma-Lauf `09909f5`, Abnahme 014 ②–⑤) | Abnahme Spec 014 ②–⑤ (2026-10-18, `messung-2-5-2026-10-18.md`) | Nachlese 4: Innenabstand des `plenstato` gegen die Bindung prüfen |
+| **Nachlese 4, F-7:** `apartigilo` kaum sichtbar; die senkrechte Variante prüfen (Figma-Lauf `09909f5`) | Abnahme Spec 014 ②–⑤ (2026-10-18) | Nachlese 4: Linienstärke und Farbe des Trenners, senkrechte Variante messen |
 
 ### Strang D – Playwright ohne `--with-deps` (gemessen 2026-10-08, #44)
 
