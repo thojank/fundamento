@@ -92,11 +92,12 @@
 
 | Was | Wert |
 |---|---|
-| Commits ③ | karto rot `8fe847d`, grün `eaa6d74`; avataro rot `e63f193`, grün `76bc595`; Toast rot `3c0ce8e`, grün in der Zeile „Toast grün“ |
+| Commits ③ | karto rot `8fe847d`, grün `eaa6d74`; avataro rot `e63f193`, grün `76bc595`; Toast rot `3c0ce8e`, grün `67895ad` |
 | Rot gemessen | karto: Modelo 64 Tests in 37 Dateien, Projekcioj 21 in 6, MCP 16 in 17 (Suite s015-inhalt lädt nicht ohne Daten); avataro: Modelo 60 in 36, Projekcioj 21 in 6, MCP 18 in 17; Toast: Modelo 8 in 3, MCP 2 in 2 |
 | `brief` | karto 306, avataro ≤ 750 (Daten-Tests, MCP `get_ero` je Ero) |
 | `check:regularo` | 59 Reguloj, 194 Jugxoj, 32 Uzoj, 0 Warnungen (keine neue `goal-keyword-shared`) |
 | Tests lokal (karto) | Modelo 3515, Projekcioj 697, MCP 301, CLI 66; `check:parity` 31 Eroj, 0 Differenzen; Lint, Modelo-Checks ohne Fehler; Browser: 234 Specs in Chromium, karto/React/Internacia in Firefox und WebKit, Alirebleco karto 8 × 3 Browser, Vitrino karto |
 | Tests lokal (avataro) | Modelo 3529, Projekcioj 706, MCP 303, CLI 66; `check:parity` 32 Eroj, 0 Differenzen; Lint, Modelo-Checks ohne Fehler; Browser: 240 Specs in Chromium, avataro und Internacia-Initialen in Firefox und WebKit (15), Alirebleco karto/avataro 32 in Firefox/WebKit, Vitrino karto/avataro |
 | Tests lokal (Toast, Endstand) | Modelo 3536, Projekcioj 706, MCP 304, CLI 66 grün; `check:parity` 32 Eroj, 0 Differenzen (297 freigegebene Werte); Lint, vortaro-lint, regularo (194 Jugxoj), mankoj, alirebleco, clean-room, ikonaro (17 Namen, keiner neu), release ohne Fehler; Browser: alle 240 Specs in Chromium, `karto`, `avataro`, `internacia`, `react` in Firefox und WebKit 100, Alirebleco-Check 561 in drei Browsern, Vitrino 30, Make-Kit 5 |
-| Toast grün | in der Zeile CI (Hash-Commit) |
+| Toast grün | `67895ad` (Endstand des PR #78) |
+| CI | Lauf 39174045280 (`67895ad`, alle Jobs grün): `checks` 1:05, `unit` 3:36, `projekcioj` 4:55 / 0:54 (Shard 1 weiter `plugin.test.ts` allein, B-2/O-5 von ②), `eroj` 2:07 / 2:06, `rendered-checks` 6:58 |
