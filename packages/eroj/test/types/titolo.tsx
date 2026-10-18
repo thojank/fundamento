@@ -14,8 +14,8 @@ export const derived = <Titolo level="1">Seite</Titolo>;
 // @ts-expect-error level is one of 1 to 6
 export const wrongLevel = <Titolo level="7">x</Titolo>;
 
-// @ts-expect-error size is a display or headline role
 export const wrongSize = (
+  // @ts-expect-error size is a display or headline role
   <Titolo level="2" size="body-1">
     x
   </Titolo>

@@ -298,6 +298,7 @@ Zwei Sätze aus den Rollen: „Every heading is a `<Titolo>` with its `level` (t
 - **B-3** Playwright: `getByRole("code", { name })` findet nichts – die Rolle `code` nimmt keinen Namen aus dem Inhalt (ARIA: name prohibited); der Spec zählt die Rolle. Kein Manko.
 - **B-4** CI von PR ② fiel in Shard 2 (`saltligilo.spec`: `browserName` im zweiten Test entfernt, aber genutzt – lokal nur Chromium gelaufen); Fix `48f3c6e` auf ②, ③ darauf gestapelt.
 - **B-5** Die `uzo-web-term`-Prüfung hält „reference“ und „title“ für Web-Begriffe: die Stichwörter des `teksto` heißen `link-text` und `subheading`. Kein Manko.
+- **B-6** CI-Lauf 39080409189 (PR ③) fiel dreifach, lokal nicht gesehen: (1) `playwright test <spec> alirebleco.check.ts` ohne die Check-Konfiguration läuft die Check-Datei still nicht mit – der Alirebleco-Block war nie gelaufen; sein `<p>` ohne Textfarbe stand in `dark` schwarz auf dunkel (axe `color-contrast`), jetzt ein `fm-teksto`; (2) die Vitrino zeigt vier Überschriften der Ebene 1 (display-1..3 und headline-1, D-06), der Check zählte drei; (3) die `@ts-expect-error`-Anweisung im React-Typtest stand vor der Klammer statt vor der fehlerhaften Zeile. Lokal prüft ab jetzt `pnpm check:alirebleco-eroj` und `pnpm check:vitrino` (eigene Konfigurationen).
 
 ### Offen (für den Maintainer)
 

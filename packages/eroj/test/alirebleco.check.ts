@@ -1402,7 +1402,7 @@ for (const aspekto of ["komuna", "ekzemplo"]) {
 // axe (headings with their levels in order, paragraphs, inline code), the text of every emphasis
 // at least 4.5:1 on the page.
 const typografio =
-  '<fm-titolo level="1">Seite</fm-titolo><fm-teksto>Ein Absatz in der Grundrolle.</fm-teksto><fm-titolo level="2" size="headline-3">Abschnitt</fm-titolo><fm-teksto emphasis="medium">Ein Absatz in der zweiten Rolle.</fm-teksto><fm-teksto emphasis="low" kind="caption">Abbildung 1</fm-teksto><fm-teksto kind="kicker">Kategorie</fm-teksto><p>Ruf <fm-teksto kind="code">fm build</fm-teksto> auf.</p>';
+  '<fm-titolo level="1">Seite</fm-titolo><fm-teksto>Ein Absatz in der Grundrolle.</fm-teksto><fm-titolo level="2" size="headline-3">Abschnitt</fm-titolo><fm-teksto emphasis="medium">Ein Absatz in der zweiten Rolle.</fm-teksto><fm-teksto emphasis="low" kind="caption">Abbildung 1</fm-teksto><fm-teksto kind="kicker">Kategorie</fm-teksto><fm-teksto>Ruf <fm-teksto kind="code">fm build</fm-teksto> auf.</fm-teksto>';
 
 for (const aspekto of ["komuna", "ekzemplo"]) {
   for (const scheme of ["light", "dark"]) {
