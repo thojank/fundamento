@@ -718,11 +718,11 @@ describe("the Vitrino shows the pagxigilo and the spuro (Spec 015 ①)", () => {
     expect(grid).toContain('<th scope="row">rest</th>');
   });
 
-  it("spuro: one row, three links of the Vitrino's words, the last current (the Modelo's word names the landmark)", () => {
+  it("spuro: one row, two links and the current page as text, the Vitrino's words (the Modelo's word names the landmark)", () => {
     const grid = datumoj.eroj.spuro ?? "";
     expect((grid.match(/<fm-spuro /g) ?? []).length).toBe(1);
     expect(grid).toContain(
-      '<fm-spuro page="3"><a href="#fm-vitrino-spuro" data-page="1">Eins</a><a href="#fm-vitrino-spuro" data-page="2">Zwei</a><a href="#fm-vitrino-spuro" data-page="3">Drei</a></fm-spuro>',
+      '<fm-spuro page="3"><a href="#fm-vitrino-spuro" data-page="1">Eins</a><a href="#fm-vitrino-spuro" data-page="2">Zwei</a><span data-page="3">Drei</span></fm-spuro>',
     );
   });
 });

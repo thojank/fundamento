@@ -46,6 +46,25 @@ test.describe("fm-pagxigilo behaviour", () => {
       [true, "true"],
       [true, "true"],
     ]);
+    // The current page differs by more than colour (G4): its weight and its border (the stylesheet
+    // keys it on aria-current, present or absent — Spec 015 ① B-5).
+    const looks = await page.locator("#p").evaluate((element) =>
+      [...(element.shadowRoot?.querySelectorAll('[part="item"]:not([data-arrow])') ?? [])].map(
+        (item) => {
+          const style = getComputedStyle(item);
+          return {
+            current: item.hasAttribute("aria-current"),
+            weight: Number(style.fontWeight),
+            border: Number.parseFloat(style.borderTopWidth),
+          };
+        },
+      ),
+    );
+    const current = looks.find((look) => look.current);
+    const other = looks.find((look) => !look.current);
+    expect(current?.weight).toBeGreaterThan(other?.weight ?? 0);
+    expect(current?.border).toBeGreaterThan(0);
+    expect(other?.border).toBe(0);
     // Without a label the Modelo's word names the landmark.
     await page.locator("#p").evaluate((element) => element.removeAttribute("label"));
     await expect(page.getByRole("navigation", { name: "Seitenblättern" })).toHaveCount(1);

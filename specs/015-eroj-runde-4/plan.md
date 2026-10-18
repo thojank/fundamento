@@ -6,14 +6,14 @@ Drei PRs, gestapelt (E9): ① Navigation von Spec 014 ⑤, ② Eingabe von ①, 
 
 ## ① Navigation
 
-**Branch:** `261018-spec-015-navigation-e3bf97` (von Spec 014 ⑤) · **Datum:** 2026-10-18 · **Stand:** in Arbeit (Nachtauftrag 17./18.10.: rot committet, Modelo grün, Web-Celo und Vitrino größtenteils grün, Figma-Plugin und Parität offen – siehe Befunde).
+**Branch:** `261018-spec-015-navigation-e3bf97` (von Spec 014 ⑤, nach dem Merge von #71–#74 auf `main` rebased) · **Datum:** 2026-10-18 · **Stand:** fertig gebaut; Abnahme offen.
 
 ### Zusammenfassung
 
 1. **`pagxigilo`** (D-01, D-03): das Seitenblättern – `page` (Pflicht, Zeichenkette wie `navigado.page`, Abweichung 1) und `total-pages` (Pflicht), `label` mit den Wörtern des Modelo („Seitenblättern“, `a11y.texts label-empty`), `mode` `button` | `link` (Ereignis `page-change`, abbrechbar; `href-template` `?page={page}`), `siblings` (1). Zustände rest/hover/focus/disabled am Eintrag; `current` ist der Zustand eines Eintrags (`SkemoSlot.entry`, E7), keine Achse. Teile `item` (Fläche und Farbe nach current × Zustand aus `color.navigation.*`, Gewicht `font.weight.semibold`), `border` (Rand `border.width.strong` nur aktuell – nie nur Farbe), `ellipsis`, `prev`/`next` (die Glyphen `chevron-left`/`chevron-right`, gespiegelt in RTL), `box`, `focus-ring`. Rolle `navigation`, `aria-current="page"`, `aria-disabled` an den Enden; jede Zahl heißt „Seite N“ (`items-name`), die Pfeile „Vorherige Seite“/„Nächste Seite“ (`prev-name`/`next-name`). Goal `paginate`. Uzo: `load-more` → `butono`, `views` → `langetaro`, Grenzen `infinite-scroll`, `page-size-select` (ask-human); die `tabelo` schließt `pagination` (use-instead), die `langetaro` schickt `list-pages`, `ikono` komponiert.
 2. **`spuro`** (D-02, D-04): die Brotkrumen – `label` („Pfad“, Vorschlag O-1), `page` (Schlüssel des aktuellen Eintrags; leer: der letzte). Einträge sind die Links der Plattform im Light DOM (wie `navigado`, E10), mindestens zwei; der letzte ist Text mit `aria-current`. Teile `item` (Farbe `color.link.*` bzw. `color.text.default` aktuell, Gewicht aktuell), `underline` (nur die Links), `separator` (`chevron-right`, dekorativ), `box`, `focus-ring`. Goal `breadcrumb` mit `link-label-names-destination` (E5 ausgeweitet). Uzo: `main-navigation` → `navigado`, `steps` nicht abgedeckt, Grenze `collapsed-middle`; die `navigado` schließt `breadcrumb` (use-instead), `ligilo` und `ikono` komponieren.
 3. **Modelo:** `a11y.texts` kennt `<part>-name` und `<slot>-name` (kleinste Änderung, D-01); Ikonaro `chevron-left` (Phosphor `caret-left`, regular und fill, gespiegelt); Zahlwörter bis neunundzwanzig.
-4. **Projekcioj:** Web-Celo Host `pagination` (Shadow, baut die Seiten selbst) und Brotkrumen als Light-Host mit manueller Slot-Zuweisung in eine geordnete Liste (D-03, D-04); Figma-Plan Bauformen `pagination`/`breadcrumb` (D-05, Plugin-Zeichnung offen); Vitrino Seite 5 von 10 und drei Ebenen (D-06); Make-Kit zwei Sätze (D-07); React-Typen (D-08).
+4. **Projekcioj:** Web-Celo Host `pagination` (Shadow, baut die Seiten selbst) und Brotkrumen als Light-Host mit manueller Slot-Zuweisung in eine geordnete Liste (D-03, D-04); Figma Bauformen `pagination`/`breadcrumb` mit Zeichnung im Plugin (D-05); Vitrino Seite 5 von 10 und drei Ebenen (D-06); Make-Kit zwei Sätze (D-07); React-Typen (D-08).
 
 ### Entwurfsentscheidungen
 
@@ -30,7 +30,7 @@ Die Links bleiben die der Plattform (E10). Die geordnete Liste (APG Breadcrumb) 
 Der Light-Host der `navigado` mit `breadcrumb`-Flag: Shadow `<nav part="list"><ol part="items">`, `#assign` und `#decorate`; das Dokument-Stylesheet selektiert `fm-spuro > *` (Link oder Text), `underline` als Textdekoration wie beim `ligilo`; `box` und `separator` im Shadow.
 
 #### D-05 Figma
-Bauformen `pagination` (Einträge 1 2 3, die erste aktuell; `prev`/`next` als Icons) und `breadcrumb` (die drei Wörter der Vitrino, das letzte aktuell; `separator` als Icon); das Label-Property nimmt das Wort aus `a11y.texts label-empty`. Die Zeichnung im Plugin (`drawPagination`, `drawBreadcrumb`) ist offen (B-2).
+Bauformen `pagination` (Einträge 1 2 3, die erste aktuell; `prev`/`next` als Icons) und `breadcrumb` (die drei Wörter der Vitrino, das letzte aktuell; `separator` als Icon); das Label-Property nimmt das Wort aus `a11y.texts label-empty`. Die Zeichnung im Plugin: `drawPagination`, `drawBreadcrumb` (B-2).
 
 #### D-06 Vitrino
 `<fm-pagxigilo total-pages="10" page="5">` (beide Auslassungen); `<fm-spuro page="3">` mit den drei Links; der Name der Landmarke kommt aus dem Element. Die Zeile „unbekannt“ bleibt dem `mezurilo` (ein Zahlbeispiel allein erzeugt sie nicht mehr).
@@ -60,9 +60,16 @@ Zwei Sätze aus der Rolle `navigation` mit den Teilen `ellipsis`/`separator`; di
 ### Befunde / Mankoj
 
 - **B-1** Die Vitrino-Zeile „unbekannt“ hing an jedem Zahlbeispiel; jetzt am Slot `value-text`. Kein Manko.
-- **B-2 (offen)** Figma-Plugin: die Bauformen `pagination` und `breadcrumb` werden noch nicht gezeichnet (Pfeile, Auslassung, Trenner ungebunden) – Parität rot, Plugin-Tests rot.
-- **B-3 (offen)** `fm-pagxigilo`: nach dem Entfernen des Attributs `label` wird die Landmarke nicht mit dem Wort des Modelo nachbenannt (ein Spec rot).
+- **B-2 (behoben)** Figma-Plugin: die Bauformen `pagination` und `breadcrumb` zeichnet jetzt `drawPagination` (Pfeil zurück, die Seiten 1 2 3 als Einträge in einer eigenen Reihe, die Auslassung als Text in einem Kasten ihrer Mindestbreite, Pfeil vor – die Pfeile als Einträge mit den Glyphen jedes Aspekto, in der Farbe einer nicht aktuellen Seite) und `drawBreadcrumb` (drei Ebenen, nach jeder außer der letzten ein Chevron-Halter mit den Glyphen, die Unterstreichung als untere Kante wie bei der `navigado`); `STRUCTURE_BINDINGS.pagination`/`.breadcrumb` binden alles, was die Skemo bindet. Parität 29 Eroj, 0 Differenzen.
+- **B-3 (behoben)** `fm-pagxigilo` benannte die Landmarke nach dem Entfernen von `label` nicht mit dem Wort des Modelo: die allgemeine Benennung am Ende des Renderns entfernte `aria-label`, sobald `label` leer war. Die Pagination benennt ihre Landmarke jetzt selbst (wie die Overlays), die allgemeine Benennung lässt sie aus.
 - **B-4** Playwright klickt kein `aria-disabled`-Element; der Spec erzwingt den Klick (`force`).
+- **B-5 (behoben)** Der Shadow-Stylesheet schrieb den Eintragszustand als `[aria-current="true"]`/`"false"`; das Element setzt `aria-current="page"` und sonst nichts – die aktuelle Seite bekam weder Fläche noch Gewicht noch Rand. `aria-current` ist jetzt anwesend/abwesend (`[aria-current]`/`:not([aria-current])`), wie die Light-Hosts es lesen; `aria-selected`/`aria-checked` bleiben `true`/`false`. Ein Browser-Spec prüft Gewicht und Rand der aktuellen Seite.
+- **B-6 (behoben)** Eine nicht aktuelle Seite zeigte 2 px Rand: `border.width` `none` schrieb nichts, der Button behielt den Rand der Plattform. `none` schreibt jetzt `border-style: none` (nur der `pagxigilo` bindet eine Randbreite an `none`).
+- **B-7** Der Figma-Plan ordnete eine Eigenschaft mit `sameAs` (die Unterstreichung der `spuro` in der Farbe des Eintrags) nicht dem Eintragszustand zu: er folgt jetzt dem `sameAs` beim Entscheiden, was je Eintrag gebunden wird. Kein Manko.
+- **B-8** Das Web-Inventar der Parität las Zustände nur an `control`, `field`, `glyph`, `text` oder einem Light-Host; die Pagination liegt in `[part="list"] [part="item"]` und wird jetzt mitgelesen (die eigene Liste der `navigado` trägt nur ihre Ausrichtung und bleibt außen vor).
+- **B-9 (behoben)** Die Links der `spuro` waren 17,5 px hoch (axe `target-size`, WCAG 2.5.8, im Vitrino-Check): `box.height` (`size.target.min`) stand auf der Liste im Shadow statt auf den Zielen. Die Höhe steht jetzt als Mindesthöhe der Einträge im Dokument-Stylesheet (wie bei der `navigado`); Abstand und Chevron bleiben im Shadow.
+- **B-10** Das Ikonaro-Raster der Vitrino hat mit `chevron-left` sechzehn Namen; der Vitrino-Check zählt 16 × 3 + 4 Icons.
+- **B-11 (behoben)** Die Vitrino gab der aktuellen Seite der `spuro` einen Link; nach der Spec ist sie Text ohne Ziel. Die letzte Ebene ist jetzt ein `span`.
 
 ### Offen (für den Maintainer)
 

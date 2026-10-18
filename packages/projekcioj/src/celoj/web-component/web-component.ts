@@ -148,8 +148,11 @@ const isNav = (skemo: Skemo): boolean => skemo.a11y.role === "navigation" && !is
  * stands in the document's stylesheet (`lightStylesheetOf`).
  */
 function lightShadowProperty(skemo: Skemo, part: string, property: string): boolean {
-  // A breadcrumb (Spec 015 ①): the list and the chevrons are the shadow's, the links the page's.
-  if (isBreadcrumb(skemo)) return part === "box" || part === "separator";
+  // A breadcrumb (Spec 015 ①): the list's gap and the chevrons are the shadow's, the links the
+  // page's — the height of the box is the links' minimum height, the size of a target (2.5.8).
+  if (isBreadcrumb(skemo)) {
+    return (part === "box" && property !== "height") || part === "separator";
+  }
   if (isNav(skemo)) return part === "box" && property === "gap";
   return LIGHT_SHADOW_PARTS.has(part);
 }
@@ -391,6 +394,9 @@ function keywordDeclarations(part: string, property: string, token: string): str
   }
   // The underline is switched off; a minimum that is none is simply not written.
   if (part === "underline" && property === "width") return ["text-decoration-line: none;"];
+  // A border whose width is none draws no border (Spec 015 ①, B-6: a page of a pagination that
+  // is not current) — not writing the width would leave the platform's own border of a button.
+  if (part === "border" && property === "width" && token === "none") return ["border-style: none;"];
   // A colour that is none (Spec 010 ②, D-08): the part is not drawn in that combination — the
   // check mark of an unticked box — and keeps its place, so the box does not change its size.
   if (token === "none" && (property === "color" || property === "fill")) return ["opacity: 0;"];
@@ -976,6 +982,8 @@ export function lightStylesheetOf(skemo: Skemo, tag: string): string {
         case "item":
         case "underline":
           return `${item}${state}`;
+        case "box":
+          return property === "height" ? item : undefined;
         case "focus-ring":
           return `${item}:focus-visible`;
         default:
@@ -1418,9 +1426,18 @@ function selectorOf(
     .filter((key) => key !== STATE_KEY && !isEntryKey(skemo, key))
     .map((key) => `[data-${key}="${combination[key] ?? ""}"]`)
     .join("");
+  // The state of one entry (E7) as the attribute the Skemo names. aria-current is no boolean: it
+  // is present ("page") on the current entry and absent elsewhere (Spec 015 ①, the pagination),
+  // as the light hosts read it; aria-selected and aria-checked say true or false.
   const entry = keys
     .filter((key) => isEntryKey(skemo, key))
-    .map((key) => `[${skemo.a11y.states[key]?.[0] ?? `data-${key}`}="${combination[key] ?? ""}"]`)
+    .map((key) => {
+      const attribute = skemo.a11y.states[key]?.[0] ?? `data-${key}`;
+      if (attribute === "aria-current") {
+        return combination[key] === "true" ? `[${attribute}]` : `:not([${attribute}])`;
+      }
+      return `[${attribute}="${combination[key] ?? ""}"]`;
+    })
     .join("");
   if (isGroup(skemo)) {
     return groupPartSelector(part, property, data, entry, combination[STATE_KEY] ?? "rest");
@@ -1624,9 +1641,12 @@ export function stylesheetInventory(moduleText: string): ParityItem {
     // the box itself — the box is the mark plus its border).
     // A light-DOM host (Spec 011 ④, E10) writes the combination on itself: fm-tabelo[data-…].
     // An icon (Spec 014 ②): its glyph is its control; a heading (Spec 014 ③): its text.
+    // A pagination (Spec 015 ①): the states stand on its items in the list (the navigado's own
+    // list carries only its orientation, no state and no prop of the Skemo's).
     if (
       !selector.includes('[part="control"]') &&
       !selector.includes('[part="field"]') &&
+      !selector.includes('[part="list"] [part="item"]') &&
       !selector.includes('[part="glyph"]') &&
       !selector.includes('[part="text"]') &&
       !selector.trim().startsWith("fm-")

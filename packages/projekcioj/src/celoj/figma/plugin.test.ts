@@ -625,6 +625,9 @@ describe("the full plan against the strict double: fresh and into the file of be
     "menuo",
     "faldilo",
     "kompletigilo",
+    // Spec 015 ①: the pagination and the breadcrumb are new to that file too.
+    "pagxigilo",
+    "spuro",
   ]);
   const before2 = structuredClone(repo.input);
   before2.modelo.eroj = before2.modelo.eroj.filter((entry) => !BEFORE_2.has(entry.ero.name));
@@ -662,7 +665,7 @@ describe("the full plan against the strict double: fresh and into the file of be
     expect(refused(report)).toEqual([]);
   });
 
-  it("the file of before ②: 17 sets, the atributlisto without auto; then the current plan into the found file creates the 10 sets and the auto variants, nothing refused", async () => {
+  it("the file of before ②: 17 sets, the atributlisto without auto; then the current plan into the found file creates the new sets and the auto variants, nothing refused", async () => {
     const double = modelDouble();
     const first = await runWith(double, files17["figma/plugin/code.js"] ?? "");
     expect(first.components).toHaveLength(17);

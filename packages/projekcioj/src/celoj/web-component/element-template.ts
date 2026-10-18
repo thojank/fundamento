@@ -3113,10 +3113,11 @@ ${
       .trim();
     const name = this.propValue("label");
 ${
-  isLight || isOverlay
+  isLight || isOverlay || isPagination
     ? `    // A light-DOM host names its region by the caption (Spec 011 ④, D-09) and its list by the
     // label prop on the dl itself (D-10); an overlay (Spec 014 ④) names its layer in its own
-    // render; nothing is written here.
+    // render, a pagination (Spec 015 ①, B-3) its landmark — the label, else the Modelo's word;
+    // nothing is written here.
     void text;
     void name;
 `

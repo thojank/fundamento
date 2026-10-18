@@ -1743,7 +1743,8 @@ describe("Web Component Celo for the pagxigilo and the spuro (Spec 015 ①)", ()
     expect(css).toContain("var(--fm-color-navigation-selected)");
     expect(css).toContain("var(--fm-border-width-strong)");
     expect(css).toContain("var(--fm-size-icon-medium)");
-    expect(css).toContain('[aria-current="page"]');
+    // The current page is the entry the Skemo names (aria-current), present or absent.
+    expect(css).toContain("[aria-current]");
     expect(css).toContain('[aria-disabled="true"]');
     expect(css).toContain("list-style: none;");
     expect(componentCssIssues("pagxigilo.css", css)).toEqual([]);

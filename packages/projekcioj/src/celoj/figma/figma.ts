@@ -1845,7 +1845,15 @@ function componentSetOf(
     ),
   ];
   const keyedByEntry = (part: string, property: string): boolean => {
-    const source = skemo.parts[part]?.[property as keyof (typeof skemo.parts)[string]];
+    const own = skemo.parts[part]?.[property as keyof (typeof skemo.parts)[string]];
+    // A property that is the same as another (Spec 015 ①: the underline of a breadcrumb's item in
+    // the item's colour) follows that one's keys.
+    const [otherPart = "", otherProperty = ""] =
+      own !== undefined && "sameAs" in own ? own.sameAs.split(".") : [];
+    const source =
+      own !== undefined && "sameAs" in own
+        ? skemo.parts[otherPart]?.[otherProperty as keyof (typeof skemo.parts)[string]]
+        : own;
     return (
       source !== undefined && "by" in source && source.by.some((key) => entryKeys.includes(key))
     );

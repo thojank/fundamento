@@ -515,7 +515,8 @@ test("the Ikonaro grid, the apartigilo and the saltligilo are upgraded in their 
 }) => {
   await open(page);
   const icons = page.locator("#fm-vitrino-ikono fm-ikono");
-  await expect(icons).toHaveCount(15 * 3 + 4);
+  // Spec 015 ①: sixteen names (chevron-left), three sizes each, and the four status icons.
+  await expect(icons).toHaveCount(16 * 3 + 4);
   await expect(page.locator("#fm-vitrino-ikono").getByRole("img")).toHaveCount(4);
   const maskOf = () =>
     page

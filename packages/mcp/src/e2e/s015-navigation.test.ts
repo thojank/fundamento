@@ -114,10 +114,10 @@ describe("the navigation dialogs of the spec (Spec 015 ①)", () => {
     expect(listed.eroj).toHaveLength(29);
     expect(listed.eroj.map((entry) => entry.name)).toContain("pagxigilo");
     expect(listed.eroj.map((entry) => entry.name)).toContain("spuro");
-    const pager = await output<Brief>(client, "brief_ero", { ero: "pagxigilo" });
+    const pager = await output<Brief>(client, "get_ero", { name: "pagxigilo", brief: true });
     expect(pager.axes.map((axis) => axis.name)).toEqual(["mode", "current"]);
     expect(pager.required).toEqual({ props: ["page", "total-pages"], slots: [] });
-    const trail = await output<Brief>(client, "brief_ero", { ero: "spuro" });
+    const trail = await output<Brief>(client, "get_ero", { name: "spuro", brief: true });
     expect(trail.axes.map((axis) => axis.name)).toEqual(["current"]);
     expect(trail.required).toEqual({ props: [], slots: ["items"] });
   });

@@ -453,13 +453,17 @@ function optionTexts(entry: LoadedEro): string {
   const navigation = entry.skemo.a11y.role === "navigation";
   // A pagination (Spec 015 ①) draws its pages itself from page and total-pages: no entries.
   if (navigation && entry.skemo.parts.ellipsis !== undefined) return "";
+  const breadcrumb = navigation && entry.skemo.parts.separator !== undefined;
   return entry.skemo.slots
     .filter((slot) => slot.entry !== undefined)
     .map((slot) =>
       VITRINO_OPTIONS.map((text, index) =>
-        navigation
-          ? `<a href="#fm-vitrino-${entry.ero.name}" data-page="${index + 1}">${text}</a>`
-          : `<data${slot.default === true ? "" : ` slot="${slot.name}"`} value="${index + 1}">${text}</data>`,
+        // The current page of a breadcrumb (Spec 015 ①) is its last level: text, no destination.
+        navigation && breadcrumb && index === VITRINO_OPTIONS.length - 1
+          ? `<span data-page="${index + 1}">${text}</span>`
+          : navigation
+            ? `<a href="#fm-vitrino-${entry.ero.name}" data-page="${index + 1}">${text}</a>`
+            : `<data${slot.default === true ? "" : ` slot="${slot.name}"`} value="${index + 1}">${text}</data>`,
       ).join(""),
     )
     .join("");

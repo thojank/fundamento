@@ -13,22 +13,22 @@
 - [x] **T1202 `pagxigilo`** Skemo, Uzo, Ontologio, G2 (`tabelo`, `langetaro`, `ikono`) (D-01).
 - [x] **T1203 `spuro`** Skemo, Uzo, Ontologio, G2 (`navigado`, `ligilo`, `ikono`), `link-label-names-destination` ausgeweitet (D-02).
 - [x] **T1204 Modelo-Code** `<part>-name`/`<slot>-name`, Zahlwörter, Ikonaro `chevron-left` in beiden Aspektoj.
-- [x] **T1205 Web** Hosts `pagination` und Brotkrumen (D-03, D-04) – ein Spec offen (B-3).
-- [ ] **T1206 Figma** Plan (Bauformen, Icons, Einträge, Label) grün; Plugin-Zeichnung offen (B-2).
+- [x] **T1205 Web** Hosts `pagination` und Brotkrumen (D-03, D-04); B-3, B-5, B-6 behoben.
+- [x] **T1206 Figma** Plan (Bauformen, Icons, Einträge, Label) und Plugin-Zeichnung `drawPagination`/`drawBreadcrumb` (B-2, B-7, B-8).
 - [x] **T1207 Vitrino, Make-Kit, React** (D-06 bis D-08).
 
 ### C – Abschluss
-- [ ] **T1208 Doku** plan ①, tasks ①, Vojmapo, README – Stand in Arbeit.
-- [ ] **T1209 Messungen** unten; Bericht im PR.
+- [x] **T1208 Doku** plan ①, tasks ①, Vojmapo, README.
+- [x] **T1209 Messungen** unten; Bericht im PR.
 
 ### Messungen
 
 | Was | Wert |
 |---|---|
-| Commits ① | rot `146f5c2` (vor dem Rebase auf ⑤ `74f6eb4`: `7b450f1`), Arbeitsstand in der Zeile nach dem Commit; nach dem Rebase auf ② `6fb4ab3` (F-4) am 2026-10-18; nach dem Rebase auf ② `e487388` (F-4) am 2026-10-18 |
+| Commits ① | rot `61955bd` (nach dem Rebase auf `main` `93a0df3`, #74 gemergt; davor `146f5c2`, `7b450f1`), Arbeitsstand `279cb5a`, fertig: Hash in der Zeile nach dem Commit |
 | `brief` | pagxigilo, spuro ≤ 750 (Daten-Tests) |
 | `check:regularo` | 58 Reguloj, 184 Jugxoj, 29 Uzoj, 0 Warnungen (keine neue `goal-keyword-shared`) |
-| Tests lokal | Modelo 3474 grün (Doku-Test ① ausgenommen bis zur Doku); Projekcioj 658 grün, 6 rot (Parität 5, Web-Pin 1); Browser-Specs pagxigilo 2 von 3, spuro 2 von 2 in Chromium |
+| Tests lokal | Modelo 3476, Projekcioj 667, MCP 291 grün; `check:parity` 29 Eroj, 0 Differenzen; Lint, `check:regularo` (29 Uzoj), vortaro-lint, mankoj, ikonaro, clean-room ohne Fehler; Browser: alle 215 Specs in Chromium, Alirebleco-Check 489 in drei Browsern (8,5 min), Vitrino-Check 27, Make-Kit-Check 5, Quickstart 1 grün |
 | CI | offen |
 
 ## ② Eingabe
