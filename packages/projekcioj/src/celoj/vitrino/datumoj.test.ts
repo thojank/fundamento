@@ -703,3 +703,25 @@ describe("the Vitrino shows the faldilo and the kompletigilo (Spec 014 ⑤)", ()
     expect((section.match(/<fm-kompletigilo /g) ?? []).length).toBe(3 * 5);
   });
 });
+
+// Spec 015 ① (plan ① D-06): the Vitrino shows the pagxigilo on page 5 of 10 (both ellipses) in one
+// row, named by the Modelo's word, and the spuro with three links of the Vitrino's words, the last
+// the current page.
+describe("the Vitrino shows the pagxigilo and the spuro (Spec 015 ①)", () => {
+  it("pagxigilo: one row, page 5 of 10, named Seitenblättern, no children", () => {
+    const grid = datumoj.eroj.pagxigilo ?? "";
+    expect((grid.match(/<fm-pagxigilo /g) ?? []).length).toBe(1);
+    expect(grid).toContain(
+      '<fm-pagxigilo label="Seitenblättern" page="5" total-pages="10"></fm-pagxigilo>',
+    );
+    expect(grid).toContain('<th scope="row">rest</th>');
+  });
+
+  it("spuro: one row, three links of the Vitrino's words, the last current, named Pfad", () => {
+    const grid = datumoj.eroj.spuro ?? "";
+    expect((grid.match(/<fm-spuro /g) ?? []).length).toBe(1);
+    expect(grid).toContain(
+      '<fm-spuro label="Pfad" page="3"><a href="#fm-vitrino-spuro" data-page="1">Eins</a><a href="#fm-vitrino-spuro" data-page="2">Zwei</a><a href="#fm-vitrino-spuro" data-page="3">Drei</a></fm-spuro>',
+    );
+  });
+});

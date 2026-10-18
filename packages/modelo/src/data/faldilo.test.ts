@@ -33,9 +33,9 @@ const suggest = (goal: string) => {
 };
 
 describe("faldilo in the repo Modelo (section ⑤, G1, G2)", () => {
-  it("lives in data/eroj/faldilo/skemo.json, one of twenty-seven Eroj", () => {
+  it("lives in data/eroj/faldilo/skemo.json, one of twenty-nine Eroj", () => {
     expect(faldilo?.file).toBe("modelo/data/eroj/faldilo/skemo.json");
-    expect(modelo.eroj).toHaveLength(27);
+    expect(modelo.eroj).toHaveLength(29);
   });
 
   it("has open (a keyed boolean, the axis) and group as props; the states of the summary; summary and content slots", () => {

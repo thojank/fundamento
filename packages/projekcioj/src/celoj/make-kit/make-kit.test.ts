@@ -743,3 +743,20 @@ describe("Make Kit and the Aufklappen (Spec 014 ⑤)", () => {
     expect(kit(aspekto, "guidelines/components/kompletigilo.md")).toContain("`allow-free`");
   });
 });
+
+// Spec 015 ① (plan ① D-07): Make pages every long list with the pagxigilo and shows the path of a
+// page with the spuro — two sentences, from the role navigation with the parts ellipsis and
+// separator.
+describe("Make Kit and the Navigation of Spec 015 ①", () => {
+  it.each(ASPEKTOJ)("%s: the guidelines name the pagxigilo and the spuro", (aspekto) => {
+    const guidelines = kit(aspekto, "guidelines/Guidelines.md");
+    expect(guidelines).toContain(
+      "- Every long list in pages gets a `<Pagxigilo>` under it, the current page marked and an arrow back and forth; more on demand is a `<Butono>`, views of one thing are a `<Langetaro>`.",
+    );
+    expect(guidelines).toContain(
+      "- Every page inside a hierarchy shows its path in a `<Spuro>` at its head, each level a link and the current page text; the places beside a page are the `<Navigado>`.",
+    );
+    expect(kit(aspekto, "guidelines/components/pagxigilo.md")).toContain("`total-pages`");
+    expect(kit(aspekto, "guidelines/components/spuro.md")).toContain("`page`");
+  });
+});

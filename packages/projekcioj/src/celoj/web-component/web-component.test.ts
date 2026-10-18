@@ -1700,3 +1700,69 @@ describe("Web Component Celo for the faldilo and the kompletigilo (Spec 014 ⑤)
     expect(componentCssIssues("kompletigilo.css", css)).toEqual([]);
   });
 });
+
+// Spec 015 ① (section ①, plan ① D-03, D-04): the pagxigilo draws its pages itself from page and
+// total-pages — a nav around an ordered list of buttons (or links in mode link), the current page
+// with aria-current, an ellipsis per gap, an arrow back and forth as composed icons, the words of
+// the Modelo as the names; the spuro keeps the platform's own links in the light DOM (E10) and
+// assigns each to a list item of its shadow (manual slot assignment), a decorative chevron between
+// two, the last item (or the page prop's) current.
+describe("Web Component Celo for the pagxigilo and the spuro (Spec 015 ①)", () => {
+  const cssOf = (ero: string) =>
+    JSON.parse(
+      new RegExp(`export const ${ero.toUpperCase()}_CSS = ("(?:[^"\\\\]|\\\\.)*");`).exec(
+        files[`eroj/src/generated/${ero}.styles.ts`] ?? "",
+      )?.[1] ?? '""',
+    ) as string;
+  const lightCssOf = (ero: string) =>
+    JSON.parse(
+      new RegExp(`export const ${ero.toUpperCase()}_LIGHT_CSS = ("(?:[^"\\\\]|\\\\.)*");`).exec(
+        files[`eroj/src/generated/${ero}.styles.ts`] ?? "",
+      )?.[1] ?? '""',
+    ) as string;
+
+  it("the pagxigilo renders a nav with the pages as a list, arrows as icons, an ellipsis per gap; page-change in mode button", () => {
+    const element = files["eroj/src/generated/fm-pagxigilo.ts"] ?? "";
+    expect(element).toContain('<nav part="list">');
+    expect(element).toContain('<ol part="pages">');
+    expect(element).toContain('data-arrow="prev"');
+    expect(element).toContain('name="chevron-left"');
+    expect(element).toContain('name="chevron-right"');
+    expect(element).toContain('part="ellipsis"');
+    expect(element).toContain('new CustomEvent("page-change"');
+    expect(element).toContain('"items-name"');
+    expect(element).toContain('"prev-name"');
+    expect(element).toContain('"label-empty"');
+    expect(element).toContain('"href-template"');
+    expect(element).toContain("static formAssociated = false;");
+    const css = cssOf("pagxigilo");
+    expect(css).toContain("var(--fm-color-navigation-selected)");
+    expect(css).toContain("var(--fm-border-width-strong)");
+    expect(css).toContain("var(--fm-size-icon-medium)");
+    expect(css).toContain('[aria-current="page"]');
+    expect(css).toContain('[aria-disabled="true"]');
+    expect(css).toContain("list-style: none;");
+    expect(componentCssIssues("pagxigilo.css", css)).toEqual([]);
+    expect(cssPhysicalPropertyIssues("pagxigilo.css", css)).toEqual([]);
+  });
+
+  it("the spuro keeps the links in the light DOM and lists them in its shadow with a chevron between two; the current one by weight, without underline", () => {
+    const element = files["eroj/src/generated/fm-spuro.ts"] ?? "";
+    expect(element).toContain('<ol part="items">');
+    expect(element).toContain('slotAssignment: "manual"');
+    expect(element).toContain('part="separator"');
+    expect(element).toContain('name="chevron-right"');
+    expect(element).toContain('"label-empty"');
+    expect(element).toContain('"aria-current"');
+    const light = lightCssOf("spuro");
+    expect(light).toContain("fm-spuro > ");
+    expect(light).toContain("var(--fm-color-link-rest)");
+    expect(light).toContain("var(--fm-font-weight-semibold)");
+    expect(light).toContain('[aria-current="page"]');
+    const css = cssOf("spuro");
+    expect(css).toContain("var(--fm-size-icon-small)");
+    expect(css).toContain("list-style: none;");
+    expect(componentCssIssues("spuro.css", css)).toEqual([]);
+    expect(cssPhysicalPropertyIssues("spuro.css", css)).toEqual([]);
+  });
+});

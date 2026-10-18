@@ -29,9 +29,9 @@ const suggest = (goal: string) => {
 };
 
 describe("sxvebilo in the repo Modelo (section ④, G1, G2, G4)", () => {
-  it("lives in data/eroj/sxvebilo/skemo.json, one of twenty-seven Eroj", () => {
+  it("lives in data/eroj/sxvebilo/skemo.json, one of twenty-nine Eroj", () => {
     expect(sxvebilo?.file).toBe("modelo/data/eroj/sxvebilo/skemo.json");
-    expect(modelo.eroj).toHaveLength(27);
+    expect(modelo.eroj).toHaveLength(29);
   });
 
   it("has label (a duty), placement (block-end) and open as props; one state; trigger, content (default) and heading slots", () => {

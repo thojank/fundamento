@@ -344,8 +344,11 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
       ...["boundary", "slots", "content"].map(() => "menuo"),
       ...["boundary", "slots", "content"].map(() => "mezurilo"),
       ...["boundary", "slots", "content"].map(() => "navigado"),
+      // Spec 015 ①: the pagxigilo and the spuro carry a Uzo like every set.
+      ...["boundary", "slots", "content"].map(() => "pagxigilo"),
       ...["boundary", "slots", "content"].map(() => "plenstato"),
       ...["boundary", "slots", "content"].map(() => "saltligilo"),
+      ...["boundary", "slots", "content"].map(() => "spuro"),
       ...["boundary", "slots", "content"].map(() => "sxaltilo"),
       ...["boundary", "slots", "content"].map(() => "sxvebilo"),
       ...["boundary", "slots", "content"].map(() => "tabelo"),
@@ -402,8 +405,11 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
       ...["menuo", "menuo", "menuo"],
       ...["mezurilo", "mezurilo", "mezurilo"],
       ...["navigado", "navigado", "navigado"],
+      // Spec 015 ①: the pagxigilo and the spuro close their three parts too.
+      ...["pagxigilo", "pagxigilo", "pagxigilo"],
       ...["plenstato", "plenstato", "plenstato"],
       ...["saltligilo", "saltligilo", "saltligilo"],
+      ...["spuro", "spuro", "spuro"],
       ...["sxaltilo", "sxaltilo", "sxaltilo"],
       ...["sxvebilo", "sxvebilo", "sxvebilo"],
       ...["tabelo", "tabelo", "tabelo"],
@@ -2704,10 +2710,13 @@ describe("every bound paint shows the plan's colour after the first and the seco
         // Spec 011 ⑤: the navigado has state = 3 variants (current is the state of one item, E7;
         // orientation keys no part and is no axis).
         { set: "navigado", created: 3, updated: 0 },
+        // Spec 015 ①: the pagxigilo has 4 states, the spuro 3.
+        { set: "pagxigilo", created: 4, updated: 0 },
         // Spec 011 ③: the plenstato has kind = 2 variants in one state.
         { set: "plenstato", created: 2, updated: 0 },
         // Spec 014 ②: the saltligilo has state = 2 variants (rest and focus).
         { set: "saltligilo", created: 2, updated: 0 },
+        { set: "spuro", created: 3, updated: 0 },
         // Spec 010 ①: the sxaltilo has checked × size × state = 24 variants.
         { set: "sxaltilo", created: 24, updated: 0 },
         // Spec 014 ④: the sxvebilo has one variant (placement and open are no axes).

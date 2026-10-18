@@ -51,8 +51,10 @@ describe("ligilo in the repo Modelo (T006)", () => {
       "menuo",
       "mezurilo",
       "navigado",
+      "pagxigilo",
       "plenstato",
       "saltligilo",
+      "spuro",
       "sxaltilo",
       "sxvebilo",
       "tabelo",
@@ -220,7 +222,7 @@ describe("the Uzo of the ligilo (T006, A3)", () => {
       "footer",
       "card",
     ]);
-    expect(uzo?.composes.with.map((entry) => entry.ero)).toEqual(["ligilo"]);
+    expect(uzo?.composes.with.map((entry) => entry.ero)).toEqual(["ligilo", "spuro"]);
     expect(uzo?.composes.never.map((entry) => entry.ero)).toEqual(["butono"]);
     expect(uzo?.composes.never[0]?.kialo).toContain("action-bar");
     expect(uzo?.composes.spacing).toEqual({
@@ -256,7 +258,7 @@ describe("the Reguloj of the ligilo (T005, A2, D-13)", () => {
     // saltligilo too (E5).
     const widened =
       name === "link-label-names-destination"
-        ? ["ligilo", "navigado", "saltligilo"]
+        ? ["ligilo", "navigado", "saltligilo", "spuro"]
         : name === "link-not-color-only"
           ? ["ligilo", "navigado"]
           : ["ligilo"];
@@ -310,6 +312,8 @@ describe("the Reguloj of the ligilo (T005, A2, D-13)", () => {
       "menuo",
       "faldilo",
       "kompletigilo",
+      "pagxigilo",
+      "spuro",
     ]);
   });
 

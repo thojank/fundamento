@@ -1582,3 +1582,67 @@ for (const aspekto of ["komuna", "ekzemplo"]) {
     }
   }
 }
+
+// Spec 015 ① (G5, plan ① D-03, D-04): the rendered pagxigilo (page 5 of 10) and spuro in every
+// colour class: axe without a finding; the current page and a link at least 4.5:1 on their
+// surfaces.
+const navigoj =
+  '<fm-pagxigilo id="an-p" page="5" total-pages="10"></fm-pagxigilo><fm-spuro id="an-s"><a href="#start">Start</a><a href="#projekte">Projekte</a><span>Fundamento</span></fm-spuro>';
+
+for (const aspekto of ["komuna", "ekzemplo"]) {
+  for (const scheme of ["light", "dark"]) {
+    for (const contrast of ["default", "high"]) {
+      test(`${aspekto} ${scheme}/${contrast}: axe on the pagxigilo and the spuro; current page and links ≥ 4.5:1`, async ({
+        page,
+      }) => {
+        await serve(page, out, navigoj);
+        await page.evaluate(
+          ([a, s, k]) => {
+            const root = document.documentElement;
+            root.setAttribute("data-fm-aspekto", a ?? "");
+            root.setAttribute("data-fm-color-scheme", s ?? "");
+            root.setAttribute("data-fm-contrast", k ?? "");
+          },
+          [aspekto, scheme, contrast],
+        );
+        await expect(page.getByRole("navigation")).toHaveCount(2);
+        expect(await axeViolations(page), "navigation").toEqual([]);
+        const measured = await page.evaluate(() => {
+          const luminance = (colour: string) => {
+            const [r = 0, g = 0, b = 0] = colour.match(/[\d.]+/g)?.map(Number) ?? [];
+            const channel = (value: number) => {
+              const c = value / 255;
+              return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+            };
+            return 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
+          };
+          const ratio = (front: string, back: string) => {
+            const [a, b] = [luminance(front), luminance(back)].sort((x, y) => y - x);
+            return ((a ?? 0) + 0.05) / ((b ?? 0) + 0.05);
+          };
+          const behind = (node: HTMLElement, fallback: HTMLElement) => {
+            const fill = getComputedStyle(node).backgroundColor;
+            return fill === "rgba(0, 0, 0, 0)" || fill === "transparent"
+              ? getComputedStyle(fallback).backgroundColor
+              : fill;
+          };
+          const current = document
+            .getElementById("an-p")
+            ?.shadowRoot?.querySelector('[aria-current="page"]') as HTMLElement;
+          const other = document
+            .getElementById("an-p")
+            ?.shadowRoot?.querySelector('[part="item"]:not([aria-current])') as HTMLElement;
+          const link = document.querySelector("#an-s > a") as HTMLElement;
+          return {
+            current: ratio(getComputedStyle(current).color, behind(current, document.body)),
+            other: ratio(getComputedStyle(other).color, behind(other, document.body)),
+            link: ratio(getComputedStyle(link).color, behind(link, document.body)),
+          };
+        });
+        expect(measured.current, "current page").toBeGreaterThanOrEqual(4.5);
+        expect(measured.other, "other page").toBeGreaterThanOrEqual(4.5);
+        expect(measured.link, "link").toBeGreaterThanOrEqual(4.5);
+      });
+    }
+  }
+}

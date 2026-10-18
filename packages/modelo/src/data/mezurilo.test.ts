@@ -30,7 +30,7 @@ const suggest = (goal: string) => {
 };
 
 describe("mezurilo in the repo Modelo (section ④, G1, G2)", () => {
-  it("lives in data/eroj/mezurilo/skemo.json, among twenty-seven Eroj", () => {
+  it("lives in data/eroj/mezurilo/skemo.json, among twenty-nine Eroj", () => {
     expect(mezurilo?.file).toBe("modelo/data/eroj/mezurilo/skemo.json");
     expect(modelo.eroj.map((entry) => entry.ero.name)).toEqual([
       "apartigilo",
@@ -52,8 +52,10 @@ describe("mezurilo in the repo Modelo (section ④, G1, G2)", () => {
       "menuo",
       "mezurilo",
       "navigado",
+      "pagxigilo",
       "plenstato",
       "saltligilo",
+      "spuro",
       "sxaltilo",
       "sxvebilo",
       "tabelo",

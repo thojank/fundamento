@@ -29,7 +29,7 @@ const suggest = (goal: string) => {
 };
 
 describe("langetaro in the repo Modelo (section ⑤, G1, G2, E7)", () => {
-  it("lives in data/eroj/langetaro/skemo.json, ninth of twenty-seven Eroj", () => {
+  it("lives in data/eroj/langetaro/skemo.json, ninth of twenty-nine Eroj", () => {
     expect(langetaro?.file).toBe("modelo/data/eroj/langetaro/skemo.json");
     expect(modelo.eroj[13]?.ero.name).toBe("langetaro");
   });
@@ -168,6 +168,8 @@ describe("the Uzo of the langetaro (section ⑤, G5)", () => {
       ["pages", "navigado"],
       // Spec 014 ⑤: content that is hidden until opened is the faldilo's.
       ["disclose", "faldilo"],
+      // Spec 015 ①: the pages of one list are the pagxigilo's.
+      ["list-pages", "pagxigilo"],
     ]);
     expect(uzo?.boundary.map((entry) => [entry.case, entry.action])).toEqual([
       // "overflow" is a web term of the Uzo (uzo-web-term): the case is named by what it is.

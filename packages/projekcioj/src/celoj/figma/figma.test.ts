@@ -783,8 +783,10 @@ describe("Figma plan for the ligilo (Spec 008 T017)", () => {
       "menuo",
       "mezurilo",
       "navigado",
+      "pagxigilo",
       "plenstato",
       "saltligilo",
+      "spuro",
       "sxaltilo",
       "sxvebilo",
       "tabelo",
@@ -3027,5 +3029,54 @@ describe("the Figma plan draws the faldilo and the kompletigilo (Spec 014 ⑤)",
       selected: 0,
     });
     expect(kompletigilo?.texts?.text).toBe("Bitte wählen");
+  });
+});
+
+// Spec 015 ① (plan ① D-05): the pagxigilo in Figma — the state as the axis, a row of an arrow,
+// three page entries (the first current, keyed like a navigation's items), an ellipsis and an
+// arrow, the arrows the Ikonaro's chevrons; the spuro — three entries of the Vitrino's words with
+// a chevron between two, the last the current one. The label of each is the name of its landmark,
+// the Modelo's own word where the prop is empty (a11y.texts label-empty).
+describe("the Figma plan draws the pagxigilo and the spuro (Spec 015 ①)", () => {
+  const set = (name: string) => plan.components.find((component) => component.set === name);
+
+  it("the pagxigilo: state as a pagination with three pages, arrows as icons, the Modelo's word as the label", () => {
+    const pagxigilo = set("pagxigilo");
+    expect(pagxigilo?.structure).toBe("pagination");
+    expect(pagxigilo?.variants).toHaveLength(4);
+    const rest = pagxigilo?.variants.find((variant) => variant.props.state === "rest");
+    expect(rest?.icons).toEqual({ prev: "chevron-left", next: "chevron-right" });
+    expect(rest?.bindings).toMatchObject({
+      "item.fill": "color/navigation/rest",
+      "item.typography": "typography/label/1",
+      "ellipsis.color": "color/navigation/text/rest",
+      "prev.size": "size/icon/medium",
+    });
+    expect(rest?.entries?.true?.bindings).toMatchObject({
+      "item.fill": "color/navigation/selected",
+      "border.width": "border/width/strong",
+    });
+    expect(pagxigilo?.entry).toEqual({ key: "current", texts: ["1", "2", "3"], selected: 0 });
+    expect(pagxigilo?.label).toEqual({ property: "label", defaultValue: "Seitenblättern" });
+  });
+
+  it("the spuro: state as a breadcrumb with three levels, the last current, the chevron between two", () => {
+    const spuro = set("spuro");
+    expect(spuro?.structure).toBe("breadcrumb");
+    expect(spuro?.variants).toHaveLength(3);
+    const rest = spuro?.variants.find((variant) => variant.props.state === "rest");
+    expect(rest?.icons).toEqual({ separator: "chevron-right" });
+    expect(rest?.bindings).toMatchObject({
+      "separator.color": "color/text/muted",
+      "separator.size": "size/icon/small",
+      "item.typography": "typography/label/1",
+    });
+    expect(rest?.entries?.false?.bindings).toMatchObject({ "item.color": "color/link/rest" });
+    expect(rest?.entries?.true?.bindings).toMatchObject({
+      "item.color": "color/text/default",
+      "item.weight": "font/weight/semibold",
+    });
+    expect(spuro?.entry).toEqual({ key: "current", texts: ["Eins", "Zwei", "Drei"], selected: 2 });
+    expect(spuro?.label).toEqual({ property: "label", defaultValue: "Pfad" });
   });
 });
