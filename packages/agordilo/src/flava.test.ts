@@ -6,6 +6,7 @@
 import { beforeAll, describe, expect, it } from "vitest";
 import {
   type Agordo,
+  agordoJugxoIssues,
   type Derivation,
   deriveAspekto,
   loadCalibration,
@@ -98,22 +99,29 @@ describe("a light yellow lead colour (G6)", () => {
   });
 
   it("never lets a Jugxo open a fixed rule", () => {
-    const withFixed = deriveAspekto(
+    // The refusal is the Agordo's own issue (checkAspekto lists it before every violation), so the
+    // rule is tested without a fourth derivation of the whole Modelo.
+    const reguloj = new Map([
+      ["contrast-reserve", { id: "reg_contrast_reserve", name: "contrast-reserve" }],
+      ["palette-aligned", { id: "reg_palette_aligned", name: "palette-aligned" }],
+    ]);
+    const jugxo = { kialo: "A deviation.", date: "2026-10-18", name: "Test Maintainer" };
+    const issues = agordoJugxoIssues(
       agordoOf({
         ...FLAVA,
         jugxoj: [
-          {
-            regulo: "contrast-reserve",
-            kialo: "A fixed rule cannot be deviated from.",
-            date: "2026-10-18",
-            name: "Test Maintainer",
-          },
+          { regulo: "contrast-reserve", ...jugxo },
+          { regulo: "palette-aligned", ...jugxo },
+          { regulo: "no-such-regulo", ...jugxo },
         ],
       }),
-      readStructure(),
-      loadCalibration(),
+      reguloj,
     );
-    expect(withFixed.exportable).toBe(false);
-    expect(withFixed.issues.map((issue) => issue.rule)).toContain("agordo-jugxo-fixed");
+    expect(issues.map(({ rule, path }) => [rule, path])).toEqual([
+      ["agordo-jugxo-fixed", "agordo#/jugxoj/0/regulo"],
+      ["regulo-unknown", "agordo#/jugxoj/2/regulo"],
+    ]);
+    // In the derivation the same issue refuses the export (`issues` is the refusal).
+    expect(derivation.issues.every((issue) => issue.suggestion.length > 0)).toBe(true);
   });
 });

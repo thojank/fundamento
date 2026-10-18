@@ -2,7 +2,15 @@
 // exactly as `pnpm fm` runs it (vitest.global-setup.ts builds it).
 
 import { spawnSync } from "node:child_process";
-import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import {
+  cpSync,
+  existsSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -21,6 +29,7 @@ const PROVO = join(
   "aspekto-provo",
   "agordo.json",
 );
+const PROVO_PACKAGE = join(dirname(PROVO), "aspekto-provo");
 
 interface Run {
   code: number | null;
@@ -97,8 +106,9 @@ describe("fm agordilo", () => {
   it(
     "finds a shipped report that no longer matches the checks",
     () => {
+      // A copy of the committed package (a derivation of its own would cost a full check).
       const dir = join(scratch, "stale");
-      expect(fm(["agordilo", "derive", PROVO, "--out", dir]).code).toBe(0);
+      cpSync(PROVO_PACKAGE, dir, { recursive: true });
       const raporto = JSON.parse(readFileSync(join(dir, "raporto.json"), "utf8"));
       raporto.summary.pairs.passed += 1;
       writeFileSync(join(dir, "raporto.json"), `${JSON.stringify(raporto, null, 2)}\n`);

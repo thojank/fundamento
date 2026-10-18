@@ -52,20 +52,21 @@ function filesOf(dir: string): Record<string, string> {
   return files;
 }
 
+// One derivation per file: each one composes and checks the whole Modelo, and the test run shares
+// its cores with every other package (CI run 39158336356). Two fresh runs are compared by the CLI
+// test (agordilo.test.ts of @fundamento/cli); here this run is compared with an earlier one, the
+// committed fixture.
 describe("deriveAspekto with the Agordo provo", () => {
   let first: Derivation;
-  let second: Derivation;
   beforeAll(() => {
-    const structure = readStructure();
-    const calibration = loadCalibration();
-    first = deriveAspekto(provoAgordo(), structure, calibration);
-    second = deriveAspekto(provoAgordo(), structure, calibration);
+    first = deriveAspekto(provoAgordo(), readStructure(), loadCalibration());
   });
 
-  it("is deterministic: two runs give the same files, byte for byte", () => {
-    expect(Object.keys(second.files)).toEqual(Object.keys(first.files));
+  it("is deterministic: this run gives the bytes of an earlier run (the committed fixture)", () => {
+    const earlier = filesOf(PROVO_PACKAGE);
+    expect(Object.keys(first.files)).toEqual(Object.keys(earlier).sort());
     for (const [path, text] of Object.entries(first.files)) {
-      expect(second.files[path], path).toBe(text);
+      expect(earlier[path], path).toBe(text);
     }
   });
 
@@ -109,6 +110,8 @@ describe("deriveAspekto with the Agordo provo", () => {
   });
 
   it("equals the committed fixture aspekto-provo (regenerate with fm agordilo derive)", () => {
+    // pnpm fm agordilo derive packages/modelo/test/fixtures/valid/aspekto-provo/agordo.json
+    //   --out packages/modelo/test/fixtures/valid/aspekto-provo/aspekto-provo
     expect(filesOf(PROVO_PACKAGE)).toEqual(first.files);
   });
 });
