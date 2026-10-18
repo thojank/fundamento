@@ -1741,7 +1741,9 @@ ${
       const target = typeof to === "string" && to !== "" ? document.getElementById(to) : null;
       if (target === null) return;
       if (!target.hasAttribute("tabindex")) target.setAttribute("tabindex", "-1");
-      requestAnimationFrame(() => target.focus());
+      // At once, not a frame later: a Tab pressed right after Enter must find the target focused
+      // (CI-Lauf 39080368228: the late focus took the focus back from the next element).
+      target.focus();
     });
 `
     : "";
