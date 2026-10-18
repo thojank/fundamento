@@ -25,7 +25,7 @@
 
 | Was | Wert |
 |---|---|
-| Commits ① | rot `77edcbd` (vor dem Rebase auf ⑤ `74f6eb4`: `7b450f1`), Arbeitsstand in der Zeile nach dem Commit; nach dem Rebase auf ② `6fb4ab3` (F-4) am 2026-10-18 |
+| Commits ① | rot `146f5c2` (vor dem Rebase auf ⑤ `74f6eb4`: `7b450f1`), Arbeitsstand in der Zeile nach dem Commit; nach dem Rebase auf ② `6fb4ab3` (F-4) am 2026-10-18; nach dem Rebase auf ② `e487388` (F-4) am 2026-10-18 |
 | `brief` | pagxigilo, spuro ≤ 750 (Daten-Tests) |
 | `check:regularo` | 58 Reguloj, 184 Jugxoj, 29 Uzoj, 0 Warnungen (keine neue `goal-keyword-shared`) |
 | Tests lokal | Modelo 3474 grün (Doku-Test ① ausgenommen bis zur Doku); Projekcioj 658 grün, 6 rot (Parität 5, Web-Pin 1); Browser-Specs pagxigilo 2 von 3, spuro 2 von 2 in Chromium |
