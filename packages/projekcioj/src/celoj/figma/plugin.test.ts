@@ -5266,6 +5266,90 @@ describe("the plenstato is drawn as a state: the column with the arc, the text a
     await run(double, source);
     expect(double.snapshot()).toBe(before);
   });
+
+  // Nachlese 4 N-5 (F-6, Figma-Lauf 09909f5): „das Set misst 101 × 148, die Kinder reichen bis
+  // 97 × 144" — the variant kind=empty ends exactly where the padding of 4 begins, and the run
+  // still called it outside. Figma keeps geometry as 32-bit floats; the empty variant carries the
+  // 0.01 of its empty actions placeholder (the loading variant hides it), and 0.01 has no exact
+  // float: the sum of a child's y and height came out a few millionths above the set's height.
+  it("warns of nothing where a variant ends at the padding but for float noise below what the report prints (N-5, F-6)", async () => {
+    const double = modelDouble();
+    const api = double.figma as { combineAsVariants: (...args: unknown[]) => DoubleNode };
+    const combine = api.combineAsVariants;
+    const figma = {
+      ...double.figma,
+      combineAsVariants: (...args: unknown[]) => {
+        const made = combine(...args);
+        if (!made.children.some((child) => child.name.startsWith("kind="))) return made;
+        return new Proxy(made, {
+          get(target, key, receiver) {
+            const value = Reflect.get(target, key, receiver);
+            // A set a few millionths smaller than the sum Figma lays out: float noise.
+            if ((key === "width" || key === "height") && typeof value === "number") {
+              return value - 0.000004;
+            }
+            return value;
+          },
+        });
+      },
+    };
+    const report = (await new Function("figma", `${source}\nreturn applyPlan();`)(
+      figma,
+    )) as Report & { components: { set: string; layout: { outside: string[] } }[] };
+    const plenstato = report.components.find((component) => component.set === "plenstato");
+    expect(plenstato?.layout.outside).toEqual([]);
+    expect(report.warnings.filter((warning) => warning.startsWith("plenstato"))).toEqual([]);
+  });
+});
+
+// Nachlese 4 N-5 (F-6): Figma lays out no invisible child of an auto-layout frame (documented:
+// a hidden layer takes no space). The double counted it — the plenstato's hidden arc (empty) and
+// hidden actions placeholder (loading) made both variants larger than in the file, and the
+// 148 the maintainer measured was out of the double's reach.
+describe("the double lays out no invisible child (N-5)", () => {
+  const frameOf = (double: ReturnType<typeof figmaDouble>) =>
+    (double.figma as { createFrame: () => DoubleNode }).createFrame();
+  const size = (node: DoubleNode) => {
+    const { width, height } = node as unknown as { width: number; height: number };
+    return { width, height };
+  };
+
+  it("a column of two children, one hidden, is as high as the visible one, without spacing", () => {
+    const double = modelDouble();
+    const column = frameOf(double);
+    Object.assign(column, {
+      layoutMode: "VERTICAL",
+      itemSpacing: 4,
+      layoutSizingHorizontal: "HUG",
+      layoutSizingVertical: "HUG",
+    });
+    const [shown, hidden] = [0, 1].map(() => {
+      const child = frameOf(double);
+      child.resize(40, 10);
+      column.appendChild(child);
+      return child;
+    });
+    expect(size(column)).toEqual({ width: 40, height: 24 });
+    Object.assign(hidden as DoubleNode, { visible: false });
+    expect(size(column)).toEqual({ width: 40, height: 10 });
+    expect(shown).toBeDefined();
+  });
+
+  it("the plenstato while loading is as high as its arc, gap and text and its paddings – the hidden actions take nothing", async () => {
+    const double = modelDouble();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    const set = pageNodes(double).find((child) => child.name === "plenstato");
+    const loading = set?.children.find((child) => child.name === "kind=loading, state=rest");
+    const control = descendant(loading, "control");
+    const parts = ["indicator", "text"].map((name) =>
+      size(descendant(loading, name) as DoubleNode),
+    );
+    const padding = (control as unknown as { paddingTop: number }).paddingTop;
+    const gap = (control as unknown as { itemSpacing: number }).itemSpacing;
+    expect(size(control as DoubleNode).height).toBe(
+      parts.reduce((sum, part) => sum + part.height, 0) + gap + 2 * padding,
+    );
+  });
 });
 
 // Spec 011 ④ (spec „mezurilo", G2, G4; plan ④ D-14): the meter is a structure of its own —
