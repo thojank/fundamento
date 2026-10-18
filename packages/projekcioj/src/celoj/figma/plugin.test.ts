@@ -5277,7 +5277,8 @@ describe("the plenstato is drawn as a state: the column with the arc, the text a
     const double = figmaDouble({ fonts: MODEL_FONTS, float32: true });
     const report = (await new Function("figma", `${source}\nreturn applyPlan();`)(
       double.figma,
-    )) as Report & {
+    )) as {
+      warnings: string[];
       components: { set: string; layout: { outside: string[]; smaller: string[] } }[];
     };
     const plenstato = report.components.find((component) => component.set === "plenstato");
