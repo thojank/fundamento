@@ -795,12 +795,18 @@ function layoutOf(
     const mode = current === undefined ? undefined : prop(current, "layoutMode");
     return mode === "HORIZONTAL" || mode === "VERTICAL";
   };
-  /** Whether a child fills an axis of its auto-layout parent (F-3). */
+  /**
+   * Whether a child fills an axis of its auto-layout parent (F-3). A hidden child stands outside
+   * the flow, so the parent hands it no share: it keeps the size it holds (Spec 015 ③ on
+   * Nachlese 4 N-5: the hidden media of the card's example „ohne Bild" read 0 × 0 here, and the
+   * plugin's fit wrote it again on every run; Figma keeps a hidden node's size).
+   */
   const fills = (current: DoubleNode, axis: "H" | "V"): boolean =>
     prop(current, axis === "H" ? "layoutSizingHorizontal" : "layoutSizingVertical") === "FILL" &&
     current.parent !== undefined &&
     isFlow(current.parent) &&
     prop(current, "layoutPositioning") !== "ABSOLUTE" &&
+    prop(current, "visible") !== false &&
     !STUCK_AT_ZERO.has(current);
   /** What a child adds to the size of a parent that hugs: nothing along an axis it fills. */
   const contribution = (child: DoubleNode): { width: number; height: number } => {
@@ -1067,6 +1073,13 @@ function layoutOf(
         const y = mode === "HORIZONTAL" ? num(current, "paddingTop") : cursor;
         place(child, { x, y, ...size });
         cursor += (mode === "HORIZONTAL" ? size.width : size.height) + num(current, "itemSpacing");
+      }
+      // A hidden child takes no space, but it keeps its size and its place (Figma stores both):
+      // it is laid out where it stands, outside the flow.
+      for (const child of current.children) {
+        if (prop(child, "visible") !== false || prop(child, "layoutPositioning") === "ABSOLUTE")
+          continue;
+        place(child, { x: num(child, "x"), y: num(child, "y"), ...measure(child) });
       }
       return;
     }
