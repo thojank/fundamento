@@ -1903,3 +1903,33 @@ describe("Spec 015 ③ documentation (specs/015-eroj-runde-4)", () => {
     expect(read("README.md")).toContain("thirty-two `fm-*` elements");
   });
 });
+
+// Nachlese 4 (Briefing 2026-10-18): specs/017-nachlese-4 carries the briefing unchanged, a plan
+// with a decision per point N-1 to N-9 and the dialogs before/after, and tasks with the red
+// hashes; the Vojmapo names the resolution of its Nachlese-4 rows.
+describe("Nachlese 4 documentation (specs/017-nachlese-4)", () => {
+  it("the briefing is the one of 2026-10-18, unchanged; plan and tasks carry N-1 to N-9", () => {
+    const briefing = read("specs/017-nachlese-4/briefing.md");
+    expect(briefing).toContain("# Briefing P0 – Nachlese 4 (nach Spec 014/015) – 2026-10-18");
+    expect(briefing).toContain("**N-1 (O-18):**");
+    const plan = read("specs/017-nachlese-4/plan.md");
+    for (const heading of [
+      "### Zusammenfassung",
+      "### Entwurfsentscheidungen",
+      "### Dialoge vorher/nachher",
+      "### Abweichungen vom Briefing",
+      "### Befunde / Mankoj",
+      "### Offen (für den Maintainer)",
+      "### In Figma zu messen",
+    ]) {
+      expect(plan, heading).toContain(heading);
+    }
+    for (const point of ["N-1", "N-2", "N-3", "N-4", "N-5", "N-6", "N-7", "N-8", "N-9"]) {
+      expect(plan, point).toMatch(new RegExp(`#### D-\\d{2} ${point}\\b`));
+    }
+    const tasks = read("specs/017-nachlese-4/tasks.md");
+    expect(tasks).toContain("### Messungen");
+    expect(tasks).toMatch(/rot `[0-9a-f]{7}`/);
+    expect(read("docs/vojmapo.md")).toContain("Erledigt mit Nachlese 4");
+  });
+});
