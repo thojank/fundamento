@@ -1892,6 +1892,98 @@
       ]
     },
     {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Titolo",
+      "term": "Titolo",
+      "inScheme": "eroj",
+      "prefLabel": {
+        "eo": "Titolo",
+        "en": "heading",
+        "de": "Überschrift"
+      },
+      "altLabel": {
+        "en": [
+          "titolo",
+          "heading",
+          "headline",
+          "title"
+        ],
+        "de": [
+          "Überschrift",
+          "Titel",
+          "Headline",
+          "titolo"
+        ]
+      },
+      "definition": {
+        "en": "A heading: names a page or a section. Its level (1–6) is the structure of the page, spoken as such; its size is a type role (display, headline), chosen apart — a heading is never picked by its size, and no level jumps down over a step (heading-levels-in-order). The dialogo composes it as its heading.",
+        "de": "Eine Überschrift: benennt eine Seite oder einen Abschnitt. Ihre Ebene (1–6) ist die Struktur der Seite und wird so gesprochen; ihre Größe ist eine Typografie-Rolle (display, headline), getrennt gewählt – eine Überschrift wird nie nach ihrer Größe gewählt, und keine Ebene springt über eine Stufe (heading-levels-in-order). Der dialogo komponiert sie als seine Überschrift."
+      },
+      "broader": [
+        "#Ero"
+      ],
+      "relations": [
+        {
+          "predicate": "references",
+          "target": "#Dialogo"
+        },
+        {
+          "predicate": "references",
+          "target": "#Teksto"
+        }
+      ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Teksto",
+      "term": "Teksto",
+      "inScheme": "eroj",
+      "prefLabel": {
+        "eo": "Teksto",
+        "en": "text",
+        "de": "Text"
+      },
+      "altLabel": {
+        "en": [
+          "teksto",
+          "text",
+          "paragraph",
+          "running text",
+          "caption",
+          "kicker",
+          "inline code"
+        ],
+        "de": [
+          "Text",
+          "Absatz",
+          "Fließtext",
+          "Bildunterschrift",
+          "Kicker",
+          "Code im Text",
+          "teksto"
+        ]
+      },
+      "definition": {
+        "en": "Running text in the type roles of the system: a paragraph (body, size 1 or 2), a caption, a kicker or inline code (spoken as code); its rank emphasis (high, medium, low) is the colour of the text and no status. A heading is the titolo's, a link in the text the ligilo's, a status word the insigno's; rich text (Markdown) is a boundary.",
+        "de": "Fließtext in den Typografie-Rollen des Systems: ein Absatz (body, Größe 1 oder 2), eine Bildunterschrift, ein Kicker oder Code im Satz (gesprochen als Code); seine Rangfolge emphasis (high, medium, low) ist die Farbe des Textes und kein Status. Eine Überschrift gehört dem titolo, ein Link im Text dem ligilo, ein Statuswort dem insigno; Rich Text (Markdown) ist eine Grenze."
+      },
+      "broader": [
+        "#Ero"
+      ],
+      "relations": [
+        {
+          "predicate": "references",
+          "target": "#Titolo"
+        },
+        {
+          "predicate": "references",
+          "target": "#Ligilo"
+        },
+        {
+          "predicate": "references",
+          "target": "#Insigno"
+        }
+      ]
+    },
+    {
       "uri": "https://fundamento.ciferecigo.com/ontologio#Vitrino",
       "term": "Vitrino",
       "inScheme": "laboro",

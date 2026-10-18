@@ -60,6 +60,8 @@ describe("Web Component Celo (T011)", () => {
       "eroj/src/generated/fm-sxaltilo.ts",
       "eroj/src/generated/fm-tabelo.ts",
       "eroj/src/generated/fm-tekstareo.ts",
+      "eroj/src/generated/fm-teksto.ts",
+      "eroj/src/generated/fm-titolo.ts",
       "eroj/src/generated/ikono.styles.ts",
       "eroj/src/generated/index.ts",
       "eroj/src/generated/insigno.styles.ts",
@@ -76,6 +78,8 @@ describe("Web Component Celo (T011)", () => {
       "eroj/src/generated/sxaltilo.styles.ts",
       "eroj/src/generated/tabelo.styles.ts",
       "eroj/src/generated/tekstareo.styles.ts",
+      "eroj/src/generated/teksto.styles.ts",
+      "eroj/src/generated/titolo.styles.ts",
     ]);
   });
 
@@ -776,7 +780,10 @@ describe("Web Component Celo for the dialogo (Spec 011 ②)", () => {
     expect(element).toContain(
       '<dialog part="control" aria-modal="true" aria-labelledby="heading" aria-describedby="message">',
     );
-    expect(element).toContain('<h2 part="heading" id="heading"><slot></slot></h2>');
+    // Spec 014 ③: the heading is a composed titolo (level 2, the dialog's own document).
+    expect(element).toContain(
+      '<fm-titolo part="heading" id="heading" level="2" size="headline-4"><slot></slot></fm-titolo>',
+    );
     // Spec 014 ① (reason-help, plan ① D-02): the help of the reason stands under the field, handed
     // to the composed tekstareo as its help (it describes the control, aria-describedby).
     expect(element).toContain(
@@ -1470,6 +1477,64 @@ describe("the Eroj draw their signs as ikono (Spec 014 ②)", () => {
     expect(css).toContain("inline-size: var(--fm-size-icon-medium);");
     expect(css).toContain(
       ':where([part="control"][data-intent="danger"]) [part="icon"] {\n  color: var(--fm-color-status-danger-text);',
+    );
+  });
+});
+
+// Spec 014 ③ (section ③, plan ③ D-04): the titolo — a heading whose level is spoken (aria-level)
+// and whose size is a type role, derived from the level where none is given; its text is the
+// control (part text), so an Ero that composes it keeps one control of its own. The teksto — a
+// paragraph in the role of its kind and size, in the colour of its emphasis; inline code is
+// spoken as code. The dialogo composes the titolo as its heading.
+describe("Web Component Celo for the titolo and the teksto (Spec 014 ③)", () => {
+  const cssOf = (ero: string) =>
+    JSON.parse(
+      new RegExp(`export const ${ero.toUpperCase()}_CSS = ("(?:[^"\\\\]|\\\\.)*");`).exec(
+        files[`eroj/src/generated/${ero}.styles.ts`] ?? "",
+      )?.[1] ?? '""',
+    ) as string;
+
+  it("the titolo renders a heading with its level, the size derived from the level where none is given", () => {
+    const element = files["eroj/src/generated/fm-titolo.ts"] ?? "";
+    expect(element).toContain('<div part="text" role="heading"><slot></slot>');
+    expect(element).toContain('"aria-level"');
+    expect(element).toContain("SIZE_OF_LEVEL");
+    expect(element).not.toContain('part="control"');
+    expect(element).toContain("static formAssociated = false;");
+    const css = cssOf("titolo");
+    expect(css).toContain(
+      ':where([part="text"][data-size="display-1"]) {\n  font-family: var(--fm-typography-display-1-font-family);',
+    );
+    expect(css).toContain("color: var(--fm-color-text-default);");
+    expect(css).toContain(":host { display: block; }");
+    expect(css).toContain("overflow-wrap: anywhere;");
+    expect(componentCssIssues("titolo.css", css)).toEqual([]);
+    expect(cssPhysicalPropertyIssues("titolo.css", css)).toEqual([]);
+  });
+
+  it("the teksto renders a paragraph in the role of its kind and size, the colour of its emphasis; code is spoken as code", () => {
+    const element = files["eroj/src/generated/fm-teksto.ts"] ?? "";
+    expect(element).toContain('"code"');
+    expect(element).toContain('customElements.define("fm-teksto", FmTeksto)');
+    const css = cssOf("teksto");
+    expect(css).toContain(
+      ':where([part="control"][data-kind="body"][data-size="2"]) {\n  font-family: var(--fm-typography-body-2-font-family);',
+    );
+    expect(css).toContain(
+      ':where([part="control"][data-kind="code"][data-size="1"]) {\n  font-family: var(--fm-typography-code-font-family);',
+    );
+    expect(css).toContain(
+      ':where([part="control"][data-emphasis="low"]) {\n  color: var(--fm-color-text-muted);',
+    );
+    expect(css).toContain(':where([part="control"][data-kind="code"]) { display: inline;');
+    expect(css).toContain("overflow-wrap: anywhere;");
+    expect(componentCssIssues("teksto.css", css)).toEqual([]);
+  });
+
+  it("the dialogo composes the titolo as its heading (level 2, headline-4)", () => {
+    const element = files["eroj/src/generated/fm-dialogo.ts"] ?? "";
+    expect(element).toContain(
+      '<fm-titolo part="heading" id="heading" level="2" size="headline-4"><slot></slot></fm-titolo>',
     );
   });
 });

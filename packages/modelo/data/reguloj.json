@@ -416,7 +416,9 @@
           "langetaro",
           "ikono",
           "apartigilo",
-          "saltligilo"
+          "saltligilo",
+          "titolo",
+          "teksto"
         ]
       }
     },
@@ -803,6 +805,19 @@
         "eroj": [
           "ikono",
           "butono"
+        ]
+      }
+    },
+    {
+      "id": "reg_01M5616GSFTAVNSEZTHHEZ8700",
+      "name": "heading-levels-in-order",
+      "statement": "In a list of headings no level jumps down over a step: after a level 2 comes a 3, never a 4; going up (3 → 1) is allowed, it closes a section.",
+      "kialo": "The levels are the table of contents for a screen reader: a person jumps from heading to heading and hears the levels; a skipped level is a section that is not there.",
+      "scope": "eroj: titolo instances in a list, in their order (check levels-in-order on prop:level): a level more than one above its predecessor is a finding at that heading; fixed, no Aspekto overrides it (Uzo content)",
+      "checkability": "automatic",
+      "appliesTo": {
+        "eroj": [
+          "titolo"
         ]
       }
     }

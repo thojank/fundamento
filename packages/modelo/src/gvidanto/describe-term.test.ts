@@ -96,6 +96,8 @@ describe("describe_term (FR-12)", () => {
       "sxaltilo",
       "tabelo",
       "tekstareo",
+      "teksto",
+      "titolo",
     ]);
   });
 

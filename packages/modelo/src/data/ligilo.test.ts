@@ -52,6 +52,8 @@ describe("ligilo in the repo Modelo (T006)", () => {
       "sxaltilo",
       "tabelo",
       "tekstareo",
+      "teksto",
+      "titolo",
     ]);
     expect(validateModelo(defaultModeloSource()).errors).toEqual([]);
     expect(ligilo.ero.description).toBe(
@@ -296,6 +298,8 @@ describe("the Reguloj of the ligilo (T005, A2, D-13)", () => {
       "ikono",
       "apartigilo",
       "saltligilo",
+      "titolo",
+      "teksto",
     ]);
   });
 

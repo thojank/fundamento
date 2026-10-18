@@ -54,9 +54,9 @@ beforeAll(async () => {
 });
 
 describe("the dialogs of the Grundbausteine", () => {
-  it("'Piktogramm neben der Überschrift' → an ikono; 'Statussymbol allein' → the insigno with the icon's reason", async () => {
+  it("'Piktogramm vor dem Wort' → an ikono; 'Statussymbol allein' → the insigno with the icon's reason", async () => {
     const icon = await output<Suggested>(client, "suggest_ero", {
-      goal: "Piktogramm neben der Überschrift",
+      goal: "Piktogramm vor dem Wort",
     });
     expect(icon.suggestion).toEqual({ ero: "ikono", props: {} });
     const status = await output<Suggested>(client, "suggest_ero", {
@@ -118,9 +118,9 @@ describe("check_usage of the icon and the skip link", () => {
 });
 
 describe("list_eroj, the briefs and columns-from", () => {
-  it("lists twenty Eroj; the briefs name the axes and duties; get_ero states columns-from (O-3)", async () => {
+  it("lists twenty-two Eroj; the briefs name the axes and duties; get_ero states columns-from (O-3)", async () => {
     const listed = await output<Listed>(client, "list_eroj", {});
-    expect(listed.eroj).toHaveLength(20);
+    expect(listed.eroj).toHaveLength(22);
     expect(listed.eroj.map((entry) => entry.name)).toContain("ikono");
     const icon = await output<Brief>(client, "get_ero", { name: "ikono", brief: true });
     expect(icon.axes.map((axis) => axis.name)).toEqual(["name", "size", "intent"]);

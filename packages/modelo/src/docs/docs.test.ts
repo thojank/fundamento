@@ -1697,3 +1697,33 @@ describe("Spec 014 ② documentation (specs/014-eroj-runde-3)", () => {
     expect(read("docs/vojmapo.md")).toContain("Spec 014 ②");
   });
 });
+
+// Spec 014 ③ (Briefing 2026-10-17): plan ③ carries the decisions (the name of the rank axis of the
+// teksto as a proposal), the Arkitekturo coverage, deviations, findings and open points; tasks ③
+// the red hashes; the Vojmapo names ③.
+describe("Spec 014 ③ documentation (specs/014-eroj-runde-3)", () => {
+  const section = (text: string) =>
+    text.slice(text.indexOf("## ③ Typografie"), text.indexOf("## ④ Overlays"));
+
+  it("plan ③ carries the decisions, the coverage, deviations, findings and open points; tasks ③ the red hashes", () => {
+    const plan = section(read("specs/014-eroj-runde-3/plan.md"));
+    for (const heading of [
+      "### Zusammenfassung",
+      "### Entwurfsentscheidungen",
+      "#### D-01",
+      "### Arkitekturo-Abdeckung",
+      "### Abweichungen von der Spec",
+      "### Befunde / Mankoj",
+      "### Offen (für den Maintainer)",
+    ]) {
+      expect(plan, heading).toContain(heading);
+    }
+    for (const ero of ["titolo", "teksto"]) expect(plan).toContain(`\`${ero}\``);
+    // The name of the rank axis is a proposal the maintainer confirms (E2).
+    expect(plan).toContain("`emphasis`");
+    const tasks = section(read("specs/014-eroj-runde-3/tasks.md"));
+    expect(tasks).toContain("### Messungen");
+    expect(tasks).toMatch(/rot `[0-9a-f]{7}`/);
+    expect(read("docs/vojmapo.md")).toContain("Spec 014 ③");
+  });
+});

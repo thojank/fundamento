@@ -45,6 +45,8 @@ describe("sxaltilo in the repo Modelo (G1, G2, section 1)", () => {
       "sxaltilo",
       "tabelo",
       "tekstareo",
+      "teksto",
+      "titolo",
     ]);
     expect(validateModelo(defaultModeloSource()).errors).toEqual([]);
   });
@@ -261,6 +263,8 @@ describe("the Reguloj of the sxaltilo (G6, E5, D-14)", () => {
       "ikono",
       "apartigilo",
       "saltligilo",
+      "titolo",
+      "teksto",
     ]);
   });
 

@@ -538,6 +538,22 @@ function guidelines(input: CeloInput, aspekto: string): GeneratedFile[] {
         `- Every line that separates groups of content is an \`<${componentName(entry.ero)}>\`; where space alone separates, use spacing and no line.`,
     )
     .join("\n");
+  // Spec 014 ③ (G7, plan ③ D-07): every heading is the titolo with its level, every running text
+  // the teksto in a type role; generated from the roles heading and paragraph.
+  const headingLines = eroj
+    .filter((entry) => entry.skemo.a11y.role === "heading" && entry.uzo !== undefined)
+    .map(
+      (entry) =>
+        `- Every heading is a \`<${componentName(entry.ero)}>\` with its \`level\` (the structure of the page); its \`size\` is design, never a level chosen for its size.`,
+    )
+    .join("\n");
+  const paragraphLines = eroj
+    .filter((entry) => entry.skemo.a11y.role === "paragraph" && entry.uzo !== undefined)
+    .map(
+      (entry) =>
+        `- Every running text, caption, kicker or inline code is a \`<${componentName(entry.ero)}>\` in a type role; never a styled span.`,
+    )
+    .join("\n");
   const skipLines = eroj
     .filter((entry) => isSkip(entry.skemo) && entry.uzo !== undefined)
     .map(
@@ -576,6 +592,8 @@ ${tabsLines}
 ${iconLines}
 ${separatorLines}
 ${skipLines}
+${headingLines}
+${paragraphLines}
 
 Where to look: \`setup.md\` for the imports, \`foundations/\` for the tokens, \`components/\` for
 each component.

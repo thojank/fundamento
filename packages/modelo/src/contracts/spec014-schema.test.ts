@@ -157,3 +157,25 @@ describe("SkemoPartProperty layer and an empty a11y.name (Spec 014 ②)", () => 
     expect(v("SkemoA11y")({ role: "img", states: {}, keys: [] })).toBe(false);
   });
 });
+
+// Spec 014 ③ (plan ③ D-03): a text rule may judge the order of a prop over a list of instances —
+// the levels of headings never jump down over a step. Additive.
+describe("UzoContent check levels-in-order (Spec 014 ③)", () => {
+  it("is a check kind without a count, judging a prop over the instances", () => {
+    expect(
+      v("UzoContent")({
+        regulo: "heading-levels-in-order",
+        fixed: true,
+        of: "prop:level",
+        check: { kind: "levels-in-order" },
+      }),
+    ).toBe(true);
+    expect(
+      v("UzoContent")({
+        regulo: "heading-levels-in-order",
+        fixed: true,
+        check: { kind: "levels-in-order", count: 1 },
+      }),
+    ).toBe(false);
+  });
+});

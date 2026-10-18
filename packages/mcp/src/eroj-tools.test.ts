@@ -36,9 +36,9 @@ describe("get_ero (FR-13)", () => {
     expect(result.structuredContent?.allowed).toEqual([
       "butono",
       "ikono",
+      "titolo",
       "insigno",
       "avizo",
-      "dialogo",
     ]);
   });
 });
@@ -95,6 +95,8 @@ describe("get_ero brief (Spec 007 A8)", () => {
     "sxaltilo",
     "tabelo",
     "tekstareo",
+    "teksto",
+    "titolo",
   ])(
     `%s stays under the ceiling of ${BRIEF_LIMIT} (ceil(bytes / 3) of the compact JSON)`,
     async (name) => {
@@ -152,6 +154,9 @@ describe("suggest_ero (FR-13)", () => {
       "toggle",
       "table",
       "multi-line",
+      "running-text",
+      "section-heading",
+      "page-title",
     ]);
   });
 });

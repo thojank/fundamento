@@ -121,6 +121,12 @@ const isIcon = (skemo: Skemo): boolean => hostOf(skemo.a11y.role) === "icon";
 /** A separator (Spec 014 ②, D-06): the control is the line. */
 const isSeparator = (skemo: Skemo): boolean => hostOf(skemo.a11y.role) === "separator";
 
+/** A heading (Spec 014 ③, D-04): the text is the control, its level spoken. */
+const isHeading = (skemo: Skemo): boolean => hostOf(skemo.a11y.role) === "heading";
+
+/** A paragraph (Spec 014 ③, D-04): running text in a type role, inline where it is code. */
+const isParagraph = (skemo: Skemo): boolean => hostOf(skemo.a11y.role) === "paragraph";
+
 /**
  * A link that floats above the page (Spec 014 ②, D-07): the skip link — a link whose surface has
  * a layer. Celo knowledge: the layer says it lies over the page, so it is fixed at the start of
@@ -664,6 +670,28 @@ const separatorStructure: string = [
 ].join("\n");
 
 /**
+ * Layout of a heading (Spec 014 ③, D-04), keywords and 0 only: the host is a block that takes the
+ * width of its container (Uzo size container, wrap allowed); the text carries no margin of its
+ * own (spacing-owned-by-container) and breaks a word longer than the line, so nothing is clipped.
+ */
+const headingStructure: string = [
+  ":host { display: block; }",
+  ':where([part="text"]) { display: block; box-sizing: border-box; margin: 0; overflow-wrap: anywhere; }',
+].join("\n");
+
+/**
+ * Layout of a paragraph (Spec 014 ③, D-04), keywords and 0 only: body, caption and kicker are
+ * blocks that wrap and carry no margin (spacing-owned-by-container); inline code lies in the
+ * sentence around it, so the host and the control are inline for that kind.
+ */
+const paragraphStructure: string = [
+  ":host { display: block; }",
+  ':host([kind="code"]) { display: inline; }',
+  ':where([part="control"]) { display: block; box-sizing: border-box; margin: 0; overflow-wrap: anywhere; }',
+  ':where([part="control"][data-kind="code"]) { display: inline; }',
+].join("\n");
+
+/**
  * Layout of a skip link (Spec 014 ②, D-07), keywords and 0 only, on top of a control's: the link
  * is fixed at the start of the viewport (the writing direction mirrors it) on its layer, and
  * clipped from sight until it has the focus — a keyboard user finds it first, nobody else sees
@@ -1060,28 +1088,34 @@ export function stylesheetOf(skemo: Skemo, uzo?: Uzo): string {
       ? iconStructure
       : isSeparator(skemo)
         ? separatorStructure
-        : isText(skemo)
-          ? textStructure(bordered)
-          : isStatus(skemo)
-            ? statusStructure(skemo)
-            : isMeter(skemo)
-              ? meterStructure
-              : isLight(skemo)
-                ? lightStructure(skemo)
-                : isTabs(skemo)
-                  ? tabsStructure
-                  : isField(skemo)
-                    ? fieldStructure(disables, isSelect(skemo), isTextarea(skemo))
-                    : isGroup(skemo)
-                      ? groupStructure(disables, skemo.parts["required-mark"] !== undefined)
-                      : isToggle(skemo)
-                        ? toggleStructure(
-                            disables,
-                            uzo?.layout.wrap !== undefined && uzo.layout.wrap !== "never",
-                            skemo.slots.some((slot) => slot.default !== true && slot.text === true),
-                            skemo.parts["required-mark"] !== undefined,
-                          )
-                        : structure(uzo?.layout.wrap === "with-text", disables, bordered);
+        : isHeading(skemo)
+          ? headingStructure
+          : isParagraph(skemo)
+            ? paragraphStructure
+            : isText(skemo)
+              ? textStructure(bordered)
+              : isStatus(skemo)
+                ? statusStructure(skemo)
+                : isMeter(skemo)
+                  ? meterStructure
+                  : isLight(skemo)
+                    ? lightStructure(skemo)
+                    : isTabs(skemo)
+                      ? tabsStructure
+                      : isField(skemo)
+                        ? fieldStructure(disables, isSelect(skemo), isTextarea(skemo))
+                        : isGroup(skemo)
+                          ? groupStructure(disables, skemo.parts["required-mark"] !== undefined)
+                          : isToggle(skemo)
+                            ? toggleStructure(
+                                disables,
+                                uzo?.layout.wrap !== undefined && uzo.layout.wrap !== "never",
+                                skemo.slots.some(
+                                  (slot) => slot.default !== true && slot.text === true,
+                                ),
+                                skemo.parts["required-mark"] !== undefined,
+                              )
+                            : structure(uzo?.layout.wrap === "with-text", disables, bordered);
   // A skip link adds its place above the page to a control's structure (Spec 014 ②, D-07).
   const floating = isSkip(skemo) ? `\n${skipStructure}` : "";
   return `${base}${floating}\n${[...tokenRules, ...undrawn].join("\n")}\n`;
@@ -1134,7 +1168,11 @@ function selectorOf(
   // An icon (Spec 014 ②): the glyph is the control, it carries the box and the colour; a
   // separator: the control is the line.
   if (isIcon(skemo)) return `:where([part="glyph"]${data})`;
-  if (isText(skemo) || isSeparator(skemo)) return `:where([part="control"]${data})`;
+  // A heading (Spec 014 ③): its text is the control; a paragraph: the control is the text.
+  if (isHeading(skemo)) return `:where([part="text"]${data})`;
+  if (isText(skemo) || isSeparator(skemo) || isParagraph(skemo)) {
+    return `:where([part="control"]${data})`;
+  }
   const state = STATE_SELECTORS[combination[STATE_KEY] ?? "rest"] ?? "";
   if (isField(skemo)) return fieldPartSelector(part, property, data, state, isSelect(skemo));
   if (isToggle(skemo)) return togglePartSelector(part, property, data, state);
@@ -1291,11 +1329,12 @@ export function stylesheetInventory(moduleText: string): ParityItem {
     // toggle (Spec 010 ②: the size of a checkbox keys only its label and its check mark, never
     // the box itself — the box is the mark plus its border).
     // A light-DOM host (Spec 011 ④, E10) writes the combination on itself: fm-tabelo[data-…].
-    // An icon (Spec 014 ②): its glyph is its control.
+    // An icon (Spec 014 ②): its glyph is its control; a heading (Spec 014 ③): its text.
     if (
       !selector.includes('[part="control"]') &&
       !selector.includes('[part="field"]') &&
       !selector.includes('[part="glyph"]') &&
+      !selector.includes('[part="text"]') &&
       !selector.trim().startsWith("fm-")
     )
       continue;

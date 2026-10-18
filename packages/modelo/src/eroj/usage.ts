@@ -906,6 +906,34 @@ export const USAGE_ENFORCERS: Readonly<Record<string, UsageEnforcer>> = {
   // a status icon without a name breaks the constraint of the Skemo (prop:label filled), a button
   // with only an icon and no label breaks label-required.
   "icon-meaning-named": textRule,
+  // Spec 014 ③ (G8, plan ③ D-03): over the headings of a list no level jumps down over a step —
+  // a check across the instances (like one-primary-per-container), read from the Uzo's content
+  // entry with the kind levels-in-order and the prop it names (level).
+  "heading-levels-in-order": ({ modelo, regulo, instances, eroOf }) => {
+    let previous: number | undefined;
+    const findings: UsageFinding[] = [];
+    instances.forEach((instance, index) => {
+      const ero = eroOf(instance);
+      if (ero === undefined || !applies(regulo, ero)) return;
+      const rule = ero.uzo?.content.find(
+        (entry) => entry.regulo === regulo.name && entry.check.kind === "levels-in-order",
+      );
+      if (rule === undefined) return;
+      const of = rule.of ?? "prop:level";
+      const level = Number(textOfSource(instance, of, ero.skemo) ?? Number.NaN);
+      if (!Number.isFinite(level)) return;
+      if (previous !== undefined && level > previous + 1) {
+        const example = approvedLabel(modelo, regulo, instance.lingvo ?? DEFAULT_LINGVO, eroOf, of);
+        findings.push({
+          instance: [index],
+          message: `Instance ${index} of ${ero.ero.name} is a heading of level ${level} after a level ${previous}: a level is skipped.`,
+          suggestion: `Give it level ${previous + 1}, or add the heading of the level in between${example === undefined ? "" : ` (the approved example counts 1, 2, 3)`}. ${regulo.statement}`,
+        });
+      }
+      previous = level;
+    });
+    return findings;
+  },
 };
 
 function applies(regulo: Regulo, ero: LoadedEro): boolean {

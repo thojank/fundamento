@@ -231,6 +231,8 @@ describe("the scheme eroj (Spec 008 T009)", () => {
       "sxaltilo",
       "tabelo",
       "tekstareo",
+      "teksto",
+      "titolo",
     ]);
     expect(eroj.map((concept) => concept.term).sort()).toEqual([
       "Apartigilo",
@@ -253,6 +255,8 @@ describe("the scheme eroj (Spec 008 T009)", () => {
       "Sxaltilo",
       "Tabelo",
       "Tekstareo",
+      "Teksto",
+      "Titolo",
     ]);
     for (const concept of eroj) {
       expect(concept.broader).toEqual(["#Ero"]);

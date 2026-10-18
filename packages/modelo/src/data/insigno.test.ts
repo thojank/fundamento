@@ -31,7 +31,7 @@ const suggest = (goal: string) => {
 const INTENTS = ["neutral", "info", "success", "warning", "danger"];
 
 describe("insigno in the repo Modelo (section ③, G1, G2)", () => {
-  it("lives in data/eroj/insigno/skemo.json, among twenty Eroj", () => {
+  it("lives in data/eroj/insigno/skemo.json, among twenty-two Eroj", () => {
     expect(insigno?.file).toBe("modelo/data/eroj/insigno/skemo.json");
     expect(modelo.eroj.map((entry) => entry.ero.name)).toEqual([
       "apartigilo",
@@ -54,6 +54,8 @@ describe("insigno in the repo Modelo (section ③, G1, G2)", () => {
       "sxaltilo",
       "tabelo",
       "tekstareo",
+      "teksto",
+      "titolo",
     ]);
   });
 
@@ -273,13 +275,13 @@ describe("check_usage and suggest_ero of the badge (G6, G7, Gvidanto)", () => {
     expect(judge("Diese Version wird gerade geprüft")).toEqual([["badge-text-short", "error"]]);
   });
 
-  it("'Badge für den Status Entwurf' and 'a tag next to the title' are the insigno", () => {
+  it("'Badge für den Status Entwurf' and 'a tag beside the row' are the insigno", () => {
     expect(suggest("Badge für den Status Entwurf").suggestion).toEqual({
       ero: "insigno",
       props: {},
     });
-    expect(suggest("a tag next to the title").suggestion).toEqual({ ero: "insigno", props: {} });
-    expect(suggest("a tag next to the title").regulo?.name).toBe("badge-text-short");
+    expect(suggest("a tag beside the row").suggestion).toEqual({ ero: "insigno", props: {} });
+    expect(suggest("a tag beside the row").regulo?.name).toBe("badge-text-short");
   });
 
   it("a dot alone and a brand badge stop with the insigno's words; 'Anteil in Prozent' is not covered yet", () => {

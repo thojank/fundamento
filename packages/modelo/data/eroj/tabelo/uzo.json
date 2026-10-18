@@ -160,6 +160,10 @@
         {
           "ero": "ikono",
           "kialo": "The sort arrow in a sortable head cell is an ikono (sort-ascending, sort-descending), because the direction is a sign of the Ikonaro the Aspekto draws; aria-sort says it aloud."
+        },
+        {
+          "ero": "titolo",
+          "kialo": "The caption of a table names the rows, visible above them; where the section around the table has a heading, that is a titolo."
         }
       ],
       "never": [],

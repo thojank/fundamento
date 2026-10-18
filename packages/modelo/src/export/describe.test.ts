@@ -65,7 +65,8 @@ describe("countWord", () => {
     // Spec 014 ②: twenty (the three Grundbausteine); beyond that the number stands.
     [18, "eighteen"],
     [20, "twenty"],
-    [21, "21"],
+    [22, "twenty-two"],
+    [23, "23"],
     [30, "30"],
   ])("%i -> %s", (count, word) => {
     expect(countWord(count)).toBe(word);

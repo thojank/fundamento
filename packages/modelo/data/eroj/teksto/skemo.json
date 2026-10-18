@@ -1,0 +1,185 @@
+{
+  "ero": {
+    "id": "ero_01M5616FMN3GPB1J421PMMKBZ2",
+    "name": "teksto",
+    "skemo": "ske_01M5616G0WKZNS96ANV6PG3A7R",
+    "description": "Running text: a paragraph, a caption, a kicker or inline code, set in the type roles of the system; its rank (emphasis) is the colour of the text, never a status."
+  },
+  "skemo": {
+    "id": "ske_01M5616G0WKZNS96ANV6PG3A7R",
+    "ero": "ero_01M5616FMN3GPB1J421PMMKBZ2",
+    "props": [
+      {
+        "name": "kind",
+        "kind": "enum",
+        "values": [
+          "body",
+          "caption",
+          "kicker",
+          "code"
+        ],
+        "default": "body",
+        "description": "body is a paragraph (typography.body.<size>), caption a short text under a figure or a field (typography.caption), kicker a word over a heading (typography.kicker), code a piece of code inside a sentence (typography.code, spoken as code)."
+      },
+      {
+        "name": "size",
+        "kind": "enum",
+        "values": [
+          "1",
+          "2"
+        ],
+        "default": "1",
+        "description": "The size of a paragraph, typography.body.1 or body.2; caption, kicker and code have one size."
+      },
+      {
+        "name": "emphasis",
+        "kind": "enum",
+        "values": [
+          "high",
+          "medium",
+          "low"
+        ],
+        "default": "high",
+        "description": "The rank of the text: high is color.text.default, medium color.text.subtle, low color.text.muted. A rank, no status — a status is an insigno or an avizo (Spec 007 F1: a status has its own Ero)."
+      }
+    ],
+    "states": [
+      "rest"
+    ],
+    "slots": [
+      {
+        "name": "label",
+        "default": true,
+        "text": true
+      }
+    ],
+    "parts": {
+      "text": {
+        "typography": {
+          "by": [
+            "kind",
+            "size"
+          ]
+        },
+        "color": {
+          "by": [
+            "emphasis"
+          ]
+        }
+      }
+    },
+    "bindings": [
+      {
+        "part": "text",
+        "property": "typography",
+        "when": {
+          "kind": "body",
+          "size": "1"
+        },
+        "token": "typography.body.1"
+      },
+      {
+        "part": "text",
+        "property": "typography",
+        "when": {
+          "kind": "body",
+          "size": "2"
+        },
+        "token": "typography.body.2"
+      },
+      {
+        "part": "text",
+        "property": "typography",
+        "when": {
+          "kind": "caption",
+          "size": "1"
+        },
+        "token": "typography.caption"
+      },
+      {
+        "part": "text",
+        "property": "typography",
+        "when": {
+          "kind": "kicker",
+          "size": "1"
+        },
+        "token": "typography.kicker"
+      },
+      {
+        "part": "text",
+        "property": "typography",
+        "when": {
+          "kind": "code",
+          "size": "1"
+        },
+        "token": "typography.code"
+      },
+      {
+        "part": "text",
+        "property": "color",
+        "when": {
+          "emphasis": "high"
+        },
+        "token": "color.text.default"
+      },
+      {
+        "part": "text",
+        "property": "color",
+        "when": {
+          "emphasis": "medium"
+        },
+        "token": "color.text.subtle"
+      },
+      {
+        "part": "text",
+        "property": "color",
+        "when": {
+          "emphasis": "low"
+        },
+        "token": "color.text.muted"
+      }
+    ],
+    "a11y": {
+      "role": "paragraph",
+      "name": [
+        "slot:label"
+      ],
+      "states": {},
+      "keys": []
+    },
+    "constraints": [
+      {
+        "when": {
+          "size": "2"
+        },
+        "allowed": {
+          "kind": [
+            "body"
+          ]
+        },
+        "kialo": "The second size belongs to the body text alone: caption, kicker and code have one role each (typography.caption, kicker, code), so a size 2 falls back to 1 and the kind stays."
+      }
+    ],
+    "goals": [
+      {
+        "goal": "running-text",
+        "keywords": {
+          "en": [
+            "running-text",
+            "body-text",
+            "caption",
+            "kicker",
+            "inline-code"
+          ],
+          "de": [
+            "fließtext",
+            "lauftext",
+            "bildunterschrift",
+            "kicker"
+          ]
+        },
+        "props": {}
+      }
+    ]
+  }
+}

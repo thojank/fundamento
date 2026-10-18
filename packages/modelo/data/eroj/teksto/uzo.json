@@ -1,0 +1,81 @@
+{
+  "$schema": "../../../schema/modelo.schema.json#/$defs/UzoFile",
+  "uzo": {
+    "id": "uzo_01M5616GCWP8C5HZTVAGHGPC97",
+    "ero": "ero_01M5616FMN3GPB1J421PMMKBZ2",
+    "skemo": "ske_01M5616G0WKZNS96ANV6PG3A7R",
+    "purpose": "Sets running text in the system's type roles: body, caption, kicker, inline code.",
+    "instead": [
+      {
+        "goal": "heading",
+        "keywords": {
+          "en": ["heading", "headline", "subheading"],
+          "de": ["überschrift", "titel"]
+        },
+        "ero": "titolo",
+        "kialo": "A text that heads a section is a heading with a level, because a screen reader lists the levels as the table of contents and a bold paragraph is not in it; that is the titolo."
+      },
+      {
+        "goal": "link-in-text",
+        "keywords": {
+          "en": ["link", "hyperlink", "link-text"],
+          "de": ["link", "verweis", "verlinkt"]
+        },
+        "ero": "ligilo",
+        "kialo": "A reference inside running text is a link, because a reader follows it from the sentence; the ligilo inline takes the text's role and breaks with it."
+      },
+      {
+        "goal": "status-word",
+        "keywords": {
+          "en": ["status", "state-word"],
+          "de": ["status", "statuswort"]
+        },
+        "ero": "insigno",
+        "kialo": "A status in one to three words beside a thing is a badge, because a status is read at a glance and never by colour alone; that is the insigno."
+      }
+    ],
+    "boundary": [
+      {
+        "case": "rich-text",
+        "action": "ask-human",
+        "keywords": {
+          "en": ["markdown", "rich", "formatted"],
+          "de": ["markdown", "formatiert", "formatierung"]
+        },
+        "kialo": "Text with its own structure — lists, emphasis, links written as Markdown — is content with a renderer, because every mark in it asks for an Ero of its own; Markdown follows in a later stage (Etappe 6), until then a person decides how the text is set."
+      }
+    ],
+    "composes": {
+      "containers": [
+        {
+          "name": "page-section",
+          "kialo": "A section of a page is its heading and the text under it, because the text is what the heading announces."
+        }
+      ],
+      "with": [
+        {
+          "ero": "ligilo",
+          "kialo": "A link stands inside the text where the thought needs it, because a reader follows it from the sentence; the ligilo inline takes the role of the text around it."
+        }
+      ],
+      "never": [],
+      "spacing": {
+        "owner": "container",
+        "regulo": "spacing-owned-by-container"
+      }
+    },
+    "slots": {
+      "label": {
+        "accepts": ["text"],
+        "max": 1,
+        "required": true,
+        "nesting": 0
+      }
+    },
+    "layout": {
+      "size": "container",
+      "wrap": "allowed"
+    },
+    "content": []
+  }
+}

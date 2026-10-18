@@ -187,6 +187,8 @@ describe("list_eroj and the brief (A5, acceptance 1)", () => {
       "sxaltilo",
       "tabelo",
       "tekstareo",
+      "teksto",
+      "titolo",
     ]);
     const full = await output<{ skemo: { a11y: { role: string } }; uzo?: { purpose: string } }>(
       client,

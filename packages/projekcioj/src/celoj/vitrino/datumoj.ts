@@ -559,6 +559,15 @@ export function eroMarkup(entry: LoadedEro, ikonaro: readonly VitrinoIkono[] = [
       const attributes = Object.entries(combination)
         .map(([key, value]) => ` ${key}="${value}"`)
         .join("");
+      // A required enum that keys no part (Spec 014 ③, plan ③ D-06: the level of a heading) takes
+      // the value the row's size implies — the Vitrino shows every size once, each at a level
+      // whose default size it is, so the page keeps its order of headings.
+      const duties = entry.skemo.props
+        .filter(
+          (prop) => prop.required === true && prop.kind === "enum" && !keys.includes(prop.name),
+        )
+        .map((prop) => ` ${prop.name}="${vitrinoDutyValue(prop, combination)}"`)
+        .join("");
       // An Ero whose parts no prop keys has one row (Spec 011 ⑤): its head says rest.
       const label = vitrinoLabelOf(combination) || "rest";
       const id = `fm-vitrino-${entry.ero.name}-${Object.values(combination).join("-")}`;
@@ -573,7 +582,7 @@ export function eroMarkup(entry: LoadedEro, ikonaro: readonly VitrinoIkono[] = [
       const cells = [undefined, ...columns]
         .map(
           (column) =>
-            `<td>${opener}<${tag}${identity}${attributes}${examples}${required}${chosen}${column === undefined ? "" : ` ${column}`}>${icons}${named ? label : ""}${optionTexts(entry)}${slotTexts(entry, column, combination)}${actions}${light}</${tag}></td>`,
+            `<td>${opener}<${tag}${identity}${attributes}${duties}${examples}${required}${chosen}${column === undefined ? "" : ` ${column}`}>${icons}${named ? label : ""}${optionTexts(entry)}${slotTexts(entry, column, combination)}${actions}${light}</${tag}></td>`,
         )
         .join("");
       return `<tr><th scope="row">${label}</th>${cells}</tr>`;
@@ -587,6 +596,23 @@ export function eroMarkup(entry: LoadedEro, ikonaro: readonly VitrinoIkono[] = [
       : `<tr><th scope="row">${VITRINO_UNKNOWN_LABEL}</th><td><${tag}>${VITRINO_UNKNOWN_LABEL}<span slot="value-text">${VITRINO_UNKNOWN_TEXT}</span></${tag}></td></tr>`;
   const heads = ["rest", ...columns].map((column) => `<th scope="col">${column}</th>`).join("");
   return `<table><caption>${tag}, jede Kombination der Skemo</caption><thead><tr><th scope="col">Kombination</th>${heads}</tr></thead><tbody>${rows}${unknown}</tbody></table>`;
+}
+
+/**
+ * The value of a required enum prop that keys no part, for one row (Spec 014 ③, plan ③ D-06):
+ * the level of a heading follows the size of the row (display-* is the page, level 1; headline-n
+ * the level n), so the Vitrino's headings stay in order; any other duty takes its first value.
+ */
+function vitrinoDutyValue(
+  prop: LoadedEro["skemo"]["props"][number],
+  combination: Readonly<Record<string, string>>,
+): string {
+  const size = combination.size;
+  if (prop.name === "level" && size !== undefined) {
+    const level = size.startsWith("display-") ? "1" : (size.split("-")[1] ?? "1");
+    return prop.values?.includes(level) === true ? level : (prop.values?.[0] ?? "");
+  }
+  return prop.values?.[0] ?? "";
 }
 
 /** The grid of every Ero of the Modelo, by name (Spec 008, D-12); the icon shows the Ikonaro. */

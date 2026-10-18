@@ -190,6 +190,8 @@ describe("list_eroj and the brief (acceptance 1)", () => {
       "sxaltilo",
       "tabelo",
       "tekstareo",
+      "teksto",
+      "titolo",
     ]);
     const brief = await output<Brief>(client, "get_ero", { name: "markobutono", brief: true });
     expect(brief.purpose).toBe(markobutono.purpose);

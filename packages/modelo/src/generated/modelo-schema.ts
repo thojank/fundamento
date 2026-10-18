@@ -1126,6 +1126,9 @@ export interface UzoContent {
         kind: "distinct";
       }
     | {
+        kind: "levels-in-order";
+      }
+    | {
         kind: "max-entries";
         count: number;
       }

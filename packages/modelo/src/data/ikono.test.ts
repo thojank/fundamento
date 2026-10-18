@@ -30,9 +30,9 @@ const suggest = (goal: string) => {
 };
 
 describe("ikono in the repo Modelo (section ②, G1, G2, G3)", () => {
-  it("lives in data/eroj/ikono/skemo.json, one of twenty Eroj", () => {
+  it("lives in data/eroj/ikono/skemo.json, one of twenty-two Eroj", () => {
     expect(ikono?.file).toBe("modelo/data/eroj/ikono/skemo.json");
-    expect(modelo.eroj).toHaveLength(20);
+    expect(modelo.eroj).toHaveLength(22);
     expect(modelo.eroj.map((entry) => entry.ero.name)).toContain("ikono");
   });
 
@@ -236,8 +236,8 @@ describe("the Ikonaro and the Eroj that compose the ikono (G6)", () => {
 });
 
 describe("suggest_ero of the icon (Gvidanto)", () => {
-  it("'Piktogramm neben der Überschrift' is the ikono; 'ein Symbol' too", () => {
-    expect(suggest("Piktogramm neben der Überschrift").suggestion).toEqual({
+  it("'Piktogramm vor dem Wort' is the ikono; 'ein Symbol' too", () => {
+    expect(suggest("Piktogramm vor dem Wort").suggestion).toEqual({
       ero: "ikono",
       props: {},
     });
