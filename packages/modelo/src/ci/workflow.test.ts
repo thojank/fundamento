@@ -65,10 +65,7 @@ const UNIT_STEPS: ReadonlyArray<readonly [name: string, run: string]> = [
 /** The job of the Projekcioj suite: two Vitest shards (every Celo builds the whole Modelo). */
 const PROJEKCIOJ_STEPS: ReadonlyArray<readonly [name: string, run: string]> = [
   ["Build", "pnpm build"],
-  [
-    "Test",
-    "pnpm --filter @fundamento/projekcioj exec vitest run --shard=${{ matrix.shard }}/2",
-  ],
+  ["Test", "pnpm --filter @fundamento/projekcioj exec vitest run --shard=${{ matrix.shard }}/2"],
 ];
 
 /** The job of the rendered Eroj: the Playwright suite in two shards (fullyParallel inside). */

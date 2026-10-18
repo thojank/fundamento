@@ -31,11 +31,17 @@ jobs:
   # Nachlese 3 W1 (Spec 011 ⑤ B-9, O-21 fortgesetzt): three jobs side by side instead of one row.
   # The one job ran the Playwright suite of the Eroj beside the spawning e2e files of modelo
   # (turbo runs the packages' tests in parallel): the hook of validate.test.ts timed out under
-  # that load (run 38966614433), and the wall clock stood at 16 to 19 minutes. Now the unit tests
-  # run without the Eroj, the Eroj in two Playwright shards, the rendered checks on their own;
-  # no timeout was raised. Measured before/after in specs/012-nachlese-3/plan.md ②.
-  unit:
-    name: Build, test, lint and Modelo checks
+  # that load (run 38966614433), and the wall clock stood at 16 to 19 minutes. Measured
+  # before/after in specs/012-nachlese-3/plan.md ②.
+  #
+  # Spec 015 ② (O-4 of plan ①, B-12): the job of the unit tests grew with every Ero past the
+  # 12-minute line (run 39126240312: 12 min 07 s, its Test step 10 min 24 s; the Projekcioj suite
+  # took 622 s of it beside modelo, cli and mcp on the four cores of the runner). It is cut in
+  # three: the checks (build, perf, lint, the Modelo checks, release — about two minutes), the
+  # unit tests of every package but Projekcioj and Eroj, and the Projekcioj suite in two Vitest
+  # shards, the cut the Eroj got with W1. Measured before/after in specs/015-eroj-runde-4/plan.md ②.
+  checks:
+    name: Build, lint and Modelo checks
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -62,11 +68,7 @@ jobs:
       - name: Build
         run: pnpm build
 
-      # Every package but the Eroj: their Playwright suite has the job eroj (W1).
-      - name: Test
-        run: pnpm turbo run test --filter=!@fundamento/eroj
-
-      # AK-07 timings alone, after the parallel test run (Spec 001 D-17).
+      # AK-07 timings alone, in a job without a test run beside them (Spec 001 D-17).
       - name: Perf
         run: pnpm perf
 
@@ -100,6 +102,70 @@ jobs:
       # packed as a dry run. A broken release path turns red here, not in the maintainer's run.
       - name: "Check: Release"
         run: pnpm check:release
+
+  unit:
+    name: Unit tests (every package but Projekcioj and Eroj)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
+
+      # A new package joins this job by itself: the filter names what runs elsewhere, not what
+      # runs here. The Eroj have the job eroj (W1), the Projekcioj the job projekcioj.
+      - name: Test
+        run: pnpm turbo run test --filter=!@fundamento/eroj --filter=!@fundamento/projekcioj
+
+  projekcioj:
+    name: Unit tests (Projekcioj, shard ${{ matrix.shard }} of 2)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
+
+      # Every Celo test builds and validates the whole Modelo (seconds each, 258 s for the suite on
+      # ten cores): this shard of the suite, sharded by Vitest over its files.
+      - name: Test
+        run: pnpm --filter @fundamento/projekcioj exec vitest run --shard=${{ matrix.shard }}/2
 
   eroj:
     name: Rendered Eroj (Playwright, shard ${{ matrix.shard }} of 2)

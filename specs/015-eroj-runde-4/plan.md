@@ -84,7 +84,38 @@ Zwei Sätze aus der Rolle `navigation` mit den Teilen `ellipsis`/`separator`; di
 
 ## ② Eingabe
 
-Folgt in PR ②.
+**Branch:** `261018-spec-015-eingabe-f027c6` (von `main` @ `7a05c6e`, ① gemergt als #75) · **Datum:** 2026-10-18 · **Stand:** im Bau.
+
+### Zusammenfassung
+
+1. **CI-Aufteilung (O-4 aus ①, B-12; D-01):** der Job „Build, test, lint and Modelo checks“ wird drei Jobs — `checks` (Build, Perf, Lint, die sieben Modelo-Checks, Release), `unit` (die Vitest-Suiten jedes Pakets außer Projekcioj und Eroj) und `projekcioj` (die Vitest-Suite der Projekcioj in zwei Shards). Dazu baut `buildProjections` der Eroj-Specs einmal je Prozess statt einmal je Spec-Datei (D-02): der Loader eines Playwright-Shards verbrachte drei bis fünf Minuten mit 36 Bauläufen, bevor der erste Test lief. Kein Timeout angehoben (Regel 0.4).
+2. **`alsxutilo`** folgt in diesem PR (Spec ②).
+
+### Entwurfsentscheidungen
+
+#### D-01 O-4: fünf CI-Jobs statt drei (Regel 0.1: der Schnitt von Nachlese 3 W1, fortgesetzt)
+
+**Befund (B-12 aus ①):** Lauf 39127146926 (`1e9e5f2`, grün) — Job `unit` **11 min 20 s**, davon der Schritt „Test“ 10 min 24 s; die vier Vitest-Suiten liefen nebeneinander auf den vier Kernen des Runners: mcp 30 Dateien 224 s (Import 74 %), cli 5 Dateien 229 s, modelo 154 Dateien 315 s, **projekcioj 16 Dateien 622 s** (Tests 83 %: jeder Celo-Test baut und validiert das ganze Modelo). Lokal, allein, zehn Kerne: mcp 26 s, cli 42 s, modelo 51 s, projekcioj 258 s. Die Projekcioj-Suite ist die Wanduhr des Jobs und wächst mit jedem Ero (⑤ auf `main`: 10 min 44 s; ① rot 12 min 07 s). Perf, Lint und die Checks dahinter brauchen zusammen unter einer Minute.
+
+**Schnitt:** `checks` — Install, Build, `pnpm perf` (allein, ohne Testlauf daneben: Spec 001 D-17 bleibt gewahrt), `pnpm lint`, `check:vortaro-lint|parity|regularo|mankoj|alirebleco|clean-room|ikonaro`, `check:release`; `unit` — Install, Build, `pnpm turbo run test --filter=!@fundamento/eroj --filter=!@fundamento/projekcioj` (der Filter nennt, was anderswo läuft: ein neues Paket — Spec 016 bringt `packages/agordilo` — läuft hier von selbst mit); `projekcioj` — Install, Build, `pnpm --filter @fundamento/projekcioj exec vitest run --shard=N/2` als Matrix (`fail-fast: false`; außerhalb von turbo baut die Vitest-Konfiguration des Pakets den Workspace zuerst, wie bisher bei jedem Paketlauf). `eroj` und `rendered-checks` unverändert; `PLAYWRIGHT_ENGINES` nur an den gerenderten Jobs; `timeout-minutes: 15` je Job. `workflow.test.ts` pinnt die fünf Jobs mit ihren Schritten, beide Matrizen, die Engines, das Budget; der Skript `check` der Wurzel (eine Reihe für lokal) ist unverändert. Vitest verteilt die Dateien eines Shards nach einem Hash ihres Pfades (deterministisch, nicht nach Dauer): die Balance der beiden Shards steht in der Messung; fällt eine Datei (die Plugin-Tests, 242 Tests) mit einer zweiten schweren in denselben Shard, ist ein dritter Shard der nächste Schritt, kein Timeout.
+
+#### D-02 `buildProjections` einmal je Prozess (Regel 0.2: kleinste Änderung mit Wirkung)
+
+Jede der 36 Spec-Dateien der Eroj ruft `await buildProjections()` auf Modulebene: alle Celoj von Kern + komuna + ekzemplo in ein Temp-Verzeichnis. Playwright importiert jede Datei einmal zum Sammeln der Tests (im Loader-Prozess) und noch einmal in jedem Worker — bisher je ein Bau je Import. Im Lauf 39127146926 stand der Loader von Shard 2 von 12:25:41 bis 12:30:40 ohne eine Zeile Ausgabe (Shard 1: drei Minuten), die Tests selbst brauchten danach 1 min 42 s (Shard 1) und 4 min 09 s (Shard 2). `serve.ts` merkt sich das Promise des Baus je Prozess; ein fehlgeschlagener Bau wird vom nächsten Aufrufer wiederholt. Der Bau ist für jede Datei derselbe und jede Datei liest ihn nur. `serve.spec.ts` pinnt: zweimal aufgerufen, dasselbe Verzeichnis und dieselbe Eingabe.
+
+**Messung vorher** (Lauf 39127146926, `1e9e5f2`, PR-Lauf, Wanduhr = längster Job): **11 min 20 s** — `unit` 11:20, `eroj` Shard 1 5:53 / Shard 2 10:21, `rendered-checks` 8:25. **Nachher:** der PR-Lauf dieses Branches, Zahlen in der Zeile „CI“ der Messungen von tasks ②.
+
+### Abweichungen von der Spec
+
+(folgen mit `alsxutilo`)
+
+### Befunde / Mankoj
+
+- **B-1 (CI, behoben mit D-02)** Die Spec-Dateien der Eroj bauten beim Import alle Celoj neu; der Loader eines Shards brauchte drei bis fünf Minuten, bevor der erste Test lief, und jeder Worker baute je Datei erneut. Das war die Hälfte der Dauer des Jobs `eroj`, nicht die Tests.
+
+### Offen (für den Maintainer)
+
+- **O-5 Balance der Projekcioj-Shards:** Vitest teilt nach Pfad-Hash. Liegen die beiden schweren Dateien (Plugin- und Figma-Tests, 242 und 128 Tests) im selben Shard, schlägt P0 einen dritten Shard vor — oder den Schnitt nach Celo (ein Shard „figma“, einer „alles andere“) statt nach Hash. Vorschlag: drei Shards, sobald ein Shard über 6 min liegt. Zahlen in tasks ②.
 
 ## ③ Inhalt
 

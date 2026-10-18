@@ -33,7 +33,25 @@
 
 ## ② Eingabe
 
-Folgt in PR ②.
+**Branch:** `261018-spec-015-eingabe-f027c6` (von `main` @ `7a05c6e`) · Aufgaben ② zählen ab T1301.
+
+### A – Rot zuerst
+- [x] **T1301 CI (O-4)** `workflow.test.ts` erwartet fünf Jobs (`checks`, `unit`, `projekcioj` × 2, `eroj` × 2, `rendered-checks`), `serve.spec.ts` erwartet einen Bau je Prozess. Rot in `f847be6` (workflow.test 8 Tests, serve.spec 1).
+
+### B – Grün
+- [x] **T1302 CI (O-4)** `ci.yml` in fünf Jobs (plan ② D-01), `serve.ts` baut einmal je Prozess (D-02).
+
+### C – Abschluss
+- [ ] **T1309 Messungen** unten; Bericht im PR.
+
+### Messungen
+
+| Was | Wert |
+|---|---|
+| Commits ② | CI rot `f847be6`, grün (Zeile folgt) |
+| Tests lokal (CI-Commit) | workflow.test 36 grün; Eroj-Playwright in Chromium (Zeile folgt) |
+| CI vorher | Lauf 39127146926 (`1e9e5f2`): Wanduhr 11:20 — `unit` 11:20 (Test 10:24: projekcioj 622 s, modelo 315 s, cli 229 s, mcp 224 s), `eroj` 5:53 / 10:21 (Loader je 3–5 min vor dem ersten Test), `rendered-checks` 8:25 |
+| CI nachher | (Lauf nach dem Push) |
 
 ## ③ Inhalt
 
