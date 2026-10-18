@@ -104,6 +104,13 @@ type PartNode =
   | "file-name-*"
   | "file-size-*"
   | "remove-*"
+  // A card (Spec 015 ③, plan ③ D-05): the surface holds the media (the stand-in image with its
+  // word) and the body — heading, content, the meta row with the badge, the actions row with
+  // two stand-ins.
+  | "body"
+  | "meta"
+  | "media"
+  | "media-text"
   | "listbox"
   | "suggestion-*"
   | "suggestions-*"
@@ -656,6 +663,23 @@ const STRUCTURE_BINDINGS: Readonly<Record<string, Readonly<Record<string, readon
     "file-size.typography": typographyOf("file-size-*"),
     "remove.size": [{ node: "remove-*", fields: ["width", "height"] }],
   },
+  // A card (Spec 015 ③, plan ③ D-05): the surface takes fill, radius and the border (colour,
+  // width) — its shadow is bound as an effect (variant.shadow) — and clips the media at its
+  // corners; the body carries the box's padding on every side and its gap between heading,
+  // content, meta and actions; the content is a text in its colour and role, which the word of
+  // the stand-in image takes too; the meta row its gap (the actions row binds actions.gap as a
+  // dialog's does). The heading is the label property (BINDINGS).
+  card: {
+    "surface.fill": [{ node: "surface", fields: ["fills"], paint: true }],
+    "surface.radius": [{ node: "surface", fields: ["cornerRadius"] }],
+    "border.color": [{ node: "surface", fields: ["strokes"], paint: true }],
+    "border.width": [{ node: "surface", fields: ["strokeWeight"] }],
+    "content.color": [{ node: "content", fields: ["fills"], paint: true }],
+    "content.typography": [...typographyOf("content"), ...typographyOf("media-text")],
+    "meta.gap": [{ node: "meta", fields: ["itemSpacing"] }],
+    "box.inline-padding": [{ node: "body", fields: [...PADDINGS] }],
+    "box.gap": [{ node: "body", fields: ["itemSpacing"] }],
+  },
   breadcrumb: {
     "item.color": [{ node: "items-*", fields: ["fills"], paint: true }],
     "item.typography": typographyOf("items-*"),
@@ -1090,6 +1114,70 @@ const INDICATOR_LAYOUT: Readonly<Record<string, string>> = {
 };
 
 /**
+ * The surface of a card (Spec 015 ③, plan ③ D-05): a column (vertical: the media above the
+ * body) or a row (horizontal: the media at the start, the body beside it) of the width the plan
+ * writes, hugging its height; the border lies in the size (border-box) and the surface clips
+ * the media at its rounded corners, as the web's overflow does.
+ */
+const CARD_LAYOUT = {
+  layoutMode: "VERTICAL",
+  primaryAxisAlignItems: "MIN",
+  counterAxisAlignItems: "MIN",
+  layoutSizingHorizontal: "FIXED",
+  layoutSizingVertical: "HUG",
+  strokesIncludedInLayout: true,
+  clipsContent: true,
+  itemSpacing: 0,
+  paddingLeft: 0,
+  paddingRight: 0,
+  paddingTop: 0,
+  paddingBottom: 0,
+};
+
+/**
+ * The body of a card (Spec 015 ③): a column across the rest of the surface — heading, content,
+ * the meta row, the actions row — its padding and gap bound (box.inline-padding, box.gap).
+ */
+const CARD_BODY_LAYOUT = {
+  layoutMode: "VERTICAL",
+  primaryAxisAlignItems: "MIN",
+  counterAxisAlignItems: "MIN",
+  layoutSizingHorizontal: "FILL",
+  layoutSizingVertical: "HUG",
+  strokesIncludedInLayout: false,
+  itemSpacing: 0,
+  paddingLeft: 0,
+  paddingRight: 0,
+  paddingTop: 0,
+  paddingBottom: 0,
+};
+
+/**
+ * The stand-in image of a card (Spec 015 ③): its word centred; across the surface and as high
+ * as the plan's extent where the card is vertical — the sizing here —, as wide as the extent and
+ * as high as the body where it is horizontal (the drawing turns the two axes).
+ */
+const CARD_MEDIA_LAYOUT = {
+  layoutMode: "HORIZONTAL",
+  primaryAxisAlignItems: "CENTER",
+  counterAxisAlignItems: "CENTER",
+  layoutSizingHorizontal: "FILL",
+  layoutSizingVertical: "FIXED",
+  strokesIncludedInLayout: false,
+  itemSpacing: 0,
+  paddingLeft: 0,
+  paddingRight: 0,
+  paddingTop: 0,
+  paddingBottom: 0,
+};
+
+/** A text across its column that wraps (Spec 015 ③: the heading and the content of a card). */
+const WRAP_SIZING: Readonly<Record<string, string>> = {
+  layoutSizingHorizontal: "FILL",
+  layoutSizingVertical: "HUG",
+};
+
+/**
  * What the plugin owns on every node it draws (Maintainer, 2026-09-21): fill, line, effects,
  * radius, opacity, clipping and layout. Each is a value from the plan or neutral; everything else
  * on a node the plugin does not touch. Neutral first, then the plan.
@@ -1236,6 +1324,10 @@ const NAV_LAYOUT = ${JSON.stringify(NAV_LAYOUT)};
 const GAP = ${JSON.stringify(PAGINATION_GAP)};
 const TABLIST_LAYOUT = ${JSON.stringify(TABLIST_LAYOUT)};
 const PANEL_LAYOUT = ${JSON.stringify(PANEL_LAYOUT)};
+const CARD_LAYOUT = ${JSON.stringify(CARD_LAYOUT)};
+const CARD_BODY_LAYOUT = ${JSON.stringify(CARD_BODY_LAYOUT)};
+const CARD_MEDIA_LAYOUT = ${JSON.stringify(CARD_MEDIA_LAYOUT)};
+const WRAP_SIZING = ${JSON.stringify(WRAP_SIZING)};
 const MARK_NEUTRAL = ${JSON.stringify(MARK_NEUTRAL)};
 const INDICATOR_LAYOUT = ${JSON.stringify(INDICATOR_LAYOUT)};
 const STRUCTURE_BINDINGS = ${JSON.stringify(STRUCTURE_BINDINGS)};
@@ -3723,8 +3815,138 @@ async function applyComponents(variables, warnings) {
     bindMeasures(measures, report, component, variant);
   }
   /**
+   * A card (Spec 015 ③, plan ③ D-05): the variant holds the surface — fill, radius, the border
+   * in its size, the shadow as an effect, clipping its content — with the media and the body: a
+   * column where the card is vertical (the media across the top, edge to edge, as high as the
+   * plan's extent), a row where it is horizontal (the media at the start, as wide as the extent,
+   * as high as the body). The media is a stand-in image — its fill the sunken ground, its word
+   * in the subtle text colour, both bound to their variables (card.media) — shown by the BOOLEAN
+   * property media (toggled); the example „ohne Bild" hides it. The body is a column with the
+   * box's padding on every side and its gap: the heading (the label property), the content, the
+   * meta row with the badge — a stand-in in the insigno's look (composed.badge) — and the actions
+   * row with the Vitrino's two actions, stand-ins in the butono's looks (composed.action-1, high,
+   * and action-2, low). The surface is as wide as the plan says (written, measured after the
+   * layout like a meter's column); the texts wrap across the body.
+   */
+  async function drawCard(node, component, variant, report, labels, toggled, example) {
+    const texts = component.texts || {};
+    const composed = component.composed || {};
+    const spec = component.card;
+    const horizontal = variant.props.orientation === "horizontal";
+    const surface = part(node, "surface", () => figma.createFrame());
+    const media = part(surface, "media", () => figma.createFrame());
+    const mediaText = part(media, "media-text", () => figma.createText());
+    const body = part(surface, "body", () => figma.createFrame());
+    const heading = part(body, "heading", () => figma.createText());
+    const content = part(body, "content", () => figma.createText());
+    const meta = part(body, "meta", () => figma.createFrame());
+    const badge = part(meta, "badge", () => figma.createFrame());
+    const badgeText = part(badge, "badge-label", () => figma.createText());
+    const actions = part(body, "actions", () => figma.createFrame());
+    const actionKeys = Object.keys(texts).filter((key) => /^action-[0-9]+$/.test(key)).sort();
+    const stands = actionKeys.map((key) => {
+      const frame = part(actions, key, () => figma.createFrame());
+      const text = part(frame, "action-label", () => figma.createText());
+      return { key, frame, text };
+    });
+    [media, body].forEach((child, index) => {
+      if (surface.children.indexOf(child) !== index) surface.insertChild(index, child);
+    });
+    [heading, content, meta, actions].forEach((child, index) => {
+      if (body.children.indexOf(child) !== index) body.insertChild(index, child);
+    });
+    stands.forEach((each, index) => {
+      if (actions.children.indexOf(each.frame) !== index) actions.insertChild(index, each.frame);
+    });
+    const all = [heading, content, mediaText, badgeText].concat(stands.map((each) => each.text));
+    for (const each of all) await loadCurrentFont(each);
+    writeCase(component, variant, heading);
+    if (variant.font !== undefined) {
+      for (const each of all) write(each, "fontName", fonts.get(variant.font.family + " " + variant.font.style));
+    }
+    if (typeof texts.content === "string") write(content, "characters", texts.content);
+    if (typeof texts.media === "string") write(mediaText, "characters", texts.media);
+    if (typeof texts.badge === "string") write(badgeText, "characters", texts.badge);
+    for (const each of stands) write(each.text, "characters", texts[each.key]);
+    if (example === undefined) labels.push(heading);
+    else if (component.label !== undefined) write(heading, "characters", component.label.defaultValue);
+    toggled.push({ part: "media", node: media });
+    const frames = [node, surface, media, body, meta, badge, actions].concat(stands.map((each) => each.frame));
+    for (const frame of frames) own(frame, NEUTRAL);
+    for (const each of all) own(each, NEUTRAL_TEXT);
+    own(node, HUG_LAYOUT);
+    if (example !== undefined) {
+      own(node, {
+        paddingLeft: example.padding,
+        paddingRight: example.padding,
+        paddingTop: example.padding,
+        paddingBottom: example.padding,
+      });
+    }
+    own(surface, CARD_LAYOUT);
+    if (horizontal) own(surface, { layoutMode: "HORIZONTAL" });
+    own(body, CARD_BODY_LAYOUT);
+    own(media, CARD_MEDIA_LAYOUT);
+    if (horizontal) own(media, { layoutSizingHorizontal: "FIXED", layoutSizingVertical: "FILL" });
+    // The example „ohne Bild" shows the card with its media hidden (a frame outside the set has
+    // no property to switch); in the set the property media shows it (connected below).
+    own(media, { visible: example === undefined || (example.toggled || {}).media !== false });
+    // The rows of meta and actions at the start, hugging; the stand-ins hug their words, their
+    // borders in their size (border-box).
+    for (const row of [meta, actions]) own(row, TOGGLE_LAYOUT);
+    for (const frame of [badge].concat(stands.map((each) => each.frame))) {
+      own(frame, CONTROL_LAYOUT);
+      own(frame, { strokesIncludedInLayout: true });
+    }
+    for (const child of frames.concat(all)) own(child, IN_FLOW);
+    for (const each of all) own(each, TEXT_SIZING);
+    for (const each of [heading, content]) own(each, WRAP_SIZING);
+    // The stand-in image (no Skemo part): its fill and its word bound to the plan's variables,
+    // with the deckkraft of the plan (F8).
+    if (spec !== undefined) {
+      for (const [target, paintSpec] of [[media, spec.media.fill], [mediaText, spec.media.color]]) {
+        const variable = variables.get(paintSpec.binding);
+        if (variable === undefined) continue;
+        const bound = figma.variables.setBoundVariableForPaint(
+          { type: "SOLID", color: { r: 0, g: 0, b: 0 } },
+          "color",
+          variable,
+        );
+        if (typeof paintSpec.paint.opacity === "number") bound.opacity = paintSpec.paint.opacity;
+        gather(target).fills = [bound];
+      }
+    }
+    const nodes = { surface, media, "media-text": mediaText, body, heading, content, meta, actions };
+    const measures = bind(nodes, variant, variables, component.structure);
+    // The stand-ins look like the Eroj they compose (composed): the actions like a butono of
+    // emphasis high and low, the badge like an insigno of intent neutral — bound as a control's
+    // and a badge's are.
+    for (const each of stands) {
+      const look = composed[each.key];
+      if (look === undefined) continue;
+      for (const measure of bind({ control: each.frame, label: each.text }, look, variables, "control")) measures.push(measure);
+    }
+    if (composed.badge !== undefined) {
+      for (const measure of bind({ control: badge, text: badgeText }, composed.badge, variables, "badge")) measures.push(measure);
+    }
+    bindShadow(nodes, variant, report);
+    for (const each of frames.concat(all)) flush(each);
+    bindMeasures(measures, report, component, variant);
+    // Measured, then written (F14, F-3): the surface as wide as the plan's card, then the media's
+    // extent along the card's flow — its height where vertical, its width where horizontal.
+    if (spec !== undefined) {
+      fit(surface, spec.width, surface.height, { layoutSizingHorizontal: "FIXED", layoutSizingVertical: "HUG" });
+      if (horizontal) {
+        fit(media, spec.media.extent, media.height, { layoutSizingHorizontal: "FIXED", layoutSizingVertical: "FILL" });
+      } else {
+        fit(media, media.width, spec.media.extent, { layoutSizingHorizontal: "FILL", layoutSizingVertical: "FIXED" });
+      }
+    }
+  }
+  /**
    * The examples beside a pagination's set (Spec 015 ①, O-2): one frame per example, each found
-   * by its own mark or created, placed in the frame „Eroj" after the set in their order.
+   * by its own mark or created, placed in the frame „Eroj" after the set in their order. An
+   * upload's (Spec 015 ②) and a card's (Spec 015 ③: „ohne Bild") the same way.
    */
   async function placeExamples(frame, set, component, report) {
     if (frame === undefined) return [];
@@ -3744,6 +3966,7 @@ async function applyComponents(variables, warnings) {
       }
       write(example, "name", spec.name);
       if (component.structure === "upload") await drawUpload(example, component, variant, report, [], spec);
+      else if (component.structure === "card") await drawCard(example, component, variant, report, [], [], spec);
       else await drawPagination(example, component, variant, report, spec);
       if (example.parent !== frame) frame.appendChild(example);
       const at = frame.children.indexOf(set) + 1 + index;
@@ -4122,6 +4345,12 @@ async function applyComponents(variables, warnings) {
       // An upload (Spec 015 ②) is drawn in a function of its own.
       if (component.structure === "upload") {
         await drawUpload(node, component, variant, report, labels, undefined);
+        if (existing === undefined) made.push(node);
+        continue;
+      }
+      // A card (Spec 015 ③): the surface with the media and the body, in a function of its own.
+      if (component.structure === "card") {
+        await drawCard(node, component, variant, report, labels, toggled, undefined);
         if (existing === undefined) made.push(node);
         continue;
       }
@@ -4510,7 +4739,7 @@ async function applyComponents(variables, warnings) {
     if (component.example !== undefined) {
       report.example = await placeExample(frame, set, component, report);
     }
-    // The examples of a pagination beside its set (Spec 015 ①, O-2).
+    // The examples of a pagination beside its set (Spec 015 ①, O-2), of an upload and a card.
     if (component.examples !== undefined) {
       report.examples = await placeExamples(frame, set, component, report);
     }

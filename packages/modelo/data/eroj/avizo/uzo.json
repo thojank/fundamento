@@ -53,6 +53,21 @@
         },
         "ero": "kampo",
         "kialo": "An error of one field stands at the field, because the person corrects it there (slot error of the kampo); a notice names what no field owns."
+      },
+      {
+        "goal": "content",
+        "keywords": {
+          "en": [
+            "teaser",
+            "contentcard"
+          ],
+          "de": [
+            "teaser",
+            "inhaltskarte"
+          ]
+        },
+        "ero": "karto",
+        "kialo": "Content about one thing is a card, because it stays as long as the thing does; a notice tells what happened."
       }
     ],
     "boundary": [

@@ -192,6 +192,10 @@
       "status": "active",
       "type": "ero"
     },
+    "ero_01M58DN4TTA74NYFENT46BHNRH": {
+      "status": "active",
+      "type": "ero"
+    },
     "iko_01M55EFZMTVJR4FGV32KYEG54W": {
       "status": "active",
       "type": "ikono"
@@ -1808,6 +1812,10 @@
       "status": "active",
       "type": "skemo"
     },
+    "ske_01M58DN56T21GD8QTD1PZFND31": {
+      "status": "active",
+      "type": "skemo"
+    },
     "tok_01M2VEEE0PMRFBGM9Z8B2DWBQF": {
       "status": "active",
       "type": "token"
@@ -3357,6 +3365,10 @@
       "type": "uzo"
     },
     "uzo_01M584YDX76W3CMH48H5T9QH8J": {
+      "status": "active",
+      "type": "uzo"
+    },
+    "uzo_01M58DN5JYEDXADWQFSB5D3RHZ": {
       "status": "active",
       "type": "uzo"
     }

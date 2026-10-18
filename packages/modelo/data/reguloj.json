@@ -192,15 +192,16 @@
     {
       "id": "reg_01M2XMV80DG7JCJDTZGE66MGHW",
       "name": "one-primary-per-container",
-      "statement": "A container holds at most one butono with emphasis=high; instances without a named container count as one container. The actions of a dialogo and of an avizo are such containers (Spec 011 ②, ③).",
+      "statement": "A container holds at most one butono with emphasis=high; instances without a named container count as one container. The actions of a dialogo, of an avizo and of a karto are such containers (Spec 011 ②, ③; Spec 015 ③).",
       "kialo": "Two equal calls to action move the decision onto the user; one primary action makes the next step obvious, and every other action steps back as secondary or tertiary.",
-      "scope": "eroj: butono instances in a design or in code (check_usage), the actions of a dialogo and of an avizo among them",
+      "scope": "eroj: butono instances in a design or in code (check_usage), the actions of a dialogo, an avizo and a karto among them",
       "checkability": "automatic",
       "appliesTo": {
         "eroj": [
           "butono",
           "dialogo",
-          "avizo"
+          "avizo",
+          "karto"
         ]
       }
     },
@@ -426,7 +427,8 @@
           "kompletigilo",
           "pagxigilo",
           "spuro",
-          "alsxutilo"
+          "alsxutilo",
+          "karto"
         ]
       }
     },

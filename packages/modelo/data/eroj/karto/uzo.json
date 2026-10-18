@@ -1,0 +1,167 @@
+{
+  "$schema": "../../../schema/modelo.schema.json#/$defs/UzoFile",
+  "uzo": {
+    "id": "uzo_01M58DN5JYEDXADWQFSB5D3RHZ",
+    "ero": "ero_01M58DN4TTA74NYFENT46BHNRH",
+    "skemo": "ske_01M58DN56T21GD8QTD1PZFND31",
+    "purpose": "Groups content about one thing into a unit: a heading, optional image and text, and up to two actions.",
+    "instead": [
+      {
+        "goal": "data-record",
+        "keywords": {
+          "en": [
+            "attributes",
+            "keyvalue"
+          ],
+          "de": [
+            "eigenschaften",
+            "schlüsselwerte"
+          ]
+        },
+        "ero": "atributlisto",
+        "kialo": "The fields of one record are names and values, because a person reads them as a list; that is the atributlisto."
+      },
+      {
+        "goal": "notice",
+        "keywords": {
+          "en": [
+            "notice",
+            "message"
+          ],
+          "de": [
+            "hinweis",
+            "meldung"
+          ]
+        },
+        "ero": "avizo",
+        "kialo": "What happened or what to watch for is a notice, because it tells a state in the flow; a card holds content."
+      },
+      {
+        "goal": "layout-box",
+        "keywords": {
+          "en": [
+            "frame",
+            "wrapper",
+            "layoutbox"
+          ],
+          "de": [
+            "umrahmung",
+            "layoutbox",
+            "layoutrahmen"
+          ]
+        },
+        "ero": null,
+        "kialo": "A card is content, not a frame for the layout, because its heading names one thing; a box around other parts is the page's."
+      }
+    ],
+    "boundary": [
+      {
+        "case": "clickable-card",
+        "action": "ask-human",
+        "keywords": {
+          "en": [
+            "clickablecard",
+            "cardlink"
+          ],
+          "de": [
+            "klickbare",
+            "anklickbare"
+          ]
+        },
+        "kialo": "Nested controls inside a link are broken for the keyboard and the screen reader, because the link swallows the buttons and reads everything as its name; a person decides where the way to the detail goes."
+      },
+      {
+        "case": "card-grid",
+        "action": "ask-human",
+        "keywords": {
+          "en": [
+            "cardgrid",
+            "masonry"
+          ],
+          "de": [
+            "raster",
+            "kartenraster",
+            "kachelraster"
+          ]
+        },
+        "kialo": "The grid of many cards is a layout of the page, because columns and gaps depend on the view around them; it belongs to a Sxablono, and a person decides it until there is one."
+      }
+    ],
+    "composes": {
+      "containers": [
+        {
+          "name": "page-section",
+          "kialo": "Cards stand in a section of the page, because they summarise the things the section lists."
+        },
+        {
+          "name": "dialog",
+          "kialo": "A dialog may show a card of what it asks about, because the decision needs the thing in sight."
+        }
+      ],
+      "with": [
+        {
+          "ero": "titolo",
+          "kialo": "The heading of a card is a titolo at the card's level, because it names the thing and is the name of the card for a screen reader."
+        },
+        {
+          "ero": "teksto",
+          "kialo": "The text of a card is running text, because it describes the thing in a sentence or two."
+        },
+        {
+          "ero": "insigno",
+          "kialo": "A status of the thing stands in the meta row as a badge, because a state is read at a glance."
+        },
+        {
+          "ero": "butono",
+          "kialo": "A card offers at most two actions as buttons, because more turn the summary into a toolbar: at most one with emphasis high (one-primary-per-container)."
+        },
+        {
+          "ero": "ligilo",
+          "kialo": "A card may lead to the detail of its thing with a link in its actions, because the detail is a destination, not an action."
+        }
+      ],
+      "never": [],
+      "spacing": {
+        "owner": "container",
+        "regulo": "spacing-owned-by-container"
+      }
+    },
+    "slots": {
+      "heading": {
+        "accepts": [
+          "text"
+        ],
+        "required": true,
+        "max": 1,
+        "nesting": 0
+      },
+      "content": {
+        "accepts": [
+          "text",
+          "teksto"
+        ],
+        "nesting": 0
+      },
+      "meta": {
+        "accepts": [
+          "insigno"
+        ],
+        "nesting": 0
+      },
+      "actions": {
+        "accepts": [
+          "butono",
+          "ligilo"
+        ],
+        "max": 2,
+        "nesting": 0
+      }
+    },
+    "layout": {
+      "size": "container",
+      "wrap": "allowed",
+      "columns-from": "size.container.small"
+    },
+    "content": []
+  }
+}

@@ -190,6 +190,46 @@ const uploadStructure = (disables: boolean): string =>
     HIDDEN_TEXT,
   ].join("\n");
 
+/**
+ * A card (Spec 015 ③, plan ③ D-04): the platform's article — the surface with its border is the
+ * control, the media lies edge to edge above (horizontal: beside) the body, whose padding and gap
+ * are the box's; heading (the composed titolo), content, meta and actions are its own elements.
+ */
+export const isCard = (skemo: Skemo): boolean => hostOf(skemo.a11y.role) === "card";
+
+function cardPartSelector(part: string, data: string): string {
+  const root = `[part="control"]${data}`;
+  if (part === "box") return `:where(${root}) [part="body"]`;
+  if (["heading", "content", "meta", "actions"].includes(part)) {
+    return `:where(${root}) [part="${part}"]`;
+  }
+  return `:where(${root})`;
+}
+
+/**
+ * Layout of a card (Spec 015 ③, D-04), keywords only: the host is a block that takes the width of
+ * its container (Uzo size container); the surface a column that clips its media to its radius,
+ * a row where the card is horizontal and not stacked (the element marks a horizontal card in a
+ * container narrower than the Uzo's columns-from with fm-stacked) — the media a third, the body
+ * two; a slotted image is a block that fills the media; meta and actions are rows that wrap; media,
+ * meta and actions without content take no room. The orientation is read from the host's own
+ * attribute: it keys no part, so no data attribute carries it (the parity inventory reads them as
+ * props of the Skemo).
+ */
+const cardStructure: string = [
+  ":host { display: block; }",
+  ':where([part="control"]) { display: flex; flex-direction: column; box-sizing: border-box; margin: 0; overflow: hidden; border-style: solid; }',
+  ':host([orientation="horizontal"]) :where([part="control"]:not(.fm-stacked)) { flex-direction: row; }',
+  ':host([orientation="horizontal"]) :where([part="control"]:not(.fm-stacked)) [part="media"] { flex: 1 1 0; }',
+  ':host([orientation="horizontal"]) :where([part="control"]:not(.fm-stacked)) [part="body"] { flex: 2 1 0; }',
+  ':where([part="media"]) { display: flex; flex-direction: column; }',
+  ':where([part="media"]) > slot::slotted(*) { display: block; }',
+  ':where([part="body"]) { display: flex; flex-direction: column; box-sizing: border-box; }',
+  ':where([part="heading"], [part="content"]) { overflow-wrap: anywhere; }',
+  ':where([part="meta"], [part="actions"]) { display: flex; flex-wrap: wrap; align-items: center; }',
+  ':where([part="media"][hidden], [part="meta"][hidden], [part="actions"][hidden]) { display: none; }',
+].join("\n");
+
 /** A breadcrumb (Spec 015 ①, plan ① D-04): a navigation with a separator part between its items. */
 export const isBreadcrumb = (skemo: Skemo): boolean =>
   skemo.a11y.role === "navigation" && skemo.parts.separator !== undefined;
@@ -482,6 +522,10 @@ function declarations(skemo: Skemo, part: string, property: string, token: strin
   // ②, D-05); none (no dropzone) writes nothing.
   if (isUpload(skemo) && part === "dropzone" && property === "inline-padding") {
     return isBindingKeyword(token) ? [] : [`padding: ${variable(token)};`];
+  }
+  // The inline padding of a card's body is its padding on every side (Spec 015 ③, D-04).
+  if (isCard(skemo) && part === "box" && property === "inline-padding") {
+    return [`padding: ${variable(token)};`];
   }
   // The inline padding of a live region is its padding on every side, as the dialog's (D-09).
   if (isStatus(skemo) && part === "box" && property === "inline-padding") {
@@ -1433,34 +1477,37 @@ export function stylesheetOf(skemo: Skemo, uzo?: Uzo): string {
                           ? paginationStructure
                           : isUpload(skemo)
                             ? uploadStructure(disables)
-                            : isLight(skemo)
-                              ? lightStructure(skemo)
-                              : isTabs(skemo)
-                                ? tabsStructure
-                                : isDisclosure(skemo)
-                                  ? disclosureStructure
-                                  : isField(skemo)
-                                    ? `${fieldStructure(disables, isSelect(skemo), isTextarea(skemo))}${isSuggest(skemo) ? `\n${suggestStructure}` : ""}`
-                                    : isGroup(skemo)
-                                      ? groupStructure(
-                                          disables,
-                                          skemo.parts["required-mark"] !== undefined,
-                                        )
-                                      : isToggle(skemo)
-                                        ? toggleStructure(
+                            : isCard(skemo)
+                              ? cardStructure
+                              : isLight(skemo)
+                                ? lightStructure(skemo)
+                                : isTabs(skemo)
+                                  ? tabsStructure
+                                  : isDisclosure(skemo)
+                                    ? disclosureStructure
+                                    : isField(skemo)
+                                      ? `${fieldStructure(disables, isSelect(skemo), isTextarea(skemo))}${isSuggest(skemo) ? `\n${suggestStructure}` : ""}`
+                                      : isGroup(skemo)
+                                        ? groupStructure(
                                             disables,
-                                            uzo?.layout.wrap !== undefined &&
-                                              uzo.layout.wrap !== "never",
-                                            skemo.slots.some(
-                                              (slot) => slot.default !== true && slot.text === true,
-                                            ),
                                             skemo.parts["required-mark"] !== undefined,
                                           )
-                                        : structure(
-                                            uzo?.layout.wrap === "with-text",
-                                            disables,
-                                            bordered,
-                                          );
+                                        : isToggle(skemo)
+                                          ? toggleStructure(
+                                              disables,
+                                              uzo?.layout.wrap !== undefined &&
+                                                uzo.layout.wrap !== "never",
+                                              skemo.slots.some(
+                                                (slot) =>
+                                                  slot.default !== true && slot.text === true,
+                                              ),
+                                              skemo.parts["required-mark"] !== undefined,
+                                            )
+                                          : structure(
+                                              uzo?.layout.wrap === "with-text",
+                                              disables,
+                                              bordered,
+                                            );
   // A skip link adds its place above the page to a control's structure (Spec 014 ②, D-07).
   const floating = isSkip(skemo) ? `\n${skipStructure}` : "";
   return `${base}${floating}\n${[...tokenRules, ...undrawn].join("\n")}\n`;
@@ -1548,6 +1595,7 @@ function selectorOf(
   if (isUpload(skemo)) {
     return uploadPartSelector(part, property, data, combination[STATE_KEY] ?? "rest");
   }
+  if (isCard(skemo)) return cardPartSelector(part, data);
   const state = STATE_SELECTORS[combination[STATE_KEY] ?? "rest"] ?? "";
   if (isField(skemo)) return fieldPartSelector(part, property, data, state, isSelect(skemo), entry);
   if (isToggle(skemo)) return togglePartSelector(part, property, data, state);

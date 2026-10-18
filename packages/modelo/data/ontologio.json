@@ -1543,6 +1543,10 @@
         {
           "predicate": "references",
           "target": "#Ligilo"
+        },
+        {
+          "predicate": "references",
+          "target": "#Karto"
         }
       ]
     },
@@ -1682,6 +1686,10 @@
         {
           "predicate": "references",
           "target": "#Mezurilo"
+        },
+        {
+          "predicate": "references",
+          "target": "#Karto"
         }
       ]
     },
@@ -2600,6 +2608,67 @@
         {
           "predicate": "references",
           "target": "#Kampo"
+        }
+      ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Karto",
+      "term": "Karto",
+      "inScheme": "eroj",
+      "prefLabel": {
+        "eo": "Karto",
+        "en": "card",
+        "de": "Karte"
+      },
+      "altLabel": {
+        "en": [
+          "karto",
+          "card",
+          "tile",
+          "teaser"
+        ],
+        "de": [
+          "Karte",
+          "Kachel",
+          "Teaser",
+          "karto"
+        ]
+      },
+      "definition": {
+        "en": "A card: groups the content about one thing into a unit — a heading (a titolo at the card's level), an optional image, text, a meta row (insigno) and up to two actions, at most one of them with emphasis high. It stands for itself as an article or as a section of the page, named by its heading; horizontal it lays the image beside the text and stacks in a narrow container. The fields of one record are the atributlisto's, what happened the avizo's; a whole card as a link and the grid of many cards stop with a person.",
+        "de": "Eine Karte: fasst den Inhalt zu einer Sache als Einheit zusammen – eine Überschrift (ein titolo auf der Ebene der Karte), ein optionales Bild, Text, eine Zeile für Metadaten (insigno) und bis zu zwei Aktionen, höchstens eine davon mit emphasis high. Sie steht für sich als Artikel oder als Abschnitt der Seite, benannt durch ihre Überschrift; waagerecht stellt sie das Bild neben den Text und stapelt in einem schmalen Container. Die Felder eines Datensatzes gehören der atributlisto, was geschehen ist dem avizo; eine ganze Karte als Link und das Raster vieler Karten entscheidet eine Person."
+      },
+      "broader": [
+        "#Ero"
+      ],
+      "relations": [
+        {
+          "predicate": "references",
+          "target": "#Titolo"
+        },
+        {
+          "predicate": "references",
+          "target": "#Teksto"
+        },
+        {
+          "predicate": "references",
+          "target": "#Insigno"
+        },
+        {
+          "predicate": "references",
+          "target": "#Butono"
+        },
+        {
+          "predicate": "references",
+          "target": "#Ligilo"
+        },
+        {
+          "predicate": "references",
+          "target": "#Atributlisto"
+        },
+        {
+          "predicate": "references",
+          "target": "#Avizo"
         }
       ]
     }

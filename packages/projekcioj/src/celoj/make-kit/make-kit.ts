@@ -654,6 +654,15 @@ function guidelines(input: CeloInput, aspekto: string): GeneratedFile[] {
         `- Every file a form asks for is an \`<${componentName(entry.ero)}>\` whose help names the kinds and the size it takes (\`accept\`, \`max-size\`)${fieldName === undefined ? "" : `; a text a person types is a \`<${componentName(fieldName.ero)}>\``}, and sending the files is the application's.`,
     )
     .join("\n");
+  // Spec 015 ③ (G7, plan ③ D-06): every summary of one thing is the karto at the level of its
+  // heading; generated from the role article, the record list and the notice named beside it.
+  const cardLines = eroj
+    .filter((entry) => entry.skemo.a11y.role === "article" && entry.uzo !== undefined)
+    .map(
+      (entry) =>
+        `- Every summary of one thing — a heading, an image, a sentence and at most two actions — is a \`<${componentName(entry.ero)}>\` with the \`level\` of its heading${recordName === undefined ? "" : `; the fields of one record are an \`<${componentName(recordName.ero)}>\``}${noticeName === undefined ? "" : `, what happened is an \`<${componentName(noticeName.ero)}>\``}, and a whole card is never one link.`,
+    )
+    .join("\n");
   const skipLines = eroj
     .filter((entry) => isSkip(entry.skemo) && entry.uzo !== undefined)
     .map(
@@ -702,6 +711,7 @@ ${menuLines}
 ${disclosureLines}
 ${suggestLines}
 ${uploadLines}
+${cardLines}
 
 Where to look: \`setup.md\` for the imports, \`foundations/\` for the tokens, \`components/\` for
 each component.

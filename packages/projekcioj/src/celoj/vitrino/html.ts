@@ -188,7 +188,10 @@ function wrapSentence(role: string | undefined, wrap: string, multiline = false)
                                   : // Spec 014 ⑤: a disclosure wraps its summary.
                                     role === "group"
                                     ? "Zusammenfassung"
-                                    : "Label";
+                                    : // Spec 015 ③: a card wraps its content.
+                                      role === "article"
+                                      ? "Inhalt"
+                                      : "Label";
   if (wrap === "never") return `${subject} bricht nie um`;
   if (wrap === "with-text") return `${subject} darf umbrechen (inline), standalone nie`;
   return `${subject} darf umbrechen`;

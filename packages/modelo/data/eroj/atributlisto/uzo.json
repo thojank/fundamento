@@ -35,6 +35,21 @@
         },
         "ero": "kampo",
         "kialo": "Editing is a form, not a list, because every value becomes a field with a label; the kampo in a form."
+      },
+      {
+        "goal": "as-card",
+        "keywords": {
+          "en": [
+            "cardview",
+            "cardlayout"
+          ],
+          "de": [
+            "kartenansicht",
+            "kachelansicht"
+          ]
+        },
+        "ero": "karto",
+        "kialo": "A record shown as one thing with an image and actions is a card, because it stands with its own heading; a list of names and values shows neither."
       }
     ],
     "boundary": [

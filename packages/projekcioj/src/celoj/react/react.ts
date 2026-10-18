@@ -57,10 +57,14 @@ function wrapper(entry: LoadedEro): string {
   const name = componentName(entry.ero);
   const props = entry.skemo.props;
   const iconSlots = entry.skemo.slots.filter((slot) => slot.decorative === true);
+  // A boolean whose default is true (Spec 015 ③, plan ③ D-03: standalone of the Karto) is
+  // written "false" when false and left out otherwise; every other boolean is there when true.
   const attributes = props.map((prop) =>
-    prop.kind === "boolean"
-      ? `    "${prop.name}": ${camel(prop.name)} === true ? true : undefined,`
-      : `    "${prop.name}": ${camel(prop.name)},`,
+    prop.kind === "boolean" && prop.default === true
+      ? `    "${prop.name}": ${camel(prop.name)} === false ? "false" : undefined,`
+      : prop.kind === "boolean"
+        ? `    "${prop.name}": ${camel(prop.name)} === true ? true : undefined,`
+        : `    "${prop.name}": ${camel(prop.name)},`,
   );
   const slots = iconSlots.map(
     (slot) =>

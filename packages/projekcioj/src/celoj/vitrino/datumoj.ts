@@ -331,6 +331,49 @@ export const VITRINO_UPLOAD_FILES: readonly { name: string; size: number }[] = [
   { name: "Zeugnis.png", size: 340_000 },
 ];
 
+/**
+ * The card of the Vitrino (Spec 015 ③, plan ③ D-04): one of the standards of the Vitrino's table,
+ * its heading, one sentence, a badge in the meta row and two actions — one with emphasis high
+ * (one-primary-per-container); the Figma set shows the same words (one source for both pictures).
+ */
+export const VITRINO_CARD = {
+  heading: "Barrierefreiheit",
+  text: "Kontrast, Fokus und Namen in jeder Marke.",
+  badge: "gültig",
+  actions: [
+    { text: "Öffnen", emphasis: "high" },
+    { text: "Teilen", emphasis: "low" },
+  ],
+} as const;
+
+/** The word Figma writes where a card shows its image (Spec 015 ③): a stand-in, not a picture. */
+export const VITRINO_MEDIA_TEXT = "Bild";
+
+/**
+ * The picture of the Vitrino's card (Spec 015 ③, plan ③ D-06): an inline SVG in the text's colour
+ * at three strengths — a landscape, decorative (the heading names the card) — since the Vitrino
+ * loads nothing from outside itself, not even an image.
+ */
+export const VITRINO_CARD_PICTURE =
+  '<svg slot="media" aria-hidden="true" viewBox="0 0 16 9"><rect width="16" height="9" fill="currentColor" opacity="0.12"></rect><circle cx="12" cy="3" r="1.5" fill="currentColor" opacity="0.35"></circle><path d="M0 9 5 4l3 3 2-2 6 4z" fill="currentColor" opacity="0.3"></path></svg>';
+
+/**
+ * The cards of the Vitrino (Spec 015 ③, plan ③ D-06): vertical with and without the picture,
+ * horizontal across both columns — wide enough it lays the picture beside the text, narrower than
+ * size.container.small it stacks; level 3 under the section's heading.
+ */
+function cardMarkup(tag: string): string {
+  const actions = VITRINO_CARD.actions
+    .map(
+      (action) =>
+        `<fm-butono slot="actions" emphasis="${action.emphasis}">${action.text}</fm-butono>`,
+    )
+    .join("");
+  const one = (attributes: string, picture: boolean) =>
+    `<${tag} level="3"${attributes}>${picture ? VITRINO_CARD_PICTURE : ""}<span slot="heading">${VITRINO_CARD.heading}</span>${VITRINO_CARD.text}<fm-insigno slot="meta">${VITRINO_CARD.badge}</fm-insigno>${actions}</${tag}>`;
+  return `<table><caption>${tag}, beide Ausrichtungen, mit und ohne Bild</caption><thead><tr><th scope="col">orientation</th><th scope="col">mit Bild</th><th scope="col">ohne Bild</th></tr></thead><tbody><tr><th scope="row">vertical</th><td>${one("", true)}</td><td>${one("", false)}</td></tr><tr><th scope="row">horizontal</th><td colspan="2">${one(' orientation="horizontal"', true)}</td></tr></tbody></table>`;
+}
+
 /** The row and label of the meter without a value in the Vitrino (Nachlese 3 W4, F-9). */
 export const VITRINO_UNKNOWN_LABEL = "unbekannt";
 
@@ -531,6 +574,8 @@ function slotTexts(
  */
 export function eroMarkup(entry: LoadedEro, ikonaro: readonly VitrinoIkono[] = []): string {
   const tag = `fm-${entry.ero.name}`;
+  // A card (Spec 015 ③): both orientations, with and without its picture.
+  if (entry.skemo.a11y.role === "article") return cardMarkup(tag);
   // The Ikonaro grid (Spec 014 ②): the icon shows every name, not every combination.
   if (entry.skemo.a11y.role === "img") return ikonaroMarkup(tag, ikonaro);
   // A separator (Spec 014 ②): both orientations, the vertical one between two words.

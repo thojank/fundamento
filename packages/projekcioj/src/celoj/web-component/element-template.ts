@@ -39,7 +39,8 @@ export type HostControl =
   | "disclosure"
   | "pagination"
   | "suggest"
-  | "upload";
+  | "upload"
+  | "card";
 
 export interface ElementNames {
   /** `fm-butono` */
@@ -152,6 +153,9 @@ export function hostOf(
   if (role === "paragraph") return "paragraph";
   if (role === "textbox") return multiline ? "textarea" : "input";
   if (role === "dialog") return "dialog";
+  // Spec 015 ③ (plan ③ D-04): a card is the platform's article (a region where it is no
+  // standalone content), its heading a composed titolo.
+  if (role === "article") return "card";
   if (role === "switch" || role === "checkbox") return "toggle";
   if (role === "radiogroup") return "group";
   if (role === "combobox") return "select";
@@ -569,6 +573,16 @@ function tabsMarkup(): string {
 /** One row of the tabs (Spec 011 ⑤, D-08): a button with role tab; its edge is the indicator. */
 const TAB_ROW = '<button part="tab" role="tab" type="button"><slot></slot></button>';
 
+/**
+ * The shadow markup of a card (Spec 015 ③, plan ③ D-04): the platform's article named by its
+ * heading — a composed titolo at the card's level in the type role of the part heading — the media
+ * edge to edge above (beside, horizontal) a body of heading, content, meta and actions; media,
+ * meta and actions show only while they have content.
+ */
+function cardMarkup(): string {
+  return '<article part="control" aria-labelledby="heading"><div part="media" hidden><slot name="media"></slot></div><div part="body"><fm-titolo part="heading" id="heading" level="2" size="headline-4"><slot name="heading"></slot></fm-titolo><div part="content"><slot></slot></div><div part="meta" hidden><slot name="meta"></slot></div><div part="actions" hidden><slot name="actions"></slot></div></div><span id="fm-texts" hidden></span></article>';
+}
+
 /** The shadow markup of the control: slots before the label (icon-start), the label, the rest. */
 function markup(
   host: HostControl,
@@ -593,6 +607,7 @@ function markup(
   if (host === "light") return lightMarkup(slots, role, breadcrumb);
   if (host === "pagination") return paginationMarkup();
   if (host === "upload") return uploadMarkup();
+  if (host === "card") return cardMarkup();
   if (host === "tabs") return tabsMarkup();
   if (host === "input") return fieldMarkup(slots);
   if (host === "textarea") return fieldMarkup(slots, true);
@@ -680,11 +695,13 @@ export function elementSource({
                                         ? "[part='list']"
                                         : host === "suggest" || host === "upload"
                                           ? "input"
-                                          : host === "popover"
-                                            ? "[role=dialog]"
-                                            : host === "menu"
-                                              ? "[role=menu]"
-                                              : "button";
+                                          : host === "card"
+                                            ? "article"
+                                            : host === "popover"
+                                              ? "[role=dialog]"
+                                              : host === "menu"
+                                                ? "[role=menu]"
+                                                : "button";
   const isToggle = host === "toggle";
   const isGroup = host === "group";
   const isSelect = host === "select";
@@ -709,6 +726,7 @@ export function elementSource({
   const isPopover = host === "popover";
   const isMenu = host === "menu";
   const isOverlay = isTooltip || isPopover || isMenu;
+  const isCard = host === "card";
   const isSkip = host === "a" && skip;
   const isStatic =
     isStatus ||
@@ -722,7 +740,8 @@ export function elementSource({
     isParagraph ||
     isOverlay ||
     isDisclosure ||
-    isPagination;
+    isPagination ||
+    isCard;
   const listSlot = slots.find((slot) => slot.list === true)?.name ?? "";
   const namedSlots = slots
     .filter((slot) => slot.default !== true && slot.decorative !== true)
@@ -1504,19 +1523,23 @@ ${
   // Layout auto (Spec 014 ①, plan ① D-03): a list whose Uzo names columns-from resolves auto to
   // columns or stacked by its own inline size, after the enums are written on the host.
   const isAuto = isLight && columnsFrom !== undefined;
+  // Spec 015 ③ (plan ③ D-04): a horizontal card stacks below the Uzo's columns-from, measured as
+  // layout auto measures its width.
+  const isStacking = isCard && columnsFrom !== undefined;
+  const observesSize = isAuto || isStacking;
   const lightRender = isLight
     ? `    this.#decorate();
 ${isAuto ? "    this.#autoLayout();\n" : ""}`
     : "";
-  const autoConstant = isAuto
-    ? `/** The width from which layout auto lays name and value side by side (Spec 014 ①, the Uzo's columns-from). */
+  const autoConstant = observesSize
+    ? `/** The width from which layout auto lays name and value side by side, a card its media beside its body (Spec 014 ①, Spec 015 ③: the Uzo's columns-from). */
 const COLUMNS_FROM = ${JSON.stringify(columnsFrom)};
 `
     : "";
-  const autoField = isAuto
-    ? "  /** Observes the inline size of the element while its layout is auto (Spec 014 ①). */\n  #sizes: ResizeObserver | undefined;\n"
+  const autoField = observesSize
+    ? "  /** Observes the inline size of the element while its layout is auto (Spec 014 ①) or it is a horizontal card (Spec 015 ③). */\n  #sizes: ResizeObserver | undefined;\n"
     : "";
-  const autoDisconnect = isAuto
+  const autoDisconnect = observesSize
     ? `
   disconnectedCallback(): void {
     this.#sizes?.disconnect();
@@ -1524,8 +1547,42 @@ const COLUMNS_FROM = ${JSON.stringify(columnsFrom)};
   }
 `
     : "";
-  const autoMethods = isAuto
+  const autoMethods = isStacking
     ? `
+  /**
+   * A horizontal card (Spec 015 ③, plan ③ D-04): the media beside the body while the element is
+   * at least as wide as the Uzo's columns-from, else stacked like a vertical card — measured as
+   * layout auto measures (a container query takes no var()). A class marks the stacked card, no
+   * data attribute: the parity inventory reads data-* as props of the Skemo.
+   */
+  #autoLayout(): void {
+    const control = this.#control;
+    if (this.propValue("orientation") !== "horizontal" || !this.isConnected) {
+      this.#sizes?.disconnect();
+      this.#sizes = undefined;
+      control.classList.remove("fm-stacked");
+      return;
+    }
+    if (this.#sizes === undefined) {
+      this.#sizes = new ResizeObserver(() => requestAnimationFrame(() => this.#autoLayout()));
+      this.#sizes.observe(this);
+    }
+    const style = getComputedStyle(this);
+    const box = this.getBoundingClientRect();
+    const inline = style.writingMode.startsWith("horizontal") ? box.width : box.height;
+    const raw = style.getPropertyValue(COLUMNS_FROM).trim();
+    const number = Number.parseFloat(raw);
+    const threshold = raw.endsWith("rem")
+      ? number * Number.parseFloat(getComputedStyle(document.documentElement).fontSize)
+      : raw.endsWith("em")
+        ? number * Number.parseFloat(style.fontSize)
+        : number;
+    // Without the token (no Aspekto loaded) the wide case stands, as the stylesheet draws it.
+    control.classList.toggle("fm-stacked", Number.isFinite(threshold) && inline < threshold);
+  }
+`
+    : isAuto
+      ? `
   /**
    * Layout auto (Spec 014 ①, plan ① D-03): columns while the element is at least as wide as the
    * Uzo's columns-from, else stacked; columns and stacked stand as they are. A container query
@@ -1558,7 +1615,7 @@ const COLUMNS_FROM = ${JSON.stringify(columnsFrom)};
     if (this.getAttribute("data-layout") !== resolved) this.setAttribute("data-layout", resolved);
   }
 `
-    : "";
+      : "";
   const lightInit = isLight
     ? `    if (lightSheet === undefined) {
       lightSheet = new CSSStyleSheet();
@@ -2619,6 +2676,31 @@ ${
     : "";
   // A skip link (Spec 014 ②, plan ② D-07): an empty label shows the Modelo's words for it, in the
   // language of the document (a11y.texts label-empty), as the fallback content of the slot.
+  // A card (Spec 015 ③, plan ③ D-04): its heading is a titolo at the card's level; content that
+  // stands for itself is an article, a section of the page a region — named by its heading either
+  // way. Media, meta and actions show while they have content; an image in the media says what it
+  // shows (alt) or that it only decorates (alt="").
+  const cardRender = isCard
+    ? `    const heading = this.shadowRoot?.querySelector('[part="heading"]');
+    if (heading instanceof HTMLElement) heading.setAttribute("level", String(this.propValue("level") ?? "1"));
+    if (this.propValue("standalone") === true) control.removeAttribute("role");
+    else control.setAttribute("role", "region");
+    for (const name of NAMED_SLOTS) {
+      if (name === "heading") continue;
+      const holder = this.shadowRoot?.querySelector(\`[part="\${name}"]\`);
+      if (holder instanceof HTMLElement) holder.hidden = !this.#filled(name);
+    }
+    const media = this.shadowRoot?.querySelector('slot[name="media"]');
+    if (media instanceof HTMLSlotElement) {
+      for (const node of media.assignedElements({ flatten: true })) {
+        const images = node instanceof HTMLImageElement ? [node] : [...node.querySelectorAll("img")];
+        if (images.some((image) => !image.hasAttribute("alt"))) {
+          warn(\`${tag}: the image in media has no alt; give it the words of what it shows, or alt="" where it only decorates.\`);
+        }
+      }
+    }
+${isStacking ? "    this.#autoLayout();\n" : ""}`
+    : "";
   const skipRender = isSkip
     ? `    const fallback = TEXTS["label-empty"];
     if (fallback !== undefined) {
@@ -3293,7 +3375,12 @@ ${autoDisconnect}
   propValue(name: string): Value | undefined {
     const prop = PROPS.find((candidate) => candidate.name === name);
     if (prop === undefined) return undefined;
-    if (prop.kind === "boolean") return this.hasAttribute(name);
+    // A boolean whose default is true (Spec 015 ③, plan ③ D-03: standalone of a card) is true
+    // while the attribute is absent and false only as name="false"; every other boolean is the
+    // presence of its attribute.
+    if (prop.kind === "boolean") {
+      return prop.default === true ? this.getAttribute(name) !== "false" : this.hasAttribute(name);
+    }
     const raw = this.getAttribute(name);
     if (prop.kind === "enum") {
       const allowed = prop.values ?? [];
@@ -3398,7 +3485,7 @@ ${autoDisconnect}
     // \`invalid\` spoken as aria-invalid and set by a filled error slot (constraint of the Skemo);
     // disabled wins over readonly; help and error show only while they have text.
     const described: string[] = [];
-${inputRender}${toggleRender}${groupRender}${selectRender}${dialogRender}${statusRender}${meterRender}${lightRender}${paginationRender}${tabsRender}${iconRender}${separatorRender}${headingRender}${paragraphRender}${tooltipRender}${popoverRender}${menuRender}${disclosureRender}${suggestRender}${uploadRender}${skipRender}${composedIconRender}    // The texts of the slots that describe the control (Spec 009, D-02; a checkbox, Spec 010 ②):
+${inputRender}${toggleRender}${groupRender}${selectRender}${dialogRender}${statusRender}${meterRender}${lightRender}${paginationRender}${tabsRender}${iconRender}${separatorRender}${headingRender}${paragraphRender}${tooltipRender}${popoverRender}${menuRender}${disclosureRender}${suggestRender}${uploadRender}${cardRender}${skipRender}${composedIconRender}    // The texts of the slots that describe the control (Spec 009, D-02; a checkbox, Spec 010 ②):
     // shown while they have text, and its description in that order.
     for (const source of DESCRIPTION) {
       const [kind, name = ""] = source.split(":");
@@ -3449,11 +3536,11 @@ ${
       .trim();
     const name = this.propValue("label");
 ${
-  isLight || isOverlay || isPagination
+  isLight || isOverlay || isPagination || isCard
     ? `    // A light-DOM host names its region by the caption (Spec 011 ④, D-09) and its list by the
     // label prop on the dl itself (D-10); an overlay (Spec 014 ④) names its layer in its own
-    // render, a pagination (Spec 015 ①, B-3) its landmark — the label, else the Modelo's word;
-    // nothing is written here.
+    // render, a pagination (Spec 015 ①, B-3) its landmark — the label, else the Modelo's word; a
+    // card (Spec 015 ③) is named by its heading (aria-labelledby); nothing is written here.
     void text;
     void name;
 `
@@ -3502,7 +3589,12 @@ for (const prop of PROPS) {
       return this.propValue(prop.name);
     },
     set(this: ${className}, next: unknown) {
-      if (prop.kind === "boolean") this.toggleAttribute(prop.name, next === true);
+      // A boolean whose default is true (Spec 015 ③, plan ③ D-03) is written as "false" when off;
+      // React 19 hands the wrapper's "false" to the property, React 18 to the attribute.
+      if (prop.kind === "boolean" && prop.default === true) {
+        if (next === false || next === "false") this.setAttribute(prop.name, "false");
+        else this.removeAttribute(prop.name);
+      } else if (prop.kind === "boolean") this.toggleAttribute(prop.name, next === true);
       else if (next === undefined || next === null) this.removeAttribute(prop.name);
       else this.setAttribute(prop.name, String(next));
     },

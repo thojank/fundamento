@@ -38,10 +38,12 @@ import {
 } from "@fundamento/modelo";
 import type { Celo, CeloInput, GeneratedFile } from "../../build.js";
 import {
+  VITRINO_CARD,
   VITRINO_CONTENT_TEXT,
   VITRINO_DIALOG_ACTIONS,
   VITRINO_ICON_EXAMPLE,
   VITRINO_LIST_ENTRIES,
+  VITRINO_MEDIA_TEXT,
   VITRINO_MENU_ITEMS,
   VITRINO_NUMBER_EXAMPLES,
   VITRINO_OPTIONS,
@@ -342,14 +344,62 @@ export const UPLOAD_COMPOSED: readonly {
   },
 ];
 
-/** The looks of an upload's stand-ins (Spec 015 ②), like composedOf for a dialog's action. */
-function uploadComposedOf(
+/**
+ * The composed butono and insigno of a card (Spec 015 ③, plan ③ D-05): its two actions — the
+ * Vitrino's, in its order: emphasis high, then low — and the badge of its meta row, an insigno
+ * of intent neutral. The stand-ins take the roles read from those Skemoj at rest in their default
+ * size, as the upload's button does; not parts of the karto, so not in its parity inventory.
+ */
+export const CARD_COMPOSED: readonly {
+  node: string;
+  ero: string;
+  props: Record<string, string>;
+  parts: readonly string[];
+}[] = [
+  ...VITRINO_CARD.actions.map((action, index) => ({
+    node: `action-${index + 1}`,
+    ero: "butono",
+    props: { emphasis: action.emphasis, intent: "neutral", size: "medium", [STATE_KEY]: "rest" },
+    parts: [
+      "surface.fill",
+      "border.color",
+      "border.width",
+      "label.color",
+      "label.typography",
+      "box.height",
+      "box.inline-padding",
+      "box.radius",
+    ],
+  })),
+  {
+    node: "badge",
+    ero: "insigno",
+    props: { intent: "neutral", size: "medium", [STATE_KEY]: "rest" },
+    parts: [
+      "surface.fill",
+      "border.color",
+      "border.width",
+      "text.color",
+      "text.typography",
+      "box.height",
+      "box.inline-padding",
+      "box.radius",
+    ],
+  },
+];
+
+/**
+ * The looks of composed stand-ins, like composedOf for a dialog's action: an upload's (Spec 015
+ * ②, UPLOAD_COMPOSED) and a card's (Spec 015 ③, CARD_COMPOSED).
+ */
+function standInsComposedOf(
+  stands: typeof UPLOAD_COMPOSED,
   eroj: readonly LoadedEro[],
   resolutions: ReturnType<typeof allResolutions>,
   base: Readonly<Record<string, { value: unknown }>>,
 ): FigmaComponentSet["composed"] {
   const composed: NonNullable<FigmaComponentSet["composed"]> = {};
-  for (const { node, ero, props, parts } of UPLOAD_COMPOSED) {
+  for (const { node, ero, props, parts } of stands) {
     const entry = eroj.find((candidate) => candidate.ero.name === ero);
     if (entry === undefined) continue;
     const bindings: Record<string, string> = {};
@@ -395,6 +445,34 @@ export function fileSizeText(bytes: number, lingvo = "de"): string {
 
 /** The name of the example frame beside an upload's set (Spec 015 ②: „mit zwei Dateien"). */
 export const UPLOAD_EXAMPLE = "mit zwei Dateien";
+
+/**
+ * The name of the example frame beside a card's set (Spec 015 ③, plan ③ D-05): the default
+ * variant with its media hidden, as `<set> – ohne Bild` — the media slot is optional.
+ */
+export const CARD_EXAMPLE = "ohne Bild";
+
+/**
+ * The stand-in image of a card (Spec 015 ③, plan ③ D-05): a frame where the media slot takes a
+ * picture, its fill the sunken ground, the Vitrino's word in it in the subtle text colour —
+ * bound to their variables, no Skemo parts (the karto styles no picture), so no parity.
+ */
+const CARD_MEDIA_FILL = "color.background.sunken";
+const CARD_MEDIA_COLOR = "color.text.subtle";
+
+/**
+ * The width of a card in the set (Spec 015 ③, plan ③ D-05): the Uzo's columns-from — from this
+ * width on a horizontal card stands beside its media —, px of the base combination, written, not
+ * bound, as the separator's length; the Skemo gives the card no width (its container does).
+ */
+const CARD_WIDTH = "size.container.small";
+
+/**
+ * The share of the card's width its media takes along the card's flow (Spec 015 ③, plan ③ D-05):
+ * its height above the body where vertical, its width beside it where horizontal. A number of
+ * this Celo, not a token (the picture's size is the application's), named here once.
+ */
+const CARD_MEDIA_SHARE = 1 / 3;
 
 /**
  * The help under the reason field of a dialog (Spec 014 ② O-5): a stand-in for the help of the
@@ -618,7 +696,8 @@ export type FigmaStructure =
   | "disclosure"
   | "pagination"
   | "breadcrumb"
-  | "upload";
+  | "upload"
+  | "card";
 
 /**
  * A radio group (Spec 010 ③, D-07) is a choice: the label (the question) above a column of
@@ -699,7 +778,12 @@ export const structureOf = (role: string, parts: readonly string[] = []): FigmaS
                                     : // Spec 014 ⑤ (plan ⑤ D-04): a disclosure (role group).
                                       role === "group"
                                       ? "disclosure"
-                                      : "control";
+                                      : // Spec 015 ③ (plan ③ D-05): a card (role article) — the
+                                        // surface with the media and the body: heading,
+                                        // content, the meta row and the actions.
+                                        role === "article"
+                                        ? "card"
+                                        : "control";
 
 /**
  * The neutral word every label template shows, per a11y role (M-3; Maintainer, F14, 2026-10-13,
@@ -754,6 +838,10 @@ const LABEL_DEFAULTS: Readonly<Record<string, string>> = {
   // which offers more actions (the Modelo's own words, a11y.texts label-empty). Proposals.
   tooltip: "Kurzhinweis",
   menu: "Weitere Aktionen",
+  // Spec 015 ③ (plan ③ D-05): a card's label property writes its heading, which names the thing
+  // the card is about; the role word of the Vitrino's heading. Proposal for the maintainer to
+  // confirm; no Jugxo created here.
+  article: "Überschrift",
 };
 
 /**
@@ -912,6 +1000,12 @@ export interface FigmaComponentSet {
      * the Vitrino's two files, each with its size in the person's units, a remove butono beside.
      */
     files?: { name: string; size: string }[];
+    /**
+     * The values of the set's toggles the example shows (Spec 015 ③, plan ③ D-05): `media`
+     * false, the card „ohne Bild" — written as the visibility of the part, a frame outside the
+     * set has no property to switch.
+     */
+    toggled?: Record<string, boolean>;
   }[];
   example?: {
     name: string;
@@ -977,6 +1071,20 @@ export interface FigmaComponentSet {
   };
   /** The entries of a key-value list (Spec 011 ④): the Vitrino's pairs, an empty value the dash. */
   entries?: { term: string; value: string }[];
+  /**
+   * A card (Spec 015 ③, plan ③ D-05): the width of its surface, px of size.container.small in
+   * the base combination, written; the media's extent along the card's flow (its height where
+   * vertical, its width where horizontal), written from CARD_MEDIA_SHARE of that width; the
+   * stand-in image's fill and the colour of its word, each a variable with its paint (F8).
+   */
+  card?: {
+    width: number;
+    media: {
+      extent: number;
+      fill: { binding: string; paint: FigmaPaint };
+      color: { binding: string; paint: FigmaPaint };
+    };
+  };
   /** The purpose of the Uzo, one line, as the description of the set (Spec 007 T028, A12). */
   description?: string;
   /**
@@ -1841,7 +1949,16 @@ function componentSetOf(
   // name keys no part, the glyph does; the Figma side is told so (extraAxes).
   // A tooltip (Spec 014 ④): one variant per placement — the side keys no part, the layer takes
   // it on the page; the set shows each side beside a stand-in of the trigger.
-  const extraAxes = structure === "icon" ? ["name"] : structure === "tooltip" ? ["placement"] : [];
+  // A card (Spec 015 ③, plan ③ D-05): one variant per orientation — it keys no part, the layout
+  // of surface and media does; the set shows the media above and beside the body.
+  const extraAxes =
+    structure === "icon"
+      ? ["name"]
+      : structure === "tooltip"
+        ? ["placement"]
+        : structure === "card"
+          ? ["orientation"]
+          : [];
   const keys = [...extraAxes, ...variantKeys(skemo)];
   // What the plugin draws for this structure (Spec 011 ③): the bindings every structure shares and
   // the ones this structure binds elsewhere — the text's colour on the label of a badge. What the
@@ -2297,7 +2414,17 @@ function componentSetOf(
               })),
             },
           ]
-        : undefined;
+        : // Spec 015 ③ (plan ③ D-05): the card without its image beside its set.
+          structure === "card"
+          ? [
+              {
+                name: `${entry.ero.name} – ${CARD_EXAMPLE}`,
+                variant: defaults,
+                padding: parityPx(base[SET_GAP]?.value),
+                toggled: { media: false },
+              },
+            ]
+          : undefined;
   const example =
     structure === "dialog" && backdrop !== undefined && backdropPaint !== undefined
       ? {
@@ -2340,7 +2467,7 @@ function componentSetOf(
         : signOf(skemo.a11y.role, "16");
   // The boolean props that show a part (Spec 011 ③): BOOLEAN properties of the set, no axis. The
   // part may be the text of a slot (Spec 011 ④: the caption of a table is its default slot).
-  const toggles = skemo.props.flatMap((prop) => {
+  const propToggles = skemo.props.flatMap((prop) => {
     const toggle = BOOLEAN_TOGGLES[prop.name];
     return prop.kind === "boolean" &&
       toggle !== undefined &&
@@ -2357,6 +2484,12 @@ function componentSetOf(
         ]
       : [];
   });
+  // Spec 015 ③ (plan ③ D-05): the media of a card is optional — a BOOLEAN property `media` shows
+  // or hides its stand-in, no prop of the Skemo (so not in `properties`, nor in parity).
+  const toggles =
+    structure === "card" && skemo.slots.some((slot) => slot.name === "media")
+      ? [...propToggles, { property: "media", part: "media", defaultValue: true }]
+      : propToggles;
   // The table of a table's set and the entries of a list's (Spec 011 ④): the Vitrino's words.
   const table =
     structure === "table"
@@ -2395,8 +2528,11 @@ function componentSetOf(
     structure === "dialog"
       ? composedOf(eroj, resolutions, base)
       : structure === "upload"
-        ? uploadComposedOf(eroj, resolutions, base)
-        : undefined;
+        ? standInsComposedOf(UPLOAD_COMPOSED, eroj, resolutions, base)
+        : // Spec 015 ③ (plan ③ D-05): a card's actions and badge look like a butono and an insigno.
+          structure === "card"
+          ? standInsComposedOf(CARD_COMPOSED, eroj, resolutions, base)
+          : undefined;
   // The overlays (Spec 014 ④, plan ④ D-06): a popover shows the words of its trigger stand-in and
   // its content beside the heading (the label property); a menu its three entries (the
   // Vitrino's: edit, duplicate disabled, delete danger) and the word of its trigger, the Modelo's
@@ -2410,6 +2546,23 @@ function componentSetOf(
             ...(item.disabled === true ? { disabled: true } : {}),
             ...(item.danger === true ? { danger: true } : {}),
           })),
+        }
+      : undefined;
+  // A card (Spec 015 ③, plan ③ D-05): its width and the media's extent, written from the base
+  // combination; the stand-in image's fill and word colour bound to their variables.
+  const mediaFill = structure === "card" ? paintOf(CARD_MEDIA_FILL, resolutions, base) : undefined;
+  const mediaColor =
+    structure === "card" ? paintOf(CARD_MEDIA_COLOR, resolutions, base) : undefined;
+  const cardWidth = parityPx(base[CARD_WIDTH]?.value);
+  const card =
+    structure === "card" && mediaFill !== undefined && mediaColor !== undefined
+      ? {
+          width: cardWidth,
+          media: {
+            extent: Math.round(cardWidth * CARD_MEDIA_SHARE),
+            fill: { binding: variableName(CARD_MEDIA_FILL), paint: mediaFill },
+            color: { binding: variableName(CARD_MEDIA_COLOR), paint: mediaColor },
+          },
         }
       : undefined;
   return {
@@ -2443,6 +2596,20 @@ function componentSetOf(
     ...(structure === "disclosure"
       ? { texts: { summary: VITRINO_SUMMARY_TEXT, content: VITRINO_CONTENT_TEXT } }
       : {}),
+    // Spec 015 ③ (plan ③ D-05): the Vitrino's card — its text, the badge of the meta row, the two
+    // actions in its order, the word of the stand-in image; the heading is the label property.
+    ...(structure === "card"
+      ? {
+          texts: {
+            content: VITRINO_CARD.text,
+            badge: VITRINO_CARD.badge,
+            ...Object.fromEntries(
+              VITRINO_CARD.actions.map((action, index) => [`action-${index + 1}`, action.text]),
+            ),
+            media: VITRINO_MEDIA_TEXT,
+          },
+        }
+      : {}),
     ...(menu === undefined
       ? {}
       : {
@@ -2462,6 +2629,7 @@ function componentSetOf(
     ...(structure === "meter" ? { meter: { share: meterShareOf(skemo) } } : {}),
     ...(table === undefined ? {} : { table }),
     ...(entries === undefined ? {} : { entries }),
+    ...(card === undefined ? {} : { card }),
     ...(description === undefined ? {} : { description }),
     ...(uzo === undefined ? {} : { uzo }),
     properties,
