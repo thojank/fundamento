@@ -1766,6 +1766,13 @@ describe("Web Component Celo for the pagxigilo and the spuro (Spec 015 ①)", ()
     expect(light).toContain("[aria-current]");
     const css = cssOf("spuro");
     expect(css).toContain("var(--fm-size-icon-small)");
+    // Abnahme 015 ① S-1: the chevron's size and colour stand on the chevron, the gap on the list
+    // of the levels — never on the nav itself, which would squeeze the path into one icon's width.
+    expect(css).toContain(
+      ':where([part="separator"]) {\n  color: var(--fm-color-text-muted);\n  inline-size: var(--fm-size-icon-small);',
+    );
+    expect(css).toContain(':where([part="items"]) {\n  gap: var(--fm-spacing-xsmall);');
+    expect(css).not.toMatch(/:where\(\[part="list"\]\) \{\n[^}]*inline-size/);
     expect(css).toContain("list-style: none;");
     expect(componentCssIssues("spuro.css", css)).toEqual([]);
     expect(cssPhysicalPropertyIssues("spuro.css", css)).toEqual([]);

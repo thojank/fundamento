@@ -24,12 +24,13 @@ test.describe("fm-spuro behaviour", () => {
     await expect(current).toHaveCount(1);
     await expect(current).toHaveText("Fundamento");
     await expect(current).toHaveAttribute("aria-current", "page");
+    // Abnahme 015 ① S-2: a chevron stands between two levels only — none after the current page.
     const separators = await page
       .locator("#s")
       .evaluate((element) =>
-        [...(element.shadowRoot?.querySelectorAll('[part="separator"]:not([hidden])') ?? [])].map(
-          (node) => [node.getAttribute("name"), node.getAttribute("aria-hidden")],
-        ),
+        [...(element.shadowRoot?.querySelectorAll('[part="separator"]') ?? [])]
+          .filter((node) => (node as HTMLElement).checkVisibility())
+          .map((node) => [node.getAttribute("name"), node.getAttribute("aria-hidden")]),
       );
     expect(separators).toEqual([
       ["chevron-right", "true"],
@@ -66,5 +67,32 @@ test.describe("fm-spuro behaviour", () => {
       );
     expect(lines[0]).toContain("underline");
     expect(lines[1]).toBe("none");
+  });
+
+  // Abnahme 015 ① S-1: the levels stand in one line where the container is wide enough, wrap
+  // only where it is not (Uzo wrap: allowed), and run from right to left in right-to-left writing.
+  test("the levels stand in one line in a wide container, wrap in a narrow one, and mirror in right-to-left writing", async ({
+    page,
+  }) => {
+    await serve(
+      page,
+      out,
+      `<div style="inline-size: 40rem">${MARKUP}</div><div style="inline-size: 6rem">${MARKUP.replace('id="s"', 'id="n"')}</div><div dir="rtl" style="inline-size: 40rem">${MARKUP.replace('id="s"', 'id="r"')}</div>`,
+    );
+    const boxes = (id: string) =>
+      page.locator(`#${id}`).evaluate((element) =>
+        [...element.children].map((child) => {
+          const box = child.getBoundingClientRect();
+          return { top: Math.round(box.top), left: box.left };
+        }),
+      );
+    const wide = await boxes("s");
+    expect(new Set(wide.map((box) => box.top)).size).toBe(1);
+    expect(wide[1]?.left ?? 0).toBeGreaterThan(wide[0]?.left ?? 0);
+    const narrow = await boxes("n");
+    expect(new Set(narrow.map((box) => box.top)).size).toBeGreaterThan(1);
+    const rtl = await boxes("r");
+    expect(new Set(rtl.map((box) => box.top)).size).toBe(1);
+    expect(rtl[1]?.left ?? 0).toBeLessThan(rtl[0]?.left ?? 0);
   });
 });
