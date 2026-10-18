@@ -154,7 +154,7 @@
 
 | Was | Wert |
 |---|---|
-| Commits ⑤ | rot `7ab25be`, grün: Hash in der Zeile nach dem Commit |
+| Commits ⑤ | rot `f41d834`, grün `0c38b8a` (nach dem Rebase auf ④ `53447a8`; davor `47a82e9`/`f057270`, ursprünglich `7ab25be`/`c73161e`) |
 | `brief` | faldilo, kompletigilo ≤ 750 (Daten-Tests und MCP e2e) |
 | Parität | `check:parity` 27 Eroj, 0 Differenzen, 285 Freigaben |
 | `check:regularo` | 58 Reguloj, 184 Jugxoj, 27 Uzoj, 0 Warnungen (keine neue `goal-keyword-shared`) |
