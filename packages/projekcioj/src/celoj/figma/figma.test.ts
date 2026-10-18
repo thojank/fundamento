@@ -1210,7 +1210,9 @@ describe("Figma plan for the markobutono (Spec 010 ②)", () => {
     expect(set?.description).toBe(markobutono?.uzo?.purpose);
     expect(set?.label?.defaultValue).toBe("Option");
     expect(set?.texts).toEqual({ error: "Fehler" });
-    expect(set?.sign).toMatch(/^<svg [^>]*viewBox="0 0 16 16"/);
+    // Nachlese 4 N-7 (Spec 014 ② O-7): the check mark is the Ikonaro's check, no sign.
+    expect(set?.sign).toBeUndefined();
+    for (const each of set?.variants ?? []) expect(each.icons).toEqual({ indicator: "check" });
     // The switch keeps its knob: no sign, no texts.
     const sxaltilo = plan.components.find((component) => component.set === "sxaltilo");
     expect(sxaltilo?.sign).toBeUndefined();

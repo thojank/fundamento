@@ -4262,23 +4262,32 @@ describe("the markobutono is drawn as a toggle: box, check mark, label and error
     expect(descendant(on, "error")?.properties.characters).toBe("Fehler");
     const control = descendant(on, "control");
     expect(control?.children.map((child) => child.name)).toEqual(["indicator"]);
-    expect(descendant(on, "indicator")?.children.map((child) => child.name)).toEqual(["mark"]);
+    // Nachlese 4 N-7: the check mark is the Ikonaro's check — a glyph frame per Aspekto, its
+    // visibility bound to the Aspekto's switch; no hand-drawn sign.
+    expect(descendant(on, "indicator")?.children.map((child) => child.name)).toEqual([
+      "glyph-komuna",
+      "glyph-ekzemplo",
+    ]);
+    expect(descendant(on, "mark")?.parent?.name).toBe("glyph-komuna");
     expect(bound(field, "itemSpacing")).toBe("spacing/small");
   });
 
-  it("binds the size of the check mark's frame, the colour of its vector, and the box's radius", async () => {
+  it("binds the size of the check mark's frame and glyphs, the colour of its vectors, and the box's radius", async () => {
     const { variant } = await drawn();
     const on = variant("checked=true, size=medium, state=rest");
     const indicator = descendant(on, "indicator");
     expect(bound(indicator, "width")).toBe("size/icon/medium");
     expect(bound(indicator, "height")).toBe("size/icon/medium");
-    const mark = descendant(on, "mark");
-    expect(mark?.type).toBe("VECTOR");
-    expect(mark?.properties.constraints).toEqual({ horizontal: "SCALE", vertical: "SCALE" });
-    const fill = (
-      (mark?.properties.fills ?? []) as { boundVariables?: { color?: { name: string } } }[]
-    )[0];
-    expect(fill?.boundVariables?.color?.name).toBe("color/action/primary/text");
+    for (const aspekto of ["komuna", "ekzemplo"]) {
+      const glyph = descendant(indicator, `glyph-${aspekto}`);
+      expect(bound(glyph, "width"), aspekto).toBe("size/icon/medium");
+      expect(bound(glyph, "visible"), aspekto).toBe(`ikonoj/${aspekto}`);
+      const mark = glyph?.children.find((child) => child.type === "VECTOR");
+      const fill = (
+        (mark?.properties.fills ?? []) as { boundVariables?: { color?: { name: string } } }[]
+      )[0];
+      expect(fill?.boundVariables?.color?.name, aspekto).toBe("color/action/primary/text");
+    }
     expect(bound(descendant(on, "control"), "cornerRadius")).toBe("radius/role/control");
     expect(indicator?.properties.opacity).toBe(1);
   });
@@ -4287,8 +4296,31 @@ describe("the markobutono is drawn as a toggle: box, check mark, label and error
     const { variant } = await drawn();
     const off = variant("checked=false, size=medium, state=rest");
     expect(descendant(off, "indicator")?.properties.opacity).toBe(0);
-    const fills = (descendant(off, "mark")?.properties.fills ?? []) as unknown[];
-    expect(fills).toEqual([]);
+    const vector = descendant(descendant(off, "indicator"), "glyph-komuna")?.children.find(
+      (child) => child.type === "VECTOR",
+    );
+    const fills = (vector?.properties.fills ?? []) as { boundVariables?: unknown }[];
+    expect(fills.some((fill) => fill.boundVariables !== undefined)).toBe(false);
+  });
+
+  // Nachlese 4 N-7: a file drawn before holds the hand-drawn check vector directly in the
+  // indicator; the run takes it out, so only the Ikonaro's glyphs are left.
+  it("takes the hand-drawn check vector of an earlier run out of the indicator (N-7)", async () => {
+    const { double, variant } = await drawn();
+    const on = variant("checked=true, size=medium, state=rest");
+    const indicator = descendant(on, "indicator") as DoubleNode;
+    const api = double.figma as { createNodeFromSvg: (svg: string) => DoubleNode };
+    const old = api.createNodeFromSvg(
+      '<svg viewBox="0 0 16 16"><path d="M6.4 12.6 2.2 8.4l1.4-1.4 2.8 2.8 6-6 1.4 1.4z"/></svg>',
+    ).children[0] as DoubleNode;
+    indicator.appendChild(old);
+    old.setSharedPluginData("fundamento", "part", "mark");
+    expect(indicator.children.some((child) => child.type === "VECTOR")).toBe(true);
+    await run(double, source);
+    expect(indicator.children.map((child) => child.name)).toEqual([
+      "glyph-komuna",
+      "glyph-ekzemplo",
+    ]);
   });
 
   it("keeps the switch's knob a filled frame without a sign or a column (Spec 010 ①)", async () => {

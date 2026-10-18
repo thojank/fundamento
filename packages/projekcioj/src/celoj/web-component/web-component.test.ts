@@ -187,6 +187,15 @@ describe("Web Component Celo for the ligilo (Spec 008 T015)", () => {
     expect(ligiloElement).toContain('described.push("fm-texts")');
     expect(ligiloElement).toContain('root.setAttribute("data-marked", "true")');
     expect(ligiloCss).toContain(':not([data-marked="true"])');
+    // Nachlese 4 N-7 (Spec 014 ② O-7): the mark is the Ikonaro's external, drawn by the Aspekto,
+    // in the size of the link; no hand-drawn arrow.
+    expect(ligiloElement).toContain(
+      '<slot name="icon-end"><fm-ikono name="external"></fm-ikono></slot>',
+    );
+    expect(ligiloElement).not.toContain("<svg");
+    expect(ligiloCss).toContain(
+      ':where([part="control"]:not([data-marked="true"])) slot[name^="icon-"] > fm-ikono { display: none; }',
+    );
     // No text of its own: the texts come from the Skemo descriptor at runtime (Art. VIII).
     expect(ligiloElement).not.toContain("öffnet extern");
     const templates = [...ligiloElement.matchAll(/`(<[^`]*)`/g)].map((m) => m[1] ?? "");
@@ -356,6 +365,17 @@ describe("Web Component Celo for the markobutono (Spec 010 ②)", () => {
     // The switch is unchanged: no mark, no error, no sign in its knob (① D-09).
     expect(parts(sxaltiloElement)).toEqual(["field", "control", "indicator", "label"]);
     expect(sxaltiloElement).toContain('role="switch"');
+  });
+
+  // Nachlese 4 N-7 (Spec 014 ② O-7): the check mark is the Ikonaro's check, drawn by the Aspekto
+  // in the size of the box; no hand-drawn sign. The knob of the switch stays a frame.
+  it("holds an fm-ikono check in the indicator that follows the size of the box (N-7)", () => {
+    expect(markobutonoElement).toContain(
+      '<span part="indicator"><fm-ikono name="check"></fm-ikono></span>',
+    );
+    expect(markobutonoElement).not.toContain("<svg");
+    expect(markobutonoElement).toContain(`querySelector('[part="indicator"] fm-ikono')`);
+    expect(sxaltiloElement).toContain('<span part="indicator"></span>');
   });
 
   it("is the form's validity: a required box left empty is valueMissing, with the text of a11y.texts.required", () => {
