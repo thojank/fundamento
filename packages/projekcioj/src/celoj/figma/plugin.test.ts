@@ -6873,6 +6873,32 @@ describe("the plugin draws the alsxutilo (Spec 015 ②)", () => {
   });
 });
 
+// Nachlese 4 N-8 (Spec 014 ⑤ O-23): the open kompletigilo shows both states of an entry — the
+// first suggestion chosen (its text in color.text.default), the second the active one under the
+// keyboard, its row filled with color.action.tertiary.hover; the others with the rest fill.
+describe("the kompletigilo fills the active suggestion (N-8)", () => {
+  const fillOf = (node: DoubleNode | undefined) =>
+    ((node?.properties.fills ?? []) as { boundVariables?: { color?: { name: string } } }[])[0]
+      ?.boundVariables?.color?.name;
+
+  it("the second suggestion of an open field is filled as active, the first written as chosen", async () => {
+    const double = modelDouble();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    const set = pageNodes(double).find((node) => node.name === "kompletigilo");
+    const open = set?.children.find(
+      (child) => child.name === "size=medium, expanded=true, state=rest",
+    );
+    expect(fillOf(descendant(open, "suggestion-1"))).toBe("color/action/tertiary/rest");
+    expect(fillOf(descendant(open, "suggestion-2"))).toBe("color/action/tertiary/hover");
+    expect(fillOf(descendant(open, "suggestion-3"))).toBe("color/action/tertiary/rest");
+    expect(fillOf(descendant(open, "suggestions-1"))).toBe("color/text/default");
+    expect(fillOf(descendant(open, "suggestions-2"))).toBe("color/text/subtle");
+    const before = double.snapshot();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    expect(double.snapshot()).toBe(before);
+  });
+});
+
 // Spec 015 ③ (plan ③ D-05): the plugin draws the karto — every variant the surface (fill, radius,
 // the border, the shadow as an effect, clipping) with the media and the body; the media a
 // stand-in image across the top where vertical, at the start beside the body where horizontal,

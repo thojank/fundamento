@@ -1732,6 +1732,26 @@ describe("Web Component Celo for the faldilo and the kompletigilo (Spec 014 ⑤)
     );
     expect(componentCssIssues("kompletigilo.css", css)).toEqual([]);
   });
+
+  // Nachlese 4 N-8 (O-23): the active suggestion is a bound part — its fill by active, written
+  // as data-active on the row (no ARIA attribute says it: the input's aria-activedescendant
+  // points at it); no class of its own. N-9 (O-24): loading is aria-busy on the input and the
+  // live region says the loading word; the field stays operable (no aria-disabled).
+  it("the kompletigilo fills the active suggestion by active and says 'lädt' while loading (N-8, N-9)", () => {
+    const element = files["eroj/src/generated/fm-kompletigilo.ts"] ?? "";
+    const css = cssOf("kompletigilo");
+    expect(css).toContain(
+      ':where([part="field"]) [part="suggestion"][data-active="true"] {\n  background-color: var(--fm-color-action-tertiary-hover);',
+    );
+    expect(css).toContain(
+      ':where([part="field"]) [part="suggestion"][data-active="false"] {\n  background-color: var(--fm-color-action-tertiary-rest);',
+    );
+    expect(element).not.toContain("fm-active");
+    expect(element).toContain('row.setAttribute("data-active", String(row === active))');
+    expect(element).toContain('control.setAttribute("aria-busy", "true")');
+    expect(element).toContain('TEXTS["loading"]');
+    expect(element).not.toContain('control.setAttribute("aria-disabled", "true");\n      } else');
+  });
 });
 
 // Spec 015 ① (section ①, plan ① D-03, D-04): the pagxigilo draws its pages itself from page and
