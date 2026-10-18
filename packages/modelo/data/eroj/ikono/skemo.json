@@ -28,6 +28,7 @@
           "sort-ascending",
           "sort-descending",
           "success",
+          "upload",
           "warning"
         ],
         "required": true,

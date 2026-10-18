@@ -92,6 +92,18 @@ type PartNode =
   | "separator-*"
   | "separator-*-glyph-*"
   | "separator-*-mark-*"
+  // An upload (Spec 015 ②, plan ② D-06): the dropzone with the button that chooses (`choose`,
+  // its word `choose-label`) and the hint; in the example the list of the chosen files, one row
+  // each (`file-row-1` …) with name, size and the remove butono.
+  | "dropzone"
+  | "drop-hint"
+  | "choose"
+  | "choose-label"
+  | "file-list"
+  | "file-row-*"
+  | "file-name-*"
+  | "file-size-*"
+  | "remove-*"
   | "listbox"
   | "suggestion-*"
   | "suggestions-*"
@@ -617,6 +629,33 @@ const STRUCTURE_BINDINGS: Readonly<Record<string, Readonly<Record<string, readon
   // entry (a link's, the current page's) and the label role, the underline its bottom stroke
   // (none on the current page) —, a chevron after every level but the last, its size bound to the
   // holder and its glyphs, its colour the fill of the glyphs' vectors.
+  // An upload (Spec 015 ②, plan ② D-06): the dropzone carries its fill, its room on every side,
+  // the gap between the button and the hint, its radius and the border (colour, width, the
+  // dash pattern of the variant); the hint, the names and sizes of the files are texts in their
+  // colours and roles; the button's height its minimum; the gap of the box between the parts of
+  // the field; the list's gap between the files and inside every row; every remove a square of
+  // remove.size. The button and the removes take the butono's look (composed).
+  upload: {
+    "dropzone.fill": [{ node: "dropzone", fields: ["fills"], paint: true }],
+    "dropzone.inline-padding": [{ node: "dropzone", fields: [...PADDINGS] }],
+    "dropzone.gap": [{ node: "dropzone", fields: ["itemSpacing"] }],
+    "dropzone.radius": [{ node: "dropzone", fields: ["cornerRadius"] }],
+    "border.color": [{ node: "dropzone", fields: ["strokes"], paint: true }],
+    "border.width": [{ node: "dropzone", fields: ["strokeWeight"] }],
+    "drop-hint.color": [{ node: "drop-hint", fields: ["fills"], paint: true }],
+    "drop-hint.typography": typographyOf("drop-hint"),
+    "choose.height": [{ node: "choose", fields: ["minHeight"] }],
+    "box.gap": [{ node: "field", fields: ["itemSpacing"] }],
+    "file-list.gap": [
+      { node: "file-list", fields: ["itemSpacing"] },
+      { node: "file-row-*", fields: ["itemSpacing"] },
+    ],
+    "file-name.color": [{ node: "file-name-*", fields: ["fills"], paint: true }],
+    "file-name.typography": typographyOf("file-name-*"),
+    "file-size.color": [{ node: "file-size-*", fields: ["fills"], paint: true }],
+    "file-size.typography": typographyOf("file-size-*"),
+    "remove.size": [{ node: "remove-*", fields: ["width", "height"] }],
+  },
   breadcrumb: {
     "item.color": [{ node: "items-*", fields: ["fills"], paint: true }],
     "item.typography": typographyOf("items-*"),
@@ -3551,6 +3590,139 @@ async function applyComponents(variables, warnings) {
     bindMeasures(measures, report, component, variant);
   }
   /**
+   * An upload (Spec 015 ②, plan ② D-06): the variant holds the field — a column: the label (the
+   * label property), the dropzone, the help and the error (the plan's words, in every variant as a
+   * field's); the dropzone a row of the ring around the button that chooses — a stand-in with the
+   * butono's look (composed.choose: fill, border, word, icon upload, box) — and the hint, shown
+   * where the variant has a dropzone; its border dashed, solid or not shown as the variant says.
+   * The example (the spec's „mit zwei Dateien") lists the files below: a row each with name, size
+   * and a remove stand-in in the butono's look (composed.remove) with the icon close.
+   */
+  async function drawUpload(node, component, variant, report, labels, example) {
+    const texts = component.texts || {};
+    const icons = variant.icons || {};
+    const composed = component.composed || {};
+    const field = part(node, "field", () => figma.createFrame());
+    const label = part(field, "label", () => figma.createText());
+    const zone = part(field, "dropzone", () => figma.createFrame());
+    const ring = part(zone, "focus-ring", () => figma.createFrame());
+    const gap = part(ring, "focus-gap", () => figma.createFrame());
+    const choose = part(gap, "choose", () => figma.createFrame());
+    const icon = part(choose, "icon", () => figma.createFrame());
+    const chooseLabel = part(choose, "choose-label", () => figma.createText());
+    const hint = part(zone, "drop-hint", () => figma.createText());
+    const help = part(field, "help", () => figma.createText());
+    const error = part(field, "error", () => figma.createText());
+    const files = example !== undefined && Array.isArray(example.files) ? example.files : [];
+    const list = files.length > 0 ? part(field, "file-list", () => figma.createFrame()) : undefined;
+    const rows = files.map((file, index) => {
+      const n = index + 1;
+      const row = part(list, "file-row-" + n, () => figma.createFrame());
+      const name = part(row, "file-name-" + n, () => figma.createText());
+      const size = part(row, "file-size-" + n, () => figma.createText());
+      const remove = part(row, "remove-" + n, () => figma.createFrame());
+      const removeIcon = part(remove, "icon", () => figma.createFrame());
+      [name, size, remove].forEach((child, at) => {
+        if (row.children.indexOf(child) !== at) row.insertChild(at, child);
+      });
+      return { n, file, row, name, size, remove, removeIcon };
+    });
+    [label, zone, help, error].concat(list !== undefined ? [list] : []).forEach((child, index) => {
+      if (field.children.indexOf(child) !== index) field.insertChild(index, child);
+    });
+    [ring, hint].forEach((child, index) => {
+      if (zone.children.indexOf(child) !== index) zone.insertChild(index, child);
+    });
+    [icon, chooseLabel].forEach((child, index) => {
+      if (choose.children.indexOf(child) !== index) choose.insertChild(index, child);
+    });
+    const all = [label, chooseLabel, hint, help, error].concat(...rows.map((row) => [row.name, row.size]));
+    for (const each of all) await loadCurrentFont(each);
+    writeCase(component, variant, label);
+    if (variant.font !== undefined) {
+      for (const each of all) write(each, "fontName", fonts.get(variant.font.family + " " + variant.font.style));
+    }
+    write(chooseLabel, "characters", typeof texts.choose === "string" ? texts.choose : "");
+    write(hint, "characters", typeof texts["drop-hint"] === "string" ? texts["drop-hint"] : "");
+    if (typeof texts.help === "string") write(help, "characters", texts.help);
+    if (typeof texts.error === "string") write(error, "characters", texts.error);
+    for (const row of rows) {
+      write(row.name, "characters", row.file.name);
+      write(row.size, "characters", row.file.size);
+    }
+    if (example === undefined) labels.push(label);
+    else if (component.label !== undefined) write(label, "characters", component.label.defaultValue);
+    const frames = [node, field, zone, ring, gap, choose, icon]
+      .concat(list !== undefined ? [list] : [])
+      .concat(...rows.map((row) => [row.row, row.remove, row.removeIcon]));
+    for (const frame of frames) own(frame, NEUTRAL);
+    for (const each of all) own(each, NEUTRAL_TEXT);
+    own(node, HUG_LAYOUT);
+    if (example !== undefined) {
+      own(node, {
+        paddingLeft: example.padding,
+        paddingRight: example.padding,
+        paddingTop: example.padding,
+        paddingBottom: example.padding,
+      });
+    }
+    own(field, FIELD_LAYOUT);
+    own(zone, TOGGLE_LAYOUT);
+    for (const frame of [ring, gap]) own(frame, HUG_LAYOUT);
+    own(choose, CONTROL_LAYOUT);
+    own(icon, INDICATOR_LAYOUT);
+    // The hint shows only where the variant has a dropzone, as on the web (hidden, no room).
+    own(hint, { visible: variant.props.dropzone === "true" });
+    if (list !== undefined) own(list, TEXTS_LAYOUT);
+    for (const row of rows) {
+      own(row.row, TOGGLE_LAYOUT);
+      own(row.remove, CONTROL_LAYOUT);
+      own(row.remove, { layoutSizingHorizontal: "FIXED", layoutSizingVertical: "FIXED" });
+      own(row.removeIcon, INDICATOR_LAYOUT);
+    }
+    for (const child of frames.concat(all)) own(child, IN_FLOW);
+    for (const each of all) own(each, TEXT_SIZING);
+    // The dash pattern of the border (own() would empty a list): the plan's numbers, or none.
+    if (variant.stroke !== undefined) gather(zone).dashPattern = variant.stroke.dashPattern.slice();
+    const measures = [];
+    const glyphs = drawGlyphs(icon, icons["icon-start"] || "upload", "icon-", measures);
+    const nodes = Object.assign(
+      {
+        field, label, help, error, dropzone: zone, "drop-hint": hint,
+        "focus-ring": ring, "focus-gap": gap, control: choose, choose,
+      },
+      list !== undefined ? { "file-list": list } : {},
+    );
+    for (const row of rows) {
+      nodes["file-row-" + row.n] = row.row;
+      nodes["file-name-" + row.n] = row.name;
+      nodes["file-size-" + row.n] = row.size;
+      nodes["remove-" + row.n] = row.remove;
+    }
+    for (const measure of bind(nodes, variant, variables, component.structure)) measures.push(measure);
+    // The button that chooses looks like the butono it composes (emphasis medium), its word and
+    // its icon too; every remove like a butono of emphasis low with the icon close.
+    if (composed.choose !== undefined) {
+      const look = Object.assign({ control: choose, label: chooseLabel, icon }, glyphs);
+      for (const measure of bind(look, composed.choose, variables, "control")) measures.push(measure);
+    }
+    const removeGlyphs = [];
+    for (const row of rows) {
+      const own2 = drawGlyphs(row.removeIcon, icons.remove || "close", "icon-", measures);
+      removeGlyphs.push(own2);
+      if (composed.remove === undefined) continue;
+      const look = Object.assign({ control: row.remove, icon: row.removeIcon }, own2);
+      for (const measure of bind(look, composed.remove, variables, "control")) measures.push(measure);
+    }
+    // A stroke that is none keeps its binding and shows nothing (as a state's, Spec 011 ③).
+    if (variant.stroke !== undefined && variant.stroke.style === "none") {
+      for (const paint of gather(zone).strokes || []) paint.visible = false;
+    }
+    for (const each of frames.concat(all).concat(Object.values(glyphs))) flush(each);
+    for (const each of removeGlyphs) for (const glyph of Object.values(each)) flush(glyph);
+    bindMeasures(measures, report, component, variant);
+  }
+  /**
    * The examples beside a pagination's set (Spec 015 ①, O-2): one frame per example, each found
    * by its own mark or created, placed in the frame „Eroj" after the set in their order.
    */
@@ -3571,7 +3743,8 @@ async function applyComponents(variables, warnings) {
         stamp(example, "example", key);
       }
       write(example, "name", spec.name);
-      await drawPagination(example, component, variant, report, spec);
+      if (component.structure === "upload") await drawUpload(example, component, variant, report, [], spec);
+      else await drawPagination(example, component, variant, report, spec);
       if (example.parent !== frame) frame.appendChild(example);
       const at = frame.children.indexOf(set) + 1 + index;
       if (frame.children.indexOf(example) !== at) frame.insertChild(at, example);
@@ -3943,6 +4116,12 @@ async function applyComponents(variables, warnings) {
       }
       if (component.structure === "breadcrumb") {
         await drawBreadcrumb(node, component, variant, report);
+        if (existing === undefined) made.push(node);
+        continue;
+      }
+      // An upload (Spec 015 ②) is drawn in a function of its own.
+      if (component.structure === "upload") {
+        await drawUpload(node, component, variant, report, labels, undefined);
         if (existing === undefined) made.push(node);
         continue;
       }

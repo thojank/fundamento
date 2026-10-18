@@ -2555,6 +2555,53 @@
           "target": "#Ikono"
         }
       ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Alsxutilo",
+      "term": "Alsxutilo",
+      "inScheme": "eroj",
+      "prefLabel": {
+        "eo": "Alsxutilo",
+        "en": "file input",
+        "de": "Datei hochladen"
+      },
+      "altLabel": {
+        "en": [
+          "alsxutilo",
+          "file input",
+          "file upload",
+          "upload",
+          "attachment"
+        ],
+        "de": [
+          "Datei hochladen",
+          "Dateiauswahl",
+          "Hochladen",
+          "Anhang",
+          "alsxutilo"
+        ]
+      },
+      "definition": {
+        "en": "A file input: chooses one or more files to send with a form and states in its help which files are allowed. The platform's own file input is its core, shown as a butono with the ikono upload; a wrong kind or a file too large makes it invalid with an error that says what to do; the chosen files stand in a list, each with its size and a butono that removes it; the number of files is announced; an optional area takes dropped files. Sending the files belongs to the application.",
+        "de": "Ein Datei-Upload: wählt eine oder mehrere Dateien, die mit einem Formular gesendet werden, und nennt in seiner Hilfe, welche Dateien erlaubt sind. Kern ist das native Datei-Eingabefeld der Plattform, gezeigt als butono mit dem ikono upload; eine falsche Art oder eine zu große Datei macht es ungültig, mit einem Fehler, der sagt, was zu tun ist; die gewählten Dateien stehen in einer Liste, jede mit Größe und einem butono, der sie entfernt; die Zahl der Dateien wird angesagt; eine optionale Fläche nimmt abgelegte Dateien an. Das Senden gehört der Anwendung."
+      },
+      "broader": [
+        "#Ero"
+      ],
+      "relations": [
+        {
+          "predicate": "references",
+          "target": "#Butono"
+        },
+        {
+          "predicate": "references",
+          "target": "#Ikono"
+        },
+        {
+          "predicate": "references",
+          "target": "#Kampo"
+        }
+      ]
     }
   ]
 }

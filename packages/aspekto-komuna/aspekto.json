@@ -42,6 +42,7 @@
       "sort-ascending": "sort-ascending",
       "sort-descending": "sort-descending",
       "success": "check-circle",
+      "upload": "upload-simple",
       "warning": "warning"
     }
   },

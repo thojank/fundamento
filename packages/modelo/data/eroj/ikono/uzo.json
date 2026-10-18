@@ -119,6 +119,10 @@
         {
           "ero": "spuro",
           "kialo": "The separator of a breadcrumb is the icon chevron-right, decorative, because it points down the path."
+        },
+        {
+          "ero": "alsxutilo",
+          "kialo": "The button of a file input shows the icon upload and its remove buttons the icon close, because the sign is read faster than the word; the word names the action."
         }
       ],
       "never": [],

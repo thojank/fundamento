@@ -38,7 +38,8 @@ export type HostControl =
   | "menu"
   | "disclosure"
   | "pagination"
-  | "suggest";
+  | "suggest"
+  | "upload";
 
 export interface ElementNames {
   /** `fm-butono` */
@@ -108,8 +109,12 @@ export function hostOf(
   popover = false,
   suggest = false,
   pagination = false,
+  upload = false,
 ): HostControl {
   if (role === "link") return "a";
+  // Spec 015 ② (plan ② D-05): the platform's file input is heard as a button; with a dropzone
+  // part it is the file input of an alsxutilo, not a button of its own.
+  if (role === "button" && upload) return "upload";
   // Spec 015 ① (plan ① D-03): a navigation with an ellipsis part draws its pages itself — a
   // shadow host; the breadcrumb stays a light host like the navigado (its links are the page's).
   if (role === "navigation" && pagination) return "pagination";
@@ -519,6 +524,22 @@ function separatorMarkup(): string {
  * panel slot; the default slot stays empty and hidden (the children lie in the rows).
  */
 /**
+ * The shadow markup of a file input (Spec 015 ②, plan ② D-05): the field of the kampo — the
+ * label with the mark of a required field, help and error below — around the platform's own file
+ * input. The input lies over the button that chooses (a composed butono with the ikono upload,
+ * inert: the input is the one target, the button its look), both in the picker; the dropzone
+ * holds the picker and its hint; the error holder shows the slot and the element's own message;
+ * the list of the chosen files follows, and a live region says how many there are.
+ */
+function uploadMarkup(): string {
+  return `<div part="field"><label part="label" for="control"><slot></slot><span part="required-mark" aria-hidden="true">${REQUIRED_MARK}</span></label><div part="dropzone"><span part="picker"><fm-butono part="choose" emphasis="medium" inert><fm-ikono slot="icon-start" name="upload"></fm-ikono><span id="choose-text"></span></fm-butono><input part="control" id="control" type="file"></span><span part="drop-hint" id="drop-hint" hidden></span></div><span part="help" id="help" hidden><slot name="help"></slot></span><span part="error" id="error" hidden aria-live="polite"><slot name="error"></slot><span id="file-error"></span></span><ul part="file-list" hidden></ul><span part="count" role="status" aria-live="polite" class="fm-hidden"></span><span id="fm-texts" hidden></span></div>`;
+}
+
+/** One chosen file (Spec 015 ②): its name, its size and the butono that removes it. */
+const FILE_ROW =
+  '<li part="file"><span part="file-name"></span><span part="file-size"></span><fm-butono part="remove" emphasis="low" size="small"><fm-ikono slot="icon-start" name="close"></fm-ikono></fm-butono></li>';
+
+/**
  * The shadow markup of a pagination (Spec 015 ①, plan ① D-03): the nav landmark around an ordered
  * list the element fills from page and total-pages — the arrow back, the pages, the arrow forth —
  * every item a button (mode button) or the platform's link (mode link).
@@ -571,6 +592,7 @@ function markup(
   if (host === "meter") return meterMarkup();
   if (host === "light") return lightMarkup(slots, role, breadcrumb);
   if (host === "pagination") return paginationMarkup();
+  if (host === "upload") return uploadMarkup();
   if (host === "tabs") return tabsMarkup();
   if (host === "input") return fieldMarkup(slots);
   if (host === "textarea") return fieldMarkup(slots, true);
@@ -655,8 +677,8 @@ export function elementSource({
                                     : host === "disclosure"
                                       ? "details"
                                       : host === "pagination"
-                                        ? "[part=\'list\']"
-                                        : host === "suggest"
+                                        ? "[part='list']"
+                                        : host === "suggest" || host === "upload"
                                           ? "input"
                                           : host === "popover"
                                             ? "[role=dialog]"
@@ -667,6 +689,7 @@ export function elementSource({
   const isGroup = host === "group";
   const isSelect = host === "select";
   const isSuggest = host === "suggest";
+  const isUpload = host === "upload";
   const isDisclosure = host === "disclosure";
   const isFieldHost = host === "input" || host === "textarea" || isSuggest;
   // The platform element of a field: the generated code names it, so the types narrow (TS).
@@ -1006,8 +1029,9 @@ export function elementSource({
   // A field shows its error once a person has touched it — typed into it — or once the form was
   // sent and the platform said invalid on the host (Spec 011 ② F-8); an empty, untouched required
   // field shows none, as the other fields of a form.
-  const invalidReport = isFieldHost
-    ? `    this.addEventListener("invalid", () => {
+  const invalidReport =
+    isFieldHost || isUpload
+      ? `    this.addEventListener("invalid", () => {
       this.#reported = true;
       this.#render();
     });
@@ -1017,7 +1041,7 @@ export function elementSource({
       this.#render();
     });
 `
-    : "";
+      : "";
   const inputEnter =
     host === "input"
       ? `    control.addEventListener("keydown", (event) => {
@@ -1780,7 +1804,7 @@ ${
   // The text of a slot of the light DOM, read for a meter's value text and a table's caption or
   // empty state (the default slot is named "").
   const slotTextMethod =
-    isMeter || isLight
+    isMeter || isLight || isUpload
       ? `
   /** The text a slot holds (the default slot as ""), trimmed; empty without content. */
   #slotText(name: string): string {
@@ -2775,6 +2799,269 @@ ${
     if (this.propValue("expanded") !== true && this.#listbox().matches(":popover-open")) this.#suggestClose();
 `
     : "";
+  // A file input (Spec 015 ②, plan ② D-05, E7): the platform's file input chooses, the element
+  // keeps the chosen files — a second choice adds to them where multiple allows, a drop on the
+  // dropzone too — and writes them back into the input, so the platform's own list and the form
+  // value always say the same. The dropzone is an addition for the pointer: dragover marks the
+  // field (its state), a drop takes the files. Every remove takes one file away.
+  const uploadInit = isUpload
+    ? `    const fileInput = control as HTMLInputElement;
+    fileInput.addEventListener("change", () => {
+      this.#take([...(fileInput.files ?? [])], true);
+    });
+    const zone = root.querySelector('[part="dropzone"]');
+    const field = root.querySelector('[part="field"]');
+    if (zone instanceof HTMLElement && field instanceof HTMLElement) {
+      const over = (event: DragEvent) => {
+        if (this.propValue("dropzone") !== true || this.propValue("disabled") === true) return;
+        event.preventDefault();
+        if (event.dataTransfer !== null) event.dataTransfer.dropEffect = "copy";
+        field.setAttribute("dragover", "");
+      };
+      zone.addEventListener("dragenter", over);
+      zone.addEventListener("dragover", over);
+      zone.addEventListener("dragleave", (event) => {
+        if (event.relatedTarget instanceof Node && zone.contains(event.relatedTarget)) return;
+        field.removeAttribute("dragover");
+      });
+      zone.addEventListener("drop", (event) => {
+        field.removeAttribute("dragover");
+        if (this.propValue("dropzone") !== true || this.propValue("disabled") === true) return;
+        event.preventDefault();
+        this.#take([...(event.dataTransfer?.files ?? [])], false);
+      });
+    }
+    root.querySelector('[part="file-list"]')?.addEventListener("click", (event) => {
+      const remove = event
+        .composedPath()
+        .find((node) => node instanceof HTMLElement && node.getAttribute("part") === "remove");
+      if (!(remove instanceof HTMLElement) || remove.hasAttribute("disabled")) return;
+      this.#remove(Number(remove.getAttribute("data-index")));
+    });
+`
+    : "";
+  // The render of a file input (Spec 015 ②, plan ② D-05): accept and multiple on the platform's
+  // input; the words of the Modelo on the button, the hint and every remove; one row per chosen
+  // file with its name and its size; the validity — a file of another kind or larger than
+  // max-size, else a required field without a file — with the Modelo's error (placeholders filled)
+  // or the error slot's text; the files as the form value under the name; aria-invalid as a field.
+  const uploadRender = isUpload
+    ? `    {
+      const input = control as HTMLInputElement;
+      const shadow = this.shadowRoot;
+      const language = this.#lingvo();
+      const word = (key: string): string => TEXTS[key]?.[language] ?? TEXTS[key]?.en ?? "";
+      const accept = this.propValue("accept");
+      if (typeof accept === "string" && accept !== "") input.setAttribute("accept", accept);
+      else input.removeAttribute("accept");
+      const multiple = this.propValue("multiple") === true;
+      input.multiple = multiple;
+      if (!multiple && this.#files.length > 1) {
+        this.#files = this.#files.slice(0, 1);
+        this.#sync();
+      }
+      const disabled = this.propValue("disabled") === true;
+      shadow?.querySelector('[part="choose"]')?.toggleAttribute("disabled", disabled);
+      const chooseText = shadow?.getElementById("choose-text");
+      if (chooseText instanceof HTMLElement) chooseText.textContent = word("choose-name");
+      const hint = shadow?.getElementById("drop-hint");
+      if (hint instanceof HTMLElement) {
+        hint.textContent = word("drop-hint-name");
+        hint.hidden = this.propValue("dropzone") !== true;
+      }
+      const list = shadow?.querySelector('[part="file-list"]');
+      if (list instanceof HTMLElement) {
+        while (list.children.length > this.#files.length) list.lastElementChild?.remove();
+        while (list.children.length < this.#files.length) {
+          list.insertAdjacentHTML("beforeend", \`${FILE_ROW}\`);
+        }
+        this.#files.forEach((file, index) => {
+          const row = list.children[index];
+          if (row === undefined) return;
+          const fileName = row.querySelector('[part="file-name"]');
+          if (fileName !== null) fileName.textContent = file.name;
+          const fileSize = row.querySelector('[part="file-size"]');
+          if (fileSize !== null) fileSize.textContent = this.#size(file.size, language);
+          const remove = row.querySelector('[part="remove"]');
+          if (remove !== null) {
+            remove.setAttribute("label", this.#fill(word("remove-name"), { file: file.name }));
+            remove.setAttribute("data-index", String(index));
+            remove.toggleAttribute("disabled", disabled);
+          }
+        });
+        list.hidden = this.#files.length === 0;
+      }
+      const required = this.propValue("required") === true;
+      input.required = required;
+      if (required) input.setAttribute("aria-required", "true");
+      else input.removeAttribute("aria-required");
+      const problem = this.#problem(language);
+      this.#fileError = problem?.message ?? "";
+      const own = shadow?.getElementById("file-error");
+      if (own instanceof HTMLElement) own.textContent = this.#fileError;
+      const missing = required && this.#files.length === 0;
+      const slotted = this.#slotText("error");
+      if (problem !== undefined) this.#internals.setValidity(problem.flags, problem.message, input);
+      else if (missing) this.#internals.setValidity({ valueMissing: true }, slotted === "" ? word("required") : slotted, input);
+      else this.#internals.setValidity({});
+      const formName = this.propValue("name");
+      if (typeof formName === "string" && formName !== "" && this.#files.length > 0) {
+        const data = new FormData();
+        for (const file of this.#files) data.append(formName, file);
+        this.#internals.setFormValue(data);
+      } else {
+        this.#internals.setFormValue(null);
+      }
+      const invalid =
+        this.propValue("invalid") === true ||
+        this.#filled("error") ||
+        problem !== undefined ||
+        (missing && this.#reported);
+      if (invalid) input.setAttribute("aria-invalid", "true");
+      else input.removeAttribute("aria-invalid");
+    }
+`
+    : "";
+  // The methods of a file input (Spec 015 ②, plan ② D-05): take, remove and write back the
+  // files; the first file that breaks accept or max-size and its message; the size and the kinds
+  // in the person's words (Intl, no word of the element's own: Art. VIII); the count spoken in
+  // the live region; the reset of the form; the validity as a native input exposes it.
+  const uploadMethods = isUpload
+    ? `
+  /** The chosen files, in the order they were chosen (the upload itself is the application's, E7). */
+  get files(): readonly File[] {
+    return [...this.#files];
+  }
+
+  /** Takes chosen or dropped files: added where multiple allows, else the first one alone. */
+  #take(chosen: File[], native: boolean): void {
+    if (chosen.length === 0) {
+      // A cancelled dialog empties the platform's selection in some engines: the list stays.
+      this.#sync();
+      return;
+    }
+    this.#files = this.propValue("multiple") === true ? [...this.#files, ...chosen] : chosen.slice(0, 1);
+    this.#reported = true;
+    this.#sync();
+    this.#render();
+    this.#announce();
+    if (!native) this.dispatchEvent(new Event("input", { bubbles: true, composed: true }));
+    this.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+
+  /** Removes one file; the focus goes to the next remove, else the previous, else the input. */
+  #remove(index: number): void {
+    if (!Number.isInteger(index) || index < 0 || index >= this.#files.length) return;
+    this.#files.splice(index, 1);
+    this.#sync();
+    this.#render();
+    this.#announce();
+    const removes = [...(this.shadowRoot?.querySelectorAll('[part="remove"]') ?? [])] as HTMLElement[];
+    (removes[index] ?? removes[index - 1] ?? this.#control).focus();
+    this.dispatchEvent(new Event("input", { bubbles: true, composed: true }));
+    this.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+
+  /** Writes the files back into the platform's input, so both lists say the same. */
+  #sync(): void {
+    const input = this.#control as HTMLInputElement;
+    if (typeof DataTransfer === "undefined") return;
+    const transfer = new DataTransfer();
+    for (const file of this.#files) transfer.items.add(file);
+    input.files = transfer.files;
+  }
+
+  /** Says how many files are chosen (a live region): the Modelo's words with the number. */
+  #announce(): void {
+    const count = this.shadowRoot?.querySelector('[part="count"]');
+    if (!(count instanceof HTMLElement)) return;
+    const language = this.#lingvo();
+    const words = TEXTS["file-list-count"]?.[language] ?? TEXTS["file-list-count"]?.en ?? "";
+    count.textContent = this.#fill(words, { count: new Intl.NumberFormat(language).format(this.#files.length) });
+  }
+
+  /** The first chosen file that breaks accept (typeMismatch) or max-size (rangeOverflow). */
+  #problem(language: string): { flags: ValidityStateFlags; message: string } | undefined {
+    const accept = this.propValue("accept");
+    const kinds =
+      typeof accept === "string"
+        ? accept.split(",").map((kind) => kind.trim().toLowerCase()).filter((kind) => kind !== "")
+        : [];
+    const bound = this.propValue("max-size");
+    const limit = typeof bound === "string" && bound !== "" ? Number(bound) : 0;
+    const word = (key: string): string => TEXTS[key]?.[language] ?? TEXTS[key]?.en ?? "";
+    for (const file of this.#files) {
+      if (kinds.length > 0 && !kinds.some((kind) => this.#fits(file, kind))) {
+        return {
+          flags: { typeMismatch: true },
+          message: this.#fill(word("accept-invalid"), { file: file.name, accept: this.#kinds(kinds, language) }),
+        };
+      }
+      if (Number.isFinite(limit) && limit > 0 && file.size > limit) {
+        return {
+          flags: { rangeOverflow: true },
+          message: this.#fill(word("max-size-invalid"), { file: file.name, "max-size": this.#size(limit, language) }),
+        };
+      }
+    }
+    return undefined;
+  }
+
+  /** Whether a file is of a kind: an ending (.pdf), a media type (image/png) or a family (image/*). */
+  #fits(file: File, kind: string): boolean {
+    if (kind.startsWith(".")) return file.name.toLowerCase().endsWith(kind);
+    const type = file.type.toLowerCase();
+    if (kind.endsWith("/*")) return type.startsWith(kind.slice(0, -1));
+    return type === kind;
+  }
+
+  /** The kinds as the person reads them: endings in capitals, joined with the language's or. */
+  #kinds(kinds: readonly string[], language: string): string {
+    const shown = kinds.map((kind) => (kind.startsWith(".") ? kind.slice(1).toUpperCase() : kind));
+    return new Intl.ListFormat(language, { type: "disjunction" }).format(shown);
+  }
+
+  /** A size in the person's units (decimal: byte, kilobyte, megabyte), as Intl names them. */
+  #size(bytes: number, language: string): string {
+    const [unit, factor] =
+      bytes >= 1_000_000 ? ["megabyte", 1_000_000] : bytes >= 1_000 ? ["kilobyte", 1_000] : ["byte", 1];
+    return new Intl.NumberFormat(language, {
+      style: "unit",
+      unit,
+      unitDisplay: "short",
+      maximumFractionDigits: 1,
+    }).format(bytes / factor);
+  }
+
+  /** A text of the Modelo with its placeholders ({file}, {count}, …) filled. */
+  #fill(text: string, values: Readonly<Record<string, string>>): string {
+    return text.replace(/\\{([a-z-]+)\\}/g, (match, key: string) => values[key] ?? match);
+  }
+
+  /** A reset of the form empties the list, as it empties a native file input. */
+  formResetCallback(): void {
+    this.#files = [];
+    this.#reported = false;
+    this.#sync();
+    this.#render();
+  }
+
+  /** The validity of the field, as a native input exposes it (ElementInternals). */
+  get validity(): ValidityState {
+    return this.#internals.validity;
+  }
+
+  /** The message of the validity, as a native input exposes it. */
+  get validationMessage(): string {
+    return this.#internals.validationMessage;
+  }
+
+  /** Whether the field is valid; fires invalid when it is not, as a native input does. */
+  checkValidity(): boolean {
+    return this.#internals.checkValidity();
+  }
+`
+    : "";
   // The skip link moves the focus to its target (G5): a landmark takes it once it may (tabindex
   // -1, written where the markup has none); the fragment of the link is the platform's.
   const skipInit = isSkip
@@ -2911,7 +3198,7 @@ export class ${className} extends Base {
   readonly #root: HTMLElement;
   readonly #label: HTMLSlotElement;
   readonly #texts: HTMLElement;
-${autoField}${isFieldHost ? "  /** Whether a person touched the field or the form reported it invalid (Spec 011 ② F-8): the error shows from then on. */\n  #reported = false;\n" : ""}
+${autoField}${isUpload ? '  /** The chosen files (Spec 015 ②): the value of the field, in the order they were chosen. */\n  #files: File[] = [];\n  /** The element\'s own error: a chosen file breaks accept or max-size (empty while none does). */\n  #fileError = "";\n' : ""}${isFieldHost || isUpload ? "  /** Whether a person touched the field or the form reported it invalid (Spec 011 ② F-8): the error shows from then on. */\n  #reported = false;\n" : ""}
   constructor() {
     super();
     this.#internals = this.attachInternals();
@@ -2939,11 +3226,14 @@ ${autoField}${isFieldHost ? "  /** Whether a person touched the field or the for
     this.#label = label;
     this.#texts = texts;
     control.addEventListener("click", (event) => this.#activate(event));
-${toggleKeys}${groupInit}${selectInit}${dialogInit}${statusInit}${lightInit}${paginationInit}${tabsInit}${tooltipInit}${popoverInit}${menuInit}${disclosureInit}${suggestInit}${skipInit}    label.addEventListener("slotchange", () => this.#render());
+${toggleKeys}${groupInit}${selectInit}${dialogInit}${statusInit}${lightInit}${paginationInit}${tabsInit}${tooltipInit}${popoverInit}${menuInit}${disclosureInit}${suggestInit}${uploadInit}${skipInit}    label.addEventListener("slotchange", () => this.#render());
     for (const named of root.querySelectorAll("slot[name]")) {
       named.addEventListener("slotchange", () => this.#render());
     }
-    if (control instanceof ${nativeField}) {
+${
+  isUpload
+    ? ""
+    : `    if (control instanceof ${nativeField}) {
       // The value a person types is the form value (ElementInternals, as fm-butono submits), and
       // the prop reflects it, so a wrapper reads what stands in the field.
       control.addEventListener("input", () => {
@@ -2951,7 +3241,8 @@ ${toggleKeys}${groupInit}${selectInit}${dialogInit}${statusInit}${lightInit}${pa
         if (this.getAttribute("value") !== control.value) this.setAttribute("value", control.value);
       });
     }
-${invalidReport}${inputEnter}  }
+`
+}${invalidReport}${inputEnter}  }
 
   connectedCallback(): void {
 ${isGroup || isTabs || isMenu ? "    this.#assign();\n" : ""}    this.#render();
@@ -3073,12 +3364,15 @@ ${autoDisconnect}
     // \`invalid\` spoken as aria-invalid and set by a filled error slot (constraint of the Skemo);
     // disabled wins over readonly; help and error show only while they have text.
     const described: string[] = [];
-${inputRender}${toggleRender}${groupRender}${selectRender}${dialogRender}${statusRender}${meterRender}${lightRender}${paginationRender}${tabsRender}${iconRender}${separatorRender}${headingRender}${paragraphRender}${tooltipRender}${popoverRender}${menuRender}${disclosureRender}${suggestRender}${skipRender}${composedIconRender}    // The texts of the slots that describe the control (Spec 009, D-02; a checkbox, Spec 010 ②):
+${inputRender}${toggleRender}${groupRender}${selectRender}${dialogRender}${statusRender}${meterRender}${lightRender}${paginationRender}${tabsRender}${iconRender}${separatorRender}${headingRender}${paragraphRender}${tooltipRender}${popoverRender}${menuRender}${disclosureRender}${suggestRender}${uploadRender}${skipRender}${composedIconRender}    // The texts of the slots that describe the control (Spec 009, D-02; a checkbox, Spec 010 ②):
     // shown while they have text, and its description in that order.
     for (const source of DESCRIPTION) {
       const [kind, name = ""] = source.split(":");
       const holder = this.shadowRoot?.getElementById(name);
-      const has = kind === "slot" ? this.#filled(name) : typeof this.propValue(name) === "string";
+      const has =
+        kind === "slot"
+          ? this.#filled(name)${isUpload ? ' || (name === "error" && this.#fileError !== "")' : ""}
+          : typeof this.propValue(name) === "string";
       if (holder instanceof HTMLElement) holder.hidden = !has;
       if (has) described.push(name);
     }
@@ -3151,7 +3445,7 @@ ${
     : `    if (!(this.#control instanceof HTMLButtonElement)) return;
 ${toggleActivate}`
 }  }
-${groupMethods}${selectMethods}${inputMethods}${dialogMethods}${statusMethods}${slotTextMethod}${lightMethods}${autoMethods}${tabsMethods}${overlayMethods}${tooltipMethods}${menuMethods}${suggestMethods}
+${groupMethods}${selectMethods}${inputMethods}${dialogMethods}${statusMethods}${slotTextMethod}${lightMethods}${autoMethods}${tabsMethods}${overlayMethods}${tooltipMethods}${menuMethods}${suggestMethods}${uploadMethods}
 }
 
 /**

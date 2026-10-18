@@ -36,6 +36,7 @@ import {
   isPopover,
   isSkip,
   isSuggest,
+  isUpload,
   lightStylesheetOf,
   namesOf,
   stylesheetOf,
@@ -469,7 +470,10 @@ function guidelines(input: CeloInput, aspekto: string): GeneratedFile[] {
     .join("\n");
   // Spec 011 ③ (plan ③ D-12): an area that loads or is empty shows the state (a live region with
   // a kind); never a bare spinner; a working button is the butono's own loading.
-  const buttonName = eroj.find((entry) => entry.skemo.a11y.role === "button");
+  // Spec 015 ②: the file input is heard as a button too; the butono is the button without a dropzone.
+  const buttonName = eroj.find(
+    (entry) => entry.skemo.a11y.role === "button" && !isUpload(entry.skemo),
+  );
   const stateLines = eroj
     .filter(
       (entry) =>
@@ -531,7 +535,7 @@ function guidelines(input: CeloInput, aspekto: string): GeneratedFile[] {
   // Spec 015 ① (G7, plan ① D-07): every long list in pages gets the pagxigilo, every page in a
   // hierarchy shows its path in the spuro; generated from the role navigation with the parts
   // ellipsis and separator, the companions named where the Modelo has them.
-  const pagerButton = eroj.find((entry) => entry.skemo.a11y.role === "button");
+  const pagerButton = buttonName;
   const tabsName = eroj.find((entry) => entry.skemo.a11y.role === "tablist");
   const paginationLines = eroj
     .filter(
@@ -641,6 +645,15 @@ function guidelines(input: CeloInput, aspekto: string): GeneratedFile[] {
         `- Every field whose values a person types and picks from suggestions is a \`<${componentName(entry.ero)}>\`${selectName === undefined ? "" : `; a fixed short list is an \`<${componentName(selectName.ero)}>\``}.`,
     )
     .join("\n");
+  // Spec 015 ② (G7, plan ② D-08): every file a form asks for is the alsxutilo, its help naming
+  // kinds and size; generated from the role button with a dropzone part, the kampo named beside.
+  const uploadLines = eroj
+    .filter((entry) => isUpload(entry.skemo) && entry.uzo !== undefined)
+    .map(
+      (entry) =>
+        `- Every file a form asks for is an \`<${componentName(entry.ero)}>\` whose help names the kinds and the size it takes (\`accept\`, \`max-size\`)${fieldName === undefined ? "" : `; a text a person types is a \`<${componentName(fieldName.ero)}>\``}, and sending the files is the application's.`,
+    )
+    .join("\n");
   const skipLines = eroj
     .filter((entry) => isSkip(entry.skemo) && entry.uzo !== undefined)
     .map(
@@ -688,6 +701,7 @@ ${popoverLines}
 ${menuLines}
 ${disclosureLines}
 ${suggestLines}
+${uploadLines}
 
 Where to look: \`setup.md\` for the imports, \`foundations/\` for the tokens, \`components/\` for
 each component.

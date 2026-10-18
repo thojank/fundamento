@@ -315,7 +315,21 @@ export const VITRINO_NUMBER_EXAMPLES: Readonly<Record<string, string>> = {
   value: "66",
   // Spec 015 ① (plan ① D-06): the pagxigilo shows page 5 of 10 — both ellipses.
   "total-pages": "10",
+  // Spec 015 ② (plan ② D-07): the alsxutilo takes files up to 5 MB.
+  "max-size": "5000000",
 };
+
+/**
+ * The kinds the Vitrino's alsxutilo takes and the help that names them with the size (Spec 015
+ * ②, plan ② D-07, Regulo file-constraints-stated: the spec's example); the Figma set shows the
+ * same help, and its example the same two files.
+ */
+export const VITRINO_UPLOAD_ACCEPT = ".pdf,.png";
+export const VITRINO_UPLOAD_HELP = "PDF oder PNG, höchstens 5 MB";
+export const VITRINO_UPLOAD_FILES: readonly { name: string; size: number }[] = [
+  { name: "Lebenslauf.pdf", size: 1_200_000 },
+  { name: "Zeugnis.png", size: 340_000 },
+];
 
 /** The row and label of the meter without a value in the Vitrino (Nachlese 3 W4, F-9). */
 export const VITRINO_UNKNOWN_LABEL = "unbekannt";
@@ -483,7 +497,11 @@ function slotTexts(
   return entry.skemo.slots
     .filter((slot) => slot.text === true && slot.default !== true)
     .flatMap((slot) => {
-      const text = VITRINO_SLOT_TEXTS[slot.name];
+      // A file input names kinds and size in its help (Spec 015 ②, file-constraints-stated).
+      const text =
+        slot.name === "help" && entry.skemo.props.some((prop) => prop.name === "accept")
+          ? VITRINO_UPLOAD_HELP
+          : VITRINO_SLOT_TEXTS[slot.name];
       if (text === undefined) return [];
       const constraint = (entry.skemo.constraints ?? []).find(
         (candidate) => candidate.when[`slot:${slot.name}`] === "filled",
@@ -627,7 +645,13 @@ export function eroMarkup(entry: LoadedEro, ikonaro: readonly VitrinoIkono[] = [
         prop.name in VITRINO_NUMBER_EXAMPLES,
     )
     .map((prop) => ` ${prop.name}="${VITRINO_NUMBER_EXAMPLES[prop.name] ?? ""}"`)
-    .join("");
+    .join("")
+    // Spec 015 ② (plan ② D-07): the kinds a file input takes, named by its help.
+    .concat(
+      entry.skemo.props.some((prop) => prop.name === "accept")
+        ? ` accept="${VITRINO_UPLOAD_ACCEPT}"`
+        : "",
+    );
   const rows = combinationsOf(entry.skemo, keys)
     .filter((combination) => combination[STATE_KEY] === undefined)
     .map((combination) => {

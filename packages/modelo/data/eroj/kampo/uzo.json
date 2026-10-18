@@ -170,7 +170,7 @@
       },
       {
         "case": "file",
-        "action": "ask-human",
+        "action": "use-instead",
         "keywords": {
           "en": [
             "file",
@@ -181,7 +181,8 @@
             "hochladen"
           ]
         },
-        "kialo": "A file is chosen, not typed, because the value is not text; no such Ero yet, so a person decides."
+        "kialo": "A file is chosen, not typed, because the value is not text; the alsxutilo chooses files and states which are allowed (Spec 015 ② closes the boundary file).",
+        "ero": "alsxutilo"
       },
       {
         "case": "no-visible-label",
