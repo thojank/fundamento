@@ -36,8 +36,9 @@ test.describe("fm-sxvebilo behaviour", () => {
     await page.locator("#trigger").click();
     await expect.poll(async () => (await layerOf(page, "p")).open).toBe(true);
     expect(await page.locator("#trigger").getAttribute("aria-expanded")).toBe("true");
+    // The platform's toggle event is a task later than :popover-open: wait for the mirror.
+    await expect.poll(async () => (await layerOf(page, "p")).attribute).toBe(true);
     const shown = await layerOf(page, "p");
-    expect(shown.attribute).toBe(true);
     expect(shown.role).toBe("dialog");
     expect(shown.name).toBe("Filter");
     const trigger = await page.locator("#trigger").boundingBox();
@@ -57,7 +58,7 @@ test.describe("fm-sxvebilo behaviour", () => {
     await expect.poll(async () => (await layerOf(page, "p")).open).toBe(true);
     await page.keyboard.press("Escape");
     await expect.poll(async () => (await layerOf(page, "p")).open).toBe(false);
-    expect((await layerOf(page, "p")).attribute).toBe(false);
+    await expect.poll(async () => (await layerOf(page, "p")).attribute).toBe(false);
     expect(await page.locator("#trigger").getAttribute("aria-expanded")).toBe("false");
     await expect.poll(() => page.evaluate(() => document.activeElement?.id ?? "")).toBe("trigger");
   });
