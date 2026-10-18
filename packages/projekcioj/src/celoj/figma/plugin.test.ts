@@ -213,7 +213,7 @@ describe("Figma development plugin (T016)", () => {
     }
     // What resize sets stays settable through resize.
     expect(() => frame.resize(24, 24)).not.toThrow();
-    expect(frame.width).toBe(24);
+    expect((frame as unknown as { width: number }).width).toBe(24);
   });
 
   it("never touches a node without Fundamento plugin data", async () => {
@@ -3641,7 +3641,9 @@ describe("every set lies in the frame Eroj in the section Fundamento (F-1, F-2, 
     if (first === undefined || second === undefined || third === undefined) throw new Error("3");
     const gap = layout?.gap ?? Number.NaN;
     const width = box(named(frame, first)).width + gap + box(named(frame, second)).width;
-    Object.assign(frame, { layoutSizingHorizontal: "FIXED", width });
+    // A size given by hand is a resize (width is read-only in the Plugin API, F-4).
+    frame.resize(width, (frame as unknown as { height: number }).height);
+    Object.assign(frame, { layoutSizingHorizontal: "FIXED" });
     expect(box(named(frame, third)).y).toBeGreaterThan(box(named(frame, first)).y);
     const report = await apply(double);
     expect((frame as unknown as { layoutSizingHorizontal: string }).layoutSizingHorizontal).toBe(
@@ -3862,17 +3864,19 @@ describe("the double lays out a horizontal frame that wraps (F-8, Annahme bis zu
   const wrapping = () => {
     const double = modelDouble();
     const frame = frameOf(double);
+    // The width by hand is a resize (width is read-only in the Plugin API, F-4); the layout after
+    // it, as in the editor: a frame resized by hand keeps hugging its height once told so again.
+    frame.resize(250, (frame as unknown as { height: number }).height);
     Object.assign(frame, {
       layoutMode: "HORIZONTAL",
       layoutWrap: "WRAP",
       itemSpacing: 10,
       counterAxisSpacing: 20,
-      width: 250,
       layoutSizingVertical: "HUG",
     });
     const children = [0, 1, 2].map(() => {
       const child = frameOf(double);
-      Object.assign(child, { width: 100, height: 50 });
+      child.resize(100, 50);
       frame.appendChild(child);
       return child;
     });
@@ -3903,7 +3907,7 @@ describe("the double lays out a horizontal frame that wraps (F-8, Annahme bis zu
   it("follows a child that grows: its neighbours move on the next read", () => {
     const { frame, children } = wrapping();
     Object.assign(frame, { layoutSizingHorizontal: "HUG" });
-    Object.assign(children[0] as DoubleNode, { width: 300 });
+    (children[0] as DoubleNode).resize(300, 50);
     expect(children.map((child) => box(child).x)).toEqual([0, 310, 420]);
   });
 });

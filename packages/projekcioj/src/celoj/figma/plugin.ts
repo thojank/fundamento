@@ -2190,11 +2190,21 @@ async function applyComponents(variables, warnings) {
     own(control, INDICATOR_LAYOUT);
     for (const frame of [node, control]) own(frame, IN_FLOW);
     own(control, { strokeTopWeight: 0, strokeRightWeight: 0, strokeBottomWeight: 0, strokeLeftWeight: 0 });
-    if (!vertical) own(control, { width: (component.separator || {}).length || 0 });
     const nodes = { control };
     nodes[vertical ? "line-v" : "line-h"] = control;
     const measures = bind(nodes, variant, variables, component.structure);
     for (const each of [node, control]) flush(each);
+    // The length of a horizontal line is the plan's number (Abnahme 014 ②–⑤, F-4): width is
+    // read-only in the Plugin API ("no setter for property"), so the frame is resized — only where
+    // it does not hold the length yet (F21), the sizing it owns written again after it (③ F-4).
+    if (!vertical) {
+      const length = Math.max((component.separator || {}).length || 0, SMALLEST_SIZE);
+      if (control.width !== length) {
+        control.resize(length, Math.max(control.height, SMALLEST_SIZE));
+        write(control, "layoutSizingHorizontal", INDICATOR_LAYOUT.layoutSizingHorizontal);
+        write(control, "layoutSizingVertical", INDICATOR_LAYOUT.layoutSizingVertical);
+      }
+    }
     bindMeasures(measures, report, component, variant);
   }
   /**
