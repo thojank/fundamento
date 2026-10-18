@@ -2596,6 +2596,67 @@ async function applyComponents(variables, warnings) {
     bindMeasures(measures, report, component, variant);
   }
   /**
+   * The example of a separator (Nachlese 4 N-6, F-7): the line where it is seen — between two
+   * texts, the Vitrino's words in the role of running text, bound like a label. A column for the
+   * horizontal line, a row for the vertical one (centred across), the gap and the padding the
+   * section's; the line itself is drawn as in the set (drawSeparator), and the frame stands on
+   * the set's ground (component.surface), so the line meets the colour it is paired with.
+   */
+  async function drawSeparatorExample(node, component, variant, report, example) {
+    const vertical = variant.props.orientation === "vertical";
+    const texts = example.texts || { words: ["", ""], bindings: {}, paints: {} };
+    const before = part(node, "before", () => figma.createText());
+    const line = part(node, "line", () => figma.createFrame());
+    const after = part(node, "after", () => figma.createText());
+    [before, line, after].forEach((child, index) => {
+      if (node.children.indexOf(child) !== index) node.insertChild(index, child);
+    });
+    const words = [[before, texts.words[0]], [after, texts.words[1]]];
+    for (const [text, word] of words) {
+      await loadCurrentFont(text);
+      if (texts.font !== undefined) {
+        write(text, "fontName", fonts.get(texts.font.family + " " + texts.font.style));
+      }
+      write(text, "characters", word);
+    }
+    own(node, NEUTRAL);
+    own(node, HUG_LAYOUT);
+    own(node, {
+      layoutMode: vertical ? "HORIZONTAL" : "VERTICAL",
+      primaryAxisAlignItems: "MIN",
+      counterAxisAlignItems: vertical ? "CENTER" : "MIN",
+      itemSpacing: example.padding,
+      paddingLeft: example.padding,
+      paddingRight: example.padding,
+      paddingTop: example.padding,
+      paddingBottom: example.padding,
+    });
+    if (component.surface !== undefined) {
+      const ground = variables.get(component.surface.variable);
+      if (ground !== undefined) {
+        const bound = figma.variables.setBoundVariableForPaint(
+          { type: "SOLID", color: { r: 0, g: 0, b: 0 } },
+          "color",
+          ground,
+        );
+        bound.opacity = component.surface.opacity;
+        gather(node).fills = [bound];
+      }
+    }
+    const measures = [];
+    for (const [text] of words) {
+      own(text, NEUTRAL_TEXT);
+      own(text, IN_FLOW);
+      own(text, TEXT_SIZING);
+      const role = { bindings: texts.bindings, paints: texts.paints, focusVisible: false };
+      for (const measure of bind({ label: text }, role, variables, "")) measures.push(measure);
+    }
+    flush(node);
+    for (const [text] of words) flush(text);
+    await drawSeparator(line, component, variant, report);
+    bindMeasures(measures, report, component, variant);
+  }
+  /**
    * A radio group (Spec 010 ③, D-07): the variant is a column — the label (the question), the
    * options, help, error — and every option a row: ring → gap → circle (control) with the dot
    * (indicator, the web's vector) in it, the option's label beside it. The group is bound once,
@@ -4096,9 +4157,14 @@ async function applyComponents(variables, warnings) {
         stamp(example, "example", key);
       }
       write(example, "name", spec.name);
-      if (component.structure === "upload") await drawUpload(example, component, variant, report, [], spec);
-      else if (component.structure === "card") await drawCard(example, component, variant, report, [], [], spec);
-      else if (component.structure === "avatar") await drawAvatar(example, component, variant, report, [], [], spec);
+      if (component.structure === "separator")
+        await drawSeparatorExample(example, component, variant, report, spec);
+      else if (component.structure === "upload")
+        await drawUpload(example, component, variant, report, [], spec);
+      else if (component.structure === "card")
+        await drawCard(example, component, variant, report, [], [], spec);
+      else if (component.structure === "avatar")
+        await drawAvatar(example, component, variant, report, [], [], spec);
       else await drawPagination(example, component, variant, report, spec);
       if (example.parent !== frame) frame.appendChild(example);
       const at = frame.children.indexOf(set) + 1 + index;

@@ -1241,16 +1241,24 @@ describe("a marked component outside the set stops the run before it writes (F-B
   const FIRST_SET = "alsxutilo";
   type Orphan = { id: string; name: string; set: string; parent: { id: string; type: string } };
 
-  /** A run that crashes once its first component stands, as Figma's run did (F-A). */
+  /**
+   * A run that crashes once its first component stands, as Figma's run did (F-A): at the first
+   * text of a component. The apartigilo draws no text in its set, only in its two examples beside
+   * it (Nachlese 4 N-6) — two texts each, written after its set stands; those four still arrive.
+   */
   async function crashedRun(double: ReturnType<typeof figmaDouble>) {
     const module = new Function(
       "figma",
       `${repoFiles["figma/plugin/code.js"] ?? ""}\nreturn applyPlan();`,
     );
+    const create = (double.figma as { createText: () => DoubleNode }).createText;
+    let texts = 0;
     await module({
       ...double.figma,
       createText: () => {
-        throw new Error("abgestürzt");
+        texts += 1;
+        if (texts > 4) throw new Error("abgestürzt");
+        return create();
       },
     }).catch(() => undefined);
   }
@@ -3941,7 +3949,8 @@ describe("every set lies in the frame Eroj in the section Fundamento (F-1, F-2, 
       moved: [first],
       frame: { name: FRAME, found: true, created: false, wrap: "WRAP" },
     });
-    // The set moves to the end, its example frames with it (Spec 015 ②: the alsxutilo's).
+    // The set moves to the end, its example frames with it (Spec 015 ②: the alsxutilo's; since
+    // Nachlese 4 N-6 the apartigilo has two).
     const own = inFrame.filter((name) => name === first || name.startsWith(`${first} – `));
     expect(frameOf(double).children.map((child) => child.name)).toEqual([
       ...inFrame.filter((name) => !own.includes(name)),

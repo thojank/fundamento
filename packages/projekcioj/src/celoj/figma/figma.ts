@@ -559,6 +559,29 @@ export const METER_UNKNOWN_TEXT = "nicht geprüft";
  */
 export const VERTICAL_EXAMPLE = "vertikal";
 
+/**
+ * The examples beside a separator's set (Nachlese 4 N-6, F-7: in the overview the line was hardly
+ * visible, the vertical one not recognisable — a 1 px line alone in a cell of 640): each
+ * orientation once more between two texts, as the Vitrino shows it, `<set> – waagerecht|senkrecht
+ * zwischen zwei Texten`.
+ */
+export const SEPARATOR_EXAMPLE = "zwischen zwei Texten";
+
+/** The words of the orientations in the names of a separator's examples. */
+const SEPARATOR_ORIENTATION_WORDS: Readonly<Record<string, string>> = {
+  horizontal: "waagerecht",
+  vertical: "senkrecht",
+};
+
+/**
+ * The role of the two texts of a separator's example: the running text the line divides, in its
+ * colour on the Vitrino's ground. Bound like a label, nothing written as a number.
+ */
+const SEPARATOR_EXAMPLE_TEXT = {
+  color: "color.text.default",
+  typography: "typography.body.1",
+} as const;
+
 /** The number of pages of the pagination's examples (Spec 015 ①, O-2: „von 10"). */
 export const PAGINATION_EXAMPLE_TOTAL = 10;
 
@@ -1032,6 +1055,7 @@ export interface FigmaComponentSet {
     name: string;
     variant: Record<string, string>;
     padding: number;
+    /** The pages of a pagination's example. */
     pages?: { texts: string[]; selected: number };
     /**
      * The chosen files an upload's example lists (Spec 015 ②, the spec's „mit zwei Dateien"):
@@ -1044,6 +1068,16 @@ export interface FigmaComponentSet {
      * as the visibility of the part, a frame outside the set has no property to switch.
      */
     toggled?: Record<string, boolean>;
+    /**
+     * The two texts a separator's example shows around its line (Nachlese 4 N-6), bound to the
+     * role of running text as a label is: the plan's bindings, paints and font for them.
+     */
+    texts?: {
+      words: [string, string];
+      bindings: Record<string, string>;
+      paints: Record<string, FigmaPaint>;
+      font?: { family: string; style: string; families: string[] };
+    };
   }[];
   example?: {
     name: string;
@@ -2375,6 +2409,10 @@ function componentSetOf(
         }
       }
     }
+    // The texts of a separator's examples (Nachlese 4 N-6) in the running text's font.
+    if (structure === "separator") {
+      need(fontOf(tokens[SEPARATOR_EXAMPLE_TEXT.typography]?.value), assignment);
+    }
   }
   const fonts = [...fontsNeeded.values()]
     .map((entry) => ({
@@ -2434,55 +2472,80 @@ function componentSetOf(
       : paintOf(backdrop.token, resolutions, base);
   // Spec 015 ① (O-2): the pagination on page 1, 5 and 10 of 10, with the web's own choice of
   // pages (the Skemo's default siblings).
-  const examples =
-    structure === "pagination"
-      ? [1, 5, 10].map((page) => {
-          const texts = paginationWords(
-            page,
-            PAGINATION_EXAMPLE_TOTAL,
-            Number(skemo.props.find((prop) => prop.name === "siblings")?.default ?? 1),
-          );
-          return {
-            name: `${entry.ero.name} – Seite ${page} von ${PAGINATION_EXAMPLE_TOTAL}`,
-            variant: defaults,
+  // Nachlese 4 N-6 (F-7): the separator once per orientation between two words of the Vitrino,
+  // the line drawn as in the set, the texts bound to the role of running text.
+  const separatorTextPaint = paintOf(SEPARATOR_EXAMPLE_TEXT.color, resolutions, base);
+  const separatorTextFont = fontOf(base[SEPARATOR_EXAMPLE_TEXT.typography]?.value);
+  const separatorExamples =
+    structure === "separator"
+      ? (skemo.props.find((prop) => prop.name === "orientation")?.values ?? []).map(
+          (orientation) => ({
+            name: `${entry.ero.name} – ${SEPARATOR_ORIENTATION_WORDS[orientation] ?? orientation} ${SEPARATOR_EXAMPLE}`,
+            variant: { ...defaults, orientation },
             padding: parityPx(base[SET_GAP]?.value),
-            pages: { texts, selected: texts.indexOf(String(page)) },
-          };
-        })
-      : // Spec 015 ② (plan ② D-06): the upload with the Vitrino's two files beside its set.
-        structure === "upload"
-        ? [
-            {
-              name: `${entry.ero.name} – ${UPLOAD_EXAMPLE}`,
+            texts: {
+              words: [VITRINO_OPTIONS[0] ?? "", VITRINO_OPTIONS[1] ?? ""] as [string, string],
+              bindings: {
+                "label.color": variableName(SEPARATOR_EXAMPLE_TEXT.color),
+                "label.typography": variableName(SEPARATOR_EXAMPLE_TEXT.typography),
+              },
+              paints: separatorTextPaint === undefined ? {} : { "label.color": separatorTextPaint },
+              ...(separatorTextFont === undefined ? {} : { font: separatorTextFont }),
+            },
+          }),
+        )
+      : undefined;
+  const examples =
+    separatorExamples !== undefined
+      ? separatorExamples
+      : structure === "pagination"
+        ? [1, 5, 10].map((page) => {
+            const texts = paginationWords(
+              page,
+              PAGINATION_EXAMPLE_TOTAL,
+              Number(skemo.props.find((prop) => prop.name === "siblings")?.default ?? 1),
+            );
+            return {
+              name: `${entry.ero.name} – Seite ${page} von ${PAGINATION_EXAMPLE_TOTAL}`,
               variant: defaults,
               padding: parityPx(base[SET_GAP]?.value),
-              files: VITRINO_UPLOAD_FILES.map((file) => ({
-                name: file.name,
-                size: fileSizeText(file.size),
-              })),
-            },
-          ]
-        : // Spec 015 ③ (plan ③ D-05): the card without its image beside its set.
-          structure === "card"
+              pages: { texts, selected: texts.indexOf(String(page)) },
+            };
+          })
+        : // Spec 015 ② (plan ② D-06): the upload with the Vitrino's two files beside its set.
+          structure === "upload"
           ? [
               {
-                name: `${entry.ero.name} – ${CARD_EXAMPLE}`,
+                name: `${entry.ero.name} – ${UPLOAD_EXAMPLE}`,
                 variant: defaults,
                 padding: parityPx(base[SET_GAP]?.value),
-                toggled: { media: false },
+                files: VITRINO_UPLOAD_FILES.map((file) => ({
+                  name: file.name,
+                  size: fileSizeText(file.size),
+                })),
               },
             ]
-          : // Spec 015 ③ (plan ③ D-11): the avatar with its image shown beside its set.
-            structure === "avatar"
+          : // Spec 015 ③ (plan ③ D-05): the card without its image beside its set.
+            structure === "card"
             ? [
                 {
-                  name: `${entry.ero.name} – ${AVATAR_EXAMPLE}`,
+                  name: `${entry.ero.name} – ${CARD_EXAMPLE}`,
                   variant: defaults,
                   padding: parityPx(base[SET_GAP]?.value),
-                  toggled: { image: true },
+                  toggled: { media: false },
                 },
               ]
-            : undefined;
+            : // Spec 015 ③ (plan ③ D-11): the avatar with its image shown beside its set.
+              structure === "avatar"
+              ? [
+                  {
+                    name: `${entry.ero.name} – ${AVATAR_EXAMPLE}`,
+                    variant: defaults,
+                    padding: parityPx(base[SET_GAP]?.value),
+                    toggled: { image: true },
+                  },
+                ]
+              : undefined;
   const example =
     structure === "dialog" && backdrop !== undefined && backdropPaint !== undefined
       ? {
