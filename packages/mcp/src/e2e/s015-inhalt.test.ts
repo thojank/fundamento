@@ -24,6 +24,9 @@ const read = <T>(path: string): T =>
 const karto = read<UzoFile>("eroj/karto/uzo.json").uzo;
 const grid = karto.boundary.find((entry) => entry.case === "card-grid");
 if (grid === undefined) throw new Error("the boundary card-grid is missing");
+const avizo = read<UzoFile>("eroj/avizo/uzo.json").uzo;
+const toast = avizo.boundary.find((entry) => entry.case === "toast");
+if (toast === undefined) throw new Error("the boundary toast is missing");
 const reguloj = read<{ reguloj: { name: string; kialo: string }[] }>("reguloj.json").reguloj;
 const kialoOf = (name: string) => reguloj.find((regulo) => regulo.name === name)?.kialo ?? "?";
 
@@ -123,6 +126,33 @@ describe("the content dialogs of the spec (Spec 015 ③)", () => {
     expect(wrong.violations.map((violation) => violation.issue.rule)).toEqual([
       "icon-meaning-named",
     ]);
+  });
+
+  it("'Toast nach dem Speichern' → the avizo in the flow (intent success passes), with the reason of avizo.boundary.toast", async () => {
+    const answer = await output<Suggested>(client, "suggest_ero", {
+      goal: "Toast nach dem Speichern",
+    });
+    expect(answer.suggestion).toEqual({ ero: "avizo", props: {} });
+    expect(answer.action).toBeUndefined();
+    expect(answer.boundary).toEqual({
+      ero: "avizo",
+      case: "toast",
+      action: "not-supported",
+      kialo: toast.kialo,
+    });
+    const saved = await output<Judged>(client, "check_usage", {
+      instances: [
+        {
+          ero: "avizo",
+          props: { intent: "success" },
+          label: "Änderungen gespeichert.",
+          lingvo: "de",
+        },
+      ],
+    });
+    expect(saved.valid).toBe(true);
+    const snackbar = await output<Suggested>(client, "suggest_ero", { goal: "Snackbar" });
+    expect(snackbar.suggestion).toEqual({ ero: "avizo", props: {} });
   });
 
   it("lists thirty-two Eroj; the briefs of the karto and the avataro name their axes and duties", async () => {

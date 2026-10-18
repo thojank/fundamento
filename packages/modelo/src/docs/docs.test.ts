@@ -1868,3 +1868,38 @@ describe("Spec 015 ② documentation (specs/015-eroj-runde-4)", () => {
     expect(read("README.md")).toMatch(/thirty(-one|-two)? `fm-\*` elements/);
   });
 });
+
+// Spec 015 ③ (Briefing 2026-10-17, Auftrag 2026-10-18): plan ③ carries the card, the avatar and
+// the toast as a boundary — its decisions, the Arkitekturo coverage, deviations, findings and open
+// points from O-15 on; tasks ③ the red and green hashes of each; the Vojmapo names ③ and closes
+// round 4; the README counts thirty-two elements.
+describe("Spec 015 ③ documentation (specs/015-eroj-runde-4)", () => {
+  it("plan ③ carries the decisions, the coverage, deviations, findings and open points; tasks ③ the hashes", () => {
+    const plan = read("specs/015-eroj-runde-4/plan.md");
+    const section = plan.slice(plan.indexOf("## ③ Inhalt"));
+    for (const heading of [
+      "### Zusammenfassung",
+      "### Entwurfsentscheidungen",
+      "#### D-01",
+      "### Arkitekturo-Abdeckung",
+      "### Abweichungen von der Spec",
+      "### Befunde / Mankoj",
+      "### Offen (für den Maintainer)",
+    ]) {
+      expect(section, heading).toContain(heading);
+    }
+    for (const word of ["`karto`", "`avataro`", "`avizo.boundary.toast`", "O-15", "E6", "E8"]) {
+      expect(section).toContain(word);
+    }
+    expect(section).not.toContain("Folgt in PR ③.");
+    const tasks = read("specs/015-eroj-runde-4/tasks.md");
+    const own = tasks.slice(tasks.indexOf("## ③ Inhalt"));
+    expect(own).toContain("**T1401");
+    expect(own).toMatch(/karto rot `[0-9a-f]{7}`/);
+    expect(own).toMatch(/avataro rot `[0-9a-f]{7}`/);
+    expect(own).toMatch(/Toast rot `[0-9a-f]{7}`/);
+    expect(read("docs/vojmapo.md")).toContain("Spec 015 ③");
+    expect(read("docs/vojmapo.md")).toContain("Runde 4 der Eroj vollständig");
+    expect(read("README.md")).toContain("thirty-two `fm-*` elements");
+  });
+});

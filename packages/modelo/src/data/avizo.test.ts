@@ -124,9 +124,10 @@ describe("avizo in the repo Modelo (section ③, G1, G2)", () => {
       ["notify", {}, undefined],
       ["report-error", { intent: "danger" }, "error-says-what-to-do"],
     ]);
+    // Spec 015 ③ (E6): toast and snackbar are synonyms of notify, the words of the boundary too.
     expect(skemo?.goals?.[0]?.keywords).toEqual({
-      en: ["notice", "alert", "message", "warning", "banner"],
-      de: ["hinweis", "meldung", "warnung", "erfolgsmeldung"],
+      en: ["notice", "alert", "message", "warning", "banner", "toast", "snackbar"],
+      de: ["hinweis", "meldung", "warnung", "erfolgsmeldung", "toast", "snackbar"],
     });
     expect(skemo?.goals?.[1]?.keywords).toEqual({
       en: ["error", "failed", "failure"],
@@ -165,6 +166,34 @@ describe("the Uzo of the avizo (section ③, G5)", () => {
       ["stacked-notices", "ask-human"],
     ]);
     expect(uzo?.boundary[0]?.kialo).toMatch(/by itself|time/);
+  });
+
+  it("Spec 015 ③ (E6): the toast stays a boundary, not supported, with the new reason — missed by whoever reads slowly, zooms in or looks elsewhere (WCAG 2.2.1, 4.1.3); the message stays in the flow until it is closed", () => {
+    const toast = uzo?.boundary.find((entry) => entry.case === "toast");
+    expect(toast?.action).toBe("not-supported");
+    expect(toast?.kialo).toContain("reads slowly, zooms in or has the focus elsewhere");
+    expect(toast?.kialo).toContain("WCAG 2.2.1, 4.1.3");
+    expect(toast?.kialo).toContain("stays in the flow of the page as an avizo until it is closed");
+    expect(toast?.kialo).not.toContain("its own");
+    // Synonyms of the goal notify, no goal of their own (E6).
+    const notify = skemo?.goals?.find((goal) => goal.goal === "notify");
+    expect(notify?.keywords.en).toEqual(expect.arrayContaining(["toast", "snackbar"]));
+    expect(notify?.keywords.de).toEqual(expect.arrayContaining(["toast", "snackbar"]));
+    expect(skemo?.goals?.map((goal) => goal.goal)).toEqual(["notify", "report-error"]);
+  });
+
+  it("Spec 015 ③ (E6): a Jugxo records the decision, in de and en, with the benchmark as a requirement (GOV.UK shows no toast)", () => {
+    const decisions = modelo.jugxoj.filter(
+      (jugxo) =>
+        "ero" in jugxo.ref &&
+        jugxo.ref.ero === avizo?.ero.id &&
+        jugxo.ekzemplo === undefined &&
+        jugxo.context.includes("E6"),
+    );
+    expect(decisions.map((jugxo) => jugxo.decision)).toEqual(["approved", "approved"]);
+    expect(decisions.map((jugxo) => jugxo.kialo).join(" ")).toMatch(/Toast/);
+    expect(decisions.map((jugxo) => jugxo.kialo).join(" ")).toMatch(/toast/);
+    for (const jugxo of decisions) expect(jugxo.context).toContain("GOV.UK");
   });
 
   it("composes in a page and at the top of a dialog's content, with butono and ligilo", () => {
@@ -228,6 +257,8 @@ describe("the cross-links of G5: the dialogo informs through the avizo, the aviz
       case: "toast",
       action: "not-supported",
     });
+    // Spec 015 ③ (E6): the Gvidanto answers with the avizo in the flow, the boundary beside it.
+    expect(suggest("ein Toast unten rechts").suggestion).toEqual({ ero: "avizo", props: {} });
     expect(suggest("Hinweise gestapelt übereinander").boundary).toMatchObject({
       ero: "avizo",
       case: "stacked-notices",
@@ -300,5 +331,42 @@ describe("check_usage of the notice (G6, G7)", () => {
       },
     ]);
     expect(rulesOf(result).map(([rule]) => rule)).toEqual(["one-primary-per-container"]);
+  });
+});
+
+// Spec 015 ③ (E6, plan ③ D-12): „Toast“ and „Snackbar“ are synonyms of the avizo's goal notify and
+// the words of its own boundary toast: the Gvidanto answers with the avizo, the boundary's reason
+// beside it — no tie with another Ero's goal (the butono's „Speichern“), because the avizo has
+// claimed the word for itself.
+describe("the toast as a boundary of the avizo (Spec 015 ③, E6)", () => {
+  it("'Toast nach dem Speichern' is the avizo in the flow with the reason of the boundary toast; 'Snackbar' too", () => {
+    const toast = uzo?.boundary.find((entry) => entry.case === "toast");
+    for (const goal of ["Toast nach dem Speichern", "Snackbar", "a snackbar after saving"]) {
+      const answer = suggest(goal);
+      expect(answer.suggestion, goal).toEqual({ ero: "avizo", props: {} });
+      expect(answer.matched?.goal, goal).toBe("notify");
+      expect(answer.action, goal).toBeUndefined();
+      expect(answer.boundary, goal).toEqual({
+        ero: "avizo",
+        case: "toast",
+        action: "not-supported",
+        kialo: toast?.kialo,
+      });
+    }
+  });
+
+  it("a success notice after saving passes as intent success in the flow", () => {
+    expect(
+      rulesOf(
+        evaluateUsage(modelo, [
+          {
+            ero: "avizo",
+            props: { intent: "success" },
+            label: "Änderungen gespeichert.",
+            lingvo: "de",
+          },
+        ]),
+      ),
+    ).toEqual([]);
   });
 });

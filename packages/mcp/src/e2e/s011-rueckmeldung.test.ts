@@ -106,7 +106,8 @@ describe("the feedback of the spec: a status word, a notice, a loading area", ()
     const answer = await output<Suggested>(client, "suggest_ero", {
       goal: "ein Toast unten rechts",
     });
-    expect(answer.suggestion).toBeNull();
+    // Spec 015 ③ (E6): the Gvidanto answers with the avizo in the flow, the boundary beside it.
+    expect(answer.suggestion).toEqual({ ero: "avizo", props: {} });
     expect(answer.boundary).toMatchObject({
       ero: "avizo",
       case: "toast",
