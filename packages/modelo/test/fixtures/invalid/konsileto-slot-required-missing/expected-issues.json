@@ -1,0 +1,9 @@
+{
+  "description": "Spec 014 ④ G10 (Spec 009 A7, E2): the accessible name of the konsileto comes from the slot label alone, but the Uzo does not mark the slot required. A tooltip without words describes nothing.",
+  "issues": [
+    {
+      "rule": "uzo-slot-required-missing",
+      "path": "data/eroj/konsileto/uzo.json#/uzo/slots/label"
+    }
+  ]
+}

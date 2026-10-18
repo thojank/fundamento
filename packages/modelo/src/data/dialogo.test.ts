@@ -32,7 +32,7 @@ const suggest = (goal: string) => {
 };
 
 describe("dialogo in the repo Modelo (section ②, E9)", () => {
-  it("lives in data/eroj/dialogo/skemo.json, fourth of twenty-two Eroj", () => {
+  it("lives in data/eroj/dialogo/skemo.json, fourth of twenty-five Eroj", () => {
     expect(dialogo?.file).toBe("modelo/data/eroj/dialogo/skemo.json");
     expect(modelo.eroj[4]?.ero.name).toBe("dialogo");
   });
@@ -167,10 +167,11 @@ describe("the Uzo of the dialogo (section ②, G5)", () => {
     expect(uzo?.instead.map((entry) => [entry.goal, entry.ero])).toEqual([
       ["inform-only", "avizo"],
       ["long-form", null],
+      // Spec 014 ④: the boundary non-modal is closed, the popover is the sxvebilo.
+      ["non-modal", "sxvebilo"],
     ]);
     expect(uzo?.instead[0]?.kialo).toMatch(/avizo/);
     expect(uzo?.boundary.map((entry) => [entry.case, entry.action])).toEqual([
-      ["non-modal", "not-supported"],
       ["drawer", "not-supported"],
       ["nested-dialog", "not-supported"],
     ]);

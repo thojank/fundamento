@@ -62,14 +62,17 @@ describe("elektilo in the repo Modelo (G1, G2, section 4)", () => {
       "ikono",
       "insigno",
       "kampo",
+      "konsileto",
       "langetaro",
       "ligilo",
       "markobutono",
+      "menuo",
       "mezurilo",
       "navigado",
       "plenstato",
       "saltligilo",
       "sxaltilo",
+      "sxvebilo",
       "tabelo",
       "tekstareo",
       "teksto",
@@ -441,6 +444,9 @@ describe("the Reguloj of the elektilo (G6, E5)", () => {
       "saltligilo",
       "titolo",
       "teksto",
+      "konsileto",
+      "sxvebilo",
+      "menuo",
     ]);
   });
 

@@ -1,0 +1,106 @@
+{
+  "$schema": "../../../schema/modelo.schema.json#/$defs/UzoFile",
+  "uzo": {
+    "id": "uzo_01M564NXJNCV7VW68BBE42BEA0",
+    "ero": "ero_01M564NWTCRSFC8QEB9TZKQB0C",
+    "skemo": "ske_01M564NX6FGBH4NHKDSHCCM5W3",
+    "purpose": "Shows the name or a short hint of a control while it is hovered or focused.",
+    "instead": [
+      {
+        "goal": "essential-info",
+        "keywords": {
+          "en": [
+            "essential",
+            "instructions",
+            "rules",
+            "necessary"
+          ],
+          "de": [
+            "notwendig",
+            "anleitung",
+            "regeln",
+            "pflichtangabe"
+          ]
+        },
+        "ero": "teksto",
+        "kialo": "What a person needs to act stands visibly as text — under a field as the kampo's help, elsewhere as running text — because whoever does not hover or focus never sees a tooltip, and on touch there is no hovering."
+      },
+      {
+        "goal": "interactive-content",
+        "keywords": {
+          "en": [
+            "interactive",
+            "operable"
+          ],
+          "de": [
+            "interaktiv",
+            "bedienbar"
+          ]
+        },
+        "ero": "sxvebilo",
+        "kialo": "A layer a person operates — a link, a field, a button in it — is a popover, because a tooltip vanishes when the pointer leaves and takes no focus; the sxvebilo stays and holds the focus."
+      }
+    ],
+    "boundary": [
+      {
+        "case": "tooltip-on-disabled",
+        "action": "ask-human",
+        "keywords": {
+          "en": [
+            "greyed",
+            "inactive",
+            "unavailable"
+          ],
+          "de": [
+            "ausgegraut",
+            "inaktiv",
+            "gesperrt"
+          ]
+        },
+        "kialo": "A disabled control takes no focus and on many platforms no hover, so its tooltip is never reached by keyboard; a person decides whether the reason stands visibly beside the control instead."
+      }
+    ],
+    "composes": {
+      "containers": [],
+      "with": [
+        {
+          "ero": "butono",
+          "kialo": "A button that shows only an icon carries its name as a tooltip, because whoever sees only a picture needs the word visibly too; the tooltip's text is the button's label, heard once."
+        },
+        {
+          "ero": "ikono",
+          "kialo": "An icon that carries meaning may show its name on hover, because the word confirms what the sign says; a decorative icon has no tooltip, it says nothing."
+        }
+      ],
+      "never": [],
+      "spacing": {
+        "owner": "container",
+        "regulo": "spacing-owned-by-container"
+      }
+    },
+    "slots": {
+      "label": {
+        "accepts": [
+          "text"
+        ],
+        "max": 1,
+        "nesting": 0
+      }
+    },
+    "layout": {
+      "size": "content",
+      "wrap": "allowed"
+    },
+    "content": [
+      {
+        "regulo": "tooltip-text-short",
+        "fixed": true,
+        "of": "slot:label",
+        "check": {
+          "kind": "max-words",
+          "count": 8
+        }
+      }
+    ]
+  }
+}

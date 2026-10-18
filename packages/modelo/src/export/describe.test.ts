@@ -66,6 +66,7 @@ describe("countWord", () => {
     [18, "eighteen"],
     [20, "twenty"],
     [22, "twenty-two"],
+    [25, "twenty-five"],
     [23, "23"],
     [30, "30"],
   ])("%i -> %s", (count, word) => {

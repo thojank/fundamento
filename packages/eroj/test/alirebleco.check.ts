@@ -1440,3 +1440,66 @@ for (const aspekto of ["komuna", "ekzemplo"]) {
     }
   }
 }
+
+// Spec 014 ④ (G5, G10, plan ④ D-05): the rendered overlays in every colour class, opened: axe on
+// the tooltip (its text at least 4.5:1 on the inverse surface), the popover (a dialog with its
+// heading) and the menu (menu items, a disabled one, a danger one at least 4.5:1 on its row).
+const overlays =
+  '<fm-butono id="ov-b" emphasis="low" label="Suchen"><fm-ikono name="search"></fm-ikono></fm-butono><fm-konsileto id="ov-t" for="ov-b">Suchen</fm-konsileto><fm-sxvebilo id="ov-p" label="Filter" open><fm-butono slot="trigger" emphasis="medium">Filter</fm-butono><span slot="heading">Nach Status filtern</span><fm-teksto>Inhalt</fm-teksto></fm-sxvebilo><fm-menuo id="ov-m" open><data value="edit">Bearbeiten</data><data value="duplicate" disabled>Duplizieren</data><fm-apartigilo></fm-apartigilo><data value="delete" intent="danger">Löschen</data></fm-menuo>';
+
+for (const aspekto of ["komuna", "ekzemplo"]) {
+  for (const scheme of ["light", "dark"]) {
+    for (const contrast of ["default", "high"]) {
+      test(`${aspekto} ${scheme}/${contrast}: axe on the opened konsileto, sxvebilo and menuo; tooltip and danger entry ≥ 4.5:1`, async ({
+        page,
+      }) => {
+        await serve(page, out, overlays);
+        await page.evaluate(
+          ([a, s, k]) => {
+            const root = document.documentElement;
+            root.setAttribute("data-fm-aspekto", a ?? "");
+            root.setAttribute("data-fm-color-scheme", s ?? "");
+            root.setAttribute("data-fm-contrast", k ?? "");
+          },
+          [aspekto, scheme, contrast],
+        );
+        await page.locator("#ov-b").hover();
+        await expect(page.getByRole("tooltip", { name: "Suchen" })).toHaveCount(1);
+        await expect(page.getByRole("dialog", { name: "Filter" })).toHaveCount(1);
+        await expect(page.getByRole("menuitem")).toHaveCount(3);
+        expect(await axeViolations(page)).toEqual([]);
+        const measured = await page.evaluate(() => {
+          const luminance = (colour: string) => {
+            const [r = 0, g = 0, b = 0] = colour.match(/[\d.]+/g)?.map(Number) ?? [];
+            const channel = (value: number) => {
+              const c = value / 255;
+              return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+            };
+            return 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
+          };
+          const ratio = (front: string, back: string) => {
+            const [a, b] = [luminance(front), luminance(back)].sort((x, y) => y - x);
+            return ((a ?? 0) + 0.05) / ((b ?? 0) + 0.05);
+          };
+          const tooltip = document
+            .getElementById("ov-t")
+            ?.shadowRoot?.querySelector('[part="control"]') as HTMLElement;
+          const rows = [
+            ...(document.getElementById("ov-m")?.shadowRoot?.querySelectorAll('[part="item"]') ??
+              []),
+          ] as HTMLElement[];
+          const danger = rows[2] as HTMLElement;
+          return {
+            tooltip: ratio(
+              getComputedStyle(tooltip).color,
+              getComputedStyle(tooltip).backgroundColor,
+            ),
+            danger: ratio(getComputedStyle(danger).color, getComputedStyle(danger).backgroundColor),
+          };
+        });
+        expect(measured.tooltip, "tooltip").toBeGreaterThanOrEqual(4.5);
+        expect(measured.danger, "danger entry").toBeGreaterThanOrEqual(4.5);
+      });
+    }
+  }
+}

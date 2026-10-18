@@ -1,0 +1,109 @@
+{
+  "ero": {
+    "id": "ero_01M564NWTCRSFC8QEB9TZKQB0C",
+    "name": "konsileto",
+    "skemo": "ske_01M564NX6FGBH4NHKDSHCCM5W3",
+    "description": "A tooltip: shows the name or a short hint of a control while it is hovered or focused — a layer of the platform (popover) anchored to its trigger, gone with Escape, standing while the pointer is over it."
+  },
+  "skemo": {
+    "id": "ske_01M564NX6FGBH4NHKDSHCCM5W3",
+    "ero": "ero_01M564NWTCRSFC8QEB9TZKQB0C",
+    "props": [
+      {
+        "name": "for",
+        "kind": "string",
+        "required": true,
+        "description": "The id of the control the tooltip describes (its trigger): the tooltip appears while that control is hovered or focused and is heard as its description (aria-describedby) — unless its text is the control's own name, then it is not spoken twice."
+      },
+      {
+        "name": "placement",
+        "kind": "enum",
+        "values": [
+          "block-start",
+          "block-end",
+          "inline-start",
+          "inline-end"
+        ],
+        "default": "block-start",
+        "description": "Where the layer stands against its trigger, in logical directions (position-area of the platform); where that side has no room, the platform flips it (position-try-fallbacks). Layout, no token: it keys no part."
+      }
+    ],
+    "states": [
+      "rest"
+    ],
+    "slots": [
+      {
+        "name": "label",
+        "default": true,
+        "text": true
+      }
+    ],
+    "parts": {
+      "surface": {
+        "fill": {
+          "fixed": "color.background.inverse"
+        },
+        "radius": {
+          "fixed": "radius.role.control"
+        },
+        "shadow": {
+          "fixed": "elevation.shadow.overlay"
+        },
+        "layer": {
+          "fixed": "elevation.layer.overlay"
+        }
+      },
+      "text": {
+        "color": {
+          "fixed": "color.text.inverse"
+        },
+        "typography": {
+          "fixed": "typography.caption"
+        }
+      },
+      "box": {
+        "inline-padding": {
+          "fixed": "spacing.small"
+        }
+      },
+      "motion": {
+        "duration": {
+          "fixed": "motion.duration.slow"
+        },
+        "easing": {
+          "fixed": "motion.easing.standard"
+        }
+      }
+    },
+    "bindings": [],
+    "a11y": {
+      "role": "tooltip",
+      "name": [
+        "slot:label"
+      ],
+      "states": {},
+      "keys": [
+        "Escape"
+      ]
+    },
+    "goals": [
+      {
+        "goal": "tooltip",
+        "keywords": {
+          "en": [
+            "tooltip",
+            "hoverhint",
+            "hover"
+          ],
+          "de": [
+            "tooltip",
+            "überfahren",
+            "mouseover"
+          ]
+        },
+        "props": {},
+        "regulo": "tooltip-text-short"
+      }
+    ]
+  }
+}
