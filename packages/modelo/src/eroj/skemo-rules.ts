@@ -672,14 +672,19 @@ function a11yIssues(entry: LoadedEro, at: At): void {
     .filter((prop) => prop.kind === "enum")
     .flatMap((prop) => (prop.values ?? []).map((value) => `${prop.name}-${value}`));
   // Spec 011 ④ (plan ④ D-05): `<slot>-empty` — what is heard for an empty entry of a slot (the
-  // dash of a key-value list: "keine Angabe").
-  const emptied = skemo.slots.map((slot) => `${slot.name}-empty`);
+  // dash of a key-value list: "keine Angabe"). Spec 014 ④ (plan ④ D-03): `<prop>-empty` of a
+  // string prop — the words that stand in while the prop is empty (the name of a menu's trigger:
+  // "Weitere Aktionen"), as the empty label of a skip link stands in for its slot.
+  const emptied = [
+    ...skemo.slots.map((slot) => `${slot.name}-empty`),
+    ...skemo.props.filter((prop) => prop.kind === "string").map((prop) => `${prop.name}-empty`),
+  ];
   for (const key of Object.keys(skemo.a11y.texts ?? {})) {
     if (booleans.includes(key) || valued.includes(key) || emptied.includes(key)) continue;
     at(
       appendPointer("/skemo/a11y/texts", key),
       "skemo-a11y-invalid",
-      `Skemo of ${ero.name} carries an a11y text for ${key}, which is no boolean prop of ${ero.name}, no <prop>-<value> of an enum prop and no <slot>-empty; the text would never be heard.`,
+      `Skemo of ${ero.name} carries an a11y text for ${key}, which is no boolean prop of ${ero.name}, no <prop>-<value> of an enum prop, no <slot>-empty and no <prop>-empty of a string prop; the text would never be heard.`,
       `Key a11y.texts by a boolean prop (${booleans.join(", ") || "none"}) or by <prop>-<value> of an enum prop, or add the prop first.`,
     );
   }

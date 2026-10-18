@@ -32,7 +32,10 @@ export type HostControl =
   | "icon"
   | "separator"
   | "heading"
-  | "paragraph";
+  | "paragraph"
+  | "tooltip"
+  | "popover"
+  | "menu";
 
 export interface ElementNames {
   /** `fm-butono` */
@@ -94,8 +97,13 @@ export interface ElementNames {
  * several lines (Spec 011 ②, D-11: the Skemo has rows) is the platform's textarea; a dialog
  * (Spec 011 ②, D-12) the platform's dialog, opened modal.
  */
-export function hostOf(role: string, multiline = false): HostControl {
+export function hostOf(role: string, multiline = false, popover = false): HostControl {
   if (role === "link") return "a";
+  // The overlays (Spec 014 ④, plan ④ D-05): a tooltip, a menu, and a popover — a non-modal dialog
+  // with a trigger slot (the Celo tells the host apart from the modal dialog by that slot).
+  if (role === "tooltip") return "tooltip";
+  if (role === "menu") return "menu";
+  if (role === "dialog" && popover) return "popover";
   // Static text (Spec 011 ③, D-08: the badge) is a span without a role attribute — generic is the
   // span's own role; a live region (D-09, D-10: notice, loading and empty state) is a div with
   // role status, alert where the Skemo's intent is danger.
@@ -410,6 +418,45 @@ function paragraphMarkup(): string {
   return '<p part="control"><slot></slot><span id="fm-texts" hidden></span></p>';
 }
 
+/**
+ * The shadow markup of a tooltip (Spec 014 ④, plan ④ D-05): the host itself is the popover of the
+ * platform (manual: shown and hidden by the element, never by a click elsewhere) with the role
+ * tooltip — it lies in the light DOM, in the tree scope of its trigger, so the anchor name of the
+ * trigger reaches it (an anchor in another tree scope is not found, B-7); the control inside is
+ * the surface, its text the slot.
+ */
+function tooltipMarkup(): string {
+  return '<div part="control"><slot></slot><span id="fm-texts" hidden></span></div>';
+}
+
+/**
+ * The shadow markup of a popover (Spec 014 ④, plan ④ D-05): the slotted trigger, then the control
+ * — a popover of the platform (auto: light dismiss and Escape are the platform's) with the role
+ * dialog, non-modal — holding a composed titolo as heading (level 2, the layer is a document of
+ * its own) and the content.
+ */
+function popoverMarkup(): string {
+  return '<slot name="trigger"></slot><div part="control" role="dialog" popover="auto" tabindex="-1"><fm-titolo part="heading" id="heading" level="2" size="headline-4"><slot name="heading"></slot></fm-titolo><div part="content"><slot></slot></div><span id="fm-texts" hidden></span></div>';
+}
+
+/**
+ * The shadow markup of a menu (Spec 014 ④, plan ④ D-05): the element's own trigger (a low butono
+ * with the icon more, hidden while a trigger is slotted), the slotted trigger, and the control — a
+ * popover of the platform with the role menu, whose rows the element makes per entry (manual slot
+ * assignment, as the tabs): a button with the role menuitem, or a separator for a slotted
+ * apartigilo. The default slot stays empty and hidden (the entries lie in the rows).
+ */
+function menuMarkup(): string {
+  return '<fm-butono part="trigger" emphasis="low"><fm-ikono name="more"></fm-ikono></fm-butono><slot name="trigger"></slot><div part="control" role="menu" popover="auto"></div><slot hidden></slot><span id="fm-texts" hidden></span>';
+}
+
+/** One row of a menu (Spec 014 ④): a button with the role menuitem; one tab stop at a time. */
+const MENU_ROW =
+  '<button part="item" role="menuitem" type="button" tabindex="-1"><slot></slot></button>';
+
+/** A group line of a menu (Spec 014 ④): the slotted apartigilo in a row of its own. */
+const MENU_SEPARATOR = '<div part="separator" role="none"><slot></slot></div>';
+
 /** The shadow markup of a separator (Spec 014 ②, plan ② D-06): the line, nothing else. */
 function separatorMarkup(): string {
   return '<div part="control"></div><slot hidden></slot><span id="fm-texts" hidden></span>';
@@ -444,6 +491,9 @@ function markup(
   if (host === "separator") return separatorMarkup();
   if (host === "heading") return headingMarkup();
   if (host === "paragraph") return paragraphMarkup();
+  if (host === "tooltip") return tooltipMarkup();
+  if (host === "popover") return popoverMarkup();
+  if (host === "menu") return menuMarkup();
   if (host === "meter") return meterMarkup();
   if (host === "light") return lightMarkup(slots, role);
   if (host === "tabs") return tabsMarkup();
@@ -522,7 +572,13 @@ export function elementSource({
                                 ? "[part='text']"
                                 : host === "paragraph"
                                   ? "p"
-                                  : "button";
+                                  : host === "tooltip"
+                                    ? "[part='control']"
+                                    : host === "popover"
+                                      ? "[role=dialog]"
+                                      : host === "menu"
+                                        ? "[role=menu]"
+                                        : "button";
   const isToggle = host === "toggle";
   const isGroup = host === "group";
   const isSelect = host === "select";
@@ -538,6 +594,10 @@ export function elementSource({
   const isSeparator = host === "separator";
   const isHeading = host === "heading";
   const isParagraph = host === "paragraph";
+  const isTooltip = host === "tooltip";
+  const isPopover = host === "popover";
+  const isMenu = host === "menu";
+  const isOverlay = isTooltip || isPopover || isMenu;
   const isSkip = host === "a" && skip;
   const isStatic =
     isStatus ||
@@ -548,7 +608,8 @@ export function elementSource({
     isIcon ||
     isSeparator ||
     isHeading ||
-    isParagraph;
+    isParagraph ||
+    isOverlay;
   const listSlot = slots.find((slot) => slot.list === true)?.name ?? "";
   const namedSlots = slots
     .filter((slot) => slot.default !== true && slot.decorative !== true)
@@ -1627,6 +1688,370 @@ ${
     }
 `
     : "";
+  // The layer of an overlay (Spec 014 ④, plan ④ D-05, E11): anchored to its trigger with CSS
+  // anchor positioning — the element writes one dashed name on the trigger (anchor-name) and the
+  // control (position-anchor), the stylesheet places the side (position-area) and flips it where
+  // there is no room (position-try-fallbacks). Where the platform has no anchor positioning, the
+  // own fallback is the plain place under the trigger, measured once on opening.
+  const overlayMethods = isOverlay
+    ? `
+  #overlayFocusWasInside = false;
+
+  /** The id of the element, made once where the markup gives none (an anchor name needs one). */
+  #overlayId(): string {
+    if (this.id === "") this.id = \`fm-overlay-\${Math.random().toString(36).slice(2, 8)}\`;
+    return this.id;
+  }
+
+  /** The popover of the platform: the host of a tooltip, the control of a popover or a menu. */
+  #overlayLayer(): HTMLElement {
+    return ${isTooltip ? "this" : "this.#control"};
+  }
+
+  /**
+   * The element that carries the anchor name, in the tree scope of the layer (an anchor in
+   * another tree scope is not found, B-7): the trigger of a tooltip (both in the light DOM); for
+   * a popover or a menu the slot that holds the slotted trigger (its box wraps the trigger in
+   * the shadow tree), else the own trigger of a menu.
+   */
+  #overlayAnchorTarget(trigger: HTMLElement): HTMLElement {
+${
+  isTooltip
+    ? `    return trigger;`
+    : `    const slot = this.shadowRoot?.querySelector('slot[name="trigger"]');
+    if (!(slot instanceof HTMLSlotElement)) return trigger;
+    return slot.assignedElements().includes(trigger) ? slot : trigger;`
+}
+  }
+
+  /** Names the trigger as the anchor of the layer; the own fallback places it under the trigger. */
+  #overlayAnchor(trigger: HTMLElement): void {
+    const layer = this.#overlayLayer();
+    const name = \`--fm-anchor-\${this.#overlayId()}\`;
+    this.#overlayAnchorTarget(trigger).style.setProperty("anchor-name", name);
+    layer.style.setProperty("position-anchor", name);
+    // CSS is the stylesheet constant of the element; the platform's CSS object is the global's.
+    const platform = (globalThis as { CSS?: { supports(query: string): boolean } }).CSS;
+    if (platform !== undefined && platform.supports("anchor-name: --a")) return;
+    const box = trigger.getBoundingClientRect();
+    layer.style.insetBlockStart = \`\${box.bottom}px\`;
+    layer.style.insetInlineStart = \`\${box.left}px\`;
+  }
+
+  /** The slotted trigger of a popover or a menu, else the element's own (a menu's butono). */
+  #overlayTrigger(): HTMLElement | undefined {
+    const slot = this.shadowRoot?.querySelector('slot[name="trigger"]');
+    const slotted = slot instanceof HTMLSlotElement ? slot.assignedElements()[0] : undefined;
+    if (slotted instanceof HTMLElement) return slotted;
+    const own = this.shadowRoot?.querySelector('[part="trigger"]');
+    return own instanceof HTMLElement ? own : undefined;
+  }
+
+  /**
+   * The element of the trigger that carries the role button: the control inside a butono's
+   * shadow (where aria-expanded and aria-haspopup are heard), else the trigger itself.
+   */
+  #overlayTriggerControl(): HTMLElement | undefined {
+    const trigger = this.#overlayTrigger();
+    const inner = trigger?.shadowRoot?.querySelector('[part="control"]');
+    return inner instanceof HTMLElement ? inner : trigger;
+  }
+
+  /** Writes an ARIA attribute on the trigger and on its inner control alike. */
+  #overlayTriggerAria(name: string, value: string): void {
+    for (const target of [this.#overlayTrigger(), this.#overlayTriggerControl()]) {
+      if (target !== undefined && target.getAttribute(name) !== value) target.setAttribute(name, value);
+    }
+  }
+
+  /** Wires the trigger once: a click toggles, the keys of a menu button open. */
+  #overlayBindTrigger(): void {
+    const trigger = this.#overlayTrigger();
+    if (trigger === undefined || trigger.dataset.fmOverlay === this.#overlayId()) return;
+    trigger.dataset.fmOverlay = this.#overlayId();
+    this.#overlayTriggerAria("aria-expanded", String(this.#control.matches(":popover-open")));
+    // A pointer on the trigger while the layer is open: the platform's light dismiss closes the
+    // layer on pointerdown (the trigger lies outside it), so the click that follows must not
+    // open it again — the trigger closes, as an invoker of the platform would.
+    trigger.addEventListener("pointerdown", () => {
+      this.#overlayWasOpen = this.#control.matches(":popover-open");
+    });
+    trigger.addEventListener("click", () => {
+      const wasOpen = this.#overlayWasOpen;
+      this.#overlayWasOpen = false;
+      if (wasOpen || this.#control.matches(":popover-open")) this.#overlayClose();
+      else this.#overlayOpen();
+    });
+    trigger.addEventListener("keydown", (event) => {
+      if (this.#control.matches(":popover-open")) return;
+      if (event.key === "ArrowDown" || (${isMenu ? "true" : "false"} && (event.key === "Enter" || event.key === " "))) {
+        event.preventDefault();
+        this.#overlayOpen();
+      }
+    });
+  }
+
+  #overlayOpen(): void {
+    const layer = this.#overlayLayer();
+    const trigger = this.#overlayTrigger();
+    if (trigger !== undefined) this.#overlayAnchor(trigger);
+    if (!layer.matches(":popover-open")) layer.showPopover();
+    // The toggle event of the platform is a task later; the trigger says the state at once, and
+    // the focus moves at once too (a key pressed right after opening finds the layer).
+    this.#overlayTriggerAria("aria-expanded", "true");
+${
+  isMenu
+    ? `    this.#menuFocus(this.#menuEnabled()[0] ?? -1);`
+    : isPopover
+      ? `    this.#overlayFocusIn();`
+      : "    // A tooltip takes no focus."
+}
+  }
+
+  #overlayClose(): void {
+    const layer = this.#overlayLayer();
+    if (layer.matches(":popover-open")) layer.hidePopover();
+    this.#overlayTriggerAria("aria-expanded", "false");
+  }
+
+  #overlayMirroring = false;
+  #overlayWasOpen = false;
+
+  /** Whether the focus lies in the layer: a row of a menu, or a child of the popover's content. */
+  #overlayHoldsFocus(): boolean {
+    const active = this.shadowRoot?.activeElement;
+    if (active instanceof HTMLElement && this.#control.contains(active)) return true;
+    const outer = document.activeElement;
+    return outer instanceof HTMLElement && this.contains(outer) && outer.closest('[slot="trigger"]') === null && outer !== this;
+  }
+
+  /** Writes the open attribute from the platform's state; the render it triggers syncs nothing back. */
+  #overlayMirror(open: boolean): void {
+    if (this.hasAttribute("open") === open) return;
+    this.#overlayMirroring = true;
+    this.toggleAttribute("open", open);
+    this.#overlayMirroring = false;
+  }
+
+  /** The open prop follows into the platform (the toggle event writes the attribute back). */
+  #overlaySync(): void {
+    if (this.#overlayMirroring) return;
+    const wanted = this.propValue("open") === true;
+    const layer = this.#overlayLayer();
+    if (wanted && !layer.matches(":popover-open")) this.#overlayOpen();
+    else if (!wanted && layer.matches(":popover-open")) this.#overlayClose();
+  }
+
+  /** The focus goes to the first focusable child of the layer, else to the layer itself. */
+  #overlayFocusIn(): void {
+    const control = this.#control;
+    // An Ero of Fundamento delegates its focus (its host has no tabindex): it counts as focusable.
+    const inside = [...this.querySelectorAll<HTMLElement>("*")].find(
+      (node) =>
+        node.getAttribute("slot") !== "trigger" &&
+        node.getAttribute("slot") !== "heading" &&
+        (node.tabIndex >= 0 || node.shadowRoot !== null) &&
+        node.closest('[slot="trigger"]') === null,
+    );
+    (inside ?? control).focus();
+    this.#overlayFocusWasInside = true;
+  }
+`
+    : "";
+  // The tooltip's own ways: the trigger is any element of the page named by for; its words are
+  // heard as the trigger's description unless they are its name.
+  const tooltipMethods = isTooltip
+    ? `
+  #tooltipTrigger: HTMLElement | undefined;
+  #tooltipTimer: ReturnType<typeof setTimeout> | undefined;
+
+  /** The delay of the motion token: the transition duration the stylesheet binds. */
+  #tooltipDelay(): number {
+    const raw = getComputedStyle(this.#control).transitionDuration.split(",")[0]?.trim() ?? "0s";
+    void raw.length;
+    const value = Number.parseFloat(raw);
+    return Number.isFinite(value) ? (raw.endsWith("ms") ? value : value * 1000) : 0;
+  }
+
+  /** Finds the trigger by id and wires it once; the description follows the words. */
+  #tooltipBind(): void {
+    const id = String(this.propValue("for") ?? "");
+    const trigger = id === "" ? null : document.getElementById(id);
+    if (!(trigger instanceof HTMLElement)) return;
+    const words = (this.textContent ?? "").trim();
+    const name = (trigger.getAttribute("label") ?? trigger.getAttribute("aria-label") ?? trigger.textContent ?? "").trim();
+    if (words !== "" && words !== name) {
+      trigger.setAttribute("aria-describedby", this.#overlayId());
+      // The same words as a plain description too (ARIA 1.3): a tool that does not read a
+      // reference into a host with a shadow tree still hears them.
+      trigger.setAttribute("aria-description", words);
+    } else if (trigger.getAttribute("aria-describedby") === this.id) {
+      trigger.removeAttribute("aria-describedby");
+      trigger.removeAttribute("aria-description");
+    }
+    if (this.#tooltipTrigger === trigger) return;
+    this.#tooltipTrigger = trigger;
+    trigger.addEventListener("mouseenter", () => this.#overlayShowSoon());
+    trigger.addEventListener("mouseleave", () => this.#overlayHideSoon());
+    trigger.addEventListener("focusin", () => this.#overlayShowSoon());
+    trigger.addEventListener("focusout", () => this.#overlayHide());
+    trigger.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") this.#overlayHide();
+    });
+  }
+
+  #overlayShowSoon(): void {
+    this.#overlayCancelHide();
+    if (this.#tooltipTimer !== undefined) return;
+    this.#tooltipTimer = setTimeout(() => {
+      this.#tooltipTimer = undefined;
+      const trigger = this.#tooltipTrigger;
+      if (trigger === undefined) return;
+      this.#overlayAnchor(trigger);
+      if (!this.matches(":popover-open")) this.showPopover();
+    }, this.#tooltipDelay());
+  }
+
+  #tooltipHideTimer: ReturnType<typeof setTimeout> | undefined;
+
+  /** Leaving the trigger hides after a moment: the pointer may be on its way onto the layer. */
+  #overlayHideSoon(): void {
+    this.#overlayCancelShow();
+    if (this.#tooltipHideTimer !== undefined) return;
+    this.#tooltipHideTimer = setTimeout(() => {
+      this.#tooltipHideTimer = undefined;
+      this.#overlayHide();
+    }, 150);
+  }
+
+  #overlayCancelHide(): void {
+    if (this.#tooltipHideTimer === undefined) return;
+    clearTimeout(this.#tooltipHideTimer);
+    this.#tooltipHideTimer = undefined;
+  }
+
+  #overlayCancelShow(): void {
+    if (this.#tooltipTimer === undefined) return;
+    clearTimeout(this.#tooltipTimer);
+    this.#tooltipTimer = undefined;
+  }
+
+  #overlayHide(): void {
+    this.#overlayCancelShow();
+    this.#overlayCancelHide();
+    if (this.matches(":popover-open")) this.hidePopover();
+  }
+`
+    : "";
+  // The menu's own ways: rows per entry, the keys of the Skemo, select with the entry's id.
+  const menuMethods = isMenu
+    ? `
+  /** Focus goes to the trigger of the menu. */
+  override focus(options?: FocusOptions): void {
+    this.#overlayTrigger()?.focus(options);
+  }
+
+  /** The rows of the menu, one per entry. */
+  #menuRows(): HTMLElement[] {
+    return [...(this.shadowRoot?.querySelectorAll('[part="item"]') ?? [])] as HTMLElement[];
+  }
+
+  /** The entry a row holds: the data element of the light DOM. */
+  #menuEntryOf(row: HTMLElement): Element | undefined {
+    const node = row.querySelector("slot")?.assignedNodes()[0];
+    return node instanceof Element ? node : undefined;
+  }
+
+  /** The indexes of the rows a person may choose. */
+  #menuEnabled(): number[] {
+    return this.#menuRows()
+      .map((row, index) => (row.getAttribute("aria-disabled") === "true" ? -1 : index))
+      .filter((index) => index !== -1);
+  }
+
+  #menuFocus(index: number): void {
+    const rows = this.#menuRows();
+    rows.forEach((row, each) => {
+      row.tabIndex = each === index ? 0 : -1;
+    });
+    rows[index]?.focus();
+    this.#overlayFocusWasInside = true;
+  }
+
+  /** Chooses a row: select with its id (the value of the entry, else its text), then the menu closes. */
+  #menuChoose(row: HTMLElement): void {
+    if (row.getAttribute("aria-disabled") === "true") return;
+    const entry = this.#menuEntryOf(row);
+    const value = entry?.getAttribute("value") ?? entry?.textContent?.trim() ?? "";
+    this.dispatchEvent(new CustomEvent("select", { bubbles: true, detail: { value } }));
+    this.#overlayClose();
+  }
+
+  /** The keys of the Skemo on the rows: arrows wrap, Home and End jump, a letter finds, Enter or Space chooses, Escape closes. */
+  #menuKey(event: KeyboardEvent): void {
+    const key = event.key === " " ? "Space" : event.key;
+    const enabled = this.#menuEnabled();
+    const rows = this.#menuRows();
+    const current = rows.findIndex((row) => row === this.shadowRoot?.activeElement);
+    const at = enabled.indexOf(current);
+    if (key === "Enter" || key === "Space") return;
+    if (KEYS.includes(key)) {
+      event.preventDefault();
+      if (key === "ArrowDown") this.#menuFocus(enabled[(at + 1) % enabled.length] ?? -1);
+      else if (key === "ArrowUp") this.#menuFocus(enabled[(at - 1 + enabled.length) % enabled.length] ?? -1);
+      else if (key === "Home") this.#menuFocus(enabled[0] ?? -1);
+      else if (key === "End") this.#menuFocus(enabled[enabled.length - 1] ?? -1);
+      else if (key === "Escape") this.#overlayClose();
+      // Enter and Space are the platform's own click on the row's button (keyup): the click
+      // listener chooses once; nothing is done here, nothing is prevented.
+      return;
+    }
+    if (event.key.length !== 1 || event.altKey || event.ctrlKey || event.metaKey) return;
+    const letter = event.key.toLowerCase();
+    const order = [...enabled.slice(at + 1), ...enabled.slice(0, at + 1)];
+    const found = order.find((index) => {
+      const row = rows[index];
+      const words = row === undefined ? "" : (this.#menuEntryOf(row)?.textContent ?? "");
+      return words.trim().toLowerCase().startsWith(letter);
+    });
+    if (found !== undefined) this.#menuFocus(found);
+  }
+
+  /**
+   * Assigns the children to the slots (manual slot assignment): every element without a slot to a
+   * row of its own, made here — an apartigilo to a separator row, every other to a menu item; the
+   * trigger to its slot.
+   */
+  #assign(): void {
+    const shadow = this.shadowRoot;
+    if (shadow === null) return;
+    const entries: Element[] = [];
+    const named = new Map<string, Element[]>();
+    for (const node of this.children) {
+      const slot = node.getAttribute("slot");
+      if (slot === null) entries.push(node);
+      else named.set(slot, [...(named.get(slot) ?? []), node]);
+    }
+    for (const holder of shadow.querySelectorAll("slot[name]")) {
+      (holder as HTMLSlotElement).assign(...(named.get(holder.getAttribute("name") ?? "") ?? []));
+    }
+    const list = this.#control;
+    const wanted = entries.map((entry) => (entry.tagName.toLowerCase() === "fm-apartigilo" ? "separator" : "item"));
+    const same =
+      list.children.length === wanted.length &&
+      [...list.children].every((child, index) => child.getAttribute("part") === wanted[index]);
+    if (!same) {
+      list.replaceChildren();
+      for (const kind of wanted) {
+        list.insertAdjacentHTML("beforeend", kind === "separator" ? \`${MENU_SEPARATOR}\` : \`${MENU_ROW}\`);
+      }
+    }
+    entries.forEach((entry, index) => {
+      list.children[index]?.querySelector("slot")?.assign(entry);
+    });
+  }
+`
+    : "";
   const tabsMethods = isTabs
     ? `
   /** Focus goes to the one tab stop: the selected tab, else the first. */
@@ -1792,6 +2217,122 @@ ${
     }
 `
     : "";
+  // A tooltip (Spec 014 ④, plan ④ D-05, G5): shown while its trigger (for) is hovered or focused,
+  // after the delay the motion token gives; hidden when the pointer leaves both, on blur and on
+  // Escape; it describes the trigger (aria-describedby) unless its words are the trigger's own
+  // name — then nothing is heard twice (an icon-only butono with its label).
+  const tooltipInit = isTooltip
+    ? `    // The host is the layer (D-05, B-7): a popover of the platform with the role tooltip.
+    this.setAttribute("popover", "manual");
+    if (!this.hasAttribute("role")) this.setAttribute("role", "tooltip");
+    this.addEventListener("mouseenter", () => this.#overlayCancelHide());
+    this.addEventListener("mouseleave", () => this.#overlayHideSoon());
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && this.matches(":popover-open")) this.#overlayHide();
+    });
+`
+    : "";
+  const tooltipRender = isTooltip
+    ? `    this.#tooltipBind();
+`
+    : "";
+  // A popover (Spec 014 ④, plan ④ D-05, G5): the slotted trigger toggles it and says aria-expanded;
+  // the layer is a popover of the platform (light dismiss, Escape), anchored to the trigger; the
+  // focus moves into the layer when it opens and back to the trigger when it closes; the open
+  // attribute follows the platform's toggle event.
+  const popoverInit = isPopover
+    ? `    control.addEventListener("toggle", () => {
+      // The event is a task later: the state of the platform now counts, not the event's (a
+      // light dismiss right after opening would otherwise be undone by the mirror).
+      const open = control.matches(":popover-open");
+      this.#overlayMirror(open);
+      this.#overlayTriggerAria("aria-expanded", String(open));
+      // Opened by the platform (the open prop): the focus moves in unless it already is in.
+      if (open && !this.#overlayHoldsFocus()) this.#overlayFocusIn();
+      else if (!open && this.#overlayFocusWasInside) this.#overlayTrigger()?.focus();
+    });
+    control.addEventListener("focusout", (event) => {
+      this.#overlayFocusWasInside = !(event.relatedTarget === null && !control.matches(":popover-open"));
+    });
+    root.querySelector('slot[name="trigger"]')?.addEventListener("slotchange", () => this.#overlayBindTrigger());
+    this.#overlayBindTrigger();
+`
+    : "";
+  const popoverRender = isPopover
+    ? `    const layerName = this.propValue("label");
+    if (typeof layerName === "string" && layerName !== "") control.setAttribute("aria-label", layerName);
+    else control.removeAttribute("aria-label");
+    const heading = this.shadowRoot?.querySelector('[part="heading"]');
+    if (heading instanceof HTMLElement) heading.hidden = !this.#filled("heading");
+    this.#overlaySync();
+`
+    : "";
+  // A menu (Spec 014 ④, plan ④ D-05, G5): the own trigger (hidden while one is slotted) or the
+  // slotted one opens it — a click, ArrowDown, Enter or Space — and the first entry takes the
+  // focus; the arrows move and wrap, Home and End jump, a letter finds an entry, a disabled entry
+  // is skipped; Enter or Space fires select with the entry's id and closes; Escape closes and the
+  // trigger takes the focus back. The rows are made per entry (manual slot assignment).
+  const menuInit = isMenu
+    ? `    new MutationObserver(() => {
+      this.#assign();
+      this.#render();
+    }).observe(this, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+      attributes: true,
+      attributeFilter: ["slot", "value", "disabled", "intent", "label"],
+    });
+    control.addEventListener("toggle", () => {
+      const open = control.matches(":popover-open");
+      this.#overlayMirror(open);
+      this.#overlayTriggerAria("aria-expanded", String(open));
+      // Opened by the platform (the open prop): the first entry takes the focus unless a row has
+      // it already (a key pressed right after opening moved it).
+      if (open && !this.#overlayHoldsFocus()) this.#menuFocus(this.#menuEnabled()[0] ?? -1);
+      else if (!open && this.#overlayFocusWasInside) this.#overlayTrigger()?.focus();
+    });
+    control.addEventListener("focusout", (event) => {
+      this.#overlayFocusWasInside = !(event.relatedTarget === null && !control.matches(":popover-open"));
+    });
+    control.addEventListener("keydown", (event) => this.#menuKey(event));
+    control.addEventListener("click", (event) => {
+      const row = event.composedPath().find(
+        (node) => node instanceof HTMLElement && node.getAttribute("part") === "item",
+      );
+      if (row instanceof HTMLElement) this.#menuChoose(row);
+    });
+    root.querySelector('slot[name="trigger"]')?.addEventListener("slotchange", () => this.#overlayBindTrigger());
+    this.#overlayBindTrigger();
+`
+    : "";
+  const menuRender = isMenu
+    ? `    const own = this.shadowRoot?.querySelector('[part="trigger"]');
+    const slotted = this.#filled("trigger");
+    const fallback = TEXTS["label-empty"];
+    const spoken = fallback === undefined ? "" : (fallback[this.#lingvo()] ?? fallback.en ?? "");
+    const given = this.propValue("label");
+    const menuName = typeof given === "string" && given !== "" ? given : spoken;
+    if (own instanceof HTMLElement) {
+      own.hidden = slotted;
+      if (own.getAttribute("label") !== menuName) own.setAttribute("label", menuName);
+    }
+    control.setAttribute("aria-label", menuName);
+    this.#overlayBindTrigger();
+    this.#overlayTriggerAria("aria-haspopup", "menu");
+    if (this.#overlayTriggerControl()?.hasAttribute("aria-expanded") !== true) {
+      this.#overlayTriggerAria("aria-expanded", String(control.matches(":popover-open")));
+    }
+    for (const row of this.#menuRows()) {
+      const entry = this.#menuEntryOf(row);
+      const off = entry !== undefined && (entry.hasAttribute("disabled") || entry.getAttribute("aria-disabled") === "true");
+      if (off) row.setAttribute("aria-disabled", "true");
+      else row.removeAttribute("aria-disabled");
+      row.classList.toggle("fm-danger", entry?.getAttribute("intent") === "danger");
+    }
+    this.#overlaySync();
+`
+    : "";
   // The skip link moves the focus to its target (G5): a landmark takes it once it may (tabindex
   // -1, written where the markup has none); the fragment of the link is the platform's.
   const skipInit = isSkip
@@ -1932,7 +2473,7 @@ ${autoField}${isFieldHost ? "  /** Whether a person touched the field or the for
   constructor() {
     super();
     this.#internals = this.attachInternals();
-    const root = this.attachShadow({ mode: "open", delegatesFocus: true${isGroup || isTabs ? ', slotAssignment: "manual"' : ""} });
+    const root = this.attachShadow({ mode: "open", delegatesFocus: true${isGroup || isTabs || isMenu ? ', slotAssignment: "manual"' : ""} });
     if (sheet === undefined) {
       sheet = new CSSStyleSheet();
       sheet.replaceSync(CSS);
@@ -1956,7 +2497,7 @@ ${autoField}${isFieldHost ? "  /** Whether a person touched the field or the for
     this.#label = label;
     this.#texts = texts;
     control.addEventListener("click", (event) => this.#activate(event));
-${toggleKeys}${groupInit}${selectInit}${dialogInit}${statusInit}${lightInit}${tabsInit}${skipInit}    label.addEventListener("slotchange", () => this.#render());
+${toggleKeys}${groupInit}${selectInit}${dialogInit}${statusInit}${lightInit}${tabsInit}${tooltipInit}${popoverInit}${menuInit}${skipInit}    label.addEventListener("slotchange", () => this.#render());
     for (const named of root.querySelectorAll("slot[name]")) {
       named.addEventListener("slotchange", () => this.#render());
     }
@@ -1971,7 +2512,7 @@ ${toggleKeys}${groupInit}${selectInit}${dialogInit}${statusInit}${lightInit}${ta
 ${invalidReport}${inputEnter}  }
 
   connectedCallback(): void {
-${isGroup || isTabs ? "    this.#assign();\n" : ""}    this.#render();
+${isGroup || isTabs || isMenu ? "    this.#assign();\n" : ""}    this.#render();
   }
 
   attributeChangedCallback(): void {
@@ -2090,7 +2631,7 @@ ${autoDisconnect}
     // \`invalid\` spoken as aria-invalid and set by a filled error slot (constraint of the Skemo);
     // disabled wins over readonly; help and error show only while they have text.
     const described: string[] = [];
-${inputRender}${toggleRender}${groupRender}${selectRender}${dialogRender}${statusRender}${meterRender}${lightRender}${tabsRender}${iconRender}${separatorRender}${headingRender}${paragraphRender}${skipRender}${composedIconRender}    // The texts of the slots that describe the control (Spec 009, D-02; a checkbox, Spec 010 ②):
+${inputRender}${toggleRender}${groupRender}${selectRender}${dialogRender}${statusRender}${meterRender}${lightRender}${tabsRender}${iconRender}${separatorRender}${headingRender}${paragraphRender}${tooltipRender}${popoverRender}${menuRender}${skipRender}${composedIconRender}    // The texts of the slots that describe the control (Spec 009, D-02; a checkbox, Spec 010 ②):
     // shown while they have text, and its description in that order.
     for (const source of DESCRIPTION) {
       const [kind, name = ""] = source.split(":");
@@ -2138,9 +2679,10 @@ ${
       .trim();
     const name = this.propValue("label");
 ${
-  isLight
+  isLight || isOverlay
     ? `    // A light-DOM host names its region by the caption (Spec 011 ④, D-09) and its list by the
-    // label prop on the dl itself (D-10); nothing is written here.
+    // label prop on the dl itself (D-10); an overlay (Spec 014 ④) names its layer in its own
+    // render; nothing is written here.
     void text;
     void name;
 `
@@ -2166,7 +2708,7 @@ ${
     : `    if (!(this.#control instanceof HTMLButtonElement)) return;
 ${toggleActivate}`
 }  }
-${groupMethods}${selectMethods}${inputMethods}${dialogMethods}${statusMethods}${slotTextMethod}${lightMethods}${autoMethods}${tabsMethods}
+${groupMethods}${selectMethods}${inputMethods}${dialogMethods}${statusMethods}${slotTextMethod}${lightMethods}${autoMethods}${tabsMethods}${overlayMethods}${tooltipMethods}${menuMethods}
 }
 
 /**

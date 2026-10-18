@@ -1445,7 +1445,7 @@ for (const aspekto of ["komuna", "ekzemplo"]) {
 // the tooltip (its text at least 4.5:1 on the inverse surface), the popover (a dialog with its
 // heading) and the menu (menu items, a disabled one, a danger one at least 4.5:1 on its row).
 const overlays =
-  '<fm-butono id="ov-b" emphasis="low" label="Suchen"><fm-ikono name="search"></fm-ikono></fm-butono><fm-konsileto id="ov-t" for="ov-b">Suchen</fm-konsileto><fm-sxvebilo id="ov-p" label="Filter" open><fm-butono slot="trigger" emphasis="medium">Filter</fm-butono><span slot="heading">Nach Status filtern</span><fm-teksto>Inhalt</fm-teksto></fm-sxvebilo><fm-menuo id="ov-m" open><data value="edit">Bearbeiten</data><data value="duplicate" disabled>Duplizieren</data><fm-apartigilo></fm-apartigilo><data value="delete" intent="danger">Löschen</data></fm-menuo>';
+  '<fm-butono id="ov-b" emphasis="low" label="Suchen"><fm-ikono name="search"></fm-ikono></fm-butono><fm-konsileto id="ov-t" for="ov-b">Suchen</fm-konsileto><fm-sxvebilo id="ov-p" label="Filter" open><fm-butono slot="trigger" emphasis="medium">Filter</fm-butono><span slot="heading">Nach Status filtern</span><fm-teksto>Inhalt</fm-teksto></fm-sxvebilo><fm-menuo id="ov-m"><data value="edit">Bearbeiten</data><data value="duplicate" disabled>Duplizieren</data><fm-apartigilo></fm-apartigilo><data value="delete" intent="danger">Löschen</data></fm-menuo>';
 
 for (const aspekto of ["komuna", "ekzemplo"]) {
   for (const scheme of ["light", "dark"]) {
@@ -1466,8 +1466,13 @@ for (const aspekto of ["komuna", "ekzemplo"]) {
         await page.locator("#ov-b").hover();
         await expect(page.getByRole("tooltip", { name: "Suchen" })).toHaveCount(1);
         await expect(page.getByRole("dialog", { name: "Filter" })).toHaveCount(1);
+        expect(await axeViolations(page), "tooltip and popover").toEqual([]);
+        // One auto popover at a time (the platform closes the other): the menu opens after.
+        await page.keyboard.press("Escape");
+        await expect(page.getByRole("dialog", { name: "Filter" })).toHaveCount(0);
+        await page.getByRole("button", { name: "Weitere Aktionen" }).click();
         await expect(page.getByRole("menuitem")).toHaveCount(3);
-        expect(await axeViolations(page)).toEqual([]);
+        expect(await axeViolations(page), "menu").toEqual([]);
         const measured = await page.evaluate(() => {
           const luminance = (colour: string) => {
             const [r = 0, g = 0, b = 0] = colour.match(/[\d.]+/g)?.map(Number) ?? [];
@@ -1489,12 +1494,21 @@ for (const aspekto of ["komuna", "ekzemplo"]) {
               []),
           ] as HTMLElement[];
           const danger = rows[2] as HTMLElement;
+          // A row at rest has the transparent tertiary fill: the text stands on the surface.
+          const surface = document
+            .getElementById("ov-m")
+            ?.shadowRoot?.querySelector('[part="control"]') as HTMLElement;
+          const rowFill = getComputedStyle(danger).backgroundColor;
+          const behind =
+            rowFill === "rgba(0, 0, 0, 0)" || rowFill === "transparent"
+              ? getComputedStyle(surface).backgroundColor
+              : rowFill;
           return {
             tooltip: ratio(
               getComputedStyle(tooltip).color,
               getComputedStyle(tooltip).backgroundColor,
             ),
-            danger: ratio(getComputedStyle(danger).color, getComputedStyle(danger).backgroundColor),
+            danger: ratio(getComputedStyle(danger).color, behind),
           };
         });
         expect(measured.tooltip, "tooltip").toBeGreaterThanOrEqual(4.5);

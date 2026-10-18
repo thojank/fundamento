@@ -17,6 +17,10 @@ const eroNamed = (name: string) => modelo.eroj.find((entry) => entry.ero.name ==
 const sxvebilo = eroNamed("sxvebilo");
 const skemo = sxvebilo?.skemo;
 const uzo = sxvebilo?.uzo;
+const skemoOrThrow = () => {
+  if (skemo === undefined) throw new Error("missing");
+  return skemo;
+};
 const named = (name: string) => modelo.reguloj.find((regulo) => regulo.name === name);
 const suggest = (goal: string) => {
   const result = suggestEro(modelo, { goal });
@@ -44,7 +48,7 @@ describe("sxvebilo in the repo Modelo (section ④, G1, G2, G4)", () => {
       { name: "content", default: true },
       { name: "heading", text: true },
     ]);
-    expect(variantKeys(skemo ?? { props: [], states: [], slots: [], parts: {} })).toEqual([]);
+    expect(variantKeys(skemoOrThrow())).toEqual(["state"]);
   });
 
   it("names its parts: the raised surface with radius, shadow, layer and the small container as width; the subtle border; heading, content and box", () => {
@@ -147,7 +151,9 @@ describe("suggest_ero of the popover (Gvidanto)", () => {
       ero: "sxvebilo",
       props: {},
     });
-    const decision = suggest("Popover mit einer unumkehrbaren Entscheidung");
+    // "Entscheidung" is the avizo's redirect word (first in Ero order); the popover's own are
+    // verbindlich and unumkehrbar.
+    const decision = suggest("Popover, verbindlich und unumkehrbar");
     expect(decision.suggestion).toEqual({ ero: "dialogo", props: {} });
     expect(decision.boundary).toMatchObject({ ero: "sxvebilo", case: "decision" });
   });

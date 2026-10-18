@@ -19,13 +19,17 @@ const menuOf = (page: Parameters<typeof serve>[0], id: string) =>
       open: control.matches(":popover-open"),
       role: control.getAttribute("role"),
       rows: rows.map((row) => ({
-        name: row.textContent?.trim() ?? "",
+        // The words of a row are its slotted entry's (manual slot assignment).
+        name: (row.querySelector("slot")?.assignedNodes({ flatten: true }) ?? [])
+          .map((node) => node.textContent ?? "")
+          .join("")
+          .trim(),
         disabled: row.getAttribute("aria-disabled"),
         colour: getComputedStyle(row).color,
         danger: row.classList.contains("fm-danger"),
       })),
       focused,
-      separators: control.querySelectorAll('[role="separator"]').length,
+      separators: control.querySelectorAll('[part="separator"]').length,
     };
   });
 

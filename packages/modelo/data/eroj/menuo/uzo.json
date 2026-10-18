@@ -1,0 +1,164 @@
+{
+  "$schema": "../../../schema/modelo.schema.json#/$defs/UzoFile",
+  "uzo": {
+    "id": "uzo_01M564NXJNCV7VW68BBE42BEA2",
+    "ero": "ero_01M564NWTE5K276E3M9RA00YKV",
+    "skemo": "ske_01M564NX6FGBH4NHKDSHCCM5W5",
+    "purpose": "Offers actions for one object behind a single button: edit, duplicate, delete.",
+    "instead": [
+      {
+        "goal": "navigate",
+        "keywords": {
+          "en": [
+            "navigate",
+            "pages"
+          ],
+          "de": [
+            "navigieren",
+            "seiten"
+          ]
+        },
+        "ero": "navigado",
+        "kialo": "A menu that leads to pages is a navigation, because an action menu fires actions on one object and a navigation moves a person through the application (G6: Menü alone is the navigado's word)."
+      },
+      {
+        "goal": "choose-value",
+        "keywords": {
+          "en": [
+            "choosevalue",
+            "selectoption",
+            "value"
+          ],
+          "de": [
+            "wert",
+            "auswahlwert"
+          ]
+        },
+        "ero": "elektilo",
+        "kialo": "A menu whose entries are values of one field is a select, because the choice stays as the field's value and is sent with the form; a menu entry fires once and holds nothing."
+      },
+      {
+        "goal": "single-action",
+        "keywords": {
+          "en": [
+            "singleaction",
+            "oneaction",
+            "only"
+          ],
+          "de": [
+            "einzelaktion",
+            "einzige",
+            "einzelne"
+          ]
+        },
+        "ero": "butono",
+        "kialo": "A menu with one entry hides an action behind a click, because a person opens it only to find one command; one action is a button with its name."
+      }
+    ],
+    "boundary": [
+      {
+        "case": "submenu",
+        "action": "not-supported",
+        "keywords": {
+          "en": [
+            "cascading",
+            "nestedmenu"
+          ],
+          "de": [
+            "kaskadierend",
+            "verschachtelt"
+          ]
+        },
+        "kialo": "A menu that opens a second menu beside an entry is not supported, because it needs a pointer path and a second focus path a keyboard cannot follow; group the entries with a separator or split them over two menus."
+      },
+      {
+        "case": "checkable-items",
+        "action": "ask-human",
+        "keywords": {
+          "en": [
+            "checkable",
+            "checkmarks"
+          ],
+          "de": [
+            "abhakbar",
+            "häkchen"
+          ]
+        },
+        "kialo": "An entry that stays checked is a setting, not an action, because it holds a state after the menu closed; a person decides whether it is a switch beside the object or a menu of checkable items (role menuitemcheckbox) in a later step."
+      }
+    ],
+    "composes": {
+      "containers": [
+        {
+          "name": "record-header",
+          "kialo": "The actions on one record stand in its head, because the head names the object the actions act on."
+        }
+      ],
+      "with": [
+        {
+          "ero": "tabelo",
+          "kialo": "The actions on one row of a table are a menu behind one button in the row, because a button per action would fill the row with controls; the tabelo sends its row actions here."
+        },
+        {
+          "ero": "butono",
+          "kialo": "The trigger of a menu is a button, because a menu opens on a command; with an icon alone it carries the name of the menu as its label (icon-meaning-named)."
+        },
+        {
+          "ero": "ikono",
+          "kialo": "An entry may carry an icon before its word, because the sign is read faster than the word — and never alone, the word names the action."
+        },
+        {
+          "ero": "apartigilo",
+          "kialo": "Groups of entries are separated by a line, because a line says that the entries above and below belong to different things (edit and duplicate; delete)."
+        }
+      ],
+      "never": [],
+      "spacing": {
+        "owner": "container",
+        "regulo": "spacing-owned-by-container"
+      }
+    },
+    "slots": {
+      "items": {
+        "accepts": [
+          "text",
+          "ikono",
+          "apartigilo"
+        ],
+        "required": true,
+        "min": 1,
+        "nesting": 1
+      },
+      "trigger": {
+        "accepts": [
+          "butono"
+        ],
+        "max": 1,
+        "nesting": 0
+      }
+    },
+    "layout": {
+      "size": "content",
+      "wrap": "never"
+    },
+    "content": [
+      {
+        "regulo": "label-names-action",
+        "fixed": false,
+        "severity": "warning",
+        "of": "slot:items",
+        "check": {
+          "kind": "names-goal"
+        }
+      },
+      {
+        "regulo": "option-labels-distinct",
+        "fixed": true,
+        "of": "slot:items",
+        "check": {
+          "kind": "distinct"
+        }
+      }
+    ]
+  }
+}

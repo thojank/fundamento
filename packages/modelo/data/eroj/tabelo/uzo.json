@@ -34,6 +34,21 @@
         },
         "ero": null,
         "kialo": "A table for the layout of a page destroys the reading order, because assistive technology reads it as data; a person decides how the page is built."
+      },
+      {
+        "goal": "row-actions",
+        "keywords": {
+          "en": [
+            "dropdown",
+            "rowmenu"
+          ],
+          "de": [
+            "aktionsmenü",
+            "zeilenmenü"
+          ]
+        },
+        "ero": "menuo",
+        "kialo": "The actions on one row stand behind one button in the row as a menu, because a button per action would fill the row with controls and a person reads the data first; the menuo names each action (Spec 014 ④ closes the boundary row-actions-menu)."
       }
     ],
     "boundary": [
@@ -81,21 +96,6 @@
           ]
         },
         "kialo": "Editing in a cell is a form in a table, because each cell becomes a field; a person decides whether a form fits better."
-      },
-      {
-        "case": "row-actions-menu",
-        "action": "ask-human",
-        "keywords": {
-          "en": [
-            "dropdown",
-            "rowmenu"
-          ],
-          "de": [
-            "aktionsmenü",
-            "zeilenmenü"
-          ]
-        },
-        "kialo": "Several small butono in a cell are allowed, because each action keeps its name; a menu that folds them is an Ero Fundamento does not have, a person decides."
       },
       {
         "case": "sticky-header",
@@ -164,6 +164,10 @@
         {
           "ero": "titolo",
           "kialo": "The caption of a table names the rows, visible above them; where the section around the table has a heading, that is a titolo."
+        },
+        {
+          "ero": "menuo",
+          "kialo": "The row actions of a table are a menuo in the last cell of the row, because one button per row keeps the row readable; the menu names edit, duplicate, delete."
         }
       ],
       "never": [],

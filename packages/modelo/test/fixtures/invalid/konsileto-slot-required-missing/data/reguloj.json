@@ -17,7 +17,8 @@
       "checkability": "manual",
       "appliesTo": {
         "eroj": [
-          "titolo"
+          "titolo",
+          "konsileto"
         ]
       }
     }

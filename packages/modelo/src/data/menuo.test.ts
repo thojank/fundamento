@@ -20,6 +20,10 @@ const eroNamed = (name: string) => modelo.eroj.find((entry) => entry.ero.name ==
 const menuo = eroNamed("menuo");
 const skemo = menuo?.skemo;
 const uzo = menuo?.uzo;
+const skemoOrThrow = () => {
+  if (skemo === undefined) throw new Error("missing");
+  return skemo;
+};
 const named = (name: string) => modelo.reguloj.find((regulo) => regulo.name === name);
 const rulesOf = (result: ReturnType<typeof evaluateUsage>) =>
   result.violations.map((violation) => [violation.issue.rule, violation.issue.severity]);
@@ -49,12 +53,8 @@ describe("menuo in the repo Modelo (section ④, G1, G2, G4)", () => {
       { name: "trigger" },
     ]);
     // Only the state is an axis: placement keys no part, label and open are no axes (E7).
-    expect(variantKeys(skemo ?? { props: [], states: [], slots: [], parts: {} })).toEqual([
-      "state",
-    ]);
-    expect(
-      combinationsOf(skemo ?? { props: [], states: [], slots: [], parts: {} }, ["state"]),
-    ).toHaveLength(4);
+    expect(variantKeys(skemoOrThrow())).toEqual(["state"]);
+    expect(combinationsOf(skemoOrThrow(), ["state"])).toHaveLength(4);
   });
 
   it("names its parts: the raised surface like the popover's, the item by state, the danger item, box and focus ring", () => {

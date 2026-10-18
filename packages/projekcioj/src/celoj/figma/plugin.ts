@@ -33,6 +33,7 @@
 // item, the line of a tab list and the indicator of a tab are bottom weights (strokeBottomWeight)
 // on a frame with the three other sides at 0, as the rows of a table are.
 
+import { VITRINO_TRIGGER_TEXT } from "../vitrino/datumoj.js";
 import { type FigmaPlan, TEXT_CASE_VARIES } from "./figma.js";
 
 /** The nodes of one variant the plugin draws, outside in (F11). */
@@ -66,6 +67,10 @@ type PartNode =
   | "action-label-1"
   | "action-label-2"
   | "backdrop"
+  // The overlays (Spec 014 ④): the content's text of a popover, the danger entry of a menu (its
+  // text node, registered once more under this name).
+  | "content-text"
+  | "danger-item"
   // A notice (Spec 011 ③): the details text and the dismiss frame; a badge and a state (Spec 011
   // ③) reuse control, text, indicator, mark, texts and actions.
   | "details"
@@ -376,6 +381,49 @@ const STRUCTURE_BINDINGS: Readonly<Record<string, Readonly<Record<string, readon
   // A radio group (Spec 010 ③, D-07): the gap of the box stands between a circle and its label,
   // in the row of the option.
   choice: { "box.gap": [{ node: "option", fields: ["itemSpacing"] }] },
+  // A tooltip (Spec 014 ④, plan ④ D-06): the control is the surface — fill, radius, the padding
+  // on every side — with the text in its colour; the shadow is bound as an effect (variant.shadow).
+  tooltip: {
+    "surface.fill": [{ node: "control", fields: ["fills"], paint: true }],
+    "surface.radius": [{ node: "control", fields: ["cornerRadius"] }],
+    "box.inline-padding": [{ node: "control", fields: [...PADDINGS] }],
+    "text.color": [{ node: "text", fields: ["fills"], paint: true }],
+  },
+  // A popover (Spec 014 ④): like a dialog, the surface takes what the control takes elsewhere;
+  // the heading is the label property, the content a text in its role.
+  popover: {
+    "surface.fill": [{ node: "surface", fields: ["fills"], paint: true }],
+    "surface.radius": [{ node: "surface", fields: ["cornerRadius"] }],
+    "surface.width": [{ node: "surface", fields: ["width"] }],
+    "border.color": [{ node: "surface", fields: ["strokes"], paint: true }],
+    "border.width": [{ node: "surface", fields: ["strokeWeight"] }],
+    "heading.color": [{ node: "heading", fields: ["fills"], paint: true }],
+    "heading.typography": typographyOf("heading"),
+    "content.color": [{ node: "content-text", fields: ["fills"], paint: true }],
+    "content.typography": typographyOf("content-text"),
+    "content.gap": [{ node: "content", fields: ["itemSpacing"] }],
+    "box.inline-padding": [{ node: "surface", fields: [...PADDINGS] }],
+    "box.gap": [{ node: "surface", fields: ["itemSpacing"] }],
+  },
+  // A menu (Spec 014 ④): the surface as the popover's; every entry a row — its fill by state,
+  // minimum height, inline padding and radius — with its text in the item's colour and role;
+  // the danger entry's text in the danger colour (its node is registered under danger-item too).
+  menu: {
+    "surface.fill": [{ node: "surface", fields: ["fills"], paint: true }],
+    "surface.radius": [{ node: "surface", fields: ["cornerRadius"] }],
+    "surface.width": [{ node: "surface", fields: ["width"] }],
+    "border.color": [{ node: "surface", fields: ["strokes"], paint: true }],
+    "border.width": [{ node: "surface", fields: ["strokeWeight"] }],
+    "item.fill": [{ node: "item-*", fields: ["fills"], paint: true }],
+    "item.color": [{ node: "items-*", fields: ["fills"], paint: true }],
+    "item.typography": typographyOf("items-*"),
+    "item.height": [{ node: "item-*", fields: ["minHeight"] }],
+    "item.inline-padding": [{ node: "item-*", fields: ["paddingLeft", "paddingRight"] }],
+    "item.radius": [{ node: "item-*", fields: ["cornerRadius"] }],
+    "danger-item.color": [{ node: "danger-item", fields: ["fills"], paint: true }],
+    "box.inline-padding": [{ node: "surface", fields: [...PADDINGS] }],
+    "box.gap": [{ node: "surface", fields: ["itemSpacing"] }],
+  },
   // A dialog (Spec 011 ②) has no control: its surface takes what the control takes elsewhere —
   // fill, border, radius, width, the gap between its parts and its padding, which the Skemo names
   // once and the surface takes on every side. The border also outlines the stand-ins: the reason
@@ -1001,6 +1049,7 @@ const WHO = "Fundamento " + PLAN.fundamento + " (Build " + BUILD + ")";
 const NAMESPACE = ${JSON.stringify(PLUGIN_NAMESPACE)};
 const BINDINGS = ${JSON.stringify(BINDINGS)};
 const CONTROL_LAYOUT = ${JSON.stringify(CONTROL_LAYOUT)};
+const VITRINO_TRIGGER_WORD = ${JSON.stringify(VITRINO_TRIGGER_TEXT)};
 const HUG_LAYOUT = ${JSON.stringify(HUG_LAYOUT)};
 const FIELD_LAYOUT = ${JSON.stringify(FIELD_LAYOUT)};
 const TOGGLE_LAYOUT = ${JSON.stringify(TOGGLE_LAYOUT)};
@@ -2520,6 +2569,151 @@ async function applyComponents(variables, warnings) {
     bindMeasures(measures, report, component, variant);
   }
   /**
+   * The shadow of a part (Spec 011 ②; Spec 014 ④ for every overlay, G4): bound to DROP_SHADOW
+   * effects where the API binds effects, written where not — and the report says which.
+   */
+  function bindShadow(nodes, variant, report) {
+    if (variant.shadow === undefined) return;
+    const shadow = shadowEffects(variant.shadow, variables);
+    const target = nodes[variant.shadow.part];
+    if (target === undefined) return;
+    gather(target).effects = shadow.effects;
+    report.shadow = shadow.report;
+  }
+  /**
+   * A stand-in of the trigger of an overlay (Spec 014 ④, plan ④ D-06): a frame with the word of
+   * the trigger (the Vitrino's: Auslöser; a menu's: Weitere Aktionen), in the label's role; no
+   * instance of the butono, which the plugin does not compose yet (candidate B-6 of Spec 011 ⑤).
+   */
+  async function drawStandIn(parent, name, word, variant) {
+    const frame = part(parent, name, () => figma.createFrame());
+    const text = part(frame, name + "-label", () => figma.createText());
+    await loadCurrentFont(text);
+    if (variant.font !== undefined) {
+      write(text, "fontName", fonts.get(variant.font.family + " " + variant.font.style));
+    }
+    write(text, "characters", word);
+    own(frame, NEUTRAL);
+    own(text, NEUTRAL_TEXT);
+    own(frame, CONTROL_LAYOUT);
+    for (const child of [frame, text]) own(child, IN_FLOW);
+    own(text, TEXT_SIZING);
+    return { frame, text };
+  }
+  /**
+   * A tooltip (Spec 014 ④, plan ④ D-06): the variant holds the control — the inverse surface
+   * with its text, the label property — on the side of its placement beside a stand-in of the
+   * trigger (above, below, before or after it: a column or a row in that order); the shadow of
+   * the surface is bound as an effect.
+   */
+  async function drawTooltip(node, component, variant, report, labels) {
+    const control = part(node, "control", () => figma.createFrame());
+    const text = part(control, "text", () => figma.createText());
+    const anchor = await drawStandIn(node, "anchor", VITRINO_TRIGGER_WORD, variant);
+    const placement = variant.props.placement || "block-start";
+    const first = placement === "block-start" || placement === "inline-start" ? control : anchor.frame;
+    const second = first === control ? anchor.frame : control;
+    [first, second].forEach((child, index) => {
+      if (node.children.indexOf(child) !== index) node.insertChild(index, child);
+    });
+    await loadCurrentFont(text);
+    writeCase(component, variant, text);
+    if (variant.font !== undefined) {
+      write(text, "fontName", fonts.get(variant.font.family + " " + variant.font.style));
+    }
+    labels.push(text);
+    for (const frame of [node, control]) own(frame, NEUTRAL);
+    own(text, NEUTRAL_TEXT);
+    own(node, HUG_LAYOUT);
+    own(node, { layoutMode: placement.indexOf("block") === 0 ? "VERTICAL" : "HORIZONTAL" });
+    own(control, CONTROL_LAYOUT);
+    for (const child of [node, control, text]) own(child, IN_FLOW);
+    own(text, TEXT_SIZING);
+    const nodes = { control, text, surface: control };
+    const measures = bind(nodes, variant, variables, component.structure);
+    bindShadow(nodes, variant, report);
+    for (const each of [node, control, text, anchor.frame, anchor.text]) flush(each);
+    bindMeasures(measures, report, component, variant);
+  }
+  /**
+   * A popover (Spec 014 ④, plan ④ D-06): the variant holds a stand-in of the trigger over the
+   * surface — a column with the heading (the label property) and the content, its width bound
+   * to the small container, its shadow bound as an effect.
+   */
+  async function drawPopover(node, component, variant, report, labels) {
+    const texts = component.texts || {};
+    const trigger = await drawStandIn(node, "trigger", typeof texts.trigger === "string" ? texts.trigger : VITRINO_TRIGGER_WORD, variant);
+    const surface = part(node, "surface", () => figma.createFrame());
+    const heading = part(surface, "heading", () => figma.createText());
+    const content = part(surface, "content", () => figma.createFrame());
+    const contentText = part(content, "content-text", () => figma.createText());
+    [trigger.frame, surface].forEach((child, index) => {
+      if (node.children.indexOf(child) !== index) node.insertChild(index, child);
+    });
+    [heading, content].forEach((child, index) => {
+      if (surface.children.indexOf(child) !== index) surface.insertChild(index, child);
+    });
+    for (const each of [heading, contentText]) await loadCurrentFont(each);
+    writeCase(component, variant, heading);
+    if (variant.font !== undefined) {
+      for (const each of [heading, contentText]) write(each, "fontName", fonts.get(variant.font.family + " " + variant.font.style));
+    }
+    if (typeof texts.content === "string") write(contentText, "characters", texts.content);
+    labels.push(heading);
+    for (const frame of [node, surface, content]) own(frame, NEUTRAL);
+    for (const each of [heading, contentText]) own(each, NEUTRAL_TEXT);
+    own(node, FIELD_LAYOUT);
+    own(surface, SURFACE_LAYOUT);
+    own(content, CONTENT_LAYOUT);
+    for (const child of [node, surface, heading, content, contentText]) own(child, IN_FLOW);
+    for (const each of [heading, contentText]) own(each, TEXT_SIZING);
+    const nodes = { surface, heading, content, "content-text": contentText };
+    const measures = bind(nodes, variant, variables, component.structure);
+    bindShadow(nodes, variant, report);
+    for (const each of [node, surface, heading, content, contentText, trigger.frame, trigger.text]) flush(each);
+    bindMeasures(measures, report, component, variant);
+  }
+  /**
+   * A menu (Spec 014 ④, plan ④ D-06): the variant holds a stand-in of the trigger (the Modelo's
+   * words, the label property) over the surface — a column of rows like a tab list's entries:
+   * edit, duplicate, delete — the third in the danger colour; the rows take the state of the
+   * variant (the disabled variant shows every row disabled: one look per variant, Abweichung);
+   * the shadow of the surface is bound as an effect.
+   */
+  async function drawMenu(node, component, variant, report, labels) {
+    const menu = component.menu || { trigger: "", items: [] };
+    const trigger = await drawStandIn(node, "trigger", menu.trigger, variant);
+    const surface = part(node, "surface", () => figma.createFrame());
+    [trigger.frame, surface].forEach((child, index) => {
+      if (node.children.indexOf(child) !== index) node.insertChild(index, child);
+    });
+    labels.push(trigger.text);
+    const rows = await drawEntries(surface, component, variant, "item", "items");
+    const all = rows.map((row) => row.text);
+    const frames = [node, surface].concat(...rows.map((row) => [row.entry, row.ring, row.gap, row.frame]));
+    for (const frame of frames) own(frame, NEUTRAL);
+    for (const each of all) own(each, NEUTRAL_TEXT);
+    own(node, FIELD_LAYOUT);
+    own(surface, SURFACE_LAYOUT);
+    for (const row of rows) {
+      for (const frame of [row.entry, row.ring, row.gap]) own(frame, HUG_LAYOUT);
+      own(row.frame, CONTROL_LAYOUT);
+      own(row.frame, { strokesIncludedInLayout: true });
+    }
+    for (const child of frames.concat(all)) own(child, IN_FLOW);
+    for (const each of all) own(each, TEXT_SIZING);
+    const nodes = { surface };
+    const measures = bind(nodes, variant, variables, component.structure);
+    bindEntries(rows, component, variant, variables, "item", "items", measures);
+    const danger = menu.items.findIndex((item) => item.danger === true);
+    if (danger !== -1 && rows[danger] !== undefined) {
+      for (const measure of bind({ "danger-item": rows[danger].text }, variant, variables, component.structure)) measures.push(measure);
+    }
+    bindShadow(nodes, variant, report);
+    for (const each of frames.concat(all).concat([trigger.frame, trigger.text])) flush(each);
+    bindMeasures(measures, report, component, variant);
+  }
+  /**
    * A notice (Spec 011 ③, plan ③ D-14): the variant holds the control — a row with the surface's
    * fill, the radius and the padding of the box, and the accent as its stroke at the start: the
    * colour bound to the strokes, the left weight bound to accent.width, the other sides 0 — with
@@ -3301,6 +3495,23 @@ async function applyComponents(variables, warnings) {
       }
       if (component.structure === "notice") {
         await drawNotice(node, component, variant, report, labels, toggled);
+        if (existing === undefined) made.push(node);
+        continue;
+      }
+      // The overlays (Spec 014 ④): a tooltip beside a stand-in of its trigger, a popover and a
+      // menu under theirs; every shadow bound (G4).
+      if (component.structure === "tooltip") {
+        await drawTooltip(node, component, variant, report, labels);
+        if (existing === undefined) made.push(node);
+        continue;
+      }
+      if (component.structure === "popover") {
+        await drawPopover(node, component, variant, report, labels);
+        if (existing === undefined) made.push(node);
+        continue;
+      }
+      if (component.structure === "menu") {
+        await drawMenu(node, component, variant, report, labels);
         if (existing === undefined) made.push(node);
         continue;
       }
@@ -4331,10 +4542,6 @@ function reportParts(result) {
         planned: report.planned,
         created: report.created.length,
         updated: report.updated.length,
-        missing: report.missing.length,
-        extra: report.extra.length,
-        duplicates: report.duplicates.length,
-        lost: report.lost.length,
       })),
     }),
     // The Mankoj by set, part and field; their evidence, the tool's words, stands in the part
@@ -4348,7 +4555,9 @@ function reportParts(result) {
     // 4 080 characters; the diagnosis of each set moved to its part state, under the same name
     // (the returned report keeps it where it was). Spec 014 ② (plan ② D-08): with twenty sets it
     // grew to 4 325 characters; the placement of each set moved to its part state, under the same
-    // name (the returned report keeps it where it was).
+    // name (the returned report keeps it where it was). Spec 014 ④ (plan ④ B-3): with
+    // twenty-five sets it grew to 4 027 characters; the counts of what a set misses, has extra,
+    // doubles or lost moved to its part state (the returned report keeps them).
     JSON.stringify({
       part: "mankoj",
       value: {
@@ -4378,6 +4587,11 @@ function reportParts(result) {
           example: report.example,
           // Spec 014 ②: where the set lies (F-8), out of the headline since twenty sets.
           placement: report.placement,
+          // Spec 014 ④: the counts of the four lists, out of the headline since twenty-five sets.
+          missing: report.missing.length,
+          extra: report.extra.length,
+          duplicates: report.duplicates.length,
+          lost: report.lost.length,
         },
       }),
     );

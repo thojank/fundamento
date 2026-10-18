@@ -573,7 +573,12 @@ function ofIssues(entry: LoadedEro, item: JsonObject, base: string, at: At): voi
     source === "slot" ? entry.skemo.slots.find((candidate) => candidate.name === name) : undefined;
   const known =
     source === "slot" ? slot !== undefined : entry.skemo.props.some((prop) => prop.name === name);
-  if (known && (!list || slot?.entry !== undefined)) return;
+  // A list check judges the entries of a slot with entry (options, tabs) — or, since Spec 014 ④
+  // (plan ④ D-03), of a text slot that takes several texts, its Uzo slot without max 1 (the
+  // items of a menu): each item is one text, and two equal ones are found among them.
+  const several =
+    slot !== undefined && slot.text === true && entry.uzo?.slots[slot.name]?.max !== 1;
+  if (known && (!list || slot?.entry !== undefined || several)) return;
   at(
     `${base}/of`,
     "uzo-content-of-invalid",

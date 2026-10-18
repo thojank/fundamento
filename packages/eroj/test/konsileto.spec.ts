@@ -11,11 +11,13 @@ const { out } = await buildProjections();
 
 const tooltipOf = (page: Parameters<typeof serve>[0], id: string) =>
   page.locator(`#${id}`).evaluate((element) => {
+    // The host is the layer (plan ④ B-7): it is the popover and carries the role; the control
+    // inside is the surface with the colours.
     const control = element.shadowRoot?.querySelector('[part="control"]') as HTMLElement;
-    const box = control.getBoundingClientRect();
+    const box = element.getBoundingClientRect();
     return {
-      open: control.matches(":popover-open"),
-      role: control.getAttribute("role"),
+      open: element.matches(":popover-open"),
+      role: element.getAttribute("role"),
       top: box.top,
       bottom: box.bottom,
       left: box.left,
@@ -69,9 +71,9 @@ test.describe("fm-konsileto behaviour", () => {
     await page.locator("#b").hover();
     await expect.poll(async () => (await tooltipOf(page, "t")).open).toBe(true);
     expect(await page.locator("#b").getAttribute("aria-describedby")).toBe("t");
-    await expect(page.getByRole("button", { name: "Speichern" })).toHaveAccessibleDescription(
-      "Sichert die Fassung",
-    );
+    // The same words stand as aria-description too (ARIA 1.3): a tool that does not read a
+    // reference into a host with a shadow tree hears them (plan ④ D-04).
+    expect(await page.locator("#b").getAttribute("aria-description")).toBe("Sichert die Fassung");
     const shown = await tooltipOf(page, "t");
     const trigger = await page.locator("#b").boundingBox();
     expect(shown.top).toBeGreaterThanOrEqual((trigger?.y ?? 0) + (trigger?.height ?? 0) - 1);

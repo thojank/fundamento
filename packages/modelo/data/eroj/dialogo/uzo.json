@@ -39,26 +39,24 @@
         },
         "ero": null,
         "kialo": "A form of more than one screen height is a page, because a dialog that scrolls hides its own actions; a person decides where it goes."
-      }
-    ],
-    "boundary": [
+      },
       {
-        "case": "non-modal",
-        "action": "not-supported",
+        "goal": "non-modal",
         "keywords": {
           "en": [
             "modeless",
-            "popover",
-            "tooltip"
+            "nonmodal"
           ],
           "de": [
             "nichtmodal",
-            "popover",
-            "tooltip"
+            "nebenbei"
           ]
         },
-        "kialo": "A surface that lets the page stay usable is no interruption, because a decision cannot be put off; that is another Ero."
-      },
+        "ero": "sxvebilo",
+        "kialo": "A layer that leaves the page usable is a popover, because a dialog takes the page until it is answered; the sxvebilo opens beside its trigger and closes on a click outside (Spec 014 ④ closes the boundary non-modal)."
+      }
+    ],
+    "boundary": [
       {
         "case": "drawer",
         "action": "not-supported",

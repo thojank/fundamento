@@ -1,31 +1,22 @@
 {
+  "$schema": "../../../../../../../schema/modelo.schema.json#/$defs/EroFile",
   "ero": {
-    "id": "ero_01M564NWTCRSFC8QEB9TZKQB0C",
+    "id": "ero_01M2XM2NGN3KJSKJ4JTXQWMF72",
     "name": "konsileto",
-    "skemo": "ske_01M564NX6FGBH4NHKDSHCCM5W3",
-    "description": "A tooltip: shows the name or a short hint of a control while it is hovered or focused — a layer of the platform (popover) anchored to its trigger, gone with Escape, standing while the pointer is over it."
+    "skemo": "ske_01M2XM2NWJ39A7BEZ9A2S8GANE",
+    "description": "A tooltip of the fixture: the Skemo of the titolo under the name of the konsileto, so only the Uzo's slot duty is judged."
   },
   "skemo": {
-    "id": "ske_01M564NX6FGBH4NHKDSHCCM5W3",
-    "ero": "ero_01M564NWTCRSFC8QEB9TZKQB0C",
+    "id": "ske_01M2XM2NWJ39A7BEZ9A2S8GANE",
+    "ero": "ero_01M2XM2NGN3KJSKJ4JTXQWMF72",
     "props": [
       {
-        "name": "for",
-        "kind": "string",
-        "required": true,
-        "description": "The id of the control the tooltip describes (its trigger): the tooltip appears while that control is hovered or focused and is heard as its description (aria-describedby) — unless its text is the control's own name, then it is not spoken twice."
-      },
-      {
-        "name": "placement",
+        "name": "emphasis",
         "kind": "enum",
         "values": [
-          "block-start",
-          "block-end",
-          "inline-start",
-          "inline-end"
+          "high"
         ],
-        "default": "block-start",
-        "description": "Where the layer stands against its trigger, in logical directions (position-area of the platform); where that side has no room, the platform flips it (position-try-fallbacks). Layout, no token: it keys no part."
+        "default": "high"
       }
     ],
     "states": [
@@ -41,69 +32,44 @@
     "parts": {
       "surface": {
         "fill": {
-          "fixed": "color.background.inverse"
-        },
-        "radius": {
-          "fixed": "radius.role.control"
-        },
-        "shadow": {
-          "fixed": "elevation.shadow.overlay"
-        },
-        "layer": {
-          "fixed": "elevation.layer.overlay"
+          "by": [
+            "emphasis",
+            "state"
+          ]
         }
       },
-      "text": {
+      "label": {
         "color": {
-          "fixed": "color.text.inverse"
-        },
-        "typography": {
-          "fixed": "typography.caption"
+          "fixed": "color.text.default"
         }
       },
       "box": {
-        "inline-padding": {
+        "gap": {
           "fixed": "spacing.small"
-        }
-      },
-      "motion": {
-        "duration": {
-          "fixed": "motion.duration.slow"
-        },
-        "easing": {
-          "fixed": "motion.easing.standard"
         }
       }
     },
-    "bindings": [],
+    "bindings": [
+      {
+        "part": "surface",
+        "property": "fill",
+        "when": {
+          "emphasis": "high",
+          "state": "rest"
+        },
+        "token": "color.background.default"
+      }
+    ],
     "a11y": {
-      "role": "tooltip",
+      "role": "button",
       "name": [
         "slot:label"
       ],
       "states": {},
       "keys": [
-        "Escape"
+        "Enter",
+        "Space"
       ]
-    },
-    "goals": [
-      {
-        "goal": "tooltip",
-        "keywords": {
-          "en": [
-            "tooltip",
-            "hoverhint",
-            "hover"
-          ],
-          "de": [
-            "tooltip",
-            "überfahren",
-            "mouseover"
-          ]
-        },
-        "props": {},
-        "regulo": "tooltip-text-short"
-      }
-    ]
+    }
   }
 }

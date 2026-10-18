@@ -3902,6 +3902,98 @@
           }
         ]
       }
+    },
+    {
+      "id": "jug_01M564NYAMHPVDJCKZ422FR5X7",
+      "ref": {
+        "ero": "ero_01M564NWTCRSFC8QEB9TZKQB0C"
+      },
+      "decision": "approved",
+      "kialo": "Ein Wort nennt die Schaltfläche: ein Blick genügt.",
+      "date": "2026-10-18",
+      "context": "Example RIGHT for the Regulo named in ekzemplo.regulo (Spec 014 ④, tooltip-text-short, G8); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M564NXYK5MC9C1SRGMW3CA7B",
+        "instances": [
+          {
+            "ero": "konsileto",
+            "props": {
+              "for": "suchen"
+            },
+            "label": "Suchen",
+            "lingvo": "de"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M564NYAPDDV16E0FDCRMW3KM",
+      "ref": {
+        "ero": "ero_01M564NWTCRSFC8QEB9TZKQB0C"
+      },
+      "decision": "approved",
+      "kialo": "One word names the button: one glance is enough.",
+      "date": "2026-10-18",
+      "context": "Example RIGHT for the Regulo named in ekzemplo.regulo (Spec 014 ④, tooltip-text-short, G8); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M564NXYK5MC9C1SRGMW3CA7B",
+        "instances": [
+          {
+            "ero": "konsileto",
+            "props": {
+              "for": "suchen"
+            },
+            "label": "Search",
+            "lingvo": "en"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M564NYAPDDV16E0FDCRMW3KN",
+      "ref": {
+        "ero": "ero_01M564NWTCRSFC8QEB9TZKQB0C"
+      },
+      "decision": "rejected",
+      "kialo": "Ein Satz von zwölf Wörtern verschwindet, bevor er gelesen ist; was so viel sagt, steht sichtbar auf der Seite.",
+      "date": "2026-10-18",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 014 ④, tooltip-text-short, G8); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M564NXYK5MC9C1SRGMW3CA7B",
+        "instances": [
+          {
+            "ero": "konsileto",
+            "props": {
+              "for": "suchen"
+            },
+            "label": "Hier kannst du nach Standards, Eroj und Reguloj suchen, die zu deinem Begriff passen",
+            "lingvo": "de"
+          }
+        ]
+      }
+    },
+    {
+      "id": "jug_01M564NYAQTWQ5W2CQQDPNNMMZ",
+      "ref": {
+        "ero": "ero_01M564NWTCRSFC8QEB9TZKQB0C"
+      },
+      "decision": "rejected",
+      "kialo": "A sentence of twelve words vanishes before it is read; what says this much stands visibly on the page.",
+      "date": "2026-10-18",
+      "context": "Example WRONG for the Regulo named in ekzemplo.regulo (Spec 014 ④, tooltip-text-short, G8); generated into get_ero and the Make Kit guidelines.",
+      "ekzemplo": {
+        "regulo": "reg_01M564NXYK5MC9C1SRGMW3CA7B",
+        "instances": [
+          {
+            "ero": "konsileto",
+            "props": {
+              "for": "suchen"
+            },
+            "label": "Here you can search for standards, Eroj and Reguloj that match your term",
+            "lingvo": "en"
+          }
+        ]
+      }
     }
   ]
 }

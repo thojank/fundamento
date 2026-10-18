@@ -38,7 +38,7 @@ describe("get_ero (FR-13)", () => {
       "ikono",
       "titolo",
       "insigno",
-      "avizo",
+      "menuo",
     ]);
   });
 });

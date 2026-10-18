@@ -332,15 +332,19 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
       ...["boundary", "slots", "content"].map(() => "ikono"),
       ...["boundary", "slots", "content"].map(() => "insigno"),
       ...["boundary", "slots", "content"].map(() => "kampo"),
+      // Spec 014 ④: the konsileto, the menuo and the sxvebilo carry a Uzo like every set.
+      ...["boundary", "slots", "content"].map(() => "konsileto"),
       // Spec 011 ⑤: the langetaro and the navigado carry a Uzo like every set.
       ...["boundary", "slots", "content"].map(() => "langetaro"),
       ...["boundary", "slots", "content"].map(() => "ligilo"),
       ...["boundary", "slots", "content"].map(() => "markobutono"),
+      ...["boundary", "slots", "content"].map(() => "menuo"),
       ...["boundary", "slots", "content"].map(() => "mezurilo"),
       ...["boundary", "slots", "content"].map(() => "navigado"),
       ...["boundary", "slots", "content"].map(() => "plenstato"),
       ...["boundary", "slots", "content"].map(() => "saltligilo"),
       ...["boundary", "slots", "content"].map(() => "sxaltilo"),
+      ...["boundary", "slots", "content"].map(() => "sxvebilo"),
       ...["boundary", "slots", "content"].map(() => "tabelo"),
       ...["boundary", "slots", "content"].map(() => "tekstareo"),
       ...["boundary", "slots", "content"].map(() => "teksto"),
@@ -383,15 +387,19 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
       ...["ikono", "ikono", "ikono"],
       ...["insigno", "insigno", "insigno"],
       ...["kampo", "kampo", "kampo"],
+      // Spec 014 ④: the overlays close their three parts too.
+      ...["konsileto", "konsileto", "konsileto"],
       // Spec 011 ⑤: the langetaro and the navigado close their three parts too.
       ...["langetaro", "langetaro", "langetaro"],
       ...["ligilo", "ligilo", "ligilo"],
       ...["markobutono", "markobutono", "markobutono"],
+      ...["menuo", "menuo", "menuo"],
       ...["mezurilo", "mezurilo", "mezurilo"],
       ...["navigado", "navigado", "navigado"],
       ...["plenstato", "plenstato", "plenstato"],
       ...["saltligilo", "saltligilo", "saltligilo"],
       ...["sxaltilo", "sxaltilo", "sxaltilo"],
+      ...["sxvebilo", "sxvebilo", "sxvebilo"],
       ...["tabelo", "tabelo", "tabelo"],
       ...["tekstareo", "tekstareo", "tekstareo"],
       ...["teksto", "teksto", "teksto"],
@@ -6471,7 +6479,8 @@ describe("the plugin draws the overlays and binds the shadows (Spec 014 ④)", (
     ]);
     const rest = set?.children[0];
     const surface = descendant(rest, "surface");
-    expect(surface?.children.map((child) => child.name)).toEqual(["item-1", "item-2", "item-3"]);
+    // The rows are entries like a tab list's: ring → gap → item, one per word of the plan.
+    expect(surface?.children.map((child) => child.name)).toEqual(["entry-1", "entry-2", "entry-3"]);
     expect(paintOf(descendant(rest, "item-1"), "fills")).toBe("color/action/tertiary/rest");
     expect(paintOf(descendant(rest, "items-1"), "fills")).toBe("color/text/default");
     expect(paintOf(descendant(rest, "items-3"), "fills")).toBe("color/status/danger/text");

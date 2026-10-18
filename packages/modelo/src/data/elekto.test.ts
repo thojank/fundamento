@@ -407,7 +407,7 @@ describe("the Reguloj of the elekto (G6, E5)", () => {
       checkability: "automatic",
       // Spec 010 ④: widened to the elektilo, whose options are entries of the same kind (E5);
       // Spec 011 ⑤: to the langetaro, whose tabs are entries too.
-      appliesTo: { eroj: ["elekto", "elektilo", "langetaro"] },
+      appliesTo: { eroj: ["elekto", "elektilo", "langetaro", "menuo"] },
     });
     expect(named("option-labels-distinct")?.kialo).toMatch(/tell apart/);
     expect(named("elekto-options-few")).toMatchObject({

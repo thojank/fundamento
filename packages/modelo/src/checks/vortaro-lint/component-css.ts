@@ -75,6 +75,14 @@ export const STRUCTURAL_PROPERTIES: readonly string[] = [
   "border-block-end-style",
   "transform",
   "align-self",
+  // Spec 014 ④ (plan ④ D-05, E11): a layer of the platform is anchored to its trigger — which
+  // side it takes (position-area, logical keywords), which anchor (position-anchor, a dashed
+  // name the element writes), how it flips where there is no room (position-try-fallbacks) and
+  // that it leaves the insets to the anchor (inset: auto) are structure.
+  "position-area",
+  "position-anchor",
+  "position-try-fallbacks",
+  "inset",
 ];
 
 /** Design properties: their value must come from a token (prefix match on the property name). */

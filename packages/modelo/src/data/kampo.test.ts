@@ -262,6 +262,7 @@ describe("the Uzo of the kampo (T004, A3)", () => {
       "butono",
       "kampo",
       "ikono",
+      "konsileto",
     ]);
   });
 

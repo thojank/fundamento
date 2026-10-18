@@ -135,6 +135,9 @@ describe("the Uzo of the ikono (section ②, G6)", () => {
       "insigno",
       "tabelo",
       "elektilo",
+      // Spec 014 ④: a tooltip may name a meaningful icon, a menu entry may carry one.
+      "konsileto",
+      "menuo",
     ]);
     expect(uzo?.slots).toEqual({});
     expect(uzo?.layout).toEqual({ size: "content", wrap: "never" });

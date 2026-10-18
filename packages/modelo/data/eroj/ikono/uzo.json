@@ -9,8 +9,16 @@
       {
         "goal": "status-only-icon",
         "keywords": {
-          "en": ["statusicon", "status-icon", "kennzeichnung"],
-          "de": ["statussymbol", "statusicon", "kennzeichnung"]
+          "en": [
+            "statusicon",
+            "status-icon",
+            "kennzeichnung"
+          ],
+          "de": [
+            "statussymbol",
+            "statusicon",
+            "kennzeichnung"
+          ]
         },
         "ero": "insigno",
         "kialo": "A status needs a word, because colour and a shape alone are no information for everyone (WCAG 1.4.1) and a picture is not read aloud; the insigno says the status in one to three words, with an icon beside it if the Aspekto wants one."
@@ -18,8 +26,16 @@
       {
         "goal": "logo",
         "keywords": {
-          "en": ["logo", "wordmark", "brandmark"],
-          "de": ["logo", "wortmarke", "bildmarke"]
+          "en": [
+            "logo",
+            "wordmark",
+            "brandmark"
+          ],
+          "de": [
+            "logo",
+            "wortmarke",
+            "bildmarke"
+          ]
         },
         "ero": null,
         "kialo": "A logo is the picture of a brand, not a sign of the system, because it keeps its own colours and proportions and never takes the text's colour; it belongs to the Aspekto as an asset of its own, which Fundamento does not carry yet."
@@ -30,8 +46,16 @@
         "case": "custom-svg",
         "action": "ask-human",
         "keywords": {
-          "en": ["custom", "own", "drawn"],
-          "de": ["eigenes", "eigene", "gezeichnet"]
+          "en": [
+            "custom",
+            "own",
+            "drawn"
+          ],
+          "de": [
+            "eigenes",
+            "eigene",
+            "gezeichnet"
+          ]
         },
         "kialo": "A picture outside the Ikonaro has no name in the core, because every name is vocabulary every Aspekto draws (Art. IV); a person decides whether the Ikonaro grows by a name or the picture is content."
       },
@@ -39,8 +63,16 @@
         "case": "animated-icon",
         "action": "not-supported",
         "keywords": {
-          "en": ["animated", "animation", "turning"],
-          "de": ["animiert", "animation", "drehend"]
+          "en": [
+            "animated",
+            "animation",
+            "turning"
+          ],
+          "de": [
+            "animiert",
+            "animation",
+            "drehend"
+          ]
         },
         "kialo": "An icon is still, because motion is a state of an Ero (the loading plenstato turns its indicator) and not of a sign; a sign that moves would carry meaning the name does not."
       }
@@ -67,6 +99,14 @@
         {
           "ero": "elektilo",
           "kialo": "The field of a select shows a chevron, because the sign says that a list opens below; the icon takes the field's size."
+        },
+        {
+          "ero": "konsileto",
+          "kialo": "An icon that carries meaning may show its name as a tooltip, because the word confirms what the sign says; a decorative icon has none."
+        },
+        {
+          "ero": "menuo",
+          "kialo": "An entry of a menu may carry an icon before its word, because the sign is read faster than the word; the word names the action."
         }
       ],
       "never": [],
@@ -88,8 +128,20 @@
         "check": {
           "kind": "not-words",
           "words": {
-            "en": ["icon", "image", "symbol", "glyph", "picture"],
-            "de": ["icon", "symbol", "bild", "grafik", "zeichen"]
+            "en": [
+              "icon",
+              "image",
+              "symbol",
+              "glyph",
+              "picture"
+            ],
+            "de": [
+              "icon",
+              "symbol",
+              "bild",
+              "grafik",
+              "zeichen"
+            ]
           }
         }
       }

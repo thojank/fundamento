@@ -17,7 +17,8 @@
       "checkability": "manual",
       "appliesTo": {
         "eroj": [
-          "teksto"
+          "teksto",
+          "menuo"
         ]
       }
     }

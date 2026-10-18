@@ -1561,7 +1561,11 @@ describe("Web Component Celo for the overlays (Spec 014 ④)", () => {
 
   it("the konsileto is a tooltip of the platform: popover manual, anchored to its trigger, shown after the delay of the motion token", () => {
     const element = files["eroj/src/generated/fm-konsileto.ts"] ?? "";
-    expect(element).toContain('<div part="control" role="tooltip" popover="manual">');
+    // The host is the layer (plan ④ B-7): it takes popover and the role itself, in the tree scope
+    // of its trigger; the control inside is the surface.
+    expect(element).toContain('<div part="control"><slot></slot>');
+    expect(element).toContain('this.setAttribute("popover", "manual")');
+    expect(element).toContain('this.setAttribute("role", "tooltip")');
     expect(element).toContain('"aria-describedby"');
     expect(element).toContain("anchor-name");
     expect(element).toContain("position-anchor");
@@ -1569,7 +1573,7 @@ describe("Web Component Celo for the overlays (Spec 014 ④)", () => {
     expect(element).toContain("static formAssociated = false;");
     const css = cssOf("konsileto");
     expect(css).toContain("position-area: block-start;");
-    expect(css).toContain(':host([placement="block-end"]) [part="control"]');
+    expect(css).toContain(':host([placement="block-end"]) { position-area: block-end; }');
     expect(css).toContain("position-try-fallbacks: flip-block, flip-inline;");
     expect(css).toContain("background-color: var(--fm-color-background-inverse);");
     expect(css).toContain("color: var(--fm-color-text-inverse);");
@@ -1617,7 +1621,7 @@ describe("Web Component Celo for the overlays (Spec 014 ④)", () => {
       ':where([part="control"] [part="item"][aria-disabled="true"]) {\n  background-color: var(--fm-color-action-tertiary-disabled);',
     );
     expect(css).toContain(
-      ':where([part="control"] [part="item"].fm-danger) {\n  color: var(--fm-color-status-danger-text);',
+      '[part="control"] [part="item"].fm-danger {\n  color: var(--fm-color-status-danger-text);',
     );
     expect(css).toContain("min-block-size: var(--fm-size-target-min);");
     expect(css).toContain(":focus-visible");

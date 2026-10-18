@@ -1984,6 +1984,138 @@
       ]
     },
     {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Konsileto",
+      "term": "Konsileto",
+      "inScheme": "eroj",
+      "prefLabel": {
+        "eo": "Konsileto",
+        "en": "tooltip",
+        "de": "Tooltip"
+      },
+      "altLabel": {
+        "en": [
+          "konsileto",
+          "tooltip",
+          "hover hint"
+        ],
+        "de": [
+          "Tooltip",
+          "Hinweis beim Überfahren",
+          "Kurzhinweis",
+          "konsileto"
+        ]
+      },
+      "definition": {
+        "en": "A tooltip: shows the name or a short hint of a control while it is hovered or focused — a layer of the platform anchored to its trigger (for), gone with Escape, standing while the pointer is over it, heard as the control's description. At most eight words (tooltip-text-short); what a person needs to act stands visibly as text, and anything operable is a sxvebilo.",
+        "de": "Ein Tooltip: zeigt den Namen oder einen kurzen Hinweis zu einem Bedienelement, solange es überfahren oder fokussiert ist – eine Ebene der Plattform, am Auslöser (for) verankert, mit Escape weg, stehend, solange der Zeiger darauf liegt, gehört als Beschreibung des Bedienelements. Höchstens acht Wörter (tooltip-text-short); was zum Handeln nötig ist, steht sichtbar als Text, und alles Bedienbare ist ein sxvebilo."
+      },
+      "broader": [
+        "#Ero"
+      ],
+      "relations": [
+        {
+          "predicate": "references",
+          "target": "#Sxvebilo"
+        },
+        {
+          "predicate": "references",
+          "target": "#Butono"
+        }
+      ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Sxvebilo",
+      "term": "Sxvebilo",
+      "inScheme": "eroj",
+      "prefLabel": {
+        "eo": "Sxvebilo",
+        "en": "popover",
+        "de": "Popover"
+      },
+      "altLabel": {
+        "en": [
+          "sxvebilo",
+          "popover",
+          "flyout"
+        ],
+        "de": [
+          "Popover",
+          "Flyout",
+          "Ausklappfenster",
+          "sxvebilo"
+        ]
+      },
+      "definition": {
+        "en": "A popover: opens a non-modal layer with content next to its trigger; the page stays usable. A layer of the platform (light dismiss), anchored to its trigger button, with a heading (a titolo) and content; the focus moves in on opening and back on closing. A decision is a dialogo, a short hint a konsileto, a list of actions a menuo.",
+        "de": "Ein Popover: öffnet eine nicht-modale Ebene mit Inhalt neben seinem Auslöser; die Seite bleibt bedienbar. Eine Ebene der Plattform (Light Dismiss), am Auslöser-Button verankert, mit Überschrift (ein titolo) und Inhalt; der Fokus geht beim Öffnen hinein und beim Schließen zurück. Eine Entscheidung ist ein dialogo, ein Kurzhinweis ein konsileto, eine Liste von Aktionen ein menuo."
+      },
+      "broader": [
+        "#Ero"
+      ],
+      "relations": [
+        {
+          "predicate": "references",
+          "target": "#Dialogo"
+        },
+        {
+          "predicate": "references",
+          "target": "#Konsileto"
+        },
+        {
+          "predicate": "references",
+          "target": "#Menuo"
+        }
+      ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Menuo",
+      "term": "Menuo",
+      "inScheme": "eroj",
+      "prefLabel": {
+        "eo": "Menuo",
+        "en": "action menu",
+        "de": "Aktionsmenü"
+      },
+      "altLabel": {
+        "en": [
+          "menuo",
+          "action menu",
+          "context menu",
+          "overflow menu",
+          "kebab menu",
+          "row actions"
+        ],
+        "de": [
+          "Aktionsmenü",
+          "Kontextmenü",
+          "Zeilenaktionen",
+          "weitere Aktionen",
+          "menuo"
+        ]
+      },
+      "definition": {
+        "en": "An action menu: offers actions for one object behind a single button — edit, duplicate, delete. A layer of the platform anchored to its trigger, with the roles menu and menuitem, walked with the arrow keys, Home and End and a letter; Escape closes it and focuses the trigger, Enter or Space fires select with the entry's id. An entry of intent danger is written in the danger text colour; groups are separated by an apartigilo. A menu that leads to pages is the navigado (Menü alone is its word).",
+        "de": "Ein Aktionsmenü: bietet Aktionen für ein Objekt hinter einer einzigen Schaltfläche – bearbeiten, duplizieren, löschen. Eine Ebene der Plattform, am Auslöser verankert, mit den Rollen menu und menuitem, mit Pfeiltasten, Pos1/Ende und Buchstabensuche begangen; Escape schließt und fokussiert den Auslöser, Enter oder Leertaste löst select mit der Id des Eintrags aus. Ein Eintrag mit intent danger steht in der Gefahr-Textfarbe; Gruppen trennt ein apartigilo. Ein Menü, das zu Seiten führt, ist die navigado („Menü“ allein ist ihr Wort)."
+      },
+      "broader": [
+        "#Ero"
+      ],
+      "relations": [
+        {
+          "predicate": "references",
+          "target": "#Navigado"
+        },
+        {
+          "predicate": "references",
+          "target": "#Tabelo"
+        },
+        {
+          "predicate": "references",
+          "target": "#Apartigilo"
+        }
+      ]
+    },
+    {
       "uri": "https://fundamento.ciferecigo.com/ontologio#Vitrino",
       "term": "Vitrino",
       "inScheme": "laboro",

@@ -102,7 +102,34 @@
 
 ## ④ Overlays
 
-*(folgt)*
+**Branch:** `261017-spec-014-overlays-e3bf97` (gestapelt auf ③) · Aufgaben ④ zählen ab T1001.
+
+### A – Rot zuerst
+- [x] **T1001 Tests** Daten-Pins `data/konsileto.test.ts`, `data/sxvebilo.test.ts`, `data/menuo.test.ts` (Skemo, Uzo, Reguloj, Jugxoj, Gvidanto-Dialoge, Listenprüfung), Eroj 22 → 25 in allen Pins (Export-Satz „twenty-five“, Listen, Goals, Ontologio, Kit-Dateien, Headline-Sets), Projekcioj (`web-component.test.ts`, `figma.test.ts`, `plugin.test.ts` mit Schatten `bound`, `datumoj.test.ts`, `make-kit.test.ts`), Browser-Specs (`konsileto.spec.ts`, `sxvebilo.spec.ts`, `menuo.spec.ts`, `alirebleco.check.ts` mit Kontrastmessung, `vitrino.check.ts`), React-Typen (`htmlFor`), MCP-Dialoge `e2e/s014-overlays.test.ts`, Doku-Test ④, zwei Fehlerfixtures (`konsileto-slot-required-missing`, `menuo-web-term`). Rot in `97098e1` (Modelo 78 Tests in 29 Dateien, Projekcioj 23 in 6 Dateien, MCP 12 in 13 Dateien; Browser-Specs im Lauf beobachtet).
+
+### B – Grün
+- [x] **T1002 `konsileto`** Skemo, Uzo, Regulo `tooltip-text-short` (`reg_01M564NXYK5MC9C1SRGMW3CA7B`) mit vier Jugxoj `jug_01M564NYAMHPVDJCKZ422FR5X7`, `…APDDV16E0FDCRMW3KM`, `…3KN`, `…AQTWQ5W2CQQDPNNMMZ`, Ontologio `Konsileto`, Enforcer `textRule` (D-01, B-4).
+- [x] **T1003 `sxvebilo`** Skemo, Uzo, Ontologio `Sxvebilo`; `dialogo` schließt `non-modal` (D-02, B-1).
+- [x] **T1004 `menuo`** Skemo (`a11y.texts label-empty`), Uzo, Ontologio `Menuo`; `label-names-action`, `option-labels-distinct` ausgeweitet; `tabelo` schließt `row-actions-menu`; `ikono`, `apartigilo`, `butono` komponieren (D-03).
+- [x] **T1005 Modelo-Code** `skemo-a11y-invalid` nimmt `<prop>-empty` einer String-Prop, `uzo-content-of-invalid` nimmt einen Text-Slot mit mehreren Texten als Liste, Zahlwörter bis fünfundzwanzig, Vortaro-Lint (`position-area`, `position-anchor`, `position-try-fallbacks`, `inset`).
+- [x] **T1006 Web** Hosts `tooltip`, `popover`, `menu` (Element-Template: Popover-API, Anchor Positioning mit Fallback, `aria-describedby`, Fokusweg, Reihen mit `menuitem`, Tasten, `select`), Stylesheet-Strukturen und Selektoren, `max-inline-size` für die Breite (D-04, D-05).
+- [x] **T1007 Figma** Plan (Bauformen tooltip/popover/menu, `extraAxes` placement, `labelPartOf` heading/item, Vorgabewörter, `menu` und `entry` je Set), Plugin (`drawTooltip`, `drawPopover`, `drawMenu`, `drawStandIn`, `bindShadow`; Headline ohne die vier Zählwerte, B-3), Double mit `setBoundVariableForEffect` (D-06).
+- [x] **T1008 Vitrino, Make-Kit, React** drei Sektionen und Wörter, drei Sätze, `htmlFor` (D-07, D-08).
+
+### C – Abschluss
+- [x] **T1009 Doku** plan ④, tasks ④, Vojmapo Zeile 4 und Befund-Zeile, README.
+- [ ] **T1010 Messungen** unten; Bericht im PR.
+
+### Messungen
+
+| Was | Wert |
+|---|---|
+| Commits ④ | rot `97098e1`, grün: Hash in der Zeile nach dem Commit |
+| `brief` | konsileto, sxvebilo, menuo ≤ 750 (Daten-Tests und MCP e2e) |
+| Parität | `check:parity` 25 Eroj, 0 Differenzen, 225 Freigaben |
+| `check:regularo` | 57 Reguloj, 180 Jugxoj, 25 Uzoj, 0 Warnungen (keine neue `goal-keyword-shared`) |
+| Tests lokal | Modelo, Projekcioj, MCP: Zahlen in der Zeile nach dem Lauf; Browser-Specs konsileto, sxvebilo, menuo, dialogo, Alirebleco-Block, Vitrino in Chromium |
+| CI | Lauf: Nummer und Dauer in der Zeile nach dem Lauf |
 
 ## ⑤ Aufklappen
 

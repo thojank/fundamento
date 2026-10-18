@@ -86,7 +86,7 @@ describe("regularo on the repo", () => {
     expect(result.stats).toEqual({
       reguloj: count("reguloj.json", "reguloj"),
       jugxoj: count("jugxoj.json", "jugxoj"),
-      uzoj: 22,
+      uzoj: 25,
     });
   });
 });
@@ -174,7 +174,7 @@ describe("built runner", () => {
     const child = spawnSync(process.execPath, [builtRunner, "regularo"], { encoding: "utf8" });
     expect(child.status).toBe(0);
     expect(child.stdout.split("\n")[0]).toMatch(/^PASS regularo: /);
-    expect(child.stdout).toMatch(/stats: .*uzoj=22/);
+    expect(child.stdout).toMatch(/stats: .*uzoj=25/);
   });
 
   it("exits 0 with the warning on valid/ero-minimal", () => {

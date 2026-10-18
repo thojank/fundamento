@@ -8,7 +8,11 @@ import type { Celo, CeloInput, GeneratedFile } from "../../build.js";
 import { GENERATED_DIR, namesOf } from "../web-component/web-component.js";
 
 const camel = (name: string) =>
-  name.replace(/-([a-z0-9])/g, (_match, letter: string) => letter.toUpperCase());
+  // A prop whose name is a reserved word of JavaScript (Spec 014 ④: the `for` of a tooltip) takes
+  // React's own name for the attribute (htmlFor, as on a label); the element keeps `for`.
+  name === "for"
+    ? "htmlFor"
+    : name.replace(/-([a-z0-9])/g, (_match, letter: string) => letter.toUpperCase());
 
 /** `Butono` for `butono`. */
 export function componentName(ero: LoadedEro["ero"]): string {
@@ -126,7 +130,9 @@ ${reactSource(modelo.eroj, (entry) => `./${namesOf(entry.ero).tag}.js`)}`;
 };
 
 /** `fullWidth` → `full-width`: the wrapper's camelCase back to the Skemo's prop name. */
-const kebab = (name: string) => name.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
+const kebab = (name: string) =>
+  // React's htmlFor is the element's for (Spec 014 ④); every other name is spelt in kebab case.
+  name === "htmlFor" ? "for" : name.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
 
 /** The body of `export interface <Name>Props … { … }`, or undefined. */
 function propsBlock(dts: string, name: string): string | undefined {

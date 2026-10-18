@@ -19,6 +19,10 @@ const eroNamed = (name: string) => modelo.eroj.find((entry) => entry.ero.name ==
 const konsileto = eroNamed("konsileto");
 const skemo = konsileto?.skemo;
 const uzo = konsileto?.uzo;
+const skemoOrThrow = () => {
+  if (skemo === undefined) throw new Error("missing");
+  return skemo;
+};
 const named = (name: string) => modelo.reguloj.find((regulo) => regulo.name === name);
 const rulesOf = (result: ReturnType<typeof evaluateUsage>) =>
   result.violations.map((violation) => [violation.issue.rule, violation.issue.severity]);
@@ -51,7 +55,7 @@ describe("konsileto in the repo Modelo (section ④, G1, G2, G4)", () => {
     expect(skemo?.states).toEqual(["rest"]);
     expect(skemo?.slots).toEqual([{ name: "label", default: true, text: true }]);
     // placement keys no part (D-01): the Figma side makes it an axis of its own (extraAxes).
-    expect(variantKeys(skemo ?? { props: [], states: [], slots: [], parts: {} })).toEqual([]);
+    expect(variantKeys(skemoOrThrow())).toEqual(["state"]);
   });
 
   it("names its parts: the inverse surface with radius, shadow and layer; the inverse caption text; the box padding; the motion of its delay", () => {
