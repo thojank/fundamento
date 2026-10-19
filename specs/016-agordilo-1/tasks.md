@@ -89,3 +89,4 @@
 | Dialog | `preview_agordo` #F5C400: Leitfarbe 1,64:1 auf Weiß; `palette-aligned` an `accent.900` (0,021 > 0,02), Vorschlag `#665000`, Kialo aus `reguloj.json`; mit `#665000` kein Verstoß |
 | CI | Lauf 39312697601 (`d7303a9`, alle acht Jobs grün, Wanduhr 8:54): `checks` 1:32, `unit` 3:43, `projekcioj` 3:30 / 2:28, `eroj` 2:55 / 1:52, `alirebleco-eroj` 4:50, `rendered-checks` 8:51 |
 | Rebase auf `main` nach #83 (`f2aa3e2`, 2026-10-19) | ohne Konflikt; der Baum ist gleich dem in Lauf 39312697601 geprüften (`git diff` leer); CI nach dem Rebase in der Zeile danach |
+| CI nach dem Rebase | Lauf 39317252650 (`d3f916c`, alle acht Jobs grün, Wanduhr 5:41): `checks` 1:28, `unit` 4:21, `projekcioj` 2:51 / 3:34, `eroj` 2:15 / 2:02, `alirebleco-eroj` 5:21, `rendered-checks` 5:39 |
