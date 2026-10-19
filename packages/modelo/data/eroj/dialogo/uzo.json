@@ -59,7 +59,7 @@
     "boundary": [
       {
         "case": "drawer",
-        "action": "not-supported",
+        "action": "ask-human",
         "keywords": {
           "en": [
             "drawer"
@@ -69,7 +69,7 @@
             "drawer"
           ]
         },
-        "kialo": "A panel that slides in from the side shows a second view, not a question, because it holds more than a decision."
+        "kialo": "A panel that slides in from the edge is neither a dialog nor a popover, because it is a region of the page with its own flow (a Sxablono), not a question and not a layer beside a trigger; a person decides until the Sxablonoj come."
       },
       {
         "case": "nested-dialog",

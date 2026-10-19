@@ -256,8 +256,12 @@ describe("suggest_ero of the card (Gvidanto)", () => {
     }
   });
 
-  it("'Karten mit Bild für die Projekte' and 'Projekt-Karten mit Bild' are the karto (the spec's dialog; „Projektkarten“ as one word hits no goal, plan ③)", () => {
-    for (const goal of ["Karten mit Bild für die Projekte", "Projekt-Karten mit Bild"]) {
+  it("'Karten mit Bild für die Projekte', 'Projekt-Karten mit Bild' and 'Projektkarten mit Bild' are the karto (the spec's dialog; the one word since Nachlese 5 O-17)", () => {
+    for (const goal of [
+      "Karten mit Bild für die Projekte",
+      "Projekt-Karten mit Bild",
+      "Projektkarten mit Bild",
+    ]) {
       expect(suggest(goal).suggestion, goal).toEqual({ ero: "karto", props: {} });
     }
   });

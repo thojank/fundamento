@@ -80,7 +80,7 @@
             "schublade"
           ]
         },
-        "kialo": "A panel that slides in from the edge and holds a whole form is a pattern of the page (a Sxablono), because it is a region with its own flow, not a layer beside a trigger; a person decides until the Sxablonoj come."
+        "kialo": "A panel that slides in from the edge is neither a dialog nor a popover, because it is a region of the page with its own flow (a Sxablono), not a question and not a layer beside a trigger; a person decides until the Sxablonoj come."
       }
     ],
     "composes": {

@@ -341,7 +341,14 @@ describe("get_ero with the Uzo and brief (T022)", () => {
     const brief = getEro(minimal, { name: "butono", brief: true });
     expect(brief.ok).toBe(true);
     if (!brief.ok) return;
-    expect(Object.keys(brief.output).sort()).toEqual(["axes", "ero", "issues", "required"]);
+    // Nachlese 5 N5-3: the props without an axis are a part of the Skemo, so they stand here too.
+    expect(Object.keys(brief.output).sort()).toEqual([
+      "axes",
+      "ero",
+      "issues",
+      "props",
+      "required",
+    ]);
     expect(brief.output.issues?.map((issue) => [issue.rule, issue.severity])).toEqual([
       ["skemo-uzo-missing", "warning"],
     ]);

@@ -11,6 +11,7 @@ import type { ValidationIssue } from "../contracts/issues.js";
 import type { Keywords, Modelo, UzoBoundary } from "../contracts/modelo.js";
 import {
   COMPOUND_SUFFIX_MIN,
+  goalMatchOf,
   goalOf,
   keywordHitOf,
   keywordHits,
@@ -144,15 +145,24 @@ type BoundaryHit = SuggestedBoundary & {
   kind: "instead" | "boundary";
 };
 
-/** The first instead or boundary entry of any Uzo whose keyword hits (declaration order). */
-function boundaryHit(modelo: Modelo, text: string, pass: Pass): BoundaryHit | undefined {
+/**
+ * The first instead or boundary entry of any Uzo whose keyword hits (declaration order) — of those
+ * `keep` keeps (Nachlese 5 N5-2: an entry of another Ero in the attribute part of the text drops
+ * out; `keep` sees the entry with its keywords).
+ */
+function boundaryHit(
+  modelo: Modelo,
+  text: string,
+  pass: Pass,
+  keep: (hit: BoundaryHit, keywords: Keywords | undefined) => boolean = () => true,
+): BoundaryHit | undefined {
   for (const entry of modelo.eroj) {
     const uzo = entry.uzo;
     if (uzo === undefined) continue;
     for (const alternative of uzo.instead) {
       const hit = uzoKeywordHit(alternative.keywords, text, pass.lingvo, pass.inflect);
       if (hit === undefined) continue;
-      return {
+      const found: BoundaryHit = {
         ero: entry.ero.name,
         case: alternative.goal,
         action: alternative.ero === null ? "ask-human" : "use-instead",
@@ -160,11 +170,12 @@ function boundaryHit(modelo: Modelo, text: string, pass: Pass): BoundaryHit | un
         kind: "instead",
         ...hit,
       };
+      if (keep(found, alternative.keywords)) return found;
     }
     for (const boundary of uzo.boundary) {
       const hit = uzoKeywordHit(boundary.keywords, text, pass.lingvo, pass.inflect);
       if (hit === undefined) continue;
-      return {
+      const found: BoundaryHit = {
         ero: entry.ero.name,
         case: boundary.case,
         action: boundary.action,
@@ -172,6 +183,7 @@ function boundaryHit(modelo: Modelo, text: string, pass: Pass): BoundaryHit | un
         ...hit,
         kind: "boundary",
       };
+      if (keep(found, boundary.keywords)) return found;
     }
   }
   return undefined;
@@ -207,9 +219,13 @@ type GoalHit = {
   regulo?: ReguloRef;
 };
 
-/** The first Skemo goal of any Ero whose keyword is a word of the text. */
-function goalHit(modelo: Modelo, text: string, pass: Pass): GoalHit | undefined {
+/**
+ * The first Skemo goal of any Ero whose keyword is a word of the text; with `only`, the goal of
+ * that Ero (Nachlese 5 N5-2: the Ero of the head word).
+ */
+function goalHit(modelo: Modelo, text: string, pass: Pass, only?: string): GoalHit | undefined {
   for (const entry of modelo.eroj) {
+    if (only !== undefined && entry.ero.name !== only) continue;
     const match = goalOf(entry.skemo, text, pass);
     if (match === undefined) continue;
     const regulo =
@@ -247,10 +263,7 @@ function goalStrength(modelo: Modelo, ero: string, text: string, pass: Pass): nu
     for (const [language, keywords] of Object.entries(goal.keywords)) {
       if (pass.lingvo !== undefined && language !== pass.lingvo) continue;
       for (const keyword of keywords) {
-        const form = keywordHitOf(keyword, language, prepared, {
-          suffixOf: "compounds",
-          inflect: pass.inflect,
-        });
+        const form = keywordHitOf(keyword, language, prepared, goalMatchOf(pass.inflect));
         if (form !== undefined) hit.add(form);
       }
     }
@@ -298,6 +311,43 @@ function tiedGoals(modelo: Modelo, first: GoalHit, text: string, pass: Pass): Go
   return tied;
 }
 
+/**
+ * The words that open the attribute part of a request (Nachlese 5 N5-2), per language: what
+ * follows them says what the thing has, is for or is about — not what it is.
+ */
+export const LINKING_WORDS: Readonly<Record<string, readonly string[]>> = {
+  de: ["mit", "für", "von", "über", "zu"],
+  en: ["with", "for", "of", "about"],
+};
+
+/**
+ * The head of a request (N5-2): its text before the first linking word of the languages the input
+ * allows — "Karte" in "Karte für ein Projekt mit Bild und Titel". Undefined without a linking word
+ * or without a word before it.
+ */
+export function headOf(text: string, lingvo?: string): string | undefined {
+  const linking = new Set(
+    Object.entries(LINKING_WORDS)
+      .filter(([language]) => lingvo === undefined || language === lingvo)
+      .flatMap(([, words]) => words),
+  );
+  const normalized = text.normalize("NFC");
+  let before = 0;
+  for (const match of normalized.matchAll(/[\p{L}\p{N}]+/gu)) {
+    if (linking.has(match[0].toLowerCase())) {
+      return before === 0 ? undefined : normalized.slice(0, match.index);
+    }
+    before += 1;
+  }
+  return undefined;
+}
+
+/** The one Ero whose goal the head names (N5-2); none where no Ero or several do. */
+function headEroOf(modelo: Modelo, head: string, pass: Pass): string | undefined {
+  const named = modelo.eroj.filter((entry) => goalOf(entry.skemo, head, pass) !== undefined);
+  return named.length === 1 ? named[0]?.ero.name : undefined;
+}
+
 function goalCandidateOf(hit: GoalHit): SuggestCandidate {
   const candidate: SuggestCandidate = {
     kind: "goal",
@@ -327,6 +377,29 @@ export function suggestEro(modelo: Modelo, input: SuggestEroInput): SuggestEroRe
     goal = goalHit(modelo, input.goal, pass);
   }
 
+  // Nachlese 5 N5-2 (Messung A15): the head word wins. Where the text before the first linking
+  // word (mit, für, von, über, zu; with, for, of, about) names the goal of exactly one Ero, that Ero
+  // is what the request asks for, and the rest says what it has: "Karte für ein Projekt mit Bild
+  // und Titel" is the karto, the titel of its attribute part names neither the titolo nor the
+  // teksto's boundary heading. The head's Ero answers with its goal read over the whole text (the
+  // longest keyword, as before); a goal of another Ero after the linking word forms no tie, and a
+  // Uzo entry of another Ero after it drops out — unless it names the head's Ero as the one to use
+  // (Spec 008 D-08). The head's own Uzo entries and every entry hit in the head keep their say.
+  const head = headOf(input.goal, pass.lingvo);
+  const headEro = head === undefined ? undefined : headEroOf(modelo, head, pass);
+  if (head !== undefined && headEro !== undefined) {
+    goal = goalHit(modelo, input.goal, pass, headEro);
+    boundary = boundaryHit(
+      modelo,
+      input.goal,
+      pass,
+      (hit, keywords) =>
+        hit.ero === headEro ||
+        insteadEro(modelo, hit) === headEro ||
+        uzoKeywordHit(keywords, head, pass.lingvo, pass.inflect) !== undefined,
+    );
+  }
+
   // Nachlese 3 G2: the goals of two Eroj hit alike (the same number of keywords) — Fundamento
   // picks no reading: ask-human with every tied candidate and its kialo. An own instead entry
   // that redirects the first Ero's goal (Spec 011 ② D-10) is no tie and keeps its way below.
@@ -347,7 +420,7 @@ export function suggestEro(modelo: Modelo, input: SuggestEroInput): SuggestEroRe
     boundary.kind === "boundary" &&
     goalWordOf(modelo, goal.ero, boundary.keyword);
   const tied =
-    goal === undefined || ownRedirect || ownSynonym
+    goal === undefined || ownRedirect || ownSynonym || headEro !== undefined
       ? []
       : tiedGoals(modelo, goal, input.goal, pass);
   if (goal !== undefined && tied.length > 0) {
