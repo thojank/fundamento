@@ -20,13 +20,15 @@
 
 ### C – Abschluss
 - [x] **T1909 Doku** plan ① (D-01–D-15, Abweichungen 1–9, B-1–B-8, K-1–K-4, O-1–O-7, M4), tasks ①, README (Felder der Stufe 2, provo-kompakta).
-- [ ] **T1910 CI** grün.
+- [x] **T1910 CI** grün (Lauf 39343610107, `3a3ee9f`).
 
 ### Messungen
 
 | Was | Wert |
 |---|---|
-| Commits ① | rot `f126b65`; grün und CI in den Zeilen danach |
+| Commits ① | rot `f126b65`, grün `3a3ee9f` (Hash des grünen Stands, CI grün); dieser Eintrag im Folgecommit |
+| CI ① | Lauf 39343610107 (`3a3ee9f`, alle acht Jobs grün, Wanduhr 8:18): `checks` 1:21, `unit` 6:17, `projekcioj` 3:38 / 3:29, `eroj` 1:42 / 2:10, `alirebleco-eroj` 3:36, `rendered-checks` 8:15 |
+| Tests lokal | Agordilo 74 in 9 Dateien, Modelo 3 598, Projekcioj 730, CLI 72, MCP 322 – je Paket allein grün; im parallelen Gesamtlauf auf diesem Rechner liefen drei ältere Tests (`export` AK-10, MCP „schema-conformant JSON“, Alirebleco provo) in ihre 30-s-Grenze, allein und in der CI grün (Last, wie Spec 016 ① B-10). `pnpm lint`, `check:vortaro-lint|regularo|mankoj|alirebleco|clean-room|ikonaro|parity|vitrino` grün |
 | M4 | 44 Agordos mit Prüfung in 63,6 s (lokal); kein fester Verstoß aus der Stufe 2 (plan ① M4) |
 | Eckwerte rein | 6 561 Ecken und 7 676 Rasterpunkte in `gestalt.test.ts` (≈ 7 s); `deriveGestalt` 0,075 ms |
 | provo / provo-kompakta | je 6 408 von 6 408 Paar-Auswertungen, 0 Verstöße; provo 108 Hinweise (wie Stufe 1), provo-kompakta 135 (davon `agordilo-body-size` an `font.size.body.2`) |
