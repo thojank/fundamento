@@ -64,11 +64,21 @@ describe("alirebleco over every known Aspekto (Nachlese 3 W2)", () => {
   // Aspekto beside ekzemplo; it is measured the same way, its failures are warnings.
   it("measures the derived Aspekto provo as an external Aspekto (Spec 016 ①)", async () => {
     const result = await check({ json: true, repoRoot });
-    expect(result.stats.aspektoj).toBe(3);
+    expect(result.stats.aspektoj).toBe(4);
     expect(result.stats["provo:combinations"]).toBe(144);
     expect(result.stats["provo:evaluations"]).toBeGreaterThan(0);
     expect(result.stats["provo:errors"]).toBe(0);
     expect(result.summary).toContain("provo");
+  });
+
+  // Spec 019 ①, G8: provo-kompakta, the counterpart of provo (sharp, dense, smaller type), is the
+  // fourth known Aspekto; measured like provo.
+  it("measures the derived Aspekto provo-kompakta as an external Aspekto (Spec 019 ①)", async () => {
+    const result = await check({ json: true, repoRoot });
+    expect(result.stats["provo-kompakta:combinations"]).toBe(144);
+    expect(result.stats["provo-kompakta:evaluations"]).toBeGreaterThan(0);
+    expect(result.stats["provo-kompakta:errors"]).toBe(0);
+    expect(result.summary).toContain("provo-kompakta");
   });
 });
 

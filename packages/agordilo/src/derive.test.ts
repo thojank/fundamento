@@ -22,15 +22,27 @@ const PROVO_DIR = fileURLToPath(
 );
 const PROVO_AGORDO = join(PROVO_DIR, "agordo.json");
 const PROVO_PACKAGE = join(PROVO_DIR, "aspekto-provo");
+// Spec 019 ①, G8: the counterpart of provo — sharp, dense, smaller type, light icons (test data).
+const KOMPAKTA_DIR = fileURLToPath(
+  new URL("../../modelo/test/fixtures/valid/aspekto-provo-kompakta/", import.meta.url),
+);
+const KOMPAKTA_AGORDO = join(KOMPAKTA_DIR, "agordo.json");
+const KOMPAKTA_PACKAGE = join(KOMPAKTA_DIR, "aspekto-provo-kompakta");
 
-function provoAgordo() {
-  const { agordo, issues } = readAgordo(
-    JSON.parse(readFileSync(PROVO_AGORDO, "utf8")),
-    "agordo.json",
-  );
+function agordoAt(path: string) {
+  const { agordo, issues } = readAgordo(JSON.parse(readFileSync(path, "utf8")), "agordo.json");
   expect(issues).toEqual([]);
-  if (agordo === undefined) throw new Error("the Agordo provo does not read");
+  if (agordo === undefined) throw new Error(`the Agordo ${path} does not read`);
   return agordo;
+}
+
+const provoAgordo = () => agordoAt(PROVO_AGORDO);
+
+/** A token of a set document by its dotted name. */
+function tokenOf(set: unknown, name: string): unknown {
+  let node = set as Record<string, unknown> | undefined;
+  for (const key of name.split(".")) node = node?.[key] as Record<string, unknown> | undefined;
+  return node?.$value;
 }
 
 /** Every token name of a DTCG set document (groups nested, `$value` marks a token). */
@@ -109,9 +121,46 @@ describe("deriveAspekto with the Agordo provo", () => {
     expect(first.raporto.summary.pairs.passed).toBeGreaterThan(0);
   });
 
+  it("has a form of its own (Spec 019 ①, G8): rounder, airier, bold icons", () => {
+    const set = JSON.parse(first.files["sets/aspekto/provo.json"] ?? "{}");
+    expect(tokenOf(set, "radius.medium")).toEqual({ value: 6, unit: "px" });
+    expect(tokenOf(set, "spacing.scale.400")).toEqual({ value: 20, unit: "px" });
+    const aspekto = JSON.parse(first.files["aspekto.json"] ?? "{}");
+    expect(aspekto.ikonoj.style).toBe("bold");
+    expect(aspekto.ikonoj.source).toContain("assets/bold");
+    expect(first.files["ikonoj/check.svg"]).toContain('icon "check" (bold)');
+  });
+
   it("equals the committed fixture aspekto-provo (regenerate with fm agordilo derive)", () => {
     // pnpm fm agordilo derive packages/modelo/test/fixtures/valid/aspekto-provo/agordo.json
     //   --out packages/modelo/test/fixtures/valid/aspekto-provo/aspekto-provo
     expect(filesOf(PROVO_PACKAGE)).toEqual(first.files);
+  });
+});
+
+describe("deriveAspekto with the Agordo provo-kompakta (Spec 019 ①, G8)", () => {
+  let derived: Derivation;
+  beforeAll(() => {
+    derived = deriveAspekto(agordoAt(KOMPAKTA_AGORDO), readStructure(), loadCalibration());
+  });
+
+  it("is sharp, dense, with smaller type and light icons — the counterpart of provo", () => {
+    const set = JSON.parse(derived.files["sets/aspekto/provo-kompakta.json"] ?? "{}");
+    expect(tokenOf(set, "radius.medium")).toEqual({ value: 1, unit: "px" });
+    expect(tokenOf(set, "spacing.scale.400")).toEqual({ value: 12, unit: "px" });
+    expect(tokenOf(set, "font.size.scale.300")).toEqual({ value: 14, unit: "px" });
+    expect(JSON.parse(derived.files["aspekto.json"] ?? "{}").ikonoj.style).toBe("light");
+  });
+
+  it("passes every check; body text below 14 px is a hint, not a violation (G4)", () => {
+    expect(derived.raporto.violations).toEqual([]);
+    expect(derived.exportable).toBe(true);
+    expect(derived.raporto.hints.map((hint) => hint.rule)).toContain("agordilo-body-size");
+  });
+
+  it("equals the committed fixture aspekto-provo-kompakta (regenerate with fm agordilo derive)", () => {
+    // pnpm fm agordilo derive packages/modelo/test/fixtures/valid/aspekto-provo-kompakta/agordo.json
+    //   --out packages/modelo/test/fixtures/valid/aspekto-provo-kompakta/aspekto-provo-kompakta
+    expect(filesOf(KOMPAKTA_PACKAGE)).toEqual(derived.files);
   });
 });
