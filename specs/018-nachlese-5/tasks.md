@@ -29,7 +29,7 @@
 | Wackel-Tests | `sxvebilo`, `menuo`, `dialogo` zehnfach: je 170 von 170 in Chromium, Firefox und WebKit |
 | Tests lokal | Modelo 3 551, Projekcioj 716, MCP 307, CLI 66 grün; Lint und alle Modelo-Checks ohne Fehler; Browser 243 Specs in Chromium, Alirebleco-Check 561, Vitrino 30 |
 | CI (Teilung, fünf Jobs) | Lauf 39245801159 (`022b5fd`, alle Jobs grün, Wanduhr 8:18): `checks` 1:16, `unit` 3:07, `projekcioj` **3:06 / 3:10** (vorher 9:29 / 1:03), `eroj` 1:51 / 1:58, `rendered-checks` **8:18** (axe 227 s, Vitrino 138 s, Make Kit 45 s, Quickstart 16 s) – über 7 min, daher D-04 |
-| CI (sechs Jobs) | (Lauf nach dem Push) |
+| CI (sechs Jobs) | Lauf 39247019640 (`46e0e68`, alle Jobs grün, **Wanduhr 4:55**, vorher 9:29 in #79): `checks` 1:07, `unit` 4:37, `projekcioj` 2:51 / 2:29, `eroj` 2:03 / 2:18, `alirebleco-eroj` 4:55, `rendered-checks` 3:11 – kein Job über 7 min; grüner Stand `46e0e68` |
 
 ## ② Befunde
 
