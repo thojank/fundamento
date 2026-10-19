@@ -51,18 +51,18 @@
 
 ### C – Abschluss
 - [x] **T1706 Doku** plan ②, tasks ②, README (Werkstatt).
-- [ ] **T1707 CI** grün; Hash des grünen Stands in der Zeile der Messungen.
+- [x] **T1707 CI** grün (Lauf 39310455722); Hash des grünen Stands `7c1828d` in der Zeile der Messungen.
 
 ### Messungen
 
 | Was | Wert |
 |---|---|
-| Commits ② | rot `fa77de1`, grün ⟨GRUEN⟩ |
+| Commits ② | rot `fa77de1`, grün `7c1828d` (Hash des grünen Stands, CI grün); dieser Eintrag im Folgecommit |
 | Tests lokal | Agordilo 42, CLI 72, MCP 312, Projekcioj 727, Modelo 3 591 grün; `check:vitrino` 43 (davon 13 Werkstatt) und `check:bazo` grün (Chromium); `pnpm lint` ohne neue Befunde; `check:vortaro-lint|parity|regularo|mankoj|alirebleco|clean-room|ikonaro` ohne Fehler; `pnpm perf` grün (`fm projekcioj build` 2,0–2,6 s, Budget 10 s) |
 | M3 | Mac (Chromium headless): Ableitung Median 46,5 ms, p95 64,4 ms; Prüfung Median 1 053,9 ms, p95 1 087,5 ms; beides Median 1 099,2 ms, p95 1 134,8 ms (Tabelle in plan ②) |
 | Gleichheit Browser–CLI | provo: Raporto der Werkstatt gleich `raporto.json` der Fixture, Wert für Wert (Test „browser and CLI agree on provo“) |
 | Vitrino | 8,1 MB statt 6,1 MB (Bündel 1,26 MB, Insel 0,69 MB) |
-| CI | ⟨CI⟩ |
+| CI | Lauf 39310455722 (`7c1828d`, alle acht Jobs grün, Wanduhr 6:57): `checks` 1:24, `unit` 5:47, `projekcioj` 3:26 / 3:14, `eroj` 2:16 / 2:04, `alirebleco-eroj` 3:51, `rendered-checks` 6:43 (mit den 13 Werkstatt-Tests); M3 im CI-Browser: Ableitung Median 68,1 ms, p95 104,7 ms; Prüfung Median 1 373,3 ms, p95 1 433,6 ms |
 
 ## ③ Gvidanto und Doku
 

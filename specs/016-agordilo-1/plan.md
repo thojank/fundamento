@@ -265,7 +265,7 @@ Gemessen über 50 Änderungen des Reglers Helligkeit (−1 … 1), je Änderung 
 | Wo | Ableitung Median | Ableitung p95 | Prüfung Median | Prüfung p95 | Beides Median | Beides p95 |
 |---|---|---|---|---|---|---|
 | Mac (Chromium headless, Lauf von P0 auf dem Rechner des Maintainers, 2026-10-19) | 46,5 ms | 64,4 ms | 1 053,9 ms | 1 087,5 ms | 1 099,2 ms | 1 134,8 ms |
-| CI (Chromium headless, Runner) | ⟨CI⟩ |
+| CI (Chromium headless, GitHub-Runner, Lauf 39310455722, `7c1828d`) | 68,1 ms | 104,7 ms | 1 373,3 ms | 1 433,6 ms | 1 441,3 ms | 1 511,8 ms |
 
 **Ziel unter 150 ms:** die Ableitung liegt darunter, die Prüfung weit darüber – also ist die Prüfung entprellt, die Ableitung nicht (D-07).
 
