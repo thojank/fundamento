@@ -135,6 +135,61 @@ const LIGHT_SHADOW_PARTS: ReadonlySet<string> = new Set(["region", "border", "fo
 export const isPagination = (skemo: Skemo): boolean =>
   skemo.a11y.role === "navigation" && skemo.parts.ellipsis !== undefined;
 
+/**
+ * A file input (Spec 015 ②, plan ② D-05): the platform's file input, heard as a button, with a
+ * dropzone part — the field of the kampo around it, the chosen files listed below.
+ */
+export const isUpload = (skemo: Skemo): boolean =>
+  skemo.a11y.role === "button" && skemo.parts.dropzone !== undefined;
+
+/**
+ * The selector of a part of a file input (Spec 015 ②, D-05): the combination stands on the field,
+ * hover, focus, invalid and disabled on the platform's input inside (`:has()`, as a field's), the
+ * state dragover on the field itself (the element marks it while files are dragged over the
+ * dropzone); the dropzone carries its fill, room and border; the ring stands around the picker
+ * whose input has the focus; the list's gap is the list's and every row's.
+ */
+function uploadPartSelector(part: string, property: string, data: string, state: string): string {
+  const own = state === "dragover" ? "[dragover]" : "";
+  const control = state === "dragover" ? "" : (STATE_SELECTORS[state] ?? "");
+  const root = `[part="field"]${data}${own}${control === "" ? "" : `:has([part="control"]${control})`}`;
+  if (part === "box" && property === "gap") return `:where(${root})`;
+  if (part === "dropzone" || part === "border" || part === "motion") {
+    return `:where(${root}) [part="dropzone"]`;
+  }
+  if (part === "focus-ring")
+    return `:where(${root}) [part="picker"]:has([part="control"]:focus-visible)`;
+  if (part === "choose") return `:where(${root}) [part="picker"]`;
+  if (part === "file-list") {
+    return `:where(${root}) [part="file-list"], :where(${root}) [part="file"]`;
+  }
+  return `:where(${root}) [part="${part}"]`;
+}
+
+/**
+ * Layout of a file input (Spec 015 ②, D-05), keywords only: the host is a block, the field a
+ * column of label, dropzone, help, error and the list; the dropzone a row of the picker and its
+ * hint that wraps; the platform's input lies over the composed button (same box, transparent: the
+ * one target for pointer and keyboard, its look the butono's); the list a column of rows, each the
+ * name, the size and the remove butono; the mark of a required field shows only while marked.
+ */
+const uploadStructure = (disables: boolean): string =>
+  [
+    ":host { display: block; }",
+    ':where([part="field"]) { display: flex; flex-direction: column; align-items: flex-start; }',
+    ':where([part="label"]) { display: inline-flex; align-items: baseline; }',
+    ':where([part="dropzone"]) { display: flex; flex-wrap: wrap; align-items: center; align-self: stretch; box-sizing: border-box; transition-property: background-color, border-color; }',
+    ':where([part="picker"]) { position: relative; display: inline-flex; }',
+    ':where([part="control"]) { position: absolute; inset: 0; margin: 0; opacity: 0; cursor: pointer; }',
+    ...(disables ? [':where([part="control"]:disabled) { cursor: not-allowed; }'] : []),
+    ':where([part="file-list"]) { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; }',
+    ':where([part="file-list"][hidden], [part="drop-hint"][hidden]) { display: none; }',
+    ':where([part="file"]) { display: flex; align-items: center; }',
+    ':where([part="file-name"]) { overflow-wrap: anywhere; }',
+    ':where([part="field"]:not([data-marked="true"])) [part="required-mark"] { display: none; }',
+    HIDDEN_TEXT,
+  ].join("\n");
+
 /** A breadcrumb (Spec 015 ①, plan ① D-04): a navigation with a separator part between its items. */
 export const isBreadcrumb = (skemo: Skemo): boolean =>
   skemo.a11y.role === "navigation" && skemo.parts.separator !== undefined;
@@ -374,6 +429,8 @@ const STATE_ORDER = [
   "invalid",
   "readonly",
   "loading",
+  // Spec 015 ② (plan ② D-05): files dragged over the dropzone, before disabled.
+  "dragover",
   "disabled",
 ];
 
@@ -420,6 +477,11 @@ function declarations(skemo: Skemo, part: string, property: string, token: strin
   if (isStatus(skemo) && part === "accent") {
     if (property === "color") return [`border-inline-start-color: ${variable(token)};`];
     if (property === "width") return [`border-inline-start-width: ${variable(token)};`];
+  }
+  // The room around the button of a file input's dropzone is its padding on every side (Spec 015
+  // ②, D-05); none (no dropzone) writes nothing.
+  if (isUpload(skemo) && part === "dropzone" && property === "inline-padding") {
+    return isBindingKeyword(token) ? [] : [`padding: ${variable(token)};`];
   }
   // The inline padding of a live region is its padding on every side, as the dialog's (D-09).
   if (isStatus(skemo) && part === "box" && property === "inline-padding") {
@@ -1369,34 +1431,36 @@ export function stylesheetOf(skemo: Skemo, uzo?: Uzo): string {
                         ? meterStructure
                         : isPagination(skemo)
                           ? paginationStructure
-                          : isLight(skemo)
-                            ? lightStructure(skemo)
-                            : isTabs(skemo)
-                              ? tabsStructure
-                              : isDisclosure(skemo)
-                                ? disclosureStructure
-                                : isField(skemo)
-                                  ? `${fieldStructure(disables, isSelect(skemo), isTextarea(skemo))}${isSuggest(skemo) ? `\n${suggestStructure}` : ""}`
-                                  : isGroup(skemo)
-                                    ? groupStructure(
-                                        disables,
-                                        skemo.parts["required-mark"] !== undefined,
-                                      )
-                                    : isToggle(skemo)
-                                      ? toggleStructure(
+                          : isUpload(skemo)
+                            ? uploadStructure(disables)
+                            : isLight(skemo)
+                              ? lightStructure(skemo)
+                              : isTabs(skemo)
+                                ? tabsStructure
+                                : isDisclosure(skemo)
+                                  ? disclosureStructure
+                                  : isField(skemo)
+                                    ? `${fieldStructure(disables, isSelect(skemo), isTextarea(skemo))}${isSuggest(skemo) ? `\n${suggestStructure}` : ""}`
+                                    : isGroup(skemo)
+                                      ? groupStructure(
                                           disables,
-                                          uzo?.layout.wrap !== undefined &&
-                                            uzo.layout.wrap !== "never",
-                                          skemo.slots.some(
-                                            (slot) => slot.default !== true && slot.text === true,
-                                          ),
                                           skemo.parts["required-mark"] !== undefined,
                                         )
-                                      : structure(
-                                          uzo?.layout.wrap === "with-text",
-                                          disables,
-                                          bordered,
-                                        );
+                                      : isToggle(skemo)
+                                        ? toggleStructure(
+                                            disables,
+                                            uzo?.layout.wrap !== undefined &&
+                                              uzo.layout.wrap !== "never",
+                                            skemo.slots.some(
+                                              (slot) => slot.default !== true && slot.text === true,
+                                            ),
+                                            skemo.parts["required-mark"] !== undefined,
+                                          )
+                                        : structure(
+                                            uzo?.layout.wrap === "with-text",
+                                            disables,
+                                            bordered,
+                                          );
   // A skip link adds its place above the page to a control's structure (Spec 014 ②, D-07).
   const floating = isSkip(skemo) ? `\n${skipStructure}` : "";
   return `${base}${floating}\n${[...tokenRules, ...undrawn].join("\n")}\n`;
@@ -1481,6 +1545,9 @@ function selectorOf(
     return disclosurePartSelector(part, data, combination[STATE_KEY] ?? "rest");
   if (isPagination(skemo))
     return paginationPartSelector(part, data, entry, combination[STATE_KEY] ?? "rest");
+  if (isUpload(skemo)) {
+    return uploadPartSelector(part, property, data, combination[STATE_KEY] ?? "rest");
+  }
   const state = STATE_SELECTORS[combination[STATE_KEY] ?? "rest"] ?? "";
   if (isField(skemo)) return fieldPartSelector(part, property, data, state, isSelect(skemo), entry);
   if (isToggle(skemo)) return togglePartSelector(part, property, data, state);
@@ -1522,6 +1589,7 @@ export function elementNamesOf(
       isPopover(entry.skemo),
       isSuggest(entry.skemo),
       isPagination(entry.skemo),
+      isUpload(entry.skemo),
     ),
     role: entry.skemo.a11y.role,
     // Spec 015 ① (plan ① D-04): the breadcrumb is a light host with a list in its shadow.
@@ -1616,6 +1684,8 @@ function cssOf(moduleText: string): string {
 
 /** The state a selector addresses; the inverse of `STATE_SELECTORS` plus the focus ring (T021). */
 function stateOf(selector: string): string {
+  // Spec 015 ② (plan ② D-05): the field of a file input while files are dragged over it.
+  if (selector.includes("[dragover]")) return "dragover";
   if (selector.includes('[aria-busy="true"]')) return "loading";
   if (selector.includes(":disabled") || selector.includes('[aria-disabled="true"]')) {
     return "disabled";

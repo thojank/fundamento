@@ -680,19 +680,27 @@ function a11yIssues(entry: LoadedEro, at: At): void {
   // Spec 015 ① (plan ① D-01): `<part>-name` — the spoken name of a part that shows no text of
   // its own (the arrows of a pagxigilo: "Vorherige Seite"); `<slot>-name` — the word heard before
   // the text of an entry of a slot (a page number: "Seite 3").
+  // Spec 015 ② (plan ② D-04): `<part>-count` — the words heard with the number of entries a part
+  // lists that is no slot (the chosen files of an alsxutilo: "Ausgewählte Dateien: 2");
+  // `<prop>-invalid` of a string or number prop — the error shown and heard when a value breaks
+  // the bound the prop sets (a file of a kind accept does not allow, larger than max-size).
   const emptied = [
     ...skemo.slots.map((slot) => `${slot.name}-empty`),
     ...skemo.slots.map((slot) => `${slot.name}-count`),
     ...skemo.slots.map((slot) => `${slot.name}-name`),
     ...skemo.props.filter((prop) => prop.kind === "string").map((prop) => `${prop.name}-empty`),
     ...Object.keys(skemo.parts).map((part) => `${part}-name`),
+    ...Object.keys(skemo.parts).map((part) => `${part}-count`),
+    ...skemo.props
+      .filter((prop) => prop.kind === "string" || prop.kind === "number")
+      .map((prop) => `${prop.name}-invalid`),
   ];
   for (const key of Object.keys(skemo.a11y.texts ?? {})) {
     if (booleans.includes(key) || valued.includes(key) || emptied.includes(key)) continue;
     at(
       appendPointer("/skemo/a11y/texts", key),
       "skemo-a11y-invalid",
-      `Skemo of ${ero.name} carries an a11y text for ${key}, which is no boolean prop of ${ero.name}, no <prop>-<value> of an enum prop, no <slot>-empty, <slot>-count or <slot>-name, no <prop>-empty of a string prop and no <part>-name; the text would never be heard.`,
+      `Skemo of ${ero.name} carries an a11y text for ${key}, which is no boolean prop of ${ero.name}, no <prop>-<value> of an enum prop, no <slot>-empty, <slot>-count or <slot>-name, no <prop>-empty of a string prop, no <part>-name or <part>-count and no <prop>-invalid of a string or number prop; the text would never be heard.`,
       `Key a11y.texts by a boolean prop (${booleans.join(", ") || "none"}) or by <prop>-<value> of an enum prop, or add the prop first.`,
     );
   }

@@ -1834,3 +1834,36 @@ describe("Spec 015 ① documentation (specs/015-eroj-runde-4)", () => {
     expect(read("docs/vojmapo.md")).toContain("Spec 015 ①");
   });
 });
+
+// Spec 015 ② (Briefing 2026-10-18): plan ② carries the CI split (D-01, D-02) and the alsxutilo —
+// its decisions from D-03 on, the Arkitekturo coverage, deviations, findings and open points;
+// tasks ② the red hash of the alsxutilo; the Vojmapo names ②; the README counts thirty elements.
+describe("Spec 015 ② documentation (specs/015-eroj-runde-4)", () => {
+  it("plan ② carries the decisions, the coverage, deviations, findings and open points; tasks ② the red hash of the alsxutilo", () => {
+    const section = (text: string) =>
+      text.slice(text.indexOf("## ② Eingabe"), text.indexOf("## ③ Inhalt"));
+    const plan = section(read("specs/015-eroj-runde-4/plan.md"));
+    for (const heading of [
+      "### Zusammenfassung",
+      "### Entwurfsentscheidungen",
+      "#### D-01",
+      "#### D-02",
+      "#### D-03",
+      "### Arkitekturo-Abdeckung",
+      "### Abweichungen von der Spec",
+      "### Befunde / Mankoj",
+      "### Offen (für den Maintainer)",
+    ]) {
+      expect(plan, heading).toContain(heading);
+    }
+    for (const word of ["`alsxutilo`", "`file-constraints-stated`", "`upload`", "O-6"]) {
+      expect(plan).toContain(word);
+    }
+    expect(plan).not.toContain("(folgen mit `alsxutilo`)");
+    const tasks = section(read("specs/015-eroj-runde-4/tasks.md"));
+    expect(tasks).toContain("**T1303");
+    expect(tasks).toMatch(/alsxutilo rot `[0-9a-f]{7}`/);
+    expect(read("docs/vojmapo.md")).toContain("Spec 015 ②");
+    expect(read("README.md")).toContain("thirty `fm-*` elements");
+  });
+});

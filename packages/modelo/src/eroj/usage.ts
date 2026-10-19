@@ -898,6 +898,10 @@ export const USAGE_ENFORCERS: Readonly<Record<string, UsageEnforcer>> = {
   "tooltip-text-short": textRule,
   // Spec 014 ⑤ (G8): the summary of a disclosure names what it hides (not-words on the slot).
   "disclosure-label-names-content": textRule,
+  // Spec 015 ② (G4, plan ② D-03): the help of a file input names kinds and size (min-words 2 on
+  // the help, adjustable); that a help stands beside accept at all is the Skemo's constraint
+  // (help empty ⇒ accept empty), reported as ero-prop-constraint.
+  "file-constraints-stated": textRule,
   "empty-state-says-what-next": textRule,
   // Spec 011 ④ (G6, plan ④ D-04, D-06): a caption that names the rows (not-words against empty
   // captions); a value text that names value and reference (min-words 2, so '0 %' alone fails).

@@ -45,6 +45,7 @@ describe("Make Kit sources (T018)", () => {
       "LICENSE",
       "README.md",
       "guidelines/Guidelines.md",
+      "guidelines/components/alsxutilo.md",
       "guidelines/components/apartigilo.md",
       "guidelines/components/atributlisto.md",
       "guidelines/components/avizo.md",
@@ -761,4 +762,25 @@ describe("Make Kit and the Navigation of Spec 015 ①", () => {
     expect(kit(aspekto, "guidelines/components/pagxigilo.md")).toContain("`total-pages`");
     expect(kit(aspekto, "guidelines/components/spuro.md")).toContain("`page`");
   });
+});
+
+// Spec 015 ② (plan ② D-08): Make takes every file a form asks for from the alsxutilo, its help
+// naming kinds and size — one sentence, from the role button with the part dropzone; the butono
+// stays the button of every other sentence.
+describe("Make Kit and the Eingabe of Spec 015 ②", () => {
+  it.each(ASPEKTOJ)(
+    "%s: the guidelines name the alsxutilo; the butono stays the button",
+    (aspekto) => {
+      const guidelines = kit(aspekto, "guidelines/Guidelines.md");
+      expect(guidelines).toContain(
+        "- Every file a form asks for is an `<Alsxutilo>` whose help names the kinds and the size it takes (`accept`, `max-size`); a text a person types is a `<Kampo>`, and sending the files is the application's.",
+      );
+      expect(guidelines).toContain("more on demand is a `<Butono>`");
+      expect(guidelines).not.toContain("more on demand is a `<Alsxutilo>`");
+      const component = kit(aspekto, "guidelines/components/alsxutilo.md");
+      expect(component).toContain("# Alsxutilo");
+      expect(component).toContain("`max-size`");
+      expect(component).toContain("**file-constraints-stated**");
+    },
+  );
 });

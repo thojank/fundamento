@@ -211,6 +211,7 @@ describe("the scheme eroj (Spec 008 T009)", () => {
 
   it("holds one concept per Ero of the Modelo, under #Ero, related to each other", () => {
     expect(eroNames).toEqual([
+      "alsxutilo",
       "apartigilo",
       "atributlisto",
       "avizo",
@@ -242,6 +243,7 @@ describe("the scheme eroj (Spec 008 T009)", () => {
       "titolo",
     ]);
     expect(eroj.map((concept) => concept.term).sort()).toEqual([
+      "Alsxutilo",
       "Apartigilo",
       "Atributlisto",
       "Avizo",

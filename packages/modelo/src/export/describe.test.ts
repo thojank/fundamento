@@ -70,8 +70,9 @@ describe("countWord", () => {
     [27, "twenty-seven"],
     [28, "twenty-eight"],
     [29, "twenty-nine"],
-    [30, "30"],
-    [30, "30"],
+    // Spec 015 ②: thirty (the alsxutilo); beyond that the number stands.
+    [30, "thirty"],
+    [31, "31"],
   ])("%i -> %s", (count, word) => {
     expect(countWord(count)).toBe(word);
   });

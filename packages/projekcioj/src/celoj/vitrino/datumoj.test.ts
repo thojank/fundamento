@@ -250,6 +250,8 @@ describe("the Vitrino after the acceptances (Nachlese 2026-10-13)", () => {
   // line that never breaks is the input line, not the label. The subject comes from the a11y role.
   it("the layout sentence names the subject and the placement (C8)", () => {
     expect(datumoj.a11yRoloj).toEqual({
+      // Spec 015 ②: the platform's file input is heard as a button.
+      alsxutilo: "button",
       apartigilo: "separator",
       atributlisto: "list",
       avizo: "status",
@@ -724,5 +726,22 @@ describe("the Vitrino shows the pagxigilo and the spuro (Spec 015 ①)", () => {
     expect(grid).toContain(
       '<fm-spuro page="3"><a href="#fm-vitrino-spuro" data-page="1">Eins</a><a href="#fm-vitrino-spuro" data-page="2">Zwei</a><span data-page="3">Drei</span></fm-spuro>',
     );
+  });
+});
+
+// Spec 015 ② (plan ② D-07): the Vitrino shows the alsxutilo in one row — at rest, with the
+// dropzone, required, disabled and invalid — each with accept and max-size and a help that names
+// kinds and size (file-constraints-stated); the error only under invalid.
+describe("the Vitrino shows the alsxutilo (Spec 015 ②)", () => {
+  it("one row, five columns, accept and max-size, the help names kinds and size", () => {
+    const grid = datumoj.eroj.alsxutilo ?? "";
+    expect((grid.match(/<fm-alsxutilo /g) ?? []).length).toBe(5);
+    expect(grid).toContain(
+      '<th scope="col">rest</th><th scope="col">dropzone</th><th scope="col">required</th><th scope="col">disabled</th><th scope="col">invalid</th>',
+    );
+    expect(grid).toContain(
+      '<fm-alsxutilo max-size="5000000" accept=".pdf,.png" dropzone>rest<span slot="help">PDF oder PNG, höchstens 5 MB</span></fm-alsxutilo>',
+    );
+    expect((grid.match(/<span slot="error">/g) ?? []).length).toBe(1);
   });
 });

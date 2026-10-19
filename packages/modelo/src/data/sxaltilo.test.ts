@@ -25,6 +25,7 @@ describe("sxaltilo in the repo Modelo (G1, G2, section 1)", () => {
   it("lives in data/eroj/sxaltilo/skemo.json, after the other Eroj, and the repo Modelo stays valid", () => {
     expect(sxaltilo.file).toBe("modelo/data/eroj/sxaltilo/skemo.json");
     expect(modelo.eroj.map((entry) => entry.ero.name)).toEqual([
+      "alsxutilo",
       "apartigilo",
       "atributlisto",
       "avizo",
@@ -250,6 +251,8 @@ describe("the Reguloj of the sxaltilo (G6, E5, D-14)", () => {
           "elektilo",
           "tekstareo",
           "kompletigilo",
+          // Spec 015 ②: and to the alsxutilo.
+          "alsxutilo",
         ],
       });
       expect(modelo.reguloj.filter((regulo) => regulo.name === name)).toHaveLength(1);
@@ -287,6 +290,7 @@ describe("the Reguloj of the sxaltilo (G6, E5, D-14)", () => {
       "kompletigilo",
       "pagxigilo",
       "spuro",
+      "alsxutilo",
     ]);
   });
 

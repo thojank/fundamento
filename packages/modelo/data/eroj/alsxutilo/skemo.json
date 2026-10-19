@@ -1,0 +1,446 @@
+{
+  "ero": {
+    "id": "ero_01M584YD41VQDMJ4QZJEEC7DA4",
+    "name": "alsxutilo",
+    "skemo": "ske_01M584YDGN2F49VDAMJY14PDWK",
+    "description": "A file input: chooses one or more files to send with a form. It always shows its label, states in its help which files are allowed, and lists the chosen files, each with its size and a button that removes it."
+  },
+  "skemo": {
+    "id": "ske_01M584YDGN2F49VDAMJY14PDWK",
+    "ero": "ero_01M584YD41VQDMJ4QZJEEC7DA4",
+    "props": [
+      {
+        "name": "accept",
+        "kind": "string",
+        "description": "The kinds of file allowed, a list separated by commas: endings (.pdf) or media types (image/png, image/*); empty allows every kind. A chosen file of another kind makes the field invalid. Named in the help (Regulo file-constraints-stated)."
+      },
+      {
+        "name": "max-size",
+        "kind": "number",
+        "description": "The largest file allowed, in bytes; empty allows any size. A larger file makes the field invalid; the error and the help name the size in the person's units (5 MB)."
+      },
+      {
+        "name": "multiple",
+        "kind": "boolean",
+        "default": false,
+        "description": "More than one file may be chosen; every choice adds to the list, every file can be removed on its own."
+      },
+      {
+        "name": "dropzone",
+        "kind": "boolean",
+        "default": false,
+        "description": "Shows an area around the button onto which files can be dropped. An addition for the pointer: without a mouse the button does everything."
+      },
+      {
+        "name": "required",
+        "kind": "boolean",
+        "default": false,
+        "description": "At least one file must be chosen; marked visibly and audibly (Regulo required-marked)."
+      },
+      {
+        "name": "disabled",
+        "kind": "boolean",
+        "default": false,
+        "description": "Not available; skipped by the keyboard, nothing can be chosen or dropped."
+      },
+      {
+        "name": "invalid",
+        "kind": "boolean",
+        "default": false,
+        "description": "The choice is wrong; true whenever the slot error is filled (constraint), and while a chosen file breaks accept or max-size."
+      },
+      {
+        "name": "name",
+        "kind": "string",
+        "description": "The name in the form; every chosen file is sent under it. Without effect in a design tool, like type on the butono."
+      }
+    ],
+    "states": [
+      "rest",
+      "hover",
+      "focus",
+      "disabled",
+      "invalid",
+      "dragover"
+    ],
+    "slots": [
+      {
+        "name": "label",
+        "default": true,
+        "text": true
+      },
+      {
+        "name": "help",
+        "text": true
+      },
+      {
+        "name": "error",
+        "text": true
+      }
+    ],
+    "parts": {
+      "label": {
+        "color": {
+          "by": [
+            "state"
+          ]
+        },
+        "typography": {
+          "fixed": "typography.label.1"
+        }
+      },
+      "required-mark": {
+        "color": {
+          "fixed": "color.status.danger.text"
+        }
+      },
+      "dropzone": {
+        "fill": {
+          "by": [
+            "state"
+          ]
+        },
+        "inline-padding": {
+          "by": [
+            "dropzone"
+          ]
+        },
+        "gap": {
+          "fixed": "spacing.small"
+        },
+        "radius": {
+          "fixed": "radius.role.surface"
+        }
+      },
+      "border": {
+        "color": {
+          "by": [
+            "state"
+          ]
+        },
+        "width": {
+          "fixed": "border.width.default"
+        },
+        "stroke": {
+          "by": [
+            "dropzone",
+            "state"
+          ]
+        }
+      },
+      "drop-hint": {
+        "color": {
+          "fixed": "color.text.muted"
+        },
+        "typography": {
+          "fixed": "typography.body.2"
+        }
+      },
+      "choose": {
+        "height": {
+          "fixed": "size.control.medium"
+        }
+      },
+      "help": {
+        "color": {
+          "fixed": "color.text.muted"
+        },
+        "typography": {
+          "fixed": "typography.caption"
+        }
+      },
+      "error": {
+        "color": {
+          "fixed": "color.status.danger.text"
+        },
+        "typography": {
+          "fixed": "typography.caption"
+        }
+      },
+      "file-list": {
+        "gap": {
+          "fixed": "spacing.small"
+        }
+      },
+      "file-name": {
+        "color": {
+          "fixed": "color.text.default"
+        },
+        "typography": {
+          "fixed": "typography.body.2"
+        }
+      },
+      "file-size": {
+        "color": {
+          "fixed": "color.text.muted"
+        },
+        "typography": {
+          "fixed": "typography.caption"
+        }
+      },
+      "remove": {
+        "size": {
+          "fixed": "size.control.small"
+        }
+      },
+      "focus-ring": {
+        "ring": {
+          "fixed": "focus.ring"
+        },
+        "offset": {
+          "fixed": "focus.offset"
+        },
+        "color": {
+          "fixed": "color.focus.inner"
+        }
+      },
+      "box": {
+        "gap": {
+          "fixed": "spacing.small"
+        },
+        "radius": {
+          "fixed": "radius.role.control"
+        }
+      },
+      "motion": {
+        "duration": {
+          "fixed": "motion.duration.fast"
+        },
+        "easing": {
+          "fixed": "motion.easing.standard"
+        }
+      }
+    },
+    "bindings": [
+      {
+        "part": "label",
+        "property": "color",
+        "when": {
+          "state": "rest"
+        },
+        "token": "color.text.default"
+      },
+      {
+        "part": "label",
+        "property": "color",
+        "when": {
+          "state": "disabled"
+        },
+        "token": "color.text.disabled"
+      },
+      {
+        "part": "dropzone",
+        "property": "fill",
+        "when": {
+          "state": "rest"
+        },
+        "token": "color.background.default"
+      },
+      {
+        "part": "dropzone",
+        "property": "fill",
+        "when": {
+          "state": "dragover"
+        },
+        "token": "color.background.sunken"
+      },
+      {
+        "part": "dropzone",
+        "property": "inline-padding",
+        "when": {
+          "dropzone": "false"
+        },
+        "token": "none"
+      },
+      {
+        "part": "dropzone",
+        "property": "inline-padding",
+        "when": {
+          "dropzone": "true"
+        },
+        "token": "spacing.large"
+      },
+      {
+        "part": "border",
+        "property": "color",
+        "when": {
+          "state": "rest"
+        },
+        "token": "color.border.default"
+      },
+      {
+        "part": "border",
+        "property": "color",
+        "when": {
+          "state": "hover"
+        },
+        "token": "color.border.strong"
+      },
+      {
+        "part": "border",
+        "property": "color",
+        "when": {
+          "state": "focus"
+        },
+        "token": "color.border.strong"
+      },
+      {
+        "part": "border",
+        "property": "color",
+        "when": {
+          "state": "disabled"
+        },
+        "token": "color.border.disabled"
+      },
+      {
+        "part": "border",
+        "property": "color",
+        "when": {
+          "state": "invalid"
+        },
+        "token": "color.status.danger.border"
+      },
+      {
+        "part": "border",
+        "property": "color",
+        "when": {
+          "state": "dragover"
+        },
+        "token": "color.border.strong"
+      },
+      {
+        "part": "border",
+        "property": "stroke",
+        "when": {
+          "dropzone": "false"
+        },
+        "token": "none"
+      },
+      {
+        "part": "border",
+        "property": "stroke",
+        "when": {
+          "dropzone": "true",
+          "state": "rest"
+        },
+        "token": "stroke.dashed"
+      },
+      {
+        "part": "border",
+        "property": "stroke",
+        "when": {
+          "dropzone": "true",
+          "state": "dragover"
+        },
+        "token": "stroke.solid"
+      }
+    ],
+    "a11y": {
+      "role": "button",
+      "name": [
+        "slot:label"
+      ],
+      "description": [
+        "slot:help",
+        "slot:error"
+      ],
+      "states": {
+        "required": [
+          "aria-required"
+        ],
+        "invalid": [
+          "aria-invalid"
+        ],
+        "disabled": [
+          "aria-disabled"
+        ]
+      },
+      "keys": [
+        "Space",
+        "Enter"
+      ],
+      "texts": {
+        "required": {
+          "de": "erforderlich",
+          "en": "required"
+        },
+        "choose-name": {
+          "de": "Datei auswählen",
+          "en": "Choose file"
+        },
+        "drop-hint-name": {
+          "de": "oder hierher ziehen",
+          "en": "or drop it here"
+        },
+        "remove-name": {
+          "de": "{file} entfernen",
+          "en": "Remove {file}"
+        },
+        "file-list-count": {
+          "de": "Ausgewählte Dateien: {count}",
+          "en": "Files chosen: {count}"
+        },
+        "accept-invalid": {
+          "de": "{file} hat eine Art, die hier nicht geht: Wähle {accept}.",
+          "en": "{file} is a kind not allowed here: choose {accept}."
+        },
+        "max-size-invalid": {
+          "de": "{file} ist zu groß: Wähle eine Datei bis {max-size}.",
+          "en": "{file} is too large: choose a file up to {max-size}."
+        }
+      }
+    },
+    "constraints": [
+      {
+        "when": {
+          "slot:error": "filled"
+        },
+        "allowed": {
+          "invalid": [
+            "true"
+          ]
+        },
+        "kialo": "An error text without the error state is a contradiction a screen reader cannot resolve: it reads a fault on a field that says it is fine."
+      },
+      {
+        "when": {
+          "slot:help": "empty"
+        },
+        "allowed": {
+          "prop:accept": [
+            "empty"
+          ]
+        },
+        "kialo": "Who learns the allowed files only from the error makes the mistake twice: a field with accept states the kinds and the size in its help, 'PDF, höchstens 5 MB' (file-constraints-stated)."
+      }
+    ],
+    "goals": [
+      {
+        "goal": "upload",
+        "keywords": {
+          "en": [
+            "upload",
+            "file",
+            "files",
+            "attachment",
+            "attachments",
+            "pdf",
+            "document"
+          ],
+          "de": [
+            "upload",
+            "hochladen",
+            "datei",
+            "dateien",
+            "anhang",
+            "anhänge",
+            "pdf",
+            "dokument"
+          ]
+        },
+        "props": {},
+        "regulo": "file-constraints-stated"
+      }
+    ]
+  }
+}

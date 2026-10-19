@@ -6,7 +6,7 @@ import { tmpdir } from "node:os";
 import { extname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { projectModeloSource } from "@fundamento/modelo";
-import { buildProjekcioj, celoInputOf } from "@fundamento/projekcioj";
+import { buildProjekcioj, type CeloInput, celoInputOf } from "@fundamento/projekcioj";
 import type { Page } from "@playwright/test";
 
 export const ORIGIN = "http://fm.test";
@@ -18,8 +18,29 @@ export const EKZEMPLO_CONFIG = fileURLToPath(
   ),
 );
 
-/** Builds the projections of core + komuna + ekzemplo once per worker. */
-export async function buildProjections() {
+interface Projections {
+  out: string;
+  input: CeloInput;
+}
+
+let projections: Promise<Projections> | undefined;
+
+/**
+ * Builds the projections of core + komuna + ekzemplo once per process. Every spec file awaits
+ * this at its top level; Playwright imports every file once to collect the tests and again in
+ * every worker, and a build per import cost the loader alone three to five minutes of a shard on
+ * the runner (Spec 015 ② O-4, run 39127146926). The output is read-only for every test, so one
+ * build serves every file of the process; a build that fails is retried by the next caller.
+ */
+export function buildProjections(): Promise<Projections> {
+  projections ??= build().catch((error: unknown) => {
+    projections = undefined;
+    throw error;
+  });
+  return projections;
+}
+
+async function build(): Promise<Projections> {
   const source = projectModeloSource(EKZEMPLO_CONFIG);
   const out = mkdtempSync(join(tmpdir(), "fm-eroj-"));
   const built = await buildProjekcioj({ outDir: out, source });

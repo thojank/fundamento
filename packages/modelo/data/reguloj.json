@@ -425,7 +425,8 @@
           "faldilo",
           "kompletigilo",
           "pagxigilo",
-          "spuro"
+          "spuro",
+          "alsxutilo"
         ]
       }
     },
@@ -566,7 +567,8 @@
           "elekto",
           "elektilo",
           "tekstareo",
-          "kompletigilo"
+          "kompletigilo",
+          "alsxutilo"
         ]
       }
     },
@@ -601,7 +603,8 @@
           "elektilo",
           "tekstareo",
           "avizo",
-          "kompletigilo"
+          "kompletigilo",
+          "alsxutilo"
         ]
       }
     },
@@ -619,7 +622,8 @@
           "elekto",
           "elektilo",
           "tekstareo",
-          "kompletigilo"
+          "kompletigilo",
+          "alsxutilo"
         ]
       }
     },
@@ -637,7 +641,8 @@
           "elekto",
           "elektilo",
           "tekstareo",
-          "kompletigilo"
+          "kompletigilo",
+          "alsxutilo"
         ]
       }
     },
@@ -656,7 +661,8 @@
           "elekto",
           "elektilo",
           "tekstareo",
-          "kompletigilo"
+          "kompletigilo",
+          "alsxutilo"
         ]
       }
     },
@@ -674,7 +680,8 @@
           "elektilo",
           "tekstareo",
           "dialogo",
-          "kompletigilo"
+          "kompletigilo",
+          "alsxutilo"
         ]
       }
     },
@@ -863,6 +870,19 @@
       "appliesTo": {
         "eroj": [
           "faldilo"
+        ]
+      }
+    },
+    {
+      "id": "reg_01M584YERK9ECVT6PD1Q64K828",
+      "name": "file-constraints-stated",
+      "statement": "An alsxutilo with accept or max-size names in its help the kinds and the size of the files it takes: 'PDF oder PNG, höchstens 5 MB'.",
+      "kialo": "Who learns the limits only after the error makes the mistake twice: the person chooses, waits, reads why, and chooses again (WCAG 3.3.2, Labels or Instructions).",
+      "scope": "eroj: alsxutilo instances (Spec 015 ②); checked through the existing Slot-Constraint of the Skemo (accept filled ⇒ help filled, written as help empty ⇒ accept empty, reported as ero-prop-constraint) and a text rule on the help (check min-words 2), an approximation without a model: two words that name neither kind nor size pass; max-size without accept is not read by the constraint (a number prop is no prop:<name> key); adjustable: a brand may word its help otherwise with a Jugxo",
+      "checkability": "automatic",
+      "appliesTo": {
+        "eroj": [
+          "alsxutilo"
         ]
       }
     }

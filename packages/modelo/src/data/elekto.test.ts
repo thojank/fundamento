@@ -43,6 +43,7 @@ describe("elekto in the repo Modelo (G1, G2, section 3)", () => {
   it("lives in data/eroj/elekto/skemo.json, between elektilo and kampo, and the repo Modelo stays valid", () => {
     expect(elekto?.file).toBe("modelo/data/eroj/elekto/skemo.json");
     expect(modelo.eroj.map((entry) => entry.ero.name)).toEqual([
+      "alsxutilo",
       "apartigilo",
       "atributlisto",
       "avizo",
@@ -425,28 +426,55 @@ describe("the Reguloj of the elekto (G6, E5)", () => {
     // Spec 010 ④: the elektilo follows the elekto in each list (E5).
     [
       "field-label-visible",
-      ["kampo", "sxaltilo", "markobutono", "elekto", "elektilo", "tekstareo", "kompletigilo"],
+      [
+        "kampo",
+        "sxaltilo",
+        "markobutono",
+        "elekto",
+        "elektilo",
+        "tekstareo",
+        "kompletigilo",
+        "alsxutilo",
+      ],
     ],
     [
       "field-label-names-the-datum",
-      ["kampo", "sxaltilo", "markobutono", "elekto", "elektilo", "tekstareo", "kompletigilo"],
+      [
+        "kampo",
+        "sxaltilo",
+        "markobutono",
+        "elekto",
+        "elektilo",
+        "tekstareo",
+        "kompletigilo",
+        "alsxutilo",
+      ],
     ],
     [
       "error-says-what-to-do",
-      ["kampo", "markobutono", "elekto", "elektilo", "tekstareo", "avizo", "kompletigilo"],
+      [
+        "kampo",
+        "markobutono",
+        "elekto",
+        "elektilo",
+        "tekstareo",
+        "avizo",
+        "kompletigilo",
+        "alsxutilo",
+      ],
     ],
     [
       "required-marked",
-      ["kampo", "markobutono", "elekto", "elektilo", "tekstareo", "kompletigilo"],
+      ["kampo", "markobutono", "elekto", "elektilo", "tekstareo", "kompletigilo", "alsxutilo"],
     ],
     [
       "error-not-color-only",
-      ["kampo", "markobutono", "elekto", "elektilo", "tekstareo", "kompletigilo"],
+      ["kampo", "markobutono", "elekto", "elektilo", "tekstareo", "kompletigilo", "alsxutilo"],
     ],
     // Spec 014 ①: widened once more, to the reason-help of the dialogo.
     [
       "help-is-one-sentence",
-      ["kampo", "elekto", "elektilo", "tekstareo", "dialogo", "kompletigilo"],
+      ["kampo", "elekto", "elektilo", "tekstareo", "dialogo", "kompletigilo", "alsxutilo"],
     ],
   ])("%s is widened to the elekto, not duplicated (E5)", (name, eroj) => {
     expect(named(name)?.appliesTo).toEqual({ eroj });
@@ -485,6 +513,7 @@ describe("the Reguloj of the elekto (G6, E5)", () => {
       "kompletigilo",
       "pagxigilo",
       "spuro",
+      "alsxutilo",
     ]);
   });
 

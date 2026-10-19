@@ -760,6 +760,8 @@ describe("Figma plan for the ligilo (Spec 008 T017)", () => {
 
   it("plans the sets in Ero order, butono first, and gives the ligilo placement × size × state", () => {
     expect(plan.components.map((component) => component.set)).toEqual([
+      // Spec 015 ②: the alsxutilo, first in the Ero order.
+      "alsxutilo",
       // Spec 014 ②: the apartigilo, the ikono and the saltligilo, in the Ero order like every set.
       "apartigilo",
       // Spec 011 ④: the atributlisto, the mezurilo and the tabelo, in the Ero order like every set.
@@ -965,6 +967,8 @@ describe("the label default of a set follows its a11y role (M-3)", () => {
     );
     // Spec 010 ①: a switch names a setting (plan D-10, for the maintainer to confirm).
     expect(defaults).toEqual({
+      // Spec 015 ②: an upload's label names what is asked for, like a field's.
+      alsxutilo: "Beschriftung",
       // Spec 014 ②: a separator and an icon carry no text — no label property.
       apartigilo: undefined,
       // Spec 011 ④ (plan ④ D-14): a key-value list (role list) names what it states (for the
@@ -1747,7 +1751,12 @@ describe("Figma plan for the dialogo (Spec 011 ②)", () => {
       expect(Object.keys(entry.bindings).some((key) => key.startsWith("action-"))).toBe(false);
       expect(Object.keys(entry.paints ?? {}).some((key) => key.startsWith("action-"))).toBe(false);
     }
-    expect(plan.components.filter((component) => component.composed !== undefined)).toHaveLength(1);
+    // Spec 015 ②: the alsxutilo composes its button and its removes too.
+    expect(
+      plan.components
+        .filter((component) => component.composed !== undefined)
+        .map((component) => component.set),
+    ).toEqual(["alsxutilo", "dialogo"]);
     const items = figmaPlanInventory(plan);
     expect(
       Object.keys(items.dialogo?.values ?? {}).filter((key) => key.startsWith("action-")),
@@ -3089,5 +3098,94 @@ describe("the Figma plan draws the pagxigilo and the spuro (Spec 015 ①)", () =
     });
     expect(spuro?.entry).toEqual({ key: "current", texts: ["Eins", "Zwei", "Drei"], selected: 2 });
     expect(spuro?.label).toEqual({ property: "label", defaultValue: "Pfad" });
+  });
+});
+
+// Spec 015 ② (plan ② D-06): the alsxutilo in Figma — dropzone × state (dragover among them), an
+// upload: the label, the dropzone with the button that chooses (the butono's look, emphasis
+// medium, with the icon upload) and the hint, help and error; the border dashed with a dropzone,
+// solid while files are dragged over it, none without; the example „mit zwei Dateien" beside the
+// set lists the Vitrino's two files with their sizes and a remove each (the butono's look,
+// emphasis low, the icon close).
+describe("the Figma plan draws the alsxutilo (Spec 015 ②)", () => {
+  const set = plan.components.find((component) => component.set === "alsxutilo");
+  const variant = (dropzone: string, state: string) =>
+    set?.variants.find(
+      (candidate) => candidate.props.dropzone === dropzone && candidate.props.state === state,
+    );
+
+  it("an upload of dropzone × state, twelve variants, the label a field's word", () => {
+    expect(set?.structure).toBe("upload");
+    expect(set?.variants).toHaveLength(12);
+    expect(set?.properties.state).toEqual([
+      "rest",
+      "hover",
+      "focus",
+      "disabled",
+      "invalid",
+      "dragover",
+    ]);
+    expect(set?.label).toEqual({ property: "label", defaultValue: "Beschriftung" });
+    expect(set?.texts).toEqual({
+      help: "PDF oder PNG, höchstens 5 MB",
+      error: "Fehler",
+      choose: "Datei auswählen",
+      "drop-hint": "oder hierher ziehen",
+    });
+  });
+
+  it("the dropzone: dashed at rest, solid on the sunken ground while dragged over, no stroke without; the button and the hint bound", () => {
+    expect(variant("true", "rest")?.stroke).toMatchObject({ part: "border", style: "dashed" });
+    expect(variant("true", "dragover")?.stroke).toMatchObject({ part: "border", style: "solid" });
+    expect(variant("false", "rest")?.stroke).toMatchObject({ part: "border", style: "none" });
+    expect(variant("true", "dragover")?.bindings).toMatchObject({
+      "dropzone.fill": "color/background/sunken",
+      "border.color": "color/border/strong",
+      "dropzone.inline-padding": "spacing/large",
+    });
+    expect(variant("false", "rest")?.bindings["dropzone.inline-padding"]).toBeUndefined();
+    expect(variant("true", "rest")?.bindings).toMatchObject({
+      "dropzone.fill": "color/background/default",
+      "border.color": "color/border/default",
+      "border.width": "border/width/default",
+      "dropzone.radius": "radius/role/surface",
+      "drop-hint.color": "color/text/muted",
+      "choose.height": "size/control/medium",
+      "file-name.color": "color/text/default",
+      "remove.size": "size/control/small",
+      "box.gap": "spacing/small",
+    });
+    expect(variant("false", "invalid")?.bindings["border.color"]).toBe(
+      "color/status/danger/border",
+    );
+    expect(variant("true", "rest")?.icons).toEqual({ "icon-start": "upload", remove: "close" });
+  });
+
+  it("the button looks like a butono of emphasis medium, every remove like one of emphasis low", () => {
+    expect(set?.composed?.choose).toMatchObject({
+      ero: "butono",
+      props: { emphasis: "medium", intent: "neutral", size: "medium", state: "rest" },
+    });
+    expect(Object.keys(set?.composed?.choose?.bindings ?? {})).toEqual(
+      expect.arrayContaining(["surface.fill", "label.color", "box.radius", "icon.size"]),
+    );
+    expect(set?.composed?.remove).toMatchObject({
+      ero: "butono",
+      props: { emphasis: "low", size: "small" },
+    });
+  });
+
+  it("the example „mit zwei Dateien“: the default variant with the Vitrino's two files and their sizes", () => {
+    expect(set?.examples).toEqual([
+      {
+        name: "alsxutilo – mit zwei Dateien",
+        variant: { dropzone: "false", state: "rest" },
+        padding: expect.any(Number),
+        files: [
+          { name: "Lebenslauf.pdf", size: "1,2 MB" },
+          { name: "Zeugnis.png", size: "340 kB" },
+        ],
+      },
+    ]);
   });
 });

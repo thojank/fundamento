@@ -74,6 +74,7 @@ describe("get_ero brief (Spec 007 A8)", () => {
   // Spec 008 T014 (A5, E of Spec 009): every Ero's brief, measured; the ceiling stays 750.
   // Spec 010 ④: seven Eroj, the elektilo among them; Spec 011 ②: nine, dialogo and tekstareo.
   it.each([
+    "alsxutilo",
     "apartigilo",
     "apartigilo",
     "atributlisto",
@@ -131,6 +132,7 @@ describe("suggest_ero (FR-13)", () => {
       expect.objectContaining({ rule: "goal-unknown", path: "suggest_ero/goal" }),
     ]);
     expect(result.structuredContent?.allowed).toEqual([
+      "upload",
       "separate",
       "details",
       "notify",

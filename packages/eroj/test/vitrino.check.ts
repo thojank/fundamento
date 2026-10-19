@@ -516,7 +516,8 @@ test("the Ikonaro grid, the apartigilo and the saltligilo are upgraded in their 
   await open(page);
   const icons = page.locator("#fm-vitrino-ikono fm-ikono");
   // Spec 015 ①: sixteen names (chevron-left), three sizes each, and the four status icons.
-  await expect(icons).toHaveCount(16 * 3 + 4);
+  // Spec 015 ②: seventeen (upload).
+  await expect(icons).toHaveCount(17 * 3 + 4);
   await expect(page.locator("#fm-vitrino-ikono").getByRole("img")).toHaveCount(4);
   const maskOf = () =>
     page
@@ -620,4 +621,31 @@ test("fm-pagxigilo and fm-spuro are upgraded in their sections, the pager usable
   for (const id of ["pagxigilo", "spuro"]) {
     expect(await axeViolations(page, `#fm-vitrino-${id}`), id).toEqual([]);
   }
+});
+
+// Spec 015 ② (plan ② D-07): the section of the alsxutilo — chosen and removed by keyboard alone
+// (Tab to the input, Space opens the platform's dialog, Tab to the remove, Enter); the help names
+// kinds and size; axe without a finding.
+test("fm-alsxutilo is upgraded in its section, a file chosen and removed by keyboard, axe-clean", async ({
+  page,
+  browserName,
+}) => {
+  await open(page);
+  const section = page.locator("#fm-vitrino-alsxutilo");
+  const first = section.locator("fm-alsxutilo").first();
+  const input = first.locator('input[type="file"]');
+  await expect(input).toHaveAccessibleDescription("PDF oder PNG, höchstens 5 MB");
+  await input.focus();
+  const chooser = page.waitForEvent("filechooser");
+  await page.keyboard.press("Space");
+  await (await chooser).setFiles([
+    { name: "Lebenslauf.pdf", mimeType: "application/pdf", buffer: Buffer.alloc(1200, 1) },
+  ]);
+  await expect(first.locator('[part="file-name"]')).toHaveText(["Lebenslauf.pdf"]);
+  await page.keyboard.press(browserName === "webkit" ? "Alt+Tab" : "Tab");
+  await expect(section.getByRole("button", { name: "Lebenslauf.pdf entfernen" })).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(first.locator('[part="file"]')).toHaveCount(0);
+  await expect(input).toBeFocused();
+  expect(await axeViolations(page, "#fm-vitrino-alsxutilo")).toEqual([]);
 });

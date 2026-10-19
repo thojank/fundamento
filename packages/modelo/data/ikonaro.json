@@ -139,6 +139,15 @@
       "kialo": "The status success of an avizo and the valid kampo need a sign beside the colour (WCAG 1.4.1); the check in a circle is told apart from the bare check that means chosen."
     },
     {
+      "id": "iko_01M584YEBDZFCS1CDQAX56B269",
+      "name": "upload",
+      "meaning": {
+        "de": "Hochladen: eine Datei vom Gerät wählen",
+        "en": "Upload: choose a file from the device"
+      },
+      "kialo": "The button of an alsxutilo that chooses files says with the arrow out of the tray what it does beside its words; the arrow points up in every writing direction, so it never mirrors."
+    },
+    {
       "id": "iko_01M55EFZMVS7WDTJ3D55SPVHR1",
       "name": "warning",
       "meaning": {

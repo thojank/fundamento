@@ -33,6 +33,7 @@ describe("Web Component Celo (T011)", () => {
   it("generates the descriptor, the stylesheet, the element and an index", () => {
     // Spec 008: the ligilo on the same path as the butono (Art. IX, Art. XI).
     expect(Object.keys(files).sort()).toEqual([
+      "eroj/src/generated/alsxutilo.styles.ts",
       "eroj/src/generated/apartigilo.styles.ts",
       "eroj/src/generated/atributlisto.styles.ts",
       "eroj/src/generated/avizo.styles.ts",
@@ -41,6 +42,7 @@ describe("Web Component Celo (T011)", () => {
       "eroj/src/generated/elektilo.styles.ts",
       "eroj/src/generated/elekto.styles.ts",
       "eroj/src/generated/faldilo.styles.ts",
+      "eroj/src/generated/fm-alsxutilo.ts",
       "eroj/src/generated/fm-apartigilo.ts",
       "eroj/src/generated/fm-atributlisto.ts",
       "eroj/src/generated/fm-avizo.ts",
@@ -662,7 +664,9 @@ describe("Web Component Celo for the kampo of Spec 011 ① (password, number, da
   it("renders a number as type text with inputmode numeric and a whole-number pattern, a date as type date, a password as type password", () => {
     expect(kampoElement).toContain('control.type = kind === "number" ? "text" : kind;');
     expect(kampoElement).toContain('control.setAttribute("inputmode", "numeric")');
-    expect(kampoElement).toContain('control.setAttribute("pattern", "-?[0-9]+")');
+    // B-1 (Spec 015 ②, plan ② D-11): no pattern on the native input — the element checks the whole
+    // number itself, the platform's bubble would show its own message.
+    expect(kampoElement).not.toContain('control.setAttribute("pattern"');
     expect(kampoElement).not.toContain('control.type = "number"');
     expect(kampoElement).toContain('for (const attribute of ["autocomplete", "min", "max"])');
     expect(kampoElement).toContain("control.setAttribute(attribute, given)");
@@ -1777,4 +1781,100 @@ describe("Web Component Celo for the pagxigilo and the spuro (Spec 015 ①)", ()
     expect(componentCssIssues("spuro.css", css)).toEqual([]);
     expect(cssPhysicalPropertyIssues("spuro.css", css)).toEqual([]);
   });
+});
+
+// Spec 015 ② (section ②, plan ② D-05): the alsxutilo is the field of the kampo around the
+// platform's file input — the input over a composed butono (inert, its look) with the ikono
+// upload in a picker, the dropzone around it with its hint, help and error (the element's own
+// message beside the slot), the list of the chosen files with a remove butono each and the count
+// in a live region; the files are the form value (FormData), accept and max-size are checked with
+// the Modelo's errors, a drop takes files. The stylesheet keys the dropzone by dropzone and its
+// state dragover by an attribute of the field.
+describe("Web Component Celo for the alsxutilo (Spec 015 ②)", () => {
+  const cssOf = (ero: string) =>
+    JSON.parse(
+      new RegExp(`export const ${ero.toUpperCase()}_CSS = ("(?:[^"\\\\]|\\\\.)*");`).exec(
+        files[`eroj/src/generated/${ero}.styles.ts`] ?? "",
+      )?.[1] ?? '""',
+    ) as string;
+
+  it("renders the platform's file input over a composed butono in the dropzone; the list, the count and the Modelo's words", () => {
+    const element = files["eroj/src/generated/fm-alsxutilo.ts"] ?? "";
+    expect(element).toContain('<input part="control" id="control" type="file">');
+    expect(element).toContain('<fm-butono part="choose" emphasis="medium" inert>');
+    expect(element).toContain('<fm-ikono slot="icon-start" name="upload">');
+    expect(element).toContain('<div part="dropzone">');
+    expect(element).toContain('<ul part="file-list" hidden>');
+    expect(element).toContain('<fm-butono part="remove" emphasis="low" size="small">');
+    expect(element).toContain('name="close"');
+    expect(element).toContain(
+      '<span part="count" role="status" aria-live="polite" class="fm-hidden">',
+    );
+    for (const key of [
+      "choose-name",
+      "drop-hint-name",
+      "remove-name",
+      "file-list-count",
+      "accept-invalid",
+      "max-size-invalid",
+    ]) {
+      expect(element).toContain(`"${key}"`);
+    }
+    expect(element).toContain("static formAssociated = true;");
+    expect(element).toContain("new FormData()");
+    expect(element).toContain("typeMismatch: true");
+    expect(element).toContain("rangeOverflow: true");
+    expect(element).toContain('new Intl.ListFormat(language, { type: "disjunction" })');
+    expect(element).toContain('style: "unit"');
+    expect(element).toContain('addEventListener("drop"');
+    expect(element).toContain('field.setAttribute("dragover", "")');
+    expect(element).toContain("formResetCallback(): void");
+    // No text input of a field: the value is the files, never the input's fake path.
+    expect(element).not.toContain("this.#internals.setFormValue(control.value)");
+  });
+
+  it("the stylesheet: the input lies over the button, the dropzone keyed by dropzone (dashed, solid while dragged over, none without), the ring around the picker", () => {
+    const css = cssOf("alsxutilo");
+    expect(css).toContain(
+      ':where([part="control"]) { position: absolute; inset: 0; margin: 0; opacity: 0; cursor: pointer; }',
+    );
+    expect(css).toContain('[data-dropzone="true"]');
+    expect(css).toContain('[data-dropzone="false"]');
+    expect(css).toContain("border-style: var(--fm-stroke-dashed);");
+    expect(css).toContain("border-style: var(--fm-stroke-solid);");
+    expect(css).toContain("border-style: none;");
+    expect(css).toContain('[dragover]) [part="dropzone"]');
+    expect(css).toContain("background-color: var(--fm-color-background-sunken);");
+    expect(css).toContain("padding: var(--fm-spacing-large);");
+    expect(css).toContain(':has([part="control"]:focus-visible)');
+    expect(css).toContain('[part="picker"]:has([part="control"]:focus-visible)');
+    expect(css).toContain("min-block-size: var(--fm-size-control-medium);");
+    expect(componentCssIssues("alsxutilo.css", css)).toEqual([]);
+    expect(cssPhysicalPropertyIssues("alsxutilo.css", css)).toEqual([]);
+  });
+
+  it("the parity inventory reads dropzone as a boolean and all six states, dragover among them", () => {
+    const inventory = stylesheetInventory(files["eroj/src/generated/alsxutilo.styles.ts"] ?? "");
+    expect(inventory.props).toEqual({ dropzone: ["boolean"] });
+    expect([...inventory.states].sort()).toEqual(
+      ["disabled", "dragover", "focus", "hover", "invalid", "rest"].sort(),
+    );
+  });
+});
+
+// B-1 of Abnahme 014 ① (Spec 015 ②, plan ② D-11): the native control of every field Ero carries
+// no constraint the platform judges — no required, no pattern —, so the browser shows no bubble
+// with its validationMessage; the validity is the Ero's (ElementInternals), required stays
+// aria-required and the mark.
+describe("Web Component Celo: no native constraint in a field (B-1, Spec 015 ②)", () => {
+  it.each(["kampo", "tekstareo", "elektilo", "kompletigilo", "markobutono", "alsxutilo"])(
+    "fm-%s sets no required and no pattern on its native control, but aria-required and the validity of the Ero",
+    (ero) => {
+      const element = files[`eroj/src/generated/fm-${ero}.ts`] ?? "";
+      expect(element).not.toMatch(/\.required = required;/);
+      expect(element).not.toContain('setAttribute("pattern"');
+      expect(element).toContain('setAttribute("aria-required", "true")');
+      expect(element).toContain("this.#internals.setValidity(");
+    },
+  );
 });

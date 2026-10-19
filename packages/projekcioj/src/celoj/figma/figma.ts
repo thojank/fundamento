@@ -51,6 +51,8 @@ import {
   VITRINO_SURFACE,
   VITRINO_TABLE,
   VITRINO_TRIGGER_TEXT,
+  VITRINO_UPLOAD_FILES,
+  VITRINO_UPLOAD_HELP,
 } from "../vitrino/datumoj.js";
 import { signOf } from "../web-component/element-template.js";
 import {
@@ -304,6 +306,97 @@ function composedOf(
 }
 
 /**
+ * The composed butono of an upload (Spec 015 ②, plan ② D-06): the button that chooses is a
+ * butono of emphasis medium, every remove one of emphasis low and size small; the stand-ins take
+ * the butono's roles read from its Skemo at rest, as the confirming action of a dialog does.
+ */
+export const UPLOAD_COMPOSED: readonly {
+  node: string;
+  ero: string;
+  props: Record<string, string>;
+  parts: readonly string[];
+}[] = [
+  {
+    node: "choose",
+    ero: "butono",
+    props: { emphasis: "medium", intent: "neutral", size: "medium", [STATE_KEY]: "rest" },
+    parts: [
+      "surface.fill",
+      "border.color",
+      "border.width",
+      "label.color",
+      "label.typography",
+      "icon.color",
+      "icon.size",
+      "box.height",
+      "box.inline-padding",
+      "box.gap",
+      "box.radius",
+    ],
+  },
+  {
+    node: "remove",
+    ero: "butono",
+    props: { emphasis: "low", intent: "neutral", size: "small", [STATE_KEY]: "rest" },
+    parts: ["surface.fill", "icon.color", "icon.size", "box.radius"],
+  },
+];
+
+/** The looks of an upload's stand-ins (Spec 015 ②), like composedOf for a dialog's action. */
+function uploadComposedOf(
+  eroj: readonly LoadedEro[],
+  resolutions: ReturnType<typeof allResolutions>,
+  base: Readonly<Record<string, { value: unknown }>>,
+): FigmaComponentSet["composed"] {
+  const composed: NonNullable<FigmaComponentSet["composed"]> = {};
+  for (const { node, ero, props, parts } of UPLOAD_COMPOSED) {
+    const entry = eroj.find((candidate) => candidate.ero.name === ero);
+    if (entry === undefined) continue;
+    const bindings: Record<string, string> = {};
+    const paints: Record<string, FigmaPaint> = {};
+    for (const key of parts) {
+      const [part = "", property = ""] = key.split(".");
+      const bound = boundToken(entry.skemo, part, property, props);
+      if (bound === undefined || isBindingKeyword(bound.token)) continue;
+      bindings[key] = variableName(bound.token);
+      if (PART_PROPERTY_TYPES[property as keyof typeof PART_PROPERTY_TYPES] !== "color") continue;
+      const paint = paintOf(bound.token, resolutions, base);
+      if (paint !== undefined) paints[key] = paint;
+    }
+    if (Object.keys(bindings).length === 0) continue;
+    composed[node] = {
+      ero,
+      props: { ...props },
+      bindings,
+      ...(Object.keys(paints).length === 0 ? {} : { paints }),
+    };
+  }
+  return Object.keys(composed).length === 0 ? undefined : composed;
+}
+
+/**
+ * The size of a file as the person reads it (Spec 015 ②): decimal units in German, as the web's
+ * element writes them with Intl in the document's language — one rule for both pictures.
+ */
+export function fileSizeText(bytes: number, lingvo = "de"): string {
+  const [unit, factor] =
+    bytes >= 1_000_000
+      ? ["megabyte", 1_000_000]
+      : bytes >= 1_000
+        ? ["kilobyte", 1_000]
+        : ["byte", 1];
+  return new Intl.NumberFormat(lingvo, {
+    style: "unit",
+    unit,
+    unitDisplay: "short",
+    maximumFractionDigits: 1,
+  }).format(bytes / Number(factor));
+}
+
+/** The name of the example frame beside an upload's set (Spec 015 ②: „mit zwei Dateien"). */
+export const UPLOAD_EXAMPLE = "mit zwei Dateien";
+
+/**
  * The help under the reason field of a dialog (Spec 014 ② O-5): a stand-in for the help of the
  * composed tekstareo — its colour and role at rest in the field's default size.
  */
@@ -524,7 +617,8 @@ export type FigmaStructure =
   | "menu"
   | "disclosure"
   | "pagination"
-  | "breadcrumb";
+  | "breadcrumb"
+  | "upload";
 
 /**
  * A radio group (Spec 010 ③, D-07) is a choice: the label (the question) above a column of
@@ -550,58 +644,62 @@ export type FigmaStructure =
  * active one, and the panel with its word below.
  */
 export const structureOf = (role: string, parts: readonly string[] = []): FigmaStructure =>
-  role === "textbox" || role === "combobox"
-    ? "field"
-    : role === "switch" || role === "checkbox"
-      ? "toggle"
-      : role === "radiogroup"
-        ? "choice"
-        : role === "dialog"
-          ? parts.length > 0 && !parts.includes("backdrop")
-            ? "popover"
-            : "dialog"
-          : role === "generic"
-            ? "badge"
-            : role === "status"
-              ? parts.includes("indicator")
-                ? "state"
-                : "notice"
-              : role === "meter"
-                ? "meter"
-                : role === "table"
-                  ? "table"
-                  : role === "list"
-                    ? "list"
-                    : role === "navigation"
-                      ? // Spec 015 ① (plan ① D-05): a navigation with an ellipsis part is a
-                        // pagination, with a separator part a breadcrumb.
-                        parts.includes("ellipsis")
-                        ? "pagination"
-                        : parts.includes("separator")
-                          ? "breadcrumb"
-                          : "nav"
-                      : role === "tablist"
-                        ? "tabs"
-                        : // Spec 014 ② (plan ② D-08): an icon (role img) is the glyph of every
-                          // Aspekto in a box; a separator (role separator) a line.
-                          role === "img"
-                          ? "icon"
-                          : role === "separator"
-                            ? "separator"
-                            : // Spec 014 ③ (plan ③ D-05): a heading and a paragraph are static
-                              // text, drawn as a badge is — the text in the role of the variant.
-                              role === "heading" || role === "paragraph"
-                              ? "badge"
-                              : // Spec 014 ④ (plan ④ D-06): the overlays — a tooltip, a menu, and
-                                // a popover (a dialog without a backdrop: non-modal, with a trigger).
-                                role === "tooltip"
-                                ? "tooltip"
-                                : role === "menu"
-                                  ? "menu"
-                                  : // Spec 014 ⑤ (plan ⑤ D-04): a disclosure (role group).
-                                    role === "group"
-                                    ? "disclosure"
-                                    : "control";
+  // Spec 015 ② (plan ② D-06): the platform's file input is heard as a button; with a dropzone
+  // part it is an upload — label, the dropzone with the button and its hint, help, error.
+  role === "button" && parts.includes("dropzone")
+    ? "upload"
+    : role === "textbox" || role === "combobox"
+      ? "field"
+      : role === "switch" || role === "checkbox"
+        ? "toggle"
+        : role === "radiogroup"
+          ? "choice"
+          : role === "dialog"
+            ? parts.length > 0 && !parts.includes("backdrop")
+              ? "popover"
+              : "dialog"
+            : role === "generic"
+              ? "badge"
+              : role === "status"
+                ? parts.includes("indicator")
+                  ? "state"
+                  : "notice"
+                : role === "meter"
+                  ? "meter"
+                  : role === "table"
+                    ? "table"
+                    : role === "list"
+                      ? "list"
+                      : role === "navigation"
+                        ? // Spec 015 ① (plan ① D-05): a navigation with an ellipsis part is a
+                          // pagination, with a separator part a breadcrumb.
+                          parts.includes("ellipsis")
+                          ? "pagination"
+                          : parts.includes("separator")
+                            ? "breadcrumb"
+                            : "nav"
+                        : role === "tablist"
+                          ? "tabs"
+                          : // Spec 014 ② (plan ② D-08): an icon (role img) is the glyph of every
+                            // Aspekto in a box; a separator (role separator) a line.
+                            role === "img"
+                            ? "icon"
+                            : role === "separator"
+                              ? "separator"
+                              : // Spec 014 ③ (plan ③ D-05): a heading and a paragraph are static
+                                // text, drawn as a badge is — the text in the role of the variant.
+                                role === "heading" || role === "paragraph"
+                                ? "badge"
+                                : // Spec 014 ④ (plan ④ D-06): the overlays — a tooltip, a menu, and
+                                  // a popover (a dialog without a backdrop: non-modal, with a trigger).
+                                  role === "tooltip"
+                                  ? "tooltip"
+                                  : role === "menu"
+                                    ? "menu"
+                                    : // Spec 014 ⑤ (plan ⑤ D-04): a disclosure (role group).
+                                      role === "group"
+                                      ? "disclosure"
+                                      : "control";
 
 /**
  * The neutral word every label template shows, per a11y role (M-3; Maintainer, F14, 2026-10-13,
@@ -671,6 +769,8 @@ const STRUCTURE_LABEL_DEFAULTS: Readonly<Partial<Record<FigmaStructure, string>>
   // Spec 014 ④ (plan ④ D-06): a popover shares the dialog's role; its label property writes its
   // heading, so the word is the heading's. Proposal for the maintainer to confirm.
   popover: "Überschrift",
+  // Spec 015 ② (plan ② D-06): an upload's label names what is asked for, like a field's.
+  upload: "Beschriftung",
 };
 
 /** The word a role without its own entry shows: the button's, as every set did before M-3. */
@@ -806,7 +906,12 @@ export interface FigmaComponentSet {
     name: string;
     variant: Record<string, string>;
     padding: number;
-    pages: { texts: string[]; selected: number };
+    pages?: { texts: string[]; selected: number };
+    /**
+     * The chosen files an upload's example lists (Spec 015 ②, the spec's „mit zwei Dateien"):
+     * the Vitrino's two files, each with its size in the person's units, a remove butono beside.
+     */
+    files?: { name: string; size: string }[];
   }[];
   example?: {
     name: string;
@@ -1689,6 +1794,8 @@ function iconsOf(
     const intent = combination.intent;
     return intent === undefined ? undefined : { icon: intent };
   }
+  // An upload (Spec 015 ②): the composed button's icon upload; every remove the icon close.
+  if (structure === "upload") return { "icon-start": "upload", remove: "close" };
   // A pagination (Spec 015 ①): the arrows back and forth; a breadcrumb: the chevron between two.
   if (structure === "pagination") return { prev: "chevron-left", next: "chevron-right" };
   if (structure === "breadcrumb") return { separator: "chevron-right" };
@@ -2177,7 +2284,20 @@ function componentSetOf(
             pages: { texts, selected: texts.indexOf(String(page)) },
           };
         })
-      : undefined;
+      : // Spec 015 ② (plan ② D-06): the upload with the Vitrino's two files beside its set.
+        structure === "upload"
+        ? [
+            {
+              name: `${entry.ero.name} – ${UPLOAD_EXAMPLE}`,
+              variant: defaults,
+              padding: parityPx(base[SET_GAP]?.value),
+              files: VITRINO_UPLOAD_FILES.map((file) => ({
+                name: file.name,
+                size: fileSizeText(file.size),
+              })),
+            },
+          ]
+        : undefined;
   const example =
     structure === "dialog" && backdrop !== undefined && backdropPaint !== undefined
       ? {
@@ -2271,7 +2391,12 @@ function componentSetOf(
       : undefined;
   // The confirming action of a dialog looks like the butono it composes (Abnahme Spec 011 ②,
   // F-5): its roles read from the butono's Skemo in the same Modelo.
-  const composed = structure === "dialog" ? composedOf(eroj, resolutions, base) : undefined;
+  const composed =
+    structure === "dialog"
+      ? composedOf(eroj, resolutions, base)
+      : structure === "upload"
+        ? uploadComposedOf(eroj, resolutions, base)
+        : undefined;
   // The overlays (Spec 014 ④, plan ④ D-06): a popover shows the words of its trigger stand-in and
   // its content beside the heading (the label property); a menu its three entries (the
   // Vitrino's: edit, duplicate disabled, delete danger) and the word of its trigger, the Modelo's
@@ -2299,6 +2424,18 @@ function componentSetOf(
       ? { texts: toggleTexts }
       : {}),
     ...(structure === "dialog" ? { texts: dialogTexts } : {}),
+    // Spec 015 ② (plan ② D-06): the help names kinds and size (the Vitrino's), the error the
+    // Vitrino's word; the button and the hint in the Modelo's words (a11y.texts).
+    ...(structure === "upload"
+      ? {
+          texts: {
+            help: VITRINO_UPLOAD_HELP,
+            error: VITRINO_SLOT_TEXTS.error ?? "",
+            choose: skemo.a11y.texts?.["choose-name"]?.de ?? "",
+            "drop-hint": skemo.a11y.texts?.["drop-hint-name"]?.de ?? "",
+          },
+        }
+      : {}),
     ...(structure === "tabs" ? { texts: { ...TABS_TEXTS } } : {}),
     ...(structure === "popover"
       ? { texts: { trigger: VITRINO_TRIGGER_TEXT, content: VITRINO_CONTENT_TEXT } }
