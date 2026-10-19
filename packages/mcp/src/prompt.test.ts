@@ -29,6 +29,7 @@ describe("prompt gvidanto", () => {
       "get_ero",
       "suggest_ero",
       "check_usage",
+      "preview_agordo",
     ]) {
       expect(text, tool).toContain(`\`${tool}\``);
     }

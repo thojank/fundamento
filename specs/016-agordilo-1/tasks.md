@@ -66,4 +66,27 @@
 
 ## ③ Gvidanto und Doku
 
-Folgt in PR ③.
+**Branch:** `261019-spec-016-gvidanto-197e67` (gestapelt auf ②; nach dem Merge von #83 auf `main` `f2aa3e2` rebased – die Hashes unten sind die nach dem Rebase) · Aufgaben ③ zählen ab T1801.
+
+### A – Rot zuerst
+- [x] **T1801 Tests** MCP: `e2e/s016-agordo.test.ts` (Beispiel-Dialog #F5C400: Verstoß mit Wert, dunklere Leitfarbe, Kialo; gleich dem Raporto; Paletten kurz; Vorschlag angewandt ohne Verstoß; Fehler an der Agordo), `contracts.test.ts`, `prompt.test.ts`; Modelo: `ontologio.test.ts` (Agordo, Raporto), Doku-Test ③ und Pin 19 Werkzeuge; Projekcioj: `figma-provo.test.ts`. Rot in `01f619b`.
+
+### B – Grün
+- [x] **T1802 `preview_agordo`** Schema (Ein-/Ausgabe), `TOOL_NAMES`, Werkzeug in `tools.ts`, Abhängigkeit `@fundamento/agordilo`, Prompt Regel 15 (D-01, D-02, D-04).
+- [x] **T1803 Ontologio** Agordo und Raporto im Schema `laboro`.
+- [x] **T1804 Figma mit provo** `fundamento.tri.config.json` (D-03).
+- [x] **T1805 Doku** README („Eine Marke in fünf Minuten“, MCP), Vojmapo (Phase 7, Reihenfolge, alter Stand), plan ③ mit Messanleitung, tasks ③.
+
+### C – Abschluss
+- [x] **T1806 CI** grün (Lauf 39312697601 vor dem Rebase, derselbe Baum); Hash des grünen Stands `dc6ce1d` in der Zeile der Messungen.
+
+### Messungen
+
+| Was | Wert |
+|---|---|
+| Commits ③ | rot `01f619b`, grün `dc6ce1d` (Hash des grünen Stands; vor dem Rebase `5b2589c` / `d7303a9`); dieser Eintrag im Folgecommit |
+| Tests lokal | Agordilo 42, MCP 322 (davon 7 `preview_agordo`), CLI 72, Modelo 3 595, Projekcioj 730 grün; `pnpm lint` ohne neue Befunde; `check:vortaro-lint|parity|regularo|mankoj|alirebleco|clean-room|ikonaro` ohne Fehler; `pnpm perf` grün; ein Nachlese-3-Test zählte die Begriffe von `laboro` (9 → 11) |
+| Dialog | `preview_agordo` #F5C400: Leitfarbe 1,64:1 auf Weiß; `palette-aligned` an `accent.900` (0,021 > 0,02), Vorschlag `#665000`, Kialo aus `reguloj.json`; mit `#665000` kein Verstoß |
+| CI | Lauf 39312697601 (`d7303a9`, alle acht Jobs grün, Wanduhr 8:54): `checks` 1:32, `unit` 3:43, `projekcioj` 3:30 / 2:28, `eroj` 2:55 / 1:52, `alirebleco-eroj` 4:50, `rendered-checks` 8:51 |
+| Rebase auf `main` nach #83 (`f2aa3e2`, 2026-10-19) | ohne Konflikt; der Baum ist gleich dem in Lauf 39312697601 geprüften (`git diff` leer); CI nach dem Rebase in der Zeile danach |
+| CI nach dem Rebase | Lauf 39317252650 (`d3f916c`, alle acht Jobs grün, Wanduhr 5:41): `checks` 1:28, `unit` 4:21, `projekcioj` 2:51 / 3:34, `eroj` 2:15 / 2:02, `alirebleco-eroj` 5:21, `rendered-checks` 5:39 |

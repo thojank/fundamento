@@ -26,6 +26,7 @@
     "lint": "tsc -p tsconfig.json --noEmit && biome check ."
   },
   "dependencies": {
+    "@fundamento/agordilo": "workspace:*",
     "@fundamento/modelo": "workspace:*",
     "@modelcontextprotocol/node": "2.0.0",
     "@modelcontextprotocol/server": "2.0.0"

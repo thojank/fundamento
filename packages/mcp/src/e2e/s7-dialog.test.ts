@@ -66,6 +66,8 @@ describe("S7 with ekzemplo (AK-06)", () => {
       check_usage: {
         instances: [{ ero: "butono", props: { emphasis: "high" }, label: "Speichern" }],
       },
+      // Spec 016 ③: the smallest Agordo, komuna's own lead colour.
+      preview_agordo: { agordo: { name: "provo", leitfarbe: "#375479" } },
     };
     for (const name of TOOL_NAMES) {
       const result = await call(client, name, inputs[name] ?? {});

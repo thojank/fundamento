@@ -1,0 +1,342 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ciferecigo.com/fundamento/schema/mcp/preview_agordo.output.json",
+  "title": "preview_agordo output",
+  "description": "The report of the Agordilo for one Agordo (raporto.json of `fm agordilo derive`, without the pair list), the lead colour's own contrast against white and black, and the light steps of the six palettes. writes is always false.",
+  "type": "object",
+  "properties": {
+    "aspekto": {
+      "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+    },
+    "exportable": {
+      "type": "boolean"
+    },
+    "writes": {
+      "const": false
+    },
+    "leitfarbe": {
+      "type": "object",
+      "description": "The lead colour as given, in sRGB, and its WCAG 2.x contrast against white (neutral.0) and black (neutral.1000) — the lead colour as a surface behind white or black text.",
+      "properties": {
+        "input": {
+          "type": "string",
+          "minLength": 1
+        },
+        "hex": {
+          "type": "string",
+          "pattern": "^#[0-9a-f]{6}$"
+        },
+        "onWhite": {
+          "type": "number"
+        },
+        "onBlack": {
+          "type": "number"
+        }
+      },
+      "required": ["input", "hex", "onWhite", "onBlack"],
+      "additionalProperties": false
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "exportable": {
+          "type": "boolean"
+        },
+        "pairs": {
+          "type": "object",
+          "properties": {
+            "measured": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "passed": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "failed": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": ["measured", "passed", "failed"],
+          "additionalProperties": false
+        },
+        "violations": {
+          "type": "object",
+          "properties": {
+            "fixed": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "adjustable": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "covered": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": ["fixed", "adjustable", "covered"],
+          "additionalProperties": false
+        },
+        "hints": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": ["exportable", "pairs", "violations", "hints"],
+      "additionalProperties": false
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "rule": {
+            "type": "string",
+            "minLength": 1
+          },
+          "fixed": {
+            "type": "boolean"
+          },
+          "passed": {
+            "type": "boolean"
+          },
+          "violations": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": ["rule", "fixed", "passed", "violations"],
+        "additionalProperties": false
+      }
+    },
+    "violations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "rule": {
+            "type": "string",
+            "minLength": 1
+          },
+          "regulo": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/ReguloId"
+              },
+              "name": {
+                "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+              },
+              "kialo": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": ["id", "name", "kialo"],
+            "additionalProperties": false
+          },
+          "fixed": {
+            "type": "boolean"
+          },
+          "subject": {
+            "type": "string",
+            "minLength": 1
+          },
+          "combination": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string",
+            "minLength": 1
+          },
+          "cause": {
+            "type": "string",
+            "minLength": 1
+          },
+          "suggestion": {
+            "type": "string",
+            "minLength": 1
+          },
+          "apply": {
+            "type": "object",
+            "description": "The suggestion as a change of the Agordo, where it is one: apply it and call preview_agordo again.",
+            "properties": {
+              "leitfarbe": {
+                "type": "string"
+              },
+              "neutral": {
+                "type": "object",
+                "properties": {
+                  "toenung": {
+                    "type": "number"
+                  }
+                },
+                "required": ["toenung"],
+                "additionalProperties": false
+              },
+              "regler": {
+                "type": "object",
+                "properties": {
+                  "helligkeit": {
+                    "type": "number"
+                  },
+                  "kontrast": {
+                    "type": "number"
+                  },
+                  "saettigung": {
+                    "type": "number"
+                  }
+                },
+                "additionalProperties": false
+              },
+              "ziele": {
+                "type": "object",
+                "additionalProperties": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "hell": {
+                          "type": "number"
+                        },
+                        "dunkel": {
+                          "type": "number"
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  ]
+                }
+              }
+            },
+            "additionalProperties": false
+          },
+          "jugxo": {
+            "type": "string"
+          }
+        },
+        "required": ["rule", "fixed", "subject", "message", "cause", "suggestion"],
+        "additionalProperties": false
+      }
+    },
+    "jugxoj": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "regulo": {
+            "type": "string"
+          },
+          "kialo": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "covers": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": ["id", "regulo", "kialo", "date", "name", "covers"],
+        "additionalProperties": false
+      }
+    },
+    "palettes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "palette": {
+            "enum": ["neutral", "accent", "success", "warning", "danger", "info"]
+          },
+          "source": {
+            "type": "object",
+            "properties": {
+              "hue": {
+                "type": "number"
+              },
+              "chroma": {
+                "type": "number"
+              },
+              "origin": {
+                "enum": ["leitfarbe", "zusatzfarbe", "default", "toenung"]
+              }
+            },
+            "required": ["hue", "chroma", "origin"],
+            "additionalProperties": false
+          },
+          "steps": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "step": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "hex": {
+                  "type": "string",
+                  "pattern": "^#[0-9a-f]{6}$"
+                },
+                "target": {
+                  "type": "number"
+                },
+                "achieved": {
+                  "type": "number"
+                },
+                "onTarget": {
+                  "type": "boolean"
+                }
+              },
+              "required": ["step", "hex", "target", "achieved", "onTarget"],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": ["palette", "source", "steps"],
+        "additionalProperties": false
+      }
+    },
+    "hints": {
+      "type": "object",
+      "properties": {
+        "apca": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "other": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": ["apca", "other"],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "aspekto",
+    "exportable",
+    "writes",
+    "leitfarbe",
+    "summary",
+    "checks",
+    "violations",
+    "jugxoj",
+    "palettes",
+    "hints"
+  ],
+  "additionalProperties": false
+}

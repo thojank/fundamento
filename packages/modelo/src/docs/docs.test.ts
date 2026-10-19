@@ -463,11 +463,12 @@ describe("Spec 003 documentation (F4: the npm org)", () => {
 describe("Spec 003 documentation: the Ero tools (T025)", () => {
   const mcp = section(read("README.md"), "MCP server");
 
-  it("the README names the four Ero tools and counts eighteen", () => {
+  // Spec 016 ③ added preview_agordo: nineteen tools since.
+  it("the README names the four Ero tools and counts nineteen", () => {
     for (const tool of ["list_eroj", "get_ero", "suggest_ero", "check_usage"]) {
       expect(mcp, tool).toContain(`\`${tool}\``);
     }
-    expect(mcp).toContain("18 tools");
+    expect(mcp).toContain("19 tools");
   });
 
   it("the README points at the Phase-3 tool contract", () => {
@@ -2028,6 +2029,85 @@ describe("Spec 016 ② documentation (specs/016-agordilo-1)", () => {
     const readme = read("README.md");
     expect(readme).toContain("Werkstatt");
     expect(readme).toContain("#modus=werkstatt");
+  });
+});
+
+// Spec 016 ③ (Briefing 2026-10-19): plan ③ carries preview_agordo, the Ontologio, the README
+// section, Figma with provo and the measuring guide for the acceptance 1–6 with full paths; tasks ③
+// start at T1801 with the red hash; the README has "Eine Marke in fünf Minuten" and names
+// preview_agordo; the Vojmapo marks stage 1 of the Werkstatt done and keeps the old order.
+describe("Spec 016 ③ documentation (specs/016-agordilo-1)", () => {
+  it("plan ③ carries decisions, deviations, findings, open points and the measuring guide; tasks ③ the red hash", () => {
+    const plan = read("specs/016-agordilo-1/plan.md");
+    const third = plan.slice(plan.indexOf("## ③ Gvidanto und Doku"));
+    expect(third).not.toContain("Folgt in PR ③.");
+    for (const heading of [
+      "### Zusammenfassung",
+      "### Entwurfsentscheidungen",
+      "#### D-01",
+      "### Abweichungen von der Spec",
+      "### Befunde / Mankoj",
+      "### Offen (für den Maintainer)",
+      "### Messanleitung (Abnahme 1–6)",
+      "### In Figma zu messen",
+    ]) {
+      expect(third, heading).toContain(heading);
+    }
+    for (const word of [
+      "preview_agordo",
+      "#F5C400",
+      "fundamento.tri.config.json",
+      "pnpm fm projekcioj build --config packages/modelo/test/fixtures/valid/aspekto-provo/fundamento.tri.config.json",
+      "pnpm fm agordilo derive",
+      "pnpm fm modelo validate --aspekto",
+      "pnpm check:alirebleco",
+      "pnpm check:parity",
+      "#modus=werkstatt",
+      "agordo=",
+      "Agordo",
+      "Raporto",
+    ]) {
+      expect(third, word).toContain(word);
+    }
+    const tasks = read("specs/016-agordilo-1/tasks.md");
+    const tasksThird = tasks.slice(tasks.indexOf("## ③ Gvidanto und Doku"));
+    expect(tasksThird).not.toContain("Folgt in PR ③.");
+    expect(tasksThird).toContain("**T1801");
+    expect(tasksThird).toContain("### Messungen");
+    expect(tasksThird).toMatch(/rot `[0-9a-f]{7}`/);
+  });
+
+  it("the README has the section Eine Marke in fünf Minuten with every path and command, and names preview_agordo", () => {
+    const readme = read("README.md");
+    const five = section(readme, "Eine Marke in fünf Minuten");
+    expect(five.length).toBeGreaterThan(400);
+    for (const word of [
+      "pnpm install",
+      "pnpm build",
+      "pnpm fm projekcioj build --out .fundamento/projekcioj",
+      ".fundamento/projekcioj/vitrino/index.html#modus=werkstatt",
+      "Agordo herunterladen",
+      "pnpm fm agordilo derive",
+      "--out",
+      "pnpm fm agordilo check",
+      "fundamento.config.json",
+      "pnpm fm modelo validate --config",
+      "raporto.md",
+    ]) {
+      expect(five, word).toContain(word);
+    }
+    expect(section(readme, "MCP server")).toContain("`preview_agordo`");
+  });
+
+  it("the Vojmapo marks Werkstatt stage 1 done, gives the new order and keeps the old one", () => {
+    const vojmapo = read("docs/vojmapo.md");
+    const phase7 = vojmapo.split("\n").find((line) => line.startsWith("| 7 |")) ?? "";
+    expect(phase7).toContain("Werkstatt Stufe 1");
+    expect(phase7).toContain("[016](../specs/016-agordilo-1/)");
+    expect(phase7).toContain("Stand vorher");
+    expect(vojmapo).toContain("## Reihenfolge (Stand 2026-10-19)");
+    expect(vojmapo).toContain("### Reihenfolge vorher (Stand 2026-10-17, Konservierung)");
+    for (const word of ["Spec 019", "8b", "Sxablonoj"]) expect(vojmapo, word).toContain(word);
   });
 });
 

@@ -169,10 +169,12 @@ describe("the scheme laboro (Nachlese 3 W6)", () => {
   const concepts = (ontologio as unknown as { concepts: Concept[] }).concepts;
   const laboro = concepts.filter((concept) => concept.inScheme === "laboro");
 
-  it("carries the scheme laboro with the nine terms, each with eo/en/de labels and a definition", () => {
+  it("carries the scheme laboro with its eleven terms, each with eo/en/de labels and a definition", () => {
     const schemes = (ontologio as unknown as { schemes: { id: string }[] }).schemes;
     expect(schemes.map((scheme) => scheme.id)).toContain("laboro");
+    // Spec 016 ③ (O-1 confirmed by the maintainer, 2026-10-19): Agordo and Raporto.
     expect(laboro.map((concept) => concept.term).sort()).toEqual([
+      "Agordo",
       "Alirebleco",
       "Ekzemplo",
       "Etoso",
@@ -180,6 +182,7 @@ describe("the scheme laboro (Nachlese 3 W6)", () => {
       "Kialo",
       "Komparo",
       "Komuna",
+      "Raporto",
       "Vitrino",
       "Vojmapo",
     ]);
@@ -194,6 +197,17 @@ describe("the scheme laboro (Nachlese 3 W6)", () => {
     expect(JSON.stringify(etoso)).toMatch(/Kandidat|candidate/);
     const komuna = laboro.find((concept) => concept.term === "Komuna");
     expect(komuna?.prefLabel).toMatchObject({ eo: "komuna" });
+  });
+
+  it("Agordo and Raporto relate to the Agordilo and the Aspekto (Spec 016 ③)", () => {
+    const agordo = laboro.find((concept) => concept.term === "Agordo");
+    const raporto = laboro.find((concept) => concept.term === "Raporto");
+    expect(agordo?.prefLabel).toMatchObject({ eo: "Agordo" });
+    expect(raporto?.prefLabel).toMatchObject({ eo: "Raporto" });
+    expect(agordo?.related).toEqual(expect.arrayContaining(["#Agordilo", "#Aspekto"]));
+    expect(raporto?.related).toEqual(expect.arrayContaining(["#Agordo", "#Regulo"]));
+    expect((agordo?.altLabel as { de?: string[] })?.de).toContain("Markenrezept");
+    expect((raporto?.altLabel as { de?: string[] })?.de).toContain("Prüfbericht");
   });
 
   it("the kampo names Passwortfeld, Zahlenfeld and Datumsfeld as alternative labels (Spec 011 ① B-4)", () => {
