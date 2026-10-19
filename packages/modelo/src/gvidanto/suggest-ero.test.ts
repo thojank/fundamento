@@ -558,6 +558,32 @@ describe("suggest_ero: Nachlese 5 – the head word wins (N5-2), compounds (O-17
     expect(suggest("Volltreffer", "de").suggestion?.ero).toBe("plenstato");
   });
 
+  // Nachlese 6 N6-4: the false friends of the compounds, checked as pins. They hit through the
+  // plural keyword "karten" (six letters, the compound rule of Nachlese 5); the singular stays
+  // unknown. No Spec dialog names one of them, so no keyword gets an exclusion (Spec 019 ④).
+  it("N6-4: the plurals of -karten compounds hit karto, their singulars nothing – pinned", () => {
+    const unknown = (text: string) => suggestEro(modelo, { goal: text, lingvo: "de" }).ok === false;
+    for (const text of [
+      "Landkarten",
+      "Eintrittskarten",
+      "Speisekarten",
+      "Fahrkarten",
+      "Postkarten",
+      "Visitenkarten",
+      "Kreditkarten",
+      "Weltkarten",
+      "Landkarten mit Filialen",
+      "Eintrittskarten für das Konzert",
+    ]) {
+      expect(suggest(text, "de").suggestion?.ero, text).toBe("karto");
+    }
+    for (const text of ["Landkarte", "Eintrittskarte", "Speisekarte", "Fahrkarte", "Postkarte"]) {
+      expect(unknown(text), text).toBe(true);
+    }
+    // The cards of a screen keep their answer.
+    expect(suggest("Projektkarten mit Bild", "de").suggestion?.ero).toBe("karto");
+  });
+
   it("O-17: only the second pass reads compounds – a text that hits as written keeps its answer", () => {
     const grid = suggest("Projektkarten im Raster", "de");
     expect(grid.suggestion).toBeNull();

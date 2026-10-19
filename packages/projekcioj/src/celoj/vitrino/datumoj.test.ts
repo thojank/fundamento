@@ -12,6 +12,7 @@ import { VITRINO_FILE } from "./vitrino.js";
 
 const dirs: string[] = [];
 let html = "";
+let full = "";
 let datumoj: VitrinoDatumoj;
 
 beforeAll(async () => {
@@ -22,7 +23,8 @@ beforeAll(async () => {
   // What the Vitrino shows, without the Werkstatt (Spec 016 ②): its module carries the Agordilo
   // as code and its island the structure as data — neither is shown text; vitrino.test.ts and
   // check:vitrino test them.
-  html = readFileSync(join(out, VITRINO_FILE), "utf8")
+  full = readFileSync(join(out, VITRINO_FILE), "utf8");
+  html = full
     .replace(/<script type="module" id="fm-vitrino-werkstatt-skripto">[\s\S]*?<\/script>/, "")
     .replace(/<script type="application\/json" id="fm-werkstatt">[\s\S]*?<\/script>/, "");
   const island = /<script type="application\/json" id="fm-vitrino">(.*?)<\/script>/s.exec(html);
@@ -115,10 +117,27 @@ describe("the sections of FR-06", () => {
     const rules = datumoj.regularo[key] ?? [];
     expect(rules.length).toBeGreaterThan(15);
     for (const rule of rules) {
-      expect(rule.kialo.length).toBeGreaterThan(20);
+      expect(datumoj.regulojKialoj[rule.regulo]?.length ?? 0).toBeGreaterThan(20);
       expect(typeof rule.pasis).toBe("boolean");
     }
     expect(rules.every((rule) => rule.pasis)).toBe(true);
+  });
+
+  // Nachlese 6 N6-3: the kialo of a Regulo stood in every one of the 72 combinations (957 KB of
+  // 5.6 MB); it is carried once, by name, and nothing is missing.
+  it("carries the kialo of every Regulo once, for every Regulo of every combination (N6-3)", () => {
+    const island =
+      /<script type="application\/json" id="fm-vitrino">(.*?)<\/script>/s.exec(full)?.[1] ?? "";
+    for (const [combination, rules] of Object.entries(datumoj.regularo)) {
+      for (const rule of rules) {
+        expect("kialo" in rule, `${combination} ${rule.regulo}`).toBe(false);
+        expect(datumoj.regulojKialoj[rule.regulo], rule.regulo).toBeDefined();
+      }
+    }
+    for (const kialo of Object.values(datumoj.regulojKialoj)) {
+      const text = JSON.stringify(kialo).slice(1, -1).replaceAll("</", "<\\/");
+      expect(island.split(text).length - 1, kialo.slice(0, 40)).toBe(1);
+    }
   });
 
   it("carries the design goals of the brand with target, measurement and result", () => {
@@ -797,5 +816,69 @@ describe("the Vitrino shows the avataro (Spec 015 ③)", () => {
     expect(grid).not.toContain("http://");
     expect(datumoj.eroj.ikono ?? "").toContain("das Ikonaro je Größe");
     expect(html).toContain("Größe aus dem Inhalt, Initialen bricht nie um.");
+  });
+});
+
+// Nachlese 6 N6-1: the kampo shows each kind in a row of its own — e-mail, URL, a date with its
+// bounds, a number, a password — each with an example value of that kind.
+describe("the kampo per kind (Nachlese 6 N6-1)", () => {
+  const EXAMPLES: Record<string, RegExp> = {
+    email: /value="[^"@]+@[^"]+"/,
+    url: /value="https:\/\/[^"]+"/,
+    date: /value="\d{4}-\d{2}-\d{2}"/,
+    number: /value="\d+"/,
+    password: /value="[^"]+"/,
+  };
+
+  it.each(Object.keys(EXAMPLES))(
+    "has one row kind=%s with an example value in every column",
+    (kind) => {
+      const markup = datumoj.eroj.kampo ?? "";
+      expect(markup.split(`<th scope="row">kind=${kind}</th>`).length - 1).toBe(1);
+      const row =
+        new RegExp(`<tr><th scope="row">kind=${kind}</th>(.*?)</tr>`).exec(markup)?.[1] ?? "";
+      const cells = row.match(/<fm-kampo[^>]*>/g) ?? [];
+      expect(cells.length).toBeGreaterThan(1);
+      for (const cell of cells) {
+        expect(cell).toContain(` kind="${kind}"`);
+        expect(cell).toMatch(EXAMPLES[kind] ?? /never/);
+      }
+    },
+  );
+
+  it("gives the date its bounds: min before the value, max after it", () => {
+    const markup = datumoj.eroj.kampo ?? "";
+    const cell = /<fm-kampo[^>]* kind="date"[^>]*>/.exec(markup)?.[0] ?? "";
+    const at = (name: string) => new RegExp(` ${name}="([^"]+)"`).exec(cell)?.[1] ?? "";
+    expect(at("min") < at("value")).toBe(true);
+    expect(at("value") < at("max")).toBe(true);
+  });
+});
+
+// Nachlese 6 N6-3: the bundled Werkstatt carried the Modelo schema, the config schema, the
+// Ontologio and its schema a second time as data: URLs (Spec 016 ② B-3). The schemas come with the
+// island (provideModeloSchemas), the Ontologio is never read by the Werkstatt: only the Modelo's
+// package.json (its version, read at load time) stays inlined.
+describe("the bundled Werkstatt without the second copy of the schemas (Nachlese 6 N6-3)", () => {
+  it("inlines no file but the Modelo's package.json; the island still carries both schemas", () => {
+    const bundle =
+      /<script type="module" id="fm-vitrino-werkstatt-skripto">([\s\S]*?)<\/script>/.exec(
+        full,
+      )?.[1] ?? "";
+    expect(bundle.length).toBeGreaterThan(100_000);
+    const inlined = [...bundle.matchAll(/data:application\/json;base64,([A-Za-z0-9+/=]+)/g)].map(
+      (match) =>
+        JSON.parse(Buffer.from(match[1] ?? "", "base64").toString("utf8")) as Record<
+          string,
+          unknown
+        >,
+    );
+    expect(inlined.map((file) => file.name)).toEqual(["@fundamento/modelo"]);
+    const island =
+      /<script type="application\/json" id="fm-werkstatt">(.*?)<\/script>/s.exec(full)?.[1] ?? "{}";
+    const werkstatt = JSON.parse(island.replaceAll("<\\/", "</")) as {
+      schemas: Record<string, unknown>;
+    };
+    expect(Object.keys(werkstatt.schemas).sort()).toEqual(["config", "modelo"]);
   });
 });

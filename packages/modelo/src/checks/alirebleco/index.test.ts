@@ -1,5 +1,7 @@
 import { spawnSync } from "node:child_process";
-import { existsSync, readFileSync } from "node:fs";
+import { cpSync, existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import type { Modelo } from "../../contracts/modelo.js";
@@ -491,4 +493,55 @@ describe("KontrastParo with a backdrop (translucent background)", () => {
     expect(transparent.length).toBeGreaterThan(0);
     expect(transparent[0]?.message).toContain("the surface 'color.background.overlay'");
   });
+});
+
+// Nachlese 6 N6-2 (Spec 016 ③ B-1, O-2): check:alirebleco --aspekto <dir> measures a package that
+// is no known fixture — a brand's own, outside the repository — over the core and the reference;
+// its failures are errors (the caller asked for this package), the known fixtures are not measured.
+describe("alirebleco --aspekto <dir> (Nachlese 6 N6-2)", () => {
+  const provo = fixture("valid/aspekto-provo/aspekto-provo");
+
+  it("measures a package outside the repository in all its combinations", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "fm-fremda-"));
+    try {
+      const own = join(dir, "aspekto-provo");
+      cpSync(provo, own, { recursive: true });
+      const result = await check({ json: true, repoRoot, aspekto: own });
+      expect(result.errors).toEqual([]);
+      expect(result.ok).toBe(true);
+      expect(result.stats.aspektoj).toBe(2);
+      expect(result.stats["provo:combinations"]).toBe(72);
+      expect(result.stats["provo:evaluations"]).toBeGreaterThan(0);
+      expect(result.stats["provo:errors"]).toBe(0);
+      expect(result.summary).toContain("provo");
+      expect(result.summary).not.toContain("ekzemplo");
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  }, 120_000);
+
+  it("reports a failing pair of that package as an error, with the package named", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "fm-fremda-"));
+    try {
+      const own = join(dir, "aspekto-provo");
+      cpSync(provo, own, { recursive: true });
+      // A pale lead step: white text on the primary action no longer reaches 4.5:1.
+      const setFile = join(own, "sets/aspekto/provo.json");
+      const set = JSON.parse(readFileSync(setFile, "utf8"));
+      set.color.palette.accent["700"].$value = {
+        colorSpace: "srgb",
+        components: [0.8, 0.75, 0.95],
+        hex: "#ccbff2",
+      };
+      writeFileSync(setFile, `${JSON.stringify(set, null, 2)}\n`);
+      const result = await check({ json: true, repoRoot, aspekto: own });
+      expect(result.ok).toBe(false);
+      expect(result.stats["provo:errors"]).toBeGreaterThan(0);
+      expect(result.errors.length).toBe(result.stats["provo:errors"]);
+      expect(result.errors.every((issue) => issue.rule === "contrast-below-threshold")).toBe(true);
+      expect(result.errors.some((issue) => issue.message.includes("provo"))).toBe(true);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  }, 120_000);
 });
