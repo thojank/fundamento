@@ -281,7 +281,7 @@ Oder in der Vitrino selbst: `pnpm fm projekcioj build --out .fundamento/projekci
 
 ## ③ Gvidanto und Doku
 
-**Branch:** `261019-spec-016-gvidanto-197e67` (gestapelt auf ② `261019-spec-016-werkstatt-197e67`) · **Datum:** 2026-10-19 · **Stand:** zur Abnahme; nach dem Merge von ② auf `main` rebasen.
+**Branch:** `261019-spec-016-gvidanto-197e67` (gestapelt auf ② `261019-spec-016-werkstatt-197e67`; nach dem Merge von #83 auf `main` `f2aa3e2` rebased, ohne Konflikt) · **Datum:** 2026-10-19 · **Stand:** zur Abnahme.
 
 ### Zusammenfassung
 
