@@ -9,7 +9,13 @@
 
 import type { ValidationIssue } from "../contracts/issues.js";
 import type { Keywords, Modelo, UzoBoundary } from "../contracts/modelo.js";
-import { compoundsOf, goalOf, wordsOf } from "../eroj/usage.js";
+import {
+  COMPOUND_SUFFIX_MIN,
+  goalOf,
+  keywordHitOf,
+  keywordHits,
+  keywordTextOf,
+} from "../eroj/usage.js";
 import { type ReguloRef, reguloRef } from "./eroj.js";
 
 /** The props a goal asks for, typed as an EroInstance takes them (R-9): never "true" as a text. */
@@ -74,32 +80,61 @@ export function knownGoals(modelo: Modelo): string[] {
 }
 
 /**
- * A Uzo keyword of this many letters or more also hits a word that ends with it (D-06, N-1): in
- * German the head noun stands last, so "projektübersicht" hits "übersicht". Shorter keywords hit
- * whole words only, like the Skemo goals.
+ * A Uzo keyword of COMPOUND_SUFFIX_MIN letters or more also hits a word that ends with it (D-06,
+ * N-1): in German the head noun stands last, so "projektübersicht" hits "übersicht". Shorter
+ * keywords hit whole words only, like the Skemo goals. Since Nachlese 4 compared without hyphens
+ * (N-1), as `goalOf` does (`keywordHits`).
  */
-export const COMPOUND_SUFFIX_MIN = 6;
+export { COMPOUND_SUFFIX_MIN };
+
+/**
+ * What one pass of the Gvidanto compares (Nachlese 4 N-2): the language the input allows, and
+ * whether German endings count. The first pass compares as written; only where it finds nothing
+ * at all — no goal, no Uzo entry — a second pass takes the endings in (`suggestEro`).
+ */
+type Pass = { lingvo?: string; inflect: boolean };
+
+const AS_WRITTEN = false;
 
 /** The keyword of a Uzo entry that hits the text, with its language (D-06). */
 export function uzoKeywordHit(
   keywords: Keywords | undefined,
   text: string,
   lingvo?: string,
+  inflect = AS_WRITTEN,
 ): { keyword: string; lingvo: string } | undefined {
   if (keywords === undefined) return undefined;
-  const words = wordsOf(text);
+  const prepared = keywordTextOf(text);
   for (const [language, list] of Object.entries(keywords)) {
     if (lingvo !== undefined && language !== lingvo) continue;
     for (const keyword of list) {
-      const needle = keyword.normalize("NFC").toLowerCase();
-      const hit = words.some(
-        (word) =>
-          word === needle || (needle.length >= COMPOUND_SUFFIX_MIN && word.endsWith(needle)),
-      );
-      if (hit) return { keyword, lingvo: language };
+      if (keywordHits(keyword, language, prepared, { suffixOf: "words", inflect })) {
+        return { keyword, lingvo: language };
+      }
     }
   }
   return undefined;
+}
+
+/**
+ * How many keywords of one Uzo entry the text hits (Nachlese 4 N-4): the strength of a boundary,
+ * counted like the strength of a goal (distinct words).
+ */
+function uzoStrength(keywords: Keywords | undefined, text: string, pass: Pass): number {
+  if (keywords === undefined) return 0;
+  const prepared = keywordTextOf(text);
+  const hit = new Set<string>();
+  for (const [language, list] of Object.entries(keywords)) {
+    if (pass.lingvo !== undefined && language !== pass.lingvo) continue;
+    for (const keyword of list) {
+      const form = keywordHitOf(keyword, language, prepared, {
+        suffixOf: "words",
+        inflect: pass.inflect,
+      });
+      if (form !== undefined) hit.add(form);
+    }
+  }
+  return hit.size;
 }
 
 type BoundaryHit = SuggestedBoundary & {
@@ -110,12 +145,12 @@ type BoundaryHit = SuggestedBoundary & {
 };
 
 /** The first instead or boundary entry of any Uzo whose keyword hits (declaration order). */
-function boundaryHit(modelo: Modelo, text: string, lingvo?: string): BoundaryHit | undefined {
+function boundaryHit(modelo: Modelo, text: string, pass: Pass): BoundaryHit | undefined {
   for (const entry of modelo.eroj) {
     const uzo = entry.uzo;
     if (uzo === undefined) continue;
     for (const alternative of uzo.instead) {
-      const hit = uzoKeywordHit(alternative.keywords, text, lingvo);
+      const hit = uzoKeywordHit(alternative.keywords, text, pass.lingvo, pass.inflect);
       if (hit === undefined) continue;
       return {
         ero: entry.ero.name,
@@ -127,7 +162,7 @@ function boundaryHit(modelo: Modelo, text: string, lingvo?: string): BoundaryHit
       };
     }
     for (const boundary of uzo.boundary) {
-      const hit = uzoKeywordHit(boundary.keywords, text, lingvo);
+      const hit = uzoKeywordHit(boundary.keywords, text, pass.lingvo, pass.inflect);
       if (hit === undefined) continue;
       return {
         ero: entry.ero.name,
@@ -173,9 +208,9 @@ type GoalHit = {
 };
 
 /** The first Skemo goal of any Ero whose keyword is a word of the text. */
-function goalHit(modelo: Modelo, text: string, lingvo?: string): GoalHit | undefined {
+function goalHit(modelo: Modelo, text: string, pass: Pass): GoalHit | undefined {
   for (const entry of modelo.eroj) {
-    const match = goalOf(entry.skemo, text, lingvo === undefined ? {} : { lingvo });
+    const match = goalOf(entry.skemo, text, pass);
     if (match === undefined) continue;
     const regulo =
       match.goal.regulo === undefined
@@ -199,31 +234,38 @@ function goalHit(modelo: Modelo, text: string, lingvo?: string): GoalHit | undef
 /**
  * How many keywords of an Ero's goals the text hits (Nachlese 3 G2): the strength of a goal hit.
  * Counted per keyword over every goal and language the input allows, with the same measure as
- * `goalOf` (whole words, hyphenated compounds by their ending).
+ * `goalOf` (`keywordHits`: whole words, hyphenated compounds by their ending, no hyphens, German
+ * endings in the second pass).
  */
-function goalStrength(modelo: Modelo, ero: string, text: string, lingvo?: string): number {
+function goalStrength(modelo: Modelo, ero: string, text: string, pass: Pass): number {
   const skemo = modelo.eroj.find((entry) => entry.ero.name === ero)?.skemo;
   if (skemo === undefined) return 0;
-  const words = new Set(wordsOf(text));
-  const compounds = compoundsOf(text);
+  const prepared = keywordTextOf(text);
   // Distinct words: "tabs" in both languages of one goal is one hit, not two.
   const hit = new Set<string>();
   for (const goal of skemo.goals ?? []) {
     for (const [language, keywords] of Object.entries(goal.keywords)) {
-      if (lingvo !== undefined && language !== lingvo) continue;
+      if (pass.lingvo !== undefined && language !== pass.lingvo) continue;
       for (const keyword of keywords) {
-        const needle = keyword.normalize("NFC").toLowerCase();
-        if (
-          words.has(needle) ||
-          (needle.length >= COMPOUND_SUFFIX_MIN &&
-            compounds.some((compound) => compound.endsWith(needle)))
-        ) {
-          hit.add(needle);
-        }
+        const form = keywordHitOf(keyword, language, prepared, {
+          suffixOf: "compounds",
+          inflect: pass.inflect,
+        });
+        if (form !== undefined) hit.add(form);
       }
     }
   }
   return hit.size;
+}
+
+/**
+ * The keywords of the Uzo entry a boundary hit stands for (Nachlese 4 N-4): the instead entry
+ * or the boundary of its Ero with that case.
+ */
+function boundaryKeywords(modelo: Modelo, hit: BoundaryHit): Keywords | undefined {
+  const uzo = modelo.eroj.find((entry) => entry.ero.name === hit.ero)?.uzo;
+  if (hit.kind === "instead") return uzo?.instead.find((item) => item.goal === hit.case)?.keywords;
+  return uzo?.boundary.find((item) => item.case === hit.case)?.keywords;
 }
 
 /**
@@ -232,14 +274,14 @@ function goalStrength(modelo: Modelo, ero: string, text: string, lingvo?: string
  * stays); where another Ero is hit with the same number of keywords, nobody decides for a
  * person. In Ero order, without the first.
  */
-function tiedGoals(modelo: Modelo, first: GoalHit, text: string, lingvo?: string): GoalHit[] {
-  const strength = goalStrength(modelo, first.ero, text, lingvo);
+function tiedGoals(modelo: Modelo, first: GoalHit, text: string, pass: Pass): GoalHit[] {
+  const strength = goalStrength(modelo, first.ero, text, pass);
   const tied: GoalHit[] = [];
   for (const entry of modelo.eroj) {
     if (entry.ero.name === first.ero) continue;
-    const match = goalOf(entry.skemo, text, lingvo === undefined ? {} : { lingvo });
+    const match = goalOf(entry.skemo, text, pass);
     if (match === undefined) continue;
-    if (goalStrength(modelo, entry.ero.name, text, lingvo) !== strength) continue;
+    if (goalStrength(modelo, entry.ero.name, text, pass) !== strength) continue;
     const regulo =
       match.goal.regulo === undefined
         ? undefined
@@ -270,8 +312,20 @@ function goalCandidateOf(hit: GoalHit): SuggestCandidate {
 }
 
 export function suggestEro(modelo: Modelo, input: SuggestEroInput): SuggestEroResult {
-  const boundary = boundaryHit(modelo, input.goal, input.lingvo);
-  const goal = goalHit(modelo, input.goal, input.lingvo);
+  // Nachlese 4 N-2 (F-3): the words as written first. Only a text that names nothing at all —
+  // no goal, no Uzo entry — is read again with the German endings ("Vorschlägen" → vorschläge),
+  // so every text that found something before keeps its answer.
+  let pass: Pass = {
+    ...(input.lingvo === undefined ? {} : { lingvo: input.lingvo }),
+    inflect: false,
+  };
+  let boundary = boundaryHit(modelo, input.goal, pass);
+  let goal = goalHit(modelo, input.goal, pass);
+  if (boundary === undefined && goal === undefined) {
+    pass = { ...pass, inflect: true };
+    boundary = boundaryHit(modelo, input.goal, pass);
+    goal = goalHit(modelo, input.goal, pass);
+  }
 
   // Nachlese 3 G2: the goals of two Eroj hit alike (the same number of keywords) — Fundamento
   // picks no reading: ask-human with every tied candidate and its kialo. An own instead entry
@@ -295,7 +349,7 @@ export function suggestEro(modelo: Modelo, input: SuggestEroInput): SuggestEroRe
   const tied =
     goal === undefined || ownRedirect || ownSynonym
       ? []
-      : tiedGoals(modelo, goal, input.goal, input.lingvo);
+      : tiedGoals(modelo, goal, input.goal, pass);
   if (goal !== undefined && tied.length > 0) {
     // A boundary that hit stands first among the candidates, as it does below (OP-12): its kialo
     // says why one Ero is not the one.
@@ -399,7 +453,22 @@ export function suggestEro(modelo: Modelo, input: SuggestEroInput): SuggestEroRe
     }
   }
 
-  if (boundary !== undefined && goal !== undefined) {
+  // Nachlese 4 N-4 (F-2): a goal word weighs more than a boundary word of another Ero. Where the
+  // goal hits at least as many keywords as the foreign boundary, that is no tie: the goal answers,
+  // as if no boundary had hit ("Mach diesen Text fett, das ist die Überschrift des Abschnitts":
+  // überschrift of the titolo against fett of the tekstareo). A boundary that hits more words
+  // than the goal still leaves the choice to a person (OP-12, below), and so does an alternative
+  // (instead) of another Ero: it names an Ero of its own, which is a reading, not a limit (plan
+  // D-04). An own entry of the goal's Ero keeps its way (Spec 011 ② D-10, Nachlese 3 D-02).
+  const goalOutweighs =
+    boundary !== undefined &&
+    goal !== undefined &&
+    boundary.kind === "boundary" &&
+    boundary.ero !== goal.ero &&
+    goalStrength(modelo, goal.ero, input.goal, pass) >=
+      uzoStrength(boundaryKeywords(modelo, boundary), input.goal, pass);
+
+  if (boundary !== undefined && goal !== undefined && !goalOutweighs) {
     // Both readings hold; Fundamento does not choose (OP-12). Prompt rule 12 passes both on.
     const goalCandidate: SuggestCandidate = {
       kind: "goal",
@@ -432,7 +501,7 @@ export function suggestEro(modelo: Modelo, input: SuggestEroInput): SuggestEroRe
     };
   }
 
-  if (boundary !== undefined) {
+  if (boundary !== undefined && !goalOutweighs) {
     const instead = insteadEro(modelo, boundary);
     return {
       ok: true,

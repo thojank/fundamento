@@ -40,8 +40,14 @@ test.describe("fm-ligilo behaviour", () => {
     const link = page.getByRole("link", { name: "Dokumentation" });
     await expect(link).toHaveAttribute("rel", "external noopener noreferrer");
     await expect(link).toHaveAccessibleDescription(texts.de);
-    const mark = page.locator("#a").locator('slot[name="icon-end"] > svg');
+    // Nachlese 4 N-7: the mark is the Ikonaro's external in the size of the link.
+    const mark = page.locator("#a").locator('slot[name="icon-end"] > fm-ikono');
+    await expect(mark).toHaveAttribute("name", "external");
     await expect(mark).toBeVisible();
+    await expect(mark).toHaveAttribute("size", "medium");
+    await page.locator("#a").evaluate((e) => e.setAttribute("size", "small"));
+    await expect(mark).toHaveAttribute("size", "small");
+    expect(await page.locator("#a").locator('slot[name="icon-end"] > svg').count()).toBe(0);
     // The language follows the nearest lang (D-02).
     await page.evaluate(() => document.documentElement.setAttribute("lang", "en"));
     await page.locator("#a").evaluate((e) => e.setAttribute("size", "medium"));

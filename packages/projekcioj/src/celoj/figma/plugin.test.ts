@@ -60,6 +60,12 @@ const MODEL_FONTS = [
 ] as const;
 const modelDouble = () => figmaDouble({ fonts: MODEL_FONTS });
 
+/** The example frames beside the apartigilo's set (Nachlese 4 N-6, F-7), in their order. */
+const SEPARATOR_EXAMPLE_NAMES = [
+  "apartigilo – waagerecht zwischen zwei Texten",
+  "apartigilo – senkrecht zwischen zwei Texten",
+] as const;
+
 /**
  * The abort of F10c lifted: a test that takes a variant out of a set the plugin made and runs it
  * again measures what such a run reports — which is only there once the run goes on.
@@ -1235,16 +1241,24 @@ describe("a marked component outside the set stops the run before it writes (F-B
   const FIRST_SET = "alsxutilo";
   type Orphan = { id: string; name: string; set: string; parent: { id: string; type: string } };
 
-  /** A run that crashes once its first component stands, as Figma's run did (F-A). */
+  /**
+   * A run that crashes once its first component stands, as Figma's run did (F-A): at the first
+   * text of a component. The apartigilo draws no text in its set, only in its two examples beside
+   * it (Nachlese 4 N-6) — two texts each, written after its set stands; those four still arrive.
+   */
   async function crashedRun(double: ReturnType<typeof figmaDouble>) {
     const module = new Function(
       "figma",
       `${repoFiles["figma/plugin/code.js"] ?? ""}\nreturn applyPlan();`,
     );
+    const create = (double.figma as { createText: () => DoubleNode }).createText;
+    let texts = 0;
     await module({
       ...double.figma,
       createText: () => {
-        throw new Error("abgestürzt");
+        texts += 1;
+        if (texts > 4) throw new Error("abgestürzt");
+        return create();
       },
     }).catch(() => undefined);
   }
@@ -3689,25 +3703,28 @@ describe("every set lies in the frame Eroj in the section Fundamento (F-1, F-2, 
   // set; it is no set, so it is moved by no test and overlaps with none. Spec 011 ④: so does the
   // example frame „unbekannt" of the mezurilo; Spec 011 ⑤: and „vertikal" of the navigado.
   const inFrame = names.flatMap((name) =>
-    name === "dialogo"
-      ? [name, `dialogo – ${BACKDROP_EXAMPLE}`]
-      : name === "mezurilo"
-        ? [name, `mezurilo – ${UNKNOWN_EXAMPLE}`]
-        : name === "navigado"
-          ? [name, `navigado – ${VERTICAL_EXAMPLE}`]
-          : // Spec 015 ① (O-2): the pagination on page 1, 5 and 10 of 10 beside its set.
-            name === "pagxigilo"
-            ? [name, ...[1, 5, 10].map((page) => `pagxigilo – Seite ${page} von 10`)]
-            : // Spec 015 ②: the upload with two files beside its set.
-              name === "alsxutilo"
-              ? [name, "alsxutilo – mit zwei Dateien"]
-              : // Spec 015 ③: the card without its image beside its set, the avatar with its
-                // image beside its.
-                name === "karto"
-                ? [name, "karto – ohne Bild"]
-                : name === "avataro"
-                  ? [name, "avataro – mit Bild"]
-                  : [name],
+    // Nachlese 4 N-6 (F-7): the separator between two texts, once per orientation.
+    name === "apartigilo"
+      ? [name, ...SEPARATOR_EXAMPLE_NAMES]
+      : name === "dialogo"
+        ? [name, `dialogo – ${BACKDROP_EXAMPLE}`]
+        : name === "mezurilo"
+          ? [name, `mezurilo – ${UNKNOWN_EXAMPLE}`]
+          : name === "navigado"
+            ? [name, `navigado – ${VERTICAL_EXAMPLE}`]
+            : // Spec 015 ① (O-2): the pagination on page 1, 5 and 10 of 10 beside its set.
+              name === "pagxigilo"
+              ? [name, ...[1, 5, 10].map((page) => `pagxigilo – Seite ${page} von 10`)]
+              : // Spec 015 ②: the upload with two files beside its set.
+                name === "alsxutilo"
+                ? [name, "alsxutilo – mit zwei Dateien"]
+                : // Spec 015 ③: the card without its image beside its set, the avatar with its
+                  // image beside its.
+                  name === "karto"
+                  ? [name, "karto – ohne Bild"]
+                  : name === "avataro"
+                    ? [name, "avataro – mit Bild"]
+                    : [name],
   );
   const layout = repoPlan.section;
   const inLayout = names.map(() => ({ frame: FRAME, action: "in-layout" }));
@@ -3932,7 +3949,8 @@ describe("every set lies in the frame Eroj in the section Fundamento (F-1, F-2, 
       moved: [first],
       frame: { name: FRAME, found: true, created: false, wrap: "WRAP" },
     });
-    // The set moves to the end, its example frames with it (Spec 015 ②: the alsxutilo's).
+    // The set moves to the end, its example frames with it (Spec 015 ②: the alsxutilo's; since
+    // Nachlese 4 N-6 the apartigilo has two).
     const own = inFrame.filter((name) => name === first || name.startsWith(`${first} – `));
     expect(frameOf(double).children.map((child) => child.name)).toEqual([
       ...inFrame.filter((name) => !own.includes(name)),
@@ -4223,6 +4241,9 @@ describe("the markobutono is drawn as a toggle: box, check mark, label and error
     const variant = (name: string) => set?.children.find((child) => child.name === name);
     return { double, set, variant };
   };
+  // The Aspektoj of the repository's Modelo, whose glyphs the plan carries (Nachlese 4 N-7).
+  const aspektoj = Object.keys(repoPlan.ikonoj?.glyphs ?? {});
+  const glyphFrames = aspektoj.map((aspekto) => `glyph-${aspekto}`);
 
   it("draws every variant of checked × size × state, named by the plan", async () => {
     const { set } = await drawn();
@@ -4244,23 +4265,29 @@ describe("the markobutono is drawn as a toggle: box, check mark, label and error
     expect(descendant(on, "error")?.properties.characters).toBe("Fehler");
     const control = descendant(on, "control");
     expect(control?.children.map((child) => child.name)).toEqual(["indicator"]);
-    expect(descendant(on, "indicator")?.children.map((child) => child.name)).toEqual(["mark"]);
+    // Nachlese 4 N-7: the check mark is the Ikonaro's check — a glyph frame per Aspekto of the
+    // Modelo, its visibility bound to the Aspekto's switch; no hand-drawn sign.
+    expect(descendant(on, "indicator")?.children.map((child) => child.name)).toEqual(glyphFrames);
+    expect(descendant(on, "mark")?.parent?.name).toBe("glyph-komuna");
     expect(bound(field, "itemSpacing")).toBe("spacing/small");
   });
 
-  it("binds the size of the check mark's frame, the colour of its vector, and the box's radius", async () => {
+  it("binds the size of the check mark's frame and glyphs, the colour of its vectors, and the box's radius", async () => {
     const { variant } = await drawn();
     const on = variant("checked=true, size=medium, state=rest");
     const indicator = descendant(on, "indicator");
     expect(bound(indicator, "width")).toBe("size/icon/medium");
     expect(bound(indicator, "height")).toBe("size/icon/medium");
-    const mark = descendant(on, "mark");
-    expect(mark?.type).toBe("VECTOR");
-    expect(mark?.properties.constraints).toEqual({ horizontal: "SCALE", vertical: "SCALE" });
-    const fill = (
-      (mark?.properties.fills ?? []) as { boundVariables?: { color?: { name: string } } }[]
-    )[0];
-    expect(fill?.boundVariables?.color?.name).toBe("color/action/primary/text");
+    for (const aspekto of aspektoj) {
+      const glyph = descendant(indicator, `glyph-${aspekto}`);
+      expect(bound(glyph, "width"), aspekto).toBe("size/icon/medium");
+      expect(bound(glyph, "visible"), aspekto).toBe(`ikonoj/${aspekto}`);
+      const mark = glyph?.children.find((child) => child.type === "VECTOR");
+      const fill = (
+        (mark?.properties.fills ?? []) as { boundVariables?: { color?: { name: string } } }[]
+      )[0];
+      expect(fill?.boundVariables?.color?.name, aspekto).toBe("color/action/primary/text");
+    }
     expect(bound(descendant(on, "control"), "cornerRadius")).toBe("radius/role/control");
     expect(indicator?.properties.opacity).toBe(1);
   });
@@ -4269,8 +4296,28 @@ describe("the markobutono is drawn as a toggle: box, check mark, label and error
     const { variant } = await drawn();
     const off = variant("checked=false, size=medium, state=rest");
     expect(descendant(off, "indicator")?.properties.opacity).toBe(0);
-    const fills = (descendant(off, "mark")?.properties.fills ?? []) as unknown[];
-    expect(fills).toEqual([]);
+    const vector = descendant(descendant(off, "indicator"), "glyph-komuna")?.children.find(
+      (child) => child.type === "VECTOR",
+    );
+    const fills = (vector?.properties.fills ?? []) as { boundVariables?: unknown }[];
+    expect(fills.some((fill) => fill.boundVariables !== undefined)).toBe(false);
+  });
+
+  // Nachlese 4 N-7: a file drawn before holds the hand-drawn check vector directly in the
+  // indicator; the run takes it out, so only the Ikonaro's glyphs are left.
+  it("takes the hand-drawn check vector of an earlier run out of the indicator (N-7)", async () => {
+    const { double, variant } = await drawn();
+    const on = variant("checked=true, size=medium, state=rest");
+    const indicator = descendant(on, "indicator") as DoubleNode;
+    const api = double.figma as { createNodeFromSvg: (svg: string) => DoubleNode };
+    const old = api.createNodeFromSvg(
+      '<svg viewBox="0 0 16 16"><path d="M6.4 12.6 2.2 8.4l1.4-1.4 2.8 2.8 6-6 1.4 1.4z"/></svg>',
+    ).children[0] as DoubleNode;
+    indicator.appendChild(old);
+    old.setSharedPluginData("fundamento", "part", "mark");
+    expect(indicator.children.some((child) => child.type === "VECTOR")).toBe(true);
+    await run(double, source);
+    expect(indicator.children.map((child) => child.name)).toEqual(glyphFrames);
   });
 
   it("keeps the switch's knob a filled frame without a sign or a column (Spec 010 ①)", async () => {
@@ -5265,6 +5312,79 @@ describe("the plenstato is drawn as a state: the column with the arc, the text a
     const before = double.snapshot();
     await run(double, source);
     expect(double.snapshot()).toBe(before);
+  });
+
+  // Nachlese 4 N-5 (F-6, Figma-Lauf 09909f5): „das Set misst 101 × 148, die Kinder reichen bis
+  // 97 × 144" — the variant kind=empty ends exactly where the padding of 4 begins, and the run
+  // still called it outside. Figma keeps geometry as 32-bit floats; the empty variant carries the
+  // 0.01 of its empty actions placeholder (the loading variant hides it), and 0.01 has no exact
+  // float: the sum of a child's y and height came out a few millionths above the set's height.
+  it("warns of nothing where a variant ends at the padding but for float noise below what the report prints (N-5, F-6)", async () => {
+    // Geometry as Figma keeps it: 32-bit floats.
+    const double = figmaDouble({ fonts: MODEL_FONTS, float32: true });
+    const report = (await new Function("figma", `${source}\nreturn applyPlan();`)(
+      double.figma,
+    )) as {
+      warnings: string[];
+      components: { set: string; layout: { outside: string[]; smaller: string[] } }[];
+    };
+    const plenstato = report.components.find((component) => component.set === "plenstato");
+    expect(plenstato?.layout.outside).toEqual([]);
+    expect(report.warnings.filter((warning) => warning.startsWith("plenstato"))).toEqual([]);
+    // No set at all reads a float's last digits as an overlap.
+    for (const component of report.components) {
+      expect(component.layout.outside, component.set).toEqual([]);
+      expect(component.layout.smaller, component.set).toEqual([]);
+    }
+  });
+});
+
+// Nachlese 4 N-5 (F-6): Figma lays out no invisible child of an auto-layout frame (documented:
+// a hidden layer takes no space). The double counted it — the plenstato's hidden arc (empty) and
+// hidden actions placeholder (loading) made both variants larger than in the file, and the
+// 148 the maintainer measured was out of the double's reach.
+describe("the double lays out no invisible child (N-5)", () => {
+  const frameOf = (double: ReturnType<typeof figmaDouble>) =>
+    (double.figma as { createFrame: () => DoubleNode }).createFrame();
+  const size = (node: DoubleNode) => {
+    const { width, height } = node as unknown as { width: number; height: number };
+    return { width, height };
+  };
+
+  it("a column of two children, one hidden, is as high as the visible one, without spacing", () => {
+    const double = modelDouble();
+    const column = frameOf(double);
+    Object.assign(column, {
+      layoutMode: "VERTICAL",
+      itemSpacing: 4,
+      layoutSizingHorizontal: "HUG",
+      layoutSizingVertical: "HUG",
+    });
+    const [shown, hidden] = [0, 1].map(() => {
+      const child = frameOf(double);
+      child.resize(40, 10);
+      column.appendChild(child);
+      return child;
+    });
+    expect(size(column)).toEqual({ width: 40, height: 24 });
+    Object.assign(hidden as DoubleNode, { visible: false });
+    expect(size(column)).toEqual({ width: 40, height: 10 });
+    expect(shown).toBeDefined();
+  });
+
+  it("the plenstato while loading takes nothing from its hidden actions placeholder: no 0.01, no gap before it", async () => {
+    const double = modelDouble();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    const set = pageNodes(double).find((child) => child.name === "plenstato");
+    const variant = (name: string) => set?.children.find((child) => child.name === name);
+    const loading = descendant(variant("kind=loading, state=rest"), "control") as DoubleNode;
+    expect(descendant(loading, "actions")?.properties.visible).toBe(false);
+    // Arc, gap, text and paddings are whole numbers; only the hidden 0.01 placeholder (and the
+    // spacing before it) made the column 78.01 high in the double — 74 in the file's terms.
+    expect(Number.isInteger(size(loading).height)).toBe(true);
+    // The empty variant shows its placeholder: there the 0.01 belongs to the column.
+    const empty = descendant(variant("kind=empty, state=rest"), "control") as DoubleNode;
+    expect(Number.isInteger(size(empty).height)).toBe(false);
   });
 });
 
@@ -6443,6 +6563,48 @@ describe("icons are drawn from the glyphs of every Aspekto and switch with the b
     await run(double, source);
     expect(double.snapshot()).toBe(before);
   });
+
+  // Nachlese 4 N-6 (F-7, Figma-Lauf 09909f5): the line was hardly visible in the overview and the
+  // vertical one not recognisable — a 1 px line alone in a cell as wide as the horizontal one.
+  // The role is right (border.subtle on the Vitrino's ground, as on the web); an example frame
+  // shows each orientation where a line is seen: between two texts.
+  it("draws the apartigilo once more per orientation between two texts, beside the set (N-6)", async () => {
+    const { double } = await drawn();
+    const frame = pageNodes(double).find(
+      (node) => node.type === "FRAME" && node.getSharedPluginData("fundamento", "frame") !== "",
+    );
+    const names = frame?.children.map((child) => child.name) ?? [];
+    const at = names.indexOf("apartigilo");
+    expect(names.slice(at, at + 3)).toEqual(["apartigilo", ...SEPARATOR_EXAMPLE_NAMES]);
+    const [across, upright] = SEPARATOR_EXAMPLE_NAMES.map((name) =>
+      frame?.children.find((child) => child.name === name),
+    );
+    // A column for the horizontal line, a row for the vertical one: text, line, text.
+    expect(across?.properties.layoutMode).toBe("VERTICAL");
+    expect(upright?.properties.layoutMode).toBe("HORIZONTAL");
+    for (const example of [across, upright]) {
+      expect(example?.children.map((child) => child.name)).toEqual(["before", "line", "after"]);
+      expect(descendant(example, "before")?.properties.characters).toBe("Eins");
+      expect(descendant(example, "after")?.properties.characters).toBe("Zwei");
+      for (const text of ["before", "after"]) {
+        expect(paintOf(descendant(example, text), "fills")).toBe("color/text/default");
+        expect(bound(descendant(example, text), "fontSize")).toBe("typography/body/1/font-size");
+      }
+      // The frame stands on the Vitrino's ground, as the set does.
+      expect(paintOf(example, "fills")).toBe("color/background/canvas");
+    }
+    // The line is the set's: the same colour and weight, on the edge of its orientation.
+    const acrossLine = descendant(descendant(across, "line"), "control");
+    expect(paintOf(acrossLine, "strokes")).toBe("color/border/subtle");
+    expect(bound(acrossLine, "strokeTopWeight")).toBe("border/width/default");
+    const uprightLine = descendant(descendant(upright, "line"), "control");
+    expect(paintOf(uprightLine, "strokes")).toBe("color/border/subtle");
+    expect(bound(uprightLine, "strokeLeftWeight")).toBe("border/width/default");
+    expect(bound(uprightLine, "height")).toBe("size/control/medium");
+    const before = double.snapshot();
+    await run(double, source);
+    expect(double.snapshot()).toBe(before);
+  });
 });
 
 // Spec 014 ④ (plan ④ D-06): the plugin draws the overlays and binds every shadow (G4): the double
@@ -6705,6 +6867,32 @@ describe("the plugin draws the alsxutilo (Spec 015 ②)", () => {
     expect(descendant(list, "file-size-1")?.properties.characters).toBe("1,2 MB");
     expect(descendant(list, "file-name-2")?.properties.characters).toBe("Zeugnis.png");
     expect(bound(descendant(list, "remove-1"), "width")).toBe("size/control/small");
+    const before = double.snapshot();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    expect(double.snapshot()).toBe(before);
+  });
+});
+
+// Nachlese 4 N-8 (Spec 014 ⑤ O-23): the open kompletigilo shows both states of an entry — the
+// first suggestion chosen (its text in color.text.default), the second the active one under the
+// keyboard, its row filled with color.background.sunken; the others with the listbox's raised fill.
+describe("the kompletigilo fills the active suggestion (N-8)", () => {
+  const fillOf = (node: DoubleNode | undefined) =>
+    ((node?.properties.fills ?? []) as { boundVariables?: { color?: { name: string } } }[])[0]
+      ?.boundVariables?.color?.name;
+
+  it("the second suggestion of an open field is filled as active, the first written as chosen", async () => {
+    const double = modelDouble();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    const set = pageNodes(double).find((node) => node.name === "kompletigilo");
+    const open = set?.children.find(
+      (child) => child.name === "size=medium, expanded=true, state=rest",
+    );
+    expect(fillOf(descendant(open, "suggestion-1"))).toBe("color/background/raised");
+    expect(fillOf(descendant(open, "suggestion-2"))).toBe("color/background/sunken");
+    expect(fillOf(descendant(open, "suggestion-3"))).toBe("color/background/raised");
+    expect(fillOf(descendant(open, "suggestions-1"))).toBe("color/text/default");
+    expect(fillOf(descendant(open, "suggestions-2"))).toBe("color/text/subtle");
     const before = double.snapshot();
     await run(double, repoFiles["figma/plugin/code.js"] ?? "");
     expect(double.snapshot()).toBe(before);

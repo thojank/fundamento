@@ -129,3 +129,68 @@ test.describe("fm-kompletigilo behaviour", () => {
     expect((await stateOf(page, "k")).open).toBe(false);
   });
 });
+
+// Nachlese 4 N-8 (Spec 014 ⑤ O-23): the active suggestion is seen, not only heard — its row is
+// written data-active and filled with color.background.sunken, the others with the raised fill of the listbox.
+// N-9 (O-24): while the application loads new suggestions (loading), the input is aria-busy and
+// the live region says "lädt"; the person keeps typing (no aria-disabled), and the count comes
+// back when loading ends.
+test.describe("fm-kompletigilo: active suggestion and loading (Nachlese 4)", () => {
+  const rowsOf = (page: Parameters<typeof serve>[0]) =>
+    page.locator("#k").evaluate((element) => {
+      const listbox = element.shadowRoot?.querySelector('[part="listbox"]') as HTMLElement;
+      const rows = [...listbox.querySelectorAll('[part="suggestion"]')] as HTMLElement[];
+      const probe = document.createElement("div");
+      document.body.append(probe);
+      const resolve = (name: string) => {
+        probe.style.backgroundColor = `var(${name})`;
+        return getComputedStyle(probe).backgroundColor;
+      };
+      const hover = resolve("--fm-color-background-sunken");
+      const rest = resolve("--fm-color-background-raised");
+      probe.remove();
+      return {
+        hover,
+        rest,
+        rows: rows.map((row) => ({
+          active: row.getAttribute("data-active"),
+          fill: getComputedStyle(row).backgroundColor,
+        })),
+      };
+    });
+
+  test("the arrows fill the active suggestion with the sunken ground; the others keep the raised fill", async ({
+    page,
+  }) => {
+    await serve(page, out, MARKUP);
+    await page.getByRole("combobox", { name: "Land" }).fill("d");
+    await expect.poll(async () => (await stateOf(page, "k")).open).toBe(true);
+    const before = await rowsOf(page);
+    expect(before.rows.map((row) => row.active)).toEqual(["false", "false"]);
+    expect(before.hover).not.toBe(before.rest);
+    await page.keyboard.press("ArrowDown");
+    const after = await rowsOf(page);
+    expect(after.rows.map((row) => row.active)).toEqual(["true", "false"]);
+    expect(after.rows[0]?.fill).toBe(after.hover);
+    expect(after.rows[1]?.fill).toBe(after.rest);
+    await page.keyboard.press("ArrowDown");
+    expect((await rowsOf(page)).rows.map((row) => row.active)).toEqual(["false", "true"]);
+  });
+
+  test("loading: aria-busy on the input and 'lädt' in the live region; still operable; the count returns", async ({
+    page,
+  }) => {
+    await serve(page, out, MARKUP);
+    const input = page.getByRole("combobox", { name: "Land" });
+    await input.fill("d");
+    await expect.poll(async () => (await stateOf(page, "k")).count).toBe("2 Vorschläge");
+    await page.locator("#k").evaluate((element) => element.setAttribute("loading", ""));
+    await expect(input).toHaveAttribute("aria-busy", "true");
+    await expect.poll(async () => (await stateOf(page, "k")).count).toBe("lädt");
+    await expect(input).not.toHaveAttribute("aria-disabled", "true");
+    await expect(input).toBeEditable();
+    await page.locator("#k").evaluate((element) => element.removeAttribute("loading"));
+    await expect(input).not.toHaveAttribute("aria-busy");
+    await expect.poll(async () => (await stateOf(page, "k")).count).toBe("2 Vorschläge");
+  });
+});

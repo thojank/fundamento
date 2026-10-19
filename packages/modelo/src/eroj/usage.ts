@@ -87,38 +87,163 @@ export function compoundsOf(text: string): string[] {
  * A keyword of this many letters or more also hits a hyphenated compound that ends with it (R-11):
  * "mailadresse" hits "e-mail-adresse". Same measure as the Uzo keywords (Spec 007 D-06, N-1).
  */
-const COMPOUND_SUFFIX_MIN = 6;
+export const COMPOUND_SUFFIX_MIN = 6;
+
+/**
+ * A keyword as the Gvidanto compares it (Nachlese 4 N-1, O-18): NFC, lower case and without
+ * hyphens — "running-text" is "runningtext". Its length is what the suffix rule measures.
+ */
+export function flatKeyword(keyword: string): string {
+  return keyword.normalize("NFC").toLowerCase().replaceAll("-", "");
+}
+
+/**
+ * The German endings a word of the text may carry beyond a keyword (Nachlese 4 N-2, F-3), the
+ * longest first: "vorschlägen" is "vorschläge" with -n, "hinweise" is "hinweis" with -e. No
+ * stemmer: these five, at the end of the word, nothing else (no umlaut, no -er, no prefix).
+ */
+const GERMAN_ENDINGS = ["en", "es", "e", "n", "s"] as const;
+
+/**
+ * The stem left after an ending has this many letters at least (N-2); a shorter word keeps its
+ * ending: "zeile" is no form of "zeilen", "seite" none of "seiten" (zeil, seit: four letters).
+ */
+export const INFLECTION_STEM_MIN = 5;
+
+/** The stem of a German word that carries one of the endings, or undefined (N-2). */
+function germanStem(word: string): string | undefined {
+  for (const ending of GERMAN_ENDINGS) {
+    if (word.endsWith(ending) && word.length - ending.length >= INFLECTION_STEM_MIN) {
+      return word.slice(0, -ending.length);
+    }
+  }
+  return undefined;
+}
+
+/**
+ * Whether a word of the text is a form of a German keyword (N-2): the word carries an ending,
+ * and what is left is the keyword or the keyword's own stem ("vorschlägen" → "vorschläg" =
+ * "vorschläge" → "vorschläg"). A word without an ending never hits a longer keyword: "nicht" is
+ * no form of "nichts".
+ */
+function germanFormOf(word: string, needle: string): boolean {
+  const stem = germanStem(word);
+  return stem !== undefined && (stem === needle || stem === germanStem(needle));
+}
+
+/** The words of a text and its hyphenated compounds, prepared once for many keywords. */
+export interface KeywordText {
+  words: readonly string[];
+  compounds: readonly string[];
+}
+
+export function keywordTextOf(text: string): KeywordText {
+  return { words: wordsOf(text), compounds: compoundsOf(text) };
+}
+
+/**
+ * How a keyword is compared (`keywordHitOf`): where its suffix rule looks — the hyphenated
+ * compounds for a goal (R-11), every word for a Uzo entry (Spec 007 D-06) — and whether German
+ * endings count (Nachlese 4 N-2: only in the Gvidanto's second pass, see `suggestEro`).
+ */
+export interface KeywordMatch {
+  suffixOf: "compounds" | "words";
+  inflect?: boolean;
+}
+
+/**
+ * Whether a keyword of the language `lingvo` names a word of the text — the one comparison of
+ * `goalOf` (Skemo goals) and `uzoKeywordHit` (Uzo entries):
+ * - a word equal to the keyword; a hyphenated keyword (N-1) also hits its parts written apart or
+ *   together, compared without hyphens: "running-text" hits "running text", "running-text" and
+ *   "runningtext". A keyword without hyphens never hits two words (Nachlese 3, Abweichung 1);
+ * - a keyword of COMPOUND_SUFFIX_MIN letters or more also hits the end of a longer word (of a
+ *   hyphenated compound for a goal, of any word for a Uzo entry);
+ * - with `inflect`, a German keyword (N-2) also hits a word that is the keyword with one of the
+ *   German endings, as a whole word and, with the ending taken off, at the end of a longer one.
+ */
+export function keywordHits(
+  keyword: string,
+  lingvo: string,
+  text: KeywordText,
+  match: KeywordMatch,
+): boolean {
+  return keywordHitOf(keyword, lingvo, text, match) !== undefined;
+}
+
+/**
+ * What a keyword hits in the text (`keywordHits`), as the word a strength counts: the keyword
+ * itself (flat) where it stands as written or ends a longer word, the word of the text where only
+ * its German ending made it a hit — so "wähle" and "wählen", both keywords, count "wählen" once.
+ */
+export function keywordHitOf(
+  keyword: string,
+  lingvo: string,
+  text: KeywordText,
+  match: KeywordMatch,
+): string | undefined {
+  const needle = flatKeyword(keyword);
+  if (needle === "") return undefined;
+  const german = match.inflect === true && lingvo === "de";
+  const parts = keyword.split("-").filter((part) => part !== "").length;
+  const { words } = text;
+  let form: string | undefined;
+  for (let start = 0; start < words.length; start += 1) {
+    let joined = "";
+    for (let length = 1; length <= parts && start + length <= words.length; length += 1) {
+      joined += words[start + length - 1];
+      if (joined === needle) return needle;
+      if (form === undefined && german && germanFormOf(joined, needle)) form = joined;
+    }
+  }
+  if (form !== undefined) return form;
+  if (needle.length < COMPOUND_SUFFIX_MIN) return undefined;
+  const stemmed = german ? germanStem(needle) : undefined;
+  const pool = match.suffixOf === "compounds" ? text.compounds : words;
+  for (const word of pool) {
+    if (word.endsWith(needle)) return needle;
+    const stem = german ? germanStem(word) : undefined;
+    if (
+      stem !== undefined &&
+      (stem.endsWith(needle) ||
+        (stemmed !== undefined && stemmed.length >= COMPOUND_SUFFIX_MIN && stem.endsWith(stemmed)))
+    ) {
+      return word;
+    }
+  }
+  return undefined;
+}
 
 /**
  * The Skemo goal a text names: the goal one of whose keywords, in any language, is a word of the
  * text. Several goals may hit; the longest keyword wins, and a tie keeps the declaration order
  * (R-11, Abnahme Spec 009 A11, 2026-10-13: "E-Mail-Adresse" fell to enter-text by `adresse`
  * because the first goal won; now `mailadresse` wins over `adresse`). A hyphenated compound counts
- * as its parts and as one word. Deterministic, no model (D-16). Called goal since F1-T00
+ * as its parts and as one word; keywords are compared without hyphens (Nachlese 4 N-1), German
+ * ones with their endings only where `inflect` asks for it (N-2: the Gvidanto's second pass;
+ * check_usage compares as written). Deterministic, no model (D-16). Called goal since F1-T00
  * (Spec 007, OP-4): `intent` is the name of a prop.
  */
 export function goalOf(
   skemo: Skemo,
   text: string,
-  options: { lingvo?: string } = {},
+  options: { lingvo?: string; inflect?: boolean } = {},
 ): { goal: NonNullable<Skemo["goals"]>[number]; keyword: string; lingvo: string } | undefined {
-  const words = new Set(wordsOf(text));
-  const compounds = compoundsOf(text);
+  const prepared = keywordTextOf(text);
+  const match: KeywordMatch = { suffixOf: "compounds", inflect: options.inflect === true };
   let best:
     | { goal: NonNullable<Skemo["goals"]>[number]; keyword: string; lingvo: string }
     | undefined;
+  let bestLength = 0;
   for (const goal of skemo.goals ?? []) {
     for (const [lingvo, keywords] of Object.entries(goal.keywords)) {
       if (options.lingvo !== undefined && lingvo !== options.lingvo) continue;
       for (const keyword of keywords) {
-        const needle = keyword.normalize("NFC").toLowerCase();
-        const hit =
-          words.has(needle) ||
-          (needle.length >= COMPOUND_SUFFIX_MIN &&
-            compounds.some((compound) => compound.endsWith(needle)));
-        if (!hit) continue;
-        if (best === undefined || needle.length > best.keyword.length) {
+        if (!keywordHits(keyword, lingvo, prepared, match)) continue;
+        const length = flatKeyword(keyword).length;
+        if (best === undefined || length > bestLength) {
           best = { goal, keyword, lingvo };
+          bestLength = length;
         }
       }
     }

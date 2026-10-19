@@ -40,6 +40,29 @@ test.describe("fm-markobutono behaviour", () => {
     ).toEqual(["field", "control", "indicator", "label", "required-mark", "error"]);
   });
 
+  // Nachlese 4 N-7 (Spec 014 ② O-7): the check mark is the Ikonaro's check in the size of the
+  // box, drawn by the Aspekto; no hand-drawn sign.
+  test("the indicator holds an fm-ikono check that follows the size of the box, shown only checked", async ({
+    page,
+  }) => {
+    await serve(page, out, box('size="small" checked'));
+    const ikono = page.locator("#a").locator('[part="indicator"] fm-ikono');
+    await expect(ikono).toHaveCount(1);
+    await expect(ikono).toHaveAttribute("name", "check");
+    await expect(ikono).toHaveAttribute("size", "small");
+    await page.locator("#a").evaluate((element) => element.setAttribute("size", "large"));
+    await expect(ikono).toHaveAttribute("size", "large");
+    expect(await page.locator("#a").locator('[part="indicator"] svg').count()).toBe(0);
+    const opacity = () =>
+      page
+        .locator("#a")
+        .locator('[part="indicator"]')
+        .evaluate((element) => getComputedStyle(element).opacity);
+    expect(await opacity()).toBe("1");
+    await page.locator("#a").evaluate((element) => element.removeAttribute("checked"));
+    await expect.poll(opacity).toBe("0");
+  });
+
   test("a click on the box or the label and Space tick it; Enter does not; checked is reflected, input and change are fired", async ({
     page,
   }) => {

@@ -2211,6 +2211,10 @@
             },
             "empty": {
               "$ref": "#/$defs/Name"
+            },
+            "active": {
+              "description": "A second state of one entry (Nachlese 4 N-8): the entry the keyboard stands on while the focus stays elsewhere — the active suggestion of a combobox (aria-activedescendant). True for that one entry, false for every other; no prop holds it, the element sets it as the person keys through the list. Parts may be keyed by it (by, when) like by key; no axis of the variants.",
+              "$ref": "#/$defs/Name"
             }
           },
           "required": ["key", "equals"],

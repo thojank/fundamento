@@ -108,7 +108,8 @@ describe("menuo in the repo Modelo (section ④, G1, G2, G4)", () => {
     expect(skemo?.goals?.map((goal) => goal.goal)).toEqual(["action-menu"]);
     expect(skemo?.goals?.[0]?.keywords).toEqual({
       en: ["actionmenu", "contextmenu", "overflowmenu", "kebabmenu", "rowactions"],
-      de: ["aktionsmenü", "kontextmenü", "zeilenaktionen", "zeilenmenü"],
+      // Nachlese 4 N-3 (F-1): "in jeder Tabellenzeile" names the menuo of the row.
+      de: ["aktionsmenü", "kontextmenü", "zeilenaktionen", "zeilenmenü", "tabellenzeile"],
     });
     expect(skemo?.goals?.[0]?.keywords.en).not.toContain("menu");
     expect(skemo?.goals?.[0]?.keywords.de).not.toContain("menü");

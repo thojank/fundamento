@@ -423,6 +423,8 @@ const STRUCTURE_BINDINGS: Readonly<Record<string, Readonly<Record<string, readon
     ],
     "suggestion.radius": [{ node: "suggestion-*", fields: ["cornerRadius"] }],
     "suggestion.color": [{ node: "suggestions-*", fields: ["fills"], paint: true }],
+    // Nachlese 4 N-8: the active suggestion's row is filled by active (the frame of the row).
+    "suggestion.fill": [{ node: "suggestion-*", fields: ["fills"], paint: true }],
     "suggestion.typography": typographyOf("suggestions-*"),
     "no-results.color": [{ node: "no-results", fields: ["fills"], paint: true }],
     "no-results.typography": typographyOf("no-results"),
@@ -2596,6 +2598,67 @@ async function applyComponents(variables, warnings) {
     bindMeasures(measures, report, component, variant);
   }
   /**
+   * The example of a separator (Nachlese 4 N-6, F-7): the line where it is seen — between two
+   * texts, the Vitrino's words in the role of running text, bound like a label. A column for the
+   * horizontal line, a row for the vertical one (centred across), the gap and the padding the
+   * section's; the line itself is drawn as in the set (drawSeparator), and the frame stands on
+   * the set's ground (component.surface), so the line meets the colour it is paired with.
+   */
+  async function drawSeparatorExample(node, component, variant, report, example) {
+    const vertical = variant.props.orientation === "vertical";
+    const texts = example.texts || { words: ["", ""], bindings: {}, paints: {} };
+    const before = part(node, "before", () => figma.createText());
+    const line = part(node, "line", () => figma.createFrame());
+    const after = part(node, "after", () => figma.createText());
+    [before, line, after].forEach((child, index) => {
+      if (node.children.indexOf(child) !== index) node.insertChild(index, child);
+    });
+    const words = [[before, texts.words[0]], [after, texts.words[1]]];
+    for (const [text, word] of words) {
+      await loadCurrentFont(text);
+      if (texts.font !== undefined) {
+        write(text, "fontName", fonts.get(texts.font.family + " " + texts.font.style));
+      }
+      write(text, "characters", word);
+    }
+    own(node, NEUTRAL);
+    own(node, HUG_LAYOUT);
+    own(node, {
+      layoutMode: vertical ? "HORIZONTAL" : "VERTICAL",
+      primaryAxisAlignItems: "MIN",
+      counterAxisAlignItems: vertical ? "CENTER" : "MIN",
+      itemSpacing: example.padding,
+      paddingLeft: example.padding,
+      paddingRight: example.padding,
+      paddingTop: example.padding,
+      paddingBottom: example.padding,
+    });
+    if (component.surface !== undefined) {
+      const ground = variables.get(component.surface.variable);
+      if (ground !== undefined) {
+        const bound = figma.variables.setBoundVariableForPaint(
+          { type: "SOLID", color: { r: 0, g: 0, b: 0 } },
+          "color",
+          ground,
+        );
+        bound.opacity = component.surface.opacity;
+        gather(node).fills = [bound];
+      }
+    }
+    const measures = [];
+    for (const [text] of words) {
+      own(text, NEUTRAL_TEXT);
+      own(text, IN_FLOW);
+      own(text, TEXT_SIZING);
+      const role = { bindings: texts.bindings, paints: texts.paints, focusVisible: false };
+      for (const measure of bind({ label: text }, role, variables, "")) measures.push(measure);
+    }
+    flush(node);
+    for (const [text] of words) flush(text);
+    await drawSeparator(line, component, variant, report);
+    bindMeasures(measures, report, component, variant);
+  }
+  /**
    * A radio group (Spec 010 ③, D-07): the variant is a column — the label (the question), the
    * options, help, error — and every option a row: ring → gap → circle (control) with the dot
    * (indicator, the web's vector) in it, the option's label beside it. The group is bound once,
@@ -3546,11 +3609,18 @@ async function applyComponents(variables, warnings) {
    */
   function bindEntries(rows, component, variant, variables, keyed, textOf, measures) {
     const chosen = component.entry !== undefined ? component.entry.selected : 0;
+    // The second state of an entry (Nachlese 4 N-8): the active row, bound with what follows
+    // active (activeEntries) besides what follows the first key.
+    const active = component.entry !== undefined ? component.entry.active : undefined;
     rows.forEach((row, index) => {
       const values = (variant.entries || {})[index === chosen ? "true" : "false"] || { bindings: {} };
+      const second =
+        typeof active === "number"
+          ? (variant.activeEntries || {})[index === active ? "true" : "false"] || { bindings: {} }
+          : { bindings: {} };
       const merged = {
-        bindings: Object.assign({}, variant.bindings, values.bindings),
-        paints: Object.assign({}, variant.paints, values.paints),
+        bindings: Object.assign({}, variant.bindings, values.bindings, second.bindings),
+        paints: Object.assign({}, variant.paints, values.paints, second.paints),
         focusVisible: variant.focusVisible === true && index === 0,
       };
       const nodes = { "focus-ring": row.ring, "focus-gap": row.gap };
@@ -4096,9 +4166,14 @@ async function applyComponents(variables, warnings) {
         stamp(example, "example", key);
       }
       write(example, "name", spec.name);
-      if (component.structure === "upload") await drawUpload(example, component, variant, report, [], spec);
-      else if (component.structure === "card") await drawCard(example, component, variant, report, [], [], spec);
-      else if (component.structure === "avatar") await drawAvatar(example, component, variant, report, [], [], spec);
+      if (component.structure === "separator")
+        await drawSeparatorExample(example, component, variant, report, spec);
+      else if (component.structure === "upload")
+        await drawUpload(example, component, variant, report, [], spec);
+      else if (component.structure === "card")
+        await drawCard(example, component, variant, report, [], [], spec);
+      else if (component.structure === "avatar")
+        await drawAvatar(example, component, variant, report, [], [], spec);
       else await drawPagination(example, component, variant, report, spec);
       if (example.parent !== frame) frame.appendChild(example);
       const at = frame.children.indexOf(set) + 1 + index;
@@ -4643,6 +4718,11 @@ async function applyComponents(variables, warnings) {
         }
       }
       if (indicator !== undefined && typeof icons.indicator === "string") {
+        // A file drawn before Nachlese 4 N-7 holds the hand-drawn check mark directly in the
+        // indicator (the sign's vector, part mark): the Ikonaro's glyphs take its place.
+        for (const child of indicator.children.slice()) {
+          if (child.type === "VECTOR") child.remove();
+        }
         Object.assign(glyphNodes, drawGlyphs(indicator, icons.indicator, "indicator-", glyphMeasures));
       }
       if (iconFrame !== undefined) {
@@ -4913,6 +4993,15 @@ const px = (value) => Math.round(value * 100) / 100;
 const dims = (box) => px(box.width) + " × " + px(box.height);
 
 /**
+ * How far two lengths may lie apart and still be the same (Nachlese 4 N-5, F-6): half of what the
+ * report prints (px rounds to hundredths). Figma keeps geometry as 32-bit floats; a 0.01 — the
+ * empty placeholder of the plenstato — has no exact float, and a child's y plus its height came
+ * out a few millionths above the set it ends in: "das Set misst 101 × 148, die Kinder reichen bis
+ * 97 × 144" with a padding of 4 was no overlap. A real one is a whole pixel or more.
+ */
+const LAYOUT_SLACK = 0.005;
+
+/**
  * Reads back what the layout did, instead of trusting the call (F14): the size of every variant
  * against its content, the places the variants took, and the size of the set. Figma accepted a
  * grid once and left every variant at 0 × 0 — only a measurement says so.
@@ -5029,7 +5118,7 @@ function measureLayout(set, component) {
   const zero = boxes.filter((box) => box.width === 0 || box.height === 0);
   const smaller = boxes.filter(
     (box) => box.width !== 0 && box.height !== 0 &&
-      (box.width < box.content.width || box.height < box.content.height),
+      (box.width < box.content.width - LAYOUT_SLACK || box.height < box.content.height - LAYOUT_SLACK),
   );
   const unplaced = nodes
     .filter((node) => !(node.gridRowAnchorIndex >= 0 && node.gridColumnAnchorIndex >= 0))
@@ -5248,8 +5337,9 @@ function measureLayout(set, component) {
   const padRight = typeof set.paddingRight === "number" ? set.paddingRight : 0;
   const padBottom = typeof set.paddingBottom === "number" ? set.paddingBottom : 0;
   const outside = all
-    .filter((box) => box.x < 0 || box.y < 0 ||
-      box.x + box.width + padRight > set.width || box.y + box.height + padBottom > set.height)
+    .filter((box) => box.x < -LAYOUT_SLACK || box.y < -LAYOUT_SLACK ||
+      box.x + box.width + padRight > set.width + LAYOUT_SLACK ||
+      box.y + box.height + padBottom > set.height + LAYOUT_SLACK)
     .map((box) => box.name);
   const first = nodes[0];
   const last = nodes[nodes.length - 1];

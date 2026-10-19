@@ -559,6 +559,29 @@ export const METER_UNKNOWN_TEXT = "nicht geprüft";
  */
 export const VERTICAL_EXAMPLE = "vertikal";
 
+/**
+ * The examples beside a separator's set (Nachlese 4 N-6, F-7: in the overview the line was hardly
+ * visible, the vertical one not recognisable — a 1 px line alone in a cell of 640): each
+ * orientation once more between two texts, as the Vitrino shows it, `<set> – waagerecht|senkrecht
+ * zwischen zwei Texten`.
+ */
+export const SEPARATOR_EXAMPLE = "zwischen zwei Texten";
+
+/** The words of the orientations in the names of a separator's examples. */
+const SEPARATOR_ORIENTATION_WORDS: Readonly<Record<string, string>> = {
+  horizontal: "waagerecht",
+  vertical: "senkrecht",
+};
+
+/**
+ * The role of the two texts of a separator's example: the running text the line divides, in its
+ * colour on the Vitrino's ground. Bound like a label, nothing written as a number.
+ */
+const SEPARATOR_EXAMPLE_TEXT = {
+  color: "color.text.default",
+  typography: "typography.body.1",
+} as const;
+
 /** The number of pages of the pagination's examples (Spec 015 ①, O-2: „von 10"). */
 export const PAGINATION_EXAMPLE_TOTAL = 10;
 
@@ -1010,7 +1033,17 @@ export interface FigmaComponentSet {
    * Spec 011 ⑤: the items of a navigation (current) and the tabs of a tab list (active) the same
    * way — the Vitrino's words, the first the current or active one.
    */
-  entry?: { key: string; texts: string[]; selected: number };
+  /**
+   * The entries of a set (E7): their words, the chosen one, and (Nachlese 4 N-8) the active one
+   * where the entry has a second state — the variant's entries are then keyed `<key>,<active>`.
+   */
+  entry?: {
+    key: string;
+    texts: string[];
+    selected: number;
+    active?: number;
+    activeKey?: string;
+  };
   /**
    * A menu (Spec 014 ④, plan ④ D-06): the word of its trigger stand-in and its entries — the
    * Vitrino's three, one disabled, one danger — drawn as rows (entry carries the same words).
@@ -1032,6 +1065,7 @@ export interface FigmaComponentSet {
     name: string;
     variant: Record<string, string>;
     padding: number;
+    /** The pages of a pagination's example. */
     pages?: { texts: string[]; selected: number };
     /**
      * The chosen files an upload's example lists (Spec 015 ②, the spec's „mit zwei Dateien"):
@@ -1044,6 +1078,16 @@ export interface FigmaComponentSet {
      * as the visibility of the part, a frame outside the set has no property to switch.
      */
     toggled?: Record<string, boolean>;
+    /**
+     * The two texts a separator's example shows around its line (Nachlese 4 N-6), bound to the
+     * role of running text as a label is: the plan's bindings, paints and font for them.
+     */
+    texts?: {
+      words: [string, string];
+      bindings: Record<string, string>;
+      paints: Record<string, FigmaPaint>;
+      font?: { family: string; style: string; families: string[] };
+    };
   }[];
   example?: {
     name: string;
@@ -1252,6 +1296,20 @@ export interface FigmaComponentSet {
          * (Spec 014 ①, plan ① D-01: the current item of a navigation in the semibold cut): the
          * role's family, the cut of the bound font.weight.* token. Absent, the variant's font.
          */
+        font?: { family: string; style: string; families: string[] };
+      }
+    >;
+    /**
+     * What follows the second state of an entry (Nachlese 4 N-8: active, the suggestion the
+     * keyboard stands on), per its value, like `entries`; the plugin binds a row with both.
+     */
+    activeEntries?: Record<
+      string,
+      {
+        bindings: Record<string, string>;
+        paints?: Record<string, FigmaPaint>;
+        geometry?: Record<string, string>;
+        hidden?: string[];
         font?: { family: string; style: string; families: string[] };
       }
     >;
@@ -1943,6 +2001,14 @@ function iconsOf(
   if (skemo.a11y.role === "combobox" && skemo.parts.indicator !== undefined) {
     return { indicator: "chevron-down" };
   }
+  // Nachlese 4 N-7 (Spec 014 ② O-7): the check mark of a checkbox is the Ikonaro's check.
+  if (
+    structure === "toggle" &&
+    skemo.a11y.role === "checkbox" &&
+    skemo.parts.indicator !== undefined
+  ) {
+    return { indicator: "check" };
+  }
   if (structure === "table" && skemo.parts["sort-indicator"] !== undefined) {
     return { "sort-indicator": "sort-ascending" };
   }
@@ -2150,7 +2216,9 @@ function componentSetOf(
       ),
     ),
   ];
-  const keyedByEntry = (part: string, property: string): boolean => {
+  const keyedByEntry = (part: string, property: string): boolean =>
+    entryKeys.some((key) => keyedByEntryKey(part, property, key));
+  function keyedByEntryKey(part: string, property: string, key: string): boolean {
     const own = skemo.parts[part]?.[property as keyof (typeof skemo.parts)[string]];
     // A property that is the same as another (Spec 015 ①: the underline of a breadcrumb's item in
     // the item's colour) follows that one's keys.
@@ -2160,10 +2228,8 @@ function componentSetOf(
       own !== undefined && "sameAs" in own
         ? skemo.parts[otherPart]?.[otherProperty as keyof (typeof skemo.parts)[string]]
         : own;
-    return (
-      source !== undefined && "by" in source && source.by.some((key) => entryKeys.includes(key))
-    );
-  };
+    return source !== undefined && "by" in source && source.by.includes(key);
+  }
   const bindParts = (
     combination: Readonly<Record<string, string>>,
     which: (part: string, property: string) => boolean,
@@ -2244,25 +2310,41 @@ function componentSetOf(
       notDrawn,
       hidden,
     });
-    const entries: NonNullable<FigmaComponentSet["variants"][number]["entries"]> = {};
-    for (const value of combinationsOf(skemo, entryKeys)) {
-      if (entryKeys.length === 0) break;
-      const sink = { bindings: {}, paints: {}, geometry: {}, notDrawn: {}, hidden: [] as string[] };
-      bindParts({ ...combination, ...value }, keyedByEntry, sink);
-      // A weight keyed by the entry writes the entry's text in its own cut (Spec 014 ①, plan ①
-      // D-01): the current item of a navigation, the active tab.
-      const entryFont = Object.keys(skemo.parts)
-        .filter((part) => keyedByEntry(part, "weight"))
-        .map((part) => weightedFontOf(part, { ...combination, ...value }, base))
-        .find((font) => font !== undefined);
-      entries[entryKeys.map((key) => value[key]).join(",")] = {
-        bindings: sink.bindings,
-        ...(Object.keys(sink.paints).length === 0 ? {} : { paints: sink.paints }),
-        ...(Object.keys(sink.geometry).length === 0 ? {} : { geometry: sink.geometry }),
-        ...(sink.hidden.length === 0 ? {} : { hidden: sink.hidden }),
-        ...(entryFont === undefined ? {} : { font: entryFont }),
-      };
-    }
+    // The parts keyed by one entry key, per value of that key. The first key of the entry (E7:
+    // selected, current, active of a tab) fills `entries`; a second state of the entry (Nachlese
+    // 4 N-8: the active suggestion) fills `activeEntries` — each part named only with the key
+    // that keys it, as the Skemo side of the parity names it.
+    const entriesOf = (key: string | undefined) => {
+      const out: NonNullable<FigmaComponentSet["variants"][number]["entries"]> = {};
+      if (key === undefined) return out;
+      const which = (part: string, property: string) => keyedByEntryKey(part, property, key);
+      for (const value of combinationsOf(skemo, [key])) {
+        const sink = {
+          bindings: {},
+          paints: {},
+          geometry: {},
+          notDrawn: {},
+          hidden: [] as string[],
+        };
+        bindParts({ ...combination, ...value }, which, sink);
+        // A weight keyed by the entry writes the entry's text in its own cut (Spec 014 ①, plan ①
+        // D-01): the current item of a navigation, the active tab.
+        const entryFont = Object.keys(skemo.parts)
+          .filter((part) => which(part, "weight"))
+          .map((part) => weightedFontOf(part, { ...combination, ...value }, base))
+          .find((font) => font !== undefined);
+        out[value[key] ?? ""] = {
+          bindings: sink.bindings,
+          ...(Object.keys(sink.paints).length === 0 ? {} : { paints: sink.paints }),
+          ...(Object.keys(sink.geometry).length === 0 ? {} : { geometry: sink.geometry }),
+          ...(sink.hidden.length === 0 ? {} : { hidden: sink.hidden }),
+          ...(entryFont === undefined ? {} : { font: entryFont }),
+        };
+      }
+      return out;
+    };
+    const entries = entriesOf(entryKeys[0]);
+    const activeEntries = entriesOf(entryKeys[1]);
     // The focus ring (F11). Its colour sits in a field of a composite token and is compared by
     // no side, so it is kept out of the parity inventory (only colour-typed parts are reported).
     const ring = boundToken(skemo, "focus-ring", "ring", combination);
@@ -2324,6 +2406,7 @@ function componentSetOf(
       ...(position === undefined ? {} : { position: position as "start" | "end" }),
       ...(hidden.length === 0 ? {} : { hidden }),
       ...(Object.keys(entries).length === 0 ? {} : { entries }),
+      ...(Object.keys(activeEntries).length === 0 ? {} : { activeEntries }),
       ...(shadow === undefined ? {} : { shadow }),
       ...(stroke === undefined ? {} : { stroke }),
     };
@@ -2374,6 +2457,10 @@ function componentSetOf(
           need(weightedFontOf(part, { ...variant.props, ...value }, tokens), assignment);
         }
       }
+    }
+    // The texts of a separator's examples (Nachlese 4 N-6) in the running text's font.
+    if (structure === "separator") {
+      need(fontOf(tokens[SEPARATOR_EXAMPLE_TEXT.typography]?.value), assignment);
     }
   }
   const fonts = [...fontsNeeded.values()]
@@ -2434,55 +2521,80 @@ function componentSetOf(
       : paintOf(backdrop.token, resolutions, base);
   // Spec 015 ① (O-2): the pagination on page 1, 5 and 10 of 10, with the web's own choice of
   // pages (the Skemo's default siblings).
-  const examples =
-    structure === "pagination"
-      ? [1, 5, 10].map((page) => {
-          const texts = paginationWords(
-            page,
-            PAGINATION_EXAMPLE_TOTAL,
-            Number(skemo.props.find((prop) => prop.name === "siblings")?.default ?? 1),
-          );
-          return {
-            name: `${entry.ero.name} – Seite ${page} von ${PAGINATION_EXAMPLE_TOTAL}`,
-            variant: defaults,
+  // Nachlese 4 N-6 (F-7): the separator once per orientation between two words of the Vitrino,
+  // the line drawn as in the set, the texts bound to the role of running text.
+  const separatorTextPaint = paintOf(SEPARATOR_EXAMPLE_TEXT.color, resolutions, base);
+  const separatorTextFont = fontOf(base[SEPARATOR_EXAMPLE_TEXT.typography]?.value);
+  const separatorExamples =
+    structure === "separator"
+      ? (skemo.props.find((prop) => prop.name === "orientation")?.values ?? []).map(
+          (orientation) => ({
+            name: `${entry.ero.name} – ${SEPARATOR_ORIENTATION_WORDS[orientation] ?? orientation} ${SEPARATOR_EXAMPLE}`,
+            variant: { ...defaults, orientation },
             padding: parityPx(base[SET_GAP]?.value),
-            pages: { texts, selected: texts.indexOf(String(page)) },
-          };
-        })
-      : // Spec 015 ② (plan ② D-06): the upload with the Vitrino's two files beside its set.
-        structure === "upload"
-        ? [
-            {
-              name: `${entry.ero.name} – ${UPLOAD_EXAMPLE}`,
+            texts: {
+              words: [VITRINO_OPTIONS[0] ?? "", VITRINO_OPTIONS[1] ?? ""] as [string, string],
+              bindings: {
+                "label.color": variableName(SEPARATOR_EXAMPLE_TEXT.color),
+                "label.typography": variableName(SEPARATOR_EXAMPLE_TEXT.typography),
+              },
+              paints: separatorTextPaint === undefined ? {} : { "label.color": separatorTextPaint },
+              ...(separatorTextFont === undefined ? {} : { font: separatorTextFont }),
+            },
+          }),
+        )
+      : undefined;
+  const examples =
+    separatorExamples !== undefined
+      ? separatorExamples
+      : structure === "pagination"
+        ? [1, 5, 10].map((page) => {
+            const texts = paginationWords(
+              page,
+              PAGINATION_EXAMPLE_TOTAL,
+              Number(skemo.props.find((prop) => prop.name === "siblings")?.default ?? 1),
+            );
+            return {
+              name: `${entry.ero.name} – Seite ${page} von ${PAGINATION_EXAMPLE_TOTAL}`,
               variant: defaults,
               padding: parityPx(base[SET_GAP]?.value),
-              files: VITRINO_UPLOAD_FILES.map((file) => ({
-                name: file.name,
-                size: fileSizeText(file.size),
-              })),
-            },
-          ]
-        : // Spec 015 ③ (plan ③ D-05): the card without its image beside its set.
-          structure === "card"
+              pages: { texts, selected: texts.indexOf(String(page)) },
+            };
+          })
+        : // Spec 015 ② (plan ② D-06): the upload with the Vitrino's two files beside its set.
+          structure === "upload"
           ? [
               {
-                name: `${entry.ero.name} – ${CARD_EXAMPLE}`,
+                name: `${entry.ero.name} – ${UPLOAD_EXAMPLE}`,
                 variant: defaults,
                 padding: parityPx(base[SET_GAP]?.value),
-                toggled: { media: false },
+                files: VITRINO_UPLOAD_FILES.map((file) => ({
+                  name: file.name,
+                  size: fileSizeText(file.size),
+                })),
               },
             ]
-          : // Spec 015 ③ (plan ③ D-11): the avatar with its image shown beside its set.
-            structure === "avatar"
+          : // Spec 015 ③ (plan ③ D-05): the card without its image beside its set.
+            structure === "card"
             ? [
                 {
-                  name: `${entry.ero.name} – ${AVATAR_EXAMPLE}`,
+                  name: `${entry.ero.name} – ${CARD_EXAMPLE}`,
                   variant: defaults,
                   padding: parityPx(base[SET_GAP]?.value),
-                  toggled: { image: true },
+                  toggled: { media: false },
                 },
               ]
-            : undefined;
+            : // Spec 015 ③ (plan ③ D-11): the avatar with its image shown beside its set.
+              structure === "avatar"
+              ? [
+                  {
+                    name: `${entry.ero.name} – ${AVATAR_EXAMPLE}`,
+                    variant: defaults,
+                    padding: parityPx(base[SET_GAP]?.value),
+                    toggled: { image: true },
+                  },
+                ]
+              : undefined;
   const example =
     structure === "dialog" && backdrop !== undefined && backdropPaint !== undefined
       ? {
@@ -2516,7 +2628,8 @@ function componentSetOf(
   // 011 ④) has the select's chevron as its sort indicator — the web turns the same sign by the
   // direction; one shape for both pictures.
   // Spec 014 ②: the chevron of a select and the sort arrow of a table are icons of the plan
-  // (iconsOf), no sign; the check mark, the dot and the arc stay signs.
+  // (iconsOf), no sign; the dot and the arc stay signs. Nachlese 4 N-7: the check mark is an icon
+  // too (signOf has no sign for a checkbox any more).
   const sign =
     structure === "state"
       ? STATE_SIGN
@@ -2567,7 +2680,14 @@ function componentSetOf(
   // The options of a choice (Spec 010 ③, D-07): the Vitrino's words, the first chosen. The items
   // of a navigation and the tabs of a tab list (Spec 011 ⑤): the same words, the first current
   // or active.
-  const [entryKey] = entryKeys;
+  const [entryKey, activeKey] = entryKeys;
+  // The second state of an entry (Nachlese 4 N-8): the active suggestion, the second row — the
+  // first is the chosen one, so the set shows both states. Keyed after the first key.
+  const activeEntry =
+    activeKey !== undefined &&
+    skemo.slots.some((slot) => slot.entry?.key === entryKey && slot.entry?.active === activeKey)
+      ? { active: 1, activeKey }
+      : {};
   // The suggestions of a field with a listbox (Spec 014 ⑤): rows like a choice's options.
   // Spec 015 ① (plan ① D-05): a pagination shows the pages 1, 2, 3 (the first current), a
   // breadcrumb the Vitrino's three words with the last the current page.
@@ -2583,7 +2703,7 @@ function componentSetOf(
         ? { key: entryKey, texts: ["1", "2", "3"], selected: 0 }
         : structure === "breadcrumb"
           ? { key: entryKey, texts: [...VITRINO_OPTIONS], selected: VITRINO_OPTIONS.length - 1 }
-          : { key: entryKey, texts: [...VITRINO_OPTIONS], selected: 0 }
+          : { key: entryKey, texts: [...VITRINO_OPTIONS], selected: 0, ...activeEntry }
       : undefined;
   // The confirming action of a dialog looks like the butono it composes (Abnahme Spec 011 ②,
   // F-5): its roles read from the butono's Skemo in the same Modelo.
@@ -2935,6 +3055,11 @@ function sortVariables(variables: readonly FigmaVariable[]): FigmaVariable[] {
   return [...variables].sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
 }
 
+/** The name of the second state of a component's entries (Nachlese 4 N-8), or "". */
+function activeKeyOf(component: FigmaComponentSet): string {
+  return component.entry?.activeKey ?? "";
+}
+
 /**
  * What the Figma plan states about the components (Spec 003 T021, FR-12): every component
  * property with its values (`BOOLEAN`, `TEXT` and `NUMBER` as the kinds they stand for) and the
@@ -2979,6 +3104,11 @@ export function figmaPlanInventory(plan: unknown): Record<string, ParityItem> {
         { props: variant.props, part: variant },
         ...Object.entries(variant.entries ?? {}).map(([value, part]) => ({
           props: { ...variant.props, [component.entry?.key ?? ""]: value },
+          part,
+        })),
+        // The second state of an entry (Nachlese 4 N-8), named with its own key.
+        ...Object.entries(variant.activeEntries ?? {}).map(([value, part]) => ({
+          props: { ...variant.props, [activeKeyOf(component)]: value },
           part,
         })),
       ];

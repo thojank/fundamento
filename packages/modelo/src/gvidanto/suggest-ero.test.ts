@@ -4,7 +4,7 @@
 import { describe, expect, it } from "vitest";
 import { loadModelo } from "../load/load-modelo.js";
 import { defaultModeloSource } from "../load/source.js";
-import { suggestEro } from "./suggest-ero.js";
+import { suggestEro, uzoKeywordHit } from "./suggest-ero.js";
 
 const { modelo } = loadModelo(defaultModeloSource());
 if (modelo === undefined) throw new Error("the repository Modelo could not be loaded");
@@ -373,5 +373,86 @@ describe("suggest_ero: an own boundary that is a synonym of an own goal (Spec 01
     // A word of the boundary alone that is no goal word keeps the boundary's own answer.
     expect(suggest("Einblendung").suggestion).toBeNull();
     expect(suggest("Einblendung").boundary).toMatchObject({ ero: "avizo", case: "toast" });
+  });
+});
+
+// Nachlese 4 (Briefing 2026-10-18, Messung Spec 014 A3/A4/A8): keywords compared without hyphens
+// (N-1, O-18), German endings of a word in the text (N-2, F-3), the menuo for actions in every
+// table row (N-3, F-1), and a goal against the boundary of another Ero (N-4, F-2).
+describe("suggest_ero: Nachlese 4 – hyphens, endings, row actions, goal over a foreign boundary", () => {
+  it.each(["running text", "running-text", "runningtext", "Running-Text below the picture"])(
+    "N-1: '%s' hits the keyword running-text of the teksto",
+    (text) => {
+      const answer = suggest(text, "en");
+      expect(answer.suggestion?.ero).toBe("teksto");
+      expect(answer.matched).toEqual({
+        goal: "running-text",
+        keyword: "running-text",
+        lingvo: "en",
+      });
+    },
+  );
+
+  it("N-1: a hyphenated keyword of a Uzo hits its words apart and written together", () => {
+    for (const text of ["a call to action", "Call-to-Action", "calltoaction"]) {
+      expect(uzoKeywordHit({ en: ["call-to-action"] }, text), text).toEqual({
+        keyword: "call-to-action",
+        lingvo: "en",
+      });
+    }
+    // Two words never hit a keyword written as one (the way of Nachlese 3, Abweichung 1).
+    expect(uzoKeywordHit({ en: ["calltoaction"] }, "call to action")).toBeUndefined();
+  });
+
+  it("N-2 (F-3): 'Feld mit Vorschlägen beim Tippen' is the kompletigilo – vorschlägen is vorschläge with -n", () => {
+    const answer = suggest("Feld mit Vorschlägen beim Tippen", "de");
+    expect(answer.suggestion?.ero).toBe("kompletigilo");
+    expect(answer.matched).toEqual({ goal: "suggest", keyword: "vorschläge", lingvo: "de" });
+  });
+
+  it("N-2: a word of the text with an ending hits the keyword without it; the bare stem does not", () => {
+    expect(suggest("Hinweise zum Speicherplatz", "de").suggestion?.ero).toBe("avizo");
+    // 'nichts' is a keyword; 'nicht' carries no ending and stays no word of the plenstato.
+    expect(suggestEro(modelo, { goal: "nicht", lingvo: "de" }).ok).toBe(false);
+    // English keywords are compared as written: no German endings for them.
+    expect(suggestEro(modelo, { goal: "suggestion", lingvo: "en" }).ok).toBe(false);
+  });
+
+  it("N-3 (F-1): a delete icon in every table row names the menuo among the candidates", () => {
+    const answer = suggest(
+      "Ich brauche ein Mülleimer-Icon zum Löschen in jeder Tabellenzeile",
+      "de",
+    );
+    expect(answer.action).toBe("ask-human");
+    expect(answer.candidates).toContainEqual(
+      expect.objectContaining({
+        kind: "goal",
+        ero: "menuo",
+        goal: "action-menu",
+        keyword: "tabellenzeile",
+      }),
+    );
+    // Actions in a table row lead to the menuo on their own.
+    expect(suggest("Aktionen in jeder Tabellenzeile", "de").suggestion?.ero).toBe("menuo");
+  });
+
+  it("N-4 (F-2): the goal word überschrift outweighs the boundary word fett of the tekstareo", () => {
+    const answer = suggest("Mach diesen Text fett, das ist die Überschrift des Abschnitts", "de");
+    expect(answer.action).toBeUndefined();
+    expect(answer.suggestion).toEqual({ ero: "titolo", props: { level: "2" } });
+    expect(answer.matched).toEqual({
+      goal: "section-heading",
+      keyword: "überschrift",
+      lingvo: "de",
+    });
+    expect(answer.regulo?.name).toBe("heading-levels-in-order");
+  });
+
+  it("N-4: a foreign boundary that hits more words than the goal still asks a person", () => {
+    const answer = suggest("Fett und Formatierung in der Überschrift", "de");
+    expect(answer.action).toBe("ask-human");
+    expect(answer.candidates?.[0]).toEqual(
+      expect.objectContaining({ kind: "boundary", ero: "tekstareo", case: "rich-text" }),
+    );
   });
 });

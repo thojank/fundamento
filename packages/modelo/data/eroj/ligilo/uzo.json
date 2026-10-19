@@ -108,6 +108,10 @@
         {
           "ero": "spuro",
           "kialo": "The items of a breadcrumb are links up the hierarchy, because each one moves to a level above; the last is text."
+        },
+        {
+          "ero": "ikono",
+          "kialo": "The mark of an external destination at the end of the link is an ikono external, because the sign that a place lies outside is vocabulary of the Ikonaro, drawn by the Aspekto in the size of the link."
         }
       ],
       "never": [

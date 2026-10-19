@@ -62,8 +62,7 @@
         "action": "not-supported",
         "keywords": {
           "en": [
-            "drawer",
-            "side-panel"
+            "drawer"
           ],
           "de": [
             "seitenpaneel",

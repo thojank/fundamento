@@ -1210,7 +1210,9 @@ describe("Figma plan for the markobutono (Spec 010 ②)", () => {
     expect(set?.description).toBe(markobutono?.uzo?.purpose);
     expect(set?.label?.defaultValue).toBe("Option");
     expect(set?.texts).toEqual({ error: "Fehler" });
-    expect(set?.sign).toMatch(/^<svg [^>]*viewBox="0 0 16 16"/);
+    // Nachlese 4 N-7 (Spec 014 ② O-7): the check mark is the Ikonaro's check, no sign.
+    expect(set?.sign).toBeUndefined();
+    for (const each of set?.variants ?? []) expect(each.icons).toEqual({ indicator: "check" });
     // The switch keeps its knob: no sign, no texts.
     const sxaltilo = plan.components.find((component) => component.set === "sxaltilo");
     expect(sxaltilo?.sign).toBeUndefined();
@@ -2846,6 +2848,32 @@ describe("the Figma plan draws icons (Spec 014 ②)", () => {
     });
     expect(apartigilo?.variants[1]?.bindings["box.height"]).toBe("size/control/medium");
     expect(apartigilo?.label).toBeUndefined();
+    // Nachlese 4 N-6 (F-7): each orientation once more between two words of the Vitrino, the
+    // texts bound to the role of running text — the line is seen where it divides.
+    expect(
+      apartigilo?.examples?.map((example) => [
+        example.name,
+        example.variant.orientation,
+        example.texts?.words,
+      ]),
+    ).toEqual([
+      ["apartigilo – waagerecht zwischen zwei Texten", "horizontal", ["Eins", "Zwei"]],
+      ["apartigilo – senkrecht zwischen zwei Texten", "vertical", ["Eins", "Zwei"]],
+    ]);
+    for (const example of apartigilo?.examples ?? []) {
+      expect(example.texts?.bindings).toEqual({
+        "label.color": "color/text/default",
+        "label.typography": "typography/body/1",
+      });
+      expect(example.texts?.paints["label.color"]).toBeDefined();
+      expect(example.texts?.font).toBeDefined();
+      expect(example.padding).toBeGreaterThan(0);
+    }
+    // The texts' font is one the run loads for the set.
+    const font = apartigilo?.examples?.[0]?.texts?.font;
+    expect(
+      apartigilo?.fonts?.some((each) => each.family === font?.family && each.style === font?.style),
+    ).toBe(true);
     const saltligilo = plan.components.find((component) => component.set === "saltligilo");
     expect(saltligilo?.structure).toBe("control");
     expect(saltligilo?.variants.map((variant) => variant.props.state)).toEqual(["rest", "focus"]);
@@ -3049,12 +3077,29 @@ describe("the Figma plan draws the faldilo and the kompletigilo (Spec 014 ⑤)",
     });
     expect(open?.shadow?.variable).toBe("elevation/shadow/overlay");
     expect(closed?.hidden).toContain("listbox");
+    // Nachlese 4 N-8: the second suggestion is the active one — the first chosen, the second
+    // under the keyboard, so the set shows both states of an entry.
     expect(kompletigilo?.entry).toEqual({
       key: "selected",
       texts: ["Eins", "Zwei", "Drei"],
       selected: 0,
+      active: 1,
+      activeKey: "active",
     });
     expect(kompletigilo?.texts?.text).toBe("Bitte wählen");
+    // What follows selected stands in the entries, what follows active in activeEntries — each
+    // part named with the key that keys it, as the parity names it.
+    expect(open?.entries?.false?.bindings).toEqual({ "suggestion.color": "color/text/subtle" });
+    expect(open?.entries?.true?.bindings).toEqual({ "suggestion.color": "color/text/default" });
+    expect(open?.activeEntries?.true?.bindings).toEqual({
+      "suggestion.fill": "color/background/sunken",
+    });
+    expect(open?.activeEntries?.false?.bindings).toEqual({
+      "suggestion.fill": "color/background/raised",
+    });
+    // N-9: loading is a property of the set, no axis and no part.
+    expect(kompletigilo?.properties.loading).toBe("BOOLEAN");
+    expect(Object.keys(open?.props ?? {})).toEqual(["size", "expanded", "state"]);
   });
 });
 

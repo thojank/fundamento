@@ -51,11 +51,18 @@ describe("kompletigilo in the repo Modelo (section ⑤, G1, G2)", () => {
       ["allow-free", "boolean", false],
       ["min-chars", "number", 1],
       ["expanded", "boolean", false],
+      // Nachlese 4 N-9 (O-24): the application loads new suggestions.
+      ["loading", "boolean", false],
     ]);
     expect(skemo?.states).toEqual(["rest", "hover", "focus", "disabled", "invalid"]);
     expect(skemo?.slots).toEqual([
       { name: "label", default: true, text: true },
-      { name: "options", text: true, entry: { key: "selected", equals: "value" } },
+      // Nachlese 4 N-8 (O-23): the suggestion the keyboard stands on is a state of its entry too.
+      {
+        name: "options",
+        text: true,
+        entry: { key: "selected", equals: "value", active: "active" },
+      },
       { name: "help", text: true },
       { name: "error", text: true },
     ]);
@@ -91,6 +98,8 @@ describe("kompletigilo in the repo Modelo (section ⑤, G1, G2)", () => {
     });
     expect(skemo?.parts.suggestion).toEqual({
       color: { by: ["selected"] },
+      // Nachlese 4 N-8 (O-23): the active suggestion is a bound part, no class.
+      fill: { by: ["active"] },
       typography: { fixed: "typography.label.1" },
       height: { fixed: "size.target.min" },
       "inline-padding": { fixed: "spacing.medium" },
@@ -118,12 +127,16 @@ describe("kompletigilo in the repo Modelo (section ⑤, G1, G2)", () => {
       invalid: ["aria-invalid"],
       disabled: ["aria-disabled"],
       expanded: ["aria-expanded"],
+      // Nachlese 4 N-9: busy while the application loads, still operable (no aria-disabled).
+      loading: ["aria-busy"],
     });
     expect(skemo?.a11y.keys).toEqual(["ArrowUp", "ArrowDown", "Enter", "Escape"]);
     expect(skemo?.a11y.texts).toEqual({
       required: { de: "erforderlich", en: "required" },
       "options-empty": { de: "Keine Vorschläge", en: "No suggestions" },
       "options-count": { de: "Vorschläge", en: "suggestions" },
+      // Nachlese 4 N-9 (O-24): heard while the application loads new suggestions.
+      loading: { de: "lädt", en: "loading" },
     });
   });
 
@@ -175,8 +188,9 @@ describe("the Uzo of the kompletigilo (section ⑤, G6)", () => {
   it("the brief names size and expanded as axes, label and options as duties, and stays under 750", () => {
     if (kompletigilo === undefined) throw new Error("missing");
     const brief = briefOf(kompletigilo);
-    // selected is the state of an entry; the brief names it as an axis (Spec 011 ① O-3).
-    expect(brief.axes.map((axis) => axis.name)).toEqual(["size", "expanded", "selected"]);
+    // selected is the state of an entry; the brief names it as an axis (Spec 011 ① O-3), and
+    // active, the second state of the entry, too (Nachlese 4 N-8).
+    expect(brief.axes.map((axis) => axis.name)).toEqual(["size", "expanded", "selected", "active"]);
     expect(brief.required).toEqual({ props: [], slots: ["label", "options"] });
     expect(Math.ceil(JSON.stringify(brief).length / 3)).toBeLessThanOrEqual(750);
   });
@@ -216,6 +230,50 @@ describe("the Reguloj of the kompletigilo (G8, E5)", () => {
     expect(
       judge({ props: { placeholder: "Deutschland" }, texts: { options: ["Deutschland"] } }),
     ).toEqual([["select-placeholder-is-prompt", "error"]]);
+  });
+});
+
+// Nachlese 4 N-8 (Spec 014 ⑤ O-23, Abweichung 2): the suggestion the keyboard stands on
+// (aria-activedescendant) is a bound part — its fill by active: the sunken ground under the
+// active one, the listbox's own raised fill under the others — with the KontrastParoj every text
+// of the field needs on it (declared, measured, passed: plan D-08; the menuo's tertiary hover is
+// no pair the field's help and error pass). N-9 (O-24): while the application loads, loading.
+describe("the active suggestion and the loading field (Nachlese 4 N-8, N-9)", () => {
+  it("active is a state of the entry, no prop: true for the one suggestion, false for the others", () => {
+    expect(skemo?.props.some((prop) => prop.name === "active")).toBe(false);
+    expect(boundToken(skemoOrThrow(), "suggestion", "fill", { active: "true" })?.token).toBe(
+      "color.background.sunken",
+    );
+    expect(boundToken(skemoOrThrow(), "suggestion", "fill", { active: "false" })?.token).toBe(
+      "color.background.raised",
+    );
+    // No axis of the variants: active, like selected, belongs to one entry.
+    expect(variantKeys(skemoOrThrow())).toEqual(["size", "expanded", "state"]);
+  });
+
+  it("the texts on the active suggestion are declared pairs, and the Modelo is valid", () => {
+    const pairs = new Set(
+      modelo.kontrastParoj.map((pair) => `${pair.foreground} ${pair.background}`),
+    );
+    for (const background of ["color.background.sunken", "color.background.raised"]) {
+      for (const foreground of [
+        "color.text.default",
+        "color.text.subtle",
+        "color.text.muted",
+        "color.status.danger.text",
+      ]) {
+        expect(pairs.has(`${foreground} ${background}`), `${foreground} on ${background}`).toBe(
+          true,
+        );
+      }
+    }
+  });
+
+  it("loading is a boolean prop that keys no part and is heard as 'lädt' (N-9)", () => {
+    const loading = skemo?.props.find((prop) => prop.name === "loading");
+    expect(loading).toMatchObject({ kind: "boolean", default: false });
+    expect(loading?.description).toMatch(/aria-busy/);
+    expect(skemo?.a11y.states.loading).toEqual(["aria-busy"]);
   });
 });
 

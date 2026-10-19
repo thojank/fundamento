@@ -99,6 +99,10 @@
         {
           "ero": "dialogo",
           "kialo": "A check mark inside a dialog applies with the confirmation, because the dialog is the form it belongs to."
+        },
+        {
+          "ero": "ikono",
+          "kialo": "The check mark in the box is an ikono check, because the sign for chosen and done is vocabulary of the Ikonaro, drawn by the Aspekto in the size of the box."
         }
       ],
       "never": [

@@ -1234,6 +1234,10 @@ export interface SkemoSlot {
     key: Name;
     equals: Name;
     empty?: Name;
+    /**
+     * A second state of one entry (Nachlese 4 N-8): the entry the keyboard stands on while the focus stays elsewhere — the active suggestion of a combobox (aria-activedescendant). True for that one entry, false for every other; no prop holds it, the element sets it as the person keys through the list. Parts may be keyed by it (by, when) like by key; no axis of the variants.
+     */
+    active?: string;
   };
   /**
    * The text of the slot is for assistive technology alone (Spec 011 ③, plan ③ D-05): present in the accessible content, never shown — the long form of a badge; a projection keeps it out of sight, a drawn set leaves it out.

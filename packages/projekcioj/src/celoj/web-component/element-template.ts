@@ -168,11 +168,12 @@ export function hostOf(
 
 /**
  * The decorative mark the control shows when a prop with an a11y text is true (Spec 008, D-05):
- * the fallback of the last decorative slot, so a slotted icon replaces it. An arrow out of a box,
- * in the current colour, sized like an icon; no text node, no name of its own.
+ * the fallback of the last decorative slot, so a slotted icon replaces it. Since Nachlese 4 N-7
+ * (Spec 014 ② O-7) the Ikonaro's external — the Aspekto draws it, in the current colour and the
+ * size of the Ero; no hand-drawn arrow, no text node, no name of its own (the ikono is decorative
+ * without a label).
  */
-const MARK =
-  '<svg aria-hidden="true" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 10l5-5M7 5h4v4M9 3H4a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V7"/></svg>';
+const MARK = '<fm-ikono name="external"></fm-ikono>';
 
 /**
  * The sign of a required field (Spec 009, A2, D-07): an asterisk as a small vector in the current
@@ -187,8 +188,13 @@ const REQUIRED_MARK =
  */
 const DOT_PATH = "M8 4a4 4 0 1 1 0 8a4 4 0 1 1 0-8z";
 
-/** The outline of the check mark in a box of 16 × 16 (Spec 010 ②, D-08). */
-const CHECK_PATH = "M6.4 12.6 2.2 8.4l1.4-1.4 2.8 2.8 6-6 1.4 1.4z";
+/**
+ * The check mark of a checkbox (Spec 010 ②, D-08): since Nachlese 4 N-7 (Spec 014 ② O-7) the
+ * Ikonaro's check in the indicator, in the indicator's colour and the size of the box, as the
+ * chevron of a select is (Spec 014 ②); the dot of a radio, the arc of a state and the mark of a
+ * required field stay signs of the projection.
+ */
+const IKONO_CHECK = '<fm-ikono name="check"></fm-ikono>';
 
 /**
  * The chevron of a select in a box of 16 × 16 (Spec 010 ④, D-05): a filled outline pointing down,
@@ -198,11 +204,12 @@ const CHECK_PATH = "M6.4 12.6 2.2 8.4l1.4-1.4 2.8 2.8 6-6 1.4 1.4z";
 const CHEVRON_PATH = "M1.9 5.7 3.3 4.3 8 9l4.7-4.7 1.4 1.4L8 11.8z";
 
 /**
- * The sign the indicator of a toggle shows, per a11y role (Spec 010 ②, D-08, D-09): the check mark
- * of a checkbox, a filled vector in the current colour — the colour of the part indicator; a sign
- * of the projection, no text node (Art. VIII), like the mark of a required field. A knob has none.
- * The web fills the indicator with it (`100%`); the Figma Celo imports the same vector in its own
- * box of 16 (one shape for both pictures).
+ * The sign an indicator shows, per a11y role (Spec 010 ③, D-05): the dot of a chosen option, a
+ * filled vector in the current colour — the colour of the part indicator; a sign of the
+ * projection, no text node (Art. VIII), like the mark of a required field. A knob has none, and
+ * since Nachlese 4 N-7 a checkbox neither: its check mark is the Ikonaro's (IKONO_CHECK). The web
+ * fills the indicator with it (`100%`); the Figma Celo imports the same vector in its own box of
+ * 16 (one shape for both pictures).
  */
 export function signOf(role: string, size = "100%"): string | undefined {
   // The dot of a chosen option (Spec 010 ③, D-05): half the box of the indicator, in its middle.
@@ -213,8 +220,7 @@ export function signOf(role: string, size = "100%"): string | undefined {
   if (role === "combobox") {
     return `<svg aria-hidden="true" viewBox="0 0 16 16" width="${size}" height="${size}" fill="currentColor"><path d="${CHEVRON_PATH}"/></svg>`;
   }
-  if (role !== "checkbox") return undefined;
-  return `<svg aria-hidden="true" viewBox="0 0 16 16" width="${size}" height="${size}" fill="currentColor"><path d="${CHECK_PATH}"/></svg>`;
+  return undefined;
 }
 
 /**
@@ -297,7 +303,8 @@ function toggleMarkup(
   const label = `<label part="label" id="label" for="control"><slot></slot>${mark}</label>`;
   const texts = textsMarkup(slots);
   const beside = texts === "" ? label : `<div>${label}${texts}</div>`;
-  return `<div part="field"><button part="control" id="control" type="button" role="${role}" aria-labelledby="label"><span part="indicator">${signOf(role) ?? ""}</span></button>${beside}<span id="fm-texts" hidden></span></div>`;
+  const sign = role === "checkbox" ? IKONO_CHECK : (signOf(role) ?? "");
+  return `<div part="field"><button part="control" id="control" type="button" role="${role}" aria-labelledby="label"><span part="indicator">${sign}</span></button>${beside}<span id="fm-texts" hidden></span></div>`;
 }
 
 /**
@@ -2449,7 +2456,15 @@ ${
     const lingvo = this.#lingvo();
     const none = TEXTS["options-empty"]?.[lingvo] ?? TEXTS["options-empty"]?.en ?? "";
     const word = TEXTS["options-count"]?.[lingvo] ?? TEXTS["options-count"]?.en ?? "";
-    const heard = matches.length === 0 ? none : \`\${matches.length} \${word}\`;
+    // While the application loads new suggestions (Nachlese 4 N-9, loading), the live region says
+    // so in the words of a11y.texts; the count comes back with the next render.
+    const loading = TEXTS["loading"]?.[lingvo] ?? TEXTS["loading"]?.en ?? "";
+    const heard =
+      this.propValue("loading") === true
+        ? loading
+        : matches.length === 0
+          ? none
+          : \`\${matches.length} \${word}\`;
     if (count instanceof HTMLElement && count.textContent !== heard) count.textContent = heard;
     let noResults = listbox.querySelector('[part="no-results"]');
     if (matches.length === 0 && this.#suggestTyped && noResults === null) {
@@ -2465,11 +2480,14 @@ ${
     return matches;
   }
 
-  /** The active option is heard through aria-activedescendant on the input. */
+  /**
+   * The active option is heard through aria-activedescendant on the input and seen through its
+   * fill (Nachlese 4 N-8): the row says data-active, the state of its entry the stylesheet keys.
+   */
   #suggestMark(): void {
     const rows = [...this.#listbox().querySelectorAll('[part="suggestion"]')] as HTMLElement[];
     const active = rows[this.#suggestActive];
-    rows.forEach((row) => row.classList.toggle("fm-active", row === active));
+    rows.forEach((row) => row.setAttribute("data-active", String(row === active)));
     if (active === undefined) this.#control.removeAttribute("aria-activedescendant");
     else this.#control.setAttribute("aria-activedescendant", active.id);
   }
@@ -3286,7 +3304,8 @@ ${isStacking ? "    this.#autoLayout();\n" : ""}`
     }
 `
       : "",
-    isSelect
+    // The check mark of a checkbox (Nachlese 4 N-7) takes the size of the box like the chevron.
+    isSelect || (isToggle && role === "checkbox")
       ? `    const chevron = this.shadowRoot?.querySelector('[part="indicator"] fm-ikono');
     const fieldSize = String(this.propValue("size") ?? "medium");
     if (chevron !== null && chevron !== undefined && chevron.getAttribute("size") !== fieldSize) {
@@ -3294,10 +3313,13 @@ ${isStacking ? "    this.#autoLayout();\n" : ""}`
     }
 `
       : "",
+    // A slotted icon and the mark the last icon slot falls back to (Nachlese 4 N-7: the ikono
+    // external) take the size of the Ero.
     (host === "button" || host === "a") && !isSkip
       ? `    if (HAS_PROP.has("size")) {
       const iconSize = String(this.propValue("size") ?? "medium");
-      for (const slotted of this.querySelectorAll(':scope > fm-ikono[slot^="icon-"]')) {
+      const fallbacks = this.shadowRoot?.querySelectorAll('slot[name^="icon-"] > fm-ikono') ?? [];
+      for (const slotted of [...this.querySelectorAll(':scope > fm-ikono[slot^="icon-"]'), ...fallbacks]) {
         if (slotted.getAttribute("size") !== iconSize) slotted.setAttribute("size", iconSize);
       }
     }
@@ -3544,13 +3566,13 @@ ${autoDisconnect}
     }
     if (HAS_PROP.has("loading")) {
       const busy = this.propValue("loading") === true;
+      // A button that works ignores activation; a field that loads suggestions (Nachlese 4 N-9)
+      // stays operable — the person keeps typing — and is only busy.
       if (busy) {
         control.setAttribute("aria-busy", "true");
-        control.setAttribute("aria-disabled", "true");
-      } else {
+${isSuggest ? "" : '        control.setAttribute("aria-disabled", "true");\n'}      } else {
         control.removeAttribute("aria-busy");
-        control.removeAttribute("aria-disabled");
-      }
+${isSuggest ? "" : '        control.removeAttribute("aria-disabled");\n'}      }
     }
     // A link: \`to\` is its target (Art. VIII, the Web Celo spells it href); \`external\` marks
     // that the target lies outside the application (Spec 008, D-09).
@@ -3595,7 +3617,11 @@ ${
     this.#texts.textContent = heard.join(" ");
 `
     : `    const heard = Object.entries(TEXTS)
-      .filter(([prop]) => this.propValue(prop) === true)
+      .filter(([prop]) => this.propValue(prop) === true)${
+        // The loading of a field with suggestions is said in its live region (Nachlese 4 N-9),
+        // not described, and marks nothing (the mark is the required asterisk).
+        isSuggest ? '\n      .filter(([prop]) => prop !== "loading")' : ""
+      }
       .map(([, byLingvo]) => byLingvo[lingvo] ?? byLingvo.en ?? Object.values(byLingvo)[0] ?? "");
     this.#texts.textContent = heard.join(" ");
     if (heard.length > 0) described.push("fm-texts");

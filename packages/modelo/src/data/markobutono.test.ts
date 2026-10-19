@@ -249,7 +249,13 @@ describe("the Uzo of the markobutono (section 2, G5)", () => {
   it("composes in a form and a dialog, with the kampo and the butono, never in a slot of the butono", () => {
     expect(uzo?.composes.containers.map((entry) => entry.name)).toEqual(["form", "dialog"]);
     // Spec 011 ② (G5): the checkbox names the dialogo among its companions.
-    expect(uzo?.composes.with.map((entry) => entry.ero)).toEqual(["kampo", "butono", "dialogo"]);
+    // Nachlese 4 N-7: the check mark is an ikono check.
+    expect(uzo?.composes.with.map((entry) => entry.ero)).toEqual([
+      "kampo",
+      "butono",
+      "dialogo",
+      "ikono",
+    ]);
     expect(uzo?.composes.never.map((entry) => entry.ero)).toEqual(["butono"]);
   });
 
