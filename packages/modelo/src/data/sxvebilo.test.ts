@@ -168,4 +168,21 @@ describe("suggest_ero of the popover (Gvidanto)", () => {
       action: "ask-human",
     });
   });
+
+  it("O-39 (Nachlese 5): the drawer of the dialogo and of the sxvebilo is one case – both ask a person with the same kialo", () => {
+    const drawerOf = (name: string) =>
+      eroNamed(name)?.uzo?.boundary.find((entry) => entry.case === "drawer");
+    const ofDialogo = drawerOf("dialogo");
+    const ofSxvebilo = drawerOf("sxvebilo");
+    expect(ofDialogo?.action).toBe("ask-human");
+    expect(ofSxvebilo?.action).toBe("ask-human");
+    expect(ofDialogo?.kialo).toBe(ofSxvebilo?.kialo);
+    expect(ofSxvebilo?.kialo).toMatch(/neither a dialog nor a popover/);
+    // Whichever Uzo speaks, the answer is the same.
+    for (const text of ["Drawer", "Seitenpaneel mit dem Inhalt", "a sidepanel that slides in"]) {
+      const answer = suggest(text);
+      expect(answer.boundary?.action, text).toBe("ask-human");
+      expect(answer.boundary?.kialo, text).toBe(ofSxvebilo?.kialo);
+    }
+  });
 });

@@ -171,8 +171,9 @@ describe("the Uzo of the dialogo (section ②, G5)", () => {
       ["non-modal", "sxvebilo"],
     ]);
     expect(uzo?.instead[0]?.kialo).toMatch(/avizo/);
+    // Nachlese 5 O-39: the drawer asks a person, as the sxvebilo's does (one answer, one kialo).
     expect(uzo?.boundary.map((entry) => [entry.case, entry.action])).toEqual([
-      ["drawer", "not-supported"],
+      ["drawer", "ask-human"],
       ["nested-dialog", "not-supported"],
     ]);
     for (const entry of [...(uzo?.boundary ?? []), ...(uzo?.instead ?? [])]) {
@@ -410,7 +411,7 @@ describe("check_usage and suggest_ero of the dialog (G6, G7, Gvidanto)", () => {
     expect(suggest("Seitenpaneel mit dem Inhalt").boundary).toMatchObject({
       ero: "dialogo",
       case: "drawer",
-      action: "not-supported",
+      action: "ask-human",
     });
     expect(suggest("verschachtelt im Dialog").boundary).toMatchObject({
       ero: "dialogo",
