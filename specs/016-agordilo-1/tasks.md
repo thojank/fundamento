@@ -38,7 +38,31 @@
 
 ## ② Werkstatt
 
-Folgt in PR ②.
+**Branch:** `261019-spec-016-werkstatt-197e67` (von `main` `8ac1934`) · Aufgaben ② zählen ab T1701.
+
+### A – Rot zuerst
+- [x] **T1701 Tests** Agordilo: `browser.test.ts` (Einstieg ohne node-Kante, Export des Pakets), `ziele.test.ts` (Ziel je Stufe gelesen, markiert, Böden, Raporto und Patch), `flava.test.ts` (Vorschlag als Patch `apply`); Modelo: `provided-schemas.test.ts`; Projekcioj: `vitrino.test.ts` (Modus-Schalter, Insel `fm-werkstatt` ohne Maschinenpfad, Bündel ohne node-Import, keine eigene Farbe); Eroj: `vitrino.check.ts` (Werkstatt: Modus und Fragment, Panel aus Eroj, Live-Ableitung, Gelb-Fall, Jugxo, Paletten mit Ziel, Gegenüberstellung, Fragment, Gleichheit Browser–CLI, M3, Tastatur und Live-Region, axe ×4); Doku-Test plan ②/tasks ②. Rot in `fa77de1`.
+
+### B – Grün
+- [x] **T1702 Modelo** Schema `AgordoZieloj` (`Agordo.ziele`), Typen generiert, `provideModeloSchemas` (D-03, D-09).
+- [x] **T1703 Agordilo** `ziele` in `palettes.ts` (`floored`, `overridden`), `apply` in `explain.ts`/`raporto.ts`/`check.ts`, `browser.ts` und Export `./browser`, `referenceStructureFiles`, `fingerprintDocuments` (D-02, D-08, D-09).
+- [x] **T1704 Vitrino-Celo** `CeloInput.files`, `werkstattDatumoj`, Insel und Bündel in `html.ts`, Modus und Fragment-API in `skripto.ts`, `werkstatt-bundle.ts` (Vite, node-Stubs) (D-01–D-03, D-10).
+- [x] **T1705 Werkstatt-Modul** `werkstatt.ts`: Panel, Live-Ableitung, entprellte Prüfung, Bericht, Paletten, Export und Jugxo, Gegenüberstellung, Fragment, `fmWerkstatt.measure` (D-04–D-13).
+
+### C – Abschluss
+- [x] **T1706 Doku** plan ②, tasks ②, README (Werkstatt).
+- [x] **T1707 CI** grün (Lauf 39310455722); Hash des grünen Stands `7c1828d` in der Zeile der Messungen.
+
+### Messungen
+
+| Was | Wert |
+|---|---|
+| Commits ② | rot `fa77de1`, grün `7c1828d` (Hash des grünen Stands, CI grün); dieser Eintrag im Folgecommit |
+| Tests lokal | Agordilo 42, CLI 72, MCP 312, Projekcioj 727, Modelo 3 591 grün; `check:vitrino` 43 (davon 13 Werkstatt) und `check:bazo` grün (Chromium); `pnpm lint` ohne neue Befunde; `check:vortaro-lint|parity|regularo|mankoj|alirebleco|clean-room|ikonaro` ohne Fehler; `pnpm perf` grün (`fm projekcioj build` 2,0–2,6 s, Budget 10 s) |
+| M3 | Mac (Chromium headless): Ableitung Median 46,5 ms, p95 64,4 ms; Prüfung Median 1 053,9 ms, p95 1 087,5 ms; beides Median 1 099,2 ms, p95 1 134,8 ms (Tabelle in plan ②) |
+| Gleichheit Browser–CLI | provo: Raporto der Werkstatt gleich `raporto.json` der Fixture, Wert für Wert (Test „browser and CLI agree on provo“) |
+| Vitrino | 8,1 MB statt 6,1 MB (Bündel 1,26 MB, Insel 0,69 MB) |
+| CI | Lauf 39310455722 (`7c1828d`, alle acht Jobs grün, Wanduhr 6:57): `checks` 1:24, `unit` 5:47, `projekcioj` 3:26 / 3:14, `eroj` 2:16 / 2:04, `alirebleco-eroj` 3:51, `rendered-checks` 6:43 (mit den 13 Werkstatt-Tests); M3 im CI-Browser: Ableitung Median 68,1 ms, p95 104,7 ms; Prüfung Median 1 373,3 ms, p95 1 433,6 ms |
 
 ## ③ Gvidanto und Doku
 

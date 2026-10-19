@@ -69,8 +69,22 @@ export const CONFIG_SCHEMA_ID = "https://ciferecigo.com/fundamento/schema/config
  */
 export const CONFIG_SCHEMA_URL = new URL("../../schema/config.schema.json", import.meta.url);
 
+/**
+ * Schemas handed in instead of read from disk (Spec 016 ②, plan ② D-03): the Werkstatt runs the
+ * Agordilo in the browser, where no file can be read; the Vitrino embeds both schemas and
+ * provides them before the first validation. `undefined` takes the provision back.
+ */
+let provided: { modelo: Record<string, unknown>; config: Record<string, unknown> } | undefined;
+
+export function provideModeloSchemas(
+  schemas: { modelo: Record<string, unknown>; config: Record<string, unknown> } | undefined,
+): void {
+  provided = schemas;
+}
+
 /** Reads the config schema from disk as a parsed JSON object. */
 export function readConfigSchema(): Record<string, unknown> {
+  if (provided !== undefined) return { ...provided.config };
   const schema: unknown = JSON.parse(readFileSync(CONFIG_SCHEMA_URL, "utf8"));
   if (typeof schema !== "object" || schema === null || Array.isArray(schema)) {
     throw new Error(`Config schema ${CONFIG_SCHEMA_URL.href} is not a JSON object.`);
@@ -80,6 +94,7 @@ export function readConfigSchema(): Record<string, unknown> {
 
 /** Reads the canonical schema from disk as a parsed JSON object. */
 export function readModeloSchema(): Record<string, unknown> {
+  if (provided !== undefined) return { ...provided.modelo };
   const schema: unknown = JSON.parse(readFileSync(MODELO_SCHEMA_URL, "utf8"));
   if (typeof schema !== "object" || schema === null || Array.isArray(schema)) {
     throw new Error(`Modelo schema ${MODELO_SCHEMA_URL.href} is not a JSON object.`);

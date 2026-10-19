@@ -188,6 +188,9 @@ importers:
 
   packages/projekcioj:
     dependencies:
+      '@fundamento/agordilo':
+        specifier: workspace:*
+        version: link:../agordilo
       '@fundamento/modelo':
         specifier: workspace:*
         version: link:../modelo

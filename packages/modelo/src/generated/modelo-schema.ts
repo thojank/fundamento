@@ -1630,8 +1630,21 @@ export interface Agordo {
     body?: Fonto;
     code?: Fonto;
   };
+  ziele?: AgordoZieloj;
   aspiroj?: AspektoAspiro[];
   jugxoj?: AgordoJugxo[];
+}
+/**
+ * Contrast targets a brand overrides per palette step (Spec 016 ②, G7): keyed by palette.step, the WCAG 2.x contrast the step should reach against the reference surface of the light mode (hell: neutral.0) or the dark mode (dunkel: neutral.1000). An override is a target, never a free colour value; the floors of kontrastSojloj still hold.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "AgordoZieloj".
+ */
+export interface AgordoZieloj {
+  [k: string]: {
+    hell?: number;
+    dunkel?: number;
+  };
 }
 /**
  * A deviation an Agordo records for an adjustable rule (Spec 016, G6, D-5): the Regulo by name, the reason, the date and the name of the person deciding. The Agordilo writes it into the package as a Jugxo; a fixed rule cannot be deviated from.

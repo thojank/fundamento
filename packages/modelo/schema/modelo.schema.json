@@ -3493,6 +3493,9 @@
           },
           "additionalProperties": false
         },
+        "ziele": {
+          "$ref": "#/$defs/AgordoZieloj"
+        },
         "aspiroj": {
           "type": "array",
           "items": {
@@ -3508,6 +3511,29 @@
       },
       "required": ["name", "leitfarbe"],
       "additionalProperties": false
+    },
+    "AgordoZieloj": {
+      "description": "Contrast targets a brand overrides per palette step (Spec 016 ②, G7): keyed by palette.step, the WCAG 2.x contrast the step should reach against the reference surface of the light mode (hell: neutral.0) or the dark mode (dunkel: neutral.1000). An override is a target, never a free colour value; the floors of kontrastSojloj still hold.",
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^(neutral|accent|success|warning|danger|info)\\.[0-9]+$"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "hell": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 21
+          },
+          "dunkel": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 21
+          }
+        },
+        "additionalProperties": false
+      }
     },
     "AspektoAspiro": {
       "description": "A design goal one Aspekto sets itself (Spec 004, plan D-03): the same measurement as a Regulo, its own bound and its own reason, checked only for this Aspekto. Reguloj enforce accessibility and structure for every brand; an Aspiro is taste, and taste belongs to the brand.",

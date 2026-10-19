@@ -19,7 +19,12 @@ beforeAll(async () => {
   dirs.push(out);
   const built = await buildProjekcioj({ outDir: out, source: defaultModeloSource() });
   expect(built.ok).toBe(true);
-  html = readFileSync(join(out, VITRINO_FILE), "utf8");
+  // What the Vitrino shows, without the Werkstatt (Spec 016 ②): its module carries the Agordilo
+  // as code and its island the structure as data — neither is shown text; vitrino.test.ts and
+  // check:vitrino test them.
+  html = readFileSync(join(out, VITRINO_FILE), "utf8")
+    .replace(/<script type="module" id="fm-vitrino-werkstatt-skripto">[\s\S]*?<\/script>/, "")
+    .replace(/<script type="application\/json" id="fm-werkstatt">[\s\S]*?<\/script>/, "");
   const island = /<script type="application\/json" id="fm-vitrino">(.*?)<\/script>/s.exec(html);
   datumoj = JSON.parse((island?.[1] ?? "{}").replaceAll("<\\/", "</")) as VitrinoDatumoj;
 }, 120_000);
@@ -339,7 +344,10 @@ describe("the Vitrino after the acceptances (Nachlese 2026-10-13)", () => {
     );
     expect(html).not.toContain("fm-kolumnoj");
     expect(html).not.toContain("fm-kolumno ");
-    expect(html).toContain('<section id="fm-vitrino-komparo" tabindex="-1">');
+    // Spec 016 ②: the section belongs to the mode Ansehen; the Werkstatt hides it.
+    expect(html).toContain(
+      '<section id="fm-vitrino-komparo" tabindex="-1" data-fm-modus-only="ansehen">',
+    );
     expect(html).toMatch(/komparoSection\.scrollIntoView\(/);
     expect(html).toMatch(/komparoSection\.focus\(/);
   });

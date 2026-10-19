@@ -34,6 +34,7 @@ import {
   type ModeOverride,
   type TargetFloors,
 } from "./palettes.js";
+import type { AgordoPatch } from "./raporto.js";
 import { TONE_KEEP } from "./solve.js";
 
 export interface ExplainContext {
@@ -52,6 +53,17 @@ const SEARCH_ITERATIONS = 14;
 const fixed = (value: number, digits: number): string => value.toFixed(digits);
 const ratio = (value: number): string => `${value.toFixed(2)}:1`;
 
+/** One suggestion (G6.1): the sentence, and the change of the Agordo it amounts to, where it is one. */
+export interface Suggestion {
+  suggestion: string;
+  apply?: AgordoPatch;
+}
+
+/** Cause and one suggestion of a violation (G6.1), with the change of the Agordo as data (②). */
+export interface Explanation extends Suggestion {
+  cause: string;
+}
+
 /** The colour tokens a finding names (its subject, its message, the members of its pair). */
 export function tokensOf(text: string, extra: readonly string[] = []): string[] {
   const found = [...extra, ...(text.match(TOKEN_IN_TEXT) ?? [])].map((token) =>
@@ -63,7 +75,7 @@ export function tokensOf(text: string, extra: readonly string[] = []): string[] 
 export class Explainer {
   readonly #context: ExplainContext;
   readonly #resolutions = new Map<string, CombinationResolution>();
-  readonly #suggestions = new Map<string, string>();
+  readonly #suggestions = new Map<string, Suggestion>();
 
   constructor(context: ExplainContext) {
     this.#context = context;
@@ -100,31 +112,35 @@ export class Explainer {
   }
 
   /** Cause and one suggestion for a finding of `rule` about `tokens` in `assignment`. */
-  explain(
-    rule: string,
-    assignment: Assignment,
-    tokens: readonly string[],
-  ): { cause: string; suggestion: string } {
+  explain(rule: string, assignment: Assignment, tokens: readonly string[]): Explanation {
     const steps = this.steps(assignment, tokens);
+    // An override of the Werkstatt (ziele, ②) moved the target by hand: the step meets it, and
+    // the one change that frees the step is taking the override back.
+    const overridden = steps.find((step) => step.overridden === true);
+    if (overridden !== undefined) {
+      const key = `${overridden.palette}.${overridden.step}`;
+      return {
+        cause: `The target of ${tokenOf(overridden)} is overridden (ziele) to ${ratio(overridden.target)} instead of its calibrated ${ratio(overridden.calibrated)}; the step meets the overridden target.`,
+        suggestion: `Take the override of ${key} back (ziele): the calibrated target ${ratio(overridden.calibrated)} then applies again.`,
+        apply: { ziele: { [key]: null } },
+      };
+    }
     const offTarget = steps.find((step) => !step.onTarget);
     if (offTarget !== undefined) {
-      return {
-        cause: this.#offTargetCause(offTarget),
-        suggestion: this.#toneSuggestion(offTarget),
-      };
+      return { cause: this.#offTargetCause(offTarget), ...this.#toneSuggestion(offTarget) };
     }
     const toneLost = steps.find((step) => !step.toneKept);
     if (toneLost !== undefined) {
       return {
         cause: `${tokenOf(toneLost)} meets its target ${ratio(toneLost.target)} only without its tone: at hue ${fixed(toneLost.h, 1)}° sRGB holds no chroma of ${fixed(toneLost.requested * TONE_KEEP, 4)} at any lightness (kept ${fixed(toneLost.c, 4)}).`,
-        suggestion: unreachable(toneLost.palette),
+        ...unreachable(toneLost.palette),
       };
     }
     const shifted = steps.find((step) => Math.abs(step.target - step.calibrated) > 1e-6);
     if (shifted !== undefined) {
       return {
         cause: `The sliders moved the target of ${tokenOf(shifted)} from ${ratio(shifted.calibrated)} to ${ratio(shifted.target)}; the step meets the moved target.`,
-        suggestion: this.#sliderSuggestion(),
+        ...this.#sliderSuggestion(),
       };
     }
     if (rule === "palette-aligned" || rule === "palette-even") {
@@ -162,10 +178,7 @@ export class Explainer {
    * yet at its hue and chroma a contrast target needs another lightness than komuna's hues. The
    * ramp that stands out is named, and the chroma share of its source that keeps the rule.
    */
-  #rampExplanation(
-    rule: string,
-    tokens: readonly string[],
-  ): { cause: string; suggestion: string } | undefined {
+  #rampExplanation(rule: string, tokens: readonly string[]): Explanation | undefined {
     const subject = tokens.map((token) => PALETTE_STEP.exec(token)).find((match) => match !== null);
     const number = Number(subject?.[2]);
     if (subject?.[1] === undefined || !Number.isFinite(number)) return undefined;
@@ -194,10 +207,10 @@ export class Explainer {
     }
     const source = this.#context.palettes.sources[culprit];
     const cause = `${detail}: every step meets its contrast target, but at hue ${fixed(source.hue, 1)}° and chroma ${fixed(source.chroma, 4)} a contrast target needs another lightness than at the hues of komuna's calibration (WCAG luminance and OKLCH lightness part with hue and chroma).`;
-    return { cause, suggestion: this.#rampSuggestion(rule, culprit) };
+    return { cause, ...this.#rampSuggestion(rule, culprit) };
   }
 
-  #rampSuggestion(rule: string, palette: PaletteName): string {
+  #rampSuggestion(rule: string, palette: PaletteName): Suggestion {
     const key = `${rule}:${palette}`;
     const known = this.#suggestions.get(key);
     if (known !== undefined) return known;
@@ -220,7 +233,7 @@ export class Explainer {
       }
       return low;
     };
-    let suggestion: string;
+    let suggestion: Suggestion;
     if (palette === "accent") {
       const lead = parseAgordoColor(agordo.leitfarbe) ?? { l: 0, c: 0, h: 0 };
       const make = (share: number): Agordo => ({
@@ -235,21 +248,32 @@ export class Explainer {
       suggestion =
         chroma < ACHROMATIC || anchor === undefined
           ? unreachable("accent")
-          : `Use the lead colour ${anchor.hex} (hue ${fixed(lead.h, 1)}°, chroma ${fixed(anchor.c, 4)} instead of ${fixed(lead.c, 4)}; any chroma up to ${fixed(chroma, 4)} holds): the ramp accent then keeps ${rule}.`;
+          : {
+              suggestion: `Use the lead colour ${anchor.hex} (hue ${fixed(lead.h, 1)}°, chroma ${fixed(anchor.c, 4)} instead of ${fixed(lead.c, 4)}; any chroma up to ${fixed(chroma, 4)} holds): the ramp accent then keeps ${rule}.`,
+              apply: { leitfarbe: anchor.hex },
+            };
     } else if (palette === "neutral") {
       const tint = agordo.neutral?.toenung ?? 0;
       const share = search((value) => ({ ...agordo, neutral: { toenung: tint * value } }));
-      suggestion = `Set neutral.toenung to ${fixed(Math.floor(tint * share * 100) / 100, 2)} (now ${fixed(tint, 2)}): the neutral ramp then keeps ${rule}.`;
+      const toenung = Math.floor(tint * share * 100) / 100;
+      suggestion = {
+        suggestion: `Set neutral.toenung to ${fixed(toenung, 2)} (now ${fixed(tint, 2)}): the neutral ramp then keeps ${rule}.`,
+        apply: { neutral: { toenung } },
+      };
     } else {
       const saturation = agordo.regler?.saettigung ?? 1;
       const share = search((value) => ({
         ...agordo,
         regler: { ...agordo.regler, saettigung: saturation * value },
       }));
+      const saettigung = Math.floor(saturation * share * 100) / 100;
       suggestion =
         saturation * share < 0.05
           ? unreachable(palette)
-          : `Set regler.saettigung to ${fixed(Math.floor(saturation * share * 100) / 100, 2)} (now ${fixed(saturation, 2)}): the ramp ${palette} then keeps ${rule}.`;
+          : {
+              suggestion: `Set regler.saettigung to ${fixed(saettigung, 2)} (now ${fixed(saturation, 2)}): the ramp ${palette} then keeps ${rule}.`,
+              apply: { regler: { saettigung } },
+            };
     }
     this.#suggestions.set(key, suggestion);
     return suggestion;
@@ -260,7 +284,7 @@ export class Explainer {
     return `${tokenOf(step)} keeps the tone of its ${originLabel(this.#context, step.palette)} (chroma ≥ ${fixed(step.requested * TONE_KEEP, 4)}) only at OKLCH L ${fixed(step.l, 3)}: ${ratio(step.achieved)} against ${surface} instead of its target ${ratio(step.target)}.`;
   }
 
-  #toneSuggestion(step: DerivedStep): string {
+  #toneSuggestion(step: DerivedStep): Suggestion {
     const key = step.palette;
     const known = this.#suggestions.get(key);
     if (known !== undefined) return known;
@@ -294,7 +318,7 @@ export class Explainer {
     return low;
   }
 
-  #leadSuggestion(): string {
+  #leadSuggestion(): Suggestion {
     const { agordo } = this.#context;
     const lead = parseAgordoColor(agordo.leitfarbe) ?? { l: 0, c: 0, h: 0 };
     const withChroma = (share: number): Agordo => ({
@@ -308,20 +332,27 @@ export class Explainer {
     const derived = this.#onTarget(withChroma(share), "accent");
     const anchor = derived?.steps.find((step) => step.step === REFERENCE_STEPS.accent);
     if (anchor === undefined) return unreachable("accent");
-    return `Use the darker lead colour ${anchor.hex} (hue ${fixed(lead.h, 1)}°, chroma ${fixed(anchor.c, 4)} instead of ${fixed(lead.c, 4)}; any chroma up to ${fixed(lead.c * share, 4)} holds): every accent step then keeps its tone at its contrast target.`;
+    return {
+      suggestion: `Use the darker lead colour ${anchor.hex} (hue ${fixed(lead.h, 1)}°, chroma ${fixed(anchor.c, 4)} instead of ${fixed(lead.c, 4)}; any chroma up to ${fixed(lead.c * share, 4)} holds): every accent step then keeps its tone at its contrast target.`,
+      apply: { leitfarbe: anchor.hex },
+    };
   }
 
-  #tintSuggestion(): string {
+  #tintSuggestion(): Suggestion {
     const { agordo } = this.#context;
     const tint = agordo.neutral?.toenung ?? 0;
     const share = this.#largestShare(
       (value) => ({ ...agordo, neutral: { toenung: tint * value } }),
       "neutral",
     );
-    return `Set neutral.toenung to ${fixed(Math.floor(tint * share * 100) / 100, 2)} (now ${fixed(tint, 2)}): every neutral step then keeps its tint at its contrast target.`;
+    const toenung = Math.floor(tint * share * 100) / 100;
+    return {
+      suggestion: `Set neutral.toenung to ${fixed(toenung, 2)} (now ${fixed(tint, 2)}): every neutral step then keeps its tint at its contrast target.`,
+      apply: { neutral: { toenung } },
+    };
   }
 
-  #saturationSuggestion(palette: PaletteName): string {
+  #saturationSuggestion(palette: PaletteName): Suggestion {
     const { agordo } = this.#context;
     const saturation = agordo.regler?.saettigung ?? 1;
     const share = this.#largestShare(
@@ -329,15 +360,22 @@ export class Explainer {
       palette,
     );
     if (saturation * share < 0.05) return unreachable(palette);
-    return `Set regler.saettigung to ${fixed(Math.floor(saturation * share * 100) / 100, 2)} (now ${fixed(saturation, 2)}): the ${palette} steps then keep their tone at their contrast targets.`;
+    const saettigung = Math.floor(saturation * share * 100) / 100;
+    return {
+      suggestion: `Set regler.saettigung to ${fixed(saettigung, 2)} (now ${fixed(saturation, 2)}): the ${palette} steps then keep their tone at their contrast targets.`,
+      apply: { regler: { saettigung } },
+    };
   }
 
-  #sliderSuggestion(): string {
+  #sliderSuggestion(): Suggestion {
     const regler = this.#context.agordo.regler ?? {};
     const helligkeit = Math.abs(regler.helligkeit ?? 0);
     const kontrast = Math.abs(regler.kontrast ?? 0);
     const name = helligkeit >= kontrast ? "helligkeit" : "kontrast";
-    return `Set regler.${name} to 0 (now ${fixed(regler[name] ?? 0, 2)}): the targets of komuna's calibration then apply unmoved.`;
+    return {
+      suggestion: `Set regler.${name} to 0 (now ${fixed(regler[name] ?? 0, 2)}): the targets of komuna's calibration then apply unmoved.`,
+      apply: { regler: { [name]: 0 } },
+    };
   }
 }
 
@@ -370,8 +408,11 @@ function originLabel(context: ExplainContext, palette: PaletteName): string {
   }
 }
 
-function unreachable(palette: PaletteName): string {
-  return palette === "accent"
-    ? "Target not reachable at this hue: choose a lead colour of another hue."
-    : `Target not reachable at this hue: choose another tone for ${palette}.`;
+function unreachable(palette: PaletteName): Suggestion {
+  return {
+    suggestion:
+      palette === "accent"
+        ? "Target not reachable at this hue: choose a lead colour of another hue."
+        : `Target not reachable at this hue: choose another tone for ${palette}.`,
+  };
 }

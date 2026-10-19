@@ -3,7 +3,11 @@
 // palette steps and every token that stage 1 writes unchanged. Read once at the I/O edge
 // (node/structure.ts); everything after it is pure.
 
-import type { AspektoPackageFiles, ModeloFiles } from "@fundamento/modelo";
+import {
+  type AspektoPackageFiles,
+  type ModeloFiles,
+  serializeCanonicalJson,
+} from "@fundamento/modelo";
 
 export interface Structure {
   /** Core sets, data files and the reference Aspekto package, as the loader reads them. */
@@ -33,4 +37,26 @@ export function referencePackage(structure: Structure): AspektoPackageFiles {
   const reference = structure.files.packages[0];
   if (reference === undefined) throw new Error("The structure holds no reference Aspekto package.");
   return reference;
+}
+
+/** The text the fingerprint hashes: the structure documents in canonical JSON (G1). Pure. */
+export function fingerprintDocuments(files: ModeloFiles): string {
+  return serializeCanonicalJson(structureDocuments(files));
+}
+
+/**
+ * The files of a structure reduced to the core and the reference Aspekto (Spec 016 ②, plan ② D-02):
+ * what the Werkstatt derives over, whatever other Aspektoj the build composes — the CLI derives over
+ * the same two, so browser and CLI agree value for value. The package directory loses its machine
+ * path (the Vitrino is a file that travels); every other path is relative to the Modelo root already.
+ */
+export function referenceStructureFiles(files: ModeloFiles): ModeloFiles | undefined {
+  const reference = files.packages[0];
+  if (reference === undefined) return undefined;
+  const dir = reference.aspekto.file.replace(/\/aspekto\.json$/, "");
+  return {
+    ...files,
+    sets: files.sets.filter((set) => set.package === undefined || set.package === reference.name),
+    packages: [{ ...reference, dir }],
+  };
 }

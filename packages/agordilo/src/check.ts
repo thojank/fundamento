@@ -170,6 +170,7 @@ function stepsOf(palettes: DerivedPalettes): RaportoStep[] {
     hex: step.hex,
     target: round(step.target),
     achieved: round(step.achieved),
+    ...(step.overridden === true ? { overridden: true as const } : {}),
     onTarget: step.onTarget,
     toneKept: step.toneKept,
     chroma: { requested: round(step.requested), kept: round(step.c) },
@@ -285,7 +286,7 @@ export function checkAspekto(input: CheckInput): CheckResult {
     if (seen.has(key)) continue;
     seen.add(key);
     const tokens = tokensOf(issue.message, [subject, ...(pairMembers.get(subject) ?? [])]);
-    const { cause, suggestion } =
+    const { cause, suggestion, apply } =
       issue.combination === undefined
         ? {
             cause: issue.message,
@@ -303,6 +304,7 @@ export function checkAspekto(input: CheckInput): CheckResult {
       message: issue.message,
       cause,
       suggestion,
+      ...(apply === undefined ? {} : { apply }),
     });
   }
 

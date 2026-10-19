@@ -13,6 +13,18 @@ export interface RaportoSummary {
   hints: number;
 }
 
+/**
+ * A change of the Agordo a suggestion amounts to (Spec 016 ②, G6, G7): what a click in the
+ * Werkstatt or an agent over preview_agordo applies without parsing prose. A target set to null
+ * takes an override back.
+ */
+export interface AgordoPatch {
+  leitfarbe?: string;
+  neutral?: { toenung: number };
+  regler?: { helligkeit?: number; kontrast?: number; saettigung?: number };
+  ziele?: Record<string, { hell?: number; dunkel?: number } | null>;
+}
+
 export interface RaportoStep {
   token: string;
   mode: "light" | "dark";
@@ -20,6 +32,8 @@ export interface RaportoStep {
   /** Target and achieved contrast against the reference surface of the mode. */
   target: number;
   achieved: number;
+  /** Present when the Agordo overrides the target of this step (ziele, Spec 016 ②). */
+  overridden?: true;
   onTarget: boolean;
   toneKept: boolean;
   chroma: { requested: number; kept: number };
@@ -61,6 +75,8 @@ export interface RaportoViolation {
   cause: string;
   /** Exactly one suggestion (G6.1). */
   suggestion: string;
+  /** The suggestion as a change of the Agordo, where it is one (Spec 016 ②). */
+  apply?: AgordoPatch;
   /** The Jugxo that records the deviation, for an adjustable rule. */
   jugxo?: string;
 }

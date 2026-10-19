@@ -159,7 +159,125 @@ M3 (Tempo im Browser) folgt mit ②.
 
 ## ② Werkstatt
 
-Folgt in PR ②.
+**Branch:** `261019-spec-016-werkstatt-197e67` (von `main` `8ac1934`, nach dem Merge von #82; CI auf den sieben Jobs) · **Datum:** 2026-10-19 · **Stand:** zur Abnahme (Messanleitung in plan ③).
+
+### Zusammenfassung
+
+1. **Modus „Werkstatt“** neben „Ansehen“ (D-01): ein Schalter im Kopf der Vitrino, `data-fm-modus` am Root, `modus=werkstatt` im Fragment – ein Link führt direkt in die Werkstatt. Die Abschnitte des Ansehen-Modus, deren Zahlen zur Bauzeit für komuna gemessen wurden (Paletten, Rollen, Gebrauch, Kontrastmatrix, Regularo, Abdeckung, Gegenüberstellung), sind in der Werkstatt verborgen; die Abschnitte der Eroj bleiben und folgen dem Entwurf. Die Aspekto-Schalter ruhen, der Root trägt die Referenz (komuna), über die der Entwurf abgeleitet wird.
+2. **Dieselbe Bibliothek im Browser** (D-02, D-03): die Vitrino bettet eine zweite Datums-Insel `fm-werkstatt` ein – die Struktur (Kern und komuna, aus den Dateien des Builds, mit dem Fingerabdruck, den `fm agordilo derive` als Herkunft schreibt), die Kalibrierung und die zwei Schemata – und den Agordilo selbst, über den neuen Einstieg `@fundamento/agordilo/browser` mit Vite zu einem Modul gebündelt (`fm-vitrino-werkstatt-skripto`). Keine zweite Ableitung, keine zweite Prüfung.
+3. **Panel** (D-04): Name, Leitfarbe (Farbwähler und Textfeld, Hex oder `oklch()`), vier Zusatzfarben mit „Standard“, Neutral-Tönung, Helligkeit, Kontrast, Sättigung. Eroj, wo es eines gibt (`kampo`, `markobutono`, `butono`, `elektilo`, `dialogo`, `insigno`, `faldilo`); die Regler sind das native `input type=range` mit Label und Wertanzeige, der Farbwähler `input type=color`, das Kontrastziel `input type=number` – Kandidaten (Offen O-3).
+4. **Live-Ableitung** (D-05): bei jeder Eingabe `derivePalettes` (die Paletten allein), die sechs Paletten als Custom Properties am Root gesetzt (Namen über die NomRegulo `cssVariable`); die Rollen sind im CSS-Celo `var()`-Aliasse, also folgen alle Abschnitte und alle Eroj sofort, in jeder Dimensio. **Prüfung entprellt** (D-06, D-07): 400 ms nach der letzten Änderung `deriveAspekto` – Modelo-Validierung und Alirebleco über alle Kombinationen – und der Raporto wie aus der CLI.
+5. **Prüfbericht live** (D-08): Zähler bestanden/verletzt und fest/anpassbar/gedeckt (`insigno`), je Verstoß Regel, Fundstelle, Ursache und **ein** Vorschlag; „Vorschlag übernehmen“ setzt den Patch `apply` in die Agordo; „Zum Ero“ springt zum Abschnitt des Ero, dessen Skemo ein Token des Paars bindet, sonst zur Stufe der Palette; APCA als Hinweise in einem `faldilo`; eine höfliche Live-Region (`role=status`, `aria-live=polite`) sagt den Bericht an, nicht jeden Reglerschritt.
+6. **Paletten-Ansicht** (D-09): sechs Tabellen mit Stufe, Farbe, Wert, Ziel und erreichtem Kontrast; das Kontrastziel je Stufe überschreibbar (`ziele` in der Agordo), eine überschriebene Stufe markiert (`data-fm-superskribita`) und einzeln rücksetzbar.
+7. **Export-Sperre und Jugxo** (D-11): feste Regel verletzt → Download gesperrt mit Grund; anpassbare Regel ohne Jugxo → gesperrt, bis der `dialogo` (Begründung Pflicht, Datum, Name) einen Jugxo je Regel in die Agordo schreibt; „Agordo herunterladen“ liefert `agordo.json`. Die Vitrino schreibt keine Datei (E7).
+8. **Teilen** (D-10): `#agordo=…` (deflate-raw, base64url) im Fragment, neben `modus=werkstatt` und den Dimensioj.
+9. **Gegenüberstellung** (D-12): Entwurf neben komuna oder ekzemplo (wählbar), dieselben Ero-Abschnitte als Klone, dieselben Modi vom Root gespiegelt.
+10. **Gleichheit Browser–CLI** (D-06): der Test lädt provo's Agordo in die Werkstatt und vergleicht den Raporto mit dem der eingecheckten Fixture (`fm agordilo derive`), Wert für Wert – gleich.
+11. **M3** (unten) und **Barrierefreiheit** (D-13): axe über die Werkstatt in vier Kombinationen, Tastatur, Live-Region.
+12. **Kleinste Änderungen daneben:** Modelo – Schema `AgordoZieloj` (`Agordo.ziele`), `provideModeloSchemas`; Agordilo – `ziele` in der Ableitung (`overridden` am Schritt und im Raporto), `apply` am Verstoß, `browser.ts`, `referenceStructureFiles`, `fingerprintDocuments`; Projekcioj – `CeloInput.files`, Abhängigkeit `@fundamento/agordilo`, DOM-Lib für das Browser-Modul.
+
+### Entwurfsentscheidungen
+
+#### D-01 Ein Modus, kein Celo (E4)
+Das Skript der Vitrino (`skripto.ts`) schaltet weiter nur Attribute: `data-fm-modus`, die Schalter, `hidden` an den Abschnitten mit `data-fm-modus-only`. Was die Werkstatt rechnet, lebt im gebündelten Modul (`werkstatt.ts`) und spricht mit dem Skript über `fmVitrino` (Fragment-Teil setzen und lesen, Modus). Beim Betreten merkt sich das Skript die Aspekto und setzt die Referenz, beim Verlassen stellt es sie zurück und das Modul entfernt seine Custom Properties.
+
+#### D-02 Die Struktur aus dem Build, auf Kern und Referenz reduziert
+`CeloInput.files` trägt die gelesenen Modelo-Dateien; `referenceStructureFiles` behält den Kern und das Referenzpaket (komuna) und verwirft jede weitere Aspekto des Builds – `fm agordilo derive` leitet über genau diese Dokumente ab, darum stimmen Browser und CLI Wert für Wert. Der Fingerabdruck ist derselbe SHA-256 (`fingerprintOf`); jeder Pfad ist relativ zum Modelo-Wurzelverzeichnis, das Paketverzeichnis verliert seinen Maschinenpfad – die Vitrino ist eine Datei, die wandert. Ein Modelo ohne Referenz-Aspekto hat keine Werkstatt (Schalter deaktiviert).
+
+#### D-03 Bündeln mit Vite, die node-Kante als Stubs, die Schemata bereitgestellt
+`werkstatt-bundle.ts` bündelt `dist/celoj/vitrino/werkstatt.js` in einem Kindprozess mit Arbeitsverzeichnis Paketwurzel (bytegleich, wie die Make Kits), einmal je Prozess. Der Modelo-Index exportiert auch seine I/O-Kante (`checks/run`, `load/source` …); ein Plugin ersetzt jedes node-Builtin durch ein Modul mit denselben Namen, dessen Funktionen beim Aufruf werfen – der reine Weg ruft keine. Was der Modelo beim Laden liest (seine Version aus `package.json`, die Schemata) adressiert er mit `new URL(…, import.meta.url)`; Vite inlined diese Dateien im Bibliotheks-Build als `data:`-URL, und der Stub `readFileSync` dekodiert, was er bekommt. Die Schemata gibt die Vitrino zusätzlich explizit mit (`provideModeloSchemas`), damit der Weg nicht an einem Bundler-Verhalten hängt (B-3).
+
+#### D-04 Eroj, wo es eines gibt; native Regler als Kandidaten
+`kampo` (Name, Farbtexte, Datum und Name des Jugxo), `markobutono` (Standard je Zusatzfarbe), `butono` (Download, Jugxo, Vorschlag, Sprung, Rücksetzen), `elektilo` (Referenz), `dialogo` mit `reason="required"` (Jugxo), `insigno` (Zähler, fest/anpassbar), `faldilo` (APCA). Kein Ero für einen Regler, einen Farbwähler oder ein Dezimalfeld (`kampo kind=number` nimmt nur ganze Zahlen): `input type=range` mit `label` und `output`, `input type=color`, `input type=number` – jeweils mit Label, in der Tabelle unsichtbar beschriftet.
+
+#### D-05 Der Live-Weg: Custom Properties, kein neues Stylesheet
+Eine abgeleitete Aspekto unterscheidet sich von der Struktur nur in den sechs Paletten und den Schriftnamen (E6). Das CSS-Celo schreibt Rollen als `var()`-Referenzen auf die Paletten-Stufen; darum genügt es, je Änderung die 73 Stufen (und `neutral.950` dunkel, wenn der Modus dunkel ist) als Inline-Eigenschaften am Root zu setzen – alles folgt in derselben Kaskade wie komuna. Beim Wechsel des Farbschemas werden die modus-spezifischen Werte neu gesetzt (MutationObserver auf die Dimensio-Attribute). Ein zur Laufzeit erzeugtes Stylesheet wäre ein zweiter Weg zu denselben Werten.
+
+#### D-06 Der Prüfweg: `deriveAspekto` wie die CLI
+Die Prüfung komponiert das Paket über der Struktur im Speicher, validiert das Modelo und wertet die Alirebleco aus – derselbe Aufruf wie in `fm agordilo derive`, mit demselben Raporto (`raporto.json` bytegleich nach `serializeRaporto`; der Test vergleicht Objekt mit Datei). Nur der Dateiname des Pakets fehlt: die Werkstatt schreibt nichts.
+
+#### D-07 Entprellt, weil über 150 ms (M3)
+Die Ableitung der Paletten dauert im Browser Millisekunden, die Prüfung Sekunden (unten); die Spec lässt bei über 150 ms die Prüfung entprellen, die Ableitung nicht. Entprellt sind die Prüfung (400 ms) und das Schreiben des Fragments (300 ms); die Ableitung läuft bei jedem `input`-Ereignis. Während der Prüfung steht der Hauptfaden (B-2, O-1).
+
+#### D-08 Vorschlag als Patch, Sprung über die Skemo
+Die Erklärung (`explain.ts`) gibt neben dem Satz den Patch der Agordo zurück, wenn der Vorschlag eine Änderung der Agordo ist (`apply`: `leitfarbe`, `neutral.toenung`, `regler.*`, `ziele.* = null`); „Ziel nicht erreichbar bei diesem Farbton“ und `role-remap` haben keinen. Der Patch steht im Raporto am Verstoß (provo hat keine Verstöße – die Fixture bleibt bytegleich). Der Sprung: die erste Skemo, in deren Text ein Token des Paars (Vorder-, Hintergrund, aux) steht, ist der Abschnitt; eine Paletten-Stufe springt zu ihrer Zeile; sonst zu den Paletten.
+
+#### D-09 `ziele`: ein Ziel je Stufe, die Böden bleiben
+`ziele["<palette>.<stufe>"] = { hell, dunkel }` (Schema `AgordoZieloj`, Werte 1…21). Ein überschriebenes Ziel ersetzt das kalibrierte Ziel nach den Reglern (die Regler lassen es in Ruhe), die Böden aus `kontrastSojloj` gelten weiter (`floored`, dieselbe Funktion wie bei den Reglern): eine Stufe, die in komunas Kalibrierung 4,5:1 erreicht, bleibt mit der Reserve darüber. Der abgeleitete Schritt trägt `overridden`, der Raporto auch; ein Verstoß, den ein überschriebenes Ziel verursacht, nennt das als Ursache und schlägt vor, das Ziel zurückzunehmen (`apply: { ziele: { … : null } }`).
+
+#### D-10 Das Fragment
+`modus=werkstatt`, die Dimensioj, dann `agordo=<deflate-raw, base64url>` (CompressionStream des Browsers; die Tests komprimieren mit `node:zlib`). Das Skript der Vitrino schreibt das Fragment weiterhin an einer Stelle; das Werkstatt-Modul setzt seinen Teil über `fmVitrino.setFragmentPart`, liest ihn beim Laden und bei jedem `hashchange` (dedupliziert gegen das zuletzt Geschriebene). Nur die zuletzt gültige Agordo wird geschrieben.
+
+#### D-11 Export und Jugxo (G6, E5)
+Nach dem Raporto: feste Regel verletzt → `Agordo herunterladen` und `Jugxo eintragen` gesperrt, der Grund nennt die Regeln; anpassbare ohne Jugxo → Download gesperrt, der Dialog offen; sonst frei. Der Dialog ist ein `dialogo` mit Pflicht-Begründung, Datum (`kampo kind=date`) und Name (`kampo`, beide Pflicht, der Dialog sperrt die Bestätigung bis sie gefüllt sind); bestätigt schreibt er je ungedeckter anpassbarer Regel einen Jugxo in die Agordo (ältere Jugxoj derselben Regel ersetzt) und prüft sofort. Der Download ist die Agordo (`agordo.json`, zwei Leerzeichen, Zeilenumbruch), nicht das Paket.
+
+#### D-12 Gegenüberstellung mit demselben Stylesheet
+Zwei Container `data-fm-side="draft|reference"` tragen die Dimensio-Attribute des Root und je eine Aspekto; das Stylesheet der Vitrino wird zur Laufzeit einmal mit `[data-fm-side]` statt `:root` eingefügt, sodass jede Seite ihre Aspekto in den Modi des Root zeigt; der Entwurf bekommt dieselben Inline-Eigenschaften wie der Root. Die Ero-Abschnitte werden beim ersten Betreten geklont (ohne `id` und `data-fm-opens`). Die Kriterientabelle aus Spec 004 bleibt im Ansehen-Modus (Abweichung 3).
+
+#### D-13 Barrierefreiheit
+Jedes Bedienelement hat einen Namen (Label, `aria-label` an den Ziel-Feldern); die Live-Region sagt nur den fertigen Bericht an; die Sprungziele bekommen `tabindex=-1`; axe über die Werkstatt in hell/dunkel × default/high ohne Befund.
+
+### Arkitekturo-Abdeckung
+
+| Artikel / Festlegung | Wie ② ihn trägt |
+|---|---|
+| Art. I, G1 | Die Werkstatt rechnet über den Modelo-Dateien der Struktur; der Download ist eine Agordo, das Paket schreibt die CLI |
+| Art. II | Custom-Property-Namen über `cssVariable` (NomRegulo), nie von Hand |
+| Art. V, E3 | Dieselbe Bibliothek, gebündelt; kein fremder Code |
+| Art. VIII | Keine zweite Berechnung im Browser: Paletten und Prüfung aus `@fundamento/agordilo`, bytegleich mit der CLI |
+| Art. X | Rot zuerst (`fa77de1`); axe und Tastatur im Browser |
+| Art. XI | Ein Modus der Vitrino (E4), kein neues Celo, kein neues Ero, keine Token-Änderung, keine Regulo-Semantik |
+| G6, E5 | Sperre bei fester Regel, Jugxo bei anpassbarer, Kialo im Dialog |
+| G7 | Panel, Live, Gegenüberstellung, Bericht, Paletten, Fragment, Download |
+| E7 | Die Vitrino schreibt keine Datei |
+
+### Abweichungen von der Spec
+
+1. **`ziele` als Feld der Agordo:** G7 nennt das Überschreiben eines Kontrastziels je Stufe, G4 kennt dafür kein Feld; es ist neu, mit Schema und Böden (D-09).
+2. **Vorschlag auch als Daten** (`apply`), damit „ein Klick übernimmt“ ohne Satz-Parsen auskommt; der Satz bleibt der eine Vorschlag (D-08).
+3. **Gegenüberstellung** zeigt dieselben Ero-Abschnitte nebeneinander (G7 „gleiche Eroj, gleiche Modi“), nicht die Kriterientabelle aus Spec 004; die bleibt im Ansehen-Modus (D-12).
+4. **Die statischen Abschnitte** der Vitrino sind in der Werkstatt verborgen: ihre Zahlen sind zur Bauzeit für komuna gemessen und gälten nicht für den Entwurf; die Werkstatt zeigt Paletten und Bericht des Entwurfs (D-01).
+5. **Schriften** stehen nicht im Panel (die Liste des Briefings nennt sie nicht); eine Agordo mit `schriften` aus dem Fragment behält sie, die Live-Ableitung setzt `font.family.*`.
+6. **Zwei kleinste Änderungen am Modelo:** `provideModeloSchemas` (D-03) und das Schema `AgordoZieloj` (D-09).
+
+### Befunde / Mankoj
+
+- **B-1 Größe der Vitrino:** 8,1 MB statt 6,1 MB (Build `core + ekzemplo`): das Bündel des Agordilo mit Modelo, Ajv und colorjs.io 1,26 MB, die Insel `fm-werkstatt` (Struktur, Kalibrierung, Schemata) 0,69 MB. Die Datei bleibt eine Datei ohne Netz.
+- **B-2 Prüfung im Hauptfaden:** eine Prüfung dauert im Browser rund 1,05 s (M3, Median); solange steht die Seite. Entprellt nach D-07; ein Worker aus demselben Bündel wäre der nächste Schritt (O-1).
+- **B-3 Vite inlined Dateien:** `new URL(…, import.meta.url)` des Modelo (Schema, Konfigurations-Schema, `package.json`) landet als `data:`-URL im Bündel; die Schemata stehen damit zweimal in der Vitrino (Bündel und Insel). Der explizite Weg (`provideModeloSchemas`) bleibt der tragende.
+- **B-4 `kampo kind=number`** nimmt nur ganze Zahlen (Spec 011 ①); ein Kontrastziel braucht zwei Nachkommastellen – natives `input type=number` (D-04).
+- **B-5 Klone und Warnungen:** die Klone der Ero-Abschnitte lösen eine Warnung `fm-ikono: name is required` aus (ein Ikono ohne Namen in einem Abschnitt der Vitrino); keine Fehler.
+- **B-6 Lint:** die Warnung `DESIGN` in `web-component.test.ts` ist älter (Nachlese 5 B-10), nicht angefasst.
+- **Mankoj:** keine neuen.
+
+### Offen (für den Maintainer)
+
+- **O-1 Prüfung im Worker** (B-2): ein Worker aus demselben Bündel hielte die Regler während der Prüfung flüssig; nicht gebaut, weil `file://`-Worker aus Blob-URLs nicht in jedem Browser laufen. Vorschlag: so lassen, messen (M3), bei Bedarf in Stufe 2.
+- **O-2 `ziele` nach den Reglern** (D-09): das überschriebene Ziel ersetzt das Ziel nach Helligkeit/Kontrast, die Böden gelten. Alternative: vor den Reglern (die Regler verschieben auch das überschriebene Ziel). Vorschlag: so.
+- **O-3 Native Regler als Kandidaten** (D-04): `input type=range`, `input type=color`, `input type=number` – Kandidaten für Eroj (Regler, Farbwähler, Dezimalfeld) in Stufe 2.
+- **O-4 Standardname des Entwurfs** `entwurf`, Leitfarbe komunas `accent.700`. Vorschlag: so.
+- **O-5 Fixture-Builds ohne Referenz-Aspekto** haben keine Werkstatt (D-02). Vorschlag: so.
+
+### M3 – Tempo (Ableitung plus Prüfung bei einer Regleränderung)
+
+Gemessen über 50 Änderungen des Reglers Helligkeit (−1 … 1), je Änderung Ableitung (Paletten und Custom Properties) und Prüfung (`deriveAspekto`), `fmWerkstatt.measure(50)` im Test „M3“ von `packages/eroj/test/vitrino.check.ts` (die Zeile steht im stderr des Laufs und als Annotation).
+
+| Wo | Ableitung Median | Ableitung p95 | Prüfung Median | Prüfung p95 | Beides Median | Beides p95 |
+|---|---|---|---|---|---|---|
+| Mac (Chromium headless, Lauf von P0 auf dem Rechner des Maintainers, 2026-10-19) | 46,5 ms | 64,4 ms | 1 053,9 ms | 1 087,5 ms | 1 099,2 ms | 1 134,8 ms |
+| CI (Chromium headless, GitHub-Runner, Lauf 39310455722, `7c1828d`) | 68,1 ms | 104,7 ms | 1 373,3 ms | 1 433,6 ms | 1 441,3 ms | 1 511,8 ms |
+
+**Ziel unter 150 ms:** die Ableitung liegt darunter, die Prüfung weit darüber – also ist die Prüfung entprellt, die Ableitung nicht (D-07).
+
+**Nachmessen (Mac):**
+
+```sh
+pnpm build
+pnpm --filter @fundamento/eroj exec playwright test --config playwright.vitrino.config.ts -g "M3"
+# die Zeile „M3 (chromium): Ableitung median … Prüfung median …“ steht im stderr
+```
+
+Oder in der Vitrino selbst: `pnpm fm projekcioj build --out .fundamento/projekcioj`, `.fundamento/projekcioj/vitrino/index.html#modus=werkstatt` öffnen und in der Konsole `fmWerkstatt.measure(50)` aufrufen – das Ergebnis sind zwei Reihen in Millisekunden.
 
 ## ③ Gvidanto und Doku
 

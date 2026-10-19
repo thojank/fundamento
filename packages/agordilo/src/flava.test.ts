@@ -98,6 +98,21 @@ describe("a light yellow lead colour (G6)", () => {
     expect(followed.exportable).toBe(true);
   });
 
+  // Spec 016 ② (G6, G7): the suggestion is also data, so a click in the Werkstatt and an agent
+  // over preview_agordo can apply it without parsing prose. The patch names the darker lead
+  // colour the text names.
+  it("carries the suggestion as a patch of the Agordo (apply), the same value as the text", () => {
+    const withPatch = derivation.raporto.violations.filter(
+      (violation) => violation.apply !== undefined,
+    );
+    expect(withPatch.length).toBeGreaterThan(0);
+    for (const violation of withPatch) {
+      const named = /lead colour (#[0-9a-f]{6})/.exec(violation.suggestion)?.[1];
+      if (named !== undefined) expect(violation.apply).toEqual({ leitfarbe: named });
+    }
+    expect(withPatch.some((violation) => violation.apply?.leitfarbe !== undefined)).toBe(true);
+  });
+
   it("never lets a Jugxo open a fixed rule", () => {
     // The refusal is the Agordo's own issue (checkAspekto lists it before every violation), so the
     // rule is tested without a fourth derivation of the whole Modelo.

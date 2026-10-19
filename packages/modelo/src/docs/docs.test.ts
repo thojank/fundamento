@@ -1984,6 +1984,53 @@ describe("Spec 016 ① documentation (specs/016-agordilo-1)", () => {
   });
 });
 
+// Spec 016 ② (Briefing 2026-10-19): plan ② carries the Werkstatt — its decisions, the coverage,
+// deviations, findings, open points and the measurement M3 (median and p95 over 50 changes, in
+// the CI browser and as a guide for the maintainer); tasks ② start at T1701 with the red hash.
+describe("Spec 016 ② documentation (specs/016-agordilo-1)", () => {
+  it("plan ② carries decisions, coverage, deviations, findings, open points and M3; tasks ② the red hash", () => {
+    const section = (text: string) =>
+      text.slice(text.indexOf("## ② Werkstatt"), text.indexOf("## ③ Gvidanto und Doku"));
+    const plan = section(read("specs/016-agordilo-1/plan.md"));
+    expect(plan).not.toContain("Folgt in PR ②.");
+    for (const heading of [
+      "### Zusammenfassung",
+      "### Entwurfsentscheidungen",
+      "#### D-01",
+      "#### D-02",
+      "### Arkitekturo-Abdeckung",
+      "### Abweichungen von der Spec",
+      "### Befunde / Mankoj",
+      "### Offen (für den Maintainer)",
+      "### M3",
+    ]) {
+      expect(plan, heading).toContain(heading);
+    }
+    for (const term of [
+      "modus=werkstatt",
+      "#agordo=",
+      "fm-vitrino-werkstatt",
+      "input type=range",
+      "ziele",
+      "entprellt",
+      "Median",
+      "p95",
+      "Gleichheit",
+      "Mac",
+    ]) {
+      expect(plan, term).toContain(term);
+    }
+    const tasks = section(read("specs/016-agordilo-1/tasks.md"));
+    expect(tasks).not.toContain("Folgt in PR ②.");
+    expect(tasks).toContain("**T1701");
+    expect(tasks).toContain("### Messungen");
+    expect(tasks).toMatch(/rot `[0-9a-f]{7}`/);
+    const readme = read("README.md");
+    expect(readme).toContain("Werkstatt");
+    expect(readme).toContain("#modus=werkstatt");
+  });
+});
+
 // Nachlese 5 (Briefing 2026-10-19): specs/018-nachlese-5 carries the briefing unchanged, a plan
 // and tasks with ① (the split of plugin.test.ts, the flaky tests) and ② (the findings).
 describe("Nachlese 5 documentation (specs/018-nachlese-5)", () => {

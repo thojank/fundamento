@@ -1,7 +1,11 @@
-// The only script of the Vitrino (Spec 004, FR-07, FR-08, contracts/vitrino §3–§4): it switches
+// The script of the Vitrino (Spec 004, FR-07, FR-08, contracts/vitrino §3–§4): it switches
 // the `data-fm-*` attributes and shows the slice of the data island that belongs to the
 // combination on screen. It computes nothing — every number was measured at build time (Art. VIII).
 // No framework, no network.
+//
+// Spec 016 ② (G7, plan ② D-04): it also switches the mode — Ansehen, or the Werkstatt — and keeps
+// the fragment, where the Werkstatt adds its own part (`agordo=…`) through `fmVitrino`. What the
+// Werkstatt computes lives in its own bundled module (werkstatt.ts), never here.
 
 export function vitrinoSkripto(): string {
   return String.raw`
@@ -92,11 +96,83 @@ function renderRoloj() {
   }
 }
 
+// The parts of the fragment that belong to the Werkstatt (agordo=...), by name.
+const extraParts = new Map();
+const fragmentHandlers = [];
+
 function fragment() {
-  const parts = ["aspekto=" + root.getAttribute("data-fm-aspekto")];
+  const parts = [];
+  if (root.getAttribute("data-fm-modus") === "werkstatt") parts.push("modus=werkstatt");
+  parts.push("aspekto=" + root.getAttribute("data-fm-aspekto"));
   for (const dimensio of datumoj.dimensioj) parts.push(dimensio.name + "=" + root.getAttribute("data-fm-" + dimensio.name));
+  for (const [name, value] of extraParts) parts.push(name + "=" + value);
   location.replace("#" + parts.join("&"));
 }
+
+// The mode (Spec 016 ②): the Werkstatt derives over the reference Aspekto, so the root shows it
+// while the mode is on and the Aspekto buttons rest; the sections of one mode hide in the other.
+const KNOWN_NAMES = new Set(["aspekto", ...datumoj.dimensioj.map((dimensio) => dimensio.name)]);
+let aspektoBefore = null;
+
+function setModus(modus, write) {
+  const werkstatt = modus === "werkstatt" && datumoj.werkstatt === true;
+  const current = root.getAttribute("data-fm-modus") === "werkstatt";
+  root.setAttribute("data-fm-modus", werkstatt ? "werkstatt" : "ansehen");
+  for (const button of document.querySelectorAll("button[data-fm-modus]")) {
+    button.setAttribute("aria-pressed", String(button.getAttribute("data-fm-modus") === (werkstatt ? "werkstatt" : "ansehen")));
+  }
+  for (const section of document.querySelectorAll("[data-fm-modus-only]")) {
+    section.hidden = section.getAttribute("data-fm-modus-only") !== (werkstatt ? "werkstatt" : "ansehen");
+  }
+  const reference = document.getElementById("fm-werkstatt-ujo")?.getAttribute("data-fm-referenco");
+  if (werkstatt && !current) {
+    aspektoBefore = root.getAttribute("data-fm-aspekto");
+    if (reference) setAspekto(reference);
+  } else if (!werkstatt && current && aspektoBefore !== null) {
+    setAspekto(aspektoBefore);
+    aspektoBefore = null;
+  }
+  for (const button of document.querySelectorAll('[data-fm-switch="aspekto"]')) {
+    if (werkstatt) button.setAttribute("disabled", "");
+    else button.removeAttribute("disabled");
+  }
+  if (write) fragment();
+}
+
+function setAspekto(value) {
+  root.setAttribute("data-fm-aspekto", value);
+  for (const other of document.querySelectorAll('[data-fm-switch="aspekto"]')) {
+    other.setAttribute("aria-pressed", String(other.getAttribute("data-fm-valoro") === value));
+  }
+}
+
+for (const button of document.querySelectorAll("button[data-fm-modus]")) {
+  button.addEventListener("click", () => {
+    setModus(button.getAttribute("data-fm-modus"), true);
+    render();
+  });
+}
+
+// What the Werkstatt's module uses (Spec 016 ②): a part of the fragment of its own, and a word
+// when the fragment changed from outside.
+globalThis.fmVitrino = {
+  setFragmentPart(name, value) {
+    if (value === undefined || value === null || value === "") extraParts.delete(name);
+    else extraParts.set(name, value);
+    fragment();
+  },
+  getFragmentPart(name) {
+    return extraParts.get(name);
+  },
+  onFragment(handler) {
+    fragmentHandlers.push(handler);
+  },
+  setModus(modus) {
+    setModus(modus, true);
+    render();
+  },
+  render,
+};
 
 function apcaTabelo() {
   const rows = (datumoj.apcaHintoj.kategorioj || []).map(function (row) {
@@ -220,15 +296,28 @@ komparoSwitch.addEventListener("click", () => {
 
 function applyFragment() {
   if (location.hash.length < 2) return;
+  let modus = "ansehen";
+  const seen = new Set();
   for (const part of location.hash.slice(1).split("&")) {
-    const [name, value] = part.split("=");
-    if (name && value) {
+    const at = part.indexOf("=");
+    const name = at === -1 ? part : part.slice(0, at);
+    const value = at === -1 ? "" : part.slice(at + 1);
+    if (!name || !value) continue;
+    if (name === "modus") {
+      modus = value;
+    } else if (KNOWN_NAMES.has(name)) {
       root.setAttribute("data-fm-" + name, value);
       for (const other of document.querySelectorAll('[data-fm-switch="' + name + '"]')) {
         other.setAttribute("aria-pressed", String(other.getAttribute("data-fm-valoro") === value));
       }
+    } else {
+      extraParts.set(name, value);
+      seen.add(name);
     }
   }
+  for (const name of [...extraParts.keys()]) if (!seen.has(name)) extraParts.delete(name);
+  setModus(modus, false);
+  for (const handler of fragmentHandlers) handler(new Map(extraParts));
 }
 
 // A fragment pasted into the address bar arrives as a hashchange: apply it without a reload.
