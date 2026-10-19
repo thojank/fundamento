@@ -78,13 +78,23 @@ const EROJ_STEPS: ReadonlyArray<readonly [name: string, run: string]> = [
   ],
 ];
 
-/** The job of the rendered checks: axe over the Eroj, the Make Kit, the quickstart, the Vitrino. */
+// Nachlese 5 ① (D-04): the rendered checks ran 7:52 to 8:34 in one job – axe over the Eroj alone
+// 178 to 233 s, the Vitrino 104 to 140 s. axe over the Eroj is a job of its own now, the Make Kit,
+// the quickstart and the Vitrino the other; no job above 7 minutes.
+/** The job of the rendered accessibility of the Eroj: axe, keyboard and focus ring. */
+const ALIREBLECO_EROJ_STEPS: ReadonlyArray<readonly [name: string, run: string]> = [
+  ["Playwright browsers", PLAYWRIGHT_BROWSERS],
+  ["Build", "pnpm build"],
+  ["Check: Alirebleco (Eroj)", "pnpm check:alirebleco-eroj"],
+];
+
+/** The job of the other rendered checks: the Make Kit, the quickstart, the Vitrino. */
 const RENDERED_CHECK_STEPS: ReadonlyArray<readonly [name: string, run: string]> = [
   ["Playwright browsers", PLAYWRIGHT_BROWSERS],
   ["Build", "pnpm build"],
-  ...ERO_CHECK_STEPS.filter(([name]) => name !== "Check: Release").map(
-    ([name, script]) => [name, `pnpm ${script}`] as const,
-  ),
+  ...ERO_CHECK_STEPS.filter(
+    ([name]) => name !== "Check: Release" && name !== "Check: Alirebleco (Eroj)",
+  ).map(([name, script]) => [name, `pnpm ${script}`] as const),
 ];
 
 const JOBS: Readonly<Record<string, ReadonlyArray<readonly [name: string, run: string]>>> = {
@@ -92,6 +102,7 @@ const JOBS: Readonly<Record<string, ReadonlyArray<readonly [name: string, run: s
   unit: UNIT_STEPS,
   projekcioj: PROJEKCIOJ_STEPS,
   eroj: EROJ_STEPS,
+  "alirebleco-eroj": ALIREBLECO_EROJ_STEPS,
   "rendered-checks": RENDERED_CHECK_STEPS,
 };
 
@@ -210,7 +221,7 @@ describe("CI workflow (.github/workflows/ci.yml)", () => {
     expect(installIndex).toBeGreaterThan(indexOfAction(steps, "actions/setup-node"));
   });
 
-  it("has the five jobs checks, unit, projekcioj, eroj and rendered-checks, each with its named steps in order after the install", () => {
+  it("has the six jobs checks, unit, projekcioj, eroj, alirebleco-eroj and rendered-checks, each with its named steps in order after the install", () => {
     expect(Object.keys(loadJobs())).toEqual(Object.keys(JOBS));
     for (const [job, expected] of Object.entries(JOBS)) {
       const steps = loadSteps(job);
@@ -236,14 +247,14 @@ describe("CI workflow (.github/workflows/ci.yml)", () => {
     }
   });
 
-  it("shards the Playwright suite of the Eroj and the Vitest suite of the Projekcioj in two, without fail-fast, and gives only the two rendered jobs the engines", () => {
+  it("shards the Playwright suite of the Eroj and the Vitest suite of the Projekcioj in two, without fail-fast, and gives only the three rendered jobs the engines", () => {
     for (const name of ["eroj", "projekcioj"]) {
       expect(loadJob(name).strategy, name).toEqual({
         "fail-fast": false,
         matrix: { shard: [1, 2] },
       });
     }
-    for (const name of ["eroj", "rendered-checks"]) {
+    for (const name of ["eroj", "alirebleco-eroj", "rendered-checks"]) {
       const env = loadJob(name).env;
       expect(isRecord(env) && typeof env.PLAYWRIGHT_ENGINES === "string", name).toBe(true);
     }

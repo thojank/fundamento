@@ -56,7 +56,12 @@ test.describe("fm-dialogo behaviour", () => {
   }) => {
     await serve(page, out, dialog(""));
     await listen(page);
-    await page.locator("#opener").click();
+    // Nachlese 5 ①: the dialog returns the focus to the element that had it when it opened. A click
+    // gives a button the focus in Chromium and Firefox, not in WebKit (as in Safari: measured, the
+    // body keeps it) — there the dialog returned the focus to the body, 3 of 3 runs on macOS. The
+    // opener takes the focus as a keyboard user gives it, and the test waits until it holds it.
+    await page.locator("#opener").focus();
+    await expect(page.locator("#opener")).toBeFocused();
     await page.locator("#d").evaluate((element) => element.setAttribute("open", ""));
     await expect(page.getByRole("dialog")).toBeVisible();
     await page.keyboard.press("Escape");

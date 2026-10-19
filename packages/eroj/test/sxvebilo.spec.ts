@@ -56,10 +56,16 @@ test.describe("fm-sxvebilo behaviour", () => {
     await serve(page, out, MARKUP);
     await page.locator("#trigger").click();
     await expect.poll(async () => (await layerOf(page, "p")).open).toBe(true);
+    // Nachlese 5 ①: the element takes the opening in the platform's toggle event, a task after
+    // :popover-open. Escape pressed before that task closed a layer whose open attribute had never
+    // been set: the wait for "attribute false" passed at once while aria-expanded still said true
+    // (red in #79, run 39231530044, and on main in Firefox, 39223137603). Wait for the opening to
+    // be taken, then for the closing, each as a state.
+    await expect.poll(async () => (await layerOf(page, "p")).attribute).toBe(true);
     await page.keyboard.press("Escape");
     await expect.poll(async () => (await layerOf(page, "p")).open).toBe(false);
     await expect.poll(async () => (await layerOf(page, "p")).attribute).toBe(false);
-    expect(await page.locator("#trigger").getAttribute("aria-expanded")).toBe("false");
+    await expect(page.locator("#trigger")).toHaveAttribute("aria-expanded", "false");
     await expect.poll(() => page.evaluate(() => document.activeElement?.id ?? "")).toBe("trigger");
   });
 
