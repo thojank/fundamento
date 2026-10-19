@@ -835,7 +835,14 @@ describe("the kompletigilo fills the active suggestion (N-8)", () => {
           width(listbox) -
           Number(listbox?.properties.paddingLeft ?? 0) -
           Number(listbox?.properties.paddingRight ?? 0);
-        expect(width(row), `${variant.name} suggestion-${n}`).toBe(inner);
+        expect(width(entry), `${variant.name} entry-${n}`).toBe(inner);
+        // The row lies in the reserve of its focus ring and gap (F17), the same reserve the
+        // field's control has in its own ring.
+        const field = descendant(variant, "field");
+        const reserve =
+          width(descendant(field, "focus-ring")) - width(descendant(field, "control"));
+        expect(reserve).toBeGreaterThan(0);
+        expect(width(row), `${variant.name} suggestion-${n}`).toBe(inner - reserve);
         expect(width(text), `${variant.name} suggestions-${n}`).toBeLessThan(width(row));
         expect(row?.properties.primaryAxisAlignItems, variant.name).toBe("MIN");
       }

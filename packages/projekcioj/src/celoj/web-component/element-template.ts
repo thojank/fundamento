@@ -2763,7 +2763,15 @@ ${isStacking ? "    this.#autoLayout();\n" : ""}`
       // scripts such as Devanagari); a word's initial is its first grapheme that is a letter or a
       // digit, so a quote or a bracket before it does not count.
       const words = avatarName.split(/[\\s\\p{Pd}]+/u).filter((word) => word !== "");
-      const picked = words.length > 1 ? [words[0] ?? "", words[words.length - 1] ?? ""] : words;
+      // Nachlese 5 N5-5 (O-18): the smallest size – the first value of the size axis – carries
+      // one initial, as in Figma; two stood over its circle.
+      const smallest = PROPS.find((prop) => prop.name === "size")?.values?.[0];
+      const one = smallest !== undefined && this.propValue("size") === smallest;
+      const picked = one
+        ? words.slice(0, 1)
+        : words.length > 1
+          ? [words[0] ?? "", words[words.length - 1] ?? ""]
+          : words;
       const graphemes = new Intl.Segmenter(lingvo, { granularity: "grapheme" });
       const letters = picked
         .map(
