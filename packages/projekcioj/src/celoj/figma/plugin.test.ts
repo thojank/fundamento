@@ -6821,6 +6821,88 @@ describe("the plugin draws the karto (Spec 015 ③)", () => {
   });
 });
 
+// Spec 015 ③ K-1 (Abnahme 2026-10-19, file f10b-5): in every variant of the karto set with its
+// image the heading stood one glyph per line, in komuna and ekzemplo; the example „ohne Bild" was
+// right. The heading of a set variant took FILL while it was still empty — its word came later,
+// through the label property — and stayed at the width of its empty box. Expected: the heading
+// fills the body (FILL, textAutoResize HEIGHT) and stands at the start like the content below it;
+// no text of a card is narrower than a glyph.
+describe("the karto's heading fills the body in every variant (K-1)", () => {
+  const box = (node: DoubleNode | undefined) =>
+    node as unknown as { width: number; height: number };
+  const cardsOf = (double: ReturnType<typeof figmaDouble>) => {
+    const nodes = pageNodes(double);
+    const set = nodes.find((node) => node.name === "karto");
+    const frame = nodes.find(
+      (node) => node.type === "FRAME" && node.getSharedPluginData("fundamento", "frame") !== "",
+    );
+    const example = frame?.children.find((child) => child.name === "karto – ohne Bild");
+    return [...(set?.children ?? []), ...(example === undefined ? [] : [example])];
+  };
+  const textsOf = (node: DoubleNode): DoubleNode[] =>
+    node.children.flatMap((child) => (child.type === "TEXT" ? [child] : textsOf(child)));
+
+  it("set and example: the heading fills the body like the content, wraps at its width and stands at the start; no text is narrower than a glyph", async () => {
+    const double = modelDouble();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    const cards = cardsOf(double);
+    expect(cards.map((card) => card.name)).toEqual([
+      "orientation=vertical, state=rest",
+      "orientation=horizontal, state=rest",
+      "karto – ohne Bild",
+    ]);
+    const narrow: string[] = [];
+    for (const card of cards) {
+      const heading = descendant(card, "heading");
+      const content = descendant(card, "content");
+      expect(heading?.properties.characters, card.name).toBe("Überschrift");
+      // Both fill the same body: as wide as each other, and more than one word wide.
+      expect(box(heading).width, card.name).toBe(box(content).width);
+      expect(box(heading).width, card.name).toBeGreaterThan(200);
+      for (const text of [heading, content]) {
+        expect(text?.properties.layoutSizingHorizontal, `${card.name} ${text?.name}`).toBe("FILL");
+        expect(text?.properties.textAutoResize, `${card.name} ${text?.name}`).toBe("HEIGHT");
+        expect(text?.properties.textAlignHorizontal, `${card.name} ${text?.name}`).toBe("LEFT");
+      }
+      for (const text of textsOf(card)) {
+        const characters = String(text.properties.characters ?? "");
+        // The smallest text of a card is a label of 12 px or more: a glyph is 0.6 × 12 wide here.
+        if (characters !== "" && box(text).width < 0.6 * 12) {
+          narrow.push(`${card.name} › ${text.name} „${characters}" ${box(text).width}`);
+        }
+      }
+    }
+    expect(narrow).toEqual([]);
+  });
+
+  it("a heading a run left at width 0 (reporting FILL) fills the body again on the next run, and a third run writes nothing", async () => {
+    const double = modelDouble();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    // The state the maintainer's file holds after the runs of 2026-10-19: every heading of the
+    // set took FILL while empty and got its word afterwards — it reports FILL and stands at
+    // width 0, one glyph a line (the double's K-1 belief), so a run that compares changes nothing.
+    const set = pageNodes(double).find((node) => node.name === "karto");
+    for (const variant of set?.children ?? []) {
+      const heading = descendant(variant, "heading");
+      if (heading === undefined) continue;
+      const word = heading.properties.characters;
+      heading.properties.characters = "";
+      (heading as unknown as { layoutSizingHorizontal: string }).layoutSizingHorizontal = "FILL";
+      heading.properties.characters = word;
+      expect(box(heading).width, variant.name).toBe(0);
+    }
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    for (const card of cardsOf(double)) {
+      const heading = descendant(card, "heading");
+      expect(heading?.properties.layoutSizingHorizontal, card.name).toBe("FILL");
+      expect(box(heading).width, card.name).toBe(box(descendant(card, "content")).width);
+    }
+    const before = double.snapshot();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    expect(double.snapshot()).toBe(before);
+  });
+});
+
 // Spec 015 ③ (plan ③ D-11): the plugin draws the avataro — every variant the box (a square of
 // box.size) with the initials (a circle: fill, radius, the label property „EM" in its colour and
 // role) and the image over it (a circle: radius, clipping, the silhouette on the stand-in ground),

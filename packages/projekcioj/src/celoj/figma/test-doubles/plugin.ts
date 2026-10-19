@@ -210,6 +210,8 @@ const FIGMA_DEFAULTS: Readonly<Record<string, Readonly<Record<string, unknown>>>
     layoutPositioning: "AUTO",
     layoutSizingHorizontal: "HUG",
     layoutSizingVertical: "HUG",
+    // A new text grows with its characters (plugin-api.d.ts, TextNode.textAutoResize).
+    textAutoResize: "WIDTH_AND_HEIGHT",
   },
 };
 
@@ -500,6 +502,15 @@ function node(
         const hugging = sizing === "HUG" && (mode === "HORIZONTAL" || mode === "VERTICAL");
         if (hugging || sizing === "FILL") self.properties[field] = "FIXED";
       }
+      // A text resized keeps the width it was given and wraps in it (K-1, belief alike).
+      if (self.type === "TEXT") {
+        self.properties.layoutSizingHorizontal = "FIXED";
+        if (self.properties.textAutoResize === "WIDTH_AND_HEIGHT") {
+          self.properties.textAutoResize = "HEIGHT";
+        }
+        STUCK_AT_ZERO.delete(self);
+        STUCK_AT_ZERO.delete(recorded);
+      }
       self.properties.width = width;
       self.properties.height = height;
       self.defaults.delete("width");
@@ -567,7 +578,7 @@ function node(
   // lands in `properties`, so the double records it and `snapshot()` shows it. Without this the
   // double swallowed every such assignment, and a projection could lose a value unseen (F8).
   recorded = new Proxy(self, {
-    set(target, key, value) {
+    set(target, key, value, receiver) {
       if (key === "gridRowAnchorIndex" || key === "gridColumnAnchorIndex") {
         throw new Error(`${String(key)} is read-only; use setGridChildPosition.`);
       }
@@ -642,6 +653,35 @@ function node(
         target.properties.description = value;
         target.defaults.delete("description");
       }
+      // The width of a text follows its sizing (documented, TextNode.textAutoResize and
+      // layoutSizingHorizontal): HUG grows with the characters, FIXED and FILL keep a width and
+      // wrap the characters in it.
+      if (target.type === "TEXT" && key === "layoutSizingHorizontal") {
+        if (value === "HUG") {
+          target.properties.textAutoResize = "WIDTH_AND_HEIGHT";
+        } else if (target.properties.textAutoResize === "WIDTH_AND_HEIGHT") {
+          target.properties.textAutoResize = "HEIGHT";
+        }
+        target.defaults.delete("textAutoResize");
+        // Spec 015 ③ K-1 (Abnahme 2026-10-19, file f10b-5) – a **belief** from one measurement,
+        // to be confirmed when the maintainer measures C2 again. The heading of the karto took
+        // FILL while it was still empty (its word came later, through the label property) and
+        // stood one glyph per line in every variant of the set: the set measured 648 × 1031, and
+        // this double gives 648 × 1007 with the heading at width 0, 648 × 507 without. The example
+        // „ohne Bild", whose heading had its word before it took FILL, wrapped across the body,
+        // and so did the content beside it. A second run, which compares before it writes,
+        // changed nothing: the heading reports FILL. So a text that takes FILL while empty
+        // reports FILL and stays at width 0, wrapping, until it is resized or takes a sizing
+        // again with characters in it.
+        // The node and its recording proxy alike: a parent's children hold the proxy.
+        for (const each of [target, receiver]) {
+          if (value === "FILL" && String(target.properties.characters ?? "") === "") {
+            STUCK_AT_ZERO.add(each);
+          } else {
+            STUCK_AT_ZERO.delete(each);
+          }
+        }
+      }
       if (typeof key === "string" && !(key in target)) {
         target.properties[key] =
           (key === "fills" || key === "strokes") && Array.isArray(value)
@@ -668,11 +708,17 @@ function node(
   return recorded;
 }
 
+/** The texts that took FILL while empty (K-1, a belief; see the setter of the recorded node). */
+const STUCK_AT_ZERO = new WeakSet<object>();
+
 /**
  * The layout of a file, as far as the plugin relies on it (F14). It follows what Figma was
  * measured to do, not a theory of it:
  * - a text is as wide as its characters (0.6 × font size each) and 1.25 × its font size high —
- *   an estimate; tests compare sizes with each other, never with a text width;
+ *   an estimate; tests compare sizes with each other, never with a text width. A text of fixed
+ *   width (textAutoResize HEIGHT) wraps its characters at that width, at least one glyph a line;
+ *   a text that takes FILL while it is empty reports FILL and stays at width 0 (K-1, Spec 015 ③,
+ *   a belief from one measurement — see the setter);
  * - an auto-layout frame hugs an axis when it says so (layoutSizing HUG, or the older AUTO sizing
  *   modes), adds its paddings and the spacing between its children in the flow, and grows to its
  *   minimum sizes; otherwise it keeps its width and height (Figma's default 100 × 100);
@@ -745,7 +791,8 @@ function layoutOf(
     prop(current, axis === "H" ? "layoutSizingHorizontal" : "layoutSizingVertical") === "FILL" &&
     current.parent !== undefined &&
     isFlow(current.parent) &&
-    prop(current, "layoutPositioning") !== "ABSOLUTE";
+    prop(current, "layoutPositioning") !== "ABSOLUTE" &&
+    !STUCK_AT_ZERO.has(current);
   /** What a child adds to the size of a parent that hugs: nothing along an axis it fills. */
   const contribution = (child: DoubleNode): { width: number; height: number } => {
     const own = intrinsic(child);
@@ -811,7 +858,22 @@ function layoutOf(
     if (current.type === "TEXT") {
       const fontSize = num(current, "fontSize") || 12;
       const characters = String(prop(current, "characters") ?? "");
-      size = { width: characters.length * fontSize * 0.6, height: fontSize * 1.25 };
+      const glyph = fontSize * 0.6;
+      const stuck = STUCK_AT_ZERO.has(current);
+      const fixed =
+        stuck ||
+        (prop(current, "layoutSizingHorizontal") === "FIXED" &&
+          prop(current, "textAutoResize") !== "WIDTH_AND_HEIGHT");
+      if (fixed) {
+        // A text of fixed width wraps its characters at that width, at least one glyph a line
+        // (K-1: at width 0, one glyph a line). A filling text is measured on one line.
+        const width = stuck ? 0 : num(current, "width");
+        const perLine = Math.max(1, Math.floor(width / glyph));
+        const lines = Math.max(1, Math.ceil(characters.length / perLine));
+        size = { width, height: lines * fontSize * 1.25 };
+      } else {
+        size = { width: characters.length * glyph, height: fontSize * 1.25 };
+      }
     } else if ((mode === "HORIZONTAL" || mode === "VERTICAL") && inFlow(current).length === 0) {
       // An empty auto-layout frame keeps its size, hug or not (F-4, measured; see above).
       size = {
