@@ -6,7 +6,7 @@ Zwei PRs, gestapelt: ① CI-Teilung von `main`, ② Befunde von ①.
 
 ## ① CI: `plugin.test.ts` teilen (O-5)
 
-**Branch:** `261019-nachlese-5-ci-f027c6` (von `main` @ `ef3c8db`, nach dem Merge von #78 und #79) · **Datum:** 2026-10-19.
+**Branch:** `261019-nachlese-5-ci-f027c6` (von `main` @ `ef3c8db`, nach dem Merge von #78 und #79; nach dem Merge von #77 auf `a1dc8b6` rebased) · **Datum:** 2026-10-19.
 
 ### Zusammenfassung
 
