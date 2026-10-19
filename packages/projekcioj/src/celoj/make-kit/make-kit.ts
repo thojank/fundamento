@@ -31,6 +31,7 @@ import { themeBlock } from "../tailwind/tailwind.js";
 import { elementSource } from "../web-component/element-template.js";
 import {
   elementNamesOf,
+  isAvatar,
   isLight,
   isMultiline,
   isPopover,
@@ -572,7 +573,10 @@ function guidelines(input: CeloInput, aspekto: string): GeneratedFile[] {
   // pasted SVG; every dividing line the apartigilo; the first focusable element of a page the
   // saltligilo (the link that floats); generated from the roles img, separator and link.
   const iconLines = eroj
-    .filter((entry) => entry.skemo.a11y.role === "img" && entry.uzo !== undefined)
+    .filter(
+      (entry) =>
+        entry.skemo.a11y.role === "img" && !isAvatar(entry.skemo) && entry.uzo !== undefined,
+    )
     .map(
       (entry) =>
         `- Every icon is an \`<${componentName(entry.ero)}>\` with a name from the Ikonaro, decorative unless it carries meaning (then with a \`label\`); never paste an SVG.`,
@@ -654,6 +658,24 @@ function guidelines(input: CeloInput, aspekto: string): GeneratedFile[] {
         `- Every file a form asks for is an \`<${componentName(entry.ero)}>\` whose help names the kinds and the size it takes (\`accept\`, \`max-size\`)${fieldName === undefined ? "" : `; a text a person types is a \`<${componentName(fieldName.ero)}>\``}, and sending the files is the application's.`,
     )
     .join("\n");
+  // Spec 015 ③ (G7, plan ③ D-06): every summary of one thing is the karto at the level of its
+  // heading; generated from the role article, the record list and the notice named beside it.
+  const cardLines = eroj
+    .filter((entry) => entry.skemo.a11y.role === "article" && entry.uzo !== undefined)
+    .map(
+      (entry) =>
+        `- Every summary of one thing — a heading, an image, a sentence and at most two actions — is a \`<${componentName(entry.ero)}>\` with the \`level\` of its heading${recordName === undefined ? "" : `; the fields of one record are an \`<${componentName(recordName.ero)}>\``}${noticeName === undefined ? "" : `, what happened is an \`<${componentName(noticeName.ero)}>\``}, and a whole card is never one link.`,
+    )
+    .join("\n");
+  // Spec 015 ③ (G7, plan ③ D-10): every person or thing shown as a picture or initials is the
+  // avataro with its name; generated from the image with an initials part, the badge named beside.
+  const avatarLines = eroj
+    .filter((entry) => isAvatar(entry.skemo) && entry.uzo !== undefined)
+    .map(
+      (entry) =>
+        `- Every person or thing shown as a picture or as initials is an \`<${componentName(entry.ero)}>\` with its \`name\` (\`decorative\` where the name stands beside it)${badgeName === undefined ? "" : `; a status is an \`<${componentName(badgeName.ero)}>\``}, never a dot or a colour worked out from the name.`,
+    )
+    .join("\n");
   const skipLines = eroj
     .filter((entry) => isSkip(entry.skemo) && entry.uzo !== undefined)
     .map(
@@ -702,6 +724,8 @@ ${menuLines}
 ${disclosureLines}
 ${suggestLines}
 ${uploadLines}
+${cardLines}
+${avatarLines}
 
 Where to look: \`setup.md\` for the imports, \`foundations/\` for the tokens, \`components/\` for
 each component.

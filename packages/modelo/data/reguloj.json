@@ -192,15 +192,16 @@
     {
       "id": "reg_01M2XMV80DG7JCJDTZGE66MGHW",
       "name": "one-primary-per-container",
-      "statement": "A container holds at most one butono with emphasis=high; instances without a named container count as one container. The actions of a dialogo and of an avizo are such containers (Spec 011 ②, ③).",
+      "statement": "A container holds at most one butono with emphasis=high; instances without a named container count as one container. The actions of a dialogo, of an avizo and of a karto are such containers (Spec 011 ②, ③; Spec 015 ③).",
       "kialo": "Two equal calls to action move the decision onto the user; one primary action makes the next step obvious, and every other action steps back as secondary or tertiary.",
-      "scope": "eroj: butono instances in a design or in code (check_usage), the actions of a dialogo and of an avizo among them",
+      "scope": "eroj: butono instances in a design or in code (check_usage), the actions of a dialogo, an avizo and a karto among them",
       "checkability": "automatic",
       "appliesTo": {
         "eroj": [
           "butono",
           "dialogo",
-          "avizo"
+          "avizo",
+          "karto"
         ]
       }
     },
@@ -426,7 +427,9 @@
           "kompletigilo",
           "pagxigilo",
           "spuro",
-          "alsxutilo"
+          "alsxutilo",
+          "karto",
+          "avataro"
         ]
       }
     },
@@ -823,14 +826,15 @@
     {
       "id": "reg_01M55X2XBTVBQC8HSYFM3SBYM2",
       "name": "icon-meaning-named",
-      "statement": "An icon that carries meaning has a name (label), and a button that shows only an icon has a label: 'Fehler', 'Warnung', 'Schließen' — never 'Icon' or 'Symbol', which name the picture and not what it means.",
+      "statement": "An icon that carries meaning has a name (label), a button that shows only an icon has a label, and an avatar is named by the person or thing it shows (name): 'Fehler', 'Warnung', 'Schließen' — never 'Icon' or 'Symbol', which name the picture and not what it means.",
       "kialo": "A picture without a name is silent for a screen reader, and a name that only says 'icon' tells nothing; whoever cannot see the sign hears its meaning or hears nothing.",
-      "scope": "eroj: ikono instances with a status intent (info, success, warning, danger) carry a label (constraint of the Skemo, prop:label filled) and the label is judged on prop:label (check not-words: icon, image, symbol, glyph, picture / icon, symbol, bild, grafik, zeichen); butono instances that show only an icon carry a label (label-required judges it); fixed, no Aspekto overrides it (Uzo content)",
+      "scope": "eroj: ikono instances with a status intent (info, success, warning, danger) carry a label (constraint of the Skemo, prop:label filled) and the label is judged on prop:label (check not-words: icon, image, symbol, glyph, picture / icon, symbol, bild, grafik, zeichen); butono instances that show only an icon carry a label (label-required judges it); fixed, no Aspekto overrides it (Uzo content); avataro instances (Spec 015 ③): the name is judged on prop:name (check not-words: avatar, image, picture, photo, icon / avatar, profilbild, bild, foto, icon), fixed",
       "checkability": "automatic",
       "appliesTo": {
         "eroj": [
           "ikono",
-          "butono"
+          "butono",
+          "avataro"
         ]
       }
     },

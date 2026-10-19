@@ -1720,3 +1720,110 @@ for (const aspekto of ["komuna", "ekzemplo"]) {
     }
   }
 }
+
+// Spec 015 ③ (G5, plan ③ D-04): the rendered karto — heading, text, a badge in the meta row and
+// two actions, on the raised surface — in every colour class: axe without a finding; the heading
+// and the text at least 4.5:1 on the surface, the border of the surface drawn.
+const karto =
+  '<fm-karto id="an-k" level="2"><span slot="heading">Barrierefreiheit</span>Kontrast, Fokus und Namen in jeder Marke.<fm-insigno slot="meta">gültig</fm-insigno><fm-butono slot="actions" emphasis="high">Öffnen</fm-butono><fm-butono slot="actions" emphasis="low">Teilen</fm-butono></fm-karto>';
+
+for (const aspekto of ["komuna", "ekzemplo"]) {
+  for (const scheme of ["light", "dark"]) {
+    for (const contrast of ["default", "high"]) {
+      test(`${aspekto} ${scheme}/${contrast}: axe on the karto; heading and text ≥ 4.5:1 on its surface`, async ({
+        page,
+      }) => {
+        await serve(page, out, karto);
+        await page.evaluate(
+          ([a, s, k]) => {
+            const root = document.documentElement;
+            root.setAttribute("data-fm-aspekto", a ?? "");
+            root.setAttribute("data-fm-color-scheme", s ?? "");
+            root.setAttribute("data-fm-contrast", k ?? "");
+          },
+          [aspekto, scheme, contrast],
+        );
+        await expect(page.getByRole("article", { name: "Barrierefreiheit" })).toBeVisible();
+        expect(await axeViolations(page), "karto").toEqual([]);
+        const measured = await page.evaluate(() => {
+          const luminance = (colour: string) => {
+            const [r = 0, g = 0, b = 0] = colour.match(/[\d.]+/g)?.map(Number) ?? [];
+            const channel = (value: number) => {
+              const c = value / 255;
+              return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+            };
+            return 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
+          };
+          const ratio = (front: string, back: string) => {
+            const [a, b] = [luminance(front), luminance(back)].sort((x, y) => y - x);
+            return ((a ?? 0) + 0.05) / ((b ?? 0) + 0.05);
+          };
+          const shadow = document.getElementById("an-k")?.shadowRoot;
+          const surface = getComputedStyle(
+            shadow?.querySelector('[part="control"]') as HTMLElement,
+          ).backgroundColor;
+          const text = (node: Element | null | undefined) =>
+            ratio(getComputedStyle(node as HTMLElement).color, surface);
+          const heading = shadow?.querySelector('[part="heading"]')?.shadowRoot;
+          return {
+            heading: text(heading?.querySelector('[part="text"]')),
+            content: text(shadow?.querySelector('[part="content"]')),
+          };
+        });
+        for (const [part, value] of Object.entries(measured)) {
+          expect(value, part).toBeGreaterThanOrEqual(4.5);
+        }
+      });
+    }
+  }
+}
+
+// Spec 015 ③ (G5, plan ③ D-08): the rendered avataro — named in every size, and decorative (the
+// page's own text beside it is not the Ero's, so it is left out here) — in every colour class: axe without a finding; the initials at least 4.5:1 on their
+// sunken ground (E8: the same roles for every name).
+const avatars =
+  '<fm-avataro id="an-a1" size="small" name="Erika Mustermann"></fm-avataro><fm-avataro id="an-a2" name="Max Mustermann"></fm-avataro><fm-avataro id="an-a3" size="large" name="Zoë Zhang"></fm-avataro><fm-avataro size="small" name="Erika Mustermann" decorative></fm-avataro>';
+
+for (const aspekto of ["komuna", "ekzemplo"]) {
+  for (const scheme of ["light", "dark"]) {
+    for (const contrast of ["default", "high"]) {
+      test(`${aspekto} ${scheme}/${contrast}: axe on the avataro; its initials ≥ 4.5:1 on their ground`, async ({
+        page,
+      }) => {
+        await serve(page, out, avatars);
+        await page.evaluate(
+          ([a, s, k]) => {
+            const root = document.documentElement;
+            root.setAttribute("data-fm-aspekto", a ?? "");
+            root.setAttribute("data-fm-color-scheme", s ?? "");
+            root.setAttribute("data-fm-contrast", k ?? "");
+          },
+          [aspekto, scheme, contrast],
+        );
+        await expect(page.getByRole("img")).toHaveCount(3);
+        expect(await axeViolations(page), "avataro").toEqual([]);
+        const ratios = await page.evaluate(() => {
+          const luminance = (colour: string) => {
+            const [r = 0, g = 0, b = 0] = colour.match(/[\d.]+/g)?.map(Number) ?? [];
+            const channel = (value: number) => {
+              const c = value / 255;
+              return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+            };
+            return 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
+          };
+          return ["an-a1", "an-a2", "an-a3"].map((id) => {
+            const initials = document
+              .getElementById(id)
+              ?.shadowRoot?.querySelector('[part="initials"]') as HTMLElement;
+            const style = getComputedStyle(initials);
+            const [a, b] = [luminance(style.color), luminance(style.backgroundColor)].sort(
+              (x, y) => y - x,
+            );
+            return ((a ?? 0) + 0.05) / ((b ?? 0) + 0.05);
+          });
+        });
+        for (const value of ratios) expect(value).toBeGreaterThanOrEqual(4.5);
+      });
+    }
+  }
+}

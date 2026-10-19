@@ -260,13 +260,17 @@
             "alert",
             "message",
             "warning",
-            "banner"
+            "banner",
+            "toast",
+            "snackbar"
           ],
           "de": [
             "hinweis",
             "meldung",
             "warnung",
-            "erfolgsmeldung"
+            "erfolgsmeldung",
+            "toast",
+            "snackbar"
           ]
         },
         "props": {}

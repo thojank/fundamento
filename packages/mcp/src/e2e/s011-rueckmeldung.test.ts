@@ -106,7 +106,8 @@ describe("the feedback of the spec: a status word, a notice, a loading area", ()
     const answer = await output<Suggested>(client, "suggest_ero", {
       goal: "ein Toast unten rechts",
     });
-    expect(answer.suggestion).toBeNull();
+    // Spec 015 ③ (E6): the Gvidanto answers with the avizo in the flow, the boundary beside it.
+    expect(answer.suggestion).toEqual({ ero: "avizo", props: {} });
     expect(answer.boundary).toMatchObject({
       ero: "avizo",
       case: "toast",
@@ -162,12 +163,13 @@ describe("check_usage of the badge, the notice and the state", () => {
 });
 
 describe("list_eroj and the briefs", () => {
-  it("lists thirty Eroj; the briefs of insigno, avizo and plenstato name their axes and duties", async () => {
+  it("lists thirty-two Eroj; the briefs of insigno, avizo and plenstato name their axes and duties", async () => {
     const listed = await output<Listed>(client, "list_eroj", {});
     expect(listed.eroj.map((entry) => entry.name)).toEqual([
       "alsxutilo",
       "apartigilo",
       "atributlisto",
+      "avataro",
       "avizo",
       "butono",
       "dialogo",
@@ -177,6 +179,7 @@ describe("list_eroj and the briefs", () => {
       "ikono",
       "insigno",
       "kampo",
+      "karto",
       "kompletigilo",
       "konsileto",
       "langetaro",

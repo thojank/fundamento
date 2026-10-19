@@ -1,0 +1,151 @@
+{
+  "ero": {
+    "id": "ero_01M58DN4TTA74NYFENT46BHNRH",
+    "name": "karto",
+    "skemo": "ske_01M58DN56T21GD8QTD1PZFND31",
+    "description": "A card: groups the content about one thing into a unit — a heading, an optional image and text, and up to two actions. It stands for itself (an article) or as a section of the page, named by its heading."
+  },
+  "skemo": {
+    "id": "ske_01M58DN56T21GD8QTD1PZFND31",
+    "ero": "ero_01M58DN4TTA74NYFENT46BHNRH",
+    "props": [
+      {
+        "name": "level",
+        "kind": "enum",
+        "values": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6"
+        ],
+        "required": true,
+        "description": "The level of the card's heading in the structure of the page, handed to the composed titolo (Regulo heading-levels-in-order): a card under a section heading of level 2 takes 3."
+      },
+      {
+        "name": "orientation",
+        "kind": "enum",
+        "values": [
+          "vertical",
+          "horizontal"
+        ],
+        "default": "vertical",
+        "description": "The image above the text (vertical) or beside it (horizontal); a horizontal card stacks like a vertical one while its container is narrower than the Uzo's columns-from."
+      },
+      {
+        "name": "standalone",
+        "kind": "boolean",
+        "default": true,
+        "description": "Whether the content stands for itself — a project, an article, read without the page around it (an article); false makes the card a section of the page (a region). Either way it is named by its heading."
+      }
+    ],
+    "states": [
+      "rest"
+    ],
+    "slots": [
+      {
+        "name": "heading",
+        "text": true
+      },
+      {
+        "name": "media"
+      },
+      {
+        "name": "content",
+        "default": true
+      },
+      {
+        "name": "meta"
+      },
+      {
+        "name": "actions"
+      }
+    ],
+    "parts": {
+      "surface": {
+        "fill": {
+          "fixed": "color.background.raised"
+        },
+        "radius": {
+          "fixed": "radius.role.surface"
+        },
+        "shadow": {
+          "fixed": "elevation.shadow.raised"
+        }
+      },
+      "border": {
+        "color": {
+          "fixed": "color.border.subtle"
+        },
+        "width": {
+          "fixed": "border.width.default"
+        }
+      },
+      "heading": {
+        "color": {
+          "fixed": "color.text.default"
+        },
+        "typography": {
+          "fixed": "typography.headline.4"
+        }
+      },
+      "content": {
+        "color": {
+          "fixed": "color.text.default"
+        },
+        "typography": {
+          "fixed": "typography.body.1"
+        }
+      },
+      "meta": {
+        "gap": {
+          "fixed": "spacing.small"
+        }
+      },
+      "actions": {
+        "gap": {
+          "fixed": "spacing.small"
+        }
+      },
+      "box": {
+        "inline-padding": {
+          "fixed": "spacing.medium"
+        },
+        "gap": {
+          "fixed": "spacing.small"
+        }
+      }
+    },
+    "bindings": [],
+    "a11y": {
+      "role": "article",
+      "name": [
+        "slot:heading"
+      ],
+      "states": {},
+      "keys": []
+    },
+    "goals": [
+      {
+        "goal": "card",
+        "keywords": {
+          "en": [
+            "card",
+            "cards",
+            "tile",
+            "tiles"
+          ],
+          "de": [
+            "karte",
+            "karten",
+            "kachel",
+            "kacheln"
+          ]
+        },
+        "props": {},
+        "regulo": "one-primary-per-container"
+      }
+    ]
+  }
+}

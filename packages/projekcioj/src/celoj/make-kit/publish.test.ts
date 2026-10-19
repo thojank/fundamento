@@ -52,7 +52,7 @@ describe("what a publish would contain (T020)", () => {
       // F25: the LICENSE is written by the generator, so it lands in the package whatever tool
       // packs it — `npm publish` by hand left it out, pnpm had taken it from the repository root.
       // Spec 008: one guideline per Ero, the ligilo's next to the butono's.
-      expect(files).toHaveLength(47);
+      expect(files).toHaveLength(49);
       expect(files).toEqual([
         "LICENSE",
         "README.md",
@@ -66,6 +66,7 @@ describe("what a publish would contain (T020)", () => {
         "guidelines/components/alsxutilo.md",
         "guidelines/components/apartigilo.md",
         "guidelines/components/atributlisto.md",
+        "guidelines/components/avataro.md",
         "guidelines/components/avizo.md",
         "guidelines/components/butono.md",
         "guidelines/components/dialogo.md",
@@ -75,6 +76,7 @@ describe("what a publish would contain (T020)", () => {
         "guidelines/components/ikono.md",
         "guidelines/components/insigno.md",
         "guidelines/components/kampo.md",
+        "guidelines/components/karto.md",
         "guidelines/components/kompletigilo.md",
         "guidelines/components/konsileto.md",
         "guidelines/components/langetaro.md",

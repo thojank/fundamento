@@ -1491,6 +1491,10 @@
         {
           "predicate": "references",
           "target": "#Mezurilo"
+        },
+        {
+          "predicate": "references",
+          "target": "#Avataro"
         }
       ]
     },
@@ -1543,6 +1547,10 @@
         {
           "predicate": "references",
           "target": "#Ligilo"
+        },
+        {
+          "predicate": "references",
+          "target": "#Karto"
         }
       ]
     },
@@ -1682,6 +1690,10 @@
         {
           "predicate": "references",
           "target": "#Mezurilo"
+        },
+        {
+          "predicate": "references",
+          "target": "#Karto"
         }
       ]
     },
@@ -2600,6 +2612,116 @@
         {
           "predicate": "references",
           "target": "#Kampo"
+        }
+      ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Karto",
+      "term": "Karto",
+      "inScheme": "eroj",
+      "prefLabel": {
+        "eo": "Karto",
+        "en": "card",
+        "de": "Karte"
+      },
+      "altLabel": {
+        "en": [
+          "karto",
+          "card",
+          "tile",
+          "teaser"
+        ],
+        "de": [
+          "Karte",
+          "Kachel",
+          "Teaser",
+          "karto"
+        ]
+      },
+      "definition": {
+        "en": "A card: groups the content about one thing into a unit — a heading (a titolo at the card's level), an optional image, text, a meta row (insigno) and up to two actions, at most one of them with emphasis high. It stands for itself as an article or as a section of the page, named by its heading; horizontal it lays the image beside the text and stacks in a narrow container. The fields of one record are the atributlisto's, what happened the avizo's; a whole card as a link and the grid of many cards stop with a person.",
+        "de": "Eine Karte: fasst den Inhalt zu einer Sache als Einheit zusammen – eine Überschrift (ein titolo auf der Ebene der Karte), ein optionales Bild, Text, eine Zeile für Metadaten (insigno) und bis zu zwei Aktionen, höchstens eine davon mit emphasis high. Sie steht für sich als Artikel oder als Abschnitt der Seite, benannt durch ihre Überschrift; waagerecht stellt sie das Bild neben den Text und stapelt in einem schmalen Container. Die Felder eines Datensatzes gehören der atributlisto, was geschehen ist dem avizo; eine ganze Karte als Link und das Raster vieler Karten entscheidet eine Person."
+      },
+      "broader": [
+        "#Ero"
+      ],
+      "relations": [
+        {
+          "predicate": "references",
+          "target": "#Titolo"
+        },
+        {
+          "predicate": "references",
+          "target": "#Teksto"
+        },
+        {
+          "predicate": "references",
+          "target": "#Insigno"
+        },
+        {
+          "predicate": "references",
+          "target": "#Butono"
+        },
+        {
+          "predicate": "references",
+          "target": "#Ligilo"
+        },
+        {
+          "predicate": "references",
+          "target": "#Atributlisto"
+        },
+        {
+          "predicate": "references",
+          "target": "#Avizo"
+        },
+        {
+          "predicate": "references",
+          "target": "#Avataro"
+        }
+      ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Avataro",
+      "term": "Avataro",
+      "inScheme": "eroj",
+      "prefLabel": {
+        "eo": "Avataro",
+        "en": "avatar",
+        "de": "Avatar"
+      },
+      "altLabel": {
+        "en": [
+          "avataro",
+          "avatar",
+          "profile picture",
+          "initials"
+        ],
+        "de": [
+          "Avatar",
+          "Profilbild",
+          "Initialen",
+          "avataro"
+        ]
+      },
+      "definition": {
+        "en": "An avatar: represents a person or a thing with a picture or, where there is none or it does not load, with the initials of its name — at most two, grapheme by grapheme, on the sunken ground in the subtle text colour; never a colour worked out from the name. It is an image named by that name (icon-meaning-named), or hidden where the name stands beside it (decorative). A status is the insigno's; a group of avatars and a presence dot stop with a person.",
+        "de": "Ein Avatar: zeigt eine Person oder eine Sache als Bild oder, wo keins da ist oder es nicht lädt, mit den Initialen ihres Namens – höchstens zwei, Graphem für Graphem, auf dem abgesenkten Grund in der gedämpften Textfarbe; nie eine aus dem Namen errechnete Farbe. Es ist ein Bild mit diesem Namen (icon-meaning-named) oder verborgen, wo der Name daneben steht (decorative). Ein Status gehört dem insigno; eine Avatar-Gruppe und ein Anwesenheitspunkt entscheidet eine Person."
+      },
+      "broader": [
+        "#Ero"
+      ],
+      "relations": [
+        {
+          "predicate": "references",
+          "target": "#Insigno"
+        },
+        {
+          "predicate": "references",
+          "target": "#Karto"
+        },
+        {
+          "predicate": "references",
+          "target": "#Tabelo"
         }
       ]
     }

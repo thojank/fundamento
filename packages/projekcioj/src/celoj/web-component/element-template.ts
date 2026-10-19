@@ -39,7 +39,9 @@ export type HostControl =
   | "disclosure"
   | "pagination"
   | "suggest"
-  | "upload";
+  | "upload"
+  | "card"
+  | "avatar";
 
 export interface ElementNames {
   /** `fm-butono` */
@@ -110,6 +112,7 @@ export function hostOf(
   suggest = false,
   pagination = false,
   upload = false,
+  avatar = false,
 ): HostControl {
   if (role === "link") return "a";
   // Spec 015 ② (plan ② D-05): the platform's file input is heard as a button; with a dropzone
@@ -144,6 +147,8 @@ export function hostOf(
   if (role === "tablist") return "tabs";
   // An icon (Spec 014 ②, plan ② D-05) is a span that shows the Aspekto's glyph as a mask; a
   // separator (D-06) a div with that role, or none where it only decorates.
+  // Spec 015 ③ (plan ③ D-08): an image with an initials part is an avatar, not an icon.
+  if (role === "img" && avatar) return "avatar";
   if (role === "img") return "icon";
   if (role === "separator") return "separator";
   // A heading (Spec 014 ③, plan ③ D-04) is a div with role heading and its level spoken as
@@ -152,6 +157,9 @@ export function hostOf(
   if (role === "paragraph") return "paragraph";
   if (role === "textbox") return multiline ? "textarea" : "input";
   if (role === "dialog") return "dialog";
+  // Spec 015 ③ (plan ③ D-04): a card is the platform's article (a region where it is no
+  // standalone content), its heading a composed titolo.
+  if (role === "article") return "card";
   if (role === "switch" || role === "checkbox") return "toggle";
   if (role === "radiogroup") return "group";
   if (role === "combobox") return "select";
@@ -569,6 +577,26 @@ function tabsMarkup(): string {
 /** One row of the tabs (Spec 011 ⑤, D-08): a button with role tab; its edge is the indicator. */
 const TAB_ROW = '<button part="tab" role="tab" type="button"><slot></slot></button>';
 
+/**
+ * The shadow markup of an avatar (Spec 015 ③, plan ③ D-08): the control is the image of the
+ * person, named by the name (or hidden where decorative); inside it the platform's img — empty
+ * alt, the control carries the name — and the initials, both decorative; the element shows the
+ * picture once it has loaded, else the initials.
+ */
+function avatarMarkup(): string {
+  return '<span part="control"><img part="image" alt="" hidden><span part="initials" aria-hidden="true"></span></span><slot hidden></slot><span id="fm-texts" hidden></span>';
+}
+
+/**
+ * The shadow markup of a card (Spec 015 ③, plan ③ D-04): the platform's article named by its
+ * heading — a composed titolo at the card's level in the type role of the part heading — the media
+ * edge to edge above (beside, horizontal) a body of heading, content, meta and actions; media,
+ * meta and actions show only while they have content.
+ */
+function cardMarkup(): string {
+  return '<article part="control" aria-labelledby="heading"><div part="media" hidden><slot name="media"></slot></div><div part="body"><fm-titolo part="heading" id="heading" level="2" size="headline-4"><slot name="heading"></slot></fm-titolo><div part="content"><slot></slot></div><div part="meta" hidden><slot name="meta"></slot></div><div part="actions" hidden><slot name="actions"></slot></div></div><span id="fm-texts" hidden></span></article>';
+}
+
 /** The shadow markup of the control: slots before the label (icon-start), the label, the rest. */
 function markup(
   host: HostControl,
@@ -593,6 +621,8 @@ function markup(
   if (host === "light") return lightMarkup(slots, role, breadcrumb);
   if (host === "pagination") return paginationMarkup();
   if (host === "upload") return uploadMarkup();
+  if (host === "card") return cardMarkup();
+  if (host === "avatar") return avatarMarkup();
   if (host === "tabs") return tabsMarkup();
   if (host === "input") return fieldMarkup(slots);
   if (host === "textarea") return fieldMarkup(slots, true);
@@ -680,11 +710,15 @@ export function elementSource({
                                         ? "[part='list']"
                                         : host === "suggest" || host === "upload"
                                           ? "input"
-                                          : host === "popover"
-                                            ? "[role=dialog]"
-                                            : host === "menu"
-                                              ? "[role=menu]"
-                                              : "button";
+                                          : host === "card"
+                                            ? "article"
+                                            : host === "avatar"
+                                              ? "[part='control']"
+                                              : host === "popover"
+                                                ? "[role=dialog]"
+                                                : host === "menu"
+                                                  ? "[role=menu]"
+                                                  : "button";
   const isToggle = host === "toggle";
   const isGroup = host === "group";
   const isSelect = host === "select";
@@ -709,6 +743,8 @@ export function elementSource({
   const isPopover = host === "popover";
   const isMenu = host === "menu";
   const isOverlay = isTooltip || isPopover || isMenu;
+  const isCard = host === "card";
+  const isAvatar = host === "avatar";
   const isSkip = host === "a" && skip;
   const isStatic =
     isStatus ||
@@ -722,7 +758,9 @@ export function elementSource({
     isParagraph ||
     isOverlay ||
     isDisclosure ||
-    isPagination;
+    isPagination ||
+    isCard ||
+    isAvatar;
   const listSlot = slots.find((slot) => slot.list === true)?.name ?? "";
   const namedSlots = slots
     .filter((slot) => slot.default !== true && slot.decorative !== true)
@@ -1504,19 +1542,23 @@ ${
   // Layout auto (Spec 014 ①, plan ① D-03): a list whose Uzo names columns-from resolves auto to
   // columns or stacked by its own inline size, after the enums are written on the host.
   const isAuto = isLight && columnsFrom !== undefined;
+  // Spec 015 ③ (plan ③ D-04): a horizontal card stacks below the Uzo's columns-from, measured as
+  // layout auto measures its width.
+  const isStacking = isCard && columnsFrom !== undefined;
+  const observesSize = isAuto || isStacking;
   const lightRender = isLight
     ? `    this.#decorate();
 ${isAuto ? "    this.#autoLayout();\n" : ""}`
     : "";
-  const autoConstant = isAuto
-    ? `/** The width from which layout auto lays name and value side by side (Spec 014 ①, the Uzo's columns-from). */
+  const autoConstant = observesSize
+    ? `/** The width from which layout auto lays name and value side by side, a card its media beside its body (Spec 014 ①, Spec 015 ③: the Uzo's columns-from). */
 const COLUMNS_FROM = ${JSON.stringify(columnsFrom)};
 `
     : "";
-  const autoField = isAuto
-    ? "  /** Observes the inline size of the element while its layout is auto (Spec 014 ①). */\n  #sizes: ResizeObserver | undefined;\n"
+  const autoField = observesSize
+    ? "  /** Observes the inline size of the element while its layout is auto (Spec 014 ①) or it is a horizontal card (Spec 015 ③). */\n  #sizes: ResizeObserver | undefined;\n"
     : "";
-  const autoDisconnect = isAuto
+  const autoDisconnect = observesSize
     ? `
   disconnectedCallback(): void {
     this.#sizes?.disconnect();
@@ -1524,8 +1566,42 @@ const COLUMNS_FROM = ${JSON.stringify(columnsFrom)};
   }
 `
     : "";
-  const autoMethods = isAuto
+  const autoMethods = isStacking
     ? `
+  /**
+   * A horizontal card (Spec 015 ③, plan ③ D-04): the media beside the body while the element is
+   * at least as wide as the Uzo's columns-from, else stacked like a vertical card — measured as
+   * layout auto measures (a container query takes no var()). A class marks the stacked card, no
+   * data attribute: the parity inventory reads data-* as props of the Skemo.
+   */
+  #autoLayout(): void {
+    const control = this.#control;
+    if (this.propValue("orientation") !== "horizontal" || !this.isConnected) {
+      this.#sizes?.disconnect();
+      this.#sizes = undefined;
+      control.classList.remove("fm-stacked");
+      return;
+    }
+    if (this.#sizes === undefined) {
+      this.#sizes = new ResizeObserver(() => requestAnimationFrame(() => this.#autoLayout()));
+      this.#sizes.observe(this);
+    }
+    const style = getComputedStyle(this);
+    const box = this.getBoundingClientRect();
+    const inline = style.writingMode.startsWith("horizontal") ? box.width : box.height;
+    const raw = style.getPropertyValue(COLUMNS_FROM).trim();
+    const number = Number.parseFloat(raw);
+    const threshold = raw.endsWith("rem")
+      ? number * Number.parseFloat(getComputedStyle(document.documentElement).fontSize)
+      : raw.endsWith("em")
+        ? number * Number.parseFloat(style.fontSize)
+        : number;
+    // Without the token (no Aspekto loaded) the wide case stands, as the stylesheet draws it.
+    control.classList.toggle("fm-stacked", Number.isFinite(threshold) && inline < threshold);
+  }
+`
+    : isAuto
+      ? `
   /**
    * Layout auto (Spec 014 ①, plan ① D-03): columns while the element is at least as wide as the
    * Uzo's columns-from, else stacked; columns and stacked stand as they are. A container query
@@ -1558,7 +1634,7 @@ const COLUMNS_FROM = ${JSON.stringify(columnsFrom)};
     if (this.getAttribute("data-layout") !== resolved) this.setAttribute("data-layout", resolved);
   }
 `
-    : "";
+      : "";
   const lightInit = isLight
     ? `    if (lightSheet === undefined) {
       lightSheet = new CSSStyleSheet();
@@ -2619,6 +2695,80 @@ ${
     : "";
   // A skip link (Spec 014 ②, plan ② D-07): an empty label shows the Modelo's words for it, in the
   // language of the document (a11y.texts label-empty), as the fallback content of the slot.
+  // A card (Spec 015 ③, plan ③ D-04): its heading is a titolo at the card's level; content that
+  // stands for itself is an article, a section of the page a region — named by its heading either
+  // way. Media, meta and actions show while they have content; an image in the media says what it
+  // shows (alt) or that it only decorates (alt="").
+  const cardRender = isCard
+    ? `    const heading = this.shadowRoot?.querySelector('[part="heading"]');
+    if (heading instanceof HTMLElement) heading.setAttribute("level", String(this.propValue("level") ?? "1"));
+    if (this.propValue("standalone") === true) control.removeAttribute("role");
+    else control.setAttribute("role", "region");
+    for (const name of NAMED_SLOTS) {
+      if (name === "heading") continue;
+      const holder = this.shadowRoot?.querySelector(\`[part="\${name}"]\`);
+      if (holder instanceof HTMLElement) holder.hidden = !this.#filled(name);
+    }
+    const media = this.shadowRoot?.querySelector('slot[name="media"]');
+    if (media instanceof HTMLSlotElement) {
+      for (const node of media.assignedElements({ flatten: true })) {
+        const images = node instanceof HTMLImageElement ? [node] : [...node.querySelectorAll("img")];
+        if (images.some((image) => !image.hasAttribute("alt"))) {
+          warn(\`${tag}: the image in media has no alt; give it the words of what it shows, or alt="" where it only decorates.\`);
+        }
+      }
+    }
+${isStacking ? "    this.#autoLayout();\n" : ""}`
+    : "";
+  // An avatar (Spec 015 ③, plan ③ D-08): an image named by the name, hidden where decorative; the
+  // picture shows once it has loaded, else — none, still loading, or broken — the initials: the
+  // first grapheme of the first and of the last word of the name (Intl.Segmenter, so a letter
+  // with a combining mark stays one), at most two, in the writing of the document. No colour is
+  // worked out from the name (E8): the initials take the fixed roles of the part.
+  const avatarRender = isAvatar
+    ? `    const avatarName = String(this.propValue("name") ?? "").trim();
+    if (avatarName === "") warn(\`${tag}: name is required; an avatar without a name is a picture nobody hears (icon-meaning-named).\`);
+    if (this.propValue("decorative") === true) {
+      control.removeAttribute("role");
+      control.removeAttribute("aria-label");
+      control.setAttribute("aria-hidden", "true");
+    } else {
+      control.setAttribute("role", "img");
+      control.setAttribute("aria-label", avatarName);
+      control.removeAttribute("aria-hidden");
+    }
+    const initials = this.shadowRoot?.querySelector('[part="initials"]');
+    const image = this.shadowRoot?.querySelector('[part="image"]');
+    if (initials instanceof HTMLElement && image instanceof HTMLImageElement) {
+      const lingvo = this.#lingvo();
+      // Words are what spaces and dashes part (the word segmenters of the engines differ on
+      // scripts such as Devanagari); a word's initial is its first grapheme that is a letter or a
+      // digit, so a quote or a bracket before it does not count.
+      const words = avatarName.split(/[\\s\\p{Pd}]+/u).filter((word) => word !== "");
+      const picked = words.length > 1 ? [words[0] ?? "", words[words.length - 1] ?? ""] : words;
+      const graphemes = new Intl.Segmenter(lingvo, { granularity: "grapheme" });
+      const letters = picked
+        .map(
+          (word) =>
+            [...graphemes.segment(word)].find((grapheme) => /[\\p{L}\\p{N}]/u.test(grapheme.segment))
+              ?.segment ?? "",
+        )
+        .join("")
+        .toLocaleUpperCase(lingvo);
+      if (initials.textContent !== letters) initials.textContent = letters;
+      const picture = String(this.propValue("picture") ?? "");
+      if (picture !== this.#picture) {
+        this.#picture = picture;
+        this.#loaded = false;
+        if (picture === "") image.removeAttribute("src");
+        else image.src = picture;
+      }
+      const shown = picture !== "" && this.#loaded;
+      image.hidden = !shown;
+      initials.hidden = shown;
+    }
+`
+    : "";
   const skipRender = isSkip
     ? `    const fallback = TEXTS["label-empty"];
     if (fallback !== undefined) {
@@ -2815,6 +2965,21 @@ ${
   // dropzone too — and writes them back into the input, so the platform's own list and the form
   // value always say the same. The dropzone is an addition for the pointer: dragover marks the
   // field (its state), a drop takes the files. Every remove takes one file away.
+  // The picture of an avatar (Spec 015 ③): loaded, it replaces the initials; broken, they stay.
+  const avatarInit = isAvatar
+    ? `    const picture = root.querySelector('[part="image"]');
+    if (picture instanceof HTMLImageElement) {
+      picture.addEventListener("load", () => {
+        this.#loaded = picture.naturalWidth > 0;
+        this.#render();
+      });
+      picture.addEventListener("error", () => {
+        this.#loaded = false;
+        this.#render();
+      });
+    }
+`
+    : "";
   const uploadInit = isUpload
     ? `    const fileInput = control as HTMLInputElement;
     fileInput.addEventListener("change", () => {
@@ -3232,7 +3397,7 @@ export class ${className} extends Base {
   readonly #root: HTMLElement;
   readonly #label: HTMLSlotElement;
   readonly #texts: HTMLElement;
-${autoField}${isUpload ? '  /** The chosen files (Spec 015 ②): the value of the field, in the order they were chosen. */\n  #files: File[] = [];\n  /** The element\'s own error: a chosen file breaks accept or max-size (empty while none does). */\n  #fileError = "";\n' : ""}${isFieldHost || isUpload ? "  /** Whether a person touched the field or the form reported it invalid (Spec 011 ② F-8): the error shows from then on. */\n  #reported = false;\n" : ""}
+${autoField}${isAvatar ? '  /** The picture an avatar shows and whether it has loaded (Spec 015 ③): until then the initials stand. */\n  #picture = "";\n  #loaded = false;\n' : ""}${isUpload ? '  /** The chosen files (Spec 015 ②): the value of the field, in the order they were chosen. */\n  #files: File[] = [];\n  /** The element\'s own error: a chosen file breaks accept or max-size (empty while none does). */\n  #fileError = "";\n' : ""}${isFieldHost || isUpload ? "  /** Whether a person touched the field or the form reported it invalid (Spec 011 ② F-8): the error shows from then on. */\n  #reported = false;\n" : ""}
   constructor() {
     super();
     this.#internals = this.attachInternals();
@@ -3260,7 +3425,7 @@ ${autoField}${isUpload ? '  /** The chosen files (Spec 015 ②): the value of th
     this.#label = label;
     this.#texts = texts;
     control.addEventListener("click", (event) => this.#activate(event));
-${toggleKeys}${groupInit}${selectInit}${dialogInit}${statusInit}${lightInit}${paginationInit}${tabsInit}${tooltipInit}${popoverInit}${menuInit}${disclosureInit}${suggestInit}${uploadInit}${skipInit}    label.addEventListener("slotchange", () => this.#render());
+${toggleKeys}${groupInit}${selectInit}${dialogInit}${statusInit}${lightInit}${paginationInit}${tabsInit}${tooltipInit}${popoverInit}${menuInit}${disclosureInit}${suggestInit}${uploadInit}${avatarInit}${skipInit}    label.addEventListener("slotchange", () => this.#render());
     for (const named of root.querySelectorAll("slot[name]")) {
       named.addEventListener("slotchange", () => this.#render());
     }
@@ -3293,7 +3458,12 @@ ${autoDisconnect}
   propValue(name: string): Value | undefined {
     const prop = PROPS.find((candidate) => candidate.name === name);
     if (prop === undefined) return undefined;
-    if (prop.kind === "boolean") return this.hasAttribute(name);
+    // A boolean whose default is true (Spec 015 ③, plan ③ D-03: standalone of a card) is true
+    // while the attribute is absent and false only as name="false"; every other boolean is the
+    // presence of its attribute.
+    if (prop.kind === "boolean") {
+      return prop.default === true ? this.getAttribute(name) !== "false" : this.hasAttribute(name);
+    }
     const raw = this.getAttribute(name);
     if (prop.kind === "enum") {
       const allowed = prop.values ?? [];
@@ -3398,7 +3568,7 @@ ${autoDisconnect}
     // \`invalid\` spoken as aria-invalid and set by a filled error slot (constraint of the Skemo);
     // disabled wins over readonly; help and error show only while they have text.
     const described: string[] = [];
-${inputRender}${toggleRender}${groupRender}${selectRender}${dialogRender}${statusRender}${meterRender}${lightRender}${paginationRender}${tabsRender}${iconRender}${separatorRender}${headingRender}${paragraphRender}${tooltipRender}${popoverRender}${menuRender}${disclosureRender}${suggestRender}${uploadRender}${skipRender}${composedIconRender}    // The texts of the slots that describe the control (Spec 009, D-02; a checkbox, Spec 010 ②):
+${inputRender}${toggleRender}${groupRender}${selectRender}${dialogRender}${statusRender}${meterRender}${lightRender}${paginationRender}${tabsRender}${iconRender}${separatorRender}${headingRender}${paragraphRender}${tooltipRender}${popoverRender}${menuRender}${disclosureRender}${suggestRender}${uploadRender}${cardRender}${avatarRender}${skipRender}${composedIconRender}    // The texts of the slots that describe the control (Spec 009, D-02; a checkbox, Spec 010 ②):
     // shown while they have text, and its description in that order.
     for (const source of DESCRIPTION) {
       const [kind, name = ""] = source.split(":");
@@ -3449,11 +3619,12 @@ ${
       .trim();
     const name = this.propValue("label");
 ${
-  isLight || isOverlay || isPagination
+  isLight || isOverlay || isPagination || isCard || isAvatar
     ? `    // A light-DOM host names its region by the caption (Spec 011 ④, D-09) and its list by the
     // label prop on the dl itself (D-10); an overlay (Spec 014 ④) names its layer in its own
-    // render, a pagination (Spec 015 ①, B-3) its landmark — the label, else the Modelo's word;
-    // nothing is written here.
+    // render, a pagination (Spec 015 ①, B-3) its landmark — the label, else the Modelo's word; a
+    // card (Spec 015 ③) is named by its heading (aria-labelledby), an avatar by its name in its
+    // own render; nothing is written here.
     void text;
     void name;
 `
@@ -3502,7 +3673,12 @@ for (const prop of PROPS) {
       return this.propValue(prop.name);
     },
     set(this: ${className}, next: unknown) {
-      if (prop.kind === "boolean") this.toggleAttribute(prop.name, next === true);
+      // A boolean whose default is true (Spec 015 ③, plan ③ D-03) is written as "false" when off;
+      // React 19 hands the wrapper's "false" to the property, React 18 to the attribute.
+      if (prop.kind === "boolean" && prop.default === true) {
+        if (next === false || next === "false") this.setAttribute(prop.name, "false");
+        else this.removeAttribute(prop.name);
+      } else if (prop.kind === "boolean") this.toggleAttribute(prop.name, next === true);
       else if (next === undefined || next === null) this.removeAttribute(prop.name);
       else this.setAttribute(prop.name, String(next));
     },

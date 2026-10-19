@@ -69,6 +69,7 @@ describe("suggest_ero", () => {
       "upload",
       "separate",
       "details",
+      "avatar",
       "notify",
       "report-error",
       "destructive",
@@ -85,6 +86,7 @@ describe("suggest_ero", () => {
       "password",
       "number",
       "date",
+      "card",
       "suggest",
       "tooltip",
       "switch-view",
@@ -334,5 +336,42 @@ describe("suggest_ero: the longest keyword wins, hyphenated compounds count as o
     expect(answer.candidates?.[1]).toEqual(
       expect.objectContaining({ kind: "goal", ero: "butono", goal: "confirm" }),
     );
+  });
+});
+
+// Spec 015 ③ (E6, plan ③ D-12): a word an Ero names both in its own boundary and in one of its own
+// goals is a synonym with a boundary — the goal answers, the boundary stands beside it, and no tie
+// with another Ero's goal is formed. Today only the avizo's toast and snackbar are such words, so
+// every other answer stays as it was.
+describe("suggest_ero: an own boundary that is a synonym of an own goal (Spec 015 ③)", () => {
+  it("the avizo's toast and snackbar are the only words in an Ero's boundary and its own goal", () => {
+    const shared: string[] = [];
+    for (const entry of modelo.eroj) {
+      const goalWords = new Set(
+        (entry.skemo.goals ?? []).flatMap((goal) =>
+          Object.values(goal.keywords).flatMap((words) => words.map((word) => word.toLowerCase())),
+        ),
+      );
+      for (const boundary of entry.uzo?.boundary ?? []) {
+        for (const words of Object.values(boundary.keywords ?? {})) {
+          for (const word of words) {
+            if (goalWords.has(word.toLowerCase()))
+              shared.push(`${entry.ero.name}.${boundary.case}:${word}`);
+          }
+        }
+      }
+    }
+    expect([...new Set(shared)].sort()).toEqual(["avizo.toast:snackbar", "avizo.toast:toast"]);
+  });
+
+  it("'Toast nach dem Speichern' is the avizo with its boundary, not a tie with the butono's 'Speichern'", () => {
+    const answer = suggest("Toast nach dem Speichern");
+    expect(answer.action).toBeUndefined();
+    expect(answer.candidates).toBeUndefined();
+    expect(answer.suggestion).toEqual({ ero: "avizo", props: {} });
+    expect(answer.boundary).toMatchObject({ ero: "avizo", case: "toast", action: "not-supported" });
+    // A word of the boundary alone that is no goal word keeps the boundary's own answer.
+    expect(suggest("Einblendung").suggestion).toBeNull();
+    expect(suggest("Einblendung").boundary).toMatchObject({ ero: "avizo", case: "toast" });
   });
 });

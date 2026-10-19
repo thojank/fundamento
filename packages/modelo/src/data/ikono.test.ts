@@ -30,9 +30,9 @@ const suggest = (goal: string) => {
 };
 
 describe("ikono in the repo Modelo (section ②, G1, G2, G3)", () => {
-  it("lives in data/eroj/ikono/skemo.json, one of thirty Eroj", () => {
+  it("lives in data/eroj/ikono/skemo.json, one of thirty-two Eroj", () => {
     expect(ikono?.file).toBe("modelo/data/eroj/ikono/skemo.json");
-    expect(modelo.eroj).toHaveLength(30);
+    expect(modelo.eroj).toHaveLength(32);
     expect(modelo.eroj.map((entry) => entry.ero.name)).toContain("ikono");
   });
 
@@ -178,9 +178,9 @@ describe("the Uzo of the ikono (section ②, G6)", () => {
 });
 
 describe("the Reguloj of the ikono (G8, E5)", () => {
-  it("icon-meaning-named is new, fixed, with a kialo, for the ikono and the butono; spacing too", () => {
+  it("icon-meaning-named is new, fixed, with a kialo, for the ikono and the butono (Spec 015 ③: and the avataro); spacing too", () => {
     const regulo = named("icon-meaning-named");
-    expect(regulo?.appliesTo?.eroj).toEqual(["ikono", "butono"]);
+    expect(regulo?.appliesTo?.eroj).toEqual(["ikono", "butono", "avataro"]);
     expect(regulo?.checkability).toBe("automatic");
     expect(regulo?.kialo).toMatch(/screen reader|name/i);
     expect(named("spacing-owned-by-container")?.appliesTo?.eroj).toContain("ikono");
@@ -199,7 +199,12 @@ describe("the Reguloj of the ikono (G8, E5)", () => {
 
   it("has an approved and a rejected example in de and en (uzo-content-example-missing)", () => {
     const regulo = named("icon-meaning-named");
-    const examples = modelo.jugxoj.filter((jugxo) => jugxo.ekzemplo?.regulo === regulo?.id);
+    // Spec 015 ③: the avataro's own examples of the widened Regulo stand beside them.
+    const examples = modelo.jugxoj.filter(
+      (jugxo) =>
+        jugxo.ekzemplo?.regulo === regulo?.id &&
+        jugxo.ekzemplo?.instances.every((instance) => instance.ero === "ikono") === true,
+    );
     expect(examples.map((jugxo) => jugxo.decision).sort()).toEqual([
       "approved",
       "approved",

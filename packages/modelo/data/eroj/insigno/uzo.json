@@ -65,6 +65,21 @@
         },
         "ero": "mezurilo",
         "kialo": "A value in a range is a measure, not a status, because it has a scale; that is the mezurilo."
+      },
+      {
+        "goal": "person",
+        "keywords": {
+          "en": [
+            "avatar",
+            "initials"
+          ],
+          "de": [
+            "avatar",
+            "initialen"
+          ]
+        },
+        "ero": "avataro",
+        "kialo": "Who something belongs to is a person, because a face or the initials say who; that is the avataro, and the badge says how."
       }
     ],
     "boundary": [

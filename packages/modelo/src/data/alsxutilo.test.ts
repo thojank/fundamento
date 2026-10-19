@@ -40,9 +40,9 @@ const suggest = (goal: string) => {
 };
 
 describe("alsxutilo in the repo Modelo (section ②, G1, G2)", () => {
-  it("lives in data/eroj/alsxutilo/skemo.json, the first of thirty Eroj", () => {
+  it("lives in data/eroj/alsxutilo/skemo.json, the first of thirty-two Eroj", () => {
     expect(alsxutilo?.file).toBe("modelo/data/eroj/alsxutilo/skemo.json");
-    expect(modelo.eroj).toHaveLength(30);
+    expect(modelo.eroj).toHaveLength(32);
     expect(modelo.eroj[0]?.ero.name).toBe("alsxutilo");
   });
 
@@ -346,5 +346,17 @@ describe("suggest_ero of the file input (Gvidanto)", () => {
       case: "camera-capture",
       action: "not-supported",
     });
+  });
+});
+
+// Spec 015 ② O-12 (decided by the maintainer at the acceptance of 2026-10-19, as proposed): the
+// Jugxo that releases the unpainted required mark in Figma names the alsxutilo and every further
+// field with a required-mark — an addendum to its wording, no new Jugxo.
+describe("the Jugxo of the required mark covers the alsxutilo (O-12)", () => {
+  it("jug_01M4S2R85WRAC5SV7CARH8RE7S names the alsxutilo and every further field with required-mark", () => {
+    const jugxo = modelo.jugxoj.find((entry) => entry.id === "jug_01M4S2R85WRAC5SV7CARH8RE7S");
+    expect(jugxo?.kialo).toContain("alsxutilo");
+    expect(jugxo?.kialo).toContain("jedes weitere Feld mit required-mark");
+    expect(jugxo?.context).toContain("O-12");
   });
 });

@@ -151,6 +151,17 @@ function insteadEro(modelo: Modelo, hit: BoundaryHit): string | undefined {
   return alternative?.ero ?? boundary?.ero ?? undefined;
 }
 
+/** Whether the word is a keyword of a goal of the Ero (Spec 015 ③: a synonym with a boundary). */
+function goalWordOf(modelo: Modelo, ero: string, word: string): boolean {
+  const needle = word.normalize("NFC").toLowerCase();
+  const skemo = modelo.eroj.find((entry) => entry.ero.name === ero)?.skemo;
+  return (skemo?.goals ?? []).some((goal) =>
+    Object.values(goal.keywords).some((keywords) =>
+      keywords.some((keyword) => keyword.normalize("NFC").toLowerCase() === needle),
+    ),
+  );
+}
+
 type GoalHit = {
   ero: string;
   goal: string;
@@ -271,8 +282,20 @@ export function suggestEro(modelo: Modelo, input: SuggestEroInput): SuggestEroRe
     boundary.ero === goal.ero &&
     boundary.kind === "instead" &&
     boundary.action === "use-instead";
+  // Spec 015 ③ (E6, plan ③ D-12): a word an Ero names both in its own boundary and in one of its
+  // own goals is a synonym with a boundary — „Toast“ is the avizo, and the avizo's boundary toast
+  // says why it stays in the flow. The goal answers with the boundary beside it, and no tie with
+  // another Ero's goal is formed: the Ero has claimed the word for itself.
+  const ownSynonym =
+    boundary !== undefined &&
+    goal !== undefined &&
+    boundary.ero === goal.ero &&
+    boundary.kind === "boundary" &&
+    goalWordOf(modelo, goal.ero, boundary.keyword);
   const tied =
-    goal === undefined || ownRedirect ? [] : tiedGoals(modelo, goal, input.goal, input.lingvo);
+    goal === undefined || ownRedirect || ownSynonym
+      ? []
+      : tiedGoals(modelo, goal, input.goal, input.lingvo);
   if (goal !== undefined && tied.length > 0) {
     // A boundary that hit stands first among the candidates, as it does below (OP-12): its kialo
     // says why one Ero is not the one.
@@ -299,6 +322,23 @@ export function suggestEro(modelo: Modelo, input: SuggestEroInput): SuggestEroRe
         candidates: [...boundaryCandidate, ...[goal, ...tied].map(goalCandidateOf)],
       },
     };
+  }
+
+  if (ownSynonym && boundary !== undefined && goal !== undefined) {
+    const output: SuggestEroOutput = {
+      goal: input.goal,
+      matched: { goal: goal.goal, keyword: goal.keyword, lingvo: goal.lingvo },
+      suggestion: { ero: goal.ero, props: goal.props },
+      boundary: {
+        ero: boundary.ero,
+        case: boundary.case,
+        action: boundary.action,
+        kialo: boundary.kialo,
+      },
+    };
+    if (goal.kialo !== undefined) output.kialo = goal.kialo;
+    if (goal.regulo !== undefined) output.regulo = goal.regulo;
+    return { ok: true, output };
   }
 
   // Spec 008 D-08: a boundary that says use-instead X and a goal of X say the same thing. The

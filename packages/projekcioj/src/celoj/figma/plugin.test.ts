@@ -324,6 +324,8 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
       ...["boundary", "slots", "content"].map(() => "apartigilo"),
       // Spec 011 ④: the atributlisto, the mezurilo and the tabelo carry a Uzo like every set.
       ...["boundary", "slots", "content"].map(() => "atributlisto"),
+      // Spec 015 ③: the avataro carries a Uzo like every set.
+      ...["boundary", "slots", "content"].map(() => "avataro"),
       // Spec 011 ③: the avizo, the insigno and the plenstato carry a Uzo like every set.
       ...["boundary", "slots", "content"].map(() => "avizo"),
       ...["boundary", "slots", "content"].map(() => "butono"),
@@ -336,6 +338,8 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
       ...["boundary", "slots", "content"].map(() => "ikono"),
       ...["boundary", "slots", "content"].map(() => "insigno"),
       ...["boundary", "slots", "content"].map(() => "kampo"),
+      // Spec 015 ③: the karto carries a Uzo like every set.
+      ...["boundary", "slots", "content"].map(() => "karto"),
       ...["boundary", "slots", "content"].map(() => "kompletigilo"),
       // Spec 014 ④: the konsileto, the menuo and the sxvebilo carry a Uzo like every set.
       ...["boundary", "slots", "content"].map(() => "konsileto"),
@@ -386,6 +390,8 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
       ...["apartigilo", "apartigilo", "apartigilo"],
       // Spec 011 ④: the atributlisto, the mezurilo and the tabelo close their three parts too.
       ...["atributlisto", "atributlisto", "atributlisto"],
+      // Spec 015 ③: the avataro closes its three parts too.
+      ...["avataro", "avataro", "avataro"],
       // Spec 011 ③: the avizo, the insigno and the plenstato close their three parts too.
       ...["avizo", "avizo", "avizo"],
       ...["butono", "butono", "butono"],
@@ -398,6 +404,8 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
       ...["ikono", "ikono", "ikono"],
       ...["insigno", "insigno", "insigno"],
       ...["kampo", "kampo", "kampo"],
+      // Spec 015 ③: the karto closes its three parts too.
+      ...["karto", "karto", "karto"],
       ...["kompletigilo", "kompletigilo", "kompletigilo"],
       // Spec 014 ④: the overlays close their three parts too.
       ...["konsileto", "konsileto", "konsileto"],
@@ -633,6 +641,9 @@ describe("the full plan against the strict double: fresh and into the file of be
     "spuro",
     // Spec 015 ②: and the file input.
     "alsxutilo",
+    // Spec 015 ③: and the card and the avatar.
+    "karto",
+    "avataro",
   ]);
   const before2 = structuredClone(repo.input);
   before2.modelo.eroj = before2.modelo.eroj.filter((entry) => !BEFORE_2.has(entry.ero.name));
@@ -2434,8 +2445,8 @@ describe("a failed run leaves everything readable in the console (F21)", () => {
         createComponent: () => {
           // Spec 011 ④: the atributlisto's three (layout auto since Spec 014 ①) and the avizo's
           // four variants are made first; the run fails in the butono. Spec 015 ②: the
-          // alsxutilo's twelve before them.
-          if (++made === 12 + 3 + 4 + 40)
+          // alsxutilo's twelve before them; Spec 015 ③: and the avataro's three.
+          if (++made === 12 + 3 + 3 + 4 + 40)
             throw new Error("in set_layoutMode: Cannot delete occupied row/column.");
           return create();
         },
@@ -2687,6 +2698,8 @@ describe("every bound paint shows the plan's colour after the first and the seco
         { set: "apartigilo", created: 2, updated: 0 },
         // Spec 011 ④: the atributlisto has layout = 3 variants in one state (auto since Spec 014 ①).
         { set: "atributlisto", created: 3, updated: 0 },
+        // Spec 015 ③: the avataro has size = 3 variants in one state.
+        { set: "avataro", created: 3, updated: 0 },
         // Spec 011 ③: the avizo has intent = 4 variants in one state (dismissible is no axis).
         { set: "avizo", created: 4, updated: 0 },
         { set: "butono", created: 72, updated: 0 },
@@ -2705,6 +2718,8 @@ describe("every bound paint shows the plan's colour after the first and the seco
         { set: "insigno", created: 10, updated: 0 },
         // Spec 009: the kampo has size × state = 18 variants.
         { set: "kampo", created: 18, updated: 0 },
+        // Spec 015 ③: the karto has orientation = 2 variants in one state (an axis of its own).
+        { set: "karto", created: 2, updated: 0 },
         // Spec 014 ⑤: the kompletigilo has size × expanded × state = 30 variants.
         { set: "kompletigilo", created: 30, updated: 0 },
         // Spec 014 ④: the konsileto has placement = 4 variants in one state (an axis of its own).
@@ -3686,7 +3701,13 @@ describe("every set lies in the frame Eroj in the section Fundamento (F-1, F-2, 
             : // Spec 015 ②: the upload with two files beside its set.
               name === "alsxutilo"
               ? [name, "alsxutilo – mit zwei Dateien"]
-              : [name],
+              : // Spec 015 ③: the card without its image beside its set, the avatar with its
+                // image beside its.
+                name === "karto"
+                ? [name, "karto – ohne Bild"]
+                : name === "avataro"
+                  ? [name, "avataro – mit Bild"]
+                  : [name],
   );
   const layout = repoPlan.section;
   const inLayout = names.map(() => ({ frame: FRAME, action: "in-layout" }));
@@ -6687,5 +6708,268 @@ describe("the plugin draws the alsxutilo (Spec 015 ②)", () => {
     const before = double.snapshot();
     await run(double, repoFiles["figma/plugin/code.js"] ?? "");
     expect(double.snapshot()).toBe(before);
+  });
+});
+
+// Spec 015 ③ (plan ③ D-05): the plugin draws the karto — every variant the surface (fill, radius,
+// the border, the shadow as an effect, clipping) with the media and the body; the media a
+// stand-in image across the top where vertical, at the start beside the body where horizontal,
+// shown by the BOOLEAN property media; the body the heading (the label property), the content,
+// the meta row with the badge in the insigno's look and the actions row with the two actions in
+// the butono's looks; the example „ohne Bild" after the set, its media hidden.
+describe("the plugin draws the karto (Spec 015 ③)", () => {
+  const bound = (node: DoubleNode | undefined, field: string) => node?.boundVariables[field]?.name;
+  const paintOf = (node: DoubleNode | undefined, field = "fills") =>
+    (
+      node?.properties[field] as { boundVariables?: { color?: { name: string } } }[] | undefined
+    )?.[0]?.boundVariables?.color?.name;
+  const box = (node: DoubleNode | undefined) =>
+    node as unknown as { x: number; y: number; width: number; height: number };
+  type Definitions = Record<string, { type: string; defaultValue: string | boolean }>;
+
+  it("both orientations: surface, media and body with their bindings, the stand-ins' looks, the media toggle, the example „ohne Bild“ after the set", async () => {
+    const double = modelDouble();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    const set = pageNodes(double).find((node) => node.name === "karto");
+    expect(set?.children.map((child) => child.name)).toEqual([
+      "orientation=vertical, state=rest",
+      "orientation=horizontal, state=rest",
+    ]);
+    const definitions = (set?.properties.componentPropertyDefinitions ?? {}) as Definitions;
+    const media = Object.keys(definitions).find((key) => key.startsWith("media#"));
+    expect(definitions[media ?? ""]).toEqual({ type: "BOOLEAN", defaultValue: true });
+    for (const variant of set?.children ?? []) {
+      const horizontal = variant.name.includes("horizontal");
+      const surface = descendant(variant, "surface");
+      expect(surface?.properties.layoutMode, variant.name).toBe(
+        horizontal ? "HORIZONTAL" : "VERTICAL",
+      );
+      expect(surface?.children.map((child) => child.name)).toEqual(["media", "body"]);
+      expect(paintOf(surface)).toBe("color/background/raised");
+      expect(paintOf(surface, "strokes")).toBe("color/border/subtle");
+      expect(bound(surface, "strokeWeight")).toBe("border/width/default");
+      expect(bound(surface, "cornerRadius")).toBe("radius/role/surface");
+      expect(surface?.properties.clipsContent).toBe(true);
+      const effects = (surface?.properties.effects ?? []) as { type: string }[];
+      expect(effects[0]?.type).toBe("DROP_SHADOW");
+      expect(box(surface).width).toBe(640);
+      const body = descendant(variant, "body");
+      expect(body?.children.map((child) => child.name)).toEqual([
+        "heading",
+        "content",
+        "meta",
+        "actions",
+      ]);
+      expect(bound(body, "paddingTop")).toBe("spacing/medium");
+      expect(bound(body, "paddingLeft")).toBe("spacing/medium");
+      expect(bound(body, "itemSpacing")).toBe("spacing/small");
+      const heading = descendant(body, "heading");
+      expect(heading?.properties.characters).toBe("Überschrift");
+      expect(heading?.properties.componentPropertyReferences).toEqual({
+        characters: expect.stringMatching(/^label#/),
+      });
+      expect(paintOf(heading)).toBe("color/text/default");
+      expect(bound(heading, "fontSize")).toBe("typography/headline/4/font-size");
+      const content = descendant(body, "content");
+      expect(content?.properties.characters).toBe("Kontrast, Fokus und Namen in jeder Marke.");
+      expect(paintOf(content)).toBe("color/text/default");
+      expect(bound(content, "fontSize")).toBe("typography/body/1/font-size");
+      expect(bound(descendant(body, "meta"), "itemSpacing")).toBe("spacing/small");
+      const badge = descendant(body, "badge");
+      expect(paintOf(badge)).toBe("color/background/sunken");
+      expect(bound(badge, "cornerRadius")).toBe("radius/role/pill");
+      expect(descendant(badge, "badge-label")?.properties.characters).toBe("gültig");
+      expect(paintOf(descendant(badge, "badge-label"))).toBe("color/text/subtle");
+      const actions = descendant(body, "actions");
+      expect(bound(actions, "itemSpacing")).toBe("spacing/small");
+      expect(actions?.children.map((child) => child.name)).toEqual(["action-1", "action-2"]);
+      expect(paintOf(actions?.children[0])).toBe("color/action/primary/rest");
+      expect(descendant(actions?.children[0], "action-label")?.properties.characters).toBe(
+        "Öffnen",
+      );
+      expect(paintOf(descendant(actions?.children[1], "action-label"))).toBe(
+        "color/action/tertiary/text",
+      );
+      const image = descendant(variant, "media");
+      expect(paintOf(image)).toBe("color/background/sunken");
+      expect(descendant(image, "media-text")?.properties.characters).toBe("Bild");
+      expect(paintOf(descendant(image, "media-text"))).toBe("color/text/subtle");
+      expect(image?.properties.visible).toBe(true);
+      expect(image?.properties.componentPropertyReferences).toEqual({ visible: media });
+      // Vertical: the media across the top, edge to edge; horizontal: a third at the start, as
+      // high as the body beside it.
+      if (horizontal) {
+        expect(box(image).width).toBe(213);
+        expect(box(image).x).toBeLessThan(box(body).x);
+        expect(box(image).height).toBe(box(body).height);
+      } else {
+        expect(box(image).height).toBe(213);
+        expect(box(image).y).toBeLessThan(box(body).y);
+        expect(box(image).width).toBe(box(body).width);
+      }
+    }
+    const frame = pageNodes(double).find(
+      (node) => node.type === "FRAME" && node.getSharedPluginData("fundamento", "frame") !== "",
+    );
+    const names = frame?.children.map((child) => child.name) ?? [];
+    const at = names.indexOf("karto");
+    expect(names.slice(at, at + 2)).toEqual(["karto", "karto – ohne Bild"]);
+    const example = frame?.children.find((child) => child.name === "karto – ohne Bild");
+    expect(descendant(example, "surface")?.properties.layoutMode).toBe("VERTICAL");
+    expect(descendant(example, "media")?.properties.visible).toBe(false);
+    expect(descendant(example, "heading")?.properties.characters).toBe("Überschrift");
+  });
+});
+
+// Spec 015 ③ K-1 (Abnahme 2026-10-19, file f10b-5): in every variant of the karto set with its
+// image the heading stood one glyph per line, in komuna and ekzemplo; the example „ohne Bild" was
+// right. The heading of a set variant took FILL while it was still empty — its word came later,
+// through the label property — and stayed at the width of its empty box. Expected: the heading
+// fills the body (FILL, textAutoResize HEIGHT) and stands at the start like the content below it;
+// no text of a card is narrower than a glyph.
+describe("the karto's heading fills the body in every variant (K-1)", () => {
+  const box = (node: DoubleNode | undefined) =>
+    node as unknown as { width: number; height: number };
+  const cardsOf = (double: ReturnType<typeof figmaDouble>) => {
+    const nodes = pageNodes(double);
+    const set = nodes.find((node) => node.name === "karto");
+    const frame = nodes.find(
+      (node) => node.type === "FRAME" && node.getSharedPluginData("fundamento", "frame") !== "",
+    );
+    const example = frame?.children.find((child) => child.name === "karto – ohne Bild");
+    return [...(set?.children ?? []), ...(example === undefined ? [] : [example])];
+  };
+  const textsOf = (node: DoubleNode): DoubleNode[] =>
+    node.children.flatMap((child) => (child.type === "TEXT" ? [child] : textsOf(child)));
+
+  it("set and example: the heading fills the body like the content, wraps at its width and stands at the start; no text is narrower than a glyph", async () => {
+    const double = modelDouble();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    const cards = cardsOf(double);
+    expect(cards.map((card) => card.name)).toEqual([
+      "orientation=vertical, state=rest",
+      "orientation=horizontal, state=rest",
+      "karto – ohne Bild",
+    ]);
+    const narrow: string[] = [];
+    for (const card of cards) {
+      const heading = descendant(card, "heading");
+      const content = descendant(card, "content");
+      expect(heading?.properties.characters, card.name).toBe("Überschrift");
+      // Both fill the same body: as wide as each other, and more than one word wide.
+      expect(box(heading).width, card.name).toBe(box(content).width);
+      expect(box(heading).width, card.name).toBeGreaterThan(200);
+      for (const text of [heading, content]) {
+        expect(text?.properties.layoutSizingHorizontal, `${card.name} ${text?.name}`).toBe("FILL");
+        expect(text?.properties.textAutoResize, `${card.name} ${text?.name}`).toBe("HEIGHT");
+        expect(text?.properties.textAlignHorizontal, `${card.name} ${text?.name}`).toBe("LEFT");
+      }
+      for (const text of textsOf(card)) {
+        const characters = String(text.properties.characters ?? "");
+        // The smallest text of a card is a label of 12 px or more: a glyph is 0.6 × 12 wide here.
+        if (characters !== "" && box(text).width < 0.6 * 12) {
+          narrow.push(`${card.name} › ${text.name} „${characters}" ${box(text).width}`);
+        }
+      }
+    }
+    expect(narrow).toEqual([]);
+  });
+
+  it("a heading a run left at width 0 (reporting FILL) fills the body again on the next run, and a third run writes nothing", async () => {
+    const double = modelDouble();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    // The state the maintainer's file holds after the runs of 2026-10-19: every heading of the
+    // set took FILL while empty and got its word afterwards — it reports FILL and stands at
+    // width 0, one glyph a line (the double's K-1 belief), so a run that compares changes nothing.
+    const set = pageNodes(double).find((node) => node.name === "karto");
+    for (const variant of set?.children ?? []) {
+      const heading = descendant(variant, "heading");
+      if (heading === undefined) continue;
+      const word = heading.properties.characters;
+      heading.properties.characters = "";
+      (heading as unknown as { layoutSizingHorizontal: string }).layoutSizingHorizontal = "FILL";
+      heading.properties.characters = word;
+      expect(box(heading).width, variant.name).toBe(0);
+    }
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    for (const card of cardsOf(double)) {
+      const heading = descendant(card, "heading");
+      expect(heading?.properties.layoutSizingHorizontal, card.name).toBe("FILL");
+      expect(box(heading).width, card.name).toBe(box(descendant(card, "content")).width);
+    }
+    const before = double.snapshot();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    expect(double.snapshot()).toBe(before);
+  });
+});
+
+// Spec 015 ③ (plan ③ D-11): the plugin draws the avataro — every variant the box (a square of
+// box.size) with the initials (a circle: fill, radius, the label property „EM" in its colour and
+// role) and the image over it (a circle: radius, clipping, the silhouette on the stand-in ground),
+// shown by the BOOLEAN property image, hidden by default; the example „mit Bild" after the set.
+describe("the plugin draws the avataro (Spec 015 ③)", () => {
+  const bound = (node: DoubleNode | undefined, field: string) => node?.boundVariables[field]?.name;
+  const paintOf = (node: DoubleNode | undefined) =>
+    (node?.properties.fills as { boundVariables?: { color?: { name: string } } }[] | undefined)?.[0]
+      ?.boundVariables?.color?.name;
+  type Definitions = Record<string, { type: string; defaultValue: string | boolean }>;
+
+  it("three sizes: the box, the initials circle with „EM“, the image circle with the silhouette; the image toggle; the example „mit Bild“ after the set", async () => {
+    const double = modelDouble();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    const set = pageNodes(double).find((node) => node.name === "avataro");
+    expect(set?.children.map((child) => child.name)).toEqual([
+      "size=small, state=rest",
+      "size=medium, state=rest",
+      "size=large, state=rest",
+    ]);
+    const definitions = (set?.properties.componentPropertyDefinitions ?? {}) as Definitions;
+    const image = Object.keys(definitions).find((key) => key.startsWith("image#"));
+    expect(definitions[image ?? ""]).toEqual({ type: "BOOLEAN", defaultValue: false });
+    const sizes: Record<string, string> = {
+      small: "size/icon/medium",
+      medium: "size/icon/large",
+      large: "size/control/large",
+    };
+    for (const variant of set?.children ?? []) {
+      const size = sizes[variant.name.slice("size=".length, variant.name.indexOf(","))];
+      const box = descendant(variant, "control");
+      expect(box?.children.map((child) => child.name)).toEqual(["initials", "image"]);
+      for (const node of [box, descendant(box, "initials"), descendant(box, "image")]) {
+        expect(bound(node, "width"), variant.name).toBe(size);
+        expect(bound(node, "height"), variant.name).toBe(size);
+      }
+      const initials = descendant(box, "initials");
+      expect(paintOf(initials)).toBe("color/background/sunken");
+      expect(bound(initials, "cornerRadius")).toBe("radius/full");
+      const text = descendant(initials, "initials-text");
+      expect(text?.properties.characters).toBe("EM");
+      expect(text?.properties.componentPropertyReferences).toEqual({
+        characters: expect.stringMatching(/^label#/),
+      });
+      expect(paintOf(text)).toBe("color/text/subtle");
+      expect(bound(text, "fontSize")).toBe(
+        variant.name.startsWith("size=large")
+          ? "typography/label/1/font-size"
+          : "typography/label/2/font-size",
+      );
+      const picture = descendant(box, "image");
+      expect(bound(picture, "cornerRadius")).toBe("radius/full");
+      expect(picture?.properties.clipsContent).toBe(true);
+      expect(paintOf(picture)).toBe("color/background/sunken");
+      expect(picture?.properties.visible).toBe(false);
+      expect(picture?.properties.componentPropertyReferences).toEqual({ visible: image });
+      expect(paintOf(descendant(descendant(picture, "picture"), "mark"))).toBe("color/text/subtle");
+    }
+    const frame = pageNodes(double).find(
+      (node) => node.type === "FRAME" && node.getSharedPluginData("fundamento", "frame") !== "",
+    );
+    const names = frame?.children.map((child) => child.name) ?? [];
+    const at = names.indexOf("avataro");
+    expect(names.slice(at, at + 2)).toEqual(["avataro", "avataro – mit Bild"]);
+    const example = frame?.children.find((child) => child.name === "avataro – mit Bild");
+    expect(bound(descendant(example, "control"), "width")).toBe("size/icon/large");
+    expect(descendant(example, "image")?.properties.visible).toBe(true);
+    expect(descendant(example, "initials-text")?.properties.characters).toBe("EM");
   });
 });

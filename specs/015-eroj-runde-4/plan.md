@@ -186,17 +186,117 @@ Die Slot-Constraint der Skemo liest Slots nur in `when` (`skemo-constraint-inval
 
 ### Offen (für den Maintainer)
 
-- **O-5 Balance der Projekcioj-Shards:** Vitest teilt nach Datei (Pfad-Hash). Gemessen (B-2): Shard 1 (3:51) ist `plugin.test.ts` allein, Shard 2 (0:55) der Rest – ein dritter Shard hilft nicht. Vorschlag: `plugin.test.ts` nach Themen (Variablen, Sets, Bauformen, Beispiele, Idempotenz) in Dateien teilen, dann verteilen die zwei Shards von selbst. Zahlen in tasks ②.
-- **O-6 Wortlaut der `a11y.texts`:** „Datei auswählen“ (auch bei `multiple`), „oder hierher ziehen“, „{file} entfernen“, „Ausgewählte Dateien: {count}“ (ohne Plural-Form, darum mit Doppelpunkt), „{file} hat eine Art, die hier nicht geht: Wähle {accept}.“, „{file} ist zu groß: Wähle eine Datei bis {max-size}.“; en entsprechend. Vorschlag: so; bei `multiple` „Dateien auswählen“ erst, wenn das Modelo einen Text je Wert eines booleschen Props kennt.
-- **O-7 Größe in MB oder Bytes:** angezeigt wird in Einheiten der Person, dezimal (1 kB = 1 000 Byte, 1 MB = 1 000 000 Byte), eine Nachkommastelle, über `Intl.NumberFormat` in der Sprache des Dokuments („1,2 MB“, „340 Byte“); das Prop bleibt in Bytes. Vorschlag: dezimal (wie die Hilfe „5 MB“ liest); binär (MiB) nur mit eigener Entscheidung.
-- **O-8 Arten im Fehler:** Endungen ohne Punkt in Großbuchstaben, Medientypen wie geschrieben, mit „oder“ verbunden (`Intl.ListFormat` disjunction): „Wähle PDF oder PNG.“ Vorschlag: so.
-- **O-9 `multiple`:** jede weitere Wahl ergänzt die Liste (die Plattform ersetzt sie); jede Datei hat ihr eigenes Entfernen. Vorschlag: ergänzen (wer eine zweite Datei sucht, verliert die erste nicht).
-- **O-10 `file-constraints-stated` fest oder anpassbar:** die Pflicht steht als Skemo-Constraint und ist fest; anpassbar ist nur der Wortlaut der Hilfe (Textregel). `max-size` allein bleibt ungeprüft, weil `prop:<name>` nur Text-Props liest. Vorschlag: so lassen; die Lesart `prop:<name>` auf Zahl-Props ausweiten (`skemo-rules`, `usage`, Web- und Figma-Celo) als kleiner eigener PR, dann eine zweite Constraint für `max-size`.
-- **O-11 Hover des Knopfs:** der `butono` unter dem Eingabefeld zeigt kein Hover (B-9). Vorschlag: so lassen; ein eigenes Hover-Bild wäre ein Zustand am `butono`, den nur der `alsxutilo` setzt.
-- **O-12 Jugxo der Pflichtmarke:** `jug_01M4S2R85WRAC5SV7CARH8RE7S` gibt jetzt auch die Marke des `alsxutilo` frei (B-7). Vorschlag: Wortlaut um „und jedes weitere Feld mit `required-mark`“ ergänzen (Nachtrag, kein neuer Jugxo).
-- **O-13 „file input“:** Rückfrage zwischen `kampo` und `alsxutilo` (Abweichung 4). Vorschlag: so lassen (OP-12); ein Stichwort „input“ am `alsxutilo` wäre `goal-keyword-shared`.
-- **O-14 Native Prüfung am Datum und an E-Mail/URL (B-10):** Vorschlag: die Grenzen des Datums und die Form von E-Mail und URL prüft das Element selbst wie die ganze Zahl (Datum lexikalisch als `YYYY-MM-DD`, die Worte der Plattform über ein Probe-Feld) und setzt `min`/`max` dann nur noch für den Dialog – eigener kleiner PR, weil `kind` sonst seine Tastaturen verlöre.
+- **O-5 Balance der Projekcioj-Shards:** Vitest teilt nach Datei (Pfad-Hash). Gemessen (B-2): Shard 1 (3:51) ist `plugin.test.ts` allein, Shard 2 (0:55) der Rest – ein dritter Shard hilft nicht. Vorschlag: `plugin.test.ts` nach Themen (Variablen, Sets, Bauformen, Beispiele, Idempotenz) in Dateien teilen, dann verteilen die zwei Shards von selbst. Zahlen in tasks ②. **Entschieden (Maintainer, Abnahme ② und ③ am 2026-10-19): ja – als eigener kleiner PR zuerst in Nachlese 5** (Shard 1 lag in #79 bei 8:13).
+- **O-6 Wortlaut der `a11y.texts`:** „Datei auswählen“ (auch bei `multiple`), „oder hierher ziehen“, „{file} entfernen“, „Ausgewählte Dateien: {count}“ (ohne Plural-Form, darum mit Doppelpunkt), „{file} hat eine Art, die hier nicht geht: Wähle {accept}.“, „{file} ist zu groß: Wähle eine Datei bis {max-size}.“; en entsprechend. Vorschlag: so; bei `multiple` „Dateien auswählen“ erst, wenn das Modelo einen Text je Wert eines booleschen Props kennt. **Entschieden (Maintainer, Abnahme ② und ③ am 2026-10-19): wie vorgeschlagen**, der Wortlaut wie in der Vitrino gemessen (B2/B3).
+- **O-7 Größe in MB oder Bytes:** angezeigt wird in Einheiten der Person, dezimal (1 kB = 1 000 Byte, 1 MB = 1 000 000 Byte), eine Nachkommastelle, über `Intl.NumberFormat` in der Sprache des Dokuments („1,2 MB“, „340 Byte“); das Prop bleibt in Bytes. Vorschlag: dezimal (wie die Hilfe „5 MB“ liest); binär (MiB) nur mit eigener Entscheidung. **Entschieden (Maintainer, Abnahme ② und ③ am 2026-10-19): wie vorgeschlagen.**
+- **O-8 Arten im Fehler:** Endungen ohne Punkt in Großbuchstaben, Medientypen wie geschrieben, mit „oder“ verbunden (`Intl.ListFormat` disjunction): „Wähle PDF oder PNG.“ Vorschlag: so. **Entschieden (Maintainer, Abnahme ② und ③ am 2026-10-19): wie vorgeschlagen.**
+- **O-9 `multiple`:** jede weitere Wahl ergänzt die Liste (die Plattform ersetzt sie); jede Datei hat ihr eigenes Entfernen. Vorschlag: ergänzen (wer eine zweite Datei sucht, verliert die erste nicht). **Entschieden (Maintainer, Abnahme ② und ③ am 2026-10-19): wie vorgeschlagen.**
+- **O-10 `file-constraints-stated` fest oder anpassbar:** die Pflicht steht als Skemo-Constraint und ist fest; anpassbar ist nur der Wortlaut der Hilfe (Textregel). `max-size` allein bleibt ungeprüft, weil `prop:<name>` nur Text-Props liest. Vorschlag: so lassen; die Lesart `prop:<name>` auf Zahl-Props ausweiten (`skemo-rules`, `usage`, Web- und Figma-Celo) als kleiner eigener PR, dann eine zweite Constraint für `max-size`. **Entschieden (Maintainer, Abnahme ② und ③ am 2026-10-19): Pflicht fest, ja; die Ausweitung von `prop:<name>` auf Zahl-Props kommt nicht in diesen PR, sondern mit eigener Begründung in Nachlese 5** (Regel 0.3: ändert die Lesart der Skemo-Regeln).
+- **O-11 Hover des Knopfs:** der `butono` unter dem Eingabefeld zeigt kein Hover (B-9). Vorschlag: so lassen; ein eigenes Hover-Bild wäre ein Zustand am `butono`, den nur der `alsxutilo` setzt. **Entschieden (Maintainer, Abnahme ② und ③ am 2026-10-19): wie vorgeschlagen.**
+- **O-12 Jugxo der Pflichtmarke:** `jug_01M4S2R85WRAC5SV7CARH8RE7S` gibt jetzt auch die Marke des `alsxutilo` frei (B-7). Vorschlag: Wortlaut um „und jedes weitere Feld mit `required-mark`“ ergänzen (Nachtrag, kein neuer Jugxo). **Entschieden (Maintainer, Abnahme ② und ③ am 2026-10-19): wie vorgeschlagen – umgesetzt in #78** (Kialo und Kontext des Jugxo ergänzt, Daten-Pin in `alsxutilo.test.ts`).
+- **O-13 „file input“:** Rückfrage zwischen `kampo` und `alsxutilo` (Abweichung 4). Vorschlag: so lassen (OP-12); ein Stichwort „input“ am `alsxutilo` wäre `goal-keyword-shared`. **Entschieden (Maintainer, Abnahme ② und ③ am 2026-10-19): wie vorgeschlagen.**
+- **O-14 Native Prüfung am Datum und an E-Mail/URL (B-10):** Vorschlag: die Grenzen des Datums und die Form von E-Mail und URL prüft das Element selbst wie die ganze Zahl (Datum lexikalisch als `YYYY-MM-DD`, die Worte der Plattform über ein Probe-Feld) und setzt `min`/`max` dann nur noch für den Dialog – eigener kleiner PR, weil `kind` sonst seine Tastaturen verlöre. **Entschieden (Maintainer, Abnahme ② und ③ am 2026-10-19): ja – als eigener kleiner PR in Nachlese 5.**
 
 ## ③ Inhalt
 
-Folgt in PR ③.
+**Branch:** `261018-spec-015-inhalt-f027c6` (gebaut gestapelt auf ②, #76; nach dessen Merge am 2026-10-19 auf `main` @ `971354d` rebased) · **Datum:** 2026-10-18/19 · **Stand:** Abnahme am 2026-10-19 nicht erteilt wegen K-1 (Figma, B-8); K-1 behoben, der Maintainer misst C2 erneut.
+
+### Zusammenfassung
+
+1. **`karto`** (D-01, D-03–D-06): die Karte – `level` (Pflicht, die Ebenen 1–6 des `titolo`, an den komponierten `titolo` durchgereicht), `orientation` `vertical` | `horizontal` (Default `vertical`, schlüsselt keinen Teil), `standalone` (boolesch, Default `true`: `article`; `false`: `region`, benannt durch die Überschrift). Slots `heading` (Text, Pflicht), `media`, `content` (Standard), `meta`, `actions`. Teile `surface` (`color.background.raised`, `radius.role.surface`, `elevation.shadow.raised`), `border` (`color.border.subtle`, `border.width.default`), `heading` (`typography.headline.4`), `content` (`typography.body.1`), `meta`, `actions`, `box` (`spacing.medium`/`spacing.small`, mit `density`). Rolle `article`, Name aus `slot:heading`. Goal `card` (Karte, Karten, Kachel, Kacheln, card, cards, tile, tiles) mit `one-primary-per-container`. Uzo: `data-record` → `atributlisto`, `notice` → `avizo`, `layout-box` → Person (Kialo der Spec), Grenzen `clickable-card` und `card-grid` (ask-human), `columns-from` `size.container.small` wie `atributlisto layout=auto`. G2: `atributlisto.as-card` und `avizo.content` → `karto`. `one-primary-per-container` und `spacing-owned-by-container` ausgeweitet.
+2. **`avataro`** (D-07–D-10): der Avatar – `name` (Pflicht), `picture` (die Adresse des Bilds; `src` ist ein Web-Begriff, D-07), `size` `small` | `medium` | `large` (`size.icon.medium`, `size.icon.large`, `size.control.large`; Initialen `typography.label.2`/`.2`/`.1`), `decorative` (Default `false`). Keine Slots. Teile `image` (`radius.full`), `initials` (`color.background.sunken`, `color.text.subtle`, `radius.full`, Typografie nach `size`), `box`. **Keine Farbe aus dem Namen** (E8): die Initialen haben feste Rollen. Rolle `img`, Name aus `prop:name`, `aria-hidden` wenn dekorativ. Goal `avatar` (Avatar, Profilbild, Initialen) mit `icon-meaning-named`. Uzo: `status` → `insigno`, `logo` → Person, Grenzen `avatar-group` und `presence-dot` (ask-human). G2: `insigno.person` → `avataro`; die `karto` nimmt den `avataro` in `meta`. `icon-meaning-named` auf `name` ausgeweitet (vier Jugxoj de/en), `spacing-owned-by-container`.
+3. **Toast als Grenze** (D-11, D-12, E6): `avizo.boundary.toast` bleibt `not-supported` (O-15) mit der neuen Kialo der Spec; „toast“/„snackbar“ sind Synonyme am Goal `notify` (kein eigenes Goal); ein Jugxo in de und en hält die Entscheidung fest (GOV.UK als Anforderung, kein fremder Inhalt). `suggest_ero` liest ein Wort, das ein Ero in eigener Grenze und eigenem Goal nennt, als Synonym mit Grenze: „Toast nach dem Speichern“ → `avizo` im Fluss, die Kialo der Grenze daneben.
+4. **Projekcioj:** Web-Celo Hosts `card` und `avatar` (D-04, D-08), Figma-Bauformen `card` und `avatar` mit Plugin-Zeichnung (D-05, D-09), Vitrino (D-06, D-10), Make-Kit-Sätze, React-Typen; ein boolesches Prop mit Default `true` liest `"false"` in Element, Property und React-Wrapper (D-03).
+
+### Entwurfsentscheidungen
+
+#### D-01 `karto`: Inhalt als Einheit, die Überschrift ist ein `titolo` (Regel 0.1: Weg des `dialogo`)
+Die Überschrift ist ein Text-Slot, den das Ero in einen komponierten `fm-titolo` setzt (wie der `dialogo`); `level` geht an ihn, die Typo-Rolle `headline.4` steht fest am Teil `heading` und als `size` am `titolo` – beide Bilder gleich. `orientation` schlüsselt keinen Teil: sie ist Layout des Celo, keine Variante der Tokens. `standalone` entscheidet `article` oder `region` (Celo-Wissen wie `role=alert` des `avizo` bei `danger`). Der Standard-Slot ist der Inhalt (die Spec), darum schreibt das Label-Property in Figma die Überschrift (`labelPartOf` → `heading`).
+
+#### D-02 Gvidanto: Stichwörter ohne falsche Freunde (G3, Nachlese 3 D-03)
+`goal-keyword-shared` ohne Warnung (`check:regularo` 0 Warnungen). Die Uzo-Stichwörter treffen ab sechs Buchstaben auch das Ende eines Worts (Spec 007 D-06): „karten“ an einer Uzo stähle „Registerkarten“ (`langetaro`), „bild“ kippte „Fließtext unter dem Bild“ (`teksto`, Dialog 014 ③). Darum tragen die Querverweise eigene Wörter (`atributlisto.as-card`: cardview, kartenansicht; `avizo.content`: teaser, inhaltskarte; `insigno.person`: avatar, initialen), die Grenzen Wörter, die kein Goal kennt (`card-grid`: raster, kartenraster; `clickable-card`: klickbare; `presence-dot`: presence, online, anwesenheit), damit `uzo-boundary-covered` nicht anschlägt. „Projektkarten mit Bild“ trifft darum kein Goal (O-17, B-1).
+
+#### D-03 Boolesches Prop mit Default `true` (`standalone`, Regel 0.2)
+`standalone` ist das erste boolesche Prop mit Default `true`; ein HTML-Attribut kann nur da sein oder fehlen. Das Element liest es als `true`, solange das Attribut fehlt, und als `false` nur bei `standalone="false"`; der Property-Setter schreibt `"false"` (React 19 reicht den Wert an die Property, React 18 ans Attribut), der React-Wrapper schreibt `"false"` bei `false` und lässt es sonst weg. Alle anderen Booleschen bleiben bitgleich (nur Props mit `default: true` nehmen den Weg).
+
+#### D-04 Web-Celo Host `card`
+`<article part="control" aria-labelledby="heading">` mit `media` (bündig, die Fläche schneidet es auf ihren Radius), `body` (Polsterung `box.inline-padding` rundum, Abstand `box.gap`), darin `fm-titolo#heading`, `content`, `meta`, `actions`; Medien, Meta und Aktionen nur mit Inhalt. Horizontal: Medien ein Drittel, Körper zwei Drittel; unter `columns-from` misst das Element seine Breite wie `atributlisto layout=auto` (eine Container-Query nimmt kein `var()`) und setzt die Klasse `fm-stacked` – keine `data-`-Attribute, denn das Paritäts-Inventar liest sie als Props der Skemo; die Ausrichtung liest der Stylesheet am Attribut des Hosts. Ein Bild in `media` ohne `alt` ist eine Entwickler-Warnung.
+
+#### D-05 Figma: Bauform `card`
+`orientation` als Zusatzachse wie `placement` des `konsileto` (zwei Varianten, ein Zustand); Medien als Platzhalter („Bild“ auf `color.background.sunken`) mit einem BOOLEAN-Schalter `media` (kein Prop der Skemo, nicht in der Parität), daneben das Beispiel „karto – ohne Bild“; Aktionen und Badge im Bild von `butono` (high, low) und `insigno` (neutral) (`composed`). Breite der Karte: `size.container.small` aufgelöst (geschrieben wie die Länge des `apartigilo`), Medien ein Drittel. Plugin-Zeichnung `drawCard`, `STRUCTURE_BINDINGS.card`.
+
+#### D-06 Vitrino, Make-Kit, React (`karto`)
+Vitrino: vertikal mit und ohne Bild, horizontal über zwei Spalten, Ebene 3 unter der Abschnittsüberschrift; das Bild ist ein Inline-SVG in der Textfarbe (die Vitrino lädt nichts von außen). Make-Kit: „Every summary of one thing … is a `<Karto>` with the `level` of its heading; the fields of one record are an `<Atributlisto>`, what happened is an `<Avizo>`, and a whole card is never one link.“ React-Typen aus der Skemo.
+
+#### D-07 `avataro`: Initialen ohne Farbe, `picture` statt `src` (Art. VIII)
+`src` ist ein Wort der Web-Plattform (`skemo-web-term`); das Prop heißt `picture`, der Web-Celo schreibt es als `src` des Bilds (wie `to` des `ligilo` als `href`). Größen (O-18): `size.icon.small` (16 px) trägt keine zwei Initialen lesbar, darum `small` = `size.icon.medium`, `medium` = `size.icon.large`, `large` = `size.control.large` (mit `density`). Die Initialen stehen immer auf `color.background.sunken` in `color.text.subtle` (KontrastParo vorhanden) – keine Farbe aus dem Namen (E8).
+
+#### D-08 Web-Celo Host `avatar`
+`<span part="control" role="img" aria-label="…">` mit `img part="image" alt=""` und `span part="initials" aria-hidden`. Das Bild steht erst nach `load`, sonst – fehlend, ladend oder kaputt – die Initialen. Initialen: Wörter an Leerraum und Strich (B-2), je Wort das erste Graphem (`Intl.Segmenter`), das Buchstabe oder Ziffer ist, vom ersten und letzten Wort, `toLocaleUpperCase` in der Sprache des Dokuments. `decorative` nimmt Rolle und Namen weg und setzt `aria-hidden`. Ohne `name` warnt das Element. `object-fit: cover` steht jetzt in der Strukturliste der Komponenten-CSS (Schlüsselwort, Regel 0.2). Das `ikono` bleibt Glyphe: `isIcon` schließt Bilder mit `initials` aus.
+
+#### D-09 Figma: Bauform `avatar`
+Drei Varianten nach `size`; das Label-Property schreibt die Initialen („EM“ aus der Vitrino); ein BOOLEAN-Schalter `image` zeigt das Bild-Ersatzbild (die Silhouette der Vitrino, eine Quelle für beide Bilder) über den Initialen, daneben das Beispiel „avataro – mit Bild“. Plugin-Zeichnung `drawAvatar`, `STRUCTURE_BINDINGS.avatar`.
+
+#### D-10 Vitrino, Make-Kit, React (`avataro`)
+Vitrino: je Größe mit Bild (SVG als data-Adresse), mit Initialen, mit kaputtem Bild (`data:,`) und dekorativ neben dem Namen; das Ikonaro-Raster bleibt dem `ikono`. Make-Kit: „Every person or thing shown as a picture or as initials is an `<Avataro>` with its `name` (`decorative` where the name stands beside it); a status is an `<Insigno>`, never a dot or a colour worked out from the name.“; der Icon-Satz gilt nur dem `ikono`. React-Typen aus der Skemo.
+
+#### D-11 Toast: Grenze mit Kialo, Jugxo (E6)
+Die Kialo von `avizo.boundary.toast` ist die der Spec; „ein Ero mit Zeitregel ist ein eigenes“ (Spec 011 ③) fällt weg, denn E6 schließt das Ero aus. Die Aktion bleibt `not-supported` (O-15). Zwei Jugxoj (de, en, `approved`, Bezug `avizo`) halten die Entscheidung mit GOV.UK als Anforderung fest. Der Make-Kit-Satz des `avizo` sagt schon „never a toast“.
+
+#### D-12 `suggest_ero`: eigene Grenze als Synonym eines eigenen Goals (Regel 0.2)
+Spec 008 D-08 deckt „Grenze → use-instead X = Goal von X“; eine Grenze, die beim eigenen Ero bleibt (`not-supported`), war mit dem eigenen Goal bisher ein Konflikt, und „Toast nach dem Speichern“ ein Gleichstand mit `butono.confirm` („speichern“). Neu: trifft dasselbe Wort die eigene Grenze und ein eigenes Goal, antwortet das Goal (Ero, Props, Regulo) mit der Grenze daneben, ohne Gleichstand. `uzo-boundary-covered` prüft nur fremde Goals und bleibt still. Heute sind „toast“ und „snackbar“ des `avizo` die einzigen solchen Wörter (Test pinnt die Invariante); jede andere Antwort bleibt bitgleich.
+
+### Arkitekturo-Abdeckung
+
+| Artikel | Wie ③ ihn trägt |
+|---|---|
+| Art. V (Clean Room) | GOV.UK nur als Anforderung im Jugxo; die Bilder der Vitrino und der Ersatzbilder sind eigene Zeichnungen; `check:clean-room` ohne Befund |
+| Art. VIII (keine Web-Begriffe, keine Strings im Ero) | `picture` statt `src`; keine Texte im Markup; Initialen aus dem Namen, Warnungen nur für Entwickler |
+| E1 (keine neuen Tokens) | nur vorhandene Rollen und `radius.full`, `size.*`, `typography.label.*` |
+| E5 (ausweiten statt vervielfachen) | `one-primary-per-container`, `icon-meaning-named`, `spacing-owned-by-container` ausgeweitet; keine neue Regulo |
+| E6 (kein Toast-Ero) | Grenze `not-supported` mit Kialo, Jugxo, Synonyme am `avizo` |
+| E8 (keine errechneten Farben) | feste Rollen der Initialen, Browser-Spec vergleicht drei Namen |
+| G2 (Verflechtung) | `atributlisto` ↔ `karto`, `avizo` ↔ `karto`, `insigno` ↔ `avataro` (instead in beide Richtungen) |
+| G3 (Stichwörter) | `goal-keyword-shared` ohne Warnung (`check:regularo` 0 Warnungen) |
+| Internacia | Karte in RTL (Medien rechts, Aktionen von rechts), Überschrift auf 200 %; Initialen mit kombinierenden Zeichen (NFD), Devanagari, Arabisch in RTL, Türkisch (ı/İ) in drei Browsern |
+| Alirebleco | axe ohne Befund und Kontrast ≥ 4,5:1 für Überschrift, Text und Initialen in acht Farbklassen, drei Browser |
+
+### Abweichungen von der Spec
+
+1. `avataro.src` heißt `picture` (Art. VIII, `skemo-web-term`; D-07).
+2. `avizo.boundary.toast` bleibt `not-supported`, nicht `ask-human` (O-15).
+3. „Toast nach dem Speichern“ → `avizo` mit leeren Props: „Toast“ sagt keine Art, `intent=success` wählt der Agent aus dem Inhalt; `check_usage` bestätigt die Instanz (O-16). Der Dialog 011 „ein Toast unten rechts“ antwortet jetzt mit `avizo` und der Grenze daneben statt nur mit der Grenze (E6).
+4. „Projektkarten mit Bild“ ist im Test „Karten mit Bild für die Projekte“ / „Projekt-Karten mit Bild“ (O-17); „Projektkarten im Raster“ fragt (Grenze `card-grid`) wie gefordert.
+5. `karto.actions` nimmt `butono` und `ligilo` (höchstens zwei): der `ligilo` kennt den Container `card` seit Spec 008 (der Weg zum Detail ist ein Ziel). Neu gegenüber der Spec: der Teil `border` neben `surface` (wie beim `dialogo`).
+6. Figma: „vertical, horizontal“ sind Varianten, „mit und ohne Bild“ ein Schalter mit Beispiel; beim Avatar „Bild/Initialen“ ebenso (Schalter `image`, Beispiel „mit Bild“).
+7. Avatar-Größen: `small`/`medium` auf `size.icon.medium`/`.large`, nicht `size.icon.small` (O-18).
+
+### Befunde / Mankoj
+
+- **B-1** Goal-Stichwörter treffen ganze Wörter und Bindestrich-Komposita, nicht „Projektkarten“ (Nachlese 4 F-2); eine Uzo-Hilfe mit „karten“ oder „bild“ hätte bestehende Antworten gekippt (D-02).
+- **B-2** Die Wort-Segmenter der Engines trennen verschieden: Firefox liefert bei „सीता राम“ nur „राम“ als Wort. Die Wörter kommen darum aus Leerraum und Strich, die Grapheme aus `Intl.Segmenter` (in drei Browsern gemessen).
+- **B-3** `src` ist ein Web-Begriff (`skemo-web-term` schlug beim ersten Laden an) – D-07.
+- **B-4** Rolle `img` teilt der `avataro` mit dem `ikono`: Web-Host, Figma-Bauform, Vitrino (Ikonaro-Raster) und Make-Kit (Icon-Satz) unterscheiden am Teil `initials`.
+- **B-5** Die Vitrino lädt nichts von außen (`<img src` und `http://` sind verboten): die Karte zeigt ein Inline-SVG, der Avatar ein SVG als data-Adresse mit kodiertem `xmlns`, das kaputte Bild ist `data:,`.
+- **B-6** Figma: `radius.full` löst zu 9999 px auf, Figma kappt das sichtbar zum Kreis; die Kreise des Avatars binden ihre Größe auch an `box.size` (Überlagerung im Rahmen ohne Layout); im echten Figma ungemessen (O-19).
+- **B-7** Alirebleco-Block des Avatars: der Text der Seite neben dem dekorativen Avatar ist kein Teil des Ero (im dunklen Schema ohne eigene Farbe); der Block prüft die Avatare allein.
+
+- **B-8 (Abnahme K-1, behoben)** In Figma brach die Überschrift der `karto` in jeder Variante des Sets nach jedem Buchstaben um, in komuna und ekzemplo; das Beispiel „ohne Bild“ war richtig (Set 648 × 1031). Ursache im Ablauf von `drawCard`: die Überschrift einer Set-Variante bekam FILL (`WRAP_SIZING`), solange sie leer war – ihr Wort kam erst danach über die Label-Property –, Beispiel und Inhalt hatten ihr Wort vorher. Figma ließ den leer gefüllten Text bei Breite 0 stehen und meldete FILL; der zweite Lauf, der vor dem Schreiben vergleicht, änderte darum nichts. Das strenge Doppel kennt jetzt `textAutoResize` (HUG ⇒ `WIDTH_AND_HEIGHT`, FIXED/FILL ⇒ `HEIGHT`, ein Text fester Breite bricht in ihr um) und als gekennzeichnete Annahme aus dieser Messung den leer gefüllten Text bei Breite 0, der FILL meldet: es gibt das Set mit 648 × 1007 wieder (richtig: 648 × 507). Fix: die Überschrift bekommt ihr Wort vor ihrer Größe, in Set und Beispiel; beide Texte stehen linksbündig (`textAlignHorizontal` LEFT); und gemessen, dann geschrieben: eine Überschrift, die schmaler ist als der Inhalt im selben Rumpf, wird auf dessen Breite skaliert und nimmt FILL neu (`fillLike`) – so heilt auch die vorhandene Datei, in der die Überschrift FILL meldet. Ein zweiter Lauf schreibt nichts. Zu messen: C2 (In Figma zu messen).
+
+### Offen (für den Maintainer)
+
+- **O-15 Aktion der Grenze `toast`:** die Spec sagt „bleibt `ask-human`“, der Bestand ist seit Spec 011 ③ `not-supported`; `ask-human` wäre schwächer (Regel 0.4). Vorschlag: `not-supported` bleibt. **Entschieden (Maintainer, Abnahme ② und ③ am 2026-10-19): wie vorgeschlagen.**
+- **O-16 `intent=success` beim Toast:** der Gvidanto antwortet mit `avizo` ohne Props. Vorschlag: so lassen; ein Goal `report-success` (Spiegel von `report-error`) wäre ein eigenes Goal, das die Spec ausschließt. **Entschieden (Maintainer, Abnahme ② und ③ am 2026-10-19): wie vorgeschlagen.**
+- **O-17 Komposita:** „Projektkarten“ trifft kein Goal. Vorschlag: in Nachlese 4 mit F-2 (Goal-Treffer am Wortende ab sechs Buchstaben, mit den falschen Freunden als Tests). **Entschieden (Maintainer, Abnahme ② und ③ am 2026-10-19): bleibt offen** – „Projektkarten“ wurde nach Nachlese 4 als `goal-unknown` gemessen (A16); kommt in Nachlese 5.
+- **O-18 Avatar-Größen:** 20 / 24 / 48 px (komfortabel 56). Vorschlag: so; `size.icon.small` nur mit einer Initiale. **Entschieden (Maintainer, Abnahme ② und ③ am 2026-10-19): wie vorgeschlagen**; dass Figma in der kleinsten Größe „EM“ zeigt und über den Kreis ragt, ist Befund N5-5 für Nachlese 5.
+- **O-19 Figma-Ersatzbilder und Vorgabewörter:** Karte 640 px breit (`size.container.small`), Medien ein Drittel; Label-Vorgaben „Überschrift“ (Karte) und „EM“ (Avatar); Avatar-Silhouette aus der Vitrino. Vorschlag: so, im Figma-Lauf der Abnahme messen. **Entschieden (Maintainer, Abnahme ② und ③ am 2026-10-19): wie vorgeschlagen**; gemessen: Karte 640 px, Bild ein Drittel – die Überschrift aber brach um (K-1, B-8).
+- **O-20 `standalone` mit Default `true`:** gelesen als Attribut `"false"` (D-03). Vorschlag: so; die Alternative wäre ein umgekehrtes Prop (`section`), das die Spec nicht nennt. **Entschieden (Maintainer, Abnahme ② und ③ am 2026-10-19): wie vorgeschlagen.**
+- **O-21 `karto.actions` mit `ligilo`:** Vorschlag: so (Abweichung 5). **Entschieden (Maintainer, Abnahme ② und ③ am 2026-10-19): wie vorgeschlagen.**
+
+### In Figma zu messen (nach K-1)
+
+Grüne Tests sind für Figma keine Abnahme. Mit dem Plugin aus dem Build dieses Branches, in f10b-5, Lauf „Plan anwenden – auch in vorgefundenem Set anlegen“ auf der Datei mit den kaputten Überschriften:
+
+1. **C2 `karto`, komuna und ekzemplo:** in beiden Varianten des Sets (oben und seitlich mit Bild) steht „Überschrift“ in einer Zeile, linksbündig wie der Text darunter; das Set misst etwa 648 × 530 statt 648 × 1031 (Bericht `layout`). Das Beispiel „ohne Bild“ bleibt unverändert.
+2. **Zweiter Lauf direkt danach:** keine Änderung am Set der `karto` (der Bericht nennt an `heading` nichts).
+3. Bestätigt der Lauf die Annahme des Doppels nicht (die Überschrift war schon nach dem ersten Lauf dieses Builds richtig, ohne Reparatur), bleibt der Fix richtig; die Annahme wird dann im Doppel gestrichen.

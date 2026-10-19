@@ -48,6 +48,7 @@ describe("tekstareo in the repo Modelo (section ②)", () => {
       "alsxutilo",
       "apartigilo",
       "atributlisto",
+      "avataro",
       "avizo",
       "butono",
       "dialogo",
@@ -57,6 +58,7 @@ describe("tekstareo in the repo Modelo (section ②)", () => {
       "ikono",
       "insigno",
       "kampo",
+      "karto",
       "kompletigilo",
       "konsileto",
       "langetaro",
@@ -281,6 +283,8 @@ describe("the Reguloj of the tekstareo (G6, E5)", () => {
       "pagxigilo",
       "spuro",
       "alsxutilo",
+      "karto",
+      "avataro",
     ]);
   });
 

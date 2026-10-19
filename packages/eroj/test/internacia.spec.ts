@@ -985,3 +985,92 @@ test("saltligilo right to left: shown at the right edge; expanded to 140 %, noth
   });
   expect(clipped).toBe(false);
 });
+
+// Spec 015 ③ (plan ③ D-04): a horizontal karto in right-to-left writing puts its media at the
+// right and its actions run from the right; its heading expanded to 200 % wraps inside the card,
+// the card keeps its width and nothing is clipped.
+test("karto right to left and heading expansion to 200 %: the media at the right, the heading wraps, nothing is clipped", async ({
+  page,
+}) => {
+  const heading = "Barrierefreiheit";
+  await serve(
+    page,
+    out,
+    `<div dir="rtl" style="inline-size: 800px"><fm-karto id="k" level="2" orientation="horizontal"><svg slot="media" aria-hidden="true" viewBox="0 0 16 9"><rect width="16" height="9" fill="currentColor"></rect></svg><span slot="heading">${heading}</span>Kontrast, Fokus und Namen.<fm-butono slot="actions" emphasis="high">Öffnen</fm-butono><fm-butono slot="actions" emphasis="low">Teilen</fm-butono></fm-karto></div>`,
+  );
+  const geometry = () =>
+    page.locator("#k").evaluate((element) => {
+      const root = element.shadowRoot;
+      const box = (part: string) =>
+        root?.querySelector(`[part="${part}"]`)?.getBoundingClientRect() ?? new DOMRect();
+      const actions = [...element.querySelectorAll('[slot="actions"]')].map(
+        (action) => action.getBoundingClientRect().left,
+      );
+      const text = root
+        ?.querySelector('[part="heading"]')
+        ?.shadowRoot?.querySelector('[part="text"]') as HTMLElement;
+      return {
+        media: box("media").left,
+        body: box("body").left,
+        width: element.getBoundingClientRect().width,
+        actions,
+        clipped: text.scrollWidth > text.clientWidth + 1,
+        lines: Math.round(text.getBoundingClientRect().height),
+      };
+    });
+  await expect.poll(async () => (await geometry()).media).toBeGreaterThan(0);
+  const before = await geometry();
+  expect(before.media).toBeGreaterThan(before.body);
+  expect(before.actions[0] ?? 0).toBeGreaterThan(before.actions[1] ?? 0);
+  await page.locator("#k span[slot=heading]").evaluate(
+    (element, text) => {
+      element.textContent = text;
+    },
+    `${pseudo(heading, 2)} ${pseudo(heading, 2)} ${pseudo(heading, 2)}`,
+  );
+  const after = await geometry();
+  expect(after.width).toBe(before.width);
+  expect(after.lines).toBeGreaterThan(before.lines);
+  expect(after.clipped).toBe(false);
+});
+
+// Spec 015 ③ (plan ③ D-08): the initials of an avataro are graphemes, not code units — a letter
+// with combining marks (decomposed, NFD) stays whole, a name in Devanagari keeps its vowel sign,
+// an emoji with a modifier stays one sign; in right-to-left writing an Arabic name gives its
+// initials in its own order, and the avatar keeps its round box.
+test("avataro initials with combining characters, in other scripts and right to left", async ({
+  page,
+}) => {
+  const names = {
+    nfd: "Émile Ångström",
+    hindi: "सीता राम",
+    arabic: "ليلى أحمد",
+    turkish: "ılgaz İnce",
+  };
+  await serve(
+    page,
+    out,
+    `<fm-avataro id="nfd" name="${names.nfd}"></fm-avataro><fm-avataro id="hindi" name="${names.hindi}"></fm-avataro><div dir="rtl" lang="ar"><fm-avataro id="arabic" name="${names.arabic}"></fm-avataro></div><div lang="tr"><fm-avataro id="turkish" name="${names.turkish}"></fm-avataro></div>`,
+  );
+  const initials = (id: string) =>
+    page
+      .locator(`#${id}`)
+      .evaluate(
+        (element) => element.shadowRoot?.querySelector('[part="initials"]')?.textContent ?? "",
+      );
+  expect(await initials("nfd")).toBe("ÉÅ");
+  expect([
+    ...new Intl.Segmenter("de", { granularity: "grapheme" }).segment(await initials("nfd")),
+  ]).toHaveLength(2);
+  expect(await initials("hindi")).toBe("सीरा");
+  expect(await initials("arabic")).toBe("لأ");
+  // Turkish upper case follows the language of the document: ı → I, i → İ.
+  expect(await initials("turkish")).toBe("Iİ");
+  await expect(page.getByRole("img", { name: names.arabic })).toBeVisible();
+  const box = await page.locator("#arabic").evaluate((element) => {
+    const rect = element.shadowRoot?.querySelector('[part="control"]')?.getBoundingClientRect();
+    return { width: rect?.width ?? 0, height: rect?.height ?? 0 };
+  });
+  expect(box.width).toBeGreaterThan(0);
+  expect(box.height).toBe(box.width);
+});

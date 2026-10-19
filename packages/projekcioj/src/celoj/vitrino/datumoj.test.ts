@@ -254,6 +254,8 @@ describe("the Vitrino after the acceptances (Nachlese 2026-10-13)", () => {
       alsxutilo: "button",
       apartigilo: "separator",
       atributlisto: "list",
+      // Spec 015 ③: the avatar is an image (told apart from the icon by its initials).
+      avataro: "img",
       avizo: "status",
       butono: "button",
       dialogo: "dialog",
@@ -263,6 +265,8 @@ describe("the Vitrino after the acceptances (Nachlese 2026-10-13)", () => {
       ikono: "img",
       insigno: "generic",
       kampo: "textbox",
+      // Spec 015 ③: the card is the platform's article.
+      karto: "article",
       kompletigilo: "combobox",
       konsileto: "tooltip",
       langetaro: "tablist",
@@ -743,5 +747,46 @@ describe("the Vitrino shows the alsxutilo (Spec 015 ②)", () => {
       '<fm-alsxutilo max-size="5000000" accept=".pdf,.png" dropzone>rest<span slot="help">PDF oder PNG, höchstens 5 MB</span></fm-alsxutilo>',
     );
     expect((grid.match(/<span slot="error">/g) ?? []).length).toBe(1);
+  });
+});
+
+// Spec 015 ③ (plan ③ D-06): the Vitrino shows the karto vertical with and without its picture
+// (an inline SVG: the Vitrino loads nothing from outside) and horizontal across both columns —
+// each with the heading, the sentence, a badge and two actions (one with emphasis high).
+describe("the Vitrino shows the karto (Spec 015 ③)", () => {
+  it("vertical with and without the picture, horizontal across both columns; level 3 under the section", () => {
+    const grid = datumoj.eroj.karto ?? "";
+    expect((grid.match(/<fm-karto /g) ?? []).length).toBe(3);
+    expect(grid).toContain(
+      '<th scope="col">orientation</th><th scope="col">mit Bild</th><th scope="col">ohne Bild</th>',
+    );
+    expect((grid.match(/<svg slot="media" aria-hidden="true"/g) ?? []).length).toBe(2);
+    expect(grid).toContain('<td colspan="2"><fm-karto level="3" orientation="horizontal">');
+    expect(grid).toContain(
+      '<span slot="heading">Barrierefreiheit</span>Kontrast, Fokus und Namen in jeder Marke.<fm-insigno slot="meta">gültig</fm-insigno><fm-butono slot="actions" emphasis="high">Öffnen</fm-butono><fm-butono slot="actions" emphasis="low">Teilen</fm-butono>',
+    );
+    expect(grid).not.toMatch(/<img/);
+    expect(html).toContain("Größe aus dem Container, Inhalt darf umbrechen.");
+  });
+});
+
+// Spec 015 ③ (plan ③ D-10): the Vitrino shows the avataro in every size with the picture (an SVG
+// as a data address: no request), with initials and with a picture that never loads; and one
+// decorative beside the name. The icon keeps the Ikonaro grid.
+describe("the Vitrino shows the avataro (Spec 015 ③)", () => {
+  it("every size with picture, initials, broken picture and decorative; the Ikonaro grid stays the ikono's", () => {
+    const grid = datumoj.eroj.avataro ?? "";
+    expect((grid.match(/<fm-avataro /g) ?? []).length).toBe(12);
+    expect(grid).toContain(
+      '<th scope="col">size</th><th scope="col">Bild</th><th scope="col">Initialen</th><th scope="col">kaputtes Bild</th><th scope="col">decorative</th>',
+    );
+    expect(grid).toContain('<fm-avataro size="large" name="Erika Mustermann" picture="data:,">');
+    expect(grid).toContain(
+      'name="Erika Mustermann" decorative></fm-avataro><span>Erika Mustermann</span>',
+    );
+    expect((grid.match(/picture="data:image\/svg\+xml,/g) ?? []).length).toBe(3);
+    expect(grid).not.toContain("http://");
+    expect(datumoj.eroj.ikono ?? "").toContain("das Ikonaro je Größe");
+    expect(html).toContain("Größe aus dem Inhalt, Initialen bricht nie um.");
   });
 });

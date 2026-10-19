@@ -35,6 +35,7 @@ describe("ligilo in the repo Modelo (T006)", () => {
       "alsxutilo",
       "apartigilo",
       "atributlisto",
+      "avataro",
       "avizo",
       "butono",
       "dialogo",
@@ -44,6 +45,7 @@ describe("ligilo in the repo Modelo (T006)", () => {
       "ikono",
       "insigno",
       "kampo",
+      "karto",
       "kompletigilo",
       "konsileto",
       "langetaro",
@@ -316,6 +318,8 @@ describe("the Reguloj of the ligilo (T005, A2, D-13)", () => {
       "pagxigilo",
       "spuro",
       "alsxutilo",
+      "karto",
+      "avataro",
     ]);
   });
 

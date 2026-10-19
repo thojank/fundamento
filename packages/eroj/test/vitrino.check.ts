@@ -649,3 +649,58 @@ test("fm-alsxutilo is upgraded in its section, a file chosen and removed by keyb
   await expect(input).toBeFocused();
   expect(await axeViolations(page, "#fm-vitrino-alsxutilo")).toEqual([]);
 });
+
+// Spec 015 ③ (plan ③ D-06): the section of the karto — three cards upgraded, each an article
+// named by its heading at level 3 under the section's heading; the picture beside the text where
+// the horizontal card has room, else stacked; the actions reachable by Tab; axe without a finding.
+test("fm-karto is upgraded in its section, three articles named by their heading, the actions by keyboard, axe-clean", async ({
+  page,
+}) => {
+  await open(page);
+  const section = page.locator("#fm-vitrino-karto");
+  await expect(section.getByRole("article", { name: "Barrierefreiheit" })).toHaveCount(3);
+  await expect(section.getByRole("heading", { level: 3, name: "Barrierefreiheit" })).toHaveCount(3);
+  const horizontal = section.locator('fm-karto[orientation="horizontal"]');
+  const placed = await horizontal.evaluate((element) => {
+    const root = element.shadowRoot;
+    const control = root?.querySelector('[part="control"]') as HTMLElement;
+    const width = element.getBoundingClientRect().width;
+    const threshold = Number.parseFloat(
+      getComputedStyle(element).getPropertyValue("--fm-size-container-small"),
+    );
+    return {
+      direction: getComputedStyle(control).flexDirection,
+      stacked: control.classList.contains("fm-stacked"),
+      wide: width >= threshold,
+    };
+  });
+  expect(placed.stacked).toBe(!placed.wide);
+  expect(placed.direction).toBe(placed.wide ? "row" : "column");
+  await section.getByRole("button", { name: "Öffnen" }).first().focus();
+  await page.keyboard.press("Tab");
+  await expect(section.getByRole("button", { name: "Teilen" }).first()).toBeFocused();
+  expect(await axeViolations(page, "#fm-vitrino-karto")).toEqual([]);
+});
+
+// Spec 015 ③ (plan ③ D-10): the section of the avataro — every size with the picture, the
+// initials without one and the initials where the picture does not load; the decorative one is
+// not heard; axe without a finding.
+test("fm-avataro is upgraded in its section, the picture loaded, the initials where it is missing or broken, axe-clean", async ({
+  page,
+}) => {
+  await open(page);
+  const section = page.locator("#fm-vitrino-avataro");
+  await expect(section.getByRole("img", { name: "Erika Mustermann" })).toHaveCount(9);
+  const shown = () =>
+    section.locator("fm-avataro").evaluateAll((elements) =>
+      elements.map((element) => {
+        const image = element.shadowRoot?.querySelector('[part="image"]') as HTMLElement;
+        const initials = element.shadowRoot?.querySelector('[part="initials"]') as HTMLElement;
+        return `${image.hidden ? "" : "image"}${initials.hidden ? "" : initials.textContent}`;
+      }),
+    );
+  await expect
+    .poll(shown)
+    .toEqual(["image", "EM", "EM", "EM", "image", "EM", "EM", "EM", "image", "EM", "EM", "EM"]);
+  expect(await axeViolations(page, "#fm-vitrino-avataro")).toEqual([]);
+});

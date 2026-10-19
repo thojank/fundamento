@@ -192,6 +192,14 @@
       "status": "active",
       "type": "ero"
     },
+    "ero_01M58DN4TTA74NYFENT46BHNRH": {
+      "status": "active",
+      "type": "ero"
+    },
+    "ero_01M58G3CNE0MHGRKAJ23VNJ6P9": {
+      "status": "active",
+      "type": "ero"
+    },
     "iko_01M55EFZMTVJR4FGV32KYEG54W": {
       "status": "active",
       "type": "ikono"
@@ -1016,6 +1024,30 @@
       "status": "active",
       "type": "jugxo"
     },
+    "jug_01M58G3DVKMJPTR9XYMYFQSGNM": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M58G3DVKMJPTR9XYMYFQSGNN": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M58G3DVKMJPTR9XYMYFQSGNP": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M58G3DVKMJPTR9XYMYFQSGNQ": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M58JAE2ACR3TN55X9PTVPP1C": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M58JAE2B490H9NDFFHAEJNQA": {
+      "status": "active",
+      "type": "jugxo"
+    },
     "kpa_01M2VEEE9HREQTY2499C9JS05Q": {
       "status": "active",
       "type": "kontrastParo"
@@ -1805,6 +1837,14 @@
       "type": "skemo"
     },
     "ske_01M584YDGN2F49VDAMJY14PDWK": {
+      "status": "active",
+      "type": "skemo"
+    },
+    "ske_01M58DN56T21GD8QTD1PZFND31": {
+      "status": "active",
+      "type": "skemo"
+    },
+    "ske_01M58G3D1F5ABHWV5AGSE09QBV": {
       "status": "active",
       "type": "skemo"
     },
@@ -3357,6 +3397,14 @@
       "type": "uzo"
     },
     "uzo_01M584YDX76W3CMH48H5T9QH8J": {
+      "status": "active",
+      "type": "uzo"
+    },
+    "uzo_01M58DN5JYEDXADWQFSB5D3RHZ": {
+      "status": "active",
+      "type": "uzo"
+    },
+    "uzo_01M58G3DF0HATBVQF8VQ1S09F4": {
       "status": "active",
       "type": "uzo"
     }

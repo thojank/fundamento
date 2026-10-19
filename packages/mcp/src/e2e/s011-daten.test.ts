@@ -136,12 +136,13 @@ describe("check_usage of the table and the meter", () => {
 });
 
 describe("list_eroj and the briefs", () => {
-  it("lists thirty Eroj; the briefs of tabelo, atributlisto and mezurilo name their axes and duties", async () => {
+  it("lists thirty-two Eroj; the briefs of tabelo, atributlisto and mezurilo name their axes and duties", async () => {
     const listed = await output<Listed>(client, "list_eroj", {});
     expect(listed.eroj.map((entry) => entry.name)).toEqual([
       "alsxutilo",
       "apartigilo",
       "atributlisto",
+      "avataro",
       "avizo",
       "butono",
       "dialogo",
@@ -151,6 +152,7 @@ describe("list_eroj and the briefs", () => {
       "ikono",
       "insigno",
       "kampo",
+      "karto",
       "kompletigilo",
       "konsileto",
       "langetaro",

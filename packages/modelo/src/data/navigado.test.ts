@@ -29,12 +29,13 @@ const suggest = (goal: string) => {
 };
 
 describe("navigado in the repo Modelo (section ⑤, G1, G2, E7)", () => {
-  it("lives in data/eroj/navigado/skemo.json, among thirty Eroj", () => {
+  it("lives in data/eroj/navigado/skemo.json, among thirty-two Eroj", () => {
     expect(navigado?.file).toBe("modelo/data/eroj/navigado/skemo.json");
     expect(modelo.eroj.map((entry) => entry.ero.name)).toEqual([
       "alsxutilo",
       "apartigilo",
       "atributlisto",
+      "avataro",
       "avizo",
       "butono",
       "dialogo",
@@ -44,6 +45,7 @@ describe("navigado in the repo Modelo (section ⑤, G1, G2, E7)", () => {
       "ikono",
       "insigno",
       "kampo",
+      "karto",
       "kompletigilo",
       "konsileto",
       "langetaro",

@@ -70,4 +70,41 @@
 
 ## ③ Inhalt
 
-Folgt in PR ③.
+**Branch:** `261018-spec-015-inhalt-f027c6` (gestapelt auf ②, #76; nach dessen Merge am 2026-10-19 auf `main` @ `971354d` rebased – die Hashes unten sind die nach dem Rebase) · Aufgaben ③ zählen ab T1401.
+
+### A – Rot zuerst
+- [x] **T1401 Tests `karto`** Daten-Pin `data/karto.test.ts`, Eroj 30 → 31 in allen Pins (Listen, Goals, Ontologio, S6-Satz „thirty-one“, Reihenfolgen, `one-primary-per-container`, Kit-Dateien 48), G2-Pins (`atributlisto`, `avizo`), Projekcioj (`web-component.test.ts`, `figma.test.ts`, `plugin.test.ts`, `datumoj.test.ts`, `make-kit.test.ts`, `publish.test.ts`), Browser-Specs (`karto.spec.ts`, `react.spec.ts`, Blöcke in `alirebleco.check.ts`, `vitrino.check.ts`, `internacia.spec.ts`), React-Typen `types/karto.tsx`, MCP-Dialoge `e2e/s015-inhalt.test.ts`.
+- [x] **T1404 Tests `avataro`** Daten-Pin `data/avataro.test.ts`, Eroj 31 → 32 in allen Pins, G2-Pins (`insigno`, `karto`, `ikono`), Projekcioj, Browser-Specs (`avataro.spec.ts`, Internacia-Initialen, Alirebleco, Vitrino), React-Typen `types/avataro.tsx`, MCP-Dialog.
+- [x] **T1407 Tests Toast (E6)** `avizo.test.ts`, `suggest-ero.test.ts` (Synonym mit Grenze, Invariante), MCP `s011-rueckmeldung` und `s015-inhalt`, Doku-Test ③.
+
+### B – Grün
+- [x] **T1402 `karto` im Modelo** Skemo, Uzo, Ontologio, G2, Reguloj ausgeweitet, Zahlwort (D-01, D-02).
+- [x] **T1403 `karto` in den Projekcioj** Web-Host `card` und Boolesches mit Default `true` (D-03, D-04), Figma `card` mit `drawCard` (D-05), Vitrino, Make-Kit, React (D-06).
+- [x] **T1405 `avataro` im Modelo** Skemo (`picture`), Uzo, Ontologio, G2, `icon-meaning-named` mit vier Jugxoj (D-07).
+- [x] **T1406 `avataro` in den Projekcioj** Web-Host `avatar` (D-08), `object-fit` in der Strukturliste, Figma `avatar` mit `drawAvatar` (D-09), Vitrino, Make-Kit, React (D-10).
+- [x] **T1408 Toast** Kialo, Synonyme, zwei Jugxoj, `suggest_ero` (D-11, D-12).
+
+### D – Abnahme 2026-10-19 (K-1, O-12)
+- [x] **T1411 Tests K-1** Das strenge Doppel kennt `textAutoResize` und die Annahme aus der Messung (ein Text, der leer FILL nimmt, meldet FILL und steht bei Breite 0); `plugin.test.ts`: die Überschrift füllt den Rumpf wie der Inhalt, FILL, `HEIGHT`, LEFT, kein Text einer Karte schmaler als ein Glyph; eine Überschrift bei Breite 0 heilt im nächsten Lauf, der dritte schreibt nichts. Rot in `4b6672d` (2 Tests, Breite 0 statt 622).
+- [x] **T1412 Fix K-1** `drawCard`: das Wort vor der Größe, LEFT an Überschrift und Inhalt, `fillLike(heading, content)` nach dem Layout (plan ③ B-8).
+- [x] **T1413 O-12** Nachtrag am Jugxo der Pflichtmarke (Entscheidung des Maintainers). Rot `a4d4ac7`, grün `a65fb76`.
+
+### C – Abschluss
+- [x] **T1409 Doku** plan ③, tasks ③, Vojmapo Zeile 4 (Runde 4 vollständig), README.
+- [x] **T1410 Messungen** unten; Bericht im PR.
+
+### Messungen
+
+| Was | Wert |
+|---|---|
+| Commits ③ | karto rot `14f3a61`, grün `705f203`; avataro rot `3ea0a58`, grün `93ddf45`; Toast rot `dceb838`, grün `81cc1bb` |
+| Rot gemessen | karto: Modelo 64 Tests in 37 Dateien, Projekcioj 21 in 6, MCP 16 in 17 (Suite s015-inhalt lädt nicht ohne Daten); avataro: Modelo 60 in 36, Projekcioj 21 in 6, MCP 18 in 17; Toast: Modelo 8 in 3, MCP 2 in 2 |
+| `brief` | karto 306, avataro ≤ 750 (Daten-Tests, MCP `get_ero` je Ero) |
+| `check:regularo` | 59 Reguloj, 194 Jugxoj, 32 Uzoj, 0 Warnungen (keine neue `goal-keyword-shared`) |
+| Tests lokal (karto) | Modelo 3515, Projekcioj 697, MCP 301, CLI 66; `check:parity` 31 Eroj, 0 Differenzen; Lint, Modelo-Checks ohne Fehler; Browser: 234 Specs in Chromium, karto/React/Internacia in Firefox und WebKit, Alirebleco karto 8 × 3 Browser, Vitrino karto |
+| Tests lokal (avataro) | Modelo 3529, Projekcioj 706, MCP 303, CLI 66; `check:parity` 32 Eroj, 0 Differenzen; Lint, Modelo-Checks ohne Fehler; Browser: 240 Specs in Chromium, avataro und Internacia-Initialen in Firefox und WebKit (15), Alirebleco karto/avataro 32 in Firefox/WebKit, Vitrino karto/avataro |
+| Tests lokal (Toast, Endstand) | Modelo 3536, Projekcioj 706, MCP 304, CLI 66 grün; `check:parity` 32 Eroj, 0 Differenzen (297 freigegebene Werte); Lint, vortaro-lint, regularo (194 Jugxoj), mankoj, alirebleco, clean-room, ikonaro (17 Namen, keiner neu), release ohne Fehler; Browser: alle 240 Specs in Chromium, `karto`, `avataro`, `internacia`, `react` in Firefox und WebKit 100, Alirebleco-Check 561 in drei Browsern, Vitrino 30, Make-Kit 5 |
+| Toast grün | `81cc1bb` (Endstand des PR #78) |
+| CI | Lauf 39174045280 (`81cc1bb`, alle Jobs grün): `checks` 1:05, `unit` 3:36, `projekcioj` 4:55 / 0:54 (Shard 1 weiter `plugin.test.ts` allein, B-2/O-5 von ②), `eroj` 2:07 / 2:06, `rendered-checks` 6:58 |
+| K-1 (lokal) | Doppel: Set der `karto` vorher 648 × 1007 in Lauf 1 und 2 (gemessen in Figma 648 × 1031), nachher 648 × 507; Projekcioj 708 grün (Figma 384 + 2 neue) |
+| CI (K-1, nach dem Rebase auf `main`) | Lauf 39227992125 (`a5adc5b`, alle sieben Jobs grün, Wanduhr 7:47): `checks` 1:21, `unit` 4:45, `projekcioj` 7:47 / 0:46 (Shard 1 ist `plugin.test.ts` allein – O-5, Nachlese 5), `eroj` 2:07 / 2:13, `rendered-checks` 6:53; grüner Stand `a5adc5b` |

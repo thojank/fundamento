@@ -1,0 +1,158 @@
+{
+  "ero": {
+    "id": "ero_01M58G3CNE0MHGRKAJ23VNJ6P9",
+    "name": "avataro",
+    "skemo": "ske_01M58G3D1F5ABHWV5AGSE09QBV",
+    "description": "An avatar: represents a person or a thing with a picture or, where there is none or it does not load, with the initials of its name. Named by that name, or hidden where the name stands beside it; never a colour worked out from the name."
+  },
+  "skemo": {
+    "id": "ske_01M58G3D1F5ABHWV5AGSE09QBV",
+    "ero": "ero_01M58G3CNE0MHGRKAJ23VNJ6P9",
+    "props": [
+      {
+        "name": "name",
+        "kind": "string",
+        "required": true,
+        "description": "The name of the person or thing: the accessible name of the picture and the source of the initials (at most two, the first letter of the first and of the last word, grapheme by grapheme)."
+      },
+      {
+        "name": "picture",
+        "kind": "string",
+        "description": "The address of the picture (the Web Celo renders it as the image's src, as `to` of the ligilo is its href); without it, and while it does not load, the initials stand."
+      },
+      {
+        "name": "size",
+        "kind": "enum",
+        "values": [
+          "small",
+          "medium",
+          "large"
+        ],
+        "default": "medium",
+        "description": "The size of the circle: small and medium on the icon scale (beside a line of text), large on the control scale (a profile header), which density changes."
+      },
+      {
+        "name": "decorative",
+        "kind": "boolean",
+        "default": false,
+        "description": "True where the name stands right beside the avatar: then the picture is hidden from assistive technology, so the name is not heard twice."
+      }
+    ],
+    "states": [
+      "rest"
+    ],
+    "slots": [],
+    "parts": {
+      "image": {
+        "radius": {
+          "fixed": "radius.full"
+        }
+      },
+      "initials": {
+        "fill": {
+          "fixed": "color.background.sunken"
+        },
+        "color": {
+          "fixed": "color.text.subtle"
+        },
+        "typography": {
+          "by": [
+            "size"
+          ]
+        },
+        "radius": {
+          "fixed": "radius.full"
+        }
+      },
+      "box": {
+        "size": {
+          "by": [
+            "size"
+          ]
+        }
+      }
+    },
+    "bindings": [
+      {
+        "part": "box",
+        "property": "size",
+        "when": {
+          "size": "small"
+        },
+        "token": "size.icon.medium"
+      },
+      {
+        "part": "box",
+        "property": "size",
+        "when": {
+          "size": "medium"
+        },
+        "token": "size.icon.large"
+      },
+      {
+        "part": "box",
+        "property": "size",
+        "when": {
+          "size": "large"
+        },
+        "token": "size.control.large"
+      },
+      {
+        "part": "initials",
+        "property": "typography",
+        "when": {
+          "size": "small"
+        },
+        "token": "typography.label.2"
+      },
+      {
+        "part": "initials",
+        "property": "typography",
+        "when": {
+          "size": "medium"
+        },
+        "token": "typography.label.2"
+      },
+      {
+        "part": "initials",
+        "property": "typography",
+        "when": {
+          "size": "large"
+        },
+        "token": "typography.label.1"
+      }
+    ],
+    "a11y": {
+      "role": "img",
+      "name": [
+        "prop:name"
+      ],
+      "states": {
+        "decorative": [
+          "aria-hidden"
+        ]
+      },
+      "keys": []
+    },
+    "goals": [
+      {
+        "goal": "avatar",
+        "keywords": {
+          "en": [
+            "avatar",
+            "avatars",
+            "initials"
+          ],
+          "de": [
+            "avatar",
+            "avatare",
+            "profilbild",
+            "initialen"
+          ]
+        },
+        "props": {},
+        "regulo": "icon-meaning-named"
+      }
+    ]
+  }
+}
