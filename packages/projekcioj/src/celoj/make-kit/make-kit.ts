@@ -43,7 +43,7 @@ import {
   stylesheetOf,
 } from "../web-component/web-component.js";
 
-/** `@fundamento/make-kit-komuna` (Q2: published under the dist-tag `next`). */
+/** `@fundamento/make-kit-komuna` (Q2: pre-releases under the dist-tag `next`, 0.1.0 under `latest`). */
 export function makeKitName(aspekto: string): string {
   return `@fundamento/make-kit-${aspekto}`;
 }
@@ -858,18 +858,21 @@ export * from "./react.js";
 const LICENSE = readFileSync(new URL("../../../../../LICENSE", import.meta.url), "utf8");
 
 /**
- * The version of the kits: `<modelo>-next.0` unless FUNDAMENTO_KIT_VERSION asks for another
- * pre-release of the Modelo's version (release.yml hands the maintainer's input through). A
- * number the Modelo does not have is refused: the kit would claim a version of nothing.
+ * The version of the kits: `<modelo>-next.0` unless FUNDAMENTO_KIT_VERSION asks for another one
+ * (release.yml hands the maintainer's input through). Two forms are taken: a pre-release of the
+ * Modelo's version (`0.1.0-next.1`, published under `next`) and, since Nachlese 5 ③, exactly the
+ * Modelo's version (`0.1.0`: the release itself, published under `latest`). Any other number is
+ * refused: the kit would claim a version of nothing.
  */
 export function kitVersion(input: CeloInput): string {
   const modelo = input.modeloJson.fundamento.version;
   const requested = input.env?.FUNDAMENTO_KIT_VERSION;
   if (requested === undefined || requested === "") return `${modelo}-next.0`;
+  if (requested === modelo) return requested;
   if (!requested.startsWith(`${modelo}-`) || !/^\d+\.\d+\.\d+-[0-9A-Za-z.-]+$/.test(requested)) {
     throw new Error(
-      `FUNDAMENTO_KIT_VERSION=${requested} is not a pre-release of the Modelo's version ${modelo} ` +
-        `(expected ${modelo}-<Vorabkennung>, e.g. ${modelo}-next.1).`,
+      `FUNDAMENTO_KIT_VERSION=${requested} is neither the Modelo's version ${modelo} nor a ` +
+        `pre-release of it (expected ${modelo} or ${modelo}-<Vorabkennung>, e.g. ${modelo}-next.1).`,
     );
   }
   return requested;

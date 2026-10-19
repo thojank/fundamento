@@ -369,10 +369,11 @@ describe("Make Kit tarball (T018, clean room)", () => {
   );
 });
 
-// The pre-release number of a kit is set from outside (release.yml, F25): the next publish is
-// 0.1.0-next.1, and nothing in the repository changes for it. It has to be a pre-release of the
-// Modelo's version — anything else would publish under a number the Modelo does not have.
-describe("the kit version comes from FUNDAMENTO_KIT_VERSION (release step)", () => {
+// The version of a kit is set from outside (release.yml, F25): a pre-release of the Modelo's
+// version (0.1.0-next.1), or — for the release itself (Spec 015 "Nach der Abnahme", Nachlese 5 ③)
+// — exactly the Modelo's version (0.1.0). Anything else is refused: it would publish under a
+// number the Modelo does not have.
+describe("the kit version comes from FUNDAMENTO_KIT_VERSION (release step, Nachlese 5 ③)", () => {
   if (!prepared.ok) throw new Error("core + ekzemplo must be valid");
   const withEnv = (value: string | undefined) => ({
     ...prepared.input,
@@ -385,6 +386,7 @@ describe("the kit version comes from FUNDAMENTO_KIT_VERSION (release step)", () 
       }
     ).version;
   const modelo = prepared.input.modeloJson.fundamento.version;
+  const escaped = modelo.replaceAll(".", "\\.");
 
   it("defaults to <modelo>-next.0", () => {
     expect(versionOf(MAKE_KIT_CELO.generate(withEnv(undefined)))).toBe(`${modelo}-next.0`);
@@ -392,13 +394,30 @@ describe("the kit version comes from FUNDAMENTO_KIT_VERSION (release step)", () 
 
   it("takes the requested pre-release of the Modelo's version", () => {
     expect(versionOf(MAKE_KIT_CELO.generate(withEnv(`${modelo}-next.1`)))).toBe(`${modelo}-next.1`);
+    expect(versionOf(MAKE_KIT_CELO.generate(withEnv(`${modelo}-next.5`)))).toBe(`${modelo}-next.5`);
   });
 
-  it("refuses a version that is not a pre-release of the Modelo's version, and says why", () => {
-    expect(() => MAKE_KIT_CELO.generate(withEnv("0.2.0-next.0"))).toThrow(
-      new RegExp(`0\\.2\\.0-next\\.0.*${modelo.replaceAll(".", "\\.")}`),
-    );
-    expect(() => MAKE_KIT_CELO.generate(withEnv(modelo))).toThrow(/pre-release|Vorab/);
+  it("takes exactly the Modelo's version: the release itself (0.1.0)", () => {
+    expect(modelo).toBe("0.1.0");
+    const generated = MAKE_KIT_CELO.generate(withEnv(modelo));
+    for (const aspekto of ASPEKTOJ) {
+      const pkg = JSON.parse(
+        generated.find((f) => f.path.endsWith(`${aspekto}/package.json`))?.text ?? "{}",
+      ) as { version: string };
+      expect(pkg.version, aspekto).toBe(modelo);
+    }
+  });
+
+  it("refuses every other number — 0.2.0, 0.1.0.1, 0.2.0-next.0 — and names both allowed forms", () => {
+    for (const bad of ["0.2.0", "0.1.0.1", "0.2.0-next.0", "0.1.0-", "v0.1.0", "0.1.0 "]) {
+      const attempt = () => MAKE_KIT_CELO.generate(withEnv(bad));
+      expect(attempt, bad).toThrow(
+        new RegExp(`FUNDAMENTO_KIT_VERSION=${bad.replaceAll(".", "\\.")}`),
+      );
+      // The error names both forms the build accepts: the Modelo's version and a pre-release of it.
+      expect(attempt, bad).toThrow(new RegExp(`${escaped}-<Vorabkennung>`));
+      expect(attempt, bad).toThrow(new RegExp(`(^|[^-.\\d])${escaped}([^-.\\d]|$)`));
+    }
   });
 });
 

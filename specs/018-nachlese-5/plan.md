@@ -2,7 +2,7 @@
 
 **Spec:** [`briefing.md`](briefing.md) (das Briefing vom 2026-10-19 ist die Spec, unverändert kopiert) · **Quellen:** Messung `messung-2-3-n4-016-2026-10-19.md` und Auftrag `auftrag-p0-2026-10-19.md` (Maintainer-Ordner, nicht kopiert) · **Regel 0** (12.10.) gilt: der Weg, der im Repo schon gegangen wird; sonst die kleinste Änderung mit Eintrag hier; Tokens, Regulo-Semantik und Constitution nie ändern; nie eine Grenze aufweichen, um grün zu werden. Kein neues Ero, keine Token-Änderung. **Aufgaben, Commits und Messungen:** [`tasks.md`](tasks.md).
 
-Zwei PRs, gestapelt: ① CI-Teilung von `main`, ② Befunde von ①.
+Zwei PRs, gestapelt: ① CI-Teilung von `main`, ② Befunde von ①. Dazu ③ (Auftrag vom 2026-10-19, nach dem Merge von #81): der Release-Weg für 0.1.0, ein kleiner PR von `main`, kein eigener Spec-Ordner.
 
 ## ① CI: `plugin.test.ts` teilen (O-5)
 
@@ -218,3 +218,55 @@ Grüne Tests sind für Figma keine Abnahme. Mit dem Plugin aus dem Build dieses 
 4. **N5-6:** `kompletigilo` `expanded=true`: die Fläche des aktiven Vorschlags („Zwei“, `color/background/sunken`) reicht über die Breite der Listbox (bis auf den Vorbehalt des Fokusrings, B-9); „Eins“ (gewählt) ebenso breit.
 5. **O-41:** `ligilo`: Eigenschaft `external` (BOOLEAN, aus) im Set; eingeschaltet erscheint nach dem Label die Glyphe `external` in der Farbe des Labels und der Größe der Variante; Moduswechsel komuna → ekzemplo wechselt die Glyphe.
 6. **Zweiter Lauf** schreibt nichts (Bericht ohne `updated` an diesen Sets).
+
+## ③ Release-Weg 0.1.0
+
+**Branch:** `261019-release-010-auftrag-umsetzen-00420d` (von `main` @ `8d6e9ad`, nach dem Merge von #81) · **Auftrag:** `auftrag-release-010-2026-10-19.md` (Maintainer-Ordner, nicht kopiert) · **Datum:** 2026-10-19.
+
+### Zusammenfassung
+
+Der Release-Weg konnte nur Vorabversionen veröffentlichen: `kitVersion` lehnte `0.1.0` ab („is not a pre-release of the Modelo's version“), und `release-kits.sh` wie `release.yml` nannten den dist-tag `next` fest. Spec 015 „Nach der Abnahme“ sieht für 0.1.0 eine Veröffentlichung über `release.yml` vor, danach `latest` auf 0.1.0.
+
+1. **`kitVersion` (D-01):** nimmt neben `<modelo>-<Vorabkennung>` genau die Version des Modelo an (`0.1.0`). Jede andere Zahl bleibt abgelehnt (`0.2.0`, `0.1.0.1`, `0.2.0-next.0`); der Fehlertext nennt beide erlaubten Formen.
+2. **dist-tag aus der Version (D-02):** eine Version ohne Vorabkennung veröffentlicht unter `latest`, eine Vorabversion weiter unter `next` – entschieden an einer Stelle des Skripts (`tag_for`, gelesen nur von `command_for` und `--print`). `--print` zeigt den Tag (`tag: latest` / `tag: next`).
+3. **`release.yml` (D-03):** reicht nur die Version durch; die Beschreibung des Inputs nennt beide Formen; der Publish-Schritt nennt keinen festen Tag mehr.
+4. **Unverändert:** kein Token (Trusted Publishing, OIDC), nur die zwei Make Kits `@fundamento/make-kit-komuna` und `@fundamento/make-kit-ekzemplo`, `id-token: write`, die npm-Versionsprüfung, `check:release` (`pack`) in der CI.
+
+Gemessen am Skript (ohne Veröffentlichung): `FUNDAMENTO_KIT_VERSION=0.1.0 scripts/release-kits.sh dry-run` baut beide Kits mit `"version": "0.1.0"` und führt in jedem `pnpm publish --dry-run --tag latest --provenance --access public --no-git-checks` aus; mit `0.1.0-next.9` dasselbe unter `--tag next`; mit `0.2.0` bricht der Bau ab (`exit 1`), bevor ein Kit einen Publish-Befehl sieht.
+
+### Entwurfsentscheidungen
+
+#### D-01 `kitVersion`: genau die Version des Modelo oder eine Vorabversion davon
+
+`kitVersion` prüft zuerst auf Gleichheit mit `modeloJson.fundamento.version` und erst dann die Vorabform `<modelo>-<Vorabkennung>`. Keine weitere Zahl, kein Versionsbereich: eine `0.2.0` würde ein Kit unter einer Version veröffentlichen, die das Modelo nicht hat (unverändert). Der Fehlertext lautet jetzt `… is neither the Modelo's version 0.1.0 nor a pre-release of it (expected 0.1.0 or 0.1.0-<Vorabkennung>, e.g. 0.1.0-next.1)` – beide Formen stehen darin, damit der Maintainer am Workflow-Log sieht, was der Input annimmt. Der Standard ohne Input bleibt `<modelo>-next.0`.
+
+#### D-02 Der dist-tag folgt der Version, an einer Stelle
+
+Das Skript kennt die Version des Modelo nicht und prüft sie nicht – das tut der Bau (`kitVersion`), der im Skript **vor** jedem Publish-Befehl läuft (`set -e`). Danach ist die Version eine von zwei Formen, und der Tag folgt aus dem Bindestrich der Vorabkennung: `*-*` → `next`, sonst → `latest`. `tag_for` ist die eine Stelle; `command_for` setzt den Tag in den Befehl, `--print` zeigt ihn als eigene Zeile `tag:` über den Befehlen – so können die Zeile und der Befehl nicht auseinanderlaufen. Modus `pack` kennt keinen Tag; `--print` zeigt dort trotzdem `tag: next` für `<modelo>-next.0`, das ist der Standard ohne Input (ohne Bedeutung für `pnpm pack`).
+
+#### D-03 `release.yml` reicht nur die Version durch
+
+Der Workflow hat keinen Tag mehr: weder im Befehl noch im Namen des Publish-Schritts („… under the dist-tag of the version“). Die Beschreibung des Inputs `version` nennt beide Formen mit ihrem Tag (`0.1.0-next.1` → next, `0.1.0` → latest). Der Trockenlauf (`dry-run`) zeigt damit genau den Tag, den der Publish verwenden würde – der Maintainer sieht `--tag latest` im Log, bevor er `publish` wählt.
+
+#### D-04 Tests
+
+- `make-kit.test.ts` (Projekcioj): `0.1.0` wird angenommen (beide Kits), `0.1.0-next.1`/`-next.5` wie bisher, abgelehnt `0.2.0`, `0.1.0.1`, `0.2.0-next.0`, `0.1.0-`, `v0.1.0`, `0.1.0 ` – je mit der Zahl und beiden Formen im Fehlertext.
+- `release-workflow.test.ts` (Modelo): `--print` mit `0.1.0` → `tag: latest` und `--tag latest` in beiden Kits, mit `0.1.0-next.5` und `-next.9` → `next`; Trockenlauf einer Vorabversion bleibt `next`, der von `0.1.0` zeigt `latest`, ohne Version `next`; genau zwei `--tag` im Skript außerhalb von Kommentaren, keines mit festem `next` oder `latest`; `release.yml` ohne `--tag` und ohne `dist-tag`; die Input-Beschreibung nennt `0.1.0`, `0.1.0-next.<n>`, `latest` und `next`. Zwei Tests laufen das Skript **ohne** `--print` mit `0.2.0` und `0.1.0.1`: der Bau lehnt ab, `stderr` nennt die Zahl und `0.1.0-<Vorabkennung>`, und kein Kit erreicht seinen Publish-Befehl (je ≈ 2 s; das Skript leert vorher `.fundamento/release`, denselben Ordner wie `check:release` – die beiden laufen in der CI in verschiedenen Jobs).
+- Zwei alte Pins (`--tag next --provenance --access public` im Skripttext) sind zu `--tag <…> --provenance --access public` gelockert; die `--print`-Pins ohne Version und mit `0.1.0-next.1` halten `--tag next` weiter fest.
+
+### Abweichungen vom Auftrag
+
+1. **`tag_for` statt nur `command_for`** (D-02): der Auftrag nennt `command_for` als die eine Stelle. Die Entscheidung steht in `tag_for`, direkt darüber, weil auch die `--print`-Zeile `tag:` sie braucht; `command_for` ist die einzige Stelle, die sie in einen Befehl setzt.
+2. **Eine README-Zeile** (Tabelle der Pakete): „published under the dist-tag `next` after the acceptance“ → „pre-releases … under `next`, the release 0.1.0 under `latest`“. Nicht im Auftrag; der alte Satz wäre nach dem Release falsch.
+
+### Befunde / Mankoj
+
+- **B-1 `npm dist-tag add` wird überflüssig:** Spec 015 „Nach der Abnahme“ Schritt 2 (`npm dist-tag add @fundamento/make-kit-<aspekto>@0.1.0 latest`) erledigt der Publish mit `--tag latest` selbst. Nach dem Release sollte `npm view @fundamento/make-kit-<aspekto> dist-tags --json` für beide Kits `latest: 0.1.0` und `next: 0.1.0-next.2` (der letzte Stand aus Spec 003 F26) zeigen; das misst der Maintainer nach dem Lauf.
+- **B-2 Umfang der Kits heute:** 49 Dateien, 289,7 kB (komuna) / 290,9 kB (ekzemplo) gepackt, 2,4 MB entpackt (Spec 003 maß 18 Dateien, 26 kB – seither 32 Eroj und die Bundles). Nur gemessen, nichts angefasst.
+- **B-3 Lint:** die Warnungen in `release-workflow.test.ts:135` (`${{ inputs.version }}` in einer Zeichenkette) und die übrigen aus ② B-10 sind älter als dieser Branch – nicht angefasst.
+- **Mankoj:** keine neuen.
+
+### Offen (für den Maintainer)
+
+- **O-1 Weitere Pakete auf npm** (`modelo`, `mcp`, `cli`, `eroj`, `agordilo`): nicht entschieden. Heute veröffentlicht der Weg nur die zwei Make Kits über Trusted Publishing; jedes weitere Paket bräuchte einen eigenen Trusted Publisher auf npm, einen eigenen Pack-Pin (Dateiliste wie contracts/projekcioj §6) und einen Eintrag im Skript.
+- **O-2 Reihenfolge des Releases:** `release.yml` mit `dry-run` und Version `0.1.0` (Log zeigt `tag: latest`), dann `publish` mit `0.1.0` von `main`; danach B-1 messen und Spec 015 Schritt 3 (Arkitekturo auf 0.1.0).

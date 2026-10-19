@@ -119,7 +119,7 @@ Everything lives in one workspace; the npm org for published packages is
 | `@fundamento/mcp` | The MCP server (Gvidanto) |
 | `@fundamento/cli` | `fm`: validate, export, build projections, run the server, derive and check an Aspekto from an Agordo |
 | `@fundamento/agordilo` | The Agordilo (Spec 016): an Agordo (lead colour, status colours, tint, three sliders, fonts) becomes a complete Aspekto in OKLCH at contrast targets measured on komuna, checked by the checks of the CI, with its report |
-| `@fundamento/make-kit-<aspekto>` | Build output of `projekcioj`: one Figma Make kit per Aspekto (published under the dist-tag `next` after the acceptance) |
+| `@fundamento/make-kit-<aspekto>` | Build output of `projekcioj`: one Figma Make kit per Aspekto (pre-releases published under the dist-tag `next`, the release 0.1.0 under `latest`) |
 
 ## MCP server
 
