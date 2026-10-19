@@ -48,7 +48,7 @@ const DATA = "data/kontrastparoj.json";
 describe("alirebleco over every known Aspekto (Nachlese 3 W2)", () => {
   it("measures komuna and ekzemplo; failures of ekzemplo are warnings that name the Aspekto", async () => {
     const result = await check({ json: true, repoRoot });
-    expect(result.stats.aspektoj).toBe(2);
+    expect(result.stats.aspektoj).toBeGreaterThanOrEqual(2);
     expect(result.stats["ekzemplo:evaluations"]).toBeGreaterThan(0);
     // The composed source carries both Aspektoj: komuna's 72 combinations and ekzemplo's.
     expect(result.stats["ekzemplo:combinations"]).toBe(144);
@@ -58,6 +58,17 @@ describe("alirebleco over every known Aspekto (Nachlese 3 W2)", () => {
     expect(result.summary).toContain("ekzemplo");
     // komuna stays binding: its errors are errors.
     expect(result.ok).toBe(true);
+  });
+
+  // Spec 016 ①: the example Aspekto provo, derived by the Agordilo from its Agordo, is a known
+  // Aspekto beside ekzemplo; it is measured the same way, its failures are warnings.
+  it("measures the derived Aspekto provo as an external Aspekto (Spec 016 ①)", async () => {
+    const result = await check({ json: true, repoRoot });
+    expect(result.stats.aspektoj).toBe(3);
+    expect(result.stats["provo:combinations"]).toBe(144);
+    expect(result.stats["provo:evaluations"]).toBeGreaterThan(0);
+    expect(result.stats["provo:errors"]).toBe(0);
+    expect(result.summary).toContain("provo");
   });
 });
 

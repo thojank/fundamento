@@ -205,6 +205,10 @@ export const RULE_IDS = [
   "ikonaro-glyph-provenance-missing",
   "ikonaro-glyph-viewbox",
   "ikonaro-glyph-unknown",
+  // Spec 016 ① (G6, G8): an Agordo that records a Jugxo for a fixed rule, and a package whose
+  // shipped report no longer matches the checks (fm agordilo check).
+  "agordo-jugxo-fixed",
+  "raporto-out-of-sync",
   // Projekcio lints (Spec 003, D-17)
   "css-physical-property",
   "ero-hardcoded-string",

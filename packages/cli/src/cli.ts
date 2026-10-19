@@ -8,6 +8,8 @@ import {
   EXIT_OK,
   EXIT_USAGE,
 } from "./command.js";
+import { agordiloCheck } from "./commands/agordilo-check.js";
+import { agordiloDerive } from "./commands/agordilo-derive.js";
 import { mcp } from "./commands/mcp.js";
 import { modeloExport } from "./commands/modelo-export.js";
 import { modeloMezuroj } from "./commands/modelo-mezuroj.js";
@@ -28,6 +30,11 @@ const ENTRIES: readonly Entry[] = [
     name: "projekcioj",
     summary: "Generate the projections of the Modelo: CSS, Tailwind, Eroj, Figma, Make Kits.",
     commands: [projekciojBuild],
+  },
+  {
+    name: "agordilo",
+    summary: "Derive a brand from an Agordo (lead colour, sliders) and check it (Spec 016).",
+    commands: [agordiloDerive, agordiloCheck],
   },
   mcp,
 ];

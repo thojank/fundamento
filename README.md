@@ -39,6 +39,8 @@ pnpm fm modelo validate --config <file>                  # a project: core, komu
 pnpm fm modelo validate --aspekto <dir> [--aspekto <dir>]  # Aspekto packages against the repo core, no config file needed
 pnpm fm modelo export [--config <file>] [--out <dir>]    # modelo.json, modelo.schema.json, rezolvoj.json, vortaro/<aspekto>/
 pnpm fm mcp [--config <file>] [--export <dir>] [--http [--port <n>]]  # the MCP server (see below)
+pnpm fm agordilo derive <agordo.json> --out <dir> [--json]  # a complete, checked Aspekto package from an Agordo
+pnpm fm agordilo check <dir> [--json]                    # the checks again, compared with the shipped raporto.json
 ```
 
 `fm modelo validate` exits 0 when valid and 1 when invalid; every issue names a `path`, a `rule` and a `suggestion`. Fixture paths are relative to the directory you run the command from, e.g. `pnpm fm modelo validate packages/modelo/test/fixtures/invalid/modelo-name-grammar`. `fm modelo export` writes nothing for an invalid Modelo (default output: `.fundamento/export/`).
@@ -52,6 +54,8 @@ An Aspekto (a brand) is a package: a folder with `aspekto.json` (owner, license,
 ```
 
 Every Aspekto must set every token the reference Aspekto sets (`aspekto-incomplete` lists what is missing) and must pass Alirebleco in every combination. The fixture `packages/modelo/test/fixtures/valid/aspekto-ekzemplo/` is a complete example, and a deliberately loud one: Archivo, a strong yellow with black text, black surfaces with white text, no corner radius, no shadow and tighter measures than the reference — so that switching the brand is visible at a glance and not a shade apart.
+
+A package can also be derived: `fm agordilo derive` writes one from an Agordo — a lead colour, optional status colours, the tint of the neutrals and three sliders — with the roles and every other token of the structure unchanged, the Agordo as its origin in `aspekto.json` and its check report (`raporto.json`, `raporto.md`). A violation of a fixed rule refuses the export; an adjustable one needs a Jugxo in the Agordo. The fixture `packages/modelo/test/fixtures/valid/aspekto-provo/` is the example (Spec 016 ①, test data).
 
 ### What an Aspekto decides, and what it never does
 
@@ -113,7 +117,8 @@ Everything lives in one workspace; the npm org for published packages is
 | `@fundamento/projekcioj` | Every generator: CSS, Tailwind, Web Component, React, Figma, Code Connect, Make Kit |
 | `@fundamento/eroj` | The generated Eroj: thirty-two `fm-*` elements (since Spec 015 ① with `fm-pagxigilo` and `fm-spuro`, the pagination and the breadcrumb; since Spec 015 ② with `fm-alsxutilo`, the file input; since Spec 015 ③ with `fm-karto` and `fm-avataro`, the card and the avatar) and their React wrappers |
 | `@fundamento/mcp` | The MCP server (Gvidanto) |
-| `@fundamento/cli` | `fm`: validate, export, build projections, run the server |
+| `@fundamento/cli` | `fm`: validate, export, build projections, run the server, derive and check an Aspekto from an Agordo |
+| `@fundamento/agordilo` | The Agordilo (Spec 016): an Agordo (lead colour, status colours, tint, three sliders, fonts) becomes a complete Aspekto in OKLCH at contrast targets measured on komuna, checked by the checks of the CI, with its report |
 | `@fundamento/make-kit-<aspekto>` | Build output of `projekcioj`: one Figma Make kit per Aspekto (published under the dist-tag `next` after the acceptance) |
 
 ## MCP server

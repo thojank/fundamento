@@ -1,0 +1,16 @@
+{
+  "ids": {
+    "dva_provo_01M564XR004GZ8VPRRGNZZP9YT": {
+      "status": "active",
+      "type": "dimensioValoro"
+    },
+    "set_provo_01M564XR004GZ8VPRRGNZZP9YV": {
+      "status": "active",
+      "type": "tokenSet"
+    },
+    "set_provo_01M564XR004GZ8VPRRGNZZP9YW": {
+      "status": "active",
+      "type": "tokenSet"
+    }
+  }
+}

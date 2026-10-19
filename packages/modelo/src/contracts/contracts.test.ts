@@ -97,8 +97,12 @@ describe("rule catalog (§2.6)", () => {
     // Nachlese 3 (G3): goal-keyword-shared, the warning about a keyword two Eroj' goals share;
     // (W2): contrast-external-aspekto, a failing pair of an Aspekto beyond the reference.
     // Spec 014 ① (G3): the five glyph rules of check:ikonaro.
-    expect(RULE_IDS).toHaveLength(160);
+    // Spec 016 ① (G6, G8): a Jugxo of an Agordo that names a fixed rule, and a shipped report
+    // that no longer matches the checks (fm agordilo check).
+    expect(RULE_IDS).toHaveLength(162);
     for (const rule of [
+      "agordo-jugxo-fixed",
+      "raporto-out-of-sync",
       "uzo-skemo-missing",
       "uzo-ero-unknown",
       "uzo-kialo-missing",

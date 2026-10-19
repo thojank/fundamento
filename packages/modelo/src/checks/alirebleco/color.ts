@@ -107,6 +107,34 @@ export function compositeOver(foreground: ColorValue, background: ColorValue): C
 }
 
 /**
+ * OKLCH components `[L, C, H]` of an opaque colour (L 0…1, C ≥ 0, H in degrees; an achromatic
+ * colour has hue 0). Spec 016: the Agordilo reads the tone of a lead colour and of the steps of
+ * komuna through the same colour mathematics as the checks (Art. XI).
+ */
+export function oklchComponentsOf(color: ColorValue): [number, number, number] {
+  const [l, c, h] = toColorjs(color).to("oklch").coords;
+  const lightness = Number(l ?? 0);
+  const chroma = Number(c ?? 0);
+  const hue = Number(h ?? 0);
+  return [lightness, chroma, Number.isFinite(hue) ? hue : 0];
+}
+
+/** A DTCG colour in OKLCH (Spec 016: a derived step before it is written in sRGB). */
+export function oklchColor(lightness: number, chroma: number, hue: number): ColorValue {
+  return { colorSpace: "oklch", components: [lightness, chroma, hue] };
+}
+
+/** Whether gamma-encoded sRGB components lie inside the sRGB gamut (with a rounding tolerance). */
+export function inSrgbGamut(components: readonly number[], tolerance = 1e-7): boolean {
+  return components.every((channel) => channel >= -tolerance && channel <= 1 + tolerance);
+}
+
+/** The distance of two colours in OKLab (ΔE OK, about 0…1; Spec 016 M1 reports it × 100). */
+export function deltaEOklab(a: ColorValue, b: ColorValue): number {
+  return Color.deltaEOK(toColorjs(a), toColorjs(b));
+}
+
+/**
  * OKLCH lightness (0…1) of a colour as seen: a translucent colour is first composited over
  * `backdrop` (Spec 002, D-04), as the contrast check does. Without a backdrop it is measured as is.
  */

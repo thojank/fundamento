@@ -1,0 +1,26 @@
+{
+  "name": "provo",
+  "owner": "Provo (fictitious, test only)",
+  "license": "MIT",
+  "leitfarbe": "#6b4fa0",
+  "zusatzfarben": {
+    "info": "oklch(0.55 0.12 225)"
+  },
+  "neutral": {
+    "toenung": 0.4
+  },
+  "regler": {
+    "helligkeit": 0.1,
+    "kontrast": 0.1,
+    "saettigung": 1.1
+  },
+  "schriften": {
+    "display": {
+      "family": "Archivo",
+      "license": "OFL-1.1",
+      "source": "https://github.com/Omnibus-Type/Archivo",
+      "redistributable": true,
+      "scripts": ["Latn"]
+    }
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "name": "@fundamento/agordilo",
+  "version": "0.1.0",
+  "description": "Fundamento Agordilo: derives a complete, checked Aspekto from an Agordo (a lead colour, optional status colours, three sliders) in OKLCH with contrast targets calibrated on komuna (Spec 016).",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "data"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "test": "vitest run",
+    "lint": "tsc -p tsconfig.json --noEmit && biome check .",
+    "calibrate": "node dist/node/calibrate-cli.js",
+    "mezuroj": "node dist/node/mezuroj-cli.js"
+  },
+  "dependencies": {
+    "@fundamento/modelo": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.5",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.1"
+  }
+}

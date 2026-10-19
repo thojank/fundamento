@@ -18,6 +18,7 @@ export const SCHEMA_DEFS = {
   kontrastParojFile: "KontrastParojFile",
   idsLock: "IdsLock",
   aspektoFile: "AspektoFile",
+  agordo: "Agordo",
   rezolvo: "Rezolvo",
   resolvedToken: "ResolvedToken",
   ero: "Ero",

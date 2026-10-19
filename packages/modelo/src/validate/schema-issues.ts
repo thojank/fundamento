@@ -194,6 +194,39 @@ export function schemaIssues(files: ModeloFiles, ajv: ModeloAjv): ValidationIssu
   return issues;
 }
 
+/**
+ * Schema issues of one document against one schema def, mapped like the Modelo files (Spec 016:
+ * the Agordo of the Agordilo). `schema-violation` at the offending member, or at the missing one.
+ */
+export function documentSchemaIssues(
+  document: ModeloDocument,
+  defName: string,
+  ajv: ModeloAjv,
+): ValidationIssue[] {
+  const validate = getModeloValidator(ajv, defName);
+  if (validate(document.value)) return [];
+  const errors = validate.errors ?? [];
+  // A missing member is reported where it belongs, with the member named in the suggestion.
+  const missing: ValidationIssue[] = errors.flatMap((error) => {
+    const member = error.params.missingProperty;
+    if (error.keyword !== "required" || typeof member !== "string") return [];
+    return [
+      {
+        rule: "schema-violation",
+        severity: "error",
+        path: formatIssuePath({ file: document.file, pointer: targetPointer(error) }),
+        message: `The required member ${JSON.stringify(member)} is missing.`,
+        suggestion: `Add "${member}"; the Modelo schema (#/$defs/${defName}) requires it.`,
+      },
+    ];
+  });
+  const rest = errors.filter((error) => error.keyword !== "required");
+  return [
+    ...missing,
+    ...mapErrors(rest, document, defName, { semantic: [], subtrees: [], isSetFile: false }),
+  ];
+}
+
 interface MappingContext {
   semantic: readonly RegExp[];
   subtrees: readonly { pattern: RegExp; rule: RuleId }[];
