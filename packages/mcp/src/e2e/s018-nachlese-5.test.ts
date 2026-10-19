@@ -36,6 +36,10 @@ type Suggested = {
   boundary?: { ero: string; case: string; action: string; kialo: string };
   kialo?: string;
 };
+type Judged = {
+  valid: boolean;
+  violations: { issue: { rule: string; message: string } }[];
+};
 type Brief = {
   ero: string;
   axes: { name: string }[];
@@ -74,6 +78,27 @@ describe("the Gvidanto dialogs of the acceptance of Nachlese 4 (Nachlese 5 ②)"
     const brief = await output<Brief>(client, "get_ero", { name: "kompletigilo", brief: true });
     expect(brief.props).toContainEqual({ name: "loading", type: "boolean" });
     expect(brief.axes.map((axis) => axis.name)).not.toContain("loading");
+  });
+
+  it("O-10: check_usage of an alsxutilo with max-size and without a help reports the constraint, citing file-constraints-stated", async () => {
+    const instance = (texts: Record<string, string>) => ({
+      ero: "alsxutilo",
+      props: { "max-size": 5000000 },
+      label: "Lebenslauf",
+      texts,
+      lingvo: "de",
+    });
+    const missing = await output<Judged>(client, "check_usage", { instances: [instance({})] });
+    expect(missing.valid).toBe(false);
+    expect(missing.violations.map((violation) => violation.issue.rule)).toEqual([
+      "ero-prop-constraint",
+    ]);
+    expect(missing.violations[0]?.issue.message).toContain("prop:max-size=filled");
+    expect(missing.violations[0]?.issue.message).toContain("(file-constraints-stated)");
+    const clean = await output<Judged>(client, "check_usage", {
+      instances: [instance({ help: "PDF, höchstens 5 MB" })],
+    });
+    expect(clean.valid).toBe(true);
   });
 
   it("O-39: a drawer asks a person with one kialo, whichever Uzo speaks", async () => {
