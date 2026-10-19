@@ -72,7 +72,7 @@ Der Dialog gibt den Fokus dem Element zurück, das ihn beim Öffnen hatte. Der T
 
 ## ② Befunde
 
-**Branch:** `261019-nachlese-5-f027c6`, gestapelt auf ① (`261019-nachlese-5-ci-f027c6` @ `2a16944`, PR #80) · **Datum:** 2026-10-19 · Kein neues Ero (32), kein Token geändert, keine neue Regulo-Semantik, kein Amendment. **Aufgaben, Commits und rote Hashes:** [`tasks.md`](tasks.md) ②.
+**Branch:** `261019-nachlese-5-f027c6`, gestapelt auf ① (`261019-nachlese-5-ci-f027c6` @ `a984699`, PR #80; nach dem Rebase von ① auf `main` @ `a1dc8b6` neu gestapelt) · **Datum:** 2026-10-19 · Kein neues Ero (32), kein Token geändert, keine neue Regulo-Semantik, kein Amendment. **Aufgaben, Commits und rote Hashes:** [`tasks.md`](tasks.md) ②.
 
 Herkunft: Messung der Abnahme 015 ②/③, Nachlese 4, 016 ① (`messung-2-3-n4-016-2026-10-19.md`: A2, A15, A16, C – Lauf 1 brach in `done` ab; Rohdaten `mess/a15-karte.json`, `a16-projektkarten.json`, `a18-ohne-hilfe.json`, `brief-kompletigilo.json`), Auftrag vom 2026-10-19 (N5-4 bis N5-6), Entscheidungen des Maintainers zu O-10, O-14, O-17 (Spec 015 plan ②/③) und O-39, O-41 (Nachlese 4).
 
@@ -165,7 +165,7 @@ Browser (`pflicht.spec.ts`, Vorbild Spec 015 ②): je Art ein falscher und ein r
 
 ### Dialoge vorher/nachher
 
-Gemessen mit **1 488 Zeichenketten** – jedes String-Literal (ohne Testtitel) der Dateien mit `suggest_ero`-Aufrufen: MCP-e2e `s007`–`s018`, `s7-*`, `ak09`, `eroj-tools.test.ts`, Modelo `data/*.test.ts`, `suggest-ero.test.ts` –, je ohne Sprache, `de` und `en` (4 464 Antworten), gegen den Stand von ① (`46e0e68`, Inhalt gleich `2a16944`) und den grünen Stand. Geändert: 33 Antworten. Spec-Dialoge, deren Antwort sich ändert:
+Gemessen mit **1 488 Zeichenketten** – jedes String-Literal (ohne Testtitel) der Dateien mit `suggest_ero`-Aufrufen: MCP-e2e `s007`–`s018`, `s7-*`, `ak09`, `eroj-tools.test.ts`, Modelo `data/*.test.ts`, `suggest-ero.test.ts` –, je ohne Sprache, `de` und `en` (4 464 Antworten), gegen den Stand von ① (`ee67be1`, Inhalt gleich `3434094`) und den grünen Stand. Geändert: 33 Antworten. Spec-Dialoge, deren Antwort sich ändert:
 
 | Dialog (Herkunft) | vorher | nachher | Jugxo |
 |---|---|---|---|
