@@ -6,7 +6,7 @@ Drei PRs, gestapelt: ① Bibliothek von `main`, ② Werkstatt in der Vitrino von
 
 ## ① Bibliothek
 
-**Branch:** `261018-spec-016-agordilo-f027c6` (nach dem Merge von #76 am 2026-10-19 auf `main` @ `971354d` rebased, CI auf den fünf Jobs) · **Datum:** 2026-10-18/19 · **Stand:** abgenommen am 2026-10-19 (Messung D1–D4); der Maintainer merged nach grüner CI.
+**Branch:** `261018-spec-016-agordilo-f027c6` (nach dem Merge von #76 auf `main` rebased, nach #78 und #79 erneut auf `ef3c8db`; CI auf den fünf Jobs) · **Datum:** 2026-10-18/19 · **Stand:** abgenommen am 2026-10-19 (Messung D1–D4); der Maintainer merged nach grüner CI.
 
 ### Zusammenfassung
 
