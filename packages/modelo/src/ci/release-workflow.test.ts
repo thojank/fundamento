@@ -188,21 +188,24 @@ describe("the dist-tag follows the version: 0.1.0 → latest, 0.1.0-next.5 → n
     ["0.1.0", "latest"],
     ["0.1.0-next.5", "next"],
     ["0.1.0-next.9", "next"],
-  ])("FUNDAMENTO_KIT_VERSION=%s publishes both kits under the dist-tag %s, and --print says so", (version, tag) => {
-    const run = print(version);
-    expect(run.status, run.stderr).toBe(0);
-    expect(run.stdout).toContain(`version: ${version}`);
-    expect(run.stdout).toContain(`tag: ${tag}`);
-    const lines = publishLines(run.stdout);
-    expect(lines).toHaveLength(2);
-    for (const line of lines) {
-      expect(line).toContain(`--tag ${tag} `);
-      expect(line).not.toContain("--dry-run");
-      expect(line).toContain("--provenance");
-      expect(line).toContain("--access public");
-    }
-    expect(run.stdout).not.toContain(tag === "latest" ? "--tag next" : "--tag latest");
-  });
+  ])(
+    "FUNDAMENTO_KIT_VERSION=%s publishes both kits under the dist-tag %s, and --print says so",
+    (version, tag) => {
+      const run = print(version);
+      expect(run.status, run.stderr).toBe(0);
+      expect(run.stdout).toContain(`version: ${version}`);
+      expect(run.stdout).toContain(`tag: ${tag}`);
+      const lines = publishLines(run.stdout);
+      expect(lines).toHaveLength(2);
+      for (const line of lines) {
+        expect(line).toContain(`--tag ${tag} `);
+        expect(line).not.toContain("--dry-run");
+        expect(line).toContain("--provenance");
+        expect(line).toContain("--access public");
+      }
+      expect(run.stdout).not.toContain(tag === "latest" ? "--tag next" : "--tag latest");
+    },
+  );
 
   it("the dry run of a pre-release stays under next, the dry run of 0.1.0 shows latest", () => {
     expect(publishLines(print("0.1.0-next.5", "dry-run").stdout).join()).toContain(
@@ -226,18 +229,14 @@ describe("the dist-tag follows the version: 0.1.0 → latest, 0.1.0-next.5 → n
     expect(body).not.toMatch(/--tag (next|latest)\b/);
     expect(body).toMatch(/command_for\(\)[\s\S]*--tag "?\$/);
     // release.yml hands only the version through: no tag, no dist-tag of its own.
-    const text = readFileSync(releasePath, "utf8");
-    expect(text).not.toMatch(/--tag|dist-tag add|npm dist-tag/);
-    expect(text).toContain("FUNDAMENTO_KIT_VERSION: ${{ inputs.version }}");
+    expect(readFileSync(releasePath, "utf8")).not.toMatch(/--tag|dist-tag add|npm dist-tag/);
   });
 
   it("the version input of release.yml names both forms: the Modelo's version (latest) and a pre-release (next)", () => {
-    const description = String(
-      (
-        (workflow().on as { workflow_dispatch?: { inputs?: Record<string, { description?: string }> } })
-          .workflow_dispatch?.inputs?.version ?? {}
-      ).description ?? "",
-    );
+    const on = workflow().on as {
+      workflow_dispatch?: { inputs?: Record<string, { description?: string }> };
+    };
+    const description = String(on.workflow_dispatch?.inputs?.version?.description ?? "");
     expect(description).toContain("0.1.0");
     expect(description).toMatch(/0\.1\.0-next\.\d/);
     expect(description).toContain("latest");

@@ -5,13 +5,17 @@
 # then runs the dry run of the given mode in every kit.
 #
 # Usage: scripts/release-kits.sh dry-run|publish|pack [--print]
-#   dry-run  `pnpm publish --dry-run --tag next --provenance --access public` — the preview
+#   dry-run  `pnpm publish --dry-run --tag <tag> --provenance --access public` — the preview
 #            (release.yml, mode dry-run)
 #   publish  the same without --dry-run: the real release, only from release.yml on main, mode
-#            publish, chosen by the maintainer; needs FUNDAMENTO_KIT_VERSION (e.g. 0.1.0-next.1)
+#            publish, chosen by the maintainer; needs FUNDAMENTO_KIT_VERSION (0.1.0 or 0.1.0-next.1)
 #   pack     `pnpm pack --dry-run` (ci.yml, every PR)
-#   --print  builds nothing, prints the command the mode would run in every kit — pnpm shows
-#            --provenance nowhere in a dry run's output, so the assembled line is what a test holds.
+#   --print  builds nothing, prints the version, the tag and the command the mode would run in
+#            every kit — pnpm shows --provenance nowhere in a dry run's output, so the assembled
+#            line is what a test holds.
+# The dist-tag follows the version (Nachlese 5 ③): a pre-release (0.1.0-next.1) publishes under
+# `next`, the Modelo's version itself (0.1.0) under `latest`. Decided once, in command_for. The
+# build refuses any number the Modelo does not have (kitVersion), before a publish is reached.
 # Exit 1 with the path names what is missing. No token anywhere: publish goes through npm Trusted
 # Publishing (OIDC) of the workflow.
 set -eu
@@ -23,9 +27,9 @@ case "$mode" in
 esac
 print="${2:-}"
 
-# The real release names its pre-release number; the build writes it into every kit.
+# The real release names its version; the build writes it into every kit.
 if [ "$mode" = "publish" ] && [ -z "${FUNDAMENTO_KIT_VERSION:-}" ]; then
-  echo "publish braucht FUNDAMENTO_KIT_VERSION (z. B. 0.1.0-next.1): die Vorabnummer des Releases." >&2
+  echo "publish braucht FUNDAMENTO_KIT_VERSION (0.1.0 oder z. B. 0.1.0-next.1): die Version des Releases." >&2
   exit 2
 fi
 version="${FUNDAMENTO_KIT_VERSION:-<modelo>-next.0}"
@@ -33,17 +37,27 @@ version="${FUNDAMENTO_KIT_VERSION:-<modelo>-next.0}"
 out=".fundamento/release"
 KITS="$out/repo/make-kit/komuna $out/ekzemplo/make-kit/ekzemplo"
 
+# The dist-tag of a version, decided once: a Vorabkennung (a hyphen) means `next`, none means
+# `latest`. Only command_for and --print read it.
+tag_for() {
+  case "$1" in
+    *-*) echo next ;;
+    *) echo latest ;;
+  esac
+}
+
 # The one command of each mode, in every kit. Kept in one place so what --print shows is what runs.
 command_for() {
   case "$1" in
-    dry-run) echo "pnpm publish --dry-run --tag next --provenance --access public --no-git-checks" ;;
-    publish) echo "pnpm publish --tag next --provenance --access public --no-git-checks" ;;
+    dry-run) echo "pnpm publish --dry-run --tag $(tag_for "$version") --provenance --access public --no-git-checks" ;;
+    publish) echo "pnpm publish --tag $(tag_for "$version") --provenance --access public --no-git-checks" ;;
     pack) echo "pnpm pack --dry-run" ;;
   esac
 }
 
 if [ "$print" = "--print" ]; then
   echo "version: $version"
+  echo "tag: $(tag_for "$version")"
   for kit in $KITS; do
     echo "$kit: $(command_for "$mode")"
   done

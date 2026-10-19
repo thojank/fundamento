@@ -411,7 +411,9 @@ describe("the kit version comes from FUNDAMENTO_KIT_VERSION (release step, Nachl
   it("refuses every other number — 0.2.0, 0.1.0.1, 0.2.0-next.0 — and names both allowed forms", () => {
     for (const bad of ["0.2.0", "0.1.0.1", "0.2.0-next.0", "0.1.0-", "v0.1.0", "0.1.0 "]) {
       const attempt = () => MAKE_KIT_CELO.generate(withEnv(bad));
-      expect(attempt, bad).toThrow(new RegExp(`FUNDAMENTO_KIT_VERSION=${bad.replaceAll(".", "\\.")}`));
+      expect(attempt, bad).toThrow(
+        new RegExp(`FUNDAMENTO_KIT_VERSION=${bad.replaceAll(".", "\\.")}`),
+      );
       // The error names both forms the build accepts: the Modelo's version and a pre-release of it.
       expect(attempt, bad).toThrow(new RegExp(`${escaped}-<Vorabkennung>`));
       expect(attempt, bad).toThrow(new RegExp(`(^|[^-.\\d])${escaped}([^-.\\d]|$)`));

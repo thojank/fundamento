@@ -2,10 +2,13 @@
 #
 # Two modes, chosen by the maintainer on demand: `dry-run` (default) builds the kits and runs
 # `pnpm publish --dry-run`, so the contents of a release can be reviewed before anything leaves
-# the repository; `publish` releases both kits under the dist-tag `next` with provenance — only
-# from main. Both go through npm Trusted Publishing: the registry trusts this repository and this
-# workflow file (OIDC), so no publish token, no secret and no auth entry in .npmrc exists anywhere
-# in this repository. The pre-release number is an input (F25): 0.1.0-next.1 is the next one.
+# the repository; `publish` releases both kits with provenance — only from main. Both go through
+# npm Trusted Publishing: the registry trusts this repository and this workflow file (OIDC), so no
+# publish token, no secret and no auth entry in .npmrc exists anywhere in this repository. The
+# version is an input (F25), in one of two forms (Nachlese 5 ③): a pre-release of the Modelo's
+# version (0.1.0-next.1) is published under the dist-tag `next`, the Modelo's version itself
+# (0.1.0: the release) under `latest`. The workflow only hands the version through; the script
+# derives the tag from it, and the build refuses any other number.
 name: Release
 
 on:
@@ -19,7 +22,7 @@ on:
           - publish
         default: dry-run
       version:
-        description: "The pre-release number of the kits, a pre-release of the Modelo's version (e.g. 0.1.0-next.1)"
+        description: "The version of the kits: a pre-release of the Modelo's version (e.g. 0.1.0-next.1, published under next) or the Modelo's version itself (0.1.0, published under latest)"
         type: string
         required: true
 
@@ -76,8 +79,9 @@ jobs:
           FUNDAMENTO_KIT_VERSION: ${{ inputs.version }}
 
       # The release itself: only when the maintainer chose it, only from main. Provenance ties the
-      # packages to this workflow run; the version is the input above, written into every kit.
-      - name: Build both kits and publish them under the tag next
+      # packages to this workflow run; the version is the input above, written into every kit, and
+      # the dist-tag follows it (next for a pre-release, latest for the Modelo's version).
+      - name: Build both kits and publish them under the dist-tag of the version
         if: inputs.mode == 'publish' && github.ref == 'refs/heads/main'
         run: scripts/release-kits.sh publish
         env:
