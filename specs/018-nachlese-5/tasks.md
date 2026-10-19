@@ -1,6 +1,6 @@
 # Nachlese 5 – Aufgaben
 
-**Spec:** [`briefing.md`](briefing.md) · **Plan:** [`plan.md`](plan.md). Aufgaben ① zählen ab T1801, ② ab T1901.
+**Spec:** [`briefing.md`](briefing.md) · **Plan:** [`plan.md`](plan.md). Aufgaben ① zählen ab T1801, ② ab T1901, ③ ab T2001.
 
 ## ① CI: `plugin.test.ts` teilen (O-5)
 
@@ -71,3 +71,30 @@
 | Checks | `pnpm lint` grün (Warnungen älter, B-10); `check:vortaro-lint`, `check:mankoj` (9), `check:alirebleco` (89 KontrastParoj × 72 Kombinationen, 0 Fehler, 2 394 APCA-Warnungen), `check:clean-room`, `check:ikonaro`, `check:release` ohne Fehler |
 | CI (PR #81) | Lauf 39254016800 (`14e0e46`, gegen ① @ `3434094`, alle sieben Jobs-Läufe grün, **Wanduhr 4:57**): `checks` 1:02, `unit` 4:54, `projekcioj` 3:27 / 3:27, `eroj` 2:19 / 2:24, `alirebleco-eroj` 3:23, `rendered-checks` 3:47; kein Job über 7 min; grüner Stand `14e0e46` |
 | Neu gestapelt auf ① @ `a984699` (nach #77, 2026-10-19) | ohne Konflikt. Lokal: Agordilo 35, MCP 312, CLI 72, Projekcioj 722, Modelo 3 579 grün; Lint und alle Modelo-Checks ohne Fehler, `check:parity` 32 Eroj 0 Differenzen, `check:regularo` 59 Reguloj 199 Jugxoj 0 Warnungen; Browser 248 Specs in Chromium, Alirebleco-Check 561, Vitrino 30; CI in der Zeile danach |
+
+## ③ Release-Weg 0.1.0
+
+**Branch:** `261019-release-010-auftrag-umsetzen-00420d` (von `main` @ `8d6e9ad`, nach dem Merge von #81). Auftrag vom 2026-10-19; kein eigener Spec-Ordner (plan ③).
+
+### A – Rote Tests
+- [x] **T2001 Rot** `make-kit.test.ts` (`0.1.0` angenommen; `0.2.0`, `0.1.0.1`, `0.2.0-next.0` abgelehnt mit beiden Formen), `release-workflow.test.ts` (`--print`: `0.1.0` → latest, `0.1.0-next.5`/`-next.9` → next; Trockenlauf; eine Stelle; `release.yml` ohne Tag, Input-Beschreibung mit beiden Formen; `0.2.0`/`0.1.0.1` am Bau abgelehnt), Doku-Pin plan ③ / tasks ③ (`docs.test.ts`). Rot `b71c0f2`: Projekcioj 1, Modelo 6 + Doku 1 (die zwei Ablehnungen am Bau waren schon grün: unverändertes Verhalten, nur gepinnt).
+
+### B – Grün
+- [x] **T2002 Grün** `kitVersion` (Gleichheit mit der Version des Modelo, Fehlertext mit beiden Formen), `release-kits.sh` (`tag_for`, `command_for`, `--print` mit `tag:`), `release.yml` (Input-Beschreibung, Schrittname, Kopfkommentar), README-Zeile (plan ③ D-01 bis D-03). Grün `110e894`.
+
+### C – Abschluss
+- [x] **T2003 Doku** plan ③, tasks ③, Doku-Test.
+- [ ] **T2004 CI** PR, Lauf, grüner Stand (Zeile CI).
+
+### Messungen
+
+| Was | Wert |
+|---|---|
+| **Commits** | rot `b71c0f2` · grün `110e894` · Doku im Commit der Messungen |
+| `scripts/release-kits.sh publish --print`, `FUNDAMENTO_KIT_VERSION=0.1.0` | `version: 0.1.0` · `tag: latest` · je Kit `pnpm publish --tag latest --provenance --access public --no-git-checks` (komuna, ekzemplo) |
+| dito, `FUNDAMENTO_KIT_VERSION=0.1.0-next.9` | `version: 0.1.0-next.9` · `tag: next` · je Kit `pnpm publish --tag next --provenance --access public --no-git-checks` |
+| `dry-run --print` ohne Version | `version: <modelo>-next.0` · `tag: next` · `pnpm publish --dry-run --tag next …` (unverändert) |
+| Probelauf lokal (`dry-run`, echter Bau) | `0.1.0`: beide Kits `"version": "0.1.0"`, `pnpm publish --dry-run --tag latest --provenance --access public --no-git-checks` je Kit durch, 49 Dateien, 289,7 kB / 290,9 kB gepackt, 2,4 MB entpackt · `0.1.0-next.9`: dasselbe unter `--tag next` · `publish` mit `0.2.0`: `exit 1` am Bau („neither the Modelo's version 0.1.0 nor a pre-release of it (expected 0.1.0 or 0.1.0-<Vorabkennung> …)“), kein Publish-Befehl erreicht · `check:release` (`pack`) grün |
+| Tests lokal | `turbo run test --filter=!@fundamento/eroj --force` (3:16): Agordilo 35, MCP 312, CLI 72, Projekcioj 723 (vorher 722; +1), Modelo 3 588 (vorher 3 579; +9: acht in `release-workflow.test.ts`, ein Doku-Pin) – alle grün, nichts übersprungen; Eroj nicht berührt (kein Ero, kein Token) |
+| Checks | `pnpm lint` grün (Warnungen älter, plan ③ B-3); `check:release` (`pack`) grün |
+| CI | folgt |
