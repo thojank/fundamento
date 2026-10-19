@@ -52,7 +52,7 @@
 
 ### D – Abschluss
 - [x] **T1909 Doku** plan ② (D-01 bis D-11, Dialoge, Abweichungen 1–6, B-3 bis B-10, O-2 bis O-9, In Figma zu messen), tasks ②, Doku-Test.
-- [ ] **T1910 CI** Lauf nach dem Push, Zeiten je Job, grüner Stand.
+- [x] **T1910 CI** PR #81, Lauf 39254016800 grün (Zeile CI), grüner Stand `dec28a3`.
 - [ ] **Aufräumen (älter als dieser Branch):** Biome-Warnungen in `web-component.test.ts`, `menuo.spec.ts` und Modelo (B-10).
 
 ### Messungen
@@ -69,4 +69,4 @@
 | Tests lokal | `turbo run test --filter=!@fundamento/eroj --force` (3:23): Modelo 3 571 (vorher 3 551; +20), MCP 312 (307; +5), Projekcioj 722 (716; +6), CLI 66. Im parallelen Gesamtlauf lief `export/build.test.ts` „building twice is byte-identical“ in seine Zeitgrenze von 30 s (Last), allein 12 von 12 grün – nichts angehoben; der Doku-Test war im Lauf rot, weil die Doku danach kam (allein 179 grün) |
 | Browser | alle 248 Specs in Chromium (vorher 243 + 5 neue); berührte Specs `pflicht`, `kampo`, `alsxutilo`, `avataro` 72 in Firefox und WebKit; `check:alirebleco-eroj` 561 (drei Engines), `check:vitrino` 30 (Pin `avataro` „E“ in der ersten Reihe, `c7e31bc`) – je grün |
 | Checks | `pnpm lint` grün (Warnungen älter, B-10); `check:vortaro-lint`, `check:mankoj` (9), `check:alirebleco` (89 KontrastParoj × 72 Kombinationen, 0 Fehler, 2 394 APCA-Warnungen), `check:clean-room`, `check:ikonaro`, `check:release` ohne Fehler |
-| CI | (Lauf nach dem Push) |
+| CI (PR #81) | Lauf 39254016800 (`dec28a3`, gegen ① @ `2a16944`, alle sieben Jobs-Läufe grün, **Wanduhr 4:57**): `checks` 1:02, `unit` 4:54, `projekcioj` 3:27 / 3:27, `eroj` 2:19 / 2:24, `alirebleco-eroj` 3:23, `rendered-checks` 3:47; kein Job über 7 min; grüner Stand `dec28a3` |
