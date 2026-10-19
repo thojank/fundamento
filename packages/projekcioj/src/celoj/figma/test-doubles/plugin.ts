@@ -46,6 +46,8 @@ export interface DoubleNode {
   id: string;
   type: string;
   name: string;
+  /** True once the node is gone (N5-1); then only `id` and `removed` answer. */
+  readonly removed?: boolean;
   children: DoubleNode[];
   parent?: DoubleNode | undefined;
   properties: Record<string, unknown>;
@@ -572,6 +574,7 @@ function node(
       self.parent?.children.splice(self.parent.children.indexOf(recorded), 1);
       self.parent = undefined;
       leaveCell();
+      REMOVED.add(self);
       context.version++;
     },
   };
@@ -696,6 +699,20 @@ function node(
       return Reflect.set(target, key, value);
     },
     get(target, key) {
+      // Nachlese 5 N5-1 (Messung 2026-10-19, file f10b-5): a node that is gone answers `removed`
+      // and its id; every other property throws. Measured: after a reconnect the run read the
+      // name of node 26:325 and Figma threw "in get_name: The node with id "26:325" does not
+      // exist". That every other property throws alike is a **belief** (the API says: check
+      // `removed` before reading a stashed node), to be confirmed when it happens again.
+      if (key === "removed") return REMOVED.has(target);
+      if (
+        REMOVED.has(target) &&
+        typeof key === "string" &&
+        key !== "id" &&
+        (key in target || key in target.properties)
+      ) {
+        throw new Error(`in get_${key}: The node with id "${target.id}" does not exist`);
+      }
       // Size and place are computed by the layout of the file, never read from what was last
       // written: the double does not assume a size the tool would compute differently (F14).
       if (typeof key === "string" && GEOMETRY_KEYS.has(key) && context.box !== undefined) {
@@ -714,6 +731,9 @@ function node(
 
 /** The texts that took FILL while empty (K-1, a belief; see the setter of the recorded node). */
 const STUCK_AT_ZERO = new WeakSet<object>();
+
+/** The nodes that were removed (N5-1): they answer `removed` and `id`, nothing else. */
+const REMOVED = new WeakSet<object>();
 
 /**
  * The layout of a file, as far as the plugin relies on it (F14). It follows what Figma was

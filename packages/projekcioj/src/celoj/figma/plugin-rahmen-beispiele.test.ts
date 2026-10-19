@@ -616,3 +616,49 @@ describe("the plugin draws the breadcrumb in one row with a chevron between two 
     expect(double.snapshot()).toBe(before);
   });
 });
+
+// Nachlese 5 N5-4 (Messung 2026-10-19, Auftrag 5.): the examples of the alsxutilo (the list of
+// files) and of the avataro (the silhouette) stood without a ground directly on the canvas of the
+// page; help, file names and sizes were hardly legible. Every example frame stands on the Vitrino's
+// ground, as the set and the examples of the apartigilo do (color/background/canvas, bound) — but
+// the dialog's, whose ground is its backdrop.
+describe("every example frame stands on the Vitrino's ground (Nachlese 5 N5-4)", () => {
+  const paintOf = (node: DoubleNode | undefined) =>
+    ((node?.properties.fills ?? []) as { boundVariables?: { color?: { name: string } } }[])[0]
+      ?.boundVariables?.color?.name;
+
+  it("every example beside a set is filled with color/background/canvas; the dialog's with its backdrop", async () => {
+    const double = modelDouble();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    const frame = pageNodes(double).find(
+      (node) => node.type === "FRAME" && node.getSharedPluginData("fundamento", "frame") !== "",
+    );
+    const examples = (frame?.children ?? []).filter(
+      (child) => child.getSharedPluginData("fundamento", "example") !== "",
+    );
+    // Every kind of example the repo plan draws: the list of files, the silhouette, the card
+    // without its image, the pages, the separators, the unknown meter, the vertical navigation.
+    for (const name of [
+      "alsxutilo – mit zwei Dateien",
+      "avataro – mit Bild",
+      "karto – ohne Bild",
+      "pagxigilo – Seite 1 von 10",
+      `mezurilo – ${UNKNOWN_EXAMPLE}`,
+      `navigado – ${VERTICAL_EXAMPLE}`,
+      ...SEPARATOR_EXAMPLE_NAMES,
+    ]) {
+      expect(
+        examples.map((example) => example.name),
+        name,
+      ).toContain(name);
+    }
+    const bare = examples
+      .filter((example) => !example.name.endsWith(BACKDROP_EXAMPLE))
+      .filter((example) => paintOf(example) !== "color/background/canvas")
+      .map((example) => example.name);
+    expect(bare).toEqual([]);
+    const before = double.snapshot();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    expect(double.snapshot()).toBe(before);
+  });
+});

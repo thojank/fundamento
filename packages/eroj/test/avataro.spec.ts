@@ -63,6 +63,27 @@ test.describe("fm-avataro behaviour", () => {
     expect((await shown(page, "#a")).text).toBe("JP");
   });
 
+  // Nachlese 5 N5-5 (O-18): the smallest size (20 px) carries one initial; two stood over the
+  // circle in Figma, and the web shows the same as Figma.
+  test("the smallest size shows one initial, the other sizes two; a change of size follows", async ({
+    page,
+  }) => {
+    await serve(
+      page,
+      out,
+      '<fm-avataro id="s" size="small" name="Erika Mustermann"></fm-avataro><fm-avataro id="m" name="Erika Mustermann"></fm-avataro><fm-avataro id="l" size="large" name="Erika Mustermann"></fm-avataro>',
+    );
+    expect((await shown(page, "#s")).text).toBe("E");
+    expect((await shown(page, "#m")).text).toBe("EM");
+    expect((await shown(page, "#l")).text).toBe("EM");
+    // The name stays whole for assistive technology.
+    await expect(page.getByRole("img", { name: "Erika Mustermann" })).toHaveCount(3);
+    await page.locator("#m").evaluate((element) => element.setAttribute("size", "small"));
+    await expect.poll(async () => (await shown(page, "#m")).text).toBe("E");
+    await page.locator("#s").evaluate((element) => element.removeAttribute("size"));
+    await expect.poll(async () => (await shown(page, "#s")).text).toBe("EM");
+  });
+
   test("the picture once it has loaded; a picture that does not load leaves the initials", async ({
     page,
   }) => {

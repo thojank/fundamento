@@ -819,6 +819,22 @@ describe("Figma plan for the ligilo (Spec 008 T017)", () => {
     expect(set?.grid).toMatchObject({ rows: 6, columns: 5 });
   });
 
+  // Nachlese 5 O-41 (Nachlese 4 B-8): the mark of an external target is the Ikonaro's external in
+  // the frame icon-end after the label, shown by the BOOLEAN property external (the way of the
+  // toggles, as dismissible), hidden by default; its size and colour those of the part icon.
+  it("O-41: every variant draws the icon-end external, shown by the property external", () => {
+    for (const each of set?.variants ?? []) {
+      expect(each.icons, JSON.stringify(each.props)).toEqual({ "icon-end": "external" });
+      expect(each.bindings["icon.size"], JSON.stringify(each.props)).toBe(
+        `size/icon/${each.props.size}`,
+      );
+      expect(each.bindings["icon.color"]).toBe(each.bindings["label.color"]);
+    }
+    expect(set?.toggles).toEqual([{ property: "external", part: "icon-end", defaultValue: false }]);
+    // The button keeps its icon-start and no toggle of its own.
+    expect(butonoOf(plan.components)?.toggles).toBeUndefined();
+  });
+
   it("underlines inline in every state and standalone from hover and focus on (D-11, B-1)", () => {
     for (const state of ["rest", "hover", "pressed", "focus", "visited"]) {
       expect(variant("inline", "medium", state)?.underline, `inline ${state}`).toBe(true);
@@ -3419,6 +3435,9 @@ describe("the Figma plan draws the avataro (Spec 015 ③)", () => {
       fill: { binding: "color/background/sunken" },
       color: { binding: "color/text/subtle" },
     });
+    // Nachlese 5 N5-5 (O-18): the smallest size – the first of the size axis – shows one initial,
+    // the first of the Vitrino's.
+    expect(set?.avatar?.oneInitial).toEqual({ prop: "size", value: "small", text: "E" });
     const sizes = {
       small: "size/icon/medium",
       medium: "size/icon/large",

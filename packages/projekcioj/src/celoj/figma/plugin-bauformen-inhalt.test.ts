@@ -2019,6 +2019,51 @@ describe("the karto's heading fills the body in every variant (K-1)", () => {
 // box.size) with the initials (a circle: fill, radius, the label property „EM" in its colour and
 // role) and the image over it (a circle: radius, clipping, the silhouette on the stand-in ground),
 // shown by the BOOLEAN property image, hidden by default; the example „mit Bild" after the set.
+// Nachlese 5 O-41 (Nachlese 4 B-8): the ligilo's property external stood in the set but hung on no
+// layer – Figma drew no mark. Now every variant draws the frame icon-end after the label with the
+// glyphs external of every Aspekto (size and colour of the part icon, bound), its visibility
+// connected to the BOOLEAN property external, hidden by default (the way of dismissible).
+describe("the plugin draws the ligilo's external mark (Nachlese 5 O-41)", () => {
+  const bound = (node: DoubleNode | undefined, field: string) => node?.boundVariables[field]?.name;
+  const paintOf = (node: DoubleNode | undefined) =>
+    (node?.properties.fills as { boundVariables?: { color?: { name: string } } }[] | undefined)?.[0]
+      ?.boundVariables?.color?.name;
+  type Definitions = Record<string, { type: string; defaultValue: string | boolean }>;
+
+  it("every variant: label, then icon-end with the glyphs external, hidden, shown by external; a second run writes nothing", async () => {
+    const double = modelDouble();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    const set = pageNodes(double).find((node) => node.name === "ligilo");
+    const definitions = (set?.properties.componentPropertyDefinitions ?? {}) as Definitions;
+    const external = Object.keys(definitions).find((key) => key.startsWith("external#"));
+    expect(definitions[external ?? ""]).toEqual({ type: "BOOLEAN", defaultValue: false });
+    expect(set?.children.length).toBe(30);
+    for (const variant of set?.children ?? []) {
+      const control = descendant(variant, "control");
+      expect(
+        control?.children.map((child) => child.name),
+        variant.name,
+      ).toEqual(["label", "icon-end"]);
+      const icon = descendant(control, "icon-end");
+      expect(icon?.properties.visible, variant.name).toBe(false);
+      expect(icon?.properties.componentPropertyReferences).toEqual({ visible: external });
+      const size = variant.name.match(/size=(\w+)/)?.[1];
+      expect(bound(icon, "width"), variant.name).toBe(`size/icon/${size}`);
+      const glyphs = icon?.children ?? [];
+      expect(glyphs.map((glyph) => glyph.name)).toEqual(["glyph-komuna"]);
+      for (const glyph of glyphs) {
+        expect(bound(glyph, "width"), variant.name).toBe(`size/icon/${size}`);
+        expect(paintOf(descendant(glyph, "mark")), variant.name).toBe(
+          paintOf(descendant(control, "label")),
+        );
+      }
+    }
+    const before = double.snapshot();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    expect(double.snapshot()).toBe(before);
+  });
+});
+
 describe("the plugin draws the avataro (Spec 015 ③)", () => {
   const bound = (node: DoubleNode | undefined, field: string) => node?.boundVariables[field]?.name;
   const paintOf = (node: DoubleNode | undefined) =>
@@ -2055,10 +2100,17 @@ describe("the plugin draws the avataro (Spec 015 ③)", () => {
       expect(paintOf(initials)).toBe("color/background/sunken");
       expect(bound(initials, "cornerRadius")).toBe("radius/full");
       const text = descendant(initials, "initials-text");
-      expect(text?.properties.characters).toBe("EM");
-      expect(text?.properties.componentPropertyReferences).toEqual({
-        characters: expect.stringMatching(/^label#/),
-      });
+      // Nachlese 5 N5-5 (O-18): the smallest size shows one initial – „EM“ stood over the circle
+      // of 20 px; the label property holds both, so the smallest size's text is not connected.
+      if (variant.name.startsWith("size=small")) {
+        expect(text?.properties.characters, variant.name).toBe("E");
+        expect(text?.properties.componentPropertyReferences ?? {}, variant.name).toEqual({});
+      } else {
+        expect(text?.properties.characters, variant.name).toBe("EM");
+        expect(text?.properties.componentPropertyReferences).toEqual({
+          characters: expect.stringMatching(/^label#/),
+        });
+      }
       expect(paintOf(text)).toBe("color/text/subtle");
       expect(bound(text, "fontSize")).toBe(
         variant.name.startsWith("size=large")
@@ -2083,5 +2135,31 @@ describe("the plugin draws the avataro (Spec 015 ③)", () => {
     expect(bound(descendant(example, "control"), "width")).toBe("size/icon/large");
     expect(descendant(example, "image")?.properties.visible).toBe(true);
     expect(descendant(example, "initials-text")?.properties.characters).toBe("EM");
+  });
+
+  it("N5-5: a smallest size connected to the label by an earlier run is disconnected and shows one initial; a third run writes nothing", async () => {
+    const double = modelDouble();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    const set = pageNodes(double).find((node) => node.name === "avataro");
+    const small = descendant(
+      set?.children.find((child) => child.name.startsWith("size=small")),
+      "initials-text",
+    );
+    const medium = descendant(
+      set?.children.find((child) => child.name.startsWith("size=medium")),
+      "initials-text",
+    );
+    if (small === undefined || medium === undefined) throw new Error("no initials");
+    // As a run before Nachlese 5 left it: connected to the label, with both initials.
+    small.properties.componentPropertyReferences = {
+      ...(medium.properties.componentPropertyReferences as Record<string, string>),
+    };
+    small.properties.characters = "EM";
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    expect(small.properties.characters).toBe("E");
+    expect(small.properties.componentPropertyReferences ?? {}).toEqual({});
+    const before = double.snapshot();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    expect(double.snapshot()).toBe(before);
   });
 });
