@@ -78,13 +78,13 @@
 - [x] **T1805 Doku** README („Eine Marke in fünf Minuten“, MCP), Vojmapo (Phase 7, Reihenfolge, alter Stand), plan ③ mit Messanleitung, tasks ③.
 
 ### C – Abschluss
-- [ ] **T1806 CI** grün; Hash des grünen Stands in der Zeile der Messungen.
+- [x] **T1806 CI** grün (Lauf 39312697601); Hash des grünen Stands `d7303a9` in der Zeile der Messungen.
 
 ### Messungen
 
 | Was | Wert |
 |---|---|
-| Commits ③ | rot `5b2589c`, grün ⟨GRUEN⟩ |
+| Commits ③ | rot `5b2589c`, grün `d7303a9` (Hash des grünen Stands, CI grün); dieser Eintrag im Folgecommit |
 | Tests lokal | Agordilo 42, MCP 322 (davon 7 `preview_agordo`), CLI 72, Modelo 3 595, Projekcioj 730 grün; `pnpm lint` ohne neue Befunde; `check:vortaro-lint|parity|regularo|mankoj|alirebleco|clean-room|ikonaro` ohne Fehler; `pnpm perf` grün; ein Nachlese-3-Test zählte die Begriffe von `laboro` (9 → 11) |
 | Dialog | `preview_agordo` #F5C400: Leitfarbe 1,64:1 auf Weiß; `palette-aligned` an `accent.900` (0,021 > 0,02), Vorschlag `#665000`, Kialo aus `reguloj.json`; mit `#665000` kein Verstoß |
-| CI | ⟨CI⟩ |
+| CI | Lauf 39312697601 (`d7303a9`, alle acht Jobs grün, Wanduhr 8:54): `checks` 1:32, `unit` 3:43, `projekcioj` 3:30 / 2:28, `eroj` 2:55 / 1:52, `alirebleco-eroj` 4:50, `rendered-checks` 8:51 |
