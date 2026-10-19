@@ -2039,7 +2039,7 @@ describe("Nachlese 5 documentation (specs/018-nachlese-5)", () => {
       "O-17",
       "O-39",
       "O-41",
-      "**B-3**",
+      "**B-3",
       "**O-2",
       "Karte für ein Projekt mit Bild und Titel",
       "Projektkarten",
