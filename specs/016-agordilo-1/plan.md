@@ -281,4 +281,135 @@ Oder in der Vitrino selbst: `pnpm fm projekcioj build --out .fundamento/projekci
 
 ## ③ Gvidanto und Doku
 
-Folgt in PR ③.
+**Branch:** `261019-spec-016-gvidanto-197e67` (gestapelt auf ② `261019-spec-016-werkstatt-197e67`) · **Datum:** 2026-10-19 · **Stand:** zur Abnahme; nach dem Merge von ② auf `main` rebasen.
+
+### Zusammenfassung
+
+1. **`preview_agordo`** (G9, D-01): neues MCP-Werkzeug, lesend (`readOnlyHint`), das neunzehnte. Eingabe `{ agordo }` (das Schema ist `#/$defs/Agordo` des Modelo), Ausgabe der Raporto des Agordilo ohne die Paarliste – Zusammenfassung, Prüfungen, Verstöße mit Ursache, einem Vorschlag, dem Patch `apply` und der **Kialo der Regulo**, Jugxoj, Hinweise gezählt (APCA, andere) –, dazu der **Eigenkontrast der Leitfarbe** gegen Weiß und Schwarz und die sechs Paletten kurz (Quelle mit Ton, Buntheit, Herkunft; je Stufe Wert, Ziel, erreicht). `writes: false`. Abgeleitet wird wie bei `fm agordilo derive` über Kern und komuna.
+2. **Beispiel-Dialog als e2e-Test** (Abnahme 6): „Ich will eine Marke mit #F5C400 als Hauptfarbe.“ → ein Verstoß mit Wert, Vorschlag einer dunkleren Leitfarbe (OKLCH-L kleiner), Kialo aus `reguloj.json`; der Vorschlag angewandt ergibt keinen Verstoß (`packages/mcp/src/e2e/s016-agordo.test.ts`).
+3. **Prompt `gvidanto`** Regel 15: eine Marke aus einer Farbe → `preview_agordo`, Werte, Ursache, Vorschlag und Kialo weitergeben, `apply` probieren, keinen Export versprechen, den der Bericht verweigert.
+4. **Ontologio** (O-1, bestätigt 2026-10-19): `Agordo` (Markenrezept) und `Raporto` (Prüfbericht) im Schema `laboro`, mit eo/en/de, Definition und Beziehungen zu Agordilo, Aspekto, Regulo, Jugxo, KontrastParo.
+5. **README** „Eine Marke in fünf Minuten“: Werkstatt öffnen, Leitfarbe wählen, Bericht lesen, Agordo herunterladen, `fm agordilo derive`, Aspekto in die Konfiguration – mit allen Pfaden und Befehlen; MCP-Abschnitt mit `preview_agordo` und 19 Werkzeugen.
+6. **Figma mit `provo`** (G10, Abnahme 4, D-03): der bestehende Weg trägt – eine Konfiguration mit ekzemplo und provo (`packages/modelo/test/fixtures/valid/aspekto-provo/fundamento.tri.config.json`), gebaut mit `fm projekcioj build --config …`, gibt der Sammlung `aspekto` die Modi komuna, ekzemplo, provo; jede markenabhängige Variable hat einen Wert in provo, die Komponenten-Sets sind dieselben (Test `figma-provo.test.ts`). Keine Codeänderung an der Figma-Projektion.
+7. **Vojmapo:** Phase 7 → Werkstatt Stufe 1 erledigt (bis zur Abnahme von ② und ③), der alte Text der Zeile bleibt als „Stand vorher“; Abschnitt „Reihenfolge (Stand 2026-10-19)“ nach der Roadmap vom 19.10., darunter die Reihenfolge vom 17.10. als Konservierung.
+
+### Entwurfsentscheidungen
+
+#### D-01 Der Raporto, nicht eine zweite Antwort
+`preview_agordo` ruft `deriveAspekto` der Bibliothek – dieselbe Funktion wie CLI und Werkstatt – und gibt den Raporto weiter. Weggelassen werden die Paarliste (`kontrastParoj`, 345 Einträge bei provo; die Zusammenfassung zählt sie) und die Paketpfade der Verstöße; hinzu kommen die Kialo je Verstoß (aus den Reguloj des bedienten Modelo), der Eigenkontrast der Leitfarbe und die Paletten kurz. Struktur und Kalibrierung werden beim ersten Aufruf gelesen und gehalten; ein Aufruf kostet die Prüfung (lokal 1–2 s).
+
+#### D-02 Die Eingabe ist die Agordo des Schemas
+Das Eingabeschema verweist auf `#/$defs/Agordo`: ein Client sieht jedes Feld. Ein fehlendes Pflichtfeld meldet darum die Eingabeprüfung des Servers (`mcp-input-invalid`, Pfad `preview_agordo/agordo`, die Meldung nennt das Feld); eine Farbe, die das Muster erfüllt, deren Helligkeit aber außerhalb 0…1 liegt, meldet `readAgordo` an ihrem Pfad (`agordo#/leitfarbe`).
+
+#### D-03 Figma: Konfiguration statt Sonderweg
+Die Figma-Projektion gibt der Sammlung `aspekto` je Aspekto des Modelo einen Modus (F27); eine Konfiguration, die ekzemplo und provo nennt, genügt. Die neue Datei liegt neben provo (`fundamento.tri.config.json`, „tri“ = drei), die bestehende `fundamento.config.json` von provo bleibt unverändert (nur provo).
+
+#### D-04 Der Eigenkontrast der Leitfarbe
+Die Spec lässt den Agenten sagen: „Die Primäraktion erreicht mit diesem Gelb als Fläche hinter weißem Text keine 4,5:1.“ Der Agordilo setzt die Leitfarbe aber nicht als Fläche ein, er leitet `accent.700` am Kontrastziel ab (Ton und Buntheit der Leitfarbe, dunkler). Damit der Agent beides sagen kann, nennt die Antwort den Eigenkontrast der Leitfarbe (`leitfarbe.onWhite`, `onBlack`) neben dem, was die Ableitung daraus macht (Abweichung 1).
+
+### Dialog vorher/nachher
+
+Vorher (vor ③): kein Werkzeug; ein Agent hätte `check_contrast` auf Tokens der bedienten Marke rufen können, nicht auf eine Farbe, die noch keine Marke ist.
+
+Nachher, gemessen (lokal, 2026-10-19): `preview_agordo { agordo: { name: "flava", leitfarbe: "#F5C400" } }` →
+
+- `leitfarbe`: `#f5c400`, auf Weiß **1,64:1**, auf Schwarz 12,78:1 – als Fläche hinter weißem Text weit unter 4,5:1.
+- `exportable: false`; 6 408 von 6 408 Paar-Auswertungen bestanden; 0 feste, 1 anpassbarer Verstoß.
+- Verstoß `palette-aligned` an `color.palette.accent.900`: „At step 900 the ramps … differ by 0.021 in OKLCH lightness, above 0.02 …“; Ursache: `accent.900` hält den Ton der Leitfarbe nur bei L 0,298, 13,76:1 statt 14,61:1; **Vorschlag: „Use the darker lead colour #665000 (hue 90.4°, chroma 0.0901 instead of 0.1716 …)“**, `apply: { leitfarbe: "#665000" }`; Kialo der Regulo: „A role picks a step number, not a colour. …“
+- Mit `#665000`: `exportable: true`, keine Verstöße, die Leitfarbe selbst 7,74:1 auf Weiß.
+
+### Abweichungen von der Spec
+
+1. **Eigenkontrast statt „Primäraktion auf Gelb“** (D-04): die Spec erwartet im Dialog einen Kontrastverstoß der Primäraktion; die Ableitung lässt ihn nicht entstehen (sie dunkelt die Stufe ab). Gemeldet wird der Verstoß, den es gibt (`palette-aligned`), und der Wert der Leitfarbe als Fläche.
+2. **`apply` und Kialo** in der Ausgabe – über G9 hinaus, damit ein Agent den Vorschlag prüfen kann, ohne Text zu zerlegen.
+3. **Eine neue Konfigurationsdatei** in der Fixture von provo (D-03).
+
+### Befunde / Mankoj
+
+- **B-1 `check:alirebleco` nimmt kein fremdes Paket:** er misst die bekannten Fixtures (ekzemplo, provo, `KNOWN_ASPEKTO_FIXTURES`). Für eine eigene Marke trägt `fm agordilo check` dieselbe Alirebleco-Auswertung; Abnahme 2 misst darum provo mit `check:alirebleco` und eine eigene Marke mit `fm agordilo check`. Kandidat: `check:alirebleco --aspekto <dir>`.
+- **B-2 Antwortgröße:** die Antwort für das Gelb ist rund 16 KB (ohne Paarliste); mit Paarliste wären es über 200 KB.
+- **B-3 Dauer:** ein Aufruf dauert die Prüfung des Agordilo (lokal 1–2 s, beim ersten zusätzlich das Lesen der Struktur); die AK-07-Budgets der übrigen Werkzeuge sind unberührt (`pnpm perf` grün).
+- **Mankoj:** keine neuen.
+
+### Offen (für den Maintainer)
+
+- **O-1 Paarliste in `preview_agordo`** (B-2): weglassen (so gebaut) oder als Option `pairs: true`. Vorschlag: so lassen.
+- **O-2 `check:alirebleco --aspekto <dir>`** (B-1): Vorschlag: Kandidat für Spec 019 oder eine Nachlese.
+- **O-3 Name `fundamento.tri.config.json`** (D-03). Vorschlag: so.
+
+### Messanleitung (Abnahme 1–6)
+
+Alle Befehle im Repository-Wurzelverzeichnis (`/Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds`, der Checkout des Maintainers; nach dem Merge von ② und ③ auf `main`), nach `pnpm install` und `pnpm build`.
+
+**1. Werkstatt (Abnahme 1, Stufe 1 in fünf Minuten).**
+
+```sh
+pnpm fm projekcioj build --out .fundamento/projekcioj
+open "/Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/projekcioj/vitrino/index.html#modus=werkstatt"
+```
+
+Leitfarbe wählen (Farbwähler oder Textfeld), Name setzen, Regler bewegen, Farbschema und Kontrast im Kopf umschalten; der Prüfbericht steht rechts neben dem Panel. Mit provo vorbelegt (Werkstatt-Link mit Agordo im Fragment):
+
+```
+/Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/projekcioj/vitrino/index.html#modus=werkstatt&aspekto=komuna&agordo=RY_NasMwEIRfxUwvCSj-CUkPuvVSKKSkh9xKD7Ii20tkyUirFif43YtSSm47szvLNzc4NRpITMF_ewj4H2cCJD6yLlYdaSYmn6Io2EQuvLPzGgKWtHExJ9_fTlkb4k6FNjtPz-2uUzUErikqvt59B3kDuc5Dwl-sHlZ1ud8Xddlsi-12v8Yi4EzioGy-ZG9ccj1kXe4WgWB6m7luGIy11F8Mcd41AhfvOKj4L6MyzNTfs03ZLAJRD4E6_iM4U5ysmvPYqZHsDImXoAe6t3-0Or4eNk3ZQCD6FHS2BuYpyqrqiYfUltqP1XF01Ka4Oc2TqR5vgjlT5EBtYtVaA8khmQwSaOII-YmDYoevZVl-AQ
+```
+
+**2. CLI (Abnahme 2).** Dieselbe Agordo (provo) zweimal ableiten, vergleichen, prüfen:
+
+```sh
+pnpm fm agordilo derive packages/modelo/test/fixtures/valid/aspekto-provo/agordo.json --out .fundamento/provo-1
+pnpm fm agordilo derive packages/modelo/test/fixtures/valid/aspekto-provo/agordo.json --out .fundamento/provo-2
+diff -r .fundamento/provo-1 .fundamento/provo-2 && echo bytegleich
+pnpm fm agordilo check .fundamento/provo-1
+pnpm fm modelo validate --aspekto .fundamento/provo-1
+pnpm check:alirebleco          # misst provo als bekannte externe Aspekto (W2), 0 fehlgeschlagene Auswertungen
+pnpm check:parity
+```
+
+Für eine eigene Agordo (aus der Werkstatt heruntergeladen) dieselben Befehle mit ihrem Pfad; `check:alirebleco` nimmt kein fremdes Paket (B-1), `pnpm fm agordilo check <ordner>` trägt dieselbe Auswertung.
+
+**3. Gelb-Fall (Abnahme 3).**
+
+```
+/Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/projekcioj/vitrino/index.html#modus=werkstatt&aspekto=komuna&agordo=q1bKS8xNVbJSSstJLEtU0lHKSc0sSUssSgKJKbuZOpsYGCjVAgA
+```
+
+Erwartet: ein Verstoß `palette-aligned` (anpassbar) mit Ursache und Vorschlag `#665000`; „Agordo herunterladen“ gesperrt mit Grund; „Jugxo eintragen“ öffnet den Dialog (Begründung, Datum, Name), danach ist der Download frei; „Vorschlag übernehmen“ setzt `#665000`, kein Verstoß. Feste Regel: in der Werkstatt Neutral-Tönung 0,4, Helligkeit 0,1, Kontrast 0,1, Sättigung 1,1 setzen (die Regler von provo) → `state-distinct` (fest), Download und Jugxo gesperrt. Dasselbe in der CLI:
+
+```sh
+printf '%s\n' '{ "name": "flava", "leitfarbe": "#F5C400" }' > .fundamento/flava.json
+pnpm fm agordilo derive .fundamento/flava.json --out .fundamento/flava   # Exit 1, nichts geschrieben, Ursache und Vorschlag je Verstoß
+```
+
+**4. Figma mit `provo` (Abnahme 4).**
+
+```sh
+pnpm fm projekcioj build --config packages/modelo/test/fixtures/valid/aspekto-provo/fundamento.tri.config.json --out .fundamento/projekcioj-provo
+```
+
+Dann das Plugin aus `.fundamento/projekcioj-provo/figma/` in der Figma-Datei laufen lassen (wie in den Figma-Messungen der Specs 014/015). Siehe „In Figma zu messen“.
+
+**5. M1–M3 (Abnahme 5):** M1 und M2 in plan ①, M3 in plan ② (Tabelle und Nachmessen am Mac).
+
+**6. `preview_agordo` (Abnahme 6).** Im Harness des Maintainers (Claude Code):
+
+```sh
+claude mcp add fundamento -- pnpm --dir /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds -s fm mcp
+```
+
+und fragen: „Ich will eine Marke mit #F5C400 als Hauptfarbe.“ Ohne Agent, direkt über die Werkzeugfunktion:
+
+```sh
+node --input-type=module -e 'const t = await import("/Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/packages/mcp/dist/tools.js"); const l = await import("/Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/packages/mcp/dist/load.js"); console.log(JSON.stringify(t.TOOLS.preview_agordo(l.loadServed(), { agordo: { name: "flava", leitfarbe: "#F5C400" } }).output, null, 2));'
+```
+
+Erwartet: die Antwort aus „Dialog vorher/nachher“.
+
+### In Figma zu messen
+
+Grüne Tests sind für Figma keine Abnahme. Mit dem Plugin aus `.fundamento/projekcioj-provo/figma/` (Build oben), in der Testdatei (Version vorher sichern):
+
+1. Die Sammlung `aspekto` hat drei Modi: komuna, ekzemplo, provo.
+2. Der Modus provo auf einem Rahmen (nicht auf einem Set) stellt alle Sets um: `butono` primär im Violett von provo, Flächen leicht getönt, Überschriften in Archivo.
+3. Hell/dunkel und hoher Kontrast funktionieren in provo wie in komuna (Moduswechsel der Sammlungen `color-scheme`, `contrast`).
+4. Ein zweiter Lauf schreibt nichts (Bericht ohne `updated`).

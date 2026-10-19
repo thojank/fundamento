@@ -2486,6 +2486,69 @@
       ]
     },
     {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Agordo",
+      "term": "Agordo",
+      "inScheme": "laboro",
+      "prefLabel": {
+        "eo": "Agordo",
+        "en": "brand recipe",
+        "de": "Markenrezept"
+      },
+      "altLabel": {
+        "en": [
+          "agordo",
+          "brand recipe",
+          "recipe"
+        ],
+        "de": [
+          "Agordo",
+          "Markenrezept",
+          "Rezept"
+        ]
+      },
+      "definition": {
+        "en": "The input of the Agordilo: a small JSON file with the recipe of a brand — a name, a lead colour, optional status colours, the tint of the neutrals, three sliders (brightness, contrast, saturation), contrast targets per step and font families, with the brand's goals and its Jugxoj. The same Agordo derives the same Aspekto, byte for byte; it travels in the Werkstatt's URL and as agordo.json, and it stands in aspekto.json as the origin of a derived Aspekto.",
+        "de": "Die Eingabe des Agordilo: eine kleine JSON-Datei mit dem Rezept einer Marke – Name, Leitfarbe, optionale Statusfarben, die Tönung der Neutralen, drei Regler (Helligkeit, Kontrast, Sättigung), Kontrastziele je Stufe und Schriftfamilien, dazu die Ziele der Marke und ihre Jugxoj. Dieselbe Agordo ergibt bytegleich dieselbe Aspekto; sie wandert in der URL der Werkstatt und als agordo.json und steht in aspekto.json als Herkunft einer abgeleiteten Aspekto."
+      },
+      "related": [
+        "#Agordilo",
+        "#Aspekto",
+        "#Raporto"
+      ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Raporto",
+      "term": "Raporto",
+      "inScheme": "laboro",
+      "prefLabel": {
+        "eo": "Raporto",
+        "en": "check report",
+        "de": "Prüfbericht"
+      },
+      "altLabel": {
+        "en": [
+          "raporto",
+          "report",
+          "check report"
+        ],
+        "de": [
+          "Raporto",
+          "Prüfbericht",
+          "Bericht"
+        ]
+      },
+      "definition": {
+        "en": "The result of every check of an Aspekto the Agordilo derived from an Agordo: per rule and pair passed or not, the value and the threshold, every violation with its cause and exactly one suggestion, fixed or adjustable, covered by a Jugxo or not, and APCA as advice. It ships in the package as raporto.json and raporto.md, the Werkstatt shows it live and preview_agordo answers with it; fm agordilo check rebuilds it byte for byte.",
+        "de": "Das Ergebnis aller Prüfungen einer Aspekto, die der Agordilo aus einer Agordo abgeleitet hat: je Regel und Paar bestanden oder nicht, Wert und Schwelle, jeder Verstoß mit Ursache und genau einem Vorschlag, fest oder anpassbar, durch einen Jugxo gedeckt oder nicht, APCA als Hinweis. Er liegt im Paket als raporto.json und raporto.md, die Werkstatt zeigt ihn live, preview_agordo antwortet mit ihm; fm agordilo check baut ihn bytegleich nach."
+      },
+      "related": [
+        "#Agordo",
+        "#Regulo",
+        "#Jugxo",
+        "#KontrastParo"
+      ]
+    },
+    {
       "uri": "https://fundamento.ciferecigo.com/ontologio#Pagxigilo",
       "term": "Pagxigilo",
       "inScheme": "eroj",

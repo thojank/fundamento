@@ -127,7 +127,8 @@ Everything lives in one workspace; the npm org for published packages is
 
 - Tools: `describe`, `list_dimensioj`, `list_aspektoj`, `search_tokens`, `get_token`, `resolve`, `list_reguloj`, `list_jugxoj`, `validate`, `derive_name`. Every input and output has a JSON Schema (`packages/mcp/schema/`); errors carry the same issues as the checks, plus the allowed values.
 - Gvidanto tools (Spec 002): `check_contrast` (the contrast of any colour pair, grouped by result, with every combination listed), `explain` (why a token has its value: alias chain, the Reguloj with kialo and result, its KontrastParoj), `explain_regulo` (a Regulo, its threshold and its violations per Aspekto) and `describe_term` (a term of the Ontologio, also from English or German words).
-- Ero tools (Spec 003): `list_eroj` (every component with its variants and props), `get_ero` (one component: Skemo, the Reguloj that judge it with their kialo, the recorded examples, and its names in every projection — element, React, Figma, CSS, Tailwind, Make Kit), `suggest_ero` ("Löschen" → `emphasis=high`, `intent=danger`, with the Regulo behind it) and `check_usage` (instances of a design or of code against the Ero Reguloj). 18 tools in all.
+- Ero tools (Spec 003): `list_eroj` (every component with its variants and props), `get_ero` (one component: Skemo, the Reguloj that judge it with their kialo, the recorded examples, and its names in every projection — element, React, Figma, CSS, Tailwind, Make Kit), `suggest_ero` ("Löschen" → `emphasis=high`, `intent=danger`, with the Regulo behind it) and `check_usage` (instances of a design or of code against the Ero Reguloj).
+- Agordilo tool (Spec 016 ③): `preview_agordo` takes an Agordo and answers with the report of the Agordilo — every violation with its value, its cause, one suggestion (also as a change of the Agordo, `apply`) and the kialo of its Regulo — the lead colour's own contrast against white and black, and the six palettes in short. It derives like `fm agordilo derive` over the repository's core and komuna, and writes nothing. 19 tools in all.
 - Prompt: `gvidanto` tells a client agent how to answer: values only from tools, reasons with Regulo ID and kialo, check when unsure, and `check_usage` before a handover.
 - Resources: `fundamento://export/modelo.json`, `modelo.schema.json` and `rezolvoj.json`, the bytes of `fm modelo export`; `fundamento://ontologio.json`, the terminology as data, in every mode.
 - `--config <file>` serves a project with its Aspekto packages; `--export <dir>` serves an export as is.
@@ -150,6 +151,45 @@ That separation is the principle **Fluida Marko**: brands are free, rules enforc
 ### Werkstatt
 
 The Vitrino has a second mode beside *Ansehen*: the **Werkstatt** (Spec 016 ②), opened with the button in the header or with `#modus=werkstatt` in the fragment. Its panel takes an Agordo — name, lead colour (picker or text, hex or `oklch()`), the four status colours (or their default tone), the tint of the neutrals and the three sliders brightness, contrast and saturation — and the Agordilo, bundled into the file, derives the six palettes live: every Ero of the Vitrino follows at once, in every colour scheme, contrast level, density and viewport you switch. The checks of the CI run in the same library, debounced, and write the report `fm agordilo derive` writes: pairs passed and failed, violations of fixed and adjustable rules with their cause and exactly one suggestion (a click applies it), APCA as advice, a link from every violation to the Ero that shows the pair. The six palettes stand with step, value and achieved contrast; a target may be overridden per step (`ziele` in the Agordo), marked and reset one by one. A fixed rule locks the download; an adjustable one unlocks it with a Jugxo (reason, date, name), recorded in the Agordo. The draft stands beside komuna or any other Aspekto of the build, same Eroj, same modes. The Agordo travels compressed in the fragment (`#agordo=…`) and leaves as `agordo.json`; the Vitrino writes no file — the package comes from `fm agordilo derive`.
+
+## Eine Marke in fünf Minuten
+
+From a lead colour to a brand that every projection carries, in the order a person takes it. Every path is relative to the repository root; every command runs there.
+
+1. **Build and open the Werkstatt.**
+
+   ```sh
+   pnpm install
+   pnpm build
+   pnpm fm projekcioj build --out .fundamento/projekcioj
+   open ".fundamento/projekcioj/vitrino/index.html#modus=werkstatt"   # macOS; elsewhere open the file in a browser
+   ```
+
+2. **Choose the lead colour** in the panel (picker or text field, hex or `oklch()`), give the brand a name, set the status colours or keep their default tone, and move the sliders. Every Ero of the page follows at once; switch `color-scheme`, `contrast`, `density` and `viewport` in the header to see the brand in every mode.
+3. **Read the report** beside the panel: pairs passed and failed, every violation with its cause and one suggestion (*Vorschlag übernehmen* applies it), *Zum Ero* jumps to the Ero that shows the pair. A violation of a fixed rule locks the download; an adjustable one needs a Jugxo (*Jugxo eintragen*: reason, date, name). The link in the address bar (`#modus=werkstatt&…&agordo=…`) shares the state.
+4. **Download the Agordo** with *Agordo herunterladen* and save it, e.g. as `../fundamento-aspekto-<name>/agordo.json` (outside this repository: a brand owner's values live in their own package).
+5. **Derive the package and check it.**
+
+   ```sh
+   pnpm fm agordilo derive ../fundamento-aspekto-<name>/agordo.json --out ../fundamento-aspekto-<name>/aspekto-<name>
+   pnpm fm agordilo check ../fundamento-aspekto-<name>/aspekto-<name>
+   ```
+
+   The package carries `aspekto.json` (with the Agordo as its origin), its sets, `ids.lock.json`, `$themes.json`, the glyphs and the report `raporto.json` / `raporto.md`. The same Agordo gives the same bytes.
+6. **Put the Aspekto into the configuration** — `../fundamento-aspekto-<name>/fundamento.config.json`, beside any other brand of the project, because one run carries every brand:
+
+   ```json
+   { "aspektoj": ["./aspekto-<name>"] }
+   ```
+
+   ```sh
+   pnpm fm modelo validate --config ../fundamento-aspekto-<name>/fundamento.config.json
+   pnpm fm projekcioj build --config ../fundamento-aspekto-<name>/fundamento.config.json --out .fundamento/projekcioj-<name>
+   ```
+
+   The CSS switches to it with `data-fm-aspekto="<name>"`, the Figma plan has it as a mode of the collection `aspekto`, and the Vitrino of that build shows it beside komuna. A worked example is the test brand `provo`: `packages/modelo/test/fixtures/valid/aspekto-provo/` (Agordo, package and a config with ekzemplo and provo, `fundamento.tri.config.json`).
+
+An agent takes the same way without the browser: `preview_agordo` over the MCP server answers with the same report before anything is written.
 
 ## Checks
 

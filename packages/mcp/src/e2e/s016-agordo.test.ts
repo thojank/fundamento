@@ -139,11 +139,24 @@ describe("preview_agordo (Spec 016 ③, G9)", () => {
     expect(followed.exportable).toBe(true);
   }, 120_000);
 
-  it("answers an Agordo without a lead colour with the issue at its path", async () => {
+  // The input schema is the Agordo of the Modelo schema, so the server's input check answers
+  // first: the issue names the missing member in its message, the path names the Agordo.
+  it("answers an Agordo without a lead colour with an issue that names it", async () => {
     const result = await call(client, "preview_agordo", { agordo: { name: "flava" } });
     expect(result.isError).toBe(true);
-    const issues = (result.structuredContent as { issues: { rule: string; path: string }[] })
-      .issues;
-    expect(issues.map((issue) => issue.path).join(" ")).toMatch(/leitfarbe/);
+    const issues = (
+      result.structuredContent as { issues: { rule: string; path: string; message: string }[] }
+    ).issues;
+    expect(issues.map((issue) => `${issue.path} ${issue.message}`).join(" ")).toMatch(/leitfarbe/);
+    expect(issues[0]?.path).toBe("preview_agordo/agordo");
+  });
+
+  it("answers a colour whose lightness lies outside 0…1 with the issue at its path", async () => {
+    const result = await call(client, "preview_agordo", {
+      agordo: { name: "flava", leitfarbe: "oklch(150% 0.1 90)" },
+    });
+    expect(result.isError).toBe(true);
+    const issues = (result.structuredContent as { issues: { path: string }[] }).issues;
+    expect(issues.map((issue) => issue.path)).toContain("agordo#/leitfarbe");
   });
 });

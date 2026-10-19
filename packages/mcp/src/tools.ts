@@ -2,6 +2,16 @@
 // contracts/mcp-tools.md). Each returns the output object or an error envelope (FR-18).
 
 import {
+  type Calibration,
+  deriveAspekto,
+  loadCalibration,
+  PALETTES,
+  parseAgordoColor,
+  readAgordo,
+  readStructure,
+  type Structure,
+} from "@fundamento/agordilo";
+import {
   CELOJ,
   type CheckContrastInput,
   type CheckUsageInput,
@@ -22,12 +32,15 @@ import {
   isNoTarget,
   listEroj,
   NOM_REGULOJ,
+  oklchColor,
   resolve as resolveAssignment,
   type SuggestEroInput,
+  srgbComponentsOf,
   suggestEro,
   type ValidationIssue,
   validateModelo,
   valoroNames,
+  WCAG2_METRIC,
   withAspektoPackages,
 } from "@fundamento/modelo";
 import type { Served } from "./load.js";
@@ -468,6 +481,106 @@ const suggestEroTool: Tool = (served, args) =>
 const checkUsageTool: Tool = (served, args) =>
   gvidanto(checkUsage(served.modelo, args as unknown as CheckUsageInput));
 
+/**
+ * The structure and calibration preview_agordo derives over: the repository's core with komuna,
+ * as `fm agordilo derive` reads them — read once, on the first call.
+ */
+let agordiloBasis: { structure: Structure; calibration: Calibration } | undefined;
+
+const round = (value: number, digits: number): number => {
+  const factor = 10 ** digits;
+  return Math.round(value * factor) / factor;
+};
+
+/** `#rrggbb` of an sRGB colour, each channel clipped to the gamut. */
+const hexOf = (components: readonly number[]): string =>
+  `#${components
+    .map((channel) =>
+      Math.round(Math.min(1, Math.max(0, channel)) * 255)
+        .toString(16)
+        .padStart(2, "0"),
+    )
+    .join("")}`;
+
+/**
+ * preview_agordo (Spec 016 ③, G9): an Agordo through the Agordilo — derived, checked, explained —
+ * without writing anything. The report is the one `fm agordilo derive` writes (without the pair
+ * list); every violation carries the kialo of its Regulo, and the lead colour its own contrast.
+ */
+const previewAgordo: Tool = (served, args) => {
+  const { agordo, issues } = readAgordo(args.agordo, "agordo");
+  if (agordo === undefined) return { ok: false, envelope: { issues } };
+  agordiloBasis ??= { structure: readStructure(), calibration: loadCalibration() };
+  const { raporto, palettes, exportable } = deriveAspekto(
+    agordo,
+    agordiloBasis.structure,
+    agordiloBasis.calibration,
+  );
+  const kialoj = new Map(
+    served.modelo.reguloj
+      .filter((regulo) => regulo.aspekto === undefined)
+      .map((regulo) => [regulo.name, regulo.kialo]),
+  );
+  const lead = parseAgordoColor(agordo.leitfarbe) ?? { l: 0, c: 0, h: 0 };
+  const leadRgb = srgbComponentsOf(oklchColor(lead.l, lead.c, lead.h));
+  const leadColor = {
+    colorSpace: "srgb" as const,
+    components: leadRgb.map((c) => Math.min(1, Math.max(0, c))),
+  };
+  const contrastOn = (surface: number) =>
+    round(
+      WCAG2_METRIC.compute(leadColor, {
+        colorSpace: "srgb",
+        components: [surface, surface, surface],
+      }),
+      2,
+    );
+  const apca = raporto.hints.filter((hint) => hint.rule === "contrast-advisory").length;
+  return ok({
+    aspekto: raporto.aspekto,
+    exportable,
+    writes: false,
+    leitfarbe: {
+      input: agordo.leitfarbe,
+      hex: hexOf(leadRgb),
+      onWhite: contrastOn(1),
+      onBlack: contrastOn(0),
+    },
+    summary: raporto.summary,
+    checks: raporto.checks.map(({ rule, fixed, passed, violations }) => ({
+      rule,
+      fixed,
+      passed,
+      violations,
+    })),
+    violations: raporto.violations.map(({ path: _path, regulo, ...violation }) => ({
+      ...violation,
+      ...(regulo === undefined
+        ? {}
+        : { regulo: { ...regulo, kialo: kialoj.get(regulo.name) ?? "" } }),
+    })),
+    jugxoj: raporto.jugxoj,
+    palettes: PALETTES.map((palette) => ({
+      palette,
+      source: {
+        hue: round(palettes.sources[palette].hue, 2),
+        chroma: round(palettes.sources[palette].chroma, 4),
+        origin: palettes.sources[palette].origin,
+      },
+      steps: palettes.steps
+        .filter((step) => step.palette === palette)
+        .map((step) => ({
+          step: step.step,
+          hex: step.hex,
+          target: round(step.target, 2),
+          achieved: round(step.achieved, 2),
+          onTarget: step.onTarget,
+        })),
+    })),
+    hints: { apca, other: raporto.hints.length - apca },
+  });
+};
+
 export const TOOLS: Record<ToolName, Tool> = {
   describe,
   list_dimensioj: listDimensioj,
@@ -487,4 +600,5 @@ export const TOOLS: Record<ToolName, Tool> = {
   get_ero: getEroTool,
   suggest_ero: suggestEroTool,
   check_usage: checkUsageTool,
+  preview_agordo: previewAgordo,
 };
