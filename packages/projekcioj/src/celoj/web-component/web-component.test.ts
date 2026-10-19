@@ -687,8 +687,15 @@ describe("Web Component Celo for the kampo of Spec 011 ① (password, number, da
   const kampoStyles = files["eroj/src/generated/kampo.styles.ts"] ?? "";
 
   it("renders a number as type text with inputmode numeric and a whole-number pattern, a date as type date, a password as type password", () => {
-    expect(kampoElement).toContain('control.type = kind === "number" ? "text" : kind;');
-    expect(kampoElement).toContain('control.setAttribute("inputmode", "numeric")');
+    // Nachlese 5 O-14: an address and a web address are text inputs like the number, each with
+    // the keyboard of its kind; the element checks their form (a probe of the kind).
+    expect(kampoElement).toContain(
+      'const inputMode = kind === "number" ? "numeric" : kind === "email" || kind === "url" ? kind : "";',
+    );
+    expect(kampoElement).toContain('control.type = inputMode === "" ? kind : "text";');
+    expect(kampoElement).toContain('control.setAttribute("inputmode", inputMode)');
+    expect(kampoElement).toContain("#formMismatch(kind, text)");
+    expect(kampoElement).toContain("#dateOutside(text, min, max)");
     // B-1 (Spec 015 ②, plan ② D-11): no pattern on the native input — the element checks the whole
     // number itself, the platform's bubble would show its own message.
     expect(kampoElement).not.toContain('control.setAttribute("pattern"');

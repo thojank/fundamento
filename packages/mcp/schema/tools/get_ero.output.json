@@ -497,6 +497,22 @@
             "additionalProperties": false
           }
         },
+        "props": {
+          "description": "Every other prop of the Skemo with its type, in Skemo order (Nachlese 5 N5-3): what may be set beyond the axes, such as loading at the kompletigilo. Absent when every prop is an axis.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+              },
+              "type": { "enum": ["string", "boolean", "number", "enum"] }
+            },
+            "required": ["name", "type"],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        },
         "required": {
           "type": "object",
           "properties": {

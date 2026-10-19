@@ -1024,6 +1024,40 @@ describe("a run reports every node of the set that was there at its start and is
     expect(again.warnings).toHaveLength(1);
     expect(again.warnings[0]).toContain(label.id);
   });
+
+  // Nachlese 5 N5-1 (Messung 2026-10-19, f10b-5): after a reconnect, node 26:325 was gone when the
+  // run reached `done`, and lostSince read its name – Figma threw "in get_name: The node with id
+  // "26:325" does not exist", and the run broke off after every write was done; only the report
+  // was lost. A vanished node is reported as lost, with the name and type it had at the start.
+  it("N5-1: a node gone before done, whose name Figma no longer gives, is reported as lost – the run ends normally", async () => {
+    const double = modelDouble();
+    await runWith(double, {});
+    const variant = setOf(double).children[0];
+    const label = descendant(variant, "label");
+    if (label === undefined) throw new Error("no label");
+    const { id: labelId, type: labelType } = label;
+    const labelName = label.name;
+    const load = (double.figma as { loadFontAsync: (font: unknown) => Promise<void> })
+      .loadFontAsync;
+    let done = false;
+    const again = await runWith(double, {
+      loadFontAsync: async (font: unknown) => {
+        if (!done) {
+          done = true;
+          label.remove();
+        }
+        return load(font);
+      },
+    });
+    // The double answers as Figma did: a removed node gives its id, nothing else.
+    expect(label.removed).toBe(true);
+    expect(() => label.name).toThrow(`The node with id "${labelId}" does not exist`);
+    expect(butonoOf(again.components)?.lost).toEqual([
+      { id: labelId, name: labelName, type: labelType, removed: true, parent: null },
+    ]);
+    expect(again.warnings.join(" ")).toContain(labelId);
+    expect(again.warnings.join(" ")).toContain("entfernt");
+  });
 });
 
 // F-A (Messung 2026-10-08, Datei 9qNldNFlofRCwlkpnEKOS1, Build d1be8f0): Lauf 1 in einer leeren

@@ -122,6 +122,12 @@ export interface GetEroBrief {
    * (selected, Spec 010 ③ E7) with the slot it belongs to and no default (Spec 011 ① O-3).
    */
   axes: { name: string; values: string[]; default?: string; slot?: string }[];
+  /**
+   * Every other prop of the Skemo with its type, in Skemo order (Nachlese 5 N5-3): what an agent
+   * may set beyond the axes — loading at the kompletigilo, min-chars, value. Absent when every
+   * prop is an axis.
+   */
+  props?: { name: string; type: SkemoProp["kind"] }[];
   /** Props without a default (the caller has to decide them) and slots the Uzo requires. */
   required: { props: string[]; slots: string[] };
   instead?: { goal: string; ero: string | null; kialo: string }[];
@@ -415,6 +421,14 @@ export function briefOf(entry: LoadedEro): GetEroBrief {
         .map(([slot]) => slot),
     },
   };
+  // Nachlese 5 N5-3 (Messung A2): the props without an axis, with name and type, so an agent
+  // learns that the kompletigilo has loading; the brief stays under 750 (the kampo's is the
+  // largest).
+  const axisNames = new Set(brief.axes.map((axis) => axis.name));
+  const props = skemo.props
+    .filter((prop) => !axisNames.has(prop.name))
+    .map((prop) => ({ name: prop.name, type: prop.kind }));
+  if (props.length > 0) brief.props = props;
   if (uzo === undefined) {
     brief.issues = [
       {

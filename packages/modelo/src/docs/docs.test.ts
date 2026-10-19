@@ -2011,4 +2011,48 @@ describe("Nachlese 5 documentation (specs/018-nachlese-5)", () => {
     expect(tasks).toContain("### Messungen");
     expect(tasks).toMatch(/rot `[0-9a-f]{7}`/);
   });
+
+  it("plan ② carries the findings, the dialogs before and after, and what Figma has to measure; tasks ② start at T1901", () => {
+    const plan = read("specs/018-nachlese-5/plan.md");
+    const second = plan.slice(plan.indexOf("## ② Befunde"));
+    expect(second).not.toContain("Folgt in PR ②.");
+    for (const heading of [
+      "### Zusammenfassung",
+      "### Entwurfsentscheidungen",
+      "### Dialoge vorher/nachher",
+      "### Abweichungen vom Briefing",
+      "### Befunde / Mankoj",
+      "### Offen (für den Maintainer)",
+      "### In Figma zu messen",
+    ]) {
+      expect(second, heading).toContain(heading);
+    }
+    for (const word of [
+      "N5-1",
+      "N5-2",
+      "N5-3",
+      "N5-4",
+      "N5-5",
+      "N5-6",
+      "O-10",
+      "O-14",
+      "O-17",
+      "O-39",
+      "O-41",
+      "**B-3",
+      "**O-2",
+      "Karte für ein Projekt mit Bild und Titel",
+      "Projektkarten",
+      "jug_",
+    ]) {
+      expect(second, word).toContain(word);
+    }
+    const tasks = read("specs/018-nachlese-5/tasks.md");
+    const tasksSecond = tasks.slice(tasks.indexOf("## ② Befunde"));
+    expect(tasksSecond).not.toContain("Folgt in PR ②.");
+    expect(tasksSecond).toContain("**T1901");
+    expect(tasksSecond).toContain("### Messungen");
+    expect(tasksSecond).toMatch(/rot `[0-9a-f]{7}`/);
+    expect(tasksSecond).toMatch(/grün `[0-9a-f]{7}`/);
+  });
 });

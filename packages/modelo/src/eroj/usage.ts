@@ -16,6 +16,7 @@ import type {
 } from "../generated/modelo-schema.js";
 import {
   describeCombination,
+  FILLABLE_KINDS,
   forbiddenBy,
   PROP_KEY_PREFIX,
   SLOT_EMPTY,
@@ -149,6 +150,28 @@ export function keywordTextOf(text: string): KeywordText {
 export interface KeywordMatch {
   suffixOf: "compounds" | "words";
   inflect?: boolean;
+  /**
+   * Nachlese 5 O-17: a German keyword also ends a compound written as one word ("projektkarten"
+   * ends with "karten"), if the first part has COMPOUND_FIRST_PART_MIN letters or more. Only in
+   * the Gvidanto's second pass, for goals (`goalMatchOf`); the Uzo entries end every word already.
+   */
+  closedCompounds?: boolean;
+}
+
+/**
+ * The first part of a compound written as one word has this many letters at least (Nachlese 5
+ * O-17): a German verb prefix (ab-, an-, be-, vor-, ver-, …) is no first part — "bemerken" is no
+ * "merken", "abwarten" no "warten"; "projekt" in "projektkarten" is.
+ */
+export const COMPOUND_FIRST_PART_MIN = 4;
+
+/**
+ * How a goal keyword is compared (`goalOf`, and the strength of a goal in `suggestEro`): the end
+ * of a hyphenated compound (R-11) as written; in the second pass (`inflect`) with the German
+ * endings (Nachlese 4 N-2) and the end of a compound written as one word (Nachlese 5 O-17).
+ */
+export function goalMatchOf(inflect: boolean): KeywordMatch {
+  return { suffixOf: "compounds", inflect, closedCompounds: inflect };
 }
 
 /**
@@ -211,6 +234,23 @@ export function keywordHitOf(
       return word;
     }
   }
+  if (match.closedCompounds !== true || lingvo !== "de") return undefined;
+  // O-17: the end of a compound written as one word, behind a first part of four letters or more.
+  const endsCompound = (word: string, end: string) =>
+    word.length - end.length >= COMPOUND_FIRST_PART_MIN && word.endsWith(end);
+  for (const word of words) {
+    if (endsCompound(word, needle)) return needle;
+    const stem = german ? germanStem(word) : undefined;
+    if (
+      stem !== undefined &&
+      (endsCompound(stem, needle) ||
+        (stemmed !== undefined &&
+          stemmed.length >= COMPOUND_SUFFIX_MIN &&
+          endsCompound(stem, stemmed)))
+    ) {
+      return word;
+    }
+  }
   return undefined;
 }
 
@@ -221,7 +261,8 @@ export function keywordHitOf(
  * because the first goal won; now `mailadresse` wins over `adresse`). A hyphenated compound counts
  * as its parts and as one word; keywords are compared without hyphens (Nachlese 4 N-1), German
  * ones with their endings only where `inflect` asks for it (N-2: the Gvidanto's second pass;
- * check_usage compares as written). Deterministic, no model (D-16). Called goal since F1-T00
+ * check_usage compares as written) — and in that pass also at the end of a compound written as one
+ * word (Nachlese 5 O-17, `goalMatchOf`). Deterministic, no model (D-16). Called goal since F1-T00
  * (Spec 007, OP-4): `intent` is the name of a prop.
  */
 export function goalOf(
@@ -230,7 +271,7 @@ export function goalOf(
   options: { lingvo?: string; inflect?: boolean } = {},
 ): { goal: NonNullable<Skemo["goals"]>[number]; keyword: string; lingvo: string } | undefined {
   const prepared = keywordTextOf(text);
-  const match: KeywordMatch = { suffixOf: "compounds", inflect: options.inflect === true };
+  const match = goalMatchOf(options.inflect === true);
   let best:
     | { goal: NonNullable<Skemo["goals"]>[number]; keyword: string; lingvo: string }
     | undefined;
@@ -353,13 +394,14 @@ export function slotStates(skemo: Skemo, instance: EroInstance): Record<string, 
 }
 
 /**
- * Whether each string prop of the Skemo is filled in an instance (Spec 011 ①, plan ① D-08): a
- * non-empty text, or a number. Keyed `prop:<name>`, so a constraint can read it like a slot.
+ * Whether each string or number prop of the Skemo is filled in an instance (Spec 011 ①, plan ①
+ * D-08; Nachlese 5 O-10: a number too): a non-empty text, or a number. Keyed `prop:<name>`, so a
+ * constraint can read it like a slot. What the instance gives counts, never the Skemo's default.
  */
 export function propStates(skemo: Skemo, instance: EroInstance): Record<string, string> {
   const states: Record<string, string> = {};
   for (const prop of skemo.props) {
-    if (prop.kind !== "string") continue;
+    if (!FILLABLE_KINDS.has(prop.kind)) continue;
     const given = instance.props[prop.name];
     const filled = (typeof given === "string" && given.trim() !== "") || typeof given === "number";
     states[`${PROP_KEY_PREFIX}${prop.name}`] = filled ? SLOT_FILLED : SLOT_EMPTY;

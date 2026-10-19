@@ -118,3 +118,120 @@ test.describe("B-1: no bubble of the browser at a required field (Abnahme 014 �
     expect(host.message).not.toBe("");
   });
 });
+
+// Nachlese 5 O-14 (Spec 015 ② B-10): the last two native checks of a field are the element's too,
+// as the whole number is. An address (kind email) and a web address (kind url) are text inputs
+// with the keyboard of their kind (inputmode); the element asks a probe of the kind, never shown,
+// whether the text has the form – and for the platform's words. A date keeps the platform's dialog;
+// the element compares it with its bounds itself (YYYY-MM-DD compares as text), the words come from
+// a probe date; the native min and max are for the dialog only and stand while the date lies within
+// them, so the native input is never invalid for a bound.
+test.describe("O-14: the element checks address, web address and the bounds of a date itself (Nachlese 5)", () => {
+  const ero = (page: Page, id: string) =>
+    page.locator(`#${id}`).evaluate((element) => {
+      const host = element as HTMLElement & { validity: ValidityState; validationMessage: string };
+      const control = element.shadowRoot?.querySelector('[part="control"]') as HTMLInputElement;
+      return {
+        type: control.type,
+        inputmode: control.getAttribute("inputmode"),
+        min: control.getAttribute("min"),
+        max: control.getAttribute("max"),
+        nativeInvalid: control.matches(":invalid"),
+        nativeMessage: control.validationMessage,
+        valid: host.validity.valid,
+        typeMismatch: host.validity.typeMismatch,
+        under: host.validity.rangeUnderflow,
+        over: host.validity.rangeOverflow,
+        message: host.validationMessage,
+        form: (document.getElementById("f") as HTMLFormElement).checkValidity(),
+      };
+    });
+  /** The platform's words for a value of a kind, from an input of that kind no one sees. */
+  const platformWords = (page: Page, type: string, value: string, bounds = {}) =>
+    page.evaluate(
+      ([kind, text, limits]) => {
+        const probe = document.createElement("input");
+        probe.type = kind;
+        for (const [name, limit] of Object.entries(limits)) probe.setAttribute(name, limit);
+        probe.value = text;
+        return probe.validationMessage;
+      },
+      [type, value, bounds as Record<string, string>] as const,
+    );
+
+  for (const [kind, wrong, right] of [
+    ["email", "erika.example.org", "erika@example.org"],
+    ["url", "example org", "https://example.org"],
+  ] as const) {
+    test(`kind ${kind}: a text input with the keyboard of its kind; a text without the form is the Ero's typeMismatch in the platform's words, the native input stays valid`, async ({
+      page,
+    }) => {
+      await serve(
+        page,
+        out,
+        `<form id="f"><fm-kampo id="a" kind="${kind}" name="a">Adresse</fm-kampo></form>`,
+      );
+      const control = page.locator("#a").locator('[part="control"]');
+      await control.fill(wrong);
+      const state = await ero(page, "a");
+      expect(state).toMatchObject({
+        type: "text",
+        inputmode: kind,
+        nativeInvalid: false,
+        nativeMessage: "",
+        valid: false,
+        typeMismatch: true,
+        form: false,
+      });
+      expect(state.message).toBe(await platformWords(page, kind, wrong));
+      expect(state.message).not.toBe("");
+      await control.fill(right);
+      expect(await ero(page, "a")).toMatchObject({ valid: true, typeMismatch: false, form: true });
+    });
+  }
+
+  test("kind date: a date outside its bounds is the Ero's range error in the platform's words; the native input stays valid, its bounds back for the dialog once the date lies within", async ({
+    page,
+  }) => {
+    await serve(
+      page,
+      out,
+      '<form id="f"><fm-kampo id="a" kind="date" name="d" min="2026-10-16" max="2026-12-31">Ablaufdatum</fm-kampo></form>',
+    );
+    const control = page.locator("#a").locator('[part="control"]');
+    expect(await ero(page, "a")).toMatchObject({
+      type: "date",
+      min: "2026-10-16",
+      max: "2026-12-31",
+      valid: true,
+    });
+    await control.fill("2026-10-01");
+    const under = await ero(page, "a");
+    expect(under).toMatchObject({
+      nativeInvalid: false,
+      nativeMessage: "",
+      valid: false,
+      under: true,
+      over: false,
+      form: false,
+    });
+    expect(under.message).toBe(
+      await platformWords(page, "date", "2026-10-01", { min: "2026-10-16", max: "2026-12-31" }),
+    );
+    expect(under.message).not.toBe("");
+    await control.fill("2027-01-05");
+    const over = await ero(page, "a");
+    expect(over).toMatchObject({ nativeInvalid: false, valid: false, under: false, over: true });
+    expect(over.message).toBe(
+      await platformWords(page, "date", "2027-01-05", { min: "2026-10-16", max: "2026-12-31" }),
+    );
+    await control.fill("2026-12-24");
+    expect(await ero(page, "a")).toMatchObject({
+      min: "2026-10-16",
+      max: "2026-12-31",
+      nativeInvalid: false,
+      valid: true,
+      form: true,
+    });
+  });
+});

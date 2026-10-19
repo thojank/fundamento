@@ -62,6 +62,8 @@ describe("get_ero brief (Spec 007 A8)", () => {
       "boundary",
       "ero",
       "instead",
+      // Nachlese 5 N5-3: the props without an axis, with their type.
+      "props",
       "purpose",
       "required",
     ]);

@@ -290,11 +290,13 @@ describe("get_ero with the Uzo and brief (T022)", () => {
     const brief = getEro(modelo, { name: "butono", brief: true });
     expect(brief.ok).toBe(true);
     if (!brief.ok) return;
+    // Nachlese 5 N5-3: props names the props without an axis (disabled, loading, …).
     expect(Object.keys(brief.output).sort()).toEqual([
       "axes",
       "boundary",
       "ero",
       "instead",
+      "props",
       "purpose",
       "required",
     ]);
@@ -339,7 +341,14 @@ describe("get_ero with the Uzo and brief (T022)", () => {
     const brief = getEro(minimal, { name: "butono", brief: true });
     expect(brief.ok).toBe(true);
     if (!brief.ok) return;
-    expect(Object.keys(brief.output).sort()).toEqual(["axes", "ero", "issues", "required"]);
+    // Nachlese 5 N5-3: the props without an axis are a part of the Skemo, so they stand here too.
+    expect(Object.keys(brief.output).sort()).toEqual([
+      "axes",
+      "ero",
+      "issues",
+      "props",
+      "required",
+    ]);
     expect(brief.output.issues?.map((issue) => [issue.rule, issue.severity])).toEqual([
       ["skemo-uzo-missing", "warning"],
     ]);
@@ -370,6 +379,47 @@ describe("brief: required.props comes from the Skemo, not from a missing default
         .map((prop) => `${entry.ero.name}.${prop.name}`),
     );
     expect(offending).toEqual([]);
+  });
+});
+
+// Nachlese 5 N5-3 (Messung A2): the brief named only the axes, so an agent did not learn that the
+// kompletigilo has `loading`. It names every prop without an axis with its name and type; every
+// brief stays under its ceiling of 750 (bytes / 3).
+describe("brief: the props without an axis (Nachlese 5 N5-3)", () => {
+  it("the kompletigilo's brief names loading as a boolean, the axes stay axes", () => {
+    const brief = getEro(modelo, { name: "kompletigilo", brief: true });
+    if (!brief.ok) throw new Error("get_ero kompletigilo failed");
+    expect(brief.output.props).toContainEqual({ name: "loading", type: "boolean" });
+    expect(brief.output.props).toContainEqual({ name: "min-chars", type: "number" });
+    expect(brief.output.props).toContainEqual({ name: "value", type: "string" });
+    const axes = new Set(brief.output.axes.map((axis) => axis.name));
+    expect(brief.output.props?.filter((prop) => axes.has(prop.name))).toEqual([]);
+  });
+
+  it("every prop of every Skemo is an axis or a prop of the brief, in Skemo order", () => {
+    const offending: string[] = [];
+    for (const entry of modelo.eroj) {
+      const brief = getEro(modelo, { name: entry.ero.name, brief: true });
+      if (!brief.ok) throw new Error(`get_ero ${entry.ero.name} failed`);
+      const axes = new Set(brief.output.axes.map((axis) => axis.name));
+      const expected = entry.skemo.props
+        .filter((prop) => !axes.has(prop.name))
+        .map((prop) => ({ name: prop.name, type: prop.kind }));
+      const props = brief.output.props ?? [];
+      if (JSON.stringify(props) !== JSON.stringify(expected)) offending.push(entry.ero.name);
+    }
+    expect(offending).toEqual([]);
+  });
+
+  it("every brief stays under 750; the largest is the kampo's", () => {
+    const sizes = modelo.eroj.map((entry) => {
+      const brief = getEro(modelo, { name: entry.ero.name, brief: true });
+      if (!brief.ok) throw new Error(`get_ero ${entry.ero.name} failed`);
+      return { ero: entry.ero.name, size: Math.ceil(JSON.stringify(brief.output).length / 3) };
+    });
+    expect(sizes.filter((entry) => entry.size > 750)).toEqual([]);
+    const largest = sizes.reduce((max, entry) => (entry.size > max.size ? entry : max));
+    expect(largest.ero).toBe("kampo");
   });
 });
 

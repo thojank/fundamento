@@ -456,3 +456,111 @@ describe("suggest_ero: Nachlese 4 – hyphens, endings, row actions, goal over a
     );
   });
 });
+
+// Nachlese 5 (Briefing 2026-10-19, Messung A15/A16): the head word of the request outweighs a word
+// of its attribute part (N5-2), and a goal keyword of six letters or more ends a German compound
+// in the second pass (O-17) – with the false friends whose ending only looks like a keyword.
+describe("suggest_ero: Nachlese 5 – the head word wins (N5-2), compounds (O-17)", () => {
+  it.each([undefined, "de"] as const)(
+    "N5-2 (A15): 'Karte für ein Projekt mit Bild und Titel' is the karto (lingvo %s)",
+    (lingvo) => {
+      const answer = suggest("Karte für ein Projekt mit Bild und Titel", lingvo);
+      expect(answer.action).toBeUndefined();
+      expect(answer.candidates).toBeUndefined();
+      expect(answer.suggestion).toEqual({ ero: "karto", props: {} });
+      expect(answer.matched).toEqual({ goal: "card", keyword: "karte", lingvo: "de" });
+      expect(answer.regulo?.name).toBe("one-primary-per-container");
+      // The boundary heading of the teksto (titel) stood in the attribute part: it is gone.
+      expect(answer.boundary).toBeUndefined();
+    },
+  );
+
+  it("N5-2: in English the head word before with/for/of/about wins too", () => {
+    const answer = suggest("Card for a project with image and title", "en");
+    expect(answer.action).toBeUndefined();
+    expect(answer.suggestion).toEqual({ ero: "karto", props: {} });
+    expect(answer.matched).toEqual({ goal: "card", keyword: "card", lingvo: "en" });
+  });
+
+  it("N5-2: two Eroj in the head, no linking word, or nothing before it – a person still decides", () => {
+    for (const text of [
+      "Karte und Titel für ein Projekt",
+      "Karte, Bild und Titel",
+      "Mit Bild und Titel: eine Karte",
+    ]) {
+      const answer = suggest(text, "de");
+      expect(answer.action, text).toBe("ask-human");
+      expect(
+        answer.candidates
+          ?.filter((candidate) => candidate.kind === "goal")
+          .map((candidate) => candidate.ero),
+        text,
+      ).toEqual(["karto", "titolo"]);
+    }
+  });
+
+  it("N5-2: an entry of the head's own Uzo in the attribute part keeps its say (card-grid)", () => {
+    const answer = suggest("Karten für Projekte im Raster", "de");
+    expect(answer.action).toBe("ask-human");
+    expect(answer.candidates?.[0]).toMatchObject({
+      kind: "boundary",
+      ero: "karto",
+      case: "card-grid",
+    });
+    expect(answer.candidates?.[1]).toMatchObject({ kind: "goal", ero: "karto", goal: "card" });
+  });
+
+  it("N5-2: the head picks the Ero, its goal is read over the whole text (E-Mail-Adresse stays email)", () => {
+    const answer = suggest("Feld für die E-Mail-Adresse", "de");
+    expect(answer.suggestion?.ero).toBe("kampo");
+    expect(answer.matched?.goal).toBe("email");
+  });
+
+  it.each([undefined, "de"] as const)(
+    "O-17 (A16): 'Projektkarten' is the karto – karten ends the compound (lingvo %s)",
+    (lingvo) => {
+      const answer = suggest("Projektkarten", lingvo);
+      expect(answer.suggestion).toEqual({ ero: "karto", props: {} });
+      expect(answer.matched).toEqual({ goal: "card", keyword: "karten", lingvo: "de" });
+    },
+  );
+
+  it("O-17: 'Projektkarten mit Bild' and 'Kontaktkacheln' are the karto", () => {
+    expect(suggest("Projektkarten mit Bild", "de").suggestion?.ero).toBe("karto");
+    expect(suggest("Kontaktkacheln", "de").suggestion?.ero).toBe("karto");
+  });
+
+  it("O-17: false friends – an ending that only looks like a keyword names no other Ero", () => {
+    const unknown = (text: string) => suggestEro(modelo, { goal: text, lingvo: "de" }).ok === false;
+    // A keyword of its own as a whole word hits in the first pass: the tabs, not the card.
+    expect(suggest("Registerkarten", "de").suggestion?.ero).toBe("langetaro");
+    expect(suggest("Registerkarten", "de").action).toBeUndefined();
+    // A word that hits as written keeps the first pass: running text, not a picture.
+    expect(suggest("Fließtext unter dem Bild", "de").suggestion?.ero).toBe("teksto");
+    // liste and menü have fewer than six letters: no compound ends with them.
+    expect(unknown("Einkaufsliste")).toBe(true);
+    expect(unknown("Speisemenü")).toBe(true);
+    expect(suggest("Kontextmenü", "de").suggestion?.ero).toBe("menuo");
+    // Feld is no keyword: a playing field is no input.
+    expect(unknown("Spielfeld")).toBe(true);
+    // A verb prefix is no first part of a compound (fewer than four letters): bemerken, anmerken
+    // and vormerken are no merken, abwarten is no warten.
+    for (const text of ["Bemerken", "Anmerken", "Vormerken", "Abwarten"]) {
+      expect(unknown(text), text).toBe(true);
+    }
+  });
+
+  it("O-17: the false friends the rule cannot tell apart (B-4) – pinned, so a change shows", () => {
+    // A map and a ticket are no card of the screen; a bull's eye is no search hit. Their first
+    // part is a word of four letters or more, as in Projektkarten.
+    expect(suggest("Landkarten", "de").suggestion?.ero).toBe("karto");
+    expect(suggest("Eintrittskarten", "de").suggestion?.ero).toBe("karto");
+    expect(suggest("Volltreffer", "de").suggestion?.ero).toBe("plenstato");
+  });
+
+  it("O-17: only the second pass reads compounds – a text that hits as written keeps its answer", () => {
+    const grid = suggest("Projektkarten im Raster", "de");
+    expect(grid.suggestion).toBeNull();
+    expect(grid.boundary).toMatchObject({ ero: "karto", case: "card-grid", action: "ask-human" });
+  });
+});

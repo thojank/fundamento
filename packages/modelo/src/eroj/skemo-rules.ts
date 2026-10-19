@@ -28,6 +28,14 @@ export const SLOT_KEY_PREFIX = "slot:";
  */
 export const PROP_KEY_PREFIX = "prop:";
 
+/**
+ * The kinds of prop a constraint reads as filled or empty under `prop:<name>`: a text (Spec 011 ①,
+ * D-08) and, since Nachlese 5 O-10, a number — given or not, as a slot is (max-size of the
+ * alsxutilo: a size limit stated nowhere but in the error). A reading of the Skemo, no new
+ * Regulo semantics: filled and empty mean what they mean for a text.
+ */
+export const FILLABLE_KINDS: ReadonlySet<string> = new Set(["string", "number"]);
+
 export const SLOT_FILLED = "filled";
 export const SLOT_EMPTY = "empty";
 
@@ -554,17 +562,19 @@ function constraintIssues(entry: LoadedEro, at: At): void {
         }
         return;
       }
-      // A string prop (Spec 011 ①, D-08): read as filled or empty in when and in allowed.
+      // A string prop (Spec 011 ①, D-08) or a number prop (Nachlese 5 O-10: max-size of the
+      // alsxutilo): read as filled or empty in when and in allowed. A boolean or an enum prop has
+      // values of its own and is constrained by them.
       if (key.startsWith(PROP_KEY_PREFIX)) {
         const name = key.slice(PROP_KEY_PREFIX.length);
         const prop = skemo.props.find((candidate) => candidate.name === name);
-        if (prop === undefined || prop.kind !== "string") {
+        if (prop === undefined || !FILLABLE_KINDS.has(prop.kind)) {
           at(
             pointer,
             "skemo-constraint-invalid",
             `Skemo of ${ero.name} reads ${key} as filled or empty, but ${name} is ${prop === undefined ? "not a prop" : `a ${prop.kind} prop`} of ${ero.name}.`,
-            `Read a string prop of the Skemo (${skemo.props
-              .filter((candidate) => candidate.kind === "string")
+            `Read a string or number prop of the Skemo (${skemo.props
+              .filter((candidate) => FILLABLE_KINDS.has(candidate.kind))
               .map((candidate) => candidate.name)
               .join(", ")}) as prop:<name>, with filled or empty.`,
           );
@@ -575,7 +585,7 @@ function constraintIssues(entry: LoadedEro, at: At): void {
             at(
               pointer,
               "skemo-constraint-invalid",
-              `Skemo of ${ero.name} reads ${key}=${value}; a string prop is read as filled or empty.`,
+              `Skemo of ${ero.name} reads ${key}=${value}; a ${prop.kind} prop is read as filled or empty.`,
               "Use filled or empty.",
             );
           }

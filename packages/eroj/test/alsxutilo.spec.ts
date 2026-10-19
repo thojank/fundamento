@@ -133,6 +133,29 @@ test.describe("fm-alsxutilo behaviour", () => {
     await expect(page.getByRole("button", { name: "Zeugnis.pdf entfernen" })).toBeFocused();
   });
 
+  // Nachlese 5 O-10: the element reads the number max-size as filled or empty, as check_usage does
+  // – without a help it warns with the kialo of file-constraints-stated, with the help it does not.
+  test("max-size without a help warns with the constraint's kialo; with the help it does not", async ({
+    page,
+  }) => {
+    const warnings: string[] = [];
+    page.on("console", (message) => {
+      if (message.type() === "warning") warnings.push(message.text());
+    });
+    await serve(page, out, FORM('max-size="5000000"'));
+    await expect
+      .poll(() => warnings.filter((text) => text.includes("file-constraints-stated")).length)
+      .toBeGreaterThan(0);
+    expect(warnings.find((text) => text.includes("file-constraints-stated"))).toContain(
+      'slot:help="empty"',
+    );
+    warnings.length = 0;
+    await serve(page, out, FORM('max-size="5000000"', HELP));
+    await expect(page.locator("#a")).toBeAttached();
+    await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(resolve)));
+    expect(warnings.filter((text) => text.includes("file-constraints-stated"))).toEqual([]);
+  });
+
   test("without multiple a second choice replaces the first", async ({ page }) => {
     await serve(page, out, FORM("", HELP));
     await fileInput(page).setInputFiles([pdf("Eins.pdf")]);

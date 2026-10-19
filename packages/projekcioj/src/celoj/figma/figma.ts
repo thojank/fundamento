@@ -705,7 +705,15 @@ export const STATE_SIGN =
 const BOOLEAN_TOGGLES: Readonly<Record<string, { part: string; hides?: boolean }>> = {
   dismissible: { part: "dismiss" },
   "caption-hidden": { part: "caption", hides: true },
+  // Nachlese 5 O-41 (Nachlese 4 B-8): the ligilo's external shows the mark in its slot icon-end.
+  external: { part: "icon-end" },
 };
+
+/**
+ * The axis whose first value is an avatar's smallest size (Nachlese 5 N5-5, O-18): there it
+ * shows one initial, in Figma as on the web.
+ */
+export const AVATAR_SIZE_PROP = "size";
 
 /**
  * The dash pattern of a dashed stroke (Spec 011 ③, plan ③ D-14), in widths of the stroke: the
@@ -1168,6 +1176,13 @@ export interface FigmaComponentSet {
     picture: string;
     fill: { binding: string; paint: FigmaPaint };
     color: { binding: string; paint: FigmaPaint };
+    /**
+     * The smallest size shows one initial (Nachlese 5 N5-5, Spec 015 ③ O-18): the variants whose
+     * `prop` has `value` (the first of the size axis) write `text`, the first initial of the
+     * Vitrino's, unconnected to the label property — a text property holds one value for the
+     * whole set, and two initials stood over the circle of 20 px.
+     */
+    oneInitial?: { prop: string; value: string; text: string };
   };
   card?: {
     width: number;
@@ -1998,6 +2013,18 @@ function iconsOf(
   ) {
     return { "icon-start": ICON_EXAMPLE };
   }
+  // Nachlese 5 O-41 (Nachlese 4 N-7, B-8): a link with a decorative icon-end slot and the prop
+  // external marks an external target with the Ikonaro's external there, as the web's fallback
+  // of that slot; the property external shows it (BOOLEAN_TOGGLES).
+  if (
+    structure === "control" &&
+    skemo.a11y.role === "link" &&
+    skemo.parts.icon !== undefined &&
+    skemo.props.some((prop) => prop.name === "external" && prop.kind === "boolean") &&
+    skemo.slots.some((slot) => slot.name === "icon-end" && slot.decorative === true)
+  ) {
+    return { "icon-end": "external" };
+  }
   if (skemo.a11y.role === "combobox" && skemo.parts.indicator !== undefined) {
     return { indicator: "chevron-down" };
   }
@@ -2751,12 +2778,21 @@ function componentSetOf(
   // An avatar (Spec 015 ③, plan ③ D-11): the Vitrino's silhouette on the stand-in's ground.
   const silhouette =
     structure === "avatar" ? avatarSilhouetteOf(VITRINO_AVATAR.picture) : undefined;
+  // Nachlese 5 N5-5 (O-18): the smallest size – the first value of the size axis – shows one
+  // initial, the first grapheme of the Vitrino's initials, as the web does.
+  const smallest = skemo.props.find((prop) => prop.name === AVATAR_SIZE_PROP)?.values?.[0];
+  const firstInitial = [
+    ...new Intl.Segmenter("de", { granularity: "grapheme" }).segment(VITRINO_AVATAR.initials),
+  ][0]?.segment;
   const avatar =
     silhouette !== undefined && mediaFill !== undefined && mediaColor !== undefined
       ? {
           picture: silhouette,
           fill: { binding: variableName(STAND_IN_FILL), paint: mediaFill },
           color: { binding: variableName(STAND_IN_COLOR), paint: mediaColor },
+          ...(smallest === undefined || firstInitial === undefined
+            ? {}
+            : { oneInitial: { prop: AVATAR_SIZE_PROP, value: smallest, text: firstInitial } }),
         }
       : undefined;
   return {

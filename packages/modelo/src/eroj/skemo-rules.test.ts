@@ -161,6 +161,31 @@ describe("Skemo ↔ Vortaro rules (T005)", () => {
     ]);
   });
 
+  // Nachlese 5 O-10: prop:<name> reads a number prop as filled or empty too (max-size of the
+  // alsxutilo); a boolean prop is an axis or a toggle and stays no such key.
+  it("O-10: prop:<name> reads a number prop as filled or empty; a boolean prop and a value stay invalid", () => {
+    const withProps = (constraints: unknown[]) =>
+      issuesOf((file) => {
+        file.skemo.props.push({ name: "count", kind: "number" }, { name: "flag", kind: "boolean" });
+        file.skemo.constraints = constraints;
+      }).filter((issue) => issue.rule === "skemo-constraint-invalid");
+    expect(
+      withProps([
+        { when: { "prop:count": "filled" }, allowed: { "prop:count": ["filled"] }, kialo: "Ok." },
+      ]),
+    ).toEqual([]);
+    expect(
+      withProps([
+        { when: { "prop:flag": "filled" }, allowed: { "prop:count": ["seven"] }, kialo: "No." },
+      ])
+        .map((issue) => issue.path)
+        .sort(),
+    ).toEqual([
+      `${FILE}#/skemo/constraints/0/allowed/prop:count`,
+      `${FILE}#/skemo/constraints/0/when/prop:flag`,
+    ]);
+  });
+
   it("skemo-goal-invalid: a goal with a value the prop does not allow and an unknown Regulo", () => {
     expect(
       issuesOf((file) => {

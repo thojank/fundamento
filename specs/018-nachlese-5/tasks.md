@@ -34,4 +34,40 @@
 
 ## ② Befunde
 
-Folgt in PR ②.
+**Branch:** `261019-nachlese-5-f027c6` (gestapelt auf ① @ `a984699`, PR #80; nach dem Rebase von ① auf `main` @ `a1dc8b6` neu gestapelt). Die Hashes aller Commits stehen in **einer** Zeile der Messungen (nach einem Rebase auf ① dort und hier ersetzen).
+
+### A – Gvidanto (N5-2, O-17, N5-3, O-39)
+- [x] **T1901 Vorher** alle Zeichenketten der Dialog-Tests × (ohne, de, en) gegen den Stand von ① aufgenommen (1 488 Zeichenketten, 4 464 Antworten; plan ② „Dialoge vorher/nachher“).
+- [x] **T1902 Rot** `suggest-ero.test.ts` (N5-2: A15 de/ohne/en, zwei Eroj im Kopf, eigene Grenze im Attributteil, E-Mail-Adresse; O-17: A16, Kontaktkacheln, falsche Freunde, Pin der nicht trennbaren), `eroj.test.ts` (brief `props`, ≤ 750, größter `kampo`), `dialogo.test.ts`/`sxvebilo.test.ts` (O-39), MCP `s018-nachlese-5.test.ts` (A15, A16, A2, O-39), Doku-Test ②. Rot `2e69906`: Modelo 15, MCP 4.
+- [x] **T1903 Grün** `suggest-ero.ts` (`LINKING_WORDS`, `headOf`, Kopf-Ero), `usage.ts` (`goalMatchOf`, `COMPOUND_FIRST_PART_MIN`), `eroj.ts` (`props` im brief), Schema `get_ero.output.json` (additiv), Uzo `dialogo`/`sxvebilo` (drawer), drei Jugxoj (D-06 bis D-09). Grün `ebd678c`.
+- [x] **T1904 Nachher** dieselben Zeichenketten gegen den grünen Stand: 33 Antworten geändert, Spec-Dialoge nur A15, A16, Drawer/Seitenpaneel (O-39), „Zeilen mit Seitennummerierung“ (bleibt Rückfrage) – Tabelle in plan ②.
+
+### B – Figma (N5-1, N5-4, N5-5, N5-6, O-41)
+- [x] **T1905 Rot** strenges Doppel (entfernter Knoten antwortet nur `removed` und `id`), `plugin-lauf` (N5-1), `plugin-rahmen-beispiele` (jeder Beispielrahmen auf `canvas`), `plugin-bauformen-inhalt` (avataro klein „E“, Verbindung gelöst; `ligilo` `icon-end`), `plugin-bauformen-eingabe` (Vorschlagsreihen FILL), `figma.test` (Plan `oneInitial`, `icons`/`toggles` des `ligilo`), Browser `avataro.spec`. Rot `def2530`: Projekcioj 11 (davon drei bestehende Tests, die einen entfernten Knoten lasen – B-3), Browser 1.
+- [x] **T1906 Grün** `plugin.ts` (`recordStart`/`lostSince` geschützt, `groundOf`, `oneInitial`, Reihen FILL, `icon-end`), `figma.ts` (`AVATAR_SIZE_PROP`, `oneInitial`, `iconsOf` `external`, `BOOLEAN_TOGGLES.external`), `element-template.ts` (eine Initiale in der kleinsten Größe), zwei Pins der Label-Vorgaben (D-01 bis D-05). Grün `1868e5b`.
+
+### C – Modelo und Web (O-10, O-14)
+- [x] **T1907 Rot** `skemo-rules.test` (Zahl-Prop gültig, boolesch ungültig), `alsxutilo.test` (dritte Constraint, `max-size` ohne Hilfe), MCP `s018` (`check_usage`), Browser `alsxutilo.spec` (Warnung), `pflicht.spec` (Adresse, Webadresse, Datum), `kampo.spec`/`web-component.test` (Textfeld mit `inputmode`). Rot `6f8961a`: Modelo 3, MCP 1, Projekcioj 1, Browser 5.
+- [x] **T1908 Grün** `skemo-rules.ts` (`FILLABLE_KINDS`), `usage.ts` (`propStates`), Skemo `alsxutilo` (Constraint, Kialo), `element-template.ts` (Zahl-Props in der Constraint-Lesung; `inputmode`, `#formMismatch`, `#dateOutside`, `#probeMessage`) (D-10, D-11). Grün `1a57683`.
+
+### D – Abschluss
+- [x] **T1909 Doku** plan ② (D-01 bis D-11, Dialoge, Abweichungen 1–6, B-3 bis B-10, O-2 bis O-9, In Figma zu messen), tasks ②, Doku-Test.
+- [x] **T1910 CI** PR #81, Lauf 39254016800 grün (Zeile CI), grüner Stand `14e0e46`.
+- [ ] **Aufräumen (älter als dieser Branch):** Biome-Warnungen in `web-component.test.ts`, `menuo.spec.ts` und Modelo (B-10).
+
+### Messungen
+
+| Was | Wert |
+|---|---|
+| **Commits** (rot / grün; nach einem Rebase hier ersetzen) | Gvidanto rot `2e69906` grün `ebd678c` · Figma rot `def2530` grün `1868e5b` · Modelo/Web rot `6f8961a` grün `1a57683` · Vitrino-Pin `5a662fc` · Doku im Commit der Messungen |
+| `suggest_ero` | A15 „Karte für ein Projekt mit Bild und Titel“ → `karto` (`card`, karte); A16 „Projektkarten“ → `karto` (`card`, karten); „Drawer“ → `dialogo.drawer` `ask-human` mit der Kialo des `sxvebilo` |
+| Dialoge | 1 488 Zeichenketten × (ohne, de, en) = 4 464 Antworten: 33 geändert, Spec-Dialoge nur A15, A16, Drawer/Seitenpaneel, „Zeilen mit Seitennummerierung“ (bleibt Rückfrage) |
+| `brief` (ceil Bytes/3, Grenze 750) | größter `kampo` 525 → **646**; `butono` 546 → 597, `elektilo` 379 → 466, `kompletigilo` 353 → 465 (`loading: boolean`), `tabelo` 427 → 456 |
+| `check_usage` | `alsxutilo` mit `max-size` ohne Hilfe: `ero-prop-constraint` („slot:help=empty, prop:max-size=filled … (file-constraints-stated)“); mit Hilfe gültig |
+| `check:regularo` | 59 Reguloj, 199 Jugxoj (+3), 32 Uzoj, 0 Fehler, 0 Warnungen |
+| `check:parity` | 32 Eroj, 0 Differenzen, 297 Freigaben |
+| Tests lokal | `turbo run test --filter=!@fundamento/eroj --force` (3:23): Modelo 3 571 (vorher 3 551; +20), MCP 312 (307; +5), Projekcioj 722 (716; +6), CLI 66. Im parallelen Gesamtlauf lief `export/build.test.ts` „building twice is byte-identical“ in seine Zeitgrenze von 30 s (Last), allein 12 von 12 grün – nichts angehoben; der Doku-Test war im Lauf rot, weil die Doku danach kam (allein 179 grün) |
+| Browser | alle 248 Specs in Chromium (vorher 243 + 5 neue); berührte Specs `pflicht`, `kampo`, `alsxutilo`, `avataro` 72 in Firefox und WebKit; `check:alirebleco-eroj` 561 (drei Engines), `check:vitrino` 30 (Pin `avataro` „E“ in der ersten Reihe, `5a662fc`) – je grün |
+| Checks | `pnpm lint` grün (Warnungen älter, B-10); `check:vortaro-lint`, `check:mankoj` (9), `check:alirebleco` (89 KontrastParoj × 72 Kombinationen, 0 Fehler, 2 394 APCA-Warnungen), `check:clean-room`, `check:ikonaro`, `check:release` ohne Fehler |
+| CI (PR #81) | Lauf 39254016800 (`14e0e46`, gegen ① @ `3434094`, alle sieben Jobs-Läufe grün, **Wanduhr 4:57**): `checks` 1:02, `unit` 4:54, `projekcioj` 3:27 / 3:27, `eroj` 2:19 / 2:24, `alirebleco-eroj` 3:23, `rendered-checks` 3:47; kein Job über 7 min; grüner Stand `14e0e46` |
+| Neu gestapelt auf ① @ `a984699` (nach #77, 2026-10-19) | ohne Konflikt. Lokal: Agordilo 35, MCP 312, CLI 72, Projekcioj 722, Modelo 3 579 grün; Lint und alle Modelo-Checks ohne Fehler, `check:parity` 32 Eroj 0 Differenzen, `check:regularo` 59 Reguloj 199 Jugxoj 0 Warnungen; Browser 248 Specs in Chromium, Alirebleco-Check 561, Vitrino 30; CI in der Zeile danach |

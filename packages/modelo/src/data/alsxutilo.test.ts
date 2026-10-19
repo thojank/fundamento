@@ -155,8 +155,11 @@ describe("alsxutilo in the repo Modelo (section ②, G1, G2)", () => {
     expect(skemo?.constraints?.map((constraint) => [constraint.when, constraint.allowed])).toEqual([
       [{ "slot:error": "filled" }, { invalid: ["true"] }],
       [{ "slot:help": "empty" }, { "prop:accept": ["empty"] }],
+      // Nachlese 5 O-10: prop:<name> reads the number max-size too – the second half of the duty.
+      [{ "slot:help": "empty" }, { "prop:max-size": ["empty"] }],
     ]);
     expect(skemo?.constraints?.[1]?.kialo).toContain("file-constraints-stated");
+    expect(skemo?.constraints?.[2]?.kialo).toBe(skemo?.constraints?.[1]?.kialo);
   });
 
   it("knows the goal upload with the words of G3, citing file-constraints-stated", () => {
@@ -269,6 +272,18 @@ describe("the Reguloj of the alsxutilo (G4, E5)", () => {
     ]);
     // Without accept no help is asked for.
     expect(rulesOf(judge({}, {}))).toEqual([]);
+  });
+
+  it("O-10 (Nachlese 5): max-size without a help breaks the constraint too; with the help it passes", () => {
+    const missing = judge({ "max-size": 5000000 }, {});
+    expect(rulesOf(missing)).toEqual([["ero-prop-constraint", "error"]]);
+    expect(missing.violations[0]?.issue.message).toContain("prop:max-size=filled");
+    expect(missing.violations[0]?.issue.message).toContain("file-constraints-stated");
+    expect(rulesOf(judge({ "max-size": 5000000 }, { help: "PDF, höchstens 5 MB" }))).toEqual([]);
+    // Both given and no help: one finding, the first constraint that forbids it.
+    expect(rulesOf(judge({ accept: ".pdf", "max-size": 5000000 }, {}))).toEqual([
+      ["ero-prop-constraint", "error"],
+    ]);
   });
 
   it("the field Reguloj judge it as a kampo: a verb in the label, an error without the state, a short error", () => {

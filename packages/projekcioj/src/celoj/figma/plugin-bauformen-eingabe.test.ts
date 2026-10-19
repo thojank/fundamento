@@ -802,4 +802,53 @@ describe("the kompletigilo fills the active suggestion (N-8)", () => {
     await run(double, repoFiles["figma/plugin/code.js"] ?? "");
     expect(double.snapshot()).toBe(before);
   });
+
+  // Nachlese 5 N5-6 (Messung 2026-10-19, Auftrag 7.): the fill of the active suggestion wrapped
+  // only its word („Zwei“), not the row. Every row – the active, the chosen and the others – fills
+  // the width of the listbox, as the row on the web does; its word stands at the start.
+  it("N5-6: every suggestion row fills the width of the listbox, the word at its start", async () => {
+    const double = modelDouble();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    const set = pageNodes(double).find((node) => node.name === "kompletigilo");
+    const open = (set?.children ?? []).filter((child) => child.name.includes("expanded=true"));
+    expect(open.length).toBeGreaterThan(0);
+    const width = (node: DoubleNode | undefined) =>
+      (node as unknown as { width: number } | undefined)?.width ?? 0;
+    for (const variant of open) {
+      const listbox = descendant(variant, "listbox");
+      expect(width(listbox), variant.name).toBeGreaterThan(0);
+      for (const n of [1, 2, 3]) {
+        const entry = descendant(listbox, `entry-${n}`);
+        const row = descendant(entry, `suggestion-${n}`);
+        const text = descendant(row, `suggestions-${n}`);
+        for (const node of [
+          entry,
+          descendant(entry, "focus-ring"),
+          descendant(entry, "focus-gap"),
+          row,
+        ]) {
+          expect(node?.properties.layoutSizingHorizontal, `${variant.name} ${node?.name}`).toBe(
+            "FILL",
+          );
+        }
+        const inner =
+          width(listbox) -
+          Number(listbox?.properties.paddingLeft ?? 0) -
+          Number(listbox?.properties.paddingRight ?? 0);
+        expect(width(entry), `${variant.name} entry-${n}`).toBe(inner);
+        // The row lies in the reserve of its focus ring and gap (F17), the same reserve the
+        // field's control has in its own ring.
+        const field = descendant(variant, "field");
+        const reserve =
+          width(descendant(field, "focus-ring")) - width(descendant(field, "control"));
+        expect(reserve).toBeGreaterThan(0);
+        expect(width(row), `${variant.name} suggestion-${n}`).toBe(inner - reserve);
+        expect(width(text), `${variant.name} suggestions-${n}`).toBeLessThan(width(row));
+        expect(row?.properties.primaryAxisAlignItems, variant.name).toBe("MIN");
+      }
+    }
+    const before = double.snapshot();
+    await run(double, repoFiles["figma/plugin/code.js"] ?? "");
+    expect(double.snapshot()).toBe(before);
+  });
 });

@@ -31,7 +31,10 @@ test.describe("fm-kampo behaviour", () => {
     );
     const box = page.getByRole("textbox", { name: "E-Mail" });
     await expect(box).toBeVisible();
-    await expect(box).toHaveAttribute("type", "email");
+    // Nachlese 5 O-14: an address is a text input with the keyboard of its kind; the element
+    // checks its form itself, so the platform has no message to show as a bubble.
+    await expect(box).toHaveAttribute("type", "text");
+    await expect(box).toHaveAttribute("inputmode", "email");
     await expect(box).toHaveAttribute("name", "mail");
     await expect(box).toHaveAccessibleDescription(
       "Wir schreiben nur zur Bestellung. Gib eine Adresse mit @ ein",

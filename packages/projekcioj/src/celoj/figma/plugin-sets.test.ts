@@ -1057,7 +1057,8 @@ describe("the label default follows the role of the Ero (M-3)", () => {
     expect(of("butono")).toEqual(["Aktion"]);
     expect(of("elekto")).toEqual(["Frage"]);
     expect(of("kampo")).toEqual(["Beschriftung"]);
-    expect(of("ligilo")).toEqual(["Ziel"]);
+    // Nachlese 5 O-41: the BOOLEAN external beside the label, hidden by default.
+    expect(of("ligilo")).toEqual(["Ziel", false]);
     expect(of("markobutono")).toEqual(["Option"]);
     expect(of("sxaltilo")).toEqual(["Einstellung"]);
     // Spec 011 ③ (plan ③ D-14): the badge, the notice (with its BOOLEAN dismissible beside the
@@ -1088,9 +1089,9 @@ describe("the label default follows the role of the Ero (M-3)", () => {
       source.replace(/^const PLAN = .*$/m, `const PLAN = ${JSON.stringify(older)};`),
     );
     const ligilo = () => pageNodes(double).find((child) => child.name === "ligilo");
-    expect(defaultsOf(ligilo())).toEqual(["Aktion"]);
+    expect(defaultsOf(ligilo())).toEqual(["Aktion", false]);
     await run(double, source);
-    expect(defaultsOf(ligilo())).toEqual(["Ziel"]);
+    expect(defaultsOf(ligilo())).toEqual(["Ziel", false]);
     for (const variant of ligilo()?.children ?? []) {
       expect(descendant(variant, "label")?.properties.characters, variant.name).toBe("Ziel");
     }

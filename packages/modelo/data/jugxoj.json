@@ -4318,6 +4318,36 @@
       "kialo": "Wer „Vorschlägen“ schreibt, meint die Vorschläge; ein Fall der Grammatik ist kein anderes Ziel.",
       "date": "2026-10-18",
       "context": "Nachlese 4 N-2 (Messung Spec 014 A8, F-3, Briefing 2026-10-18): eine Antwort, die stand, ändert sich (OP-12) — suggest_ero „Feld mit Vorschlägen beim Tippen“ → kompletigilo (suggest, vorschläge) statt goal-unknown. Regel: Findet der Text wörtlich weder ein Goal noch einen Eintrag einer Uzo, liest der Gvidanto ihn ein zweites Mal mit den deutschen Endungen -en, -es, -e, -n, -s am Wortende (Stamm ab fünf Buchstaben); jede Antwort, die wörtlich etwas fand, bleibt."
+    },
+    {
+      "id": "jug_01M59ZYEQEQ7SQRAXHET75FMZJ",
+      "ref": {
+        "ero": "ero_01M51T74A5H5FGY35BQ90VQEGH"
+      },
+      "decision": "approved",
+      "kialo": "Eine Seitenleiste ist weder Dialog noch Popover; derselbe Fall hat eine Antwort, gleich welche Uzo spricht.",
+      "date": "2026-10-19",
+      "context": "Nachlese 5 O-39 (Nachlese 4 B-4, Entscheidung des Maintainers vom 2026-10-19): Datenkorrektur, eine Antwort, die stand, ändert sich (OP-12) — die Grenze drawer des dialogo war not-supported, die des sxvebilo ask-human; welche sprach, entschied die Ero-Ordnung. Jetzt beide ask-human mit derselben Kialo („neither a dialog nor a popover … a person decides until the Sxablonoj come“). suggest_ero „Drawer“ und „Seitenpaneel mit dem Inhalt“ → Grenze dialogo.drawer ask-human statt not-supported; „a sidepanel that slides in“ → sxvebilo.drawer ask-human wie bisher, mit der neuen Kialo."
+    },
+    {
+      "id": "jug_01M5A01V471S1ZBV2YKH1D8GZY",
+      "ref": {
+        "ero": "ero_01M58DN4TTA74NYFENT46BHNRH"
+      },
+      "decision": "approved",
+      "kialo": "Wer „Karte für ein Projekt mit Bild und Titel“ sagt, will eine Karte; was nach „mit“ und „für“ steht, sagt, was sie enthält.",
+      "date": "2026-10-19",
+      "context": "Nachlese 5 N5-2 (Messung A15, Briefing 2026-10-19): eine Antwort, die stand, ändert sich (OP-12) — suggest_ero „Karte für ein Projekt mit Bild und Titel“ → karto (card, karte) statt ask-human zwischen der Grenze heading des teksto (titel), karto und titolo. Regel: Nennt der Text vor dem ersten Bindewort (mit, für, von, über, zu; en with, for, of, about) das Goal genau eines Ero, antwortet dieses Ero mit seinem Goal über den ganzen Text; ein Goal eines anderen Ero danach bildet keinen Gleichstand, ein Uzo-Eintrag eines anderen Ero danach fällt weg, außer er nennt das Ero des Kopfs. Eigene Uzo-Einträge des Kopfs und alles, was im Kopf trifft, zählen wie bisher."
+    },
+    {
+      "id": "jug_01M5A01VGBEYM573ZX1YEFNQQ0",
+      "ref": {
+        "ero": "ero_01M58DN4TTA74NYFENT46BHNRH"
+      },
+      "decision": "approved",
+      "kialo": "„Projektkarten“ sind Karten; das Grundwort steht im Deutschen am Ende.",
+      "date": "2026-10-19",
+      "context": "Nachlese 5 O-17 (Messung A16, Briefing 2026-10-19): eine Antwort, die stand, ändert sich (OP-12) — suggest_ero „Projektkarten“ → karto (card, karten) statt goal-unknown. Regel: Im zweiten Durchgang (wörtlich traf nichts, Nachlese 4 N-2) trifft ein deutsches Goal-Stichwort ab sechs Buchstaben auch das Ende eines zusammengeschriebenen Kompositums, mit den Endungen von N-2, wenn der Vorderteil mindestens vier Buchstaben hat (ab-, an-, be-, vor- sind keine Vorderteile: „bemerken“ ist kein „merken“). Bekannte falsche Freunde: „Landkarten“, „Eintrittskarten“ → karto, „Volltreffer“ → plenstato."
     }
   ]
 }

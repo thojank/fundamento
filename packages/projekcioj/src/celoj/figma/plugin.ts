@@ -2188,7 +2188,12 @@ function recordStart() {
   for (const component of PLAN.components) {
     const set = findSet(component.set);
     if (set === undefined) continue;
-    seenAtStart.set(component.set, { set: set, nodes: nodesOf(set) });
+    // Name and type as they were at the start (N5-1): a node that is gone at the end gives
+    // nothing but its id — Figma throws on every other field.
+    seenAtStart.set(component.set, {
+      set: set,
+      nodes: nodesOf(set).map((node) => ({ node: node, id: node.id, name: node.name, type: node.type })),
+    });
   }
 }
 
@@ -2206,28 +2211,53 @@ function nodesAtEnd(name) {
   return nodesOf(set).length;
 }
 
-/** Was beim Start im Set war und am Ende nicht mehr, je Knoten: entfernt oder wohin verdrängt. */
+/**
+ * Was beim Start im Set war und am Ende nicht mehr, je Knoten: entfernt oder wohin verdrängt.
+ * Ein verschwundener Knoten nennt nur noch seine ID (N5-1, gemessen 2026-10-19: nach einem
+ * Verbindungsabbruch warf \`name\` an 26:325 „does not exist“, und der Lauf brach in \`done\` ab,
+ * obwohl alles geschrieben war): Name und Typ stammen vom Start, jedes Lesen am Ende ist geschützt —
+ * was nicht mehr zu lesen ist, gilt als entfernt. Der Lauf endet normal.
+ */
 function lostSince(name) {
   const seen = seenAtStart.get(name);
   if (seen === undefined) return [];
-  const now = new Set(seen.set.removed === true ? [] : nodesOf(seen.set).map((node) => node.id));
+  let setGone = true;
+  try {
+    setGone = seen.set.removed === true;
+  } catch (error) {
+    setGone = true;
+  }
+  let now = new Set();
+  if (!setGone) {
+    try {
+      now = new Set(nodesOf(seen.set).map((node) => node.id));
+    } catch (error) {
+      now = new Set();
+    }
+  }
   return seen.nodes
-    .filter((node) => !now.has(node.id))
-    .map((node) => {
+    .filter((entry) => !now.has(entry.id))
+    .map((entry) => {
       let parent = null;
-      if (node.removed !== true) {
+      try {
+        parent = entry.node.removed === true ? null : entry.node.parent || null;
+      } catch (error) {
+        parent = null;
+      }
+      let where = null;
+      if (parent !== null) {
         try {
-          parent = node.parent || null;
+          where = { id: parent.id, type: parent.type, name: parent.name };
         } catch (error) {
-          parent = null;
+          where = null;
         }
       }
       return {
-        id: node.id,
-        name: node.name,
-        type: node.type,
-        removed: parent === null,
-        parent: parent === null ? null : { id: parent.id, type: parent.type, name: parent.name },
+        id: entry.id,
+        name: entry.name,
+        type: entry.type,
+        removed: where === null,
+        parent: where,
       };
     });
 }
@@ -2529,6 +2559,25 @@ async function applyComponents(variables, warnings) {
    * scaling with its frame; the caller binds the frames' size and the vectors' fill through the
    * nodes this returns (<prefix>glyph-n, <prefix>mark-n).
    */
+  /**
+   * The ground of the Vitrino (F16) on a set or an example frame beside it (F-6, Nachlese 4 N-6,
+   * Nachlese 5 N5-4): filled with the model's background, bound to the variable so it follows
+   * color-scheme and contrast — never a fixed colour; the texts of an example lie on the canvas
+   * their roles are paired with in every mode, not on whatever the section shows. Called after the
+   * node's neutral values are gathered, before it is flushed.
+   */
+  function groundOf(node, component) {
+    if (component.surface === undefined) return;
+    const ground = variables.get(component.surface.variable);
+    if (ground === undefined) return;
+    const bound = figma.variables.setBoundVariableForPaint(
+      { type: "SOLID", color: { r: 0, g: 0, b: 0 } },
+      "color",
+      ground,
+    );
+    bound.opacity = component.surface.opacity;
+    gather(node).fills = [bound];
+  }
   function drawGlyphs(holder, name, prefix, measures) {
     const nodes = {};
     Object.keys(IKONOJ.glyphs).forEach((aspekto, index) => {
@@ -2633,18 +2682,7 @@ async function applyComponents(variables, warnings) {
       paddingTop: example.padding,
       paddingBottom: example.padding,
     });
-    if (component.surface !== undefined) {
-      const ground = variables.get(component.surface.variable);
-      if (ground !== undefined) {
-        const bound = figma.variables.setBoundVariableForPaint(
-          { type: "SOLID", color: { r: 0, g: 0, b: 0 } },
-          "color",
-          ground,
-        );
-        bound.opacity = component.surface.opacity;
-        gather(node).fills = [bound];
-      }
-    }
+    groundOf(node, component);
     const measures = [];
     for (const [text] of words) {
       own(text, NEUTRAL_TEXT);
@@ -3318,18 +3356,7 @@ async function applyComponents(variables, warnings) {
       });
     }
     // The ground of the example (F-6): the set's surface, bound like the set's (F16).
-    if (example !== undefined && component.surface !== undefined) {
-      const ground = variables.get(component.surface.variable);
-      if (ground !== undefined) {
-        const bound = figma.variables.setBoundVariableForPaint(
-          { type: "SOLID", color: { r: 0, g: 0, b: 0 } },
-          "color",
-          ground,
-        );
-        bound.opacity = component.surface.opacity;
-        gather(node).fills = [bound];
-      }
-    }
+    if (example !== undefined) groundOf(node, component);
     own(control, METER_LAYOUT);
     own(track, TRACK_LAYOUT);
     if (fill) own(fill, FILL_LAYOUT);
@@ -3661,6 +3688,8 @@ async function applyComponents(variables, warnings) {
         paddingTop: example.padding,
         paddingBottom: example.padding,
       });
+      // The example stands on the Vitrino's ground (Nachlese 5 N5-4).
+      groundOf(node, component);
     }
     own(control, NAV_LAYOUT);
     if (vertical) own(control, { layoutMode: "VERTICAL", counterAxisAlignItems: "MIN" });
@@ -3758,6 +3787,8 @@ async function applyComponents(variables, warnings) {
         paddingTop: example.padding,
         paddingBottom: example.padding,
       });
+      // The example stands on the Vitrino's ground (Nachlese 5 N5-4).
+      groundOf(node, component);
     }
     own(control, NAV_LAYOUT);
     own(pages, NAV_LAYOUT);
@@ -3867,6 +3898,8 @@ async function applyComponents(variables, warnings) {
         paddingTop: example.padding,
         paddingBottom: example.padding,
       });
+      // The example stands on the Vitrino's ground (Nachlese 5 N5-4).
+      groundOf(node, component);
     }
     own(field, FIELD_LAYOUT);
     own(zone, TOGGLE_LAYOUT);
@@ -3995,6 +4028,8 @@ async function applyComponents(variables, warnings) {
         paddingTop: example.padding,
         paddingBottom: example.padding,
       });
+      // The example stands on the Vitrino's ground (Nachlese 5 N5-4).
+      groundOf(node, component);
     }
     own(surface, CARD_LAYOUT);
     if (horizontal) own(surface, { layoutMode: "HORIZONTAL" });
@@ -4087,7 +4122,22 @@ async function applyComponents(variables, warnings) {
     if (variant.font !== undefined) {
       write(text, "fontName", fonts.get(variant.font.family + " " + variant.font.style));
     }
-    if (example === undefined) labels.push(text);
+    // Nachlese 5 N5-5 (O-18): the smallest size shows one initial. A text property holds one value
+    // for the whole set, so its text is not connected to the label property; a connection an
+    // earlier run made is taken off.
+    const one = spec !== undefined && spec.oneInitial !== undefined &&
+      variant.props[spec.oneInitial.prop] === spec.oneInitial.value
+      ? spec.oneInitial.text
+      : undefined;
+    if (one !== undefined) {
+      write(text, "characters", one);
+      const references = text.componentPropertyReferences || {};
+      if (references.characters !== undefined) {
+        const rest = Object.assign({}, references);
+        delete rest.characters;
+        write(text, "componentPropertyReferences", rest);
+      }
+    } else if (example === undefined) labels.push(text);
     else if (component.label !== undefined) write(text, "characters", component.label.defaultValue);
     toggled.push({ part: "image", node: image });
     const frames = [node, control, initials, image].concat(picture === undefined ? [] : [picture]);
@@ -4101,6 +4151,8 @@ async function applyComponents(variables, warnings) {
         paddingTop: example.padding,
         paddingBottom: example.padding,
       });
+      // The example stands on the Vitrino's ground (Nachlese 5 N5-4).
+      groundOf(node, component);
     }
     own(control, INDICATOR_LAYOUT);
     // The circles lie in no flow (the box has no layout); what they are as children is written
@@ -4597,6 +4649,13 @@ async function applyComponents(variables, warnings) {
       const glyphMeasures = [];
       const iconFrame = typeof icons["icon-start"] === "string" ? part(control, "icon-start", () => figma.createFrame()) : undefined;
       if (iconFrame !== undefined && control.children.indexOf(iconFrame) !== 0) control.insertChild(0, iconFrame);
+      // The mark of an external link (Nachlese 5 O-41): icon-end after the label, shown by the
+      // BOOLEAN property external (toggled, connected below), as the web's fallback of the slot.
+      const iconEnd = typeof icons["icon-end"] === "string" ? part(control, "icon-end", () => figma.createFrame()) : undefined;
+      if (iconEnd !== undefined) {
+        if (control.children.indexOf(iconEnd) !== control.children.length - 1) control.appendChild(iconEnd);
+        toggled.push({ part: "icon-end", node: iconEnd });
+      }
       if (isField && field.children.indexOf(label) !== 0) field.insertChild(0, label);
       if (isToggle && column === undefined && field.children.indexOf(label) !== 1) field.insertChild(1, label);
       if (column !== undefined && field.children.indexOf(column) !== 1) field.insertChild(1, column);
@@ -4711,8 +4770,15 @@ async function applyComponents(variables, warnings) {
         own(listbox, SURFACE_LAYOUT);
         own(listbox, { visible: (variant.hidden || []).indexOf("listbox") === -1 });
         for (const row of suggestionRows) {
-          for (const frame of [row.entry, row.ring, row.gap]) own(frame, HUG_LAYOUT);
+          // Nachlese 5 N5-6: every row fills the listbox's width, as the row on the web does — the
+          // fill of the active (and of the chosen) suggestion spans the list, not only its word,
+          // which stands at the start.
+          for (const frame of [row.entry, row.ring, row.gap]) {
+            own(frame, HUG_LAYOUT);
+            own(frame, { layoutSizingHorizontal: "FILL" });
+          }
           own(row.frame, CONTROL_LAYOUT);
+          own(row.frame, { layoutSizingHorizontal: "FILL", primaryAxisAlignItems: "MIN" });
           own(row.text, NEUTRAL_TEXT);
           own(row.text, TEXT_SIZING);
         }
@@ -4731,6 +4797,13 @@ async function applyComponents(variables, warnings) {
         own(iconFrame, IN_FLOW);
         glyphNodes.icon = iconFrame;
         Object.assign(glyphNodes, drawGlyphs(iconFrame, icons["icon-start"], "icon-", glyphMeasures));
+      }
+      if (iconEnd !== undefined) {
+        own(iconEnd, NEUTRAL);
+        own(iconEnd, INDICATOR_LAYOUT);
+        own(iconEnd, IN_FLOW);
+        glyphNodes.icon = iconEnd;
+        Object.assign(glyphNodes, drawGlyphs(iconEnd, icons["icon-end"], "icon-", glyphMeasures));
       }
       if (column) {
         own(column, TEXTS_LAYOUT);
@@ -4847,18 +4920,7 @@ async function applyComponents(variables, warnings) {
     own(set, NEUTRAL);
     // The ground of the Vitrino (F16): the set is filled with the model's background, bound to the
     // variable so it follows color-scheme and contrast — never a fixed colour.
-    if (component.surface !== undefined) {
-      const ground = variables.get(component.surface.variable);
-      if (ground !== undefined) {
-        const bound = figma.variables.setBoundVariableForPaint(
-          { type: "SOLID", color: { r: 0, g: 0, b: 0 } },
-          "color",
-          ground,
-        );
-        bound.opacity = component.surface.opacity;
-        gather(set).fills = [bound];
-      }
-    }
+    groundOf(set, component);
     // The grid of the Vitrino (F11): one row per combination, one column per state, in the order
     // of the plan — a variant a later run had to create goes back to its place.
     const grid = component.grid;
