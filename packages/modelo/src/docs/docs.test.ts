@@ -1983,3 +1983,32 @@ describe("Spec 016 ① documentation (specs/016-agordilo-1)", () => {
     expect(readme).toContain("fm agordilo check");
   });
 });
+
+// Nachlese 5 (Briefing 2026-10-19): specs/018-nachlese-5 carries the briefing unchanged, a plan
+// and tasks with ① (the split of plugin.test.ts, the flaky tests) and ② (the findings).
+describe("Nachlese 5 documentation (specs/018-nachlese-5)", () => {
+  it("the briefing is the one of 2026-10-19, unchanged; plan ① carries the split and the flaky tests", () => {
+    const briefing = read("specs/018-nachlese-5/briefing.md");
+    expect(briefing).toContain(
+      "# Briefing P0 – Nachlese 5 (nach Spec 015, 016 ① und Nachlese 4) – 2026-10-19",
+    );
+    const plan = read("specs/018-nachlese-5/plan.md");
+    for (const heading of [
+      "## ① CI",
+      "### Zusammenfassung",
+      "### Entwurfsentscheidungen",
+      "### Abweichungen vom Briefing",
+      "### Befunde / Mankoj",
+      "### Offen (für den Maintainer)",
+      "## ② Befunde",
+    ]) {
+      expect(plan, heading).toContain(heading);
+    }
+    for (const word of ["plugin-test-helpers.ts", "sxvebilo.spec.ts:53", "716"]) {
+      expect(plan, word).toContain(word);
+    }
+    const tasks = read("specs/018-nachlese-5/tasks.md");
+    expect(tasks).toContain("### Messungen");
+    expect(tasks).toMatch(/rot `[0-9a-f]{7}`/);
+  });
+});
