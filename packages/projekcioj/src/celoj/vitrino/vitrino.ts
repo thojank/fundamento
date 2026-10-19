@@ -2,13 +2,21 @@
 // whole visual layer of one Modelo. It runs in the second phase of the build, because it embeds
 // what the other Celoj wrote: the stylesheet of the CSS Celo and the React-free element bundle of
 // the reference kit. The composing is I/O; the document itself is a pure function.
+//
+// Spec 016 ② (G7, plan ② D-01–D-03): the Vitrino carries a second mode, the Werkstatt. For it the
+// Celo embeds the structure the Agordilo derives over (core and the reference Aspekto, with the
+// fingerprint `fm agordilo derive` writes as the origin), the calibration, the two schemas and the
+// Agordilo itself, bundled for the browser — the same library, no second derivation.
 
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { fingerprintOf, loadCalibration, referenceStructureFiles } from "@fundamento/agordilo";
+import { readConfigSchema, readModeloSchema, referenceAspektoOf } from "@fundamento/modelo";
 import type { Celo, CeloInput, GeneratedFile } from "../../build.js";
 import { kitReferenceAspekto, kitTypesPath } from "../make-kit/make-kit.js";
 import { type VitrinoBazo, vitrinoDatumoj } from "./datumoj.js";
-import { vitrinoHtml } from "./html.js";
+import { vitrinoHtml, type WerkstattDatumoj } from "./html.js";
+import { bundleWerkstatt } from "./werkstatt-bundle.js";
 
 export const VITRINO_FILE = "vitrino/index.html";
 
@@ -18,6 +26,29 @@ export * from "./html.js";
 /** The kit file the Vitrino embeds: the elements without React, for plain HTML. */
 const elementPath = (aspekto: string): string =>
   kitTypesPath(aspekto).replace(/dist\/index\.d\.ts$/, "dist/element.js");
+
+/**
+ * What the Werkstatt needs (plan ② D-02): the structure reduced to core and the reference
+ * Aspekto — the documents `fm agordilo derive` derives over, so browser and CLI agree value for
+ * value — with its fingerprint, the calibration of the Agordilo and the two schemas the Modelo
+ * reads from disk. `undefined` for a Modelo without a reference package: the Vitrino then has no
+ * Werkstatt.
+ */
+export function werkstattDatumoj(input: CeloInput): WerkstattDatumoj | undefined {
+  const files = input.files === undefined ? undefined : referenceStructureFiles(input.files);
+  const reference = referenceAspektoOf(input.modelo);
+  if (files === undefined || reference === undefined) return undefined;
+  const aspektoj = (
+    input.modelo.dimensioj.find((dimensio) => dimensio.name === "aspekto")?.valoroj ?? []
+  ).map((valoro) => valoro.name);
+  return {
+    structure: { files, fingerprint: fingerprintOf(files) },
+    calibration: loadCalibration(),
+    schemas: { modelo: readModeloSchema(), config: readConfigSchema() },
+    reference,
+    aspektoj,
+  };
+}
 
 export const VITRINO_CELO: Celo = {
   name: "vitrino",
@@ -29,6 +60,7 @@ export const VITRINO_CELO: Celo = {
       join(outDir, elementPath(kitReferenceAspekto(input.modelo))),
       "utf8",
     );
+    const werkstatt = werkstattDatumoj(input);
     return [
       {
         path: VITRINO_FILE,
@@ -39,6 +71,7 @@ export const VITRINO_CELO: Celo = {
             input,
             ...(input.bazo === undefined ? {} : { bazo: input.bazo }),
           }),
+          ...(werkstatt === undefined ? {} : { werkstatt, werkstattJs: bundleWerkstatt() }),
         }),
       },
     ];

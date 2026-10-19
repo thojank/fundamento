@@ -4,13 +4,13 @@
 
 import { describe, expect, it } from "vitest";
 import {
+  type Agordo,
+  derivationBasis,
+  deriveAspekto,
   derivePalettes,
   loadCalibration,
   readAgordo,
   readStructure,
-  derivationBasis,
-  deriveAspekto,
-  type Agordo,
 } from "./index.js";
 
 const BASE = { name: "provo", leitfarbe: "#6b4fa0" };
@@ -30,9 +30,12 @@ describe("ziele: a contrast target per step (②)", () => {
     expect(agordoOf({ ...BASE, ziele: { "accent.700": { hell: 7.5 } } }).ziele).toEqual({
       "accent.700": { hell: 7.5 },
     });
+    // A key outside the six palettes fails the property-name pattern of `ziele` (the issue stands
+    // at the object, as Ajv reports propertyNames).
     const bad = readAgordo({ ...BASE, ziele: { "brand.700": { hell: 7.5 } } }, "agordo.json");
     expect(bad.agordo).toBeUndefined();
-    expect(bad.issues.map((issue) => issue.path)).toContain("agordo.json#/ziele/brand.700");
+    expect(bad.issues.map((issue) => issue.path)).toContain("agordo.json#/ziele");
+    expect(bad.issues[0]?.suggestion.length).toBeGreaterThan(0);
     const low = readAgordo({ ...BASE, ziele: { "accent.700": { hell: 0.5 } } }, "agordo.json");
     expect(low.agordo).toBeUndefined();
     expect(low.issues.map((issue) => issue.path)).toContain("agordo.json#/ziele/accent.700/hell");
@@ -81,14 +84,18 @@ describe("ziele: a contrast target per step (②)", () => {
 
   it("the Raporto marks the overridden step and explains a violation it causes as an override, with a patch that resets it", () => {
     const structure = readStructure();
-    // neutral.25 is the raised surface: a target close to the page makes surface-distinct fail.
-    const agordo = agordoOf({ ...BASE, ziele: { "neutral.25": { hell: 1.01 } } });
+    // neutral.25 is the raised surface, neutral.50 the page: the same target for both makes
+    // surface-distinct fail (the calibrated target of neutral.50 in the light mode).
+    const pageTarget = calibration.palettes.neutral.steps["50"]?.light ?? 0;
+    const agordo = agordoOf({ ...BASE, ziele: { "neutral.25": { hell: pageTarget } } });
     const derivation = deriveAspekto(agordo, structure, calibration);
     const row = derivation.raporto.palettes.find(
       (entry) => entry.token === "color.palette.neutral.25" && entry.mode === "light",
     );
     expect(row?.overridden).toBe(true);
-    const violation = derivation.raporto.violations.find((entry) => entry.rule === "surface-distinct");
+    const violation = derivation.raporto.violations.find(
+      (entry) => entry.rule === "surface-distinct",
+    );
     expect(violation).toBeDefined();
     expect(violation?.cause).toMatch(/overrid/i);
     expect(violation?.apply).toEqual({ ziele: { "neutral.25": null } });

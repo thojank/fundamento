@@ -44,7 +44,7 @@ describe("the Vitrino is one self-contained file", () => {
     // request from a script.
     const outside = html
       .replace(/<script type="application\/json"[\s\S]*?<\/script>/g, "")
-      .replace(/<script type="module" id="fm-vitrino-werkstatt">[\s\S]*?<\/script>/, "");
+      .replace(/<script type="module" id="fm-vitrino-werkstatt-skripto">[\s\S]*?<\/script>/, "");
     expect(outside).not.toContain("http://");
     expect(outside).not.toContain("https://");
     expect(html).not.toMatch(/<link[^>]+href=/);
@@ -108,7 +108,11 @@ describe("the Werkstatt in the Vitrino (Spec 016 ②)", () => {
     expect(structure.fingerprint).toMatch(/^[0-9a-f]{64}$/);
     expect(structure.files.packages.map((pkg) => pkg.name)).toEqual(["@fundamento/aspekto-komuna"]);
     expect(structure.files.sets.some((set) => set.name === "core")).toBe(true);
-    expect(structure.files.sets.every((set) => set.package === undefined || set.package === "@fundamento/aspekto-komuna")).toBe(true);
+    expect(
+      structure.files.sets.every(
+        (set) => set.package === undefined || set.package === "@fundamento/aspekto-komuna",
+      ),
+    ).toBe(true);
     for (const document of [...structure.files.sets, ...Object.values(structure.files.data)]) {
       expect(document.file, document.file).not.toMatch(/^\//);
       expect(document.file).not.toContain(tmpdir());
@@ -122,7 +126,9 @@ describe("the Werkstatt in the Vitrino (Spec 016 ②)", () => {
 
   it("bundles the Agordilo for the browser: one module script, no node import, the same derivation", () => {
     const bundle =
-      /<script type="module" id="fm-vitrino-werkstatt">([\s\S]*?)<\/script>/.exec(html)?.[1] ?? "";
+      /<script type="module" id="fm-vitrino-werkstatt-skripto">([\s\S]*?)<\/script>/.exec(
+        html,
+      )?.[1] ?? "";
     expect(bundle.length).toBeGreaterThan(10_000);
     expect(bundle).not.toMatch(/from\s*["']node:/);
     expect(bundle).not.toMatch(/import\s*\(\s*["']node:/);

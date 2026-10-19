@@ -11,6 +11,7 @@ import {
   defaultModeloSource,
   fixtureModeloSource,
   type Modelo,
+  type ModeloFiles,
   type ModeloJson,
   type ModeloSource,
   prepareModeloExport,
@@ -40,6 +41,12 @@ export interface CeloInput {
   bazo?: VitrinoBazo;
   /** The state the build comes from (a commit); the Figma plugin names it in every run. */
   build?: string;
+  /**
+   * The files the Modelo was built from (Spec 016 ②, plan ② D-02): the Werkstatt of the Vitrino
+   * embeds the structure — core and the reference Aspekto — the Agordilo derives over, so the
+   * browser derives over the same documents as `fm agordilo derive`.
+   */
+  files?: ModeloFiles;
 }
 
 /** One generated file: a path relative to the output directory and its text. */
@@ -139,6 +146,7 @@ export function celoInputOf(
       modeloJson: JSON.parse(prepared.files.modeloJson) as ModeloJson,
       rezolvoj: JSON.parse(prepared.files.rezolvojJson) as RezolvojJson,
       env: process.env,
+      files,
     },
     warnings: prepared.warnings,
   };

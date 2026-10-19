@@ -9,12 +9,11 @@ import {
   type ModeloFiles,
   readModeloFiles,
   referenceAspektoPackageDir,
-  serializeCanonicalJson,
   type ValidationIssue,
   withAspektoPackages,
 } from "@fundamento/modelo";
 import type { Calibration } from "../calibration.js";
-import { type Structure, structureDocuments } from "../structure.js";
+import { fingerprintDocuments, type Structure } from "../structure.js";
 
 /** data/calibration.json of this package; valid from both `src/node/` and `dist/node/`. */
 export const CALIBRATION_URL = new URL("../../data/calibration.json", import.meta.url);
@@ -36,9 +35,7 @@ function filesOrThrow(result: { files?: ModeloFiles; issues: ValidationIssue[] }
 
 /** SHA-256 of the structure documents in canonical JSON (G1: the origin of a derived Aspekto). */
 export function fingerprintOf(files: ModeloFiles): string {
-  return createHash("sha256")
-    .update(serializeCanonicalJson(structureDocuments(files)))
-    .digest("hex");
+  return createHash("sha256").update(fingerprintDocuments(files)).digest("hex");
 }
 
 function structureOf(files: ModeloFiles): Structure {

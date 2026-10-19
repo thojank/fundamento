@@ -60,8 +60,10 @@ export interface DerivedStep extends StepSolution {
   mode: Mode;
   /** The calibrated target of komuna in this mode. */
   calibrated: number;
-  /** The target after the sliders and the floors. */
+  /** The target after the sliders and the floors — or the overridden target (ziele), floored. */
   target: number;
+  /** Present when the Agordo overrides the target of this step in this mode (Spec 016 ②, G7). */
+  overridden?: true;
   /** The chroma the step asked for. */
   requested: number;
   hex: string;
@@ -148,11 +150,21 @@ export function transformTarget(
   const gamma = 1 + KONTRAST_SPREAD * kontrast;
   const spread = position ** gamma / (position ** gamma + (1 - position) ** gamma);
   const moved = spread ** (1 + HELLIGKEIT_POWER * helligkeit);
-  let result = Math.exp(Math.min(1, Math.max(0, moved)) * scale);
-  const onBlack = MAX_CONTRAST / target;
+  const result = Math.exp(Math.min(1, Math.max(0, moved)) * scale);
+  return floored(result, target, floors);
+}
+
+/**
+ * The floors (G4): a target that reached a threshold of kontrastSojloj (with the reserve of
+ * contrast-reserve) against white or against black keeps reaching it, whatever moved it — the
+ * sliders or an override of the Werkstatt (ziele, Spec 016 ②).
+ */
+export function floored(moved: number, calibrated: number, floors: TargetFloors): number {
+  let result = moved;
+  const onBlack = MAX_CONTRAST / calibrated;
   for (const threshold of floors.thresholds) {
     const floor = threshold * (1 + floors.reserve);
-    if (target >= threshold) result = Math.max(result, Math.min(target, floor));
+    if (calibrated >= threshold) result = Math.max(result, Math.min(calibrated, floor));
     if (onBlack >= threshold) result = Math.min(result, MAX_CONTRAST / Math.min(onBlack, floor));
   }
   return result;
@@ -179,7 +191,13 @@ function solve(
   const requested = source.chroma * calibrated.chroma * (agordo.regler?.saettigung ?? 1);
   // The sliders act on the light scale; a dark target is its mirror on black (t · t' = 21).
   const lightTarget = mode === "light" ? calibrated.light : MAX_CONTRAST / calibrated.dark;
-  const moved = transformTarget(lightTarget, agordo.regler, floors);
+  // An override of the Werkstatt (ziele, Spec 016 ② G7) is the target itself: the sliders leave
+  // it alone, the floors of kontrastSojloj still hold.
+  const own = agordo.ziele?.[`${palette}.${step}`]?.[mode === "light" ? "hell" : "dunkel"];
+  const moved =
+    own === undefined
+      ? transformTarget(lightTarget, agordo.regler, floors)
+      : floored(mode === "light" ? own : MAX_CONTRAST / own, lightTarget, floors);
   const target = mode === "light" ? moved : MAX_CONTRAST / moved;
   const solution = solveStep({
     target,
@@ -194,6 +212,7 @@ function solve(
     mode,
     calibrated: mode === "light" ? calibrated.light : calibrated.dark,
     target,
+    ...(own === undefined ? {} : { overridden: true as const }),
     requested,
     hex: hexOf(solution.components),
   };

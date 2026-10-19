@@ -31,7 +31,10 @@ describe("provideModeloSchemas (②)", () => {
   });
 
   it("is taken back with undefined: the files on disk apply again", () => {
-    provideModeloSchemas({ modelo: { $id: MODELO_SCHEMA_ID, type: "object" }, config: { type: "object" } });
+    provideModeloSchemas({
+      modelo: { $id: MODELO_SCHEMA_ID, type: "object" },
+      config: { type: "object" },
+    });
     expect(readModeloSchema().$defs).toBeUndefined();
     provideModeloSchemas(undefined);
     expect(readModeloSchema().$defs).toBeDefined();

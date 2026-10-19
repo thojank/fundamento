@@ -3,8 +3,24 @@
 // from the build. Every colour stands in a table row next to its token name and its measurement,
 // so colour is never the only information (WCAG 1.4.1).
 
+import type { Calibration } from "@fundamento/agordilo";
+import type { ModeloFiles } from "@fundamento/modelo";
 import { VITRINO_SURFACE, type VitrinoDatumoj } from "./datumoj.js";
 import { vitrinoSkripto } from "./skripto.js";
+
+/**
+ * The data island of the Werkstatt (Spec 016 ②, plan ② D-02): what the Agordilo needs to derive
+ * and check in the browser. Every path in it is relative to the Modelo root; no machine path.
+ */
+export interface WerkstattDatumoj {
+  structure: { files: ModeloFiles; fingerprint: string };
+  calibration: Calibration;
+  schemas: { modelo: Record<string, unknown>; config: Record<string, unknown> };
+  /** The reference Aspekto the draft is derived over (komuna). */
+  reference: string;
+  /** Every Aspekto of the build, for the comparison. */
+  aspektoj: string[];
+}
 
 export interface VitrinoInput {
   /** The CSS Celo's stylesheet with every Aspekto and Dimensio. */
@@ -12,6 +28,9 @@ export interface VitrinoInput {
   /** The bundled, React-free element module of the reference kit. */
   elementJs: string;
   datumoj: VitrinoDatumoj;
+  /** The Werkstatt (Spec 016 ②): its data island and the bundled Agordilo; absent without a reference Aspekto. */
+  werkstatt?: WerkstattDatumoj;
+  werkstattJs?: string;
 }
 
 const escapeHtml = (text: string): string =>
@@ -38,9 +57,31 @@ th, td { text-align: start; padding: var(--fm-spacing-small); border-block-end: 
 .fm-group button { font: inherit; padding: var(--fm-spacing-small); background-color: var(--fm-color-action-secondary-rest); color: var(--fm-color-action-secondary-text); border: var(--fm-border-width-default) solid var(--fm-color-border-default); border-radius: var(--fm-radius-role-control); cursor: pointer; }
 .fm-group button[aria-pressed="true"] { background-color: var(--fm-color-action-primary-rest); color: var(--fm-color-action-primary-text); }
 .fm-row { display: flex; align-items: center; gap: var(--fm-spacing-small); }
-[hidden] { display: none !important; }`;
+[hidden] { display: none !important; }
+/* The Werkstatt (Spec 016 ②): the panel beside the report, the palettes and the comparison below. */
+#fm-vitrino-werkstatt { gap: var(--fm-spacing-large); }
+.fm-werkstatt-kolumnoj { display: grid; grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr)); gap: var(--fm-spacing-large); align-items: start; }
+.fm-werkstatt-panelo, .fm-werkstatt-raporto { display: flex; flex-direction: column; gap: var(--fm-spacing-medium); }
+.fm-werkstatt-regilo { display: grid; grid-template-columns: 1fr auto; gap: var(--fm-spacing-small); align-items: center; }
+.fm-werkstatt-regilo input[type="range"] { grid-column: 1 / -1; inline-size: 100%; accent-color: var(--fm-color-action-primary-rest); }
+.fm-werkstatt-regilo output { font-variant-numeric: tabular-nums; }
+.fm-werkstatt-koloro { display: grid; grid-template-columns: auto 1fr; gap: var(--fm-spacing-small); align-items: end; }
+.fm-werkstatt-koloro input[type="color"] { inline-size: 2.75rem; block-size: 2.75rem; padding: 0; border: var(--fm-border-width-default) solid var(--fm-color-border-default); border-radius: var(--fm-radius-role-control); background: none; }
+.fm-werkstatt-stato { margin: 0; padding: var(--fm-spacing-small); border: var(--fm-border-width-default) solid var(--fm-color-border-subtle); border-radius: var(--fm-radius-role-control); }
+.fm-werkstatt-zahloj { display: flex; flex-wrap: wrap; gap: var(--fm-spacing-small); align-items: center; margin: 0; }
+.fm-werkstatt-zahloj dt { font-size: var(--fm-typography-label-1-font-size); }
+.fm-werkstatt-zahloj dd { margin: 0; }
+.fm-werkstatt-zahloj div { display: flex; gap: var(--fm-spacing-small); align-items: center; }
+#fm-werkstatt-malobservoj { padding-inline-start: var(--fm-spacing-large); display: flex; flex-direction: column; gap: var(--fm-spacing-medium); }
+#fm-werkstatt-malobservoj li { border-block-end: var(--fm-border-width-default) solid var(--fm-color-border-subtle); padding-block-end: var(--fm-spacing-small); }
+#fm-werkstatt-malobservoj p { margin: 0 0 var(--fm-spacing-small); }
+.fm-werkstatt-celo { inline-size: 5.5rem; font: inherit; padding: var(--fm-spacing-small); border: var(--fm-border-width-default) solid var(--fm-color-border-default); border-radius: var(--fm-radius-role-control); background-color: var(--fm-color-background-default); color: var(--fm-color-text-default); }
+tr[data-fm-superskribita="true"] th { text-decoration: underline; }
+.fm-werkstatt-flankoj { display: grid; grid-template-columns: repeat(auto-fit, minmax(24rem, 1fr)); gap: var(--fm-spacing-large); align-items: start; }
+[data-fm-side] { padding: var(--fm-spacing-large); background-color: var(--fm-${VITRINO_SURFACE.replaceAll(".", "-")}); color: var(--fm-color-text-default); font-family: var(--fm-typography-body-1-font-family); border: var(--fm-border-width-default) solid var(--fm-color-border-subtle); display: flex; flex-direction: column; gap: var(--fm-spacing-large); }
+.fm-werkstatt-kasxita { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }`;
 
-function switcher(datumoj: VitrinoDatumoj): string {
+function switcher(datumoj: VitrinoDatumoj, werkstatt: boolean): string {
   const dimensioj = datumoj.dimensioj
     .map((dimensio) => {
       const buttons = dimensio.valoroj
@@ -58,13 +99,25 @@ function switcher(datumoj: VitrinoDatumoj): string {
         `<button type="button" data-fm-switch="aspekto" data-fm-valoro="${escapeHtml(aspekto)}" aria-pressed="${aspekto === datumoj.aspektoj[0]}">${escapeHtml(aspekto)}</button>`,
     )
     .join("");
-  return `<div class="fm-group" role="group" aria-label="aspekto"><span>aspekto</span>${aspektoj}</div>${dimensioj}
+  // Spec 016 ② (G7): the mode — Ansehen, or the Werkstatt where a brand is derived live. The
+  // mode stands in the fragment (modus=werkstatt), so a link leads straight into the workshop.
+  const modus = `<div class="fm-group" role="group" aria-label="Modus"><span>Modus</span><button type="button" data-fm-modus="ansehen" aria-pressed="true">Ansehen</button><button type="button" data-fm-modus="werkstatt" aria-pressed="false"${werkstatt ? "" : " disabled"}>Werkstatt</button></div>`;
+  return `${modus}<div class="fm-group" role="group" aria-label="aspekto"><span>aspekto</span>${aspektoj}</div>${dimensioj}
 <div class="fm-group"><button type="button" id="fm-vitrino-komparo-switch">Zur Gegenüberstellung</button></div>`;
 }
 
-/** A section; one the header's button leads to takes the focus (`tabindex="-1"`). */
-const section = (id: string, title: string, body: string, focusable = false): string =>
-  `<section id="fm-vitrino-${id}"${focusable ? ' tabindex="-1"' : ""}><h2>${escapeHtml(title)}</h2>${body}</section>`;
+/**
+ * A section; one the header's button leads to takes the focus (`tabindex="-1"`). A section of the
+ * Ansehen mode that the Werkstatt replaces says so (`data-fm-modus-only`); the Eroj stay in both.
+ */
+const section = (
+  id: string,
+  title: string,
+  body: string,
+  focusable = false,
+  modusOnly?: "ansehen" | "werkstatt",
+): string =>
+  `<section id="fm-vitrino-${id}"${focusable ? ' tabindex="-1"' : ""}${modusOnly === undefined ? "" : ` data-fm-modus-only="${modusOnly}"${modusOnly === "werkstatt" ? " hidden" : ""}`}><h2>${escapeHtml(title)}</h2>${body}</section>`;
 
 /** `butono` → `Butono`, for the question of a section. */
 const capitalised = (name: string): string => name.charAt(0).toUpperCase() + name.slice(1);
@@ -239,8 +292,24 @@ function roleTable(caption: string, rows: VitrinoDatumoj["roloj"][string]["surfa
   );
 }
 
+/**
+ * The shell of the Werkstatt (Spec 016 ②, plan ② D-04): the bundled script fills it — panel,
+ * report, palettes and comparison are built from the data, in the browser, on first use.
+ */
+function werkstattShell(werkstatt: WerkstattDatumoj | undefined): string {
+  if (werkstatt === undefined)
+    return "<p>Kein Referenz-Aspekto im Modelo; die Werkstatt braucht eine.</p>";
+  return `<div data-fm-referenco="${escapeHtml(werkstatt.reference)}" id="fm-werkstatt-ujo"><p>Die Werkstatt lädt den Agordilo …</p></div>`;
+}
+
 /** The whole document; `datumoj` decides everything that is shown. */
-export function vitrinoHtml({ css, elementJs, datumoj }: VitrinoInput): string {
+export function vitrinoHtml({
+  css,
+  elementJs,
+  datumoj,
+  werkstatt,
+  werkstattJs,
+}: VitrinoInput): string {
   const first = datumoj.kombinoj[0] ?? "";
   const attributes = datumoj.dimensioj
     .map((dimensio) => ` data-fm-${dimensio.name}="${escapeHtml(dimensio.default)}"`)
@@ -259,27 +328,30 @@ export function vitrinoHtml({ css, elementJs, datumoj }: VitrinoInput): string {
 <title>Fundamento Vitrino</title>
 <style id="fm-vitrino-css">${css}</style>
 <style id="fm-vitrino-layout">${LAYOUT}</style>
-<script type="application/json" id="fm-vitrino">${jsonIsland(datumoj)}</script>
+<script type="application/json" id="fm-vitrino">${jsonIsland({ ...datumoj, werkstatt: werkstatt !== undefined })}</script>
+${werkstatt === undefined ? "" : `<script type="application/json" id="fm-werkstatt">${jsonIsland(werkstatt)}</script>`}
 </head>
 <body data-fm-kombino="${escapeHtml(first)}">
 <header id="fm-vitrino-kapo">
   <h1>Fundamento Vitrino <small>v${escapeHtml(datumoj.fundamento)}</small></h1>
-  ${switcher(datumoj)}
+  ${switcher(datumoj, werkstatt !== undefined)}
 </header>
 <main>
-${section("paletroj", "Paletten", paletroj(datumoj))}
-${section("roloj", "Flächen, Text, Status und Aktionen", roles)}
+${section("werkstatt", "Werkstatt", werkstattShell(werkstatt), true, "werkstatt")}
+${section("paletroj", "Paletten", paletroj(datumoj), false, "ansehen")}
+${section("roloj", "Flächen, Text, Status und Aktionen", roles, false, "ansehen")}
 ${Object.entries(datumoj.eroj)
   .map(([ero, markup]) => section(ero, ero, markup))
   .join("\n")}
-${section("uzo", "Gebrauch", uzo(datumoj))}
-${section("kontrasto", "Kontrastmatrix", '<div id="fm-vitrino-kontrasto-tabelo"></div>')}
-${section("regularo", "Regularo und Ziele", '<div id="fm-vitrino-regularo-tabelo"></div>')}
-${section("kovrado", "Eigene Werte je Dimensio", '<div id="fm-vitrino-kovrado-tabelo"></div>')}
-${section("komparo", "Gegenüberstellung", '<div id="fm-vitrino-komparo-tabelo"></div>', true)}
+${section("uzo", "Gebrauch", uzo(datumoj), false, "ansehen")}
+${section("kontrasto", "Kontrastmatrix", '<div id="fm-vitrino-kontrasto-tabelo"></div>', false, "ansehen")}
+${section("regularo", "Regularo und Ziele", '<div id="fm-vitrino-regularo-tabelo"></div>', false, "ansehen")}
+${section("kovrado", "Eigene Werte je Dimensio", '<div id="fm-vitrino-kovrado-tabelo"></div>', false, "ansehen")}
+${section("komparo", "Gegenüberstellung", '<div id="fm-vitrino-komparo-tabelo"></div>', true, "ansehen")}
 </main>
 <script type="module" id="fm-vitrino-elemento">${elementJs}</script>
 <script type="module" id="fm-vitrino-skripto">${vitrinoSkripto()}</script>
+${werkstattJs === undefined ? "" : `<script type="module" id="fm-vitrino-werkstatt-skripto">${werkstattJs.replaceAll("</script", "<\\/script")}</script>`}
 </body>
 </html>
 `;

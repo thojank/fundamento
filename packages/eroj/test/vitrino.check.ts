@@ -714,10 +714,7 @@ test("fm-avataro is upgraded in its section, the picture loaded, the initials wh
 // CLI, the tempo (M3) and the accessibility of the workshop itself.
 import { deflateRawSync } from "node:zlib";
 
-const PROVO_DIR = new URL(
-  "../../modelo/test/fixtures/valid/aspekto-provo/",
-  import.meta.url,
-);
+const PROVO_DIR = new URL("../../modelo/test/fixtures/valid/aspekto-provo/", import.meta.url);
 const provoAgordo = JSON.parse(readFileSync(new URL("agordo.json", PROVO_DIR), "utf8")) as Record<
   string,
   unknown
@@ -760,7 +757,9 @@ async function openWerkstatt(page: Page, agordo?: unknown): Promise<string[]> {
 
 const state = (page: Page) => page.evaluate(() => fmWerkstatt.state);
 const checkedAtLeast = (page: Page, count: number) =>
-  expect.poll(() => page.evaluate(() => fmWerkstatt.state.checked), { timeout: 60_000 }).toBeGreaterThanOrEqual(count);
+  expect
+    .poll(() => page.evaluate(() => fmWerkstatt.state.checked), { timeout: 60_000 })
+    .toBeGreaterThanOrEqual(count);
 
 /** The computed fill of the first primary butono of the Vitrino's own sections. */
 const primaryFill = (page: Page) =>
@@ -776,7 +775,7 @@ test.describe("the Werkstatt (Spec 016 ②)", () => {
   }) => {
     const problems = await open(page);
     await expect(page.locator("#fm-vitrino-werkstatt")).toBeHidden();
-    await page.locator('[data-fm-modus="werkstatt"]').click();
+    await page.locator('button[data-fm-modus="werkstatt"]').click();
     await expect(page.locator("#fm-vitrino-werkstatt")).toBeVisible();
     expect(await page.evaluate(() => location.hash)).toContain("modus=werkstatt");
     // The sections of the Ansehen mode that the Werkstatt replaces are hidden; the Eroj stay.
@@ -786,7 +785,9 @@ test.describe("the Werkstatt (Spec 016 ②)", () => {
     const panel = page.locator("#fm-werkstatt-panelo");
     await expect(panel.locator("fm-kampo#fm-werkstatt-nomo")).toHaveCount(1);
     await expect(panel.locator("fm-kampo#fm-werkstatt-leitfarbe")).toHaveCount(1);
-    await expect(panel.locator("input[type='color']#fm-werkstatt-leitfarbe-elektilo")).toHaveCount(1);
+    await expect(panel.locator("input[type='color']#fm-werkstatt-leitfarbe-elektilo")).toHaveCount(
+      1,
+    );
     for (const status of ["success", "warning", "danger", "info"]) {
       await expect(panel.locator(`fm-markobutono#fm-werkstatt-${status}-standard`)).toHaveCount(1);
       await expect(panel.locator(`fm-kampo#fm-werkstatt-${status}`)).toHaveCount(1);
@@ -804,7 +805,7 @@ test.describe("the Werkstatt (Spec 016 ②)", () => {
     await page.locator('[data-fm-switch="color-scheme"][data-fm-valoro="dark"]').click();
     await expect.poll(() => primaryFill(page)).not.toBe(before);
     // Back to Ansehen: komuna's values return.
-    await page.locator('[data-fm-modus="ansehen"]').click();
+    await page.locator('button[data-fm-modus="ansehen"]').click();
     await page.locator('[data-fm-switch="color-scheme"][data-fm-valoro="light"]').click();
     await expect(page.locator("#fm-vitrino-werkstatt")).toBeHidden();
     await expect.poll(() => primaryFill(page)).toBe(before);
@@ -818,7 +819,9 @@ test.describe("the Werkstatt (Spec 016 ②)", () => {
     await checkedAtLeast(page, 1);
     const report = page.locator("#fm-werkstatt-raporto");
     await expect(report.locator('[data-fm-raporto="violations-adjustable"]')).not.toHaveText("0");
-    const violation = page.locator('#fm-werkstatt-malobservoj li[data-fm-regulo="palette-aligned"]').first();
+    const violation = page
+      .locator('#fm-werkstatt-malobservoj li[data-fm-regulo="palette-aligned"]')
+      .first();
     await expect(violation).toBeVisible();
     await expect(violation).toContainText("palette-aligned");
     await expect(violation.locator("[data-fm-kialo]")).not.toBeEmpty();
@@ -832,9 +835,13 @@ test.describe("the Werkstatt (Spec 016 ②)", () => {
     await expect(page.locator("#fm-werkstatt-elsxuti-kialo")).toContainText("Jugxo");
     // A click on the violation jumps to the section that shows the pair, or to the palettes.
     await violation.locator("[data-fm-salto]").click();
-    await expect.poll(() => page.evaluate(() => document.activeElement?.id)).toMatch(/^fm-(vitrino|werkstatt)-/);
+    await expect
+      .poll(() => page.evaluate(() => document.activeElement?.id))
+      .toMatch(/^fm-(vitrino|werkstatt)-/);
     // A click on the suggestion applies it to the panel: the darker lead colour the text names.
-    const suggested = await violation.locator("[data-fm-apliki]").getAttribute("data-fm-apliki-leitfarbe");
+    const suggested = await violation
+      .locator("[data-fm-apliki]")
+      .getAttribute("data-fm-apliki-leitfarbe");
     expect(suggested).toMatch(/^#[0-9a-f]{6}$/);
     await violation.locator("[data-fm-apliki]").click();
     await expect(page.locator("#fm-werkstatt-leitfarbe")).toHaveAttribute("value", suggested ?? "");
@@ -854,16 +861,27 @@ test.describe("the Werkstatt (Spec 016 ②)", () => {
     await page.locator("#fm-werkstatt-jugxo-malfermi").click();
     const dialog = page.getByRole("dialog");
     await expect(dialog).toBeVisible();
-    await dialog.locator('[part="reason"]').locator("textarea").fill("Das Gelb der Marke bleibt; die Rampe darf abweichen.");
+    await dialog
+      .locator('[part="reason"]')
+      .locator("textarea")
+      .fill("Das Gelb der Marke bleibt; die Rampe darf abweichen.");
     await page.locator("#fm-werkstatt-jugxo-dato").locator("input").fill("2026-10-19");
     await page.locator("#fm-werkstatt-jugxo-nomo").locator("input").fill("Test Maintainer");
-    await dialog.locator("fm-butono[emphasis='high']").click();
+    // The actions are slotted children of the host, not descendants of the platform's dialog.
+    await page.locator("#fm-werkstatt-jugxo fm-butono[emphasis='high']").click();
     await expect(dialog).toHaveCount(0);
-    await expect.poll(() => page.evaluate(() => fmWerkstatt.state.raporto?.summary.exportable), { timeout: 60_000 }).toBe(true);
+    await expect
+      .poll(() => page.evaluate(() => fmWerkstatt.state.raporto?.summary.exportable), {
+        timeout: 60_000,
+      })
+      .toBe(true);
     await expect(download).not.toHaveAttribute("disabled", "");
     const [file] = await Promise.all([page.waitForEvent("download"), download.click()]);
     const text = readFileSync(await file.path(), "utf8");
-    const agordo = JSON.parse(text) as { name: string; jugxoj: { regulo: string; date: string; name: string }[] };
+    const agordo = JSON.parse(text) as {
+      name: string;
+      jugxoj: { regulo: string; date: string; name: string }[];
+    };
     expect(file.suggestedFilename()).toBe("agordo.json");
     expect(agordo.name).toBe("flava");
     expect(agordo.jugxoj.map((jugxo) => jugxo.regulo)).toContain("palette-aligned");
@@ -871,15 +889,27 @@ test.describe("the Werkstatt (Spec 016 ②)", () => {
     // The Jugxo stands in the Agordo and travels in the fragment.
     expect(await page.evaluate(() => location.hash)).toContain("agordo=");
 
-    // A fixed rule (state-distinct with provo's sliders on the yellow, plan ① O-8): locked, with
-    // its reason, even with a Jugxo.
+    // A fixed rule (state-distinct: provo's Agordo with the yellow as lead colour, plan ① O-8,
+    // measured by the maintainer): locked, with its reason, even with a Jugxo for every
+    // adjustable rule. A fresh load: the same URL with another fragment would not reload, and
+    // the counter of the first case would already stand.
+    await page.goto("about:blank");
     await openWerkstatt(page, {
-      name: "flava",
+      ...provoAgordo,
       leitfarbe: "#F5C400",
-      regler: { helligkeit: 0.1, kontrast: 0.1, saettigung: 1.1 },
       jugxoj: [
-        { regulo: "palette-aligned", kialo: "Recorded.", date: "2026-10-19", name: "Test Maintainer" },
-        { regulo: "surface-distinct", kialo: "Recorded.", date: "2026-10-19", name: "Test Maintainer" },
+        {
+          regulo: "palette-aligned",
+          kialo: "Recorded.",
+          date: "2026-10-19",
+          name: "Test Maintainer",
+        },
+        {
+          regulo: "surface-distinct",
+          kialo: "Recorded.",
+          date: "2026-10-19",
+          name: "Test Maintainer",
+        },
       ],
     });
     await checkedAtLeast(page, 1);
@@ -924,9 +954,15 @@ test.describe("the Werkstatt (Spec 016 ②)", () => {
     const draft = komparo.locator('[data-fm-side="draft"]');
     const reference = komparo.locator('[data-fm-side="reference"]');
     await expect(draft.locator("fm-butono[emphasis='high']").first()).toBeVisible();
-    expect(await draft.locator("fm-butono").count()).toBe(await reference.locator("fm-butono").count());
+    expect(await draft.locator("fm-butono").count()).toBe(
+      await reference.locator("fm-butono").count(),
+    );
     const fill = (side: typeof draft) =>
-      side.locator("fm-butono[emphasis='high']").first().locator("button").evaluate((element) => getComputedStyle(element).backgroundColor);
+      side
+        .locator("fm-butono[emphasis='high']")
+        .first()
+        .locator("button")
+        .evaluate((element) => getComputedStyle(element).backgroundColor);
     expect(await fill(draft)).not.toBe(await fill(reference));
     const komunaFill = await fill(reference);
     await page.locator("#fm-werkstatt-referenco").locator("select").selectOption("ekzemplo");
@@ -944,11 +980,16 @@ test.describe("the Werkstatt (Spec 016 ②)", () => {
     await expect(page.locator("#fm-werkstatt-nomo")).toHaveAttribute("value", "provo");
     await expect(page.locator("#fm-werkstatt-leitfarbe")).toHaveAttribute("value", "#6b4fa0");
     await expect(page.locator("#fm-werkstatt-toenung")).toHaveValue("0.4");
+    const before = await page.evaluate(() => location.hash);
     await page.locator("#fm-werkstatt-toenung").fill("0.7");
-    await expect.poll(() => page.evaluate(() => location.hash)).toMatch(/agordo=[A-Za-z0-9_-]+/);
+    // The fragment is written debounced: wait until it carries the new Agordo, not the old one.
+    await expect.poll(() => page.evaluate(() => location.hash)).not.toBe(before);
     const hash = await page.evaluate(() => location.hash);
+    expect(hash).toMatch(/agordo=[A-Za-z0-9_-]+/);
     expect(hash).not.toContain("provo");
-    // The same link in a fresh page restores the state.
+    // The same link in a fresh page restores the state (about:blank first: the same URL alone
+    // would only be a fragment change).
+    await page.goto("about:blank");
     await open(page, hash);
     await expect(page.locator("#fm-vitrino-werkstatt")).toBeVisible();
     await expect(page.locator("#fm-werkstatt-toenung")).toHaveValue("0.7");
@@ -973,7 +1014,8 @@ test.describe("the Werkstatt (Spec 016 ②)", () => {
     expect(timings.check).toHaveLength(50);
     const stat = (values: number[]) => {
       const sorted = [...values].sort((a, b) => a - b);
-      const at = (share: number) => sorted[Math.min(sorted.length - 1, Math.floor(share * sorted.length))] ?? 0;
+      const at = (share: number) =>
+        sorted[Math.min(sorted.length - 1, Math.floor(share * sorted.length))] ?? 0;
       return { median: at(0.5), p95: at(0.95) };
     };
     const derive = stat(timings.derive);
@@ -993,7 +1035,9 @@ test.describe("the Werkstatt (Spec 016 ②)", () => {
     await expect(status).toHaveAttribute("aria-live", "polite");
     await expect(status).toContainText(/\d+ von \d+/);
     // The suggestion is a button: Enter applies it.
-    const apply = page.locator('#fm-werkstatt-malobservoj li[data-fm-regulo="palette-aligned"] [data-fm-apliki]').first();
+    const apply = page
+      .locator('#fm-werkstatt-malobservoj li[data-fm-regulo="palette-aligned"] [data-fm-apliki]')
+      .first();
     await apply.focus();
     await page.keyboard.press("Enter");
     await expect(page.locator("#fm-werkstatt-leitfarbe")).not.toHaveAttribute("value", "#F5C400");
