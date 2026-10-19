@@ -411,7 +411,18 @@
             "empty"
           ]
         },
-        "kialo": "Who learns the allowed files only from the error makes the mistake twice: a field with accept states the kinds and the size in its help, 'PDF, höchstens 5 MB' (file-constraints-stated)."
+        "kialo": "Who learns the allowed files only from the error makes the mistake twice: a field with accept or max-size states the kinds and the size in its help, 'PDF, höchstens 5 MB' (file-constraints-stated)."
+      },
+      {
+        "when": {
+          "slot:help": "empty"
+        },
+        "allowed": {
+          "prop:max-size": [
+            "empty"
+          ]
+        },
+        "kialo": "Who learns the allowed files only from the error makes the mistake twice: a field with accept or max-size states the kinds and the size in its help, 'PDF, höchstens 5 MB' (file-constraints-stated)."
       }
     ],
     "goals": [

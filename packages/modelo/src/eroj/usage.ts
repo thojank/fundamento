@@ -16,6 +16,7 @@ import type {
 } from "../generated/modelo-schema.js";
 import {
   describeCombination,
+  FILLABLE_KINDS,
   forbiddenBy,
   PROP_KEY_PREFIX,
   SLOT_EMPTY,
@@ -393,13 +394,14 @@ export function slotStates(skemo: Skemo, instance: EroInstance): Record<string, 
 }
 
 /**
- * Whether each string prop of the Skemo is filled in an instance (Spec 011 ①, plan ① D-08): a
- * non-empty text, or a number. Keyed `prop:<name>`, so a constraint can read it like a slot.
+ * Whether each string or number prop of the Skemo is filled in an instance (Spec 011 ①, plan ①
+ * D-08; Nachlese 5 O-10: a number too): a non-empty text, or a number. Keyed `prop:<name>`, so a
+ * constraint can read it like a slot. What the instance gives counts, never the Skemo's default.
  */
 export function propStates(skemo: Skemo, instance: EroInstance): Record<string, string> {
   const states: Record<string, string> = {};
   for (const prop of skemo.props) {
-    if (prop.kind !== "string") continue;
+    if (!FILLABLE_KINDS.has(prop.kind)) continue;
     const given = instance.props[prop.name];
     const filled = (typeof given === "string" && given.trim() !== "") || typeof given === "number";
     states[`${PROP_KEY_PREFIX}${prop.name}`] = filled ? SLOT_FILLED : SLOT_EMPTY;

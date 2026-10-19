@@ -177,10 +177,12 @@ describe("Skemo ↔ Vortaro rules (T005)", () => {
     expect(
       withProps([
         { when: { "prop:flag": "filled" }, allowed: { "prop:count": ["seven"] }, kialo: "No." },
-      ]).map((issue) => issue.path),
+      ])
+        .map((issue) => issue.path)
+        .sort(),
     ).toEqual([
-      `${FILE}#/skemo/constraints/0/when/prop:flag`,
       `${FILE}#/skemo/constraints/0/allowed/prop:count`,
+      `${FILE}#/skemo/constraints/0/when/prop:flag`,
     ]);
   });
 

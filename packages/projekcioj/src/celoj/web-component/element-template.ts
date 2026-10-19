@@ -1108,18 +1108,25 @@ ${
   host === "input" || isSuggest
     ? `      // A number is a text input with a numeric keyboard and a whole-number pattern (Spec 011 ①,
       // E8; GOV.UK: type=number changes its value with the wheel and the arrows); a date is the
-      // platform's own dialog; a password hides what is typed. Every other kind is its type.
-      control.type = kind === "number" ? "text" : kind;
+      // platform's own dialog; a password hides what is typed. Nachlese 5 O-14: an address and a
+      // web address are text inputs like the number, each with the keyboard of its kind — the
+      // platform would judge their form on the native input and show its message as a bubble.
+      // Every other kind is its type.
+      const inputMode = kind === "number" ? "numeric" : kind === "email" || kind === "url" ? kind : "";
+      control.type = inputMode === "" ? kind : "text";
       // B-1 (Spec 015 ② D-11): no pattern on the native input; the element checks the whole number
       // itself (#validate), so the platform has no message to show as a bubble.
       control.removeAttribute("pattern");
-      if (kind === "number") control.setAttribute("inputmode", "numeric");
+      if (inputMode !== "") control.setAttribute("inputmode", inputMode);
       else control.removeAttribute("inputmode");
-      // What the platform fills in, and the bounds of a number or a date (the platform checks
-      // them on a date; the element on a number, below).
+      // What the platform fills in, and the bounds of a number or a date. The element checks both
+      // bounds itself (#validate); on a date they stand for the platform's dialog only, and only
+      // while the date lies within them (O-14), so the native input is never invalid for a bound.
+      const dateOutside = kind === "date" && this.#dateOutside(String(this.propValue("value") ?? ""), this.propValue("min"), this.propValue("max")) !== "";
       for (const attribute of ["autocomplete", "min", "max"]) {
         const given = this.propValue(attribute);
-        if (typeof given === "string" && given !== "") control.setAttribute(attribute, given);
+        const bound = attribute !== "autocomplete";
+        if (typeof given === "string" && given !== "" && !(bound && dateOutside)) control.setAttribute(attribute, given);
         else control.removeAttribute(attribute);
       }
 `
@@ -1205,13 +1212,24 @@ ${
       if (typeof min === "string" && min !== "" && number < Number(min)) flags = { rangeUnderflow: true };
       else if (typeof max === "string" && max !== "" && number > Number(max)) flags = { rangeOverflow: true };
       if (own === "") message = this.#platformMessage(text, min, max);
-    } else if (kind === "date" && !control.validity.valid) {
-      flags = {
-        badInput: control.validity.badInput,
-        rangeUnderflow: control.validity.rangeUnderflow,
-        rangeOverflow: control.validity.rangeOverflow,
-      };
+    } else if (kind === "date" && control.validity.badInput) {
+      // A date typed only in part: the platform knows it, and only the platform can say it.
+      flags = { badInput: true };
       if (own === "") message = control.validationMessage;
+    } else if (kind === "date" && text !== "") {
+      // Nachlese 5 O-14: the bounds of a date are the element's, as those of a whole number: a date
+      // is YYYY-MM-DD, which compares as text; the words are a probe date's.
+      const min = this.propValue("min");
+      const max = this.propValue("max");
+      const outside = this.#dateOutside(text, min, max);
+      if (outside === "under") flags = { rangeUnderflow: true };
+      else if (outside === "over") flags = { rangeOverflow: true };
+      if (outside !== "" && own === "") message = this.#probeMessage("date", text, min, max);
+    } else if ((kind === "email" || kind === "url") && text !== "" && this.#formMismatch(kind, text)) {
+      // Nachlese 5 O-14: the form of an address or a web address is judged by a probe of its kind,
+      // with the platform's grammar and words (the shown input is a text input).
+      flags = { typeMismatch: true };
+      if (own === "") message = this.#probeMessage(kind, text, undefined, undefined);
     }
     const wrong = Object.values(flags).some((flag) => flag === true);
     if (wrong && message !== "") this.#internals.setValidity(flags, message, control);
@@ -1232,6 +1250,43 @@ ${
     const probe = document.createElement("input");
     probe.type = "number";
     probe.step = "1";
+    if (typeof min === "string" && min !== "") probe.min = min;
+    if (typeof max === "string" && max !== "") probe.max = max;
+    probe.value = text;
+    return probe.validationMessage;
+  }
+
+  /**
+   * Where a date lies against its bounds (Nachlese 5 O-14): "under", "over" or "" — compared as
+   * text, which YYYY-MM-DD allows; a value or a bound that is no such date compares to nothing.
+   */
+  #dateOutside(text: string, min: Value | undefined, max: Value | undefined): "" | "under" | "over" {
+    const day = /^\\d{4}-\\d{2}-\\d{2}$/;
+    if (!day.test(text)) return "";
+    if (typeof min === "string" && day.test(min) && text < min) return "under";
+    if (typeof max === "string" && day.test(max) && text > max) return "over";
+    return "";
+  }
+
+  /**
+   * Whether a text lacks the form of an address or a web address (Nachlese 5 O-14), judged by an
+   * input of that kind no one sees: the platform's grammar, not the element's.
+   */
+  #formMismatch(kind: string, text: string): boolean {
+    const probe = document.createElement("input");
+    probe.type = kind;
+    probe.value = text;
+    return probe.validity.typeMismatch;
+  }
+
+  /**
+   * The platform's own words for a value of a kind (Nachlese 5 O-14: a date out of its bounds, an
+   * address or a web address without its form), asked of an input of that kind that is never
+   * shown: no text of the element's own (Art. VIII).
+   */
+  #probeMessage(kind: string, text: string, min: Value | undefined, max: Value | undefined): string {
+    const probe = document.createElement("input");
+    probe.type = kind;
     if (typeof min === "string" && min !== "") probe.min = min;
     if (typeof max === "string" && max !== "") probe.max = max;
     probe.value = text;
@@ -3548,10 +3603,12 @@ ${autoDisconnect}
     // A string prop reads as filled or empty in a constraint (Spec 011 ①, plan ① D-08), like a
     // slot: a bound on a kind without a scale, an empty option beside a prompt. Read here, never
     // written on the root as a data attribute.
+    // Nachlese 5 O-10: a number prop too (max-size), given or not — its attribute, never the
+    // default, as check_usage reads what an instance gives.
     const read: Record<string, string> = { ...values };
     for (const prop of PROPS) {
-      if (prop.kind !== "string") continue;
-      const given = this.propValue(prop.name);
+      if (prop.kind !== "string" && prop.kind !== "number") continue;
+      const given = prop.kind === "number" ? this.getAttribute(prop.name) : this.propValue(prop.name);
       read[\`prop:\${prop.name}\`] = typeof given === "string" && given !== "" ? "filled" : "empty";
     }
     // A named slot reads as filled or empty (Spec 009 D-04; Spec 011 ③: actions of a state only
