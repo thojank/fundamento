@@ -2830,7 +2830,20 @@ ${isStacking ? "    this.#autoLayout();\n" : ""}`
       else if (!open && this.#overlayFocusWasInside) this.#overlayTrigger()?.focus();
     });
     control.addEventListener("focusout", (event) => {
-      this.#overlayFocusWasInside = !(event.relatedTarget === null && !control.matches(":popover-open"));
+      // Nachlese 5 ①: where the focus goes decides. Lost to nothing because the layer closed (Escape,
+      // light dismiss), it was inside and goes back to the trigger; Chromium and WebKit give it
+      // back themselves, Firefox left it on the body. Moved by the person to an element outside the
+      // layer, it stays there. Moved within the layer, it is still inside.
+      const next = event.relatedTarget;
+      if (next === null) {
+        if (!control.matches(":popover-open")) this.#overlayFocusWasInside = true;
+        return;
+      }
+      const trigger = this.#overlayTrigger();
+      this.#overlayFocusWasInside =
+        next instanceof Node &&
+        (control.contains(next) || this.contains(next)) &&
+        !(trigger !== undefined && trigger.contains(next));
     });
     root.querySelector('slot[name="trigger"]')?.addEventListener("slotchange", () => this.#overlayBindTrigger());
     this.#overlayBindTrigger();
@@ -2871,7 +2884,20 @@ ${isStacking ? "    this.#autoLayout();\n" : ""}`
       else if (!open && this.#overlayFocusWasInside) this.#overlayTrigger()?.focus();
     });
     control.addEventListener("focusout", (event) => {
-      this.#overlayFocusWasInside = !(event.relatedTarget === null && !control.matches(":popover-open"));
+      // Nachlese 5 ①: where the focus goes decides. Lost to nothing because the layer closed (Escape,
+      // light dismiss), it was inside and goes back to the trigger; Chromium and WebKit give it
+      // back themselves, Firefox left it on the body. Moved by the person to an element outside the
+      // layer, it stays there. Moved within the layer, it is still inside.
+      const next = event.relatedTarget;
+      if (next === null) {
+        if (!control.matches(":popover-open")) this.#overlayFocusWasInside = true;
+        return;
+      }
+      const trigger = this.#overlayTrigger();
+      this.#overlayFocusWasInside =
+        next instanceof Node &&
+        (control.contains(next) || this.contains(next)) &&
+        !(trigger !== undefined && trigger.contains(next));
     });
     control.addEventListener("keydown", (event) => this.#menuKey(event));
     control.addEventListener("click", (event) => {
