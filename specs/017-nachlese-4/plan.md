@@ -1,8 +1,10 @@
 # Nachlese 4 – Plan
 
-**Spec:** [`briefing.md`](briefing.md) (das Briefing vom 2026-10-18 ist die Spec, unverändert kopiert) · **Branch:** `261018-nachlese-4-f027c6`, gestapelt auf Spec 015 ③ (`261018-spec-015-inhalt-f027c6` @ `4c58cfd`, PR #78); gebaut von `main` @ `7a05c6e` und am 2026-10-19 darauf rebased · **Regel 0** (12.10.) gilt: der Weg, der im Repo schon gegangen wird; sonst die kleinste Änderung mit Eintrag hier; Tokens, Regulo-Semantik und Constitution unverändert; nie eine Grenze aufweichen, um grün zu werden. Kein neues Ero (29), kein Token geändert, keine neue Regulo-Semantik. **Aufgaben, Commits und rote Hashes:** [`tasks.md`](tasks.md).
+**Spec:** [`briefing.md`](briefing.md) (das Briefing vom 2026-10-18 ist die Spec, unverändert kopiert) · **Branch:** `261018-nachlese-4-f027c6`, gestapelt auf Spec 015 ③ (`261018-spec-015-inhalt-f027c6` @ `b0545f6`, PR #78, mit K-1; ③ liegt seit dem Merge von #76 auf `main`); gebaut von `main` @ `7a05c6e`, am 2026-10-19 zweimal rebased · **Regel 0** (12.10.) gilt: der Weg, der im Repo schon gegangen wird; sonst die kleinste Änderung mit Eintrag hier; Tokens, Regulo-Semantik und Constitution unverändert; nie eine Grenze aufweichen, um grün zu werden. Kein neues Ero (29), kein Token geändert, keine neue Regulo-Semantik. **Aufgaben, Commits und rote Hashes:** [`tasks.md`](tasks.md).
 
 Herkunft: Messung der Abnahme Spec 014 ②–⑤ (`.fundamento/spec014/mess/a3-zeile.json`, `a4-titel.json`, `a8-kompletigilo.json`, `messung-2-5-2026-10-18.md`, Figma-Lauf `09909f5`), Spec 014 plan O-7, O-18 (B-2), O-23 (Abweichung 2 von ⑤), O-24; Vojmapo „Offene Kern-Befunde“, die neun Zeilen „Nachlese 4“ (jetzt mit Auflösung).
+
+**Abnahme (2026-10-19):** abgenommen unter Vorbehalt – gemergt wird erst nach #78 (Spec 015 ③, K-1). Gemessen: A3, A4, A8 wie erwartet; Figma C1, C3, C7 erfüllt (plenstato ohne Warnung, 101 × 148,01); die Befunde der Messung (N5-1 bis N5-6, `brief` ohne `loading` u. a.) gehen in Nachlese 5.
 
 ### Zusammenfassung
 
@@ -106,15 +108,15 @@ Alle übrigen Spec-Dialoge antworten bitgleich (008–015, auch „a sidepanel t
 
 ### Offen (für den Maintainer)
 
-- **O-36 Reichweite von N-4** (D-04): nur fremde Grenzen, nicht fremde Alternativen. Vorschlag: so lassen (eine Alternative nennt ein Ero; „Mehrladen unter den Treffern“ bliebe sonst nicht `butono`, sobald „Treffer“ ein Goal trifft).
-- **O-37 N-2 als zweiter Durchgang** (D-02, Abweichung 1). Vorschlag: so lassen; Alternative: in jedem Durchgang, mit den fünf Kippungen und je einem Jugxo.
-- **O-38 Kialo von `tabelo.row-actions` am `menuo`-Kandidaten** (Abweichung 2). Vorschlag: so lassen (die Kialo des Regulo nennt den Grund des Ero); Alternative: eine getroffene fremde Alternative leiht dem Kandidaten ihres Ziels ihre Kialo (Erweiterung `candidates[].via` im MCP-Schema, ändert Kandidatenlisten anderer Dialoge).
-- **O-39 Schublade** (B-4). Vorschlag: eine Antwort für denselben Fall — beide Grenzen `ask-human` mit derselben Kialo (eine Seitenleiste ist weder Dialog noch Popover), als Datenkorrektur in einer späteren Runde mit Jugxo; bis dahin spricht die `sxvebilo` (wie vor N-1).
-- **O-40 Fläche des aktiven Vorschlags** (D-08, Abweichung 5). Vorschlag: `color.background.sunken` bestätigen; Alternative: erst B-5 (Lage der Texte) lösen, dann `color.action.tertiary.hover` wie der `menuo`.
-- **O-41 Außen-Markierung des `ligilo` in Figma** (B-8). Vorschlag: ja, in einer Folgerunde — Rahmen `icon-end` mit den Glyphen `external`, Sichtbarkeit an die Eigenschaft `external` gebunden (Weg der `toggles`, wie `dismissible`).
-- **O-42 Rolle der Linie** (D-06): bleibt der Trenner nach der Messung der Beispielrahmen zu schwach, wäre `line.color` → `color.border.default` eine Änderung der Skemo (kein Token). Vorschlag: erst messen.
-- **O-43 Vitrino-Spalte `loading`** (D-09). Vorschlag: bestätigen (die Regel der Vitrino für Props mit Text).
-- **O-44 Sichtbares Laden** (D-09): `loading` ist hörbar, nicht sichtbar (kein Bogen im Feld). Vorschlag: so lassen; ein Bogen am Feld wäre ein neuer Teil.
+- **O-36 Reichweite von N-4** (D-04): nur fremde Grenzen, nicht fremde Alternativen. Vorschlag: so lassen (eine Alternative nennt ein Ero; „Mehrladen unter den Treffern“ bliebe sonst nicht `butono`, sobald „Treffer“ ein Goal trifft). **Entschieden (Maintainer, Abnahme am 2026-10-19): wie vorgeschlagen.**
+- **O-37 N-2 als zweiter Durchgang** (D-02, Abweichung 1). Vorschlag: so lassen; Alternative: in jedem Durchgang, mit den fünf Kippungen und je einem Jugxo. **Entschieden (Maintainer, Abnahme am 2026-10-19): wie vorgeschlagen.**
+- **O-38 Kialo von `tabelo.row-actions` am `menuo`-Kandidaten** (Abweichung 2). Vorschlag: so lassen (die Kialo des Regulo nennt den Grund des Ero); Alternative: eine getroffene fremde Alternative leiht dem Kandidaten ihres Ziels ihre Kialo (Erweiterung `candidates[].via` im MCP-Schema, ändert Kandidatenlisten anderer Dialoge). **Entschieden (Maintainer, Abnahme am 2026-10-19): wie vorgeschlagen.**
+- **O-39 Schublade** (B-4). Vorschlag: eine Antwort für denselben Fall — beide Grenzen `ask-human` mit derselben Kialo (eine Seitenleiste ist weder Dialog noch Popover), als Datenkorrektur in einer späteren Runde mit Jugxo; bis dahin spricht die `sxvebilo` (wie vor N-1). **Entschieden (Maintainer, Abnahme am 2026-10-19): ja – in Nachlese 5.**
+- **O-40 Fläche des aktiven Vorschlags** (D-08, Abweichung 5). Vorschlag: `color.background.sunken` bestätigen; Alternative: erst B-5 (Lage der Texte) lösen, dann `color.action.tertiary.hover` wie der `menuo`. **Entschieden (Maintainer, Abnahme am 2026-10-19): wie vorgeschlagen (`sunken`).**
+- **O-41 Außen-Markierung des `ligilo` in Figma** (B-8). Vorschlag: ja, in einer Folgerunde — Rahmen `icon-end` mit den Glyphen `external`, Sichtbarkeit an die Eigenschaft `external` gebunden (Weg der `toggles`, wie `dismissible`). **Entschieden (Maintainer, Abnahme am 2026-10-19): ja – in Nachlese 5.**
+- **O-42 Rolle der Linie** (D-06): bleibt der Trenner nach der Messung der Beispielrahmen zu schwach, wäre `line.color` → `color.border.default` eine Änderung der Skemo (kein Token). Vorschlag: erst messen. **Entschieden (Maintainer, Abnahme am 2026-10-19): so lassen** – die Linie ist in den Beispielrahmen sichtbar, `border.subtle` bleibt.
+- **O-43 Vitrino-Spalte `loading`** (D-09). Vorschlag: bestätigen (die Regel der Vitrino für Props mit Text). **Entschieden (Maintainer, Abnahme am 2026-10-19): wie vorgeschlagen.**
+- **O-44 Sichtbares Laden** (D-09): `loading` ist hörbar, nicht sichtbar (kein Bogen im Feld). Vorschlag: so lassen; ein Bogen am Feld wäre ein neuer Teil. **Entschieden (Maintainer, Abnahme am 2026-10-19): wie vorgeschlagen.**
 
 ### In Figma zu messen
 
