@@ -32,6 +32,7 @@
 | provo | 6 408 Paar-Auswertungen bestanden, 0 verletzt; 0 Verstöße; 108 Hinweise (APCA); `fm modelo validate --aspekto` 0 Fehler; `check:alirebleco` provo 0 fehlgeschlagene Auswertungen; `check:ikonaro` 3 Aspektoj |
 | Paket provo | 24 Dateien; `raporto.json` 209 KB, `raporto.md` 54 KB |
 | Nach dem Rebase auf `main` (2026-10-19) | ein Konflikt (Doku-Test: der Block 016 ① nach dem Block 015 ②); `provo` neu abgeleitet (B-12: nur `upload.svg` und die Herkunft in `aspekto.json`); lokal Agordilo 35, CLI 72, MCP 296, Projekcioj 688, Modelo 3 503 grün; Lint, `check:parity|regularo|vortaro-lint|mankoj|alirebleco|clean-room` ohne Fehler, `check:ikonaro` 17 Namen × 3 Aspektoj; CI auf den fünf Jobs in der Zeile danach |
+| CI (fünf Jobs, nach dem Rebase) | Lauf 39229106557 (`d6c225e`, alle sieben Jobs grün, Wanduhr 7:18): `checks` 1:20, `unit` 3:53 (mit der Agordilo-Suite), `projekcioj` 7:18 / 0:46, `eroj` 2:22 / 2:07, `rendered-checks` 5:19 – B-10 erledigt (vorher Build-Job 12:58–13:35); grüner Stand `d6c225e` |
 | CI | Lauf 39158336356 (`4f80dcd`): Build/Test/Checks grün 12:39 (Test-Schritt 11:20), Eroj Shard 1 grün 8:36, Shard 2 rot 7:09 am Flake `sxvebilo.spec.ts:53` (auch auf `main`, B-11), neu gestartet und vom nächsten Lauf abgelöst, Rendered checks grün 5:21. Lauf 39159638652 (`cb68e97`): alle vier Jobs grün – Build/Test/Checks 12:58 (Test-Schritt 11:42, B-10), Eroj Shard 1 8:32, Shard 2 6:47, Rendered checks 7:49 |
 
 ## ② Werkstatt
