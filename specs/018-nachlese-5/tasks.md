@@ -84,7 +84,7 @@
 
 ### C – Abschluss
 - [x] **T2003 Doku** plan ③, tasks ③, Doku-Test.
-- [ ] **T2004 CI** PR, Lauf, grüner Stand (Zeile CI).
+- [x] **T2004 CI** PR #82, Lauf 39271742386 grün (Zeile CI), grüner Stand `2744566`.
 
 ### Messungen
 
@@ -97,4 +97,4 @@
 | Probelauf lokal (`dry-run`, echter Bau) | `0.1.0`: beide Kits `"version": "0.1.0"`, `pnpm publish --dry-run --tag latest --provenance --access public --no-git-checks` je Kit durch, 49 Dateien, 289,7 kB / 290,9 kB gepackt, 2,4 MB entpackt · `0.1.0-next.9`: dasselbe unter `--tag next` · `publish` mit `0.2.0`: `exit 1` am Bau („neither the Modelo's version 0.1.0 nor a pre-release of it (expected 0.1.0 or 0.1.0-<Vorabkennung> …)“), kein Publish-Befehl erreicht · `check:release` (`pack`) grün |
 | Tests lokal | `turbo run test --filter=!@fundamento/eroj --force` (3:16): Agordilo 35, MCP 312, CLI 72, Projekcioj 723 (vorher 722; +1), Modelo 3 588 (vorher 3 579; +9: acht in `release-workflow.test.ts`, ein Doku-Pin) – alle grün, nichts übersprungen; Eroj nicht berührt (kein Ero, kein Token) |
 | Checks | `pnpm lint` grün (Warnungen älter, plan ③ B-3); `check:release` (`pack`) grün |
-| CI | folgt |
+| CI (PR #82) | Lauf 39271742386 (`2744566`, alle acht Jobs-Läufe grün, **Wanduhr 5:49**): `checks` 1:22, `unit` 5:30, `projekcioj` 3:21 / 2:54, `eroj` 1:50 / 2:28, `alirebleco-eroj` 4:49, `rendered-checks` 4:30; kein Job über 7 min; grüner Stand `2744566` |
