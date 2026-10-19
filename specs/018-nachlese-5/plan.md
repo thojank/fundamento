@@ -15,6 +15,8 @@ Zwei PRs, gestapelt: ① CI-Teilung von `main`, ② Befunde von ①.
 3. **Wackel-Test Escape im `dialogo` unter WebKit (D-03):** kein Wackeln, sondern eine falsche Vorbedingung – WebKit setzt beim Klick auf einen Knopf keinen Fokus. Der Öffner bekommt den Fokus wie über die Tastatur.
 4. **Der rote Lauf in #79** (Lauf 39231530044, erster Versuch, Playwright-Shard 2) war derselbe `sxvebilo`-Test.
 
+5. **Sechster CI-Job (D-04):** die gerenderten Checks lagen bei 7:52 bis 8:34; axe über die Eroj läuft jetzt in einem eigenen Job.
+
 Keine Testlogik geändert außer den zwei Wackel-Tests; kein `retries`, kein `skip` (Regel 0.4).
 
 ### Entwurfsentscheidungen
@@ -48,13 +50,16 @@ Gemessen mit dem JSON-Reporter (vorher `plugin.test.ts` 250 Tests, 310 s): die P
 
 Der Dialog gibt den Fokus dem Element zurück, das ihn beim Öffnen hatte. Der Test klickte den Öffner und erwartete danach den Fokus dort. Gemessen: WebKit setzt beim Klick auf einen Knopf keinen Fokus (auch nicht auf ein einfaches `<button>`, wie Safari); der `body` behält ihn, und der Dialog gab ihn folgerichtig dem `body` zurück – 3 von 3 rot unter macOS, auf dem Linux-Runner nicht. Kein Fehler des Ero. Der Öffner bekommt den Fokus jetzt wie über die Tastatur (`focus()`), und der Test wartet, bis er ihn hält. WebKit 5 von 5, alle drei Engines zehnfach grün.
 
-#### D-04 Shards
+#### D-04 Shards und ein sechster Job
 
-Zwei Projekcioj-Shards bleiben, solange die Messung sie trägt; die Zahlen je Job stehen in tasks ① (Zeile CI). Vitest teilt nach Datei; mit sieben Dateien statt einer verteilt sich die Last.
+**Projekcioj: zwei Shards reichen.** Erster Lauf nach der Teilung (39245801159): Shard 1 **3:06**, Shard 2 **3:10** – vorher 9:29 / 1:03 (#79). Vitest teilt nach Datei; mit sieben Dateien statt einer verteilt sich die Last, und in einem Shard laufen die Dateien auf den vier Kernen des Runners nebeneinander. Ein dritter Shard brächte nichts (O-1 entschieden: nein).
+
+**Der Lauf zeigte einen anderen Job über 7 min:** die gerenderten Checks mit **8:18** – axe über die Eroj 227 s, Vitrino 138 s, Make Kit 45 s, Quickstart 16 s, dazu Browser 47 s und Build 8 s. Über vier Läufe lag der Job bei 7:52 bis 8:34 (axe 178–233 s, Vitrino 104–140 s). Derselbe Schnitt wie Nachlese 3 W1 und Spec 015 ② D-01: **axe über die Eroj ist ein eigener Job** `alirebleco-eroj`, Make Kit, Quickstart und Vitrino bleiben `rendered-checks`; beide mit den Engines (auf `main` drei, im PR Chromium). `workflow.test.ts` pinnt die sechs Jobs; der Skript `check` der Wurzel (eine Reihe für lokal) ist unverändert. Kein Timeout angehoben. Zeiten nach dem Schnitt: tasks ① (Zeile CI).
 
 ### Abweichungen vom Briefing
 
 1. **Ein Fix am Element in ①** (D-02): das Briefing verlangt, Wackel-Tests über die Ursache zu stabilisieren; die Ursache des `sxvebilo`-Tests war zur Hälfte ein Fehler im Element. Er ist in ① behoben statt als Befund geführt, weil der stabilisierte Test sonst in Firefox rot wäre.
+2. **Ein sechster CI-Job** (D-04): das Briefing nennt nur die Projekcioj-Shards; das Ziel „kein Job über 7 min“ verlangte auch den Schnitt der gerenderten Checks.
 
 ### Befunde / Mankoj
 
@@ -63,7 +68,7 @@ Zwei Projekcioj-Shards bleiben, solange die Messung sie trägt; die Zahlen je Jo
 
 ### Offen (für den Maintainer)
 
-- **O-1 Dritter Projekcioj-Shard:** nach der Messung in tasks ① (Zeile CI). Vorschlag: zwei Shards, solange kein Job über 7 min liegt.
+- **O-1 Dritter Projekcioj-Shard:** **entschieden (P0 nach Messung, wie das Briefing es vorsieht): nein** – die zwei Shards liegen bei 3:06 und 3:10 (D-04).
 
 ## ② Befunde
 

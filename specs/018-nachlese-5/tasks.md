@@ -16,7 +16,7 @@
 
 ### C – Abschluss
 - [x] **T1805 Doku** plan ①, tasks ①, Doku-Test.
-- [ ] **T1806 CI** Zeiten je Job, Entscheidung zu den Shards (O-1).
+- [x] **T1806 CI** Zeiten je Job; zwei Projekcioj-Shards reichen (O-1: nein). Die gerenderten Checks lagen über 7 min: axe über die Eroj als eigener Job (plan ① D-04), rot `7c1f5d0`, grün im Commit danach.
 - [ ] **Aufräumen (älter als dieser Branch):** Biome-Warnung `DESIGN` unbenutzt in `packages/projekcioj/src/celoj/web-component/web-component.test.ts`.
 
 ### Messungen
@@ -28,7 +28,8 @@
 | Projekcioj lokal (zehn Kerne) | 318 s → 90 s Wanduhr der Suite; längste Datei `plugin-sets` 82 s |
 | Wackel-Tests | `sxvebilo`, `menuo`, `dialogo` zehnfach: je 170 von 170 in Chromium, Firefox und WebKit |
 | Tests lokal | Modelo 3 551, Projekcioj 716, MCP 307, CLI 66 grün; Lint und alle Modelo-Checks ohne Fehler; Browser 243 Specs in Chromium, Alirebleco-Check 561, Vitrino 30 |
-| CI | (Lauf nach dem Push) |
+| CI (Teilung, fünf Jobs) | Lauf 39245801159 (`022b5fd`, alle Jobs grün, Wanduhr 8:18): `checks` 1:16, `unit` 3:07, `projekcioj` **3:06 / 3:10** (vorher 9:29 / 1:03), `eroj` 1:51 / 1:58, `rendered-checks` **8:18** (axe 227 s, Vitrino 138 s, Make Kit 45 s, Quickstart 16 s) – über 7 min, daher D-04 |
+| CI (sechs Jobs) | (Lauf nach dem Push) |
 
 ## ② Befunde
 
