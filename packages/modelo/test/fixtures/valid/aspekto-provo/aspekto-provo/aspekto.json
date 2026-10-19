@@ -56,6 +56,7 @@
       "sort-ascending": "sort-ascending",
       "sort-descending": "sort-descending",
       "success": "check-circle",
+      "upload": "upload-simple",
       "warning": "warning"
     }
   },
@@ -64,7 +65,7 @@
     "structure": {
       "vortaro": "0.1.0",
       "reference": "komuna",
-      "sha256": "c50b930eb96009730fa14fae24708f84af93241e73504ff545a613eba233dc1a"
+      "sha256": "aa3ea4adb749f9e9f0fdb96072c6cdb35e9564c10b72b864f5280ba031073e9e"
     },
     "agordo": {
       "name": "provo",

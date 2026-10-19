@@ -6,7 +6,7 @@ Drei PRs, gestapelt: ① Bibliothek von `main`, ② Werkstatt in der Vitrino von
 
 ## ① Bibliothek
 
-**Branch:** `261018-spec-016-agordilo-f027c6` · **Datum:** 2026-10-18 · **Stand:** gebaut, lokal grün; Abnahme offen.
+**Branch:** `261018-spec-016-agordilo-f027c6` (nach dem Merge von #76 am 2026-10-19 auf `main` @ `971354d` rebased, CI auf den fünf Jobs) · **Datum:** 2026-10-18/19 · **Stand:** abgenommen am 2026-10-19 (Messung D1–D4); der Maintainer merged nach grüner CI.
 
 ### Zusammenfassung
 
@@ -106,18 +106,20 @@ Die Beispiel-Agordo `provo` (erfundene Werte: Violett `#6b4fa0`, Info-Ton `oklch
 - **B-11 Flake auf `main`:** `sxvebilo.spec.ts:53` („Escape closes it and returns the focus …“, `aria-expanded` wird ohne `expect.poll` gelesen) fiel im Shard 2 dieses Laufs (Chromium) und schon auf `main` (Lauf 39152793200, Firefox). Kein Bezug zu ①; der Job wurde neu gestartet, der Test nicht verändert (Regel 0.4). Kandidat für eine Nachlese.
 - **B-9 Helles Gelb `#F5C400`** (Abnahme 3): Verstoß `palette-aligned` an `accent.900` (anpassbar) – die Stufe hält ihren Ton nur bei L 0,298 (13,76:1 statt 14,61:1). Vorschlag: dunklere Leitfarbe `#665000`. Export ohne Jugxo verweigert, mit Jugxo erlaubt; mit dem Vorschlag kein Verstoß.
 
+- **B-12 (Rebase auf `main` nach #76)** Mit Spec 015 ② kam der Ikonaro-Name `upload` nach `main`; die eingecheckte `provo` war vorher abgeleitet und hatte keine Glyphe dafür (`check:ikonaro` rot, der Determinismus-Vergleich mit der Fixture rot) – genau der Fall von B-7. Neu abgeleitet mit `fm agordilo derive`: es ändern sich nur `ikonoj/upload.svg` (neu) und in `aspekto.json` die Herkunft der Glyphe und der SHA-256 der Struktur; Paletten, Sets, `raporto.json`/`raporto.md` bytegleich, 6 408 von 6 408 Paar-Auswertungen, 0 Verstöße.
+
 ### Offen (für den Maintainer)
 
-- **O-1 Namen „Agordo“ und „Raporto“** (E9): so gebaut (`Agordo` im Schema, `raporto.json`/`raporto.md`, `Raporto` im Code). **Vorschlag: bestätigen.** Die Ontologio-Einträge (Schema `laboro`) folgen mit ③.
-- **O-2 Die Regel der Standardtöne** (D-06: ein Fünftel des Winkels, höchstens 10°). **Vorschlag: so lassen**; ② macht sie sichtbar.
-- **O-3 Fest und anpassbar** (D-08). **Vorschlag: so**, als Liste in der Bibliothek; eine Kennzeichnung in `reguloj.json` wäre eine Änderung der Regulo-Semantik und gehört in eine eigene Spec.
-- **O-4 Tonschwelle 40 %** (D-05, B-6). **Vorschlag: 40 %.**
-- **O-5 Bezugsfläche** `neutral.0`/`neutral.1000` statt `background.default` (Abweichung 1). **Vorschlag: so.**
-- **O-6 Zusätzliche Felder der Agordo** (`owner`, `license` mit Standard `proprietary`, `aspiroj`, `jugxoj`). **Vorschlag: so**; die Werkstatt (②) trägt sie im URL-Fragment mit.
-- **O-7 provo als bekannte Aspekto** in `KNOWN_ASPEKTO_FIXTURES` – wie ekzemplo als Warnung (O-32 aus Nachlese 3 gilt mit). **Vorschlag: so.**
-- **O-8 `palette-aligned` gegen Kontrastziele** (B-1): (a) so lassen, satte Töne brauchen einen Jugxo; (b) die Kalibrierung je Ton anpassen; (c) die Schwelle der Regulo prüfen. **Vorschlag: (a)** für Stufe 1, Entscheidung mit den Messungen aus ②.
-- **O-9 Neutraltönung** (`toenung` 1 = ein Viertel der Buntheit der Leitfarbe, komuna ≈ 0,35). **Vorschlag: so.**
-- **O-10 Umfang von `raporto.json`** (B-4): alle Paar-Ergebnisse oder nur das schlechteste je Paar. **Vorschlag: alle** (G5: „je Regel und Paar“).
+- **O-1 Namen „Agordo“ und „Raporto“** (E9): so gebaut (`Agordo` im Schema, `raporto.json`/`raporto.md`, `Raporto` im Code). **Vorschlag: bestätigen.** Die Ontologio-Einträge (Schema `laboro`) folgen mit ③. **Entschieden (Maintainer, Abnahme am 2026-10-19): bestätigt.**
+- **O-2 Die Regel der Standardtöne** (D-06: ein Fünftel des Winkels, höchstens 10°). **Vorschlag: so lassen**; ② macht sie sichtbar. **Entschieden (Maintainer, Abnahme am 2026-10-19): wie vorgeschlagen.**
+- **O-3 Fest und anpassbar** (D-08). **Vorschlag: so**, als Liste in der Bibliothek; eine Kennzeichnung in `reguloj.json` wäre eine Änderung der Regulo-Semantik und gehört in eine eigene Spec. **Entschieden (Maintainer, Abnahme am 2026-10-19): wie vorgeschlagen.**
+- **O-4 Tonschwelle 40 %** (D-05, B-6). **Vorschlag: 40 %.** **Entschieden (Maintainer, Abnahme am 2026-10-19): wie vorgeschlagen.**
+- **O-5 Bezugsfläche** `neutral.0`/`neutral.1000` statt `background.default` (Abweichung 1). **Vorschlag: so.** **Entschieden (Maintainer, Abnahme am 2026-10-19): wie vorgeschlagen.**
+- **O-6 Zusätzliche Felder der Agordo** (`owner`, `license` mit Standard `proprietary`, `aspiroj`, `jugxoj`). **Vorschlag: so**; die Werkstatt (②) trägt sie im URL-Fragment mit. **Entschieden (Maintainer, Abnahme am 2026-10-19): wie vorgeschlagen.**
+- **O-7 provo als bekannte Aspekto** in `KNOWN_ASPEKTO_FIXTURES` – wie ekzemplo als Warnung (O-32 aus Nachlese 3 gilt mit). **Vorschlag: so.** **Entschieden (Maintainer, Abnahme am 2026-10-19): wie vorgeschlagen.**
+- **O-8 `palette-aligned` gegen Kontrastziele** (B-1): (a) so lassen, satte Töne brauchen einen Jugxo; (b) die Kalibrierung je Ton anpassen; (c) die Schwelle der Regulo prüfen. **Vorschlag: (a)** für Stufe 1, Entscheidung mit den Messungen aus ②. **Entschieden (Maintainer, Abnahme am 2026-10-19): (a)**; entschieden wird mit den Messungen aus ②. Gemessen (D4): Gelb `#F5C400` auf `provo` meldet `palette-aligned`, dazu `state-distinct` und `surface-distinct` aus den Reglern von `provo`, Vorschlag `#675100` – Ursache und Vorschlag wandern mit den Reglern.
+- **O-9 Neutraltönung** (`toenung` 1 = ein Viertel der Buntheit der Leitfarbe, komuna ≈ 0,35). **Vorschlag: so.** **Entschieden (Maintainer, Abnahme am 2026-10-19): wie vorgeschlagen.**
+- **O-10 Umfang von `raporto.json`** (B-4): alle Paar-Ergebnisse oder nur das schlechteste je Paar. **Vorschlag: alle** (G5: „je Regel und Paar“). **Entschieden (Maintainer, Abnahme am 2026-10-19): wie vorgeschlagen.**
 
 ### M1 – Kalibrierung (ΔE OKLab × 100, komunas Leitfarbe gegen komuna)
 
