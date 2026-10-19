@@ -84,7 +84,8 @@ export function checkPackageDir(dir: string): PackageCheck {
   if (agordo === undefined) return { ok: false, issues: agordoIssues };
 
   const calibration = loadCalibration();
-  const { floors, overrides, palettes } = derivationBasis(agordo, structure, calibration);
+  const basis = derivationBasis(agordo, structure, calibration);
+  const { floors, overrides, palettes, gestalt } = basis;
   const { raporto, issues } = checkAspekto({
     files: structure.files,
     label: pkg.name,
@@ -93,6 +94,8 @@ export function checkPackageDir(dir: string): PackageCheck {
     floors,
     overrides,
     palettes,
+    gestalt,
+    agordoIssues: basis.agordoIssues,
   });
   const stale: ValidationIssue[] = [];
   for (const [file, expected] of [

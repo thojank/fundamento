@@ -1,0 +1,195 @@
+# Spec 019 – Werkstatt Stufe 2+3 – Plan
+
+**Spec:** [`spec.md`](spec.md) (Fassung vom 2026-10-20, unverändert kopiert) · **Briefing:** `briefing-p0-2026-10-20.md` (Maintainer-Ordner, nicht kopiert) · **Basis:** `main` nach #84 (`ac5deb3`) · **Regel 0** (12.10.) gilt: der Weg, den das Repo schon geht (Art. XI), sonst die kleinste Änderung mit Eintrag hier; Tokens, Rollen, Eroj, Regulo-Semantik und Constitution nie ändern; nie eine Grenze aufweichen, um grün zu werden.
+
+Vier PRs: ① Bibliothek von `main`, ② Werkstatt von ①, ③ Prompt von ② (gestapelt), ④ Nachlese 6 getrennt von `main`.
+
+## ① Bibliothek Stufe 2
+
+**Branch:** `261020-spec-019-bibliothek-116ba2` (von `main` `ac5deb3`) · **Datum:** 2026-10-20 · **Stand:** zur Abnahme (Messanleitung in plan ③).
+
+### Zusammenfassung
+
+1. **Agordo G2** im einen Modelo-Schema (`$defs/Agordo`): `form.radius` 0–2, `form.rahmen` 0,5–2, `form.schatten` 0–2, `raum.abstand` 0,75–1,5, `raum.hoehe` 0,85–1,25, `schrift.groesse` −1…1, `schrift.skala` 1,125–1,5, `schrift.gewicht` −1…1, `ikono.gewicht` (die sechs Phosphor-Gewichte). Alle optional; ohne Angabe gilt die Struktur. `schrift.familien` ist das Feld `schriften` aus Stufe 1 (Abweichung 1). Typen neu generiert.
+2. **Ableitung G3** (`packages/agordilo/src/gestalt.ts`): je Regler eine Funktion auf der **Struktur des Vortaro** – dem Kern-Set und den Sets seiner Dimensioj –, nie auf komuna zur Laufzeit; gerundet auf das Raster (Abstände 4 px, 2 px wo die Struktur feiner ist; Höhen 4 px; Schriftgrößen, Radien, Rahmen ganze px; Gewichte ganze Schnitte). Ins Haupt-Set `aspekto/<name>` kommt nur, was sich ändert; die Aliasse der Rollen bleiben, darum folgen Dichte, Viewport und Kontrast als Modi darüber.
+3. **Kalibrierung „Standard = Stufe 1“:** Jeder Regler auf seinem Standard (oder nicht genannt) ändert keinen Token. Die Agordo `provo` der Stufe 1 ergibt jede Datei der Stufe-1-Ableitung **bytegleich** (Prüfsummen der 25 Dateien von `main` `ac5deb3` in `packages/agordilo/fixtures/stufe1-provo.json`); mit allen Reglern der Stufe 2 auf ihrem Standard ausgeschrieben sind Sets, Lock, `$themes.json`, Glyphen und Raporto bytegleich, `aspekto.json` bis auf die Agordo als Herkunft.
+4. **Leitplanken G4:** die vorhandenen Reguloj binden unverändert – `size.target` (`touch-target-min`), der Fokusring (`protected-minimum`), `type-scale`, `type-rhythm`, Kontraste. Wo ein Regler eine Gefahr ohne Regel bringt, gibt es einen **Hinweis** im Raporto, keine neue Regulo (E2): Fließtext unter 14 px, Rahmen-Stufen fallen zusammen, kein Schatten (Regulo-Kandidaten unten).
+5. **Eckwert-Tests:** alle 3^8 Kombinationen aus min/Standard/max der acht Zahlenregler rein (ohne Modelo, 6 s) über `size.target` in jeder Dichte, die Rangfolge der Schriftrollen in jedem Viewport, `type-scale`, sichtbare Rahmen, Fokusring, Gewichte und Raster; dazu `schrift.groesse` × `schrift.skala` auf einem Raster von 101 × 76 Werten; dazu alle Regler an ihrem Minimum und an ihrem Maximum **durch alle Prüfungen** des Modelo ohne festen Verstoß.
+6. **Icon-Gewichte (E6):** thin, light, bold, fill und duotone der 17 Ikonaro-Namen aus `@phosphor-icons/core` 2.1.1 (dieselbe Quelle und Version wie das Ikonaro von komuna) in `packages/agordilo/data/ikonoj/<gewicht>/`, mit `LICENSE` (MIT) und `ikonoj.json` (Herkunft, Integrität des Pakets, Lesedatum, Namenskarte); jede Glyphe trägt Quelle, Version und Lizenz im `<metadata>`. Ein Gewicht ohne Glyphe für jeden Namen wird abgelehnt (`ikonaro-glyph-missing` an `agordo#/ikono/gewicht`, Export verweigert).
+7. **Beispielmarken (G8):** `provo` bekommt `form.radius` 1,6, `raum.abstand` 1,15, `ikono.gewicht` bold; neu `provo-kompakta` (eckig `form.radius` 0,25, dicht `raum.abstand` 0,8 und `raum.hoehe` 0,9, kleinere Schrift `schrift.groesse` −0,5, weichere Schatten 0,5, Icons light, Leitfarbe `#0f6b5c`), nur Testdaten, mit Konfiguration und `fundamento.provoj.config.json` (provo und provo-kompakta) für Figma. Beide 6 408 von 6 408 Paar-Auswertungen, 0 Verstöße.
+8. **CLI unverändert in der Bedienung:** `fm agordilo derive|check` wie in Spec 016; `check` baut auch die Hinweise der Stufe 2 bytegleich nach.
+9. **M4** (unten).
+10. **Kleinste Änderungen daneben:** Modelo – Schema und Typen, `KNOWN_ASPEKTO_FIXTURES` += `provo-kompakta` (Weg von Nachlese 3 W2, wie provo); Agordilo – `Structure.ikonoGewichte`, `loadIkonoGewichte`, `ikonoChoice`, `packageDocuments(…, gestalt)`, `CheckInput.gestalt|agordoIssues`, `measureM4`; Projekcioj – die Insel `fm-werkstatt` trägt die Glyphen der Gewichte mit (sonst wiche der Raporto der Werkstatt für provo bold von der CLI ab). Das Panel der Werkstatt folgt in ②.
+
+### Entwurfsentscheidungen
+
+#### D-01 Ein Modul, eine Funktion je Regler
+`gestaltBasis(files)` liest die Struktur einmal (Kern-Set, die Sets der Dimensioj, die Skala, die Stufen der Controls, `size.target.min`, die Breite des Fokusrings, die shade-Palette, die Schwelle von `type-scale` aus `reguloj.json`); `deriveGestalt(agordo, basis)` gibt die Tokens zurück, die sich ändern (`main` für das Haupt-Set, `dark` für das Konjunktions-Set mit `color-scheme=dark`), und die Hinweise. Rein und schnell (gemessen 0,075 ms je Ableitung), darum laufen die Eckwerte ohne Modelo. `gestaltTokens` löst die Struktur mit der Gestalt über benannten Dimensio-Sets auf (für Tests und ②).
+
+#### D-02 Wohin die Werte gehen
+Die Dimensio `aspekto` hat Priorität 1, die Sets von Viewport, Dichte, Farbschema und Kontrast liegen darüber (Reihenfolge in `resolve/order.ts`). Darum schreiben die Regler die **Skalen-Literale** (`spacing.scale.*`, `size.scale.*`, `font.size.scale.*`, `radius.*`, `border.width.scale.*`, `font.weight.*`, die Schatten) und lassen die **Aliasse** der Rollen stehen: `density=compact` zeigt `spacing.medium` weiter auf `spacing.scale.150` – über der verschobenen Skala. So bleibt die Dichte ein Modus über der Grundstruktur (G2).
+
+#### D-03 `form.radius`
+`radius.small|medium|large|xlarge` × r, ganze px; `radius.none` und `radius.full` bleiben. Die Rollen `radius.role.*` folgen über ihre Aliasse.
+
+#### D-04 `form.rahmen` und der Fokusring
+`border.width.scale.*` × k, ganze px, nie unter 1 px. Fällt `border.width.focus` dabei unter die Breite der Referenz (2 px; `protected-minimum` verlangt mindestens den Wert von komuna), zeigt er auf die kleinste Stufe, die sie hält (bei 0,5: `border.width.scale.3` = 2 px). Kein Literal, kein neuer Token.
+
+#### D-05 `form.schatten`
+Versatz (`offsetX`, `offsetY`) und Unschärfe (`blur`) aller Lagen von `elevation.shadow.*` × s, ganze px; `spread` bleibt. Die Deckkraft: `color.shadow.key|ambient` zeigen auf die Stufe der shade-Palette, deren Deckkraft der der Struktur × s am nächsten liegt (0, 8, 10, 25, 50 %; Gleichstand: die hellere) – hell im Haupt-Set, dunkel im Konjunktions-Set des Pakets, weil im Dunkeln das Set `color-scheme/dark` des Vortaro die Schattenfarben setzt und nur das Konjunktions-Set darüber liegt. Keine neue Palette-Stufe (E1).
+
+#### D-06 `raum.abstand`
+`spacing.scale.*` × a auf dem 4-px-Raster; wo die Struktur selbst feiner ist (2 px, 6 px), auf 2 px. Die benannten `spacing.*`, `layout.grid.gutter|margin` und `focus.offset` folgen über ihre Aliasse.
+
+#### D-07 `raum.hoehe`
+Die Stufen von `size.scale.*`, auf die `size.control.*` im Kern oder in einer Dichte zeigt (500–900), × h auf 4 px, nie unter `size.target.min` (24 px). `size.icon.*` und `size.target.min` (`size.scale.200–400`) bleiben. Die Untergrenze 0,85 ist so gewählt, dass die kleinste Höhe (`density=compact`, `size.control.small` 28 px) auf 24 px landet.
+
+#### D-08 `schrift.skala`
+Das Verhältnis benachbarter Stufen von `font.size.scale`. Standard ist der **Median der Nachbarverhältnisse der Struktur**, auf drei Stellen: 1,167 (derselbe Median, den `type-scale` misst). Jedes Nachbarverhältnis wird mit skala/1,167 multipliziert, verankert an der Stufe von `font.size.body.1` (16 px bleibt 16 px): Die Abweichungen vom Median bleiben die der Struktur (7,1 %), `type-scale` (10 %) hält.
+
+#### D-09 `schrift.groesse`
+Jede Stufe × 1,167^(2g): höchstens zwei Stufen der **Struktur-Skala** kleiner oder größer, unabhängig von skala. Gemessen: mit der neuen Skala als Schritt (1,5² = 2,25) ergab die Ecke groesse −1 / skala 1,5 eine Bildunterschrift von 3 px und verletzte `type-scale` (11,7 %).
+
+#### D-10 Ganze px, ohne `type-scale` zu reißen
+Zuerst einfache Rundung (halb von null weg). Reißt sie die Schwelle von `type-scale` (aus `reguloj.json`, 0,1) – die kleinen Stufen springen um bis zu 5 % je px –, nimmt die Ableitung die ganzzahlige Skala mit der kleinsten größten Abweichung (je Stufe ab- oder aufgerundet, streng steigend; Gleichstand: die nächste an den exakten Größen). Gemessen in M4 vor dieser Entscheidung: zwei der zehn Zufalls-Agordos verletzten `type-scale` (fest), danach keine; das Raster 101 × 76 hält.
+
+#### D-11 `schrift.gewicht`
+`font.weight.*` um round(2g) ganze Schnitte (100) – höchstens zwei –, geklemmt auf das leichteste und das schwerste Gewicht der Struktur (100, 900). Die Rangfolge bleibt (sie fällt an den Enden höchstens zusammen). Ganze Schnitte, weil Figma den Schnitt („Medium“) aus dem auf 100 gerundeten Gewicht ableitet (F30).
+
+#### D-12 `ikono.gewicht`
+Das Paket trägt die Glyphen des Gewichts aus `data/ikonoj/<gewicht>/` statt der von komuna, `aspekto.json#/ikonoj` nennt `style`, `source` (`assets/<gewicht>`) und das Lesedatum. regular ist komunas eigenes. Die Glyphen gehören dem Agordilo wie die Kalibrierung und stehen **nicht** im Fingerabdruck der Struktur (sonst änderte sich die Herkunft jeder abgeleiteten Marke). Fehlt einem Gewicht eine Glyphe, steht beim Zusammensetzen die von komuna, der Fehler sperrt den Export.
+
+#### D-13 Hinweise statt Reguloj (G4, E2)
+`agordilo-body-size` (eine Rolle `font.size.body.*` unter 14 px in einem Viewport), `agordilo-border-collapse` (`border.width.default` = `border.width.strong`: `contrast=high`, das den Standardrand als starken zeichnet, verdickt nichts mehr), `agordilo-shadow-none` (`form.schatten` 0). Sie stehen nur im Raporto, wenn sie auftreten – der Raporto einer Agordo der Stufe 1 bleibt bytegleich.
+
+#### D-14 Der Beweis „bytegleich“
+Die Stufe-1-Ableitung von provo ist auf `main` eingecheckt; bevor ① provo änderte, wurden die SHA-256 ihrer 25 Dateien mit der Agordo als Fixture gesichert. Zwei Tests: die Agordo der Stufe 1 ergibt alle 25 Prüfsummen; mit ausgeschriebenen Standards alle bis auf `aspekto.json`, und dessen Prüfsumme nach dem Entfernen der Felder der Stufe 2 aus der Herkunft.
+
+#### D-15 Die Beispielmarken
+`provo` bleibt die Marke aus Spec 016 (Farbe gleich) und wird runder, luftiger, mit bold-Icons: sichtbar andere Form in jedem Ero. `provo-kompakta` ist der Gegenpol mit eigener Leitfarbe, damit die Gegenüberstellung in Figma und in der Werkstatt beide Achsen zeigt. Beide sind bekannte Aspektoj wie provo (`check:alirebleco` misst sie, `check:ikonaro` prüft ihre Glyphen).
+
+### Arkitekturo-Abdeckung
+
+| Artikel / Festlegung | Wie ① ihn trägt |
+|---|---|
+| Art. I, G1 | Die Werte der Stufe 2 sind gewöhnliche Token-Werte im Paket; die Agordo steht als Herkunft in `aspekto.json` |
+| Art. IV, G3 | Jeder Regler eine Funktion auf der Struktur des Vortaro; das Paket belegt weiter jeden Token |
+| Art. V, E3 | Eigene Ableitung, kein fremder Code; die Glyphen aus Phosphor (MIT) mit Herkunft wie das Ikonaro |
+| Art. VI, G4 | Feste Regeln binden unverändert; Gefahren ohne Regel sind Hinweise und Kandidaten |
+| Art. VII, E6 | Jede Glyphe mit Quelle, Version, Lizenz; `ikonoj.json` mit Integrität des Pakets |
+| Art. X | Rot zuerst (`f126b65`); die Prüfungen sind die der CI |
+| Art. XI | Kein neuer Mechanismus: Schema, `rewriteSet`, W2, die Raporto-Hinweise; ein Modul im vorhandenen Paket |
+| E1, E2 | Keine neuen Tokens, Rollen, Eroj, Reguloj |
+| E7 | Neue Namen nur als Vorschlag (O-1) |
+| G8 | provo und provo-kompakta; CSS, Make Kit, Figma, Penpot folgen ohne Sonderweg (Parität 0 Differenzen) |
+
+### Abweichungen von der Spec
+
+1. **`schrift.familien` ist `schriften`** (Stufe 1): ein Feld, kein zweites. `aspekto.json#/fonts` verlangt zu jeder Familie Lizenz, Quelle und Weitergabe (`font-rules`); ein bloßer Name ergäbe eine ungültige Aspekto. Das Panel (②) schreibt `schriften`.
+2. **`raum.hoehe` wirkt über die Stufen von `size.scale.*`**, auf die die Controls zeigen, nicht als Literal auf `size.control.*` – sonst überschriebe die Dichte die Höhe (D-02, D-07).
+3. **Deckkraft der Schatten in Stufen der shade-Palette** (0, 8, 10, 25, 50 %), nicht stufenlos (E1).
+4. **`schrift.groesse` in Stufen der Struktur-Skala** (D-09).
+5. **Rundung der Schriftgrößen mit Suche**, wo die einfache Rundung `type-scale` risse (D-10).
+6. **„Raster in `dimensioj.json`“:** `dimensioj.json` nennt kein Raster; genommen 4 px, 2 px wo die Struktur feiner ist (D-06).
+7. **Fünf Phosphor-Gewichte nachgeholt** (E6): im Repo lagen regular (komuna) und fill (ekzemplo); thin, light, bold, fill, duotone liegen jetzt beim Agordilo.
+8. **Die Insel der Werkstatt trägt in ① die Glyphen**, damit Browser und CLI für `provo` (bold) gleich bleiben; Panel, Live-Werte und Verlauf folgen in ②.
+9. **Plan und Aufgaben von ④** stehen in [`nachlese-6/`](nachlese-6/) neben diesem Plan: ④ geht von `main` ab, ① bis ③ sind gestapelt; legten beide Zweige `plan.md` an, kollidierten sie beim Merge. Der Abschnitt ④ unten fasst zusammen.
+
+### Befunde / Mankoj
+
+- **B-1 Farbregler der Stufe 1 an ihren Enden** verletzen feste Regeln (M4): `regler.helligkeit` −1 67 feste Verstöße (`contrast-below-threshold` 58), +1 18; `regler.kontrast` −1 218 (`contrast-below-threshold` 195), +1 4; acht der zehn Zufalls-Agordos durch Farbe. Kein Regler der Stufe 2 verletzt eine feste Regel, einzeln nicht und alle zusammen an ihren Enden nicht. G4 („die Grenzen sind so gewählt …“) gilt damit für die neuen Regler; die Bereiche aus Spec 016 bleiben unverändert (Regel 0, O-4). In ③ hält `propose_agordo` vor einer festen Regel an.
+- **B-2 `schrift.skala` 1,5** spreizt die zwölf Stufen auf 7 … 613 px (`display.1` 417 px, in `viewport=expanded` 613 px; die Bildunterschrift 7 px, `body.2` 11 px – Hinweis). Bei 1,25: 10 … 119 px (`display.1` 97 px). Der Bereich ist der der Spec (O-5).
+- **B-3 `chevron-left`** ist in komuna und ekzemplo der gespiegelte Pfad von `caret-right` (Spec 015 ①: „gespiegelt“); die neuen Gewichte tragen `caret-left`, wie Phosphor es liefert (gleiche Form). Alle anderen Glyphen von regular und fill baut der Generator bytegleich nach.
+- **B-4 fill und duotone** sind bei Phosphor Gewichte, gestalterisch Stile: fill füllt die Fläche (ekzemplo nutzt es), duotone legt eine Fläche mit 20 % Deckkraft unter die Linie (bei `check` ein Quadrat). Beide liegen bereit (O-7).
+- **B-5 Größe:** `data/ikonoj` 50,5 KB (85 Glyphen); die Insel der Werkstatt wächst um 54,7 KB (Vitrino des Parität-Builds 5,70 MB).
+- **B-6 Rahmen 0,5:** `border.width.default` und `strong` sind beide 1 px – Hinweis `agordilo-border-collapse` (K-2).
+- **B-7 Fingerabdruck** unverändert: provo hat dieselbe `structure.sha256` wie in Stufe 1.
+- **B-8 Werkstatt in ①:** Eine Agordo mit Feldern der Stufe 2 im Fragment wird geprüft wie in der CLI (Raporto gleich), aber noch nicht live dargestellt – die Werkstatt setzt in ① nur die Paletten als Custom Properties. Das folgt mit ②.
+- **Mankoj:** keine neuen.
+
+### Regulo-Kandidaten
+
+Keine neue Regulo (E2). Die Werkstatt und der Raporto zeigen einen Hinweis; der Maintainer entscheidet später.
+
+- **K-1 Mindestgröße Fließtext** (`agordilo-body-size`): eine Rolle `font.size.body.*` unter 14 px. Gemessen: ab `schrift.groesse` −0,12 und ab `schrift.skala` 1,184 – `font.size.body.2` steht in der Struktur mit 14 px genau auf der Grenze, jede Verkleinerung löst den Hinweis aus. Vorschlag für eine Regulo: `font.size.body.*` ≥ 14 px in jeder Kombination.
+- **K-2 Starker Rand stärker als der Standardrand** (`agordilo-border-collapse`): `border.width.strong` > `border.width.default`, damit `contrast=high` den Rand sichtbar verdickt.
+- **K-3 Ebenen ohne Schatten** (`agordilo-shadow-none`): bei `form.schatten` 0 trägt nur die Helligkeit die Ebenen; `surface-distinct` (anpassbar) misst das schon, ein eigener Kandidat nur, wenn der Maintainer Schatten als Pflicht sieht.
+- **K-4 Obergrenze der Displaygröße** (B-2): kein Schutz einer Person, eher Geschmack – als Kandidat genannt, Vorschlag: keiner, stattdessen O-5.
+- **„Zeilenhöhe zu knapp“** (Beispiel der Spec) tritt nicht auf: die Zeilenhöhen sind Verhältnisse und kein Regler bewegt sie; `type-rhythm` bindet weiter.
+
+### Offen (für den Maintainer)
+
+- **O-1 Namen (E7):** Im Code heißt die Stufe 2 `Gestalt` (`gestalt.ts`, `deriveGestalt`); die Hinweise `agordilo-body-size`, `agordilo-border-collapse`, `agordilo-shadow-none`. **Vorschlag: so**; Ontologio-Einträge mit ③.
+- **O-2 `schrift.familien` = `schriften`** (Abweichung 1). **Vorschlag: so.**
+- **O-3 Deckkraft in shade-Stufen** (Abweichung 3, D-05). **Vorschlag: so**; stufenlos ginge nur mit neuen Palette-Stufen (E1).
+- **O-4 Bereiche der Farbregler** (B-1): (a) so lassen, in ③ hält `propose_agordo` vor der Regel an und die Werkstatt zeigt den Verstoß; (b) die Bereiche aus Spec 016 enger. **Vorschlag: (a).**
+- **O-5 Obergrenze `schrift.skala`** (B-2): 1,5 laut Spec; **Vorschlag: 1,25** (größte Stufe 119 px).
+- **O-6 `provo-kompakta` als bekannte Aspekto** – kostet in `check:alirebleco` eine Aspekto mehr (144 Kombinationen). **Vorschlag: so** (wie O-7 aus Spec 016).
+- **O-7 fill und duotone** als Gewichte zulassen (B-4). **Vorschlag: so** (Phosphor nennt sie Gewichte).
+
+### M4 – Eckwerte
+
+Je Regler Minimum und Maximum bei sonst Standard (Leitfarbe komunas `#375479`), jedes Icon-Gewicht, alle acht Zahlenregler der Stufe 2 zugleich an Minimum bzw. Maximum, die beiden Beispielmarken und zehn Zufalls-Agordos (Seed 19, `seededRandom`: Leitfarbe in OKLCH, jeder Regler gleichverteilt im Bereich, ein Gewicht). Jede Agordo abgeleitet und mit allen Prüfungen geprüft: `pnpm --filter @fundamento/agordilo mezuroj m4`. „Paare“ sind Paar-Auswertungen der Aspekto (89 KontrastParoj × 72 Kombinationen). „Hinweise gesamt“ zählt APCA mit.
+
+| Fall | Agordo | Paare bestanden | Paare verletzt | Hinweise Stufe 2 | Hinweise gesamt | Verstöße fest | Verstöße anpassbar | Regeln | Export |
+|---|---|---|---|---|---|---|---|---|---|
+| Standard | `{"leitfarbe":"#375479"}` | 6408 | 0 | – | 133 | 0 | 0 | – | ja |
+| neutral.toenung min (0) | `{"leitfarbe":"#375479","neutral":{"toenung":0}}` | 6408 | 0 | – | 133 | 0 | 0 | – | ja |
+| neutral.toenung max (1) | `{"leitfarbe":"#375479","neutral":{"toenung":1}}` | 6408 | 0 | – | 133 | 0 | 0 | – | ja |
+| regler.helligkeit min (-1) | `{"leitfarbe":"#375479","regler":{"helligkeit":-1}}` | 5364 | 1044 | – | 276 | 67 | 11 | state-distinct 5, text-hierarchy 1, contrast-reserve 4, palette-aligned 4, palette-even 6, contrast-below-threshold 58 | nein |
+| regler.helligkeit max (1) | `{"leitfarbe":"#375479","regler":{"helligkeit":1}}` | 6408 | 0 | – | 41 | 18 | 17 | contrast-reserve 4, state-distinct 14, text-hierarchy 5, surface-distinct 3, palette-aligned 3, palette-even 6 | nein |
+| regler.kontrast min (-1) | `{"leitfarbe":"#375479","regler":{"kontrast":-1}}` | 2880 | 3528 | – | 301 | 218 | 10 | state-distinct 10, text-hierarchy 2, contrast-reserve 13, palette-aligned 2, palette-even 6, contrast-below-threshold 195 | nein |
+| regler.kontrast max (1) | `{"leitfarbe":"#375479","regler":{"kontrast":1}}` | 6408 | 0 | – | 14 | 4 | 11 | state-distinct 4, text-hierarchy 2, surface-distinct 3, palette-even 6 | nein |
+| regler.saettigung min (0) | `{"leitfarbe":"#375479","regler":{"saettigung":0}}` | 6408 | 0 | – | 132 | 0 | 7 | palette-aligned 7 | nur mit Jugxo |
+| regler.saettigung max (2) | `{"leitfarbe":"#375479","regler":{"saettigung":2}}` | 6408 | 0 | – | 134 | 0 | 0 | – | ja |
+| form.radius min (0) | `{"leitfarbe":"#375479","form":{"radius":0}}` | 6408 | 0 | – | 133 | 0 | 0 | – | ja |
+| form.radius max (2) | `{"leitfarbe":"#375479","form":{"radius":2}}` | 6408 | 0 | – | 133 | 0 | 0 | – | ja |
+| form.rahmen min (0.5) | `{"leitfarbe":"#375479","form":{"rahmen":0.5}}` | 6408 | 0 | border-collapse border.width.strong | 134 | 0 | 0 | – | ja |
+| form.rahmen max (2) | `{"leitfarbe":"#375479","form":{"rahmen":2}}` | 6408 | 0 | – | 133 | 0 | 0 | – | ja |
+| form.schatten min (0) | `{"leitfarbe":"#375479","form":{"schatten":0}}` | 6408 | 0 | shadow-none elevation.shadow.* | 134 | 0 | 0 | – | ja |
+| form.schatten max (2) | `{"leitfarbe":"#375479","form":{"schatten":2}}` | 6408 | 0 | – | 133 | 0 | 0 | – | ja |
+| raum.abstand min (0.75) | `{"leitfarbe":"#375479","raum":{"abstand":0.75}}` | 6408 | 0 | – | 133 | 0 | 0 | – | ja |
+| raum.abstand max (1.5) | `{"leitfarbe":"#375479","raum":{"abstand":1.5}}` | 6408 | 0 | – | 133 | 0 | 0 | – | ja |
+| raum.hoehe min (0.85) | `{"leitfarbe":"#375479","raum":{"hoehe":0.85}}` | 6408 | 0 | – | 133 | 0 | 0 | – | ja |
+| raum.hoehe max (1.25) | `{"leitfarbe":"#375479","raum":{"hoehe":1.25}}` | 6408 | 0 | – | 133 | 0 | 0 | – | ja |
+| schrift.groesse min (-1) | `{"leitfarbe":"#375479","schrift":{"groesse":-1}}` | 6408 | 0 | body-size font.size.body.1, body-size font.size.body.2 | 135 | 0 | 0 | – | ja |
+| schrift.groesse max (1) | `{"leitfarbe":"#375479","schrift":{"groesse":1}}` | 6408 | 0 | – | 133 | 0 | 0 | – | ja |
+| schrift.skala min (1.125) | `{"leitfarbe":"#375479","schrift":{"skala":1.125}}` | 6408 | 0 | – | 133 | 0 | 0 | – | ja |
+| schrift.skala max (1.5) | `{"leitfarbe":"#375479","schrift":{"skala":1.5}}` | 6408 | 0 | body-size font.size.body.2 | 134 | 0 | 0 | – | ja |
+| schrift.gewicht min (-1) | `{"leitfarbe":"#375479","schrift":{"gewicht":-1}}` | 6408 | 0 | – | 133 | 0 | 0 | – | ja |
+| schrift.gewicht max (1) | `{"leitfarbe":"#375479","schrift":{"gewicht":1}}` | 6408 | 0 | – | 133 | 0 | 0 | – | ja |
+| ikono.gewicht thin | `{"leitfarbe":"#375479","ikono":{"gewicht":"thin"}}` | 6408 | 0 | – | 133 | 0 | 0 | – | ja |
+| ikono.gewicht light | `{"leitfarbe":"#375479","ikono":{"gewicht":"light"}}` | 6408 | 0 | – | 133 | 0 | 0 | – | ja |
+| ikono.gewicht bold | `{"leitfarbe":"#375479","ikono":{"gewicht":"bold"}}` | 6408 | 0 | – | 133 | 0 | 0 | – | ja |
+| ikono.gewicht fill | `{"leitfarbe":"#375479","ikono":{"gewicht":"fill"}}` | 6408 | 0 | – | 133 | 0 | 0 | – | ja |
+| ikono.gewicht duotone | `{"leitfarbe":"#375479","ikono":{"gewicht":"duotone"}}` | 6408 | 0 | – | 133 | 0 | 0 | – | ja |
+| alle Form-Regler min | `{"leitfarbe":"#375479","form":{"radius":0,"rahmen":0.5,"schatten":0},"raum":{"abstand":0.75,"hoehe":0.85},"schrift":{"groesse":-1,"skala":1.125,"gewicht":-1}}` | 6408 | 0 | body-size font.size.body.1, body-size font.size.body.2, border-collapse border.width.strong, shadow-none elevation.shadow.* | 137 | 0 | 0 | – | ja |
+| alle Form-Regler max | `{"leitfarbe":"#375479","form":{"radius":2,"rahmen":2,"schatten":2},"raum":{"abstand":1.5,"hoehe":1.25},"schrift":{"groesse":1,"skala":1.5,"gewicht":1}}` | 6408 | 0 | – | 133 | 0 | 0 | – | ja |
+| provo | `{"leitfarbe":"#6b4fa0","zusatzfarben":{"info":"oklch(0.55 0.12 225)"},"neutral":{"toenung":0.4},"regler":{"helligkeit":0.1,"kontrast":0.1,"saettigung":1.1},"schriften":{"display":"Archivo …"},"form":{"radius":1.6},"raum":{"abstand":1.15},"ikono":{"gewicht":"bold"}}` | 6408 | 0 | – | 108 | 0 | 0 | – | ja |
+| provo-kompakta | `{"leitfarbe":"#0f6b5c","neutral":{"toenung":0.2},"form":{"radius":0.25,"schatten":0.5},"raum":{"abstand":0.8,"hoehe":0.9},"schrift":{"groesse":-0.5},"ikono":{"gewicht":"light"}}` | 6408 | 0 | body-size font.size.body.2 | 135 | 0 | 0 | – | ja |
+| Zufall 1 | `{"leitfarbe":"oklch(0.37 0.086 162.906)","neutral":{"toenung":0.757},"regler":{"helligkeit":0.973,"kontrast":-0.355,"saettigung":1.307},"form":{"radius":1.063,"rahmen":1.295,"schatten":1.645},"raum":{"abstand":0.835,"hoehe":1.045},"schrift":{"groesse":0.154,"skala":1.274,"gewicht":0.153},"ikono":{"gewicht":"thin"}}` | 6192 | 216 | body-size font.size.body.2 | 132 | 38 | 16 | contrast-reserve 13, state-distinct 13, text-hierarchy 4, surface-distinct 2, palette-aligned 4, palette-even 6, contrast-below-threshold 12 | nein |
+| Zufall 2 | `{"leitfarbe":"oklch(0.383 0.11 257.016)","neutral":{"toenung":0.835},"regler":{"helligkeit":-0.066,"kontrast":-0.61,"saettigung":0.151},"form":{"radius":0.28,"rahmen":1.412,"schatten":0.574},"raum":{"abstand":0.873,"hoehe":1.203},"schrift":{"groesse":-0.459,"skala":1.486,"gewicht":0.885},"ikono":{"gewicht":"regular"}}` | 5184 | 1224 | body-size font.size.body.2 | 260 | 96 | 4 | contrast-reserve 24, state-distinct 5, palette-even 3, text-hierarchy 1, contrast-below-threshold 67 | nein |
+| Zufall 3 | `{"leitfarbe":"oklch(0.404 0.077 330.548)","neutral":{"toenung":0.865},"regler":{"helligkeit":-0.997,"kontrast":-0.38,"saettigung":1.868},"form":{"radius":1.877,"rahmen":1.24,"schatten":0.783},"raum":{"abstand":0.898,"hoehe":0.967},"schrift":{"groesse":0.697,"skala":1.149,"gewicht":-0.246},"ikono":{"gewicht":"bold"}}` | 4356 | 2052 | – | 298 | 138 | 20 | state-distinct 19, text-hierarchy 4, contrast-reserve 6, surface-distinct 1, surface-order 1, palette-aligned 8, palette-even 6, contrast-below-threshold 113 | nein |
+| Zufall 4 | `{"leitfarbe":"oklch(0.533 0.17 180.782)","neutral":{"toenung":0.224},"regler":{"helligkeit":-0.794,"kontrast":0.383,"saettigung":1.213},"form":{"radius":1.537,"rahmen":1.833,"schatten":0.002},"raum":{"abstand":0.995,"hoehe":1.038},"schrift":{"groesse":-0.71,"skala":1.259,"gewicht":0.621},"ikono":{"gewicht":"light"}}` | 5886 | 522 | body-size font.size.body.1, body-size font.size.body.2 | 235 | 33 | 14 | contrast-reserve 3, state-distinct 2, palette-aligned 8, palette-even 6, contrast-below-threshold 28 | nein |
+| Zufall 5 | `{"leitfarbe":"oklch(0.549 0.043 11.166)","neutral":{"toenung":0.295},"regler":{"helligkeit":0.292,"kontrast":0.631,"saettigung":0.232},"form":{"radius":1.214,"rahmen":1.475,"schatten":0.858},"raum":{"abstand":1.191,"hoehe":0.954},"schrift":{"groesse":-0.772,"skala":1.13,"gewicht":0.672},"ikono":{"gewicht":"duotone"}}` | 6408 | 0 | body-size font.size.body.1, body-size font.size.body.2 | 17 | 8 | 17 | state-distinct 8, text-hierarchy 4, surface-distinct 3, palette-even 6, palette-aligned 4 | nein |
+| Zufall 6 | `{"leitfarbe":"oklch(0.505 0.168 55.542)","neutral":{"toenung":0.39},"regler":{"helligkeit":0.103,"kontrast":-0.135,"saettigung":0.183},"form":{"radius":0.055,"rahmen":1.82,"schatten":1.871},"raum":{"abstand":1.08,"hoehe":1.06},"schrift":{"groesse":0.256,"skala":1.234,"gewicht":0.73},"ikono":{"gewicht":"thin"}}` | 6408 | 0 | – | 146 | 5 | 4 | contrast-reserve 5, palette-aligned 4 | nein |
+| Zufall 7 | `{"leitfarbe":"oklch(0.554 0.105 221.409)","neutral":{"toenung":0.545},"regler":{"helligkeit":0.571,"kontrast":0.334,"saettigung":1.699},"form":{"radius":0.251,"rahmen":1.765,"schatten":1.634},"raum":{"abstand":1.343,"hoehe":1.089},"schrift":{"groesse":-0.831,"skala":1.439,"gewicht":-0.193},"ikono":{"gewicht":"duotone"}}` | 6408 | 0 | body-size font.size.body.1, body-size font.size.body.2 | 49 | 15 | 22 | contrast-reserve 6, state-distinct 9, text-hierarchy 4, surface-distinct 3, surface-order 1, palette-aligned 8, palette-even 6 | nein |
+| Zufall 8 | `{"leitfarbe":"oklch(0.537 0.077 72.95)","neutral":{"toenung":0.789},"regler":{"helligkeit":0.91,"kontrast":-0.465,"saettigung":1.909},"form":{"radius":0.415,"rahmen":0.587,"schatten":1.838},"raum":{"abstand":1.29,"hoehe":1.04},"schrift":{"groesse":0.4,"skala":1.442,"gewicht":0.034},"ikono":{"gewicht":"bold"}}` | 6138 | 270 | body-size font.size.body.2, border-collapse border.width.strong | 160 | 43 | 14 | contrast-reserve 16, state-distinct 12, text-hierarchy 3, surface-distinct 1, palette-aligned 4, palette-even 6, contrast-below-threshold 15 | nein |
+| Zufall 9 | `{"leitfarbe":"oklch(0.556 0.103 69.048)","neutral":{"toenung":0.245},"regler":{"helligkeit":-0.822,"kontrast":0.807,"saettigung":0.49},"form":{"radius":0.614,"rahmen":0.627,"schatten":0.744},"raum":{"abstand":0.807,"hoehe":0.983},"schrift":{"groesse":-0.75,"skala":1.468,"gewicht":0.483},"ikono":{"gewicht":"fill"}}` | 6408 | 0 | body-size font.size.body.1, body-size font.size.body.2, border-collapse border.width.strong | 184 | 0 | 6 | palette-even 6 | nur mit Jugxo |
+| Zufall 10 | `{"leitfarbe":"oklch(0.44 0.081 359.201)","neutral":{"toenung":0.471},"regler":{"helligkeit":0.122,"kontrast":0.383,"saettigung":1.378},"form":{"radius":0.346,"rahmen":1.25,"schatten":0.603},"raum":{"abstand":0.76,"hoehe":1.192},"schrift":{"groesse":0.453,"skala":1.137,"gewicht":0.944},"ikono":{"gewicht":"bold"}}` | 6408 | 0 | – | 67 | 4 | 9 | state-distinct 4, text-hierarchy 2, surface-distinct 2, palette-even 2, palette-aligned 3 | nein |
+
+**Ergebnis:** Kein Regler der Stufe 2 verletzt eine feste Regel – einzeln an seinen Enden nicht, alle zusammen an Minimum oder Maximum nicht, in keiner Zufalls-Agordo. Feste Verstöße kommen nur aus `regler.helligkeit` und `regler.kontrast` (Stufe 1) an ihren Enden (B-1). Die Hinweise der Stufe 2 erscheinen genau dort, wo die Kandidaten K-1 bis K-3 greifen.
+
+**Rein, ohne Modelo** (Test `gestalt.test.ts`): 3^8 = 6 561 Ecken × 3 Dichten × 3 Viewports × 2 Kontraste ohne Fund; `schrift.groesse` × `schrift.skala` 101 × 76 Werte ohne `type-scale`-Verstoß.
+
+## ② Werkstatt Stufe 2
+
+Folgt in PR ②.
+
+## ③ Prompt (Stufe 3)
+
+Folgt in PR ③.
+
+## ④ Nachlese 6
+
+Eigener Branch von `main` (Abweichung 9 in ①); Plan und Aufgaben in [`nachlese-6/plan.md`](nachlese-6/plan.md) und [`nachlese-6/tasks.md`](nachlese-6/tasks.md). Folgt in PR ④.

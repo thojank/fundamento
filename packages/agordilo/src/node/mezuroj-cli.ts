@@ -1,12 +1,43 @@
-// Maintainer script: prints the measurements M1 and M2 of Spec 016 ① as Markdown tables.
-// Usage: pnpm --filter @fundamento/agordilo mezuroj
+// Maintainer script: prints the measurements M1 and M2 of Spec 016 ① and M4 of Spec 019 ① as
+// Markdown tables.
+// Usage: pnpm --filter @fundamento/agordilo mezuroj [m4]   (m4: only M4)
 
-import { measureM1, measureM2 } from "../mezuroj.js";
+import { readFileSync } from "node:fs";
+import { readAgordo } from "../agordo.js";
+import { measureM1, measureM2, measureM4 } from "../mezuroj.js";
 import { loadCalibration, readStructure } from "./structure.js";
 
 const structure = readStructure();
 const calibration = loadCalibration();
 const out: string[] = [];
+
+/** provo and provo-kompakta, the example brands (Modelo fixtures). */
+function examples() {
+  return ["aspekto-provo", "aspekto-provo-kompakta"].flatMap((dir) => {
+    const url = new URL(`../../../modelo/test/fixtures/valid/${dir}/agordo.json`, import.meta.url);
+    const { agordo } = readAgordo(JSON.parse(readFileSync(url, "utf8")));
+    return agordo === undefined ? [] : [agordo];
+  });
+}
+
+if (process.argv[2] === "m4") {
+  const started = performance.now();
+  const rows = measureM4(structure, calibration, examples());
+  const seconds = (performance.now() - started) / 1000;
+  out.push(
+    `M4 – Eckwerte (${rows.length} Agordos, ${seconds.toFixed(1)} s mit Prüfung)`,
+    "",
+    "| Fall | Agordo | Paare bestanden | Paare verletzt | Hinweise Stufe 2 | Hinweise gesamt | Verstöße fest | Verstöße anpassbar | Regeln | Export |",
+    "|---|---|---|---|---|---|---|---|---|---|",
+  );
+  for (const row of rows) {
+    out.push(
+      `| ${row.label} | \`${row.agordo}\` | ${row.passed} | ${row.failed} | ${row.gestaltHints} | ${row.hints} | ${row.fixed} | ${row.adjustable} | ${row.rules || "–"} | ${row.exportable ? "ja" : row.fixed > 0 ? "nein" : "nur mit Jugxo"} |`,
+    );
+  }
+  process.stdout.write(`${out.join("\n")}\n`);
+  process.exit(0);
+}
 
 const m1 = measureM1(structure, calibration);
 const byPalette = new Map<string, number[]>();

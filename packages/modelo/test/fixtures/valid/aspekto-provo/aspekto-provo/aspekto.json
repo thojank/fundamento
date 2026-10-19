@@ -35,11 +35,11 @@
   ],
   "ikonoj": {
     "set": "Phosphor Icons",
-    "style": "regular",
+    "style": "bold",
     "version": "2.1.1",
     "license": "MIT",
-    "source": "https://github.com/phosphor-icons/core (npm @phosphor-icons/core 2.1.1, assets/regular)",
-    "read": "2026-10-17",
+    "source": "https://github.com/phosphor-icons/core (npm @phosphor-icons/core 2.1.1, assets/bold)",
+    "read": "2026-10-20",
     "names": {
       "check": "check",
       "chevron-down": "caret-down",
@@ -93,6 +93,15 @@
             "Latn"
           ]
         }
+      },
+      "form": {
+        "radius": 1.6
+      },
+      "raum": {
+        "abstand": 1.15
+      },
+      "ikono": {
+        "gewicht": "bold"
       }
     }
   }

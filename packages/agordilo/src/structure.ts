@@ -19,6 +19,20 @@ export interface Structure {
   fingerprint: string;
   /** The licence text of the reference package's glyphs (`ikonoj/LICENSE`), copied with them. */
   ikonojLicense?: string;
+  /**
+   * The Ikonaro in the Phosphor weights the reference does not draw (Spec 019, G2 ikono.gewicht,
+   * E6): data/ikonoj of the Agordilo. Not part of the fingerprint — like the calibration, it is
+   * the Agordilo's, not the structure's.
+   */
+  ikonoGewichte?: IkonoGewichte;
+}
+
+/** Glyphs per Phosphor weight with their provenance (data/ikonoj/ikonoj.json). */
+export interface IkonoGewichte {
+  /** set, version, licence, source (with `<gewicht>`), the day it was read, the weights. */
+  provenance: Record<string, unknown>;
+  /** weight → Ikonaro name → SVG text. */
+  glyphs: Record<string, Record<string, string>>;
 }
 
 /** The documents the fingerprint covers: the core sets and the reference package, by name. */

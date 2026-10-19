@@ -7,6 +7,7 @@ export * from "./calibration.js";
 export * from "./check.js";
 export * from "./derive.js";
 export * from "./explain.js";
+export * from "./gestalt.js";
 export * from "./ids.js";
 export * from "./mezuroj.js";
 export * from "./node/package-dir.js";

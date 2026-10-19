@@ -10,7 +10,12 @@
 
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { fingerprintOf, loadCalibration, referenceStructureFiles } from "@fundamento/agordilo";
+import {
+  fingerprintOf,
+  loadCalibration,
+  loadIkonoGewichte,
+  referenceStructureFiles,
+} from "@fundamento/agordilo";
 import { readConfigSchema, readModeloSchema, referenceAspektoOf } from "@fundamento/modelo";
 import type { Celo, CeloInput, GeneratedFile } from "../../build.js";
 import { kitReferenceAspekto, kitTypesPath } from "../make-kit/make-kit.js";
@@ -41,8 +46,15 @@ export function werkstattDatumoj(input: CeloInput): WerkstattDatumoj | undefined
   const aspektoj = (
     input.modelo.dimensioj.find((dimensio) => dimensio.name === "aspekto")?.valoroj ?? []
   ).map((valoro) => valoro.name);
+  // Spec 019 ①: the Ikonaro in the further Phosphor weights travels with the structure, so the
+  // Werkstatt derives an Agordo with ikono.gewicht as the CLI does.
+  const ikonoGewichte = loadIkonoGewichte();
   return {
-    structure: { files, fingerprint: fingerprintOf(files) },
+    structure: {
+      files,
+      fingerprint: fingerprintOf(files),
+      ...(ikonoGewichte === undefined ? {} : { ikonoGewichte }),
+    },
     calibration: loadCalibration(),
     schemas: { modelo: readModeloSchema(), config: readConfigSchema() },
     reference,

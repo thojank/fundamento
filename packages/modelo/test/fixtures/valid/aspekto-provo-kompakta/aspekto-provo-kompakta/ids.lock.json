@@ -1,0 +1,16 @@
+{
+  "ids": {
+    "dva_provokom_01M564XR00KXK7C869AGPC73G8": {
+      "status": "active",
+      "type": "dimensioValoro"
+    },
+    "set_provokom_01M564XR00KXK7C869AGPC73G9": {
+      "status": "active",
+      "type": "tokenSet"
+    },
+    "set_provokom_01M564XR00KXK7C869AGPC73GA": {
+      "status": "active",
+      "type": "tokenSet"
+    }
+  }
+}

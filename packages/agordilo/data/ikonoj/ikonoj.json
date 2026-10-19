@@ -1,0 +1,35 @@
+{
+  "description": "Glyphs of the Ikonaro in the Phosphor weights the reference Aspekto does not draw (Spec 019 ①, G2 ikono.gewicht, E6). komuna draws regular; these folders hold thin, light, bold, fill and duotone of the same names, read from the same package and version as the Ikonaro of komuna, each glyph with its provenance in <metadata>. The map names → Phosphor name is the one of komuna.",
+  "set": "Phosphor Icons",
+  "version": "2.1.1",
+  "license": "MIT",
+  "source": "https://github.com/phosphor-icons/core (npm @phosphor-icons/core 2.1.1, assets/<gewicht>)",
+  "integrity": "sha512-v4ARvrip4qBCImOE5rmPUylOEK4iiED9ZyKjcvzuezqMaiRASCHKcRIuvvxL/twvLpkfnEODCOJp5dM4eZilxQ==",
+  "read": "2026-10-20",
+  "gewichte": [
+    "thin",
+    "light",
+    "bold",
+    "fill",
+    "duotone"
+  ],
+  "names": {
+    "check": "check",
+    "chevron-down": "caret-down",
+    "chevron-left": "caret-left",
+    "chevron-right": "caret-right",
+    "close": "x",
+    "collapse": "arrows-in-simple",
+    "danger": "warning-octagon",
+    "expand": "arrows-out-simple",
+    "external": "arrow-square-out",
+    "info": "info",
+    "more": "dots-three",
+    "search": "magnifying-glass",
+    "sort-ascending": "sort-ascending",
+    "sort-descending": "sort-descending",
+    "success": "check-circle",
+    "upload": "upload-simple",
+    "warning": "warning"
+  }
+}

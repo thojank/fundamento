@@ -8,6 +8,7 @@ export * from "./calibration.js";
 export * from "./check.js";
 export * from "./derive.js";
 export * from "./explain.js";
+export * from "./gestalt.js";
 export * from "./ids.js";
 export * from "./package.js";
 export * from "./palettes.js";

@@ -13,9 +13,11 @@ import {
   MODELO_VERSION,
   type ModeloSetDocument,
   serializeIdsLock,
+  type ValidationIssue,
 } from "@fundamento/modelo";
 import type { Agordo } from "./agordo.js";
 import { type Mode, PALETTES, type PaletteName } from "./calibration.js";
+import type { Gestalt } from "./gestalt.js";
 import { derivedIdGenerator, namespaceOf } from "./ids.js";
 import type { DerivedPalettes, DerivedStep, ModeOverride } from "./palettes.js";
 import { isRecord as isJsonObject } from "./record.js";
@@ -86,6 +88,24 @@ function rewriteSet(
   };
   const body = isJsonObject(value) ? walk(value, []) : {};
   return { $extensions: { [EXTENSION_KEY]: { id, kondicxoj } }, ...body };
+}
+
+/**
+ * Writes tokens a set of the reference does not carry into a rewritten set (Spec 019 ①: the
+ * shadow colours of stage 2 in the dark conjunction set), at their dotted path; groups keep the
+ * `$type` they have.
+ */
+function withTokens(set: Record<string, unknown>, tokens: ReadonlyMap<string, unknown>) {
+  for (const [name, value] of tokens) {
+    const path = name.split(".");
+    let node = set;
+    for (const key of path.slice(0, -1)) {
+      if (!isJsonObject(node[key])) node[key] = {};
+      node = node[key] as Record<string, unknown>;
+    }
+    node[path.at(-1) ?? ""] = { $value: value };
+  }
+  return set;
 }
 
 function kondicxojOf(value: unknown): string[] {
@@ -163,6 +183,74 @@ function fontsOf(agordo: Agordo, structure: Structure): Fonto[] {
   return fonts;
 }
 
+/** The AGORDO_PATH of check.ts, repeated to keep package.ts free of the checks. */
+const AGORDO_ISSUE_PATH = "agordo#/ikono/gewicht";
+
+export interface IkonoChoice {
+  /** The Phosphor weight drawn; the reference's style when the Agordo names none. */
+  weight: string;
+  /** Ikonaro name → SVG text, for every name the reference draws. */
+  glyphs: Record<string, string>;
+  /** aspekto.json#/ikonoj of the derived package. */
+  ikonoj?: NonNullable<AspektoFile["ikonoj"]>;
+  /** A weight without a glyph for every name is refused (Spec 019 ①, E6). */
+  issues: ValidationIssue[];
+}
+
+/**
+ * The glyphs of the derived package (Spec 019, G2 ikono.gewicht, E6): the reference's own, or
+ * the weight the Agordo names from data/ikonoj — only where that weight has a glyph for every
+ * name the reference draws; a missing glyph is reported at the Agordo and the reference's glyph
+ * stands in, so the package still composes for the checks while the export is refused.
+ */
+export function ikonoChoice(agordo: Agordo, structure: Structure): IkonoChoice {
+  const reference = referencePackage(structure);
+  const referenceValue = isJsonObject(reference.aspekto.value) ? reference.aspekto.value : {};
+  const referenceIkonoj = isJsonObject(referenceValue.ikonoj)
+    ? (referenceValue.ikonoj as NonNullable<AspektoFile["ikonoj"]>)
+    : undefined;
+  const own = reference.ikonoj ?? {};
+  const style = referenceIkonoj?.style ?? "regular";
+  const weight = agordo.ikono?.gewicht ?? style;
+  if (weight === style) {
+    return {
+      weight,
+      glyphs: { ...own },
+      ...(referenceIkonoj === undefined ? {} : { ikonoj: referenceIkonoj }),
+      issues: [],
+    };
+  }
+  const drawn = structure.ikonoGewichte?.glyphs[weight] ?? {};
+  const names = Object.keys(own).sort();
+  const missing = names.filter((name) => drawn[name] === undefined);
+  const glyphs = Object.fromEntries(names.map((name) => [name, drawn[name] ?? own[name] ?? ""]));
+  const provenance = structure.ikonoGewichte?.provenance ?? {};
+  const text = (key: string, fallback: string | undefined): string =>
+    typeof provenance[key] === "string" ? (provenance[key] as string) : (fallback ?? "");
+  const ikonoj: NonNullable<AspektoFile["ikonoj"]> = {
+    set: text("set", referenceIkonoj?.set),
+    style: weight,
+    version: text("version", referenceIkonoj?.version),
+    license: text("license", referenceIkonoj?.license),
+    source: text("source", referenceIkonoj?.source).replace("<gewicht>", weight),
+    read: text("read", referenceIkonoj?.read),
+    ...(referenceIkonoj?.names === undefined ? {} : { names: referenceIkonoj.names }),
+  };
+  const issues: ValidationIssue[] =
+    missing.length === 0
+      ? []
+      : [
+          {
+            rule: "ikonaro-glyph-missing",
+            severity: "error",
+            path: AGORDO_ISSUE_PATH,
+            message: `The Phosphor weight ${weight} has no glyph for ${missing.map((name) => JSON.stringify(name)).join(", ")}; every Aspekto draws every name of the Ikonaro (Art. IV).`,
+            suggestion: `Choose a weight whose glyphs are all in the repository (${Object.keys(structure.ikonoGewichte?.glyphs ?? {}).join(", ") || "none"} besides ${style}), or add the missing Phosphor glyphs to data/ikonoj/${weight} with their provenance and licence (Spec 019, E6).`,
+          },
+        ];
+  return { weight, glyphs, ikonoj, issues };
+}
+
 /**
  * Builds every file of the package except `$themes.json` and the report: the sets over the
  * structure, aspekto.json with the origin (the structure's fingerprint, node/structure.ts), the
@@ -173,6 +261,7 @@ export function packageDocuments(
   structure: Structure,
   palettes: DerivedPalettes,
   jugxoj: readonly RecordedJugxo[],
+  gestalt?: Gestalt,
 ): PackageDocuments {
   const { name } = agordo;
   const reference = referencePackage(structure);
@@ -209,6 +298,7 @@ export function packageDocuments(
     (token, value) => {
       const step = byToken.get(token);
       if (step !== undefined) return colorValue(step);
+      if (gestalt?.main.has(token) === true) return gestalt.main.get(token);
       const role = /^font\.family\.([a-z]+)$/.exec(token)?.[1];
       const own = role === undefined ? undefined : agordo.schriften?.[role as "display"];
       if (own !== undefined && Array.isArray(value)) return [own.family, ...value.slice(1)];
@@ -224,10 +314,12 @@ export function packageDocuments(
     const mode = modeOf(kondicxoj);
     const setName = set.name.replace(`aspekto/${referenceName}`, mainName);
     const path = `sets/${setName}.json`;
-    json[path] = rewriteSet(set.value, mint("tokenSet"), kondicxoj, (token, value) => {
+    const rewritten = rewriteSet(set.value, mint("tokenSet"), kondicxoj, (token, value) => {
       const step = byModeToken.get(`${mode}:${token}`);
       return step === undefined ? value : colorValue(step);
     });
+    json[path] =
+      mode === "dark" && gestalt !== undefined ? withTokens(rewritten, gestalt.dark) : rewritten;
     sets.push({ name: setName, path });
   }
 
@@ -256,9 +348,8 @@ export function packageDocuments(
     idNamespace: namespaceOf(name),
     fonts: fontsOf(agordo, structure),
   };
-  if (isJsonObject(referenceValue.ikonoj)) {
-    aspekto.ikonoj = referenceValue.ikonoj as NonNullable<AspektoFile["ikonoj"]>;
-  }
+  const ikono = ikonoChoice(agordo, structure);
+  if (ikono.ikonoj !== undefined) aspekto.ikonoj = ikono.ikonoj;
   if (agordo.aspiroj !== undefined && agordo.aspiroj.length > 0) aspekto.aspiroj = agordo.aspiroj;
   aspekto.agordilo = {
     version: AGORDILO_VERSION,
@@ -269,7 +360,7 @@ export function packageDocuments(
   json["ids.lock.json"] = ids;
 
   const text: Record<string, string> = {};
-  for (const [glyph, svg] of Object.entries(reference.ikonoj ?? {}).sort(([a], [b]) =>
+  for (const [glyph, svg] of Object.entries(ikono.glyphs).sort(([a], [b]) =>
     a < b ? -1 : a > b ? 1 : 0,
   )) {
     text[`ikonoj/${glyph}.svg`] = svg;

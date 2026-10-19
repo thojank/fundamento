@@ -20,6 +20,7 @@ import {
 import type { Agordo } from "./agordo.js";
 import type { Calibration } from "./calibration.js";
 import { Explainer, tokensOf } from "./explain.js";
+import type { Gestalt } from "./gestalt.js";
 import type { DerivedPalettes, ModeOverride, TargetFloors } from "./palettes.js";
 import type {
   Raporto,
@@ -70,6 +71,10 @@ export interface CheckInput {
   floors: TargetFloors;
   overrides: readonly ModeOverride[];
   palettes: DerivedPalettes;
+  /** The values of stage 2 (Spec 019 ①); its hints join the Raporto's. */
+  gestalt?: Gestalt;
+  /** Issues of the Agordo found before the checks (an icon weight without its glyphs). */
+  agordoIssues?: readonly ValidationIssue[];
 }
 
 export interface CheckResult {
@@ -332,7 +337,7 @@ export function checkAspekto(input: CheckInput): CheckResult {
     });
   }
 
-  const agordoIssues = agordoJugxoIssues(agordo, reguloj);
+  const agordoIssues = [...(input.agordoIssues ?? []), ...agordoJugxoIssues(agordo, reguloj)];
   const issues: ValidationIssue[] = [
     ...agordoIssues,
     ...violations
@@ -390,6 +395,10 @@ export function checkAspekto(input: CheckInput): CheckResult {
         : `Meets its target without its tone: chroma ${step.c.toFixed(4)} of ${step.requested.toFixed(4)}.`,
       combinations: 1,
     });
+  }
+  // Stage 2 (Spec 019 ①, G4): dangers no Regulo names, as hints.
+  for (const hint of input.gestalt?.hints ?? []) {
+    hints.set(`${hint.rule}|${hint.subject}`, { ...hint });
   }
 
   const passed = measurements.filter((measurement) => measurement.passed).length;

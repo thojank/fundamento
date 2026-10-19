@@ -16,7 +16,9 @@ import {
 import type { Agordo } from "./agordo.js";
 import { type Calibration, structureModelo } from "./calibration.js";
 import { ADJUSTABLE_RULES, checkAspekto } from "./check.js";
+import { deriveGestalt, type Gestalt, gestaltBasis } from "./gestalt.js";
 import {
+  ikonoChoice,
   modeOverrides,
   type PackageDocuments,
   packageDocuments,
@@ -129,6 +131,10 @@ export interface DerivationBasis {
   floors: TargetFloors;
   overrides: ModeOverride[];
   palettes: DerivedPalettes;
+  /** Form, space, type and icon weight of stage 2 (Spec 019 ①): the tokens they change, the hints. */
+  gestalt: Gestalt;
+  /** Why the Agordo's icon weight cannot be drawn (Spec 019 ①, E6); empty when it can. */
+  agordoIssues: ValidationIssue[];
 }
 
 /** The palettes of an Agordo over a structure, with what they were derived against. */
@@ -145,6 +151,8 @@ export function derivationBasis(
     floors,
     overrides,
     palettes: derivePalettes(agordo, calibration, floors, overrides),
+    gestalt: deriveGestalt(agordo, gestaltBasis(structure.files)),
+    agordoIssues: ikonoChoice(agordo, structure).issues,
   };
 }
 
@@ -154,8 +162,18 @@ export function deriveAspekto(
   structure: Structure,
   calibration: Calibration,
 ): Derivation {
-  const { modelo, floors, overrides, palettes } = derivationBasis(agordo, structure, calibration);
-  const documents = packageDocuments(agordo, structure, palettes, recordedJugxoj(agordo, modelo));
+  const { modelo, floors, overrides, palettes, gestalt, agordoIssues } = derivationBasis(
+    agordo,
+    structure,
+    calibration,
+  );
+  const documents = packageDocuments(
+    agordo,
+    structure,
+    palettes,
+    recordedJugxoj(agordo, modelo),
+    gestalt,
+  );
   const label = packageLabel(agordo);
 
   // $themes.json is the fragment the composed Modelo derives for the package (Spec 001, D-05).
@@ -170,6 +188,8 @@ export function deriveAspekto(
     floors,
     overrides,
     palettes,
+    gestalt,
+    agordoIssues,
   });
 
   const out: Record<string, string> = {};

@@ -248,8 +248,34 @@ describe("the corners of every slider (G4: the known minimums are never undercut
   }
 
   it("holds size.target, the order of the type roles, the type scale, the visible border and the focus ring in all 3^8 combinations", () => {
+    // Only the tokens the corners are measured on: the test stays light beside the other suites.
+    const core = [
+      ...gestaltTokens(basis, deriveGestalt({ name: "s", leitfarbe: LEAD }, basis), []),
+    ];
+    const scaleNames = core
+      .map(([name]) => name)
+      .filter((name) => /^font\.size\.scale\.\d+$/.test(name));
+    const gridNames = core
+      .map(([name]) => name)
+      .filter((name) => /^(radius\.|spacing\.scale\.)/.test(name));
+    const NAMES = {
+      density: [
+        "size.target.min",
+        "size.control.small",
+        "size.control.medium",
+        "size.control.large",
+      ],
+      viewport: [...ROLES, ...scaleNames],
+      contrast: ["border.width.default", "border.width.strong", "border.width.focus"],
+      core: [...WEIGHTS, ...gridNames],
+    };
+    const tokens = (
+      gestalt: ReturnType<typeof deriveGestalt>,
+      overlays: string[],
+      names: string[],
+    ) => gestaltTokens(basis, gestalt, overlays, names);
     const structure = (overlays: string[]) =>
-      gestaltTokens(basis, deriveGestalt({ name: "struktur", leitfarbe: LEAD }, basis), overlays);
+      tokens(deriveGestalt({ name: "struktur", leitfarbe: LEAD }, basis), overlays, NAMES.viewport);
     const failures: string[] = [];
     let count = 0;
     for (const agordo of corners()) {
@@ -257,7 +283,7 @@ describe("the corners of every slider (G4: the known minimums are never undercut
       const label = JSON.stringify({ ...agordo, name: undefined, leitfarbe: undefined });
       const gestalt = deriveGestalt(agordo, basis);
       for (const density of DENSITIES) {
-        const at = gestaltTokens(basis, gestalt, density);
+        const at = tokens(gestalt, density, NAMES.density);
         const target = px(at.get("size.target.min"));
         if (target !== 24) failures.push(`${label} ${density}: size.target.min ${target}`);
         for (const control of ["small", "medium", "large"]) {
@@ -268,7 +294,7 @@ describe("the corners of every slider (G4: the known minimums are never undercut
         }
       }
       for (const viewport of VIEWPORTS) {
-        const at = gestaltTokens(basis, gestalt, viewport);
+        const at = tokens(gestalt, viewport, NAMES.viewport);
         const before = structure(viewport);
         for (const [i, a] of ROLES.entries()) {
           for (const b of ROLES.slice(i + 1)) {
@@ -287,13 +313,13 @@ describe("the corners of every slider (G4: the known minimums are never undercut
         if (worst > 0.1 + 1e-9) failures.push(`${label}: type-scale ${worst.toFixed(3)}`);
       }
       for (const contrast of CONTRASTS) {
-        const at = gestaltTokens(basis, gestalt, contrast);
+        const at = tokens(gestalt, contrast, NAMES.contrast);
         for (const width of ["default", "strong", "focus"]) {
           if (px(at.get(`border.width.${width}`)) < 1) failures.push(`${label}: ${width} < 1 px`);
         }
         if (px(at.get("border.width.focus")) < 2) failures.push(`${label}: focus ring below 2 px`);
       }
-      const at = gestaltTokens(basis, gestalt, []);
+      const at = tokens(gestalt, [], NAMES.core);
       const weights = WEIGHTS.map((name) => at.get(name) as number);
       if (weights.some((w, i) => w < 100 || w > 900 || (i > 0 && w < (weights[i - 1] ?? 0)))) {
         failures.push(`${label}: weights ${weights.join(" ")}`);
@@ -307,6 +333,35 @@ describe("the corners of every slider (G4: the known minimums are never undercut
     }
     expect(count).toBe(3 ** 8);
     expect(failures.slice(0, 20)).toEqual([]);
+  });
+});
+
+describe("the whole range of the type sliders keeps the type scale (G4, type-scale)", () => {
+  it("every schrift.groesse (step 0.02) × schrift.skala (step 0.005) rounds to a regular whole-px scale", () => {
+    const failures: string[] = [];
+    let count = 0;
+    for (let g = -50; g <= 50; g += 1) {
+      for (let k = 0; k <= 75; k += 1) {
+        const groesse = g / 50;
+        const skala = Math.round((1.125 + k * 0.005) * 1000) / 1000;
+        count += 1;
+        const at = gestaltTokens(
+          basis,
+          deriveGestalt({ name: "raster", leitfarbe: LEAD, schrift: { groesse, skala } }, basis),
+          [],
+          basis.fontScale.map((step) => step.name),
+        );
+        const scale = [...at.values()].map(px).sort((x, y) => x - y);
+        const { worst } = typeScaleConsistency(scale);
+        if (worst > 0.1 + 1e-9 || new Set(scale).size !== scale.length) {
+          failures.push(
+            `groesse ${groesse} skala ${skala}: ${scale.join(" ")} (${worst.toFixed(3)})`,
+          );
+        }
+      }
+    }
+    expect(count).toBe(101 * 76);
+    expect(failures.slice(0, 10)).toEqual([]);
   });
 });
 
