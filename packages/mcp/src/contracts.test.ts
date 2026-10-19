@@ -414,6 +414,50 @@ const EXAMPLES: Record<string, { input: unknown; output: unknown; badInput: unkn
     },
     badInput: { instances: [] },
   },
+  // Spec 016 ③ (G9): an Agordo in, the Raporto and the palettes in short out; read-only.
+  preview_agordo: {
+    input: { agordo: { name: "flava", leitfarbe: "#F5C400" } },
+    output: {
+      aspekto: "flava",
+      exportable: false,
+      writes: false,
+      leitfarbe: { input: "#F5C400", hex: "#f5c400", onWhite: 1.62, onBlack: 12.96 },
+      summary: {
+        exportable: false,
+        pairs: { measured: 6408, passed: 6408, failed: 0 },
+        violations: { fixed: 0, adjustable: 1, covered: 0 },
+        hints: 108,
+      },
+      checks: [{ rule: "palette-aligned", fixed: false, passed: false, violations: 1 }],
+      violations: [
+        {
+          rule: "palette-aligned",
+          regulo: {
+            id: REGULO_REF.id,
+            name: "palette-aligned",
+            kialo: "The same step weighs the same.",
+          },
+          fixed: false,
+          subject: "color.palette.accent.900",
+          combination: "aspekto=flava",
+          message: "At step 900 the ramps differ by 0.056.",
+          cause: "accent.900 keeps its tone only at L 0.298.",
+          suggestion: "Use the darker lead colour #665000.",
+          apply: { leitfarbe: "#665000" },
+        },
+      ],
+      jugxoj: [],
+      palettes: [
+        {
+          palette: "accent",
+          source: { hue: 90.4, chroma: 0.1716, origin: "leitfarbe" },
+          steps: [{ step: "700", hex: "#6b5300", target: 7.77, achieved: 7.77, onTarget: true }],
+        },
+      ],
+      hints: { apca: 108, other: 0 },
+    },
+    badInput: { agordo: { name: "flava" } },
+  },
 };
 
 describe("tool schemas (contracts/mcp-tools.md)", () => {
@@ -437,6 +481,7 @@ describe("tool schemas (contracts/mcp-tools.md)", () => {
       "get_ero",
       "suggest_ero",
       "check_usage",
+      "preview_agordo",
     ]);
   });
 
