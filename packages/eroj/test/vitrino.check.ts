@@ -701,8 +701,9 @@ test("fm-avataro is upgraded in its section, the picture loaded, the initials wh
         return `${image.hidden ? "" : "image"}${initials.hidden ? "" : initials.textContent}`;
       }),
     );
+  // Nachlese 5 N5-5 (O-18): the smallest size, the first row, shows one initial.
   await expect
     .poll(shown)
-    .toEqual(["image", "EM", "EM", "EM", "image", "EM", "EM", "EM", "image", "EM", "EM", "EM"]);
+    .toEqual(["image", "E", "E", "E", "image", "EM", "EM", "EM", "image", "EM", "EM", "EM"]);
   expect(await axeViolations(page, "#fm-vitrino-avataro")).toEqual([]);
 });
