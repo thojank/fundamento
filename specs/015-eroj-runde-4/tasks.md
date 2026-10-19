@@ -106,4 +106,5 @@
 | Tests lokal (Toast, Endstand) | Modelo 3536, Projekcioj 706, MCP 304, CLI 66 grün; `check:parity` 32 Eroj, 0 Differenzen (297 freigegebene Werte); Lint, vortaro-lint, regularo (194 Jugxoj), mankoj, alirebleco, clean-room, ikonaro (17 Namen, keiner neu), release ohne Fehler; Browser: alle 240 Specs in Chromium, `karto`, `avataro`, `internacia`, `react` in Firefox und WebKit 100, Alirebleco-Check 561 in drei Browsern, Vitrino 30, Make-Kit 5 |
 | Toast grün | `81cc1bb` (Endstand des PR #78) |
 | CI | Lauf 39174045280 (`81cc1bb`, alle Jobs grün): `checks` 1:05, `unit` 3:36, `projekcioj` 4:55 / 0:54 (Shard 1 weiter `plugin.test.ts` allein, B-2/O-5 von ②), `eroj` 2:07 / 2:06, `rendered-checks` 6:58 |
-| K-1 (lokal) | Doppel: Set der `karto` vorher 648 × 1007 in Lauf 1 und 2 (gemessen in Figma 648 × 1031), nachher 648 × 507; Projekcioj 708 grün (Figma 384 + 2 neue); Zeile CI nach dem Push |
+| K-1 (lokal) | Doppel: Set der `karto` vorher 648 × 1007 in Lauf 1 und 2 (gemessen in Figma 648 × 1031), nachher 648 × 507; Projekcioj 708 grün (Figma 384 + 2 neue) |
+| CI (K-1, nach dem Rebase auf `main`) | Lauf 39227992125 (`a5adc5b`, alle sieben Jobs grün, Wanduhr 7:47): `checks` 1:21, `unit` 4:45, `projekcioj` 7:47 / 0:46 (Shard 1 ist `plugin.test.ts` allein – O-5, Nachlese 5), `eroj` 2:07 / 2:13, `rendered-checks` 6:53; grüner Stand `a5adc5b` |
