@@ -2055,4 +2055,42 @@ describe("Nachlese 5 documentation (specs/018-nachlese-5)", () => {
     expect(tasksSecond).toMatch(/rot `[0-9a-f]{7}`/);
     expect(tasksSecond).toMatch(/grün `[0-9a-f]{7}`/);
   });
+
+  // Nachlese 5 ③ (Auftrag 2026-10-19): the release path for 0.1.0 — a section of this plan, no
+  // spec folder of its own.
+  it("plan ③ carries the release path for 0.1.0: kitVersion, the dist-tag from the version, what stays open; tasks ③ start at T2001", () => {
+    const plan = read("specs/018-nachlese-5/plan.md");
+    const third = plan.slice(plan.indexOf("## ③ Release-Weg 0.1.0"));
+    expect(third.length).toBeGreaterThan(0);
+    for (const heading of [
+      "### Zusammenfassung",
+      "### Entwurfsentscheidungen",
+      "### Abweichungen vom Auftrag",
+      "### Befunde / Mankoj",
+      "### Offen (für den Maintainer)",
+    ]) {
+      expect(third, heading).toContain(heading);
+    }
+    for (const word of [
+      "kitVersion",
+      "command_for",
+      "`latest`",
+      "`next`",
+      "0.1.0-next.9",
+      "0.2.0",
+      "0.1.0.1",
+      "Trusted Publishing",
+      "make-kit-komuna",
+      "make-kit-ekzemplo",
+    ]) {
+      expect(third, word).toContain(word);
+    }
+    const tasks = read("specs/018-nachlese-5/tasks.md");
+    const tasksThird = tasks.slice(tasks.indexOf("## ③ Release-Weg 0.1.0"));
+    expect(tasksThird.length).toBeGreaterThan(0);
+    expect(tasksThird).toContain("**T2001");
+    expect(tasksThird).toContain("### Messungen");
+    expect(tasksThird).toMatch(/rot `[0-9a-f]{7}`/);
+    expect(tasksThird).toMatch(/grün `[0-9a-f]{7}`/);
+  });
 });

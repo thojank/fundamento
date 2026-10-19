@@ -42,7 +42,7 @@ describe("release.yml (T020, Trusted Publishing)", () => {
     const runs = commands();
     expect(runs).toMatch(/fm projekcioj build|projekcioj:make-kit|pnpm build/);
     for (const aspekto of ASPEKTOJ) expect(runs, aspekto).toContain(`make-kit/${aspekto}`);
-    expect(runs).toContain("--tag next --provenance --access public");
+    expect(runs).toMatch(/--tag \S+ --provenance --access public/);
   });
 
   it("refuses an npm older than 11.5.1, which Trusted Publishing needs (F7, research §7)", () => {
@@ -59,7 +59,7 @@ describe("release.yml (T020, Trusted Publishing)", () => {
       .map((step) => step.run ?? "")
       .join("\n");
     expect(runs).not.toMatch(/pnpm publish|npm publish/);
-    expect(commands()).toContain("--dry-run --tag next --provenance");
+    expect(commands()).toMatch(/--dry-run --tag \S+ --provenance/);
   });
 
   it("uses no token: no secret in any workflow, no auth entry in .npmrc", () => {
@@ -135,7 +135,7 @@ describe("release.yml publishes only when the maintainer says so (F25 release st
     expect(text).toContain("FUNDAMENTO_KIT_VERSION: ${{ inputs.version }}");
   });
 
-  it("prints a real publish with provenance and without --dry-run in mode publish", () => {
+  it("prints a real publish with provenance and without --dry-run in mode publish (a pre-release → next)", () => {
     const run = spawnSync("sh", ["scripts/release-kits.sh", "publish", "--print"], {
       cwd: repoRoot,
       encoding: "utf8",
@@ -164,4 +164,103 @@ describe("release.yml publishes only when the maintainer says so (F25 release st
     expect(run.status).not.toBe(0);
     expect(run.stderr).toContain("FUNDAMENTO_KIT_VERSION");
   });
+});
+
+// Nachlese 5 ③ (Spec 015 "Nach der Abnahme", 2026-10-19): the release 0.1.0 goes through the same
+// path. The dist-tag follows the version — a pre-release (0.1.0-next.5) publishes under `next`, the
+// Modelo's version itself (0.1.0) under `latest` —, decided in one place of the script
+// (`command_for`), shown by --print; release.yml hands only the version through. A number the Modelo
+// does not have (0.2.0, 0.1.0.1) is refused by the build before any publish.
+describe("the dist-tag follows the version: 0.1.0 → latest, 0.1.0-next.5 → next (Nachlese 5 ③)", () => {
+  const print = (version: string | undefined, mode = "publish") => {
+    const env = { ...process.env };
+    delete env.FUNDAMENTO_KIT_VERSION;
+    return spawnSync("sh", ["scripts/release-kits.sh", mode, "--print"], {
+      cwd: repoRoot,
+      encoding: "utf8",
+      env: version === undefined ? env : { ...env, FUNDAMENTO_KIT_VERSION: version },
+    });
+  };
+  const publishLines = (stdout: string) =>
+    stdout.split("\n").filter((line) => line.includes("pnpm publish"));
+
+  it.each([
+    ["0.1.0", "latest"],
+    ["0.1.0-next.5", "next"],
+    ["0.1.0-next.9", "next"],
+  ])("FUNDAMENTO_KIT_VERSION=%s publishes both kits under the dist-tag %s, and --print says so", (version, tag) => {
+    const run = print(version);
+    expect(run.status, run.stderr).toBe(0);
+    expect(run.stdout).toContain(`version: ${version}`);
+    expect(run.stdout).toContain(`tag: ${tag}`);
+    const lines = publishLines(run.stdout);
+    expect(lines).toHaveLength(2);
+    for (const line of lines) {
+      expect(line).toContain(`--tag ${tag} `);
+      expect(line).not.toContain("--dry-run");
+      expect(line).toContain("--provenance");
+      expect(line).toContain("--access public");
+    }
+    expect(run.stdout).not.toContain(tag === "latest" ? "--tag next" : "--tag latest");
+  });
+
+  it("the dry run of a pre-release stays under next, the dry run of 0.1.0 shows latest", () => {
+    expect(publishLines(print("0.1.0-next.5", "dry-run").stdout).join()).toContain(
+      "--dry-run --tag next ",
+    );
+    expect(publishLines(print("0.1.0", "dry-run").stdout).join()).toContain(
+      "--dry-run --tag latest ",
+    );
+    // Without a version the dry run previews <modelo>-next.0: next.
+    expect(publishLines(print(undefined, "dry-run").stdout).join()).toContain("--tag next ");
+  });
+
+  it("decides the tag in one place: command_for, from the version; nothing else names a tag", () => {
+    const script = readFileSync(`${repoRoot}scripts/release-kits.sh`, "utf8");
+    const body = script
+      .split("\n")
+      .filter((line) => !line.trimStart().startsWith("#"))
+      .join("\n");
+    const mentions = body.match(/--tag/g) ?? [];
+    expect(mentions).toHaveLength(2);
+    expect(body).not.toMatch(/--tag (next|latest)\b/);
+    expect(body).toMatch(/command_for\(\)[\s\S]*--tag "?\$/);
+    // release.yml hands only the version through: no tag, no dist-tag of its own.
+    const text = readFileSync(releasePath, "utf8");
+    expect(text).not.toMatch(/--tag|dist-tag add|npm dist-tag/);
+    expect(text).toContain("FUNDAMENTO_KIT_VERSION: ${{ inputs.version }}");
+  });
+
+  it("the version input of release.yml names both forms: the Modelo's version (latest) and a pre-release (next)", () => {
+    const description = String(
+      (
+        (workflow().on as { workflow_dispatch?: { inputs?: Record<string, { description?: string }> } })
+          .workflow_dispatch?.inputs?.version ?? {}
+      ).description ?? "",
+    );
+    expect(description).toContain("0.1.0");
+    expect(description).toMatch(/0\.1\.0-next\.\d/);
+    expect(description).toContain("latest");
+    expect(description).toContain("next");
+    const publish = steps().find((step) => (step.run ?? "").includes("release-kits.sh publish"));
+    expect(String(publish?.name ?? "")).not.toMatch(/tag next/);
+  });
+
+  it.each(["0.2.0", "0.1.0.1"])(
+    "FUNDAMENTO_KIT_VERSION=%s is refused by the build, before any kit is published",
+    (version) => {
+      // Not --print: the real path builds first, and the build refuses the number (kitVersion).
+      // The publish command of a kit is never reached, so nothing leaves the repository.
+      const run = spawnSync("sh", ["scripts/release-kits.sh", "publish"], {
+        cwd: repoRoot,
+        encoding: "utf8",
+        env: { ...process.env, FUNDAMENTO_KIT_VERSION: version },
+      });
+      expect(run.status).not.toBe(0);
+      expect(run.stderr).toContain(`FUNDAMENTO_KIT_VERSION=${version}`);
+      expect(run.stderr).toContain("0.1.0-<Vorabkennung>");
+      expect(run.stdout + run.stderr).not.toMatch(/== .*pnpm publish/);
+    },
+    60_000,
+  );
 });
