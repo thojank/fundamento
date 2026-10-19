@@ -2079,6 +2079,23 @@ function fit(frame, width, height, layout) {
 }
 
 /**
+ * A wrapping text as wide as a sibling that fills the same column (Spec 015 ③, K-1 of the
+ * acceptance of 2026-10-19). Figma left a text that took FILL while it was still empty at width 0,
+ * one glyph a line, and reported FILL: a run that compares before it writes never repaired it.
+ * Measured, then written (F14, F-3): only where the text is narrower than its sibling is it resized
+ * to the sibling's width and given FILL again, which lets the layout own its width once more; a
+ * second run finds it as wide and writes nothing.
+ */
+function fillLike(text, sibling) {
+  const width = sibling.width;
+  if (!(width > SMALLEST_SIZE) || text.width + 0.5 >= width) return false;
+  text.resize(width, Math.max(text.height, SMALLEST_SIZE));
+  text.layoutSizingHorizontal = "FILL";
+  write(text, "textAutoResize", "HEIGHT");
+  return true;
+}
+
+/**
  * The number a variable shows for a node — the mode the node stands in decides, aliases followed
  * (resolveForConsumer, as the report reads a paint's colour) — or undefined where the tool has no
  * such method or the value is no number.
@@ -3891,8 +3908,11 @@ async function applyComponents(variables, warnings) {
     if (typeof texts.media === "string") write(mediaText, "characters", texts.media);
     if (typeof texts.badge === "string") write(badgeText, "characters", texts.badge);
     for (const each of stands) write(each.text, "characters", texts[each.key]);
+    // K-1 (Abnahme 2026-10-19): the heading has its word before it takes FILL, in the set as in
+    // the example. A set variant's heading got it only afterwards, through the label property, and
+    // Figma left a text that took FILL while empty at width 0 — one glyph a line, reporting FILL.
+    if (component.label !== undefined) write(heading, "characters", component.label.defaultValue);
     if (example === undefined) labels.push(heading);
-    else if (component.label !== undefined) write(heading, "characters", component.label.defaultValue);
     toggled.push({ part: "media", node: media });
     const frames = [node, surface, media, body, meta, badge, actions].concat(stands.map((each) => each.frame));
     for (const frame of frames) own(frame, NEUTRAL);
@@ -3924,6 +3944,8 @@ async function applyComponents(variables, warnings) {
     for (const child of frames.concat(all)) own(child, IN_FLOW);
     for (const each of all) own(each, TEXT_SIZING);
     for (const each of [heading, content]) own(each, WRAP_SIZING);
+    // Both texts stand at the start of the body, as on the web (K-1: the heading stood centred).
+    for (const each of [heading, content]) own(each, { textAlignHorizontal: "LEFT" });
     // The stand-in image (no Skemo part): its fill and its word bound to the plan's variables,
     // with the deckkraft of the plan (F8).
     if (spec !== undefined) {
@@ -3965,6 +3987,9 @@ async function applyComponents(variables, warnings) {
         fit(media, media.width, spec.media.extent, { layoutSizingHorizontal: "FILL", layoutSizingVertical: "FIXED" });
       }
     }
+    // K-1: a heading a run left at width 0 reports FILL, so comparing never repairs it. Measured
+    // against the content, which fills the same body: narrower, it is resized and takes FILL anew.
+    fillLike(heading, content);
   }
   /**
    * An avatar (Spec 015 ③, plan ③ D-11): the variant holds the box — a square of box.size, no
