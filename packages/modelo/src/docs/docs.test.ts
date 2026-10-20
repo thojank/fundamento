@@ -2639,3 +2639,34 @@ describe("Spec 020 ① documentation (specs/020-sxablonoj-1)", () => {
     expect(own).toMatch(/rot `[0-9a-f]{7}`/);
   });
 });
+
+describe("Spec 020 ② documentation (specs/020-sxablonoj-1)", () => {
+  it("plan ② carries the decisions of formularo and filtrilo; tasks ② start at T2071", () => {
+    const plan = read("specs/020-sxablonoj-1/plan.md");
+    const tasks = read("specs/020-sxablonoj-1/tasks.md");
+    const second = plan.slice(
+      plan.indexOf("## ② formularo und filtrilo"),
+      plan.indexOf("## ③ Inhalt"),
+    );
+    for (const heading of [
+      "### Zusammenfassung",
+      "### Entwurfsentscheidungen",
+      "### Arkitekturo-Abdeckung",
+      "### Gekippte Dialoge",
+      "### Abweichungen",
+      "### Befunde / Mankoj",
+      "### Offen (für den Maintainer)",
+    ]) {
+      expect(second, heading).toContain(heading);
+    }
+    for (const term of ["formularo", "filtrilo", "novalidate", "submit", "search", "long-form"])
+      expect(second, term).toContain(term);
+    expect(second).not.toContain("ciferecigo");
+    const own = tasks.slice(
+      tasks.indexOf("## ② formularo und filtrilo"),
+      tasks.indexOf("## ③ Inhalt"),
+    );
+    expect(own).toContain("**T2071");
+    expect(own).toMatch(/rot `[0-9a-f]{7}`/);
+  });
+});

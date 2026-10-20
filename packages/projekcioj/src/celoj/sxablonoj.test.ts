@@ -121,3 +121,30 @@ describe("the Vitrino section Sxablonoj", () => {
     }
   });
 });
+
+// Spec 020 ②: formularo and filtrilo through the same Celoj.
+describe("formularo and filtrilo (Spec 020 ②)", () => {
+  it("web: the form sends submit itself (novalidate), the filter bar is the landmark search with a polite status", () => {
+    const form = read("eroj/src/generated/fm-formularo.ts");
+    expect(form).toContain('customElements.define("fm-formularo"');
+    for (const region of ["problems", "fields", "actions"])
+      expect(form, region).toContain(`name="${region}"`);
+    expect(form).toContain('new CustomEvent("submit"');
+    const bar = read("eroj/src/generated/fm-filtrilo.ts");
+    expect(bar).toContain('role="search"');
+    expect(bar).toContain('aria-live="polite"');
+    expect(read("eroj/src/generated/filtrilo.styles.ts")).toContain("flex-wrap: wrap");
+  });
+
+  it("Make Kit and Vitrino carry both", () => {
+    const base = "make-kit/komuna/guidelines";
+    expect(read(`${base}/patterns/formularo.md`)).toMatch(
+      /^\| `actions` \| butono \|.*exactly one with type=submit/m,
+    );
+    expect(read(`${base}/patterns/filtrilo.md`)).toMatch(/^\| `status` \|/m);
+    const html = read("vitrino/index.html");
+    const section = html.slice(html.indexOf('id="fm-vitrino-sxablonoj"'));
+    expect(section).toMatch(/data-fm-breite="schmal"[^>]*>\s*<fm-formularo[ >]/);
+    expect(section).toMatch(/data-fm-breite="breit"[^>]*>\s*<fm-filtrilo[ >]/);
+  });
+});
