@@ -2481,3 +2481,67 @@ describe("Spec 019 Nachtrag 20.10. documentation", () => {
     expect(read("README.md")).not.toMatch(/Kontrast 0,1 → 0,0[^5]/);
   });
 });
+
+// Nachlese 7 ① (Briefing 2026-10-20): specs/021-nachlese-7 carries the briefing unchanged, a plan
+// and tasks with ① (the faults, 0.1.1) and ② (the additions, 0.2.0); plan ① has the found patterns,
+// the measuring guide with full paths and the release steps; the CHANGELOG has 0.1.1 with A-1 to A-7.
+describe("Nachlese 7 ① documentation (specs/021-nachlese-7)", () => {
+  it("the briefing is copied unchanged; plan ① carries the faults, the patterns and the guide; the CHANGELOG 0.1.1", () => {
+    const briefing = read("specs/021-nachlese-7/briefing.md");
+    expect(createHash("sha256").update(briefing).digest("hex")).toBe(
+      "6fcf096a5146e1e9eb06bb2613ee5fb231249a12cdcbdc4b18720223241cd2be",
+    );
+    const plan = read("specs/021-nachlese-7/plan.md");
+    const tasks = read("specs/021-nachlese-7/tasks.md");
+    for (const text of [plan, tasks]) {
+      expect(text).toContain("## ① Fehler (0.1.1)");
+      expect(text).toContain("## ② Ergänzungen (0.2.0)");
+    }
+    const first = plan.slice(
+      plan.indexOf("## ① Fehler (0.1.1)"),
+      plan.indexOf("## ② Ergänzungen (0.2.0)"),
+    );
+    for (const heading of [
+      "### Zusammenfassung",
+      "### Entwurfsentscheidungen",
+      "### Gefundene Muster",
+      "### Abweichungen",
+      "### Befunde / Mankoj",
+      "### Offen (für den Maintainer)",
+      "### Messanleitung",
+    ]) {
+      expect(first, heading).toContain(heading);
+    }
+    for (const term of [
+      "A-1",
+      "A-2",
+      "A-3",
+      "A-4",
+      "A-5",
+      "A-6",
+      "A-7",
+      "0.1.1",
+      "release.yml",
+      "dry-run",
+      "file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/",
+    ]) {
+      expect(first, term).toContain(term);
+    }
+    for (const line of first.split("\n").filter((entry) => entry.includes("vitrino/index.html#"))) {
+      expect(line, line).toMatch(/file:\/\/\/Users\//);
+    }
+    expect(first).not.toContain("ciferecigo");
+    const own = tasks.slice(
+      tasks.indexOf("## ① Fehler (0.1.1)"),
+      tasks.indexOf("## ② Ergänzungen (0.2.0)"),
+    );
+    expect(own).toContain("**T2101");
+    expect(own).toMatch(/rot `[0-9a-f]{7}`/);
+    const changelog = read("CHANGELOG.md");
+    expect(changelog).toContain("## 0.1.1 – Fehlerbehebungen");
+    const release = changelog.slice(changelog.indexOf("## 0.1.1"));
+    for (const id of ["A-1", "A-2", "A-3", "A-4", "A-5", "A-6", "A-7"])
+      expect(release, id).toContain(id);
+    expect(changelog).toContain("## 0.2.0 – geplant");
+  });
+});
