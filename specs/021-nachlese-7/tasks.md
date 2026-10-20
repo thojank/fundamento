@@ -20,13 +20,15 @@
 
 ### C – Abschluss
 - [x] **T2109 Doku** briefing (Kopie), plan, tasks, CHANGELOG.
-- [ ] **T2110 CI** grün.
+- [x] **T2110 CI** grün (Lauf 39433980852, `d94a5de`).
 
 ### Messungen
 
 | Was | Wert |
 |---|---|
-| Commits | rot `28992c3` |
+| Commits | rot `28992c3`, grün `d94a5de` (Hash des grünen Stands, CI grün); dieser Eintrag im Folgecommit |
+| CI | Lauf 39433980852 (`d94a5de`, alle acht Jobs grün, Wanduhr 6:31): `checks` 1:40, `unit` 6:27, `projekcioj` 3:22 / 3:27, `eroj` 2:20 / 2:18, `alirebleco-eroj` 4:34, `rendered-checks` 6:23 |
+| Tests lokal | Modelo 3 610, Projekcioj 747, CLI 72, MCP 340, Agordilo 94, Eroj 763 (drei Engines) – je Paket allein grün; im vollen parallelen Lauf laufen `wunsch.test.ts` und `quickstart.test.ts` in ihre Zeitgrenzen (Last, allein grün); `pnpm lint` und alle `check:*` grün |
 
 ## ② Ergänzungen (0.2.0)
 
