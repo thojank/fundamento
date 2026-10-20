@@ -887,3 +887,49 @@ describe("the bundled Werkstatt without the second copy of the schemas (Nachlese
     expect(Object.keys(werkstatt.schemas).sort()).toEqual(["config", "modelo"]);
   });
 });
+
+// Nachlese 7 ② (0.2.0): every addition that shows gets a row of its own in its Ero's table — the
+// meter without its label, the locked menu, the empty table with its next step, the notice with a
+// list and code in its details, the dialog whose message has two paragraphs, the text with a
+// link, a badge and code in its line.
+describe("the Vitrino rows of Nachlese 7 ②", () => {
+  const rowOf = (ero: string, head: string) =>
+    new RegExp(`<tr><th scope="row">${head}</th>(.*?)</tr>`, "s").exec(
+      datumoj.eroj[ero] ?? "",
+    )?.[1] ?? "";
+
+  it("B-2: the mezurilo with label-hidden", () => {
+    expect(rowOf("mezurilo", "label-hidden")).toMatch(/<fm-mezurilo[^>]* label-hidden[^>]*>/);
+  });
+
+  it("B-3: the tabelo without rows, its empty state with a butono", () => {
+    const row = rowOf("tabelo", "empty mit butono");
+    expect(row).toContain("<tbody></tbody>");
+    expect(row).toMatch(
+      /<span slot="empty">[^<]+<\/span><fm-butono slot="empty"[^>]*>[^<]+<\/fm-butono>/,
+    );
+  });
+
+  it("B-4: the menuo disabled", () => {
+    expect(rowOf("menuo", "disabled")).toMatch(/<fm-menuo disabled>/);
+  });
+
+  it("B-5: the avizo with a list and code in its details", () => {
+    const row = rowOf("avizo", "details mit Liste und Code");
+    expect(row).toMatch(/<ul slot="details"><li>[^<]+<\/li><\/ul>/);
+    expect(row).toMatch(/<fm-teksto slot="details" kind="code">[^<]+<\/fm-teksto>/);
+  });
+
+  it("B-8: the dialogo whose message has two paragraphs, behind its opener", () => {
+    const row = rowOf("dialogo", "message in Absätzen");
+    expect(row.match(/<fm-teksto slot="message">/g)).toHaveLength(2);
+    expect(row).toContain("data-fm-opens=");
+  });
+
+  it("B-10: the teksto with a ligilo, an insigno and code in its line", () => {
+    const row = rowOf("teksto", "mit ligilo, insigno, code");
+    expect(row).toMatch(/<fm-teksto>[^<]+<fm-ligilo[^>]*>[^<]+<\/fm-ligilo>/);
+    expect(row).toContain("<fm-insigno");
+    expect(row).toContain('<fm-teksto kind="code">');
+  });
+});

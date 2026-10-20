@@ -3490,3 +3490,29 @@ describe("the Figma plan draws the avataro (Spec 015 ③)", () => {
     );
   });
 });
+
+// Nachlese 7 ② (B-2, B-4): label-hidden of the mezurilo is a BOOLEAN property of the set that hides
+// the label (shown as label-visible: label is the TEXT property of the set); disabled of the
+// menuo is a boolean that is a state, a BOOLEAN property beside the state axis like the
+// butono's.
+describe("Figma plan after Nachlese 7 ② (B-2, B-4)", () => {
+  const set = (name: string) => plan.components.find((component) => component.set === name);
+
+  it("B-2: the mezurilo has label-hidden as a BOOLEAN that hides the label, under its own name", () => {
+    expect(set("mezurilo")?.properties["label-hidden"]).toBe("BOOLEAN");
+    expect(set("mezurilo")?.toggles).toEqual([
+      {
+        property: "label-hidden",
+        part: "label",
+        defaultValue: false,
+        hides: true,
+        shownAs: "label-visible",
+      },
+    ]);
+  });
+
+  it("B-4: the menuo has disabled as a BOOLEAN beside its states", () => {
+    expect(set("menuo")?.properties.disabled).toBe("BOOLEAN");
+    expect(set("menuo")?.properties.state).toEqual(["rest", "hover", "focus", "disabled"]);
+  });
+});
