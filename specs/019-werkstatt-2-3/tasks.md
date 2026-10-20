@@ -62,8 +62,30 @@
 
 ## ③ Prompt (Stufe 3)
 
-Folgt in PR ③.
+**Branch:** `261020-spec-019-prompt-116ba2` (gestapelt auf ②).
+
+### A – Rot zuerst
+- [x] **T1941 Tests** Agordilo `wunsch.test.ts` (Vokabular, Erkennen, Bewegen, Bereichsende, Farbton, Unbekanntes, Historie), `agordo.test.ts` (`historio`); MCP `e2e/s019-prompt.test.ts` (die vier Dialoge), `contracts.test.ts`, `server.test.ts`, `prompt.test.ts`; Modelo `ontologio.test.ts`, `docs.test.ts` (README 21 Werkzeuge, plan ③, Vojmapo). Rot in `5f01a59`.
+
+### B – Grün
+- [x] **T1942 Bibliothek** `wunsch.ts`, `readWuensche`, `data/wuensche.json` (D-01–D-03); Test der Leitplanke („ruhiger“ hält bei der Hälfte vor `contrast-reserve`).
+- [x] **T1943 Modelo** Schema `AgordoHistorio`, `Agordo.historio`, Typen; `RULE_IDS` 163.
+- [x] **T1944 MCP** `propose_agordo`, `save_agordo` mit Schemata, Annotationen (schreibend), Ablehnung über HTTP, `Served.workdir` (D-04, D-05).
+- [x] **T1945 Prompt, Ontologio, README, Vojmapo** Regeln 16 und 17; Deziraro, Propono, Historio; „Die Marke per Prompt formen“.
+
+### C – Abschluss
+- [x] **T1946 Doku** plan ③ (D-01–D-06, Abweichungen 1–4, B-1–B-3, O-1–O-4, Messanleitung, Figma), tasks ③, Abschnitt ④.
+- [ ] **T1947 CI** grün.
+
+### Messungen
+
+| Was | Wert |
+|---|---|
+| Commits ③ | rot `5f01a59`; grün und CI in den Zeilen danach |
+| „Mach provo ruhiger.“ | Kontrast 0,1 → 0,0, Sättigung 1,1 → 0,9, Schatten 1,0 → 0,7; 0 feste Verstöße, Export möglich |
+| Leitplanke | „ruhiger“ von Kontrast 0 aus: angehalten bei 50 % vor `contrast-reserve`, 4 s |
+| Tests lokal | Agordilo 93, MCP 323 (davon 11 in `s019-prompt.test.ts`), Modelo 3 601, CLI 72, Projekcioj 733 (darin `figma-provoj.test.ts`) – je Paket grün; `pnpm lint`, `pnpm perf` grün |
 
 ## ④ Nachlese 6
 
-Eigener Branch von `main`; Aufgaben in [`nachlese-6/tasks.md`](nachlese-6/tasks.md). Folgt in PR ④.
+Eigener Branch von `main` (PR #86); Aufgaben T1961–T1967 in [`nachlese-6/tasks.md`](nachlese-6/tasks.md) (kommt mit #86), CI grün (Lauf 39346192486).

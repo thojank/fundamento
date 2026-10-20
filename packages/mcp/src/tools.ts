@@ -1,15 +1,29 @@
 // The tools of @fundamento/mcp as pure functions over what is served (Spec 001, D-13,
 // contracts/mcp-tools.md). Each returns the output object or an error envelope (FR-18).
 
+import { existsSync, mkdirSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
+import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
+import { deflateRawSync } from "node:zlib";
 import {
+  type Agordo,
   type Calibration,
   deriveAspekto,
+  type GestaltBasis,
+  gestaltBasis,
+  historioEintrag,
   loadCalibration,
   PALETTES,
   parseAgordoColor,
+  parseWunsch,
+  proposeAgordo,
+  type Raporto,
   readAgordo,
   readStructure,
+  readWuensche,
   type Structure,
+  vorschlagSatz,
+  type Wuensche,
 } from "@fundamento/agordilo";
 import {
   CELOJ,
@@ -502,6 +516,31 @@ const hexOf = (components: readonly number[]): string =>
     )
     .join("")}`;
 
+/** The report in short (preview_agordo, propose_agordo): no pair list, the kialo per violation. */
+function raportoShort(served: Served, raporto: Raporto) {
+  const kialoj = new Map(
+    served.modelo.reguloj
+      .filter((regulo) => regulo.aspekto === undefined)
+      .map((regulo) => [regulo.name, regulo.kialo]),
+  );
+  return {
+    summary: raporto.summary,
+    checks: raporto.checks.map(({ rule, fixed, passed, violations }) => ({
+      rule,
+      fixed,
+      passed,
+      violations,
+    })),
+    violations: raporto.violations.map(({ path: _path, regulo, ...violation }) => ({
+      ...violation,
+      ...(regulo === undefined
+        ? {}
+        : { regulo: { ...regulo, kialo: kialoj.get(regulo.name) ?? "" } }),
+    })),
+    jugxoj: raporto.jugxoj,
+  };
+}
+
 /**
  * preview_agordo (Spec 016 ③, G9): an Agordo through the Agordilo — derived, checked, explained —
  * without writing anything. The report is the one `fm agordilo derive` writes (without the pair
@@ -515,11 +554,6 @@ const previewAgordo: Tool = (served, args) => {
     agordo,
     agordiloBasis.structure,
     agordiloBasis.calibration,
-  );
-  const kialoj = new Map(
-    served.modelo.reguloj
-      .filter((regulo) => regulo.aspekto === undefined)
-      .map((regulo) => [regulo.name, regulo.kialo]),
   );
   const lead = parseAgordoColor(agordo.leitfarbe) ?? { l: 0, c: 0, h: 0 };
   const leadRgb = srgbComponentsOf(oklchColor(lead.l, lead.c, lead.h));
@@ -546,20 +580,7 @@ const previewAgordo: Tool = (served, args) => {
       onWhite: contrastOn(1),
       onBlack: contrastOn(0),
     },
-    summary: raporto.summary,
-    checks: raporto.checks.map(({ rule, fixed, passed, violations }) => ({
-      rule,
-      fixed,
-      passed,
-      violations,
-    })),
-    violations: raporto.violations.map(({ path: _path, regulo, ...violation }) => ({
-      ...violation,
-      ...(regulo === undefined
-        ? {}
-        : { regulo: { ...regulo, kialo: kialoj.get(regulo.name) ?? "" } }),
-    })),
-    jugxoj: raporto.jugxoj,
+    ...raportoShort(served, raporto),
     palettes: PALETTES.map((palette) => ({
       palette,
       source: {
@@ -578,6 +599,214 @@ const previewAgordo: Tool = (served, args) => {
         })),
     })),
     hints: { apca, other: raporto.hints.length - apca },
+  });
+};
+
+/** What the Agordo tools of Spec 019 ③ read once: the gestalt basis and the wish vocabulary. */
+let promptBasis: { gestalt: GestaltBasis; wuensche: Wuensche } | undefined;
+
+function agordoBases() {
+  agordiloBasis ??= { structure: readStructure(), calibration: loadCalibration() };
+  promptBasis ??= {
+    gestalt: gestaltBasis(agordiloBasis.structure.files),
+    wuensche: readWuensche(),
+  };
+  return { ...agordiloBasis, ...promptBasis };
+}
+
+/** The repository root: the Vitrino of `fm projekcioj build --out .fundamento/projekcioj` lies below. */
+const REPO_ROOT = fileURLToPath(new URL("../../../", import.meta.url));
+const VITRINO = join(REPO_ROOT, ".fundamento", "projekcioj", "vitrino", "index.html");
+
+/** A part of the Werkstatt's fragment: deflate-raw, base64url (Spec 016 ② D-10). */
+const fragmentPart = (value: unknown): string =>
+  deflateRawSync(Buffer.from(JSON.stringify(value), "utf8")).toString("base64url");
+
+/** The link into the Werkstatt: the Agordo before, the proposal on top (Spec 019 ②, G7). */
+function werkstattLink(before: Agordo, proposed: Agordo, wunsch: string | undefined) {
+  const vorschlag = wunsch === undefined ? { agordo: proposed } : { wunsch, agordo: proposed };
+  const fragment = `#aspekto=komuna&modus=werkstatt&agordo=${fragmentPart(before)}&vorschlag=${fragmentPart(vorschlag)}`;
+  return { fragment, file: `${pathToFileURL(VITRINO).href}${fragment}` };
+}
+
+/**
+ * propose_agordo (Spec 019 ③, G6.1): a wish in words and explicit values move the sliders, from
+ * the wish vocabulary; the answer is the new Agordo, the diff, the report in short and a link
+ * into the Werkstatt. An unknown wish asks back; a movement stops before a fixed rule. Read-only.
+ */
+const proposeAgordoTool: Tool = (served, args) => {
+  const { agordo, issues } = readAgordo(args.agordo, "agordo");
+  if (agordo === undefined) return { ok: false, envelope: { issues } };
+  const bases = agordoBases();
+  const wunsch = typeof args.wunsch === "string" ? args.wunsch : undefined;
+  const regler = (args.regler ?? {}) as Record<string, number | string>;
+  const parsed =
+    wunsch === undefined ? { treffer: [], unbekannt: [] } : parseWunsch(wunsch, bases.wuensche);
+  const wish =
+    wunsch === undefined
+      ? {}
+      : {
+          wish: {
+            text: wunsch,
+            matched: parsed.treffer.map((entry) => ({ word: entry.wort, kialo: entry.kialo })),
+            unknown: parsed.unbekannt,
+          },
+        };
+  const known = bases.wuensche.wuensche.map((entry) => entry.wort);
+  if (parsed.treffer.length === 0 && Object.keys(regler).length === 0) {
+    // G6.1 Grenze: no movement, no guess — the question goes back to the person.
+    const unknown = parsed.unbekannt.length === 0 ? (wunsch ?? "") : parsed.unbekannt.join(", ");
+    return ok({
+      aspekto: agordo.name,
+      writes: false,
+      ...wish,
+      action: "ask-human",
+      known,
+      kialo: `The wish vocabulary knows no movement for „${unknown}“; Fundamento does not guess what it should mean (Spec 019 G6). Ask which of the known wishes is meant, or set the sliders yourself: ${known.join(", ")}.`,
+      agordo,
+      diff: [],
+      sentence: vorschlagSatz(wunsch, []),
+      kialoj: [],
+      atLimit: [],
+    });
+  }
+  const proposed = proposeAgordo(
+    agordo,
+    { ...(wunsch === undefined ? {} : { wunsch }), regler },
+    bases.wuensche,
+    bases.gestalt,
+    bases.structure,
+    bases.calibration,
+  );
+  const { raporto, exportable } = proposed.derivation;
+  return ok({
+    aspekto: agordo.name,
+    writes: false,
+    ...wish,
+    agordo: proposed.agordo,
+    diff: proposed.diff,
+    sentence: vorschlagSatz(wunsch, proposed.diff),
+    kialoj: proposed.saetze,
+    atLimit: proposed.amEnde,
+    ...(proposed.angehalten === undefined
+      ? {}
+      : {
+          stopped: {
+            share: proposed.angehalten.anteil,
+            rules: proposed.angehalten.regeln,
+            sentence:
+              proposed.angehalten.anteil === 0
+                ? `Stopped before the fixed rule ${proposed.angehalten.regeln.join(", ")}: no part of the movement holds, the Agordo stays as it was.`
+                : `Stopped before the fixed rule ${proposed.angehalten.regeln.join(", ")}: the movement goes ${Math.round(proposed.angehalten.anteil * 100)} % of the way.`,
+          },
+        }),
+    exportable,
+    ...raportoShort(served, raporto),
+    link: werkstattLink(agordo, proposed.agordo, wunsch),
+  });
+};
+
+/** A refusal of save_agordo (E4): the path, the file, nothing written. */
+function refuse(message: string, suggestion: string): ToolResult {
+  return fail({ rule: "agordo-save-refused", path: "save_agordo/pfad", message, suggestion });
+}
+
+const inside = (root: string, path: string): boolean => {
+  const rel = relative(root, path);
+  return rel !== "" && !rel.startsWith("..") && !isAbsolute(rel);
+};
+
+/**
+ * save_agordo (Spec 019 ③, G6.2, W-25, W-26): writes an Agordo — only with confirm, only inside
+ * the server's working directory, only *.json, never over a file that is no Agordo — and appends
+ * a historio entry. A fixed rule locks the save; an adjustable one needs a Jugxo.
+ */
+const saveAgordoTool: Tool = (served, args) => {
+  const { agordo, issues } = readAgordo(args.agordo, "agordo");
+  if (agordo === undefined) return { ok: false, envelope: { issues } };
+  const pfad = String(args.pfad ?? "");
+  const root = resolve(served.workdir);
+  const target = resolve(root, pfad);
+  if (!pfad.endsWith(".json")) {
+    return refuse(
+      `save_agordo writes only *.json; ${JSON.stringify(pfad)} is none.`,
+      "Name a path that ends in .json, e.g. marken/<name>.json.",
+    );
+  }
+  if (!inside(root, target)) {
+    return refuse(
+      `${JSON.stringify(pfad)} lies outside the server's working directory (${root}); save_agordo never writes there.`,
+      "Name a path inside the working directory, e.g. marken/<name>.json.",
+    );
+  }
+  // A link may not lead out: the nearest existing folder (and an existing file) must lie inside.
+  let probe = dirname(target);
+  while (!existsSync(probe)) probe = dirname(probe);
+  const realRoot = realpathSync(root);
+  const realProbe = realpathSync(probe);
+  if (realProbe !== realRoot && !inside(realRoot, realProbe)) {
+    return refuse(
+      `${JSON.stringify(pfad)} leads out of the working directory through a link.`,
+      "Name a path inside the working directory that no link leads out of.",
+    );
+  }
+  const exists = existsSync(target);
+  let before: Agordo | undefined;
+  if (exists) {
+    if (!inside(realRoot, realpathSync(target))) {
+      return refuse(
+        `${JSON.stringify(pfad)} is a link out of the working directory.`,
+        "Name another file inside the working directory.",
+      );
+    }
+    let value: unknown;
+    try {
+      value = JSON.parse(readFileSync(target, "utf8"));
+    } catch {
+      value = undefined;
+    }
+    before = readAgordo(value, "agordo").agordo;
+    if (before === undefined) {
+      return refuse(
+        `${JSON.stringify(pfad)} exists and is no Agordo; save_agordo never writes over another file.`,
+        "Name a new path, or the path of an Agordo saved before.",
+      );
+    }
+  }
+  const bases = agordoBases();
+  const {
+    raporto,
+    exportable,
+    issues: refused,
+  } = deriveAspekto(agordo, bases.structure, bases.calibration);
+  if (!exportable) return { ok: false, envelope: { issues: refused } };
+  const datum = typeof args.datum === "string" ? args.datum : new Date().toISOString().slice(0, 10);
+  const wunsch = typeof args.wunsch === "string" ? args.wunsch : undefined;
+  const { historio: given, ...rest } = agordo;
+  const { historio: earlier, ...previous } = before ?? { historio: undefined };
+  const entry = historioEintrag(
+    before === undefined ? undefined : (previous as Agordo),
+    rest as Agordo,
+    wunsch,
+    datum,
+    bases.gestalt,
+  );
+  const toWrite: Agordo = { ...(rest as Agordo), historio: [...(earlier ?? given ?? []), entry] };
+  const text = `${JSON.stringify(toWrite, null, 2)}\n`;
+  const confirm = args.confirm === true;
+  if (confirm) {
+    mkdirSync(dirname(target), { recursive: true });
+    writeFileSync(target, text);
+  }
+  return ok({
+    writes: confirm,
+    path: relative(root, target).split(sep).join("/"),
+    exists,
+    agordo: toWrite,
+    entry,
+    text,
+    exportable,
+    summary: raporto.summary,
   });
 };
 
@@ -601,4 +830,6 @@ export const TOOLS: Record<ToolName, Tool> = {
   suggest_ero: suggestEroTool,
   check_usage: checkUsageTool,
   preview_agordo: previewAgordo,
+  propose_agordo: proposeAgordoTool,
+  save_agordo: saveAgordoTool,
 };

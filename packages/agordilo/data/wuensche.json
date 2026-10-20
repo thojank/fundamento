@@ -7,15 +7,8 @@
   "wuensche": [
     {
       "wort": "ruhiger",
-      "de": [
-        "ruhiger",
-        "ruhig"
-      ],
-      "en": [
-        "calmer",
-        "calm",
-        "quieter"
-      ],
+      "de": ["ruhiger", "ruhig"],
+      "en": ["calmer", "calm", "quieter"],
       "bewegungen": [
         {
           "regler": "regler.saettigung",
@@ -35,16 +28,8 @@
     },
     {
       "wort": "kräftiger",
-      "de": [
-        "kräftiger",
-        "kräftig",
-        "stärker"
-      ],
-      "en": [
-        "bolder",
-        "bold",
-        "stronger"
-      ],
+      "de": ["kräftiger", "kräftig", "stärker"],
+      "en": ["bolder", "bold", "stronger"],
       "bewegungen": [
         {
           "regler": "regler.saettigung",
@@ -64,14 +49,8 @@
     },
     {
       "wort": "wärmer",
-      "de": [
-        "wärmer",
-        "warm"
-      ],
-      "en": [
-        "warmer",
-        "warm"
-      ],
+      "de": ["wärmer", "warm"],
+      "en": ["warmer", "warm"],
       "bewegungen": [
         {
           "regler": "leitfarbe.ton",
@@ -87,14 +66,8 @@
     },
     {
       "wort": "kühler",
-      "de": [
-        "kühler",
-        "kühl"
-      ],
-      "en": [
-        "cooler",
-        "cool"
-      ],
+      "de": ["kühler", "kühl"],
+      "en": ["cooler", "cool"],
       "bewegungen": [
         {
           "regler": "leitfarbe.ton",
@@ -110,14 +83,8 @@
     },
     {
       "wort": "runder",
-      "de": [
-        "runder",
-        "rund"
-      ],
-      "en": [
-        "rounder",
-        "round"
-      ],
+      "de": ["runder", "rund"],
+      "en": ["rounder", "round"],
       "bewegungen": [
         {
           "regler": "form.radius",
@@ -129,16 +96,8 @@
     },
     {
       "wort": "eckiger",
-      "de": [
-        "eckiger",
-        "eckig",
-        "kantiger"
-      ],
-      "en": [
-        "sharper",
-        "sharp",
-        "squarer"
-      ],
+      "de": ["eckiger", "eckig", "kantiger"],
+      "en": ["sharper", "sharp", "squarer"],
       "bewegungen": [
         {
           "regler": "form.radius",
@@ -150,16 +109,8 @@
     },
     {
       "wort": "luftiger",
-      "de": [
-        "luftiger",
-        "luftig",
-        "großzügiger"
-      ],
-      "en": [
-        "airier",
-        "airy",
-        "roomier"
-      ],
+      "de": ["luftiger", "luftig", "großzügiger"],
+      "en": ["airier", "airy", "roomier"],
       "bewegungen": [
         {
           "regler": "raum.abstand",
@@ -171,18 +122,8 @@
     },
     {
       "wort": "kompakter",
-      "de": [
-        "kompakter",
-        "kompakt",
-        "dichter",
-        "enger"
-      ],
-      "en": [
-        "denser",
-        "dense",
-        "compact",
-        "tighter"
-      ],
+      "de": ["kompakter", "kompakt", "dichter", "enger"],
+      "en": ["denser", "dense", "compact", "tighter"],
       "bewegungen": [
         {
           "regler": "raum.abstand",
@@ -198,16 +139,8 @@
     },
     {
       "wort": "größer",
-      "de": [
-        "größer",
-        "grösser",
-        "groß"
-      ],
-      "en": [
-        "larger",
-        "bigger",
-        "large"
-      ],
+      "de": ["größer", "grösser", "groß"],
+      "en": ["larger", "bigger", "large"],
       "bewegungen": [
         {
           "regler": "schrift.groesse",
@@ -219,14 +152,8 @@
     },
     {
       "wort": "kleiner",
-      "de": [
-        "kleiner",
-        "klein"
-      ],
-      "en": [
-        "smaller",
-        "small"
-      ],
+      "de": ["kleiner", "klein"],
+      "en": ["smaller", "small"],
       "bewegungen": [
         {
           "regler": "schrift.groesse",

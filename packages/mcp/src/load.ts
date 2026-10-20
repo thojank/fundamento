@@ -27,6 +27,8 @@ export interface LoadOptions {
   config?: string;
   /** A directory written by `fm modelo export`, served as is (absolute). */
   exportDir?: string;
+  /** The working directory save_agordo writes in (Spec 019 ③, E4); default: the process's. */
+  workdir?: string;
 }
 
 export interface Served {
@@ -39,6 +41,8 @@ export interface Served {
   exportFiles?: { modeloJson: string; schemaJson: string; rezolvojJson: string };
   /** The source the server composed, for validating a package against the same core. */
   source?: ModeloSource;
+  /** The only directory save_agordo writes in (Spec 019 ③, E4). */
+  workdir: string;
 }
 
 /** The source could not be read at all (missing or malformed files). */
@@ -51,7 +55,7 @@ export class ServedLoadError extends Error {
   }
 }
 
-export function loadServed(options: LoadOptions = {}): Served {
+function loadServedModelo(options: LoadOptions): Omit<Served, "workdir"> {
   if (options.exportDir !== undefined) {
     const read = (name: string) => readFileSync(join(options.exportDir ?? "", name), "utf8");
     const exportFiles = {
@@ -143,4 +147,9 @@ function partialModeloJson(modelo: Modelo): ModeloJson {
 function uzojOf(modelo: Modelo): Pick<ModeloJson, "uzoj"> {
   const uzoj = modelo.eroj.flatMap((entry) => (entry.uzo === undefined ? [] : [entry.uzo]));
   return uzoj.length === 0 ? {} : { uzoj };
+}
+
+/** What the server serves, with the working directory save_agordo may write in. */
+export function loadServed(options: LoadOptions = {}): Served {
+  return { ...loadServedModelo(options), workdir: options.workdir ?? process.cwd() };
 }

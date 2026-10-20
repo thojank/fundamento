@@ -288,8 +288,147 @@ Oder in der Vitrino selbst (`file://`, siehe Messanleitung in plan ③): in der 
 
 ## ③ Prompt (Stufe 3)
 
-Folgt in PR ③.
+**Branch:** `261020-spec-019-prompt-116ba2` (gestapelt auf ② `261020-spec-019-werkstatt-116ba2`) · **Datum:** 2026-10-20 · **Stand:** zur Abnahme.
+
+### Zusammenfassung
+
+1. **`propose_agordo`** (lesend, 20. Werkzeug): Agordo und Wunsch in Worten (`wunsch`, de/en) und/oder explizite Reglerwerte (`regler`: Pfad → Wert) → die neue Agordo, der Diff (vorher → nachher, mit deutschem Label), der Satz der Vorschlags-Leiste, die Kialo jedes Wortes, das gegriffen hat, die Regler am Ende ihres Bereichs, der Raporto kurz wie `preview_agordo` und ein **Werkstatt-Link** (`#agordo=` die Agordo vorher, `#vorschlag=` der Vorschlag). Kein Sprachmodell im Werkzeug (E3).
+2. **Wunsch-Vokabular** als Datum `packages/agordilo/data/wuensche.json`: ruhiger/calmer, kräftiger/bolder, wärmer/warmer, kühler/cooler, runder/rounder, eckiger/sharper, luftiger/airier, kompakter/denser, größer/larger, kleiner/smaller – je Wort Reglerbewegungen mit Schritt, eine Kialo und das Gegenteil. Vage Wörter fehlen bewusst.
+3. **Grenze:** Ein Wunsch, den das Vokabular nicht kennt, bewegt nichts; die Antwort fragt nach (`action: ask-human`) und nennt die bekannten Wörter.
+4. **Leitplanke:** Bricht die ganze Bewegung eine feste Regel, die die Agordo vorher nicht brach, versucht das Werkzeug die Hälfte und das Viertel des Weges und hält bei der ersten an, die hält (`stopped`: Anteil, Regeln, Satz); sonst bewegt es nichts.
+5. **`save_agordo`** (schreibend, 21. Werkzeug, `readOnlyHint: false`): ohne `confirm` die Antwort, was es schreiben würde, mit `confirm: true` die Datei. Nur im Arbeitsverzeichnis des Servers (auch nicht über einen Link hinaus), nur `*.json`, nie über eine Datei, die keine Agordo ist; feste Regeln sperren, anpassbare brauchen einen Jugxo. Nur über stdio, nicht über HTTP.
+6. **`historio`** (W-26): ein Feld der Agordo im Modelo-Schema (`$defs/AgordoHistorio`: Datum, Wunsch oder „Hand“, Diff der Regler); jeder Speichervorgang hängt einen Eintrag an.
+7. **Die vier Beispiel-Dialoge** der Spec als e2e-Tests (`packages/mcp/src/e2e/s019-prompt.test.ts`).
+8. **Prompt `gvidanto`** Regeln 16 und 17; **Ontologio** Deziraro (Wunsch-Vokabular), Propono (Vorschlag), Historio im Schema `laboro` – Namen als Vorschlag (E7, O-1); **README** „Die Marke per Prompt formen“ und 21 Werkzeuge; **Vojmapo** Werkstatt Stufe 2+3 zur Abnahme.
+9. **Kleinste Änderungen daneben:** Agordilo `wunsch.ts` (`parseWunsch`, `proponoOf`, `proposeAgordo`, `historioEintrag`, `partOfTheWay`), `readWuensche`; Modelo – Schema `AgordoHistorio`, `RULE_IDS` 162 → 163 (`agordo-save-refused`); MCP – `Served.workdir` (`LoadOptions.workdir`, Standard: das Arbeitsverzeichnis des Prozesses), `raportoShort` (gemeinsam mit `preview_agordo`).
+
+### Entwurfsentscheidungen
+
+#### D-01 Das Werkzeug rechnet, der Agent formuliert
+`parseWunsch` zerlegt den Text in Wörter und sucht sie in den Listen `de` und `en`; jedes Wort zählt einmal, in der Reihenfolge des Wunsches. Eine Bewegung ist ein Schritt auf einem Regler (auf seinen Bereich begrenzt, drei Stellen) oder `leitfarbe.ton`: der Farbton der Leitfarbe so viele Grad zum warmen (60°) bzw. kühlen Pol (240°), nie darüber hinaus; die Leitfarbe steht danach als `oklch(L C H)`.
+
+#### D-02 Unbekannt heißt: nachfragen
+Bewegt der Wunsch nichts und nennt der Aufruf keine Reglerwerte, antwortet das Werkzeug mit `action: ask-human`, der Kialo und der Liste der bekannten Wörter, ohne abzuleiten. Wörter, die wie ein Komparativ aussehen („moderner“, „more modern“) und unbekannt sind, nennt es in `wish.unknown`.
+
+#### D-03 Vor der Regel anhalten
+`proposeAgordo` leitet ab und prüft. Neue feste Verstöße (gegenüber der Agordo vorher) → Hälfte, dann Viertel des Weges (`partOfTheWay`, Regler linear, Farbton auf dem kürzeren Bogen). Gemessen: „ruhiger“ von komunas Leitfarbe mit Kontrast 0 aus bricht bei −0,1 `contrast-reserve`; das Werkzeug geht die Hälfte (Kontrast −0,05, Sättigung 0,9, Schatten 0,85) in 4 s (drei Ableitungen).
+
+#### D-04 Der Link
+`file://`, der Pfad der Vitrino im Repo des Servers (`.fundamento/projekcioj/vitrino/index.html`, der Ausgabeordner von `pnpm fm projekcioj build --out .fundamento/projekcioj`) und das Fragment `#aspekto=komuna&modus=werkstatt&agordo=…&vorschlag=…`; die Teile deflate-raw, base64url wie in der Werkstatt (plan ② D-08). `vorschlag=` trägt `{ wunsch, agordo }`, den Diff rechnet die Werkstatt.
+
+#### D-05 Schreiben nur, wo es sicher ist (E4)
+Der Pfad wird gegen das Arbeitsverzeichnis aufgelöst und muss darin liegen; der nächste vorhandene Ordner und eine vorhandene Datei werden über `realpath` geprüft (kein Link hinaus). Eine vorhandene Datei muss eine Agordo sein; ihr Inhalt ist das „vorher“ des Diffs und ihre `historio` wird fortgesetzt. Über HTTP schreibt kein Client in das Verzeichnis des Servers.
+
+#### D-06 Die Historie reist mit
+`historio` steht in der Agordo und damit in `aspekto.json#/agordilo/agordo` jeder abgeleiteten Marke; der Diff der ersten Speicherung geht von der Struktur aus (alle Regler auf Standard). Datum: heute oder `datum` aus dem Aufruf (die Tests setzen es).
+
+### Abweichungen von der Spec
+
+1. **`stopped` statt „hält vor der Regel an“ in einem Schritt:** die Bewegung geht die Hälfte oder ein Viertel des Weges (D-03); feiner suchen hieße mehr Ableitungen je Aufruf.
+2. **`save_agordo` nicht über HTTP** (D-05) – die Spec nennt den Transport nicht.
+3. **`wärmer`/`kühler` drehen den Farbton** der Leitfarbe und tönen die Neutralen etwas stärker: es gibt keinen Regler für den Farbton; der Schritt ist ein Datum im Vokabular.
+4. **Ausgabe auf Englisch** wie bei `preview_agordo`; die Labels der Regler und die Sätze der Vorschlags-Leiste deutsch (die Werkstatt zeigt sie).
+
+### Befunde / Mankoj
+
+- **B-1 „ruhiger“ und der Kontrastregler:** bei komunas Leitfarbe bricht schon `regler.kontrast` −0,1 `contrast-reserve` (−0,2: sechs feste Verstöße); „ruhiger“ hält darum bei Marken ohne eigenen Kontrast an. Zusammen mit plan ① B-1 Kandidat: die Bewegung „weniger Kontrastspreizung“ kleiner wählen oder den Kontrastregler enger fassen (O-3).
+- **B-2 Dauer:** `propose_agordo` leitet ein- bis fünfmal ab (1,7–7 s); `save_agordo` einmal.
+- **B-3 Der Link setzt den Build voraus:** die Datei `.fundamento/projekcioj/vitrino/index.html` entsteht mit `pnpm fm projekcioj build --out .fundamento/projekcioj`; die Antwort nennt den Pfad, ob er existiert oder nicht.
+- **Mankoj:** keine neuen.
+
+### Offen (für den Maintainer)
+
+- **O-1 Namen (E7):** Deziraro (Wunsch-Vokabular), Propono (Vorschlag), Historio (Feld `historio`); im Code `wuensche.json`, `vorschlag=`, `historio`. **Vorschlag: bestätigen.**
+- **O-2 Schritte des Vokabulars** (z. B. ruhiger: Sättigung −0,2, Kontrast −0,1, Schatten −0,3). **Vorschlag: so**, nach der Abnahme nachstimmen.
+- **O-3 „ruhiger“ und Kontrast** (B-1). **Vorschlag:** Schritt auf −0,05 senken, sobald der Maintainer die Bereiche der Farbregler entscheidet (plan ① O-4).
+- **O-4 `save_agordo` über HTTP** (Abweichung 2). **Vorschlag: so lassen.**
+
+### Messanleitung (Abnahme 1–7)
+
+Alle Befehle im Checkout des Maintainers `/Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds` (nach dem Merge von ① bis ③ und ④ auf `main`), nach `pnpm install` und `pnpm build`. **Links immer mit `file://`**, sonst liest macOS das Fragment als Teil des Dateinamens.
+
+**1. Werkstatt (Abnahme 1).** Build der Vitrino:
+
+```sh
+cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds
+pnpm fm projekcioj build --out .fundamento/projekcioj
+open "file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/projekcioj/vitrino/index.html#modus=werkstatt"
+```
+
+Mit `provo` vorbelegt (rund, luftig, bold), dann mit den Reglern „runder, luftiger“ weiter:
+
+```sh
+open "file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/projekcioj/vitrino/index.html#modus=werkstatt&aspekto=komuna&agordo=RY_BasMwEER_xUwvCSiOHZIcdOulUEhJD7mVHmRbtpfIkpFWDU7wvxe5lNx2ZnaXNw9YNWhIjN79OAi4m9UeEp9JZ6uWaiYmF4PIWAfOnDXTGgKGam1Duvx4vyStiVvlq-S8HKt9qwoI3GNQfF98C_kA2dZBwl1N3a-K_HDIirzcZbvdYY1ZwOrIXpm0yU7baDvIIt_PAl53JnE90GtjqLtq4pSVAldn2avwL4PSzNQtt2VezgKh7j21_EfQUBiNmtLYqoHMBIlXX_e0tH-2Or-dNmVeQiC46Otk9cxjkNttR9zHKq_dsD0PlqoYNpdp1NvnG68bCuypiqwqoyHZR51API0cIL9wUmzxPc8CrfNDovGqoRgS8zH1VXFxVRVY2WapcpgF6OqsS0Gnb1T3DInKmQbz_As"
+```
+
+Mit `provo-kompakta` vorbelegt (eckig, dicht, kleinere Schrift, light):
+
+```sh
+open "file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/projekcioj/vitrino/index.html#modus=werkstatt&aspekto=komuna&agordo=LY5RasMwEESvYqY_KSglFFxa3aCUQj56gbWysoRtbZBWDSXo7kVu_3bezCxzR6KNYXHN8i3HRbYrLUowkFviDItzN4aPf2M4-Og0apRazKBcdJC0_jzCYI2OU-m_Pt-_uuaonvLUycPJv0yjg0HiqplW2DtUONU0w56enpuBl7x1nOkSa9npaFBcIFVOXY_NIFPdUzQVpXTp-NUgCAfu91vbKzl67ak5C5e-6fjXjosk2Q2-RRcUFmucg6K1Xw"
+```
+
+Zu sehen: die Gruppen Farbe, Form, Raum, Schrift, Icons (zuklappbar), je Regler „Zurücksetzen“, Rückgängig/Wiederholen (⌘Z / ⇧⌘Z), alle Eroj folgen live, auch in der Gegenüberstellung; die Regler stocken nicht. In der Konsole: `fmWerkstatt.state.worker` (true) und `await fmWerkstatt.measure(50)` (M5).
+
+**2. Prompt in Claude (Abnahme 2).** Den Server anbinden:
+
+```sh
+claude mcp add fundamento -- pnpm --dir /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds -s fm mcp
+```
+
+Dann sagen: „Mach provo ruhiger.“ (Agordo: `/Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/packages/modelo/test/fixtures/valid/aspekto-provo/agordo.json`). Erwartet: `propose_agordo` mit `wunsch: "ruhiger"`, Diff „Kontrast 0,1 → 0,0, Sättigung 1,1 → 0,9, Schatten 1,0 → 0,7“, kein fester Verstoß, der Link. Der Link öffnet die Werkstatt mit der Vorschlags-Leiste; „Übernehmen“ setzt die Bewegung. Derselbe Link, fertig:
+
+```sh
+open "file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/projekcioj/vitrino/index.html#aspekto=komuna&modus=werkstatt&agordo=RY_BasMwEER_xUwvCSiOHZIcdOulUEhJD7mVHmRbtpfIkpFWDU7wvxe5lNx2ZnaXNw9YNWhIjN79OAi4m9UeEp9JZ6uWaiYmF4PIWAfOnDXTGgKGam1Duvx4vyStiVvlq-S8HKt9qwoI3GNQfF98C_kA2dZBwl1N3a-K_HDIirzcZbvdYY1ZwOrIXpm0yU7baDvIIt_PAl53JnE90GtjqLtq4pSVAldn2avwL4PSzNQtt2VezgKh7j21_EfQUBiNmtLYqoHMBIlXX_e0tH-2Or-dNmVeQiC46Otk9cxjkNttR9zHKq_dsD0PlqoYNpdp1NvnG68bCuypiqwqoyHZR51API0cIL9wUmzxPc8CrfNDovGqoRgS8zH1VXFxVRVY2WapcpgF6OqsS0Gnb1T3DInKmQbz_As&vorschlag=RZFBa9wwEIX_inm9JKB47SWbUt16KQQS0kNupQfZlq1hZcmMRl02i_57kVvITe_pjeZ76IZLDml00ODsaLEMBbNEniL0DcGsFhobxz8RCvESLEPjZ9XN3UyjkFDMSTVikzQx-Os9FDyNNqQ6-fr8XrUlmQ0P1fnyNDzOpoPCR05GPnY_1GUU5giNePaju-va06np2v7YHI-nexSFYLOw8TUp0YYcFuiufSwKbBdfuW5w1ntazpak3vUK5xiETapSIRkrQsv_yW9FIY2OaZZ_-ydKmzfXepzNSv4Kje88Otq7f3Z6-_Hy0Lc9FFLMPFbLiWxJHw4LictDO8b18LYGGnJ6eL9u9vD5DNuJkjANWczgLbRwthWEaZME_QsvRgJ-l6IwR14rDZuJcoLu26cd2chO3LVfa3mT95AZkpgw1VR_Kgp0jmH_w8VeaHQCjSH6CaWUvw"
+```
+
+Weitere Dialoge: „Mach die Marke runder und luftiger.“ (zwei Bewegungen, ein Diff), „Mach die Marke moderner.“ (Rückfrage mit den bekannten Wörtern). Ohne Agent, direkt über die Werkzeugfunktion:
+
+```sh
+node --input-type=module -e 'const t = await import("/Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/packages/mcp/dist/tools.js"); const l = await import("/Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/packages/mcp/dist/load.js"); const a = JSON.parse((await import("node:fs")).readFileSync("/Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/packages/modelo/test/fixtures/valid/aspekto-provo/agordo.json", "utf8")); const r = t.TOOLS.propose_agordo(l.loadServed(), { agordo: a, wunsch: "ruhiger" }); console.log(r.output.sentence); console.log(r.output.link.file);'
+```
+
+**3. Speichern (Abnahme 3).** „Speichere das als marken/provo-ruhig.json.“ – `save_agordo` ohne `confirm` zeigt Pfad, Inhalt und den `historio`-Eintrag und schreibt nichts; erst nach Bestätigung mit `confirm: true` liegt `/Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/marken/provo-ruhig.json` (Arbeitsverzeichnis des Servers: `/Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds` bei `pnpm --dir /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds`) mit `historio`. Ein Pfad außerhalb (`../provo-ruhig.json`) wird abgelehnt (`agordo-save-refused`).
+
+**4. CLI (Abnahme 4).** Beide Beispielmarken zweimal ableiten, vergleichen, prüfen:
+
+```sh
+cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds
+for marke in provo provo-kompakta; do
+  pnpm fm agordilo derive packages/modelo/test/fixtures/valid/aspekto-$marke/agordo.json --out .fundamento/$marke-1
+  pnpm fm agordilo derive packages/modelo/test/fixtures/valid/aspekto-$marke/agordo.json --out .fundamento/$marke-2
+  diff -r .fundamento/$marke-1 .fundamento/$marke-2 && echo "$marke bytegleich"
+  pnpm fm agordilo check .fundamento/$marke-1
+  pnpm fm modelo validate --aspekto .fundamento/$marke-1
+done
+pnpm check:parity
+pnpm check:alirebleco --aspekto .fundamento/provo-kompakta-1   # nach ④: ein eigenes Paket messen
+pnpm --filter @fundamento/agordilo mezuroj m4                   # M4 (plan ①)
+```
+
+**5. Figma (Abnahme 5).** Eigene Konfiguration mit beiden Beispielmarken:
+
+```sh
+cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds
+pnpm fm projekcioj build --config packages/modelo/test/fixtures/valid/aspekto-provo-kompakta/fundamento.provoj.config.json --out .fundamento/projekcioj-provoj
+```
+
+Dann in Figma: **Version der Testdatei vorher sichern** (Dateimenü → Version speichern), das Plugin aus `/Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/projekcioj-provoj/figma/` **neu importieren** (Plugins → Development → Import plugin from manifest) und laufen lassen; nach der Messung die gesicherte **Version wiederherstellen**. Siehe „In Figma zu messen“.
+
+**6. M4 und M5 (Abnahme 6):** M4 in plan ①, M5 in plan ②.
+
+**7. Nachlese 6 (Abnahme 7):** `open "file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/projekcioj/vitrino/index.html#modus=ansehen"`, Abschnitt `kampo`: je Art eine Zeile `kind=…`; die Größen in `nachlese-6/plan.md`.
+
+### In Figma zu messen
+
+Grüne Tests sind für Figma keine Abnahme. Mit dem Plugin aus `.fundamento/projekcioj-provoj/figma/`:
+
+1. Die Sammlung `aspekto` hat die Modi komuna, provo, provo-kompakta.
+2. Modus provo auf einem Rahmen: `butono` mit größerem Radius (Radius `radius.medium` 6 px statt 4 px), mehr Abstand (`spacing.scale.400` 20 px), die Icons in Phosphor bold.
+3. Modus provo-kompakta: Radius 1 px, Abstände kleiner (`spacing.scale.400` 12 px), Schrift kleiner (`font.size.scale.300` 14 px), Bedienelemente niedriger, Icons light.
+4. Radius, Abstände, Schrift und Icon-Gewicht sind **gebunden** (Variablen der Sammlungen), nicht hart gesetzt: im Inspektor zeigt jedes Maß den Namen seiner Variable.
+5. Ein zweiter Lauf schreibt nichts (Bericht ohne `updated`).
+
 
 ## ④ Nachlese 6
 
-Eigener Branch von `main` (Abweichung 9 in ①); Plan und Aufgaben in [`nachlese-6/plan.md`](nachlese-6/plan.md) und [`nachlese-6/tasks.md`](nachlese-6/tasks.md). Folgt in PR ④.
+Eigener Branch von `main` (`261020-nachlese-6-116ba2`, PR #86; plan ① Abweichung 9); Plan und Aufgaben in [`nachlese-6/plan.md`](nachlese-6/plan.md) und [`nachlese-6/tasks.md`](nachlese-6/tasks.md), die mit #86 nach `main` kommen. Kurz: N6-1 `kampo` je `kind` in der Vitrino; N6-2 `check:alirebleco --aspekto <dir>`; N6-3 Vitrino (Build `core + ekzemplo`) 8,11 → 5,88 MB, Make Kit 2,38 → 1,56 MB – Kialo einmal statt je Kombination, Werkstatt-Bündel ohne zweite Kopie der Schemata, Make Kit nur als ES-Modul; N6-4 falsche Freunde der „-karten“-Komposita als Pins, kein Ausschluss. CI grün (Lauf 39346192486).

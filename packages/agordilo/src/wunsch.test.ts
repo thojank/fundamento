@@ -9,9 +9,11 @@ import {
   type GestaltBasis,
   gestaltBasis,
   historioEintrag,
+  loadCalibration,
   parseAgordoColor,
   parseWunsch,
   proponoOf,
+  proposeAgordo,
   readStructure,
   readWuensche,
   reglerOf,
@@ -155,5 +157,24 @@ describe("historioEintrag (W-26)", () => {
       ],
     });
     expect(historioEintrag(undefined, PROVO, undefined, "2026-10-20", basis).wunsch).toBe("Hand");
+  });
+});
+
+describe("proposeAgordo (G6.2: stops before a fixed rule)", () => {
+  it("ruhiger from contrast 0 would break contrast-reserve: the movement goes half the way and says so", () => {
+    const structure = readStructure();
+    const proposed = proposeAgordo(
+      { name: "marke", leitfarbe: "#375479" },
+      { wunsch: "ruhiger" },
+      wuensche,
+      basis,
+      structure,
+      loadCalibration(),
+    );
+    expect(proposed.angehalten).toEqual({ anteil: 0.5, regeln: ["contrast-reserve"] });
+    expect(proposed.agordo.regler).toEqual({ kontrast: -0.05, saettigung: 0.9 });
+    expect(proposed.derivation.raporto.violations.filter((violation) => violation.fixed)).toEqual(
+      [],
+    );
   });
 });

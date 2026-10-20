@@ -68,6 +68,9 @@ describe("S7 with ekzemplo (AK-06)", () => {
       },
       // Spec 016 ③: the smallest Agordo, komuna's own lead colour.
       preview_agordo: { agordo: { name: "provo", leitfarbe: "#375479" } },
+      // Spec 019 ③: a wish, and a save without confirm (writes nothing).
+      propose_agordo: { agordo: { name: "provo", leitfarbe: "#375479" }, wunsch: "runder" },
+      save_agordo: { agordo: { name: "provo", leitfarbe: "#375479" }, pfad: "marken/provo.json" },
     };
     for (const name of TOOL_NAMES) {
       const result = await call(client, name, inputs[name] ?? {});

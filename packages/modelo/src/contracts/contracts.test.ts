@@ -99,7 +99,8 @@ describe("rule catalog (§2.6)", () => {
     // Spec 014 ① (G3): the five glyph rules of check:ikonaro.
     // Spec 016 ① (G6, G8): a Jugxo of an Agordo that names a fixed rule, and a shipped report
     // that no longer matches the checks (fm agordilo check).
-    expect(RULE_IDS).toHaveLength(162);
+    // Spec 019 ③: agordo-save-refused.
+    expect(RULE_IDS).toHaveLength(163);
     for (const rule of [
       "agordo-jugxo-fixed",
       "raporto-out-of-sync",

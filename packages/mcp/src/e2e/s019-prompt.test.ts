@@ -90,8 +90,8 @@ describe("„Mach provo ruhiger.“", () => {
   it("lowers saturation and contrast spread and softens the shadows; the diff, the report, the link", () => {
     expect(calmer.writes).toBe(false);
     const moved = Object.fromEntries(calmer.diff.map((entry) => [entry.path, entry]));
-    expect(Number(moved["regler.saettigung"]?.nachher)).toBeLessThan(PROVO.regler.saettigung);
-    expect(Number(moved["regler.kontrast"]?.nachher)).toBeLessThan(PROVO.regler.kontrast);
+    expect(Number(moved["regler.saettigung"]?.nachher)).toBeLessThan(PROVO.regler.saettigung ?? 0);
+    expect(Number(moved["regler.kontrast"]?.nachher)).toBeLessThan(PROVO.regler.kontrast ?? 0);
     expect(Number(moved["form.schatten"]?.nachher)).toBeLessThan(1);
     expect(calmer.summary.violations.fixed).toBe(0);
     expect(calmer.wish?.matched.map((entry) => entry.word)).toEqual(["ruhiger"]);

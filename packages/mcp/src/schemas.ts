@@ -7,7 +7,8 @@ import { createModeloAjv, type ValidateFunction } from "@fundamento/modelo";
 
 /**
  * The ten read-only tools of FR-16, then the Gvidanto tools of Spec 002, the Ero tools of
- * Spec 003 and preview_agordo of Spec 016 ③, in contract order.
+ * Spec 003, preview_agordo of Spec 016 ③ and propose_agordo, save_agordo of Spec 019 ③, in
+ * contract order.
  */
 export const TOOL_NAMES = [
   "describe",
@@ -29,6 +30,8 @@ export const TOOL_NAMES = [
   "suggest_ero",
   "check_usage",
   "preview_agordo",
+  "propose_agordo",
+  "save_agordo",
 ] as const;
 
 export type ToolName = (typeof TOOL_NAMES)[number];

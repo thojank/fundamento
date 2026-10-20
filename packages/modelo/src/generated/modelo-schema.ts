@@ -1689,6 +1689,10 @@ export interface Agordo {
   ziele?: AgordoZieloj;
   aspiroj?: AspektoAspiro[];
   jugxoj?: AgordoJugxo[];
+  /**
+   * The history of the Agordo (Spec 019 ③, W-26): every save by save_agordo appends an entry. Part of the Agordo, so it travels with the file.
+   */
+  historio?: AgordoHistorio[];
 }
 /**
  * Contrast targets a brand overrides per palette step (Spec 016 ②, G7): keyed by palette.step, the WCAG 2.x contrast the step should reach against the reference surface of the light mode (hell: neutral.0) or the dark mode (dunkel: neutral.1000). An override is a target, never a free colour value; the floors of kontrastSojloj still hold.
@@ -1713,6 +1717,21 @@ export interface AgordoJugxo {
   kialo: NonEmptyText;
   date: string;
   name: NonEmptyText;
+}
+/**
+ * One save of an Agordo (Spec 019 ③, W-26): the date, the wish the movement came from (or Hand for a change by hand) and the sliders that moved, before → after.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "AgordoHistorio".
+ */
+export interface AgordoHistorio {
+  datum: string;
+  wunsch: NonEmptyText;
+  diff: {
+    regler: NonEmptyText;
+    vorher: number | string;
+    nachher: number | string;
+  }[];
 }
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema
