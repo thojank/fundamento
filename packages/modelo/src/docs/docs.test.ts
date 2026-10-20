@@ -2288,3 +2288,52 @@ describe("Spec 019 ① documentation (specs/019-werkstatt-2-3)", () => {
     }
   });
 });
+
+// Spec 019 ② (Briefing 2026-10-20): plan ② carries the Werkstatt of stage 2 — the panel G7, the
+// check without stalling G5 (a worker or a check in slices), the history, the suggestion bar for
+// links of propose_agordo and the measurement M5 (median and p95, the longest block of the main
+// thread, in the CI browser and as a guide for the Mac); tasks ② start at T1921 with the red hash.
+describe("Spec 019 ② documentation (specs/019-werkstatt-2-3)", () => {
+  it("plan ② carries decisions, coverage, deviations, findings, open points and M5; tasks ② the red hash", () => {
+    const section = (text: string) =>
+      text.slice(text.indexOf("## ② Werkstatt Stufe 2"), text.indexOf("## ③ Prompt (Stufe 3)"));
+    const plan = section(read("specs/019-werkstatt-2-3/plan.md"));
+    expect(plan).not.toContain("Folgt in PR ②.");
+    for (const heading of [
+      "### Zusammenfassung",
+      "### Entwurfsentscheidungen",
+      "#### D-01",
+      "### Arkitekturo-Abdeckung",
+      "### Abweichungen von der Spec",
+      "### Befunde / Mankoj",
+      "### Offen (für den Maintainer)",
+      "### M5",
+    ]) {
+      expect(plan, heading).toContain(heading);
+    }
+    for (const term of [
+      "Worker",
+      "Long Task",
+      "50 ms",
+      "Vorschlags-Leiste",
+      "vorschlag=",
+      "Rückgängig",
+      "fm-faldilo",
+      "input type=range",
+      "Median",
+      "p95",
+      "Mac",
+      "`provo-kompakta`",
+    ]) {
+      expect(plan, term).toContain(term);
+    }
+    const tasks = section(read("specs/019-werkstatt-2-3/tasks.md"));
+    expect(tasks).not.toContain("Folgt in PR ②.");
+    expect(tasks).toContain("**T1921");
+    expect(tasks).toContain("### Messungen");
+    expect(tasks).toMatch(/rot `[0-9a-f]{7}`/);
+    const readme = read("README.md");
+    expect(readme).toContain("vorschlag=");
+    expect(readme).toContain("Form, Raum, Schrift");
+  });
+});
