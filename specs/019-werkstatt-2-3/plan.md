@@ -271,7 +271,7 @@ Gemessen über 50 Änderungen des Reglers Helligkeit (−1 … 1), je Änderung 
 | Wo | Ableitung Median | Ableitung p95 | Prüfung Median | Prüfung p95 | längste Blockade |
 |---|---|---|---|---|---|
 | Mac (Chromium headless, Lauf von P0 auf dem Rechner des Maintainers, 2026-10-20) | 57,1 ms | 71,6 ms | 1 042,0 ms | 1 092,3 ms | 0 ms (0 Long Tasks) |
-| CI (Chromium headless, GitHub-Runner) | siehe tasks ② | | | | |
+| CI (Chromium headless, GitHub-Runner, Lauf 39350608447, `be843c5`) | 90,1 ms | 120,0 ms | 1 575,5 ms | 1 659,8 ms | 0 ms (0 Long Tasks) |
 
 **Ziel:** Ableitung unter 150 ms – erreicht; keine Blockade über 50 ms – erreicht. Die Prüfung dauert weiter rund eine Sekunde, aber im Worker.
 

@@ -48,13 +48,15 @@
 
 ### C – Abschluss
 - [x] **T1926 Doku** plan ② (D-01–D-09, Abweichungen 1–5, B-1–B-5, O-1–O-4, M5), tasks ②, README.
-- [ ] **T1927 CI** grün.
+- [x] **T1927 CI** grün (Lauf 39350608447, `be843c5`).
 
 ### Messungen
 
 | Was | Wert |
 |---|---|
-| Commits ② | rot `1e72db4`; grün und CI in den Zeilen danach |
+| Commits ② | rot `1e72db4`, grün `be843c5` (Hash des grünen Stands, CI grün); dieser Eintrag im Folgecommit |
+| CI ② | Lauf 39350608447 (`be843c5`, alle acht Jobs grün, Wanduhr 8:14): `checks` 1:20, `unit` 5:57, `projekcioj` 3:32 / 3:10, `eroj` 2:06 / 1:44, `alirebleco-eroj` 5:03, `rendered-checks` 8:10 |
+| M5 CI | Ableitung 90,1 / 120,0 ms, Prüfung 1 575,5 / 1 659,8 ms (Median / p95), längste Blockade 0 ms |
 | Tests lokal | Agordilo 79, Projekcioj 730; `check:vitrino` 51 grün (davon 9 neu für Stufe 2); `pnpm lint` grün |
 | M5 Mac | Ableitung 57,1 / 71,6 ms, Prüfung 1 042,0 / 1 092,3 ms (Median / p95), längste Blockade 0 ms |
 
