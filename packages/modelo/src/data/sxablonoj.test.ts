@@ -32,6 +32,7 @@ describe("the Sxablonoj of the repo Modelo (Spec 020 ①, G1)", () => {
       "filtrilo",
       "formularo",
       "pagxo",
+      "redaktilo",
       "sxelo",
     ]);
     for (const entry of sxablonoj) {
@@ -144,6 +145,7 @@ describe("the Sxablonoj in modelo.json (FR-17) and in describe_term (G3)", () =>
       "filtrilo",
       "formularo",
       "pagxo",
+      "redaktilo",
       "sxelo",
     ]);
     const back = modeloFromExport(structuredClone(json));
@@ -151,9 +153,10 @@ describe("the Sxablonoj in modelo.json (FR-17) and in describe_term (G3)", () =>
       "filtrilo",
       "formularo",
       "pagxo",
+      "redaktilo",
       "sxelo",
     ]);
-    expect(back.sxablonoj?.[3]?.skemo.regions.map((region) => region.name)).toEqual([
+    expect(back.sxablonoj?.[4]?.skemo.regions.map((region) => region.name)).toEqual([
       "brand",
       "principal",
       "nav",
@@ -167,8 +170,8 @@ describe("the Sxablonoj in modelo.json (FR-17) and in describe_term (G3)", () =>
     const result = describeTerm(modelo, { term: "Sxablono" });
     if (!result.ok) throw new Error("describe_term failed");
     expect(result.output.instances).toEqual({
-      count: 4,
-      names: ["filtrilo", "formularo", "pagxo", "sxelo"],
+      count: 5,
+      names: ["filtrilo", "formularo", "pagxo", "redaktilo", "sxelo"],
     });
   });
 });

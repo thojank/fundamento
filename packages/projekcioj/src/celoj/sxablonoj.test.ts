@@ -91,11 +91,12 @@ describe("Figma: example frames of instances, outside the sets (E3)", () => {
       }[];
     };
     expect(plan.components.map((component) => component.set)).not.toContain("sxelo");
-    // Spec 020 ②: formularo and filtrilo beside them.
+    // Spec 020 ②: formularo and filtrilo beside them; ③: redaktilo.
     expect(plan.sxablonoj?.map((entry) => entry.name)).toEqual([
       "filtrilo",
       "formularo",
       "pagxo",
+      "redaktilo",
       "sxelo",
     ]);
     const sxelo = plan.sxablonoj?.find((entry) => entry.name === "sxelo");
@@ -162,7 +163,9 @@ describe("kodbloko, markdovido and redaktilo (Spec 020 ③)", () => {
       expect(read(`eroj/src/generated/${tag}.ts`), tag).toContain(`customElements.get("${tag}")`);
     const markdown = read("eroj/src/generated/fm-markdovido.ts");
     expect(markdown).toContain("createElement");
-    expect(markdown).not.toMatch(/\.innerHTML\s*=(?!\s*MARKUP)/);
+    // The one innerHTML is the element's own shadow template, a literal of the generator.
+    expect(markdown.match(/\.innerHTML\s*=/g)).toHaveLength(1);
+    expect(markdown).toMatch(/root\.innerHTML = `<div part="control">/);
     expect(markdown).not.toContain("insertAdjacentHTML");
   });
 

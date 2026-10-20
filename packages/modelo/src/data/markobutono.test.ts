@@ -40,10 +40,12 @@ describe("markobutono in the repo Modelo (G1, G2, section 2)", () => {
       "insigno",
       "kampo",
       "karto",
+      "kodbloko",
       "kompletigilo",
       "konsileto",
       "langetaro",
       "ligilo",
+      "markdovido",
       "markobutono",
       "menuo",
       "mezurilo",
@@ -379,6 +381,8 @@ describe("the Reguloj of the markobutono (G6, E5)", () => {
       "alsxutilo",
       "karto",
       "avataro",
+      "kodbloko",
+      "markdovido",
     ]);
   });
 

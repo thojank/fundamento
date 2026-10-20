@@ -301,10 +301,13 @@ describe("the Vitrino after the acceptances (Nachlese 2026-10-13)", () => {
       kampo: "textbox",
       // Spec 015 ③: the card is the platform's article.
       karto: "article",
+      // Spec 020 ③: the code block is the platform's figure, the Markdown view a document.
+      kodbloko: "figure",
       kompletigilo: "combobox",
       konsileto: "tooltip",
       langetaro: "tablist",
       ligilo: "link",
+      markdovido: "document",
       markobutono: "checkbox",
       menuo: "menu",
       mezurilo: "meter",

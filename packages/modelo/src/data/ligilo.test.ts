@@ -46,10 +46,12 @@ describe("ligilo in the repo Modelo (T006)", () => {
       "insigno",
       "kampo",
       "karto",
+      "kodbloko",
       "kompletigilo",
       "konsileto",
       "langetaro",
       "ligilo",
+      "markdovido",
       "markobutono",
       "menuo",
       "mezurilo",
@@ -321,6 +323,8 @@ describe("the Reguloj of the ligilo (T005, A2, D-13)", () => {
       "alsxutilo",
       "karto",
       "avataro",
+      "kodbloko",
+      "markdovido",
     ]);
   });
 

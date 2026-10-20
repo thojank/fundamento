@@ -34,23 +34,38 @@ test.describe("Spec 020 ③ kodbloko", () => {
 
   test("copyable: the button copies the text and the block says Kopiert politely", async ({
     page,
-    context,
-    browserName,
   }) => {
-    test.skip(browserName !== "chromium", "clipboard permissions are Chromium's here");
-    await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+    // The test origin is no secure context, so the platform has no clipboard there: a stand-in
+    // keeps what is written, in every engine.
+    await page.addInitScript(() => {
+      let kept = "";
+      Object.defineProperty(navigator, "clipboard", {
+        configurable: true,
+        value: {
+          writeText: async (text: string) => {
+            kept = text;
+          },
+          readText: async () => kept,
+        },
+      });
+    });
     await serve(
       page,
       out,
       '<fm-kodbloko id="k" copyable><span slot="caption">Befehl</span>pnpm fm mcp</fm-kodbloko>',
     );
     await page.getByRole("button", { name: "Kopieren" }).click();
-    expect(await page.evaluate(() => navigator.clipboard.readText())).toBe("pnpm fm mcp");
-    const said = await page.locator("#k").evaluate((element) => {
-      const live = element.shadowRoot?.querySelector('[part="announce"]');
-      return { text: live?.textContent ?? "", live: live?.getAttribute("aria-live") ?? "" };
-    });
-    expect(said).toEqual({ text: "Kopiert", live: "polite" });
+    await expect
+      .poll(() => page.evaluate(() => navigator.clipboard.readText()))
+      .toBe("pnpm fm mcp");
+    await expect
+      .poll(() =>
+        page.locator("#k").evaluate((element) => {
+          const live = element.shadowRoot?.querySelector('[part="announce"]');
+          return { text: live?.textContent ?? "", live: live?.getAttribute("aria-live") ?? "" };
+        }),
+      )
+      .toEqual({ text: "Kopiert", live: "polite" });
   });
 });
 

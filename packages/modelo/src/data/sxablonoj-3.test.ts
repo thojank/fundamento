@@ -29,7 +29,8 @@ describe("the Eroj of Spec 020 ③", () => {
     ]);
     expect(skemo?.slots.map((slot) => slot.name)).toEqual(["label", "caption"]);
     expect(skemo?.a11y.texts?.copyable).toEqual({ de: "Kopieren", en: "Copy" });
-    expect(skemo?.a11y.texts?.copied).toEqual({ de: "Kopiert", en: "Copied" });
+    // The announcement after a copy: the name of the part announce (a11y texts are keyed by props or parts).
+    expect(skemo?.a11y.texts?.["announce-name"]).toEqual({ de: "Kopiert", en: "Copied" });
   });
 
   it("markdovido: the source as text, headings from start-level (2 by default); images and HTML are boundaries", () => {

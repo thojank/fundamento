@@ -43,9 +43,12 @@ const WORDS = [
   // Spec 015 ③: thirty-one Eroj (the card), thirty-two (the avatar).
   "thirty-one",
   "thirty-two",
+  // Spec 020 ③: thirty-four Eroj (the code block and the Markdown view).
+  "thirty-three",
+  "thirty-four",
 ] as const;
 
-/** A count as an English word for 0 to 32 (`no` for zero), otherwise as digits. */
+/** A count as an English word for 0 to 34 (`no` for zero), otherwise as digits. */
 export function countWord(count: number): string {
   return WORDS[count] ?? String(count);
 }

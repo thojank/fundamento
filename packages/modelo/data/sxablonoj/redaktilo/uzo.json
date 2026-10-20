@@ -1,0 +1,54 @@
+{
+  "$schema": "../../../schema/modelo.schema.json#/$defs/SxablonoUzoFile",
+  "uzo": {
+    "id": "uzo_01M5D5JMAHP0J37BDYFZG8V3KZ",
+    "sxablono": "sxa_01M5D5JMPSCPRMVHYZ8EGVR5JY",
+    "skemo": "ske_01M5D5JKXZQ7G5DHPNSSQZ2N7D",
+    "purpose": "Lets a person write Markdown and see it as it will be shown: the source and its preview side by side, the preview following every input.",
+    "instead": [
+      {
+        "goal": "show-only",
+        "keywords": {
+          "en": ["markdown-view"],
+          "de": ["markdownansicht"]
+        },
+        "ero": "markdovido",
+        "kialo": "Content that is only shown is a markdovido, because there is nothing to write."
+      }
+    ],
+    "boundary": [
+      {
+        "case": "rich-text-editor",
+        "action": "not-supported",
+        "keywords": {
+          "en": ["wysiwyg", "rich-text-editor"],
+          "de": ["wysiwyg", "rich-text-editor"]
+        },
+        "kialo": "Formatting by buttons over the text is not supported, because the source stays the text a person reads and writes; the preview shows the result."
+      }
+    ],
+    "composes": {
+      "containers": [
+        {
+          "name": "page",
+          "kialo": "An editor stands in a formularo or a section of a pagxo, because it is part of the task the page is about."
+        }
+      ],
+      "with": [
+        {
+          "ero": "tekstareo",
+          "kialo": "The source is a tekstareo of kind code, because Markdown is text in the code role."
+        },
+        {
+          "ero": "markdovido",
+          "kialo": "The preview is a markdovido, because it shows the source as the page will."
+        }
+      ],
+      "never": [],
+      "spacing": {
+        "owner": "container",
+        "regulo": "spacing-owned-by-container"
+      }
+    }
+  }
+}

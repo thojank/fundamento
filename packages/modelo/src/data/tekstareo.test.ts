@@ -59,10 +59,12 @@ describe("tekstareo in the repo Modelo (section ②)", () => {
       "insigno",
       "kampo",
       "karto",
+      "kodbloko",
       "kompletigilo",
       "konsileto",
       "langetaro",
       "ligilo",
+      "markdovido",
       "markobutono",
       "menuo",
       "mezurilo",
@@ -285,6 +287,8 @@ describe("the Reguloj of the tekstareo (G6, E5)", () => {
       "alsxutilo",
       "karto",
       "avataro",
+      "kodbloko",
+      "markdovido",
     ]);
   });
 

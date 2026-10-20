@@ -313,7 +313,21 @@ export const VITRINO_SLOT_TEXTS: Readonly<Record<string, string>> = {
   "value-text": "66 % von 3 prüfbaren",
   // Spec 014 ⑤ (plan ⑤ D-05): the summary of a disclosure names what it hides.
   summary: "Lieferbedingungen",
+  // Spec 020 ③ (plan ③ D-28): the caption of a code block names what the code does.
+  caption: "Prüfung starten",
 };
+
+/**
+ * The Markdown of the Vitrino (Spec 020 ③, plan ③ D-28): a paragraph with emphasis and code, a
+ * nested list, a quote and a link to the section — no heading, so the page keeps its order of
+ * headings. The markdovido shows it in every cell, the redaktilo in its field and its preview.
+ */
+export const VITRINO_MARKDOWN =
+  "Ein Absatz mit *Hervorhebung*, **Gewicht** und `STD-1`.\n\n- eins\n  - zwei\n\n> Ein Zitat.\n\n[Mehr](#fm-vitrino-markdovido)";
+
+/** The command of the Vitrino's code block (Spec 020 ③): long, so the region scrolls. */
+const VITRINO_COMMAND =
+  "arkitekturo check --project standards --dir /home/arkitekturo/projekte/standards --format json";
 
 /** The summary of the Vitrino's disclosure (Spec 014 ⑤); Figma shows the same word. */
 export const VITRINO_SUMMARY_TEXT = "Lieferbedingungen";
@@ -654,6 +668,12 @@ function additionRows(entry: LoadedEro, tag: string, menuItems = ""): string {
         `<fm-butono emphasis="medium" data-fm-opens="${id}">${VITRINO_OPEN}</fm-butono><${tag} id="${id}">Befund verwerfen?<fm-teksto slot="message">Fundstelle: STD-4, Absatz 2.</fm-teksto><fm-teksto slot="message">Der Befund gilt danach als verworfen.</fm-teksto>${VITRINO_DIALOG_ACTIONS}</${tag}>`,
       );
     }
+    // Spec 020 ③: a command longer than the cell, so the region scrolls; with copyable.
+    case "kodbloko":
+      return row(
+        "lange Zeile",
+        `<${tag} copyable><span slot="caption">${VITRINO_SLOT_TEXTS.caption ?? ""}</span>${VITRINO_COMMAND}</${tag}>`,
+      );
     case "teksto":
       return row(
         "mit ligilo, insigno, code",
@@ -673,6 +693,9 @@ const VITRINO_PAGXO =
 
 /** The example of one Sxablono in the Vitrino: the shell holds the page in its main. */
 function sxablonoExample(name: string): string {
+  // Spec 020 ③: the editor with its source in the field; the preview follows it.
+  if (name === "redaktilo")
+    return `<fm-redaktilo preview-label="Vorschau"><fm-tekstareo slot="field" kind="code" rows="6" value="${VITRINO_MARKDOWN.replaceAll("\n", "&#10;")}">Quelltext</fm-tekstareo><fm-markdovido slot="preview"></fm-markdovido></fm-redaktilo>`;
   if (name === "pagxo") return VITRINO_PAGXO;
   if (name === "sxelo")
     return `<fm-sxelo><span slot="brand">Fundamento</span><span slot="principal">Erika Mustermann</span><fm-navigado slot="nav" label="Hauptnavigation" page="standards"><a href="#fm-vitrino-sxablonoj" data-page="standards">Standards</a><a href="#fm-vitrino-sxablonoj" data-page="projekte">Projekte</a></fm-navigado><fm-avizo slot="notices" intent="success">Gespeichert.</fm-avizo>${VITRINO_PAGXO}</fm-sxelo>`;
@@ -856,11 +879,14 @@ export function eroMarkup(entry: LoadedEro, ikonaro: readonly VitrinoIkono[] = [
       const actions = dialog ? VITRINO_DIALOG_ACTIONS : "";
       // A light-DOM list carries its dl and no word of its own (Abnahme ① F-1): the prop value is
       // the row's heading, whatever layout the list chooses.
-      const named = role !== "list" && !entriesInDefault;
+      // A Markdown view (Spec 020 ③) shows the Vitrino's Markdown, no word beside it.
+      const markdown = entry.skemo.props.some((prop) => prop.name === "source");
+      const named = role !== "list" && !entriesInDefault && !markdown;
+      const source = markdown ? ` source="${VITRINO_MARKDOWN.replaceAll("\n", "&#10;")}"` : "";
       const cells = [undefined, ...columns]
         .map(
           (column) =>
-            `<td>${opener}<${tag}${identity}${attributes}${duties}${examples}${required}${chosen}${column === undefined ? "" : ` ${column}`}>${icons}${named ? label : ""}${optionTexts(entry)}${slotTexts(entry, column, combination)}${actions}${light}</${tag}></td>`,
+            `<td>${opener}<${tag}${identity}${attributes}${duties}${examples}${required}${chosen}${source}${column === undefined ? "" : ` ${column}`}>${icons}${named ? label : ""}${optionTexts(entry)}${slotTexts(entry, column, combination)}${actions}${light}</${tag}></td>`,
         )
         .join("");
       return `<tr><th scope="row">${label}</th>${cells}</tr>`;

@@ -39,10 +39,12 @@ describe("sxaltilo in the repo Modelo (G1, G2, section 1)", () => {
       "insigno",
       "kampo",
       "karto",
+      "kodbloko",
       "kompletigilo",
       "konsileto",
       "langetaro",
       "ligilo",
+      "markdovido",
       "markobutono",
       "menuo",
       "mezurilo",
@@ -295,6 +297,8 @@ describe("the Reguloj of the sxaltilo (G6, E5, D-14)", () => {
       "alsxutilo",
       "karto",
       "avataro",
+      "kodbloko",
+      "markdovido",
     ]);
   });
 

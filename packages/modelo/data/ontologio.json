@@ -2789,6 +2789,99 @@
       ]
     },
     {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Kodbloko",
+      "term": "Kodbloko",
+      "inScheme": "eroj",
+      "prefLabel": {
+        "eo": "Kodbloko",
+        "en": "code block",
+        "de": "Codeblock"
+      },
+      "altLabel": {
+        "en": [
+          "kodbloko",
+          "code block",
+          "command",
+          "snippet"
+        ],
+        "de": [
+          "Codeblock",
+          "Befehl",
+          "Quelltext",
+          "Fundstelle",
+          "kodbloko"
+        ]
+      },
+      "definition": {
+        "en": "A code block: a command or a place in a file, named by its caption, its content as text in the code role that scrolls along the line instead of being cut; copyable, it offers a button that copies the text and says so politely.",
+        "de": "Ein Codeblock: ein Befehl oder eine Fundstelle in einer Datei, benannt durch seine Beschriftung, der Inhalt als Text in der Code-Rolle, der entlang der Zeile scrollt statt abgeschnitten zu werden; kopierbar bietet er einen Knopf, der den Text kopiert und es höflich sagt."
+      },
+      "broader": [
+        "#Ero"
+      ],
+      "relations": [
+        {
+          "predicate": "references",
+          "target": "#Teksto"
+        },
+        {
+          "predicate": "references",
+          "target": "#Butono"
+        }
+      ]
+    },
+    {
+      "uri": "https://fundamento.ciferecigo.com/ontologio#Markdovido",
+      "term": "Markdovido",
+      "inScheme": "eroj",
+      "prefLabel": {
+        "eo": "Markdovido",
+        "en": "Markdown view",
+        "de": "Markdown-Ansicht"
+      },
+      "altLabel": {
+        "en": [
+          "markdovido",
+          "markdown view",
+          "rendered markdown"
+        ],
+        "de": [
+          "Markdown-Ansicht",
+          "Markdown",
+          "markdovido"
+        ]
+      },
+      "definition": {
+        "en": "A Markdown view: shows a source in Markdown with the Eroj of the system — headings from start-level, paragraphs, emphasis, code, quotes, lists, tables, rules and links — built from text alone; no HTML passes, links take safe targets only, images are shown by their text.",
+        "de": "Eine Markdown-Ansicht: zeigt eine Quelle in Markdown mit den Eroj des Systems – Überschriften ab start-level, Absätze, Hervorhebung, Code, Zitate, Listen, Tabellen, Trennlinien und Links –, nur aus Text gebaut; kein HTML wird durchgereicht, Links nur mit sicheren Zielen, Bilder als ihr Text."
+      },
+      "broader": [
+        "#Ero"
+      ],
+      "relations": [
+        {
+          "predicate": "references",
+          "target": "#Titolo"
+        },
+        {
+          "predicate": "references",
+          "target": "#Teksto"
+        },
+        {
+          "predicate": "references",
+          "target": "#Tabelo"
+        },
+        {
+          "predicate": "references",
+          "target": "#Kodbloko"
+        },
+        {
+          "predicate": "references",
+          "target": "#Ligilo"
+        }
+      ]
+    },
+    {
       "uri": "https://fundamento.ciferecigo.com/ontologio#Deziraro",
       "term": "Deziraro",
       "inScheme": "laboro",

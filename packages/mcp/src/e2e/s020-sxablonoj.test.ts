@@ -55,15 +55,17 @@ beforeAll(async () => {
 });
 
 describe("list_sxablonoj and get_sxablono (G3)", () => {
-  it("list_eroj stays with the 32 Eroj; list_sxablonoj names pagxo and sxelo with their regions", async () => {
+  it("list_eroj stays with the Eroj (34 since Spec 020 ③); list_sxablonoj names pagxo and sxelo with their regions", async () => {
     const eroj = await output<{ eroj: unknown[] }>(client, "list_eroj", {});
-    expect(eroj.eroj).toHaveLength(32);
+    expect(eroj.eroj).toHaveLength(34);
     const listed = await output<Listed>(client, "list_sxablonoj", {});
     // Spec 020 ②: formularo and filtrilo beside them.
     expect(listed.sxablonoj.map((entry) => [entry.name, entry.kind, entry.regions])).toEqual([
       ["filtrilo", "flow", ["fields", "actions", "status"]],
       ["formularo", "flow", ["problems", "fields", "actions"]],
       ["pagxo", "page", ["title", "badges", "subtitle", "actions", "sections"]],
+      // Spec 020 ③: the editor with its preview.
+      ["redaktilo", "flow", ["field", "preview"]],
       ["sxelo", "layout", ["brand", "principal", "nav", "notices", "main"]],
     ]);
     for (const entry of listed.sxablonoj) expect(entry.id).toMatch(/^sxa_/);
@@ -215,8 +217,8 @@ describe("the example dialogs of Spec 020 ①", () => {
       { term: "Sxablono" },
     );
     expect(term.instances).toEqual({
-      count: 4,
-      names: ["filtrilo", "formularo", "pagxo", "sxelo"],
+      count: 5,
+      names: ["filtrilo", "formularo", "pagxo", "redaktilo", "sxelo"],
     });
   });
 });

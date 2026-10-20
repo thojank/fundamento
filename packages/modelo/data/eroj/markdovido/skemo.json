@@ -1,0 +1,59 @@
+{
+  "$schema": "../../../schema/modelo.schema.json#/$defs/EroFile",
+  "ero": {
+    "id": "ero_01M5D5JKHFX2EFVCS08CFE8DS6",
+    "name": "markdovido",
+    "skemo": "ske_01M5D5JKXZQ7G5DHPNSSQZ2N7C",
+    "description": "A Markdown view: shows a source in Markdown (CommonMark and pipe tables) with the Eroj of the system — headings, paragraphs, emphasis, code, quotes, lists to depth three, tables, rules and links — built from text alone, so nothing of the source runs."
+  },
+  "skemo": {
+    "id": "ske_01M5D5JKXZQ7G5DHPNSSQZ2N7C",
+    "ero": "ero_01M5D5JKHFX2EFVCS08CFE8DS6",
+    "props": [
+      {
+        "name": "source",
+        "kind": "string",
+        "description": "The Markdown, as text. No HTML passes: what looks like HTML is shown as text; a link takes https:, http:, mailto: or a relative target, and opens with rel noopener noreferrer; an image is shown by its text."
+      },
+      {
+        "name": "start-level",
+        "kind": "enum",
+        "values": ["2", "3", "4", "5", "6"],
+        "default": "2",
+        "description": "The level of a heading # in the page: one below the page's own h1 by default, so the headings of the source keep the order of the page (Regulo heading-levels-in-order)."
+      }
+    ],
+    "states": ["rest"],
+    "slots": [],
+    "parts": {
+      "box": {
+        "gap": { "fixed": "spacing.medium" }
+      },
+      "quote": {
+        "color": { "fixed": "color.border.default" },
+        "width": { "fixed": "border.width.default" },
+        "inline-padding": { "fixed": "spacing.medium" }
+      },
+      "indent": {
+        "inline-padding": { "fixed": "spacing.large" }
+      }
+    },
+    "bindings": [],
+    "a11y": {
+      "role": "document",
+      "name": [],
+      "states": {},
+      "keys": []
+    },
+    "goals": [
+      {
+        "goal": "markdown",
+        "keywords": {
+          "en": ["markdown", "markdown-view", "rendered-markdown"],
+          "de": ["markdown", "markdown-text", "markdownansicht"]
+        },
+        "props": {}
+      }
+    ]
+  }
+}

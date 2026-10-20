@@ -6,6 +6,17 @@
 // what assistive technology hears in addition comes from `a11y.texts` of the Skemo, in the
 // language of the document. Console warnings are developer messages.
 
+import {
+  codeblockInit,
+  codeblockMarkup,
+  codeblockMethods,
+  codeblockRender,
+  markdownConstants,
+  markdownMarkup,
+  markdownMethods,
+  markdownRender,
+} from "./content-template.js";
+
 /**
  * The native control an a11y role is rendered as (Celo knowledge, Art. VIII). `toggle` is a
  * native button with the role of the Skemo, a control with its label beside it: the track of a
@@ -41,7 +52,9 @@ export type HostControl =
   | "suggest"
   | "upload"
   | "card"
-  | "avatar";
+  | "avatar"
+  | "codeblock"
+  | "markdown";
 
 export interface ElementNames {
   /** `fm-butono` */
@@ -163,6 +176,10 @@ export function hostOf(
   if (role === "switch" || role === "checkbox") return "toggle";
   if (role === "radiogroup") return "group";
   if (role === "combobox") return "select";
+  // Spec 020 ③ (plan ③ D-23, D-24): a code block is the platform's figure, named by its caption;
+  // a Markdown view a column of Eroj it builds from its source (role document).
+  if (role === "figure") return "codeblock";
+  if (role === "document") return "markdown";
   return "button";
 }
 
@@ -630,6 +647,8 @@ function markup(
   if (host === "upload") return uploadMarkup();
   if (host === "card") return cardMarkup();
   if (host === "avatar") return avatarMarkup();
+  if (host === "codeblock") return codeblockMarkup();
+  if (host === "markdown") return markdownMarkup();
   if (host === "tabs") return tabsMarkup();
   if (host === "input") return fieldMarkup(slots);
   if (host === "textarea") return fieldMarkup(slots, true);
@@ -719,13 +738,15 @@ export function elementSource({
                                           ? "input"
                                           : host === "card"
                                             ? "article"
-                                            : host === "avatar"
+                                            : host === "avatar" || host === "markdown"
                                               ? "[part='control']"
-                                              : host === "popover"
-                                                ? "[role=dialog]"
-                                                : host === "menu"
-                                                  ? "[role=menu]"
-                                                  : "button";
+                                              : host === "codeblock"
+                                                ? "figure"
+                                                : host === "popover"
+                                                  ? "[role=dialog]"
+                                                  : host === "menu"
+                                                    ? "[role=menu]"
+                                                    : "button";
   const isToggle = host === "toggle";
   const isGroup = host === "group";
   const isSelect = host === "select";
@@ -752,6 +773,8 @@ export function elementSource({
   const isOverlay = isTooltip || isPopover || isMenu;
   const isCard = host === "card";
   const isAvatar = host === "avatar";
+  const isCodeblock = host === "codeblock";
+  const isMarkdown = host === "markdown";
   const isSkip = host === "a" && skip;
   const isStatic =
     isStatus ||
@@ -767,7 +790,9 @@ export function elementSource({
     isDisclosure ||
     isPagination ||
     isCard ||
-    isAvatar;
+    isAvatar ||
+    isCodeblock ||
+    isMarkdown;
   const listSlot = slots.find((slot) => slot.list === true)?.name ?? "";
   const namedSlots = slots
     .filter((slot) => slot.default !== true && slot.decorative !== true)
@@ -3574,6 +3599,7 @@ const KEYED_BOOLEANS = PROPS.filter(
     ),
 ).map((prop) => prop.name);
 
+${isMarkdown ? markdownConstants : ""}
 let sheet: CSSStyleSheet | undefined;
 ${isLight ? "/** The stylesheet of the light DOM (Spec 011 ④, E10): adopted by the document once, scoped to the host. */\nlet lightSheet: CSSStyleSheet | undefined;\n" : ""}${autoConstant}const warned = new Set<string>();
 
@@ -3633,7 +3659,7 @@ ${autoField}${isAvatar ? '  /** The picture an avatar shows and whether it has l
     this.#label = label;
     this.#texts = texts;
     control.addEventListener("click", (event) => this.#activate(event));
-${toggleKeys}${groupInit}${selectInit}${dialogInit}${statusInit}${lightInit}${paginationInit}${tabsInit}${tooltipInit}${popoverInit}${menuInit}${disclosureInit}${suggestInit}${uploadInit}${avatarInit}${skipInit}    label.addEventListener("slotchange", () => this.#render());
+${toggleKeys}${groupInit}${selectInit}${dialogInit}${statusInit}${lightInit}${paginationInit}${tabsInit}${tooltipInit}${popoverInit}${menuInit}${disclosureInit}${suggestInit}${uploadInit}${avatarInit}${isCodeblock ? codeblockInit : ""}${skipInit}    label.addEventListener("slotchange", () => this.#render());
     for (const named of root.querySelectorAll("slot[name]")) {
       named.addEventListener("slotchange", () => this.#render());
     }
@@ -3778,7 +3804,7 @@ ${isSuggest ? "" : '        control.removeAttribute("aria-disabled");\n'}      }
     // \`invalid\` spoken as aria-invalid and set by a filled error slot (constraint of the Skemo);
     // disabled wins over readonly; help and error show only while they have text.
     const described: string[] = [];
-${inputRender}${toggleRender}${groupRender}${selectRender}${dialogRender}${statusRender}${meterRender}${lightRender}${paginationRender}${tabsRender}${iconRender}${separatorRender}${headingRender}${paragraphRender}${tooltipRender}${popoverRender}${menuRender}${disclosureRender}${suggestRender}${uploadRender}${cardRender}${avatarRender}${skipRender}${composedIconRender}    // The texts of the slots that describe the control (Spec 009, D-02; a checkbox, Spec 010 ②):
+${inputRender}${toggleRender}${groupRender}${selectRender}${dialogRender}${statusRender}${meterRender}${lightRender}${paginationRender}${tabsRender}${iconRender}${separatorRender}${headingRender}${paragraphRender}${tooltipRender}${popoverRender}${menuRender}${disclosureRender}${suggestRender}${uploadRender}${cardRender}${avatarRender}${isCodeblock ? codeblockRender : ""}${isMarkdown ? markdownRender : ""}${skipRender}${composedIconRender}    // The texts of the slots that describe the control (Spec 009, D-02; a checkbox, Spec 010 ②):
     // shown while they have text, and its description in that order.
     for (const source of DESCRIPTION) {
       const [kind, name = ""] = source.split(":");
@@ -3833,7 +3859,7 @@ ${
       .trim();
     const name = this.propValue("label");
 ${
-  isLight || isOverlay || isPagination || isCard || isAvatar
+  isLight || isOverlay || isPagination || isCard || isAvatar || isCodeblock || isMarkdown
     ? `    // A light-DOM host names its region by the caption (Spec 011 ④, D-09) and its list by the
     // label prop on the dl itself (D-10); an overlay (Spec 014 ④) names its layer in its own
     // render, a pagination (Spec 015 ①, B-3) its landmark — the label, else the Modelo's word; a
@@ -3864,7 +3890,7 @@ ${
     : `    if (!(this.#control instanceof HTMLButtonElement)) return;
 ${toggleActivate}`
 }  }
-${groupMethods}${selectMethods}${inputMethods}${dialogMethods}${statusMethods}${slotTextMethod}${lightMethods}${autoMethods}${tabsMethods}${overlayMethods}${tooltipMethods}${menuMethods}${suggestMethods}${uploadMethods}${choiceValidityMethods}
+${groupMethods}${selectMethods}${inputMethods}${dialogMethods}${statusMethods}${slotTextMethod}${lightMethods}${autoMethods}${tabsMethods}${overlayMethods}${tooltipMethods}${menuMethods}${suggestMethods}${uploadMethods}${choiceValidityMethods}${isCodeblock ? codeblockMethods : ""}${isMarkdown ? markdownMethods : ""}
 }
 
 /**

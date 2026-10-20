@@ -74,4 +74,31 @@
 
 ## ③ Inhalt
 
-Folgt im PR ③.
+**Branch:** `261020-spec-020-inhalt-116ba2` (gestapelt auf ②) · Aufgaben ab T2081.
+
+### A – Rot zuerst
+- [x] **T2081 Tests:**
+  - Modelo (`src/data/sxablonoj-3.test.ts`): kodbloko, markdovido, redaktilo, Ziele, Grenzen, rich-text → markdovido.
+  - MCP (`s020-sxablonoj-3.test.ts`): die zwei Beispiel-Dialoge, redaktilo in check_usage, list_eroj 34.
+  - Projektionen (`sxablonoj.test.ts`): Elemente, kein `innerHTML` aus der Quelle, Make Kit, Figma-Sets, Vitrino.
+  - Browser (`sxablonoj-3.spec.ts`): figure, Scroll-Region, Kopieren und Ansage, Markdown aus Eroj, Sicherheitstest, redaktilo.
+  - Doku.
+  - Rot in `c26497a`.
+
+### B – Grün
+- [x] **T2082 Daten** kodbloko, markdovido, redaktilo; `teksto.rich-text` → markdovido (Jugxo); Ontologio; `spacing-owned-by-container`.
+- [x] **T2083 Web** (D-21 bis D-25): Hosts `codeblock` und `markdown` (`content-template.ts`), Selektoren und Struktur, redaktilo im Sxablono-Template.
+- [x] **T2084 Figma** (D-27): Struktur badge, Freigabe der fünf Teile (Jugxo), Wörter der Sets.
+- [x] **T2085 Make Kit, React, Vitrino, Parität** (D-28): Beispiele der Vitrino, Satz zum Umbruch.
+- [x] **T2086 Pins** (Abweichungen 2, 3, 5, 6, 7).
+
+### C – Abschluss
+- [x] **T2087 Doku** plan (mit Messanleitung), tasks, README.
+- [ ] **T2088 CI** grün.
+
+### Messungen
+
+| Was | Wert |
+|---|---|
+| Commits | rot `c26497a` |
+| Tests lokal | Modelo 3 638, Projekcioj 773, MCP 371, Eroj 841 (drei Engines; 2 übersprungen), Agordilo 94, CLI 72, `check:vitrino` 51, `check:alirebleco-eroj` 561 – je Paket allein grün; `pnpm lint`, `pnpm perf` und alle `check:*` grün |

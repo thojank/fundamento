@@ -1866,7 +1866,7 @@ describe("Spec 015 ② documentation (specs/015-eroj-runde-4)", () => {
     expect(tasks).toMatch(/alsxutilo rot `[0-9a-f]{7}`/);
     expect(read("docs/vojmapo.md")).toContain("Spec 015 ②");
     // Spec 015 ③ counts on (thirty-one with the karto, thirty-two with the avataro).
-    expect(read("README.md")).toMatch(/thirty(-one|-two)? `fm-\*` elements/);
+    expect(read("README.md")).toMatch(/thirty(-one|-two|-four)? `fm-\*` elements/);
   });
 });
 
@@ -1901,7 +1901,8 @@ describe("Spec 015 ③ documentation (specs/015-eroj-runde-4)", () => {
     expect(own).toMatch(/Toast rot `[0-9a-f]{7}`/);
     expect(read("docs/vojmapo.md")).toContain("Spec 015 ③");
     expect(read("docs/vojmapo.md")).toContain("Runde 4 der Eroj vollständig");
-    expect(read("README.md")).toContain("thirty-two `fm-*` elements");
+    // Spec 020 ③: thirty-four with the kodbloko and the markdovido.
+    expect(read("README.md")).toContain("thirty-four `fm-*` elements");
   });
 });
 

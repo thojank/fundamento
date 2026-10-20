@@ -156,6 +156,14 @@ export const FIGMA_NOT_DRAWN: Readonly<Record<string, string>> = {
   // names all four).
   text: "jug_01M4S2R85WRAC5SV7CARH8RE7S",
   "required-mark": "jug_01M4S2R85WRAC5SV7CARH8RE7S",
+  // Spec 020 ③ (plan ③ D-27): the code block and the Markdown view are drawn as static text; the
+  // caption, the ring of the scroll region and the announcement of a copy of the kodbloko, the
+  // line of a quote and the indent of a list of the markdovido have no node.
+  legend: "jug_01M5D5JN34KAD7N6A822HW524H",
+  "scroll-ring": "jug_01M5D5JN34KAD7N6A822HW524H",
+  announce: "jug_01M5D5JN34KAD7N6A822HW524H",
+  quote: "jug_01M5D5JN34KAD7N6A822HW524H",
+  indent: "jug_01M5D5JN34KAD7N6A822HW524H",
 };
 
 /**
@@ -836,7 +844,12 @@ export const structureOf = (role: string, parts: readonly string[] = []): FigmaS
                               ? "separator"
                               : // Spec 014 ③ (plan ③ D-05): a heading and a paragraph are static
                                 // text, drawn as a badge is — the text in the role of the variant.
-                                role === "heading" || role === "paragraph"
+                                // Spec 020 ③ (plan ③ D-27): a code block (role figure) and a
+                                // Markdown view (role document) too.
+                                role === "heading" ||
+                                  role === "paragraph" ||
+                                  role === "figure" ||
+                                  role === "document"
                                 ? "badge"
                                 : // Spec 014 ④ (plan ④ D-06): the overlays — a tooltip, a menu, and
                                   // a popover (a dialog without a backdrop: non-modal, with a trigger).
@@ -903,6 +916,10 @@ const LABEL_DEFAULTS: Readonly<Record<string, string>> = {
   // for the maintainer to confirm; no Jugxo created here.
   heading: "Überschrift",
   paragraph: "Text",
+  // Spec 020 ③ (plan ③ D-27): a code block shows code, a Markdown view running text. Proposals
+  // for the maintainer to confirm; no Jugxo created here.
+  figure: "Code",
+  document: "Text",
   // Spec 014 ④ (plan ④ D-06): a tooltip is a short hint; the label of a menu names its trigger,
   // which offers more actions (the Modelo's own words, a11y.texts label-empty). Proposals.
   tooltip: "Kurzhinweis",

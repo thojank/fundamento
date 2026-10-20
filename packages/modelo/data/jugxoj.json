@@ -4368,6 +4368,27 @@
       "kialo": "Ein langes Formular ist eine Seite mit einem Formular: Es gibt jetzt ein Sxablono dafür.",
       "date": "2026-10-20",
       "context": "Spec 020 ② (G1): eine Antwort, die stand, ändert sich (OP-12) — die Alternative long-form des dialogo nannte null („a person decides where it goes“), jetzt formularo. suggest_ero „Formularseite“ → Sxablono formularo statt Rückfrage; „Assistent“, „mehrschrittig“ → Grenze wizard des formularo (ask-human) wie bisher eine Rückfrage, jetzt mit der Kialo der Runde 2."
+    },
+    {
+      "id": "jug_01M5D5JN33G18AWD9G23JVVRD7",
+      "ref": {
+        "ero": "ero_01M5616FMN3GPB1J421PMMKBZ2"
+      },
+      "decision": "approved",
+      "kialo": "Markdown hat jetzt eine Ansicht: Die Grenze rich-text des teksto schickt zur markdovido.",
+      "date": "2026-10-20",
+      "context": "Spec 020 ③ (G1): eine Antwort, die stand, ändert sich (OP-12) — die Grenze rich-text des teksto war ask-human („Markdown follows in a later stage“), jetzt use-instead markdovido. suggest_ero „Markdown im Text rendern“ und „Zeig den Markdown-Text eines Standards an.“ → markdovido (die Grenze daneben) statt Rückfrage."
+    },
+    {
+      "id": "jug_01M5D5JN34KAD7N6A822HW524H",
+      "ref": {
+        "artikolo": "VIII",
+        "celo": "figma"
+      },
+      "decision": "approved",
+      "kialo": "Figma zeigt den Codeblock und die Markdown-Ansicht als Text: Beschriftung, Fokusring der Scroll-Region, Ansage nach dem Kopieren und die Linie eines Zitats zeichnet es nicht.",
+      "date": "2026-10-20",
+      "context": "Spec 020 ③ (G2): Figma zeichnet kodbloko und markdovido mit der Struktur statischen Textes (badge) wie titolo und teksto — der Text in der Rolle seiner Teile, die Fläche, die Abstände. Nicht gezeichnet und darum für die Parität freigegeben: die Teile legend (Beschriftung), scroll-ring (Fokusring der Scroll-Region) und announce (Ansage „Kopiert“) des kodbloko, quote (Linie und Einzug eines Zitats) und indent (Einzug einer Liste) der markdovido."
     }
   ]
 }

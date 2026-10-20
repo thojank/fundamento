@@ -273,4 +273,214 @@ Alle früheren Dialoge der e2e-Tests sind unverändert, auch „Tabs, um zwische
 
 ## ③ Inhalt
 
-Folgt im PR ③.
+**Branch:** `261020-spec-020-inhalt-116ba2` (gestapelt auf ② `261020-spec-020-formular-116ba2`) · **Datum:** 2026-10-20 · **Stand:** zur Abnahme; Arbeitsnamen (E4).
+
+### Zusammenfassung
+
+1. **`kodbloko`** (Ero, Rolle figure):
+   - Beschriftung im Slot `caption` (Pflicht, z. B. der Befehl oder `Datei:Zeile`), der Inhalt als Text im Standard-Slot.
+   - Der Inhalt läuft in einer Region, die waagrecht scrollt und den Fokus nimmt (Tastatur). Er bricht nie um.
+   - Prop `copyable`: ein `butono` niedriger Betonung „Kopieren“; nach dem Kopieren sagt die Live-Region (polite) „Kopiert“.
+   - Grenzen: Diff (ask-human, E5) und Syntax-Hervorhebung (not-supported); `instead` inline-code → teksto.
+2. **`markdovido`** (Ero, Rolle document), G6 und E7:
+   - Prop `source` (Markdown als Text) und `start-level` (2–6, Standard 2).
+   - Der Inhalt entsteht nur über `createElement`, `createTextNode` und `textContent` aus den Eroj `titolo`, `teksto`, `tabelo`, `apartigilo`, `ligilo` und `kodbloko`.
+   - Umfang: Überschriften, Absätze, Hervorhebung, Inline-Code, Codeblöcke (Zaun und Einzug), Zitate, Listen bis Tiefe 3, Pipe-Tabellen mit Ausrichtung, Trennlinien.
+   - Links nur mit `https:`, `http:`, `mailto:` oder relativ, mit `rel="noopener noreferrer"`. Jedes andere Schema (`javascript:`, `data:`, `vbscript:` …) bleibt Text.
+   - Kein HTML wird durchgereicht: HTML der Quelle steht als Text da. Bilder sind ihr Alt-Text (Grenze images, ask-human).
+3. **`redaktilo`** (Sxablono, kind flow):
+   - Regionen `field` (tekstareo `kind=code`, höchstens eins) und `preview` (markdovido, höchstens eins), beide Pflicht.
+   - Prop `preview-label` (Pflicht): der Name der Vorschau, einer Region ohne Live-Region.
+   - Unterhalb von `size.container.medium` untereinander, ab dort nebeneinander (Container Query).
+   - Die Vorschau folgt jeder Eingabe (Abweichung 1).
+4. **Gvidanto:**
+   - suggest_ero: „Zeig den Befehl … kopieren …“ → `kodbloko` mit `copyable`; „Zeig den Markdown-Text eines Standards an.“ → `markdovido`; „Editor mit Vorschau …“ → `redaktilo`.
+   - Die Grenze `teksto.rich-text` wechselt von ask-human auf use-instead `markdovido` (Jugxo).
+   - check_usage kennt den redaktilo (Regionen, `props` kind=code der Region `field`); `spacing-owned-by-container` gilt auch für die zwei neuen Eroj.
+5. **Projektionen:** Web (zwei Hosts im Element-Template, ein Sxablono), React, Make Kit (`components/kodbloko.md`, `components/markdovido.md`, `patterns/redaktilo.md`), Figma (zwei Sets, ein Beispielrahmen), Vitrino (Abschnitte kodbloko und markdovido, redaktilo im Abschnitt Sxablonoj in drei Breiten), Parität.
+6. **Sicherheitstest** (Abnahme 4): `packages/eroj/test/sxablonoj-3.spec.ts` in Chromium, Firefox und WebKit.
+
+### Entwurfsentscheidungen
+
+#### D-21 Der kodbloko ist eine figure
+`ark-command-hint` und `ark-source-excerpt` zeigen beide einen Text, der so bleiben muss, wie er ist, mit einer Beschriftung. Die Plattform hat dafür `figure` mit `figcaption`: Die Beschriftung benennt die Abbildung. Der Inhalt steht in `pre` und `code` in einer Region (`role=region`, `tabindex=0`, benannt durch die Beschriftung). Sie scrollt waagrecht, darum muss sie mit der Tastatur erreichbar sein (axe `scrollable-region-focusable`). Ihr Fokusring ist der Teil `scroll-ring` mit den Tokens des Fokusrings. Ein eigener Teilname, weil `focus-ring` in Figma ein gezeichneter Teil ist.
+
+#### D-22 Die markdovido ist ein document
+Die Ansicht ist ein Dokument im Dokument: Rolle `document`, ihre Blöcke im Light DOM. So stylen die Eroj darin sich selbst, die tabelo mit dem Stylesheet des Dokuments wie überall. Der Schattenbaum hält nur die Spalte mit dem Abstand zwischen den Blöcken (`box.gap`), die Linie eines Zitats (`quote`) und den Einzug einer Liste (`indent`).
+
+#### D-23 Kopieren und Ansage
+Der Kopierknopf ist ein `fm-butono` im Schattenbaum (emphasis low, size small), beschriftet aus den Texten der Skemo in der Sprache des Dokuments („Kopieren“/„Copy“). Er kopiert den Text des Standard-Slots über `navigator.clipboard.writeText`. Danach setzt das Element die Ansage („Kopiert“/„Copied“) in eine polite Live-Region. Vorher leert es sie, damit dieselbe Ansage zweimal gehört wird.
+
+Ohne Zwischenablage (kein sicherer Kontext) zeigt das Element den Knopf nicht: Ein Knopf, der nichts kopiert, verspräche, was er nicht tut (Befund F-7).
+
+#### D-24 Markdown aus Eroj, nichts aus der Quelle
+Die markdovido parst zeilenweise. Erkannte Blöcke:
+- Zaun (```` ``` ````, `~~~`) und Einzug von vier Leerzeichen → `fm-kodbloko`
+- `#`–`######` → `fm-titolo` mit `level = start-level + n − 1`, höchstens 6
+- `---`, `***`, `___` → `fm-apartigilo`
+- `>` → `blockquote` mit den Blöcken des Zitats
+- Kopfzeile mit Pipe und Trennzeile darunter → `fm-tabelo` um eine native `table` (`slot=content`), `th scope=col`, die Ausrichtung als `data-align` (start, center, end)
+- `-`, `*`, `+` oder `1.` → `ul`/`ol`; ein tieferer Einzug verschachtelt bis Tiefe 3; der Text jedes Eintrags ist ein `fm-teksto`
+- alles andere → Absatz `fm-teksto`
+
+Inline: Code → `fm-teksto kind=code`, `**`/`__` → `strong`, `*`/`_` → `em`, `[Text](Ziel)` → `fm-ligilo to=… rel="noopener noreferrer"`, `![Alt](…)` → der Alt-Text.
+
+Ein Ziel ist sicher, wenn es nach dem Entfernen von Steuer- und Leerzeichen mit `https:`, `http:` oder `mailto:` beginnt oder gar kein Schema hat. Sonst steht nur der Linktext da.
+
+Nichts wird als Markup gelesen: kein `innerHTML`, kein `insertAdjacentHTML`, kein `DOMParser`. Das einzige `innerHTML` des Elements ist seine eigene Schattenvorlage, ein Literal des Generators (geprüft in `sxablonoj.test.ts`). Neu gerendert wird nur, wenn sich `source` oder `start-level` ändert. Die Blöcke tragen `data-fm-markdown` und werden beim nächsten Rendern ersetzt.
+
+#### D-25 Der redaktilo
+Die Vorschau ist eine Region (`role=region`, `aria-label` aus `preview-label`), keine Live-Region (G4): Wer tippt, hört nicht jede Taste zweimal; wer die Vorschau lesen will, geht zu ihr.
+
+Das Element hört auf `input` und setzt `source` der markdovido auf den Wert des tekstareo. Die Rollen erkennt das Template an den Regionen: Die Region, die eine markdovido nimmt, ist die Vorschau, die mit dem tekstareo das Feld. Daneben die Container Query aus `container.width` (`size.container.medium`, 720 px der Basisauflösung). Ab dieser Breite stehen beide Hälften nebeneinander.
+
+#### D-26 Ziele und Grenzen
+- kodbloko: Ziele `command` (befehl, kommando, kommandozeile; props `copyable: true`) und `code-block`.
+- markdovido: Ziel `markdown`.
+- redaktilo: Ziel `markdown-editor` (editor, markdown-editor, texteditor).
+- `teksto.rich-text` wird use-instead `markdovido` (Jugxo `jug_01M5D5JN33G18AWD9G23JVVRD7`).
+- Ontologio: Konzepte Kodbloko und Markdovido im Schema der Eroj. Der redaktilo steht, wie die anderen Sxablonoj, erst nach E4 dort.
+
+#### D-27 Figma zeichnet beide als Text
+Figma kennt keine Scroll-Region und keine Live-Region. Beide Eroj nutzen darum die Struktur statischen Textes (`badge`) wie titolo und teksto: Fläche, Abstände, der Text in seiner Rolle.
+
+Nicht gezeichnet und mit der Jugxo `jug_01M5D5JN34KAD7N6A822HW524H` (Art. VIII, Celo figma) für die Parität freigegeben:
+- beim kodbloko `legend`, `scroll-ring` und `announce`
+- bei der markdovido `quote` und `indent`
+
+Die Wörter der Sets sind „Code“ und „Text“ (Vorschlag, zur Bestätigung). Der redaktilo ist ein Beispielrahmen wie die anderen Sxablonoj (E3).
+
+#### D-28 Make Kit, React, Vitrino, Parität
+- Make Kit und React folgen ohne Sonderweg (Guidelines aus Skemo und Uzo, Props-Tabelle).
+- Die Vitrino zeigt kodbloko und markdovido in eigenen Ero-Abschnitten in allen Modi. Den redaktilo zeigt sie im Abschnitt Sxablonoj in drei Breiten, und darin steht die markdovido noch einmal.
+- Die Parität prüft beide Eroj auf allen Seiten und den redaktilo auf Web, React und Make Kit.
+
+### Arkitekturo-Abdeckung
+
+| Baustein | Fundamento | offen |
+|---|---|---|
+| `ark-markdown` | `markdovido` (source, start-level; G6) | Bilder (Grenze images, ask-human, E7); eigenes HTML (not-supported) |
+| `ark-markdown-editor` | `redaktilo` (field tekstareo kind=code, preview markdovido) | Speichern und Entwürfe bleiben Anwendung (G5) |
+| `ark-command-hint` | `kodbloko` mit `copyable` | – |
+| `ark-source-excerpt` | `kodbloko` mit `Datei:Zeile` als Beschriftung | Zeilennummern und Hervorhebung einer Zeile (Grenze syntax-highlighting, not-supported) |
+| `ark-diff` | – | bleibt in Arkitekturo (E5); der kodbloko nennt ihn als Grenze diff (ask-human) |
+
+Den Umzug macht Arkitekturo selbst; es gibt keinen Codetransfer.
+
+### Gekippte Dialoge
+
+| Dialog | vorher | jetzt | Jugxo |
+|---|---|---|---|
+| „Markdown im Text rendern“ | Rückfrage (Grenze `teksto.rich-text`, ask-human) | `markdovido`, die Grenze (use-instead) daneben | `jug_01M5D5JN33G18AWD9G23JVVRD7` |
+| „Zeig den Markdown-Text eines Standards an.“ (Beispiel-Dialog) | Rückfrage (dieselbe Grenze) | `markdovido` | dieselbe |
+| „Zeig den Befehl zum Starten der Prüfung so an, dass man ihn kopieren kann.“ (Beispiel-Dialog) | goal-unknown | `kodbloko` mit `copyable: true` | – (vorher keine Antwort) |
+| „Editor mit Vorschau für Markdown“ | Rückfrage (Grenze `alsxutilo.image-preview`) | `redaktilo` | – (die Grenze des alsxutilo meint Bilder; sie bleibt) |
+| „Codeblock mit Beschriftung“ | Rückfrage (Grenze `apartigilo.labelled-line`) | `kodbloko` | – |
+
+Die Antworten „vorher“ sind mit dem Code von ③ gegen die Daten von ② gerechnet (`suggestEro`). Der Gvidanto-Code ist in ③ unverändert. Alle übrigen früheren Dialoge der e2e-Tests sind unverändert.
+
+### Abweichungen
+
+1. **Die Vorschau folgt der Eingabe (G2/G5).** G2 erlaubt einem Sxablono kein Verhalten außer Landmarken, Fokus und Live-Regionen. Die Spec verlangt aber, dass die Vorschau dem Feld folgt (Tabelle „Inhalt der Runde“). Das Element setzt darum bei `input` `source` der markdovido. Das ist kein Ereignis und keine Anwendungslogik: Speichern und Absenden bleiben Anwendung. Die kleinste Änderung, im Template nur für ein Sxablono mit einer Region der markdovido.
+2. **Die Kopie im Browser-Test** läuft über einen Ersatz der Zwischenablage (`addInitScript`). Die Testseite `http://fm.test` ist kein sicherer Kontext, also hat sie keine `navigator.clipboard`. Der rote Test gab Chromium Rechte und wäre nie grün geworden. So prüft der Test jetzt alle drei Engines statt einer; die Ansage wartet per `expect.poll` auf den nächsten Frame.
+3. **`innerHTML` im Projektionstest:** Der rote Test erwartete für die markdovido eine Konstante `MARKUP` wie bei den Sxablonoj. Die Eroj schreiben ihre Schattenvorlage als Literal. Der Test prüft jetzt genau ein `innerHTML` und dass es die Vorlage `<div part="control">` ist.
+4. **Vitrino, Abnahme 1 („alle sieben Bausteine“ im Abschnitt Sxablonoj):** kodbloko und markdovido sind Eroj. Sie haben eigene Abschnitte in allen Modi, auch in der Werkstatt. Der Abschnitt Sxablonoj zeigt die fünf Sxablonoj; im redaktilo steht die markdovido.
+5. **Pins, die folgen:**
+   - 32 → 34 Eroj in den Daten-, e2e- und Export-Tests, im Satz von `describe_modelo` (Zahlwort bis thirty-four) und im README
+   - die Indizes in `list_eroj` (langetaro, plenstato, tabelo, ligilo)
+   - die Ziele in Ero-Reihenfolge (+ command, code-block, markdown)
+   - `spacing-owned-by-container` (+ kodbloko, markdovido)
+   - die Sxablonoj (+ redaktilo, describe_term 5)
+   - `uzoj` 34 in den Stats von regularo
+   - die Dateilisten des Web-Celo (+ sechs) und des Make Kits (+ drei; im Paket 54 Dateien)
+   - die Figma-Pläne, das Plugin (+ zwei Sets, der Bericht) und die Wörter der Sets
+   - die Rollen der Vitrino und ihr Satz zum Umbruch (kodbloko „Codezeile bricht nie um“, markdovido „Text darf umbrechen“)
+6. **Kandidaten der Code-Schrift im Plugin-Test:** Der Test gab sie nur dem tekstareo. Jetzt bekommt sie jedes Set mit der Code-Familie, denn der kodbloko steht vor dem tekstareo und lädt die Schrift zuerst.
+7. **Jugxo der Figma-Freigabe:** Sie verweist auf Art. VIII und den Celo figma wie die Freigaben der Spec 008 und 009, nicht auf ein Ero (AK-12: Der Export nennt Figma nur dort).
+
+### Befunde / Mankoj
+
+- **F-5** `::slotted` erreicht nur die Blöcke der ersten Ebene. Eine verschachtelte Liste behält den Einzug der Plattform, nicht den Token `indent`. Für Tokens bis in die Tiefe bräuchte die markdovido ein Stylesheet im Dokument wie die tabelo. Festgehalten, nicht gebaut.
+- **F-6** Eine Markdown-Tabelle hat keine Beschriftung. Ihre Scroll-Region bleibt darum ohne Namen. Runde 2 könnte die Überschrift davor oder ein Attribut nehmen.
+- **F-7** Kopieren braucht einen sicheren Kontext. In `file://` und `http://localhost` ist er da; in einem anderen `http://` fehlt der Knopf (D-23).
+- **F-8** „formatierter Text“ bleibt goal-unknown: Das Stichwort der Grenze ist „formatiert“, die Wortform trifft nicht. Die Kontext-Zeile der Jugxo nennt darum nur die Dialoge, die kippen.
+- **Manko Penpot:** wie in ①. Der Penpot-Celo schreibt nur Tokens; kein Eintrag in `mankoj.json`.
+- **Tokens:** keiner fehlt (E6).
+
+### Offen (für den Maintainer)
+
+1. **E4:** die Namen `kodbloko`, `markdovido` und `redaktilo` bestätigen.
+2. **Abweichung 1** bestätigen: Die Vorschau des redaktilo folgt der Eingabe.
+3. **D-27:** die Wörter „Code“ und „Text“ der Figma-Sets.
+4. **F-5, F-6** für Runde 2 einplanen oder verwerfen.
+
+### Messanleitung
+
+Alle Befehle im Checkout des Maintainers `/Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds`, nach dem Merge von ③ (oder auf dem Branch `261020-spec-020-inhalt-116ba2`), nach `pnpm install` und `pnpm build`. **Links immer mit `file://`**, sonst liest macOS das Fragment als Teil des Dateinamens.
+
+**1. Vitrino (Abnahme 1).**
+
+```sh
+cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds
+pnpm fm projekcioj build --out .fundamento/projekcioj
+open "file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/projekcioj/vitrino/index.html#modus=ansehen"
+```
+
+- Abschnitt „Sxablonoj“: sxelo, pagxo, formularo, filtrilo und redaktilo, je schmal, mittel und breit. Beim redaktilo steht die Vorschau schmal unter dem Feld und breit daneben. In das Feld tippen, die Vorschau folgt.
+- Abschnitte „kodbloko“ und „markdovido“ in allen Modi (Hell/Dunkel, Kontrast, Dichte, RTL): der kodbloko scrollt waagrecht und nimmt mit Tab den Fokus; die markdovido zeigt Überschriften ab Ebene 2.
+- Werkstatt mit den Beispielmarken: `file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/projekcioj/vitrino/index.html#modus=werkstatt`, dort `provo` und `provo-kompakta` wählen. Alle Abschnitte folgen dem Entwurf.
+
+**2. Gvidanto (Abnahme 2).**
+
+```sh
+cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds
+pnpm --filter @fundamento/mcp exec vitest run src/e2e/s020-sxablonoj-3.test.ts src/e2e/s014-typografie.test.ts
+```
+
+Oder im Gvidanto (`pnpm fm mcp`): `suggest_ero` mit „Zeig den Befehl zum Starten der Prüfung so an, dass man ihn kopieren kann.“ (→ `kodbloko`, `copyable: true`) und „Zeig den Markdown-Text eines Standards an.“ (→ `markdovido`, Grenze `teksto.rich-text` daneben). `check_usage` mit einem redaktilo ohne `preview` meldet `sxablono-region-required-missing`.
+
+**3. Sicherheit (Abnahme 4).**
+
+```sh
+cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds
+pnpm --filter @fundamento/eroj exec playwright test test/sxablonoj-3.spec.ts
+```
+
+Erwartet: 18 grün (sechs Tests × drei Engines). Von Hand in der Konsole der Vitrino:
+
+```js
+const m = document.createElement("fm-markdovido");
+document.body.append(m);
+m.source = '<script>window.pwned = 1</script>\n\n<img src=x onerror="window.pwned = 2">\n\n[Gefahr](javascript:window.pwned=3)';
+m.querySelectorAll("script, img, a, [onerror]").length; // 0
+window.pwned;                                            // undefined
+m.textContent.includes("<script>");                      // true: als Text
+```
+
+**4. Make Kit.** `file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/projekcioj/make-kit/komuna/guidelines/components/kodbloko.md`, `file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/projekcioj/make-kit/komuna/guidelines/components/markdovido.md`, `file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/projekcioj/make-kit/komuna/guidelines/patterns/redaktilo.md` (Regionen-Tabelle: `field` tekstareo, `preview` markdovido).
+
+**5. Figma (Abnahme 5).** Eigene Konfiguration mit beiden Beispielmarken:
+
+```sh
+cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds
+pnpm fm projekcioj build --config packages/modelo/test/fixtures/valid/aspekto-provo-kompakta/fundamento.provoj.config.json --out .fundamento/projekcioj-provoj
+```
+
+Dann in Figma:
+1. **Version der Testdatei vorher sichern** (Dateimenü → Version speichern).
+2. Das Plugin aus `/Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/projekcioj-provoj/figma/` **neu importieren** (Plugins → Development → Import plugin from manifest) und laufen lassen.
+3. Messen:
+   - Sets `kodbloko` (zwei Varianten, rest und focus) und `markdovido` (eine), beide mit Fläche und Text in ihrer Rolle.
+   - Im Rahmen „Sxablonoj“ der Beispielrahmen `redaktilo` mit den Regionen `field` und `preview`, darin Instanzen von tekstareo und markdovido.
+   - Beim Moduswechsel (komuna, provo, provo-kompakta; Hell/Dunkel) folgen die Instanzen.
+   - Der Bericht nennt `legend`, `scroll-ring`, `announce`, `quote` und `indent` als nicht gezeichnet (Jugxo `jug_01M5D5JN34KAD7N6A822HW524H`).
+4. Nach der Messung die gesicherte **Version wiederherstellen**.
+
+**6. Parität und Checks.**
+
+```sh
+cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds
+pnpm check:parity && pnpm check:alirebleco-eroj && pnpm check:vitrino
+```
+
+Spec, Plan und Aufgaben: `file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/specs/020-sxablonoj-1/plan.md`, `file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/specs/020-sxablonoj-1/tasks.md`.

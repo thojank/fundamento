@@ -36,10 +36,12 @@ describe("list_eroj", () => {
       "insigno",
       "kampo",
       "karto",
+      "kodbloko",
       "kompletigilo",
       "konsileto",
       "langetaro",
       "ligilo",
+      "markdovido",
       "markobutono",
       "menuo",
       "mezurilo",
@@ -62,7 +64,8 @@ describe("list_eroj", () => {
       variants: ["high", "medium", "low"],
       props: ["emphasis", "intent", "size", "type", "disabled", "loading", "full-width", "label"],
     });
-    expect(listEroj(modelo).eroj[17]).toMatchObject({
+    // Spec 020 ③: the kodbloko stands before the ligilo.
+    expect(listEroj(modelo).eroj[18]).toMatchObject({
       name: "ligilo",
       variants: ["inline", "standalone"],
       props: ["to", "placement", "external", "size", "label"],
