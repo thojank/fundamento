@@ -94,11 +94,12 @@
 
 ### C – Abschluss
 - [x] **T2087 Doku** plan (mit Messanleitung), tasks, README.
-- [ ] **T2088 CI** grün.
+- [x] **T2088 CI** grün (Lauf 39477922590, `574cfad`).
 
 ### Messungen
 
 | Was | Wert |
 |---|---|
-| Commits | rot `c26497a` |
+| Commits | rot `c26497a`, grün `574cfad` (Hash des grünen Stands, CI grün); dieser Eintrag im Folgecommit |
+| CI | Lauf 39477922590 (`574cfad`), Versuch 1: alle acht Jobs grün. Wanduhr 10:26 (`unit` 6:44, `projekcioj` 3:18 / 3:58, `eroj` 2:44 / 2:06, `alirebleco-eroj` 6:36, `rendered-checks` 10:21, `checks` 1:00) |
 | Tests lokal | Modelo 3 638, Projekcioj 773, MCP 371, Eroj 841 (drei Engines; 2 übersprungen), Agordilo 94, CLI 72, `check:vitrino` 51, `check:alirebleco-eroj` 561 – je Paket allein grün; `pnpm lint`, `pnpm perf` und alle `check:*` grün |
