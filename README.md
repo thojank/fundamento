@@ -119,7 +119,7 @@ Everything lives in one workspace; the npm org for published packages is
 | `@fundamento/mcp` | The MCP server (Gvidanto) |
 | `@fundamento/cli` | `fm`: validate, export, build projections, run the server, derive and check an Aspekto from an Agordo |
 | `@fundamento/agordilo` | The Agordilo (Spec 016): an Agordo (lead colour, status colours, tint, three sliders, fonts) becomes a complete Aspekto in OKLCH at contrast targets measured on komuna, checked by the checks of the CI, with its report |
-| `@fundamento/make-kit-<aspekto>` | Build output of `projekcioj`: one Figma Make kit per Aspekto (pre-releases published under the dist-tag `next`, the release 0.1.0 under `latest`) |
+| `@fundamento/make-kit-<aspekto>` | Build output of `projekcioj`: one Figma Make kit per Aspekto, an ES module per entry (`import`; `require()` from Node 22 on loads the same module), pre-releases published under the dist-tag `next`, the release 0.1.0 under `latest` |
 
 ## MCP server
 
@@ -200,7 +200,7 @@ Each check is its own command and its own named CI step. Exit 0 = pass, 1 = chec
 | `pnpm check:vortaro-lint` | No literal values in Projekcio CSS; the `--fm-` / `fm-` / `@fundamento/` namespace rule over the repo (Art. X gate 1). |
 | `pnpm check:parity` | Every projection agrees with the Skemo of its Ero in props, values, states and documented defaults (Art. X gate 2). The command builds the projections first; each Celo writes what it emitted to `parity/<side>.json`, and the check compares those files with the Modelo. |
 | `pnpm check:regularo` | Every Regulo has a `kialo`; every Jugxo references something that exists (Art. X gate 3). Automatic Reguloj are enforced by `fm modelo validate`, and every issue they raise cites the Regulo with its ID and kialo. |
-| `pnpm check:alirebleco` | Every KontrastParo meets its thresholds in all 72 combinations: WCAG 2.x binding, APCA advisory (Art. X gate 4). A non-text pair may name an alternative pair `aux` (e.g. a status border); `--json` lists the pair × combination results the alternative carries under `branches`. |
+| `pnpm check:alirebleco` | Every KontrastParo meets its thresholds in all 72 combinations: WCAG 2.x binding, APCA advisory (Art. X gate 4). A non-text pair may name an alternative pair `aux` (e.g. a status border); `--json` lists the pair × combination results the alternative carries under `branches`. `pnpm check:alirebleco --aspekto <dir>` measures a package of your own — e.g. one written by `fm agordilo derive` outside this repository — over the core and komuna in all its combinations; its failing pairs are errors. |
 | `pnpm check:clean-room` | Nothing from a benchmark directory is in or referenced by the repo; every identifier is in the Fundamento namespace (Art. V). |
 | `pnpm check:ikonaro` | Every installed Aspekto draws every name of the Ikonaro (`packages/modelo/data/ikonaro.json`) as `ikonoj/<name>.svg`: a square viewBox, no fixed colour (`currentColor`) and its provenance — source, version, licence — in `<metadata>` (Spec 014 ①, Art. IV, Art. VII). A glyph whose name is not in the Ikonaro is a warning; nothing is deleted. |
 | `pnpm check:alirebleco-eroj` | axe-core and the focus ring on the rendered `fm-butono` in Chromium, Firefox and WebKit, in every colour class of both Aspektoj. |

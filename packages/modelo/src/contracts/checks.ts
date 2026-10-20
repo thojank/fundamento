@@ -31,6 +31,11 @@ export interface CheckOptions {
   /** A project's fundamento.config.json: core + reference Aspekto + its packages (Spec 001). */
   config?: string;
   /**
+   * Alirebleco only: an Aspekto package of one's own (Nachlese 6 N6-2) — measured over the core
+   * and the reference, its failures are errors; the known fixtures are not measured beside it.
+   */
+  aspekto?: string;
+  /**
    * Parity only: the projections to compare with the Skemo (`fm projekcioj build --out`).
    * Defaults to `<repoRoot>/.fundamento/projekcioj` (Spec 003 T021).
    */

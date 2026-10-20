@@ -94,7 +94,8 @@ describe("fm projekcioj build (T008)", () => {
   it("bundles the Make kit, so the output can be packed and published (T020)", () => {
     const { out, run } = build(["--celo", "make-kit"]);
     expect(run.status).toBe(0);
-    for (const file of ["dist/index.js", "dist/index.cjs", "dist/index.d.ts", "package.json"]) {
+    // Nachlese 6 N6-3: one built version per entry (ESM).
+    for (const file of ["dist/index.js", "dist/index.d.ts", "package.json"]) {
       expect(existsSync(join(out, "make-kit/komuna", file)), file).toBe(true);
     }
     expect(run.stdout).toContain("make-kit");

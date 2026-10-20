@@ -89,7 +89,10 @@ export interface VitrinoDatumoj {
     { surfaces: VitrinoRolo[]; text: VitrinoRolo[]; status: VitrinoRolo[]; agoj: VitrinoRolo[] }
   >;
   mezuroj: Record<string, VitrinoMezuro[]>;
-  regularo: Record<string, { regulo: string; kialo: string; pasis: boolean; trovoj: string[] }[]>;
+  /** Per combination every automatic Regulo with its result; its kialo stands in regulojKialoj. */
+  regularo: Record<string, { regulo: string; pasis: boolean; trovoj: string[] }[]>;
+  /** The kialo of every automatic Regulo, once (Nachlese 6 N6-3: it stood in all 72 combinations). */
+  regulojKialoj: Record<string, string>;
   aspiroj: Record<
     string,
     {
@@ -327,6 +330,19 @@ export const VITRINO_NUMBER_EXAMPLES: Readonly<Record<string, string>> = {
  * same help, and its example the same two files.
  */
 export const VITRINO_UPLOAD_ACCEPT = ".pdf,.png";
+
+/**
+ * Nachlese 6 N6-1: the kinds of the kampo the Vitrino shows in a row of their own, each with an
+ * example value of its kind — a date with its bounds (min before the value, max after it). Text,
+ * search and tel look like text; the rows show what a kind changes.
+ */
+export const VITRINO_KAMPO_KINDS: Readonly<Record<string, Readonly<Record<string, string>>>> = {
+  email: { value: "name@example.org" },
+  url: { value: "https://example.org" },
+  date: { value: "2026-10-20", min: "2026-10-01", max: "2026-12-31" },
+  number: { value: "42" },
+  password: { value: "beispiel1234" },
+};
 export const VITRINO_UPLOAD_HELP = "PDF oder PNG, höchstens 5 MB";
 export const VITRINO_UPLOAD_FILES: readonly { name: string; size: number }[] = [
   { name: "Lebenslauf.pdf", size: 1_200_000 },
@@ -764,6 +780,28 @@ export function eroMarkup(entry: LoadedEro, ikonaro: readonly VitrinoIkono[] = [
       return `<tr><th scope="row">${label}</th>${cells}</tr>`;
     })
     .join("");
+  // Nachlese 6 N6-1: an enum prop kind that keys no part (the kampo) shows each kind of
+  // VITRINO_KAMPO_KINDS in a row of its own, with an example value in every column.
+  const kinds = entry.skemo.props.some(
+    (prop) => prop.name === "kind" && prop.kind === "enum" && !keys.includes("kind"),
+  )
+    ? (entry.skemo.props.find((prop) => prop.name === "kind")?.values ?? [])
+        .filter((kind) => VITRINO_KAMPO_KINDS[kind] !== undefined)
+        .map((kind) => {
+          const example = Object.entries(VITRINO_KAMPO_KINDS[kind] ?? {})
+            .map(([name, value]) => ` ${name}="${value}"`)
+            .join("");
+          const label = `kind=${kind}`;
+          const cells = [undefined, ...columns]
+            .map(
+              (column) =>
+                `<td><${tag} kind="${kind}"${example}${required}${column === undefined ? "" : ` ${column}`}>${label}${slotTexts(entry, column, { kind })}</${tag}></td>`,
+            )
+            .join("");
+          return `<tr><th scope="row">${label}</th>${cells}</tr>`;
+        })
+        .join("")
+    : "";
   // Nachlese 3 W4 (F-9): an Ero with a number prop without a default (the meter's value) shows one
   // more row without it — the unknown value, its text "nicht geprüft", once for every intent.
   // Spec 015 ①: only an Ero with a value text (the meter) shows the unknown row; the pagxigilo's
@@ -773,7 +811,7 @@ export function eroMarkup(entry: LoadedEro, ikonaro: readonly VitrinoIkono[] = [
       ? ""
       : `<tr><th scope="row">${VITRINO_UNKNOWN_LABEL}</th><td><${tag}>${VITRINO_UNKNOWN_LABEL}<span slot="value-text">${VITRINO_UNKNOWN_TEXT}</span></${tag}></td></tr>`;
   const heads = ["rest", ...columns].map((column) => `<th scope="col">${column}</th>`).join("");
-  return `<table><caption>${tag}, jede Kombination der Skemo</caption><thead><tr><th scope="col">Kombination</th>${heads}</tr></thead><tbody>${rows}${unknown}</tbody></table>`;
+  return `<table><caption>${tag}, jede Kombination der Skemo</caption><thead><tr><th scope="col">Kombination</th>${heads}</tr></thead><tbody>${rows}${kinds}${unknown}</tbody></table>`;
 }
 
 /**
@@ -820,7 +858,6 @@ function regularoOf(
     const found = byCombination.get(key);
     result[key] = automatic.map((regulo) => ({
       regulo: regulo.name,
-      kialo: regulo.kialo,
       pasis: found?.get(regulo.name) === undefined,
       trovoj: found?.get(regulo.name) ?? [],
     }));
@@ -1098,6 +1135,11 @@ export function vitrinoDatumoj({ input, bazo }: VitrinoDatumojInput): VitrinoDat
     roloj,
     mezuroj,
     regularo: regularoOf(modelo, regularoEnforcementIssues(modelo)),
+    regulojKialoj: Object.fromEntries(
+      modelo.reguloj
+        .filter((regulo) => regulo.checkability === "automatic")
+        .map((regulo) => [regulo.name, regulo.kialo]),
+    ),
     aspiroj: aspirojOf(evaluateAspiroj(modelo)),
     kovrado,
     komparo: komparoOf({

@@ -126,8 +126,7 @@ describe("the sections of FR-06", () => {
   // Nachlese 6 N6-3: the kialo of a Regulo stood in every one of the 72 combinations (957 KB of
   // 5.6 MB); it is carried once, by name, and nothing is missing.
   it("carries the kialo of every Regulo once, for every Regulo of every combination (N6-3)", () => {
-    const island =
-      /<script type="application\/json" id="fm-vitrino">(.*?)<\/script>/s.exec(full)?.[1] ?? "";
+    const regularo = JSON.stringify(datumoj.regularo);
     for (const [combination, rules] of Object.entries(datumoj.regularo)) {
       for (const rule of rules) {
         expect("kialo" in rule, `${combination} ${rule.regulo}`).toBe(false);
@@ -135,9 +134,15 @@ describe("the sections of FR-06", () => {
       }
     }
     for (const kialo of Object.values(datumoj.regulojKialoj)) {
-      const text = JSON.stringify(kialo).slice(1, -1).replaceAll("</", "<\\/");
-      expect(island.split(text).length - 1, kialo.slice(0, 40)).toBe(1);
+      expect(regularo.includes(JSON.stringify(kialo).slice(1, -1)), kialo.slice(0, 40)).toBe(false);
     }
+    expect(Object.keys(datumoj.regulojKialoj).sort()).toEqual(
+      [
+        ...new Set(
+          Object.values(datumoj.regularo).flatMap((rules) => rules.map((rule) => rule.regulo)),
+        ),
+      ].sort(),
+    );
   });
 
   it("carries the design goals of the brand with target, measurement and result", () => {

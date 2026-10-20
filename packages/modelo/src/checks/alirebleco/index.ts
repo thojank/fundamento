@@ -1,15 +1,23 @@
 // Alirebleco check (Art. X gate 4, S5.4, FR-15, FR-16, AK-13): every KontrastParo in every
 // combination, WCAG 2.x binding and APCA advisory, thresholds from the active `kontrastSojloj`.
-// Runs on the repo Modelo, or on the Modelo root given by `--fixture` (`vortaro/`, `data/`).
+// Runs on the repo Modelo, or on the Modelo root given by `--fixture` (`vortaro/`, `data/`), or
+// on the repo Modelo with one package of one's own (`--aspekto <dir>`, Nachlese 6 N6-2).
 
-import { existsSync } from "node:fs";
-import { join } from "node:path";
+import { existsSync, readFileSync } from "node:fs";
+import { basename, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { CheckOptions, CheckResult } from "../../contracts/checks.js";
 import type { ValidationIssue } from "../../contracts/issues.js";
 import type { ModeloSource } from "../../contracts/modelo.js";
+import { ASPEKTO_DIMENSIO } from "../../load/build.js";
 import { loadModelo } from "../../load/load-modelo.js";
-import { modeloRootOf, projectModeloSource, relativeModeloPath } from "../../load/source.js";
+import {
+  defaultModeloSource,
+  modeloRootOf,
+  projectModeloSource,
+  relativeModeloPath,
+  withAspektoPackages,
+} from "../../load/source.js";
 import { checkSource } from "../source.js";
 import { evaluateAlirebleco } from "./evaluate.js";
 
@@ -37,6 +45,7 @@ export function knownAspektoConfigs(): { name: string; configFile: string }[] {
 }
 
 export async function check(options: CheckOptions): Promise<CheckResult> {
+  if (options.aspekto !== undefined) return checkOwnAspekto(options.aspekto);
   const source: ModeloSource = checkSource(options);
   const reference = evaluateSource(source);
   if (reference.modelo === undefined) {
@@ -93,6 +102,77 @@ export async function check(options: CheckOptions): Promise<CheckResult> {
     warnings,
     stats,
     branches: reference.evaluation.branches,
+  };
+}
+
+/** The name of an Aspekto package (its aspekto.json), else the folder name without `aspekto-`. */
+function packageName(dir: string): string {
+  try {
+    const value: unknown = JSON.parse(readFileSync(join(dir, "aspekto.json"), "utf8"));
+    if (typeof value === "object" && value !== null && "name" in value) {
+      if (typeof value.name === "string") return value.name;
+    }
+  } catch {
+    // An unreadable aspekto.json is reported by the loader.
+  }
+  return basename(dir).replace(/^aspekto-/, "");
+}
+
+/**
+ * Nachlese 6 N6-2 (Spec 016 ③ B-1, O-2): one package of one's own — a brand derived by the
+ * Agordilo, outside the repository — over the core and the reference. Every pair in every
+ * combination; a failing pair is an error, whichever Aspekto it belongs to (the caller asked for
+ * this package; the known fixtures are not measured beside it).
+ */
+async function checkOwnAspekto(dir: string): Promise<CheckResult> {
+  const name = packageName(dir);
+  const source = withAspektoPackages(defaultModeloSource(), [dir]);
+  const { modelo, issues } = loadModelo(source);
+  const loadErrors = issues.filter((issue) => issue.severity === "error");
+  if (modelo === undefined || loadErrors.length > 0) {
+    return {
+      check: "alirebleco",
+      ok: false,
+      summary: `The Modelo with the Aspekto ${name} (${dir}) could not be loaded (${loadErrors.length} error(s)); no KontrastParo was checked.`,
+      errors: loadErrors,
+      warnings: issues.filter((issue) => issue.severity === "warning"),
+      stats: { pairs: 0, combinations: 0, evaluations: 0 },
+    };
+  }
+  const root = modeloRootOf(source);
+  const evaluation = evaluateAlirebleco(modelo, {
+    kontrastParojFile: relativeModeloPath(root, join(source.dataDir, "kontrastparoj.json")),
+    dimensiojFile: relativeModeloPath(root, join(source.dataDir, "dimensioj.json")),
+    collect: true,
+  });
+  const own = (combination: Readonly<Record<string, string>> | undefined) =>
+    combination?.[ASPEKTO_DIMENSIO] === name;
+  const measured = (evaluation.measurements ?? []).filter((entry) => own(entry.combination));
+  const errors = evaluation.errors.map((issue) =>
+    own(issue.combination) ? { ...issue, message: `[${name}] ${issue.message}` } : issue,
+  );
+  const ownErrors = evaluation.errors.filter((issue) => own(issue.combination)).length;
+  const combinations = new Set(measured.map((entry) => JSON.stringify(entry.combination))).size;
+  const stats: Record<string, number> = {
+    ...evaluation.stats,
+    aspektoj: 2,
+    [`${name}:combinations`]: combinations,
+    [`${name}:evaluations`]: measured.length,
+    [`${name}:errors`]: ownErrors,
+  };
+  const ok = errors.length === 0;
+  const counts = `${stats.pairs} KontrastParo(j) x ${stats.combinations} combinations, ${stats.evaluations} evaluations`;
+  const theirs = `Aspekto ${name} (${dir}): ${measured.length} evaluation(s) in ${combinations} combination(s), ${ownErrors} failing`;
+  return {
+    check: "alirebleco",
+    ok,
+    summary: ok
+      ? `${counts}: all meet the binding WCAG 2.x thresholds; ${theirs}.`
+      : `${counts}: ${errors.length} error(s); ${theirs}.`,
+    errors,
+    warnings: [...issues.filter((issue) => issue.severity === "warning"), ...evaluation.warnings],
+    stats,
+    branches: evaluation.branches,
   };
 }
 
