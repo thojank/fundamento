@@ -30,13 +30,15 @@
 
 ### C – Abschluss
 - [x] **T2062 Doku** spec (Kopie), plan, tasks.
-- [ ] **T2063 CI** grün.
+- [x] **T2063 CI** grün (Lauf 39458073636, `15e1220`; Versuch 2 des Jobs „Rendered checks“).
 
 ### Messungen
 
 | Was | Wert |
 |---|---|
-| Commits | rot `0595564` |
+| Commits | rot `0595564`, grün `15e1220` (Hash des grünen Stands, CI grün); dieser Eintrag im Folgecommit |
+| CI | Lauf 39458073636 (`15e1220`), Versuch 1: sieben Jobs grün, „Rendered checks“ rot – M5 der Werkstatt 51 ms längste Blockade (ein Long Task) gegen die Grenze 50 ms; lokal zweimal 0 ms. Versuch 2 des Jobs grün (M5 0 ms, 0 Long Tasks). Wanduhr Versuch 1 8:19 (`unit` 6:45, `projekcioj` 3:16 / 3:47, `eroj` 2:27 / 6:09, `alirebleco-eroj` 4:13, `rendered-checks` 8:15, `checks` 1:10) |
+| Tests lokal | Modelo 3 623, Projekcioj 769, MCP 363, Eroj 811 (drei Engines), `check:vitrino` 51 – je Paket allein grün; `pnpm lint` und alle `check:*` grün |
 
 ## ② formularo und filtrilo
 
