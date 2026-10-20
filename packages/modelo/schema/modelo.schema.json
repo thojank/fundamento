@@ -3585,7 +3585,7 @@
               "description": "The ratio of neighbouring steps of font.size.scale; the body text keeps its size.",
               "type": "number",
               "minimum": 1.125,
-              "maximum": 1.5
+              "maximum": 1.25
             },
             "gewicht": {
               "description": "−1 … 1: font.weight.* by up to two cuts lighter or heavier, never outside the lightest and the heaviest weight of the structure; 0 = the structure.",

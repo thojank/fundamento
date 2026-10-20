@@ -218,7 +218,8 @@ export function gestaltSliders(basis: GestaltBasis): GestaltSlider[] {
     { path: "raum.abstand", min: 0.75, max: 1.5, standard: 1, step: 0.05 },
     { path: "raum.hoehe", min: 0.85, max: 1.25, standard: 1, step: 0.05 },
     { path: "schrift.groesse", min: -1, max: 1, standard: 0, step: 0.05 },
-    { path: "schrift.skala", min: 1.125, max: 1.5, standard: basis.skala, step: 0.001 },
+    // Nachtrag 20.10. (Maintainer, ① O-5): the upper bound is 1.25 (at 1.5 display.1 was 417 px).
+    { path: "schrift.skala", min: 1.125, max: 1.25, standard: basis.skala, step: 0.001 },
     { path: "schrift.gewicht", min: -1, max: 1, standard: 0, step: 0.05 },
   ];
 }
