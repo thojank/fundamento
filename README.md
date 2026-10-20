@@ -119,7 +119,7 @@ Everything lives in one workspace; the npm org for published packages is
 | `@fundamento/mcp` | The MCP server (Gvidanto) |
 | `@fundamento/cli` | `fm`: validate, export, build projections, run the server, derive and check an Aspekto from an Agordo |
 | `@fundamento/agordilo` | The Agordilo (Spec 016): an Agordo (lead colour, status colours, tint, three sliders, fonts) becomes a complete Aspekto in OKLCH at contrast targets measured on komuna, checked by the checks of the CI, with its report |
-| `@fundamento/make-kit-<aspekto>` | Build output of `projekcioj`: one Figma Make kit per Aspekto, an ES module per entry (`import`; `require()` from Node 22 on loads the same module), pre-releases published under the dist-tag `next`, the release 0.1.0 under `latest` |
+| `@fundamento/make-kit-<aspekto>` | Build output of `projekcioj`: one Figma Make kit per Aspekto (pre-releases published under the dist-tag `next`, the release 0.1.0 under `latest`) |
 
 ## MCP server
 
@@ -204,7 +204,7 @@ Each check is its own command and its own named CI step. Exit 0 = pass, 1 = chec
 | `pnpm check:clean-room` | Nothing from a benchmark directory is in or referenced by the repo; every identifier is in the Fundamento namespace (Art. V). |
 | `pnpm check:ikonaro` | Every installed Aspekto draws every name of the Ikonaro (`packages/modelo/data/ikonaro.json`) as `ikonoj/<name>.svg`: a square viewBox, no fixed colour (`currentColor`) and its provenance — source, version, licence — in `<metadata>` (Spec 014 ①, Art. IV, Art. VII). A glyph whose name is not in the Ikonaro is a warning; nothing is deleted. |
 | `pnpm check:alirebleco-eroj` | axe-core and the focus ring on the rendered `fm-butono` in Chromium, Firefox and WebKit, in every colour class of both Aspektoj. |
-| `pnpm check:make-kit` | Each Make Kit installs from its packed tarball into a fresh Vite project and builds and renders there, with React 18.3 and with React 19.3 + Tailwind 4.3, in plain HTML without React, and on a server without a DOM. |
+| `pnpm check:make-kit` | Each Make Kit installs from its packed tarball into a fresh Vite project and builds and renders there, with React 18.3 and with React 19.3 + Tailwind 4.3, in plain HTML without React, and on a server without a DOM. The kit ships one ES module per entry (Nachlese 6); `require()` from Node 22 on loads the same module. |
 | `pnpm check:quickstart` | The quickstart of this README, run as a user would and timed: pack `@fundamento/eroj`, install it in a fresh Vite project, render both projections, switch Aspekto and colour scheme without a reload — under five minutes (AK-07). |
 | `pnpm check:release` | The release path of the Make kits, as `release.yml` runs it: both kits built (komuna from the repository, ekzemplo from its fixture), each present, with its LICENSE and without a font file, each packed as a dry run (`scripts/release-kits.sh pack`). The release itself is `release.yml` in mode `publish`, on main, chosen by the maintainer with the pre-release number as input. |
 | `pnpm check:vitrino` | The Vitrino (`vitrino/index.html` of a projection build) in a browser: every Dimensio switches without a reload and the numbers follow, the comparison of two Aspektoj names both sides, `fm-butono` carries the tokens of its Aspekto, and axe-core finds nothing in light, dark and both contrast levels. |

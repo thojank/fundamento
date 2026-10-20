@@ -2111,6 +2111,48 @@ describe("Spec 016 ③ documentation (specs/016-agordilo-1)", () => {
   });
 });
 
+// Nachlese 6 (Spec 019 ④, Briefing 2026-10-20): a branch of its own from main; plan and tasks in
+// specs/019-werkstatt-2-3/nachlese-6 (beside the plan of ① to ③, which are stacked). The plan
+// carries the four items N6-1 to N6-4, the sizes before and after with every cause named, the
+// decisions, deviations, findings and open points; tasks start at T1961 with the red hash; the
+// README names check:alirebleco --aspekto.
+describe("Nachlese 6 documentation (specs/019-werkstatt-2-3/nachlese-6)", () => {
+  it("plan carries N6-1 to N6-4, the sizes with their causes and the open points; tasks the red hash", () => {
+    const plan = read("specs/019-werkstatt-2-3/nachlese-6/plan.md");
+    for (const heading of [
+      "# Spec 019 ④ – Nachlese 6",
+      "### Zusammenfassung",
+      "### Entwurfsentscheidungen",
+      "### Abweichungen von der Spec",
+      "### Befunde / Mankoj",
+      "### Offen (für den Maintainer)",
+      "### Größen",
+    ]) {
+      expect(plan, heading).toContain(heading);
+    }
+    for (const term of [
+      "N6-1",
+      "N6-2",
+      "N6-3",
+      "N6-4",
+      "kind",
+      "--aspekto",
+      "vorher",
+      "nachher",
+      "Landkarten",
+      "element.cjs",
+    ]) {
+      expect(plan, term).toContain(term);
+    }
+    expect(plan).not.toContain("ciferecigo");
+    const tasks = read("specs/019-werkstatt-2-3/nachlese-6/tasks.md");
+    expect(tasks).toContain("**T1961");
+    expect(tasks).toContain("### Messungen");
+    expect(tasks).toMatch(/rot `[0-9a-f]{7}`/);
+    expect(read("README.md")).toContain("check:alirebleco --aspekto");
+  });
+});
+
 // Nachlese 5 (Briefing 2026-10-19): specs/018-nachlese-5 carries the briefing unchanged, a plan
 // and tasks with ① (the split of plugin.test.ts, the flaky tests) and ② (the findings).
 describe("Nachlese 5 documentation (specs/018-nachlese-5)", () => {
@@ -2222,44 +2264,3 @@ describe("Nachlese 5 documentation (specs/018-nachlese-5)", () => {
   });
 });
 
-// Nachlese 6 (Spec 019 ④, Briefing 2026-10-20): a branch of its own from main; plan and tasks in
-// specs/019-werkstatt-2-3/nachlese-6 (beside the plan of ① to ③, which are stacked). The plan
-// carries the four items N6-1 to N6-4, the sizes before and after with every cause named, the
-// decisions, deviations, findings and open points; tasks start at T1961 with the red hash; the
-// README names check:alirebleco --aspekto.
-describe("Nachlese 6 documentation (specs/019-werkstatt-2-3/nachlese-6)", () => {
-  it("plan carries N6-1 to N6-4, the sizes with their causes and the open points; tasks the red hash", () => {
-    const plan = read("specs/019-werkstatt-2-3/nachlese-6/plan.md");
-    for (const heading of [
-      "# Spec 019 ④ – Nachlese 6",
-      "### Zusammenfassung",
-      "### Entwurfsentscheidungen",
-      "### Abweichungen von der Spec",
-      "### Befunde / Mankoj",
-      "### Offen (für den Maintainer)",
-      "### Größen",
-    ]) {
-      expect(plan, heading).toContain(heading);
-    }
-    for (const term of [
-      "N6-1",
-      "N6-2",
-      "N6-3",
-      "N6-4",
-      "kind",
-      "--aspekto",
-      "vorher",
-      "nachher",
-      "Landkarten",
-      "element.cjs",
-    ]) {
-      expect(plan, term).toContain(term);
-    }
-    expect(plan).not.toContain("ciferecigo");
-    const tasks = read("specs/019-werkstatt-2-3/nachlese-6/tasks.md");
-    expect(tasks).toContain("**T1961");
-    expect(tasks).toContain("### Messungen");
-    expect(tasks).toMatch(/rot `[0-9a-f]{7}`/);
-    expect(read("README.md")).toContain("check:alirebleco --aspekto");
-  });
-});
