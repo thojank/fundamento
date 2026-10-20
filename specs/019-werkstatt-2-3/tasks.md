@@ -35,7 +35,28 @@
 
 ## ② Werkstatt Stufe 2
 
-Folgt in PR ②.
+**Branch:** `261020-spec-019-werkstatt-116ba2` (gestapelt auf ①).
+
+### A – Rot zuerst
+- [x] **T1921 Tests** Agordilo `regler.test.ts` (zwölf Regler mit Gruppe, Label, Standard; Rücksetzen; Diff und Satz der Vorschlags-Leiste); Browser `vitrino.check.ts` (Gruppen als `fm-faldilo`, Regler mit Label, Wert, Rücksetzen; live an jedem Ero und auf der Entwurfsseite; Rücksetzen; Verlauf mit Knöpfen und Strg+Z; Vorschlags-Leiste; Schrift-Hinweis; G5 ohne Long Task über 50 ms im Worker; Browser = CLI für provo-kompakta; M5 statt M3); Doku-Test ②. Rot in `1e72db4` (Agordilo 5; im Browser M5 rot, die Suite bricht nach dem ersten Fehler ab).
+
+### B – Grün
+- [x] **T1922 Reglerliste** `regler.ts`, `GestaltBasis.types` (D-05, D-09).
+- [x] **T1923 Panel** Gruppen, Regler, Rücksetzen, Icon-Gewicht, Schriftfelder, Verlauf, Vorschlags-Leiste (D-06–D-08).
+- [x] **T1924 Live** Werte der Stufe 2 und Glyphen als Custom Properties am Root und auf der Entwurfsseite (D-05).
+- [x] **T1925 G5** zwei klassische Worker aus dem Bündel, eine Anfrage unterwegs, ein Frame je Änderung, Schema beim Laden, Bericht schlank, `content-visibility` (D-01–D-04).
+
+### C – Abschluss
+- [x] **T1926 Doku** plan ② (D-01–D-09, Abweichungen 1–5, B-1–B-5, O-1–O-4, M5), tasks ②, README.
+- [ ] **T1927 CI** grün.
+
+### Messungen
+
+| Was | Wert |
+|---|---|
+| Commits ② | rot `1e72db4`; grün und CI in den Zeilen danach |
+| Tests lokal | Agordilo 79, Projekcioj 730; `check:vitrino` 51 grün (davon 9 neu für Stufe 2); `pnpm lint` grün |
+| M5 Mac | Ableitung 57,1 / 71,6 ms, Prüfung 1 042,0 / 1 092,3 ms (Median / p95), längste Blockade 0 ms |
 
 ## ③ Prompt (Stufe 3)
 

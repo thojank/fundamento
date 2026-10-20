@@ -54,7 +54,6 @@ describe("reglerOf (G7)", () => {
     expect(reglerValue({ ...BASE, neutral: { toenung: 0.4 } }, of("neutral.toenung"))).toBe(0.4);
     expect(reglerValue(BASE, of("regler.saettigung"))).toBe(1);
   });
-
 });
 
 describe("withRegler (W-8: back to the standard)", () => {

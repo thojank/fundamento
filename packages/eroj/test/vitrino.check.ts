@@ -959,12 +959,13 @@ test.describe("the Werkstatt (Spec 016 ②)", () => {
     expect(await draft.locator("fm-butono").count()).toBe(
       await reference.locator("fm-butono").count(),
     );
-    const fill = (side: typeof draft) =>
-      side
-        .locator("fm-butono[emphasis='high']")
-        .first()
-        .locator("button")
-        .evaluate((element) => getComputedStyle(element).backgroundColor);
+    // Spec 019 ② (G5): off-screen clones skip rendering (content-visibility); a person looks at
+    // the sides, so does the test.
+    const fill = async (side: typeof draft) => {
+      const button = side.locator("fm-butono[emphasis='high']").first().locator("button");
+      await button.scrollIntoViewIfNeeded();
+      return button.evaluate((element) => getComputedStyle(element).backgroundColor);
+    };
     expect(await fill(draft)).not.toBe(await fill(reference));
     const komunaFill = await fill(reference);
     await page.locator("#fm-werkstatt-referenco").locator("select").selectOption("ekzemplo");
@@ -1064,6 +1065,14 @@ test.describe("the Werkstatt (Spec 016 ②)", () => {
       );
       await expect(page.locator("#fm-vitrino-werkstatt")).toBeVisible();
       await checkedAtLeast(page, 1);
+      // Spec 019 ② (G5): the Werkstatt skips the rendering of what is off screen
+      // (content-visibility); axe judges what a person sees, so everything is rendered for it.
+      await page.addStyleTag({ content: "* { content-visibility: visible !important; }" });
+      // What was skipped renders now; its colours may still be in transition (motion tokens).
+      await page.evaluate(async () => {
+        await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+        await Promise.all(document.getAnimations().map((animation) => animation.finished));
+      });
       expect(await axeViolations(page)).toEqual([]);
     });
   }
