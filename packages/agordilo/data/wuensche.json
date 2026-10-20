@@ -1,0 +1,240 @@
+{
+  "description": "The wish vocabulary of propose_agordo (Spec 019 ③, G6, E3): each word of a wish moves sliders of the Agordo by a step, with a kialo. Data, not code; no language model. Vague words such as 'moderner' are deliberately missing: a wish the vocabulary does not know moves nothing, and the answer asks back (ask-human). A step on leitfarbe.ton turns the hue of the lead colour by that many degrees towards the warm (60°, orange) or the cool (240°, blue) pole.",
+  "pole": {
+    "warm": 60,
+    "kuehl": 240
+  },
+  "wuensche": [
+    {
+      "wort": "ruhiger",
+      "de": [
+        "ruhiger",
+        "ruhig"
+      ],
+      "en": [
+        "calmer",
+        "calm",
+        "quieter"
+      ],
+      "bewegungen": [
+        {
+          "regler": "regler.saettigung",
+          "schritt": -0.2
+        },
+        {
+          "regler": "regler.kontrast",
+          "schritt": -0.1
+        },
+        {
+          "regler": "form.schatten",
+          "schritt": -0.3
+        }
+      ],
+      "kialo": "ruhiger: weniger Sättigung, weniger Kontrastspreizung, weichere Schatten, weil eine ruhige Marke mit gedämpften Farben, kleineren Helligkeitssprüngen und leisen Ebenen weniger um Aufmerksamkeit ringt.",
+      "gegenteil": "kräftiger"
+    },
+    {
+      "wort": "kräftiger",
+      "de": [
+        "kräftiger",
+        "kräftig",
+        "stärker"
+      ],
+      "en": [
+        "bolder",
+        "bold",
+        "stronger"
+      ],
+      "bewegungen": [
+        {
+          "regler": "regler.saettigung",
+          "schritt": 0.2
+        },
+        {
+          "regler": "regler.kontrast",
+          "schritt": 0.1
+        },
+        {
+          "regler": "schrift.gewicht",
+          "schritt": 0.5
+        }
+      ],
+      "kialo": "kräftiger: mehr Sättigung, mehr Kontrastspreizung, ein Schnitt schwerer, weil eine kräftige Marke satte Farben, deutliche Helligkeitssprünge und Gewicht in der Schrift zeigt.",
+      "gegenteil": "ruhiger"
+    },
+    {
+      "wort": "wärmer",
+      "de": [
+        "wärmer",
+        "warm"
+      ],
+      "en": [
+        "warmer",
+        "warm"
+      ],
+      "bewegungen": [
+        {
+          "regler": "leitfarbe.ton",
+          "schritt": 15
+        },
+        {
+          "regler": "neutral.toenung",
+          "schritt": 0.1
+        }
+      ],
+      "kialo": "wärmer: der Farbton der Leitfarbe 15° näher an Orange, die Neutralen etwas stärker getönt, weil Wärme im Farbton liegt (Rot bis Gelb) und getönte Flächen sie weitertragen.",
+      "gegenteil": "kühler"
+    },
+    {
+      "wort": "kühler",
+      "de": [
+        "kühler",
+        "kühl"
+      ],
+      "en": [
+        "cooler",
+        "cool"
+      ],
+      "bewegungen": [
+        {
+          "regler": "leitfarbe.ton",
+          "schritt": -15
+        },
+        {
+          "regler": "neutral.toenung",
+          "schritt": 0.1
+        }
+      ],
+      "kialo": "kühler: der Farbton der Leitfarbe 15° näher an Blau, die Neutralen etwas stärker getönt, weil Kühle im Farbton liegt (Cyan bis Blau) und getönte Flächen sie weitertragen.",
+      "gegenteil": "wärmer"
+    },
+    {
+      "wort": "runder",
+      "de": [
+        "runder",
+        "rund"
+      ],
+      "en": [
+        "rounder",
+        "round"
+      ],
+      "bewegungen": [
+        {
+          "regler": "form.radius",
+          "schritt": 0.4
+        }
+      ],
+      "kialo": "runder: größere Radien, weil weiche Ecken freundlicher und weniger technisch wirken.",
+      "gegenteil": "eckiger"
+    },
+    {
+      "wort": "eckiger",
+      "de": [
+        "eckiger",
+        "eckig",
+        "kantiger"
+      ],
+      "en": [
+        "sharper",
+        "sharp",
+        "squarer"
+      ],
+      "bewegungen": [
+        {
+          "regler": "form.radius",
+          "schritt": -0.4
+        }
+      ],
+      "kialo": "eckiger: kleinere Radien, weil scharfe Ecken genauer und sachlicher wirken.",
+      "gegenteil": "runder"
+    },
+    {
+      "wort": "luftiger",
+      "de": [
+        "luftiger",
+        "luftig",
+        "großzügiger"
+      ],
+      "en": [
+        "airier",
+        "airy",
+        "roomier"
+      ],
+      "bewegungen": [
+        {
+          "regler": "raum.abstand",
+          "schritt": 0.15
+        }
+      ],
+      "kialo": "luftiger: mehr Abstand, weil Raum zwischen den Elementen Ruhe und Übersicht gibt.",
+      "gegenteil": "kompakter"
+    },
+    {
+      "wort": "kompakter",
+      "de": [
+        "kompakter",
+        "kompakt",
+        "dichter",
+        "enger"
+      ],
+      "en": [
+        "denser",
+        "dense",
+        "compact",
+        "tighter"
+      ],
+      "bewegungen": [
+        {
+          "regler": "raum.abstand",
+          "schritt": -0.15
+        },
+        {
+          "regler": "raum.hoehe",
+          "schritt": -0.05
+        }
+      ],
+      "kialo": "kompakter: weniger Abstand und etwas niedrigere Bedienelemente, weil eine dichte Marke mehr Inhalt auf einen Blick zeigt (die Zielgröße von 24 px bleibt).",
+      "gegenteil": "luftiger"
+    },
+    {
+      "wort": "größer",
+      "de": [
+        "größer",
+        "grösser",
+        "groß"
+      ],
+      "en": [
+        "larger",
+        "bigger",
+        "large"
+      ],
+      "bewegungen": [
+        {
+          "regler": "schrift.groesse",
+          "schritt": 0.5
+        }
+      ],
+      "kialo": "größer: die Schrift um eine Stufe größer, weil größere Schrift leichter lesbar ist und mehr Präsenz hat.",
+      "gegenteil": "kleiner"
+    },
+    {
+      "wort": "kleiner",
+      "de": [
+        "kleiner",
+        "klein"
+      ],
+      "en": [
+        "smaller",
+        "small"
+      ],
+      "bewegungen": [
+        {
+          "regler": "schrift.groesse",
+          "schritt": -0.5
+        }
+      ],
+      "kialo": "kleiner: die Schrift um eine Stufe kleiner, weil kleinere Schrift mehr Inhalt fasst (Fließtext unter 14 px ist ein Hinweis).",
+      "gegenteil": "größer"
+    }
+  ]
+}

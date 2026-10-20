@@ -458,6 +458,61 @@ const EXAMPLES: Record<string, { input: unknown; output: unknown; badInput: unkn
     },
     badInput: { agordo: { name: "flava" } },
   },
+  // Spec 019 ③ (G6): a wish in, the moved Agordo, the diff, the report in short and a link out.
+  propose_agordo: {
+    input: { agordo: { name: "provo", leitfarbe: "#6b4fa0" }, wunsch: "ruhiger" },
+    output: {
+      aspekto: "provo",
+      writes: false,
+      wish: {
+        text: "ruhiger",
+        matched: [{ word: "ruhiger", kialo: "ruhiger: weniger Sättigung …" }],
+        unknown: [],
+      },
+      agordo: { name: "provo", leitfarbe: "#6b4fa0", regler: { saettigung: 0.8 } },
+      diff: [{ path: "regler.saettigung", label: "Sättigung", vorher: 1, nachher: 0.8 }],
+      sentence: "Vorgeschlagen: ruhiger (Sättigung 1,0 → 0,8)",
+      kialoj: ["ruhiger: weniger Sättigung …"],
+      atLimit: [],
+      exportable: true,
+      summary: {
+        exportable: true,
+        pairs: { measured: 6408, passed: 6408, failed: 0 },
+        violations: { fixed: 0, adjustable: 0, covered: 0 },
+        hints: 108,
+      },
+      violations: [],
+      link: {
+        fragment: "#aspekto=komuna&modus=werkstatt&agordo=q1Y&vorschlag=q1Y",
+        file: "file:///repo/.fundamento/projekcioj/vitrino/index.html#aspekto=komuna&modus=werkstatt&agordo=q1Y&vorschlag=q1Y",
+      },
+    },
+    badInput: { wunsch: "ruhiger" },
+  },
+  // Spec 019 ③ (G6, W-25, W-26): an Agordo and a path in; written only with confirm.
+  save_agordo: {
+    input: { agordo: { name: "provo", leitfarbe: "#6b4fa0" }, pfad: "marken/provo.json" },
+    output: {
+      writes: false,
+      path: "marken/provo.json",
+      exists: false,
+      agordo: {
+        name: "provo",
+        leitfarbe: "#6b4fa0",
+        historio: [{ datum: "2026-10-20", wunsch: "Hand", diff: [] }],
+      },
+      entry: { datum: "2026-10-20", wunsch: "Hand", diff: [] },
+      text: "{}\n",
+      exportable: true,
+      summary: {
+        exportable: true,
+        pairs: { measured: 6408, passed: 6408, failed: 0 },
+        violations: { fixed: 0, adjustable: 0, covered: 0 },
+        hints: 108,
+      },
+    },
+    badInput: { agordo: { name: "provo", leitfarbe: "#6b4fa0" }, pfad: "", confirm: "ja" },
+  },
 };
 
 describe("tool schemas (contracts/mcp-tools.md)", () => {
@@ -482,6 +537,8 @@ describe("tool schemas (contracts/mcp-tools.md)", () => {
       "suggest_ero",
       "check_usage",
       "preview_agordo",
+      "propose_agordo",
+      "save_agordo",
     ]);
   });
 

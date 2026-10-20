@@ -100,6 +100,38 @@ describe("readAgordo with the fields of stage 2 (Spec 019 ①, G2)", () => {
   });
 });
 
+describe("readAgordo with historio (Spec 019 ③, W-26)", () => {
+  it("reads the history: date, wish or Hand, the diff of the sliders", () => {
+    const value = {
+      name: "provo",
+      leitfarbe: "#1d4ed8",
+      historio: [
+        {
+          datum: "2026-10-20",
+          wunsch: "ruhiger",
+          diff: [{ regler: "regler.saettigung", vorher: 1, nachher: 0.8 }],
+        },
+        {
+          datum: "2026-10-21",
+          wunsch: "Hand",
+          diff: [{ regler: "ikono.gewicht", vorher: "regular", nachher: "bold" }],
+        },
+      ],
+    };
+    const { agordo, issues } = readAgordo(value, FILE);
+    expect(issues).toEqual([]);
+    expect(agordo).toEqual(value);
+  });
+
+  it("refuses an entry without date at its path", () => {
+    const { issues } = readAgordo(
+      { name: "provo", leitfarbe: "#1d4ed8", historio: [{ wunsch: "Hand", diff: [] }] },
+      FILE,
+    );
+    expect(issues.map((issue) => issue.path)).toContain(`${FILE}#/historio/0/datum`);
+  });
+});
+
 describe("parseAgordoColor", () => {
   it("reads hex in three and six digits and oklch() with L as number or percentage", () => {
     expect(parseAgordoColor("#ffffff")?.l).toBeCloseTo(1, 4);
