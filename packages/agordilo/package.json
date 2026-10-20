@@ -1,6 +1,6 @@
 {
   "name": "@fundamento/agordilo",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Fundamento Agordilo: derives a complete, checked Aspekto from an Agordo (a lead colour, optional status colours, three sliders) in OKLCH with contrast targets calibrated on komuna (Spec 016).",
   "license": "MIT",
   "type": "module",

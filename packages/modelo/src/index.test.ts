@@ -20,6 +20,6 @@ describe("@fundamento/modelo public entry", () => {
   it("locates @fundamento/vortaro through its exported package.json", async () => {
     const url = import.meta.resolve("@fundamento/vortaro/package.json");
     const manifest: unknown = JSON.parse(await readFile(fileURLToPath(url), "utf8"));
-    expect(manifest).toMatchObject({ name: "@fundamento/vortaro", version: "0.1.0" });
+    expect(manifest).toMatchObject({ name: "@fundamento/vortaro", version: "0.1.1" });
   });
 });

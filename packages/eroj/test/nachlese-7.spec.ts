@@ -44,7 +44,10 @@ test.describe("Nachlese 7 ① (0.1.1)", () => {
     );
     const message = page.locator("#d").locator('[part="message"]');
     await expect(message).toBeVisible();
-    await expect(message).toContainText("Der Standard gilt danach nicht mehr im Projekt.");
+    // The paragraph holds a slot: the words are the slotted span's, seen through the paragraph.
+    const words = page.locator('#d [slot="message"]');
+    await expect(words).toBeVisible();
+    await expect(words).toHaveText("Der Standard gilt danach nicht mehr im Projekt.");
     const described = await page.locator("#d").evaluate((element) => {
       const dialog = element.shadowRoot?.querySelector("dialog");
       const id = dialog?.getAttribute("aria-describedby") ?? "";
@@ -154,5 +157,21 @@ test.describe("Nachlese 7 ① (0.1.1)", () => {
     );
     await expect(page.locator("#t caption")).toHaveText("Standards des Projekts");
     await expect(page.getByRole("table", { name: "Standards des Projekts" })).toBeVisible();
+  });
+  test("A-7: the guideline's way to remove a dismissed avizo keeps the element's focus move", async ({
+    page,
+  }) => {
+    await serve(
+      page,
+      out,
+      '<fm-butono id="vor">Vorher</fm-butono><fm-avizo id="a" dismissible>Gespeichert.</fm-avizo><fm-butono id="nach">Weiter</fm-butono>',
+    );
+    const text = readFileSync(join(GUIDELINES, "avizo.md"), "utf8");
+    const snippet = /```js\n([\s\S]*?)\n```/.exec(text.slice(text.indexOf("## Dismiss")))?.[1];
+    expect(snippet).toBeDefined();
+    await page.evaluate((code) => new Function(code)(), snippet ?? "");
+    await page.locator("#a").locator('[part="dismiss"]').click();
+    await expect(page.locator("#a")).toHaveCount(0);
+    await expect(page.locator("#nach")).toBeFocused();
   });
 });

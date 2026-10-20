@@ -131,7 +131,7 @@ describe("the S6 dialog from dist/modelo.json alone (AK-06)", () => {
   const description = describeModelo(modeloJson);
 
   it("answers 'what is here?' with computed facts", () => {
-    expect(description.version).toBe("0.1.0");
+    expect(description.version).toBe("0.1.1");
     expect(description.dimensioj).toEqual(modeloJson.dimensioj.map((dimensio) => dimensio.name));
     expect(description.dimensioj).toHaveLength(6);
     expect(description.aspektoj).toEqual(["komuna"]);
@@ -148,7 +148,7 @@ describe("the S6 dialog from dist/modelo.json alone (AK-06)", () => {
     );
     // Counts change while Spec 001 fills the Vortaro; the shape of the sentence does not.
     expect(description.sentence).toMatch(
-      /^Fundamento v0\.1\.0: six Dimensioj \(aspekto, viewport, density, color-scheme, contrast, motion\), one Aspekto \(`komuna`: reference, MIT, Geist\), \d+ tokens in \w+ types \(.+\), \w+ rules with reasons \(\w+ automatic\), \w+ Jugxoj, thirty-two Eroj \(`alsxutilo`, `apartigilo`, `atributlisto`, `avataro`, `avizo`, `butono`, `dialogo`, `elektilo`, `elekto`, `faldilo`, `ikono`, `insigno`, `kampo`, `karto`, `kompletigilo`, `konsileto`, `langetaro`, `ligilo`, `markobutono`, `menuo`, `mezurilo`, `navigado`, `pagxigilo`, `plenstato`, `saltligilo`, `spuro`, `sxaltilo`, `sxvebilo`, `tabelo`, `tekstareo`, `teksto`, `titolo`\)\. Ask explain why a value is what it is\.$/,
+      /^Fundamento v0\.1\.1: six Dimensioj \(aspekto, viewport, density, color-scheme, contrast, motion\), one Aspekto \(`komuna`: reference, MIT, Geist\), \d+ tokens in \w+ types \(.+\), \w+ rules with reasons \(\w+ automatic\), \w+ Jugxoj, thirty-two Eroj \(`alsxutilo`, `apartigilo`, `atributlisto`, `avataro`, `avizo`, `butono`, `dialogo`, `elektilo`, `elekto`, `faldilo`, `ikono`, `insigno`, `kampo`, `karto`, `kompletigilo`, `konsileto`, `langetaro`, `ligilo`, `markobutono`, `menuo`, `mezurilo`, `navigado`, `pagxigilo`, `plenstato`, `saltligilo`, `spuro`, `sxaltilo`, `sxvebilo`, `tabelo`, `tekstareo`, `teksto`, `titolo`\)\. Ask explain why a value is what it is\.$/,
     );
   });
 });

@@ -25,7 +25,7 @@
         "name": "dismissible",
         "kind": "boolean",
         "default": false,
-        "description": "Shows a close button (a butono with emphasis low) named by a11y.texts.dismissible; closing hides the notice and says dismiss."
+        "description": "Shows a close button (a butono with emphasis low) named by a11y.texts.dismissible; closing hides the notice and says dismiss. The element hides itself and stays in the document; the application removes it on dismiss if it wants."
       }
     ],
     "states": [

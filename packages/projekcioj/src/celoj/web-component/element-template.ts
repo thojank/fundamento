@@ -1366,6 +1366,12 @@ ${
       area.toggleAttribute("required", reason === "required");
       area.toggleAttribute("hidden", reason === "none");
     }
+    // Nachlese 7 ① A-1: the message shows while its slot is filled, and only then describes the
+    // dialog (aria-describedby points at visible text, never at an empty paragraph).
+    const message = this.shadowRoot?.querySelector('[part="message"]');
+    if (message instanceof HTMLElement) message.hidden = !this.#filled("message");
+    if (this.#filled("message")) dialog.setAttribute("aria-describedby", "message");
+    else dialog.removeAttribute("aria-describedby");
     const open = this.propValue("open") === true;
     if (open && !dialog.open) {
       dialog.showModal();
@@ -1848,21 +1854,26 @@ ${
   #decorateTable(table: HTMLElement): void {
     // The caption from the default slot (Spec 011 ④, D-09): written into the table, where the
     // platform names it; hidden from sight with caption-hidden, never removed (G4).
+    // A native caption of the table counts while the slot is empty (Nachlese 7 ① A-6): only the
+    // caption the element wrote itself (data-fm-caption) follows an emptied slot.
     const captionText = this.#slotText("");
     let caption = table.querySelector(":scope > caption");
     if (caption === null && captionText !== "") {
       caption = document.createElement("caption");
+      caption.setAttribute("data-fm-caption", "");
       table.prepend(caption);
     }
     if (caption instanceof HTMLElement) {
-      if (caption.textContent !== captionText) caption.textContent = captionText;
+      const written = captionText !== "" || caption.hasAttribute("data-fm-caption");
+      if (written && caption.textContent !== captionText) caption.textContent = captionText;
       const hidden = HAS_PROP.has("caption-hidden") && this.propValue("caption-hidden") === true;
       if (caption.classList.contains("fm-hidden") !== hidden) caption.classList.toggle("fm-hidden", hidden);
     }
+    const tableName = captionText !== "" ? captionText : (caption?.textContent?.trim() ?? "");
     const region = this.shadowRoot?.querySelector('[part="region"]');
-    if (region instanceof HTMLElement && region.getAttribute("aria-label") !== (captionText || null)) {
-      if (captionText === "") region.removeAttribute("aria-label");
-      else region.setAttribute("aria-label", captionText);
+    if (region instanceof HTMLElement && region.getAttribute("aria-label") !== (tableName || null)) {
+      if (tableName === "") region.removeAttribute("aria-label");
+      else region.setAttribute("aria-label", tableName);
     }
     // The sort buttons (Spec 011 ④, D-09, G4): every header that carries data-sort holds a button
     // with its text and the indicator; aria-sort stands on the sorted column alone.
@@ -2858,15 +2869,22 @@ ${isStacking ? "    this.#autoLayout();\n" : ""}`
     }
 `
     : "";
+  // What an Ero writes on its own host or binds to its trigger happens on connecting or in the
+  // render, never in the constructor (Nachlese 7 ① A-2): a constructor that sets an attribute on
+  // its host makes document.createElement fail — the platform reports the error and returns an
+  // unknown element. A popover or a menu wires its trigger on connecting (an anchor names the id
+  // of the host); the tooltip writes its layer in the render.
+  const connectHost =
+    isPopover || isMenu
+      ? `    this.#overlayBindTrigger();
+`
+      : "";
   // A tooltip (Spec 014 ④, plan ④ D-05, G5): shown while its trigger (for) is hovered or focused,
   // after the delay the motion token gives; hidden when the pointer leaves both, on blur and on
   // Escape; it describes the trigger (aria-describedby) unless its words are the trigger's own
   // name — then nothing is heard twice (an icon-only butono with its label).
   const tooltipInit = isTooltip
-    ? `    // The host is the layer (D-05, B-7): a popover of the platform with the role tooltip.
-    this.setAttribute("popover", "manual");
-    if (!this.hasAttribute("role")) this.setAttribute("role", "tooltip");
-    this.addEventListener("mouseenter", () => this.#overlayCancelHide());
+    ? `    this.addEventListener("mouseenter", () => this.#overlayCancelHide());
     this.addEventListener("mouseleave", () => this.#overlayHideSoon());
     document.addEventListener("keydown", (event) => {
       if (event.key === "Escape" && this.matches(":popover-open")) this.#overlayHide();
@@ -2874,7 +2892,10 @@ ${isStacking ? "    this.#autoLayout();\n" : ""}`
 `
     : "";
   const tooltipRender = isTooltip
-    ? `    this.#tooltipBind();
+    ? `    // The host is the layer (D-05, B-7): a popover of the platform with the role tooltip.
+    if (this.getAttribute("popover") !== "manual") this.setAttribute("popover", "manual");
+    if (!this.hasAttribute("role")) this.setAttribute("role", "tooltip");
+    this.#tooltipBind();
 `
     : "";
   // A popover (Spec 014 ④, plan ④ D-05, G5): the slotted trigger toggles it and says aria-expanded;
@@ -2909,7 +2930,6 @@ ${isStacking ? "    this.#autoLayout();\n" : ""}`
         !(trigger !== undefined && trigger.contains(next));
     });
     root.querySelector('slot[name="trigger"]')?.addEventListener("slotchange", () => this.#overlayBindTrigger());
-    this.#overlayBindTrigger();
 `
     : "";
   const popoverRender = isPopover
@@ -2970,7 +2990,6 @@ ${isStacking ? "    this.#autoLayout();\n" : ""}`
       if (row instanceof HTMLElement) this.#menuChoose(row);
     });
     root.querySelector('slot[name="trigger"]')?.addEventListener("slotchange", () => this.#overlayBindTrigger());
-    this.#overlayBindTrigger();
 `
     : "";
   const menuRender = isMenu
@@ -3555,7 +3574,7 @@ ${
 }${invalidReport}${inputEnter}  }
 
   connectedCallback(): void {
-${isGroup || isTabs || isMenu ? "    this.#assign();\n" : ""}    this.#render();
+${connectHost}${isGroup || isTabs || isMenu ? "    this.#assign();\n" : ""}    this.#render();
   }
 
   attributeChangedCallback(): void {

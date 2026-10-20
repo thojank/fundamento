@@ -756,7 +756,9 @@ const dialogStructure: string = [
   // surface keeps the width of its size.
   ':where([part="heading"]) { margin: 0; overflow-wrap: anywhere; }',
   ':where([part="message"]) { margin: 0; overflow-wrap: anywhere; }',
-  ':where([part="message"]:not(:has(slot:not(:empty)))) { display: none; }',
+  // Nachlese 7 ① A-1: the render hides the message while its slot is empty (a slot element is
+  // always :empty in the shadow tree; the rule before hid every message).
+  ':where([part="message"][hidden]) { display: none; }',
   ':where([part="content"]) { display: flex; flex-direction: column; }',
   ':where([part="actions"]) { display: flex; justify-content: flex-end; flex-wrap: wrap; }',
   ':where([part="control"][data-reason="none"]) [part="reason"] { display: none; }',
