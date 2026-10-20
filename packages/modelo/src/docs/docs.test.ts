@@ -2670,3 +2670,42 @@ describe("Spec 020 ② documentation (specs/020-sxablonoj-1)", () => {
     expect(own).toMatch(/rot `[0-9a-f]{7}`/);
   });
 });
+
+describe("Spec 020 ③ documentation (specs/020-sxablonoj-1)", () => {
+  it("plan ③ carries the content, the security test and the guide for the acceptance with full paths; tasks ③ start at T2081", () => {
+    const plan = read("specs/020-sxablonoj-1/plan.md");
+    const tasks = read("specs/020-sxablonoj-1/tasks.md");
+    const third = plan.slice(plan.indexOf("## ③ Inhalt"));
+    for (const heading of [
+      "### Zusammenfassung",
+      "### Entwurfsentscheidungen",
+      "### Arkitekturo-Abdeckung",
+      "### Gekippte Dialoge",
+      "### Abweichungen",
+      "### Befunde / Mankoj",
+      "### Offen (für den Maintainer)",
+      "### Messanleitung",
+    ]) {
+      expect(third, heading).toContain(heading);
+    }
+    for (const term of [
+      "kodbloko",
+      "markdovido",
+      "redaktilo",
+      "textContent",
+      "javascript:",
+      "rich-text",
+      "file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/",
+      "Version",
+      "neu importieren",
+      "wiederherstellen",
+    ])
+      expect(third, term).toContain(term);
+    for (const line of third.split("\n").filter((entry) => entry.includes("vitrino/index.html#")))
+      expect(line, line).toMatch(/file:\/\/\/Users\//);
+    expect(third).not.toContain("ciferecigo");
+    const own = tasks.slice(tasks.indexOf("## ③ Inhalt"));
+    expect(own).toContain("**T2081");
+    expect(own).toMatch(/rot `[0-9a-f]{7}`/);
+  });
+});
