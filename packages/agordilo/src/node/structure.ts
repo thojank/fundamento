@@ -2,7 +2,7 @@
 // disk, and the calibration file. Everything else in the package is pure.
 
 import { createHash } from "node:crypto";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import {
   defaultModeloSource,
@@ -13,10 +13,34 @@ import {
   withAspektoPackages,
 } from "@fundamento/modelo";
 import type { Calibration } from "../calibration.js";
-import { fingerprintDocuments, type Structure } from "../structure.js";
+import { fingerprintDocuments, type IkonoGewichte, type Structure } from "../structure.js";
 
 /** data/calibration.json of this package; valid from both `src/node/` and `dist/node/`. */
 export const CALIBRATION_URL = new URL("../../data/calibration.json", import.meta.url);
+
+/** data/ikonoj of this package: the Ikonaro in further Phosphor weights (Spec 019, E6). */
+export const IKONOJ_URL = new URL("../../data/ikonoj/", import.meta.url);
+
+/** The glyphs of every weight in data/ikonoj with their provenance (Spec 019, G2, E6). */
+export function loadIkonoGewichte(): IkonoGewichte | undefined {
+  const provenanceUrl = new URL("ikonoj.json", IKONOJ_URL);
+  if (!existsSync(provenanceUrl)) return undefined;
+  const provenance = JSON.parse(readFileSync(provenanceUrl, "utf8")) as Record<string, unknown>;
+  const weights = Array.isArray(provenance.gewichte) ? provenance.gewichte.map(String) : [];
+  const glyphs: Record<string, Record<string, string>> = {};
+  for (const weight of weights) {
+    const dir = new URL(`${weight}/`, IKONOJ_URL);
+    if (!existsSync(dir)) continue;
+    const own: Record<string, string> = {};
+    for (const file of readdirSync(dir)
+      .filter((entry) => entry.endsWith(".svg"))
+      .sort()) {
+      own[file.slice(0, -".svg".length)] = readFileSync(new URL(file, dir), "utf8");
+    }
+    glyphs[weight] = own;
+  }
+  return { provenance, glyphs };
+}
 
 function ikonojLicense(): string | undefined {
   const path = join(referenceAspektoPackageDir(), "ikonoj", "LICENSE");
@@ -40,10 +64,13 @@ export function fingerprintOf(files: ModeloFiles): string {
 
 function structureOf(files: ModeloFiles): Structure {
   const license = ikonojLicense();
-  const fingerprint = fingerprintOf(files);
-  return license === undefined
-    ? { files, fingerprint }
-    : { files, fingerprint, ikonojLicense: license };
+  const weights = loadIkonoGewichte();
+  return {
+    files,
+    fingerprint: fingerprintOf(files),
+    ...(license === undefined ? {} : { ikonojLicense: license }),
+    ...(weights === undefined ? {} : { ikonoGewichte: weights }),
+  };
 }
 
 /** The structure of the repository: the core Vortaro and data with the reference Aspekto. */

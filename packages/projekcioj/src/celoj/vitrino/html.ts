@@ -3,7 +3,7 @@
 // from the build. Every colour stands in a table row next to its token name and its measurement,
 // so colour is never the only information (WCAG 1.4.1).
 
-import type { Calibration } from "@fundamento/agordilo";
+import type { Calibration, IkonoGewichte } from "@fundamento/agordilo";
 import type { ModeloFiles } from "@fundamento/modelo";
 import { VITRINO_SURFACE, type VitrinoDatumoj } from "./datumoj.js";
 import { vitrinoSkripto } from "./skripto.js";
@@ -13,7 +13,7 @@ import { vitrinoSkripto } from "./skripto.js";
  * and check in the browser. Every path in it is relative to the Modelo root; no machine path.
  */
 export interface WerkstattDatumoj {
-  structure: { files: ModeloFiles; fingerprint: string };
+  structure: { files: ModeloFiles; fingerprint: string; ikonoGewichte?: IkonoGewichte };
   calibration: Calibration;
   schemas: { modelo: Record<string, unknown>; config: Record<string, unknown> };
   /** The reference Aspekto the draft is derived over (komuna). */

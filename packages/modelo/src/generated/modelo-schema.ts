@@ -1601,7 +1601,7 @@ export interface AspektoAgordilo {
   agordo: Agordo;
 }
 /**
- * The recipe of a brand for the Agordilo (Spec 016, G4): a lead colour, optional status colours, the tint of the neutrals, three sliders and font families. The same Agordo derives the same Aspekto, byte for byte. owner and license fill aspekto.json; aspiroj are the brand's own goals, checked only when named; jugxoj record deviations from adjustable rules.
+ * The recipe of a brand for the Agordilo (Spec 016, G4; Spec 019, G2): a lead colour, optional status colours, the tint of the neutrals, three sliders and font families, and the sliders of form, space, type and icon weight (stage 2), each on the structure of the Vortaro. The same Agordo derives the same Aspekto, byte for byte. owner and license fill aspekto.json; aspiroj are the brand's own goals, checked only when named; jugxoj record deviations from adjustable rules.
  *
  * This interface was referenced by `ModeloJson`'s JSON-Schema
  * via the `definition` "Agordo".
@@ -1629,6 +1629,62 @@ export interface Agordo {
     display?: Fonto;
     body?: Fonto;
     code?: Fonto;
+  };
+  /**
+   * Form (Spec 019, G2): factors on the structure of the Vortaro, 1 = the structure. radius multiplies radius.small … xlarge (none and full stay), rahmen border.width.* (never below 1 px, the focus ring keeps the reference's width), schatten offset and blur of elevation.shadow.* and the opacity of color.shadow.*.
+   */
+  form?: {
+    /**
+     * Factor on radius.small, medium, large and xlarge; 1 = the structure.
+     */
+    radius?: number;
+    /**
+     * Factor on border.width.*; 1 = the structure.
+     */
+    rahmen?: number;
+    /**
+     * Factor on the offsets and blur of elevation.shadow.* and the opacity of color.shadow.*; 1 = the structure, 0 = no shadow.
+     */
+    schatten?: number;
+  };
+  /**
+   * Space (Spec 019, G2): abstand multiplies spacing.scale.* (the named spacing.* and the density modes follow), hoehe the steps of size.scale.* the controls use (size.control.*), never below size.target.min.
+   */
+  raum?: {
+    /**
+     * Factor on spacing.scale.*; 1 = the structure.
+     */
+    abstand?: number;
+    /**
+     * Factor on the heights of size.control.*; 1 = the structure.
+     */
+    hoehe?: number;
+  };
+  /**
+   * Type (Spec 019, G2): groesse shifts every font.size.* by up to two steps of the scale, skala sets the ratio of neighbouring steps of font.size.scale (the structure's median ratio is the standard), gewicht moves font.weight.* by up to two cuts. The families are schriften (stage 1).
+   */
+  schrift?: {
+    /**
+     * −1 … 1: every font size by up to two steps of the scale smaller or larger; 0 = the structure.
+     */
+    groesse?: number;
+    /**
+     * The ratio of neighbouring steps of font.size.scale; the body text keeps its size.
+     */
+    skala?: number;
+    /**
+     * −1 … 1: font.weight.* by up to two cuts lighter or heavier, never outside the lightest and the heaviest weight of the structure; 0 = the structure.
+     */
+    gewicht?: number;
+  };
+  /**
+   * Icons (Spec 019, G2, E6): the Phosphor weight the Aspekto draws the Ikonaro in. A weight is derived only where every name of the Ikonaro has a glyph in it, with its provenance.
+   */
+  ikono?: {
+    /**
+     * A Phosphor weight; regular is the reference's own.
+     */
+    gewicht?: "thin" | "light" | "regular" | "bold" | "fill" | "duotone";
   };
   ziele?: AgordoZieloj;
   aspiroj?: AspektoAspiro[];

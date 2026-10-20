@@ -3413,7 +3413,7 @@
       "additionalProperties": false
     },
     "Agordo": {
-      "description": "The recipe of a brand for the Agordilo (Spec 016, G4): a lead colour, optional status colours, the tint of the neutrals, three sliders and font families. The same Agordo derives the same Aspekto, byte for byte. owner and license fill aspekto.json; aspiroj are the brand's own goals, checked only when named; jugxoj record deviations from adjustable rules.",
+      "description": "The recipe of a brand for the Agordilo (Spec 016, G4; Spec 019, G2): a lead colour, optional status colours, the tint of the neutrals, three sliders and font families, and the sliders of form, space, type and icon weight (stage 2), each on the structure of the Vortaro. The same Agordo derives the same Aspekto, byte for byte. owner and license fill aspekto.json; aspiroj are the brand's own goals, checked only when named; jugxoj record deviations from adjustable rules.",
       "type": "object",
       "properties": {
         "name": {
@@ -3489,6 +3489,87 @@
             },
             "code": {
               "$ref": "#/$defs/Fonto"
+            }
+          },
+          "additionalProperties": false
+        },
+        "form": {
+          "description": "Form (Spec 019, G2): factors on the structure of the Vortaro, 1 = the structure. radius multiplies radius.small … xlarge (none and full stay), rahmen border.width.* (never below 1 px, the focus ring keeps the reference's width), schatten offset and blur of elevation.shadow.* and the opacity of color.shadow.*.",
+          "type": "object",
+          "properties": {
+            "radius": {
+              "description": "Factor on radius.small, medium, large and xlarge; 1 = the structure.",
+              "type": "number",
+              "minimum": 0,
+              "maximum": 2
+            },
+            "rahmen": {
+              "description": "Factor on border.width.*; 1 = the structure.",
+              "type": "number",
+              "minimum": 0.5,
+              "maximum": 2
+            },
+            "schatten": {
+              "description": "Factor on the offsets and blur of elevation.shadow.* and the opacity of color.shadow.*; 1 = the structure, 0 = no shadow.",
+              "type": "number",
+              "minimum": 0,
+              "maximum": 2
+            }
+          },
+          "additionalProperties": false
+        },
+        "raum": {
+          "description": "Space (Spec 019, G2): abstand multiplies spacing.scale.* (the named spacing.* and the density modes follow), hoehe the steps of size.scale.* the controls use (size.control.*), never below size.target.min.",
+          "type": "object",
+          "properties": {
+            "abstand": {
+              "description": "Factor on spacing.scale.*; 1 = the structure.",
+              "type": "number",
+              "minimum": 0.75,
+              "maximum": 1.5
+            },
+            "hoehe": {
+              "description": "Factor on the heights of size.control.*; 1 = the structure.",
+              "type": "number",
+              "minimum": 0.85,
+              "maximum": 1.25
+            }
+          },
+          "additionalProperties": false
+        },
+        "schrift": {
+          "description": "Type (Spec 019, G2): groesse shifts every font.size.* by up to two steps of the scale, skala sets the ratio of neighbouring steps of font.size.scale (the structure's median ratio is the standard), gewicht moves font.weight.* by up to two cuts. The families are schriften (stage 1).",
+          "type": "object",
+          "properties": {
+            "groesse": {
+              "description": "−1 … 1: every font size by up to two steps of the scale smaller or larger; 0 = the structure.",
+              "type": "number",
+              "minimum": -1,
+              "maximum": 1
+            },
+            "skala": {
+              "description": "The ratio of neighbouring steps of font.size.scale; the body text keeps its size.",
+              "type": "number",
+              "minimum": 1.125,
+              "maximum": 1.5
+            },
+            "gewicht": {
+              "description": "−1 … 1: font.weight.* by up to two cuts lighter or heavier, never outside the lightest and the heaviest weight of the structure; 0 = the structure.",
+              "type": "number",
+              "minimum": -1,
+              "maximum": 1
+            }
+          },
+          "additionalProperties": false
+        },
+        "ikono": {
+          "description": "Icons (Spec 019, G2, E6): the Phosphor weight the Aspekto draws the Ikonaro in. A weight is derived only where every name of the Ikonaro has a glyph in it, with its provenance.",
+          "type": "object",
+          "properties": {
+            "gewicht": {
+              "description": "A Phosphor weight; regular is the reference's own.",
+              "type": "string",
+              "enum": ["thin", "light", "regular", "bold", "fill", "duotone"]
             }
           },
           "additionalProperties": false

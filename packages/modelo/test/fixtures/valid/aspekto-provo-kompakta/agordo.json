@@ -1,0 +1,23 @@
+{
+  "name": "provo-kompakta",
+  "owner": "Provo Kompakta (fictitious, test only)",
+  "license": "MIT",
+  "leitfarbe": "#0f6b5c",
+  "neutral": {
+    "toenung": 0.2
+  },
+  "form": {
+    "radius": 0.25,
+    "schatten": 0.5
+  },
+  "raum": {
+    "abstand": 0.8,
+    "hoehe": 0.9
+  },
+  "schrift": {
+    "groesse": -0.5
+  },
+  "ikono": {
+    "gewicht": "light"
+  }
+}

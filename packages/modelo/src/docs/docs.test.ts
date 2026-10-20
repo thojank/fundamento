@@ -2221,3 +2221,70 @@ describe("Nachlese 5 documentation (specs/018-nachlese-5)", () => {
     expect(tasksThird).toMatch(/grün `[0-9a-f]{7}`/);
   });
 });
+
+// Spec 019 ① (Briefing 2026-10-20): specs/019-werkstatt-2-3 carries the spec unchanged, a plan and
+// tasks with the four sections ① to ④ (④ is Nachlese 6, a branch of its own from main); plan ①
+// carries the decisions, the coverage, deviations, findings, the Regulo candidates (hints instead
+// of new Reguloj, E2), open points and the measurement M4; tasks ① start at T1901 with the red
+// hash; the README names the fields of stage 2.
+describe("Spec 019 ① documentation (specs/019-werkstatt-2-3)", () => {
+  const SPEC_019_SHA256 = "15353c7f24f8e681a83be6b2cb9bd0dccebf1bb3c901fd4bcb6e364d37b7333e";
+  const HEADINGS = [
+    "## ① Bibliothek Stufe 2",
+    "## ② Werkstatt Stufe 2",
+    "## ③ Prompt (Stufe 3)",
+    "## ④ Nachlese 6",
+  ];
+
+  it("the spec is the one of 2026-10-20, unchanged; plan and tasks carry ① to ④", () => {
+    const spec = read("specs/019-werkstatt-2-3/spec.md");
+    expect(createHash("sha256").update(spec).digest("hex")).toBe(SPEC_019_SHA256);
+    expect(spec).toMatch(/^# Spec 019 – Werkstatt Stufe 2\+3/);
+    for (const file of ["plan.md", "tasks.md"]) {
+      const text = read(`specs/019-werkstatt-2-3/${file}`);
+      for (const heading of HEADINGS) expect(text, `${file}: ${heading}`).toContain(heading);
+    }
+  });
+
+  it("plan ① carries decisions, coverage, deviations, findings, Regulo candidates, open points and M4; tasks ① the red hash", () => {
+    const section = (text: string) =>
+      text.slice(text.indexOf("## ① Bibliothek Stufe 2"), text.indexOf("## ② Werkstatt Stufe 2"));
+    const plan = section(read("specs/019-werkstatt-2-3/plan.md"));
+    for (const heading of [
+      "### Zusammenfassung",
+      "### Entwurfsentscheidungen",
+      "#### D-01",
+      "#### D-02",
+      "### Arkitekturo-Abdeckung",
+      "### Abweichungen von der Spec",
+      "### Befunde / Mankoj",
+      "### Regulo-Kandidaten",
+      "### Offen (für den Maintainer)",
+      "### M4",
+    ]) {
+      expect(plan, heading).toContain(heading);
+    }
+    for (const term of [
+      "form.radius",
+      "raum.abstand",
+      "schrift.skala",
+      "ikono.gewicht",
+      "size.target",
+      "bytegleich",
+      "`provo-kompakta`",
+      "Hinweis",
+      "type-scale",
+    ]) {
+      expect(plan, term).toContain(term);
+    }
+    expect(plan).not.toContain("ciferecigo");
+    const tasks = section(read("specs/019-werkstatt-2-3/tasks.md"));
+    expect(tasks).toContain("**T1901");
+    expect(tasks).toContain("### Messungen");
+    expect(tasks).toMatch(/rot `[0-9a-f]{7}`/);
+    const readme = read("README.md");
+    for (const field of ["form.radius", "raum.hoehe", "schrift.gewicht", "ikono.gewicht"]) {
+      expect(readme, field).toContain(field);
+    }
+  });
+});

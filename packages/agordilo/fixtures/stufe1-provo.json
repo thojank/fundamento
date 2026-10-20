@@ -1,0 +1,56 @@
+{
+  "source": "packages/modelo/test/fixtures/valid/aspekto-provo/aspekto-provo auf main ac5deb3 (Spec 016, Agordilo Stufe 1)",
+  "agordo": {
+    "name": "provo",
+    "owner": "Provo (fictitious, test only)",
+    "license": "MIT",
+    "leitfarbe": "#6b4fa0",
+    "zusatzfarben": {
+      "info": "oklch(0.55 0.12 225)"
+    },
+    "neutral": {
+      "toenung": 0.4
+    },
+    "regler": {
+      "helligkeit": 0.1,
+      "kontrast": 0.1,
+      "saettigung": 1.1
+    },
+    "schriften": {
+      "display": {
+        "family": "Archivo",
+        "license": "OFL-1.1",
+        "source": "https://github.com/Omnibus-Type/Archivo",
+        "redistributable": true,
+        "scripts": ["Latn"]
+      }
+    }
+  },
+  "sha256": {
+    "$themes.json": "32d20d206abf9b832c41c26c654fb33aef9694a5661ff89655091a4aae9931d3",
+    "aspekto.json": "a2e9270a4569ffa47497dc742356686facc3487feae3f2d00e5a5546ebc1ae6b",
+    "ids.lock.json": "19279ae73d078332a67f90d7e401fa8878e9fc7794e8496809c133730e1e564e",
+    "ikonoj/LICENSE": "ddbe6082ec3cf979db47e5af549d2849c5d6182b3e005ef91ce1dbb9eb122f11",
+    "ikonoj/check.svg": "37080105de6ae35b2bfda063742a7cfe4b088de778edc72a8be69fc537548639",
+    "ikonoj/chevron-down.svg": "5283306e5f6fde1abee28343c16d2a1d13a3c9d42a6690bbba155502a22ebe3d",
+    "ikonoj/chevron-left.svg": "512b7d134bdc27d7f9c0fe71b2c8e4db32d6ffeeb7d846c51dbded5910703bde",
+    "ikonoj/chevron-right.svg": "6ed52d8ef95da4476c99e095288e5a3ed7cf7f30fd4c54d7be17a27b4e070e9b",
+    "ikonoj/close.svg": "9bb4679a52d3dee72b089839cb2cc8e0475be4d9ca1c522d5c3c39d05b6e394a",
+    "ikonoj/collapse.svg": "c5373aea766baa7578ed292adaefc3457646cebe103da68116a6949d859f8e03",
+    "ikonoj/danger.svg": "191d6bf1b82bc9914f8c10323839df826e665281ff96bd92834289ab5b4c9478",
+    "ikonoj/expand.svg": "5cf8f13effa4a620f3cc17e86f6199a04035431d0a5c47d1d6b12451d4a74b14",
+    "ikonoj/external.svg": "11966b513a1e2af09645cf7a5867a2664bbd190658bd4281f8cb1f76cce39267",
+    "ikonoj/info.svg": "b8b6494b1a755bdcb1ba75b20fe731a9741f60d5da6aa5dd493118d4196226f2",
+    "ikonoj/more.svg": "045cb75d31f0ca0ea320e0e8be506c79bc2b32c91004910c31dcc70a64b5009e",
+    "ikonoj/search.svg": "a199d68a44476ba7e148d8711bb24649e4e713099a99ff50c924f771a6b3aed3",
+    "ikonoj/sort-ascending.svg": "5d987a85af68fc08fc9d9bbedfd42eb18840d5c91dbff9db9b36d072b95860b9",
+    "ikonoj/sort-descending.svg": "a2fc9fcacc8629c34c41696b4bfbc7ba153fed9c4baf2e1fade248c2640e1731",
+    "ikonoj/success.svg": "9dad12b9422fa0917c97a728e2864deebf92a31eaf8787f6610b50f50031fdd6",
+    "ikonoj/upload.svg": "58a3e265785ce61dd953378ceaef7740a7aa30d8a228e14ec17084895b01ec7c",
+    "ikonoj/warning.svg": "a259c73cc10ebf602d378b0cbb84233867bfea183a7354e609ea4b274c5b869a",
+    "raporto.json": "8a429b8aaff04903c137c758f018faedc85a4e661fc874ddd4a98147a535be6a",
+    "raporto.md": "28fd8b12d7a75c1c9f9d3f8aa372d70572b3f22579c9bf5acce5f872ca14e8be",
+    "sets/aspekto/provo+color-scheme/dark.json": "4e9efc4e7d34a6eaad46b1c022e18344e118f17b12935e0b93cd4497d8aa30ad",
+    "sets/aspekto/provo.json": "98e2488ff7030169cf082631d3c23a354aa4e59b672bb49bfc512e808b27aaea"
+  }
+}

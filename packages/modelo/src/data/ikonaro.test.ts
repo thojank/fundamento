@@ -157,14 +157,15 @@ describe("data/ikonaro.json (Spec 014 ①, G3)", () => {
   });
 
   // Spec 016 ①: provo, the Aspekto the Agordilo derives, is the third known Aspekto.
-  it("check:ikonaro passes on the repo: komuna, ekzemplo and provo complete", async () => {
+  it("check:ikonaro passes on the repo: komuna, ekzemplo, provo and provo-kompakta complete", async () => {
     const result = await check({ json: true, repoRoot });
     expect(result.errors).toEqual([]);
     expect(result.ok).toBe(true);
+    // Spec 019 ①: provo-kompakta is the fourth known Aspekto (Phosphor light).
     expect(result.stats).toMatchObject({
       names: names.length,
-      aspektoj: 3,
-      glyphs: names.length * 3,
+      aspektoj: 4,
+      glyphs: names.length * 4,
     });
   });
 

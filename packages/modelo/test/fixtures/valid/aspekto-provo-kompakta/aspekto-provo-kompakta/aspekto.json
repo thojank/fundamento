@@ -1,0 +1,85 @@
+{
+  "id": "dva_provokom_01M564XR00KXK7C869AGPC73G8",
+  "name": "provo-kompakta",
+  "owner": "Provo Kompakta (fictitious, test only)",
+  "license": "MIT",
+  "idNamespace": "provokom",
+  "fonts": [
+    {
+      "family": "Geist",
+      "license": "OFL-1.1",
+      "source": "https://github.com/vercel/geist-font",
+      "redistributable": true,
+      "scripts": [
+        "Latn"
+      ]
+    },
+    {
+      "family": "Geist Mono",
+      "license": "OFL-1.1",
+      "source": "https://github.com/vercel/geist-font",
+      "redistributable": true,
+      "scripts": [
+        "Latn"
+      ]
+    }
+  ],
+  "ikonoj": {
+    "set": "Phosphor Icons",
+    "style": "light",
+    "version": "2.1.1",
+    "license": "MIT",
+    "source": "https://github.com/phosphor-icons/core (npm @phosphor-icons/core 2.1.1, assets/light)",
+    "read": "2026-10-20",
+    "names": {
+      "check": "check",
+      "chevron-down": "caret-down",
+      "chevron-left": "caret-left",
+      "chevron-right": "caret-right",
+      "close": "x",
+      "collapse": "arrows-in-simple",
+      "danger": "warning-octagon",
+      "expand": "arrows-out-simple",
+      "external": "arrow-square-out",
+      "info": "info",
+      "more": "dots-three",
+      "search": "magnifying-glass",
+      "sort-ascending": "sort-ascending",
+      "sort-descending": "sort-descending",
+      "success": "check-circle",
+      "upload": "upload-simple",
+      "warning": "warning"
+    }
+  },
+  "agordilo": {
+    "version": "0.1.0",
+    "structure": {
+      "vortaro": "0.1.0",
+      "reference": "komuna",
+      "sha256": "aa3ea4adb749f9e9f0fdb96072c6cdb35e9564c10b72b864f5280ba031073e9e"
+    },
+    "agordo": {
+      "name": "provo-kompakta",
+      "owner": "Provo Kompakta (fictitious, test only)",
+      "license": "MIT",
+      "leitfarbe": "#0f6b5c",
+      "neutral": {
+        "toenung": 0.2
+      },
+      "form": {
+        "radius": 0.25,
+        "schatten": 0.5
+      },
+      "raum": {
+        "abstand": 0.8,
+        "hoehe": 0.9
+      },
+      "schrift": {
+        "groesse": -0.5
+      },
+      "ikono": {
+        "gewicht": "light"
+      }
+    }
+  }
+}

@@ -41,19 +41,21 @@ describe("check:ikonaro on the repo (Spec 014 ①)", () => {
     expect(GLYPH_DIR_NAME).toBe("ikonoj");
   });
 
-  it("passes: every name drawn by komuna, ekzemplo and provo, every glyph square, in currentColor, with provenance", async () => {
+  it("passes: every name drawn by komuna, ekzemplo, provo and provo-kompakta, every glyph square, in currentColor, with provenance", async () => {
     const result = await check({ json: true, repoRoot });
     expect(result.check).toBe("ikonaro");
     expect(result.errors).toEqual([]);
     expect(result.warnings).toEqual([]);
     expect(result.ok).toBe(true);
     // Spec 016 ①: the derived Aspekto provo draws the Ikonaro of komuna, copied with the structure.
-    expect(result.stats.aspektoj).toBe(3);
+    // Spec 019 ①: provo draws it in Phosphor bold, provo-kompakta in light (ikono.gewicht).
+    expect(result.stats.aspektoj).toBe(4);
     expect(result.stats.names).toBeGreaterThan(0);
-    expect(result.stats.glyphs).toBe((result.stats.names ?? 0) * 3);
+    expect(result.stats.glyphs).toBe((result.stats.names ?? 0) * 4);
     expect(result.summary).toMatch(/komuna/);
     expect(result.summary).toMatch(/ekzemplo/);
     expect(result.summary).toMatch(/provo/);
+    expect(result.summary).toMatch(/provo-kompakta/);
   });
 });
 

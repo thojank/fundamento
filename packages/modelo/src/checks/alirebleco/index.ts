@@ -21,12 +21,13 @@ export * from "./metrics.js";
 /**
  * The Aspektoj the Modelo knows beside the reference (Nachlese 3 W2, Spec 011 ⑤ B-8): the test
  * Aspekto ekzemplo, which the tests, the showcase and the Figma sets compose over the core, and
- * provo, the example the Agordilo derives from its Agordo (Spec 016 ①). Each is a fixture folder
+ * provo, the example the Agordilo derives from its Agordo (Spec 016 ①), and provo-kompakta, its
+ * counterpart in form, space and type (Spec 019 ①). Each is a fixture folder
  * `test/fixtures/valid/aspekto-<name>` with a `fundamento.config.json`; a further Aspekto is
  * listed here when the system composes it. Valid from `src/checks/alirebleco` and from
  * `dist/checks/alirebleco`.
  */
-export const KNOWN_ASPEKTO_FIXTURES: readonly string[] = ["ekzemplo", "provo"];
+export const KNOWN_ASPEKTO_FIXTURES: readonly string[] = ["ekzemplo", "provo", "provo-kompakta"];
 
 export function knownAspektoConfigs(): { name: string; configFile: string }[] {
   const dir = fileURLToPath(new URL("../../../test/fixtures/valid/", import.meta.url));
