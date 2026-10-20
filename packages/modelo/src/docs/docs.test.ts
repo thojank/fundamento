@@ -2263,4 +2263,3 @@ describe("Nachlese 5 documentation (specs/018-nachlese-5)", () => {
     expect(tasksThird).toMatch(/grün `[0-9a-f]{7}`/);
   });
 });
-
