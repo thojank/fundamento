@@ -76,11 +76,24 @@ const stubs = {
     return lines.join("\\n") + "\\nexport default {};\\n";
   },
 };
+// Nachlese 6 N6-3: the schemas come with the island (provideModeloSchemas) and the Ontologio is
+// never read in the Werkstatt; inlined, they stood in the Vitrino twice (Spec 016 ② B-3). Their
+// URLs point nowhere, so a read of them would throw — only package.json stays inlined.
+const PROVIDED = /new URL\\(\\s*"(\\.\\.\\/\\.\\.\\/(?:schema\\/(?:modelo|config|ontologio)\\.schema|data\\/ontologio)\\.json)",\\s*import\\.meta\\.url\\s*\\)/g;
+const provided = {
+  name: "fm-provided-files",
+  enforce: "pre",
+  transform(code, id) {
+    if (!id.includes("/modelo/dist/")) return null;
+    const next = code.replace(PROVIDED, (_match, path) => "new URL(" + JSON.stringify("fm-provided:" + path.split("/").pop()) + ")");
+    return next === code ? null : { code: next, map: null };
+  },
+};
 await build({
   configFile: false,
   logLevel: "silent",
   root: ".",
-  plugins: [stubs],
+  plugins: [provided, stubs],
   define: { "process.env.NODE_ENV": JSON.stringify("production") },
   build: {
     lib: { entry: ${JSON.stringify(ENTRY)}, formats: ["es"], fileName: () => ${JSON.stringify(OUT_NAME)} },

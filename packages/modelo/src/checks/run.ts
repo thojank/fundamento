@@ -38,7 +38,7 @@ export interface RunCheckEnv {
   stderr: (text: string) => void;
 }
 
-const USAGE = `Usage: run.js <check> [--json] [--fixture <path>] [--projekcioj <dir>] [--spuroj <file>]\nChecks: ${CHECK_NAMES.join(", ")}\nRun with --help for details.\n`;
+const USAGE = `Usage: run.js <check> [--json] [--fixture <path>] [--aspekto <dir>] [--projekcioj <dir>] [--spuroj <file>]\nChecks: ${CHECK_NAMES.join(", ")}\nRun with --help for details.\n`;
 
 const CHECK_SUMMARIES: Readonly<Record<CheckName, string>> = {
   "vortaro-lint":
@@ -53,7 +53,7 @@ const CHECK_SUMMARIES: Readonly<Record<CheckName, string>> = {
 };
 
 export const HELP = [
-  "Usage: pnpm check:<check> [--json] [--fixture <path>] [--projekcioj <dir>] [--spuroj <file>]",
+  "Usage: pnpm check:<check> [--json] [--fixture <path>] [--aspekto <dir>] [--projekcioj <dir>] [--spuroj <file>]",
   "       node packages/modelo/dist/checks/run.js <check> [--json] [--fixture <path>]",
   "",
   "Runs one conformance check (FR-15).",
@@ -67,6 +67,9 @@ export const HELP = [
   "                    against the directory pnpm was invoked from (INIT_CWD), else the cwd.",
   "  --config <file>   Run against a project: the core, komuna and the Aspekto packages its",
   "                    fundamento.config.json lists (relative paths as for --fixture).",
+  "  --aspekto <dir>   Alirebleco only: an Aspekto package of your own (e.g. derived by",
+  "                    `fm agordilo derive`), measured over the core and komuna; its failing",
+  "                    pairs are errors (relative paths as for --fixture).",
   "  --projekcioj <dir>  Parity only: the projections to compare with the Skemo; defaults to",
   "                    .fundamento/projekcioj (written by `fm projekcioj build`).",
   "  --spuroj <file>   Clean-room only: a fingerprint list of a benchmark Aspekto, repeatable.",
@@ -86,6 +89,7 @@ type ParsedArgs =
       json: boolean;
       fixture: string | undefined;
       config: string | undefined;
+      aspekto: string | undefined;
       projekcioj: string | undefined;
       spuroj: string[];
     }
@@ -129,6 +133,15 @@ export function parseCheckArgs(argv: readonly string[]): ParsedArgs {
   if (parsed.values.fixture !== undefined && parsed.values.config !== undefined) {
     return { ok: false, message: "Use either --fixture or --config, not both." };
   }
+  if (parsed.values.aspekto !== undefined && name !== "alirebleco") {
+    return { ok: false, message: "--aspekto is an option of alirebleco only." };
+  }
+  if (
+    parsed.values.aspekto !== undefined &&
+    (parsed.values.fixture !== undefined || parsed.values.config !== undefined)
+  ) {
+    return { ok: false, message: "Use --aspekto without --fixture and --config." };
+  }
   if (parsed.values.fixture !== undefined && parsed.values.projekcioj !== undefined) {
     return { ok: false, message: "Use either --fixture or --projekcioj, not both." };
   }
@@ -139,6 +152,7 @@ export function parseCheckArgs(argv: readonly string[]): ParsedArgs {
     json: parsed.values.json,
     fixture: parsed.values.fixture,
     config: parsed.values.config,
+    aspekto: parsed.values.aspekto,
     projekcioj: parsed.values.projekcioj,
     spuroj: parsed.values.spuroj ?? [],
   };
@@ -153,6 +167,7 @@ function parseArgsStrict(argv: readonly string[]) {
       json: { type: "boolean", default: false },
       fixture: { type: "string" },
       config: { type: "string" },
+      aspekto: { type: "string" },
       projekcioj: { type: "string" },
       // Clean-room only: a benchmark Aspekto hands over its fingerprints; several lists are
       // allowed and the reading order decides the provenance (Spec 004 T013).
@@ -267,6 +282,7 @@ export async function runCheck(argv: readonly string[], env: RunCheckEnv): Promi
   const options: CheckOptions = { json: args.json, repoRoot: env.repoRoot };
   if (fixture !== undefined) options.fixture = fixture;
   if (args.config !== undefined) options.config = resolve(env.cwd, args.config);
+  if (args.aspekto !== undefined) options.aspekto = resolve(env.cwd, args.aspekto);
   if (args.projekcioj !== undefined) options.projekcioj = resolve(env.cwd, args.projekcioj);
   if (args.spuroj.length > 0) options.spuroj = args.spuroj.map((file) => resolve(env.cwd, file));
 

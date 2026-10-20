@@ -3,7 +3,7 @@
 // line (Art. VII) — and a tarball that passes the clean-room fingerprints.
 
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { existsSync, mkdtempSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, relative } from "node:path";
 import {
@@ -98,13 +98,17 @@ describe("Make Kit sources (T018)", () => {
     expect(manifest.license).toBe("MIT");
     expect(manifest.publishConfig).toEqual({ access: "public", tag: "next" });
     // Tree shaking in a user's build must keep the registration and the stylesheets (K1).
-    expect(manifest.sideEffects).toEqual([
-      "**/*.css",
-      "./dist/element.js",
-      "./dist/element.cjs",
-      "./dist/index.js",
-      "./dist/index.cjs",
-    ]);
+    // Nachlese 6 N6-3: one built version per entry (ESM); require() of Node 22+ loads it too.
+    expect(manifest.sideEffects).toEqual(["**/*.css", "./dist/element.js", "./dist/index.js"]);
+    expect(manifest.main).toBe("./dist/index.js");
+    expect((manifest.exports as Record<string, unknown>)["."]).toEqual({
+      types: "./dist/index.d.ts",
+      default: "./dist/index.js",
+    });
+    expect((manifest.exports as Record<string, unknown>)["./element"]).toEqual({
+      types: "./dist/element.d.ts",
+      default: "./dist/element.js",
+    });
     expect(manifest.dependencies).toBeUndefined();
     expect(manifest.peerDependencies).toEqual({ react: ">=18", "react-dom": ">=18" });
     // Provenance fails when repository.url does not match the repository the workflow runs in (F7).
@@ -310,14 +314,14 @@ describe("Make Kit tarball (T018, clean room)", () => {
     built = await buildMakeKits(mkdtempSync(join(tmpdir(), "fm-kits-")), source);
   }, 180_000);
 
-  it("builds an ESM and a CJS bundle with types for every Aspekto", () => {
+  it("builds one ESM bundle with types per entry for every Aspekto, no second CJS version (Nachlese 6 N6-3)", () => {
     for (const aspekto of ASPEKTOJ) {
+      expect(existsSync(join(built[aspekto] ?? "", "dist/index.cjs"))).toBe(false);
+      expect(existsSync(join(built[aspekto] ?? "", "dist/element.cjs"))).toBe(false);
       for (const file of [
         "dist/index.js",
-        "dist/index.cjs",
         "dist/index.d.ts",
         "dist/element.js",
-        "dist/element.cjs",
         "dist/element.d.ts",
       ]) {
         expect(

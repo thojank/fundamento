@@ -4,8 +4,9 @@
 // line (Art. VII). No hex value anywhere: the guidelines name tokens and classes, never values, so
 // a model reading them cannot copy a colour out of the system.
 //
-// `MAKE_KIT_CELO` writes the sources; `buildMakeKits` additionally bundles them with Vite (ESM and
-// CJS) and writes the type declarations, so the package can be packed and installed (AK-08).
+// `MAKE_KIT_CELO` writes the sources; `buildMakeKits` additionally bundles them with Vite (ESM only
+// since Nachlese 6) and writes the type declarations, so the package can be packed and installed
+// (AK-08).
 
 import { execFileSync } from "node:child_process";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -902,20 +903,19 @@ export const MAKE_KIT_CELO: Celo = {
             },
             homepage: "https://github.com/thojank/fundamento#readme",
             type: "module",
-            main: "./dist/index.cjs",
+            // Nachlese 6 N6-3: one built version per entry; require() of Node 22+ loads the ESM.
+            main: "./dist/index.js",
             module: "./dist/index.js",
             types: "./dist/index.d.ts",
             exports: {
               ".": {
                 types: "./dist/index.d.ts",
-                import: "./dist/index.js",
-                require: "./dist/index.cjs",
+                default: "./dist/index.js",
               },
               // Plain HTML: the elements alone, so no bare "react" import has to resolve (F6).
               "./element": {
                 types: "./dist/element.d.ts",
-                import: "./dist/element.js",
-                require: "./dist/element.cjs",
+                default: "./dist/element.js",
               },
               "./styles.css": "./styles.css",
               "./tailwind.css": "./tailwind.css",
@@ -926,13 +926,7 @@ export const MAKE_KIT_CELO: Celo = {
             peerDependencies: { react: ">=18", "react-dom": ">=18" },
             publishConfig: { access: "public", tag: "next" },
             // Tree shaking must keep the registration of the elements and the stylesheets (K1).
-            sideEffects: [
-              "**/*.css",
-              "./dist/element.js",
-              "./dist/element.cjs",
-              "./dist/index.js",
-              "./dist/index.cjs",
-            ],
+            sideEffects: ["**/*.css", "./dist/element.js", "./dist/index.js"],
           },
           null,
           2,
@@ -991,7 +985,7 @@ export declare function defineEroj(): void;
 }
 
 /**
- * Writes every kit under `outDir` and bundles it with Vite in library mode (ESM and CJS, React
+ * Writes every kit under `outDir` and bundles it with Vite in library mode (ESM, React
  * external), then writes the type declarations. Returns the directory of each Aspekto.
  */
 export async function buildMakeKits(
@@ -1020,7 +1014,7 @@ export async function buildMakeKits(
 }
 
 /**
- * Bundles the kit sources already written under `outDir` (ESM and CJS, React external) and writes
+ * Bundles the kit sources already written under `outDir` (ESM, React external) and writes
  * the type declarations. Returns the relative directory of each kit.
  */
 export async function bundleMakeKits(outDir: string, input: CeloInput): Promise<string[]> {
@@ -1029,10 +1023,8 @@ export async function bundleMakeKits(outDir: string, input: CeloInput): Promise<
     const dir = join(outDir, DIR, aspekto);
     kits.push(
       `${DIR}/${aspekto}/dist/index.js`,
-      `${DIR}/${aspekto}/dist/index.cjs`,
       `${DIR}/${aspekto}/dist/index.d.ts`,
       `${DIR}/${aspekto}/dist/element.js`,
-      `${DIR}/${aspekto}/dist/element.cjs`,
       `${DIR}/${aspekto}/dist/element.d.ts`,
     );
     bundle(dir);
@@ -1060,8 +1052,9 @@ await build({
     lib: {
       // Two entries: the package (React) and the elements alone, for plain HTML (F6).
       entry: ["src/index.ts", "src/element.ts"],
-      formats: ["es", "cjs"],
-      fileName: (format, name) => (format === "cjs" ? name + ".cjs" : name + ".js"),
+      // Nachlese 6 N6-3: ESM only — the CJS build was a second copy of the same 0.8 MB.
+      formats: ["es"],
+      fileName: (_format, name) => name + ".js",
     },
     outDir: "dist",
     emptyOutDir: true,

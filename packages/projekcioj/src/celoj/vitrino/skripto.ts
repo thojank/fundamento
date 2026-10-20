@@ -51,7 +51,7 @@ function renderKontrasto() {
 function renderRegularo() {
   const rows = (datumoj.regularo[kombino()] || []).map((row) =>
     '<tr><th scope="row">' + esc(row.regulo) + '</th><td>' + (row.pasis ? "bestanden" : "verletzt") +
-    '</td><td>' + esc(row.trovoj.join(", ")) + '</td><td>' + esc(row.kialo) + '</td></tr>');
+    '</td><td>' + esc(row.trovoj.join(", ")) + '</td><td>' + esc(datumoj.regulojKialoj[row.regulo] || "") + '</td></tr>');
   const aspiroj = (datumoj.aspiroj[root.getAttribute("data-fm-aspekto")] || []).map((row) =>
     '<tr><th scope="row">' + esc(row.metriko) + '</th><td>' + esc(row.limo) + '</td><td>' + esc(row.amplekso) +
     '</td><td>' + esc(row.mezurita) + '</td><td>' + (row.atingita ? "erreicht" : "verfehlt") + '</td><td>' +

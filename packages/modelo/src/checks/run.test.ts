@@ -8,6 +8,7 @@ import {
   EXIT_FAIL,
   EXIT_PASS,
   EXIT_USAGE,
+  parseCheckArgs,
   type RunCheckEnv,
   runCheck,
 } from "./run.js";
@@ -213,5 +214,27 @@ describe("built runner entry point", () => {
       expect(child.status).toBe(EXIT_USAGE);
       expect(child.stderr).toContain("Cannot read fixture");
     });
+  });
+});
+
+// Nachlese 6 N6-2 (Spec 016 ③ O-2): check:alirebleco measures a package of one's own.
+describe("--aspekto <dir> (Nachlese 6 N6-2)", () => {
+  it("is read for alirebleco", () => {
+    expect(parseCheckArgs(["alirebleco", "--aspekto", "../marke/aspekto-marke"])).toMatchObject({
+      ok: true,
+      check: "alirebleco",
+      aspekto: "../marke/aspekto-marke",
+    });
+  });
+
+  it("is refused for any other check and beside --config or --fixture", () => {
+    expect(parseCheckArgs(["parity", "--aspekto", "x"]).ok).toBe(false);
+    expect(parseCheckArgs(["alirebleco", "--aspekto", "x", "--config", "y"]).ok).toBe(false);
+    expect(parseCheckArgs(["alirebleco", "--aspekto", "x", "--fixture", "y"]).ok).toBe(false);
+  });
+
+  it("names the option in the help", async () => {
+    const out = await run(["--help"]);
+    expect(out.stdout).toContain("--aspekto <dir>");
   });
 });

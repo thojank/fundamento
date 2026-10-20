@@ -44,7 +44,9 @@ describe("the Vitrino is one self-contained file", () => {
     // request from a script.
     const outside = html
       .replace(/<script type="application\/json"[\s\S]*?<\/script>/g, "")
-      .replace(/<script type="module" id="fm-vitrino-werkstatt-skripto">[\s\S]*?<\/script>/, "");
+      .replace(/<script type="module" id="fm-vitrino-werkstatt-skripto">[\s\S]*?<\/script>/, "")
+      // Nachlese 6 N6-1: the example value of the kampo kind=url is a value, no request.
+      .replaceAll(' kind="url" value="https://example.org"', "");
     expect(outside).not.toContain("http://");
     expect(outside).not.toContain("https://");
     expect(html).not.toMatch(/<link[^>]+href=/);
