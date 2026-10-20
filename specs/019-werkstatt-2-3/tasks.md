@@ -65,7 +65,7 @@
 **Branch:** `261020-spec-019-prompt-116ba2` (gestapelt auf ②).
 
 ### A – Rot zuerst
-- [x] **T1941 Tests** Agordilo `wunsch.test.ts` (Vokabular, Erkennen, Bewegen, Bereichsende, Farbton, Unbekanntes, Historie), `agordo.test.ts` (`historio`); MCP `e2e/s019-prompt.test.ts` (die vier Dialoge), `contracts.test.ts`, `server.test.ts`, `prompt.test.ts`; Modelo `ontologio.test.ts`, `docs.test.ts` (README 21 Werkzeuge, plan ③, Vojmapo). Rot in `5f01a59`.
+- [x] **T1941 Tests** Agordilo `wunsch.test.ts` (Vokabular, Erkennen, Bewegen, Bereichsende, Farbton, Unbekanntes, Historie), `agordo.test.ts` (`historio`); MCP `e2e/s019-prompt.test.ts` (die vier Dialoge), `contracts.test.ts`, `server.test.ts`, `prompt.test.ts`; Modelo `ontologio.test.ts`, `docs.test.ts` (README 21 Werkzeuge, plan ③, Vojmapo). Rot in `91c33e3` (nach dem Rebase auf den CI-Eintrag von ②; vorher `5f01a59`).
 
 ### B – Grün
 - [x] **T1942 Bibliothek** `wunsch.ts`, `readWuensche`, `data/wuensche.json` (D-01–D-03); Test der Leitplanke („ruhiger“ hält bei der Hälfte vor `contrast-reserve`).
@@ -75,13 +75,14 @@
 
 ### C – Abschluss
 - [x] **T1946 Doku** plan ③ (D-01–D-06, Abweichungen 1–4, B-1–B-3, O-1–O-4, Messanleitung, Figma), tasks ③, Abschnitt ④.
-- [ ] **T1947 CI** grün.
+- [x] **T1947 CI** grün (Lauf 39352817646, `6ba84cc`).
 
 ### Messungen
 
 | Was | Wert |
 |---|---|
-| Commits ③ | rot `5f01a59`; grün und CI in den Zeilen danach |
+| Commits ③ | rot `91c33e3`, grün `6ba84cc` (Hash des grünen Stands, CI grün; nach dem Rebase auf `f2f757e`, vorher `5f01a59`/`a611bc3`); dieser Eintrag im Folgecommit |
+| CI ③ | Lauf 39352817646 (`6ba84cc`, alle acht Jobs grün, Wanduhr 8:05): `checks` 1:19, `unit` 5:56, `projekcioj` 3:21 / 3:47, `eroj` 2:26 / 2:10, `alirebleco-eroj` 5:06, `rendered-checks` 7:43 |
 | „Mach provo ruhiger.“ | Kontrast 0,1 → 0,0, Sättigung 1,1 → 0,9, Schatten 1,0 → 0,7; 0 feste Verstöße, Export möglich |
 | Leitplanke | „ruhiger“ von Kontrast 0 aus: angehalten bei 50 % vor `contrast-reserve`, 4 s |
 | Tests lokal | Agordilo 93, MCP 323 (davon 11 in `s019-prompt.test.ts`), Modelo 3 601, CLI 72, Projekcioj 733 (darin `figma-provoj.test.ts`) – je Paket grün; `pnpm lint`, `pnpm perf` grün |
