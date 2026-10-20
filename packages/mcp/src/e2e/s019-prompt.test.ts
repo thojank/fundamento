@@ -93,6 +93,15 @@ describe("„Mach provo ruhiger.“", () => {
     expect(Number(moved["regler.saettigung"]?.nachher)).toBeLessThan(PROVO.regler.saettigung ?? 0);
     expect(Number(moved["regler.kontrast"]?.nachher)).toBeLessThan(PROVO.regler.kontrast ?? 0);
     expect(Number(moved["form.schatten"]?.nachher)).toBeLessThan(1);
+    // Nachtrag 20.10. (③ O-3): the step on the contrast is −0.05 — the diff of the dialog.
+    expect(calmer.diff).toEqual([
+      { path: "regler.kontrast", label: "Kontrast", vorher: 0.1, nachher: 0.05 },
+      { path: "regler.saettigung", label: "Sättigung", vorher: 1.1, nachher: 0.9 },
+      { path: "form.schatten", label: "Schatten", vorher: 1, nachher: 0.7 },
+    ]);
+    expect(calmer.sentence).toBe(
+      "Vorgeschlagen: ruhiger (Kontrast 0,1 → 0,05, Sättigung 1,1 → 0,9, Schatten 1,0 → 0,7)",
+    );
     expect(calmer.summary.violations.fixed).toBe(0);
     expect(calmer.wish?.matched.map((entry) => entry.word)).toEqual(["ruhiger"]);
     const ruhiger = readWuensche().wuensche.find((entry) => entry.wort === "ruhiger");

@@ -101,6 +101,10 @@ describe("Make Kit sources (T018)", () => {
     // Nachlese 6 N6-3: one built version per entry (ESM); require() of Node 22+ loads it too.
     expect(manifest.sideEffects).toEqual(["**/*.css", "./dist/element.js", "./dist/index.js"]);
     expect(manifest.main).toBe("./dist/index.js");
+    // Nachtrag 20.10. (④ O-2): the CJS build is gone with 0.2.0 (CHANGELOG); no require target and
+    // no .cjs file may come back by accident.
+    expect(JSON.stringify(manifest.exports)).not.toContain('"require"');
+    expect(JSON.stringify(manifest)).not.toMatch(/\.cjs"/);
     expect((manifest.exports as Record<string, unknown>)["."]).toEqual({
       types: "./dist/index.d.ts",
       default: "./dist/index.js",

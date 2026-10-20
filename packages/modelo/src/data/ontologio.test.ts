@@ -214,14 +214,17 @@ describe("the scheme laboro (Nachlese 3 W6)", () => {
     expect((raporto?.altLabel as { de?: string[] })?.de).toContain("Prüfbericht");
   });
 
-  it("Deziraro, Propono and Historio relate to the Agordo and its tools (Spec 019 ③, E7)", () => {
+  it("Deziraro, Propono and Historio relate to the Agordo and its tools (Spec 019 ③, E7; confirmed 2026-10-20)", () => {
     const of = (term: string) => laboro.find((concept) => concept.term === term);
     expect((of("Deziraro")?.altLabel as { de?: string[] })?.de).toContain("Wunsch-Vokabular");
     expect((of("Propono")?.altLabel as { de?: string[] })?.de).toContain("Vorschlag");
     expect((of("Historio")?.altLabel as { de?: string[] })?.de).toContain("Historie");
     for (const term of ["Deziraro", "Propono", "Historio"]) {
       expect(of(term)?.related, term).toEqual(expect.arrayContaining(["#Agordo"]));
-      expect(JSON.stringify(of(term)), term).toMatch(/Vorschlag von P0|proposed by P0/);
+      // Nachtrag 20.10.: the maintainer confirmed the names (③ O-1).
+      expect(JSON.stringify(of(term)), term).toMatch(/bestätigt am 2026-10-20/);
+      expect(JSON.stringify(of(term)), term).toMatch(/confirmed on 2026-10-20/);
+      expect(JSON.stringify(of(term)), term).not.toMatch(/Vorschlag von P0|proposed by P0/);
     }
   });
 

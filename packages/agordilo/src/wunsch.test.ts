@@ -99,10 +99,11 @@ describe("parseWunsch", () => {
 describe("proponoOf (G6.1)", () => {
   it("ruhiger: less saturation, less contrast spread, softer shadows — from where the brand stands", () => {
     const propono = proponoOf(PROVO, { wunsch: "ruhiger" }, wuensche, basis);
-    expect(propono.agordo.regler).toEqual({ helligkeit: 0.1, kontrast: 0, saettigung: 0.9 });
+    // Nachtrag 20.10. (③ O-3): the step of ruhiger on the contrast is −0.05.
+    expect(propono.agordo.regler).toEqual({ helligkeit: 0.1, kontrast: 0.05, saettigung: 0.9 });
     expect(propono.agordo.form).toEqual({ radius: 1.6, schatten: 0.7 });
     expect(propono.diff).toEqual([
-      { path: "regler.kontrast", label: "Kontrast", vorher: 0.1, nachher: 0 },
+      { path: "regler.kontrast", label: "Kontrast", vorher: 0.1, nachher: 0.05 },
       { path: "regler.saettigung", label: "Sättigung", vorher: 1.1, nachher: 0.9 },
       { path: "form.schatten", label: "Schatten", vorher: 1, nachher: 0.7 },
     ]);
@@ -151,7 +152,7 @@ describe("historioEintrag (W-26)", () => {
       datum: "2026-10-20",
       wunsch: "ruhiger",
       diff: [
-        { regler: "regler.kontrast", vorher: 0.1, nachher: 0 },
+        { regler: "regler.kontrast", vorher: 0.1, nachher: 0.05 },
         { regler: "regler.saettigung", vorher: 1.1, nachher: 0.9 },
         { regler: "form.schatten", vorher: 1, nachher: 0.7 },
       ],
@@ -161,10 +162,10 @@ describe("historioEintrag (W-26)", () => {
 });
 
 describe("proposeAgordo (G6.2: stops before a fixed rule)", () => {
-  it("ruhiger from contrast 0 would break contrast-reserve: the movement goes half the way and says so", () => {
+  it("ruhiger from contrast −0.05 would break contrast-reserve at −0.1: the movement goes half the way and says so", () => {
     const structure = readStructure();
     const proposed = proposeAgordo(
-      { name: "marke", leitfarbe: "#375479" },
+      { name: "marke", leitfarbe: "#375479", regler: { kontrast: -0.05 } },
       { wunsch: "ruhiger" },
       wuensche,
       basis,
@@ -172,9 +173,22 @@ describe("proposeAgordo (G6.2: stops before a fixed rule)", () => {
       loadCalibration(),
     );
     expect(proposed.angehalten).toEqual({ anteil: 0.5, regeln: ["contrast-reserve"] });
-    expect(proposed.agordo.regler).toEqual({ kontrast: -0.05, saettigung: 0.9 });
+    expect(proposed.agordo.regler).toEqual({ kontrast: -0.075, saettigung: 0.9 });
     expect(proposed.derivation.raporto.violations.filter((violation) => violation.fixed)).toEqual(
       [],
     );
+  });
+
+  it("ruhiger from contrast 0 holds now (step −0.05): no stop", () => {
+    const proposed = proposeAgordo(
+      { name: "marke", leitfarbe: "#375479" },
+      { wunsch: "ruhiger" },
+      wuensche,
+      basis,
+      readStructure(),
+      loadCalibration(),
+    );
+    expect(proposed.angehalten).toBeUndefined();
+    expect(proposed.agordo.regler).toEqual({ kontrast: -0.05, saettigung: 0.8 });
   });
 });

@@ -62,8 +62,8 @@ describe("readAgordo (G4)", () => {
       "#/raum/hoehe",
     ],
     [
-      "schrift.skala outside 1.125…1.5",
-      { name: "provo", leitfarbe: "#1d4ed8", schrift: { skala: 1.6 } },
+      "schrift.skala above 1.25 (Nachtrag 20.10.)",
+      { name: "provo", leitfarbe: "#1d4ed8", schrift: { skala: 1.3 } },
       "#/schrift/skala",
     ],
     [
