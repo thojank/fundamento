@@ -17,12 +17,13 @@
 
 ### C – Abschluss
 - [x] **T1966 Doku** plan, tasks, README (`check:alirebleco --aspekto`, Make Kit ESM).
-- [ ] **T1967 CI** grün.
+- [x] **T1967 CI** grün (Lauf 39346192486, `bd41898`).
 
 ### Messungen
 
 | Was | Wert |
 |---|---|
-| Commits | rot `92a630b`; grün und CI in den Zeilen danach |
+| Commits | rot `92a630b`, grün `bd41898` (Hash des grünen Stands, CI grün); dieser Eintrag im Folgecommit |
+| CI | Lauf 39346192486 (`bd41898`, alle acht Jobs grün, Wanduhr 7:27): `checks` 1:03, `unit` 5:15, `projekcioj` 3:42 / 3:34, `eroj` 2:51 / 1:34, `alirebleco-eroj` 4:11, `rendered-checks` 7:23 |
 | Größen | Vitrino 8,11 → 5,88 MB, Make Kit 2,38 → 1,56 MB (plan, Größen) |
 | Tests lokal | Modelo 3 602, Projekcioj 738, CLI 72, MCP 322 – je Paket allein grün; `pnpm lint` grün; `check:parity`, `check:vitrino` (43, mit der Werkstatt ohne eingebettete Schemata), `check:make-kit` (5), `check:quickstart`, `check:release` grün; `require()` des ES-Moduls `dist/element.js` unter Node 24 liefert 65 Exporte |
