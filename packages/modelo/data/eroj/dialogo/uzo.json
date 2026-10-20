@@ -122,6 +122,10 @@
         {
           "ero": "markobutono",
           "kialo": "A yes or no the decision needs stands in the content, because a check mark applies with the confirmation."
+        },
+        {
+          "ero": "avizo",
+          "kialo": "A notice stands in the content when the confirmation failed, because the person decides there what to do next; it takes no focus, the first field does."
         }
       ],
       "never": [],
@@ -141,10 +145,10 @@
       },
       "message": {
         "accepts": [
-          "text"
+          "text",
+          "teksto"
         ],
-        "max": 1,
-        "nesting": 0
+        "nesting": 1
       },
       "reason": {
         "accepts": [
@@ -167,7 +171,8 @@
           "elektilo",
           "elekto",
           "markobutono",
-          "sxaltilo"
+          "sxaltilo",
+          "avizo"
         ],
         "nesting": 1
       },

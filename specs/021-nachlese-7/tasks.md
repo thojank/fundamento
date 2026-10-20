@@ -32,4 +32,24 @@
 
 ## ② Ergänzungen (0.2.0)
 
-Folgt im PR ②.
+**Branch:** `261020-nachlese-7-ergaenzungen-116ba2` (gestapelt auf ①) · Aufgaben ab T2111.
+
+### A – Rot zuerst
+- [x] **T2111 Tests** Browser je Ergänzung (`packages/eroj/test/nachlese-7-ergaenzungen.spec.ts`); Guidelines (`make-kit.test.ts`); Figma-Plan und Plugin (B-2, B-4); Vitrino-Zeilen (`datumoj.test.ts`); Gvidanto-Dialoge (`packages/mcp/src/e2e/s021-nachlese-7.test.ts`); Doku (`docs.test.ts`). Rot in `ca71c29` (Browser in Chromium 8 von 10 – grün schon B-8 und B-10, plan ② D-09 –, Make Kit 4, Figma 4, Vitrino 6, MCP 9, Modelo 1).
+
+### B – Grün
+- [x] **T2112 Daten** Props `focusable`, `label-hidden`, `disabled`, `focus-only`; `a11y.keys` Enter und Beschreibung von `open` (dialogo); Uzo `empty`, `details`, `content`, `message`, `label`, `composes.with` (D-01, D-09).
+- [x] **T2113 Elemente** B-1, B-3, B-4, B-6, B-7, B-9 in `element-template.ts`; B-2 in `web-component.ts` (D-02 bis D-08).
+- [x] **T2114 Figma** `label-hidden` als Schalter `label-visible`, Auslöser im gesperrten Menü (D-03, D-05).
+- [x] **T2115 Vitrino** `additionRows` (D-10).
+- [x] **T2116 Pins** (Abweichung 5).
+
+### C – Abschluss
+- [x] **T2117 Doku** plan ②, Hinweis für Arkitekturo in plan ①, tasks, CHANGELOG „0.2.0 – geplant“.
+- [ ] **T2118 CI** grün.
+
+### Messungen
+
+| Was | Wert |
+|---|---|
+| Commits | rot `ca71c29` |

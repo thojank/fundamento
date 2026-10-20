@@ -3104,6 +3104,17 @@ async function applyComponents(variables, warnings) {
     const nodes = { surface };
     const measures = bind(nodes, variant, variables, component.structure);
     bindEntries(rows, component, variant, variables, "item", "items", measures);
+    // Nachlese 7 ② B-4: in the variant disabled the trigger is locked too — the stand-in takes the
+    // look of a disabled entry (the web's trigger is a butono of emphasis low, the same tertiary
+    // fill and disabled text); in every other variant it stays the neutral sketch of a trigger.
+    // Only the colours: the measures stay the stand-in's, so every variant keeps one size.
+    if (variant.props.state === "disabled") {
+      const colours = { bindings: {}, paints: variant.paints, focusVisible: false };
+      for (const key of ["item.fill", "item.color"]) {
+        if (variant.bindings[key] !== undefined) colours.bindings[key] = variant.bindings[key];
+      }
+      bind({ "item-0": trigger.frame, "items-0": trigger.text }, colours, variables, component.structure);
+    }
     const danger = menu.items.findIndex((item) => item.danger === true);
     if (danger !== -1 && rows[danger] !== undefined) {
       for (const measure of bind({ "danger-item": rows[danger].text }, variant, variables, component.structure)) measures.push(measure);
@@ -3323,7 +3334,7 @@ async function applyComponents(variables, warnings) {
    * Vitrino's ground like the set (component.surface), so its texts lie on the canvas their roles
    * are paired with in every mode — not on whatever the section shows.
    */
-  async function drawMeter(node, component, variant, report, labels, example) {
+  async function drawMeter(node, component, variant, report, labels, example, toggled) {
     const texts = Object.assign({}, component.texts || {}, example === undefined ? {} : example.texts || {});
     const unknown = example !== undefined && example.texts !== undefined;
     const control = part(node, "control", () => figma.createFrame());
@@ -3341,8 +3352,11 @@ async function applyComponents(variables, warnings) {
       for (const each of all) write(each, "fontName", fonts.get(variant.font.family + " " + variant.font.style));
     }
     if (typeof texts["value-text"] === "string") write(valueText, "characters", texts["value-text"]);
-    if (example === undefined) labels.push(label);
-    else if (component.label !== undefined) write(label, "characters", component.label.defaultValue);
+    if (example === undefined) {
+      labels.push(label);
+      // Nachlese 7 ② B-2: label-hidden takes the label away (the set's BOOLEAN label-visible).
+      if (toggled !== undefined) toggled.push({ part: "label", node: label });
+    } else if (component.label !== undefined) write(label, "characters", component.label.defaultValue);
     const frames = [node, control, track].concat(fill ? [fill] : []);
     for (const frame of frames) own(frame, NEUTRAL);
     for (const each of all) own(each, NEUTRAL_TEXT);
@@ -4564,7 +4578,7 @@ async function applyComponents(variables, warnings) {
       // A meter, a table and a list (Spec 011 ④) are drawn in functions of their own; the table
       // keeps its focus ring around the sort button.
       if (component.structure === "meter") {
-        await drawMeter(node, component, variant, report, labels, undefined);
+        await drawMeter(node, component, variant, report, labels, undefined, toggled);
         if (existing === undefined) made.push(node);
         continue;
       }
@@ -4974,7 +4988,7 @@ async function applyComponents(variables, warnings) {
     // the part's name (\`caption\`), true where the prop's default is false.
     for (const toggle of component.toggles || []) {
       const hides = toggle.hides === true;
-      const name = hides ? toggle.part : toggle.property;
+      const name = hides ? toggle.shownAs || toggle.part : toggle.property;
       const shown = hides ? !toggle.defaultValue : toggle.defaultValue;
       const definitions = set.componentPropertyDefinitions || {};
       let key = Object.keys(definitions).find(

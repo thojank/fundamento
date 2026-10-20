@@ -14,6 +14,12 @@
         "kind": "string",
         "required": true,
         "description": "The id of the target on the same page: a landmark (main) or an element that can take the focus; the Web Celo spells it as the fragment of the link and gives the target the focus."
+      },
+      {
+        "name": "focus-only",
+        "kind": "boolean",
+        "default": false,
+        "description": "Gives the target the focus without changing the fragment of the page (Nachlese 7 ② B-9: a hash-routed application, whose router reads the fragment). Without it the click is cancelable: preventDefault() on it does the same — the focus moves, the fragment stays."
       }
     ],
     "states": ["rest", "focus"],

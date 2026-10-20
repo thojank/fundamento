@@ -53,6 +53,8 @@ describe("titolo in the repo Modelo (section ③, G1, G2)", () => {
         undefined,
         undefined,
       ],
+      // Nachlese 7 ② B-1.
+      ["focusable", undefined, false, undefined],
     ]);
     expect(skemo?.states).toEqual(["rest"]);
     expect(skemo?.slots).toEqual([{ name: "label", default: true, text: true }]);

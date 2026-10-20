@@ -840,6 +840,9 @@ const meterStructure: string = [
   ':where([part="control"]) { display: flex; flex-direction: column; box-sizing: border-box; margin: 0; }',
   ':where([part="track"]) { display: flex; overflow: hidden; box-sizing: border-box; border-style: none; }',
   ':where([part="fill"]) { display: block; flex: none; align-self: stretch; }',
+  // Nachlese 7 ② B-2: label-hidden takes the label from sight, as caption-hidden the caption of a
+  // table (HIDDEN_TEXT); it stays the meter's name (aria-labelledby).
+  ':host([label-hidden]) [part="label"] { position: absolute; clip-path: inset(50%); overflow: hidden; white-space: nowrap; }',
 ].join("\n");
 
 /**

@@ -62,16 +62,16 @@ Neun `package.json` (Wurzel und acht Pakete) und `AGORDILO_VERSION`; die Modelo-
 
 ### Befunde / Mankoj
 
-- **B-1 Ursache A-4 anders als vermutet** (D-04): der Filter nach Rolle, nicht die use-instead-Regeln.
-- **B-2 A-2 ist ein gemeldeter Fehler, kein Wurf** (Abweichung 1). Arkitekturo erzeugt Kit-Elemente seit dem Befund über die registrierte Klasse; das geht weiter, `createElement` geht jetzt auch.
-- **B-3 Die Vitrino zeigt im Dialogo das Wort „Nachricht“** (`VITRINO_SLOT_TEXTS.message`, dasselbe Wort wie in Figma), keinen ganzen Satz. Vor 0.1.1 fehlte es; jetzt steht es unter der Überschrift. Ganze Sätze stehen in den Beispielen von `dialogo.md`.
+- **F-1 Ursache A-4 anders als vermutet** (D-04): der Filter nach Rolle, nicht die use-instead-Regeln.
+- **F-2 A-2 ist ein gemeldeter Fehler, kein Wurf** (Abweichung 1). Arkitekturo erzeugt Kit-Elemente seit dem Befund über die registrierte Klasse; das geht weiter, `createElement` geht jetzt auch.
+- **F-3 Die Vitrino zeigt im Dialogo das Wort „Nachricht“** (`VITRINO_SLOT_TEXTS.message`, dasselbe Wort wie in Figma), keinen ganzen Satz. Vor 0.1.1 fehlte es; jetzt steht es unter der Überschrift. Ganze Sätze stehen in den Beispielen von `dialogo.md`.
 - **Mankoj:** keine. Kein Token fehlt, keines ist geändert.
 
 ### Offen (für den Maintainer)
 
 1. **Abnahme ①** nach der Messanleitung.
 2. **Release 0.1.1** nach der Abnahme: `release.yml` von Hand starten, zuerst `dry-run` mit Version `0.1.1` (zeigt `--dry-run --tag latest`), dann `publish` mit Version `0.1.1`. Veröffentlicht werden die Make Kits `@fundamento/make-kit-komuna` und `@fundamento/make-kit-ekzemplo` unter `latest`.
-3. **Hinweis für Arkitekturo** (welche Umwege entfallen können): folgt nach ② in diesem Abschnitt.
+3. **Hinweis für Arkitekturo:** unten, nach ② geschrieben.
 
 ### Messanleitung
 
@@ -129,6 +129,111 @@ pnpm check:release
 
 **Figma:** ① ändert nichts, was das Plugin zeichnet (Stilregel und Verhalten der Web-Elemente, Guidelines des Make Kits). Ein Lauf des Plugins ist für ① keine Abnahme; Figma kommt mit ② (B-2, B-4).
 
+### Hinweis für Arkitekturo
+
+Nach ② geschrieben (Briefing, Abnahme „Danach“). Was Arkitekturo um 0.1.0 herum gebaut hat und mit 0.1.1 bzw. 0.2.0 entfallen **kann**. Es gibt keinen Codetransfer: Kein Code geht von hier nach Arkitekturo und keiner von dort hierher. Arkitekturo entscheidet selbst, ob und wann es umstellt. Jede Zeile nennt den Befund der Nutzungsdatei und das, was jetzt das Ero tut.
+
+| Umweg in Arkitekturo (0.1.0) | ab | was das Ero jetzt tut |
+|---|---|---|
+| Kit-Elemente über `new (customElements.get(tag))()` statt `document.createElement` (Lücke `menuo`) | 0.1.1 (A-2) | `createElement` liefert jedes der 32 Elemente; der Weg über die Klasse bleibt gültig |
+| Der Erläuterungssatz der Dialoge fehlte sichtbar (kein Umweg, offene Frage des PR) | 0.1.1 (A-1) | `message` ist sichtbar; `aria-describedby` nur mit Meldung |
+| Eigene `<caption>` wurde vom leeren Slot geleert | 0.1.1 (A-6) | die native Caption bleibt, solange der Slot leer ist |
+| Entfernen der Avizo per Microtask nach `dismiss` | – (A-7) | bleibt der Weg; die Guideline zeigt genau ihn |
+| Native `h1`/`h2` in `ark-page` und `section`, weil `titolo` keinen Fokus nimmt | 0.2.0 (B-1) | `<fm-titolo level="1" focusable>`; `focus()` am Element setzt den Fokus auf die Überschrift |
+| Spaltenname „Konformität“ in jeder Zeile der Pflicht-Übersicht | 0.2.0 (B-2) | `<fm-mezurilo label-hidden>`; der Name bleibt für Screenreader |
+| Leerzustand der Tabelle nur mit Text | 0.2.0 (B-3) | eine `fm-butono slot="empty"` neben dem Text ist der nächste Schritt |
+| Eigene Sperre `busy` gegen eine zweite Wahl im Zeilenmenü | 0.2.0 (B-4) | `<fm-menuo disabled>`: Auslöser gesperrt (`aria-disabled`), das Menü öffnet nicht |
+| Pfad der Validierungsfehler als Text („/tags/1: …“) | 0.2.0 (B-5) | `details` nimmt eine Liste und `fm-teksto kind="code"` |
+| Problemhinweis ans Ende des Formular-Dialogs gestellt | 0.2.0 (B-6) | `fm-avizo slot="content"` darf oben stehen; der erste Fokus geht auf das erste Feld |
+| Enter im Dialog „Metadaten bearbeiten“ bestätigte nichts mehr | 0.2.0 (B-7) | Enter in einem einzeiligen Feld des Inhalts löst `confirm` aus (abbrechbar wie bisher), solange keine Sperre greift |
+| Meldung des Befunds an die `message` angehängt | 0.2.0 (B-8) | mehrere `fm-teksto slot="message"` als Absätze |
+| `preventDefault` auf dem Host des `saltligilo` | 0.2.0 (B-9) | bleibt gültig und dokumentiert; dazu `focus-only` |
+| Native `p` für Absätze mit Badge und Link | 0.2.0 (B-10) | `fm-teksto` mit `fm-ligilo`, `fm-insigno` und `fm-teksto kind="code"` als Kinder; `check_usage` erlaubt es |
+| `insigno` „Pflicht“ neutral statt brandfarben | – | bleibt: eine Entscheidung (Grenze `brand-badge`), keine Lücke |
+
 ## ② Ergänzungen (0.2.0)
 
-Folgt im PR ② (`261020-nachlese-7-ergaenzungen-116ba2`, gestapelt auf ①).
+**Branch:** `261020-nachlese-7-ergaenzungen-116ba2` (gestapelt auf ① `261020-nachlese-7-fehler-116ba2`) · **Datum:** 2026-10-20 · **Stand:** zur Abnahme; Teil von 0.2.0 (nicht veröffentlicht).
+
+### Zusammenfassung
+
+Nur additiv: neue Props, Slots, die mehr annehmen, oder Verhalten, wo vorher keines war. Kein neues Ero, kein Token, keine Regulo, nichts umbenannt.
+
+| # | Ero | Ergänzung | Skemo / Uzo | Guideline | Vitrino | Figma | Gvidanto | Browser-Test |
+|---|---|---|---|---|---|---|---|---|
+| B-1 | `titolo` | `focusable`: `tabindex=-1` an der Überschrift im Schattenbaum, `focus()` am Element fokussiert sie | Prop | Props-Tabelle | – (unsichtbar) | – | `get_ero` | ✓ |
+| B-2 | `mezurilo` | `label-hidden`: Label weg aus der Sicht, Name bleibt | Prop | Props-Tabelle | Zeile „label-hidden“ | BOOLEAN `label-visible` am Label | `get_ero` | ✓ |
+| B-3 | `tabelo` | Slot `empty` nimmt `butono` (nächster Schritt) | Uzo `empty`: text, butono; max 2, nesting 1 | Slots-Tabelle | Zeile „empty mit butono“ | – | `check_usage` | ✓ |
+| B-4 | `menuo` | `disabled`: Auslöser gesperrt (`aria-disabled`), öffnet nicht, ein offenes schließt | Prop | Props-Tabelle | Zeile „disabled“ | Variante disabled: Auslöser gesperrt | `get_ero` | ✓ |
+| B-5 | `avizo` | `details` nimmt `teksto kind=code` und Listen | Uzo `details`: text, teksto; nesting 1 | Slots-Tabelle | Zeile „details mit Liste und Code“ | – | `check_usage` | ✓ |
+| B-6 | `dialogo` | `content` nimmt `avizo`; erster Fokus auf das erste fokussierbare Kind | Uzo `content` + avizo, `composes.with` + avizo; Beschreibung von `open` | Slots, Together with, Props | – | – | `check_usage` | ✓ |
+| B-7 | `dialogo` | Enter in einem einzeiligen Feld des Inhalts bestätigt, solange keine Sperre greift | `a11y.keys` + Enter; Beschreibung von `open` | Props-Tabelle | – | – | `get_ero` (keys) | ✓ |
+| B-8 | `dialogo` | `message` aus mehreren Absätzen `teksto` | Uzo `message`: text, teksto; ohne max, nesting 1 | Slots-Tabelle | Zeile „message in Absätzen“ | – | `check_usage` | ✓ |
+| B-9 | `saltligilo` | `click` abbrechbar (dokumentiert), dazu `focus-only` | Prop | Props-Tabelle | – (Verhalten) | – | `get_ero` | ✓ |
+| B-10 | `teksto` | gemischter Fließtext: `ligilo`, `insigno`, `teksto kind=code` als Kinder | Uzo `label`: text, ligilo, insigno, teksto; ohne max, nesting 1; `composes.with` + insigno, teksto | Slots, Together with | Zeile „mit ligilo, insigno, code“ | – | `check_usage` | ✓ |
+
+**Nicht geändert:** `insigno` ohne Brand-Ton – eine Entscheidung, keine Lücke; die Grenze `brand-badge` bleibt.
+
+### Entwurfsentscheidungen
+
+#### D-01 Wo eine Ergänzung steht
+Ein Verhalten steht im Skemo (die Beschreibung eines Props, `a11y.keys`), eine Zusammensetzung in der Uzo (`slots`, `composes.with`). Daraus erzeugt das Make Kit die Guideline (Props-, Slots-Tabelle, „Together with“), und der Gvidanto antwortet daraus (`get_ero`, `check_usage`). Kein Satz steht zweimal.
+
+#### D-02 B-1 Fokus über die Delegation
+Alle Eroj hängen ihren Schattenbaum mit `delegatesFocus` an. `tabindex=-1` an der Überschrift (`[part="text"]`, Rolle heading) macht sie zum ersten fokussierbaren Bereich. `focus()` am Host landet dort, die Tab-Reihenfolge bleibt unberührt.
+
+#### D-03 B-2 wie `caption-hidden`
+Die Stilregel `:host([label-hidden]) [part="label"]` ist dieselbe Ausblendung wie `.fm-hidden` (abgeschnitten, aus dem Fluss), ohne Größenliteral. `aria-labelledby` des Meters zeigt weiter auf das Label. In Figma ist es ein BOOLEAN-Schalter wie bei `caption-hidden`. Er heißt `label-visible`, weil `label` schon die TEXT-Eigenschaft des Sets ist (`shownAs` im Plan).
+
+#### D-04 B-3 der Knopf zieht um
+Der Leerzustand ist ein `fm-plenstato` in der nativen Tabelle (Light DOM); dorthin kann kein Slot des `fm-tabelo` projizieren. Darum zieht die `fm-butono slot="empty"` der Anwendung in die `actions` des Zustands, solange er steht. Kommen Zeilen, zieht sie zurück in den Slot. Es bleibt dasselbe Element, Listener bleiben. Der Text des Zustands ist der Text des Slots ohne den Knopf.
+
+#### D-05 B-4 gesperrt, nicht deaktiviert
+`aria-disabled` am Auslöser (eigener wie eingesetzter, und an dessen innerem Control), kein natives `disabled`. Der Auslöser bleibt fokussierbar und sagt, warum nichts aufgeht. `#overlayOpen` öffnet nicht, solange `disabled` gilt, ob über Klick, Taste oder `open`; ein offenes Menü schließt. Gibt der Render die Sperre frei, nimmt er nur zurück, was er selbst gesetzt hat. In Figma zeigt die Variante `state=disabled` den Auslöser-Stellvertreter in den Farben eines gesperrten Eintrags (`item.fill`, `item.color`; der Auslöser im Web ist eine `butono` emphasis low, dieselbe tertiäre Familie), ohne die Maße zu binden: alle Varianten bleiben gleich groß.
+
+#### D-06 B-6 der erste fokussierbare
+`#focusFirst` versucht die Kinder des Inhalts der Reihe nach und hört beim ersten auf, das den Fokus hält (`:focus-within`). Eine Meldung (Rolle status oder alert im Schattenbaum) wird gelesen, nicht betreten, und wird übersprungen, auch wenn sie einen Schließen-Knopf hat. Danach wie bisher: Begründung, Bestätigung.
+
+#### D-07 B-7 Enter wie in einem Formular
+Ein `keydown` Enter, dessen Ursprung ein einzeiliges `input` in einem Kind des Inhalts ist, ruft `#confirm` auf. Damit gilt die Sperre (Begründung `required` leer, ungültiges Feld), und `confirm` bleibt abbrechbar. Ausgenommen: Mehrzeiliges (die Begründung, `tekstareo`), Kästchen, Schalter, Datei, Bereich, Farbe, eine laufende Eingabe-Komposition. `a11y.keys` nennt Enter, wie beim `kampo`.
+
+#### D-08 B-9 erst der Fokus, dann das Fragment
+Der Listener des Elements sitzt am Link im Schattenbaum und läuft vor jedem Listener am Host. Der Fokus ist also gesetzt, bevor die Seite `preventDefault` ruft; das Fragment bleibt dann stehen. `focus-only` macht dasselbe ohne Listener der Seite.
+
+#### D-09 B-5, B-8, B-10 – das Element konnte es schon
+Die Absätze in `message`, Liste und Code in `details`, Link, Badge und Code im Fließtext rendert das Element schon richtig (Browser-Tests grün schon im Rot-Commit). Gefehlt hat die Erlaubnis: `check_usage` wies jede dieser Zusammensetzungen ab (`uzo-slot-accepts`, `uzo-slot-max`, `uzo-slot-nesting`). Die Ergänzung ist die Uzo, mit Guideline und Gvidanto daraus.
+
+#### D-10 Vitrino
+Eine Funktion `additionRows` hängt an die Tabelle des Ero je eine Zeile für das, was sich zeigt (B-2, B-3, B-4, B-5, B-8, B-10). Die Wörter folgen den Fällen aus Arkitekturo; der Dialog liegt wie alle Dialoge der Vitrino hinter „Öffnen“.
+
+### Arkitekturo-Vertrag
+
+Geprüft gegen die Tabelle „Ero × genutzte Props, Slots und Achsenwerte“ der Nutzungsdatei: Kein Prop, Slot, Achsenwert, Ereignis oder Tag ist umbenannt oder entfernt; jede vorhandene Form gilt weiter.
+- Text in `empty` der Tabelle: wie bisher.
+- `message` als ein Text: wie bisher.
+- Sechs Felder und ein Problembereich im `content`: wie bisher.
+- `preventDefault` am Saltligilo: wie bisher, jetzt dokumentiert.
+- `dismiss` der Avizo: unverändert.
+
+Neu ist Verhalten an zwei Stellen, wo vorher keines war:
+- **Enter bestätigt im Dialog (B-7).** Der Formular-Dialog, der `confirm` bis zum Erfolg mit `preventDefault` hält, bekommt das Ereignis jetzt auch von Enter, abbrechbar wie vom Knopf.
+- **Der erste Fokus überspringt eine Meldung (B-6).**
+
+### Abweichungen
+
+1. **B-5, B-10: `teksto kind=code` heißt in der Uzo `teksto`.** Die Uzo kennt in `accepts` nur Namen von Eroj, `text` und `icon`, keine Props. „kind=code“ steht in der Guideline (Together with) und im Beispiel. Eine Liste (`ul`/`ol` mit Text) ist für `check_usage` Text. Keine Schemaänderung.
+2. **B-2: Prüfung im Browser über die Lage.** Der rote Test erwartete `toBeHidden()`. Ein abgeschnittenes Element zählt für Playwright als sichtbar, so wie die Caption mit `caption-hidden`. Der Test prüft jetzt, dass das Label keinen Platz nimmt (die Spur steht oben) und abgeschnitten ist.
+3. **B-5: Prüfung über den Zugänglichkeitsbaum.** Der erste Entwurf suchte den Code-Text mit `hasText` an der Rolle code; der Absatz im Schattenbaum enthält nur den Slot. Geprüft wird der Baum (`ariaSnapshot`: listitem, code). Korrigiert vor dem Rot-Commit.
+4. **Doku-Test:** Der rote Test verlangte wörtlich „kein Codetransfer“; der Satz heißt richtig „keinen Codetransfer“. Der Test nimmt beide Formen.
+5. **Pins der Daten** (`src/data/*.test.ts` von avizo, dialogo, menuo, mezurilo, saltligilo, tabelo, teksto, titolo), **der Figma-Pläne** (mezurilo: Eigenschaften, Inventar, Schalter; titolo: Eigenschaften; Plugin: Vorgaben der Sets) **und der Vitrino-Zählungen** (`datumoj.test.ts` und `check:vitrino`: dialogo, avizo, tabelo, mezurilo, teksto je ein Element mehr; der zweite Auslöser „Weitere Aktionen“ ist der gesperrte): Sie folgen den Ergänzungen, mit einem Kommentar „Nachlese 7 ②“. `check:vitrino` öffnet zusätzlich den Dialog von B-8 (axe) und prüft den gesperrten Auslöser.
+
+### Befunde / Mankoj
+
+- **F-1 `actions` mit nesting 0 (Befund, nicht behoben).** Die Uzo von `dialogo` und `avizo` erlaubt in `actions` den `butono` mit `nesting: 0`. `check_usage` meldet darum jeden Knopf dort als `uzo-slot-nesting`, vor und nach ② gleich. Die Gvidanto-Dialoge von ② lassen `actions` weg. Die Korrektur (nesting 1) kippt Antworten von `check_usage` und ist eine Entscheidung für den Maintainer.
+- **Mankoj:** keine. Kein Token fehlt.
+
+### Offen (für den Maintainer)
+
+1. **Abnahme ②:** je Ergänzung ein Browser-Test (`packages/eroj/test/nachlese-7-ergaenzungen.spec.ts`, drei Engines). In der Vitrino stehen die neuen Zeilen bei mezurilo, tabelo, menuo, avizo, dialogo und teksto. In Figma (Version vorher sichern, Plugin bauen und neu importieren, danach die Version wiederherstellen) zeigen der Schalter `label-visible` am mezurilo und der gesperrte Auslöser in `menuo` `state=disabled` die Ergänzungen.
+2. **Befund F-1** (nesting der `actions`): korrigieren oder lassen.
+3. **Release 0.2.0** mit der CJS-Entfernung (CHANGELOG „0.2.0 – geplant“).

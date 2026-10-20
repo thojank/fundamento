@@ -145,7 +145,8 @@ describe("the Uzo of the avizo (section ③, G5)", () => {
     expect(uzo?.slots).toEqual({
       heading: { accepts: ["text"], max: 1, nesting: 0 },
       message: { accepts: ["text"], required: true, max: 1, nesting: 0 },
-      details: { accepts: ["text"], nesting: 0 },
+      // Nachlese 7 ② B-5: the details take a teksto (kind code) beside text and lists.
+      details: { accepts: ["text", "teksto"], nesting: 1 },
       actions: { accepts: ["butono", "ligilo"], max: 2, nesting: 0 },
     });
     expect(uzo?.layout).toEqual({ size: "container", wrap: "allowed" });

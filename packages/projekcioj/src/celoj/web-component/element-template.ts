@@ -1351,6 +1351,20 @@ ${
     });
     root.addEventListener("input", () => this.#lock());
     this.addEventListener("input", () => this.#lock());
+    // Nachlese 7 ② B-7: Enter in a one-line field of the content confirms (a.11y keys), as a form
+    // would submit; #confirm keeps the lock (a required reason, an invalid field).
+    this.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" || !KEYS.includes("Enter") || event.isComposing || event.defaultPrevented) return;
+      const path = event.composedPath();
+      const origin = path[0];
+      if (!(origin instanceof HTMLInputElement) || NOT_ONE_LINE.has(origin.type)) return;
+      const inContent = path.some(
+        (node) => node instanceof HTMLElement && node.parentElement === this && node.getAttribute("slot") === "content",
+      );
+      if (!inContent) return;
+      event.preventDefault();
+      this.#confirm();
+    });
 `
     : "";
   // The render of a dialog (Spec 011 ②, D-12, E9): open shows it modal (the focus trap and the
@@ -1440,13 +1454,21 @@ ${
 
   /** The focus on opening (G4): the first field of the content, else the reason area, else the confirmation. */
   #focusFirst(): void {
-    const field = [...this.children].find(
+    // Nachlese 7 ② B-6: the first child of the content that takes the focus — a notice (role
+    // status or alert) is read, not entered, and takes none.
+    const content = [...this.children].filter(
       (child): child is HTMLElement =>
-        child instanceof HTMLElement && child.getAttribute("slot") === "content",
+        child instanceof HTMLElement &&
+        child.getAttribute("slot") === "content" &&
+        child.shadowRoot?.querySelector('[role="status"], [role="alert"]') == null,
     );
+    for (const child of content) {
+      child.focus();
+      if (child.matches(":focus-within")) return;
+    }
     const reason = this.propValue("reason") === "none" ? undefined : this.#reasonArea();
     const confirm = this.#actions().find((action) => action.getAttribute("emphasis") === "high");
-    (field ?? reason ?? confirm ?? this.#actions()[0])?.focus();
+    (reason ?? confirm ?? this.#actions()[0])?.focus();
   }
 
   /** Confirms: the event carries the reason and may be prevented, then the dialog stays open. */
@@ -1910,11 +1932,22 @@ ${
     }
     // The empty state (Spec 011 ④, D-09): without rows, the empty slot's text as a plenstato over
     // all columns; rows take it away.
+    // Nachlese 7 ② B-3: a butono in the empty slot is the next step — it moves into the state's
+    // actions while the state shows (the application's element, its listeners stay) and back into
+    // the slot when rows come; the words of the state are the slot's text without it.
     const body = table.querySelector(":scope > tbody");
     if (body !== null && NAMED_SLOTS.includes("empty")) {
       const rows = [...body.children].filter((row) => !row.hasAttribute("data-fm-empty"));
       const placeholder = body.querySelector(":scope > tr[data-fm-empty]");
-      const emptyText = this.#slotText("empty");
+      const emptySlot = this.shadowRoot?.querySelector('slot[name="empty"]');
+      const emptyNodes = emptySlot instanceof HTMLSlotElement ? emptySlot.assignedNodes({ flatten: true }) : [];
+      const isAction = (node: Node): node is HTMLElement =>
+        node instanceof HTMLElement && node.tagName.toLowerCase() === "fm-butono";
+      const emptyText = emptyNodes
+        .filter((node) => !isAction(node))
+        .map((node) => node.textContent ?? "")
+        .join("")
+        .trim();
       if (rows.length === 0 && emptyText !== "") {
         if (placeholder === null) {
           body.insertAdjacentHTML(
@@ -1923,8 +1956,22 @@ ${
           );
         }
         const state = body.querySelector(":scope > tr[data-fm-empty] fm-plenstato");
-        if (state instanceof HTMLElement && state.textContent !== emptyText) state.textContent = emptyText;
+        if (state instanceof HTMLElement) {
+          const words = state.firstChild;
+          if (!(words instanceof Text)) state.prepend(emptyText);
+          else if (words.data !== emptyText) words.data = emptyText;
+          for (const action of emptyNodes.filter(isAction)) {
+            action.setAttribute("slot", "actions");
+            action.setAttribute("data-fm-empty-action", "");
+            state.append(action);
+          }
+        }
       } else if (placeholder !== null) {
+        for (const action of placeholder.querySelectorAll("[data-fm-empty-action]")) {
+          action.removeAttribute("data-fm-empty-action");
+          action.setAttribute("slot", "empty");
+          this.append(action);
+        }
         placeholder.remove();
       }
     }
@@ -2206,6 +2253,8 @@ ${
   }
 
   #overlayOpen(): void {
+    // Nachlese 7 ② B-4: a locked menu does not open, by its trigger, its keys or its open prop.
+    if (HAS_PROP.has("disabled") && this.propValue("disabled") === true) return;
     const layer = this.#overlayLayer();
     const trigger = this.#overlayTrigger();
     if (trigger !== undefined) this.#overlayAnchor(trigger);
@@ -2360,6 +2409,9 @@ ${
   // The menu's own ways: rows per entry, the keys of the Skemo, select with the entry's id.
   const menuMethods = isMenu
     ? `
+  /** Whether the render locked the trigger (Nachlese 7 ② B-4): only then it unlocks it again. */
+  #menuLocked = false;
+
   /** Focus goes to the trigger of the menu. */
   override focus(options?: FocusOptions): void {
     this.#overlayTrigger()?.focus(options);
@@ -2763,6 +2815,13 @@ ${
   const headingRender = isHeading
     ? `    const level = String(this.propValue("level") ?? "1");
     control.setAttribute("aria-level", level);
+    // Nachlese 7 ② B-1: a focusable heading is a target of focus() (the host delegates it), never
+    // a stop of the tab order.
+    if (HAS_PROP.has("focusable") && this.propValue("focusable") === true) {
+      if (control.getAttribute("tabindex") !== "-1") control.setAttribute("tabindex", "-1");
+    } else if (control.hasAttribute("tabindex")) {
+      control.removeAttribute("tabindex");
+    }
     if (this.getAttribute("size") === null) {
       const derived = SIZE_OF_LEVEL[level] ?? "headline-4";
       root.setAttribute("data-size", derived);
@@ -3006,6 +3065,16 @@ ${isStacking ? "    this.#autoLayout();\n" : ""}`
     control.setAttribute("aria-label", menuName);
     this.#overlayBindTrigger();
     this.#overlayTriggerAria("aria-haspopup", "menu");
+    // Nachlese 7 ② B-4: disabled locks the trigger (aria-disabled, it stays focusable and says
+    // why nothing opens) and closes an open menu.
+    const locked = this.propValue("disabled") === true;
+    if (locked) {
+      this.#overlayTriggerAria("aria-disabled", "true");
+      if (control.matches(":popover-open")) this.#overlayClose();
+    } else if (this.#menuLocked) {
+      for (const target of [this.#overlayTrigger(), this.#overlayTriggerControl()]) target?.removeAttribute("aria-disabled");
+    }
+    this.#menuLocked = locked;
     if (this.#overlayTriggerControl()?.hasAttribute("aria-expanded") !== true) {
       this.#overlayTriggerAria("aria-expanded", String(control.matches(":popover-open")));
     }
@@ -3390,7 +3459,10 @@ ${isStacking ? "    this.#autoLayout();\n" : ""}`
   // The skip link moves the focus to its target (G5): a landmark takes it once it may (tabindex
   // -1, written where the markup has none); the fragment of the link is the platform's.
   const skipInit = isSkip
-    ? `    control.addEventListener("click", () => {
+    ? `    control.addEventListener("click", (event) => {
+      // Nachlese 7 ② B-9: focus-only keeps the fragment of the page (a hash router reads it); the
+      // click stays cancelable for the page as well — the focus moves first, either way.
+      if (HAS_PROP.has("focus-only") && this.propValue("focus-only") === true) event.preventDefault();
       const to = this.propValue("to");
       const target = typeof to === "string" && to !== "" ? document.getElementById(to) : null;
       if (target === null) return;
@@ -3469,7 +3541,7 @@ const VALUED_TEXTS = PROPS.filter((prop) => prop.kind === "enum").flatMap((prop)
   }),
 );
 /** The keys the Skemo names (Space, Enter): a toggle turns with these alone (Spec 010 ②). */
-const KEYS = SKEMO.a11y.keys as readonly string[];
+const KEYS = SKEMO.a11y.keys as readonly string[];${isDialog ? '\n/** The inputs Enter does not confirm from (Nachlese 7 ② B-7): no one-line text. */\nconst NOT_ONE_LINE: ReadonlySet<string> = new Set(["checkbox", "radio", "button", "submit", "reset", "file", "range", "color"]);' : ""}
 ${
   isIcon
     ? `/** The names of the Ikonaro and whether each mirrors in right-to-left writing (Spec 014 ②). */

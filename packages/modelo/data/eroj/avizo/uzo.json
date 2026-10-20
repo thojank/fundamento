@@ -156,9 +156,10 @@
       },
       "details": {
         "accepts": [
-          "text"
+          "text",
+          "teksto"
         ],
-        "nesting": 0
+        "nesting": 1
       },
       "actions": {
         "accepts": [

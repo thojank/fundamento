@@ -2571,7 +2571,7 @@ describe("Nachlese 7 ② documentation (specs/021-nachlese-7)", () => {
     );
     expect(first).toContain("### Hinweis für Arkitekturo");
     const note = first.slice(first.indexOf("### Hinweis für Arkitekturo"));
-    expect(note).toContain("kein Codetransfer");
+    expect(note).toMatch(/keinen? Codetransfer/);
     const own = tasks.slice(tasks.indexOf("## ② Ergänzungen (0.2.0)"));
     expect(own).toContain("**T2111");
     expect(own).toMatch(/rot `[0-9a-f]{7}`/);

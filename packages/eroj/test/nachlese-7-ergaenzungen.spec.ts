@@ -45,8 +45,20 @@ test.describe("Nachlese 7 ② (0.2.0)", () => {
       out,
       '<fm-mezurilo id="m" value="40" label-hidden>Konformität<span slot="value-text">40 %</span></fm-mezurilo>',
     );
-    const label = page.locator("#m").locator('[part="label"]');
-    await expect(label).toBeHidden();
+    // Hidden from sight as the caption of a tabelo is (clipped, out of the flow): the track stands
+    // where the label stood, the label takes no space.
+    const place = await page.locator("#m").evaluate((element) => {
+      const control = element.shadowRoot?.querySelector('[part="control"]');
+      const track = element.shadowRoot?.querySelector('[part="track"]');
+      const label = element.shadowRoot?.querySelector('[part="label"]');
+      return {
+        track: Math.round(
+          (track?.getBoundingClientRect().top ?? 0) - (control?.getBoundingClientRect().top ?? 0),
+        ),
+        clip: label instanceof HTMLElement ? getComputedStyle(label).clipPath : "",
+      };
+    });
+    expect(place).toEqual({ track: 0, clip: "inset(50%)" });
     await expect(page.getByRole("meter", { name: "Konformität" })).toBeAttached();
     await expect(page.locator("#m").locator('[part="track"]')).toBeVisible();
   });

@@ -31,6 +31,12 @@
         "kind": "boolean",
         "default": false,
         "description": "Whether the menu is shown; the trigger toggles it, an entry, Escape and a click outside close it, and the attribute follows."
+      },
+      {
+        "name": "disabled",
+        "kind": "boolean",
+        "default": false,
+        "description": "Locks the trigger (Nachlese 7 ② B-4): it says aria-disabled, the menu does not open and an open one closes — for instance while a write of its row runs."
       }
     ],
     "states": [

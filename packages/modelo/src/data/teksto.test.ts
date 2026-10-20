@@ -115,9 +115,10 @@ describe("the Uzo of the teksto (section ③, G6)", () => {
 
   it("composes in a page section with the ligilo; requires the label; size container, wraps; no text rule", () => {
     expect(uzo?.composes.containers.map((container) => container.name)).toEqual(["page-section"]);
-    expect(uzo?.composes.with.map((entry) => entry.ero)).toEqual(["ligilo"]);
+    // Nachlese 7 ② B-10: running text holds a link, a badge and code (phrasing content).
+    expect(uzo?.composes.with.map((entry) => entry.ero)).toEqual(["ligilo", "insigno", "teksto"]);
     expect(uzo?.slots).toEqual({
-      label: { accepts: ["text"], max: 1, required: true, nesting: 0 },
+      label: { accepts: ["text", "ligilo", "insigno", "teksto"], required: true, nesting: 1 },
     });
     expect(uzo?.layout).toEqual({ size: "container", wrap: "allowed" });
     expect(uzo?.content).toEqual([]);
