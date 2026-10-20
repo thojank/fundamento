@@ -91,7 +91,13 @@ describe("Figma: example frames of instances, outside the sets (E3)", () => {
       }[];
     };
     expect(plan.components.map((component) => component.set)).not.toContain("sxelo");
-    expect(plan.sxablonoj?.map((entry) => entry.name)).toEqual(["pagxo", "sxelo"]);
+    // Spec 020 ②: formularo and filtrilo beside them.
+    expect(plan.sxablonoj?.map((entry) => entry.name)).toEqual([
+      "filtrilo",
+      "formularo",
+      "pagxo",
+      "sxelo",
+    ]);
     const sxelo = plan.sxablonoj?.find((entry) => entry.name === "sxelo");
     expect(sxelo?.regions.map((region) => region.name)).toEqual([
       "brand",
@@ -101,7 +107,7 @@ describe("Figma: example frames of instances, outside the sets (E3)", () => {
       "main",
     ]);
     const sets = new Set(plan.components.map((component) => component.set));
-    for (const region of [...(sxelo?.regions ?? []), ...(plan.sxablonoj?.[0]?.regions ?? [])])
+    for (const region of (plan.sxablonoj ?? []).flatMap((entry) => entry.regions))
       for (const item of region.items)
         if (item.set !== undefined) expect(sets.has(item.set), item.set).toBe(true);
     expect(sxelo?.regions.find((region) => region.name === "nav")?.items[0]?.set).toBe("navigado");
@@ -126,7 +132,7 @@ describe("the Vitrino section Sxablonoj", () => {
 describe("formularo and filtrilo (Spec 020 ②)", () => {
   it("web: the form sends submit itself (novalidate), the filter bar is the landmark search with a polite status", () => {
     const form = read("eroj/src/generated/fm-formularo.ts");
-    expect(form).toContain('customElements.define("fm-formularo"');
+    expect(form).toContain('customElements.get("fm-formularo")');
     for (const region of ["problems", "fields", "actions"])
       expect(form, region).toContain(`name="${region}"`);
     expect(form).toContain('new CustomEvent("submit"');

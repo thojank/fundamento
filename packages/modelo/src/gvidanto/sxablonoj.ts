@@ -249,6 +249,25 @@ export function evaluateSxablonoUsage(
           );
         }
       }
+      if (region.one !== undefined) {
+        const wanted = Object.entries(region.one);
+        const ones = children.filter(
+          (child) =>
+            typeof child === "object" &&
+            "ero" in child &&
+            wanted.every(([prop, value]) => String(child.props?.[prop] ?? "") === value),
+        );
+        if (ones.length !== 1) {
+          const named = wanted.map(([prop, value]) => `${prop}=${value}`).join(", ");
+          at(
+            index,
+            pointer,
+            "sxablono-region-one",
+            `The region ${region.name} of the ${name} of instance ${index} holds ${ones.length} children with ${named}; it takes exactly one.`,
+            `Give exactly one child of the region ${region.name} ${named}.`,
+          );
+        }
+      }
       if (region.primary !== undefined) {
         const primary = children.filter(
           (child) =>

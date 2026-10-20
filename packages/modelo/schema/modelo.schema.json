@@ -3318,6 +3318,17 @@
           "type": "integer",
           "minimum": 0
         },
+        "one": {
+          "description": "Exactly one child of the region has these props (Spec 020 ②: the one submit button of a form).",
+          "type": "object",
+          "minProperties": 1,
+          "propertyNames": {
+            "$ref": "#/$defs/Name"
+          },
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
         "live": {
           "type": "string",
           "enum": ["polite"]
@@ -3370,6 +3381,32 @@
         "kialo": {
           "type": "string",
           "minLength": 1
+        },
+        "children": {
+          "description": "What the answer names per region for this goal (Spec 020 ②: a sign-in form holds a kampo of kind password and a butono of type submit).",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "region": {
+                "$ref": "#/$defs/Name"
+              },
+              "ero": {
+                "$ref": "#/$defs/Name"
+              },
+              "props": {
+                "type": "object",
+                "propertyNames": {
+                  "$ref": "#/$defs/Name"
+                },
+                "additionalProperties": {
+                  "oneOf": [{ "type": "string" }, { "type": "boolean" }]
+                }
+              }
+            },
+            "required": ["region", "ero"],
+            "additionalProperties": false
+          }
         }
       },
       "required": ["goal", "keywords", "props", "kialo"],

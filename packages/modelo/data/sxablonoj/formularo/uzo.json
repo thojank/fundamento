@@ -1,0 +1,58 @@
+{
+  "$schema": "../../../schema/modelo.schema.json#/$defs/SxablonoUzoFile",
+  "uzo": {
+    "id": "uzo_01M5D2JH6G7448QCJ45MW66Y8H",
+    "sxablono": "sxa_01M5D2JGEAJRP4ANKTTBRY3EH9",
+    "skemo": "ske_01M5D2JGTG64E2RX99DFXQC23Z",
+    "purpose": "Collects what a task needs and sends it once: the fields a person fills, what went wrong as a whole at the top, one submit button — the application validates and sends, the fields show their errors.",
+    "instead": [
+      {
+        "goal": "filters",
+        "keywords": {
+          "en": ["filter-form"],
+          "de": ["filterformular"]
+        },
+        "ero": "filtrilo",
+        "kialo": "Filters over a list are a filtrilo, because they apply as they change and send nothing; a form is filled and then sent."
+      }
+    ],
+    "boundary": [
+      {
+        "case": "wizard",
+        "action": "ask-human",
+        "keywords": {
+          "en": ["wizard", "multi-step"],
+          "de": ["assistent", "mehrschrittig"]
+        },
+        "kialo": "A form over several steps is a flow of round 2, because each step keeps what the person entered and says where they are; a person decides until it comes."
+      }
+    ],
+    "composes": {
+      "containers": [
+        {
+          "name": "page",
+          "kialo": "A form stands in a section of a pagxo or in the content of a dialogo, because it belongs to the task the page or the dialog is about."
+        }
+      ],
+      "with": [
+        {
+          "ero": "kampo",
+          "kialo": "A short entry is a kampo, because one line holds it; Enter in it sends the form."
+        },
+        {
+          "ero": "butono",
+          "kialo": "The form is sent by its one butono of type submit, because one action finishes the task."
+        },
+        {
+          "ero": "avizo",
+          "kialo": "What went wrong with the form as a whole stands at its top as an avizo, because the person reads it before the fields."
+        }
+      ],
+      "never": [],
+      "spacing": {
+        "owner": "container",
+        "regulo": "spacing-owned-by-container"
+      }
+    }
+  }
+}

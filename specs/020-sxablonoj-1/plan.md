@@ -185,7 +185,91 @@ Alle früheren Dialoge der e2e-Tests sind unverändert (MCP 363, Modelo-Dialoge 
 
 ## ② formularo und filtrilo
 
-Folgt im PR ②.
+**Branch:** `261020-spec-020-formular-116ba2` (gestapelt auf ① `261020-spec-020-grundlage-116ba2`) · **Datum:** 2026-10-20 · **Stand:** zur Abnahme; Arbeitsnamen (E4).
+
+### Zusammenfassung
+
+1. **`formularo`** (kind flow):
+   - `problems` (avizo, oben), `fields` (die acht Formular-Eroj, Standard-Slot), `actions` (butono, genau einer mit `type=submit`, höchstens ein primärer).
+   - Prop `label`: der Name der Landmarke form.
+   - Das Element sendet `submit` einmal, über den Submit-Knopf oder Enter in einem einzeiligen Feld, mit den Werten der Felder nach `name`. Ein ungültiges Feld hält es an, zeigt seinen Fehler am Feld und nimmt den Fokus (novalidate: keine Blase des Browsers).
+2. **`filtrilo`** (kind flow):
+   - Landmarke `search` mit Namen (`label`, Pflicht).
+   - `fields` in einer Zeile, die umbricht; `actions`; `status` (Trefferzahl, `role=status`, polite).
+   - Die Bindung an die URL bleibt bei der Anwendung (G5).
+3. **Regionen und Ziele:**
+   - Eine Region kann verlangen, dass genau ein Kind bestimmte Props hat (`one`, Regel `sxablono-region-one`).
+   - Ein Ziel nennt, was je Region steht (`children`). „Formular für die Anmeldung mit Token.“ ist die formularo mit `kampo kind=password` und `butono type=submit`.
+4. **suggest_ero:**
+   - Ein Sxablono antwortet, wenn sein Stichwort das **erste Wort** der Anfrage ist (nach einem Artikel); bisher reichte das Kopfwort (D-11).
+   - Die Grenzen des vorgeschlagenen Sxablono sprechen mit („Assistent“ → Grenze wizard der formularo).
+5. **Grenzen, die damit lösbar werden:**
+   - `dialogo.long-form` nannte null und nennt jetzt die formularo (Jugxo).
+   - Der Container `filter-bar` des elektilo nennt die filtrilo.
+6. **Projektionen:** Web, React, Make Kit (`patterns/formularo.md`, `patterns/filtrilo.md` mit Props-Tabelle), Figma-Beispielrahmen, Vitrino (beide in drei Breiten), Parität (Props der Sxablonoj jetzt auf allen drei Seiten).
+
+### Entwurfsentscheidungen
+
+#### D-11 Das erste Wort statt des Kopfs
+In ① entschied das Kopfwort, also der Text vor dem ersten Verbindungswort. Bei „Tabs, um zwischen Liste und Formular zu wechseln“ steht das erste Verbindungswort („zu“) spät, und „Formular“ läge im Kopf; das Gleichgewicht von langetaro und elektilo (Rückfrage, Nachlese 3 G2) wäre gekippt. Ein Sxablono antwortet darum nur, wenn sein Stichwort das erste Wort der Anfrage ist (nach ein, eine, der, die, das, a, an, the). Das betrifft „Rahmen …“, „Seitenkopf …“, „Formular …“ und „Filter …“. Die Dialoge von ① bleiben, alle früheren auch.
+
+#### D-12 Das spezifischere Ziel und die Grenzen des Sxablono
+Unter den Zielen des Sxablono, das das erste Wort trifft, antwortet das, dessen Stichwort im ganzen Text am längsten trifft. „Formular für die Anmeldung mit Token“ trifft das Ziel sign-in (anmeldung, token) vor form, und dessen `children` nennen das Passwortfeld und den Submit-Knopf.
+
+Trifft der Text eine Grenze dieses Sxablono, spricht die Grenze. Das gilt auch, wenn eine Antwort über eine use-instead-Alternative zu einem Sxablono führt: „Assistent“ erreicht über `dialogo.long-form` die formularo, und deren Grenze wizard (ask-human, Runde 2) antwortet.
+
+#### D-13 Das eine Ereignis der Formularo (G7)
+Ein natives `<form>` im Schattenbaum besäße die Felder nicht: Der Formularbesitzer folgt dem DOM, nicht dem Schattenbaum, und die Felder liegen im Light DOM. Darum nimmt das Element den Klick auf einen `fm-butono type=submit` unter seinen Kindern und Enter in einem einzeiligen Feld selbst.
+- Es fragt jedes Feld `checkValidity()`. Ein ungültiges Feld zeigt dann seinen Fehler, wie nach einem Absenden.
+- Es setzt den Fokus auf das erste ungültige Feld.
+- Sonst sendet es `submit` (abbrechbar, `detail.values` nach `name`; Kästchen und Schalter nur, wenn angehakt).
+
+Kein weiteres Ereignis, keine Absendelogik (G5). Die Landmarke form heißt nach `label`.
+
+#### D-14 Die Filterleiste
+`role="search"` mit `aria-label` aus `label` (Pflicht), die Felder in einer Zeile mit `flex-wrap: wrap` und die Fußzeile mit Status und Aktionen. Der Status ist `role="status"` mit `aria-live="polite"` und darum nie versteckt, auch leer nicht. `check_usage` zählt die Landmarke search einmal je Seite.
+
+#### D-15 Props der Sxablonoj in allen Projektionen
+Das Element beobachtet die Props seiner Skemo (`observedAttributes`); die Guideline hat eine Props-Tabelle. Die Inventare der Parität lesen beide: Web aus der Konstante `PROPS` des Elements, Make Kit aus der Tabelle. React hatte sie schon (Typen).
+
+### Arkitekturo-Abdeckung
+
+| Baustein | Fundamento | offen |
+|---|---|---|
+| `ark-form` | `formularo` (problems, fields, actions mit einem Submit; `submit` einmal; Fehler an den Feldern) | `onSubmit` wird zum Ereignis `submit` mit `detail.values`; Absenden und Antwort bleiben Anwendung |
+| `ark-filterbar` | `filtrilo` (search mit Namen, fields umbrechend, actions, status polite) | `setStatus(text)` wird zum Text in `status` |
+| `ark-query-filters` | `filtrilo`: die Felder einer Zeile | Bindung an die Route bleibt Anwendung (G5) |
+
+### Gekippte Dialoge
+
+| Dialog | vorher | jetzt | Jugxo |
+|---|---|---|---|
+| „Formularseite“ (Alternative long-form des dialogo) | Rückfrage (ero null) | Sxablono `formularo` | `jug_01M5D2JHJJR6AVV6B3WMQ3748E` |
+| „Assistent“, „mehrschrittig“ | Rückfrage (long-form null) | Rückfrage über die Grenze wizard der formularo (Kialo der Runde 2) | dieselbe |
+
+Alle früheren Dialoge der e2e-Tests sind unverändert, auch „Tabs, um zwischen Liste und Formular zu wechseln“ (Rückfrage, D-11).
+
+### Abweichungen
+
+1. **Der Kopf wird zum ersten Wort** (D-11). Das ändert die Entscheidung aus ① D-04; die Dialoge von ① bleiben.
+2. **Ein roter Test erwartete für „Tabs, um zwischen Liste und Formular zu wechseln“ den langetaro.** Die Antwort war und bleibt eine Rückfrage zwischen langetaro und elektilo; der Test prüft das jetzt.
+3. **Pins, die folgen:**
+   - die Liste der Sxablonoj in den Tests von ① (Modelo, MCP, Figma-Plan und -Plugin)
+   - `RULE_IDS` 174 → 175
+   - die Alternative long-form im Daten-Pin des dialogo
+   - die Dateilisten des Web-Celo und des Make Kits (im Paket 51 Dateien)
+   - der Test „der kampo zeigt seine Hilfe in jeder Zelle“ der Vitrino misst nur noch den Abschnitt des kampo (die Beispiele der Sxablonoj halten ein kampo mit eigener Hilfe)
+4. **Der Browser-Test des Absendens** wartet auf die Definition des Elements und den Wert im Feld, bevor er klickt: Unter paralleler Last kam der Klick vor dem Wert (einmal in Firefox).
+
+### Befunde / Mankoj
+
+- **F-4** `ask-human`-Grenzen eines Sxablono prüft `uzo-boundary-covered` nicht. Das ist eine Regel für Eroj; ein Sxablono-Ziel deckt keine Ero-Grenze ab und umgekehrt. Festgehalten, nicht erweitert.
+- **Mankoj:** keine; kein Token fehlt.
+
+### Offen (für den Maintainer)
+
+1. **E4:** die Namen `formularo` und `filtrilo` bestätigen.
+2. **D-11** bestätigen (das erste Wort, nicht der Kopf).
 
 ## ③ Inhalt
 

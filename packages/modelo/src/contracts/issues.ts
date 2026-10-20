@@ -226,6 +226,8 @@ export const RULE_IDS = [
   "sxablono-region-accepts",
   "sxablono-region-max",
   "sxablono-region-props",
+  // Spec 020 ②: exactly one child of a region with the props it names (the submit button).
+  "sxablono-region-one",
   "sxablono-landmark-twice",
   // Projekcio lints (Spec 003, D-17)
   "css-physical-property",

@@ -53,8 +53,8 @@ describe("what a publish would contain (T020)", () => {
       // packs it — `npm publish` by hand left it out, pnpm had taken it from the repository root.
       // Spec 008: one guideline per Ero, the ligilo's next to the butono's.
       // Nachlese 6 N6-3: without the second (CJS) build, 47 files; Spec 020 ①: and a guideline
-      // per Sxablono in patterns/, 49.
-      expect(files).toHaveLength(49);
+      // per Sxablono in patterns/, 49; Spec 020 ②: formularo and filtrilo, 51.
+      expect(files).toHaveLength(51);
       expect(files).toEqual([
         "LICENSE",
         "README.md",
@@ -99,6 +99,8 @@ describe("what a publish would contain (T020)", () => {
         "guidelines/foundations/dimensioj.md",
         "guidelines/foundations/spacing.md",
         "guidelines/foundations/typography.md",
+        "guidelines/patterns/filtrilo.md",
+        "guidelines/patterns/formularo.md",
         "guidelines/patterns/pagxo.md",
         "guidelines/patterns/sxelo.md",
         "guidelines/setup.md",

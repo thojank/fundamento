@@ -4358,6 +4358,16 @@
       "kialo": "Die Titelzeile mit Aktionen ist die Seite: Es gibt jetzt ein Sxablono dafür, die Rückfrage entfällt.",
       "date": "2026-10-20",
       "context": "Spec 020 ① (G1): eine Antwort, die stand, ändert sich (OP-12) — die Grenze heading-with-actions des titolo war ask-human („a person decides … until the Sxablonoj come“), jetzt use-instead pagxo. suggest_ero „toolbar beside the section“, „Titelzeile“, „Kopfzeile“ → Sxablono pagxo (Grenze titolo.heading-with-actions daneben) statt Rückfrage."
+    },
+    {
+      "id": "jug_01M5D2JHJJR6AVV6B3WMQ3748E",
+      "ref": {
+        "ero": "ero_01M51T74A5H5FGY35BQ90VQEGH"
+      },
+      "decision": "approved",
+      "kialo": "Ein langes Formular ist eine Seite mit einem Formular: Es gibt jetzt ein Sxablono dafür.",
+      "date": "2026-10-20",
+      "context": "Spec 020 ② (G1): eine Antwort, die stand, ändert sich (OP-12) — die Alternative long-form des dialogo nannte null („a person decides where it goes“), jetzt formularo. suggest_ero „Formularseite“ → Sxablono formularo statt Rückfrage; „Assistent“, „mehrschrittig“ → Grenze wizard des formularo (ask-human) wie bisher eine Rückfrage, jetzt mit der Kialo der Runde 2."
     }
   ]
 }

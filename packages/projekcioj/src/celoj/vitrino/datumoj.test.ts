@@ -252,7 +252,12 @@ describe("the Vitrino after the acceptances (Nachlese 2026-10-13)", () => {
   // help and no error text. The error text stands only where the Skemo allows it: the constraint
   // "slot error filled ⇒ invalid" keeps it out of every other column.
   it("the kampo shows the help text in every cell and the error text only in the invalid column (F-5)", () => {
-    const cells = html.match(/<fm-kampo[^>]*>.*?<\/fm-kampo>/g) ?? [];
+    // The cells of the kampo's own section (Spec 020 ②: the Sxablonoj hold a kampo too).
+    const own = html.slice(
+      html.indexOf('id="fm-vitrino-kampo"'),
+      html.indexOf("</section>", html.indexOf('id="fm-vitrino-kampo"')),
+    );
+    const cells = own.match(/<fm-kampo[^>]*>.*?<\/fm-kampo>/g) ?? [];
     expect(cells.length).toBeGreaterThan(10);
     const withHelp = cells.filter((cell) => cell.includes('<span slot="help">Hinweis</span>'));
     expect(withHelp.length).toBe(cells.length);

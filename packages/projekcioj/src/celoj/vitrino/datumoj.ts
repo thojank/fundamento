@@ -676,6 +676,10 @@ function sxablonoExample(name: string): string {
   if (name === "pagxo") return VITRINO_PAGXO;
   if (name === "sxelo")
     return `<fm-sxelo><span slot="brand">Fundamento</span><span slot="principal">Erika Mustermann</span><fm-navigado slot="nav" label="Hauptnavigation" page="standards"><a href="#fm-vitrino-sxablonoj" data-page="standards">Standards</a><a href="#fm-vitrino-sxablonoj" data-page="projekte">Projekte</a></fm-navigado><fm-avizo slot="notices" intent="success">Gespeichert.</fm-avizo>${VITRINO_PAGXO}</fm-sxelo>`;
+  if (name === "formularo")
+    return '<fm-formularo label="Anmeldung"><fm-kampo kind="password" name="token" required>Token<span slot="help">Der Token steht in den Einstellungen des Kontos.</span></fm-kampo><fm-butono slot="actions" type="submit" emphasis="high">Anmelden</fm-butono></fm-formularo>';
+  if (name === "filtrilo")
+    return `<fm-filtrilo label="Standards filtern"><fm-elektilo name="status" empty-label="Alle">Status<data slot="options" value="valid">Gültig</data><data slot="options" value="draft">Entwurf</data></fm-elektilo><fm-kampo kind="search" name="q">Suche</fm-kampo><fm-butono slot="actions" emphasis="low">Filter zurücksetzen</fm-butono><span slot="status">3 von 7 Standards</span></fm-filtrilo>`;
   return `<fm-${name}></fm-${name}>`;
 }
 

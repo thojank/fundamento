@@ -1076,6 +1076,10 @@
       "status": "retired",
       "type": "jugxo"
     },
+    "jug_01M5D2JHJJR6AVV6B3WMQ3748E": {
+      "status": "active",
+      "type": "jugxo"
+    },
     "kpa_01M2VEEE9HREQTY2499C9JS05Q": {
       "status": "active",
       "type": "kontrastParo"
@@ -1884,11 +1888,27 @@
       "status": "active",
       "type": "skemo"
     },
+    "ske_01M5D2JGTG64E2RX99DFXQC23Z": {
+      "status": "active",
+      "type": "skemo"
+    },
+    "ske_01M5D2JGTHDE3PAJ6W09E2X0PJ": {
+      "status": "active",
+      "type": "skemo"
+    },
     "sxa_01M5CYB6RYTJHVH5RJPJYZE8QX": {
       "status": "active",
       "type": "sxablono"
     },
     "sxa_01M5CYB6RYTJHVH5RJPJYZE8QY": {
+      "status": "active",
+      "type": "sxablono"
+    },
+    "sxa_01M5D2JGEAJRP4ANKTTBRY3EH9": {
+      "status": "active",
+      "type": "sxablono"
+    },
+    "sxa_01M5D2JGEBD0AB4KSN8X4Q3M2F": {
       "status": "active",
       "type": "sxablono"
     },
@@ -3457,6 +3477,14 @@
       "type": "uzo"
     },
     "uzo_01M5CYB7K43SNJWSQYFZ7QH2BG": {
+      "status": "active",
+      "type": "uzo"
+    },
+    "uzo_01M5D2JH6G7448QCJ45MW66Y8H": {
+      "status": "active",
+      "type": "uzo"
+    },
+    "uzo_01M5D2JH6HVHQ58CSKW67AXJ1D": {
       "status": "active",
       "type": "uzo"
     }

@@ -72,6 +72,8 @@ export interface SuggestEroOutput {
     | null;
   /** The regions of the suggested Sxablono (Spec 020, G3): what stands where. */
   regions?: SuggestedRegion[];
+  /** What its goal names per region (Spec 020 ②: the password field and the submit button). */
+  children?: { region: string; ero: string; props?: Record<string, string | boolean> }[];
   kialo?: string;
   regulo?: ReguloRef;
   /** The boundary or alternative that answers (Spec 007); absent when a Skemo goal answers. */
@@ -418,25 +420,83 @@ function regionsOf(entry: LoadedSxablono): SuggestedRegion[] {
   }));
 }
 
-/** The answer with a Sxablono for the text, if one of its goals hits (Spec 020, G3). */
+/** The articles a request may begin with before the thing it names (Spec 020 ②). */
+const ARTICLES: ReadonlySet<string> = new Set([
+  "ein",
+  "eine",
+  "einen",
+  "einem",
+  "der",
+  "die",
+  "das",
+  "den",
+  "dem",
+  "a",
+  "an",
+  "the",
+]);
+
+/** The first word of a request after an article: the thing it names (Spec 020 ②). */
+function leadWordOf(text: string): string | undefined {
+  for (const match of text.normalize("NFC").matchAll(/[\p{L}\p{N}-]+/gu)) {
+    if (!ARTICLES.has(match[0].toLowerCase())) return match[0];
+  }
+  return undefined;
+}
+
+/**
+ * The answer with a Sxablono whose goal `lead` hits (Spec 020, G3). Of its goals the one the
+ * whole text hits with the longest keyword answers — the sign-in form before the form — else the
+ * goal of the lead. A boundary of the Sxablono the text hits speaks instead (a form over several
+ * steps asks a person).
+ */
 function sxablonoAnswer(
   modelo: Modelo,
-  text: string,
+  lead: string,
   goalText: string,
   pass: Pass,
 ): SuggestEroOutput | undefined {
   for (const entry of modelo.sxablonoj ?? []) {
-    const hit = sxablonoGoalOf(entry, text, pass);
+    const hit = sxablonoGoalOf(entry, lead, pass);
     if (hit === undefined) continue;
-    return {
-      goal: goalText,
-      matched: { goal: hit.goal.goal, keyword: hit.keyword, lingvo: hit.lingvo },
-      suggestion: { sxablono: entry.sxablono.name, props: { ...hit.goal.props } },
-      regions: regionsOf(entry),
-      kialo: hit.goal.kialo,
-    };
+    return sxablonoOutput(entry, sxablonoGoalOf(entry, goalText, pass) ?? hit, goalText, pass);
   }
   return undefined;
+}
+
+/** The answer for a Sxablono and its goal, or its boundary where the text hits one. */
+function sxablonoOutput(
+  entry: LoadedSxablono,
+  hit: { goal: SxablonoGoal; keyword: string; lingvo: string },
+  goalText: string,
+  pass: Pass,
+): SuggestEroOutput {
+  for (const boundary of entry.uzo?.boundary ?? []) {
+    const word = uzoKeywordHit(boundary.keywords, goalText, pass.lingvo, pass.inflect);
+    if (word === undefined) continue;
+    return {
+      goal: goalText,
+      matched: { goal: boundary.case, keyword: word.keyword, lingvo: word.lingvo },
+      suggestion:
+        boundary.action === "use-instead" && boundary.ero !== undefined
+          ? { ero: boundary.ero, props: {} }
+          : null,
+      boundary: {
+        ero: entry.sxablono.name,
+        case: boundary.case,
+        action: boundary.action,
+        kialo: boundary.kialo,
+      },
+    };
+  }
+  return {
+    goal: goalText,
+    matched: { goal: hit.goal.goal, keyword: hit.keyword, lingvo: hit.lingvo },
+    suggestion: { sxablono: entry.sxablono.name, props: { ...hit.goal.props } },
+    regions: regionsOf(entry),
+    ...(hit.goal.children === undefined ? {} : { children: structuredClone(hit.goal.children) }),
+    kialo: hit.goal.kialo,
+  };
 }
 
 /**
@@ -449,9 +509,11 @@ function sxablonoAnswer(
  */
 export function suggestEro(modelo: Modelo, input: SuggestEroInput): SuggestEroResult {
   const pass = { ...(input.lingvo === undefined ? {} : { lingvo: input.lingvo }), inflect: false };
-  const head = headOf(input.goal, input.lingvo);
-  if (head !== undefined) {
-    const answer = sxablonoAnswer(modelo, head, input.goal, pass);
+  // Spec 020 ②: the first word of the request (after an article), not the whole head — „Tabs, um
+  // zwischen Liste und Formular zu wechseln“ names tabs, whatever its head holds.
+  const lead = leadWordOf(input.goal);
+  if (lead !== undefined) {
+    const answer = sxablonoAnswer(modelo, lead, input.goal, pass);
     if (answer !== undefined) return { ok: true, output: answer };
   }
   const result = suggestEroOf(modelo, input);
@@ -468,6 +530,28 @@ export function suggestEro(modelo: Modelo, input: SuggestEroInput): SuggestEroRe
       ? undefined
       : (modelo.sxablonoj ?? []).find((entry) => entry.sxablono.name === suggestion.ero);
   if (named === undefined || suggestion === null) return result;
+  // A boundary of the Sxablono the text hits speaks first (Spec 020 ②: „Assistent“ reaches the
+  // formularo through the dialogo's long form; the formularo's boundary wizard asks a person).
+  for (const inflect of [false, true]) {
+    for (const boundary of named.uzo?.boundary ?? []) {
+      const word = uzoKeywordHit(boundary.keywords, input.goal, input.lingvo, inflect);
+      if (word === undefined) continue;
+      return {
+        ok: true,
+        output: {
+          goal: input.goal,
+          matched: { goal: boundary.case, keyword: word.keyword, lingvo: word.lingvo },
+          suggestion: null,
+          boundary: {
+            ero: named.sxablono.name,
+            case: boundary.case,
+            action: boundary.action,
+            kialo: boundary.kialo,
+          },
+        },
+      };
+    }
+  }
   return {
     ok: true,
     output: {

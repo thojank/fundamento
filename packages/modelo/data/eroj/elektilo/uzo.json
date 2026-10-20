@@ -113,7 +113,7 @@
         },
         {
           "name": "filter-bar",
-          "kialo": "A filter of many values folds them into one field above the list it narrows, because a row of every value would push the list away."
+          "kialo": "A filter of many values folds them into one field above the list it narrows — in the region fields of the filtrilo — because a row of every value would push the list away."
         }
       ],
       "with": [

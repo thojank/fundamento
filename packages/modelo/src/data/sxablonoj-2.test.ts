@@ -95,10 +95,13 @@ describe("the alternatives that waited for a Sxablono (Spec 020 ② G1)", () => 
     expect(bar?.kialo).toContain("filtrilo");
   });
 
-  it("a Sxablono answers when its keyword is the first word: „Tabs, um zwischen Liste und Formular zu wechseln“ stays the langetaro", () => {
+  it("a Sxablono answers when its keyword is the first word: „Tabs, um zwischen Liste und Formular zu wechseln“ stays what it was", () => {
+    // A tie of the langetaro (tabs) and the elektilo (liste), a person decides (Nachlese 3 G2) —
+    // the formular in its head names no formularo.
     const tabs = suggestEro(modelo, { goal: "Tabs, um zwischen Liste und Formular zu wechseln" });
     if (!tabs.ok) throw new Error("suggest_ero failed");
-    expect(tabs.output.suggestion).toEqual({ ero: "langetaro", props: {} });
+    expect(tabs.output.action).toBe("ask-human");
+    expect(tabs.output.suggestion).toBeNull();
     const form = suggestEro(modelo, { goal: "Ein Formular für die Anmeldung mit Token." });
     if (!form.ok) throw new Error("suggest_ero failed");
     expect(form.output.suggestion).toEqual({ sxablono: "formularo", props: {} });

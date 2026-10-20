@@ -92,7 +92,17 @@ export function patternInventory(markdown: string): ParityItem {
     markdown.indexOf("## Accessibility"),
   );
   const regions = [...table.matchAll(/^\| `([a-z0-9-]+)` \|/gm)].map((match) => match[1] ?? "");
-  return { props: {}, states: [], values: { regions: regions.sort().join(",") } };
+  const start = markdown.indexOf("## Props");
+  const propsTable = start === -1 ? "" : markdown.slice(start, markdown.indexOf("## Regions"));
+  const props = Object.fromEntries(
+    [...propsTable.matchAll(/^\| `([a-z0-9-]+)` \| ([^|]+) \|/gm)].map(
+      ([, name = "", values = ""]) => {
+        const literals = [...values.matchAll(/`([^`]*)`/g)].map(([, value = ""]) => value);
+        return [name, literals.length > 0 ? literals : [values.trim()]];
+      },
+    ),
+  );
+  return { props, states: [], values: { regions: regions.sort().join(",") } };
 }
 
 /** Where a kit's guideline of one Ero is written inside the projections. */
@@ -967,6 +977,13 @@ function patternGuideline(entry: LoadedSxablono): string {
         value === true ? key : `${key}=${String(value)}`,
       ),
       ...(region.primary === undefined ? [] : [`${region.primary} with emphasis high at most`]),
+      ...(region.one === undefined
+        ? []
+        : [
+            `exactly one with ${Object.entries(region.one)
+              .map(([key, value]) => `${key}=${value}`)
+              .join(", ")}`,
+          ]),
       ...(region.live === undefined ? [] : [`a ${region.live} live region`]),
       ...(region.default === true ? ["the default slot"] : []),
     ].join(", ");
@@ -1017,7 +1034,22 @@ ${regions.map(exampleChild).join("\n")}
 ## What it is for
 
 ${uzo?.purpose ?? entry.sxablono.description}
+${
+  entry.skemo.props.length === 0
+    ? ""
+    : `
+## Props
 
+| Prop | Values | Default | Meaning |
+|---|---|---|---|
+${entry.skemo.props
+  .map(
+    (prop) =>
+      `| \`${prop.name}\` | ${prop.kind === "enum" ? (prop.values ?? []).map((value) => `\`${value}\``).join(", ") : prop.kind} | ${prop.default === undefined ? "–" : `\`${String(prop.default)}\``} | ${prop.description}${prop.required === true ? " Required." : ""} |`,
+  )
+  .join("\n")}
+`
+}
 ## Regions
 
 | Region | Accepts | Max | Required | Children need | What stands there |

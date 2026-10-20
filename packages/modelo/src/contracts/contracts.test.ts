@@ -100,8 +100,8 @@ describe("rule catalog (§2.6)", () => {
     // Spec 016 ① (G6, G8): a Jugxo of an Agordo that names a fixed rule, and a shipped report
     // that no longer matches the checks (fm agordilo check).
     // Spec 019 ③: agordo-save-refused.
-    // Spec 020 ① (G1, G3, G4): eleven rules of the Sxablonoj.
-    expect(RULE_IDS).toHaveLength(174);
+    // Spec 020 ① (G1, G3, G4): eleven rules of the Sxablonoj; ②: the one submit of a form.
+    expect(RULE_IDS).toHaveLength(175);
     for (const rule of [
       "agordo-jugxo-fixed",
       "raporto-out-of-sync",

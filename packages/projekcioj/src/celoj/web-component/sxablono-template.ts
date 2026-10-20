@@ -66,6 +66,18 @@ export function sxablonoMarkup(entry: LoadedSxablono): string {
     );
     return `<div part="frame"><div part="head"><div part="lead"><div part="heading">${lead.map((name) => holder(entry, name)).join("")}</div>${below.map((name) => holder(entry, name)).join("")}</div>${holder(entry, "actions")}</div>${after.map((name) => holder(entry, name)).join("")}</div>`;
   }
+  // A filter bar (a11y.landmarks search): the landmark search, named by the label prop in the
+  // render; its fields in a row, below them the status (role status, polite) beside the actions.
+  if (a11y.landmarks.includes("search")) {
+    const footer: string[] = names.filter((name) => name === "status" || name === "actions");
+    const rest = names.filter((name) => !footer.includes(name));
+    return `<div part="frame" role="search">${rest.map((name) => holder(entry, name)).join("")}<div part="footer">${footer.map((name) => holder(entry, name, "div", name === "status" ? ' role="status"' : "")).join("")}</div></div>`;
+  }
+  // A form (a region asks for exactly one child, the submit button): the landmark form, named by
+  // the label prop; its regions in order — problems, fields, actions.
+  if (regions.some((region) => region.one !== undefined)) {
+    return `<div part="frame" role="form">${names.map((name) => holder(entry, name)).join("")}</div>`;
+  }
   return `<div part="frame">${names.map((name) => holder(entry, name)).join("")}</div>`;
 }
 
@@ -105,7 +117,16 @@ export function sxablonoStylesheetOf(
     "[hidden] { display: none; }",
     '[part="frame"] { display: flex; flex-direction: column; }',
   ];
-  const rows = ["header", "head", "heading", "badges", "actions", "principal"];
+  const search = entry.skemo.a11y.landmarks.includes("search");
+  const rows = [
+    "header",
+    "head",
+    "heading",
+    "badges",
+    "actions",
+    "principal",
+    ...(search ? ["fields", "footer"] : []),
+  ];
   for (const region of entry.skemo.regions.map((candidate) => candidate.name).concat(rows)) {
     const direction = rows.includes(region) ? "row" : "column";
     rules.push(
@@ -115,6 +136,7 @@ export function sxablonoStylesheetOf(
   rules.push(
     '[part="header"], [part="head"] { align-items: center; justify-content: space-between; }',
     '[part="heading"], [part="principal"] { align-items: center; }',
+    '[part="footer"] { align-items: center; justify-content: space-between; }',
     '[part="lead"] { display: flex; flex-direction: column; }',
   );
   for (const [part, properties] of Object.entries(parts)) {
@@ -167,14 +189,73 @@ export function sxablonoElementSource(
         region.name !== a11y.focus,
     )
     .map((region) => region.name);
+  const isForm = regions.some((region) => region.one !== undefined);
+  const named = entry.skemo.props.some((prop) => prop.name === "label");
   const head =
     options.inline === true
       ? `const CSS = ${constant}_CSS;`
       : `import { ${constant}_CSS as CSS } from "./${name}.styles.js";`;
+  // Spec 020 ② (G7): the one event of a Sxablono — submit of a form, sent by its submit button or
+  // Enter in a one-line field, once, with the values of its fields; an invalid field stops it,
+  // reports its error at the field and takes the focus (novalidate: no bubble of the browser).
+  const formMethods = isForm
+    ? `
+  #onClick(event: Event): void {
+    const button = event
+      .composedPath()
+      .find((node) => node instanceof HTMLElement && node.tagName.toLowerCase() === "fm-butono");
+    if (!(button instanceof HTMLElement) || button.parentElement !== this) return;
+    if (button.getAttribute("type") !== "submit" || button.hasAttribute("disabled")) return;
+    event.preventDefault();
+    this.#submit();
+  }
+
+  #onKey(event: KeyboardEvent): void {
+    if (event.key !== "Enter" || event.isComposing || event.defaultPrevented) return;
+    const origin = event.composedPath()[0];
+    if (!(origin instanceof HTMLInputElement) || NOT_ONE_LINE.has(origin.type)) return;
+    event.preventDefault();
+    this.#submit();
+  }
+
+  /** The fields: every child in the region of the fields (the default slot). */
+  #fields(): HTMLElement[] {
+    return [...this.children].filter(
+      (child): child is HTMLElement =>
+        child instanceof HTMLElement && (child.slot === "" || child.slot === "fields"),
+    );
+  }
+
+  #submit(): void {
+    const fields = this.#fields();
+    const invalid = fields.filter((field) => {
+      const check = (field as { checkValidity?: () => boolean }).checkValidity;
+      return typeof check === "function" && !check.call(field);
+    });
+    if (invalid.length > 0) {
+      invalid[0]?.focus();
+      return;
+    }
+    const values: Record<string, unknown> = {};
+    for (const field of fields) {
+      const fieldName = field.getAttribute("name");
+      if (fieldName === null || fieldName === "") continue;
+      if ("checked" in field) {
+        if ((field as { checked?: unknown }).checked === true) values[fieldName] = field.getAttribute("value") ?? "on";
+        continue;
+      }
+      values[fieldName] = (field as { value?: unknown }).value ?? field.getAttribute("value") ?? "";
+    }
+    this.dispatchEvent(new CustomEvent("submit", { bubbles: true, cancelable: true, detail: { values } }));
+  }
+`
+    : "";
   // As a template literal: the markup holds no backtick and no placeholder.
   const body = `const MARKUP = \`${sxablonoMarkup(entry)}\`;
 const HIDEABLE: readonly string[] = ${JSON.stringify(hideable)};
 const FOCUS: string | undefined = ${JSON.stringify(a11y.focus)};
+/** The props of the Sxablono (its Skemo), observed as attributes. */
+const PROPS: readonly { name: string; kind: string }[] = ${JSON.stringify(entry.skemo.props.map((prop) => ({ name: prop.name, kind: prop.kind })))};${isForm ? '\n/** The inputs Enter does not send from: no one-line text. */\nconst NOT_ONE_LINE: ReadonlySet<string> = new Set(["checkbox", "radio", "button", "submit", "reset", "file", "range", "color"]);' : ""}
 
 let sheet: CSSStyleSheet | undefined;
 
@@ -186,6 +267,8 @@ const Base = (typeof HTMLElement === "undefined" ? class {} : HTMLElement) as ty
  * focus and live regions, nothing else (G5).
  */
 export class ${className} extends Base {
+  static observedAttributes = PROPS.map((prop) => prop.name);
+
   constructor() {
     super();
     const root = this.attachShadow({ mode: "open" });
@@ -197,10 +280,14 @@ export class ${className} extends Base {
     root.innerHTML = MARKUP;
     for (const slot of root.querySelectorAll("slot")) {
       slot.addEventListener("slotchange", () => this.#render());
-    }
+    }${isForm ? '\n    this.addEventListener("click", (event) => this.#onClick(event));\n    this.addEventListener("keydown", (event) => this.#onKey(event));' : ""}
   }
 
   connectedCallback(): void {
+    this.#render();
+  }
+
+  attributeChangedCallback(): void {
     this.#render();
   }
 
@@ -217,7 +304,18 @@ export class ${className} extends Base {
     super.focus(options);
   }
 
-  #render(): void {
+  #render(): void {${
+    named
+      ? `
+    // The name of the landmark (search, form) is the label prop.
+    const frame = this.shadowRoot?.querySelector('[part="frame"]');
+    const label = this.getAttribute("label");
+    if (frame instanceof HTMLElement && frame.hasAttribute("role")) {
+      if (label === null || label === "") frame.removeAttribute("aria-label");
+      else if (frame.getAttribute("aria-label") !== label) frame.setAttribute("aria-label", label);
+    }`
+      : ""
+  }
     for (const region of HIDEABLE) {
       const holder = this.shadowRoot?.querySelector(\`[part="\${region}"]\`);
       const slot = holder?.querySelector("slot");
@@ -228,7 +326,7 @@ export class ${className} extends Base {
       if (holder.hidden === filled) holder.hidden = !filled;
     }
   }
-}
+${formMethods}}
 
 /** Registers ${tag} once; importing twice is safe. */
 export function define${className}(): void {
@@ -262,5 +360,14 @@ export function sxablonoElementInventory(source: string): {
   const regions = [
     ...new Set([...source.matchAll(/<slot name="([a-z0-9-]+)">/g)].map((m) => m[1] ?? "")),
   ];
-  return { props: {}, states: [], values: { regions: regions.sort().join(",") } };
+  const declared = /const PROPS: readonly \{ name: string; kind: string \}\[\] = (\[.*?\]);/.exec(
+    source,
+  );
+  const props = Object.fromEntries(
+    (JSON.parse(declared?.[1] ?? "[]") as { name: string; kind: string }[]).map((prop) => [
+      prop.name,
+      [prop.kind],
+    ]),
+  );
+  return { props, states: [], values: { regions: regions.sort().join(",") } };
 }

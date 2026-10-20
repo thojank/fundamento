@@ -26,7 +26,12 @@ test.describe("Spec 020 ② formularo and filtrilo", () => {
         (window as unknown as { sent: unknown[] }).sent.push((event as CustomEvent).detail);
       });
     });
+    await page.waitForFunction(() => customElements.get("fm-formularo") !== undefined);
     await page.locator("#t").locator("input").fill("geheim");
+    await expect(page.locator("#t").locator("input")).toHaveValue("geheim");
+    await expect
+      .poll(() => page.locator("#t").evaluate((element) => (element as { value?: string }).value))
+      .toBe("geheim");
     await page.getByRole("button", { name: "Anmelden" }).click();
     await expect
       .poll(() => page.evaluate(() => (window as unknown as { sent: unknown[] }).sent))
