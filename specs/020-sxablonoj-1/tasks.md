@@ -63,13 +63,14 @@
 
 ### C – Abschluss
 - [x] **T2078 Doku.**
-- [ ] **T2079 CI** grün.
+- [x] **T2079 CI** grün (Lauf 39465250512, `19db412`).
 
 ### Messungen
 
 | Was | Wert |
 |---|---|
-| Commits | rot `c8452e7` |
+| Commits | rot `c8452e7`, grün `19db412` (Hash des grünen Stands, CI grün); dieser Eintrag im Folgecommit |
+| CI | Lauf 39465250512 (`19db412`), Versuch 1: alle acht Jobs grün. Wanduhr 10:10 (`unit` 6:38, `projekcioj` 2:44 / 3:40, `eroj` 2:21 / 2:09, `alirebleco-eroj` 5:11, `rendered-checks` 10:07, `checks` 1:23) |
 
 ## ③ Inhalt
 
