@@ -46,10 +46,12 @@
 
 ### C – Abschluss
 - [x] **T2117 Doku** plan ②, Hinweis für Arkitekturo in plan ①, tasks, CHANGELOG „0.2.0 – geplant“.
-- [ ] **T2118 CI** grün.
+- [x] **T2118 CI** grün (Lauf 39443405846, `894ea76`).
 
 ### Messungen
 
 | Was | Wert |
 |---|---|
-| Commits | rot `ca71c29` |
+| Commits | rot `ca71c29`, grün `894ea76` (Hash des grünen Stands, CI grün); dieser Eintrag im Folgecommit |
+| CI | Lauf 39443405846 (`894ea76`, alle acht Jobs grün, Wanduhr 9:57): `checks` 2:31, `unit` 5:05, `projekcioj` 3:43 / 3:55, `eroj` 2:23 / 2:04, `alirebleco-eroj` 3:36, `rendered-checks` 9:53 |
+| Tests lokal | Eroj 793 (drei Engines, 2 übersprungen wie auf `main`), Projekcioj 761, MCP 350, Modelo 3 611, Agordilo 94, CLI 72 – je Paket allein grün; `pnpm lint`, alle `check:*` und `perf` grün (`check:vitrino` 51) |
