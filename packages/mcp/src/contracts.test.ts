@@ -539,6 +539,9 @@ describe("tool schemas (contracts/mcp-tools.md)", () => {
       "preview_agordo",
       "propose_agordo",
       "save_agordo",
+      // Spec 020 ① (G3): the Sxablonoj beside the Eroj.
+      "list_sxablonoj",
+      "get_sxablono",
     ]);
   });
 
