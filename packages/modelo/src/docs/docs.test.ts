@@ -463,12 +463,12 @@ describe("Spec 003 documentation (F4: the npm org)", () => {
 describe("Spec 003 documentation: the Ero tools (T025)", () => {
   const mcp = section(read("README.md"), "MCP server");
 
-  // Spec 016 ③ added preview_agordo: nineteen tools since.
-  it("the README names the four Ero tools and counts nineteen", () => {
+  // Spec 016 ③ added preview_agordo, Spec 019 ③ propose_agordo and save_agordo: 21 tools since.
+  it("the README names the four Ero tools and counts twenty-one", () => {
     for (const tool of ["list_eroj", "get_ero", "suggest_ero", "check_usage"]) {
       expect(mcp, tool).toContain(`\`${tool}\``);
     }
-    expect(mcp).toContain("19 tools");
+    expect(mcp).toContain("21 tools");
   });
 
   it("the README points at the Phase-3 tool contract", () => {
@@ -2377,5 +2377,71 @@ describe("Spec 019 ② documentation (specs/019-werkstatt-2-3)", () => {
     const readme = read("README.md");
     expect(readme).toContain("vorschlag=");
     expect(readme).toContain("Form, Raum, Schrift");
+  });
+});
+
+// Spec 019 ③ (Briefing 2026-10-20): plan ③ carries the prompt as a control — propose_agordo,
+// save_agordo, the wish vocabulary, historio — and the measuring guide for the acceptance with full
+// paths in the maintainer's checkout (links always with file://, the Werkstatt links for provo and
+// provo-kompakta, the dialog in Claude with the command to connect the server, the CLI, the Figma run
+// with both example brands); tasks ③ start at T1941 with the red hash; the README has „Die Marke per
+// Prompt formen“; the Vojmapo marks stage 2+3.
+describe("Spec 019 ③ documentation (specs/019-werkstatt-2-3)", () => {
+  it("plan ③ carries decisions, deviations, findings, open points and the measuring guide; tasks ③ the red hash", () => {
+    const plan = read("specs/019-werkstatt-2-3/plan.md");
+    const section = plan.slice(
+      plan.indexOf("## ③ Prompt (Stufe 3)"),
+      plan.indexOf("## ④ Nachlese 6"),
+    );
+    expect(section).not.toContain("Folgt in PR ③.");
+    for (const heading of [
+      "### Zusammenfassung",
+      "### Entwurfsentscheidungen",
+      "#### D-01",
+      "### Abweichungen von der Spec",
+      "### Befunde / Mankoj",
+      "### Offen (für den Maintainer)",
+      "### Messanleitung",
+      "### In Figma zu messen",
+    ]) {
+      expect(section, heading).toContain(heading);
+    }
+    for (const term of [
+      "propose_agordo",
+      "save_agordo",
+      "wuensche.json",
+      "historio",
+      "ask-human",
+      'open "file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/projekcioj/vitrino/index.html#modus=werkstatt',
+      "provo-kompakta",
+      "claude mcp add",
+      "fundamento.provoj.config.json",
+      "Version",
+      "wiederherstellen",
+      "Deziraro",
+    ]) {
+      expect(section, term).toContain(term);
+    }
+    // Links into the Vitrino always with file:// (macOS reads the fragment as part of the name otherwise).
+    for (const line of section
+      .split("\n")
+      .filter((entry) => entry.includes("vitrino/index.html#"))) {
+      expect(line, line).toMatch(/file:\/\/\/Users\//);
+    }
+    expect(section).not.toContain("ciferecigo");
+    const tasks = read("specs/019-werkstatt-2-3/tasks.md");
+    const own = tasks.slice(
+      tasks.indexOf("## ③ Prompt (Stufe 3)"),
+      tasks.indexOf("## ④ Nachlese 6"),
+    );
+    expect(own).toContain("**T1941");
+    expect(own).toMatch(/rot `[0-9a-f]{7}`/);
+    const readme = read("README.md");
+    expect(readme).toContain("Die Marke per Prompt formen");
+    expect(readme).toContain("`propose_agordo`");
+    expect(readme).toContain("`save_agordo`");
+    const vojmapo = read("docs/vojmapo.md");
+    expect(vojmapo).toContain("Werkstatt Stufe 2+3");
+    expect(vojmapo).toContain("[019](../specs/019-werkstatt-2-3/)");
   });
 });

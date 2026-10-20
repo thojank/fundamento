@@ -34,7 +34,8 @@ describe("the repo server", () => {
     const { tools } = await client.listTools();
     expect(tools.map((tool) => tool.name)).toEqual([...schemas.keys()]);
     for (const tool of tools) {
-      expect(tool.annotations?.readOnlyHint, tool.name).toBe(true);
+      // Spec 019 ③: save_agordo is the one tool that writes (with confirm, in the working directory).
+      expect(tool.annotations?.readOnlyHint, tool.name).toBe(tool.name !== "save_agordo");
       expect(tool.outputSchema, tool.name).toBeDefined();
       expect(tool.description, tool.name).toBeTruthy();
     }

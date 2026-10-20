@@ -69,6 +69,26 @@ function toolSchemas(): CompiledTool[] {
   return compiled;
 }
 
+/** Spec 019 ③ (E4): a client over HTTP never writes in the server's working directory. */
+function saveOverHttp(): ToolResult {
+  return {
+    ok: false,
+    envelope: {
+      issues: [
+        {
+          rule: "agordo-save-refused",
+          severity: "error",
+          path: "save_agordo",
+          message:
+            "save_agordo writes only over stdio: a client over HTTP does not write in the server's working directory.",
+          suggestion:
+            "Connect the server over stdio (fm mcp) to save, or download the Agordo from the Werkstatt.",
+        },
+      ],
+    },
+  };
+}
+
 function aspektoPathOverHttp(): ToolResult {
   return {
     ok: false,
@@ -126,7 +146,16 @@ export function createFundamentoServer(served: Served, options: ServerOptions = 
     description: String(tool.input.schema.description ?? tool.name),
     inputSchema: bundleSchema(tool.input.schema) as { type: "object" },
     outputSchema: bundleResultSchema(tool.output.schema, tool.error.schema) as { type: "object" },
-    annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+    // Spec 019 ③: save_agordo writes (with confirm, in the working directory, over an Agordo).
+    annotations:
+      tool.name === "save_agordo"
+        ? {
+            readOnlyHint: false,
+            destructiveHint: true,
+            idempotentHint: false,
+            openWorldHint: false,
+          }
+        : { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   }));
   server.setRequestHandler("tools/list", () => ({ tools: listed }));
   server.setRequestHandler("tools/call", (request) => {
@@ -153,6 +182,9 @@ export function createFundamentoServer(served: Served, options: ServerOptions = 
       return asCallResult(inputIssues(tool.input.validate.errors, name));
     if (name === "validate" && options.transport === "http" && "aspektoPath" in args) {
       return asCallResult(aspektoPathOverHttp());
+    }
+    if (name === "save_agordo" && options.transport === "http") {
+      return asCallResult(saveOverHttp());
     }
     return asCallResult(TOOLS[name](served, args));
   });

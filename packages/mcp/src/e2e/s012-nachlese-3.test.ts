@@ -31,8 +31,9 @@ const ontologio = JSON.parse(
   ),
 ) as { concepts: Concept[] };
 const laboro = ontologio.concepts.filter((concept) => concept.inScheme === "laboro");
-// Nine terms since Nachlese 3 W6, eleven since Spec 016 ③ (Agordo, Raporto).
-if (laboro.length !== 11) throw new Error("the scheme laboro holds eleven terms");
+// Nine terms since Nachlese 3 W6, eleven since Spec 016 ③ (Agordo, Raporto), fourteen since
+// Spec 019 ③ (Deziraro, Propono, Historio).
+if (laboro.length !== 14) throw new Error("the scheme laboro holds fourteen terms");
 const kampo = ontologio.concepts.find((concept) => concept.term === "Kampo");
 if (kampo === undefined) throw new Error("Kampo missing");
 

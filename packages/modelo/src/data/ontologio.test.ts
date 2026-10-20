@@ -169,19 +169,23 @@ describe("the scheme laboro (Nachlese 3 W6)", () => {
   const concepts = (ontologio as unknown as { concepts: Concept[] }).concepts;
   const laboro = concepts.filter((concept) => concept.inScheme === "laboro");
 
-  it("carries the scheme laboro with its eleven terms, each with eo/en/de labels and a definition", () => {
+  it("carries the scheme laboro with its fourteen terms, each with eo/en/de labels and a definition", () => {
     const schemes = (ontologio as unknown as { schemes: { id: string }[] }).schemes;
     expect(schemes.map((scheme) => scheme.id)).toContain("laboro");
     // Spec 016 ③ (O-1 confirmed by the maintainer, 2026-10-19): Agordo and Raporto.
+    // Spec 019 ③ (E7, names proposed, the maintainer confirms): Deziraro, Historio, Propono.
     expect(laboro.map((concept) => concept.term).sort()).toEqual([
       "Agordo",
       "Alirebleco",
+      "Deziraro",
       "Ekzemplo",
       "Etoso",
+      "Historio",
       "Internacia",
       "Kialo",
       "Komparo",
       "Komuna",
+      "Propono",
       "Raporto",
       "Vitrino",
       "Vojmapo",
@@ -208,6 +212,17 @@ describe("the scheme laboro (Nachlese 3 W6)", () => {
     expect(raporto?.related).toEqual(expect.arrayContaining(["#Agordo", "#Regulo"]));
     expect((agordo?.altLabel as { de?: string[] })?.de).toContain("Markenrezept");
     expect((raporto?.altLabel as { de?: string[] })?.de).toContain("Prüfbericht");
+  });
+
+  it("Deziraro, Propono and Historio relate to the Agordo and its tools (Spec 019 ③, E7)", () => {
+    const of = (term: string) => laboro.find((concept) => concept.term === term);
+    expect((of("Deziraro")?.altLabel as { de?: string[] })?.de).toContain("Wunsch-Vokabular");
+    expect((of("Propono")?.altLabel as { de?: string[] })?.de).toContain("Vorschlag");
+    expect((of("Historio")?.altLabel as { de?: string[] })?.de).toContain("Historie");
+    for (const term of ["Deziraro", "Propono", "Historio"]) {
+      expect(of(term)?.related, term).toEqual(expect.arrayContaining(["#Agordo"]));
+      expect(JSON.stringify(of(term)), term).toMatch(/Vorschlag von P0|proposed by P0/);
+    }
   });
 
   it("the kampo names Passwortfeld, Zahlenfeld and Datumsfeld as alternative labels (Spec 011 ① B-4)", () => {

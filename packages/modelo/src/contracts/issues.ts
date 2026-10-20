@@ -209,6 +209,9 @@ export const RULE_IDS = [
   // shipped report no longer matches the checks (fm agordilo check).
   "agordo-jugxo-fixed",
   "raporto-out-of-sync",
+  // Spec 019 ③ (G6, E4): save_agordo refuses a path outside the working directory, a file that
+  // is no *.json or no Agordo.
+  "agordo-save-refused",
   // Projekcio lints (Spec 003, D-17)
   "css-physical-property",
   "ero-hardcoded-string",

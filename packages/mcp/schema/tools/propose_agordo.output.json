@@ -1,0 +1,397 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ciferecigo.com/fundamento/schema/mcp/propose_agordo.output.json",
+  "title": "propose_agordo output",
+  "description": "The proposal of one wish: the moved Agordo, the diff, the sentence of the wish vocabulary, the report in short (summary, checks, violations with kialo, Jugxoj, like preview_agordo) and a link into the Werkstatt (#agordo= the Agordo before, #vorschlag= the proposal). An unknown wish answers with action ask-human and the known words, and moves nothing. writes is always false.",
+  "type": "object",
+  "properties": {
+    "aspekto": {
+      "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+    },
+    "writes": {
+      "const": false
+    },
+    "wish": {
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "matched": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "word": {
+                "type": "string",
+                "minLength": 1
+              },
+              "kialo": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": ["word", "kialo"],
+            "additionalProperties": false
+          }
+        },
+        "unknown": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "required": ["text", "matched", "unknown"],
+      "additionalProperties": false
+    },
+    "action": {
+      "const": "ask-human"
+    },
+    "known": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "kialo": {
+      "type": "string",
+      "minLength": 1
+    },
+    "agordo": {
+      "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Agordo"
+    },
+    "diff": {
+      "type": "array",
+      "description": "Every slider (and the lead colour, the icon weight) that moves, before → after, with its German label.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1
+          },
+          "vorher": {
+            "oneOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "nachher": {
+            "oneOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "required": ["path", "label", "vorher", "nachher"],
+        "additionalProperties": false
+      }
+    },
+    "sentence": {
+      "type": "string",
+      "minLength": 1
+    },
+    "kialoj": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "atLimit": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "grenze": {
+            "type": "number"
+          }
+        },
+        "required": ["path", "grenze"],
+        "additionalProperties": false
+      }
+    },
+    "stopped": {
+      "type": "object",
+      "description": "The movement stopped before a fixed rule (G6.2): the share of the way it went, the rules, a sentence.",
+      "properties": {
+        "share": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "rules": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "sentence": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": ["share", "rules", "sentence"],
+      "additionalProperties": false
+    },
+    "exportable": {
+      "type": "boolean"
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "exportable": {
+          "type": "boolean"
+        },
+        "pairs": {
+          "type": "object",
+          "properties": {
+            "measured": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "passed": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "failed": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": ["measured", "passed", "failed"],
+          "additionalProperties": false
+        },
+        "violations": {
+          "type": "object",
+          "properties": {
+            "fixed": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "adjustable": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "covered": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": ["fixed", "adjustable", "covered"],
+          "additionalProperties": false
+        },
+        "hints": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": ["exportable", "pairs", "violations", "hints"],
+      "additionalProperties": false
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "rule": {
+            "type": "string",
+            "minLength": 1
+          },
+          "fixed": {
+            "type": "boolean"
+          },
+          "passed": {
+            "type": "boolean"
+          },
+          "violations": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": ["rule", "fixed", "passed", "violations"],
+        "additionalProperties": false
+      }
+    },
+    "violations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "rule": {
+            "type": "string",
+            "minLength": 1
+          },
+          "regulo": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/ReguloId"
+              },
+              "name": {
+                "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+              },
+              "kialo": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": ["id", "name", "kialo"],
+            "additionalProperties": false
+          },
+          "fixed": {
+            "type": "boolean"
+          },
+          "subject": {
+            "type": "string",
+            "minLength": 1
+          },
+          "combination": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string",
+            "minLength": 1
+          },
+          "cause": {
+            "type": "string",
+            "minLength": 1
+          },
+          "suggestion": {
+            "type": "string",
+            "minLength": 1
+          },
+          "apply": {
+            "type": "object",
+            "description": "The suggestion as a change of the Agordo, where it is one: apply it and call preview_agordo again.",
+            "properties": {
+              "leitfarbe": {
+                "type": "string"
+              },
+              "neutral": {
+                "type": "object",
+                "properties": {
+                  "toenung": {
+                    "type": "number"
+                  }
+                },
+                "required": ["toenung"],
+                "additionalProperties": false
+              },
+              "regler": {
+                "type": "object",
+                "properties": {
+                  "helligkeit": {
+                    "type": "number"
+                  },
+                  "kontrast": {
+                    "type": "number"
+                  },
+                  "saettigung": {
+                    "type": "number"
+                  }
+                },
+                "additionalProperties": false
+              },
+              "ziele": {
+                "type": "object",
+                "additionalProperties": {
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "hell": {
+                          "type": "number"
+                        },
+                        "dunkel": {
+                          "type": "number"
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  ]
+                }
+              }
+            },
+            "additionalProperties": false
+          },
+          "jugxo": {
+            "type": "string"
+          }
+        },
+        "required": ["rule", "fixed", "subject", "message", "cause", "suggestion"],
+        "additionalProperties": false
+      }
+    },
+    "jugxoj": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "regulo": {
+            "type": "string"
+          },
+          "kialo": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "covers": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": ["id", "regulo", "kialo", "date", "name", "covers"],
+        "additionalProperties": false
+      }
+    },
+    "link": {
+      "type": "object",
+      "properties": {
+        "fragment": {
+          "type": "string",
+          "pattern": "^#"
+        },
+        "file": {
+          "type": "string",
+          "pattern": "^file:///"
+        }
+      },
+      "required": ["fragment", "file"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["aspekto", "writes", "agordo", "diff", "sentence", "kialoj", "atLimit"],
+  "additionalProperties": false
+}

@@ -14,6 +14,7 @@ import {
 } from "@fundamento/modelo";
 import type { Calibration } from "../calibration.js";
 import { fingerprintDocuments, type IkonoGewichte, type Structure } from "../structure.js";
+import type { Wuensche } from "../wunsch.js";
 
 /** data/calibration.json of this package; valid from both `src/node/` and `dist/node/`. */
 export const CALIBRATION_URL = new URL("../../data/calibration.json", import.meta.url);
@@ -89,6 +90,14 @@ export function readStructureWith(packageDir: string): {
   const result = readModeloFiles(withAspektoPackages(defaultModeloSource(), [packageDir]));
   if (result.files === undefined) return { issues: result.issues };
   return { structure: structureOf(result.files), issues: result.issues };
+}
+
+/** data/wuensche.json: the wish vocabulary of propose_agordo (Spec 019 ③, G6). */
+export const WUENSCHE_URL = new URL("../../data/wuensche.json", import.meta.url);
+
+/** The wish vocabulary as the package ships it. */
+export function readWuensche(): Wuensche {
+  return JSON.parse(readFileSync(WUENSCHE_URL, "utf8")) as Wuensche;
 }
 
 /** The calibration as the package ships it (data/calibration.json). */

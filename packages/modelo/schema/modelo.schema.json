@@ -3391,6 +3391,40 @@
       "type": "string",
       "pattern": "^(#[0-9a-fA-F]{3}|#[0-9a-fA-F]{6}|oklch\\(\\s*[0-9]*\\.?[0-9]+%?\\s+[0-9]*\\.?[0-9]+\\s+[0-9]*\\.?[0-9]+\\s*\\))$"
     },
+    "AgordoHistorio": {
+      "description": "One save of an Agordo (Spec 019 ③, W-26): the date, the wish the movement came from (or Hand for a change by hand) and the sliders that moved, before → after.",
+      "type": "object",
+      "properties": {
+        "datum": {
+          "type": "string",
+          "format": "date"
+        },
+        "wunsch": {
+          "$ref": "#/$defs/NonEmptyText"
+        },
+        "diff": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "regler": {
+                "$ref": "#/$defs/NonEmptyText"
+              },
+              "vorher": {
+                "oneOf": [{ "type": "number" }, { "type": "string" }]
+              },
+              "nachher": {
+                "oneOf": [{ "type": "number" }, { "type": "string" }]
+              }
+            },
+            "required": ["regler", "vorher", "nachher"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["datum", "wunsch", "diff"],
+      "additionalProperties": false
+    },
     "AgordoJugxo": {
       "description": "A deviation an Agordo records for an adjustable rule (Spec 016, G6, D-5): the Regulo by name, the reason, the date and the name of the person deciding. The Agordilo writes it into the package as a Jugxo; a fixed rule cannot be deviated from.",
       "type": "object",
@@ -3587,6 +3621,13 @@
           "type": "array",
           "items": {
             "$ref": "#/$defs/AgordoJugxo"
+          }
+        },
+        "historio": {
+          "description": "The history of the Agordo (Spec 019 ③, W-26): every save by save_agordo appends an entry. Part of the Agordo, so it travels with the file.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/AgordoHistorio"
           }
         }
       },

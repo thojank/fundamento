@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ciferecigo.com/fundamento/schema/mcp/propose_agordo.input.json",
+  "title": "propose_agordo input",
+  "description": "Turns a wish into visible movements of the sliders (Spec 019 ③, G6) — read-only, deterministic, no language model in the tool: the agent words it, the tool computes. Input: an Agordo, a wish in words (wunsch, German or English: ruhiger/calmer, kräftiger/bolder, wärmer/warmer, kühler/cooler, runder/rounder, eckiger/sharper, luftiger/airier, kompakter/denser, größer/larger, kleiner/smaller) and/or explicit slider values (regler: path → value, e.g. form.radius → 1.4, ikono.gewicht → bold). Answers with the new Agordo, the diff of the sliders, the report in short like preview_agordo, the sentence of the wish vocabulary that moved them and a link into the Werkstatt that shows the proposal before it holds. A wish the vocabulary does not know moves nothing: the answer asks back (action ask-human) and names the known words. A movement that would break a fixed rule stops before it. Writes nothing; save_agordo writes.",
+  "type": "object",
+  "properties": {
+    "agordo": {
+      "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Agordo"
+    },
+    "wunsch": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The wish as said: „Mach die Marke ruhiger“, „runder und luftiger“, „make it calmer“."
+    },
+    "regler": {
+      "type": "object",
+      "description": "Explicit values by slider path (neutral.toenung, regler.*, form.*, raum.*, schrift.*) or ikono.gewicht.",
+      "propertyNames": {
+        "pattern": "^(neutral|regler|form|raum|schrift|ikono)\\.[a-z]+$"
+      },
+      "additionalProperties": {
+        "oneOf": [
+          {
+            "type": "number"
+          },
+          {
+            "type": "string"
+          }
+        ]
+      }
+    }
+  },
+  "required": ["agordo"],
+  "additionalProperties": false
+}
