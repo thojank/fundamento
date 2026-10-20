@@ -89,7 +89,8 @@ describe("the build writes one parity inventory per side", () => {
     const { code, result } = runParity(base);
     expect(result.errors).toEqual([]);
     expect(code).toBe(0);
-    expect(result.stats.sides).toBe(4);
+    // Four sides of the Eroj, three of the Sxablonoj (Spec 020 ①).
+    expect(result.stats.sides).toBe(7);
   });
 });
 

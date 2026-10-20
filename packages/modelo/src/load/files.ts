@@ -64,6 +64,10 @@ export interface ModeloFiles {
    * reports those: uzo-skemo-missing). Spec 007, D-01.
    */
   uzoj: ModeloDocument[];
+  /** `data/sxablonoj/<name>/skemo.json`, sorted by path (Spec 020); absent or empty without any. */
+  sxablonoj?: ModeloDocument[];
+  /** `data/sxablonoj/<name>/uzo.json`, sorted by path, also in folders without a Skemo. */
+  sxablonoUzoj?: ModeloDocument[];
   themes: ModeloDocument;
   metadata: ModeloDocument;
 }
@@ -84,6 +88,8 @@ export const METADATA_FILE_NAME = "$metadata.json";
 export const SETS_DIR_NAME = "sets";
 /** Directory below the data directory holding one folder per Ero (Spec 003, D-02). */
 export const EROJ_DIR_NAME = "eroj";
+/** Directory below the data directory holding one folder per Sxablono (Spec 020, G1). */
+export const SXABLONOJ_DIR_NAME = "sxablonoj";
 /** The file in each Ero folder: the Ero and its Skemo. */
 export const SKEMO_FILE_NAME = "skemo.json";
 /** The file next to the Skemo that says how the Ero is used (Spec 007, D-01). */
@@ -193,6 +199,17 @@ export function readModeloFiles(source: ModeloSource): ReadModeloFilesResult {
     if (document !== undefined) uzoj.push(document);
   }
 
+  const sxablonoj: ModeloDocument[] = [];
+  for (const path of listEroFiles(join(source.dataDir, SXABLONOJ_DIR_NAME), SKEMO_FILE_NAME)) {
+    const document = read(path);
+    if (document !== undefined) sxablonoj.push(document);
+  }
+  const sxablonoUzoj: ModeloDocument[] = [];
+  for (const path of listEroFiles(join(source.dataDir, SXABLONOJ_DIR_NAME), UZO_FILE_NAME)) {
+    const document = read(path);
+    if (document !== undefined) sxablonoUzoj.push(document);
+  }
+
   const blocking = issues.some(
     (issue) => issue.rule === "file-missing" || issue.rule.startsWith("json-"),
   );
@@ -205,7 +222,10 @@ export function readModeloFiles(source: ModeloSource): ReadModeloFilesResult {
   ) {
     return { issues };
   }
-  return { files: { sets, packages, data, eroj, uzoj, themes, metadata }, issues };
+  return {
+    files: { sets, packages, data, eroj, uzoj, sxablonoj, sxablonoUzoj, themes, metadata },
+    issues,
+  };
 }
 
 /** `<erojDir>/<name>/<fileName>` for every folder that has one, sorted by path. */

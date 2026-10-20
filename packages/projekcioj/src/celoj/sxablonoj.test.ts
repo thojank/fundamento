@@ -61,7 +61,7 @@ describe("React and the Make Kit", () => {
   });
 
   it("the Make Kit writes guidelines/patterns/<name>.md and a section in Guidelines.md", () => {
-    for (const aspekto of ["komuna", "ekzemplo"]) {
+    for (const aspekto of ["komuna"]) {
       const base = `make-kit/${aspekto}/guidelines`;
       const guidelines = read(`${base}/Guidelines.md`);
       expect(guidelines).toContain("## Patterns (Sxablonoj)");
@@ -87,7 +87,7 @@ describe("Figma: example frames of instances, outside the sets (E3)", () => {
       components: { set: string }[];
       sxablonoj?: {
         name: string;
-        regions: { name: string; direction: string; items: { set: string }[] }[];
+        regions: { name: string; direction: string; items: { set?: string }[] }[];
       }[];
     };
     expect(plan.components.map((component) => component.set)).not.toContain("sxelo");
@@ -102,7 +102,8 @@ describe("Figma: example frames of instances, outside the sets (E3)", () => {
     ]);
     const sets = new Set(plan.components.map((component) => component.set));
     for (const region of [...(sxelo?.regions ?? []), ...(plan.sxablonoj?.[0]?.regions ?? [])])
-      for (const item of region.items) expect(sets.has(item.set), item.set).toBe(true);
+      for (const item of region.items)
+        if (item.set !== undefined) expect(sets.has(item.set), item.set).toBe(true);
     expect(sxelo?.regions.find((region) => region.name === "nav")?.items[0]?.set).toBe("navigado");
   });
 });

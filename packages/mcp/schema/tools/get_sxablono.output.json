@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "get_sxablono output",
+  "description": "The Sxablono with its Skemo and its Uzo (Spec 020, G3), as the Modelo holds them; with brief: true the brief.",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "sxablono": { "type": "object" },
+        "skemo": { "type": "object" },
+        "uzo": { "type": "object" }
+      },
+      "required": ["sxablono", "skemo"],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "sxablono": { "type": "string", "minLength": 1 },
+        "kind": { "enum": ["layout", "page", "flow"] },
+        "purpose": { "type": "string", "minLength": 1 },
+        "regions": { "type": "array", "items": { "type": "object" } },
+        "props": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": { "name": { "type": "string" }, "type": { "type": "string" } },
+            "required": ["name", "type"],
+            "additionalProperties": false
+          }
+        },
+        "a11y": { "type": "object" },
+        "instead": { "type": "array", "items": { "type": "object" } },
+        "boundary": { "type": "array", "items": { "type": "object" } }
+      },
+      "required": [
+        "sxablono",
+        "kind",
+        "purpose",
+        "regions",
+        "props",
+        "a11y",
+        "instead",
+        "boundary"
+      ],
+      "additionalProperties": false
+    }
+  ]
+}

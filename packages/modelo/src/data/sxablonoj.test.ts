@@ -132,6 +132,7 @@ describe("the boundary that waited for a Sxablono (Spec 020 ① G1)", () => {
 describe("the Sxablonoj in modelo.json (FR-17) and in describe_term (G3)", () => {
   it("are exported under sxablonoj and read back from the export alone", () => {
     const { files } = readModeloFiles(source);
+    if (files === undefined) throw new Error("the repo Modelo must read");
     const json = buildModeloJson({ modelo, sets: files.sets, schema: readModeloSchema() });
     expect(json.sxablonoj?.map((entry) => entry.sxablono.name)).toEqual(["pagxo", "sxelo"]);
     const back = modeloFromExport(structuredClone(json));

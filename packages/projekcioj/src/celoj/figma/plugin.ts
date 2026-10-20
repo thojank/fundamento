@@ -34,7 +34,7 @@
 // on a frame with the three other sides at 0, as the rows of a table are.
 
 import { VITRINO_TRIGGER_TEXT } from "../vitrino/datumoj.js";
-import { type FigmaPlan, PAGINATION_GAP, TEXT_CASE_VARIES } from "./figma.js";
+import { FIGMA_SXABLONO_FRAME, type FigmaPlan, PAGINATION_GAP, TEXT_CASE_VARIES } from "./figma.js";
 
 /** The nodes of one variant the plugin draws, outside in (F11). */
 type PartNode =
@@ -1513,6 +1513,127 @@ function ours(parent, key, value) {
 function findSection() {
   if (PLAN.section === undefined) return undefined;
   return ours(figma.currentPage, "section", PLAN.section.name);
+}
+
+/**
+ * The example frames of the Sxablonoj (Spec 020, G2, E3): the frame „Sxablonoj" in the section,
+ * below the frame „Eroj"; in it a frame per Sxablono (a column), in that a frame per region (its
+ * direction) holding instances of the Ero sets — the variant whose props match, its label the
+ * region's word — or a text. No set, no variants: an example of how the Eroj compose, which follows
+ * the modes as the instances do. Found again by its marks on every run: an instance that already
+ * shows the wanted variant stays, a text that already says the word stays (a second run writes
+ * nothing).
+ */
+async function placeSxablonoj(section, eroj, warnings, variables) {
+  if (section === undefined || PLAN.sxablonoj === undefined || PLAN.sxablonoj.length === 0) return;
+  // A frame of the example: neutral like every node the plugin draws (F13), its layout the plan's.
+  const layOut = (node, direction, spacing, hugWidth, inFlow = true) => {
+    own(node, NEUTRAL);
+    if (inFlow) own(node, IN_FLOW);
+    Object.assign(gather(node), {
+      layoutMode: direction,
+      itemSpacing: spacing,
+      ...(hugWidth ? { layoutSizingHorizontal: "HUG" } : {}),
+      layoutSizingVertical: "HUG",
+    });
+    flush(node);
+  };
+  let frame = ours(section, "frame", "${FIGMA_SXABLONO_FRAME}");
+  const made = frame === undefined;
+  if (made) {
+    frame = create(() => figma.createFrame());
+    section.appendChild(frame);
+    stamp(frame, "frame", "${FIGMA_SXABLONO_FRAME}");
+  }
+  write(frame, "name", "${FIGMA_SXABLONO_FRAME}");
+  write(frame, "x", PLAN.section.padding);
+  write(frame, "y", eroj === undefined ? PLAN.section.padding : eroj.y + eroj.height + PLAN.section.gap);
+  layOut(frame, "VERTICAL", PLAN.section.gap, made, false);
+  const textColour = variables === undefined ? undefined : variables.get("color/text/default");
+  for (const [index, sxablono] of PLAN.sxablonoj.entries()) {
+    let example = ours(frame, "sxablono", sxablono.name);
+    if (example === undefined) {
+      example = create(() => figma.createFrame());
+      frame.appendChild(example);
+      stamp(example, "sxablono", sxablono.name);
+    }
+    if (frame.children.indexOf(example) !== index) frame.insertChild(index, example);
+    write(example, "name", sxablono.name);
+    layOut(example, "VERTICAL", PLAN.section.gap / 2, true);
+    for (const [position, region] of sxablono.regions.entries()) {
+      let holder = ours(example, "region", region.name);
+      if (holder === undefined) {
+        holder = create(() => figma.createFrame());
+        example.appendChild(holder);
+        stamp(holder, "region", region.name);
+      }
+      if (example.children.indexOf(holder) !== position) example.insertChild(position, holder);
+      write(holder, "name", region.name);
+      layOut(holder, region.direction, PLAN.section.gap / 4, true);
+      for (const [slot, item] of region.items.entries()) {
+        const current = holder.children[slot];
+        if (item.set === undefined) {
+          let text = current !== undefined && current.type === "TEXT" ? current : undefined;
+          if (text === undefined) {
+            text = create(() => figma.createText());
+            holder.insertChild(slot, text);
+          }
+          await loadCurrentFont(text);
+          write(text, "name", region.name + "-text");
+          write(text, "characters", item.text || "");
+          own(text, NEUTRAL_TEXT);
+          own(text, IN_FLOW);
+          own(text, TEXT_SIZING);
+          if (textColour !== undefined) {
+            gather(text).fills = [
+              figma.variables.setBoundVariableForPaint(
+                { type: "SOLID", color: { r: 0, g: 0, b: 0 } },
+                "color",
+                textColour,
+              ),
+            ];
+          }
+          flush(text);
+          continue;
+        }
+        const set = findSet(item.set);
+        if (set === undefined) {
+          warnings.push("Sxablonoj/" + sxablono.name + "/" + region.name + ": Das Set " + item.set + " fehlt; das Beispiel zeigt es nicht.");
+          continue;
+        }
+        const wanted = Object.entries(Object.assign({ state: "rest" }, item.props || {}));
+        const variant =
+          set.children.find((child) => {
+            const name = child.name.split(", ");
+            return wanted.every(([key, value]) =>
+              name.indexOf(key + "=" + value) !== -1 ||
+              !name.some((pair) => pair.indexOf(key + "=") === 0),
+            );
+          }) || set.children[0];
+        if (variant === undefined) continue;
+        let instance =
+          current !== undefined && current.type === "INSTANCE" && current.mainComponent === variant
+            ? current
+            : undefined;
+        if (instance === undefined) {
+          instance = create(() => variant.createInstance());
+          holder.insertChild(slot, instance);
+        }
+        write(instance, "name", item.set);
+        own(instance, IN_FLOW);
+        flush(instance);
+        const definitions = set.componentPropertyDefinitions || {};
+        const label = Object.keys(definitions).find(
+          (key) => key.split("#")[0] === "label" && definitions[key].type === "TEXT",
+        );
+        if (label !== undefined && item.text !== undefined) {
+          const shown = (instance.componentProperties || {})[label];
+          const value = shown !== undefined && typeof shown === "object" ? shown.value : shown;
+          if (value !== item.text) instance.setProperties({ [label]: item.text });
+        }
+      }
+    }
+  }
 }
 
 /** The frame „Eroj" in the section (F-8), found by its mark \`frame\`, or undefined. */
@@ -5061,6 +5182,8 @@ async function applyComponents(variables, warnings) {
     stamp(set, "after", JSON.stringify(report.after));
     reports.push(report);
   }
+  // Spec 020 (G2, E3): the example frames of the Sxablonoj, after every set exists.
+  await placeSxablonoj(section, frame, warnings, variables);
   fitSection(section);
   return reports;
 }

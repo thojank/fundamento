@@ -88,8 +88,9 @@ function instancesOf(modelo: Modelo, term: string): DescribeTermOutput["instance
     case "Ero":
     case "Skemo":
       return listed(modelo.eroj.map((entry) => entry.ero.name));
+    // Spec 020 (G3): the Sxablonoj of the Modelo.
     case "Sxablono":
-      return { count: 0 };
+      return listed((modelo.sxablonoj ?? []).map((entry) => entry.sxablono.name));
     default:
       return undefined;
   }

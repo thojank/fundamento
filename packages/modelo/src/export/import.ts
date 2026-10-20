@@ -68,6 +68,13 @@ export function modeloFromExport(modeloJson: ModeloJson): Modelo {
         },
       ];
     }),
+    // Spec 020 (G1): the Sxablonoj travel whole (Sxablono, Skemo, Uzo); the files are not exported.
+    sxablonoj: (modeloJson.sxablonoj ?? []).map((entry) => ({
+      file: "",
+      sxablono: structuredClone(entry.sxablono),
+      skemo: structuredClone(entry.skemo),
+      ...(entry.uzo === undefined ? {} : { uzo: structuredClone(entry.uzo), uzoFile: "" }),
+    })),
     idsLock: { ids: {} },
     aspektoPackages,
     themesFile: [],

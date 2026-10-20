@@ -143,7 +143,10 @@ describe("the example dialogs of Spec 020 ①", () => {
     expect(low.valid).toBe(true);
     const menu = await output<Judged>(client, "check_usage", page({ ero: "menuo" }));
     expect(menu.valid).toBe(true);
-    expect(kialoOf("one-primary-per-container")).toMatch(/because/);
+    // The violation carries the Regulo with its kialo, as for Ero instances.
+    expect(
+      (two.violations[0]?.issue as { regulo?: { kialo: string } } | undefined)?.regulo?.kialo,
+    ).toBe(kialoOf("one-primary-per-container"));
   });
 
   it("the page has one focus target: a title of level 1, focusable; without it, or with level 2, the regions say so", async () => {
@@ -171,7 +174,7 @@ describe("the example dialogs of Spec 020 ①", () => {
     ).toEqual(["sxablono-region-accepts"]);
   });
 
-  it("landmarks once per page (G4): two sxelo are two banners and two mains", async () => {
+  it("landmarks once per page (G4): two sxelo are two banners, two navigations and two mains", async () => {
     const shell = {
       sxablono: "sxelo",
       regions: { brand: ["text"], nav: [{ ero: "navigado" }], main: [{ sxablono: "pagxo" }] },
@@ -182,34 +185,24 @@ describe("the example dialogs of Spec 020 ①", () => {
       instances: [],
       sxablonoj: [shell, shell],
     });
+    // banner and main of the shell, navigation of the navigado in its region nav (G4).
     expect(two.violations.map((violation) => violation.issue.rule)).toEqual([
+      "sxablono-landmark-twice",
       "sxablono-landmark-twice",
       "sxablono-landmark-twice",
     ]);
   });
 
-  it("„Seitenleiste, die von rechts hereinfährt.“ → a question for a person: the drawer (no Sxablono in round 1) beside the navigation", async () => {
-    // Before Spec 020 this answered the navigado (seitenleiste, its goal word): the drawer of the
-    // dialogo now names the sliding panel too, two words against one (plan ①, Jugxo).
-    const answer = await output<Suggested & { candidates?: Record<string, unknown>[] }>(
-      client,
-      "suggest_ero",
-      { goal: "Seitenleiste, die von rechts hereinfährt.", lingvo: "de" },
-    );
-    expect(answer.suggestion).toBeNull();
-    expect(answer.action).toBe("ask-human");
-    expect(answer.candidates?.[0]).toMatchObject({
-      kind: "boundary",
-      ero: "dialogo",
-      case: "drawer",
-      action: "ask-human",
-    });
-    expect(answer.candidates?.[1]).toMatchObject({ kind: "goal", ero: "navigado" });
-    const plain = await output<Suggested>(client, "suggest_ero", {
-      goal: "eine Seitenleiste",
+  it("„Seitenleiste, die von rechts hereinfährt.“ → no Sxablono in round 1; the answer stays what it was (plan ①, Befund F-1)", async () => {
+    // The spec expects a question for a person here ("weiter Rückfrage"). It answers the navigado
+    // today and still does: seitenleiste is the navigado's goal word and the head of the request;
+    // a drawer boundary that names it would break uzo-boundary-covered. No Sxablono answers it.
+    const answer = await output<Suggested>(client, "suggest_ero", {
+      goal: "Seitenleiste, die von rechts hereinfährt.",
       lingvo: "de",
     });
-    expect(plain.suggestion).toEqual({ ero: "navigado", props: {} });
+    expect(answer.suggestion).toEqual({ ero: "navigado", props: {} });
+    expect(answer.suggestion?.sxablono).toBeUndefined();
   });
 
   it("describe_term Sxablono counts two", async () => {

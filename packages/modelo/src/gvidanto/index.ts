@@ -7,3 +7,4 @@ export * from "./explain.js";
 export * from "./explain-regulo.js";
 export * from "./nearest.js";
 export * from "./suggest-ero.js";
+export * from "./sxablonoj.js";

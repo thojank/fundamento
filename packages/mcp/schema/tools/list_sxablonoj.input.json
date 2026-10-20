@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "list_sxablonoj input",
+  "description": "Every Sxablono of the served Modelo (Spec 020): the patterns of Eroj — the frame of an application, a page — with their kind and their regions. Takes no input; list_eroj lists the Eroj.",
+  "type": "object",
+  "properties": {},
+  "additionalProperties": false
+}

@@ -199,6 +199,16 @@ export function buildModeloJson(input: ModeloExportInput): ModeloJson {
   if (uzoj.length > 0) {
     modeloJson.uzoj = uzoj;
   }
+  // Spec 020 (G1): the Sxablonoj with their Skemo and Uzo, sorted by name; absent while the Modelo
+  // has none, so an export without them keeps its bytes.
+  const sxablonoj = modelo.sxablonoj ?? [];
+  if (sxablonoj.length > 0) {
+    modeloJson.sxablonoj = sxablonoj.map((entry) => ({
+      sxablono: structuredClone(entry.sxablono),
+      skemo: structuredClone(entry.skemo),
+      ...(entry.uzo === undefined ? {} : { uzo: structuredClone(entry.uzo) }),
+    }));
+  }
   return modeloJson;
 }
 

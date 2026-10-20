@@ -11,6 +11,7 @@ import {
   evaluateAspiroj,
   getEro,
   type LoadedEro,
+  type LoadedSxablono,
   type Modelo,
   oklchLExtreme,
   oklchLightness,
@@ -112,6 +113,11 @@ export interface VitrinoDatumoj {
   komparo: Record<string, { kriterio: string; a: string; b: string; pli: "a" | "b" | "egale" }[]>;
   /** Per Ero its grid as markup (`fm-<ero>`); the element upgrades it in the browser (Spec 008). */
   eroj: Record<string, string>;
+  /**
+   * Per Sxablono its example at the three container widths schmal, mittel, breit (Spec 020, G2):
+   * the layout follows the container, so the same element shows each of its layouts.
+   */
+  sxablonoj: Record<string, string>;
   /**
    * The a11y role of every Ero (button, link, textbox): the section "Gebrauch" names the subject
    * of a layout sentence from it — the line of a textbox that never breaks is the input line, not
@@ -658,6 +664,34 @@ function additionRows(entry: LoadedEro, tag: string, menuItems = ""): string {
   }
 }
 
+/** The container widths of the Sxablonoj section (Spec 020, Abnahme 1), narrow to wide. */
+export const VITRINO_BREITEN = ["schmal", "mittel", "breit"] as const;
+
+/** The page of the Vitrino's Sxablonoj: a title with two badges, a line, two actions, a section. */
+const VITRINO_PAGXO =
+  '<fm-pagxo><fm-titolo slot="title" level="1" focusable>Standards</fm-titolo><fm-insigno slot="badges" intent="success">Gültig</fm-insigno><fm-insigno slot="badges">Pflicht</fm-insigno><fm-teksto slot="subtitle">Alle Standards des Projekts.</fm-teksto><fm-butono slot="actions" emphasis="high">Bearbeiten</fm-butono><fm-menuo slot="actions" label="Weitere Aktionen"><data value="delete" intent="danger">Löschen</data></fm-menuo><section><fm-titolo level="2">Geltung</fm-titolo><fm-teksto>Gilt in allen Projekten.</fm-teksto></section></fm-pagxo>';
+
+/** The example of one Sxablono in the Vitrino: the shell holds the page in its main. */
+function sxablonoExample(name: string): string {
+  if (name === "pagxo") return VITRINO_PAGXO;
+  if (name === "sxelo")
+    return `<fm-sxelo><span slot="brand">Fundamento</span><span slot="principal">Erika Mustermann</span><fm-navigado slot="nav" label="Hauptnavigation" page="standards"><a href="#fm-vitrino-sxablonoj" data-page="standards">Standards</a><a href="#fm-vitrino-sxablonoj" data-page="projekte">Projekte</a></fm-navigado><fm-avizo slot="notices" intent="success">Gespeichert.</fm-avizo>${VITRINO_PAGXO}</fm-sxelo>`;
+  return `<fm-${name}></fm-${name}>`;
+}
+
+/** Per Sxablono its example at the three container widths (Spec 020, G2, Abnahme 1). */
+function sxablonojMarkup(sxablonoj: readonly LoadedSxablono[]): Record<string, string> {
+  return Object.fromEntries(
+    sxablonoj.map((entry) => [
+      entry.sxablono.name,
+      VITRINO_BREITEN.map(
+        (breite) =>
+          `<figure class="fm-sxablono"><figcaption>${entry.sxablono.name} · ${breite}</figcaption><div class="fm-breite" data-fm-breite="${breite}">${sxablonoExample(entry.sxablono.name)}</div></figure>`,
+      ).join(""),
+    ]),
+  );
+}
+
 /**
  * The grid of one Ero (Spec 004 for the butono; Spec 008 D-12 for every Ero): one row per
  * combination of the enum props its parts are keyed by, one column at rest and one per boolean
@@ -1202,6 +1236,7 @@ export function vitrinoDatumoj({ input, bazo }: VitrinoDatumojInput): VitrinoDat
       ankroj,
     }),
     eroj: erojMarkup(modelo.eroj, modelo.ikonaro),
+    sxablonoj: sxablonojMarkup(modelo.sxablonoj ?? []),
     a11yRoloj: Object.fromEntries(
       modelo.eroj.map((entry) => [entry.ero.name, entry.skemo.a11y.role]),
     ),

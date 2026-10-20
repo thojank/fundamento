@@ -6,7 +6,7 @@
 // viewport. Chromium, Firefox and WebKit.
 
 import { expect, test } from "@playwright/test";
-import { axeViolations } from "./alirebleco.js";
+import { axeViolations, TAB } from "./alirebleco.js";
 import { buildProjections, serve } from "./serve.js";
 
 const { out } = await buildProjections();
@@ -22,7 +22,8 @@ test.describe("Spec 020 ① Sxablonoj", () => {
     await expect(page.getByRole("banner")).toHaveCount(1);
     await expect(page.getByRole("navigation")).toHaveCount(1);
     await expect(page.getByRole("main")).toHaveCount(1);
-    await expect(page.getByRole("banner")).toContainText("Arkitekturo");
+    // The brand is heard inside the banner (slotted: the accessibility tree, not the DOM text).
+    expect(await page.getByRole("banner").ariaSnapshot()).toContain("Arkitekturo");
     const live = await page.locator("#s").evaluate((element) => {
       const region = element.shadowRoot?.querySelector('[part="notices"]');
       return region?.getAttribute("aria-live") ?? null;
@@ -32,9 +33,10 @@ test.describe("Spec 020 ① Sxablonoj", () => {
 
   test("sxelo: its skip link is the first stop and moves the focus to main, the fragment stays", async ({
     page,
+    browserName,
   }) => {
     await serve(page, out, SHELL);
-    await page.keyboard.press("Tab");
+    await page.keyboard.press(TAB(browserName));
     const first = await page.evaluate(() => {
       const shell = document.getElementById("s");
       return shell?.shadowRoot?.activeElement?.tagName.toLowerCase() ?? "";

@@ -100,15 +100,17 @@ describe("titolo in the repo Modelo (section ③, G1, G2)", () => {
 });
 
 describe("the Uzo of the titolo (section ③, G6)", () => {
-  it("states the purpose; a bold paragraph as heading is the titolo itself; a heading with actions asks a person", () => {
+  it("states the purpose; a bold paragraph as heading is the titolo itself; a heading with actions is the pagxo (Spec 020 ①)", () => {
     expect(uzo?.purpose).toBe(
       "Names a page or section; its level is structure, its size is design.",
     );
     expect(uzo?.instead.map((entry) => [entry.goal, entry.ero])).toEqual([
       ["bold-paragraph-as-heading", "titolo"],
     ]);
-    expect(uzo?.boundary.map((entry) => [entry.case, entry.action])).toEqual([
-      ["heading-with-actions", "ask-human"],
+    // Spec 020 ① (G1, Jugxo jug_01M5CYB7ZTCZVBJXCVDYX300V0): the row of a heading with its actions
+    // asked a person until the Sxablonoj came; it is the pagxo now.
+    expect(uzo?.boundary.map((entry) => [entry.case, entry.action, entry.ero])).toEqual([
+      ["heading-with-actions", "use-instead", "pagxo"],
     ]);
     for (const entry of [...(uzo?.instead ?? []), ...(uzo?.boundary ?? [])]) {
       expect(entry.kialo).toMatch(/because/);
@@ -204,12 +206,14 @@ describe("suggest_ero of the heading (Gvidanto)", () => {
     expect(answer.suggestion).toEqual({ ero: "titolo", props: { level: "2" } });
   });
 
-  it("'Titel der Seite' is a titolo with level 1; 'a toolbar beside the section' asks a person", () => {
+  it("'Titel der Seite' is a titolo with level 1; 'a toolbar beside the section' is the pagxo (Spec 020 ①)", () => {
     expect(suggest("Titel der Seite").suggestion).toEqual({ ero: "titolo", props: { level: "1" } });
-    expect(suggest("toolbar beside the section").boundary).toMatchObject({
+    const toolbar = suggest("toolbar beside the section");
+    expect(toolbar.suggestion).toEqual({ sxablono: "pagxo", props: {} });
+    expect(toolbar.boundary).toMatchObject({
       ero: "titolo",
       case: "heading-with-actions",
-      action: "ask-human",
+      action: "use-instead",
     });
   });
 });

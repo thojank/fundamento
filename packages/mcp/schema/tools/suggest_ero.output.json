@@ -57,8 +57,51 @@
           },
           "required": ["ero", "props"],
           "additionalProperties": false
+        },
+        {
+          "description": "A Sxablono (Spec 020, G3): a pattern of Eroj; its regions stand in regions.",
+          "type": "object",
+          "properties": {
+            "sxablono": {
+              "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+            },
+            "props": {
+              "type": "object",
+              "propertyNames": {
+                "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+              },
+              "additionalProperties": {
+                "anyOf": [{ "type": "string" }, { "type": "number" }, { "type": "boolean" }]
+              }
+            }
+          },
+          "required": ["sxablono", "props"],
+          "additionalProperties": false
         }
       ]
+    },
+    "regions": {
+      "description": "The regions of the suggested Sxablono (Spec 020): name, whether required, what it accepts.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "accepts": {
+            "type": "array",
+            "items": {
+              "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+            }
+          }
+        },
+        "required": ["name"],
+        "additionalProperties": false
+      }
     },
     "kialo": {
       "type": "string",

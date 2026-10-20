@@ -10,6 +10,10 @@ import type { DoubleNode } from "./test-doubles/plugin.js";
 
 const source = repoFiles["figma/plugin/code.js"] ?? "";
 
+/** The main component of an instance (InstanceNode.mainComponent). */
+const mainOf = (node: DoubleNode | undefined) =>
+  (node as unknown as { mainComponent?: DoubleNode } | undefined)?.mainComponent;
+
 const instancesIn = (node: DoubleNode | undefined): DoubleNode[] =>
   (node?.children ?? []).flatMap((child) =>
     child.type === "INSTANCE" ? [child, ...instancesIn(child)] : instancesIn(child),
@@ -37,14 +41,12 @@ describe("the plugin draws the Sxablonoj as example frames (Spec 020 ①)", () =
     const nav = instancesIn(descendant(sxelo, "nav"));
     expect(nav).toHaveLength(1);
     // An instance of a variant of the set navigado, not a copy.
-    expect(nav[0]?.properties.mainComponent).toMatchObject({ parent: { name: "navigado" } });
+    expect(mainOf(nav[0])?.parent?.name).toBe("navigado");
     const pagxo = frame?.children.find((child) => child.name === "pagxo");
     const title = instancesIn(descendant(pagxo, "title"));
-    expect(title[0]?.properties.mainComponent).toMatchObject({ parent: { name: "titolo" } });
+    expect(mainOf(title[0])?.parent?.name).toBe("titolo");
     const actions = instancesIn(descendant(pagxo, "actions"));
-    expect(
-      actions.map((node) => (node.properties.mainComponent as DoubleNode).parent?.name),
-    ).toEqual(["butono", "menuo"]);
+    expect(actions.map((node) => mainOf(node)?.parent?.name)).toEqual(["butono", "menuo"]);
   });
 
   it("a second run finds the frames again: no second Sxablonoj, no second instance", async () => {

@@ -443,9 +443,15 @@ const samples: Sample[] = [
     ],
   },
   {
+    // Spec 020 ① (E1): a Sxablono names its Skemo of regions; the Eroj stand in the regions.
     def: "Sxablono",
-    valid: [{ id: id("sxa"), name: "login-page", kind: "page", eroj: [id("ero")] }],
-    invalid: [{ id: id("sxa"), name: "login-page", kind: "widget", eroj: [] }],
+    valid: [
+      { id: id("sxa"), name: "login-page", skemo: id("ske"), kind: "page", description: "A page." },
+    ],
+    invalid: [
+      { id: id("sxa"), name: "login-page", skemo: id("ske"), kind: "widget", description: "A." },
+      { id: id("sxa"), name: "login-page", kind: "page", eroj: [id("ero")] },
+    ],
   },
   {
     def: "Projekcio",

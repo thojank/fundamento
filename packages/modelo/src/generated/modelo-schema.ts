@@ -223,6 +223,11 @@ export type KontrastKategorio = "text-normal" | "text-large" | "ui";
  */
 export type IkonoId = string;
 /**
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "SxablonoId".
+ */
+export type SxablonoId = string;
+/**
  * Where a part property gets its token: bindings keyed by props and state (by), one token (fixed), or the token of another part property (sameAs, 'part.property').
  *
  * This interface was referenced by `ModeloJson`'s JSON-Schema
@@ -306,11 +311,6 @@ export type EntityType =
  * via the `definition` "AnyId".
  */
 export type AnyId = string;
-/**
- * This interface was referenced by `ModeloJson`'s JSON-Schema
- * via the `definition` "SxablonoId".
- */
-export type SxablonoId = string;
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema
  * via the `definition` "ProjekcioId".
@@ -498,6 +498,10 @@ export interface ModeloJson {
    */
   ikonaro?: Ikono[];
   eroj: Ero[];
+  /**
+   * The Sxablonoj (Spec 020): patterns of Eroj, each with its Skemo of regions and its Uzo; absent while the Modelo has none.
+   */
+  sxablonoj?: SxablonoEntry[];
   skemoj: Skemo[];
   rezolvo: Rezolvo;
   /**
@@ -1178,6 +1182,150 @@ export interface Ero {
   description: NonEmptyText;
 }
 /**
+ * A Sxablono in modelo.json (Spec 020): the Sxablono, its Skemo and its Uzo, read back by modeloFromExport.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "SxablonoEntry".
+ */
+export interface SxablonoEntry {
+  sxablono: Sxablono;
+  skemo: SxablonoSkemo;
+  uzo?: SxablonoUzo;
+}
+/**
+ * A template or pattern (Spec 020, E1): a layout, page type or flow of Eroj, with a Skemo of regions and an Uzo like an Ero's. kind says which: layout (the frame of an application), page (a page), flow (a form, a filter bar, an editor).
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "Sxablono".
+ */
+export interface Sxablono {
+  id: SxablonoId;
+  name: Name;
+  skemo: SkemoId;
+  kind: "layout" | "page" | "flow";
+  description: string;
+}
+/**
+ * The blueprint of a Sxablono (Spec 020, G1): its regions (each a slot in the projection), its props, what it sets for accessibility (landmarks, the skip target, the focus target), the goals suggest_ero answers with it, and the tokens of its layout (parts, as an Ero's).
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "SxablonoSkemo".
+ */
+export interface SxablonoSkemo {
+  id: SkemoId;
+  sxablono: SxablonoId;
+  props: SkemoProp[];
+  /**
+   * @minItems 1
+   */
+  regions: SxablonoRegion[];
+  a11y: SxablonoA11Y;
+  goals?: SxablonoGoal[];
+  /**
+   * The tokens of the layout, by part and platform-neutral property (Art. VIII); the projection maps them. The part container takes width: the container width below which the regions stack (a size.container.* token).
+   */
+  parts: {
+    [k: string]: SkemoPart;
+  };
+}
+/**
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "SkemoProp".
+ */
+export interface SkemoProp {
+  name: Name;
+  kind: "enum" | "boolean" | "string" | "number";
+  /**
+   * @minItems 1
+   */
+  values?: Name[];
+  default?: string | number | boolean;
+  description?: NonEmptyText;
+  /**
+   * The prop must be given (get_ero brief lists it under required.props). A prop without a default is not a duty by that alone: label is the fallback name of an empty slot, value the text of an empty field (Abnahme Spec 008/009 R-10, 2026-10-13).
+   */
+  required?: boolean;
+}
+/**
+ * A named region of a Sxablono (Spec 020): what may stand in it (Ero or Sxablono names, text or icon; any content where accepts is absent), how many, which props its children must have, how many of them may be primary actions (emphasis high), and whether it is a polite live region. One region may be the default slot.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "SxablonoRegion".
+ */
+export interface SxablonoRegion {
+  name: Name;
+  description: string;
+  required?: boolean;
+  default?: boolean;
+  /**
+   * @minItems 1
+   */
+  accepts?: Name[];
+  min?: number;
+  max?: number;
+  /**
+   * Props every Ero in the region must have, with their values (the title of a page: level 1, focusable).
+   */
+  props?: {
+    [k: string]: string | boolean;
+  };
+  /**
+   * At most this many children with emphasis high (Regulo one-primary-per-container).
+   */
+  primary?: number;
+  live?: "polite";
+}
+/**
+ * What a Sxablono sets for accessibility (Spec 020, G4): the landmarks it renders (once per page), the region its own skip link jumps to, the region that holds the page's focus target.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "SxablonoA11y".
+ */
+export interface SxablonoA11Y {
+  landmarks: ("banner" | "navigation" | "main" | "search" | "contentinfo" | "complementary")[];
+  skip?: Name;
+  focus?: Name;
+}
+/**
+ * A goal suggest_ero answers with the Sxablono (Spec 020, G3): its keywords, the props to set and why.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "SxablonoGoal".
+ */
+export interface SxablonoGoal {
+  goal: Name;
+  keywords: Keywords;
+  props: {
+    [k: string]: string;
+  };
+  kialo: string;
+}
+/**
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "SkemoPart".
+ */
+export interface SkemoPart {
+  [k: string]: SkemoPartSource;
+}
+/**
+ * The use of a Sxablono (Spec 020, G1): the same structure as an Ero's Uzo — purpose, alternatives, boundaries, composition — without slot rules (the regions of the Skemo say what stands where).
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "SxablonoUzo".
+ */
+export interface SxablonoUzo {
+  id: UzoId;
+  sxablono: SxablonoId;
+  skemo: SkemoId;
+  purpose: string;
+  instead: UzoInstead[];
+  /**
+   * @minItems 1
+   */
+  boundary: UzoBoundary[];
+  composes: UzoComposes;
+}
+/**
  * The machine-readable specification of an Ero (Spec 003, data-model §2): the single source of every projection.
  *
  * This interface was referenced by `ModeloJson`'s JSON-Schema
@@ -1202,24 +1350,6 @@ export interface Skemo {
    * The goals a user may have with the Ero (delete, save, cancel); suggest_ero matches a word of the user against their keywords. Called goals, not intents, so that the word intent is free for a prop (Spec 007, OP-4, F1-T00).
    */
   goals?: SkemoGoal[];
-}
-/**
- * This interface was referenced by `ModeloJson`'s JSON-Schema
- * via the `definition` "SkemoProp".
- */
-export interface SkemoProp {
-  name: Name;
-  kind: "enum" | "boolean" | "string" | "number";
-  /**
-   * @minItems 1
-   */
-  values?: Name[];
-  default?: string | number | boolean;
-  description?: NonEmptyText;
-  /**
-   * The prop must be given (get_ero brief lists it under required.props). A prop without a default is not a duty by that alone: label is the fallback name of an empty slot, value the text of an empty field (Abnahme Spec 008/009 R-10, 2026-10-13).
-   */
-  required?: boolean;
 }
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema
@@ -1250,13 +1380,6 @@ export interface SkemoSlot {
    * The text of the slot is for assistive technology alone (Spec 011 ③, plan ③ D-05): present in the accessible content, never shown — the long form of a badge; a projection keeps it out of sight, a drawn set leaves it out.
    */
   hidden?: boolean;
-}
-/**
- * This interface was referenced by `ModeloJson`'s JSON-Schema
- * via the `definition` "SkemoPart".
- */
-export interface SkemoPart {
-  [k: string]: SkemoPartSource;
 }
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema
@@ -1809,17 +1932,51 @@ export interface UzoFile {
   uzo: Uzo;
 }
 /**
- * A template or pattern (layout, page type, flow). Schema only in Phase 0.
+ * data/sxablonoj/<name>/skemo.json (Spec 020): the Sxablono and its Skemo.
  *
  * This interface was referenced by `ModeloJson`'s JSON-Schema
- * via the `definition` "Sxablono".
+ * via the `definition` "SxablonoFile".
  */
-export interface Sxablono {
-  id: SxablonoId;
-  name: Name;
-  kind: "layout" | "page" | "flow";
-  eroj: EroId[];
-  description?: string;
+export interface SxablonoFile {
+  $schema?: string;
+  sxablono: Sxablono;
+  skemo: SxablonoSkemo;
+}
+/**
+ * data/sxablonoj/<name>/uzo.json (Spec 020).
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "SxablonoUzoFile".
+ */
+export interface SxablonoUzoFile {
+  $schema?: string;
+  uzo: SxablonoUzo;
+}
+/**
+ * An instance of a Sxablono for check_usage (Spec 020, G3): its props and what stands in each region — text, an icon, an Ero (with its props) or a Sxablono by name.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "SxablonoInstance".
+ */
+export interface SxablonoInstance {
+  sxablono: Name;
+  props?: {
+    [k: string]: string | boolean | number;
+  };
+  regions?: {
+    [k: string]: (
+      | ("text" | "icon")
+      | {
+          ero: Name;
+          props?: {
+            [k: string]: string | boolean | number;
+          };
+        }
+      | {
+          sxablono: Name;
+        }
+    )[];
+  };
 }
 /**
  * A derivation from the Modelo into one output target. Schema only in Phase 0.

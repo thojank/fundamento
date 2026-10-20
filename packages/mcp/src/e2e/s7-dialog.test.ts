@@ -71,6 +71,8 @@ describe("S7 with ekzemplo (AK-06)", () => {
       // Spec 019 ③: a wish, and a save without confirm (writes nothing).
       propose_agordo: { agordo: { name: "provo", leitfarbe: "#375479" }, wunsch: "runder" },
       save_agordo: { agordo: { name: "provo", leitfarbe: "#375479" }, pfad: "marken/provo.json" },
+      // Spec 020 ①: a Sxablono by name.
+      get_sxablono: { name: "pagxo" },
     };
     for (const name of TOOL_NAMES) {
       const result = await call(client, name, inputs[name] ?? {});

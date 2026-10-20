@@ -212,6 +212,21 @@ export const RULE_IDS = [
   // Spec 019 ③ (G6, E4): save_agordo refuses a path outside the working directory, a file that
   // is no *.json or no Agordo.
   "agordo-save-refused",
+  // Spec 020 ① (G1, G3, G4): the Sxablonoj — their files (pairs of IDs, a name an Ero has, a
+  // name nobody has, a missing Uzo, a token the core lacks), and check_usage of an instance (an
+  // unknown Sxablono, a required region left empty, a child the region does not accept, too
+  // many, a prop the region asks for, a landmark twice on a page).
+  "sxablono-pair-mismatch",
+  "sxablono-name-taken",
+  "sxablono-ref-unknown",
+  "sxablono-uzo-missing",
+  "sxablono-token-unknown",
+  "sxablono-unknown",
+  "sxablono-region-required-missing",
+  "sxablono-region-accepts",
+  "sxablono-region-max",
+  "sxablono-region-props",
+  "sxablono-landmark-twice",
   // Projekcio lints (Spec 003, D-17)
   "css-physical-property",
   "ero-hardcoded-string",

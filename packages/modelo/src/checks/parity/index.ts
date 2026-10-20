@@ -15,6 +15,7 @@ import {
   type ParityAspect,
   restrictParityInventory,
   skemoParityInventory,
+  sxablonoParityInventory,
 } from "../../eroj/inventories.js";
 import { loadModelo } from "../../load/load-modelo.js";
 import { checkSource } from "../source.js";
@@ -53,6 +54,23 @@ function aspektojOf(modelo: Modelo): string[] {
       .find((dimensio) => dimensio.name === "aspekto")
       ?.valoroj.map((valoro) => valoro.name) ?? []
   );
+}
+
+/** The sides of the Sxablonoj (Spec 020, G2): Web (props, regions), React (props), Make Kit. */
+export function sxablonoSides(modelo: Modelo): ParitySide[] {
+  return [
+    {
+      file: "sxablonoj-web-component.json",
+      label: "web-component(Sxablonoj)",
+      aspects: ["props", "values"],
+    },
+    { file: "sxablonoj-react.json", label: "react(Sxablonoj)", aspects: ["props"] },
+    ...aspektojOf(modelo).map((aspekto) => ({
+      file: `sxablonoj-guidelines-${aspekto}.json`,
+      label: `guidelines(${aspekto}, Sxablonoj)`,
+      aspects: ["props", "values"] as ParityAspect[],
+    })),
+  ];
 }
 
 /**
@@ -169,6 +187,26 @@ export async function check(options: CheckOptions): Promise<CheckResult> {
     );
   }
 
+  // Spec 020 (G2): the Sxablonoj against Web, React and the Make Kit (Figma shows an example frame
+  // and counts for no parity, E3).
+  const sxablonoj = modelo.sxablonoj ?? [];
+  const patternSides = sxablonoj.length === 0 ? [] : sxablonoSides(modelo);
+  for (const side of patternSides) {
+    const read = readInventory(inventoryDir, side.file, join(display, side.file));
+    if (read.inventory === undefined) {
+      unread.push(...read.issues.map(buildFirst));
+      continue;
+    }
+    compared += 1;
+    errors.push(
+      ...compareInventories(
+        restrictParityInventory(sxablonoParityInventory(sxablonoj), side.aspects),
+        restrictParityInventory(read.inventory, side.aspects),
+        { labels: ["skemo", side.label] },
+      ),
+    );
+  }
+  sides.push(...patternSides);
   const names = sides.map((side) => side.label).join(", ");
   const items = itemCount(skemoParityInventory(modelo.eroj));
   const released = errors.filter((issue) => issue.severity !== "error").length;

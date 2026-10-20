@@ -50,7 +50,11 @@ export function uzoIssues(modelo: Modelo, files: ModeloFiles): ValidationIssue[]
     }
   }
 
-  const eroNames = new Set(modelo.eroj.map((entry) => entry.ero.name));
+  // Spec 020 (G1): an Uzo may send to a Sxablono (use-instead, instead, composes) as to an Ero.
+  const eroNames = new Set([
+    ...modelo.eroj.map((entry) => entry.ero.name),
+    ...(modelo.sxablonoj ?? []).map((entry) => entry.sxablono.name),
+  ]);
   for (const entry of modelo.eroj) {
     if (entry.uzo === undefined || entry.uzoFile === undefined) continue;
     const uzo = entry.uzo as unknown as JsonObject;

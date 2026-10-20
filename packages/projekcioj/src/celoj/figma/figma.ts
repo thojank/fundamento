@@ -21,6 +21,7 @@ import {
   isEntryKey,
   isPositionKeyword,
   type LoadedEro,
+  type LoadedSxablono,
   type Modelo,
   nomRegulo,
   PARITY_ALPHA_VARIES,
@@ -1444,6 +1445,75 @@ export interface FigmaPlan {
    * combination.
    */
   section?: { name: string; gap: number; padding: number; frame: string };
+  /**
+   * The example frames of the Sxablonoj (Spec 020, G2, E3): no component set, no variants — a frame
+   * per Sxablono in the frame `FIGMA_SXABLONO_FRAME` of the section, a frame per region (its
+   * direction) holding instances of the Ero sets (the variant whose props match, with its label)
+   * or a word. Outside `components`: the frames are an example and count for no parity.
+   */
+  sxablonoj?: FigmaSxablono[];
+}
+
+/** An example frame of a Sxablono in the plan (Spec 020, G2). */
+export interface FigmaSxablono {
+  name: string;
+  description: string;
+  regions: {
+    name: string;
+    direction: "HORIZONTAL" | "VERTICAL";
+    items: { set?: string; props?: Record<string, string>; text?: string }[];
+  }[];
+}
+
+/** The frame of the Sxablonoj in the section, beside the frame of the sets (Spec 020, E3). */
+export const FIGMA_SXABLONO_FRAME = "Sxablonoj";
+
+/** The words of the regions in the example frames (the Vitrino's, one source for both pictures). */
+const SXABLONO_WORDS: Readonly<Record<string, string>> = {
+  brand: "Fundamento",
+  principal: "Erika Mustermann",
+  notices: "Gespeichert.",
+  title: "Standards",
+  badges: "Gültig",
+  subtitle: "Alle Standards des Projekts.",
+  actions: "Bearbeiten",
+  main: VITRINO_CONTENT_TEXT,
+  sections: VITRINO_CONTENT_TEXT,
+};
+
+/**
+ * The example frame of a Sxablono (Spec 020, G2, E3): per region the first Ero it accepts as an
+ * instance — with the props the region asks for, and for a region with one primary action the
+ * primary butono beside the last Ero it accepts (the menu) — or, for a region of text or of any
+ * content, its word.
+ */
+function sxablonoFrameOf(entry: LoadedSxablono, sets: ReadonlySet<string>): FigmaSxablono {
+  return {
+    name: entry.sxablono.name,
+    description: entry.uzo?.purpose ?? entry.sxablono.description,
+    regions: entry.skemo.regions.map((region) => {
+      const word = SXABLONO_WORDS[region.name] ?? region.name;
+      const eroj = (region.accepts ?? []).filter((name) => sets.has(name));
+      const props = Object.fromEntries(
+        Object.entries(region.props ?? {}).map(([key, value]) => [key, String(value)]),
+      );
+      const first = eroj[0];
+      const items =
+        region.accepts === undefined || region.accepts[0] === "text" || first === undefined
+          ? [{ text: word }]
+          : region.primary !== undefined && eroj.length > 1
+            ? [
+                { set: first, props: { ...props, emphasis: "high" }, text: word },
+                { set: eroj[eroj.length - 1] ?? first },
+              ]
+            : [{ set: first, ...(Object.keys(props).length === 0 ? {} : { props }), text: word }];
+      return {
+        name: region.name,
+        direction: region.max === undefined && region.default !== true ? "HORIZONTAL" : "VERTICAL",
+        items,
+      } as FigmaSxablono["regions"][number];
+    }),
+  };
 }
 
 /** The single-mode collection of everything no Dimensio changes, and its mode. */
@@ -3091,6 +3161,13 @@ export const FIGMA_CELO: Celo = {
         ),
       ),
       section: { name: FIGMA_SECTION, gap, padding: gap, frame: FIGMA_SET_FRAME },
+      ...((modelo.sxablonoj ?? []).length === 0
+        ? {}
+        : {
+            sxablonoj: (modelo.sxablonoj ?? []).map((entry) =>
+              sxablonoFrameOf(entry, new Set(modelo.eroj.map((ero) => ero.ero.name))),
+            ),
+          }),
     };
     return [
       { path: "figma/plan.json", text: `${JSON.stringify(plan, null, 2)}\n` },

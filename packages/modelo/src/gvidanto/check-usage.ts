@@ -5,17 +5,26 @@
 // for an Aspekto or a Dimensio value the Modelo does not know (Spec 007, D-04). Pure.
 
 import type { ValidationIssue } from "../contracts/issues.js";
-import type { EroInstance, Modelo, Skemo } from "../contracts/modelo.js";
+import type { EroInstance, Modelo, Skemo, SxablonoInstance } from "../contracts/modelo.js";
 import { evaluateUsage, type UsageResult } from "../eroj/usage.js";
 import { ASPEKTO_DIMENSIO } from "../load/build.js";
 import { valoroNames } from "../resolve/assignment.js";
+import type { SxablonoViolation } from "./sxablonoj.js";
+import { evaluateSxablonoUsage, sxablonoInputIssue } from "./sxablonoj.js";
 
 export interface CheckUsageInput {
   instances: EroInstance[];
+  /** Instances of Sxablonoj (Spec 020, G3): their regions and the landmarks of the page. */
+  sxablonoj?: SxablonoInstance[];
 }
 
+/** The judgement: the violations of the Ero instances, then those of the Sxablono instances. */
+export type CheckUsageOutput = Omit<UsageResult, "violations"> & {
+  violations: (UsageResult["violations"][number] | SxablonoViolation)[];
+};
+
 export type CheckUsageResult =
-  | { ok: true; output: UsageResult }
+  | { ok: true; output: CheckUsageOutput }
   | { ok: false; issues: ValidationIssue[]; allowed?: string[] };
 
 function invalid(path: string, message: string, suggestion: string): ValidationIssue {
@@ -153,5 +162,18 @@ export function checkUsage(modelo: Modelo, input: CheckUsageInput): CheckUsageRe
       propIssue(entry.skemo, instance, index) ?? slotIssue(entry.skemo, instance, index);
     if (found !== undefined) return { ok: false, issues: [found.issue], allowed: found.allowed };
   }
-  return { ok: true, output: evaluateUsage(modelo, input.instances) };
+  const sxablonoj = input.sxablonoj ?? [];
+  const region = sxablonoInputIssue(modelo, sxablonoj);
+  if (region !== undefined) return { ok: false, issues: [region.issue], allowed: region.allowed };
+  const usage = evaluateUsage(modelo, input.instances);
+  if (sxablonoj.length === 0) return { ok: true, output: usage };
+  const patterns = evaluateSxablonoUsage(modelo, sxablonoj);
+  return {
+    ok: true,
+    output: {
+      ...usage,
+      valid: usage.valid && patterns.every((violation) => violation.issue.severity !== "error"),
+      violations: [...usage.violations, ...patterns],
+    },
+  };
 }

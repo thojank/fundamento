@@ -46,6 +46,12 @@ const jsonIsland = (value: unknown): string =>
   JSON.stringify(value).replaceAll("</", "<\\/").replaceAll("<!--", "<\\!--");
 
 const LAYOUT = `:root { color-scheme: light dark; }
+.fm-breiten { display: flex; flex-direction: column; gap: var(--fm-spacing-large); }
+.fm-sxablono { margin: 0; display: flex; flex-direction: column; gap: var(--fm-spacing-small); }
+.fm-breite { overflow-x: auto; border: var(--fm-border-width-default) dashed var(--fm-color-border-default); }
+.fm-breite[data-fm-breite="schmal"] { inline-size: calc(var(--fm-size-container-small) / 2); }
+.fm-breite[data-fm-breite="mittel"] { inline-size: var(--fm-size-container-medium); max-inline-size: 100%; }
+.fm-breite[data-fm-breite="breit"] { inline-size: var(--fm-size-container-large); max-inline-size: 100%; }
 body { margin: 0; font-family: var(--fm-typography-body-1-font-family); background-color: var(--fm-${VITRINO_SURFACE.replaceAll(".", "-")}); color: var(--fm-color-text-default); }
 header, main { padding: var(--fm-spacing-large); display: flex; flex-direction: column; gap: var(--fm-spacing-large); }
 h1, h2 { margin: 0; font-family: var(--fm-typography-headline-2-font-family); }
@@ -352,6 +358,20 @@ ${section("roloj", "Flächen, Text, Status und Aktionen", roles, false, "ansehen
 ${Object.entries(datumoj.eroj)
   .map(([ero, markup]) => section(ero, ero, markup))
   .join("\n")}
+${
+  Object.keys(datumoj.sxablonoj).length === 0
+    ? ""
+    : section(
+        "sxablonoj",
+        "Sxablonoj",
+        Object.entries(datumoj.sxablonoj)
+          .map(
+            ([name, markup]) =>
+              `<h3>${escapeHtml(name)}</h3><div class="fm-breiten">${markup}</div>`,
+          )
+          .join(""),
+      )
+}
 ${section("uzo", "Gebrauch", uzo(datumoj), false, "ansehen")}
 ${section("kontrasto", "Kontrastmatrix", '<div id="fm-vitrino-kontrasto-tabelo"></div>', false, "ansehen")}
 ${section("regularo", "Regularo und Ziele", '<div id="fm-vitrino-regularo-tabelo"></div>', false, "ansehen")}

@@ -139,6 +139,15 @@ function partialModeloJson(modelo: Modelo): ModeloJson {
     eroj: modelo.eroj.map((entry) => entry.ero),
     skemoj: modelo.eroj.map((entry) => entry.skemo),
     ...uzojOf(modelo),
+    ...((modelo.sxablonoj ?? []).length === 0
+      ? {}
+      : {
+          sxablonoj: (modelo.sxablonoj ?? []).map((entry) => ({
+            sxablono: entry.sxablono,
+            skemo: entry.skemo,
+            ...(entry.uzo === undefined ? {} : { uzo: entry.uzo }),
+          })),
+        }),
     rezolvo: { assignment: {}, tokens: {} },
   };
 }
