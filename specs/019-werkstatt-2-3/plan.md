@@ -184,7 +184,107 @@ Je Regler Minimum und Maximum bei sonst Standard (Leitfarbe komunas `#375479`), 
 
 ## ② Werkstatt Stufe 2
 
-Folgt in PR ②.
+**Branch:** `261020-spec-019-werkstatt-116ba2` (gestapelt auf ① `261020-spec-019-bibliothek-116ba2`) · **Datum:** 2026-10-20 · **Stand:** zur Abnahme (Messanleitung in plan ③).
+
+### Zusammenfassung
+
+1. **Panel G7:** zu „Farbe“ (Zusatzfarben, Neutral-Tönung, Helligkeit, Kontrast, Sättigung) kommen die Gruppen „Form“ (Radius, Rahmen, Schatten), „Raum“ (Abstand, Höhe), „Schrift“ (Schriftgröße, Skala, Schriftgewicht und je Rolle display/body/code ein Feld für die Familie) und „Icons“ (Icon-Gewicht). Jede Gruppe ist ein `fm-faldilo` (zuklappbar, offen beim Start). Die Regler bleiben das native `input type=range` mit Label und Wert (`output`); daneben je Regler ein `fm-butono` „Zurücksetzen“ auf den Standard (W-8). Das Icon-Gewicht ist ein `fm-elektilo` mit regular und jedem Gewicht, dessen Glyphen vollständig im Repo liegen.
+2. **Live an jedem Ero:** Die Werte der Stufe 2 (`deriveGestalt` aus ①) stehen als Custom Properties am Root und auf der Entwurfsseite der Gegenüberstellung, geschrieben mit den Deklarationen des CSS-Celo (`tokenDeclarations`); die Rollen sind im CSS `var()`-Aliasse, also folgen Dichte, Viewport und Kontrast. Die Glyphen eines anderen Gewichts ersetzen `--fm-ikono-<name>` (`glyphValue` des CSS-Celo). Im Dunkelmodus gelten die Schattenfarben aus dem Konjunktions-Set (plan ① D-05).
+3. **Prüfung ohne Stocken G5:** Paletten und Prüfung laufen in **zwei Workern**, gebaut aus dem Text des eigenen Moduls als Blob; der Hauptfaden setzt nur noch Werte, einmal je Frame. Gemessen: vorher blockierte eine Prüfung den Hauptfaden 1 045 ms und ein Reglerzug bis 92 ms; nachher **keine Long Task** über 50 ms, beim Ziehen über 50 Änderungen und in M5. Ohne Worker läuft derselbe Code im Hauptfaden.
+4. **Verlauf:** „Rückgängig“ und „Wiederholen“ als `fm-butono` und mit ⌘Z / ⇧⌘Z bzw. Strg+Z / Umschalt+Strg+Z, nur im Speicher der Seite. Die Schritte eines Reglers innerhalb von 600 ms sind ein Schritt (ein Zug); in Textfeldern bleibt das Rückgängig des Feldes.
+5. **Vorschlags-Leiste:** Ein Link aus `propose_agordo` trägt neben `#agordo=…` (die Agordo vorher) den Teil `vorschlag=…` (deflate-raw, base64url, JSON `{ wunsch, agordo }`). Die Werkstatt zeigt oben „Vorgeschlagen: ruhiger (Sättigung 1,0 → 0,8, …)“ mit „Übernehmen“ und „Verwerfen“; bis dahin gilt die Agordo vorher. „Übernehmen“ ist ein Schritt des Verlaufs; beide nehmen `vorschlag=` aus dem Fragment.
+6. **Schriften:** Ein Name im Feld einer Rolle wird `schriften.<rolle>` (plan ① Abweichung 1) – nur der Name, nie eine Datei. Kennt der Browser die Schrift nicht, steht unter der Gruppe „Schrift nicht installiert, Darstellung in Ersatzschrift: …“.
+7. **Gleichheit Browser–CLI** für beide Beispielmarken: Der Raporto der Werkstatt ist für `provo` und `provo-kompakta` Wert für Wert der der eingecheckten Fixtures.
+8. **M5** (unten).
+9. **Kleinste Änderungen daneben:** Agordilo – `regler.ts` (`reglerOf`, `reglerValue`, `withRegler`, `reglerDiff`, `vorschlagSatz`, `Vorschlag`), `GestaltBasis.types`; Projekcioj – `content-visibility: auto` für die Abschnitte, die Palettentabellen und die beiden Seiten der Gegenüberstellung im Werkstatt-Modus; Bericht mit Zählern an Ort und Stelle, Liste nur bei Änderung, APCA-Liste erst beim Öffnen; Tests – der Vergleichstest scrollt die Seiten in den Blick, die Axe-Tests rendern alles, der Test M3 ist M5.
+
+### Entwurfsentscheidungen
+
+#### D-01 Worker statt Häppchen
+Die Prüfung ist ein Aufruf der Bibliothek (Modelo-Validierung rund 1 s am Stück); in Häppchen teilen hieße, die Validierung umzubauen. Ein Worker trägt dieselbe Bibliothek unverändert. Die Spec verlangt, dass er aus der statischen Datei in Chromium, Firefox und WebKit läuft; gemessen (Probe mit Playwright unter `file://`): ein **Modul-Worker** aus einem Blob startet in Chromium nicht, Firefox und WebKit starten ihn; ein **klassischer Worker** startet in allen dreien. Darum wird der Text des Bündels klassisch gemacht: `import.meta.url` wird die Adresse des Workers (jede URL darauf ist absolut: `data:`, `fm-provided:`), `import.meta.main` (der tote CLI-Zweig) `false`, und eine async-Funktion hält das Ganze.
+
+#### D-02 Eine Anfrage unterwegs, die neueste gewinnt
+Je Worker ist höchstens eine Anfrage unterwegs; kommt ihre Antwort für eine ältere Agordo, geht sofort die neueste hinaus. Das ersetzt den Abbruch des Häppchen-Wegs: Ein veraltetes Ergebnis erscheint nie (Abweichung 1). Die Prüfung bleibt entprellt (400 ms), die Paletten nicht.
+
+#### D-03 Ein Frame, gleich viele Änderungen
+Ein Reglerzug liefert mehrere `input` je Frame; die Werkstatt setzt Werte der Stufe 2 und Paletten einmal je Frame (`requestAnimationFrame`). Das Agordo-Schema wird beim Laden übersetzt, nicht beim ersten Zug (gemessen 78 ms beim ersten `setAgordo`).
+
+#### D-04 Nur rechnen, was man sieht
+Gemessen (Chromium): ein Wechsel der 73 Palettenwerte kostete 20 ms Neuberechnung, davon 16 ms für die zwei Klone aller Ero-Abschnitte in der Gegenüberstellung. Mit `content-visibility: auto` auf den Abschnitten, den Palettentabellen und den beiden Seiten 4–5 ms. Folge für Tests: Werte in übersprungenen Inhalten liest man, nachdem sie im Blick sind; Axe misst übersprungene Inhalte mit Platzhaltermaßen und wird darum auf alles Gerenderte angesetzt (B-4).
+
+#### D-05 Die Live-Werte schreibt das CSS-Celo
+`tokenDeclarations` und `glyphValue` sind die Funktionen, mit denen das CSS-Celo das Stylesheet schreibt (Art. II, Art. XI): kein zweiter Formatierer. Der Typ jedes Tokens kommt aus dem Kern-Set (`GestaltBasis.types`).
+
+#### D-06 Verlauf
+Zwei Stapel (vorher, nachher) der Agordo. Ein Schritt entsteht, wenn sich die Agordo aus dem Panel ändert; Änderungen desselben Bedienelements innerhalb von 600 ms verschmelzen. Laden aus dem Fragment ist kein Schritt. Tastatur nur im Werkstatt-Modus und nicht in Textfeldern.
+
+#### D-07 Schrift als Name
+Eine neue Familie wird ein Fonto mit `license: "proprietary"`, `redistributable: false`, `source: "Werkstatt: nur der Name, ohne Datei"`, `scripts: ["Latn"]` – die vorsichtige Aussage, solange niemand die Lizenz nennt (O-2). Ob der Browser sie hat, entscheidet ein Breitenvergleich auf einem Canvas gegen drei generische Familien.
+
+#### D-08 Das Fragment des Vorschlags
+`vorschlag=` trägt die vorgeschlagene Agordo und das Wort, nicht den Diff: den Diff rechnet die Werkstatt aus der Agordo, die gerade gilt (`reglerDiff`), so stimmt die Leiste auch, wenn man vorher noch etwas bewegt. Dasselbe Verfahren wie `#agordo=` (deflate-raw, base64url).
+
+#### D-09 Eine Reglerliste
+Panel, Verlauf, Leiste und in ③ `propose_agordo` lesen dieselbe Liste aus der Bibliothek (`reglerOf`): Gruppe, deutsches Label, Bereich, Standard. Die Kennungen der Regler aus Stufe 1 bleiben (`fm-werkstatt-helligkeit` …), die neuen heißen `fm-werkstatt-<gruppe>-<feld>`.
+
+### Arkitekturo-Abdeckung
+
+| Artikel / Festlegung | Wie ② ihn trägt |
+|---|---|
+| Art. I, G1 | Die Werkstatt rechnet über den Modelo-Dateien der Struktur; der Download bleibt eine Agordo |
+| Art. II | Custom Properties über `cssVariable` und `tokenDeclarations` (NomRegulo), nie von Hand |
+| Art. VIII | Dieselbe Bibliothek im Worker; Raporto für provo und provo-kompakta gleich der CLI |
+| Art. X | Rot zuerst (`1e72db4`); Long Tasks, Gleichheit, Axe in vier Kombinationen im Browser |
+| Art. XI | Ein Modus der Vitrino, kein neues Celo, kein neues Ero; Eroj, wo es eines gibt (`fm-faldilo`, `fm-elektilo`, `fm-kampo`, `fm-butono`) |
+| G5 | Zwei Worker, eine Anfrage unterwegs, keine Long Task über 50 ms |
+| G7 | Gruppen, Rücksetzen, Verlauf, Vorschlags-Leiste, live, Icons, Schriften, native Regler |
+| E5 | Die Vitrino schreibt keine Datei |
+
+### Abweichungen von der Spec
+
+1. **Kein Abbruch der Prüfung**, sondern verworfene veraltete Ergebnisse (D-02): Die Spec verlangt den Abbruch für den Häppchen-Weg; im Worker kostet eine laufende Prüfung den Hauptfaden nichts.
+2. **Tests an einer Rendering-Optimierung angepasst** (D-04): Der Vergleichstest aus Spec 016 ② scrollt die Seiten in den Blick, bevor er Farben liest; die Axe-Tests schalten `content-visibility` ab und warten laufende Übergänge ab. Die Erwartungen sind unverändert.
+3. **Der Test M3 ist jetzt M5** (gleiche 50 Änderungen, dazu die längste Blockade).
+4. **Das Icon-Gewicht zeigt nur Gewichte mit vollständigen Glyphen** (heute alle sechs).
+5. **Die Schriftfelder schreiben `schriften`** mit vorsichtigen Lizenzangaben (D-07, plan ① Abweichung 1).
+
+### Befunde / Mankoj
+
+- **B-1 Chromium und Modul-Worker unter `file://`:** gemessen in Chromium, Firefox und WebKit (Playwright 1.63): klassischer Worker aus Blob überall, Modul-Worker aus Blob nicht in Chromium. Darum D-01.
+- **B-2 Vorher/nachher:** vorher (Stand ①) beim Ziehen Long Tasks von 92, 52 und 283 ms, die Prüfung 1 045 ms im Hauptfaden; nachher keine (G5-Test, M5).
+- **B-3 Die Gegenüberstellung war der teuerste Teil** der Neuberechnung (16 von 20 ms); `content-visibility` auf den Seiten senkt sie auf 4–5 ms (D-04).
+- **B-4 Axe und `content-visibility`:** übersprungene Inhalte haben für Axe Platzhaltermaße (8,3 px hohe Knöpfe) und einen falschen Hintergrund; der Test rendert alles, bevor er misst. Kein Befund am Produkt.
+- **B-5 Rückfall ohne Worker:** gibt ein Browser keinen Worker, rechnet der Hauptfaden wie in Spec 016 ② (Long Tasks wie vorher); `fmWerkstatt.state.worker` sagt, welcher Weg gilt.
+- **Mankoj:** keine neuen.
+
+### Offen (für den Maintainer)
+
+- **O-1 Regler als Ero** (O-3 aus Spec 016 ②): native `input type=range`, `type=color`, `type=number` bleiben Kandidaten; kein neues Ero in dieser Spec. **Vorschlag:** Kandidat für Etappe 8b.
+- **O-2 Lizenz einer Schrift aus dem Panel** (D-07): `proprietary`, nicht weitergegeben, bis jemand die Lizenz einträgt. **Vorschlag: so.**
+- **O-3 `content-visibility` in der Werkstatt** (D-04). **Vorschlag: so**; im Ansehen-Modus bleibt die Vitrino unverändert.
+- **O-4 600 ms je Verlaufsschritt** (D-06). **Vorschlag: so.**
+
+### M5 – Tempo (Ableitung und Prüfung beim Ziehen, längste Blockade)
+
+Gemessen über 50 Änderungen des Reglers Helligkeit (−1 … 1), je Änderung die Ableitung (Paletten im Worker samt Setzen der Werte, bis sie stehen) und die Prüfung (Worker, bis der Bericht steht); dazu die längste Long Task des Hauptfadens während der Messung (`fmWerkstatt.measure(50)`, Test „M5“ in `packages/eroj/test/vitrino.check.ts`, die Zeile steht im stderr und als Annotation). Zusätzlich prüft der Test „G5“ 50 Reglerzüge über die Tastatur gegen Long Tasks über 50 ms.
+
+| Wo | Ableitung Median | Ableitung p95 | Prüfung Median | Prüfung p95 | längste Blockade |
+|---|---|---|---|---|---|
+| Mac (Chromium headless, Lauf von P0 auf dem Rechner des Maintainers, 2026-10-20) | 57,1 ms | 71,6 ms | 1 042,0 ms | 1 092,3 ms | 0 ms (0 Long Tasks) |
+| CI (Chromium headless, GitHub-Runner, Lauf 39350608447, `be843c5`) | 90,1 ms | 120,0 ms | 1 575,5 ms | 1 659,8 ms | 0 ms (0 Long Tasks) |
+
+**Ziel:** Ableitung unter 150 ms – erreicht; keine Blockade über 50 ms – erreicht. Die Prüfung dauert weiter rund eine Sekunde, aber im Worker.
+
+**Nachmessen (Mac):**
+
+```sh
+pnpm build
+pnpm --filter @fundamento/eroj exec playwright test --config playwright.vitrino.config.ts -g "M5|G5"
+# die Zeile „M5 (chromium): Ableitung median … längste Blockade …“ steht im stderr
+```
+
+Oder in der Vitrino selbst (`file://`, siehe Messanleitung in plan ③): in der Konsole `await fmWerkstatt.measure(50)` und `fmWerkstatt.state.worker`.
+
 
 ## ③ Prompt (Stufe 3)
 

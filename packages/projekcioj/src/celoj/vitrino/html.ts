@@ -79,6 +79,15 @@ th, td { text-align: start; padding: var(--fm-spacing-small); border-block-end: 
 tr[data-fm-superskribita="true"] th { text-decoration: underline; }
 .fm-werkstatt-flankoj { display: grid; grid-template-columns: repeat(auto-fit, minmax(24rem, 1fr)); gap: var(--fm-spacing-large); align-items: start; }
 [data-fm-side] { padding: var(--fm-spacing-large); background-color: var(--fm-${VITRINO_SURFACE.replaceAll(".", "-")}); color: var(--fm-color-text-default); font-family: var(--fm-typography-body-1-font-family); border: var(--fm-border-width-default) solid var(--fm-color-border-subtle); display: flex; flex-direction: column; gap: var(--fm-spacing-large); }
+/* Spec 019 ② (G5): in the Werkstatt every section of the Vitrino and every clone on the two sides
+   of the comparison skip the work of rendering while off screen, so a slider recomputes what is
+   visible, not the page. */
+[data-fm-modus="werkstatt"] main > section:not(#fm-vitrino-werkstatt), #fm-werkstatt-paletroj > table { content-visibility: auto; contain-intrinsic-size: auto 30rem; }
+[data-fm-modus="werkstatt"] [data-fm-side] { content-visibility: auto; contain-intrinsic-size: auto 200rem; }
+/* Spec 019 ②: the suggestion bar of a link from propose_agordo, the groups of the panel. */
+.fm-werkstatt-vorschlag:not([hidden]) { display: flex; flex-wrap: wrap; gap: var(--fm-spacing-medium); align-items: center; justify-content: space-between; padding: var(--fm-spacing-medium); border: var(--fm-border-width-strong) solid var(--fm-color-status-info-border); border-radius: var(--fm-radius-role-surface); background-color: var(--fm-color-status-info-subtle); color: var(--fm-color-text-default); }
+.fm-werkstatt-vorschlag p { margin: 0; }
+.fm-werkstatt-grupo { display: flex; flex-direction: column; gap: var(--fm-spacing-medium); padding-block: var(--fm-spacing-small); }
 .fm-werkstatt-kasxita { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }`;
 
 function switcher(datumoj: VitrinoDatumoj, werkstatt: boolean): string {

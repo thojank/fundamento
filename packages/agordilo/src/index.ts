@@ -15,6 +15,7 @@ export * from "./node/structure.js";
 export * from "./package.js";
 export * from "./palettes.js";
 export * from "./raporto.js";
+export * from "./regler.js";
 export * from "./solve.js";
 export * from "./structure.js";
 export * from "./version.js";

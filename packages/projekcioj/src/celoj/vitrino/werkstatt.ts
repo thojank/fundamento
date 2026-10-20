@@ -7,6 +7,13 @@
 // CLI writes. The Agordo travels compressed in the fragment (`#agordo=…`) and leaves as a download;
 // the Vitrino writes no file (E7). This module is bundled by Vite (werkstatt-bundle.ts) and
 // embedded in the Vitrino; it holds no colour and no number of the brand of its own.
+//
+// Spec 019 ② (G5, G7): stage 2 — the groups Form, Raum, Schrift and Icons beside Farbe, their
+// values live as custom properties (written by the CSS Celo's own formatter), a reset per slider,
+// undo and redo in the page's memory, the suggestion bar of a link from propose_agordo
+// (`#vorschlag=…`), fonts the browser lacks named as a hint. The palettes and the check run in two
+// workers made from this very module (its text, as a Blob): the main thread only sets values, so
+// moving a slider never blocks it. Without workers the same code runs on the main thread.
 
 import {
   type Agordo,
@@ -15,15 +22,26 @@ import {
   type DerivedPalettes,
   type DerivedStep,
   deriveAspekto,
+  deriveGestalt,
   derivePalettes,
   floorsOf,
+  type GestaltBasis,
+  gestaltBasis,
+  IKONO_GEWICHTE,
   modeOverrides,
   parseAgordoColor,
   type Raporto,
   type RaportoViolation,
+  type Regler,
   readAgordo,
+  reglerDiff,
+  reglerOf,
+  reglerValue,
   type Structure,
   structureModelo,
+  type Vorschlag,
+  vorschlagSatz,
+  withRegler,
 } from "@fundamento/agordilo/browser";
 import {
   CORE_SET_NAME,
@@ -33,20 +51,54 @@ import {
   readDtcgColor,
   srgbComponentsOf,
 } from "@fundamento/modelo";
-import { cssVariable } from "../css/css.js";
+import { cssVariable, glyphValue, tokenDeclarations } from "../css/css.js";
 import type { WerkstattDatumoj } from "./html.js";
 
 /** The fragment and the check wait this long after the last change (plan ② D-07, M3). */
 const CHECK_DELAY_MS = 400;
 const FRAGMENT_DELAY_MS = 300;
 const STATUS = ["success", "warning", "danger", "info"] as const;
-const SLIDERS = [
-  { key: "toenung", label: "Neutral-Tönung", min: 0, max: 1, step: 0.01, fallback: 0 },
-  { key: "helligkeit", label: "Helligkeit", min: -1, max: 1, step: 0.01, fallback: 0 },
-  { key: "kontrast", label: "Kontrast", min: -1, max: 1, step: 0.01, fallback: 0 },
-  { key: "saettigung", label: "Sättigung", min: 0, max: 2, step: 0.01, fallback: 1 },
+/** Changes of one control closer than this are one step of the history (a drag, a typed word). */
+const HISTORY_MERGE_MS = 600;
+const FONT_ROLES = ["display", "body", "code"] as const;
+const GROUPS = [
+  { key: "farbe", label: "Farbe" },
+  { key: "form", label: "Form" },
+  { key: "raum", label: "Raum" },
+  { key: "schrift", label: "Schrift" },
 ] as const;
-type SliderKey = (typeof SLIDERS)[number]["key"];
+
+/** The id of a slider: stage 1 keeps its ids of Spec 016 (fm-werkstatt-helligkeit …). */
+function reglerId(path: string): string {
+  const [group, key] = path.split(".");
+  return group === "regler" || group === "neutral"
+    ? `fm-werkstatt-${key}`
+    : `fm-werkstatt-${group}-${key}`;
+}
+
+/** A font the browser has, judged by the width of a sample against three generic fallbacks. */
+function fontInstalled(family: string): boolean {
+  const context = document.createElement("canvas").getContext("2d");
+  if (context === null) return true;
+  const sample = "mmmmmmmmmmlli1WWQ@";
+  const quoted = `"${family.replaceAll('"', "")}"`;
+  for (const fallback of ["monospace", "serif", "sans-serif"]) {
+    context.font = `72px ${fallback}`;
+    const base = context.measureText(sample).width;
+    context.font = `72px ${quoted}, ${fallback}`;
+    if (context.measureText(sample).width !== base) return true;
+  }
+  return false;
+}
+
+/** The messages between the page and its workers (palettes live, the check debounced). */
+type WorkerRequest =
+  | { kind: "init"; datumoj: WerkstattDatumoj }
+  | { kind: "palettes" | "check"; id: number; agordo: Agordo };
+type WorkerAnswer =
+  | { kind: "palettes"; id: number; palettes: DerivedPalettes; ms: number }
+  | { kind: "check"; id: number; raporto: Raporto; ms: number }
+  | { kind: "error"; id: number; message: string };
 
 interface VitrinoApi {
   setFragmentPart(name: string, value: string | undefined): void;
@@ -62,8 +114,10 @@ interface State {
   raporto?: Raporto;
   /** How many checks ran; tests wait on it. */
   checked: number;
-  /** The last derivation and check, in milliseconds. */
+  /** The last derivation and check, in milliseconds (in the worker, or here without one). */
   timings: { derive: number; check: number };
+  /** Whether the palettes and the check run in workers (G5); false on the main thread. */
+  worker: boolean;
 }
 
 const esc = (text: string): string =>
@@ -167,6 +221,9 @@ class Werkstatt {
   readonly #modelo: Modelo;
   readonly #floors: ReturnType<typeof floorsOf>;
   readonly #overrides: ReturnType<typeof modeOverrides>;
+  readonly #basis: GestaltBasis;
+  readonly #regloj: Regler[];
+  readonly #referenceStyle: string;
   readonly #vitrino: VitrinoApi;
   readonly #root = document.documentElement;
   readonly #eroTexts: Map<string, string>;
@@ -177,6 +234,25 @@ class Werkstatt {
   #lastFragment: string | undefined;
   #sides: { draft: HTMLElement; reference: HTMLElement } | undefined;
   #lastValid: Agordo;
+  /** The custom properties of stage 2 set on the root and the draft side (G7). */
+  #gestaltProps = new Set<string>();
+  /** Undo and redo, in the page's memory only (G7). */
+  #past: Agordo[] = [];
+  #future: Agordo[] = [];
+  #lastRecord = { source: "", at: 0 };
+  /** A suggestion of a link from propose_agordo, until it is taken or dropped (G7). */
+  #vorschlag: Vorschlag | undefined;
+  #lastVorschlag: string | undefined;
+  /** The two workers (G5) and what is asked of them. */
+  #live: Worker | undefined;
+  #checker: Worker | undefined;
+  #paletteRun = { id: 0, sent: 0, busy: false, started: 0 };
+  #checkRun = { id: 0, sent: 0, busy: false, started: 0 };
+  #paletteWaiters: (() => void)[] = [];
+  #frame: number | undefined;
+  #paletteFrame: number | undefined;
+  #pendingPalettes: DerivedPalettes | undefined;
+  #checkWaiters: ((raporto: Raporto) => void)[] = [];
 
   constructor(datumoj: WerkstattDatumoj, vitrino: VitrinoApi) {
     this.#datumoj = datumoj;
@@ -187,6 +263,12 @@ class Werkstatt {
     this.#modelo = structureModelo(this.#structure);
     this.#floors = floorsOf(this.#modelo);
     this.#overrides = modeOverrides(this.#structure);
+    this.#basis = gestaltBasis(this.#structure.files);
+    this.#regloj = reglerOf(this.#basis);
+    const referenceAspekto = this.#structure.files.packages[0]?.aspekto.value as
+      | { ikonoj?: { style?: string } }
+      | undefined;
+    this.#referenceStyle = referenceAspekto?.ikonoj?.style ?? "regular";
     this.#eroTexts = new Map(
       this.#modelo.eroj.map((entry) => [entry.ero.name, JSON.stringify(entry.skemo)]),
     );
@@ -195,7 +277,136 @@ class Werkstatt {
       leitfarbe: referenceLeadColour(this.#structure, datumoj.reference),
     };
     this.#lastValid = agordo;
-    this.state = { agordo, checked: 0, timings: { derive: 0, check: 0 } };
+    // The schema of the Agordo is compiled on its first read (about 80 ms): here, while the page
+    // loads, not on the first move of a slider (G5).
+    readAgordo(agordo, "agordo.json");
+    this.state = { agordo, checked: 0, timings: { derive: 0, check: 0 }, worker: false };
+    this.#live = this.#spawn("palettes");
+    this.#checker = this.#spawn("check");
+  }
+
+  // --- the workers (G5) -------------------------------------------------------------------------
+
+  /** A worker from the text of this module; undefined where the browser gives none. */
+  #spawn(kind: "palettes" | "check"): Worker | undefined {
+    const source = document.getElementById("fm-vitrino-werkstatt-skripto")?.textContent ?? "";
+    if (source === "" || typeof Worker === "undefined") return undefined;
+    try {
+      // A classic worker: Chromium starts no module worker from a Blob in a file:// page, Firefox
+      // and WebKit start both. The module's own syntax is made classic — import.meta becomes the
+      // worker's location (every URL built on it is absolute: data:, fm-provided:), the dead
+      // CLI branch (import.meta.main) false, and an async function holds the whole.
+      const classic = `"use strict";(async () => {\n${source
+        .replaceAll("import.meta.main", "false")
+        .replaceAll("import.meta.url", "self.location.href")}\n})();`;
+      const url = URL.createObjectURL(new Blob([classic], { type: "text/javascript" }));
+      const worker = new Worker(url, { name: `fm-werkstatt-${kind}` });
+      worker.addEventListener("message", (event: MessageEvent<WorkerAnswer>) =>
+        this.#onAnswer(event.data),
+      );
+      worker.addEventListener("error", () => this.#dropWorker(kind));
+      worker.postMessage({ kind: "init", datumoj: this.#datumoj } satisfies WorkerRequest);
+      return worker;
+    } catch {
+      return undefined;
+    }
+  }
+
+  /** A worker that fails gives its work to the main thread. */
+  #dropWorker(kind: "palettes" | "check"): void {
+    if (kind === "palettes") {
+      this.#live?.terminate();
+      this.#live = undefined;
+      this.#paletteRun.busy = false;
+      this.#requestPalettes();
+    } else {
+      this.#checker?.terminate();
+      this.#checker = undefined;
+      this.#checkRun.busy = false;
+      this.#requestCheck();
+    }
+    this.state.worker = this.#live !== undefined && this.#checker !== undefined;
+  }
+
+  #onAnswer(answer: WorkerAnswer): void {
+    this.state.worker = this.#live !== undefined && this.#checker !== undefined;
+    if (answer.kind === "error") {
+      this.#status(`Die Werkstatt konnte nicht rechnen: ${answer.message}`);
+      return;
+    }
+    if (answer.kind === "palettes") {
+      this.#paletteRun.busy = false;
+      this.state.timings.derive = performance.now() - this.#paletteRun.started;
+      if (answer.id !== this.#paletteRun.id) {
+        this.#requestPalettes();
+        return;
+      }
+      // Set in the next frame, together with whatever else the frame changes.
+      this.#pendingPalettes = answer.palettes;
+      if (this.#paletteFrame === undefined) {
+        this.#paletteFrame = requestAnimationFrame(() => {
+          this.#paletteFrame = undefined;
+          const palettes = this.#pendingPalettes;
+          this.#pendingPalettes = undefined;
+          if (palettes !== undefined) this.#applyPalettes(palettes);
+          this.#flush(this.#paletteWaiters, undefined);
+        });
+      }
+      return;
+    }
+    this.#checkRun.busy = false;
+    this.state.timings.check = performance.now() - this.#checkRun.started;
+    if (answer.id === this.#checkRun.id) this.#finishCheck(answer.raporto);
+    else this.#requestCheck();
+  }
+
+  #flush<T>(waiters: ((value: T) => void)[], value: T): void {
+    for (const resolve of waiters.splice(0)) resolve(value);
+  }
+
+  /** Asks for the palettes of the last valid Agordo; one request in flight, the newest wins. */
+  #requestPalettes(): void {
+    if (this.#paletteRun.busy) return;
+    const id = this.#paletteRun.id;
+    this.#paletteRun.started = performance.now();
+    if (this.#live === undefined) {
+      const palettes = derivePalettes(
+        this.#lastValid,
+        this.#calibration,
+        this.#floors,
+        this.#overrides,
+      );
+      this.state.timings.derive = performance.now() - this.#paletteRun.started;
+      this.#applyPalettes(palettes);
+      this.#flush(this.#paletteWaiters, undefined);
+      return;
+    }
+    this.#paletteRun.busy = true;
+    this.#paletteRun.sent = id;
+    this.#live.postMessage({
+      kind: "palettes",
+      id,
+      agordo: this.#lastValid,
+    } satisfies WorkerRequest);
+  }
+
+  #requestCheck(): void {
+    if (this.#checkRun.busy) return;
+    const id = this.#checkRun.id;
+    this.#checkRun.started = performance.now();
+    if (this.#checker === undefined) {
+      const { raporto } = deriveAspekto(this.#lastValid, this.#structure, this.#calibration);
+      this.state.timings.check = performance.now() - this.#checkRun.started;
+      this.#finishCheck(raporto);
+      return;
+    }
+    this.#checkRun.busy = true;
+    this.#checkRun.sent = id;
+    this.#checker.postMessage({
+      kind: "check",
+      id,
+      agordo: this.#lastValid,
+    } satisfies WorkerRequest);
   }
 
   /** Starts: reads the fragment, builds the workshop when the mode is on, follows the root. */
@@ -204,7 +415,7 @@ class Werkstatt {
       for (const mutation of mutations) {
         if (mutation.attributeName === "data-fm-modus") this.#onModus();
         else if (this.#active()) {
-          this.#applyDraft();
+          this.#reapply();
           this.#mirrorSides();
         }
       }
@@ -216,9 +427,14 @@ class Werkstatt {
     this.#vitrino.onFragment((parts) => {
       const part = parts.get("agordo");
       if (part !== undefined && part !== this.#lastFragment) void this.#loadFragment(part);
+      const vorschlag = parts.get("vorschlag");
+      if (vorschlag !== this.#lastVorschlag) void this.#loadVorschlag(vorschlag);
     });
     const initial = this.#vitrino.getFragmentPart("agordo");
     if (initial !== undefined) void this.#loadFragment(initial);
+    const vorschlag = this.#vitrino.getFragmentPart("vorschlag");
+    if (vorschlag !== undefined) void this.#loadVorschlag(vorschlag);
+    document.addEventListener("keydown", (event) => this.#onKey(event));
     this.#onModus();
   }
 
@@ -243,21 +459,142 @@ class Werkstatt {
 
   // --- the Agordo ------------------------------------------------------------------------------
 
-  /** Sets the Agordo: the panel follows, the palettes are derived, the check and the fragment wait. */
-  setAgordo(agordo: Agordo, options: { write?: boolean; check?: "now" | "later" } = {}): void {
+  /**
+   * Sets the Agordo: the panel follows, the values of stage 2 at once, the palettes from the live
+   * worker, the check and the fragment wait. A change from the panel is a step of the history
+   * (`record`, merged with the previous one of the same control within HISTORY_MERGE_MS).
+   */
+  setAgordo(
+    agordo: Agordo,
+    options: { write?: boolean; check?: "now" | "later"; record?: string | false } = {},
+  ): void {
+    const previous = this.state.agordo;
+    if (options.record !== undefined && options.record !== false)
+      this.#record(previous, options.record);
     this.state.agordo = agordo;
     const read = readAgordo(agordo, "agordo.json");
     if (read.agordo !== undefined) this.#lastValid = read.agordo;
     this.#syncPanel(read.issues.map((issue) => issue.path));
+    this.#renderVorschlag();
     if (!this.#active()) return;
     this.#applyDraft();
-    if (options.check === "now") this.runCheck();
+    if (options.check === "now") void this.runCheck();
     else this.#scheduleCheck();
     if (options.write !== false) this.#scheduleFragment();
   }
 
   applyPatch(patch: AgordoPatch): void {
-    this.setAgordo(patched(this.state.agordo, patch));
+    this.setAgordo(patched(this.state.agordo, patch), { record: "patch" });
+  }
+
+  // --- the history (G7) ------------------------------------------------------------------------
+
+  #record(previous: Agordo, source: string): void {
+    const now = performance.now();
+    const merge =
+      source === this.#lastRecord.source && now - this.#lastRecord.at < HISTORY_MERGE_MS;
+    this.#lastRecord = { source, at: now };
+    if (!merge) this.#past.push(previous);
+    this.#future = [];
+    this.#syncHistory();
+  }
+
+  undo(): void {
+    const previous = this.#past.pop();
+    if (previous === undefined) return;
+    this.#future.push(this.state.agordo);
+    this.#lastRecord = { source: "", at: 0 };
+    this.setAgordo(previous, { record: false });
+    this.#syncHistory();
+  }
+
+  redo(): void {
+    const next = this.#future.pop();
+    if (next === undefined) return;
+    this.#past.push(this.state.agordo);
+    this.#lastRecord = { source: "", at: 0 };
+    this.setAgordo(next, { record: false });
+    this.#syncHistory();
+  }
+
+  #syncHistory(): void {
+    if (!this.#built) return;
+    const lock = (id: string, locked: boolean) => {
+      const element = byId(id);
+      if (locked) element.setAttribute("disabled", "");
+      else element.removeAttribute("disabled");
+    };
+    lock("fm-werkstatt-malfari", this.#past.length === 0);
+    lock("fm-werkstatt-refari", this.#future.length === 0);
+  }
+
+  /** ⌘Z / Ctrl+Z undoes, ⇧⌘Z / Ctrl+Shift+Z redoes — not inside a text field, which has its own. */
+  #onKey(event: KeyboardEvent): void {
+    if (!this.#active() || !(event.metaKey || event.ctrlKey) || event.key.toLowerCase() !== "z")
+      return;
+    const target = event.composedPath()[0];
+    const text =
+      target instanceof HTMLTextAreaElement ||
+      (target instanceof HTMLInputElement && !["range", "color", "checkbox"].includes(target.type));
+    if (text) return;
+    event.preventDefault();
+    if (event.shiftKey) this.redo();
+    else this.undo();
+  }
+
+  // --- the suggestion bar (G7) -------------------------------------------------------------------
+
+  async #loadVorschlag(part: string | undefined): Promise<void> {
+    this.#lastVorschlag = part;
+    if (part === undefined) {
+      this.#vorschlag = undefined;
+      this.#renderVorschlag();
+      return;
+    }
+    try {
+      const value = JSON.parse(await decompress(part)) as { wunsch?: unknown; agordo?: unknown };
+      const { agordo, issues } = readAgordo(value.agordo, "vorschlag.json", "/agordo");
+      if (agordo === undefined) {
+        this.#status(
+          `Der Vorschlag im Fragment ist ungültig: ${issues.map((issue) => `${issue.path} – ${issue.message}`).join("; ")}`,
+        );
+        return;
+      }
+      this.#vorschlag = {
+        ...(typeof value.wunsch === "string" ? { wunsch: value.wunsch } : {}),
+        agordo,
+      };
+    } catch (error) {
+      this.#status(
+        `Der Vorschlag im Fragment ist nicht lesbar: ${error instanceof Error ? error.message : String(error)}`,
+      );
+      return;
+    }
+    this.#renderVorschlag();
+  }
+
+  #renderVorschlag(): void {
+    if (!this.#built) return;
+    const bar = byId("fm-werkstatt-vorschlag");
+    if (this.#vorschlag === undefined) {
+      bar.hidden = true;
+      return;
+    }
+    const diff = reglerDiff(this.state.agordo, this.#vorschlag.agordo, this.#basis);
+    byId("fm-werkstatt-vorschlag-satz").textContent = vorschlagSatz(this.#vorschlag.wunsch, diff);
+    bar.hidden = false;
+  }
+
+  #closeVorschlag(take: boolean): void {
+    const vorschlag = this.#vorschlag;
+    this.#vorschlag = undefined;
+    this.#lastVorschlag = undefined;
+    this.#vitrino.setFragmentPart("vorschlag", undefined);
+    if (take && vorschlag !== undefined) {
+      this.setAgordo(vorschlag.agordo, { record: "vorschlag" });
+      this.#lastRecord = { source: "", at: 0 };
+    }
+    this.#renderVorschlag();
   }
 
   async #loadFragment(part: string): Promise<void> {
@@ -292,21 +629,79 @@ class Werkstatt {
 
   // --- the derivation (live) and the check (debounced) ------------------------------------------
 
-  /** Derives the palettes of the last valid Agordo and sets them on the root and the draft side. */
-  #applyDraft(): DerivedPalettes {
-    const started = performance.now();
-    const palettes = derivePalettes(
-      this.#lastValid,
-      this.#calibration,
-      this.#floors,
-      this.#overrides,
-    );
+  /**
+   * A new Agordo: the values of stage 2 and the palettes from the live worker — once per frame
+   * however many inputs the frame brought (G5: the main thread only sets values).
+   */
+  #applyDraft(): void {
+    this.#paletteRun.id += 1;
+    if (this.#frame !== undefined) return;
+    this.#frame = requestAnimationFrame(() => {
+      this.#frame = undefined;
+      this.#applyGestalt();
+      this.#requestPalettes();
+    });
+  }
+
+  /** A new mode of the root: the mode-specific values again, nothing derived anew. */
+  #reapply(): void {
+    this.#applyGestalt();
+    if (this.state.palettes !== undefined) this.#applyPalettes(this.state.palettes);
+  }
+
+  #applyPalettes(palettes: DerivedPalettes): void {
     this.state.palettes = palettes;
     this.#setProperties(this.#root, palettes);
     if (this.#sides !== undefined) this.#setProperties(this.#sides.draft, palettes);
     this.#renderPaletteValues(palettes);
-    this.state.timings.derive = performance.now() - started;
-    return palettes;
+  }
+
+  /**
+   * Form, space, type and icon weight (G7, Spec 019 ①): the tokens the Gestalt changes, written
+   * with the declarations of the CSS Celo, on the root and the draft side. A token the dark
+   * colour scheme sets anew takes the Gestalt's dark value in dark (or the stylesheet's); the
+   * glyphs of a further Phosphor weight replace `--fm-ikono-<name>`.
+   */
+  #applyGestalt(): void {
+    const gestalt = deriveGestalt(this.#lastValid, this.#basis);
+    const dark = this.#root.getAttribute("data-fm-color-scheme") === "dark";
+    const darkSet = this.#basis.overlays.get("color-scheme/dark");
+    const next = new Map<string, string>();
+    const declare = (name: string, value: unknown) => {
+      for (const [property, css] of tokenDeclarations(
+        name,
+        this.#basis.types.get(name) ?? "",
+        value,
+      )) {
+        next.set(property, css);
+      }
+    };
+    for (const [name, value] of gestalt.main) {
+      if (dark && darkSet?.has(name) === true) continue;
+      declare(name, value);
+    }
+    if (dark) for (const [name, value] of gestalt.dark) declare(name, value);
+    const weight = this.#lastValid.ikono?.gewicht ?? this.#referenceStyle;
+    if (weight !== this.#referenceStyle) {
+      for (const [name, svg] of Object.entries(
+        this.#structure.ikonoGewichte?.glyphs[weight] ?? {},
+      )) {
+        next.set(`--fm-ikono-${name}`, glyphValue(svg));
+      }
+    }
+    const targets = [this.#root, ...(this.#sides === undefined ? [] : [this.#sides.draft])];
+    for (const property of this.#gestaltProps) {
+      if (next.has(property)) continue;
+      for (const target of targets) target.style.removeProperty(property);
+    }
+    for (const [property, css] of next) {
+      for (const target of targets) {
+        if (target.style.getPropertyValue(property) !== css)
+          target.style.setProperty(property, css);
+      }
+    }
+    this.#gestaltProps = new Set(next.keys());
+    this.#hintFonts();
   }
 
   #setProperties(element: HTMLElement, palettes: DerivedPalettes): void {
@@ -325,60 +720,94 @@ class Werkstatt {
         );
       }
     }
-    for (const [role, font] of Object.entries(this.#lastValid.schriften ?? {})) {
-      element.style.setProperty(cssVariable(`font.family.${role}`), JSON.stringify(font.family));
+    for (const role of FONT_ROLES) {
+      const font = this.#lastValid.schriften?.[role];
+      if (font === undefined) element.style.removeProperty(cssVariable(`font.family.${role}`));
+      else
+        element.style.setProperty(cssVariable(`font.family.${role}`), JSON.stringify(font.family));
     }
   }
 
   #clearDraft(): void {
     const palettes = this.state.palettes;
-    if (palettes === undefined) return;
-    for (const step of [...palettes.steps, ...palettes.overrides]) {
+    for (const step of [...(palettes?.steps ?? []), ...(palettes?.overrides ?? [])]) {
       this.#root.style.removeProperty(cssVariable(`color.palette.${step.palette}.${step.step}`));
     }
-    for (const role of Object.keys(this.#lastValid.schriften ?? {})) {
+    for (const role of FONT_ROLES) {
       this.#root.style.removeProperty(cssVariable(`font.family.${role}`));
     }
+    for (const property of this.#gestaltProps) this.#root.style.removeProperty(property);
+    this.#gestaltProps = new Set();
   }
 
   #scheduleCheck(): void {
     clearTimeout(this.#checkTimer);
-    this.#checkTimer = setTimeout(() => this.runCheck(), CHECK_DELAY_MS);
-  }
-
-  /** Runs every check of the Agordilo on the draft and renders the Raporto (G5, G6). */
-  runCheck(): Raporto {
-    clearTimeout(this.#checkTimer);
-    const started = performance.now();
-    const derivation = deriveAspekto(this.#lastValid, this.#structure, this.#calibration);
-    this.state.timings.check = performance.now() - started;
-    this.state.raporto = derivation.raporto;
-    this.state.checked += 1;
-    this.#renderReport(derivation.raporto);
-    this.#renderExport(derivation.raporto);
-    document.dispatchEvent(new CustomEvent("fm-werkstatt-raporto", { detail: derivation.raporto }));
-    return derivation.raporto;
+    this.#checkTimer = setTimeout(() => void this.runCheck(), CHECK_DELAY_MS);
   }
 
   /**
-   * M3: `count` slider changes, each derived and checked at once, the times in milliseconds. The
-   * Agordo is restored afterwards.
+   * Runs every check of the Agordilo on the draft — in the check worker, or here without one — and
+   * resolves with the Raporto of the Agordo as it is now (G5, G6).
    */
-  measure(count: number): { derive: number[]; check: number[] } {
+  runCheck(): Promise<Raporto> {
+    clearTimeout(this.#checkTimer);
+    const done = new Promise<Raporto>((resolve) => this.#checkWaiters.push(resolve));
+    this.#checkRun.id += 1;
+    this.#requestCheck();
+    return done;
+  }
+
+  #finishCheck(raporto: Raporto): void {
+    this.state.raporto = raporto;
+    this.state.checked += 1;
+    this.#renderReport(raporto);
+    this.#renderExport(raporto);
+    document.dispatchEvent(new CustomEvent("fm-werkstatt-raporto", { detail: raporto }));
+    this.#flush(this.#checkWaiters, raporto);
+  }
+
+  /** The palettes of the Agordo as it is now, once they are set. */
+  #palettesNow(): Promise<void> {
+    const done = new Promise<void>((resolve) => this.#paletteWaiters.push(resolve));
+    this.#applyDraft();
+    return done;
+  }
+
+  /**
+   * M5 (Spec 019 ②): `count` slider changes, each derived (the palettes, with the values of stage
+   * 2) and checked, the times in milliseconds, and the longest block of the main thread meanwhile
+   * (Long Tasks, where the browser reports them). The Agordo is restored afterwards.
+   */
+  async measure(
+    count: number,
+  ): Promise<{ derive: number[]; check: number[]; longest: number; longTasks: number }> {
     const original = this.state.agordo;
     const derive: number[] = [];
     const check: number[] = [];
+    const long: number[] = [];
+    let observer: PerformanceObserver | undefined;
+    if (PerformanceObserver.supportedEntryTypes?.includes("longtask") === true) {
+      observer = new PerformanceObserver((list) => {
+        for (const entry of list.getEntries()) long.push(entry.duration);
+      });
+      observer.observe({ type: "longtask" });
+    }
     for (let index = 0; index < count; index++) {
       const helligkeit = Math.round((-1 + (2 * (index + 1)) / (count + 1)) * 100) / 100;
       this.state.agordo = patched(original, { regler: { helligkeit } });
       this.#lastValid = this.state.agordo;
-      this.#applyDraft();
-      derive.push(this.state.timings.derive);
-      this.runCheck();
-      check.push(this.state.timings.check);
+      const started = performance.now();
+      await this.#palettesNow();
+      derive.push(performance.now() - started);
+      const checking = performance.now();
+      await this.runCheck();
+      check.push(performance.now() - checking);
     }
-    this.setAgordo(original, { write: false, check: "now" });
-    return { derive, check };
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    observer?.disconnect();
+    this.setAgordo(original, { write: false });
+    await this.runCheck();
+    return { derive, check, longest: Math.max(0, ...long), longTasks: long.length };
   }
 
   // --- the panel --------------------------------------------------------------------------------
@@ -387,19 +816,52 @@ class Werkstatt {
     if (this.#built) return;
     this.#built = true;
     const host = byId("fm-werkstatt-ujo");
-    host.innerHTML = `<div class="fm-werkstatt-kolumnoj">
+    const slider = (regler: Regler) => {
+      const id = reglerId(regler.path);
+      return `<div class="fm-werkstatt-regilo"><label for="${id}">${esc(regler.label)}</label><output for="${id}">${regler.standard}</output><input type="range" id="${id}" min="${regler.min}" max="${regler.max}" step="${regler.step}" value="${regler.standard}"><fm-butono size="small" emphasis="low" data-fm-rekomenci-regilo="${esc(regler.path)}">Zurücksetzen<span class="fm-werkstatt-kasxita"> ${esc(regler.label)}</span></fm-butono></div>`;
+    };
+    const sliders = (group: string) =>
+      this.#regloj
+        .filter((regler) => regler.group === group)
+        .map(slider)
+        .join("");
+    const weights = [
+      this.#referenceStyle,
+      ...IKONO_GEWICHTE.filter(
+        (weight) =>
+          weight !== this.#referenceStyle &&
+          this.#structure.ikonoGewichte?.glyphs[weight] !== undefined,
+      ),
+    ];
+    const groupOf = (key: string, label: string, content: string) =>
+      `<fm-faldilo id="fm-werkstatt-gruppe-${key}" open><span slot="summary">${esc(label)}</span><div class="fm-werkstatt-grupo">${content}</div></fm-faldilo>`;
+    const zusatzfarben = `<fieldset><legend>Zusatzfarben</legend>${STATUS.map(
+      (status) =>
+        `<div class="fm-werkstatt-koloro"><div><fm-markobutono id="fm-werkstatt-${status}-standard" checked>Standard</fm-markobutono><label for="fm-werkstatt-${status}-elektilo" class="fm-werkstatt-kasxita">${status} wählen</label><input type="color" id="fm-werkstatt-${status}-elektilo" disabled></div><fm-kampo id="fm-werkstatt-${status}" disabled>${status}<span slot="help">eigener Farbton, Hex oder OKLCH</span><span slot="error" hidden>Keine Farbe.</span></fm-kampo></div>`,
+    ).join("")}</fieldset>`;
+    const fonts = FONT_ROLES.map(
+      (role) =>
+        `<fm-kampo id="fm-werkstatt-schrift-${role}">Schrift ${role}<span slot="help">Name einer Schriftfamilie; leer: die der Struktur</span></fm-kampo>`,
+    ).join("");
+    host.innerHTML = `<div id="fm-werkstatt-vorschlag" class="fm-werkstatt-vorschlag" role="region" aria-label="Vorschlag" hidden><p id="fm-werkstatt-vorschlag-satz"></p><div class="fm-group"><fm-butono id="fm-werkstatt-vorschlag-uebernehmen" emphasis="high">Übernehmen</fm-butono><fm-butono id="fm-werkstatt-vorschlag-verwerfen" emphasis="medium">Verwerfen</fm-butono></div></div>
+<div class="fm-group" role="group" aria-label="Verlauf"><fm-butono id="fm-werkstatt-malfari" emphasis="low" disabled>Rückgängig</fm-butono><fm-butono id="fm-werkstatt-refari" emphasis="low" disabled>Wiederholen</fm-butono></div>
+<div class="fm-werkstatt-kolumnoj">
 <form id="fm-werkstatt-panelo" class="fm-werkstatt-panelo" aria-label="Panel der Werkstatt">
 <h3>Agordo</h3>
 <fm-kampo id="fm-werkstatt-nomo" required>Name<span slot="help">Kleinbuchstaben, Ziffern, Bindestrich</span><span slot="error" hidden>Der Name folgt der Grammatik nicht.</span></fm-kampo>
 <div class="fm-werkstatt-koloro"><div><label for="fm-werkstatt-leitfarbe-elektilo" class="fm-werkstatt-kasxita">Leitfarbe wählen</label><input type="color" id="fm-werkstatt-leitfarbe-elektilo"></div><fm-kampo id="fm-werkstatt-leitfarbe" required>Leitfarbe<span slot="help">Hex (#rrggbb) oder OKLCH (L C H)</span><span slot="error" hidden>Keine Farbe: Hex (#rrggbb) oder OKLCH (L C H).</span></fm-kampo></div>
-<fieldset><legend>Zusatzfarben</legend>${STATUS.map(
-      (status) =>
-        `<div class="fm-werkstatt-koloro"><div><fm-markobutono id="fm-werkstatt-${status}-standard" checked>Standard</fm-markobutono><label for="fm-werkstatt-${status}-elektilo" class="fm-werkstatt-kasxita">${status} wählen</label><input type="color" id="fm-werkstatt-${status}-elektilo" disabled></div><fm-kampo id="fm-werkstatt-${status}" disabled>${status}<span slot="help">eigener Farbton, Hex oder OKLCH</span><span slot="error" hidden>Keine Farbe.</span></fm-kampo></div>`,
-    ).join("")}</fieldset>
-${SLIDERS.map(
-  (slider) =>
-    `<div class="fm-werkstatt-regilo"><label for="fm-werkstatt-${slider.key}">${slider.label}</label><output for="fm-werkstatt-${slider.key}">${slider.fallback}</output><input type="range" id="fm-werkstatt-${slider.key}" min="${slider.min}" max="${slider.max}" step="${slider.step}" value="${slider.fallback}"></div>`,
+${GROUPS.map((group) =>
+  groupOf(
+    group.key,
+    group.label,
+    group.key === "farbe"
+      ? zusatzfarben + sliders("farbe")
+      : group.key === "schrift"
+        ? sliders("schrift") + fonts + '<p id="fm-werkstatt-schrift-hinweis" role="status"></p>'
+        : sliders(group.key),
+  ),
 ).join("")}
+${groupOf("ikonoj", "Icons", `<fm-elektilo id="fm-werkstatt-ikono-gewicht" value="${esc(this.#referenceStyle)}">Icon-Gewicht${weights.map((weight) => `<data slot="options" value="${esc(weight)}">${esc(weight)}</data>`).join("")}<span slot="help">Phosphor; jede Glyphe des Ikonaro in diesem Gewicht</span></fm-elektilo>`)}
 </form>
 <div id="fm-werkstatt-raporto" class="fm-werkstatt-raporto">
 <h3>Prüfbericht</h3>
@@ -418,20 +880,28 @@ ${SLIDERS.map(
     this.#buildSides();
     this.#wirePanel();
     this.#syncPanel([]);
+    this.#syncHistory();
+    this.#renderVorschlag();
   }
 
   #wirePanel(): void {
     const nomo = byId("fm-werkstatt-nomo");
     nomo.addEventListener("input", () => {
-      this.setAgordo({ ...this.state.agordo, name: nomo.getAttribute("value") ?? "" });
+      this.setAgordo(
+        { ...this.state.agordo, name: nomo.getAttribute("value") ?? "" },
+        { record: "name" },
+      );
     });
     const leitfarbe = byId("fm-werkstatt-leitfarbe");
     const picker = byId<HTMLInputElement>("fm-werkstatt-leitfarbe-elektilo");
     leitfarbe.addEventListener("input", () => {
-      this.setAgordo({ ...this.state.agordo, leitfarbe: leitfarbe.getAttribute("value") ?? "" });
+      this.setAgordo(
+        { ...this.state.agordo, leitfarbe: leitfarbe.getAttribute("value") ?? "" },
+        { record: "leitfarbe" },
+      );
     });
     picker.addEventListener("input", () => {
-      this.setAgordo({ ...this.state.agordo, leitfarbe: picker.value });
+      this.setAgordo({ ...this.state.agordo, leitfarbe: picker.value }, { record: "leitfarbe" });
     });
     for (const status of STATUS) {
       const standard = byId(`fm-werkstatt-${status}-standard`);
@@ -444,7 +914,7 @@ ${SLIDERS.map(
         const next: Agordo = { ...this.state.agordo };
         if (Object.keys(zusatzfarben).length === 0) delete next.zusatzfarben;
         else next.zusatzfarben = zusatzfarben;
-        this.setAgordo(next);
+        this.setAgordo(next, { record: `zusatzfarbe:${status}` });
       };
       standard.addEventListener("input", () => {
         set(standard.hasAttribute("checked") ? undefined : colour.value);
@@ -452,17 +922,70 @@ ${SLIDERS.map(
       field.addEventListener("input", () => set(field.getAttribute("value") ?? ""));
       colour.addEventListener("input", () => set(colour.value));
     }
-    for (const slider of SLIDERS) {
-      const input = byId<HTMLInputElement>(`fm-werkstatt-${slider.key}`);
+    for (const regler of this.#regloj) {
+      const input = byId<HTMLInputElement>(reglerId(regler.path));
       input.addEventListener("input", () => {
-        const value = Number(input.value);
-        this.setAgordo(
-          slider.key === "toenung"
-            ? patched(this.state.agordo, { neutral: { toenung: value } })
-            : patched(this.state.agordo, { regler: { [slider.key]: value } }),
-        );
+        this.setAgordo(withRegler(this.state.agordo, regler.path, Number(input.value)), {
+          record: regler.path,
+        });
       });
     }
+    byId("fm-werkstatt-panelo").addEventListener("click", (event) => {
+      const button = (event.target as HTMLElement | null)?.closest<HTMLElement>(
+        "[data-fm-rekomenci-regilo]",
+      );
+      const path = button?.dataset.fmRekomenciRegilo;
+      if (path === undefined) return;
+      this.setAgordo(withRegler(this.state.agordo, path, undefined), { record: `reset:${path}` });
+    });
+    const gewicht = byId("fm-werkstatt-ikono-gewicht");
+    const onWeight = () => {
+      const value = gewicht.getAttribute("value") ?? this.#referenceStyle;
+      const current = this.state.agordo.ikono?.gewicht ?? this.#referenceStyle;
+      if (value === current) return;
+      this.setAgordo(
+        withRegler(
+          this.state.agordo,
+          "ikono.gewicht",
+          value === this.#referenceStyle ? undefined : value,
+        ),
+        { record: "ikono.gewicht" },
+      );
+    };
+    gewicht.addEventListener("input", onWeight);
+    gewicht.addEventListener("change", onWeight);
+    for (const role of FONT_ROLES) {
+      const field = byId(`fm-werkstatt-schrift-${role}`);
+      field.addEventListener("input", () => {
+        const family = (field.getAttribute("value") ?? "").trim();
+        const schriften = { ...this.state.agordo.schriften };
+        const own = schriften[role];
+        if (family === "") delete schriften[role];
+        else if (own?.family !== family) {
+          // A name alone (G2): the font travels as a name, never as a file; its licence is unknown,
+          // so it is not redistributed (plan ① Abweichung 1, plan ② D-07).
+          schriften[role] = {
+            family,
+            license: "proprietary",
+            source: "Werkstatt: nur der Name, ohne Datei",
+            redistributable: false,
+            scripts: ["Latn"],
+          };
+        }
+        const next: Agordo = { ...this.state.agordo };
+        if (Object.keys(schriften).length === 0) delete next.schriften;
+        else next.schriften = schriften;
+        this.setAgordo(next, { record: `schrift:${role}` });
+      });
+    }
+    byId("fm-werkstatt-malfari").addEventListener("click", () => this.undo());
+    byId("fm-werkstatt-refari").addEventListener("click", () => this.redo());
+    byId("fm-werkstatt-vorschlag-uebernehmen").addEventListener("click", () =>
+      this.#closeVorschlag(true),
+    );
+    byId("fm-werkstatt-vorschlag-verwerfen").addEventListener("click", () =>
+      this.#closeVorschlag(false),
+    );
     byId("fm-werkstatt-panelo").addEventListener("submit", (event) => event.preventDefault());
 
     byId("fm-werkstatt-elsxuti").addEventListener("click", () => this.#download());
@@ -520,17 +1043,24 @@ ${SLIDERS.map(
         if (ownHex !== undefined && colour.value !== ownHex) colour.value = ownHex;
       }
     }
-    for (const slider of SLIDERS) {
-      const value =
-        slider.key === "toenung"
-          ? (agordo.neutral?.toenung ?? slider.fallback)
-          : (agordo.regler?.[slider.key as Exclude<SliderKey, "toenung">] ?? slider.fallback);
-      const input = byId<HTMLInputElement>(`fm-werkstatt-${slider.key}`);
+    for (const regler of this.#regloj) {
+      const value = reglerValue(agordo, regler);
+      const id = reglerId(regler.path);
+      const input = byId<HTMLInputElement>(id);
       if (Number(input.value) !== value) input.value = String(value);
-      const output = document.querySelector<HTMLOutputElement>(
-        `output[for="fm-werkstatt-${slider.key}"]`,
-      );
+      const output = document.querySelector<HTMLOutputElement>(`output[for="${id}"]`);
       if (output !== null) output.value = String(value);
+    }
+    const gewicht = byId("fm-werkstatt-ikono-gewicht");
+    const weight = agordo.ikono?.gewicht ?? this.#referenceStyle;
+    if (gewicht.getAttribute("value") !== weight) gewicht.setAttribute("value", weight);
+    for (const role of FONT_ROLES) {
+      const field = byId(`fm-werkstatt-schrift-${role}`);
+      const family = agordo.schriften?.[role]?.family ?? "";
+      if ((field.getAttribute("value") ?? "") !== family) {
+        if (family === "") field.removeAttribute("value");
+        else field.setAttribute("value", family);
+      }
     }
     this.#syncTargets();
   }
@@ -631,65 +1161,108 @@ ${SLIDERS.map(
 
   #renderReport(raporto: Raporto): void {
     const { summary } = raporto;
-    const badge = (label: string, value: number, intent: string, key: string) =>
-      `<div><dt>${esc(label)}</dt><dd><fm-insigno intent="${intent}" data-fm-raporto="${key}">${value}</fm-insigno></dd></div>`;
-    byId("fm-werkstatt-zahloj").innerHTML = [
-      badge("Paare bestanden", summary.pairs.passed, "success", "pairs-passed"),
-      badge(
+    const apcaCount = raporto.hints.filter((hint) => hint.rule === "contrast-advisory").length;
+    const badges: [string, string, number, string][] = [
+      ["Paare bestanden", "pairs-passed", summary.pairs.passed, "success"],
+      [
         "Paare verletzt",
+        "pairs-failed",
         summary.pairs.failed,
         summary.pairs.failed > 0 ? "danger" : "neutral",
-        "pairs-failed",
-      ),
-      badge(
+      ],
+      [
         "feste Regeln verletzt",
+        "violations-fixed",
         summary.violations.fixed,
         summary.violations.fixed > 0 ? "danger" : "neutral",
-        "violations-fixed",
-      ),
-      badge(
+      ],
+      [
         "anpassbare Regeln verletzt",
+        "violations-adjustable",
         summary.violations.adjustable,
         summary.violations.adjustable > 0 ? "warning" : "neutral",
-        "violations-adjustable",
-      ),
-      badge("durch Jugxo gedeckt", summary.violations.covered, "info", "violations-covered"),
-      badge(
-        "Hinweise (APCA)",
-        raporto.hints.filter((hint) => hint.rule === "contrast-advisory").length,
-        "neutral",
-        "hints-apca",
-      ),
-    ].join("");
-    byId("fm-werkstatt-malobservoj").innerHTML = raporto.violations
-      .map((violation) => this.#violationMarkup(violation))
-      .join("");
+      ],
+      ["durch Jugxo gedeckt", "violations-covered", summary.violations.covered, "info"],
+      ["Hinweise (APCA)", "hints-apca", apcaCount, "neutral"],
+    ];
+    // The counters are written once and then updated in place (G5: a check renders little).
+    const counters = byId("fm-werkstatt-zahloj");
+    if (counters.childElementCount === 0) {
+      counters.innerHTML = badges
+        .map(
+          ([label, key]) =>
+            `<div><dt>${esc(label)}</dt><dd><fm-insigno data-fm-raporto="${key}"></fm-insigno></dd></div>`,
+        )
+        .join("");
+    }
+    for (const [, key, value, intent] of badges) {
+      const badge = counters.querySelector<HTMLElement>(`[data-fm-raporto="${key}"]`);
+      if (badge === null) continue;
+      if (badge.getAttribute("intent") !== intent) badge.setAttribute("intent", intent);
+      if (badge.textContent !== String(value)) badge.textContent = String(value);
+    }
+    const list = byId("fm-werkstatt-malobservoj");
+    const markup = raporto.violations.map((violation) => this.#violationMarkup(violation)).join("");
+    if (markup !== this.#violationsMarkup) {
+      this.#violationsMarkup = markup;
+      list.innerHTML = markup;
+      for (const button of list.querySelectorAll<HTMLElement>("[data-fm-apliki]")) {
+        button.addEventListener("click", () => {
+          const index = Number(button.dataset.fmApliki);
+          const patch = this.state.raporto?.violations[index]?.apply;
+          if (patch !== undefined) this.applyPatch(patch);
+        });
+      }
+      for (const button of list.querySelectorAll<HTMLElement>("[data-fm-salto]")) {
+        button.addEventListener("click", () => this.#jump(button.dataset.fmSalto ?? ""));
+      }
+    }
+    // The APCA hints (advice) fill their list only while it is open: a check renders the count,
+    // not a hundred list items (G5).
     const apca = raporto.hints.filter((hint) => hint.rule === "contrast-advisory");
-    byId("fm-werkstatt-apca").innerHTML =
-      apca.length === 0
-        ? "<p>Keine APCA-Hinweise.</p>"
-        : `<fm-faldilo><span slot="summary">${apca.length} APCA-Hinweise (beratend)</span><ul>${apca
-            .map(
-              (hint) =>
-                `<li><code>${esc(hint.subject)}</code> (${hint.combinations}×): ${esc(hint.message)}</li>`,
-            )
-            .join("")}</ul></fm-faldilo>`;
+    this.#renderApca(apca);
     this.#status(
       `Prüfbericht: ${summary.pairs.passed} von ${summary.pairs.measured} Paar-Auswertungen bestanden, ${raporto.violations.length} Verstöße (${summary.violations.fixed} fest, ${summary.violations.adjustable} anpassbar, ${summary.violations.covered} gedeckt), ${apca.length} APCA-Hinweise.`,
     );
-    for (const button of byId("fm-werkstatt-malobservoj").querySelectorAll<HTMLElement>(
-      "[data-fm-apliki]",
-    )) {
-      button.addEventListener("click", () => {
-        const index = Number(button.dataset.fmApliki);
-        const patch = raporto.violations[index]?.apply;
-        if (patch !== undefined) this.applyPatch(patch);
+  }
+
+  #apcaHints: Raporto["hints"] = [];
+  #violationsMarkup: string | undefined;
+  #apcaListed: Raporto["hints"] | undefined;
+
+  #renderApca(apca: Raporto["hints"]): void {
+    this.#apcaHints = apca;
+    const host = byId("fm-werkstatt-apca");
+    let fold = host.querySelector<HTMLElement>("fm-faldilo");
+    if (fold === null) {
+      host.innerHTML = `<p hidden>Keine APCA-Hinweise.</p><fm-faldilo><span slot="summary"></span><ul></ul></fm-faldilo>`;
+      fold = host.querySelector<HTMLElement>("fm-faldilo");
+      if (fold === null) return;
+      new MutationObserver(() => this.#listApca()).observe(fold, {
+        attributes: true,
+        attributeFilter: ["open"],
       });
     }
-    for (const button of byId("fm-werkstatt-malobservoj").querySelectorAll<HTMLElement>(
-      "[data-fm-salto]",
-    )) {
-      button.addEventListener("click", () => this.#jump(button.dataset.fmSalto ?? ""));
+    const empty = host.querySelector<HTMLElement>("p");
+    if (empty !== null) empty.hidden = apca.length > 0;
+    fold.hidden = apca.length === 0;
+    const summary = fold.querySelector('[slot="summary"]');
+    if (summary !== null) summary.textContent = `${apca.length} APCA-Hinweise (beratend)`;
+    this.#listApca();
+  }
+
+  #listApca(): void {
+    const fold = byId("fm-werkstatt-apca").querySelector<HTMLElement>("fm-faldilo");
+    if (fold === null || !fold.hasAttribute("open") || this.#apcaListed === this.#apcaHints) return;
+    this.#apcaListed = this.#apcaHints;
+    const list = fold.querySelector("ul");
+    if (list !== null) {
+      list.innerHTML = this.#apcaHints
+        .map(
+          (hint) =>
+            `<li><code>${esc(hint.subject)}</code> (${hint.combinations}×): ${esc(hint.message)}</li>`,
+        )
+        .join("");
     }
   }
 
@@ -731,6 +1304,21 @@ ${SLIDERS.map(
     if (!element.hasAttribute("tabindex")) element.setAttribute("tabindex", "-1");
     element.scrollIntoView();
     element.focus();
+  }
+
+  /** A font of the Agordo the browser does not have is named (G7): the page shows a fallback. */
+  #hintFonts(): void {
+    if (!this.#built) return;
+    const missing = FONT_ROLES.flatMap((role) => {
+      const family = this.#lastValid.schriften?.[role]?.family;
+      return family === undefined || fontInstalled(family) ? [] : [`${family} (${role})`];
+    });
+    const hint = byId("fm-werkstatt-schrift-hinweis");
+    const text =
+      missing.length === 0
+        ? ""
+        : `Schrift nicht installiert, Darstellung in Ersatzschrift: ${missing.join(", ")}.`;
+    if (hint.textContent !== text) hint.textContent = text;
   }
 
   #status(text: string): void {
@@ -783,7 +1371,7 @@ ${SLIDERS.map(
     ];
     const kept = (this.state.agordo.jugxoj ?? []).filter((jugxo) => !rules.includes(jugxo.regulo));
     const jugxoj = [...kept, ...rules.map((regulo) => ({ regulo, kialo, date, name }))];
-    this.setAgordo({ ...this.state.agordo, jugxoj }, { check: "now" });
+    this.setAgordo({ ...this.state.agordo, jugxoj }, { check: "now", record: "jugxo" });
   }
 
   #download(): void {
@@ -854,19 +1442,95 @@ ${SLIDERS.map(
     byId("fm-werkstatt-flanko-referenco").textContent = chosen;
     if (this.state.palettes !== undefined)
       this.#setProperties(this.#sides.draft, this.state.palettes);
+    for (const property of this.#gestaltProps) {
+      this.#sides.draft.style.setProperty(property, this.#root.style.getPropertyValue(property));
+    }
   }
 }
 
-const island = document.getElementById("fm-werkstatt");
-const api = (globalThis as unknown as { fmVitrino?: VitrinoApi }).fmVitrino;
-if (island?.textContent && api !== undefined) {
-  const werkstatt = new Werkstatt(JSON.parse(island.textContent) as WerkstattDatumoj, api);
-  (globalThis as unknown as { fmWerkstatt: unknown }).fmWerkstatt = {
-    state: werkstatt.state,
-    setAgordo: (agordo: Agordo) => werkstatt.setAgordo(agordo),
-    applyPatch: (patch: AgordoPatch) => werkstatt.applyPatch(patch),
-    runCheck: () => werkstatt.runCheck(),
-    measure: (count: number) => werkstatt.measure(count),
-  };
-  werkstatt.start();
+/**
+ * The worker side (G5): the same module, started from its own text as a Blob. It holds the
+ * structure, derives the palettes or runs the checks of the Agordilo and answers with plain data.
+ */
+function workerMain(scope: {
+  addEventListener(type: "message", listener: (event: MessageEvent<WorkerRequest>) => void): void;
+  postMessage(message: WorkerAnswer): void;
+}): void {
+  let basis:
+    | {
+        structure: Structure;
+        calibration: Calibration;
+        floors: ReturnType<typeof floorsOf>;
+        overrides: ReturnType<typeof modeOverrides>;
+      }
+    | undefined;
+  scope.addEventListener("message", (event) => {
+    const request = event.data;
+    if (request.kind === "init") {
+      provideModeloSchemas(request.datumoj.schemas);
+      const structure = request.datumoj.structure;
+      basis = {
+        structure,
+        calibration: request.datumoj.calibration,
+        floors: floorsOf(structureModelo(structure)),
+        overrides: modeOverrides(structure),
+      };
+      return;
+    }
+    if (basis === undefined) {
+      scope.postMessage({ kind: "error", id: request.id, message: "not initialised" });
+      return;
+    }
+    const started = performance.now();
+    try {
+      if (request.kind === "palettes") {
+        const palettes = derivePalettes(
+          request.agordo,
+          basis.calibration,
+          basis.floors,
+          basis.overrides,
+        );
+        scope.postMessage({
+          kind: "palettes",
+          id: request.id,
+          palettes,
+          ms: performance.now() - started,
+        });
+      } else {
+        const { raporto } = deriveAspekto(request.agordo, basis.structure, basis.calibration);
+        scope.postMessage({
+          kind: "check",
+          id: request.id,
+          raporto,
+          ms: performance.now() - started,
+        });
+      }
+    } catch (error) {
+      scope.postMessage({
+        kind: "error",
+        id: request.id,
+        message: error instanceof Error ? error.message : String(error),
+      });
+    }
+  });
+}
+
+if (typeof document === "undefined") {
+  workerMain(globalThis as unknown as Parameters<typeof workerMain>[0]);
+} else {
+  const island = document.getElementById("fm-werkstatt");
+  const api = (globalThis as unknown as { fmVitrino?: VitrinoApi }).fmVitrino;
+  if (island?.textContent && api !== undefined) {
+    const werkstatt = new Werkstatt(JSON.parse(island.textContent) as WerkstattDatumoj, api);
+    (globalThis as unknown as { fmWerkstatt: unknown }).fmWerkstatt = {
+      state: werkstatt.state,
+      setAgordo: (agordo: Agordo) => werkstatt.setAgordo(agordo, { record: "api" }),
+      applyPatch: (patch: AgordoPatch) => werkstatt.applyPatch(patch),
+      runCheck: () => werkstatt.runCheck(),
+      measure: (count: number) => werkstatt.measure(count),
+      undo: () => werkstatt.undo(),
+      redo: () => werkstatt.redo(),
+    };
+    werkstatt.start();
+  }
 }

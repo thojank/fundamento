@@ -741,8 +741,10 @@ type WerkstattState = {
 };
 
 declare const fmWerkstatt: {
-  state: WerkstattState;
-  measure(count: number): Promise<{ derive: number[]; check: number[] }>;
+  state: WerkstattState & { worker?: boolean };
+  measure(
+    count: number,
+  ): Promise<{ derive: number[]; check: number[]; longest: number; longTasks: number }>;
 };
 
 /** Opens the Vitrino in the Werkstatt, optionally with an Agordo in the fragment. */
@@ -957,12 +959,13 @@ test.describe("the Werkstatt (Spec 016 ②)", () => {
     expect(await draft.locator("fm-butono").count()).toBe(
       await reference.locator("fm-butono").count(),
     );
-    const fill = (side: typeof draft) =>
-      side
-        .locator("fm-butono[emphasis='high']")
-        .first()
-        .locator("button")
-        .evaluate((element) => getComputedStyle(element).backgroundColor);
+    // Spec 019 ② (G5): off-screen clones skip rendering (content-visibility); a person looks at
+    // the sides, so does the test.
+    const fill = async (side: typeof draft) => {
+      const button = side.locator("fm-butono[emphasis='high']").first().locator("button");
+      await button.scrollIntoViewIfNeeded();
+      return button.evaluate((element) => getComputedStyle(element).backgroundColor);
+    };
     expect(await fill(draft)).not.toBe(await fill(reference));
     const komunaFill = await fill(reference);
     await page.locator("#fm-werkstatt-referenco").locator("select").selectOption("ekzemplo");
@@ -1004,7 +1007,7 @@ test.describe("the Werkstatt (Spec 016 ②)", () => {
     expect(raporto).toEqual(provoRaporto);
   });
 
-  test("M3: derivation and check per slider change, median and 95th percentile over 50 changes", async ({
+  test("M5: derivation and check per slider change and the longest block of the main thread, over 50 changes (Spec 019 ②)", async ({
     page,
   }) => {
     await openWerkstatt(page);
@@ -1020,12 +1023,12 @@ test.describe("the Werkstatt (Spec 016 ②)", () => {
     };
     const derive = stat(timings.derive);
     const check = stat(timings.check);
-    const both = stat(timings.derive.map((value, index) => value + (timings.check[index] ?? 0)));
-    const line = `M3 (${test.info().project.name}): Ableitung median ${derive.median.toFixed(1)} ms, p95 ${derive.p95.toFixed(1)} ms; Prüfung median ${check.median.toFixed(1)} ms, p95 ${check.p95.toFixed(1)} ms; beides median ${both.median.toFixed(1)} ms, p95 ${both.p95.toFixed(1)} ms`;
+    const line = `M5 (${test.info().project.name}): Ableitung median ${derive.median.toFixed(1)} ms, p95 ${derive.p95.toFixed(1)} ms; Prüfung median ${check.median.toFixed(1)} ms, p95 ${check.p95.toFixed(1)} ms; längste Blockade des Hauptfadens ${timings.longest.toFixed(0)} ms (${timings.longTasks} Long Tasks)`;
     process.stderr.write(`${line}\n`);
-    test.info().annotations.push({ type: "M3", description: line });
-    // The derivation stays live whatever the check costs (the check is debounced, D-07).
-    expect(derive.median).toBeLessThan(1_000);
+    test.info().annotations.push({ type: "M5", description: line });
+    // G5: no block of the main thread above 50 ms; the derivation under 150 ms (M5).
+    expect(timings.longest).toBeLessThanOrEqual(50);
+    expect(derive.median).toBeLessThan(150);
   });
 
   test("the Werkstatt is keyboard-operable and announces the report politely", async ({ page }) => {
@@ -1062,7 +1065,219 @@ test.describe("the Werkstatt (Spec 016 ②)", () => {
       );
       await expect(page.locator("#fm-vitrino-werkstatt")).toBeVisible();
       await checkedAtLeast(page, 1);
+      // Spec 019 ② (G5): the Werkstatt skips the rendering of what is off screen
+      // (content-visibility); axe judges what a person sees, so everything is rendered for it.
+      await page.addStyleTag({ content: "* { content-visibility: visible !important; }" });
+      // What was skipped renders now; its colours may still be in transition (motion tokens).
+      await page.evaluate(async () => {
+        await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+        await Promise.all(document.getAnimations().map((animation) => animation.finished));
+      });
       expect(await axeViolations(page)).toEqual([]);
     });
   }
+});
+
+// Spec 019 ② (G5, G7): stage 2 of the Werkstatt — the groups Form, Raum, Schrift and Icons beside
+// Farbe, live at every Ero, a reset per slider, undo and redo, the suggestion bar of a link from
+// propose_agordo, fonts the browser lacks named, the check off the main thread, and browser = CLI
+// for both example brands.
+const KOMPAKTA_DIR = new URL(
+  "../../modelo/test/fixtures/valid/aspekto-provo-kompakta/",
+  import.meta.url,
+);
+const kompaktaAgordo = JSON.parse(
+  readFileSync(new URL("agordo.json", KOMPAKTA_DIR), "utf8"),
+) as Record<string, unknown>;
+const kompaktaRaporto = JSON.parse(
+  readFileSync(new URL("aspekto-provo-kompakta/raporto.json", KOMPAKTA_DIR), "utf8"),
+) as Record<string, unknown>;
+
+/** A custom property of an element, as computed. */
+const property = (page: Page, selector: string, name: string) =>
+  page
+    .locator(selector)
+    .first()
+    .evaluate((element, key) => getComputedStyle(element).getPropertyValue(key).trim(), name);
+
+/** Moves a range input to a value (the input event the Werkstatt listens to). */
+async function slide(page: Page, id: string, value: number): Promise<void> {
+  await page.locator(`#${id}`).evaluate((input, next) => {
+    (input as HTMLInputElement).value = String(next);
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+  }, value);
+}
+
+test.describe("the Werkstatt, stage 2 (Spec 019 ②)", () => {
+  test("the panel has the groups Farbe, Form, Raum, Schrift and Icons, each collapsible, a slider per field of G2 with label, value and reset", async ({
+    page,
+  }) => {
+    await openWerkstatt(page);
+    for (const group of ["farbe", "form", "raum", "schrift", "ikonoj"]) {
+      await expect(page.locator(`fm-faldilo#fm-werkstatt-gruppe-${group}`)).toHaveCount(1);
+    }
+    for (const path of [
+      "form.radius",
+      "form.rahmen",
+      "form.schatten",
+      "raum.abstand",
+      "raum.hoehe",
+      "schrift.groesse",
+      "schrift.skala",
+      "schrift.gewicht",
+    ]) {
+      const id = `fm-werkstatt-${path.replace(".", "-")}`;
+      const input = page.locator(`input[type="range"]#${id}`);
+      await expect(input, path).toHaveCount(1);
+      await expect(page.locator(`label[for="${id}"]`), path).toHaveCount(1);
+      await expect(page.locator(`output[for="${id}"]`), path).toHaveCount(1);
+      await expect(page.locator(`[data-fm-rekomenci-regilo="${path}"]`), path).toHaveCount(1);
+    }
+    await expect(page.locator("fm-elektilo#fm-werkstatt-ikono-gewicht")).toHaveCount(1);
+    for (const role of ["display", "body", "code"]) {
+      await expect(page.locator(`fm-kampo#fm-werkstatt-schrift-${role}`)).toHaveCount(1);
+    }
+    // A group folds away and opens again.
+    const form = page.locator("fm-faldilo#fm-werkstatt-gruppe-form");
+    await expect(form).toHaveAttribute("open", "");
+  });
+
+  test("form, space, type and icon weight follow live at every Ero and on the draft side", async ({
+    page,
+  }) => {
+    await openWerkstatt(page);
+    await checkedAtLeast(page, 1);
+    const radius = () =>
+      page
+        .locator("#fm-vitrino-butono fm-butono")
+        .first()
+        .locator("button")
+        .evaluate((element) => getComputedStyle(element).borderTopLeftRadius);
+    expect(await radius()).toBe("4px");
+    await slide(page, "fm-werkstatt-form-radius", 2);
+    await expect.poll(radius).toBe("8px");
+    await slide(page, "fm-werkstatt-raum-abstand", 1.5);
+    await expect.poll(() => property(page, "html", "--fm-spacing-scale-400")).toBe("24px");
+    await slide(page, "fm-werkstatt-schrift-gewicht", 1);
+    await expect.poll(() => property(page, "html", "--fm-font-weight-regular")).toBe("600");
+    await expect
+      .poll(() => property(page, '[data-fm-side="draft"]', "--fm-radius-medium"))
+      .toBe("8px");
+    const glyph = await property(page, "html", "--fm-ikono-check");
+    await page.locator("#fm-werkstatt-ikono-gewicht").locator("select").selectOption("bold");
+    await expect.poll(() => property(page, "html", "--fm-ikono-check")).not.toBe(glyph);
+    expect((await state(page)).agordo).toMatchObject({
+      form: { radius: 2 },
+      raum: { abstand: 1.5 },
+      schrift: { gewicht: 1 },
+      ikono: { gewicht: "bold" },
+    });
+  });
+
+  test("a reset puts a slider back on its standard and the Agordo loses the field (W-8)", async ({
+    page,
+  }) => {
+    await openWerkstatt(page);
+    await slide(page, "fm-werkstatt-form-radius", 1.6);
+    await expect.poll(async () => (await state(page)).agordo.form).toEqual({ radius: 1.6 });
+    await page.locator('[data-fm-rekomenci-regilo="form.radius"]').click();
+    await expect(page.locator("#fm-werkstatt-form-radius")).toHaveValue("1");
+    await expect.poll(async () => (await state(page)).agordo.form).toBeUndefined();
+  });
+
+  test("undo and redo in the page's memory, with the buttons and with Ctrl+Z / Shift+Ctrl+Z", async ({
+    page,
+  }) => {
+    await openWerkstatt(page);
+    await slide(page, "fm-werkstatt-form-radius", 1.5);
+    await slide(page, "fm-werkstatt-raum-abstand", 1.2);
+    await page.locator("#fm-werkstatt-malfari").click();
+    await expect(page.locator("#fm-werkstatt-raum-abstand")).toHaveValue("1");
+    await expect(page.locator("#fm-werkstatt-form-radius")).toHaveValue("1.5");
+    await page.locator("body").press("Control+z");
+    await expect(page.locator("#fm-werkstatt-form-radius")).toHaveValue("1");
+    await page.locator("body").press("Control+Shift+z");
+    await expect(page.locator("#fm-werkstatt-form-radius")).toHaveValue("1.5");
+    await page.locator("#fm-werkstatt-refari").click();
+    await expect(page.locator("#fm-werkstatt-raum-abstand")).toHaveValue("1.2");
+  });
+
+  test("a link from propose_agordo shows the movement above the panel; Übernehmen sets it, Verwerfen drops it", async ({
+    page,
+  }) => {
+    const before = { name: "provo", leitfarbe: "#6b4fa0" };
+    const proposed = { ...before, regler: { saettigung: 0.8 }, form: { schatten: 0.7 } };
+    const link = `#aspekto=komuna&modus=werkstatt&agordo=${agordoFragment(before)}&vorschlag=${agordoFragment({ wunsch: "ruhiger", agordo: proposed })}`;
+    await open(page, link);
+    const bar = page.locator("#fm-werkstatt-vorschlag");
+    await expect(bar).toBeVisible();
+    await expect(bar).toContainText(
+      "Vorgeschlagen: ruhiger (Sättigung 1,0 → 0,8, Schatten 1,0 → 0,7)",
+    );
+    // Seen before it holds: the Agordo is still the one before.
+    expect((await state(page)).agordo).toEqual(before);
+    await bar.locator("#fm-werkstatt-vorschlag-uebernehmen").click();
+    await expect(bar).toBeHidden();
+    await expect.poll(async () => (await state(page)).agordo).toEqual(proposed);
+    await expect(page.locator("#fm-werkstatt-saettigung")).toHaveValue("0.8");
+    await expect.poll(() => page.evaluate(() => location.hash)).not.toContain("vorschlag=");
+    // Undo takes the proposal back.
+    await page.locator("#fm-werkstatt-malfari").click();
+    await expect.poll(async () => (await state(page)).agordo).toEqual(before);
+
+    await open(page, link);
+    await page.locator("#fm-werkstatt-vorschlag-verwerfen").click();
+    await expect(page.locator("#fm-werkstatt-vorschlag")).toBeHidden();
+    expect((await state(page)).agordo).toEqual(before);
+  });
+
+  test("a font the browser does not know is a hint: shown in a fallback font", async ({ page }) => {
+    await openWerkstatt(page);
+    const field = page.locator("#fm-werkstatt-schrift-display").locator("input");
+    await field.fill("Fundamento Nicht Installiert");
+    await field.blur();
+    await expect(page.locator("#fm-werkstatt-schrift-hinweis")).toContainText(
+      "Schrift nicht installiert, Darstellung in Ersatzschrift",
+    );
+    await expect
+      .poll(async () => (await state(page)).agordo.schriften)
+      .toMatchObject({ display: { family: "Fundamento Nicht Installiert" } });
+  });
+
+  test("G5: 50 changes of a slider never block the main thread longer than 50 ms; the check runs in a worker", async ({
+    page,
+  }) => {
+    await openWerkstatt(page);
+    await checkedAtLeast(page, 1);
+    expect((await state(page)).worker).toBe(true);
+    await page.evaluate(() => {
+      (globalThis as unknown as { fmLong: number[] }).fmLong = [];
+      new PerformanceObserver((list) => {
+        for (const entry of list.getEntries())
+          (globalThis as unknown as { fmLong: number[] }).fmLong.push(entry.duration);
+      }).observe({ type: "longtask" });
+    });
+    const checked = (await state(page)).checked;
+    const slider = page.locator("#fm-werkstatt-helligkeit");
+    await slider.focus();
+    for (let index = 0; index < 50; index += 1) {
+      await page.keyboard.press(index % 2 === 0 ? "ArrowRight" : "ArrowLeft");
+      await page.keyboard.press("ArrowRight");
+    }
+    await checkedAtLeast(page, checked + 1);
+    await page.waitForTimeout(500);
+    const longTasks = await page.evaluate(
+      () => (globalThis as unknown as { fmLong: number[] }).fmLong,
+    );
+    expect(longTasks.filter((duration) => duration > 50)).toEqual([]);
+  });
+
+  test("browser and CLI agree on provo-kompakta: the report, value for value (G5)", async ({
+    page,
+  }) => {
+    await openWerkstatt(page, kompaktaAgordo);
+    await checkedAtLeast(page, 1);
+    expect(await page.evaluate(() => fmWerkstatt.state.raporto)).toEqual(kompaktaRaporto);
+  });
 });

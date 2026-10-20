@@ -59,6 +59,8 @@ interface Dimension {
 /** What the sliders of stage 2 are functions on: the structure, read once. */
 export interface GestaltBasis {
   core: Flat;
+  /** The DTCG type of every core token (inherited from its groups): how a Projekcio writes it. */
+  types: Map<string, string>;
   /** The sets of the Vortaro's Dimensioj (no Aspekto), by set name. */
   overlays: Map<string, Flat>;
   /** The median ratio of neighbouring steps of font.size.scale, three decimals: the standard of skala. */
@@ -84,14 +86,22 @@ export function roundHalf(value: number): number {
   return rounded === 0 ? 0 : rounded;
 }
 
-function flatten(value: unknown, path: string[] = [], out: Flat = new Map()): Flat {
+function flatten(
+  value: unknown,
+  path: string[] = [],
+  out: Flat = new Map(),
+  types?: Map<string, string>,
+  inherited?: string,
+): Flat {
   if (!isRecord(value)) return out;
+  const type = typeof value.$type === "string" ? value.$type : inherited;
   if ("$value" in value) {
     out.set(path.join("."), value.$value);
+    if (types !== undefined && type !== undefined) types.set(path.join("."), type);
     return out;
   }
   for (const [key, child] of Object.entries(value)) {
-    if (!key.startsWith("$")) flatten(child, [...path, key], out);
+    if (!key.startsWith("$")) flatten(child, [...path, key], out, types, type);
   }
   return out;
 }
@@ -132,7 +142,13 @@ function median(values: readonly number[]): number {
 
 /** Reads the structure once: the core set and the sets of the Dimensioj of the Vortaro. */
 export function gestaltBasis(files: ModeloFiles): GestaltBasis {
-  const core = flatten(files.sets.find((set) => set.name === CORE_SET_NAME)?.value);
+  const types = new Map<string, string>();
+  const core = flatten(
+    files.sets.find((set) => set.name === CORE_SET_NAME)?.value,
+    [],
+    new Map(),
+    types,
+  );
   const overlays = new Map<string, Flat>();
   for (const set of files.sets) {
     if (set.name === CORE_SET_NAME || set.package !== undefined) continue;
@@ -180,6 +196,7 @@ export function gestaltBasis(files: ModeloFiles): GestaltBasis {
 
   return {
     core,
+    types,
     overlays,
     skala,
     typeScaleMax: typeof sojlo === "number" ? sojlo : 0.1,
