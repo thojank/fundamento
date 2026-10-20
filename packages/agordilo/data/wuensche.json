@@ -16,7 +16,7 @@
         },
         {
           "regler": "regler.kontrast",
-          "schritt": -0.1
+          "schritt": -0.05
         },
         {
           "regler": "form.schatten",

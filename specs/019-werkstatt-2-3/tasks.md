@@ -83,7 +83,7 @@
 |---|---|
 | Commits ③ | rot `91c33e3`, grün `6ba84cc` (Hash des grünen Stands, CI grün; nach dem Rebase auf `f2f757e`, vorher `5f01a59`/`a611bc3`); dieser Eintrag im Folgecommit |
 | CI ③ | Lauf 39352817646 (`6ba84cc`, alle acht Jobs grün, Wanduhr 8:05): `checks` 1:19, `unit` 5:56, `projekcioj` 3:21 / 3:47, `eroj` 2:26 / 2:10, `alirebleco-eroj` 5:06, `rendered-checks` 7:43 |
-| „Mach provo ruhiger.“ | Kontrast 0,1 → 0,0, Sättigung 1,1 → 0,9, Schatten 1,0 → 0,7; 0 feste Verstöße, Export möglich |
+| „Mach provo ruhiger.“ | Kontrast 0,1 → 0,0, Sättigung 1,1 → 0,9, Schatten 1,0 → 0,7; 0 feste Verstöße, Export möglich (seit dem Nachtrag 20.10.: Kontrast 0,1 → 0,05, plan ③ Nachtrag) |
 | Leitplanke | „ruhiger“ von Kontrast 0 aus: angehalten bei 50 % vor `contrast-reserve`, 4 s |
 | Tests lokal | Agordilo 93, MCP 323 (davon 11 in `s019-prompt.test.ts`), Modelo 3 601, CLI 72, Projekcioj 733 (darin `figma-provoj.test.ts`) – je Paket grün; `pnpm lint`, `pnpm perf` grün |
 

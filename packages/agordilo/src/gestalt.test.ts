@@ -66,7 +66,8 @@ describe("the sliders of stage 2 (G2)", () => {
       ["raum.abstand", 0.75, 1.5],
       ["raum.hoehe", 0.85, 1.25],
       ["schrift.groesse", -1, 1],
-      ["schrift.skala", 1.125, 1.5],
+      // Nachtrag 20.10. (Maintainer, ① O-5): the upper bound of schrift.skala is 1.25.
+      ["schrift.skala", 1.125, 1.25],
       ["schrift.gewicht", -1, 1],
     ]);
     const standard = Object.fromEntries(sliders.map((s) => [s.path, s.standard]));
@@ -175,10 +176,10 @@ describe("each slider moves the token group of G2, on the grid of the system", (
   it("schrift.groesse shifts every font.size.* by up to two steps; schrift.skala spreads the steps around the body text", () => {
     expect(px(tokens({ schrift: { groesse: 1 } }).get("font.size.body.1"))).toBe(22);
     expect(px(tokens({ schrift: { groesse: -1 } }).get("font.size.body.1"))).toBe(12);
-    const wide = tokens({ schrift: { skala: 1.5 } });
+    const wide = tokens({ schrift: { skala: 1.25 } });
     expect(px(wide.get("font.size.body.1"))).toBe(16);
-    expect(px(wide.get("font.size.scale.400"))).toBe(23);
-    expect(px(wide.get("font.size.scale.200"))).toBe(11);
+    expect(px(wide.get("font.size.scale.400"))).toBe(19);
+    expect(px(wide.get("font.size.scale.200"))).toBe(13);
   });
 
   it("schrift.gewicht moves font.weight.* by whole cuts, inside the lightest and the heaviest weight", () => {
@@ -341,7 +342,7 @@ describe("the whole range of the type sliders keeps the type scale (G4, type-sca
     const failures: string[] = [];
     let count = 0;
     for (let g = -50; g <= 50; g += 1) {
-      for (let k = 0; k <= 75; k += 1) {
+      for (let k = 0; k <= 25; k += 1) {
         const groesse = g / 50;
         const skala = Math.round((1.125 + k * 0.005) * 1000) / 1000;
         count += 1;
@@ -360,7 +361,7 @@ describe("the whole range of the type sliders keeps the type scale (G4, type-sca
         }
       }
     }
-    expect(count).toBe(101 * 76);
+    expect(count).toBe(101 * 26);
     expect(failures.slice(0, 10)).toEqual([]);
   });
 });

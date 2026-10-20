@@ -2810,8 +2810,8 @@
         ]
       },
       "definition": {
-        "en": "The words a wish for a brand may use (ruhiger/calmer, runder/rounder …), each with the movements of the sliders it stands for and a kialo; data in packages/agordilo/data/wuensche.json, never a language model. propose_agordo reads it; a word it does not know moves nothing and is asked back. Name proposed by P0 (Spec 019 ③, E7); the maintainer confirms it.",
-        "de": "Die Wörter, mit denen ein Wunsch an eine Marke gesagt werden kann (ruhiger, runder …), je mit den Bewegungen der Regler, für die sie stehen, und einer Kialo; ein Datum in packages/agordilo/data/wuensche.json, nie ein Sprachmodell. propose_agordo liest es; ein Wort, das es nicht kennt, bewegt nichts und wird zurückgefragt. Name als Vorschlag von P0 (Spec 019 ③, E7); der Maintainer bestätigt ihn."
+        "en": "The words a wish for a brand may use (ruhiger/calmer, runder/rounder …), each with the movements of the sliders it stands for and a kialo; data in packages/agordilo/data/wuensche.json, never a language model. propose_agordo reads it; a word it does not know moves nothing and is asked back. Name confirmed on 2026-10-20 by the maintainer (Spec 019 ③, E7).",
+        "de": "Die Wörter, mit denen ein Wunsch an eine Marke gesagt werden kann (ruhiger, runder …), je mit den Bewegungen der Regler, für die sie stehen, und einer Kialo; ein Datum in packages/agordilo/data/wuensche.json, nie ein Sprachmodell. propose_agordo liest es; ein Wort, das es nicht kennt, bewegt nichts und wird zurückgefragt. Name vom Maintainer bestätigt am 2026-10-20 (Spec 019 ③, E7)."
       },
       "related": [
         "#Agordo",
@@ -2841,8 +2841,8 @@
         ]
       },
       "definition": {
-        "en": "A movement of the sliders that propose_agordo computes from a wish and the Werkstatt shows before it holds: the Agordo before in #agordo=, the proposed one in #vorschlag=, a bar with the diff, Übernehmen and Verwerfen. Name proposed by P0 (Spec 019 ③, E7); the maintainer confirms it.",
-        "de": "Eine Bewegung der Regler, die propose_agordo aus einem Wunsch rechnet und die Werkstatt zeigt, bevor sie gilt: die Agordo vorher in #agordo=, die vorgeschlagene in #vorschlag=, eine Leiste mit dem Diff, Übernehmen und Verwerfen. Name als Vorschlag von P0 (Spec 019 ③, E7); der Maintainer bestätigt ihn."
+        "en": "A movement of the sliders that propose_agordo computes from a wish and the Werkstatt shows before it holds: the Agordo before in #agordo=, the proposed one in #vorschlag=, a bar with the diff, Übernehmen and Verwerfen. Name confirmed on 2026-10-20 by the maintainer (Spec 019 ③, E7).",
+        "de": "Eine Bewegung der Regler, die propose_agordo aus einem Wunsch rechnet und die Werkstatt zeigt, bevor sie gilt: die Agordo vorher in #agordo=, die vorgeschlagene in #vorschlag=, eine Leiste mit dem Diff, Übernehmen und Verwerfen. Name vom Maintainer bestätigt am 2026-10-20 (Spec 019 ③, E7)."
       },
       "related": [
         "#Agordo",
@@ -2871,8 +2871,8 @@
         ]
       },
       "definition": {
-        "en": "The field historio of an Agordo: every save by save_agordo appends an entry with the date, the wish (or Hand) and the diff of the sliders. Part of the Agordo, so it travels with the file. Name proposed by P0 (Spec 019 ③, E7); the maintainer confirms it.",
-        "de": "Das Feld historio einer Agordo: jeder Speichervorgang von save_agordo hängt einen Eintrag mit Datum, Wunsch (oder Hand) und Diff der Regler an. Teil der Agordo, damit sie mit der Datei reist. Name als Vorschlag von P0 (Spec 019 ③, E7); der Maintainer bestätigt ihn."
+        "en": "The field historio of an Agordo: every save by save_agordo appends an entry with the date, the wish (or Hand) and the diff of the sliders. Part of the Agordo, so it travels with the file. Name confirmed on 2026-10-20 by the maintainer (Spec 019 ③, E7).",
+        "de": "Das Feld historio einer Agordo: jeder Speichervorgang von save_agordo hängt einen Eintrag mit Datum, Wunsch (oder Hand) und Diff der Regler an. Teil der Agordo, damit sie mit der Datei reist. Name vom Maintainer bestätigt am 2026-10-20 (Spec 019 ③, E7)."
       },
       "related": [
         "#Agordo",

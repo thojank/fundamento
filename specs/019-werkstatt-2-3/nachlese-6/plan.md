@@ -71,3 +71,10 @@ Gemessen mit `pnpm fm projekcioj build --config packages/modelo/test/fixtures/va
 | Make Kit ekzemplo | 2 400 657 B | 1 582 978 B | dito |
 
 Standard-Build (`pnpm fm projekcioj build`): Vitrino 5 620 635 → 4 382 521 B.
+
+### Nachtrag 20.10.
+
+**Entscheidungen des Maintainers vom 2026-10-20:** O-2 CJS im Make Kit entfernen – **ja, aber erst mit 0.2.0**, kein Release jetzt; O-1 (Messwerte) später; O-3 kein Ausschluss je Stichwort. Umgesetzt im PR `261020-spec-019-nachtrag-116ba2` von `main`:
+
+- `CHANGELOG.md` (neu; es gab weder ihn noch einen Release-Abschnitt im README) mit „0.2.0 – geplant: Breaking: Das Make Kit liefert nur noch ESM. `require()` braucht Node ≥ 22.12.“
+- Ein Pin in `make-kit.test.ts`: `package.json` des Kits nennt kein `require`-Ziel und keine `.cjs`-Datei – die CJS-Fassung kommt nicht versehentlich zurück.

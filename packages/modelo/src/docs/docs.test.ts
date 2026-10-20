@@ -2445,3 +2445,39 @@ describe("Spec 019 ③ documentation (specs/019-werkstatt-2-3)", () => {
     expect(vojmapo).toContain("[019](../specs/019-werkstatt-2-3/)");
   });
 });
+
+// Nachtrag 20.10. (Entscheidungen des Maintainers, 2026-10-20): one PR from main with the upper
+// bound 1.25 of schrift.skala, the step −0.05 of ruhiger on the contrast, the CHANGELOG entry
+// „0.2.0 – geplant“ for the Make Kit without CJS and the confirmed names; recorded as a section
+// „Nachtrag 20.10.“ in plan ①, plan ③ and nachlese-6/plan.md.
+describe("Spec 019 Nachtrag 20.10. documentation", () => {
+  it("plan ① and ③ and the plan of Nachlese 6 carry the Nachtrag; the CHANGELOG plans 0.2.0", () => {
+    const plan = read("specs/019-werkstatt-2-3/plan.md");
+    const first = plan.slice(
+      plan.indexOf("## ① Bibliothek Stufe 2"),
+      plan.indexOf("## ② Werkstatt Stufe 2"),
+    );
+    const third = plan.slice(
+      plan.indexOf("## ③ Prompt (Stufe 3)"),
+      plan.indexOf("## ④ Nachlese 6"),
+    );
+    for (const [label, text] of [
+      ["①", first],
+      ["③", third],
+    ] as const) {
+      expect(text, label).toContain("### Nachtrag 20.10.");
+    }
+    expect(first).toContain("neu gemessen mit Obergrenze 1,25");
+    expect(first).toMatch(/1,125–1,25/);
+    expect(third).toMatch(/Kontrast 0,1 → 0,0\b/);
+    expect(third).toContain("Kontrast 0,1 → 0,05");
+    const n6 = read("specs/019-werkstatt-2-3/nachlese-6/plan.md");
+    expect(n6).toContain("### Nachtrag 20.10.");
+    const changelog = read("CHANGELOG.md");
+    expect(changelog).toContain("## 0.2.0 – geplant");
+    expect(changelog).toContain(
+      "Breaking: Das Make Kit liefert nur noch ESM. `require()` braucht Node ≥ 22.12.",
+    );
+    expect(read("README.md")).not.toMatch(/Kontrast 0,1 → 0,0[^5]/);
+  });
+});
