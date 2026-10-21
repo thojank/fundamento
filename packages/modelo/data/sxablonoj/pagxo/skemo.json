@@ -16,7 +16,9 @@
         "name": "title",
         "description": "The title of the page: a titolo of level 1, focusable — the one focus target of the page.",
         "required": true,
-        "accepts": ["titolo"],
+        "accepts": [
+          "titolo"
+        ],
         "max": 1,
         "props": {
           "level": "1",
@@ -26,18 +28,26 @@
       {
         "name": "badges",
         "description": "Badges beside the title: the status of what the page shows.",
-        "accepts": ["insigno"]
+        "accepts": [
+          "insigno"
+        ]
       },
       {
         "name": "subtitle",
         "description": "One line under the title that says what the page is about.",
-        "accepts": ["teksto"],
+        "accepts": [
+          "teksto"
+        ],
         "max": 1
       },
       {
         "name": "actions",
         "description": "The actions on the page; one primary at most, a destructive one in a menuo or as a butono of low emphasis.",
-        "accepts": ["butono", "ligilo", "menuo"],
+        "accepts": [
+          "butono",
+          "ligilo",
+          "menuo"
+        ],
         "primary": 1
       },
       {
@@ -54,8 +64,16 @@
       {
         "goal": "page-header",
         "keywords": {
-          "en": ["page-header", "page-template", "page-layout"],
-          "de": ["seitenkopf", "seitenvorlage", "seitenaufbau"]
+          "en": [
+            "page-header",
+            "page-template",
+            "page-layout"
+          ],
+          "de": [
+            "seitenkopf",
+            "seitenvorlage",
+            "seitenaufbau"
+          ]
         },
         "props": {},
         "kialo": "A page is one pattern, because its title is the one heading of level 1 and the focus target after a change of route, and its actions stand in one place with one primary at most."
@@ -63,22 +81,39 @@
     ],
     "parts": {
       "frame": {
-        "gap": { "fixed": "spacing.xlarge" }
+        "gap": {
+          "fixed": "spacing.xlarge"
+        }
       },
       "head": {
-        "gap": { "fixed": "spacing.small" }
+        "gap": {
+          "fixed": "spacing.small"
+        }
+      },
+      "heading": {
+        "gap": {
+          "fixed": "spacing.small"
+        }
       },
       "badges": {
-        "gap": { "fixed": "spacing.xsmall" }
+        "gap": {
+          "fixed": "spacing.xsmall"
+        }
       },
       "actions": {
-        "gap": { "fixed": "spacing.small" }
+        "gap": {
+          "fixed": "spacing.small"
+        }
       },
       "sections": {
-        "gap": { "fixed": "spacing.xlarge" }
+        "gap": {
+          "fixed": "spacing.xlarge"
+        }
       },
       "container": {
-        "width": { "fixed": "size.container.small" }
+        "width": {
+          "fixed": "size.container.small"
+        }
       }
     }
   }

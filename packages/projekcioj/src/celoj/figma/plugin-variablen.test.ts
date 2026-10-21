@@ -821,21 +821,39 @@ describe("a variable the file holds in another collection stops the run before i
       }),
     );
   };
+  /**
+   * Nachlese 8 ② (② 1): no plan fills fundamento any more — a core token lives in aspekto whatever
+   * brands the build has. A file an older plugin made from the one-brand plan (f10b-2 on
+   * 2026-10-09: 364 variables in fundamento) still holds them there; this makes that file: every
+   * variable the two-brand plan shows in aspekto, in a collection fundamento.
+   */
+  const olderFile = (double: ReturnType<typeof figmaDouble>): Switched[] => {
+    const api = double.figma as unknown as VariablesApi;
+    const old = api.variables.createVariableCollection("fundamento");
+    const moved = named(plan, "aspekto").filter((variable) => variable.hidden !== true);
+    for (const variable of moved) api.variables.createVariable(variable.name, old, variable.type);
+    return moved.map((variable) => ({ name: variable.name, from: "fundamento", to: "aspekto" }));
+  };
   const firstOfAspekto = () => {
     const [first] = named(plan, "aspekto");
     if (first === undefined) throw new Error("the two-brand plan has no variable in aspekto");
     return first;
   };
 
-  it("is the maintainer's case: the one-brand plan fills fundamento, the two-brand plan leaves it empty", () => {
-    expect(named(repoPlan, "fundamento").length).toBeGreaterThan(0);
+  // Nachlese 8 ②: the maintainer's case (f10b-5, 2026-10-20: „aspekto → fundamento: 362") came
+  // from the choice of the build; it does not arise any more — both plans place alike.
+  // What still moves is what a brand's own conjunction set makes change along a further Dimensio
+  // (ekzemplo's aspekto+contrast/high: the focus ring and the warning's text move with contrast
+  // there, not in komuna) — the highest Dimensio along which the value changes (Jugxo of F35);
+  // never into or out of fundamento.
+  it("the one-brand and the two-brand plan leave fundamento empty; only a brand's conjunction moves a variable", () => {
+    expect(named(repoPlan, "fundamento")).toEqual([]);
     expect(named(plan, "fundamento")).toEqual([]);
-    const switches = expectedSwitches();
-    expect(switches.length).toBeGreaterThan(0);
-    // Most go to aspekto; the contrast tokens the one-brand plan kept in fundamento go to contrast.
-    const targets = new Set(switches.map((entry) => entry.to));
-    expect(targets.has("aspekto")).toBe(true);
-    expect(targets.has("fundamento")).toBe(false);
+    expect(expectedSwitches()).toEqual([
+      { name: "border/width/focus", from: "aspekto", to: "contrast" },
+      { name: "color/status/warning/on", from: "color-scheme", to: "contrast" },
+      { name: "radius/focus/ring", from: "aspekto", to: "contrast" },
+    ]);
   });
 
   it("the double refuses a value for a mode its collection does not have, with Figma's words", () => {
@@ -853,7 +871,7 @@ describe("a variable the file holds in another collection stops the run before i
 
   it("aborts before the first write when the file holds the brand's variables in fundamento", async () => {
     const double = modelDouble();
-    await run(double, ONE_BRAND);
+    olderFile(double);
     const counts = { ...double.counts };
     const before = double.snapshot();
     const error = await abortOf(double, TWO_BRANDS);
@@ -869,9 +887,8 @@ describe("a variable the file holds in another collection stops the run before i
 
   it("names every affected variable, the collection it lies in and the one the plan puts it in", async () => {
     const double = modelDouble();
-    await run(double, ONE_BRAND);
+    const expected = olderFile(double);
     const error = await abortOf(double, TWO_BRANDS);
-    const expected = expectedSwitches();
     expect(error?.abort?.switched).toEqual(expected);
     expect(error?.message).toContain(String(expected.length));
     expect(error?.message).toContain(expected[0]?.name ?? "?");
@@ -905,7 +922,7 @@ describe("a variable the file holds in another collection stops the run before i
 
   it("says it in the toast and prints the whole list as JSON lines in the console", async () => {
     const double = modelDouble();
-    await run(double, ONE_BRAND);
+    const expected = olderFile(double);
     const lines: string[] = [];
     const module = new Function("figma", "console", TWO_BRANDS);
     await module(
@@ -927,7 +944,7 @@ describe("a variable the file holds in another collection stops the run before i
       .map((line) => JSON.parse(line) as { part?: string; items?: Switched[] })
       .filter((part) => part.part === "switched")
       .flatMap((part) => part.items ?? []);
-    expect(listed).toEqual(expectedSwitches());
+    expect(listed).toEqual(expected);
   });
 
   it("reports a collection of the plan that stands empty in the file, and does not remove it", async () => {

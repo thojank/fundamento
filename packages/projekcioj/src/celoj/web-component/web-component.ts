@@ -288,6 +288,14 @@ function markdownPartSelector(part: string): string {
   return `:where(${root})`;
 }
 
+/** The rules of a Markdown view's light DOM (Nachlese 8 ②, F-5): the indent of a nested list. */
+function markdownDocumentCss(entry: LoadedEro): string {
+  const indent = fixedToken(entry.skemo.parts.indent?.["inline-padding"]);
+  return indent === undefined
+    ? ""
+    : `fm-${entry.ero.name} :is(ul, ol) :is(ul, ol) { margin-block: 0; padding-inline-start: ${variable(indent)}; }`;
+}
+
 /** Layout of a Markdown view (Spec 020 ③, D-24), keywords and 0 only: a column of blocks. */
 const markdownStructure: string = [
   ":host { display: block; }",
@@ -1789,6 +1797,9 @@ export function elementNamesOf(
     // Spec 014 ① (plan ① D-03): the width from which layout auto lays name and value side by side,
     // the Uzo's columns-from as the custom property its token is projected to.
     ...(columnsFrom === undefined ? {} : { columnsFrom: nomRegulo("css").derive(columnsFrom) }),
+    // Nachlese 8 ② (F-5): a Markdown view indents a nested list as its first level, by the indent
+    // of its Skemo — in the light DOM, where ::slotted does not reach.
+    ...(isMarkdown(entry.skemo) ? { documentCss: markdownDocumentCss(entry) } : {}),
     slots: entry.skemo.slots.map((slot) => ({
       name: slot.name,
       ...(slot.default === undefined ? {} : { default: slot.default }),

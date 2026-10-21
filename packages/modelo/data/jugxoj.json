@@ -4388,7 +4388,7 @@
       "decision": "approved",
       "kialo": "Figma zeigt den Codeblock und die Markdown-Ansicht als Text: Beschriftung, Fokusring der Scroll-Region, Ansage nach dem Kopieren und die Linie eines Zitats zeichnet es nicht.",
       "date": "2026-10-20",
-      "context": "Spec 020 ③ (G2): Figma zeichnet kodbloko und markdovido mit der Struktur statischen Textes (badge) wie titolo und teksto — der Text in der Rolle seiner Teile, die Fläche, die Abstände. Nicht gezeichnet und darum für die Parität freigegeben: die Teile legend (Beschriftung), scroll-ring (Fokusring der Scroll-Region) und announce (Ansage „Kopiert“) des kodbloko, quote (Linie und Einzug eines Zitats) und indent (Einzug einer Liste) der markdovido."
+      "context": "Spec 020 ③ (G2): Figma zeichnet kodbloko und markdovido mit der Struktur statischen Textes (badge) wie titolo und teksto — der Text in der Rolle seiner Teile, die Fläche, die Abstände. Nicht gezeichnet und darum für die Parität freigegeben: die Teile legend (Beschriftung), scroll-ring (Fokusring der Scroll-Region) und announce (Ansage „Kopiert“) des kodbloko, quote (Linie und Einzug eines Zitats) und indent (Einzug einer Liste) der markdovido. Nachtrag Nachlese 8 ② (F-12, 2026-10-21): kodbloko und markdovido haben eigene Strukturen (codeblock, markdown); die Beschriftung (legend), die Linie und der Einzug eines Zitats (quote) und der Einzug einer Liste (indent) sind jetzt gezeichnet. Freigegeben bleiben scroll-ring und announce."
     },
     {
       "id": "jug_01M5EYQ8T6MSKZR1GYNPT7HS2F",
@@ -4409,6 +4409,16 @@
       "kialo": "Eine Seitenleiste oder ein Panel, das hereinfährt, ist ein Drawer: eine Rückfrage, weil Runde 1 kein Sxablono dafür hat.",
       "date": "2026-10-21",
       "context": "Nachlese 8 ① F-1 (Abnahme Spec 020, Messung D9; Spec 020 ① F-1): Eine Antwort, die stand, ändert sich (OP-12). Der navigado hat die Grenze drawer (ask-human) mit Bewegungswörtern in Formen, die kein Ziel eines anderen Ero belegen (uzo-boundary-covered: nicht „ausklappen“ des faldilo, nicht „einblenden“ der Grenze des kampo). Gekippt: „Seitenleiste, die von rechts hereinfährt“, „Ausklappbare Seitenleiste“ und „Off-Canvas-Navigation“ → Rückfrage zwischen der Grenze drawer und dem Ziel navigate-app statt navigado; „Ein Panel, das von links hereinfährt“ → Rückfrage drawer statt goal-unknown; „a sidepanel that slides in“ bleibt eine Rückfrage an einer Grenze drawer, jetzt der des navigado statt der des sxvebilo (Ero-Reihenfolge). „Seitenleiste mit Navigation“ bleibt navigado."
+    },
+    {
+      "id": "jug_01M5F3FY2AN3PK0EHYS0GW7EJ8",
+      "ref": {
+        "ero": "ero_01M51T74A5H5FGY35BQ90VQEGH"
+      },
+      "decision": "approved",
+      "kialo": "Die Knöpfe eines Dialogs und einer Meldung stehen in actions: Dort ist ein butono eine Verschachtelung der Tiefe 1, keine Verletzung.",
+      "date": "2026-10-21",
+      "context": "Nachlese 8 ② (N7-F-1, Befund F-1 von Nachlese 7 ②): Eine Antwort, die stand, ändert sich (OP-12). Die Uzo von dialogo und avizo erlaubten in actions den butono (und bei der avizo den ligilo) mit nesting 0; check_usage meldete darum jeden Knopf dort als uzo-slot-nesting. Jetzt nesting 1. Gekippt: check_usage einer avizo oder eines dialogo mit butono in actions ist ohne uzo-slot-nesting; jede andere Prüfung der Slots (accepts, max, min, required) bleibt."
     }
   ]
 }

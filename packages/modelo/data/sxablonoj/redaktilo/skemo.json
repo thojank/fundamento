@@ -23,7 +23,9 @@
         "name": "field",
         "description": "The source: a tekstareo of kind code with its label, help and error.",
         "required": true,
-        "accepts": ["tekstareo"],
+        "accepts": [
+          "tekstareo"
+        ],
         "max": 1,
         "props": {
           "kind": "code"
@@ -33,7 +35,9 @@
         "name": "preview",
         "description": "The preview: a markdovido that shows the source as it is typed, without announcing every key.",
         "required": true,
-        "accepts": ["markdovido"],
+        "accepts": [
+          "markdovido"
+        ],
         "max": 1
       }
     ],
@@ -44,8 +48,15 @@
       {
         "goal": "markdown-editor",
         "keywords": {
-          "en": ["editor", "markdown-editor"],
-          "de": ["editor", "markdown-editor", "texteditor"]
+          "en": [
+            "editor",
+            "markdown-editor"
+          ],
+          "de": [
+            "editor",
+            "markdown-editor",
+            "texteditor"
+          ]
         },
         "props": {},
         "kialo": "Writing with a preview is one pattern, because the field and the preview are one task; the preview speaks only when the person goes there."
@@ -53,10 +64,27 @@
     ],
     "parts": {
       "frame": {
-        "gap": { "fixed": "spacing.large" }
+        "gap": {
+          "fixed": "spacing.large"
+        }
+      },
+      "preview": {
+        "gap": {
+          "fixed": "spacing.small"
+        }
+      },
+      "preview-label": {
+        "typography": {
+          "fixed": "typography.label.1"
+        },
+        "color": {
+          "fixed": "color.text.default"
+        }
       },
       "container": {
-        "width": { "fixed": "size.container.medium" }
+        "width": {
+          "fixed": "size.container.medium"
+        }
       }
     }
   }

@@ -1023,8 +1023,9 @@ describe("the label default of a set follows its a11y role (M-3)", () => {
       kampo: "Beschriftung",
       // Spec 015 ③: a card's label property writes its heading (proposal, to confirm).
       karto: "Überschrift",
-      // Spec 020 ③: a code block shows code, a Markdown view running text (proposals, to confirm).
-      kodbloko: "Code",
+      // Spec 020 ③: a code block shows code, a Markdown view running text (proposals, to confirm);
+      // Nachlese 8 ② (F-12): the code block's label is the Vitrino's command.
+      kodbloko: "pnpm fm mcp",
       // Spec 014 ⑤: the combobox shares the elektilo's role; its word applies (O-21).
       kompletigilo: "Auswahl",
       // Spec 014 ④: a tooltip is a short hint, the trigger of a menu offers more actions, a

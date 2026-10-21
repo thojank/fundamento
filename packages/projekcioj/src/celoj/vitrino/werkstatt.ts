@@ -60,6 +60,12 @@ const FRAGMENT_DELAY_MS = 300;
 const STATUS = ["success", "warning", "danger", "info"] as const;
 /** Changes of one control closer than this are one step of the history (a drag, a typed word). */
 const HISTORY_MERGE_MS = 600;
+/**
+ * Nachlese 8 ② (M5, D-14): the entries of the report written in one task before the main thread
+ * is given back. An entry costs about 0.65 ms on a CI runner (its Eroj with their shadow roots);
+ * 73 entries in one task were a block of 52 ms. Twelve stay under 10 ms.
+ */
+const REPORT_BATCH = 12;
 const FONT_ROLES = ["display", "body", "code"] as const;
 const GROUPS = [
   { key: "farbe", label: "Farbe" },
@@ -706,25 +712,25 @@ class Werkstatt {
 
   #setProperties(element: HTMLElement, palettes: DerivedPalettes): void {
     const mode = this.#root.getAttribute("data-fm-color-scheme") === "dark" ? "dark" : "light";
+    // Nachlese 8 ② (M5): only what changed is written. A write of the root's inline style, even of
+    // the value it has, makes the browser recompute the style of every element on screen.
+    const set = (property: string, value: string) => {
+      if (element.style.getPropertyValue(property) !== value)
+        element.style.setProperty(property, value);
+    };
     for (const step of palettes.steps) {
-      element.style.setProperty(
-        cssVariable(`color.palette.${step.palette}.${step.step}`),
-        step.hex,
-      );
+      set(cssVariable(`color.palette.${step.palette}.${step.step}`), step.hex);
     }
     for (const step of palettes.overrides) {
-      if (step.mode === mode) {
-        element.style.setProperty(
-          cssVariable(`color.palette.${step.palette}.${step.step}`),
-          step.hex,
-        );
-      }
+      if (step.mode === mode)
+        set(cssVariable(`color.palette.${step.palette}.${step.step}`), step.hex);
     }
     for (const role of FONT_ROLES) {
       const font = this.#lastValid.schriften?.[role];
-      if (font === undefined) element.style.removeProperty(cssVariable(`font.family.${role}`));
-      else
-        element.style.setProperty(cssVariable(`font.family.${role}`), JSON.stringify(font.family));
+      const property = cssVariable(`font.family.${role}`);
+      if (font === undefined) {
+        if (element.style.getPropertyValue(property) !== "") element.style.removeProperty(property);
+      } else set(property, JSON.stringify(font.family));
     }
   }
 
@@ -759,11 +765,17 @@ class Werkstatt {
 
   #finishCheck(raporto: Raporto): void {
     this.state.raporto = raporto;
-    this.state.checked += 1;
-    this.#renderReport(raporto);
-    this.#renderExport(raporto);
-    document.dispatchEvent(new CustomEvent("fm-werkstatt-raporto", { detail: raporto }));
-    this.#flush(this.#checkWaiters, raporto);
+    this.#reportRun += 1;
+    const run = this.#reportRun;
+    // The check counts as done once its report stands complete; a newer report that arrives
+    // meanwhile takes over, and its end resolves every waiter.
+    void this.#renderReport(raporto, run).then((complete) => {
+      if (!complete) return;
+      this.state.checked += 1;
+      this.#renderExport(raporto);
+      document.dispatchEvent(new CustomEvent("fm-werkstatt-raporto", { detail: raporto }));
+      this.#flush(this.#checkWaiters, raporto);
+    });
   }
 
   /** The palettes of the Agordo as it is now, once they are set. */
@@ -1128,20 +1140,31 @@ ${groupOf("ikonoj", "Icons", `<fm-elektilo id="fm-werkstatt-ikono-gewicht" value
 
   #renderPaletteValues(palettes: DerivedPalettes): void {
     if (!this.#built) return;
+    // Nachlese 8 ② (M5): a text or a colour is written only where it changed; every write
+    // replaced a text node and made the table lay out again.
+    const text = (node: Element | null, value: string) => {
+      if (node !== null && node.textContent !== value) node.textContent = value;
+    };
     for (const step of [...palettes.steps, ...palettes.overrides]) {
       const row = document.querySelector<HTMLElement>(`tr[data-fm-stupo="${this.#stepKey(step)}"]`);
       if (row === null) continue;
       const swatch = row.querySelector<HTMLElement>("[data-fm-muestro]");
-      if (swatch !== null) swatch.style.backgroundColor = step.hex;
-      const value = row.querySelector("[data-fm-valoro]");
-      if (value !== null) value.textContent = step.hex;
-      const target = row.querySelector("[data-fm-celo-teksto]");
-      if (target !== null)
-        target.textContent = `${ratio(step.target)}${step.onTarget ? "" : " (verfehlt)"}`;
-      const achieved = row.querySelector("[data-fm-atingita]");
-      if (achieved !== null)
-        achieved.textContent = `${ratio(step.achieved)}${step.toneKept ? "" : " (ohne Ton)"}`;
-      row.setAttribute("data-fm-superskribita", String(step.overridden === true));
+      if (swatch !== null && swatch.dataset.fmHex !== step.hex) {
+        swatch.style.backgroundColor = step.hex;
+        swatch.dataset.fmHex = step.hex;
+      }
+      text(row.querySelector("[data-fm-valoro]"), step.hex);
+      text(
+        row.querySelector("[data-fm-celo-teksto]"),
+        `${ratio(step.target)}${step.onTarget ? "" : " (verfehlt)"}`,
+      );
+      text(
+        row.querySelector("[data-fm-atingita]"),
+        `${ratio(step.achieved)}${step.toneKept ? "" : " (ohne Ton)"}`,
+      );
+      const overridden = String(step.overridden === true);
+      if (row.getAttribute("data-fm-superskribita") !== overridden)
+        row.setAttribute("data-fm-superskribita", overridden);
     }
   }
 
@@ -1159,7 +1182,8 @@ ${groupOf("ikonoj", "Icons", `<fm-elektilo id="fm-werkstatt-ikono-gewicht" value
 
   // --- the report -------------------------------------------------------------------------------
 
-  #renderReport(raporto: Raporto): void {
+  /** Writes the report; false where a newer one took over before the list was complete. */
+  async #renderReport(raporto: Raporto, run: number): Promise<boolean> {
     const { summary } = raporto;
     const apcaCount = raporto.hints.filter((hint) => hint.rule === "contrast-advisory").length;
     const badges: [string, string, number, string][] = [
@@ -1201,22 +1225,6 @@ ${groupOf("ikonoj", "Icons", `<fm-elektilo id="fm-werkstatt-ikono-gewicht" value
       if (badge.getAttribute("intent") !== intent) badge.setAttribute("intent", intent);
       if (badge.textContent !== String(value)) badge.textContent = String(value);
     }
-    const list = byId("fm-werkstatt-malobservoj");
-    const markup = raporto.violations.map((violation) => this.#violationMarkup(violation)).join("");
-    if (markup !== this.#violationsMarkup) {
-      this.#violationsMarkup = markup;
-      list.innerHTML = markup;
-      for (const button of list.querySelectorAll<HTMLElement>("[data-fm-apliki]")) {
-        button.addEventListener("click", () => {
-          const index = Number(button.dataset.fmApliki);
-          const patch = this.state.raporto?.violations[index]?.apply;
-          if (patch !== undefined) this.applyPatch(patch);
-        });
-      }
-      for (const button of list.querySelectorAll<HTMLElement>("[data-fm-salto]")) {
-        button.addEventListener("click", () => this.#jump(button.dataset.fmSalto ?? ""));
-      }
-    }
     // The APCA hints (advice) fill their list only while it is open: a check renders the count,
     // not a hundred list items (G5).
     const apca = raporto.hints.filter((hint) => hint.rule === "contrast-advisory");
@@ -1224,10 +1232,46 @@ ${groupOf("ikonoj", "Icons", `<fm-elektilo id="fm-werkstatt-ikono-gewicht" value
     this.#status(
       `Prüfbericht: ${summary.pairs.passed} von ${summary.pairs.measured} Paar-Auswertungen bestanden, ${raporto.violations.length} Verstöße (${summary.violations.fixed} fest, ${summary.violations.adjustable} anpassbar, ${summary.violations.covered} gedeckt), ${apca.length} APCA-Hinweise.`,
     );
+    // Nachlese 8 ② (M5): a check replaces only the entries that changed — and writes them in
+    // batches of REPORT_BATCH, giving the main thread back in between (D-14): the work grows with
+    // the number of violations, the block does not.
+    const list = byId("fm-werkstatt-malobservoj");
+    const items = raporto.violations.map((violation) => this.#violationMarkup(violation));
+    for (let index = 0; index < items.length; index++) {
+      if (index > 0 && index % REPORT_BATCH === 0) {
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        if (run !== this.#reportRun) return false;
+      }
+      const item = items[index] ?? "";
+      if (this.#violationItems[index] === item && list.children[index] !== undefined) continue;
+      const template = document.createElement("template");
+      template.innerHTML = item;
+      const entry = template.content.firstElementChild;
+      if (!(entry instanceof HTMLElement)) continue;
+      for (const button of entry.querySelectorAll<HTMLElement>("[data-fm-apliki]")) {
+        button.addEventListener("click", () => {
+          const at = Number(button.dataset.fmApliki);
+          const patch = this.state.raporto?.violations[at]?.apply;
+          if (patch !== undefined) this.applyPatch(patch);
+        });
+      }
+      for (const button of entry.querySelectorAll<HTMLElement>("[data-fm-salto]")) {
+        button.addEventListener("click", () => this.#jump(button.dataset.fmSalto ?? ""));
+      }
+      const old = list.children[index];
+      if (old === undefined) list.append(entry);
+      else old.replaceWith(entry);
+      this.#violationItems[index] = item;
+    }
+    while (list.children.length > items.length) list.lastElementChild?.remove();
+    this.#violationItems.length = items.length;
+    return true;
   }
 
   #apcaHints: Raporto["hints"] = [];
-  #violationsMarkup: string | undefined;
+  #violationItems: string[] = [];
+  /** The report being written (M5): a newer one stops the older between two batches. */
+  #reportRun = 0;
   #apcaListed: Raporto["hints"] | undefined;
 
   #renderApca(apca: Raporto["hints"]): void {
@@ -1338,27 +1382,38 @@ ${groupOf("ikonoj", "Icons", `<fm-elektilo id="fm-werkstatt-ikono-gewicht" value
         raporto.violations.filter((v) => !v.fixed && v.jugxo === undefined).map((v) => v.rule),
       ),
     ];
+    // Nachlese 8 ② (M5): written only where it changes.
     const lock = (element: HTMLElement, locked: boolean) => {
+      if (locked === element.hasAttribute("disabled")) return;
       if (locked) element.setAttribute("disabled", "");
       else element.removeAttribute("disabled");
+    };
+    const say = (text: string) => {
+      if (reason.textContent !== text) reason.textContent = text;
     };
     if (fixedRules.length > 0) {
       lock(download, true);
       lock(jugxo, true);
-      reason.textContent = `Der Download ist gesperrt: feste Regel verletzt (${fixedRules.join(", ")}). Ein Jugxo öffnet keine feste Regel (G6); ändere die Agordo, bis sie hält.`;
+      say(
+        `Der Download ist gesperrt: feste Regel verletzt (${fixedRules.join(", ")}). Ein Jugxo öffnet keine feste Regel (G6); ändere die Agordo, bis sie hält.`,
+      );
       return;
     }
     if (uncovered.length > 0) {
       lock(download, true);
       lock(jugxo, false);
-      reason.textContent = `Der Download ist gesperrt, bis ein Jugxo die anpassbaren Regeln deckt (${uncovered.join(", ")}): Begründung, Datum und Name. Der Jugxo steht in der Agordo.`;
+      say(
+        `Der Download ist gesperrt, bis ein Jugxo die anpassbaren Regeln deckt (${uncovered.join(", ")}): Begründung, Datum und Name. Der Jugxo steht in der Agordo.`,
+      );
       return;
     }
     lock(download, !raporto.summary.exportable);
     lock(jugxo, true);
-    reason.textContent = raporto.summary.exportable
-      ? "Der Download ist frei: keine Verstöße, oder jeder durch einen Jugxo gedeckt. Das Paket entsteht über `fm agordilo derive`."
-      : "Der Download ist gesperrt: die Agordo selbst hat Fehler (siehe Prüfbericht).";
+    say(
+      raporto.summary.exportable
+        ? "Der Download ist frei: keine Verstöße, oder jeder durch einen Jugxo gedeckt. Das Paket entsteht über `fm agordilo derive`."
+        : "Der Download ist gesperrt: die Agordo selbst hat Fehler (siehe Prüfbericht).",
+    );
   }
 
   #recordJugxoj(kialo: string, date: string, name: string): void {

@@ -72,7 +72,17 @@ export const codeblockMethods = `
 `;
 
 /** The render of a Markdown view: the content follows source and start-level. */
-export const markdownRender = `    this.#markdownRender();
+export const markdownRender = `    // Nachlese 8 ② (F-5): the rules of the light DOM, adopted by the document once.
+    if (typeof document !== "undefined" && MARKDOWN_DOCUMENT_CSS !== "") {
+      if (markdownSheet === undefined) {
+        markdownSheet = new CSSStyleSheet();
+        markdownSheet.replaceSync(MARKDOWN_DOCUMENT_CSS);
+      }
+      if (!document.adoptedStyleSheets.includes(markdownSheet)) {
+        document.adoptedStyleSheets = [...document.adoptedStyleSheets, markdownSheet];
+      }
+    }
+    this.#markdownRender();
 `;
 
 /**
@@ -115,6 +125,8 @@ export const markdownMethods = `
 
   #markdownBlocks(lines: readonly string[], start: number): HTMLElement[] {
     const out: HTMLElement[] = [];
+    // Nachlese 8 ② (F-6): the text of the last heading names the table after it.
+    let heading = "";
     let index = 0;
     while (index < lines.length) {
       const line = lines[index] ?? "";
@@ -135,11 +147,12 @@ export const markdownMethods = `
         out.push(this.#markdownCode(body.join("\\n")));
         continue;
       }
-      const heading = /^\\s{0,3}(#{1,6})\\s+(.*?)\\s*#*\\s*$/.exec(line);
-      if (heading !== null) {
+      const match = /^\\s{0,3}(#{1,6})\\s+(.*?)\\s*#*\\s*$/.exec(line);
+      if (match !== null) {
         const title = document.createElement("fm-titolo");
-        title.setAttribute("level", String(Math.min(6, start + (heading[1] ?? "#").length - 1)));
-        this.#markdownInline(title, heading[2] ?? "");
+        title.setAttribute("level", String(Math.min(6, start + (match[1] ?? "#").length - 1)));
+        this.#markdownInline(title, match[2] ?? "");
+        heading = (title.textContent ?? "").trim();
         out.push(title);
         index += 1;
         continue;
@@ -162,6 +175,14 @@ export const markdownMethods = `
       }
       if (line.includes("|") && MARKDOWN_RULE.test(lines[index + 1] ?? "")) {
         const [table, next] = this.#markdownTable(lines, index);
+        // A table is named by its caption (the tabelo: never without one): the heading before it,
+        // hidden from sight because it stands above already.
+        if (heading !== "") {
+          table.prepend(document.createTextNode(heading));
+          table.setAttribute("caption-hidden", "");
+        } else {
+          warn("fm-markdovido: a table without a heading before it has no name; put a heading over it (the tabelo is never without a caption).");
+        }
         out.push(table);
         index = next;
         continue;
@@ -340,8 +361,14 @@ export const markdownMethods = `
   }
 `;
 
-/** The module-level constants of a Markdown view: the patterns of a table rule and of inline text. */
-export const markdownConstants = `
+/**
+ * The module-level constants of a Markdown view: the patterns of a table rule and of inline text,
+ * and the rules of its light DOM (Nachlese 8 ②, F-5), from the indent of the Skemo.
+ */
+export const markdownConstants = (documentCss: string): string => `
+/** The rules of the light DOM (F-5): the indent of a nested list, which ::slotted cannot reach. */
+const MARKDOWN_DOCUMENT_CSS: string = ${JSON.stringify(documentCss)};
+let markdownSheet: CSSStyleSheet | undefined;
 /** The rule under the head of a pipe table. */
 const MARKDOWN_RULE = /^\\s*\\|?\\s*:?-+:?\\s*(\\|\\s*:?-+:?\\s*)*\\|?\\s*$/;
 /** Inline Markdown: code, strong, emphasis, an image, a link (the backtick spelt as \\x60). */

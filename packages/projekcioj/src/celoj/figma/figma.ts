@@ -16,6 +16,7 @@ import {
   alphaOf,
   baseResolution,
   boundToken,
+  CORE_SET_NAME,
   combinationsOf,
   isBindingKeyword,
   isEntryKey,
@@ -50,6 +51,7 @@ import {
   VITRINO_NUMBER_EXAMPLES,
   VITRINO_OPTIONS,
   VITRINO_PROMPT,
+  VITRINO_SHORT_COMMAND,
   VITRINO_SLOT_TEXTS,
   VITRINO_SUMMARY_TEXT,
   VITRINO_SURFACE,
@@ -156,14 +158,11 @@ export const FIGMA_NOT_DRAWN: Readonly<Record<string, string>> = {
   // names all four).
   text: "jug_01M4S2R85WRAC5SV7CARH8RE7S",
   "required-mark": "jug_01M4S2R85WRAC5SV7CARH8RE7S",
-  // Spec 020 ③ (plan ③ D-27): the code block and the Markdown view are drawn as static text; the
-  // caption, the ring of the scroll region and the announcement of a copy of the kodbloko, the
-  // line of a quote and the indent of a list of the markdovido have no node.
-  legend: "jug_01M5D5JN34KAD7N6A822HW524H",
+  // Spec 020 ③ (plan ③ D-27): the ring of the scroll region and the announcement of a copy of the
+  // kodbloko have no node — Figma has no scroll region and no live region. Since Nachlese 8 ②
+  // (F-12) the caption of the kodbloko and the quote and indent of the markdovido are drawn.
   "scroll-ring": "jug_01M5D5JN34KAD7N6A822HW524H",
   announce: "jug_01M5D5JN34KAD7N6A822HW524H",
-  quote: "jug_01M5D5JN34KAD7N6A822HW524H",
-  indent: "jug_01M5D5JN34KAD7N6A822HW524H",
 };
 
 /**
@@ -591,6 +590,17 @@ const SEPARATOR_EXAMPLE_TEXT = {
   typography: "typography.body.1",
 } as const;
 
+/**
+ * The example of a Markdown view in Figma (Nachlese 8 ② F-12): the paragraph, the list and the
+ * quote of the Vitrino's Markdown (VITRINO_MARKDOWN), as the markdovido shows them — the marks of
+ * emphasis and code are the view's, the words are these.
+ */
+export const MARKDOWN_EXAMPLE = {
+  paragraph: "Ein Absatz mit Hervorhebung, Gewicht und STD-1.",
+  items: ["eins", "zwei"],
+  quote: "Ein Zitat.",
+} as const;
+
 /** The number of pages of the pagination's examples (Spec 015 ①, O-2: „von 10"). */
 export const PAGINATION_EXAMPLE_TOTAL = 10;
 
@@ -770,7 +780,9 @@ export type FigmaStructure =
   | "breadcrumb"
   | "upload"
   | "card"
-  | "avatar";
+  | "avatar"
+  | "codeblock"
+  | "markdown";
 
 /**
  * A radio group (Spec 010 ③, D-07) is a choice: the label (the question) above a column of
@@ -844,28 +856,30 @@ export const structureOf = (role: string, parts: readonly string[] = []): FigmaS
                               ? "separator"
                               : // Spec 014 ③ (plan ③ D-05): a heading and a paragraph are static
                                 // text, drawn as a badge is — the text in the role of the variant.
-                                // Spec 020 ③ (plan ③ D-27): a code block (role figure) and a
-                                // Markdown view (role document) too.
-                                role === "heading" ||
-                                  role === "paragraph" ||
-                                  role === "figure" ||
-                                  role === "document"
+                                role === "heading" || role === "paragraph"
                                 ? "badge"
-                                : // Spec 014 ④ (plan ④ D-06): the overlays — a tooltip, a menu, and
-                                  // a popover (a dialog without a backdrop: non-modal, with a trigger).
-                                  role === "tooltip"
-                                  ? "tooltip"
-                                  : role === "menu"
-                                    ? "menu"
-                                    : // Spec 014 ⑤ (plan ⑤ D-04): a disclosure (role group).
-                                      role === "group"
-                                      ? "disclosure"
-                                      : // Spec 015 ③ (plan ③ D-05): a card (role article) — the
-                                        // surface with the media and the body: heading,
-                                        // content, the meta row and the actions.
-                                        role === "article"
-                                        ? "card"
-                                        : "control";
+                                : // Nachlese 8 ② (F-12): a code block (role figure) is its caption,
+                                  // the code in the code role and the copy button; a Markdown view
+                                  // (role document) a paragraph, a list and a quote.
+                                  role === "figure"
+                                  ? "codeblock"
+                                  : role === "document"
+                                    ? "markdown"
+                                    : // Spec 014 ④ (plan ④ D-06): the overlays — a tooltip, a menu, and
+                                      // a popover (a dialog without a backdrop: non-modal, with a trigger).
+                                      role === "tooltip"
+                                      ? "tooltip"
+                                      : role === "menu"
+                                        ? "menu"
+                                        : // Spec 014 ⑤ (plan ⑤ D-04): a disclosure (role group).
+                                          role === "group"
+                                          ? "disclosure"
+                                          : // Spec 015 ③ (plan ③ D-05): a card (role article) — the
+                                            // surface with the media and the body: heading,
+                                            // content, the meta row and the actions.
+                                            role === "article"
+                                            ? "card"
+                                            : "control";
 
 /**
  * The neutral word every label template shows, per a11y role (M-3; Maintainer, F14, 2026-10-13,
@@ -917,8 +931,9 @@ const LABEL_DEFAULTS: Readonly<Record<string, string>> = {
   heading: "Überschrift",
   paragraph: "Text",
   // Spec 020 ③ (plan ③ D-27): a code block shows code, a Markdown view running text. Proposals
-  // for the maintainer to confirm; no Jugxo created here.
-  figure: "Code",
+  // for the maintainer to confirm; no Jugxo created here. Nachlese 8 ② (F-12): the code block's
+  // label writes its code — the Vitrino's command.
+  figure: VITRINO_SHORT_COMMAND,
   document: "Text",
   // Spec 014 ④ (plan ④ D-06): a tooltip is a short hint; the label of a menu names its trigger,
   // which offers more actions (the Modelo's own words, a11y.texts label-empty). Proposals.
@@ -1034,6 +1049,16 @@ export interface FigmaComponentSet {
   set: string;
   /** How the plugin draws the variants (Spec 009, D-09); a plan without it is a control. */
   structure?: FigmaStructure;
+  /** A code block's words (Nachlese 8 ② F-12): its caption, its code, the copy button. */
+  codeblock?: { caption: string; code: string; copy: string };
+  /** A Markdown view's example (Nachlese 8 ② F-12): a paragraph, a list and a quote. */
+  markdown?: { paragraph: string; items: string[]; quote: string };
+  /** The role its example texts are bound to (the running text's, like a separator's examples). */
+  markdownTexts?: {
+    bindings: Record<string, string>;
+    paints: Record<string, FigmaPaint>;
+    font?: { family: string; style: string; families?: string[] };
+  };
   /**
    * The default text of every text node of a field besides the label (F-4); of a toggle, of its
    * error (Spec 010 ②, D-09: the word the kampo's field shows).
@@ -1471,65 +1496,170 @@ export interface FigmaPlan {
   sxablonoj?: FigmaSxablono[];
 }
 
-/** An example frame of a Sxablono in the plan (Spec 020, G2). */
+/** An example frame of a Sxablono in the plan (Spec 020, G2; Nachlese 8 ② F-9 to F-11). */
 export interface FigmaSxablono {
   name: string;
   description: string;
+  /** How the regions stand, as on the web: rows and columns of named frames, regions as leaves. */
+  layout: FigmaSxablonoBox;
   regions: {
     name: string;
     direction: "HORIZONTAL" | "VERTICAL";
-    items: { set?: string; props?: Record<string, string>; text?: string }[];
+    items: FigmaSxablonoItem[];
   }[];
+}
+
+/** A row or a column of an example frame: a frame of its name holding boxes and regions. */
+export interface FigmaSxablonoBox {
+  name: string;
+  direction: "HORIZONTAL" | "VERTICAL";
+  children: (string | FigmaSxablonoBox)[];
+}
+
+/**
+ * What stands in a region: an instance of a set (the variant whose props match, its label the
+ * text, its BOOLEAN properties the toggles) or a word.
+ */
+export interface FigmaSxablonoItem {
+  set?: string;
+  props?: Record<string, string>;
+  text?: string;
+  toggles?: Record<string, boolean>;
 }
 
 /** The frame of the Sxablonoj in the section, beside the frame of the sets (Spec 020, E3). */
 export const FIGMA_SXABLONO_FRAME = "Sxablonoj";
 
-/** The words of the regions in the example frames (the Vitrino's, one source for both pictures). */
-const SXABLONO_WORDS: Readonly<Record<string, string>> = {
-  brand: "Fundamento",
-  principal: "Erika Mustermann",
-  notices: "Gespeichert.",
-  title: "Standards",
-  badges: "Gültig",
-  subtitle: "Alle Standards des Projekts.",
-  actions: "Bearbeiten",
-  main: VITRINO_CONTENT_TEXT,
-  sections: VITRINO_CONTENT_TEXT,
+/**
+ * The examples of the regions (Nachlese 8 ② F-10, F-11): what the Vitrino's example of each
+ * Sxablono holds there, in its words — a test reads every word in the Vitrino's section. A region
+ * the Vitrino leaves empty (the problems of the form) is not drawn either. The menu is closed.
+ */
+const SXABLONO_EXAMPLES: Readonly<Record<string, readonly FigmaSxablonoItem[]>> = {
+  "sxelo/brand": [{ text: "Fundamento" }],
+  "sxelo/principal": [{ text: "Erika Mustermann" }],
+  "sxelo/nav": [{ set: "navigado" }],
+  "sxelo/notices": [{ set: "avizo", props: { intent: "success" }, text: "Gespeichert." }],
+  "sxelo/main": [
+    { set: "titolo", props: { level: "1" }, text: "Standards" },
+    { set: "teksto", text: "Alle Standards des Projekts." },
+  ],
+  "pagxo/title": [{ set: "titolo", props: { level: "1" }, text: "Standards" }],
+  "pagxo/badges": [
+    { set: "insigno", props: { intent: "success" }, text: "Gültig" },
+    { set: "insigno", text: "Pflicht" },
+  ],
+  "pagxo/subtitle": [{ set: "teksto", text: "Alle Standards des Projekts." }],
+  "pagxo/actions": [
+    { set: "butono", props: { emphasis: "high" }, text: "Bearbeiten" },
+    { set: "menuo", text: "Weitere Aktionen", toggles: { open: false } },
+  ],
+  "pagxo/sections": [
+    { set: "titolo", props: { level: "2" }, text: "Geltung" },
+    { set: "teksto", text: "Gilt in allen Projekten." },
+  ],
+  "formularo/fields": [{ set: "kampo", props: { kind: "password" }, text: "Token" }],
+  "formularo/actions": [
+    { set: "butono", props: { emphasis: "high", type: "submit" }, text: "Anmelden" },
+  ],
+  "filtrilo/fields": [
+    { set: "elektilo", text: "Status" },
+    { set: "kampo", props: { kind: "search" }, text: "Suche" },
+  ],
+  "filtrilo/actions": [{ set: "butono", props: { emphasis: "low" }, text: "Filter zurücksetzen" }],
+  "filtrilo/status": [{ text: "3 von 7 Standards" }],
+  "redaktilo/field": [{ set: "tekstareo", props: { kind: "code" }, text: "Quelltext" }],
+  "redaktilo/preview": [{ set: "markdovido" }],
 };
 
+/** The regions that stand in a row on the web (sxablono-template): the rest are columns. */
+function rowRegionsOf(entry: LoadedSxablono): readonly string[] {
+  return [
+    "header",
+    "head",
+    "heading",
+    "badges",
+    "actions",
+    "principal",
+    ...(entry.skemo.a11y.landmarks.includes("search") ? ["fields", "footer"] : []),
+  ];
+}
+
 /**
- * The example frame of a Sxablono (Spec 020, G2, E3): per region the first Ero it accepts as an
- * instance — with the props the region asks for, and for a region with one primary action the
- * primary butono beside the last Ero it accepts (the menu) — or, for a region of text or of any
- * content, its word.
+ * The layout of an example frame (Nachlese 8 ② F-9), by the rules of the web's markup
+ * (sxablonoMarkup): the frame of an application has its head row of the regions before the
+ * navigation; a page its head — the title with its badges and the subtitle beside the actions —
+ * over the sections; a filter bar its fields over the footer of actions and count; an editor its
+ * field beside its preview; any other Sxablono its regions in a column. Only regions with an
+ * example stand in it.
+ */
+function sxablonoLayoutOf(
+  entry: LoadedSxablono,
+  shown: (name: string) => boolean,
+): FigmaSxablonoBox {
+  const { regions, a11y } = entry.skemo;
+  const names = regions.map((region) => region.name).filter(shown);
+  const box = (
+    name: string,
+    direction: FigmaSxablonoBox["direction"],
+    children: (string | FigmaSxablonoBox)[],
+  ): FigmaSxablonoBox => ({ name, direction, children });
+  if (a11y.landmarks.includes("banner") && a11y.landmarks.includes("main")) {
+    const all = regions.map((region) => region.name);
+    const navAt = all.indexOf("nav");
+    const head = all.slice(0, navAt === -1 ? 2 : navAt).filter(shown);
+    return box("frame", "VERTICAL", [
+      box("header", "HORIZONTAL", head),
+      ...names.filter((name) => !head.includes(name)),
+    ]);
+  }
+  if (a11y.focus !== undefined && names.includes("actions")) {
+    const lead = names.filter((name) => name === a11y.focus || name === "badges");
+    const below: string[] = names.filter((name) => name === "subtitle");
+    const after = names.filter(
+      (name) => !lead.includes(name) && !below.includes(name) && name !== "actions",
+    );
+    return box("frame", "VERTICAL", [
+      box("head", "HORIZONTAL", [
+        box("lead", "VERTICAL", [box("heading", "HORIZONTAL", lead), ...below]),
+        "actions",
+      ]),
+      ...after,
+    ]);
+  }
+  if (a11y.landmarks.includes("search")) {
+    const footer: string[] = names.filter((name) => name === "status" || name === "actions");
+    return box("frame", "VERTICAL", [
+      ...names.filter((name) => !footer.includes(name)),
+      box("footer", "HORIZONTAL", footer),
+    ]);
+  }
+  if (regions.some((region) => region.accepts?.includes("markdovido") === true)) {
+    return box("frame", "HORIZONTAL", names);
+  }
+  return box("frame", "VERTICAL", names);
+}
+
+/**
+ * The example frame of a Sxablono (Spec 020, G2, E3; Nachlese 8 ② F-9 to F-11): the layout of
+ * the web, the regions as named frames with the Vitrino's example in them — instances of the Ero
+ * sets with their words, or a word — and never the name of a region as a visible word.
  */
 function sxablonoFrameOf(entry: LoadedSxablono, sets: ReadonlySet<string>): FigmaSxablono {
+  const itemsOf = (region: string): FigmaSxablonoItem[] =>
+    (SXABLONO_EXAMPLES[`${entry.sxablono.name}/${region}`] ?? [])
+      .filter((item) => item.set === undefined || sets.has(item.set))
+      .map((item) => structuredClone(item) as FigmaSxablonoItem);
+  const rows = rowRegionsOf(entry);
   return {
     name: entry.sxablono.name,
     description: entry.uzo?.purpose ?? entry.sxablono.description,
-    regions: entry.skemo.regions.map((region) => {
-      const word = SXABLONO_WORDS[region.name] ?? region.name;
-      const eroj = (region.accepts ?? []).filter((name) => sets.has(name));
-      const props = Object.fromEntries(
-        Object.entries(region.props ?? {}).map(([key, value]) => [key, String(value)]),
-      );
-      const first = eroj[0];
-      const items =
-        region.accepts === undefined || region.accepts[0] === "text" || first === undefined
-          ? [{ text: word }]
-          : region.primary !== undefined && eroj.length > 1
-            ? [
-                { set: first, props: { ...props, emphasis: "high" }, text: word },
-                { set: eroj[eroj.length - 1] ?? first },
-              ]
-            : [{ set: first, ...(Object.keys(props).length === 0 ? {} : { props }), text: word }];
-      return {
-        name: region.name,
-        direction: region.max === undefined && region.default !== true ? "HORIZONTAL" : "VERTICAL",
-        items,
-      } as FigmaSxablono["regions"][number];
-    }),
+    layout: sxablonoLayoutOf(entry, (name) => itemsOf(name).length > 0),
+    regions: entry.skemo.regions.map((region) => ({
+      name: region.name,
+      direction: rows.includes(region.name) ? "HORIZONTAL" : "VERTICAL",
+      items: itemsOf(region.name),
+    })),
   };
 }
 
@@ -1759,11 +1889,18 @@ function dimensiojOf(modelo: Modelo): { name: string; modes: string[]; defaultMo
   });
 }
 
-/** The Dimensioj whose sets define `token`, in priority order (ascending). */
+/**
+ * The Dimensioj whose sets define `token`, in priority order (ascending). A token of the core is
+ * one every Aspekto sets (FR-10, Spec 001 D-04: every brand but the reference overrides every core
+ * token, the reference's values live in core): it lives in the collection aspekto whatever brands
+ * the build has (Nachlese 8 ②), so a build of komuna alone and a build with the test brands
+ * place it alike, and the guard of the plugin never sees it move.
+ */
 function dimensiojOfToken(modelo: Modelo, token: string): string[] {
   const names = new Set<string>();
   for (const set of modelo.setoj) {
     if (set.tokens[token] === undefined) continue;
+    if (set.name === CORE_SET_NAME) names.add(ASPEKTO_DIMENSIO);
     for (const kondicxo of set.kondicxoj) names.add(kondicxo.dimensio);
   }
   return modelo.dimensioj.map((dimensio) => dimensio.name).filter((name) => names.has(name));
@@ -1940,6 +2077,14 @@ function derivedRadiusVariables(
         ),
       )
       .map((dimensio) => dimensio.name);
+    // Nachlese 8 ②: the sum of core tokens is a brand's like its parts (FR-10), whatever brands
+    // the build compares — so a build of komuna alone places it in aspekto too.
+    if (!dims.includes(ASPEKTO_DIMENSIO) && dimensioj.some((one) => one.name === ASPEKTO_DIMENSIO))
+      dims.unshift(ASPEKTO_DIMENSIO);
+    dims.sort(
+      (a, b) =>
+        dimensioj.findIndex((one) => one.name === a) - dimensioj.findIndex((one) => one.name === b),
+    );
     const add = (collection: string, variable: FigmaVariable) => {
       out.set(collection, [...(out.get(collection) ?? []), variable]);
     };
@@ -2584,8 +2729,9 @@ function componentSetOf(
         }
       }
     }
-    // The texts of a separator's examples (Nachlese 4 N-6) in the running text's font.
-    if (structure === "separator") {
+    // The texts of a separator's examples (Nachlese 4 N-6) and of a Markdown view's example
+    // (Nachlese 8 ② F-12) in the running text's font.
+    if (structure === "separator" || structure === "markdown") {
       need(fontOf(tokens[SEPARATOR_EXAMPLE_TEXT.typography]?.value), assignment);
     }
   }
@@ -2787,12 +2933,30 @@ function componentSetOf(
   // Spec 015 ③ (plan ③ D-11): an avatar shows its picture where it has one and loads it — a
   // BOOLEAN property `image` shows the stand-in over the initials, false by default (the
   // picture prop has no default); no prop of the Skemo either.
+  // Nachlese 8 ② (F-12): copyable shows the copy button of a code block — a part of the Figma
+  // Celo (the web's butono), not of the Skemo; (F-9) a menu's list shows by the BOOLEAN open,
+  // true in the set (its variants show the states of the entries), false where an example closes
+  // it.
+  const ownToggles =
+    structure === "codeblock" && skemo.props.some((prop) => prop.name === "copyable")
+      ? [
+          {
+            property: "copyable",
+            part: "copy",
+            defaultValue: skemo.props.find((prop) => prop.name === "copyable")?.default === true,
+          },
+        ]
+      : structure === "menu" && skemo.props.some((prop) => prop.name === "open")
+        ? [{ property: "open", part: "surface", defaultValue: true }]
+        : [];
   const toggles =
-    structure === "card" && skemo.slots.some((slot) => slot.name === "media")
-      ? [...propToggles, { property: "media", part: "media", defaultValue: true }]
-      : structure === "avatar" && skemo.parts.image !== undefined
-        ? [...propToggles, { property: "image", part: "image", defaultValue: false }]
-        : propToggles;
+    ownToggles.length > 0
+      ? [...propToggles, ...ownToggles]
+      : structure === "card" && skemo.slots.some((slot) => slot.name === "media")
+        ? [...propToggles, { property: "media", part: "media", defaultValue: true }]
+        : structure === "avatar" && skemo.parts.image !== undefined
+          ? [...propToggles, { property: "image", part: "image", defaultValue: false }]
+          : propToggles;
   // The table of a table's set and the entries of a list's (Spec 011 ④): the Vitrino's words.
   const table =
     structure === "table"
@@ -2949,6 +3113,30 @@ function componentSetOf(
     ...(extraAxes.length === 0 ? {} : { extraAxes }),
     ...(structure === "separator"
       ? { separator: { length: parityPx(base[SEPARATOR_LENGTH]?.value) } }
+      : {}),
+    // Nachlese 8 ② (F-12): the Vitrino's command with its caption and the Modelo's word of the
+    // copy button; the Markdown view's example in the role of running text.
+    ...(structure === "codeblock"
+      ? {
+          codeblock: {
+            caption: VITRINO_SLOT_TEXTS.caption ?? "",
+            code: VITRINO_SHORT_COMMAND,
+            copy: skemo.a11y.texts?.copyable?.de ?? "",
+          },
+        }
+      : {}),
+    ...(structure === "markdown"
+      ? {
+          markdown: { ...MARKDOWN_EXAMPLE, items: [...MARKDOWN_EXAMPLE.items] },
+          markdownTexts: {
+            bindings: {
+              "label.color": variableName(SEPARATOR_EXAMPLE_TEXT.color),
+              "label.typography": variableName(SEPARATOR_EXAMPLE_TEXT.typography),
+            },
+            paints: separatorTextPaint === undefined ? {} : { "label.color": separatorTextPaint },
+            ...(separatorTextFont === undefined ? {} : { font: separatorTextFont }),
+          },
+        }
       : {}),
     ...(sign === undefined ? {} : { sign }),
     ...(options === undefined ? {} : { entry: options }),
