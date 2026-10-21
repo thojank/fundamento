@@ -139,7 +139,8 @@ describe("avizo in the repo Modelo (section ③, G1, G2)", () => {
 describe("the Uzo of the avizo (section ③, G5)", () => {
   it("states the purpose, requires the message, lets actions hold butono and ligilo; size container, wrap allowed", () => {
     expect(uzo?.purpose).toBe(
-      "Tells the person in the flow of the page what happened or what to watch for: saved, could not save, import not confirmed.",
+      // Nachlese 7 ① A-7: closing hides the notice; the element is not removed.
+      "Tells the person in the flow of the page what happened or what to watch for: saved, could not save, import not confirmed. Closed, it hides itself and stays in the document; the application removes it on dismiss if it wants.",
     );
     expect(uzo?.slots).toEqual({
       heading: { accepts: ["text"], max: 1, nesting: 0 },

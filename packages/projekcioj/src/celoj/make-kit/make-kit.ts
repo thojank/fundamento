@@ -106,20 +106,71 @@ function tokenTable(input: CeloInput, prefix: string, utility = true): string {
   return ["| Token | CSS | Tailwind | Use |", "|---|---|---|---|", ...rows].join("\n");
 }
 
+type EntrySlot = LoadedEro["skemo"]["slots"][number];
+
+/**
+ * One entry of a slot of entries in the shape the element reads (Nachlese 7 ① A-3), as the
+ * Vitrino writes it: a link child of a navigation (the current page of a breadcrumb, its last
+ * level, is text), a child without a slot in a default slot (the tabs), else an element in the
+ * named slot (the options).
+ */
+function entryMarkup(
+  skemo: LoadedEro["skemo"],
+  slot: EntrySlot,
+  key: string,
+  text: string,
+  last = false,
+): string {
+  if (skemo.a11y.role === "navigation") {
+    if (skemo.parts.separator !== undefined && last)
+      return `<span data-page="${key}">${text}</span>`;
+    return `<a href="/${key}" data-page="${key}">${text}</a>`;
+  }
+  return `<data${slot.default === true ? "" : ` slot="${slot.name}"`} value="${key}">${text}</data>`;
+}
+
+/**
+ * How the entries of a slot are written, as one sentence of the guideline (Spec 010 ③, E7;
+ * Nachlese 7 ① A-3: the shape the element reads, not one shape for all).
+ */
+function entrySentence(skemo: LoadedEro["skemo"], slot: EntrySlot): string {
+  const equals = slot.entry?.equals ?? "";
+  const example = entryMarkup(skemo, slot, "express", "Express");
+  if (skemo.a11y.role === "navigation") {
+    // A pagination (Spec 015 ①) draws its pages itself: it has no entries as children.
+    if (skemo.parts.ellipsis !== undefined)
+      return ` It draws its pages itself from the prop \`${equals}\` and the props below; it takes no entries as children.`;
+    if (skemo.parts.separator !== undefined)
+      return ` Each level is a link child: \`${example}\`; the last level is the current page, as text: \`${entryMarkup(skemo, slot, "express", "Express", true)}\`.`;
+    return ` Each entry is a link child: \`${example}\`; the entry whose \`data-page\` is \`${equals}\` is current.`;
+  }
+  if (slot.default === true) {
+    const noun = skemo.a11y.role === "tablist" ? "tab" : "entry";
+    return ` Each ${noun} is a child without a slot: \`${example}\`; the ${noun} whose value is \`${equals}\` is ${slot.entry?.key ?? "chosen"}.`;
+  }
+  return ` Each option is an element in the slot \`${slot.name}\` with its value: \`${example}\`; the option whose value is \`${equals}\` is chosen.`;
+}
+
 /** The example instances of a Jugxo as one line of HTML, with its kialo. */
-function exampleBlock(jugxo: Jugxo, tag: string): string {
+function exampleBlock(jugxo: Jugxo, tag: string, skemo: LoadedEro["skemo"]): string {
   const instances = (jugxo.ekzemplo?.instances ?? [])
     .map((instance) => {
       const attributes = Object.entries(instance.props)
         .map(([key, value]) => (value === true ? ` ${key}` : ` ${key}="${String(value)}"`))
         .join("");
-      // The options of a radio group (Spec 010 ③): one element per entry, its value its position.
+      // The entries of a slot (Spec 010 ③): one element per entry, its value its position, in the
+      // shape the element reads; the text of a named slot (help, error, Nachlese 7 ① A-5) is a
+      // span in its slot — an example shows what it says.
       const entries = Object.entries(instance.texts ?? {})
-        .flatMap(([slot, texts]) =>
-          Array.isArray(texts)
-            ? texts.map((text, index) => `<data slot="${slot}" value="${index + 1}">${text}</data>`)
-            : [],
-        )
+        .flatMap(([name, texts]) => {
+          const slot = skemo.slots.find((candidate) => candidate.name === name);
+          if (slot === undefined) return [];
+          if (Array.isArray(texts))
+            return texts.map((text, index) =>
+              entryMarkup(skemo, slot, String(index + 1), text, index === texts.length - 1),
+            );
+          return slot.default === true ? [texts] : [`<span slot="${name}">${texts}</span>`];
+        })
         .join("");
       return `<${tag}${attributes}>${instance.label ?? ""}${entries}</${tag}>`;
     })
@@ -285,7 +336,7 @@ function componentGuideline(
       (jugxo) =>
         jugxo.ekzemplo !== undefined && "ero" in jugxo.ref && jugxo.ref.ero === entry.ero.id,
     )
-    .map((jugxo) => exampleBlock(jugxo, tag))
+    .map((jugxo) => exampleBlock(jugxo, tag, skemo))
     .join("\n\n");
   const states = skemo.states.map((state) => `\`${state}\``).join(", ");
   // Spec 008 (D-12): no button wording for every Ero. The states a prop switches are the boolean
@@ -309,14 +360,24 @@ function componentGuideline(
   // A slot whose entries are options (Spec 010 ③, E7): how an option is written, and which is
   // chosen — the one whose value is the prop the Skemo names.
   const options = skemo.slots
-    .flatMap((slot) =>
-      slot.entry === undefined
-        ? []
-        : [
-            ` Each option is an element in the slot \`${slot.name}\` with its value: \`<data slot="${slot.name}" value="express">Express</data>\`; the option whose value is \`${slot.entry.equals}\` is chosen.`,
-          ],
-    )
+    .flatMap((slot) => (slot.entry === undefined ? [] : [entrySentence(skemo, slot)]))
     .join("");
+  // Nachlese 7 ① A-7: what dismiss does to the element (it hides, it is not removed) and how an
+  // application removes it — the contract stands, the guideline says it.
+  const dismiss = skemo.props.some((prop) => prop.name === "dismissible")
+    ? `
+## Dismiss
+
+With \`dismissible\` the ${entry.ero.name} shows a close button. Closing says \`dismiss\` (cancelable: \`preventDefault()\` keeps it open), then hides the element, keeps it in the document and moves the focus to the next focusable element. The application removes it if it wants — after the event, so the focus has moved on:
+
+\`\`\`js
+document.querySelector("${tag}").addEventListener("dismiss", (event) => {
+  const notice = event.currentTarget;
+  queueMicrotask(() => notice.remove());
+});
+\`\`\`
+`
+    : "";
   return `# ${name}
 
 ${entry.ero.description}
@@ -331,7 +392,7 @@ the component${iconOnly === "" ? "; it always shows." : `;${iconOnly}`}${target}
 ${props}
 
 States: ${states}. ${origin}; never style them yourself.
-
+${dismiss}
 ## Which ${entry.ero.name} for which goal
 
 | Goal | Words | Use | Rule |
@@ -387,9 +448,14 @@ function guidelines(input: CeloInput, aspekto: string): GeneratedFile[] {
     )
     .join("\n");
   // Spec 011 ② (G7, plan ② D-14): every confirmation before an action that cannot be undone comes
-  // from the dialog, whose heading names the decision; never a second button that asks.
+  // from the dialog, whose heading names the decision; never a second button that asks. The
+  // popover shares the role (Spec 014 ④): one sentence per goal names the modal dialog alone
+  // (Nachlese 7 ① A-4 — the filter by role gave the sentence twice, once with the popover).
   const dialogLines = eroj
-    .filter((entry) => entry.skemo.a11y.role === "dialog" && entry.uzo !== undefined)
+    .filter(
+      (entry) =>
+        entry.skemo.a11y.role === "dialog" && !isPopover(entry.skemo) && entry.uzo !== undefined,
+    )
     .map(
       (entry) =>
         `- Every confirmation before an action that cannot be undone is a \`<${componentName(entry.ero)}>\` whose heading names the decision; never a second button that asks.`,
@@ -418,7 +484,9 @@ function guidelines(input: CeloInput, aspekto: string): GeneratedFile[] {
   // Spec 010 ③ (G7, plan ③ D-11): a choice of one among a few visible options comes from the radio
   // group; six or more go into a list — named once the Modelo has one (elektilo, Spec 010 ④, plan ④
   // D-11), until then the kit says that it has none.
-  const listName = eroj.find((entry) => entry.skemo.a11y.role === "combobox");
+  const listName = eroj.find(
+    (entry) => entry.skemo.a11y.role === "combobox" && !isSuggest(entry.skemo),
+  );
   const radioLines = eroj
     .filter((entry) => entry.skemo.a11y.role === "radiogroup" && entry.uzo !== undefined)
     .map(
@@ -428,10 +496,14 @@ function guidelines(input: CeloInput, aspekto: string): GeneratedFile[] {
     .join("\n");
   // Spec 010 ④ (G7, plan ④ D-11): a choice of one among many options comes from the select, whose
   // list is the platform's; up to five visible options from the radio group, named where the
-  // Modelo has one. Generated from every Ero with role combobox.
+  // Modelo has one. Generated from every Ero with role combobox but the field with suggestions,
+  // which shares the role (Spec 014 ⑤) and has its own sentence (Nachlese 7 ① A-4).
   const radioName = eroj.find((entry) => entry.skemo.a11y.role === "radiogroup");
   const selectLines = eroj
-    .filter((entry) => entry.skemo.a11y.role === "combobox" && entry.uzo !== undefined)
+    .filter(
+      (entry) =>
+        entry.skemo.a11y.role === "combobox" && !isSuggest(entry.skemo) && entry.uzo !== undefined,
+    )
     .map(
       (entry) =>
         `- A choice of one among many options is an \`<${componentName(entry.ero)}>\` list${radioName === undefined ? "" : `; up to five visible options are an \`<${componentName(radioName.ero)}>\``}.`,

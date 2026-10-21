@@ -8,6 +8,7 @@ import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
+  AGORDILO_VERSION,
   type Agordo,
   deriveAspekto,
   gestaltBasis,
@@ -28,8 +29,25 @@ const STUFE1: Stufe1 = JSON.parse(
 
 const sha256 = (text: string): string => createHash("sha256").update(text).digest("hex");
 
+/**
+ * The version stamps of a derivation (the Agordilo's and the Vortaro's) as stage 1 wrote them:
+ * the bytes compared are the derivation's, not the release's (Nachlese 7 ① A-8: 0.1.1 stamps
+ * 0.1.1, stage 1 on main ac5deb3 stamped 0.1.0).
+ */
+const STAGE1_VERSION = "0.1.0";
+const asStage1 = (text: string): string =>
+  text
+    .replaceAll(
+      new RegExp(
+        `("(?:agordilo|vortaro|version)": )"${AGORDILO_VERSION.replaceAll(".", "\\.")}"`,
+        "g",
+      ),
+      `$1"${STAGE1_VERSION}"`,
+    )
+    .replaceAll(`Agordilo ${AGORDILO_VERSION} (`, `Agordilo ${STAGE1_VERSION} (`);
+
 const hashes = (files: Record<string, string>): Record<string, string> =>
-  Object.fromEntries(Object.entries(files).map(([path, text]) => [path, sha256(text)]));
+  Object.fromEntries(Object.entries(files).map(([path, text]) => [path, sha256(asStage1(text))]));
 
 describe("calibration (G3): the standard sliders give the stage-1 derivation byte for byte", () => {
   it("the Agordo provo of stage 1 derives the package of stage 1 (main ac5deb3), every file", () => {
@@ -68,7 +86,7 @@ describe("calibration (G3): the standard sliders give the stage-1 derivation byt
     // aspekto.json carries the Agordo as its origin; without the fields of stage 2 it is stage 1's.
     const parsed = JSON.parse(aspekto ?? "{}");
     for (const field of ["form", "raum", "schrift", "ikono"]) delete parsed.agordilo.agordo[field];
-    expect(sha256(`${JSON.stringify(parsed, null, 2)}\n`)).toBe(stufe1Aspekto);
+    expect(sha256(asStage1(`${JSON.stringify(parsed, null, 2)}\n`))).toBe(stufe1Aspekto);
   });
 });
 

@@ -1,6 +1,6 @@
 {
   "name": "@fundamento/projekcioj",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Fundamento projections: every generator, one folder per Celo (CSS, Tailwind, Web Component, React, Figma, Code Connect, Make Kit).",
   "license": "MIT",
   "private": true,

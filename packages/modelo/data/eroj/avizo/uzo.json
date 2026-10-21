@@ -4,7 +4,7 @@
     "id": "uzo_01M51ZRGEPTH2CEY385GE1PB0K",
     "ero": "ero_01M51ZRFPHM8B0ED97V23SDRRJ",
     "skemo": "ske_01M51ZRG2K24R0RFTV8RPJMHBG",
-    "purpose": "Tells the person in the flow of the page what happened or what to watch for: saved, could not save, import not confirmed.",
+    "purpose": "Tells the person in the flow of the page what happened or what to watch for: saved, could not save, import not confirmed. Closed, it hides itself and stays in the document; the application removes it on dismiss if it wants.",
     "instead": [
       {
         "goal": "needs-decision",

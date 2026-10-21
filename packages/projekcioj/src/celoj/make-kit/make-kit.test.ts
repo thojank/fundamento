@@ -378,8 +378,8 @@ describe("Make Kit tarball (T018, clean room)", () => {
 });
 
 // The version of a kit is set from outside (release.yml, F25): a pre-release of the Modelo's
-// version (0.1.0-next.1), or — for the release itself (Spec 015 "Nach der Abnahme", Nachlese 5 ③)
-// — exactly the Modelo's version (0.1.0). Anything else is refused: it would publish under a
+// version (0.1.1-next.1), or — for the release itself (Spec 015 "Nach der Abnahme", Nachlese 5 ③)
+// — exactly the Modelo's version (0.1.1). Anything else is refused: it would publish under a
 // number the Modelo does not have.
 describe("the kit version comes from FUNDAMENTO_KIT_VERSION (release step, Nachlese 5 ③)", () => {
   if (!prepared.ok) throw new Error("core + ekzemplo must be valid");
@@ -405,8 +405,8 @@ describe("the kit version comes from FUNDAMENTO_KIT_VERSION (release step, Nachl
     expect(versionOf(MAKE_KIT_CELO.generate(withEnv(`${modelo}-next.5`)))).toBe(`${modelo}-next.5`);
   });
 
-  it("takes exactly the Modelo's version: the release itself (0.1.0)", () => {
-    expect(modelo).toBe("0.1.0");
+  it("takes exactly the Modelo's version: the release itself (0.1.1)", () => {
+    expect(modelo).toBe("0.1.1");
     const generated = MAKE_KIT_CELO.generate(withEnv(modelo));
     for (const aspekto of ASPEKTOJ) {
       const pkg = JSON.parse(
@@ -416,8 +416,8 @@ describe("the kit version comes from FUNDAMENTO_KIT_VERSION (release step, Nachl
     }
   });
 
-  it("refuses every other number — 0.2.0, 0.1.0.1, 0.2.0-next.0 — and names both allowed forms", () => {
-    for (const bad of ["0.2.0", "0.1.0.1", "0.2.0-next.0", "0.1.0-", "v0.1.0", "0.1.0 "]) {
+  it("refuses every other number — 0.2.0, 0.1.1.1, 0.2.0-next.0 — and names both allowed forms", () => {
+    for (const bad of ["0.2.0", "0.1.1.1", "0.2.0-next.0", "0.1.1-", "v0.1.1", "0.1.1 "]) {
       const attempt = () => MAKE_KIT_CELO.generate(withEnv(bad));
       expect(attempt, bad).toThrow(
         new RegExp(`FUNDAMENTO_KIT_VERSION=${bad.replaceAll(".", "\\.")}`),
@@ -849,6 +849,63 @@ describe("Make Kit and the avataro of Spec 015 ③", () => {
       expect(component).toContain("# Avataro");
       expect(component).toContain("`picture`");
       expect(component).toContain("presence-dot");
+    },
+  );
+});
+
+// Nachlese 7 ① (0.1.1): the guidelines answer as the element does (A-3, A-4, A-5, A-7).
+describe("Make Kit guidelines after Nachlese 7 ①", () => {
+  it.each(ASPEKTOJ)(
+    "%s: A-4 no two rules of Guidelines.md begin alike and name different Eroj",
+    (aspekto) => {
+      const lines = kit(aspekto, "guidelines/Guidelines.md")
+        .split("\n")
+        .filter((line) => line.startsWith("- ") && line.includes("`<"));
+      const byStart = new Map<string, Set<string>>();
+      for (const line of lines) {
+        const start = line.slice(0, line.indexOf("`<"));
+        const ero = /`<([A-Z][A-Za-z]*)>`/.exec(line)?.[1] ?? "";
+        byStart.set(start, new Set([...(byStart.get(start) ?? []), ero]));
+      }
+      const doubles = [...byStart]
+        .filter(([, eroj]) => eroj.size > 1)
+        .map(([start, eroj]) => `${start}${[...eroj].join(" / ")}`);
+      expect(doubles).toEqual([]);
+      const text = kit(aspekto, "guidelines/Guidelines.md");
+      expect(text).toContain(
+        "- Every confirmation before an action that cannot be undone is a `<Dialogo>`",
+      );
+      expect(text).not.toContain("is a `<Sxvebilo>` whose heading names the decision");
+      expect(text).toContain("- A choice of one among many options is an `<Elektilo>` list");
+      expect(text).not.toContain("is an `<Kompletigilo>` list");
+    },
+  );
+
+  it.each(ASPEKTOJ)(
+    "%s: A-3 langetaro and navigado describe the entries in the form of the element",
+    (aspekto) => {
+      const tabs = kit(aspekto, "guidelines/components/langetaro.md");
+      const nav = kit(aspekto, "guidelines/components/navigado.md");
+      expect(tabs).not.toContain('slot="tabs"');
+      expect(tabs).toContain(
+        'Each tab is a child without a slot: `<data value="express">Express</data>`',
+      );
+      expect(nav).not.toContain('slot="items"');
+      expect(nav).toContain(
+        'Each entry is a link child: `<a href="/express" data-page="express">Express</a>`',
+      );
+    },
+  );
+
+  it.each(ASPEKTOJ)(
+    "%s: A-7 the avizo says that dismiss hides it, and how an application removes it",
+    (aspekto) => {
+      const text = kit(aspekto, "guidelines/components/avizo.md");
+      expect(text).toContain("## Dismiss");
+      expect(text).toContain("keeps it in the document");
+      // Removed after the event, so the element's own focus move comes first (Nachlese 7 ① A-7).
+      expect(text).toContain('addEventListener("dismiss", (event) => {');
+      expect(text).toContain("queueMicrotask(() => notice.remove());");
     },
   );
 });

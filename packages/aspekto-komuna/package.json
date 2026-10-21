@@ -1,6 +1,6 @@
 {
   "name": "@fundamento/aspekto-komuna",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Fundamento reference Aspekto komuna in the Aspekto package format (calm, neutral, no signature colour; Geist). Its values live in the core; this package holds its metadata, empty set and conjunction sets. Draws the Ikonaro from Phosphor Icons (regular, MIT) in ikonoj/. Contains no code.",
   "license": "MIT",
   "type": "module",

@@ -6,8 +6,8 @@
 # npm Trusted Publishing: the registry trusts this repository and this workflow file (OIDC), so no
 # publish token, no secret and no auth entry in .npmrc exists anywhere in this repository. The
 # version is an input (F25), in one of two forms (Nachlese 5 ③): a pre-release of the Modelo's
-# version (0.1.0-next.1) is published under the dist-tag `next`, the Modelo's version itself
-# (0.1.0: the release) under `latest`. The workflow only hands the version through; the script
+# version (0.1.1-next.1) is published under the dist-tag `next`, the Modelo's version itself
+# (0.1.1: the release) under `latest`. The workflow only hands the version through; the script
 # derives the tag from it, and the build refuses any other number.
 name: Release
 
@@ -22,7 +22,7 @@ on:
           - publish
         default: dry-run
       version:
-        description: "The version of the kits: a pre-release of the Modelo's version (e.g. 0.1.0-next.1, published under next) or the Modelo's version itself (0.1.0, published under latest)"
+        description: "The version of the kits: a pre-release of the Modelo's version (e.g. 0.1.1-next.1, published under next) or the Modelo's version itself (0.1.1, published under latest)"
         type: string
         required: true
 
