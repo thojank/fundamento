@@ -2710,3 +2710,89 @@ describe("Spec 020 ③ documentation (specs/020-sxablonoj-1)", () => {
     expect(own).toMatch(/rot `[0-9a-f]{7}`/);
   });
 });
+
+// Nachlese 8 ① (Briefing 2026-10-21): specs/022-nachlese-8 carries the briefing unchanged, a plan
+// and tasks with ① (Gvidanto, plugin name, 0.2.0), ② (Figma and Vitrino) and ③ (rule texts in
+// German); the acceptance result of Spec 020 lies beside its spec; the CHANGELOG has 0.2.0 with
+// the section of 0.1.1 merged into it.
+describe("Nachlese 8 ① documentation (specs/022-nachlese-8)", () => {
+  it("the briefing and the result are copied unchanged; plan ① carries the findings, the dialogs and the guide; the CHANGELOG 0.2.0", () => {
+    const briefing = read("specs/022-nachlese-8/briefing.md");
+    expect(createHash("sha256").update(briefing).digest("hex")).toBe(
+      "195417d7b580749509155f0366bb043cd09e034d0a59d612754fe906f90ba350",
+    );
+    const result = read("specs/020-sxablonoj-1/ergebnis-2026-10-21.md");
+    expect(createHash("sha256").update(result).digest("hex")).toBe(
+      "832fcbfd7e3e44b0eb23aa9d3b2a7e49fff6de6a3c058ede0d1104c1b46d2041",
+    );
+    const plan = read("specs/022-nachlese-8/plan.md");
+    const tasks = read("specs/022-nachlese-8/tasks.md");
+    for (const text of [plan, tasks]) {
+      expect(text).toContain("## ① Gvidanto, Plugin-Name, 0.2.0");
+      expect(text).toContain("## ② Figma und Vitrino");
+      expect(text).toContain("## ③ Regeltexte deutsch");
+    }
+    const first = plan.slice(
+      plan.indexOf("## ① Gvidanto, Plugin-Name, 0.2.0"),
+      plan.indexOf("## ② Figma und Vitrino"),
+    );
+    for (const heading of [
+      "### Zusammenfassung",
+      "### Entwurfsentscheidungen",
+      "### Gekippte Dialoge",
+      "### Abweichungen",
+      "### Befunde / Mankoj",
+      "### Offen (für den Maintainer)",
+      "### Messanleitung",
+    ]) {
+      expect(first, heading).toContain(heading);
+    }
+    for (const term of [
+      "G-1",
+      "D-11",
+      "F-1",
+      "F-13",
+      "Anmeldung",
+      "gvidanto.json",
+      "0.2.0",
+      "release.yml",
+      "dry-run",
+      "latest",
+      "/Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/nachlese8/mess/",
+      "echo FERTIG",
+      "file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/",
+    ]) {
+      expect(first, term).toContain(term);
+    }
+    expect(first).not.toContain("ciferecigo");
+    const own = tasks.slice(
+      tasks.indexOf("## ① Gvidanto, Plugin-Name, 0.2.0"),
+      tasks.indexOf("## ② Figma und Vitrino"),
+    );
+    expect(own).toContain("**T2201");
+    expect(own).toMatch(/rot `[0-9a-f]{7}`/);
+    const changelog = read("CHANGELOG.md");
+    expect(changelog).not.toContain("## 0.1.1");
+    expect(changelog).not.toContain("## 0.2.0 – geplant");
+    const release = changelog.slice(changelog.indexOf("## 0.2.0"));
+    for (const term of [
+      "A-1",
+      "A-7",
+      "B-1",
+      "B-10",
+      "sxelo",
+      "pagxo",
+      "formularo",
+      "filtrilo",
+      "redaktilo",
+      "kodbloko",
+      "markdovido",
+      "list_sxablonoj",
+      "get_sxablono",
+      "Spec 019",
+      "Nachlese 8",
+      "ESM",
+    ])
+      expect(release, term).toContain(term);
+  });
+});

@@ -41,15 +41,16 @@ describe("workspace packages (plan D-01)", () => {
     }
   });
 
-  // Nachlese 7 ① (A-8): the fault release 0.1.1, prepared; published after the acceptance.
-  it("puts every package and the workspace root on version 0.1.1", () => {
+  // Nachlese 7 ① (A-8) prepared 0.1.1; Nachlese 8 ① (decision a of the maintainer, 2026-10-21):
+  // 0.1.1 is not published, the release is 0.2.0 — prepared, published after the acceptance.
+  it("puts every package and the workspace root on version 0.2.0", () => {
     for (const dir of Object.keys(PACKAGES)) {
-      expect(manifest(dir).version, dir).toBe("0.1.1");
+      expect(manifest(dir).version, dir).toBe("0.2.0");
     }
     const root = JSON.parse(
       readFileSync(new URL("../package.json", packagesDir), "utf8"),
     ) as Manifest;
-    expect(root.version).toBe("0.1.1");
+    expect(root.version).toBe("0.2.0");
   });
 
   it("pins the MCP SDK v2 packages exactly (Spec 002 plan D-17)", () => {
