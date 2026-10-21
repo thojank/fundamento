@@ -30,7 +30,7 @@
 |---|---|
 | Commits ① | rot `9357257`, grün (Hash des grünen Stands, CI grün); dieser Eintrag im Folgecommit |
 | CI ① | (Lauf, Hash, Jobs und Zeiten) |
-| Tests lokal | Metiejo 91 in 9 Dateien (90 grün, 1 rot: Figma F-13 bis zum Rebase), CLI 75 (davon 3 neu), Modelo `workflow.test.ts` 36 grün; `pnpm lint` grün |
+| Tests lokal | Metiejo 91 in 9 Dateien (90 grün, 1 rot: Figma F-13 bis zum Rebase), Agordilo 11 Dateien, MCP 40 Dateien, CLI 7 Dateien (3 Tests neu), Modelo 161 Dateien grün (Workspace-Pin um `metiejo` ergänzt); `pnpm lint`, `pnpm check:tiparoj` (4 075 Dateien, keine Schrift bekannt) grün. Probe-Rebase auf `261021-nachlese-8-gvidanto-116ba2` (#95): ohne Konflikt, der Figma-Test (F-13) wird grün, nur die Paketversion von `metiejo` muss auf 0.2.0 |
 | Zeiten | `derivationBasis` 114 ms, `deriveAspekto` mit Prüfung 1 620 ms, Vorschau-Stylesheet ≈ 200 ms, Export (Paket, CSS, Figma) ≈ 4 s |
 | Katalog | 2 100 von 2 103 Familien, 6 Lizenzen (OFL-1.1 2 059, Apache-2.0 36, UFL-1.0 5, CC0-1.0 1, MIT 1, Unlicense 1), 20 Subsets ohne Zuordnung (B-4) |
 | M-4 | `check:tiparoj`: Export mit 33 Dateien und einer bekannten Schrift PASS; ein hineinkopiertes Muster FAIL mit Datei und Schrift, Exit 1 |
