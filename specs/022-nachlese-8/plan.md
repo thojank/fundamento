@@ -244,6 +244,17 @@ Behoben in der Vitrino: Im Werkstatt-Modus sind im Bedienbereich alle `--fm-moti
 
 Ohne Drosselung: 0 ms, 0 Long Tasks. Die Grenze von 50 ms im Test ist unverändert.
 
+**Zweite Ursache (nach CI-Lauf 39597245355).** Mit diesem Stand blieb die CI rot: 52 ms, 1 Long Task. Long Animation Frames zeigten, wo: Der lange Frame fällt auf das Ende einer Prüfung. `#finishCheck` ruft `#renderReport`, und das ersetzte die ganze Liste der Verstöße per `innerHTML`, mit allen Eroj darin (Insignoj, Butonoj). Bei jedem Wechsel entstanden so dutzende neue Schattenbäume, auch wenn sich kein Verstoß geändert hatte.
+
+Behoben in der Werkstatt: Die Liste wird je Eintrag abgeglichen. Ein unveränderter Verstoß behält sein Element; nur neue oder geänderte Einträge entstehen aus dem Template, entfallene werden entfernt. Sperre (`lock`) und Ansage (`say`) schreibt die Werkstatt nur, wenn sich ihr Wert ändert. Vergleich bei 2,8-facher Drosselung auf dem Entwicklungsrechner, abwechselnd A (ohne) und B (mit), je 50 Wechsel:
+
+| Serie | Last des Rechners | A: Läufe mit Long Task | B: Läufe mit Long Task |
+|---|---|---|---|
+| 1 | hoch (Load um 60) | 1 von 5 (52 ms) | 0 von 5 |
+| 2 | gering | 0 von 6 | 0 von 5 |
+
+Lokal lässt sich der Fehler also nur unter Last zeigen; maßgeblich ist die CI (T2230). Die Grenze bleibt 50 ms.
+
 ### Gekippte Dialoge
 
 | Dialog | vorher | jetzt | Jugxo |
@@ -258,7 +269,7 @@ Ohne Drosselung: 0 ms, 0 Long Tasks. Die Grenze von 50 ms im Test ist unverände
 2. **`open` des menuo ist im Set wahr**, obwohl die Skemo `false` vorgibt. Die Varianten des Sets zeigen die Zustände der Einträge, also die offene Liste. Das Beispiel schließt sie.
 3. **V-3 ändert auch die Anwendung.** Das Briefing sagt „in der Anwendung bleibt das Verhalten“. Ein Verhalten „volle Höhe“ gab es nicht; der Zusammenbruch der pagxo in einer umbrechenden Spalte trat in der Anwendung genauso auf. Behoben ist er überall.
 4. **V-4 mit sichtbarer Beschriftung** statt mit einem bloßen Abstand: Gleiche Tokens wie die Beschriftung des Feldes, also gleiche Höhe in jeder Marke und Dichte.
-5. **M5 in der Vitrino behoben**, nicht in den Tokens: Die Bewegungsdauer steht nur im Bedienbereich der Werkstatt auf 0 ms.
+5. **M5 in der Vitrino behoben**, nicht in den Tokens: Die Bewegungsdauer steht nur im Bedienbereich der Werkstatt auf 0 ms; der Bericht wird je Eintrag abgeglichen statt neu geschrieben.
 6. **Figma-Beispiele sind HUG**, nicht 720 px breit wie „mittel“: Der Aufbau folgt „mittel“, die Breite ihrem Inhalt.
 7. **Pins, die folgen:**
    - das Vorgabewort des kodbloko („pnpm fm mcp“)

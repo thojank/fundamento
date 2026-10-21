@@ -1212,22 +1212,32 @@ ${groupOf("ikonoj", "Icons", `<fm-elektilo id="fm-werkstatt-ikono-gewicht" value
       if (badge.getAttribute("intent") !== intent) badge.setAttribute("intent", intent);
       if (badge.textContent !== String(value)) badge.textContent = String(value);
     }
+    // Nachlese 8 ② (M5): a check replaces only the entries that changed. The whole list made anew
+    // created every entry's Eroj again — a frame of 50 ms on a runner half as fast.
     const list = byId("fm-werkstatt-malobservoj");
-    const markup = raporto.violations.map((violation) => this.#violationMarkup(violation)).join("");
-    if (markup !== this.#violationsMarkup) {
-      this.#violationsMarkup = markup;
-      list.innerHTML = markup;
-      for (const button of list.querySelectorAll<HTMLElement>("[data-fm-apliki]")) {
+    const items = raporto.violations.map((violation) => this.#violationMarkup(violation));
+    items.forEach((item, index) => {
+      if (this.#violationItems[index] === item && list.children[index] !== undefined) return;
+      const template = document.createElement("template");
+      template.innerHTML = item;
+      const entry = template.content.firstElementChild;
+      if (!(entry instanceof HTMLElement)) return;
+      for (const button of entry.querySelectorAll<HTMLElement>("[data-fm-apliki]")) {
         button.addEventListener("click", () => {
-          const index = Number(button.dataset.fmApliki);
-          const patch = this.state.raporto?.violations[index]?.apply;
+          const at = Number(button.dataset.fmApliki);
+          const patch = this.state.raporto?.violations[at]?.apply;
           if (patch !== undefined) this.applyPatch(patch);
         });
       }
-      for (const button of list.querySelectorAll<HTMLElement>("[data-fm-salto]")) {
+      for (const button of entry.querySelectorAll<HTMLElement>("[data-fm-salto]")) {
         button.addEventListener("click", () => this.#jump(button.dataset.fmSalto ?? ""));
       }
-    }
+      const old = list.children[index];
+      if (old === undefined) list.append(entry);
+      else old.replaceWith(entry);
+    });
+    while (list.children.length > items.length) list.lastElementChild?.remove();
+    this.#violationItems = items;
     // The APCA hints (advice) fill their list only while it is open: a check renders the count,
     // not a hundred list items (G5).
     const apca = raporto.hints.filter((hint) => hint.rule === "contrast-advisory");
@@ -1238,7 +1248,7 @@ ${groupOf("ikonoj", "Icons", `<fm-elektilo id="fm-werkstatt-ikono-gewicht" value
   }
 
   #apcaHints: Raporto["hints"] = [];
-  #violationsMarkup: string | undefined;
+  #violationItems: string[] = [];
   #apcaListed: Raporto["hints"] | undefined;
 
   #renderApca(apca: Raporto["hints"]): void {
@@ -1349,27 +1359,34 @@ ${groupOf("ikonoj", "Icons", `<fm-elektilo id="fm-werkstatt-ikono-gewicht" value
         raporto.violations.filter((v) => !v.fixed && v.jugxo === undefined).map((v) => v.rule),
       ),
     ];
+    // Nachlese 8 ② (M5): written only where it changes.
     const lock = (element: HTMLElement, locked: boolean) => {
+      if (locked === element.hasAttribute("disabled")) return;
       if (locked) element.setAttribute("disabled", "");
       else element.removeAttribute("disabled");
+    };
+    const say = (text: string) => {
+      if (reason.textContent !== text) reason.textContent = text;
     };
     if (fixedRules.length > 0) {
       lock(download, true);
       lock(jugxo, true);
-      reason.textContent = `Der Download ist gesperrt: feste Regel verletzt (${fixedRules.join(", ")}). Ein Jugxo öffnet keine feste Regel (G6); ändere die Agordo, bis sie hält.`;
+      say(`Der Download ist gesperrt: feste Regel verletzt (${fixedRules.join(", ")}). Ein Jugxo öffnet keine feste Regel (G6); ändere die Agordo, bis sie hält.`);
       return;
     }
     if (uncovered.length > 0) {
       lock(download, true);
       lock(jugxo, false);
-      reason.textContent = `Der Download ist gesperrt, bis ein Jugxo die anpassbaren Regeln deckt (${uncovered.join(", ")}): Begründung, Datum und Name. Der Jugxo steht in der Agordo.`;
+      say(`Der Download ist gesperrt, bis ein Jugxo die anpassbaren Regeln deckt (${uncovered.join(", ")}): Begründung, Datum und Name. Der Jugxo steht in der Agordo.`);
       return;
     }
     lock(download, !raporto.summary.exportable);
     lock(jugxo, true);
-    reason.textContent = raporto.summary.exportable
-      ? "Der Download ist frei: keine Verstöße, oder jeder durch einen Jugxo gedeckt. Das Paket entsteht über `fm agordilo derive`."
-      : "Der Download ist gesperrt: die Agordo selbst hat Fehler (siehe Prüfbericht).";
+    say(
+      raporto.summary.exportable
+        ? "Der Download ist frei: keine Verstöße, oder jeder durch einen Jugxo gedeckt. Das Paket entsteht über `fm agordilo derive`."
+        : "Der Download ist gesperrt: die Agordo selbst hat Fehler (siehe Prüfbericht).",
+    );
   }
 
   #recordJugxoj(kialo: string, date: string, name: string): void {
