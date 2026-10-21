@@ -81,18 +81,18 @@
     },
     "Ref": {
       "type": "string",
-      "pattern": "^#[A-Z][A-Za-z]*$"
+      "pattern": "^#[A-Z][A-Za-z-]*$"
     },
     "Concept": {
       "type": "object",
       "properties": {
         "uri": {
           "type": "string",
-          "pattern": "^https://fundamento\\.ciferecigo\\.com/ontologio#[A-Z][A-Za-z]*$"
+          "pattern": "^https://fundamento\\.ciferecigo\\.com/ontologio#[A-Z][A-Za-z-]*$"
         },
         "term": {
           "type": "string",
-          "pattern": "^[A-Z][A-Za-z]*$"
+          "pattern": "^[A-Z][A-Za-z-]*$"
         },
         "inScheme": {
           "enum": ["terminologio", "modelo", "principoj", "eroj", "laboro"]

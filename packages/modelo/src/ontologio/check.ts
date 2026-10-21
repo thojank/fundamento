@@ -63,7 +63,8 @@ export function constitutionTerms(constitution: string): string[] {
   const rest = constitution.slice(start);
   const end = rest.indexOf("\n---");
   const section = end < 0 ? rest : rest.slice(0, end);
-  return [...section.matchAll(/^\| \*\*([A-Za-z]+)\*\* \|/gm)].map((match) => match[1] ?? "");
+  // A term may carry a hyphen (Ero-Tokeno, Constitution v2.3).
+  return [...section.matchAll(/^\| \*\*([A-Za-z-]+)\*\* \|/gm)].map((match) => match[1] ?? "");
 }
 
 function entityTypes(): string[] {
