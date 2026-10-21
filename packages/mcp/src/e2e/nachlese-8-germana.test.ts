@@ -49,3 +49,16 @@ describe("lingvo de (Nachlese 8 ③)", () => {
     expect(shell.uzo?.purpose).toBe(de[`${sxelo?.id}/purpose`]);
   });
 });
+
+// Befund F-17 (Nachlese 8 ③): get_ero of the kampo and the avizo broke the output schema since
+// Spec 009 and Spec 011 ③ — content.of and when.props were missing from it, and clients such as
+// the SDK's validate structuredContent against it. Every Ero with a Uzo passes now.
+describe("get_ero answers every Ero within its output schema (F-17)", () => {
+  it.each(modelo.eroj.filter((entry) => entry.uzo !== undefined).map((entry) => entry.ero.name))(
+    "%s",
+    async (name) => {
+      await output(client, "get_ero", { name });
+      await output(client, "get_ero", { name, lingvo: "de" });
+    },
+  );
+});

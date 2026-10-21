@@ -367,4 +367,162 @@ Erwartet: `valid: true`, keine Verletzung `uzo-slot-nesting`. Datei: `file:///Us
 
 ## ③ Regeltexte deutsch
 
-Folgt im PR ③.
+**Branch:** `261021-nachlese-8-germana-116ba2`, gestapelt auf ②, weil beide `datumoj.ts` und die Vitrino-Tests berühren · Aufgaben ab T2241.
+
+### Zusammenfassung
+
+1. **Englisch bleibt die Quelle.** Deutsch ist eine Übersetzung je Text in `packages/modelo/data/tradukoj.json` (`tradukoj.de`). Der Schlüssel ist die ID des Eintrags plus der Pfad des Texts darin, etwa `<uzo-id>/purpose`, `<uzo-id>/boundary/drawer/kialo` oder `<regulo-id>/statement`.
+2. **Umfang:**
+   - 526 Texte: Zweck und Kialoj jeder Uzo (Eroj und Sxablonoj), dazu Statement und Kialo jeder Regulo des Kerns.
+   - 14 316 Wörter Englisch, 13 665 Wörter Deutsch.
+3. **Check:**
+   - `traduko-missing` (Fehler): Ein Text des Kerns hat keine deutsche Fassung.
+   - `traduko-orphaned` (Warnung): Eine Übersetzung nennt einen Text, den es nicht gibt.
+   - Beide laufen in `fm modelo validate` und in jedem Build.
+4. **Vitrino:** Der Abschnitt „Gebrauch“ (Zweck, Grenzen, Zusammen mit, Layout, Text) und die Kialoj der automatischen Reguloj im Abschnitt Regularo sind deutsch.
+5. **Gvidanto:**
+   - `get_ero`, `get_sxablono`, `explain_regulo` und `suggest_ero` antworten mit `lingvo: "de"` deutsch.
+   - Ohne `lingvo` oder mit `"en"` antworten sie wie bisher englisch.
+   - `get_ero` und `get_sxablono` nehmen `lingvo` auch mit `brief`.
+6. **Make Kit:** Die Guidelines bleiben englisch, ohne Änderung.
+7. **Dauer:**
+   - Übersetzung rund 35 Minuten, in zehn parallelen Teilen.
+   - ③ insgesamt rund zwei Stunden (rote Tests, Unterbau, Verdrahtung, Pins, Doku).
+   - Den Nachtlauf hat ③ nicht gesprengt.
+
+### Entwurfsentscheidungen
+
+#### D-15 Der Weg von `lingvo` (Regel 0.1)
+`lingvo` steht heute an zwei Stellen:
+- an den Schlüsselwörtern (`keywords.de`, `keywords.en`)
+- an den Texten für Assistenztechnik (ein Text je Sprache)
+
+Beide halten die Sprachen nebeneinander am Eintrag. Für die Regeltexte hätte das jede Uzo- und Regulo-Datei verdoppelt, und jedes `kialo` wäre ein Objekt geworden. Damit hätte sich die Antwort ohne `lingvo` geändert.
+
+Darum stehen die Übersetzungen als eigene optionale Wurzeldatei neben den Einträgen, nach dem Weg der Ikonaro und des Gvidanto aus ① (`OPTIONAL_DATA_FILE_SCHEMA_DEFS`). Schema `Tradukoj`, Wurzel `tradukoj`, Schlüssel nach dem Muster `<präfix>_<ULID>/<pfad>`. Export und Import tragen die Datei mit.
+
+#### D-16 Welche Texte
+`tekstojOf` zählt jeden Text des Kerns, den die Vitrino zeigt oder der Gvidanto als Text ausgibt:
+- `purpose`
+- die Kialoj von `instead` und `boundary`
+- die Kialoj von `composes.containers`, `composes.with` und `composes.never`
+- Statement und Kialo jeder Regulo
+
+Namen, Fälle, Aktionen, Prop-Werte und Schlüsselwörter sind Begriffe des Vortaro und bleiben. Ein Test prüft, dass jeder Ero-Name eines englischen Texts auch im deutschen steht.
+
+#### D-17 Übersetzen an der Antwort, nicht an den Daten
+`uzoIn` und `reguloIn` ersetzen in der Antwort nur die Texte. `traduko` fällt auf das Englische zurück, wenn keine Übersetzung da ist. Ein Kialo, der der Kialo einer Regulo ist (Ziele mit Regulo in `suggest_ero`), wird mit der Regulo übersetzt. `suggest_ero` findet den Text einer Grenze über die Uzo der Ero oder des Sxablono und den Fall.
+
+#### D-18 WCAG-Titel
+Für die Titel der Kriterien gilt die autorisierte deutsche Übersetzung von WCAG 2.1 (Aktion Mensch, beim W3C gelistet). Beispiele:
+- 1.4.1 „Benutzung von Farbe“
+- 1.4.3 „Kontrast (Minimum)“
+- 1.4.11 „Nicht-Text-Kontrast“
+- 2.2.1 „Zeiteinteilung anpassbar“
+- 3.3.2 „Beschriftungen (Labels) oder Anweisungen“
+- 4.1.3 „Statusmeldungen“
+
+WCAG 2.2 hat keine autorisierte deutsche Übersetzung (F-18). 2.4.13 und 2.5.8 tragen darum eine eigene, wörtliche Übersetzung mit dem englischen Titel: „Fokusdarstellung (Focus Appearance)“ und „Zielgröße (Minimum)“. Der Titel steht beim ersten Verweis eines Texts hinter der Nummer.
+
+### Stichprobe
+
+20 Texte zur Prüfung durch den Maintainer: Zwecke, Grenzen, eine Alternative, Composes, Statements und Kialoj, darunter die WCAG-Verweise.
+
+| # | Text | Englisch (Quelle) | Deutsch |
+|---|---|---|---|
+| 1 | `butono` purpose | Starts an action on the current view: it saves, sends, confirms, cancels or deletes something here. | Startet eine Aktion in der aktuellen Ansicht: Es speichert, sendet, bestätigt, bricht ab oder löscht etwas hier. |
+| 2 | `kampo` purpose | Takes one line of text from a person: a name, an address, an e-mail, a search term. | Nimmt eine Zeile Text von einer Person auf: einen Namen, eine Adresse, eine E-Mail, einen Suchbegriff. |
+| 3 | `pagxo` purpose | Builds one page of an application: the title a person reads first and the focus lands on after a change of route, the badges and the line beside it, the actions on the page and its sections — in the order a screen reader lists them. | Baut eine Seite einer Anwendung: den Titel, den eine Person zuerst liest und auf dem der Fokus nach einem Wechsel der Route landet, die Badges und die Zeile daneben, die Aktionen der Seite und ihre Abschnitte – in der Reihenfolge, in der ein Screenreader sie auflistet. |
+| 4 | `markdovido` purpose | Shows content written in Markdown — a standard, a proposal, a preview — in the type and the order of the page, safely: the source is data, never markup. | Zeigt Inhalt, der in Markdown geschrieben ist – einen Standard, einen Vorschlag, eine Vorschau –, in der Schrift und der Ordnung der Seite, sicher: Die Quelle ist Daten, nie Markup. |
+| 5 | `sxelo` purpose | Frames an application: its name and who is signed in, the main navigation, the notices of the application and the page in the main — the same on every page, so a person and a screen reader find their way the same way everywhere. | Rahmt eine Anwendung: ihren Namen und wer angemeldet ist, die Hauptnavigation, die Meldungen der Anwendung und die Seite im main – auf jeder Seite gleich, damit eine Person und ein Screenreader sich überall gleich zurechtfinden. |
+| 6 | `avizo` boundary/toast/kialo | A notice that goes away by itself is missed by whoever reads slowly, zooms in or has the focus elsewhere, because it is gone before they get there (WCAG 2.2.1, 4.1.3); a message stays in the flow of the page as an avizo until it is closed. | Eine Meldung, die von selbst verschwindet, verpasst, wer langsam liest, vergrößert oder den Fokus woanders hat, weil sie weg ist, bevor man dort ist (WCAG 2.2.1 Zeiteinteilung anpassbar, 4.1.3 Statusmeldungen); eine Meldung bleibt als avizo im Fluss der Seite, bis sie geschlossen wird. |
+| 7 | `navigado` boundary/drawer/kialo | A panel that slides in from the edge is neither a dialog nor a popover, because it is a region of the page with its own flow (a Sxablono), not a question and not a layer beside a trigger; a person decides until the Sxablonoj come. | Ein Panel, das vom Rand hereinfährt, ist weder Dialog noch Popover, weil es ein Bereich der Seite mit eigenem Fluss ist (ein Sxablono), keine Frage und keine Ebene neben einem Auslöser; bis die Sxablonoj kommen, entscheidet eine Person. |
+| 8 | `teksto` boundary/rich-text/kialo | Text with its own structure — lists, emphasis, links written as Markdown — is content with a renderer, because every mark in it asks for an Ero of its own: the markdovido, which builds it from the Eroj and lets nothing of the source run. | Text mit eigener Struktur – Listen, Hervorhebung, Links, als Markdown geschrieben – ist Inhalt mit einem Renderer, weil jede Auszeichnung darin ein eigenes Ero verlangt: die markdovido, die ihn aus den Eroj baut und nichts von der Quelle ausführt. |
+| 9 | `insigno` boundary/dot-only/kialo | A dot without text is colour alone, because a person who does not see the hue reads nothing (WCAG 1.4.1); the text is required. | Ein Punkt ohne Text ist nur Farbe, weil eine Person, die den Farbton nicht sieht, nichts liest (WCAG 1.4.1 Benutzung von Farbe); der Text ist Pflicht. |
+| 10 | `ikono` instead/status-only-icon/kialo | A status needs a word, because colour and a shape alone are no information for everyone (WCAG 1.4.1) and a picture is not read aloud; the insigno says the status in one to three words, with an icon beside it if the Aspekto wants one. | Ein Status braucht ein Wort, weil Farbe und Form allein nicht für alle Information sind (WCAG 1.4.1 Benutzung von Farbe) und ein Bild nicht vorgelesen wird; der insigno sagt den Status in ein bis drei Wörtern, mit einem Icon daneben, wenn die Aspekto eines will. |
+| 11 | `tabelo` boundary/row-tint/kialo | A coloured row says something only with a word, because colour alone carries no meaning (WCAG 1.4.1); a person decides what the row says and where. | Eine farbige Zeile sagt nur mit einem Wort etwas, weil Farbe allein keine Bedeutung trägt (WCAG 1.4.1 Benutzung von Farbe); eine Person entscheidet, was die Zeile sagt und wo. |
+| 12 | `touch-target-min` statement | In every combination of every Aspekto, every size.control.* resolves to at least size.target.min, the minimum pointer target of WCAG 2.5.8 (24 px). A ligilo with placement inline is exempt: running text cannot carry 24 px lines, and WCAG 2.5.8 excepts targets that stand in a sentence (Spec 008 A2). | In jeder Kombination jeder Aspekto löst jedes size.control.* mindestens zu size.target.min auf, dem kleinsten Zeigerziel nach WCAG 2.5.8 Zielgröße (Minimum) (24 px). Ein ligilo mit placement inline ist ausgenommen: Fließtext kann keine Zeilen von 24 px tragen, und WCAG 2.5.8 nimmt Ziele aus, die in einem Satz stehen (Spec 008 A2). |
+| 13 | `touch-target-min` kialo | WCAG 2.5.8 (AA) requires a target of at least 24 by 24 px; smaller targets fail people with tremor, with large fingers or on a moving device. The threshold is a token, so the rule and the rendered component read the same value. The exception for inline links is WCAG's own: a target in a block of text is excluded from the minimum, because the line height of the text decides its size. | WCAG 2.5.8 Zielgröße (Minimum) (Stufe AA) verlangt ein Ziel von mindestens 24 mal 24 px; kleinere Ziele schließen Menschen mit Zittern, mit großen Fingern oder auf einem bewegten Gerät aus. Die Schwelle ist ein Token, also lesen die Regel und die gerenderte Komponente denselben Wert. Die Ausnahme für Links im Text ist die der WCAG: Ein Ziel in einem Textblock ist vom Minimum ausgenommen, weil die Zeilenhöhe des Texts seine Größe bestimmt. |
+| 14 | `disabled-exempt-from-contrast` kialo | WCAG 2.x exempts inactive components (1.4.3) and decoration that carries no information (1.4.11). Forcing contrast on them would make disabled controls look actionable and dividers look like content. | WCAG 2.x nimmt inaktive Komponenten (1.4.3 Kontrast (Minimum)) und Dekoration, die keine Information trägt (1.4.11 Nicht-Text-Kontrast), aus. Kontrast für sie zu erzwingen, ließe deaktivierte Bedienelemente bedienbar und Trennlinien wie Inhalt aussehen. |
+| 15 | `label-names-action` kialo | A person decides from the label alone what happens on activation. A verb says it; a noun or a mood makes them guess. | Eine Person entscheidet allein aus der Beschriftung, was beim Auslösen geschieht. Ein Verb sagt es; ein Substantiv oder eine Stimmung lässt sie raten. |
+| 16 | `heading-levels-in-order` kialo | The levels are the table of contents for a screen reader: a person jumps from heading to heading and hears the levels; a skipped level is a section that is not there. | Die Ebenen sind für einen Screenreader das Inhaltsverzeichnis: Eine Person springt von Überschrift zu Überschrift und hört die Ebenen; eine übersprungene Ebene ist ein Abschnitt, den es nicht gibt. |
+| 17 | `one-primary-per-container` kialo | Two equal calls to action move the decision onto the user; one primary action makes the next step obvious, and every other action steps back as secondary or tertiary. | Zwei gleich starke Handlungsaufforderungen schieben die Entscheidung auf die Nutzenden; eine Hauptaktion macht den nächsten Schritt offensichtlich, und jede andere Aktion tritt als sekundär oder tertiär zurück. |
+| 18 | `alsxutilo` composes/containers/form/kialo | A file input without a form has no sender, because the files are only sent with the form. | Ein Datei-Upload ohne Formular hat keinen Absender, weil die Dateien nur mit dem Formular gesendet werden. |
+| 19 | `alsxutilo` composes/never/butono/kialo | A file input stands in no slot of a button, because a button is one target with one name and the input could not be reached on its own. | Ein Datei-Upload steht in keinem Slot eines Knopfs, weil ein Knopf ein Ziel mit einem Namen ist und das Feld allein nicht erreichbar wäre. |
+| 20 | `formularo` boundary/wizard/kialo | A form over several steps is a flow of round 2, because each step keeps what the person entered and says where they are; a person decides until it comes. | Ein Formular über mehrere Schritte ist ein Ablauf der Runde 2, weil jeder Schritt behält, was die Person eingegeben hat, und sagt, wo sie ist; bis er kommt, entscheidet eine Person. |
+
+### Abweichungen
+
+1. **Reguloj einer Marke bleiben englisch.** Das Briefing verlangt einen Fehler für alles, was die Vitrino zeigt. Die eigenen Reguloj eines Aspekto-Pakets (IDs mit Namensraum, `reg_ekz_…`) zeigt die Vitrino eines Projekts ebenfalls. Ihre Texte stehen aber im Paket der Marke und nicht in der `tradukoj.json` des Kerns. Der Kern kann sie also nicht übersetzen. Ein Fehler dafür hätte jeden Build mit eigener Marke gebrochen (gefunden im Build mit ekzemplo). Der Check fordert darum die Texte des Kerns. Texte einer Marke zeigt die Vitrino englisch.
+2. **Der Kialo eines Sxablono-Ziels in `suggest_ero` bleibt englisch.** Er ist ein Text der Skemo und kein Uzo- oder Regulo-Text, und die Vitrino zeigt ihn nicht. Die Kialoj der Uzo des Sxablono sind deutsch.
+3. **`lingvo` in `suggest_ero` hat jetzt zwei Wirkungen.** Er begrenzt wie bisher die Schlüsselwörter, und mit `"de"` übersetzt er die Antwort. Die Pins der deutschen Dialoge aus Nachlese 4 und 5 erwarten darum den deutschen Kialo. Gekippt ist kein Dialog: Ero, Sxablono, Fall und Aktion sind dieselben.
+4. **Sxablono-Uzoj übersetzt, obwohl die Vitrino sie nicht zeigt.** `get_sxablono` gibt sie aus, und der Check soll vollständig sein.
+
+### Befunde / Mankoj
+
+- **F-17 `get_ero` brach für kampo und avizo das eigene Output-Schema.**
+  - Seit Spec 009 fehlte `content.of`, seit Spec 011 ③ fehlte `when.props`.
+  - Clients wie das SDK prüfen `structuredContent` gegen das Schema und lehnten die Antwort ab.
+  - Behoben im Schema, mit der kleinsten Änderung. Ein Test ruft `get_ero` für jedes Ero mit Uzo auf, mit und ohne `lingvo`.
+- **F-18 WCAG 2.2 hat keine autorisierte deutsche Übersetzung.** Die Titel von 2.4.13 und 2.5.8 sind eigene Übersetzungen (D-18). Sobald es eine autorisierte Fassung gibt, sind sie zu ersetzen.
+- **Mankoj:** keine. Kein Token und keine Regulo fehlt.
+
+### Offen (für den Maintainer)
+
+1. **Abnahme ③:** die Stichprobe lesen und die Vitrino ansehen (Messanleitung).
+2. **Abweichung 1:** Sollen Aspekto-Pakete eigene `tradukoj.json` tragen dürfen, mit demselben Check für ihre Reguloj?
+3. **F-18:** Die eigenen Titel für 2.4.13 und 2.5.8 bestätigen oder ersetzen.
+
+### Messanleitung
+
+Alle Befehle im Checkout `/Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds`, auf dem Branch `261021-nachlese-8-germana-116ba2` oder nach dem Merge von ③, nach `pnpm install` und `pnpm build`. **Links immer mit `file://`.**
+
+**1. Vitrino.**
+
+```sh
+cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds
+pnpm fm projekcioj build --out .fundamento/projekcioj
+open "file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/projekcioj/vitrino/index.html#modus=ansehen"
+```
+
+| Stelle | erwartet |
+|---|---|
+| Abschnitt Gebrauch, butono | Zweck „Startet eine Aktion in der aktuellen Ansicht: …“ |
+| Abschnitt Gebrauch, avizo, Grenze toast | „… (WCAG 2.2.1 Zeiteinteilung anpassbar, 4.1.3 Statusmeldungen) …“ |
+| Abschnitt Gebrauch, Text-Regeln | Statement und Kialo deutsch, die Regulo-Namen englisch |
+| Abschnitt Regularo, Spalte Kialo (z. B. touch-target-min) | „WCAG 2.5.8 Zielgröße (Minimum) (Stufe AA) verlangt …“ |
+| Make Kit: `file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/projekcioj/make-kit/komuna/guidelines/components/butono.md` | englisch, unverändert |
+
+**2. Gvidanto.** Mit dem Harness aus Spec 020. Der Block schreibt nach `/Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/nachlese8/mess/` und endet mit `echo FERTIG`:
+
+```sh
+cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds && M=.fundamento/nachlese8/mess && mkdir -p $M && C="node .fundamento/m3/mcp-call.mjs" && \
+$C get_ero '{"name":"butono","lingvo":"de"}' > $M/de-get-ero.json && \
+$C get_ero '{"name":"butono"}' > $M/en-get-ero.json && \
+$C get_ero '{"name":"kampo","lingvo":"de"}' > $M/de-get-ero-kampo.json && \
+$C get_sxablono '{"name":"pagxo","lingvo":"de","brief":true}' > $M/de-get-sxablono.json && \
+$C explain_regulo '{"name":"touch-target-min","lingvo":"de"}' > $M/de-explain-regulo.json && \
+$C suggest_ero '{"goal":"Seitenleiste, die von rechts hereinfährt","lingvo":"de"}' > $M/de-suggest-drawer.json && \
+$C suggest_ero '{"goal":"Markdown im Text rendern","lingvo":"de"}' > $M/de-suggest-markdown.json && echo FERTIG
+```
+
+| Datei | erwartet |
+|---|---|
+| `de-get-ero.json` | `uzo.purpose` deutsch; `uzo.content[*].regulo.statement` und `.kialo` deutsch; Namen englisch |
+| `en-get-ero.json` | englisch, wie vor ③ |
+| `de-get-ero-kampo.json` | kein Fehler (F-17), `uzo.content[*].of` vorhanden |
+| `de-get-sxablono.json` | `purpose` deutsch |
+| `de-explain-regulo.json` | „WCAG 2.5.8 Zielgröße (Minimum) (Stufe AA) verlangt …“ |
+| `de-suggest-drawer.json` | Rückfrage wie nach ①; der Kialo des Kandidaten drawer deutsch |
+| `de-suggest-markdown.json` | `boundary.case` rich-text, `boundary.kialo` „Text mit eigener Struktur …“ |
+
+**3. Check.**
+
+```sh
+cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds
+pnpm fm modelo validate
+pnpm --filter @fundamento/modelo exec vitest run src/gvidanto/nachlese-8-germana.test.ts
+```
+
+Erwartet: `validate` ohne Fehler. Der Test zeigt grün, dass ein entfernter Text `traduko-missing` (Fehler) und eine verwaiste Übersetzung `traduko-orphaned` (Warnung) ergibt. Die Übersetzungen: `file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/packages/modelo/data/tradukoj.json`.
+

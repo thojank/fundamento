@@ -5,10 +5,14 @@
 
 import type { ValidationIssue } from "../contracts/issues.js";
 import type { Jugxo, Modelo, Regulo } from "../contracts/modelo.js";
+import { type Lingvo, traduko } from "../lingvo/tradukoj.js";
 import { ASPEKTO_DIMENSIO } from "../load/build.js";
 import { nearestNames } from "./nearest.js";
 
-export type ExplainReguloInput = { name: string } | { id: string };
+export type ExplainReguloInput = ({ name: string } | { id: string }) & {
+  /** The language of statement and kialo (Nachlese 8 ③); English without it. */
+  lingvo?: Lingvo;
+};
 
 export interface ExplainReguloOutput {
   id: string;
@@ -70,8 +74,8 @@ export function explainRegulo(
     output: {
       id: regulo.id,
       name: regulo.name,
-      statement: regulo.statement,
-      kialo: regulo.kialo,
+      statement: traduko(modelo, input.lingvo, `${regulo.id}/statement`, regulo.statement),
+      kialo: traduko(modelo, input.lingvo, `${regulo.id}/kialo`, regulo.kialo),
       checkability: regulo.checkability,
       scope: regulo.scope,
       ...(regulo.aspekto === undefined ? {} : { aspekto: regulo.aspekto }),

@@ -4,16 +4,40 @@
   "description": "One Sxablono (Spec 020) with its Skemo — regions with what each accepts, how many, the props its children need and whether it is a live region; landmarks, skip link and focus target; the tokens of its layout — and its Uzo: purpose, what to use instead, boundaries and composition, each with its kialo. Name it by name or by ID. With brief: true only what building it needs, generated and under a measured size ceiling.",
   "type": "object",
   "properties": {
-    "name": { "type": "string", "minLength": 1 },
-    "id": { "type": "string", "pattern": "^sxa_" },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^sxa_"
+    },
     "brief": {
       "description": "Only the brief answer: sxablono, kind, purpose, regions (without their descriptions), props, a11y, instead and boundary without kialo. Default false.",
       "type": "boolean"
+    },
+    "lingvo": {
+      "description": "The language of the texts of the answer (Nachlese 8 ③): \"de\" gives the purpose, the kialoj and the Reguloj in German, from data/tradukoj.json; without it or with \"en\" English, the source. Names, cases and keywords stay.",
+      "enum": ["en", "de"]
     }
   },
   "oneOf": [
-    { "properties": { "name": true, "brief": true }, "required": ["name"] },
-    { "properties": { "id": true, "brief": true }, "required": ["id"] }
+    {
+      "properties": {
+        "name": true,
+        "brief": true,
+        "lingvo": true
+      },
+      "required": ["name"]
+    },
+    {
+      "properties": {
+        "id": true,
+        "brief": true,
+        "lingvo": true
+      },
+      "required": ["id"]
+    }
   ],
   "additionalProperties": false
 }

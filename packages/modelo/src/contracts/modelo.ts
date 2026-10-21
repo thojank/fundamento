@@ -24,6 +24,7 @@ import type {
   SxablonoUzo,
   TextTransform,
   TokenRole,
+  Tradukoj,
   Uzo,
 } from "../generated/modelo-schema.js";
 import type { IssueLocation, ValidationIssue } from "./issues.js";
@@ -82,6 +83,8 @@ export type {
   SxablonoUzo,
   SxablonoUzoFile,
   TokenSetFile,
+  Tradukoj,
+  TradukojFile,
   Uzo,
   UzoBoundary,
   UzoContent,
@@ -224,6 +227,11 @@ export interface Modelo {
    * absent while data/gvidanto.json is (a Modelo built by hand may leave it out).
    */
   gvidanto?: Gvidanto;
+  /**
+   * The translations of the texts of the Uzoj and the Reguloj (Nachlese 8 ③), per language and
+   * text ID; absent while data/tradukoj.json is. English, the text of the entry, is the source.
+   */
+  tradukoj?: Tradukoj;
   /** Eroj with their Skemoj, sorted by Ero name (Spec 003). */
   eroj: LoadedEro[];
   /**

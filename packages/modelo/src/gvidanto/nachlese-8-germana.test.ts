@@ -4,10 +4,11 @@
 // text without a German version as an error and every translation without its text. The Gvidanto
 // answers in German with lingvo "de" and as before in English without it.
 
+import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { tekstojOf, tradukoIssues } from "../lingvo/tradukoj.js";
 import { loadModelo } from "../load/load-modelo.js";
-import { defaultModeloSource } from "../load/source.js";
+import { defaultModeloSource, projectModeloSource } from "../load/source.js";
 import { getEro } from "./eroj.js";
 import { explainRegulo } from "./explain-regulo.js";
 import { suggestEro } from "./suggest-ero.js";
@@ -57,7 +58,19 @@ describe("every text the Vitrino shows has a German version under its ID", () =>
       ["traduko-missing", "error"],
       ["traduko-orphaned", "warning"],
     ]);
-    expect(issues[0]?.path).toContain(first.key);
+    expect(issues[0]?.path).toContain(first.key.replaceAll("/", "~1"));
+  });
+});
+
+describe("the Reguloj of an Aspekto package are its own texts (③, Abweichung 1)", () => {
+  it("a project with ekzemplo loads without traduko-missing: reg_ekz_… stands in its package", () => {
+    const config = fileURLToPath(
+      new URL("../../test/fixtures/valid/aspekto-ekzemplo/fundamento.config.json", import.meta.url),
+    );
+    const project = loadModelo(projectModeloSource(config));
+    if (project.modelo === undefined) throw new Error(JSON.stringify(project.issues));
+    expect(project.modelo.reguloj.some((regulo) => regulo.id.startsWith("reg_ekz_"))).toBe(true);
+    expect(tradukoIssues(project.modelo)).toEqual([]);
   });
 });
 
@@ -81,7 +94,7 @@ describe("the Gvidanto answers in German with lingvo de (③)", () => {
 
   it("get_sxablono, suggest_ero and explain_regulo in German too", () => {
     const pagxo = getSxablono(modelo, { name: "pagxo", lingvo: "de" });
-    if (!pagxo.ok) throw new Error("get_sxablono failed");
+    if (!pagxo.ok || !("skemo" in pagxo.output)) throw new Error("get_sxablono failed");
     const uzo = modelo.sxablonoj?.find((entry) => entry.sxablono.name === "pagxo")?.uzo;
     expect(pagxo.output.uzo?.purpose).toBe(german(`${uzo?.id}/purpose`));
     const suggested = suggestEro(modelo, { goal: "Markdown im Text rendern", lingvo: "de" });

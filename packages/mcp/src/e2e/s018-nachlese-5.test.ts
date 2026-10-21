@@ -21,8 +21,15 @@ preload({ config: EKZEMPLO_CONFIG });
 const DATA = new URL("../../../modelo/data/", import.meta.url);
 const read = <T>(path: string): T =>
   JSON.parse(readFileSync(fileURLToPath(new URL(path, DATA)), "utf8")) as T;
-const reguloj = read<{ reguloj: { name: string; kialo: string }[] }>("reguloj.json").reguloj;
-const kialoOf = (name: string) => reguloj.find((regulo) => regulo.name === name)?.kialo ?? "?";
+const reguloj = read<{ reguloj: { id: string; name: string; kialo: string }[] }>(
+  "reguloj.json",
+).reguloj;
+// Nachlese 8 ③: with lingvo "de" the kialo is the German one, under the ID of the Regulo.
+const de = read<{ tradukoj: { de: Record<string, string> } }>("tradukoj.json").tradukoj.de;
+const kialoOf = (name: string) => {
+  const regulo = reguloj.find((entry) => entry.name === name);
+  return regulo === undefined ? "?" : (de[`${regulo.id}/kialo`] ?? "?");
+};
 const sxvebiloUzo = read<{ uzo: { boundary: { case: string; kialo: string }[] } }>(
   "eroj/sxvebilo/uzo.json",
 ).uzo;

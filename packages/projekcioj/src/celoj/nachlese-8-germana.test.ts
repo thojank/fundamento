@@ -14,7 +14,7 @@ if (modelo === undefined) throw new Error("the repo Modelo must load");
 const de = modelo.tradukoj?.de ?? {};
 const butono = modelo.eroj.find((entry) => entry.ero.name === "butono")?.uzo;
 const regulo = modelo.reguloj.find((entry) => entry.name === "touch-target-min");
-const escape = (text: string) =>
+const escaped = (text: string) =>
   text
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
@@ -33,13 +33,16 @@ afterAll(() => rmSync(out, { recursive: true, force: true }));
 
 describe("the Vitrino in German (③)", () => {
   it("the section Gebrauch shows the purpose, the boundaries and the rules in German", () => {
-    const html = read("vitrino/index.html");
+    // The article of the butono in the section Gebrauch: the Werkstatt carries the files of the
+    // Modelo as they are, its English sources too.
+    const html =
+      read("vitrino/index.html").match(/<article><h3>butono<\/h3>.*?<\/article>/s)?.[0] ?? "";
     const german = de[`${butono?.id}/purpose`] ?? "";
     expect(german).not.toBe("");
-    expect(html).toContain(escape(german));
-    expect(html).not.toContain(escape(butono?.purpose ?? "?"));
+    expect(html).toContain(escaped(german));
+    expect(html).not.toContain(escaped(butono?.purpose ?? "?"));
     const boundary = butono?.boundary[0];
-    expect(html).toContain(escape(de[`${butono?.id}/boundary/${boundary?.case}/kialo`] ?? "?"));
+    expect(html).toContain(escaped(de[`${butono?.id}/boundary/${boundary?.case}/kialo`] ?? "?"));
   });
 
   it("the kialoj of the automatic Reguloj are German", () => {

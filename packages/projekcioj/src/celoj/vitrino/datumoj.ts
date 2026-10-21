@@ -21,6 +21,7 @@ import {
   regularoEnforcementIssues,
   STATE_KEY,
   styledProps,
+  traduko,
   typeScaleConsistency,
   type UzoOutput,
   type ValidationIssue,
@@ -281,11 +282,14 @@ export function vitrinoLabelOf(combination: Readonly<Record<string, string>>): s
   return Object.values(combination).join(" · ");
 }
 
-/** The Uzo of every Ero of the Modelo that has one, from get_ero (one source, S5). */
+/**
+ * The Uzo of every Ero of the Modelo that has one, from get_ero (one source, S5) — in German
+ * (Nachlese 8 ③, decision d: the Vitrino shows the texts of the Uzoj and the Reguloj in German).
+ */
 export function uzojOf(modelo: Modelo): Record<string, UzoOutput> {
   const uzoj: Record<string, UzoOutput> = {};
   for (const entry of modelo.eroj) {
-    const answer = getEro(modelo, { name: entry.ero.name });
+    const answer = getEro(modelo, { name: entry.ero.name, lingvo: "de" });
     if (answer.ok && answer.output.uzo !== undefined) uzoj[entry.ero.name] = answer.output.uzo;
   }
   return uzoj;
@@ -1257,7 +1261,7 @@ export function vitrinoDatumoj({ input, bazo }: VitrinoDatumojInput): VitrinoDat
     regulojKialoj: Object.fromEntries(
       modelo.reguloj
         .filter((regulo) => regulo.checkability === "automatic")
-        .map((regulo) => [regulo.name, regulo.kialo]),
+        .map((regulo) => [regulo.name, traduko(modelo, "de", `${regulo.id}/kialo`, regulo.kialo)]),
     ),
     aspiroj: aspirojOf(evaluateAspiroj(modelo)),
     kovrado,

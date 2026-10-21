@@ -24,6 +24,7 @@ import {
   keywordHits,
   keywordTextOf,
 } from "../eroj/usage.js";
+import { type Lingvo, reguloIn, traduko } from "../lingvo/tradukoj.js";
 import { type ReguloRef, reguloRef } from "./eroj.js";
 
 /** The props a goal asks for, typed as an EroInstance takes them (R-9): never "true" as a text. */
@@ -31,7 +32,10 @@ export type GoalProps = Record<string, string | number | boolean>;
 
 export interface SuggestEroInput {
   goal: string;
-  /** Only the keywords of this language count; without it, every language does. */
+  /**
+   * Only the keywords of this language count; without it, every language does. With "de" the
+   * kialoj and Reguloj of the answer are German too (Nachlese 8 ③).
+   */
   lingvo?: string;
 }
 
@@ -531,6 +535,61 @@ function sxablonoOutput(
  * to one) carries it as such, with its regions.
  */
 export function suggestEro(modelo: Modelo, input: SuggestEroInput): SuggestEroResult {
+  const result = suggestEroIn(modelo, input);
+  if (!result.ok || input.lingvo !== "de") return result;
+  return { ok: true, output: answerIn(modelo, result.output, input.lingvo) };
+}
+
+/**
+ * The kialo of a boundary or alternative in the language asked for (Nachlese 8 ③): the text of
+ * the Uzo of the Ero or Sxablono under its ID — an alternative where its goal and kialo are the
+ * ones of the answer, else the boundary of that case.
+ */
+function boundaryIn<T extends SuggestedBoundary>(modelo: Modelo, boundary: T, lingvo: Lingvo): T {
+  const uzo =
+    modelo.eroj.find((entry) => entry.ero.name === boundary.ero)?.uzo ??
+    (modelo.sxablonoj ?? []).find((entry) => entry.sxablono.name === boundary.ero)?.uzo;
+  if (uzo === undefined) return boundary;
+  const instead = uzo.instead.some(
+    (item) => item.goal === boundary.case && item.kialo === boundary.kialo,
+  );
+  const path = `${instead ? "instead" : "boundary"}/${boundary.case}/kialo`;
+  return { ...boundary, kialo: traduko(modelo, lingvo, `${uzo.id}/${path}`, boundary.kialo) };
+}
+
+/**
+ * The answer with its texts in the language asked for (Nachlese 8 ③): the kialo of the boundary
+ * and of every candidate, and a Regulo with its statement and kialo — a kialo that is the
+ * Regulo's in its translation. Names, cases and keywords stay as they are.
+ */
+function answerIn(modelo: Modelo, output: SuggestEroOutput, lingvo: Lingvo): SuggestEroOutput {
+  const reguloOf = <T extends { kialo?: string; regulo?: ReguloRef }>(item: T): T => {
+    if (item.regulo === undefined) return item;
+    const regulo = reguloIn(modelo, item.regulo, lingvo);
+    return {
+      ...item,
+      regulo,
+      ...(item.kialo === item.regulo.kialo ? { kialo: regulo.kialo } : {}),
+    };
+  };
+  return reguloOf({
+    ...output,
+    ...(output.boundary === undefined
+      ? {}
+      : { boundary: boundaryIn(modelo, output.boundary, lingvo) }),
+    ...(output.candidates === undefined
+      ? {}
+      : {
+          candidates: output.candidates.map((candidate) =>
+            candidate.kind === "boundary"
+              ? boundaryIn(modelo, candidate, lingvo)
+              : reguloOf(candidate),
+          ),
+        }),
+  });
+}
+
+function suggestEroIn(modelo: Modelo, input: SuggestEroInput): SuggestEroResult {
   const pass = { ...(input.lingvo === undefined ? {} : { lingvo: input.lingvo }), inflect: false };
   // Spec 020 ②: the first word of the request (after an article), not the whole head — „Tabs, um
   // zwischen Liste und Formular zu wechseln“ names tabs, whatever its head holds.

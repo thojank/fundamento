@@ -11,6 +11,7 @@ import type {
   SxablonoSkemo,
   SxablonoUzo,
 } from "../contracts/modelo.js";
+import { type Lingvo, uzoIn } from "../lingvo/tradukoj.js";
 import { nearestNames } from "./nearest.js";
 
 export interface ListSxablonojOutput {
@@ -30,7 +31,11 @@ export function listSxablonoj(modelo: Modelo): ListSxablonojOutput {
 }
 
 export type SxablonoSelector = { name: string } | { id: string };
-export type GetSxablonoInput = SxablonoSelector & { brief?: boolean };
+export type GetSxablonoInput = SxablonoSelector & {
+  brief?: boolean;
+  /** The language of the texts of the Uzo (Nachlese 8 ③); English without it. */
+  lingvo?: Lingvo;
+};
 
 /** The brief of a Sxablono (≤ 750 tokens): what an agent needs to build it, generated. */
 export interface SxablonoBrief {
@@ -99,13 +104,16 @@ export function getSxablono(modelo: Modelo, input: GetSxablonoInput): GetSxablon
       ),
     };
   }
-  if (input.brief === true) return { ok: true, output: briefOf(entry) };
+  // Nachlese 8 ③: the texts of the Uzo in the language asked for.
+  const uzo = entry.uzo === undefined ? undefined : uzoIn(modelo, entry.uzo, input.lingvo);
+  if (input.brief === true)
+    return { ok: true, output: briefOf(uzo === undefined ? entry : { ...entry, uzo }) };
   return {
     ok: true,
     output: {
       sxablono: entry.sxablono,
       skemo: entry.skemo,
-      ...(entry.uzo === undefined ? {} : { uzo: entry.uzo }),
+      ...(uzo === undefined ? {} : { uzo }),
     },
   };
 }

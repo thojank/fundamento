@@ -17,6 +17,7 @@ import type {
   Manko,
   Modelo,
   Regulo,
+  Tradukoj,
 } from "../contracts/modelo.js";
 import type { AspektoAspiro, Fonto, LingvoOverride } from "../generated/modelo-schema.js";
 import type {
@@ -82,6 +83,8 @@ export function buildModelo(files: ModeloFiles): BuildModeloResult {
     ikonaro: entriesOf<Ikono>(files.data["ikonaro.json"]?.value, "ikonaro"),
     // Nachlese 8 ① (D-11): the words of the Gvidanto, absent while data/gvidanto.json is.
     ...gvidantoOf(files.data["gvidanto.json"]?.value),
+    // Nachlese 8 ③: the translations, absent while data/tradukoj.json is.
+    ...tradukojOf(files.data["tradukoj.json"]?.value),
     eroj: loadedEroj(files.eroj, files.uzoj),
     sxablonoj: loadedSxablonoj(files.sxablonoj ?? [], files.sxablonoUzoj ?? []),
     idsLock,
@@ -295,6 +298,12 @@ function gvidantoOf(document: unknown): { gvidanto?: Gvidanto } {
   return isJsonObject(gvidanto) && isJsonObject(gvidanto.fillers)
     ? { gvidanto: gvidanto as unknown as Gvidanto }
     : {};
+}
+
+/** The translations as the Modelo carries them (Nachlese 8 ③); validation reports the shape. */
+function tradukojOf(document: unknown): { tradukoj?: Tradukoj } {
+  const tradukoj = isJsonObject(document) ? document.tradukoj : undefined;
+  return isJsonObject(tradukoj) ? { tradukoj: tradukoj as unknown as Tradukoj } : {};
 }
 
 /** Stable sort by `priority` ascending; entries without a numeric priority go last. */

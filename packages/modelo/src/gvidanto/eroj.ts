@@ -26,6 +26,7 @@ import type {
   UzoSlot,
 } from "../contracts/modelo.js";
 import { variantKeys } from "../eroj/inventories.js";
+import { type Lingvo, reguloIn, uzoIn } from "../lingvo/tradukoj.js";
 import { ASPEKTO_DIMENSIO } from "../load/build.js";
 import { nomRegulo } from "../nomreguloj/index.js";
 import { isNoTarget } from "../nomreguloj/types.js";
@@ -160,6 +161,8 @@ type EroSelector = { name: string } | { id: string };
 export type GetEroInput = EroSelector & {
   /** Only the brief answer (A8, Spec 007); default false. */
   brief?: boolean;
+  /** The language of the texts of the Uzo and the Reguloj (Nachlese 8 ③); English without it. */
+  lingvo?: Lingvo;
 };
 
 export type GetEroFailure = { ok: false; issues: ValidationIssue[]; allowed?: string[] };
@@ -340,17 +343,23 @@ export function examplesOf(modelo: Modelo, entry: LoadedEro): EroExample[] {
 }
 
 /** A Regulo name of the Uzo as a ReguloRef; a name the Modelo does not know stays a name. */
-function reguloRefNamed(modelo: Modelo, name: string): ReguloRef {
+function reguloRefNamed(modelo: Modelo, name: string, lingvo?: Lingvo): ReguloRef {
   const regulo = modelo.reguloj.find((candidate) => candidate.name === name);
   if (regulo === undefined) {
     return { id: "", name, statement: "", kialo: "", checkability: "manual" };
   }
-  return reguloRef(regulo);
+  return reguloIn(modelo, reguloRef(regulo), lingvo);
 }
 
 /** The Uzo of an Ero as get_ero states it (D-05), or nothing. */
-export function uzoOf(modelo: Modelo, uzo: Uzo | undefined): UzoOutput | undefined {
-  if (uzo === undefined) return undefined;
+export function uzoOf(
+  modelo: Modelo,
+  source: Uzo | undefined,
+  lingvo?: Lingvo,
+): UzoOutput | undefined {
+  if (source === undefined) return undefined;
+  // Nachlese 8 ③: the texts in the language asked for, everything else as it is.
+  const uzo = uzoIn(modelo, source, lingvo);
   const layout: UzoOutput["layout"] = { size: uzo.layout.size, wrap: uzo.layout.wrap };
   // Spec 014 ② (O-3 of ①): the threshold of layout auto, so an agent sees it.
   if (uzo.layout["columns-from"] !== undefined) layout["columns-from"] = uzo.layout["columns-from"];
@@ -358,7 +367,7 @@ export function uzoOf(modelo: Modelo, uzo: Uzo | undefined): UzoOutput | undefin
     if (typeof allowance !== "object") continue;
     layout[prop] = {
       allowedIn: structuredClone(allowance.allowedIn),
-      regulo: reguloRefNamed(modelo, allowance.regulo),
+      regulo: reguloRefNamed(modelo, allowance.regulo, lingvo),
     };
   }
   return {
@@ -371,14 +380,14 @@ export function uzoOf(modelo: Modelo, uzo: Uzo | undefined): UzoOutput | undefin
       never: structuredClone(uzo.composes.never),
       spacing: {
         owner: uzo.composes.spacing.owner,
-        regulo: reguloRefNamed(modelo, uzo.composes.spacing.regulo),
+        regulo: reguloRefNamed(modelo, uzo.composes.spacing.regulo, lingvo),
       },
     },
     slots: structuredClone(uzo.slots),
     layout,
     content: uzo.content.map((entry) => ({
       ...structuredClone(entry),
-      regulo: reguloRefNamed(modelo, entry.regulo),
+      regulo: reguloRefNamed(modelo, entry.regulo, lingvo),
     })),
   };
 }
@@ -454,8 +463,14 @@ export function briefOf(entry: LoadedEro): GetEroBrief {
   return brief;
 }
 
-export function getEro(modelo: Modelo, input: EroSelector & { brief: true }): GetEroBriefResult;
-export function getEro(modelo: Modelo, input: EroSelector & { brief?: false }): GetEroResult;
+export function getEro(
+  modelo: Modelo,
+  input: EroSelector & { brief: true; lingvo?: Lingvo },
+): GetEroBriefResult;
+export function getEro(
+  modelo: Modelo,
+  input: EroSelector & { brief?: false; lingvo?: Lingvo },
+): GetEroResult;
 export function getEro(modelo: Modelo, input: GetEroInput): GetEroResult | GetEroBriefResult;
 export function getEro(modelo: Modelo, input: GetEroInput): GetEroResult | GetEroBriefResult {
   const field = "id" in input ? "id" : "name";
@@ -481,9 +496,15 @@ export function getEro(modelo: Modelo, input: GetEroInput): GetEroResult | GetEr
       ),
     };
   }
-  if (input.brief === true) return { ok: true, output: briefOf(entry) };
+  const lingvo = input.lingvo;
+  if (input.brief === true) {
+    // Nachlese 8 ③: the purpose and the alternatives in the language asked for.
+    const translated =
+      entry.uzo === undefined ? entry : { ...entry, uzo: uzoIn(modelo, entry.uzo, lingvo) };
+    return { ok: true, output: briefOf(translated) };
+  }
   const { skemo } = entry;
-  const uzo = uzoOf(modelo, entry.uzo);
+  const uzo = uzoOf(modelo, entry.uzo, lingvo);
   return {
     ok: true,
     output: {
@@ -498,7 +519,9 @@ export function getEro(modelo: Modelo, input: GetEroInput): GetEroResult | GetEr
         a11y: skemo.a11y,
         ...(skemo.goals === undefined ? {} : { goals: skemo.goals }),
       },
-      reguloj: regulojOf(modelo, entry.ero.name).map(reguloRef),
+      reguloj: regulojOf(modelo, entry.ero.name).map((regulo) =>
+        reguloIn(modelo, reguloRef(regulo), lingvo),
+      ),
       examples: examplesOf(modelo, entry),
       projekcioj: projekciojOf(modelo, entry),
       ...(uzo === undefined ? {} : { uzo }),

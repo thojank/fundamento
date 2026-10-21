@@ -494,6 +494,7 @@ export interface ModeloJson {
   uzoj?: Uzo[];
   kontrastParoj: KontrastParo[];
   gvidanto?: Gvidanto;
+  tradukoj?: Tradukoj;
   /**
    * The Ikonaro (Spec 014 ①): the icon names of the core with meaning and kialo; absent while the Modelo has none.
    */
@@ -1162,6 +1163,14 @@ export interface Gvidanto {
    */
   fillers: {
     [k: string]: string[];
+  };
+}
+/**
+ * The translations of the texts of the Uzoj and the Reguloj (Nachlese 8 ③): per language, per text under its ID; English stays the source. Absent while the Modelo has none.
+ */
+export interface Tradukoj {
+  [k: string]: {
+    [k: string]: string;
   };
 }
 /**
@@ -2042,6 +2051,27 @@ export interface Gvidanto1 {
   fillers: {
     [k: string]: string[];
   };
+}
+/**
+ * Translations of the texts of the Uzoj and the Reguloj (Nachlese 8 ③), per language (ISO 639-1): the key is the ID of the entry and the path of the text in it — <uzo id>/purpose, <uzo id>/boundary/<case>/kialo, <uzo id>/instead/<goal>/kialo, <uzo id>/composes/containers/<name>/kialo, <uzo id>/composes/with/<ero>/kialo, <uzo id>/composes/never/<ero>/kialo, <regulo id>/statement, <regulo id>/kialo. English, the text of the entry itself, stays the source.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "Tradukoj".
+ */
+export interface Tradukoj1 {
+  [k: string]: {
+    [k: string]: string;
+  };
+}
+/**
+ * data/tradukoj.json: the translations of the texts of the Uzoj and the Reguloj (Nachlese 8 ③); absent while the Modelo has none.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "TradukojFile".
+ */
+export interface TradukojFile {
+  $schema?: string;
+  tradukoj: Tradukoj1;
 }
 /**
  * data/gvidanto.json: the words of the Gvidanto (Nachlese 8 ①); absent while it has none.

@@ -20,6 +20,7 @@ export * from "./eroj/usage.js";
 export * from "./export/index.js";
 export * from "./gvidanto/index.js";
 export * from "./ids/index.js";
+export * from "./lingvo/tradukoj.js";
 export * from "./load/index.js";
 export * from "./metrikoj/index.js";
 export * from "./nomreguloj/index.js";

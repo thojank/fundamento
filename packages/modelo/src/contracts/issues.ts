@@ -186,6 +186,9 @@ export const RULE_IDS = [
   "skemo-web-term",
   "skemo-a11y-invalid",
   "uzo-boundary-covered",
+  // Nachlese 8 ③: a text without its translation, a translation without its text.
+  "traduko-missing",
+  "traduko-orphaned",
   "link-not-color-only",
   "external-link-marked",
   // Spec 009 (plan D-05, D-07): a slot the name depends on that the Uzo does not require, and the

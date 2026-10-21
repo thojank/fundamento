@@ -7,6 +7,7 @@ import { CORE_SET_NAME } from "../contracts/grammar.js";
 import { formatIssuePath, type RuleId, type ValidationIssue } from "../contracts/issues.js";
 import { isKonstitucioArtikolo, KONSTITUCIO_ARTIKOLOJ } from "../contracts/jugxo.js";
 import type { Modelo } from "../contracts/modelo.js";
+import { tradukoIssues } from "../lingvo/tradukoj.js";
 import type { ModeloDocument, ModeloFiles } from "../load/files.js";
 import { CELOJ } from "../nomreguloj/types.js";
 import { isJsonObject, type JsonObject, rawEntries } from "./raw.js";
@@ -40,6 +41,9 @@ export function dataIssues(modelo: Modelo, files: ModeloFiles): DataRulesResult 
       // implementation, so `fm validate` and `pnpm check:mankoj` can never disagree.
       ...checkMankoj({ mankoj: files.data["mankoj.json"] }).issues,
       ...kontrast.issues,
+      // Nachlese 8 ③: every text the Vitrino shows has its translation in every language the
+      // Modelo translates into.
+      ...tradukoIssues(modelo),
     ],
     kontrastParoj: kontrast.checkable,
   };
