@@ -235,12 +235,15 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
       ...["boundary", "slots", "content"].map(() => "kampo"),
       // Spec 015 ③: the karto carries a Uzo like every set.
       ...["boundary", "slots", "content"].map(() => "karto"),
+      // Spec 020 ③: the kodbloko and the markdovido carry a Uzo like every set.
+      ...["boundary", "slots", "content"].map(() => "kodbloko"),
       ...["boundary", "slots", "content"].map(() => "kompletigilo"),
       // Spec 014 ④: the konsileto, the menuo and the sxvebilo carry a Uzo like every set.
       ...["boundary", "slots", "content"].map(() => "konsileto"),
       // Spec 011 ⑤: the langetaro and the navigado carry a Uzo like every set.
       ...["boundary", "slots", "content"].map(() => "langetaro"),
       ...["boundary", "slots", "content"].map(() => "ligilo"),
+      ...["boundary", "slots", "content"].map(() => "markdovido"),
       ...["boundary", "slots", "content"].map(() => "markobutono"),
       ...["boundary", "slots", "content"].map(() => "menuo"),
       ...["boundary", "slots", "content"].map(() => "mezurilo"),
@@ -301,12 +304,15 @@ describe("the plugin tries the Uzo beyond the purpose and reports open or closed
       ...["kampo", "kampo", "kampo"],
       // Spec 015 ③: the karto closes its three parts too.
       ...["karto", "karto", "karto"],
+      // Spec 020 ③: the kodbloko and the markdovido close their three parts too.
+      ...["kodbloko", "kodbloko", "kodbloko"],
       ...["kompletigilo", "kompletigilo", "kompletigilo"],
       // Spec 014 ④: the overlays close their three parts too.
       ...["konsileto", "konsileto", "konsileto"],
       // Spec 011 ⑤: the langetaro and the navigado close their three parts too.
       ...["langetaro", "langetaro", "langetaro"],
       ...["ligilo", "ligilo", "ligilo"],
+      ...["markdovido", "markdovido", "markdovido"],
       ...["markobutono", "markobutono", "markobutono"],
       ...["menuo", "menuo", "menuo"],
       ...["mezurilo", "mezurilo", "mezurilo"],
@@ -462,6 +468,9 @@ describe("the full plan against the strict double: fresh and into the file of be
     // Spec 015 ③: and the card and the avatar.
     "karto",
     "avataro",
+    // Spec 020 ③: and the code block and the Markdown view.
+    "kodbloko",
+    "markdovido",
   ]);
   const before2 = structuredClone(repo.input);
   before2.modelo.eroj = before2.modelo.eroj.filter((entry) => !BEFORE_2.has(entry.ero.name));

@@ -426,6 +426,8 @@ describe("every bound paint shows the plan's colour after the first and the seco
         { set: "kampo", created: 18, updated: 0 },
         // Spec 015 ③: the karto has orientation = 2 variants in one state (an axis of its own).
         { set: "karto", created: 2, updated: 0 },
+        // Spec 020 ③: the kodbloko has state = 2 variants (copyable keys no part, no axis).
+        { set: "kodbloko", created: 2, updated: 0 },
         // Spec 014 ⑤: the kompletigilo has size × expanded × state = 30 variants.
         { set: "kompletigilo", created: 30, updated: 0 },
         // Spec 014 ④: the konsileto has placement = 4 variants in one state (an axis of its own).
@@ -434,6 +436,8 @@ describe("every bound paint shows the plan's colour after the first and the seco
         // label and selected are strings, no axis).
         { set: "langetaro", created: 4, updated: 0 },
         { set: "ligilo", created: 30, updated: 0 },
+        // Spec 020 ③: the markdovido has one variant (source and start-level are no axes).
+        { set: "markdovido", created: 1, updated: 0 },
         // Spec 010 ②: the markobutono has checked × size × state = 30 variants.
         { set: "markobutono", created: 30, updated: 0 },
         // Spec 014 ④: the menuo has state = 4 variants (the states of an entry).

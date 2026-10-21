@@ -91,11 +91,12 @@ describe("Figma: example frames of instances, outside the sets (E3)", () => {
       }[];
     };
     expect(plan.components.map((component) => component.set)).not.toContain("sxelo");
-    // Spec 020 ②: formularo and filtrilo beside them.
+    // Spec 020 ②: formularo and filtrilo beside them; ③: redaktilo.
     expect(plan.sxablonoj?.map((entry) => entry.name)).toEqual([
       "filtrilo",
       "formularo",
       "pagxo",
+      "redaktilo",
       "sxelo",
     ]);
     const sxelo = plan.sxablonoj?.find((entry) => entry.name === "sxelo");
@@ -152,5 +153,35 @@ describe("formularo and filtrilo (Spec 020 ②)", () => {
     const section = html.slice(html.indexOf('id="fm-vitrino-sxablonoj"'));
     expect(section).toMatch(/data-fm-breite="schmal"[^>]*>\s*<fm-formularo[ >]/);
     expect(section).toMatch(/data-fm-breite="breit"[^>]*>\s*<fm-filtrilo[ >]/);
+  });
+});
+
+// Spec 020 ③: two Eroj and a Sxablono of content through the same Celoj.
+describe("kodbloko, markdovido and redaktilo (Spec 020 ③)", () => {
+  it("web: the two Eroj and the editor are elements; the markdown view builds its content without innerHTML", () => {
+    for (const tag of ["fm-kodbloko", "fm-markdovido", "fm-redaktilo"])
+      expect(read(`eroj/src/generated/${tag}.ts`), tag).toContain(`customElements.get("${tag}")`);
+    const markdown = read("eroj/src/generated/fm-markdovido.ts");
+    expect(markdown).toContain("createElement");
+    // The one innerHTML is the element's own shadow template, a literal of the generator.
+    expect(markdown.match(/\.innerHTML\s*=/g)).toHaveLength(1);
+    expect(markdown).toMatch(/root\.innerHTML = `<div part="control">/);
+    expect(markdown).not.toContain("insertAdjacentHTML");
+  });
+
+  it("Make Kit: a component guideline for each Ero, a pattern for the editor; Figma sets for the Eroj; the Vitrino shows all three", () => {
+    const base = "make-kit/komuna/guidelines";
+    expect(read(`${base}/components/kodbloko.md`)).toContain("# Kodbloko");
+    expect(read(`${base}/components/markdovido.md`)).toContain("# Markdovido");
+    expect(read(`${base}/patterns/redaktilo.md`)).toMatch(/^\| `field` \| tekstareo \|/m);
+    const plan = JSON.parse(read("figma/plan.json")) as { components: { set: string }[] };
+    const sets = plan.components.map((component) => component.set);
+    expect(sets).toContain("kodbloko");
+    expect(sets).toContain("markdovido");
+    const html = read("vitrino/index.html");
+    expect(html).toContain('id="fm-vitrino-kodbloko"');
+    expect(html).toContain('id="fm-vitrino-markdovido"');
+    const section = html.slice(html.indexOf('id="fm-vitrino-sxablonoj"'));
+    expect(section).toMatch(/data-fm-breite="breit"[^>]*>\s*<fm-redaktilo[ >]/);
   });
 });

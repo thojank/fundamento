@@ -1,0 +1,82 @@
+{
+  "$schema": "../../../schema/modelo.schema.json#/$defs/UzoFile",
+  "uzo": {
+    "id": "uzo_01M5D5JMAGCDCBH8FJJNN0DMKG",
+    "ero": "ero_01M5D5JKHFX2EFVCS08CFE8DS5",
+    "skemo": "ske_01M5D5JKXYZ7F3VJCPGRYJ8RX1",
+    "purpose": "Shows a command or a place in a file as code a person can read, select and copy: named by its caption, never cut off — a long line scrolls.",
+    "instead": [
+      {
+        "goal": "inline-code",
+        "keywords": {
+          "en": ["inline-code"],
+          "de": ["inline-code", "codewort"]
+        },
+        "ero": "teksto",
+        "kialo": "A piece of code inside a sentence is a teksto with kind code, because it stands in the line of the text; a code block stands on its own."
+      }
+    ],
+    "boundary": [
+      {
+        "case": "diff",
+        "action": "ask-human",
+        "keywords": {
+          "en": ["diff", "line-diff"],
+          "de": ["diff", "zeilenvergleich"]
+        },
+        "kialo": "A comparison of two versions line by line is no code block, because every line says what changed with a mark and a word; it stays with the application until a second one needs it."
+      },
+      {
+        "case": "syntax-highlighting",
+        "action": "not-supported",
+        "keywords": {
+          "en": ["syntax-highlighting"],
+          "de": ["syntaxhervorhebung"]
+        },
+        "kialo": "Colours per kind of word are not supported, because a colour names no word (WCAG 1.4.1) and every language would need a grammar; the code stands in one colour."
+      }
+    ],
+    "composes": {
+      "containers": [
+        {
+          "name": "page-section",
+          "kialo": "A code block stands in a section of a page where the text that explains it stands, because the command belongs to its explanation."
+        },
+        {
+          "name": "table",
+          "kialo": "A place in a file can head a row of a table, because the finding of the row is about it."
+        }
+      ],
+      "with": [
+        {
+          "ero": "teksto",
+          "kialo": "The text before a code block says what it does, because a command without its purpose is a risk."
+        }
+      ],
+      "never": [],
+      "spacing": {
+        "owner": "container",
+        "regulo": "spacing-owned-by-container"
+      }
+    },
+    "slots": {
+      "label": {
+        "accepts": ["text"],
+        "required": true,
+        "max": 1,
+        "nesting": 0
+      },
+      "caption": {
+        "accepts": ["text"],
+        "required": true,
+        "max": 1,
+        "nesting": 0
+      }
+    },
+    "layout": {
+      "size": "container",
+      "wrap": "never"
+    },
+    "content": []
+  }
+}

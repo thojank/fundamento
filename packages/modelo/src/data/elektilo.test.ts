@@ -66,10 +66,12 @@ describe("elektilo in the repo Modelo (G1, G2, section 4)", () => {
       "insigno",
       "kampo",
       "karto",
+      "kodbloko",
       "kompletigilo",
       "konsileto",
       "langetaro",
       "ligilo",
+      "markdovido",
       "markobutono",
       "menuo",
       "mezurilo",
@@ -502,6 +504,8 @@ describe("the Reguloj of the elektilo (G6, E5)", () => {
       "alsxutilo",
       "karto",
       "avataro",
+      "kodbloko",
+      "markdovido",
     ]);
   });
 

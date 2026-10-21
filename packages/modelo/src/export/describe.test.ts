@@ -71,11 +71,13 @@ describe("countWord", () => {
     [28, "twenty-eight"],
     [29, "twenty-nine"],
     // Spec 015 ②: thirty (the alsxutilo); Spec 015 ③: thirty-one (the karto) and thirty-two (the
-    // avataro); beyond that the number stands.
+    // avataro); Spec 020 ③: thirty-four (kodbloko and markdovido); beyond that the number stands.
     [30, "thirty"],
     [31, "thirty-one"],
     [32, "thirty-two"],
-    [33, "33"],
+    [33, "thirty-three"],
+    [34, "thirty-four"],
+    [35, "35"],
   ])("%i -> %s", (count, word) => {
     expect(countWord(count)).toBe(word);
   });

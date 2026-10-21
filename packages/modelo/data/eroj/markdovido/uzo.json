@@ -1,0 +1,85 @@
+{
+  "$schema": "../../../schema/modelo.schema.json#/$defs/UzoFile",
+  "uzo": {
+    "id": "uzo_01M5D5JMAHP0J37BDYFZG8V3KY",
+    "ero": "ero_01M5D5JKHFX2EFVCS08CFE8DS6",
+    "skemo": "ske_01M5D5JKXZQ7G5DHPNSSQZ2N7C",
+    "purpose": "Shows content written in Markdown — a standard, a proposal, a preview — in the type and the order of the page, safely: the source is data, never markup.",
+    "instead": [
+      {
+        "goal": "edit-markdown",
+        "keywords": {
+          "en": ["markdown-editor"],
+          "de": ["markdown-editor"]
+        },
+        "ero": "redaktilo",
+        "kialo": "Writing Markdown with its preview is the redaktilo, because the field and the preview belong together; the markdovido only shows."
+      }
+    ],
+    "boundary": [
+      {
+        "case": "images",
+        "action": "ask-human",
+        "keywords": {
+          "en": ["markdown-image"],
+          "de": ["markdown-bild"]
+        },
+        "kialo": "An image in a source is shown by its text in round 1, because where it comes from, how large it is and what it says are decisions of their own; a person decides."
+      },
+      {
+        "case": "html",
+        "action": "not-supported",
+        "keywords": {
+          "en": ["markdown-html"],
+          "de": ["markdown-html"]
+        },
+        "kialo": "HTML in a source is not passed through, because markup from data can run code in the page; it is shown as text."
+      }
+    ],
+    "composes": {
+      "containers": [
+        {
+          "name": "page-section",
+          "kialo": "A Markdown view stands in a section of a page under its heading, because its own headings start one level below."
+        }
+      ],
+      "with": [
+        {
+          "ero": "titolo",
+          "kialo": "A heading of the source is a titolo, one level below the page (start-level)."
+        },
+        {
+          "ero": "teksto",
+          "kialo": "A paragraph is a teksto, inline code a teksto of kind code."
+        },
+        {
+          "ero": "tabelo",
+          "kialo": "A pipe table is a tabelo with column headers, its alignment kept."
+        },
+        {
+          "ero": "kodbloko",
+          "kialo": "A code block of the source is a kodbloko, because a long line scrolls instead of being cut."
+        },
+        {
+          "ero": "apartigilo",
+          "kialo": "A rule of the source is an apartigilo."
+        },
+        {
+          "ero": "ligilo",
+          "kialo": "A link of the source is a ligilo, with a safe target only."
+        }
+      ],
+      "never": [],
+      "spacing": {
+        "owner": "container",
+        "regulo": "spacing-owned-by-container"
+      }
+    },
+    "slots": {},
+    "layout": {
+      "size": "container",
+      "wrap": "allowed"
+    },
+    "content": []
+  }
+}

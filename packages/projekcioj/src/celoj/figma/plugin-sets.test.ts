@@ -936,15 +936,19 @@ describe("the report names the font that was applied, not the one that was plann
 // kein Kandidat lädt, und nennt, was versucht wurde. Kein Token ändert sich dafür.
 describe("the code font is the first loadable family of its stack (W3, F-2)", () => {
   const CODE_FAMILIES = ["Geist Mono", "Menlo"];
-  /** The fixture's plan with a second candidate for the code family of the tekstareo. */
+  /**
+   * The fixture's plan with a second candidate for the code family — of every set that writes it:
+   * the tekstareo, since Spec 020 ③ the kodbloko and the markdovido too.
+   */
   const withCandidates = () => {
     const changed = JSON.parse(JSON.stringify(plan)) as FigmaPlan;
-    const set = changed.components.find((component) => component.set === "tekstareo");
-    for (const font of set?.fonts ?? []) {
-      if (font.family === "Geist Mono") font.families = [...CODE_FAMILIES];
-    }
-    for (const variant of set?.variants ?? []) {
-      if (variant.font?.family === "Geist Mono") variant.font.families = [...CODE_FAMILIES];
+    for (const set of changed.components) {
+      for (const font of set.fonts ?? []) {
+        if (font.family === "Geist Mono") font.families = [...CODE_FAMILIES];
+      }
+      for (const variant of set.variants ?? []) {
+        if (variant.font?.family === "Geist Mono") variant.font.families = [...CODE_FAMILIES];
+      }
     }
     return (files["figma/plugin/code.js"] ?? "").replace(
       /^const PLAN = .*$/m,

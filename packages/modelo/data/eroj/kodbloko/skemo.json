@@ -1,0 +1,81 @@
+{
+  "$schema": "../../../schema/modelo.schema.json#/$defs/EroFile",
+  "ero": {
+    "id": "ero_01M5D5JKHFX2EFVCS08CFE8DS5",
+    "name": "kodbloko",
+    "skemo": "ske_01M5D5JKXYZ7F3VJCPGRYJ8RX1",
+    "description": "A code block: a command to run or a place in a file, named by its caption, its content as text in the code role that scrolls along the line instead of being cut; it can offer a button that copies the text and says so."
+  },
+  "skemo": {
+    "id": "ske_01M5D5JKXYZ7F3VJCPGRYJ8RX1",
+    "ero": "ero_01M5D5JKHFX2EFVCS08CFE8DS5",
+    "props": [
+      {
+        "name": "copyable",
+        "kind": "boolean",
+        "default": false,
+        "description": "Shows a button (a butono of low emphasis) named by a11y.texts.copyable that copies the content; after copying the block says so politely (a11y.texts announce-name)."
+      }
+    ],
+    "states": ["rest", "focus"],
+    "slots": [
+      { "name": "label", "default": true, "text": true },
+      { "name": "caption", "text": true }
+    ],
+    "parts": {
+      "surface": {
+        "fill": { "fixed": "color.background.sunken" }
+      },
+      "box": {
+        "inline-padding": { "fixed": "spacing.medium" },
+        "radius": { "fixed": "radius.role.control" },
+        "gap": { "fixed": "spacing.small" }
+      },
+      "text": {
+        "typography": { "fixed": "typography.code" },
+        "color": { "fixed": "color.text.default" }
+      },
+      "legend": {
+        "typography": { "fixed": "typography.caption" },
+        "color": { "fixed": "color.text.subtle" }
+      },
+      "scroll-ring": {
+        "ring": { "fixed": "focus.ring" },
+        "offset": { "fixed": "focus.offset" },
+        "color": { "fixed": "color.focus.inner" }
+      },
+      "announce": {
+        "color": { "fixed": "color.text.subtle" }
+      }
+    },
+    "bindings": [],
+    "a11y": {
+      "role": "figure",
+      "name": ["slot:caption"],
+      "states": {},
+      "keys": [],
+      "texts": {
+        "copyable": { "de": "Kopieren", "en": "Copy" },
+        "announce-name": { "de": "Kopiert", "en": "Copied" }
+      }
+    },
+    "goals": [
+      {
+        "goal": "command",
+        "keywords": {
+          "en": ["command", "cli-command", "shell-command"],
+          "de": ["befehl", "kommando", "kommandozeile"]
+        },
+        "props": { "copyable": true }
+      },
+      {
+        "goal": "code-block",
+        "keywords": {
+          "en": ["code-block", "codeblock", "snippet", "source-excerpt"],
+          "de": ["codeblock", "quelltext", "fundstelle", "codeausschnitt"]
+        },
+        "props": {}
+      }
+    ]
+  }
+}

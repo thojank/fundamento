@@ -239,6 +239,64 @@ const cardStructure: string = [
   ':where([part="media"][hidden], [part="meta"][hidden], [part="actions"][hidden]) { display: none; }',
 ].join("\n");
 
+/**
+ * A code block (Spec 020 ③, plan ③ D-23): the platform's figure — the surface with its padding
+ * and gap is the control, the caption its legend, the content a pre in a region that scrolls and
+ * takes the focus (the scroll ring), the copy button and the polite live region after it.
+ */
+export const isCodeblock = (skemo: Skemo): boolean => hostOf(skemo.a11y.role) === "codeblock";
+
+function codeblockPartSelector(part: string, data: string): string {
+  const root = `[part="control"]${data}`;
+  if (part === "text" || part === "legend" || part === "announce") {
+    return `:where(${root}) [part="${part}"]`;
+  }
+  if (part === "scroll-ring") return `:where(${root}) [part="region"]:focus-visible`;
+  return `:where(${root})`;
+}
+
+/**
+ * Layout of a code block (Spec 020 ③, D-23), keywords and 0 only: a block that takes the width
+ * of its container; the figure a column; the region scrolls along the line and never wraps it
+ * (a command keeps its spaces), the pre and the code without the platform's margin and font; the
+ * copy button at the start, shown with copyable; the live region clipped from sight.
+ */
+const codeblockStructure = (): string =>
+  [
+    ":host { display: block; }",
+    ':where([part="control"]) { display: flex; flex-direction: column; box-sizing: border-box; margin: 0; min-inline-size: 0; }',
+    ':where([part="region"]) { overflow-x: auto; min-inline-size: 0; }',
+    ':where([part="text"]) { margin: 0; white-space: pre; }',
+    ':where([part="text"]) > code { font: inherit; }',
+    ':where([part="copy"]) { align-self: flex-start; }',
+    ':where([part="copy"][hidden]) { display: none; }',
+    HIDDEN_TEXT,
+  ].join("\n");
+
+/**
+ * A Markdown view (Spec 020 ③, plan ③ D-24): the Eroj it builds stand in its light DOM; the
+ * column in the shadow holds the gap between the blocks, a quote its edge at the start, a list
+ * its indent — on the blocks of the first level (::slotted reaches no deeper; a nested list keeps
+ * the platform's indent, Befund F-5).
+ */
+export const isMarkdown = (skemo: Skemo): boolean => hostOf(skemo.a11y.role) === "markdown";
+
+function markdownPartSelector(part: string): string {
+  const root = '[part="control"]';
+  if (part === "quote") return `:where(${root}) > slot::slotted(blockquote)`;
+  if (part === "indent") return `:where(${root}) > slot::slotted(:is(ul, ol))`;
+  return `:where(${root})`;
+}
+
+/** Layout of a Markdown view (Spec 020 ③, D-24), keywords and 0 only: a column of blocks. */
+const markdownStructure: string = [
+  ":host { display: block; }",
+  ':where([part="control"]) { display: flex; flex-direction: column; min-inline-size: 0; }',
+  ':where([part="control"]) > slot::slotted(*) { margin: 0; }',
+  ':where([part="control"]) > slot::slotted(blockquote) { border-inline-start-style: solid; }',
+  ':where([part="control"]) > slot::slotted(:is(ul, ol)) { padding-inline-end: 0; }',
+].join("\n");
+
 /** A breadcrumb (Spec 015 ①, plan ① D-04): a navigation with a separator part between its items. */
 export const isBreadcrumb = (skemo: Skemo): boolean =>
   skemo.a11y.role === "navigation" && skemo.parts.separator !== undefined;
@@ -559,6 +617,27 @@ function declarations(skemo: Skemo, part: string, property: string, token: strin
   // ②, D-05); none (no dropzone) writes nothing.
   if (isUpload(skemo) && part === "dropzone" && property === "inline-padding") {
     return isBindingKeyword(token) ? [] : [`padding: ${variable(token)};`];
+  }
+  // A code block (Spec 020 ③, D-23): the inline padding of the figure is its padding on every
+  // side; the scroll ring's colour fills the gap between region and ring, as a focus ring's.
+  if (isCodeblock(skemo) && part === "box" && property === "inline-padding") {
+    return [`padding: ${variable(token)};`];
+  }
+  if (isCodeblock(skemo) && part === "scroll-ring" && property === "color") {
+    const offset = fixedToken(skemo.parts[part]?.offset);
+    return offset === undefined
+      ? []
+      : [`box-shadow: 0 0 0 ${variable(offset)} ${variable(token)};`];
+  }
+  // A Markdown view (Spec 020 ③, D-24): a quote is an edge at the start and the room after it, a
+  // list the room before its items — the writing direction mirrors both.
+  if (isMarkdown(skemo) && part === "quote") {
+    if (property === "color") return [`border-inline-start-color: ${variable(token)};`];
+    if (property === "width") return [`border-inline-start-width: ${variable(token)};`];
+    if (property === "inline-padding") return [`padding-inline-start: ${variable(token)};`];
+  }
+  if (isMarkdown(skemo) && part === "indent" && property === "inline-padding") {
+    return [`padding-inline-start: ${variable(token)};`];
   }
   // The inline padding of a card's body is its padding on every side (Spec 015 ③, D-04).
   if (isCard(skemo) && part === "box" && property === "inline-padding") {
@@ -1519,39 +1598,43 @@ export function stylesheetOf(skemo: Skemo, uzo?: Uzo): string {
                           ? paginationStructure
                           : isUpload(skemo)
                             ? uploadStructure(disables)
-                            : isCard(skemo)
-                              ? cardStructure
-                              : isAvatar(skemo)
-                                ? avatarStructure
-                                : isLight(skemo)
-                                  ? lightStructure(skemo)
-                                  : isTabs(skemo)
-                                    ? tabsStructure
-                                    : isDisclosure(skemo)
-                                      ? disclosureStructure
-                                      : isField(skemo)
-                                        ? `${fieldStructure(disables, isSelect(skemo), isTextarea(skemo))}${isSuggest(skemo) ? `\n${suggestStructure}` : ""}`
-                                        : isGroup(skemo)
-                                          ? groupStructure(
-                                              disables,
-                                              skemo.parts["required-mark"] !== undefined,
-                                            )
-                                          : isToggle(skemo)
-                                            ? toggleStructure(
-                                                disables,
-                                                uzo?.layout.wrap !== undefined &&
-                                                  uzo.layout.wrap !== "never",
-                                                skemo.slots.some(
-                                                  (slot) =>
-                                                    slot.default !== true && slot.text === true,
-                                                ),
-                                                skemo.parts["required-mark"] !== undefined,
-                                              )
-                                            : structure(
-                                                uzo?.layout.wrap === "with-text",
-                                                disables,
-                                                bordered,
-                                              );
+                            : isCodeblock(skemo)
+                              ? codeblockStructure()
+                              : isMarkdown(skemo)
+                                ? markdownStructure
+                                : isCard(skemo)
+                                  ? cardStructure
+                                  : isAvatar(skemo)
+                                    ? avatarStructure
+                                    : isLight(skemo)
+                                      ? lightStructure(skemo)
+                                      : isTabs(skemo)
+                                        ? tabsStructure
+                                        : isDisclosure(skemo)
+                                          ? disclosureStructure
+                                          : isField(skemo)
+                                            ? `${fieldStructure(disables, isSelect(skemo), isTextarea(skemo))}${isSuggest(skemo) ? `\n${suggestStructure}` : ""}`
+                                            : isGroup(skemo)
+                                              ? groupStructure(
+                                                  disables,
+                                                  skemo.parts["required-mark"] !== undefined,
+                                                )
+                                              : isToggle(skemo)
+                                                ? toggleStructure(
+                                                    disables,
+                                                    uzo?.layout.wrap !== undefined &&
+                                                      uzo.layout.wrap !== "never",
+                                                    skemo.slots.some(
+                                                      (slot) =>
+                                                        slot.default !== true && slot.text === true,
+                                                    ),
+                                                    skemo.parts["required-mark"] !== undefined,
+                                                  )
+                                                : structure(
+                                                    uzo?.layout.wrap === "with-text",
+                                                    disables,
+                                                    bordered,
+                                                  );
   // A skip link adds its place above the page to a control's structure (Spec 014 ②, D-07).
   const floating = isSkip(skemo) ? `\n${skipStructure}` : "";
   return `${base}${floating}\n${[...tokenRules, ...undrawn].join("\n")}\n`;
@@ -1639,6 +1722,8 @@ function selectorOf(
   if (isUpload(skemo)) {
     return uploadPartSelector(part, property, data, combination[STATE_KEY] ?? "rest");
   }
+  if (isCodeblock(skemo)) return codeblockPartSelector(part, data);
+  if (isMarkdown(skemo)) return markdownPartSelector(part);
   if (isCard(skemo)) return cardPartSelector(part, data);
   if (isAvatar(skemo)) return avatarPartSelector(part, data);
   const state = STATE_SELECTORS[combination[STATE_KEY] ?? "rest"] ?? "";

@@ -58,7 +58,9 @@ describe("the typography dialogs of the spec", () => {
     expect(answer.kialo).toBe(kialoOf("heading-levels-in-order"));
   });
 
-  it("'Fließtext unter dem Bild' → a teksto; 'Markdown im Text rendern' stops at the teksto's rich-text boundary", async () => {
+  // Spec 020 ③ (gekippter Dialog, Jugxo jug_01M5D5JN33G18AWD9G23JVVRD7): the boundary sends rich
+  // text to the markdovido.
+  it("'Fließtext unter dem Bild' → a teksto; 'Markdown im Text rendern' → the markdovido, by the teksto's rich-text boundary", async () => {
     const plain = await output<Suggested>(client, "suggest_ero", {
       goal: "Fließtext unter dem Bild",
     });
@@ -66,8 +68,12 @@ describe("the typography dialogs of the spec", () => {
     const rich = await output<Suggested>(client, "suggest_ero", {
       goal: "Markdown im Text rendern",
     });
-    expect(rich.suggestion).toBeNull();
-    expect(rich.boundary).toMatchObject({ ero: "teksto", case: "rich-text", action: "ask-human" });
+    expect(rich.suggestion).toEqual({ ero: "markdovido", props: {} });
+    expect(rich.boundary).toMatchObject({
+      ero: "teksto",
+      case: "rich-text",
+      action: "use-instead",
+    });
     // The cross-link of the Uzo (G6): a heading inside running text is the titolo's.
     expect(heading.ero).toBe("titolo");
   });
@@ -96,9 +102,9 @@ describe("check_usage of the headings", () => {
 });
 
 describe("list_eroj and the briefs", () => {
-  it("lists thirty-two Eroj; the briefs of titolo and teksto name their axes and duties", async () => {
+  it("lists thirty-four Eroj; the briefs of titolo and teksto name their axes and duties", async () => {
     const listed = await output<Listed>(client, "list_eroj", {});
-    expect(listed.eroj).toHaveLength(32);
+    expect(listed.eroj).toHaveLength(34);
     const titolo = await output<Brief>(client, "get_ero", { name: "titolo", brief: true });
     expect(titolo.axes.map((axis) => axis.name)).toEqual(["level", "size"]);
     expect(titolo.required).toEqual({ props: ["level"], slots: ["label"] });

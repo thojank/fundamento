@@ -787,10 +787,13 @@ describe("Figma plan for the ligilo (Spec 008 T017)", () => {
       "insigno",
       "kampo",
       "karto",
+      // Spec 020 ③: the kodbloko and the markdovido.
+      "kodbloko",
       "kompletigilo",
       "konsileto",
       "langetaro",
       "ligilo",
+      "markdovido",
       "markobutono",
       "menuo",
       "mezurilo",
@@ -1020,6 +1023,8 @@ describe("the label default of a set follows its a11y role (M-3)", () => {
       kampo: "Beschriftung",
       // Spec 015 ③: a card's label property writes its heading (proposal, to confirm).
       karto: "Überschrift",
+      // Spec 020 ③: a code block shows code, a Markdown view running text (proposals, to confirm).
+      kodbloko: "Code",
       // Spec 014 ⑤: the combobox shares the elektilo's role; its word applies (O-21).
       kompletigilo: "Auswahl",
       // Spec 014 ④: a tooltip is a short hint, the trigger of a menu offers more actions, a
@@ -1029,6 +1034,7 @@ describe("the label default of a set follows its a11y role (M-3)", () => {
       // Ero's (proposal for the maintainer to confirm).
       langetaro: "Reiter",
       ligilo: "Ziel",
+      markdovido: "Text",
       // Spec 010 ②: a checkbox names an option (plan ② D-11, for the maintainer to confirm, O-x).
       markobutono: "Option",
       menuo: "Weitere Aktionen",

@@ -105,8 +105,9 @@ describe("the Uzo of the teksto (section ③, G6)", () => {
       ["link-in-text", "ligilo"],
       ["status-word", "insigno"],
     ]);
-    expect(uzo?.boundary.map((entry) => [entry.case, entry.action])).toEqual([
-      ["rich-text", "ask-human"],
+    // Spec 020 ③ (Jugxo jug_01M5D5JN33G18AWD9G23JVVRD7): rich text goes to the markdovido.
+    expect(uzo?.boundary.map((entry) => [entry.case, entry.action, entry.ero])).toEqual([
+      ["rich-text", "use-instead", "markdovido"],
     ]);
     for (const entry of [...(uzo?.instead ?? []), ...(uzo?.boundary ?? [])]) {
       expect(entry.kialo).toMatch(/because/);
@@ -156,11 +157,15 @@ describe("suggest_ero of the text (Gvidanto)", () => {
     });
   });
 
-  it("'Markdown im Text' asks a person: rich text is a boundary", () => {
-    expect(suggest("Markdown im Text rendern").boundary).toMatchObject({
+  // Spec 020 ③ (gekippter Dialog, Jugxo jug_01M5D5JN33G18AWD9G23JVVRD7): the boundary sends
+  // rich text to the markdovido instead of asking a person.
+  it("'Markdown im Text' is the markdovido: rich text is a boundary of the teksto", () => {
+    const answer = suggest("Markdown im Text rendern");
+    expect(answer.suggestion).toEqual({ ero: "markdovido", props: {} });
+    expect(answer.boundary).toMatchObject({
       ero: "teksto",
       case: "rich-text",
-      action: "ask-human",
+      action: "use-instead",
     });
   });
 });

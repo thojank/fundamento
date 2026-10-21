@@ -20,6 +20,7 @@ describe("the Sxablonoj of Spec 020 ②", () => {
       "filtrilo",
       "formularo",
       "pagxo",
+      "redaktilo",
       "sxelo",
     ]);
   });

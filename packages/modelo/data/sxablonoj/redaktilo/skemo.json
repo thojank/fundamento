@@ -1,0 +1,63 @@
+{
+  "$schema": "../../../schema/modelo.schema.json#/$defs/SxablonoFile",
+  "sxablono": {
+    "id": "sxa_01M5D5JMPSCPRMVHYZ8EGVR5JY",
+    "name": "redaktilo",
+    "skemo": "ske_01M5D5JKXZQ7G5DHPNSSQZ2N7D",
+    "kind": "flow",
+    "description": "An editor with its preview: the source in a tekstareo of kind code beside its preview in a markdovido, side by side where there is room, one below the other where there is none; the preview follows every input and is no live region."
+  },
+  "skemo": {
+    "id": "ske_01M5D5JKXZQ7G5DHPNSSQZ2N7D",
+    "sxablono": "sxa_01M5D5JMPSCPRMVHYZ8EGVR5JY",
+    "props": [
+      {
+        "name": "preview-label",
+        "kind": "string",
+        "required": true,
+        "description": "The name of the preview, a region (Vorschau): heard, so a person knows what the text beside the field is."
+      }
+    ],
+    "regions": [
+      {
+        "name": "field",
+        "description": "The source: a tekstareo of kind code with its label, help and error.",
+        "required": true,
+        "accepts": ["tekstareo"],
+        "max": 1,
+        "props": {
+          "kind": "code"
+        }
+      },
+      {
+        "name": "preview",
+        "description": "The preview: a markdovido that shows the source as it is typed, without announcing every key.",
+        "required": true,
+        "accepts": ["markdovido"],
+        "max": 1
+      }
+    ],
+    "a11y": {
+      "landmarks": []
+    },
+    "goals": [
+      {
+        "goal": "markdown-editor",
+        "keywords": {
+          "en": ["editor", "markdown-editor"],
+          "de": ["editor", "markdown-editor", "texteditor"]
+        },
+        "props": {},
+        "kialo": "Writing with a preview is one pattern, because the field and the preview are one task; the preview speaks only when the person goes there."
+      }
+    ],
+    "parts": {
+      "frame": {
+        "gap": { "fixed": "spacing.large" }
+      },
+      "container": {
+        "width": { "fixed": "size.container.medium" }
+      }
+    }
+  }
+}

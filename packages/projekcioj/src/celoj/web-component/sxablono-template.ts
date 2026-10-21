@@ -73,12 +73,30 @@ export function sxablonoMarkup(entry: LoadedSxablono): string {
     const rest = names.filter((name) => !footer.includes(name));
     return `<div part="frame" role="search">${rest.map((name) => holder(entry, name)).join("")}<div part="footer">${footer.map((name) => holder(entry, name, "div", name === "status" ? ' role="status"' : "")).join("")}</div></div>`;
   }
+  // An editor (Spec 020 ③, plan ③ D-25: a region shows a markdovido): the field, then the preview —
+  // a region named by the preview-label prop in the render, no live region (a person goes there).
+  const preview = previewOf(entry);
+  if (preview !== undefined) {
+    return `<div part="frame">${names.map((name) => holder(entry, name, "div", name === preview ? ' role="region"' : "")).join("")}</div>`;
+  }
   // A form (a region asks for exactly one child, the submit button): the landmark form, named by
   // the label prop; its regions in order — problems, fields, actions.
   if (regions.some((region) => region.one !== undefined)) {
     return `<div part="frame" role="form">${names.map((name) => holder(entry, name)).join("")}</div>`;
   }
   return `<div part="frame">${names.map((name) => holder(entry, name)).join("")}</div>`;
+}
+
+/** The region of an editor's preview: the one that shows a markdovido (Spec 020 ③, D-25). */
+function previewOf(entry: LoadedSxablono): string | undefined {
+  return entry.skemo.regions.find((region) => region.accepts?.includes("markdovido") === true)
+    ?.name;
+}
+
+/** The region of an editor's source: the one that takes a tekstareo, beside the preview. */
+function sourceOf(entry: LoadedSxablono): string | undefined {
+  if (previewOf(entry) === undefined) return undefined;
+  return entry.skemo.regions.find((region) => region.accepts?.includes("tekstareo") === true)?.name;
 }
 
 /** Where a part property of the Skemo goes in CSS (Celo knowledge, Art. VIII). */
@@ -160,7 +178,13 @@ export function sxablonoStylesheetOf(
   const headGap = fixed("head", "gap");
   if (headGap !== undefined) rules.push(`[part="lead"] { gap: ${variable(headGap)}; }`);
   const stack = fixed("container", "width");
-  if (stack !== undefined) {
+  // An editor (Spec 020 ③, D-25): one below the other, side by side from the width of the part
+  // container on, each half of the row.
+  if (stack !== undefined && previewOf(entry) !== undefined) {
+    rules.push(
+      `@container (inline-size >= ${lengthOf(stack, base)}) { [part="frame"] { flex-direction: row; } [part="frame"] > [part] { flex: 1 1 0; min-inline-size: 0; } }`,
+    );
+  } else if (stack !== undefined) {
     rules.push(
       `@container (inline-size < ${lengthOf(stack, base)}) { [part="header"], [part="head"] { flex-direction: column; align-items: flex-start; } }`,
     );
@@ -190,6 +214,8 @@ export function sxablonoElementSource(
     )
     .map((region) => region.name);
   const isForm = regions.some((region) => region.one !== undefined);
+  const preview = previewOf(entry);
+  const source = sourceOf(entry);
   const named = entry.skemo.props.some((prop) => prop.name === "label");
   const head =
     options.inline === true
@@ -250,6 +276,23 @@ export function sxablonoElementSource(
   }
 `
     : "";
+  // Spec 020 ③ (plan ③ D-25, Abweichung zu G5): the preview of an editor follows every input of
+  // its field — the source of the markdovido is the value of the tekstareo; nothing is announced.
+  const editorMethods =
+    preview !== undefined && source !== undefined
+      ? `
+  /** The source of the preview: the value of the field, after every input. */
+  #follow(): void {
+    const field = this.querySelector(':scope > [slot="${source}"]');
+    const shown = this.querySelector(':scope > [slot="${preview}"]');
+    if (!(field instanceof HTMLElement) || !(shown instanceof HTMLElement)) return;
+    const value = (field as { value?: unknown }).value ?? field.getAttribute("value");
+    if (typeof value !== "string") return;
+    const target = shown as unknown as { source?: unknown };
+    if (target.source !== value) target.source = value;
+  }
+`
+      : "";
   // As a template literal: the markup holds no backtick and no placeholder.
   const body = `const MARKUP = \`${sxablonoMarkup(entry)}\`;
 const HIDEABLE: readonly string[] = ${JSON.stringify(hideable)};
@@ -280,7 +323,7 @@ export class ${className} extends Base {
     root.innerHTML = MARKUP;
     for (const slot of root.querySelectorAll("slot")) {
       slot.addEventListener("slotchange", () => this.#render());
-    }${isForm ? '\n    this.addEventListener("click", (event) => this.#onClick(event));\n    this.addEventListener("keydown", (event) => this.#onKey(event));' : ""}
+    }${isForm ? '\n    this.addEventListener("click", (event) => this.#onClick(event));\n    this.addEventListener("keydown", (event) => this.#onKey(event));' : ""}${editorMethods === "" ? "" : '\n    this.addEventListener("input", () => this.#follow());'}
   }
 
   connectedCallback(): void {
@@ -316,7 +359,19 @@ export class ${className} extends Base {
     }`
       : ""
   }
-    for (const region of HIDEABLE) {
+${
+  editorMethods === ""
+    ? ""
+    : `    // The name of the preview, a region (Spec 020 ③): the preview-label prop.
+    const preview = this.shadowRoot?.querySelector('[part="${preview}"]');
+    const previewLabel = this.getAttribute("preview-label");
+    if (preview instanceof HTMLElement) {
+      if (previewLabel === null || previewLabel === "") preview.removeAttribute("aria-label");
+      else if (preview.getAttribute("aria-label") !== previewLabel) preview.setAttribute("aria-label", previewLabel);
+    }
+    this.#follow();
+`
+}    for (const region of HIDEABLE) {
       const holder = this.shadowRoot?.querySelector(\`[part="\${region}"]\`);
       const slot = holder?.querySelector("slot");
       if (!(holder instanceof HTMLElement) || !(slot instanceof HTMLSlotElement)) continue;
@@ -326,7 +381,7 @@ export class ${className} extends Base {
       if (holder.hidden === filled) holder.hidden = !filled;
     }
   }
-${formMethods}}
+${formMethods}${editorMethods}}
 
 /** Registers ${tag} once; importing twice is safe. */
 export function define${className}(): void {
