@@ -26,7 +26,7 @@ import {
 import type { DoubleNode } from "./test-doubles/plugin.js";
 
 type Box = { name: string; direction: "HORIZONTAL" | "VERTICAL"; children: (string | Box)[] };
-type Plan = FigmaPlan & {
+type Plan = Omit<FigmaPlan, "components" | "sxablonoj"> & {
   sxablonoj: {
     name: string;
     layout: Box;
@@ -72,7 +72,7 @@ const provojPlan = JSON.parse(
   FIGMA_CELO.generate(provoj.input).find((file) => file.path === "figma/plan.json")?.text ?? "{}",
 ) as FigmaPlan;
 
-const homeOf = (of: FigmaPlan) =>
+const homeOf = (of: Pick<FigmaPlan, "collections">) =>
   new Map(
     of.collections.flatMap((collection) =>
       collection.variables.map((variable) => [variable.name, collection.name] as const),

@@ -25,7 +25,7 @@ describe("N7-F-1: the actions of the dialogo and the avizo take a butono", () =>
           ero: "avizo",
           props: { intent: "success" },
           label: "Gespeichert.",
-          slots: { actions: [{ ero: "butono", props: { emphasis: "low" }, label: "Rückgängig" }] },
+          slots: { actions: [{ ero: "butono" }] },
         },
         {
           ero: "dialogo",
@@ -33,10 +33,7 @@ describe("N7-F-1: the actions of the dialogo and the avizo take a butono", () =>
           label: "Befund verwerfen?",
           slots: {
             heading: ["text"],
-            actions: [
-              { ero: "butono", props: { emphasis: "high" }, label: "Verwerfen" },
-              { ero: "butono", props: { emphasis: "low" }, label: "Abbrechen" },
-            ],
+            actions: [{ ero: "butono" }, { ero: "butono" }],
           },
         },
       ],

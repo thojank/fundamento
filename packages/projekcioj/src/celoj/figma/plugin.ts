@@ -177,7 +177,14 @@ type PartNode =
   | "sort-glyph-*"
   | "sort-mark-*"
   | "line-h"
-  | "line-v";
+  | "line-v"
+  // Nachlese 8 ② (F-12): a code block's caption (legend), its code (text) and the copy stand-in; a
+  // Markdown view's paragraph, its list with the indent and the quote with its line.
+  | "legend"
+  | "copy"
+  | "paragraph"
+  | "items-list"
+  | "quote";
 
 interface Binding {
   node: PartNode;
@@ -546,6 +553,22 @@ const STRUCTURE_BINDINGS: Readonly<Record<string, Readonly<Record<string, readon
   // A badge (Spec 011 ③, plan ③ D-14): its text is the label — the colour of the text part goes
   // on the text node (in a field the text node shows the placeholder, B-2).
   badge: { "text.color": [{ node: "text", fields: ["fills"], paint: true }] },
+  // Nachlese 8 ② (F-12): a code block — the padding of the box on every side of the surface, as on
+  // the web; the code in the code role and its colour; the caption in its own role and colour.
+  codeblock: {
+    "box.inline-padding": [{ node: "control", fields: [...PADDINGS] }],
+    "text.color": [{ node: "text", fields: ["fills"], paint: true }],
+    "legend.color": [{ node: "legend", fields: ["fills"], paint: true }],
+    "legend.typography": typographyOf("legend"),
+  },
+  // A Markdown view: the line of a quote is its start edge (colour and width), the room after it
+  // the quote's padding; the indent of a list the list's padding at the start.
+  markdown: {
+    "quote.color": [{ node: "quote", fields: ["strokes"], paint: true }],
+    "quote.width": [{ node: "quote", fields: ["strokeLeftWeight"] }],
+    "quote.inline-padding": [{ node: "quote", fields: ["paddingLeft"] }],
+    "indent.inline-padding": [{ node: "items-list", fields: ["paddingLeft"] }],
+  },
   // A notice (Spec 011 ③): the padding of the box on every side of the control (the Skemo names
   // it once); the gap of the box between the parts of the row and between the texts of the column.
   notice: {
@@ -1538,6 +1561,20 @@ async function placeSxablonoj(section, eroj, warnings, variables) {
     });
     flush(node);
   };
+  // A frame the plugin made below \`root\`, at any depth: a second run finds the frames of the
+  // first, also where an older run left them flat (Nachlese 8 ②: regions moved into rows).
+  const below = (root, key, value) => {
+    for (const child of root.children || []) {
+      if (child.getSharedPluginData(NAMESPACE, key) === value) return child;
+      const found = below(child, key, value);
+      if (found !== undefined) return found;
+    }
+    return undefined;
+  };
+  const place = (parent, node, position) => {
+    if (node.parent !== parent) parent.appendChild(node);
+    if (parent.children.indexOf(node) !== position) parent.insertChild(position, node);
+  };
   let frame = ours(section, "frame", "${FIGMA_SXABLONO_FRAME}");
   const made = frame === undefined;
   if (made) {
@@ -1548,7 +1585,27 @@ async function placeSxablonoj(section, eroj, warnings, variables) {
   write(frame, "name", "${FIGMA_SXABLONO_FRAME}");
   write(frame, "x", PLAN.section.padding);
   write(frame, "y", eroj === undefined ? PLAN.section.padding : eroj.y + eroj.height + PLAN.section.gap);
-  layOut(frame, "VERTICAL", PLAN.section.gap, made, false);
+  // Nachlese 8 ② (F-8): the frame is a surface bound to the background role, with the section's
+  // padding, so the examples read in light and in dark like the Vitrino's page — written with its
+  // layout in one go, so a second run finds nothing to write.
+  const ground = variables === undefined ? undefined : variables.get("color/background/default");
+  own(frame, NEUTRAL);
+  Object.assign(gather(frame), {
+    layoutMode: "VERTICAL",
+    itemSpacing: PLAN.section.gap,
+    ...(made ? { layoutSizingHorizontal: "HUG" } : {}),
+    layoutSizingVertical: "HUG",
+    ...(ground === undefined
+      ? {}
+      : {
+          fills: [figma.variables.setBoundVariableForPaint({ type: "SOLID", color: { r: 1, g: 1, b: 1 } }, "color", ground)],
+          paddingLeft: PLAN.section.padding,
+          paddingRight: PLAN.section.padding,
+          paddingTop: PLAN.section.padding,
+          paddingBottom: PLAN.section.padding,
+        }),
+  });
+  flush(frame);
   const textColour = variables === undefined ? undefined : variables.get("color/text/default");
   for (const [index, sxablono] of PLAN.sxablonoj.entries()) {
     let example = ours(frame, "sxablono", sxablono.name);
@@ -1559,17 +1616,42 @@ async function placeSxablonoj(section, eroj, warnings, variables) {
     }
     if (frame.children.indexOf(example) !== index) frame.insertChild(index, example);
     write(example, "name", sxablono.name);
-    layOut(example, "VERTICAL", PLAN.section.gap / 2, true);
-    for (const [position, region] of sxablono.regions.entries()) {
-      let holder = ours(example, "region", region.name);
-      if (holder === undefined) {
-        holder = create(() => figma.createFrame());
-        example.appendChild(holder);
-        stamp(holder, "region", region.name);
+    const layout = sxablono.layout || { name: "frame", direction: "VERTICAL", children: sxablono.regions.map((region) => region.name) };
+    layOut(example, layout.direction, PLAN.section.gap / 2, true);
+    const used = new Set();
+    // Nachlese 8 ② (F-9): the rows and columns of the web, each a named frame; the regions in them.
+    const build = async (parent, children) => {
+      for (const [position, child] of children.entries()) {
+        if (typeof child !== "string") {
+          let box = below(example, "box", child.name);
+          if (box === undefined) {
+            box = create(() => figma.createFrame());
+            stamp(box, "box", child.name);
+          }
+          place(parent, box, position);
+          write(box, "name", child.name);
+          layOut(box, child.direction, PLAN.section.gap / 4, true);
+          used.add(box);
+          await build(box, child.children);
+          continue;
+        }
+        const region = sxablono.regions.find((candidate) => candidate.name === child);
+        if (region === undefined) continue;
+        let holder = below(example, "region", region.name);
+        if (holder === undefined) {
+          holder = create(() => figma.createFrame());
+          stamp(holder, "region", region.name);
+        }
+        place(parent, holder, position);
+        used.add(holder);
+        write(holder, "name", region.name);
+        layOut(holder, region.direction, PLAN.section.gap / 4, true);
+        await fill(holder, region);
       }
-      if (example.children.indexOf(holder) !== position) example.insertChild(position, holder);
-      write(holder, "name", region.name);
-      layOut(holder, region.direction, PLAN.section.gap / 4, true);
+    };
+    // F-10: what stands in a region is the Vitrino's example — an instance or a word, never the
+    // region's name; the name is the layer's.
+    const fill = async (holder, region) => {
       for (const [slot, item] of region.items.entries()) {
         const current = holder.children[slot];
         if (item.set === undefined) {
@@ -1623,16 +1705,39 @@ async function placeSxablonoj(section, eroj, warnings, variables) {
         own(instance, IN_FLOW);
         flush(instance);
         const definitions = set.componentPropertyDefinitions || {};
+        const shown = instance.componentProperties || {};
+        const valueOf = (key) => {
+          const entry = shown[key];
+          return entry !== undefined && typeof entry === "object" ? entry.value : entry;
+        };
+        const wantedProperties = {};
         const label = Object.keys(definitions).find(
           (key) => key.split("#")[0] === "label" && definitions[key].type === "TEXT",
         );
-        if (label !== undefined && item.text !== undefined) {
-          const shown = (instance.componentProperties || {})[label];
-          const value = shown !== undefined && typeof shown === "object" ? shown.value : shown;
-          if (value !== item.text) instance.setProperties({ [label]: item.text });
+        if (label !== undefined && item.text !== undefined && valueOf(label) !== item.text) wantedProperties[label] = item.text;
+        // F-9: an example sets the BOOLEAN properties it names — the menu closed.
+        for (const [name, value] of Object.entries(item.toggles || {})) {
+          const key = Object.keys(definitions).find(
+            (candidate) => candidate.split("#")[0] === name && definitions[candidate].type === "BOOLEAN",
+          );
+          if (key !== undefined && valueOf(key) !== value) wantedProperties[key] = value;
         }
+        if (Object.keys(wantedProperties).length > 0) instance.setProperties(wantedProperties);
       }
-    }
+    };
+    await build(example, layout.children);
+    // A frame of an earlier run that the layout no longer has (a region left empty, the flat
+    // regions before Nachlese 8): the plugin's own example, taken away.
+    const stale = [];
+    const collect = (node) => {
+      for (const child of node.children || []) {
+        const kind = child.getSharedPluginData(NAMESPACE, "region") !== "" || child.getSharedPluginData(NAMESPACE, "box") !== "";
+        if (kind && !used.has(child)) stale.push(child);
+        else if (child.type === "FRAME") collect(child);
+      }
+    };
+    collect(example);
+    for (const node of stale) node.remove();
   }
 }
 
@@ -3089,6 +3194,86 @@ async function applyComponents(variables, warnings) {
     bindMeasures(measures, report, component, variant);
   }
   /**
+   * A code block (Nachlese 8 ② F-12): the variant holds the surface — a column with its fill,
+   * radius, gap and padding bound — with the caption in its role, the code in the code role (the
+   * label property, the Vitrino's command) and the stand-in of the copy button, shown by the
+   * BOOLEAN copyable. The ring of the scroll region and the announcement have no node (Jugxo).
+   */
+  async function drawCodeblock(node, component, variant, report, labels, toggled) {
+    const words = component.codeblock || { caption: "", code: "", copy: "" };
+    const control = part(node, "control", () => figma.createFrame());
+    const legend = part(control, "legend", () => figma.createText());
+    const text = part(control, "text", () => figma.createText());
+    const copy = await drawStandIn(control, "copy", words.copy, variant);
+    [legend, text, copy.frame].forEach((child, index) => {
+      if (control.children.indexOf(child) !== index) control.insertChild(index, child);
+    });
+    for (const each of [legend, text]) await loadCurrentFont(each);
+    writeCase(component, variant, text);
+    if (variant.font !== undefined) {
+      write(text, "fontName", fonts.get(variant.font.family + " " + variant.font.style));
+    }
+    write(legend, "characters", words.caption);
+    write(text, "characters", words.code);
+    labels.push(text);
+    toggled.push({ part: "copy", node: copy.frame });
+    for (const frame of [node, control]) own(frame, NEUTRAL);
+    for (const each of [legend, text]) own(each, NEUTRAL_TEXT);
+    own(node, HUG_LAYOUT);
+    own(control, Object.assign({}, CONTROL_LAYOUT, { layoutMode: "VERTICAL", counterAxisAlignItems: "MIN" }));
+    for (const child of [node, control, legend, text]) own(child, IN_FLOW);
+    for (const each of [legend, text]) own(each, TEXT_SIZING);
+    const measures = bind({ control, text, legend }, variant, variables, component.structure);
+    for (const each of [node, control, legend, text, copy.frame, copy.text]) flush(each);
+    bindMeasures(measures, report, component, variant);
+  }
+  /**
+   * A Markdown view (Nachlese 8 ② F-12): the variant is a column — its gap the box's — with a
+   * paragraph, a list (its indent the start padding) and a quote (its line the start edge, the room
+   * after it the padding), the Vitrino's words in the role of running text.
+   */
+  async function drawMarkdown(node, component, variant, report) {
+    const example = component.markdown || { paragraph: "", items: [], quote: "" };
+    const role = component.markdownTexts || { bindings: {}, paints: {} };
+    const control = part(node, "control", () => figma.createFrame());
+    const paragraph = part(control, "paragraph", () => figma.createText());
+    const list = part(control, "items-list", () => figma.createFrame());
+    const quote = part(control, "quote", () => figma.createFrame());
+    [paragraph, list, quote].forEach((child, index) => {
+      if (control.children.indexOf(child) !== index) control.insertChild(index, child);
+    });
+    const lines = example.items.map((item, index) => {
+      const line = part(list, "item-text-" + (index + 1), () => figma.createText());
+      return [line, "\u2022 " + item];
+    });
+    const quoteText = part(quote, "quote-text", () => figma.createText());
+    const words = [[paragraph, example.paragraph], ...lines, [quoteText, example.quote]];
+    for (const [each, word] of words) {
+      await loadCurrentFont(each);
+      if (role.font !== undefined) {
+        write(each, "fontName", fonts.get(role.font.family + " " + role.font.style));
+      }
+      write(each, "characters", word);
+    }
+    for (const frame of [node, control, list, quote]) own(frame, NEUTRAL);
+    own(node, HUG_LAYOUT);
+    own(control, Object.assign({}, CONTROL_LAYOUT, { layoutMode: "VERTICAL", counterAxisAlignItems: "MIN" }));
+    for (const frame of [list, quote]) own(frame, Object.assign({}, HUG_LAYOUT, { layoutMode: "VERTICAL" }));
+    own(quote, { strokeTopWeight: 0, strokeRightWeight: 0, strokeBottomWeight: 0, strokesIncludedInLayout: true });
+    const measures = [];
+    for (const [each] of words) {
+      own(each, NEUTRAL_TEXT);
+      own(each, IN_FLOW);
+      own(each, TEXT_SIZING);
+      const texts = { bindings: role.bindings, paints: role.paints, focusVisible: false };
+      for (const measure of bind({ label: each }, texts, variables, "")) measures.push(measure);
+    }
+    for (const child of [node, control, list, quote]) own(child, IN_FLOW);
+    for (const measure of bind({ control, quote, "items-list": list }, variant, variables, component.structure)) measures.push(measure);
+    for (const each of [node, control, list, quote].concat(words.map(([each]) => each))) flush(each);
+    bindMeasures(measures, report, component, variant);
+  }
+  /**
    * The shadow of a part (Spec 011 ②; Spec 014 ④ for every overlay, G4): bound to DROP_SHADOW
    * effects where the API binds effects, written where not — and the report says which.
    */
@@ -3200,10 +3385,12 @@ async function applyComponents(variables, warnings) {
    * variant (the disabled variant shows every row disabled: one look per variant, Abweichung);
    * the shadow of the surface is bound as an effect.
    */
-  async function drawMenu(node, component, variant, report, labels) {
+  async function drawMenu(node, component, variant, report, labels, toggled) {
     const menu = component.menu || { trigger: "", items: [] };
     const trigger = await drawStandIn(node, "trigger", menu.trigger, variant);
     const surface = part(node, "surface", () => figma.createFrame());
+    // Nachlese 8 ② (F-9): the list shows by the BOOLEAN open; an example closes it.
+    if (toggled !== undefined) toggled.push({ part: "surface", node: surface });
     [trigger.frame, surface].forEach((child, index) => {
       if (node.children.indexOf(child) !== index) node.insertChild(index, child);
     });
@@ -4663,6 +4850,17 @@ async function applyComponents(variables, warnings) {
         if (existing === undefined) made.push(node);
         continue;
       }
+      // Nachlese 8 ② (F-12): a code block and a Markdown view, in functions of their own.
+      if (component.structure === "codeblock") {
+        await drawCodeblock(node, component, variant, report, labels, toggled);
+        if (existing === undefined) made.push(node);
+        continue;
+      }
+      if (component.structure === "markdown") {
+        await drawMarkdown(node, component, variant, report);
+        if (existing === undefined) made.push(node);
+        continue;
+      }
       if (component.structure === "notice") {
         await drawNotice(node, component, variant, report, labels, toggled);
         if (existing === undefined) made.push(node);
@@ -4681,7 +4879,7 @@ async function applyComponents(variables, warnings) {
         continue;
       }
       if (component.structure === "menu") {
-        await drawMenu(node, component, variant, report, labels);
+        await drawMenu(node, component, variant, report, labels, toggled);
         if (existing === undefined) made.push(node);
         continue;
       }

@@ -147,7 +147,8 @@ describe("the Uzo of the avizo (section ③, G5)", () => {
       message: { accepts: ["text"], required: true, max: 1, nesting: 0 },
       // Nachlese 7 ② B-5: the details take a teksto (kind code) beside text and lists.
       details: { accepts: ["text", "teksto"], nesting: 1 },
-      actions: { accepts: ["butono", "ligilo"], max: 2, nesting: 0 },
+      // Nachlese 8 ② (N7-F-1, Jugxo): a butono in actions is a nesting of depth 1.
+      actions: { accepts: ["butono", "ligilo"], max: 2, nesting: 1 },
     });
     expect(uzo?.layout).toEqual({ size: "container", wrap: "allowed" });
   });

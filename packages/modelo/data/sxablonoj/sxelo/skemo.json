@@ -16,24 +16,36 @@
         "name": "brand",
         "description": "The name of the application, a link home where it is one.",
         "required": true,
-        "accepts": ["text", "ligilo"],
+        "accepts": [
+          "text",
+          "ligilo"
+        ],
         "max": 1
       },
       {
         "name": "principal",
         "description": "Who is signed in — name, roles, a badge — and the action that signs out.",
-        "accepts": ["text", "insigno", "butono", "ligilo"]
+        "accepts": [
+          "text",
+          "insigno",
+          "butono",
+          "ligilo"
+        ]
       },
       {
         "name": "nav",
         "description": "The main navigation: a navigado, the landmark navigation.",
-        "accepts": ["navigado"],
+        "accepts": [
+          "navigado"
+        ],
         "max": 1
       },
       {
         "name": "notices",
         "description": "The notices of the application, a polite live region: what happened is heard without the focus leaving its place.",
-        "accepts": ["avizo"],
+        "accepts": [
+          "avizo"
+        ],
         "live": "polite"
       },
       {
@@ -44,15 +56,26 @@
       }
     ],
     "a11y": {
-      "landmarks": ["banner", "main"],
+      "landmarks": [
+        "banner",
+        "main"
+      ],
       "skip": "main"
     },
     "goals": [
       {
         "goal": "application-shell",
         "keywords": {
-          "en": ["shell", "app-shell", "frame"],
-          "de": ["rahmen", "anwendungsrahmen", "grundgerüst"]
+          "en": [
+            "shell",
+            "app-shell",
+            "frame"
+          ],
+          "de": [
+            "rahmen",
+            "anwendungsrahmen",
+            "grundgerüst"
+          ]
         },
         "props": {},
         "kialo": "The frame of an application is one pattern, because the landmarks banner, navigation and main exist once per page and a skip link leads past them; built by hand, every application repeats them differently."
@@ -60,28 +83,57 @@
     ],
     "parts": {
       "frame": {
-        "gap": { "fixed": "spacing.medium" }
+        "gap": {
+          "fixed": "spacing.medium"
+        }
       },
       "header": {
-        "fill": { "fixed": "color.background.default" },
-        "gap": { "fixed": "spacing.medium" },
-        "inline-padding": { "fixed": "spacing.large" }
+        "fill": {
+          "fixed": "color.background.default"
+        },
+        "gap": {
+          "fixed": "spacing.medium"
+        },
+        "inline-padding": {
+          "fixed": "spacing.large"
+        }
+      },
+      "nav": {
+        "inline-padding": {
+          "fixed": "spacing.large"
+        }
       },
       "divider": {
-        "color": { "fixed": "color.border.subtle" },
-        "width": { "fixed": "border.width.default" }
+        "color": {
+          "fixed": "color.border.subtle"
+        },
+        "width": {
+          "fixed": "border.width.default"
+        }
       },
       "notices": {
-        "gap": { "fixed": "spacing.small" },
-        "inline-padding": { "fixed": "spacing.large" }
+        "gap": {
+          "fixed": "spacing.small"
+        },
+        "inline-padding": {
+          "fixed": "spacing.large"
+        }
       },
       "main": {
-        "gap": { "fixed": "spacing.large" },
-        "inline-padding": { "fixed": "spacing.large" },
-        "width": { "fixed": "layout.container.max" }
+        "gap": {
+          "fixed": "spacing.large"
+        },
+        "inline-padding": {
+          "fixed": "spacing.large"
+        },
+        "width": {
+          "fixed": "layout.container.max"
+        }
       },
       "container": {
-        "width": { "fixed": "size.container.medium" }
+        "width": {
+          "fixed": "size.container.medium"
+        }
       }
     }
   }

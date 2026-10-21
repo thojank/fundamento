@@ -324,6 +324,20 @@ function werkstattShell(werkstatt: WerkstattDatumoj | undefined): string {
 }
 
 /** The whole document; `datumoj` decides everything that is shown. */
+/**
+ * Nachlese 8 ② (M5): the panel and the report of the Werkstatt follow a slider without
+ * transitions — every motion duration of the CSS Celo is 0 there. A colour that changes started a
+ * transition on each of their controls, and its frames ran into the style of the next change: the
+ * longest block of the main thread (M5, measured with a CPU three times slower: 52–63 ms with
+ * them, 0–50 ms without). The Eroj of the page and of the comparison keep their motion.
+ */
+function stillControls(css: string): string {
+  const durations = [...new Set(css.match(/--fm-motion-duration-[a-z0-9-]+/g) ?? [])].sort();
+  return durations.length === 0
+    ? ""
+    : `[data-fm-modus="werkstatt"] .fm-werkstatt-kolumnoj { ${durations.map((name) => `${name}: 0ms;`).join(" ")} }`;
+}
+
 export function vitrinoHtml({
   css,
   elementJs,
@@ -348,7 +362,8 @@ export function vitrinoHtml({
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Fundamento Vitrino</title>
 <style id="fm-vitrino-css">${css}</style>
-<style id="fm-vitrino-layout">${LAYOUT}</style>
+<style id="fm-vitrino-layout">${LAYOUT}
+${stillControls(css)}</style>
 <script type="application/json" id="fm-vitrino">${jsonIsland({ ...datumoj, werkstatt: werkstatt !== undefined })}</script>
 ${werkstatt === undefined ? "" : `<script type="application/json" id="fm-werkstatt">${jsonIsland(werkstatt)}</script>`}
 </head>

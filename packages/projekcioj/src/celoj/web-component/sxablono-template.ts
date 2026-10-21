@@ -75,9 +75,17 @@ export function sxablonoMarkup(entry: LoadedSxablono): string {
   }
   // An editor (Spec 020 ③, plan ③ D-25: a region shows a markdovido): the field, then the preview —
   // a region named by the preview-label prop in the render, no live region (a person goes there).
+  // Nachlese 8 ② (V-4): the preview names itself visibly, in the role of a field's label, so it
+  // begins at the height of the field; heard is the region's name (aria-label), not this text.
   const preview = previewOf(entry);
   if (preview !== undefined) {
-    return `<div part="frame">${names.map((name) => holder(entry, name, "div", name === preview ? ' role="region"' : "")).join("")}</div>`;
+    return `<div part="frame">${names
+      .map((name) =>
+        name === preview
+          ? `<div part="${name}" role="region"><span part="${name}-label" aria-hidden="true"></span><slot name="${name}"></slot></div>`
+          : holder(entry, name),
+      )
+      .join("")}</div>`;
   }
   // A form (a region asks for exactly one child, the submit button): the landmark form, named by
   // the label prop; its regions in order — problems, fields, actions.
@@ -107,6 +115,15 @@ const PROPERTY_CSS: Readonly<Record<string, string>> = {
   "inline-padding": "padding-inline",
   width: "max-inline-size",
 };
+
+/** The fields of a typography role, as the CSS Celo writes them (one custom property each). */
+const TYPOGRAPHY_FIELDS = [
+  "font-family",
+  "font-size",
+  "font-weight",
+  "letter-spacing",
+  "line-height",
+] as const;
 
 /** The px of a dimension token in the base resolution, for a container query (no var() there). */
 function lengthOf(token: string, base: Readonly<Record<string, ResolvedToken>>): string {
@@ -145,10 +162,13 @@ export function sxablonoStylesheetOf(
     "principal",
     ...(search ? ["fields", "footer"] : []),
   ];
+  // Nachlese 8 ② (V-3): only a row wraps. A column that wraps sizes its items by their own
+  // widths, and a Sxablono in it — a container of its own, with no width of its own — shrank to
+  // nothing and grew as tall as its words: the shell in the Vitrino as high as the screen.
   for (const region of entry.skemo.regions.map((candidate) => candidate.name).concat(rows)) {
     const direction = rows.includes(region) ? "row" : "column";
     rules.push(
-      `[part="${region}"] { display: flex; flex-direction: ${direction}; flex-wrap: wrap; box-sizing: border-box; }`,
+      `[part="${region}"] { display: flex; flex-direction: ${direction}; flex-wrap: ${direction === "row" ? "wrap" : "nowrap"}; box-sizing: border-box; }`,
     );
   }
   rules.push(
@@ -161,6 +181,12 @@ export function sxablonoStylesheetOf(
     if (part === "container" || part === "divider") continue;
     const declarations = Object.keys(properties).flatMap((property) => {
       const token = fixed(part, property);
+      // Nachlese 8 ② (V-4): a typography role, as the Eroj write it — every field of the role.
+      if (property === "typography" && token !== undefined) {
+        return TYPOGRAPHY_FIELDS.map(
+          (field) => `${field}: var(${nomRegulo("css").derive(token)}-${field});`,
+        );
+      }
       const css = PROPERTY_CSS[property];
       return token === undefined || css === undefined ? [] : [`${css}: ${variable(token)};`];
     });
@@ -368,6 +394,8 @@ ${
     if (preview instanceof HTMLElement) {
       if (previewLabel === null || previewLabel === "") preview.removeAttribute("aria-label");
       else if (preview.getAttribute("aria-label") !== previewLabel) preview.setAttribute("aria-label", previewLabel);
+      const shown = preview.querySelector('[part="${preview}-label"]');
+      if (shown instanceof HTMLElement && shown.textContent !== (previewLabel ?? "")) shown.textContent = previewLabel ?? "";
     }
     this.#follow();
 `

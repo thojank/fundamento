@@ -36,12 +36,16 @@ describe("the plugin draws the Sxablonoj as example frames (Spec 020 ①)", () =
       "sxelo",
     ]);
     const sxelo = frame?.children.find((child) => child.name === "sxelo");
+    // Nachlese 8 ② (F-9): brand and principal stand in the head row, as on the web.
     expect(sxelo?.children.map((child) => child.name)).toEqual([
-      "brand",
-      "principal",
+      "header",
       "nav",
       "notices",
       "main",
+    ]);
+    expect(descendant(sxelo, "header")?.children.map((child) => child.name)).toEqual([
+      "brand",
+      "principal",
     ]);
     for (const region of sxelo?.children ?? [])
       expect(region.properties.layoutMode, region.name).toMatch(/^(HORIZONTAL|VERTICAL)$/);

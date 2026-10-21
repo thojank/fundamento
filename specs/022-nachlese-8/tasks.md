@@ -39,7 +39,38 @@
 
 ## ② Figma und Vitrino
 
-Folgt im PR ②.
+**Branch:** `261021-nachlese-8-darstellung-116ba2` (gestapelt auf ①) · Aufgaben ab T2221.
+
+### A – Rot zuerst
+- [x] **T2221 Tests:**
+  - Projektionen (`figma/nachlese-8-darstellung.test.ts`): Sammlung gleich in beiden Builds, Aufbau der Sxablonoj, Beispiele der Vitrino, Vorschau, menuo zu, codeblock, markdown; im Double: Fläche, Rahmen, Instanzen, `copyable`.
+  - Vitrino und Web (`nachlese-8-vitrino.test.ts`): V-1 bis V-6, F-5, M5.
+  - Modelo (`data/nachlese-8.test.ts`): N7-F-1.
+  - Browser (`packages/eroj/test/nachlese-8.spec.ts`): V-1 bis V-4, F-5, F-6.
+  - Doku.
+  - Rot in `e626558`.
+
+### B – Grün
+- [x] **T2222 Sammlung** aus FR-10 (D-06).
+- [x] **T2223 Sxablonoj in Figma** (D-07 bis D-09): Fläche, Aufbau, Beispiele, `open`.
+- [x] **T2224 codeblock und markdown** (D-10), Nachtrag zur Jugxo.
+- [x] **T2225 Vitrino und Web** (D-11 bis D-13): Teile von sxelo, pagxo, redaktilo; Zeilen umbrechen; Beschriftung der Vorschau; Befehl; Markdown; Dokument-Stylesheet; Caption.
+- [x] **T2226 N7-F-1** nesting 1, Jugxo.
+- [x] **T2227 M5** (D-14): Messung, keine Übergänge im Bedienbereich, nur geänderte Werte schreiben.
+- [x] **T2228 Pins** (Abweichung 7).
+
+### C – Abschluss
+- [x] **T2229 Doku** plan (mit Messanleitung), tasks.
+- [ ] **T2230 CI** grün.
+
+### Messungen
+
+| Was | Wert |
+|---|---|
+| Commits | rot `e626558` |
+| Tests lokal | Modelo 3 658, MCP 371, Projekcioj 792, Eroj 859 (drei Engines), Agordilo 94, CLI 72, `check:vitrino` 51 (M5 0 ms, 0 Long Tasks), `check:alirebleco-eroj` 561; `pnpm lint`, `pnpm perf` und alle `check:*` grün |
+| Dialoge | `suggest_ero`: 218 Sätze wie nach ①; `check_usage`: `actions` mit butono gültig (Jugxo) |
+| M5 (Drosselung ×3) | vorher 52 / 59 / 63 ms, 3 / 3 / 3 Long Tasks; nachher 50 / 0 / 0 ms, 1 / 0 / 0 |
 
 ## ③ Regeltexte deutsch
 

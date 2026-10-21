@@ -159,7 +159,8 @@ describe("the Uzo of the dialogo (section ②, G5)", () => {
         accepts: ["kampo", "tekstareo", "elektilo", "elekto", "markobutono", "sxaltilo", "avizo"],
         nesting: 1,
       },
-      actions: { accepts: ["butono"], required: true, min: 1, max: 2, nesting: 0 },
+      // Nachlese 8 ② (N7-F-1, Jugxo): a butono in actions is a nesting of depth 1.
+      actions: { accepts: ["butono"], required: true, min: 1, max: 2, nesting: 1 },
     });
     // The heading is a sentence ("Standard „Datenschutz-Grundverordnung" löschen?") and wraps;
     // the width is the size's (Abweichung 3 of plan ②).

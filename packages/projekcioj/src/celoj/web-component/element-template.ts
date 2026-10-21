@@ -96,6 +96,11 @@ export interface ElementNames {
    */
   columnsFrom?: string;
   /**
+   * Rules for the light DOM of a Markdown view (Nachlese 8 ②, F-5): what its shadow cannot reach
+   * — the indent of a nested list —, adopted by the document once, like a table's.
+   */
+  documentCss?: string;
+  /**
    * The Ikonaro as the icon element knows it (Spec 014 ②, plan ② D-05): every name, and whether
    * its direction carries meaning (mirrored in right-to-left writing). An unknown name warns.
    */
@@ -682,6 +687,7 @@ export function elementSource({
   indicator = false,
   dismiss = false,
   columnsFrom,
+  documentCss = "",
   ikonaro = [],
   skip = false,
   icon = false,
@@ -3599,7 +3605,7 @@ const KEYED_BOOLEANS = PROPS.filter(
     ),
 ).map((prop) => prop.name);
 
-${isMarkdown ? markdownConstants : ""}
+${isMarkdown ? markdownConstants(documentCss) : ""}
 let sheet: CSSStyleSheet | undefined;
 ${isLight ? "/** The stylesheet of the light DOM (Spec 011 ④, E10): adopted by the document once, scoped to the host. */\nlet lightSheet: CSSStyleSheet | undefined;\n" : ""}${autoConstant}const warned = new Set<string>();
 

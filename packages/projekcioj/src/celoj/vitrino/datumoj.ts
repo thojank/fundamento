@@ -318,12 +318,17 @@ export const VITRINO_SLOT_TEXTS: Readonly<Record<string, string>> = {
 };
 
 /**
- * The Markdown of the Vitrino (Spec 020 ③, plan ③ D-28): a paragraph with emphasis and code, a
- * nested list, a quote and a link to the section — no heading, so the page keeps its order of
- * headings. The markdovido shows it in every cell, the redaktilo in its field and its preview.
+ * The Markdown of the Vitrino (Spec 020 ③, plan ③ D-28; Nachlese 8 ② V-6): a heading, a paragraph
+ * with emphasis and code, a nested list, a quote, a table named by the heading (F-6) and a link to
+ * the section. The heading is of level 2 (start-level 2), as the headings of the sections are, so
+ * the page keeps its order of headings. The markdovido shows it in every cell, the redaktilo in
+ * its field and its preview.
  */
 export const VITRINO_MARKDOWN =
-  "Ein Absatz mit *Hervorhebung*, **Gewicht** und `STD-1`.\n\n- eins\n  - zwei\n\n> Ein Zitat.\n\n[Mehr](#fm-vitrino-markdovido)";
+  "# Geltung\n\nEin Absatz mit *Hervorhebung*, **Gewicht** und `STD-1`.\n\n- eins\n  - zwei\n\n> Ein Zitat.\n\n| Name | Status |\n|---|:---:|\n| STD-1 | gültig |\n\n[Mehr](#fm-vitrino-markdovido)";
+
+/** The command in every row of the Vitrino's code block (Nachlese 8 ② V-5), Figma's too. */
+export const VITRINO_SHORT_COMMAND = "pnpm fm mcp";
 
 /** The command of the Vitrino's code block (Spec 020 ③): long, so the region scrolls. */
 const VITRINO_COMMAND =
@@ -882,11 +887,13 @@ export function eroMarkup(entry: LoadedEro, ikonaro: readonly VitrinoIkono[] = [
       // A Markdown view (Spec 020 ③) shows the Vitrino's Markdown, no word beside it.
       const markdown = entry.skemo.props.some((prop) => prop.name === "source");
       const named = role !== "list" && !entriesInDefault && !markdown;
+      // Nachlese 8 ② (V-5): a code block shows a command in every row, not the word of the row.
+      const content = role === "figure" ? VITRINO_SHORT_COMMAND : label;
       const source = markdown ? ` source="${VITRINO_MARKDOWN.replaceAll("\n", "&#10;")}"` : "";
       const cells = [undefined, ...columns]
         .map(
           (column) =>
-            `<td>${opener}<${tag}${identity}${attributes}${duties}${examples}${required}${chosen}${source}${column === undefined ? "" : ` ${column}`}>${icons}${named ? label : ""}${optionTexts(entry)}${slotTexts(entry, column, combination)}${actions}${light}</${tag}></td>`,
+            `<td>${opener}<${tag}${identity}${attributes}${duties}${examples}${required}${chosen}${source}${column === undefined ? "" : ` ${column}`}>${icons}${named ? content : ""}${optionTexts(entry)}${slotTexts(entry, column, combination)}${actions}${light}</${tag}></td>`,
         )
         .join("");
       return `<tr><th scope="row">${label}</th>${cells}</tr>`;

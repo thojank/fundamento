@@ -706,25 +706,25 @@ class Werkstatt {
 
   #setProperties(element: HTMLElement, palettes: DerivedPalettes): void {
     const mode = this.#root.getAttribute("data-fm-color-scheme") === "dark" ? "dark" : "light";
+    // Nachlese 8 ② (M5): only what changed is written. A write of the root's inline style, even of
+    // the value it has, makes the browser recompute the style of every element on screen.
+    const set = (property: string, value: string) => {
+      if (element.style.getPropertyValue(property) !== value)
+        element.style.setProperty(property, value);
+    };
     for (const step of palettes.steps) {
-      element.style.setProperty(
-        cssVariable(`color.palette.${step.palette}.${step.step}`),
-        step.hex,
-      );
+      set(cssVariable(`color.palette.${step.palette}.${step.step}`), step.hex);
     }
     for (const step of palettes.overrides) {
-      if (step.mode === mode) {
-        element.style.setProperty(
-          cssVariable(`color.palette.${step.palette}.${step.step}`),
-          step.hex,
-        );
-      }
+      if (step.mode === mode)
+        set(cssVariable(`color.palette.${step.palette}.${step.step}`), step.hex);
     }
     for (const role of FONT_ROLES) {
       const font = this.#lastValid.schriften?.[role];
-      if (font === undefined) element.style.removeProperty(cssVariable(`font.family.${role}`));
-      else
-        element.style.setProperty(cssVariable(`font.family.${role}`), JSON.stringify(font.family));
+      const property = cssVariable(`font.family.${role}`);
+      if (font === undefined) {
+        if (element.style.getPropertyValue(property) !== "") element.style.removeProperty(property);
+      } else set(property, JSON.stringify(font.family));
     }
   }
 
@@ -1128,20 +1128,31 @@ ${groupOf("ikonoj", "Icons", `<fm-elektilo id="fm-werkstatt-ikono-gewicht" value
 
   #renderPaletteValues(palettes: DerivedPalettes): void {
     if (!this.#built) return;
+    // Nachlese 8 ② (M5): a text or a colour is written only where it changed; every write
+    // replaced a text node and made the table lay out again.
+    const text = (node: Element | null, value: string) => {
+      if (node !== null && node.textContent !== value) node.textContent = value;
+    };
     for (const step of [...palettes.steps, ...palettes.overrides]) {
       const row = document.querySelector<HTMLElement>(`tr[data-fm-stupo="${this.#stepKey(step)}"]`);
       if (row === null) continue;
       const swatch = row.querySelector<HTMLElement>("[data-fm-muestro]");
-      if (swatch !== null) swatch.style.backgroundColor = step.hex;
-      const value = row.querySelector("[data-fm-valoro]");
-      if (value !== null) value.textContent = step.hex;
-      const target = row.querySelector("[data-fm-celo-teksto]");
-      if (target !== null)
-        target.textContent = `${ratio(step.target)}${step.onTarget ? "" : " (verfehlt)"}`;
-      const achieved = row.querySelector("[data-fm-atingita]");
-      if (achieved !== null)
-        achieved.textContent = `${ratio(step.achieved)}${step.toneKept ? "" : " (ohne Ton)"}`;
-      row.setAttribute("data-fm-superskribita", String(step.overridden === true));
+      if (swatch !== null && swatch.dataset.fmHex !== step.hex) {
+        swatch.style.backgroundColor = step.hex;
+        swatch.dataset.fmHex = step.hex;
+      }
+      text(row.querySelector("[data-fm-valoro]"), step.hex);
+      text(
+        row.querySelector("[data-fm-celo-teksto]"),
+        `${ratio(step.target)}${step.onTarget ? "" : " (verfehlt)"}`,
+      );
+      text(
+        row.querySelector("[data-fm-atingita]"),
+        `${ratio(step.achieved)}${step.toneKept ? "" : " (ohne Ton)"}`,
+      );
+      const overridden = String(step.overridden === true);
+      if (row.getAttribute("data-fm-superskribita") !== overridden)
+        row.setAttribute("data-fm-superskribita", overridden);
     }
   }
 
