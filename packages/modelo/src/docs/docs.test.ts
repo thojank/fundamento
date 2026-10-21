@@ -2851,3 +2851,40 @@ describe("Nachlese 8 ② documentation (specs/022-nachlese-8)", () => {
     expect(own).toMatch(/rot `[0-9a-f]{7}`/);
   });
 });
+
+// Nachlese 8 ③ (Briefing 2026-10-21, Entscheidung d): plan ③ carries the way of lingvo, the check,
+// the size and a sample of 20 texts in English and German side by side for the maintainer; tasks
+// ③ start at T2241.
+describe("Nachlese 8 ③ documentation (specs/022-nachlese-8)", () => {
+  it("plan ③ carries the decisions, the sample of 20 texts and the guide; tasks ③ start at T2241", () => {
+    const plan = read("specs/022-nachlese-8/plan.md");
+    const tasks = read("specs/022-nachlese-8/tasks.md");
+    const third = plan.slice(plan.indexOf("## ③ Regeltexte deutsch"));
+    for (const heading of [
+      "### Zusammenfassung",
+      "### Entwurfsentscheidungen",
+      "### Stichprobe",
+      "### Abweichungen",
+      "### Befunde / Mankoj",
+      "### Offen (für den Maintainer)",
+      "### Messanleitung",
+    ]) {
+      expect(third, heading).toContain(heading);
+    }
+    const sample = third.slice(third.indexOf("### Stichprobe"), third.indexOf("### Abweichungen"));
+    const rows = sample.split("\n").filter((line) => /^\| \d+ \|/.test(line));
+    expect(rows.length).toBeGreaterThanOrEqual(20);
+    for (const term of [
+      "tradukoj.json",
+      "traduko-missing",
+      "lingvo",
+      "WCAG",
+      "file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/",
+    ])
+      expect(third, term).toContain(term);
+    expect(third).not.toContain("ciferecigo");
+    const own = tasks.slice(tasks.indexOf("## ③ Regeltexte deutsch"));
+    expect(own).toContain("**T2241");
+    expect(own).toMatch(/rot `[0-9a-f]{7}`/);
+  });
+});
