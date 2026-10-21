@@ -34,6 +34,8 @@ export interface RaportoStep {
   achieved: number;
   /** Present when the Agordo overrides the target of this step (ziele, Spec 016 ②). */
   overridden?: true;
+  /** Present when the Studio set the value of this step (festgelegt, Spec 024): kept, not derived. */
+  gesetzt?: true;
   onTarget: boolean;
   toneKept: boolean;
   chroma: { requested: number; kept: number };

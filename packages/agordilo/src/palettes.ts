@@ -3,6 +3,12 @@
 // tinted, for neutral), a status colour or the default tone turned towards the lead colour for the
 // status palettes. Pure.
 
+import {
+  oklchComponentsOf,
+  readDtcgColor,
+  srgbComponentsOf,
+  WCAG2_METRIC,
+} from "@fundamento/modelo";
 import type { Agordo } from "./agordo.js";
 import { parseAgordoColor } from "./agordo.js";
 import {
@@ -64,6 +70,8 @@ export interface DerivedStep extends StepSolution {
   target: number;
   /** Present when the Agordo overrides the target of this step in this mode (Spec 016 ②, G7). */
   overridden?: true;
+  /** Present when the Studio set this step's value (festgelegt, Spec 024): kept as set, measured. */
+  gesetzt?: true;
   /** The chroma the step asked for. */
   requested: number;
   hex: string;
@@ -255,4 +263,80 @@ export function derivePalettes(
     );
   }
   return { sources, steps, overrides: modeSteps };
+}
+
+const SET_PALETTE = /^color\.palette\.([a-z]+)\.(\d+)$/;
+
+/** A step as the Studio set it (Spec 024, S-2): the value kept, its contrast measured, marked. */
+function setStep(base: DerivedStep, value: unknown): DerivedStep | undefined {
+  const colour = readDtcgColor(value);
+  if (colour === undefined) return undefined;
+  const components = srgbComponentsOf(colour).map(
+    (channel) => Math.round(Math.min(1, Math.max(0, channel)) * 10_000) / 10_000,
+  ) as [number, number, number];
+  const [l, c, h] = oklchComponentsOf({ colorSpace: "srgb", components });
+  const achieved = WCAG2_METRIC.compute(
+    { colorSpace: "srgb", components },
+    base.mode === "light" ? WHITE : BLACK,
+  );
+  return {
+    ...base,
+    l,
+    c,
+    h,
+    components,
+    achieved,
+    onTarget: Math.abs(achieved - base.target) < 0.05,
+    toneKept: true,
+    requested: c,
+    hex: hexOf(components),
+    gesetzt: true,
+  };
+}
+
+/**
+ * The palettes with the steps the Studio set (Spec 024, `festgelegt`): a `wert` replaces the
+ * light step, a `modoj["color-scheme=dark"].wert` the dark override (added where the structure
+ * has none). An alias on a palette step is left to the set; the report keeps the derived step.
+ */
+export function withFestgelegtSteps(palettes: DerivedPalettes, agordo: Agordo): DerivedPalettes {
+  const entries = Object.entries(agordo.festgelegt ?? {});
+  if (entries.length === 0) return palettes;
+  const steps = [...palettes.steps];
+  const overrides = [...palettes.overrides];
+  for (const [token, set] of entries) {
+    const match = SET_PALETTE.exec(token);
+    const palette = match?.[1];
+    const stepName = match?.[2];
+    if (
+      palette === undefined ||
+      stepName === undefined ||
+      !(PALETTES as readonly string[]).includes(palette)
+    )
+      continue;
+    if (set.wert !== undefined && set.alias === undefined) {
+      const index = steps.findIndex((step) => step.palette === palette && step.step === stepName);
+      const replaced = index === -1 ? undefined : setStep(steps[index] as DerivedStep, set.wert);
+      if (index !== -1 && replaced !== undefined) steps[index] = replaced;
+    }
+    const dark = set.modoj?.["color-scheme=dark"];
+    if (dark?.wert !== undefined && dark.alias === undefined) {
+      const index = overrides.findIndex(
+        (step) => step.palette === palette && step.step === stepName && step.mode === "dark",
+      );
+      const base =
+        index === -1
+          ? steps.find((step) => step.palette === palette && step.step === stepName)
+          : overrides[index];
+      if (base === undefined) continue;
+      const replaced = setStep(
+        { ...base, mode: "dark", target: index === -1 ? MAX_CONTRAST / base.target : base.target },
+        dark.wert,
+      );
+      if (replaced === undefined) continue;
+      if (index === -1) overrides.push(replaced);
+      else overrides[index] = replaced;
+    }
+  }
+  return { ...palettes, steps, overrides };
 }

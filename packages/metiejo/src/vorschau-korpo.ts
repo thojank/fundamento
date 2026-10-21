@@ -69,9 +69,52 @@ function widths(markup: string, breite: string): string {
     .join("")}</div>`;
 }
 
-/** The body of the preview for a step at a width (schmal, mittel, breit or alle). */
-export function previewBody(sxtupo: SxtupoKey, breite: string, agordo: Agordo): string {
+const TYPO_LEITER = `<div class="mt-spalte">${[
+  ["display-1", "Display 1"],
+  ["display-2", "Display 2"],
+  ["display-3", "Display 3"],
+  ["headline-1", "Headline 1"],
+  ["headline-2", "Headline 2"],
+  ["headline-3", "Headline 3"],
+  ["headline-4", "Headline 4"],
+]
+  .map(
+    ([size, label]) =>
+      `<fm-titolo level="2" size="${size}">${label} – Die Marke in ihrer Schrift</fm-titolo>`,
+  )
+  .join(
+    "",
+  )}<fm-teksto size="1">Body 1 – Fließtext in der Grundgröße, so wie ein Absatz in einer Anwendung steht.</fm-teksto><fm-teksto size="2">Body 2 – Fließtext in der kleineren Stufe.</fm-teksto><fm-teksto kind="caption">Caption – eine Bildunterschrift.</fm-teksto><fm-teksto kind="kicker">Kicker – Dachzeile</fm-teksto><fm-teksto kind="code">Code – pnpm fm metiejo</fm-teksto><fm-kampo name="label" value="Label 1 im Feld">Label 1</fm-kampo></div>`;
+
+const TIEFE = `<div class="mt-zeile">${KARTO}${KARTO}</div><div class="mt-spalte"><fm-avizo intent="info">Eine Meldung auf der Fläche.</fm-avizo><fm-sxvebilo label="Mehr" open><fm-butono slot="trigger" emphasis="medium">Schwebende Ebene</fm-butono><fm-teksto slot="content">Ein Popover mit dem Schatten der Marke.</fm-teksto></fm-sxvebilo></div>`;
+
+/** The body of the preview for a step or a page of the Studio (`studio-<seite>`) at a width. */
+export function previewBody(sxtupo: SxtupoKey | string, breite: string, agordo: Agordo): string {
   switch (sxtupo) {
+    case "studio-farbe":
+    case "studio-semantik":
+      return (
+        surface("Aktionen", ACTIONS) +
+        surface("Zustände und Meldungen", STATUS) +
+        surface("Text", TEXT) +
+        surface("Felder", FIELDS)
+      );
+    case "studio-schrift":
+      return surface("Typo-Leiter", TYPO_LEITER);
+    case "studio-raum":
+      return (
+        surface("Raum: Abstände", widths(FORMULARO, "mittel")) +
+        surface("Aktionen", ACTIONS) +
+        surface("Seite", widths(PAGXO, "mittel"))
+      );
+    case "studio-form":
+      return surface("Form: Radius", `${ACTIONS}${KARTO}`) + surface("Felder", FIELDS);
+    case "studio-tiefe":
+      return surface("Tiefe: Schatten und Ebenen", TIEFE);
+    case "studio-bewegung":
+      return (
+        surface("Bewegung: Zustände beim Zeigen und Drücken", ACTIONS) + surface("Felder", FIELDS)
+      );
     case "farbe":
       return (
         surface("Aktionen", ACTIONS) +

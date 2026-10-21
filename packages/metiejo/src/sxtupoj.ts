@@ -15,6 +15,7 @@ import {
 } from "@fundamento/agordilo";
 import { oklchColor, srgbComponentsOf } from "@fundamento/modelo";
 import { escapeHtml, jsonIsland, screenDocument } from "./html.js";
+import { markoLabel } from "./ident.js";
 import type { Klartext } from "./klartext.js";
 import { readTiparoj, searchTiparoj, type Tiparo } from "./tiparoj.js";
 import { loadBases } from "./vorschau.js";
@@ -72,7 +73,7 @@ export const SXTUPOJ: readonly Sxtupo[] = [
     spec: 5,
     title: "Form",
     question: "Wie rund soll die Marke sein?",
-    hint: "Der Regler skaliert alle Eckenradien gemeinsam; 1,0 ist die Ausgangsform.",
+    hint: "Eine Wahl: eckig, leicht gerundet, rund oder ganz rund. Bei ganz rund werden Bedienelemente zur Pille; Karten und Dialoge bleiben groß gerundet.",
   },
   {
     key: "raum",
@@ -164,8 +165,26 @@ export interface ScreenInput {
   eksporto?: { sentences: string[]; issues: string[] };
 }
 
+/** K-5 (Spec 024): the form is a choice; each maps to the radius factor of the Agordo. */
+export const FORM_WAHL: readonly { key: string; label: string; radius: number }[] = [
+  { key: "eckig", label: "Eckig", radius: 0 },
+  { key: "leicht", label: "Leicht gerundet", radius: 0.5 },
+  { key: "rund", label: "Rund", radius: 1 },
+  { key: "ganz-rund", label: "Ganz rund (Bedienelemente als Pille)", radius: 2 },
+];
+
+/** The choice an Agordo stands at: the nearest radius factor, the pill when the control role is radius.full. */
+export function formWahlOf(agordo: Agordo): string {
+  if (agordo.festgelegt?.["radius.role.control"]?.alias === "radius.full") return "ganz-rund";
+  const radius = agordo.form?.radius ?? 1;
+  return (
+    [...FORM_WAHL]
+      .filter((wahl) => wahl.key !== "ganz-rund")
+      .sort((a, b) => Math.abs(a.radius - radius) - Math.abs(b.radius - radius))[0]?.key ?? "rund"
+  );
+}
+
 const STEP_SLIDERS: Readonly<Partial<Record<SxtupoKey, string>>> = {
-  form: "form.radius",
   raum: "raum.abstand",
   groesse: "schrift.groesse",
 };
@@ -207,7 +226,9 @@ function navigation(input: ScreenInput): string {
 function notices(input: ScreenInput): string {
   const parts: string[] = [];
   if (input.problem !== undefined) {
-    parts.push(`<fm-avizo slot="notices" intent="danger">${escapeHtml(input.problem)}</fm-avizo>`);
+    parts.push(
+      `<fm-avizo slot="notices" intent="danger" id="mt-problem">${escapeHtml(input.problem)}</fm-avizo>`,
+    );
   }
   if (input.message !== undefined) {
     parts.push(`<fm-avizo slot="notices" intent="success">${escapeHtml(input.message)}</fm-avizo>`);
@@ -264,7 +285,7 @@ function fields(input: ScreenInput): string {
                   `<data slot="options" value="${escapeHtml(name)}">${escapeHtml(name)}</data>`,
               )
               .join("")}</fm-elektilo>`;
-      return `<fm-kampo name="name" required autocomplete="off" placeholder="meine-marke">Name der Marke<span slot="help">Kleinbuchstaben, Ziffern und Bindestriche, zum Beispiel meine-marke.</span></fm-kampo><fm-elekto name="basis" value="leer">Womit fängst du an?<data slot="options" value="leer">Leer: nur der Name und eine Leitfarbe zum Ändern</data><data slot="options" value="komuna">Beispiel komuna: die Farbe und die Schriften der Referenz</data>${
+      return `<fm-kampo name="name" required autocomplete="off" placeholder="Bluna">Name der Marke<span slot="help">So, wie du ihn schreibst. Kennung: <output data-mt-kennung aria-live="polite">–</output></span></fm-kampo><fm-elekto name="basis" value="leer">Womit fängst du an?<data slot="options" value="leer">Leer: nur der Name und eine Leitfarbe zum Ändern</data><data slot="options" value="komuna">Beispiel komuna: die Farbe und die Schriften der Referenz</data>${
         input.markoj.length === 0
           ? ""
           : '<data slot="options" value="oeffnen">Vorhandene Marke öffnen</data>'
@@ -295,7 +316,7 @@ function fields(input: ScreenInput): string {
       const results = input.tiparoj?.results ?? [];
       if (results.length > 0) {
         parts.push(
-          `<fm-elekto name="tiparo">Treffer${results
+          `<fm-elekto name="tiparo" id="mt-treffer">Treffer${results
             .map(
               (tiparo) =>
                 `<data slot="options" value="${escapeHtml(tiparo.id)}">${escapeHtml(tiparo.family)} · ${escapeHtml(tiparo.license)} · ${escapeHtml(tiparo.category)}</data>`,
@@ -310,7 +331,13 @@ function fields(input: ScreenInput): string {
       }
       return parts.join("");
     }
-    case "form":
+    case "form": {
+      if (marko === undefined) return "";
+      const current = formWahlOf(marko.agordo);
+      return `<fm-elekto name="form.wahl" value="${current}" data-live="form.wahl">Form${FORM_WAHL.map(
+        (wahl) => `<data slot="options" value="${wahl.key}">${escapeHtml(wahl.label)}</data>`,
+      ).join("")}</fm-elekto>`;
+    }
     case "raum":
     case "groesse":
       return sliderField(input, STEP_SLIDERS[input.sxtupo] ?? "");
@@ -337,6 +364,11 @@ function fields(input: ScreenInput): string {
 function problems(input: ScreenInput): string {
   const parts: string[] = [];
   if (input.sxtupo === "schrift") {
+    // K-4 (Spec 024): without a hit, a sentence that says what to do.
+    const query = input.tiparoj?.query ?? "";
+    parts.push(
+      `<fm-avizo slot="problems" intent="info" id="mt-keine-schrift"${query !== "" && (input.tiparoj?.results.length ?? 0) === 0 ? "" : " hidden"}>Keine Schrift gefunden für „<span data-mt-suche>${escapeHtml(query)}</span>“: Versuche einen Teil des Namens, zum Beispiel „Sans“ oder „Serif“, oder lade eine eigene Schrift hoch.</fm-avizo>`,
+    );
     if (input.privata.locked) {
       parts.push(
         `<fm-avizo slot="problems" intent="info">${escapeHtml(input.privata.sentence)}</fm-avizo>`,
@@ -433,13 +465,18 @@ export function screen(input: ScreenInput): string {
           : name === undefined
             ? "/marko"
             : url(name, input.sxtupo);
-  const expertLink =
+  const expertLink = `${
+    name === undefined
+      ? ""
+      : `<fm-ligilo slot="actions" to="/studio/${encodeURIComponent(name)}/farbe" placement="standalone">Studio</fm-ligilo>`
+  }${
     input.expert.href === undefined
       ? ""
-      : `<fm-ligilo slot="actions" to="${escapeHtml(input.expert.href)}" placement="standalone" external>Expertenansicht</fm-ligilo>`;
+      : `<fm-ligilo slot="actions" to="${escapeHtml(input.expert.href)}" placement="standalone" external>Expertenansicht</fm-ligilo>`
+  }`;
   const body = `<fm-sxelo>
 <span slot="brand">Metiejo</span>
-<span slot="principal">${name === undefined ? "Neue Marke" : `Marke ${escapeHtml(name)}`} · ${stepLine(input.sxtupo)}</span>
+<span slot="principal">${name === undefined ? "Neue Marke" : `Marke ${escapeHtml(markoLabel(name, input.marko?.agordo.etikedoj?.marko))}`} · ${stepLine(input.sxtupo)}</span>
 ${navigation(input)}
 ${notices(input)}
 <fm-pagxo>

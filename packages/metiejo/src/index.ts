@@ -6,6 +6,7 @@
 export * from "./eksporto.js";
 export * from "./env.js";
 export * from "./html.js";
+export * from "./ident.js";
 export * from "./klartext.js";
 export * from "./kontrolo.js";
 export * from "./marko.js";
@@ -13,6 +14,7 @@ export * from "./privata.js";
 export * from "./root.js";
 export * from "./servilo.js";
 export * from "./start.js";
+export * from "./studio.js";
 export * from "./sxtupoj.js";
 export * from "./tiparoj.js";
 export * from "./tiparoj-npm.js";

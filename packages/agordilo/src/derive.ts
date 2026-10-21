@@ -30,6 +30,7 @@ import {
   derivePalettes,
   type ModeOverride,
   type TargetFloors,
+  withFestgelegtSteps,
 } from "./palettes.js";
 import { type Raporto, renderRaportoMd, serializeRaporto } from "./raporto.js";
 import { isRecord } from "./record.js";
@@ -150,7 +151,7 @@ export function derivationBasis(
     modelo,
     floors,
     overrides,
-    palettes: derivePalettes(agordo, calibration, floors, overrides),
+    palettes: withFestgelegtSteps(derivePalettes(agordo, calibration, floors, overrides), agordo),
     gestalt: deriveGestalt(agordo, gestaltBasis(structure.files)),
     agordoIssues: ikonoChoice(agordo, structure).issues,
   };

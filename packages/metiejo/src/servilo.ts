@@ -10,12 +10,19 @@ import type { AddressInfo } from "node:net";
 import { dirname, extname, join, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { deflateRawSync } from "node:zlib";
-import { type Agordo, readAgordo, reglerOf } from "@fundamento/agordilo";
+import {
+  ADJUSTABLE_RULES,
+  type Agordo,
+  type Derivation,
+  readAgordo,
+  reglerOf,
+} from "@fundamento/agordilo";
 import type { ValidationIssue } from "@fundamento/modelo";
 import { EKSPORTO_CELOJ, type EksportoCelo, exportMarko } from "./eksporto.js";
 import type { Settings } from "./env.js";
 import { CLIENT_SCRIPT, escapeHtml, previewDocument } from "./html.js";
-import { type Klartext, klartextOf } from "./klartext.js";
+import { identOf } from "./ident.js";
+import { type Klartext, klartextOf, satzOf, vorschlagOf } from "./klartext.js";
 import { knownFonts } from "./kontrolo.js";
 import {
   createMarko,
@@ -28,7 +35,9 @@ import {
   writeDraft,
 } from "./marko.js";
 import { type PrivataDeps, privataState, uploadFont } from "./privata.js";
+import { composeDraft, isStudioPage, kombinationOf, studioRows, studioScreen } from "./studio.js";
 import {
+  FORM_WAHL,
   isSxtupoKey,
   klartextHtml,
   nextOf,
@@ -38,7 +47,14 @@ import {
 } from "./sxtupoj.js";
 import { fontFaceCss, fontoOf, licencedFonto, readTiparoj, searchTiparoj } from "./tiparoj.js";
 import type { NpmDeps } from "./tiparoj-npm.js";
-import { type Bases, checkDraft, komunaCss, loadBases, previewCss } from "./vorschau.js";
+import {
+  type Bases,
+  checkDraft,
+  komunaCss,
+  loadBases,
+  previewCss,
+  startAgordo,
+} from "./vorschau.js";
 import { previewBody } from "./vorschau-korpo.js";
 
 export const HTTP_HOST = "127.0.0.1";
@@ -70,6 +86,8 @@ export interface Servilo {
 interface Draft {
   agordo: Agordo;
   rev: number;
+  /** The derivation with every check of the draft at `checked`, so a page needs it once per change. */
+  pruefung?: { rev: number; derivation: Derivation };
   upload?: { filename: string; family: string; path: string };
   privataResult?: string;
   eksporto?: { sentences: string[]; issues: string[] };
@@ -102,6 +120,8 @@ const PATCHABLE = new Set([
   "schrift",
   "ikono",
   "ziele",
+  "festgelegt",
+  "etikedoj",
 ]);
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -152,11 +172,40 @@ function readBody(request: IncomingMessage, limit = 32 * 1024 * 1024): Promise<s
 /** The German sentence of an issue the start screen shows. */
 function problemSentence(issue: MetiejoIssue | ValidationIssue, name: string): string {
   if (issue.rule === "name-invalid") {
-    return `„${name}“ ist kein Markenname: Kleinbuchstaben, Ziffern und Bindestriche, zum Beispiel meine-marke.`;
+    return `„${name}“ ergibt keine Kennung: Der Name braucht mindestens einen Buchstaben oder eine Ziffer, zum Beispiel „Bluna“ (Kennung bluna).`;
   }
   if (issue.rule === "marko-exists")
     return `Die Marke „${name}“ gibt es schon. Öffne sie unter „Vorhandene Marke öffnen“.`;
   return issue.message;
+}
+
+/** K-5 (Spec 024): the choice of the form as a radius factor, the pill as a set alias of the control role. */
+export function withFormWahl(agordo: Agordo, wahl: string): Agordo {
+  const choice = FORM_WAHL.find((entry) => entry.key === wahl);
+  if (choice === undefined) return agordo;
+  const next = patched(agordo, { form: { radius: choice.radius } });
+  const festgelegt = { ...(next.festgelegt ?? {}) };
+  if (wahl === "ganz-rund") festgelegt["radius.role.control"] = { alias: "radius.full" };
+  else delete festgelegt["radius.role.control"];
+  if (Object.keys(festgelegt).length === 0) {
+    const { festgelegt: _gone, ...rest } = next;
+    return rest as Agordo;
+  }
+  return { ...next, festgelegt };
+}
+
+/** A colour the Studio sets, as hex text, as a DTCG colour of the set. */
+function colourWert(text: string): unknown {
+  const hex = /^#[0-9a-f]{6}$/i.exec(text)?.[0]?.toLowerCase();
+  if (hex === undefined) return text;
+  const components = [1, 3, 5].map(
+    (index) => Number.parseInt(hex.slice(index, index + 2), 16) / 255,
+  );
+  return {
+    colorSpace: "srgb",
+    components: components.map((c) => Math.round(c * 10_000) / 10_000),
+    hex,
+  };
 }
 
 /** The family a font file is called after: the name without extension, hyphens as spaces. */
@@ -236,8 +285,196 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
     return input;
   };
 
-  const klartextOfDraft = (draft: Draft): Klartext =>
-    klartextOf(checkDraft(draft.agordo, bases).raporto);
+  /** The derivation with every check of a draft, once per revision. */
+  const pruefungOf = (draft: Draft): Derivation => {
+    if (draft.pruefung?.rev !== draft.rev) {
+      draft.pruefung = { rev: draft.rev, derivation: checkDraft(draft.agordo, bases) };
+    }
+    return draft.pruefung.derivation;
+  };
+  const problemeOf = (derivation: Derivation): number => {
+    const { violations } = derivation.raporto.summary;
+    return violations.fixed + violations.adjustable - violations.covered;
+  };
+
+  /** Saves the draft and writes the chosen exports (Schnellstart step 7, the Studio's Speichern). */
+  const saveAndExport = async (
+    name: string,
+    draft: Draft,
+    values: URLSearchParams,
+  ): Promise<void> => {
+    // Without any choice (a save without the form) every export is written.
+    const chosen = EKSPORTO_CELOJ.filter((celo) => values.get(`eksporto-${celo}`) === "ja");
+    const celoj: EksportoCelo[] = values.size === 0 ? [...EKSPORTO_CELOJ] : chosen;
+    const today = new Date().toISOString().slice(0, 10);
+    saveMarko(options.workdir, name, draft.agordo, today, bases.gestalt);
+    const fonts = knownFonts(
+      options.deps?.cacheDir ?? join(options.root, "nenie"),
+      options.workdir,
+    );
+    const result = await exportMarko(options.workdir, name, draft.agordo, bases, {
+      celoj: celoj.length === 0 ? ["aspekto"] : celoj,
+      fonts,
+      ...(options.npm === undefined ? {} : { npm: options.npm }),
+    });
+    draft.eksporto = {
+      sentences: result.ok ? result.sentences : [],
+      issues: result.ok
+        ? []
+        : result.issues.map((issue) => `${issue.message} (${issue.suggestion})`),
+    };
+  };
+
+  const klartextOfDraft = (draft: Draft): Klartext => klartextOf(pruefungOf(draft).raporto);
+
+  /** The origin of a token in a draft, as the Studio shows it. */
+  const herkunftOf = (agordo: Agordo, token: string): string => {
+    if (agordo.festgelegt?.[token] !== undefined) return "gesetzt";
+    return composeDraft(agordo, bases).derived.has(token) ? "abgeleitet" : "struktur";
+  };
+
+  /**
+   * The Studio sets a token (Spec 024, § 4, Grenze 1, M-5): a value or an alias, per Dimensio
+   * condition, a display name, or takes a setting back. A value that breaks a fixed rule is not
+   * taken: one sentence why, one suggestion. An adjustable rule is taken and needs a Jugxo.
+   */
+  function festlegen(
+    name: string,
+    draft: Draft,
+    body: Record<string, unknown>,
+    response: ServerResponse,
+  ): void {
+    const token = typeof body.token === "string" ? body.token : "";
+    if (!/^[a-z0-9]+(\.[a-z0-9-]+)*$/.test(token)) {
+      sendJson(
+        response,
+        {
+          issues: [
+            {
+              rule: "token-invalid",
+              path: "token",
+              message: "no token name",
+              suggestion: "name a token of the Vortaro",
+            },
+          ],
+        },
+        422,
+      );
+      return;
+    }
+    const modus = typeof body.modus === "string" && body.modus !== "" ? body.modus : undefined;
+    let next: Agordo;
+    const checked = typeof body.etikedo !== "string";
+    if (typeof body.etikedo === "string") {
+      next = patched(draft.agordo, {
+        etikedoj: { [token]: body.etikedo.trim() === "" ? null : body.etikedo.trim() },
+      });
+    } else if (body.zurueck === true) {
+      const festgelegt = { ...(draft.agordo.festgelegt ?? {}) };
+      const entry = festgelegt[token];
+      if (entry !== undefined && modus !== undefined) {
+        const modoj = { ...(entry.modoj ?? {}) };
+        delete modoj[modus];
+        const { modoj: _modoj, ...rest } = entry;
+        const kept = Object.keys(modoj).length === 0 ? rest : { ...rest, modoj };
+        if (Object.keys(kept).length === 0) delete festgelegt[token];
+        else festgelegt[token] = kept;
+      } else {
+        delete festgelegt[token];
+      }
+      const { festgelegt: _gone, ...rest } = draft.agordo;
+      next =
+        Object.keys(festgelegt).length === 0
+          ? (rest as Agordo)
+          : { ...(rest as Agordo), festgelegt };
+    } else {
+      const alias = typeof body.alias === "string" && body.alias !== "" ? body.alias : undefined;
+      const wert =
+        alias === undefined
+          ? typeof body.wert === "string"
+            ? colourWert(body.wert)
+            : body.wert
+          : undefined;
+      if (alias === undefined && wert === undefined) {
+        sendJson(
+          response,
+          {
+            issues: [
+              {
+                rule: "wert-missing",
+                path: "wert",
+                message: "no value and no alias",
+                suggestion: "send wert or alias",
+              },
+            ],
+          },
+          422,
+        );
+        return;
+      }
+      const own = alias === undefined ? { wert } : { alias };
+      const festgelegt = { ...(draft.agordo.festgelegt ?? {}) };
+      const entry = festgelegt[token] ?? {};
+      if (modus === undefined) {
+        const { wert: _w, alias: _a, ...rest } = entry;
+        festgelegt[token] = { ...rest, ...own };
+      } else {
+        festgelegt[token] = { ...entry, modoj: { ...(entry.modoj ?? {}), [modus]: own } };
+      }
+      next = { ...draft.agordo, festgelegt };
+    }
+    const { agordo, issues } = readAgordo(next);
+    if (agordo === undefined) {
+      sendJson(response, { issues }, 422);
+      return;
+    }
+    let derivation: Derivation | undefined;
+    let betroffen: string[] = [];
+    if (checked) {
+      const before = pruefungOf(draft);
+      derivation = checkDraft(agordo, bases);
+      const known = new Set(before.issues.map((issue) => `${issue.rule} ${issue.path}`));
+      const fresh = derivation.issues.filter(
+        (issue) =>
+          !known.has(`${issue.rule} ${issue.path}`) && !ADJUSTABLE_RULES.includes(issue.rule),
+      );
+      const rules = new Set<string>();
+      for (const violation of derivation.raporto.violations) {
+        if (violation.subject.includes(token) || violation.path.includes(token))
+          rules.add(violation.rule);
+      }
+      for (const issue of derivation.issues)
+        if (!known.has(`${issue.rule} ${issue.path}`)) rules.add(issue.rule);
+      betroffen = [...rules].sort();
+      const refused = fresh[0];
+      if (refused !== undefined) {
+        const violation = derivation.raporto.violations.find(
+          (entry) =>
+            entry.rule === refused.rule &&
+            (entry.path === refused.path || entry.subject === refused.path),
+        );
+        sendJson(
+          response,
+          {
+            satz:
+              violation === undefined ? `${refused.rule}: ${refused.message}` : satzOf(violation),
+            vorschlag: violation === undefined ? refused.suggestion : vorschlagOf(violation),
+            betroffen,
+          },
+          409,
+        );
+        return;
+      }
+    }
+    setDraft(name, draft, agordo);
+    if (derivation !== undefined) draft.pruefung = { rev: draft.rev, derivation };
+    sendJson(response, {
+      rev: draft.rev,
+      herkunft: herkunftOf(agordo, token),
+      probleme: problemeOf(pruefungOf(draft)),
+      betroffen,
+    });
+  }
 
   const sendHtml = (response: ServerResponse, html: string, status = 200): void => {
     response.writeHead(status, { "content-type": TYPES[".html"] ?? "text/html" }).end(html);
@@ -285,11 +522,13 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
         const fonto = fontoOf(tiparo);
         return patched(draft.agordo, { schriften: { display: fonto, body: fonto } });
       }
-      case "form":
+      case "form": {
+        const wahl = values.get("form.wahl");
+        return wahl === null || wahl === "" ? draft.agordo : withFormWahl(draft.agordo, wahl);
+      }
       case "raum":
       case "groesse": {
-        const path =
-          key === "form" ? "form.radius" : key === "raum" ? "raum.abstand" : "schrift.groesse";
+        const path = key === "raum" ? "raum.abstand" : "schrift.groesse";
         const raw = values.get(path);
         if (raw === null || raw === "" || Number.isNaN(Number(raw))) return draft.agordo;
         const [group = "", field = ""] = path.split(".");
@@ -378,11 +617,17 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
         );
         return;
       }
-      const name = (values.get("name") ?? "").trim();
-      const created = createMarko(options.workdir, {
-        name,
-        basis: basis === "komuna" ? "komuna" : "leer",
-      });
+      // K-1 (Spec 024): the name as written, the identifier derived.
+      const written = (values.get("name") ?? "").trim();
+      const name = identOf(written);
+      const created = createMarko(
+        options.workdir,
+        { name, basis: basis === "komuna" ? "komuna" : "leer" },
+        (ident, start) => {
+          const agordo = startAgordo(ident, start);
+          return written === ident ? agordo : { ...agordo, etikedoj: { marko: written } };
+        },
+      );
       if (created.issues.length > 0 || created.marko === undefined) {
         const issue = created.issues[0];
         sendHtml(
@@ -392,7 +637,7 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
               problem:
                 issue === undefined
                   ? "Die Marke wurde nicht angelegt."
-                  : problemSentence(issue, name),
+                  : problemSentence(issue, written),
             }),
           ),
         );
@@ -403,7 +648,29 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
       return;
     }
 
-    const api = /^\/api\/marko\/([a-z0-9-]+)\/(entwurf|pruefung|schrift|alsxuti)$/.exec(path);
+    const tiparojApi = /^\/api\/marko\/([a-z0-9-]+)\/tiparoj$/.exec(path);
+    if (tiparojApi !== null && method === "GET") {
+      // K-3/K-4 (Spec 024): hits while typing; without a hit the sentence that says what to do.
+      const query = url.searchParams.get("q") ?? "";
+      const treffer = searchTiparoj(tiparoj, query, 12).map((tiparo) => ({
+        id: tiparo.id,
+        family: tiparo.family,
+        license: tiparo.license,
+        category: tiparo.category,
+      }));
+      sendJson(response, {
+        treffer,
+        ...(query !== "" && treffer.length === 0
+          ? {
+              satz: `Keine Schrift gefunden für „${query}“: Versuche einen Teil des Namens, zum Beispiel „Sans“ oder „Serif“, oder lade eine eigene Schrift hoch.`,
+            }
+          : {}),
+      });
+      return;
+    }
+    const api = /^\/api\/marko\/([a-z0-9-]+)\/(entwurf|pruefung|schrift|alsxuti|festlegen)$/.exec(
+      path,
+    );
     if (api !== null && method === "POST") {
       const [, name = "", action = ""] = api;
       const draft = draftOf(name);
@@ -466,8 +733,24 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
         );
         return;
       }
+      if (action === "festlegen") {
+        festlegen(name, draft, body, response);
+        return;
+      }
       if (action === "entwurf") {
-        const next = patched(draft.agordo, body);
+        const form = isRecord(body.form) ? body.form : undefined;
+        const wahl = typeof form?.wahl === "string" ? form.wahl : undefined;
+        const patch =
+          form === undefined
+            ? body
+            : {
+                ...body,
+                form: Object.fromEntries(Object.entries(form).filter(([key]) => key !== "wahl")),
+              };
+        const next =
+          wahl === undefined
+            ? patched(draft.agordo, patch)
+            : withFormWahl(patched(draft.agordo, patch), wahl);
         const { agordo, issues } = readAgordo(next);
         if (agordo === undefined) {
           sendJson(response, { issues }, 422);
@@ -536,6 +819,59 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
       }
     }
 
+    const studio = /^\/studio\/([a-z0-9-]+)(?:\/([a-z]+))?$/.exec(path);
+    if (studio !== null) {
+      const [, name = "", page] = studio;
+      const draft = draftOf(name);
+      if (draft === undefined) {
+        notFound(response);
+        return;
+      }
+      if (page === undefined) {
+        redirect(response, `/studio/${encodeURIComponent(name)}/farbe`);
+        return;
+      }
+      if (method === "POST" && page === "speichern") {
+        await saveAndExport(name, draft, new URLSearchParams(await readBody(request)));
+        redirect(response, `/studio/${encodeURIComponent(name)}/farbe?gespeichert=1`);
+        return;
+      }
+      if (method !== "GET" || !isStudioPage(page)) {
+        notFound(response);
+        return;
+      }
+      const kombination = kombinationOf(url.searchParams);
+      const marko = readMarko(options.workdir, name);
+      const derivation = pruefungOf(draft);
+      const message =
+        url.searchParams.get("gespeichert") === "1"
+          ? [
+              "Gespeichert.",
+              ...(draft.eksporto?.sentences ?? []),
+              ...(draft.eksporto?.issues ?? []),
+            ].join(" ")
+          : undefined;
+      sendHtml(
+        response,
+        studioScreen({
+          page,
+          marko: {
+            name,
+            agordo: draft.agordo,
+            saved:
+              marko !== undefined && JSON.stringify(marko.agordo) === JSON.stringify(draft.agordo),
+            rev: draft.rev,
+          },
+          kombination,
+          groups: studioRows(page, draft.agordo, bases, kombination),
+          probleme: problemeOf(derivation),
+          ...(message === undefined ? {} : { message }),
+          expert: expertOf(draft.agordo),
+        }),
+      );
+      return;
+    }
+
     const marko = /^\/marko\/([a-z0-9-]+)\/([a-z]+)(\.css)?$/.exec(path);
     if (marko !== null) {
       const [, name = "", key = "", css] = marko;
@@ -560,33 +896,22 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
             cssHref: `/marko/${encodeURIComponent(name)}/vorschau.css?rev=${draft.rev}`,
             fontFace: fontFaceOf(draft.agordo),
             scheme: url.searchParams.get("scheme") === "dark" ? "dark" : "light",
-            body: previewBody(isSxtupoKey(sxtupo) ? sxtupo : "vorschau", breite, draft.agordo),
+            attributes: Object.fromEntries(
+              (["density", "contrast", "viewport"] as const)
+                .map((key) => [`data-fm-${key}`, url.searchParams.get(key) ?? ""])
+                .filter(([, value]) => value !== ""),
+            ),
+            body: previewBody(
+              isSxtupoKey(sxtupo) || sxtupo.startsWith("studio-") ? sxtupo : "vorschau",
+              breite,
+              draft.agordo,
+            ),
           }),
         );
         return;
       }
       if (method === "POST" && key === "speichern") {
-        const values = new URLSearchParams(await readBody(request));
-        // Without any choice (a save without the form) every export is written.
-        const chosen = EKSPORTO_CELOJ.filter((celo) => values.get(`eksporto-${celo}`) === "ja");
-        const celoj: EksportoCelo[] = values.size === 0 ? [...EKSPORTO_CELOJ] : chosen;
-        const today = new Date().toISOString().slice(0, 10);
-        saveMarko(options.workdir, name, draft.agordo, today, bases.gestalt);
-        const fonts = knownFonts(
-          options.deps?.cacheDir ?? join(options.root, "nenie"),
-          options.workdir,
-        );
-        const result = await exportMarko(options.workdir, name, draft.agordo, bases, {
-          celoj: celoj.length === 0 ? ["aspekto"] : celoj,
-          fonts,
-          ...(options.npm === undefined ? {} : { npm: options.npm }),
-        });
-        draft.eksporto = {
-          sentences: result.ok ? result.sentences : [],
-          issues: result.ok
-            ? []
-            : result.issues.map((issue) => `${issue.message} (${issue.suggestion})`),
-        };
+        await saveAndExport(name, draft, new URLSearchParams(await readBody(request)));
         redirect(response, `/marko/${encodeURIComponent(name)}/fertig?gespeichert=1`);
         return;
       }
@@ -630,7 +955,11 @@ export async function startServilo(options: ServiloOptions, io: ServiloIo): Prom
       }
       if (method === "POST") {
         const values = new URLSearchParams(await readBody(request));
-        if (key === "schrift" && !values.has("tiparo") && (values.get("q") ?? "") !== "") {
+        if (
+          key === "schrift" &&
+          (values.get("tiparo") ?? "") === "" &&
+          (values.get("q") ?? "") !== ""
+        ) {
           redirect(
             response,
             `/marko/${encodeURIComponent(name)}/schrift?q=${encodeURIComponent(values.get("q") ?? "")}`,

@@ -13,3 +13,6 @@ packages/modelo/data/ids.lock.json linguist-generated=true
 
 # Screenshots of the Metiejo for the acceptance of Spec 023; written by a browser run at the local server.
 specs/023-werkstatt-konfigurilo/bildoj/** linguist-generated=true
+
+# Screenshots of the Studio and the Schnellstart for the acceptance of Spec 024; written by a browser run at the local server.
+specs/024-studio/bildoj/** linguist-generated=true

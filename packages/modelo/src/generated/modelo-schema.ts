@@ -1726,6 +1726,12 @@ export interface AspektoFile {
   fonts: Fonto[];
   tavoloj?: Tavoloj;
   aspiroj?: AspektoAspiro[];
+  /**
+   * Display names of the brand (Spec 024, § 3 B): the brand as written (`marko`), a palette or a role → its name as the Studio, the Vitrino and the Guidelines show it; identifiers stay canonical (Art. II).
+   */
+  etikedoj?: {
+    [k: string]: NonEmptyText;
+  };
   agordilo?: AspektoAgordilo;
   /**
    * The icon set the package draws the Ikonaro from (Spec 014 ①, G3, E10; Art. V: open source with a permissive licence in the core repository, Art. VII: the import carries its provenance): the set's name, the style drawn (a set with several styles: komuna Phosphor regular, ekzemplo Phosphor fill), the version read, its licence, the source and the day it was read, and the map from each Ikonaro name to the name of the set it is drawn from (plan ① D-04). Every glyph repeats source, version and licence in its own metadata. A package that draws its own glyphs names neither style nor map.
@@ -1850,6 +1856,18 @@ export interface Agordo {
   aspiroj?: AspektoAspiro[];
   jugxoj?: AgordoJugxo[];
   /**
+   * Values the Studio sets (Spec 024 Runde 1, S-2): token name → what the brand sets instead of what the derivation would write. `wert` is a DTCG value for the main set, `alias` the name of a token the brand re-points to (an alias counts as an assignment, Art. IV), `modoj` the same per Dimensio condition (`color-scheme=dark`, `viewport=compact`), written into the brand's conjunction set of that condition. Schnellstart and Studio work on the same data.
+   */
+  festgelegt?: {
+    [k: string]: AgordoFestgelegt;
+  };
+  /**
+   * Display names of the brand (Spec 024, § 3 B): `marko` for the brand as written, a palette (`color.palette.accent`) or a role (`color.text.default`) → its name as the Studio, the Vitrino and the Guidelines show it. Identifiers in every Projekcio stay canonical (Art. II).
+   */
+  etikedoj?: {
+    [k: string]: NonEmptyText;
+  };
+  /**
    * The history of the Agordo (Spec 019 ③, W-26): every save by save_agordo appends an entry. Part of the Agordo, so it travels with the file.
    */
   historio?: AgordoHistorio[];
@@ -1877,6 +1895,29 @@ export interface AgordoJugxo {
   kialo: NonEmptyText;
   date: string;
   name: NonEmptyText;
+}
+/**
+ * A set token of the Studio (Spec 024): the value or alias for the main set of the brand (an alias wins over a value), and per Dimensio condition for the brand's conjunction set of that condition.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "AgordoFestgelegt".
+ */
+export interface AgordoFestgelegt {
+  wert?: unknown;
+  alias?: TokenName;
+  modoj?: {
+    [k: string]: AgordoFestgelegtWert;
+  };
+}
+/**
+ * What the brand sets for one token in one set: a DTCG value (`wert`) or the name of a token to alias (`alias`), not both.
+ *
+ * This interface was referenced by `ModeloJson`'s JSON-Schema
+ * via the `definition` "AgordoFestgelegtWert".
+ */
+export interface AgordoFestgelegtWert {
+  wert?: unknown;
+  alias?: TokenName;
 }
 /**
  * One save of an Agordo (Spec 019 ③, W-26): the date, the wish the movement came from (or Hand for a change by hand) and the sliders that moved, before → after.

@@ -40,7 +40,8 @@
       "includes": [
         "packages/vortaro/**/*.json",
         "packages/modelo/data/**/*.json",
-        "packages/aspekto-komuna/sets/**/*.json"
+        "packages/aspekto-komuna/sets/**/*.json",
+        "packages/metiejo/data/**/*.json"
       ],
       "formatter": {
         "enabled": false

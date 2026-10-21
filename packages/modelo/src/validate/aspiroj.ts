@@ -305,8 +305,71 @@ function nearest(measured: readonly Measured[], aspiro: AspektoAspiro): Measured
   return best;
 }
 
-/** One issue per design goal a brand declares and misses (`aspiro-missed`). */
+/**
+ * The Regulo an Aspiro's metric is bounded by, with its bound (Spec 024, § 3 B): the Reguloj of
+ * Spec 004 carry a `sojlo` with the metric they measure; an Aspiro of the same metric may only
+ * tighten that bound. A Regulo without a sojlo bounds nothing here.
+ */
+function boundingRegulo(
+  modelo: Modelo,
+  metriko: string,
+): { name: string; min?: number; max?: number } | undefined {
+  for (const regulo of modelo.reguloj) {
+    const sojlo = (regulo as { sojlo?: { metric?: string; min?: number; max?: number } }).sojlo;
+    if (regulo.aspekto === undefined && sojlo?.metric === metriko) {
+      return {
+        name: regulo.name,
+        ...(typeof sojlo.min === "number" ? { min: sojlo.min } : {}),
+        ...(typeof sojlo.max === "number" ? { max: sojlo.max } : {}),
+      };
+    }
+  }
+  return undefined;
+}
+
+/** One issue per Aspiro that loosens the bound of the Regulo measuring the same (`aspiro-loosens-regulo`). */
+export function aspirojLoosenIssues(modelo: Modelo): ValidationIssue[] {
+  return modelo.aspektoPackages.flatMap((pkg: LoadedAspektoPackage) => {
+    const aspekto = pkg.aspekto;
+    if (aspekto === undefined) return [];
+    return (pkg.aspiroj ?? []).flatMap((aspiro, index) => {
+      const regulo = boundingRegulo(modelo, aspiro.metriko);
+      if (regulo === undefined) return [];
+      const loosened: string[] = [];
+      if (
+        regulo.min !== undefined &&
+        aspiro.min !== undefined &&
+        aspiro.min < regulo.min - EPSILON
+      ) {
+        loosened.push(`min ${aspiro.min} is below the Regulo's ${regulo.min}`);
+      }
+      if (
+        regulo.max !== undefined &&
+        aspiro.max !== undefined &&
+        aspiro.max > regulo.max + EPSILON
+      ) {
+        loosened.push(`max ${aspiro.max} is above the Regulo's ${regulo.max}`);
+      }
+      if (loosened.length === 0) return [];
+      return [
+        {
+          rule: "aspiro-loosens-regulo" as const,
+          severity: "error" as const,
+          path: formatIssuePath({ file: pkg.aspektoFile, pointer: `/aspiroj/${index}` }),
+          message: `Design goal of ${aspekto}: ${aspiro.metriko} loosens the Regulo ${regulo.name} (${loosened.join("; ")}). A brand's own rule may only tighten a Regulo; the Regulo keeps its bound regardless.`,
+          suggestion: `Set the bound at least as strict as the Regulo ${regulo.name}${regulo.min === undefined ? "" : ` (min ${regulo.min})`}${regulo.max === undefined ? "" : ` (max ${regulo.max})`}, or drop the goal: the Regulo already holds for ${aspekto}.`,
+        },
+      ];
+    });
+  });
+}
+
+/** One issue per design goal a brand declares and misses (`aspiro-missed`), and per goal that loosens a Regulo. */
 export function aspirojIssues(modelo: Modelo): ValidationIssue[] {
+  return [...aspirojLoosenIssues(modelo), ...aspirojMissedIssues(modelo)];
+}
+
+function aspirojMissedIssues(modelo: Modelo): ValidationIssue[] {
   return modelo.aspektoPackages.flatMap((pkg: LoadedAspektoPackage) => {
     const aspekto = pkg.aspekto;
     if (aspekto === undefined) return [];

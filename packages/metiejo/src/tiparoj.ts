@@ -18,6 +18,8 @@ export interface Tiparo {
   /** Writing systems as ISO 15924 codes, sorted. */
   scripts: string[];
   variable: boolean;
+  /** The weights the package carries (K-6 follow-up: the preview asks only for those). */
+  weights: number[];
 }
 
 export interface Tiparoj {
@@ -239,6 +241,11 @@ export function tiparoFrom(raw: unknown): Tiparo | undefined {
     ),
   ].sort();
   if (scripts.length === 0) return undefined;
+  const weights = Array.isArray(raw.weights)
+    ? raw.weights
+        .filter((weight): weight is number => typeof weight === "number")
+        .sort((a, b) => a - b)
+    : [];
   return {
     id: raw.id,
     family: raw.family,
@@ -246,6 +253,7 @@ export function tiparoFrom(raw: unknown): Tiparo | undefined {
     category: typeof raw.category === "string" ? raw.category : "",
     scripts,
     variable: raw.variable === true,
+    weights,
   };
 }
 
@@ -359,7 +367,9 @@ const CDN = "https://cdn.jsdelivr.net/fontsource/fonts";
 export function fontFaceCss(tiparo: Tiparo): string {
   if (!tiparo.scripts.includes("Latn")) return "";
   const family = JSON.stringify(tiparo.family);
-  return [400, 700]
+  const available =
+    tiparo.weights.length === 0 ? [400, 700] : [400, 700].filter((w) => tiparo.weights.includes(w));
+  return (available.length === 0 ? [tiparo.weights[0] ?? 400] : available)
     .map(
       (weight) =>
         `@font-face { font-family: ${family}; font-style: normal; font-weight: ${weight}; font-display: swap; src: url(${CDN}/${tiparo.id}@latest/latin-${weight}-normal.woff2) format("woff2"); }`,
