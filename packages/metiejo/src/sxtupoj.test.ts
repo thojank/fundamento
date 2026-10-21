@@ -88,3 +88,40 @@ describe("screenInventory", () => {
     expect(inventory.text).toContain("Wie?");
   });
 });
+
+describe("K-1 to K-5 of Spec 024 on the screens", () => {
+  it("K-1: the start takes the name as written and shows the identifier small", () => {
+    const html = screen(exampleScreenInput("start"));
+    expect(html).not.toContain("Kleinbuchstaben");
+    expect(html).toContain('name="name"');
+    expect(html).toContain("Kennung");
+    expect(html).toContain("data-mt-kennung");
+  });
+
+  it("K-1: a brand with a written name shows it with its identifier", () => {
+    const input = exampleScreenInput("farbe");
+    if (input.marko !== undefined)
+      input.marko.agordo = { ...input.marko.agordo, etikedoj: { marko: "Provo GmbH" } };
+    const html = screen(input);
+    expect(html).toContain("Provo GmbH");
+    expect(html).toContain("(provo)");
+  });
+
+  it("K-4: a search without a hit says what to do", () => {
+    const input = exampleScreenInput("schrift");
+    input.tiparoj = { query: "zzzz", results: [] };
+    expect(screen(input)).toMatch(/Keine Schrift/);
+  });
+
+  it("K-5: the form is a choice of four, no slider", () => {
+    const html = screen(exampleScreenInput("form"));
+    expect(html).toContain('<fm-elekto name="form.wahl"');
+    for (const value of ["eckig", "leicht", "rund", "ganz-rund"])
+      expect(html).toContain(`value="${value}"`);
+    expect(html).not.toContain('type="range"');
+  });
+
+  it("every screen of a brand links to the Studio", () => {
+    expect(screen(exampleScreenInput("farbe"))).toContain("/studio/provo/");
+  });
+});

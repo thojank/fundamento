@@ -102,11 +102,11 @@ describe("a brand through the steps", () => {
     const response = await get("/marko", {
       method: "POST",
       headers: { "content-type": "application/x-www-form-urlencoded" },
-      body: "name=Falsch+Name&basis=leer",
+      body: "name=%21%21%21&basis=leer",
       redirect: "manual",
     });
     expect(response.status).toBe(200);
-    expect(await response.text()).toMatch(/Kleinbuchstaben/);
+    expect(await response.text()).toMatch(/Kennung/);
   });
 
   it("the draft takes a value and the preview stylesheet carries the brand", async () => {
@@ -238,5 +238,221 @@ describe("M-7: no secret anywhere", () => {
       expect(text).not.toContain(SECRET);
       expect(text).not.toContain("owner/name");
     }
+  });
+});
+
+describe("K-1 to K-6 of Spec 024 in the Schnellstart", () => {
+  it("K-1: the name is taken as written, the identifier derived and shown small", async () => {
+    const response = await get("/marko", {
+      method: "POST",
+      headers: { "content-type": "application/x-www-form-urlencoded" },
+      body: "name=Bluna+Marke&basis=komuna",
+      redirect: "manual",
+    });
+    expect(response.status).toBe(303);
+    expect(response.headers.get("location")).toBe("/marko/bluna-marke/farbe");
+    const html = await (await get("/marko/bluna-marke/farbe")).text();
+    expect(html).toContain("Bluna Marke");
+    expect(html).toContain("(bluna-marke)");
+    const draft = await (
+      await get("/api/marko/bluna-marke/entwurf", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: "{}",
+      })
+    ).json();
+    expect((draft as { agordo: { etikedoj?: { marko?: string } } }).agordo.etikedoj?.marko).toBe(
+      "Bluna Marke",
+    );
+  });
+
+  it("K-3/K-4: the search answers while typing, and says what to do without a hit", async () => {
+    const hits = (await (await get("/api/marko/testa/tiparoj?q=inter")).json()) as {
+      treffer: { id: string }[];
+      satz?: string;
+    };
+    expect(hits.treffer[0]?.id).toBe("inter");
+    expect(hits.satz).toBeUndefined();
+    const none = (await (await get("/api/marko/testa/tiparoj?q=zzzz-nenio")).json()) as {
+      treffer: unknown[];
+      satz?: string;
+    };
+    expect(none.treffer).toEqual([]);
+    expect(none.satz).toMatch(/Keine Schrift/);
+    const page = await (await get("/marko/testa/schrift?q=zzzz-nenio")).text();
+    expect(page).toMatch(/Keine Schrift/);
+  });
+
+  it("K-6: Enter in the search searches; a chosen font is taken over", async () => {
+    const search = await get("/marko/testa/schrift", {
+      method: "POST",
+      headers: { "content-type": "application/x-www-form-urlencoded" },
+      body: "q=prata&tiparo=",
+      redirect: "manual",
+    });
+    expect(search.status).toBe(303);
+    expect(search.headers.get("location")).toBe("/marko/testa/schrift?q=prata");
+    const choose = await get("/marko/testa/schrift", {
+      method: "POST",
+      headers: { "content-type": "application/x-www-form-urlencoded" },
+      body: "q=prata&tiparo=prata",
+      redirect: "manual",
+    });
+    expect(choose.status).toBe(303);
+    expect(choose.headers.get("location")).toBe("/marko/testa/form");
+    const draft = (await (
+      await get("/api/marko/testa/entwurf", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: "{}",
+      })
+    ).json()) as {
+      agordo: { schriften: { body: { family: string }; display: { family: string } } };
+    };
+    expect(draft.agordo.schriften.body.family).toBe("Prata");
+    expect(draft.agordo.schriften.display.family).toBe("Prata");
+  });
+
+  it("K-5: the form is a choice; ganz rund makes the controls a pill and keeps surfaces rounded", async () => {
+    const pill = await get("/marko/testa/form", {
+      method: "POST",
+      headers: { "content-type": "application/x-www-form-urlencoded" },
+      body: "form.wahl=ganz-rund",
+      redirect: "manual",
+    });
+    expect(pill.status).toBe(303);
+    let draft = (await (
+      await get("/api/marko/testa/entwurf", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: "{}",
+      })
+    ).json()) as {
+      agordo: { form?: { radius?: number }; festgelegt?: Record<string, { alias?: string }> };
+    };
+    expect(draft.agordo.form?.radius).toBe(2);
+    expect(draft.agordo.festgelegt?.["radius.role.control"]?.alias).toBe("radius.full");
+    const css = await (await get("/marko/testa/vorschau.css?rev=99")).text();
+    expect(css).toContain("--fm-radius-role-control: var(--fm-radius-full)");
+    await get("/marko/testa/form", {
+      method: "POST",
+      headers: { "content-type": "application/x-www-form-urlencoded" },
+      body: "form.wahl=eckig",
+      redirect: "manual",
+    });
+    draft = (await (
+      await get("/api/marko/testa/entwurf", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: "{}",
+      })
+    ).json()) as typeof draft;
+    expect(draft.agordo.form?.radius).toBe(0);
+    expect(draft.agordo.festgelegt?.["radius.role.control"]).toBeUndefined();
+  });
+});
+
+describe("the Studio (Spec 024, § 4)", () => {
+  it("opens at Farbe and renders every page with the number of problems", async () => {
+    const entry = await get("/studio/testa", { redirect: "manual" });
+    expect(entry.status).toBe(303);
+    expect(entry.headers.get("location")).toBe("/studio/testa/farbe");
+    for (const page of ["farbe", "schrift", "raum", "form", "tiefe", "bewegung", "semantik"]) {
+      const response = await get(`/studio/testa/${page}`);
+      expect(response.status, page).toBe(200);
+      const html = await response.text();
+      expect(html, page).toContain("Prüfung");
+      expect(html, page).toContain("<fm-navigado");
+    }
+    expect((await get("/studio/testa/nenio")).status).toBe(404);
+  });
+
+  it("sets a value: the step is gesetzt, the Schnellstart sees it (M-6), and it can be taken back", async () => {
+    const set = await get("/api/marko/testa/festlegen", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ token: "color.palette.accent.700", wert: "#2a338f" }),
+    });
+    expect(set.status).toBe(200);
+    const body = (await set.json()) as {
+      rev: number;
+      herkunft: string;
+      probleme: number;
+      betroffen: string[];
+    };
+    expect(body.herkunft).toBe("gesetzt");
+    expect(typeof body.probleme).toBe("number");
+    const css = await (await get(`/marko/testa/vorschau.css?rev=${body.rev}`)).text();
+    expect(css).toContain("#2a338f");
+    const page = await (await get("/studio/testa/farbe")).text();
+    expect(page).toContain("#2a338f");
+    expect(page).toContain("gesetzt");
+    const back = await get("/api/marko/testa/festlegen", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ token: "color.palette.accent.700", zurueck: true }),
+    });
+    expect(((await back.json()) as { herkunft: string }).herkunft).toBe("abgeleitet");
+  });
+
+  it("refuses a value that breaks a fixed rule, with one sentence and one suggestion (M-5)", async () => {
+    const response = await get("/api/marko/testa/festlegen", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ token: "color.text.default", alias: "color.palette.neutral.100" }),
+    });
+    expect(response.status).toBe(409);
+    const body = (await response.json()) as {
+      satz: string;
+      vorschlag: string;
+      betroffen: string[];
+    };
+    expect(body.satz).toBeTruthy();
+    expect(body.vorschlag).toBeTruthy();
+    expect(body.betroffen.length).toBeGreaterThan(0);
+    const draft = (await (
+      await get("/api/marko/testa/entwurf", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: "{}",
+      })
+    ).json()) as { agordo: { festgelegt?: Record<string, unknown> } };
+    expect(draft.agordo.festgelegt?.["color.text.default"]).toBeUndefined();
+  });
+
+  it("re-points a role within the rules, names a palette, sets a size per viewport", async () => {
+    const role = await get("/api/marko/testa/festlegen", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ token: "color.text.default", alias: "color.palette.neutral.800" }),
+    });
+    expect(role.status).toBe(200);
+    expect(((await role.json()) as { betroffen: string[] }).betroffen).toEqual(expect.any(Array));
+    const name = await get("/api/marko/testa/festlegen", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ token: "color.palette.accent", etikedo: "Ozean" }),
+    });
+    expect(name.status).toBe(200);
+    expect(await (await get("/studio/testa/farbe")).text()).toContain("Ozean");
+    const size = await get("/api/marko/testa/festlegen", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        token: "font.size.display.1",
+        alias: "font.size.scale.900",
+        modus: "viewport=compact",
+      }),
+    });
+    expect(size.status).toBe(200);
+    const schrift = await (await get("/studio/testa/schrift?viewport=compact")).text();
+    expect(schrift).toContain("font.size.scale.900");
+  });
+
+  it("saves from the Studio like the Schnellstart", async () => {
+    const save = await get("/studio/testa/speichern", { method: "POST", redirect: "manual" });
+    expect(save.status).toBe(303);
+    expect(save.headers.get("location")).toBe("/studio/testa/farbe?gespeichert=1");
+    expect(await (await get("/studio/testa/farbe?gespeichert=1")).text()).toContain("Gespeichert");
   });
 });
