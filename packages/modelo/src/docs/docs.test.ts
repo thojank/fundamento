@@ -2797,3 +2797,57 @@ describe("Nachlese 8 ① documentation (specs/022-nachlese-8)", () => {
       expect(release, term).toContain(term);
   });
 });
+
+// Nachlese 8 ② (Briefing 2026-10-21): plan ② carries Figma and the Vitrino, the cause of M5 with
+// its measurements, what happens to f10b-5, and the guide for the acceptance in four Figma steps
+// with a table of expected values; tasks ② start at T2221.
+describe("Nachlese 8 ② documentation (specs/022-nachlese-8)", () => {
+  it("plan ② carries the findings, the cause of M5 and the guide with the four Figma steps; tasks ② start at T2221", () => {
+    const plan = read("specs/022-nachlese-8/plan.md");
+    const tasks = read("specs/022-nachlese-8/tasks.md");
+    const second = plan.slice(
+      plan.indexOf("## ② Figma und Vitrino"),
+      plan.indexOf("## ③ Regeltexte deutsch"),
+    );
+    for (const heading of [
+      "### Zusammenfassung",
+      "### Entwurfsentscheidungen",
+      "### Gekippte Dialoge",
+      "### Abweichungen",
+      "### Befunde / Mankoj",
+      "### Offen (für den Maintainer)",
+      "### Messanleitung",
+    ]) {
+      expect(second, heading).toContain(heading);
+    }
+    for (const term of [
+      "F-5",
+      "F-6",
+      "F-8",
+      "F-9",
+      "F-10",
+      "F-11",
+      "F-12",
+      "V-1",
+      "V-6",
+      "N7-F-1",
+      "M5",
+      "f10b-5",
+      "pnpm fm projekcioj build --out .fundamento/projekcioj",
+      ".fundamento/projekcioj-provoj",
+      "neu importieren",
+      "neuen leeren Datei",
+      "file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/",
+    ]) {
+      expect(second, term).toContain(term);
+    }
+    expect(second).toMatch(/\| [^|\n]+ \| [^|\n]+ \|/);
+    expect(second).not.toContain("ciferecigo");
+    const own = tasks.slice(
+      tasks.indexOf("## ② Figma und Vitrino"),
+      tasks.indexOf("## ③ Regeltexte deutsch"),
+    );
+    expect(own).toContain("**T2221");
+    expect(own).toMatch(/rot `[0-9a-f]{7}`/);
+  });
+});
