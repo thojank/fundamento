@@ -18,15 +18,15 @@
 
 ### C – Abschluss
 - [x] **T2407 Doku** plan ① (Constitutional Compliance Review, D-01–D-12, Raster-Vorschlag, Abweichungen 1–8, B-1–B-8, O-1–O-4, Messanleitung), tasks ①, README („Studio“), Vojmapo (8a''').
-- [ ] **T2408 PR**, CI grün, Bericht.
+- [x] **T2408 PR #99**, CI grün (Lauf 39667790259, `fbd2ee9`), Bericht.
 
 ### Messungen
 
 | Was | Wert |
 |---|---|
-| Commits ① | rot `062e3ec`, grün (Hash des grünen Stands, CI grün); dieser Eintrag im Folgecommit |
-| CI ① | (Lauf, Hash, Jobs und Zeiten) |
-| Tests lokal | Metiejo 146 in 13 Dateien, Agordilo 102 in 12 Dateien, Modelo `validate` und `contracts` grün (Regel-Zähler 178); `pnpm lint` grün |
+| Commits ① | rot `062e3ec`, grün `fbd2ee9` (CI grün); dieser Eintrag im Folgecommit |
+| CI ① | Lauf 39667790259 (`fbd2ee9`, alle acht Jobs grün im ersten Lauf, Wanduhr 10:16): `checks` 1:46, `unit` 6:17, `projekcioj` 3:43 / 4:06, `eroj` 2:33 / 2:13, `alirebleco-eroj` 5:16, `rendered-checks` 10:13 |
+| Tests lokal | Metiejo 146 in 13 Dateien, Agordilo 102 in 12 Dateien, Modelo 165 Dateien (Regel-Zähler 178), MCP 41, CLI 7 – je grün; `pnpm build`, `pnpm lint` grün |
 | Zeiten (Studio) | Seite 75–140 ms, Vorschau-Stylesheet 60 ms, Prüfung je Setzen 1,3 s warm / 3,1 s kalt, Speichern mit Exporten ≈ 4 s |
 | Ero-Tokens | 0 (Runde 2) · Figma-Variablen unverändert gegenüber 0.2.0 |
 | Raster | neutral 17 Stufen, farbige Paletten 11; Vorschlag + 25, 150, 850, 975 (plan ①) |
