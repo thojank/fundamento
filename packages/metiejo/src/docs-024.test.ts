@@ -110,3 +110,18 @@ describe("Spec 024 Runde 1 documentation (specs/024-studio)", () => {
     expect(tasks).not.toContain("ciferecigo");
   });
 });
+
+// Decision O-1 of the maintainer (22.10.): the finer grid of the coloured palettes is its own PR
+// between ① and ②, documented in plan and tasks beside the rounds.
+describe("Spec 024 O-1 documentation (specs/024-studio)", () => {
+  it("plan and tasks carry the O-1 section with the measured values, the method and the commits", () => {
+    const plan = read("plan.md");
+    const tasks = read("tasks.md");
+    expect(plan).toContain("## O-1 Palettenraster");
+    for (const term of ["25, 150, 850, 975", "calibration.json", "palette-even", "palette-aligned"])
+      expect(plan, term).toContain(term);
+    expect(tasks).toContain("## O-1 Palettenraster");
+    expect(tasks).toContain("**T2421");
+    expect(tasks.slice(tasks.indexOf("## O-1 Palettenraster"))).toMatch(/rot `[0-9a-f]{7}`/);
+  });
+});

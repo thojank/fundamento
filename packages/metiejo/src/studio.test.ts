@@ -48,7 +48,10 @@ describe("studioRows", () => {
     const accent = groups.find((group) => group.key === "color.palette.accent");
     expect(accent?.title).toBe("Ozean");
     expect(accent?.etikedoToken).toBe("color.palette.accent");
-    expect(accent?.rows.length).toBeGreaterThanOrEqual(11);
+    expect(accent?.rows.length).toBeGreaterThanOrEqual(15);
+    // O-1 (Spec 024): the four new steps of every coloured palette stand in the Studio.
+    for (const step of ["25", "150", "850", "975"])
+      expect(accent?.rows.map((row) => row.token), step).toContain(`color.palette.accent.${step}`);
     const step = accent?.rows.find((row) => row.token === "color.palette.accent.700");
     expect(step?.shown).toBe("#2a338f");
     expect(step?.herkunft).toBe("gesetzt");
@@ -70,6 +73,7 @@ describe("studioRows", () => {
     expect(role?.alias).toBe("color.palette.neutral.900");
     expect(role?.dunkel?.alias).toMatch(/^color\.palette\./);
     expect(role?.candidates).toContain("color.palette.neutral.800");
+    expect(role?.candidates).toContain("color.palette.accent.975");
     expect(role?.herkunft).toBe("struktur");
     expect(groups.map((group) => group.key)).toEqual(
       expect.arrayContaining([
