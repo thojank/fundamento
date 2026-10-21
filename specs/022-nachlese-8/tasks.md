@@ -83,7 +83,7 @@
   - Projekcioj (`celoj/nachlese-8-germana.test.ts`): Gebrauch und Kialoj deutsch, Make Kit englisch.
   - MCP (`e2e/nachlese-8-germana.test.ts`): `lingvo` über das Protokoll.
   - Doku.
-  - Rot in `ae452a7`.
+  - Rot in `4bb15db`.
 
 ### B – Grün
 - [x] **T2242 Unterbau** (D-15): Schema `Tradukoj`, Wurzel `tradukoj.json`, Laden, Export, Import, Typen.
@@ -102,7 +102,7 @@
 
 | Was | Wert |
 |---|---|
-| Commits | rot `ae452a7` |
+| Commits | rot `4bb15db` |
 | Umfang | 526 Texte, 14 316 Wörter Englisch, 13 665 Wörter Deutsch |
 | Dauer | Übersetzung rund 35 Minuten (zehn Teile parallel), ③ insgesamt rund zwei Stunden |
 | Dialoge | `suggest_ero`: keiner gekippt; mit `lingvo` de deutsche Kialoj |
