@@ -44,8 +44,9 @@
 
 | Was | Wert |
 |---|---|
-| Commits O-1 | rot `23dec57`, grün (Folgecommit); dieser Eintrag im Folgecommit |
+| Commits O-1 | rot `23dec57`, grün `334b979`; dieser Eintrag im Folgecommit |
 | Tokens | Kern 356 → 376; Figma-Variablen 856 → 876 |
+| Tests lokal | Modelo 3678 in 166 Dateien, Agordilo 104, Metiejo 147, MCP 407, CLI 75, Projekcioj 795, Eroj 859 (2 übersprungen wie zuvor) – je grün; `pnpm lint` und alle `check:*` grün |
 | Schritte | 950 → 975: 0,16 OKLCH-L je 100 Einheiten (Aspiro 0,04–0,2 hält); `palette-aligned` Spreizung 0 an 25/150/850/975 |
 
 ## ② Runde 2
