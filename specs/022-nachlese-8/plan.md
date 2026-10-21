@@ -244,16 +244,24 @@ Behoben in der Vitrino: Im Werkstatt-Modus sind im Bedienbereich alle `--fm-moti
 
 Ohne Drosselung: 0 ms, 0 Long Tasks. Die Grenze von 50 ms im Test ist unverändert.
 
-**Zweite Ursache (nach CI-Lauf 39597245355).** Mit diesem Stand blieb die CI rot: 52 ms, 1 Long Task. Long Animation Frames zeigten, wo: Der lange Frame fällt auf das Ende einer Prüfung. `#finishCheck` ruft `#renderReport`, und das ersetzte die ganze Liste der Verstöße per `innerHTML`, mit allen Eroj darin (Insignoj, Butonoj). Bei jedem Wechsel entstanden so dutzende neue Schattenbäume, auch wenn sich kein Verstoß geändert hatte.
+**Zweite Ursache (CI-Läufe 39597245355 und 39605110053, beide 52 ms, 1 Long Task).** Die CI blieb rot, und zwar mit denselben Zahlen; auf ① waren es 0 ms. Ein erster Versuch, nur geänderte Einträge des Berichts neu zu schreiben, änderte nichts: Die Texte der Verstöße nennen Messwerte, und die ändern sich bei jedem Wechsel. Darum schreibt der M5-Test seither die Long Animation Frames über 50 ms in die Ausgabe. CI-Lauf 39606691466 (grün, 0 Long Tasks, also knapp):
 
-Behoben in der Werkstatt: Die Liste wird je Eintrag abgeglichen. Ein unveränderter Verstoß behält sein Element; nur neue oder geänderte Einträge entstehen aus dem Template, entfallene werden entfernt. Sperre (`lock`) und Ansage (`say`) schreibt die Werkstatt nur, wenn sich ihr Wert ändert. Vergleich bei 2,8-facher Drosselung auf dem Entwicklungsrechner, abwechselnd A (ohne) und B (mit), je 50 Wechsel:
+| Frame | davon Skript `Worker.onmessage` | Stil und Layout |
+|---|---|---|
+| 85 ms | 49 ms | 36 ms |
+| 70 ms | 45 ms | 25 ms |
+| 64 ms | 44 ms | 20 ms |
 
-| Serie | Last des Rechners | A: Läufe mit Long Task | B: Läufe mit Long Task |
-|---|---|---|---|
-| 1 | hoch (Load um 60) | 1 von 5 (52 ms) | 0 von 5 |
-| 2 | gering | 0 von 6 | 0 von 5 |
+Der Handler der Prüfung schreibt den Bericht. Seine Dauer wächst mit der Zahl der Verstöße: lokal bei dreifacher Drosselung rund 0,5 ms je Eintrag, weil jeder Eintrag Eroj mit Schattenbäumen baut (insigno, butono). An den Rändern des Reglers gibt es 73 Verstöße, das ergibt 40 ms lokal und 44–52 ms in der CI. Warum ① knapp darunter blieb, ist nicht gemessen.
 
-Lokal lässt sich der Fehler also nur unter Last zeigen; maßgeblich ist die CI (T2230). Die Grenze bleibt 50 ms.
+Behoben in der Werkstatt: Der Bericht schreibt die Liste in Portionen von zwölf Einträgen (`REPORT_BATCH`) und gibt den Hauptfaden dazwischen frei. Ein neuerer Bericht löst den älteren zwischen zwei Portionen ab. Eine Prüfung gilt erst als fertig (`checked`), wenn ihr Bericht vollständig steht. Lokal bei dreifacher Drosselung, je 50 Wechsel:
+
+| Stand | Handler der Prüfung, Median / Maximum | bei 73 Verstößen |
+|---|---|---|
+| vorher | 11 / 41 ms | 41 ms |
+| mit Portionen | 8 / 14 ms | 13 ms |
+
+Bei vierfacher Drosselung halbiert das die Long Tasks (13–17 → 5–8). Was bleibt, ist die Stilberechnung nach dem Setzen der Farben (F-16), nicht der Bericht. Die Grenze bleibt 50 ms.
 
 ### Gekippte Dialoge
 
@@ -269,7 +277,7 @@ Lokal lässt sich der Fehler also nur unter Last zeigen; maßgeblich ist die CI 
 2. **`open` des menuo ist im Set wahr**, obwohl die Skemo `false` vorgibt. Die Varianten des Sets zeigen die Zustände der Einträge, also die offene Liste. Das Beispiel schließt sie.
 3. **V-3 ändert auch die Anwendung.** Das Briefing sagt „in der Anwendung bleibt das Verhalten“. Ein Verhalten „volle Höhe“ gab es nicht; der Zusammenbruch der pagxo in einer umbrechenden Spalte trat in der Anwendung genauso auf. Behoben ist er überall.
 4. **V-4 mit sichtbarer Beschriftung** statt mit einem bloßen Abstand: Gleiche Tokens wie die Beschriftung des Feldes, also gleiche Höhe in jeder Marke und Dichte.
-5. **M5 in der Vitrino behoben**, nicht in den Tokens: Die Bewegungsdauer steht nur im Bedienbereich der Werkstatt auf 0 ms; der Bericht wird je Eintrag abgeglichen statt neu geschrieben.
+5. **M5 in der Vitrino behoben**, nicht in den Tokens: Die Bewegungsdauer steht nur im Bedienbereich der Werkstatt auf 0 ms, und der Bericht wird in Portionen geschrieben.
 6. **Figma-Beispiele sind HUG**, nicht 720 px breit wie „mittel“: Der Aufbau folgt „mittel“, die Breite ihrem Inhalt.
 7. **Pins, die folgen:**
    - das Vorgabewort des kodbloko („pnpm fm mcp“)

@@ -60,6 +60,12 @@ const FRAGMENT_DELAY_MS = 300;
 const STATUS = ["success", "warning", "danger", "info"] as const;
 /** Changes of one control closer than this are one step of the history (a drag, a typed word). */
 const HISTORY_MERGE_MS = 600;
+/**
+ * Nachlese 8 ② (M5, D-14): the entries of the report written in one task before the main thread
+ * is given back. An entry costs about 0.65 ms on a CI runner (its Eroj with their shadow roots);
+ * 73 entries in one task were a block of 52 ms. Twelve stay under 10 ms.
+ */
+const REPORT_BATCH = 12;
 const FONT_ROLES = ["display", "body", "code"] as const;
 const GROUPS = [
   { key: "farbe", label: "Farbe" },
@@ -759,11 +765,17 @@ class Werkstatt {
 
   #finishCheck(raporto: Raporto): void {
     this.state.raporto = raporto;
-    this.state.checked += 1;
-    this.#renderReport(raporto);
-    this.#renderExport(raporto);
-    document.dispatchEvent(new CustomEvent("fm-werkstatt-raporto", { detail: raporto }));
-    this.#flush(this.#checkWaiters, raporto);
+    this.#reportRun += 1;
+    const run = this.#reportRun;
+    // The check counts as done once its report stands complete; a newer report that arrives
+    // meanwhile takes over, and its end resolves every waiter.
+    void this.#renderReport(raporto, run).then((complete) => {
+      if (!complete) return;
+      this.state.checked += 1;
+      this.#renderExport(raporto);
+      document.dispatchEvent(new CustomEvent("fm-werkstatt-raporto", { detail: raporto }));
+      this.#flush(this.#checkWaiters, raporto);
+    });
   }
 
   /** The palettes of the Agordo as it is now, once they are set. */
@@ -1170,7 +1182,8 @@ ${groupOf("ikonoj", "Icons", `<fm-elektilo id="fm-werkstatt-ikono-gewicht" value
 
   // --- the report -------------------------------------------------------------------------------
 
-  #renderReport(raporto: Raporto): void {
+  /** Writes the report; false where a newer one took over before the list was complete. */
+  async #renderReport(raporto: Raporto, run: number): Promise<boolean> {
     const { summary } = raporto;
     const apcaCount = raporto.hints.filter((hint) => hint.rule === "contrast-advisory").length;
     const badges: [string, string, number, string][] = [
@@ -1212,16 +1225,29 @@ ${groupOf("ikonoj", "Icons", `<fm-elektilo id="fm-werkstatt-ikono-gewicht" value
       if (badge.getAttribute("intent") !== intent) badge.setAttribute("intent", intent);
       if (badge.textContent !== String(value)) badge.textContent = String(value);
     }
-    // Nachlese 8 ② (M5): a check replaces only the entries that changed. The whole list made anew
-    // created every entry's Eroj again — a frame of 50 ms on a runner half as fast.
+    // The APCA hints (advice) fill their list only while it is open: a check renders the count,
+    // not a hundred list items (G5).
+    const apca = raporto.hints.filter((hint) => hint.rule === "contrast-advisory");
+    this.#renderApca(apca);
+    this.#status(
+      `Prüfbericht: ${summary.pairs.passed} von ${summary.pairs.measured} Paar-Auswertungen bestanden, ${raporto.violations.length} Verstöße (${summary.violations.fixed} fest, ${summary.violations.adjustable} anpassbar, ${summary.violations.covered} gedeckt), ${apca.length} APCA-Hinweise.`,
+    );
+    // Nachlese 8 ② (M5): a check replaces only the entries that changed — and writes them in
+    // batches of REPORT_BATCH, giving the main thread back in between (D-14): the work grows with
+    // the number of violations, the block does not.
     const list = byId("fm-werkstatt-malobservoj");
     const items = raporto.violations.map((violation) => this.#violationMarkup(violation));
-    items.forEach((item, index) => {
-      if (this.#violationItems[index] === item && list.children[index] !== undefined) return;
+    for (let index = 0; index < items.length; index++) {
+      if (index > 0 && index % REPORT_BATCH === 0) {
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        if (run !== this.#reportRun) return false;
+      }
+      const item = items[index] ?? "";
+      if (this.#violationItems[index] === item && list.children[index] !== undefined) continue;
       const template = document.createElement("template");
       template.innerHTML = item;
       const entry = template.content.firstElementChild;
-      if (!(entry instanceof HTMLElement)) return;
+      if (!(entry instanceof HTMLElement)) continue;
       for (const button of entry.querySelectorAll<HTMLElement>("[data-fm-apliki]")) {
         button.addEventListener("click", () => {
           const at = Number(button.dataset.fmApliki);
@@ -1235,20 +1261,17 @@ ${groupOf("ikonoj", "Icons", `<fm-elektilo id="fm-werkstatt-ikono-gewicht" value
       const old = list.children[index];
       if (old === undefined) list.append(entry);
       else old.replaceWith(entry);
-    });
+      this.#violationItems[index] = item;
+    }
     while (list.children.length > items.length) list.lastElementChild?.remove();
-    this.#violationItems = items;
-    // The APCA hints (advice) fill their list only while it is open: a check renders the count,
-    // not a hundred list items (G5).
-    const apca = raporto.hints.filter((hint) => hint.rule === "contrast-advisory");
-    this.#renderApca(apca);
-    this.#status(
-      `Prüfbericht: ${summary.pairs.passed} von ${summary.pairs.measured} Paar-Auswertungen bestanden, ${raporto.violations.length} Verstöße (${summary.violations.fixed} fest, ${summary.violations.adjustable} anpassbar, ${summary.violations.covered} gedeckt), ${apca.length} APCA-Hinweise.`,
-    );
+    this.#violationItems.length = items.length;
+    return true;
   }
 
   #apcaHints: Raporto["hints"] = [];
   #violationItems: string[] = [];
+  /** The report being written (M5): a newer one stops the older between two batches. */
+  #reportRun = 0;
   #apcaListed: Raporto["hints"] | undefined;
 
   #renderApca(apca: Raporto["hints"]): void {
