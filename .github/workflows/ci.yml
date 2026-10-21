@@ -103,6 +103,11 @@ jobs:
       - name: "Check: Release"
         run: pnpm check:release
 
+      # Spec 023 (§4.5, M-4): no byte of a licensed font in a public result — the projections,
+      # the packages, the Make Kits. The CI knows no private repository; the step proves the path.
+      - name: "Check: Tiparoj"
+        run: pnpm check:tiparoj
+
   unit:
     name: Unit tests (every package but Projekcioj and Eroj)
     runs-on: ubuntu-latest

@@ -107,7 +107,11 @@ describe("fontoOf and licencedFonto (K-3)", () => {
     expect(fonto.license).toBe("proprietary");
     expect(fonto.redistributable).toBe(false);
     expect(fonto.source).toContain("lizenziert, nicht enthalten");
-    const { issues } = readAgordo({ name: "x", leitfarbe: "#336699", schriften: { display: fonto } });
+    const { issues } = readAgordo({
+      name: "x",
+      leitfarbe: "#336699",
+      schriften: { display: fonto },
+    });
     expect(issues).toEqual([]);
   });
 

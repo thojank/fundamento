@@ -11,6 +11,7 @@ import {
 import { agordiloCheck } from "./commands/agordilo-check.js";
 import { agordiloDerive } from "./commands/agordilo-derive.js";
 import { mcp } from "./commands/mcp.js";
+import { metiejo } from "./commands/metiejo.js";
 import { modeloExport } from "./commands/modelo-export.js";
 import { modeloMezuroj } from "./commands/modelo-mezuroj.js";
 import { modeloValidate } from "./commands/modelo-validate.js";
@@ -37,6 +38,7 @@ const ENTRIES: readonly Entry[] = [
     commands: [agordiloDerive, agordiloCheck],
   },
   mcp,
+  metiejo,
 ];
 
 const HELP_FLAGS = new Set(["--help", "-h"]);

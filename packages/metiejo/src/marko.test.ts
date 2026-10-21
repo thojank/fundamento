@@ -46,7 +46,10 @@ describe("createMarko (step 1)", () => {
   it("refuses a name that is no Name of the Modelo, and writes nothing", () => {
     for (const name of ["Provo Neu", "../x", "", "a/b", "ÄÖ"]) {
       const result = createMarko(workdir, { name, basis: "leer" });
-      expect(result.issues.map((issue) => issue.rule), name).toEqual(["name-invalid"]);
+      expect(
+        result.issues.map((issue) => issue.rule),
+        name,
+      ).toEqual(["name-invalid"]);
       expect(result.issues[0]?.suggestion).toBeTruthy();
     }
     expect(existsSync(join(workdir, "Provo Neu"))).toBe(false);
@@ -90,9 +93,9 @@ describe("the draft and the save (step 7, W-25, W-26)", () => {
   });
 
   it("writes only inside the working directory and only an Agordo", () => {
-    expect(() => saveMarko(workdir, "../leera", { name: "x", leitfarbe: "#336699" }, "2026-10-21")).toThrow(
-      /name/i,
-    );
+    expect(() =>
+      saveMarko(workdir, "../leera", { name: "x", leitfarbe: "#336699" }, "2026-10-21"),
+    ).toThrow(/name/i);
     expect(existsSync(join(scratch, "leera"))).toBe(false);
   });
 

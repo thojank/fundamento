@@ -10,7 +10,9 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { SXTUPOJ } from "./sxtupoj.js";
 
-const specDir = fileURLToPath(new URL("../../../specs/023-werkstatt-konfigurilo/", import.meta.url));
+const specDir = fileURLToPath(
+  new URL("../../../specs/023-werkstatt-konfigurilo/", import.meta.url),
+);
 const read = (name: string): string => readFileSync(join(specDir, name), "utf8");
 
 /** SHA-256 of the maintainer's spec of 2026-10-21 (10 979 bytes), copied verbatim. */
@@ -43,11 +45,16 @@ describe("Spec 023 Runde 1 documentation (specs/023-werkstatt-konfigurilo)", () 
 
   it("the plan shows a screenshot of every step, and every screenshot exists", () => {
     const plan = read("plan.md");
-    const shots = [...plan.matchAll(/\]\((bildoj\/[a-z0-9-]+\.png)\)/g)].map(([, path = ""]) => path);
+    const shots = [...plan.matchAll(/\]\((bildoj\/[a-z0-9-]+\.png)\)/g)].map(
+      ([, path = ""]) => path,
+    );
     expect(shots.length).toBeGreaterThanOrEqual(SXTUPOJ.length);
     for (const shot of shots) expect(existsSync(join(specDir, shot)), shot).toBe(true);
     for (const sxtupo of SXTUPOJ) {
-      expect(shots.some((shot) => shot.includes(`-${sxtupo.key}`)), sxtupo.key).toBe(true);
+      expect(
+        shots.some((shot) => shot.includes(`-${sxtupo.key}`)),
+        sxtupo.key,
+      ).toBe(true);
     }
   });
 

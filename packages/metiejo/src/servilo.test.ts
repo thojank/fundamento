@@ -3,6 +3,7 @@
 // the link to the Expertenansicht; no value of the .env in any response or log line.
 
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { request as httpRequest } from "node:http";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
@@ -49,8 +50,19 @@ describe("the server (K-1)", () => {
   });
 
   it("answers loopback requests only (a foreign Host is refused)", async () => {
-    const response = await get("/", { headers: { host: "evil.example:80" } });
-    expect(response.status).toBe(403);
+    // fetch never sends a foreign Host; node:http does.
+    const status = await new Promise<number>((done, fail) => {
+      const request = httpRequest(
+        { host: "127.0.0.1", port: servilo.port, path: "/", headers: { host: "evil.example:80" } },
+        (response) => {
+          response.resume();
+          done(response.statusCode ?? 0);
+        },
+      );
+      request.on("error", fail);
+      request.end();
+    });
+    expect(status).toBe(403);
   });
 
   it("serves the start screen, the built Eroj and the stylesheet of komuna", async () => {
@@ -109,10 +121,18 @@ describe("a brand through the steps", () => {
     expect(body.agordo.leitfarbe).toBe("#336699");
     const css = await (await get(`/marko/testa/vorschau.css?rev=${body.rev}`)).text();
     expect(css).toContain('data-fm-aspekto="testa"');
-    const preview = await (await get("/marko/testa/vorschau?sxtupo=vorschau&breite=mittel&scheme=dark")).text();
+    const preview = await (
+      await get("/marko/testa/vorschau?sxtupo=vorschau&breite=mittel&scheme=dark")
+    ).text();
     expect(preview).toContain('data-fm-aspekto="testa"');
     expect(preview).toContain('data-fm-color-scheme="dark"');
-    for (const sxablono of ["fm-sxelo", "fm-pagxo", "fm-formularo", "fm-filtrilo", "fm-redaktilo"]) {
+    for (const sxablono of [
+      "fm-sxelo",
+      "fm-pagxo",
+      "fm-formularo",
+      "fm-filtrilo",
+      "fm-redaktilo",
+    ]) {
       expect(preview, sxablono).toContain(`<${sxablono}`);
     }
   });
@@ -124,7 +144,9 @@ describe("a brand through the steps", () => {
       body: JSON.stringify({ form: { radius: 9 } }),
     });
     expect(response.status).toBe(422);
-    const body = (await response.json()) as { issues: { path: string; rule: string; suggestion: string }[] };
+    const body = (await response.json()) as {
+      issues: { path: string; rule: string; suggestion: string }[];
+    };
     expect(body.issues[0]?.path).toContain("form/radius");
     expect(body.issues[0]?.rule).toBeTruthy();
     expect(body.issues[0]?.suggestion).toBeTruthy();
@@ -153,7 +175,9 @@ describe("a brand through the steps", () => {
     expect(fertig).toContain("Speichern");
     const save = await get("/marko/testa/speichern", { method: "POST", redirect: "manual" });
     expect(save.status).toBe(303);
-    const after = await (await get("/marko/testa/fertig")).text();
+    const location = save.headers.get("location") ?? "";
+    expect(location).toBe("/marko/testa/fertig?gespeichert=1");
+    const after = await (await get(location)).text();
     expect(after).toContain("Gespeichert");
     expect(after).toContain("Expertenansicht");
     // Without a built Vitrino the link is a sentence with the build command.
@@ -165,7 +189,9 @@ describe("a brand through the steps", () => {
     mkdirSync(vitrino, { recursive: true });
     writeFileSync(join(vitrino, "index.html"), "<!doctype html><title>Vitrino</title>");
     const html = await (await get("/marko/testa/fertig")).text();
-    expect(html).toMatch(/href="\/vitrino\/index\.html#aspekto=komuna&amp;modus=werkstatt&amp;agordo=[A-Za-z0-9_-]+"/);
+    expect(html).toMatch(
+      /to="\/vitrino\/index\.html#aspekto=komuna&amp;modus=werkstatt&amp;agordo=[A-Za-z0-9_-]+"/,
+    );
     const served = await get("/vitrino/index.html");
     expect(served.status).toBe(200);
     expect(await served.text()).toContain("Vitrino");
@@ -183,7 +209,9 @@ describe("the fonts (step 4)", () => {
       body: JSON.stringify({ tiparo: "inter" }),
     });
     expect(response.status).toBe(200);
-    const body = (await response.json()) as { agordo: { schriften: { body: { family: string; license: string } } } };
+    const body = (await response.json()) as {
+      agordo: { schriften: { body: { family: string; license: string } } };
+    };
     expect(body.agordo.schriften.body).toMatchObject({ family: "Inter", license: "OFL-1.1" });
   });
 
@@ -197,7 +225,13 @@ describe("the fonts (step 4)", () => {
 describe("M-7: no secret anywhere", () => {
   it("no response and no log line carries the value of a key or the name of the private repository", async () => {
     const texts = [log.join("")];
-    for (const path of ["/", "/marko/testa/farbe", "/marko/testa/schrift", "/marko/testa/fertig", "/css/fundamento.css"]) {
+    for (const path of [
+      "/",
+      "/marko/testa/farbe",
+      "/marko/testa/schrift",
+      "/marko/testa/fertig",
+      "/css/fundamento.css",
+    ]) {
       texts.push(await (await get(path)).text());
     }
     for (const text of texts) {

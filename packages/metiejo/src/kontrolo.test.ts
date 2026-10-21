@@ -9,13 +9,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterAll, describe, expect, it } from "vitest";
-import {
-  findInBuffer,
-  fingerprintsOf,
-  knownFonts,
-  scanDirs,
-  WINDOW_BYTES,
-} from "./kontrolo.js";
+import { findInBuffer, fingerprintsOf, knownFonts, scanDirs, WINDOW_BYTES } from "./kontrolo.js";
 
 const scratch = mkdtempSync(join(tmpdir(), "fm-metiejo-kontrolo-"));
 afterAll(() => rmSync(scratch, { recursive: true, force: true }));
@@ -61,7 +55,9 @@ describe("findInBuffer", () => {
   it("finds the font copied raw into a file and as base64 in a data URL", () => {
     const raw = Buffer.concat([Buffer.from("/* css */ "), font, Buffer.from(" rest")]);
     expect(findInBuffer(raw, prints).map((hit) => hit.source)).toEqual(["Marke-Sans.woff2"]);
-    const data = Buffer.from(`@font-face{src:url(data:font/woff2;base64,${font.toString("base64")})}`);
+    const data = Buffer.from(
+      `@font-face{src:url(data:font/woff2;base64,${font.toString("base64")})}`,
+    );
     expect(findInBuffer(data, prints)).toHaveLength(1);
     // A different alignment of the base64 (one byte before the font).
     const shifted = Buffer.from(Buffer.concat([Buffer.from("x"), font]).toString("base64"));
@@ -107,7 +103,9 @@ describe("scanDirs (M-4)", () => {
     );
     const result = scanDirs([out], fonts);
     expect(result.ok).toBe(false);
-    expect(result.findings).toEqual([{ file: planted, source: join(privateDir, "Marke-Sans.woff2") }]);
+    expect(result.findings).toEqual([
+      { file: planted, source: join(privateDir, "Marke-Sans.woff2") },
+    ]);
     rmSync(planted);
   });
 
@@ -126,7 +124,15 @@ describe("the command line (check:tiparoj)", () => {
 
   it("exits 0 with a JSON result for a clean target and names what it knew", () => {
     const out = join(scratch, "projekcioj");
-    const result = run(["--json", "--target", out, "--cache", join(scratch, "cache"), "--workdir", workdir]);
+    const result = run([
+      "--json",
+      "--target",
+      out,
+      "--cache",
+      join(scratch, "cache"),
+      "--workdir",
+      workdir,
+    ]);
     expect(result.status).toBe(0);
     const parsed = JSON.parse(result.stdout) as { ok: boolean; fonts: number; targets: string[] };
     expect(parsed.ok).toBe(true);
@@ -147,7 +153,15 @@ describe("the command line (check:tiparoj)", () => {
   });
 
   it("without known fonts it passes and says so, so the CI runs it without the private repository", () => {
-    const result = run(["--json", "--target", join(scratch, "projekcioj"), "--cache", join(scratch, "nenie"), "--workdir", join(scratch, "nenie")]);
+    const result = run([
+      "--json",
+      "--target",
+      join(scratch, "projekcioj"),
+      "--cache",
+      join(scratch, "nenie"),
+      "--workdir",
+      join(scratch, "nenie"),
+    ]);
     expect(result.status).toBe(0);
     expect(JSON.parse(result.stdout)).toMatchObject({ ok: true, fonts: 0 });
   });

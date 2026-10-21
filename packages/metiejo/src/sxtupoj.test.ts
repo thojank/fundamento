@@ -3,7 +3,7 @@
 // Fundamento's own Sxablonoj and Eroj.
 
 import { describe, expect, it } from "vitest";
-import { exampleScreenInput, screen, screenInventory, SXTUPOJ, type SxtupoKey } from "./sxtupoj.js";
+import { exampleScreenInput, SXTUPOJ, type SxtupoKey, screen, screenInventory } from "./sxtupoj.js";
 
 const KEYS: SxtupoKey[] = [
   "start",
@@ -33,12 +33,19 @@ describe("every screen (M-2)", () => {
       expect(inventory.questions, "questions").toBe(1);
       expect(inventory.mainButtons, "main buttons").toBeLessThanOrEqual(1);
       expect(inventory.back, "Zurück").toBe(key !== "start");
-      expect(inventory.next, "Weiter").toBe(key !== "fertig");
+      // The start has Anlegen, the finish Speichern as the way on; every other screen has Weiter.
+      expect(inventory.next, "Weiter").toBe(key !== "fertig" && key !== "start");
       // The frame of the app and the page come from Fundamento itself (§3): sxelo, pagxo, formularo.
       expect(html).toContain("<fm-sxelo");
       expect(html).toContain("<fm-pagxo");
       expect(html).toContain("<fm-formularo");
-      expect(html).not.toMatch(/<(button|input|select|textarea|h[1-6]|a)\b/);
+      // No native control where an Ero exists; the colour picker and the slider have none (Manko,
+      // plan ①) and stay native as in the Werkstatt; links stand only inside the navigado.
+      expect(html).not.toMatch(/<(button|select|textarea|h[1-6])\b/);
+      for (const [input = ""] of html.matchAll(/<input\b[^>]*>/g)) {
+        expect(input).toMatch(/type="(range|color)"/);
+      }
+      expect(html.replace(/<fm-navigado[\s\S]*?<\/fm-navigado>/g, "")).not.toMatch(/<a\b/);
     });
 
     it(`${key}: names no term of the Vortaro outside the Expertenansicht`, () => {

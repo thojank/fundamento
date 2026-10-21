@@ -80,11 +80,16 @@ describe("the cache (§4.5: outside the checkout)", () => {
 });
 
 describe("uploadFont (§4.5)", () => {
-  const bytes = Buffer.from("woff2-bytes-of-a-test-font-" + "x".repeat(200));
+  const bytes = Buffer.from(`woff2-bytes-of-a-test-font-${"x".repeat(200)}`);
 
   it("refuses to push when the repository is public, with a sentence why, and the remote stays empty", async () => {
     const cache = join(scratch, "cache-public");
-    const result = await uploadFont(REPO, deps("public", cache), { name: "Marke-Sans.woff2", bytes }, "Marke Sans");
+    const result = await uploadFont(
+      REPO,
+      deps("public", cache),
+      { name: "Marke-Sans.woff2", bytes },
+      "Marke Sans",
+    );
     expect(result.pushed).toBe(false);
     expect(result.sentence).toMatch(/öffentlich/);
     expect(result.sentence).not.toContain(REPO);
@@ -93,7 +98,12 @@ describe("uploadFont (§4.5)", () => {
 
   it("refuses to push when the visibility cannot be determined", async () => {
     const cache = join(scratch, "cache-unknown");
-    const result = await uploadFont(REPO, deps("unknown", cache), { name: "Marke-Sans.woff2", bytes }, "Marke Sans");
+    const result = await uploadFont(
+      REPO,
+      deps("unknown", cache),
+      { name: "Marke-Sans.woff2", bytes },
+      "Marke Sans",
+    );
     expect(result.pushed).toBe(false);
     expect(result.sentence).toMatch(/nicht feststellen/);
     expect(remoteFiles()).toEqual([]);
@@ -101,7 +111,12 @@ describe("uploadFont (§4.5)", () => {
 
   it("commits and pushes into the private repository under tiparoj/<family>/, the sentence without the name", async () => {
     const cache = join(scratch, "cache-private");
-    const result = await uploadFont(REPO, deps("private", cache), { name: "Marke-Sans.woff2", bytes }, "Marke Sans");
+    const result = await uploadFont(
+      REPO,
+      deps("private", cache),
+      { name: "Marke-Sans.woff2", bytes },
+      "Marke Sans",
+    );
     expect(result.pushed).toBe(true);
     expect(result.path).toBe("tiparoj/marke-sans/Marke-Sans.woff2");
     expect(result.sentence).not.toContain(REPO);
