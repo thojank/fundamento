@@ -16,3 +16,7 @@ packages/eroj/src/generated/
 # Playwright run artefacts
 test-results/
 playwright-report/
+# The example of the settings stays in the repo (Spec 023, §4.3): names only, every value empty.
+!.env.example
+# Brands of the Metiejo never live in the checkout (Spec 023, O-3); the folder stays out should one appear.
+marken/

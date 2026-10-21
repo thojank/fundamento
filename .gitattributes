@@ -10,3 +10,6 @@ specs/004-komparo/bildoj/** linguist-generated=true
 
 # The ID registry grows by `pnpm id:new`; every line is issued, never written by hand.
 packages/modelo/data/ids.lock.json linguist-generated=true
+
+# Screenshots of the Metiejo for the acceptance of Spec 023; written by a browser run at the local server.
+specs/023-werkstatt-konfigurilo/bildoj/** linguist-generated=true

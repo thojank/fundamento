@@ -32,6 +32,8 @@ const ERO_CHECK_STEPS: ReadonlyArray<readonly [name: string, script: string]> = 
   ["Check: Vitrino", "check:vitrino"],
   // The release path itself, as release.yml runs it, packed as a dry run (Spec 003 F23).
   ["Check: Release", "check:release"],
+  // Spec 023 (§4.5, M-4): no byte of a licensed font in a public result; runs in the checks job.
+  ["Check: Tiparoj", "check:tiparoj"],
 ];
 
 // Nachlese 3 W1 (Spec 011 ⑤ B-9, O-21): the one job of before ran everything in a row — the
@@ -54,6 +56,7 @@ const CHECKS_STEPS: ReadonlyArray<readonly [name: string, run: string]> = [
   ["Lint", "pnpm lint"],
   ...CHECK_STEPS.map(([name, script]) => [name, `pnpm ${script}`] as const),
   ["Check: Release", "pnpm check:release"],
+  ["Check: Tiparoj", "pnpm check:tiparoj"],
 ];
 
 /** The job of the unit tests: every package but the Projekcioj (their own shards) and the Eroj. */
@@ -93,7 +96,8 @@ const RENDERED_CHECK_STEPS: ReadonlyArray<readonly [name: string, run: string]> 
   ["Playwright browsers", PLAYWRIGHT_BROWSERS],
   ["Build", "pnpm build"],
   ...ERO_CHECK_STEPS.filter(
-    ([name]) => name !== "Check: Release" && name !== "Check: Alirebleco (Eroj)",
+    ([name]) =>
+      name !== "Check: Release" && name !== "Check: Alirebleco (Eroj)" && name !== "Check: Tiparoj",
   ).map(([name, script]) => [name, `pnpm ${script}`] as const),
 ];
 

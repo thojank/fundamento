@@ -119,6 +119,7 @@ Everything lives in one workspace; the npm org for published packages is
 | `@fundamento/mcp` | The MCP server (Gvidanto) |
 | `@fundamento/cli` | `fm`: validate, export, build projections, run the server, derive and check an Aspekto from an Agordo |
 | `@fundamento/agordilo` | The Agordilo (Spec 016, Spec 019): an Agordo (lead colour, status colours, tint, three sliders, fonts; form, space, type and icon weight) becomes a complete Aspekto in OKLCH at contrast targets measured on komuna, checked by the checks of the CI, with its report |
+| `@fundamento/metiejo` | The Metiejo (Spec 023, working name): the brand configurator as a local server (`pnpm fm metiejo`) — step by step from a name and a lead colour to a checked Aspekto package, with webfonts under licence, licensed fonts in a private repository, exports (package, CSS, Figma plugin) and the byte check `check:tiparoj` |
 | `@fundamento/make-kit-<aspekto>` | Build output of `projekcioj`: one Figma Make kit per Aspekto (pre-releases published under the dist-tag `next`, the release 0.1.0 under `latest`) |
 
 ## MCP server
@@ -202,6 +203,23 @@ With the MCP server connected (`claude mcp add fundamento -- pnpm --dir <repo> -
 4. **Save it:** „Speichere das als marken/provo-ruhig.json.“ `save_agordo` shows first what it would write; with `confirm: true` it writes the file inside the server's working directory and appends a `historio` entry (date, wish, diff). A path outside is refused.
 5. **Derive it:** `pnpm fm agordilo derive marken/provo-ruhig.json --out marken/aspekto-provo-ruhig`, as in „Eine Marke in fünf Minuten“.
 
+## Der Konfigurator (Metiejo)
+
+The Metiejo (Spec 023, working name) is the Agordilo for a person without the Vortaro: one question per screen, one suggestion, one preview, at most one main button beside *Zurück* and *Weiter*. It runs as a local server on this machine only:
+
+```sh
+pnpm fm metiejo            # http://localhost:7301
+```
+
+1. **Start:** the name of the brand; empty, the example komuna, or an existing brand. Brands live outside the repository, in the folder `FM_MARKEN_DIR` of the `.env` names (default `~/Fundamento/marken`), one folder per brand (agordo.json, the draft, uploads in `fontoj/`, the exports in `eksporto/`); a folder inside the checkout is refused.
+2. **Farbe:** the lead colour; the contrast problems in plain words, each with one suggestion a click applies.
+3. **Schrift:** an open-source webfont with its licence from the catalogue of Fontsource (`packages/metiejo/data/tiparoj.json`, with provenance), or a licensed font of your own: its file goes into your private repository named by `FM_TIPAROJ_REPO` in the `.env` of the checkout (see `.env.example`), after a confirmation and only when the GitHub API says the repository is private; the brand names it as „lizenziert, nicht enthalten“ with a fallback.
+4. **Form, Raum, Schriftgröße, Icons:** one slider or one choice each, the preview follows at once.
+5. **Vorschau:** the five Sxablonoj in three widths, light and dark.
+6. **Fertig:** the report in plain words; *Speichern* writes `agordo.json` with its `historio` and the chosen exports: the Aspekto package (with the files of every webfont and their licence from the npm package `@fontsource/<id>`, cached outside the checkout, plus `tiparoj.css`), the CSS and the Figma plugin. The same values give the same bytes. `check:tiparoj` runs over every export; a byte of a licensed font removes it.
+
+The **Expertenansicht** is the Werkstatt of the Vitrino (`pnpm fm projekcioj build --out .fundamento/projekcioj` once; the server then links into it with the Agordo in the fragment). Round 2 adds the sources (screenshots, tokens) with an AI adapter and the view „Fluss“.
+
 ## Checks
 
 Each check is its own command and its own named CI step. Exit 0 = pass, 1 = check failed, 2 = usage or internal error.
@@ -219,6 +237,7 @@ Each check is its own command and its own named CI step. Exit 0 = pass, 1 = chec
 | `pnpm check:quickstart` | The quickstart of this README, run as a user would and timed: pack `@fundamento/eroj`, install it in a fresh Vite project, render both projections, switch Aspekto and colour scheme without a reload — under five minutes (AK-07). |
 | `pnpm check:release` | The release path of the Make kits, as `release.yml` runs it: both kits built (komuna from the repository, ekzemplo from its fixture), each present, with its LICENSE and without a font file, each packed as a dry run (`scripts/release-kits.sh pack`). The release itself is `release.yml` in mode `publish`, on main, chosen by the maintainer with the pre-release number as input. |
 | `pnpm check:vitrino` | The Vitrino (`vitrino/index.html` of a projection build) in a browser: every Dimensio switches without a reload and the numbers follow, the comparison of two Aspektoj names both sides, `fm-butono` carries the tokens of its Aspekto, and axe-core finds nothing in light, dark and both contrast levels. |
+| `pnpm check:tiparoj` | No byte of a licensed font in a public result (Spec 023, §4.5, M-4): the fonts of the private repository's cache (`FM_TIPAROJ_REPO` in the `.env` of the checkout) and of every `marken/<name>/fontoj/` are searched, raw and as base64, in `.fundamento` (projections, release) and `packages`. Without a known font the check passes and says so; a finding names the file and the font and breaks the build. |
 
 The last four render in a real browser: install the engines once with `pnpm --filter @fundamento/eroj exec playwright install --with-deps chromium firefox webkit` (CI does it in its own step).
 

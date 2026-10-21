@@ -24,13 +24,15 @@ const PACKAGES = {
   cli: "@fundamento/cli",
   eroj: "@fundamento/eroj",
   mcp: "@fundamento/mcp",
+  // Spec 023: the Metiejo, the brand configurator (working name).
+  metiejo: "@fundamento/metiejo",
   modelo: "@fundamento/modelo",
   projekcioj: "@fundamento/projekcioj",
   vortaro: "@fundamento/vortaro",
 } as const;
 
 describe("workspace packages (plan D-01)", () => {
-  it("has exactly the five Phase-1 packages, the two of Phase 3 and the Agordilo (Spec 016)", () => {
+  it("has exactly the five Phase-1 packages, the two of Phase 3, the Agordilo (Spec 016) and the Metiejo (Spec 023)", () => {
     const dirs = readdirSync(packagesDir, { withFileTypes: true })
       .filter((entry) => entry.isDirectory())
       .map((entry) => entry.name)

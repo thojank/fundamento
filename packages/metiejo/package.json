@@ -1,0 +1,37 @@
+{
+  "name": "@fundamento/metiejo",
+  "version": "0.2.0",
+  "description": "Fundamento Metiejo: the brand configurator (Spec 023) — step by step from a name and a lead colour to a checked Aspekto package, with webfonts under licence, licensed fonts in a private repository, exports and a local server. Working name; the maintainer confirms it.",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "data"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "test": "vitest run",
+    "lint": "tsc -p tsconfig.json --noEmit && biome check .",
+    "tiparoj:import": "node dist/node/tiparoj-import-cli.js",
+    "check:tiparoj": "node dist/node/kontrolo-cli.js"
+  },
+  "dependencies": {
+    "@fundamento/agordilo": "workspace:*",
+    "@fundamento/eroj": "workspace:*",
+    "@fundamento/modelo": "workspace:*",
+    "@fundamento/projekcioj": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.5",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.1"
+  }
+}
