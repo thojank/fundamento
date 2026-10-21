@@ -29,6 +29,12 @@
           "headline-4"
         ],
         "description": "The type role of the text, typography.<size>. Without it the level decides: 1 → headline-1, 2 → headline-2, 3 → headline-3, 4 to 6 → headline-4; the display roles are a choice of design."
+      },
+      {
+        "name": "focusable",
+        "kind": "boolean",
+        "default": false,
+        "description": "Makes the heading a target of the focus (Nachlese 7 ② B-1): it takes tabindex -1, so focus() on the element moves the focus to the heading — the place a page sets the focus after a change of route — while the heading stays out of the tab order."
       }
     ],
     "states": ["rest"],

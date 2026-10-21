@@ -505,7 +505,8 @@ describe("the Vitrino shows the tekstareo and the dialogo (Spec 011 ②)", () =>
 
   it("dialogo: a row per size × reason, each cell a button that opens the closed dialog with heading, message, reason label and two actions", () => {
     const grid = datumoj.eroj.dialogo ?? "";
-    expect((grid.match(/<fm-dialogo /g) ?? []).length).toBe(6);
+    // Six, and the dialog of Nachlese 7 ② B-8 (its message in two paragraphs).
+    expect((grid.match(/<fm-dialogo /g) ?? []).length).toBe(7);
     expect(grid).toContain(
       '<fm-butono emphasis="medium" data-fm-opens="fm-vitrino-dialogo-small-none">Öffnen</fm-butono>',
     );
@@ -548,7 +549,8 @@ describe("the Vitrino shows the insigno, the avizo and the plenstato (Spec 011 �
 
   it("avizo: a row per intent, the columns rest and dismissible, heading and details with their words", () => {
     const grid = datumoj.eroj.avizo ?? "";
-    expect((grid.match(/<tr>/g) ?? []).length).toBe(5);
+    // Five, and the row of Nachlese 7 ② B-5 (a list and code in the details).
+    expect((grid.match(/<tr>/g) ?? []).length).toBe(6);
     expect(grid).toContain('<th scope="col">dismissible</th>');
     expect(grid).toContain(
       '<fm-avizo intent="danger" dismissible>danger<span slot="heading">Überschrift</span><span slot="details">Einzelheit</span></fm-avizo>',
@@ -576,7 +578,8 @@ describe("the Vitrino shows the tabelo, the atributlisto and the mezurilo (Spec 
     );
     expect(grid).toContain('<th scope="col" numeric>Anzahl</th>');
     // Three row headers per table, plus the Vitrino's own row header per combination.
-    expect((grid.match(/<th scope="row">/g) ?? []).length).toBe(8);
+    // And the row of Nachlese 7 ② B-3 (the empty table with its butono).
+    expect((grid.match(/<th scope="row">/g) ?? []).length).toBe(9);
   });
 
   it("atributlisto: a row per layout (columns, stacked, auto since Spec 014 ①), each a dl with three entries, the last value empty", () => {
@@ -594,7 +597,8 @@ describe("the Vitrino shows the tabelo, the atributlisto and the mezurilo (Spec 
     const grid = datumoj.eroj.mezurilo ?? "";
     // Four intents with the value, and the row "unbekannt": the meter without a value, its text
     // "nicht geprüft" — the picture of F-9.
-    expect((grid.match(/<fm-mezurilo[ >]/g) ?? []).length).toBe(5);
+    // And the row of Nachlese 7 ② B-2 (label-hidden).
+    expect((grid.match(/<fm-mezurilo[ >]/g) ?? []).length).toBe(6);
     expect(grid).toContain(
       '<tr><th scope="row">unbekannt</th><td><fm-mezurilo>unbekannt<span slot="value-text">nicht geprüft</span></fm-mezurilo></td></tr>',
     );
@@ -684,7 +688,8 @@ describe("the Vitrino shows the titolo and the teksto (Spec 014 ③)", () => {
 
   it("the teksto has fifteen rows of kind · size · emphasis", () => {
     const section = datumoj.eroj.teksto ?? "";
-    expect((section.match(/<fm-teksto /g) ?? []).length).toBe(15);
+    // And the code inside the line of Nachlese 7 ② B-10.
+    expect((section.match(/<fm-teksto /g) ?? []).length).toBe(16);
     expect(section).toContain(
       '<fm-teksto kind="code" size="1" emphasis="high">code · 1 · high</fm-teksto>',
     );
@@ -885,5 +890,52 @@ describe("the bundled Werkstatt without the second copy of the schemas (Nachlese
       schemas: Record<string, unknown>;
     };
     expect(Object.keys(werkstatt.schemas).sort()).toEqual(["config", "modelo"]);
+  });
+});
+
+// Nachlese 7 ② (0.2.0): every addition that shows gets a row of its own in its Ero's table — the
+// meter without its label, the locked menu, the empty table with its next step, the notice with a
+// list and code in its details, the dialog whose message has two paragraphs, the text with a
+// link, a badge and code in its line.
+describe("the Vitrino rows of Nachlese 7 ②", () => {
+  const rowOf = (ero: string, head: string) =>
+    // To the end of the row's cell: a table in the cell has rows of its own.
+    new RegExp(`<tr><th scope="row">${head}</th><td>(.*?)</td></tr>`, "s").exec(
+      datumoj.eroj[ero] ?? "",
+    )?.[1] ?? "";
+
+  it("B-2: the mezurilo with label-hidden", () => {
+    expect(rowOf("mezurilo", "label-hidden")).toMatch(/<fm-mezurilo[^>]* label-hidden[^>]*>/);
+  });
+
+  it("B-3: the tabelo without rows, its empty state with a butono", () => {
+    const row = rowOf("tabelo", "empty mit butono");
+    expect(row).toContain("<tbody></tbody>");
+    expect(row).toMatch(
+      /<span slot="empty">[^<]+<\/span><fm-butono slot="empty"[^>]*>[^<]+<\/fm-butono>/,
+    );
+  });
+
+  it("B-4: the menuo disabled", () => {
+    expect(rowOf("menuo", "disabled")).toMatch(/<fm-menuo disabled>/);
+  });
+
+  it("B-5: the avizo with a list and code in its details", () => {
+    const row = rowOf("avizo", "details mit Liste und Code");
+    expect(row).toMatch(/<ul slot="details"><li>[^<]+<\/li><\/ul>/);
+    expect(row).toMatch(/<fm-teksto slot="details" kind="code">[^<]+<\/fm-teksto>/);
+  });
+
+  it("B-8: the dialogo whose message has two paragraphs, behind its opener", () => {
+    const row = rowOf("dialogo", "message in Absätzen");
+    expect(row.match(/<fm-teksto slot="message">/g)).toHaveLength(2);
+    expect(row).toContain("data-fm-opens=");
+  });
+
+  it("B-10: the teksto with a ligilo, an insigno and code in its line", () => {
+    const row = rowOf("teksto", "mit ligilo, insigno, code");
+    expect(row).toMatch(/<fm-teksto>[^<]+<fm-ligilo[^>]*>[^<]+<\/fm-ligilo>/);
+    expect(row).toContain("<fm-insigno");
+    expect(row).toContain('<fm-teksto kind="code">');
   });
 });

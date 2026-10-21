@@ -45,6 +45,8 @@ describe("menuo in the repo Modelo (section ④, G1, G2, G4)", () => {
         ["label", "string", undefined, undefined],
         ["placement", "enum", "block-end", undefined],
         ["open", "boolean", false, undefined],
+        // Nachlese 7 ② B-4.
+        ["disabled", "boolean", false, undefined],
       ],
     );
     expect(skemo?.states).toEqual(["rest", "hover", "focus", "disabled"]);

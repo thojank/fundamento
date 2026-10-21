@@ -56,6 +56,14 @@
         {
           "ero": "ligilo",
           "kialo": "A link stands inside the text where the thought needs it, because a reader follows it from the sentence; the ligilo inline takes the role of the text around it."
+        },
+        {
+          "ero": "insigno",
+          "kialo": "A badge stands inside the text next to the word it describes, because a status is read at a glance where the sentence names the thing (Nachlese 7 ② B-10: phrasing content)."
+        },
+        {
+          "ero": "teksto",
+          "kialo": "Code inside a sentence is a teksto with kind code, because it is spoken as code in the line of the text; a paragraph never holds a paragraph."
         }
       ],
       "never": [],
@@ -66,10 +74,9 @@
     },
     "slots": {
       "label": {
-        "accepts": ["text"],
-        "max": 1,
+        "accepts": ["text", "ligilo", "insigno", "teksto"],
         "required": true,
-        "nesting": 0
+        "nesting": 1
       }
     },
     "layout": {

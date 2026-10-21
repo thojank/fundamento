@@ -104,7 +104,8 @@ describe("dialogo in the repo Modelo (section ②, E9)", () => {
       name: ["slot:heading"],
       description: ["slot:message"],
       states: {},
-      keys: ["Escape"],
+      // Nachlese 7 ② B-7: Enter in a one-line field of the content confirms.
+      keys: ["Escape", "Enter"],
     });
   });
 
@@ -149,11 +150,13 @@ describe("the Uzo of the dialogo (section ②, G5)", () => {
     );
     expect(uzo?.slots).toEqual({
       heading: { accepts: ["text"], required: true, max: 1, nesting: 0 },
-      message: { accepts: ["text"], max: 1, nesting: 0 },
+      // Nachlese 7 ② B-8: the message may be several paragraphs of teksto.
+      message: { accepts: ["text", "teksto"], nesting: 1 },
       reason: { accepts: ["text"], max: 1, nesting: 0 },
       "reason-help": { accepts: ["text"], max: 1, nesting: 0 },
       content: {
-        accepts: ["kampo", "tekstareo", "elektilo", "elekto", "markobutono", "sxaltilo"],
+        // Nachlese 7 ② B-6: a notice in the content when the confirmation failed.
+        accepts: ["kampo", "tekstareo", "elektilo", "elekto", "markobutono", "sxaltilo", "avizo"],
         nesting: 1,
       },
       actions: { accepts: ["butono"], required: true, min: 1, max: 2, nesting: 0 },
@@ -191,6 +194,8 @@ describe("the Uzo of the dialogo (section ②, G5)", () => {
       "kampo",
       "elektilo",
       "markobutono",
+      // Nachlese 7 ② B-6.
+      "avizo",
     ]);
   });
 

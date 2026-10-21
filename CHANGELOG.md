@@ -6,6 +6,17 @@ Changes of the published packages (the Make Kits `@fundamento/make-kit-<aspekto>
 
 - Breaking: Das Make Kit liefert nur noch ESM. `require()` braucht Node ≥ 22.12.
   (Nachlese 6 N6-3, Entscheidung des Maintainers vom 2026-10-20: die CJS-Fassung fällt mit 0.2.0; kein Release vorher.)
+- Ergänzungen aus Arkitekturo (Nachlese 7 ②, nur additiv, nichts umbenannt):
+  - B-1 `fm-titolo focusable`: `focus()` setzt den Fokus auf die Überschrift (tabindex −1).
+  - B-2 `fm-mezurilo label-hidden`: Label aus der Sicht, der Name bleibt.
+  - B-3 `fm-tabelo`: Der Slot `empty` nimmt eine `fm-butono` als nächsten Schritt.
+  - B-4 `fm-menuo disabled`: Auslöser gesperrt (`aria-disabled`), das Menü öffnet nicht.
+  - B-5 `fm-avizo`: `details` nimmt eine Liste und `fm-teksto kind="code"`.
+  - B-6 `fm-dialogo`: `content` nimmt eine `fm-avizo`; der erste Fokus geht auf das erste fokussierbare Kind.
+  - B-7 `fm-dialogo`: Enter in einem einzeiligen Feld des Inhalts bestätigt, solange keine Sperre greift.
+  - B-8 `fm-dialogo`: `message` aus mehreren Absätzen `fm-teksto`.
+  - B-9 `fm-saltligilo`: `click` abbrechbar (nur Fokus, kein Fragment), dazu `focus-only`.
+  - B-10 `fm-teksto`: Fließtext mit `fm-ligilo`, `fm-insigno` und `fm-teksto kind="code"` als Kindern.
 
 ## 0.1.1 – Fehlerbehebungen
 

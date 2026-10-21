@@ -75,6 +75,8 @@ describe("mezurilo in the repo Modelo (section ④, G1, G2)", () => {
         ["min", "number", 0],
         ["max", "number", 100],
         ["intent", ["neutral", "success", "warning", "danger"], "neutral"],
+        // Nachlese 7 ② B-2.
+        ["label-hidden", "boolean", false],
       ],
     );
     expect(skemo?.states).toEqual(["rest"]);

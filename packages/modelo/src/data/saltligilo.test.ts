@@ -35,6 +35,8 @@ describe("saltligilo in the repo Modelo (section ②)", () => {
   it("has to (a duty: the id of the target) as its prop; the states rest and focus; the label slot", () => {
     expect(skemo?.props.map((prop) => [prop.name, prop.kind, prop.required])).toEqual([
       ["to", "string", true],
+      // Nachlese 7 ② B-9.
+      ["focus-only", "boolean", undefined],
     ]);
     expect(skemo?.states).toEqual(["rest", "focus"]);
     expect(skemo?.slots).toEqual([{ name: "label", default: true, text: true }]);

@@ -702,9 +702,14 @@ export const STATE_SIGN =
  * caption of a table, the text of its default slot, which the set draws as the label; `hides`
  * says the prop takes the part away where dismissible brings it).
  */
-const BOOLEAN_TOGGLES: Readonly<Record<string, { part: string; hides?: boolean }>> = {
+const BOOLEAN_TOGGLES: Readonly<
+  Record<string, { part: string; hides?: boolean; shownAs?: string }>
+> = {
   dismissible: { part: "dismiss" },
   "caption-hidden": { part: "caption", hides: true },
+  // Nachlese 7 ② B-2: label-hidden hides the meter's label like caption-hidden the caption; the
+  // property that shows it is named label-visible, because label is the TEXT property of the set.
+  "label-hidden": { part: "label", hides: true, shownAs: "label-visible" },
   // Nachlese 5 O-41 (Nachlese 4 B-8): the ligilo's external shows the mark in its slot icon-end.
   external: { part: "icon-end" },
 };
@@ -1141,7 +1146,14 @@ export interface FigmaComponentSet {
    * layer when its property is true, so the plugin declares the inverse — the part's name as the
    * property, shown by default where the prop's default is false.
    */
-  toggles?: { property: string; part: string; defaultValue: boolean; hides?: boolean }[];
+  toggles?: {
+    property: string;
+    part: string;
+    defaultValue: boolean;
+    hides?: boolean;
+    /** The name of the property that shows a part a prop hides, where the part's name is taken. */
+    shownAs?: string;
+  }[];
   /**
    * The share of the track the fill of a meter takes (Spec 011 ④, plan ④ D-14): the Vitrino's
    * value example in the Skemo's range, written as the fill's width from the measured track.
@@ -2678,6 +2690,7 @@ function componentSetOf(
             part: toggle.part,
             defaultValue: prop.default === true,
             ...(toggle.hides === true ? { hides: true } : {}),
+            ...(toggle.shownAs === undefined ? {} : { shownAs: toggle.shownAs }),
           },
         ]
       : [];

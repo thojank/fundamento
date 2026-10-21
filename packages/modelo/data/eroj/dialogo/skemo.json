@@ -13,7 +13,7 @@
         "name": "open",
         "kind": "boolean",
         "default": false,
-        "description": "Whether the dialog is shown; the application opens it and closes it after confirm or cancel."
+        "description": "Whether the dialog is shown; the application opens it and closes it after confirm or cancel. On opening the focus goes to the first focusable child of the content (a notice there takes none), else to the reason, else to the confirmation; Enter in a one-line field of the content confirms unless the confirmation is locked (Nachlese 7 ② B-6, B-7)."
       },
       {
         "name": "size",
@@ -189,7 +189,8 @@
       ],
       "states": {},
       "keys": [
-        "Escape"
+        "Escape",
+        "Enter"
       ]
     },
     "constraints": [

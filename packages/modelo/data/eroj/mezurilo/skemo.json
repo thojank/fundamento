@@ -37,6 +37,12 @@
         ],
         "default": "neutral",
         "description": "The colour of the fill; the application chooses it, the meter computes no thresholds."
+      },
+      {
+        "name": "label-hidden",
+        "kind": "boolean",
+        "default": false,
+        "description": "Hides the label from sight; it stays the name of the meter for assistive technology (Nachlese 7 ② B-2: a meter in a table cell, where the column header says what it measures). Never without a label."
       }
     ],
     "states": [

@@ -2163,3 +2163,58 @@ describe("the plugin draws the avataro (Spec 015 ③)", () => {
     expect(double.snapshot()).toBe(before);
   });
 });
+
+// Nachlese 7 ② (B-2, B-4): where an addition is a visible part, Figma draws it. label-hidden of
+// the mezurilo hides its label like caption-hidden the caption of the tabelo — a BOOLEAN property
+// connected to the label's visibility, named label-visible (label is the set's TEXT property); the disabled menuo shows its
+// trigger stand-in locked in the variant disabled — the look of a disabled entry (the trigger
+// on the web is a butono of emphasis low: the same tertiary fill and the disabled text).
+describe("the plugin draws the additions of Nachlese 7 ② (B-2, B-4)", () => {
+  const source = repoFiles["figma/plugin/code.js"] ?? "";
+  const paintOf = (node: DoubleNode | undefined, field: "fills" | "strokes" = "fills") =>
+    ((node?.properties[field] ?? []) as { boundVariables?: { color?: { name: string } } }[])[0]
+      ?.boundVariables?.color?.name;
+  type Definitions = Record<string, { type: string; defaultValue: string | boolean }>;
+  const drawn = async () => {
+    const double = modelDouble();
+    await new Function("figma", `${source}\nreturn applyPlan();`)(double.figma);
+    const setOf = (name: string) => pageNodes(double).find((child) => child.name === name);
+    return { double, setOf };
+  };
+
+  it("B-2: the mezurilo declares label-hidden as the BOOLEAN property label-visible (shown), connected to the label of every variant", async () => {
+    const { double, setOf } = await drawn();
+    const set = setOf("mezurilo");
+    const definitions = () => (set?.properties.componentPropertyDefinitions ?? {}) as Definitions;
+    const key = () =>
+      Object.keys(definitions()).find(
+        (candidate) =>
+          candidate.startsWith("label-visible#") && definitions()[candidate]?.type === "BOOLEAN",
+      );
+    expect(key()).toBeDefined();
+    expect(definitions()[key() ?? ""]).toEqual({ type: "BOOLEAN", defaultValue: true });
+    for (const node of set?.children ?? []) {
+      const label = descendant(node, "label");
+      expect(label?.properties.visible, node.name).toBe(true);
+      expect(label?.properties.componentPropertyReferences, node.name).toMatchObject({
+        visible: key(),
+      });
+    }
+    const before = Object.keys(definitions()).length;
+    await run(double, source);
+    expect(Object.keys(definitions())).toHaveLength(before);
+  });
+
+  it("B-4: the disabled variant of the menuo shows its trigger stand-in locked, like a disabled entry", async () => {
+    const { setOf } = await drawn();
+    const set = setOf("menuo");
+    const disabled = set?.children.find((child) => child.name === "state=disabled");
+    const rest = set?.children.find((child) => child.name === "state=rest");
+    expect(paintOf(descendant(disabled, "trigger"))).toBe("color/action/tertiary/disabled");
+    expect(paintOf(descendant(disabled, "trigger-label"))).toBe(
+      paintOf(descendant(disabled, "items-1")),
+    );
+    // In every other state the stand-in stays the neutral sketch of a trigger it was.
+    expect(paintOf(descendant(rest, "trigger"))).toBeUndefined();
+  });
+});

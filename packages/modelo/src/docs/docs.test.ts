@@ -2545,3 +2545,43 @@ describe("Nachlese 7 ① documentation (specs/021-nachlese-7)", () => {
     expect(changelog).toContain("## 0.2.0 – geplant");
   });
 });
+
+describe("Nachlese 7 ② documentation (specs/021-nachlese-7)", () => {
+  it("plan ② carries the additions B-1 to B-10, tasks ② start at T2111, plan ① the note for Arkitekturo, the CHANGELOG 0.2.0 the additions", () => {
+    const plan = read("specs/021-nachlese-7/plan.md");
+    const tasks = read("specs/021-nachlese-7/tasks.md");
+    const second = plan.slice(plan.indexOf("## ② Ergänzungen (0.2.0)"));
+    for (const heading of [
+      "### Zusammenfassung",
+      "### Entwurfsentscheidungen",
+      "### Arkitekturo-Vertrag",
+      "### Abweichungen",
+      "### Befunde / Mankoj",
+      "### Offen (für den Maintainer)",
+    ]) {
+      expect(second, heading).toContain(heading);
+    }
+    for (const id of ["B-1", "B-2", "B-3", "B-4", "B-5", "B-6", "B-7", "B-8", "B-9", "B-10"])
+      expect(second, id).toContain(id);
+    expect(second).toContain("brand-badge");
+    expect(second).not.toContain("ciferecigo");
+    const first = plan.slice(
+      plan.indexOf("## ① Fehler (0.1.1)"),
+      plan.indexOf("## ② Ergänzungen (0.2.0)"),
+    );
+    expect(first).toContain("### Hinweis für Arkitekturo");
+    const note = first.slice(first.indexOf("### Hinweis für Arkitekturo"));
+    expect(note).toMatch(/keinen? Codetransfer/);
+    const own = tasks.slice(tasks.indexOf("## ② Ergänzungen (0.2.0)"));
+    expect(own).toContain("**T2111");
+    expect(own).toMatch(/rot `[0-9a-f]{7}`/);
+    const changelog = read("CHANGELOG.md");
+    const planned = changelog.slice(
+      changelog.indexOf("## 0.2.0 – geplant"),
+      changelog.indexOf("## 0.1.1"),
+    );
+    for (const id of ["B-1", "B-2", "B-3", "B-4", "B-5", "B-6", "B-7", "B-8", "B-9", "B-10"])
+      expect(planned, id).toContain(id);
+    expect(planned).toContain("Breaking: Das Make Kit liefert nur noch ESM.");
+  });
+});

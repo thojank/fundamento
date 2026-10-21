@@ -1069,7 +1069,8 @@ describe("the label default follows the role of the Ero (M-3)", () => {
     // Spec 011 ④ (plan ④ D-14): the meter, the list (its label is the accessible name, no text
     // node) and the table, whose BOOLEAN caption-hidden is declared as the caption's visibility —
     // Figma shows a layer when its property is true, so the property is „caption", default true.
-    expect(of("mezurilo")).toEqual(["Messwert"]);
+    // Nachlese 7 ② B-2: the BOOLEAN label-visible (label-hidden false) beside the label.
+    expect(of("mezurilo")).toEqual(["Messwert", true]);
     expect(of("atributlisto")).toEqual(["Angaben"]);
     expect(of("tabelo")).toEqual(["Beschriftung", true]);
     // Spec 011 ⑤: the navigation and the tab list — their label is the accessible name, heard,

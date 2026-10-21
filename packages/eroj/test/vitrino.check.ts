@@ -360,7 +360,8 @@ test("fm-dialogo opens from its section, modal and axe-clean, and Escape closes 
 }) => {
   await open(page);
   const section = page.locator("#fm-vitrino-dialogo");
-  await expect(section.locator("fm-dialogo")).toHaveCount(6);
+  // Six, and the dialog of Nachlese 7 ② B-8 (its message in two paragraphs).
+  await expect(section.locator("fm-dialogo")).toHaveCount(7);
   await expect(page.getByRole("dialog")).toHaveCount(0);
   await section.locator('[data-fm-opens="fm-vitrino-dialogo-medium-required"]').click();
   const dialog = page.getByRole("dialog", { name: "medium · required" });
@@ -385,6 +386,16 @@ test("fm-dialogo opens from its section, modal and axe-clean, and Escape closes 
   expect(await axeViolations(page)).toEqual([]);
   await page.keyboard.press("Escape");
   await expect(page.getByRole("dialog")).toHaveCount(0);
+  // Nachlese 7 ② B-8: the message in two paragraphs of teksto, both seen and both heard.
+  await section.locator('[data-fm-opens="fm-vitrino-dialogo-absaetze"]').click();
+  const paragraphs = page.getByRole("dialog", { name: "Befund verwerfen?" });
+  await expect(paragraphs).toBeVisible();
+  await expect(paragraphs).toHaveAccessibleDescription(
+    /Fundstelle: STD-4, Absatz 2\.\s*Der Befund gilt danach als verworfen\./,
+  );
+  expect(await axeViolations(page)).toEqual([]);
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("dialog")).toHaveCount(0);
 });
 
 // Spec 011 ③ (plan ③ D-13): the sections of the insigno, the avizo and the plenstato in the
@@ -399,8 +410,9 @@ test("fm-insigno, fm-avizo and fm-plenstato are upgraded in their sections, axe-
   await expect(badges).toHaveCount(10);
   await expect(badges.first()).toHaveText(/neutral · small/);
   const notices = page.locator("#fm-vitrino-avizo fm-avizo");
-  await expect(notices).toHaveCount(8);
-  await expect(page.locator("#fm-vitrino-avizo").getByRole("alert")).toHaveCount(2);
+  // Eight, and the danger notice of Nachlese 7 ② B-5 (a list and code in its details).
+  await expect(notices).toHaveCount(9);
+  await expect(page.locator("#fm-vitrino-avizo").getByRole("alert")).toHaveCount(3);
   await expect(page.locator("#fm-vitrino-avizo").getByRole("status")).toHaveCount(6);
   await expect(
     page.locator("#fm-vitrino-avizo").getByRole("button", { name: "Schließen" }),
@@ -424,9 +436,15 @@ test("fm-tabelo, fm-atributlisto and fm-mezurilo are upgraded in their sections,
 }) => {
   await open(page);
   const tables = page.locator("#fm-vitrino-tabelo fm-tabelo");
-  await expect(tables).toHaveCount(2);
+  // Two, and the empty table of Nachlese 7 ② B-3 (its next step a butono).
+  await expect(tables).toHaveCount(3);
   // The section's own grid is a table too: count the tables inside the Eroj.
-  await expect(page.locator("#fm-vitrino-tabelo fm-tabelo").getByRole("table")).toHaveCount(2);
+  await expect(page.locator("#fm-vitrino-tabelo fm-tabelo").getByRole("table")).toHaveCount(3);
+  await expect(
+    page
+      .locator("#fm-vitrino-tabelo fm-plenstato")
+      .getByRole("button", { name: "Standard anlegen" }),
+  ).toBeVisible();
   await expect(page.locator("#fm-vitrino-tabelo th[data-sort] > button")).toHaveCount(2);
   const lists = page.locator("#fm-vitrino-atributlisto fm-atributlisto");
   // Spec 014 ① (plan ① D-03): a third row, layout auto, beside columns and stacked.
@@ -445,15 +463,16 @@ test("fm-tabelo, fm-atributlisto and fm-mezurilo are upgraded in their sections,
   }
   await expect(page.locator("#fm-vitrino-atributlisto dd").last().locator("svg")).toHaveCount(1);
   const meters = page.locator("#fm-vitrino-mezurilo fm-mezurilo");
-  // Nachlese 3 W4 (F-9): the fifth meter has no value — unknown, dashed, "nicht geprüft".
-  await expect(meters).toHaveCount(5);
-  await expect(meters.last().getByRole("meter")).toHaveAttribute("aria-valuetext", "nicht geprüft");
+  // Nachlese 3 W4 (F-9): the fifth meter has no value — unknown, dashed, "nicht geprüft"; the
+  // sixth is label-hidden (Nachlese 7 ② B-2).
+  await expect(meters).toHaveCount(6);
+  const unknownMeter = meters.nth(4);
+  await expect(unknownMeter.getByRole("meter")).toHaveAttribute("aria-valuetext", "nicht geprüft");
+  await expect(meters.last().getByRole("meter")).toHaveAccessibleName("label-hidden");
   expect(
-    await meters
-      .last()
-      .evaluate((element) =>
-        element.shadowRoot?.querySelector('[part="control"]')?.hasAttribute("data-unknown"),
-      ),
+    await unknownMeter.evaluate((element) =>
+      element.shadowRoot?.querySelector('[part="control"]')?.hasAttribute("data-unknown"),
+    ),
   ).toBe(true);
   await expect(page.locator("#fm-vitrino-mezurilo").getByRole("meter").first()).toHaveAttribute(
     "aria-valuenow",
@@ -553,8 +572,12 @@ test("fm-titolo and fm-teksto are upgraded in their sections, axe-clean", async 
   await expect(page.locator("#fm-vitrino-titolo").getByRole("heading", { level: 4 })).toHaveCount(
     1,
   );
-  await expect(page.locator("#fm-vitrino-teksto fm-teksto")).toHaveCount(15);
-  await expect(page.locator("#fm-vitrino-teksto").getByRole("code")).toHaveCount(3);
+  // Fifteen, and the text of Nachlese 7 ② B-10 with the code inside its line.
+  await expect(page.locator("#fm-vitrino-teksto fm-teksto")).toHaveCount(17);
+  await expect(page.locator("#fm-vitrino-teksto").getByRole("code")).toHaveCount(4);
+  await expect(
+    page.locator("#fm-vitrino-teksto").getByRole("link", { name: "Projekt A" }),
+  ).toBeVisible();
   for (const id of ["titolo", "teksto"]) {
     expect(await axeViolations(page, `#fm-vitrino-${id}`), id).toEqual([]);
   }
@@ -572,7 +595,13 @@ test("fm-konsileto, fm-sxvebilo and fm-menuo are upgraded and open in their sect
   await expect(page.locator("#fm-vitrino-sxvebilo").getByRole("dialog")).toHaveCount(1);
   expect(await axeViolations(page, "#fm-vitrino-sxvebilo"), "sxvebilo").toEqual([]);
   await page.keyboard.press("Escape");
-  await page.locator("#fm-vitrino-menuo").getByRole("button", { name: "Weitere Aktionen" }).click();
+  // The first trigger opens; the second menu is locked (Nachlese 7 ② B-4): its trigger says so.
+  const triggers = page
+    .locator("#fm-vitrino-menuo")
+    .getByRole("button", { name: "Weitere Aktionen" });
+  await expect(triggers).toHaveCount(2);
+  await expect(triggers.nth(1)).toBeDisabled();
+  await triggers.first().click();
   await expect(page.locator("#fm-vitrino-menuo").getByRole("menuitem")).toHaveCount(3);
   expect(await axeViolations(page, "#fm-vitrino-menuo"), "menuo").toEqual([]);
   await page.keyboard.press("Escape");

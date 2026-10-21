@@ -611,6 +611,54 @@ function slotTexts(
 }
 
 /**
+ * The rows of the additions of Nachlese 7 ② (0.2.0): where an addition shows, its Ero's table has
+ * a row of its own — the meter without its label (B-2), the empty table with its next step
+ * (B-3), the locked menu (B-4), the notice with a list and code in its details (B-5), the dialog
+ * whose message has two paragraphs (B-8, behind its opener), the text with a link, a badge and
+ * code in its line (B-10).
+ */
+function additionRows(entry: LoadedEro, tag: string, menuItems = ""): string {
+  const row = (head: string, cell: string) =>
+    `<tr><th scope="row">${head}</th><td>${cell}</td></tr>`;
+  const has = (prop: string) => entry.skemo.props.some((candidate) => candidate.name === prop);
+  switch (entry.ero.name) {
+    case "mezurilo":
+      return has("label-hidden")
+        ? row(
+            "label-hidden",
+            `<${tag} value="${VITRINO_NUMBER_EXAMPLES.value ?? ""}" label-hidden>label-hidden<span slot="value-text">${VITRINO_SLOT_TEXTS["value-text"] ?? ""}</span></${tag}>`,
+          )
+        : "";
+    case "tabelo":
+      return row(
+        "empty mit butono",
+        `<${tag}>Standards<table slot="content"><thead><tr><th scope="col">Name</th><th scope="col">Status</th></tr></thead><tbody></tbody></table><span slot="empty">Noch keine Standards im Projekt.</span><fm-butono slot="empty" emphasis="medium">Standard anlegen</fm-butono></${tag}>`,
+      );
+    case "menuo":
+      return has("disabled") ? row("disabled", `<${tag} disabled>${menuItems}</${tag}>`) : "";
+    case "avizo":
+      return row(
+        "details mit Liste und Code",
+        `<${tag} intent="danger">Speichern fehlgeschlagen: zwei Felder sind ungültig.<ul slot="details"><li>Der Titel fehlt.</li></ul><fm-teksto slot="details" kind="code">/title</fm-teksto></${tag}>`,
+      );
+    case "dialogo": {
+      const id = `fm-vitrino-${entry.ero.name}-absaetze`;
+      return row(
+        "message in Absätzen",
+        `<fm-butono emphasis="medium" data-fm-opens="${id}">${VITRINO_OPEN}</fm-butono><${tag} id="${id}">Befund verwerfen?<fm-teksto slot="message">Fundstelle: STD-4, Absatz 2.</fm-teksto><fm-teksto slot="message">Der Befund gilt danach als verworfen.</fm-teksto>${VITRINO_DIALOG_ACTIONS}</${tag}>`,
+      );
+    }
+    case "teksto":
+      return row(
+        "mit ligilo, insigno, code",
+        `<${tag}>Gilt für <fm-ligilo to="#fm-vitrino-${entry.ero.name}">Projekt A</fm-ligilo> als <fm-insigno intent="info">Pflicht</fm-insigno> seit <fm-teksto kind="code">STD-1</fm-teksto>.</${tag}>`,
+      );
+    default:
+      return "";
+  }
+}
+
+/**
  * The grid of one Ero (Spec 004 for the butono; Spec 008 D-12 for every Ero): one row per
  * combination of the enum props its parts are keyed by, one column at rest and one per boolean
  * prop that is a state (disabled, loading), carries an a11y text (external) or keys the parts
@@ -649,7 +697,7 @@ export function eroMarkup(entry: LoadedEro, ikonaro: readonly VitrinoIkono[] = [
         ? `<fm-apartigilo></fm-apartigilo>${row}`
         : row;
     });
-    return `<table><caption>${tag}, mit eigenem Auslöser</caption><thead><tr><th scope="col">Kombination</th><th scope="col">rest</th></tr></thead><tbody><tr><th scope="row">rest</th><td><${tag}>${items.join("")}</${tag}></td></tr></tbody></table>`;
+    return `<table><caption>${tag}, mit eigenem Auslöser</caption><thead><tr><th scope="col">Kombination</th><th scope="col">rest</th></tr></thead><tbody><tr><th scope="row">rest</th><td><${tag}>${items.join("")}</${tag}></td></tr>${additionRows(entry, tag, items.join(""))}</tbody></table>`;
   }
   const styled = styledProps(entry.skemo);
   const keys = styled.filter((key) =>
@@ -811,7 +859,7 @@ export function eroMarkup(entry: LoadedEro, ikonaro: readonly VitrinoIkono[] = [
       ? ""
       : `<tr><th scope="row">${VITRINO_UNKNOWN_LABEL}</th><td><${tag}>${VITRINO_UNKNOWN_LABEL}<span slot="value-text">${VITRINO_UNKNOWN_TEXT}</span></${tag}></td></tr>`;
   const heads = ["rest", ...columns].map((column) => `<th scope="col">${column}</th>`).join("");
-  return `<table><caption>${tag}, jede Kombination der Skemo</caption><thead><tr><th scope="col">Kombination</th>${heads}</tr></thead><tbody>${rows}${kinds}${unknown}</tbody></table>`;
+  return `<table><caption>${tag}, jede Kombination der Skemo</caption><thead><tr><th scope="col">Kombination</th>${heads}</tr></thead><tbody>${rows}${kinds}${unknown}${additionRows(entry, tag)}</tbody></table>`;
 }
 
 /**

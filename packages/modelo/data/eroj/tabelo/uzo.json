@@ -200,10 +200,11 @@
       },
       "empty": {
         "accepts": [
-          "text"
+          "text",
+          "butono"
         ],
-        "max": 1,
-        "nesting": 0
+        "max": 2,
+        "nesting": 1
       }
     },
     "layout": {

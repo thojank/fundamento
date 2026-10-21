@@ -128,7 +128,8 @@ describe("the Uzo of the tabelo (section ④, G5)", () => {
     expect(uzo?.slots).toEqual({
       caption: { accepts: ["text"], required: true, max: 1, nesting: 0 },
       content: { accepts: ["text"], required: true, max: 1, nesting: 1 },
-      empty: { accepts: ["text"], max: 1, nesting: 0 },
+      // Nachlese 7 ② B-3: the empty state names its next step with a butono.
+      empty: { accepts: ["text", "butono"], max: 2, nesting: 1 },
     });
     expect(uzo?.layout).toEqual({ size: "container", wrap: "never" });
   });

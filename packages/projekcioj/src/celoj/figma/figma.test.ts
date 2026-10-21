@@ -2126,6 +2126,8 @@ describe("Figma plan for the mezurilo (Spec 011 ④)", () => {
       min: "NUMBER",
       max: "NUMBER",
       intent: ["neutral", "success", "warning", "danger"],
+      // Nachlese 7 ② B-2.
+      "label-hidden": "BOOLEAN",
       state: ["rest"],
     });
     expect(set?.variants).toHaveLength(4);
@@ -2148,7 +2150,8 @@ describe("Figma plan for the mezurilo (Spec 011 ④)", () => {
     expect(UNKNOWN_EXAMPLE).toBe("unbekannt");
     expect(METER_UNKNOWN_TEXT).toBe("nicht geprüft");
     expect(set?.sign).toBeUndefined();
-    expect(set?.toggles).toBeUndefined();
+    // Nachlese 7 ② B-2: label-hidden is the set's only toggle (the plan of ② below).
+    expect(set?.toggles?.map((toggle) => toggle.property)).toEqual(["label-hidden"]);
     expect(set?.variants.every((entry) => entry.focusVisible === false)).toBe(true);
   });
 
@@ -2207,6 +2210,8 @@ describe("Figma plan for the mezurilo (Spec 011 ④)", () => {
       min: ["number"],
       max: ["number"],
       intent: ["neutral", "success", "warning", "danger"],
+      // Nachlese 7 ② B-2.
+      "label-hidden": ["boolean"],
     });
     expect(items.mezurilo?.states).toEqual(["rest"]);
     expect(items.mezurilo?.values["fill.color@intent=neutral,state=rest"]).toMatch(/^#[0-9a-f]{6}/);
@@ -2941,6 +2946,8 @@ describe("the Figma plan draws the titolo and the teksto as text (Spec 014 ③)"
         "headline-3",
         "headline-4",
       ],
+      // Nachlese 7 ② B-1: a boolean that keys nothing Figma draws.
+      focusable: "BOOLEAN",
       state: ["rest"],
     });
     expect(titolo?.variants).toHaveLength(7);
@@ -3488,5 +3495,31 @@ describe("the Figma plan draws the avataro (Spec 015 ③)", () => {
         ]),
       ),
     );
+  });
+});
+
+// Nachlese 7 ② (B-2, B-4): label-hidden of the mezurilo is a BOOLEAN property of the set that hides
+// the label (shown as label-visible: label is the TEXT property of the set); disabled of the
+// menuo is a boolean that is a state, a BOOLEAN property beside the state axis like the
+// butono's.
+describe("Figma plan after Nachlese 7 ② (B-2, B-4)", () => {
+  const set = (name: string) => plan.components.find((component) => component.set === name);
+
+  it("B-2: the mezurilo has label-hidden as a BOOLEAN that hides the label, under its own name", () => {
+    expect(set("mezurilo")?.properties["label-hidden"]).toBe("BOOLEAN");
+    expect(set("mezurilo")?.toggles).toEqual([
+      {
+        property: "label-hidden",
+        part: "label",
+        defaultValue: false,
+        hides: true,
+        shownAs: "label-visible",
+      },
+    ]);
+  });
+
+  it("B-4: the menuo has disabled as a BOOLEAN beside its states", () => {
+    expect(set("menuo")?.properties.disabled).toBe("BOOLEAN");
+    expect(set("menuo")?.properties.state).toEqual(["rest", "hover", "focus", "disabled"]);
   });
 });

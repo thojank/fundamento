@@ -909,3 +909,52 @@ describe("Make Kit guidelines after Nachlese 7 ①", () => {
     },
   );
 });
+
+// Nachlese 7 ② (0.2.0, additive): every addition stands in the guideline of its Ero — a prop in
+// the props table, a slot that takes more in the slots table, a composition under „Together
+// with"; nothing existing goes away.
+describe("Make Kit guidelines after Nachlese 7 ②", () => {
+  const row = (text: string, start: string) =>
+    text.split("\n").find((line) => line.startsWith(start)) ?? "";
+
+  it.each(ASPEKTOJ)("%s: B-1, B-2, B-4, B-9 the new props stand in the props tables", (aspekto) => {
+    expect(row(kit(aspekto, "guidelines/components/titolo.md"), "| `focusable` |")).toContain(
+      "tabindex -1",
+    );
+    expect(row(kit(aspekto, "guidelines/components/mezurilo.md"), "| `label-hidden` |")).toContain(
+      "assistive technology",
+    );
+    expect(row(kit(aspekto, "guidelines/components/menuo.md"), "| `disabled` |")).toContain(
+      "aria-disabled",
+    );
+    const skip = kit(aspekto, "guidelines/components/saltligilo.md");
+    expect(row(skip, "| `focus-only` |")).toContain("fragment");
+    expect(row(skip, "| `focus-only` |")).toContain("preventDefault()");
+  });
+
+  it.each(ASPEKTOJ)(
+    "%s: B-3, B-5, B-6, B-8, B-10 the slots take more; the old entries stay",
+    (aspekto) => {
+      expect(row(kit(aspekto, "guidelines/components/tabelo.md"), "| `empty` |")).toMatch(
+        /^\| `empty` \| text, butono \|/,
+      );
+      expect(row(kit(aspekto, "guidelines/components/avizo.md"), "| `details` |")).toMatch(
+        /^\| `details` \| text, teksto \|/,
+      );
+      const dialog = kit(aspekto, "guidelines/components/dialogo.md");
+      expect(row(dialog, "| `content` |")).toMatch(
+        /^\| `content` \| kampo, tekstareo, elektilo, elekto, markobutono, sxaltilo, avizo \|/,
+      );
+      expect(row(dialog, "| `message` |")).toMatch(/^\| `message` \| text, teksto \| – \|/);
+      expect(row(dialog, "| `open` |")).toContain("first focusable child");
+      expect(row(dialog, "| `open` |")).toContain("Enter");
+      const text = kit(aspekto, "guidelines/components/teksto.md");
+      expect(row(text, "| `label` |")).toMatch(
+        /^\| `label` \| text, ligilo, insigno, teksto \| – \|/,
+      );
+      const together = text.slice(text.indexOf("## Together with"), text.indexOf("## Slots"));
+      for (const name of ["ligilo", "insigno", "teksto"])
+        expect(together, name).toContain(`- with \`${name}\``);
+    },
+  );
+});
