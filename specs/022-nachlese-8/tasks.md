@@ -24,14 +24,18 @@
 
 ### C – Abschluss
 - [x] **T2208 Doku** plan (mit Messanleitung), tasks.
-- [ ] **T2209 Dry-run** `release.yml` mit 0.2.0, Tag `latest`.
-- [ ] **T2210 CI** grün.
+- [x] **T2209 Dry-run** `release.yml` mit 0.2.0, Tag `latest` (Lauf 39584022420, `7aa400a`).
+- [x] **T2210 CI** grün (Lauf 39583993268, `7aa400a`).
 
 ### Messungen
 
 | Was | Wert |
 |---|---|
-| Commits | rot `a227699` |
+| Commits | rot `a227699`, grün `7aa400a` (Hash des grünen Stands, CI grün); dieser Eintrag im Folgecommit |
+| CI | Lauf 39583993268 (`7aa400a`), Versuch 1: alle acht Jobs grün. Wanduhr 10:17 (`unit` 6:28, `projekcioj` 4:03 / 3:01, `eroj` 2:27 / 2:30, `alirebleco-eroj` 5:14, `rendered-checks` 10:13, `checks` 1:22) |
+| Dry-run | `release.yml` mit `mode=dry-run`, `version=0.2.0` auf dem Branch: Lauf 39584022420 grün; beide Kits `pnpm publish --dry-run --tag latest --provenance --access public`. Veröffentlicht ist nichts. |
+| Tests lokal | Modelo 3 655, MCP 371, Projekcioj 776, Agordilo 94, CLI 72; `pnpm lint`, `fm modelo validate`, `check:regularo`, `check:mankoj`, `check:vortaro-lint`, `check:clean-room`, `check:ikonaro`, `check:alirebleco`, `check:release`, `check:parity`, `check:make-kit`, `check:quickstart` grün |
+| Dialoge | 218 Sätze mit `main` `59ab620` verglichen, 8 gekippt (Gekippte Dialoge) |
 
 ## ② Figma und Vitrino
 
