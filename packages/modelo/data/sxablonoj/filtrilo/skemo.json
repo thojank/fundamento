@@ -1,0 +1,71 @@
+{
+  "$schema": "../../../schema/modelo.schema.json#/$defs/SxablonoFile",
+  "sxablono": {
+    "id": "sxa_01M5D2JGEBD0AB4KSN8X4Q3M2F",
+    "name": "filtrilo",
+    "skemo": "ske_01M5D2JGTHDE3PAJ6W09E2X0PJ",
+    "kind": "flow",
+    "description": "A filter bar over a list: the landmark search with its name, its fields in a row that wraps, its actions and a status line with the count of hits, heard politely."
+  },
+  "skemo": {
+    "id": "ske_01M5D2JGTHDE3PAJ6W09E2X0PJ",
+    "sxablono": "sxa_01M5D2JGEBD0AB4KSN8X4Q3M2F",
+    "props": [
+      {
+        "name": "label",
+        "kind": "string",
+        "required": true,
+        "description": "The name of the landmark search: what the filters filter (Standards filtern)."
+      }
+    ],
+    "regions": [
+      {
+        "name": "fields",
+        "description": "The filters, each a field with its visible label, in a row that wraps.",
+        "required": true,
+        "default": true,
+        "accepts": ["elektilo", "kampo", "elekto", "sxaltilo", "markobutono", "kompletigilo"]
+      },
+      {
+        "name": "actions",
+        "description": "Actions on the filters, such as resetting them.",
+        "accepts": ["butono", "ligilo"]
+      },
+      {
+        "name": "status",
+        "description": "The count of hits (3 von 7 Standards), a polite live region: the effect of a filter is heard while the focus stays in the field.",
+        "accepts": ["text", "teksto"],
+        "max": 1,
+        "live": "polite"
+      }
+    ],
+    "a11y": {
+      "landmarks": ["search"]
+    },
+    "goals": [
+      {
+        "goal": "filter-bar",
+        "keywords": {
+          "en": ["filter", "filters", "filter-bar"],
+          "de": ["filter", "filterleiste", "filterzeile"]
+        },
+        "props": {},
+        "kialo": "Filters over a list are one pattern, because they are the landmark search of the page, wrap as one row and say the count of hits without moving the focus."
+      }
+    ],
+    "parts": {
+      "frame": {
+        "gap": { "fixed": "spacing.medium" }
+      },
+      "fields": {
+        "gap": { "fixed": "spacing.medium" }
+      },
+      "footer": {
+        "gap": { "fixed": "spacing.medium" }
+      },
+      "actions": {
+        "gap": { "fixed": "spacing.small" }
+      }
+    }
+  }
+}

@@ -82,6 +82,8 @@ describe("Make Kit sources (T018)", () => {
       "guidelines/foundations/dimensioj.md",
       "guidelines/foundations/spacing.md",
       "guidelines/foundations/typography.md",
+      "guidelines/patterns/filtrilo.md",
+      "guidelines/patterns/formularo.md",
       "guidelines/patterns/pagxo.md",
       "guidelines/patterns/sxelo.md",
       "guidelines/setup.md",

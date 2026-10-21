@@ -37,8 +37,8 @@
             "formularseite"
           ]
         },
-        "ero": null,
-        "kialo": "A form of more than one screen height is a page, because a dialog that scrolls hides its own actions; a person decides where it goes."
+        "ero": "formularo",
+        "kialo": "A form of more than one screen height is a page, because a dialog that scrolls hides its own actions: a formularo in a section of a pagxo; a form over several steps is still a person's decision (the boundary wizard of the formularo)."
       },
       {
         "goal": "non-modal",

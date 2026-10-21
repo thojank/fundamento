@@ -80,6 +80,29 @@
         }
       ]
     },
+    "children": {
+      "description": "What the goal of the suggested Sxablono names per region (Spec 020 ②): an Ero with its props.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "region": {
+            "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+          },
+          "ero": {
+            "$ref": "https://ciferecigo.com/fundamento/schema/modelo.schema.json#/$defs/Name"
+          },
+          "props": {
+            "type": "object",
+            "additionalProperties": {
+              "anyOf": [{ "type": "string" }, { "type": "boolean" }]
+            }
+          }
+        },
+        "required": ["region", "ero"],
+        "additionalProperties": false
+      }
+    },
     "regions": {
       "description": "The regions of the suggested Sxablono (Spec 020): name, whether required, what it accepts.",
       "type": "array",

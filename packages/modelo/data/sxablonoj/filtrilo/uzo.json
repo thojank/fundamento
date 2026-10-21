@@ -1,0 +1,58 @@
+{
+  "$schema": "../../../schema/modelo.schema.json#/$defs/SxablonoUzoFile",
+  "uzo": {
+    "id": "uzo_01M5D2JH6HVHQ58CSKW67AXJ1D",
+    "sxablono": "sxa_01M5D2JGEBD0AB4KSN8X4Q3M2F",
+    "skemo": "ske_01M5D2JGTHDE3PAJ6W09E2X0PJ",
+    "purpose": "Narrows a list: the filters in one row that wraps, an action to reset them and the count of hits heard as it changes — binding the filters to the address stays the application's.",
+    "instead": [
+      {
+        "goal": "send-form",
+        "keywords": {
+          "en": ["submit-form"],
+          "de": ["absendeformular"]
+        },
+        "ero": "formularo",
+        "kialo": "What is filled and then sent once is a formularo, because a filter applies as it changes and sends nothing."
+      }
+    ],
+    "boundary": [
+      {
+        "case": "saved-filters",
+        "action": "ask-human",
+        "keywords": {
+          "en": ["saved-filters"],
+          "de": ["gespeicherte-filter"]
+        },
+        "kialo": "Filters a person saves and names are data of the application, because they live beyond the page; a person decides where they stand."
+      }
+    ],
+    "composes": {
+      "containers": [
+        {
+          "name": "page",
+          "kialo": "A filter bar stands above the list it narrows in a section of a pagxo, because the person reads the filters before the rows."
+        }
+      ],
+      "with": [
+        {
+          "ero": "elektilo",
+          "kialo": "A filter of one value among many is an elektilo, its empty label the choice of all."
+        },
+        {
+          "ero": "kampo",
+          "kialo": "A search in the list is a kampo of kind search, because it filters by text."
+        },
+        {
+          "ero": "butono",
+          "kialo": "Resetting the filters is a butono of low emphasis, because it is no primary action."
+        }
+      ],
+      "never": [],
+      "spacing": {
+        "owner": "container",
+        "regulo": "spacing-owned-by-container"
+      }
+    }
+  }
+}

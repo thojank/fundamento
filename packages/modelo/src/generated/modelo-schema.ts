@@ -1273,6 +1273,12 @@ export interface SxablonoRegion {
    * At most this many children with emphasis high (Regulo one-primary-per-container).
    */
   primary?: number;
+  /**
+   * Exactly one child of the region has these props (Spec 020 ②: the one submit button of a form).
+   */
+  one?: {
+    [k: string]: string;
+  };
   live?: "polite";
 }
 /**
@@ -1299,6 +1305,16 @@ export interface SxablonoGoal {
     [k: string]: string;
   };
   kialo: string;
+  /**
+   * What the answer names per region for this goal (Spec 020 ②: a sign-in form holds a kampo of kind password and a butono of type submit).
+   */
+  children?: {
+    region: Name;
+    ero: Name;
+    props?: {
+      [k: string]: string | boolean;
+    };
+  }[];
 }
 /**
  * This interface was referenced by `ModeloJson`'s JSON-Schema

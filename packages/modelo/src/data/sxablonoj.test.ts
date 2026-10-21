@@ -26,8 +26,14 @@ const lock = JSON.parse(
 ) as { ids: Record<string, { type: string; status: string }> };
 
 describe("the Sxablonoj of the repo Modelo (Spec 020 ①, G1)", () => {
-  it("are sxelo and pagxo, each in data/sxablonoj/<name>/, with IDs of their own in the lock", () => {
-    expect(sxablonoj.map((entry) => entry.sxablono.name)).toEqual(["pagxo", "sxelo"]);
+  it("are sxelo and pagxo (and since ② formularo and filtrilo), each in data/sxablonoj/<name>/, with IDs of their own in the lock", () => {
+    // Spec 020 ②: formularo and filtrilo beside them.
+    expect(sxablonoj.map((entry) => entry.sxablono.name)).toEqual([
+      "filtrilo",
+      "formularo",
+      "pagxo",
+      "sxelo",
+    ]);
     for (const entry of sxablonoj) {
       const name = entry.sxablono.name;
       expect(entry.file).toBe(`modelo/data/sxablonoj/${name}/skemo.json`);
@@ -134,22 +140,35 @@ describe("the Sxablonoj in modelo.json (FR-17) and in describe_term (G3)", () =>
     const { files } = readModeloFiles(source);
     if (files === undefined) throw new Error("the repo Modelo must read");
     const json = buildModeloJson({ modelo, sets: files.sets, schema: readModeloSchema() });
-    expect(json.sxablonoj?.map((entry) => entry.sxablono.name)).toEqual(["pagxo", "sxelo"]);
+    expect(json.sxablonoj?.map((entry) => entry.sxablono.name)).toEqual([
+      "filtrilo",
+      "formularo",
+      "pagxo",
+      "sxelo",
+    ]);
     const back = modeloFromExport(structuredClone(json));
-    expect(back.sxablonoj?.map((entry) => entry.sxablono.name)).toEqual(["pagxo", "sxelo"]);
-    expect(back.sxablonoj?.[1]?.skemo.regions.map((region) => region.name)).toEqual([
+    expect(back.sxablonoj?.map((entry) => entry.sxablono.name)).toEqual([
+      "filtrilo",
+      "formularo",
+      "pagxo",
+      "sxelo",
+    ]);
+    expect(back.sxablonoj?.[3]?.skemo.regions.map((region) => region.name)).toEqual([
       "brand",
       "principal",
       "nav",
       "notices",
       "main",
     ]);
-    expect(back.sxablonoj?.[0]?.uzo?.purpose).toBe(named("pagxo")?.uzo?.purpose);
+    expect(back.sxablonoj?.[2]?.uzo?.purpose).toBe(named("pagxo")?.uzo?.purpose);
   });
 
   it("describe_term Sxablono counts the Sxablonoj and names them", () => {
     const result = describeTerm(modelo, { term: "Sxablono" });
     if (!result.ok) throw new Error("describe_term failed");
-    expect(result.output.instances).toEqual({ count: 2, names: ["pagxo", "sxelo"] });
+    expect(result.output.instances).toEqual({
+      count: 4,
+      names: ["filtrilo", "formularo", "pagxo", "sxelo"],
+    });
   });
 });

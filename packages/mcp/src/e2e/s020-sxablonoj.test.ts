@@ -59,7 +59,10 @@ describe("list_sxablonoj and get_sxablono (G3)", () => {
     const eroj = await output<{ eroj: unknown[] }>(client, "list_eroj", {});
     expect(eroj.eroj).toHaveLength(32);
     const listed = await output<Listed>(client, "list_sxablonoj", {});
+    // Spec 020 ②: formularo and filtrilo beside them.
     expect(listed.sxablonoj.map((entry) => [entry.name, entry.kind, entry.regions])).toEqual([
+      ["filtrilo", "flow", ["fields", "actions", "status"]],
+      ["formularo", "flow", ["problems", "fields", "actions"]],
       ["pagxo", "page", ["title", "badges", "subtitle", "actions", "sections"]],
       ["sxelo", "layout", ["brand", "principal", "nav", "notices", "main"]],
     ]);
@@ -205,12 +208,15 @@ describe("the example dialogs of Spec 020 ①", () => {
     expect(answer.suggestion?.sxablono).toBeUndefined();
   });
 
-  it("describe_term Sxablono counts two", async () => {
+  it("describe_term Sxablono counts them (four since ②)", async () => {
     const term = await output<{ instances: { count: number; names?: string[] } }>(
       client,
       "describe_term",
       { term: "Sxablono" },
     );
-    expect(term.instances).toEqual({ count: 2, names: ["pagxo", "sxelo"] });
+    expect(term.instances).toEqual({
+      count: 4,
+      names: ["filtrilo", "formularo", "pagxo", "sxelo"],
+    });
   });
 });

@@ -42,7 +42,35 @@
 
 ## ② formularo und filtrilo
 
-Folgt im PR ②.
+**Branch:** `261020-spec-020-formular-116ba2` (gestapelt auf ①) · Aufgaben ab T2071.
+
+### A – Rot zuerst
+- [x] **T2071 Tests:**
+  - Modelo (`src/data/sxablonoj-2.test.ts`): formularo, filtrilo, long-form, filter-bar, das erste Wort.
+  - MCP (`s020-sxablonoj-2.test.ts`): die zwei Beispiel-Dialoge, `one`, search einmal.
+  - Projektionen (`sxablonoj.test.ts`).
+  - Browser (`sxablonoj-2.spec.ts`): submit einmal, ungültiges Feld, search, Umbruch.
+  - Doku; Pins von ①.
+  - Rot in `c8452e7`.
+
+### B – Grün
+- [x] **T2072 Schema** `one`, `children`; Typen.
+- [x] **T2073 Daten** formularo, filtrilo; long-form → formularo (Jugxo); filter-bar.
+- [x] **T2074 Gvidanto** (D-11, D-12): erstes Wort, spezifischeres Ziel, Grenzen des Sxablono, `children`; Regel `sxablono-region-one`.
+- [x] **T2075 Web** (D-13, D-14, D-15): Formular, Suche, Props.
+- [x] **T2076 Make Kit, Vitrino, Parität.**
+- [x] **T2077 Pins** (Abweichung 3).
+
+### C – Abschluss
+- [x] **T2078 Doku.**
+- [x] **T2079 CI** grün (Lauf 39465250512, `19db412`).
+
+### Messungen
+
+| Was | Wert |
+|---|---|
+| Commits | rot `c8452e7`, grün `19db412` (Hash des grünen Stands, CI grün); dieser Eintrag im Folgecommit |
+| CI | Lauf 39465250512 (`19db412`), Versuch 1: alle acht Jobs grün. Wanduhr 10:10 (`unit` 6:38, `projekcioj` 2:44 / 3:40, `eroj` 2:21 / 2:09, `alirebleco-eroj` 5:11, `rendered-checks` 10:07, `checks` 1:23) |
 
 ## ③ Inhalt
 

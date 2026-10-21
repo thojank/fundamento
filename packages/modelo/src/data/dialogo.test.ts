@@ -169,7 +169,8 @@ describe("the Uzo of the dialogo (section ②, G5)", () => {
   it("sends a mere notice to the avizo (③) and names a long form as a person's decision; stops at non-modal, drawer and nested", () => {
     expect(uzo?.instead.map((entry) => [entry.goal, entry.ero])).toEqual([
       ["inform-only", "avizo"],
-      ["long-form", null],
+      // Spec 020 ② (Jugxo jug_01M5D2JHJJR6AVV6B3WMQ3748E): a long form is a formularo on a page.
+      ["long-form", "formularo"],
       // Spec 014 ④: the boundary non-modal is closed, the popover is the sxvebilo.
       ["non-modal", "sxvebilo"],
     ]);

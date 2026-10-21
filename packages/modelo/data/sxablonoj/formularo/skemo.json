@@ -1,0 +1,96 @@
+{
+  "$schema": "../../../schema/modelo.schema.json#/$defs/SxablonoFile",
+  "sxablono": {
+    "id": "sxa_01M5D2JGEAJRP4ANKTTBRY3EH9",
+    "name": "formularo",
+    "skemo": "ske_01M5D2JGTG64E2RX99DFXQC23Z",
+    "kind": "flow",
+    "description": "A form: its problems at the top, its fields in a column, its actions with exactly one submit button; it sends submit once and leaves validation to its fields (novalidate)."
+  },
+  "skemo": {
+    "id": "ske_01M5D2JGTG64E2RX99DFXQC23Z",
+    "sxablono": "sxa_01M5D2JGEAJRP4ANKTTBRY3EH9",
+    "props": [
+      {
+        "name": "label",
+        "kind": "string",
+        "description": "The name of the form, heard with its landmark form (Anmeldung, Entwurf bearbeiten)."
+      }
+    ],
+    "regions": [
+      {
+        "name": "problems",
+        "description": "What went wrong with the form as a whole — an avizo at its top; the error of one field stands at the field.",
+        "accepts": ["avizo"]
+      },
+      {
+        "name": "fields",
+        "description": "The fields of the form, in the order a person fills them.",
+        "required": true,
+        "default": true,
+        "accepts": [
+          "kampo",
+          "elektilo",
+          "elekto",
+          "markobutono",
+          "sxaltilo",
+          "tekstareo",
+          "kompletigilo",
+          "alsxutilo"
+        ]
+      },
+      {
+        "name": "actions",
+        "description": "The actions of the form: exactly one submit button, one primary at most.",
+        "required": true,
+        "accepts": ["butono"],
+        "primary": 1,
+        "one": {
+          "type": "submit"
+        }
+      }
+    ],
+    "a11y": {
+      "landmarks": []
+    },
+    "goals": [
+      {
+        "goal": "form",
+        "keywords": {
+          "en": ["form", "input-form"],
+          "de": ["formular", "eingabemaske"]
+        },
+        "props": {},
+        "kialo": "A form is one pattern, because its fields, its problems and its one submit button belong together and are sent once; the fields carry their own errors."
+      },
+      {
+        "goal": "sign-in",
+        "keywords": {
+          "en": ["sign-in", "login", "token"],
+          "de": ["anmeldung", "login", "token", "anmeldeformular"]
+        },
+        "props": {},
+        "kialo": "A sign-in is a form, because a secret is entered in a field that hides it and sent with one submit button; Enter in the field sends it too.",
+        "children": [
+          { "region": "fields", "ero": "kampo", "props": { "kind": "password" } },
+          { "region": "actions", "ero": "butono", "props": { "type": "submit", "emphasis": "high" } }
+        ]
+      }
+    ],
+    "parts": {
+      "frame": {
+        "gap": { "fixed": "spacing.large" }
+      },
+      "problems": {
+        "gap": { "fixed": "spacing.small" }
+      },
+      "fields": {
+        "gap": { "fixed": "spacing.medium" },
+        "width": { "fixed": "size.container.medium" }
+      },
+      "actions": {
+        "gap": { "fixed": "spacing.small" }
+      }
+    }
+  }
+}

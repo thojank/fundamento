@@ -27,7 +27,13 @@ describe("the plugin draws the Sxablonoj as example frames (Spec 020 ①)", () =
     const frame = nodes.find((node) => node.name === "Sxablonoj");
     expect(frame?.type).toBe("FRAME");
     expect(nodes.find((node) => node.name === "Eroj")).toBeDefined();
-    expect(frame?.children.map((child) => child.name)).toEqual(["pagxo", "sxelo"]);
+    // Spec 020 ②: formularo and filtrilo beside them.
+    expect(frame?.children.map((child) => child.name)).toEqual([
+      "filtrilo",
+      "formularo",
+      "pagxo",
+      "sxelo",
+    ]);
     const sxelo = frame?.children.find((child) => child.name === "sxelo");
     expect(sxelo?.children.map((child) => child.name)).toEqual([
       "brand",
