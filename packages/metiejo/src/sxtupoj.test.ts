@@ -118,7 +118,7 @@ describe("K-1 to K-5 of Spec 024 on the screens", () => {
     expect(html).toContain('<fm-elekto name="form.wahl"');
     for (const value of ["eckig", "leicht", "rund", "ganz-rund"])
       expect(html).toContain(`value="${value}"`);
-    expect(html).not.toContain('type="range"');
+    expect(html.replace(/<style[\s\S]*?<\/style>/g, "")).not.toContain('type="range"');
   });
 
   it("every screen of a brand links to the Studio", () => {

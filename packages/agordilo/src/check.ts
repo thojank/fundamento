@@ -176,6 +176,7 @@ function stepsOf(palettes: DerivedPalettes): RaportoStep[] {
     target: round(step.target),
     achieved: round(step.achieved),
     ...(step.overridden === true ? { overridden: true as const } : {}),
+    ...(step.gesetzt === true ? { gesetzt: true as const } : {}),
     onTarget: step.onTarget,
     toneKept: step.toneKept,
     chroma: { requested: round(step.requested), kept: round(step.c) },

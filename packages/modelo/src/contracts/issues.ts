@@ -150,6 +150,8 @@ export const RULE_IDS = [
   "goal-unknown",
   // Reguloj of Spec 004 (T003, T004); their rule IDs are the Regulo names (plan D-03)
   "aspiro-missed",
+  // Spec 024 (§ 3 B, S-2): a brand's own rule only tightens the Regulo that measures the same.
+  "aspiro-loosens-regulo",
   "contrast-reserve",
   "surface-distinct",
   "palette-even",

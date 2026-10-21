@@ -32,6 +32,12 @@ body { margin: 0; font-family: var(--fm-typography-body-1-font-family); backgrou
 .mt-liste { display: flex; flex-direction: column; gap: var(--fm-spacing-small); }
 .mt-zeile { display: flex; flex-wrap: wrap; gap: var(--fm-spacing-small); align-items: center; }
 .mt-pruefung { display: flex; flex-direction: column; gap: var(--fm-spacing-medium); }
+.mt-studio { display: grid; grid-template-columns: minmax(10rem, 12rem) minmax(0, 1fr) minmax(20rem, 30rem); gap: var(--fm-spacing-large); align-items: start; }
+.mt-studio-vorschau { display: flex; flex-direction: column; gap: var(--fm-spacing-small); }
+.mt-studio-vorschau iframe { inline-size: 100%; block-size: 48rem; border: var(--fm-border-width-default) dashed var(--fm-color-border-default); border-radius: var(--fm-radius-role-surface); background-color: var(--fm-color-background-canvas); }
+.mt-gruppe { display: flex; flex-direction: column; gap: var(--fm-spacing-medium); }
+.mt-reihe { display: flex; flex-direction: column; gap: var(--fm-spacing-xsmall); padding-block: var(--fm-spacing-small); border-block-end: var(--fm-border-width-default) solid var(--fm-color-border-subtle); }
+.mt-reihe input[type="color"] { inline-size: 2.75rem; block-size: 2.75rem; padding: 0; border: var(--fm-border-width-default) solid var(--fm-color-border-default); border-radius: var(--fm-radius-role-control); background: none; }
 .mt-kasxita { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 [hidden] { display: none !important; }`;
 
@@ -60,7 +66,7 @@ const marko = root.getAttribute("data-mt-marko");
 const sxtupo = root.getAttribute("data-mt-sxtupo");
 const frame = document.querySelector("iframe[data-mt-vorschau]");
 let rev = Number(root.getAttribute("data-mt-rev") || "0");
-let scheme = "light";
+let scheme = root.getAttribute("data-mt-scheme") || "light";
 
 function encode(values) {
   const body = new URLSearchParams();
@@ -176,6 +182,129 @@ if (upload) {
   });
 }
 
+// K-1 (Spec 024): the identifier of the name as written, shown small while typing; K-2: a problem
+// of the start goes as soon as the name is one.
+const umlauts = { "ä": "ae", "ö": "oe", "ü": "ue", "ß": "ss", "æ": "ae", "ø": "oe", "œ": "oe" };
+function identOf(text) {
+  return text.toLowerCase().replace(/[äöüßæøœ]/g, (c) => umlauts[c] || c).normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+}
+const nameField = document.querySelector('fm-kampo[name="name"]');
+const kennung = document.querySelector("[data-mt-kennung]");
+if (nameField && kennung) {
+  const show = () => {
+    const ident = identOf(nameField.value || "");
+    kennung.textContent = ident === "" ? "–" : ident;
+    const problem = document.getElementById("mt-problem");
+    if (problem && ident !== "") problem.hidden = true;
+  };
+  nameField.addEventListener("input", show);
+  show();
+}
+
+// K-3/K-4 (Spec 024): the search answers while typing, without Enter; without a hit a sentence.
+const searchField = document.querySelector('fm-kampo[name="q"]');
+let searchTimer;
+if (searchField && marko) {
+  searchField.addEventListener("input", () => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(async () => {
+      const q = searchField.value || "";
+      const response = await fetch("/api/marko/" + marko + "/tiparoj?q=" + encodeURIComponent(q));
+      if (!response.ok) return;
+      const body = await response.json();
+      const none = document.getElementById("mt-keine-schrift");
+      const old = document.getElementById("mt-treffer");
+      const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+      if (body.treffer.length > 0) {
+        const html = '<fm-elekto name="tiparo" id="mt-treffer">Treffer' + body.treffer.map((t) => '<data slot="options" value="' + esc(t.id) + '">' + esc(t.family) + " · " + esc(t.license) + " · " + esc(t.category) + "</data>").join("") + "</fm-elekto>";
+        if (old) old.outerHTML = html; else searchField.insertAdjacentHTML("afterend", html);
+      } else if (old) old.remove();
+      if (none) { none.hidden = !(q !== "" && body.treffer.length === 0); const target = none.querySelector("[data-mt-suche]"); if (target) target.textContent = q; }
+    }, 200);
+  });
+}
+
+// The Studio (Spec 024): a changed control sets a token, Zurücksetzen takes it back, a display
+// name is a word, the switches of the combination lead to the page in that combination.
+function studioMeldung(text, intent) {
+  const target = document.getElementById("mt-studio-meldung");
+  if (!target) return;
+  target.setAttribute("intent", intent);
+  target.textContent = text;
+  target.hidden = text === "";
+}
+async function festlegen(body) {
+  const response = await fetch("/api/marko/" + marko + "/festlegen", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
+  const result = await response.json();
+  if (!response.ok) {
+    studioMeldung((result.satz || "Der Wert wurde nicht übernommen.") + " Vorschlag: " + (result.vorschlag || "–"), "danger");
+    return undefined;
+  }
+  rev = result.rev;
+  refreshFrame();
+  const count = document.getElementById("mt-probleme");
+  if (count && typeof result.probleme === "number") { count.textContent = result.probleme + (result.probleme === 1 ? " Problem" : " Probleme"); count.setAttribute("intent", result.probleme === 0 ? "success" : "warning"); }
+  studioMeldung(result.betroffen && result.betroffen.length > 0 ? "Betroffene Regeln: " + result.betroffen.join(", ") : "", "info");
+  return result;
+}
+function wertOf(control) {
+  const art = control.getAttribute("data-mt-art");
+  const raw = control.value;
+  if (art === "alias") return { alias: raw };
+  if (art === "color") return { wert: raw };
+  if (art === "dimension") return { wert: { value: Number(raw), unit: control.getAttribute("data-mt-einheit") || "px" } };
+  if (art === "number") return { wert: Number(raw) };
+  try { return { wert: JSON.parse(raw) }; } catch { return undefined; }
+}
+for (const control of document.querySelectorAll("[data-mt-festlegen]")) {
+  control.addEventListener("change", async () => {
+    const value = wertOf(control);
+    if (!value) { studioMeldung("Kein gültiger Wert.", "danger"); return; }
+    const body = { token: control.getAttribute("data-mt-festlegen"), ...value };
+    const modus = control.getAttribute("data-mt-modus");
+    if (modus) body.modus = modus;
+    const result = await festlegen(body);
+    if (!result) {
+      // Not taken (a fixed rule): the control shows the value that holds.
+      const before = control.getAttribute("value");
+      if (before !== null) control.value = before;
+      return;
+    }
+    control.setAttribute("value", String(control.value));
+    {
+      const row = control.closest("[data-mt-token]");
+      const badge = row && row.querySelector("fm-insigno");
+      if (badge) { badge.textContent = result.herkunft; badge.setAttribute("intent", result.herkunft === "gesetzt" ? "info" : "neutral"); }
+    }
+  });
+}
+for (const button of document.querySelectorAll("[data-mt-zuruecksetzen]")) {
+  button.addEventListener("click", async () => {
+    const result = await festlegen({ token: button.getAttribute("data-mt-zuruecksetzen"), zurueck: true });
+    if (result) location.reload();
+  });
+}
+let etikedoTimer;
+for (const field of document.querySelectorAll("[data-mt-etikedo]")) {
+  field.addEventListener("input", () => {
+    clearTimeout(etikedoTimer);
+    etikedoTimer = setTimeout(() => festlegen({ token: field.getAttribute("data-mt-etikedo"), etikedo: field.value || "" }), 400);
+  });
+}
+for (const choice of document.querySelectorAll("[data-mt-kombination]")) {
+  choice.addEventListener("change", () => {
+    const url = new URL(location.href);
+    url.searchParams.set(choice.getAttribute("data-mt-kombination"), choice.value);
+    location.href = url.toString();
+  });
+}
+for (const button of document.querySelectorAll("[data-mt-post]")) {
+  button.addEventListener("click", async () => {
+    const response = await fetch(button.getAttribute("data-mt-post"), { method: "POST", headers: { "content-type": "application/x-www-form-urlencoded" }, body: "" });
+    await follow(response);
+  });
+}
+
 if (frame) refreshFrame();
 if (sxtupo === "farbe") check();
 `;
@@ -214,6 +343,8 @@ ${doc.body}
 
 export interface PreviewDocument {
   name: string;
+  /** Further root attributes: the density, the contrast, the viewport (Spec 024, the Studio's header). */
+  attributes?: Readonly<Record<string, string>>;
   /** The stylesheet of the preview (core, komuna and the brand), by URL. */
   cssHref: string;
   /** `@font-face` rules of the chosen webfonts, inline. */
@@ -225,7 +356,7 @@ export interface PreviewDocument {
 /** The preview: a document in the brand, switched by the root attributes as a project would. */
 export function previewDocument(doc: PreviewDocument): string {
   return `<!doctype html>
-<html lang="de" data-fm-aspekto="${escapeHtml(doc.name)}" data-fm-color-scheme="${doc.scheme}">
+<html lang="de" data-fm-aspekto="${escapeHtml(doc.name)}" data-fm-color-scheme="${doc.scheme}"${attributes(doc.attributes ?? {})}>
 <head>
 <meta charset="utf-8">
 <title>Vorschau ${escapeHtml(doc.name)}</title>

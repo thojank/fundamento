@@ -218,6 +218,8 @@ pnpm fm metiejo            # http://localhost:7301
 5. **Vorschau:** the five Sxablonoj in three widths, light and dark.
 6. **Fertig:** the report in plain words; *Speichern* writes `agordo.json` with its `historio` and the chosen exports: the Aspekto package (with the files of every webfont and their licence from the npm package `@fontsource/<id>`, cached outside the checkout, plus `tiparoj.css`), the CSS and the Figma plugin. The same values give the same bytes. `check:tiparoj` runs over every export; a byte of a licensed font removes it.
 
+The **Studio** (Spec 024) is the fine work on the same data: `http://localhost:7301/studio/<name>` — left the navigation (Farbe, Schrift, Raum, Form, Tiefe, Bewegung, Semantik), in the middle the live preview with switches for light/dark, density, contrast and viewport, right the properties: every token with its value, its origin (Struktur, abgeleitet, gesetzt), an alias with its candidates, a colour with its contrast against light and dark, a font size per viewport. A set value goes into `festgelegt` of the Agordo, a display name of a palette or a role into `etikedoj`; a value that breaks a fixed rule is refused with one sentence and one suggestion, an adjustable rule needs a Jugxo. A brand's own rule is an Aspiro and may only tighten a Regulo (`aspiro-loosens-regulo`). What the Studio changes, the Schnellstart shows, and the other way round.
+
 The **Expertenansicht** is the Werkstatt of the Vitrino (`pnpm fm projekcioj build --out .fundamento/projekcioj` once; the server then links into it with the Agordo in the fragment). Round 2 adds the sources (screenshots, tokens) with an AI adapter and the view „Fluss“.
 
 ## Checks

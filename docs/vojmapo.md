@@ -51,6 +51,7 @@ Nach Roadmap vom 2026-10-19 (Maintainer-Ordner, `roadmap/roadmap-2026-10-19.md`)
 | 8a' | **Werkstatt Stufe 2+3** (Spec 019: ① Form, Raum, Schrift, Icon-Gewicht in der Bibliothek, ② Werkstatt mit Verlauf, Vorschlags-Leiste und Prüfung im Worker, ③ `propose_agordo`, `save_agordo`, Wunsch-Vokabular, `historio`; ④ Nachlese 6) | [019](../specs/019-werkstatt-2-3/) | **zur Abnahme** (PRs #85, #87, ③; #86) |
 | 6 | Sxablonoj und Inhalt (Shell, Seite, Formular, Filterleiste; Markdown, Editor, Code) | – | danach |
 | 8a'' | **Werkstatt-Konfigurator Metiejo** (Spec 023, Arbeitsname; Runde 1: Paket `packages/metiejo`, `pnpm fm metiejo`, Schritte 1 und 3–7, Webfonts mit Lizenz und lizenzierte Schriften im privaten Repo mit Byte-Check `check:tiparoj`, Export, Link zur Expertenansicht; Runde 2: Quellen mit KI-Adapter, Ansicht „Fluss“) | [023](../specs/023-werkstatt-konfigurilo/) | **Runde 1 zur Abnahme**; Runde 2 danach |
+| 8a''' | **Studio** (Spec 024: Runde 1 K-1 bis K-6, Studio-Rahmen, Grundlagen und Semantik auf denselben Daten wie der Schnellstart (`festgelegt`, `etikedoj`), Aspiroj nur verschärfen, Raster-Vorschlag; Runde 2 Amendment v2.3 mit Ero-Tokens und Komponentenseiten; Runde 3 Quellen, KI, Fluss) | [024](../specs/024-studio/) | **Runde 1 zur Abnahme** |
 | 8b | Werkstatt Stufe 4: Doku als Lesemodus, Storybook als erzeugte Projektion | – | danach |
 | 7, 8c, 9–12 | Generatoren in der Breite, Enportilo, CLI und Registry, Fluida Marko und Etoso, Agenten und Evals, Veröffentlichung 1.0 | – | danach |
 

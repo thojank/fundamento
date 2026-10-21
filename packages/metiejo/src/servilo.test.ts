@@ -371,7 +371,7 @@ describe("the Studio (Spec 024, § 4)", () => {
     const set = await get("/api/marko/testa/festlegen", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ token: "color.palette.accent.700", wert: "#2a338f" }),
+      body: JSON.stringify({ token: "color.palette.accent.700", wert: "#365378" }),
     });
     expect(set.status).toBe(200);
     const body = (await set.json()) as {
@@ -383,9 +383,9 @@ describe("the Studio (Spec 024, § 4)", () => {
     expect(body.herkunft).toBe("gesetzt");
     expect(typeof body.probleme).toBe("number");
     const css = await (await get(`/marko/testa/vorschau.css?rev=${body.rev}`)).text();
-    expect(css).toContain("#2a338f");
+    expect(css).toContain("#365378");
     const page = await (await get("/studio/testa/farbe")).text();
-    expect(page).toContain("#2a338f");
+    expect(page).toContain("#365378");
     expect(page).toContain("gesetzt");
     const back = await get("/api/marko/testa/festlegen", {
       method: "POST",

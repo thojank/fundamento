@@ -103,9 +103,38 @@ function withTokens(set: Record<string, unknown>, tokens: ReadonlyMap<string, un
       if (!isJsonObject(node[key])) node[key] = {};
       node = node[key] as Record<string, unknown>;
     }
-    node[path.at(-1) ?? ""] = { $value: value };
+    // A typed token (Spec 024: a set of the brand's own has no group types to inherit).
+    const typed =
+      isJsonObject(value) && "type" in value && "value" in value && Object.keys(value).length === 2;
+    node[path.at(-1) ?? ""] = typed
+      ? { ...(typeof value.type === "string" ? { $type: value.type } : {}), $value: value.value }
+      : { $value: value };
   }
   return set;
+}
+
+/** The DTCG type of a core token: its own `$type` or the nearest group's, walking its path. */
+function coreTypeOf(structure: Structure, token: string): string | undefined {
+  const core = structure.files.sets.find((set) => set.name === CORE_SET_NAME)?.value;
+  let node: unknown = core;
+  let type: string | undefined =
+    isJsonObject(core) && typeof core.$type === "string" ? core.$type : undefined;
+  for (const key of token.split(".")) {
+    if (!isJsonObject(node)) return type;
+    node = node[key];
+    if (isJsonObject(node) && typeof node.$type === "string") type = node.$type;
+  }
+  return type;
+}
+
+/** Tokens for `withTokens` with their type, so a set of the brand's own carries complete tokens. */
+function typedTokens(
+  structure: Structure,
+  tokens: ReadonlyMap<string, unknown>,
+): Map<string, unknown> {
+  return new Map(
+    [...tokens].map(([name, value]) => [name, { type: coreTypeOf(structure, name), value }]),
+  );
 }
 
 function kondicxojOf(value: unknown): string[] {
@@ -296,6 +325,10 @@ export function packageDocuments(
     mint("tokenSet"),
     [`aspekto=${name}`],
     (token, value) => {
+      // Spec 024 (festgelegt): what the Studio set wins over everything the derivation writes.
+      const set = agordo.festgelegt?.[token];
+      if (set?.alias !== undefined) return `{${set.alias}}`;
+      if (set?.wert !== undefined) return set.wert;
       const step = byToken.get(token);
       if (step !== undefined) return colorValue(step);
       if (gestalt?.main.has(token) === true) return gestalt.main.get(token);
@@ -307,6 +340,20 @@ export function packageDocuments(
   );
   sets.push({ name: mainName, path: mainPath });
 
+  // Spec 024 (festgelegt.modoj): per Dimensio condition the tokens the Studio set, for the
+  // brand's conjunction set of that condition — the reference's dark set where it has one, a set
+  // of the brand's own for every other condition.
+  const setByKondicxo = new Map<string, Map<string, unknown>>();
+  for (const [token, set] of Object.entries(agordo.festgelegt ?? {})) {
+    for (const [kondicxo, own] of Object.entries(set.modoj ?? {})) {
+      const value = own.alias !== undefined ? `{${own.alias}}` : own.wert;
+      if (value === undefined) continue;
+      const tokens = setByKondicxo.get(kondicxo) ?? new Map<string, unknown>();
+      tokens.set(token, value);
+      setByKondicxo.set(kondicxo, tokens);
+    }
+  }
+  const written = new Set<string>();
   for (const set of referenceConjunctionSets(structure)) {
     const kondicxoj = kondicxojOf(set.value).map((entry) =>
       entry === `aspekto=${referenceName}` ? `aspekto=${name}` : entry,
@@ -315,11 +362,37 @@ export function packageDocuments(
     const setName = set.name.replace(`aspekto/${referenceName}`, mainName);
     const path = `sets/${setName}.json`;
     const rewritten = rewriteSet(set.value, mint("tokenSet"), kondicxoj, (token, value) => {
+      const own = kondicxoj
+        .filter((entry) => !entry.startsWith("aspekto="))
+        .map((entry) => setByKondicxo.get(entry)?.get(token))
+        .find((entry) => entry !== undefined);
+      if (own !== undefined) return own;
       const step = byModeToken.get(`${mode}:${token}`);
       return step === undefined ? value : colorValue(step);
     });
-    json[path] =
+    let document =
       mode === "dark" && gestalt !== undefined ? withTokens(rewritten, gestalt.dark) : rewritten;
+    for (const kondicxo of kondicxoj.filter((entry) => !entry.startsWith("aspekto="))) {
+      const own = setByKondicxo.get(kondicxo);
+      if (own !== undefined && kondicxoj.length === 2) {
+        document = withTokens(document, typedTokens(structure, own));
+        written.add(kondicxo);
+      }
+    }
+    json[path] = document;
+    sets.push({ name: setName, path });
+  }
+  for (const [kondicxo, tokens] of [...setByKondicxo.entries()].sort(([a], [b]) =>
+    a < b ? -1 : a > b ? 1 : 0,
+  )) {
+    if (written.has(kondicxo)) continue;
+    const [dimensio = "", valoro = ""] = kondicxo.split("=");
+    const setName = `${mainName}+${dimensio}/${valoro}`;
+    const path = `sets/${setName}.json`;
+    json[path] = withTokens(
+      rewriteSet({}, mint("tokenSet"), [`aspekto=${name}`, kondicxo], (_token, value) => value),
+      typedTokens(structure, tokens),
+    );
     sets.push({ name: setName, path });
   }
 
@@ -351,6 +424,9 @@ export function packageDocuments(
   const ikono = ikonoChoice(agordo, structure);
   if (ikono.ikonoj !== undefined) aspekto.ikonoj = ikono.ikonoj;
   if (agordo.aspiroj !== undefined && agordo.aspiroj.length > 0) aspekto.aspiroj = agordo.aspiroj;
+  if (agordo.etikedoj !== undefined && Object.keys(agordo.etikedoj).length > 0) {
+    aspekto.etikedoj = agordo.etikedoj;
+  }
   aspekto.agordilo = {
     version: AGORDILO_VERSION,
     structure: { vortaro: MODELO_VERSION, reference: referenceName, sha256: structure.fingerprint },

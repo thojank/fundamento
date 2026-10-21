@@ -50,6 +50,7 @@ describe("tiparoFrom (no licence, no entry)", () => {
     category: "sans-serif",
     license: "OFL-1.1",
     variable: false,
+    weights: [700, 400],
   };
 
   it("maps subsets to ISO 15924 scripts and keeps the SPDX licence", () => {
@@ -60,6 +61,7 @@ describe("tiparoFrom (no licence, no entry)", () => {
       category: "sans-serif",
       scripts: ["Cyrl", "Latn"],
       variable: false,
+      weights: [400, 700],
     });
     expect(tiparoFrom({ ...raw, license: "mit" })?.license).toBe("MIT");
   });

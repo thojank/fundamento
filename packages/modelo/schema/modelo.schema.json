@@ -1402,6 +1402,16 @@
             "$ref": "#/$defs/AspektoAspiro"
           }
         },
+        "etikedoj": {
+          "description": "Display names of the brand (Spec 024, § 3 B): the brand as written (`marko`), a palette or a role → its name as the Studio, the Vitrino and the Guidelines show it; identifiers stay canonical (Art. II).",
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z0-9]+(\\.[a-z0-9-]+)*$"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/NonEmptyText"
+          }
+        },
         "agordilo": {
           "$ref": "#/$defs/AspektoAgordilo"
         },
@@ -3744,6 +3754,39 @@
       "type": "string",
       "pattern": "^(#[0-9a-fA-F]{3}|#[0-9a-fA-F]{6}|oklch\\(\\s*[0-9]*\\.?[0-9]+%?\\s+[0-9]*\\.?[0-9]+\\s+[0-9]*\\.?[0-9]+\\s*\\))$"
     },
+    "AgordoFestgelegtWert": {
+      "description": "What the brand sets for one token in one set: a DTCG value (`wert`) or the name of a token to alias (`alias`), not both.",
+      "type": "object",
+      "properties": {
+        "wert": {},
+        "alias": {
+          "$ref": "#/$defs/TokenName"
+        }
+      },
+      "additionalProperties": false,
+      "minProperties": 1,
+      "maxProperties": 1
+    },
+    "AgordoFestgelegt": {
+      "description": "A set token of the Studio (Spec 024): the value or alias for the main set of the brand (an alias wins over a value), and per Dimensio condition for the brand's conjunction set of that condition.",
+      "type": "object",
+      "properties": {
+        "wert": {},
+        "alias": {
+          "$ref": "#/$defs/TokenName"
+        },
+        "modoj": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z-]+=[a-z0-9-]+$"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/AgordoFestgelegtWert"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
     "AgordoHistorio": {
       "description": "One save of an Agordo (Spec 019 ③, W-26): the date, the wish the movement came from (or Hand for a change by hand) and the sliders that moved, before → after.",
       "type": "object",
@@ -3974,6 +4017,26 @@
           "type": "array",
           "items": {
             "$ref": "#/$defs/AgordoJugxo"
+          }
+        },
+        "festgelegt": {
+          "description": "Values the Studio sets (Spec 024 Runde 1, S-2): token name → what the brand sets instead of what the derivation would write. `wert` is a DTCG value for the main set, `alias` the name of a token the brand re-points to (an alias counts as an assignment, Art. IV), `modoj` the same per Dimensio condition (`color-scheme=dark`, `viewport=compact`), written into the brand's conjunction set of that condition. Schnellstart and Studio work on the same data.",
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/TokenName"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/AgordoFestgelegt"
+          }
+        },
+        "etikedoj": {
+          "description": "Display names of the brand (Spec 024, § 3 B): `marko` for the brand as written, a palette (`color.palette.accent`) or a role (`color.text.default`) → its name as the Studio, the Vitrino and the Guidelines show it. Identifiers in every Projekcio stay canonical (Art. II).",
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z0-9]+(\\.[a-z0-9-]+)*$"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/NonEmptyText"
           }
         },
         "historio": {

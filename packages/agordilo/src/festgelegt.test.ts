@@ -84,10 +84,10 @@ describe("deriveAspekto with festgelegt (Spec 024, S-2)", () => {
     name: "festa",
     festgelegt: {
       "color.palette.accent.700": {
-        wert: { colorSpace: "srgb", components: [0.1647, 0.2, 0.5608], hex: "#2a338f" },
+        wert: { colorSpace: "srgb", components: [0.3843, 0.2549, 0.6039], hex: "#62419a" },
       },
       "color.text.default": {
-        alias: "color.palette.neutral.800",
+        alias: "color.palette.neutral.950",
         modoj: { "color-scheme=dark": { alias: "color.palette.neutral.100" } },
       },
       "font.size.display.1": { modoj: { "viewport=compact": { alias: "font.size.scale.900" } } },
@@ -100,11 +100,11 @@ describe("deriveAspekto with festgelegt (Spec 024, S-2)", () => {
   it("keeps a set palette step where it would derive one, and the report marks it", () => {
     expect(derivation.issues.filter((issue) => issue.rule === "schema-violation")).toEqual([]);
     const main = setOf(derivation.files, "sets/aspekto/festa.json");
-    expect(tokenValue(main, "color.palette.accent.700")).toMatchObject({ hex: "#2a338f" });
+    expect(tokenValue(main, "color.palette.accent.700")).toMatchObject({ hex: "#62419a" });
     const step = derivation.raporto.palettes.find(
       (entry) => entry.token === "color.palette.accent.700" && entry.mode === "light",
     );
-    expect(step?.hex).toBe("#2a338f");
+    expect(step?.hex).toBe("#62419a");
     expect(step?.gesetzt).toBe(true);
     expect(step?.achieved).toBeGreaterThan(1);
     const other = derivation.raporto.palettes.find(
@@ -115,7 +115,7 @@ describe("deriveAspekto with festgelegt (Spec 024, S-2)", () => {
 
   it("writes an alias for a re-pointed role, light and dark", () => {
     const main = setOf(derivation.files, "sets/aspekto/festa.json");
-    expect(tokenValue(main, "color.text.default")).toBe("{color.palette.neutral.800}");
+    expect(tokenValue(main, "color.text.default")).toBe("{color.palette.neutral.950}");
     expect(tokenValue(main, "radius.role.control")).toBe("{radius.full}");
     const dark = setOf(derivation.files, "sets/aspekto/festa+color-scheme/dark.json");
     expect(tokenValue(dark, "color.text.default")).toBe("{color.palette.neutral.100}");
