@@ -288,6 +288,19 @@
       }
     },
     {
+      "token": "color.palette.accent.25",
+      "mode": "light",
+      "hex": "#f4f8f6",
+      "target": 1.0746,
+      "achieved": 1.0745,
+      "onTarget": true,
+      "toneKept": true,
+      "chroma": {
+        "requested": 0.0045,
+        "kept": 0.0045
+      }
+    },
+    {
       "token": "color.palette.accent.50",
       "mode": "light",
       "hex": "#e8f0ee",
@@ -311,6 +324,19 @@
       "chroma": {
         "requested": 0.019,
         "kept": 0.019
+      }
+    },
+    {
+      "token": "color.palette.accent.150",
+      "mode": "light",
+      "hex": "#c9e0da",
+      "target": 1.389,
+      "achieved": 1.389,
+      "onTarget": true,
+      "toneKept": true,
+      "chroma": {
+        "requested": 0.0261,
+        "kept": 0.0261
       }
     },
     {
@@ -405,6 +431,19 @@
       }
     },
     {
+      "token": "color.palette.accent.850",
+      "mode": "light",
+      "hex": "#003a31",
+      "target": 12.7003,
+      "achieved": 12.7023,
+      "onTarget": true,
+      "toneKept": true,
+      "chroma": {
+        "requested": 0.0783,
+        "kept": 0.0575
+      }
+    },
+    {
       "token": "color.palette.accent.900",
       "mode": "light",
       "hex": "#002f27",
@@ -431,6 +470,32 @@
       }
     },
     {
+      "token": "color.palette.accent.975",
+      "mode": "light",
+      "hex": "#041a15",
+      "target": 18.0988,
+      "achieved": 18.0981,
+      "onTarget": true,
+      "toneKept": true,
+      "chroma": {
+        "requested": 0.0293,
+        "kept": 0.0293
+      }
+    },
+    {
+      "token": "color.palette.success.25",
+      "mode": "light",
+      "hex": "#f4f8f4",
+      "target": 1.0724,
+      "achieved": 1.0724,
+      "onTarget": true,
+      "toneKept": true,
+      "chroma": {
+        "requested": 0.007,
+        "kept": 0.007
+      }
+    },
+    {
       "token": "color.palette.success.50",
       "mode": "light",
       "hex": "#eaf1e8",
@@ -454,6 +519,19 @@
       "chroma": {
         "requested": 0.0297,
         "kept": 0.0297
+      }
+    },
+    {
+      "token": "color.palette.success.150",
+      "mode": "light",
+      "hex": "#cde2c9",
+      "target": 1.3703,
+      "achieved": 1.3704,
+      "onTarget": true,
+      "toneKept": true,
+      "chroma": {
+        "requested": 0.0408,
+        "kept": 0.0408
       }
     },
     {
@@ -548,6 +626,19 @@
       }
     },
     {
+      "token": "color.palette.success.850",
+      "mode": "light",
+      "hex": "#0d3f00",
+      "target": 12.2139,
+      "achieved": 12.2122,
+      "onTarget": true,
+      "toneKept": true,
+      "chroma": {
+        "requested": 0.1039,
+        "kept": 0.1032
+      }
+    },
+    {
       "token": "color.palette.success.900",
       "mode": "light",
       "hex": "#093300",
@@ -574,6 +665,32 @@
       }
     },
     {
+      "token": "color.palette.success.975",
+      "mode": "light",
+      "hex": "#0d1a0a",
+      "target": 17.9693,
+      "achieved": 17.9697,
+      "onTarget": true,
+      "toneKept": true,
+      "chroma": {
+        "requested": 0.0355,
+        "kept": 0.0355
+      }
+    },
+    {
+      "token": "color.palette.warning.25",
+      "mode": "light",
+      "hex": "#fbf6f2",
+      "target": 1.0753,
+      "achieved": 1.0754,
+      "onTarget": true,
+      "toneKept": true,
+      "chroma": {
+        "requested": 0.0075,
+        "kept": 0.0075
+      }
+    },
+    {
       "token": "color.palette.warning.50",
       "mode": "light",
       "hex": "#f7ece5",
@@ -597,6 +714,19 @@
       "chroma": {
         "requested": 0.032,
         "kept": 0.032
+      }
+    },
+    {
+      "token": "color.palette.warning.150",
+      "mode": "light",
+      "hex": "#f2d5bf",
+      "target": 1.3958,
+      "achieved": 1.3957,
+      "onTarget": true,
+      "toneKept": true,
+      "chroma": {
+        "requested": 0.0439,
+        "kept": 0.0439
       }
     },
     {
@@ -691,6 +821,19 @@
       }
     },
     {
+      "token": "color.palette.warning.850",
+      "mode": "light",
+      "hex": "#4d2805",
+      "target": 12.898,
+      "achieved": 12.8992,
+      "onTarget": true,
+      "toneKept": true,
+      "chroma": {
+        "requested": 0.0713,
+        "kept": 0.0713
+      }
+    },
+    {
       "token": "color.palette.warning.900",
       "mode": "light",
       "hex": "#3f2002",
@@ -717,6 +860,32 @@
       }
     },
     {
+      "token": "color.palette.warning.975",
+      "mode": "light",
+      "hex": "#1e130b",
+      "target": 18.1586,
+      "achieved": 18.1596,
+      "onTarget": true,
+      "toneKept": true,
+      "chroma": {
+        "requested": 0.0236,
+        "kept": 0.0236
+      }
+    },
+    {
+      "token": "color.palette.danger.25",
+      "mode": "light",
+      "hex": "#fbf5f5",
+      "target": 1.0771,
+      "achieved": 1.0772,
+      "onTarget": true,
+      "toneKept": true,
+      "chroma": {
+        "requested": 0.007,
+        "kept": 0.007
+      }
+    },
+    {
       "token": "color.palette.danger.50",
       "mode": "light",
       "hex": "#f8ebeb",
@@ -740,6 +909,19 @@
       "chroma": {
         "requested": 0.0309,
         "kept": 0.0309
+      }
+    },
+    {
+      "token": "color.palette.danger.150",
+      "mode": "light",
+      "hex": "#f7d0d0",
+      "target": 1.4114,
+      "achieved": 1.4114,
+      "onTarget": true,
+      "toneKept": true,
+      "chroma": {
+        "requested": 0.0441,
+        "kept": 0.0441
       }
     },
     {
@@ -834,6 +1016,19 @@
       }
     },
     {
+      "token": "color.palette.danger.850",
+      "mode": "light",
+      "hex": "#65001a",
+      "target": 13.4324,
+      "achieved": 13.4314,
+      "onTarget": true,
+      "toneKept": true,
+      "chroma": {
+        "requested": 0.1304,
+        "kept": 0.1283
+      }
+    },
+    {
       "token": "color.palette.danger.900",
       "mode": "light",
       "hex": "#530014",
@@ -860,6 +1055,32 @@
       }
     },
     {
+      "token": "color.palette.danger.975",
+      "mode": "light",
+      "hex": "#270d0f",
+      "target": 18.2864,
+      "achieved": 18.2873,
+      "onTarget": true,
+      "toneKept": true,
+      "chroma": {
+        "requested": 0.0438,
+        "kept": 0.0438
+      }
+    },
+    {
+      "token": "color.palette.info.25",
+      "mode": "light",
+      "hex": "#f3f8fa",
+      "target": 1.0739,
+      "achieved": 1.0739,
+      "onTarget": true,
+      "toneKept": true,
+      "chroma": {
+        "requested": 0.0064,
+        "kept": 0.0064
+      }
+    },
+    {
       "token": "color.palette.info.50",
       "mode": "light",
       "hex": "#e6f0f5",
@@ -883,6 +1104,19 @@
       "chroma": {
         "requested": 0.0274,
         "kept": 0.0274
+      }
+    },
+    {
+      "token": "color.palette.info.150",
+      "mode": "light",
+      "hex": "#c2e0ef",
+      "target": 1.3828,
+      "achieved": 1.3827,
+      "onTarget": true,
+      "toneKept": true,
+      "chroma": {
+        "requested": 0.0376,
+        "kept": 0.0376
       }
     },
     {
@@ -977,6 +1211,19 @@
       }
     },
     {
+      "token": "color.palette.info.850",
+      "mode": "light",
+      "hex": "#00374c",
+      "target": 12.6822,
+      "achieved": 12.6841,
+      "onTarget": true,
+      "toneKept": true,
+      "chroma": {
+        "requested": 0.0882,
+        "kept": 0.0632
+      }
+    },
+    {
       "token": "color.palette.info.900",
       "mode": "light",
       "hex": "#002d3e",
@@ -1000,6 +1247,19 @@
       "chroma": {
         "requested": 0.0628,
         "kept": 0.0473
+      }
+    },
+    {
+      "token": "color.palette.info.975",
+      "mode": "light",
+      "hex": "#051821",
+      "target": 18.0952,
+      "achieved": 18.0961,
+      "onTarget": true,
+      "toneKept": true,
+      "chroma": {
+        "requested": 0.0314,
+        "kept": 0.0314
       }
     },
     {

@@ -51,7 +51,10 @@ describe("studioRows", () => {
     expect(accent?.rows.length).toBeGreaterThanOrEqual(15);
     // O-1 (Spec 024): the four new steps of every coloured palette stand in the Studio.
     for (const step of ["25", "150", "850", "975"])
-      expect(accent?.rows.map((row) => row.token), step).toContain(`color.palette.accent.${step}`);
+      expect(
+        accent?.rows.map((row) => row.token),
+        step,
+      ).toContain(`color.palette.accent.${step}`);
     const step = accent?.rows.find((row) => row.token === "color.palette.accent.700");
     expect(step?.shown).toBe("#2a338f");
     expect(step?.herkunft).toBe("gesetzt");

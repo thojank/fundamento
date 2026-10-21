@@ -1096,6 +1096,18 @@
       "status": "active",
       "type": "jugxo"
     },
+    "jug_01M5EYQ8T67D7J99BBS0VJHVPR": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M5EYQ8T6MSKZR1GYNPT7HS2F": {
+      "status": "active",
+      "type": "jugxo"
+    },
+    "jug_01M5F3FY2AN3PK0EHYS0GW7EJ8": {
+      "status": "active",
+      "type": "jugxo"
+    },
     "kpa_01M2VEEE9HREQTY2499C9JS05Q": {
       "status": "active",
       "type": "kontrastParo"
@@ -3376,6 +3388,86 @@
       "status": "active",
       "type": "token"
     },
+    "tok_01M5GDCME33SKWMP56CQMKR03X": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M5GDCME33SKWMP56CQMKR03Y": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M5GDCME33SKWMP56CQMKR03Z": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M5GDCME33SKWMP56CQMKR040": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M5GDCME33SKWMP56CQMKR041": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M5GDCME33SKWMP56CQMKR042": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M5GDCME33SKWMP56CQMKR043": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M5GDCME33SKWMP56CQMKR044": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M5GDCME33SKWMP56CQMKR045": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M5GDCME33SKWMP56CQMKR046": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M5GDCME33SKWMP56CQMKR047": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M5GDCME33SKWMP56CQMKR048": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M5GDCME33SKWMP56CQMKR049": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M5GDCME33SKWMP56CQMKR04A": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M5GDCME33SKWMP56CQMKR04B": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M5GDCME33SKWMP56CQMKR04C": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M5GDCME33SKWMP56CQMKR04D": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M5GDCME33SKWMP56CQMKR04E": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M5GDCME33SKWMP56CQMKR04F": {
+      "status": "active",
+      "type": "token"
+    },
+    "tok_01M5GDCME33SKWMP56CQMKR04G": {
+      "status": "active",
+      "type": "token"
+    },
     "uzo_01M4RPK0VYYXNCF41ME86Q4Z8P": {
       "status": "active",
       "type": "uzo"
@@ -3531,18 +3623,6 @@
     "uzo_01M5D5JMAHP0J37BDYFZG8V3KZ": {
       "status": "active",
       "type": "uzo"
-    },
-    "jug_01M5EYQ8T6MSKZR1GYNPT7HS2F": {
-      "status": "active",
-      "type": "jugxo"
-    },
-    "jug_01M5EYQ8T67D7J99BBS0VJHVPR": {
-      "status": "active",
-      "type": "jugxo"
-    },
-    "jug_01M5F3FY2AN3PK0EHYS0GW7EJ8": {
-      "status": "active",
-      "type": "jugxo"
     }
   }
 }

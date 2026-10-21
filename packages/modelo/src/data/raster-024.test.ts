@@ -6,6 +6,7 @@
 
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import { oklchLightness, readDtcgColor } from "../checks/alirebleco/color.js";
 import { CORE_SET_NAME } from "../contracts/grammar.js";
 import { loadModelo } from "../load/load-modelo.js";
 import { defaultModeloSource, projectModeloSource } from "../load/source.js";
@@ -72,10 +73,8 @@ describe("O-1: the coloured palettes carry the steps 25, 150, 850 and 975 (Spec 
 
   it("the new steps lie between their neighbours in OKLCH lightness, so every ramp stays monotone", () => {
     const lightness = (name: string): number => {
-      const value = core[name]?.value as { components: number[] } | undefined;
-      const [r = 0, g = 0, b = 0] = value?.components ?? [];
-      // A plain luminance is enough for the order of a ramp; the Reguloj measure OKLCH.
-      return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+      const colour = readDtcgColor(core[name]?.value);
+      return colour === undefined ? Number.NaN : oklchLightness(colour);
     };
     const between: [string, string, string][] = [
       ["50", "25", "0"],
@@ -101,7 +100,8 @@ describe("O-1: the coloured palettes carry the steps 25, 150, 850 and 975 (Spec 
       const loaded = loadModelo(projectModeloSource(fixture(name))).modelo;
       const set = loaded?.setoj.find((candidate) => candidate.name === `aspekto/${aspekto}`);
       expect(set).toBeDefined();
-      for (const palette of COLOURED) expect(stepsOf(set?.tokens ?? {}, palette), palette).toEqual(STEPS);
+      for (const palette of COLOURED)
+        expect(stepsOf(set?.tokens ?? {}, palette), palette).toEqual(STEPS);
     },
   );
 

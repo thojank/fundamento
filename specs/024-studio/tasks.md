@@ -31,6 +31,23 @@
 | Ero-Tokens | 0 (Runde 2) · Figma-Variablen unverändert gegenüber 0.2.0 |
 | Raster | neutral 17 Stufen, farbige Paletten 11; Vorschlag + 25, 150, 850, 975 (plan ①) |
 
+## O-1 Palettenraster (eigener PR)
+
+**Branch:** `261022-spec-024-o1-raster-f87267` (von `main` `8915fa6`, nach #99). Entscheidung des Maintainers (22.10.): die farbigen Paletten bekommen 25, 150, 850 und 975.
+
+- [x] **T2421 Tests** Modelo `data/raster-024.test.ts` (15 Stufen je farbige Palette im Kern, ID im Lock, Rolle, Beschreibung, Ordnung in OKLCH, jede Fixture-Marke belegt sie, `palette-even`/`palette-aligned`/`srgb-gamut` grün); Agordilo `raster-024.test.ts` (Kalibrierung je Stufe zwischen den Nachbarn, Ableitung mit 15 Stufen); Metiejo `studio.test.ts` (Stufen und Kandidaten im Studio), `docs-024.test.ts` (plan und tasks O-1). Rot in `23dec57`.
+- [x] **T2422 Tokens** 20 IDs (`pnpm id:new token --count 20`), die Stufen in `core.json` mit den Werten aus D-13.
+- [x] **T2423 Kalibrierung und Fixtures** `calibration.json` neu gemessen; `provo` und `provo-kompakta` mit `fm agordilo derive` neu abgeleitet; `ekzemplo` von Hand nach derselben Regel.
+- [x] **T2424 Doku und PR** plan O-1 (Review, D-13, Messungen, Abweichungen, Messanleitung), tasks O-1, Vojmapo; PR, CI grün, Bericht.
+
+### Messungen (O-1)
+
+| Was | Wert |
+|---|---|
+| Commits O-1 | rot `23dec57`, grün (Folgecommit); dieser Eintrag im Folgecommit |
+| Tokens | Kern 356 → 376; Figma-Variablen 856 → 876 |
+| Schritte | 950 → 975: 0,16 OKLCH-L je 100 Einheiten (Aspiro 0,04–0,2 hält); `palette-aligned` Spreizung 0 an 25/150/850/975 |
+
 ## ② Runde 2
 
 Nach dem Merge von ①: Constitution Amendment v2.3 als eigener erster Commit, Ero-Tokens aus den Skemoj, Migration aller Aspektoj als Alias, Projekcioj und Eroj lesen Ero-Tokens (pixelgleich, M-3), Komponentenseiten (M-4), Figma-Variablen gezählt. Aufgaben ab T2431.

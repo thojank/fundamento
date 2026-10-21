@@ -28,7 +28,11 @@ describe("O-1: calibration and derivation with the finer grid (Spec 024)", () =>
   });
 
   it("derives 15 steps per coloured palette for a brand that names none of them", () => {
-    const basis = derivationBasis({ name: "provo", leitfarbe: "#6b4fa0" }, readStructure(), calibration);
+    const basis = derivationBasis(
+      { name: "provo", leitfarbe: "#6b4fa0" },
+      readStructure(),
+      calibration,
+    );
     for (const palette of COLOURED) {
       const steps = basis.palettes.steps
         .filter((step) => step.palette === palette)

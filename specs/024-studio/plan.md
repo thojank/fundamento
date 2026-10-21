@@ -170,3 +170,69 @@ cat "<Markenordner>/bluna/agordo.json" | head -60
 **Expertenansicht:** der Link auf jedem Bildschirm, oder direkt `open "file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/projekcioj/vitrino/index.html#modus=werkstatt"`.
 
 **Tests:** `pnpm --filter @fundamento/metiejo exec vitest run src/studio.test.ts src/servilo.test.ts` (Studio, K-1 bis K-6, M-5, M-6), `pnpm --filter @fundamento/agordilo exec vitest run src/festgelegt.test.ts` (festgelegt, etikedoj, bytegleich), `pnpm --filter @fundamento/modelo exec vitest run src/validate/aspiroj-loosen.test.ts`.
+
+## O-1 Palettenraster (eigener PR)
+
+**Branch:** `261022-spec-024-o1-raster-f87267` (von `main` `8915fa6`, nach #99) · **Datum:** 2026-10-22 · **Stand:** zur Abnahme. Entscheidung des Maintainers vom 22.10. zu O-1: der Raster-Vorschlag aus ① gilt – die farbigen Paletten bekommen die vier Stufen der neutralen Palette, die ihnen fehlten, **25, 150, 850, 975**, für alle Marken abgeleitet. Eine Token-Änderung durch Spec, kein Amendment (§ 3 B).
+
+### Zusammenfassung
+
+1. **20 neue Kern-Tokens:** `color.palette.{accent,success,warning,danger,info}.{25,150,850,975}`, je mit ID aus dem Lock (`pnpm id:new token --count 20`), Rolle `palette` und Beschreibung; die farbigen Paletten haben 15 Stufen, die neutrale behält 17 (mit 0 und 1000), `shade` und `tint` bleiben. Plan ① zählte 24 (4 × 6) – die neutrale Palette hat die Stufen schon, also 20.
+2. **Die Werte von komuna** (D-13): je neue Stufe die OKLCH-Helligkeit der gleichnamigen neutralen Stufe, die Buntheit als geometrisches Mittel der Nachbarn, der Farbton der Nachbarn, in den sRGB-Farbraum gebracht. Der erreichte Kontrast gegen Weiß entspricht dem geometrischen Mittel der Nachbarn aus dem Vorschlag in ① (25 ≈ 1,07 · 150 ≈ 1,39 · 850 ≈ 12,7 · 975 ≈ 18,1).
+3. **Kalibrierung neu gemessen** (`pnpm --filter @fundamento/agordilo calibrate`): `calibration.json` trägt je farbiger Palette 15 Stufen mit Ziel hell und dunkel und relativer Buntheit; die Ableitung schreibt die neuen Stufen für jede Marke (§ 3 B: „Die Stufen, die eine Marke nicht nutzt, belegt die Ableitung“).
+4. **Alle vorhandenen Marken belegen die Stufen (Art. IV):** komuna im Kern, `provo` und `provo-kompakta` neu abgeleitet (`fm agordilo derive`, Herkunft mit neuem Fingerabdruck der Struktur), `ekzemplo` von Hand mit erfundenen Werten nach derselben Regel aus seinen eigenen Paletten.
+5. **Die Reguloj bleiben grün:** `palette-even`, `palette-aligned`, `srgb-gamut` und das Aspiro `oklch-l-step` (0,04–0,2 je 100 Stufeneinheiten) von komuna – gemessen, nicht gelockert. Keine Rolle zeigt auf eine neue Stufe, die KontrastParoj sind unverändert.
+6. **Studio und Werkstatt** zeigen die neuen Stufen von selbst (die Zeilen und Kandidaten kommen aus dem Modelo): je Stufe Wert, OKLCH, Kontrast, Herkunft, setzbar und zurücksetzbar.
+
+### Constitutional Compliance Review
+
+- **Art. I:** konform – die Tokens stehen im Kern, Kalibrierung und Fixtures sind aus ihm abgeleitet; keine Projekcio von Hand.
+- **Art. II:** konform – kanonische Namen `color.palette.<palette>.<stufe>`, die Bezeichner der Celoj folgen mechanisch.
+- **Art. III:** konform – `resolve` und `describe` nennen die neuen Tokens ohne Änderung.
+- **Art. IV:** konform – jede Aspekto belegt jede neue Stufe (Test je Fixture); `aspekto-incomplete` erzwingt es.
+- **Art. V:** konform – kein fremder Style-Guide geöffnet; die Werte sind aus komuna gerechnet.
+- **Art. VI:** konform – keine Regulo geändert, keine Schranke gelockert; das Aspiro von komuna hält (D-13).
+- **Art. VII:** konform – die Beschreibung jeder Stufe nennt Spec und Entscheidung; die Fixtures tragen den Fingerabdruck der Struktur.
+- **Art. VIII:** konform – DTCG-Farbwerte, nichts Webspezifisches.
+- **Art. IX:** konform – keine neue Fähigkeit an Eroj.
+- **Art. X:** konform – rot in `23dec57`, dann grün; alle Prüfungen laufen unverändert.
+- **Art. XI:** konform – kein Paket, kein Code; 20 Tokens, eine Messung, drei Fixtures.
+- **Art. XII:** konform – DTCG; `$themes.json` unverändert (kein neuer Set).
+- **Art. XIII:** konform – der Schnellstart ändert sich nicht; das Studio zeigt vier Stufen mehr je Palette.
+
+### Entwurfsentscheidungen
+
+#### D-13 Die neue Stufe nimmt die Helligkeit der neutralen Stufe
+Der Vorschlag in ① nannte als Ziel das geometrische Mittel der Nachbarkontraste. Gerechnet ergibt das für 975 einen Schritt von 0,21–0,22 OKLCH-L je 100 Stufeneinheiten (950 → 975), über dem Aspiro `oklch-l-step ≤ 0,2` von komuna; die neutrale Palette macht denselben Schritt mit 0,16. Darum nimmt jede neue Stufe die OKLCH-Helligkeit der gleichnamigen neutralen Stufe (25: 0,975 · 150: 0,89 · 850: 0,32 · 975: 0,2): `palette-aligned` hält damit von selbst (Spreizung 0 an diesen Stufen), `palette-even` und das Aspiro messen dieselben Schritte wie bei neutral, und der Kontrast landet beim geometrischen Mittel der Nachbarn. Die Buntheit ist das geometrische Mittel der Nachbarn (am Rand die halbe Buntheit des einen Nachbarn), der Farbton der Mittelwert der Nachbarn, die Buntheit auf den sRGB-Farbraum begrenzt (`maxChroma`).
+
+### Messungen
+
+| Stufe | accent | success | warning | danger | info | Kontrast hell (≈) |
+|---|---|---|---|---|---|---|
+| 25 | `#f5f7f9` | `#f4f8f4` | `#faf6f1` | `#fbf5f4` | `#f3f7fb` | 1,07 |
+| 150 | `#d1dce9` | `#c9e3cd` | `#ecd7bb` | `#f7d1ca` | `#c5dff2` | 1,39 |
+| 850 | `#1a3454` | `#013f06` | `#4b2a01` | `#660100` | `#01345d` | 12,7 |
+| 975 | `#0e1721` | `#0c1a0b` | `#1e130b` | `#270d0a` | `#0b1724` | 18,1 |
+
+Schritte in OKLCH-L je 100 Stufeneinheiten nach der Änderung (komuna, hell): 25 → 50 0,099 · 100 → 150 0,06 · 150 → 200 0,06 · 800 → 850 0,076 · 850 → 900 0,084 · 950 → 975 0,16 – alle innerhalb 0,04–0,2. Kern-Tokens 356 → 376 (im Band 250–400). Figma-Variablen 856 → 876 (+20 in der Sammlung `aspekto`, eine je Token, jede Marke ein Modus).
+
+### Abweichungen
+
+1. **20 statt 24 Tokens** (Plan ① zählte die neutrale Palette mit, die die Stufen schon hatte).
+2. **Ziel nicht das geometrische Mittel, sondern die Helligkeit der neutralen Stufe** (D-13); der erreichte Kontrast entspricht dem Mittel auf die zweite Stelle.
+3. **Keine Rolle nutzt die neuen Stufen** – wie in ① gesagt, bis eine Spec es will; die KontrastParoj bleiben.
+4. **Die Prüfsummen der Stufe-1-Ableitung** (`packages/agordilo/fixtures/stufe1-provo.json`, Spec 019 ①: „Standard der Regler = Stufe 1“) sind mit den neuen Stufen neu gerechnet; die Eigenschaft bleibt geprüft (`stufe2.test.ts`), die Herkunft im Fixture sagt es.
+
+### Messanleitung
+
+```sh
+cd /Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds
+pnpm install && pnpm build
+pnpm -s fm modelo validate                                  # grün, 376 Tokens
+pnpm --filter @fundamento/agordilo calibrate -- --check     # die Kalibrierung ist die Messung von komuna
+pnpm fm projekcioj build --out .fundamento/projekcioj
+open "file:///Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.fundamento/projekcioj/vitrino/index.html"   # Paletten mit 15 Stufen
+pnpm fm metiejo --open                                      # http://localhost:7301/studio/<name>/farbe – je farbige Palette 15 Stufen
+```
+
+Tests: `pnpm --filter @fundamento/modelo exec vitest run src/data/raster-024.test.ts`, `pnpm --filter @fundamento/agordilo exec vitest run src/raster-024.test.ts src/calibration.test.ts src/derive.test.ts`, `pnpm --filter @fundamento/metiejo exec vitest run src/studio.test.ts`.
