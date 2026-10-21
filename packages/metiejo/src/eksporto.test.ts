@@ -8,10 +8,13 @@ import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync }
 import { tmpdir } from "node:os";
 import { join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
-import { readAgordo } from "@fundamento/agordilo";
+import { checkPackageDir, readAgordo } from "@fundamento/agordilo";
 import { afterAll, describe, expect, it } from "vitest";
 import { exportMarko } from "./eksporto.js";
 import { MARKEN_DIR, markoDir } from "./marko.js";
+import { CHECKOUT_ROOT } from "./root.js";
+import { tarballOf } from "./test-doubles/tar.js";
+import type { NpmDeps } from "./tiparoj-npm.js";
 import { loadBases } from "./vorschau.js";
 
 const repoRoot = fileURLToPath(new URL("../../../", import.meta.url));
@@ -76,6 +79,58 @@ describe("exportMarko: the package and the CSS (M-3)", () => {
     expect(result.ok).toBe(false);
     expect(result.issues.length).toBeGreaterThan(0);
     expect(existsSync(join(markoDir(workdir, "malbona"), "eksporto"))).toBe(false);
+  });
+});
+
+describe("exportMarko: the webfont files from npm (O-4)", () => {
+  const tarball = tarballOf([
+    { path: "package/LICENSE", bytes: Buffer.from("OFL (test)") },
+    { path: "package/files/archivo-latin-400-normal.woff2", bytes: Buffer.from("archivo-regular") },
+    { path: "package/files/archivo-latin-700-normal.woff2", bytes: Buffer.from("archivo-bold") },
+  ]);
+  const npm: NpmDeps = {
+    fetchJson: async () => ({ version: "5.1.0", license: "OFL-1.1", dist: { tarball: "https://registry.npmjs.org/@fontsource/archivo/-/archivo-5.1.0.tgz" } }),
+    fetchBytes: async () => tarball,
+    cacheDir: join(scratch, "npm-cache"),
+    date: "2026-10-22",
+  };
+
+  it("puts the files of every webfont with licence and provenance into the package, writes tiparoj.css, and the package still checks", async () => {
+    const result = await exportMarko(workdir, "provo", provo, bases, { celoj: ["aspekto"], fonts: [], npm });
+    expect(result.ok).toBe(true);
+    const fonts = join(result.dir, "aspekto-provo", "tiparoj", "archivo");
+    for (const file of ["LICENSE", "archivo-latin-400-normal.woff2", "archivo-latin-700-normal.woff2", "herkunto.json"]) {
+      expect(existsSync(join(fonts, file)), file).toBe(true);
+    }
+    const css = readFileSync(join(result.dir, "tiparoj.css"), "utf8");
+    expect(css).toContain('font-family: "Archivo"');
+    expect(css).toContain("url(aspekto-provo/tiparoj/archivo/archivo-latin-700-normal.woff2)");
+    expect(result.sentences.join(" ")).toContain("Archivo");
+    expect(result.sentences.join(" ")).toContain("@fontsource/archivo 5.1.0");
+    expect(checkPackageDir(join(result.dir, "aspekto-provo")).ok).toBe(true);
+    const before = hashes(result.dir);
+    const again = await exportMarko(workdir, "provo", provo, bases, { celoj: ["aspekto"], fonts: [], npm: { ...npm, fetchJson: async () => { throw new Error("offline"); }, fetchBytes: async () => { throw new Error("offline"); } } });
+    expect(again.ok).toBe(true);
+    expect(hashes(again.dir)).toEqual(before);
+  });
+
+  it("without npm the brand names the font with its licence and says that no file was taken", async () => {
+    const result = await exportMarko(workdir, "provo", provo, bases, { celoj: ["aspekto"], fonts: [] });
+    expect(result.ok).toBe(true);
+    expect(existsSync(join(result.dir, "aspekto-provo", "tiparoj"))).toBe(false);
+    expect(result.sentences.join(" ")).toMatch(/Archivo.*ohne Schriftdatei/);
+  });
+
+  it("a failed download is a sentence, not a refusal", async () => {
+    const failing: NpmDeps = { ...npm, cacheDir: join(scratch, "npm-leer"), fetchJson: async () => { throw new Error("offline"); } };
+    const result = await exportMarko(workdir, "provo", provo, bases, { celoj: ["aspekto"], fonts: [], npm: failing });
+    expect(result.ok).toBe(true);
+    expect(result.sentences.join(" ")).toMatch(/Archivo.*nicht geladen/);
+  });
+
+  it("never exports into the checkout (O-3)", async () => {
+    await expect(exportMarko(join(CHECKOUT_ROOT, "marken"), "provo", provo, bases, { celoj: ["aspekto"], fonts: [] })).rejects.toThrow(/checkout/i);
+    expect(existsSync(join(CHECKOUT_ROOT, "marken"))).toBe(false);
   });
 });
 

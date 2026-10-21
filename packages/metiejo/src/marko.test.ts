@@ -6,6 +6,7 @@ import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { readAgordo } from "@fundamento/agordilo";
+import { CHECKOUT_ROOT } from "./root.js";
 import { afterAll, describe, expect, it } from "vitest";
 import {
   createMarko,
@@ -102,6 +103,17 @@ describe("the draft and the save (step 7, W-25, W-26)", () => {
   it("lists the brands of the working directory, sorted", () => {
     expect(listMarkoj(workdir)).toEqual(["ekzempla", "leera"]);
     expect(listMarkoj(join(scratch, "nenie"))).toEqual([]);
+  });
+});
+
+describe("never inside the checkout (O-3)", () => {
+  it("refuses a working directory inside the repository, so no brand, draft, save or export lands in the checkout", () => {
+    const inside = join(CHECKOUT_ROOT, "marken");
+    expect(() => markoDir(inside, "provo")).toThrow(/checkout/i);
+    expect(() => createMarko(inside, { name: "provo", basis: "leer" })).toThrow(/checkout/i);
+    expect(() => saveMarko(inside, "provo", { name: "provo", leitfarbe: "#336699" }, "2026-10-22")).toThrow(/checkout/i);
+    expect(existsSync(inside)).toBe(false);
+    expect(existsSync(join(CHECKOUT_ROOT, "marken", "provo"))).toBe(false);
   });
 });
 

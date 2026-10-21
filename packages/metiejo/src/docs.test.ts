@@ -65,6 +65,7 @@ describe("Spec 023 Runde 1 documentation (specs/023-werkstatt-konfigurilo)", () 
     expect(guide).toContain("pnpm fm metiejo");
     expect(guide).toMatch(/http:\/\/localhost:\d+/);
     expect(guide).toContain("/Users/thorstenjankowski/n8n-compose/20260918_fundamento-ds/.env");
+    expect(guide).toContain("FM_MARKEN_DIR");
     expect(guide).toContain("M-1");
     expect(guide).toContain("M-4");
     for (const line of guide.split("\n").filter((entry) => entry.includes("vitrino/index.html#"))) {

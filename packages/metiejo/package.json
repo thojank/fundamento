@@ -1,6 +1,6 @@
 {
   "name": "@fundamento/metiejo",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Fundamento Metiejo: the brand configurator (Spec 023) — step by step from a name and a lead colour to a checked Aspekto package, with webfonts under licence, licensed fonts in a private repository, exports and a local server. Working name; the maintainer confirms it.",
   "license": "MIT",
   "private": true,

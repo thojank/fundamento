@@ -8,16 +8,17 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterAll, describe, expect, it } from "vitest";
-import { ENV_NAMES, envExampleText, parseEnv, readSettings, settingsOf } from "./env.js";
+import { ENV_NAMES, envExampleText, markenDirOf, parseEnv, readSettings, settingsOf } from "./env.js";
 
 const repoRoot = fileURLToPath(new URL("../../../", import.meta.url));
 const scratch = mkdtempSync(join(tmpdir(), "fm-metiejo-env-"));
 afterAll(() => rmSync(scratch, { recursive: true, force: true }));
 
 describe("the names of the settings (§4.3)", () => {
-  it("are the six of the spec, in its order", () => {
+  it("are the six of the spec plus the folder of the brands (O-3), in that order", () => {
     expect([...ENV_NAMES]).toEqual([
       "FM_TIPAROJ_REPO",
+      "FM_MARKEN_DIR",
       "FM_KI_ANBIETER",
       "FM_KI_MODELL",
       "MISTRAL_API_KEY",
@@ -66,11 +67,27 @@ describe("settingsOf (M-7)", () => {
     expect(JSON.stringify(settings)).not.toContain("sk-geheim");
   });
 
+  it("carries the folder of the brands (O-3)", () => {
+    expect(settingsOf({ FM_MARKEN_DIR: "~/Marken" })).toEqual({
+      markenDir: "~/Marken",
+      present: ["FM_MARKEN_DIR"],
+    });
+  });
+
   it("knows no repository when FM_TIPAROJ_REPO is empty or not a owner/name", () => {
     expect(settingsOf({})).toEqual({ present: [] });
     expect(settingsOf({ FM_TIPAROJ_REPO: "nur-ein-wort" })).toEqual({
       present: ["FM_TIPAROJ_REPO"],
     });
+  });
+});
+
+describe("markenDirOf (O-3: the brands live outside the repo)", () => {
+  it("is ~/Fundamento/marken without FM_MARKEN_DIR, expands ~ and resolves a relative path against the checkout", () => {
+    expect(markenDirOf({ present: [] }, "/Users/me", "/repo")).toBe("/Users/me/Fundamento/marken");
+    expect(markenDirOf({ markenDir: "~/Marken", present: [] }, "/Users/me", "/repo")).toBe("/Users/me/Marken");
+    expect(markenDirOf({ markenDir: "/srv/marken", present: [] }, "/Users/me", "/repo")).toBe("/srv/marken");
+    expect(markenDirOf({ markenDir: "../marken", present: [] }, "/Users/me", "/repo")).toBe("/marken");
   });
 });
 
