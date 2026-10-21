@@ -82,6 +82,30 @@ describe("exportMarko: the package and the CSS (M-3)", () => {
   });
 });
 
+describe("exportMarko: the byte check (M-4)", () => {
+  it("removes a result that carries a byte pattern of a licensed font and says which", async () => {
+    // The "licensed font" is a slice of the stylesheet the export writes: planted by construction.
+    const dir = join(markoDir(workdir, "provo"), "eksporto");
+    const css = readFileSync(join(dir, "projekcioj", "css", "fundamento.css"));
+    const planted = {
+      source: join(scratch, "cache", "Planted.woff2"),
+      bytes: css.subarray(100, 1100),
+    };
+    const result = await exportMarko(workdir, "provo", provo, bases, {
+      celoj: ["aspekto", "css"],
+      fonts: [planted],
+    });
+    expect(result.ok).toBe(false);
+    // The slice stands in every stylesheet the export writes: one finding per file, all of one rule.
+    expect(result.issues.length).toBeGreaterThanOrEqual(1);
+    expect(new Set(result.issues.map((issue) => issue.rule))).toEqual(
+      new Set(["tiparo-in-result"]),
+    );
+    expect(result.issues[0]?.message).toContain("Planted.woff2");
+    expect(existsSync(dir)).toBe(false);
+  });
+});
+
 describe("exportMarko: the webfont files from npm (O-4)", () => {
   const tarball = tarballOf([
     { path: "package/LICENSE", bytes: Buffer.from("OFL (test)") },
@@ -174,31 +198,6 @@ describe("exportMarko: the webfont files from npm (O-4)", () => {
       }),
     ).rejects.toThrow(/checkout/i);
     expect(existsSync(join(CHECKOUT_ROOT, "marken"))).toBe(false);
-  });
-});
-
-describe("exportMarko: the byte check (M-4)", () => {
-  it("removes a result that carries a byte pattern of a licensed font and says which", async () => {
-    // The "licensed font" is a slice of the stylesheet the export writes: planted by construction.
-    const dir = join(markoDir(workdir, "provo"), "eksporto");
-    await exportMarko(workdir, "provo", provo, bases, { celoj: ["aspekto", "css"], fonts: [] });
-    const css = readFileSync(join(dir, "projekcioj", "css", "fundamento.css"));
-    const planted = {
-      source: join(scratch, "cache", "Planted.woff2"),
-      bytes: css.subarray(100, 1100),
-    };
-    const result = await exportMarko(workdir, "provo", provo, bases, {
-      celoj: ["aspekto", "css"],
-      fonts: [planted],
-    });
-    expect(result.ok).toBe(false);
-    // The slice stands in every stylesheet the export writes: one finding per file, all of one rule.
-    expect(result.issues.length).toBeGreaterThanOrEqual(1);
-    expect(new Set(result.issues.map((issue) => issue.rule))).toEqual(
-      new Set(["tiparo-in-result"]),
-    );
-    expect(result.issues[0]?.message).toContain("Planted.woff2");
-    expect(existsSync(dir)).toBe(false);
   });
 });
 

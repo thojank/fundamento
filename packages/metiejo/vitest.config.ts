@@ -19,5 +19,10 @@ export default defineConfig({
   test: {
     testTimeout: 120_000,
     hookTimeout: 120_000,
+    // The files of this package derive, build projections and run a server; side by side they
+    // flooded the four cores of the CI runner next to the other packages of the unit job (run
+    // 39651272243: the derivation spawns of the CLI's agordilo.test.ts ran past their 120 s).
+    // One file at a time keeps the load of this package to one worker.
+    fileParallelism: false,
   },
 });

@@ -109,6 +109,7 @@ Aufgenommen am 2026-10-21 in Chromium (1280 × 900) am Server `pnpm fm metiejo -
 - **B-5 Zeiten** (dieser Rechner): `derivationBasis` 114 ms, `deriveAspekto` mit Prüfung 1 620 ms, Vorschau-Stylesheet ≈ 200 ms, Export mit CSS und Figma ≈ 4 s, Speichern bis „Gespeichert“ im Browser ≈ 4 s.
 - **B-6 Die `sxelo` nimmt in der Vorschau die volle Höhe** (wie V-3 aus Nachlese 8 ②, in der Vitrino); hier nicht geändert.
 - **B-7 Keine Konsolenfehler** in Chromium über alle neun Bildschirme (nur `favicon.ico` 404, jetzt 204).
+- **B-8 Last im Job `unit` der CI:** Im ersten Lauf des PR (39651272243) liefen die Dateien dieses Pakets (Ableitungen, Projektions-Builds, Server) parallel neben Modelo, MCP, CLI und Agordilo; die Spawns von `agordilo.test.ts` der CLI überschritten ihre 120 s (lokal, allein: grün). Seitdem laufen die Testdateien von `metiejo` eine nach der anderen (`fileParallelism: false`, wie die e2e-Dateien des Modelo, Spec 011 ① O-21), und der Byte-Check-Test baut keine zweite Projektion. Die Grenze der CLI ist unverändert.
 
 ### Offen (für den Maintainer)
 
